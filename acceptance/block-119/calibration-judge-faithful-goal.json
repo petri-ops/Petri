@@ -1,0 +1,4957 @@
+{
+  "kind": "block119-judge-faithful-goal-calibration",
+  "version": "1.0.0",
+  "capturedAt": "2026-09-23T16:40:35.531Z",
+  "sourceCommit": "286f560ad4b996e2a86014f3f5eb97495768f20b",
+  "supply": {
+    "baseUrl": "https://api.typesafe.ai",
+    "model": "jev-1.13.0"
+  },
+  "corpus": {
+    "file": "acceptance/block-119/corpus-judge-faithful-goal.json",
+    "labeling": "仓内文档锚定（纯确定性构造，零网络零模型）：faithful 正例=抽取式轮转（verbatim 切片/head3 前三句/shuffled 句序重排，抽取不改写=构造上必然忠实）、负例=机械扰动（op0 数字改写/op1 极性翻转/op2 编造插入/op3 绝对化伪结论，扰动后必含参考材料不支持声明）；goal=内容要求逐目标 noul（主题词提及/含具体数字/列举要点提及），gold 由构造期包含性检查落定。全部文本派生自仓内文档，无用户数据。caveat=正例为抽取式（非生成式摘要），语料难度为 faithful 任务下界，门控采纳按保守解读。",
+    "docs": 56
+  },
+  "gate": {
+    "criterion": "存在 θ：precision ≥ 0.85 且 coverage ≥ 0.5（noul 直判较 fit 严一档）",
+    "faithfulPassed": true,
+    "goalPassed": true
+  },
+  "faithful": {
+    "count": 112,
+    "positives": 56,
+    "negatives": 56,
+    "recommended": {
+      "theta": 0.3,
+      "adopted": 55,
+      "adoptedPrecision": 0.9455,
+      "adoptedCoverage": 0.9286,
+      "trapRate": 0.0536
+    },
+    "grid": [
+      {
+        "theta": 0.3,
+        "adopted": 55,
+        "adoptedPrecision": 0.9455,
+        "adoptedCoverage": 0.9286,
+        "trapRate": 0.0536
+      },
+      {
+        "theta": 0.35,
+        "adopted": 52,
+        "adoptedPrecision": 0.9423,
+        "adoptedCoverage": 0.875,
+        "trapRate": 0.0536
+      },
+      {
+        "theta": 0.4,
+        "adopted": 50,
+        "adoptedPrecision": 0.94,
+        "adoptedCoverage": 0.8393,
+        "trapRate": 0.0536
+      },
+      {
+        "theta": 0.45,
+        "adopted": 50,
+        "adoptedPrecision": 0.94,
+        "adoptedCoverage": 0.8393,
+        "trapRate": 0.0536
+      },
+      {
+        "theta": 0.5,
+        "adopted": 47,
+        "adoptedPrecision": 0.9787,
+        "adoptedCoverage": 0.8214,
+        "trapRate": 0.0179
+      },
+      {
+        "theta": 0.55,
+        "adopted": 45,
+        "adoptedPrecision": 0.9778,
+        "adoptedCoverage": 0.7857,
+        "trapRate": 0.0179
+      },
+      {
+        "theta": 0.6,
+        "adopted": 40,
+        "adoptedPrecision": 1,
+        "adoptedCoverage": 0.7143,
+        "trapRate": 0
+      },
+      {
+        "theta": 0.65,
+        "adopted": 38,
+        "adoptedPrecision": 1,
+        "adoptedCoverage": 0.6786,
+        "trapRate": 0
+      },
+      {
+        "theta": 0.7,
+        "adopted": 35,
+        "adoptedPrecision": 1,
+        "adoptedCoverage": 0.625,
+        "trapRate": 0
+      },
+      {
+        "theta": 0.75,
+        "adopted": 30,
+        "adoptedPrecision": 1,
+        "adoptedCoverage": 0.5357,
+        "trapRate": 0
+      },
+      {
+        "theta": 0.8,
+        "adopted": 24,
+        "adoptedPrecision": 1,
+        "adoptedCoverage": 0.4286,
+        "trapRate": 0
+      },
+      {
+        "theta": 0.85,
+        "adopted": 17,
+        "adoptedPrecision": 1,
+        "adoptedCoverage": 0.3036,
+        "trapRate": 0
+      },
+      {
+        "theta": 0.9,
+        "adopted": 5,
+        "adoptedPrecision": 1,
+        "adoptedCoverage": 0.0893,
+        "trapRate": 0
+      }
+    ],
+    "byKind": {
+      "positive_verbatim": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "negative_op0": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0
+      ],
+      "positive_head3": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "negative_op1": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "positive_shuffled": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        0,
+        0
+      ],
+      "negative_op2": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "negative_op3": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "goal": {
+    "judgments": 504,
+    "positives": 254,
+    "negatives": 250,
+    "recommended": {
+      "theta": 0.5,
+      "adopted": 274,
+      "adoptedPrecision": 0.8504,
+      "adoptedCoverage": 0.9173,
+      "trapRate": 0.164
+    },
+    "grid": [
+      {
+        "theta": 0.3,
+        "adopted": 336,
+        "adoptedPrecision": 0.7321,
+        "adoptedCoverage": 0.9685,
+        "trapRate": 0.36
+      },
+      {
+        "theta": 0.35,
+        "adopted": 316,
+        "adoptedPrecision": 0.7753,
+        "adoptedCoverage": 0.9646,
+        "trapRate": 0.284
+      },
+      {
+        "theta": 0.4,
+        "adopted": 297,
+        "adoptedPrecision": 0.8081,
+        "adoptedCoverage": 0.9449,
+        "trapRate": 0.228
+      },
+      {
+        "theta": 0.45,
+        "adopted": 289,
+        "adoptedPrecision": 0.8235,
+        "adoptedCoverage": 0.937,
+        "trapRate": 0.204
+      },
+      {
+        "theta": 0.5,
+        "adopted": 274,
+        "adoptedPrecision": 0.8504,
+        "adoptedCoverage": 0.9173,
+        "trapRate": 0.164
+      },
+      {
+        "theta": 0.55,
+        "adopted": 255,
+        "adoptedPrecision": 0.8706,
+        "adoptedCoverage": 0.874,
+        "trapRate": 0.132
+      },
+      {
+        "theta": 0.6,
+        "adopted": 238,
+        "adoptedPrecision": 0.895,
+        "adoptedCoverage": 0.8386,
+        "trapRate": 0.1
+      },
+      {
+        "theta": 0.65,
+        "adopted": 227,
+        "adoptedPrecision": 0.9119,
+        "adoptedCoverage": 0.815,
+        "trapRate": 0.08
+      },
+      {
+        "theta": 0.7,
+        "adopted": 207,
+        "adoptedPrecision": 0.9227,
+        "adoptedCoverage": 0.752,
+        "trapRate": 0.064
+      },
+      {
+        "theta": 0.75,
+        "adopted": 186,
+        "adoptedPrecision": 0.9194,
+        "adoptedCoverage": 0.6732,
+        "trapRate": 0.06
+      },
+      {
+        "theta": 0.8,
+        "adopted": 167,
+        "adoptedPrecision": 0.9222,
+        "adoptedCoverage": 0.6063,
+        "trapRate": 0.052
+      },
+      {
+        "theta": 0.85,
+        "adopted": 143,
+        "adoptedPrecision": 0.9441,
+        "adoptedCoverage": 0.5315,
+        "trapRate": 0.032
+      },
+      {
+        "theta": 0.9,
+        "adopted": 104,
+        "adoptedPrecision": 0.9808,
+        "adoptedCoverage": 0.4016,
+        "trapRate": 0.008
+      }
+    ]
+  },
+  "apiFailures": 0,
+  "perSample": {
+    "faithful": [
+      {
+        "id": "f-pos-0",
+        "kind": "positive_verbatim",
+        "gold": 1,
+        "value": 0.86,
+        "elapsedMs": 950,
+        "ok": true
+      },
+      {
+        "id": "f-neg-0",
+        "kind": "negative_op0",
+        "gold": 0,
+        "value": 0.04,
+        "elapsedMs": 928,
+        "ok": true
+      },
+      {
+        "id": "f-pos-1",
+        "kind": "positive_head3",
+        "gold": 1,
+        "value": 0.97,
+        "elapsedMs": 903,
+        "ok": true
+      },
+      {
+        "id": "f-neg-1",
+        "kind": "negative_op1",
+        "gold": 0,
+        "value": 0.03,
+        "elapsedMs": 926,
+        "ok": true
+      },
+      {
+        "id": "f-pos-2",
+        "kind": "positive_shuffled",
+        "gold": 1,
+        "value": 0.5,
+        "elapsedMs": 789,
+        "ok": true
+      },
+      {
+        "id": "f-neg-2",
+        "kind": "negative_op2",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 988,
+        "ok": true
+      },
+      {
+        "id": "f-pos-3",
+        "kind": "positive_verbatim",
+        "gold": 1,
+        "value": 0.34,
+        "elapsedMs": 303,
+        "ok": true
+      },
+      {
+        "id": "f-neg-3",
+        "kind": "negative_op3",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 313,
+        "ok": true
+      },
+      {
+        "id": "f-pos-4",
+        "kind": "positive_head3",
+        "gold": 1,
+        "value": 0.88,
+        "elapsedMs": 310,
+        "ok": true
+      },
+      {
+        "id": "f-neg-4",
+        "kind": "negative_op0",
+        "gold": 0,
+        "value": 0.12,
+        "elapsedMs": 324,
+        "ok": true
+      },
+      {
+        "id": "f-pos-5",
+        "kind": "positive_shuffled",
+        "gold": 1,
+        "value": 0.6,
+        "elapsedMs": 344,
+        "ok": true
+      },
+      {
+        "id": "f-neg-5",
+        "kind": "negative_op1",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 279,
+        "ok": true
+      },
+      {
+        "id": "f-pos-6",
+        "kind": "positive_verbatim",
+        "gold": 1,
+        "value": 0.89,
+        "elapsedMs": 344,
+        "ok": true
+      },
+      {
+        "id": "f-neg-6",
+        "kind": "negative_op2",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 275,
+        "ok": true
+      },
+      {
+        "id": "f-pos-7",
+        "kind": "positive_head3",
+        "gold": 1,
+        "value": 0.87,
+        "elapsedMs": 320,
+        "ok": true
+      },
+      {
+        "id": "f-neg-7",
+        "kind": "negative_op3",
+        "gold": 0,
+        "value": 0.01,
+        "elapsedMs": 339,
+        "ok": true
+      },
+      {
+        "id": "f-pos-8",
+        "kind": "positive_shuffled",
+        "gold": 1,
+        "value": 0.61,
+        "elapsedMs": 260,
+        "ok": true
+      },
+      {
+        "id": "f-neg-8",
+        "kind": "negative_op0",
+        "gold": 0,
+        "value": 0.03,
+        "elapsedMs": 329,
+        "ok": true
+      },
+      {
+        "id": "f-pos-9",
+        "kind": "positive_verbatim",
+        "gold": 1,
+        "value": 0.86,
+        "elapsedMs": 340,
+        "ok": true
+      },
+      {
+        "id": "f-neg-9",
+        "kind": "negative_op1",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 369,
+        "ok": true
+      },
+      {
+        "id": "f-pos-10",
+        "kind": "positive_head3",
+        "gold": 1,
+        "value": 0.96,
+        "elapsedMs": 268,
+        "ok": true
+      },
+      {
+        "id": "f-neg-10",
+        "kind": "negative_op2",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 356,
+        "ok": true
+      },
+      {
+        "id": "f-pos-11",
+        "kind": "positive_shuffled",
+        "gold": 1,
+        "value": 0.59,
+        "elapsedMs": 299,
+        "ok": true
+      },
+      {
+        "id": "f-neg-11",
+        "kind": "negative_op3",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 289,
+        "ok": true
+      },
+      {
+        "id": "f-pos-12",
+        "kind": "positive_verbatim",
+        "gold": 1,
+        "value": 0.93,
+        "elapsedMs": 325,
+        "ok": true
+      },
+      {
+        "id": "f-neg-12",
+        "kind": "negative_op0",
+        "gold": 0,
+        "value": 0.09,
+        "elapsedMs": 503,
+        "ok": true
+      },
+      {
+        "id": "f-pos-13",
+        "kind": "positive_head3",
+        "gold": 1,
+        "value": 0.85,
+        "elapsedMs": 392,
+        "ok": true
+      },
+      {
+        "id": "f-neg-13",
+        "kind": "negative_op1",
+        "gold": 0,
+        "value": 0.01,
+        "elapsedMs": 334,
+        "ok": true
+      },
+      {
+        "id": "f-pos-14",
+        "kind": "positive_shuffled",
+        "gold": 1,
+        "value": 0.92,
+        "elapsedMs": 309,
+        "ok": true
+      },
+      {
+        "id": "f-neg-14",
+        "kind": "negative_op2",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 518,
+        "ok": true
+      },
+      {
+        "id": "f-pos-15",
+        "kind": "positive_verbatim",
+        "gold": 1,
+        "value": 0.83,
+        "elapsedMs": 300,
+        "ok": true
+      },
+      {
+        "id": "f-neg-15",
+        "kind": "negative_op3",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 409,
+        "ok": true
+      },
+      {
+        "id": "f-pos-16",
+        "kind": "positive_head3",
+        "gold": 1,
+        "value": 0.34,
+        "elapsedMs": 295,
+        "ok": true
+      },
+      {
+        "id": "f-neg-16",
+        "kind": "negative_op0",
+        "gold": 0,
+        "value": 0.05,
+        "elapsedMs": 307,
+        "ok": true
+      },
+      {
+        "id": "f-pos-17",
+        "kind": "positive_shuffled",
+        "gold": 1,
+        "value": 0.59,
+        "elapsedMs": 283,
+        "ok": true
+      },
+      {
+        "id": "f-neg-17",
+        "kind": "negative_op1",
+        "gold": 0,
+        "value": 0.06,
+        "elapsedMs": 318,
+        "ok": true
+      },
+      {
+        "id": "f-pos-18",
+        "kind": "positive_verbatim",
+        "gold": 1,
+        "value": 0.85,
+        "elapsedMs": 285,
+        "ok": true
+      },
+      {
+        "id": "f-neg-18",
+        "kind": "negative_op2",
+        "gold": 0,
+        "value": 0.03,
+        "elapsedMs": 308,
+        "ok": true
+      },
+      {
+        "id": "f-pos-19",
+        "kind": "positive_head3",
+        "gold": 1,
+        "value": 0.81,
+        "elapsedMs": 310,
+        "ok": true
+      },
+      {
+        "id": "f-neg-19",
+        "kind": "negative_op3",
+        "gold": 0,
+        "value": 0.01,
+        "elapsedMs": 250,
+        "ok": true
+      },
+      {
+        "id": "f-pos-20",
+        "kind": "positive_shuffled",
+        "gold": 1,
+        "value": 0.3,
+        "elapsedMs": 297,
+        "ok": true
+      },
+      {
+        "id": "f-neg-20",
+        "kind": "negative_op0",
+        "gold": 0,
+        "value": 0.09,
+        "elapsedMs": 311,
+        "ok": true
+      },
+      {
+        "id": "f-pos-21",
+        "kind": "positive_verbatim",
+        "gold": 1,
+        "value": 0.7,
+        "elapsedMs": 316,
+        "ok": true
+      },
+      {
+        "id": "f-neg-21",
+        "kind": "negative_op1",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 405,
+        "ok": true
+      },
+      {
+        "id": "f-pos-22",
+        "kind": "positive_head3",
+        "gold": 1,
+        "value": 0.69,
+        "elapsedMs": 265,
+        "ok": true
+      },
+      {
+        "id": "f-neg-22",
+        "kind": "negative_op2",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 313,
+        "ok": true
+      },
+      {
+        "id": "f-pos-23",
+        "kind": "positive_shuffled",
+        "gold": 1,
+        "value": 0.13,
+        "elapsedMs": 289,
+        "ok": true
+      },
+      {
+        "id": "f-neg-23",
+        "kind": "negative_op3",
+        "gold": 0,
+        "value": 0.01,
+        "elapsedMs": 273,
+        "ok": true
+      },
+      {
+        "id": "f-pos-24",
+        "kind": "positive_verbatim",
+        "gold": 1,
+        "value": 0.77,
+        "elapsedMs": 284,
+        "ok": true
+      },
+      {
+        "id": "f-neg-24",
+        "kind": "negative_op0",
+        "gold": 0,
+        "value": 0.47,
+        "elapsedMs": 313,
+        "ok": true
+      },
+      {
+        "id": "f-pos-25",
+        "kind": "positive_head3",
+        "gold": 1,
+        "value": 0.76,
+        "elapsedMs": 353,
+        "ok": true
+      },
+      {
+        "id": "f-neg-25",
+        "kind": "negative_op1",
+        "gold": 0,
+        "value": 0.03,
+        "elapsedMs": 284,
+        "ok": true
+      },
+      {
+        "id": "f-pos-26",
+        "kind": "positive_shuffled",
+        "gold": 1,
+        "value": 0.49,
+        "elapsedMs": 333,
+        "ok": true
+      },
+      {
+        "id": "f-neg-26",
+        "kind": "negative_op2",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 262,
+        "ok": true
+      },
+      {
+        "id": "f-pos-27",
+        "kind": "positive_verbatim",
+        "gold": 1,
+        "value": 0.84,
+        "elapsedMs": 330,
+        "ok": true
+      },
+      {
+        "id": "f-neg-27",
+        "kind": "negative_op3",
+        "gold": 0,
+        "value": 0.03,
+        "elapsedMs": 275,
+        "ok": true
+      },
+      {
+        "id": "f-pos-28",
+        "kind": "positive_head3",
+        "gold": 1,
+        "value": 0.79,
+        "elapsedMs": 279,
+        "ok": true
+      },
+      {
+        "id": "f-neg-28",
+        "kind": "negative_op0",
+        "gold": 0,
+        "value": 0.24,
+        "elapsedMs": 298,
+        "ok": true
+      },
+      {
+        "id": "f-pos-29",
+        "kind": "positive_shuffled",
+        "gold": 1,
+        "value": 0.36,
+        "elapsedMs": 309,
+        "ok": true
+      },
+      {
+        "id": "f-neg-29",
+        "kind": "negative_op1",
+        "gold": 0,
+        "value": 0.01,
+        "elapsedMs": 298,
+        "ok": true
+      },
+      {
+        "id": "f-pos-30",
+        "kind": "positive_verbatim",
+        "gold": 1,
+        "value": 0.75,
+        "elapsedMs": 967,
+        "ok": true
+      },
+      {
+        "id": "f-neg-30",
+        "kind": "negative_op2",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 273,
+        "ok": true
+      },
+      {
+        "id": "f-pos-31",
+        "kind": "positive_head3",
+        "gold": 1,
+        "value": 0.7,
+        "elapsedMs": 264,
+        "ok": true
+      },
+      {
+        "id": "f-neg-31",
+        "kind": "negative_op3",
+        "gold": 0,
+        "value": 0.01,
+        "elapsedMs": 267,
+        "ok": true
+      },
+      {
+        "id": "f-pos-32",
+        "kind": "positive_shuffled",
+        "gold": 1,
+        "value": 0.54,
+        "elapsedMs": 300,
+        "ok": true
+      },
+      {
+        "id": "f-neg-32",
+        "kind": "negative_op0",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 285,
+        "ok": true
+      },
+      {
+        "id": "f-pos-33",
+        "kind": "positive_verbatim",
+        "gold": 1,
+        "value": 0.88,
+        "elapsedMs": 272,
+        "ok": true
+      },
+      {
+        "id": "f-neg-33",
+        "kind": "negative_op1",
+        "gold": 0,
+        "value": 0.03,
+        "elapsedMs": 305,
+        "ok": true
+      },
+      {
+        "id": "f-pos-34",
+        "kind": "positive_head3",
+        "gold": 1,
+        "value": 0.88,
+        "elapsedMs": 303,
+        "ok": true
+      },
+      {
+        "id": "f-neg-34",
+        "kind": "negative_op2",
+        "gold": 0,
+        "value": 0.01,
+        "elapsedMs": 471,
+        "ok": true
+      },
+      {
+        "id": "f-pos-35",
+        "kind": "positive_shuffled",
+        "gold": 1,
+        "value": 0.57,
+        "elapsedMs": 305,
+        "ok": true
+      },
+      {
+        "id": "f-neg-35",
+        "kind": "negative_op3",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 375,
+        "ok": true
+      },
+      {
+        "id": "f-pos-36",
+        "kind": "positive_verbatim",
+        "gold": 1,
+        "value": 0.58,
+        "elapsedMs": 356,
+        "ok": true
+      },
+      {
+        "id": "f-neg-36",
+        "kind": "negative_op0",
+        "gold": 0,
+        "value": 0.45,
+        "elapsedMs": 317,
+        "ok": true
+      },
+      {
+        "id": "f-pos-37",
+        "kind": "positive_head3",
+        "gold": 1,
+        "value": 0.85,
+        "elapsedMs": 313,
+        "ok": true
+      },
+      {
+        "id": "f-neg-37",
+        "kind": "negative_op1",
+        "gold": 0,
+        "value": 0.01,
+        "elapsedMs": 328,
+        "ok": true
+      },
+      {
+        "id": "f-pos-38",
+        "kind": "positive_shuffled",
+        "gold": 1,
+        "value": 0.72,
+        "elapsedMs": 306,
+        "ok": true
+      },
+      {
+        "id": "f-neg-38",
+        "kind": "negative_op2",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 272,
+        "ok": true
+      },
+      {
+        "id": "f-pos-39",
+        "kind": "positive_verbatim",
+        "gold": 1,
+        "value": 0.88,
+        "elapsedMs": 339,
+        "ok": true
+      },
+      {
+        "id": "f-neg-39",
+        "kind": "negative_op3",
+        "gold": 0,
+        "value": 0.03,
+        "elapsedMs": 277,
+        "ok": true
+      },
+      {
+        "id": "f-pos-40",
+        "kind": "positive_head3",
+        "gold": 1,
+        "value": 0.91,
+        "elapsedMs": 312,
+        "ok": true
+      },
+      {
+        "id": "f-neg-40",
+        "kind": "negative_op0",
+        "gold": 0,
+        "value": 0.55,
+        "elapsedMs": 317,
+        "ok": true
+      },
+      {
+        "id": "f-pos-41",
+        "kind": "positive_shuffled",
+        "gold": 1,
+        "value": 0.73,
+        "elapsedMs": 316,
+        "ok": true
+      },
+      {
+        "id": "f-neg-41",
+        "kind": "negative_op1",
+        "gold": 0,
+        "value": 0.01,
+        "elapsedMs": 328,
+        "ok": true
+      },
+      {
+        "id": "f-pos-42",
+        "kind": "positive_verbatim",
+        "gold": 1,
+        "value": 0.87,
+        "elapsedMs": 253,
+        "ok": true
+      },
+      {
+        "id": "f-neg-42",
+        "kind": "negative_op2",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 893,
+        "ok": true
+      },
+      {
+        "id": "f-pos-43",
+        "kind": "positive_head3",
+        "gold": 1,
+        "value": 0.87,
+        "elapsedMs": 347,
+        "ok": true
+      },
+      {
+        "id": "f-neg-43",
+        "kind": "negative_op3",
+        "gold": 0,
+        "value": 0.03,
+        "elapsedMs": 313,
+        "ok": true
+      },
+      {
+        "id": "f-pos-44",
+        "kind": "positive_shuffled",
+        "gold": 1,
+        "value": 0.17,
+        "elapsedMs": 310,
+        "ok": true
+      },
+      {
+        "id": "f-neg-44",
+        "kind": "negative_op0",
+        "gold": 0,
+        "value": 0.1,
+        "elapsedMs": 289,
+        "ok": true
+      },
+      {
+        "id": "f-pos-45",
+        "kind": "positive_verbatim",
+        "gold": 1,
+        "value": 0.8,
+        "elapsedMs": 493,
+        "ok": true
+      },
+      {
+        "id": "f-neg-45",
+        "kind": "negative_op1",
+        "gold": 0,
+        "value": 0.03,
+        "elapsedMs": 424,
+        "ok": true
+      },
+      {
+        "id": "f-pos-46",
+        "kind": "positive_head3",
+        "gold": 1,
+        "value": 0.89,
+        "elapsedMs": 312,
+        "ok": true
+      },
+      {
+        "id": "f-neg-46",
+        "kind": "negative_op2",
+        "gold": 0,
+        "value": 0.01,
+        "elapsedMs": 296,
+        "ok": true
+      },
+      {
+        "id": "f-pos-47",
+        "kind": "positive_shuffled",
+        "gold": 1,
+        "value": 0.36,
+        "elapsedMs": 317,
+        "ok": true
+      },
+      {
+        "id": "f-neg-47",
+        "kind": "negative_op3",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 292,
+        "ok": true
+      },
+      {
+        "id": "f-pos-48",
+        "kind": "positive_verbatim",
+        "gold": 1,
+        "value": 0.89,
+        "elapsedMs": 322,
+        "ok": true
+      },
+      {
+        "id": "f-neg-48",
+        "kind": "negative_op0",
+        "gold": 0,
+        "value": 0.29,
+        "elapsedMs": 360,
+        "ok": true
+      },
+      {
+        "id": "f-pos-49",
+        "kind": "positive_head3",
+        "gold": 1,
+        "value": 0.75,
+        "elapsedMs": 363,
+        "ok": true
+      },
+      {
+        "id": "f-neg-49",
+        "kind": "negative_op1",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 301,
+        "ok": true
+      },
+      {
+        "id": "f-pos-50",
+        "kind": "positive_shuffled",
+        "gold": 1,
+        "value": 0.2,
+        "elapsedMs": 305,
+        "ok": true
+      },
+      {
+        "id": "f-neg-50",
+        "kind": "negative_op2",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 343,
+        "ok": true
+      },
+      {
+        "id": "f-pos-51",
+        "kind": "positive_verbatim",
+        "gold": 1,
+        "value": 0.72,
+        "elapsedMs": 374,
+        "ok": true
+      },
+      {
+        "id": "f-neg-51",
+        "kind": "negative_op3",
+        "gold": 0,
+        "value": 0.03,
+        "elapsedMs": 292,
+        "ok": true
+      },
+      {
+        "id": "f-pos-52",
+        "kind": "positive_head3",
+        "gold": 1,
+        "value": 0.79,
+        "elapsedMs": 510,
+        "ok": true
+      },
+      {
+        "id": "f-neg-52",
+        "kind": "negative_op0",
+        "gold": 0,
+        "value": 0.27,
+        "elapsedMs": 320,
+        "ok": true
+      },
+      {
+        "id": "f-pos-53",
+        "kind": "positive_shuffled",
+        "gold": 1,
+        "value": 0.03,
+        "elapsedMs": 348,
+        "ok": true
+      },
+      {
+        "id": "f-neg-53",
+        "kind": "negative_op1",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 300,
+        "ok": true
+      },
+      {
+        "id": "f-pos-54",
+        "kind": "positive_verbatim",
+        "gold": 1,
+        "value": 0.78,
+        "elapsedMs": 307,
+        "ok": true
+      },
+      {
+        "id": "f-neg-54",
+        "kind": "negative_op2",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 269,
+        "ok": true
+      },
+      {
+        "id": "f-pos-55",
+        "kind": "positive_head3",
+        "gold": 1,
+        "value": 0.84,
+        "elapsedMs": 301,
+        "ok": true
+      },
+      {
+        "id": "f-neg-55",
+        "kind": "negative_op3",
+        "gold": 0,
+        "value": 0.02,
+        "elapsedMs": 326,
+        "ok": true
+      }
+    ],
+    "goal": [
+      {
+        "id": "g-0-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.58
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.61
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.58
+          }
+        ]
+      },
+      {
+        "id": "g-0-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.88
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.8
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.92
+          }
+        ]
+      },
+      {
+        "id": "g-0-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.8
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.36
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.82
+          }
+        ]
+      },
+      {
+        "id": "g-1-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.95
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.95
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.93
+          }
+        ]
+      },
+      {
+        "id": "g-1-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.94
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.86
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.24
+          }
+        ]
+      },
+      {
+        "id": "g-1-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.94
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.31
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.04
+          }
+        ]
+      },
+      {
+        "id": "g-2-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.33
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.98
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.02
+          }
+        ]
+      },
+      {
+        "id": "g-2-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.67
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.96
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.78
+          }
+        ]
+      },
+      {
+        "id": "g-2-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.2
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.25
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.07
+          }
+        ]
+      },
+      {
+        "id": "g-3-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.28
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.85
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.02
+          }
+        ]
+      },
+      {
+        "id": "g-3-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.66
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.95
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.79
+          }
+        ]
+      },
+      {
+        "id": "g-3-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.23
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.17
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.04
+          }
+        ]
+      },
+      {
+        "id": "g-4-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.36
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.97
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.03
+          }
+        ]
+      },
+      {
+        "id": "g-4-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.72
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.93
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.23
+          }
+        ]
+      },
+      {
+        "id": "g-4-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.16
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.04
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.03
+          }
+        ]
+      },
+      {
+        "id": "g-5-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.81
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.98
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.04
+          }
+        ]
+      },
+      {
+        "id": "g-5-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.5
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.48
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.69
+          }
+        ]
+      },
+      {
+        "id": "g-5-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.25
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.12
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.03
+          }
+        ]
+      },
+      {
+        "id": "g-6-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.52
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.95
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.03
+          }
+        ]
+      },
+      {
+        "id": "g-6-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.52
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.44
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.71
+          }
+        ]
+      },
+      {
+        "id": "g-6-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.31
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.15
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.04
+          }
+        ]
+      },
+      {
+        "id": "g-7-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.52
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.94
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.04
+          }
+        ]
+      },
+      {
+        "id": "g-7-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.56
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.47
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.72
+          }
+        ]
+      },
+      {
+        "id": "g-7-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.32
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.24
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.04
+          }
+        ]
+      },
+      {
+        "id": "g-8-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.56
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.93
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.69
+          }
+        ]
+      },
+      {
+        "id": "g-8-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.71
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.75
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.13
+          }
+        ]
+      },
+      {
+        "id": "g-8-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.35
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.26
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.25
+          }
+        ]
+      },
+      {
+        "id": "g-9-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.33
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.98
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.05
+          }
+        ]
+      },
+      {
+        "id": "g-9-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.51
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.36
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.22
+          }
+        ]
+      },
+      {
+        "id": "g-9-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.25
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.12
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.04
+          }
+        ]
+      },
+      {
+        "id": "g-10-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.31
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.98
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.85
+          }
+        ]
+      },
+      {
+        "id": "g-10-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.75
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.91
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.02
+          }
+        ]
+      },
+      {
+        "id": "g-10-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.32
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.11
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.02
+          }
+        ]
+      },
+      {
+        "id": "g-11-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.86
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.89
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.03
+          }
+        ]
+      },
+      {
+        "id": "g-11-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.83
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.96
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.94
+          }
+        ]
+      },
+      {
+        "id": "g-11-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.44
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.2
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.02
+          }
+        ]
+      },
+      {
+        "id": "g-12-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.53
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.86
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.9
+          }
+        ]
+      },
+      {
+        "id": "g-12-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.78
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.72
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.19
+          }
+        ]
+      },
+      {
+        "id": "g-12-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.36
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.24
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.34
+          }
+        ]
+      },
+      {
+        "id": "g-13-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.68
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.94
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.9
+          }
+        ]
+      },
+      {
+        "id": "g-13-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.78
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.64
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.91
+          }
+        ]
+      },
+      {
+        "id": "g-13-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.67
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.33
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.89
+          }
+        ]
+      },
+      {
+        "id": "g-14-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.76
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.92
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.01
+          }
+        ]
+      },
+      {
+        "id": "g-14-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.91
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.95
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.01
+          }
+        ]
+      },
+      {
+        "id": "g-14-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.88
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.06
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.01
+          }
+        ]
+      },
+      {
+        "id": "g-15-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.15
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.93
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.46
+          }
+        ]
+      },
+      {
+        "id": "g-15-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.14
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.95
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.89
+          }
+        ]
+      },
+      {
+        "id": "g-15-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.2
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.28
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.78
+          }
+        ]
+      },
+      {
+        "id": "g-16-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.61
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.75
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.02
+          }
+        ]
+      },
+      {
+        "id": "g-16-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.7
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.83
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.02
+          }
+        ]
+      },
+      {
+        "id": "g-16-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.14
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.12
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.03
+          }
+        ]
+      },
+      {
+        "id": "g-17-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.45
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.55
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.02
+          }
+        ]
+      },
+      {
+        "id": "g-17-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.69
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.58
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.02
+          }
+        ]
+      },
+      {
+        "id": "g-17-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.69
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.07
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.02
+          }
+        ]
+      },
+      {
+        "id": "g-18-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.5
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.96
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.03
+          }
+        ]
+      },
+      {
+        "id": "g-18-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.74
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.95
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.48
+          }
+        ]
+      },
+      {
+        "id": "g-18-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.39
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.39
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.03
+          }
+        ]
+      },
+      {
+        "id": "g-19-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.3
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.9
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.04
+          }
+        ]
+      },
+      {
+        "id": "g-19-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.55
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.93
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.02
+          }
+        ]
+      },
+      {
+        "id": "g-19-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.17
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.15
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.04
+          }
+        ]
+      },
+      {
+        "id": "g-20-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.34
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.97
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.01
+          }
+        ]
+      },
+      {
+        "id": "g-20-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.3
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.68
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.01
+          }
+        ]
+      },
+      {
+        "id": "g-20-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.15
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.2
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.01
+          }
+        ]
+      },
+      {
+        "id": "g-21-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.37
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.94
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.88
+          }
+        ]
+      },
+      {
+        "id": "g-21-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.43
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.87
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.05
+          }
+        ]
+      },
+      {
+        "id": "g-21-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.19
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.16
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.03
+          }
+        ]
+      },
+      {
+        "id": "g-22-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.5
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.97
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.5
+          }
+        ]
+      },
+      {
+        "id": "g-22-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.49
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.94
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.15
+          }
+        ]
+      },
+      {
+        "id": "g-22-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.15
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.11
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.07
+          }
+        ]
+      },
+      {
+        "id": "g-23-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.39
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.95
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.46
+          }
+        ]
+      },
+      {
+        "id": "g-23-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.49
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.92
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.41
+          }
+        ]
+      },
+      {
+        "id": "g-23-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.21
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.35
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.09
+          }
+        ]
+      },
+      {
+        "id": "g-24-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.35
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.94
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.05
+          }
+        ]
+      },
+      {
+        "id": "g-24-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.23
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.6
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.03
+          }
+        ]
+      },
+      {
+        "id": "g-24-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.12
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.21
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.02
+          }
+        ]
+      },
+      {
+        "id": "g-25-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.43
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.96
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.03
+          }
+        ]
+      },
+      {
+        "id": "g-25-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.59
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.96
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.97
+          }
+        ]
+      },
+      {
+        "id": "g-25-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.17
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.07
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.69
+          }
+        ]
+      },
+      {
+        "id": "g-26-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.35
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.97
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.03
+          }
+        ]
+      },
+      {
+        "id": "g-26-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.54
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.98
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.98
+          }
+        ]
+      },
+      {
+        "id": "g-26-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.25
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.55
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.04
+          }
+        ]
+      },
+      {
+        "id": "g-27-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.36
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.98
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.03
+          }
+        ]
+      },
+      {
+        "id": "g-27-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.58
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.95
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.96
+          }
+        ]
+      },
+      {
+        "id": "g-27-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.13
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.11
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.06
+          }
+        ]
+      },
+      {
+        "id": "g-28-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.22
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.81
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.02
+          }
+        ]
+      },
+      {
+        "id": "g-28-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.74
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.93
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.03
+          }
+        ]
+      },
+      {
+        "id": "g-28-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.27
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.16
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.04
+          }
+        ]
+      },
+      {
+        "id": "g-29-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.23
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.91
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.27
+          }
+        ]
+      },
+      {
+        "id": "g-29-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.77
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.85
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.11
+          }
+        ]
+      },
+      {
+        "id": "g-29-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.23
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.15
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.09
+          }
+        ]
+      },
+      {
+        "id": "g-30-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.47
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.95
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.94
+          }
+        ]
+      },
+      {
+        "id": "g-30-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.72
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.93
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.09
+          }
+        ]
+      },
+      {
+        "id": "g-30-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.26
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.16
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.03
+          }
+        ]
+      },
+      {
+        "id": "g-31-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.66
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.96
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.96
+          }
+        ]
+      },
+      {
+        "id": "g-31-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.51
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.73
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.14
+          }
+        ]
+      },
+      {
+        "id": "g-31-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.24
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.23
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.03
+          }
+        ]
+      },
+      {
+        "id": "g-32-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.89
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.96
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.85
+          }
+        ]
+      },
+      {
+        "id": "g-32-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.9
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.86
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.82
+          }
+        ]
+      },
+      {
+        "id": "g-32-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.43
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.18
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.78
+          }
+        ]
+      },
+      {
+        "id": "g-33-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.11
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.91
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.04
+          }
+        ]
+      },
+      {
+        "id": "g-33-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.91
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.87
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.9
+          }
+        ]
+      },
+      {
+        "id": "g-33-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.54
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.25
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.93
+          }
+        ]
+      },
+      {
+        "id": "g-34-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.45
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.73
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.75
+          }
+        ]
+      },
+      {
+        "id": "g-34-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.92
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.81
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.55
+          }
+        ]
+      },
+      {
+        "id": "g-34-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.41
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.17
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.27
+          }
+        ]
+      },
+      {
+        "id": "g-35-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.28
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.94
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.03
+          }
+        ]
+      },
+      {
+        "id": "g-35-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.88
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.9
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.85
+          }
+        ]
+      },
+      {
+        "id": "g-35-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.67
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.47
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.57
+          }
+        ]
+      },
+      {
+        "id": "g-36-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.55
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.87
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.13
+          }
+        ]
+      },
+      {
+        "id": "g-36-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.83
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.9
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.86
+          }
+        ]
+      },
+      {
+        "id": "g-36-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.35
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.28
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.62
+          }
+        ]
+      },
+      {
+        "id": "g-37-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.27
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.97
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.04
+          }
+        ]
+      },
+      {
+        "id": "g-37-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.88
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.94
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.82
+          }
+        ]
+      },
+      {
+        "id": "g-37-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.55
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.15
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.59
+          }
+        ]
+      },
+      {
+        "id": "g-38-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.37
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.25
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.05
+          }
+        ]
+      },
+      {
+        "id": "g-38-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.9
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.93
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.8
+          }
+        ]
+      },
+      {
+        "id": "g-38-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.55
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.14
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.5
+          }
+        ]
+      },
+      {
+        "id": "g-39-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.14
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.95
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.04
+          }
+        ]
+      },
+      {
+        "id": "g-39-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.84
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.93
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.88
+          }
+        ]
+      },
+      {
+        "id": "g-39-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.38
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.33
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.52
+          }
+        ]
+      },
+      {
+        "id": "g-40-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.81
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.85
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.12
+          }
+        ]
+      },
+      {
+        "id": "g-40-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.87
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.96
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.87
+          }
+        ]
+      },
+      {
+        "id": "g-40-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.61
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.49
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.7
+          }
+        ]
+      },
+      {
+        "id": "g-41-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.72
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.76
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.31
+          }
+        ]
+      },
+      {
+        "id": "g-41-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.72
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.6
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.87
+          }
+        ]
+      },
+      {
+        "id": "g-41-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.36
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.25
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.78
+          }
+        ]
+      },
+      {
+        "id": "g-42-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.33
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.97
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.03
+          }
+        ]
+      },
+      {
+        "id": "g-42-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.77
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.94
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.93
+          }
+        ]
+      },
+      {
+        "id": "g-42-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.13
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.12
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.71
+          }
+        ]
+      },
+      {
+        "id": "g-43-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.75
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.96
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.24
+          }
+        ]
+      },
+      {
+        "id": "g-43-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.91
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.95
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.82
+          }
+        ]
+      },
+      {
+        "id": "g-43-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.55
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.45
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.52
+          }
+        ]
+      },
+      {
+        "id": "g-44-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.54
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.98
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.86
+          }
+        ]
+      },
+      {
+        "id": "g-44-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.76
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.93
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.71
+          }
+        ]
+      },
+      {
+        "id": "g-44-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.28
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.05
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.27
+          }
+        ]
+      },
+      {
+        "id": "g-45-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.32
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.26
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.84
+          }
+        ]
+      },
+      {
+        "id": "g-45-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.89
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.96
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.93
+          }
+        ]
+      },
+      {
+        "id": "g-45-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.26
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.04
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.84
+          }
+        ]
+      },
+      {
+        "id": "g-46-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.77
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.94
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.97
+          }
+        ]
+      },
+      {
+        "id": "g-46-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.8
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.52
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.85
+          }
+        ]
+      },
+      {
+        "id": "g-46-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.46
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.11
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.94
+          }
+        ]
+      },
+      {
+        "id": "g-47-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.61
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.96
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.89
+          }
+        ]
+      },
+      {
+        "id": "g-47-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.88
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.95
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.03
+          }
+        ]
+      },
+      {
+        "id": "g-47-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.27
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.14
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.02
+          }
+        ]
+      },
+      {
+        "id": "g-48-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.64
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.88
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.8
+          }
+        ]
+      },
+      {
+        "id": "g-48-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.6
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.72
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.09
+          }
+        ]
+      },
+      {
+        "id": "g-48-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.34
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.15
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.65
+          }
+        ]
+      },
+      {
+        "id": "g-49-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.53
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.95
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.06
+          }
+        ]
+      },
+      {
+        "id": "g-49-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.85
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.94
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.81
+          }
+        ]
+      },
+      {
+        "id": "g-49-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.43
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.18
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.72
+          }
+        ]
+      },
+      {
+        "id": "g-50-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.64
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.97
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.05
+          }
+        ]
+      },
+      {
+        "id": "g-50-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.93
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.97
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.96
+          }
+        ]
+      },
+      {
+        "id": "g-50-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.31
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.1
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.54
+          }
+        ]
+      },
+      {
+        "id": "g-51-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.91
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.97
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.06
+          }
+        ]
+      },
+      {
+        "id": "g-51-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.95
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.97
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.96
+          }
+        ]
+      },
+      {
+        "id": "g-51-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.33
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.1
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.66
+          }
+        ]
+      },
+      {
+        "id": "g-52-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.83
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.95
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.04
+          }
+        ]
+      },
+      {
+        "id": "g-52-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.89
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.97
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.97
+          }
+        ]
+      },
+      {
+        "id": "g-52-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.47
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.07
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.7
+          }
+        ]
+      },
+      {
+        "id": "g-53-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.87
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.97
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.04
+          }
+        ]
+      },
+      {
+        "id": "g-53-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.87
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.97
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.97
+          }
+        ]
+      },
+      {
+        "id": "g-53-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.37
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.07
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.66
+          }
+        ]
+      },
+      {
+        "id": "g-54-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.68
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.95
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.05
+          }
+        ]
+      },
+      {
+        "id": "g-54-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.93
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.97
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.97
+          }
+        ]
+      },
+      {
+        "id": "g-54-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.34
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.1
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.68
+          }
+        ]
+      },
+      {
+        "id": "g-55-full",
+        "kind": "coverage_full",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.9
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.94
+          },
+          {
+            "goalIndex": 2,
+            "gold": 0,
+            "value": 0.12
+          }
+        ]
+      },
+      {
+        "id": "g-55-truncated",
+        "kind": "coverage_truncated",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 1,
+            "value": 0.9
+          },
+          {
+            "goalIndex": 1,
+            "gold": 1,
+            "value": 0.97
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.97
+          }
+        ]
+      },
+      {
+        "id": "g-55-digitless",
+        "kind": "coverage_digitless",
+        "ok": true,
+        "judgments": [
+          {
+            "goalIndex": 0,
+            "gold": 0,
+            "value": 0.38
+          },
+          {
+            "goalIndex": 1,
+            "gold": 0,
+            "value": 0.15
+          },
+          {
+            "goalIndex": 2,
+            "gold": 1,
+            "value": 0.76
+          }
+        ]
+      }
+    ]
+  }
+}

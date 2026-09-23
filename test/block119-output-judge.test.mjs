@@ -137,12 +137,21 @@ test('注册表：output-judge 证据在位 + 门控=校准推荐一致', () => 
   const g = thresholds['output-judge'].gates;
   assert.equal(g.fitPass, 3);
   assert.equal(g.fitRetry, 2.5);
-  assert.equal(g.faithfulPass, undefined, 'faithful 未校准=observe-only（缺键红线）');
-  assert.equal(g.goalPass, undefined, 'goal 未校准=observe-only（缺键红线）');
+  // BLOCK-119 加映 2（2026-09-23）— faithful/goal 校准达标落键，升级为可门控；
+  // 键值必须与证据推荐一致（改键必先重校准红线）。
+  assert.equal(g.faithfulPass, 0.3, 'faithful 校准 θ（加映 2 证据）');
+  assert.equal(g.goalPass, 0.5, 'goal 校准 θ（加映 2 证据）');
   const ev = JSON.parse(fs.readFileSync(path.join(root, thresholds['output-judge'].evidence), 'utf8'));
   assert.equal(ev.recommended.theta, 3, '注册表 θ 必须与证据推荐一致');
   assert.ok(ev.recommended.adoptedPrecision >= 0.8);
   assert.ok(ev.caveat && ev.caveat.includes('下界'), '配对语料下界 caveat 必须在证据中留痕');
+  const evFG = JSON.parse(fs.readFileSync(path.join(root, thresholds['output-judge'].evidenceFaithfulGoal), 'utf8'));
+  assert.equal(evFG.gate.faithfulPassed, true);
+  assert.equal(evFG.gate.goalPassed, true);
+  assert.equal(evFG.faithful.recommended.theta, g.faithfulPass, 'faithfulPass 必须与证据推荐一致');
+  assert.ok(evFG.faithful.recommended.adoptedPrecision >= 0.85);
+  assert.equal(evFG.goal.recommended.theta, g.goalPass, 'goalPass 必须与证据推荐一致');
+  assert.ok(evFG.goal.recommended.adoptedPrecision >= 0.85);
 });
 
 test('语料隐私：corpus-judge-fit.json 只存指针零原文', () => {

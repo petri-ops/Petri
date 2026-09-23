@@ -92,10 +92,15 @@ module.exports = {
   // BLOCK-119 P0 — output-judge 输出评判门（dev-time + P2 试点运行时）：fit 五级量表
   //（score≥fitPass=PASS 区；≥fitRetry=RETRY 区；更低=ESCALATE）。配对语料下界校准
   //（θ=3：precision 0.8254/coverage 0.7875；真实配对 21% 落 retry 区，fail-open+RETRY 语义
-  // 承载）；faithful/goalPass 缺键=observe-only（未校准不门控，无证据不门控红线）。
+  // 承载）。
+  // BLOCK-119 加映 2（2026-09-23）— faithful/goal 校准达标落键，升级为可门控：
+  // faithfulPass=0.3（noul，precision 0.9455/coverage 0.9286/trap 0.0536，仓内文档锚定
+  // 语料 112）、goalPass=0.5（noul，precision 0.8504/coverage 0.9173/trap 0.164，语料
+  // 504 判定）。证据=calibration-judge-faithful-goal.json；改键必先重校准（红线）。
   'output-judge': {
-    gates: { fitPass: 3, fitRetry: 2.5 },
+    gates: { fitPass: 3, fitRetry: 2.5, faithfulPass: 0.3, goalPass: 0.5 },
     evidence: 'acceptance/block-119/calibration-judge-fit.json',
+    evidenceFaithfulGoal: 'acceptance/block-119/calibration-judge-faithful-goal.json',
     model: 'jev-1.13.0',
   },
 };
