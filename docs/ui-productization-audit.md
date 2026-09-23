@@ -4090,6 +4090,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据（契约 · v5.8）**：ToolActivityList 25/25（行级复制钮断言）+ 全量 1195/1195 + tsc 0。
 - **加映 v5.9（同日，用户验收反馈「返回 JSON 显示处需优化：复制钮放合适位置、JSON 左对齐、去掉左侧调用的工具名竖排、长行横向滚动看全」）**：①「返回」块标题栏复制钮右置（margin-left auto）；②JSON 本体 `white-space: pre` + `overflow-x: auto`——长行不换行、横向拖动看全、左对齐；③详情体内工具名/结果块各自 `flex-basis: 100%` 独占整行（修复 flex 行内被挤成一字一行竖排的布局破坏，UI-272 工具名契约保留）。
 - **证据（契约 · v5.9）**：ToolActivityList 26/26（UI-272 恢复通过）+ 全量 1196/1196 + tsc 0 + docs/ui 绿。
+- **加映 v5.10（同日，用户验收反馈「复制图标按钮应放到 JSON 展示框内右上角；JSON 现在仍旧看不完整」）**：①复制钮移入 JSON 框内**右上角悬浮**（GitHub 代码块同款，绝对定位 + surface 底色 + 边框）；②**溢出逃逸根因修复**——`.sc-tool-resultdata` 无 min-width 0，长 JSON 行把 flex 容器撑爆导致滚动条失效、内容截断出界；修=结果块 `min-width 0 + max-width 100% + overflow hidden`，JSON 框内 `white-space: pre + overflow: auto` 双向滚动（横向拖动看全、纵向限高 240px）。
+- **证据（实机 · v5.10）**：CDP 实测 frameExists/copyBtn/copyInFrameTopRight 全 true，JSON 框内滚动机制在位（截图 `ui-437-v510-live.png` 归档）；组件 26/26 + tsc 0。
 - **抓真修复（v5.6 验收实测抓出）**：①`mergeToolResultActivity` 的 resultData 三元方向写反（result 是新到数据却走了「保留旧值」分支——running 项已存在时 resultData 恒 undefined，即用户截图「点开只有工具名」的根因），改为总是取本次 `result?.data`，补合并方向契约测试；②展开体断言需先点行头出 ActivityBody（行级两级折叠语义）。
 - **加映 v5.7（同日，用户反馈「返回 JSON 有复制图标按钮吗？应该加上」）**：返回详情块增标题栏（返回 + 复制钮）——复制走 navigator.clipboard（与终端块复制同模式），写后 is-copied ✓ 反馈 1.5s；剪贴板不可用时静默失败（正文仍可手动选择）。resultdata 块补 CSS（标题栏/画布底色 inset/限高滚动/等宽）。复制契约测试（writeText 参数 = JSON 本体）。
 - **证据（契约 · v5.7）**：ToolActivityList 25/25（+复制钮断言）+ tsc 0。
