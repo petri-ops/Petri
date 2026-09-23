@@ -211,16 +211,16 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     ...overrides,
   });
 
-  it('Q2 UI-437 v2 纯流水：无簇头摘要；失败以 error 行可见；运行态「工作中」头部', () => {
+  it('Q2 UI-437 v3：完成簇自动折叠为一行摘要（含需注意计数）；运行态「工作中」+ 单行最新事件', () => {
     const { rerender } = render(
       <ToolActivityList
         activities={[activity('success', { key: 'a' }), execActivity({ key: 'e' })]}
         collapseWhenSettled
       />
     );
-    // 总结味下线：无簇头摘要；行常驻
-    expect(screen.queryByText(/执行工具 2 次/)).toBeNull();
-    expect(screen.getByTestId('qoder-cluster-body')).toBeTruthy();
+    // 完成即折叠：头部一行摘要，明细默认隐藏
+    expect(screen.getByText(/执行工具 2 次/)).toBeTruthy();
+    expect(screen.queryByTestId('qoder-cluster-body')).toBeNull();
 
     rerender(
       <ToolActivityList
@@ -231,12 +231,16 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
         collapseWhenSettled
       />
     );
-    // 失败可见性迁移到行级：error 行（✕ 字形 + 红色）
+    expect(screen.getByText(/执行工具 2 次 · 1 项需注意/)).toBeTruthy();
+
+    // 点簇头展开明细 → error 行可见（行级 ✕ 红字形）
+    fireEvent.click(screen.getByText(/执行工具 2 次 · 1 项需注意/));
     expect(document.querySelectorAll('.sc-tool-qoder-row[data-status="error"]').length).toBe(1);
 
     rerender(<ToolActivityList activities={[activity('running', { key: 'r' })]} collapseWhenSettled showRunningStopwatch />);
-    // 运行态 = ZCode「工作中 · 已运行 Ns」头部
+    // 运行态 = ZCode「工作中 · 已运行 Ns」头部 + 单行最新事件
     expect(screen.getByText(/工作中 · 已运行/)).toBeTruthy();
+    expect(screen.getAllByTestId('qoder-row-head').length).toBe(1);
   });
 
   it('Q3 统一单行：exec 行默认折叠（无终端块），无 routine 二级折叠', () => {
@@ -252,7 +256,8 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
         collapseWhenSettled
       />
     );
-    // UI-437 — 完成簇默认展开为静音单行时间线：行常驻可见，无需点击簇头
+    // v3 — 完成簇默认折叠，点簇头展开为单行流
+    fireEvent.click(screen.getByText(/执行工具 4 次/));
     // exec 也只是单行：命令预览在，输出块不在
     expect(screen.getByText('终端命令 已运行')).toBeTruthy();
     expect(screen.getAllByText('npm run docs:reconcile 2>&1 | tail -60').length).toBeGreaterThanOrEqual(1);
@@ -265,7 +270,7 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
 
   it('Q4 点击展开：exec 行展开出命令+输出，再点击收起', () => {
     render(<ToolActivityList activities={[execActivity()]} collapseWhenSettled />);
-    // UI-437 — 完成簇行默认可见，直接点行头展开终端块
+    fireEvent.click(screen.getByText(/执行工具 1 次/));
     fireEvent.click(screen.getByTestId('qoder-row-head'));
     expect(screen.getByTestId('tool-term-output')).toBeTruthy();
     expect(screen.getByTestId('tool-term-output').textContent).toContain('zero manual review candidates');
@@ -282,6 +287,7 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
       />
     );
     // UI-437 加映 — 完成态思考行只留标签一行（无长预览），点击展开全文
+    fireEvent.click(screen.getByText(/执行工具 1 次/));
     expect(screen.getByText('已思考')).toBeTruthy();
     expect(screen.queryByText('先确认登记行再改文档')).toBeNull();
     expect(screen.queryByText(/第二行细节/)).toBeNull();
@@ -307,8 +313,10 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     expect(screen.queryByText('cmd-1')).toBeNull();
     expect(screen.queryByText('第一轮思路')).toBeNull();
     expect(screen.queryByText('第二轮思路')).toBeNull();
-    // 运行态头部 = 「工作中 · 已运行 Ns」（非交互状态行）；最新事件单行即全部可见内容
+    // 运行态头部 = 「工作中 · 已运行 Ns」+ 仅最新事件单行（历史轮收起，不可中途展开）
     expect(screen.getByText(/工作中 · 已运行/)).toBeTruthy();
+    expect(screen.getByText('cmd-2')).toBeTruthy();
+    expect(screen.queryByText('cmd-1')).toBeNull();
   });
 
   it('UI-431 P2 派发行：子智能体行参与当轮渲染，无快照时无计时', () => {
@@ -324,7 +332,7 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     expect(screen.getByText('已派发').textContent).toBe('已派发');
   });
 
-  it('UI-437 完成簇行常驻可见；簇头点击折叠为摘要、再点恢复', () => {
+  it('UI-437 v3 完成簇自动折叠为一行摘要；点簇头展开明细、再点收起', () => {
     const mk = (key: string, iteration: number, detail: string): ToolActivityItem => ({
       key, name: 'workspace_exec', status: 'success', actionLabel: '已运行', actionDetail: detail, iteration,
     });
@@ -334,11 +342,14 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
         collapseWhenSettled
       />
     );
-    // 无任何点击：行即常驻可见（ZCode 完成态）；且无簇头摘要（总结味下线）
-    expect(screen.getByTestId('qoder-cluster-body')).toBeTruthy();
+    // 完成即折叠：摘要一行，明细隐藏
+    expect(screen.queryByTestId('qoder-cluster-body')).toBeNull();
+    // 点簇头 → 展开明细（cmd-1/cmd-2 逐行）；再点 → 收起
+    fireEvent.click(screen.getByText(/执行工具 2 次/));
     expect(screen.getByText('cmd-1')).toBeTruthy();
     expect(screen.getByText('cmd-2')).toBeTruthy();
-    expect(screen.queryByText(/执行工具 2 次/)).toBeNull();
+    fireEvent.click(screen.getByText(/执行工具 2 次/));
+    expect(screen.queryByTestId('qoder-cluster-body')).toBeNull();
   });
 
   it('UI-437 写入行差异角标：changeDiff 渲染 +N / -M（零值侧省略）', () => {
@@ -350,6 +361,7 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     render(
       <ToolActivityList activities={[write('w1', 130, 0), write('w2', 4, 2)]} collapseWhenSettled />
     );
+    fireEvent.click(screen.getByText(/执行工具 2 次/));
     expect(screen.getByText('+130')).toBeTruthy();
     expect(screen.queryByText('-0')).toBeNull();
     expect(screen.getByText('+4')).toBeTruthy();
@@ -370,7 +382,8 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
         collapseWhenSettled
       />
     );
-    // UI-437 — 完成簇行默认可见；完成态思考行只留标签（预览不渲染）
+    // v3 — 完成簇默认折叠，点簇头展开；完成态思考行只留标签（预览不渲染）
+    fireEvent.click(screen.getByText(/执行工具 2 次/));
     const thinkHeads = screen.getAllByRole('button', { name: '展开 已思考' });
     expect(thinkHeads.length).toBe(2);
     // 点开两行思考后，交错顺序仍为：思考(1) → 命令(1) → 思考(2) → 文件(2)
@@ -382,17 +395,17 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     expect(body.indexOf('再看台账 diff')).toBeLessThan(body.indexOf('docs/AUDIT-LOG.md'));
   });
 
-  it('UI-430 单工具簇：无簇头摘要，工具信息由行自身承载（零耗时不显示）', () => {
+  it('UI-430 单工具簇：折叠簇头携带该工具的一行摘要；零耗时不显示', () => {
     render(
       <ToolActivityList
         activities={[execActivity({ durationMs: 0 })]}
         collapseWhenSettled
       />
     );
-    expect(screen.queryByText(/执行工具 1 次/)).toBeNull();
-    expect(screen.getByText(/npm run docs:reconcile/)).toBeTruthy();
-    expect(screen.queryByText(/耗时/)).toBeNull();
-    expect(screen.queryByText(/0 ms/)).toBeNull();
+    const head = screen.getByText(/执行工具 1 次/).textContent || '';
+    expect(head).toContain('已运行 npm run docs:reconcile');
+    expect(head).not.toContain('耗时');
+    expect(head).not.toContain('0 ms');
   });
 });
 

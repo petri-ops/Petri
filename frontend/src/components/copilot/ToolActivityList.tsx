@@ -658,38 +658,60 @@ export function ToolActivityList({
   ));
   const renderedIterations = new Set<number>();
 
-  // UI-437 v2 — 时间线（ZCode 纯流水）：无簇头摘要，事件行即时间线本体。
+  // UI-437 v3（用户裁决「每一轮所有任务都自动折叠 需要再点开」）：完成簇自动折叠
+  // 为一行摘要（点簇头展开明细、再点收起）；运行簇=「工作中 · 已运行 Ns」+ 最新
+  // 一条事件单行。所有轮次同一规则，无一例外。
   if (collapseWhenSettled) {
     const last = activities[activities.length - 1];
+    const runningTail = anyRunning && manualExpanded === null;
+    const headOpen = runningTail ? false : (manualExpanded !== null ? manualExpanded : false);
+    const singlePreview = activities.length === 1 && activities[0]
+      ? `${activities[0].actionLabel}${activities[0].actionDetail ? ` ${activities[0].actionDetail}` : ''}`.slice(0, 64)
+      : '';
+    const attentionCount = activities.filter(
+      (activity) => activity.status === 'error' || activity.status === 'denied'
+    ).length;
+    const settledDuration = (processingDurationMs ?? totalDurationMs) > 0 ? totalDuration : null;
+    const headText = anyRunning
+      ? `工作中 · 已运行 ${runningElapsedMs !== null ? formatToolDuration(runningElapsedMs) : '0 s'}`
+      : `执行工具 ${activities.length} 次${attentionCount ? ` · ${attentionCount} 项需注意` : ''}${singlePreview ? ` · ${singlePreview}` : ''}${settledDuration ? ` · 耗时 ${settledDuration}` : ''}`;
     return (
       <div className="sc-tool-activity-list" aria-label="工具活动">
-        {anyRunning && (
-          <div className="sc-tool-activity-summary sc-tool-live-head" data-state="running" aria-label="执行中">
-            <span className="sc-tool-activity-summary-label">
-              {`工作中 · 已运行 ${runningElapsedMs !== null ? formatToolDuration(runningElapsedMs) : '0 s'}`}
-            </span>
-            <span className="sc-tool-term-spinner" aria-hidden="true" />
+        <button
+          type="button"
+          className="sc-tool-activity-summary"
+          data-expanded={headOpen || undefined}
+          data-state={anyRunning ? 'running' : 'settled'}
+          aria-expanded={headOpen}
+          aria-label={headOpen ? '收起执行记录' : '展开执行记录'}
+          title={headOpen ? '收起执行记录' : '展开执行记录'}
+          onClick={() => setManualExpanded(!headOpen)}
+        >
+          {anyRunning && <span className="sc-tool-term-spinner" aria-hidden="true" />}
+          <span className="sc-tool-activity-summary-label">{headText}</span>
+          <Icon name={headOpen ? 'chevron-down' : 'chevron-right'} size={14} />
+        </button>
+        {(headOpen || runningTail) && (
+          <div className="sc-tool-activity-inline" data-testid="qoder-cluster-body">
+            {reasoningRows}
+            {runningTail && last ? (
+              <QoderRow key={last.key} activity={last} />
+            ) : groupOrder.map((iterationKey) => (
+              <div key={`qoder-iter-${iterationKey}`}>
+                {reasoningMap[iterationKey] ? (
+                  <ReasoningRow
+                    iteration={iterationKey}
+                    text={reasoningMap[iterationKey]}
+                    label="已思考"
+                  />
+                ) : null}
+                {(byIteration.get(iterationKey) || []).map((activity) => (
+                  <QoderRow key={activity.key} activity={activity} />
+                ))}
+              </div>
+            ))}
           </div>
         )}
-        <div className="sc-tool-activity-inline" data-testid="qoder-cluster-body">
-          {reasoningRows}
-          {anyRunning && last ? (
-            <QoderRow key={last.key} activity={last} />
-          ) : groupOrder.map((iterationKey) => (
-            <div key={`qoder-iter-${iterationKey}`}>
-              {reasoningMap[iterationKey] ? (
-                <ReasoningRow
-                  iteration={iterationKey}
-                  text={reasoningMap[iterationKey]}
-                  label="已思考"
-                />
-              ) : null}
-              {(byIteration.get(iterationKey) || []).map((activity) => (
-                <QoderRow key={activity.key} activity={activity} />
-              ))}
-            </div>
-          ))}
-        </div>
       </div>
     );
   }

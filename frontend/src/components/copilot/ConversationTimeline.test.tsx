@@ -42,8 +42,8 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     const view = within(container);
     // UI-437 加映 — 思考节点标签去轮次号（内部细节不外露）
     expect(view.getByText('思考')).toBeTruthy();
-    // UI-437 v2 — 无簇头摘要；事件以 Qoder 单行呈现
-    expect(container.querySelectorAll('.sc-tool-qoder-row').length).toBe(1);
+    // BLOCK-108 P3 / UI-437 v3 — 完成簇折叠为计数式簇头一行
+    expect(container.textContent).toContain('执行工具 1 次');
     // 正文不由本组件产出（宿主负责），避免同一正文被渲染两次
     expect(container.textContent).not.toContain('最终正文');
   });
@@ -52,9 +52,9 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     const { container } = render(<ConversationTimeline segments={[toolsSegment]} />);
     expect(container.querySelector('.sc-conversation-timeline')).toBeTruthy();
     expect(container.querySelector('.sc-timeline-cluster')).toBeTruthy();
-    // UI-437 v2 — 完成簇无簇头摘要（总结味下线），事件行直接可见
-    expect(container.querySelector('.sc-tool-activity-summary')).toBeNull();
-    expect(container.querySelectorAll('.sc-tool-qoder-row').length).toBe(1);
+    // UI-437 v3 — 完成簇保留折叠开关（簇头一行摘要），明细默认隐藏
+    expect(container.querySelector('.sc-tool-activity-summary')).toBeTruthy();
+    expect(container.querySelector('[data-testid="qoder-cluster-body"]')).toBeNull();
     // 簇内不再出现思考行（思考已由时间线独立成节点）
     expect(container.querySelector('.sc-timeline-reasoning')).toBeNull();
   });
@@ -156,10 +156,9 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     expect(container.querySelectorAll('.sc-timeline-cluster')).toHaveLength(2);
   });
 
-  it('UI-437 ZCode 模型：完成簇行常驻可见；运行簇只渲染最新一条事件单行', () => {
-    // 用「含 workspace_exec」的簇做判据——历史契约（D4 完成后折叠为一行摘要）已由
-    // UI-437 修订（用户裁决「完全模仿 zocode」）：完成簇默认展开为静音单行时间线，
-    // 过程史常驻可扫读；运行簇只渲染最新一条事件单行。
+  it('UI-437 v3 ZCode 模型：完成簇自动折叠为一行摘要；运行簇只渲染最新一条事件单行', () => {
+    // 用户裁决「每一轮所有任务都自动折叠 需要再点开」：完成即折叠为摘要一行
+    // （点簇头展开明细），运行簇头部「工作中 · 已运行 Ns」+ 仅最新事件单行。
     const settledExec: ConversationSegment = {
       ...toolsSegment,
       activities: [{
@@ -173,8 +172,8 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
       totalCount: 1,
     };
     const settled = render(<ConversationTimeline segments={[settledExec]} />);
-    expect(settled.container.querySelector('.sc-tool-activity-inline')).toBeTruthy();
-    expect(settled.container.querySelectorAll('.sc-tool-qoder-row').length).toBe(1);
+    expect(settled.container.querySelector('.sc-tool-activity-inline')).toBeNull();
+    expect(settled.container.textContent).toContain('执行工具 1 次');
 
     const running: ConversationSegment = {
       ...settledExec,
