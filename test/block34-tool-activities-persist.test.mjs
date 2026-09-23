@@ -138,6 +138,23 @@ describe('BLOCK-34 P1 behavior: recorder snapshot lands in copilot_messages.meta
     }
   });
 
+  it('UI-437 v5.5: 对象结果 summary 用 digest 取代 ok（top-3 键，ok/error 样板剔除）', () => {
+    const { buildToolResultEvent } = require(resolve('core/biof3-server/agent-tools/tool-events'));
+
+    const evt = buildToolResultEvent(
+      { tool: 'query', status: 'success', durationMs: 7, data: { ok: true, datasets: [], analyses: [], query: '项目文档' } },
+      {},
+    );
+    // ok=true 是执行回执样板被剔除；数组=「N 条」；字符串=key 值截断；cap 3 键
+    assert.equal(evt.summary, 'datasets 0 条 · analyses 0 条 · query 项目文档');
+
+    const okOnly = buildToolResultEvent({ tool: 'noop', status: 'success', data: { ok: true } }, {});
+    assert.equal(okOnly.summary, 'ok', '剔除后无内容时回退 ok');
+
+    const errored = buildToolResultEvent({ tool: 'query', status: 'error', data: { error: '空间未启用' } }, {});
+    assert.equal(errored.summary, '错误: 空间未启用');
+  });
+
   it('UI-273: buildToolResultEvent and recorder snapshot carry changeDiff for write ops', () => {
     const { createToolActivityRecorder } = require(resolve('core/biof3-server/agent-tools'));
     const { buildToolResultEvent } = require(resolve('core/biof3-server/agent-tools/tool-events'));

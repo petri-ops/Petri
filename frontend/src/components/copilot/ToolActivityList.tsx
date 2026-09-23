@@ -501,9 +501,14 @@ function QoderRow({ activity }: { activity: ToolActivityItem }) {
     }
     return '';
   })();
+  // UI-437 v5.5 — 预览组合：参数摘要 → 结果摘要（后端 digest）；'ok' 样板过滤
+  const summaryText = activity.summary && activity.summary !== 'ok' ? activity.summary : '';
   const previewSource = isExec
     ? (command.split('\n')[0] || '').slice(0, 120)
-    : (activity.actionDetail || activity.summary || outputPreview);
+    : [
+        activity.actionDetail || summaryText || outputPreview,
+        summaryText && summaryText !== (activity.actionDetail || '') ? `→ ${summaryText}` : '',
+      ].filter(Boolean).join(' ');
   const subSnap = useSyncExternalStore(
     activity.agentRunId
       ? (cb) => subscribeSubAgentTask(activity.agentRunId, cb)

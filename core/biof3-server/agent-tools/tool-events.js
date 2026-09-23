@@ -50,6 +50,23 @@ function buildToolCallEvent({ name, args, traceId, callId, iteration }) {
   };
 }
 
+/** UI-437 v5.5 — 对象结果摘要（top-3 键）：数组=「N 条」/字符串=截 24 字/原始值=字面。
+ *  ok/error 是执行回执样板不是内容，剔除。取代对象结果一律 'ok' 的旧口径。 */
+function summarizeResultObject(obj) {
+  const parts = [];
+  for (const [key, value] of Object.entries(obj)) {
+    if (key === 'ok' || key === 'error' || typeof value === 'function') continue;
+    let rendered;
+    if (Array.isArray(value)) rendered = `${value.length} 条`;
+    else if (typeof value === 'string') rendered = value.replace(/\s+/g, ' ').trim().slice(0, 24) || '""';
+    else if (typeof value === 'number' || typeof value === 'boolean') rendered = String(value);
+    else rendered = '{…}';
+    parts.push(`${key} ${rendered}`);
+    if (parts.length >= 3) break;
+  }
+  return parts.join(' · ');
+}
+
 function buildToolResultEvent(envelope, args = {}, options = {}) {
   const result = envelope.data;
   const published = publicData(result);
@@ -58,7 +75,7 @@ function buildToolResultEvent(envelope, args = {}, options = {}) {
       ? `返回 ${result.length} 条`
       : result.error
         ? `错误: ${result.error}`
-        : 'ok'
+        : summarizeResultObject(result) || 'ok'
     : String(result);
   const evt = {
     event: 'tool_result',

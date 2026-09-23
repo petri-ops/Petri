@@ -421,6 +421,36 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     expect(summarizeToolCall('workspace_read', { path: 'src/a.ts' }).actionDetail).toBe('src/a.ts');
   });
 
+  it('UI-437 v5.5 行内组合：参数摘要 → 结果摘要；ok 样板不显示', () => {
+    const { rerender } = render(
+      <ToolActivityList
+        activities={[{
+          key: 'q9', name: 'query', status: 'success', actionLabel: '已调用',
+          actionDetail: 'query（datasets=项目文档）',
+          summary: 'datasets 0 条 · analyses 0 条',
+        }]}
+        collapseWhenSettled
+      />
+    );
+    fireEvent.click(screen.getByText(/执行工具 1 次/));
+    // 簇头单工具摘要与行预览都携带参数摘要（≥2 处）；结果摘要以 → 连接出现在行上
+    expect(screen.getAllByText(/query（datasets=项目文档）/).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText(/→ datasets 0 条 · analyses 0 条/)).toBeTruthy();
+
+    // summary='ok' 样板被过滤，不显示 → ok
+    rerender(
+      <ToolActivityList
+        activities={[{
+          key: 'q10', name: 'query', status: 'success', actionLabel: '已调用',
+          actionDetail: 'query（datasets=项目文档）',
+          summary: 'ok',
+        }]}
+        collapseWhenSettled
+      />
+    );
+    expect(screen.queryByText(/→ ok/)).toBeNull();
+  });
+
   it('UI-437 v5.3 输出预览兜底：actionDetail 为空的调用行显示输出尾首个非空行（ANSI 剥离）', () => {
     render(
       <ToolActivityList
