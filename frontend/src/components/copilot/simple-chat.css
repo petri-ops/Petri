@@ -4102,6 +4102,17 @@
   color: var(--gewu-success);
 }
 
+/* UI-437 v5.12 — 溢出逃逸根治：min-width:0 必须贯穿整条 grid/flex 祖先链。
+   实测（祖先链走查）：可视消息列右缘 1054px，而工具行被长 JSON 行经
+   cluster/list/inline 三层 min-width:auto 网格项撑到 1388px——复制钮被顶进
+   右栏下方（不可见）、长行被右栏裁切（看似截断）。v5.9–v5.11 只修结果块
+   自身属打地鼠；本规则让内容在 JSON 框内收敛为横向滚动。 */
+.sc-conversation-timeline > *,
+.sc-tool-activity-list > *,
+.sc-tool-activity-inline > * {
+  min-width: 0;
+}
+
 /* UI-437 v5.7/v5.11 — 工具返回详情块：JSON 框即全部（v5.11 去标题栏/工具名行，
    展开体首个元素直接是框；复制钮悬浮框内右上角）。等宽、画布底色 inset、限高滚动。 */
 .sc-tool-resultdata {
@@ -4134,6 +4145,30 @@
   overflow-y: auto;
 }
 
+/* UI-437 v5.12 — 滚动可见性：框内横滚必须带可见滚动条——auto 滚动条在
+   覆盖式滚动条环境下不渲染，长行看起来像被截断（用户实测反馈） */
+.sc-tool-resultdata-json::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+.sc-tool-resultdata-json::-webkit-scrollbar-thumb {
+  background: var(--gewu-border-strong);
+  border: 2px solid transparent;
+  border-radius: 5px;
+  background-clip: padding-box;
+}
+
+.sc-tool-resultdata-json::-webkit-scrollbar-thumb:hover {
+  background: var(--gewu-text-tertiary);
+  background-clip: padding-box;
+}
+
+.sc-tool-resultdata-json::-webkit-scrollbar-track,
+.sc-tool-resultdata-json::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 /* UI-437 v4 — 运行级折叠行：整段任务（多轮）收成一行运行摘要，
    点开才是每轮思考和执行的细节。复用 qoder 行骨架，识别度靠 ✓ + 轮次计数。 */
 .sc-run-fold-line {
@@ -4163,9 +4198,10 @@
   align-items: center;
   justify-content: center;
   padding: 4px;
-  border: 1px solid var(--gewu-border);
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--gewu-bg-surface) 85%, transparent);
+  /* v5.12 — 实底 + 强边框：悬浮钮必须与 JSON 文本有明确对比度（85% 透明混色
+     在浅色主题下几乎不可见，用户实测反馈「复制图标没有修复」） */
+  border: 1px solid var(--gewu-border-strong);
+  background: var(--gewu-bg-surface);
   color: var(--gewu-text-secondary);
   cursor: pointer;
 }

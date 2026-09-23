@@ -37,6 +37,15 @@ description: Use when creating or modifying pages/components/styles, working on 
 - **像素取证**：PowerShell System.Drawing 采样/分布统计（System.Drawing 采样法 + 分布直方图见 gates 记忆）；对比「页面底 vs 卡片底 vs hover 底」。
 - **生效通道**：dev 栈 CSS 走 Vite HMR 即时生效；打包版不跟随（G0 不外推）。合成 CDP mouseMoved 不触发 `:hover`——hover 色验证用内联注入色值+截图像素采样。
 
+### 视觉验收红线（UI-437 v5.11/v5.12 事故制度化，2026-09-23）
+
+DOM/几何断言通过 ≠ 视觉验收通过。涉及悬浮元素、滚动容器、长内容或嵌套布局的 CSS 工作包，以下四条是硬要求：
+
+1. **必须元素级截图过目**：对组件区域裁剪放大（System.Drawing crop 或等价物）确认视觉形态，不允许只引用 boundingClientRect 合格就宣布修复。事故：复制钮几何量测 `copyWithinFrame=true` 但实际被顶进右栏下方——量测通过、用户看不见。
+2. **溢出量测参照系=可视列边界 + 祖先链走查**：escape 对比对象必须是可视列（如消息列 `.sc-msg-body`/视口），并从目标元素向上逐层检查祖先右缘 ≤ 可视列右缘；**禁止**用组件子树内部容器当 host——它可能与目标同处逃逸子树（事故：对 `sc-tool-activity-inline` 量测得 escapePx=-4「假绿」，真实逃逸 334px）。
+3. **长内容三态必测**：完整容纳 / 框内滚动（滚动条必须可见——`overflow:auto` 在覆盖式滚动条环境下不渲染滚动条，需显式 `::-webkit-scrollbar` token 化样式，否则长行看起来像被截断）/ 窄视口 ≤900px 不越出宿主列。
+4. **`min-width: 0` 贯穿整条 flex/grid 祖先链**：从可视列容器到滚动容器逐层检查 grid/flex 项的 `min-width:auto`（自动最小尺寸会把长内容的最小宽度逐级上传）；只给最内层补漏是打地鼠——v5.9/v5.10/v5.11 三连事故的逃逸均发生在结果块之上三层。
+
 ## 4. 门禁与评审
 
 - `cd frontend && npx vitest run src/styles/theme-token-contract.test.ts`：token 定义覆盖 + slate/遗留 token 零残留 + 暗色块特异性形态，写样式后必跑。

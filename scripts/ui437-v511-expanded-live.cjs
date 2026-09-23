@@ -2,14 +2,15 @@
 'use strict';
 
 /**
- * UI-437 v5.11 实机验证（dev Electron 测试实例，只连 :9223，禁触用户主窗 :9222）：
+ * UI-437 v5.11/v5.12 实机验证（dev Electron 测试实例，只连 :9223，禁触用户主窗 :9222）：
  * 真跑一轮「system_info + knowledge_search」只读任务（复刻用户截图场景），终态后
- * 展开运行摘要与全部工具行，机械量测展开体：
+ * 展开运行摘要与全部工具行，机械量测展开体（v5.12 量测参照系=可视列 .sc-msg-body
+ * + 祖先链零逃逸断言，见 gewu-css-theme skill 视觉验收红线）：
  *   V1 无工具名行（.sc-tool-activity-tool 不存在）
  *   V2 无「返回」标题（.sc-tool-resultdata-title 不存在）
- *   V3 JSON 框在场且复制钮悬浮框内右上角（copy rect 落在 frame 顶部区域内）
+ *   V3 JSON 框在场且复制钮悬浮框内右上角且不越可视列（copyEscapePx<=0）
  *   V4 展开态无游离行复制钮（.sc-tool-row-copy 计数 0）
- *   V5 溢出收敛：JSON 框右缘不越出宿主列（escapePx <= 0）+ 页面级零横向溢出
+ *   V5 溢出收敛：JSON 框右缘不越可视列（escapePx<=0）+ 祖先链零逃逸 + 页面零横向溢出
  * 证据：acceptance/ui-437/ui437-v511-expanded-live.json + PNG。
  * 前置：dev 栈在跑 + bash scripts/start-test-instance.sh。临时项目/会话 finally 清理。
  */
@@ -47,15 +48,27 @@ const GEOM_PROBE = `JSON.stringify((function(){
     var copy = f.querySelector('.sc-tool-resultdata-copy');
     var pr = pre ? pre.getBoundingClientRect() : null;
     var cr = copy ? copy.getBoundingClientRect() : null;
-    var host = f.closest('.sc-tool-activity-inline') || f.closest('.sc-conversation-timeline') || f.parentElement;
-    var hr = host ? host.getBoundingClientRect() : null;
+    // v5.12 — 参照系=可视消息列（.sc-msg-body），不得用逃逸子树内部容器
+    // （v5.11 事故：对同处逃逸子树的 host 量测得 escapePx=-4 假绿）
+    var col = f.closest('.sc-msg-body');
+    var colr = col ? col.getBoundingClientRect() : null;
+    // 祖先链零逃逸：pre 的每一层祖先右缘都不得越出可视列
+    var chainEscape = [];
+    var el = pre;
+    while (el && col && el !== col) {
+      var r = el.getBoundingClientRect();
+      if (Math.round(r.right - colr.right) > 1) chainEscape.push(String(el.className || el.tagName).slice(0, 50));
+      el = el.parentElement;
+    }
     return {
       hasPre: !!pre,
       hasCopy: !!copy,
       jsonScrollW: pre ? pre.scrollWidth : null,
       jsonClientW: pre ? pre.clientWidth : null,
       innerScrollsX: pre ? (pre.scrollWidth > pre.clientWidth) : null,
-      escapePx: (pr && hr) ? Math.round(pr.right - hr.right) : null,
+      escapePx: (pr && colr) ? Math.round(pr.right - colr.right) : null,
+      copyEscapePx: (cr && colr) ? Math.round(cr.right - colr.right) : null,
+      chainEscape: chainEscape,
       copyTopInside: (cr && fr) ? Math.round(cr.top - fr.top) : null,
       copyRightInside: (cr && fr) ? Math.round(fr.right - cr.right) : null,
       copyWithinFrame: (cr && fr) ? (cr.top >= fr.top - 1 && cr.bottom <= fr.bottom + 1 && cr.right <= fr.right + 1 && cr.left >= fr.left - 1) : null,
@@ -150,17 +163,19 @@ async function main() {
     const geom = JSON.parse(await lib.evalJs(client, GEOM_PROBE, 15_000));
     assert('V1_no_tool_name_row', geom.toolNameEls === 0, `toolNameEls=${geom.toolNameEls}`);
     assert('V2_no_result_title', geom.titleEls === 0, `titleEls=${geom.titleEls}`);
-    assert('V3_copy_inside_frame_top_right',
+    assert('V3_copy_inside_frame_top_right_visible',
       geom.frames.length > 0 && geom.frames.every((f) => f.hasPre && f.hasCopy && f.copyWithinFrame
-        && f.copyTopInside !== null && f.copyTopInside >= 0 && f.copyTopInside <= 30),
-      `frames=${geom.frames.length} :: ${JSON.stringify(geom.frames).slice(0, 240)}`);
+        && f.copyTopInside !== null && f.copyTopInside >= 0 && f.copyTopInside <= 30
+        && f.copyEscapePx !== null && f.copyEscapePx <= 0),
+      `frames=${geom.frames.length} copyEscape=[${geom.frames.map((f) => f.copyEscapePx).join(',')}] :: ${JSON.stringify(geom.frames).slice(0, 240)}`);
     assert('V4_no_stray_row_copy_when_expanded',
       Number(geom.expandedRows) > 0 && Number(geom.strayRowCopy) === 0,
       `expandedRows=${geom.expandedRows} strayRowCopy=${geom.strayRowCopy}`);
     assert('V5_json_contained_no_page_overflow',
       geom.frames.length > 0 && geom.frames.every((f) => f.escapePx !== null && f.escapePx <= 0)
+        && geom.frames.every((f) => Array.isArray(f.chainEscape) && f.chainEscape.length === 0)
         && Number(geom.docOverflow) === 0,
-      `escape=[${geom.frames.map((f) => f.escapePx).join(',')}] innerScrollsX=[${geom.frames.map((f) => f.innerScrollsX).join(',')}] docOverflow=${geom.docOverflow}`);
+      `escape=[${geom.frames.map((f) => f.escapePx).join(',')}] innerScrollsX=[${geom.frames.map((f) => f.innerScrollsX).join(',')}] chainEscape=[${geom.frames.map((f) => (f.chainEscape || []).join(';')).join(' | ')}] docOverflow=${geom.docOverflow}`);
 
     await lib.screenshotPng(client, EVIDENCE_DIR, 'ui437-v511-expanded-live.png').catch(() => null);
 
