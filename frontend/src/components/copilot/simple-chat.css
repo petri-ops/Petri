@@ -4169,3 +4169,33 @@
   white-space: nowrap;
 }
 
+
+/* UI-437 v5.10 — 复制钮悬浮于 JSON 框内右上角（GitHub 代码块同款） */
+.sc-tool-resultdata-frame {
+  position: relative;
+}
+
+.sc-tool-resultdata-copy {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--gewu-bg-surface) 85%, transparent);
+  color: var(--gewu-text-secondary);
+  cursor: pointer;
+}
+
+.sc-tool-resultdata-copy:hover {
+  color: var(--gewu-accent);
+  border-color: var(--gewu-accent);
+}
+
+.sc-tool-resultdata-copy.is-copied {
+  color: var(--gewu-success);
+  border-color: var(--gewu-success);
+}

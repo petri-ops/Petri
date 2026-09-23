@@ -426,17 +426,20 @@ function ActivityBody({ activity, subSnap }: {
           <div className="sc-tool-resultdata">
             <div className="sc-tool-resultdata-bar">
               <span className="sc-tool-resultdata-title">返回</span>
+            </div>
+            {/* UI-437 v5.10 — 复制钮悬浮于 JSON 框内右上角（GitHub 代码块同款） */}
+            <div className="sc-tool-resultdata-frame">
+              <pre className="sc-tool-resultdata-json">{rendered}</pre>
               <button
                 type="button"
-                className={`sc-tool-term-copy${resultCopied ? ' is-copied' : ''}`}
+                className={`sc-tool-resultdata-copy${resultCopied ? ' is-copied' : ''}`}
                 title="复制返回 JSON"
                 aria-label="复制返回 JSON"
                 onClick={() => { void copyResultData(); }}
               >
-                <Icon name={resultCopied ? 'check' : 'copy'} size={11} />
+                <Icon name={resultCopied ? 'check' : 'copy'} size={12} />
               </button>
             </div>
-            <pre className="sc-tool-resultdata-json">{rendered}</pre>
           </div>
         );
       })()}
