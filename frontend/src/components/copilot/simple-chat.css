@@ -4066,7 +4066,11 @@
 }
 
 .sc-tool-qoder-row > .sc-tool-qoder-head {
-  flex: 1 1 auto;
+  /* v5.13 — flex-basis 定 0：行头基样式带 width:100%（flex-basis auto 会继承它
+     当假设主尺寸），在 wrap 容器里永远独占首行、把行级复制钮挤到下一行行首
+     （用户实测「复制钮掉到信息下一行有脱离感」）。basis 0 + grow 1 = 头部与
+     复制钮恒同排，钮落在行尾右侧；预览截断仍由 min-width:0 + overflow 承担。 */
+  flex: 1 1 0;
   min-width: 0;
 }
 

@@ -147,6 +147,29 @@ async function main() {
     // 展开：运行摘要行 → 全部簇 → 全部工具行
     await lib.evalJs(client, `(function(){ var f = document.querySelector('.sc-run-fold-line'); if (f) f.click(); return 'x'; })()`, 10_000);
     await sleep(600);
+
+    // V6（v5.13）— 折叠态行级复制钮与行头同排、落在行尾右侧（不换行掉行首）
+    const rowCopyGeom = JSON.parse(await lib.evalJs(client, `JSON.stringify((function(){
+      var rows = [].slice.call(document.querySelectorAll('.sc-tool-qoder-row')).slice(0, 6);
+      return rows.map(function(row){
+        var head = row.querySelector('.sc-tool-qoder-head');
+        var copy = row.querySelector('.sc-tool-row-copy');
+        if (!head || !copy) return { present: false };
+        var hr = head.getBoundingClientRect();
+        var cr = copy.getBoundingClientRect();
+        var rr = row.getBoundingClientRect();
+        return {
+          present: true,
+          sameLine: Math.abs((cr.top + cr.height / 2) - (hr.top + hr.height / 2)) <= Math.max(hr.height, cr.height) / 2 + 2,
+          atRowEnd: Math.round(rr.right - cr.right) >= 0 && Math.round(rr.right - cr.right) <= 24,
+          headCopyGapOk: cr.left >= hr.left,
+        };
+      });
+    })())`, 15_000));
+    assert('V6_collapsed_row_copy_inline_at_end',
+      rowCopyGeom.length > 0 && rowCopyGeom.every((g) => !g.present || (g.sameLine && g.atRowEnd && g.headCopyGapOk)),
+      `rows=${rowCopyGeom.length} :: ${JSON.stringify(rowCopyGeom).slice(0, 220)}`);
+
     await lib.evalJs(client, `(function(){
       var s = [].slice.call(document.querySelectorAll('.sc-tool-activity-summary'));
       s.forEach(function(x){ if (x.getAttribute('aria-expanded') === 'false') x.click(); });
