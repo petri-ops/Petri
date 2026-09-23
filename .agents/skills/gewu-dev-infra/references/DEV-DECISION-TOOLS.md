@@ -11,20 +11,26 @@
 | 规划定向测试前 | `npm run test:suggest` | 在静态 impact-map 下限之上，由决策模型分类改动波及的测试域，**追加**建议补跑的定向测试 |
 | 工作包增量完成、准备台账回写前 | `npm run doc:suggest -- --context "<改动说明>"` | 提示可能漏回写的 canonical 文档（planDoc 为模型门控；frontend/src 变更的 uiAudit 为确定性硬命中） |
 
-## 供给选择（`--supply`）
+## 供给选择（`--supply`）：agent 默认 `--supply=cloud`
 
-- `--supply=file`（默认）：跟随 `data/decision-config.json`（设置页「决策模型接口」同源，
-  当前可为本机 Laya 8765 或 Jev 云）。
-- `--supply=cloud`：从 `.biof3-dev-user-data/jev.env.bak-by-user-request` 读 key 直连 Jev 云
-  （只读不回显；当前唯一有完整校准证据的供给）。
+- `--supply=cloud`（**agent 调用时的默认选择**）：从 `.biof3-dev-user-data/jev.env.bak-by-user-request`
+  读 key 直连 Jev 云（只读不回显）——当前**唯一有校准证据**的供给，建议真实可用。
+- `--supply=file`：跟随 `data/decision-config.json`（设置页「决策模型接口」同源）。
+  当前指向本地 Laya → 工具恒零建议（安全静默，非故障）。
 
-**双供给校准事实（2026-09-23，证据 `acceptance/block-118/`）**：
+### 什么时候用 Laya、什么时候用 Jev（2026-09-23 校准证据 + 成本账）
 
-- test-suggest：Jev 云可用（θ=0.8）；**Laya 不可采纳**（confidence/top-probability 双语义
-  均不过门）——Laya 供给下恒零建议（安全默认，非故障）。
-- doc-suggest：仅 planDoc 有模型门控（Jev θ=0.5，精度 0.82/覆盖 0.87）；uiAudit=确定性硬规则
-  （`frontend/src/**` → 必建议）；roadmap/handoff/auditLog 双供给均不可采纳 → 静默
-  （回写检查仍由收口纪律承载，本工具不假装能预测）。
+| 场景 | 用哪个 | 依据 |
+| --- | --- | --- |
+| dev 建议工具（test:suggest / doc:suggest） | **Jev（cloud）** | 唯一过校准门的供给；**成本实测可忽略**：Jev 只收输入 token（$42/十亿 token），一次调用 ≈ 几百 token ≈ 万分之几美分，每月几百次调用合计几美分——「省钱」不构成用 Laya 的理由 |
+| 产品运行时五接点（copilot/知识库等） | Laya 可用（现状） | 零采纳=自动回退原行为，安全；想要真实增益需在设置页切 Jev（BLOCK-117/118 证据已证 Laya 全接点零采纳，属另一裁决面） |
+| 隐私敏感、不允许出站 | Laya | dev 工具 state 只有文件路径清单+改动说明一句话，无隐私面，此理由在 dev 场景基本不成立 |
+| 离线（无网络） | Laya | 云不可达时工具降级零建议，不阻塞流程 |
+
+**Laya 的翻盘条件**：当前本地模型（laya 0.3.5，421M）输出分布平坦、排序无信息量，test-suggest
+连 top-probability 门控也救不回（最优精度 0.45 vs 门 0.80）——问题在模型质量而非阈值。
+若日后本地换更强决策模型，走「重校准→证据达标→注册表落 per-model 阈值」流程即可翻转；
+在那之前，「Laya 不可采纳」是证据裁决定论。
 
 ## 如何解读输出
 
