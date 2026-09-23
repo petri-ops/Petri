@@ -417,7 +417,8 @@ export function mergeToolResultActivity(
     actionDetail: index >= 0 ? current[index].actionDetail : fallbackAction.actionDetail,
     agentRunId: resultAgentRunId || (index >= 0 ? current[index].agentRunId : undefined),
     // UI-437 v5.6 — 结果数据本体（后端 publicData 已界定的 bounded 版本），供展开详情
-    resultData: index >= 0 ? current[index].resultData : result?.data,
+    // UI-437 v5.6 修复 — resultData 是本次结果新到的数据，不能走「保留旧值」分支
+    resultData: result?.data,
   };
 
   if (index < 0) return [...current, item];

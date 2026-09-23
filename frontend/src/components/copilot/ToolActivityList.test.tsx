@@ -5,7 +5,7 @@ import { ToolActivityList } from './ToolActivityList';
 import { groupToolActivities } from './toolActivity';
 import assert from 'node:assert/strict';
 import { gewuEvents } from '@/lib/events';
-import { summarizeToolCall, type ToolActivityItem } from './toolActivity';
+import { mergeToolResultActivity, summarizeToolCall, type ToolActivityItem } from './toolActivity';
 
 function activity(
   status: ToolActivityItem['status'],
@@ -418,6 +418,43 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     expect(summarizeToolCall('query').actionDetail).toBe('query');
     // 已登记工具不受影响
     expect(summarizeToolCall('workspace_read', { path: 'src/a.ts' }).actionDetail).toBe('src/a.ts');
+  });
+
+  it('UI-437 v5.6 合并方向：result 合并必须携带 resultData（running 项已存在时也不例外）', () => {
+    const running: ToolActivityItem[] = [{
+      // 运行时键规则 = callId（callKey），与 result 事件按 callId 关联
+      key: 'call-ks-1', name: 'knowledge_search', status: 'running', actionLabel: '已调用',
+    }];
+    const resultEvent = {
+      callId: 'call-ks-1',
+      name: 'knowledge_search',
+      toolResult: {
+        callId: 'call-ks-1', tool: 'knowledge_search', status: 'success',
+        durationMs: 3,
+        data: { ok: true, spaceEnabled: false, hits: [], message: '知识空间未启用' },
+      },
+    };
+    const merged = mergeToolResultActivity(running, resultEvent as never);
+    // 方向回归：resultData 必须取本次结果，而非旧项的 undefined
+    expect(merged[0].resultData).toEqual({ ok: true, spaceEnabled: false, hits: [], message: '知识空间未启用' });
+  });
+
+  it('UI-437 v5.6 展开体：activity 带 resultData 时渲染「返回」JSON 详情块', () => {
+    render(
+      <ToolActivityList
+        activities={[{
+          key: 'si-1', name: 'system_info', status: 'success', actionLabel: '已查询',
+          actionDetail: '系统环境',
+          resultData: { os: 'Windows', shell: 'cmd.exe' },
+        }]}
+        collapseWhenSettled
+      />
+    );
+    fireEvent.click(screen.getByText(/执行工具 1 次/));
+    // 行级展开：点行头出 ActivityBody（含「返回」详情块）
+    fireEvent.click(screen.getByTestId('qoder-row-head'));
+    expect(screen.getByText('返回')).toBeTruthy();
+    expect(screen.getByText(/"os": "Windows"/)).toBeTruthy();
   });
 
   it('UI-437 v5.5 行内组合：参数摘要 → 结果摘要；ok 样板不显示', () => {
