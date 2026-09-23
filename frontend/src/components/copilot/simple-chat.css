@@ -4022,7 +4022,9 @@
   white-space: nowrap;
   font-size: var(--gewu-font-size-xs);
   color: var(--gewu-text-tertiary);
-  /* UI-437 v5 — 抵消全局 code 灰底：思考/调用/执行行统一为无底纯文本 */
+  /* UI-437 v5/v5.1 — 元素用 span（全局 code 灰底规则不再命中）；
+     等宽字体保留命令/路径的扫读性 */
+  font-family: var(--gewu-font-mono);
   background: transparent;
   padding: 0;
   border: 0;

@@ -525,7 +525,7 @@ function QoderRow({ activity }: { activity: ToolActivityItem }) {
         </span>
         <span className="sc-tool-qoder-label">{label}</span>
         {previewSource && (
-          <code className="sc-tool-qoder-preview" title={previewSource}>{previewSource}</code>
+          <span className="sc-tool-qoder-preview" title={previewSource}>{previewSource}</span>
         )}
         {diffStat && (
           <span className="sc-tool-qoder-diffstat" aria-label={`变更 +${diffStat.added} -${diffStat.removed}`}>
