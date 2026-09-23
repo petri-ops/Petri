@@ -89,8 +89,14 @@ async function main() {
   const results = [];
   const assert = (name, pass, detail) => {
     results.push({ name, pass: !!pass, detail: String(detail || '').slice(0, 300) });
-    fs.writeFileSync(path.join(EVIDENCE_DIR, 'ui437-v511-expanded-live.json'),
-      JSON.stringify({ prompt: PROMPT, at: new Date().toISOString(), results }, null, 2));
+    const evidencePath = path.join(EVIDENCE_DIR, 'ui437-v511-expanded-live.json');
+    const evidence = JSON.stringify({ prompt: PROMPT, at: new Date().toISOString(), results }, null, 2);
+    try {
+      fs.writeFileSync(evidencePath, evidence);
+    } catch {
+      // 瞬态文件锁（杀软/索引器）：重试一次，再失败不阻断量测本身
+      sleep(300).then(() => { try { fs.writeFileSync(evidencePath, evidence); } catch { /* */ } });
+    }
     console.log(`${pass ? 'PASS' : 'FAIL'} ${name} :: ${String(detail || '').slice(0, 220)}`);
   };
 
@@ -124,17 +130,21 @@ async function main() {
     })()`, 10_000);
     if (typed !== 'typed') throw new Error('send_click_failed: ' + typed);
 
-    // 等终态：running 簇 0 + 时间线在场 + 连续 8 样本稳定
+    // 等终态：running 簇 0 + 时间线在场 + 连续 8 样本稳定；同时采样循环状态面板
+    // （V10 前置证据：运行中面板在场=实时反馈保留）
     const deadline = Date.now() + RUN_TIMEOUT_MS;
     let stable = 0; let lastKey = ''; let settled = false;
+    let loopPanelSeenWhileRunning = false;
     while (Date.now() < deadline) {
       await sleep(800);
       const snap = JSON.parse(await lib.evalJs(client, `JSON.stringify({
         running: document.querySelectorAll('.sc-timeline-cluster[data-state="running"]').length,
         rows: document.querySelectorAll('.sc-tool-qoder-row').length,
         fold: document.querySelectorAll('.sc-run-fold-line').length,
+        loopPanel: document.querySelectorAll('.sc-loop-panel').length,
         body: (function(){ var b = document.querySelectorAll('.sc-msg-body'); return b.length ? (b[b.length-1].textContent || '').length : 0; })(),
       })`, 10_000));
+      if (Number(snap.running) > 0 && Number(snap.loopPanel) > 0) loopPanelSeenWhileRunning = true;
       const key = `${snap.running}|${snap.rows}|${snap.fold}|${snap.body}`;
       const isSettled = Number(snap.running) === 0 && Number(snap.fold) > 0 && Number(snap.body) > 20;
       stable = isSettled && key === lastKey ? stable + 1 : 0;
@@ -247,6 +257,11 @@ async function main() {
       `rowDurations=${JSON.stringify(dur.rowDurations)} fold=「${dur.foldText}」`);
 
     const geom = JSON.parse(await lib.evalJs(client, GEOM_PROBE, 15_000));
+    // V10（v5.17）— 循环状态面板：运行中在场（实时反馈），终态后消失（已完成条取消）
+    const loopPanelAfter = Number(await lib.evalJs(client, `document.querySelectorAll('.sc-loop-panel').length`, 10_000));
+    assert('V10_loop_panel_running_only',
+      loopPanelAfter === 0,
+      `运行中采样见面板=${loopPanelSeenWhileRunning} 终态后面板=${loopPanelAfter}`);
     assert('V1_no_tool_name_row', geom.toolNameEls === 0, `toolNameEls=${geom.toolNameEls}`);
     assert('V2_no_result_title', geom.titleEls === 0, `titleEls=${geom.titleEls}`);
     assert('V3_copy_inside_frame_top_right_visible',

@@ -16,9 +16,14 @@ export function LoopStatusPanel({
 }: {
   loop: ConversationLoopState;
   pending: boolean;
-}): React.ReactElement {
+}): React.ReactElement | null {
   const [expanded, setExpanded] = useState(false);
   const display = deriveLoopDisplay(loop, pending);
+  // UI-437 v5.17 — completed 态不渲染（用户裁决「已完成条没用就取消」）：
+  // 「已完成 · N 轮 · 一句套话」与时间线运行摘要行（执行工具 N 次 · X 轮 · 耗时）
+  // 和紧随的回答正文三重冗余，且永久驻留会话。运行中/重试中/已阻断/已取消/
+  // 等待中仍渲染——实时反馈与失败可见性才是本面板的真实价值。
+  if (display.status === 'completed') return null;
   const iterations = loop.iterations || [];
   // Only surface public conclusions — never hidden reasoning. The backend
   // already redacts these; blocked/failed turns must read as "not complete".
