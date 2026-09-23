@@ -5,7 +5,9 @@
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 > 入口直链（registry `entrypoint` 指向本台的 canonical 文档，归档轮转不得切断发现路径）：[block-14-left-panel-qa-fix-closeout](./block-14-left-panel-qa-fix-closeout.md) · [block-15-architecture-perf-plan](./block-15-architecture-perf-plan.md) · [block-22-codemirror-inline-diff-plan](./block-22-codemirror-inline-diff-plan.md)
 
-最后更新：2026-09-23 凌晨六（**UI-437 加映 v5 + 翻 verified**——用户实机截图反馈「已思考前面没有✅图标…需要优化」+整体「看起来比较清爽 区分度明显」：思考行补 ✓ 状态字形，全行 anatomy 统一（状态字形+类别图标+标签+明细+耗时+箭头）。UI-437 **翻 verified**（用户实机认可整体节奏）。同批 UI-438 仍 in_progress 待子智能体任务实机过目。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-23 凌晨七（**UI-437 加映 v5.5：query 类行结果摘要上线（跨前后端，已实机验证）**——用户裁决原话「需要的 现在就整」：后端 `tool-events.js` `buildToolResultEvent` 对象结果 summary 由一律 'ok' 改为 digest（top-3 键：数组=「N 条」/字符串=截 24 字/原始值=字面；ok/error 样板剔除）+ 前端 QoderRow 预览组合「参数摘要 → 结果摘要」。实机证据=重启 dev 栈后无头只读任务 3 条 tool_result summary 全部为 digest（task_events 落库 + `acceptance/ui-437/v55-digest-evidence.json`）；block34 契约 +1；block109-agent-panel flow A4 断言同步修订（组卡下线→行内详情按钮）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-23 凌晨六（**UI-437 加映 v5 + 翻 verified**——用户实机截图反馈「已思考前面没有✅图标…需要优化」+整体「看起来比较清爽 区分度明显」：思考行补 ✓ 状态字形，全行 anatomy 统一（状态字形+类别图标+标签+明细+耗时+箭头）。UI-437 **翻 verified**（用户实机认可整体节奏）。同批 UI-438 仍 in_progress 待子智能体任务实机过目。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-23 凌晨五（**UI-438 子智能体呈现收敛到时间线行内（轻量批，plan=本条目）**——用户实测裁决「阶段汇总…总是挂在会话的最后…子智能体应该以图标的形式存在于对应会话阶段出现的地方…点开智能体图标就自动展开详细信息…不需要详情卡片占地方」：移除消息尾部「阶段汇总」组卡（SubAgentResultGroup/SubAgentResultCard/useTerminalSubAgentResults 共 6 文件）——子智能体以 bot 图标行内联在派发发生位置（UI-382 既有能力，随运行摘要折叠/展开），点行展开职能/需求/状态/停止/详情（详情跳右栏面板）。block109-agent-panel flow A4 断言同步修订（组卡可见→行内详情按钮可达）。门禁=前端全量 1190/1190 + tsc 0 + test:changed 0 + docs/ui 绿。UI-437 仍 in_progress（v4 待实机过目）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

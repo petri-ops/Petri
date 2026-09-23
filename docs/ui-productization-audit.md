@@ -4081,6 +4081,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **加映 v5.1（同日，用户截图反馈「灰色背景不要 保持统一 / ms 运行时间应对齐」）**：明细预览抵消全局 code 灰底（思考/调用/执行行统一无底纯文本）；耗时列定宽 56px 右对齐（所有行时间数字同列）。
 - **加映 v5.3（同日，用户反馈「已调用 工具名 后面都是空白 应增加工具调用的实际输出预览」）**：预览兜底链——actionDetail/summary 为空时取输出尾首个非空行（ANSI 剥离、120 字截断）；output 为内存态不随会话持久化，历史消息维持原状（点行展开仍看全量）。契约测试含 ANSI 剥离断言。
 - **加映 v5.4（同日，用户反馈「已调用 query 后面都是空白 应增加实际输出预览」）**：`summarizeToolCall` 未登记工具 default 分支增参数摘要兜底——`query（datasets=…）`/`todo_write（todos=[…]）`/`plan（op=create · draft=true）`（单键 40 字、最多 3 键、无参回退工具名）；叠加 v5.3 输出尾首行兜底。已登记工具（workspace_* 家族）零变化。
+- **加映 v5.5（跨前后端，同日，用户裁决「需要的 现在就整」）**：后端 `tool-events.js` `buildToolResultEvent` 对象结果 summary 由一律 'ok' 改为 digest（top-3 键：数组=「N 条」/字符串=截 24 字/原始值=字面；ok/error 样板剔除）+ 前端 QoderRow 预览组合「参数摘要 → 结果摘要」。证据（实机 · 重启 dev 栈后真实任务）：无头只读任务 3 条 tool_result summary 全部为 digest（`knowledge_search → spaceEnabled false · hits 0 条` / `system_info → os {…} · shell cmd` / `todo_write → 错误: execution_not_allowed`），`acceptance/ui-437/v55-digest-evidence.json` + task_events 落库；block34 契约 +1。
 - **实机验收（2026-09-23）**：用户实机截图确认整体节奏「看起来比较清爽 区分度明显」；✓ 字形与灰底/对齐微调为末处修正。**翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
