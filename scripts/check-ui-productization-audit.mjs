@@ -376,6 +376,14 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
 
+  // 2026-09-23 UI-437 收口债清偿批（670de5e，code-size manifest 死条目移除+基线
+  // 重打 + lint 21 error 真修清零——未用参/无效断言/any 界定/ANSI 正则预编译/
+  // [object Object] 兜底改空串）：零 UI 行为变化（组件 51/51 原断言锚定）；
+  // 台账=UI-437 加映 v5.19 条目由后续提交 bc8e18c0 补登对账（先例 21d84f52）。
+  // 豁免同提交台账要求；不重写共享历史。
+  '670de5e3d1f14556c12496e0654fd660d5772f46',
+
+
   // 2026-09-20 BLOCK-106 P0/P1 实现提交（6327d1a / 18a051e）：同提交未同步
   // docs/ui-productization-audit.md，UI-427 条目由 P3 收口提交统一补登（含实机
   // 证据与 plan §8 对账）；豁免同提交台账要求（subject 门经
