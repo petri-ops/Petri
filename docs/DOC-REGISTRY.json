@@ -5154,13 +5154,13 @@
       "id": "BLOCK-118-DEV-DECISION-TOOLING",
       "path": "docs/block-118-dev-decision-tooling-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-118-dev-decision-tooling",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-23",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "tags": [
         "block-118",
         "jev",
@@ -5172,7 +5172,7 @@
         "doc-suggest",
         "w2"
       ],
-      "notes": "开发时决策工具化 active（2026-09-23 立项即启动；用户裁决「两者都支持（Jev 云+本地 Laya）」+「加文档回写建议」+「裁决并行启动」）。P0=thresholdsByModel 每模型阈值解析（仅 dev-time 点）+ npm 包装 test:suggest（git 改动收集 + --supply=cloud|file）+ Jev 云冒烟 + Laya 版 test-suggest 校准；P1=doc-suggest 新决策点（git 历史挖掘语料 ≥100 + 并行 noul + 确定性前置层 + 双供给校准 + 契约测试）；P2=gewu-dev-infra 指引 + impact-map 补登记（UI-437 收口后）+ dogfood + closeout。并行隔离=UI-437 v5.1.1 会话独占 frontend/copilot + ui-audit 台账 + check 脚本 + impact-map 现有改动，本包零触碰。非范围=产品运行时五接点零改动/hook/MCP/新 skill/0 新依赖。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+      "notes": "开发时决策工具化 completed（2026-09-23 当日立项当日收口；用户裁决「两者都支持（Jev 云+本地 Laya）」+「加文档回写建议」+「裁决并行启动」）。P0=thresholdsByModel 每模型阈值解析（仅 dev-time 点）+ test:suggest 双供给实跑（Jev 云采纳/Laya 零建议）+ Laya 校准裁决=不可采纳（双语义不过门，不落阈值=红线正向行使）；P1=doc-suggest（语料 150 三轮 D-修订：context 意图信号/伴随提交吸收/逐文档专属 instructions；Jev 仅 planDoc 可采纳 θ=0.5 精度 0.8222/覆盖 0.8654，其余静默；uiAudit=确定性硬规则）+ doc:suggest CLI；P2=gewu-dev-infra DEV-DECISION-TOOLS 指引 + impact-map 补登记 + dogfood 3 份。门禁=定向 31/31 + test:changed 116 项 0 红 + docs/secret/arch/types 绿；code-size 红=并行 UI-437/438 在制面（e107da37 删文件未清台账，如实归属）。并行隔离=UI-437 v5.1x 独占面零触碰。G0 开发期常态 · 不外推 packaged/Provider/GA。",
       "lastUpdated": "2026-09-23"
     }
   ],

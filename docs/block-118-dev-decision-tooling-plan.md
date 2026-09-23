@@ -1,7 +1,7 @@
 # BLOCK-118-DEV-DECISION-TOOLING 计划：开发时决策工具化（Jev/Laya 提效开发流程）
 
 **Plan ID**：`BLOCK-118-DEV-DECISION-TOOLING`
-**状态**：`active（P0-LAUNCH）`
+**状态**：`completed（2026-09-23 当日立项当日收口：P0 供给打通（thresholdsByModel 每模型门控 + test:suggest 双供给实跑：Jev 云采纳 agent-backend 7 建议 conf=0.87 / Laya 零建议）+ Jev 云冒烟 1-call 通过 + Laya 版 test-suggest 校准裁决=不可采纳（confidence 门最优 θ0.05 精度 0.3913/覆盖 0.2473；top-probability 诊断最优精度 0.4516 亦不过门，证据=calibration-test-suggest-laya.json）→ P1 doc-suggest 接点（语料 150 条三轮 D-修订抓真=state 补 context 意图信号/gold 吸收 docs 伴随提交/逐文档专属 instructions；Jev 裁决=仅 planDoc 可采纳 θ=0.5 精度 0.8222/覆盖 0.8654，roadmap/handoff/auditLog 双供给均不可采纳=静默；uiAudit=frontend/src 确定性硬规则）+ doc:suggest CLI + 契约 block118 9/9 + block116 扩八接点 12/12 → P2 gewu-dev-infra 指引 + impact-map 补登记（并行会话提交后窗口打开，分类冲突解除）+ dogfood 3 份。门禁=定向 31/31 + test:changed 116 项 0 红 + docs:check PASS + secret/arch/types 绿；gate:code-size 红=并行 UI-437/438 在制面（e107da37 删文件未清台账 44 行，非本包文件面，如实归属）。裁决=「Laya 不可采纳」为合法完成态（证据如实，不硬凑 θ）；翻转需重校准）`
 **立项日期**：2026-09-23
 **责任轨道**：BLOCK（开发时决策工具化 / 双供给打通 / 新决策点 doc-suggest）
 **上游文档**：`docs/block-115-test-suggest-plan.md`（建议器内核与校准先例）· `docs/block-116-decision-platform-plan.md`（阈值注册表与记账）· `docs/block-117-laya-supply-validation-plan.md`（本地供给先例与 confidence 语义结论）· `docs/planning/typesafe-jev-system-one-research.md`（技术底稿）
