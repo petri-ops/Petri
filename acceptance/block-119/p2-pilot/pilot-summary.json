@@ -1,0 +1,53 @@
+{
+  "kind": "block119-p2-pilot",
+  "version": "1.0.0",
+  "capturedAt": "2026-09-23T14:17:53.377Z",
+  "setup": {
+    "guardEnv": "BIOF3_JEV_REPORT_GUARD=1（bash→powershell→electron→backend 全链继承验证：门真实触发）",
+    "supply": "decision-config provider 切 Jev 云（快照 decision-config.json.pre-p119-pilot 可还原 Laya）",
+    "stack": "dev 栈 21:59:54 重启（backend pid 2560，守卫代码加载）"
+  },
+  "realProductRun": {
+    "task": "spawn_agent 子任务：统计项目根目录 *.md 数量并列文件名（B109-spawn 项目，accessMode=full）",
+    "childTaskId": "406826fc-f321-44be-8699-4b0ffe0cfe37",
+    "ledger": {
+      "point": "report-guard",
+      "fit": 3.42,
+      "theta": 3,
+      "verdictZone": "pass",
+      "latencyMs": 1501,
+      "tokens": 812,
+      "degraded": 0
+    },
+    "outcome": "真实好汇报 → PASS → 原样放行（零误拦证据）",
+    "childReportFile": "gated-child-report.txt"
+  },
+  "contrast": {
+    "good": {
+      "file": "judge-good.json",
+      "verdict": "PASS",
+      "fit": 3.61
+    },
+    "drifted": {
+      "file": "judge-drifted.json",
+      "verdict": "ESCALATE",
+      "fit": 0.55,
+      "hint": "契合度不足：请紧扣请求的原始意图重新作答"
+    },
+    "note": "跑偏版=真实汇报基底 + 大段背景科普 + 答非所问 + 编造数字（模型跑偏典型形态）"
+  },
+  "catches": [
+    "抓真 1：无 accessMode:full 的 API 提交按 read_only 拒 spawn（flow 先例 submit 带 page/projectId/accessMode 三件套）；且被拒轮父级把自己核查结论当子级汇报转告（幻觉形态）——门的作用域=子级汇报，父级终语不在门内（scope 如实登记）",
+    "抓真 2：fit 分数轮间波动实测放大——同一真实好汇报 5 次判分 2.91/2.97/3.04/3.42/3.61（跨 θ=3 两侧），--probe 一致率 0.3333；近阈值判定会翻转 PASS/RETRY——RETRY（非硬拦）语义设计与 fail-open 的正确性得到实证，但产品侧误重写率须在试点指标中盯住",
+    "抓真 3：npm run 传参 --probe 3 后接 -o 会丢 -o（npm 解析边角），direct node 正常——CLI 用法注意"
+  ],
+  "observability": {
+    "ledger": "decision_log point=report-guard 逐行可见（choice=fit 分、input_tokens、latency）",
+    "knownGap": "子级 runAgentLoop 的 onEvent 为 no-op（spawn-agent-tools 既有形态），report_guard 事件目前无处落地——观测面=台账（事件面留候选）"
+  },
+  "candidates": [
+    "fit 近阈值双判投票（2-of-3）降翻转率",
+    "report_guard 事件面接线（子级事件 sink）",
+    "误重写率/采纳率试点指标累计后裁决常开"
+  ]
+}

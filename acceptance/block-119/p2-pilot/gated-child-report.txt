@@ -1,0 +1,7 @@
+我先用只读工具核查工作区根目录。核对结果：`workspace_find`（pattern=`*.md`, maxDepth=1）匹配 0 条，`workspace_list`（path=`.`）返回空目录，两者一致。
+
+回报要点：
+- 当前项目工作区根目录 `.md` 文件数量为 0（为空），无文件名可列。
+- 依据：workspace_find(pattern="*.md", maxDepth=1) 返回 matches=[]、filesScanned=0；workspace_list(path=".") 返回 entries=[]。
+- 两个只读工具结果互相印证，根目录为空目录。
+- 未核对项：递归子目录下的 .md 文件（本次按要求仅做非递归根目录统计，未检查）；隐藏文件未包含。

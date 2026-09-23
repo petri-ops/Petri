@@ -60,3 +60,13 @@ LLM 输出（限定提示词 or 多轮会话结果）
 - `completed`：P0~P2 落地且门禁逐项对账；fit 校准不可采纳=合法完成态（judge-core 降级 observe-only，如实登记）。
 - 风险：fit 弱标签噪声（纠错词表误伤）→ 语料 dry 先验 + 精度门兜底；评判质量不足 → 负裁决落档不硬凑；agent-runner 触碰面谨慎（汇报门挂在收敛点，默认关）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## P2 试点实录（2026-09-23 深夜，用户裁决「开起来…最好有个对比」）
+
+- 开启：BIOF3_JEV_REPORT_GUARD=1 + dev 栈重启（env 全链继承实证）+ 供给切 Jev 云（快照 decision-config.json.pre-p119-pilot 可还原）。
+- 真实轮：spawn_agent 子任务（B109-spawn 项目，accessMode=full）→ report-guard 台账落行 fit=3.42 ≥ θ=3 → PASS 原样放行（1501ms/812 tokens/零降级）——好汇报零误拦实证。
+- 对比：同一真实汇报 fit=3.61 PASS vs 跑偏版（背景科普+答非所问+编造数字）fit=0.55 ESCALATE 带判词（judge-good/drifted.json）。
+- 抓真三条：read_only 拒 spawn（须 accessMode:full；被拒轮父级幻觉转告=门作用域外如实登记）/ fit 轮间波动放大（同一文本 5 判 2.91~3.61 跨 θ 两侧，probe 0.33——RETRY 非硬拦语义正确性实证，误重写率入试点指标）/ npm run --probe 后 -o 丢失（direct node 规避）。
+- 已知缺口：子级 onEvent 为 no-op → report_guard 事件暂无处落地，观测面=台账（事件面留候选）。
+- 证据=acceptance/block-119/p2-pilot/（pilot-summary.json + 汇报文本 + 判定 JSON ×2）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
