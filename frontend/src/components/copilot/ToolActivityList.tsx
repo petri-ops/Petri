@@ -639,7 +639,9 @@ function QoderRow({ activity }: { activity: ToolActivityItem }) {
                 : ''}
           </span>
         )}
-        {duration && (activity.durationMs ?? 0) > 0 && <span className="sc-tool-activity-duration">{duration}</span>}
+        {/* UI-437 v5.14 — 行级耗时只显示慢调用（≥1s）：毫秒级读数（0/76 ms）无
+            差异感属噪声，任务总耗时已在运行摘要行；≥1s 才有「哪步慢了」诊断价值 */}
+        {duration && (activity.durationMs ?? 0) >= 1000 && <span className="sc-tool-activity-duration">{duration}</span>}
         <span className="sc-tool-row-chevron" aria-hidden="true">
           <Icon name={open ? 'chevron-down' : 'chevron-right'} size={12} />
         </span>

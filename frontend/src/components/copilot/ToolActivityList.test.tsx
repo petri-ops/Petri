@@ -443,6 +443,24 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     expect(writeText.mock.calls[0][0]).toBe('knowledge_search（spaceEnabled=false） → spaceEnabled false · hits 0 条');
   });
 
+  it('UI-437 v5.14 行级耗时只显示慢调用（≥1s）：毫秒级读数是噪声', () => {
+    // 两行：快调用 76ms（隐藏）与慢调用 4.3s（保留诊断价值）
+    render(
+      <ToolActivityList
+        activities={[
+          { key: 'fast', name: 'knowledge_search', status: 'success', actionLabel: '已调用', durationMs: 76 },
+          { key: 'slow', name: 'workspace_exec', status: 'success', actionLabel: '已运行', durationMs: 4300 },
+        ]}
+        collapseWhenSettled
+      />
+    );
+    // v3 语义：完成簇默认折叠，先点运行摘要行展开行级明细
+    fireEvent.click(screen.getByText(/执行工具 2 次/));
+    const heads = screen.getAllByTestId('qoder-row-head').map((n) => n.textContent || '');
+    expect(heads.some((t) => t.includes('76 ms'))).toBe(false);
+    expect(heads.some((t) => t.includes('4.3 s'))).toBe(true);
+  });
+
   it('UI-437 v5.6 合并方向：result 合并必须携带 resultData（running 项已存在时也不例外）', () => {
     const running: ToolActivityItem[] = [{
       // 运行时键规则 = callId（callKey），与 result 事件按 callId 关联

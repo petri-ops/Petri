@@ -183,6 +183,16 @@ async function main() {
     })()`, 10_000);
     await sleep(900);
 
+    // V7（v5.14）— 行级耗时只显示慢调用（≥1s）：全快任务下行头无耗时读数，
+    // 运行摘要行仍保留任务总耗时
+    const dur = JSON.parse(await lib.evalJs(client, `JSON.stringify({
+      rowDurations: [].slice.call(document.querySelectorAll('.sc-tool-qoder-head:not(.sc-run-fold-line) .sc-tool-activity-duration')).map(function(n){ return (n.textContent || '').trim(); }),
+      foldText: (function(){ var f = document.querySelector('.sc-run-fold-line'); return f ? (f.textContent || '').replace(/\\s+/g, ' ').trim().slice(0, 80) : ''; })(),
+    })`, 15_000));
+    assert('V7_row_duration_only_slow_calls',
+      dur.rowDurations.length === 0 && /ms|\ds/.test(dur.foldText),
+      `rowDurations=${JSON.stringify(dur.rowDurations)} fold=「${dur.foldText}」`);
+
     const geom = JSON.parse(await lib.evalJs(client, GEOM_PROBE, 15_000));
     assert('V1_no_tool_name_row', geom.toolNameEls === 0, `toolNameEls=${geom.toolNameEls}`);
     assert('V2_no_result_title', geom.titleEls === 0, `titleEls=${geom.titleEls}`);
