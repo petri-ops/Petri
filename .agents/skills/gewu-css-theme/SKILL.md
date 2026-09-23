@@ -27,6 +27,7 @@ description: Use when creating or modifying pages/components/styles, working on 
 2. **禁 slate 灰系字面量**：`rgba(148,163,184,α)`、`#0f172a`、`#1b1b1d`、`#334155` 等（infima/docs 时代遗产，与 navy 族脱节）。
 3. **infima 特异性战争**：infima 暗色默认用 `html[data-theme='dark']`（特异性 0,1,1）；本仓覆盖块若写 `[data-theme='dark']`（0,1,0）**全部是死字**。暗色覆盖块必须写 `html[data-theme='dark'], [data-theme='dark']` 双选择器（global/custom 的 @import 在 infima 之后，同特异性必胜；双写兼顾子树作用域）。
 4. **层级方向**：卡片/面板不得比其所在页面更深。页面=surface 时卡片=subtle；canvas 只作内容页画布或卡内 inset。卡片画 canvas = 「页面上的洞」（UI-392 根因四）。
+5. **全局元素级规则的溅射**（UI-437 v5.2 事故）：`global.css` 的元素选择器（`code`/`pre`/`a`/`table` 等）对**所有**组件生效——组件内使用这类语义元素时必须显式中性化（background/border/padding/border-radius）或改用中性元素（`span`/`div`，保留字族用 `font-family: var(--gewu-font-mono)`）；反向亦然——在 global 新增/修改元素级规则前，必须评估对既有组件的溅射面。事故实录：`code { background: var(--gewu-bg-subtle) }`（UI-240 行内代码样式）漏进会话时间线行，类选择器覆盖后仍因级联环境反复「复活」，根治=元素换 `span`。
 5. **页头标准件**：独立页（/skills /knowledge /settings 形态）头部 = `global-page.module.css` 的 backBtn + 图标 + 标题/副标题；**页面级不放关闭钮**（关闭窗口归标题栏系统控件）。返回按钮样式单一真源就是该文件 `.backBtn`，勿复制。
 
 ## 3. 验证配方（本机实证）
