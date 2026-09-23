@@ -4086,6 +4086,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据（契约 · v5.6）**：三组件 + 全量 1193/1193 + tsc 0（思考短预览/resultData 合并与恢复/组合预览断言）。
 - **加映 v5.6 后端侧（同日抓真）**：实机发现 v5.6 只通了前端——后端 recorder（`tool-events.js` `recordCall/recordResult`）不携带参数摘要与 resultData，任务完成后前端用快照对账会丢「返回」块、未登记工具历史行只剩工具名。修=后端同构补齐（`summarizeToolCallForActivity` default 增参数摘要 `query（datasets=…）`；`recordResult` 随快照落 `resultData`）+ recorder 链路契约测试（经 buildToolResultEvent 真实事件链：参数摘要/结果 digest/resultData 本体三断言）。
 - **抓真修复（v5.6 验收实测抓出）**：①`mergeToolResultActivity` 的 resultData 三元方向写反（result 是新到数据却走了「保留旧值」分支——running 项已存在时 resultData 恒 undefined，即用户截图「点开只有工具名」的根因），改为总是取本次 `result?.data`，补合并方向契约测试；②展开体断言需先点行头出 ActivityBody（行级两级折叠语义）。
+- **加映 v5.7（同日，用户反馈「返回 JSON 有复制图标按钮吗？应该加上」）**：返回详情块增标题栏（返回 + 复制钮）——复制走 navigator.clipboard（与终端块复制同模式），写后 is-copied ✓ 反馈 1.5s；剪贴板不可用时静默失败（正文仍可手动选择）。resultdata 块补 CSS（标题栏/画布底色 inset/限高滚动/等宽）。复制契约测试（writeText 参数 = JSON 本体）。
+- **证据（契约 · v5.7）**：ToolActivityList 25/25（+复制钮断言）+ tsc 0。
 - **实机验收（2026-09-23）**：用户实机截图确认整体节奏「看起来比较清爽 区分度明显」；✓ 字形与灰底/对齐微调为末处修正。**翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 

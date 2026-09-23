@@ -457,7 +457,7 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     expect(screen.getByText(/"os": "Windows"/)).toBeTruthy();
 
     // v5.7 — 复制按钮：写剪贴板内容 = 返回 JSON 本体
-    const writeText = vi.fn(() => Promise.resolve());
+    const writeText = vi.fn((text: string) => Promise.resolve());
     vi.stubGlobal('navigator', { ...navigator, clipboard: { writeText } });
     fireEvent.click(screen.getByRole('button', { name: '复制返回 JSON' }));
     await waitFor(() => expect(writeText).toHaveBeenCalledTimes(1));
