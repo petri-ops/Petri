@@ -29,6 +29,8 @@
 | `dev-verify/lib.cjs` + `run.cjs` + `flows/` | 需一步接线 | CDP 客户端从宿主 `scripts/g0-rs-p7-cdp.cjs` 懒解析——目标仓库自备等价 `CdpClient`（WebSocket JSON-RPC：send/on event），或拷贝格物的该文件 |
 | `templates/delegation-contract.md` | 开箱即用 | 纯流程模板 |
 | `references/PRODUCT-PRINCIPLES.md` | 开箱即读 | 非 canonical 原则摘要，按目标仓库治理体系校正 |
+| `references/DEV-DECISION-TOOLS.md`（决策建议器方法论） | 开箱即读（方法论层） | 四时点主动行使、`--supply` 选型、θ 门与红线全部通用；npm 命令行按目标仓库 package.json 接线 |
+| 决策/校准代码层（`decision-api` / `judge-core` / 校准 harness / 语料构建器） | 需一步对接 | 源码在格物 `core/biof3-server/helpers/` + `scripts/`（不随本 skill 携带）：`judge-core` 经 `overrides {apiKey,baseUrl,model}` 与端点解耦（换模型=换配置）；`decision-api` 打 `{baseUrl}/v1/systemone` 类型化决策端点——目标仓库或复用同一端点（Jev/Laya 为仓库外独立服务），或把该单文件换成自有模型封装。校准方法论（配对语料 gold 确定性/θ 扫描/precision-coverage-trap 门/无证据不门控）直接照搬 |
 
 ## 4. 写第一个 flow
 
