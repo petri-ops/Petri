@@ -102,3 +102,6 @@ sidecars/computer-use-windows/axfixture/obj/
 # CodeBuddy 项目级配置：只有 skills 发现桥入库，会话/缓存等运行时数据不入库
 .codebuddy/*
 !.codebuddy/skills/
+
+# ZCode 项目级运行时数据（会话计划/缓存），无入库面
+.zcode/

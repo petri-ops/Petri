@@ -68,7 +68,9 @@ ${changedFiles.map((f) => String(f)).join(SEP).slice(0, 600)}`,
   };
 }
 
-/** 决策失败/低置信/none → 零建议（安全默认）；永不 throw。 */
+/** 决策失败/低置信/none → 零建议（安全默认）；永不 throw。
+ * BLOCK-118 P0：门控经 thresholdForPoint(point, outcome.model) 每模型解析——per-model 覆盖
+ * 未命中（含 Jev 云）回落校准默认 θ=0.80；语义与既有契约零变化（block115 fixtures 全 Jev）。 */
 export async function resolveSuggestion(changedFiles, overrides = {}) {
   if (!changedFiles || changedFiles.length === 0) return { suggest: false, reason: 'no_input', suggestions: [] };
   if (!isSuggestEnabled()) return { suggest: false, reason: 'disabled', suggestions: [] };
@@ -77,13 +79,14 @@ export async function resolveSuggestion(changedFiles, overrides = {}) {
   const outcome = await decisionApi.askDecision({ state, questions, overrides, meta: { point: 'test-suggest', threshold: SUGGEST_THRESHOLD } });
   if (!outcome.ok) return { suggest: false, reason: outcome.reason, suggestions: [] };
   const answer = outcome.answers.area;
-  if (answer.choice === 'none') return { suggest: false, reason: 'area_none', area: 'none', confidence: answer.confidence, suggestions: [] };
-  if (answer.confidence < SUGGEST_THRESHOLD) {
-    return { suggest: false, reason: 'below_threshold', area: answer.choice, confidence: answer.confidence, suggestions: [] };
+  const gate = thresholdForPoint('test-suggest', outcome.model);
+  if (answer.choice === 'none') return { suggest: false, reason: 'area_none', area: 'none', confidence: answer.confidence, model: outcome.model, threshold: gate, suggestions: [] };
+  if (answer.confidence < gate) {
+    return { suggest: false, reason: 'below_threshold', area: answer.choice, confidence: answer.confidence, model: outcome.model, threshold: gate, suggestions: [] };
   }
   const area = TEST_AREAS[answer.choice];
   if (!area || !area.tests) return { suggest: false, reason: 'unknown_area', suggestions: [] };
-  return { suggest: true, area: answer.choice, confidence: answer.confidence, suggestions: [...area.tests], reason: 'adopted' };
+  return { suggest: true, area: answer.choice, confidence: answer.confidence, model: outcome.model, threshold: gate, suggestions: [...area.tests], reason: 'adopted' };
 }
 
 const NEWLINE = String.fromCharCode(10);
@@ -101,12 +104,14 @@ async function main() {
   const r = await resolveSuggestion(input.changedFiles || []);
   const report = {
     kind: 'block115-suggestions',
-    version: '1.0.0',
+    version: '1.1.0',
     generatedAt: new Date().toISOString(),
     changedFiles: input.changedFiles || [],
     suggested: r.suggest,
     area: r.area || null,
     confidence: r.confidence ?? null,
+    model: r.model ?? null,
+    threshold: r.threshold ?? null,
     reason: r.reason,
     suggestions: r.suggestions,
     note: '建议为增量附加（静态 impact-map 下限不受影响）；执行与否由人/流程决定。',

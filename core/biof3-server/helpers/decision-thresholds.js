@@ -10,14 +10,32 @@
  */
 'use strict';
 
-/** 取接点单阈值（gates 形态接点无单阈值，返回 undefined——调用方用 gates）。 */
-function thresholdForPoint(point) {
+/** 取接点单阈值（可选 per-model 覆盖；gates 形态接点无单阈值，返回 undefined）。 */
+function thresholdForPoint(point, model) {
+  const config = configForPoint(point, model);
+  return config && typeof config.threshold === 'number' ? config.threshold : undefined;
+}
+
+/**
+ * 取接点门控配置（BLOCK-118 P0）：per-model 覆盖优先（thresholdsByModel[model]，键=响应体
+ * model 字段），未命中回落条目校准默认（threshold 或 gates）。返回 {threshold?}|{gates?}；
+ * 未登记点 null。红线：thresholdsByModel 每条必须绑定各自校准证据（block116 契约测试承载），
+ * 当前仅 dev-time 接点（test-suggest/doc-suggest）使用——产品运行时五接点条目零漂移。
+ */
+function configForPoint(point, model) {
   const entry = module.exports[point];
-  return entry && typeof entry.threshold === 'number' ? entry.threshold : undefined;
+  if (!entry || typeof entry !== 'object') return null;
+  const perModel = model != null && entry.thresholdsByModel ? entry.thresholdsByModel[model] : undefined;
+  const resolved = perModel !== undefined ? perModel
+    : (typeof entry.threshold === 'number' ? entry.threshold : entry.gates);
+  if (typeof resolved === 'number') return { threshold: resolved };
+  if (resolved && typeof resolved === 'object' && !Array.isArray(resolved)) return { gates: { ...resolved } };
+  return null;
 }
 
 module.exports = {
   thresholdForPoint,
+  configForPoint,
   // W0-P1 话题漂移（noul 双阈值三区间：≥YES 切换 / ≤NO 未切换 / 中间带回退大模型）
   'topic-shift': {
     gates: { yes: 0.85, no: 0.5 },
@@ -54,10 +72,21 @@ module.exports = {
     evidence: 'acceptance/block-114/calibration.json',
     model: 'jev-1.13.0',
   },
-  // W1-5 增量测试建议
+  // W1-5 增量测试建议（dev-time，BLOCK-115）：Laya 供给校准裁决=不可采纳
+  //（confidence/top-probability 双语义均不过门，证据=acceptance/block-118/calibration-test-suggest-laya.json）
+  // ——不落 thresholdsByModel（无证据不改阈值红线），Laya 供给下零建议=安全默认。
   'test-suggest': {
     threshold: 0.8,
     evidence: 'acceptance/block-115/calibration.json',
+    model: 'jev-1.13.0',
+  },
+  // BLOCK-118 P1 — doc-suggest 文档回写建议（dev-time）：仅 planDoc 有达标模型门控
+  //（θ=0.5：precision 0.8222/coverage 0.8654，Jev 云 150 样本）；uiAudit 走确定性硬规则
+  //（frontend/src → 必建议，A 型永不模型化）；roadmap/handoff/auditLog 双供给校准均不可采纳
+  //（最优精度≈基础正例率=排序无信息量，v4 证据+三轮 D-修订留痕同目录）——缺键回落 1=永不采纳。
+  'doc-suggest': {
+    gates: { planDoc: 0.5 },
+    evidence: 'acceptance/block-118/calibration-doc-suggest-cloud.json',
     model: 'jev-1.13.0',
   },
 };

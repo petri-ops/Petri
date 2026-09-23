@@ -5149,8 +5149,33 @@
       ],
       "notes": "本地 Laya 决策供给接入验证 completed（2026-09-22 当日立项当日收口；用户裁决原话「直接开」）。P0 线兼容层=仓库外 laya_decide serve 增 /v1/systemone 别名（decision-api 客户端零改动）+ 真实 Laya 响应 fixtures 过 validateAnswers 三题型契约 + 七接点 Jev 注册表零漂移红线（2/2）；抓真=适配器 1 候选 choice 缺口（生产 n≥1 严于 jev.py 包装器 2-255，已修）。P1 三启用接点校准裁决 0/3 可采纳（intent-route/tool-route=confidence 语义差异零采纳；marker-celltype=采纳精度 1.0/覆盖 0.7875<0.85 门槛）——证据落 acceptance/block-117/，注册表零改动（无证据不改阈值红线正向行使）；harness 触改=输出重定向 env（touch-and-migrate，默认行为不变）。P2 实机 flow block117-layasupply-live 7/7：PUT provider 切换（设置页同通道）→真实 chitchat 经本地 Laya 落账（choice=chitchat 56ms degraded=0）→配置文件级还原零残留；抓真=flow 配置路径须对齐 dev 后端数据面。后续候选=门控语义改换（top-probability）属契约变更另裁。G0 开发期常态 · 不外推 packaged/Provider/GA。",
       "lastUpdated": "2026-09-22"
+    },
+    {
+      "id": "BLOCK-118-DEV-DECISION-TOOLING",
+      "path": "docs/block-118-dev-decision-tooling-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-118-dev-decision-tooling",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-23",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH",
+      "tags": [
+        "block-118",
+        "jev",
+        "laya",
+        "system-one",
+        "decision-model",
+        "dev-tooling",
+        "test-suggest",
+        "doc-suggest",
+        "w2"
+      ],
+      "notes": "开发时决策工具化 active（2026-09-23 立项即启动；用户裁决「两者都支持（Jev 云+本地 Laya）」+「加文档回写建议」+「裁决并行启动」）。P0=thresholdsByModel 每模型阈值解析（仅 dev-time 点）+ npm 包装 test:suggest（git 改动收集 + --supply=cloud|file）+ Jev 云冒烟 + Laya 版 test-suggest 校准；P1=doc-suggest 新决策点（git 历史挖掘语料 ≥100 + 并行 noul + 确定性前置层 + 双供给校准 + 契约测试）；P2=gewu-dev-infra 指引 + impact-map 补登记（UI-437 收口后）+ dogfood + closeout。并行隔离=UI-437 v5.1.1 会话独占 frontend/copilot + ui-audit 台账 + check 脚本 + impact-map 现有改动，本包零触碰。非范围=产品运行时五接点零改动/hook/MCP/新 skill/0 新依赖。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+      "lastUpdated": "2026-09-23"
     }
   ],
-  "lastUpdated": "2026-09-22",
-  "documentCount": 274
+  "lastUpdated": "2026-09-23",
+  "documentCount": 275
 }

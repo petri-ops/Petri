@@ -61,8 +61,8 @@ async function readRows() {
   return rows;
 }
 
-test('阈值注册表：七接点在册 + evidence 文件在位 + 模块常量一致', () => {
-  for (const point of ['topic-shift', 'knowledge-guard', 'marker-celltype', 'intent-route', 'tool-route', 'failure-triage', 'test-suggest']) {
+test('阈值注册表：八接点在册 + evidence 文件在位 + 模块常量一致', () => {
+  for (const point of ['topic-shift', 'knowledge-guard', 'marker-celltype', 'intent-route', 'tool-route', 'failure-triage', 'test-suggest', 'doc-suggest']) {
     assert.ok(thresholds[point], `接点 ${point} 在册`);
     assert.ok(fs.existsSync(path.join(root, thresholds[point].evidence)), `${point} 校准证据文件在位`);
     assert.equal(thresholds[point].model, DECISION_MODEL_PIN, `${point} 模型 pin 一致`);

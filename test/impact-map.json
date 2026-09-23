@@ -2246,6 +2246,21 @@
       "scriptRole": "governance"
     },
     {
+      "id": "block118-dev-decision-tooling",
+      "note": "BLOCK-118-DEV-DECISION-TOOLING：开发时决策工具化（Jev/Laya 提效开发流程；产品运行时零改动）。test:suggest/doc:suggest 双供给建议 CLI（block118-dev-suggest-run.mjs）+ doc-suggest 内核与 CLI（block118-doc-suggest.mjs，五 canonical 文档并行 noul + frontend/src 确定性硬规则 + 仅 planDoc 有 Jev 门控 θ=0.5）+ 语料构建（block118-build-doc-corpus.mjs，git 历史挖掘+伴随提交吸收+context 意图信号）+ 双供给校准 harness（block118-doc-calibrate.mjs / block118-laya-calibrate.mjs）。契约=test/block118-doc-suggest.test.mjs（9 项）。证据 acceptance/block-118/（含 test-suggest Laya 不可采纳负裁决与 doc-suggest 三轮 D-修订迭代存档）。",
+      "patterns": [
+        "scripts/block118-*.mjs",
+        "acceptance/block-118/**",
+        "test/block118-*.test.mjs"
+      ],
+      "tests": [
+        "test/block118-doc-suggest.test.mjs"
+      ],
+      "frontendRelated": false,
+      "classifiesScripts": true,
+      "scriptRole": "governance"
+    },
+    {
       "id": "block113-tool-prerouting",
       "note": "BLOCK-113-TOOL-PREROUTING：W1-3 工具两跳预路由。tool-router.js 决策接点（choice 九域+all，θ=0.80，默认关 BIOF3_JEV_TOOL_ROUTE=1）+ narrowToolDefsByFamily 收窄器（路由域∪session 底座）+ agent-runner 下发链挂钩 + tool-defs.js DOMAIN_TOOL_DEFS additive 导出（71 工具恒等红线）。契约=test/block113-tool-prerouting.test.mjs（恒等/guard 零出站/降级五态/伪造域拒收/all 弃权/低置信/收窄器保序与保守回退 12 项）。P0 证据 acceptance/block-113/。",
       "patterns": [

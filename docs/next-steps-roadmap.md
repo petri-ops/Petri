@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-22 深夜九（**BLOCK-116-DECISION-PLATFORM 当日立项当日整包 completed（closeout 十门全绿）——决策内化弧 W2 前四件完成，当前无 active 工作包**——决策台账 decision_log+七接点阈值注册表+校准共享库+观测面（summary 端点+设置面板 UI-434）+flow 5/5。W2 剩余=逐条回放 UI/阈值热调/agent 可见决策工具（候选池）。此前 同日=W1 弧线五点全部收口（111~115）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-23 晚八（**BLOCK-118-DEV-DECISION-TOOLING 立项即启动 active（P0-LAUNCH；与 UI-437 v5.1.1 会话并行，用户裁决「裁决并行启动」）**——开发时决策工具化：Jev/Laya 提效**开发流程**（开发侧 CLI + agent 指引，Gewu 产品运行时零改动）。用户裁决：供给「两者都支持」+ 范围「加文档回写建议」。P0=thresholdsByModel 每模型阈值（仅 dev-time 点）+ `test:suggest` npm 接线 + Jev 云冒烟 + Laya 校准；P1=doc-suggest 文档回写建议（git 历史语料 + 并行 noul）；P2=gewu-dev-infra 指引 + impact-map 补登记（UI-437 收口后）+ dogfood + closeout。并行隔离=UI-437 独占面零触碰（见 plan §0）。plan=docs/block-118-dev-decision-tooling-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-22 深夜九（**BLOCK-116-DECISION-PLATFORM 当日立项当日整包 completed（closeout 十门全绿）——决策内化弧 W2 前四件完成，当前无 active 工作包**——决策台账 decision_log+七接点阈值注册表+校准共享库+观测面（summary 端点+设置面板 UI-434）+flow 5/5。W2 剩余=逐条回放 UI/阈值热调/agent 可见决策工具（候选池）。此前 同日=W1 弧线五点全部收口（111~115）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-22 深夜八（**BLOCK-116-DECISION-PLATFORM 立项即启动 active（P0-LAUNCH）**——用户裁决「你能做就做下去 不要让我裁决 你可以判断的」授予自主判断权；W2 平台化前四件：decision_log 台账+阈值注册表+校准共享库+观测面（BLOCK-79 模式）。此前 同日=W1 弧线五点全部收口（111~115）+ 43 提交已推 origin。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

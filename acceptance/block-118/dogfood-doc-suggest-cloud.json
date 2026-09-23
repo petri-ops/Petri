@@ -1,0 +1,79 @@
+{
+  "kind": "block118-dev-doc-suggest",
+  "version": "1.0.0",
+  "generatedAt": "2026-09-23T12:43:36.494Z",
+  "changedFiles": [
+    ".agents/skills/gewu-dev-infra/SKILL.md",
+    "core/biof3-server/helpers/decision-thresholds.js",
+    "docs/DOC-REGISTRY.json",
+    "docs/README.md",
+    "docs/next-steps-roadmap.md",
+    "frontend/src/components/copilot/simple-chat.css",
+    "package.json",
+    "scripts/block115-test-suggest.mjs",
+    "test/block116-decision-platform.test.mjs",
+    ".agents/skills/gewu-dev-infra/references/DEV-DECISION-TOOLS.md",
+    ".zcode/plans/plan-sess_7cf068c8-461f-48ba-b432-34415dc7a5f6.md",
+    "acceptance/block-118/calibration-doc-suggest-cloud-v1-pathonly.json",
+    "acceptance/block-118/calibration-doc-suggest-cloud-v2-samecommit-gold.json",
+    "acceptance/block-118/calibration-doc-suggest-cloud-v3-shared-instructions.json",
+    "acceptance/block-118/calibration-doc-suggest-cloud.json",
+    "acceptance/block-118/calibration-doc-suggest-laya.json",
+    "acceptance/block-118/calibration-test-suggest-laya.json",
+    "acceptance/block-118/corpus-doc-suggest.json",
+    "acceptance/block-118/dogfood-test-suggest-cloud.json",
+    "acceptance/block-118/dogfood-test-suggest-laya.json",
+    "docs/block-118-dev-decision-tooling-plan.md",
+    "scripts/block118-build-doc-corpus.mjs",
+    "scripts/block118-doc-calibrate.mjs",
+    "scripts/block118-doc-suggest.mjs",
+    "scripts/block118-laya-calibrate.mjs",
+    "scripts/dev-suggest-run.mjs",
+    "test/block118-doc-suggest.test.mjs"
+  ],
+  "context": "BLOCK-118 开发时决策工具化：test:suggest/doc:suggest 双供给建议 CLI + doc-suggest 校准 harness + 语料构建 + 注册表 doc-suggest 接点 + 契约测试",
+  "suggested": true,
+  "reason": "adopted",
+  "model": "jev-1.13.0",
+  "suggestions": [
+    "uiAudit"
+  ],
+  "perDoc": {
+    "roadmap": {
+      "suggested": false,
+      "source": "model",
+      "gate": 1,
+      "value": 0.37,
+      "confidence": null
+    },
+    "handoff": {
+      "suggested": false,
+      "source": "model",
+      "gate": 1,
+      "value": 0.81,
+      "confidence": null
+    },
+    "uiAudit": {
+      "suggested": true,
+      "source": "deterministic",
+      "gate": 1,
+      "value": null
+    },
+    "auditLog": {
+      "suggested": false,
+      "source": "model",
+      "gate": 1,
+      "value": 0.33,
+      "confidence": null
+    },
+    "planDoc": {
+      "suggested": false,
+      "source": "model",
+      "gate": 0.5,
+      "value": 0.45,
+      "confidence": null
+    }
+  },
+  "note": "建议为增量附加（不替代任何既有门禁/流程语义）；frontend/src 硬规则命中独立于模型；执行与否由人/流程决定。",
+  "supply": "cloud"
+}

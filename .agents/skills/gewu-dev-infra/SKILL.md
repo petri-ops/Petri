@@ -17,6 +17,7 @@ description: Use Gewu development infrastructure when starting or resuming a ses
 ├── dev-verify/                     # lib.cjs 四原语 + run.cjs 注册表 + flows/ + _template.cjs
 ├── templates/delegation-contract.md# 子 Agent 委派任务书模板
 ├── references/FILE-TREE-POLICY.md  # 文件树纯净策略（区域生命周期 + scripts 归档判据）
+├── references/DEV-DECISION-TOOLS.md# 开发时决策建议工具（test:suggest / doc:suggest 双供给用法与红线，BLOCK-118）
 └── references/PRODUCT-PRINCIPLES.md# 产品原则自包含速查（宿主有 AGENTS.md/治理 skill 时冲突以宿主为准）
 ```
 
@@ -114,6 +115,10 @@ description: Use Gewu development infrastructure when starting or resuming a ses
 ## 调试与归因纪律
 
 测试红／构建炸／行为不符预期的排查，按 [references/DEBUGGING-ATTRIBUTION-DISCIPLINE.md](./references/DEBUGGING-ATTRIBUTION-DISCIPLINE.md) 执行：停线存证 → 四类归因（确定性红/并发互踩/环境平台缺失/契约漂移）→ 隔离实验三法（单文件隔离/基线对照/最小复现）→ 修根因+设回归门禁；非平凡结论落定前过证伪式复核，结论一律可回溯到源。上方第 8/9 条是其 Windows 侧特化先例（2026-09-20 制度化批改编内化，素材源 addyosmani/agent-skills，MIT）。
+
+## 开发时决策建议（Jev/Laya 建议器，BLOCK-118）
+
+规划定向测试前跑 `npm run test:suggest`、台账回写前跑 `npm run doc:suggest -- --context "<改动说明>"`——两者都是**建议器**（增量附加、只加不减、低置信=零建议，零建议不是故障）：用法、双供给校准事实（Jev 云可用 / Laya 不可采纳=恒零建议）与红线见 [references/DEV-DECISION-TOOLS.md](./references/DEV-DECISION-TOOLS.md)。建议永不替代 impact-map 下限、收口门禁或台账回写纪律。
 
 ## 后台任务等待纪律（事件驱动 · 用户裁决 2026-09-20「跟踪触发，而不是没有目的的等待」）
 

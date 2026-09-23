@@ -1,0 +1,3646 @@
+{
+  "kind": "block118-doc-suggest-calibration",
+  "version": "1.0.0",
+  "capturedAt": "2026-09-23T12:36:11.435Z",
+  "sourceCommit": "d74df78208e9c73f2fd7cc94e69325b4dc0b8725",
+  "wrapper": "core/biof3-server/helpers/decision-api.js",
+  "decisionPoint": "doc-suggest（dev-time，BLOCK-118 P1）",
+  "supply": "cloud",
+  "result": {
+    "corpus": {
+      "file": "acceptance/block-118/corpus-doc-suggest.json",
+      "sha256": "3a4d3fc3f1575a5ded14d86a1df763497f4454e44055bbbf97c8b7aba300eaa6",
+      "count": 150
+    },
+    "supply": {
+      "baseUrl": "https://api.typesafe.ai",
+      "requestModel": "jev-1.13.0",
+      "responseModels": [
+        "jev-1.13.0"
+      ]
+    },
+    "apiFailures": 0,
+    "validCount": 150,
+    "latency": {
+      "p50Ms": 308,
+      "p95Ms": 941
+    },
+    "inputTokens": 254159,
+    "elapsedMs": 12225,
+    "perDoc": {
+      "roadmap": {
+        "grid": [
+          {
+            "theta": 0.05,
+            "adopted": 150,
+            "adoptedCoverage": 3.9474,
+            "adoptedPrecision": 0.2533
+          },
+          {
+            "theta": 0.1,
+            "adopted": 139,
+            "adoptedCoverage": 3.6579,
+            "adoptedPrecision": 0.2734
+          },
+          {
+            "theta": 0.15,
+            "adopted": 133,
+            "adoptedCoverage": 3.5,
+            "adoptedPrecision": 0.2857
+          },
+          {
+            "theta": 0.2,
+            "adopted": 128,
+            "adoptedCoverage": 3.3684,
+            "adoptedPrecision": 0.2969
+          },
+          {
+            "theta": 0.25,
+            "adopted": 124,
+            "adoptedCoverage": 3.2632,
+            "adoptedPrecision": 0.2984
+          },
+          {
+            "theta": 0.3,
+            "adopted": 120,
+            "adoptedCoverage": 3.1579,
+            "adoptedPrecision": 0.3
+          },
+          {
+            "theta": 0.35,
+            "adopted": 114,
+            "adoptedCoverage": 3,
+            "adoptedPrecision": 0.307
+          },
+          {
+            "theta": 0.4,
+            "adopted": 108,
+            "adoptedCoverage": 2.8421,
+            "adoptedPrecision": 0.3241
+          },
+          {
+            "theta": 0.45,
+            "adopted": 104,
+            "adoptedCoverage": 2.7368,
+            "adoptedPrecision": 0.3173
+          },
+          {
+            "theta": 0.5,
+            "adopted": 96,
+            "adoptedCoverage": 2.5263,
+            "adoptedPrecision": 0.3438
+          },
+          {
+            "theta": 0.55,
+            "adopted": 89,
+            "adoptedCoverage": 2.3421,
+            "adoptedPrecision": 0.3258
+          },
+          {
+            "theta": 0.6,
+            "adopted": 80,
+            "adoptedCoverage": 2.1053,
+            "adoptedPrecision": 0.3375
+          },
+          {
+            "theta": 0.65,
+            "adopted": 67,
+            "adoptedCoverage": 1.7632,
+            "adoptedPrecision": 0.3433
+          },
+          {
+            "theta": 0.7,
+            "adopted": 47,
+            "adoptedCoverage": 1.2368,
+            "adoptedPrecision": 0.4043
+          },
+          {
+            "theta": 0.75,
+            "adopted": 20,
+            "adoptedCoverage": 0.5263,
+            "adoptedPrecision": 0.65
+          },
+          {
+            "theta": 0.8,
+            "adopted": 6,
+            "adoptedCoverage": 0.1579,
+            "adoptedPrecision": 0.8333
+          },
+          {
+            "theta": 0.85,
+            "adopted": 0,
+            "adoptedCoverage": 0,
+            "adoptedPrecision": 1
+          },
+          {
+            "theta": 0.9,
+            "adopted": 0,
+            "adoptedCoverage": 0,
+            "adoptedPrecision": 1
+          },
+          {
+            "theta": 0.95,
+            "adopted": 0,
+            "adoptedCoverage": 0,
+            "adoptedPrecision": 1
+          }
+        ],
+        "recommended": null,
+        "positives": 38
+      },
+      "handoff": {
+        "grid": [
+          {
+            "theta": 0.05,
+            "adopted": 150,
+            "adoptedCoverage": 5.5556,
+            "adoptedPrecision": 0.18
+          },
+          {
+            "theta": 0.1,
+            "adopted": 139,
+            "adoptedCoverage": 5.1481,
+            "adoptedPrecision": 0.1942
+          },
+          {
+            "theta": 0.15,
+            "adopted": 133,
+            "adoptedCoverage": 4.9259,
+            "adoptedPrecision": 0.203
+          },
+          {
+            "theta": 0.2,
+            "adopted": 130,
+            "adoptedCoverage": 4.8148,
+            "adoptedPrecision": 0.2077
+          },
+          {
+            "theta": 0.25,
+            "adopted": 123,
+            "adoptedCoverage": 4.5556,
+            "adoptedPrecision": 0.2114
+          },
+          {
+            "theta": 0.3,
+            "adopted": 119,
+            "adoptedCoverage": 4.4074,
+            "adoptedPrecision": 0.1933
+          },
+          {
+            "theta": 0.35,
+            "adopted": 117,
+            "adoptedCoverage": 4.3333,
+            "adoptedPrecision": 0.1966
+          },
+          {
+            "theta": 0.4,
+            "adopted": 108,
+            "adoptedCoverage": 4,
+            "adoptedPrecision": 0.1944
+          },
+          {
+            "theta": 0.45,
+            "adopted": 103,
+            "adoptedCoverage": 3.8148,
+            "adoptedPrecision": 0.2039
+          },
+          {
+            "theta": 0.5,
+            "adopted": 97,
+            "adoptedCoverage": 3.5926,
+            "adoptedPrecision": 0.2165
+          },
+          {
+            "theta": 0.55,
+            "adopted": 90,
+            "adoptedCoverage": 3.3333,
+            "adoptedPrecision": 0.2
+          },
+          {
+            "theta": 0.6,
+            "adopted": 82,
+            "adoptedCoverage": 3.037,
+            "adoptedPrecision": 0.2073
+          },
+          {
+            "theta": 0.65,
+            "adopted": 66,
+            "adoptedCoverage": 2.4444,
+            "adoptedPrecision": 0.2121
+          },
+          {
+            "theta": 0.7,
+            "adopted": 44,
+            "adoptedCoverage": 1.6296,
+            "adoptedPrecision": 0.2273
+          },
+          {
+            "theta": 0.75,
+            "adopted": 23,
+            "adoptedCoverage": 0.8519,
+            "adoptedPrecision": 0.3478
+          },
+          {
+            "theta": 0.8,
+            "adopted": 6,
+            "adoptedCoverage": 0.2222,
+            "adoptedPrecision": 0.3333
+          },
+          {
+            "theta": 0.85,
+            "adopted": 2,
+            "adoptedCoverage": 0.0741,
+            "adoptedPrecision": 0.5
+          },
+          {
+            "theta": 0.9,
+            "adopted": 0,
+            "adoptedCoverage": 0,
+            "adoptedPrecision": 1
+          },
+          {
+            "theta": 0.95,
+            "adopted": 0,
+            "adoptedCoverage": 0,
+            "adoptedPrecision": 1
+          }
+        ],
+        "recommended": null,
+        "positives": 27
+      },
+      "uiAudit": {
+        "grid": [
+          {
+            "theta": 0.05,
+            "adopted": 150,
+            "adoptedCoverage": 3.5714,
+            "adoptedPrecision": 0.28
+          },
+          {
+            "theta": 0.1,
+            "adopted": 139,
+            "adoptedCoverage": 3.3095,
+            "adoptedPrecision": 0.3022
+          },
+          {
+            "theta": 0.15,
+            "adopted": 133,
+            "adoptedCoverage": 3.1667,
+            "adoptedPrecision": 0.3158
+          },
+          {
+            "theta": 0.2,
+            "adopted": 129,
+            "adoptedCoverage": 3.0714,
+            "adoptedPrecision": 0.3256
+          },
+          {
+            "theta": 0.25,
+            "adopted": 124,
+            "adoptedCoverage": 2.9524,
+            "adoptedPrecision": 0.3387
+          },
+          {
+            "theta": 0.3,
+            "adopted": 119,
+            "adoptedCoverage": 2.8333,
+            "adoptedPrecision": 0.3529
+          },
+          {
+            "theta": 0.35,
+            "adopted": 114,
+            "adoptedCoverage": 2.7143,
+            "adoptedPrecision": 0.3684
+          },
+          {
+            "theta": 0.4,
+            "adopted": 109,
+            "adoptedCoverage": 2.5952,
+            "adoptedPrecision": 0.3761
+          },
+          {
+            "theta": 0.45,
+            "adopted": 102,
+            "adoptedCoverage": 2.4286,
+            "adoptedPrecision": 0.3922
+          },
+          {
+            "theta": 0.5,
+            "adopted": 96,
+            "adoptedCoverage": 2.2857,
+            "adoptedPrecision": 0.4063
+          },
+          {
+            "theta": 0.55,
+            "adopted": 88,
+            "adoptedCoverage": 2.0952,
+            "adoptedPrecision": 0.4318
+          },
+          {
+            "theta": 0.6,
+            "adopted": 79,
+            "adoptedCoverage": 1.881,
+            "adoptedPrecision": 0.4557
+          },
+          {
+            "theta": 0.65,
+            "adopted": 68,
+            "adoptedCoverage": 1.619,
+            "adoptedPrecision": 0.4559
+          },
+          {
+            "theta": 0.7,
+            "adopted": 42,
+            "adoptedCoverage": 1,
+            "adoptedPrecision": 0.5
+          },
+          {
+            "theta": 0.75,
+            "adopted": 23,
+            "adoptedCoverage": 0.5476,
+            "adoptedPrecision": 0.4348
+          },
+          {
+            "theta": 0.8,
+            "adopted": 5,
+            "adoptedCoverage": 0.119,
+            "adoptedPrecision": 0.4
+          },
+          {
+            "theta": 0.85,
+            "adopted": 1,
+            "adoptedCoverage": 0.0238,
+            "adoptedPrecision": 1
+          },
+          {
+            "theta": 0.9,
+            "adopted": 0,
+            "adoptedCoverage": 0,
+            "adoptedPrecision": 1
+          },
+          {
+            "theta": 0.95,
+            "adopted": 0,
+            "adoptedCoverage": 0,
+            "adoptedPrecision": 1
+          }
+        ],
+        "recommended": null,
+        "positives": 42
+      },
+      "auditLog": {
+        "grid": [
+          {
+            "theta": 0.05,
+            "adopted": 150,
+            "adoptedCoverage": 2.3077,
+            "adoptedPrecision": 0.4333
+          },
+          {
+            "theta": 0.1,
+            "adopted": 138,
+            "adoptedCoverage": 2.1231,
+            "adoptedPrecision": 0.471
+          },
+          {
+            "theta": 0.15,
+            "adopted": 132,
+            "adoptedCoverage": 2.0308,
+            "adoptedPrecision": 0.4924
+          },
+          {
+            "theta": 0.2,
+            "adopted": 129,
+            "adoptedCoverage": 1.9846,
+            "adoptedPrecision": 0.5039
+          },
+          {
+            "theta": 0.25,
+            "adopted": 126,
+            "adoptedCoverage": 1.9385,
+            "adoptedPrecision": 0.5079
+          },
+          {
+            "theta": 0.3,
+            "adopted": 120,
+            "adoptedCoverage": 1.8462,
+            "adoptedPrecision": 0.5083
+          },
+          {
+            "theta": 0.35,
+            "adopted": 116,
+            "adoptedCoverage": 1.7846,
+            "adoptedPrecision": 0.5086
+          },
+          {
+            "theta": 0.4,
+            "adopted": 109,
+            "adoptedCoverage": 1.6769,
+            "adoptedPrecision": 0.5229
+          },
+          {
+            "theta": 0.45,
+            "adopted": 104,
+            "adoptedCoverage": 1.6,
+            "adoptedPrecision": 0.5385
+          },
+          {
+            "theta": 0.5,
+            "adopted": 96,
+            "adoptedCoverage": 1.4769,
+            "adoptedPrecision": 0.5521
+          },
+          {
+            "theta": 0.55,
+            "adopted": 88,
+            "adoptedCoverage": 1.3538,
+            "adoptedPrecision": 0.5455
+          },
+          {
+            "theta": 0.6,
+            "adopted": 80,
+            "adoptedCoverage": 1.2308,
+            "adoptedPrecision": 0.5875
+          },
+          {
+            "theta": 0.65,
+            "adopted": 66,
+            "adoptedCoverage": 1.0154,
+            "adoptedPrecision": 0.6212
+          },
+          {
+            "theta": 0.7,
+            "adopted": 46,
+            "adoptedCoverage": 0.7077,
+            "adoptedPrecision": 0.6087
+          },
+          {
+            "theta": 0.75,
+            "adopted": 20,
+            "adoptedCoverage": 0.3077,
+            "adoptedPrecision": 0.75
+          },
+          {
+            "theta": 0.8,
+            "adopted": 7,
+            "adoptedCoverage": 0.1077,
+            "adoptedPrecision": 0.8571
+          },
+          {
+            "theta": 0.85,
+            "adopted": 2,
+            "adoptedCoverage": 0.0308,
+            "adoptedPrecision": 1
+          },
+          {
+            "theta": 0.9,
+            "adopted": 0,
+            "adoptedCoverage": 0,
+            "adoptedPrecision": 1
+          },
+          {
+            "theta": 0.95,
+            "adopted": 0,
+            "adoptedCoverage": 0,
+            "adoptedPrecision": 1
+          }
+        ],
+        "recommended": null,
+        "positives": 65
+      },
+      "planDoc": {
+        "grid": [
+          {
+            "theta": 0.05,
+            "adopted": 150,
+            "adoptedCoverage": 2.8846,
+            "adoptedPrecision": 0.3467
+          },
+          {
+            "theta": 0.1,
+            "adopted": 139,
+            "adoptedCoverage": 2.6731,
+            "adoptedPrecision": 0.3669
+          },
+          {
+            "theta": 0.15,
+            "adopted": 133,
+            "adoptedCoverage": 2.5577,
+            "adoptedPrecision": 0.3835
+          },
+          {
+            "theta": 0.2,
+            "adopted": 129,
+            "adoptedCoverage": 2.4808,
+            "adoptedPrecision": 0.3953
+          },
+          {
+            "theta": 0.25,
+            "adopted": 125,
+            "adoptedCoverage": 2.4038,
+            "adoptedPrecision": 0.4
+          },
+          {
+            "theta": 0.3,
+            "adopted": 121,
+            "adoptedCoverage": 2.3269,
+            "adoptedPrecision": 0.405
+          },
+          {
+            "theta": 0.35,
+            "adopted": 117,
+            "adoptedCoverage": 2.25,
+            "adoptedPrecision": 0.4017
+          },
+          {
+            "theta": 0.4,
+            "adopted": 110,
+            "adoptedCoverage": 2.1154,
+            "adoptedPrecision": 0.4273
+          },
+          {
+            "theta": 0.45,
+            "adopted": 104,
+            "adoptedCoverage": 2,
+            "adoptedPrecision": 0.4519
+          },
+          {
+            "theta": 0.5,
+            "adopted": 96,
+            "adoptedCoverage": 1.8462,
+            "adoptedPrecision": 0.4688
+          },
+          {
+            "theta": 0.55,
+            "adopted": 89,
+            "adoptedCoverage": 1.7115,
+            "adoptedPrecision": 0.4607
+          },
+          {
+            "theta": 0.6,
+            "adopted": 77,
+            "adoptedCoverage": 1.4808,
+            "adoptedPrecision": 0.4805
+          },
+          {
+            "theta": 0.65,
+            "adopted": 68,
+            "adoptedCoverage": 1.3077,
+            "adoptedPrecision": 0.5
+          },
+          {
+            "theta": 0.7,
+            "adopted": 46,
+            "adoptedCoverage": 0.8846,
+            "adoptedPrecision": 0.5217
+          },
+          {
+            "theta": 0.75,
+            "adopted": 22,
+            "adoptedCoverage": 0.4231,
+            "adoptedPrecision": 0.8182
+          },
+          {
+            "theta": 0.8,
+            "adopted": 6,
+            "adoptedCoverage": 0.1154,
+            "adoptedPrecision": 1
+          },
+          {
+            "theta": 0.85,
+            "adopted": 2,
+            "adoptedCoverage": 0.0385,
+            "adoptedPrecision": 1
+          },
+          {
+            "theta": 0.9,
+            "adopted": 0,
+            "adoptedCoverage": 0,
+            "adoptedPrecision": 1
+          },
+          {
+            "theta": 0.95,
+            "adopted": 0,
+            "adoptedCoverage": 0,
+            "adoptedPrecision": 1
+          }
+        ],
+        "recommended": {
+          "theta": 0.75,
+          "adopted": 22,
+          "adoptedCoverage": 0.4231,
+          "adoptedPrecision": 0.8182
+        },
+        "positives": 52
+      }
+    },
+    "gate": {
+      "criterion": "每文档存在 θ：adoptedPrecision ≥ 0.8 且 adoptedCoverage ≥ 0.3（覆盖门修订自 block115 的 0.50，理由：回写误报代价=多看一眼、漏报代价=治理缺账，随证据落档）",
+      "passed": false,
+      "note": "uiAudit 在生产有确定性硬规则（frontend/src → 必建议），校准曲线仍如实评模型判别力。"
+    },
+    "verdict": "部分/不可采纳：roadmap=无达标θ(最优P0.2533), handoff=无达标θ(最优P0.18), uiAudit=无达标θ(最优P0.28), auditLog=无达标θ(最优P0.4333), planDoc=θ0.75",
+    "perSample": [
+      {
+        "id": "d74df78208",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.8,
+          "handoff": 0.79,
+          "uiAudit": 0.8,
+          "auditLog": 0.8,
+          "planDoc": 0.8
+        },
+        "elapsedMs": 690
+      },
+      {
+        "id": "02a24d0416",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.71,
+          "handoff": 0.71,
+          "uiAudit": 0.71,
+          "auditLog": 0.71,
+          "planDoc": 0.71
+        },
+        "elapsedMs": 676
+      },
+      {
+        "id": "24708ea382",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.69,
+          "handoff": 0.71,
+          "uiAudit": 0.7,
+          "auditLog": 0.71,
+          "planDoc": 0.71
+        },
+        "elapsedMs": 674
+      },
+      {
+        "id": "e6bb6836f2",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.69,
+          "handoff": 0.7,
+          "uiAudit": 0.7,
+          "auditLog": 0.71,
+          "planDoc": 0.7
+        },
+        "elapsedMs": 699
+      },
+      {
+        "id": "20d9bc7930",
+        "group": "test",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.47,
+          "handoff": 0.49,
+          "uiAudit": 0.47,
+          "auditLog": 0.51,
+          "planDoc": 0.46
+        },
+        "elapsedMs": 2210
+      },
+      {
+        "id": "b51d52a6df",
+        "group": "docs",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.65,
+          "handoff": 0.6,
+          "uiAudit": 0.62,
+          "auditLog": 0.61,
+          "planDoc": 0.63
+        },
+        "elapsedMs": 262
+      },
+      {
+        "id": "bc2442fe38",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.75,
+          "handoff": 0.75,
+          "uiAudit": 0.75,
+          "auditLog": 0.75,
+          "planDoc": 0.73
+        },
+        "elapsedMs": 274
+      },
+      {
+        "id": "63d0b75ccc",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.68,
+          "handoff": 0.66,
+          "uiAudit": 0.64,
+          "auditLog": 0.69,
+          "planDoc": 0.67
+        },
+        "elapsedMs": 255
+      },
+      {
+        "id": "e44eb99fc2",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.75,
+          "handoff": 0.76,
+          "uiAudit": 0.76,
+          "auditLog": 0.74,
+          "planDoc": 0.76
+        },
+        "elapsedMs": 318
+      },
+      {
+        "id": "3dd88c2a55",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.47,
+          "handoff": 0.48,
+          "uiAudit": 0.48,
+          "auditLog": 0.48,
+          "planDoc": 0.48
+        },
+        "elapsedMs": 950
+      },
+      {
+        "id": "f98cc03475",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.39,
+          "handoff": 0.39,
+          "uiAudit": 0.37,
+          "auditLog": 0.37,
+          "planDoc": 0.4
+        },
+        "elapsedMs": 505
+      },
+      {
+        "id": "7c6538c2a4",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.69,
+          "handoff": 0.71,
+          "uiAudit": 0.69,
+          "auditLog": 0.7,
+          "planDoc": 0.69
+        },
+        "elapsedMs": 285
+      },
+      {
+        "id": "24e700df9d",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.69,
+          "handoff": 0.69,
+          "uiAudit": 0.7,
+          "auditLog": 0.7,
+          "planDoc": 0.7
+        },
+        "elapsedMs": 290
+      },
+      {
+        "id": "803692ad60",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.61,
+          "handoff": 0.6,
+          "uiAudit": 0.59,
+          "auditLog": 0.58,
+          "planDoc": 0.56
+        },
+        "elapsedMs": 463
+      },
+      {
+        "id": "c3e96b1735",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.64,
+          "handoff": 0.66,
+          "uiAudit": 0.65,
+          "auditLog": 0.65,
+          "planDoc": 0.67
+        },
+        "elapsedMs": 1025
+      },
+      {
+        "id": "3bc09859f9",
+        "group": "docs",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.46,
+          "handoff": 0.45,
+          "uiAudit": 0.44,
+          "auditLog": 0.44,
+          "planDoc": 0.45
+        },
+        "elapsedMs": 297
+      },
+      {
+        "id": "301ee83a9a",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.65,
+          "handoff": 0.64,
+          "uiAudit": 0.62,
+          "auditLog": 0.64,
+          "planDoc": 0.62
+        },
+        "elapsedMs": 616
+      },
+      {
+        "id": "ba6692fc00",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.64,
+          "handoff": 0.64,
+          "uiAudit": 0.65,
+          "auditLog": 0.63,
+          "planDoc": 0.66
+        },
+        "elapsedMs": 306
+      },
+      {
+        "id": "7eb9f5a72f",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.71,
+          "handoff": 0.7,
+          "uiAudit": 0.67,
+          "auditLog": 0.68,
+          "planDoc": 0.71
+        },
+        "elapsedMs": 275
+      },
+      {
+        "id": "e107da37ec",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.74,
+          "handoff": 0.73,
+          "uiAudit": 0.74,
+          "auditLog": 0.74,
+          "planDoc": 0.73
+        },
+        "elapsedMs": 321
+      },
+      {
+        "id": "0528519a77",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.75,
+          "handoff": 0.75,
+          "uiAudit": 0.75,
+          "auditLog": 0.74,
+          "planDoc": 0.75
+        },
+        "elapsedMs": 363
+      },
+      {
+        "id": "98db150d4e",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.71,
+          "handoff": 0.69,
+          "uiAudit": 0.69,
+          "auditLog": 0.7,
+          "planDoc": 0.7
+        },
+        "elapsedMs": 328
+      },
+      {
+        "id": "6e7906f9ce",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.64,
+          "handoff": 0.64,
+          "uiAudit": 0.63,
+          "auditLog": 0.64,
+          "planDoc": 0.64
+        },
+        "elapsedMs": 347
+      },
+      {
+        "id": "b0f8df4e57",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.63,
+          "handoff": 0.64,
+          "uiAudit": 0.65,
+          "auditLog": 0.63,
+          "planDoc": 0.63
+        },
+        "elapsedMs": 1641
+      },
+      {
+        "id": "f238310ea8",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.72,
+          "handoff": 0.72,
+          "uiAudit": 0.72,
+          "auditLog": 0.72,
+          "planDoc": 0.72
+        },
+        "elapsedMs": 275
+      },
+      {
+        "id": "97656271aa",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.74,
+          "handoff": 0.75,
+          "uiAudit": 0.74,
+          "auditLog": 0.74,
+          "planDoc": 0.75
+        },
+        "elapsedMs": 370
+      },
+      {
+        "id": "72cc09cc6d",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.71,
+          "handoff": 0.71,
+          "uiAudit": 0.7,
+          "auditLog": 0.7,
+          "planDoc": 0.71
+        },
+        "elapsedMs": 329
+      },
+      {
+        "id": "fb4c8ad964",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.55,
+          "handoff": 0.56,
+          "uiAudit": 0.55,
+          "auditLog": 0.54,
+          "planDoc": 0.56
+        },
+        "elapsedMs": 298
+      },
+      {
+        "id": "6c337b7da5",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.79,
+          "handoff": 0.77,
+          "uiAudit": 0.78,
+          "auditLog": 0.78,
+          "planDoc": 0.78
+        },
+        "elapsedMs": 337
+      },
+      {
+        "id": "8d03c227a4",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.15,
+          "handoff": 0.15,
+          "uiAudit": 0.15,
+          "auditLog": 0.15,
+          "planDoc": 0.14
+        },
+        "elapsedMs": 341
+      },
+      {
+        "id": "97f9ca72c2",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.08,
+          "handoff": 0.08,
+          "uiAudit": 0.08,
+          "auditLog": 0.08,
+          "planDoc": 0.08
+        },
+        "elapsedMs": 351
+      },
+      {
+        "id": "afc0ee3b48",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.59,
+          "handoff": 0.6,
+          "uiAudit": 0.61,
+          "auditLog": 0.6,
+          "planDoc": 0.6
+        },
+        "elapsedMs": 311
+      },
+      {
+        "id": "85837bb9ba",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.77,
+          "handoff": 0.77,
+          "uiAudit": 0.78,
+          "auditLog": 0.78,
+          "planDoc": 0.78
+        },
+        "elapsedMs": 288
+      },
+      {
+        "id": "dac5522caa",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.78,
+          "handoff": 0.78,
+          "uiAudit": 0.78,
+          "auditLog": 0.79,
+          "planDoc": 0.79
+        },
+        "elapsedMs": 962
+      },
+      {
+        "id": "bcb2dd7e31",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.44,
+          "handoff": 0.4,
+          "uiAudit": 0.43,
+          "auditLog": 0.43,
+          "planDoc": 0.44
+        },
+        "elapsedMs": 277
+      },
+      {
+        "id": "fba95cc2d4",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.35,
+          "handoff": 0.31,
+          "uiAudit": 0.34,
+          "auditLog": 0.34,
+          "planDoc": 0.3
+        },
+        "elapsedMs": 304
+      },
+      {
+        "id": "858743447a",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.77,
+          "handoff": 0.76,
+          "uiAudit": 0.77,
+          "auditLog": 0.75,
+          "planDoc": 0.78
+        },
+        "elapsedMs": 370
+      },
+      {
+        "id": "8226e30db3",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.11,
+          "handoff": 0.11,
+          "uiAudit": 0.13,
+          "auditLog": 0.12,
+          "planDoc": 0.12
+        },
+        "elapsedMs": 334
+      },
+      {
+        "id": "7e3bdd376f",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.22,
+          "handoff": 0.23,
+          "uiAudit": 0.26,
+          "auditLog": 0.25,
+          "planDoc": 0.27
+        },
+        "elapsedMs": 273
+      },
+      {
+        "id": "2929307fbb",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.74,
+          "handoff": 0.73,
+          "uiAudit": 0.73,
+          "auditLog": 0.73,
+          "planDoc": 0.75
+        },
+        "elapsedMs": 358
+      },
+      {
+        "id": "aac13f69ee",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.85,
+          "handoff": 0.86,
+          "uiAudit": 0.85,
+          "auditLog": 0.86,
+          "planDoc": 0.87
+        },
+        "elapsedMs": 284
+      },
+      {
+        "id": "d1bbd1df73",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.07,
+          "handoff": 0.07,
+          "uiAudit": 0.06,
+          "auditLog": 0.07,
+          "planDoc": 0.06
+        },
+        "elapsedMs": 296
+      },
+      {
+        "id": "1e27c02bab",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.52,
+          "handoff": 0.54,
+          "uiAudit": 0.54,
+          "auditLog": 0.53,
+          "planDoc": 0.52
+        },
+        "elapsedMs": 292
+      },
+      {
+        "id": "a4c780c025",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.07,
+          "handoff": 0.06,
+          "uiAudit": 0.06,
+          "auditLog": 0.07,
+          "planDoc": 0.07
+        },
+        "elapsedMs": 312
+      },
+      {
+        "id": "744e1a475a",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.08,
+          "handoff": 0.08,
+          "uiAudit": 0.07,
+          "auditLog": 0.08,
+          "planDoc": 0.08
+        },
+        "elapsedMs": 267
+      },
+      {
+        "id": "2f93358bcb",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.72,
+          "handoff": 0.7,
+          "uiAudit": 0.7,
+          "auditLog": 0.72,
+          "planDoc": 0.72
+        },
+        "elapsedMs": 415
+      },
+      {
+        "id": "fb4307bbe5",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.56,
+          "handoff": 0.55,
+          "uiAudit": 0.54,
+          "auditLog": 0.55,
+          "planDoc": 0.56
+        },
+        "elapsedMs": 344
+      },
+      {
+        "id": "cbe352695d",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.67,
+          "handoff": 0.69,
+          "uiAudit": 0.68,
+          "auditLog": 0.69,
+          "planDoc": 0.69
+        },
+        "elapsedMs": 316
+      },
+      {
+        "id": "6746ebecf7",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.45,
+          "handoff": 0.43,
+          "uiAudit": 0.43,
+          "auditLog": 0.45,
+          "planDoc": 0.44
+        },
+        "elapsedMs": 941
+      },
+      {
+        "id": "503a40b7cc",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.75,
+          "handoff": 0.76,
+          "uiAudit": 0.77,
+          "auditLog": 0.76,
+          "planDoc": 0.76
+        },
+        "elapsedMs": 374
+      },
+      {
+        "id": "6297b687a7",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.25,
+          "handoff": 0.24,
+          "uiAudit": 0.24,
+          "auditLog": 0.25,
+          "planDoc": 0.24
+        },
+        "elapsedMs": 272
+      },
+      {
+        "id": "2015be8a7b",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.57,
+          "handoff": 0.59,
+          "uiAudit": 0.57,
+          "auditLog": 0.57,
+          "planDoc": 0.56
+        },
+        "elapsedMs": 245
+      },
+      {
+        "id": "fdbc8839a7",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.71,
+          "handoff": 0.72,
+          "uiAudit": 0.72,
+          "auditLog": 0.72,
+          "planDoc": 0.71
+        },
+        "elapsedMs": 364
+      },
+      {
+        "id": "b905665ce8",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.24,
+          "handoff": 0.23,
+          "uiAudit": 0.21,
+          "auditLog": 0.24,
+          "planDoc": 0.24
+        },
+        "elapsedMs": 259
+      },
+      {
+        "id": "2e06cbd330",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.16,
+          "handoff": 0.16,
+          "uiAudit": 0.17,
+          "auditLog": 0.17,
+          "planDoc": 0.18
+        },
+        "elapsedMs": 519
+      },
+      {
+        "id": "67b9e7bce3",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.82,
+          "handoff": 0.83,
+          "uiAudit": 0.83,
+          "auditLog": 0.82,
+          "planDoc": 0.82
+        },
+        "elapsedMs": 308
+      },
+      {
+        "id": "70d8efb4c0",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.72,
+          "handoff": 0.72,
+          "uiAudit": 0.72,
+          "auditLog": 0.72,
+          "planDoc": 0.72
+        },
+        "elapsedMs": 282
+      },
+      {
+        "id": "d224af7ff9",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.64,
+          "handoff": 0.63,
+          "uiAudit": 0.65,
+          "auditLog": 0.66,
+          "planDoc": 0.65
+        },
+        "elapsedMs": 365
+      },
+      {
+        "id": "4dbfeff789",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.08,
+          "handoff": 0.09,
+          "uiAudit": 0.08,
+          "auditLog": 0.08,
+          "planDoc": 0.08
+        },
+        "elapsedMs": 326
+      },
+      {
+        "id": "9d6de76707",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.08,
+          "handoff": 0.07,
+          "uiAudit": 0.07,
+          "auditLog": 0.07,
+          "planDoc": 0.07
+        },
+        "elapsedMs": 322
+      },
+      {
+        "id": "97b697c0fb",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.09,
+          "handoff": 0.09,
+          "uiAudit": 0.1,
+          "auditLog": 0.09,
+          "planDoc": 0.1
+        },
+        "elapsedMs": 547
+      },
+      {
+        "id": "993cd6a529",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.08,
+          "handoff": 0.09,
+          "uiAudit": 0.09,
+          "auditLog": 0.09,
+          "planDoc": 0.09
+        },
+        "elapsedMs": 376
+      },
+      {
+        "id": "6a8da2fa55",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.78,
+          "handoff": 0.78,
+          "uiAudit": 0.78,
+          "auditLog": 0.78,
+          "planDoc": 0.79
+        },
+        "elapsedMs": 300
+      },
+      {
+        "id": "7bce4663c3",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.61,
+          "handoff": 0.63,
+          "uiAudit": 0.62,
+          "auditLog": 0.62,
+          "planDoc": 0.6
+        },
+        "elapsedMs": 292
+      },
+      {
+        "id": "553e2c7ca0",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.65,
+          "handoff": 0.66,
+          "uiAudit": 0.66,
+          "auditLog": 0.66,
+          "planDoc": 0.68
+        },
+        "elapsedMs": 308
+      },
+      {
+        "id": "e6a4743205",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.77,
+          "handoff": 0.76,
+          "uiAudit": 0.76,
+          "auditLog": 0.76,
+          "planDoc": 0.77
+        },
+        "elapsedMs": 316
+      },
+      {
+        "id": "900d418b8f",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.34,
+          "handoff": 0.35,
+          "uiAudit": 0.34,
+          "auditLog": 0.36,
+          "planDoc": 0.35
+        },
+        "elapsedMs": 1336
+      },
+      {
+        "id": "a539e6c8ab",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.68,
+          "handoff": 0.66,
+          "uiAudit": 0.67,
+          "auditLog": 0.68,
+          "planDoc": 0.69
+        },
+        "elapsedMs": 265
+      },
+      {
+        "id": "ba39dc3c6d",
+        "group": "docs",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.34,
+          "handoff": 0.35,
+          "uiAudit": 0.33,
+          "auditLog": 0.36,
+          "planDoc": 0.35
+        },
+        "elapsedMs": 278
+      },
+      {
+        "id": "65509f702d",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.09,
+          "handoff": 0.08,
+          "uiAudit": 0.08,
+          "auditLog": 0.09,
+          "planDoc": 0.07
+        },
+        "elapsedMs": 318
+      },
+      {
+        "id": "2ac34b1b3b",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.7,
+          "handoff": 0.7,
+          "uiAudit": 0.7,
+          "auditLog": 0.68,
+          "planDoc": 0.71
+        },
+        "elapsedMs": 303
+      },
+      {
+        "id": "ba027e47ae",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.67,
+          "handoff": 0.67,
+          "uiAudit": 0.7,
+          "auditLog": 0.68,
+          "planDoc": 0.66
+        },
+        "elapsedMs": 296
+      },
+      {
+        "id": "b5b6966fc3",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.72,
+          "handoff": 0.72,
+          "uiAudit": 0.71,
+          "auditLog": 0.72,
+          "planDoc": 0.72
+        },
+        "elapsedMs": 299
+      },
+      {
+        "id": "4cf926b650",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.1,
+          "handoff": 0.1,
+          "uiAudit": 0.09,
+          "auditLog": 0.09,
+          "planDoc": 0.09
+        },
+        "elapsedMs": 299
+      },
+      {
+        "id": "a6dd710330",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.46,
+          "handoff": 0.45,
+          "uiAudit": 0.46,
+          "auditLog": 0.45,
+          "planDoc": 0.46
+        },
+        "elapsedMs": 497
+      },
+      {
+        "id": "c2bf3d15e7",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.11,
+          "handoff": 0.1,
+          "uiAudit": 0.11,
+          "auditLog": 0.1,
+          "planDoc": 0.1
+        },
+        "elapsedMs": 295
+      },
+      {
+        "id": "130847913f",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.48,
+          "handoff": 0.51,
+          "uiAudit": 0.51,
+          "auditLog": 0.49,
+          "planDoc": 0.47
+        },
+        "elapsedMs": 291
+      },
+      {
+        "id": "9cbda3dd04",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.09,
+          "handoff": 0.09,
+          "uiAudit": 0.09,
+          "auditLog": 0.08,
+          "planDoc": 0.08
+        },
+        "elapsedMs": 516
+      },
+      {
+        "id": "7a7e0cdfa2",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.42,
+          "handoff": 0.39,
+          "uiAudit": 0.4,
+          "auditLog": 0.4,
+          "planDoc": 0.42
+        },
+        "elapsedMs": 297
+      },
+      {
+        "id": "ff77faa712",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.14,
+          "handoff": 0.14,
+          "uiAudit": 0.13,
+          "auditLog": 0.14,
+          "planDoc": 0.14
+        },
+        "elapsedMs": 303
+      },
+      {
+        "id": "6ebba60825",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.53,
+          "handoff": 0.55,
+          "uiAudit": 0.52,
+          "auditLog": 0.53,
+          "planDoc": 0.54
+        },
+        "elapsedMs": 324
+      },
+      {
+        "id": "c26c16a055",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.81,
+          "handoff": 0.81,
+          "uiAudit": 0.8,
+          "auditLog": 0.81,
+          "planDoc": 0.81
+        },
+        "elapsedMs": 276
+      },
+      {
+        "id": "2d258278bb",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.75,
+          "handoff": 0.74,
+          "uiAudit": 0.75,
+          "auditLog": 0.75,
+          "planDoc": 0.75
+        },
+        "elapsedMs": 306
+      },
+      {
+        "id": "8857c57407",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.83,
+          "handoff": 0.84,
+          "uiAudit": 0.83,
+          "auditLog": 0.85,
+          "planDoc": 0.83
+        },
+        "elapsedMs": 279
+      },
+      {
+        "id": "8ce457e674",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.47,
+          "handoff": 0.47,
+          "uiAudit": 0.44,
+          "auditLog": 0.45,
+          "planDoc": 0.43
+        },
+        "elapsedMs": 336
+      },
+      {
+        "id": "c029b61694",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.75,
+          "handoff": 0.74,
+          "uiAudit": 0.74,
+          "auditLog": 0.73,
+          "planDoc": 0.74
+        },
+        "elapsedMs": 504
+      },
+      {
+        "id": "de24ff8be1",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.57,
+          "handoff": 0.58,
+          "uiAudit": 0.59,
+          "auditLog": 0.57,
+          "planDoc": 0.55
+        },
+        "elapsedMs": 340
+      },
+      {
+        "id": "e2cf0c41d4",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.5,
+          "handoff": 0.52,
+          "uiAudit": 0.54,
+          "auditLog": 0.55,
+          "planDoc": 0.54
+        },
+        "elapsedMs": 293
+      },
+      {
+        "id": "3f25ffc3b3",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.66,
+          "handoff": 0.66,
+          "uiAudit": 0.66,
+          "auditLog": 0.67,
+          "planDoc": 0.67
+        },
+        "elapsedMs": 305
+      },
+      {
+        "id": "50e1e03090",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.7,
+          "handoff": 0.7,
+          "uiAudit": 0.71,
+          "auditLog": 0.71,
+          "planDoc": 0.7
+        },
+        "elapsedMs": 279
+      },
+      {
+        "id": "e110f56164",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.79,
+          "handoff": 0.77,
+          "uiAudit": 0.77,
+          "auditLog": 0.79,
+          "planDoc": 0.79
+        },
+        "elapsedMs": 264
+      },
+      {
+        "id": "dddd135c2e",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.77,
+          "handoff": 0.78,
+          "uiAudit": 0.78,
+          "auditLog": 0.78,
+          "planDoc": 0.78
+        },
+        "elapsedMs": 297
+      },
+      {
+        "id": "3f9efa2ab5",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.59,
+          "handoff": 0.6,
+          "uiAudit": 0.59,
+          "auditLog": 0.6,
+          "planDoc": 0.59
+        },
+        "elapsedMs": 275
+      },
+      {
+        "id": "b5eae78a57",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.72,
+          "handoff": 0.74,
+          "uiAudit": 0.74,
+          "auditLog": 0.72,
+          "planDoc": 0.73
+        },
+        "elapsedMs": 297
+      },
+      {
+        "id": "dd4395400c",
+        "group": "test",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.53,
+          "handoff": 0.53,
+          "uiAudit": 0.5,
+          "auditLog": 0.51,
+          "planDoc": 0.52
+        },
+        "elapsedMs": 282
+      },
+      {
+        "id": "f76f7b0b11",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.71,
+          "handoff": 0.73,
+          "uiAudit": 0.72,
+          "auditLog": 0.72,
+          "planDoc": 0.73
+        },
+        "elapsedMs": 286
+      },
+      {
+        "id": "0eeb3b2783",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.33,
+          "handoff": 0.37,
+          "uiAudit": 0.36,
+          "auditLog": 0.36,
+          "planDoc": 0.36
+        },
+        "elapsedMs": 337
+      },
+      {
+        "id": "3fd0846477",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.82,
+          "handoff": 0.83,
+          "uiAudit": 0.83,
+          "auditLog": 0.83,
+          "planDoc": 0.83
+        },
+        "elapsedMs": 316
+      },
+      {
+        "id": "397bc36eb7",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.73,
+          "handoff": 0.73,
+          "uiAudit": 0.72,
+          "auditLog": 0.73,
+          "planDoc": 0.72
+        },
+        "elapsedMs": 256
+      },
+      {
+        "id": "c4ab4f25f7",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.33,
+          "handoff": 0.28,
+          "uiAudit": 0.29,
+          "auditLog": 0.31,
+          "planDoc": 0.3
+        },
+        "elapsedMs": 319
+      },
+      {
+        "id": "51843c3a76",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.47,
+          "handoff": 0.48,
+          "uiAudit": 0.47,
+          "auditLog": 0.49,
+          "planDoc": 0.48
+        },
+        "elapsedMs": 256
+      },
+      {
+        "id": "6995a71373",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.77,
+          "handoff": 0.77,
+          "uiAudit": 0.77,
+          "auditLog": 0.78,
+          "planDoc": 0.77
+        },
+        "elapsedMs": 501
+      },
+      {
+        "id": "2b0f98cbb5",
+        "group": "docs",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.52,
+          "handoff": 0.54,
+          "uiAudit": 0.55,
+          "auditLog": 0.54,
+          "planDoc": 0.55
+        },
+        "elapsedMs": 347
+      },
+      {
+        "id": "70ec33f16c",
+        "group": "test",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.6,
+          "handoff": 0.6,
+          "uiAudit": 0.62,
+          "auditLog": 0.6,
+          "planDoc": 0.6
+        },
+        "elapsedMs": 331
+      },
+      {
+        "id": "f284030f98",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.18,
+          "handoff": 0.21,
+          "uiAudit": 0.21,
+          "auditLog": 0.2,
+          "planDoc": 0.2
+        },
+        "elapsedMs": 304
+      },
+      {
+        "id": "c6a9b6d139",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.14,
+          "handoff": 0.13,
+          "uiAudit": 0.15,
+          "auditLog": 0.15,
+          "planDoc": 0.14
+        },
+        "elapsedMs": 332
+      },
+      {
+        "id": "1cdc2823e1",
+        "group": "test",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 0,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.56,
+          "handoff": 0.56,
+          "uiAudit": 0.56,
+          "auditLog": 0.56,
+          "planDoc": 0.57
+        },
+        "elapsedMs": 302
+      },
+      {
+        "id": "a2f4eab4fa",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.73,
+          "handoff": 0.74,
+          "uiAudit": 0.73,
+          "auditLog": 0.74,
+          "planDoc": 0.72
+        },
+        "elapsedMs": 331
+      },
+      {
+        "id": "d8712d25be",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 1,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.25,
+          "handoff": 0.27,
+          "uiAudit": 0.25,
+          "auditLog": 0.25,
+          "planDoc": 0.25
+        },
+        "elapsedMs": 311
+      },
+      {
+        "id": "a515f1f540",
+        "group": "docs",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.53,
+          "handoff": 0.52,
+          "uiAudit": 0.53,
+          "auditLog": 0.52,
+          "planDoc": 0.51
+        },
+        "elapsedMs": 302
+      },
+      {
+        "id": "939dabb3e5",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.08,
+          "handoff": 0.09,
+          "uiAudit": 0.08,
+          "auditLog": 0.09,
+          "planDoc": 0.08
+        },
+        "elapsedMs": 300
+      },
+      {
+        "id": "813fc3812f",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.73,
+          "handoff": 0.74,
+          "uiAudit": 0.74,
+          "auditLog": 0.74,
+          "planDoc": 0.73
+        },
+        "elapsedMs": 281
+      },
+      {
+        "id": "efe8650783",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.21,
+          "handoff": 0.21,
+          "uiAudit": 0.22,
+          "auditLog": 0.24,
+          "planDoc": 0.25
+        },
+        "elapsedMs": 300
+      },
+      {
+        "id": "64da69b717",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.34,
+          "handoff": 0.37,
+          "uiAudit": 0.35,
+          "auditLog": 0.34,
+          "planDoc": 0.36
+        },
+        "elapsedMs": 297
+      },
+      {
+        "id": "3eb814c530",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.16,
+          "handoff": 0.16,
+          "uiAudit": 0.16,
+          "auditLog": 0.15,
+          "planDoc": 0.16
+        },
+        "elapsedMs": 921
+      },
+      {
+        "id": "735467e483",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.55,
+          "handoff": 0.59,
+          "uiAudit": 0.48,
+          "auditLog": 0.51,
+          "planDoc": 0.51
+        },
+        "elapsedMs": 319
+      },
+      {
+        "id": "e351aedcfd",
+        "group": "test",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 0,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.37,
+          "handoff": 0.41,
+          "uiAudit": 0.42,
+          "auditLog": 0.41,
+          "planDoc": 0.47
+        },
+        "elapsedMs": 359
+      },
+      {
+        "id": "f4af1ad23e",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.17,
+          "handoff": 0.17,
+          "uiAudit": 0.17,
+          "auditLog": 0.16,
+          "planDoc": 0.16
+        },
+        "elapsedMs": 327
+      },
+      {
+        "id": "09827083fc",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.75,
+          "handoff": 0.76,
+          "uiAudit": 0.76,
+          "auditLog": 0.73,
+          "planDoc": 0.75
+        },
+        "elapsedMs": 305
+      },
+      {
+        "id": "52fbca8f96",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.68,
+          "handoff": 0.65,
+          "uiAudit": 0.65,
+          "auditLog": 0.67,
+          "planDoc": 0.65
+        },
+        "elapsedMs": 280
+      },
+      {
+        "id": "bec01c6d09",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.17,
+          "handoff": 0.2,
+          "uiAudit": 0.17,
+          "auditLog": 0.16,
+          "planDoc": 0.18
+        },
+        "elapsedMs": 261
+      },
+      {
+        "id": "6ee570ec49",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.8,
+          "handoff": 0.8,
+          "uiAudit": 0.8,
+          "auditLog": 0.81,
+          "planDoc": 0.8
+        },
+        "elapsedMs": 345
+      },
+      {
+        "id": "75c345bac6",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.28,
+          "handoff": 0.28,
+          "uiAudit": 0.27,
+          "auditLog": 0.29,
+          "planDoc": 0.31
+        },
+        "elapsedMs": 308
+      },
+      {
+        "id": "f5720bb6cc",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.23,
+          "handoff": 0.22,
+          "uiAudit": 0.21,
+          "auditLog": 0.25,
+          "planDoc": 0.24
+        },
+        "elapsedMs": 280
+      },
+      {
+        "id": "2bac35e317",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.3,
+          "handoff": 0.33,
+          "uiAudit": 0.32,
+          "auditLog": 0.32,
+          "planDoc": 0.31
+        },
+        "elapsedMs": 306
+      },
+      {
+        "id": "f287e46ded",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.71,
+          "handoff": 0.69,
+          "uiAudit": 0.69,
+          "auditLog": 0.7,
+          "planDoc": 0.7
+        },
+        "elapsedMs": 299
+      },
+      {
+        "id": "258e7a06dc",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 1,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.67,
+          "handoff": 0.65,
+          "uiAudit": 0.67,
+          "auditLog": 0.63,
+          "planDoc": 0.65
+        },
+        "elapsedMs": 276
+      },
+      {
+        "id": "e7b4f5f7fa",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.44,
+          "handoff": 0.44,
+          "uiAudit": 0.47,
+          "auditLog": 0.49,
+          "planDoc": 0.48
+        },
+        "elapsedMs": 282
+      },
+      {
+        "id": "356ce2ebb9",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.62,
+          "handoff": 0.6,
+          "uiAudit": 0.62,
+          "auditLog": 0.61,
+          "planDoc": 0.58
+        },
+        "elapsedMs": 324
+      },
+      {
+        "id": "18a051ed3e",
+        "group": "perf",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.78,
+          "handoff": 0.78,
+          "uiAudit": 0.77,
+          "auditLog": 0.77,
+          "planDoc": 0.78
+        },
+        "elapsedMs": 333
+      },
+      {
+        "id": "6327d1a187",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.68,
+          "handoff": 0.69,
+          "uiAudit": 0.69,
+          "auditLog": 0.69,
+          "planDoc": 0.69
+        },
+        "elapsedMs": 530
+      },
+      {
+        "id": "e4e2810acd",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 1,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.28,
+          "handoff": 0.28,
+          "uiAudit": 0.28,
+          "auditLog": 0.29,
+          "planDoc": 0.27
+        },
+        "elapsedMs": 277
+      },
+      {
+        "id": "f076d3fd81",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.38,
+          "handoff": 0.42,
+          "uiAudit": 0.41,
+          "auditLog": 0.41,
+          "planDoc": 0.42
+        },
+        "elapsedMs": 305
+      },
+      {
+        "id": "8e1dc84023",
+        "group": "chore",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.35,
+          "handoff": 0.37,
+          "uiAudit": 0.34,
+          "auditLog": 0.35,
+          "planDoc": 0.35
+        },
+        "elapsedMs": 270
+      },
+      {
+        "id": "5a4df30533",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.77,
+          "handoff": 0.78,
+          "uiAudit": 0.76,
+          "auditLog": 0.77,
+          "planDoc": 0.76
+        },
+        "elapsedMs": 415
+      },
+      {
+        "id": "81ea136457",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.71,
+          "handoff": 0.7,
+          "uiAudit": 0.7,
+          "auditLog": 0.71,
+          "planDoc": 0.69
+        },
+        "elapsedMs": 284
+      },
+      {
+        "id": "5900702efc",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 1,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.38,
+          "handoff": 0.35,
+          "uiAudit": 0.37,
+          "auditLog": 0.36,
+          "planDoc": 0.37
+        },
+        "elapsedMs": 525
+      },
+      {
+        "id": "c6fb41b286",
+        "group": "docs",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 1,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.75,
+          "handoff": 0.72,
+          "uiAudit": 0.73,
+          "auditLog": 0.74,
+          "planDoc": 0.72
+        },
+        "elapsedMs": 269
+      },
+      {
+        "id": "71dd5d98b9",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.69,
+          "handoff": 0.69,
+          "uiAudit": 0.68,
+          "auditLog": 0.69,
+          "planDoc": 0.68
+        },
+        "elapsedMs": 271
+      },
+      {
+        "id": "53a266cfbb",
+        "group": "docs",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.52,
+          "handoff": 0.5,
+          "uiAudit": 0.54,
+          "auditLog": 0.48,
+          "planDoc": 0.52
+        },
+        "elapsedMs": 311
+      },
+      {
+        "id": "3d07a9031f",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.8,
+          "handoff": 0.8,
+          "uiAudit": 0.8,
+          "auditLog": 0.8,
+          "planDoc": 0.8
+        },
+        "elapsedMs": 515
+      },
+      {
+        "id": "e5c23597ea",
+        "group": "docs",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.6,
+          "handoff": 0.61,
+          "uiAudit": 0.56,
+          "auditLog": 0.55,
+          "planDoc": 0.58
+        },
+        "elapsedMs": 314
+      },
+      {
+        "id": "8c85898a01",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.69,
+          "handoff": 0.68,
+          "uiAudit": 0.68,
+          "auditLog": 0.68,
+          "planDoc": 0.68
+        },
+        "elapsedMs": 516
+      },
+      {
+        "id": "52a37a06b3",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.67,
+          "handoff": 0.66,
+          "uiAudit": 0.66,
+          "auditLog": 0.66,
+          "planDoc": 0.66
+        },
+        "elapsedMs": 310
+      },
+      {
+        "id": "6f7079ea59",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.58,
+          "handoff": 0.59,
+          "uiAudit": 0.59,
+          "auditLog": 0.59,
+          "planDoc": 0.57
+        },
+        "elapsedMs": 290
+      },
+      {
+        "id": "44354281c6",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.6,
+          "handoff": 0.6,
+          "uiAudit": 0.61,
+          "auditLog": 0.61,
+          "planDoc": 0.59
+        },
+        "elapsedMs": 300
+      },
+      {
+        "id": "10a22709ba",
+        "group": "docs",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 0
+        },
+        "answers": {
+          "roadmap": 0.4,
+          "handoff": 0.38,
+          "uiAudit": 0.39,
+          "auditLog": 0.39,
+          "planDoc": 0.38
+        },
+        "elapsedMs": 258
+      },
+      {
+        "id": "2d99c3b0e1",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 0,
+          "handoff": 0,
+          "uiAudit": 0,
+          "auditLog": 0,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.61,
+          "handoff": 0.63,
+          "uiAudit": 0.62,
+          "auditLog": 0.64,
+          "planDoc": 0.62
+        },
+        "elapsedMs": 957
+      },
+      {
+        "id": "c932a79fdf",
+        "group": "fix",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 1,
+          "uiAudit": 0,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.6,
+          "handoff": 0.6,
+          "uiAudit": 0.61,
+          "auditLog": 0.62,
+          "planDoc": 0.61
+        },
+        "elapsedMs": 931
+      },
+      {
+        "id": "4b731fb305",
+        "group": "feat",
+        "ok": true,
+        "gold": {
+          "roadmap": 1,
+          "handoff": 0,
+          "uiAudit": 1,
+          "auditLog": 1,
+          "planDoc": 1
+        },
+        "answers": {
+          "roadmap": 0.85,
+          "handoff": 0.87,
+          "uiAudit": 0.86,
+          "auditLog": 0.86,
+          "planDoc": 0.88
+        },
+        "elapsedMs": 276
+      }
+    ]
+  }
+}
