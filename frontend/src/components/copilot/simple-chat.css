@@ -4022,6 +4022,11 @@
   white-space: nowrap;
   font-size: var(--gewu-font-size-xs);
   color: var(--gewu-text-tertiary);
+  /* UI-437 v5 — 抵消全局 code 灰底：思考/调用/执行行统一为无底纯文本 */
+  background: transparent;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
 }
 
 .sc-tool-row-head[data-expanded] .sc-tool-qoder-preview {
@@ -4032,6 +4037,8 @@
    （「4.3 s」逐字符断行），qoder 行内锁定不换行、不收缩。 */
 .sc-tool-qoder-head .sc-tool-activity-duration {
   flex: 0 0 auto;
+  width: 56px;
+  text-align: right;
   white-space: nowrap;
 }
 
