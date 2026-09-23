@@ -4130,6 +4130,13 @@
   margin-left: auto;
 }
 
+.sc-tool-activity-detail > .sc-tool-resultdata,
+.sc-tool-activity-detail > .sc-tool-activity-tool {
+  /* UI-437 v5.9 — 结果块/工具名各自独占整行（flex 行内不被挤成竖排） */
+  flex-basis: 100%;
+  min-width: 0;
+}
+
 .sc-tool-resultdata-json {
   margin: 0;
   padding: 8px 10px;
@@ -4140,8 +4147,9 @@
   font-size: var(--gewu-font-size-xs);
   line-height: 1.5;
   color: var(--gewu-text-secondary);
-  white-space: pre-wrap;
-  word-break: break-word;
+  /* UI-437 v5.9 — 长行不换行，横向滚动看全（JSON 左对齐） */
+  white-space: pre;
+  overflow-x: auto;
   max-height: 240px;
   overflow-y: auto;
 }
