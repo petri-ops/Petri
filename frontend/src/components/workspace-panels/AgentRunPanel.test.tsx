@@ -119,7 +119,8 @@ describe('UI-404 AgentRunPanel 分区折叠', () => {
     fireEvent.click(screen.getByText(/执行工具 1 次/));
     expect(screen.getByTestId('qoder-cluster-body')).toBeTruthy();
     expect(screen.getByText('已思考')).toBeTruthy();
-    expect(screen.queryByText(/先看一眼目录/)).toBeNull();
+    // UI-437 v5.6 — 思考行带短预览（单行省略），点行展开全文
+    expect(screen.getByText(/先看一眼目录/)).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: '展开 已思考' }));
     expect(screen.getByText(/先看一眼目录/)).toBeTruthy();
   });
