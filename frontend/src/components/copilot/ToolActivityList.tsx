@@ -485,7 +485,25 @@ function QoderRow({ activity }: { activity: ToolActivityItem }) {
   const isExec = EXEC_TOOL_NAMES.has(activity.name);
   const isAgent = ACTIVITY_AGENT_TOOLS.has(activity.name) || Boolean(activity.agentRunId);
   const command = activity.command || activity.actionDetail || '';
-  const previewSource = isExec ? (command.split('\n')[0] || '').slice(0, 120) : (activity.actionDetail || activity.summary || '');
+  // UI-437 v5.3 加映（用户反馈「已调用 工具名 后面都是空白」）——actionDetail/summary
+  // 为空时兜底输出尾首个非空行（query/todo_write 等调用行不再空白）。
+  // output 为内存态不随会话持久化：历史消息无输出时维持原状（点击展开仍看全量）。
+  // 预览剥离 ANSI 转义避免乱码。
+  const outputPreview = (() => {
+    const tail = activity.output && typeof activity.output.tail === 'string' ? activity.output.tail : '';
+    for (const raw of tail.split('\n')) {
+      const line = raw
+        .replace(/\x1b\[[0-9;]*[A-Za-z]/g, '')
+        .replace(/\r/g, '')
+        .replace(/^[\s>*\-+#]+/, '')
+        .trim();
+      if (line) return line.slice(0, 120);
+    }
+    return '';
+  })();
+  const previewSource = isExec
+    ? (command.split('\n')[0] || '').slice(0, 120)
+    : (activity.actionDetail || activity.summary || outputPreview);
   const subSnap = useSyncExternalStore(
     activity.agentRunId
       ? (cb) => subscribeSubAgentTask(activity.agentRunId, cb)

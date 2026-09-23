@@ -407,6 +407,20 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     expect(head).not.toContain('耗时');
     expect(head).not.toContain('0 ms');
   });
+
+  it('UI-437 v5.3 输出预览兜底：actionDetail 为空的调用行显示输出尾首个非空行（ANSI 剥离）', () => {
+    render(
+      <ToolActivityList
+        activities={[{
+          key: 'q1', name: 'query', status: 'success', actionLabel: '已调用',
+          output: { tail: '\n\u001b[32m[ 数据集 A ]\u001b[0m\n2 条记录\n', truncated: false },
+        }]}
+        collapseWhenSettled
+      />
+    );
+    fireEvent.click(screen.getByText(/执行工具 1 次/));
+    expect(screen.getByText('[ 数据集 A ]')).toBeTruthy();
+  });
 });
 
 describe('BLOCK-107 P2c 运行中秒表（showRunningStopwatch）', () => {
