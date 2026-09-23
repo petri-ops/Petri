@@ -1,7 +1,7 @@
 # BLOCK-119-OUTPUT-JUDGE-HARNESS 计划：输出评判 Harness 工程
 
 **Plan ID**：`BLOCK-119-OUTPUT-JUDGE-HARNESS`
-**状态**：`active（P0-LAUNCH）`
+**状态**：`completed（2026-09-24 当日立项当日收口：P0 judge-core canonical 单源三态门（fit/faithful/goal_N 多维一包）+ stability-core 探针 + 配对语料 160 条（抓真两轮：结果信号 0 命中/截断 1 条均弃用→配对设计定稿；隐私红线原文不入仓）+ fit 校准可采纳 θ=3（precision 0.8254/coverage 0.7875）→ P1 output:judge CLI（三模式+--probe）+ agent 指引 + impact-map + dogfood（真实轮 PASS 但 probe 一致率 0.33=分数波动真信号；错配例 0.01→ESCALATE 判词正确）→ P2 子智能体汇报门试点（report-guard.js + agent-runner 挂点，默认关+fail-open+RETRY×1 带判词重写+复判观测，child_finished additive 标注）。门禁=block119 13/13 + 定向 56/56（含 block113 agent-runner 回归）+ docs/secret PASS + eslint 0 error。遗留候选=P2 实机开启观察（试点指标采纳率/误拦率/延迟增量待真实轮次累计）+ faithful/goal 维度校准（当前 observe-only）+ 分数轮间波动治理（阈值附近须 --probe））`
 **立项日期**：2026-09-24
 **责任轨道**：BLOCK（LLM 输出语义合格性评判 / 三态推进门 / 稳定性探针 / harness 工程）
 **上游文档**：`docs/block-118-dev-decision-tooling-plan.md`（dev 工具化与可观测性地基）· `docs/planning/typesafe-jev-system-one-research.md`（技术底稿）· `docs/planning/decision-primitive-internalization-arc.md`（W4 工程制度内化方向）

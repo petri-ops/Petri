@@ -5179,13 +5179,13 @@
       "id": "BLOCK-119-OUTPUT-JUDGE-HARNESS",
       "path": "docs/block-119-output-judge-harness-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-119-output-judge-harness",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-24",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "tags": [
         "block-119",
         "jev",
@@ -5196,7 +5196,7 @@
         "stability-probe",
         "w4"
       ],
-      "notes": "输出评判 Harness 工程 active（2026-09-24 立项即启动；用户裁决「行 你懂我 继续推进吧」——提案整体获批，P2=子智能体汇报门/评判供给=Jev 云/RETRY×1 全按推荐）。三态推进门（PASS/RETRY/ESCALATE）+ judgeOutput 多维一包（fit score/faithful noul 需 reference/goal_N 完备性）+ probeStability 稳定性探针（k 重放一致率）+ llm-transcripts 结果信号语料挖掘（隐私红线：语料证据只存指针+哈希+分数，原文不出 gitignored 区）。诚实边界：执行真相（测试/门禁）永不下放、无锚定泛判只观测、fail-open。并行=UI-437 v5.1x 同款隔离（BLOCK-118 先例）。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+      "notes": "输出评判 Harness 工程 completed（2026-09-24 当日立项当日收口；用户裁决「行 你懂我 继续推进吧」）。三态推进门（judge-core canonical 单源：core CJS + scripts ESM 薄壳）+ stability-core 探针 + 配对语料 160（隐私红线：指针+分数，原文不入仓）+ fit 校准 θ=3（P 0.8254/C 0.7875，配对下界 caveat 留痕）+ output-judge 注册表（faithful/goal=observe-only）+ output:judge CLI + P2 子智能体汇报门（默认关 BIOF3_JEV_REPORT_GUARD=1，fail-open+RETRY×1+复判，child_finished additive）。门禁=13/13+定向 56/56+docs/secret/eslint 绿。遗留=P2 实机观察/faithful+goal 校准/分数波动治理。G0 开发期常态 · 不外推 packaged/Provider/GA。",
       "lastUpdated": "2026-09-24"
     }
   ],
