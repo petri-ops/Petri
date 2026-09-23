@@ -325,6 +325,8 @@ async function askDecision({ state, questions, meta, overrides = {} } = {}) {
               model: okResult.model,
               latencyMs: okResult.elapsedMs,
               probabilities: firstAnswer && firstAnswer.probabilities ? firstAnswer.probabilities : null,
+              // BLOCK-118 加映 1 — token 用量逐条落库（本地供给/缺 usage 时为 null）
+              inputTokens: okResult.usage && typeof okResult.usage.input_tokens === 'number' ? okResult.usage.input_tokens : null,
             });
           } catch { /* 记账永不影响决策 */ }
         }

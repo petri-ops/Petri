@@ -62,3 +62,20 @@
 - `completed`：P0~P2 全落 + 门禁清单逐项对账 + 双供给校准三值裁决落档（「Laya 不可采纳」也是合法完成态，只要证据如实）。
 - 关键风险与对策：Laya 校准不达标→如实落证不硬凑 θ（该供给零建议=安全默认）；git 历史自动标注 gold 噪声→harness dry 先验语料，精度门不过先修语料；Jev key 失效→P0 首步冒烟，失效即报告用户不阻塞 file/Laya 路径。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 加映 1（2026-09-23 晚，用户裁决「A+B+C 全做」）：可观测性补强
+
+用户问「每次调用 jev/laya 的细节和用量会返回给我吗」→ 排查发现两缺口并当场收口：
+
+1. **缺口 A（抓真）**：dev 工具 CLI 调用未进决策台账——裸 shell 缺 `BIOF3_DB_PATH` 时
+   logDecision 打开默认路径库（无 decision_log 表）→ INSERT 失败被 best-effort 静默跳过。
+   修=包装脚本增 `anchorDecisionDbPath()`（与配置路径锚定同模式）。
+2. **缺口 B**：每次调用的 token 用量没有逐条落库。修=migration `012_decision_log_tokens.sql`
+   （additive 可空列）+ `decision-api.js` 记账带 `usage.input_tokens` + `decision-log.js` INSERT 扩列；
+   dev 库经 `migration-runner.runMigrations` 无头应用（v12 已登记 schema_migrations，
+   后端下次启动零重复）。
+3. **新增 `npm run decision:report`**：一条命令出「今天/--hours=N/--since=日期」的按接点×模型
+   报告（调用量/降级/avg+p95 延迟/token 合计/Jev 云成本估算），只读零副作用。
+
+验证=block116 契约（记账断言扩 input_tokens）12/12 + block118 9/9 + 实机双供给复验
+（Jev 云调用 tokens=800 落账 / Laya 0 token / 报告表正确）。lint 0 error。G0 开发期常态 · 不外推 packaged/Provider/GA。

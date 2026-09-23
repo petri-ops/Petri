@@ -49,7 +49,7 @@ function okFetch(answer) {
   return async () => ({
     ok: true,
     status: 200,
-    json: async () => ({ model: 'jev-1.13.0', answers: { probe: answer } }),
+    json: async () => ({ model: 'jev-1.13.0', answers: { probe: answer }, usage: { input_tokens: 1234 } }),
   });
 }
 
@@ -104,6 +104,8 @@ test('记账：askDecision 带 meta.point → decision_log 落行（choice/confi
   assert.ok(row.state_hash && row.state_hash.length === 16);
   assert.match(row.state_preview, /探针状态文本/);
   assert.ok(row.latency_ms !== null);
+  // BLOCK-118 加映 1 — token 用量逐条落库（012 迁移 input_tokens 列；缺 usage 时为 null）
+  assert.equal(row.input_tokens, 1234);
 });
 
 test('记账：降级也落行（degraded=1 + reason）', async () => {

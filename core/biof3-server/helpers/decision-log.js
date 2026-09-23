@@ -41,8 +41,8 @@ async function logDecision(entry) {
     const db = await getDb();
     await db.prepare(
       `INSERT INTO decision_log
-        (at, point, state_hash, state_preview, choice, confidence, threshold, degraded, reason, model, latency_ms, probabilities_json)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        (at, point, state_hash, state_preview, choice, confidence, threshold, degraded, reason, model, latency_ms, probabilities_json, input_tokens)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(
       new Date().toISOString(),
       String(entry.point),
@@ -55,7 +55,8 @@ async function logDecision(entry) {
       entry.reason == null ? null : String(entry.reason).slice(0, 120),
       entry.model == null ? null : String(entry.model),
       typeof entry.latencyMs === 'number' ? entry.latencyMs : null,
-      entry.probabilities ? JSON.stringify(entry.probabilities) : null
+      entry.probabilities ? JSON.stringify(entry.probabilities) : null,
+      typeof entry.inputTokens === 'number' ? entry.inputTokens : null
     );
   } catch (e) {
     // 记账失败静默跳过——决策结果永不因台账受影响；BLOCK116_DEBUG=1 时出口诊断

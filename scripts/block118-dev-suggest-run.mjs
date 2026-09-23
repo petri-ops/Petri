@@ -71,6 +71,17 @@ function anchorDecisionConfigPath() {
   }
 }
 
+/** 锚定决策台账 DB（BLOCK-118 加映 1）：裸 shell 缺 BIOF3_DB_PATH 时 logDecision 会打开
+ * 默认路径库（无 decision_log 表）→ INSERT 失败被 best-effort 静默跳过=调用不留痕。
+ * dev 数据面存在时锚定之，与后端同账本；无 dev 数据面保持默认（诚实零记账）。 */
+function anchorDecisionDbPath() {
+  if (process.env.BIOF3_DB_PATH) return;
+  const candidate = path.join(root, '.biof3-dev-user-data', 'data', 'biof3.db');
+  if (fs.existsSync(candidate)) {
+    process.env.BIOF3_DB_PATH = candidate;
+  }
+}
+
 /** 解析 cloud 供给（备份 env 文件只读，值不回显不落日志）。 */
 function cloudOverrides() {
   const envFile = path.join(root, '.biof3-dev-user-data', 'jev.env.bak-by-user-request');
@@ -111,6 +122,7 @@ async function main() {
   }
 
   anchorDecisionConfigPath();
+  anchorDecisionDbPath();
   let overrides = {};
   if (supply === 'cloud') {
     const cloud = cloudOverrides();

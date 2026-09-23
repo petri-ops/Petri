@@ -39,8 +39,9 @@
 - `零建议（below_threshold，model=…）`：模型置信不足，**不是工具故障**；静态下限照常执行。
 - doc:suggest 的 `--context` 强烈建议提供（改动说明一句话）：回写意图主要在语境里，
   无 context 时 planDoc 判别力显著下降（校准三轮 D-修订的证据教训）。
-- 两个工具的调用都会落 `decision_log` 台账（BLOCK-116 观测面可见），供给切换在
-  设置页「决策原语→模型接口」或 `--supply` 每次显式指定。
+- 两个工具的调用都会落 `decision_log` 台账（含 input_tokens 逐条用量，BLOCK-118 加映 1；
+  包装已自动锚定 dev DB——与后端同账本）；**`npm run decision:report [-- --hours=24|--since=日期]`
+  一条命令出会话报告**（按接点×模型的调用量/延迟/降级/token 合计与云端成本估算）。
 
 ## 红线
 
