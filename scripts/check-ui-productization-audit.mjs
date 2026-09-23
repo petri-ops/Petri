@@ -47,6 +47,13 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 
+  // 2026-09-23 UI-437 收口债清偿批（670de5e，code-size manifest 死条目移除+基线
+  // 重打 + lint 21 error 真修清零——未用参/无效断言/any 界定/ANSI 正则预编译/
+  // [object Object] 兜底改空串）：零 UI 行为变化（组件 51/51 原断言锚定）；
+  // 台账=UI-437 加映 v5.19 条目由后续提交 bc8e18c0 补登对账（先例 21d84f52）。
+  // 豁免同提交台账与 subject 要求；不重写共享历史。
+  '670de5e3d1f14556c12496e0654fd660d5772f46',
+
   // 2026-09-20 BLOCK-106 P0/P1 实现提交（6327d1a 启动度量可归因化+中位数阈值
   // 棘轮 / 18a051e 首屏负载切分）：subject 用 feat(block-106):/perf(block-106):
   // 未带 UI-###；其前端可见语义边界（路由 chunk 占位不跳版、代码高亮渐进上色、
