@@ -415,17 +415,19 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     expect(head).not.toContain('0 ms');
   });
 
-  it('UI-437 v5.4 未登记工具：参数摘要兜底（不再只剩工具名）', () => {
-    expect(summarizeToolCall('query', { datasets: '项目文档' }).actionDetail)
-      .toBe('query（datasets=项目文档）');
-    expect(summarizeToolCall('todo_write', { todos: [{ id: 1 }] }).actionDetail)
-      .toBe('todo_write（todos=[{"id":1}]）');
+  it('UI-437 v5.18 工具注册表：已登记工具带规范动词；未登记保持参数摘要兜底', () => {
+    // 已登记（v5.4 的 query/todo_write/plan 自本版起入注册表）
+    expect(summarizeToolCall('query', { datasets: '项目文档' }))
+      .toEqual({ actionLabel: '已查询', actionDetail: 'datasets=项目文档' });
+    expect(summarizeToolCall('todo_write', { todos: [{ id: 1 }] }))
+      .toEqual({ actionLabel: '已记录', actionDetail: '任务清单' });
     expect(summarizeToolCall('plan', { op: 'create', draft: true }).actionDetail)
-      .toBe('plan（op=create · draft=true）');
-    // 无参数回退工具名
+      .toBe('op=create · draft=true');
     expect(summarizeToolCall('query').actionDetail).toBe('query');
     // 已登记工具不受影响
     expect(summarizeToolCall('workspace_read', { path: 'src/a.ts' }).actionDetail).toBe('src/a.ts');
+    // 未登记（MCP/插件动态工具）保持「已调用 name（参数摘要）」兜底
+    expect(summarizeToolCall('mcp__ext__run', { q: 'x' }).actionLabel).toBe('已调用');
   });
 
   it('UI-437 v5.8 行级复制：点击复制钮写入该行可见内容', async () => {

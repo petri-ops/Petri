@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { existsSync, readFileSync } from 'node:fs';
+import path from 'node:path';
 import {
   formatToolDuration,
   formatToolSideEffects,
@@ -6,6 +8,7 @@ import {
   mergeToolResultActivity,
   restoreToolActivities,
   summarizeToolCall,
+  TOOL_ACTIVITY_ICONS,
 } from './toolActivity';
 
 const structuredResult = {
@@ -208,7 +211,28 @@ describe('tool activity projection', () => {
     expect(summarizeToolCall('workspace_write', {
       path: 'notes.txt',
       content: 'Authorization: secret-value',
-    })).toEqual({ actionLabel: '已修改', actionDetail: 'notes.txt' });
+    })).toEqual({ actionLabel: '已写入', actionDetail: 'notes.txt' });
+  });
+
+  // UI-437 v5.18 — 工具动词/图标注册表：与 test/fixtures/tool-activity-labels.json
+  // 逐工具一致（该 fixture 同时钉住后端 tool-events.js 侧，双端同构由其保证）
+  it('UI-437 v5.18 工具注册表：动词+图标与 fixture 全量一致', () => {
+    // vitest 的 import.meta.url 非 file 协议，用 cwd 候选定位（cwd=frontend 或仓库根）
+    const fixturePath = [
+      path.resolve(process.cwd(), 'test/fixtures/tool-activity-labels.json'),
+      path.resolve(process.cwd(), '../test/fixtures/tool-activity-labels.json'),
+    ].find((p) => existsSync(p));
+    expect(fixturePath, 'fixture 未找到').toBeTruthy();
+    const fixture = JSON.parse(readFileSync(fixturePath!, 'utf8')) as Record<string, { label: string; icon: string }>;
+    const tools = Object.keys(fixture);
+    expect(tools.length).toBeGreaterThanOrEqual(71);
+    for (const name of tools) {
+      expect(summarizeToolCall(name).actionLabel, name).toBe(fixture[name].label);
+      expect(TOOL_ACTIVITY_ICONS[name], name).toBe(fixture[name].icon);
+    }
+    // 未登记（MCP/插件动态工具）保持「已调用 name（参数摘要）」兜底
+    expect(summarizeToolCall('mcp__ext__lookup', { q: 'x' }))
+      .toEqual({ actionLabel: '已调用', actionDetail: 'mcp__ext__lookup（q=x）' });
   });
 
   // BLOCK-59 P4 — agent 管理工具结果携带 agentId → 活动行「详情窗」入口数据面

@@ -205,8 +205,10 @@ async function main() {
       rows.forEach(function(row){
         var label = row.querySelector('.sc-tool-qoder-label');
         var t = (label && label.textContent) || '';
-        if (!tool && t.indexOf('已调用') >= 0) tool = row;
-        if (!reasoning && (t === '已思考' || t === '思考')) reasoning = row;
+        // v5.18 工具注册表后工具动词多样（已检索/已查询/已运行…），工具行 =
+        // 非思考行（思考行 label ∈ {已思考, 思考}）
+        if (!tool && t.indexOf('思考') < 0) tool = row;
+        if (!reasoning && t.indexOf('思考') >= 0) reasoning = row;
       });
       if (!reasoning || !tool) return { found: false };
       function geom(row) {

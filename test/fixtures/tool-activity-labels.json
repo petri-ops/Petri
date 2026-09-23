@@ -1,0 +1,286 @@
+{
+  "act": {
+    "label": "已变更",
+    "icon": "settings"
+  },
+  "artifact_revision_list": {
+    "label": "已列出",
+    "icon": "archive"
+  },
+  "artifact_revision_restore": {
+    "label": "已恢复",
+    "icon": "archive"
+  },
+  "computer_authorize": {
+    "label": "已授权",
+    "icon": "eye"
+  },
+  "computer_click": {
+    "label": "已点击",
+    "icon": "eye"
+  },
+  "computer_press": {
+    "label": "已按键",
+    "icon": "eye"
+  },
+  "computer_screenshot": {
+    "label": "已截屏",
+    "icon": "eye"
+  },
+  "computer_scroll": {
+    "label": "已滚动",
+    "icon": "eye"
+  },
+  "computer_snapshot": {
+    "label": "已取快照",
+    "icon": "eye"
+  },
+  "computer_type": {
+    "label": "已输入",
+    "icon": "eye"
+  },
+  "computer_wait": {
+    "label": "已等待",
+    "icon": "eye"
+  },
+  "delegate_to_gewu_node": {
+    "label": "已委派",
+    "icon": "globe"
+  },
+  "followup_task": {
+    "label": "已派发",
+    "icon": "bot"
+  },
+  "generate_methods": {
+    "label": "已生成",
+    "icon": "table"
+  },
+  "interrupt_agent": {
+    "label": "已中断",
+    "icon": "bot"
+  },
+  "knowledge_doc_delete": {
+    "label": "已删除",
+    "icon": "book"
+  },
+  "knowledge_doc_list": {
+    "label": "已列出",
+    "icon": "book"
+  },
+  "knowledge_doc_move": {
+    "label": "已移动",
+    "icon": "book"
+  },
+  "knowledge_doc_reindex": {
+    "label": "已重建索引",
+    "icon": "book"
+  },
+  "knowledge_read": {
+    "label": "已读取",
+    "icon": "book"
+  },
+  "knowledge_search": {
+    "label": "已检索",
+    "icon": "search"
+  },
+  "knowledge_space_bind": {
+    "label": "已绑定",
+    "icon": "book"
+  },
+  "knowledge_space_clear": {
+    "label": "已清空",
+    "icon": "book"
+  },
+  "knowledge_space_create": {
+    "label": "已创建",
+    "icon": "book"
+  },
+  "knowledge_space_delete": {
+    "label": "已删除",
+    "icon": "book"
+  },
+  "knowledge_space_enable": {
+    "label": "已启用",
+    "icon": "book"
+  },
+  "knowledge_space_impact": {
+    "label": "已评估影响",
+    "icon": "book"
+  },
+  "knowledge_space_list": {
+    "label": "已列出",
+    "icon": "book"
+  },
+  "knowledge_space_rename": {
+    "label": "已重命名",
+    "icon": "book"
+  },
+  "knowledge_status": {
+    "label": "已查询",
+    "icon": "book"
+  },
+  "list_agents": {
+    "label": "已列出",
+    "icon": "bot"
+  },
+  "plan": {
+    "label": "已规划",
+    "icon": "list-details"
+  },
+  "process_status": {
+    "label": "已查询",
+    "icon": "cpu"
+  },
+  "process_stop": {
+    "label": "已停止",
+    "icon": "cpu"
+  },
+  "query": {
+    "label": "已查询",
+    "icon": "database"
+  },
+  "read_image": {
+    "label": "已读取",
+    "icon": "image"
+  },
+  "read_page": {
+    "label": "已读取",
+    "icon": "globe"
+  },
+  "resident_task_create": {
+    "label": "已创建",
+    "icon": "list-details"
+  },
+  "resident_task_list": {
+    "label": "已列出",
+    "icon": "list-details"
+  },
+  "resident_task_read": {
+    "label": "已读取",
+    "icon": "list-details"
+  },
+  "result_changeset_adopt": {
+    "label": "已采纳",
+    "icon": "table"
+  },
+  "result_changeset_adopt_in_context": {
+    "label": "已采纳",
+    "icon": "table"
+  },
+  "result_changeset_compare": {
+    "label": "已比对",
+    "icon": "table"
+  },
+  "result_changeset_compare_in_context": {
+    "label": "已比对",
+    "icon": "table"
+  },
+  "result_changeset_create": {
+    "label": "已创建",
+    "icon": "table"
+  },
+  "result_changeset_create_in_context": {
+    "label": "已创建",
+    "icon": "table"
+  },
+  "result_changeset_revert": {
+    "label": "已恢复",
+    "icon": "table"
+  },
+  "result_changeset_revert_in_context": {
+    "label": "已恢复",
+    "icon": "table"
+  },
+  "result_changeset_status": {
+    "label": "已查询",
+    "icon": "table"
+  },
+  "result_changeset_status_in_context": {
+    "label": "已查询",
+    "icon": "table"
+  },
+  "result_edit_plan": {
+    "label": "已规划",
+    "icon": "table"
+  },
+  "result_edit_plan_in_context": {
+    "label": "已规划",
+    "icon": "table"
+  },
+  "result_enrichment_from_context": {
+    "label": "已充实",
+    "icon": "table"
+  },
+  "result_selection_run": {
+    "label": "已运行",
+    "icon": "play"
+  },
+  "result_studio_context": {
+    "label": "已查询",
+    "icon": "table"
+  },
+  "run_tool": {
+    "label": "已运行",
+    "icon": "play"
+  },
+  "search": {
+    "label": "已搜索",
+    "icon": "globe"
+  },
+  "send_message": {
+    "label": "已发送",
+    "icon": "bot"
+  },
+  "spawn_agent": {
+    "label": "已派发",
+    "icon": "bot"
+  },
+  "system_info": {
+    "label": "已查询",
+    "icon": "cpu"
+  },
+  "todo_write": {
+    "label": "已记录",
+    "icon": "list-details"
+  },
+  "verify_state": {
+    "label": "已校验",
+    "icon": "shield"
+  },
+  "wait_agent": {
+    "label": "已等待",
+    "icon": "bot"
+  },
+  "workspace_exec": {
+    "label": "已运行",
+    "icon": "terminal"
+  },
+  "workspace_exec_background": {
+    "label": "后台运行",
+    "icon": "terminal"
+  },
+  "workspace_find": {
+    "label": "已查找",
+    "icon": "search"
+  },
+  "workspace_list": {
+    "label": "已列出",
+    "icon": "folder"
+  },
+  "workspace_read": {
+    "label": "已读取",
+    "icon": "file"
+  },
+  "workspace_replace": {
+    "label": "已替换",
+    "icon": "pencil"
+  },
+  "workspace_search": {
+    "label": "已搜索",
+    "icon": "search"
+  },
+  "workspace_write": {
+    "label": "已写入",
+    "icon": "pencil"
+  }
+}

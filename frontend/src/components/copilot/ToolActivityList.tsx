@@ -14,6 +14,7 @@ import {
   formatToolDuration,
   formatToolSideEffects,
   groupToolActivities,
+  TOOL_ACTIVITY_ICONS,
   type ToolActivityItem,
 } from './toolActivity';
 import { reasoningPreview } from './conversationSegments';
@@ -614,7 +615,15 @@ function QoderRow({ activity }: { activity: ToolActivityItem }) {
   const diffStat = activity.changeDiff && (activity.changeDiff.added > 0 || activity.changeDiff.removed > 0)
     ? { added: activity.changeDiff.added, removed: activity.changeDiff.removed }
     : null;
-  const kindIcon = isExec ? 'terminal' : isAgent ? 'bot' : isWrite ? 'pencil' : 'file';
+  // UI-437 v5.18 — 图标走工具注册表（域感知：检索/知识空间/清单/系统/结果/网络/
+  // 屏幕操作…），terminal/子智能体/写入三类行为集合仍优先。
+  const kindIcon = isExec
+    ? 'terminal'
+    : isAgent
+      ? 'bot'
+      : isWrite
+        ? 'pencil'
+        : (TOOL_ACTIVITY_ICONS[activity.name] || 'file');
   const label = isExec ? `终端命令 ${QODER_STATUS_WORD[activity.status]}` : activity.actionLabel;
   return (
     <div className={`sc-tool-activity sc-tool-qoder-row sc-tool-qoder-row-${activity.status}`} data-status={activity.status}>

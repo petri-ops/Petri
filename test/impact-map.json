@@ -2327,15 +2327,26 @@
     },
     {
       "id": "ui437-expanded-live",
-      "note": "UI-437 会话信息流工具行呈现（v5.x 加映系列）：Qoder 行展开体=返回 JSON 框直出（无工具名行/无标题栏）+ 复制钮悬浮框内右上角 + 展开态隐藏行级复制钮 + 结果块溢出收敛（min-width 链 + 框内横滚）。实机证据脚本 scripts/ui437-v511-expanded-live.cjs（真跑 system_info+knowledge_search 轮次后几何量测）与截图/JSON 证据 acceptance/ui-437/。前端契约由 frontendRelated 分流 Vitest（ToolActivityList/ConversationTimeline）。",
+      "note": "UI-437 会话信息流工具行呈现（v5.x 加映系列）：Qoder 行展开体=返回 JSON 框直出（无工具名行/无标题栏）+ 复制钮悬浮框内右上角 + 展开态隐藏行级复制钮 + 结果块溢出收敛（min-width 链 + 框内横滚）+ 思考行同构（预览/复制钮/行宽）+ 工具动词/图标注册表（fixture 单源双侧钉住）+ 循环状态面板 completed 态取消。实机证据脚本 scripts/ui437-v511-expanded-live.cjs（真跑 system_info+knowledge_search 轮次后几何量测 V0-V10）与截图/JSON 证据 acceptance/ui-437/。前端契约由 frontendRelated 分流 Vitest（ToolActivityList/ConversationTimeline/toolActivity/LoopStatusPanel）。",
       "patterns": [
         "frontend/src/components/copilot/ToolActivityList.tsx",
         "frontend/src/components/copilot/ToolActivityList.test.tsx",
+        "frontend/src/components/copilot/ConversationTimeline.tsx",
+        "frontend/src/components/copilot/ConversationTimeline.test.tsx",
+        "frontend/src/components/copilot/toolActivity.ts",
+        "frontend/src/components/copilot/toolActivity.test.ts",
+        "frontend/src/components/copilot/SimpleChat/LoopStatusPanel.tsx",
+        "frontend/src/components/copilot/SimpleChat/LoopStatusPanel.test.tsx",
         "frontend/src/components/copilot/simple-chat.css",
+        "core/biof3-server/agent-tools/tool-events.js",
+        "test/tool-activity-labels.test.mjs",
+        "test/fixtures/tool-activity-labels.json",
         "scripts/ui437-*",
         "acceptance/ui-437/**"
       ],
-      "tests": [],
+      "tests": [
+        "test/tool-activity-labels.test.mjs"
+      ],
       "frontendRelated": true,
       "classifiesScripts": true,
       "scriptRole": "development-smoke"

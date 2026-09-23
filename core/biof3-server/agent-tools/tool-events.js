@@ -345,8 +345,86 @@ function emitReadOnlyResultOutput({ name, result, callId, traceId, iteration, em
   }
 }
 
+/** UI-437 v5.18 — 工具动词注册表（全量 71 静态工具，契约测试
+ *  test/tool-activity-labels.test.mjs 经 test/fixtures/tool-activity-labels.json
+ *  逐工具钉住）。行头动词 = 「已×」规范态，宾语由 actionDetail 承载；
+ *  未登记（MCP/插件动态工具）回退「已调用」。 */
+const TOOL_ACTIVITY_VERBS = Object.freeze({
+  "act": "已变更",
+  "artifact_revision_list": "已列出",
+  "artifact_revision_restore": "已恢复",
+  "computer_authorize": "已授权",
+  "computer_click": "已点击",
+  "computer_press": "已按键",
+  "computer_screenshot": "已截屏",
+  "computer_scroll": "已滚动",
+  "computer_snapshot": "已取快照",
+  "computer_type": "已输入",
+  "computer_wait": "已等待",
+  "delegate_to_gewu_node": "已委派",
+  "followup_task": "已派发",
+  "generate_methods": "已生成",
+  "interrupt_agent": "已中断",
+  "knowledge_doc_delete": "已删除",
+  "knowledge_doc_list": "已列出",
+  "knowledge_doc_move": "已移动",
+  "knowledge_doc_reindex": "已重建索引",
+  "knowledge_read": "已读取",
+  "knowledge_search": "已检索",
+  "knowledge_space_bind": "已绑定",
+  "knowledge_space_clear": "已清空",
+  "knowledge_space_create": "已创建",
+  "knowledge_space_delete": "已删除",
+  "knowledge_space_enable": "已启用",
+  "knowledge_space_impact": "已评估影响",
+  "knowledge_space_list": "已列出",
+  "knowledge_space_rename": "已重命名",
+  "knowledge_status": "已查询",
+  "list_agents": "已列出",
+  "plan": "已规划",
+  "process_status": "已查询",
+  "process_stop": "已停止",
+  "query": "已查询",
+  "read_image": "已读取",
+  "read_page": "已读取",
+  "resident_task_create": "已创建",
+  "resident_task_list": "已列出",
+  "resident_task_read": "已读取",
+  "result_changeset_adopt": "已采纳",
+  "result_changeset_adopt_in_context": "已采纳",
+  "result_changeset_compare": "已比对",
+  "result_changeset_compare_in_context": "已比对",
+  "result_changeset_create": "已创建",
+  "result_changeset_create_in_context": "已创建",
+  "result_changeset_revert": "已恢复",
+  "result_changeset_revert_in_context": "已恢复",
+  "result_changeset_status": "已查询",
+  "result_changeset_status_in_context": "已查询",
+  "result_edit_plan": "已规划",
+  "result_edit_plan_in_context": "已规划",
+  "result_enrichment_from_context": "已充实",
+  "result_selection_run": "已运行",
+  "result_studio_context": "已查询",
+  "run_tool": "已运行",
+  "search": "已搜索",
+  "send_message": "已发送",
+  "spawn_agent": "已派发",
+  "system_info": "已查询",
+  "todo_write": "已记录",
+  "verify_state": "已校验",
+  "wait_agent": "已等待",
+  "workspace_exec": "已运行",
+  "workspace_exec_background": "后台运行",
+  "workspace_find": "已查找",
+  "workspace_list": "已列出",
+  "workspace_read": "已读取",
+  "workspace_replace": "已替换",
+  "workspace_search": "已搜索",
+  "workspace_write": "已写入",
+});
+
 /** Safe, compact activity details suitable for conversation metadata. */
-function summarizeToolCallForActivity(name, args = {}) {
+function summarizeToolCallSwitch(name, args = {}) {
   switch (name) {
     case 'workspace_exec':
       return { actionLabel: '已运行', actionDetail: compactActivityDetail(args.command) || '命令' };
@@ -373,8 +451,37 @@ function summarizeToolCallForActivity(name, args = {}) {
       return { actionLabel: '已修改', actionDetail: compactActivityDetail(args.path) || '文件' };
     case 'run_tool':
       return { actionLabel: '已运行', actionDetail: compactActivityDetail(args.toolId) || '分析工具' };
+    // UI-437 v5.18 — 高频工具的定制宾语（default 参数摘要对这些太噪）：
+    case 'knowledge_search':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.knowledge_search, actionDetail: compactActivityDetail(args.query) || '知识空间' };
+    case 'todo_write':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.todo_write, actionDetail: '任务清单' };
+    case 'spawn_agent':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.spawn_agent, actionDetail: compactActivityDetail(args.task) || '子智能体' };
+    case 'followup_task':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.followup_task, actionDetail: compactActivityDetail(args.task) || '后续任务' };
+    case 'send_message':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.send_message, actionDetail: compactActivityDetail(args.agentId) || '子智能体' };
+    case 'wait_agent':
+    case 'interrupt_agent':
+      return { actionLabel: TOOL_ACTIVITY_VERBS[name], actionDetail: compactActivityDetail(args.agentId) || '子智能体' };
+    case 'list_agents':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.list_agents, actionDetail: '子智能体' };
+    case 'resident_task_create':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.resident_task_create, actionDetail: compactActivityDetail(args.command) || '常驻任务' };
+    case 'search':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.search, actionDetail: compactActivityDetail(args.q) || '网络' };
+    case 'read_page':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.read_page, actionDetail: compactActivityDetail(args.url) || '网页' };
+    case 'read_image':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.read_image, actionDetail: compactActivityDetail(args.filePath || args.toolJobId) || '图像' };
+    case 'delegate_to_gewu_node':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.delegate_to_gewu_node, actionDetail: compactActivityDetail(args.task) || '协作节点' };
     default: {
-      // UI-437 v5.4 加映（后端同步）——未登记工具参数摘要：query（datasets=…）
+      // UI-437 v5.18 — 已登记工具：动词取注册表、detail 用参数摘要（无工具名
+      // 前缀，与登记工具同构）；未登记（MCP/插件动态工具）保持
+      // 「已调用 name（参数摘要）」兜底。
+      const verb = TOOL_ACTIVITY_VERBS[name];
       const parts = [];
       for (const [key, value] of Object.entries(args || {})) {
         let rendered;
@@ -391,10 +498,20 @@ function summarizeToolCallForActivity(name, args = {}) {
         parts.push(`${key}=${rendered}`);
         if (parts.length >= 3) break;
       }
+      if (verb) return { actionLabel: verb, actionDetail: parts.join(' · ') || name };
       return { actionLabel: '已调用', actionDetail: parts.length ? `${name}（${parts.join(' · ')}）` : name };
     }
   }
 }
+
+/** UI-437 v5.18 — 标签唯一真源 = TOOL_ACTIVITY_VERBS：switch 只负责 detail
+ *  构造，动词统一由注册表覆盖（switch 内联 label 仅为注册表缺项时的兜底）。 */
+function summarizeToolCallForActivity(name, args = {}) {
+  const result = summarizeToolCallSwitch(name, args);
+  const verb = TOOL_ACTIVITY_VERBS[name];
+  return verb ? { ...result, actionLabel: verb } : result;
+}
+
 
 function shellLabelFromPath(executable) {
   const base = String(executable || '').split(/[\\/|]/).pop() || '';
@@ -540,6 +657,7 @@ module.exports = {
   TOOL_OUTPUT_INTERVAL_MS,
   TOOL_OUTPUT_MAX_CHARS,
   RESULT_OUTPUT_TOOLS,
+  TOOL_ACTIVITY_VERBS,
   buildToolCallEvent,
   buildToolOutputEvent,
   buildToolResultEvent,

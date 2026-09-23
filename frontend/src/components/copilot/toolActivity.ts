@@ -4,6 +4,7 @@ import type {
   ToolResultEvent,
   ToolSideEffects,
 } from './copilotClient';
+import type { IconName } from '@/components/icons/Icon';
 
 export type ToolActivityStatus = 'running' | 'awaiting_confirmation' | 'success' | 'error' | 'denied';
 
@@ -217,13 +218,202 @@ function summarizeArgsDetail(args: Record<string, unknown> = {}): string {
   return parts.join(' · ');
 }
 
+/** UI-437 v5.18 — 工具动词注册表（全量 71 静态工具，与后端
+ *  tool-events.js TOOL_ACTIVITY_VERBS 同构；契约测试经
+ *  test/fixtures/tool-activity-labels.json 双侧逐工具钉住）。 */
+export const TOOL_ACTIVITY_VERBS: Readonly<Record<string, string>> = {
+  "act": "已变更",
+  "artifact_revision_list": "已列出",
+  "artifact_revision_restore": "已恢复",
+  "computer_authorize": "已授权",
+  "computer_click": "已点击",
+  "computer_press": "已按键",
+  "computer_screenshot": "已截屏",
+  "computer_scroll": "已滚动",
+  "computer_snapshot": "已取快照",
+  "computer_type": "已输入",
+  "computer_wait": "已等待",
+  "delegate_to_gewu_node": "已委派",
+  "followup_task": "已派发",
+  "generate_methods": "已生成",
+  "interrupt_agent": "已中断",
+  "knowledge_doc_delete": "已删除",
+  "knowledge_doc_list": "已列出",
+  "knowledge_doc_move": "已移动",
+  "knowledge_doc_reindex": "已重建索引",
+  "knowledge_read": "已读取",
+  "knowledge_search": "已检索",
+  "knowledge_space_bind": "已绑定",
+  "knowledge_space_clear": "已清空",
+  "knowledge_space_create": "已创建",
+  "knowledge_space_delete": "已删除",
+  "knowledge_space_enable": "已启用",
+  "knowledge_space_impact": "已评估影响",
+  "knowledge_space_list": "已列出",
+  "knowledge_space_rename": "已重命名",
+  "knowledge_status": "已查询",
+  "list_agents": "已列出",
+  "plan": "已规划",
+  "process_status": "已查询",
+  "process_stop": "已停止",
+  "query": "已查询",
+  "read_image": "已读取",
+  "read_page": "已读取",
+  "resident_task_create": "已创建",
+  "resident_task_list": "已列出",
+  "resident_task_read": "已读取",
+  "result_changeset_adopt": "已采纳",
+  "result_changeset_adopt_in_context": "已采纳",
+  "result_changeset_compare": "已比对",
+  "result_changeset_compare_in_context": "已比对",
+  "result_changeset_create": "已创建",
+  "result_changeset_create_in_context": "已创建",
+  "result_changeset_revert": "已恢复",
+  "result_changeset_revert_in_context": "已恢复",
+  "result_changeset_status": "已查询",
+  "result_changeset_status_in_context": "已查询",
+  "result_edit_plan": "已规划",
+  "result_edit_plan_in_context": "已规划",
+  "result_enrichment_from_context": "已充实",
+  "result_selection_run": "已运行",
+  "result_studio_context": "已查询",
+  "run_tool": "已运行",
+  "search": "已搜索",
+  "send_message": "已发送",
+  "spawn_agent": "已派发",
+  "system_info": "已查询",
+  "todo_write": "已记录",
+  "verify_state": "已校验",
+  "wait_agent": "已等待",
+  "workspace_exec": "已运行",
+  "workspace_exec_background": "后台运行",
+  "workspace_find": "已查找",
+  "workspace_list": "已列出",
+  "workspace_read": "已读取",
+  "workspace_replace": "已替换",
+  "workspace_search": "已搜索",
+  "workspace_write": "已写入",
+};
+
+/** UI-437 v5.18 — 工具分类图标（域感知：检索/知识空间/清单/系统/结果/网络/
+ *  屏幕操作/产物版本…），terminal/write/agent 三类仍由行为集合优先。 */
+export const TOOL_ACTIVITY_ICONS: Readonly<Record<string, IconName>> = {
+  "act": "settings",
+  "artifact_revision_list": "archive",
+  "artifact_revision_restore": "archive",
+  "computer_authorize": "eye",
+  "computer_click": "eye",
+  "computer_press": "eye",
+  "computer_screenshot": "eye",
+  "computer_scroll": "eye",
+  "computer_snapshot": "eye",
+  "computer_type": "eye",
+  "computer_wait": "eye",
+  "delegate_to_gewu_node": "globe",
+  "followup_task": "bot",
+  "generate_methods": "table",
+  "interrupt_agent": "bot",
+  "knowledge_doc_delete": "book",
+  "knowledge_doc_list": "book",
+  "knowledge_doc_move": "book",
+  "knowledge_doc_reindex": "book",
+  "knowledge_read": "book",
+  "knowledge_search": "search",
+  "knowledge_space_bind": "book",
+  "knowledge_space_clear": "book",
+  "knowledge_space_create": "book",
+  "knowledge_space_delete": "book",
+  "knowledge_space_enable": "book",
+  "knowledge_space_impact": "book",
+  "knowledge_space_list": "book",
+  "knowledge_space_rename": "book",
+  "knowledge_status": "book",
+  "list_agents": "bot",
+  "plan": "list-details",
+  "process_status": "cpu",
+  "process_stop": "cpu",
+  "query": "database",
+  "read_image": "image",
+  "read_page": "globe",
+  "resident_task_create": "list-details",
+  "resident_task_list": "list-details",
+  "resident_task_read": "list-details",
+  "result_changeset_adopt": "table",
+  "result_changeset_adopt_in_context": "table",
+  "result_changeset_compare": "table",
+  "result_changeset_compare_in_context": "table",
+  "result_changeset_create": "table",
+  "result_changeset_create_in_context": "table",
+  "result_changeset_revert": "table",
+  "result_changeset_revert_in_context": "table",
+  "result_changeset_status": "table",
+  "result_changeset_status_in_context": "table",
+  "result_edit_plan": "table",
+  "result_edit_plan_in_context": "table",
+  "result_enrichment_from_context": "table",
+  "result_selection_run": "play",
+  "result_studio_context": "table",
+  "run_tool": "play",
+  "search": "globe",
+  "send_message": "bot",
+  "spawn_agent": "bot",
+  "system_info": "cpu",
+  "todo_write": "list-details",
+  "verify_state": "shield",
+  "wait_agent": "bot",
+  "workspace_exec": "terminal",
+  "workspace_exec_background": "terminal",
+  "workspace_find": "search",
+  "workspace_list": "folder",
+  "workspace_read": "file",
+  "workspace_replace": "pencil",
+  "workspace_search": "search",
+  "workspace_write": "pencil",
+};
+
 export function summarizeToolCall(
+  name: string,
+  args: Record<string, unknown> = {}
+): { actionLabel: string; actionDetail?: string } {
+  const result = summarizeToolCallSwitch(name, args);
+  // UI-437 v5.18 — 标签唯一真源 = TOOL_ACTIVITY_VERBS（与后端注册表同构）
+  const verb = TOOL_ACTIVITY_VERBS[name];
+  return verb ? { ...result, actionLabel: verb } : result;
+}
+
+function summarizeToolCallSwitch(
   name: string,
   args: Record<string, unknown> = {}
 ): { actionLabel: string; actionDetail?: string } {
   switch (name) {
     case 'workspace_exec':
       return { actionLabel: '已运行', actionDetail: compactDetail(args.command) || '命令' };
+    // UI-437 v5.18 — 高频工具定制宾语（参数摘要太噪的工具给固定宾语）：
+    case 'knowledge_search':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.knowledge_search, actionDetail: compactDetail(args.query) || '知识空间' };
+    case 'todo_write':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.todo_write, actionDetail: '任务清单' };
+    case 'spawn_agent':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.spawn_agent, actionDetail: compactDetail(args.task) || '子智能体' };
+    case 'followup_task':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.followup_task, actionDetail: compactDetail(args.task) || '后续任务' };
+    case 'send_message':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.send_message, actionDetail: compactDetail(args.agentId) || '子智能体' };
+    case 'wait_agent':
+    case 'interrupt_agent':
+      return { actionLabel: TOOL_ACTIVITY_VERBS[name], actionDetail: compactDetail(args.agentId) || '子智能体' };
+    case 'list_agents':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.list_agents, actionDetail: '子智能体' };
+    case 'resident_task_create':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.resident_task_create, actionDetail: compactDetail(args.command) || '常驻任务' };
+    case 'search':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.search, actionDetail: compactDetail(args.q) || '网络' };
+    case 'read_page':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.read_page, actionDetail: compactDetail(args.url) || '网页' };
+    case 'read_image':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.read_image, actionDetail: compactDetail(args.filePath || args.toolJobId) || '图像' };
+    case 'delegate_to_gewu_node':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.delegate_to_gewu_node, actionDetail: compactDetail(args.task) || '协作节点' };
     case 'workspace_read': {
       const path = compactDetail(args.path) || '文件';
       const start = Number.isInteger(args.startLine) ? ` · 第 ${args.startLine} 行起` : '';
@@ -244,9 +434,12 @@ export function summarizeToolCall(
       // BLOCK-33 P1 — 环境自省：只读、无参数
       return { actionLabel: '已查询', actionDetail: '系统环境' };
     default: {
-      // UI-437 v5.4（用户反馈「已调用 query 后面都是空白」）——未登记工具用
-      // 参数摘要兜底：query（datasets=…）；无参数时回退工具名。
+      // UI-437 v5.18 — 已登记工具：动词取注册表、detail 用参数摘要（无工具名
+      // 前缀，与登记工具同构）；未登记（MCP/插件动态工具）保持
+      // 「已调用 name（参数摘要）」兜底。
+      const verb = TOOL_ACTIVITY_VERBS[name];
       const detail = summarizeArgsDetail(args);
+      if (verb) return { actionLabel: verb, actionDetail: detail || name };
       return { actionLabel: '已调用', actionDetail: detail ? `${name}（${detail}）` : name };
     }
   }
