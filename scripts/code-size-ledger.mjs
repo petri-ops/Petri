@@ -41,7 +41,6 @@ const MANIFEST = [
   { path: 'frontend/src/components/copilot/SimpleChat.tsx', wave: 'A', module: 'W-03' },
   { path: 'frontend/src/components/copilot/SimpleChat/hooks/useThinkingLevel.ts', wave: 'A', module: 'W-03' },
   { path: 'frontend/src/components/copilot/SimpleChat/hooks/useScrollGuard.ts', wave: 'A', module: 'W-03' },
-  { path: 'frontend/src/components/copilot/SimpleChat/hooks/useTerminalSubAgentResults.ts', wave: 'A', module: 'W-03' },
   { path: 'frontend/src/pages/project-workspace.tsx', wave: 'B', module: 'W-02' },
   { path: 'frontend/src/components/workspace-panels/ResultArtifactShell.tsx', wave: 'B', module: 'W-04' },
   { path: 'frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx', wave: 'B', module: 'W-04' },

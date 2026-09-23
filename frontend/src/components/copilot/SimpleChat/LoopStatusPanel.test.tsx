@@ -58,7 +58,7 @@ describe('LoopStatusPanel（UI-437 v5.17）', () => {
             iterationId: 'it-1', sequence: 1, decision: 'block', status: 'blocked',
             publicConclusion: '检测到假成功：任务失败但产生了文件（1 个）。',
           }],
-        } as Partial<ConversationLoopState> as ConversationLoopState)}
+        } as Partial<ConversationLoopState>)}
         pending={false}
       />
     );

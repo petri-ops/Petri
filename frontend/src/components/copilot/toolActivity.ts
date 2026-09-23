@@ -159,7 +159,7 @@ export function restoreToolActivities(value: unknown): ToolActivityItem[] {
     shellLabel: typeof raw.shellLabel === 'string' ? raw.shellLabel.slice(0, 24) : undefined,
     agentRunId: typeof raw.agentRunId === 'string' ? raw.agentRunId : undefined,
     // UI-437 v5.6 — 结果数据本体（后端 publicData 已界定的有界形状）随 meta 恢复
-    resultData: 'resultData' in raw ? raw.resultData as unknown : undefined,
+    resultData: 'resultData' in raw ? raw.resultData : undefined,
     }];
   });
 }
@@ -208,7 +208,7 @@ function summarizeArgsDetail(args: Record<string, unknown> = {}): string {
       try {
         rendered = JSON.stringify(value).replace(/\s+/g, ' ');
       } catch {
-        rendered = String(value);
+        rendered = '';
       }
     }
     if (!rendered) continue;

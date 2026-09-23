@@ -19,6 +19,9 @@ import {
 } from './toolActivity';
 import { reasoningPreview } from './conversationSegments';
 
+// ANSI CSI 序列（ESC=0x1b 开头）——预编译供输出尾逐行剥离
+const ANSI_CSI_RE = new RegExp(String.fromCharCode(27) + '\\[[0-9;]*[A-Za-z]', 'g');
+
 /** UI-316 — agent 管理类工具（子智能体独立标识 + 行内实时状态）。 */
 const ACTIVITY_AGENT_TOOLS: ReadonlySet<string> = new Set([
   'spawn_agent',
@@ -94,7 +97,7 @@ export function RowCopyButton({ text, ariaLabel }: { text: string; ariaLabel?: s
  *  `preview`（首行预览，折叠即可看出这一轮在琢磨什么）。
  *  UI-437 v5.16 — 行级复制钮与工具行同款（行尾右侧、悬停显现、复制全文）：
  *  思考行此前无复制钮且行尾结构少一个槽位，与工具行并排像两部分。 */
-function ReasoningRow({ iteration, text, label, preview }: {
+function ReasoningRow({ text, label, preview }: {
   iteration: number;
   text: string;
   label?: string;
@@ -319,7 +322,7 @@ function ActivityBody({ activity, subSnap }: {
     try {
       return JSON.stringify(activity.resultData, null, 2);
     } catch {
-      return String(activity.resultData);
+      return '';
     }
   })();
   const copyResultData = async () => {
@@ -453,7 +456,7 @@ function ActivityBody({ activity, subSnap }: {
         try {
           rendered = JSON.stringify(activity.resultData, null, 2);
         } catch {
-          rendered = String(activity.resultData);
+          rendered = '';
         }
         return (
           <div className="sc-tool-resultdata">
@@ -581,7 +584,7 @@ function QoderRow({ activity }: { activity: ToolActivityItem }) {
     const tail = activity.output && typeof activity.output.tail === 'string' ? activity.output.tail : '';
     for (const raw of tail.split('\n')) {
       const line = raw
-        .replace(/\x1b\[[0-9;]*[A-Za-z]/g, '')
+        .replace(ANSI_CSI_RE, '')
         .replace(/\r/g, '')
         .replace(/^[\s>*\-+#]+/, '')
         .trim();

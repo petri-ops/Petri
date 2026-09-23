@@ -293,7 +293,7 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     expect(screen.getByText(/先确认登记行再改文档/)).toBeTruthy();
     expect(screen.queryByText(/第二行细节/)).toBeNull();
     // UI-437 v5.16 — 思考行行级复制钮与工具行同款：复制全文（非预览截断）
-    const writeText = vi.fn((text: string) => Promise.resolve());
+    const writeText = vi.fn((_text: string) => Promise.resolve());
     vi.stubGlobal('navigator', { ...navigator, clipboard: { writeText } });
     const reasoningRow = screen.getByText('已思考').closest('.sc-tool-qoder-row') as HTMLElement;
     fireEvent.click(reasoningRow.querySelector('button[aria-label="复制该行内容"]') as HTMLElement);
@@ -441,7 +441,7 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
         collapseWhenSettled
       />
     );
-    const writeText = vi.fn((text: string) => Promise.resolve());
+    const writeText = vi.fn((_text: string) => Promise.resolve());
     vi.stubGlobal('navigator', { ...navigator, clipboard: { writeText } });
     // v3 语义：完成簇默认折叠，先点运行摘要行展开，行级复制钮才渲染
     fireEvent.click(screen.getByText(/执行工具 1 次/));
@@ -511,7 +511,7 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     expect(screen.queryByRole('button', { name: '复制该行内容' })).toBeNull();
 
     // 复制按钮：悬浮于框内右上角，写剪贴板内容 = 返回 JSON 本体
-    const writeText = vi.fn((text: string) => Promise.resolve());
+    const writeText = vi.fn((_text: string) => Promise.resolve());
     vi.stubGlobal('navigator', { ...navigator, clipboard: { writeText } });
     const copyBtn = screen.getByRole('button', { name: '复制返回 JSON' });
     expect(copyBtn.closest('.sc-tool-resultdata-frame')).not.toBeNull();

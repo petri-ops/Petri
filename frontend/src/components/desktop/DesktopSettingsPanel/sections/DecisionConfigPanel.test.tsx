@@ -109,7 +109,7 @@ describe('DecisionConfigPanel（BLOCK-116 P4 配置面）', () => {
   it('BLOCK-117 一键预设 Laya → PUT 本地供给三元组 + 表单同步 + 当前供给标签更新', async () => {
     const { fn, calls } = mockFetch((url, init) => {
       if (init?.method === 'PUT' && url.includes('/ai/decisions/provider')) {
-        const body = typeof init.body === 'string' ? JSON.parse(init.body) : {};
+        const body = typeof init.body === 'string' ? (JSON.parse(init.body) as Record<string, unknown>) : {};
         return { status: 200, body: { status: 'ok', provider: { baseUrl: body.baseUrl, model: body.model, hasKey: true } } };
       }
       return {
@@ -128,14 +128,14 @@ describe('DecisionConfigPanel（BLOCK-116 P4 配置面）', () => {
     });
     expect(put.body).toEqual({ baseUrl: 'http://127.0.0.1:8765', apiKey: 'local-laya', model: 'laya-typed-decisions' });
     await waitFor(() => expect(screen.getByText(/当前供给：Laya（本地）/)).toBeTruthy());
-    expect((screen.getByDisplayValue('http://127.0.0.1:8765') as HTMLInputElement).value).toContain('8765');
+    expect(screen.getByDisplayValue<HTMLInputElement>('http://127.0.0.1:8765').value).toContain('8765');
     expect(screen.getByDisplayValue('laya-typed-decisions')).toBeTruthy();
   });
 
   it('BLOCK-117 一键预设 Jev → PUT 不带 apiKey（服务端保留已配置 Key）', async () => {
     const { fn, calls } = mockFetch((url, init) => {
       if (init?.method === 'PUT' && url.includes('/ai/decisions/provider')) {
-        const body = typeof init.body === 'string' ? JSON.parse(init.body) : {};
+        const body = typeof init.body === 'string' ? (JSON.parse(init.body) as Record<string, unknown>) : {};
         return { status: 200, body: { status: 'ok', provider: { baseUrl: body.baseUrl, model: body.model, hasKey: true } } };
       }
       return {
