@@ -343,9 +343,11 @@ async function interrupt_agent(args, ctx) {
 }
 
 /**
- * send_message — 向子 agent 投递父消息（持久化到其事件流，followup_task
- * 续派时作为上下文注入）。运行中即时注入 loop 需改 agent-runner 核心，
- * 二期 v1 为持久化队列语义（诚实登记）。
+ * send_message — 向子 agent 投递父消息。双通道（2026-09-23 实时化）：
+ * ①运行中 → 复用 BLOCK-98 M4 输入插队队列，子 agent 下一个模型请求边界即看到
+ *   （前缀「父智能体消息」）；送达回执 parent_message_delivered 落事件流。
+ * ②终态前未被消费 → followup_task 续派时作为上下文注入（原队列语义兜底）。
+ * parent_message 事件恒落事件流作审计与续派兜底，两通道经 refs 去重不重复。
  */
 async function send_message(args, ctx) {
   const parentTaskId = ctx && ctx.taskId;
@@ -360,20 +362,25 @@ async function send_message(args, ctx) {
   if (TERMINAL_TASK_STATUSES.has(child.status)) {
     return fail('agent_terminal', '子 agent 已结束；请用 followup_task 追加任务（消息将随续派注入）。', { agentId: child.taskId, status: child.status });
   }
+  const seq = nextEventSeq(child.taskId);
   try {
     agentTaskStore.appendAgentTaskEvent(
-      child.taskId, nextEventSeq(child.taskId), 'parent_message',
+      child.taskId, seq, 'parent_message',
       { message, from: 'parent', at: new Date().toISOString() },
     );
   } catch (e) {
     return fail('queue_failed', '消息入队失败: ' + (e && e.message ? e.message : String(e)));
   }
+  // 实时 steering：入队失败不阻塞（事件流已在，退化为 followup 注入语义）
+  const steered = enqueueSteeringForChild(child.taskId, message, seq, '【父智能体消息】');
   return {
     ok: true,
     agentId: child.taskId,
     queued: true,
-    note: '消息已入队（子 agent 事件流可见）。运行中即时注入需 loop 核心支持（登记候选）；'
-      + '当前该消息将在 followup_task 续派该子 agent 时作为上下文注入。',
+    ...(steered ? { deliveredVia: 'steering' } : {}),
+    note: steered
+      ? '消息已实时送达：子 agent 将在下一个模型请求边界看到（前缀「父智能体消息」）；若其终态前未消费，仍随 followup_task 续派注入。'
+      : '消息已入队（子 agent 事件流可见）；将在 followup_task 续派该子 agent 时作为上下文注入。',
   };
 }
 
@@ -399,17 +406,8 @@ async function followup_task(args, ctx) {
   const parentParams = parentTask.params || {};
   const summary = await buildTerminalSummary(childFull);
 
-  // 队列消息取出（消费即清：事件流保留审计，续派提示只带未消费语义）
-  const queued = agentTaskStore.getAgentTaskEventsSince(child.taskId, 0, 1000000)
-    .filter((e) => e.eventType === 'parent_message')
-    .map((e) => {
-      // payload 形状双兼容：store 读取已解析为对象；字符串形状防御性保留
-      try {
-        const raw = typeof e.payload === 'string' ? JSON.parse(e.payload || '{}') : (e.payload || {});
-        return String(raw.message || '').slice(0, 500);
-      } catch { return ''; }
-    })
-    .filter(Boolean);
+  // 队列消息取出（实时已送达的经 delivered refs 剔除；事件流保留审计）
+  const queued = collectUndeliveredParentMessages(child.taskId);
 
   const parts = [
     `【续派任务】你此前完成了以下任务，现在基于前情继续：`,
@@ -454,10 +452,55 @@ async function followup_task(args, ctx) {
 }
 
 /**
+ * collectUndeliveredParentMessages — 收集未被实时 steering 送达的父消息/留言
+ * （followup 续派注入用）。parent_message 事件中剔除 parent_message_delivered
+ * 回执 refs 已引用的条目：运行中已实时看到的消息续派时不再重复注入。
+ */
+function collectUndeliveredParentMessages(taskId) {
+  const events = agentTaskStore.getAgentTaskEventsSince(taskId, 0, 1000000);
+  const delivered = new Set();
+  for (const e of events) {
+    if (e.eventType !== 'parent_message_delivered') continue;
+    const refs = e.payload && Array.isArray(e.payload.refs) ? e.payload.refs : [];
+    for (const r of refs) delivered.add(Number(r));
+  }
+  return events
+    .filter((e) => e.eventType === 'parent_message' && !delivered.has(Number(e.seq)))
+    .map((e) => {
+      // payload 形状双兼容：store 读取已解析为对象；字符串形状防御性保留
+      try {
+        const raw = typeof e.payload === 'string' ? JSON.parse(e.payload || '{}') : (e.payload || {});
+        return String(raw.message || '').slice(0, 500);
+      } catch { return ''; }
+    })
+    .filter(Boolean);
+}
+
+/**
+ * enqueueSteeringForChild — 把父消息/用户留言推入运行中子 agent 的 M4 插队
+ * 队列（实时送达：下一个模型请求边界注入）。best-effort：失败由调用方退化为
+ * followup 注入语义，不阻塞消息落事件流。
+ * @returns {boolean} 是否成功入队（=实时通道生效）
+ */
+function enqueueSteeringForChild(childTaskId, text, parentMessageSeq, prefix) {
+  try {
+    const agentResilience = require('../helpers/agent-resilience');
+    const enq = agentResilience.enqueueUserInput(
+      childTaskId,
+      `${prefix}${text}`,
+      { preformatted: true, parentMessageSeq },
+    );
+    return Boolean(enq && enq.ok);
+  } catch {
+    return false;
+  }
+}
+
+/**
  * queueUserMessage — 用户侧留言等价（BLOCK-65 P1-a）：agent 专属窗（用户操作）
  * 对运行中子 agent 留言。语义与 send_message 工具单源（持久化 parent_message
- * 事件 + 队列语义：followup_task 续派时注入）；差异仅在归属校验——工具版要求
- * 调用方是父 loop ctx，本函数面向 HTTP 用户态（子任务真实存在即可）。
+ * 事件 + 实时 steering 双通道，delivered refs 去重）；差异仅在归属校验——
+ * 工具版要求调用方是父 loop ctx，本函数面向 HTTP 用户态（子任务真实存在即可）。
  */
 function queueUserMessage({ childTaskId, message }) {
   const text = String(message || '').trim();
@@ -468,19 +511,23 @@ function queueUserMessage({ childTaskId, message }) {
   if (TERMINAL_TASK_STATUSES.has(child.status)) {
     return { ok: false, error: 'agent_terminal', message: '子 agent 已结束；请改用「继续派」追加任务（留言将随续派注入）。', status: child.status };
   }
+  const seq = nextEventSeq(childTaskId);
   try {
     agentTaskStore.appendAgentTaskEvent(
-      childTaskId, nextEventSeq(childTaskId), 'parent_message',
+      childTaskId, seq, 'parent_message',
       { message: text, from: 'user_window', at: new Date().toISOString() },
     );
   } catch (e) {
     return { ok: false, error: 'queue_failed', message: '留言入队失败: ' + (e && e.message ? e.message : String(e)) };
   }
+  const steered = enqueueSteeringForChild(childTaskId, text, seq, '【用户留言】');
   return {
     ok: true,
     queued: true,
-    note: '留言已入队（子 agent 事件流可见）。运行中即时注入需 loop 核心支持（登记候选）；'
-      + '当前该留言将在「继续派」续派该子 agent 时作为上下文注入。',
+    ...(steered ? { deliveredVia: 'steering' } : {}),
+    note: steered
+      ? '留言已实时送达：子 agent 将在下一个模型请求边界看到（前缀「用户留言」）；若其终态前未消费，仍随「继续派」续派注入。'
+      : '留言已入队（子 agent 事件流可见）；将在「继续派」续派该子 agent 时作为上下文注入。',
   };
 }
 
@@ -505,15 +552,7 @@ async function launchUserFollowup({ childTaskId, userId, task }) {
   const parentParams = parentTask.params || {};
   const summary = await buildTerminalSummary(child);
 
-  const queued = agentTaskStore.getAgentTaskEventsSince(child.taskId, 0, 1000000)
-    .filter((e) => e.eventType === 'parent_message')
-    .map((e) => {
-      try {
-        const raw = typeof e.payload === 'string' ? JSON.parse(e.payload || '{}') : (e.payload || {});
-        return String(raw.message || '').slice(0, 500);
-      } catch { return ''; }
-    })
-    .filter(Boolean);
+  const queued = collectUndeliveredParentMessages(child.taskId);
 
   const parts = [
     `【续派任务】你此前完成了以下任务，现在基于前情继续：`,
@@ -664,5 +703,11 @@ module.exports = {
   queueUserMessage,
   launchUserFollowup,
   // 测试钩子（不进入 registry）
-  __test: { clampWaitTimeoutMs, truncateToTokenBudget, resolvePresetByModel },
+  __test: {
+    clampWaitTimeoutMs,
+    truncateToTokenBudget,
+    resolvePresetByModel,
+    collectUndeliveredParentMessages,
+    enqueueSteeringForChild,
+  },
 };

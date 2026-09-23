@@ -731,12 +731,27 @@ async function runAgentLoop({
     const projected = agentResilience.maybeMicrocompactBody(body, { contextWindow: safeCtx });
     // BLOCK-98 M4 — 输入插队：每次模型请求边界排空队列，用户 steer 消息以
     // user 角色追加到请求尾部（下轮生效；事件流已发 input_queued 供前端可见）。
+    // 子智能体实时 steering（2026-09-23）：条目带 meta——preformatted=调用方已带
+    // 来源前缀（send_message=父消息 / queueUserMessage=用户留言）；同步 push 进
+    // fullMessages 使注入跨迭代持久（仅投影当次请求体会下一轮丢失）；携带
+    // parentMessageSeq 的条目发 delivered 回执事件，供 followup_task 去重。
     const pendingInputs = agentResilience.drainUserInput(taskId);
     if (pendingInputs.length > 0 && Array.isArray(projected.messages)) {
-      projected.messages = [
-        ...projected.messages,
-        ...pendingInputs.map((text) => ({ role: 'user', content: `[用户插入] ${text}` })),
-      ];
+      const injectedMessages = pendingInputs.map((entry) => {
+        const text = entry && typeof entry === 'object' ? entry.text : entry;
+        const preformatted = entry && typeof entry === 'object' && entry.meta && entry.meta.preformatted;
+        return { role: 'user', content: preformatted ? String(text) : `[用户插入] ${text}` };
+      });
+      projected.messages = [...projected.messages, ...injectedMessages];
+      if (Array.isArray(fullMessages)) {
+        for (const m of injectedMessages) fullMessages.push(m);
+      }
+      const deliveredRefs = pendingInputs
+        .map((entry) => (entry && typeof entry === 'object' && entry.meta ? entry.meta.parentMessageSeq : null))
+        .filter((seq) => Number.isInteger(seq) && seq > 0);
+      if (deliveredRefs.length > 0) {
+        _emit({ event: 'parent_message_delivered', refs: deliveredRefs, at: new Date().toISOString() });
+      }
       try { console.log('[block98-steer] injected', pendingInputs.length, 'queued user message(s)'); } catch {}
     }
     try {

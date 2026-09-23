@@ -320,16 +320,19 @@ function recordRetryUsage({ userId, conversationId, model, attempt, contextExcee
 // ── M4：输入插队队列（进程内；与 ZCode session_input 的 admitted→promoted 同型）──
 // 任务运行中用户消息不拒绝而是入队，下一次模型请求边界 drain 注入。
 // 队列生命周期=单次运行（任务终态由调用方清空；进程重启队列消失=诚实降级为留言）。
+// 子智能体实时 steering（2026-09-23）：send_message/queueUserMessage 复用同一
+// 队列，条目扩展为 {text, meta}；meta.parentMessageSeq 供送达回执（delivered
+// refs）与 followup 去重，meta.preformatted 表示 text 已带来源前缀。
 const pendingInputQueues = new Map();
 
-function enqueueUserInput(taskId, text) {
+function enqueueUserInput(taskId, text, meta = null) {
   const id = String(taskId || '');
   const t = String(text || '').trim();
   if (!id || !t) return { ok: false, error: 'invalid_arguments' };
   let q = pendingInputQueues.get(id);
   if (!q) { q = []; pendingInputQueues.set(id, q); }
   if (q.length >= 20) return { ok: false, error: 'queue_full', message: '排队消息过多（>20），请稍候再发' };
-  q.push(t.slice(0, 8000));
+  q.push({ text: t.slice(0, 8000), meta: meta && typeof meta === 'object' ? meta : null });
   return { ok: true, queued: true, depth: q.length };
 }
 

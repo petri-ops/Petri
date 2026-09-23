@@ -2370,6 +2370,23 @@
       "frontendRelated": false,
       "classifiesScripts": true,
       "scriptRole": "governance"
+    },
+    {
+      "id": "agent-steering",
+      "note": "子智能体实时 steering（2026-09-23 增量）：send_message/queueUserMessage 复用 BLOCK-98 M4 输入插队队列实时送达（队列条目扩展 {text, meta}，parentMessageSeq 供回执）+ M4 注入跨迭代持久（drain 后同步 fullMessages）+ parent_message_delivered 回执 + followup_task/launchUserFollowup 经 collectUndeliveredParentMessages 去重已实时送达的父消息。",
+      "patterns": [
+        "core/biof3-server/agent-tools/spawn-agent-tools.js",
+        "core/biof3-server/agent-tools/tool-defs/agent-orchestration.js",
+        "core/biof3-server/helpers/agent-resilience.js",
+        "core/biof3-server/agent-runner.js"
+      ],
+      "tests": [
+        "test/agent-steering.test.mjs",
+        "test/block49-phase2-tools.test.mjs",
+        "test/block98-resilience-state.test.mjs",
+        "test/block109-reporting-reconcile.test.mjs"
+      ],
+      "frontendRelated": false
     }
   ]
 }

@@ -28,7 +28,7 @@ module.exports = [
     "type": "function",
     "function": {
       "name": "send_message",
-      "description": "向自己的一个子 agent 投递父消息（持久化到其事件流）。运行中子 agent 的消息将入队（followup_task 续派时注入其上下文）；已终态的子 agent 会报错——此时应改用 followup_task。",
+      "description": "向自己的一个子 agent 投递父消息（持久化到其事件流）。运行中的子 agent 会在下一个模型请求边界实时看到（前缀「父智能体消息」），可用来中途纠偏、补充约束；未被消费的消息仍会随 followup_task 续派注入。已终态的子 agent 会报错——此时应改用 followup_task。",
       "parameters": {
         "type": "object",
         "properties": {
