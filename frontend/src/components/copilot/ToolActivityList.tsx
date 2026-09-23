@@ -83,6 +83,7 @@ function ReasoningRow({ iteration, text, label }: {
         title={open ? '收起思考' : '展开思考'}
         onClick={() => setOpen((v) => !v)}
       >
+        <span className="sc-tool-qoder-glyph sc-tool-qoder-glyph-success" aria-hidden="true">✓</span>
         <span className="sc-tool-qoder-kind" aria-hidden="true">
           <Icon name="brain" size={12} />
         </span>

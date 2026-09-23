@@ -37,6 +37,7 @@ function ReasoningSegmentRow({ segment }: { segment: ReasoningSegment }): React.
         title={open ? '收起思考' : '展开思考'}
         onClick={() => setOpen((value) => !value)}
       >
+        <span className="sc-tool-qoder-glyph sc-tool-qoder-glyph-success" aria-hidden="true">✓</span>
         <span className="sc-tool-qoder-kind" aria-hidden="true">
           <Icon name="brain" size={12} />
         </span>
