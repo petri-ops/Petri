@@ -310,7 +310,8 @@ function ActivityBody({ activity, subSnap }: {
   };
   return (
     <div className="sc-tool-activity-body sc-tool-activity-detail">
-      <span className="sc-tool-activity-tool">{activity.name}</span>
+      {/* UI-437 v5.11 — 展开体不再重复工具名行（行头已有同信息），有返回体时
+          首个元素直接就是 JSON 框（复制钮悬浮框内右上角），无样板标签 */}
       {activity.agentRunId && subSnap && (
         // UI-382 — 子智能体实况卡内联到派发源头（工具调用时间线），
         // 不再只沉在底部聚合条；详情窗/中断动作随卡就地可达。
@@ -414,7 +415,8 @@ function ActivityBody({ activity, subSnap }: {
           {activity.output.truncated ? '\n…（输出已截断）' : ''}
         </pre>
       )}
-      {/* UI-437 v5.6 — 工具返回数据本体（后端 publicData bounded）：展开即见「返回」详情 */}
+      {/* UI-437 v5.6/v5.11 — 工具返回数据本体（后端 publicData bounded）：展开即见
+          JSON 本体；v5.11 去掉「返回」标题栏，框即全部（复制钮悬浮框内右上角） */}
       {activity.resultData !== undefined && (() => {
         let rendered = '';
         try {
@@ -424,9 +426,6 @@ function ActivityBody({ activity, subSnap }: {
         }
         return (
           <div className="sc-tool-resultdata">
-            <div className="sc-tool-resultdata-bar">
-              <span className="sc-tool-resultdata-title">返回</span>
-            </div>
             {/* UI-437 v5.10 — 复制钮悬浮于 JSON 框内右上角（GitHub 代码块同款） */}
             <div className="sc-tool-resultdata-frame">
               <pre className="sc-tool-resultdata-json">{rendered}</pre>
@@ -645,15 +644,20 @@ function QoderRow({ activity }: { activity: ToolActivityItem }) {
           <Icon name={open ? 'chevron-down' : 'chevron-right'} size={12} />
         </span>
       </button>
-      <button
-        type="button"
-        className={`sc-tool-row-copy${rowCopied ? ' is-copied' : ''}`}
-        title="复制该行内容"
-        aria-label="复制该行内容"
-        onClick={(e) => { e.stopPropagation(); void copyRow(); }}
-      >
-        <Icon name={rowCopied ? 'check' : 'copy'} size={11} />
-      </button>
+      {/* UI-437 v5.8/v5.11 — 行级复制钮只服务折叠态（悬停显现）；展开态隐藏：
+          展开体的复制 affordance 归属内容本体（JSON 框内右上角钮/终端块钮），
+          行级钮在展开后会成为掉行首的游离图标（用户实测反馈） */}
+      {!open && (
+        <button
+          type="button"
+          className={`sc-tool-row-copy${rowCopied ? ' is-copied' : ''}`}
+          title="复制该行内容"
+          aria-label="复制该行内容"
+          onClick={(e) => { e.stopPropagation(); void copyRow(); }}
+        >
+          <Icon name={rowCopied ? 'check' : 'copy'} size={11} />
+        </button>
+      )}
       {open && (isExec
         ? <TerminalBody activity={activity} />
         : <ActivityBody activity={activity} subSnap={subSnap} />)}

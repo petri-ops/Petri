@@ -55,7 +55,8 @@ describe('ToolActivityList (UI-271 内联手风琴)', () => {
     // 点击该执行行展开详情
     fireEvent.click(screen.getByRole('button', { name: '展开执行详情 已运行' }));
     expect(screen.getByText(/R version 4.4.0/)).toBeTruthy();
-    expect(screen.getByText('run_tool')).toBeTruthy();
+    // UI-437 v5.11 — 展开体不再重复工具名行（行头已有「已运行 + 命令摘要」）
+    expect(screen.queryByText('run_tool')).toBeNull();
 
     // 再次点击收起详情
     fireEvent.click(screen.getByRole('button', { name: '收起执行详情 已运行' }));
@@ -461,7 +462,7 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     expect(merged[0].resultData).toEqual({ ok: true, spaceEnabled: false, hits: [], message: '知识空间未启用' });
   });
 
-  it('UI-437 v5.6 展开体：activity 带 resultData 时渲染「返回」JSON 详情块', async () => {
+  it('UI-437 v5.11 展开体：直接渲染返回 JSON 框（无工具名行/无「返回」标题，行复制钮隐藏）', async () => {
     render(
       <ToolActivityList
         activities={[{
@@ -473,15 +474,21 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
       />
     );
     fireEvent.click(screen.getByText(/执行工具 1 次/));
-    // 行级展开：点行头出 ActivityBody（含「返回」详情块）
+    // 展开前行级复制钮在（悬停显现）；点行头展开后隐藏（复制 affordance 归 JSON 框内钮）
+    expect(screen.getAllByRole('button', { name: '复制该行内容' }).length).toBeGreaterThanOrEqual(1);
     fireEvent.click(screen.getByTestId('qoder-row-head'));
-    expect(screen.getByText('返回')).toBeTruthy();
+    // v5.11 — 无「返回」标题、无工具名行：展开体首个内容直接就是 JSON 本体
+    expect(screen.queryByText('返回')).toBeNull();
+    expect(document.querySelector('.sc-tool-activity-tool')).toBeNull();
     expect(screen.getByText(/"os": "Windows"/)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: '复制该行内容' })).toBeNull();
 
-    // v5.7 — 复制按钮：写剪贴板内容 = 返回 JSON 本体
+    // 复制按钮：悬浮于框内右上角，写剪贴板内容 = 返回 JSON 本体
     const writeText = vi.fn((text: string) => Promise.resolve());
     vi.stubGlobal('navigator', { ...navigator, clipboard: { writeText } });
-    fireEvent.click(screen.getByRole('button', { name: '复制返回 JSON' }));
+    const copyBtn = screen.getByRole('button', { name: '复制返回 JSON' });
+    expect(copyBtn.closest('.sc-tool-resultdata-frame')).not.toBeNull();
+    fireEvent.click(copyBtn);
     await waitFor(() => expect(writeText).toHaveBeenCalledTimes(1));
     expect(JSON.parse(writeText.mock.calls[0][0])).toEqual({ os: 'Windows', shell: 'cmd.exe' });
   });

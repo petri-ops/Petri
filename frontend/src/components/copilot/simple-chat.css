@@ -1314,12 +1314,6 @@
   white-space: nowrap;
 }
 
-.sc-tool-activity-tool {
-  color: var(--gewu-text-tertiary);
-  font-family: var(--gewu-font-mono, monospace);
-  font-size: var(--gewu-font-size-xs);
-}
-
 .sc-tool-activity-status {
   font-size: var(--gewu-font-size-sm);
   font-weight: 650;
@@ -4108,31 +4102,17 @@
   color: var(--gewu-success);
 }
 
-/* UI-437 v5.7 — 工具返回详情块：「返回」标题栏（含复制钮）+ JSON 本体（等宽、
-   画布底色 inset、限高滚动）。视觉语系对齐 .sc-tool-activity-output 终端输出块。 */
+/* UI-437 v5.7/v5.11 — 工具返回详情块：JSON 框即全部（v5.11 去标题栏/工具名行，
+   展开体首个元素直接是框；复制钮悬浮框内右上角）。等宽、画布底色 inset、限高滚动。 */
 .sc-tool-resultdata {
   margin: 4px 0 2px;
+  /* v5.11 — 溢出收敛加固：块自身不撑破宿主列（长 JSON 由框内横滚消化） */
+  min-width: 0;
+  max-width: 100%;
 }
 
-.sc-tool-resultdata-bar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 2px;
-}
-
-.sc-tool-resultdata-title {
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text-tertiary);
-}
-
-.sc-tool-resultdata-bar .sc-tool-term-copy {
-  margin-left: auto;
-}
-
-.sc-tool-activity-detail > .sc-tool-resultdata,
-.sc-tool-activity-detail > .sc-tool-activity-tool {
-  /* UI-437 v5.9 — 结果块/工具名各自独占整行（flex 行内不被挤成竖排） */
+.sc-tool-activity-detail > .sc-tool-resultdata {
+  /* UI-437 v5.9 — 结果块独占整行（flex 行内不被挤成竖排） */
   flex-basis: 100%;
   min-width: 0;
 }

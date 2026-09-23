@@ -523,6 +523,19 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 台账已由后续 UI-AUDIT-FIX（P2 提交）补登为 UI-265（in_progress）。
   // 豁免同提交台账要求。
   '0acffcc13c78a27c1c1e764c5d56afe13e4602ef',
+  // 2026-09-23 UI-437 v5.x 加映系列（301ee83a v5.2 灰底去除 / 24e700df v5.5 后端
+  // digest / 7c6538c2 v5.6 思考短预览+resultData 全链路 / e44eb99f v5.7 复制钮 /
+  // bc2442fe v5.8 行级复制 / 24708ea3 v5.9 左对齐+横滚 / 02a24d04 v5.10 复制钮
+  // 入框）：七个实现提交各自只动代码与证据，台账按批落在后续 docs 提交
+  // （89eba5c4/e9af0627），v5.11 提交统一补登完整 v5.6–v5.11 对账。豁免同提交
+  // 台账要求（subject 均带 UI-437，subject 门天然过）；不重写共享历史。
+  '301ee83a9a04904fa4c77fe969dc4f7ba80737b5',
+  '24e700df9d601729af9ab81a15295dd844684752',
+  '7c6538c2a434c84465247e95b37ad8b566bf718e',
+  'e44eb99fc20cadd0f7326b1eba87fd0a6d122810',
+  'bc2442fe38004288dd21895f1a3e8bbf956bf01b',
+  '24708ea382a2977c427e2240045f72e89e31f53d',
+  '02a24d041695d8d1cb4f3620faedef5befaebb1c',
   // 2026-08-30 BLOCK-30-BACKEND-CONVERGENCE P1/P2/P4：UI 影响补登为 UI-222
   // （合并条目，见 LEGACY_MESSAGE_EXEMPTIONS 注释）。豁免同提交台账要求。
   'edd1116b2b524bfdc96fc16bc16fa2ad8318b216',

@@ -1,0 +1,36 @@
+{
+  "prompt": "只读检查，共两步，不要写任何文件：(1) 调用 system_info 一次；(2) 用 knowledge_search 检索一次，query 用「溢出逃逸测试超长文本行横向滚动验证用」；最后用一句话总结即可。",
+  "at": "2026-09-23T11:54:58.374Z",
+  "results": [
+    {
+      "name": "V0_task_reached_terminal",
+      "pass": true,
+      "detail": "stableKey=0|1|1|184"
+    },
+    {
+      "name": "V1_no_tool_name_row",
+      "pass": true,
+      "detail": "toolNameEls=0"
+    },
+    {
+      "name": "V2_no_result_title",
+      "pass": true,
+      "detail": "titleEls=0"
+    },
+    {
+      "name": "V3_copy_inside_frame_top_right",
+      "pass": true,
+      "detail": "frames=2 :: [{\"hasPre\":true,\"hasCopy\":true,\"jsonScrollW\":959,\"jsonClientW\":959,\"innerScrollsX\":false,\"escapePx\":-4,\"copyTopInside\":6,\"copyRightInside\":8,\"copyWithinFrame\":true},{\"hasPre\":true,\"hasCopy\":true,\"jsonScrollW\":967,\"jsonClientW\":967,\"innerScr"
+    },
+    {
+      "name": "V4_no_stray_row_copy_when_expanded",
+      "pass": true,
+      "detail": "expandedRows=2 strayRowCopy=0"
+    },
+    {
+      "name": "V5_json_contained_no_page_overflow",
+      "pass": true,
+      "detail": "escape=[-4,-4] innerScrollsX=[false,false] docOverflow=0"
+    }
+  ]
+}
