@@ -4062,6 +4062,32 @@
   color: var(--gewu-danger);
 }
 
+/* UI-437 v5.8 — 事件行级复制钮：折叠态悬停显现（不占常态视觉），点击复制该行内容 */
+.sc-tool-qoder-row .sc-tool-row-copy {
+  flex: 0 0 auto;
+  border: none;
+  background: transparent;
+  color: var(--gewu-text-tertiary);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.sc-tool-qoder-row:hover .sc-tool-row-copy,
+.sc-tool-qoder-row .sc-tool-row-copy.is-copied {
+  opacity: 1;
+}
+
+.sc-tool-qoder-row .sc-tool-row-copy:hover {
+  color: var(--gewu-accent);
+}
+
+.sc-tool-qoder-row .sc-tool-row-copy.is-copied {
+  color: var(--gewu-success);
+}
+
 /* UI-437 v5.7 — 工具返回详情块：「返回」标题栏（含复制钮）+ JSON 本体（等宽、
    画布底色 inset、限高滚动）。视觉语系对齐 .sc-tool-activity-output 终端输出块。 */
 .sc-tool-resultdata {

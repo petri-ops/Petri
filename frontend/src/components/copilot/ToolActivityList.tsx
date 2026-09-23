@@ -527,8 +527,15 @@ function useSubAgentElapsed(startedAt: number | undefined, active: boolean): num
  * 这消除了 legacy「exec 默认展开终端块」的形态，使簇内是纯单行流，
  * 扫一眼即可知道这批工具各自动了什么。
  */
+function previewSourceOf(activity: ToolActivityItem): string {
+  const isExec = EXEC_TOOL_NAMES.has(activity.name);
+  if (isExec) return (activity.command || activity.actionDetail || '').split('\n')[0] || '';
+  return activity.actionDetail || activity.summary || '';
+}
+
 function QoderRow({ activity }: { activity: ToolActivityItem }) {
   const [open, setOpen] = useState(false);
+  const [rowCopied, setRowCopied] = useState(false);
   const duration = formatToolDuration(activity.durationMs);
   const running = activity.status === 'running';
   const isExec = EXEC_TOOL_NAMES.has(activity.name);
@@ -564,7 +571,20 @@ function QoderRow({ activity }: { activity: ToolActivityItem }) {
       : () => () => {},
     () => (activity.agentRunId ? getSubAgentTaskSnapshot(activity.agentRunId) : null)
   );
-  // UI-431 P2 — 派发行运行计时（running 时每秒步进）
+  // UI-437 v5.8 — 行级复制：折叠态悬停即现，复制该行可见内容（不触发行展开）
+  const copyRow = async () => {
+    const parts = [activity.actionDetail, activity.summary && activity.summary !== 'ok' ? activity.summary : '']
+      .filter(Boolean);
+    const text = parts.length ? parts.join(' → ') : previewSourceOf(activity);
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      setRowCopied(true);
+      setTimeout(() => setRowCopied(false), 1500);
+    } catch {
+      // 剪贴板不可用时静默（内容仍可见可手动选择）
+    }
+  };
   const spawnElapsedMs = useSubAgentElapsed(subSnap?.startedAt, subSnap?.status === 'running');
   // UI-437 — ZCode 形态：写入/编辑行带 +N -N 差异角标（changeDiff 为预计算聚合值）。
   const isWrite = QODER_WRITE_TOOLS.has(activity.name);
@@ -618,6 +638,15 @@ function QoderRow({ activity }: { activity: ToolActivityItem }) {
           </span>
         )}
         {duration && (activity.durationMs ?? 0) > 0 && <span className="sc-tool-activity-duration">{duration}</span>}
+        <button
+          type="button"
+          className={`sc-tool-row-copy${rowCopied ? ' is-copied' : ''}`}
+          title="复制该行内容"
+          aria-label="复制该行内容"
+          onClick={(e) => { e.stopPropagation(); void copyRow(); }}
+        >
+          <Icon name={rowCopied ? 'check' : 'copy'} size={11} />
+        </button>
         <span className="sc-tool-row-chevron" aria-hidden="true">
           <Icon name={open ? 'chevron-down' : 'chevron-right'} size={12} />
         </span>
