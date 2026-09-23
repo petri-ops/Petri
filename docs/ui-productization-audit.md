@@ -4100,6 +4100,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据（实机 · v5.13）**：证据脚本增 V6 断言（折叠态行级复制钮 sameLine + atRowEnd≤24px + 不与行头重叠）复跑 6/6 PASS；折叠态实拍（悬停钮按 skill §3 内联注入显形）确认按钮在行尾右侧同排（`ui437-v513-rowcopy-inline.png` + crop）。契约=theme 契约 + copilot 全绿 + tsc 0。待用户实机过目。
 - **加映 v5.14（同日，用户反馈「复制按钮左侧的时间显示有必要吗 怎么优化」）**：行级耗时降噪——毫秒级读数（0/76 ms）无差异感属噪声，任务总耗时已在运行摘要行；修=Qoder 行耗时只在 `durationMs ≥ 1000` 时渲染（慢调用才有「哪步慢了」诊断价值），行尾常态只剩箭头+复制钮。legacy 降级路径（老会话无时间线素材）不改，范围收紧。
 - **证据（实机 · v5.14）**：契约=组件 39/39（新增 76ms 隐藏/4.3s 保留断言）+ tsc 0；实机证据脚本增 V7（全快任务行头零耗时读数 `rowDurations=[]` + 摘要行保留总耗时）复跑 7/7 PASS（首跑抓真：V7 选择器误伤运行摘要行自身的总耗时——fold line 同带 `qoder-head` 类，`:not(.sc-run-fold-line)` 修正后过）。待用户实机过目。
+- **加映 v5.15（同日，用户反馈「已思考和已调用是不是应该保持一致？目前看上去是两个部分的内容」）**：抓真=`.sc-timeline-reasoning-preview` 此前**零 CSS 规则命中**，思考行预览回退正文继承样式（正文字号+二级文字色），与工具行的 xs+三级灰+等宽并排时像两个部分。修=预览同族——`.sc-tool-qoder-preview, .sc-timeline-reasoning-preview` 共用一条规则（同字号/同色/同单行截断/同等宽），行骨架（✓ 字形+图标+标签+预览+箭头）v5 时已统一，至此两类行视觉完全一致。
+- **证据（实机 · v5.15）**：证据脚本增 V8（两类预览 computed style 三项一致断言：fontSize/color/fontFamily）复跑 8/8 PASS（reasoning=tool：11.025px / rgb(113,113,122) / ui-monospace）；折叠态实拍同框确认（`ui437-v515-preview-consistency{,-crop}.png`）。theme 契约 4/4。待用户实机过目。
 - **抓真修复（v5.6 验收实测抓出）**：①`mergeToolResultActivity` 的 resultData 三元方向写反（result 是新到数据却走了「保留旧值」分支——running 项已存在时 resultData 恒 undefined，即用户截图「点开只有工具名」的根因），改为总是取本次 `result?.data`，补合并方向契约测试；②展开体断言需先点行头出 ActivityBody（行级两级折叠语义）。
 - **加映 v5.7（同日，用户反馈「返回 JSON 有复制图标按钮吗？应该加上」）**：返回详情块增标题栏（返回 + 复制钮）——复制走 navigator.clipboard（与终端块复制同模式），写后 is-copied ✓ 反馈 1.5s；剪贴板不可用时静默失败（正文仍可手动选择）。resultdata 块补 CSS（标题栏/画布底色 inset/限高滚动/等宽）。复制契约测试（writeText 参数 = JSON 本体）。
 - **证据（契约 · v5.7）**：ToolActivityList 25/25（+复制钮断言）+ tsc 0。

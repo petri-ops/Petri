@@ -4008,7 +4008,11 @@
   white-space: nowrap;
 }
 
-.sc-tool-qoder-preview {
+/* UI-437 v5.15 — 思考预览与工具明细同族：.sc-timeline-reasoning-preview 此前
+   无任何规则命中、回退正文样式（更大更黑），与工具行的 xs+三级灰并排时看着
+   像两个部分（用户实测反馈）。两类预览统一字号/颜色/单行截断。 */
+.sc-tool-qoder-preview,
+.sc-timeline-reasoning-preview {
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;

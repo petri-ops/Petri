@@ -170,6 +170,23 @@ async function main() {
       rowCopyGeom.length > 0 && rowCopyGeom.every((g) => !g.present || (g.sameLine && g.atRowEnd && g.headCopyGapOk)),
       `rows=${rowCopyGeom.length} :: ${JSON.stringify(rowCopyGeom).slice(0, 220)}`);
 
+    // V8（v5.15）— 思考预览与工具明细同族：字号/颜色/字体 computed style 一致
+    const previewStyles = JSON.parse(await lib.evalJs(client, `JSON.stringify((function(){
+      function pick(sel) {
+        var n = document.querySelector(sel);
+        if (!n) return null;
+        var cs = getComputedStyle(n);
+        return { fontSize: cs.fontSize, color: cs.color, fontFamily: cs.fontFamily };
+      }
+      return { reasoning: pick('.sc-timeline-reasoning-preview'), tool: pick('.sc-tool-qoder-preview') };
+    })())`, 15_000));
+    assert('V8_reasoning_preview_matches_tool_preview',
+      !!previewStyles.reasoning && !!previewStyles.tool
+      && previewStyles.reasoning.fontSize === previewStyles.tool.fontSize
+      && previewStyles.reasoning.color === previewStyles.tool.color
+      && previewStyles.reasoning.fontFamily === previewStyles.tool.fontFamily,
+      `reasoning=${JSON.stringify(previewStyles.reasoning)} tool=${JSON.stringify(previewStyles.tool)}`);
+
     await lib.evalJs(client, `(function(){
       var s = [].slice.call(document.querySelectorAll('.sc-tool-activity-summary'));
       s.forEach(function(x){ if (x.getAttribute('aria-expanded') === 'false') x.click(); });
