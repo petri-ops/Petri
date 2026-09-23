@@ -70,13 +70,16 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     expect(container.textContent).toContain('src/a.ts');
   });
 
-  it('UI-437 加映：思考节点与工具行同款骨架（brain 图标行，点击展开全文）', () => {
+  it('UI-437 v5.6：思考节点与工具行同款骨架（brain 图标行 + 短预览，点击展开全文）', () => {
     const { container } = render(<ConversationTimeline segments={[toolsSegment, reasoningSegment]} />);
     fireEvent.click(within(container).getByRole('button', { name: '展开执行过程' }));
-    expect(container.querySelector('.sc-timeline-reasoning-preview')).toBeNull();
+    // 短预览单行省略（64 字截断 + CSS ellipsis），不与正文混淆
+    expect(container.querySelector('.sc-timeline-reasoning-preview')?.textContent)
+      .toBe('先确认一下这个函数在哪被调用');
     fireEvent.click(within(container).getByRole('button', { name: '展开思考' }));
     expect(container.querySelector('.sc-tool-reasoning-text')?.textContent)
       .toContain('第二行细节');
+    expect(container.querySelector('.sc-timeline-reasoning-preview')).toBeNull();
   });
 
   it('progress 分段默认跳过（宿主仍在别处渲染阶段进度时不重复展示）', () => {

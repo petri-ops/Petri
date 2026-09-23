@@ -90,6 +90,9 @@ export interface ToolActivityItem {
   /** BLOCK-59 P4 — agent 管理工具（spawn/wait/list）结果携带的子 agent
    *  任务 id；活动行据此提供「详情窗」入口（弹出 agent 独立窗）。 */
   agentRunId?: string;
+  /** UI-437 v5.6 — 工具返回数据本体（后端 publicData 已界定的 bounded 版本）；
+   *  活动行展开时渲染「返回」详情。 */
+  resultData?: unknown;
 }
 
 const ACTIVITY_STATUSES: ToolActivityStatus[] = [
@@ -154,6 +157,8 @@ export function restoreToolActivities(value: unknown): ToolActivityItem[] {
     })(),
     shellLabel: typeof raw.shellLabel === 'string' ? raw.shellLabel.slice(0, 24) : undefined,
     agentRunId: typeof raw.agentRunId === 'string' ? raw.agentRunId : undefined,
+    // UI-437 v5.6 — 结果数据本体（后端 publicData 已界定的有界形状）随 meta 恢复
+    resultData: 'resultData' in raw ? raw.resultData as unknown : undefined,
     }];
   });
 }
@@ -411,6 +416,8 @@ export function mergeToolResultActivity(
     actionLabel: index >= 0 ? current[index].actionLabel : fallbackAction.actionLabel,
     actionDetail: index >= 0 ? current[index].actionDetail : fallbackAction.actionDetail,
     agentRunId: resultAgentRunId || (index >= 0 ? current[index].agentRunId : undefined),
+    // UI-437 v5.6 — 结果数据本体（后端 publicData 已界定的 bounded 版本），供展开详情
+    resultData: index >= 0 ? current[index].resultData : result?.data,
   };
 
   if (index < 0) return [...current, item];

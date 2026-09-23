@@ -286,13 +286,12 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
         collapseWhenSettled
       />
     );
-    // UI-437 加映 — 完成态思考行只留标签一行（无长预览），点击展开全文
+    // UI-437 v5.6 — 思考行带短预览（64 字截断，单行省略），点击展开全文
     fireEvent.click(screen.getByText(/执行工具 1 次/));
     expect(screen.getByText('已思考')).toBeTruthy();
-    expect(screen.queryByText('先确认登记行再改文档')).toBeNull();
+    expect(screen.getByText(/先确认登记行再改文档/)).toBeTruthy();
     expect(screen.queryByText(/第二行细节/)).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: '展开 已思考' }));
-    expect(screen.getByText(/先确认登记行再改文档/)).toBeTruthy();
     expect(screen.getByText(/第二行细节/)).toBeTruthy();
   });
 

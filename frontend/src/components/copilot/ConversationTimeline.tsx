@@ -42,6 +42,9 @@ function ReasoningSegmentRow({ segment }: { segment: ReasoningSegment }): React.
           <Icon name="brain" size={12} />
         </span>
         <span className="sc-tool-qoder-label">思考</span>
+        {!open && segment.preview && (
+          <span className="sc-timeline-reasoning-preview">{segment.preview}</span>
+        )}
         <span className="sc-tool-row-chevron" aria-hidden="true">
           <Icon name={open ? 'chevron-down' : 'chevron-right'} size={12} />
         </span>

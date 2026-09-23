@@ -30,7 +30,7 @@ const FAILED_STATUSES: ReadonlySet<string> = new Set(['error', 'denied']);
 const RUNNING_STATUSES: ReadonlySet<string> = new Set(['running', 'awaiting_confirmation']);
 
 /** 折叠态思考行的预览长度上限。 */
-export const REASONING_PREVIEW_CHARS = 96;
+export const REASONING_PREVIEW_CHARS = 64;
 
 /** 无 iteration 号的历史活动归入此段（永远排最前）。 */
 export const UNGROUPED_ITERATION = 0;

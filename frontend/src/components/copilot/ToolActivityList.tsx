@@ -16,6 +16,7 @@ import {
   groupToolActivities,
   type ToolActivityItem,
 } from './toolActivity';
+import { reasoningPreview } from './conversationSegments';
 
 /** UI-316 — agent 管理类工具（子智能体独立标识 + 行内实时状态）。 */
 const ACTIVITY_AGENT_TOOLS: ReadonlySet<string> = new Set([
@@ -63,10 +64,11 @@ const RUNNING_STATUSES: ReadonlySet<ToolActivityItem['status']> = new Set([
 /** UI-272 — 单条思考段：默认收起，点击展开全文（限高滚动）。
  *  BLOCK-108 P3 — 支持 Qoder 行形态覆写：`label`（如「已思考」）与折叠态
  *  `preview`（首行预览，折叠即可看出这一轮在琢磨什么）。 */
-function ReasoningRow({ iteration, text, label }: {
+function ReasoningRow({ iteration, text, label, preview }: {
   iteration: number;
   text: string;
   label?: string;
+  preview?: string;
 }) {
   const [open, setOpen] = useState(false);
   // UI-437 v4 加映 — 与工具行同款骨架（brain 图标 + 标签 + 箭头）；
@@ -88,6 +90,7 @@ function ReasoningRow({ iteration, text, label }: {
           <Icon name="brain" size={12} />
         </span>
         <span className="sc-tool-qoder-label">{resolvedLabel}</span>
+        {!open && preview && <span className="sc-timeline-reasoning-preview">{preview}</span>}
         <span className="sc-tool-row-chevron" aria-hidden="true">
           <Icon name={open ? 'chevron-down' : 'chevron-right'} size={12} />
         </span>
@@ -391,6 +394,21 @@ function ActivityBody({ activity, subSnap }: {
           {activity.output.truncated ? '\n…（输出已截断）' : ''}
         </pre>
       )}
+      {/* UI-437 v5.6 — 工具返回数据本体（后端 publicData bounded）：展开即见「返回」详情 */}
+      {activity.resultData !== undefined && (() => {
+        let rendered = '';
+        try {
+          rendered = JSON.stringify(activity.resultData, null, 2);
+        } catch {
+          rendered = String(activity.resultData);
+        }
+        return (
+          <div className="sc-tool-resultdata">
+            <span className="sc-tool-resultdata-title">返回</span>
+            <pre className="sc-tool-resultdata-json">{rendered}</pre>
+          </div>
+        );
+      })()}
     </div>
   );
 }
@@ -685,6 +703,7 @@ export function ToolActivityList({
       iteration={entry.iteration}
       text={entry.text}
       label="已思考"
+      preview={reasoningPreview(entry.text)}
     />
   ));
   const renderedIterations = new Set<number>();
@@ -705,6 +724,7 @@ export function ToolActivityList({
                   iteration={iterationKey}
                   text={reasoningMap[iterationKey]}
                   label="已思考"
+                  preview={reasoningPreview(reasoningMap[iterationKey])}
                 />
               ) : null}
               {(byIteration.get(iterationKey) || []).map((activity) => (
