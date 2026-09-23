@@ -373,8 +373,26 @@ function summarizeToolCallForActivity(name, args = {}) {
       return { actionLabel: '已修改', actionDetail: compactActivityDetail(args.path) || '文件' };
     case 'run_tool':
       return { actionLabel: '已运行', actionDetail: compactActivityDetail(args.toolId) || '分析工具' };
-    default:
-      return { actionLabel: '已调用', actionDetail: name };
+    default: {
+      // UI-437 v5.4 加映（后端同步）——未登记工具参数摘要：query（datasets=…）
+      const parts = [];
+      for (const [key, value] of Object.entries(args || {})) {
+        let rendered;
+        if (typeof value === 'string') rendered = compactActivityDetail(value) || '';
+        else if (value == null) rendered = '';
+        else {
+          try {
+            rendered = compactActivityDetail(JSON.stringify(value)) || '';
+          } catch {
+            rendered = '';
+          }
+        }
+        if (!rendered) continue;
+        parts.push(`${key}=${rendered}`);
+        if (parts.length >= 3) break;
+      }
+      return { actionLabel: '已调用', actionDetail: parts.length ? `${name}（${parts.join(' · ')}）` : name };
+    }
   }
 }
 
@@ -496,8 +514,9 @@ function createToolActivityRecorder() {
         : undefined,
       // UI-315 优化 — exec 实际使用的 shell 标签（头行展示）
       shellLabel: result.shellLabel || (existing ? existing.shellLabel : undefined),
-      // UI-382 — 子智能体任务 id（展开行内联实况卡 / 详情窗入口按它渲染）
       agentRunId: resultAgentRunId || (existing ? existing.agentRunId : undefined),
+      // UI-437 v5.6 — 结果数据本体（publicData bounded）随活动快照落库，历史展开可回看
+      resultData: result.data,
       summary: event.summary,
       actionLabel: existing ? existing.actionLabel : summarizeToolCallForActivity(name).actionLabel,
       actionDetail: existing ? existing.actionDetail : summarizeToolCallForActivity(name).actionDetail,

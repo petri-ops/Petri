@@ -138,6 +138,27 @@ describe('BLOCK-34 P1 behavior: recorder snapshot lands in copilot_messages.meta
     }
   });
 
+  it('UI-437 v5.6: recorder 快照携带参数摘要与 resultData（时间线行内详情的数据源）', () => {
+    const { createToolActivityRecorder } = require(resolve('core/biof3-server/agent-tools'));
+    const { buildToolResultEvent } = require(resolve('core/biof3-server/agent-tools/tool-events'));
+    const recorder = createToolActivityRecorder();
+
+    recorder.recordCall({ name: 'query', callId: 'c-1', args: { datasets: '项目文档' } });
+    recorder.recordOutput({ callId: 'c-1', text: '[ 数据集 ]\n0 条' });
+    // 生产链路：tool_result 事件先经 buildToolResultEvent 计算 digest，再入 recorder
+    const evt = buildToolResultEvent(
+      { tool: 'query', status: 'success', durationMs: 7, data: { ok: true, datasets: [], total: 0 } },
+      { datasets: '项目文档' },
+    );
+    recorder.recordResult(evt);
+
+    const items = recorder.snapshot ? recorder.snapshot() : [];
+    assert.equal(items.length, 1, '快照恰一条活动');
+    assert.equal(items[0].actionDetail, 'query（datasets=项目文档）', '参数摘要落快照');
+    assert.equal(items[0].summary, 'datasets 0 条 · total 0', '结果 digest 落快照');
+    assert.deepEqual(items[0].resultData, { ok: true, datasets: [], total: 0 }, 'resultData 本体落快照');
+  });
+
   it('UI-437 v5.5: 对象结果 summary 用 digest 取代 ok（top-3 键，ok/error 样板剔除）', () => {
     const { buildToolResultEvent } = require(resolve('core/biof3-server/agent-tools/tool-events'));
 
