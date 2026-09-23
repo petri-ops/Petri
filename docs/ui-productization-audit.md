@@ -4082,6 +4082,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **加映 v5.3（同日，用户反馈「已调用 工具名 后面都是空白 应增加工具调用的实际输出预览」）**：预览兜底链——actionDetail/summary 为空时取输出尾首个非空行（ANSI 剥离、120 字截断）；output 为内存态不随会话持久化，历史消息维持原状（点行展开仍看全量）。契约测试含 ANSI 剥离断言。
 - **加映 v5.4（同日，用户反馈「已调用 query 后面都是空白 应增加实际输出预览」）**：`summarizeToolCall` 未登记工具 default 分支增参数摘要兜底——`query（datasets=…）`/`todo_write（todos=[…]）`/`plan（op=create · draft=true）`（单键 40 字、最多 3 键、无参回退工具名）；叠加 v5.3 输出尾首行兜底。已登记工具（workspace_* 家族）零变化。
 - **加映 v5.5（跨前后端，同日，用户裁决「需要的 现在就整」）**：后端 `tool-events.js` `buildToolResultEvent` 对象结果 summary 由一律 'ok' 改为 digest（top-3 键：数组=「N 条」/字符串=截 24 字/原始值=字面；ok/error 样板剔除）+ 前端 QoderRow 预览组合「参数摘要 → 结果摘要」。证据（实机 · 重启 dev 栈后真实任务）：无头只读任务 3 条 tool_result summary 全部为 digest（`knowledge_search → spaceEnabled false · hits 0 条` / `system_info → os {…} · shell cmd` / `todo_write → 错误: execution_not_allowed`），`acceptance/ui-437/v55-digest-evidence.json` + task_events 落库；block34 契约 +1。
+- **加映 v5.6（同日，用户验收反馈「已思考折叠态完全空白应展示摘要/信息流；已调用点开只有工具名应展示详细返回；两者风格统一」）**：①思考行恢复**短预览**（REASONING_PREVIEW_CHARS 96→64 + CSS 单行省略——v5.3 全删矫枉过正，短预览不再与正文混淆），独立节点/簇内/legacy 全路径统一；②工具行展开体新增「返回」详情块——`ToolActivityItem.resultData`（后端 toolResult.data 的 publicData bounded 版本，合并/持久化/恢复全链路）渲染 JSON（限高滚动），query/system_info/todo_write 等全部工具点开即见返回本体，不再只有工具名。
+- **证据（契约 · v5.6）**：三组件 + 全量 1193/1193 + tsc 0（思考短预览/resultData 合并与恢复/组合预览断言）。
 - **实机验收（2026-09-23）**：用户实机截图确认整体节奏「看起来比较清爽 区分度明显」；✓ 字形与灰底/对齐微调为末处修正。**翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 

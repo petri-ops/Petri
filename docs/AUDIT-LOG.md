@@ -5,7 +5,9 @@
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 > 入口直链（registry `entrypoint` 指向本台的 canonical 文档，归档轮转不得切断发现路径）：[block-14-left-panel-qa-fix-closeout](./block-14-left-panel-qa-fix-closeout.md) · [block-15-architecture-perf-plan](./block-15-architecture-perf-plan.md) · [block-22-codemirror-inline-diff-plan](./block-22-codemirror-inline-diff-plan.md)
 
-最后更新：2026-09-23 凌晨七（**UI-437 加映 v5.5：query 类行结果摘要上线（跨前后端，已实机验证）**——用户裁决原话「需要的 现在就整」：后端 `tool-events.js` `buildToolResultEvent` 对象结果 summary 由一律 'ok' 改为 digest（top-3 键：数组=「N 条」/字符串=截 24 字/原始值=字面；ok/error 样板剔除）+ 前端 QoderRow 预览组合「参数摘要 → 结果摘要」。实机证据=重启 dev 栈后无头只读任务 3 条 tool_result summary 全部为 digest（task_events 落库 + `acceptance/ui-437/v55-digest-evidence.json`）；block34 契约 +1；block109-agent-panel flow A4 断言同步修订（组卡下线→行内详情按钮）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-23 凌晨八（**UI-437 加映 v5.6：思考行短预览恢复 + 工具行「返回」详情块（同批延伸，仍 in_progress）**——用户验收反馈「已思考折叠态完全空白应展示摘要/信息流；已调用点开只有工具名应展示详细返回；两者风格统一尽可能简化」：①思考行恢复短预览（cap 96→64 + CSS 单行省略，独立节点/簇内/legacy 全路径统一）；②`ToolActivityItem.resultData` 全链路（toolResult.data publicData bounded → 合并/持久化/恢复）→ 展开体渲染「返回」JSON（限高滚动），query/todo_write/system_info 点开即见返回本体。门禁=三组件 + 全量 1193/1193 + tsc 0。UI-437/438 仍 in_progress 待实机过目。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-23 凌晨七（**UI-437 加映 v5.5：query 类行结果摘要上线（跨前后端，已实机验证）**——用户裁决原话「需要的 现在就整」：后端 `tool-events.js` `buildToolResultEvent` 对象结果 summary 由一律 'ok' 改为 digest（top-3 键：数组=「N 条」/字符串=截 24 字/原始值=字面；ok/error 样板剔除）+ 前端 QoderRow 预览组合「参数摘要 → 结果摘要」。实机证据=重启 dev 栈后无头只读任务 3 条 tool_result summary 全部为 digest（task_events 落库 + `acceptance/ui-437/v55-digest-evidence.json`）；block34 契约 +1；block109-agent-panel flow A4 断言同步修订（组卡下线→行内详情按钮）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-23 凌晨六（**UI-437 加映 v5 + 翻 verified**——用户实机截图反馈「已思考前面没有✅图标…需要优化」+整体「看起来比较清爽 区分度明显」：思考行补 ✓ 状态字形，全行 anatomy 统一（状态字形+类别图标+标签+明细+耗时+箭头）。UI-437 **翻 verified**（用户实机认可整体节奏）。同批 UI-438 仍 in_progress 待子智能体任务实机过目。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
