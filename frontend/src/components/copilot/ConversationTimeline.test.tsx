@@ -76,6 +76,9 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     // 短预览单行省略（64 字截断 + CSS ellipsis），不与正文混淆
     expect(container.querySelector('.sc-timeline-reasoning-preview')?.textContent)
       .toBe('先确认一下这个函数在哪被调用');
+    // UI-437 v5.16 — 独立思考节点行级复制钮与工具行同款（行尾同构，宽度一致）
+    expect(container.querySelector('.sc-timeline-reasoning')
+      ?.querySelector('button[aria-label="复制该行内容"]')).toBeTruthy();
     fireEvent.click(within(container).getByRole('button', { name: '展开思考' }));
     expect(container.querySelector('.sc-tool-reasoning-text')?.textContent)
       .toContain('第二行细节');

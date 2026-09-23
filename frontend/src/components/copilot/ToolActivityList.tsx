@@ -61,9 +61,38 @@ const RUNNING_STATUSES: ReadonlySet<ToolActivityItem['status']> = new Set([
   'awaiting_confirmation',
 ]);
 
+/** UI-437 v5.16 — 行级复制钮（共享组件）：工具行/簇内思考行/独立思考节点同款。
+ *  行尾右侧、悬停显现（is-copied 常显 1.5s）、stopPropagation 不触发行展开；
+ *  剪贴板不可用静默失败（内容仍可见可手动选择）。v5.13 布局语义：行头
+ *  flex-basis 0 让本钮恒落行尾（不掉行首）。 */
+export function RowCopyButton({ text, ariaLabel }: { text: string; ariaLabel?: string }) {
+  const [copied, setCopied] = useState(false);
+  const label = ariaLabel || '复制该行内容';
+  return (
+    <button
+      type="button"
+      className={`sc-tool-row-copy${copied ? ' is-copied' : ''}`}
+      title={label}
+      aria-label={label}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (!text) return;
+        navigator.clipboard.writeText(text).then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1500);
+        }).catch(() => { /* 静默 */ });
+      }}
+    >
+      <Icon name={copied ? 'check' : 'copy'} size={11} />
+    </button>
+  );
+}
+
 /** UI-272 — 单条思考段：默认收起，点击展开全文（限高滚动）。
  *  BLOCK-108 P3 — 支持 Qoder 行形态覆写：`label`（如「已思考」）与折叠态
- *  `preview`（首行预览，折叠即可看出这一轮在琢磨什么）。 */
+ *  `preview`（首行预览，折叠即可看出这一轮在琢磨什么）。
+ *  UI-437 v5.16 — 行级复制钮与工具行同款（行尾右侧、悬停显现、复制全文）：
+ *  思考行此前无复制钮且行尾结构少一个槽位，与工具行并排像两部分。 */
 function ReasoningRow({ iteration, text, label, preview }: {
   iteration: number;
   text: string;
@@ -95,6 +124,7 @@ function ReasoningRow({ iteration, text, label, preview }: {
           <Icon name={open ? 'chevron-down' : 'chevron-right'} size={12} />
         </span>
       </button>
+      {!open && <RowCopyButton text={text} />}
       {open && <p className="sc-tool-reasoning-text">{text}</p>}
     </div>
   );
@@ -537,7 +567,6 @@ function previewSourceOf(activity: ToolActivityItem): string {
 
 function QoderRow({ activity }: { activity: ToolActivityItem }) {
   const [open, setOpen] = useState(false);
-  const [rowCopied, setRowCopied] = useState(false);
   const duration = formatToolDuration(activity.durationMs);
   const running = activity.status === 'running';
   const isExec = EXEC_TOOL_NAMES.has(activity.name);
@@ -574,19 +603,11 @@ function QoderRow({ activity }: { activity: ToolActivityItem }) {
     () => (activity.agentRunId ? getSubAgentTaskSnapshot(activity.agentRunId) : null)
   );
   // UI-437 v5.8 — 行级复制：折叠态悬停即现，复制该行可见内容（不触发行展开）
-  const copyRow = async () => {
+  const rowCopyText = (() => {
     const parts = [activity.actionDetail, activity.summary && activity.summary !== 'ok' ? activity.summary : '']
       .filter(Boolean);
-    const text = parts.length ? parts.join(' → ') : previewSourceOf(activity);
-    if (!text) return;
-    try {
-      await navigator.clipboard.writeText(text);
-      setRowCopied(true);
-      setTimeout(() => setRowCopied(false), 1500);
-    } catch {
-      // 剪贴板不可用时静默（内容仍可见可手动选择）
-    }
-  };
+    return parts.length ? parts.join(' → ') : previewSourceOf(activity);
+  })();
   const spawnElapsedMs = useSubAgentElapsed(subSnap?.startedAt, subSnap?.status === 'running');
   // UI-437 — ZCode 形态：写入/编辑行带 +N -N 差异角标（changeDiff 为预计算聚合值）。
   const isWrite = QODER_WRITE_TOOLS.has(activity.name);
@@ -649,17 +670,7 @@ function QoderRow({ activity }: { activity: ToolActivityItem }) {
       {/* UI-437 v5.8/v5.11 — 行级复制钮只服务折叠态（悬停显现）；展开态隐藏：
           展开体的复制 affordance 归属内容本体（JSON 框内右上角钮/终端块钮），
           行级钮在展开后会成为掉行首的游离图标（用户实测反馈） */}
-      {!open && (
-        <button
-          type="button"
-          className={`sc-tool-row-copy${rowCopied ? ' is-copied' : ''}`}
-          title="复制该行内容"
-          aria-label="复制该行内容"
-          onClick={(e) => { e.stopPropagation(); void copyRow(); }}
-        >
-          <Icon name={rowCopied ? 'check' : 'copy'} size={11} />
-        </button>
-      )}
+      {!open && <RowCopyButton text={rowCopyText} />}
       {open && (isExec
         ? <TerminalBody activity={activity} />
         : <ActivityBody activity={activity} subSnap={subSnap} />)}

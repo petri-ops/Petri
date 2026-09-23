@@ -18,12 +18,14 @@ import { Icon } from '@/components/icons/Icon';
 
 import { formatToolDuration } from './toolActivity';
 import type { ConversationSegment, ReasoningSegment, ToolsSegment } from './conversationSegments';
-import { ToolActivityList } from './ToolActivityList';
+import { RowCopyButton, ToolActivityList } from './ToolActivityList';
 
 /**
  * 思考节点（UI-437 v4 加映 — 与工具行同款骨架：brain 图标 + 标签 + 箭头，
  * 去除旧的蓝色左界线/加粗标签差异样式；点击展开全文）。轮次号是内部
  * 实现细节，不在标签中暴露。
+ * UI-437 v5.16 — 行级复制钮与工具行同款（行尾右侧、悬停显现、复制全文）：
+ * 此前无复制钮且行尾少一个槽位，箭头位置与工具行错位（宽度不同的体感）。
  */
 function ReasoningSegmentRow({ segment }: { segment: ReasoningSegment }): React.ReactElement {
   const [open, setOpen] = useState(false);
@@ -49,6 +51,7 @@ function ReasoningSegmentRow({ segment }: { segment: ReasoningSegment }): React.
           <Icon name={open ? 'chevron-down' : 'chevron-right'} size={12} />
         </span>
       </button>
+      {!open && <RowCopyButton text={segment.text} />}
       {open && <p className="sc-tool-reasoning-text">{segment.text}</p>}
     </div>
   );

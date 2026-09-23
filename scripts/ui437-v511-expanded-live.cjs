@@ -187,6 +187,42 @@ async function main() {
       && previewStyles.reasoning.fontFamily === previewStyles.tool.fontFamily,
       `reasoning=${JSON.stringify(previewStyles.reasoning)} tool=${JSON.stringify(previewStyles.tool)}`);
 
+    // V9（v5.16）— 思考行行级复制钮与工具行同款：钮在行尾 + 思考行与工具行
+    // 右缘结构对齐（chevron 右缘差 ≤2px，行宽差 ≤2px）
+    const align = JSON.parse(await lib.evalJs(client, `JSON.stringify((function(){
+      var rows = [].slice.call(document.querySelectorAll('.sc-tool-qoder-row'));
+      var reasoning = null; var tool = null;
+      rows.forEach(function(row){
+        var label = row.querySelector('.sc-tool-qoder-label');
+        var t = (label && label.textContent) || '';
+        if (!tool && t.indexOf('已调用') >= 0) tool = row;
+        if (!reasoning && (t === '已思考' || t === '思考')) reasoning = row;
+      });
+      if (!reasoning || !tool) return { found: false };
+      function geom(row) {
+        var head = row.querySelector('.sc-tool-qoder-head');
+        var chev = row.querySelector('.sc-tool-row-chevron');
+        var copy = row.querySelector('.sc-tool-row-copy');
+        var rr = row.getBoundingClientRect();
+        var hr = head.getBoundingClientRect();
+        var cr = chev ? chev.getBoundingClientRect() : null;
+        var cpr = copy ? copy.getBoundingClientRect() : null;
+        return {
+          rowRight: Math.round(rr.right),
+          chevRight: cr ? Math.round(cr.right) : null,
+          hasCopy: !!copy,
+          copySameLine: cpr ? Math.abs((cpr.top + cpr.height / 2) - (hr.top + hr.height / 2)) <= Math.max(hr.height, cpr.height) / 2 + 2 : null,
+        };
+      }
+      return { found: true, reasoning: geom(reasoning), tool: geom(tool) };
+    })())`, 15_000));
+    assert('V9_reasoning_row_copy_and_width_aligned',
+      align.found && align.reasoning.hasCopy && align.reasoning.copySameLine
+      && Math.abs(align.reasoning.rowRight - align.tool.rowRight) <= 2
+      && Math.abs(align.reasoning.chevRight - align.tool.chevRight) <= 2,
+      `reasoning=${JSON.stringify(align.reasoning)} tool=${JSON.stringify(align.tool)}`);
+    await lib.screenshotPng(client, EVIDENCE_DIR, 'ui437-v516-row-anatomy.png').catch(() => null);
+
     await lib.evalJs(client, `(function(){
       var s = [].slice.call(document.querySelectorAll('.sc-tool-activity-summary'));
       s.forEach(function(x){ if (x.getAttribute('aria-expanded') === 'false') x.click(); });

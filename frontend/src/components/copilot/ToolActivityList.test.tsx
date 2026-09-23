@@ -279,7 +279,7 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     expect(screen.queryByTestId('tool-term-output')).toBeNull();
   });
 
-  it('Q5 思考入簇：「已思考」单行置顶，折叠预览 + 点击展开全文', () => {
+  it('Q5 思考入簇：「已思考」单行置顶，折叠预览 + 点击展开全文', async () => {
     render(
       <ToolActivityList
         activities={[execActivity()]}
@@ -292,6 +292,13 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     expect(screen.getByText('已思考')).toBeTruthy();
     expect(screen.getByText(/先确认登记行再改文档/)).toBeTruthy();
     expect(screen.queryByText(/第二行细节/)).toBeNull();
+    // UI-437 v5.16 — 思考行行级复制钮与工具行同款：复制全文（非预览截断）
+    const writeText = vi.fn((text: string) => Promise.resolve());
+    vi.stubGlobal('navigator', { ...navigator, clipboard: { writeText } });
+    const reasoningRow = screen.getByText('已思考').closest('.sc-tool-qoder-row') as HTMLElement;
+    fireEvent.click(reasoningRow.querySelector('button[aria-label="复制该行内容"]') as HTMLElement);
+    await waitFor(() => expect(writeText).toHaveBeenCalledTimes(1));
+    expect(writeText.mock.calls[0][0]).toBe('先确认登记行再改文档\n第二行细节');
     fireEvent.click(screen.getByRole('button', { name: '展开 已思考' }));
     expect(screen.getByText(/第二行细节/)).toBeTruthy();
   });
