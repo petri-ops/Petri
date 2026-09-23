@@ -281,6 +281,26 @@ function ActivityBody({ activity, subSnap }: {
   subSnap: ReturnType<typeof getSubAgentTaskSnapshot>;
 }) {
   const sideEffects = formatToolSideEffects(activity.sideEffects);
+  // UI-437 v5.7 — 「返回」详情块复制（与终端块复制同模式：写剪贴板 + is-copied 反馈）
+  const [resultCopied, setResultCopied] = useState(false);
+  const resultDataText = (() => {
+    if (activity.resultData === undefined) return '';
+    try {
+      return JSON.stringify(activity.resultData, null, 2);
+    } catch {
+      return String(activity.resultData);
+    }
+  })();
+  const copyResultData = async () => {
+    if (!resultDataText) return;
+    try {
+      await navigator.clipboard.writeText(resultDataText);
+      setResultCopied(true);
+      setTimeout(() => setResultCopied(false), 1500);
+    } catch {
+      // 剪贴板不可用（非安全上下文/权限拒绝）：静默失败，正文本身仍可见可手动选择
+    }
+  };
   const showReason = activity.status === 'error' || activity.status === 'denied';
   // UI-385 — 子 agent 详情改由右栏「智能体」tab 承载（独立窗退役）：派发
   // agentOpenInRail 事件，project-workspace 切 tab 并把面板指到该 runId。
@@ -404,7 +424,18 @@ function ActivityBody({ activity, subSnap }: {
         }
         return (
           <div className="sc-tool-resultdata">
-            <span className="sc-tool-resultdata-title">返回</span>
+            <div className="sc-tool-resultdata-bar">
+              <span className="sc-tool-resultdata-title">返回</span>
+              <button
+                type="button"
+                className={`sc-tool-term-copy${resultCopied ? ' is-copied' : ''}`}
+                title="复制返回 JSON"
+                aria-label="复制返回 JSON"
+                onClick={() => { void copyResultData(); }}
+              >
+                <Icon name={resultCopied ? 'check' : 'copy'} size={11} />
+              </button>
+            </div>
             <pre className="sc-tool-resultdata-json">{rendered}</pre>
           </div>
         );

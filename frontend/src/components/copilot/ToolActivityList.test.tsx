@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, act } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ToolActivityList } from './ToolActivityList';
@@ -439,7 +439,7 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     expect(merged[0].resultData).toEqual({ ok: true, spaceEnabled: false, hits: [], message: '知识空间未启用' });
   });
 
-  it('UI-437 v5.6 展开体：activity 带 resultData 时渲染「返回」JSON 详情块', () => {
+  it('UI-437 v5.6 展开体：activity 带 resultData 时渲染「返回」JSON 详情块', async () => {
     render(
       <ToolActivityList
         activities={[{
@@ -455,6 +455,13 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     fireEvent.click(screen.getByTestId('qoder-row-head'));
     expect(screen.getByText('返回')).toBeTruthy();
     expect(screen.getByText(/"os": "Windows"/)).toBeTruthy();
+
+    // v5.7 — 复制按钮：写剪贴板内容 = 返回 JSON 本体
+    const writeText = vi.fn(() => Promise.resolve());
+    vi.stubGlobal('navigator', { ...navigator, clipboard: { writeText } });
+    fireEvent.click(screen.getByRole('button', { name: '复制返回 JSON' }));
+    await waitFor(() => expect(writeText).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(writeText.mock.calls[0][0])).toEqual({ os: 'Windows', shell: 'cmd.exe' });
   });
 
   it('UI-437 v5.5 行内组合：参数摘要 → 结果摘要；ok 样板不显示', () => {

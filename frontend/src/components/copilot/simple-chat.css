@@ -4062,6 +4062,44 @@
   color: var(--gewu-danger);
 }
 
+/* UI-437 v5.7 — 工具返回详情块：「返回」标题栏（含复制钮）+ JSON 本体（等宽、
+   画布底色 inset、限高滚动）。视觉语系对齐 .sc-tool-activity-output 终端输出块。 */
+.sc-tool-resultdata {
+  margin: 4px 0 2px;
+}
+
+.sc-tool-resultdata-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.sc-tool-resultdata-title {
+  font-size: var(--gewu-font-size-caption);
+  color: var(--gewu-text-tertiary);
+}
+
+.sc-tool-resultdata-bar .sc-tool-term-copy {
+  margin-left: auto;
+}
+
+.sc-tool-resultdata-json {
+  margin: 0;
+  padding: 8px 10px;
+  background: var(--gewu-bg-canvas);
+  border: 1px solid var(--gewu-border);
+  border-radius: 6px;
+  font-family: var(--gewu-font-mono);
+  font-size: var(--gewu-font-size-xs);
+  line-height: 1.5;
+  color: var(--gewu-text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
 /* UI-437 v4 — 运行级折叠行：整段任务（多轮）收成一行运行摘要，
    点开才是每轮思考和执行的细节。复用 qoder 行骨架，识别度靠 ✓ + 轮次计数。 */
 .sc-run-fold-line {
