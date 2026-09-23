@@ -1,0 +1,18 @@
+{
+  "taskId": "03f8c5de",
+  "terminal": "done",
+  "summaries": [
+    {
+      "name": "knowledge_search",
+      "summary": "spaceEnabled false · hits 0 条 · message 知识空间「默认知识空间」未启用，无法检索。可在知"
+    },
+    {
+      "name": "system_info",
+      "summary": "os {…} · shell C:\\windows\\system32\\cmd. · pathSeparator \\"
+    },
+    {
+      "name": "todo_write",
+      "summary": "错误: execution_not_allowed"
+    }
+  ]
+}

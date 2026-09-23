@@ -4063,14 +4063,23 @@
 }
 
 /* UI-437 v5.8 — 事件行级复制钮：折叠态悬停显现（不占常态视觉），点击复制该行内容。
-   行容器改 flex：行头占满，复制钮为兄弟元素（button 不可嵌套）。 */
+   行容器改 flex（wrap）：行头占满首行，复制钮行尾；展开详情体 flex-basis 100%
+   独占整行——修复 flex row 把详情体挤成竖排列的布局破坏。 */
 .sc-tool-qoder-row {
   display: flex;
-  align-items: flex-start;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .sc-tool-qoder-row > .sc-tool-qoder-head {
   flex: 1 1 auto;
+  min-width: 0;
+}
+
+.sc-tool-qoder-row > .sc-tool-reasoning-text,
+.sc-tool-qoder-row > .sc-tool-activity-body,
+.sc-tool-qoder-row > .sc-tool-resultdata {
+  flex-basis: 100%;
   min-width: 0;
 }
 
