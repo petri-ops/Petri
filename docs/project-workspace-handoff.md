@@ -1,6 +1,8 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-24 深夜八（**BK-06 第四刀=no-unsafe-member-access 全族 151→0 收官（closeout 十门全绿）**——残余 81 条清零，根基线 752→616（−136=真修 81+漂移 55）；全量 147/1201 绿。**恢复要点**：dev 栈在跑；队列头=BK-06 续批（set-state-in-effect 101 / refs 74 / no-unsafe-assignment 66）；教训=错误信封优先 Record 承载（判别联合与 eslint 类型信息可能不一致）；用户事项 U-01~U-03 不变待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-24 深夜九（**BK-06 第五刀=set-state-in-effect 定性（C 类示范修复 2 + A/B 类 99 豁免留痕）+ no-unsafe-assignment 24→7 收口（closeout 十门全绿）**，根基线 616→597；全量 147/1201 绿。**恢复要点**：dev 栈在跑；队列头=BK-06 续批（refs 74 / no-misused-promises 41 / no-floating-promises 41）；教训=注解赋值触发 no-unsafe-assignment 而 cast 形态不触发；用户事项 U-01~U-03 不变待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-24 深夜八（**BK-06 第四刀=no-unsafe-member-access 全族 151→0 收官（closeout 十门全绿）**——残余 81 条清零，根基线 752→616（−136=真修 81+漂移 55）；全量 147/1201 绿。**恢复要点**：dev 栈在跑；队列头=BK-06 续批（set-state-in-effect 101 / refs 74 / no-unsafe-assignment 66）；教训=错误信封优先 Record 承载（判别联合与 eslint 类型信息可能不一致）；用户事项 U-01~U-03 不变待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-24 深夜七（**BK-06 第三刀=no-unsafe-member-access result-studio 域簇收口（closeout 十门全绿）**——生产信封类型化 29 + 测试 vi.fn 泛型签名 41，根基线 849→752（−97=真修 70+陈旧槽位 27）；全量 147/1201 绿。**恢复要点**：dev 栈在跑；队列头=BK-06 续批（unsafe-member-access 余 81 / set-state-in-effect 101 / refs 74）；教训=unknown 直投 as 判冗余（any 源一次性信封断言自洽）、fix( 触 .tsx 需 UI-### 而 chore(lint) 豁免。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

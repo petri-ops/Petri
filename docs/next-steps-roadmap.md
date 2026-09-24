@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-24 深夜八（**BK-06 第四刀=no-unsafe-member-access 全族 151→0 收官（closeout 十门全绿）**——残余 81 条清零（信封断言/typeof/JSON.parse/Map 泛型/catch unknown 化），根基线 752→616（−136）；tsc 0+全量 147/1201。**队列头仍=BK-06 续批**（set-state-in-effect 101 / refs 74 / no-unsafe-assignment 66 / misused-promises 41）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-24 深夜九（**BK-06 第五刀=set-state-in-effect 族定性（A/B/C，示范修复 2，豁免 99 留痕）+ no-unsafe-assignment 24→7（匹配器豁免 7）收口（closeout 十门全绿）**，根基线 616→597；tsc 0+全量 147/1201。**队列头仍=BK-06 续批**（refs 74 / no-misused-promises 41 / no-floating-promises 41）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-24 深夜八（**BK-06 第四刀=no-unsafe-member-access 全族 151→0 收官（closeout 十门全绿）**——残余 81 条清零（信封断言/typeof/JSON.parse/Map 泛型/catch unknown 化），根基线 752→616（−136）；tsc 0+全量 147/1201。**队列头仍=BK-06 续批**（set-state-in-effect 101 / refs 74 / no-unsafe-assignment 66 / misused-promises 41）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-24 深夜七（**BK-06 第三刀=no-unsafe-member-access result-studio 域簇收口（closeout 十门全绿）**——生产 29（信封类型化）+ 测试 41（vi.fn 泛型签名），根基线 849→752（−97=真修 70+陈旧槽位 27）；tsc 0+全量 147/1201。**队列头仍=BK-06 续批**（unsafe-member-access 余 81 / set-state-in-effect 101 / refs 74）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
