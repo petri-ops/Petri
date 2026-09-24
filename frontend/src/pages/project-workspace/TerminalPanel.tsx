@@ -44,8 +44,8 @@ export function TerminalPanel({
   }, []);
 
   useEffect(() => {
-    refresh();
-    const timer = window.setInterval(refresh, 5000);
+    void refresh();
+    const timer = window.setInterval(() => void refresh(), 5000);
     return () => window.clearInterval(timer);
   }, [refresh]);
 
@@ -63,20 +63,20 @@ export function TerminalPanel({
           </div>
         </div>
         <div className={styles.terminalPanelActions}>
-          <button type="button" className={styles.terminalPanelActionBtn} onClick={refresh}>
+          <button type="button" className={styles.terminalPanelActionBtn} onClick={() => void refresh()}>
             刷新
           </button>
           <button
             type="button"
             className={styles.terminalPanelActionBtn}
-            onClick={() => window.biof3Desktop?.terminal?.openLogDir?.()}
+            onClick={() => void window.biof3Desktop?.terminal?.openLogDir?.()}
           >
             打开日志
           </button>
           <button
             type="button"
             className={styles.terminalPanelActionBtn}
-            onClick={() => window.biof3Desktop?.terminal?.openShell?.(project?.workspacePath)}
+            onClick={() => void window.biof3Desktop?.terminal?.openShell?.(project?.workspacePath)}
           >
             系统终端
           </button>

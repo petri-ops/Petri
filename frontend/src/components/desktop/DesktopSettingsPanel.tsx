@@ -472,10 +472,10 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
               </button>
               {userModelProfiles.length > 0 && (
                 <div className="gewu-endpoint-transfer-actions">
-                  <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={() => exportEndpoints('json')}>
+                  <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={() => void exportEndpoints('json')}>
                     导出 JSON
                   </button>
-                  <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={() => exportEndpoints('csv')}>
+                  <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={() => void exportEndpoints('csv')}>
                     导出 CSV
                   </button>
                   <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={() => endpointImportRef.current?.click()}>
@@ -574,7 +574,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
               id="gewu-telemetry-toggle"
               className="gewu-toggle"
               checked={telemetryEnabled}
-              onChange={(e) => handleToggleTelemetry(e.target.checked)}
+              onChange={(e) => void handleToggleTelemetry(e.target.checked)}
             />
             <label htmlFor="gewu-telemetry-toggle" className="gewu-toggle-label">
               {telemetryEnabled ? '已开启' : '已关闭'}
@@ -625,7 +625,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
         <button
           type="button"
           className="gewu-btn gewu-btn--primary gewu-btn--sm"
-          onClick={handleSave}
+          onClick={() => void handleSave()}
           disabled={saving}
         >
           {saving ? '保存中…' : '保存'}

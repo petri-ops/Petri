@@ -150,7 +150,7 @@ export function MobileSyncPanel(): React.ReactElement {
       } catch {
         /* 静默：下一轮续码或手动重试 */
       }
-      if (!cancelled) timer = window.setTimeout(generate, PAIRING_AUTO_REFRESH_MS);
+      if (!cancelled) timer = window.setTimeout(() => void generate(), PAIRING_AUTO_REFRESH_MS);
     };
     void generate();
     return () => {
@@ -270,7 +270,7 @@ export function MobileSyncPanel(): React.ReactElement {
             type="button"
             className="gewu-btn gewu-btn--ghost gewu-btn--sm"
             disabled={busy}
-            onClick={toggleEnabled}
+            onClick={() => void toggleEnabled()}
           >
             {status.enabled ? '关闭' : '开启'}
           </button>

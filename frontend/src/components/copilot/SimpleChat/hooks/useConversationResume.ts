@@ -195,7 +195,7 @@ export function useConversationResume({
   useEffect(() => {
     if (!conversationId) return;
     if (activeRun && activeRun.status === 'running') return;
-    const timer = setInterval(async () => {
+    const timer = setInterval(() => { void (async () => {
       if (document.visibilityState === 'hidden') return;
       try {
         const persisted = await getConversationMessages(conversationId, 200);
@@ -206,7 +206,7 @@ export function useConversationResume({
           return unchanged ? current : mergeKeepOlderPrefix(current, next);
         });
       } catch { /* 单次轮询失败静默，下一轮继续 */ }
-    }, 5000);
+    })(); }, 5000);
     return () => clearInterval(timer);
   }, [conversationId, activeRun, setMessages]);
 

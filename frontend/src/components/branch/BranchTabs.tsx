@@ -198,7 +198,7 @@ export function BranchTabs({
             <button
               type="button"
               className={styles.branchTabButton}
-              onClick={() => onSwitch(branch.id)}
+              onClick={() => void onSwitch(branch.id)}
               title={branch.name}
               aria-pressed={branch.id === activeBranchId}
             >

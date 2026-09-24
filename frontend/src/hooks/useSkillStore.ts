@@ -110,7 +110,7 @@ async function _discoverSkills(): Promise<DiscoverResult> {
 
   _inflight = promise;
 
-  (async () => {
+  void (async () => {
     try {
       const result = await bridge.discover();
       if (result.ok && Array.isArray(result.skills)) {

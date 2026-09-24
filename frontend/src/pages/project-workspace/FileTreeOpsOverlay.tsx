@@ -121,7 +121,7 @@ function DirPicker({
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetchDir(pickedDir).then((entries) => {
+    void fetchDir(pickedDir).then((entries) => {
       if (cancelled) return;
       setDirs(entries.filter((entry) => entry.type === 'dir'));
       setLoading(false);

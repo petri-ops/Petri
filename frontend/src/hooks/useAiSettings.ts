@@ -242,7 +242,7 @@ export function useAiSettings(): UseAiSettingsResult {
     subscribers.add(onChange);
     if (!loaded) {
       setLoading(true);
-      refreshFromBridge().then((next) => {
+      void refreshFromBridge().then((next) => {
         if (cancelled) return;
         setSnapshot(next);
         setLoading(false);

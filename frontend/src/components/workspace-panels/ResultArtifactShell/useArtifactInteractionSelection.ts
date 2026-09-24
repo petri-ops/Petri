@@ -102,7 +102,7 @@ export function useArtifactInteractionSelection(options: UseArtifactInteractionS
     if (!job || effectiveJobStatus !== 'done' || !selectedArtifactName) return;
     if (!shouldRequestArtifactInteraction(viewerAdapter)) return;
     let cancelled = false;
-    (async () => {
+    void (async () => {
       try {
         setInteractionError('');
         const data = await fetchArtifactInteraction({

@@ -674,7 +674,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
                               <button
                                 type="button"
                                 className="gewu-btn gewu-btn--primary gewu-btn--sm"
-                                onClick={() => handleUpdate(id)}
+                                onClick={() => void handleUpdate(id)}
                                 disabled={isUpdating}
                               >
                                 {isUpdating ? '更新中…' : '更新'}
@@ -695,7 +695,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
                             <button
                               type="button"
                               className="gewu-btn gewu-btn--danger-ghost gewu-btn--sm"
-                              onClick={() => handleUninstall(id)}
+                              onClick={() => void handleUninstall(id)}
                               disabled={uninstalling === id}
                             >
                               {uninstalling === id ? '卸载中…' : '卸载'}
@@ -716,7 +716,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
                           <button
                             type="button"
                             className="gewu-btn gewu-btn--primary gewu-btn--sm"
-                            onClick={() => handleInstall(id)}
+                            onClick={() => void handleInstall(id)}
                             disabled={isInstalling}
                           >
                             {isInstalling ? '安装中…' : '安装'}
@@ -773,7 +773,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
               <button
                 type="button"
                 className="gewu-plugin-store__refresh-btn"
-                onClick={checkForUpdates}
+                onClick={() => void checkForUpdates()}
                 disabled={checkingUpdates}
               >
                 {checkingUpdates ? '检查中…' : `${updates.length} 个可更新`}

@@ -90,7 +90,7 @@ export function recordConversationFileChange(
 ): void {
   if (!conversationId || !path) return;
   ensureSubscribed();
-  const bucket = changesByConversation.get(conversationId) ?? new Map();
+  const bucket = changesByConversation.get(conversationId) ?? new Map<string, ConversationFileChange>();
   bucket.set(path, {
     path,
     status,
@@ -98,7 +98,7 @@ export function recordConversationFileChange(
     iteration: attribution?.iteration,
     tool: attribution?.tool,
   });
-  changesByConversation.set(conversationId, bucket);
+  changesByConversation.set(conversationId as string, bucket);
   invalidateSnapshot(conversationId);
   emitChange();
 }
@@ -175,7 +175,7 @@ export function mergeConversationFileChanges(
   );
   if (valid.length === 0) return;
   ensureSubscribed();
-  const bucket = changesByConversation.get(conversationId) ?? new Map();
+  const bucket = changesByConversation.get(conversationId) ?? new Map<string, ConversationFileChange>();
   for (const item of valid) {
     if (bucket.has(item.path)) continue; // live / 已有记录优先，不覆盖
     bucket.set(item.path, {
@@ -186,7 +186,7 @@ export function mergeConversationFileChanges(
       tool: typeof item.tool === 'string' ? item.tool : undefined,
     });
   }
-  changesByConversation.set(conversationId, bucket);
+  changesByConversation.set(conversationId as string, bucket);
   invalidateSnapshot(conversationId);
   emitChange();
 }

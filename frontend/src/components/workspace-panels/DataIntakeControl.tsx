@@ -105,7 +105,7 @@ export function DataIntakeControl({
         type="file"
         accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values,text/plain"
         multiple
-        onChange={handleFiles}
+        onChange={(e) => void handleFiles(e)}
       />
       <button
         ref={triggerRef}

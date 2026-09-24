@@ -29,7 +29,7 @@ export function UpdateChecker(): React.ReactElement | null {
         <button
           type="button"
           className="gewu-btn gewu-btn--primary gewu-btn--sm"
-          onClick={install}
+          onClick={() => void install()}
           disabled={installing}
         >
           {installing ? '正在打开…' : '打开安装包'}
@@ -40,7 +40,7 @@ export function UpdateChecker(): React.ReactElement | null {
         <button
           type="button"
           className="gewu-btn gewu-btn--primary gewu-btn--sm"
-          onClick={download}
+          onClick={() => void download()}
         >
           下载 v{availableVersion}
         </button>
@@ -48,7 +48,7 @@ export function UpdateChecker(): React.ReactElement | null {
         <button
           type="button"
           className="gewu-btn gewu-btn--ghost gewu-btn--sm"
-          onClick={check}
+          onClick={() => void check()}
           disabled={checking}
         >
           {checking ? '检查中…' : '检查更新'}

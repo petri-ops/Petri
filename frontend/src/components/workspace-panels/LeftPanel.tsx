@@ -537,7 +537,7 @@ function ProjectNode({
           className={styles.projectTreeAddBtn}
           onClick={(e) => {
             e.stopPropagation();
-            ctx.createConversationForProject(p.id);
+            void ctx.createConversationForProject(p.id);
           }}
           title="创建新对话"
           disabled={ctx.creatingConversation}

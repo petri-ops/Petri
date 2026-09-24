@@ -62,7 +62,7 @@ describe('UI-141 startup gate', () => {
     render(<Home />);
 
     expect(screen.queryByText('本地分析服务未就绪')).toBeNull();
-    act(() => vi.advanceTimersByTime(30_000));
+    void act(() => vi.advanceTimersByTime(30_000));
 
     expect(screen.getByRole('heading', { name: '本地分析服务未就绪' })).toBeTruthy();
     expect(screen.getByText(/与「是否安装分析运行时」无关/)).toBeTruthy();

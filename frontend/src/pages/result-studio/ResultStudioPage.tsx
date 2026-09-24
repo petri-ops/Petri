@@ -52,7 +52,7 @@ export function ResultStudioPage(): React.ReactElement {
   // Load results on mount / projectId change
   useEffect(() => {
     if (projectId) {
-      refresh();
+      void refresh();
     }
   }, [projectId, refresh]);
 
@@ -82,7 +82,7 @@ export function ResultStudioPage(): React.ReactElement {
             <button
               type="button"
               className={styles.refreshButton}
-              onClick={() => refresh()}
+              onClick={() => void refresh()}
               disabled={loading}
             >
               刷新
@@ -136,9 +136,9 @@ export function ResultStudioPage(): React.ReactElement {
           {activeResult ? (
             <ResultDetail
               result={activeResult}
-              onUpdate={(updates) => updateResult(activeResult.id, updates)}
+              onUpdate={(updates) => void updateResult(activeResult.id, updates)}
               onDelete={() => {
-                deleteResult(activeResult.id);
+                void deleteResult(activeResult.id);
                 setActiveResult(null);
               }}
             />

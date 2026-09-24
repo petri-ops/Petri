@@ -595,7 +595,7 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
           <button
             type="button"
             className={styles.workspaceTreeToggle}
-            onClick={downloadActiveFile}
+            onClick={() => void downloadActiveFile()}
             title="下载到本地"
             aria-label="下载到本地"
             data-testid="file-download"
@@ -623,7 +623,7 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
             openError={openError}
             opening={opening}
             onOpen={openWithSystemApp}
-            onDownload={downloadActiveFile}
+            onDownload={() => void downloadActiveFile()}
             onOpenFile={handleOpenFile}
             projectId={project.id}
           />

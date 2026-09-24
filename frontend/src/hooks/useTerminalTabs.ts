@@ -126,7 +126,7 @@ export function useTerminalTabs(options: UseTerminalTabsOptions): UseTerminalTab
           if (!entry) continue;
           try {
             entry.fit.fit();
-            getBridgeTerminal()?.resizeSession?.(entry.term.cols, entry.term.rows, id);
+            void getBridgeTerminal()?.resizeSession?.(entry.term.cols, entry.term.rows, id);
           } catch {
             /* ignore */
           }
@@ -157,7 +157,7 @@ export function useTerminalTabs(options: UseTerminalTabsOptions): UseTerminalTab
         term.loadAddon(fit);
         term.open(host);
         term.onData((data) => {
-          getBridgeTerminal()?.writeSession?.(data, tab.id);
+          void getBridgeTerminal()?.writeSession?.(data, tab.id);
         });
         entry = { term, fit, started: false, host };
         entriesRef.current.set(tab.id, entry);
@@ -183,7 +183,7 @@ export function useTerminalTabs(options: UseTerminalTabsOptions): UseTerminalTab
           window.requestAnimationFrame(() => {
             try {
               ent.fit.fit();
-              bridge.resizeSession?.(ent.term.cols, ent.term.rows, tab.id);
+              void bridge.resizeSession?.(ent.term.cols, ent.term.rows, tab.id);
               ent.term.focus();
             } catch {
               /* ignore */
@@ -214,7 +214,7 @@ export function useTerminalTabs(options: UseTerminalTabsOptions): UseTerminalTab
       if (!entry) return;
       try {
         entry.fit.fit();
-        getBridgeTerminal()?.resizeSession?.(entry.term.cols, entry.term.rows, activeId);
+        void getBridgeTerminal()?.resizeSession?.(entry.term.cols, entry.term.rows, activeId);
         entry.term.focus();
       } catch {
         /* ignore */
@@ -239,7 +239,7 @@ export function useTerminalTabs(options: UseTerminalTabsOptions): UseTerminalTab
     (id: string) => {
       setLimitNotice(null);
       const entry = entriesRef.current.get(id);
-      if (entry?.started) getBridgeTerminal()?.stopSession?.(id);
+      if (entry?.started) void getBridgeTerminal()?.stopSession?.(id);
       if (entry) {
         try {
           resizeObserverRef.current?.unobserve(entry.host);
@@ -290,7 +290,7 @@ export function useTerminalTabs(options: UseTerminalTabsOptions): UseTerminalTab
     return () => {
       const bridge = getBridgeTerminal();
       for (const [id, entry] of entries.current.entries()) {
-        if (entry.started) bridge?.stopSession?.(id);
+        if (entry.started) void bridge?.stopSession?.(id);
         try {
           observer.current?.unobserve(entry.host);
         } catch {

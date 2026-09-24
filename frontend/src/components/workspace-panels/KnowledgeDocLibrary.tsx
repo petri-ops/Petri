@@ -307,7 +307,7 @@ export function KnowledgeDocLibrary({
             <button
               type="button"
               className={`${styles.ghostBtn} ${confirmClear ? styles.dangerBtn : ''}`}
-              onClick={handleClear}
+              onClick={() => void handleClear()}
               data-testid="knowledge-clear"
             >
               <Icon name="trash" size={13} />

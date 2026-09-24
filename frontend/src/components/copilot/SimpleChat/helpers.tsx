@@ -59,7 +59,7 @@ export function useDomainExamplePrompts(): ExamplePrompt[] {
   const [prompts, setPrompts] = useState<ExamplePrompt[]>(DEFAULT_EXAMPLE_PROMPTS);
   useEffect(() => {
     let alive = true;
-    (async () => {
+    void (async () => {
       try {
         const packsBridge = getBridge('packs') as
           | { listInstalled?: () => Promise<unknown> }

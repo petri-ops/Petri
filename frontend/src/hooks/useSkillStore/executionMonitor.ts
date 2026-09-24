@@ -11,7 +11,7 @@ function _startPolling(
 ): void {
   if (_pollIntervals.has(executionId)) return;
 
-  const interval = setInterval(async () => {
+  const interval = setInterval(() => { void (async () => {
     const bridge = getBridge('skills');
     if (!bridge) {
       clearInterval(interval);
@@ -55,7 +55,7 @@ function _startPolling(
       // BLOCK-3 P2 A1: 异常路径同样清 onProgress 订阅
       _unsubscribeProgressWakeup(executionId);
     }
-  }, 2000);
+  })(); }, 2000);
 
   _pollIntervals.set(executionId, interval);
 }

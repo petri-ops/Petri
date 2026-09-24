@@ -20,7 +20,7 @@
       "wave": "A",
       "module": "W-03",
       "lines": 1644,
-      "sha256": "008d97b5ab2866dc01adb6551fe39f2109f56ef2462d59fdb36c965f7823a986"
+      "sha256": "905585834fd3a214cdf8236b68501c8abe649f842597617affe4a125fd8faaee"
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat/hooks/useThinkingLevel.ts",
@@ -48,7 +48,7 @@
       "wave": "B",
       "module": "W-04",
       "lines": 1226,
-      "sha256": "a3749a660fd8c3f476a48744fc06fa28fce289d3c96494d5025dc824d0d7980a"
+      "sha256": "7967ca6d48bcbf18b7d9388d76da31776217967af91aff9e11e98831d4ef3f4b"
     },
     {
       "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx",
@@ -62,14 +62,14 @@
       "wave": "B",
       "module": "W-01",
       "lines": 638,
-      "sha256": "5325a28c9d648fec9b3145dbca351f3f4caf1d44712abb087e063cd2f907fcf0"
+      "sha256": "7cda7f977ab48d442e8ba4918fcaa63073e2426bc401a3de62894ea4c600a50b"
     },
     {
       "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
       "wave": "B",
       "module": "W-01",
       "lines": 789,
-      "sha256": "b9ec44b2ab009a27b62301e256cba028a556a60605a5f99d1d0cbb0300c52043"
+      "sha256": "ddcbb24874b2a8a8efb98aebd0ca1a83c9adf8330bf41615c7e2ad985e70c739"
     },
     {
       "path": "frontend/src/pages/home.tsx",
@@ -90,7 +90,7 @@
       "wave": "B",
       "module": "W-02",
       "lines": 529,
-      "sha256": "21230069715b6833c95d7ee613bf1d7fbd79d9b22bd9c2cf8a0de6d66c8f89b2"
+      "sha256": "0b16011cfdab1b1a72602d7bb2df35f0e41ed104edd574aa318010fbda0cb22f"
     },
     {
       "path": "frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx",

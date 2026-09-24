@@ -28,7 +28,7 @@ export function DataManagement(): React.ReactElement | null {
   }, []);
 
   useEffect(() => {
-    loadInfo();
+    void loadInfo();
   }, [loadInfo]);
 
   const handleOpenDir = useCallback(async () => {
@@ -82,7 +82,7 @@ export function DataManagement(): React.ReactElement | null {
       <button
         type="button"
         className="gewu-btn gewu-btn--ghost gewu-btn--sm"
-        onClick={handleOpenDir}
+        onClick={() => void handleOpenDir()}
         disabled={opening}
       >
         {opening ? '打开中…' : '在文件管理器中打开'}

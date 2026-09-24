@@ -297,7 +297,7 @@ export function WorkspaceFilePreview({
           <BinaryPreviewCard
             file={file}
             opening={opening}
-            onOpen={onOpen}
+            onOpen={() => void onOpen()}
             onDownload={onDownload}
           />
         )}
@@ -305,7 +305,7 @@ export function WorkspaceFilePreview({
           <BinaryPreviewCard
             file={file}
             opening={opening}
-            onOpen={onOpen}
+            onOpen={() => void onOpen()}
             onDownload={onDownload}
             reason={officePreview.fallback.reason}
           />

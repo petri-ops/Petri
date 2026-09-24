@@ -64,7 +64,7 @@ export const ResultVersionHistory: React.FC<ResultVersionHistoryProps> = ({
       <button
         type="button"
         className={styles.versionHeader}
-        onClick={loadVersions}
+        onClick={() => void loadVersions()}
         aria-expanded={expanded}
       >
         <span>版本历史 ({loaded ? versions.length : '...'})</span>

@@ -38,7 +38,7 @@ export function ExportDiagnostic(): React.ReactElement | null {
       <button
         type="button"
         className="gewu-btn gewu-btn--ghost gewu-btn--sm"
-        onClick={handleExport}
+        onClick={() => void handleExport()}
         disabled={exporting}
       >
         {exporting ? '导出中…' : '导出诊断日志'}

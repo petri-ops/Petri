@@ -236,7 +236,7 @@ export function useOtherConversations(
     );
     if (relevant.length === 0) return;
     let cancelled = false;
-    Promise.all(
+    void Promise.all(
       relevant.map(async (pid): Promise<[string, ConversationSummary[]]> => {
         try {
           return [pid, await loadShared(pid)];

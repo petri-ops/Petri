@@ -249,7 +249,7 @@ export function ResultArtifactShell({
         setSelectedName('');
         setSelectedSectionId('');
       }
-      (async () => {
+      void (async () => {
         try {
           const token = getToken();
           const resp = await fetch(getApiPrefix(lang) + '/tools/status/' + requestedJobId, {

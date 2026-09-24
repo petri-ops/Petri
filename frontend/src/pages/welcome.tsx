@@ -106,7 +106,7 @@ export default function Welcome(): React.ReactElement {
     // ?project= 预选生效，选择器保持「选择项目」，输入框常驻可先行键入。
     let cancelled = false;
     const backoffMs = [0, 2000, 5000, 10000, 15000];
-    (async () => {
+    void (async () => {
       for (const wait of backoffMs) {
         if (cancelled) return;
         if (wait) await new Promise((resolve) => setTimeout(resolve, wait));

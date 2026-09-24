@@ -101,7 +101,7 @@ export function useEndpointProfilesEditor(): {
   const [telemetryEnabled, setTelemetryEnabled] = useState(false);
 
   useEffect(() => {
-    loadSettings();
+    void loadSettings();
   }, []);
 
   useEffect(() => {
@@ -183,7 +183,7 @@ export function useEndpointProfilesEditor(): {
     setSaved(true);
     setCredentialInputs({});
     setTimeout(() => setSaved(false), 3000);
-    loadSettings();
+    void loadSettings();
   }
 
   async function discoverModels(profile: ChatModelPreset, apiKey = '', silent = false) {

@@ -89,7 +89,7 @@ export function TerminalWindowPage(): React.ReactElement {
     const observer = new ResizeObserver(() => {
       try {
         fit.fit();
-        bridge.resizeSession?.(term.cols, term.rows, sessionId);
+        void bridge.resizeSession?.(term.cols, term.rows, sessionId);
       } catch {
         /* ignore */
       }
@@ -98,7 +98,7 @@ export function TerminalWindowPage(): React.ReactElement {
     window.requestAnimationFrame(() => {
       try {
         fit.fit();
-        bridge.resizeSession?.(term.cols, term.rows, sessionId);
+        void bridge.resizeSession?.(term.cols, term.rows, sessionId);
         term.focus();
       } catch {
         /* ignore */

@@ -743,7 +743,7 @@ function useProjectUsage(projectId: string | null, enabled: boolean): ProjectUsa
       }
     };
     void load();
-    const timer = window.setInterval(load, 30000);
+    const timer = window.setInterval(() => void load(), 30000);
     return () => {
       alive = false;
       window.clearInterval(timer);
@@ -781,7 +781,7 @@ function useProjectStorage(projectId: string | null, enabled: boolean): ProjectS
       }
     };
     void load();
-    const timer = window.setInterval(load, 60000);
+    const timer = window.setInterval(() => void load(), 60000);
     return () => {
       alive = false;
       window.clearInterval(timer);
@@ -812,7 +812,7 @@ function useProjectNoticeUnread(projectId: string | null, enabled: boolean, refr
       }
     };
     void load();
-    const timer = window.setInterval(load, 30000);
+    const timer = window.setInterval(() => void load(), 30000);
     return () => {
       alive = false;
       window.clearInterval(timer);

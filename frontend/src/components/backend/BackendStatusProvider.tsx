@@ -133,7 +133,7 @@ export function BackendStatusProvider({
       } catch {
         // 忽略
       } finally {
-        if (alive) timeoutId = setTimeout(safeTick, nextDelay);
+        if (alive) timeoutId = setTimeout(() => void safeTick(), nextDelay);
       }
     };
     void safeTick();

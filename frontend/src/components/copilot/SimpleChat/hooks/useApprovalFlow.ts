@@ -72,7 +72,7 @@ export function useApprovalFlow(options: UseApprovalFlowOptions): {
     const originalParams = pendingApproval.params || {};
     setApprovalRepair({ status: 'loading' });
 
-    (async () => {
+    void (async () => {
       try {
         const remoteManifest = await fetchHarnessToolManifest(pendingApproval.toolId || '');
         // BLOCK-83 D4：目录投影自插件；未安装该插件时无回退 manifest（保持既有跳过语义）。
@@ -164,7 +164,7 @@ export function useApprovalFlow(options: UseApprovalFlowOptions): {
     });
     if (!acknowledged) return;
     if (conversationId) clearConversationPendingApproval(conversationId);
-    send(
+    void send(
       `用户已确认开始（ackToken=${ackToken}）。请重调 run_tool(op=run, toolId="${toolId ?? ''}", params=${JSON.stringify(mergedParams)}, ackToken="${ackToken}") 续跑该重操作。`
     );
   }, [conversationId, paramDraft, pendingApproval, projectId, send, streaming]);
@@ -177,7 +177,7 @@ export function useApprovalFlow(options: UseApprovalFlowOptions): {
     });
     if (!acknowledged) return;
     if (conversationId) clearConversationPendingApproval(conversationId);
-    send('用户取消了该重操作，不要重试。请简短说明已取消，并给出如需继续时应调整哪些参数。');
+    void send('用户取消了该重操作，不要重试。请简短说明已取消，并给出如需继续时应调整哪些参数。');
   }, [conversationId, pendingApproval, projectId, send, streaming]);
 
   useEffect(() => {

@@ -321,7 +321,7 @@ export function FederationPanel(): React.ReactElement {
       } catch {
         /* 静默：下一轮续码或手动「重新生成」 */
       }
-      if (!cancelled) timer = window.setTimeout(generate, PAIRING_AUTO_REFRESH_MS);
+      if (!cancelled) timer = window.setTimeout(() => void generate(), PAIRING_AUTO_REFRESH_MS);
     };
     void generate();
     return () => {

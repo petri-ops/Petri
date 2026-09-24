@@ -1589,7 +1589,7 @@ export function SimpleChat({
                             type="button"
                             key={preset.id}
                             className={`sc-model-option ${preset.id === activeModelId ? 'sc-model-option-active' : ''}`}
-                            onClick={() => selectModel(preset)}
+                            onClick={() => void selectModel(preset)}
                           >
                             <span className="sc-model-option-title">{preset.model}</span>
                             <span className="sc-model-option-meta">

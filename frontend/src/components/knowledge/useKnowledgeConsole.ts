@@ -125,7 +125,7 @@ export function useKnowledgeConsole() {
   // D6 — 会话引导：localStorage 记忆的 conversation 仍存在则复用，否则新建。
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    void (async () => {
       let conv = null;
       let convId: string | null = null;
       try {

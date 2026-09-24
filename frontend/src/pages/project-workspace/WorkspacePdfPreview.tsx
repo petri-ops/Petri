@@ -25,7 +25,7 @@ export function WorkspacePdfPreview({ url, name }: { url: string; name: string }
     if (!container || !url) return;
     const canvases: HTMLCanvasElement[] = [];
 
-    (async () => {
+    void (async () => {
       let doc: PdfDoc | null = null;
       try {
         const pdfjs = await import('pdfjs-dist');

@@ -64,7 +64,7 @@ describe('useAutoUpdate', () => {
   it('check() sets error on non-ok response', async () => {
     installMock({ check: () => Promise.resolve({ ok: false, error: 'timeout' }), download: () => Promise.resolve(), install: () => Promise.resolve() });
     const { result } = renderHook(() => useAutoUpdate());
-    await act(async () => { result.current.check(); await vi.runOnlyPendingTimersAsync(); });
+    await act(async () => { void result.current.check(); await vi.runOnlyPendingTimersAsync(); });
     expect(result.current.error).toBe('timeout');
   });
 
@@ -74,7 +74,7 @@ describe('useAutoUpdate', () => {
     await act(async () => { await vi.runOnlyPendingTimersAsync(); });
     expect(result.current.available).toBe(true);
     installMock({ check: () => Promise.resolve({ ok: true, hasUpdate: false }), download: () => Promise.resolve(), install: () => Promise.resolve() });
-    await act(async () => { result.current.check(); await vi.runOnlyPendingTimersAsync(); });
+    await act(async () => { void result.current.check(); await vi.runOnlyPendingTimersAsync(); });
     expect(result.current.available).toBe(false);
     expect(result.current.upToDate).toBe(true);
   });
@@ -157,7 +157,7 @@ describe('useAutoUpdate', () => {
   it('install() sets installing=true immediately', async () => {
     installMock({ check: () => Promise.resolve({ ok: true, hasUpdate: false }), download: () => Promise.resolve(), install: () => new Promise(() => {}) });
     const { result } = renderHook(() => useAutoUpdate());
-    await act(async () => { result.current.install(); await vi.runOnlyPendingTimersAsync(); });
+    await act(async () => { void result.current.install(); await vi.runOnlyPendingTimersAsync(); });
     expect(result.current.installing).toBe(true);
   });
 
@@ -168,7 +168,7 @@ describe('useAutoUpdate', () => {
       install: () => Promise.reject(new Error('denied')),
     });
     const { result } = renderHook(() => useAutoUpdate());
-    await act(async () => { result.current.install(); await vi.runOnlyPendingTimersAsync(); });
+    await act(async () => { void result.current.install(); await vi.runOnlyPendingTimersAsync(); });
     expect(result.current.error).toBe('denied');
     expect(result.current.installing).toBe(false);
   });
@@ -180,8 +180,8 @@ describe('useAutoUpdate', () => {
     expect(result.current.available).toBe(false);
     expect(result.current.downloading).toBe(false);
     expect(result.current.installing).toBe(false);
-    await act(async () => { result.current.check(); });
-    await act(async () => { result.current.download(); });
-    await act(async () => { result.current.install(); });
+    await act(async () => { void result.current.check(); });
+    await act(async () => { void result.current.download(); });
+    await act(async () => { void result.current.install(); });
   });
 });

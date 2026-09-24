@@ -187,7 +187,7 @@ export default function SkillsPage(): React.ReactElement {
         <SkillDetail
           skill={selectedSkill}
           onClose={handleCloseDetail}
-          onExecute={handleExecute}
+          onExecute={(skill, params) => void handleExecute(skill, params)}
           canExecute={executingSkillId === null}
           isExecuting={executingSkillId === selectedSkill.id}
         />

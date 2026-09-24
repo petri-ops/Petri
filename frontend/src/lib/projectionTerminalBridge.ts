@@ -40,13 +40,13 @@ function attachStream(tabId: string, sessionId: string) {
   const source = new EventSource(url);
   source.addEventListener('terminal:data', (event) => {
     try {
-      const payload = JSON.parse((event).data) as { data: string };
+      const payload = JSON.parse((event as MessageEvent<string>).data) as { data: string };
       for (const handler of dataHandlers) handler({ sessionId: tabId, data: payload.data });
     } catch { /* 忽略坏帧 */ }
   });
   source.addEventListener('terminal:exit', (event) => {
     try {
-      const payload = JSON.parse((event).data) as { exitCode?: number | null };
+      const payload = JSON.parse((event as MessageEvent<string>).data) as { exitCode?: number | null };
       for (const handler of exitHandlers) handler({ sessionId: tabId, exitCode: payload.exitCode });
     } catch { /* 忽略坏帧 */ }
     source.close();

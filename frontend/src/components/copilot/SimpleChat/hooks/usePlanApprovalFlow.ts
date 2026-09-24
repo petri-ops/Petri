@@ -46,7 +46,7 @@ export function usePlanApprovalFlow(options: UsePlanApprovalFlowOptions): {
   useEffect(() => {
     if (!conversationId || streaming) return;
     let cancelled = false;
-    (async () => {
+    void (async () => {
       try {
         const drafts = await fetchDraftPlansForConversation(conversationId);
         if (!cancelled) setPendingPlan(drafts[0] ? { ...drafts[0] } : null);

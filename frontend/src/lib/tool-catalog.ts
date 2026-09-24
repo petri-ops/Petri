@@ -133,7 +133,7 @@ export function useToolCatalog(): { tools: CatalogTool[]; loading: boolean; erro
     let alive = true;
     if (_cache === null) {
       setLoading(true);
-      fetchToolCatalog().finally(() => { if (alive) setLoading(false); });
+      void fetchToolCatalog().finally(() => { if (alive) setLoading(false); });
     } else {
       setLoading(false);
     }

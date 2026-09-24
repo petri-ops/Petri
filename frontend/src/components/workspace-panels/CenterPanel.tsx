@@ -285,7 +285,7 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
               <ResultsLibrary
                 projectId={ctx.projectId}
                 jobs={ctx.jobs}
-                onOpenJob={(jobId) => ctx.handleOpenResult(jobId, ctx.projectId)}
+                onOpenJob={(jobId) => void ctx.handleOpenResult(jobId, ctx.projectId)}
               />
             )}
           </ResultStudioCanvas>

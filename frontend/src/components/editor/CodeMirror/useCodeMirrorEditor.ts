@@ -269,7 +269,7 @@ export function useCodeMirrorEditor(
     // 异步加载语言 extension；挂上 Compartment.reconfigure
     let cancelled = false;
     if (language) {
-      loadLanguage(language).then((langExt) => {
+      void loadLanguage(language).then((langExt) => {
         if (cancelled) return;
         const compartment = langCompartmentRef.current;
         if (!compartment || !viewRef.current) return;
@@ -310,7 +310,7 @@ export function useCodeMirrorEditor(
       view.dispatch({ effects: compartment.reconfigure([]) });
       return;
     }
-    loadLanguage(language).then((langExt) => {
+    void loadLanguage(language).then((langExt) => {
       if (cancelled || !viewRef.current) return;
       viewRef.current.dispatch({
         effects: compartment.reconfigure(langExt ? [langExt] : [createFallbackLanguage()]),

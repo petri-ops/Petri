@@ -53,7 +53,7 @@ export function useAutoUpdate(): AutoUpdateState & AutoUpdateActions {
     if (!updater) return;
 
     let cancelled = false;
-    (async () => {
+    void (async () => {
       try {
         const r = await updater.check();
         if (cancelled || !r?.ok) return;
