@@ -1,6 +1,8 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-24 深夜三（**BK-04=agent 可见决策工具收口（closeout 十门全绿）——队列 3/8 完成**——decision_summary/decision_recent 只读工具上岗（71→73），实机真模型自主调用正确作答（acceptance/block-116/w2-agent-tools-live.json）。**恢复要点**：dev 栈在跑（已加载 BK-04 工具）；队列下一项=BK-05（阈值热调，BLOCK-116 W2 末件）；BLOCK-120 todoRefs 与本批工具的生产表现并入 BK-02 观察口径。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-24 深夜四（**BK-05=阈值热调统一收口（closeout 十门全绿）——队列 4/8 完成，BLOCK-116 W2 候选池清空**——topic-shift/knowledge-guard 闸门迁 getPointRuntime + gates 键级 patch 四层校验（不变量违反拒写），BLOCK-110~113 运行时接点热调全通；实机七断言全过（acceptance/block-116/bk05-gates-hot-tune-live.json）。**恢复要点**：dev 栈在跑；队列下一项=BK-06（lint Batch-8，长线可分批）；output-judge 0-4 量表热调=新登记候选（候选池 C-10）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-24 深夜三（**BK-04=agent 可见决策工具收口（closeout 十门全绿）——队列 3/8 完成**——decision_summary/decision_recent 只读工具上岗（71→73），实机真模型自主调用正确作答（acceptance/block-116/w2-agent-tools-live.json）。**恢复要点**：dev 栈在跑（已加载 BK-04 工具）；队列下一项=BK-05（阈值热调，BLOCK-116 W2 末件）；BLOCK-120 todoRefs 与本批工具的生产表现并入 BK-02 观察口径。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-24 深夜二（**BK-03=BLOCK-120 终态对账 v2 收口（closeout 十门全绿）——队列 2/8 完成**——todoRefs 声明制归属落 params（零 migration）+ 对账 v2 条目级失真向后兼容；实机真 spawn 轮 todoRefs=['1'] 落库、clean 轮零假阳性（acceptance/block-120/live.json）。**恢复要点**：dev 栈在跑（已重启加载 BLOCK-120 代码）；全量待办查 pending-work-backlog.md，**队列下一项=BK-04 agent 可见决策工具**；连带清偿=block34 v5.6 断言已同步 v5.18 契约。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

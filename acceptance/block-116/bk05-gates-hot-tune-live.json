@@ -1,0 +1,64 @@
+{
+  "generatedAt": "2026-09-24T11:51:09.591Z",
+  "steps": [
+    {
+      "step": "before",
+      "gates": {
+        "relevantMin": 0.5,
+        "injectionMax": 0.7
+      },
+      "defaultGates": {
+        "relevantMin": 0.5,
+        "injectionMax": 0.7
+      }
+    },
+    {
+      "step": "patch",
+      "status": 200,
+      "gates": {
+        "relevantMin": 0.6,
+        "injectionMax": 0.7
+      },
+      "defaultGates": {
+        "relevantMin": 0.5,
+        "injectionMax": 0.7
+      }
+    },
+    {
+      "step": "rejected",
+      "unknownKey": 400,
+      "outOfScale": 400,
+      "invariant": 400,
+      "invariantMsg": "gates 不变量违反：yes（判切换下界）必须大于 no（判未切换上界）"
+    },
+    {
+      "step": "restore",
+      "status": 200,
+      "gates": {
+        "relevantMin": 0.5,
+        "injectionMax": 0.7
+      }
+    }
+  ],
+  "realRound": {
+    "taskId": "c9b9a814-c9ab-4f7d-8c73-35bbed1abe7e",
+    "terminal": "completed",
+    "topicShiftRows": [],
+    "intentRouteRows": [
+      {
+        "id": 148,
+        "at": "2026-09-24T11:51:05.266Z",
+        "choice": "chitchat"
+      }
+    ]
+  },
+  "acceptance": {
+    "patchApplied": true,
+    "defaultGatesUntouched": true,
+    "unknownKeyRejected": true,
+    "outOfScaleRejected": true,
+    "invariantRejected": true,
+    "restored": true,
+    "consumerAlive": true
+  }
+}

@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-24 深夜三（**BK-04=agent 可见决策工具收口（BLOCK-116 W2 轻量批，closeout 十门全绿）——全局待办队列推进 3/8**——decision_summary/decision_recent 只读观测工具（工具总数 71→73，诚实边界=变更面不对模型开放）；实机真模型自主调用并正确作答（acceptance/block-116/w2-agent-tools-live.json）。**队列下一项=BK-05（阈值热调）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-24 深夜四（**BK-05=阈值热调统一收口（BLOCK-116 W2 末件，closeout 十门全绿）——全局待办队列推进 4/8**——topic-shift/knowledge-guard 闸门迁 config 消费（常量漂移退役）+ gates 键级 patch 四层校验，BLOCK-110~113 运行时接点热调全通；实机七断言全过。**队列下一项=BK-06（BLOCK-105 §7 Batch-8 lint 收缩，长线）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-24 深夜三（**BK-04=agent 可见决策工具收口（BLOCK-116 W2 轻量批，closeout 十门全绿）——全局待办队列推进 3/8**——decision_summary/decision_recent 只读观测工具（工具总数 71→73，诚实边界=变更面不对模型开放）；实机真模型自主调用并正确作答（acceptance/block-116/w2-agent-tools-live.json）。**队列下一项=BK-05（阈值热调）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-24 深夜二（**BK-03=BLOCK-120 终态对账 v2 当日收口（closeout 十门全绿）——全局待办队列推进 2/8**——todoRefs 声明制归属（spawn/followup 可选参数，快照校验丢弃回传，params 落库零 migration）+ 对账 item_level_mismatch 条目级失真（无 linkage 回退 v1 向后兼容）；实机真 spawn 轮 todoRefs 落库+零假阳性；连带清偿 block34 存量契约漂移。**队列下一项=BK-04（agent 可见决策工具）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
