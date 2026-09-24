@@ -168,6 +168,8 @@ desktop/
 
 - 创建或修改计划、Goal、工作包，完成阶段收口、Handoff、归档/替代文档，或创建/移除 Git Worktree 时，必须使用 `$gewu-project-governance`（BLOCK-61 改名前为 `$biof3-project-governance`）。该 skill 的 canonical 位置是 [`.agents/skills/gewu-project-governance/SKILL.md`](.agents/skills/gewu-project-governance/SKILL.md)。
 - 会话启动/收口/实机验收/工作区卫生/产品 Skill 编写/子 Agent 委派等日常开发实践，使用 `$gewu-dev-infra`（canonical：[`.agents/skills/gewu-dev-infra/SKILL.md`](.agents/skills/gewu-dev-infra/SKILL.md)，BLOCK-71 沉淀；自洽工具包——脚本/模板/原则随包携带，跨仓库复用见包内 PORTING.md，委派任务书模板在包内 `templates/`）。
+- **开发时决策建议器（Jev/Laya）主动行使（2026-09-24 用户裁决，无需用户提醒）**：规划定向测试前跑 `npm run test:suggest -- --supply=cloud`、台账回写前跑 `npm run doc:suggest -- --supply=cloud --context "<改动说明>"`、测试失败归因时跑 `node scripts/block114-failure-triage.mjs`、收口声明前跑 `npm run output:judge`——到点即跑，结果（含零建议）如实附在交付说明里；确定性规则优先于模型，零建议不是故障。用法/选型/红线见 [`.agents/skills/gewu-dev-infra/references/DEV-DECISION-TOOLS.md`](.agents/skills/gewu-dev-infra/references/DEV-DECISION-TOOLS.md)；**调用与否以 `decision_log` 为准（`npm run decision:report` 可查账）**。
+- **Skill 使用透明度（2026-09-24 用户裁决）**：会话中实际使用（加载并依据其内容行事）了某个 skill 时，在该次交付/答复的收尾用标签列出，形如 `〔skills: gewu-dev-infra(SKILL, references/DEV-DECISION-TOOLS)〕`；**只标真实使用的**——未使用任何 skill 的纯问答可不标，不得虚标。
 - 评审代码变更/审查 diff/写审计报告时，使用 `$gewu-code-review`（canonical：[`.agents/skills/gewu-code-review/SKILL.md`](.agents/skills/gewu-code-review/SKILL.md)，BLOCK-71 沉淀；六维度评审 + P1/P2/Minor 分级 + 表行式报告模板；P1 修复后方可收口）。
 
 - 新建页面/组件、写样式、暗色模式与主题色工作、排查「颜色不一致」反馈，或评审涉及 CSS 的 diff 时，使用 `$gewu-css-theme`（canonical：[`.agents/skills/gewu-css-theme/SKILL.md`](.agents/skills/gewu-css-theme/SKILL.md)，UI-392/393 沉淀；海军蓝 token 阶梯 + 禁零定义/禁 slate 字面量 + infima 特异性战争规则 + 页头标准件；机械化门禁=theme-token-contract.test.ts，写样式后必跑）。
