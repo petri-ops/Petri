@@ -5,13 +5,13 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-09-24 深夜七（**BK-06 第三刀收口：no-unsafe-member-access result-studio 域簇（closeout 十门全绿）**——生产 29 条（错误信封 Record+typeof 收窄 / json() 处一次性信封类型断言）+ 测试 41 条（vi.fn 泛型签名用组件真类型+mockImplementation 回调标 StreamChatOptions+JSON.parse 断言）；**根基线 849→752（−97=真修 70+陈旧槽位 prune 27）**；抓真=unknown 直投 as 触发 no-unnecessary-type-assertion、fix( 类型触 .tsx 需 UI-### 而 chore(lint) 按 Batch-7 先例豁免。**队列头=BK-06 续批**：unsafe-member-access 余 81 / set-state-in-effect 101 / refs 74 / unsafe-assignment 66。）
+最后更新：2026-09-24 深夜八（**BK-06 第四刀收口：no-unsafe-member-access 全族 151→0（closeout 十门全绿）**——残余 81 条清零（生产 19 文件 66：json() 信封一次性断言+typeof 错误信封+JSON.parse 入口断言+Map 泛型+catch unknown 化；测试 15：parse/mocks/取值收窄）；**根基线 752→616（−136=真修 81+陈旧槽位 55）**；抓真=fileOps 判别联合信封与 eslint 类型信息不一致（「type error typed」混淆消息），Record 承载+返回处一次断言自洽。**队列头=BK-06 续批**：set-state-in-effect 101 / refs 74 / no-unsafe-assignment 66 / misused-promises 41 / floating-promises 41。）
 
 ## 推进队列（串行，按序逐个推进）
 
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
-| 3 | ▶ BK-06 | **BLOCK-105 §7 Batch-8：lint 抑制基线收缩**——已收三刀（−155：require-await 40 / 类型面双族 58 / unsafe-member-access 域簇 70+漂移 27），基线 947→752；剩余=unsafe-member-access 81 / set-state-in-effect 101 / refs 74 / unsafe-assignment 66 / misused-promises 41 / floating-promises 41 等，逐案推进、每批棘轮收紧；**唯一无需新裁决即可续接的已登记工作** | roadmap/handoff「无需新裁决即可续接」段 + AUDIT-LOG 2026-09-24 深夜五/六/七行 | **队列头（长线，可分批收口）·待续批** |
+| 3 | ▶ BK-06 | **BLOCK-105 §7 Batch-8：lint 抑制基线收缩**——已收四刀（−331：require-await 40 / 类型面双族 58 / unsafe-member-access 域簇 70+27 / 全族收官 81+55），基线 947→616，unsafe-member-access 全族清零；剩余=set-state-in-effect 101 / refs 74 / no-unsafe-assignment 66 / misused-promises 41 / floating-promises 41 / base-to-string 残余等，逐案推进、每批棘轮收紧；**唯一无需新裁决即可续接的已登记工作** | roadmap/handoff「无需新裁决即可续接」段 + AUDIT-LOG 2026-09-24 深夜五~八行 | **队列头（长线，可分批收口）·待续批** |
 | 4 | ▶ BK-07 | **BLOCK-105 Batch-4 抓真 3 件处置**——①Office `loadAssets` 五参签名化石（收窄需单独裁决）②`ResultArtifactShell` `_jobMeta`/`_selectedSectionId` + `ResultStudioPage` `currentVersion` 只写不读＝结果元信息与版本投影停在未接线态（**交产品裁决**）③`SideChatDock.test` 头注声称覆盖 copilotAsk 实际无断言（小修） | AUDIT-LOG 2026-09-20 Mac 会话之五第 5 条 | 排队（②需用户裁决） |
 | 5 | ▶ BK-08 | **darwin 启动预算档建基线**——`block101-startup-timeline` 首跑因缺 `platforms.darwin` 档判红（设计行为非故障）；需 Mac 会话采 5 样本建基线，禁止复制 win32 数字 | BLOCK-106 遗留 + handoff ⚡ 清单 | 排队（需 Mac 环境） |
 | — | 👁 BK-02 | **汇报门 P2 试点观察期盘点**（持续观察，不占队列序）——采纳率/误拦率（含误重写率）/延迟增量/fitReplay 触发率随真实轮次累计；首盘点已并入 BK-01 P0（decision_log report-guard 行 + fit-volatility-review.json）；观察窗开启中（dev 栈 BIOF3_JEV_REPORT_GUARD=1）。此后周期性盘点 | BLOCK-119 收口遗留候选 | 观察（持续） |
@@ -27,6 +27,7 @@
 | 🔁 BK-06 | Batch-8 第一刀：require-await 族（非整项收口，长线续批中） | 2026-09-24 当日收口：生产 35 条 stub 契约化直返 + 测试安全回调 5 条；替身 147 条承重 async 误报豁免保留；根基线 947→907 + frontend 本地基线化石删除；tsc 0 + 前端全量 147/1201 绿 + closeout 十门绿；教训=测试替身 async 不可机械摘（promise 契约+微任务让渡双承重） |
 | 🔁 BK-06 | Batch-8 第二刀：类型面双族（非整项收口，长线续批中） | 2026-09-24 当日收口：no-base-to-string 36（project-store 25 + parse 11，typeof 守卫）+ no-redundant-type-constituents 22（字面量联合塌缩留值域注释）；根基线 907→849；tsc 0 + 全量 147/1201 + 定向 44/384 + closeout 十门绿；教训=String((x as string)) 直投触发 no-unnecessary-type-assertion 互锁 |
 | 🔁 BK-06 | Batch-8 第三刀：unsafe-member-access result-studio 域簇（非整项收口，长线续批中） | 2026-09-24 当日收口：生产 29（信封 Record+typeof / json() 一次性信封断言）+ 测试 41（vi.fn 泛型签名/mockImplementation 回调类型/JSON.parse 断言）；根基线 849→752（−97=真修 70+陈旧槽位 27）；tsc 0 + 全量 147/1201 + closeout 十门绿；抓真=unknown 直投 as 判冗余、chore(lint) 类型豁免先例 |
+| 🔁 BK-06 | Batch-8 第四刀：no-unsafe-member-access 全族收官（非整项收口，长线续批中） | 2026-09-24 当日收口：残余 81 条清零（生产 19 文件 66 + 测试 8 文件 15），族 151→0；根基线 752→616（−136=真修 81+漂移 55）；tsc 0 + 全量 147/1201 + closeout 十门绿；教训=判别联合信封与 eslint 类型信息不一致时改 Record 承载+返回处一次断言 |
 
 ## 👤 用户事项（Agent 不代行，仅登记与提醒）
 
