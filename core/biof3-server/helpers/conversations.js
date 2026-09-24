@@ -215,10 +215,9 @@ async function _maybeAutoTitleConversation(conversationId, userId) {
 // ============================================================
 const _TOPIC_CHECK_EVERY = 5;
 const _TOPIC_COOLDOWN_MS = 60 * 60 * 1000;
-// BLOCK-110 P1 — Jev 直替双阈值（中文校准初值，acceptance/block-110/calibration.json；
-// 绑定 jev-1.13.0——模型升级致分布漂移时须重校准）
-const _JEV_YES = 0.85;
-const _JEV_NO = 0.5;
+// BLOCK-110 P1 — Jev 直替双闸门：校准初值在注册表 decision-thresholds('topic-shift')，
+// 运行时经 getPointRuntime('topic-shift').gates 解析（配置文件 gates patch 可热调，
+// BLOCK-116 W2/BK-05）；校准默认不再以本地常量第二真相存在。
 
 async function _maybeDetectTopicShift(conversationId, userId) {
   if (!conversationId || !userId) return null;
@@ -240,6 +239,8 @@ async function _maybeDetectTopicShift(conversationId, userId) {
     // 杀开关：BIOF3_JEV_TOPIC_SHIFT=0 整体停用（回退现行为）。
     if (process.env.BIOF3_JEV_TOPIC_SHIFT !== '0') {
       try {
+        const jevGates = require('./decision-config').getPointRuntime('topic-shift').gates
+          || { yes: 0.85, no: 0.5 }; // 防御兜底（注册表缺键时维持校准初值）
         const { askDecision } = require('./decision-api');
         const jevRecent = sqlite.prepare('SELECT role, content FROM copilot_messages WHERE conversation_id=? ORDER BY ts DESC LIMIT 6').all(conversationId);
         if (jevRecent && jevRecent.length >= 4) {
@@ -258,14 +259,14 @@ async function _maybeDetectTopicShift(conversationId, userId) {
           });
           if (outcome.ok) {
             const noul = outcome.answers.topic_shift && outcome.answers.topic_shift.noul;
-            if (typeof noul === 'number' && noul >= _JEV_YES) {
+            if (typeof noul === 'number' && noul >= jevGates.yes) {
               const reason = `Jev 判定话题切换（noul=${noul.toFixed(2)}）`.slice(0, 60);
               sqlite.prepare('UPDATE copilot_conversations SET last_topic_shift_at=?, last_topic_shift_reason=? WHERE id=?')
                 .run(new Date().toISOString(), reason, conversationId);
               console.log('[topic-shift][jev] conv=' + conversationId + ' → ' + reason);
               return { shifted: true, reason };
             }
-            if (typeof noul === 'number' && noul <= _JEV_NO) {
+            if (typeof noul === 'number' && noul <= jevGates.no) {
               return null; // Jev 明确判「未切换」——直替成立，不再走大模型
             }
             // 中间带 (NO, YES)：落入下方大模型路径复核

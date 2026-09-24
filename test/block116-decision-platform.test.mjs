@@ -286,3 +286,64 @@ test('BK-04：工具注册四件套在位（defs/registry handler/metadata/计�
   assert.equal(meta.decision_summary.readOnly, true, '纯读元数据');
   assert.equal(meta.decision_recent.concurrentSafe, true, '纯读可并发');
 });
+
+// ---------- BLOCK-116 W2（BK-05）：阈值热调——gates 覆盖解析/校验/不变量 + 消费方迁移 ----------
+
+test('BK-05：gates patch 经 setPointConfig 落盘 → getPointRuntime 合并解析（defaultGates 恒暴露校准原值）', async (t) => {
+  const cfgDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-bk05-'));
+  process.env.BIOF3_DECISION_CONFIG_PATH = path.join(cfgDir, 'decision-config.json');
+  t.after(() => {
+    delete process.env.BIOF3_DECISION_CONFIG_PATH;
+    try { fs.rmSync(cfgDir, { recursive: true, force: true }); } catch { /* 句柄延迟释放 */ }
+  });
+
+  const before = decisionConfigModule.getPointRuntime('topic-shift');
+  assert.deepEqual(before.gates, { yes: 0.85, no: 0.5 }, '默认 gates=注册表校准值');
+  assert.deepEqual(before.defaultGates, { yes: 0.85, no: 0.5 });
+
+  decisionConfigModule.setPointConfig('topic-shift', { gates: { yes: 0.9 } });
+  const after = decisionConfigModule.getPointRuntime('topic-shift');
+  assert.deepEqual(after.gates, { yes: 0.9, no: 0.5 }, '部分 patch 叠加（no 保留校准值）');
+  assert.deepEqual(after.defaultGates, { yes: 0.85, no: 0.5 }, 'defaultGates 不被覆盖污染');
+
+  // 落盘持久性：重读文件链路（readDoc 路径）仍生效
+  const reread = decisionConfigModule.getPointRuntime('topic-shift');
+  assert.equal(reread.gates.yes, 0.9);
+});
+
+test('BK-05：gates patch 校验——未知键/非有限值/[0,1] 量表越界/不变量违反 全部拒绝', async (t) => {
+  const cfgDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-bk05b-'));
+  process.env.BIOF3_DECISION_CONFIG_PATH = path.join(cfgDir, 'decision-config.json');
+  t.after(() => {
+    delete process.env.BIOF3_DECISION_CONFIG_PATH;
+    try { fs.rmSync(cfgDir, { recursive: true, force: true }); } catch { /* 句柄延迟释放 */ }
+  });
+
+  assert.throws(
+    () => decisionConfigModule.setPointConfig('topic-shift', { gates: { ghost: 0.5 } }),
+    /不在注册表/, '未知键拒绝'
+  );
+  assert.throws(
+    () => decisionConfigModule.setPointConfig('topic-shift', { gates: { yes: 'high' } }),
+    /有限数值/, '非有限值拒绝'
+  );
+  assert.throws(
+    () => decisionConfigModule.setPointConfig('topic-shift', { gates: { yes: 1.5 } }),
+    /\[0,1\] 量表/, '[0,1] 量表键越界拒绝'
+  );
+  assert.throws(
+    () => decisionConfigModule.setPointConfig('topic-shift', { gates: { yes: 0.4 } }),
+    /不变量违反/, 'yes≤no 不变量拒绝（默认 no=0.5）'
+  );
+  // 合法写入后不残留被拒 patch
+  assert.deepEqual(decisionConfigModule.getPointRuntime('topic-shift').gates, { yes: 0.85, no: 0.5 });
+});
+
+test('BK-05：消费方迁移源码契约——本地常量第二真相退役，闸门经 getPointRuntime 解析', () => {
+  const convSrc = fs.readFileSync(path.join(root, 'core', 'biof3-server', 'helpers', 'conversations.js'), 'utf8');
+  assert.ok(!convSrc.includes('_JEV_YES') && !convSrc.includes('_JEV_NO'), 'topic-shift 本地常量退役');
+  assert.match(convSrc, /getPointRuntime\('topic-shift'\)\.gates/, 'topic-shift 闸门经配置解析');
+  const ksSrc = fs.readFileSync(path.join(root, 'core', 'biof3-server', 'helpers', 'knowledge-space.js'), 'utf8');
+  assert.ok(!ksSrc.includes('_JEV_RELEVANT_NOUL') && !ksSrc.includes('_JEV_INJECTION_NOUL'), 'knowledge-guard 本地常量退役');
+  assert.match(ksSrc, /getPointRuntime\('knowledge-guard'\)\.gates/, 'knowledge-guard 闸门经配置解析');
+});

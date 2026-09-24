@@ -470,8 +470,9 @@ async function searchKnowledge({ query, topK = INJECT_TOPK, embed, docId, spaceI
 // BLOCK-110 P2 — Jev 二跳常量：逐条语义复核上限 5 条（成本界）；注入拦截阈值初值
 // 0.70（plan P0 评审「注入样本实测后可调」——P2 注入样本拦截实测见契约测试）。
 const _JEV_GUARD_TOPK = 5;
-const _JEV_RELEVANT_NOUL = 0.5;
-const _JEV_INJECTION_NOUL = 0.7;
+// BLOCK-116 W2/BK-05 — 双闸门阈值经 getPointRuntime('knowledge-guard').gates 解析
+//（注册表校准默认 + 配置文件 gates patch 热调）；本地不再持第二真相常量。
+const _JEV_GUARD_FALLBACK_GATES = { relevantMin: 0.5, injectionMax: 0.7 };
 
 /**
  * Jev 二跳（P2）：逐候选语义复核。两种问题一次调用（同 state）：
@@ -481,6 +482,8 @@ const _JEV_INJECTION_NOUL = 0.7;
  */
 async function jevSecondStageGuard(query, hits) {
   const { askDecision } = require('./decision-api');
+  const jevGates = (require('./decision-config').getPointRuntime('knowledge-guard').gates)
+    || _JEV_GUARD_FALLBACK_GATES; // 防御兜底（注册表缺键时维持校准初值）
   const kept = [];
   const dropped = [];
   const injectionSuspects = [];
@@ -504,12 +507,12 @@ async function jevSecondStageGuard(query, hits) {
     if (!outcome.ok) { kept.push(hit); continue; }
     const relevant = outcome.answers.is_relevant && outcome.answers.is_relevant.noul;
     const injection = outcome.answers.has_injection && outcome.answers.has_injection.noul;
-    if (typeof injection === 'number' && injection >= _JEV_INJECTION_NOUL) {
+    if (typeof injection === 'number' && injection >= jevGates.injectionMax) {
       injectionSuspects.push({ chunkId: hit.chunkId, noul: injection });
       dropped.push({ chunkId: hit.chunkId, why: 'injection', noul: injection });
       continue;
     }
-    if (typeof relevant === 'number' && relevant < _JEV_RELEVANT_NOUL) {
+    if (typeof relevant === 'number' && relevant < jevGates.relevantMin) {
       dropped.push({ chunkId: hit.chunkId, why: 'irrelevant', noul: relevant });
       continue;
     }

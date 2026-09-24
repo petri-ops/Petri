@@ -59,6 +59,20 @@ function readDoc() {
   return seedDoc();
 }
 
+/** gates 部分覆盖合并：只接受注册表既有键、有限数值；registry 缺失/输入非法=原样返回默认。 */
+function mergeGates(registryGates, storedGates) {
+  if (!registryGates) return null;
+  const merged = { ...registryGates };
+  if (storedGates && typeof storedGates === 'object' && !Array.isArray(storedGates)) {
+    for (const [key, value] of Object.entries(storedGates)) {
+      if (key in registryGates && typeof value === 'number' && Number.isFinite(value)) {
+        merged[key] = value;
+      }
+    }
+  }
+  return merged;
+}
+
 /** 生效配置（env='0' 强制关最高；env='1' 在 envOverride 如实暴露但不强制——以配置文件为准）。 */
 function getPointRuntime(point) {
   const meta = RUNTIME_POINTS[point];
@@ -74,7 +88,10 @@ function getPointRuntime(point) {
     envOverride: env || null,
     threshold: typeof stored.threshold === 'number' ? stored.threshold : registry.threshold,
     defaultThreshold: registry.threshold ?? null,
-    gates: registry.gates || null,
+    // BK-05 阈值热调：gates 支持配置文件部分覆盖（stored.gates 键级 patch 叠在
+    // 校准默认之上）；defaultGates 恒暴露校准原值供 UI/审计对照。
+    gates: mergeGates(registry.gates || null, stored.gates),
+    defaultGates: registry.gates ? { ...registry.gates } : null,
     evidence: registry.evidence || null,
   };
 }
@@ -89,6 +106,16 @@ function getAllPointConfigs() {
     };
   });
 }
+
+/** gates 接点级不变量（合并默认+已存覆盖+新 patch 后校验；违反=拒绝写入）。 */
+const GATES_INVARIANTS = {
+  'topic-shift': [
+    { describe: 'yes（判切换下界）必须大于 no（判未切换上界）', ok: (g) => !(g.yes <= g.no) },
+  ],
+  'output-judge': [
+    { describe: 'fitRetry（RETRY 区下界）必须 ≤ fitPass（PASS 区下界）', ok: (g) => !(g.fitRetry > g.fitPass) },
+  ],
+};
 
 /** 更新接点配置（落盘）。非法接点 null；非法值 TypeError 由端点转 400。 */
 function setPointConfig(point, patch) {
@@ -106,6 +133,33 @@ function setPointConfig(point, patch) {
   doc.points[point] = { ...(doc.points[point] || {}) };
   if (patch.enabled !== undefined) doc.points[point].enabled = patch.enabled;
   if (patch.threshold !== undefined) doc.points[point].threshold = patch.threshold;
+  // BK-05 — gates 热调（键级 patch）：键必须存在于注册表 gates；量表键（注册表值 ∈ (0,1]）
+  // 限 [0,1]；写入前做接点级不变量校验（见 GATES_INVARIANTS），违反即 TypeError。
+  if (patch.gates !== undefined) {
+    if (!patch.gates || typeof patch.gates !== 'object' || Array.isArray(patch.gates)) {
+      throw new TypeError('gates 必须是对象（键=注册表 gate 名）');
+    }
+    const registryGates = (thresholds[point] && thresholds[point].gates) || {};
+    for (const [key, value] of Object.entries(patch.gates)) {
+      if (!(key in registryGates)) {
+        throw new TypeError(`gates 键 "${key}" 不在注册表（合法键：${Object.keys(registryGates).join(', ')}）`);
+      }
+      if (typeof value !== 'number' || !Number.isFinite(value)) {
+        throw new TypeError(`gates.${key} 必须是有限数值`);
+      }
+      const regValue = registryGates[key];
+      if (regValue > 0 && regValue <= 1 && (value < 0 || value > 1)) {
+        throw new TypeError(`gates.${key} 为 [0,1] 量表键（注册表校准值 ${regValue}），新值必须在 [0,1] 内`);
+      }
+    }
+    const merged = mergeGates(registryGates, { ...(doc.points[point].gates || {}), ...patch.gates });
+    for (const rule of GATES_INVARIANTS[point] || []) {
+      if (!rule.ok(merged)) {
+        throw new TypeError(`gates 不变量违反：${rule.describe}`);
+      }
+    }
+    doc.points[point].gates = { ...(doc.points[point].gates || {}), ...patch.gates };
+  }
   fs.mkdirSync(path.dirname(configPath()), { recursive: true });
   fs.writeFileSync(configPath(), JSON.stringify(doc, null, 2) + NEWLINE, 'utf8');
   return getPointRuntime(point);
