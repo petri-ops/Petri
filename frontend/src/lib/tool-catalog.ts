@@ -13,7 +13,7 @@ import { getApiPrefix } from './env';
 export interface CatalogInputField {
   id: string;
   label?: string;
-  type: 'file' | 'select' | 'number' | 'text' | 'checkbox' | string;
+  type: string; // 后端值域：'file' | 'select' | 'number' | 'text' | 'checkbox'
   required?: boolean;
   accept?: string;
   options?: { value: string; label: string }[];
@@ -24,7 +24,7 @@ export interface CatalogInputField {
 
 export interface CatalogOutputDef {
   id: string;
-  type: 'table' | 'plot' | 'file' | 'text' | string;
+  type: string; // 后端值域：'table' | 'plot' | 'file' | 'text'
   label?: string;
   filename?: string;
 }

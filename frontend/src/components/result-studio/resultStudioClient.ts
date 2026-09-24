@@ -201,16 +201,16 @@ export interface RevisionSourceProjection {
   revisionOrdinal: number;
   relativePath: string;
   entryPoint: string;
-  language: 'r' | 'python' | string;
-  origin: 'canonical_plugin' | 'execution_snapshot' | 'project_materialized' | 'unknown_legacy' | string;
+  language: string; // 后端值域：'r' | 'python' 等
+  origin: string; // 后端值域：'canonical_plugin' | 'execution_snapshot' | 'project_materialized' | 'unknown_legacy'
   rendererId: string;
-  scope: 'artifact_specific_materialization' | 'job_shared_execution_snapshot' | 'canonical_plugin_shared' | 'unknown_legacy' | string;
+  scope: string; // 后端值域：'artifact_specific_materialization' | 'job_shared_execution_snapshot' | 'canonical_plugin_shared' | 'unknown_legacy'
   content: string;
   sha256: string;
   openableRelativePath: string | null;
   parameters: { relativePath: string; sha256: string; values: Record<string, unknown> } | null;
   reproduction: {
-    status: 'unavailable' | 'available' | 'verified' | string;
+    status: string; // 后端值域：'unavailable' | 'available' | 'verified'
     requiresConfirmation: boolean;
     replayable: boolean;
     inputDrift: Array<{ artifactId: string | null; role: string | null; sha256: string | null; status: string }>;

@@ -231,14 +231,14 @@ function mapProject(p: Record<string, unknown>): Project {
   return {
     id: String(p.id),
     name: String((p.name as string) || ''),
-    description: p.description ? String((p.description)) : undefined,
+    description: typeof p.description === 'string' && p.description ? p.description : undefined,
     createdAt: String((p.created_at as string) || ''),
     updatedAt: String((p.updated_at as string) || ''),
-    modality: p.modality ? String((p.modality)) : undefined,
-    workspacePath: p.workspace_path ? String((p.workspace_path)) : undefined,
+    modality: typeof p.modality === 'string' && p.modality ? p.modality : undefined,
+    workspacePath: typeof p.workspace_path === 'string' && p.workspace_path ? p.workspace_path : undefined,
     workspaceKind: p.workspace_kind === 'ssh' ? 'ssh' : 'local',
-    sshHost: p.ssh_host ? String((p.ssh_host)) : undefined,
-    remotePath: p.remote_path ? String((p.remote_path)) : undefined,
+    sshHost: typeof p.ssh_host === 'string' && p.ssh_host ? p.ssh_host : undefined,
+    remotePath: typeof p.remote_path === 'string' && p.remote_path ? p.remote_path : undefined,
     status: p.status === 'archived' ? 'archived' : 'active',
     g0Baseline: baseline ? mapProjectG0Baseline(baseline) : undefined,
   };
@@ -248,23 +248,23 @@ function mapProjectG0Baseline(value: Record<string, unknown>): ProjectG0Baseline
   const compatibilityStatus = value.compatibilityStatus;
   return {
     recordVersion: Number(value.recordVersion || 1),
-    createdBaselineId: String((value.createdBaselineId || 'legacy-unversioned')),
-    createdBaselineVersion: value.createdBaselineVersion ? String((value.createdBaselineVersion)) : null,
-    createdManifestDigest: value.createdManifestDigest ? String((value.createdManifestDigest)) : null,
-    createdBundleDigest: value.createdBundleDigest ? String((value.createdBundleDigest)) : null,
-    openedBaselineId: String((value.openedBaselineId || '')),
-    openedBaselineVersion: String((value.openedBaselineVersion || '')),
-    openedManifestDigest: String((value.openedManifestDigest || '')),
-    openedBundleDigest: String((value.openedBundleDigest || '')),
+    createdBaselineId: String(((value.createdBaselineId as string) || 'legacy-unversioned')),
+    createdBaselineVersion: typeof value.createdBaselineVersion === 'string' && value.createdBaselineVersion ? value.createdBaselineVersion : null,
+    createdManifestDigest: typeof value.createdManifestDigest === 'string' && value.createdManifestDigest ? value.createdManifestDigest : null,
+    createdBundleDigest: typeof value.createdBundleDigest === 'string' && value.createdBundleDigest ? value.createdBundleDigest : null,
+    openedBaselineId: String(((value.openedBaselineId as string) || '')),
+    openedBaselineVersion: String(((value.openedBaselineVersion as string) || '')),
+    openedManifestDigest: String(((value.openedManifestDigest as string) || '')),
+    openedBundleDigest: String(((value.openedBundleDigest as string) || '')),
     compatibilityStatus:
       compatibilityStatus === 'blocked' || compatibilityStatus === 'migration_required'
         ? compatibilityStatus
         : 'compatible',
-    compatibilityReason: String((value.compatibilityReason || '')),
+    compatibilityReason: String(((value.compatibilityReason as string) || '')),
     executionAllowed: value.executionAllowed === true,
     migrationRequired: value.migrationRequired === true,
-    firstRecordedAt: value.firstRecordedAt ? String((value.firstRecordedAt)) : null,
-    lastOpenedAt: value.lastOpenedAt ? String((value.lastOpenedAt)) : null,
+    firstRecordedAt: typeof value.firstRecordedAt === 'string' && value.firstRecordedAt ? value.firstRecordedAt : null,
+    lastOpenedAt: typeof value.lastOpenedAt === 'string' && value.lastOpenedAt ? value.lastOpenedAt : null,
   };
 }
 
@@ -278,13 +278,13 @@ function mapToolJob(j: Record<string, unknown>): ToolJob {
     status: normalizeToolJobStatus(j.status),
     created_at: Number(j.created_at || 0),
     completed_at: j.completed_at ? Number(j.completed_at) : undefined,
-    error: j.error ? String((j.error)) : undefined,
-    name: j.name ? String((j.name)) : undefined,
-    project_id: j.project_id ? String((j.project_id)) : null,
-    conversationId: conversationId == null ? null : String((conversationId)),
+    error: typeof j.error === 'string' && j.error ? j.error : undefined,
+    name: typeof j.name === 'string' && j.name ? j.name : undefined,
+    project_id: typeof j.project_id === 'string' && j.project_id ? j.project_id : null,
+    conversationId: conversationId == null || typeof conversationId !== 'string' ? null : conversationId,
     // BLOCK-64 P1-a：后端 history SELECT 显式返回该列，此前 mapper 漏映射
     // → 指挥中心/结果库「远程」徽章生产环境永不渲染（测试手工注入掩盖断链）。
-    execution_target_id: j.execution_target_id != null ? String((j.execution_target_id)) : null,
+    execution_target_id: typeof j.execution_target_id === 'string' ? j.execution_target_id : null,
   };
 }
 
@@ -304,12 +304,12 @@ function mapDataset(d: Record<string, unknown>): Dataset {
     ossUrl: String((d.oss_url as string) || ''),
     size: Number(d.size || 0),
     uploadedAt: String((d.uploaded_at as string) || ''),
-    description: d.description ? String((d.description)) : undefined,
+    description: typeof d.description === 'string' && d.description ? d.description : undefined,
     nCells: d.n_cells ? Number(d.n_cells) : undefined,
     nGenes: d.n_genes ? Number(d.n_genes) : undefined,
-    metaUrl: d.meta_url ? String((d.meta_url)) : undefined,
-    featuresUrl: d.features_url ? String((d.features_url)) : undefined,
-    parentDatasetId: d.parent_dataset_id ? String((d.parent_dataset_id)) : undefined,
+    metaUrl: typeof d.meta_url === 'string' && d.meta_url ? d.meta_url : undefined,
+    featuresUrl: typeof d.features_url === 'string' && d.features_url ? d.features_url : undefined,
+    parentDatasetId: typeof d.parent_dataset_id === 'string' && d.parent_dataset_id ? d.parent_dataset_id : undefined,
     sourceDatasetIds: parseSourceDatasetIds(d.source_dataset_ids),
   };
 }

@@ -10,14 +10,14 @@ export function parseResultEditProgressEvent(obj: Record<string, unknown>): Resu
   return {
     resultEditProgressVersion: 1,
     sequence: typeof obj.sequence === 'number' ? obj.sequence : 0,
-    changeSetId: String(obj.changeSetId || ''),
-    stage: String(obj.stage || ''),
-    status: String(obj.status || ''),
-    publicPhase: obj.publicPhase ? String(obj.publicPhase) : undefined,
-    publicPhaseLabel: obj.publicPhaseLabel ? String(obj.publicPhaseLabel) : undefined,
-    reason: obj.reason ? String(obj.reason) : undefined,
-    toolJobId: obj.toolJobId ? String(obj.toolJobId) : undefined,
-    revisionId: obj.revisionId ? String(obj.revisionId) : undefined,
+    changeSetId: typeof obj.changeSetId === 'string' ? obj.changeSetId : '',
+    stage: typeof obj.stage === 'string' ? obj.stage : '',
+    status: typeof obj.status === 'string' ? obj.status : '',
+    publicPhase: typeof obj.publicPhase === 'string' && obj.publicPhase ? obj.publicPhase : undefined,
+    publicPhaseLabel: typeof obj.publicPhaseLabel === 'string' && obj.publicPhaseLabel ? obj.publicPhaseLabel : undefined,
+    reason: typeof obj.reason === 'string' && obj.reason ? obj.reason : undefined,
+    toolJobId: typeof obj.toolJobId === 'string' && obj.toolJobId ? obj.toolJobId : undefined,
+    revisionId: typeof obj.revisionId === 'string' && obj.revisionId ? obj.revisionId : undefined,
   };
 }
 
@@ -36,7 +36,7 @@ export function restoreResultEditProgressEvents(value: unknown): ResultEditProgr
 
 export function parseToolCallEvent(obj: Record<string, unknown>): ToolCallEvent {
   return {
-    name: String(obj.name || ''),
+    name: typeof obj.name === 'string' ? obj.name : '',
     args: obj.args && typeof obj.args === 'object' && !Array.isArray(obj.args)
       ? obj.args as Record<string, unknown>
       : {},
@@ -48,7 +48,7 @@ export function parseToolCallEvent(obj: Record<string, unknown>): ToolCallEvent 
 
 export function parseToolOutputEvent(obj: Record<string, unknown>): ToolOutputEvent {
   return {
-    name: String(obj.name || ''),
+    name: typeof obj.name === 'string' ? obj.name : '',
     traceId: typeof obj.traceId === 'string' ? obj.traceId : undefined,
     callId: typeof obj.callId === 'string' ? obj.callId : undefined,
     iteration: typeof obj.iteration === 'number' ? obj.iteration : undefined,
@@ -59,7 +59,7 @@ export function parseToolOutputEvent(obj: Record<string, unknown>): ToolOutputEv
 
 export function parseToolResultEvent(obj: Record<string, unknown>): ToolResultEvent {
   return {
-    name: String(obj.name || ''),
+    name: typeof obj.name === 'string' ? obj.name : '',
     summary: typeof obj.summary === 'string' ? obj.summary : '',
     iteration: typeof obj.iteration === 'number' ? obj.iteration : undefined,
     toolResult: obj.toolResult && typeof obj.toolResult === 'object'
