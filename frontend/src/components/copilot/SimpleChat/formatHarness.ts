@@ -26,6 +26,7 @@
 // commit.
 // ============================================================
 
+import { unknownText } from '@/lib/unknownText';
 import type { HarnessDiagnosticIssue } from '@/lib/harness-client';
 
 export function stringifyParamValue(value: unknown): string {
@@ -34,7 +35,7 @@ export function stringifyParamValue(value: unknown): string {
   try {
     return JSON.stringify(value);
   } catch {
-    return String(value);
+    return unknownText(value);
   }
 }
 
@@ -44,8 +45,8 @@ export function shortValue(value: unknown): string {
 }
 
 export function formatHarnessRepair(item: Record<string, unknown>): string {
-  const code = String(item.code || '');
-  const inputId = String(item.inputId || '参数');
+  const code = unknownText(item.code || '');
+  const inputId = unknownText(item.inputId || '参数');
   if (code === 'file_input_prefilled') {
     return `已为 ${inputId} 选择候选文件：${shortValue(item.value)}`;
   }
@@ -64,8 +65,8 @@ export function formatHarnessRepair(item: Record<string, unknown>): string {
 }
 
 export function formatHarnessWarning(item: Record<string, unknown>): string {
-  const code = String(item.code || '');
-  const inputId = String(item.inputId || '参数');
+  const code = unknownText(item.code || '');
+  const inputId = unknownText(item.inputId || '参数');
   if (code === 'missing_required_columns') {
     return `${inputId} 可能缺少必要列：${shortValue(item.missing)}`;
   }

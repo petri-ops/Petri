@@ -4,6 +4,7 @@
 // UI-305 P0.1 从 SimpleChat.tsx 尾部整簇平移（原 2211-2343 行），零行为变化。
 // ApprovalRepairHint 仅被 ApprovalCard 使用，随卡同文件。
 // ============================================================
+import { unknownText } from '@/lib/unknownText';
 import React from 'react';
 import { Icon } from '@/components/icons/Icon';
 import type { HarnessNextAction } from '@/lib/harness-client';
@@ -118,7 +119,7 @@ function ApprovalRepairHint({
       {repairItems.length > 0 && (
         <ul className="sc-approval-harness-list">
           {repairItems.slice(0, 4).map((item, index) => (
-            <li key={`${String(item.code || 'repair')}-${index}`}>{formatHarnessRepair(item)}</li>
+            <li key={`${unknownText(item.code || 'repair')}-${index}`}>{formatHarnessRepair(item)}</li>
           ))}
         </ul>
       )}

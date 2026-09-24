@@ -50,7 +50,7 @@ function makeFetch(treeByPrefix: Record<string, { name: string; type: 'file' | '
       const prefix = new URL(u, 'http://localhost').searchParams.get('prefix') || '';
       return jsonResp({ ok: true, entries: treeByPrefix[prefix] ?? [] });
     }
-    calls.push({ url: u, body: (init?.body ? JSON.parse(String(init.body)) : {}) as Record<string, unknown> });
+    calls.push({ url: u, body: (init?.body ? JSON.parse(init.body as string) : {}) as Record<string, unknown> });
     return jsonResp({ ok: true, entry: { type: 'file', size: 1, mtimeMs: 1 } });
   });
   return { calls, fn };

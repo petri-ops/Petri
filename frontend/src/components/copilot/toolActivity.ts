@@ -420,7 +420,7 @@ function summarizeToolCallSwitch(
       return { actionLabel: TOOL_ACTIVITY_VERBS.delegate_to_gewu_node, actionDetail: compactDetail(args.task) || '协作节点' };
     case 'workspace_read': {
       const path = compactDetail(args.path) || '文件';
-      const start = Number.isInteger(args.startLine) ? ` · 第 ${args.startLine} 行起` : '';
+      const start = Number.isInteger(args.startLine) ? ` · 第 ${Number(args.startLine)} 行起` : '';
       return { actionLabel: '已读取', actionDetail: `${path}${start}` };
     }
     case 'workspace_list':

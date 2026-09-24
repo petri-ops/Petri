@@ -1,4 +1,4 @@
-export type ResultTitleBarMode = 'chat' | 'result' | 'code' | 'compare' | 'history' | string;
+export type ResultTitleBarMode = string; // 后端值域：'chat' | 'result' | 'code' | 'compare' | 'history'
 
 const MODE_LABELS: Record<string, string> = {
   result: '结果',

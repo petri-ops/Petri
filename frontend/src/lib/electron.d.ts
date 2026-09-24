@@ -32,7 +32,7 @@ export interface TelemetryPayload {
 /** Stage 3 M1: one entry from the Harness provisioning ledger. */
 export interface HarnessCapabilityEntry {
   capabilityId: string;
-  kind: 'bundle' | 'runtime' | string;
+  kind: string; // 后端值域：'bundle' | 'runtime'
   version: string;
   sha256: string | null;
   url: string;

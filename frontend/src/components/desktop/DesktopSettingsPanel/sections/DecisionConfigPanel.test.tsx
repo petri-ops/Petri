@@ -90,7 +90,7 @@ describe('DecisionConfigPanel（BLOCK-116 P4 配置面）', () => {
     const { fn, calls } = mockFetch((url, init) => {
       if (init?.method === 'PUT') {
         const body: Record<string, unknown> = typeof init.body === 'string' ? JSON.parse(init.body) as Record<string, unknown> : {};
-        const target = pointsFixture.find((pp) => url.includes('marker-celltype')) ?? pointsFixture[0];
+        const target = pointsFixture.find((_pp) => url.includes('marker-celltype')) ?? pointsFixture[0];
         return { status: 200, body: { status: 'ok', point: { ...target, ...body } } };
       }
       return { status: 200, body: { status: 'ok', points: pointsFixture } };

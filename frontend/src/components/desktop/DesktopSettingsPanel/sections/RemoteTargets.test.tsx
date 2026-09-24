@@ -22,7 +22,7 @@ const PEER = {
 };
 
 function stubFetch(opts: { peers?: unknown[]; peersOk?: boolean; registered?: unknown[] } = {}) {
-  const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+  const fetchMock = vi.fn((input: string, init?: RequestInit) => {
     const url = String(input);
     if (url.endsWith('/federation/peers') && (!init?.method || init.method === 'GET')) {
       return fetchJson({ ok: opts.peersOk !== false, version: 1, peers: opts.peers ?? [PEER] });

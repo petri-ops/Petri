@@ -96,6 +96,7 @@ async function main() {
     log('SKIP 场景 A（BIOF57_SKIP_A=1，A 证据沿用上一轮）');
     results.assertions.push({ name: '场景 A（沿用已通过证据）', pass: true, detail: 'skipped by flag' });
   if (process.env.BIOF57_SKIP_A !== '1') {
+    // 场景 A 在 else 分支执行
   } else
   await client.send('Page.navigate', { url: `http://localhost:3000/project/${PROJECT_ID}/settings` });
   await delay(3500);

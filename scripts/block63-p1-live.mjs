@@ -1,4 +1,5 @@
 'use strict';
+import { spawn } from 'node:child_process';
 // BLOCK-104 P4 — Windows 专属脚本入口护栏：非 win32 直接退出，杜绝半途怪异失败。
 if (process.platform !== 'win32') {
   console.error(`[platform] block63-p1-live.mjs 仅支持 Windows（当前 ${process.platform}）。`);

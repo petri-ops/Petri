@@ -1,3 +1,4 @@
+import { unknownText } from './unknownText';
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
 import { endpointBaseUrl } from './model-provider-options';
 
@@ -20,7 +21,7 @@ export interface ParsedEndpointTransfer {
 const CSV_HEADERS = ['id', 'supplier', 'baseUrl', 'defaultModel', 'provider', 'hasApiKey'];
 
 function clean(value: unknown): string {
-  return typeof value === 'string' ? value.trim() : value == null ? '' : String(value).trim();
+  return typeof value === 'string' ? value.trim() : value == null ? '' : unknownText(value).trim();
 }
 
 function boolValue(value: unknown): boolean | undefined {
@@ -56,7 +57,7 @@ function normalizeProfile(input: unknown, index: number): EndpointTransferProfil
 }
 
 function csvEscape(value: unknown): string {
-  const text = value == null ? '' : String(value);
+  const text = unknownText(value);
   return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 

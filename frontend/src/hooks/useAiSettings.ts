@@ -25,6 +25,7 @@
 //     `aiSettings.save(...)` handles durability.
 // ============================================================
 
+import { unknownText } from '@/lib/unknownText';
 import { useCallback, useEffect, useState } from 'react';
 import { getBridge } from '@/lib/desktopBridge';
 import {
@@ -122,7 +123,7 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
             .map(normalizeLegacyUserModelProfile)
         : [];
       let presets = presetsRaw.length > 0 ? presetsRaw : DEFAULT_CHAT_MODEL_PRESETS;
-      const activeEndpointId = String(
+      const activeEndpointId = unknownText(
         (raw?.model_role_bindings as Record<string, unknown> | undefined)?.chat ||
           raw?.active_chat_model_id || presets[0]?.id || DEFAULT_CHAT_MODEL_PRESETS[0].id
       );

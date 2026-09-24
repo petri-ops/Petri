@@ -210,7 +210,7 @@ export function getProjectionAiSettingsBridge() {
 
 export type ProjectionDataBridgeName = 'skills' | 'plugins' | 'packs' | 'runtime' | 'aiSettings';
 
-export function getProjectionDataBridge(name: ProjectionDataBridgeName): unknown | null {
+export function getProjectionDataBridge(name: ProjectionDataBridgeName): unknown {
   if (!isProjectionEnv()) return null;
   if (name === 'skills') return skillsBridge;
   if (name === 'plugins') return pluginsBridge;

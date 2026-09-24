@@ -69,7 +69,7 @@ export const TERMINAL_THEMES: Readonly<Record<TerminalThemeName, ITheme>> = {
  * Resolve an explicit application theme to the matching xterm palette.
  * Unknown or missing values use the dark palette as a safe fallback.
  */
-export function pickTerminalTheme(name?: TerminalThemeName | string | null): ITheme {
+export function pickTerminalTheme(name?: string | null): ITheme {
   const resolved: TerminalThemeName = name === 'light' ? 'light' : 'dark';
   return TERMINAL_THEMES[resolved];
 }

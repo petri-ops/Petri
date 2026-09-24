@@ -213,8 +213,32 @@ export function triggerDownload(
 
 export function TableRenderer({ node }: { node: ResultNode }) {
   const payload = node.payload;
+  const tablePayload = isTablePayload(payload) ? payload : null;
 
-  if (!isTablePayload(payload)) {
+  // rules-of-hooks：hooks 必须无条件先于条件早退调用（BLOCK-105 §7 tail 真修）；
+  // tablePayload 空值分支在下载回调内与渲染早退处统一守卫。
+  const csvFilename = useMemo(
+    () => buildFilename(node.title, node.createdAt, 'csv'),
+    [node.title, node.createdAt],
+  );
+  const markdownFilename = useMemo(
+    () => buildFilename(node.title, node.createdAt, 'md'),
+    [node.title, node.createdAt],
+  );
+
+  const onDownloadCsv = useCallback(() => {
+    if (!tablePayload) return;
+    const content = buildCsv(tablePayload.columns, tablePayload.rows);
+    triggerDownload(csvFilename, content, 'text/csv;charset=utf-8');
+  }, [tablePayload, csvFilename]);
+
+  const onDownloadMarkdown = useCallback(() => {
+    if (!tablePayload) return;
+    const content = buildMarkdown(tablePayload.columns, tablePayload.rows);
+    triggerDownload(markdownFilename, content, 'text/markdown;charset=utf-8');
+  }, [tablePayload, markdownFilename]);
+
+  if (!tablePayload) {
     return (
       <div
         data-testid="result-renderer-table-fallback"
@@ -230,26 +254,7 @@ export function TableRenderer({ node }: { node: ResultNode }) {
     );
   }
 
-  const { columns, rows } = payload;
-
-  const csvFilename = useMemo(
-    () => buildFilename(node.title, node.createdAt, 'csv'),
-    [node.title, node.createdAt],
-  );
-  const markdownFilename = useMemo(
-    () => buildFilename(node.title, node.createdAt, 'md'),
-    [node.title, node.createdAt],
-  );
-
-  const onDownloadCsv = useCallback(() => {
-    const content = buildCsv(columns, rows);
-    triggerDownload(csvFilename, content, 'text/csv;charset=utf-8');
-  }, [columns, rows, csvFilename]);
-
-  const onDownloadMarkdown = useCallback(() => {
-    const content = buildMarkdown(columns, rows);
-    triggerDownload(markdownFilename, content, 'text/markdown;charset=utf-8');
-  }, [columns, rows, markdownFilename]);
+  const { columns, rows } = tablePayload;
 
   return (
     <div

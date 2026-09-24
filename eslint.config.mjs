@@ -37,7 +37,7 @@ export default tseslint.config(
   // ── 基线：所有 JS（src/ core/ scripts/ 等）──
   js.configs.recommended,
   {
-    files: ['src/**/*.js', 'core/**/*.js', 'core/**/*.cjs', 'scripts/**/*.{js,mjs,cjs}', 'test/**/*.{mjs,cjs,js}'],
+    files: ['build/**/*.js', 'src/**/*.js', 'core/**/*.js', 'core/**/*.cjs', 'scripts/**/*.{js,mjs,cjs}', 'test/**/*.{mjs,cjs,js}'],
     languageOptions: {
       globals: { ...globals.node, ...globals.browser },
     },
@@ -73,6 +73,8 @@ export default tseslint.config(
       'security/detect-non-literal-fs-filename': 'off',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
+      // BLOCK-97 同款 best-effort catch 惯例对 frontend TS 同样成立（BLOCK-105 §7 tail 定性）：
+      'no-empty': ['error', { allowEmptyCatch: true }],
     },
   },
 

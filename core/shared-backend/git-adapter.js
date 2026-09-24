@@ -1,6 +1,6 @@
 'use strict';
 
-const { execFileSync } = require('child_process');
+const { execFileSync, execFile } = require('child_process');
 const { randomUUID } = require('crypto');
 const fs = require('fs');
 const path = require('path');

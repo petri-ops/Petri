@@ -191,7 +191,7 @@ function normalizeProjectIds(
   ids: ReadonlySet<string> | string[] | null | undefined
 ): string[] {
   if (!ids) return [];
-  if (ids instanceof Set) return Array.from(ids);
+  if (ids instanceof Set) return Array.from(ids as Set<string>);
   // After the Set branch TS still widens the union; copy into a fresh
   // array so downstream .filter / .map calls see string[].
   return [...ids];

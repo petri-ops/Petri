@@ -1,3 +1,4 @@
+import { unknownText } from '@/lib/unknownText';
 import React from 'react';
 import {
   buildColumnSelection,
@@ -47,7 +48,7 @@ function scatterPointerPosition(svg: SVGSVGElement, clientX: number, clientY: nu
 }
 
 function numeric(value: unknown): number | null {
-  const text = String(value ?? '').trim();
+  const text = unknownText(value).trim();
   const ratio = text.match(/^(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)$/);
   if (ratio) {
     const denominator = Number(ratio[2]);

@@ -34,7 +34,7 @@ export interface LoopRunCompact {
   createdAt: string;
   updatedAt: string;
   /** AGENT-CONCURRENCY: primary vs subagent identity of this LoopRun. */
-  kind?: 'primary' | 'subagent' | string | null;
+  kind?: string | null; // 后端值域：'primary' | 'subagent'
   /** Parent primary LoopRun when kind === 'subagent'. */
   parentLoopRunId?: string | null;
   /** Backend task id that drives this LoopRun (used for event-stream resubscription). */
@@ -45,7 +45,7 @@ export interface LoopIterationCompact {
   iterationId: string;
   loopRunId: string;
   sequence: number;
-  decision: LoopDecision | string;
+  decision: string; // LoopDecision 字符串形式
   decisionReasonCode: string;
   status: string;
   publicConclusion: string | null;
@@ -99,7 +99,7 @@ export interface LoopRecovery {
   lastIteration: {
     iterationId: string;
     sequence: number;
-    decision: LoopDecision | string;
+    decision: string; // LoopDecision 字符串形式
     decisionReasonCode: string;
     status: string;
     publicConclusion: string | null;
@@ -151,7 +151,7 @@ export interface LoopIterationEvent {
   loopRunId: string;
   iterationId: string;
   sequence: number;
-  decision: LoopDecision | string;
+  decision: string; // LoopDecision 字符串形式
   decisionReasonCode: string;
   publicConclusion: string;
   status: string;
@@ -285,17 +285,17 @@ export async function abortLoopRun(
 // ---------------------------------------------------------------------------
 
 /** A loop is "done successfully" ONLY when the backend says completed. */
-export function isLoopComplete(status: LoopStatus | string | null | undefined): boolean {
+export function isLoopComplete(status: string | null | undefined): boolean {
   return status === 'completed';
 }
 
 /** failed/blocked/cancelled are terminal-but-not-success; must never show green. */
-export function isLoopUnsuccessfulTerminal(status: LoopStatus | string | null | undefined): boolean {
+export function isLoopUnsuccessfulTerminal(status: string | null | undefined): boolean {
   return status === 'failed' || status === 'blocked' || status === 'cancelled';
 }
 
 /** Map a loop status to a compact, honest phase label for the chat/summary. */
-export function loopStatusLabel(status: LoopStatus | string | null | undefined): string {
+export function loopStatusLabel(status: string | null | undefined): string {
   switch (status) {
     case 'planned': return '已规划';
     case 'running': return '执行中';

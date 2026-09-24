@@ -3,6 +3,7 @@
  * 显示技能的完整信息、参数配置和执行选项
  */
 
+import { unknownText } from '@/lib/unknownText';
 import React, { useCallback, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import type { Skill, ParameterSchema } from '@/hooks/useSkillStore';
@@ -67,7 +68,7 @@ function ParameterField({
           <select
             id={inputId}
             className={styles.select}
-            value={String(value ?? spec.default ?? '')}
+            value={unknownText(value ?? spec.default)}
             onChange={handleChange}
           >
             {spec.options?.map((opt) => (
@@ -81,7 +82,7 @@ function ParameterField({
             type="number"
             id={inputId}
             className={styles.numberInput}
-            value={String(value ?? spec.default ?? '')}
+            value={unknownText(value ?? spec.default)}
             min={spec.min}
             max={spec.max}
             step={spec.step}
@@ -92,12 +93,12 @@ function ParameterField({
             type="text"
             id={inputId}
             className={styles.textInput}
-            value={String(value ?? spec.default ?? '')}
+            value={unknownText(value ?? spec.default)}
             onChange={handleChange}
           />
         )}
         {spec.type !== 'boolean' && spec.default !== undefined && (
-          <span className={styles.paramDefault}>默认: {String(spec.default)}</span>
+          <span className={styles.paramDefault}>默认: {unknownText(spec.default)}</span>
         )}
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { unknownText } from './unknownText';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 
 /** A structural hypothesis produced by the bounded backend profiler. */
@@ -8,7 +9,7 @@ export interface DataProfileCandidate {
   basis?: string;
 }
 
-export type DataProfileDiagnosticSeverity = 'warning' | 'blocked' | 'error' | 'info' | string;
+export type DataProfileDiagnosticSeverity = string; // 后端值域：'warning' | 'blocked' | 'error' | 'info'
 
 /** A diagnostic may contain bounded, code-specific evidence from the backend. */
 export interface DataProfileDiagnostic {
@@ -581,7 +582,7 @@ function observationDimensions(profile: DataProfileResult): { rows: string; colu
 }
 
 function promptCandidateLabel(candidate: DataProfileCandidate): string {
-  const label = candidate.candidate.replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, 80);
+  const label = unknownText(candidate.candidate).replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, 80);
   const confidence = Math.max(0, Math.min(1, candidate.confidence));
   return `${label} (${confidence.toFixed(3)})`;
 }

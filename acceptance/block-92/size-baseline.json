@@ -160,7 +160,7 @@
       "wave": "C",
       "module": "P-01",
       "lines": 1253,
-      "sha256": "dd57ab158e9370c5dc63eafaa4e082eccea27bddae2bae4bb1fb8ff2698c392d"
+      "sha256": "32f3f9ebb2fc5b56146f9d958e4cbecf51d1529efa8cbc6b07f19f1162b6ddb2"
     },
     {
       "path": "src/ipc/working-tree-review.js",

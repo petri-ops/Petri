@@ -100,7 +100,7 @@ export interface HarnessParamRepair {
 
 export interface HarnessDiagnosticIssue {
   code: string;
-  severity?: 'error' | 'warning' | string;
+  severity?: string; // 后端值域：'error' | 'warning'
   recoverable?: boolean;
   inputId?: string | null;
   message?: string;
@@ -122,8 +122,8 @@ export interface HarnessNextAction {
 
 export interface HarnessRunDiagnostics {
   ok: boolean;
-  status: 'ready' | 'needs_review' | 'blocked' | string;
-  readiness?: 'ready' | 'recoverable' | 'blocked' | string;
+  status: string; // 后端值域：'ready' | 'needs_review' | 'blocked'
+  readiness?: string; // 后端值域：'ready' | 'recoverable' | 'blocked'
   toolId?: string | null;
   repairs?: Array<Record<string, unknown>>;
   warnings?: Array<Record<string, unknown>>;

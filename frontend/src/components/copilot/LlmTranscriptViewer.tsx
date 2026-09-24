@@ -10,6 +10,7 @@
  * 无会话渲染诚实空态。
  */
 
+import { unknownText } from '@/lib/unknownText';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Icon } from '@/components/icons/Icon';
@@ -48,7 +49,7 @@ function messageText(message: LlmTranscriptMessage): string {
   try {
     return JSON.stringify(content, null, 2);
   } catch {
-    return String(content);
+    return unknownText(content);
   }
 }
 

@@ -31,7 +31,7 @@ function jsonResponse(body: unknown, status = 200): Response {
 
 /** 按路径后缀路由的 fetch mock（URL 带完整 origin，须 endsWith 匹配）。 */
 function mockFetchByPath(routes: Record<string, unknown>): void {
-  vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+  vi.stubGlobal('fetch', vi.fn(async (input: string) => {
     const url = String(input);
     const hit = Object.entries(routes).find(([path]) => url.endsWith(path));
     if (!hit) throw new Error(`unexpected fetch: ${url}`);
@@ -176,7 +176,7 @@ describe('projectionDataBridges', () => {
   });
 
   it('aiSettings.save posts to /api/ai/settings and returns { ok: true } per ai-settings:save contract', async () => {
-    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const fetchMock = vi.fn(async (input: string, init?: RequestInit) => {
       expect(String(input).endsWith('/api/ai/settings')).toBe(true);
       expect(init?.method).toBe('POST');
       return jsonResponse({ status: 'ok' });

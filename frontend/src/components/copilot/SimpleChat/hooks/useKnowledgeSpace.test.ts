@@ -50,7 +50,7 @@ describe('BLOCK-69 useKnowledgeSpaceToggle', () => {
     let serverEnabled = false;
     const fetchMock = mockFetch((url, init) => {
       if (url.includes('/knowledge/space') && init?.method === 'POST') {
-        serverEnabled = (JSON.parse(String(init.body)) as { enabled?: boolean }).enabled ?? false;
+        serverEnabled = (JSON.parse(typeof init.body === 'string' ? init.body : '{}') as { enabled?: boolean }).enabled ?? false;
         return { status: 'ok' };
       }
       return spaceBody(serverEnabled);
@@ -61,7 +61,7 @@ describe('BLOCK-69 useKnowledgeSpaceToggle', () => {
       await result.current.toggle();
     });
     await waitFor(() => expect(result.current.enabled).toBe(true));
-    const postCalls = fetchMock.mock.calls.filter((call) => String(call[0]).includes('/knowledge/space') && (call[1])?.method === 'POST');
+    const postCalls = fetchMock.mock.calls.filter((call) => typeof call[0] === 'string' && call[0].includes('/knowledge/space') && (call[1])?.method === 'POST');
     expect(postCalls.length).toBe(1);
     expect((JSON.parse(String(postCalls[0][1] ? (postCalls[0][1] as { body?: string }).body : '{}')) as { enabled?: boolean }).enabled).toBe(true);
   });

@@ -3,6 +3,7 @@
 // 取消、act 与 run_tool 确认回执。
 // ============================================================
 
+import { unknownText } from '@/lib/unknownText';
 import { getApiPrefix, getAuthHeader } from './apiBase';
 import { ensureOnlineOrThrow } from './offline';
 
@@ -87,9 +88,9 @@ export async function resumeAgentTask(taskId: string): Promise<{
     throw new Error(String((body as { error?: string }).error || `HTTP ${resp.status}`));
   }
   return {
-    taskId: String(body.taskId),
+    taskId: unknownText(body.taskId),
     conversationId: typeof body.conversationId === 'string' ? body.conversationId : null,
-    resumeOfTaskId: String(body.resumeOfTaskId || taskId),
+    resumeOfTaskId: unknownText(body.resumeOfTaskId || taskId),
     interruptedAt: typeof body.interruptedAt === 'string' ? body.interruptedAt : null,
     lastModelCall: (body.lastModelCall as ResumeLastModelCall | null) || null,
   };

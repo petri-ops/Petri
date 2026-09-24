@@ -1,3 +1,4 @@
+import { unknownText } from '@/lib/unknownText';
 import { useEffect, useRef, useState } from 'react';
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 import {
@@ -127,7 +128,7 @@ export function useEndpointProfilesEditor(): {
     setFallbackEnabled(s.model_fallback_enabled === true);
     setFallbackBindings((s.model_fallback_bindings as Partial<Record<ModelRole, string[]>>) || {});
     setCredentialStatus(statuses);
-    setCredentialBackend(String(s.credential_backend || 'local'));
+    setCredentialBackend(unknownText(s.credential_backend || 'local'));
     await refreshAiSettings();
     setTelemetryEnabled(s.telemetry_enabled === true);
     profiles

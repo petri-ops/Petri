@@ -1,3 +1,4 @@
+import { unknownText } from '@/lib/unknownText';
 import React from 'react';
 import { Icon } from '@/components/icons/Icon';
 import type {
@@ -76,7 +77,7 @@ export function ResultEditControlField({
     return (
       <select
         id={inputId}
-        value={String(value ?? '')}
+        value={unknownText(value)}
         onChange={(event) => onChange(event.target.value)}
       >
         {(control.options || []).map((option) => (
@@ -110,7 +111,7 @@ export function ResultEditControlField({
       <input
         id={inputId}
         type="number"
-        value={value === null || value === undefined ? '' : String(value)}
+        value={unknownText(value)}
         {...(control.minimum === null || control.minimum === undefined ? {} : { min: control.minimum })}
         {...(control.maximum === null || control.maximum === undefined ? {} : { max: control.maximum })}
         step="any"
@@ -125,7 +126,7 @@ export function ResultEditControlField({
     <input
       id={inputId}
       type="text"
-      value={value === null || value === undefined ? '' : String(value)}
+      value={unknownText(value)}
       onChange={(event) => onChange(event.target.value)}
     />
   );

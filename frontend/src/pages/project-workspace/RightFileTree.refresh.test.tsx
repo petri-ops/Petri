@@ -14,7 +14,7 @@ import type { ActiveWorkspaceFile } from './types';
 const treeCalls: string[] = [];
 
 globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
-  const url = String(input);
+  const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
   if (url.includes('/tree')) {
     treeCalls.push(url);
     return new Response(JSON.stringify({

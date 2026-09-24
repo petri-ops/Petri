@@ -98,7 +98,7 @@ export function recordConversationFileChange(
     iteration: attribution?.iteration,
     tool: attribution?.tool,
   });
-  changesByConversation.set(conversationId as string, bucket);
+  changesByConversation.set(conversationId, bucket);
   invalidateSnapshot(conversationId);
   emitChange();
 }
@@ -186,7 +186,7 @@ export function mergeConversationFileChanges(
       tool: typeof item.tool === 'string' ? item.tool : undefined,
     });
   }
-  changesByConversation.set(conversationId as string, bucket);
+  changesByConversation.set(conversationId, bucket);
   invalidateSnapshot(conversationId);
   emitChange();
 }

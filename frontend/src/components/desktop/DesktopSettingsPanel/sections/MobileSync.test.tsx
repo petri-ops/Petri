@@ -15,7 +15,7 @@ describe('MobileSyncPanel 手机连接面板（BLOCK-70 / UI-354）', () => {
   });
 
   it('未开启：状态点灰 + 诚实提示 + 「开启」按钮，无二维码', async () => {
-    const fetchMock = vi.fn((input: RequestInfo | URL) => {
+    const fetchMock = vi.fn((input: string) => {
       const url = String(input);
       if (url.endsWith('/mobile/status')) {
         return fetchJson({
@@ -39,7 +39,7 @@ describe('MobileSyncPanel 手机连接面板（BLOCK-70 / UI-354）', () => {
   it('已开启：自动出码（无需点击）、复制链接只显示主机不裸露 token', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
-    const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+    const fetchMock = vi.fn((input: string, init?: RequestInit) => {
       const url = String(input);
       if (url.endsWith('/mobile/status')) {
         return fetchJson({
@@ -69,7 +69,7 @@ describe('MobileSyncPanel 手机连接面板（BLOCK-70 / UI-354）', () => {
   });
 
   it('设备区：只显示活跃设备（已吊销彻底不渲染）+ 空态 + 相对时间', async () => {
-    const fetchMock = vi.fn((input: RequestInfo | URL, _init?: RequestInit) => {
+    const fetchMock = vi.fn((input: string, _init?: RequestInit) => {
       const url = String(input);
       if (url.endsWith('/mobile/status')) {
         return fetchJson({
@@ -106,7 +106,7 @@ describe('MobileSyncPanel 手机连接面板（BLOCK-70 / UI-354）', () => {
   });
 
   it('空设备态：显示引导文案，无「全部吊销」', async () => {
-    const fetchMock = vi.fn((input: RequestInfo | URL) => {
+    const fetchMock = vi.fn((input: string) => {
       const url = String(input);
       if (url.endsWith('/mobile/status')) {
         return fetchJson({

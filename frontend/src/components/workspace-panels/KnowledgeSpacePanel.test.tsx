@@ -229,7 +229,7 @@ describe('BLOCK-69 KnowledgeSpacePanel', () => {
     });
     const pasteCall = (fetchMock.mock.calls as unknown[][]).find((call) => String(call[0]).includes('/paste'));
     const init = (pasteCall ? pasteCall[1] : undefined) as RequestInit | undefined;
-    const body = JSON.parse(String((init && init.body) || '{}')) as { name: string; text: string };
+    const body = JSON.parse(typeof init?.body === 'string' ? init.body : '{}') as { name: string; text: string };
     expect(body.name).toBe('笔记');
     expect(body.text).toContain('TP53');
     // 成功后收起粘贴箱
@@ -263,7 +263,7 @@ describe('BLOCK-69 KnowledgeSpacePanel', () => {
     });
     const call = (fetchMock.mock.calls as unknown[][]).find((c) => String(c[0]).includes('batch-delete'));
     const init = (call ? call[1] : undefined) as RequestInit | undefined;
-    const body = JSON.parse(String((init && init.body) || '{}')) as { ids: string[] };
+    const body = JSON.parse(typeof init?.body === 'string' ? init.body : '{}') as { ids: string[] };
     expect(body.ids.sort()).toEqual(['kdoc_a', 'kdoc_b']);
   });
 

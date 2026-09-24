@@ -19,9 +19,9 @@ function unpackPacks(payload: unknown): Array<{
   name?: string;
   requiresRuntimes?: Array<{ pluginId: string; version?: string }>;
 }> {
-  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload)) return payload as Array<{ packId: string; name?: string; requiresRuntimes?: Array<{ pluginId: string; version?: string }>; }>;
   const env = payload as { ok?: boolean; packs?: unknown } | null;
-  return env && Array.isArray(env.packs) ? env.packs : [];
+  return env && Array.isArray(env.packs) ? (env.packs as Array<{ packId: string; name?: string; requiresRuntimes?: Array<{ pluginId: string; version?: string }>; }>) : [];
 }
 
 /** 已安装且契约声明了运行时的领域包列表（名称缺失回退 packId——旧记录兼容）。 */

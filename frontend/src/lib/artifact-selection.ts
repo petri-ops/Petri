@@ -1,3 +1,4 @@
+import { unknownText } from './unknownText';
 /**
  * artifact-selection.ts
  *
@@ -183,7 +184,7 @@ export function readEntityId(
   if (!row || !manifest.idField) return null;
   const raw = row[manifest.idField];
   if (raw == null) return null;
-  const value = String(raw).trim();
+  const value = unknownText(raw).trim();
   return value || null;
 }
 
@@ -451,9 +452,9 @@ export function fromPersistedSelection(
   const origin = (display?.origin as SelectionOrigin) || 'row_select';
   return {
     contractVersion: 1,
-    artifactId: String(persisted.artifactId || ''),
+    artifactId: unknownText(persisted.artifactId || ''),
     revisionId: (persisted.revisionId as string) || null,
-    entityType: String(persisted.entityType || 'row'),
+    entityType: unknownText(persisted.entityType || 'row'),
     origin,
     entityIds,
     entityIdCount: Number.isFinite(rawCount) ? rawCount : entityIds.length,
@@ -467,7 +468,7 @@ export function fromPersistedSelection(
     sort: Array.isArray(persisted.sort) ? (persisted.sort as SelectionSortSpec[]) : [],
     region: (display?.region as ArtifactSelection['region']) || null,
     durable: display?.durable === undefined ? true : display.durable === true,
-    createdAt: String(persisted.createdAt || new Date().toISOString()),
+    createdAt: unknownText(persisted.createdAt || new Date().toISOString()),
     selectionId: typeof persisted.selectionId === 'string' ? persisted.selectionId : null,
   };
 }

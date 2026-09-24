@@ -6,6 +6,7 @@
 // P1.2 / P1.3 land.
 // ============================================================
 
+import { unknownText } from '@/lib/unknownText';
 import type { ResultNode } from '../types';
 
 export function TextRenderer({ node }: { node: ResultNode }) {
@@ -19,7 +20,7 @@ export function TextRenderer({ node }: { node: ResultNode }) {
           try {
             return JSON.stringify(raw, null, 2);
           } catch {
-            return String(raw);
+            return unknownText(raw);
           }
         })();
 

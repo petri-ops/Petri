@@ -168,7 +168,7 @@ export interface StreamChatOptions {
   }) => void;
   /** BLOCK-56 P1 — 模型降级事件（请求级/任务级），info.message 为用户可读文案。 */
   onModelFallback?: (info: {
-    scope?: 'request_level' | 'task_level' | string;
+    scope?: string; // 后端值域：'request_level' | 'task_level'
     fromProfileId?: string | null;
     toProfileId?: string | null;
     toProfileLabel?: string | null;

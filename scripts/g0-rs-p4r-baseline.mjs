@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 /**
  * G0-RS-P4R-0 — machine-capture the real open-result baseline.
  *
