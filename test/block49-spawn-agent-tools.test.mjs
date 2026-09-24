@@ -371,3 +371,29 @@ test('模型可见投影：spawn/list/wait 保留 agentId 等关键字段（bloc
   const waitSeen = JSON.parse(serializeToolResultForModel(waitEnvelope));
   assert.deepEqual(waitSeen.data.summary, { text: '结论文本' });
 });
+
+// ── BLOCK-119 加映 3 — goals 上岗 ──
+
+test('加映 3：spawn_agent goals 落 params + 任务书判据段', async () => {
+  const userId = createUser();
+  const parent = createPrimaryParent(userId);
+  const res = await spawn_agent(
+    { task: '核对依赖数量', goals: ['给出 dependencies 总数', '列出 scripts 文件名'] },
+    { userId, taskId: parent.taskId }
+  );
+  assert.equal(res.ok, true);
+  const child = agentTaskStore.getAgentTask(res.agentId);
+  assert.deepEqual(child.params.goals, ['给出 dependencies 总数', '列出 scripts 文件名']);
+  assert.match(child.params.messages[0].content, /【完成判据（终态汇报将逐条核对完备性，未达成会被点名）】/);
+  assert.match(child.params.messages[0].content, /1\. 给出 dependencies 总数/);
+  assert.match(child.params.messages[0].content, /2\. 列出 scripts 文件名/);
+});
+
+test('加映 3：normalizeGoals 校验（fail-closed）', () => {
+  const { normalizeGoals } = __test;
+  assert.deepEqual(normalizeGoals(undefined).goals, []);
+  assert.deepEqual(normalizeGoals([' a ', '', 'b ']).goals, ['a', 'b']);
+  assert.equal(normalizeGoals('not-array').ok, false);
+  assert.equal(normalizeGoals(['1', '2', '3', '4', '5', '6']).ok, false, '>5 条拒绝');
+  assert.equal(normalizeGoals(['x'.repeat(201)]).ok, false, '单条超长拒绝');
+});

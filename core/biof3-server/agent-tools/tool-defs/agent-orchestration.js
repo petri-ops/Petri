@@ -63,6 +63,12 @@ module.exports = [
             "type": "string",
             "description": "追加的子任务描述"
           },
+          "goals": {
+            "type": "array",
+            "items": { "type": "string" },
+            "maxItems": 5,
+            "description": "可选，新的可核对目标清单（1-5 条）；不传则继承原子智能体的 goals"
+          },
           "model": {
             "type": "string",
             "description": "可选：指定模型 preset（默认继承父）"
@@ -110,6 +116,12 @@ module.exports = [
           "instructions": {
             "type": "string",
             "description": "可选，对子智能体的额外约束或指导（如输出格式、边界）"
+          },
+          "goals": {
+            "type": "array",
+            "items": { "type": "string" },
+            "maxItems": 5,
+            "description": "可选，可核对的目标清单（1-5 条、每条一句话）：随任务书作为完成判据下发给子智能体，其终态汇报将逐目标核对完备性，未达成会在汇报门判词中点名"
           }
         },
         "required": [

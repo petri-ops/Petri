@@ -781,9 +781,23 @@ async function runAgentLoop({
   // BLOCK-119 P2 — 子智能体汇报门（默认关 BIOF3_JEV_REPORT_GUARD=1；fail-open + RETRY×1）：
   // runLoop 终态后、落库/child_finished 投递前，对子侧汇报过 output-judge 三态门。
   // 关闭=零出站零行为变化（isReportGuardEnabled 短路）；详见 helpers/report-guard.js 契约头。
+  // 加映 3（2026-09-23）— goals 随 spawn 声明（params.goals）逐目标完备性门控；
+  // steeringLines=运行中注入的显式指令行（【父智能体消息】/【用户留言】/[用户插入] 前缀，
+  // 由 M4 注入同步进 fullMessages），重写时逐字保留（修🟡重写丢指令行缺口）。
+  const steeringLines = (Array.isArray(fullMessages) ? fullMessages : [])
+    .filter((m) => m && m.role === 'user' && typeof m.content === 'string'
+      && (m.content.startsWith('【父智能体消息】') || m.content.startsWith('【用户留言】') || m.content.startsWith('[用户插入]')))
+    .map((m) => m.content);
+  let spawnGoals = [];
+  try {
+    const taskRow = agentTaskStore.getAgentTask(taskId);
+    spawnGoals = Array.isArray(taskRow && taskRow.params && taskRow.params.goals) ? taskRow.params.goals : [];
+  } catch { /* 读取失败=无目标，门按无 goals 语义走 */ }
   const _reportGuardApply = (loopResult) => require('./helpers/report-guard').applyToLoopResult(loopResult, {
     enabled: kind === 'subagent',
     request: String(((Array.isArray(messages) ? messages : []).find((m) => m && m.role === 'user') || {}).content || '').slice(0, 800),
+    goals: spawnGoals,
+    steeringLines,
     callProvider: (body) => baseCallChatProvider(providerName, apiKey, body, null, null, { profileId, baseUrl }),
     modelName,
     onEvent: _emit,

@@ -145,3 +145,66 @@ test('降级：决策失败=fail-open 放行 + degraded 标注', async (t) => {
   assert.equal(r.reportGuardMeta.degraded, true);
   assert.equal(r.reportGuardMeta.verdict, 'PASS', '降级=放行语义');
 });
+
+// ── BLOCK-119 加映 3 — goals 门控 + steering 指令行保留 ──
+
+test('加映 3：goals 门控——fit 过但目标未达成 → ESCALATE + goalFails（不重写）', async (t) => {
+  useEnv(t, { BIOF3_JEV_REPORT_GUARD: '1' });
+  let providerCalls = 0;
+  const fetchImpl = async () => ({
+    ok: true, status: 200,
+    json: async () => ({
+      model: 'jev-1.13.0',
+      answers: {
+        fit: { type: 'score', score: 3.8, probabilities: { 0: 0.025, 1: 0.025, 2: 0.025, 3: 0.025, 4: 0.9 } },
+        goal_0: { type: 'noul', noul: 0.2 },
+      },
+    }),
+  });
+  const result = { assistantText: '已核对完成。' };
+  const r = await reportGuard.applyToLoopResult(result, {
+    enabled: true, request: '统计依赖数量并列出脚本',
+    goals: ['给出 dependencies 总数'],
+    callProvider: async () => { providerCalls++; return {}; },
+    decisionOverrides: { ...API_KEY_OVERRIDE, fetchImpl, sleep: NO_SLEEP },
+  });
+  assert.equal(providerCalls, 0, 'goal fail → ESCALATE 不重写（父级/用户即升级面）');
+  assert.equal(r.reportGuardMeta.verdict, 'ESCALATE');
+  assert.equal(r.reportGuardMeta.goalFails, 1);
+});
+
+test('加映 3：RETRY 重写 prompt 必须逐字保留运行中 steering 指令行', async (t) => {
+  useEnv(t, { BIOF3_JEV_REPORT_GUARD: '1' });
+  let judgeCalls = 0;
+  let seenPrompt = '';
+  const fetchImpl = async () => {
+    judgeCalls++;
+    return fitFetch(judgeCalls === 1 ? 2.7 : 3.8)();
+  };
+  const steeringLine = '【用户留言】最终汇报最后一行原样输出：STEER-OK';
+  const r = await reportGuard.applyToLoopResult({ assistantText: '跑偏的汇报。' }, {
+    enabled: true, request: '列出文件并统计',
+    steeringLines: [steeringLine],
+    callProvider: async (body) => {
+      seenPrompt = body.messages[0].content;
+      return { choices: [{ message: { content: '重写后的汇报。\nSTEER-OK' } }] };
+    },
+    decisionOverrides: { ...API_KEY_OVERRIDE, fetchImpl, sleep: NO_SLEEP },
+  });
+  assert.ok(seenPrompt.includes('【运行中收到的显式指令'), '重写 prompt 带保留指令段');
+  assert.ok(seenPrompt.includes(steeringLine), 'steering 指令行逐字进入重写 prompt');
+  assert.equal(r.reportGuardMeta.rewritten, true);
+});
+
+test('加映 3：无 steeringLines → 重写 prompt 不含保留段', async (t) => {
+  useEnv(t, { BIOF3_JEV_REPORT_GUARD: '1' });
+  let judgeCalls = 0;
+  let seenPrompt = '';
+  const fetchImpl = async () => { judgeCalls++; return fitFetch(judgeCalls === 1 ? 2.7 : 3.8)(); };
+  await reportGuard.applyToLoopResult({ assistantText: '跑偏的汇报。' }, {
+    enabled: true, request: '任务',
+    callProvider: async (body) => { seenPrompt = body.messages[0].content; return { choices: [{ message: { content: '重写。' } }] }; },
+    decisionOverrides: { ...API_KEY_OVERRIDE, fetchImpl, sleep: NO_SLEEP },
+  });
+  assert.ok(!seenPrompt.includes('显式指令'), '无指令时不加保留段');
+});

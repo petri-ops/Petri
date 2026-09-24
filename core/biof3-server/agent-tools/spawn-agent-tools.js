@@ -30,6 +30,8 @@ const { getOrCreateActiveConversation, getAssistantMessageByTaskId } = require('
 
 const MAX_TASK_CHARS = 8000;
 const MAX_INSTRUCTIONS_CHARS = 4000;
+const MAX_GOALS = 5;
+const MAX_GOAL_CHARS = 200;
 const WAIT_POLL_INTERVAL_MS = 1000;
 const WAIT_DEFAULT_TIMEOUT_MS = 300000;
 // BLOCK-109 P2 — 单父任务同时活跃子智能体上限（软：超出即软指引，非硬拒）
@@ -105,9 +107,22 @@ function resolveSpawnModelSettings({ explicitModel, parentParams }) {
   return { preset: getChatModelPreset() };
 }
 
+/** goals 归一校验（fail-closed）：未传=空；数组 1-5 条非空字符串、单条 ≤200 字符。 */
+function normalizeGoals(raw) {
+  if (raw === undefined || raw === null) return { ok: true, goals: [] };
+  if (!Array.isArray(raw)) return { ok: false, fail: fail('invalid_arguments', 'goals 必须是字符串数组（可核对的目标清单）。') };
+  const goals = raw.map((g) => String(g || '').trim()).filter(Boolean);
+  if (goals.length === 0) return { ok: true, goals: [] };
+  if (goals.length > MAX_GOALS) return { ok: false, fail: fail('invalid_arguments', `goals 最多 ${MAX_GOALS} 条（现 ${goals.length}）。`) };
+  for (const g of goals) {
+    if (g.length > MAX_GOAL_CHARS) return { ok: false, fail: fail('invalid_arguments', `单条目标过长（> ${MAX_GOAL_CHARS} 字符）：${g.slice(0, 30)}…`) };
+  }
+  return { ok: true, goals };
+}
+
 /**
  * spawn_agent — 派生子 agent（异步启动，立即返回 agentId）。
- * @param {{task: string, model?: string, instructions?: string}} args
+ * @param {{task: string, model?: string, instructions?: string, goals?: string[]}} args
  * @param {{userId: string, taskId: string, context?: object}} ctx 父 loop 的 toolCtx
  */
 async function spawn_agent(args, ctx) {
@@ -172,6 +187,10 @@ async function spawn_agent(args, ctx) {
   const roleCheck = agentRoles.resolveRoleOrError(args && args.role);
   if (!roleCheck.ok) return roleCheck.fail;
 
+  // 加映 3 — goals 可选声明：落 params（汇报门逐目标核对）+ 子任务书判据段
+  const goalCheck = normalizeGoals(args && args.goals);
+  if (!goalCheck.ok) return goalCheck.fail;
+
   const userContent = instructions ? `${taskText}\n\n${instructions}` : taskText;
 
   return launchSubAgent({
@@ -182,6 +201,7 @@ async function spawn_agent(args, ctx) {
     userContent,
     model,
     role: roleCheck.role,
+    goals: goalCheck.goals,
     spawnSource: 'tool:spawn_agent',
   });
 }
@@ -190,15 +210,20 @@ async function spawn_agent(args, ctx) {
  * launchSubAgent — 创建子 agent 任务 + 并发槽 + 异步启动 loop。
  * BLOCK-49 二期：从 spawn_agent 抽取核心，spawn_agent / followup_task 共用。
  * BLOCK-93 P1：role（可选角色 key）随 params 落库 + 注册表指令片段注入 system prompt。
+ * 加映 3：goals 落 params（汇报门逐目标核对）+ 任务书尾部「完成判据」段。
  * @returns {{ok:true, agentId:string, model?:string, role?:string} | {ok:false, error, message, ...}}
  */
-function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, userContent, model, role, spawnSource }) {
+function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, userContent, model, role, goals = [], spawnSource }) {
   const context = { ...(parentContext || {}) };
   if (model.accessModeHint && !context.accessMode) context.accessMode = model.accessModeHint;
   const preset = model.preset;
   const providerName = (preset && preset.provider) || parentParams.providerName || getChatProviderName();
   const providerLabel = parentParams.providerLabel || providerName;
   const modelName = (preset && preset.model) || parentParams.modelName;
+  const goalList = Array.isArray(goals) ? goals.filter(Boolean) : [];
+  const userContentFinal = goalList.length
+    ? `${userContent}\n\n【完成判据（终态汇报将逐条核对完备性，未达成会被点名）】\n${goalList.map((g, i) => `${i + 1}. ${g}`).join('\n')}`
+    : userContent;
   // BLOCK-93 P1 — prompt 软约束：注册表指令片段（未知 key 时 renderRoleDirective
   // 返回 null＝零注入；上游已做 fail-closed 校验，此处是纵深）
   const roleDirective = role ? agentRoles.renderRoleDirective(role) : null;
@@ -220,7 +245,7 @@ function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, use
       agentStatus: 'running',
       userId,
       params: {
-        messages: [{ role: 'user', content: userContent }],
+        messages: [{ role: 'user', content: userContentFinal }],
         context,
         conversationId: _activeConv && _activeConv.id,
         providerName,
@@ -230,6 +255,7 @@ function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, use
         parentTaskId,
         spawnSource,
         ...(role ? { role } : {}),
+        ...(goalList.length ? { goals: goalList } : {}),
         // BLOCK-88 P2（D3）— 联邦委托派生的 subagent 继承访客归属
         //（俯瞰面板 federatedFrom 角标数据源；宿主本地派生恒 undefined）。
         ...(parentParams && parentParams.federated ? { federated: parentParams.federated } : {}),
@@ -262,7 +288,7 @@ function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, use
 
   setImmediate(() => {
     runAgentLoop({
-      messages: [{ role: 'user', content: userContent }],
+      messages: [{ role: 'user', content: userContentFinal }],
       context,
       userId,
       conversationId: _activeConv && _activeConv.id,
@@ -429,6 +455,16 @@ async function followup_task(args, ctx) {
   );
   if (!roleCheck.ok) return roleCheck.fail;
 
+  // 加映 3 — 续派 goals：显式 args.goals > 继承原子 agent goals
+  let goals = [];
+  if (args && args.goals !== undefined) {
+    const gc = normalizeGoals(args.goals);
+    if (!gc.ok) return gc.fail;
+    goals = gc.goals;
+  } else if (Array.isArray(childFull.params && childFull.params.goals)) {
+    goals = childFull.params.goals.slice(0, MAX_GOALS);
+  }
+
   const launched = launchSubAgent({
     parentTaskId,
     userId,
@@ -437,6 +473,7 @@ async function followup_task(args, ctx) {
     userContent,
     model,
     role: roleCheck.role,
+    goals,
     spawnSource: 'tool:followup_task',
   });
   if (launched.ok === false) return launched;
@@ -572,6 +609,11 @@ async function launchUserFollowup({ childTaskId, userId, task }) {
   const roleCheck = agentRoles.resolveRoleOrError((child.params && child.params.role) || '');
   if (!roleCheck.ok) return { ok: false, error: 'invalid_arguments', message: roleCheck.fail.message };
 
+  // 加映 3 — 用户侧续派同样继承原子 agent goals
+  const goals = Array.isArray(child.params && child.params.goals)
+    ? child.params.goals.slice(0, MAX_GOALS)
+    : [];
+
   const launched = launchSubAgent({
     parentTaskId,
     userId,
@@ -580,6 +622,7 @@ async function launchUserFollowup({ childTaskId, userId, task }) {
     userContent,
     model,
     role: roleCheck.role,
+    goals,
     spawnSource: 'user:followup',
   });
   if (launched.ok === false) return launched;
@@ -709,5 +752,6 @@ module.exports = {
     resolvePresetByModel,
     collectUndeliveredParentMessages,
     enqueueSteeringForChild,
+    normalizeGoals,
   },
 };

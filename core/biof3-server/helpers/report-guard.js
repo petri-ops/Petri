@@ -23,9 +23,11 @@ function isReportGuardEnabled() {
 /**
  * 对 runAgentLoop 结果应用汇报门（原地可变：成功重写时改写 assistantText 并挂 meta）。
  * @param {object} loopResult runLoop 返回对象（含 assistantText）
- * @param {object} args { enabled, request, callProvider(body)=>result, modelName, onEvent, decisionOverrides? }
+ * @param {object} args { enabled, request, callProvider(body)=>result, modelName, onEvent, decisionOverrides?,
+ *   goals?: string[]（spawn 声明的可核对目标——逐目标完备性门控，fail 进判词）,
+ *   steeringLines?: string[]（运行中注入的显式指令行——重写时必须逐字保留，BLOCK-119 加映 3 修🟡缺口） }
  */
-async function applyToLoopResult(loopResult, { enabled, request, callProvider, modelName, onEvent, decisionOverrides } = {}) {
+async function applyToLoopResult(loopResult, { enabled, request, callProvider, modelName, onEvent, decisionOverrides, goals = [], steeringLines = [] } = {}) {
   if (!loopResult || !enabled || !isReportGuardEnabled()) return loopResult;
   const output = loopResult.assistantText;
   if (!output || !String(output).trim()) return loopResult;
@@ -34,14 +36,17 @@ async function applyToLoopResult(loopResult, { enabled, request, callProvider, m
     const judged = await judgeCore.judgeOutput({
       output: String(output),
       request: String(request || ''),
+      goals: Array.isArray(goals) ? goals : [],
       overrides: decisionOverrides || {},
       metaPoint: 'report-guard',
     });
+    const goalFails = (judged.statuses.goals || []).filter((g) => g.status === 'fail').length;
     const meta = {
       verdict: judged.verdict,
       degraded: judged.degraded === true,
       reason: judged.reason || null,
       fit: judged.statuses && judged.statuses.fit ? judged.statuses.fit.value : null,
+      goalFails,
       model: judged.model || null,
       latencyMs: Date.now() - startedAt,
       rewritten: false,
@@ -49,6 +54,7 @@ async function applyToLoopResult(loopResult, { enabled, request, callProvider, m
       fitAfter: null,
     };
     if (judged.verdict === 'RETRY' && typeof callProvider === 'function') {
+      const steering = Array.isArray(steeringLines) ? steeringLines.filter(Boolean) : [];
       const rewritePrompt = [
         '你之前为子任务写的汇报未通过对题性检查，请重写。',
         '',
@@ -60,6 +66,11 @@ async function applyToLoopResult(loopResult, { enabled, request, callProvider, m
         '',
         '【检查判词（逐条修正）】',
         ...(judged.hints.length ? judged.hints.map((h) => '- ' + h) : ['- 契合度不足：只覆盖任务所问。']),
+        ...(steering.length ? [
+          '',
+          '【运行中收到的显式指令（必须逐字保留在重写后的汇报中，不得删除或改写）】',
+          ...steering.map((l) => '- ' + String(l).slice(0, 300)),
+        ] : []),
         '',
         '重写要求：要点式（≤10 条、每条一句话），只回传所辖部分的事实、数据、结论；不要寒暄、不要背景铺垫、不要复述任务全文。直接输出新汇报正文。',
       ].join('\n');
@@ -72,6 +83,7 @@ async function applyToLoopResult(loopResult, { enabled, request, callProvider, m
         const rejudged = await judgeCore.judgeOutput({
           output: rewritten,
           request: String(request || ''),
+          goals: Array.isArray(goals) ? goals : [],
           overrides: decisionOverrides || {},
           metaPoint: 'report-guard',
         });
