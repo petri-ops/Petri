@@ -5193,6 +5193,26 @@
       "lastUpdated": "2026-09-23"
     },
     {
+      "id": "BLOCK-120-RECONCILIATION-LINKAGE",
+      "path": "docs/block-120-reconciliation-linkage-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-120-reconciliation-linkage",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-24",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH",
+      "tags": [
+        "block-120",
+        "reconciliation",
+        "todo",
+        "subagent",
+        "queue-bk-03"
+      ],
+      "notes": "全局待办 BK-03（用户裁决「继续冲」按队列推进）：todo 条目↔子任务声明制 linkage，纯 additive 零 migration。"
+    },
+    {
       "id": "BLOCK-119-OUTPUT-JUDGE-HARNESS",
       "path": "docs/block-119-output-judge-harness-plan.md",
       "kind": "work-package",

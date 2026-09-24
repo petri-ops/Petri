@@ -967,10 +967,12 @@ async function runAgentLoop({
       filesChangedCount: Array.isArray(taskFilesChanged) ? taskFilesChanged.length : 0,
       at: new Date().toISOString(),
     });
-    // 「终态对账」v1（候选落地，2026-09-21 用户裁决）：主任务终态时粗粒度核对——
-    // 存在失败子任务而清单最后状态全部 completed → 下发对账提示（reconciliation_notice
-    // 事件 + agent_status 用户可见面；不改写清单、不阻断终态。条目级归属对账待
-    // 数据模型补 linkage 后另裁——v1 口径见 helpers/agent-reconciliation.js 头注）。
+    // 「终态对账」v1+BLOCK-120 v2（2026-09-21 用户裁决；v2=BK-03「继续冲」按队列推进）：
+    // 主任务终态时核对——存在失败/取消子任务而清单最后状态全部 completed → 下发对账提示
+    // （reconciliation_notice 事件 + agent_status 用户可见面；不改写清单、不阻断终态）。
+    // v2 条目级归属：子任务 params.todoRefs（spawn_agent/followup_task 声明制）反查清单，
+    // 已 completed 条目出条目级失真明细（kind=item_level_mismatch）；无 linkage=回退 v1
+    // 粗粒度 kind（向后兼容）。口径见 helpers/agent-reconciliation.js 头注。
     if (kind !== 'subagent') {
       try {
         const allEvents = agentTaskStore.getAgentTaskEventsSince(taskId, 0, 1000000);

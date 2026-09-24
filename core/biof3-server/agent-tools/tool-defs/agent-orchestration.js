@@ -69,6 +69,12 @@ module.exports = [
             "maxItems": 5,
             "description": "可选，新的可核对目标清单（1-5 条）；不传则继承原子智能体的 goals"
           },
+          "todoRefs": {
+            "type": "array",
+            "items": { "type": "string" },
+            "maxItems": 5,
+            "description": "可选，新的任务清单条目归属（清单条目 id，≤5 条）；不传则继承原子智能体的 todoRefs"
+          },
           "model": {
             "type": "string",
             "description": "可选：指定模型 preset（默认继承父）"
@@ -122,6 +128,12 @@ module.exports = [
             "items": { "type": "string" },
             "maxItems": 5,
             "description": "可选，可核对的目标清单（1-5 条、每条一句话）：随任务书作为完成判据下发给子智能体，其终态汇报将逐目标核对完备性，未达成会在汇报门判词中点名"
+          },
+          "todoRefs": {
+            "type": "array",
+            "items": { "type": "string" },
+            "maxItems": 5,
+            "description": "可选，本子任务对应的任务清单条目 id（最近一次 todo_write 清单中的 id，≤5 条）：终态对账按此归属——若本子任务失败/被取消而其对应清单条目仍标记完成，条目会被点名请核对"
           }
         },
         "required": [

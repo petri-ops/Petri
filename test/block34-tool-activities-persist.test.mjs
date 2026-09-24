@@ -154,7 +154,10 @@ describe('BLOCK-34 P1 behavior: recorder snapshot lands in copilot_messages.meta
 
     const items = recorder.snapshot ? recorder.snapshot() : [];
     assert.equal(items.length, 1, '快照恰一条活动');
-    assert.equal(items[0].actionDetail, 'query（datasets=项目文档）', '参数摘要落快照');
+    // UI-437 v5.18 契约：行头动词（actionLabel）承载工具语义，actionDetail 只承载宾语；
+    // 本断言随 v5.18 契约同步（BLOCK-120 收口前基线对照抓真的存量漂移，非新引入）
+    assert.equal(items[0].actionLabel, '已查询', '动词 label 落快照（v5.18 契约）');
+    assert.equal(items[0].actionDetail, 'datasets=项目文档', '参数摘要（宾语）落快照');
     assert.equal(items[0].summary, 'datasets 0 条 · total 0', '结果 digest 落快照');
     assert.deepEqual(items[0].resultData, { ok: true, datasets: [], total: 0 }, 'resultData 本体落快照');
   });

@@ -4,13 +4,23 @@
  * 「终态对账」候选落地（2026-09-21 用户裁决「要立终态对账机制……结果要符合的」）。
  * v1 口径（诚实边界）：任务清单是模型申报制，条目与子任务无结构化归属，故 v1 只做
  * **粗粒度不一致检测**——存在失败子任务而清单最后状态全部 completed 时判「未对账」，
- * 提示用户核对；不改写清单、不阻断终态。条目级归属对账待数据模型补 linkage 后另裁。
+ * 提示用户核对；不改写清单、不阻断终态。
+ *
+ * BLOCK-120 v2 — 条目级归属（全局待办 BK-03；用户裁决「继续冲」按队列推进）：
+ * 子任务 params.todoRefs（spawn_agent/followup_task 声明制，未登记 id 已在派发侧
+ * 丢弃）建立「清单条目 ↔ 子任务」归属。failed/cancelled 子任务按 refs 反查清单，
+ * **已标记 completed 的条目**→ 条目级失真明细（kind=item_level_mismatch，message
+ * 点名条目内容）；无任何 linkage 命中=回退 v1 粗粒度 kind（向后兼容，D-4）。
+ * 清单非全 completed 时维持 v1 语义=不出提示（对账针对「清单声称已完成」的失真）。
+ * 不改写清单、不阻断终态（v1 红线不变）。
  */
 
 /**
- * @param {Array<{status: string}>} todoItems 最后一次 todo_write 的清单项
- * @param {Array<{status: string}>} children 该主任务的全部子任务（listChildAgentTasks）
- * @returns {null | { kind: string, failedCount: number, cancelledCount: number, totalCount: number, message: string }}
+ * @param {Array<{id?: string, status: string, content?: string}>} todoItems 最后一次 todo_write 的清单项
+ * @param {Array<{taskId?: string, status: string, params?: {todoRefs?: string[]}}>} children 该主任务的全部子任务（listChildAgentTasks）
+ * @returns {null | { kind: string, failedCount: number, cancelledCount: number, totalCount: number,
+ *            items?: Array<{itemId: string, content: string, childTaskId: string|null, childStatus: string}>,
+ *            message: string }}
  *          null = 一致（无需提示）
  */
 function computeReconciliationNotice(todoItems, children) {
@@ -23,12 +33,42 @@ function computeReconciliationNotice(todoItems, children) {
   const cancelled = children.filter((c) => c && c.status === 'cancelled');
   const notClean = failed.length + cancelled.length;
   if (notClean === 0) return null;
+
+  // BLOCK-120 v2 — 条目级归属：failed/cancelled 子任务按 params.todoRefs 反查清单条目
+  const itemById = new Map(todoItems.map((t) => [String((t && t.id) || ''), t]));
+  const itemMismatches = [];
+  for (const c of [...failed, ...cancelled]) {
+    const refs = c && c.params && Array.isArray(c.params.todoRefs) ? c.params.todoRefs : [];
+    for (const ref of refs) {
+      const item = itemById.get(String(ref || ''));
+      if (item && item.status === 'completed') {
+        itemMismatches.push({
+          itemId: String(ref),
+          content: String(item.content || '').slice(0, 80),
+          childTaskId: c.taskId || null,
+          childStatus: c.status,
+        });
+      }
+    }
+  }
+
+  if (itemMismatches.length === 0) {
+    return {
+      kind: 'failed_children_vs_completed_checklist',
+      failedCount: failed.length,
+      cancelledCount: cancelled.length,
+      totalCount: children.length,
+      message: `对账提示：${notClean}/${children.length} 个子智能体未正常完成（失败 ${failed.length}、取消 ${cancelled.length}），但任务清单已全部标记完成——结果可能不完整，请核对。`,
+    };
+  }
+
   return {
-    kind: 'failed_children_vs_completed_checklist',
+    kind: 'item_level_mismatch',
     failedCount: failed.length,
     cancelledCount: cancelled.length,
     totalCount: children.length,
-    message: `对账提示：${notClean}/${children.length} 个子智能体未正常完成（失败 ${failed.length}、取消 ${cancelled.length}），但任务清单已全部标记完成——结果可能不完整，请核对。`,
+    items: itemMismatches,
+    message: `对账提示：任务清单中 ${itemMismatches.length} 条已完成条目对应子智能体未正常完成（如「${itemMismatches[0].content}」→ ${itemMismatches[0].childStatus === 'failed' ? '失败' : '被取消'}）；共 ${notClean}/${children.length} 个子智能体未正常完成——结果可能不完整，请核对相关条目。`,
   };
 }
 

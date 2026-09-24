@@ -140,3 +140,63 @@ test('包三 自动计划 — agent-runner 接线（源码契约：显式优先�
   const injectIdx = runnerSrc.indexOf('if (planModeActive) {');
   assert.ok(autoIdx > -1 && injectIdx > autoIdx, '自动判定在计划模式注入之前');
 });
+
+// ---------- BLOCK-120 v2：条目级归属（todo 条目 ↔ 子任务 linkage） ----------
+
+const TODO_ALL_DONE_V2 = [
+  { id: '1', content: '盘点数据集质量', status: 'completed' },
+  { id: '2', content: '跑 deseq2 差异分析', status: 'completed' },
+  { id: '3', content: '整理报告', status: 'completed' },
+];
+
+test('BLOCK-120 v2 — 失败子任务带 todoRefs 且条目已 completed → item_level_mismatch 点名条目', () => {
+  const children = [
+    { taskId: 'child-a', status: 'completed', params: { todoRefs: ['1'] } },
+    { taskId: 'child-b', status: 'failed', params: { todoRefs: ['2'] } },
+    { taskId: 'child-c', status: 'completed', params: { todoRefs: ['3'] } },
+  ];
+  const notice = computeReconciliationNotice(TODO_ALL_DONE_V2, children);
+  assert.ok(notice, '条目级失真应出提示');
+  assert.equal(notice.kind, 'item_level_mismatch');
+  assert.equal(notice.failedCount, 1);
+  assert.deepEqual(
+    notice.items.map((i) => ({ itemId: i.itemId, childStatus: i.childStatus })),
+    [{ itemId: '2', childStatus: 'failed' }]
+  );
+  assert.equal(notice.items[0].content, '跑 deseq2 差异分析');
+  assert.match(notice.message, /跑 deseq2 差异分析/, 'message 点名条目内容');
+  assert.match(notice.message, /失败/);
+});
+
+test('BLOCK-120 v2 — 取消子任务同样触发条目级归属（v1.5 口径延伸）', () => {
+  const children = [{ taskId: 'child-x', status: 'cancelled', params: { todoRefs: ['1'] } }];
+  const notice = computeReconciliationNotice(TODO_ALL_DONE_V2, children);
+  assert.ok(notice);
+  assert.equal(notice.kind, 'item_level_mismatch');
+  assert.equal(notice.items[0].childStatus, 'cancelled');
+  assert.match(notice.message, /被取消/);
+});
+
+test('BLOCK-120 v2 — 无 linkage（子任务无 todoRefs）→ 回退 v1 粗粒度 kind（向后兼容）', () => {
+  const children = [{ taskId: 'child-a', status: 'failed', params: {} }];
+  const notice = computeReconciliationNotice(TODO_ALL_DONE_V2, children);
+  assert.ok(notice);
+  assert.equal(notice.kind, 'failed_children_vs_completed_checklist');
+  assert.equal(notice.items, undefined);
+});
+
+test('BLOCK-120 v2 — linked 子任务正常完成 / refs 指向非完成条目 → 不出提示或仅 v1 兜底', () => {
+  // linked 但子任务正常 → 无失真
+  const clean = [{ taskId: 'child-a', status: 'completed', params: { todoRefs: ['1'] } }];
+  assert.equal(computeReconciliationNotice(TODO_ALL_DONE_V2, clean), null);
+  // ref 指向的条目未标记 completed（清单非全 completed）→ v1 门即不出提示
+  const partialList = [
+    { id: '1', status: 'completed' },
+    { id: '2', status: 'pending' },
+  ];
+  assert.equal(computeReconciliationNotice(partialList, [{ taskId: 'x', status: 'failed', params: { todoRefs: ['2'] } }]), null);
+  // ref 指向清单中不存在的 id（派发侧应已丢弃，防御性再兜底）→ 无条目级命中
+  const ghost = [{ taskId: 'x', status: 'failed', params: { todoRefs: ['ghost'] } }];
+  const n = computeReconciliationNotice(TODO_ALL_DONE_V2, ghost);
+  assert.equal(n.kind, 'failed_children_vs_completed_checklist', '回退 v1 粗粒度');
+});

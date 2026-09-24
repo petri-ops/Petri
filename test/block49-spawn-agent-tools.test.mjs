@@ -36,7 +36,7 @@ for (const key of Object.keys(process.env)) {
 
 const { decideAgentToolCall } = require('../core/biof3-server/agent-tools/agent-tool-policy.js');
 const { getToolContract } = require('../core/biof3-server/agent-tools/registry.js');
-const { spawn_agent, list_agents, wait_agent, __test } = require('../core/biof3-server/agent-tools/spawn-agent-tools.js');
+const { spawn_agent, list_agents, wait_agent, followup_task, __test } = require('../core/biof3-server/agent-tools/spawn-agent-tools.js');
 const agentTaskStore = require('../core/biof3-server/agent-task-store.js');
 const { getOrCreateActiveConversation, appendMessageToConversation } = require('../core/biof3-server/helpers/conversations.js');
 const { aiTaskConcurrencyAcquire, aiTaskConcurrencyRelease } = require('../core/biof3-server/helpers/runtime.js');
@@ -396,4 +396,123 @@ test('加映 3：normalizeGoals 校验（fail-closed）', () => {
   assert.equal(normalizeGoals('not-array').ok, false);
   assert.equal(normalizeGoals(['1', '2', '3', '4', '5', '6']).ok, false, '>5 条拒绝');
   assert.equal(normalizeGoals(['x'.repeat(201)]).ok, false, '单条超长拒绝');
+});
+
+// ── BLOCK-120 — todoRefs 声明制归属（终态对账 v2 条目级 linkage）──
+
+function appendTodoSnapshot(parentTaskId, items) {
+  const events = agentTaskStore.getAgentTaskEventsSince(parentTaskId, 0, 5000);
+  const seq = (events.length ? events[events.length - 1].seq : 0) + 1;
+  agentTaskStore.appendAgentTaskEvent(parentTaskId, seq, 'tool_call', {
+    name: 'todo_write',
+    args: { items },
+  });
+}
+
+test('BLOCK-120：spawn_agent todoRefs 对照清单快照落 params', async () => {
+  const userId = createUser();
+  const parent = createPrimaryParent(userId);
+  appendTodoSnapshot(parent.taskId, [
+    { id: '1', content: '盘点数据', status: 'completed' },
+    { id: '2', content: '跑分析', status: 'in_progress' },
+  ]);
+  const res = await spawn_agent(
+    { task: '盘点数据集质量', todoRefs: ['1'] },
+    { userId, taskId: parent.taskId }
+  );
+  assert.equal(res.ok, true, JSON.stringify(res));
+  assert.deepEqual(res.todoRefs, ['1']);
+  const child = agentTaskStore.getAgentTask(res.agentId);
+  assert.deepEqual(child.params.todoRefs, ['1'], 'params.todoRefs 落库（对账归属数据源）');
+});
+
+test('BLOCK-120：未登记 id 丢弃 + 工具结果回传（D-2）', async () => {
+  const userId = createUser();
+  const parent = createPrimaryParent(userId);
+  appendTodoSnapshot(parent.taskId, [{ id: '1', content: '盘点数据', status: 'completed' }]);
+  const res = await spawn_agent(
+    { task: '核对依赖', todoRefs: ['1', 'ghost'] },
+    { userId, taskId: parent.taskId }
+  );
+  assert.equal(res.ok, true);
+  const child = agentTaskStore.getAgentTask(res.agentId);
+  assert.deepEqual(child.params.todoRefs, ['1'], '仅有效 ref 落库');
+  assert.deepEqual(res.todoRefsIgnored, ['ghost']);
+  assert.match(res.note, /未在当前任务清单登记/);
+});
+
+test('BLOCK-120：无清单时 todoRefs 全部忽略并提示先建清单（D-2）', async () => {
+  const userId = createUser();
+  const parent = createPrimaryParent(userId);
+  const res = await spawn_agent(
+    { task: '核对依赖', todoRefs: ['1'] },
+    { userId, taskId: parent.taskId }
+  );
+  assert.equal(res.ok, true);
+  const child = agentTaskStore.getAgentTask(res.agentId);
+  assert.equal(child.params.todoRefs, undefined);
+  assert.match(res.note, /尚无任务清单/);
+});
+
+test('BLOCK-120：normalizeTodoRefs 校验（fail-closed 同 goals）', () => {
+  const { normalizeTodoRefs } = __test;
+  assert.deepEqual(normalizeTodoRefs(undefined).refs, []);
+  assert.deepEqual(normalizeTodoRefs([' a ', '', 'b']).refs, ['a', 'b']);
+  assert.equal(normalizeTodoRefs('not-array').ok, false);
+  assert.equal(normalizeTodoRefs(['1', '2', '3', '4', '5', '6']).ok, false, '>5 条拒绝');
+  assert.equal(normalizeTodoRefs(['x'.repeat(65)]).ok, false, '单条超长拒绝（64 字符=todo id 同界）');
+  assert.equal(normalizeTodoRefs([]).ok, true);
+});
+
+test('BLOCK-120：spawn_agent todoRefs 形状非法 → fail-closed 拒绝', async () => {
+  const userId = createUser();
+  const parent = createPrimaryParent(userId);
+  const bad = await spawn_agent(
+    { task: 'x', todoRefs: 'not-array' },
+    { userId, taskId: parent.taskId }
+  );
+  assert.equal(bad.ok, false);
+  assert.equal(bad.error, 'invalid_arguments');
+});
+
+test('BLOCK-120：followup 续派继承原子 todoRefs + 显式覆盖（D-5）', async () => {
+  const userId = createUser();
+  const parent = createPrimaryParent(userId);
+  appendTodoSnapshot(parent.taskId, [
+    { id: '1', content: '盘点数据', status: 'completed' },
+    { id: '2', content: '跑分析', status: 'in_progress' },
+  ]);
+  const first = await spawn_agent(
+    { task: '盘点数据集质量', todoRefs: ['1'] },
+    { userId, taskId: parent.taskId }
+  );
+  assert.equal(first.ok, true);
+  agentTaskStore.markAgentTaskDone(first.agentId, []);
+
+  const inherited = await followup_task(
+    { agentId: first.agentId, task: '继续盘点' },
+    { userId, taskId: parent.taskId }
+  );
+  assert.equal(inherited.ok, true, JSON.stringify(inherited));
+  const childB = agentTaskStore.getAgentTask(inherited.agentId);
+  assert.deepEqual(childB.params.todoRefs, ['1'], '不传=继承原子 refs');
+  agentTaskStore.markAgentTaskDone(inherited.agentId, []);
+
+  const overridden = await followup_task(
+    { agentId: inherited.agentId, task: '再跑一轮', todoRefs: ['2'] },
+    { userId, taskId: parent.taskId }
+  );
+  assert.equal(overridden.ok, true);
+  const childC = agentTaskStore.getAgentTask(overridden.agentId);
+  assert.deepEqual(childC.params.todoRefs, ['2'], '显式覆盖优先');
+});
+
+test('BLOCK-120：工具 schema 含 todoRefs（spawn_agent/followup_task）', () => {
+  const defs = require('../core/biof3-server/agent-tools/tool-defs/agent-orchestration.js');
+  const spawn = defs.find((d) => d.function && d.function.name === 'spawn_agent');
+  assert.ok(spawn.function.parameters.properties.todoRefs, 'spawn_agent todoRefs 在位');
+  assert.match(spawn.function.parameters.properties.todoRefs.description, /清单条目 id/);
+  const followup = defs.find((d) => d.function && d.function.name === 'followup_task');
+  assert.ok(followup.function.parameters.properties.todoRefs, 'followup_task todoRefs 在位');
+  assert.match(followup.function.parameters.properties.todoRefs.description, /继承原子智能体/);
 });

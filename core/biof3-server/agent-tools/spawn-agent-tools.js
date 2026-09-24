@@ -120,6 +120,61 @@ function normalizeGoals(raw) {
   return { ok: true, goals };
 }
 
+// BLOCK-120 — todoRefs 声明制归属（终态对账 v2）：todo id 与 todo-tools 的
+// MAX_ID_LENGTH 同界（≤64 字符）；≤5 条。
+const MAX_TODO_REFS = 5;
+const MAX_TODO_REF_CHARS = 64;
+
+/** todoRefs 形状归一（fail-closed 同 goals）：未传=空；数组 1-5 条非空字符串、单条 ≤64 字符。 */
+function normalizeTodoRefs(raw) {
+  if (raw === undefined || raw === null) return { ok: true, refs: [] };
+  if (!Array.isArray(raw)) return { ok: false, fail: fail('invalid_arguments', 'todoRefs 必须是字符串数组（任务清单条目 id）。') };
+  const refs = raw.map((r) => String(r || '').trim()).filter(Boolean);
+  if (refs.length === 0) return { ok: true, refs: [] };
+  if (refs.length > MAX_TODO_REFS) return { ok: false, fail: fail('invalid_arguments', `todoRefs 最多 ${MAX_TODO_REFS} 条（现 ${refs.length}）。`) };
+  for (const r of refs) {
+    if (r.length > MAX_TODO_REF_CHARS) return { ok: false, fail: fail('invalid_arguments', `单条 todoRef 过长（> ${MAX_TODO_REF_CHARS} 字符）：${r.slice(0, 30)}…`) };
+  }
+  return { ok: true, refs };
+}
+
+/**
+ * 读当前任务运行最近一次 todo_write 快照的条目 id（对照校验用）。
+ * 读法与 agent-runner 终态对账块同源（task_events tool_call(todo_write) 事件重放）。
+ * 无清单返回 null（≠空清单：无清单时 refs 无从对照，全部按未登记处置）。
+ */
+function latestTodoIds(parentTaskId) {
+  try {
+    const events = agentTaskStore.getAgentTaskEventsSince(parentTaskId, 0, 1000000);
+    // 整单幂等替换（todo-tools 契约）：最后一次 todo_write 即最新快照，正向扫到末尾
+    let latestItems = null;
+    for (const e of events) {
+      if (e.eventType === 'tool_call' && e.payload && e.payload.name === 'todo_write'
+        && e.payload.args && Array.isArray(e.payload.args.items)) {
+        latestItems = e.payload.args.items;
+      }
+    }
+    if (latestItems) {
+      return latestItems.map((it) => String((it && it.id) || '')).filter(Boolean);
+    }
+  } catch { /* 快照读取失败=无从对照，按无清单处置 */ }
+  return null;
+}
+
+/**
+ * todoRefs 对照快照裁决（BLOCK-120 D-2）：有效 refs 保留；未登记 id 丢弃并回传
+ * （不整单拒绝——typo 不应阻断派发；无清单时全部按未登记处置）。
+ */
+function resolveTodoRefs(rawRefs, parentTaskId) {
+  const check = normalizeTodoRefs(rawRefs);
+  if (!check.ok) return check;
+  const knownIds = latestTodoIds(parentTaskId);
+  const known = new Set(knownIds || []);
+  const refs = check.refs.filter((r) => known.has(r));
+  const ignored = check.refs.filter((r) => !known.has(r));
+  return { ok: true, refs, ignored, hasSnapshot: knownIds !== null };
+}
+
 /**
  * spawn_agent — 派生子 agent（异步启动，立即返回 agentId）。
  * @param {{task: string, model?: string, instructions?: string, goals?: string[]}} args
@@ -191,9 +246,13 @@ async function spawn_agent(args, ctx) {
   const goalCheck = normalizeGoals(args && args.goals);
   if (!goalCheck.ok) return goalCheck.fail;
 
+  // BLOCK-120 — todoRefs 可选声明：对照最近清单快照，未登记 id 丢弃+回传（D-2）
+  const refsCheck = resolveTodoRefs(args && args.todoRefs, parentTaskId);
+  if (!refsCheck.ok) return refsCheck.fail;
+
   const userContent = instructions ? `${taskText}\n\n${instructions}` : taskText;
 
-  return launchSubAgent({
+  const launched = launchSubAgent({
     parentTaskId,
     userId,
     parentParams,
@@ -202,8 +261,20 @@ async function spawn_agent(args, ctx) {
     model,
     role: roleCheck.role,
     goals: goalCheck.goals,
+    todoRefs: refsCheck.refs,
     spawnSource: 'tool:spawn_agent',
   });
+  if (launched.ok === false) return launched;
+  return {
+    ...launched,
+    ...(refsCheck.refs.length ? { todoRefs: refsCheck.refs } : {}),
+    ...(refsCheck.ignored.length ? {
+      todoRefsIgnored: refsCheck.ignored,
+      note: refsCheck.hasSnapshot
+        ? `todoRefs 中未在当前任务清单登记的 id 已忽略：${refsCheck.ignored.join(', ')}`
+        : '当前任务尚无任务清单，todoRefs 已忽略（先用 todo_write 建清单再派发即可归属）。',
+    } : {}),
+  };
 }
 
 /**
@@ -213,7 +284,7 @@ async function spawn_agent(args, ctx) {
  * 加映 3：goals 落 params（汇报门逐目标核对）+ 任务书尾部「完成判据」段。
  * @returns {{ok:true, agentId:string, model?:string, role?:string} | {ok:false, error, message, ...}}
  */
-function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, userContent, model, role, goals = [], spawnSource }) {
+function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, userContent, model, role, goals = [], todoRefs = [], spawnSource }) {
   const context = { ...(parentContext || {}) };
   if (model.accessModeHint && !context.accessMode) context.accessMode = model.accessModeHint;
   const preset = model.preset;
@@ -221,6 +292,7 @@ function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, use
   const providerLabel = parentParams.providerLabel || providerName;
   const modelName = (preset && preset.model) || parentParams.modelName;
   const goalList = Array.isArray(goals) ? goals.filter(Boolean) : [];
+  const refList = Array.isArray(todoRefs) ? todoRefs.filter(Boolean) : [];
   const userContentFinal = goalList.length
     ? `${userContent}\n\n【完成判据（终态汇报将逐条核对完备性，未达成会被点名）】\n${goalList.map((g, i) => `${i + 1}. ${g}`).join('\n')}`
     : userContent;
@@ -256,6 +328,9 @@ function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, use
         spawnSource,
         ...(role ? { role } : {}),
         ...(goalList.length ? { goals: goalList } : {}),
+        // BLOCK-120 — todoRefs 落 params：终态对账按此把失败/取消子任务归属到清单条目
+        //（D-3：子任务书不注入 refs——归因是父侧观测面，子侧上下文保持精简）
+        ...(refList.length ? { todoRefs: refList } : {}),
         // BLOCK-88 P2（D3）— 联邦委托派生的 subagent 继承访客归属
         //（俯瞰面板 federatedFrom 角标数据源；宿主本地派生恒 undefined）。
         ...(parentParams && parentParams.federated ? { federated: parentParams.federated } : {}),
@@ -465,6 +540,24 @@ async function followup_task(args, ctx) {
     goals = childFull.params.goals.slice(0, MAX_GOALS);
   }
 
+  // BLOCK-120 — 续派 todoRefs：显式 args.todoRefs > 继承原子 agent todoRefs（D-5）
+  let todoRefs = [];
+  let refsIgnored = [];
+  let refsNote = null;
+  if (args && args.todoRefs !== undefined) {
+    const rc = resolveTodoRefs(args.todoRefs, parentTaskId);
+    if (!rc.ok) return rc.fail;
+    todoRefs = rc.refs;
+    refsIgnored = rc.ignored;
+    if (rc.ignored.length) {
+      refsNote = rc.hasSnapshot
+        ? `todoRefs 中未在当前任务清单登记的 id 已忽略：${rc.ignored.join(', ')}`
+        : '当前任务尚无任务清单，todoRefs 已忽略。';
+    }
+  } else if (Array.isArray(childFull.params && childFull.params.todoRefs)) {
+    todoRefs = childFull.params.todoRefs.slice(0, MAX_TODO_REFS);
+  }
+
   const launched = launchSubAgent({
     parentTaskId,
     userId,
@@ -474,6 +567,7 @@ async function followup_task(args, ctx) {
     model,
     role: roleCheck.role,
     goals,
+    todoRefs,
     spawnSource: 'tool:followup_task',
   });
   if (launched.ok === false) return launched;
@@ -485,6 +579,8 @@ async function followup_task(args, ctx) {
     queuedMessagesInjected: queued.length,
     model: launched.model || undefined,
     ...(roleCheck.role ? { role: roleCheck.role } : {}),
+    ...(todoRefs.length ? { todoRefs } : {}),
+    ...(refsIgnored.length ? { todoRefsIgnored: refsIgnored, note: refsNote } : {}),
   };
 }
 
@@ -753,5 +849,8 @@ module.exports = {
     collectUndeliveredParentMessages,
     enqueueSteeringForChild,
     normalizeGoals,
+    normalizeTodoRefs,
+    latestTodoIds,
+    resolveTodoRefs,
   },
 };
