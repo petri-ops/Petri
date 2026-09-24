@@ -258,14 +258,7 @@ export function ResultArtifactShell({
             }
             return;
           }
-          const data = (await resp.json()) as {
-            ok?: unknown;
-            result?: JobResult;
-            params?: Record<string, unknown>;
-            ackStatus?: string | null;
-            projectId?: string | null;
-            error?: unknown;
-          };
+          const data = (await resp.json()) as { ok?: unknown; result?: JobResult; params?: Record<string, unknown>; ackStatus?: string | null; projectId?: string | null; error?: unknown };
           if (!canCommitResultFetch(requestedJobId, activeBodyJobRef.current, cancelled)) return;
           if (data.ok && data.result) {
             bodyJobRef.current = requestedJobId;
