@@ -225,10 +225,10 @@ describe('useTerminalTabs', () => {
     onDataListeners[0]({ sessionId: 'tab-2', data: 'from-2\n' });
     onDataListeners[0]({ sessionId: 'tab-1', data: 'from-1\n' });
     const term1 = hoisted.FakeXTerm.instances.find(
-      (t) => t.open.mock.calls[0]?.[0]?.getAttribute?.('data-tab-body') === 'tab-1'
+      (t) => (t.open.mock.calls[0]?.[0] as HTMLElement | undefined)?.getAttribute?.('data-tab-body') === 'tab-1'
     );
     const term2 = hoisted.FakeXTerm.instances.find(
-      (t) => t.open.mock.calls[0]?.[0]?.getAttribute?.('data-tab-body') === 'tab-2'
+      (t) => (t.open.mock.calls[0]?.[0] as HTMLElement | undefined)?.getAttribute?.('data-tab-body') === 'tab-2'
     );
     expect(term1?.write).toHaveBeenCalledWith('from-1\n');
     expect(term1?.write).not.toHaveBeenCalledWith('from-2\n');

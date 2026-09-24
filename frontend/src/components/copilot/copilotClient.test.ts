@@ -23,7 +23,7 @@ describe('copilot SSE tool event projection', () => {
       conversationId: 'conversation-1',
     })).resolves.toBe(true);
     expect(fetchMock).toHaveBeenCalledOnce();
-    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({
+    expect(JSON.parse(String((fetchMock.mock.calls[0][1] as { body?: string })?.body))).toEqual({
       approve: true,
       projectId: 'project-1',
       conversationId: 'conversation-1',

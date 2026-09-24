@@ -35,11 +35,11 @@ async function fsOp(
       body: JSON.stringify(payload),
     },
   );
-  const data = await resp.json().catch(() => ({ ok: false, error: `请求失败（${resp.status}）` }));
-  if (!resp.ok || !data?.ok) {
-    throw new Error(String(data?.error || `操作失败（${resp.status}）`));
+  const raw = (await resp.json().catch(() => ({ ok: false, error: `请求失败（${resp.status}）` }))) as Record<string, unknown>;
+  if (!resp.ok || !raw.ok) {
+    throw new Error(typeof raw.error === 'string' && raw.error ? raw.error : `操作失败（${resp.status}）`);
   }
-  return data;
+  return raw as { ok: true; entry?: { type: string; size?: number; mtimeMs?: number }; removed?: number };
 }
 
 export function fsMove(projectId: string, fromPath: string, toPath: string) {

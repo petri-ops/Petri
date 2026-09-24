@@ -12,10 +12,10 @@ type MockUpdater = {
 };
 
 function installMock(mock: MockUpdater) {
-  (window as any).biof3Desktop = { updater: mock };
+  (window as unknown as Record<string, unknown>).biof3Desktop = { updater: mock };
 }
 function clearMock() {
-  delete (window as any).biof3Desktop;
+  delete (window as unknown as Record<string, unknown>).biof3Desktop;
 }
 
 describe('useAutoUpdate', () => {

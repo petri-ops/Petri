@@ -26,8 +26,8 @@ export function UsageResourcePanel(): React.ReactElement {
     void fetch(`${getPlatformApiPrefix()}/ai/usage-mine?days=30`, {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     }).then(async (response) => {
-      const data = await response.json();
-      if (!response.ok || data?.status !== 'ok') throw new Error(data?.error || '用量不可用');
+      const data = (await response.json()) as UsageSummary & { status?: unknown; error?: unknown };
+      if (!response.ok || data?.status !== 'ok') throw new Error(typeof data?.error === 'string' && data.error ? data.error : '用量不可用');
       setUsage(data);
       setUsageError('');
     }).catch((reason) => setUsageError(reason instanceof Error ? reason.message : String(reason)));

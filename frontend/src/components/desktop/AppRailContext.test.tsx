@@ -143,8 +143,8 @@ describe('AppRailContext startup SWR snapshot (BLOCK-101 P1)', () => {
     await act(async () => { await vi.advanceTimersByTimeAsync(5_000); });
     expect(screen.getByText('新数据项目')).toBeTruthy();
     // 对账后快照写回为新鲜数据（下次启动即用）
-    const stored = JSON.parse(window.localStorage.getItem('gewu-startup-snapshot-v1') || '{}');
-    expect(stored.projects.map((p: { id: string }) => p.id)).toEqual(['p_fresh']);
+    const stored = JSON.parse(window.localStorage.getItem('gewu-startup-snapshot-v1') || '{}') as { projects?: Array<{ id: string }> };
+    expect((stored.projects ?? []).map((p: { id: string }) => p.id)).toEqual(['p_fresh']);
   });
 
   it('discards snapshots with a wrong version or malformed shape (fail-closed to normal load)', async () => {

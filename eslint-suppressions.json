@@ -103,14 +103,6 @@
       "count": 1
     }
   },
-  "frontend/src/components/copilot/SimpleChat/attachmentUpload.ts": {
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 2
-    }
-  },
   "frontend/src/components/copilot/SimpleChat/formatHarness.ts": {
     "@typescript-eslint/no-base-to-string": {
       "count": 5
@@ -118,9 +110,6 @@
   },
   "frontend/src/components/copilot/SimpleChat/helpers.tsx": {
     "@typescript-eslint/no-floating-promises": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
       "count": 1
     }
   },
@@ -161,12 +150,6 @@
   },
   "frontend/src/components/copilot/SimpleChat/hooks/useKnowledgeSpace.test.ts": {
     "@typescript-eslint/no-base-to-string": {
-      "count": 3
-    },
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
       "count": 2
     }
   },
@@ -213,25 +196,13 @@
   },
   "frontend/src/components/copilot/conversationChangesStore.ts": {
     "@typescript-eslint/no-unsafe-argument": {
-      "count": 3
-    },
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 4
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 3
+      "count": 2
     },
     "no-empty": {
       "count": 1
     }
   },
   "frontend/src/components/copilot/conversationRunStore.test.ts": {
-    "@typescript-eslint/no-unsafe-call": {
-      "count": 7
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 8
-    },
     "@typescript-eslint/require-await": {
       "count": 3
     }
@@ -245,19 +216,8 @@
     "@typescript-eslint/no-unsafe-assignment": {
       "count": 1
     },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 3
-    },
-    "@typescript-eslint/no-unsafe-return": {
-      "count": 2
-    },
     "@typescript-eslint/require-await": {
       "count": 5
-    }
-  },
-  "frontend/src/components/copilot/copilotClient.test.ts": {
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 1
     }
   },
   "frontend/src/components/copilot/copilotClient.ts": {
@@ -276,11 +236,6 @@
   "frontend/src/components/copilot/copilotClient/agentTaskStream.ts": {
     "no-empty": {
       "count": 1
-    }
-  },
-  "frontend/src/components/copilot/copilotClient/parse.ts": {
-    "@typescript-eslint/no-base-to-string": {
-      "count": 11
     }
   },
   "frontend/src/components/copilot/copilotClient/types.ts": {
@@ -342,26 +297,11 @@
     }
   },
   "frontend/src/components/desktop/AppRailContext.test.tsx": {
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-call": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 1
-    },
     "@typescript-eslint/no-unsafe-return": {
       "count": 1
     }
   },
   "frontend/src/components/desktop/AppRailContext.tsx": {
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 3
-    },
     "react-hooks/set-state-in-effect": {
       "count": 2
     }
@@ -460,17 +400,6 @@
   "frontend/src/components/desktop/DesktopSettingsPanel/sections/UpdateChecker.tsx": {
     "@typescript-eslint/no-misused-promises": {
       "count": 3
-    }
-  },
-  "frontend/src/components/desktop/DesktopSettingsPanel/sections/UsageResourcePanel.tsx": {
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 2
-    },
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 2
     }
   },
   "frontend/src/components/desktop/DesktopSettingsPanel/useEndpointProfilesEditor.ts": {
@@ -625,12 +554,6 @@
     }
   },
   "frontend/src/components/result-studio/GitRepositoryConsent.test.tsx": {
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 1
-    },
     "@typescript-eslint/require-await": {
       "count": 5
     }
@@ -638,19 +561,6 @@
   "frontend/src/components/result-studio/GitRepositoryConsent.tsx": {
     "react-hooks/set-state-in-effect": {
       "count": 1
-    }
-  },
-  "frontend/src/components/result-studio/ResultAgentComposer.test.tsx": {
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 1
-    }
-  },
-  "frontend/src/components/result-studio/ResultEditPanel.test.tsx": {
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 4
     }
   },
   "frontend/src/components/result-studio/ResultEditPanel.tsx": {
@@ -674,15 +584,6 @@
     }
   },
   "frontend/src/components/result-studio/ScientificInteractionViewer.test.tsx": {
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 2
-    },
-    "@typescript-eslint/no-unsafe-call": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 19
-    },
     "@typescript-eslint/no-unsafe-return": {
       "count": 1
     },
@@ -707,37 +608,16 @@
     }
   },
   "frontend/src/components/result-studio/resultStudioClient.ts": {
-    "@typescript-eslint/no-redundant-type-constituents": {
-      "count": 13
-    },
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 1
-    },
     "@typescript-eslint/no-unsafe-assignment": {
       "count": 1
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 3
     }
   },
   "frontend/src/components/settings/ExperimentalFeaturesSection.test.tsx": {
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 1
-    },
     "@typescript-eslint/require-await": {
       "count": 1
     }
   },
   "frontend/src/components/settings/ExperimentalFeaturesSection.tsx": {
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 2
-    },
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 2
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 5
-    },
     "react-hooks/set-state-in-effect": {
       "count": 1
     }
@@ -780,15 +660,6 @@
   "frontend/src/components/workspace-panels/KnowledgeSpacePanel.test.tsx": {
     "@typescript-eslint/no-base-to-string": {
       "count": 2
-    },
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 2
-    },
-    "@typescript-eslint/no-unsafe-call": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 3
     }
   },
   "frontend/src/components/workspace-panels/KnowledgeSpacePanel.tsx": {
@@ -821,15 +692,6 @@
     "@typescript-eslint/no-floating-promises": {
       "count": 1
     },
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 3
-    },
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 4
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 9
-    },
     "react-hooks/refs": {
       "count": 1
     },
@@ -851,14 +713,8 @@
     }
   },
   "frontend/src/components/workspace-panels/ResultArtifactShell/useResultReportActions.ts": {
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 3
-    },
     "@typescript-eslint/no-unsafe-assignment": {
       "count": 2
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 8
     },
     "react-hooks/set-state-in-effect": {
       "count": 2
@@ -882,15 +738,6 @@
   "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx": {
     "@typescript-eslint/no-misused-promises": {
       "count": 3
-    },
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 2
-    },
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 3
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 4
     }
   },
   "frontend/src/hooks/useAiSettings.test.ts": {
@@ -912,9 +759,6 @@
   "frontend/src/hooks/useAutoUpdate.test.ts": {
     "@typescript-eslint/no-floating-promises": {
       "count": 7
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 2
     },
     "@typescript-eslint/require-await": {
       "count": 4
@@ -944,12 +788,6 @@
     "@typescript-eslint/no-floating-promises": {
       "count": 1
     },
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 1
-    },
     "@typescript-eslint/no-unsafe-return": {
       "count": 1
     },
@@ -972,14 +810,6 @@
       "count": 1
     }
   },
-  "frontend/src/hooks/useResizableColumns.test.ts": {
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 3
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 8
-    }
-  },
   "frontend/src/hooks/useResizableColumns.ts": {
     "no-empty": {
       "count": 2
@@ -999,15 +829,6 @@
     }
   },
   "frontend/src/hooks/useRuntimeResourceSnapshot.ts": {
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 2
-    },
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 6
-    },
     "react-hooks/set-state-in-effect": {
       "count": 1
     }
@@ -1034,12 +855,6 @@
     }
   },
   "frontend/src/hooks/useTerminalTabs.test.ts": {
-    "@typescript-eslint/no-unsafe-call": {
-      "count": 2
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 2
-    },
     "@typescript-eslint/require-await": {
       "count": 5
     }
@@ -1128,11 +943,6 @@
       "count": 2
     }
   },
-  "frontend/src/lib/project-store.ts": {
-    "@typescript-eslint/no-base-to-string": {
-      "count": 25
-    }
-  },
   "frontend/src/lib/projectionDataBridges.test.ts": {
     "@typescript-eslint/no-base-to-string": {
       "count": 2
@@ -1151,24 +961,12 @@
   },
   "frontend/src/lib/projectionTerminalBridge.ts": {
     "@typescript-eslint/no-unsafe-argument": {
-      "count": 4
-    },
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 7
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 9
+      "count": 2
     }
   },
   "frontend/src/lib/result-studio-interaction-client.ts": {
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 1
-    },
     "@typescript-eslint/no-unsafe-assignment": {
       "count": 2
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 9
     }
   },
   "frontend/src/lib/result-title-bar.ts": {
@@ -1184,9 +982,6 @@
   "frontend/src/lib/tool-catalog.ts": {
     "@typescript-eslint/no-floating-promises": {
       "count": 1
-    },
-    "@typescript-eslint/no-redundant-type-constituents": {
-      "count": 9
     },
     "react-hooks/set-state-in-effect": {
       "count": 1
@@ -1211,15 +1006,6 @@
     }
   },
   "frontend/src/pages/project-workspace.tsx": {
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 16
-    },
     "react-hooks/preserve-manual-memoization": {
       "count": 1
     },
@@ -1263,12 +1049,6 @@
     "@typescript-eslint/no-misused-promises": {
       "count": 2
     },
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 2
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 6
-    },
     "react-hooks/set-state-in-effect": {
       "count": 3
     }
@@ -1296,15 +1076,6 @@
     "@typescript-eslint/no-misused-promises": {
       "count": 2
     },
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 3
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 2
-    },
     "react-hooks/set-state-in-effect": {
       "count": 2
     }
@@ -1325,17 +1096,6 @@
     },
     "@typescript-eslint/require-await": {
       "count": 2
-    }
-  },
-  "frontend/src/pages/project-workspace/fileOps.ts": {
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 2
-    },
-    "@typescript-eslint/no-unsafe-return": {
-      "count": 1
     }
   },
   "frontend/src/pages/project-workspace/useResultStudioEditContext.ts": {
@@ -1406,17 +1166,6 @@
     },
     "react-hooks/set-state-in-effect": {
       "count": 1
-    }
-  },
-  "frontend/src/themes/ThemeProvider.tsx": {
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 4
     }
   },
   "frontend/src/themes/terminal-themes.ts": {

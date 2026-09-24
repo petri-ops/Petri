@@ -50,7 +50,7 @@ describe('BLOCK-69 useKnowledgeSpaceToggle', () => {
     let serverEnabled = false;
     const fetchMock = mockFetch((url, init) => {
       if (url.includes('/knowledge/space') && init?.method === 'POST') {
-        serverEnabled = JSON.parse(String(init.body)).enabled;
+        serverEnabled = (JSON.parse(String(init.body)) as { enabled?: boolean }).enabled ?? false;
         return { status: 'ok' };
       }
       return spaceBody(serverEnabled);
@@ -63,7 +63,7 @@ describe('BLOCK-69 useKnowledgeSpaceToggle', () => {
     await waitFor(() => expect(result.current.enabled).toBe(true));
     const postCalls = fetchMock.mock.calls.filter((call) => String(call[0]).includes('/knowledge/space') && (call[1])?.method === 'POST');
     expect(postCalls.length).toBe(1);
-    expect(JSON.parse(String(postCalls[0][1] ? (postCalls[0][1]).body : '{}')).enabled).toBe(true);
+    expect((JSON.parse(String(postCalls[0][1] ? (postCalls[0][1] as { body?: string }).body : '{}')) as { enabled?: boolean }).enabled).toBe(true);
   });
 
   it('无 key：embeddingAvailable=false → unavailable 标记（UI 禁用开关的数据源）', async () => {

@@ -51,7 +51,7 @@ function ensureSubscribed(): void {
       (item) => item && typeof item.path === 'string'
     );
     if (authoritative.length === 0) return;
-    const bucket = changesByConversation.get(detail.conversationId) ?? new Map();
+    const bucket = changesByConversation.get(detail.conversationId) ?? new Map<string, ConversationFileChange>();
     const now = Date.now();
     for (const item of authoritative) {
       const existing = bucket.get(item.path);

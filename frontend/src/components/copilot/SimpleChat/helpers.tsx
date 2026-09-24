@@ -72,7 +72,7 @@ export function useDomainExamplePrompts(): ExamplePrompt[] {
           : (result as { packs?: Array<{ packId?: string }> } | null)?.packs;
         if (!alive || !Array.isArray(packs)) return;
         const extra = packs.flatMap(
-          (pack) => DOMAIN_EXAMPLE_PROMPTS[String(pack?.packId || '')] || [],
+          (pack) => DOMAIN_EXAMPLE_PROMPTS[String((pack as { packId?: string }).packId || '')] || [],
         );
         if (extra.length > 0) setPrompts([...DEFAULT_EXAMPLE_PROMPTS, ...extra]);
       } catch {

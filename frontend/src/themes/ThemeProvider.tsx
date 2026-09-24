@@ -118,7 +118,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
     const pull = async () => {
       try {
         const response = await fetch(prefsApi(), { headers: prefsHeaders() });
-        const data = await response.json();
+        const data = (await response.json()) as { ok?: unknown; prefs?: { theme?: string; fontScale?: number; accent?: string } };
         if (data?.ok && data.prefs) {
           const signature = JSON.stringify(data.prefs);
           if (signature !== last) {

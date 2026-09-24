@@ -477,10 +477,10 @@ export function ProjectWorkspace(): React.ReactElement {
       setDatasets(dsList);
       // 成功路径必须清除此前轮询留下的瞬时错误，否则错误屏永驻（P0-2）
       setError('');
-    } catch (e: any) {
+    } catch (e) {
       if (seq !== fetchSequenceRef.current) return;
       // 轮询瞬时失败：保留已加载数据，错误以非阻塞横幅呈现，下一轮成功即自愈
-      setError(e.message || '加载失败');
+      setError(e instanceof Error ? e.message : '加载失败');
     } finally {
       if (seq === fetchSequenceRef.current) setLoading(false);
     }
@@ -675,7 +675,7 @@ export function ProjectWorkspace(): React.ReactElement {
         const resp = await fetch(getApiPrefix() + '/tools/status/' + encodeURIComponent(jobId), {
           headers: token ? { Authorization: 'Bearer ' + token } : {},
         });
-        const data = await resp.json();
+        const data = (await resp.json()) as { ok?: unknown; id?: string; toolId?: string; status?: unknown; createdAt?: string | number; completedAt?: string | number; error?: string; projectId?: string; conversationId?: string | null };
         if (!canCommitJobOpen(openRequestId, openResultRequestSequenceRef.current)) return;
         if (data && data.ok) {
           nextJob = {

@@ -116,7 +116,7 @@ describe('ExperimentalFeaturesSection', () => {
       expect(window.localStorage.getItem(EXTRA_RENDERERS_STORAGE_KEY)).toBe('true');
     });
     // Storage event is dispatched synchronously inside notifyStorage.
-    const storageEvents = onStorage.mock.calls.filter(([event]) => event.type === 'storage');
+    const storageEvents = onStorage.mock.calls.filter(([event]) => (event as StorageEvent).type === 'storage');
     expect(storageEvents.length).toBeGreaterThan(0);
     const lastStorageEvent = storageEvents[storageEvents.length - 1][0] as StorageEvent;
     expect(lastStorageEvent.key).toBe(EXTRA_RENDERERS_STORAGE_KEY);

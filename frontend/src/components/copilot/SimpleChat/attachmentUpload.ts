@@ -61,9 +61,9 @@ async function uploadChunk(projectId: string, toPath: string, dataB64: string, o
       body: JSON.stringify({ toPath, dataB64, offset }),
     },
   );
-  const data = await resp.json().catch(() => ({ ok: false, error: `请求失败（${resp.status}）` }));
+  const data = (await resp.json().catch(() => ({ ok: false, error: `请求失败（${resp.status}）` }))) as { ok?: unknown; error?: unknown };
   if (!resp.ok || !data?.ok) {
-    throw new Error(String(data?.error || `附件上传失败（${resp.status}）`));
+    throw new Error(typeof data?.error === 'string' && data.error ? data.error : `附件上传失败（${resp.status}）`);
   }
 }
 

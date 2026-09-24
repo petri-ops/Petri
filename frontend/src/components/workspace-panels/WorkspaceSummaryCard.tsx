@@ -735,7 +735,7 @@ function useProjectUsage(projectId: string | null, enabled: boolean): ProjectUsa
           `${getPlatformApiPrefix()}/ai/usage-project?projectId=${encodeURIComponent(projectId)}`,
           { headers: token ? { Authorization: `Bearer ${token}` } : undefined }
         );
-        const body = await resp.json().catch(() => null);
+        const body = (await resp.json().catch(() => null)) as (ProjectUsageSummary & { status?: unknown }) | null;
         if (!alive) return;
         setUsage(body && body.status === 'ok' ? body : null);
       } catch {
@@ -773,7 +773,7 @@ function useProjectStorage(projectId: string | null, enabled: boolean): ProjectS
           `${getPlatformApiPrefix()}/harness/project-storage?projectId=${encodeURIComponent(projectId)}`,
           { headers: token ? { Authorization: `Bearer ${token}` } : undefined }
         );
-        const body = await resp.json().catch(() => null);
+        const body = (await resp.json().catch(() => null)) as (ProjectStorageSummary & { ok?: unknown }) | null;
         if (!alive) return;
         setStorage(body && body.ok ? body : null);
       } catch {
@@ -805,7 +805,7 @@ function useProjectNoticeUnread(projectId: string | null, enabled: boolean, refr
           `${getPlatformApiPrefix()}/harness/notices?projectId=${encodeURIComponent(projectId)}&unread=1`,
           { headers: token ? { Authorization: `Bearer ${token}` } : undefined }
         );
-        const body = await resp.json().catch(() => null);
+        const body = (await resp.json().catch(() => null)) as { ok?: unknown; unread?: unknown } | null;
         if (alive) setUnread(body && body.ok ? Number(body.unread) || 0 : 0);
       } catch {
         if (alive) setUnread(0);

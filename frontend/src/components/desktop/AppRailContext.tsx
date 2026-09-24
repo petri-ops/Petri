@@ -154,7 +154,7 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
     try {
       const raw = window.localStorage.getItem('gewu-startup-snapshot-v1');
       if (!raw) return [];
-      const parsed = JSON.parse(raw);
+      const parsed = JSON.parse(raw) as { version?: unknown; projects?: unknown };
       if (parsed?.version !== 1 || !Array.isArray(parsed.projects)) return [];
       return parsed.projects as Project[];
     } catch {

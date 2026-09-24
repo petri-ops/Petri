@@ -103,8 +103,8 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
       const resp = await fetch(
         getApiPrefix() + `/workspaces/${encodeURIComponent(project.id)}/tree?prefix=${encodeURIComponent(prefix)}${showHidden ? '&showHidden=1' : ''}`
       );
-      const data = await resp.json();
-      if (data.ok) return data.entries as FileEntry[];
+      const data = (await resp.json()) as { ok?: unknown; entries?: FileEntry[]; total?: number; truncated?: boolean };
+      if (data.ok) return data.entries ?? [];
     } catch { /* ignore */ }
     return [];
   }, [project.id, showHidden]);
@@ -115,9 +115,9 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
       const resp = await fetch(
         getApiPrefix() + `/workspaces/${encodeURIComponent(project.id)}/tree?prefix=${encodeURIComponent(prefix)}${showHidden ? '&showHidden=1' : ''}&limit=${TREE_DIR_PAGE_LIMIT}&offset=${offset}`
       );
-      const data = await resp.json();
+      const data = (await resp.json()) as { ok?: unknown; entries?: FileEntry[]; total?: number; truncated?: boolean };
       if (data.ok) {
-        return { entries: (data.entries || []) as FileEntry[], total: Number(data.total || 0), truncated: data.truncated === true };
+        return { entries: data.entries || [], total: Number(data.total || 0), truncated: data.truncated === true };
       }
     } catch { /* ignore */ }
     return { entries: [], total: 0, truncated: false };

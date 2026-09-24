@@ -44,9 +44,9 @@ export function useRuntimeResourceSnapshot(
       const response = await fetch(`${getPlatformApiPrefix()}/harness/resource-snapshot${query}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
-      const data = await response.json();
+      const data = (await response.json()) as { ok?: unknown; snapshot?: RuntimeResourceSnapshot; stale?: unknown; message?: unknown };
       if (seq !== refreshSequenceRef.current) return;
-      if (!response.ok || !data?.ok || !data?.snapshot) throw new Error(data?.message || '资源快照不可用');
+      if (!response.ok || !data?.ok || !data?.snapshot) throw new Error(typeof data?.message === 'string' && data.message ? data.message : '资源快照不可用');
       // stale:true = 远程探测失败回退的历史读数（诚实降级，前端显示观测时间）。
       setSnapshot(data.stale === true ? { ...data.snapshot, stale: true } : data.snapshot);
       setError('');

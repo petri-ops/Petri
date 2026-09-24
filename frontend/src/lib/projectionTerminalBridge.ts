@@ -40,13 +40,13 @@ function attachStream(tabId: string, sessionId: string) {
   const source = new EventSource(url);
   source.addEventListener('terminal:data', (event) => {
     try {
-      const payload = JSON.parse((event).data);
+      const payload = JSON.parse((event).data) as { data: string };
       for (const handler of dataHandlers) handler({ sessionId: tabId, data: payload.data });
     } catch { /* 忽略坏帧 */ }
   });
   source.addEventListener('terminal:exit', (event) => {
     try {
-      const payload = JSON.parse((event).data);
+      const payload = JSON.parse((event).data) as { exitCode?: number | null };
       for (const handler of exitHandlers) handler({ sessionId: tabId, exitCode: payload.exitCode });
     } catch { /* 忽略坏帧 */ }
     source.close();
@@ -70,9 +70,9 @@ const bridge: ProjectionTerminalBridge = {
           ssh: sshInfo?.alias && sshInfo?.remotePath ? { alias: sshInfo.alias, remotePath: sshInfo.remotePath } : undefined,
         }),
       });
-      const data = await response.json();
+      const data = (await response.json()) as { ok?: unknown; sessionId?: string; message?: unknown; error?: unknown };
       if (!data.ok || !data.sessionId) {
-        return { ok: false, error: data.message || data.error || '终端启动失败' };
+        return { ok: false, error: typeof data.message === 'string' && data.message ? data.message : typeof data.error === 'string' && data.error ? data.error : '终端启动失败' };
       }
       sessionByTab.set(tabId, data.sessionId);
       attachStream(tabId, data.sessionId);

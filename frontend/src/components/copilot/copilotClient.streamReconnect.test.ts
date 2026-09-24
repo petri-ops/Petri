@@ -99,7 +99,7 @@ describe('BLOCK-39 agent 事件流断线重连', () => {
     });
     expect(opts.onError).toHaveBeenCalledTimes(1);
     const [err, info] = (opts.onError as ReturnType<typeof vi.fn>).mock.calls[0];
-    expect(String(err.message)).toContain('服务重启，Agent 任务中断');
+    expect(String((err as Error).message)).toContain('服务重启，Agent 任务中断');
     expect(info).toMatchObject({ resumable: true, interruptedAt: '2026-09-02T10:00:00.000Z' });
     // 终态 [DONE] 后 onDone 仍触发（store 侧 finish 守卫保证 error 不被覆盖）
     expect(opts.onDone).toHaveBeenCalledTimes(1);
@@ -127,7 +127,7 @@ describe('BLOCK-39 agent 事件流断线重连', () => {
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(String(fetchMock.mock.calls[1][0])).toContain('afterSeq=2');
     expect(String(fetchMock.mock.calls[2][0])).toContain('afterSeq=2');
-    const reconnectCalls = (opts.onStreamReconnecting as ReturnType<typeof vi.fn>).mock.calls;
+    const reconnectCalls = (opts.onStreamReconnecting as ReturnType<typeof vi.fn>).mock.calls as Array<[{ attempt: number; nextRetryMs: number }]>;
     expect(reconnectCalls.map((c) => c[0].attempt)).toEqual([1, 2]);
     expect(reconnectCalls.map((c) => c[0].nextRetryMs)).toEqual([1000, 2000]);
     expect(opts.onDone).toHaveBeenCalledTimes(1);

@@ -104,9 +104,9 @@ function ServerFlagRows(): React.ReactElement {
   const refresh = useCallback(async () => {
     try {
       const resp = await fetch(`${getApiPrefix()}/feature-flags`);
-      const body = await resp.json();
+      const body = (await resp.json()) as { status?: unknown; error?: unknown; flags?: Record<string, Record<string, unknown>> };
       if (body.status === 'ok') {
-        setFlags(Object.entries(body.flags).map(([key, view]) => ({ key, ...(view as object) } as ServerFlagView)));
+        setFlags(Object.entries(body.flags ?? {}).map(([key, view]) => ({ key, ...view } as ServerFlagView)));
       }
     } catch {
       // 后端未就绪时静默（设置页其余分区同策略）；下次进入页面重试
@@ -127,9 +127,9 @@ function ServerFlagRows(): React.ReactElement {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key, enabled: next }),
       });
-      const body = await resp.json();
-      if (body.status !== 'ok') throw new Error(String(body.error || `HTTP ${resp.status}`));
-      setFlags(Object.entries(body.flags).map(([k, view]) => ({ key: k, ...(view as object) } as ServerFlagView)));
+      const body = (await resp.json()) as { status?: unknown; error?: unknown; flags?: Record<string, Record<string, unknown>> };
+      if (body.status !== 'ok') throw new Error(typeof body.error === 'string' && body.error ? body.error : `HTTP ${resp.status}`);
+      setFlags(Object.entries(body.flags ?? {}).map(([k, view]) => ({ key: k, ...view } as ServerFlagView)));
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
       void refresh();

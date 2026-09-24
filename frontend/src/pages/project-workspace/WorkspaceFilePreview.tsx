@@ -224,11 +224,11 @@ export function WorkspaceFilePreview({
           }
         );
         if (!resp.ok) {
-          const data = await resp.json().catch(() => null);
-          setSaveError(data?.error || `保存失败（HTTP ${resp.status}）`);
+          const data = (await resp.json().catch(() => null)) as { error?: unknown } | null;
+          setSaveError(typeof data?.error === 'string' && data.error ? data.error : `保存失败（HTTP ${resp.status}）`);
           return;
         }
-        const data = await resp.json().catch(() => null);
+        const data = (await resp.json().catch(() => null)) as { stat?: { mtimeMs?: number } } | null;
         savedMtimeRef.current = data?.stat?.mtimeMs ?? null;
         setSaveError('');
         setTextSaved(text);

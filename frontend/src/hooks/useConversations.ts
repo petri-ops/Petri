@@ -131,7 +131,7 @@ export function useConversations(
       })
       .catch((e) => {
         if (cancelled || currentRef.current !== projectId) return;
-        setError(e?.message || 'failed to load conversations');
+        setError(e instanceof Error ? e.message : 'failed to load conversations');
         setLoading(false);
       });
     return () => {
