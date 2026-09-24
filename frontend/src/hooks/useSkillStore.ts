@@ -326,8 +326,7 @@ export function useSkillStore(
   }, []);
 
   const search = useCallback((_query: string) => {
-    // Local filtering is handled by useMemo; this method is reserved
-    // for server-side search if/when the backend supports it.
+    // Local filtering is handled by useMemo; reserved for server-side search if/when the backend supports it.
     setSearchQuery(_query);
     return Promise.resolve();
   }, []);
