@@ -5,13 +5,13 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-09-25 凌晨（**BK-06 第六刀收口：promise 三族收官 + refs 定性（closeout 十门全绿）**——no-floating-promises 41→0 全族清零 + no-misused-promises 41→2（真修 39）+ no-unsafe-argument 4→0 + react-hooks/refs 74 定性豁免（CenterPanelContext 混合对象污染推断，拆分=新登记候选 C-11）；**根基线 597→515（−82）；六刀累计 947→515（−432）**。**队列头=BK-06 续批 tail**：base-to-string 40 / redundant-type 31 / no-undef 19 / no-empty 19 / control-regex 13。）
+最后更新：2026-09-25 早（**BK-06 第七刀收口：tail 十八族收官（closeout 十门全绿）**——no-undef 19→2（配置 build globals 双修+缺件导入补齐，fileURLToPath 存量真缺陷）+ no-empty 19→1（allowEmptyCatch 补齐 frontend TS）+ base-to-string 40→2（unknownText 共享辅助）+ redundant-type 31→0 + rules-of-hooks 4→0 真修 + 豁免定性 47；**根基线 515→397（−118）；七刀累计 947→397（−550），剩余全部为已书面定性豁免类**。**队列头=BK-06 收官评估**。）
 
 ## 推进队列（串行，按序逐个推进）
 
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
-| 3 | ▶ BK-06 | **BLOCK-105 §7 Batch-8：lint 抑制基线收缩**——已收六刀（−432），基线 947→515；已清零族=require-await 外的 floating-promises/misused-promises(余 2)/unsafe-argument/unsafe-member-access/no-unsafe-assignment(余 7)/base-to-string(余 40 为残余)；豁免定性族=set-state-in-effect 99 / refs 74 / 匹配器 7 / mock 替身 147；tail=base-to-string 40 / redundant-type 31 / no-undef 19 / no-empty 19 / control-regex 13 等；**唯一无需新裁决即可续接的已登记工作** | roadmap/handoff「无需新裁决即可续接」段 + AUDIT-LOG 2026-09-24 深夜五~09-25 凌晨行 | **队列头（长线，可分批收口）·待续批** |
+| 3 | ▶ BK-06 | **BLOCK-105 §7 Batch-8：lint 抑制基线收缩**——已收七刀（−550），基线 947→397；清零族=floating-promises/misused-promises(余 2)/unsafe-argument/unsafe-member-access/no-unsafe-assignment(余 7)/base-to-string(余 2)/redundant-type/rules-of-hooks/no-undef(余 2)/no-empty(余 1)；豁免定性族=require-await 147（mock 替身）/set-state-in-effect 99/refs 74（拆分=C-11）/control-regex 13/compiler+测试 idiom 39/匹配器 7；**长线待用户裁决是否收官或续清角落残余** | roadmap/handoff「无需新裁决即可续接」段 + AUDIT-LOG 2026-09-24 深夜五~09-25 早行 | **队列头（长线，可分批收口）·收官评估** |
 | 4 | ▶ BK-07 | **BLOCK-105 Batch-4 抓真 3 件处置**——①Office `loadAssets` 五参签名化石（收窄需单独裁决）②`ResultArtifactShell` `_jobMeta`/`_selectedSectionId` + `ResultStudioPage` `currentVersion` 只写不读＝结果元信息与版本投影停在未接线态（**交产品裁决**）③`SideChatDock.test` 头注声称覆盖 copilotAsk 实际无断言（小修） | AUDIT-LOG 2026-09-20 Mac 会话之五第 5 条 | 排队（②需用户裁决） |
 | 5 | ▶ BK-08 | **darwin 启动预算档建基线**——`block101-startup-timeline` 首跑因缺 `platforms.darwin` 档判红（设计行为非故障）；需 Mac 会话采 5 样本建基线，禁止复制 win32 数字 | BLOCK-106 遗留 + handoff ⚡ 清单 | 排队（需 Mac 环境） |
 | — | 👁 BK-02 | **汇报门 P2 试点观察期盘点**（持续观察，不占队列序）——采纳率/误拦率（含误重写率）/延迟增量/fitReplay 触发率随真实轮次累计；首盘点已并入 BK-01 P0（decision_log report-guard 行 + fit-volatility-review.json）；观察窗开启中（dev 栈 BIOF3_JEV_REPORT_GUARD=1）。此后周期性盘点 | BLOCK-119 收口遗留候选 | 观察（持续） |
@@ -30,6 +30,7 @@
 | 🔁 BK-06 | Batch-8 第四刀：no-unsafe-member-access 全族收官（非整项收口，长线续批中） | 2026-09-24 当日收口：残余 81 条清零（生产 19 文件 66 + 测试 8 文件 15），族 151→0；根基线 752→616（−136=真修 81+漂移 55）；tsc 0 + 全量 147/1201 + closeout 十门绿；教训=判别联合信封与 eslint 类型信息不一致时改 Record 承载+返回处一次断言 |
 | 🔁 BK-06 | Batch-8 第五刀：set-state-in-effect 定性 + no-unsafe-assignment 近清零（非整项收口，长线续批中） | 2026-09-24 当日收口：set-state-in-effect 三形态定性（C 示范修复 2 + A/B 99 豁免留痕）+ no-unsafe-assignment 真修 17（余 7 匹配器豁免）；根基线 616→597；tsc 0 + 全量 147/1201 + closeout 十门绿；教训=注解赋值触发 no-unsafe-assignment 而 cast 形态不触发 |
 | 🔁 BK-06 | Batch-8 第六刀：promise 三族收官 + refs 定性（非整项收口，长线续批中） | 2026-09-25 收口：floating-promises 41→0 + misused-promises 41→2（真修 39）+ unsafe-argument 4→0 + refs 74 定性豁免（C-11 登记）；根基线 597→515；tsc 0 + 全量 147/1201 + closeout 十门绿 |
+| 🔁 BK-06 | Batch-8 第七刀：tail 十八族收官（非整项收口，长线） | 2026-09-25 收口：配置双修（build globals+allowEmptyCatch）/unknownText 共享辅助 24 站点/联合塌缩 31/rules-of-hooks 4 真修/豁免定性 47/fileURLToPath 真缺陷补齐；根基线 515→397；tsc 0 + 全量 147/1201 + closeout 十门绿 |
 
 ## 👤 用户事项（Agent 不代行，仅登记与提醒）
 

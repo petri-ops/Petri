@@ -1,6 +1,8 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-25 凌晨（**BK-06 第六刀=promise 三族收官 + refs 定性（closeout 十门全绿）**——floating 41→0 / misused 41→2 / unsafe-arg 4→0 / refs 74 豁免（拆分=C-11），根基线 597→515；六刀累计 947→515（−432）。**恢复要点**：dev 栈在跑；队列头=BK-06 续批 tail（base-to-string 40 / redundant-type 31 / no-undef 19 / no-empty 19）；豁免类清单=require-await 147（mock 替身）/set-state-in-effect 99（A/B 形态）/refs 74（混合对象）/匹配器 7；用户事项 U-01~U-03 不变待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 早（**BK-06 第七刀=tail 十八族收官（closeout 十门全绿）**——配置双修（build globals+allowEmptyCatch）/unknownText 辅助/联合塌缩/rules-of-hooks 真修/豁免定性 47，根基线 515→397；七刀累计 947→397（−550）。**恢复要点**：dev 栈在跑；豁免类清单=require-await 147（mock 替身）/set-state-in-effect 99/refs 74（拆分=C-11）/control-regex 13/compiler+测试 idiom 39/匹配器 7 等，全部有书面理由；用户事项 U-01~U-03 不变待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 凌晨（**BK-06 第六刀=promise 三族收官 + refs 定性（closeout 十门全绿）**——floating 41→0 / misused 41→2 / unsafe-arg 4→0 / refs 74 豁免（拆分=C-11），根基线 597→515；六刀累计 947→515（−432）。**恢复要点**：dev 栈在跑；队列头=BK-06 续批 tail（base-to-string 40 / redundant-type 31 / no-undef 19 / no-empty 19）；豁免类清单=require-await 147（mock 替身）/set-state-in-effect 99（A/B 形态）/refs 74（混合对象）/匹配器 7；用户事项 U-01~U-03 不变待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-24 深夜九（**BK-06 第五刀=set-state-in-effect 定性（C 类示范修复 2 + A/B 类 99 豁免留痕）+ no-unsafe-assignment 24→7 收口（closeout 十门全绿）**，根基线 616→597；全量 147/1201 绿。**恢复要点**：dev 栈在跑；队列头=BK-06 续批（refs 74 / no-misused-promises 41 / no-floating-promises 41）；教训=注解赋值触发 no-unsafe-assignment 而 cast 形态不触发；用户事项 U-01~U-03 不变待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
