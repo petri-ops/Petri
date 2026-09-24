@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-24 深夜二（**BK-03=BLOCK-120 终态对账 v2 当日收口（closeout 十门全绿）——全局待办队列推进 2/8**——todoRefs 声明制归属（spawn/followup 可选参数，快照校验丢弃回传，params 落库零 migration）+ 对账 item_level_mismatch 条目级失真（无 linkage 回退 v1 向后兼容）；实机真 spawn 轮 todoRefs 落库+零假阳性；连带清偿 block34 存量契约漂移。**队列下一项=BK-04（agent 可见决策工具）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-24 深夜三（**BK-04=agent 可见决策工具收口（BLOCK-116 W2 轻量批，closeout 十门全绿）——全局待办队列推进 3/8**——decision_summary/decision_recent 只读观测工具（工具总数 71→73，诚实边界=变更面不对模型开放）；实机真模型自主调用并正确作答（acceptance/block-116/w2-agent-tools-live.json）。**队列下一项=BK-05（阈值热调）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-24 深夜二（**BK-03=BLOCK-120 终态对账 v2 当日收口（closeout 十门全绿）——全局待办队列推进 2/8**——todoRefs 声明制归属（spawn/followup 可选参数，快照校验丢弃回传，params 落库零 migration）+ 对账 item_level_mismatch 条目级失真（无 linkage 回退 v1 向后兼容）；实机真 spawn 轮 todoRefs 落库+零假阳性；连带清偿 block34 存量契约漂移。**队列下一项=BK-04（agent 可见决策工具）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-24 深夜一（**BK-01=BLOCK-119 加映 4 当日收口（closeout 十门全绿）——全局待办队列推进 1/8**——fit 波动治理以测量鲁棒性落地：fitReviewBand=0.5 邻域内 fit-only 重放 median-of-3 重建路由（θ 不动、带外零开销、fail-open 不变），实机真 spawn 轮 fitReplay 端到端（3.15→median 3.14=PASS）+ 契约 24/24 + test:changed 114 项 0 红。BK-02 观察期首盘点并入 P0。**队列下一项=BK-03（终态对账 v2 条目级 linkage）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

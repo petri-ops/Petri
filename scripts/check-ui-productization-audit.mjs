@@ -94,6 +94,10 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // UI-434/435 已登记（数据链路 flow 5/5+6/6+4/4 实证，verified）；台账同步落在后续提交，
   // SHA 豁免按 64da69b 先例。
   'aac13f69eeb07677cdb3dccafcb20e8edc8b3f21',
+  // 2026-09-24 BLOCK-116 W2（BK-04）agent 可见决策工具（a23ab0f decision_summary/recent
+  // 后端工具 + 前端 toolActivity.ts verbs/icons +2 同步 fixture 单源）：UI-437 注册表延伸，
+  // 台账 v5.20 行随收口提交补登，SHA 豁免按 64da69b 先例。
+  'a23ab0fd97f460541aedaa7157a2acabf8f7c6dc',
   '6c337b7da5c276d3e513f342f4ce8c533a1b3d0a',
   '85837bb9ba64c61e7105d88ab5b32314ed7b7f47',
   '64da69b71771661b49ba43fe7230cdb30347f7d7',
@@ -419,6 +423,10 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 2026-09-22 BLOCK-116 W2/P4 决策观测面与配置面（aac13f6 DecisionUsagePanel；
   // 85837bb recent 回放端点）：UI-434/435 已登记，台账同步落在后续提交。
   'aac13f69eeb07677cdb3dccafcb20e8edc8b3f21',
+  // 2026-09-24 BLOCK-116 W2（BK-04）agent 可见决策工具（a23ab0f decision_summary/recent
+  // 后端工具 + 前端 toolActivity.ts verbs/icons +2 同步 fixture 单源）：UI-437 注册表延伸，
+  // 台账 v5.20 行随收口提交补登，SHA 豁免按 64da69b 先例。
+  'a23ab0fd97f460541aedaa7157a2acabf8f7c6dc',
   '85837bb9ba64c61e7105d88ab5b32314ed7b7f47',
   '6c337b7da5c276d3e513f342f4ce8c533a1b3d0a',
   '64da69b71771661b49ba43fe7230cdb30347f7d7',

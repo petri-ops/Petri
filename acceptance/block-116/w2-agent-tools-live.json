@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-09-24T11:29:42.030Z",
+  "taskId": "e776063f-7191-4d26-9677-ce16679b853f",
+  "conversationId": "conv_9e565fcc-578",
+  "primaryStatus": "completed",
+  "decisionToolEvents": [
+    {
+      "type": "tool_call",
+      "at": "2026-09-24T11:29:29.475Z",
+      "excerpt": "{\"event\":\"tool_call\",\"name\":\"decision_recent\",\"args\":{\"limit\":5},\"traceId\":\"trace_17d887be-8cd4-4dfa-91f1-78355e263d79\",\"callId\":\"call_00_ET_O0VYSoLLzKWpJDIsXMr15028\",\"iteration\":1}"
+    },
+    {
+      "type": "tool_result",
+      "at": "2026-09-24T11:29:29.476Z",
+      "excerpt": "{\"event\":\"tool_result\",\"name\":\"decision_recent\",\"summary\":\"available true · count 5 · decisions 5 条\",\"iteration\":1,\"toolResult\":{\"contractVersion\":\"1.0.0\",\"traceId\":\"trace_17d887be-8cd4-4dfa-91f1-78355e263d79\",\"callId\":\"call_00_ET_O0VYSoLLzKWpJDIsXMr15028\",\"tool\":\"decision_recent\",\"status\":\"success\",\"terminationReason\":\"success\",\"durationMs\":0.1,\"sourceTruncated\":false,\"previewTruncated\":true,\"tru"
+    }
+  ],
+  "finalAssistantAnswer": "查询结果如下：\n\n**一共查到 5 条**（返回 `count: 5`，`available: true`）。\n\n**是否存在降级：没有。** 这 5 条记录的 `degraded` 字段全部为 `false`，`reason` 也均为 `null`。\n\n**接点分布**（共两种）：\n\n| 接点 | 条数 | 判定值 | 置信度 | 阈值 |\n|---|---|---|---|---|\n| `intent-route` | 2 | result_studio | 0.52 / 0.47 | 0.7 |\n| `tool-route` | 3 | all | 0.21 / 0.17 | 0.8 |\n\n最近一条是 `tool-route`（2026-09-24T11:29:28Z，choice=all，confidence 0.17，未降级）。\n\n一点值得注意的观察：这两个接点的判定置信度都明显低于各自阈值（intent-route 0.47–0.52 < 0.7；tool-route 0.17–0.21 < 0.8），但记录里 `degraded=false`、`reason=null`，说明系统并未把这些低置信判定标记为降级路径。这 5 条都来自同一请求的连续重放（statePreview 内容一致），所以接点分布反映的是单轮任务内的判定序列，而非多轮任务的统计。"
+}

@@ -1,6 +1,8 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-24 深夜二（**BK-03=BLOCK-120 终态对账 v2 收口（closeout 十门全绿）——队列 2/8 完成**——todoRefs 声明制归属落 params（零 migration）+ 对账 v2 条目级失真向后兼容；实机真 spawn 轮 todoRefs=['1'] 落库、clean 轮零假阳性（acceptance/block-120/live.json）。**恢复要点**：dev 栈在跑（已重启加载 BLOCK-120 代码）；全量待办查 pending-work-backlog.md，**队列下一项=BK-04 agent 可见决策工具**；连带清偿=block34 v5.6 断言已同步 v5.18 契约。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-24 深夜三（**BK-04=agent 可见决策工具收口（closeout 十门全绿）——队列 3/8 完成**——decision_summary/decision_recent 只读工具上岗（71→73），实机真模型自主调用正确作答（acceptance/block-116/w2-agent-tools-live.json）。**恢复要点**：dev 栈在跑（已加载 BK-04 工具）；队列下一项=BK-05（阈值热调，BLOCK-116 W2 末件）；BLOCK-120 todoRefs 与本批工具的生产表现并入 BK-02 观察口径。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-24 深夜二（**BK-03=BLOCK-120 终态对账 v2 收口（closeout 十门全绿）——队列 2/8 完成**——todoRefs 声明制归属落 params（零 migration）+ 对账 v2 条目级失真向后兼容；实机真 spawn 轮 todoRefs=['1'] 落库、clean 轮零假阳性（acceptance/block-120/live.json）。**恢复要点**：dev 栈在跑（已重启加载 BLOCK-120 代码）；全量待办查 pending-work-backlog.md，**队列下一项=BK-04 agent 可见决策工具**；连带清偿=block34 v5.6 断言已同步 v5.18 契约。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-24 深夜一（**BK-01=BLOCK-119 加映 4 收口（closeout 十门全绿）——队列 1/8 完成**——fit 波动治理落地：注册表 fitReviewBand=0.5（证据绑定 fit-volatility-review.json）+ judgeOutput 邻域重放 median-of-3 + report-guard/child_finished 增 additive fitReplay；实机真 spawn 轮端到端（首判 3.15→重放→median 3.14=PASS，证据 acceptance/block-119/jiaying4-live.json）。**恢复要点**：dev 栈在跑（BIOF3_JEV_REPORT_GUARD=1，vite+electron 均 09-24 起）；全量待办查 pending-work-backlog.md，**队列下一项=BK-03 终态对账 v2 条目级 linkage**（需 migration，启动照立项检查单）；用户事项 U-01~U-03（Jev key 轮换/UI-437·438 过目）待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
