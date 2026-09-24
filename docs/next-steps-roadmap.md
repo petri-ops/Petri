@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-24 深夜四（**BK-05=阈值热调统一收口（BLOCK-116 W2 末件，closeout 十门全绿）——全局待办队列推进 4/8**——topic-shift/knowledge-guard 闸门迁 config 消费（常量漂移退役）+ gates 键级 patch 四层校验，BLOCK-110~113 运行时接点热调全通；实机七断言全过。**队列下一项=BK-06（BLOCK-105 §7 Batch-8 lint 收缩，长线）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-24 深夜五（**BK-06 第一刀=BLOCK-105 §7 Batch-8 require-await 族收口（closeout 十门全绿）**——生产 35 条 stub 契约化直返 + 测试安全回调 5 条真修；vi.fn 替身 147 条承重 async 误报豁免保留（机械摘除被批量测试抓真后回退重做）；根基线 947→907 + frontend 本地基线化石删除。**队列头仍=BK-06 续批**（unsafe-member-access 151 / set-state-in-effect 101 / base-to-string 77 等）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-24 深夜四（**BK-05=阈值热调统一收口（BLOCK-116 W2 末件，closeout 十门全绿）——全局待办队列推进 4/8**——topic-shift/knowledge-guard 闸门迁 config 消费（常量漂移退役）+ gates 键级 patch 四层校验，BLOCK-110~113 运行时接点热调全通；实机七断言全过。**队列下一项=BK-06（BLOCK-105 §7 Batch-8 lint 收缩，长线）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-24 深夜三（**BK-04=agent 可见决策工具收口（BLOCK-116 W2 轻量批，closeout 十门全绿）——全局待办队列推进 3/8**——decision_summary/decision_recent 只读观测工具（工具总数 71→73，诚实边界=变更面不对模型开放）；实机真模型自主调用并正确作答（acceptance/block-116/w2-agent-tools-live.json）。**队列下一项=BK-05（阈值热调）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

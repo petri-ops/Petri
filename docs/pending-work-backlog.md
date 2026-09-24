@@ -5,14 +5,13 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-09-24 深夜四（**队列推进 4/8：BK-05 收口（阈值热调统一，BLOCK-116 W2 末件，closeout 十门全绿）**——BLOCK-110~113 运行时接点热调全通，实机七断言全过；**队列头=BK-06（lint Batch-8 长线）**；新增候选 C-10（output-judge 0-4 量表多闸门热调）。）（agent 可见决策工具，BLOCK-116 W2 轻量批，closeout 十门全绿）**——decision_summary/recent 上岗（工具 71→73），实机真模型自主调用正确作答；**队列头=BK-05（阈值热调）**。）（BLOCK-120 终态对账 v2，closeout 十门全绿）**——todoRefs 声明制归属+条目级对账向后兼容落地，实机 todoRefs 落库+零假阳性；**队列头=BK-04（agent 可见决策工具）**。）
+最后更新：2026-09-24 深夜五（**BK-06 第一刀收口：BLOCK-105 §7 Batch-8 require-await 族（closeout 十门全绿）**——生产 35 条真修（桥/投影 stub `Promise.reject/resolve` 直返保契约 + UI 回调摘 async 4 处）+ 测试 it/test/hooks 回调安全摘 async 5 条；vi.fn 测试替身 147 条承重 async 按「误报豁免」如实保留（批量测试抓真：机械摘除破坏 promise 契约与微任务让渡）；**根基线 947→907**；连带删除 frontend/eslint-suppressions.json 漂移化石。**队列头=BK-06 续批**：unsafe-member-access 151 / set-state-in-effect 101 / base-to-string 77 / refs 74 / unsafe-assignment 66 等。）
 
 ## 推进队列（串行，按序逐个推进）
 
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
-| 1 | ▶ BK-05 | **阈值热调（BLOCK-116 W2 剩余）——阈值注册表的运行时调整面；「改阈值必先重校准」红线由既有契约承载 | 同上 | 排队 |
-| 3 | ▶ BK-06 | **BLOCK-105 §7 Batch-8：lint 抑制基线收缩**——剩余 ~956 条语义批（require-await 187 / set-state-in-effect 100 / refs 74 / exhaustive-deps 70 / base-to-string ~59 / unsafe 残尾等），逐案推进、每批棘轮收紧；**唯一无需新裁决即可续接的已登记工作**，可作长线在收口间隙续批 | roadmap/handoff「无需新裁决即可续接」段（Batch-7 后基线 956） | **队列头（长线，可分批收口）** |
+| 3 | ▶ BK-06 | **BLOCK-105 §7 Batch-8：lint 抑制基线收缩**——第一刀已收口（require-await 族：生产 35 真修 + 测试回调 5 真修 + 替身 147 误报豁免保留，基线 947→907）；剩余语义批按现基线=unsafe-member-access 151 / set-state-in-effect 101 / base-to-string 77 / refs 74 / unsafe-assignment 66 / redundant-type 53 / misused-promises 43 / floating-promises 41 等，逐案推进、每批棘轮收紧；**唯一无需新裁决即可续接的已登记工作** | roadmap/handoff「无需新裁决即可续接」段 + AUDIT-LOG 2026-09-24 深夜五行 | **队列头（长线，可分批收口）·待续批** |
 | 4 | ▶ BK-07 | **BLOCK-105 Batch-4 抓真 3 件处置**——①Office `loadAssets` 五参签名化石（收窄需单独裁决）②`ResultArtifactShell` `_jobMeta`/`_selectedSectionId` + `ResultStudioPage` `currentVersion` 只写不读＝结果元信息与版本投影停在未接线态（**交产品裁决**）③`SideChatDock.test` 头注声称覆盖 copilotAsk 实际无断言（小修） | AUDIT-LOG 2026-09-20 Mac 会话之五第 5 条 | 排队（②需用户裁决） |
 | 5 | ▶ BK-08 | **darwin 启动预算档建基线**——`block101-startup-timeline` 首跑因缺 `platforms.darwin` 档判红（设计行为非故障）；需 Mac 会话采 5 样本建基线，禁止复制 win32 数字 | BLOCK-106 遗留 + handoff ⚡ 清单 | 排队（需 Mac 环境） |
 | — | 👁 BK-02 | **汇报门 P2 试点观察期盘点**（持续观察，不占队列序）——采纳率/误拦率（含误重写率）/延迟增量/fitReplay 触发率随真实轮次累计；首盘点已并入 BK-01 P0（decision_log report-guard 行 + fit-volatility-review.json）；观察窗开启中（dev 栈 BIOF3_JEV_REPORT_GUARD=1）。此后周期性盘点 | BLOCK-119 收口遗留候选 | 观察（持续） |
@@ -25,6 +24,7 @@
 | ✅ BK-03 | 终态对账 v2：条目级归属（BLOCK-120） | 2026-09-24 当日收口：todoRefs 声明制 linkage（快照校验/丢弃回传/params 落库零 migration）+ item_level_mismatch 条目级对账向后兼容；契约 +11（block49+7/reconcile+4）+ 实机 todoRefs 落库零假阳性；plan=docs/block-120-reconciliation-linkage-plan.md §7，证据=acceptance/block-120/live.json |
 | ✅ BK-04 | agent 可见决策工具（BLOCK-116 W2 轻量批） | 2026-09-24 当日收口：decision_summary/decision_recent 只读观测工具（decision-log 单源直调，工具 71→73 三面同步）；实机真模型自主调用正确作答；证据=acceptance/block-116/w2-agent-tools-live.json，台账=UI-437 v5.20 |
 | ✅ BK-05 | 阈值热调统一（BLOCK-116 W2 轻量批） | 2026-09-24 当日收口：topic-shift/knowledge-guard 闸门迁 getPointRuntime（常量漂移退役）+ gates 键级 patch 四层校验；BLOCK-110~113 接点热调全通；实机七断言全过；证据=acceptance/block-116/bk05-gates-hot-tune-live.json |
+| 🔁 BK-06 | Batch-8 第一刀：require-await 族（非整项收口，长线续批中） | 2026-09-24 当日收口：生产 35 条 stub 契约化直返 + 测试安全回调 5 条；替身 147 条承重 async 误报豁免保留；根基线 947→907 + frontend 本地基线化石删除；tsc 0 + 前端全量 147/1201 绿 + closeout 十门绿；教训=测试替身 async 不可机械摘（promise 契约+微任务让渡双承重） |
 
 ## 👤 用户事项（Agent 不代行，仅登记与提醒）
 

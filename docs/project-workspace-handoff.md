@@ -1,6 +1,8 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-24 深夜四（**BK-05=阈值热调统一收口（closeout 十门全绿）——队列 4/8 完成，BLOCK-116 W2 候选池清空**——topic-shift/knowledge-guard 闸门迁 getPointRuntime + gates 键级 patch 四层校验（不变量违反拒写），BLOCK-110~113 运行时接点热调全通；实机七断言全过（acceptance/block-116/bk05-gates-hot-tune-live.json）。**恢复要点**：dev 栈在跑；队列下一项=BK-06（lint Batch-8，长线可分批）；output-judge 0-4 量表热调=新登记候选（候选池 C-10）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-24 深夜五（**BK-06 第一刀=BLOCK-105 §7 Batch-8 require-await 族收口（closeout 十门全绿）**——生产 stub `Promise.reject/resolve` 契约化直返 35 条 + it/test/hooks 回调安全摘 async 5 条；vi.fn 替身 147 条承重 async 误报豁免保留（教训：测试替身 async=promise 契约+微任务让渡双承重，不可机械摘）；根基线 947→907；frontend/eslint-suppressions.json 化石删除（零消费方+实证漂移）。**恢复要点**：dev 栈在跑；队列头=BK-06 续批（unsafe-member-access 151 / set-state-in-effect 101 / base-to-string 77 / refs 74）；用户事项 U-01~U-03 不变待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-24 深夜四（**BK-05=阈值热调统一收口（closeout 十门全绿）——队列 4/8 完成，BLOCK-116 W2 候选池清空**——topic-shift/knowledge-guard 闸门迁 getPointRuntime + gates 键级 patch 四层校验（不变量违反拒写），BLOCK-110~113 运行时接点热调全通；实机七断言全过（acceptance/block-116/bk05-gates-hot-tune-live.json）。**恢复要点**：dev 栈在跑；队列下一项=BK-06（lint Batch-8，长线可分批）；output-judge 0-4 量表热调=新登记候选（候选池 C-10）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-24 深夜三（**BK-04=agent 可见决策工具收口（closeout 十门全绿）——队列 3/8 完成**——decision_summary/decision_recent 只读工具上岗（71→73），实机真模型自主调用正确作答（acceptance/block-116/w2-agent-tools-live.json）。**恢复要点**：dev 栈在跑（已加载 BK-04 工具）；队列下一项=BK-05（阈值热调，BLOCK-116 W2 末件）；BLOCK-120 todoRefs 与本批工具的生产表现并入 BK-02 观察口径。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
