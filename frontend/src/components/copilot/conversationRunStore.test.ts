@@ -309,7 +309,7 @@ describe('conversation run store', () => {
     });
   });
 
-  it('preserves progress and tool activity when the user stops a background task', async () => {
+  it('preserves progress and tool activity when the user stops a background task', () => {
     start('conversation-a', 'run a long analysis');
     const callbacks = streamCallOpts(0);
     callbacks.onTaskStarted?.('task-1');

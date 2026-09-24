@@ -49,11 +49,11 @@ export function subscribeAuth(_callback: (user: AuthUser | null) => void): () =>
 export function getCachedGuestPermissions(): Record<string, boolean> | null {
   return null;
 }
-export async function fetchGuestPermissions(): Promise<Record<string, boolean> | null> {
-  return null;
+export function fetchGuestPermissions(): Promise<Record<string, boolean> | null> {
+  return Promise.resolve(null);
 }
-export async function fetchMe(): Promise<AuthUser | null> {
-  return DESKTOP_USER;
+export function fetchMe(): Promise<AuthUser | null> {
+  return Promise.resolve(DESKTOP_USER);
 }
 
 // login/register 桌面版不应被调用，保留 stub 防止类型缺口
@@ -61,14 +61,14 @@ export async function login(
   _username: string,
   _password: string
 ): Promise<{ ok: boolean; error?: string }> {
-  return { ok: true };
+  return Promise.resolve({ ok: true });
 }
 export async function register(_data: {
   username: string;
   password: string;
   email?: string;
 }): Promise<{ ok: boolean; error?: string }> {
-  return { ok: true };
+  return Promise.resolve({ ok: true });
 }
 
 export { errMsg };

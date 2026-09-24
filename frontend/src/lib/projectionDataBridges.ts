@@ -41,11 +41,11 @@ const skillsBridge = {
       return { ok: false as const, error: error instanceof Error ? error.message : 'network' };
     }
   },
-  async execute() {
-    return { ok: false as const, error: '投影环境暂不支持执行技能，请在桌面端操作' };
+  execute() {
+    return Promise.resolve({ ok: false as const, error: '投影环境暂不支持执行技能，请在桌面端操作' });
   },
-  async getExecution() {
-    return { ok: false as const, error: '投影环境暂不支持执行状态查询' };
+  getExecution() {
+    return Promise.resolve({ ok: false as const, error: '投影环境暂不支持执行状态查询' });
   },
   cancel: () => {},
   onProgress: () => () => {},
@@ -77,11 +77,11 @@ const pluginsBridge = {
       return { plugins: {} };
     }
   },
-  async install(_pluginId: string, _onProgress?: unknown) {
-    return { ok: false as const, error: '投影环境暂不支持安装插件，请在桌面端操作' };
+  install(_pluginId: string, _onProgress?: unknown) {
+    return Promise.resolve({ ok: false as const, error: '投影环境暂不支持安装插件，请在桌面端操作' });
   },
-  async uninstall(_pluginId: string) {
-    return { ok: false as const, error: '投影环境暂不支持卸载插件，请在桌面端操作' };
+  uninstall(_pluginId: string) {
+    return Promise.resolve({ ok: false as const, error: '投影环境暂不支持卸载插件，请在桌面端操作' });
   },
 };
 
@@ -109,14 +109,14 @@ const packsBridge = {
       return { ok: false, packs: [] };
     }
   },
-  async installFromDialog() {
-    return { ok: false as const, error: '投影环境暂不支持安装领域包，请在桌面端操作' };
+  installFromDialog() {
+    return Promise.resolve({ ok: false as const, error: '投影环境暂不支持安装领域包，请在桌面端操作' });
   },
-  async installPath(_packRoot: string) {
-    return { ok: false as const, error: '投影环境暂不支持安装领域包，请在桌面端操作' };
+  installPath(_packRoot: string) {
+    return Promise.resolve({ ok: false as const, error: '投影环境暂不支持安装领域包，请在桌面端操作' });
   },
-  async uninstall(_packId: string) {
-    return { ok: false as const, error: '投影环境暂不支持卸载领域包，请在桌面端操作' };
+  uninstall(_packId: string) {
+    return Promise.resolve({ ok: false as const, error: '投影环境暂不支持卸载领域包，请在桌面端操作' });
   },
 };
 
@@ -175,16 +175,16 @@ const aiSettingsBridge = {
     }
   },
   // 桌面 IPC `ai-settings:list-models` 失败形状 = { ok:false, models:[], message }。
-  async listModels(_providerOrProfile: unknown, _apiKey?: string) {
-    return { ok: false as const, models: [] as Array<Record<string, unknown>>, message: '投影环境暂不支持拉取模型列表，请在桌面端操作' };
+  listModels(_providerOrProfile: unknown, _apiKey?: string) {
+    return Promise.resolve({ ok: false as const, models: [] as Array<Record<string, unknown>>, message: '投影环境暂不支持拉取模型列表，请在桌面端操作' });
   },
   // 桌面 IPC `ai-settings:get-credential` 失败形状 = { ok:false, apiKey:'', error }。
   // 凭据明文不过投影 HTTP：投影下恒走失败分支，消费方已有优雅降级。
-  async getCredential(_credentialId: string) {
-    return { ok: false as const, apiKey: '', error: '投影环境暂不支持读取凭据，请在桌面端操作' };
+  getCredential(_credentialId: string) {
+    return Promise.resolve({ ok: false as const, apiKey: '', error: '投影环境暂不支持读取凭据，请在桌面端操作' });
   },
-  async test(_providerOrProfile: unknown, _apiKey?: string) {
-    return { ok: false as const, message: '投影环境暂不支持连通性测试，请在桌面端操作' };
+  test(_providerOrProfile: unknown, _apiKey?: string) {
+    return Promise.resolve({ ok: false as const, message: '投影环境暂不支持连通性测试，请在桌面端操作' });
   },
 };
 

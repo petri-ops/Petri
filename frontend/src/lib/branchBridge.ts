@@ -70,20 +70,12 @@ function createBranchBridge(): {
   if (!bridge) {
     // Stub implementation when branch bridge is not available
     return {
-      create: async () => {
-        throw new Error('Branch bridge not available');
-      },
-      list: async () => [],
-      switch: async () => {
-        throw new Error('Branch bridge not available');
-      },
-      delete: async () => {
-        throw new Error('Branch bridge not available');
-      },
-      rename: async () => {
-        throw new Error('Branch bridge not available');
-      },
-      getActive: async () => null,
+      create: () => Promise.reject(new Error('Branch bridge not available')),
+      list: () => Promise.resolve([]),
+      switch: () => Promise.reject(new Error('Branch bridge not available')),
+      delete: () => Promise.reject(new Error('Branch bridge not available')),
+      rename: () => Promise.reject(new Error('Branch bridge not available')),
+      getActive: () => Promise.resolve(null),
     };
   }
 

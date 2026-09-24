@@ -196,7 +196,7 @@ function ResultDetail({
 }): React.ReactElement {
   const [currentVersion, setCurrentVersion] = useState<number>(1);
 
-  const handleVersionSelect = async (version: ResultVersion) => {
+  const handleVersionSelect = (version: ResultVersion) => {
     // Load the old version data and display it
     // The parent component should handle the actual data update
     if (version.data) {

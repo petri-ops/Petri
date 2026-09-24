@@ -271,7 +271,7 @@ describe('Welcome（BLOCK-80 欢迎页 + UI-341 内嵌聊天模块 + UI-373 不�
     expect(alert.textContent).toContain('目标别名不可达');
   });
 
-  it('快捷 chip 一键直发 starter prompt（copilotAsk 事件）', async () => {
+  it('快捷 chip 一键直发 starter prompt（copilotAsk 事件）', () => {
     renderWelcome();
     fireEvent.click(screen.getByText('差异分析'));
     expect(mockDispatchGewuEvent).toHaveBeenCalledWith(

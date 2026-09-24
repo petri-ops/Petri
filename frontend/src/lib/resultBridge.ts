@@ -85,27 +85,19 @@ function createResultBridge(): ResultApi {
 
   if (!bridge) {
     return {
-      create: async () => {
-        throw new Error('Result bridge not available');
-      },
-      get: async () => null,
-      list: async () => [],
-      update: async () => null,
-      delete: async () => {
-        throw new Error('Result bridge not available');
-      },
-      byProject: async () => [],
+      create: () => Promise.reject(new Error('Result bridge not available')),
+      get: () => Promise.resolve(null),
+      list: () => Promise.resolve([]),
+      update: () => Promise.resolve(null),
+      delete: () => Promise.reject(new Error('Result bridge not available')),
+      byProject: () => Promise.resolve([]),
       version: {
-        create: async () => {
-          throw new Error('Result bridge not available');
-        },
-        get: async () => null,
-        getByNumber: async () => null,
-        list: async () => [],
+        create: () => Promise.reject(new Error('Result bridge not available')),
+        get: () => Promise.resolve(null),
+        getByNumber: () => Promise.resolve(null),
+        list: () => Promise.resolve([]),
       },
-      createFromConversation: async () => {
-        throw new Error('Result bridge not available');
-      },
+      createFromConversation: () => Promise.reject(new Error('Result bridge not available')),
     };
   }
 

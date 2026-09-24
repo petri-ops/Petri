@@ -94,9 +94,6 @@
     "@typescript-eslint/no-misused-promises": {
       "count": 1
     },
-    "@typescript-eslint/require-await": {
-      "count": 1
-    },
     "react-hooks/set-state-in-effect": {
       "count": 3
     }
@@ -236,7 +233,7 @@
       "count": 8
     },
     "@typescript-eslint/require-await": {
-      "count": 4
+      "count": 3
     }
   },
   "frontend/src/components/copilot/conversationRunStore/subAgentTasks.ts": {
@@ -981,9 +978,6 @@
     },
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 8
-    },
-    "@typescript-eslint/require-await": {
-      "count": 3
     }
   },
   "frontend/src/hooks/useResizableColumns.ts": {
@@ -1028,9 +1022,6 @@
   },
   "frontend/src/hooks/useSkillStore.ts": {
     "@typescript-eslint/no-floating-promises": {
-      "count": 1
-    },
-    "@typescript-eslint/require-await": {
       "count": 1
     },
     "react-hooks/set-state-in-effect": {
@@ -1084,19 +1075,9 @@
       "count": 4
     }
   },
-  "frontend/src/lib/authClient.ts": {
-    "@typescript-eslint/require-await": {
-      "count": 4
-    }
-  },
   "frontend/src/lib/branchBridge.test.ts": {
     "@typescript-eslint/require-await": {
       "count": 8
-    }
-  },
-  "frontend/src/lib/branchBridge.ts": {
-    "@typescript-eslint/require-await": {
-      "count": 6
     }
   },
   "frontend/src/lib/chat-file-references.test.ts": {
@@ -1166,9 +1147,6 @@
     },
     "@typescript-eslint/no-unsafe-assignment": {
       "count": 2
-    },
-    "@typescript-eslint/require-await": {
-      "count": 10
     }
   },
   "frontend/src/lib/projectionTerminalBridge.ts": {
@@ -1201,11 +1179,6 @@
   "frontend/src/lib/resultBridge.test.ts": {
     "@typescript-eslint/require-await": {
       "count": 16
-    }
-  },
-  "frontend/src/lib/resultBridge.ts": {
-    "@typescript-eslint/require-await": {
-      "count": 11
     }
   },
   "frontend/src/lib/tool-catalog.ts": {
@@ -1288,16 +1261,13 @@
   },
   "frontend/src/pages/project-workspace/RightFileTree.tsx": {
     "@typescript-eslint/no-misused-promises": {
-      "count": 3
+      "count": 2
     },
     "@typescript-eslint/no-unsafe-assignment": {
       "count": 2
     },
     "@typescript-eslint/no-unsafe-member-access": {
       "count": 6
-    },
-    "@typescript-eslint/require-await": {
-      "count": 1
     },
     "react-hooks/set-state-in-effect": {
       "count": 3
@@ -1386,10 +1356,7 @@
       "count": 2
     },
     "@typescript-eslint/no-misused-promises": {
-      "count": 3
-    },
-    "@typescript-eslint/require-await": {
-      "count": 1
+      "count": 2
     }
   },
   "frontend/src/pages/result-studio/components/ResultVersionHistory.tsx": {
@@ -1409,9 +1376,6 @@
   },
   "frontend/src/pages/welcome.test.tsx": {
     "@typescript-eslint/no-unsafe-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/require-await": {
       "count": 1
     }
   },

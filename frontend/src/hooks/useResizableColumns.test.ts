@@ -185,7 +185,7 @@ describe('useResizableColumns', () => {
     expect(saved.rightWidth).toBe(340);
   });
 
-  it('restores dimensions from localStorage on re-mount', async () => {
+  it('restores dimensions from localStorage on re-mount', () => {
     localStorage.setItem(LS_KEY, JSON.stringify({ leftWidth: 500, rightWidth: 200, inputHeight: 90, bottomTerminalHeight: 300 }));
     const { result } = renderHook(() => useResizableColumns());
     expect(result.current.leftWidth).toBe(500);
@@ -222,7 +222,7 @@ describe('useResizableColumns', () => {
     expect(invalid.result.current.resultRightWidth).toBe(720);
   });
 
-  it('prefers localStorage over defaults but caller overrides override localStorage', async () => {
+  it('prefers localStorage over defaults but caller overrides override localStorage', () => {
     localStorage.setItem(LS_KEY, JSON.stringify({ leftWidth: 999, rightWidth: 888, inputHeight: 77, bottomTerminalHeight: 666 }));
     const { result } = renderHook(() =>
       useResizableColumns({ leftWidth: 300 }), // only leftWidth overridden
@@ -247,7 +247,7 @@ describe('useResizableColumns', () => {
     expect(saved.bottomTerminalHeight).toBe(120);
   });
 
-  it('survives corrupted localStorage gracefully', async () => {
+  it('survives corrupted localStorage gracefully', () => {
     localStorage.setItem(LS_KEY, 'not valid json {{{');
     const { result } = renderHook(() => useResizableColumns());
     // Should fall back to defaults without crashing

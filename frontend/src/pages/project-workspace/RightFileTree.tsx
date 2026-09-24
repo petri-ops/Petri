@@ -215,7 +215,7 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
     };
   }, [active, project.id, project.workspaceKind, refreshFiles]);
 
-  const toggleDir = useCallback(async (dirPath: string) => {
+  const toggleDir = useCallback((dirPath: string) => {
     setExpandedDirs((prev) => {
       const next = new Set(prev);
       if (next.has(dirPath)) next.delete(dirPath);

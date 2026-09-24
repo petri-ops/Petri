@@ -903,7 +903,7 @@ export function SimpleChat({
   // 需要时可经事件或快捷键恢复。
 
   // Create new conversation
-  const newConversation = useCallback(async () => {
+  const newConversation = useCallback(() => {
     onConversationChange(null);
     setMessages([]);
     setQueuedPrompts([]);
