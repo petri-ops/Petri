@@ -223,6 +223,8 @@ function summarizeArgsDetail(args: Record<string, unknown> = {}): string {
  *  test/fixtures/tool-activity-labels.json 双侧逐工具钉住）。 */
 export const TOOL_ACTIVITY_VERBS: Readonly<Record<string, string>> = {
   "act": "已变更",
+  "decision_summary": "已统计",
+  "decision_recent": "已回放",
   "artifact_revision_list": "已列出",
   "artifact_revision_restore": "已恢复",
   "computer_authorize": "已授权",
@@ -299,6 +301,8 @@ export const TOOL_ACTIVITY_VERBS: Readonly<Record<string, string>> = {
  *  屏幕操作/产物版本…），terminal/write/agent 三类仍由行为集合优先。 */
 export const TOOL_ACTIVITY_ICONS: Readonly<Record<string, IconName>> = {
   "act": "settings",
+  "decision_recent": "clock",
+  "decision_summary": "settings",
   "artifact_revision_list": "archive",
   "artifact_revision_restore": "archive",
   "computer_authorize": "eye",

@@ -282,5 +282,13 @@
   "workspace_write": {
     "label": "已写入",
     "icon": "pencil"
+  },
+  "decision_summary": {
+    "label": "已统计",
+    "icon": "settings"
+  },
+  "decision_recent": {
+    "label": "已回放",
+    "icon": "clock"
   }
 }

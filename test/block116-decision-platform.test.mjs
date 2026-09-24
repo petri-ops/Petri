@@ -230,3 +230,59 @@ test('70 工具恒等红线延续（W1-3 契约复验）', () => {
   const union = Object.values(DOMAIN_TOOL_DEFS).flat();
   assert.equal(union.length, TOOL_DEFS.length);
 });
+
+// ---------- BLOCK-116 W2（BK-04）：agent 可见决策工具（decision_summary/decision_recent） ----------
+
+test('BK-04：decision_summary 聚合统计 + days 边界钳制 + available:false 诚实面', async () => {
+  const { tool_decision_summary } = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'decision-tools.js'));
+  // 种子：两条可统计判定（走记账单源 logDecision）
+  await decisionLog.logDecision({ point: 'intent-route', threshold: 0.7, state: 's', choice: 'task', confidence: 0.9, degraded: 0, model: 'jev-1.13.0', latencyMs: 100 });
+  await decisionLog.logDecision({ point: 'report-guard', threshold: 3, state: 's2', choice: 3.2, confidence: 0.6, degraded: 1, reason: 'auth_failed', model: 'jev-1.13.0', latencyMs: 50 });
+
+  const r1 = await tool_decision_summary({ days: 7 });
+  assert.equal(r1.ok, true);
+  assert.equal(r1.available, true);
+  const points = new Map(r1.points.map((p) => [p.point, p]));
+  assert.ok(points.get('intent-route').calls >= 1);
+  assert.ok(points.get('report-guard').degradedCount >= 1, '降级行计入 degradedCount');
+  assert.ok(r1.totalCalls >= 2);
+  assert.match(r1.message, /个接点/);
+
+  const r2 = await tool_decision_summary({ days: 9999 });
+  assert.equal(r2.days, 90, 'days 上界钳制 90');
+  const r3 = await tool_decision_summary({ days: -5 });
+  assert.equal(r3.days, 1, 'days 下界钳制 1（0=取默认 7，与 REST 同语义）');
+});
+
+test('BK-04：decision_recent 逐条回放 + point 过滤 + limit 钳制', async () => {
+  const { tool_decision_recent } = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'decision-tools.js'));
+  const all = await tool_decision_recent({ limit: 20 });
+  assert.equal(all.ok, true);
+  assert.equal(all.available, true);
+  assert.ok(all.decisions.length >= 2);
+  for (const d of all.decisions) {
+    for (const key of ['at', 'point', 'choice', 'degraded', 'latencyMs']) {
+      assert.ok(key in d, `回放字段 ${key} 在位`);
+    }
+  }
+  const filtered = await tool_decision_recent({ point: 'report-guard' });
+  assert.ok(filtered.decisions.length >= 1);
+  assert.ok(filtered.decisions.every((d) => d.point === 'report-guard'), 'point 过滤生效');
+  const capped = await tool_decision_recent({ limit: 999 });
+  assert.ok(capped.decisions.length <= 20, 'limit 上界钳制 20');
+  const byPoint = await tool_decision_recent({ point: 'x'.repeat(200) });
+  assert.equal(byPoint.decisions.length, 0, '超长 point 截断后无命中（不抛错）');
+});
+
+test('BK-04：工具注册四件套在位（defs/registry handler/metadata/计数 73）', () => {
+  const { TOOL_DEFS, DOMAIN_TOOL_DEFS } = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'tool-defs.js'));
+  const names = TOOL_DEFS.map((t) => t.function.name);
+  assert.ok(names.includes('decision_summary') && names.includes('decision_recent'), 'defs 在位');
+  assert.equal(names.length, 73, '工具总数 71→73（BLOCK-116 W2 决策观测 2 件）');
+  // 恒等：新工具经 session 域模块进入（⋃ 域 = 全集）
+  const union = Object.values(DOMAIN_TOOL_DEFS).flat().map((t) => t.function.name);
+  assert.ok(union.includes('decision_summary') && union.includes('decision_recent'));
+  const { TOOL_METADATA: meta } = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'tool-metadata.js'));
+  assert.equal(meta.decision_summary.readOnly, true, '纯读元数据');
+  assert.equal(meta.decision_recent.concurrentSafe, true, '纯读可并发');
+});

@@ -265,5 +265,41 @@ module.exports = [
         ]
       }
     }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "decision_summary",
+      "description": "查看决策系统的按接点聚合统计（最近 N 天：调用量/平均延迟/降级率/最近判定时间）。只读观测面：用于了解各决策接点（意图路由/工具预路由/汇报门等）的运行情况。不提供任何修改配置的能力。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "type": "number",
+            "description": "可选，统计窗口天数（1-90，默认 7）"
+          }
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "decision_recent",
+      "description": "逐条回放最近的决策判定记录（判定值/置信度/阈值/是否降级/耗时），可按接点过滤。只读观测面：用于核对某类决策（如 intent-route/report-guard）最近的判定形态。不提供任何修改配置的能力。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "可选，返回条数（1-20，默认 10）"
+          },
+          "point": {
+            "type": "string",
+            "description": "可选，按接点过滤（如 intent-route / tool-route / report-guard / output-judge）"
+          }
+        }
+      }
+    }
   }
 ];

@@ -351,6 +351,8 @@ function emitReadOnlyResultOutput({ name, result, callId, traceId, iteration, em
  *  未登记（MCP/插件动态工具）回退「已调用」。 */
 const TOOL_ACTIVITY_VERBS = Object.freeze({
   "act": "已变更",
+  "decision_summary": "已统计",
+  "decision_recent": "已回放",
   "artifact_revision_list": "已列出",
   "artifact_revision_restore": "已恢复",
   "computer_authorize": "已授权",
