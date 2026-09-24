@@ -85,4 +85,6 @@ LLM 输出（限定提示词 or 多轮会话结果）
 **验收门禁**：①注册表键↔证据一致断言（同 fitPass 先例）；②邻域触发重放且中位数翻转（首判 RETRY 区 2.7 + 重放 3.1×2 → median 3.1=PASS，调用量=3）；③带外不触发（3.8 与 1.8 调用量=1）；④反方向同样成立（首判 3.2 + 重放 2.6×2 → RETRY，防单侧偏置）；⑤重放全败沿用首判不 throw；⑥report-guard meta 载 fitReplay；⑦定向回归 0 红 + closeout 门禁绿；⑧实机一轮真 spawn：邻域轮 fitReplay.triggered=true 且 verdict 与 median 一致（证据落 acceptance/block-119/）。
 
 **非范围**：不改 fitPass/fitRetry/faithfulPass/goalPass（θ 红线）；不改 RETRY×1/ESCALATE 透传语义；不做 faithful/goal 维度重放（noul 单点，波动主因在 fit 期望值）；不动 probeStability（精确一致语义保留给 CLI --probe 诊断用途——连续分数一致率低是语义使然非缺陷）；供给语义差异（Laya degraded 轮低分）不在本带治理范围。
+
+**收口（2026-09-24 当日，提交 cdde817c + 收口笔）**：P0 盘点（decision_log 15 行 + 5 判实验）→ P1 实现（fitReviewBand=0.5 落键证据绑定 + judgeOutput 邻域重放 median-of-3 + report-guard fitReplay + ESM 薄壳同形）→ P2 验证。门禁=block119 契约 24/24（+6：邻域触发中位数翻转 RETRY→PASS / 反方向防偏置 / 带外零开销×2 / 重放全败沿用首判 / band=0 关闭；注册表键↔证据一致断言扩展）+ test:changed 114 项 0 红 + closeout 十门全绿。实机真 spawn 轮：首判 3.15 落邻域→重放 3.14×2→median 3.14=PASS，fitReplay 完整落 report_guard 事件与 child_finished，goalFails=0，门耗时 1361ms（证据=acceptance/block-119/jiaying4-live.json）；output:judge CLI dogfood 同走重放路径（fit=3.49 PASS）。抓真=首跑 spawn 未显式 accessMode:'full' 被只读门拒（P2 试点同款已知行为非本包缺陷）。**BK-01 收口，BK-02 观察期首盘点已并入 P0**；band/θ 最终复核值按观察期 fitReplay 数据累计后另裁。G0 开发期常态 · 不外推 packaged/Provider/GA。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。

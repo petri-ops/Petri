@@ -1,0 +1,40 @@
+{
+  "generatedAt": "2026-09-24",
+  "what": "BLOCK-119 加映 4（BK-01）实机验证——真 spawn 轮 × 汇报门 fit 阈值邻域复核",
+  "environment": "dev 栈带 BIOF3_JEV_REPORT_GUARD=1 重启（restart-dev-stack.sh READY，18 项目在库）；供给=Jev 云（decision-config.json）；加映 4 代码=提交 cdde817c",
+  "flow": "POST /api/ai/conversations → POST /api/ai/agent（task 模式，context.accessMode='full'，任务=派子智能体统计工作区并用 goals 声明 2 条可核对目标）→ 主任务 completed（真模型自觉 spawn_agent + goalsDeclared）→ 子汇报过汇报门",
+  "privacy": "只存 fit 分数/延迟/门 meta，零汇报原文",
+  "primaryTask": { "status": "completed", "type": "agent_loop", "childSpawned": true },
+  "reportGuard": {
+    "verdict": "PASS",
+    "firstCallFit": 3.15,
+    "firstCallInBand": true,
+    "inBandCheck": "|3.15 - 3| = 0.15 ≤ fitReviewBand 0.5 → 触发重放",
+    "replayFits": [3.14, 3.14],
+    "median": 3.14,
+    "verdictConsistentWithMedian": true,
+    "goalFails": 0,
+    "model": "jev-1.13.0",
+    "guardLatencyMs": 1361,
+    "degraded": false,
+    "decisionLogRows": [
+      { "id": 120, "fit": 3.15, "confidence": 0.78, "latencyMs": 674 },
+      { "id": 121, "fit": 3.14, "confidence": 0.8, "latencyMs": 660 },
+      { "id": 122, "fit": 3.14, "confidence": 0.79, "latencyMs": 685 }
+    ],
+    "fitReplayMeta": { "triggered": true, "k": 3, "fits": [3.15, 3.14, 3.14], "median": 3.14, "band": 0.5, "replayErrors": 0 },
+    "observedSurfaces": [
+      "report_guard 事件（reportGuard meta 含 fitReplay）",
+      "child_finished payload（additive fitReplay 字段）",
+      "decision_log point=report-guard 3 行（首判+重放逐行落账=波动观测面）"
+    ]
+  },
+  "acceptanceChecklist": {
+    "liveSpawnRound": true,
+    "nearThresholdTriggered": true,
+    "verdictMatchesMedian": true,
+    "zeroDegraded": true,
+    "goalGatePass": true
+  },
+  "notes": "首跑抓真=spawn 未显式 accessMode:'full' 被只读门拒（P2 试点同款已知行为，非本包缺陷）；v2 显式 full 后真 spawn 成功。本轮实测点分布极稳（3.14~3.15），翻转场景由契约测试覆盖（RETRY↔PASS 双向+重放全败+band=0）；生产波动形态（2.91~3.61）与带设计依据见 fit-volatility-review.json。"
+}

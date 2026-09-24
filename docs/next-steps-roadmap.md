@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-24（**全局未完成项计划表建表 + 队列首项 BK-01 立项（用户裁决「列个未完成计划表，所有已知的问题都需要待处理，后面按照逐个推进」）**——新建 canonical 台账 [`pending-work-backlog.md`](./pending-work-backlog.md)（truthDomain=pending-work-queue：推进队列 8 / 用户事项 3 / 候选池 9 / 阻塞延期 4 / 已核实销号 2；职责分工=台账管全量队列与推进序，当前立即任务仍由本 roadmap 决定）；首项 **BK-01=BLOCK-119 加映 4：fit 分数轮间波动治理** 同批立项启动（P0 盘点 decision_log report-guard 4 行 + output-judge 9 行；方向=阈值附近 probe 复核/滞回带/RETRY 策略收敛）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-24 深夜一（**BK-01=BLOCK-119 加映 4 当日收口（closeout 十门全绿）——全局待办队列推进 1/8**——fit 波动治理以测量鲁棒性落地：fitReviewBand=0.5 邻域内 fit-only 重放 median-of-3 重建路由（θ 不动、带外零开销、fail-open 不变），实机真 spawn 轮 fitReplay 端到端（3.15→median 3.14=PASS）+ 契约 24/24 + test:changed 114 项 0 红。BK-02 观察期首盘点并入 P0。**队列下一项=BK-03（终态对账 v2 条目级 linkage）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-24（**全局未完成项计划表建表 + 队列首项 BK-01 立项（用户裁决「列个未完成计划表，所有已知的问题都需要待处理，后面按照逐个推进」）**——新建 canonical 台账 [`pending-work-backlog.md`](./pending-work-backlog.md)（truthDomain=pending-work-queue：推进队列 8 / 用户事项 3 / 候选池 9 / 阻塞延期 4 / 已核实销号 2；职责分工=台账管全量队列与推进序，当前立即任务仍由本 roadmap 决定）；首项 **BK-01=BLOCK-119 加映 4：fit 分数轮间波动治理** 同批立项启动（P0 盘点 decision_log report-guard 4 行 + output-judge 9 行；方向=阈值附近 probe 复核/滞回带/RETRY 策略收敛）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-24（**BLOCK-119-OUTPUT-JUDGE-HARNESS 当日立项当日整包 completed——输出评判 Harness 工程落地，BLOCK 槽位空闲**——三态推进门（judge-core 单源：fit score 0-4/faithful 需 reference/goal_N）+ 稳定性探针（k 重放一致率）+ 配对语料 160（隐私红线：指针化，原文不入仓）+ fit 校准可采纳 θ=3 + output:judge CLI（agent 指引挂载）+ P2 子智能体汇报门试点（默认关 BIOF3_JEV_REPORT_GUARD=1，fail-open+RETRY×1+复判，child_finished additive 标注）。门禁=block119 13/13+定向 56/56+docs/secret/eslint 绿。dogfood 抓真=fit 分数轮间波动（真实轮 PASS 但 probe 0.33）→阈值附近判定须 --probe。**遗留候选**=P2 实机开启观察（采纳率/误拦率/延迟增量）/faithful+goal 维度校准（当前 observe-only）/分数波动治理。plan=docs/block-119-output-judge-harness-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
