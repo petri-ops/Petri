@@ -97,10 +97,15 @@ module.exports = {
   // faithfulPass=0.3（noul，precision 0.9455/coverage 0.9286/trap 0.0536，仓内文档锚定
   // 语料 112）、goalPass=0.5（noul，precision 0.8504/coverage 0.9173/trap 0.164，语料
   // 504 判定）。证据=calibration-judge-faithful-goal.json；改键必先重校准（红线）。
+  // BLOCK-119 加映 4（2026-09-24）— fitReviewBand=0.5：fit 阈值邻域复核带（|fit−fitPass|
+  // ≤band 触发 fit-only 重放 k−1=2 取中位数重建路由；θ 不动）。证据=fit-volatility-review
+  // .json（P2 试点同一好汇报 5 判 2.91~3.61 跨 θ 两侧、真负例 ≤0.78 远低于带下界；改带
+  // 必先重盘点）。
   'output-judge': {
-    gates: { fitPass: 3, fitRetry: 2.5, faithfulPass: 0.3, goalPass: 0.5 },
+    gates: { fitPass: 3, fitRetry: 2.5, faithfulPass: 0.3, goalPass: 0.5, fitReviewBand: 0.5 },
     evidence: 'acceptance/block-119/calibration-judge-fit.json',
     evidenceFaithfulGoal: 'acceptance/block-119/calibration-judge-faithful-goal.json',
+    evidenceFitVolatility: 'acceptance/block-119/fit-volatility-review.json',
     model: 'jev-1.13.0',
   },
 };

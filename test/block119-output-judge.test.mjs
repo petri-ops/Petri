@@ -27,6 +27,8 @@ const {
   parseDimensionStatuses,
   aggregateVerdict,
   retryHints,
+  median,
+  fitNearThreshold,
   judgeOutput,
 } = require(path.join(root, 'scripts', 'lib', 'harness', 'judge-core.mjs'));
 const { probeStability } = require(path.join(root, 'scripts', 'lib', 'harness', 'stability-core.mjs'));
@@ -152,6 +154,12 @@ test('注册表：output-judge 证据在位 + 门控=校准推荐一致', () => 
   assert.ok(evFG.faithful.recommended.adoptedPrecision >= 0.85);
   assert.equal(evFG.goal.recommended.theta, g.goalPass, 'goalPass 必须与证据推荐一致');
   assert.ok(evFG.goal.recommended.adoptedPrecision >= 0.85);
+  // BLOCK-119 加映 4（2026-09-24）— fitReviewBand 证据绑定（同 θ 红线：改带必先重盘点）。
+  assert.equal(g.fitReviewBand, 0.5, '邻域复核带（加映 4 证据）');
+  const evVol = JSON.parse(fs.readFileSync(path.join(root, thresholds['output-judge'].evidenceFitVolatility), 'utf8'));
+  assert.equal(evVol.recommended.fitReviewBand, g.fitReviewBand, 'fitReviewBand 必须与盘点证据推荐一致');
+  assert.ok(evVol.fiveFoldExperiment.spread >= 0.5, '波动带证据在位（同一文本 spread ≥ band）');
+  assert.ok(evVol.trueNegatives.max < 1, '真负例远离阈值的事实必须留痕（无漏放路径）');
 });
 
 test('语料隐私：corpus-judge-fit.json 只存指针零原文', () => {
@@ -183,4 +191,124 @@ test('probeStability：多数一致率与 2/3 阈；异常样本不中断', asyn
   let j = 0;
   const r3 = await probeStability(async () => [1, 2, 3][j++], 3);
   assert.equal(r3.verdict, 'unstable');
+});
+
+// ── BLOCK-119 加映 4 — fit 阈值邻域复核（band + median-of-3）──
+
+/** 精确分数 mock：两点分布使期望严格等于 score（Σ级号×概率±0.05 校验内）。 */
+function fitAnswerExact(score) {
+  const lo = Math.max(0, Math.min(4, Math.floor(score)));
+  const hi = Math.min(4, lo + 1);
+  const w = Math.max(0, Math.min(1, score - lo));
+  const probabilities = Object.fromEntries(Array.from({ length: 5 }, (_, i) => [String(i), 0]));
+  probabilities[String(lo)] += 1 - w;
+  if (hi !== lo) probabilities[String(hi)] += w;
+  return { type: 'score', score, probabilities };
+}
+
+/** 按调用序返回不同 answers 的 fetch mock（首判→重放→复判共用一个计数器）。 */
+function seqFetch(scoreFn, model = 'jev-1.13.0') {
+  let n = 0;
+  const calls = { count: 0 };
+  const fetchImpl = async () => {
+    calls.count++;
+    const score = scoreFn(n++);
+    return { ok: true, status: 200, json: async () => ({ model, answers: { fit: fitAnswerExact(score) } }) };
+  };
+  return { fetchImpl, calls };
+}
+
+test('加映 4：median 与 fitNearThreshold 纯函数（边界含等号、band=0/缺门不复核）', () => {
+  assert.equal(median([3.1, 2.7, 3.1]), 3.1);
+  assert.equal(median([1, 2, 3, 4]), 2.5, '偶数取均值');
+  assert.equal(median(['x', null]), null, '非数值全滤掉=null');
+  const gates = { fitPass: 3, fitRetry: 2.5, fitReviewBand: 0.5 };
+  assert.equal(fitNearThreshold(2.5, gates), true, '带下界含等号');
+  assert.equal(fitNearThreshold(3.5, gates), true, '带上界含等号');
+  assert.equal(fitNearThreshold(2.49, gates), false);
+  assert.equal(fitNearThreshold(3.51, gates), false);
+  assert.equal(fitNearThreshold(2.7, { fitPass: 3, fitRetry: 2.5 }), false, '无 band 键=不复核');
+  assert.equal(fitNearThreshold(2.7, { fitPass: 3, fitRetry: 2.5, fitReviewBand: 0 }), false, 'band=0=显式关闭');
+  assert.equal(fitNearThreshold('x', gates), false);
+});
+
+test('加映 4：邻域首判触发 fit-only 重放，中位数重建路由（RETRY 区→PASS 翻转）', async () => {
+  // 首判 2.7（RETRY 区，|2.7−3|=0.3 落带内）→ 重放 2 次 3.1 → median(2.7,3.1,3.1)=3.1=PASS
+  const { fetchImpl, calls } = seqFetch((n) => (n === 0 ? 2.7 : 3.1));
+  const r = await judgeOutput({
+    output: 'o', request: 'r',
+    overrides: { ...API_KEY_OVERRIDE, fetchImpl, sleep: NO_SLEEP },
+  });
+  assert.equal(calls.count, 3, '首判 1 + fit-only 重放 2');
+  assert.equal(r.verdict, 'PASS', '中位数 3.1 ≥ fitPass=3 → 翻转 RETRY');
+  assert.equal(r.statuses.fit.value, 3.1, 'fit 值=中位数');
+  assert.deepEqual(
+    { triggered: r.statuses.fit.replay.triggered, k: r.statuses.fit.replay.k, fits: r.statuses.fit.replay.fits, median: r.statuses.fit.replay.median, band: r.statuses.fit.replay.band, replayErrors: r.statuses.fit.replay.replayErrors },
+    { triggered: true, k: 3, fits: [2.7, 3.1, 3.1], median: 3.1, band: 0.5, replayErrors: 0 }
+  );
+});
+
+test('加映 4：反方向同样成立（首判 PASS 区落带内，中位数拉回 RETRY——防单侧偏置）', async () => {
+  // 首判 3.2（|3.2−3|=0.2 落带内）→ 重放 2.6×2 → median(3.2,2.6,2.6)=2.6=RETRY 区
+  const { fetchImpl, calls } = seqFetch((n) => (n === 0 ? 3.2 : 2.6));
+  const r = await judgeOutput({
+    output: 'o', request: 'r',
+    overrides: { ...API_KEY_OVERRIDE, fetchImpl, sleep: NO_SLEEP },
+  });
+  assert.equal(calls.count, 3);
+  assert.equal(r.verdict, 'RETRY', '中位数 2.6 < fitPass → 复核不偏袒放行');
+  assert.equal(r.statuses.fit.value, 2.6);
+  assert.ok(r.hints.length > 0, 'RETRY 带判词');
+});
+
+test('加映 4：带外零开销——高分区与 fail 区都不触发重放', async () => {
+  const hi = seqFetch(() => 3.8);
+  const rHi = await judgeOutput({
+    output: 'o', request: 'r',
+    overrides: { ...API_KEY_OVERRIDE, fetchImpl: hi.fetchImpl, sleep: NO_SLEEP },
+  });
+  assert.equal(hi.calls.count, 1, '3.8 距 θ=0.8 出带，零额外调用');
+  assert.equal(rHi.verdict, 'PASS');
+  assert.equal(rHi.statuses.fit.replay, undefined, '未触发时无 replay 键');
+
+  const lo = seqFetch(() => 1.8);
+  const rLo = await judgeOutput({
+    output: 'o', request: 'r',
+    overrides: { ...API_KEY_OVERRIDE, fetchImpl: lo.fetchImpl, sleep: NO_SLEEP },
+  });
+  assert.equal(lo.calls.count, 1, '1.8 距 θ=1.2 出带，零额外调用');
+  assert.equal(rLo.verdict, 'ESCALATE');
+});
+
+test('加映 4：重放全败沿用首判（fail-open 不变，replayErrors 留痕）', async () => {
+  let n = 0;
+  const fetchImpl = async () => {
+    if (n++ === 0) return { ok: true, status: 200, json: async () => ({ model: 'jev-1.13.0', answers: { fit: fitAnswerExact(2.7) } }) };
+    throw new Error('replay down');
+  };
+  const r = await judgeOutput({
+    output: 'o', request: 'r',
+    overrides: { ...API_KEY_OVERRIDE, fetchImpl, sleep: NO_SLEEP },
+  });
+  assert.equal(r.verdict, 'RETRY', '沿用首判路由');
+  assert.equal(r.statuses.fit.value, 2.7);
+  assert.equal(r.statuses.fit.replay.replayErrors, 2);
+  assert.match(r.statuses.fit.replay.note, /沿用首判/);
+});
+
+test('加映 4：band=0（注册表临时置 0）→ 邻域不复核', async () => {
+  const entry = thresholds['output-judge'];
+  const saved = entry.gates.fitReviewBand;
+  entry.gates.fitReviewBand = 0;
+  try {
+    const { fetchImpl, calls } = seqFetch(() => 2.7);
+    const r = await judgeOutput({
+      output: 'o', request: 'r',
+      overrides: { ...API_KEY_OVERRIDE, fetchImpl, sleep: NO_SLEEP },
+    });
+    assert.equal(calls.count, 1, 'band=0 邻域不重放');
+    assert.equal(r.verdict, 'RETRY');
+  } finally {
+    entry.gates.fitReviewBand = saved;
+  }
 });

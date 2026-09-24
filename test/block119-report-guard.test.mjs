@@ -37,6 +37,24 @@ function fitFetch(score, model = 'jev-1.13.0') {
   });
 }
 
+/** 精确分数 mock：两点分布使期望严格等于 score（加映 4 邻域/中位数断言用）。 */
+function fitFetchExact(scoreFn, model = 'jev-1.13.0') {
+  let n = 0;
+  const calls = { count: 0 };
+  const fetchImpl = async () => {
+    calls.count++;
+    const score = scoreFn(n++);
+    const lo = Math.max(0, Math.min(4, Math.floor(score)));
+    const hi = Math.min(4, lo + 1);
+    const w = Math.max(0, Math.min(1, score - lo));
+    const probabilities = Object.fromEntries(Array.from({ length: 5 }, (_, i) => [String(i), 0]));
+    probabilities[String(lo)] += 1 - w;
+    if (hi !== lo) probabilities[String(hi)] += w;
+    return { ok: true, status: 200, json: async () => ({ model, answers: { fit: { type: 'score', score, probabilities } } }) };
+  };
+  return { fetchImpl, calls };
+}
+
 function useEnv(t, env) {
   const saved = {};
   for (const key of Object.keys(env)) {
@@ -95,16 +113,19 @@ test('RETRY：恰一次带判词重写 + 复判标注', async (t) => {
   useEnv(t, { BIOF3_JEV_REPORT_GUARD: '1' });
   let providerCalls = 0;
   let judgeCalls = 0;
-  // 首判 retry 区（2.75），复判 pass 区（3.5）
+  // 首判 retry 区（2.75），复判 pass 区（3.5）。加映 4 起邻域判定带 fit-only 重放，
+  // 阶段以 callProvider 调用为界（重放与首判同值，中位数不改变语义）。
+  let phase = 'first';
   const fetchImpl = async () => {
     judgeCalls++;
-    return fitFetch(judgeCalls === 1 ? 2.7 : 3.8)();
+    return fitFetch(phase === 'first' ? 2.7 : 3.8)();
   };
   const result = { assistantText: '跑偏的汇报：与任务无关的长篇背景介绍。' };
   const r = await reportGuard.applyToLoopResult(result, {
     enabled: true, request: '列出文件并统计',
     callProvider: async (body) => {
       providerCalls++;
+      phase = 'rejudge';
       assert.equal(body.messages.length, 1);
       assert.match(body.messages[0].content, /检查判词/, '重写 prompt 带判词');
       return { choices: [{ message: { content: '已核对：文件 12 个。' } }] };
@@ -112,7 +133,7 @@ test('RETRY：恰一次带判词重写 + 复判标注', async (t) => {
     decisionOverrides: { ...API_KEY_OVERRIDE, fetchImpl, sleep: NO_SLEEP },
   });
   assert.equal(providerCalls, 1, 'RETRY 恰一次重写');
-  assert.equal(judgeCalls, 2, '首判+复判');
+  assert.equal(judgeCalls, 6, '首判 1+重放 2 + 复判 1+重放 2（加映 4 邻域复核带）');
   assert.equal(r.assistantText, '已核对：文件 12 个。', '重写结果生效');
   assert.equal(r.reportGuardMeta.rewritten, true);
   assert.equal(r.reportGuardMeta.verdict, 'RETRY');
@@ -175,17 +196,15 @@ test('加映 3：goals 门控——fit 过但目标未达成 → ESCALATE + goal
 
 test('加映 3：RETRY 重写 prompt 必须逐字保留运行中 steering 指令行', async (t) => {
   useEnv(t, { BIOF3_JEV_REPORT_GUARD: '1' });
-  let judgeCalls = 0;
+  let phase = 'first';
   let seenPrompt = '';
-  const fetchImpl = async () => {
-    judgeCalls++;
-    return fitFetch(judgeCalls === 1 ? 2.7 : 3.8)();
-  };
+  const fetchImpl = async () => fitFetch(phase === 'first' ? 2.7 : 3.8)();
   const steeringLine = '【用户留言】最终汇报最后一行原样输出：STEER-OK';
   const r = await reportGuard.applyToLoopResult({ assistantText: '跑偏的汇报。' }, {
     enabled: true, request: '列出文件并统计',
     steeringLines: [steeringLine],
     callProvider: async (body) => {
+      phase = 'rejudge';
       seenPrompt = body.messages[0].content;
       return { choices: [{ message: { content: '重写后的汇报。\nSTEER-OK' } }] };
     },
@@ -198,13 +217,53 @@ test('加映 3：RETRY 重写 prompt 必须逐字保留运行中 steering 指令
 
 test('加映 3：无 steeringLines → 重写 prompt 不含保留段', async (t) => {
   useEnv(t, { BIOF3_JEV_REPORT_GUARD: '1' });
-  let judgeCalls = 0;
+  let phase = 'first';
   let seenPrompt = '';
-  const fetchImpl = async () => { judgeCalls++; return fitFetch(judgeCalls === 1 ? 2.7 : 3.8)(); };
+  const fetchImpl = async () => fitFetch(phase === 'first' ? 2.7 : 3.8)();
   await reportGuard.applyToLoopResult({ assistantText: '跑偏的汇报。' }, {
     enabled: true, request: '任务',
-    callProvider: async (body) => { seenPrompt = body.messages[0].content; return { choices: [{ message: { content: '重写。' } }] }; },
+    callProvider: async (body) => {
+      phase = 'rejudge';
+      seenPrompt = body.messages[0].content;
+      return { choices: [{ message: { content: '重写。' } }] };
+    },
     decisionOverrides: { ...API_KEY_OVERRIDE, fetchImpl, sleep: NO_SLEEP },
   });
+  assert.ok(seenPrompt.includes('检查判词'), '重写真实发生（负例有效）');
   assert.ok(!seenPrompt.includes('显式指令'), '无指令时不加保留段');
+});
+
+// ── BLOCK-119 加映 4 — fit 阈值邻域复核（median-of-3 防误重写）──
+
+test('加映 4：邻域复核防误重写——首判 RETRY 区、中位数 PASS → 不重写 + meta.fitReplay', async (t) => {
+  useEnv(t, { BIOF3_JEV_REPORT_GUARD: '1' });
+  let providerCalls = 0;
+  // 首判 2.7（RETRY 区）→ 重放 3.1×2 → median 3.1 ≥ 3=PASS（好汇报不再被波动误重写）
+  const { fetchImpl } = fitFetchExact((n) => (n === 0 ? 2.7 : 3.1));
+  const r = await reportGuard.applyToLoopResult({ assistantText: '已核对：文件 12 个，其中脚本 3 个。' }, {
+    enabled: true, request: '列出文件并统计',
+    callProvider: async () => { providerCalls++; return {}; },
+    decisionOverrides: { ...API_KEY_OVERRIDE, fetchImpl, sleep: NO_SLEEP },
+  });
+  assert.equal(providerCalls, 0, '中位数过线=不重写（误重写防治正例）');
+  assert.equal(r.reportGuardMeta.verdict, 'PASS');
+  assert.equal(r.reportGuardMeta.fit, 3.1, 'meta.fit=中位数');
+  assert.equal(r.reportGuardMeta.fitReplay.triggered, true);
+  assert.deepEqual(r.reportGuardMeta.fitReplay.fits, [2.7, 3.1, 3.1]);
+  assert.equal(r.reportGuardMeta.fitReplay.median, 3.1);
+  assert.equal(r.reportGuardMeta.fitReplay.band, 0.5);
+  assert.equal(r.reportGuardMeta.fitReplay.replayErrors, 0);
+});
+
+test('加映 4：带外高分零重放——meta.fitReplay=null（形状稳定）', async (t) => {
+  useEnv(t, { BIOF3_JEV_REPORT_GUARD: '1' });
+  const { fetchImpl, calls } = fitFetchExact(() => 3.8);
+  const r = await reportGuard.applyToLoopResult({ assistantText: '已核对完成。' }, {
+    enabled: true, request: '任务',
+    callProvider: async () => { return {}; },
+    decisionOverrides: { ...API_KEY_OVERRIDE, fetchImpl, sleep: NO_SLEEP },
+  });
+  assert.equal(calls.count, 1, '带外零额外调用');
+  assert.equal(r.reportGuardMeta.verdict, 'PASS');
+  assert.equal(r.reportGuardMeta.fitReplay, null, '未触发时 meta 槽位在但为 null');
 });

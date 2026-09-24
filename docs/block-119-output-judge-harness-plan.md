@@ -70,3 +70,19 @@ LLM 输出（限定提示词 or 多轮会话结果）
 - 已知缺口：子级 onEvent 为 no-op → report_guard 事件暂无处落地，观测面=台账（事件面留候选）。
 - 证据=acceptance/block-119/p2-pilot/（pilot-summary.json + 汇报文本 + 判定 JSON ×2）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 加映 4：fit 阈值邻域复核（2026-09-24，BK-01=全局待办队列首项；用户裁决「列个未完成计划表…按照逐个推进」）
+
+**问题（P0 盘点，证据 acceptance/block-119/fit-volatility-review.json）**：fit=概率分布期望值（决策 API 无 temperature 可调），同一份好汇报 5 判 2.91~3.61（spread 0.7）跨 θ=3 两侧——首判落 RETRY 区（<3 且 ≥2.5）即触发对好汇报的重写（5 判中 2 次=误重写率 40%）；而真负例（跑偏/编造版）全部 ≤0.78，远低于 RETRY 下界 2.5。波动集中在阈值邻域，远离阈值处判定天然稳定。
+
+**方案：测量鲁棒性，不改判定语义**——邻域内多次测量取中位数，而非改 θ（无证据不改阈值红线不触碰）：
+
+1. 注册表 `output-judge` 增 `fitReviewBand: 0.5`（证据绑定同 θ 红线：`evidenceFitVolatility` 指向盘点证据；改带必先重盘点）。
+2. `judge-core.judgeOutput`：fit 已门控且 `|fit − fitPass| ≤ fitReviewBand` 时，并行补 `k−1=2` 次 **fit-only** 重放（同 state 单题，省 token；决策台账逐次落行=波动观测面），全部成功 fit 取**中位数**重建 fit 状态与三态路由；带外零额外调用；重放全败=沿用首判（fail-open 不变，replayErrors 留痕）。
+3. `report-guard` meta additive 增 `fitReplay`（triggered/k/fits/median/band/replayErrors），child_finished 观测面同步变宽。
+4. ESM 薄壳零改动（单源 re-export）；`output:judge` CLI 自动获益。
+
+**验收门禁**：①注册表键↔证据一致断言（同 fitPass 先例）；②邻域触发重放且中位数翻转（首判 RETRY 区 2.7 + 重放 3.1×2 → median 3.1=PASS，调用量=3）；③带外不触发（3.8 与 1.8 调用量=1）；④反方向同样成立（首判 3.2 + 重放 2.6×2 → RETRY，防单侧偏置）；⑤重放全败沿用首判不 throw；⑥report-guard meta 载 fitReplay；⑦定向回归 0 红 + closeout 门禁绿；⑧实机一轮真 spawn：邻域轮 fitReplay.triggered=true 且 verdict 与 median 一致（证据落 acceptance/block-119/）。
+
+**非范围**：不改 fitPass/fitRetry/faithfulPass/goalPass（θ 红线）；不改 RETRY×1/ESCALATE 透传语义；不做 faithful/goal 维度重放（noul 单点，波动主因在 fit 期望值）；不动 probeStability（精确一致语义保留给 CLI --probe 诊断用途——连续分数一致率低是语义使然非缺陷）；供给语义差异（Laya degraded 轮低分）不在本带治理范围。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

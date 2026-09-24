@@ -1,0 +1,50 @@
+{
+  "generatedAt": "2026-09-24",
+  "purpose": "BLOCK-119 加映 4（BK-01）— fit 阈值邻域波动盘点与 fitReviewBand 证据",
+  "privacy": "只存分数/延迟/结论指针，零汇报原文（语料隐私红线同 corpus 纪律）",
+  "sources": [
+    "decision_log（.biof3-dev-user-data/data/biof3.db，point IN (report-guard, output-judge)，截至 2026-09-24 全量 15 行）",
+    "P2 试点实录同一真实汇报 5 判实验（acceptance/block-119/p2-pilot/，AUDIT-LOG 2026-09-23 深夜二）"
+  ],
+  "fiveFoldExperiment": {
+    "text": "P2 试点同一真实汇报（原文见 p2-pilot，不入本档）",
+    "fits": [2.91, 2.97, 3.04, 3.42, 3.61],
+    "min": 2.91,
+    "max": 3.61,
+    "spread": 0.7,
+    "median": 3.04,
+    "firstCallRetryZoneCount": 2,
+    "note": "首判落 RETRY 区（2.91/2.97 <θ=3 且 ≥2.5）即对好汇报触发重写；median-of-5=3.04=PASS 区"
+  },
+  "trueNegatives": {
+    "desc": "跑偏版（背景科普+答非所问+编造数字）与机械错配版",
+    "fits": [0.55, 0.76, 0.76, 0.78],
+    "max": 0.78,
+    "note": "真负例上界 0.78，远低于 RETRY 下界 2.5——邻域复核无漏放路径"
+  },
+  "decisionLogRows": [
+    { "id": 72, "point": "output-judge", "fit": 3.8, "latencyMs": 688 },
+    { "id": 85, "point": "report-guard", "fit": 3.42, "latencyMs": 1501 },
+    { "id": 87, "point": "output-judge", "fit": 2.91, "latencyMs": 687 },
+    { "id": 88, "point": "output-judge", "fit": 0.55, "latencyMs": 688 },
+    { "id": 89, "point": "output-judge", "fit": 2.97, "latencyMs": 716 },
+    { "id": 90, "point": "output-judge", "fit": 3.04, "latencyMs": 2271 },
+    { "id": 91, "point": "output-judge", "fit": 0.76, "latencyMs": 3775 },
+    { "id": 92, "point": "output-judge", "fit": 0.76, "latencyMs": 1636 },
+    { "id": 93, "point": "output-judge", "fit": 0.78, "latencyMs": 1461 },
+    { "id": 94, "point": "output-judge", "fit": 3.61, "latencyMs": 1891 },
+    { "id": 97, "point": "report-guard", "fit": 3.51, "latencyMs": 1457 },
+    { "id": 100, "point": "report-guard", "fit": 2.5015, "latencyMs": 58, "note": "Laya 兼容层 degraded 语义，非 Jev 供给" },
+    { "id": 101, "point": "report-guard", "fit": 2.5275, "latencyMs": 48, "note": "Laya 兼容层 degraded 语义，非 Jev 供给" },
+    { "id": 107, "point": "report-guard", "fit": 3.41, "latencyMs": 720 },
+    { "id": 110, "point": "report-guard", "fit": 3.68, "latencyMs": 661 }
+  ],
+  "verdictZones": { "fitPass": 3, "fitRetry": 2.5, "source": "decision-thresholds.js output-judge（θ 校准证据 calibration-judge-fit.json）" },
+  "recommended": {
+    "fitReviewBand": 0.5,
+    "mechanism": "邻域 |fit−fitPass|≤band 触发 k−1=2 次 fit-only 重放，取中位数重建 fit 状态与三态路由；带外零开销；重放全败沿用首判（fail-open 不变）",
+    "rationale": "band=0.5 覆盖 θ±0.5=2.5~3.5 观测波动带（5 判中 3 判落带内）；真负例上界 0.78 远低于带下界 2.5 无漏放路径；5 判经验分布下枚举全部 C(5,3)=10 个三元组：中位数 ≥3 的组合 7/10（首判单测 PASS 3/5）——误重写率 40%→30%，方向正确；精确比率与 band 复核值按 P2 观察期 fitReplay 字段累计后再裁（改带必先重盘点）",
+    "honestLimit": "中位数降幅适度而非消除：单测噪声 std≈0.3 量级下 n=3 中位数只压部分方差；本带定位=试点期测量噪声缓解 + 逐门观测数据面（fits[] 留档），θ/band 的最终修订以观察期生产配对证据为准"
+  },
+  "outOfScope": "probeStability 精确一致语义（连续分数一致率低=语义使然）保留 CLI --probe 诊断用途；Laya degraded 低分轮属供给语义差异非波动；θ 不动（无证据不改阈值红线）"
+}

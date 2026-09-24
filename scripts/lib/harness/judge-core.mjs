@@ -13,4 +13,6 @@ export const buildJudgeRequest = core.buildJudgeRequest;
 export const parseDimensionStatuses = core.parseDimensionStatuses;
 export const aggregateVerdict = core.aggregateVerdict;
 export const retryHints = core.retryHints;
+export const median = core.median;
+export const fitNearThreshold = core.fitNearThreshold;
 export const judgeOutput = core.judgeOutput;

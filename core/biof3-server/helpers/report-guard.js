@@ -10,7 +10,8 @@
  *    即升级面，不硬阻塞）。
  *  - fail-open：任何异常原样透传；决策降级（缺 key/网络/校验失败）=放行+标注。
  *  - 观测：决策落 decision_log（metaPoint=report-guard，区别于 dev 侧 output-judge），
- *    试点指标（采纳率/误拦率/延迟增量）经台账汇总。
+ *    试点指标（采纳率/误拦率/延迟增量）经台账汇总；加映 4 起 meta 增 fitReplay（fit 阈值
+ *    邻域重放观测：triggered/k/fits/median/band/replayErrors）。
  */
 'use strict';
 
@@ -41,12 +42,14 @@ async function applyToLoopResult(loopResult, { enabled, request, callProvider, m
       metaPoint: 'report-guard',
     });
     const goalFails = (judged.statuses.goals || []).filter((g) => g.status === 'fail').length;
+    const fitReplay = judged.statuses && judged.statuses.fit ? (judged.statuses.fit.replay || null) : null;
     const meta = {
       verdict: judged.verdict,
       degraded: judged.degraded === true,
       reason: judged.reason || null,
       fit: judged.statuses && judged.statuses.fit ? judged.statuses.fit.value : null,
       goalFails,
+      fitReplay,
       model: judged.model || null,
       latencyMs: Date.now() - startedAt,
       rewritten: false,

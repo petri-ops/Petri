@@ -10,6 +10,8 @@
  *  - 门控值全部来自注册表（decision-thresholds 'output-judge'，per-model 解析）；缺键维度
  *    =observe-only——校准过才有门控，无证据不门控。
  *  - 单源纪律：scripts/lib/harness/judge-core.mjs 是本文件的 ESM 薄壳（校准/CLI 复用同形）。
+ *  - 加映 4（fit 阈值邻域复核）：fit 落 |fit−fitPass|≤fitReviewBand 时并行补 fit-only 重放
+ *    取中位数重建路由（测量鲁棒性，θ 不动）；重放全败沿用首判，fail-open 语义不变。
  */
 'use strict';
 
@@ -118,6 +120,65 @@ function retryHints(statuses, goals = []) {
   return hints;
 }
 
+/** 中位数（升序取中；偶数取均值——fit 复核 k=3 恒奇数，防御性支持偶数）。 */
+function median(values) {
+  const arr = [...values].filter((v) => typeof v === 'number' && Number.isFinite(v)).sort((a, b) => a - b);
+  if (!arr.length) return null;
+  const mid = Math.floor(arr.length / 2);
+  return arr.length % 2 ? arr[mid] : (arr[mid - 1] + arr[mid]) / 2;
+}
+
+/** fit 阈值邻域判定（加映 4）：fit 已门控、band>0 且首判落 |fit−fitPass|≤band 内才值得复核。 */
+function fitNearThreshold(fitValue, gates) {
+  if (!gates || typeof fitValue !== 'number' || !Number.isFinite(fitValue)) return false;
+  if (typeof gates.fitPass !== 'number' || typeof gates.fitRetry !== 'number') return false;
+  const band = typeof gates.fitReviewBand === 'number' ? gates.fitReviewBand : 0;
+  if (!(band > 0)) return false;
+  return Math.abs(fitValue - gates.fitPass) <= band;
+}
+
+/** 邻域重放规模（含首判共 k=3）。 */
+const FIT_REPLAY_EXTRA = 2;
+
+/**
+ * 加映 4 — fit 阈值邻域复核：并行补 fit-only 单题重放，取中位数重建 fit 状态（测量鲁棒性，
+ * θ 不动）。原地改写 statuses.fit（value/status 按中位数重算），返回 replay 观测对象。
+ * 重放全败=沿用首判（fail-open 不变，replayErrors 留痕）。永不 throw。
+ */
+async function replayFitNearThreshold({ state, fitQuestion, gates, statuses, answers, overrides, metaPoint }) {
+  const firstFit = statuses.fit.value;
+  const results = await Promise.all(
+    Array.from({ length: FIT_REPLAY_EXTRA }, () =>
+      decisionApi.askDecision({
+        state,
+        questions: { fit: fitQuestion },
+        overrides,
+        meta: { point: metaPoint, threshold: gates.fitPass },
+      }).catch(() => ({ ok: false, reason: 'replay_exception' }))
+    )
+  );
+  const replayFits = results
+    .filter((r) => r && r.ok && r.answers && r.answers.fit && typeof r.answers.fit.score === 'number')
+    .map((r) => r.answers.fit.score);
+  const replay = {
+    triggered: true,
+    k: 1 + replayFits.length,
+    fits: [firstFit, ...replayFits],
+    median: replayFits.length ? median([firstFit, ...replayFits]) : firstFit,
+    band: gates.fitReviewBand,
+    replayErrors: FIT_REPLAY_EXTRA - replayFits.length,
+  };
+  if (replayFits.length) {
+    const adjusted = parseDimensionStatuses({ ...answers, fit: { ...answers.fit, score: replay.median } }, gates);
+    if (adjusted.fit) statuses.fit = { ...adjusted.fit, replay };
+    else statuses.fit.replay = replay;
+  } else {
+    replay.note = 'replay 全败沿用首判（fail-open）';
+    statuses.fit.replay = replay;
+  }
+  return replay;
+}
+
 /**
  * 评判门主入口。永不 throw；降级=fail-open 放行。
  * @param {object} args { output, request, reference?, goals?, overrides?, metaPoint? }
@@ -137,6 +198,9 @@ async function judgeOutput({ output, request, reference = '', goals = [], overri
     return { verdict: 'PASS', degraded: true, reason: outcome.reason, model: null, statuses: {}, hints: [], note: '评判降级=fail-open 放行' };
   }
   const statuses = parseDimensionStatuses(outcome.answers, gates);
+  if (statuses.fit && fitNearThreshold(statuses.fit.value, gates)) {
+    await replayFitNearThreshold({ state, fitQuestion: questions.fit, gates, statuses, answers: outcome.answers, overrides, metaPoint });
+  }
   const verdict = aggregateVerdict(statuses);
   return {
     verdict,
@@ -154,5 +218,7 @@ module.exports = {
   parseDimensionStatuses,
   aggregateVerdict,
   retryHints,
+  median,
+  fitNearThreshold,
   judgeOutput,
 };
