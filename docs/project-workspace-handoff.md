@@ -1,6 +1,8 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-24 深夜五（**BK-06 第一刀=BLOCK-105 §7 Batch-8 require-await 族收口（closeout 十门全绿）**——生产 stub `Promise.reject/resolve` 契约化直返 35 条 + it/test/hooks 回调安全摘 async 5 条；vi.fn 替身 147 条承重 async 误报豁免保留（教训：测试替身 async=promise 契约+微任务让渡双承重，不可机械摘）；根基线 947→907；frontend/eslint-suppressions.json 化石删除（零消费方+实证漂移）。**恢复要点**：dev 栈在跑；队列头=BK-06 续批（unsafe-member-access 151 / set-state-in-effect 101 / base-to-string 77 / refs 74）；用户事项 U-01~U-03 不变待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-24 深夜六（**BK-06 第二刀=Batch-8 类型面双族收口（closeout 十门全绿）**——no-base-to-string 36 + no-redundant-type-constituents 22（typeof 守卫/联合塌缩，编译语义零变化），根基线 907→849；全量 147/1201 绿。**恢复要点**：dev 栈在跑；队列头=BK-06 续批（unsafe-member-access 151 / set-state-in-effect 101 / refs 74 / unsafe-assignment 66）；教训=String((x as string)) 直投与 no-unnecessary-type-assertion 互锁；closeout 须先提交代码面再跑（工作区未提交 UI 改动会拦红）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-24 深夜五（**BK-06 第一刀=BLOCK-105 §7 Batch-8 require-await 族收口（closeout 十门全绿）**——生产 stub `Promise.reject/resolve` 契约化直返 35 条 + it/test/hooks 回调安全摘 async 5 条；vi.fn 替身 147 条承重 async 误报豁免保留（教训：测试替身 async=promise 契约+微任务让渡双承重，不可机械摘）；根基线 947→907；frontend/eslint-suppressions.json 化石删除（零消费方+实证漂移）。**恢复要点**：dev 栈在跑；队列头=BK-06 续批（unsafe-member-access 151 / set-state-in-effect 101 / base-to-string 77 / refs 74）；用户事项 U-01~U-03 不变待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-24 深夜四（**BK-05=阈值热调统一收口（closeout 十门全绿）——队列 4/8 完成，BLOCK-116 W2 候选池清空**——topic-shift/knowledge-guard 闸门迁 getPointRuntime + gates 键级 patch 四层校验（不变量违反拒写），BLOCK-110~113 运行时接点热调全通；实机七断言全过（acceptance/block-116/bk05-gates-hot-tune-live.json）。**恢复要点**：dev 栈在跑；队列下一项=BK-06（lint Batch-8，长线可分批）；output-judge 0-4 量表热调=新登记候选（候选池 C-10）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
