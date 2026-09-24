@@ -41,3 +41,12 @@
 `completed`=P1 契约全绿 + P2 实机 + closeout 十门 + canonical 回写（本 plan 收口节/backlog BK-03 翻 ✅/roadmap/handoff/AUDIT-LOG）。PoC 失败语义（模型侧声明率过低致条目级对账不可观测）=诚实收缩：契约与机制保留、观察声明率、不硬凑实机阳性。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 7. 收口（2026-09-24 当日，提交 15b22e12 + 收口笔）
+
+- **P1 交付**：spawn-agent-tools 三处接线（normalizeTodoRefs/`latestTodoIds` 快照对照/`resolveTodoRefs` 丢弃回传）+ params.todoRefs 落库 + 对账 v2（item_level_mismatch/回退 v1）+ followup 继承覆盖 + 工具 schema 双定义 + agent-runner 对账点注释翻新。
+- **门禁**：block49 契约 19/19（+7）+ block109-reconcile 13/13（+4）+ test:changed 0 红 + closeout 十门全绿（抓真归因=block34 v5.6 断言存量漂移，基线对照证伪非本包引入，已同步 v5.18 动词契约 12/12；test:changed 首跑分类冲突=acceptance/block-120/ 未登记 impact-map，补 block120 规则收口）。
+- **P2 实机**（证据 `acceptance/block-120/live.json`）：真模型按工具描述自觉声明 `todoRefs:['1']` 且落子任务 params；clean 轮 reconciliation 事件=0（零假阳性）；失败分支语义由契约承载（与加映 3 同证据等级）。
+- **Dogfood**：output:judge 对本包收口声明首判 fit=2.94→RETRY（带判词），按门语义重写后复判 fit=3.67=PASS——评判门三态闭环在自家收口上完整行使。
+- **D-1~D-5 全按推荐落定**（声明制/丢弃回传/子任务书不注入/混合口径/继承覆盖）。遗留=生产声明率与条目级命中率按观察期累计（并入 BK-02 观察盘点口径）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -2387,6 +2387,19 @@
         "test/block109-reporting-reconcile.test.mjs"
       ],
       "frontendRelated": false
+    },
+    {
+      "id": "block120-reconciliation-linkage",
+      "note": "BLOCK-120-RECONCILIATION-LINKAGE（BK-03）：终态对账 v2 条目级归属。spawn_agent/followup_task 增可选 todoRefs（normalizeTodoRefs fail-closed + latestTodoIds 快照对照，未登记 id 丢弃回传）落 params.todoRefs；对账 v2=helpers/agent-reconciliation.js 按 refs 反查清单出 item_level_mismatch 条目级失真（无 linkage 回退 v1 kind）。契约=test/block49-spawn-agent-tools.test.mjs + test/block109-reporting-reconcile.test.mjs。证据 acceptance/block-120/。",
+      "patterns": [
+        "core/biof3-server/agent-tools/spawn-agent-tools.js",
+        "core/biof3-server/helpers/agent-reconciliation.js",
+        "acceptance/block-120/**"
+      ],
+      "tests": [
+        "test/block49-spawn-agent-tools.test.mjs",
+        "test/block109-reporting-reconcile.test.mjs"
+      ]
     }
   ]
 }

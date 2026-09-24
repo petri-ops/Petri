@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-24 深夜一（**BK-01=BLOCK-119 加映 4 当日收口（closeout 十门全绿）——全局待办队列推进 1/8**——fit 波动治理以测量鲁棒性落地：fitReviewBand=0.5 邻域内 fit-only 重放 median-of-3 重建路由（θ 不动、带外零开销、fail-open 不变），实机真 spawn 轮 fitReplay 端到端（3.15→median 3.14=PASS）+ 契约 24/24 + test:changed 114 项 0 红。BK-02 观察期首盘点并入 P0。**队列下一项=BK-03（终态对账 v2 条目级 linkage）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-24 深夜二（**BK-03=BLOCK-120 终态对账 v2 当日收口（closeout 十门全绿）——全局待办队列推进 2/8**——todoRefs 声明制归属（spawn/followup 可选参数，快照校验丢弃回传，params 落库零 migration）+ 对账 item_level_mismatch 条目级失真（无 linkage 回退 v1 向后兼容）；实机真 spawn 轮 todoRefs 落库+零假阳性；连带清偿 block34 存量契约漂移。**队列下一项=BK-04（agent 可见决策工具）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-24 深夜一（**BK-01=BLOCK-119 加映 4 当日收口（closeout 十门全绿）——全局待办队列推进 1/8**——fit 波动治理以测量鲁棒性落地：fitReviewBand=0.5 邻域内 fit-only 重放 median-of-3 重建路由（θ 不动、带外零开销、fail-open 不变），实机真 spawn 轮 fitReplay 端到端（3.15→median 3.14=PASS）+ 契约 24/24 + test:changed 114 项 0 红。BK-02 观察期首盘点并入 P0。**队列下一项=BK-03（终态对账 v2 条目级 linkage）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-24（**全局未完成项计划表建表 + 队列首项 BK-01 立项（用户裁决「列个未完成计划表，所有已知的问题都需要待处理，后面按照逐个推进」）**——新建 canonical 台账 [`pending-work-backlog.md`](./pending-work-backlog.md)（truthDomain=pending-work-queue：推进队列 8 / 用户事项 3 / 候选池 9 / 阻塞延期 4 / 已核实销号 2；职责分工=台账管全量队列与推进序，当前立即任务仍由本 roadmap 决定）；首项 **BK-01=BLOCK-119 加映 4：fit 分数轮间波动治理** 同批立项启动（P0 盘点 decision_log report-guard 4 行 + output-judge 9 行；方向=阈值附近 probe 复核/滞回带/RETRY 策略收敛）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

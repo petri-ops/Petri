@@ -5,25 +5,25 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-09-24 深夜一（**队列推进 1/8：BK-01 收口（BLOCK-119 加映 4，closeout 十门全绿）**——fit 阈值邻域复核落地：fitReviewBand=0.5 + median-of-3 重放 + fitReplay 观测面，实机真 spawn 轮端到端（详见 plan 加映 4 收口行）；BK-02 观察期首盘点并入其 P0。**队列头=BK-03（终态对账 v2 条目级 linkage）**。）
+最后更新：2026-09-24 深夜二（**队列推进 2/8：BK-03 收口（BLOCK-120 终态对账 v2，closeout 十门全绿）**——todoRefs 声明制归属+条目级对账向后兼容落地，实机 todoRefs 落库+零假阳性；**队列头=BK-04（agent 可见决策工具）**。）
+
+## 推进队列（串行，按序逐个推进）
+
+| 序 | ID | 事项 | 来源（证据指针） | 状态 |
+| --- | --- | --- | --- | --- |
+| 1 | ▶ BK-04 | **agent 可见决策工具**（BLOCK-116 W2 剩余）——让 agent 会话内可查/用决策台账（decision_log/summary 面的 agent 工具化） | BLOCK-116 收口候选池 + roadmap「W2 剩余」 | **队列头（下一项）** |
+| 2 | ▶ BK-05 | **阈值热调**（BLOCK-116 W2 剩余）——阈值注册表的运行时调整面；「改阈值必先重校准」红线由既有契约承载 | 同上 | 排队 |
+| 3 | ▶ BK-06 | **BLOCK-105 §7 Batch-8：lint 抑制基线收缩**——剩余 ~956 条语义批（require-await 187 / set-state-in-effect 100 / refs 74 / exhaustive-deps 70 / base-to-string ~59 / unsafe 残尾等），逐案推进、每批棘轮收紧；**唯一无需新裁决即可续接的已登记工作**，可作长线在收口间隙续批 | roadmap/handoff「无需新裁决即可续接」段（Batch-7 后基线 956） | 排队（长线） |
+| 4 | ▶ BK-07 | **BLOCK-105 Batch-4 抓真 3 件处置**——①Office `loadAssets` 五参签名化石（收窄需单独裁决）②`ResultArtifactShell` `_jobMeta`/`_selectedSectionId` + `ResultStudioPage` `currentVersion` 只写不读＝结果元信息与版本投影停在未接线态（**交产品裁决**）③`SideChatDock.test` 头注声称覆盖 copilotAsk 实际无断言（小修） | AUDIT-LOG 2026-09-20 Mac 会话之五第 5 条 | 排队（②需用户裁决） |
+| 5 | ▶ BK-08 | **darwin 启动预算档建基线**——`block101-startup-timeline` 首跑因缺 `platforms.darwin` 档判红（设计行为非故障）；需 Mac 会话采 5 样本建基线，禁止复制 win32 数字 | BLOCK-106 遗留 + handoff ⚡ 清单 | 排队（需 Mac 环境） |
+| — | 👁 BK-02 | **汇报门 P2 试点观察期盘点**（持续观察，不占队列序）——采纳率/误拦率（含误重写率）/延迟增量/fitReplay 触发率随真实轮次累计；首盘点已并入 BK-01 P0（decision_log report-guard 行 + fit-volatility-review.json）；观察窗开启中（dev 栈 BIOF3_JEV_REPORT_GUARD=1）。此后周期性盘点 | BLOCK-119 收口遗留候选 | 观察（持续） |
 
 ## 已完成（本表排队项收口记录）
 
 | ID | 事项 | 收口 |
 | --- | --- | --- |
 | ✅ BK-01 | 汇报门 fit 分数轮间波动治理（BLOCK-119 加映 4） | 2026-09-24 当日收口：fitReviewBand=0.5 邻域重放 median-of-3（θ 不动/带外零开销/fail-open 不变），契约 24/24 + closeout 十门绿 + 实机真 spawn 轮 fitReplay 端到端；证据=acceptance/block-119/{fit-volatility-review,jiaying4-live}.json，plan=block-119 plan 加映 4 |
-
-## 推进队列（串行，按序逐个推进）
-
-| 序 | ID | 事项 | 来源（证据指针） | 状态 |
-| --- | --- | --- | --- | --- |
-| 1 | ▶ BK-03 | **终态对账 v2：条目级归属**——任务清单条目与子任务无结构化 linkage，v1 只能粗粒度核对（「N/M 失败但清单全完成」告警）；做数据模型 linkage（todo 条目 ↔ spawn 子任务，migration additive）升级为条目级归属对账 | BLOCK-109-ORCH-UX 批 v1 诚实边界 + roadmap 排队候选（「终态对账条目级归属（待数据模型 linkage）」） | **队列头（下一项）** |
-| 2 | ▶ BK-04 | **agent 可见决策工具**（BLOCK-116 W2 剩余）——让 agent 会话内可查/用决策台账（decision_log/summary 面的 agent 工具化） | BLOCK-116 收口候选池 + roadmap「W2 剩余」 | 排队 |
-| 3 | ▶ BK-05 | **阈值热调**（BLOCK-116 W2 剩余）——阈值注册表的运行时调整面；「改阈值必先重校准」红线由既有契约承载 | 同上 | 排队 |
-| 4 | ▶ BK-06 | **BLOCK-105 §7 Batch-8：lint 抑制基线收缩**——剩余 ~956 条语义批（require-await 187 / set-state-in-effect 100 / refs 74 / exhaustive-deps 70 / base-to-string ~59 / unsafe 残尾等），逐案推进、每批棘轮收紧；**唯一无需新裁决即可续接的已登记工作**，可作长线在收口间隙续批 | roadmap/handoff「无需新裁决即可续接」段（Batch-7 后基线 956） | 排队（长线） |
-| 5 | ▶ BK-07 | **BLOCK-105 Batch-4 抓真 3 件处置**——①Office `loadAssets` 五参签名化石（收窄需单独裁决）②`ResultArtifactShell` `_jobMeta`/`_selectedSectionId` + `ResultStudioPage` `currentVersion` 只写不读＝结果元信息与版本投影停在未接线态（**交产品裁决**）③`SideChatDock.test` 头注声称覆盖 copilotAsk 实际无断言（小修） | AUDIT-LOG 2026-09-20 Mac 会话之五第 5 条 | 排队（②需用户裁决） |
-| 6 | ▶ BK-08 | **darwin 启动预算档建基线**——`block101-startup-timeline` 首跑因缺 `platforms.darwin` 档判红（设计行为非故障）；需 Mac 会话采 5 样本建基线，禁止复制 win32 数字 | BLOCK-106 遗留 + handoff ⚡ 清单 | 排队（需 Mac 环境） |
-| — | 👁 BK-02 | **汇报门 P2 试点观察期盘点**（持续观察，不占队列序）——采纳率/误拦率（含误重写率）/延迟增量/fitReplay 触发率随真实轮次累计；首盘点已并入 BK-01 P0（decision_log report-guard 行 + fit-volatility-review.json）；观察窗开启中（dev 栈 BIOF3_JEV_REPORT_GUARD=1）。此后周期性盘点 | BLOCK-119 收口遗留候选 | 观察（持续） |
+| ✅ BK-03 | 终态对账 v2：条目级归属（BLOCK-120） | 2026-09-24 当日收口：todoRefs 声明制 linkage（快照校验/丢弃回传/params 落库零 migration）+ item_level_mismatch 条目级对账向后兼容；契约 +11（block49+7/reconcile+4）+ 实机 todoRefs 落库零假阳性；plan=docs/block-120-reconciliation-linkage-plan.md §7，证据=acceptance/block-120/live.json |
 
 ## 👤 用户事项（Agent 不代行，仅登记与提醒）
 
