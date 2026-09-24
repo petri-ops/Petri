@@ -620,6 +620,23 @@
       "id": "AUDIT-AGENT-WB-DEV-ELECTRON-VERIFICATION-2026-08-15"
     },
     {
+      "id": "PENDING-WORK-BACKLOG",
+      "path": "docs/pending-work-backlog.md",
+      "kind": "roadmap",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "pending-work-queue",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "never_archive",
+      "registeredAt": "2026-09-24",
+      "tags": [
+        "ledger",
+        "governance",
+        "docs"
+      ],
+      "notes": "全量已知未完成项的唯一登记与推进序台账；当前立即任务仍由 ROADMAP-NEXT 决定。"
+    },
+    {
       "id": "AUDIT-LOG",
       "path": "docs/AUDIT-LOG.md",
       "kind": "audit",
