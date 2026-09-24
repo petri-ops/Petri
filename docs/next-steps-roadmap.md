@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-24 深夜六（**BK-06 第二刀=Batch-8 类型面双族收口（closeout 十门全绿）**——no-base-to-string 36（project-store/parse typeof 守卫）+ no-redundant-type-constituents 22（字面量联合塌缩留值域注释），根基线 907→849；tsc 0+全量 147/1201。**队列头仍=BK-06 续批**（unsafe-member-access 151 / set-state-in-effect 101 / refs 74 / unsafe-assignment 66）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-24 深夜七（**BK-06 第三刀=no-unsafe-member-access result-studio 域簇收口（closeout 十门全绿）**——生产 29（信封类型化）+ 测试 41（vi.fn 泛型签名），根基线 849→752（−97=真修 70+陈旧槽位 27）；tsc 0+全量 147/1201。**队列头仍=BK-06 续批**（unsafe-member-access 余 81 / set-state-in-effect 101 / refs 74）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-24 深夜六（**BK-06 第二刀=Batch-8 类型面双族收口（closeout 十门全绿）**——no-base-to-string 36（project-store/parse typeof 守卫）+ no-redundant-type-constituents 22（字面量联合塌缩留值域注释），根基线 907→849；tsc 0+全量 147/1201。**队列头仍=BK-06 续批**（unsafe-member-access 151 / set-state-in-effect 101 / refs 74 / unsafe-assignment 66）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-24 深夜五（**BK-06 第一刀=BLOCK-105 §7 Batch-8 require-await 族收口（closeout 十门全绿）**——生产 35 条 stub 契约化直返 + 测试安全回调 5 条真修；vi.fn 替身 147 条承重 async 误报豁免保留（机械摘除被批量测试抓真后回退重做）；根基线 947→907 + frontend 本地基线化石删除。**队列头仍=BK-06 续批**（unsafe-member-access 151 / set-state-in-effect 101 / base-to-string 77 等）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
