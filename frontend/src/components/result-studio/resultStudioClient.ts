@@ -237,12 +237,14 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
       ...(init?.headers || {}),
     },
   });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new ResultStudioRequestError(
-    String(data.error || 'result_studio_request_failed'),
-    response.status,
-    data.message || data.error || `Result Studio request failed (${response.status})`,
-  );
+  const data: Record<string, unknown> = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const code = typeof data.error === 'string' && data.error ? data.error : 'result_studio_request_failed';
+    const detail = typeof data.message === 'string' && data.message
+      ? data.message
+      : typeof data.error === 'string' && data.error ? data.error : `Result Studio request failed (${response.status})`;
+    throw new ResultStudioRequestError(code, response.status, detail);
+  }
   return data as T;
 }
 

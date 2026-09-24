@@ -1,6 +1,7 @@
 import React from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { ResultEditSubmission } from './ResultEditPanel';
 import { ResultEditAdvancedDrawer, ResultEditPanel } from './ResultEditPanel';
 import type { ResultStudioEditControls } from '@/lib/result-studio-interaction-client';
 
@@ -63,7 +64,7 @@ describe('G0-RS-P4 Schema 驱动统一编辑面板', () => {
   });
 
   it('仅改呈现参数时声明不重新计算科学结论，且无需科学确认', () => {
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<(submission: ResultEditSubmission) => void>();
     render(<ResultEditPanel editControls={schema()} onSubmit={onSubmit} />);
     fireEvent.change(screen.getByLabelText('point_size'), { target: { value: '3' } });
     const status = screen.getByRole('status');
@@ -79,7 +80,7 @@ describe('G0-RS-P4 Schema 驱动统一编辑面板', () => {
   });
 
   it('改科学参数必须显式确认才能提交，UI 不代替用户确认', () => {
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<(submission: ResultEditSubmission) => void>();
     render(<ResultEditPanel editControls={schema()} onSubmit={onSubmit} />);
     fireEvent.change(screen.getByLabelText('fc_threshold'), { target: { value: '2' } });
     const status = screen.getByRole('status');
@@ -116,7 +117,7 @@ describe('G0-RS-P4 Schema 驱动统一编辑面板', () => {
   });
 
   it('作为高级精调抽屉时默认折叠，展开后仍提交同一种手动 patch', () => {
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<(submission: ResultEditSubmission) => void>();
     render(<ResultEditAdvancedDrawer editControls={schema()} onSubmit={onSubmit} />);
 
     const drawer = document.querySelector('details[aria-label="高级精细调整"]') as HTMLDetailsElement;

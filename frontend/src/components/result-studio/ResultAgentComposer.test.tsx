@@ -1,6 +1,7 @@
 import React from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { ResultEditSubmission } from './ResultEditPanel';
 import { ResultAgentComposer } from './ResultAgentComposer';
 
 afterEach(cleanup);
@@ -10,7 +11,7 @@ const TOKEN_B = 'b'.repeat(64);
 
 describe('G0-RS-P4R-3 result-focus Agent Composer', () => {
   it('默认只呈现单行目标输入，并把当前 token 原样绑定到提交但不渲染 token', () => {
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<(submission: ResultEditSubmission) => boolean | void>();
     const onDraftChange = vi.fn();
     render(
       <ResultAgentComposer
@@ -97,7 +98,7 @@ describe('G0-RS-P4R-3 result-focus Agent Composer', () => {
   });
 
   it('上下文刷新后只提交最新 token，旧 token 不会被复用', () => {
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<(submission: ResultEditSubmission) => boolean | void>();
     const { rerender } = render(
       <ResultAgentComposer
         context={{ status: 'ready', contextToken: TOKEN_A }}
@@ -119,7 +120,7 @@ describe('G0-RS-P4R-3 result-focus Agent Composer', () => {
   });
 
   it('Cmd/Ctrl+Enter 可发送，但普通 Enter 只换行', () => {
-    const onSubmit = vi.fn();
+    const onSubmit = vi.fn<(submission: ResultEditSubmission) => boolean | void>();
     render(
       <ResultAgentComposer
         context={{ status: 'ready', contextToken: TOKEN_A }}

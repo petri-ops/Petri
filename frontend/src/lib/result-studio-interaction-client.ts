@@ -50,8 +50,13 @@ function headers(json = false): HeadersInit {
 }
 
 async function parseResponse<T>(response: Response): Promise<T> {
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.message || data.error || `HTTP ${response.status}`);
+  const data: Record<string, unknown> = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const detail = typeof data.message === 'string' && data.message
+      ? data.message
+      : typeof data.error === 'string' && data.error ? data.error : `HTTP ${response.status}`;
+    throw new Error(detail);
+  }
   return data as T;
 }
 
@@ -234,11 +239,15 @@ export async function fetchResultStudioContext(input: {
     `${getApiPrefix(input.language)}/result-studio/context-envelope?${query}`,
     { headers: headers() },
   );
-  const data = await response.json().catch(() => ({}));
+  const data: Record<string, unknown> = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const diagnostics = Array.isArray(data?.diagnostics) && data.diagnostics.length > 0
-      ? (data.diagnostics as ResultStudioContextDiagnostic[])
-      : [{ code: String(data?.error || 'context_unavailable'), message: String(data?.message || '无法读取当前结果上下文。') }];
+    const diagnosticsRaw = data.diagnostics;
+    const diagnostics = Array.isArray(diagnosticsRaw) && diagnosticsRaw.length > 0
+      ? (diagnosticsRaw as ResultStudioContextDiagnostic[])
+      : [{
+          code: typeof data.error === 'string' && data.error ? data.error : 'context_unavailable',
+          message: typeof data.message === 'string' && data.message ? data.message : '无法读取当前结果上下文。',
+        }];
     return { status: 'blocked', agentView: null, editControls: null, diagnostics };
   }
   return {

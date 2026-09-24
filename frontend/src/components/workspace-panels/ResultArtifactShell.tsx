@@ -258,7 +258,14 @@ export function ResultArtifactShell({
             }
             return;
           }
-          const data = await resp.json();
+          const data = (await resp.json()) as {
+            ok?: unknown;
+            result?: JobResult;
+            params?: Record<string, unknown>;
+            ackStatus?: string | null;
+            projectId?: string | null;
+            error?: unknown;
+          };
           if (!canCommitResultFetch(requestedJobId, activeBodyJobRef.current, cancelled)) return;
           if (data.ok && data.result) {
             bodyJobRef.current = requestedJobId;
@@ -271,14 +278,14 @@ export function ResultArtifactShell({
             });
           } else if (!data.ok) {
             // 服务显式报错：如实展示，不归入"未生成结果"
-            setResultError(data.error || '结果服务返回失败');
+            setResultError(typeof data.error === 'string' && data.error ? data.error : '结果服务返回失败');
           }
           // data.ok 但无 result：确实没有结果文件，保持 resultError 为空，
           // 由 !result 分支展示"未生成可视化结果文件"
-        } catch (e: any) {
+        } catch (e) {
           // 网络层失败（服务不可达/超时）：必须让用户知道是连接问题而非"没有结果"
           if (canCommitResultFetch(requestedJobId, activeBodyJobRef.current, cancelled)) {
-            setResultError(e?.message || '网络错误，无法获取结果');
+            setResultError(e instanceof Error ? e.message : '网络错误，无法获取结果');
           }
         } finally {
           if (canCommitResultFetch(requestedJobId, activeBodyJobRef.current, cancelled)) {

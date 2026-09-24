@@ -54,9 +54,15 @@ export function useResultReportActions(options: UseResultReportActionsOptions): 
         },
         body: JSON.stringify({ theme: resolvedTheme }),
       });
-      const data = await response.json();
-      if (!response.ok || !data.ok || !data.fileName) throw new Error(data.message || data.error || '报告生成失败');
-      setFinalReportUrl(buildUrl(data.fileName));
+      const data: Record<string, unknown> = await response.json();
+      const fileName = typeof data.fileName === 'string' ? data.fileName : '';
+      if (!response.ok || !data.ok || !fileName) {
+        const detail = typeof data.message === 'string' && data.message
+          ? data.message
+          : typeof data.error === 'string' && data.error ? data.error : '报告生成失败';
+        throw new Error(detail);
+      }
+      setFinalReportUrl(buildUrl(fileName));
     } catch (error) {
       setReportGenerationError(error instanceof Error ? error.message : '报告生成失败');
     } finally {
@@ -78,9 +84,12 @@ export function useResultReportActions(options: UseResultReportActionsOptions): 
         },
         body: JSON.stringify({}),
       });
-      const data = await response.json();
-      if (!response.ok || !data.ok) throw new Error(data.error || '复现包导出失败');
-      const completeness = data.replayPackageRef?.status === 'complete' ? '完整历史' : '历史部分可用';
+      const data: Record<string, unknown> = await response.json();
+      if (!response.ok || !data.ok) {
+        throw new Error(typeof data.error === 'string' && data.error ? data.error : '复现包导出失败');
+      }
+      const replayRef = data.replayPackageRef as { status?: unknown } | undefined;
+      const completeness = replayRef?.status === 'complete' ? '完整历史' : '历史部分可用';
       setReplayPackageMessage(`复现包已写入项目结果目录 · ${completeness}`);
     } catch (error) {
       setReplayPackageMessage(error instanceof Error ? error.message : '复现包导出失败');

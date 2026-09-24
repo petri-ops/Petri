@@ -113,12 +113,12 @@ describe('ScientificInteractionViewer', () => {
 
   it('select-all uses authoritative count and hashes instead of enumerating browser rows', async () => {
     queryResultStudioTable.mockResolvedValue(tableQuery());
-    const onSelectionChange = vi.fn();
+    const onSelectionChange = vi.fn<(selection: ArtifactSelection | null) => void>();
     render(<ScientificInteractionViewer language="r" jobId="job_1" artifactName="deg_table.csv" manifest={manifest('table')} selection={null} onSelectionChange={onSelectionChange} />);
     const button = await screen.findByRole('button', { name: '选择全部筛选结果' });
     await waitFor(() => expect((button as HTMLButtonElement).disabled).toBe(false));
     fireEvent.click(button);
-    const selection = onSelectionChange.mock.calls[0][0];
+    const selection = onSelectionChange.mock.calls[0][0]!;
     expect(selection.entityIdCount).toBe(100_000);
     expect(selection.entityIds).toEqual(['G0', 'G1']);
     expect(selection.durable).toBe(true);
@@ -126,7 +126,7 @@ describe('ScientificInteractionViewer', () => {
 
   it('hydrates row checkboxes from a restored durable selection', async () => {
     queryResultStudioTable.mockResolvedValue(tableQuery());
-    const onSelectionChange = vi.fn();
+    const onSelectionChange = vi.fn<(selection: ArtifactSelection | null) => void>();
     const restored: ArtifactSelection = {
       contractVersion: 1,
       artifactId: 'deg_table',
@@ -150,16 +150,16 @@ describe('ScientificInteractionViewer', () => {
     const first = await screen.findByRole('checkbox', { name: '选择 G0' });
     expect((first as HTMLInputElement).checked).toBe(true);
     fireEvent.click(await screen.findByRole('checkbox', { name: '选择 G1' }));
-    expect(onSelectionChange.mock.calls[0][0].entityIds).toEqual(['G0', 'G1']);
+    expect(onSelectionChange.mock.calls[0][0]!.entityIds).toEqual(['G0', 'G1']);
   });
 
   it('selects stable table columns without confusing them with row entities', async () => {
     queryResultStudioTable.mockResolvedValue(tableQuery());
-    const onSelectionChange = vi.fn();
+    const onSelectionChange = vi.fn<(selection: ArtifactSelection | null) => void>();
     render(<ScientificInteractionViewer language="r" jobId="job_1" artifactName="deg_table.csv" manifest={manifest('table')} selection={null} onSelectionChange={onSelectionChange} />);
     const padj = await screen.findByRole('checkbox', { name: '选择列 padj' });
     fireEvent.click(padj);
-    const selection = onSelectionChange.mock.calls[0][0];
+    const selection = onSelectionChange.mock.calls[0][0]!;
     expect(selection.origin).toBe('column_select');
     expect(selection.fields).toEqual(['padj']);
     expect(selection.entityIds).toEqual([]);
@@ -167,7 +167,7 @@ describe('ScientificInteractionViewer', () => {
   });
 
   it('maps a scatter point click back to its stable gene id', () => {
-    const onSelectionChange = vi.fn();
+    const onSelectionChange = vi.fn<(selection: ArtifactSelection | null) => void>();
     const query = {
       ...tableQuery(0),
       rows: [
@@ -182,12 +182,12 @@ describe('ScientificInteractionViewer', () => {
     } satisfies ResultTableQuery;
     const { container } = render(<ScientificInteractionViewer language="r" jobId="job_1" artifactName="volcano.png" manifest={manifest('scatter')} backingTable={query} selection={null} onSelectionChange={onSelectionChange} />);
     fireEvent.click(container.querySelector('circle') as SVGCircleElement);
-    expect(onSelectionChange.mock.calls[0][0].entityIds).toEqual(['TP53']);
+    expect(onSelectionChange.mock.calls[0][0]!.entityIds).toEqual(['TP53']);
     expect(screen.getByText('-log10(pvalue)').getAttribute('transform')).toBe('rotate(-90 16 169)');
   });
 
   it('lets keyboard users focus and select a scatter point', () => {
-    const onSelectionChange = vi.fn();
+    const onSelectionChange = vi.fn<(selection: ArtifactSelection | null) => void>();
     const query: ResultTableQuery = {
       ...tableQuery(0),
       rows: [{ gene: 'TP53', log2FoldChange: '2', pvalue: '0.001' }],
@@ -202,11 +202,11 @@ describe('ScientificInteractionViewer', () => {
     point.focus();
     expect(document.activeElement).toBe(point);
     fireEvent.keyDown(point, { key: 'Enter' });
-    expect(onSelectionChange.mock.calls[0][0].entityIds).toEqual(['TP53']);
+    expect(onSelectionChange.mock.calls[0][0]!.entityIds).toEqual(['TP53']);
   });
 
   it('maps a scatter legend and dragged region to stable entity ids', () => {
-    const onSelectionChange = vi.fn();
+    const onSelectionChange = vi.fn<(selection: ArtifactSelection | null) => void>();
     const scatterManifest = {
       ...manifest('scatter'),
       mapping: { ...manifest('scatter').mapping!, legendField: 'direction' },
@@ -227,8 +227,8 @@ describe('ScientificInteractionViewer', () => {
     } satisfies ResultTableQuery;
     const { container } = render(<ScientificInteractionViewer language="r" jobId="job_1" artifactName="volcano.png" manifest={scatterManifest} backingTable={query} selection={null} onSelectionChange={onSelectionChange} />);
     fireEvent.click(screen.getByRole('button', { name: 'up' }));
-    expect(onSelectionChange.mock.calls[0][0].origin).toBe('legend_select');
-    expect(onSelectionChange.mock.calls[0][0].entityIds).toEqual(['TP53']);
+    expect(onSelectionChange.mock.calls[0][0]!.origin).toBe('legend_select');
+    expect(onSelectionChange.mock.calls[0][0]!.entityIds).toEqual(['TP53']);
 
     const svg = container.querySelector('svg') as SVGSVGElement;
     vi.spyOn(svg, 'getBoundingClientRect').mockReturnValue({
@@ -238,12 +238,12 @@ describe('ScientificInteractionViewer', () => {
     fireEvent.pointerDown(svg, { clientX: 1, clientY: 1 });
     fireEvent.pointerMove(svg, { clientX: 599, clientY: 349 });
     fireEvent.pointerUp(svg, { clientX: 599, clientY: 349 });
-    expect(onSelectionChange.mock.calls[1][0].origin).toBe('region_select');
-    expect(onSelectionChange.mock.calls[1][0].entityIds.sort()).toEqual(['EGFR', 'TP53']);
+    expect(onSelectionChange.mock.calls[1][0]!.origin).toBe('region_select');
+    expect(onSelectionChange.mock.calls[1][0]!.entityIds.sort()).toEqual(['EGFR', 'TP53']);
   });
 
   it('maps heatmap rows to genes and columns to samples', () => {
-    const onSelectionChange = vi.fn();
+    const onSelectionChange = vi.fn<(selection: ArtifactSelection | null) => void>();
     const query = {
       ...tableQuery(0),
       rows: [
@@ -258,12 +258,12 @@ describe('ScientificInteractionViewer', () => {
     } satisfies ResultTableQuery;
     render(<ScientificInteractionViewer language="r" jobId="job_1" artifactName="heatmap.png" manifest={matrixManifest()} backingTable={query} selection={null} onSelectionChange={onSelectionChange} />);
     fireEvent.click(screen.getByRole('button', { name: 'TP53' }));
-    expect(onSelectionChange.mock.calls[0][0].origin).toBe('row_select');
-    expect(onSelectionChange.mock.calls[0][0].entityIds).toEqual(['TP53']);
+    expect(onSelectionChange.mock.calls[0][0]!.origin).toBe('row_select');
+    expect(onSelectionChange.mock.calls[0][0]!.entityIds).toEqual(['TP53']);
     fireEvent.click(screen.getByTitle('选择 sample_a'));
-    expect(onSelectionChange.mock.calls[1][0].origin).toBe('column_select');
-    expect(onSelectionChange.mock.calls[1][0].entityType).toBe('sample');
-    expect(onSelectionChange.mock.calls[1][0].fields).toEqual(['sample_a']);
+    expect(onSelectionChange.mock.calls[1][0]!.origin).toBe('column_select');
+    expect(onSelectionChange.mock.calls[1][0]!.entityType).toBe('sample');
+    expect(onSelectionChange.mock.calls[1][0]!.fields).toEqual(['sample_a']);
   });
 
   it('fails closed as read-only when a plot has no stable mapping', () => {

@@ -658,7 +658,7 @@ describe('sub-agent task subsystem', () => {
   });
 
   function spawn(conversationId: string, parentTaskId: string, taskId: string): void {
-    streamChatMock.mockImplementation(async (opts) => {
+    streamChatMock.mockImplementation(async (opts: StreamChatOptions) => {
       opts.onTaskStarted?.(taskId);
       opts.onDelta?.('后台结果-' + taskId);
       opts.onDone?.();
@@ -689,7 +689,7 @@ describe('sub-agent task subsystem', () => {
   });
 
   it('runs multiple sub-agents concurrently in the same conversation', () => {
-    streamChatMock.mockImplementation(async (opts) => {
+    streamChatMock.mockImplementation(async (opts: StreamChatOptions) => {
       const id = opts.parentTaskId === 'p-a' ? 'sub-a' : 'sub-b';
       opts.onTaskStarted?.(id);
       opts.onDelta?.(id === 'sub-a' ? '结果A' : '结果B');
@@ -713,7 +713,7 @@ describe('sub-agent task subsystem', () => {
   });
 
   it('cancels a running sub-agent via stopSubAgentTask', () => {
-    streamChatMock.mockImplementation(async (opts) => {
+    streamChatMock.mockImplementation(async (opts: StreamChatOptions) => {
       opts.onTaskStarted?.('sub-stop');
     });
     startSubAgentTask({

@@ -153,7 +153,7 @@ describe('useResizableColumns', () => {
     fireMouse(document, 'mouseup');
     await flush();
 
-    const saved = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+    const saved = JSON.parse(localStorage.getItem(LS_KEY) || '{}') as Record<string, unknown>;
     expect(saved.leftWidth).toBe(340); // 240 + 100
     expect(saved.rightWidth).toBe(340);
     expect(saved.resultRightWidth).toBe(720);
@@ -180,7 +180,7 @@ describe('useResizableColumns', () => {
 
     expect(result.current.resultRightWidth).toBe(420);
     expect(result.current.rightWidth).toBe(340);
-    const saved = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+    const saved = JSON.parse(localStorage.getItem(LS_KEY) || '{}') as Record<string, unknown>;
     expect(saved.resultRightWidth).toBe(420);
     expect(saved.rightWidth).toBe(340);
   });
@@ -243,7 +243,7 @@ describe('useResizableColumns', () => {
     fireMouse(document, 'mouseup');
     await flush();
 
-    const saved = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+    const saved = JSON.parse(localStorage.getItem(LS_KEY) || '{}') as Record<string, unknown>;
     expect(saved.bottomTerminalHeight).toBe(120);
   });
 

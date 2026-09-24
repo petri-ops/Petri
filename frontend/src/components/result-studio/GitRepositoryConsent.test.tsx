@@ -120,7 +120,7 @@ describe('G0-RS-P7 existing Git 显式同意 UI（前端）', () => {
     expect(fetchMock).toHaveBeenCalledTimes(3);
     const postCall = fetchMock.mock.calls[1];
     expect(postCall[0]).toContain('/repository-binding/consent');
-    expect(JSON.parse(postCall[1].body)).toMatchObject({
+    expect(JSON.parse((postCall[1] as { body?: string }).body ?? '{}')).toMatchObject({
       projectId: 'p1',
       allowExistingRepository: true,
     });
