@@ -237,7 +237,7 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
       ...(init?.headers || {}),
     },
   });
-  const data: Record<string, unknown> = await response.json().catch(() => ({}));
+  const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
   if (!response.ok) {
     const code = typeof data.error === 'string' && data.error ? data.error : 'result_studio_request_failed';
     const detail = typeof data.message === 'string' && data.message

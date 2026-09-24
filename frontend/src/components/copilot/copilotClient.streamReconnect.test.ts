@@ -98,8 +98,8 @@ describe('BLOCK-39 agent 事件流断线重连', () => {
       nextRetryMs: 1000,
     });
     expect(opts.onError).toHaveBeenCalledTimes(1);
-    const [err, info] = (opts.onError as ReturnType<typeof vi.fn>).mock.calls[0];
-    expect(String((err as Error).message)).toContain('服务重启，Agent 任务中断');
+    const [err, info] = (opts.onError as ReturnType<typeof vi.fn>).mock.calls[0] as [Error, { resumable: boolean; interruptedAt: string }];
+    expect(String(err.message)).toContain('服务重启，Agent 任务中断');
     expect(info).toMatchObject({ resumable: true, interruptedAt: '2026-09-02T10:00:00.000Z' });
     // 终态 [DONE] 后 onDone 仍触发（store 侧 finish 守卫保证 error 不被覆盖）
     expect(opts.onDone).toHaveBeenCalledTimes(1);

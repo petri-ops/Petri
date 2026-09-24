@@ -25,8 +25,8 @@ function authHeaders(): Record<string, string> {
 
 async function getJson(path: string): Promise<{ status: number; data: Record<string, unknown> }> {
   const response = await fetch(path, { headers: authHeaders() });
-  const data = await response.json().catch(() => ({}));
-  return { status: response.status, data: data as Record<string, unknown> };
+  const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+  return { status: response.status, data };
 }
 
 const skillsBridge = {
@@ -165,8 +165,8 @@ const aiSettingsBridge = {
         headers: authHeaders(),
         body: JSON.stringify(settings ?? {}),
       });
-      const data = await response.json().catch(() => ({}));
-      if (response.ok && (data as { status?: string }).status === 'ok') {
+      const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+      if (response.ok && data.status === 'ok') {
         return { ok: true as const };
       }
       return { ok: false as const, error: (data as { message?: string }).message || 'save failed' };

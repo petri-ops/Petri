@@ -138,11 +138,14 @@ export function ResultStudioChangeSetPanel({
     }
   }, [selected]);
 
-  useEffect(() => {
+  // 选中项切换时清比较态：render 期 adjust-state（替代 effect 同步 setState，少一次级联 render）。
+  const [prevSelectedId, setPrevSelectedId] = useState(selectedId);
+  if (prevSelectedId !== selectedId) {
+    setPrevSelectedId(selectedId);
     setComparison(null);
     setComparisonAttemptedFor(null);
     setTablePages({});
-  }, [selectedId]);
+  }
 
   useEffect(() => {
     if (mode !== 'compare' || !selected || comparison || loading || comparisonAttemptedFor === selected.changeSetId) return;

@@ -99,7 +99,7 @@ describe('BLOCK-74 预览头部减负', () => {
     // 防抖窗口内不应立即保存
     expect(writeTextFileMock).not.toHaveBeenCalled();
     await waitFor(() => expect(writeTextFileMock).toHaveBeenCalled(), { timeout: 3000 });
-    const [dir, path, content] = writeTextFileMock.mock.calls[0];
+    const [dir, path, content] = writeTextFileMock.mock.calls[0] as [unknown, string, string];
     expect(path).toBe('check.md');
     expect(String(content)).toContain('autosave marker');
     void dir;

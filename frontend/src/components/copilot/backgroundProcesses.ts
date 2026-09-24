@@ -38,7 +38,7 @@ async function requestJson<T>(url: string): Promise<T> {
   const resp = await fetch(url, { headers: { ...getAuthHeader() } });
   let body: (T & { status?: string; error?: string }) | null = null;
   try {
-    body = await resp.json();
+    body = (await resp.json()) as T & { status?: string; error?: string };
   } catch {
     // 非 JSON 响应按 HTTP 状态处理
   }

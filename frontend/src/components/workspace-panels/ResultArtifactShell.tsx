@@ -166,9 +166,13 @@ export function ResultArtifactShell({
   // Revision. Keep the clicked identity as disposable view state and pass it
   // explicitly to the interaction route; do not infer it from job+artifact.
   const [viewedRevision, setViewedRevision] = useState<ArtifactRevision | null>(null);
-  useEffect(() => {
+  // job 切换时重置查看态：render 期 adjust-state（React「You Might Not Need an Effect」官方模式，
+  // 替代原 effect 同步 setState——同一提交内生效，少一次级联 render）。
+  const [prevViewedJobId, setPrevViewedJobId] = useState<string | null>(job?.id ?? null);
+  if ((job?.id ?? null) !== prevViewedJobId) {
+    setPrevViewedJobId(job?.id ?? null);
     setViewedRevision((current) => revisionAfterJobSelection(current, job?.id ?? null));
-  }, [job?.id]);
+  }
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [artifactSwitchMs, setArtifactSwitchMs] = useState<number | null>(null);
 

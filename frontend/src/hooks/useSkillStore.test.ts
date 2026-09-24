@@ -200,7 +200,7 @@ describe('useSkillStore', () => {
     }).biof3Desktop;
     let cancelResult: { ok: boolean; cancelled?: boolean; error?: string } = { ok: false };
     await act(async () => {
-      cancelResult = await bridge.skills.cancel('sre_test123');
+      cancelResult = (await bridge.skills.cancel('sre_test123')) as { ok: boolean; cancelled?: boolean; error?: string };
     });
     expect(handles.cancel).toHaveBeenCalledWith('sre_test123');
     expect(cancelResult.ok).toBe(true);
@@ -407,7 +407,7 @@ describe('useSkillStore', () => {
     }).biof3Desktop;
     let cancelResult: { ok: boolean; cancelled?: boolean; error?: string } = { ok: true };
     await act(async () => {
-      cancelResult = await bridge.skills.cancel('nonexistent_id');
+      cancelResult = (await bridge.skills.cancel('nonexistent_id')) as { ok: boolean; cancelled?: boolean; error?: string };
     });
 
     expect(handles.cancel).toHaveBeenCalledWith('nonexistent_id');

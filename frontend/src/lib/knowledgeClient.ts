@@ -62,9 +62,9 @@ export interface KnowledgeSearchResponse extends KnowledgeSearchResult {
 }
 
 async function jsonOrThrow<T>(resp: Response): Promise<T> {
-  const body = await resp.json().catch(() => ({}));
-  if (!resp.ok || (body as { status?: string }).status === 'error') {
-    throw new Error((body as { error?: string }).error || `HTTP ${resp.status}`);
+  const body = (await resp.json().catch(() => ({}))) as { status?: unknown; error?: unknown };
+  if (!resp.ok || body.status === 'error') {
+    throw new Error(typeof body.error === 'string' && body.error ? body.error : `HTTP ${resp.status}`);
   }
   return body as T;
 }

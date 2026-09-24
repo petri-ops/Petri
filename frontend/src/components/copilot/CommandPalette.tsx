@@ -4,6 +4,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
+import type { IconName } from '@/components/icons/Icon';
 import { formatRelativeTime } from '@/lib/format';
 import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 import './simple-chat.css';
@@ -394,7 +395,7 @@ export function CommandPalette({
             currentIdx++;
             const idx = currentIdx;
             const isSelected = idx === selectedIndex;
-            const iconName = (ICON_MAP[item.icon!] || item.icon!) as any;
+            const iconName = (ICON_MAP[item.icon!] || item.icon!) as IconName;
 
             return (
               <div

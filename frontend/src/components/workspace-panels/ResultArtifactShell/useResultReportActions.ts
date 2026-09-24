@@ -54,7 +54,7 @@ export function useResultReportActions(options: UseResultReportActionsOptions): 
         },
         body: JSON.stringify({ theme: resolvedTheme }),
       });
-      const data: Record<string, unknown> = await response.json();
+      const data = (await response.json()) as Record<string, unknown>;
       const fileName = typeof data.fileName === 'string' ? data.fileName : '';
       if (!response.ok || !data.ok || !fileName) {
         const detail = typeof data.message === 'string' && data.message
@@ -84,7 +84,7 @@ export function useResultReportActions(options: UseResultReportActionsOptions): 
         },
         body: JSON.stringify({}),
       });
-      const data: Record<string, unknown> = await response.json();
+      const data = (await response.json()) as Record<string, unknown>;
       if (!response.ok || !data.ok) {
         throw new Error(typeof data.error === 'string' && data.error ? data.error : '复现包导出失败');
       }

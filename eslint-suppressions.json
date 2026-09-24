@@ -60,9 +60,6 @@
     }
   },
   "frontend/src/components/copilot/CommandPalette.tsx": {
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 2
-    },
     "react-hooks/set-state-in-effect": {
       "count": 2
     }
@@ -189,11 +186,6 @@
       "count": 4
     }
   },
-  "frontend/src/components/copilot/backgroundProcesses.ts": {
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 1
-    }
-  },
   "frontend/src/components/copilot/conversationChangesStore.ts": {
     "@typescript-eslint/no-unsafe-argument": {
       "count": 2
@@ -213,9 +205,6 @@
     }
   },
   "frontend/src/components/copilot/copilotClient.streamReconnect.test.ts": {
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 1
-    },
     "@typescript-eslint/require-await": {
       "count": 5
     }
@@ -259,16 +248,6 @@
   "frontend/src/components/copilot/integration/__tests__/ChatCardLinkBridge.test.tsx": {
     "react-hooks/immutability": {
       "count": 2
-    }
-  },
-  "frontend/src/components/copilot/llmTranscripts.ts": {
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 1
-    }
-  },
-  "frontend/src/components/copilot/planApprovals.ts": {
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 1
     }
   },
   "frontend/src/components/copilot/renderers/TableRenderer.test.tsx": {
@@ -570,7 +549,7 @@
   },
   "frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx": {
     "react-hooks/set-state-in-effect": {
-      "count": 4
+      "count": 3
     }
   },
   "frontend/src/components/result-studio/ResultStudioSurface.tsx": {
@@ -604,11 +583,6 @@
   },
   "frontend/src/components/result-studio/copilotAskDelivery.test.tsx": {
     "@typescript-eslint/no-unsafe-return": {
-      "count": 1
-    }
-  },
-  "frontend/src/components/result-studio/resultStudioClient.ts": {
-    "@typescript-eslint/no-unsafe-assignment": {
       "count": 1
     }
   },
@@ -696,7 +670,7 @@
       "count": 1
     },
     "react-hooks/set-state-in-effect": {
-      "count": 8
+      "count": 7
     }
   },
   "frontend/src/components/workspace-panels/ResultArtifactShell/useArtifactInteractionSelection.ts": {
@@ -713,9 +687,6 @@
     }
   },
   "frontend/src/components/workspace-panels/ResultArtifactShell/useResultReportActions.ts": {
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 2
-    },
     "react-hooks/set-state-in-effect": {
       "count": 2
     }
@@ -834,9 +805,6 @@
     }
   },
   "frontend/src/hooks/useSkillStore.test.ts": {
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 2
-    },
     "@typescript-eslint/require-await": {
       "count": 2
     }
@@ -923,11 +891,6 @@
       "count": 8
     }
   },
-  "frontend/src/lib/knowledgeClient.ts": {
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 1
-    }
-  },
   "frontend/src/lib/loop-client.ts": {
     "@typescript-eslint/no-redundant-type-constituents": {
       "count": 8
@@ -954,18 +917,10 @@
   "frontend/src/lib/projectionDataBridges.ts": {
     "@typescript-eslint/no-redundant-type-constituents": {
       "count": 1
-    },
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 2
     }
   },
   "frontend/src/lib/projectionTerminalBridge.ts": {
     "@typescript-eslint/no-unsafe-argument": {
-      "count": 2
-    }
-  },
-  "frontend/src/lib/result-studio-interaction-client.ts": {
-    "@typescript-eslint/no-unsafe-assignment": {
       "count": 2
     }
   },
@@ -1065,9 +1020,6 @@
     }
   },
   "frontend/src/pages/project-workspace/WorkspaceFilePreview.test.tsx": {
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 1
-    },
     "@typescript-eslint/require-await": {
       "count": 1
     }

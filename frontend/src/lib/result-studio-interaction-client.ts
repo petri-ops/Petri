@@ -50,7 +50,7 @@ function headers(json = false): HeadersInit {
 }
 
 async function parseResponse<T>(response: Response): Promise<T> {
-  const data: Record<string, unknown> = await response.json().catch(() => ({}));
+  const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
   if (!response.ok) {
     const detail = typeof data.message === 'string' && data.message
       ? data.message
@@ -239,7 +239,7 @@ export async function fetchResultStudioContext(input: {
     `${getApiPrefix(input.language)}/result-studio/context-envelope?${query}`,
     { headers: headers() },
   );
-  const data: Record<string, unknown> = await response.json().catch(() => ({}));
+  const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
   if (!response.ok) {
     const diagnosticsRaw = data.diagnostics;
     const diagnostics = Array.isArray(diagnosticsRaw) && diagnosticsRaw.length > 0
