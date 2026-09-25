@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-25 早（**BK-06 第七刀=tail 十八族收官（closeout 十门全绿）**——no-undef 19→2 配置双修+缺件补齐 / no-empty 19→1 / base-to-string 40→2（unknownText 辅助）/ redundant 31→0 / rules-of-hooks 4 真修 / 豁免定性 47；根基线 515→397；**七刀累计 947→397（−550），剩余全部为已书面定性豁免类**。**队列头=BK-06 收官评估**（tail 角落残余≈10）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 早二（**BK-06=Batch-8 整包收官（尾清 closeout 十门绿 + 整包判定 fit=3.39 PASS）**——七刀基线 947→395（−552），可清族全部归零，剩余全为书面定性豁免类（清单见 handoff/整包声明）；机制教训六条入册；连带真缺陷 fileURLToPath/TableRenderer hooks/fileOps 判别信封等修复。**队列头=BK-07**（③ 小修；①② 需用户裁决）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 早（**BK-06 第七刀=tail 十八族收官（closeout 十门全绿）**——no-undef 19→2 配置双修+缺件补齐 / no-empty 19→1 / base-to-string 40→2（unknownText 辅助）/ redundant 31→0 / rules-of-hooks 4 真修 / 豁免定性 47；根基线 515→397；**七刀累计 947→397（−550），剩余全部为已书面定性豁免类**。**队列头=BK-06 收官评估**（tail 角落残余≈10）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 凌晨（**BK-06 第六刀=promise 三族收官 + refs 定性（closeout 十门全绿）**——floating-promises 41→0 全族清零 + misused-promises 41→2 + unsafe-argument 4→0 + refs 74 定性豁免（ctx 混合对象污染推断，拆分=C-11），根基线 597→515；**六刀累计 947→515（−432）**。**队列头仍=BK-06 续批 tail**（base-to-string 40 / redundant-type 31 / no-undef 19 等）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
