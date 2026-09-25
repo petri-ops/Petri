@@ -65,4 +65,4 @@ function _writeRejectEntry(userDataDir, args) {
   }
 }
 
-module.exports = { pruneRejectFiles, _writeRejectEntry };
+module.exports = { _writeRejectEntry };
