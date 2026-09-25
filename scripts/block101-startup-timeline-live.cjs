@@ -31,8 +31,20 @@ async function listPageTargets() {
 }
 
 async function killTestInstance() {
-  // 幂等杀测试实例（只杀 9223 身份进程——命令行含测试实例标记/userData；绝不碰主实例）。
-  // wmic 在部分 Windows 镜像缺席，PowerShell CIM 为准。
+  // 幂等杀测试实例（只杀 9223 监听者）。darwin=lsof 定点杀（禁 pkill 红线，同
+  // start-test-instance.sh）；win32=PowerShell CIM 按命令行标记杀。收尾清场走同一
+  // 入口——此前 darwin 上 PowerShell 分支空转，采样结束后最后一轮测试实例残留
+  // （2026-09-25 用户抓真「TEST 还在」）。
+  if (process.platform === 'darwin') {
+    try {
+      const pid = execSync('lsof -tnP -iTCP:9223 -sTCP:LISTEN', { encoding: 'utf8' }).trim().split('\n')[0];
+      if (pid) {
+        try { process.kill(Number(pid)); log(`killed test instance pid=${pid}`); } catch {}
+      }
+    } catch { /* 9223 无监听 = 无需清理 */ }
+    await sleep(2000);
+    return;
+  }
   try {
     const out = execSync(
       "powershell -NoProfile -Command \"Get-CimInstance Win32_Process -Filter \\\"Name='electron.exe'\\\" | Select-Object ProcessId,CommandLine | ConvertTo-Json\"",

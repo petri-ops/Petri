@@ -71,6 +71,12 @@ async function createWindow({
   const testWindowBounds = {};
   const testWindowSize = {};
   if (IS_TEST_INSTANCE) {
+    // macOS：测试实例退为 accessory 应用——Dock 无图标、冷启动不抢焦点激活
+    // （2026-09-25 用户需求「TEST 实例不要靠前」）；窗口仍离屏可见正常渲染，
+    // 不以 hidden/minimized 换清净（渲染冻结反例见上）。
+    if (process.platform === "darwin") {
+      require("electron").app.dock.hide();
+    }
     // UI-410 — 测试窗口缩小到 1280x800（预览够用；仍大于 960 响应式断点，
     // 不破坏布局类断言）。
     testWindowSize.width = 1280;
@@ -81,9 +87,12 @@ async function createWindow({
       testWindowBounds.x = primary.x + primary.width - 1280 - 24;
       testWindowBounds.y = primary.y + 60;
     } else {
+      // 离屏摆位=所有显示器并集左缘之外（2026-09-25 加固：原「主屏左缘外」在
+      // 左侧排列的外接屏上会落在可见区；并集之外任何排列都真离屏）。
       const { screen } = require("electron");
       const primary = screen.getPrimaryDisplay().bounds;
-      testWindowBounds.x = primary.x - 1280 - 100;
+      const minX = Math.min(...screen.getAllDisplays().map((d) => d.bounds.x));
+      testWindowBounds.x = minX - 1280 - 100;
       testWindowBounds.y = primary.y + 40;
     }
   }
