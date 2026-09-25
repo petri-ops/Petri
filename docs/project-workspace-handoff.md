@@ -1,6 +1,8 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-25 早六（**CK 推进系列建表**——CK-01~CK-10 逐项推进序入 backlog（用户预授权按表推进、项内产品裁决点单独问）；队列头=CK-01 steer 接线。**恢复要点**：dev 栈在跑；全量表查 pending-work-backlog.md；用户事项 U-01~U-04（U-04=UI-439 过目）待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 早七（**CK-01 完成**：运行中发送自动 steer（UI-440 in_progress 待用户过目翻 verified）；队列头=CK-02 长列表虚拟化。**恢复要点**：dev 栈在跑（Vite HMR 已生效）；CK 表在 pending-work-backlog.md；用户事项 U-01~U-04 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 早六（**CK 推进系列建表**——CK-01~CK-10 逐项推进序入 backlog（用户预授权按表推进、项内产品裁决点单独问）；队列头=CK-01 steer 接线。**恢复要点**：dev 栈在跑；全量表查 pending-work-backlog.md；用户事项 U-01~U-04（U-04=UI-439 过目）待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 早四（**BK-07 三件全部完成**：①loadAssets 收窄 ②死状态拆除+currentVersion 复核推翻 ③copilotAsk 断言；closeout 十门绿 + fit=3.76 PASS。**恢复要点**：dev 栈在跑；**队列无可串行推进项**——BK-08 需 Mac 会话采 5 样本、其余完成/豁免定性完毕；Batch-8 收官态=基线 394 全为书面定性豁免类（清单见早二行）；用户事项 U-01（Jev key 轮换）/U-02·U-03（UI-437·438 过目）待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
