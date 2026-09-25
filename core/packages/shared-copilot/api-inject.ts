@@ -21,10 +21,4 @@ export function configureApi(opts: {
   if (opts.getToken) _getToken = opts.getToken;
 }
 
-export function getApiPrefix(): string {
-  return _getApiPrefix();
-}
 
-export function getToken(): string | null {
-  return _getToken();
-}

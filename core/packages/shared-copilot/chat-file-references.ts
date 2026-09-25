@@ -72,7 +72,7 @@ export interface ResolveResponse {
 
 export type LinkKind = 'external' | 'internal' | 'workspace' | 'artifact' | 'dangerous';
 
-export function isSafeHttpUrl(raw: string): boolean {
+function isSafeHttpUrl(raw: string): boolean {
   const value = (raw || '').trim();
   if (!value) return false;
   if (/[\u0000-\u001F\u007F]/.test(value)) return false;
@@ -85,7 +85,7 @@ export function isSafeHttpUrl(raw: string): boolean {
   }
 }
 
-export function isSafeRelativeUrl(raw: string): boolean {
+function isSafeRelativeUrl(raw: string): boolean {
   const value = (raw || '').trim();
   if (!value) return false;
   if (/[\u0000-\u001F\u007F]/.test(value)) return false;
@@ -148,7 +148,7 @@ const EXACT_ARTIFACT_FILENAME_RE = new RegExp(
   'iu',
 );
 
-export function stripCodeRegions(markdown: string): string {
+function stripCodeRegions(markdown: string): string {
   let out = markdown.replace(/```[\s\S]*?(?:```|$)/g, (block) => block.replace(/[^\n]/g, ' '));
   out = out.replace(/`[^`\n]*`/g, (span) => span.replace(/[^\n]/g, ' '));
   out = out.replace(/<pre[\s\S]*?<\/pre>/gi, (span) => span.replace(/[^\n]/g, ' '));
@@ -156,7 +156,7 @@ export function stripCodeRegions(markdown: string): string {
   return out;
 }
 
-export function isFileReferenceCandidate(raw: string): boolean {
+function isFileReferenceCandidate(raw: string): boolean {
   const value = (raw || '').trim();
   if (!value || value.length > 256 || /[\u0000-\u001F\u007F]/.test(value)) return false;
   if (EXACT_INTERNAL_URI_RE.test(value) || EXACT_TOOLS_FILE_URL_RE.test(value)) return true;
@@ -253,28 +253,6 @@ export function extractFileReferenceCandidates(
   return out.slice(0, limit);
 }
 
-export function syntheticInternalUri(
-  candidate: string,
-  resolved: ResolvedReference
-): string | null {
-  if (resolved.kind === 'artifact') {
-    const artifactName = resolved.artifactName || resolved.name;
-    if (!resolved.jobId || !artifactName) return null;
-    return `gewu://artifact/${encodeURIComponent(resolved.jobId)}/${artifactName
-      .split('/')
-      .map((part) => encodeURIComponent(part))
-      .join('/')}`;
-  }
-  if (resolved.kind === 'workspace') {
-    if (!resolved.projectId || !resolved.relativePath) return null;
-    const tail = resolved.relativePath
-      .split('/')
-      .map((part) => encodeURIComponent(part))
-      .join('/');
-    return `gewu://workspace/${encodeURIComponent(resolved.projectId)}/${tail}`;
-  }
-  return null;
-}
 
 // ---------------------------------------------------------------------------
 // Platform-agnostic resolver — uses an injected fetcher

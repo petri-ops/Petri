@@ -871,7 +871,7 @@ export function CopilotMarkdown({
 // Helpers exposed for tests
 // ---------------------------------------------------------------------------
 
-export function syntheticInternalUri(
+function syntheticInternalUri(
   candidate: string,
   resolved: ResolvedReference
 ): string | null {
@@ -894,10 +894,3 @@ export function syntheticInternalUri(
   return null;
 }
 
-// Internal helper re-exported only so test runners can exercise the parser.
-export const __test__ = {
-  parse,
-  tokenizeInline,
-  extractFileReferenceCandidates,
-  classifyLink,
-};

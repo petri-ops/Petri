@@ -15,12 +15,6 @@ type Handler = (action: CopilotAction) => Promise<ActionResult> | ActionResult;
 
 let handler: Handler | null = null;
 
-export function registerActionHandler(h: Handler): () => void {
-  handler = h;
-  return () => {
-    if (handler === h) handler = null;
-  };
-}
 
 export async function dispatchAction(action: CopilotAction): Promise<ActionResult> {
   // Universal handlers (work without page registration)

@@ -57,51 +57,11 @@ export interface ParsedReply {
   actions: CopilotAction[];
 }
 
-export function parseActionsFromMarkdown(md: string): ParsedReply {
-  const actions: CopilotAction[] = [];
-  // Match ```action\n...JSON...\n```
-  const regex = /```action\s*\n([\s\S]*?)\n```/g;
-  let lastIdx = 0;
-  let out = '';
-  let m: RegExpExecArray | null;
-  while ((m = regex.exec(md)) !== null) {
-    const before = md.slice(lastIdx, m.index);
-    out += before;
-    const jsonText = m[1].trim();
-    let parsed: unknown = null;
-    try {
-      parsed = JSON.parse(jsonText);
-    } catch {
-      // Streaming may give partial JSON — keep block visible until next chunk
-      out += m[0];
-      lastIdx = m.index + m[0].length;
-      continue;
-    }
-    if (
-      parsed &&
-      typeof parsed === 'object' &&
-      typeof (parsed as Record<string, unknown>).type === 'string'
-    ) {
-      const idx = actions.length;
-      actions.push(parsed as CopilotAction);
-      out += `\n\n[[ACTION:${idx}]]\n\n`;
-    } else {
-      out += m[0];
-    }
-    lastIdx = m.index + m[0].length;
-  }
-  out += md.slice(lastIdx);
-  return { text: out, actions };
-}
 
 // ============================================================
 // Action validators — ensure no destructive ops without confirmation
 // ============================================================
 
-export function isDestructive(_action: CopilotAction): boolean {
-  // L1 only adds new analyses or navigates — nothing destructive yet.
-  return false;
-}
 
 export function shortDescription(a: CopilotAction): string {
   switch (a.type) {
