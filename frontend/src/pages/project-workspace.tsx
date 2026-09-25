@@ -8,7 +8,7 @@ import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Icon } from '@/components/icons/Icon';
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
 import { BottomTerminal } from '@/components/workspace-panels/BottomTerminal';
-import { CenterPanel, type CenterPanelContext } from '@/components/workspace-panels/CenterPanel';
+import { CenterPanel, type CenterPanelContext, type CenterPanelRefs } from '@/components/workspace-panels/CenterPanel';
 import { RightPanel, type RightPanelContext } from '@/components/workspace-panels/RightPanel';
 import { ColumnHeader } from '@/components/desktop/titlebar/ColumnizedTitleBar';
 import { TitleBar } from '@/components/desktop/TitleBar';
@@ -857,8 +857,6 @@ export function ProjectWorkspace(): React.ReactElement {
     projectConversations,
     workspaceMode,
     showPinnedSummary,
-    centerColRef: centerColRef as React.RefObject<HTMLElement>,
-    sessionFrameRef: sessionFrameRef,
     bottomTerminalOpen,
     bottomTerminalHeight,
     leftOpen,
@@ -1022,7 +1020,7 @@ export function ProjectWorkspace(): React.ReactElement {
         {/* UI-341 加映三（档 2）——左栏上提为壳层 AppRail（常驻、跨页面），
             本组件不再渲染左栏；BottomTerminal 亦无需再避让左栏宽度。 */}
         {/* Center column — Simple chat (conversation-driven) */}
-        <CenterPanel ctx={centerPanelCtx} />
+        <CenterPanel ctx={centerPanelCtx} refs={{ centerColRef: centerColRef as React.RefObject<HTMLElement>, sessionFrameRef }} />
         <RightPanel
           ctx={rightPanelCtx}
           visible={rightRailVisible}

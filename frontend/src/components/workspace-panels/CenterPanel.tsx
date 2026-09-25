@@ -42,6 +42,14 @@ import styles from '@/pages/project-workspace.module.css';
 
 export type { ActiveArtifact };
 
+/** CK-06（C-11）— refs 与纯值拆分：混合对象触发 react-hooks/refs 类型级污染
+ *  推断（47 处纯值访问被误标 render 期读 ref），拆分后规则可正确区分。 */
+export interface CenterPanelRefs {
+  centerColRef: React.RefObject<HTMLElement>;
+  /** UI-371 — 回调式测量 ref（可同时传给 chat / scheduled 两个 SessionFrameView 实例）。 */
+  sessionFrameRef: React.Ref<HTMLDivElement>;
+}
+
 export interface CenterPanelContext {
   /** BLOCK-62 P1b — 列级 header（main 第一个子元素，flex:1 子项各自让位）。 */
   columnHeader?: React.ReactNode;
@@ -58,10 +66,7 @@ export interface CenterPanelContext {
   workspaceMode: WorkspaceMode;
   showPinnedSummary: boolean;
 
-  // Layout refs
-  centerColRef: React.RefObject<HTMLElement>;
-  /** UI-371 — 回调式测量 ref（可同时传给 chat / scheduled 两个 SessionFrameView 实例）。 */
-  sessionFrameRef: React.Ref<HTMLDivElement>;
+  // Layout（refs 已拆至 CenterPanelRefs——CK-06）
   bottomTerminalOpen: boolean;
   bottomTerminalHeight: number;
   leftOpen: boolean;
@@ -116,6 +121,8 @@ export interface CenterPanelContext {
 
 export interface CenterPanelProps {
   ctx: CenterPanelContext;
+  /** CK-06 — refs 独立传递（与纯值 ctx 分离，规避 refs 类型级污染推断）。 */
+  refs: CenterPanelRefs;
 }
 
 /**
@@ -126,8 +133,9 @@ export interface CenterPanelProps {
  * parent via the `ctx` callbacks. ProjectWorkspace remains the single source
  * of truth until state is further decomposed into hooks.
  */
-export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
-  const { workspaceMode, bottomTerminalOpen, bottomTerminalHeight, centerColRef } = ctx;
+export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement {
+  const { workspaceMode, bottomTerminalOpen, bottomTerminalHeight } = ctx;
+  const { centerColRef, sessionFrameRef } = refs;
   const [returnConversationMs, setReturnConversationMs] = React.useState<number | null>(null);
   // Reuse the durable conversation run; the result Composer does not create a
   // second progress store and therefore survives tool switches/stop/failure by
@@ -208,7 +216,7 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
         aria-hidden={workspaceMode !== 'chat'}
         data-projection="conversation"
       >
-        <SessionFrameView ctx={ctx} variant="chat">
+        <SessionFrameView ctx={ctx} sessionFrameRef={sessionFrameRef} variant="chat">
           <div className={styles.agentMain}>
             {ctx.project && ctx.projectId && (
               <SimpleChat
@@ -292,7 +300,7 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
         </div>
       )}
       {workspaceMode === 'scheduled' && (
-        <SessionFrameView ctx={ctx}>
+        <SessionFrameView ctx={ctx} sessionFrameRef={sessionFrameRef}>
           <ScheduledWorkspacePanel
             onBackToChat={() => ctx.updateWorkspaceMode('chat')}
           />
@@ -310,10 +318,12 @@ export function CenterPanel({ ctx }: CenterPanelProps): React.ReactElement {
 
 function SessionFrameView({
   ctx,
+  sessionFrameRef,
   children,
   variant = 'default',
 }: {
   ctx: CenterPanelContext;
+  sessionFrameRef: React.Ref<HTMLDivElement>;
   children: React.ReactNode;
   variant?: 'default' | 'chat';
 }): React.ReactElement {
@@ -336,7 +346,7 @@ function SessionFrameView({
       className={`${styles.workspaceSessionFrame} ${
         variant === 'chat' ? styles.workspaceSessionFrameChat : ''
       }`}
-      ref={ctx.sessionFrameRef}
+      ref={sessionFrameRef}
     >
       <div className={styles.workspaceSessionLayout}>
         <div className={styles.workspaceSessionInset}>

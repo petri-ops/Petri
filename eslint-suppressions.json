@@ -422,9 +422,6 @@
     }
   },
   "frontend/src/components/workspace-panels/CenterPanel.tsx": {
-    "react-hooks/refs": {
-      "count": 40
-    },
     "react-hooks/set-state-in-effect": {
       "count": 1
     }
@@ -659,6 +656,9 @@
     }
   },
   "frontend/src/pages/project-workspace.tsx": {
+    "@typescript-eslint/no-unused-vars": {
+      "count": 1
+    },
     "react-hooks/preserve-manual-memoization": {
       "count": 1
     },

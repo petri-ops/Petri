@@ -1,7 +1,7 @@
 import React from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { CenterPanel, type CenterPanelContext } from './CenterPanel';
+import { CenterPanel, type CenterPanelContext, type CenterPanelRefs } from './CenterPanel';
 
 vi.mock('@/components/copilot/SimpleChat', () => ({
   SimpleChat: () => <div data-testid="persistent-chat">Agent conversation</div>,
@@ -55,7 +55,6 @@ function context(mode: CenterPanelContext['workspaceMode']): CenterPanelContext 
     // assertion below passed while the conversation was in fact unmounted in
     // result mode — the precise requirement this test is named for.
     showPinnedSummary: mode === 'chat' || mode === 'scheduled',
-    centerColRef: { current: null }, sessionFrameRef: { current: null },
     bottomTerminalOpen: false, bottomTerminalHeight: 0, leftOpen: true, rightOpen: true, inputHeight: 120,
     summaryCardOpen: false, summaryVisibility: 'hidden', summaryOpenWidth: 0,
     activeJob: { id: 'job-1', tool_id: 'deseq2', status: 'done', created_at: 1 },
@@ -79,10 +78,13 @@ function context(mode: CenterPanelContext['workspaceMode']): CenterPanelContext 
   } as unknown as CenterPanelContext;
 }
 
+
+const refs: CenterPanelRefs = { centerColRef: { current: null }, sessionFrameRef: { current: null } };
+
 describe('G0-RS-P1 CenterPanel projection', () => {
   it('keeps the Agent conversation mounted while the result owns the visible center', () => {
     const ctx = context('result');
-    render(<CenterPanel ctx={ctx} />);
+    render(<CenterPanel ctx={ctx} refs={refs} />);
     expect(screen.getByTestId('persistent-chat')).toBeTruthy();
     expect(screen.getByTestId('persistent-chat').closest('[data-projection="conversation"]')?.getAttribute('aria-hidden')).toBe('true');
     expect(screen.getAllByTestId('central-result-view')).toHaveLength(1);
@@ -93,14 +95,14 @@ describe('G0-RS-P1 CenterPanel projection', () => {
 
   it('returns to the same conversation projection through the visible context action', () => {
     const ctx = context('result');
-    render(<CenterPanel ctx={ctx} />);
+    render(<CenterPanel ctx={ctx} refs={refs} />);
     fireEvent.click(screen.getByRole('button', { name: '返回对话' }));
     expect(ctx.updateWorkspaceMode).toHaveBeenCalledWith('chat');
   });
 
   it.each(['code', 'compare', 'history'] as const)('renders %s as a distinct central mode without the edit Composer', (mode) => {
     const ctx = context(mode);
-    render(<CenterPanel ctx={ctx} />);
+    render(<CenterPanel ctx={ctx} refs={refs} />);
     expect(screen.getByTestId('central-result-view').getAttribute('data-mode')).toBe(mode);
     expect(screen.queryByRole('region', { name: '用 Agent 修改当前结果' })).toBeNull();
     expect(screen.getByRole('region', { name: '结果主画布' }).getAttribute('data-mode')).toBe(mode);
@@ -108,7 +110,7 @@ describe('G0-RS-P1 CenterPanel projection', () => {
 
   it('routes the visible review and history actions through the workspace state owner', () => {
     const ctx = context('result');
-    render(<CenterPanel ctx={ctx} />);
+    render(<CenterPanel ctx={ctx} refs={refs} />);
     fireEvent.click(screen.getByRole('button', { name: '审查' }));
     fireEvent.click(screen.getByRole('button', { name: '历史' }));
     expect(ctx.updateWorkspaceMode).toHaveBeenCalledWith('compare', true, 'job-1');
@@ -121,7 +123,7 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     ctx.showPinnedSummary = true;
     ctx.summaryCardOpen = true;
     ctx.summaryVisibility = 'float';
-    render(<CenterPanel ctx={ctx} />);
+    render(<CenterPanel ctx={ctx} refs={refs} />);
     expect(document.querySelector('[class*="workspaceSummaryFloat"]')).toBeTruthy();
     expect(document.querySelector('[class*="workspaceSummaryColumn"]')).toBeNull();
   });
@@ -131,7 +133,7 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     ctx.showPinnedSummary = true;
     ctx.summaryCardOpen = true;
     ctx.summaryVisibility = 'compact';
-    render(<CenterPanel ctx={ctx} />);
+    render(<CenterPanel ctx={ctx} refs={refs} />);
     expect(document.querySelector('[class*="workspaceSummaryColumn"]')).toBeTruthy();
     expect(document.querySelector('[class*="workspaceSummaryFloat"]')).toBeNull();
   });
