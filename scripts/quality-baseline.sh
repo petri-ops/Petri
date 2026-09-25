@@ -13,7 +13,7 @@ PREV="acceptance/block-105/p0-baseline"
 mkdir -p "$OUT"
 
 echo "== 1/4 密钥快扫 =="
-bash "$(dirname "$0")/secret-scan.mjs" > "$OUT/secret-scan.txt" 2>&1 || true
+node "$(dirname "$0")/secret-scan.mjs" > "$OUT/secret-scan.txt" 2>&1 || true
 
 echo "== 2/4 npm audit（根 + 前端）=="
 npm audit --json > "$OUT/audit-root.json" 2>&1 || true
