@@ -22,6 +22,7 @@ vi.mock('@/lib/copilotContext', () => ({
 }));
 
 import { SideChatDock } from './SideChatDock';
+import { subscribeCopilotContext } from '@/lib/copilotContext';
 
 describe('UI-417 SideChatDock', () => {
   beforeEach(() => {
@@ -56,6 +57,16 @@ describe('UI-417 SideChatDock', () => {
       window.dispatchEvent(new CustomEvent('gewu:side-chat-open'));
     });
     expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
+  });
+
+  it('copilotAsk 归属不在悬挂面：不订阅 copilot 上下文，copilot-ask 派发不展开悬挂面', async () => {
+    const { subscribeCopilotContext: sub } = await import('@/lib/copilotContext');
+    render(<SideChatDock projectId="p_1" conversationId="conv_1" onConversationChange={vi.fn()} />);
+    await act(async () => {
+      window.dispatchEvent(new CustomEvent('gewu:copilot-ask', { detail: { prompt: '悬挂面不应响应' } }));
+    });
+    expect(screen.queryByTestId('side-chat-simplechat')).toBeNull();
+    expect(sub).not.toHaveBeenCalled();
   });
 
   it('Esc 收起', () => {

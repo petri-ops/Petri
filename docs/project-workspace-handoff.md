@@ -1,6 +1,8 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-25 早二（**BK-06=Batch-8 整包收官（基线 947→395，七刀 −552）**——可清族全部归零；豁免类构成=require-await 147 测试替身 / set-state 99 / refs 74（C-11）/ compiler+测试 idiom 39 / control-regex 13 / 匹配器 7 / 契约名 4 / async onClick 2。**恢复要点**：dev 栈在跑；**队列头=BK-07**（③ SideChatDock.test 断言小修；① Office 五参签名收窄需单独裁决；② 结果元信息接线需产品裁决）；重开条件=React 编译器迁移/匹配器类型升级/C-11 立项；用户事项 U-01~U-03 不变待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 早三（**BK-07 ③ copilotAsk 断言补齐完成**。**恢复要点**：dev 栈在跑；**队列阻塞于用户**——BK-07 ①② 需用户裁决（五参签名收窄 / 结果元信息接线产品语义）、BK-08 需 Mac；Batch-8 收官态=基线 395 全为书面定性豁免类（清单见上文早二行）；用户事项 U-01~U-03 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 早二（**BK-06=Batch-8 整包收官（基线 947→395，七刀 −552）**——可清族全部归零；豁免类构成=require-await 147 测试替身 / set-state 99 / refs 74（C-11）/ compiler+测试 idiom 39 / control-regex 13 / 匹配器 7 / 契约名 4 / async onClick 2。**恢复要点**：dev 栈在跑；**队列头=BK-07**（③ SideChatDock.test 断言小修；① Office 五参签名收窄需单独裁决；② 结果元信息接线需产品裁决）；重开条件=React 编译器迁移/匹配器类型升级/C-11 立项；用户事项 U-01~U-03 不变待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 早（**BK-06 第七刀=tail 十八族收官（closeout 十门全绿）**——配置双修（build globals+allowEmptyCatch）/unknownText 辅助/联合塌缩/rules-of-hooks 真修/豁免定性 47，根基线 515→397；七刀累计 947→397（−550）。**恢复要点**：dev 栈在跑；豁免类清单=require-await 147（mock 替身）/set-state-in-effect 99/refs 74（拆分=C-11）/control-regex 13/compiler+测试 idiom 39/匹配器 7 等，全部有书面理由；用户事项 U-01~U-03 不变待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

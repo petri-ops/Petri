@@ -5,13 +5,13 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-09-25 早二（**BK-06 整包收官：Batch-8 七刀完成（closeout 十门绿 + 整包判定 fit=3.39 PASS）**——基线 947→395（−552），可清族全部归零，剩余全为书面定性豁免类；C-11（ctx 拆分）登记候选池。**队列头=BK-07**（③ 小修可做；①② 需用户裁决）。
+最后更新：2026-09-25 早三（**BK-07 ③=SideChatDock.test copilotAsk 断言补齐（tsc 0+组件 7/7；头注声称自此有真断言）**——**队列实质阻塞于用户**：BK-07 ①② 需用户裁决、BK-08 需 Mac 会话；BK-02 观察期随使用累计。）
 
 ## 推进队列（串行，按序逐个推进）
 
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
-| 3 | ▶ BK-07 | **BLOCK-105 Batch-4 抓真 3 件处置**——①Office loadAssets 五参签名化石（收窄需单独裁决）②ResultArtifactShell _jobMeta/_selectedSectionId + ResultStudioPage currentVersion 只写不读＝结果元信息与版本投影停在未接线态（**交产品裁决**）③SideChatDock.test 头注声称覆盖 copilotAsk 实际无断言（小修） | AUDIT-LOG 2026-09-20 Mac 会话之五第 5 条 | **队列头（③ 可做；①② 需用户裁决）** |
+| 3 | ▶ BK-07 | **BLOCK-105 Batch-4 抓真 3 件处置**——✅③ SideChatDock.test copilotAsk 断言已补齐（2026-09-25 早三）；①Office loadAssets 五参签名化石（收窄需单独裁决）②ResultArtifactShell _jobMeta/_selectedSectionId + ResultStudioPage currentVersion 只写不读＝结果元信息与版本投影停在未接线态（**交产品裁决**） | AUDIT-LOG 2026-09-20 Mac 会话之五第 5 条 | **③ 完成；①② 需用户裁决** |
 | 5 | ▶ BK-08 | **darwin 启动预算档建基线**——`block101-startup-timeline` 首跑因缺 `platforms.darwin` 档判红（设计行为非故障）；需 Mac 会话采 5 样本建基线，禁止复制 win32 数字 | BLOCK-106 遗留 + handoff ⚡ 清单 | 排队（需 Mac 环境） |
 | — | 👁 BK-02 | **汇报门 P2 试点观察期盘点**（持续观察，不占队列序）——采纳率/误拦率（含误重写率）/延迟增量/fitReplay 触发率随真实轮次累计；首盘点已并入 BK-01 P0（decision_log report-guard 行 + fit-volatility-review.json）；观察窗开启中（dev 栈 BIOF3_JEV_REPORT_GUARD=1）。此后周期性盘点 | BLOCK-119 收口遗留候选 | 观察（持续） |
 
