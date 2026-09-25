@@ -60,14 +60,14 @@ export function useInvalidationStream(enabled: boolean, handler: InvalidationHan
                 try {
                   const obj = JSON.parse(m[1]) as { type?: string; domain?: string; at?: string };
                   if (obj.type === 'invalidate' && obj.domain) {
-                    handlerRef.current({ domain: obj.domain, at: obj.at || '', payload: obj as Record<string, unknown> });
+                    handlerRef.current({ domain: obj.domain, at: obj.at || '', payload: obj });
                   }
                 } catch { /* 忽略坏帧 */ }
               }
             }
           }
           // 服务端关闭（部署重启等）→ 走重连
-        } catch (e) {
+        } catch {
           if (controller.signal.aborted || stopped) return;
         }
         // 指数退避重连：1s → 2s → 4s → 8s 封顶

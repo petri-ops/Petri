@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useInvalidationStream } from '@/hooks/useInvalidationStream';
 import { Icon } from '@/components/icons/Icon';
 import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import type { ToolJob, Project, Dataset } from '@/lib/project-types';
@@ -704,7 +703,7 @@ function useProjectAgentOverview(projectId: string | null, enabled: boolean): Ag
         });
     };
     load();
-    const timer = window.setInterval(load, 15_000) // CK-03：jobs 域 SSE 失效驱动为主，15s 兜底;
+    const timer = window.setInterval(load, 5000);
     return () => {
       alive = false;
       window.clearInterval(timer);

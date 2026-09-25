@@ -486,6 +486,11 @@ export function ProjectWorkspace(): React.ReactElement {
       if (seq === fetchSequenceRef.current) setLoading(false);
     }
   }, [projectId]);
+  // CK-03 — jobs 域失效通知驱动刷新（SSE 秒级感知 + 60s 兜底轮询）
+  useInvalidationStream(Boolean(projectId), useCallback(
+    (info) => { if (info.domain === 'jobs') void fetchData(); },
+    [fetchData],
+  ));
   useEffect(() => {
     if (!projectId) {
       setCopilotHarnessIndex(null);
