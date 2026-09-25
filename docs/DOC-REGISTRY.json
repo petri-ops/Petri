@@ -5235,6 +5235,22 @@
       ],
       "notes": "输出评判 Harness 工程 completed（2026-09-24 当日立项当日收口；用户裁决「行 你懂我 继续推进吧」）。三态推进门（judge-core canonical 单源：core CJS + scripts ESM 薄壳）+ stability-core 探针 + 配对语料 160（隐私红线：指针+分数，原文不入仓）+ fit 校准 θ=3（P 0.8254/C 0.7875，配对下界 caveat 留痕）+ output-judge 注册表（faithful/goal=observe-only）+ output:judge CLI + P2 子智能体汇报门（默认关 BIOF3_JEV_REPORT_GUARD=1，fail-open+RETRY×1+复判，child_finished additive）。门禁=13/13+定向 56/56+docs/secret/eslint 绿。遗留=P2 实机观察/faithful+goal 校准/分数波动治理。G0 开发期常态 · 不外推 packaged/Provider/GA。",
       "lastUpdated": "2026-09-24"
+    },
+    {
+      "id": "CK05-SQLITE-EVALUATION",
+      "path": "docs/ck05-sqlite-evaluation.md",
+      "kind": "reference",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "sqlite-evaluation",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-25",
+      "tags": [
+        "CK-05",
+        "sqlite",
+        "evaluation"
+      ],
+      "archivePolicy": "retain_stable_path"
     }
   ],
   "lastUpdated": "2026-09-24",

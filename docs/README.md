@@ -215,6 +215,8 @@
 
 - [`codex-style-workbench-direction.md`](./codex-style-workbench-direction.md) — UI 产品方向。
 
+- [`ck05-sqlite-evaluation.md`](./ck05-sqlite-evaluation.md) — CK-05 SQLite 评估报告（mmap64 已实施；node:sqlite 迁移与三契约单源化=不采纳，重开条件在案）。
+
 - **Skills 子文档入口图**（2026-08-16 GATES-4 batch 2 增补）：
 
   - **入口** [`skills-architecture.md`](./architecture/skills-architecture.md) — Skills 层四层架构设计（Skills → Workflows → Plugins → Capabilities），唯一 canonical=true。
