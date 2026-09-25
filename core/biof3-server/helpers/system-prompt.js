@@ -417,71 +417,116 @@ function buildStaticTemplate() {
 }
 
 // ============================================================================
+
+// ============================================================================
+// CK-04（C-04）— 分段 token 预算治理（段级字符上限默认值）。
+// 背景（BLOCK-109 plan §2）：system-prompt 十余个注入源有条数上限但无字符级
+// 预算；pageContent（当前界面正文）完全无上限=最大风险点。治理形态=段级
+// 字符上限 + 超限截断并诚实标注 + 组装计量报告（sections）。
+// 字符≈token 换算不做（中文/代码混合下 per-char 估算误导，计量以字符为准）。
+// ============================================================================
+const SECTION_CHAR_BUDGETS = {
+  pageContent: 8000,
+  harnessProjectSummary: 2500,
+  harnessActiveSummary: 2500,
+  workingTreeRejects: 4000,
+};
+
 // MAIN EXPORT: buildSystemPrompt
 // ============================================================================
 
-function buildSystemPrompt(context, runtimeIdentity = {}) {
+function clipSection(text, budgetKey) {
+  const limit = SECTION_CHAR_BUDGETS[budgetKey];
+  if (!limit || typeof text !== 'string' || text.length <= limit) return text;
+  return text.slice(0, limit) + '\n…（已截断，原 ' + text.length + ' 字符）';
+}
+
+/** CK-04 — 分段组装：返回 {prompt, sections:[{name, chars}]}（计量报告）。 */
+function buildSystemPromptSections(context, runtimeIdentity = {}) {
   cacheMetrics.dynamicBuilds++;
   const template = buildStaticTemplate();
+  const sections = [];
 
-  let prompt = template.baseRole;
-  prompt += renderRuntimeIdentityBlock(runtimeIdentity);
-  prompt += template.principles;
+  const base = template.baseRole + renderRuntimeIdentityBlock(runtimeIdentity) + template.principles;
+  if (!context) {
+    sections.push({ name: 'base', text: base });
+    return { prompt: base, sections: sections.map(({ name, text }) => ({ name, chars: text.length })) };
+  }
 
-  if (!context) return prompt;
+  let body = '';
+  const add = (text) => { if (typeof text === 'string' && text) body += text; };
+
   if (context.page === 'desktop-home') {
-    prompt += template.homePageHint;
+    add(template.homePageHint);
   } else if (context.page === 'desktop-project') {
-    prompt += '\n\n用户当前在【桌面端项目工作台】';
-    if (context.pageTitle) prompt += '：' + context.pageTitle;
-    if (context.projectId) prompt += '\nprojectId=' + context.projectId;
-    if (context.projectModality) prompt += '\n项目类型：' + context.projectModality;
+    let seg = '\n\n用户当前在【桌面端项目工作台】';
+    if (context.pageTitle) seg += '：' + context.pageTitle;
+    if (context.projectId) seg += '\nprojectId=' + context.projectId;
     if (Array.isArray(context.projectDatasets) && context.projectDatasets.length > 0) {
-      prompt += '\n\n【项目数据集】';
+      seg += '\n\n【项目数据集】';
       for (const ds of context.projectDatasets.slice(0, 10)) {
-        prompt += '\n- ' + ds.name + ' (id=' + ds.id;
-        if (ds.rows != null) prompt += ', rows=' + ds.rows;
-        if (ds.type) prompt += ', type=' + ds.type;
-        prompt += ')';
+        seg += '\n- ' + ds.name + ' (id=' + ds.id;
+        if (ds.rows != null) seg += ', rows=' + ds.rows;
+        if (ds.type) seg += ', type=' + ds.type;
+        seg += ')';
       }
     } else {
-      prompt += '\n\n【项目数据集】暂无数据集';
+      seg += '\n\n【项目数据集】暂无数据集';
     }
     if (Array.isArray(context.projectJobs) && context.projectJobs.length > 0) {
-      prompt += '\n\n【项目分析历史】';
+      seg += '\n\n【项目分析历史】';
       for (const job of context.projectJobs.slice(0, 15)) {
-        prompt += '\n- [' + job.status + '] ' + (job.name || job.toolId) + ' (id=' + job.id + ')';
+        seg += '\n- [' + job.status + '] ' + (job.name || job.toolId) + ' (id=' + job.id + ')';
       }
     }
-    prompt += renderHarnessSummaryForPrompt('Harness 项目文件摘要', context.projectHarnessSummary, {
+    seg += renderHarnessSummaryForPrompt('Harness 项目文件摘要', context.projectHarnessSummary, {
       maxEntries: 20,
     });
-    prompt += renderHarnessSummaryForPrompt('Harness 当前结果产物摘要', context.activeJobHarnessSummary, {
+    seg += renderHarnessSummaryForPrompt('Harness 当前结果产物摘要', context.activeJobHarnessSummary, {
       activeArtifactName: context.activeArtifact && context.activeArtifact.name,
       maxEntries: 20,
     });
-    if (context.activeJobId) prompt += '\n\n当前结果：jobId=' + context.activeJobId;
-    prompt += renderResultStudioContextForPrompt(context);
+    if (context.activeJobId) seg += '\n\n当前结果：jobId=' + context.activeJobId;
+    seg += renderResultStudioContextForPrompt(context);
+    add(seg);
   }
 
   // BLOCK-16 PHASE 3：工作树 hunk 拒绝记录。所有页面都注入（不只是 desktop-project）；
   // 用户在任意 session 拒绝过的 hunk 都应该影响下次 agent 提议。
+  let rejectsSeg = '';
   if (context && Array.isArray(context.workingTreeRejects)) {
-    prompt += renderWorkingTreeRejectsForPrompt(context.workingTreeRejects);
+    rejectsSeg = renderWorkingTreeRejectsForPrompt(context.workingTreeRejects);
   } else if (context && typeof context.workingTreeRejectsUserDataDir === 'string' && context.workingTreeRejectsUserDataDir) {
     const entries = loadWorkingTreeRejectEntries(context.workingTreeRejectsUserDataDir);
-    if (entries.length > 0) prompt += renderWorkingTreeRejectsForPrompt(entries);
+    if (entries.length > 0) rejectsSeg = renderWorkingTreeRejectsForPrompt(entries);
   }
+  add(clipSection(rejectsSeg, 'workingTreeRejects'));
 
   if (typeof context.pageContent === 'string' && context.pageContent.length > 0) {
-    prompt += '\n\n【当前界面正文】\n' + context.pageContent;
+    add(clipSection('\n\n【当前界面正文】\n' + context.pageContent, 'pageContent'));
   }
-  prompt += renderFileReferenceHints(context);
-  return prompt;
+  add(renderFileReferenceHints(context));
+
+  // base 段计量在最前；body 计入 base 段之后的总量
+  sections.push({ name: 'base', text: base });
+  const prompt = base + body;
+  return {
+    prompt,
+    sections: [
+      { name: 'base', chars: base.length },
+      { name: 'body', chars: body.length },
+    ],
+  };
+}
+
+function buildSystemPrompt(context, runtimeIdentity = {}) {
+  return buildSystemPromptSections(context, runtimeIdentity).prompt;
 }
 
 module.exports = {
   buildSystemPrompt,
+  buildSystemPromptSections,
+  SECTION_CHAR_BUDGETS,
   localizeToolResult,
   renderFileReferenceHints,
   renderResultStudioContextForPrompt,

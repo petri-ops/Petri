@@ -2428,6 +2428,22 @@
       ],
       "frontendRelated": true,
       "classifiesScripts": false
+    },
+    {
+      "id": "ck04-section-budgets",
+      "note": "CK-04（C-04 分段 token 预算治理第一刀）：system-prompt.js 组装重构为 buildSystemPromptSections（段计量 sections 报告）+ 段级字符预算表 SECTION_CHAR_BUDGETS（pageContent 8000/harness 2×2500/workingTreeRejects 4000）+ 超限截断诚实标注；buildSystemPrompt 旧签名零破坏（内部委托）。契约=test/ck04-section-budgets.test.mjs（零破坏全等/计量对账/截断标注）。",
+      "patterns": [
+        "core/biof3-server/helpers/system-prompt.js",
+        "test/ck04-*.test.mjs"
+      ],
+      "tests": [
+        "test/ck04-section-budgets.test.mjs",
+        "test/system-prompt-identity.test.mjs",
+        "test/system-prompt-rejects.test.mjs",
+        "test/system-prompt-result-context.test.mjs"
+      ],
+      "frontendRelated": false,
+      "classifiesScripts": false
     }
   ]
 }
