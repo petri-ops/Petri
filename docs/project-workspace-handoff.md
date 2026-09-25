@@ -1,6 +1,8 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-25 早十（**CK-03 完成**：jobs 域失效通知 SSE 上线（UI-442 待过目）；队列头=CK-04 分段 token 预算。**恢复要点**：dev 栈已重启加载 /api/events；CK 表在 backlog；增量接入清单=SummaryCard liveJobsPreview（hook 重构）/非 jobs 域（conversations/runtime/knowledge/executionMonitor 发布点待建）；用户事项 U-01~U-04 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 晚一（**CK-04 完成**：system-prompt 分段预算治理（SECTION_CHAR_BUDGETS 注册表可调）；队列头=CK-05。**恢复要点**：dev 栈在跑（后端需重启加载 system-prompt 改动——下次重启生效或手动重启）；CK 表在 backlog；用户事项 U-01~U-04 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 早十（**CK-03 完成**：jobs 域失效通知 SSE 上线（UI-442 待过目）；队列头=CK-04 分段 token 预算。**恢复要点**：dev 栈已重启加载 /api/events；CK 表在 backlog；增量接入清单=SummaryCard liveJobsPreview（hook 重构）/非 jobs 域（conversations/runtime/knowledge/executionMonitor 发布点待建）；用户事项 U-01~U-04 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 早九（**CK-02 勘察收缩**：cv 与 prepend 锚定冲突（实验数据留痕 AUDIT-LOG），重开=用户实测卡顿报告；队列头=CK-03 轮询→SSE。**恢复要点**：dev 栈在跑；CK 表在 backlog；用户事项 U-01~U-04 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
