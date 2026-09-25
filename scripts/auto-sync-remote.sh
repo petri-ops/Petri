@@ -52,6 +52,29 @@ if git merge-base --is-ancestor HEAD origin/main 2>/dev/null; then
   # 纯落后 → ff-only 快进（fast-forward 定义上不可能冲突）
   if git merge --ff-only origin/main >>"$LOG" 2>&1; then
     log "FF $(git rev-parse --short "$LOCAL") -> $(git rev-parse --short HEAD) (+$(git rev-list --count "$LOCAL..HEAD")) — dev 栈在跑则 Vite 热更会闪窗口（预期）"
+    # --- CK-11 补（2026-09-25 用户裁决「把这个搞了」）：依赖自动同步——
+    # 跨端教训⑧「提交了代码≠对端依赖同步了」的结构性修复：ff 变更集包含
+    # lockfile 时自动 npm install（--no-audit --no-fund 提速；npm 不可用/失败
+    # 只登记不阻塞，半更新状态由 events 待会话裁决）。
+    if git diff --name-only "$LOCAL" HEAD | grep -q '^package-lock.json$'; then
+      if ! command -v npm >/dev/null 2>&1; then
+        event "DEPS_SKIP npm 不在 PATH（launchd/计划任务环境）— 需会话手动 npm install"
+      else
+        DEPS_LOCK="node_modules/.ck-deps-install"
+        mkdir -p node_modules 2>/dev/null
+        if mkdir "$DEPS_LOCK" 2>/dev/null; then
+          log "DEPS ff touched package-lock.json → npm install"
+          if npm install --no-audit --no-fund >>"$LOG" 2>&1; then
+            log "DEPS npm install OK (lockfile aligned)"
+          else
+            event "DEPS_FAIL npm install 失败 — 依赖树可能半更新，查 auto-sync.log 后需会话裁决"
+          fi
+          rmdir "$DEPS_LOCK" 2>/dev/null
+        else
+          log "DEPS SKIP install-in-progress"
+        fi
+      fi
+    fi
   else
     log "FF_FAIL local=$(git rev-parse --short "$LOCAL") remote=$(git rev-parse --short "$REMOTE")"
     event "FF_FAIL local=$(git rev-parse --short "$LOCAL") remote=$(git rev-parse --short "$REMOTE") — 查 auto-sync.log 的 merge 输出"
