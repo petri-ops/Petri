@@ -765,11 +765,6 @@
       "count": 2
     }
   },
-  "scripts/block99-console-live.cjs": {
-    "no-undef": {
-      "count": 2
-    }
-  },
   "scripts/ui354-titlebar-mobile-live.cjs": {
     "no-async-promise-executor": {
       "count": 1

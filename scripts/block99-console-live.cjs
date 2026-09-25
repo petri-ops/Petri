@@ -76,7 +76,7 @@ function fetchTaskEvents(taskId, timeoutMs = 12000) {
       res.on('end', () => { clearTimeout(timer); finish(); });
       res.on('error', () => { clearTimeout(timer); finish(); });
     });
-    req.on('error', () => { clearTimeout(timer); finish(); });
+    req.on('error', () => { /* 连接层错误：res 回调未到达，timer/finish 不可达（BLOCK-105 §7 tail no-undef 清偿） */ });
   });
 }
 
