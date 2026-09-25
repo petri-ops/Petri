@@ -118,12 +118,6 @@ export function getConversationFileChanges(
   return snapshot;
 }
 
-/** React useSyncExternalStore 订阅。 */
-export function subscribeConversationChanges(listener: ChangeListener): () => void {
-  ensureSubscribed();
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-}
 
 /** 会话改动清空（提交/还原后由调用方触发全量刷新用不到此函数时勿滥用）。 */
 export function clearConversationFileChanges(conversationId: string): void {

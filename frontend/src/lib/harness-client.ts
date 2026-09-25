@@ -280,23 +280,6 @@ export async function repairHarnessParams(input: HarnessRepairRequest): Promise<
   return data;
 }
 
-export async function planHarnessWorkflow(
-  input: HarnessWorkflowPlanRequest,
-): Promise<HarnessWorkflowPlanResponse> {
-  const resp = await fetch(`${getPlatformApiPrefix()}/harness/workflow/plan`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...authHeaders(),
-    },
-    body: JSON.stringify(input),
-  });
-  const data = (await resp.json()) as HarnessWorkflowPlanResponse;
-  if (!resp.ok || !data.ok) {
-    throw new Error(data.error || 'Harness workflow planning failed');
-  }
-  return data;
-}
 
 export async function fetchHarnessWorkflowStatus(jobId: string): Promise<HarnessWorkflowStatusResponse> {
   const resp = await fetch(`${getPlatformApiPrefix()}/harness/workflow/status/${encodeURIComponent(jobId)}`, {

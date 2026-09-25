@@ -43,7 +43,7 @@ export function fileName(path: string): string {
   return path.split('/').pop() || path;
 }
 
-export function redactWindowsCoordinates(value: string): string {
+function redactWindowsCoordinates(value: string): string {
   let output = '';
   let index = 0;
   while (index < value.length) {

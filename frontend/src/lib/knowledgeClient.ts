@@ -207,14 +207,6 @@ export async function renameKnowledgeSpace(id: string, name: string): Promise<vo
   await jsonOrThrow(resp);
 }
 
-export async function setKnowledgeSpaceEnabledById(id: string, enabled: boolean): Promise<void> {
-  const resp = await fetch(`${getApiPrefix()}/knowledge/spaces/${encodeURIComponent(id)}/enable`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ enabled }),
-  });
-  await jsonOrThrow(resp);
-}
 
 export async function fetchKnowledgeSpaceImpact(id: string): Promise<{ documents: number; chunks: number }> {
   const resp = await fetch(`${getApiPrefix()}/knowledge/spaces/${encodeURIComponent(id)}/impact`);
@@ -224,13 +216,6 @@ export async function fetchKnowledgeSpaceImpact(id: string): Promise<{ documents
 
 export async function deleteKnowledgeSpace(id: string): Promise<{ deleted: string; documents: number; chunks: number }> {
   const resp = await fetch(`${getApiPrefix()}/knowledge/spaces/${encodeURIComponent(id)}`, { method: 'DELETE' });
-  return jsonOrThrow(resp);
-}
-
-export async function uploadKnowledgeDocuments(files: File[]): Promise<{ accepted: KnowledgeDoc[]; rejected: Array<{ name: string; error: string }> }> {
-  const form = new FormData();
-  for (const file of files) form.append('files', file);
-  const resp = await fetch(`${getApiPrefix()}/knowledge/documents`, { method: 'POST', body: form });
   return jsonOrThrow(resp);
 }
 
@@ -249,15 +234,3 @@ export async function clearKnowledgeSpace(): Promise<void> {
   await jsonOrThrow(resp);
 }
 
-export async function searchKnowledge(
-  query: string,
-  topK?: number,
-  docId?: string
-): Promise<KnowledgeSearchResponse> {
-  const resp = await fetch(`${getApiPrefix()}/knowledge/search`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query, topK, docId: docId || undefined }),
-  });
-  return jsonOrThrow<KnowledgeSearchResponse>(resp);
-}

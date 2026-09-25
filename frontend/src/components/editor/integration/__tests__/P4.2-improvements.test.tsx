@@ -49,7 +49,6 @@ vi.mock('../../CodeMirror/CodeMirrorEditor', () => ({
 
 import {
   WorkspaceFilePreviewBridge,
-  useEditorApi,
 } from '../WorkspaceFilePreviewBridge';
 import type { EditorApi } from '../../CodeMirror/types';
 import { ChatCardLink } from '../../../copilot/integration/ChatCardLinkBridge';
@@ -138,29 +137,10 @@ describe('P4.2 WorkspaceFilePreviewBridge — BridgeRoot auto-wrap', () => {
   });
 });
 
-describe('P4.2 useEditorApi() hook', () => {
+describe('P4.2 pendingRequest → scrollToLine via editorRef', () => {
   afterEach(() => {
     cleanup();
     mockScrollToLine.mockClear();
-  });
-
-    it('useEditorApi is exported and is a function', () => {
-    expect(typeof useEditorApi).toBe('function');
-  });
-
-  it('useEditorApi returns null object when outside Bridge subtree (graceful fallback)', () => {
-    let captured: { api: EditorApi | null } | null = null;
-    function Checker(): React.ReactElement {
-      captured = useEditorApi();
-      return <span data-testid="checker" />;
-    }
-    render(
-      <PendingScrollProvider>
-        <Checker />
-      </PendingScrollProvider>,
-    );
-    expect(captured).not.toBeNull();
-    expect(captured!.api).toBeNull();
   });
 
   it('scrollToLine is called via pendingRequest through editorRef', async () => {
@@ -184,28 +164,6 @@ describe('P4.2 useEditorApi() hook', () => {
     editorRef.current!.scrollToLine({ line: 99 });
 
     expect(mockScrollToLine).toHaveBeenCalledWith({ line: 99 });
-  });
-
-  it('does NOT throw when called outside Provider (graceful null)', () => {
-    // useEditorApi returns { api: null } when called outside WorkspaceFilePreviewBridge subtree
-    // (no Bridge context, EditorApiContext.Provider is never rendered)
-    let result: unknown = 'not-called';
-
-    function ApiChecker(): React.ReactElement {
-      const { api } = useEditorApi();
-      result = api; // null outside Bridge
-      return <span data-testid="api-checker" />;
-    }
-
-    const { getByTestId } = render(
-      <PendingScrollProvider>
-        <ApiChecker />
-      </PendingScrollProvider>,
-    );
-
-    expect(getByTestId('api-checker')).toBeTruthy();
-    // Outside WorkspaceFilePreviewBridge subtree, EditorApiContext.Provider never renders
-    expect(result).toBeNull();
   });
 });
 

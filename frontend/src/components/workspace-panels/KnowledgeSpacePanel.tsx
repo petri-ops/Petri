@@ -197,4 +197,3 @@ export function KnowledgeSpacePanel() {
   );
 }
 
-export default KnowledgeSpacePanel;

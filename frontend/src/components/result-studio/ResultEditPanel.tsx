@@ -63,7 +63,7 @@ function isChanged(
   return draft[control.name] !== baseline;
 }
 
-export function ResultEditControlField({
+function ResultEditControlField({
   control,
   value,
   onChange,

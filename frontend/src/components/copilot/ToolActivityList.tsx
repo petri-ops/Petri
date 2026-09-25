@@ -975,4 +975,3 @@ export function ToolActivityList({
 }
 
 
-export default ToolActivityList;

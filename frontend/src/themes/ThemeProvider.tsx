@@ -10,12 +10,12 @@ const THEME_CHANGE_EVENT = 'gewu:theme-change';
 
 // BLOCK-49 加映三 — 界面字号：root 字号缩放系数（默认 1 = 14px 正文基准）。
 // 注入 --gewu-font-scale 到 html.style，全部字号 token 走 calc() 跟随缩放。
-export const FONT_SCALE_STORAGE_KEY = 'gewu-font-scale';
+const FONT_SCALE_STORAGE_KEY = 'gewu-font-scale';
 export const FONT_SCALE_MIN = 0.8;
 export const FONT_SCALE_MAX = 1.4;
 const FONT_CHANGE_EVENT = 'gewu:font-scale-change';
 import { applyAccent, readAccent, ACCENT_STORAGE_KEY, type AccentId } from './accents';
-export { ACCENT_OPTIONS, type AccentId } from './accents';
+export { type AccentId } from './accents';
 
 function readFontScale(): number {
   try {

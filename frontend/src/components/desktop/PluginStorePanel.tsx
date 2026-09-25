@@ -786,4 +786,3 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
   );
 }
 
-export default PluginStorePanel;

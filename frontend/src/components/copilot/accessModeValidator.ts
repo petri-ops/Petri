@@ -118,15 +118,3 @@ export function getBlockedToolMessage(toolName: string, accessMode?: string): st
   return `工具 "${toolName}" 需要完全访问权限。当前为只读模式，无法执行文件修改或命令操作。请切换到"完全访问"模式后重试。`;
 }
 
-/**
- * Validate a tool call and throw an error if not allowed.
- * Use this in the tool call pipeline to enforce access mode restrictions.
- */
-export function validateToolCall(
-  toolName: string,
-  context: CopilotContext | undefined
-): void {
-  if (!isToolCallAllowed(toolName, context)) {
-    throw new Error(getBlockedToolMessage(toolName, context?.accessMode));
-  }
-}

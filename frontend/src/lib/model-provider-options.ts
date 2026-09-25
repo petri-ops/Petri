@@ -5,7 +5,7 @@ export const USER_MODEL_PROVIDER_OPTIONS = [
 
 export type UserModelProvider = (typeof USER_MODEL_PROVIDER_OPTIONS)[number]['value'];
 
-export const LEGACY_DEEPSEEK_BASE_URL = 'https://api.deepseek.com';
+const LEGACY_DEEPSEEK_BASE_URL = 'https://api.deepseek.com';
 
 const USER_MODEL_PROVIDERS = new Set<string>(
   USER_MODEL_PROVIDER_OPTIONS.map((option) => option.value)

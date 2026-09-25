@@ -204,22 +204,6 @@ export async function listDatasetsByProject(projectId: string): Promise<Dataset[
   return (data.datasets || []).map(mapDataset);
 }
 
-export async function createDataset(input: {
-  projectId: string;
-  name: string;
-  ossUrl: string;
-  size: number;
-  description?: string;
-  sourceDatasetIds?: string[];
-}): Promise<Dataset> {
-  const data = (await api('/datasets', { method: 'POST', body: JSON.stringify(input) })) as { dataset?: Record<string, unknown> };
-  return mapDataset(data.dataset as Record<string, unknown>);
-}
-
-export async function deleteDataset(id: string): Promise<void> {
-  await api(`/datasets/${id}`, { method: 'DELETE' });
-}
-
 // ============================================================
 // Mappers (snake_case → camelCase)
 // ============================================================

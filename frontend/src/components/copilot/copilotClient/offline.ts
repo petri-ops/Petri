@@ -7,7 +7,7 @@
 import { getApiPrefix, getAuthHeader } from './apiBase';
 
 /** 离线错误 —— UI 层据此渲染友好占位，区别于普通请求失败。 */
-export class OfflineError extends Error {
+class OfflineError extends Error {
   readonly isOffline = true;
   constructor(message = '离线模式，AI 暂不可用') {
     super(message);
@@ -15,10 +15,6 @@ export class OfflineError extends Error {
   }
 }
 
-/** 判断一个错误是否为离线错误（用于 UI 层区分降级占位 vs 普通报错）。 */
-export function isOfflineError(err: unknown): boolean {
-  return err instanceof OfflineError || (err as { isOffline?: boolean })?.isOffline === true;
-}
 
 /**
  * 探测网络是否可用：navigator.onLine + 一次 HEAD/GET 探测 fetch。
@@ -27,7 +23,7 @@ export function isOfflineError(err: unknown): boolean {
  *   status=0 视为离线。成功（含 4xx/5xx，只要有响应）即视为在线。
  * - 探测请求带 AbortSignal，避免长时间挂起。
  */
-export async function checkOnline(timeoutMs = 4000): Promise<boolean> {
+async function checkOnline(timeoutMs = 4000): Promise<boolean> {
   if (typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean') {
     if (!navigator.onLine) return false;
   }

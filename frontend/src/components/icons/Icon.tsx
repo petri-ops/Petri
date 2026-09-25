@@ -681,4 +681,3 @@ export function Icon({
   );
 }
 
-export default Icon;

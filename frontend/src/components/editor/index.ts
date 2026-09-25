@@ -26,10 +26,5 @@ export type {
   WorkspaceFilePreviewBridgeProps,
 } from './integration/WorkspaceFilePreviewBridge';
 
-// P4.2 新增：useEditorApi hook
-export { useEditorApi } from './integration/WorkspaceFilePreviewBridge';
-
 // P4.2 重命名：AppLevelBridge → GewuOpenFileDevBridge
-export { GewuOpenFileDevBridge } from './integration/GewuOpenFileDevBridge';
-export { AppLevelBridge } from './integration/AppLevelBridge';
 export type { DispatchOpenFileFn } from './integration/GewuOpenFileDevBridge';

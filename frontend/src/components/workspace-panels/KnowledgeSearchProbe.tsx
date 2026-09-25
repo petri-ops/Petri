@@ -118,4 +118,3 @@ export function KnowledgeSearchProbe({
   );
 }
 
-export default KnowledgeSearchProbe;

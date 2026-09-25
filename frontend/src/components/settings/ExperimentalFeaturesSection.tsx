@@ -182,4 +182,3 @@ function ServerFlagRows(): React.ReactElement {
   );
 }
 
-export default ExperimentalFeaturesSection;

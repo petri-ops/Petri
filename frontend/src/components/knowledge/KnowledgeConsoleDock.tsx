@@ -92,4 +92,3 @@ export function KnowledgeConsoleDock(): React.ReactElement {
   );
 }
 
-export default KnowledgeConsoleDock;

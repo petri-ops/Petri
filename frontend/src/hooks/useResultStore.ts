@@ -343,9 +343,3 @@ export function useResultStore(
   };
 }
 
-/** Test-only helper. Clears module-scope cache between test runs. */
-export function __resetResultStoreCacheForTests(): void {
-  sharedCache.clear();
-  inflight.clear();
-  subscribers.clear();
-}

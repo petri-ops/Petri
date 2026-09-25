@@ -185,18 +185,6 @@ async function getJson<T>(url: string): Promise<T> {
 // Endpoints
 // ---------------------------------------------------------------------------
 
-/** GET /api/loop/runs/:loopRunId — compact by default, expanded when requested. */
-export async function fetchLoopRun(
-  loopRunId: string,
-  opts: { expanded?: boolean } = {}
-): Promise<LoopRunExpanded> {
-  const suffix = opts.expanded ? '?expanded=1' : '';
-  const data = await getJson<{ run: LoopRunExpanded }>(
-    `${loopBase()}/runs/${encodeURIComponent(loopRunId)}${suffix}`
-  );
-  return data.run;
-}
-
 /** GET /api/loop/runs?conversationId=&projectId=&limit= */
 export async function fetchLoopRuns(input: {
   conversationId?: string;
@@ -226,59 +214,6 @@ export async function fetchLoopSessionSummary(input: {
   return data.summary;
 }
 
-/** GET /api/loop/iterations/:loopRunId */
-export async function fetchLoopIterations(loopRunId: string): Promise<LoopIterationCompact[]> {
-  const data = await getJson<{ iterations: LoopIterationCompact[] }>(
-    `${loopBase()}/iterations/${encodeURIComponent(loopRunId)}`
-  );
-  return data.iterations || [];
-}
-
-/** GET /api/loop/actions/:loopRunId */
-export async function fetchLoopActions(loopRunId: string): Promise<LoopActionCompact[]> {
-  const data = await getJson<{ actions: LoopActionCompact[] }>(
-    `${loopBase()}/actions/${encodeURIComponent(loopRunId)}`
-  );
-  return data.actions || [];
-}
-
-/** GET /api/loop/evidence/:loopRunId */
-export async function fetchLoopEvidence(loopRunId: string): Promise<LoopEvidenceCompact[]> {
-  const data = await getJson<{ evidence: LoopEvidenceCompact[] }>(
-    `${loopBase()}/evidence/${encodeURIComponent(loopRunId)}`
-  );
-  return data.evidence || [];
-}
-
-/** GET /api/loop/recovery/:loopRunId */
-export async function fetchLoopRecovery(loopRunId: string): Promise<LoopRecovery> {
-  const data = await getJson<{ recovery: LoopRecovery }>(
-    `${loopBase()}/recovery/${encodeURIComponent(loopRunId)}`
-  );
-  return data.recovery;
-}
-
-/** POST /api/loop/runs/:loopRunId/abort — request the loop stop on next pre-turn check. */
-export async function abortLoopRun(
-  loopRunId: string
-): Promise<{ loopRunId: string; aborted: boolean; updatedAt: string }> {
-  const resp = await fetch(`${loopBase()}/runs/${encodeURIComponent(loopRunId)}/abort`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
-  });
-  const data = (await resp.json()) as {
-    ok?: boolean;
-    error?: string;
-    loopRunId: string;
-    aborted: boolean;
-    updatedAt: string;
-  };
-  if (!resp.ok || !data.ok) {
-    throw new Error(data.error || `loop abort failed: HTTP ${resp.status}`);
-  }
-  return { loopRunId: data.loopRunId, aborted: data.aborted, updatedAt: data.updatedAt };
-}
-
 // ---------------------------------------------------------------------------
 // Presentation helpers — pure, shared by chat + summary so completion state
 // has ONE derivation (never a second source of truth).
@@ -289,23 +224,7 @@ export function isLoopComplete(status: string | null | undefined): boolean {
   return status === 'completed';
 }
 
-/** failed/blocked/cancelled are terminal-but-not-success; must never show green. */
-export function isLoopUnsuccessfulTerminal(status: string | null | undefined): boolean {
-  return status === 'failed' || status === 'blocked' || status === 'cancelled';
-}
 
-/** Map a loop status to a compact, honest phase label for the chat/summary. */
-export function loopStatusLabel(status: string | null | undefined): string {
-  switch (status) {
-    case 'planned': return '已规划';
-    case 'running': return '执行中';
-    case 'completed': return '已完成';
-    case 'failed': return '失败';
-    case 'blocked': return '已阻断';
-    case 'cancelled': return '已取消';
-    default: return '未知';
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Loop display derivation — ONE honest mapping from live loop state to a

@@ -9,7 +9,7 @@
 // no side effects — safe to import anywhere.
 // ============================================================
 
-import { classifyArtifact, type ResultArtifactKind, type ResultArtifactRecord } from '@/lib/result-manifest';
+import { type ResultArtifactKind } from '@/lib/result-manifest';
 import type { IconName } from '@/components/icons/Icon';
 import type { JobResultFile } from './types';
 import type { ArtifactRevision } from '@/components/result-studio/resultStudioClient';
@@ -35,16 +35,6 @@ export function artifactKindIcon(kind: ResultArtifactKind): IconName {
   return 'file';
 }
 
-export function artifactPreviewLabel(artifact: ResultArtifactRecord): string {
-  const kind = classifyArtifact(artifact);
-  if (artifact.preview === false) return '文件';
-  if (kind === 'report') return 'HTML';
-  if (kind === 'plot') return '图像';
-  if (kind === 'table') return '表格';
-  if (kind === 'text') return '文本';
-  if (kind === 'data') return '数据';
-  return '文件';
-}
 
 export function workflowStageLabel(stage: string): string {
   return {

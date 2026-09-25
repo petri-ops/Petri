@@ -19,7 +19,7 @@ import { unknownText } from './unknownText';
 export const MAX_PERSISTED_ENTITY_IDS = 2000;
 
 /** 交给 Agent 的样本 ID 上限。 */
-export const MAX_AGENT_SAMPLE_IDS = 12;
+const MAX_AGENT_SAMPLE_IDS = 12;
 
 export type ArtifactIdStrategy = 'declared_column' | 'inferred_column' | 'positional';
 

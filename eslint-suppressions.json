@@ -316,11 +316,6 @@
       "count": 1
     }
   },
-  "frontend/src/components/editor/CodeMirror/CodeMirrorEditor.tsx": {
-    "react-hooks/refs": {
-      "count": 1
-    }
-  },
   "frontend/src/components/editor/CodeMirror/__tests__/CodeMirrorEditor.test.tsx": {
     "react-hooks/globals": {
       "count": 1
@@ -339,9 +334,6 @@
   "frontend/src/components/editor/integration/__tests__/P4.2-improvements.test.tsx": {
     "@typescript-eslint/require-await": {
       "count": 1
-    },
-    "react-hooks/globals": {
-      "count": 2
     },
     "react-hooks/immutability": {
       "count": 2
@@ -589,11 +581,6 @@
   },
   "frontend/src/hooks/useWorkspaceLayout.test.tsx": {
     "@typescript-eslint/unbound-method": {
-      "count": 1
-    }
-  },
-  "frontend/src/hooks/useWorkspaceRouting.ts": {
-    "react-hooks/set-state-in-effect": {
       "count": 1
     }
   },

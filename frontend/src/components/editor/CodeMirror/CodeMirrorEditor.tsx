@@ -21,7 +21,7 @@
  * （经 extraExtensions 注入）承担。
  */
 
-import React, { createContext, forwardRef, useContext, useRef } from 'react';
+import React, { createContext, forwardRef, useRef } from 'react';
 
 import { useCodeMirrorEditor } from './useCodeMirrorEditor';
 import type {
@@ -42,9 +42,6 @@ import styles from './CodeMirrorEditor.module.css';
  */
 export const EditorApiContext = createContext<EditorApi | null>(null);
 
-export function useEditorApi(): EditorApi | null {
-  return useContext(EditorApiContext);
-}
 
 export const CodeMirrorEditor = forwardRef<EditorApi, CodeMirrorEditorProps>(function CodeMirrorEditor(
   {

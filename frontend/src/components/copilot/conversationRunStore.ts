@@ -43,14 +43,8 @@ import {
   setConversationCitations,
   subscribeConversationCitations,
 } from './conversationRunStore/conversationCitations';
-export {
-  getConversationTodoList,
-  subscribeConversationTodo,
-} from './conversationRunStore/conversationTodos';
-export {
-  getConversationCitations,
-  subscribeConversationCitations,
-} from './conversationRunStore/conversationCitations';
+export { getConversationTodoList } from './conversationRunStore/conversationTodos';
+export { getConversationCitations } from './conversationRunStore/conversationCitations';
 export { clearConversationTodosForTests as __resetConversationTodosForTests };
 export { clearConversationCitationsForTests as __resetConversationCitationsForTests };
 import {
@@ -82,17 +76,12 @@ export {
 } from './conversationRunStore/conversationNotices';
 export { subscribeConversationRun } from './conversationRunStore/runListeners';
 export {
-  clearSubAgentTask,
   getSubAgentTaskSnapshot,
-  isSubAgentTaskRunning,
   listSubAgentTasksForConversation,
-  loadHistoricalSubAgentTasks,
   resumeSubAgentTasks,
   startSubAgentTask,
   stopSubAgentTask,
   subscribeSubAgentTask,
-  subscribeSubAgentTasksForConversation,
-  useSubAgentTask,
   useSubAgentTasksForConversation,
 } from './conversationRunStore/subAgentTasks';
 export type { StartSubAgentTaskOptions } from './conversationRunStore/subAgentTasks';

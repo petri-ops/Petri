@@ -83,4 +83,3 @@ export function ResultView({
 
 // UI-305 P2 - extracted inline components now live in sibling files:
 import { ResultArtifactShell } from './ResultArtifactShell';
-export { EmptyAnalysisResult } from './ResultArtifactShell';

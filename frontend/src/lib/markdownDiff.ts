@@ -47,7 +47,7 @@ export function computeSimpleDiff(left: string, right: string): DiffSide {
 
 type Op = { kind: 'eq' | 'del' | 'add'; line: string };
 
-export function buildOps(leftLines: string[], rightLines: string[]): Op[] {
+function buildOps(leftLines: string[], rightLines: string[]): Op[] {
   const m = leftLines.length;
   const n = rightLines.length;
   // dp 使用 number[]（避免 Uint32Array 在 V8 里的特殊处理）

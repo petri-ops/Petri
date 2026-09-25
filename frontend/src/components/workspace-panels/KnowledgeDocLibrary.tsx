@@ -503,4 +503,3 @@ export function KnowledgeDocLibrary({
   );
 }
 
-export default KnowledgeDocLibrary;

@@ -125,7 +125,7 @@ const bridge: ProjectionTerminalBridge = {
   },
 };
 
-export function isProjectionEnv(): boolean {
+function isProjectionEnv(): boolean {
   return typeof window !== 'undefined'
     && !!(window.biof3Desktop as { __projection?: boolean } | undefined)?.__projection;
 }

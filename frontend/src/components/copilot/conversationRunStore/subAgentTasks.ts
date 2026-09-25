@@ -5,7 +5,7 @@
 // blocking the main thread of the conversation. The primary run path lives in
 // conversationRunStore.ts and is intentionally kept separate from this module.
 // ===========================================================================
-import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 import type { CopilotContext } from '@/lib/copilotContext';
 import {
   cancelAgentTask,
@@ -19,9 +19,7 @@ import {
   mergeToolResultActivity,
 } from '../toolActivity';
 import { fetchLoopRuns, type LoopRunCompact } from '@/lib/loop-client';
-import { getPlatformApiPrefix } from '@/lib/authClient';
 import { formatErrorForUser } from '../errorMessages';
-import { emitConversationRun } from './runListeners';
 import type { ConversationRunSnapshot, ConversationRunStatus } from './types';
 
 const subTaskRuns = new Map<string, ConversationRunSnapshot>();
@@ -136,17 +134,9 @@ export function subscribeSubAgentTask(taskId: string | null | undefined, listene
   };
 }
 
-export function useSubAgentTask(taskId: string | null | undefined): ConversationRunSnapshot | null {
-  const subscribe = useCallback((listener: () => void) => subscribeSubAgentTask(taskId, listener), [taskId]);
-  const getSnapshot = useCallback(() => getSubAgentTaskSnapshot(taskId), [taskId]);
-  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
-}
 
-export function isSubAgentTaskRunning(taskId: string | null | undefined): boolean {
-  return getSubAgentTaskSnapshot(taskId)?.status === 'running';
-}
 
-export function subscribeSubAgentTasksForConversation(
+function subscribeSubAgentTasksForConversation(
   conversationId: string | null | undefined,
   listener: () => void
 ): () => void {
@@ -434,75 +424,6 @@ export async function resumeSubAgentTasks(
   }
 }
 
-/**
- * BLOCK-105 §7 Batch-5 类型化：/api/ai/agent/tasks 行 wire 形状（tasks 表只读投影）。
- */
-interface SubAgentTaskRow {
-  taskId: string;
-  status: string;
-  taskText: string;
-  error: string | null;
-  projectId: string | null;
-  parentTaskId: string | null;
-  createdAt: string | number | null;
-  finishedAt: string | number | null;
-}
-
-/**
- * BLOCK-65 修正：会话打开时回填该会话的历史子 agent（含终态）。
- * resumeSubAgentTasks 只恢复 running 任务——刷新后历史完成态不进 store，
- * 会让摘要卡「智能体」节（UI-386 起的项目级聚合唯一入口）在该会话永久不可见。
- * 只登记终态快照（running/pending 交由 resume/live 订阅路径），幂等。
- * 零第二真相：数据来自 /api/ai/agent/tasks（tasks 表只读投影）。
- */
-export async function loadHistoricalSubAgentTasks(conversationId: string): Promise<void> {
-  if (!conversationId) return;
-  let rows: SubAgentTaskRow[] = [];
-  try {
-    const resp = await fetch(
-      `${getPlatformApiPrefix()}/ai/agent/tasks?limit=50&conversationId=${encodeURIComponent(conversationId)}`
-    );
-    const body = (await resp.json().catch(() => null)) as { ok?: unknown; tasks?: unknown } | null;
-    if (!resp.ok || body?.ok !== true) return;
-    rows = (body.tasks || []) as SubAgentTaskRow[];
-  } catch {
-    return;
-  }
-  let changed = false;
-  for (const t of rows) {
-    if (!t.taskId || subTaskRuns.has(t.taskId)) continue;
-    if (t.status === 'running' || t.status === 'pending') continue; // 由 resume/live 路径负责
-    const status: ConversationRunStatus =
-      t.status === 'completed' ? 'done' : t.status === 'failed' ? 'error' : 'stopped';
-    const startedAt = t.createdAt ? new Date(t.createdAt).getTime() : Date.now();
-    const finishedAt = t.finishedAt ? new Date(t.finishedAt).getTime() : undefined;
-    subTaskRuns.set(t.taskId, {
-      conversationId,
-      projectId: t.projectId || '',
-      status,
-      userContent: t.taskText || '（子 agent 任务）',
-      userTs: t.createdAt ? String(t.createdAt) : new Date(startedAt).toISOString(),
-      assistantContent: t.error ? `失败：${t.error}` : '',
-      assistantTs: new Date(startedAt + 1).toISOString(),
-      assistantPending: false,
-      assistantError: status === 'error',
-      progressUpdates: [],
-      resultEditProgress: [],
-      toolActivities: [],
-      pendingApproval: null,
-      startedAt,
-      taskId: t.taskId,
-      parentTaskId: t.parentTaskId ?? undefined,
-      loop: null,
-      processingDurationMs: finishedAt ? Math.max(0, finishedAt - startedAt) : 0,
-      completedAt: finishedAt,
-    });
-    emitSubTask(t.taskId);
-    changed = true;
-  }
-  // 历史子 agent 回填后同样通知主 run 订阅者（与拆分前 emit(conversationId) 同一注册表）
-  if (changed) emitConversationRun(conversationId);
-}
 
 export function stopSubAgentTask(taskId: string | null | undefined): void {
   if (!taskId) return;
@@ -525,14 +446,6 @@ export function stopSubAgentTask(taskId: string | null | undefined): void {
   }
 }
 
-export function clearSubAgentTask(taskId: string | null | undefined): void {
-  if (!taskId) return;
-  const convId = subTaskRuns.get(taskId)?.conversationId;
-  if (subTaskRuns.delete(taskId)) {
-    if (convId) subTaskConvListeners.get(convId)?.forEach((listener) => listener());
-    emitSubTask(taskId);
-  }
-}
 
 /** Test-only：清空子 agent 存储（由 __resetConversationRunsForTests 统一调用）。 */
 export function __resetSubAgentTaskStoresForTests(): void {

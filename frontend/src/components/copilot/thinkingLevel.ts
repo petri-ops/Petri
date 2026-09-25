@@ -29,7 +29,7 @@ function storageKey(projectId: string | null | undefined, conversationId: string
   return `${PREFIX}${projectId || 'none'}:${conversationId || 'new'}`;
 }
 
-export function isThinkingLevel(value: unknown): value is ThinkingLevel {
+function isThinkingLevel(value: unknown): value is ThinkingLevel {
   return typeof value === 'string' && (THINKING_LEVELS as readonly string[]).includes(value);
 }
 

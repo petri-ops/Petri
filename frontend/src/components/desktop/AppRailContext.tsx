@@ -128,13 +128,9 @@ export function useAppRail(): AppRailState {
   return ctx;
 }
 
-/** 可选读取：组件既可能在壳层内（有 provider）也可能在独立单测里渲染。 */
-export function useAppRailOptional(): AppRailState | null {
-  return useContext(AppRailCtx);
-}
 
 /** 从路由推导当前项目 id（/project/:id[/...]）——壳层与工作区共用的唯一来源。 */
-export function projectIdFromPath(pathname: string): string | null {
+function projectIdFromPath(pathname: string): string | null {
   const m = pathname.replace(/\/+$/, '').match(/^\/project\/([^/]+)/);
   return m ? m[1] : null;
 }

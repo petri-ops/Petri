@@ -228,4 +228,3 @@ export function ConversationTimeline({
   );
 }
 
-export default ConversationTimeline;

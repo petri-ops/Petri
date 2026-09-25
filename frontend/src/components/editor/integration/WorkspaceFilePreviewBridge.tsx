@@ -57,29 +57,6 @@ import {
  */
 const EditorApiContext = React.createContext<{ api: EditorApi | null }>({ api: null });
 
-/**
- * useEditorApi —— P4.2 便利 hook。
- *
- * 在 WorkspaceFilePreviewBridge 子树内调用，返回 EditorApi 实例。
- * 返回 `{ api: null }`（非 null 对象）表示 EditorApi 尚未就绪；
- * 在 Bridge 外调用时也返回 `{ api: null }`（graceful fallback）。
- *
- * 特点：
- * - **不会**在 null 时 throw（业务侧可能在 Provider 外使用，需 graceful fallback）
- * - 零额外渲染成本（context 只存稳定引用，内部通过 mutation 更新）
- *
- * 用法：
- *   const { api } = useEditorApi();
- *   api?.scrollToLine({ line: 5 });
- *
- *   // 或直接用 editorRef prop（原有方式，仍有效）
- *   const editorRef = useRef<EditorApi | null>(null);
- *   <WorkspaceFilePreviewBridge editorRef={editorRef} ... />
- */
-export function useEditorApi(): { api: EditorApi | null } {
-  return React.useContext(EditorApiContext);
-}
-
 export interface WorkspaceFilePreviewBridgeProps
   extends Omit<CodeMirrorEditorProps, 'mode' | 'diffRevision'> {
   /** 当前预览的文件路径（用于比对 pendingRequest.filePath）。 */

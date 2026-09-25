@@ -39,7 +39,7 @@ export function stringifyParamValue(value: unknown): string {
   }
 }
 
-export function shortValue(value: unknown): string {
+function shortValue(value: unknown): string {
   const text = stringifyParamValue(value);
   return text.length > 64 ? `${text.slice(0, 61)}…` : text;
 }

@@ -33,7 +33,7 @@ const STATUS_LABEL: Record<BackgroundProcessStatus, string> = {
   orphaned: '失联',
 };
 
-export function isProcessActive(status: BackgroundProcessStatus): boolean {
+function isProcessActive(status: BackgroundProcessStatus): boolean {
   return status === 'running';
 }
 
@@ -245,4 +245,3 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
   );
 }
 
-export default ToolActivityDock;

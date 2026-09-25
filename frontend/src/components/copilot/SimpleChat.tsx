@@ -95,16 +95,10 @@ export { ResultEditProgressList };
 
 // Re-export helpers (so `import { restoreSimpleMessage } from './SimpleChat'` keeps working)
 export {
-  SLASH_COMMANDS,
   shouldOpenWithSystemApp,
   restoreSimpleMessage,
   compactStageConclusion,
-  MessageMeta,
-  ExamplePrompts,
-  ImagePreviewModal,
 };
-// canonical 单源在 ./SimpleChat/types（helpers 仅 re-export），转出保持旧路径可用
-export { DEFAULT_EXAMPLE_PROMPTS, DOMAIN_EXAMPLE_PROMPTS } from './SimpleChat/types';
 export type {
   SlashCommand,
   SimpleMessage,

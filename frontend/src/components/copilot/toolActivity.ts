@@ -221,7 +221,7 @@ function summarizeArgsDetail(args: Record<string, unknown> = {}): string {
 /** UI-437 v5.18 — 工具动词注册表（全量 71 静态工具，与后端
  *  tool-events.js TOOL_ACTIVITY_VERBS 同构；契约测试经
  *  test/fixtures/tool-activity-labels.json 双侧逐工具钉住）。 */
-export const TOOL_ACTIVITY_VERBS: Readonly<Record<string, string>> = {
+const TOOL_ACTIVITY_VERBS: Readonly<Record<string, string>> = {
   "act": "已变更",
   "decision_summary": "已统计",
   "decision_recent": "已回放",
@@ -646,7 +646,7 @@ export function formatToolSideEffects(sideEffects?: ToolSideEffects): string | n
 }
 
 /** UI-383 — 常规只读工具：成功时折叠为汇总行（错误/运行中/等待确认仍独立可见）。 */
-export const ROUTINE_READ_TOOLS: ReadonlySet<string> = new Set([
+const ROUTINE_READ_TOOLS: ReadonlySet<string> = new Set([
   'workspace_read',
   'workspace_list',
   'workspace_find',
@@ -654,7 +654,7 @@ export const ROUTINE_READ_TOOLS: ReadonlySet<string> = new Set([
   'system_info',
 ]);
 
-export function isRoutineReadActivity(activity: ToolActivityItem): boolean {
+function isRoutineReadActivity(activity: ToolActivityItem): boolean {
   return ROUTINE_READ_TOOLS.has(activity.name) && activity.status === 'success';
 }
 

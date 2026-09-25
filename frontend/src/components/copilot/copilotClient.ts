@@ -15,7 +15,6 @@ import type { StreamChatOptions } from './copilotClient/types';
 // ---- re-export surface（原 ./copilotClient 全量公开 API）----
 
 export { getApiPrefix, getAuthHeader } from './copilotClient/apiBase';
-export { OfflineError, checkOnline, isOfflineError } from './copilotClient/offline';
 export type {
   AgentTaskTodoItem,
   KnowledgeCitation,
@@ -31,7 +30,6 @@ export type {
 export {
   parseResultEditProgressEvent,
   parseToolCallEvent,
-  parseToolOutputEvent,
   parseToolResultEvent,
   restoreResultEditProgressEvents,
 } from './copilotClient/parse';
@@ -41,7 +39,6 @@ export type {
   ResumeLastModelCall,
 } from './copilotClient/agentTaskApi';
 export {
-  ackAct,
   ackRunTool,
   cancelAgentTask,
   fetchAgentTaskMeta,

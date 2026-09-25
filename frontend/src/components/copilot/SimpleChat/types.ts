@@ -174,7 +174,7 @@ export interface AgentProgressUpdate {
   content: string;
 }
 
-export function restoreProgressUpdates(value: unknown): Array<{ iteration: number; content: string }> {
+function restoreProgressUpdates(value: unknown): Array<{ iteration: number; content: string }> {
   if (!Array.isArray(value)) return [];
   return value.slice(0, 50).flatMap((item, index) => {
     if (!item || typeof item !== 'object') return [];

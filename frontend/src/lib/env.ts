@@ -1,8 +1,6 @@
 // Gewu 桌面版原生 shell — 环境与 API 工具
 // 替代 Docusaurus 版的 authClient.ts / getApiPrefix 等
 
-// 桌面版恒为 true（这个前端只在桌面版跑）
-export const IS_DESKTOP = true;
 
 // BLOCK-30 P1: py-server HTTP 服务已摘除，唯一业务后端是 biof3-server；
 // Python 工具在服务端经 shared-backend 执行器注册表本地执行。

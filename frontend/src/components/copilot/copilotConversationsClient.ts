@@ -221,20 +221,6 @@ export async function deleteConversation(id: string): Promise<boolean> {
   }
 }
 
-export async function dismissTopicShift(id: string): Promise<boolean> {
-  try {
-    const resp = await fetch(
-      getApiPrefix() + '/ai/conversations/' + encodeURIComponent(id) + '/dismiss-topic-shift',
-      {
-        method: 'POST',
-        headers: getAuthHeader(),
-      }
-    );
-    return resp.ok;
-  } catch {
-    return false;
-  }
-}
 
 /**
  * Fork an existing conversation — creates a new conversation with messages copied.

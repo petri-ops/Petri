@@ -26,4 +26,3 @@ export function registerDefaultRenderers(): void {
   registerRenderer('image', ImageRenderer);
 }
 
-export { ChartRenderer, ImageRenderer, TableRenderer, TextRenderer };

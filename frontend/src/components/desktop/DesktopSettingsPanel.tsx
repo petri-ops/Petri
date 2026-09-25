@@ -635,4 +635,3 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   );
 }
 
-export default DesktopSettingsPanel;

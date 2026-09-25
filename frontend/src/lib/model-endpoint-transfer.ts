@@ -61,7 +61,7 @@ function csvEscape(value: unknown): string {
   return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
-export function endpointProfilesForTransfer(
+function endpointProfilesForTransfer(
   profiles: ChatModelPreset[],
   apiKeys: Record<string, string> = {}
 ): EndpointTransferProfile[] {

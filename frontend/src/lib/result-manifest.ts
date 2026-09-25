@@ -78,7 +78,7 @@ function normalizeArtifact(item: unknown): ResultArtifactRecord | null {
   };
 }
 
-export function getArtifactName(item: ResultArtifactRecord | { name?: string; filename?: string; path?: string }): string {
+function getArtifactName(item: ResultArtifactRecord | { name?: string; filename?: string; path?: string }): string {
   return asString((item as ResultArtifactRecord).name || (item as { filename?: string }).filename || (item as { path?: string }).path);
 }
 
@@ -287,17 +287,8 @@ export function countArtifactsByKind(artifacts: ResultArtifactRecord[]): Record<
   );
 }
 
-export function isTextLikeArtifact(artifact: ResultArtifactRecord): boolean {
-  return classifyArtifact(artifact) === 'text';
-}
 
-export function isHtmlArtifact(artifact: ResultArtifactRecord): boolean {
-  return classifyArtifact(artifact) === 'report';
-}
 
-export function isImageArtifact(artifact: ResultArtifactRecord): boolean {
-  return classifyArtifact(artifact) === 'plot';
-}
 
 export function artifactKindLabel(kind: ResultArtifactKind): string {
   return SECTION_LABELS[kind];
