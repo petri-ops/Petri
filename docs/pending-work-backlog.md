@@ -93,7 +93,7 @@
 | C-09 | capability-provisioning 共享下载 helper | 🟡建议：host 白名单已修；共享 helper 只在改动该能力时评估（AUDIT-LOG 2026-07-17） |
 | C-10 | output-judge 0-4 量表多闸门热调——**已编入 CK-09** | BK-05 非范围登记 |
 | C-11 | CenterPanelContext 拆分 refs/纯值两对象——**已编入 CK-06** | react-hooks/refs 74 条豁免的结构性修复（BK-06 第六刀定性时登记） |
-| CK-11 | knip 死代码清理大批（BK-09 重扫登记）——**进行中（五批已落；frontend/core/shared-copilot 面收净；knip 虚高 1078→实测 62）** | 首批=authClient 14；二批=frontend 90（232→142）；三批=揭洋葱 29（139→110）；四批=src CJS 30（110→80，3 条测试强制契约恢复+USED_PROD 40=resources 插件 require 盲区保留）；**五批=未引用文件 46 三分（11 删：content-sync+shared-copilot 死岛 6+frontend 4；35 保留留痕=verify flows 动态入口 34+acceptance 证据 3）+shared-copilot 族死导出 12 收净**；**下一批=src 48 新洋葱层**（批次四删成员后暴露）+.agents 14（CLI 直调工具脚本，低价值维持保留）；**CK-11 收尾判据=src 洋葱层清偿后 knip exports 收敛至 .agents 保留面**；参照 Batch-3/4 分批棘轮 |
+| ✅ CK-11 | knip 死代码清理大批（BK-09 重扫登记）——**completed（2026-09-25 六批收口；用户逐批「继续/开」授权；closeout 六轮十门绿）** | 总账：knip 虚高 1078→**实测 61 收敛至保留面**，累计清理约 **220 条真实死导出 + 11 个死文件**；方法论三件套=①workspaces 别名修正（frontend/lib 簇 31 条误报根除）→②逐案词法 grep（frontend TS 面）→③导入边精确分类（JS 同名密集区词法全假证据）+测试网兜底；**保留面全数定性**=.agents dev-verify flows 34（verify runner 按路径动态调用入口）+acceptance 证据脚本 3+USED_PROD 40+USED_TEST 3（懒 require/resources 插件 require 盲区）+测试强制契约 4（getRuntimeBinName 源码扫描守卫/BLOCK-84+A-009.7 直测/FUNNEL_EVENTS CK-10 契约直测）；批次账=①authClient 14 ②frontend 90（232→142）③揭洋葱 29（139→110）④src CJS 30（110→80）⑤文件 11 删+族 12（80→62）⑥洋葱定性 1+47（62→61） |
 
 ## ⛔ 阻塞/延期（🟡 在册维持；G0 纪律不外推，重开条件见 AUDIT-LOG 对应行）
 
