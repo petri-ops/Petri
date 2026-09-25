@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-25 早七（**BK-08=darwin 启动预算档建基线完成（Mac 会话首建；closeout 十门绿 + fit=3.36 PASS · jev×8）**——三轮 5 样本实测最差中位数 ×1.10 写入 platforms.darwin 七段档；契约测试 9/9+终轮 budget.pass=true；连带=TEST 实例三连修+impact-map 两连补登+P6 源绑定重打 10/10（darwin-only P6 契约首跑 13/13 零 skip）。**队列头=CK-01（C-06 运行中发送走 steer 通道）**；BK-02 观察期随使用累计。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 早八（**CK-01=C-06 运行中发送自动 steer 收口（closeout 十门绿 + fit=3.77 PASS；UI-440 待过目）**——设计裁决=即时 steer+回执（入队不可撤）；契约 8/8 + 全量 147/1205。**队列头=CK-02（长列表虚拟化）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 早七（Mac 侧会话；**BK-08=darwin 启动预算档建基线完成（Mac 会话首建；closeout 十门绿 + fit=3.36 PASS · jev×8）**——三轮 5 样本实测最差中位数 ×1.10 写入 platforms.darwin 七段档；契约测试 9/9+终轮 budget.pass=true；连带=TEST 实例三连修+impact-map 两连补登+P6 源绑定重打 10/10（darwin-only P6 契约首跑 13/13 零 skip）。**队列头=CK-01（C-06 运行中发送走 steer 通道）**；BK-02 观察期随使用累计。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 早六（**CK 推进系列建表（用户裁决「像 BK 一样做个计划表 逐步推进所有的项目」=按表逐项推进预授权）**——二次盘点抓回 3 项漏网（grants teardown/mmap 评估/qa-smoke TODO），候选池 8 项+新发现编成 CK-01~CK-10（排序=用户可见价值→技术债→评估类）；**队列头=CK-01（C-06 运行中发送走 steer 通道）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

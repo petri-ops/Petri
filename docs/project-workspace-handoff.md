@@ -1,6 +1,8 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-25 早七（**BK-08=darwin 启动预算档建基线完成（Mac 会话首建）**：darwin arm64 三轮 5 样本实测最差中位数 ×1.10 写入 platforms.darwin 七段档；契约 9/9+终轮 budget.pass=true violations=0；closeout 十门绿+fit=3.36 PASS · jev×8。连带=TEST 实例三连修（dock.hide/并集外摆位/darwin 收尾清场）+impact-map 两连补登+P6 源绑定重打 10/10（darwin-only P6 契约首跑 13/13 零 skip）。**恢复要点**：dev 栈在跑（Mac）；队列头=CK-01（预授权按表推进，项内产品裁决点单独问）；本机 Jev key 已由用户会中提供（gitignore 内 env 文件），决策工具 cloud 全通；用户事项 U-01~U-04 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 早八（**CK-01 完成**：运行中发送自动 steer（UI-440 in_progress 待用户过目翻 verified）；队列头=CK-02 长列表虚拟化。**恢复要点**：dev 栈在跑（Vite HMR 已生效）；CK 表在 pending-work-backlog.md；用户事项 U-01~U-04 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 早七（Mac 侧会话；**BK-08=darwin 启动预算档建基线完成（Mac 会话首建）**：darwin arm64 三轮 5 样本实测最差中位数 ×1.10 写入 platforms.darwin 七段档；契约 9/9+终轮 budget.pass=true violations=0；closeout 十门绿+fit=3.36 PASS · jev×8。连带=TEST 实例三连修（dock.hide/并集外摆位/darwin 收尾清场）+impact-map 两连补登+P6 源绑定重打 10/10（darwin-only P6 契约首跑 13/13 零 skip）。**恢复要点**：dev 栈在跑（Mac）；队列头=CK-01（预授权按表推进，项内产品裁决点单独问）；本机 Jev key 已由用户会中提供（gitignore 内 env 文件），决策工具 cloud 全通；用户事项 U-01~U-04 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 早六（**CK 推进系列建表**——CK-01~CK-10 逐项推进序入 backlog（用户预授权按表推进、项内产品裁决点单独问）；队列头=CK-01 steer 接线。**恢复要点**：dev 栈在跑；全量表查 pending-work-backlog.md；用户事项 U-01~U-04（U-04=UI-439 过目）待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
