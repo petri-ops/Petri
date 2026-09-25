@@ -293,12 +293,7 @@ function buildOdpText(xml: string): string {
 
 async function loadAssets(
   entries: Record<string, ZipEntry>,
-  patterns: RegExp[],
-  _baseUrl: string,
-  _projectId: string,
-  _workspacePath: string,
-  _relativePath: string,
-  _authHeader?: { Authorization: string }
+  patterns: RegExp[]
 ): Promise<OfficePreviewAsset[]> {
   const assets: OfficePreviewAsset[] = [];
   for (const [name, entry] of Object.entries(entries)) {
@@ -408,10 +403,6 @@ export async function loadOfficePreview(req: OfficePreviewRequest): Promise<Offi
       const assets = await loadAssets(
         entries,
         [/^word\/media\/(?:image\d+\.(?:png|jpe?g|gif|svg|emf|wmf))$/i],
-        req.url,
-        req.projectId || '',
-        req.workspacePath || '',
-        req.name,
       ).catch(() => []);
       return { kind, title: req.name, text, byteLength: resource.byteLength, assets };
     }
@@ -438,10 +429,6 @@ export async function loadOfficePreview(req: OfficePreviewRequest): Promise<Offi
       const assets = await loadAssets(
         entries,
         [/^ppt\/media\/(?:image\d+\.(?:png|jpe?g|gif|svg|emf|wmf))$/i],
-        req.url,
-        req.projectId || '',
-        req.workspacePath || '',
-        req.name,
       ).catch(() => []);
       return {
         kind,
@@ -457,10 +444,6 @@ export async function loadOfficePreview(req: OfficePreviewRequest): Promise<Offi
       const assets = await loadAssets(
         entries,
         [/^media\/.+\.(?:png|jpe?g|gif|svg)$/i],
-        req.url,
-        req.projectId || '',
-        req.workspacePath || '',
-        req.name,
       ).catch(() => []);
       return { kind, title: req.name, text, assets, byteLength: resource.byteLength };
     }
@@ -475,10 +458,6 @@ export async function loadOfficePreview(req: OfficePreviewRequest): Promise<Offi
       const assets = await loadAssets(
         entries,
         [/^media\/.+\.(?:png|jpe?g|gif|svg)$/i],
-        req.url,
-        req.projectId || '',
-        req.workspacePath || '',
-        req.name,
       ).catch(() => []);
       return { kind, title: req.name, text, assets, byteLength: resource.byteLength };
     }

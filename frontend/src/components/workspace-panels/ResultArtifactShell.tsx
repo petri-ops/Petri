@@ -67,7 +67,6 @@ import {
 import type {
   ActiveArtifact,
   JobResult,
-  JobDetailMeta,
 } from './ResultView/types';
 
 // 预览可用性状态：字面量联合在条件表达式的对象字面量分支里会被拓宽成 string，
@@ -145,13 +144,11 @@ export function ResultArtifactShell({
   // once the body is mounted. See resultScrollMemory.ts.
   const resultViewRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(false);
-  const [_jobMeta, setJobMeta] = useState<JobDetailMeta | null>(null);
   const [manifestRaw, setManifestRaw] = useState<unknown>(null);
   const [manifestLoading, setManifestLoading] = useState(false);
   const [manifestError, setManifestError] = useState('');
   const [manifestRetryVersion, setManifestRetryVersion] = useState(0);
   const [selectedName, setSelectedName] = useState('');
-  const [_selectedSectionId, setSelectedSectionId] = useState('');
   const [previewText, setPreviewText] = useState<string | null>(null);
   const [previewData, setPreviewData] = useState<string[][] | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -215,12 +212,10 @@ export function ResultArtifactShell({
       bodyJobRef.current = null;
       setResult(null);
       setResultError('');
-      setJobMeta(null);
       setManifestRaw(null);
       setManifestLoading(false);
       setManifestError('');
       setSelectedName('');
-      setSelectedSectionId('');
       setPreviewText(null);
       setPreviewData(null);
       setPreviewLoading(false);
@@ -245,9 +240,7 @@ export function ResultArtifactShell({
       if (shownAfter !== shownBefore) {
         bodyJobRef.current = null;
         setResult(null);
-        setJobMeta(null);
         setSelectedName('');
-        setSelectedSectionId('');
       }
       void (async () => {
         try {
@@ -268,11 +261,6 @@ export function ResultArtifactShell({
             bodyJobRef.current = requestedJobId;
             setResult(data.result);
             setResultError('');
-            setJobMeta({
-              params: data.params || {},
-              ackStatus: data.ackStatus || null,
-              projectId: data.projectId || null,
-            });
           } else if (!data.ok) {
             // 服务显式报错：如实展示，不归入"未生成结果"
             setResultError(typeof data.error === 'string' && data.error ? data.error : '结果服务返回失败');
@@ -312,13 +300,11 @@ export function ResultArtifactShell({
       bodyJobRef.current = null;
       setResult(null);
       setResultError('');
-      setJobMeta(null);
       setLoading(false);
       setManifestRaw(null);
       setManifestLoading(false);
       setManifestError('');
       setSelectedName('');
-      setSelectedSectionId('');
       setPreviewText(null);
       setPreviewData(null);
       setPreviewLoading(false);
@@ -579,13 +565,6 @@ export function ResultArtifactShell({
   }, [selectedArtifactName]);
 
   useEffect(() => {
-    if (!selectedArtifactName || navSections.length === 0) return;
-    const nextSection = navSections.find((section) => section.artifactNames.includes(selectedArtifactName));
-    if (!nextSection) return;
-    setSelectedSectionId((current) => (current === nextSection.id ? current : nextSection.id));
-  }, [navSections, selectedArtifactName]);
-
-  useEffect(() => {
     if (!job || effectiveJobStatus !== 'done' || artifacts.length === 0) return;
     const preferredPool = coreArtifacts.length > 0 ? coreArtifacts : artifacts;
     const preferred = pickPreferredArtifact(preferredPool, preferredArtifactName) || preferredPool[0];
@@ -596,17 +575,6 @@ export function ResultArtifactShell({
       preferredName,
       availableNames: artifacts.map((artifact) => artifact.name),
     }));
-    setSelectedSectionId((current) => {
-      if (current && navSections.some((section) => section.id === current)) return current;
-      const focusName =
-        (pendingArtifactName && artifacts.some((artifact) => artifact.name === pendingArtifactName)
-          ? pendingArtifactName
-          : preferredName);
-      const nextSection =
-        (focusName && navSections.find((item) => item.artifactNames.includes(focusName))) ||
-        navSections[0];
-      return nextSection?.id || '';
-    });
   }, [artifacts, coreArtifacts, effectiveJobStatus, job?.id, navSections, pendingArtifactName, preferredArtifactName]);
 
   // Clear the pending artifact after it's been applied so a subsequent
@@ -1045,10 +1013,9 @@ export function ResultArtifactShell({
         current === interactionBindingKey ? null : interactionBindingKey
       ))}
       onModeChange={onModeChange ? (nextMode) => onModeChange(nextMode, job.id) : undefined}
-      onSelectArtifact={(artifactName, sectionId) => {
+      onSelectArtifact={(artifactName, _sectionId) => {
         beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.artifactStart);
         setViewedRevision(null);
-        setSelectedSectionId(sectionId);
         setSelectedName(artifactName);
       }}
     />
