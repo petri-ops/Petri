@@ -5,15 +5,28 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-09-25 早四（**BK-07 全部完成（①② 按用户裁决「1 2 搞定」落地 + ③ 前刀完成；closeout 十门绿 + fit=3.76 PASS）**——①loadAssets 收窄 (entries, patterns)；②死状态拆除+currentVersion 复核推翻原判（已接线）。**队列现状：BK-08 需 Mac、其余完成或豁免定性完毕——无可安全串行推进项，等待用户新输入**。）
+最后更新：2026-09-25 早五（**CK 推进系列建表（用户裁决「再检查检查是否不够齐全 之后像 BK 一样做个计划表 逐步推进所有的项目」）**——全仓二次盘点：候选池 11 + 新抓漏网 3（BLOCK-102 grants 测试 teardown 卫生 / BLOCK-106 mmap_size 评估并入 C-05 / qa-smoke 遥测漏斗 TODO）+ BK-08，编成 **CK-01~CK-10 逐项推进序**（用户预授权按表推进，项内产品语义裁决点仍单独问）；C-07/C-08/C-09 条件未满足不编入，D 区 G1+/证书/产品决策阻塞不编入；用户事项新增 U-04（UI-439 过目）。**队列头=CK-01（C-06 运行中发送走 steer 通道）**。）
+
+此前 最后更新：2026-09-25 早四（**BK-07 全部完成（①② 按用户裁决「1 2 搞定」落地 + ③ 前刀完成；closeout 十门绿 + fit=3.76 PASS）**——①loadAssets 收窄 (entries, patterns)；②死状态拆除+currentVersion 复核推翻原判（已接线）。）
 
 ## 推进队列（串行，按序逐个推进）
 
+> **CK 系列（2026-09-25 用户裁决）**：「像 BK 一样做个计划表，逐步推进所有的项目」=按本表逐项推进的预授权；每项启动仍走立项检查单，**项内产品语义裁决点单独问**。排序原则=用户可见价值 → 技术债卫生 → 评估/设计类；大改造与低优先项靠后。
+
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
-| — | 👁 BK-08 | **darwin 启动预算档建基线**——`block101-startup-timeline` 首跑因缺 `platforms.darwin` 档判红（设计行为非故障）；需 Mac 会话采 5 样本建基线，禁止复制 win32 数字 | BLOCK-106 遗留 + handoff ⚡ 清单 | **队列唯一剩余项（需 Mac 环境）** |
-| 5 | ▶ BK-08 | **darwin 启动预算档建基线**——`block101-startup-timeline` 首跑因缺 `platforms.darwin` 档判红（设计行为非故障）；需 Mac 会话采 5 样本建基线，禁止复制 win32 数字 | BLOCK-106 遗留 + handoff ⚡ 清单 | 排队（需 Mac 环境） |
-| — | 👁 BK-02 | **汇报门 P2 试点观察期盘点**（持续观察，不占队列序）——采纳率/误拦率（含误重写率）/延迟增量/fitReplay 触发率随真实轮次累计；首盘点已并入 BK-01 P0（decision_log report-guard 行 + fit-volatility-review.json）；观察窗开启中（dev 栈 BIOF3_JEV_REPORT_GUARD=1）。此后周期性盘点 | BLOCK-119 收口遗留候选 | 观察（持续） |
+| 1 | ▶ CK-01 | **C-06：composer 运行中发送自动改走 steer 通道**——后端通道已有（BLOCK-98 M4 `POST task/:id/steer`），UI 接线：运行中输入不再被拦/排队而是转向在跑任务；项内裁决点=交互形态（自动 steer vs 询问） | BLOCK-98 M4 + handoff UI 候选 | **队列头** |
+| 2 | ▶ CK-02 | **C-01：长列表虚拟化**——大会话（数百条消息）滚动/渲染性能；前置帧时基线已备（BLOCK-107 转交） | BLOCK-106/107 遗留候选 | 排队 |
+| 3 | ▶ CK-03 | **C-02：轮询→SSE**——刷新链路实时化（后端+前端多接点） | BLOCK-106 遗留候选 | 排队 |
+| 4 | ▶ CK-04 | **C-04：分段 token 预算**——压缩机制零重复（BLOCK-95/98 已交付基础） | BLOCK-109 候选池 | 排队 |
+| 5 | ▶ CK-05 | **C-05：node:sqlite 评估 / 三契约单源化**——吸收 BLOCK-106 遗留 mmap_size=64MB 裁决（实测大扫描 2.2x，需与 SQLite 域包一起裁决） | BLOCK-109 候选池 + block-106 plan §7 | 排队 |
+| 6 | ▶ CK-06 | **C-11：CenterPanelContext 拆分 refs/纯值两对象**——react-hooks/refs 74 条豁免的结构性修复；涉及 project-workspace 构造面+CenterPanel/SummaryCard 消费面 | BK-06 第六刀定性登记 | 排队 |
+| 7 | ▶ CK-07 | **测试卫生小批**——BLOCK-102 遗留：grants 测试补显式 teardown（关 buildMobileGateway 内部资源）；同批扫同类测试卫生散项 | block-102 plan 遗留候选（本轮盘点抓回） | 排队 |
+| 8 | ▶ CK-08 | **C-03：task_id 数据模型改造**——大改造，排后 | BLOCK-106 遗留候选 | 排队（大） |
+| 9 | ▶ CK-09 | **C-10：output-judge 0-4 量表多闸门热调设计**——量表界与区间不变量语义需单独设计；现由代码注册表承载（证据绑定） | BK-05 非范围登记 | 排队（低） |
+| 10 | ▶ CK-10 | **qa-smoke 遥测漏斗事件**——生产面唯一 TODO（`scripts/qa-smoke.mjs:219`，Gate 5 之后语义） | 本轮盘点抓回 | 排队（低） |
+| — | 👁 BK-08 | **darwin 启动预算档建基线**——需 Mac 会话采 5 样本建基线，禁止复制 win32 数字（保持原 ID 不入 CK 序） | BLOCK-106 遗留 + handoff ⚡ 清单 | 排队（需 Mac 环境） |
+| — | 👁 BK-02 | **汇报门 P2 试点观察期盘点**（持续观察，不占队列序）——采纳率/误拦率/延迟增量/fitReplay 触发率随真实轮次累计；观察窗开启中（dev 栈 BIOF3_JEV_REPORT_GUARD=1） | BLOCK-119 收口遗留候选 | 观察（持续） |
 
 ## 已完成（本表排队项收口记录）
 
@@ -40,22 +53,23 @@
 | U-01 | **Jev key 轮换裁决** | 运行时抓真：decision-config.json 旧 Jev key 已失效（auth_failed→汇报门降级放行，fail-open 语义正确行使），备份 env 的有效 key 已按「只读不回显」纪律同步入 config；现 config 与备份双 key 并存且旧者已死。此前裁决「暂保留后续轮换」，轮换时机由用户定 |
 | U-02 | **UI-437 v5.13–v5.19 实机过目** | 行级复制钮归位/思考行同族/耗时降噪/动词图标注册表等七批增量已实装，待用户实机过目翻 verified（Agent 不代行） |
 | U-03 | **UI-438 子智能体行内呈现实机过目** | 组卡下线→时间线行内 bot 图标行，待子智能体任务实机过目 |
+| U-04 | **UI-439 composer 底栏尺寸平衡实机过目** | 上下文环+发送钮 28→24（环 SVG 18）已实装（Vite HMR 生效），CDP 量测+裁剪截图证据在 acceptance/ui-436/；待用户过目翻 verified |
 
 ## 🗃 候选池（未排期；启动均需用户裁决 + 立项）
 
 | ID | 事项 | 重开条件 / 来源 |
 | --- | --- | --- |
-| C-01 | 长列表虚拟化 | 前置证据已备（BLOCK-107 帧时基线转交）；BLOCK-106/107 遗留候选 |
-| C-02 | 轮询→SSE | BLOCK-106 遗留候选 |
-| C-03 | task_id 数据模型改造 | BLOCK-106 遗留候选 |
-| C-04 | 分段 token 预算 | BLOCK-109 候选池（压缩机制零重复，BLOCK-95/98 已交付基础） |
-| C-05 | node:sqlite 评估 / 三契约单源化 | BLOCK-109 候选池 |
-| C-06 | composer 运行中发送自动改走 steer 通道 | BLOCK-98 M4 后端通道已有（POST task/:id/steer），UI 未接线；handoff 待用户事项登记的 UI 候选 |
+| C-01 | 长列表虚拟化 | 前置证据已备（BLOCK-107 帧时基线转交）——**已编入 CK-02** |
+| C-02 | 轮询→SSE——**已编入 CK-03** | BLOCK-106 遗留候选 |
+| C-03 | task_id 数据模型改造——**已编入 CK-08** | BLOCK-106 遗留候选 |
+| C-04 | 分段 token 预算——**已编入 CK-04** | BLOCK-109 候选池 |
+| C-05 | node:sqlite 评估 / 三契约单源化——**已编入 CK-05**（吸收 BLOCK-106 mmap 裁决） | BLOCK-109 候选池 |
+| C-06 | composer 运行中发送自动改走 steer 通道——**已编入 CK-01** | BLOCK-98 M4 后端通道已有（POST task/:id/steer），UI 未接线 |
 | C-07 | Laya 接点翻转重校准 | 重开条件＝门控语义改换（top-probability）属决策契约变更另裁；BLOCK-117/118 裁决＝三接点维持 Jev |
 | C-08 | roadmap/handoff/auditLog 文档回写预测 | 重开条件＝工作流语境 state 证据补齐（BLOCK-118 终裁＝当前证据不支持，静默） |
 | C-09 | capability-provisioning 共享下载 helper | 🟡建议：host 白名单已修；共享 helper 只在改动该能力时评估（AUDIT-LOG 2026-07-17） |
-| C-10 | output-judge 0-4 量表多闸门热调 | BK-05 非范围登记：fitPass/fitRetry 量表界与区间不变量语义需单独设计；现由代码注册表承载（证据绑定） |
-| C-11 | CenterPanelContext 拆分 refs/纯值两对象 | react-hooks/refs 74 条豁免的结构性修复：混合对象触发规则类型级污染推断（47 处误标）；涉及 project-workspace 构造面+CenterPanel/SummaryCard 消费面，架构级改动需单独立项（BK-06 第六刀定性时登记） |
+| C-10 | output-judge 0-4 量表多闸门热调——**已编入 CK-09** | BK-05 非范围登记 |
+| C-11 | CenterPanelContext 拆分 refs/纯值两对象——**已编入 CK-06** | react-hooks/refs 74 条豁免的结构性修复（BK-06 第六刀定性时登记） |
 
 ## ⛔ 阻塞/延期（🟡 在册维持；G0 纪律不外推，重开条件见 AUDIT-LOG 对应行）
 
