@@ -93,7 +93,7 @@
 | C-09 | capability-provisioning 共享下载 helper | 🟡建议：host 白名单已修；共享 helper 只在改动该能力时评估（AUDIT-LOG 2026-07-17） |
 | C-10 | output-judge 0-4 量表多闸门热调——**已编入 CK-09** | BK-05 非范围登记 |
 | C-11 | CenterPanelContext 拆分 refs/纯值两对象——**已编入 CK-06** | react-hooks/refs 74 条豁免的结构性修复（BK-06 第六刀定性时登记） |
-| CK-11 | knip 死代码清理大批（BK-09 重扫登记）——**进行中（workspaces 修正+三批已落，frontend 面收净）** | 首批=authClient 14 条；**第二批=frontend 簇清理 90 条（knip 232→142）**：六 barrel 死 re-export 链两端同收/12 残迹 default 删/21 摘 export/35 删死声明；**第三批=揭洋葱 35 条处置 29 条（knip 139→110）**：17 零引用删声明/11 摘 export/1 死 re-export 行（函数粒度洋葱两级=useTerminalTheme+readActiveThemeName 退役）；**frontend 面余 6 条=chat-file-references.ts 缓议壳**（core/packages/shared-copilot re-export 层，指向共享包直连 or 删壳需结构裁决）；**批次四=src 簇 78 条（Electron 主进程，字符串引用/插件加载盲区，逐案 grep 双验证）+core 簇 12（懒 require 盲区）+other 14+46 未引用文件（单独批）**；参照 Batch-3/4 分批棘轮 |
+| CK-11 | knip 死代码清理大批（BK-09 重扫登记）——**进行中（workspaces 修正+四批已落；frontend+src 面收净）** | 首批=authClient 14；**第二批=frontend 90 条（knip 232→142）**；**第三批=揭洋葱 29 条（139→110）**；**批次四=src 簇 CJS 35 条处置 30 条（110→80）**：导入边精确分类（词法 grep 在 JS 同名密集区全假证据→require/import 解析+导入方核查），22 死成员摘除+5 死函数删除+2 死 re-export 收缩；**3 条恢复保留=测试强制契约**（getRuntimeBinName 源码扫描守卫/getBackendPorts+computeTrustedRendererOrigins 直测）；USED_PROD 40 保留=resources 插件 require 项目外盲区实证；**余=frontend 壳 6+shared-copilot 11（同族结构裁决：消费方直连共享包 vs 删壳）+.agents 14（CLI 直调工具脚本，低价值不动）+46 未引用文件（单独批需逐文件核对动态引用）**；参照 Batch-3/4 分批棘轮 |
 
 ## ⛔ 阻塞/延期（🟡 在册维持；G0 纪律不外推，重开条件见 AUDIT-LOG 对应行）
 
