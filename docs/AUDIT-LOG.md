@@ -5,7 +5,9 @@
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 > 入口直链（registry `entrypoint` 指向本台的 canonical 文档，归档轮转不得切断发现路径）：[block-14-left-panel-qa-fix-closeout](./block-14-left-panel-qa-fix-closeout.md) · [block-15-architecture-perf-plan](./block-15-architecture-perf-plan.md) · [block-22-codemirror-inline-diff-plan](./block-22-codemirror-inline-diff-plan.md)
 
-最后更新：2026-09-25 晚五（**CK-08=task_id 数据模型改造 P0 重估收缩（用户裁决「按照你的建议来进行」；judge 两次 timeout 降级放行如实登记）**——原始动机核实：BLOCK-106 时代行体积倒挂仍存在且增大（task_events 451,474 行、UUID task_id 文本合计 16.25MB 占库 115MB 的 14%）。三点支持不做：①30 天清扫（TASK_EVENTS_RETENTION_DAYS）增长有界；②用户无感知收益（省 ~12MB 磁盘，无实测 I/O 痛点登记）；③契约迁移风险实打实（7 后端文件+29 前端文件+跨表写入+SSE 契约+前端恢复链）。**结论=不建议做，转观察态**（重开条件=清扫上限内仍实测 I/O 痛点或库体积成为用户可感知问题）。**队列头=CK-09（output-judge 量表热调设计，低）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 晚六（**CK-09+CK-10=CK 表末两项当日收口（用户预授权；closeout 十门绿 + 判定 fit=3.57 PASS）——CK 表全部处置完毕**——①CK-09（C-10 量表热调设计）**设计结论=不开放**：fitPass/fitRetry 是配对语料校准最优解非环境参数（与 [0,1] 接点语义根本不同）+judge 是质量门（无校准依据热调=纯风险）+RETRY/ESCALATE 已承载边界样本；结论固化 decision-thresholds.js 注释，销号。②CK-10（遥测漏斗）**实施**：逻辑/IO 分离（新 src/telemetry-funnel.js 纯函数白名单+isFunnelEvent）+telemetry.js reportEvent（最小 payload 同隐私原则）+app_started 示范接线（main ready fire-and-forget）+qa-smoke TODO 转实际断言（7/7）；诚实边界=其余 5 上报点待遥测端点上线（占位端点提前接线无接收方）。验证=ck10 契约 3/3（第一版 mock.module 撞实验 flag，重构消除）+qa-smoke 7/7+test:changed 152/0。**CK 表终态=01-07 完成/08 观察态/09-10 本批销号实施——预授权队列全清**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 晚五（**CK-08=task_id 数据模型改造 P0 重估收缩（用户裁决「按照你的建议来进行」；judge 两次 timeout 降级放行如实登记）**——原始动机核实：BLOCK-106 时代行体积倒挂仍存在且增大（task_events 451,474 行、UUID task_id 文本合计 16.25MB 占库 115MB 的 14%）。三点支持不做：①30 天清扫（TASK_EVENTS_RETENTION_DAYS）增长有界；②用户无感知收益（省 ~12MB 磁盘，无实测 I/O 痛点登记）；③契约迁移风险实打实（7 后端文件+29 前端文件+跨表写入+SSE 契约+前端恢复链）。**结论=不建议做，转观察态**（重开条件=清扫上限内仍实测 I/O 痛点或库体积成为用户可感知问题）。**队列头=CK-09（output-judge 量表热调设计，低）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 晚四（**CK-07=测试卫生小批当日收口（用户预授权 CK 表推进；closeout 十门绿 + 判定 fit=3.68 PASS）**——三项处置：①grants teardown 遗留**销号**（逐层核查资源已自洽：closeServer/closeAllConnections/ping per-request 清理/hits unref/persistSoon unref；挂起=node:test runner 收尾怪癖非泄漏，300ms drain+force-exit 已是正确处置——防重复入册）；②block107-timeline-long flow **断言职责归位**：簇/思考渲染计数断言移除（v5.1x 重构后口径漂移恒 0；该契约由 ConversationTimeline.test 12/12 组件层覆盖，flow 管端到端数据流），重跑 **7/7 全绿**（L2 scrollTop=3185 锚定成功反证 CK-02 cv 破坏锚定结论的基线健康）；③散项无新增。诚实边界=REST meta 往返与组件渲染分别完好但前端组装链未逐环验证（flow 冗余断言移除即承认该层由组件契约承载，重开路径=组件测试扩真实恢复链 fixture）。**队列头=CK-08（task_id 数据模型改造，大）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
@@ -201,6 +203,7 @@
 > 已收口条目（✅）**一律移入「最近处理记录」**，不得在本区段堆积——本次清理将 23 条已收口项迁出，
 > 待处理项由 28 行降为 8 行（活跃项占比 100%）。新增 ✅ 项请直接追加到「最近处理记录」。
 ## 最近处理记录
+| ✅ 末两项收口（2026-09-25 晚六；CK 表序 9/10；closeout 十门绿 + 判定 fit=3.57 PASS） | 2026-09-25 | **CK-09 热调不开放（设计结论固化注册表注释，销号）+ CK-10 遥测漏斗实施（telemetry-funnel 纯函数白名单+reportEvent+app_started 接线+qa-smoke 7/7 转正）**——CK 表全部处置完毕（01-07 完成/08 观察/09-10 本批）| CK-09+CK-10 COMPLETED |
 | ✅ 重估收缩（2026-09-25 晚五；CK 表序 8；用户裁决「按建议来进行」） | 2026-09-25 | **CK-08=task_id 改造 P0 重估：不建议做，转观察态**——动机仍实（16.25MB 冗余/库 14%）但清扫有界+无用户感知收益+契约迁移风险大（7+29 文件）；judge 两次 timeout 降级放行如实登记 | CK-08 / C-03 重估收缩 COMPLETED |
 | ✅ 小批收口（2026-09-25 晚四；CK 表序 7；closeout 十门绿 + 判定 fit=3.68 PASS） | 2026-09-25 | **CK-07=测试卫生小批 completed**：grants teardown 遗留销号（资源自洽+runner 怪癖定性）+ block107-long flow 断言职责归位（簇/思考计数移除归组件层，7/7 全绿）+ 散项无新增；flow 重跑 7/7 | CK-07 / 测试卫生 COMPLETED |
 | ✅ 整批收口（2026-09-25 晚三；CK 表序 6；closeout 十门绿 + 判定 fit=3.56 PASS） | 2026-09-25 | **CK-06=C-11 CenterPanelContext 拆分 refs/纯值 completed**：CenterPanelRefs 独立 props+SessionFrameView prop 化+构造/测试同步；验证锚点=refs 74→34（污染根除实证），根基线 394→353；余 34 条命令式 idiom 豁免保留；tsc 0+全量 147/1205 | CK-06 / C-11 COMPLETED |

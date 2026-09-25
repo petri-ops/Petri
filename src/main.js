@@ -396,6 +396,8 @@ async function waitForBackendHealthy(port, timeoutMs) {
 async function main() {
   // BLOCK-101 P0 — D1 口径第二段：whenReady resolve 即 mainReady（进程起点→事件循环就绪）
   require("./ipc/startup-timeline").markStartup("mainReady");
+  // CK-10 — 漏斗事件示范接线（fire-and-forget，遥测默认关零开销）
+  try { require("./telemetry").reportEvent("app_started").catch(() => {}); } catch { /* 遥测永不阻塞启动 */ }
   // BLOCK-100 P1 — 测试实例直连既有后端，不做端口抢占：主实例已占 3001，
   // reserveAvailablePort(3001) 会误选 3002 指错后端。端口以 R_SERVER_PORT 为准。
   const backendPorts = IS_TEST_INSTANCE

@@ -1,6 +1,8 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-25 晚五（**CK-08 重估收缩**：task_id 改造不做（数据在案）；队列头=CK-09。**恢复要点**：dev 栈在跑；CK 表在 backlog；用户事项 U-01~U-04 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 晚六（**CK-09/10 收口——CK 表全清**（01-07 完成/08 观察/09 不开放销号/10 实施 telemetry-funnel+app_started 接线）。**恢复要点**：dev 栈在跑（后端重启后 mmap/system-prompt 预算生效）；全量表 backlog；观察态重开条件三项在案（CK-02 用户实测卡顿/CK-08 实测 I/O 痛点/CK-05 两项重开条件在评估报告）；用户事项 U-01（Jev key 轮换）/U-02~U-04（UI-437/438/440·442 过目）待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 晚五（**CK-08 重估收缩**：task_id 改造不做（数据在案）；队列头=CK-09。**恢复要点**：dev 栈在跑；CK 表在 backlog；用户事项 U-01~U-04 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 晚四（**CK-07 完成**：grants 遗留销号+flow 归位 7/7；队列头=CK-08 task_id 大改造。**恢复要点**：dev 栈在跑（测试实例新起）；CK 表在 backlog；用户事项 U-01~U-04 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

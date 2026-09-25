@@ -216,9 +216,8 @@ register('telemetry', 'telemetry.js 暴露发行漏斗钩子（开关 + 接收�
   if (!haveSwitch) throw new Error('telemetry.js 缺少开关读取（isTelemetryEnabled）');
   if (!haveSink) throw new Error('telemetry.js 缺少接收入口（reportError/reportEvent/trackEvent）');
 
-  // TODO（Gate 5 之后）：funnel events — 见 plan §4 第 5 步
-  //   app_started / runtime_install / project_created / first_job_succeeded /
-  //   report_generated / update_succeeded
+  // CK-10 — funnel events 已暴露（telemetry.js FUNNEL_EVENTS 白名单 + reportEvent）；
+  // 业务上报点接线清单见 telemetry.js 头注（端点上线后逐点接）。
   const funnel = ['app_started', 'runtime_install', 'project_created', 'first_job_succeeded', 'report_generated', 'update_succeeded'];
   const missingFunnel = funnel.filter((k) => !new RegExp(`['"\`]${k}['"\`]`).test(t));
   if (missingFunnel.length === funnel.length) {

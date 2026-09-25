@@ -97,6 +97,10 @@ module.exports = {
   // faithfulPass=0.3（noul，precision 0.9455/coverage 0.9286/trap 0.0536，仓内文档锚定
   // 语料 112）、goalPass=0.5（noul，precision 0.8504/coverage 0.9173/trap 0.164，语料
   // 504 判定）。证据=calibration-judge-faithful-goal.json；改键必先重校准（红线）。
+  // CK-09 设计结论（2026-09-25）— 本接点**热调不开放**：fitPass/fitRetry 是配对语料
+  // 校准的精度/覆盖最优解（非环境适应参数，与 topic-shift 类 [0,1] 接点语义不同）；
+  // judge 是质量门——无校准依据的热调=纯风险（调松放行质量降、调紧误拦升），边界
+  // 样本由 RETRY/ESCALATE 弹性承载。「改键必先重校准」红线不变，无运行时操作员通道。
   // BLOCK-119 加映 4（2026-09-24）— fitReviewBand=0.5：fit 阈值邻域复核带（|fit−fitPass|
   // ≤band 触发 fit-only 重放 k−1=2 取中位数重建路由；θ 不动）。证据=fit-volatility-review
   // .json（P2 试点同一好汇报 5 判 2.91~3.61 跨 θ 两侧、真负例 ≤0.78 远低于带下界；改带

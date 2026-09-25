@@ -119,8 +119,48 @@ function _sanitize(str, maxLen) {
   return s;
 }
 
+/**
+ * CK-10 — 漏斗事件上报（固定 6 项白名单，最小 payload：event + appVersion + timestamp）。
+ * 与 reportError 同隐私原则：默认关、白名单字段、失败静默、每次上报前重读开关。
+ * 上报点接线清单：app_started（main ready，已接）；其余 5 点
+ *（runtime_install/project_created/first_job_succeeded/report_generated/update_succeeded）
+ * 待遥测端点上线后随业务点接线（诚实边界：端点为占位，提前接线无接收方）。
+ */
+const { FUNNEL_EVENTS, isFunnelEvent } = require('./telemetry-funnel');
+
+async function reportEvent(name) {
+  if (!isFunnelEvent(name)) {
+    return { ok: false, reason: 'not_in_whitelist' };
+  }
+  if (!isTelemetryEnabled()) {
+    return { ok: false, reason: 'disabled' };
+  }
+  const body = {
+    event: _sanitize(String(name), 40),
+    appVersion: _getAppVersion(),
+    timestamp: new Date().toISOString(),
+  };
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(TELEMETRY_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    if (!res.ok) return { ok: false, reason: 'http_' + res.status };
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'network' };
+  }
+}
+
 module.exports = {
   reportError,
+  reportEvent,
+  FUNNEL_EVENTS,
   isTelemetryEnabled,
   TELEMETRY_ENDPOINT,
 };

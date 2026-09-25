@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-25 晚五（**CK-08=task_id 改造重估收缩（不建议做，转观察；数据与重开条件在 AUDIT-LOG 本行）**。**队列头=CK-09（output-judge 量表热调设计，低）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 晚六（**CK-09/10 收口——CK 表全部处置完毕**（01-07 完成/08 观察态/09 热调不开放销号/10 遥测漏斗实施）。**队列状态=预授权队列全清，无待推进项**；观察态三项（CK-02 长列表/CK-08 task_id/重开条件均在案）；用户事项 U-01~U-04 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 晚五（**CK-08=task_id 改造重估收缩（不建议做，转观察；数据与重开条件在 AUDIT-LOG 本行）**。**队列头=CK-09（output-judge 量表热调设计，低）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 晚四（**CK-07=测试卫生小批收口（grants 遗留销号+block107-long flow 7/7 归位）**。**队列头=CK-08（task_id 数据模型改造，大）**——其后 CK-09/10 低优先；CK 表渐进尾声。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
