@@ -2411,17 +2411,6 @@
         "test/block49-spawn-agent-tools.test.mjs",
         "test/block109-reporting-reconcile.test.mjs"
       ]
-    },
-    {
-      "id": "decision-session-count",
-      "note": "CK 透明标签会话计数锚（2026-09-25 用户裁决 jev×N 取数机制）：scripts/decision-session-count.mjs=marker 文件建会话锚+decision_log 自锚计数只读查询。变更时跑 node scripts/decision-session-count.mjs 自证（锚点创建/沿用/计数输出）；无独立契约测试（脚本自证+decision:report 同口径）。",
-      "patterns": [
-        "scripts/decision-session-count.mjs"
-      ],
-      "tests": [],
-      "frontendRelated": false,
-      "classifiesScripts": true,
-      "scriptRole": "governance"
     }
   ]
 }
