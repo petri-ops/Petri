@@ -2251,7 +2251,8 @@
       "patterns": [
         "scripts/block118-*.mjs",
         "acceptance/block-118/**",
-        "test/block118-*.test.mjs"
+        "test/block118-*.test.mjs",
+        "scripts/decision-*.mjs"
       ],
       "tests": [
         "test/block118-doc-suggest.test.mjs"
