@@ -47,6 +47,13 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 
+  // 2026-09-25 D7 领域中立棘轮红门清偿（2f1314a，fix(D7): interpret.js 决策 state
+  // 文案合法定性入基线 + DecisionConfigPanel 卡注迁改对齐单源 label）：UI 面仅设置
+  // 卡注文案语义恒等改写（「单细胞 cluster 的」→「细胞簇」，D7 领域词迁移，组件 5/5
+  // 原断言锚定+tsc 0）；台账=UI-435 加映注记随豁免登记提交补登对账（先例 670de5e）。
+  // 豁免 subject UI-### 与同提交台账要求；不重写共享历史。
+  '2f1314a2d5ff70694aa66c979925557c6c3a4067',
+
   // 2026-09-23 UI-437 收口债清偿批（670de5e，code-size manifest 死条目移除+基线
   // 重打 + lint 21 error 真修清零——未用参/无效断言/any 界定/ANSI 正则预编译/
   // [object Object] 兜底改空串）：零 UI 行为变化（组件 51/51 原断言锚定）；
@@ -379,6 +386,11 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+
+  // 2026-09-25 D7 领域中立棘轮红门清偿（2f1314a，fix(D7)）：同提交未同步台账，
+  // UI-435 加映注记随豁免登记提交补登对账（先例 670de5e）；豁免同提交台账要求；
+  // 不重写共享历史。
+  '2f1314a2d5ff70694aa66c979925557c6c3a4067',
 
   // 2026-09-23 UI-437 收口债清偿批（670de5e，code-size manifest 死条目移除+基线
   // 重打 + lint 21 error 真修清零——未用参/无效断言/any 界定/ANSI 正则预编译/
