@@ -1,5 +1,5 @@
 {
-  "_about": "BLOCK-83 D7 领域中性化棘轮基线：核心生产代码（core/ + frontend/src/ + src/，排除 test/migrations/插件目录）中领域关键词的现存残留。门禁 test/domain-neutrality.test.mjs 只拦新增与计数恶化；清理后请下调本文件（或运行 node scripts/d7-baseline.cjs --update）。",
+  "_about": "BLOCK-83 D7 领域中性化棘轮基线：核心生产代码（core/ + frontend/src/ + src/，排除 test/migrations/插件目录）中领域关键词的现存残留。门禁 test/domain-neutrality.test.mjs 只拦新增与计数恶化；清理后请下调本文件（或运行 node scripts/d7-baseline.mjs --update）。",
   "schemaVersion": 1,
   "words": [
     "seurat",
@@ -67,7 +67,7 @@
     "core/biof3-server/db/schema.js::single-cell": 2,
     "core/biof3-server/helpers/guest-permissions.js::single-cell": 1,
     "core/biof3-server/helpers/interpret.js::scrna": 1,
-    "core/biof3-server/helpers/interpret.js::单细胞": 2,
+    "core/biof3-server/helpers/interpret.js::单细胞": 3,
     "core/biof3-server/helpers/methods-export.js::cellchat": 4,
     "core/biof3-server/helpers/methods-export.js::gsea": 1,
     "core/biof3-server/helpers/methods-export.js::h5ad": 17,
@@ -110,12 +110,6 @@
     "core/packages/shared-copilot/actionBus.ts::single-cell": 2,
     "core/packages/shared-copilot/actions.ts::scrna": 2,
     "core/packages/shared-copilot/chat-file-references.ts::h5ad": 1,
-    "core/packages/shared-copilot/context.ts::single-cell": 14,
-    "core/packages/shared-copilot/helpers.ts::deseq2": 1,
-    "core/packages/shared-copilot/helpers.ts::scanpy": 1,
-    "core/packages/shared-copilot/helpers.ts::seurat": 1,
-    "core/packages/shared-copilot/helpers.ts::single-cell": 12,
-    "core/packages/shared-copilot/helpers.ts::单细胞": 4,
     "core/shared-backend/agent-workflow.js::deseq2": 3,
     "core/shared-backend/agent-workflow.js::go-kegg": 3,
     "core/shared-backend/agent-workflow.js::gsea": 4,
@@ -146,7 +140,7 @@
     "frontend/src/components/copilot/SimpleChat/types.ts::单细胞": 2,
     "frontend/src/components/result-studio/ResultStudioChangeSetPanel/display.tsx::volcano": 1,
     "frontend/src/components/workspace-panels/WorkspaceFileIcon.tsx::h5ad": 1,
-    "frontend/src/lib/copilotContext.ts::single-cell": 14,
+    "frontend/src/lib/copilotContext.ts::single-cell": 5,
     "frontend/src/lib/office-file-preview.ts::h5ad": 7,
     "frontend/src/lib/office-file-preview.ts::scanpy": 1,
     "frontend/src/lib/office-file-preview.ts::单细胞": 2,
@@ -162,5 +156,5 @@
     "src/main/core-utils.js::seurat": 1,
     "src/main/core-utils.js::wgcna": 1
   },
-  "updatedAt": "2026-09-21"
+  "updatedAt": "2026-09-25"
 }

@@ -31,7 +31,7 @@ interface ConfigResponse {
 const POINT_NOTES: Record<string, string> = {
   'topic-shift': '多轮对话偏离原话题时提示「话题已切换」。默认启用。',
   'knowledge-guard': '知识库检索结果的语义相关性与注入拦截。需知识空间已启用。',
-  'marker-celltype': '单细胞 cluster 的 marker→细胞类型提示附置信度。需项目打开。',
+  'marker-celltype': '细胞簇 marker→细胞类型提示附置信度。需项目打开。',
   'intent-route': '闲聊消息走轻量直答，不启动完整 agent 循环。',
   'tool-route': '按任务语义只下发相关工具域，降低 token 与误选率。',
 };
