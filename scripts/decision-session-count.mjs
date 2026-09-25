@@ -1,15 +1,14 @@
 #!/usr/bin/env node
 /**
- * decision-session-count — 会话级 Jev 调用计数（2026-09-25 用户裁决：透明标签 jev×N 的 N 取数锚）。
+ * decision-session-count — Jev 调用计数（2026-09-25 用户裁决两连）：
+ *   v1：会话锚（marker 起点）——修复"24h 窗口跨会话误量"
+ *   v2（本版，用户追问「为啥一直 jev×1」）：**分段口径**——marker 记 startedAt +
+ *   lastReadAt 两个时间戳；每次收尾重跑输出「本轮增量 N（自上次收尾）+ 累计 M（自锚点）」，
+ *   读写后 lastReadAt 前移。增量=当前工作阶段的 Jev 消耗，累计=会话总量，双双如实。
  *
- * 用法：
- *   npm run decision:session        # 会话起点 marker 不存在则创建（=本会话首跑），输出自起点以来的 calls 合计
- *   npm run decision:session -- --reset   # 强制重开会话锚（新会话首跑也可手动重置）
- *
- * 语义：marker 文件 .biof3-dev-user-data/jev-session-start.txt 存 ISO 时间戳（gitignored，不脏仓）；
- * 计数=decision_log 中 at >= marker 的行数（跨接点求和，与 decision:report 的 calls 合计同口径）。
- * 规则配套（AGENTS.md「Skill 使用透明度」）：收尾标签的 jev×N 必须每次收尾重跑本脚本取数，
- * 禁止复用上一轮数字（会话内数字随调用增长是正确行为，不变才可疑）。
+ * 用法：npm run decision:session [-- --reset]
+ * 配套规则（AGENTS.md 透明标签）：收尾标签写 jev×N（**本轮增量**，即自上次收尾）；
+ * 禁止复用上一轮数字；零次如实标 jev×0。
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -41,18 +40,33 @@ if (!dbPath || !fs.existsSync(dbPath)) {
 const mp = markerPath();
 fs.mkdirSync(path.dirname(mp), { recursive: true });
 const reset = process.argv.includes('--reset');
-let start;
-let created = false;
+
+let startedAt = null;
+let lastReadAt = null;
 if (reset || !fs.existsSync(mp)) {
-  start = new Date().toISOString();
-  fs.writeFileSync(mp, start + '\n');
-  created = true;
-  console.log(`decision:session 锚点已${reset ? '重置' : '创建'}：${start}（此后调用计入本会话）`);
+  startedAt = new Date().toISOString();
+  lastReadAt = startedAt;
+  fs.writeFileSync(mp, JSON.stringify({ startedAt, lastReadAt }));
+  console.log(`decision:session 锚点已${reset ? '重置' : '创建'}：${startedAt}`);
 } else {
-  start = fs.readFileSync(mp, 'utf8').trim();
+  try {
+    const doc = JSON.parse(fs.readFileSync(mp, 'utf8'));
+    startedAt = doc.startedAt || doc.replace?.('\n', '') || null;
+    lastReadAt = doc.lastReadAt || startedAt;
+    if (typeof startedAt !== 'string') { startedAt = doc; lastReadAt = startedAt; }
+  } catch {
+    startedAt = fs.readFileSync(mp, 'utf8').trim();
+    lastReadAt = startedAt;
+  }
 }
+
 const Database = require('better-sqlite3');
 const db = new Database(dbPath, { readonly: true });
-const row = db.prepare('SELECT COUNT(*) AS n FROM decision_log WHERE at >= ?').get(start);
+const sinceLast = db.prepare('SELECT COUNT(*) AS n FROM decision_log WHERE at >= ?').get(lastReadAt).n;
+const sinceStart = db.prepare('SELECT COUNT(*) AS n FROM decision_log WHERE at >= ?').get(startedAt).n;
 db.close();
-console.log(`jev×${row.n}（自 ${start}，会话锚=${created ? '新建' : '沿用'}）`);
+
+// lastReadAt 前移（本轮已读，下轮增量从此刻起）
+fs.writeFileSync(mp, JSON.stringify({ startedAt, lastReadAt: new Date().toISOString() }));
+
+console.log(`jev×${sinceLast}（本轮增量，自 ${lastReadAt}）· 累计 ${sinceStart}（自 ${startedAt} 锚点）`);
