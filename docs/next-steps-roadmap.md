@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-25 早九（**CK-02 长列表虚拟化勘察收缩（实机对照抓真 cv 与 prepend 锚定结构性冲突；收益前提无实测支撑；CSS 回退零残留）**，转观察待用户实测卡顿报告。**队列头=CK-03（轮询→SSE）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 早十（**CK-03=C-02 失效通知第一批 jobs 域收口（closeout 十门绿 + fit=3.73 PASS；UI-442 待过目）**——/api/events+4 发布点+useInvalidationStream+两消费方（15s→60s 兜底），任务状态感知秒级。**队列头=CK-04（分段 token 预算）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 早九（**CK-02 长列表虚拟化勘察收缩（实机对照抓真 cv 与 prepend 锚定结构性冲突；收益前提无实测支撑；CSS 回退零残留）**，转观察待用户实测卡顿报告。**队列头=CK-03（轮询→SSE）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 早八（**CK-01=C-06 运行中发送自动 steer 收口（closeout 十门绿 + fit=3.77 PASS；UI-440 待过目）**——设计裁决=即时 steer+回执（入队不可撤）；契约 8/8 + 全量 147/1205。**队列头=CK-02（长列表虚拟化）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
