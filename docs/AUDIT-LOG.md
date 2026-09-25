@@ -5,7 +5,9 @@
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 > 入口直链（registry `entrypoint` 指向本台的 canonical 文档，归档轮转不得切断发现路径）：[block-14-left-panel-qa-fix-closeout](./block-14-left-panel-qa-fix-closeout.md) · [block-15-architecture-perf-plan](./block-15-architecture-perf-plan.md) · [block-22-codemirror-inline-diff-plan](./block-22-codemirror-inline-diff-plan.md)
 
-最后更新：2026-09-25 晚三（**CK-06=C-11 CenterPanelContext 拆分 refs/纯值当日收口（用户预授权 CK 表推进；closeout 十门绿 + 判定 fit=3.56 PASS）**——BK-06 第六刀定性豁免的结构性修复落地：新 CenterPanelRefs 接口（两 ref 字段）独立 props 传递 + SessionFrameView 增 sessionFrameRef prop（两调用点）+ 构造点/测试工厂同步；组件行为零变化。**验证锚点达成=refs 74→34（CenterPanel 簇 40 条污染误标从基线消失，根因修复实证）**，根基线 394→353；余 34 条=命令式 idiom 豁免（保留）。验证=tsc 0+触达面 100 用例+全量 147/1205；ui:audit 两次拦红按 chore(lint) 先例改型（零 UI 行为变化无台账条目）。**队列头=CK-07（测试卫生小批）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 晚四（**CK-07=测试卫生小批当日收口（用户预授权 CK 表推进；closeout 十门绿 + 判定 fit=3.68 PASS）**——三项处置：①grants teardown 遗留**销号**（逐层核查资源已自洽：closeServer/closeAllConnections/ping per-request 清理/hits unref/persistSoon unref；挂起=node:test runner 收尾怪癖非泄漏，300ms drain+force-exit 已是正确处置——防重复入册）；②block107-timeline-long flow **断言职责归位**：簇/思考渲染计数断言移除（v5.1x 重构后口径漂移恒 0；该契约由 ConversationTimeline.test 12/12 组件层覆盖，flow 管端到端数据流），重跑 **7/7 全绿**（L2 scrollTop=3185 锚定成功反证 CK-02 cv 破坏锚定结论的基线健康）；③散项无新增。诚实边界=REST meta 往返与组件渲染分别完好但前端组装链未逐环验证（flow 冗余断言移除即承认该层由组件契约承载，重开路径=组件测试扩真实恢复链 fixture）。**队列头=CK-08（task_id 数据模型改造，大）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 晚三（**CK-06=C-11 CenterPanelContext 拆分 refs/纯值当日收口（用户预授权 CK 表推进；closeout 十门绿 + 判定 fit=3.56 PASS）**——BK-06 第六刀定性豁免的结构性修复落地：新 CenterPanelRefs 接口（两 ref 字段）独立 props 传递 + SessionFrameView 增 sessionFrameRef prop（两调用点）+ 构造点/测试工厂同步；组件行为零变化。**验证锚点达成=refs 74→34（CenterPanel 簇 40 条污染误标从基线消失，根因修复实证）**，根基线 394→353；余 34 条=命令式 idiom 豁免（保留）。验证=tsc 0+触达面 100 用例+全量 147/1205；ui:audit 两次拦红按 chore(lint) 先例改型（零 UI 行为变化无台账条目）。**队列头=CK-07（测试卫生小批）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 晚二（**CK-05=SQLite 评估批当日收口（用户预授权 CK 表推进；closeout 十门绿 + 判定 fit=3.76 PASS〔首判 timeout 降级放行，复判 PASS〕）**——三题裁决：①**mmap_size=64MB 采纳并已实施**（connection.js，实测大扫描 −8.5%/点查 −15% 两轮稳定；与 block-106 时代 2.2x 差距=口径为特定全表清扫语境，当前规模下温和但真实）；②node:sqlite 迁移**不采纳**（大扫描+5%/插入慢 1.8x/API 差异面 8 文件；唯一收益=去 native 依赖不足以覆盖；重开条件在案）；③三契约单源化**不采纳**（漂移已被 ipc-channels-registry 双向守护机械化覆盖，单源化增量=人工成本非正确性；重开条件在案）。评估报告 docs/ck05-sqlite-evaluation.md 落盘并 DOC-REGISTRY 登记（279 绿）+README 入口。诚实边界=mmap 生效为 pragma 语法级验证（随下次重启生效）/实验装置一次性不入仓。**队列头=CK-06（CenterPanelContext 拆分）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
@@ -197,6 +199,7 @@
 > 已收口条目（✅）**一律移入「最近处理记录」**，不得在本区段堆积——本次清理将 23 条已收口项迁出，
 > 待处理项由 28 行降为 8 行（活跃项占比 100%）。新增 ✅ 项请直接追加到「最近处理记录」。
 ## 最近处理记录
+| ✅ 小批收口（2026-09-25 晚四；CK 表序 7；closeout 十门绿 + 判定 fit=3.68 PASS） | 2026-09-25 | **CK-07=测试卫生小批 completed**：grants teardown 遗留销号（资源自洽+runner 怪癖定性）+ block107-long flow 断言职责归位（簇/思考计数移除归组件层，7/7 全绿）+ 散项无新增；flow 重跑 7/7 | CK-07 / 测试卫生 COMPLETED |
 | ✅ 整批收口（2026-09-25 晚三；CK 表序 6；closeout 十门绿 + 判定 fit=3.56 PASS） | 2026-09-25 | **CK-06=C-11 CenterPanelContext 拆分 refs/纯值 completed**：CenterPanelRefs 独立 props+SessionFrameView prop 化+构造/测试同步；验证锚点=refs 74→34（污染根除实证），根基线 394→353；余 34 条命令式 idiom 豁免保留；tsc 0+全量 147/1205 | CK-06 / C-11 COMPLETED |
 | ✅ 评估批收口（2026-09-25 晚二；CK 表序 5；closeout 十门绿 + 判定 fit=3.76 PASS〔首判 timeout 降级，复判 PASS〕） | 2026-09-25 | **CK-05=SQLite 评估批 completed**：mmap64 实施（−8.5%/−15% 两轮稳定）+ node:sqlite 不采纳（插入慢 1.8x）+ 三契约单源化不采纳（既有门禁覆盖收益）；评估报告落盘登记（279 绿）；重开条件均在案 | CK-05 / C-05 COMPLETED |
 | ✅ 整批收口（2026-09-25 晚一；CK 表序 4；closeout 十门绿 + 判定 fit=3.61 PASS） | 2026-09-25 | **CK-04=C-04 分段 token 预算治理第一刀 completed**：buildSystemPromptSections 段计量+段级字符预算表+超限截断标注，旧签名零破坏（黄金对照+回归 22/22）；设计裁决=字符计量不换算/第一刀只治段级；流程事故=amend 误用拆分重组修复（零污染）；契约 5/5+全量 147/1205 | CK-04 / C-04 第一刀 COMPLETED |

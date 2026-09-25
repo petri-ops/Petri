@@ -5,7 +5,9 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-09-25 晚三（**CK-06 收口：C-11 ctx 拆分 refs/纯值（验证锚点达成 refs 74→34 污染根除；根基线 394→353；closeout 十门绿 + fit=3.56 PASS）**。**队列头=CK-07（测试卫生小批）**。）
+最后更新：2026-09-25 晚四（**CK-07 收口：测试卫生小批（grants 遗留销号+block107-long flow 断言归位 7/7 全绿）**。**队列头=CK-08（task_id 数据模型改造，大）**——CK-09/10 低优先随序。）
+
+此前 最后更新：2026-09-25 晚三（**CK-06 收口：C-11 ctx 拆分 refs/纯值（验证锚点达成 refs 74→34 污染根除；根基线 394→353；closeout 十门绿 + fit=3.56 PASS）**。**队列头=CK-07（测试卫生小批）**。）
 
 此前 最后更新：2026-09-25 晚二（**CK-05 收口：SQLite 评估批（mmap64 已实施 −8.5%/−15%；node:sqlite 与三契约单源化不采纳，重开条件在案；报告 docs/ck05-sqlite-evaluation.md 登记）**。**队列头=CK-06（CenterPanelContext 拆分）**。）
 
@@ -28,8 +30,7 @@
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
 | 1 | ▶ CK-02 | **C-01：长列表虚拟化**——大会话（数百条消息）滚动/渲染性能；前置帧时基线已备（BLOCK-107 转交） | BLOCK-106/107 遗留候选 | **队列头** |
-| 1 | ▶ CK-07 | **测试卫生小批**——BLOCK-102 遗留：grants 测试补显式 teardown（关 buildMobileGateway 内部资源）；同批扫同类测试卫生散项 + block107-long flow 断言口径存量漂移清偿（CK-02 附带发现） | block-102 plan 遗留候选（本轮盘点抓回） | **队列头** |
-| 8 | ▶ CK-08 | **C-03：task_id 数据模型改造**——大改造，排后 | BLOCK-106 遗留候选 | 排队（大） |
+| 1 | ▶ CK-08 | **C-03：task_id 数据模型改造**——大改造，排后；启动前建议先重估价值（BLOCK-109 后任务体系已多轮演进） | BLOCK-106 遗留候选 | **队列头（大）** |
 | 9 | ▶ CK-09 | **C-10：output-judge 0-4 量表多闸门热调设计**——量表界与区间不变量语义需单独设计；现由代码注册表承载（证据绑定） | BK-05 非范围登记 | 排队（低） |
 | 10 | ▶ CK-10 | **qa-smoke 遥测漏斗事件**——生产面唯一 TODO（`scripts/qa-smoke.mjs:219`，Gate 5 之后语义） | 本轮盘点抓回 | 排队（低） |
 | — | 👁 BK-02 | **汇报门 P2 试点观察期盘点**（持续观察，不占队列序）——采纳率/误拦率/延迟增量/fitReplay 触发率随真实轮次累计；观察窗开启中（dev 栈 BIOF3_JEV_REPORT_GUARD=1） | BLOCK-119 收口遗留候选 | 观察（持续） |
@@ -55,6 +56,7 @@
 | ✅ CK-04 | C-04：分段 token 预算治理第一刀 | 2026-09-25 当日收口：system-prompt 段级字符预算（SECTION_CHAR_BUDGETS）+段计量报告+截断标注，旧签名零破坏（黄金对照+回归 22/22）；契约 5/5 + closeout 十门绿 + fit=3.61 PASS；总预算裁剪与前端接线留观察 |
 | ✅ CK-05 | C-05：node:sqlite 评估 / 三契约单源化 / mmap 裁决 | 2026-09-25 当日收口：mmap64 实施（−8.5%/−15% 两轮稳定）+ node:sqlite/三契约不采纳（数据与重开条件在 docs/ck05-sqlite-evaluation.md）；closeout 十门绿 + fit=3.76 PASS |
 | ✅ CK-06 | C-11：CenterPanelContext 拆分 refs/纯值两对象 | 2026-09-25 当日收口：CenterPanelRefs 独立 props+SessionFrameView prop 化；验证锚点=refs 74→34 污染根除实证，根基线 394→353；tsc 0 + 全量 147/1205 + closeout 十门绿 + fit=3.56 PASS |
+| ✅ CK-07 | 测试卫生小批 | 2026-09-25 当日收口：grants teardown 遗留销号（资源自洽+runner 怪癖定性）+ block107-long flow 断言职责归位（7/7 全绿）；closeout 十门绿 + fit=3.68 PASS |
 | ✅ CK-01 | C-06：composer 运行中发送自动改走 steer 通道 | 2026-09-25 当日收口（Windows 侧）：isConversationRunning 分支改造（steer 入队+行内回执+失败回退+title 显式化）；设计裁决=即时 steer+回执（入队不可撤）；契约 8/8 + 全量 147/1205 + closeout 十门绿 + fit=3.77 PASS；UI-440 in_progress 待过目 |
 | ✅ BK-08 | **darwin 启动预算档建基线** | 2026-09-25 当日收口：Mac 会话（darwin arm64/Node v24.16.0/项目数 4）三轮 5 样本实测，最差中位数 ×1.10（ceil）写入 platforms.darwin 七段（mainReady 46/preload 371/domContentLoaded 219/firstPaint 326/windowShown 577/didFinishLoad 578/dataReady 539）；教训=两轮基线被第三轮复跑判红 2 段（轮间中位漂移 ~15%）；契约测试 8→9；终轮 budget.pass=true violations=0；closeout 十门绿 + fit=3.36 PASS；连带=TEST 实例三连修 + impact-map 两连补登 + P6 重打 10/10（darwin-only P6 契约 13/13 零 skip）；证据=acceptance/block-101/block101-startup-timeline.json |
 

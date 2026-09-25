@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-25 晚三（**CK-06=C-11 ctx 拆分收口（refs 74→34 污染根除实证；根基线 394→353；closeout 十门绿 + fit=3.56 PASS）**。**队列头=CK-07（测试卫生小批）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 晚四（**CK-07=测试卫生小批收口（grants 遗留销号+block107-long flow 7/7 归位）**。**队列头=CK-08（task_id 数据模型改造，大）**——其后 CK-09/10 低优先；CK 表渐进尾声。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 晚三（**CK-06=C-11 ctx 拆分收口（refs 74→34 污染根除实证；根基线 394→353；closeout 十门绿 + fit=3.56 PASS）**。**队列头=CK-07（测试卫生小批）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 晚二（**CK-05=SQLite 评估批收口（mmap64 已实施；node:sqlite/三契约不采纳，重开条件在案；评估报告登记 279 绿）**。**队列头=CK-06（CenterPanelContext 拆分 refs/纯值）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
