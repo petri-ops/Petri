@@ -120,7 +120,7 @@ description: Use Gewu development infrastructure when starting or resuming a ses
 
 **主动行使（2026-09-23 用户裁决「能用 Jev/Laya 的地方就用，后续不用提醒」——到点即跑，不需要用户开口）**：规划定向测试前跑 `npm run test:suggest -- --supply=cloud`、台账回写前跑 `npm run doc:suggest -- --supply=cloud --context "<改动说明>"`、测试失败归因时跑 `node scripts/block114-failure-triage.mjs`（L1/L2 零模型先行，L3 才 Jev）、多轮会话关键结论/收口声明前跑 `npm run output:judge`（评判门三态 + `--probe` 稳定性探针，BLOCK-119）——结果（含零建议）如实附在收口/交付说明里。建议器语义=增量附加、只加不减、低置信=零建议（零建议不是故障）；确定性规则优先于模型（uiAudit 硬规则、impact-map 下限先走）。**agent 调用固定带 `--supply=cloud`**：Jev 云是唯一过校准门的供给，且 dev 工具用量成本可忽略（只收输入 token，每月几百次≈几美分）；Laya（`--supply=file` 现状）证据裁决=不可采纳，恒零建议。test:suggest 按聚焦工作包改动面喂（混合大批量置信度被稀释）。用法细节、Laya/Jev 选型表与翻盘条件见 [references/DEV-DECISION-TOOLS.md](./references/DEV-DECISION-TOOLS.md)。建议永不替代 impact-map 下限、收口门禁或台账回写纪律。
 
-**透明标签附 Jev 计数（2026-09-25 用户裁决，与 AGENTS.md「Skill 使用透明度」同源）**：交付/答复收尾的〔skills: …〕标签须附 `· jev×N`——N=本次会话 Jev 调用次数，取 `npm run decision:report -- --hours <会话时长>` 的 calls 合计（台账实数，禁止凭记忆估数；零次如实标 jev×0）。
+**透明标签附 Jev 计数（2026-09-25 用户裁决，与 AGENTS.md「Skill 使用透明度」同源）**：交付/答复收尾的〔skills: …〕标签须附 `· jev×N`——N=本次会话 Jev 调用次数，取 `npm run decision:session`（会话锚点机制：首跑建锚、收尾**重跑取数**；会话内数字增长是正确行为，复用上一轮数字即违规；台账实数禁止凭记忆估数；零次如实标 jev×0）。
 
 ## 后台任务等待纪律（事件驱动 · 用户裁决 2026-09-20「跟踪触发，而不是没有目的的等待」）
 
