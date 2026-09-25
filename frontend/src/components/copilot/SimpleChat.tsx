@@ -232,6 +232,13 @@ export function SimpleChat({
   const [attachments, setAttachments] = useState<AttachmentFile[]>([]);
   // BLOCK-91 — 附件发送失败/守卫提示（诚实可见，不再静默丢弃）。
   const [attachmentNotice, setAttachmentNotice] = useState<string | null>(null);
+  // CK-01（C-06）— 运行中发送自动 steer 的行内回执提示（几秒自动消退）
+  const [steerNotice, setSteerNotice] = useState<string | null>(null);
+  useEffect(() => {
+    if (!steerNotice) return undefined;
+    const t = window.setTimeout(() => setSteerNotice(null), 4000);
+    return () => window.clearTimeout(t);
+  }, [steerNotice]);
   // BLOCK-52 P1（选中即引用）: 右栏预览选中文字 → 引用块，随下一条消息发送。
   const [selectionRefs, setSelectionRefs] = useState<SelectionReference[]>([]);
   const selectionRefsRef = useRef<SelectionReference[]>([]);
@@ -729,6 +736,15 @@ export function SimpleChat({
     thinkingLevel,
     // UI-373 — 未选项目等宿主侧发送拦截（欢迎页）
     sendGuard,
+    // CK-01 — 运行中发送自动 steer 回执（行内轻提示 + 自动消退）
+    onSteer: (info) => {
+      if (info.ok) {
+        const preview = info.text.length > 24 ? info.text.slice(0, 24) + '…' : info.text;
+        setSteerNotice('已转向当前任务' + (typeof info.depth === 'number' && info.depth > 1 ? '（排队第 ' + info.depth + ' 位）' : '') + '：' + preview);
+      } else {
+        setSteerNotice('转向失败：' + (info.error || '未知原因') + '（输入已保留）');
+      }
+    },
   });
 
   // BLOCK-92 Wave A-3 — 审批流状态簇外迁（参数草稿同步/harness 修复/自动批准门，
@@ -1289,6 +1305,9 @@ export function SimpleChat({
             {attachmentNotice && (
               <div className="sc-attachment-notice" role="alert">{attachmentNotice}</div>
             )}
+            {steerNotice && (
+              <div className="sc-attachment-notice" role="status">{steerNotice}</div>
+            )}
             {/* Attachments preview */}
             {attachments.length > 0 && (
               <div className="sc-attachments">
@@ -1605,7 +1624,7 @@ export function SimpleChat({
                   className="sc-send-cta sc-send-cta-send"
                   onClick={() => void sendWithRefs(input)}
                   disabled={!input.trim() || streaming}
-                  title={streaming ? '任务进行中…' : '发送消息'}
+                  title={streaming ? '任务进行中…' : activeRun?.status === 'running' ? '发送 · 将转向当前任务' : '发送消息'}
                 >
                   <Icon name="arrow-up" size={12} />
                 </button>

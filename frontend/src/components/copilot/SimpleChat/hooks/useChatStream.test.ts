@@ -10,13 +10,15 @@
 import { cleanup, renderHook, act } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { startConversationRunMock, isConversationRunningMock } = vi.hoisted(() => ({
+const { startConversationRunMock, isConversationRunningMock, getConversationRunSnapshotMock } = vi.hoisted(() => ({
   startConversationRunMock: vi.fn((_options: { thinkingLevel?: string }) => true),
   isConversationRunningMock: vi.fn(() => false),
+  getConversationRunSnapshotMock: vi.fn(() => null as { taskId?: string } | null),
 }));
 
 vi.mock('@/components/copilot/conversationRunStore', () => ({
   isConversationRunning: isConversationRunningMock,
+  getConversationRunSnapshot: getConversationRunSnapshotMock,
   startConversationRun: startConversationRunMock,
   startSubAgentTask: vi.fn(),
   stopConversationRun: vi.fn(),
@@ -34,6 +36,12 @@ vi.mock('@/lib/events', () => ({
 }));
 
 vi.mock('@/lib/brand', () => ({ readBrandStorage: vi.fn(() => null) }));
+vi.mock('@/lib/authClient', () => ({
+  getApiPrefix: vi.fn(() => '/api'),
+  getToken: vi.fn(() => 'desktop-local'),
+  errMsg: vi.fn((e: unknown) => String(e)),
+  IS_DESKTOP: true,
+}));
 vi.mock('@/lib/result-edit-agent-bridge', () => ({ copilotContextOverrideForAsk: vi.fn(() => ({})) }));
 
 import { INITIAL_NAV_STATE } from '@/components/copilot/chatHistoryNav';
@@ -79,6 +87,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   startConversationRunMock.mockReturnValue(true);
   isConversationRunningMock.mockReturnValue(false);
+  getConversationRunSnapshotMock.mockReturnValue(null);
 });
 
 afterEach(() => {
@@ -173,5 +182,78 @@ describe('useChatStream 发送守卫（UI-373 欢迎页未选项目拦截）', (
     });
     expect(accepted).toBe(true);
     expect(startConversationRunMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+
+// ============================================================
+// CK-01（C-06）— 运行中发送自动改走 steer 通道。
+// 契约：会话运行中 send → POST task/:id/steer 入队（不启动新 run），
+// onSteer.ok=true 回执且 send 返回 true；POST 失败 → onSteer.ok=false +
+// 文本退回输入框（setInput）；无 taskId 的极旧运行态保持静默吞。
+// ============================================================
+describe('useChatStream 运行中发送自动 steer（CK-01）', () => {
+  it('运行中发送 → POST steer 成功：onSteer ok=true、send true、不启动新 run', async () => {
+    isConversationRunningMock.mockReturnValue(true);
+    getConversationRunSnapshotMock.mockReturnValue({ taskId: 'task_ck01' });
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({ ok: true, queued: true, depth: 1 }),
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+    const onSteer = vi.fn();
+    const { result } = renderHook(() => useChatStream(makeArgs({ onSteer })));
+    let ok: boolean | undefined;
+    await act(async () => {
+      ok = await result.current.send('中途改一下参数');
+    });
+    expect(ok).toBe(true);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe('/api/ai/agent/task/task_ck01/steer');
+    expect(JSON.parse(String(init.body))).toEqual({ message: '中途改一下参数' });
+    expect(onSteer).toHaveBeenCalledWith(expect.objectContaining({ ok: true, depth: 1 }));
+    expect(startConversationRunMock).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+
+  it('steer POST 失败：onSteer ok=false、文本退回输入框、send false', async () => {
+    isConversationRunningMock.mockReturnValue(true);
+    getConversationRunSnapshotMock.mockReturnValue({ taskId: 'task_ck01' });
+    const fetchMock = vi.fn(async () => ({
+      ok: false,
+      status: 400,
+      json: async () => ({ ok: false, error: 'invalid_arguments', message: 'message 不能为空' }),
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+    const setInput = vi.fn();
+    const onSteer = vi.fn();
+    const { result } = renderHook(() => useChatStream(makeArgs({ onSteer, setInput })));
+    let ok: boolean | undefined;
+    await act(async () => {
+      ok = await result.current.send('会被保留的输入');
+    });
+    expect(ok).toBe(false);
+    expect(onSteer).toHaveBeenCalledWith(expect.objectContaining({ ok: false, error: 'message 不能为空' }));
+    expect(setInput).toHaveBeenCalledWith('会被保留的输入');
+    expect(startConversationRunMock).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+
+  it('运行中但无 taskId（极旧运行态）：保持静默吞，不 fetch、不回调', async () => {
+    isConversationRunningMock.mockReturnValue(true);
+    getConversationRunSnapshotMock.mockReturnValue(null);
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    const onSteer = vi.fn();
+    const { result } = renderHook(() => useChatStream(makeArgs({ onSteer })));
+    let ok: boolean | undefined;
+    await act(async () => {
+      ok = await result.current.send('静默路径');
+    });
+    expect(ok).toBe(false);
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(onSteer).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
   });
 });
