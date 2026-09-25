@@ -93,7 +93,7 @@
 | C-09 | capability-provisioning 共享下载 helper | 🟡建议：host 白名单已修；共享 helper 只在改动该能力时评估（AUDIT-LOG 2026-07-17） |
 | C-10 | output-judge 0-4 量表多闸门热调——**已编入 CK-09** | BK-05 非范围登记 |
 | C-11 | CenterPanelContext 拆分 refs/纯值两对象——**已编入 CK-06** | react-hooks/refs 74 条豁免的结构性修复（BK-06 第六刀定性时登记） |
-| CK-11 | knip 死代码清理大批（BK-09 重扫登记）——**进行中（首批已落）** | 首批=authClient 14 条收缩（knip 1078→1065，证伪类型缺口论）；方法论=逐案 grep 引用核查→分类（删/登记 ignore/盲区标注）→删后 tsc+全量双验证；**core 后端文件=懒 require/字符串引用盲区高危区，逐条双验证**；参照 Batch-3/4 分批棘轮 |
+| CK-11 | knip 死代码清理大批（BK-09 重扫登记）——**进行中（首批已落）** | 首批=authClient 14 条收缩（knip 1078→1065，证伪类型缺口论）；**下一步第一步=knip 别名解析调通**（frontend/lib 簇 31 条抽检全为 PROD 在用=系统性误报，根因=knip 未配置 tsconfig paths/@ 别名，knip 6.38 需 workspace 化让 frontend/tsconfig.json 生效——调通后真实数字才可知，预计大幅缩水）；core 后端簇（懒 require/字符串引用）为另一误报源，逐案 grep 双验证；参照 Batch-3/4 分批棘轮 |
 
 ## ⛔ 阻塞/延期（🟡 在册维持；G0 纪律不外推，重开条件见 AUDIT-LOG 对应行）
 
