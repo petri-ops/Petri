@@ -93,7 +93,7 @@
 | C-09 | capability-provisioning 共享下载 helper | 🟡建议：host 白名单已修；共享 helper 只在改动该能力时评估（AUDIT-LOG 2026-07-17） |
 | C-10 | output-judge 0-4 量表多闸门热调——**已编入 CK-09** | BK-05 非范围登记 |
 | C-11 | CenterPanelContext 拆分 refs/纯值两对象——**已编入 CK-06** | react-hooks/refs 74 条豁免的结构性修复（BK-06 第六刀定性时登记） |
-| CK-11 | knip 死代码清理大批（BK-09 重扫登记）——**进行中（workspaces 修正+两批已落）** | 首批=authClient 14 条收缩（knip 1078→1065）；workspaces 配置修正（`.`+`frontend` 双 workspace 使 @/ 别名解析正确）后**真实基线=232 条未用导出+46 未引用文件**（虚高 1078 中 ~940 条系别名系统性误报）；**第二批=frontend 簇 128 条逐案 grep 证据三分类清理 90 条（knip 232→142）**：六 barrel 死 re-export 链两端同收/12 残迹 default 删/21 内部在用摘 export/35 完全死删声明（51 文件 +28/−533）；**下一批对象=「揭洋葱」新暴露 ~38 条**（tool-catalog 3/hunkControls 3/scrollToLine+unifiedDiff 4/accents.accentLabel/agentTaskApi.ackAct 等——删死 re-export 后下一层失去唯一消费者浮出）+46 未引用文件+src 簇 79 条+core 簇（懒 require/字符串引用盲区，逐案 grep 双验证）；chat-file-references.ts 系 core 共享包 re-export 壳不在此列另评估；参照 Batch-3/4 分批棘轮 |
+| CK-11 | knip 死代码清理大批（BK-09 重扫登记）——**进行中（workspaces 修正+三批已落，frontend 面收净）** | 首批=authClient 14 条；**第二批=frontend 簇清理 90 条（knip 232→142）**：六 barrel 死 re-export 链两端同收/12 残迹 default 删/21 摘 export/35 删死声明；**第三批=揭洋葱 35 条处置 29 条（knip 139→110）**：17 零引用删声明/11 摘 export/1 死 re-export 行（函数粒度洋葱两级=useTerminalTheme+readActiveThemeName 退役）；**frontend 面余 6 条=chat-file-references.ts 缓议壳**（core/packages/shared-copilot re-export 层，指向共享包直连 or 删壳需结构裁决）；**批次四=src 簇 78 条（Electron 主进程，字符串引用/插件加载盲区，逐案 grep 双验证）+core 簇 12（懒 require 盲区）+other 14+46 未引用文件（单独批）**；参照 Batch-3/4 分批棘轮 |
 
 ## ⛔ 阻塞/延期（🟡 在册维持；G0 纪律不外推，重开条件见 AUDIT-LOG 对应行）
 
