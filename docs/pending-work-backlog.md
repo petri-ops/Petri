@@ -5,7 +5,9 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-09-25 早五（**CK 推进系列建表（用户裁决「再检查检查是否不够齐全 之后像 BK 一样做个计划表 逐步推进所有的项目」）**——全仓二次盘点：候选池 11 + 新抓漏网 3（BLOCK-102 grants 测试 teardown 卫生 / BLOCK-106 mmap_size 评估并入 C-05 / qa-smoke 遥测漏斗 TODO）+ BK-08，编成 **CK-01~CK-10 逐项推进序**（用户预授权按表推进，项内产品语义裁决点仍单独问）；C-07/C-08/C-09 条件未满足不编入，D 区 G1+/证书/产品决策阻塞不编入；用户事项新增 U-04（UI-439 过目）。**队列头=CK-01（C-06 运行中发送走 steer 通道）**。）
+最后更新：2026-09-25 早六（**BK-08=darwin 启动预算档建基线完成（Mac 会话首建；closeout 十门绿 + output:judge fit=3.36 PASS · jev×8）**——三轮 5 样本实测最差中位数 ×1.10 写入 platforms.darwin 七段档；契约测试 8→9；连带=TEST 实例三连修（dock.hide/并集外摆位/darwin 收尾清场）+ impact-map 两连补登（ui439 证据目录、decision-*.mjs 归类，均为远端提交 fail-closed 拦截）+ P6 源绑定重打 10/10（吸收 BK-03 以来 win32 侧陈旧，darwin-only P6 契约首跑 13/13 零 skip）。**队列头=CK-01 不变**，BK-08 移入已完成；本机无 Jev key 的环境事实已消除（用户会中提供 key，cloud 全通零降级）。）
+
+此前 最后更新：2026-09-25 早五（**CK 推进系列建表（用户裁决「再检查检查是否不够齐全 之后像 BK 一样做个计划表 逐步推进所有的项目」）**——全仓二次盘点：候选池 11 + 新抓漏网 3（BLOCK-102 grants 测试 teardown 卫生 / BLOCK-106 mmap_size 评估并入 C-05 / qa-smoke 遥测漏斗 TODO）+ BK-08，编成 **CK-01~CK-10 逐项推进序**（用户预授权按表推进，项内产品语义裁决点仍单独问）；C-07/C-08/C-09 条件未满足不编入，D 区 G1+/证书/产品决策阻塞不编入；用户事项新增 U-04（UI-439 过目）。**队列头=CK-01（C-06 运行中发送走 steer 通道）**。）
 
 此前 最后更新：2026-09-25 早四（**BK-07 全部完成（①② 按用户裁决「1 2 搞定」落地 + ③ 前刀完成；closeout 十门绿 + fit=3.76 PASS）**——①loadAssets 收窄 (entries, patterns)；②死状态拆除+currentVersion 复核推翻原判（已接线）。）
 
@@ -25,7 +27,6 @@
 | 8 | ▶ CK-08 | **C-03：task_id 数据模型改造**——大改造，排后 | BLOCK-106 遗留候选 | 排队（大） |
 | 9 | ▶ CK-09 | **C-10：output-judge 0-4 量表多闸门热调设计**——量表界与区间不变量语义需单独设计；现由代码注册表承载（证据绑定） | BK-05 非范围登记 | 排队（低） |
 | 10 | ▶ CK-10 | **qa-smoke 遥测漏斗事件**——生产面唯一 TODO（`scripts/qa-smoke.mjs:219`，Gate 5 之后语义） | 本轮盘点抓回 | 排队（低） |
-| — | 👁 BK-08 | **darwin 启动预算档建基线**——需 Mac 会话采 5 样本建基线，禁止复制 win32 数字（保持原 ID 不入 CK 序） | BLOCK-106 遗留 + handoff ⚡ 清单 | 排队（需 Mac 环境） |
 | — | 👁 BK-02 | **汇报门 P2 试点观察期盘点**（持续观察，不占队列序）——采纳率/误拦率/延迟增量/fitReplay 触发率随真实轮次累计；观察窗开启中（dev 栈 BIOF3_JEV_REPORT_GUARD=1） | BLOCK-119 收口遗留候选 | 观察（持续） |
 
 ## 已完成（本表排队项收口记录）
@@ -45,6 +46,7 @@
 | 🔁 BK-06 | Batch-8 第七刀：tail 十八族收官（非整项收口，长线） | 2026-09-25 收口：配置双修（build globals+allowEmptyCatch）/unknownText 共享辅助 24 站点/联合塌缩 31/rules-of-hooks 4 真修/豁免定性 47/fileURLToPath 真缺陷补齐；根基线 515→397；tsc 0 + 全量 147/1201 + closeout 十门绿 |
 | ✅ BK-06 | **BLOCK-105 §7 Batch-8 整包（七刀）** | 2026-09-25 整包收官：基线 947→395（−552），可清族全部归零，剩余 395 全为书面定性豁免类；豁免清单与六条机制教训见 handoff/整包声明；C-11（ctx 拆分）登记候选池 |
 | ✅ BK-07 | **BLOCK-105 Batch-4 抓真三件处置** | 2026-09-25 全部完成：①loadAssets 五参化石收窄 (entries, patterns)（四调用点同步）；②_jobMeta/_selectedSectionId 死状态整体拆除+currentVersion 复核推翻原判（已接线，Batch-4 盘点路径有误）；③copilotAsk 断言补齐；tsc 0+全量 147/1202+closeout 十门绿 |
+| ✅ BK-08 | **darwin 启动预算档建基线** | 2026-09-25 当日收口：Mac 会话（darwin arm64/Node v24.16.0/项目数 4）三轮 5 样本实测，最差中位数 ×1.10（ceil）写入 platforms.darwin 七段（mainReady 46/preload 371/domContentLoaded 219/firstPaint 326/windowShown 577/didFinishLoad 578/dataReady 539）；教训=两轮基线被第三轮复跑判红 2 段（轮间中位漂移 ~15%）；契约测试 8→9；终轮 budget.pass=true violations=0；closeout 十门绿 + fit=3.36 PASS；连带=TEST 实例三连修 + impact-map 两连补登 + P6 重打 10/10（darwin-only P6 契约 13/13 零 skip）；证据=acceptance/block-101/block101-startup-timeline.json |
 
 ## 👤 用户事项（Agent 不代行，仅登记与提醒）
 
