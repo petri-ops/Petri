@@ -2411,6 +2411,23 @@
         "test/block49-spawn-agent-tools.test.mjs",
         "test/block109-reporting-reconcile.test.mjs"
       ]
+    },
+    {
+      "id": "ck03-events-bus",
+      "note": "CK-03（C-02 轮询→SSE 第一批：jobs 域失效通知）：helpers/event-bus.js（SSE 客户端注册表+publishInvalidation+心跳）+ routes/events-bus.js（GET /api/events 通道）+ agent-task-store 4 发布点（create/markDone/markFailed/markCancelled）+ 前端 hooks/useInvalidationStream（fetch-SSE 解析+指数退避重连）+ 消费方接入（useConversationJobs/project-workspace/WorkspaceSummaryCard 706 jobs 轮询降频）。契约=test/ck03-events-bus.test.mjs。",
+      "patterns": [
+        "core/biof3-server/helpers/event-bus.js",
+        "core/biof3-server/routes/events-bus.js",
+        "core/biof3-server/agent-task-store.js",
+        "frontend/src/hooks/useInvalidationStream.ts",
+        "frontend/src/hooks/useConversationJobs.ts",
+        "test/ck03-*.test.mjs"
+      ],
+      "tests": [
+        "test/ck03-events-bus.test.mjs"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": false
     }
   ]
 }

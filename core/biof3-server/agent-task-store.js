@@ -6,6 +6,7 @@
  * execution belongs to run_tool -> tool_job -> artifact truth.
  */
 
+const eventBus = require('./helpers/event-bus');
 const Database = require('better-sqlite3');
 const config = require('./config');
 const logger = require('./logger');
@@ -480,6 +481,7 @@ function createAgentTask(opts = {}) {
   const { userId, params, status, agentStatus } = opts;
   const taskId = require('crypto').randomUUID();
   const result = insertAgentTask({ taskId, userId, params });
+  try { eventBus.publishInvalidation('jobs', { taskId, state: 'created' }); } catch { /* 通知失败不阻塞落库 */ }
   if (result && (status || agentStatus)) {
     // insertAgentTask already wrote status='running' / agent_status='running'
     // via the prepared statement defaults; if a caller passes different
@@ -665,6 +667,7 @@ function serializeFilesChanged(filesChanged) {
 // BLOCK-31 P1: filesChanged 为可选权威清单（agent-files-changed.js 聚合产物），
 // 传空/缺省时保留列中原值（COALESCE）。
 function markAgentTaskDone(taskId, filesChanged) {
+  try { eventBus.publishInvalidation('jobs', { taskId, state: 'completed' }); } catch { /* 通知失败不阻塞落库 */ }
   stmts.updateStatus.run(
     'done',
     'completed',
@@ -676,6 +679,7 @@ function markAgentTaskDone(taskId, filesChanged) {
 }
 
 function markAgentTaskFailed(taskId, error, filesChanged) {
+  try { eventBus.publishInvalidation('jobs', { taskId, state: 'failed' }); } catch { /* 通知失败不阻塞落库 */ }
   stmts.updateStatus.run(
     'failed',
     'failed',
@@ -802,6 +806,7 @@ function isAgentTaskCancellationRequested(taskId) {
 }
 
 function markAgentTaskCancelled(taskId, filesChanged) {
+  try { eventBus.publishInvalidation('jobs', { taskId, state: 'cancelled' }); } catch { /* 通知失败不阻塞落库 */ }
   stmts.updateStatus.run(
     'cancelled',
     'cancelled',

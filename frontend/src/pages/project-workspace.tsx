@@ -60,6 +60,7 @@ import { useWorkspaceFileTabs } from './project-workspace/useWorkspaceFileTabs';
 import { useRuntimeDemandBanner } from './project-workspace/useRuntimeDemandBanner';
 import { useWorkspaceTitleBar } from './project-workspace/useWorkspaceTitleBar';
 import { useResultStudioEditContext } from './project-workspace/useResultStudioEditContext';
+import { useInvalidationStream } from '@/hooks/useInvalidationStream';
 import { useWorkspaceOpenEffects } from './project-workspace/useWorkspaceOpenEffects';
 export function ProjectWorkspace(): React.ReactElement {
   const shell = useWorkspacePanelsContext();
@@ -511,7 +512,7 @@ export function ProjectWorkspace(): React.ReactElement {
   }, [project?.workspacePath]);
   useEffect(() => {
     void fetchData();
-    const id = setInterval(() => { void fetchData(); }, 15_000);
+    const id = setInterval(() => { void fetchData(); }, 60_000); // CK-03：SSE 失效驱动为主，60s 兜底
     return () => clearInterval(id);
   }, [fetchData]);
   useEffect(() => {

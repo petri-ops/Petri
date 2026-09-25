@@ -28,6 +28,7 @@ module.exports = async function registerRoutes(app) {
     ['AI admin', () => require('./ai-admin')(app)],
     ['AI plans', () => require('./ai-plans')(app)],
     ['AI misc', () => require('./ai-misc')(app)],
+    ['Events bus', () => require('./events-bus')(app)],
     ['AI legacy', () => require('./ai-legacy')(app)],
     ['AI progress', () => require('./ai-progress')(app)],
     ['Data CRUD', () => { app.use('/api/data', require('../api-data')); }],

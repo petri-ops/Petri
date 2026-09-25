@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useInvalidationStream } from './useInvalidationStream';
 import { listProjectJobs } from '@/lib/project-store';
 import type { ToolJob } from '@/lib/project-types';
 
@@ -76,12 +77,19 @@ export function useConversationJobs(
         requestSequence.current += 1;
       };
     }
-    const timer = window.setInterval(() => void refresh(), pollMs);
+    // CK-03（C-02）— 失效通知驱动：SSE invalidate(jobs) 即时刷新；轮询降为
+    // 60s 兜底（防 SSE 断线窗口漏更新，重连后由下次事件/兜底自愈）。
+    const timer = window.setInterval(() => void refresh(), 60_000);
     return () => {
       window.clearInterval(timer);
       requestSequence.current += 1;
     };
   }, [conversationId, pollMs, projectId, refresh]);
+
+  useInvalidationStream(Boolean(projectId && conversationId), useCallback(
+    (info) => { if (info.domain === 'jobs') void refresh(); },
+    [refresh],
+  ));
 
   return { jobs, loading, error, refresh };
 }
