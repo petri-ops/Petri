@@ -19,7 +19,9 @@
     "core/biof3-server/build/**",
     "**/__fixtures__/**"
   ],
-  "ignoreBinaries": ["gitleaks"],
+  "ignoreBinaries": [
+    "gitleaks"
+  ],
   "ignoreDependencies": [
     "typescript",
     "@types/react",
@@ -27,5 +29,24 @@
     "electron",
     "react",
     "react-dom"
-  ]
+  ],
+  "workspaces": {
+    ".": {
+      "entry": [
+        "src/main.js",
+        "src/preload.js",
+        "core/**/*.js",
+        "scripts/**/*.{js,mjs,cjs}",
+        "test/**/*.{mjs,cjs,js}",
+        "build/**/*.js"
+      ]
+    },
+    "frontend": {
+      "entry": [
+        "frontend/src/main.tsx",
+        "frontend/src/App.tsx",
+        "frontend/src/**/*.test.{ts,tsx}"
+      ]
+    }
+  }
 }
