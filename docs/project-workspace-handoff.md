@@ -1,6 +1,8 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-25 晚四（**CK-07 完成**：grants 遗留销号+flow 归位 7/7；队列头=CK-08 task_id 大改造。**恢复要点**：dev 栈在跑（测试实例新起）；CK 表在 backlog；用户事项 U-01~U-04 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 晚五（**CK-08 重估收缩**：task_id 改造不做（数据在案）；队列头=CK-09。**恢复要点**：dev 栈在跑；CK 表在 backlog；用户事项 U-01~U-04 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 晚四（**CK-07 完成**：grants 遗留销号+flow 归位 7/7；队列头=CK-08 task_id 大改造。**恢复要点**：dev 栈在跑（测试实例新起）；CK 表在 backlog；用户事项 U-01~U-04 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 晚三（**CK-06 完成**：ctx 拆分（CenterPanelRefs 独立 props）；队列头=CK-07 测试卫生小批。**恢复要点**：dev 栈在跑；CK 表在 backlog；用户事项 U-01~U-04 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

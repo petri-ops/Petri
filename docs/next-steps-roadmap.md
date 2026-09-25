@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-25 晚四（**CK-07=测试卫生小批收口（grants 遗留销号+block107-long flow 7/7 归位）**。**队列头=CK-08（task_id 数据模型改造，大）**——其后 CK-09/10 低优先；CK 表渐进尾声。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 晚五（**CK-08=task_id 改造重估收缩（不建议做，转观察；数据与重开条件在 AUDIT-LOG 本行）**。**队列头=CK-09（output-judge 量表热调设计，低）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 晚四（**CK-07=测试卫生小批收口（grants 遗留销号+block107-long flow 7/7 归位）**。**队列头=CK-08（task_id 数据模型改造，大）**——其后 CK-09/10 低优先；CK 表渐进尾声。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 晚三（**CK-06=C-11 ctx 拆分收口（refs 74→34 污染根除实证；根基线 394→353；closeout 十门绿 + fit=3.56 PASS）**。**队列头=CK-07（测试卫生小批）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
