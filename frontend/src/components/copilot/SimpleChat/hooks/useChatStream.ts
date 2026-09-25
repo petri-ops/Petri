@@ -43,6 +43,7 @@ import {
   migrateConversationDraft,
 } from '@/components/copilot/conversationDraft';
 import {
+  getConversationRunSnapshot,
   isConversationRunning,
   startConversationRun,
   startSubAgentTask,
@@ -51,6 +52,7 @@ import {
   type ConversationRunSnapshot,
 } from '@/components/copilot/conversationRunStore';
 import { type ChatMessage } from '@/components/copilot/copilotClient';
+import { getApiPrefix, getToken } from '@/lib/authClient';
 import { type SimpleMessage } from '../types';
 
 /** BLOCK-102 P2 — 排队追问带会话归属：drain 只消费当前会话的条目，
@@ -99,6 +101,9 @@ export interface UseChatStreamArgs {
   createConversationForRun: (title?: string) => Promise<{ id: string } | null>;
   /** BLOCK-81 P2 — 会话级思考档位（缺省/standard＝不发任何上游思考参数） */
   thinkingLevel?: 'off' | 'standard' | 'high';
+  /** CK-01（C-06）— 运行中发送自动 steer 的回执回调：ok=true 已入队（depth=排队深度），
+   *  ok=false 转向失败（error=原因，调用方应保留输入）。缺省=静默（回归原行为）。 */
+  onSteer?: (info: { ok: boolean; text: string; depth?: number; error?: string }) => void;
   /**
    * UI-373 — 发送前置守卫：返回非空字符串 = 拦截本次发送（侧效应由守卫自身
    * 负责，如欢迎页未选项目时展开项目选择器）。守卫在空文本/streaming 检查
@@ -143,6 +148,7 @@ export function useChatStream({
   conversationId,
   onConversationChange,
   ownsCopilotAsk,
+  onSteer,
   taRef,
   historyNavRef,
   copilotCtxRef,
@@ -217,7 +223,39 @@ export function useChatStream({
           // 事件总线失败不阻塞发送
         }
       }
-      if (isConversationRunning(targetConversationId)) return false;
+      // CK-01（C-06）— 运行中发送自动改走 steer 通道：不再静默吞掉，POST
+      // task/:id/steer 入队（下一轮模型请求边界注入，后端 BLOCK-98 M4）。
+      // 诚实边界：入队即不可撤（已在后端队列），成功回执经 onSteer 行内提示；
+      // 失败（404/非运行/网络）回退原行为——文本退回输入框保留。
+      if (isConversationRunning(targetConversationId)) {
+        const runTaskId = getConversationRunSnapshot(targetConversationId)?.taskId;
+        if (!runTaskId) return false; // 极旧运行态无 taskId：保持原静默行为
+        try {
+          const resp = await fetch(getApiPrefix() + '/ai/agent/task/' + encodeURIComponent(runTaskId) + '/steer', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(getToken() ? { Authorization: 'Bearer ' + getToken() } : {}),
+            },
+            body: JSON.stringify({ message: trimmed }),
+          });
+          const data = (await resp.json().catch(() => ({}))) as { ok?: unknown; depth?: unknown; error?: unknown; message?: unknown };
+          if (resp.ok && data.ok) {
+            onSteer?.({ ok: true, text: trimmed, depth: typeof data.depth === 'number' ? data.depth : undefined });
+            return true; // 已受理：调用方按既有 ok=true 语义清空输入与引用块
+          }
+          const reason = typeof data.message === 'string' && data.message
+            ? data.message
+            : typeof data.error === 'string' && data.error ? data.error : 'HTTP ' + resp.status;
+          onSteer?.({ ok: false, text: trimmed, error: reason });
+          setInput(text);
+          return false;
+        } catch (e) {
+          onSteer?.({ ok: false, text: trimmed, error: e instanceof Error ? e.message : '网络错误' });
+          setInput(text);
+          return false;
+        }
+      }
 
       // BLOCK-55 P1 — 清上下文执行：仅发 spec 自包含首 turn，不带会话历史
       const history: ChatMessage[] = messagesRef.current
@@ -275,6 +313,8 @@ export function useChatStream({
     projectId,
     // UI-373 — 守卫闭包须新鲜（宿主按选中态切换守卫）
     sendGuard,
+    // CK-01 — steer 回执闭包须新鲜（行内提示读取最新 setState）
+    onSteer,
     streaming,
     // BLOCK-81 P3 实机抓真修：`send` 闭包读了 thinkingLevel，漏进依赖数组会让
     // 「切档位后不刷新页面直接发送」沿用挂载时的旧档位——控件显示「高」而请求体
