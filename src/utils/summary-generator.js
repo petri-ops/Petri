@@ -154,40 +154,7 @@ function generateSummaryText(messages, userMessages, assistantMessages) {
   return `对话导出 (${total} 条消息, ${userCount} 用户 / ${assistantCount} 助手${durationStr})${context}`;
 }
 
-/**
- * Calculate conversation metrics.
- *
- * @param {Array<{created_at?: number}>} messages - Messages with optional timestamps
- * @returns {ConversationMetrics} Metrics object
- */
-function calculateConversationMetrics(messages) {
-  if (!messages || messages.length === 0) {
-    return { topics: [], messageCount: 0, duration: 0 };
-  }
-
-  const userMessages = messages.filter((m) => m.role === 'user');
-  const topics = extractTopics(userMessages);
-
-  let duration = 0;
-  if (messages.length >= 2) {
-    const first = messages[0].created_at;
-    const last = messages[messages.length - 1].created_at;
-    if (first && last) {
-      duration = last - first;
-    }
-  }
-
-  return {
-    topics,
-    messageCount: messages.length,
-    duration,
-  };
-}
 
 module.exports = {
   generateConversationSummary,
-  extractTopics,
-  extractKeyFindings,
-  generateSummaryText,
-  calculateConversationMetrics,
 };

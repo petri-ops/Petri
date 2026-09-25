@@ -29,7 +29,7 @@ const { createSenderGuard } = require('./_sender-guard');
 const { safeInvoke, resolveGitAdapter, getProjectWorkspacePath } = require('./working-tree-review/context');
 const { initRepositoryAt } = require('./working-tree-review/repository-init');
 const { diffForReview, parseDiffFiles, buildReversePatchForReject } = require('./working-tree-review/diff-parse');
-const { _writeRejectEntry, REJECT_TTL_DAYS } = require('./working-tree-review/reject-store');
+const { _writeRejectEntry } = require('./working-tree-review/reject-store');
 
 const MAX_FILE_CONTENT_BYTES = 1024 * 1024; // 1MB；超过只返回元信息（行级渲染策略）
 
@@ -631,4 +631,4 @@ function setupWorkingTreeReviewIpc(options = {}) {
   return { notifyAgentTaskDone };
 }
 
-module.exports = { setupWorkingTreeReviewIpc, initRepositoryAt, MAX_FILE_CONTENT_BYTES, REJECT_TTL_DAYS };
+module.exports = { setupWorkingTreeReviewIpc, initRepositoryAt };

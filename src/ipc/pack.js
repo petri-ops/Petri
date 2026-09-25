@@ -103,4 +103,4 @@ function registerPackIpc() {
   });
 }
 
-module.exports = { registerPackIpc, getDataDir };
+module.exports = { registerPackIpc };

@@ -95,16 +95,12 @@ try {
 }
 
 module.exports = {
-  resolveSharedBackendDir,
-  resolveProjectRoot,
   getFixRPathsScript,
   SHARED_BACKEND_DIR,
   PROJECT_ROOT,
-  USER_DATA_DIR,
   PLUGINS_DIR,
   RUNTIMES_DIR,
   INSTALLED_FILE,
-  RESOURCES_PATH,
   BUILT_IN_PLUGINS_DIR,
   MANIFEST_URL,
 };

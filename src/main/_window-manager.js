@@ -441,6 +441,4 @@ module.exports = {
   clampBoundsToWorkArea,
   CONTENT_TYPES,
   MAX_POPPED_WINDOWS,
-  RAIL_STATIC_FADE_MS,
-  KEY_PATTERN,
 };

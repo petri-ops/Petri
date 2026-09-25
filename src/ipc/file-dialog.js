@@ -282,4 +282,4 @@ function setupFileDialogIpc({ mainWindow } = {}) {
   });
 }
 
-module.exports = { setupFileDialogIpc, ALLOWED_OPEN_EXTENSIONS };
+module.exports = { setupFileDialogIpc };

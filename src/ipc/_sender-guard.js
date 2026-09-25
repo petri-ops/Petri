@@ -68,5 +68,4 @@ function createSenderGuard(mainWindowOrGetter) {
 
 module.exports = {
   createSenderGuard,
-  isWebContentsDestroyed,
 };

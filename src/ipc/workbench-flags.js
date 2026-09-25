@@ -45,7 +45,6 @@ function setupAgentWorkbenchFlagsIpc({ getMainWindow, getAgentWorkbenchFlags, pu
 
 module.exports = {
   AGENT_WORKBENCH_FLAG_CHANNEL,
-  AGENT_WORKBENCH_FLAG_NAME,
   parseAgentWorkbenchFlags,
   setupAgentWorkbenchFlagsIpc,
 };

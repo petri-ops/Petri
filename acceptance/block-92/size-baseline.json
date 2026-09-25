@@ -5,22 +5,22 @@
       "path": "frontend/src/components/copilot/conversationRunStore.ts",
       "wave": "A",
       "module": "W-03",
-      "lines": 813,
-      "sha256": "693d5aa6e33a032188ff3fa00478d00f0edd161583a9291b06734eb19f0a0cfe"
+      "lines": 802,
+      "sha256": "ca17aa8cd48d753dfd1d67c98ea8a39f529b91cdaac6b46330265c4cda4ecd5b"
     },
     {
       "path": "frontend/src/components/copilot/copilotClient.ts",
       "wave": "A",
       "module": "W-03",
-      "lines": 134,
-      "sha256": "fd6e1b90af93e4fc0ed91186dc7b7a63172982fd7966221aa8df4e318f26d1e4"
+      "lines": 131,
+      "sha256": "12e14987eb126b1c89fc4632a6c247ba2df30a471f112e3e35f2e3ac52679358"
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat.tsx",
       "wave": "A",
       "module": "W-03",
-      "lines": 1663,
-      "sha256": "b8660c85f4af38cd565cf3108a5f49d8ca1d896a02b1feb939c7a2a06fca5c97"
+      "lines": 1657,
+      "sha256": "1f7fa58c55f81aa67e895efe1eefafadc2a7ddf3ed24ad9f7a9d1be0eed88440"
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat/hooks/useThinkingLevel.ts",
@@ -48,7 +48,7 @@
       "wave": "B",
       "module": "W-04",
       "lines": 1193,
-      "sha256": "e1d26b4be11764ef6851922d1a73db3f525020385725a7cbec7e037a41e83d28"
+      "sha256": "4c7308920035818583a4a44d0cf3497b75b1ecfcf71e8ac8e0d1511d0b05b448"
     },
     {
       "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx",
@@ -61,15 +61,15 @@
       "path": "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
       "wave": "B",
       "module": "W-01",
-      "lines": 638,
-      "sha256": "7cda7f977ab48d442e8ba4918fcaa63073e2426bc401a3de62894ea4c600a50b"
+      "lines": 637,
+      "sha256": "ff0e286214d0ca0e21bc084c3a2876dd298de132b0de11e43ab013d9e056df19"
     },
     {
       "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
       "wave": "B",
       "module": "W-01",
-      "lines": 789,
-      "sha256": "ddcbb24874b2a8a8efb98aebd0ca1a83c9adf8330bf41615c7e2ad985e70c739"
+      "lines": 788,
+      "sha256": "46762ca5d2dae982575b682b42a657103b4b2cad98a5ec394d0e1a053cb9fd6c"
     },
     {
       "path": "frontend/src/pages/home.tsx",
@@ -170,5 +170,5 @@
       "sha256": "2d0d1d1810a7b186cb7de9632316c542bc55fc2ba8078b8bb3d9bdf765dea3e4"
     }
   ],
-  "total": 22048
+  "total": 22026
 }

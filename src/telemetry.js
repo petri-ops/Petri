@@ -126,7 +126,7 @@ function _sanitize(str, maxLen) {
  *（runtime_install/project_created/first_job_succeeded/report_generated/update_succeeded）
  * 待遥测端点上线后随业务点接线（诚实边界：端点为占位，提前接线无接收方）。
  */
-const { FUNNEL_EVENTS, isFunnelEvent } = require('./telemetry-funnel');
+const { isFunnelEvent } = require('./telemetry-funnel');
 
 async function reportEvent(name) {
   if (!isFunnelEvent(name)) {
@@ -160,7 +160,4 @@ async function reportEvent(name) {
 module.exports = {
   reportError,
   reportEvent,
-  FUNNEL_EVENTS,
-  isTelemetryEnabled,
-  TELEMETRY_ENDPOINT,
 };

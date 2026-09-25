@@ -71,6 +71,5 @@ function compareVersions(a, b) {
 module.exports = {
   detectPlatform,
   getRuntimeStatus,
-  parseVersion,
   compareVersions,
 };

@@ -619,4 +619,4 @@ function setupWindowManagerIpc({
   };
 }
 
-module.exports = { setupWindowManagerIpc, forwardToContentWindow, RAIL_CONTENT_ID };
+module.exports = { setupWindowManagerIpc, forwardToContentWindow };

@@ -317,17 +317,6 @@ function listResultVersions(resultId, limit = 50, offset = 0) {
   return rows.map(deserializeVersion);
 }
 
-/**
- * Delete all versions for a result
- * @param {string} resultId - Result ID
- * @returns {number} Number of deleted versions
- */
-function deleteResultVersions(resultId) {
-  const db = getDatabase();
-  const stmt = db.prepare('DELETE FROM result_versions WHERE result_id = ?');
-  const result = stmt.run(resultId);
-  return result.changes;
-}
 
 // ============================================================
 // Serialization Helpers
@@ -376,5 +365,4 @@ module.exports = {
   getLatestVersionNumber,
   getResultVersion,
   listResultVersions,
-  deleteResultVersions,
 };

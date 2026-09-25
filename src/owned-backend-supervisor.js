@@ -126,6 +126,5 @@ function createOwnedBackendSupervisor({
 }
 
 module.exports = {
-  DEFAULT_RESTART_DELAYS_MS,
   createOwnedBackendSupervisor,
 };

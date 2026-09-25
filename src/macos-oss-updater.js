@@ -186,7 +186,6 @@ function createMacOssUpdater({
 }
 
 module.exports = {
-  DEFAULT_FEED_URL,
   compareVersions,
   createMacOssUpdater,
   parseLatestMacYaml,

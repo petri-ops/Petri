@@ -47,4 +47,4 @@ function zoomReset(win) {
   return 0;
 }
 
-module.exports = { ZOOM_MIN, ZOOM_MAX, clampZoom, zoomBy, zoomReset };
+module.exports = { ZOOM_MIN, ZOOM_MAX, zoomBy, zoomReset };

@@ -137,6 +137,4 @@ module.exports = {
   listContentPluginDocs,
   readContentPluginDoc,
   listAllContentPlugins,
-  extractMdTitle,
-  extractSidebarPos,
 };

@@ -340,4 +340,4 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
   });
 }
 
-module.exports = { setupTerminalIpc, MAX_TERMINAL_TABS, DEFAULT_SESSION_ID };
+module.exports = { setupTerminalIpc };

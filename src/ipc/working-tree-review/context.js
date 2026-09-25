@@ -108,4 +108,4 @@ async function resolveGitAdapter(projectId) {
   );
 }
 
-module.exports = { safeInvoke, getProjectInfo, getProjectWorkspacePath, resolveGitAdapter };
+module.exports = { safeInvoke, getProjectWorkspacePath, resolveGitAdapter };

@@ -65,4 +65,4 @@ function _writeRejectEntry(userDataDir, args) {
   }
 }
 
-module.exports = { pruneRejectFiles, _writeRejectEntry, REJECT_TTL_DAYS };
+module.exports = { pruneRejectFiles, _writeRejectEntry };

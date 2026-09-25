@@ -197,19 +197,5 @@ async function startStaticServer(buildDir, opts = {}) {
   return server;
 }
 
-/** 停止指定端口的服务器（不传则停止全部） */
-function stopStaticServer(port) {
-  if (port) {
-    if (servers[port]) {
-      servers[port].close();
-      delete servers[port];
-    }
-    return;
-  }
-  for (const p of Object.keys(servers)) {
-    servers[p].close();
-    delete servers[p];
-  }
-}
 
-module.exports = { startStaticServer, stopStaticServer };
+module.exports = { startStaticServer };
