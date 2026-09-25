@@ -4115,9 +4115,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据（契约+实机 · UI-442）**：ck03 契约 4/4（真实 Express+DB 自举：401/hello/广播到达/断开清理/终态发布点/心跳帧）+ 前端全量 147/1205 + tsc 0 + 实机 /api/events hello 到达（dev 栈重启后 200 text/event-stream）。接线收尾（fix(UI-442)）：project-workspace 补 jobs 失效订阅；WorkspaceSummaryCard liveJobsPreview 回滚 5s（load 定义于 useEffect 内部 hook 外不可达，接入留增量批）。待用户实机过目（观察任务状态变化秒级感知）翻 verified。
 - **UI-440（2026-09-25，CK-01/C-06 运行中发送自动 steer，in_progress）**：候选池 C-06 落地（用户预授权 CK 表逐项推进）——运行中再发消息不再被静默吞掉：send 的 isConversationRunning 分支改为 POST `task/:id/steer`（BLOCK-98 M4 既有通道）自动入队，下一轮模型请求边界注入；行内回执提示「已转向当前任务（排队第 N 位）：预览」（4s 自动消退），失败回退原行为（文本退回输入框保留）；发送按钮 title 运行中态显式化「发送 · 将转向当前任务」。诚实边界=steer 入队即不可撤（推荐形态「可撤销 2 秒」修正为「即时 steer+回执」，伪撤销不做）。
 - **证据（契约 · UI-440）**：useChatStream 契约 8/8（+3：steer 成功入队不启动新 run / POST 失败文本保留 / 无 taskId 极旧态静默回归）+ 前端全量 147 文件/1205 用例 + tsc 0。待实机过目翻 verified。
-- **证据（契约+实机 · UI-439）**：CDP 量测三断言 PASS（send 24×24 / ringBtn 24×24 / ringSvg 18）+ 元素级裁剪截图过目（acceptance/ui-439/ui436-composer-row-crop.png，环与发送钮明显小于 34px 选择器、失衡消除）；theme-token-contract 4/4 + ContextBudgetBar/SimpleChat 组件 6/6 + tsc 0。待用户实机过目翻 verified。
+- **证据（契约+实机 · UI-439）**：CDP 量测三断言 PASS（send 24×24 / ringBtn 24×24 / ringSvg 18）+ 元素级裁剪截图过目（acceptance/ui-439/ui436-composer-row-crop.png，环与发送钮明显小于 34px 选择器、失衡消除）；theme-token-contract 4/4 + ContextBudgetBar/SimpleChat 组件 6/6 + tsc 0。
+- **verified 翻转（2026-09-25，用户授权代行评估 + Jev 裁决）**：CDP 量测（24/24/18）+ 全窗截图视觉核对（与 34px 选择器平衡）——acceptance/ui-eval-agent/。
 - **加映 v5.20（2026-09-24，BLOCK-116 W2/BK-04 伴随增量，提交 a23ab0f）**：决策观测工具的动词/图标注册——后端新增 `decision_summary`（已统计）/`decision_recent`（已回放）两工具（agent 可见决策台账只读查询面，工具总数 71→73），前后端动词表与域感知图标（settings/clock）+ `test/fixtures/tool-activity-labels.json` 单源同步；无新增 UI 组件、无既有行为变化（时间线对新工具自然渲染行内动词行）。
-- **证据（契约 · v5.20）**：tool-activity-labels 5/5（宇宙 73 双向覆盖）+ 前端 toolActivity 16/16（fixture 对齐含新两件）+ tsc 0；实机=真模型调用 decision_recent 轮（acceptance/block-116/w2-agent-tools-live.json，行内动词行随之生效）。待用户实机过目（并入 UI-437 v5.13–v5.19 同批验收）。
+- **证据（契约 · v5.20）**：tool-activity-labels 5/5（宇宙 73 双向覆盖）+ 前端 toolActivity 16/16（fixture 对齐含新两件）+ tsc 0；实机=真模型调用 decision_recent 轮（acceptance/block-116/w2-agent-tools-live.json，行内动词行随之生效）。
+- **verified 翻转（2026-09-25，用户授权代行评估 + Jev 裁决 fit=3 PASS）**：v5.13–v5.20 七批增量经真实 spawn 任务轮全链取证（工具行/fold 折叠/运行摘要/复制钮 hover 设计/动词注册表）全部符合各批验收描述——acceptance/ui-eval-agent/，台账状态由 in_progress 翻 verified。
 - **抓真修复（v5.6 验收实测抓出）**：①`mergeToolResultActivity` 的 resultData 三元方向写反（result 是新到数据却走了「保留旧值」分支——running 项已存在时 resultData 恒 undefined，即用户截图「点开只有工具名」的根因），改为总是取本次 `result?.data`，补合并方向契约测试；②展开体断言需先点行头出 ActivityBody（行级两级折叠语义）。
 - **加映 v5.7（同日，用户反馈「返回 JSON 有复制图标按钮吗？应该加上」）**：返回详情块增标题栏（返回 + 复制钮）——复制走 navigator.clipboard（与终端块复制同模式），写后 is-copied ✓ 反馈 1.5s；剪贴板不可用时静默失败（正文仍可手动选择）。resultdata 块补 CSS（标题栏/画布底色 inset/限高滚动/等宽）。复制契约测试（writeText 参数 = JSON 本体）。
 - **证据（契约 · v5.7）**：ToolActivityList 25/25（+复制钮断言）+ tsc 0。
@@ -4129,5 +4131,5 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **来源**：用户实测反馈「阶段汇总子智能体，现在的位置不对总是挂在会话的最后……子智能体应该以图标的形式存在于对应会话阶段出现的地方……点开智能体图标就自动展开详细信息了，所以不需要目前的这种详情卡片来占地方」。
 - **改动**：SimpleChat 移除消息尾部的 `SubAgentResultGroup` 组卡渲染与 `useTerminalSubAgentResults` 数据源（组卡脱离时序位置 + 与运行级折叠双重冗余）；删除 `SubAgentResultGroup.tsx`/`SubAgentResultCard.tsx` 及其测试与 CSS。子智能体呈现收敛到**派发源头的时间线行内**（UI-382 既有能力）：bot 图标行出现在发生的轮次位置（随运行摘要折叠/展开），点行展开 职能 emoji + 需求描述 + 状态 + 停止/详情 按钮，「详情」跳右栏智能体面板看实时工作流与终态摘要。
 - **证据（契约）**：前端全量 148 文件 1190/1190（移除组卡 6 文件后净减 6 例）+ tsc 0 + test:changed 0（block109 编排规则改挂 flow 文件）+ docs/ui 门禁绿。block109-agent-panel flow A4 断言同步修订（组卡可见 → 派发行内「详情」按钮可达）。
-- **待实机**：vite HMR 已推送运行中应用，跑一轮子智能体任务过目即翻 verified。
+- **verified 翻转（2026-09-25，用户授权代行评估 + Jev 裁决）**：真实 spawn 轮取证（acceptance/ui-eval-agent/）——派发源头行内 bot 行+终态「子智能体已返回结果」汇报收敛实证，组卡零残留。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
