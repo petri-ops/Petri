@@ -70,13 +70,14 @@ npm run quality:secret  # 密钥泄漏扫描（fail-closed：生产面命中即�
 npm run quality:arch    # 架构规则（dependency-cruiser：IPC 必经 desktopBridge / 前后端边界 / 依赖方向）
 npm run quality:lint    # ESLint blocking（存量在 eslint-suppressions.json 抑制基线，新增违规即红）
 npm run quality:types   # 前端类型门禁（tsc --noEmit -p frontend/tsconfig.json；fail-closed：任何类型红即红）
-npm run quality:knip    # 死代码扫描（report-only：core 懒 require 盲区，数字属上界）
+npm run quality:knip    # 死代码扫描（report-only 全量报告：core 懒 require 盲区，数字属上界）
+npm run quality:knip:check # 死代码保留面棘轮（CK-11 收官冻结：exports/types/files 逐键基线 test/knip-baseline.json，新增即红；清理后 --update 下调）
 npm run quality:baseline # P0 四项体检基线重扫（Knip/jscpd/audit/密钥，报告落 acceptance/block-105/）
 
 # 开发基础设施（BLOCK-71）
 npm run state        # 会话状态一键恢复：分支/WIP/AUDIT-LOG 未决项/active 工作包
 npm run hygiene:check   # 工作区卫生：死符号链接 + 临时残留 + 换行漂移 + 符号链接检出退化 + 文本源码控制字节（只报告不代删）
-npm run closeout     # 收口门禁聚合（fail-fast）：hygiene → docs → ui-audit → test:changed → gate:code-size → quality:secret → quality:arch → quality:lint → quality:types（九门）
+npm run closeout     # 收口门禁聚合（fail-fast）：hygiene → docs → ui-audit → test:changed → gate:code-size → gate:arch-cycles → quality:secret → quality:arch → quality:lint → quality:types → quality:knip:check（十一门）
 npm run verify -- <flow> # dev-verify 实机校验 flow（--list 查清单；前置 dev 栈在跑）
 npm run skills:check    # 产品 Skill 契约校验（resources/skills/）
 ```

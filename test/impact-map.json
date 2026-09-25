@@ -2103,7 +2103,7 @@
     },
     {
       "id": "block105-code-quality",
-      "note": "BLOCK-105 代码质量与安全治理：ESLint flat config、密钥门禁、Knip 配置与体检基线。改动影响 quality:* 门禁与豁免基线。",
+      "note": "BLOCK-105 代码质量与安全治理：ESLint flat config、密钥门禁、Knip 配置与体检基线。改动影响 quality:* 门禁与豁免基线。CK-11 收官后含 knip 保留面棘轮（quality:knip:check，新增死代码即红）。",
       "patterns": [
         ".dependency-cruiser.cjs",
         "eslint.config.mjs",
@@ -2115,10 +2115,14 @@
         "src/preload.js",
         "eslint-suppressions.json",
         "frontend/eslint-suppressions.json",
-        "scripts/quality-baseline.sh"
+        "scripts/quality-baseline.sh",
+        "scripts/knip-ratchet.mjs",
+        "test/knip-baseline.json",
+        "test/knip-ratchet.test.mjs"
       ],
       "tests": [
-        "test/electron-security-assertions.test.mjs"
+        "test/electron-security-assertions.test.mjs",
+        "test/knip-ratchet.test.mjs"
       ],
       "frontendRelated": false,
       "classifiesScripts": true,
