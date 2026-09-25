@@ -71,7 +71,7 @@
   },
   "frontend/src/components/copilot/SimpleChat/hooks/useChatStream.test.ts": {
     "@typescript-eslint/require-await": {
-      "count": 2
+      "count": 1
     }
   },
   "frontend/src/components/copilot/SimpleChat/hooks/useChatStream.ts": {

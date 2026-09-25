@@ -196,7 +196,7 @@ describe('useChatStream 运行中发送自动 steer（CK-01）', () => {
   it('运行中发送 → POST steer 成功：onSteer ok=true、send true、不启动新 run', async () => {
     isConversationRunningMock.mockReturnValue(true);
     getConversationRunSnapshotMock.mockReturnValue({ taskId: 'task_ck01' });
-    const fetchMock = vi.fn(() => Promise.resolve({
+    const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<{ ok: boolean; json: () => Promise<{ ok: boolean; queued?: boolean; depth?: number }> }>>(() => Promise.resolve({
       ok: true,
       json: () => Promise.resolve({ ok: true, queued: true, depth: 1 }),
     }));
