@@ -5193,6 +5193,25 @@
       "lastUpdated": "2026-09-23"
     },
     {
+      "id": "BLOCK-121-RESULT-LOOP-VERTICAL",
+      "path": "docs/block-121-result-loop-vertical-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-121-result-loop-vertical",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-25",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH",
+      "tags": [
+        "block-121",
+        "result-loop",
+        "vertical-slice",
+        "dev-electron"
+      ],
+      "notes": "开发态结果闭环垂直切片（用户裁决「可以的 开始吧 一次性搞定」阶段三件套之三）：选定一条插件分析路径端到端收实（插件→Studio 可信结果→Copilot 引用继续），dev Electron 边界内 verified 为完成语义；G0 不外推 packaged/Provider/GA。"
+    },
+    {
       "id": "BLOCK-120-RECONCILIATION-LINKAGE",
       "path": "docs/block-120-reconciliation-linkage-plan.md",
       "kind": "work-package",
