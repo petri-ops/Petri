@@ -229,8 +229,4 @@ export async function reindexKnowledgeDocument(id: string): Promise<void> {
   await jsonOrThrow(resp);
 }
 
-export async function clearKnowledgeSpace(): Promise<void> {
-  const resp = await fetch(`${getApiPrefix()}/knowledge/space/clear`, { method: 'POST' });
-  await jsonOrThrow(resp);
-}
 

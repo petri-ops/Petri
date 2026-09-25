@@ -152,7 +152,7 @@ function directionChanges(value: unknown): EnrichmentDirectionChange[] | null {
   return changes;
 }
 
-export function availableEnrichmentDirection(value: unknown): AvailableEnrichmentDirection | null {
+function availableEnrichmentDirection(value: unknown): AvailableEnrichmentDirection | null {
   const candidate = record(value);
   if (!candidate || candidate.status !== 'available'
       || typeof candidate.changedCount !== 'number' || !Number.isInteger(candidate.changedCount)

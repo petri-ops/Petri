@@ -214,26 +214,6 @@ export async function followupAgentTask(taskId: string, task: string): Promise<{
   return { agentId: String(body.agentId), followupOf: String(body.followupOf || taskId) };
 }
 
-/**
- * Confirm to the server that a frontend-side act handler actually fired.
- * Called after each window event for `switch_result_tab`, etc.
- * If `info.error` is supplied the server records it.
- */
-export async function ackAct(
-  token: string,
-  info?: { error?: string; ok?: boolean }
-): Promise<void> {
-  if (!token) return;
-  try {
-    await fetch(getApiPrefix() + '/ai/act-ack/' + encodeURIComponent(token), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
-      body: JSON.stringify(info || { ok: true }),
-    });
-  } catch {
-    // best-effort
-  }
-}
 
 // TOOL_JOB_APPROVAL_v1（阶段2 Task3）：重操作 run_tool 确认/取消。
 // approve=true 落 ack_status=approved，agent 下轮重调 run_tool(ackToken) 续跑；

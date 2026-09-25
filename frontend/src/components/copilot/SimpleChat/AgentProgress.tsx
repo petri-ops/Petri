@@ -12,32 +12,6 @@
 // ============================================================
 import React from 'react';
 
-import { CopilotMarkdown } from '../copilotMarkdown';
-import { compactStageConclusion } from './helpers';
-import type { FileReferenceClickDetail } from '@/lib/chat-file-references';
-
-/** 单条阶段公开结论（首条意图由调用方挡在门外，此处不做省略判断）。 */
-export function AgentProgressItem({
-  content,
-  onFileReferenceClick,
-}: {
-  content: string;
-  onFileReferenceClick: (detail: FileReferenceClickDetail) => void;
-}): React.ReactElement | null {
-  const conclusion = compactStageConclusion(content);
-  if (!conclusion) return null;
-  return (
-    <div className="sc-agent-progress-item">
-      <span className="sc-agent-progress-dot" aria-hidden="true" />
-      <CopilotMarkdown
-        text={conclusion}
-        onFileReferenceClick={onFileReferenceClick}
-        resolveContext={null}
-      />
-    </div>
-  );
-}
-
 /** UI-305 ② — 本轮仍在跑时挂在末条结论后的运行中标记。 */
 export function AgentProgressPendingRow(): React.ReactElement {
   return (

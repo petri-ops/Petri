@@ -219,10 +219,6 @@ export async function fetchLoopSessionSummary(input: {
 // has ONE derivation (never a second source of truth).
 // ---------------------------------------------------------------------------
 
-/** A loop is "done successfully" ONLY when the backend says completed. */
-export function isLoopComplete(status: string | null | undefined): boolean {
-  return status === 'completed';
-}
 
 
 

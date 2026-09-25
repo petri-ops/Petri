@@ -76,7 +76,7 @@ function _emit(): void {
 }
 
 /** 拉取目录并写入进程内缓存（并发去重）。 */
-export async function fetchToolCatalog(): Promise<CatalogTool[]> {
+async function fetchToolCatalog(): Promise<CatalogTool[]> {
   if (_cache) return _cache;
   if (_inflight) return _inflight;
   _inflight = (async () => {
@@ -101,11 +101,11 @@ export async function fetchToolCatalog(): Promise<CatalogTool[]> {
 }
 
 /** 同步读取已缓存目录（未加载时为空数组）。 */
-export function getCachedToolCatalog(): CatalogTool[] {
+function getCachedToolCatalog(): CatalogTool[] {
   return _cache || EMPTY;
 }
 
-export function invalidateToolCatalog(): void {
+function invalidateToolCatalog(): void {
   _cache = null;
   _error = null;
   _emit();

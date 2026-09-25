@@ -125,7 +125,3 @@ export function createScrollToLineApi(view: EditorView): ScrollApi {
   };
 }
 
-/** 测试导出：脉冲高亮 class name。 */
-export const __PULSE_HIGHLIGHT_CLASS = PULSE_HIGHLIGHT_CLASS;
-/** 测试导出：StateEffect 引用。 */
-export const __setPulseEffect = setPulseEffect;

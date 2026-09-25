@@ -11,7 +11,7 @@
  *   2. Re-invoke via `useTerminalTheme` (or their own MutationObserver) on
  *      `data-theme` mutations to reapply palette live.
  */
-import { useEffect, useState } from 'react';
+
 import type { ITheme } from '@xterm/xterm';
 
 export type TerminalThemeName = 'light' | 'dark';
@@ -72,31 +72,4 @@ export const TERMINAL_THEMES: Readonly<Record<TerminalThemeName, ITheme>> = {
 export function pickTerminalTheme(name?: string | null): ITheme {
   const resolved: TerminalThemeName = name === 'light' ? 'light' : 'dark';
   return TERMINAL_THEMES[resolved];
-}
-
-/**
- * Hook variant: returns the active theme and re-renders whenever
- * `<html data-theme>` changes. Use this when you want React to drive
- * xterm theme updates; the legacy code uses an explicit MutationObserver,
- * which still works but doesn't trigger re-renders.
- */
-export function useTerminalTheme(): ITheme {
-  const [name, setName] = useState<TerminalThemeName>(() => readActiveThemeName());
-
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-    const el = document.documentElement;
-    const sync = () => setName(readActiveThemeName());
-    sync();
-    const observer = new MutationObserver(sync);
-    observer.observe(el, { attributes: true, attributeFilter: ['data-theme'] });
-    return () => observer.disconnect();
-  }, []);
-
-  return TERMINAL_THEMES[name];
-}
-
-function readActiveThemeName(): TerminalThemeName {
-  if (typeof document === 'undefined') return 'dark';
-  return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
 }

@@ -48,23 +48,4 @@ export function readBrandStorage(key: string): string | null {
   }
 }
 
-export function writeBrandStorage(key: string, value: string): void {
-  if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.setItem(`gewu-${key}`, value);
-  } catch {
-    /* 存储不可用时静默（与既有各调用点行为一致） */
-  }
-}
 
-export function removeBrandStorage(key: string): void {
-  if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.removeItem(`gewu-${key}`);
-    for (const legacyKey of [`biof3-${key}`, `biof3.${key}`, `biof3_${key}`]) {
-      window.localStorage.removeItem(legacyKey);
-    }
-  } catch {
-    /* ignore */
-  }
-}

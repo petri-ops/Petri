@@ -9,7 +9,7 @@
 import { validateAttachmentSize, type AttachmentFile } from './attachments';
 
 /** 附件落盘目录（工作区相对路径）。 */
-export const ATTACHMENT_DIR = '.chat-attachments';
+const ATTACHMENT_DIR = '.chat-attachments';
 /** fs/upload 分片大小（64KB 二进制，b64 后 <128KB argv 上限，与 BLOCK-90 对齐）。 */
 const UPLOAD_CHUNK = 64 * 1024;
 

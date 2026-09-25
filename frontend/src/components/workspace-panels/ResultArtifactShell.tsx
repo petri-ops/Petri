@@ -1182,7 +1182,7 @@ export function ResultArtifactShell({
 
 
 // UI-305 P2 - moved from ResultView.tsx (only consumer is this shell empty state):
-export function EmptyAnalysisResult(): React.ReactElement {
+function EmptyAnalysisResult(): React.ReactElement {
   return (
     <div className="rv-empty">
       <Icon name="bar-chart" size={40} />

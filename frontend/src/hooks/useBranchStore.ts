@@ -286,9 +286,3 @@ export function useBranchStore(
   };
 }
 
-/** Test-only helper. Clears module-scope cache between test runs. */
-export function __resetBranchStoreCacheForTests(): void {
-  sharedCache.clear();
-  inflight.clear();
-  subscribers.clear();
-}

@@ -70,7 +70,3 @@ export function createUnifiedDiffExtension(
   });
 }
 
-/** 测试导出：scanLimit 默认值。 */
-export const __DIFF_SCAN_LIMIT = DIFF_SCAN_LIMIT;
-/** 测试导出：timeout 默认值。 */
-export const __DIFF_TIMEOUT_MS = DIFF_TIMEOUT_MS;

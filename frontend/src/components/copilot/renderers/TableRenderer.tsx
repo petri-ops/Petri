@@ -184,7 +184,7 @@ export function buildFilename(
   return `${slugifyTitle(title)}-${buildTimestampSegment(createdAt)}.${extension}`;
 }
 
-export function triggerDownload(
+function triggerDownload(
   filename: string,
   content: string,
   mimeType: string,

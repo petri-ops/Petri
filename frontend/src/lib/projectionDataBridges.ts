@@ -188,9 +188,6 @@ const aiSettingsBridge = {
   },
 };
 
-export function getProjectionSkillsBridge() {
-  return skillsBridge;
-}
 
 export function getProjectionPluginsBridge() {
   return pluginsBridge;

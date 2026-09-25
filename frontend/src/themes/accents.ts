@@ -41,6 +41,3 @@ export function applyAccent(accent: AccentId): void {
   else html.setAttribute('data-accent', accent);
 }
 
-export function accentLabel(id: AccentId): string {
-  return ACCENT_OPTIONS.find((o) => o.id === id)?.label || id;
-}

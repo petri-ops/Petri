@@ -38,7 +38,3 @@ export async function listPacksRequiringRuntimes(): Promise<PackRequiringRuntime
   }
 }
 
-/** 把包名列表拼进提示文案：挂包名，多包顿号连接。 */
-export function formatPackNames(names: PackRequiringRuntimes[]): string {
-  return names.map((p) => `「${p.name}」`).join('、');
-}

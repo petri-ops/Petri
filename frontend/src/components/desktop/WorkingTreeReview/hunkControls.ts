@@ -35,9 +35,9 @@ export interface HunkControlsHandlers {
 }
 
 /** 测试导出：控件 DOM 标记。 */
-export const DATA_HUNK_CONTROL = 'data-hunk-control';
-export const DATA_HUNK_ACCEPT = 'data-hunk-accept';
-export const DATA_HUNK_REJECT = 'data-hunk-reject';
+const DATA_HUNK_CONTROL = 'data-hunk-control';
+const DATA_HUNK_ACCEPT = 'data-hunk-accept';
+const DATA_HUNK_REJECT = 'data-hunk-reject';
 
 class HunkControlWidget extends WidgetType {
   constructor(

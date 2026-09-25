@@ -20,7 +20,6 @@ import type {
 // DOMAIN_EXAMPLE_PROMPTS）；此处 re-export 仅为向后兼容旧内部导入路径。
 // 2026-09-18 曾在此文件与 types.ts 各存一份拷贝（双维护陷阱），已收编单源。
 import { DEFAULT_EXAMPLE_PROMPTS, DOMAIN_EXAMPLE_PROMPTS } from './types';
-export { DEFAULT_EXAMPLE_PROMPTS } from './types';
 
 /**
  * T83 — small header shown on every AI message: 模型名。

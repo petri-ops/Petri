@@ -92,25 +92,4 @@ export function useErrorFormatter() {
   };
 }
 
-/**
- * Severity icon mapping for UI display.
- */
-export const SEVERITY_ICONS: Record<ErrorSeverity, string> = {
-  error: 'alert-circle',
-  warning: 'alert-triangle',
-  info: 'info',
-};
 
-/**
- * Get severity label for display.
- */
-export function getSeverityLabel(severity: ErrorSeverity): string {
-  switch (severity) {
-    case 'error':
-      return '错误';
-    case 'warning':
-      return '警告';
-    case 'info':
-      return '提示';
-  }
-}
