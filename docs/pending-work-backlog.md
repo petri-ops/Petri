@@ -5,7 +5,9 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-09-25 晚一（**CK-04 收口：C-04 分段 token 预算治理第一刀（closeout 十门绿 + fit=3.61 PASS）**——system-prompt 段级字符预算+计量报告+截断标注，旧签名零破坏；总预算裁剪与前端接线留观察。**队列头=CK-05（node:sqlite 评估/三契约单源化）**。）
+最后更新：2026-09-25 晚二（**CK-05 收口：SQLite 评估批（mmap64 已实施 −8.5%/−15%；node:sqlite 与三契约单源化不采纳，重开条件在案；报告 docs/ck05-sqlite-evaluation.md 登记）**。**队列头=CK-06（CenterPanelContext 拆分）**。）
+
+此前 最后更新：2026-09-25 晚一（**CK-04 收口：C-04 分段 token 预算治理第一刀（closeout 十门绿 + fit=3.61 PASS）**——system-prompt 段级字符预算+计量报告+截断标注，旧签名零破坏；总预算裁剪与前端接线留观察。**队列头=CK-05（node:sqlite 评估/三契约单源化）**。）
 
 此前 最后更新：2026-09-25 早十（**CK-03 收口：C-02 轮询→SSE 失效通知第一批 jobs 域（closeout 十门绿 + fit=3.73 PASS；UI-442 待过目）**——/api/events 通道+4 发布点+useInvalidationStream+两消费方接入，任务状态感知秒级；增量接入清单在 handoff。**队列头=CK-04（分段 token 预算）**。）
 
@@ -24,8 +26,7 @@
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
 | 1 | ▶ CK-02 | **C-01：长列表虚拟化**——大会话（数百条消息）滚动/渲染性能；前置帧时基线已备（BLOCK-107 转交） | BLOCK-106/107 遗留候选 | **队列头** |
-| 1 | ▶ CK-05 | **C-05：node:sqlite 评估 / 三契约单源化**——吸收 BLOCK-106 遗留 mmap_size=64MB 裁决（实测大扫描 2.2x） | BLOCK-109 候选池 + block-106 plan §7 | **队列头** |
-| 6 | ▶ CK-06 | **C-11：CenterPanelContext 拆分 refs/纯值两对象**——react-hooks/refs 74 条豁免的结构性修复；涉及 project-workspace 构造面+CenterPanel/SummaryCard 消费面 | BK-06 第六刀定性登记 | 排队 |
+| 1 | ▶ CK-06 | **C-11：CenterPanelContext 拆分 refs/纯值两对象**——react-hooks/refs 74 条豁免的结构性修复；涉及 project-workspace 构造面+CenterPanel/SummaryCard 消费面 | BK-06 第六刀定性登记 | **队列头** |
 | 7 | ▶ CK-07 | **测试卫生小批**——BLOCK-102 遗留：grants 测试补显式 teardown（关 buildMobileGateway 内部资源）；同批扫同类测试卫生散项 | block-102 plan 遗留候选（本轮盘点抓回） | 排队 |
 | 8 | ▶ CK-08 | **C-03：task_id 数据模型改造**——大改造，排后 | BLOCK-106 遗留候选 | 排队（大） |
 | 9 | ▶ CK-09 | **C-10：output-judge 0-4 量表多闸门热调设计**——量表界与区间不变量语义需单独设计；现由代码注册表承载（证据绑定） | BK-05 非范围登记 | 排队（低） |
@@ -51,6 +52,7 @@
 | ✅ BK-07 | **BLOCK-105 Batch-4 抓真三件处置** | 2026-09-25 全部完成：①loadAssets 五参化石收窄 (entries, patterns)（四调用点同步）；②_jobMeta/_selectedSectionId 死状态整体拆除+currentVersion 复核推翻原判（已接线，Batch-4 盘点路径有误）；③copilotAsk 断言补齐；tsc 0+全量 147/1202+closeout 十门绿 |
 | ✅ CK-03 | C-02：轮询→SSE 失效通知第一批（jobs 域） | 2026-09-25 当日收口：/api/events 通道+4 发布点+useInvalidationStream+两消费方接入（15s→60s 兜底）；契约 4/4 + 全量 147/1205 + 实机 hello + closeout 十门绿；UI-442 待过目；增量接入清单在 handoff |
 | ✅ CK-04 | C-04：分段 token 预算治理第一刀 | 2026-09-25 当日收口：system-prompt 段级字符预算（SECTION_CHAR_BUDGETS）+段计量报告+截断标注，旧签名零破坏（黄金对照+回归 22/22）；契约 5/5 + closeout 十门绿 + fit=3.61 PASS；总预算裁剪与前端接线留观察 |
+| ✅ CK-05 | C-05：node:sqlite 评估 / 三契约单源化 / mmap 裁决 | 2026-09-25 当日收口：mmap64 实施（−8.5%/−15% 两轮稳定）+ node:sqlite/三契约不采纳（数据与重开条件在 docs/ck05-sqlite-evaluation.md）；closeout 十门绿 + fit=3.76 PASS |
 | ✅ CK-01 | C-06：composer 运行中发送自动改走 steer 通道 | 2026-09-25 当日收口（Windows 侧）：isConversationRunning 分支改造（steer 入队+行内回执+失败回退+title 显式化）；设计裁决=即时 steer+回执（入队不可撤）；契约 8/8 + 全量 147/1205 + closeout 十门绿 + fit=3.77 PASS；UI-440 in_progress 待过目 |
 | ✅ BK-08 | **darwin 启动预算档建基线** | 2026-09-25 当日收口：Mac 会话（darwin arm64/Node v24.16.0/项目数 4）三轮 5 样本实测，最差中位数 ×1.10（ceil）写入 platforms.darwin 七段（mainReady 46/preload 371/domContentLoaded 219/firstPaint 326/windowShown 577/didFinishLoad 578/dataReady 539）；教训=两轮基线被第三轮复跑判红 2 段（轮间中位漂移 ~15%）；契约测试 8→9；终轮 budget.pass=true violations=0；closeout 十门绿 + fit=3.36 PASS；连带=TEST 实例三连修 + impact-map 两连补登 + P6 重打 10/10（darwin-only P6 契约 13/13 零 skip）；证据=acceptance/block-101/block101-startup-timeline.json |
 
