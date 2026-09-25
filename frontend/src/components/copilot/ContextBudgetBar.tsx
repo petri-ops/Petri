@@ -35,8 +35,8 @@ function formatTokens(n: number): string {
   return String(n);
 }
 
-const RING_SIZE = 24;
-const RING_STROKE = 2.5;
+const RING_SIZE = 18;
+const RING_STROKE = 2;
 const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
@@ -117,8 +117,8 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
         onClick={() => setOpen((v) => !v)}
         title="上下文用量（点击查看详情）"
         style={{
-          width: '28px',
-          height: '28px',
+          width: '24px',
+          height: '24px',
           borderRadius: '999px',
           border: 'none',
           background: 'transparent',
