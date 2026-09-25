@@ -467,7 +467,7 @@
       "count": 1
     },
     "react-hooks/set-state-in-effect": {
-      "count": 7
+      "count": 6
     }
   },
   "frontend/src/components/workspace-panels/ResultArtifactShell/useArtifactInteractionSelection.ts": {

@@ -1,6 +1,8 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-25 早三（**BK-07 ③ copilotAsk 断言补齐完成**。**恢复要点**：dev 栈在跑；**队列阻塞于用户**——BK-07 ①② 需用户裁决（五参签名收窄 / 结果元信息接线产品语义）、BK-08 需 Mac；Batch-8 收官态=基线 395 全为书面定性豁免类（清单见上文早二行）；用户事项 U-01~U-03 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 早四（**BK-07 三件全部完成**：①loadAssets 收窄 ②死状态拆除+currentVersion 复核推翻 ③copilotAsk 断言；closeout 十门绿 + fit=3.76 PASS。**恢复要点**：dev 栈在跑；**队列无可串行推进项**——BK-08 需 Mac 会话采 5 样本、其余完成/豁免定性完毕；Batch-8 收官态=基线 394 全为书面定性豁免类（清单见早二行）；用户事项 U-01（Jev key 轮换）/U-02·U-03（UI-437·438 过目）待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 早三（**BK-07 ③ copilotAsk 断言补齐完成**。**恢复要点**：dev 栈在跑；**队列阻塞于用户**——BK-07 ①② 需用户裁决（五参签名收窄 / 结果元信息接线产品语义）、BK-08 需 Mac；Batch-8 收官态=基线 395 全为书面定性豁免类（清单见上文早二行）；用户事项 U-01~U-03 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 早二（**BK-06=Batch-8 整包收官（基线 947→395，七刀 −552）**——可清族全部归零；豁免类构成=require-await 147 测试替身 / set-state 99 / refs 74（C-11）/ compiler+测试 idiom 39 / control-regex 13 / 匹配器 7 / 契约名 4 / async onClick 2。**恢复要点**：dev 栈在跑；**队列头=BK-07**（③ SideChatDock.test 断言小修；① Office 五参签名收窄需单独裁决；② 结果元信息接线需产品裁决）；重开条件=React 编译器迁移/匹配器类型升级/C-11 立项；用户事项 U-01~U-03 不变待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

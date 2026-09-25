@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-25 早三（**BK-07 ③=SideChatDock.test copilotAsk 断言补齐（tsc 0+组件 7/7）**——头注声称自此有真断言背书。**队列实质阻塞于用户输入**：BK-07 ①（五参签名收窄）②（结果元信息接线）需用户裁决；BK-08 需 Mac 会话。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 早四（**BK-07 全部完成（①② 按用户裁决落地 + 复核推翻 currentVersion 原判；closeout 十门绿 + fit=3.76 PASS）**。**队列现状=无可安全串行推进项**：BK-08 需 Mac 会话；BK-02 观察期随使用累计；等待用户新输入（新需求/裁决/U-01~U-03）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 早三（**BK-07 ③=SideChatDock.test copilotAsk 断言补齐（tsc 0+组件 7/7）**——头注声称自此有真断言背书。**队列实质阻塞于用户输入**：BK-07 ①（五参签名收窄）②（结果元信息接线）需用户裁决；BK-08 需 Mac 会话。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 早二（**BK-06=Batch-8 整包收官（尾清 closeout 十门绿 + 整包判定 fit=3.39 PASS）**——七刀基线 947→395（−552），可清族全部归零，剩余全为书面定性豁免类（清单见 handoff/整包声明）；机制教训六条入册；连带真缺陷 fileURLToPath/TableRenderer hooks/fileOps 判别信封等修复。**队列头=BK-07**（③ 小修；①② 需用户裁决）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

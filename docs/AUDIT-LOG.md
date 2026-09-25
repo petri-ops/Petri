@@ -5,7 +5,9 @@
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 > 入口直链（registry `entrypoint` 指向本台的 canonical 文档，归档轮转不得切断发现路径）：[block-14-left-panel-qa-fix-closeout](./block-14-left-panel-qa-fix-closeout.md) · [block-15-architecture-perf-plan](./block-15-architecture-perf-plan.md) · [block-22-codemirror-inline-diff-plan](./block-22-codemirror-inline-diff-plan.md)
 
-最后更新：2026-09-25 早三（**BK-07 ③=SideChatDock.test copilotAsk 断言补齐（小修，closeout 前置验证 tsc 0+组件 7/7）**——抓真坐实=头注声称「copilotAsk 归属不在悬挂面（不派发）」且 mock 布了 subscribeCopilotContext 探测点，但全文件零断言验证；修=新增专测（copilot-ask 派发后悬挂面不展开 + dock 从未订阅 copilot 上下文双向断言），头注声称自此有真断言背书。**BK-07 剩余 ①② 需用户裁决**（① Office loadAssets 五参签名收窄；② 结果元信息/版本投影接线的产品语义），队列实质阻塞于用户输入。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 早四（**BK-07=Batch-4 抓真三件全部完成（用户裁决「1 2 搞定」；closeout 十门绿 + 判定 fit=3.76 PASS）**——①Office loadAssets 五参化石收窄 (entries, patterns)（四调用点同步，纯签名清理零运行时变化）；②_jobMeta/_selectedSectionId 死状态整体拆除（声明+reset+effect+handler 调用链+类型导入，无任何消费方）；**currentVersion 复核推翻原判**：已接线（ResultVersionHistory 消费该 prop 做 active 高亮+当前徽标，Batch-4 盘点子组件路径核对有误）。③ 前刀已完成。波折=③ 断言测试首轮 lint 三红（未用导入+无 await async act）当轮清偿；closeout 一次假红复跑绿。**队列现状：BK-08 需 Mac 会话，其余队列项全部完成或豁免定性完毕——等待用户新输入**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 早三（**BK-07 ③=SideChatDock.test copilotAsk 断言补齐（小修，closeout 前置验证 tsc 0+组件 7/7）**——抓真坐实=头注声称「copilotAsk 归属不在悬挂面（不派发）」且 mock 布了 subscribeCopilotContext 探测点，但全文件零断言验证；修=新增专测（copilot-ask 派发后悬挂面不展开 + dock 从未订阅 copilot 上下文双向断言），头注声称自此有真断言背书。**BK-07 剩余 ①② 需用户裁决**（① Office loadAssets 五参签名收窄；② 结果元信息/版本投影接线的产品语义），队列实质阻塞于用户输入。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 早二（**BK-06=Batch-8 整包收官（用户裁决「一次性搞定剩余大头」续；尾清 closeout 十门全绿 + 整包判定 output:judge fit=3.39 PASS）**——第七刀尾清后整包定性：**基线 947→395（七刀 −552），可清族全部归零，剩余 395 条全部为逐族书面定性的豁免类**（require-await 147 测试替身承重 async / set-state-in-effect 99 A·B 形态 idiom / refs 74 ctx 混合对象污染推断〔拆分=C-11〕/ control-regex 13 清洗本义 / compiler+测试 idiom 39 / unbound-method 8 restore 惯例 / 匹配器 7 / 契约保留名 4 / async onClick 2 等）。七刀清单=①require-await 40 真修+化石基线删除 ②类型面双族 58 ③④unsafe-member-access 151→0（域簇+全族） ⑤set-state 定性+no-unsafe-assignment 24→7 ⑥promise 三族 82 ⑦tail 十八族 118。机制教训六条入册（抑制计数压制/temp-cwd base-path/unknown 直投 as/注解赋值 vs cast/判别联合信封/测试替身 async 双承重）。连带真缺陷=fileURLToPath 未导入（执行即崩）/TableRenderer 条件后调 hooks/block34 契约漂移等。**队列头=BK-07**（③ SideChatDock.test 断言小修可做；① 五参签名收窄与② 结果元信息接线需用户裁决）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
@@ -179,6 +181,7 @@
 > 已收口条目（✅）**一律移入「最近处理记录」**，不得在本区段堆积——本次清理将 23 条已收口项迁出，
 > 待处理项由 28 行降为 8 行（活跃项占比 100%）。新增 ✅ 项请直接追加到「最近处理记录」。
 ## 最近处理记录
+| ✅ 整批收口（2026-09-25 早四；用户裁决「1 2 搞定」；closeout 十门绿 + 判定 fit=3.76 PASS） | 2026-09-25 | **BK-07 完成=①loadAssets 收窄 (entries, patterns) + ②死状态拆除（_jobMeta/_selectedSectionId）+ currentVersion 复核推翻原判（已接线）**；③ 前刀完成；波折=③ 测试首轮 lint 三红当轮清偿 + closeout 一次假红复跑绿；tsc 0 + 全量 147/1202 | BLOCK-105 Batch-4 抓真 / BK-07 COMPLETED |
 | ✅ 小修收口（2026-09-25 早三；队列序推进；tsc 0 + 组件 7/7） | 2026-09-25 | **BK-07 ③=SideChatDock.test copilotAsk 断言补齐**：头注声称+mock 探测点本有、独缺断言——新增专测双向断言（copilot-ask 派发不展开悬挂面 + 从未订阅 copilot 上下文）；BK-07 ①② 需用户裁决，队列实质阻塞于用户输入 | BLOCK-105 Batch-4 抓真 / ③ COMPLETED |
 | ✅ 整包收官（2026-09-25 早二；用户裁决「一次性搞定剩余大头」；尾清 closeout 十门绿 + 整包判定 fit=3.39 PASS） | 2026-09-25 | **BK-06=BLOCK-105 §7 Batch-8 整包完成（基线 947→395，七刀 −552，可清族全部归零，余 395 全为书面定性豁免类）**：七刀清单+豁免构成+六条机制教训+连带真缺陷修复见整包收官声明；队列头=BK-07 | BLOCK-105 §7 / Batch-8 COMPLETED |
 | ✅ 长线批次收口（2026-09-25 早；用户裁决「一次性搞定剩余大头」；closeout 十门全绿，提交=chore(lint) 第七刀 + 本回写） | 2026-09-25 | **BK-06 第七刀=tail 十八族收官（根基线 515→397，−118）**：no-undef 配置双修+缺件补齐 / no-empty allowEmptyCatch 补齐 / base-to-string 40→2（unknownText 共享辅助）/ redundant 31→0 / rules-of-hooks 4 真修 / 豁免定性 47；fileURLToPath 存量真缺陷补齐；tsc 0 + 全量 147/1201；七刀累计 947→397（−550） | BLOCK-105 §7 / Batch-8 第七刀 COMPLETED |

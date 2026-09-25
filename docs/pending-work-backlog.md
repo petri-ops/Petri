@@ -5,13 +5,13 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-09-25 早三（**BK-07 ③=SideChatDock.test copilotAsk 断言补齐（tsc 0+组件 7/7；头注声称自此有真断言）**——**队列实质阻塞于用户**：BK-07 ①② 需用户裁决、BK-08 需 Mac 会话；BK-02 观察期随使用累计。）
+最后更新：2026-09-25 早四（**BK-07 全部完成（①② 按用户裁决「1 2 搞定」落地 + ③ 前刀完成；closeout 十门绿 + fit=3.76 PASS）**——①loadAssets 收窄 (entries, patterns)；②死状态拆除+currentVersion 复核推翻原判（已接线）。**队列现状：BK-08 需 Mac、其余完成或豁免定性完毕——无可安全串行推进项，等待用户新输入**。）
 
 ## 推进队列（串行，按序逐个推进）
 
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
-| 3 | ▶ BK-07 | **BLOCK-105 Batch-4 抓真 3 件处置**——✅③ SideChatDock.test copilotAsk 断言已补齐（2026-09-25 早三）；①Office loadAssets 五参签名化石（收窄需单独裁决）②ResultArtifactShell _jobMeta/_selectedSectionId + ResultStudioPage currentVersion 只写不读＝结果元信息与版本投影停在未接线态（**交产品裁决**） | AUDIT-LOG 2026-09-20 Mac 会话之五第 5 条 | **③ 完成；①② 需用户裁决** |
+| — | 👁 BK-08 | **darwin 启动预算档建基线**——`block101-startup-timeline` 首跑因缺 `platforms.darwin` 档判红（设计行为非故障）；需 Mac 会话采 5 样本建基线，禁止复制 win32 数字 | BLOCK-106 遗留 + handoff ⚡ 清单 | **队列唯一剩余项（需 Mac 环境）** |
 | 5 | ▶ BK-08 | **darwin 启动预算档建基线**——`block101-startup-timeline` 首跑因缺 `platforms.darwin` 档判红（设计行为非故障）；需 Mac 会话采 5 样本建基线，禁止复制 win32 数字 | BLOCK-106 遗留 + handoff ⚡ 清单 | 排队（需 Mac 环境） |
 | — | 👁 BK-02 | **汇报门 P2 试点观察期盘点**（持续观察，不占队列序）——采纳率/误拦率（含误重写率）/延迟增量/fitReplay 触发率随真实轮次累计；首盘点已并入 BK-01 P0（decision_log report-guard 行 + fit-volatility-review.json）；观察窗开启中（dev 栈 BIOF3_JEV_REPORT_GUARD=1）。此后周期性盘点 | BLOCK-119 收口遗留候选 | 观察（持续） |
 
@@ -31,6 +31,7 @@
 | 🔁 BK-06 | Batch-8 第六刀：promise 三族收官 + refs 定性（非整项收口，长线续批中） | 2026-09-25 收口：floating-promises 41→0 + misused-promises 41→2（真修 39）+ unsafe-argument 4→0 + refs 74 定性豁免（C-11 登记）；根基线 597→515；tsc 0 + 全量 147/1201 + closeout 十门绿 |
 | 🔁 BK-06 | Batch-8 第七刀：tail 十八族收官（非整项收口，长线） | 2026-09-25 收口：配置双修（build globals+allowEmptyCatch）/unknownText 共享辅助 24 站点/联合塌缩 31/rules-of-hooks 4 真修/豁免定性 47/fileURLToPath 真缺陷补齐；根基线 515→397；tsc 0 + 全量 147/1201 + closeout 十门绿 |
 | ✅ BK-06 | **BLOCK-105 §7 Batch-8 整包（七刀）** | 2026-09-25 整包收官：基线 947→395（−552），可清族全部归零，剩余 395 全为书面定性豁免类；豁免清单与六条机制教训见 handoff/整包声明；C-11（ctx 拆分）登记候选池 |
+| ✅ BK-07 | **BLOCK-105 Batch-4 抓真三件处置** | 2026-09-25 全部完成：①loadAssets 五参化石收窄 (entries, patterns)（四调用点同步）；②_jobMeta/_selectedSectionId 死状态整体拆除+currentVersion 复核推翻原判（已接线，Batch-4 盘点路径有误）；③copilotAsk 断言补齐；tsc 0+全量 147/1202+closeout 十门绿 |
 
 ## 👤 用户事项（Agent 不代行，仅登记与提醒）
 
