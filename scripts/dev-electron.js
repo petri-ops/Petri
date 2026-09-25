@@ -408,6 +408,14 @@ async function main() {
   // 后端指到另一个空库，与主进程分裂）。
   process.env.BIOF3_DB_PATH = path.join(electronLocalDataDir, 'biof3.db');
 
+  // 全新克隆首个 dev boot 的目录自举：迁移与 biof3-server 在此之前打开
+  // BIOF3_DB_PATH，但此前 mkdir 只存在于 darwin 启动分支（449 行）——旧工作区
+  // 目录早已存在掩盖了这一点（2026-09-25 全新克隆冷启动测试抓真：
+  // migration failed: Cannot open database because the directory does not exist）。
+  // recursive 建两层，用户自定义 BIOF3_ELECTRON_USER_DATA_DIR 同样受益。
+  fs.mkdirSync(electronUserDataDir, { recursive: true });
+  fs.mkdirSync(electronLocalDataDir, { recursive: true });
+
   // Run pending DB migrations against the shared DB before biof3-server starts.
   // Uses the same BIOF3_BETTER_SQLITE3_ROOT root as main.js:367 so the
   // better-sqlite3 native addon ABI matches.
