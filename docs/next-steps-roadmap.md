@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-25 晚二（**CK-05=SQLite 评估批收口（mmap64 已实施；node:sqlite/三契约不采纳，重开条件在案；评估报告登记 279 绿）**。**队列头=CK-06（CenterPanelContext 拆分 refs/纯值）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 晚三（**CK-06=C-11 ctx 拆分收口（refs 74→34 污染根除实证；根基线 394→353；closeout 十门绿 + fit=3.56 PASS）**。**队列头=CK-07（测试卫生小批）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 晚二（**CK-05=SQLite 评估批收口（mmap64 已实施；node:sqlite/三契约不采纳，重开条件在案；评估报告登记 279 绿）**。**队列头=CK-06（CenterPanelContext 拆分 refs/纯值）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 晚一（**CK-04=C-04 分段 token 预算治理第一刀收口（closeout 十门绿 + fit=3.61 PASS）**——system-prompt 段级字符预算+计量报告，旧签名零破坏；pageContent 首获上限（8000）。**队列头=CK-05（node:sqlite 评估/三契约单源化）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

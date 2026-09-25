@@ -1,6 +1,8 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-25 晚二（**CK-05 完成**：mmap64 已实施（随下次后端重启生效）；node:sqlite/三契约不采纳（重开条件在评估报告）；队列头=CK-06 ctx 拆分。**恢复要点**：dev 栈在跑；CK 表在 backlog；用户事项 U-01~U-04 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 晚三（**CK-06 完成**：ctx 拆分（CenterPanelRefs 独立 props）；队列头=CK-07 测试卫生小批。**恢复要点**：dev 栈在跑；CK 表在 backlog；用户事项 U-01~U-04 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 晚二（**CK-05 完成**：mmap64 已实施（随下次后端重启生效）；node:sqlite/三契约不采纳（重开条件在评估报告）；队列头=CK-06 ctx 拆分。**恢复要点**：dev 栈在跑；CK 表在 backlog；用户事项 U-01~U-04 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 晚一（**CK-04 完成**：system-prompt 分段预算治理（SECTION_CHAR_BUDGETS 注册表可调）；队列头=CK-05。**恢复要点**：dev 栈在跑（后端需重启加载 system-prompt 改动——下次重启生效或手动重启）；CK 表在 backlog；用户事项 U-01~U-04 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
