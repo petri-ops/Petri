@@ -72,7 +72,7 @@ function makeArgs(overrides: Partial<UseChatStreamArgs> = {}): UseChatStreamArgs
     activeModelId: 'deepseek-chat',
     accessMode: 'full',
     planMode: false,
-    createConversationForRun: vi.fn(async () => ({ id: 'conv_new' })),
+    createConversationForRun: vi.fn(() => Promise.resolve({ id: 'conv_new' })),
     thinkingLevel: 'standard',
     ...overrides,
   } as UseChatStreamArgs;
@@ -196,9 +196,9 @@ describe('useChatStream 运行中发送自动 steer（CK-01）', () => {
   it('运行中发送 → POST steer 成功：onSteer ok=true、send true、不启动新 run', async () => {
     isConversationRunningMock.mockReturnValue(true);
     getConversationRunSnapshotMock.mockReturnValue({ taskId: 'task_ck01' });
-    const fetchMock = vi.fn(async () => ({
+    const fetchMock = vi.fn(() => Promise.resolve({
       ok: true,
-      json: async () => ({ ok: true, queued: true, depth: 1 }),
+      json: () => Promise.resolve({ ok: true, queued: true, depth: 1 }),
     }));
     vi.stubGlobal('fetch', fetchMock);
     const onSteer = vi.fn();
@@ -211,7 +211,7 @@ describe('useChatStream 运行中发送自动 steer（CK-01）', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(url).toBe('/api/ai/agent/task/task_ck01/steer');
-    expect(JSON.parse(String(init.body))).toEqual({ message: '中途改一下参数' });
+    expect(JSON.parse(typeof init.body === 'string' ? init.body : '{}')).toEqual({ message: '中途改一下参数' });
     expect(onSteer).toHaveBeenCalledWith(expect.objectContaining({ ok: true, depth: 1 }));
     expect(startConversationRunMock).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
@@ -220,10 +220,10 @@ describe('useChatStream 运行中发送自动 steer（CK-01）', () => {
   it('steer POST 失败：onSteer ok=false、文本退回输入框、send false', async () => {
     isConversationRunningMock.mockReturnValue(true);
     getConversationRunSnapshotMock.mockReturnValue({ taskId: 'task_ck01' });
-    const fetchMock = vi.fn(async () => ({
+    const fetchMock = vi.fn(() => Promise.resolve({
       ok: false,
       status: 400,
-      json: async () => ({ ok: false, error: 'invalid_arguments', message: 'message 不能为空' }),
+      json: () => Promise.resolve({ ok: false, error: 'invalid_arguments', message: 'message 不能为空' }),
     }));
     vi.stubGlobal('fetch', fetchMock);
     const setInput = vi.fn();
