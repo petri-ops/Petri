@@ -258,7 +258,7 @@
     "ali-oss": "^6.23.0",
     "dependency-cruiser": "^18.3.1",
     "electron": "^41.10.7",
-    "electron-builder": "^24.13.0",
+    "electron-builder": "^26.15.3",
     "eslint": "^9.39.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-security": "^4.0.1",

@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-25 晚八（**BK-09=baseline 重扫+audit 处置收口（32→10 −22；frontend 清零；剩余三族登记在案）**。**队列=CK-11（knip 死代码清理大批，误报过滤先行）新登记待续**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 晚九（**electron-builder 26.15.3 升级（audit 10→2）+ CK-11 首批 authClient 收缩（knip 1078→1065）收口**——CK-11 余 1065 条分批推进中。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 晚八（**BK-09=baseline 重扫+audit 处置收口（32→10 −22；frontend 清零；剩余三族登记在案）**。**队列=CK-11（knip 死代码清理大批，误报过滤先行）新登记待续**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 晚七（**U-02/03/04 代行评估完成（437/438/440 verified；442 待长任务自然取证；Jev 裁决 fit=3 PASS）**。**当前无队列项**；仅余 U-01（Jev key 轮换）待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

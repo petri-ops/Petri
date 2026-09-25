@@ -2344,7 +2344,8 @@
         "test/fixtures/tool-activity-labels.json",
         "scripts/ui437-*",
         "acceptance/ui-437/**",
-        "acceptance/ui-439/**"
+        "acceptance/ui-439/**",
+        "acceptance/ui-eval-agent/**"
       ],
       "tests": [
         "test/tool-activity-labels.test.mjs"

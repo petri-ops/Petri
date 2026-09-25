@@ -1,74 +1,12 @@
 // Gewu 桌面版 auth client — 简化版
 // 桌面版无登录，固定本地 admin 用户，所有模块权限全开。
 // 替代 Docusaurus 版 authClient.ts 的桌面分支。
+// CK-11 首批（2026-09-25）：14 个无消费方的 stub 导出已删除（grep 全仓证伪
+// 「防类型缺口」——34 个 import 方只用 getApiPrefix/getToken/getPlatformApiPrefix/
+// errMsg/AuthUser；IS_DESKTOP/getComputeApiPrefix 与 lib/env.ts 重复定义亦删）。
 
-import { errMsg } from '@/lib/error';
-import { getApiPrefix, getComputeApiPrefix, getPlatformApiPrefix } from '@/lib/env';
+import { getApiPrefix, getPlatformApiPrefix } from '@/lib/env';
 
-export const IS_DESKTOP = true;
+export const getToken = (): string => 'desktop-local';
 
-export interface AuthUser {
-  id: string;
-  username: string;
-  role: string;
-  permissions?: Record<string, boolean>;
-}
-
-const DESKTOP_USER: AuthUser = {
-  id: 'local-user',
-  username: 'Local User',
-  role: 'admin',
-  permissions: {
-    docs: true,
-    blog: true,
-    tools: true,
-    copilot: true,
-  },
-};
-
-export { getApiPrefix, getComputeApiPrefix, getPlatformApiPrefix };
-
-// 桌面版固定 admin，无需登录
-export function getToken(): string | null {
-  return 'desktop-local';
-}
-export function getStoredUser(): AuthUser | null {
-  return DESKTOP_USER;
-}
-export function isLoggedIn(): boolean {
-  return true;
-}
-export function hasModule(_user: AuthUser | null, _moduleKey: string): boolean {
-  return true;
-}
-export function clearAuth(): void {}
-export function logout(): void {}
-export function subscribeAuth(_callback: (user: AuthUser | null) => void): () => void {
-  return () => {};
-}
-export function getCachedGuestPermissions(): Record<string, boolean> | null {
-  return null;
-}
-export function fetchGuestPermissions(): Promise<Record<string, boolean> | null> {
-  return Promise.resolve(null);
-}
-export function fetchMe(): Promise<AuthUser | null> {
-  return Promise.resolve(DESKTOP_USER);
-}
-
-// login/register 桌面版不应被调用，保留 stub 防止类型缺口
-export async function login(
-  _username: string,
-  _password: string
-): Promise<{ ok: boolean; error?: string }> {
-  return Promise.resolve({ ok: true });
-}
-export async function register(_data: {
-  username: string;
-  password: string;
-  email?: string;
-}): Promise<{ ok: boolean; error?: string }> {
-  return Promise.resolve({ ok: true });
-}
-
-export { errMsg };
+export { getApiPrefix, getPlatformApiPrefix };

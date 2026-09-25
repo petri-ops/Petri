@@ -1,6 +1,8 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-25 晚八（**BK-09 完成**：audit 32→10（三族登记）+jscpd 收档+knip 1078 导出→CK-11 登记；baseline 快照 acceptance/block-105/baseline-20260925/。**恢复要点**：dev 栈在跑；lockfile 已动（audit fix）已验证；队列=CK-11。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 晚九（**electron-builder 26.15.3 升级 + CK-11 首批完成**：audit 剩 2（extract-zip 待上游/uuid 不受影响）；CK-11 余 1065 条分批（方法=逐案 grep+双验证，core 盲区高危）；真打包回归待 G1。**恢复要点**：dev 栈在跑；lockfile 两动（audit fix+builder 升级）已验证。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 晚八（**BK-09 完成**：audit 32→10（三族登记）+jscpd 收档+knip 1078 导出→CK-11 登记；baseline 快照 acceptance/block-105/baseline-20260925/。**恢复要点**：dev 栈在跑；lockfile 已动（audit fix）已验证；队列=CK-11。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 晚七（**U-02/03/04 代行评估完成**：三面 verified+442 in_progress 待长任务；仅余 U-01 待用户。**恢复要点**：dev 栈在跑（真实 spawn 会话在项目 p_mu174w3u_ncze 可查）；CK/BK 表全清。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

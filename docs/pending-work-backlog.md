@@ -5,7 +5,9 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-09-25 晚八（**BK-09=quality:baseline 重扫+audit 处置收口（32→10 −22，frontend 清零；剩余三族登记；jscpd 2.56% 收档）**——knip 抓真 1078 未使用导出+122 未引用文件→**新候选 CK-11 登记（死代码清理大批）**。**队列=CK-11 待续**。）
+最后更新：2026-09-25 晚九（**CK-11 首批收口（authClient 14 条收缩，knip 1078→1065）+ electron-builder 26.15.3 major 升级（audit 10→2，critical 清零；真打包回归待 G1）**。**队列=CK-11 余 1065 条分批推进中**（core 后端盲区高危逐案双验证）。）
+
+此前 最后更新：2026-09-25 晚八（**BK-09=quality:baseline 重扫+audit 处置收口（32→10 −22，frontend 清零；剩余三族登记；jscpd 2.56% 收档）**——knip 抓真 1078 未使用导出+122 未引用文件→**新候选 CK-11 登记（死代码清理大批）**。**队列=CK-11 待续**。）
 
 此前 最后更新：2026-09-25 晚七（**U-02/03/04 代行实机评估完成（用户授权+Jev 裁决 fit=3 PASS）：437/438/440 翻 verified、442 保持 in_progress 待长任务自然取证**。**队列全清；仅余 U-01（Jev key 轮换）待用户**。）
 
@@ -65,6 +67,7 @@
 | ✅ CK-07 | 测试卫生小批 | 2026-09-25 当日收口：grants teardown 遗留销号（资源自洽+runner 怪癖定性）+ block107-long flow 断言职责归位（7/7 全绿）；closeout 十门绿 + fit=3.68 PASS |
 | ✅ CK-09 | C-10：output-judge 量表热调设计 | 2026-09-25 设计结论=**不开放**（fitPass/fitRetry 为校准最优解非环境参数+质量门热调纯风险+RETRY/ESCALATE 承载边界）；固化 decision-thresholds.js 注释；销号 |
 | ✅ CK-10 | 遥测漏斗事件（qa-smoke TODO） | 2026-09-25 实施：src/telemetry-funnel.js 纯函数白名单+telemetry.js reportEvent（最小 payload 同隐私原则）+app_started 示范接线+qa-smoke TODO 转断言（7/7）；诚实边界=5 上报点待遥测端点上线 |
+| ✅ BK-09 续 | electron-builder 26.15.3 major 升级（用户问「是否适合」裁决=适合） | 2026-09-25 当日收口：audit 10→2（critical tar+工具链 8 HIGH 清零）；G0 验证面全验（CLI/钩子语法/回归）；notarize 隔离论证（自有 v2 CJS）；真打包回归待 G1 |
 | ✅ BK-09 | quality:baseline 重扫 + audit 处置 | 2026-09-25 当日收口：audit 32→10（−22，安全修 9+frontend 清零+回归 147/1205 绿）；剩余三族登记（工具链族 G1 打包期/extract-zip 待上游/uuid v4 不受影响）；jscpd 2.56% 收档；knip→CK-11 登记；连带修 baseline 脚本 secret 调用 bug |
 | ✅ CK-01 | C-06：composer 运行中发送自动改走 steer 通道 | 2026-09-25 当日收口（Windows 侧）：isConversationRunning 分支改造（steer 入队+行内回执+失败回退+title 显式化）；设计裁决=即时 steer+回执（入队不可撤）；契约 8/8 + 全量 147/1205 + closeout 十门绿 + fit=3.77 PASS；UI-440 in_progress 待过目 |
 | ✅ BK-08 | **darwin 启动预算档建基线** | 2026-09-25 当日收口：Mac 会话（darwin arm64/Node v24.16.0/项目数 4）三轮 5 样本实测，最差中位数 ×1.10（ceil）写入 platforms.darwin 七段（mainReady 46/preload 371/domContentLoaded 219/firstPaint 326/windowShown 577/didFinishLoad 578/dataReady 539）；教训=两轮基线被第三轮复跑判红 2 段（轮间中位漂移 ~15%）；契约测试 8→9；终轮 budget.pass=true violations=0；closeout 十门绿 + fit=3.36 PASS；连带=TEST 实例三连修 + impact-map 两连补登 + P6 重打 10/10（darwin-only P6 契约 13/13 零 skip）；证据=acceptance/block-101/block101-startup-timeline.json |
@@ -90,7 +93,7 @@
 | C-09 | capability-provisioning 共享下载 helper | 🟡建议：host 白名单已修；共享 helper 只在改动该能力时评估（AUDIT-LOG 2026-07-17） |
 | C-10 | output-judge 0-4 量表多闸门热调——**已编入 CK-09** | BK-05 非范围登记 |
 | C-11 | CenterPanelContext 拆分 refs/纯值两对象——**已编入 CK-06** | react-hooks/refs 74 条豁免的结构性修复（BK-06 第六刀定性时登记） |
-| CK-11 | knip 死代码清理大批（BK-09 重扫登记） | knip 2026-09-25 重扫=1078 未使用导出+122 未引用文件（report-only 上界）；**误报过滤先行**（懒 require/动态引用盲区），参照 BLOCK-105 Batch-3/4 先例分批棘轮 |
+| CK-11 | knip 死代码清理大批（BK-09 重扫登记）——**进行中（首批已落）** | 首批=authClient 14 条收缩（knip 1078→1065，证伪类型缺口论）；方法论=逐案 grep 引用核查→分类（删/登记 ignore/盲区标注）→删后 tsc+全量双验证；**core 后端文件=懒 require/字符串引用盲区高危区，逐条双验证**；参照 Batch-3/4 分批棘轮 |
 
 ## ⛔ 阻塞/延期（🟡 在册维持；G0 纪律不外推，重开条件见 AUDIT-LOG 对应行）
 
