@@ -5,7 +5,9 @@
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 > 入口直链（registry `entrypoint` 指向本台的 canonical 文档，归档轮转不得切断发现路径）：[block-14-left-panel-qa-fix-closeout](./block-14-left-panel-qa-fix-closeout.md) · [block-15-architecture-perf-plan](./block-15-architecture-perf-plan.md) · [block-22-codemirror-inline-diff-plan](./block-22-codemirror-inline-diff-plan.md)
 
-最后更新：2026-09-25 早四（**BK-07=Batch-4 抓真三件全部完成（用户裁决「1 2 搞定」；closeout 十门绿 + 判定 fit=3.76 PASS）**——①Office loadAssets 五参化石收窄 (entries, patterns)（四调用点同步，纯签名清理零运行时变化）；②_jobMeta/_selectedSectionId 死状态整体拆除（声明+reset+effect+handler 调用链+类型导入，无任何消费方）；**currentVersion 复核推翻原判**：已接线（ResultVersionHistory 消费该 prop 做 active 高亮+当前徽标，Batch-4 盘点子组件路径核对有误）。③ 前刀已完成。波折=③ 断言测试首轮 lint 三红（未用导入+无 await async act）当轮清偿；closeout 一次假红复跑绿。**队列现状：BK-08 需 Mac 会话，其余队列项全部完成或豁免定性完毕——等待用户新输入**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 早六（**CK 推进系列建表（用户裁决「再检查检查是否不够齐全 之后像 BK 一样做个计划表 逐步推进所有的项目」；治理 skill 全流程）**——全仓二次盘点四源清点：①候选池 11 项 ②AUDIT-LOG 🟡 区（D-01~04 均 G1+/证书/产品决策阻塞不编入）③生产面 TODO 注释精确扫描=**仅 1 条**（qa-smoke.mjs:219 遥测漏斗）④plan 文档遗留候选抽查=抓回 3 项漏网（BLOCK-102 grants 测试 teardown 卫生 / BLOCK-106 mmap_size 评估〔并入 C-05〕/ qa-smoke TODO）——BLOCK-118/119 遗留已全部消化核实。编成 **CK-01~CK-10 逐项推进序**（排序=用户可见价值→技术债卫生→评估设计类；用户预授权按表推进，项内产品语义裁决点仍单独问；C-07/08/09 条件未满足不编入）；用户事项 +U-04（UI-439 过目）。**队列头=CK-01（C-06 运行中发送走 steer 通道：后端 POST task/:id/steer 已有，纯 UI 接线；项内裁决点=自动 steer vs 询问交互形态）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 早四（**BK-07=Batch-4 抓真三件全部完成（用户裁决「1 2 搞定」；closeout 十门绿 + 判定 fit=3.76 PASS）**——①Office loadAssets 五参化石收窄 (entries, patterns)（四调用点同步，纯签名清理零运行时变化）；②_jobMeta/_selectedSectionId 死状态整体拆除（声明+reset+effect+handler 调用链+类型导入，无任何消费方）；**currentVersion 复核推翻原判**：已接线（ResultVersionHistory 消费该 prop 做 active 高亮+当前徽标，Batch-4 盘点子组件路径核对有误）。③ 前刀已完成。波折=③ 断言测试首轮 lint 三红（未用导入+无 await async act）当轮清偿；closeout 一次假红复跑绿。**队列现状：BK-08 需 Mac 会话，其余队列项全部完成或豁免定性完毕——等待用户新输入**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 早三（**BK-07 ③=SideChatDock.test copilotAsk 断言补齐（小修，closeout 前置验证 tsc 0+组件 7/7）**——抓真坐实=头注声称「copilotAsk 归属不在悬挂面（不派发）」且 mock 布了 subscribeCopilotContext 探测点，但全文件零断言验证；修=新增专测（copilot-ask 派发后悬挂面不展开 + dock 从未订阅 copilot 上下文双向断言），头注声称自此有真断言背书。**BK-07 剩余 ①② 需用户裁决**（① Office loadAssets 五参签名收窄；② 结果元信息/版本投影接线的产品语义），队列实质阻塞于用户输入。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
@@ -181,6 +183,7 @@
 > 已收口条目（✅）**一律移入「最近处理记录」**，不得在本区段堆积——本次清理将 23 条已收口项迁出，
 > 待处理项由 28 行降为 8 行（活跃项占比 100%）。新增 ✅ 项请直接追加到「最近处理记录」。
 ## 最近处理记录
+| ✅ 建表登记（2026-09-25 早六；用户裁决「像 BK 一样做个计划表 逐步推进所有的项目」） | 2026-09-25 | **CK 推进系列建表**：二次盘点四源（候选池/AUDIT-LOG 🟡/生产面 TODO/plan 遗留）抓回 3 项漏网，编成 CK-01~CK-10 推进序 + U-04 登记；C-07/08/09 条件未满足不编入；队列头=CK-01 steer 接线 | pending-work-backlog / CK 建表 COMPLETED |
 | ✅ 整批收口（2026-09-25 早四；用户裁决「1 2 搞定」；closeout 十门绿 + 判定 fit=3.76 PASS） | 2026-09-25 | **BK-07 完成=①loadAssets 收窄 (entries, patterns) + ②死状态拆除（_jobMeta/_selectedSectionId）+ currentVersion 复核推翻原判（已接线）**；③ 前刀完成；波折=③ 测试首轮 lint 三红当轮清偿 + closeout 一次假红复跑绿；tsc 0 + 全量 147/1202 | BLOCK-105 Batch-4 抓真 / BK-07 COMPLETED |
 | ✅ 小修收口（2026-09-25 早三；队列序推进；tsc 0 + 组件 7/7） | 2026-09-25 | **BK-07 ③=SideChatDock.test copilotAsk 断言补齐**：头注声称+mock 探测点本有、独缺断言——新增专测双向断言（copilot-ask 派发不展开悬挂面 + 从未订阅 copilot 上下文）；BK-07 ①② 需用户裁决，队列实质阻塞于用户输入 | BLOCK-105 Batch-4 抓真 / ③ COMPLETED |
 | ✅ 整包收官（2026-09-25 早二；用户裁决「一次性搞定剩余大头」；尾清 closeout 十门绿 + 整包判定 fit=3.39 PASS） | 2026-09-25 | **BK-06=BLOCK-105 §7 Batch-8 整包完成（基线 947→395，七刀 −552，可清族全部归零，余 395 全为书面定性豁免类）**：七刀清单+豁免构成+六条机制教训+连带真缺陷修复见整包收官声明；队列头=BK-07 | BLOCK-105 §7 / Batch-8 COMPLETED |

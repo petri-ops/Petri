@@ -1,6 +1,8 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-25 早四（**BK-07 三件全部完成**：①loadAssets 收窄 ②死状态拆除+currentVersion 复核推翻 ③copilotAsk 断言；closeout 十门绿 + fit=3.76 PASS。**恢复要点**：dev 栈在跑；**队列无可串行推进项**——BK-08 需 Mac 会话采 5 样本、其余完成/豁免定性完毕；Batch-8 收官态=基线 394 全为书面定性豁免类（清单见早二行）；用户事项 U-01（Jev key 轮换）/U-02·U-03（UI-437·438 过目）待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 早六（**CK 推进系列建表**——CK-01~CK-10 逐项推进序入 backlog（用户预授权按表推进、项内产品裁决点单独问）；队列头=CK-01 steer 接线。**恢复要点**：dev 栈在跑；全量表查 pending-work-backlog.md；用户事项 U-01~U-04（U-04=UI-439 过目）待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 早四（**BK-07 三件全部完成**：①loadAssets 收窄 ②死状态拆除+currentVersion 复核推翻 ③copilotAsk 断言；closeout 十门绿 + fit=3.76 PASS。**恢复要点**：dev 栈在跑；**队列无可串行推进项**——BK-08 需 Mac 会话采 5 样本、其余完成/豁免定性完毕；Batch-8 收官态=基线 394 全为书面定性豁免类（清单见早二行）；用户事项 U-01（Jev key 轮换）/U-02·U-03（UI-437·438 过目）待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 早三（**BK-07 ③ copilotAsk 断言补齐完成**。**恢复要点**：dev 栈在跑；**队列阻塞于用户**——BK-07 ①② 需用户裁决（五参签名收窄 / 结果元信息接线产品语义）、BK-08 需 Mac；Batch-8 收官态=基线 395 全为书面定性豁免类（清单见上文早二行）；用户事项 U-01~U-03 待用户。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

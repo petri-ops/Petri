@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-25 早四（**BK-07 全部完成（①② 按用户裁决落地 + 复核推翻 currentVersion 原判；closeout 十门绿 + fit=3.76 PASS）**。**队列现状=无可安全串行推进项**：BK-08 需 Mac 会话；BK-02 观察期随使用累计；等待用户新输入（新需求/裁决/U-01~U-03）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-25 早六（**CK 推进系列建表（用户裁决「像 BK 一样做个计划表 逐步推进所有的项目」=按表逐项推进预授权）**——二次盘点抓回 3 项漏网（grants teardown/mmap 评估/qa-smoke TODO），候选池 8 项+新发现编成 CK-01~CK-10（排序=用户可见价值→技术债→评估类）；**队列头=CK-01（C-06 运行中发送走 steer 通道）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 早四（**BK-07 全部完成（①② 按用户裁决落地 + 复核推翻 currentVersion 原判；closeout 十门绿 + fit=3.76 PASS）**。**队列现状=无可安全串行推进项**：BK-08 需 Mac 会话；BK-02 观察期随使用累计；等待用户新输入（新需求/裁决/U-01~U-03）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 早三（**BK-07 ③=SideChatDock.test copilotAsk 断言补齐（tsc 0+组件 7/7）**——头注声称自此有真断言背书。**队列实质阻塞于用户输入**：BK-07 ①（五参签名收窄）②（结果元信息接线）需用户裁决；BK-08 需 Mac 会话。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
