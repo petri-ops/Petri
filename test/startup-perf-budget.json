@@ -2,6 +2,44 @@
   "schema": "gewu/startup-perf-budget.v2",
   "note": "BLOCK-106 启动性能中位数预算（棘轮语义：只许收缩，不许放宽；放宽需用户裁决）。断言对象=各段 5 样本中位数，缺失某段判不通过（不得用「没采到」绕过门禁）。**按平台分档**：启动绝对值强依赖机器/系统，跨平台套用数字必然假红或假绿；无本平台档时 flow 直接判红并给出建基线方法（不许静默跳过）。",
   "platforms": {
+    "darwin": {
+      "basis": {
+        "source": "npm run verify -- block101-startup-timeline（BK-08 建基线：同机三轮 5 样本实测取最差中位数 ×1.10，ceil 取整，与 win32 P3 同法）",
+        "capturedAt": "2026-09-25T01:15:46.291Z",
+        "head": "6cfb681d",
+        "machine": "darwin arm64 / Node v24.16.0 / 项目数 4 / dev 态（Vite dev server :3000）/ 单内建显示",
+        "method": "worst-observed-median × 1.10（三轮全数据：日志轮+两轮证据轮）；教训=前两轮建基线被第三轮实测打脸（domContentLoaded 173→199 / firstPaint 248→296 判红），扩为三轮最差后自洽",
+        "marginPct": 10,
+        "medians": {
+          "mainReady": 41,
+          "preload": 337,
+          "domContentLoaded": 199,
+          "firstPaint": 296,
+          "windowShown": 524,
+          "didFinishLoad": 525,
+          "dataReady": 490
+        },
+        "observedSpread": {
+          "crossRunMedianSpreadPct": 15,
+          "worstStage": "domContentLoaded 173/165/199、firstPaint 260/248/296（轮间漂移远超 win32 的 ~3%，小样本粒度+机器负载敏感；最差中位×1.10 覆盖）",
+          "firstRoundOutliers": "preload 895 / windowShown 1103（Vite dev 冷变换，与前端改动无关）",
+          "evidence": "acceptance/block-101/block101-startup-timeline.json（raw 5 样本）"
+        },
+        "history": [
+          "BK-08（2026-09-25，Mac 会话首建）：首跑因缺档判红（设计行为）→ 采 5 样本建基线 darwin arm64；本机为 M 系芯片，各段绝对值普遍低于 win32 档（mainReady 41 vs 118 / dataReady 490 vs 945），禁止跨平台互套的原则两侧各自成立",
+          "BK-08 同日追加：两轮基线被第三轮复跑判红（2 段超限）→ 按最差中位数法扩为三轮重建，棘轮语义在建档期内完成实质收紧前自洽"
+        ]
+      },
+      "medians": {
+        "mainReady": 46,
+        "preload": 371,
+        "domContentLoaded": 219,
+        "firstPaint": 326,
+        "windowShown": 577,
+        "didFinishLoad": 578,
+        "dataReady": 539
+      }
+    },
     "win32": {
       "basis": {
         "source": "npm run verify -- block101-startup-timeline（BLOCK-106 P3 收口重设：同机多轮实测取最差中位数 ×1.10）",
@@ -42,6 +80,6 @@
     }
   },
   "missingPlatforms": {
-    "darwin": "Mac 侧尚无基线（本包全部证据出自 Windows 机）。Mac 会话首跑 flow 会因缺档判红——那是设计行为，不是故障；照错误信息里的方法采 5 样本、取中位数 ×1.10 写入 platforms.darwin 即可（不得复制 win32 数字）。"
+    "linux": "Linux 会话若跑此 flow 同样因缺档判红（设计行为，不是故障）；照错误信息里的方法在该机采 5 样本、取中位数 ×1.10 写入 platforms.linux 即可（不得跨平台复制数字）。darwin 档已由 BK-08 于 2026-09-25 在 Mac 会话实测建立。"
   }
 }

@@ -1,13 +1,13 @@
 {
   "name": "block101-startup-timeline",
-  "startedAt": "2026-09-20T10:45:58.869Z",
-  "finishedAt": "2026-09-20T10:46:41.667Z",
+  "startedAt": "2026-09-25T00:47:53.778Z",
+  "finishedAt": "2026-09-25T00:48:27.189Z",
   "assertions": [
     {
       "name": "block101_startup_timeline_allPass",
-      "pass": true,
-      "detail": "exit=0 :306,\"min\":300,\"max\":308,\"n\":5},\"windowShown\":{\"median\":746,\"min\":744,\"max\":760,\"n\":5},\"didFinishLoad\":{\"median\":747,\"min\":745,\"max\":760,\"n\":5},\"firstPaint\":{\"median\":632,\"min\":624,\"max\":636,\"n\":5},\"dataReady\":{\"median\":911,\"min\":897,\"max\":921,\"n\":5},\"domContentLoaded\":{\"median\":446,\"min\":444,\"max\":455,\"n\":5},\"projectCount\":{\"median\":10,\"min\":10,\"max\":10,\"n\":5}}\nbudget: {\"pass\":true,\"headro"
+      "pass": false,
+      "detail": "exit=1 t-O\n[block101] sample5: mainReady=50ms preload=346ms windowShown=528ms didLoad=529ms firstPaint=268ms dataReady=453ms projects=4\n/bin/sh: powershell: command not found\n[block101] kill probe skipped: Command failed: powershell -NoProfile -Command \"Get-CimInstance Win32_Process -Filter \\\"Name='electron.exe'\\\" | Select-O\n[block101] FAIL /Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/"
     }
   ],
-  "allPass": true
+  "allPass": false
 }

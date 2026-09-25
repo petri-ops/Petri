@@ -26,23 +26,31 @@ test('win32 档预算形态合法且七段齐备', () => {
   for (const stage of STAGES) assert.ok(ceilings[stage] > 0, `${stage} 上限必须为正数`);
 });
 
+test('darwin 档预算形态合法且七段齐备（BK-08 Mac 会话实测建立）', () => {
+  const ceilings = resolvePlatformBudget(rawBudget, 'darwin', budgetPath);
+  for (const stage of STAGES) assert.ok(ceilings[stage] > 0, `${stage} 上限必须为正数`);
+  // 本机实测档：basis.machine 必须是 darwin 实测痕迹，禁止从 win32 复制数字
+  assert.match(rawBudget.platforms.darwin.basis.machine, /darwin/i);
+});
+
 test('跨平台不得套用：无本平台档直接抛错并给出建基线方法', () => {
   assert.throws(
     () => resolvePlatformBudget(rawBudget, 'linux', budgetPath),
     /无 linux 平台基线[\s\S]*block101-startup-timeline[\s\S]*×1\.10/
   );
-  // 本包证据全部出自 Windows 机；Mac 档必须留空由 Mac 会话自己实测，不得复制数字
-  assert.equal(rawBudget.platforms.darwin, undefined, 'darwin 档需由 Mac 会话实测后建立，禁止套用 win32');
-  assert.match(rawBudget.missingPlatforms.darwin, /不得复制 win32 数字/);
+  // 缺档平台在 missingPlatforms 留建基线方法指引（darwin 已由 BK-08 实测建档）
+  assert.match(rawBudget.missingPlatforms.linux, /不得跨平台复制数字/);
 });
 
 test('基线与上限自洽：上限不低于基线中位数、也不宽于 +25%（防手改漂移）', () => {
-  const ceilings = resolvePlatformBudget(rawBudget, 'win32', budgetPath);
-  const basis = rawBudget.platforms.win32.basis.medians;
-  for (const stage of STAGES) {
-    assert.ok(basis[stage] > 0, `${stage} 缺基线中位数`);
-    assert.ok(ceilings[stage] >= basis[stage], `${stage} 上限低于基线中位数，首轮就会假红`);
-    assert.ok(ceilings[stage] <= basis[stage] * 1.25 + 1, `${stage} 上限宽于基线 +25%，门禁形同虚设`);
+  for (const platform of ['win32', 'darwin']) {
+    const ceilings = resolvePlatformBudget(rawBudget, platform, budgetPath);
+    const basis = rawBudget.platforms[platform].basis.medians;
+    for (const stage of STAGES) {
+      assert.ok(basis[stage] > 0, `${platform} ${stage} 缺基线中位数`);
+      assert.ok(ceilings[stage] >= basis[stage], `${platform} ${stage} 上限低于基线中位数，首轮就会假红`);
+      assert.ok(ceilings[stage] <= basis[stage] * 1.25 + 1, `${platform} ${stage} 上限宽于基线 +25%，门禁形同虚设`);
+    }
   }
 });
 

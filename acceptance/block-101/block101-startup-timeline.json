@@ -1,71 +1,71 @@
 {
   "flow": "block101-startup-timeline",
   "summary": {
-    "capturedAt": "2026-09-20T10:46:41.612Z",
+    "capturedAt": "2026-09-25T01:21:02.590Z",
     "samples": 5,
     "context": {
-      "head": "f287e46d",
-      "platform": "win32",
-      "node": "v24.20.0",
+      "head": "6cfb681d",
+      "platform": "darwin",
+      "node": "v24.16.0",
       "frontendBundle": {
         "available": true,
-        "entryChunk": "index-CVxrf6VP.js",
-        "entryChunkBytes": 568207,
-        "largestChunk": "index-Bu92LC2G.js",
-        "largestChunkBytes": 948063,
-        "jsChunkCount": 55,
-        "jsTotalBytes": 4049821,
-        "cssTotalBytes": 544711,
-        "builtAt": "2026-09-20T09:22:10.205Z"
+        "entryChunk": "index-DxGIf25U.js",
+        "entryChunkBytes": 2979736,
+        "largestChunk": "index-DxGIf25U.js",
+        "largestChunkBytes": 2979736,
+        "jsChunkCount": 28,
+        "jsTotalBytes": 3928539,
+        "cssTotalBytes": 534920,
+        "builtAt": "2026-09-20T11:21:45.829Z"
       },
-      "budgetFile": "test\\startup-perf-budget.json"
+      "budgetFile": "test/startup-perf-budget.json"
     },
     "mainReady": {
-      "median": 96,
-      "min": 95,
-      "max": 98,
+      "median": 35,
+      "min": 35,
+      "max": 37,
       "n": 5
     },
     "preload": {
-      "median": 306,
-      "min": 300,
+      "median": 304,
+      "min": 295,
       "max": 308,
       "n": 5
     },
     "windowShown": {
-      "median": 746,
-      "min": 744,
-      "max": 760,
+      "median": 474,
+      "min": 456,
+      "max": 492,
       "n": 5
     },
     "didFinishLoad": {
-      "median": 747,
-      "min": 745,
-      "max": 760,
+      "median": 474,
+      "min": 457,
+      "max": 493,
       "n": 5
     },
     "firstPaint": {
-      "median": 632,
-      "min": 624,
-      "max": 636,
+      "median": 248,
+      "min": 244,
+      "max": 272,
       "n": 5
     },
     "dataReady": {
-      "median": 911,
-      "min": 897,
-      "max": 921,
+      "median": 438,
+      "min": 408,
+      "max": 446,
       "n": 5
     },
     "domContentLoaded": {
-      "median": 446,
-      "min": 444,
-      "max": 455,
+      "median": 170,
+      "min": 162,
+      "max": 189,
       "n": 5
     },
     "projectCount": {
-      "median": 10,
-      "min": 10,
-      "max": 10,
+      "median": 4,
+      "min": 4,
+      "max": 4,
       "n": 5
     }
   },
@@ -74,45 +74,45 @@
     "checked": [
       {
         "stage": "mainReady",
-        "medianMs": 96,
-        "ceilingMs": 130,
-        "headroomMs": 34
+        "medianMs": 35,
+        "ceilingMs": 46,
+        "headroomMs": 11
       },
       {
         "stage": "preload",
-        "medianMs": 306,
-        "ceilingMs": 396,
-        "headroomMs": 90
+        "medianMs": 304,
+        "ceilingMs": 371,
+        "headroomMs": 67
       },
       {
         "stage": "domContentLoaded",
-        "medianMs": 446,
-        "ceilingMs": 543,
-        "headroomMs": 97
+        "medianMs": 170,
+        "ceilingMs": 219,
+        "headroomMs": 49
       },
       {
         "stage": "firstPaint",
-        "medianMs": 632,
-        "ceilingMs": 784,
-        "headroomMs": 152
+        "medianMs": 248,
+        "ceilingMs": 326,
+        "headroomMs": 78
       },
       {
         "stage": "windowShown",
-        "medianMs": 746,
-        "ceilingMs": 916,
-        "headroomMs": 170
+        "medianMs": 474,
+        "ceilingMs": 577,
+        "headroomMs": 103
       },
       {
         "stage": "didFinishLoad",
-        "medianMs": 747,
-        "ceilingMs": 917,
-        "headroomMs": 170
+        "medianMs": 474,
+        "ceilingMs": 578,
+        "headroomMs": 104
       },
       {
         "stage": "dataReady",
-        "medianMs": 911,
-        "ceilingMs": 1040,
-        "headroomMs": 129
+        "medianMs": 438,
+        "ceilingMs": 539,
+        "headroomMs": 101
       }
     ],
     "violations": []
@@ -121,137 +121,137 @@
     {
       "main": {
         "processStart": 0,
-        "mainReady": 98,
+        "mainReady": 37,
+        "preload": 305,
+        "windowShown": 474,
+        "didFinishLoad": 474,
+        "reported": {
+          "reportedAt": 1790299240755,
+          "dataReadyMs": 438,
+          "projectCount": 4,
+          "firstPaintMs": 248,
+          "receivedAt": 741
+        }
+      },
+      "paints": [
+        {
+          "name": "first-paint",
+          "startTime": 248
+        },
+        {
+          "name": "first-contentful-paint",
+          "startTime": 248
+        }
+      ],
+      "domContentLoaded": 170
+    },
+    {
+      "main": {
+        "processStart": 0,
+        "mainReady": 35,
         "preload": 308,
-        "windowShown": 760,
-        "didFinishLoad": 760,
+        "windowShown": 482,
+        "didFinishLoad": 483,
         "reported": {
-          "reportedAt": 1789901165846,
-          "dataReadyMs": 921,
-          "projectCount": 10,
-          "firstPaintMs": 632,
-          "receivedAt": 1224
+          "reportedAt": 1790299245355,
+          "dataReadyMs": 438,
+          "projectCount": 4,
+          "firstPaintMs": 256,
+          "receivedAt": 744
         }
       },
       "paints": [
         {
           "name": "first-paint",
-          "startTime": 632
+          "startTime": 256
         },
         {
           "name": "first-contentful-paint",
-          "startTime": 632
+          "startTime": 256
         }
       ],
-      "domContentLoaded": 455
+      "domContentLoaded": 175
     },
     {
       "main": {
         "processStart": 0,
-        "mainReady": 95,
-        "preload": 306,
-        "windowShown": 746,
-        "didFinishLoad": 747,
+        "mainReady": 35,
+        "preload": 304,
+        "windowShown": 492,
+        "didFinishLoad": 493,
         "reported": {
-          "reportedAt": 1789901173779,
-          "dataReadyMs": 900,
-          "projectCount": 10,
-          "firstPaintMs": 628,
-          "receivedAt": 1201
+          "reportedAt": 1790299249928,
+          "dataReadyMs": 446,
+          "projectCount": 4,
+          "firstPaintMs": 272,
+          "receivedAt": 747
         }
       },
       "paints": [
         {
           "name": "first-paint",
-          "startTime": 628
+          "startTime": 272
         },
         {
           "name": "first-contentful-paint",
-          "startTime": 628
+          "startTime": 272
         }
       ],
-      "domContentLoaded": 444
+      "domContentLoaded": 189
     },
     {
       "main": {
         "processStart": 0,
-        "mainReady": 95,
-        "preload": 300,
-        "windowShown": 744,
-        "didFinishLoad": 745,
+        "mainReady": 37,
+        "preload": 298,
+        "windowShown": 461,
+        "didFinishLoad": 461,
         "reported": {
-          "reportedAt": 1789901181874,
-          "dataReadyMs": 911,
-          "projectCount": 10,
-          "firstPaintMs": 624,
-          "receivedAt": 1207
+          "reportedAt": 1790299254466,
+          "dataReadyMs": 432,
+          "projectCount": 4,
+          "firstPaintMs": 248,
+          "receivedAt": 728
         }
       },
       "paints": [
         {
           "name": "first-paint",
-          "startTime": 624
+          "startTime": 248
         },
         {
           "name": "first-contentful-paint",
-          "startTime": 624
+          "startTime": 248
         }
       ],
-      "domContentLoaded": 447
+      "domContentLoaded": 164
     },
     {
       "main": {
         "processStart": 0,
-        "mainReady": 98,
-        "preload": 303,
-        "windowShown": 746,
-        "didFinishLoad": 748,
+        "mainReady": 35,
+        "preload": 295,
+        "windowShown": 456,
+        "didFinishLoad": 457,
         "reported": {
-          "reportedAt": 1789901189866,
-          "dataReadyMs": 897,
-          "projectCount": 10,
-          "firstPaintMs": 636,
-          "receivedAt": 1195
+          "reportedAt": 1790299259002,
+          "dataReadyMs": 408,
+          "projectCount": 4,
+          "firstPaintMs": 244,
+          "receivedAt": 701
         }
       },
       "paints": [
         {
           "name": "first-paint",
-          "startTime": 636
+          "startTime": 244
         },
         {
           "name": "first-contentful-paint",
-          "startTime": 636
+          "startTime": 244
         }
       ],
-      "domContentLoaded": 446
-    },
-    {
-      "main": {
-        "processStart": 0,
-        "mainReady": 96,
-        "preload": 306,
-        "windowShown": 745,
-        "didFinishLoad": 746,
-        "reported": {
-          "reportedAt": 1789901197918,
-          "dataReadyMs": 915,
-          "projectCount": 10,
-          "firstPaintMs": 636,
-          "receivedAt": 1215
-        }
-      },
-      "paints": [
-        {
-          "name": "first-paint",
-          "startTime": 636
-        },
-        {
-          "name": "first-contentful-paint",
-          "startTime": 636
-        }
-      ],
-      "domContentLoaded": 444
+      "domContentLoaded": 162
     }
   ]
 }
