@@ -487,6 +487,8 @@ const desktopBridgeSurface = {
     splitSideDiff: (params) => ipcRenderer.invoke('git:split-side-diff', params || {}),
     revertFile: (params) => ipcRenderer.invoke('git:revert-file', params || {}),
     applyInverseHunk: (params) => ipcRenderer.invoke('git:apply-inverse-hunk', params || {}),
+    // UI-449（C-16）— 审阅徽章 ±行数权威源
+    workingTreeShortstat: (params) => ipcRenderer.invoke('git:working-tree-shortstat', params || {}),
     // BLOCK-20 — Commit Review
     commitReview: (params) => ipcRenderer.invoke('git:commit-review', params || {}),
     // BLOCK-29 — 提交历史（审阅面板「历史」分区，只读）

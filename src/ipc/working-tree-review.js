@@ -73,6 +73,17 @@ function setupWorkingTreeReviewIpc(options = {}) {
     });
   });
 
+  // UI-449（C-16）— 审阅徽章 ±行数权威源：git shortstat（tracked+untracked 分开），
+  // 前端不自行数行（避免第二真相）。
+  ipcMain.handle(CHANNELS.git.shortstat, async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const adapter = await resolveGitAdapter(args.projectId);
+      const stat = adapter.workingTreeShortstat();
+      return { tracked: stat.tracked, untrackedFiles: stat.untrackedFiles, empty: stat.empty };
+    });
+  });
+
   ipcMain.handle(CHANNELS.git.workingTreeDiff, async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
     return safeInvoke(async () => {

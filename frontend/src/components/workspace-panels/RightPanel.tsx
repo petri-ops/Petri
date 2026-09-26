@@ -21,7 +21,7 @@ import {
 import { useToolCatalog } from '@/lib/tool-catalog';
 import { AnalysisLaunchPanel } from '@/components/workspace-panels/AnalysisLaunchPanel';
 // UI-446 加映 v3 — 空态磁贴的审阅未读圆点数据源
-import { useConversationUnreviewedCount } from '@/components/copilot/conversationChangesStore';
+import { useConversationShortstat, useConversationUnreviewedCount } from '@/components/copilot/conversationChangesStore';
 import { CommandCenterJobsWall } from '@/pages/window/CommandCenterJobsWall';
 // BLOCK-28.5 — 审阅并入右侧边栏 tab 体系（复用 dock 紧凑形态，填满 tab 容器）
 import { ReviewMode } from '@/components/desktop/WorkingTreeReview/ReviewMode';
@@ -132,6 +132,8 @@ export function RightPanel({
 
   // UI-446 v4 — 空态「审阅」磁贴的未审文件数徽章（当前会话有未看工作区改动）
   const reviewCount = useConversationUnreviewedCount(ctx.activeConvId);
+  // UI-449（C-16）— 磁贴 ±行数（权威源=后端 git shortstat；有未审改动才拉）
+  const reviewStat = useConversationShortstat(ctx.activeConvId, ctx.projectId ?? null, reviewCount > 0);
 
   // UI-341 加映二 — 侧栏开合平滑：原实现 !visible 直接 return null（卸载 =
   // 开合瞬时跳变）。现保持挂载、宽度收到 0，走 .rightCol 的 width transition 平滑收起。
@@ -166,6 +168,7 @@ export function RightPanel({
                     onOpenReview={() => ctx.openRightPanel('review')}
                     onOpenJobs={() => ctx.openRightPanel('jobs')}
                     reviewCount={reviewCount}
+                    reviewStat={reviewStat ? { added: reviewStat.tracked.added, removed: reviewStat.tracked.removed } : null}
                   />
                 )}
                 {/* UI-362 — 指挥中心 tab：项目绑定俯瞰（瓦片墙按当前项目过滤） */}

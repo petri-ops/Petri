@@ -5,6 +5,7 @@
 // ============================================================
 import React from 'react';
 import { Icon } from '@/components/icons/Icon';
+import { formatShortstatBadge } from '@/components/copilot/conversationChangesStore';
 import styles from '../project-workspace.module.css';
 
 export function EmptyResult({
@@ -15,6 +16,7 @@ export function EmptyResult({
   onOpenReview,
   onOpenJobs,
   reviewCount,
+  reviewStat,
 }: {
   onOpenResults?: () => void;
   // UI-348 — 「后端」卡已删除（BLOCK-72 后端管理面在左栏入口的全局 /backend 页，
@@ -28,6 +30,8 @@ export function EmptyResult({
   onOpenJobs?: () => void;
   /** UI-446 v4 — 当前会话有未看工作区改动：审阅磁贴亮计数徽章引导。 */
   reviewCount?: number;
+  /** UI-449（C-16）— ±行数（权威源=后端 git shortstat；缺省回落纯计数）。 */
+  reviewStat?: { added: number; removed: number } | null;
 }): React.ReactElement {
   return (
     <div className={styles.emptyResult}>
@@ -51,7 +55,7 @@ export function EmptyResult({
         <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenReview} disabled={!onOpenReview}>
           <Icon name="git-branch" size={16} />
           <span className={styles.emptyResultLaunchText}>审阅</span>
-          {reviewCount ? <span className={styles.emptyResultLaunchCount} data-testid="review-tile-count">{reviewCount}</span> : null}
+          {reviewCount ? <span className={styles.emptyResultLaunchCount} data-testid="review-tile-count">{formatShortstatBadge(reviewCount, reviewStat)}</span> : null}
         </button>
         <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenJobs} disabled={!onOpenJobs}>
           <Icon name="command" size={16} />

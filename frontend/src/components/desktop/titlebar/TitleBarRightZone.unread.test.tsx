@@ -18,6 +18,7 @@ const mockPanels = {
     tabs: [] as TitleBarTab[],
     activeTabId: 'files' as string | null,
     reviewCount: 0,
+    reviewStat: null as { added: number; removed: number } | null,
     onSelectTab: vi.fn(),
     onCloseTab: vi.fn(),
     onMoreAction: vi.fn(),
@@ -88,6 +89,34 @@ describe('TitleBarRightZone 审阅 tab 计数徽章（UI-446 v4）', () => {
       expect(screen.queryByTestId('review-menu-count')).toBeNull();
     } finally {
       mockPanels.titleBar.reviewCount = 0;
+    }
+  });
+
+  it('UI-449：带 reviewStat → 徽章显示「N·+A−D」（tab 药丸与 + 钮同格式）', () => {
+    mockPanels.titleBar.reviewCount = 3;
+    mockPanels.titleBar.reviewStat = { added: 5, removed: 1 };
+    try {
+      mountWithTabs([
+        { id: 'review', label: '审阅', icon: 'git-branch', closable: true, reviewCount: 3, reviewStat: { added: 5, removed: 1 } },
+      ]);
+      expect(screen.getByTestId('review-tab-count').textContent).toBe('3·+5−1');
+    } finally {
+      mockPanels.titleBar.reviewCount = 0;
+      mockPanels.titleBar.reviewStat = null;
+    }
+  });
+
+  it('UI-449：reviewStat 缺省 → 回落纯计数（桥失败/未取到时不渲染坏形态）', () => {
+    mockPanels.titleBar.reviewCount = 2;
+    mockPanels.titleBar.reviewStat = null;
+    try {
+      mountWithTabs([
+        { id: 'review', label: '审阅', icon: 'git-branch', closable: true, reviewCount: 2 },
+      ]);
+      expect(screen.getByTestId('review-tab-count').textContent).toBe('2');
+    } finally {
+      mockPanels.titleBar.reviewCount = 0;
+      mockPanels.titleBar.reviewStat = null;
     }
   });
 });

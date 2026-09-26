@@ -4,7 +4,7 @@ import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsC
 import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import { RIGHT_PANEL_ITEMS, type RightPanelMode } from './rightPanelTabs';
 // UI-446 — 审阅 tab 未读圆点数据源（当前会话工作区改动索引）
-import { useConversationUnreviewedCount } from '@/components/copilot/conversationChangesStore';
+import { useConversationUnreviewedCount, useConversationShortstat } from '@/components/copilot/conversationChangesStore';
 
 // BLOCK-92 Wave B-1 — TitleBar 注册 effect 簇外迁（原 ProjectWorkspace 内联，纯搬运零行为变化）。
 // TitleBar 注册 —— 8f3d55a5 曾误删整段（右侧工具菜单「+」/ 标签 pills / 结果
@@ -18,6 +18,8 @@ type UpdateTitleBar = ReturnType<typeof useWorkspacePanelsContext>['updateTitleB
 interface UseWorkspaceTitleBarOptions {
   updateTitleBar: UpdateTitleBar;
   projectName: string | undefined;
+  /** UI-449（C-16）— shortstat 取数需要项目根（badge ±行数权威源）。 */
+  projectId?: string;
   titleBarTitle: string;
   rightTab: RightPanelMode;
   rightToolMenuOpen: boolean;
@@ -43,6 +45,7 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
   const {
     updateTitleBar,
     projectName,
+    projectId,
     titleBarTitle,
     rightTab,
     rightToolMenuOpen,
@@ -65,6 +68,8 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
 
   // UI-446 v4 — 审阅 tab 计数徽章：当前会话未审工作区改动文件数（激活审阅 tab 即归零）
   const reviewCount = useConversationUnreviewedCount(activeConvId);
+  // UI-449（C-16）— ±行数（权威源=git shortstat；有未审改动才拉，TTL 节流）
+  const reviewStat = useConversationShortstat(activeConvId, projectId ?? null, reviewCount > 0);
 
   const titleBarTabs = useMemo(
     () =>
@@ -78,9 +83,13 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
             icon: item?.icon || 'folder',
             closable: true,
             reviewCount: tab === 'review' ? reviewCount : undefined,
+            reviewStat:
+              tab === 'review' && reviewStat
+                ? { added: reviewStat.tracked.added, removed: reviewStat.tracked.removed }
+                : undefined,
           };
         }),
-    [openRightTabs, reviewCount]
+    [openRightTabs, reviewCount, reviewStat]
   );
   const titleBarResultItems = useMemo(() => conversationJobs.map((job) => {
     const status = job.status === 'done'
@@ -109,6 +118,7 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
       activeTabId: rightTab === 'home' ? null : rightTab,
       // UI-446 v4 — 审阅 tab 未打开时计数挂「+」按钮（当前会话有未看工作区改动）
       reviewCount,
+      reviewStat: reviewStat ? { added: reviewStat.tracked.added, removed: reviewStat.tracked.removed } : null,
       onSelectTab: (tabId) => {
         if (tabId === 'results') {
           handleOpenRightResults();
@@ -151,11 +161,12 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
           : null,
     });
     return () => {
-      updateTitleBar({
-        title: 'Gewu',
-        tabs: [],
-        activeTabId: null,
-        reviewCount: 0,
+    updateTitleBar({
+      title: 'Gewu',
+      tabs: [],
+      activeTabId: null,
+      reviewCount: 0,
+      reviewStat: null,
         onSelectTab: null,
         onCloseTab: null,
         onMoreAction: null,
@@ -190,6 +201,9 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
     titleBarTabs,
     titleBarResultItems,
     updateTitleBar,
+    // UI-449（C-16）— 缺失会让 ±行数徽章闭包过期
+    projectId,
+    reviewStat,
     // UI-309：旧版遗漏——缺失会让顶栏会话选择器持有过期闭包
     conversations,
     activeConvId,

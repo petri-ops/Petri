@@ -620,6 +620,17 @@ declare global {
           error?: string;
           message?: string;
         }>;
+        // UI-449（C-16）— 审阅徽章 ±行数权威源（git shortstat，tracked/untracked 分开）
+        workingTreeShortstat: (params?: { projectId?: string }) => Promise<{
+          ok: boolean;
+          data?: {
+            tracked: { files: number; added: number; removed: number };
+            untrackedFiles: number;
+            empty: boolean;
+          };
+          error?: string;
+          message?: string;
+        }>;
         // BLOCK-20 — Commit Review
         commitReview: (params: {
           decisions: Record<string, 'accept' | 'reject' | 'pending'>;

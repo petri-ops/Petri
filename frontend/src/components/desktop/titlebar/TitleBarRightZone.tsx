@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
+import { formatShortstatBadge } from '@/components/copilot/conversationChangesStore';
 import { useWorkspacePanelsContext } from '../WorkspacePanelsContext';
 import styles from '../TitleBar.module.css';
 import { getIsMac, getIsProjection, parseWorkspaceRoute, WindowControls } from './shared';
@@ -60,9 +61,9 @@ export function TitleBarRightZone(): React.ReactElement {
                 >
                   <Icon name={tab.icon} size={14} />
                   <span className={styles.tabPillText}>{tab.label}</span>
-                  {/* UI-446 v4 — tab 级未审文件数徽章（审阅 tab：当前会话有未看工作区改动） */}
+                  {/* UI-446 v4 — tab 级未审文件数徽章；UI-449（C-16）带 ±行数（git shortstat 权威源） */}
                   {tab.reviewCount ? (
-                    <span className={styles.tabCountBadge} data-testid="review-tab-count">{tab.reviewCount}</span>
+                    <span className={styles.tabCountBadge} data-testid="review-tab-count">{formatShortstatBadge(tab.reviewCount, tab.reviewStat)}</span>
                   ) : null}
                 </button>
                 {tab.closable && onCloseTab && (
@@ -93,7 +94,7 @@ export function TitleBarRightZone(): React.ReactElement {
               {/* UI-446 v4 — 审阅 tab 未打开时，计数徽章挂「+」按钮引导入口（点开审阅即熄）。
                   注意 >0 判定：&& 直接接 reviewCount 会在 0 时把数字渲染出来（React 渲染 falsy 数字）。 */}
               {(panels.titleBar.reviewCount ?? 0) > 0 && !tabs.some((tab) => tab.id === 'review') && (
-                <span className={styles.tabCountBadge} data-testid="review-menu-count">{panels.titleBar.reviewCount}</span>
+                <span className={styles.tabCountBadge} data-testid="review-menu-count">{formatShortstatBadge(panels.titleBar.reviewCount ?? 0, panels.titleBar.reviewStat)}</span>
               )}
             </button>
             {toolMenuOpen && (

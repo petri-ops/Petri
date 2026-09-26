@@ -2185,6 +2185,22 @@
       "scriptRole": "governance"
     },
     {
+      "id": "ui449-c16-shortstat",
+      "note": "UI-449（C-16）审阅徽章 ±行数：git-adapter.workingTreeShortstat 权威源桥（git diff HEAD --shortstat + untracked porcelain 分开计数）+ IPC 四件套（git:working-tree-shortstat）+ 前端 formatShortstatBadge「N·+A−D」四入口；C-17b 终端反馈面走查脚本与证据随本规则。",
+      "patterns": [
+        "test/git-adapter-shortstat.test.mjs",
+        "scripts/c17b-streaming-sse.mjs",
+        "scripts/c17b-terminal-feedback.mjs",
+        "acceptance/c17b-terminal/**"
+      ],
+      "tests": [
+        "test/git-adapter-shortstat.test.mjs"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true,
+      "scriptRole": "governance"
+    },
+    {
       "id": "hk03-symbol-graph",
       "note": "HK-03 符号图/导入边精确分类查询（typescript Compiler API 零新增依赖；选型/回放/DEAD 语义边界=docs/hk03-symbol-graph-selection.md）。BLOCK-124（C-13）内核单源迁 core/biof3-server/helpers/code-graph.js（scripts/symbol-graph.mjs 只剩 CLI 薄壳），契约测试随迁。补登原因=UI-445 提交 c3387d24 登记 test:changed fail-closed 拦截本脚本未登记，红旗归属 HK-03 收口清偿。",
       "patterns": [

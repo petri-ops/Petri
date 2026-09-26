@@ -4199,3 +4199,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：契约 SideChatDock 9 / CenterPanel 8（新增共享开态与让位类两契约）+ sideChatDockStore 3 + ComposerYield 5 = 25/25 绿；前端全量 153 文件/1229 用例 0 红；tsc 0；theme-token-contract 4/4；eslint 0 error。实机三态走查 allPass（dev 栈 dark 主题 1680×950）：开态 composers 2→1、让位类 padding-right 432px、16px 圆角 + 暗档 float 阴影、compact 占位符单行、中栏内容零切割；点「返回中栏输入」dock 收起 + composer 完整占位符还原。截图+断言=acceptance/ui-448/（walkthrough.json + 三态截图 + 提示条特写）。
 - **非范围**：0.92 半透明不采纳（交互面≠只读监控面）、宽度拖拽调节、悬浮面×摘要浮层同屏叠置已知边界（reopen 条件在 plan §3）。
 - 用户实机过目后翻 verified。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-449: C-16 — 审阅徽章 ±行数版（「N·+A−D」，权威源=后端 git shortstat 桥）(2026-09-26 in_progress，契约已验，待用户过目)
+
+- **来源**：候选池 C-16（UI-446 v4 计数徽章升级：入口直接显示 +A −D 行数变化；队列逐推模式第四项）。权威源红线=不前端数行，后端 shortstat 桥避免第二真相。
+- **改动**：①后端权威源=git-adapter 新方法 `workingTreeShortstat()`（`git diff HEAD --shortstat` 含暂存区 + untracked porcelain 分开计数，零第二真相）；②IPC 四件套=`git:working-tree-shortstat` 通道（channels.js + working-tree-review.js handler + preload `workingTreeReview.workingTreeShortstat` + electron.d.ts）；③前端=conversationChangesStore 增 `refreshConversationShortstat`（20s TTL 节流+失败回落旧值不抛）与 `useConversationShortstat` hook + `formatShortstatBadge`（「N·+A−D」格式）；④四处入口同源渲染（useWorkspaceTitleBar 组装 tab 药丸/+钮/菜单徽章 + RightPanel→EmptyResult 磁贴），shortstat 缺省回落纯计数（桥失败/浏览器态不渲染坏形态）。
+- **证据（契约）**：红绿先行——adapter 3 红（含测试算术自纠：改 1 行按 +1/−1 计）→3/3 绿 + store/RightZone 4 红→13/13 绿（含 UI-446 v4 存量计数语义零回归）；tsc 0。C-17b 走查附带实证 agent exec 输出流式进工具行（acceptance/c17b-terminal/streaming-sse.json allPass）。
+- 待用户实机过目（有未审改动时四处入口显示「N·+A−D」）。G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -304,6 +304,33 @@ function createGitAdapter(options = {}) {
       };
     },
 
+    /**
+     * UI-449（C-16）— 审阅徽章 ±行数权威源：HEAD vs 工作树（含暂存区）shortstat。
+     * 行数只对已跟踪文件有意义（未跟踪文件无基线），untrackedFiles 分开计数；
+     * 单次调用两次只读 git（diff --shortstat + status porcelain），无第二真相。
+     */
+    workingTreeShortstat() {
+      const stat = run(['diff', 'HEAD', '--no-color', '--shortstat'], { allowFailure: true, readOnly: true });
+      let tracked = { files: 0, added: 0, removed: 0 };
+      const text = (stat.stdout || '').trim();
+      if (stat.ok && text) {
+        const m = /(\d+) files? changed(?:, (\d+) insertions?\(\+\))?(?:, (\d+) deletions?\(-\))?/.exec(text);
+        if (m) tracked = { files: Number(m[1]), added: Number(m[2] ?? 0), removed: Number(m[3] ?? 0) };
+      }
+      let untrackedFiles = 0;
+      try {
+        const parsed = parsePorcelainZ(
+          run(['status', '--porcelain=v1', '-z', '--untracked-files=all'], { allowFailure: true, readOnly: true }).stdout || ''
+        );
+        untrackedFiles = parsed.entries.filter((entry) => entry.untracked).length;
+      } catch {}
+      return {
+        tracked,
+        untrackedFiles,
+        empty: tracked.files === 0 && untrackedFiles === 0,
+      };
+    },
+
     /** 路径受限 diff。`staged` 走 --cached；给定 refs 则比较两个提交。
      * UI-232 — 双 ref（fromRef+toRef）区间是有界的提交间只读比较，允许不带
      * pathspec 整树比较；工作区 diff（无 ref，含 --cached）维持 pathspec 强制

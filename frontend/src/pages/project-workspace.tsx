@@ -429,6 +429,7 @@ export function ProjectWorkspace(): React.ReactElement {
   useWorkspaceTitleBar({
     updateTitleBar,
     projectName: project?.name,
+    projectId: projectId ?? undefined,
     titleBarTitle,
     rightTab,
     rightToolMenuOpen,

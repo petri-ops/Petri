@@ -12,6 +12,8 @@ export interface TitleBarTab {
   closable?: boolean;
   /** UI-446 v4 — tab 级未审文件数徽章（审阅 tab：当前会话未看工作区改动数，0/缺省隐藏）。 */
   reviewCount?: number;
+  /** UI-449（C-16）— ±行数（权威源=后端 git shortstat；缺省回落纯计数）。 */
+  reviewStat?: { added: number; removed: number } | null;
 }
 
 export interface TitleBarToolItem {
@@ -36,6 +38,8 @@ export interface TitleBarState {
   activeTabId: string | null;
   /** UI-446 v4 — 审阅 tab 未打开时，「+」工具菜单按钮亮未审文件数徽章。 */
   reviewCount?: number;
+  /** UI-449（C-16）— ±行数（权威源=后端 git shortstat；缺省回落纯计数）。 */
+  reviewStat?: { added: number; removed: number } | null;
   onSelectTab: ((id: string) => void) | null;
   onCloseTab: ((id: string) => void) | null;
   onMoreAction: (() => void) | null;
@@ -74,6 +78,7 @@ const DEFAULT_TITLE_BAR: TitleBarState = {
   tabs: [],
   activeTabId: null,
   reviewCount: 0,
+  reviewStat: null,
   onSelectTab: null,
   onCloseTab: null,
   onMoreAction: null,
@@ -99,6 +104,7 @@ function titleBarDataEqual(a: TitleBarState, b: TitleBarState): boolean {
     a.canGoForward === b.canGoForward &&
     JSON.stringify(a.tabs) === JSON.stringify(b.tabs) &&
     a.reviewCount === b.reviewCount &&
+    JSON.stringify(a.reviewStat ?? null) === JSON.stringify(b.reviewStat ?? null) &&
     JSON.stringify(a.toolMenuItems) === JSON.stringify(b.toolMenuItems) &&
     JSON.stringify(a.resultItems) === JSON.stringify(b.resultItems)
   );

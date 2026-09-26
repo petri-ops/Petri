@@ -92,6 +92,7 @@ const CHANNELS = {
     remoteList: 'git:remote-list',
     remoteStatus: 'git:remote-status',
     revertFile: 'git:revert-file',
+    shortstat: 'git:working-tree-shortstat',
     splitSideDiff: 'git:split-side-diff',
     stagePaths: 'git:stage-paths',
     stashList: 'git:stash-list',

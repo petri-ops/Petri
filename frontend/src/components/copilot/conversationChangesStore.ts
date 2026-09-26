@@ -11,9 +11,10 @@
 // git working tree 仍是 diff/统计的事实源；本 store 只负责「路径归属」。
 // ============================================================
 
-import { useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
 import { getApiPrefix } from '@/lib/env';
+import { BridgeUnavailableError, getBridge } from '@/lib/desktopBridge';
 
 export interface ConversationFileChange {
   path: string;
@@ -292,4 +293,76 @@ export function hydrateConversationFileChanges(
   })();
   hydrateInFlight.set(conversationId, promise);
   return promise;
+}
+
+// ============================================================
+// UI-449（C-16）— 审阅徽章 ±行数（权威源=后端 git shortstat，前端不数行）
+// per-conversation 缓存 + 20s TTL；桥失败回落旧值/null，绝不抛。
+// ============================================================
+
+export interface ConversationShortstat {
+  tracked: { files: number; added: number; removed: number };
+  untrackedFiles: number;
+  empty: boolean;
+}
+
+const SHORTSTAT_TTL_MS = 20_000;
+const shortstatCache = new Map<string, { at: number; stat: ConversationShortstat | null }>();
+
+export function formatShortstatBadge(
+  count: number,
+  stat: { added: number; removed: number } | null | undefined,
+): string {
+  if (count <= 0) return '';
+  if (stat && (stat.added > 0 || stat.removed > 0)) return `${count}·+${stat.added}−${stat.removed}`;
+  return String(count);
+}
+
+export async function refreshConversationShortstat(
+  conversationId: string,
+  projectId: string,
+  options: { force?: boolean } = {},
+): Promise<ConversationShortstat | null> {
+  const cached = shortstatCache.get(conversationId);
+  const now = Date.now();
+  if (!options.force && cached && now - cached.at < SHORTSTAT_TTL_MS) return cached.stat;
+  let stat: ConversationShortstat | null = null;
+  try {
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge) throw new BridgeUnavailableError('workingTreeReview');
+    const resp = await bridge.workingTreeShortstat({ projectId });
+    if (resp && resp.ok && resp.data) stat = resp.data;
+  } catch {
+    stat = cached ? cached.stat : null;
+  }
+  shortstatCache.set(conversationId, { at: now, stat });
+  return stat;
+}
+
+export function __resetShortstatCacheForTest(): void {
+  shortstatCache.clear();
+}
+
+/** UI-449（C-16）— 徽章 ±行数取数 hook：enabled（通常=有未审改动）时拉 shortstat，
+ *  带 20s TTL 节流；桥不可用/失败回落 null（徽章回落纯计数）。 */
+export function useConversationShortstat(
+  conversationId: string | null,
+  projectId: string | null,
+  enabled: boolean,
+): ConversationShortstat | null {
+  const [stat, setStat] = useState<ConversationShortstat | null>(null);
+  useEffect(() => {
+    if (!enabled || !conversationId || !projectId) {
+      setStat(null);
+      return;
+    }
+    let alive = true;
+    refreshConversationShortstat(conversationId, projectId).then((value) => {
+      if (alive) setStat(value);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [conversationId, projectId, enabled]);
+  return stat;
 }
