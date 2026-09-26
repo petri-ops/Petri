@@ -5,7 +5,9 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-09-26 晨（**BLOCK-121 开发态结果闭环垂直切片当日整包 completed（P0+P1+P2）**——deg/deseq2 路径 dev Electron 边界内 verified：真实 chat→模型自主 run_tool→R 真实执行→artifactTruth=valid→Studio「可信结果」徽标→Copilot 跨轮追问引用真实基因/数字（flow 20/20）；P1 抓真=run_tool 迁 session 域修复 tool-route 剔除断点+回归钉；P2=result_summary 有界只读工具（74 工具恒等）。**队列=无可推进项；下一步等用户输入**（候选池 scrna_standard 路径已登记重开条件）。）
+最后更新：2026-09-26（**HK 系列 harness 工程实践吸收批建表（用户裁决「需要改进…是否需要更详细和全面精准的改进队列项呢」；doc:suggest cloud 全通零建议如实附）**——外部 harness 六件套（OpenSpec/Superpowers/CodeGraph/Ponytail/Caveman/RTK）评估对照落四项推进序，性质=**开发 harness 层工程实践**（skills/治理/脚本），非产品工作包：**HK-01** TDD 红绿先行纪律入 gewu-dev-infra（红→绿证据随收口笔录留痕；豁免=纯重构/纯类型面/治理批/PoC；不加新门禁）→ **HK-02** YAGNI 五问阶梯入 gewu-code-review（最小化检查行；不引 Ponytail 插件）→ **HK-03** 符号图/导入边查询脚本两阶段（P0 选型走 DEPENDENCY-CHANGE-CHECKLIST；P1 落 scripts 查询+CK-11 批次四 35 条已定性边回放校验一致率判据）→ **HK-04** 能力级规格层勘察（front-matter goal/acceptance/reopen/status 四键草案+registry 增量；试点裁决点在用户；不引 OpenSpec CLI）。候选池 +C-13（符号图 MCP 产品化：重开=HK-03 收口+产品方向裁决）/+C-14（RTK 型输出压缩：重开=实测 token 痛点+ZCode hooks 适配验证）；Caveman 式输出压缩**评估不采纳销号**（与审计留痕文化冲突）。**队列头=HK-01（HK-02 可同批小刀）**。）
+
+此前 最后更新：2026-09-26 晨（**BLOCK-121 开发态结果闭环垂直切片当日整包 completed（P0+P1+P2）**——deg/deseq2 路径 dev Electron 边界内 verified：真实 chat→模型自主 run_tool→R 真实执行→artifactTruth=valid→Studio「可信结果」徽标→Copilot 跨轮追问引用真实基因/数字（flow 20/20）；P1 抓真=run_tool 迁 session 域修复 tool-route 剔除断点+回归钉；P2=result_summary 有界只读工具（74 工具恒等）。**队列=无可推进项；下一步等用户输入**（候选池 scrna_standard 路径已登记重开条件）。）
 
 此前 最后更新：2026-09-25 深夜四（**阶段切换：清债期收束，产品闭环期开启（用户裁决「可以的 开始吧 一次性搞定」三件套全部落地）**——①D7 领域中立红门清偿（interpret.js 校准文案合法定性入基线+面板卡注迁改对齐单源；2f1314a）②CK-11 保留面冻结为 knip 棘轮 quality:knip:check 入 closeout 十一门（c819f144）③**BLOCK-121 开发态结果闭环垂直切片立项 active（P0-LAUNCH）**。**队列头=BLOCK-121**。）
 
@@ -37,8 +39,14 @@
 
 > **CK 系列（2026-09-25 用户裁决）**：「像 BK 一样做个计划表，逐步推进所有的项目」=按本表逐项推进的预授权；每项启动仍走立项检查单，**项内产品语义裁决点单独问**。排序原则=用户可见价值 → 技术债卫生 → 评估/设计类；大改造与低优先项靠后。
 
+> **HK 系列（2026-09-26 用户裁决）**：「需要改进…是否需要更详细和全面精准的改进队列项呢」=外部 harness 方法论（OpenSpec/Superpowers/CodeGraph/Ponytail/Caveman/RTK）吸收评估落成的推进序；性质=**开发 harness 层工程实践**（skills/治理/脚本），非产品工作包；排序原则=小刀规范类 → 工具类中刀 → 勘察裁决类；每项启动照常走立项检查单，项内裁决点单独问。
+
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
+| 1 | ▶ HK-01 | **TDD 红绿先行纪律入 gewu-dev-infra（小刀·开发规范）**：SKILL.md 增「红绿先行」节——新行为契约/缺陷修复先落失败测试再写实现，红→绿证据随收口笔录留痕；`templates/` 委派任务书模板同步加一行。豁免边界=纯重构（既有行为基线承索）/纯类型面/纯治理文档批/探索性 PoC（CK-02 式，失败即回退不产出红绿史）。**明确不做**=不引 Superpowers 框架本体、不加新机械门禁（红绿缺失若二次出现才按「重复缺陷转门禁」升级）、不改 AGENTS.md（细节住 skill 防第二真相）。实效验收=下一个实际工作包按新纪律留红绿证据 | 外部 harness 六件套评估 2026-09-26（Superpowers TDD 纪律对照缺口：测试量大但节奏为实现后补测，无「先见失败测试」约束） | 待启动（启动走立项检查单） |
+| 2 | ▶ HK-02 | **YAGNI 五问阶梯入 gewu-code-review（小刀·开发规范）**：评审维度增「最小化」检查行——逐 diff 五问（可不做？可复用既有实现？标准库可达？新增依赖必要？行数可更少？），评审报告模板对应加一行结论。**明确不做**=不引 Ponytail 插件/hooks、不改 P1/P2/Minor 分级语义、不加门禁。哲学依据=项目已具更强形态（观察态/重开条件/裁决留痕），只补评审显式清单 | 同上评估（Ponytail 决策阶梯对照） | 待启动（可与 HK-01 同批小刀） |
+| 3 | ▶ HK-03 | **符号图/导入边查询脚本（中刀·开发工具·两阶段）**：P0 勘察选型=盘点 dependency-cruiser/knip/tsc 可复用产物，定「导入边精确分类」需求规格（CK-11 批次四方法论机械化：require/import 说明符解析+导入方符号核查→USED_PROD/USED_TEST/DEAD 三分类）；依赖裁决走 DEPENDENCY-CHANGE-CHECKLIST（ts-morph 新增 devDependency 默认 no，vs 复用 cruiser 输出 vs Node 内建 parser）。P1 落地 `scripts/symbol-graph.mjs`（名随实现定）：who-imports \<symbol\> / classify-edges \<file\> 两查询 + **回放校验**（对 CK-11 批次四 35 条已定性导入边重放，与人工结论一致率为收口判据，分歧逐条留痕）+ 脚本自身契约测试入 test/。**明确不做**=不建常驻索引服务、不做 MCP 产品化（转候选 C-13）、不引原生依赖（rust/tree-sitter）、不动 knip/dependency-cruiser 既有语义 | CK-11 批次四手工分类 78 条痛点实证（AUDIT-LOG 09-25 晚十二/深夜一）+ 同上评估（CodeGraph 对照缺口；自研薄子集优先于第三方索引器，避索引漂移/盲区） | 待启动（P0 先行，1-2 会话） |
+| 4 | ▶ HK-04 | **能力级规格层勘察（勘察+裁决类）**：P0=盘点 plan 文档 front-matter 现状 + DOC-REGISTRY schema + docs:check 规则面，产出「规格差量」映射设计稿（草案：goal/acceptance/reopen/status 四键 front-matter + registry 扩展 + docs:check 增量校验）落 docs/ 并登记 DOC-REGISTRY；**裁决点（用户）**=P1 是否试点（选 2-3 份 plan 文档结构化+门禁扩展）。**明确不做**=不引 OpenSpec CLI、不建第二 truthDomain、docs:check 只增量不动既有语义 | 同上评估（OpenSpec delta 思想对照缺口：能力级行为要求散在 roadmap/plan/ui-audit/IPC registry 四处，工作包收口后无单点可查） | 待启动（垫后；勘察小，试点另裁） |
 | — | ⛔ CK-08 | **C-03：task_id 数据模型改造——重估收缩转观察**：动机仍实（45 万行 UUID 冗余 16.25MB/库 14%）但 30 天清扫有界+无用户感知收益+契约迁移风险大（7+29 文件）；**重开条件=清扫上限内实测 I/O 痛点或库体积成用户可感知问题** | 本批重估数据（AUDIT-LOG 晚五行） | 观察待证据 |
 | — | 👁 BK-02 | **汇报门 P2 试点观察期盘点**（持续观察，不占队列序）——采纳率/误拦率/延迟增量/fitReplay 触发率随真实轮次累计；观察窗开启中（dev 栈 BIOF3_JEV_REPORT_GUARD=1） | BLOCK-119 收口遗留候选 | 观察（持续） |
 
@@ -84,6 +92,8 @@
 | --- | --- | --- |
 | C-01 | 长列表虚拟化——**已编入 CK-02 → 勘察收缩转观察（2026-09-25：cv 与 prepend 锚定结构性冲突，CSS 回退零残留；重开=用户实测卡顿报告，届时带实验数据选型 react-virtuoso 或重写锚定后 cv 重试）** | BLOCK-106/107 遗留候选 |
 | C-12 | **scrna_standard 结果闭环路径**（BLOCK-121 出局项转候选）：seurat-standard/scanpy-advanced 在 `../gewu-pack-bio/plugins.dormant/` 休眠且包内无 scrna 演示数据；重开条件=dormant 激活 + scrna 演示数据入库 + Seurat/scanpy 运行时库在位实证；届时 BLOCK-121 的 flow/工具面（result_summary）直接复用 | BLOCK-121 P0 勘察登记 |
+| C-13 | **符号图 MCP 产品化**（HK-03 产出后评估）：把 symbol-graph 查询注册为产品 MCP 工具（格物 agent 的代码理解能力） | 重开条件=HK-03 P1 收口 + 用户产品方向裁决（立项三件套照常）；来源=HK 建表批 2026-09-26 |
+| C-14 | **RTK 型工具输出压缩**（ZCode hooks 适配 shell 输出压缩，社区口径 60-90%） | 重开条件=实测 token 成本成为痛点 + ZCode hooks 适配验证可行；来源=HK 建表批 2026-09-26 |
 | C-02 | 轮询→SSE——**已编入 CK-03** | BLOCK-106 遗留候选 |
 | C-03 | task_id 数据模型改造——**已编入 CK-08** | BLOCK-106 遗留候选 |
 | C-04 | 分段 token 预算——**已编入 CK-04** | BLOCK-109 候选池 |
@@ -107,6 +117,7 @@
 
 ## ✅ 已核实销号（防重复入册）
 
+- **Caveman 式输出压缩**（2026-09-26 外部 harness 评估）——不采纳：极简表达与审计留痕/收口笔录/诚实边界文化直接冲突；子代理中间过程理论可用但收益薄、无落地场景。防重复入册。
 - **U-02/U-03/U-04 实机过目**（2026-09-25）——用户授权 Agent 代行评估 + Jev 裁决（fit=3 PASS）：UI-437/438/440 翻 verified（真实 spawn 任务轮取证 acceptance/ui-eval-agent/）；UI-442 保持 in_progress（运行稳态证据待长任务自然产生，不凑证据）。
 - **灰度开关翻默认裁决**（BIOF3_SERVER_HISTORY_ASSEMBLY / SESSION_COMPACTION / AGENT_RESILIENCE）——`core/biof3-server/helpers/feature-flags.js` `FLAG_DEFAULTS` 现全为 `true`（Git 事实），handoff 2026-09-17「翻默认待用户显式裁决（呈报中）」记载已过时。
 - **汇报门重写丢运行中 steering 指令行**（AUDIT-LOG 🟡 2026-09-23）——BLOCK-119 加映 3 已修（report-guard steeringLines + 重写 prompt「必须逐字保留」段 + 契约），该 🟡 行已从 AUDIT-LOG 待处理表清除。
