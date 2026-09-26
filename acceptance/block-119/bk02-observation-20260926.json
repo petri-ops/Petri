@@ -1,0 +1,79 @@
+{
+  "name": "bk02-report-guard-observation-2nd-review",
+  "window": {
+    "from": "2026-09-23T14:14Z",
+    "to": "2026-09-26T09:20Z"
+  },
+  "reportGuard": {
+    "evaluations": 7,
+    "verdicts": {
+      "PASS": 7,
+      "RETRY": 0,
+      "ESCALATE": 0
+    },
+    "fitRange": [
+      3.14,
+      3.68
+    ],
+    "misfires": 0,
+    "fitReplay": {
+      "triggered": 2,
+      "rate": "2/7≈29%",
+      "cases": [
+        {
+          "state": "3ae91af2",
+          "first": 3.15,
+          "replay": [
+            3.14,
+            3.14
+          ],
+          "median": 3.14
+        },
+        {
+          "state": "8c3cbe27",
+          "first": 3.42,
+          "replay": [
+            3.43,
+            3.44
+          ],
+          "median": 3.43
+        }
+      ]
+    },
+    "latencyMs": {
+      "singleAvg": 680,
+      "replayTotal": 2020
+    },
+    "degraded": 0,
+    "note": "fitReplay 触发为带内设计行为（|fit-3|<=0.5），median 收敛轮间波动 ±0.01~0.15；θ=3/band=0.5 维持不动（无证据支持改动）"
+  },
+  "outputJudge": {
+    "validCalls": 54,
+    "verdicts": {
+      "PASS": 42,
+      "RETRYband": 6,
+      "ESCALATEband": 6
+    },
+    "fitRange": [
+      0.55,
+      3.8
+    ],
+    "degradedTimeouts": 3,
+    "degradedSemantics": "fail-open 放行并如实落账（09-25 会话真实行使）"
+  },
+  "routes": {
+    "window": ">=2026-09-25",
+    "intentRoute": {
+      "calls": 9,
+      "avgConf": 0.93,
+      "degraded": 0
+    },
+    "toolRoute": {
+      "calls": 9,
+      "avgConf": 0.86,
+      "degraded": 0,
+      "note": "BLOCK-121 P1 实机旁证：conf>=θ 收窄真实生效，并抓出 run_tool 域映射断链已修（回归钉在 block113 契约）"
+    }
+  },
+  "honestLimits": "汇报门样本仅 7 且全部来自 dev-verify 真实 spawn 轮（好汇报为主），误拦率需负样本才能估计——观察窗继续开启"
+}
