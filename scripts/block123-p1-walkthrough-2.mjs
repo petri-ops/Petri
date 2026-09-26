@@ -234,7 +234,7 @@ async function scenarioB() {
     const baseline = runTests(workspacePath);
     record('B1 播种', baseline.pass === false ? '通' : '断', `基线红=${!baseline.pass}（硬编码 1≠回退 3）`);
 
-    const { taskId, conversationId, terminal } = await submitAndWait(
+    const { taskId, terminal } = await submitAndWait(
       '工作区 ' + workspacePath + ' 中 fetcher.js 的重试次数是硬编码的。请改为从 config.json 的 retries 字段读取（缺失时默认 3），改完运行 node run-tests.mjs 验证并报告结果。',
       { projectId, page: 'workspace', pageTitle: '项目工作区', accessMode: 'full' },
       TASK_TIMEOUT_MS,
@@ -244,7 +244,6 @@ async function scenarioB() {
     const events = await collectEvents(taskId, 15_000);
     const payloads = events.map((e) => (e && e.payload) || e);
     fs.writeFileSync(path.join(EVDIR, 'p1-scenario-b-events.json'), JSON.stringify(payloads, null, 2));
-    const { seq } = analyzeEvents(payloads);
     const final = runTests(workspacePath);
     const changed = git(workspacePath, ['status', '--porcelain']).split('\n').filter(Boolean);
     const fetcherReadsConfig = fs.readFileSync(path.join(workspacePath, 'fetcher.js'), 'utf8').includes('config');

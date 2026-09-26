@@ -387,6 +387,11 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
 
+  // 2026-09-26 UI-446 收口尾清（8bec1397，fix(UI-446)）：knip 棘轮双抓后的
+  // 去导出修复同提交未同步台账；台账=UI-446 条目收口尾清注记由后续提交
+  // 0d6f17f6 补登对账（先例 2f1314a/670de5e）；不重写共享历史。
+  '8bec13973e6ddb58aa0d9ce93c2325e7aed80369',
+
   // 2026-09-25 D7 领域中立棘轮红门清偿（2f1314a，fix(D7)）：同提交未同步台账，
   // UI-435 加映注记随豁免登记提交补登对账（先例 670de5e）；豁免同提交台账要求；
   // 不重写共享历史。
