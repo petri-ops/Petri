@@ -59,7 +59,7 @@
 
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
-| 1 | ▶ BLOCK-123 | **通用编码 harness 使用界面主线（方向裁决落项；P0=端到端任务对账先行）**：用户 2026-09-26 方向裁决「现在需要的仍旧是通用编码harness使用界面作为开发主要工作项」——垂直域扩展让位（原 BLOCK-122 提案转候选池 C-15）；该裁决同时收口 `product-strategy-review-2026-09.md` §6 观察期约定（2026-09-03 方向开放→今日落定：通用编码面为开发主线）。**存量资产盘点（本批勘察，防重复开发）**：工具面=workspace_list/find/search/read/write（workspace.js 域 1521 行）+process_status/stop+system_info+todo_write；UI 面=工作台四件套俱全（RightFileTree+文件标签+TerminalPanel+RightPanel 审阅 tab；ReviewMode 1310 行 verified；SimpleChat 含 plan 审批/steering）。**P0=dev 栈实机端到端任务对账**：跑一个真实通用编码任务全链路（chat→workspace 工具改文件→process/终端跑验证→工作树审阅→提交），逐环节记录断点/缺工具/缺反馈→产出缺口清单→按 AGENT-WORKBENCH 修订 3 同款「逐项对账再实做」串行推进。**明确不做**=不预设架构手术、垂直域不回摊、红海面（chat/流式/agent loop 标配）不加厚 | 用户方向裁决 2026-09-26 + 战略评审 §6/§7 + 本批资产盘点 | 已勘察待启动（用户确认方向即立项三件套） |
+| 1 | ▶ BLOCK-123 | **通用编码 harness 使用界面主线**（方向裁决 2026-09-26 落项；plan=docs/block-123-coding-harness-ui-plan.md，capability=coding-harness-ui） | **P0 收口：六环节全部走通零断点**——真实模型 12s 完成「修 bug→跑测试」（工具序列 list→find→read→replace→exec 教科书级；盘面真修复探针独立复跑通过；审阅面完整=diff/接受/拒绝/提交审阅/已审进度全在场）；**缺口清单 3 条**（G-01 审阅不主动浮现=P1 首项候选/G-02 终端入口待人工核对/G-03 测试实例会话残留卫生项）；证据=acceptance/block-123/ | **P0 收口；P1=缺口逐项清偿（首项 G-01 审阅主动引导）** |
 | — | ⛔ CK-08 | **C-03：task_id 数据模型改造——重估收缩转观察**：动机仍实（45 万行 UUID 冗余 16.25MB/库 14%）但 30 天清扫有界+无用户感知收益+契约迁移风险大（7+29 文件）；**重开条件=清扫上限内实测 I/O 痛点或库体积成用户可感知问题** | 本批重估数据（AUDIT-LOG 晚五行） | 观察待证据 |
 | — | 👁 BK-02 | **汇报门 P2 试点观察期盘点**（持续观察，不占队列序）——采纳率/误拦率/延迟增量/fitReplay 触发率随真实轮次累计；观察窗开启中（dev 栈 BIOF3_JEV_REPORT_GUARD=1） | BLOCK-119 收口遗留候选 | 观察（持续） |
 

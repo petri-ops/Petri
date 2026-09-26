@@ -53,9 +53,17 @@ status: active
 
 每环节记录三类判定：**通（有证据）/ 涩（能走但反馈弱或绕路，记具体表现）/ 断（走不通，记报错与现场）**。产出=缺口清单（编号 G-01..），每条带 file:line 或截图证据指针。
 
-## 5. P0 缺口清单（走查后回填）
+## 5. P0 缺口清单（2026-09-26 走查回填）
 
-（P0 执行后回填；本节为占位锚点。）
+**总体结论：六环节全部走通，零断点。** 真实模型（测试实例供给 DeepSeek/deepseek-flash，完全访问）**12 秒**完成「修 bug→跑测试」任务；工具序列教科书级（`workspace_list → find → read → read → replace → read → exec`）；盘面真修复（探针独立复跑 `node utils.test.js` 通过）；审阅面完整——改动/历史双 tab、逐文件 diff 渲染（+1/−1 与变更行原文）、接受/拒绝、未跟踪文件识别、全部还原、提交审阅、`0/2 已审` 进度（acceptance/block-123/p0-review-innertext.txt 取证）。
+
+| 编号 | 判定 | 缺口 | 证据 | 处置 |
+| --- | --- | --- | --- | --- |
+| G-01 | 涩 | **审阅不主动浮现**：agent 完成编辑后，默认视图无「有 N 处变更待审阅」类引导，用户需自行发现右侧「审阅」tab——审阅面完整但发现靠用户（walkthrough S5 `changedHint=null` 佐证） | p0-walkthrough.json S5 + p0-review-innertext.txt | **P1 首项候选**：编辑完成后审阅入口主动引导（角标/横幅/toast，形态届时对账裁决） |
+| G-02 | 观察项 | 工作台默认视图 DOM 未命中终端 tab（`terminalTab=false`）——终端面板可能懒渲染或入口在别处，未人工核对 | p0-workspace-innertext.txt | 人工过目一次即销或立缺口 |
+| G-03 | 观察项 | 测试实例左栏历史会话残留堆积（UI444/UI442 取证、LIVE-VERIFY 等十余条）——测试 userData 会话历史无清理机制；主实例不受影响 | p0-review-innertext.txt 左栏 | 测试卫生候选项（小） |
+
+探针侧瑕疵（非产品缺口，如实登记）：`screenshotPng` 签名误用致两张截图落成空目录（正确签名=三参 `(client, dir, filename)`，探针代码已修正）；「审阅」文本存在歧义元素（探针首击命中 `_emptyResultLaunchCard` 类按钮），最终以 tab 激活后 innerText 取证为准。
 
 ## 6. 边界与风险
 

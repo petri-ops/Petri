@@ -1,0 +1,75 @@
+工作台
+新建任务
+插件
+Skills
+知识空间
+项目
+BLOCK123-走验-1790409252970
+修复divide除零bug
+刚刚
+UI444-取证-1790390262426
+UI444-取证-1790390191279
+UI442-取证-1790385994119
+UI442-取证-1790385945045
+B-Goals-PASS-1790211333608
+B-Goals-PASS-1790211303219
+LIVE-VERIFY2-1790003812064
+LIVE-VERIFY2-1790003779807
+LIVE-VERIFY-1790003584201
+B109-spawn-1789972542860
+biof3-desktop
+B108-final-1789958290129
+biof3-desktop
+SingleCell
+B97-todo-live
+Desktop
+Desktop
+SingleCell
+YST
+1.WorkDir
+biof3
+devah
+联邦
+设置
+BLOCK123-走验-1790409252970
+
+工作区 D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\data\projects\block123---1790409252970-mui3fx4f 里有两个文件 utils.js 和 utils.test.js。utils.js 的 divide 函数有 bug：divide(1, 0) 返回 Infinity 而不是抛错。请修复这个 bug（除数为 0 时抛出包含 zero 的错误），然后运行 node utils.test.js 验证，并告诉我测试是否全部通过。
+
+✓
+执行工具 8 次 · 4 轮
+443 ms
+
+已修复并验证通过。
+
+改动（utils.js，新 sha256 c56f3bc2…）：
+
+js
+function divide(a, b) {
+  if (b === 0) {
+    throw new Error('divide by zero: divisor must not be zero');
+  }
+  return a / b;
+}
+
+原来是直接 return a / b，除数为 0 时返回 Infinity/NaN；现在 b === 0 时抛出错误，信息含 zero，匹配测试里的 assert.throws(..., /zero|除以零|divisor/i)。add 未改动。
+
+验证：在当前项目根目录执行 node utils.test.js（Node v24.20.0，PowerShell），退出码 0，stdout 为 all tests passed，stderr 为空。
+
+测试全部通过。注意一点：b === 0 只覆盖数值零，divide(1, -0) 也会被拦（-0 === 0 为真），但传入 undefined/NaN/字符串等仍会返回 NaN 而非抛错——测试没有覆盖这些情况，如果这是你关心的边界，可以再补断言，我可以一并改。
+
+复制
+重新生成
+创建分支
+刚刚
+完全访问
+DeepSeek
+deepseek-flash
+标准
+结果
+浏览器
+文件
+侧边聊天
+审阅
+指挥中心
+测试实例 · TEST
+内容已穿透 · Control+Alt+Shift+M 解锁窗口管理
