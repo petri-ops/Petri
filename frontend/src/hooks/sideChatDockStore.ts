@@ -24,7 +24,7 @@ export function setSideChatDockOpen(next: boolean | ((prev: boolean) => boolean)
   for (const listener of listeners) listener();
 }
 
-export function subscribeSideChatDockOpen(listener: () => void): () => void {
+function subscribeSideChatDockOpen(listener: () => void): () => void {
   listeners.add(listener);
   return () => {
     listeners.delete(listener);

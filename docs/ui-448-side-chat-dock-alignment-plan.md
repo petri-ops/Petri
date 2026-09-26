@@ -9,7 +9,7 @@ acceptance:
   - 窄面适配：悬挂面 SimpleChat compact 占位符（短提示不折行）；表格/长 token 三态实机核对（框内滚动+滚动条可见）
   - 台账同步：docs/ui-productization-audit.md UI-448 条目与实现同一提交；实机走查截图证据落 acceptance/ui-448/
 reopen: 用户实机过目后对新形态不满意，或悬浮面与摘要浮层同屏叠置的已知边界升级为真问题时
-status: active
+status: completed
 ---
 
 # UI-448 — 侧边聊天悬浮面体验对齐项目摘要
@@ -17,6 +17,7 @@ status: active
 > 立项：2026-09-26（用户裁决原话「行！ 按照你的建议 开冲」——对主会话核查结论的四点建议整体放行）。
 > 前置核查：dev 栈实机复现用户截图，四点不和谐全部坐实（双 composer 并存/380px 拦腰切割/窄面内容挤压/视觉语言与摘要浮层脱节），证据为本 plan §2 与 acceptance/ui-448/ 截图。
 > 能力：`side-chat-dock`（HK-04 增量采纳：立项即带 capability front-matter）。
+> **2026-09-26 当日整包 completed**（实现提交 bf64ddea）：红绿 4 文件全红→25/25 绿；前端全量 153 文件/1229 用例 0 红；tsc 0；theme 4/4；eslint 0 error；实机三态走查 allPass（acceptance/ui-448/walkthrough.json）。UI 台账 UI-448 `in_progress` 待用户实机过目（过目后翻 verified，见 plan §5 完成语义）。实施记录见 §7。
 
 ## 1. 一句话目标与裁决来源
 
@@ -82,3 +83,28 @@ SideChatDock（UI-417）展开后是「同一主视图的第二份拷贝」：38
 - test:suggest（实现前，零改动文件）：零建议（工具如实回报，无文件面可供挖掘）。
 - doc:suggest：台账回写前补跑。
 - output:judge：收口声明前补跑。
+
+## 7. 实施记录与收口（2026-09-26）
+
+**提交**：立项 4b0916cc → 实现 bf64ddea（21 文件 +470/−17，UI 台账同提交）。
+
+**红绿先行（HK-01）**：契约先落 4 文件全红（sideChatDockStore/ComposerYield 模块未存在 + SideChatDock/CenterPanel 新契约失败）→ 实现 → 25/25 绿（store 3 + ComposerYield 5 + SideChatDock 9 + CenterPanel 8）。
+
+**门禁对账（§5 逐项）**：
+| 门禁 | 结果 |
+| --- | --- |
+| 定向组件契约 | 25/25 绿（红→绿留痕本节+commit） |
+| theme 契约 | theme-token-contract 4/4 绿 |
+| 类型/lint | tsc 0 红；eslint 0 error（22 warning=CSS 文件配置外忽略告警，无新增违规） |
+| 实机走查 | allPass：关（composer 1/无 dock）→开（composers 1、centerHint true、让位 padding 432px、16px 圆角、暗档 float 阴影、compact 单行占位符、零切割）→点「返回中栏输入」（dock 收起、完整占位符还原、让位类/提示条消失）；截图+断言 acceptance/ui-448/ |
+| 台账 | UI-448 条目随 bf64ddea 提交，in_progress 待过目；ui:audit:check 收口跑绿 |
+| 文档 | 本 plan + DOC-REGISTRY（completed 翻转）+ README 157 号收口注记 |
+| 收口 | npm run closeout 十一门（结果见 AUDIT-LOG 收口行） |
+
+**波折如实登记**：SimpleChat composer 尾部条件闭合两次错层（sc-composer-bar 中间层漏数：`)}` 先插早一层、再补挂一个多余 `</div>`），用 typescript 解析探针打印 JsxElement 配对行号定位后修正——教训=大 JSX 块包条件渲染不靠缩进目测，用解析器量。
+
+**Jev 决策工具（§6 补全）**：test:suggest（实现前）零建议（零改动文件）；doc:suggest（台账回写前）planDoc 建议 0.8>0.5 采纳=本 plan §7 承载；output:judge 收口声明判定见 AUDIT-LOG 收口行；decision:session 会话锚随收尾重跑取数。
+
+**并行协调**：BLOCK-125（reject→agent 回路）同日并行收口（b08bfeb4），文件面零重叠，双方提交互认隔离边界。
+
+**G0 开发期常态 · 不外推 packaged/Provider/GA。**
