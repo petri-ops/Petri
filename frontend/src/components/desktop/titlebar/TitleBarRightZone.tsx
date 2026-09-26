@@ -114,6 +114,10 @@ export function TitleBarRightZone(): React.ReactElement {
                     >
                       <Icon name={item.icon} size={14} />
                       <span>{item.label}</span>
+                      {/* UI-446 加映 v3 — 菜单内审阅入口的未读圆点（与 + 钮/药丸同源） */}
+                      {item.id === 'review' && panels.titleBar.reviewDot && (
+                        <span className={styles.reviewMenuItemDot} data-testid="review-menu-item-dot" aria-hidden="true" />
+                      )}
                       {item.isOpen && <Icon name="check" size={13} />}
                     </button>
                   ))}

@@ -14,6 +14,7 @@ export function EmptyResult({
   onOpenChat,
   onOpenReview,
   onOpenJobs,
+  reviewDot,
 }: {
   onOpenResults?: () => void;
   // UI-348 — 「后端」卡已删除（BLOCK-72 后端管理面在左栏入口的全局 /backend 页，
@@ -25,6 +26,8 @@ export function EmptyResult({
   onOpenReview?: () => void;
   /** UI-362 — 打开指挥中心 tab（项目绑定作业俯瞰）。 */
   onOpenJobs?: () => void;
+  /** UI-446 加映 v3 — 当前会话有未看工作区改动：审阅磁贴亮圆点引导。 */
+  reviewDot?: boolean;
 }): React.ReactElement {
   return (
     <div className={styles.emptyResult}>
@@ -48,6 +51,7 @@ export function EmptyResult({
         <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenReview} disabled={!onOpenReview}>
           <Icon name="git-branch" size={16} />
           <span className={styles.emptyResultLaunchText}>审阅</span>
+          {reviewDot && <span className={styles.emptyResultLaunchDot} data-testid="review-tile-dot" aria-hidden="true" />}
         </button>
         <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenJobs} disabled={!onOpenJobs}>
           <Icon name="command" size={16} />

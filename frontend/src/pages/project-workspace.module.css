@@ -5539,6 +5539,7 @@ body:global(.gewu-resizing-columns) * {
 /* UI-301 加映 — 卡片文字垂直居中 + 去外框线（保留底色作分区）
    UI-333 — UI-329 的 fit-content 收窄实验整体回退，恢复 width:100% 满宽 */
 .emptyResultLaunchCard {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -7529,4 +7530,15 @@ body:global(.gewu-resizing-columns) * {
 
 .convSearchBox input::placeholder {
   color: var(--gewu-text-muted);
+}
+
+/* UI-446 加映 v3 — 审阅磁贴未读圆点（当前会话有未看工作区改动时点亮） */
+.emptyResultLaunchDot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gewu-accent);
 }

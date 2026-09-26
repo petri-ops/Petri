@@ -5,7 +5,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { TitleBarRightZone } from './TitleBarRightZone';
-import type { TitleBarTab } from '@/hooks/useWorkspacePanels';
+import type { TitleBarTab, TitleBarToolItem } from '@/hooks/useWorkspacePanels';
 
 vi.mock('@/components/desktop/WorkspacePanelsContext', () => ({
   useWorkspacePanelsContext: () => mockPanels,
@@ -21,7 +21,7 @@ const mockPanels = {
     onCloseTab: vi.fn(),
     onMoreAction: vi.fn(),
     toolMenuOpen: false,
-    toolMenuItems: [],
+    toolMenuItems: [] as TitleBarToolItem[],
     onSelectToolItem: vi.fn(),
   },
 };
@@ -78,6 +78,37 @@ describe('TitleBarRightZone 审阅 tab 圆点（UI-446）', () => {
       expect(screen.queryByTestId('review-menu-dot')).toBeNull();
     } finally {
       mockPanels.titleBar.reviewDot = false;
+    }
+  });
+
+  // UI-446 加映 v3（用户抓真：菜单里的审阅入口也要有信号）
+  it('菜单展开 + reviewDot → 菜单「审阅」项亮圆点', () => {
+    mockPanels.titleBar.reviewDot = true;
+    mockPanels.titleBar.toolMenuOpen = true;
+    mockPanels.titleBar.toolMenuItems = [
+      { id: 'results', label: '结果', icon: 'bar-chart', isOpen: false },
+      { id: 'review', label: '审阅', icon: 'git-branch', isOpen: false },
+    ];
+    try {
+      mountWithTabs([{ id: 'files', label: '文件', icon: 'folder', closable: true }]);
+      expect(screen.getByTestId('review-menu-item-dot')).toBeTruthy();
+    } finally {
+      mockPanels.titleBar.reviewDot = false;
+      mockPanels.titleBar.toolMenuOpen = false;
+    }
+  });
+
+  it('菜单展开但无未读 → 菜单项不亮', () => {
+    mockPanels.titleBar.reviewDot = false;
+    mockPanels.titleBar.toolMenuOpen = true;
+    mockPanels.titleBar.toolMenuItems = [
+      { id: 'review', label: '审阅', icon: 'git-branch', isOpen: false },
+    ];
+    try {
+      mountWithTabs([{ id: 'files', label: '文件', icon: 'folder', closable: true }]);
+      expect(screen.queryByTestId('review-menu-item-dot')).toBeNull();
+    } finally {
+      mockPanels.titleBar.toolMenuOpen = false;
     }
   });
 });

@@ -4175,4 +4175,6 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **加映 v2（2026-09-26，用户实测抓真「圆点没亮 但确实改了文件」）**：根因=圆点只挂审阅 tab 药丸，**审阅 tab 未打开时无处可挂**，且用户点开审阅即 acknowledge 熄灭（用户窗口 ack 时间线实锤：ack 打点晚于写入，观察窗错过点亮期）——「最需要引导（tab 没开）的场景恰恰失效」。修复=圆点升格双挂点：**审阅 tab 未打开时挂「+」工具菜单按钮**（引导入口本身），已打开时挂 tab 药丸；实现=TitleBarState 增 reviewDot + useWorkspaceTitleBar 组装 + TitleBarRightZone 条件渲染（+钮/药丸互斥）+conversationChangesStore 移除临时诊断出口。
 - **证据（加映 v2）**：TitleBarRightZone.unread.test +4（菜单钮亮/审阅已开不双亮等互斥断言）→ 19/19；tsc 0 + theme 契约 5/5 + quality:lint 0 error。诊断过程沉淀=测试实例 UI 驱动复现（tmp 驱动：composer 真实发送）实证 UI 流记录管线好用（record 计数/存储/未读判定逐环取数），缺陷在挂点前提而非数据链。
 - 待用户按 v2 姿势复测（**无需预先打开审阅 tab**：发改动任务→「+」按钮亮圆点→点开审阅→熄灭）。
+- **加映 v3（2026-09-26，用户再看抓真「审阅和磁贴是不是也该有圆点 不然咋知道要点开审阅」）**：圆点覆盖扩展到全部审阅入口——①+ 菜单展开时「审阅」menuitem 亮圆点；②工作台空态「审阅」磁贴亮圆点（EmptyResult 增 reviewDot prop，RightPanel 经 useConversationUnreviewedChanges 供数）；与 + 钮/tab 药丸同一未读信号源（titleBar.reviewDot / tab.dot）。契约 +5（磁贴三态+菜单亮/不亮互斥）→ 全套 22/22；tsc 0。
+- 待用户复测（入口全亮姿势：发改动任务→+ 钮/菜单审阅项/空态磁贴（如停空态）三处同步亮→任一入口点开审阅→全熄）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。

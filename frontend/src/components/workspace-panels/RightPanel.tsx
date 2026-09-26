@@ -20,6 +20,8 @@ import {
 } from '@/pages/project-workspace';
 import { useToolCatalog } from '@/lib/tool-catalog';
 import { AnalysisLaunchPanel } from '@/components/workspace-panels/AnalysisLaunchPanel';
+// UI-446 加映 v3 — 空态磁贴的审阅未读圆点数据源
+import { useConversationUnreviewedChanges } from '@/components/copilot/conversationChangesStore';
 import { CommandCenterJobsWall } from '@/pages/window/CommandCenterJobsWall';
 // BLOCK-28.5 — 审阅并入右侧边栏 tab 体系（复用 dock 紧凑形态，填满 tab 容器）
 import { ReviewMode } from '@/components/desktop/WorkingTreeReview/ReviewMode';
@@ -128,6 +130,9 @@ export function RightPanel({
   // BLOCK-83 D4：分析目录投影自已装插件（零插件 → 诚实空态）。
   const { tools: catalogTools, loading: catalogLoading } = useToolCatalog();
 
+  // UI-446 加映 v3 — 空态「审阅」磁贴的未读圆点（当前会话有未看工作区改动）
+  const reviewUnread = useConversationUnreviewedChanges(ctx.activeConvId);
+
   // UI-341 加映二 — 侧栏开合平滑：原实现 !visible 直接 return null（卸载 =
   // 开合瞬时跳变）。现保持挂载、宽度收到 0，走 .rightCol 的 width transition 平滑收起。
   return (
@@ -160,6 +165,7 @@ export function RightPanel({
                     onOpenChat={ctx.handleOpenRightChat}
                     onOpenReview={() => ctx.openRightPanel('review')}
                     onOpenJobs={() => ctx.openRightPanel('jobs')}
+                    reviewDot={reviewUnread}
                   />
                 )}
                 {/* UI-362 — 指挥中心 tab：项目绑定俯瞰（瓦片墙按当前项目过滤） */}
