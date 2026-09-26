@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "source": "built-in",
-  "updated": "2026-08-14T00:00:00Z",
+  "updated": "2026-09-26",
   "skills": {
     "deg-analysis-standard": {
       "id": "deg-analysis-standard",
@@ -9,12 +9,21 @@
       "source": "built-in",
       "kind": "skill",
       "category": "bioinformatics/ngs",
-      "capabilities": ["r-enrichment"],
+      "capabilities": [
+        "r-enrichment"
+      ],
       "plugins": {
-        "required": ["expression-qc", "deseq2", "volcano-plot"]
+        "required": [
+          "expression-qc",
+          "deseq2",
+          "volcano-plot"
+        ]
       },
       "artifacts": {
-        "macos-arm64": { "url": "built-in://skills/deg-analysis-standard", "sha256": null }
+        "macos-arm64": {
+          "url": "built-in://skills/deg-analysis-standard",
+          "sha256": null
+        }
       }
     },
     "go-enrichment-analysis": {
@@ -23,12 +32,19 @@
       "source": "built-in",
       "kind": "skill",
       "category": "bioinformatics/ngs",
-      "capabilities": ["r-enrichment"],
+      "capabilities": [
+        "r-enrichment"
+      ],
       "plugins": {
-        "required": ["clusterProfiler"]
+        "required": [
+          "clusterProfiler"
+        ]
       },
       "artifacts": {
-        "macos-arm64": { "url": "built-in://skills/go-enrichment-analysis", "sha256": null }
+        "macos-arm64": {
+          "url": "built-in://skills/go-enrichment-analysis",
+          "sha256": null
+        }
       }
     },
     "sc-analysis-standard": {
@@ -37,13 +53,48 @@
       "source": "built-in",
       "kind": "skill",
       "category": "bioinformatics/single-cell",
-      "capabilities": ["py-single-cell", "r-single-cell"],
+      "capabilities": [
+        "py-single-cell",
+        "r-single-cell"
+      ],
       "plugins": {
-        "required": ["scanpy-advanced", "seurat-standard"],
-        "optional": ["celltypist", "cellchat", "scvi-tools"]
+        "required": [
+          "scanpy-advanced",
+          "seurat-standard"
+        ],
+        "optional": [
+          "celltypist",
+          "cellchat",
+          "scvi-tools"
+        ]
       },
       "artifacts": {
-        "macos-arm64": { "url": "built-in://skills/sc-analysis-standard", "sha256": null }
+        "macos-arm64": {
+          "url": "built-in://skills/sc-analysis-standard",
+          "sha256": null
+        }
+      }
+    },
+    "coding-playbook": {
+      "id": "coding-playbook",
+      "version": "0.1.0",
+      "source": "built-in",
+      "kind": "skill",
+      "category": "coding/playbook",
+      "capabilities": [
+        "coding-conventions",
+        "verification-discipline",
+        "minimal-change"
+      ],
+      "plugins": {
+        "required": [],
+        "optional": []
+      },
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://skills/coding-playbook",
+          "sha256": null
+        }
       }
     }
   }
