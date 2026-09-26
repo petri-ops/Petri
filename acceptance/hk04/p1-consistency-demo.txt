@@ -1,0 +1,13 @@
+=== HK-04 P1 一致性校验抓真演示（2026-09-26T14:56:51） ===
+
+[1] 手改 block-121 front-matter status: completed -> active（制造漂移）
+[2] npm run docs:check（期待 FAIL + FRONTMATTER_STATUS_MISMATCH）:
+npm warn exec The following package was not found and will be installed: node@22.23.3
+[docs:check] FAIL (1 issue(s))
+  - FRONTMATTER_STATUS_MISMATCH docs/block-121-result-loop-vertical-plan.md: front-matter status "active" != registry status "completed".
+exit=0
+
+[3] 还原 status: completed
+[4] npm run docs:check（期待 PASS）:
+[docs:check] PASS (282 registered documents)
+exit=0

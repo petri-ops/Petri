@@ -67,6 +67,68 @@ export const ARCHIVE_POLICIES = Object.freeze([
   'manual_review',
 ]);
 
+// HK-04 P1（docs/hk04-spec-layer-design.md §2）：capability front-matter 受限格式。
+// 设计裁决=不引入完整 YAML 解析器：扁平键 + 单行值 + `acceptance` 块列表（`- 项`），解析确定性可测。
+export const CAPABILITY_FRONTMATTER_REQUIRED_KEYS = Object.freeze(['capability', 'goal', 'acceptance', 'status']);
+export const CAPABILITY_FRONTMATTER_OPTIONAL_KEYS = Object.freeze(['reopen']);
+
+export function parseCapabilityFrontMatter(content) {
+  if (typeof content !== 'string' || !content.startsWith('---')) return null;
+  const lines = content.split(/\r?\n/);
+  if ((lines[0] ?? '').trim() !== '---') return null;
+  const end = lines.findIndex((line, index) => index > 0 && line.trim() === '---');
+  if (end === -1) return { ok: false, reason: 'format', error: 'front-matter block not closed' };
+  const data = { acceptance: [] };
+  let currentKey = null;
+  for (let index = 1; index < end; index++) {
+    const line = lines[index];
+    if (line.trim() === '') continue;
+    if (/^\s*-\s+/.test(line)) {
+      if (!currentKey || !Array.isArray(data[currentKey])) {
+        return { ok: false, reason: 'format', error: `list item outside a list key at line ${index + 1}` };
+      }
+      data[currentKey].push(line.replace(/^\s*-\s*/, '').trim());
+      continue;
+    }
+    const match = line.match(/^([A-Za-z][A-Za-z0-9_]*)\s*:\s*(.*)$/);
+    if (!match) return { ok: false, reason: 'format', error: `unparseable line ${index + 1}: ${line.trim()}` };
+    const key = match[1];
+    const value = match[2].trim();
+    currentKey = key;
+    if (!CAPABILITY_FRONTMATTER_REQUIRED_KEYS.includes(key) && !CAPABILITY_FRONTMATTER_OPTIONAL_KEYS.includes(key)) {
+      return { ok: false, reason: 'unknown-key', error: `unknown key: ${key}` };
+    }
+    if (key === 'acceptance') {
+      if (value !== '') return { ok: false, reason: 'format', error: 'acceptance must be a block list ("- item" lines)' };
+      data.acceptance = [];
+    } else {
+      if (value === '') return { ok: false, reason: 'format', error: `key ${key} requires a single-line value` };
+      data[key] = value;
+    }
+  }
+  return { ok: true, data };
+}
+
+// capability 聚合视图（--status）：按 registry capability 登记分组（opt-in 语义），列文档与 front-matter 状态。
+async function collectCapabilityFrontMatter(registry, rootDir) {
+  const rows = [];
+  for (const document of registry.documents) {
+    if (typeof document.capability !== 'string' || document.capability.trim() === '') continue;
+    let status = document.status;
+    if (document.path && document.path.endsWith('.md')) {
+      try {
+        const content = await fs.readFile(path.join(rootDir, document.path), 'utf8');
+        const parsed = parseCapabilityFrontMatter(content);
+        if (parsed !== null && parsed.ok && typeof parsed.data.status === 'string') status = parsed.data.status;
+      } catch {
+        // 读取失败按 registry status 呈报（校验问题由 validateDocumentRegistry 负责）
+      }
+    }
+    rows.push({ capability: document.capability.trim(), id: document.id || '<invalid>', status });
+  }
+  return rows.sort((a, b) => a.capability.localeCompare(b.capability) || a.id.localeCompare(b.id));
+}
+
 function toPosix(value) {
   return value.split(path.sep).join('/');
 }
@@ -419,6 +481,56 @@ export async function validateDocumentRegistry(registry, options = {}) {
     }
   }
 
+  // HK-04 P1（docs/hk04-spec-layer-design.md §2）：capability front-matter 增量校验。
+  // 触发语义（实现期修正，见设计稿 §5）：registry 条目显式声明 `capability` 才校验——
+  // 存量文档大量以 `---` 水平线开头，按「文件出现 front-matter 即校验」必误伤；
+  // registry capability=能力命名空间的显式登记（opt-in），未登记文档零影响（增量采纳、无迁移墙）。
+  // 校验三条：①四键格式 ②status 与 registry 一致（防第二真相漂移）③capability 与 registry 一致。
+  for (const document of normalizedDocuments) {
+    if (typeof document.capability !== 'string' || document.capability.trim() === '') continue;
+    if (!document.path || !document.path.startsWith('docs/') || !document.path.endsWith('.md')) continue;
+    if (!(await pathExists(path.join(rootDir, document.path)))) continue; // 缺失由 DOCUMENT_MISSING 另行报
+    let content;
+    try {
+      content = await fs.readFile(path.join(rootDir, document.path), 'utf8');
+    } catch {
+      continue;
+    }
+    const parsed = parseCapabilityFrontMatter(content);
+    if (parsed === null) {
+      issues.push(issue('FRONTMATTER_INVALID_FORMAT', `registry declares capability "${document.capability.trim()}" but the document has no capability front-matter.`, document.id || null, document.path));
+      continue;
+    }
+    if (!parsed.ok) {
+      issues.push(issue(
+        parsed.reason === 'unknown-key' ? 'FRONTMATTER_UNKNOWN_KEY' : 'FRONTMATTER_INVALID_FORMAT',
+        `capability front-matter invalid: ${parsed.error}.`,
+        document.id || null,
+        document.path,
+      ));
+      if (parsed.reason !== 'unknown-key') continue;
+    }
+    const data = parsed.data ?? {};
+    for (const key of CAPABILITY_FRONTMATTER_REQUIRED_KEYS) {
+      const value = data[key];
+      const missing = key === 'acceptance'
+        ? !Array.isArray(value) || value.length === 0
+        : typeof value !== 'string' || value.trim() === '';
+      if (missing) {
+        issues.push(issue('FRONTMATTER_INVALID_FORMAT', `capability front-matter missing required key: ${key}.`, document.id || null, document.path));
+      }
+    }
+    if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(data.capability ?? '')) {
+      issues.push(issue('FRONTMATTER_CAPABILITY_INVALID', 'capability must be kebab-case (a-z / 0-9 / hyphen).', document.id || null, document.path));
+    }
+    if (data.capability !== undefined && data.capability !== document.capability.trim()) {
+      issues.push(issue('FRONTMATTER_CAPABILITY_MISMATCH', `front-matter capability "${data.capability}" != registry capability "${document.capability.trim()}".`, document.id || null, document.path));
+    }
+    if (data.status !== undefined && data.status !== document.status) {
+      issues.push(issue('FRONTMATTER_STATUS_MISMATCH', `front-matter status "${data.status}" != registry status "${document.status}".`, document.id || null, document.path));
+    }
+  }
+
   return issues;
 }
 
@@ -660,6 +772,14 @@ async function runCli() {
     for (const [status, count] of countBy(registry.documents, 'status')) console.log(`    ${status}: ${count}`);
     console.log('  By kind:');
     for (const [kind, count] of countBy(registry.documents, 'kind')) console.log(`    ${kind}: ${count}`);
+    console.log('  By capability (front-matter spec layer, HK-04):');
+    const capabilityRows = await collectCapabilityFrontMatter(registry, DEFAULT_ROOT);
+    if (capabilityRows.length === 0) {
+      console.log('    (none — no registered document declares a capability yet)');
+    }
+    for (const row of capabilityRows) {
+      console.log(`    ${row.capability}: ${row.id}(${row.status})`);
+    }
     if (issues.length > 0) printIssueList(issues);
     return;
   }

@@ -5,7 +5,9 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-09-26（**HK-04 P0 规格层设计稿收口（队列头推进）**——盘点结论：plan 存量 ~330 份零 front-matter（状态全在正文引语）、DOC-REGISTRY 只描述文档生命周期、校验器不拒未知字段（增量零破坏）；已有 IPC registry/ui-audit/knip 棘轮三类机读契约不重复建设，缺的只是能力级行为要求单点索引。**设计=四键 front-matter（capability/goal/acceptance/reopen+status）+registry 可选 capability 字段+docs:check 三条增量校验（格式/一致性/命名空间唯一），增量采纳无迁移墙，front-matter=机读投影非第二账本**。P1 试点选样 block-121/119/g0-rs 三份，**裁决在用户**。设计稿 docs/hk04-spec-layer-design.md 登记 DOC-REGISTRY+README。）
+最后更新：2026-09-26（**HK-04 P1 试点当日收口——HK 系列（01~04）全部收官（用户委派「你来定」按推荐执行；HK-01 红绿先行第二次行使）**——实现=parseCapabilityFrontMatter 受限解析（零 YAML 依赖）+docs:check 增量校验（**registry capability opt-in 触发**，五类 FRONTMATTER_* issue）+docs:status capability 视图；三份试点（result-loop/output-judge/result-studio）front-matter+registry 全亮；**status 漂移抓真演示**精确红→还原（acceptance/hk04/p1-consistency-demo.txt）；契约 12/12+docs:check 282 份零回归；实现期修正=presence 触发误伤存量 --- 水平线→opt-in（设计稿 §5 留痕）。**增量采纳持续生效：新 plan 立项即带 capability front-matter。队列无可推进项（HK 全清；观察态 CK-08/BK-02 留档）**。）
+
+此前 最后更新：2026-09-26（**HK-04 P0 规格层设计稿收口（队列头推进）**——盘点结论：plan 存量 ~330 份零 front-matter（状态全在正文引语）、DOC-REGISTRY 只描述文档生命周期、校验器不拒未知字段（增量零破坏）；已有 IPC registry/ui-audit/knip 棘轮三类机读契约不重复建设，缺的只是能力级行为要求单点索引。**设计=四键 front-matter（capability/goal/acceptance/reopen+status）+registry 可选 capability 字段+docs:check 三条增量校验（格式/一致性/命名空间唯一），增量采纳无迁移墙，front-matter=机读投影非第二账本**。P1 试点选样 block-121/119/g0-rs 三份，**裁决在用户**。设计稿 docs/hk04-spec-layer-design.md 登记 DOC-REGISTRY+README。）
 
 此前 最后更新：2026-09-26（**HK-03 红旗清偿 + U-01 销号 + 双前置确认（用户「确定一下…可以继续推进」）**——①**impact-map 补登 hk03-symbol-graph 规则**：UI-445 c3387d24 登记的 test:changed fail-closed 拦截红旗归 HK-03 收口，本批清偿（scripts/symbol-graph.mjs+契约测试归 exactly-one 规则，test:changed:list 复跑零分类冲突）；②**U-01 Jev key 轮换销号**（用户确认已走完；功能性证据=当日三轮 doc:suggest cloud 全通；重开条件在案）；③**UI-444 确认 verified**（48dd1d83 用户实机验收通过+加映二，他包收口）。两前置均满足，**队列头=HK-04（能力级规格层勘察）继续推进**。）
 
@@ -49,11 +51,11 @@
 
 > **CK 系列（2026-09-25 用户裁决）**：「像 BK 一样做个计划表，逐步推进所有的项目」=按本表逐项推进的预授权；每项启动仍走立项检查单，**项内产品语义裁决点单独问**。排序原则=用户可见价值 → 技术债卫生 → 评估/设计类；大改造与低优先项靠后。
 
-> **HK 系列（2026-09-26 用户裁决）**：「需要改进…是否需要更详细和全面精准的改进队列项呢」=外部 harness 方法论（OpenSpec/Superpowers/CodeGraph/Ponytail/Caveman/RTK）吸收评估落成的推进序；性质=**开发 harness 层工程实践**（skills/治理/脚本），非产品工作包；排序原则=小刀规范类 → 工具类中刀 → 勘察裁决类；每项启动照常走立项检查单，项内裁决点单独问。
+> **HK 系列（2026-09-26 用户裁决）**：「需要改进…是否需要更详细和全面精准的改进队列项呢」=外部 harness 方法论（OpenSpec/Superpowers/CodeGraph/Ponytail/Caveman/RTK）吸收评估落成的推进序；性质=**开发 harness 层工程实践**（skills/治理/脚本），非产品工作包；排序原则=小刀规范类 → 工具类中刀 → 勘察裁决类；每项启动照常走立项检查单，项内裁决点单独问。**HK-01~04 已全部收口（2026-09-26）；增量规范持续生效=新 plan 立项即带 capability front-matter（docs/hk04-spec-layer-design.md §4）**。
 
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
-| 1 | ▶ HK-04 | **能力级规格层勘察（勘察+裁决类）**：P0=盘点 plan 文档 front-matter 现状 + DOC-REGISTRY schema + docs:check 规则面，产出「规格差量」映射设计稿（草案：goal/acceptance/reopen/status 四键 front-matter + registry 扩展 + docs:check 增量校验）落 docs/ 并登记 DOC-REGISTRY；**裁决点（用户）**=P1 是否试点（选 2-3 份 plan 文档结构化+门禁扩展）。**明确不做**=不引 OpenSpec CLI、不建第二 truthDomain、docs:check 只增量不动既有语义 | 外部 harness 评估 2026-09-26（OpenSpec delta 思想对照缺口：能力级行为要求散在 roadmap/plan/ui-audit/IPC registry 四处，工作包收口后无单点可查）；**P0 结论=四键 front-matter+registry capability 增量+docs:check 增量校验，存量零迁移墙，设计稿 docs/hk04-spec-layer-design.md 已登记** | **P0 收口；P1 试点（选样 block-121/119/g0-rs 三份）裁决在用户** |
+| — | （HK 系列全清；当前无可推进项） | — | — | — |
 | — | ⛔ CK-08 | **C-03：task_id 数据模型改造——重估收缩转观察**：动机仍实（45 万行 UUID 冗余 16.25MB/库 14%）但 30 天清扫有界+无用户感知收益+契约迁移风险大（7+29 文件）；**重开条件=清扫上限内实测 I/O 痛点或库体积成用户可感知问题** | 本批重估数据（AUDIT-LOG 晚五行） | 观察待证据 |
 | — | 👁 BK-02 | **汇报门 P2 试点观察期盘点**（持续观察，不占队列序）——采纳率/误拦率/延迟增量/fitReplay 触发率随真实轮次累计；观察窗开启中（dev 栈 BIOF3_JEV_REPORT_GUARD=1） | BLOCK-119 收口遗留候选 | 观察（持续） |
 
@@ -61,6 +63,7 @@
 
 | ID | 事项 | 收口 |
 | --- | --- | --- |
+| ✅ HK-04 | **能力级规格层（P0 设计+P1 试点同日；用户委派「你来定」）** | 2026-09-26 当日收口：设计=四键 front-matter（capability/goal/acceptance/reopen+status）+registry capability opt-in 字段+docs:check 增量校验；实现=parseCapabilityFrontMatter 受限解析器（零 YAML 依赖）+第三遍历五类 FRONTMATTER_* issue+docs:status capability 视图；红绿先行 6 契约先落→**12/12 绿**（实现期抓真=presence 触发误伤存量 --- 水平线→修正为 opt-in，设计稿 §5 留痕）；三份试点全亮（result-loop/output-judge/result-studio）+**status 漂移抓真演示**（精确红→还原，acceptance/hk04/p1-consistency-demo.txt）+282 份零回归；**增量采纳持续生效=新 plan 立项即带 capability front-matter**；设计稿=docs/hk04-spec-layer-design.md |
 | ✅ HK-03 | **符号图/导入边查询脚本（方案 A 零新增依赖，P0+P1 同日）** | 2026-09-26 当日收口（P0 勘察选型+P1 实现；用户 AskUserQuestion 裁决「开工 P1·方案 A」）：scripts/symbol-graph.mjs（who-imports/classify-edges 两查询，AST 级，typescript Compiler API）+test/symbol-graph.test.mjs 契约 **10/10**；**红绿先行 HK-01 首次行使**（契约先落→8 红→绿，两实现 bug 当轮抓住；第二轮命名空间访问/字面量拼接两形态先补测试再实现）；**回放校验：可静态判定集合 2/2 零误判**（getRuntimeBinName/isFunnelEvent 与 CK-11 批次四人工定性一致）+3 锚点=运行时构造路径形态正确归入 CK-11 已登记盲区（零猜测）；**DEAD 语义诚实标注**=静态无已解析使用≠可安全删除，删除裁决仍走 CK-11 三分法+人工复核；选型与结果=docs/hk03-symbol-graph-selection.md |
 | ✅ HK-01 | **TDD 红绿先行纪律入 gewu-dev-infra（制度化沉淀）** | 2026-09-26 当日收口：SKILL.md 增「红绿先行」节（适用=新行为契约/缺陷修复先落失败测试，红→绿证据随收口笔录留痕；豁免四类=纯重构/纯类型面治理批/PoC/实机面；不加新门禁，二次出现才按「回归→门禁转化」评估）+委派任务书第 4 节同步字段；素材源=Superpowers TDD 改编内化；**实效验收=下一个实际工作包留红→绿证据**；门禁=hygiene/docs:check/ui:audit 绿 |
 | ✅ HK-02 | **YAGNI 五问阶梯入 gewu-code-review（制度化沉淀）** | 2026-09-26 当日收口：维度 7「最小化」五问（不做/可复用/标准库可达/依赖必要/行数更少，引入依赖或并造第二实现可达 P1）+六维度全线改称七维度（顺序节/时机节/独立性节）+评审报告模板两处同步（维度行/收尾核对行）；素材源=Ponytail 决策阶梯改编内化非逐字移植；**实效验收=下一次评审报告行使维度 7** |

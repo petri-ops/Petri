@@ -1,3 +1,12 @@
+---
+capability: result-loop
+goal: 用户在 dev Electron 对真实项目跑通一次插件分析——Studio 可信结果 + Copilot 跨轮追问引用真实基因/数字
+acceptance:
+  - block121-result-loop flow 20/20
+  - block113 契约 run_tool 恒在场
+status: completed
+---
+
 # BLOCK-121 — 开发态结果闭环垂直切片（Result Loop Vertical）
 
 > 立项：2026-09-25（active，P0-LAUNCH）→ **2026-09-26 当日整包 completed（P0+P1+P2 三阶段）**。

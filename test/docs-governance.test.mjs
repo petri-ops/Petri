@@ -182,3 +182,128 @@ test('reconciliation remains read-only and separates archive from retained candi
   assert.equal(Array.isArray(report.archiveCandidates), true);
   assert.equal(report.retainedCompleted.length > 0, true);
 });
+
+// —— HK-04 P1：capability front-matter 增量校验（红绿先行：本节先于实现落盘）——
+// 契约锚点：docs/hk04-spec-layer-design.md §2（四键 front-matter + 三条增量校验）。
+
+function buildFrontMatterFixtureRegistry(docBody, docOverrides = {}) {
+  return {
+    schemaVersion: 1,
+    coverage: { managedRoots: ['docs'], excludedPrefixes: [], requireRegistration: false },
+    documents: [{
+      id: 'PILOT-1',
+      path: 'docs/pilot.md',
+      kind: 'work-package',
+      status: 'completed',
+      canonical: false,
+      archivePolicy: 'retain_stable_path',
+      ...docOverrides,
+    }],
+    __docBody: docBody,
+  };
+}
+
+async function writeFrontMatterFixture(context, docBody) {
+  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'biof3-frontmatter-'));
+  context.after(() => fs.rm(tempRoot, { recursive: true, force: true }));
+  await fs.mkdir(path.join(tempRoot, 'docs'), { recursive: true });
+  await fs.writeFile(path.join(tempRoot, 'docs', 'pilot.md'), docBody, 'utf8');
+  return tempRoot;
+}
+
+test('capability front-matter：四键齐备且 status/capability 与 registry 一致 → 零新增 issue', async (context) => {
+  const tempRoot = await writeFrontMatterFixture(context, [
+    '---',
+    'capability: result-loop',
+    'goal: 用户跑一次插件分析，在 Studio 看见可信结果',
+    'acceptance:',
+    '  - block121-result-loop 20/20',
+    'status: completed',
+    '---',
+    '',
+    '# Plan',
+  ].join('\n'));
+
+  const issues = await validateDocumentRegistry(
+    buildFrontMatterFixtureRegistry(null, { capability: 'result-loop' }),
+    { rootDir: tempRoot },
+  );
+  assert.equal(issues.some((item) => item.code.startsWith('FRONTMATTER_')), false);
+});
+
+test('capability front-matter：缺必填键/未知键 → 红', async (context) => {
+  const tempRoot = await writeFrontMatterFixture(context, [
+    '---',
+    'capability: result-loop',
+    'status: completed',
+    'typoKey: oops',
+    '---',
+    '',
+    '# Plan',
+  ].join('\n'));
+
+  const issues = await validateDocumentRegistry(
+    buildFrontMatterFixtureRegistry(null, { capability: 'result-loop' }),
+    { rootDir: tempRoot },
+  );
+  const codes = new Set(issues.map((item) => item.code));
+  assert.equal(codes.has('FRONTMATTER_INVALID_FORMAT'), true, '缺 goal/acceptance 必须红');
+  assert.equal(codes.has('FRONTMATTER_UNKNOWN_KEY'), true, '未知键必须红');
+});
+
+test('capability front-matter：status 与 registry 漂移 → 红（第二真相防线）', async (context) => {
+  const tempRoot = await writeFrontMatterFixture(context, [
+    '---',
+    'capability: result-loop',
+    'goal: g',
+    'acceptance:',
+    '  - x 1/1',
+    'status: active',
+    '---',
+    '',
+    '# Plan',
+  ].join('\n'));
+
+  const issues = await validateDocumentRegistry(
+    buildFrontMatterFixtureRegistry(null, { capability: 'result-loop' }),
+    { rootDir: tempRoot },
+  );
+  assert.equal(issues.some((item) => item.code === 'FRONTMATTER_STATUS_MISMATCH'), true);
+});
+
+test('capability front-matter：命名与 registry capability 一致性', async (context) => {
+  const tempRoot = await writeFrontMatterFixture(context, [
+    '---',
+    'capability: Bad_Cap',
+    'goal: g',
+    'acceptance:',
+    '  - x 1/1',
+    'status: completed',
+    '---',
+    '',
+    '# Plan',
+  ].join('\n'));
+
+  const issues = await validateDocumentRegistry(
+    buildFrontMatterFixtureRegistry(null, { capability: 'result-loop' }),
+    { rootDir: tempRoot },
+  );
+  const codes = new Set(issues.map((item) => item.code));
+  assert.equal(codes.has('FRONTMATTER_CAPABILITY_INVALID'), true, '非 kebab-case 必须红');
+  assert.equal(codes.has('FRONTMATTER_CAPABILITY_MISMATCH'), true, '与 registry capability 漂移必须红');
+});
+
+test('capability front-matter：无 front-matter 的存量文档零影响（增量采纳判据）', async (context) => {
+  const tempRoot = await writeFrontMatterFixture(context, '# Plan\n\n正文无 front-matter。\n');
+  const issues = await validateDocumentRegistry(buildFrontMatterFixtureRegistry(null), { rootDir: tempRoot });
+  assert.equal(issues.some((item) => item.code.startsWith('FRONTMATTER_')), false);
+});
+
+test('capability front-matter：registry 声明 capability 但文档缺 front-matter → 红', async (context) => {
+  const tempRoot = await writeFrontMatterFixture(context, '# Plan\n\n存量形态：无 front-matter，但 registry 已声明 capability。\n');
+  const issues = await validateDocumentRegistry(
+    buildFrontMatterFixtureRegistry(null, { capability: 'result-loop' }),
+    { rootDir: tempRoot },
+  );
+  assert.equal(issues.some((item) => item.code === 'FRONTMATTER_INVALID_FORMAT'), true);
+});

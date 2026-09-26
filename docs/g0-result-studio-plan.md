@@ -1,3 +1,12 @@
+---
+capability: result-studio
+goal: Result Studio 意图驱动、可编辑、Git-backed 的科研结果工作台（implemented_unverified/experimental 为 G0 常态，RS-P7 deferred）
+acceptance:
+  - G0-RS 各 P 阶段门禁（plan §13 收口判据）
+reopen: RS-P7 与资格重认证按 plan §14 判据与 G1+ 阶段用户裁决
+status: completed
+---
+
 # G0 Result Studio — 意图驱动、可编辑、Git-backed 的科研结果工作台计划
 
 最后更新：2026-09-15

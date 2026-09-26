@@ -1,3 +1,13 @@
+---
+capability: output-judge
+goal: 输出评判 harness——fit 三态推进门 + 稳定性探针 + 子代理汇报门，阈值绑定校准证据
+acceptance:
+  - block119 契约 13/13
+  - fit 校准 precision 0.8254 / coverage 0.7875
+reopen: faithful/goal 维度 observe-only 校准与 P2 实机开启观察期，按真实轮次数据另裁
+status: completed
+---
+
 # BLOCK-119-OUTPUT-JUDGE-HARNESS 计划：输出评判 Harness 工程
 
 **Plan ID**：`BLOCK-119-OUTPUT-JUDGE-HARNESS`

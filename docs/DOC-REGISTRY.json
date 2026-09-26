@@ -1445,6 +1445,7 @@
     {
       "id": "G0-RS",
       "path": "docs/g0-result-studio-plan.md",
+      "capability": "result-studio",
       "kind": "work-package",
       "status": "completed",
       "canonical": false,
@@ -5195,6 +5196,7 @@
     {
       "id": "BLOCK-121-RESULT-LOOP-VERTICAL",
       "path": "docs/block-121-result-loop-vertical-plan.md",
+      "capability": "result-loop",
       "kind": "work-package",
       "status": "completed",
       "canonical": true,
@@ -5234,6 +5236,7 @@
     {
       "id": "BLOCK-119-OUTPUT-JUDGE-HARNESS",
       "path": "docs/block-119-output-judge-harness-plan.md",
+      "capability": "output-judge",
       "kind": "work-package",
       "status": "completed",
       "canonical": true,
