@@ -2194,6 +2194,19 @@
       "scriptRole": "governance"
     },
     {
+      "id": "block123-p0-probes",
+      "note": "BLOCK-123 P0 端到端对账探针（实机走查证据工具，非回归测试：block123-p0-coding-walkthrough 真实 chat 六环节走查 / block123-p0-review-probe 审阅面定点取证；证据=acceptance/block-123/）。补登原因=与 hk03 同款 fail-closed 拦截（新脚本未登记）——同一坑二次出现，登记处留痕。",
+      "patterns": [
+        "scripts/block123-p0-coding-walkthrough.mjs",
+        "scripts/block123-p0-review-probe.mjs",
+        "acceptance/block-123/**"
+      ],
+      "tests": [],
+      "frontendRelated": false,
+      "classifiesScripts": true,
+      "scriptRole": "governance"
+    },
+    {
       "id": "block111-jev-w1-marker",
       "note": "BLOCK-111-JEV-W1-MARKER-CLASSIFICATION：决策内化弧 W1-1 marker→细胞类型判别二跳。interpret.js CELL_MARKERS 规则表候选生成 + decision-api choice 二跳（D-5 单阈值 θ=0.55 门控，D-4 默认关 BIOF3_JEV_MARKER_GUARD=1 显式开）+ ai-legacy.js /api/ai/interpret cellTypeHintsDetailed additive（cellTypeHints 老契约零变化）。契约=test/block111-marker-classification.test.mjs（现行契约钉/候选推导/请求形状/降级五态/伪造候选拒收/门控边界 14 项）。P0 证据 acceptance/block-111/（calibration.json gate.passed + corpus 104 条）。P2 实机 flow 落地后把脚本加进 patterns。",
       "patterns": [
