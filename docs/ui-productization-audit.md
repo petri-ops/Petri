@@ -4179,5 +4179,6 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - 待用户复测（入口全亮姿势：发改动任务→+ 钮/菜单审阅项/空态磁贴（如停空态）三处同步亮→任一入口点开审阅→全熄）。
 - **加映 v4（2026-09-26，用户提议「直接显示当前审阅按钮中的 + - 数量变化」→ 升格为未审文件数计数徽章）**：圆点升格为计数徽章，四处入口同源显示未审文件数 N（+ 钮/菜单项/空态磁贴/tab 药丸）；实现=conversationChangesStore 增 `countUnreviewedConversationChanges` 纯计数 + `getConversationUnreviewedCount`/`useConversationUnreviewedCount`（v3 布尔判定面收编升级）+ `TitleBarTab.reviewCount`/`TitleBarState.reviewCount`（equality/default/cleanup 同步）+ RightZone 药丸与 + 钮、EmptyResult 磁贴计数渲染（accent tint 底+数字）；acknowledge 语义不变（打开审阅归零，新改动重新累计）。±行数版登记候选池 C-16（权威源=审阅面板 git diff，入口展示需 shortstat 桥避免第二真相）。
 - **证据（加映 v4）**：unread 测试升格计数语义 4/4 + RightZone 计数徽章 4/4（药丸/+ 钮互斥、0/缺省隐藏）+ EmptyResult 3/3 + hydrate 8/8 零回归 + tsc 0 + theme 契约 5/5 + eslint 0 error。
+- **加映 v5（2026-09-26，用户复测抓真「+ 0 默认情况下 0 不应该出现」）**：+ 钮徽章条件用 `reviewCount && ...`，计数为 0 时 React 把 falsy 数字 `0` 渲染了出来（经典 && 渲染陷阱）——修复为 `(reviewCount ?? 0) > 0` 判定 + 0 态回归测试补位（此前未覆盖的洞）；tsc 0。教训入册=**徽章类条件禁用裸 `&&` 接数字**，统一 `> 0` 或 `?:`。
 - 待用户复测（姿势不变：改动任务→四处徽章显示未审文件数→点开审阅→归零）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
