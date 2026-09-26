@@ -4136,3 +4136,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据（契约）**：前端全量 148 文件 1190/1190（移除组卡 6 文件后净减 6 例）+ tsc 0 + test:changed 0（block109 编排规则改挂 flow 文件）+ docs/ui 门禁绿。block109-agent-panel flow A4 断言同步修订（组卡可见 → 派发行内「详情」按钮可达）。
 - **verified 翻转（2026-09-25，用户授权代行评估 + Jev 裁决）**：真实 spawn 轮取证（acceptance/ui-eval-agent/）——派发源头行内 bot 行+终态「子智能体已返回结果」汇报收敛实证，组卡零残留。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-443: 路由级错误边界——页面渲染异常不再白屏整树（健壮性兜底轻量批）(2026-09-26 in_progress，契约已验+dev 栈旁证，实机过目待补)
+
+- **来源**：自主动作批（用户授权「你找找其它能做的事情…不想你闲着」）；勘察发现全仓零 ErrorBoundary——任何路由页渲染抛异常（如结果页渲染插件产出的异形数据）都会卸载整棵 React 树=整窗白屏，只能重启应用。
+- **改动**：新增 `RouteErrorBoundary`（frontend/src/components/）——class 边界 getDerivedStateFromError + componentDidCatch（console.error 保留诊断可见性）；回退 UI=「页面出错了」说明 + 错误摘要（等宽 pre 限高滚动）+ 双动作钮「重新加载」（location.reload）/「返回主页」（location.assign('/') 整页重建 React 树）；样式走 --gewu-* token 阶梯（surface 上浮 subtle 卡，暗色安全）；接线 App.tsx 两棵路由树（主窗 + /window 独立窗），页面骨架（标题栏/侧栏）在边界之外不被波及。
+- **证据（契约+实机旁证）**：RouteErrorBoundary.test 3/3（无错透明渲染/抛错回退+不渲染子树+诊断保留/错误态持续=恢复走整页重建语义）+ theme-token-contract 4/4 + tsc 0 + eslint 0 error；dev 栈 CDP 旁证=接线后正常渲染不受影响（root 子树在场/composer 在场/无 vite-error-overlay）。
+- 待用户实机过目（可人为触发异常形态后翻 verified）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

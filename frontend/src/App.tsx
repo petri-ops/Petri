@@ -18,6 +18,7 @@ import { BackendStatusProvider } from '@/components/backend/BackendStatusProvide
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { getBridge } from '@/lib/desktopBridge';
 import { CommandPalette, useCommandPalette } from '@/components/copilot/CommandPalette';
+import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
 // BLOCK-42 — pending-scroll 全局 Provider（见 AppShell 内注释）
 import { PendingScrollProvider } from '@/lib/pendingScrollContext';
 // BLOCK-106 P1 — 路由级代码分割：首屏路由 `/`（欢迎页）保持直包，其余页面切
@@ -131,6 +132,8 @@ function AppShell(): React.ReactElement {
           {/* dev mode passes through here just like production: deep-linkable
               /project/:id/<mode> and /skills routes are intentionally reachable.
               Only the dev-home skip-auto-navigate logic lives in pages/home.tsx. */}
+          {/* 路由级错误边界：任何路由页渲染异常不再白屏整树（健壮性兜底） */}
+          <RouteErrorBoundary>
           <Suspense fallback={<RouteFallback />}>
           <Routes>
             {/* BLOCK-80 — / 为欢迎页（问候+项目/分支+首问直发）；原工作台（项目卡+创建流）退役至 /projects 项目管理 */}
@@ -157,6 +160,7 @@ function AppShell(): React.ReactElement {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
           </Suspense>
+          </RouteErrorBoundary>
         </main>
         </div>
         <TestInstanceBadge />
@@ -207,6 +211,7 @@ export default function App(): React.ReactElement {
   // （窗口永不持有 canonical state，plan §10 治理红线）。
   if (isWindowSurface) {
     return (
+      <RouteErrorBoundary>
       <Suspense fallback={<RouteFallback />}>
       <Routes>
         <Route path="/window/terminal/:sessionId" element={<TerminalWindowPage />} />
@@ -215,6 +220,7 @@ export default function App(): React.ReactElement {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </Suspense>
+      </RouteErrorBoundary>
     );
   }
 
