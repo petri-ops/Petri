@@ -220,6 +220,8 @@
 
 - [`hk03-symbol-graph-selection.md`](./hk03-symbol-graph-selection.md) — HK-03 P0 符号图勘察选型（结论=方案 A 既有 typescript Compiler API 零新增依赖；P1 开工待裁决，回放校验判据在案）。
 
+- [`hk04-spec-layer-design.md`](./hk04-spec-layer-design.md) — HK-04 能力级规格层设计稿（四键 front-matter+registry 增量+docs:check 增量校验；P1 试点三份选样在案，裁决在用户）。
+
 - **Skills 子文档入口图**（2026-08-16 GATES-4 batch 2 增补）：
 
   - **入口** [`skills-architecture.md`](./architecture/skills-architecture.md) — Skills 层四层架构设计（Skills → Workflows → Plugins → Capabilities），唯一 canonical=true。

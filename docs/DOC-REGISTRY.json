@@ -5286,8 +5286,24 @@
         "selection"
       ],
       "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "HK04-SPEC-LAYER-DESIGN",
+      "path": "docs/hk04-spec-layer-design.md",
+      "kind": "reference",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "spec-layer-design",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-26",
+      "tags": [
+        "HK-04",
+        "spec-layer",
+        "design"
+      ],
+      "archivePolicy": "retain_stable_path"
     }
   ],
   "lastUpdated": "2026-09-26",
-  "documentCount": 281
+  "documentCount": 282
 }
