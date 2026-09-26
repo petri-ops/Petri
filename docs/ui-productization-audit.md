@@ -4177,4 +4177,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - 待用户按 v2 姿势复测（**无需预先打开审阅 tab**：发改动任务→「+」按钮亮圆点→点开审阅→熄灭）。
 - **加映 v3（2026-09-26，用户再看抓真「审阅和磁贴是不是也该有圆点 不然咋知道要点开审阅」）**：圆点覆盖扩展到全部审阅入口——①+ 菜单展开时「审阅」menuitem 亮圆点；②工作台空态「审阅」磁贴亮圆点（EmptyResult 增 reviewDot prop，RightPanel 经 useConversationUnreviewedChanges 供数）；与 + 钮/tab 药丸同一未读信号源（titleBar.reviewDot / tab.dot）。契约 +5（磁贴三态+菜单亮/不亮互斥）→ 全套 22/22；tsc 0。
 - 待用户复测（入口全亮姿势：发改动任务→+ 钮/菜单审阅项/空态磁贴（如停空态）三处同步亮→任一入口点开审阅→全熄）。
+- **加映 v4（2026-09-26，用户提议「直接显示当前审阅按钮中的 + - 数量变化」→ 升格为未审文件数计数徽章）**：圆点升格为计数徽章，四处入口同源显示未审文件数 N（+ 钮/菜单项/空态磁贴/tab 药丸）；实现=conversationChangesStore 增 `countUnreviewedConversationChanges` 纯计数 + `getConversationUnreviewedCount`/`useConversationUnreviewedCount`（v3 布尔判定面收编升级）+ `TitleBarTab.reviewCount`/`TitleBarState.reviewCount`（equality/default/cleanup 同步）+ RightZone 药丸与 + 钮、EmptyResult 磁贴计数渲染（accent tint 底+数字）；acknowledge 语义不变（打开审阅归零，新改动重新累计）。±行数版登记候选池 C-16（权威源=审阅面板 git diff，入口展示需 shortstat 桥避免第二真相）。
+- **证据（加映 v4）**：unread 测试升格计数语义 4/4 + RightZone 计数徽章 4/4（药丸/+ 钮互斥、0/缺省隐藏）+ EmptyResult 3/3 + hydrate 8/8 零回归 + tsc 0 + theme 契约 5/5 + eslint 0 error。
+- 待用户复测（姿势不变：改动任务→四处徽章显示未审文件数→点开审阅→归零）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。

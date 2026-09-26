@@ -7532,13 +7532,19 @@ body:global(.gewu-resizing-columns) * {
   color: var(--gewu-text-muted);
 }
 
-/* UI-446 加映 v3 — 审阅磁贴未读圆点（当前会话有未看工作区改动时点亮） */
-.emptyResultLaunchDot {
+/* UI-446 v4 — 审阅磁贴未审文件数徽章（当前会话有未看工作区改动时显示） */
+.emptyResultLaunchCount {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--gewu-accent);
+  top: 6px;
+  right: 6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--gewu-accent) 16%, transparent);
+  color: var(--gewu-accent);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
 }

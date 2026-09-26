@@ -149,14 +149,14 @@ export function clearConversationFileChanges(conversationId: string): void {
 /** 每会话已读时间戳（打开审阅 tab 时写入）。 */
 const acknowledgedAtByConversation = new Map<string, number>();
 
-/** 纯判定：改动列表 + 已读时间戳 → 是否未读。导出供测试直接断言。 */
-export function hasUnreviewedConversationChanges(
+/** 纯计数：改动列表 + 已读时间戳 → 未审文件数。导出供测试直接断言。 */
+export function countUnreviewedConversationChanges(
   changes: ConversationFileChange[],
   acknowledgedAt: number | undefined
-): boolean {
-  if (changes.length === 0) return false;
+): number {
+  if (changes.length === 0) return 0;
   const ack = acknowledgedAt ?? 0;
-  return changes.some((change) => change.lastChangedAt > ack);
+  return changes.filter((change) => change.lastChangedAt > ack).length;
 }
 
 /** 打开审阅 tab 即调用：记录已读时间戳（当前时刻）。 */
@@ -177,25 +177,25 @@ function subscribeConversationChanges(listener: ChangeListener): () => void {
   return () => listeners.delete(listener);
 }
 
-/** 当前会话是否有未读改动（非钩子取数，测试与消费方共用）。 */
-export function isConversationUnreviewed(
+/** 当前会话未审文件数（非钩子取数，测试与消费方共用）。 */
+export function getConversationUnreviewedCount(
   conversationId: string | undefined | null
-): boolean {
-  return hasUnreviewedConversationChanges(
+): number {
+  return countUnreviewedConversationChanges(
     getConversationFileChanges(conversationId),
     acknowledgedAtByConversation.get(conversationId ?? '')
   );
 }
 
-/** 当前会话是否有未读改动（右栏审阅 tab 圆点数据源）。 */
-export function useConversationUnreviewedChanges(
+/** 当前会话未审文件数（右栏审阅 tab 计数徽章数据源）。 */
+export function useConversationUnreviewedCount(
   conversationId: string | undefined | null
-): boolean {
+): number {
   useSyncExternalStore(
     subscribeConversationChanges,
     () => getConversationFileChanges(conversationId)
   );
-  return isConversationUnreviewed(conversationId);
+  return getConversationUnreviewedCount(conversationId);
 }
 
 // ============================================================

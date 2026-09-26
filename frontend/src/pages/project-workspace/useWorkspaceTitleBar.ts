@@ -4,7 +4,7 @@ import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsC
 import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import { RIGHT_PANEL_ITEMS, type RightPanelMode } from './rightPanelTabs';
 // UI-446 — 审阅 tab 未读圆点数据源（当前会话工作区改动索引）
-import { useConversationUnreviewedChanges } from '@/components/copilot/conversationChangesStore';
+import { useConversationUnreviewedCount } from '@/components/copilot/conversationChangesStore';
 
 // BLOCK-92 Wave B-1 — TitleBar 注册 effect 簇外迁（原 ProjectWorkspace 内联，纯搬运零行为变化）。
 // TitleBar 注册 —— 8f3d55a5 曾误删整段（右侧工具菜单「+」/ 标签 pills / 结果
@@ -63,8 +63,8 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
     setRightToolMenuOpen,
   } = options;
 
-  // UI-446 — 审阅 tab 圆点：当前会话存在未看工作区改动时点亮（激活审阅 tab 即熄灭）
-  const reviewUnread = useConversationUnreviewedChanges(activeConvId);
+  // UI-446 v4 — 审阅 tab 计数徽章：当前会话未审工作区改动文件数（激活审阅 tab 即归零）
+  const reviewCount = useConversationUnreviewedCount(activeConvId);
 
   const titleBarTabs = useMemo(
     () =>
@@ -77,10 +77,10 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
             label: item?.label || tab,
             icon: item?.icon || 'folder',
             closable: true,
-            dot: tab === 'review' ? reviewUnread : undefined,
+            reviewCount: tab === 'review' ? reviewCount : undefined,
           };
         }),
-    [openRightTabs, reviewUnread]
+    [openRightTabs, reviewCount]
   );
   const titleBarResultItems = useMemo(() => conversationJobs.map((job) => {
     const status = job.status === 'done'
@@ -107,8 +107,8 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
       title: titleBarTitle,
       tabs: titleBarTabs,
       activeTabId: rightTab === 'home' ? null : rightTab,
-      // UI-446 — 审阅 tab 未打开时圆点挂「+」按钮（当前会话有未看工作区改动）
-      reviewDot: reviewUnread,
+      // UI-446 v4 — 审阅 tab 未打开时计数挂「+」按钮（当前会话有未看工作区改动）
+      reviewCount,
       onSelectTab: (tabId) => {
         if (tabId === 'results') {
           handleOpenRightResults();
@@ -155,7 +155,7 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
         title: 'Gewu',
         tabs: [],
         activeTabId: null,
-        reviewDot: false,
+        reviewCount: 0,
         onSelectTab: null,
         onCloseTab: null,
         onMoreAction: null,

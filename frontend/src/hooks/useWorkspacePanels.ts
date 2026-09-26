@@ -10,8 +10,8 @@ export interface TitleBarTab {
   label: string;
   icon: IconName;
   closable?: boolean;
-  /** UI-446 — tab 级未读圆点（审阅 tab：当前会话有未看工作区改动时点亮）。 */
-  dot?: boolean;
+  /** UI-446 v4 — tab 级未审文件数徽章（审阅 tab：当前会话未看工作区改动数，0/缺省隐藏）。 */
+  reviewCount?: number;
 }
 
 export interface TitleBarToolItem {
@@ -34,8 +34,8 @@ export interface TitleBarState {
   // 只在 compact/loading/error/非工作区路由渲染，这些态无真实可拖列，宽度推送成死链。
   tabs: TitleBarTab[];
   activeTabId: string | null;
-  /** UI-446 — 审阅 tab 未打开时，圆点挂「+」工具菜单按钮（当前会话有未看工作区改动）。 */
-  reviewDot?: boolean;
+  /** UI-446 v4 — 审阅 tab 未打开时，「+」工具菜单按钮亮未审文件数徽章。 */
+  reviewCount?: number;
   onSelectTab: ((id: string) => void) | null;
   onCloseTab: ((id: string) => void) | null;
   onMoreAction: (() => void) | null;
@@ -73,7 +73,7 @@ const DEFAULT_TITLE_BAR: TitleBarState = {
   title: 'Gewu',
   tabs: [],
   activeTabId: null,
-  reviewDot: false,
+  reviewCount: 0,
   onSelectTab: null,
   onCloseTab: null,
   onMoreAction: null,
@@ -98,7 +98,7 @@ function titleBarDataEqual(a: TitleBarState, b: TitleBarState): boolean {
     a.canGoBack === b.canGoBack &&
     a.canGoForward === b.canGoForward &&
     JSON.stringify(a.tabs) === JSON.stringify(b.tabs) &&
-    a.reviewDot === b.reviewDot &&
+    a.reviewCount === b.reviewCount &&
     JSON.stringify(a.toolMenuItems) === JSON.stringify(b.toolMenuItems) &&
     JSON.stringify(a.resultItems) === JSON.stringify(b.resultItems)
   );

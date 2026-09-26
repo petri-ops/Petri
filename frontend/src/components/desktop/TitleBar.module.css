@@ -593,13 +593,20 @@
   cursor: pointer;
 }
 
-/* UI-446 — 审阅 tab 未读圆点（当前会话有未看工作区改动时点亮） */
-.tabPillDot {
+/* UI-446 v4 — 审阅 tab/菜单/+ 钮共用的未审文件数徽章（当前会话有未看工作区改动时显示） */
+.tabCountBadge {
   flex: none;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--gewu-accent);
+  min-width: 16px;
+  height: 16px;
+  padding: 0 5px;
+  margin-left: 4px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--gewu-accent) 16%, transparent);
+  color: var(--gewu-accent);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
 }
 
 .pathPillText,

@@ -60,10 +60,10 @@ export function TitleBarRightZone(): React.ReactElement {
                 >
                   <Icon name={tab.icon} size={14} />
                   <span className={styles.tabPillText}>{tab.label}</span>
-                  {/* UI-446 — tab 级未读圆点（审阅 tab：当前会话有未看工作区改动） */}
-                  {tab.dot && (
-                    <span className={styles.tabPillDot} data-testid="review-tab-dot" aria-hidden="true" />
-                  )}
+                  {/* UI-446 v4 — tab 级未审文件数徽章（审阅 tab：当前会话有未看工作区改动） */}
+                  {tab.reviewCount ? (
+                    <span className={styles.tabCountBadge} data-testid="review-tab-count">{tab.reviewCount}</span>
+                  ) : null}
                 </button>
                 {tab.closable && onCloseTab && (
                   <button
@@ -90,9 +90,9 @@ export function TitleBarRightZone(): React.ReactElement {
               aria-controls="titlebar-tool-menu"
             >
               <Icon name="plus" size={15} />
-              {/* UI-446 — 审阅 tab 未打开时，圆点挂「+」按钮引导入口（点开审阅即熄） */}
-              {panels.titleBar.reviewDot && !tabs.some((tab) => tab.id === 'review') && (
-                <span className={styles.tabPillDot} data-testid="review-menu-dot" aria-hidden="true" />
+              {/* UI-446 v4 — 审阅 tab 未打开时，计数徽章挂「+」按钮引导入口（点开审阅即熄） */}
+              {panels.titleBar.reviewCount && !tabs.some((tab) => tab.id === 'review') && (
+                <span className={styles.tabCountBadge} data-testid="review-menu-count">{panels.titleBar.reviewCount}</span>
               )}
             </button>
             {toolMenuOpen && (
@@ -114,10 +114,10 @@ export function TitleBarRightZone(): React.ReactElement {
                     >
                       <Icon name={item.icon} size={14} />
                       <span>{item.label}</span>
-                      {/* UI-446 加映 v3 — 菜单内审阅入口的未读圆点（与 + 钮/药丸同源） */}
-                      {item.id === 'review' && panels.titleBar.reviewDot && (
-                        <span className={styles.reviewMenuItemDot} data-testid="review-menu-item-dot" aria-hidden="true" />
-                      )}
+                      {/* UI-446 v4 — 菜单内审阅入口的未审文件数徽章（与 + 钮/药丸同源） */}
+                      {item.id === 'review' && panels.titleBar.reviewCount ? (
+                        <span className={styles.tabCountBadge} data-testid="review-menu-item-count">{panels.titleBar.reviewCount}</span>
+                      ) : null}
                       {item.isOpen && <Icon name="check" size={13} />}
                     </button>
                   ))}

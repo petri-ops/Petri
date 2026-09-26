@@ -1,53 +1,43 @@
-// UI-446 — 审阅 tab 未读圆点判定（BLOCK-123 G-01 · 红绿先行：本文件先于实现落盘）。
-// 语义：当前会话存在改动记录且存在晚于「已读时间戳」的改动 → 未读（圆点亮）；
-// 打开审阅 tab 即 acknowledge（圆点熄灭）；之后的新改动重新点亮。
-// 不复活 2026-09-09 被用户裁决移除的聊天区卡片（c0e92dd0）——本判定只服务 tab 圆点。
+// UI-446 v4 — 审阅 tab 计数徽章判定（红绿先行升格：dot → 未审文件数计数）。
+// 语义：当前会话存在晚于「已读时间戳」的改动 → 未审（计数=N）；打开审阅 tab 即
+// acknowledge（归零）；之后的新改动重新累计。
+// 不复活 2026-09-09 被用户裁决移除的聊天区卡片（c0e92dd0）——计数只服务右栏入口徽章。
 import { describe, expect, it } from 'vitest';
 import {
   acknowledgeConversationChanges,
+  countUnreviewedConversationChanges,
   getConversationFileChanges,
-  hasUnreviewedConversationChanges,
-  isConversationUnreviewed,
+  getConversationUnreviewedCount,
   recordConversationFileChange,
 } from './conversationChangesStore';
 
-describe('conversationChangesStore 未读判定（UI-446）', () => {
-  it('纯判定：无改动 → 永不未读', () => {
-    expect(hasUnreviewedConversationChanges([], undefined)).toBe(false);
-    expect(hasUnreviewedConversationChanges([], 999)).toBe(false);
+describe('conversationChangesStore 未审计数（UI-446 v4）', () => {
+  it('纯计数：无改动 → 0', () => {
+    expect(countUnreviewedConversationChanges([], undefined)).toBe(0);
+    expect(countUnreviewedConversationChanges([], 999)).toBe(0);
   });
 
-  it('纯判定：有改动且无已读时间戳 → 未读', () => {
-    const changes = [{ path: 'a.js', status: 'modified' as const, lastChangedAt: 100 }];
-    expect(hasUnreviewedConversationChanges(changes, undefined)).toBe(true);
-    expect(hasUnreviewedConversationChanges(changes, 0)).toBe(true);
-  });
-
-  it('纯判定：已读晚于全部改动 → 非未读', () => {
-    const changes = [{ path: 'a.js', status: 'modified' as const, lastChangedAt: 100 }];
-    expect(hasUnreviewedConversationChanges(changes, 150)).toBe(false);
-  });
-
-  it('纯判定：已读之后的新改动 → 重新未读', () => {
+  it('纯计数：无已读 → 全部未审；已读晚于部分 → 只计新改动', () => {
     const changes = [
       { path: 'a.js', status: 'modified' as const, lastChangedAt: 100 },
       { path: 'b.js', status: 'created' as const, lastChangedAt: 200 },
     ];
-    expect(hasUnreviewedConversationChanges(changes, 150)).toBe(true);
+    expect(countUnreviewedConversationChanges(changes, undefined)).toBe(2);
+    expect(countUnreviewedConversationChanges(changes, 0)).toBe(2);
+    expect(countUnreviewedConversationChanges(changes, 150)).toBe(1);
+    expect(countUnreviewedConversationChanges(changes, 300)).toBe(0);
   });
 
-  it('store 集成：record → 未读；acknowledge → 熄灭；再 record → 重新点亮', () => {
-    const conversationId = 'conv-ui446-' + Math.random().toString(36).slice(2);
+  it('store 集成：record → 计数；acknowledge → 归零；再 record → 重新累计', () => {
+    const conversationId = 'conv-ui446v4-' + Math.random().toString(36).slice(2);
     recordConversationFileChange(conversationId, 'utils.js', 'modified', { tool: 'workspace_replace' });
-    const changes = getConversationFileChanges(conversationId);
-    expect(changes.length).toBe(1);
-    expect(isConversationUnreviewed(conversationId)).toBe(true);
+    expect(getConversationUnreviewedCount(conversationId)).toBe(1);
 
     acknowledgeConversationChanges(conversationId);
-    expect(isConversationUnreviewed(conversationId)).toBe(false);
+    expect(getConversationUnreviewedCount(conversationId)).toBe(0);
 
     recordConversationFileChange(conversationId, 'utils.test.js', 'created');
-    expect(isConversationUnreviewed(conversationId)).toBe(true);
+    expect(getConversationUnreviewedCount(conversationId)).toBe(1);
 
     acknowledgeConversationChanges(undefined); // 无会话 id：安全 no-op
   });
