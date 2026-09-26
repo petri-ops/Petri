@@ -70,6 +70,67 @@
 - [ ] output:judge 判收口声明 PASS（首判 RETRY 按判词重写复判）
 - [ ] canonical 五件套回写 + docs:check PASS
 
-## 8. P0 勘察附录（P0 进行中回填）
+## 8. P0 勘察结论（2026-09-26 定稿）
 
-（待 P0 回填：选定路径、断点清单、flow 断言清单。）
+### 8.1 选定路径：deg / deseq2 差异表达分析（deg-analysis-standard）
+
+判据（「现有能力最完整、断点最少」）逐项对照后 **deg 胜出，scrna_standard 出局**：
+
+| 事实 | deg/deseq2 | scrna_standard（seurat-standard） |
+| --- | --- | --- |
+| 插件态 | **激活**：运行栈 catalog 实证 deseq2 已载（`/api/tools/catalog` 唯一工具） | **休眠**：`../gewu-pack-bio/plugins.dormant/seurat-standard`，需先激活 |
+| 演示数据 | 包内自带（`demo-data/deseq2/demo-counts.csv + demo-coldata.csv`） | **包内无 scrna 演示数据**，需外部获取数据集 |
+| 运行时 | 本机 R 运行时在位（`.biof3-dev-user-data/data/runtimes/R/bin/Rscript.exe`） | 同一 R 运行时，但 Seurat 库在位未实证 |
+| 历史证据 | pack-lifecycle A8 曾在本机真实跑通（deseq2→completed） | 无 |
+| 语义层 | interpret.js 原生支持 `deg` 解读分支 | 支持 `scrna_standard`，但链路断头同 deg |
+
+scrna 登记为后续候选（重开条件=包内激活 seurat-standard + scrna 演示数据入库）。
+
+### 8.2 链路事实（三路探查实证，file:line 见勘察记录）
+
+1. **发起**：主路径=自然语言 → agent loop → `run_tool(deseq2)`（`agent-tools/learning.js:700`；
+   AnalysisLaunchPanel 把「运行」转成 chat 消息，`RightPanel.tsx:225`）。执行核=`tools-executor.js`
+   → 插件脚本 → 产物带 sha256 artifact-truth（`tools-executor\result-files.js:37`）。
+2. **落库与自动打开**：`tool_jobs.result_json` + 产物落 jobDir；agent 通道成功后前端自动派发
+   `projectOpenResult`（`conversationRunStore.ts:549-559`）→ workspace result 模式 →
+   `ResultView`/`ResultArtifactShell`（`CenterPanel.tsx:148`）。
+3. **可信徽标**：truthStatus=`valid` → 「可信结果」（`result-studio/resultSurface.ts:164-175`），
+   真值链=`Revision.validationStatus ?? deliveryManifest.status ?? artifactTruth`
+   （`ResultArtifactShell.tsx:618,966-970`）。**与 G0 qualificationEligible 完全解耦**（前端零
+   引用资格评估器），无需触碰资格面。
+4. **Copilot 引用（真实缺口所在）**：跨轮无任何工具可按 jobId 读回结果内容——
+   `result_studio_context` 明示不含结果值（`tool-defs/result-studio.js:313-319`）；run_tool 摘要
+   仅同轮可见且截断 6000 字符（`tool-execution.js:10`）；服务端表格查询
+   `result-studio-table-query.js:228-258`（limit≤100）**已存在但未接 agent 工具**；
+   `/api/ai/interpret` 前端调用已删（孤链，不接回）。
+
+### 8.3 断点清单
+
+- **B1（P2 修）**：Copilot 跨轮读结果无工具 → 新增有界只读工具 `result_summary`（jobId →
+  工具/状态/产物清单/manifest 分节/主表前 N 行与关键统计，走既有 table-query 服务，遵守
+  result_studio_context 同款有界纪律）+ 注册四件套（tool-defs/registry/contracts/前端
+  label+icon fixture 三面同步，BK-04 先例）+ system prompt 分析历史块提示该工具。
+- B2（不修，契约在案）：工具输出 6000 字符截断、harness headers 截断。
+- B3（不修，legacy 面）：interpret 孤链维持孤链，新工具直读 tool_jobs 内容。
+- B4（环境事实）：scanpy 面本机无 Python 运行时，Py 侧断言不做（同 pack-lifecycle 诚实边界）。
+
+### 8.4 flow 断言清单（`block121-result-loop`，P1 落地 A1-A4，P2 增 A5）
+
+- A1 `catalog_deseq2_loaded`：/api/tools/catalog 含 deseq2（包装载前置）。
+- A2 `real_deseq2_run_completed`：经**真实 chat 路径**（POST /api/ai/agent，演示数据先入
+  项目工作区）发起，模型自主 run_tool → job completed（真实 Rscript；不走 REST 直跑，
+  因 Studio 打开有 conversationId 归属守卫 `project-workspace.tsx:716-721`，且 chat 才是
+  用户真实路径与语义本体）。
+- A3 `artifact_truth_valid`：result_json.artifactTruth.status='valid' 且产物文件在盘。
+- A4 `studio_trusted_badge`：CDP 实机——结果自动打开 result 模式，truthBadge=「可信结果」，
+  正文含真实数据元素（非占位/非错误态）。
+- A5 `copilot_cross_turn_citation`（P2）：同会话新轮追问「这个结果说明了什么」→ 回答内容
+  引用结果真实值（基因名/上下调数字可对回 result_json），证明 B1 工具生效。
+- A6 cleanup：临时项目/会话清理。
+
+### 8.5 P1 环境前置（全部实证在位）
+
+- 主 dev 栈在跑（:3001 health ok；`BIOF3_LOCAL_DATA_DIR=.biof3-dev-user-data/data`）；
+- 测试实例 CDP 9223（`bash scripts/start-test-instance.sh`，零 fork 直连主栈后端）；
+- R 运行时 + deseq2 插件 + 演示数据（`../gewu-pack-bio`）；
+- 真实模型供给（dev 栈既有配置，block111/116 系列 flow 同款）。
