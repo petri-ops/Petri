@@ -90,8 +90,9 @@ export function TitleBarRightZone(): React.ReactElement {
               aria-controls="titlebar-tool-menu"
             >
               <Icon name="plus" size={15} />
-              {/* UI-446 v4 — 审阅 tab 未打开时，计数徽章挂「+」按钮引导入口（点开审阅即熄） */}
-              {panels.titleBar.reviewCount && !tabs.some((tab) => tab.id === 'review') && (
+              {/* UI-446 v4 — 审阅 tab 未打开时，计数徽章挂「+」按钮引导入口（点开审阅即熄）。
+                  注意 >0 判定：&& 直接接 reviewCount 会在 0 时把数字渲染出来（React 渲染 falsy 数字）。 */}
+              {(panels.titleBar.reviewCount ?? 0) > 0 && !tabs.some((tab) => tab.id === 'review') && (
                 <span className={styles.tabCountBadge} data-testid="review-menu-count">{panels.titleBar.reviewCount}</span>
               )}
             </button>

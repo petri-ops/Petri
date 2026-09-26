@@ -66,6 +66,17 @@ describe('TitleBarRightZone 审阅 tab 计数徽章（UI-446 v4）', () => {
     }
   });
 
+  it('审阅 tab 未打开 + reviewCount=0 → 「+」按钮不得渲染「0」（用户实测抓真）', () => {
+    mockPanels.titleBar.reviewCount = 0;
+    try {
+      mountWithTabs([{ id: 'files', label: '文件', icon: 'folder', closable: true }]);
+      expect(screen.queryByTestId('review-menu-count')).toBeNull();
+      expect(screen.queryByText(/^0$/)).toBeNull();
+    } finally {
+      mockPanels.titleBar.reviewCount = 0;
+    }
+  });
+
   it('审阅 tab 已打开 + 有未读 → 徽章在药丸，「+」按钮不亮', () => {
     mockPanels.titleBar.reviewCount = 2;
     try {
