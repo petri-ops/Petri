@@ -167,6 +167,23 @@ module.exports = function mountConversations(app) {
     } catch (e) { res.status(500).json({status:'error', error: e.message}); }
   });
 
+  // UI-444 — 会话导出 Markdown：配 preload files.downloadFromUrl（静默落 Downloads，
+  // 点击即下载心智）。组合逻辑单源在 helpers/conversation-export.js（纯函数可测）。
+  app.get('/api/ai/conversations/:id/export.md', async (req, res) => {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({status:'error', error:'未授权'});
+    try {
+      const conv = await adb.prepare('SELECT id, title, project_id, created_at FROM copilot_conversations WHERE id=? AND user_id=?').get(req.params.id, userId);
+      if (!conv) return res.status(404).json({status:'error', error:'not_found'});
+      const rows = await adb.prepare('SELECT role, content, ts FROM copilot_messages WHERE conversation_id=? ORDER BY rowid ASC').all(req.params.id);
+      const { composeConversationMarkdown } = require('../helpers/conversation-export');
+      const markdown = composeConversationMarkdown({ conversation: conv, messages: rows });
+      res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
+      res.setHeader('Content-Disposition', 'attachment; filename="conversation-export.md"');
+      res.status(200).send(markdown);
+    } catch (e) { res.status(500).json({status:'error', error: e.message}); }
+  });
+
   // BLOCK-95 B2 — 手动触发会话压缩（同步等待摘要生成；开关关时诚实 409）。
   app.post('/api/ai/conversations/:id/compact', async (req, res) => {
     const userId = req.user && req.user.id;

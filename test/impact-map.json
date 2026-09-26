@@ -2419,14 +2419,15 @@
     },
     {
       "id": "ck03-events-bus",
-      "note": "CK-03（C-02 轮询→SSE 第一批：jobs 域失效通知）：helpers/event-bus.js（SSE 客户端注册表+publishInvalidation+心跳）+ routes/events-bus.js（GET /api/events 通道）+ agent-task-store 4 发布点（create/markDone/markFailed/markCancelled）+ 前端 hooks/useInvalidationStream（fetch-SSE 解析+指数退避重连）+ 消费方接入（useConversationJobs/project-workspace/WorkspaceSummaryCard 706 jobs 轮询降频）。契约=test/ck03-events-bus.test.mjs。",
+      "note": "CK-03（C-02 轮询→SSE 第一批：jobs 域失效通知）：helpers/event-bus.js（SSE 客户端注册表+publishInvalidation+心跳）+ routes/events-bus.js（GET /api/events 通道）+ agent-task-store 4 发布点（create/markDone/markFailed/markCancelled）+ 前端 hooks/useInvalidationStream（fetch-SSE 解析+指数退避重连）+ 消费方接入（useConversationJobs/project-workspace/WorkspaceSummaryCard 706 jobs 轮询降频）。契约=test/ck03-events-bus.test.mjs。 UI-442 自然取证目录（acceptance/ui-442/）随本规则登记。",
       "patterns": [
         "core/biof3-server/helpers/event-bus.js",
         "core/biof3-server/routes/events-bus.js",
         "core/biof3-server/agent-task-store.js",
         "frontend/src/hooks/useInvalidationStream.ts",
         "frontend/src/hooks/useConversationJobs.ts",
-        "test/ck03-*.test.mjs"
+        "test/ck03-*.test.mjs",
+        "acceptance/ui-442/**"
       ],
       "tests": [
         "test/ck03-events-bus.test.mjs"
@@ -2465,6 +2466,23 @@
         "test/block113-tool-prerouting.test.mjs"
       ],
       "frontendRelated": false,
+      "classifiesScripts": true,
+      "scriptRole": "governance"
+    },
+    {
+      "id": "ui444-conversation-export",
+      "note": "UI-444 会话导出 Markdown：后端 helpers/conversation-export.js 纯组合器 + GET /ai/conversations/:id/export.md 路由（ai-conversations.js）+ SimpleChat composer 导出按钮（files.downloadFromUrl 静默落 Downloads）。",
+      "patterns": [
+        "core/biof3-server/helpers/conversation-export.js",
+        "core/biof3-server/routes/ai-conversations.js",
+        "test/conversation-export.test.mjs",
+        "acceptance/ui-444/**",
+        "frontend/src/components/copilot/SimpleChat.tsx"
+      ],
+      "tests": [
+        "test/conversation-export.test.mjs"
+      ],
+      "frontendRelated": true,
       "classifiesScripts": true,
       "scriptRole": "governance"
     }

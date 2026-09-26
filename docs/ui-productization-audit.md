@@ -4144,3 +4144,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据（契约+实机旁证）**：RouteErrorBoundary.test 3/3（无错透明渲染/抛错回退+不渲染子树+诊断保留/错误态持续=恢复走整页重建语义）+ theme-token-contract 4/4 + tsc 0 + eslint 0 error；dev 栈 CDP 旁证=接线后正常渲染不受影响（root 子树在场/composer 在场/无 vite-error-overlay）。
 - 待用户实机过目（可人为触发异常形态后翻 verified）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-444: 会话导出 Markdown——聊天记录一键存档到下载目录（自主动作批轻量批）(2026-09-26 in_progress，契约+实机取证已齐，实机过目待用户)
+
+- **来源**：自主动作批（用户授权「你找找其它能做的事情…不想你闲着」）；学习平台语义=对话里的解读/结论应能变成用户自己的笔记资产，此前会话内容被锁死在应用内无法带走。
+- **改动**：①后端 `GET /api/ai/conversations/:id/export.md`（ai-conversations.js，user_id 归属校验）——组合逻辑单源在 `helpers/conversation-export.js` 纯函数（元信息头 + 用户/格物/系统分节 + 内容逐字保留 + 空白跳过 + 5000 条防御性截断并如实标注）；②前端 SimpleChat composer 左区新增下载图标钮（conversationId 在场时显示），走既有 `files.downloadFromUrl` 通道静默落 Downloads（与结果产物导出同一条「点击即下载」心智，失败行内回执复用 steer 通知槽）。
+- **证据（契约+实机）**：组合器契约 4/4（基本组合/空白跳过+未知角色/截断防御标注/formatTs）+ tsc 0 + eslint 0 error；**实机**=CDP 全链取证（acceptance/ui-444/）：真实发送消息→按钮出现→等回复落库→点击导出→Downloads 出现「会话导出-*.md」→内容四断言全过（标题/用户/格物/消息数），截图+证据 JSON 落盘。
+- 待用户实机过目翻 verified。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

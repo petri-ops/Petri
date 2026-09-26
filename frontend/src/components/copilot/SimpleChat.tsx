@@ -148,6 +148,8 @@ import {
 } from './extraRenderers';
 import './simple-chat.css';
 import { Icon } from '@/components/icons/Icon';
+import { getBridge } from '@/lib/desktopBridge';
+import { getPlatformApiPrefix } from '@/lib/authClient';
 import { HighlightedCode } from '@/components/ui/CodeHighlight';
 import { INITIAL_NAV_STATE, stepHistoryNavigation } from './chatHistoryNav';
 import {
@@ -228,6 +230,21 @@ export function SimpleChat({
   const [attachmentNotice, setAttachmentNotice] = useState<string | null>(null);
   // CK-01（C-06）— 运行中发送自动 steer 的行内回执提示（几秒自动消退）
   const [steerNotice, setSteerNotice] = useState<string | null>(null);
+
+  // UI-444 — 会话导出 Markdown：后端 /export.md 组合，经 files.downloadFromUrl
+  // 静默落 Downloads（与结果产物导出同一条点击即下载通道）。
+  const handleExportConversation = useCallback((): void => {
+    if (!conversationId) return;
+    const name = `会话导出-${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '')}.md`;
+    void getBridge('files')
+      ?.downloadFromUrl(
+        `${getPlatformApiPrefix()}/ai/conversations/${encodeURIComponent(conversationId)}/export.md`,
+        name,
+      )
+      .then((r) => {
+        if (r && r.ok === false) setSteerNotice('会话导出失败：' + (r.error || '未知原因'));
+      });
+  }, [conversationId]);
   useEffect(() => {
     if (!steerNotice) return undefined;
     const t = window.setTimeout(() => setSteerNotice(null), 4000);
@@ -1415,6 +1432,16 @@ export function SimpleChat({
               <div className="sc-composer-left">
                 {/* BLOCK-60：死控件 + 已移除；刷新/I-O 收进 ⋯ 溢出菜单 */}
                 <div className="sc-access-picker">
+                  {conversationId ? (
+                    <button
+                      type="button"
+                      className="sc-access-btn"
+                      onClick={handleExportConversation}
+                      title="导出会话为 Markdown"
+                    >
+                      <Icon name="download" size={14} />
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     className="sc-access-btn"
