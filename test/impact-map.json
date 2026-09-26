@@ -2209,6 +2209,16 @@
       "scriptRole": "governance"
     },
     {
+      "id": "hk04-evidence",
+      "note": "HK-04 规格层试点证据目录（status 漂移抓真演示 p1-consistency-demo.txt；设计稿 docs/hk04-spec-layer-design.md §4）。新建 acceptance 子目录须同步认领——test-affected 枚举每目录 evidence.json 要求全可解析。",
+      "patterns": [
+        "acceptance/hk04/**"
+      ],
+      "tests": [],
+      "frontendRelated": false,
+      "classifiesScripts": false
+    },
+    {
       "id": "block111-jev-w1-marker",
       "note": "BLOCK-111-JEV-W1-MARKER-CLASSIFICATION：决策内化弧 W1-1 marker→细胞类型判别二跳。interpret.js CELL_MARKERS 规则表候选生成 + decision-api choice 二跳（D-5 单阈值 θ=0.55 门控，D-4 默认关 BIOF3_JEV_MARKER_GUARD=1 显式开）+ ai-legacy.js /api/ai/interpret cellTypeHintsDetailed additive（cellTypeHints 老契约零变化）。契约=test/block111-marker-classification.test.mjs（现行契约钉/候选推导/请求形状/降级五态/伪造候选拒收/门控边界 14 项）。P0 证据 acceptance/block-111/（calibration.json gate.passed + corpus 104 条）。P2 实机 flow 落地后把脚本加进 patterns。",
       "patterns": [
