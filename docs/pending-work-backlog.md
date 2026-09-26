@@ -5,7 +5,9 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-09-26（**HK-04 P1 试点当日收口——HK 系列（01~04）全部收官（用户委派「你来定」按推荐执行；HK-01 红绿先行第二次行使）**——实现=parseCapabilityFrontMatter 受限解析（零 YAML 依赖）+docs:check 增量校验（**registry capability opt-in 触发**，五类 FRONTMATTER_* issue）+docs:status capability 视图；三份试点（result-loop/output-judge/result-studio）front-matter+registry 全亮；**status 漂移抓真演示**精确红→还原（acceptance/hk04/p1-consistency-demo.txt）；契约 12/12+docs:check 282 份零回归；实现期修正=presence 触发误伤存量 --- 水平线→opt-in（设计稿 §5 留痕）。**增量采纳持续生效：新 plan 立项即带 capability front-matter。队列无可推进项（HK 全清；观察态 CK-08/BK-02 留档）**。）
+最后更新：2026-09-26（**BLOCK-122 结果闭环路径扩展登记队列头（用户「你给个建议 反正不能停下来」；P0 勘察先行情报在案）**——勘察实测：插件包在本机（D:\1.WorkDir\gewu-pack-bio），**deseq2 唯一激活插件**，休眠 15 插件（volcano-plot/wgcna/pca-explorer/gene-correlation/gsea/go-kegg/scrna 系等），pack demo-data 四路在位（consensus-cluster/ml-classifier/ml-feature-select/rsf-survival）但与 dormant 集合错位（对应插件未激活）；run_tool 目录声明 volcano-plot/gene-correlation/pca-explorer 可用工具。**推荐=从已验证 deseq2 链延伸**（A: bind_artifact 串 volcano-plot 吃真实 DE 输出 / B: 激活 pca-explorer 走独立第二路径吃已有 demo counts）避免 C-12 式「休眠+无数据」双缺阻塞。**裁决点=选 A/B/双做，裁决后立项走三件套**；HK 系列 01~04 全清留档；开发栈存活（3001/9222 在听）可随时实机。）
+
+此前 最后更新：2026-09-26（**HK-04 P1 试点当日收口——HK 系列（01~04）全部收官（用户委派「你来定」按推荐执行；HK-01 红绿先行第二次行使）**——实现=parseCapabilityFrontMatter 受限解析（零 YAML 依赖）+docs:check 增量校验（**registry capability opt-in 触发**，五类 FRONTMATTER_* issue）+docs:status capability 视图；三份试点（result-loop/output-judge/result-studio）front-matter+registry 全亮；**status 漂移抓真演示**精确红→还原（acceptance/hk04/p1-consistency-demo.txt）；契约 12/12+docs:check 282 份零回归；实现期修正=presence 触发误伤存量 --- 水平线→opt-in（设计稿 §5 留痕）。**增量采纳持续生效：新 plan 立项即带 capability front-matter。队列无可推进项（HK 全清；观察态 CK-08/BK-02 留档）**。）
 
 此前 最后更新：2026-09-26（**HK-04 P0 规格层设计稿收口（队列头推进）**——盘点结论：plan 存量 ~330 份零 front-matter（状态全在正文引语）、DOC-REGISTRY 只描述文档生命周期、校验器不拒未知字段（增量零破坏）；已有 IPC registry/ui-audit/knip 棘轮三类机读契约不重复建设，缺的只是能力级行为要求单点索引。**设计=四键 front-matter（capability/goal/acceptance/reopen+status）+registry 可选 capability 字段+docs:check 三条增量校验（格式/一致性/命名空间唯一），增量采纳无迁移墙，front-matter=机读投影非第二账本**。P1 试点选样 block-121/119/g0-rs 三份，**裁决在用户**。设计稿 docs/hk04-spec-layer-design.md 登记 DOC-REGISTRY+README。）
 
@@ -55,7 +57,8 @@
 
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
-| — | （HK 系列全清；当前无可推进项） | — | — | — |
+| 1 | ▶ BLOCK-122 | **结果闭环路径扩展（第二垂直切片，产品闭环期主线）**：复用 BLOCK-121 全套基建（run_tool session 域回归钉 + result_summary + block121-result-loop flow 模板）把第二条分析路径走通同款端到端闭环（真实运行→artifactTruth=valid→Studio 可信徽标→Copilot 跨轮引用真实数字）。P0 勘察已在案（2026-09-26）：pack 在本机 `D:\1.WorkDir\gewu-pack-bio`；**deseq2 唯一激活插件**；休眠 15 插件含 volcano-plot/wgcna/pca-explorer/gene-correlation/gsea/go-kegg 等；pack demo-data 四路在位（consensus-cluster/ml-classifier/ml-feature-select/rsf-survival）但对应插件未激活（demo-data 与 dormant 集合错位）；**推荐形态=从已验证 deseq2 链延伸避 C-12 式双缺阻塞**——A) bind_artifact 串联 volcano-plot（吃 deseq2 真实 DE 输出，验证计划联动/bind 机制）或 B) pca-explorer/gene-correlation 独立第二路径（直接吃已有 demo counts.csv，需激活休眠插件）。**裁决点=选 A/B/双做**；启动走立项检查单（三件套+roadmap/handoff 一行） | BLOCK-121 收口登记 + 本批 P0 勘察（pack 实测盘点） | 已勘察待启动（用户裁决路径后立项） |
+| — | （HK 系列全清） | — | — | — |
 | — | ⛔ CK-08 | **C-03：task_id 数据模型改造——重估收缩转观察**：动机仍实（45 万行 UUID 冗余 16.25MB/库 14%）但 30 天清扫有界+无用户感知收益+契约迁移风险大（7+29 文件）；**重开条件=清扫上限内实测 I/O 痛点或库体积成用户可感知问题** | 本批重估数据（AUDIT-LOG 晚五行） | 观察待证据 |
 | — | 👁 BK-02 | **汇报门 P2 试点观察期盘点**（持续观察，不占队列序）——采纳率/误拦率/延迟增量/fitReplay 触发率随真实轮次累计；观察窗开启中（dev 栈 BIOF3_JEV_REPORT_GUARD=1） | BLOCK-119 收口遗留候选 | 观察（持续） |
 
