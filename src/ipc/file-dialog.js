@@ -74,10 +74,17 @@ function setupFileDialogIpc({ mainWindow } = {}) {
       return { ok: false, error: "content too large or invalid" };
     }
     try {
-      const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
-        defaultPath: defaultName,
+      // defaultPath 用「绝对路径」（下载目录+默认名）——裸文件名在部分 Windows
+      // Electron 版本上不回填文件名框（用户实测：对话框弹出但文件名为空）。
+      const defaultPath = path.join(app.getPath("downloads"), defaultName);
+      const opts = {
+        title: "导出会话",
+        defaultPath,
         filters: [{ name: "Markdown", extensions: ["md"] }, { name: "文本文件", extensions: ["txt"] }, { name: "所有文件", extensions: ["*"] }],
-      });
+      };
+      // 无父窗口形态：带父窗口的模态形式在本机 Electron 41 实测中 defaultPath/filters
+      // 被丢弃（探针隔离环境同参正常，app 内空对话框——2026-09-26 UI-444 抓真）。
+      const { canceled, filePath } = await dialog.showSaveDialog(opts);
       if (canceled || !filePath) return { ok: true, canceled: true };
       fs.writeFileSync(filePath, content, "utf8");
       return { ok: true, path: filePath };

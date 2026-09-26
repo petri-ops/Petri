@@ -4145,7 +4145,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - 待用户实机过目（可人为触发异常形态后翻 verified）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-444: 会话导出 Markdown——聊天记录一键存档到下载目录（自主动作批轻量批）(2026-09-26 in_progress，契约+实机取证已齐，实机过目待用户)
+## UI-444: 会话导出 Markdown——聊天记录一键存档到下载目录（自主动作批轻量批）(2026-09-26 verified，用户实机验收通过)
 
 - **来源**：自主动作批（用户授权「你找找其它能做的事情…不想你闲着」）；学习平台语义=对话里的解读/结论应能变成用户自己的笔记资产，此前会话内容被锁死在应用内无法带走。
 - **改动**：①后端 `GET /api/ai/conversations/:id/export.md`（ai-conversations.js，user_id 归属校验）——组合逻辑单源在 `helpers/conversation-export.js` 纯函数（元信息头 + 用户/格物/系统分节 + 内容逐字保留 + 空白跳过 + 5000 条防御性截断并如实标注）；②前端 SimpleChat composer 左区新增下载图标钮（conversationId 在场时显示），走既有 `files.downloadFromUrl` 通道静默落 Downloads（与结果产物导出同一条「点击即下载」心智，失败行内回执复用 steer 通知槽）。
@@ -4154,3 +4154,6 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 - **加映（2026-09-26，用户实测反馈「点击了下载但是没有窗口出来 导出位置是不是应该打开文件管理器确认」）**：导出交互改版——原走 downloadFromUrl 静默落 Downloads（点击无任何反馈=静默成功看起来像坏了，用户抓真成立）；改走**原生另存为**：SimpleChat fetch 后端组合的 Markdown → 新增 `file:save-text-file` IPC（channels+file-dialog handler+preload+electron.d.ts 四件套同步）→ 原生保存对话框（默认文件名带日期、Markdown 过滤器、用户确认位置）→ 主进程写所选路径 → 行内回执「已导出：<path>」（取消不打扰/失败回执）；浏览器（非桌面）回退 blob 锚点下载。防御=文件名非法字符校验（字符码实现避免 no-control-regex 棘轮）+20MB 内容上限。
 - **证据（加映）**：D7 棘轮跟账=run_tool 描述文案随 def 搬家 remote→session（deseq2 3/volcano 1/wgcna 1 净零挪动，非新增领域内容）；ipc-channels-registry 双向守护 7/7；tsc 0；eslint 0 error（新代码字符码校验不触控制字符正则）。待用户点击复验（对话框为原生 OS UI，CDP 不可驱动=用户即验收人）。
+- **加映二（2026-09-26，用户实测两轮抓真+修复确认，verified 翻转）**：①静默版无任何提示=「静默成功形同坏了」（用户抓真成立）→ 改原生另存为（file:save-text-file IPC：channels/handler/preload/d.ts 四件套，原生对话框确认位置+主进程写所选路径+行内回执）；②对话框弹出但文件名框空白（用户二次抓真+截图）——根因定位三步：主进程 debug 日志证明 opts 正确下发（defaultPath 绝对路径+filters）→ 最小 Electron 探针隔离环境同参对话框**预填正常**（probe-inview.png）→ 锁定差异=**带父窗口的模态形式在本机 Electron 41 丢弃 defaultPath/filters**，改无父窗口形态（showSaveDialog(opts)）修复；③UI-444 全流程用户实机验收通过（对话框预填默认名→保存→回执「已导出：路径」），**翻 verified**。
+- **证据（加映二）**：用户实机（hello.md 保存至桌面+回执确认）+ 主进程日志（payload/opts 全量正确下发）+ 隔离探针对照截图（acceptance/ui-444/{dlg-pid26220,probe-inview}.png：app 内空对话框 vs 探针正确预填）+ file:save-text-file 通道经 ipc-channels-registry 双向守护 + D7 基线跟账（描述文案随 def 搬家净零）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
