@@ -5,7 +5,7 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-09-26（**BLOCK-124-HARNESS-PRODUCTIZATION 立项 active（P0-LAUNCH）——Gewu Harness 产品化第一批（用户裁决「启动『Gewu Harness 产品化』第一批工作」）**：P0 勘察当日完成（资产四问盘点+C-13 决策点 D1-D5+组合勘察缺口 5 项），**实现动手前等用户确认**；C-13 编入 BLOCK-124 批次 1；勘察范围外转候选 **C-18/C-19**。plan=docs/block-124-harness-productization-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-26（**BLOCK-124-HARNESS-PRODUCTIZATION 当日整包 completed——Gewu Harness 产品化第一批**：C-13 符号图产品化落地并实机走查 allPass（agent 自主调 codegraph_who_imports×2 完成死导出清理）；资产四问盘点+组合勘察缺口已落 plan；范围外转候选 C-18/C-19 在册。**rider=UI-447 待用户实机过目**。plan=docs/block-124-harness-productization-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-26（**BLOCK-123 当日整包 completed（用户「按照你的建议来进行」；closeout 十二门绿）**——P0 六环节零断点 + P1 三轮走查四形态闭环（错误恢复双障碍/跨文件 TTL 防作弊复核）+ 缺口全清（G-01=UI-446 审阅 tab 未读圆点 in_progress 待过目/G-02 销号/G-03 清偿 30 条测试会话残留/G-04 续观）。**队列=无可推进项**；riders 全清（UI-446 verified）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
@@ -114,7 +114,7 @@
 | --- | --- | --- |
 | C-01 | 长列表虚拟化——**已编入 CK-02 → 勘察收缩转观察（2026-09-25：cv 与 prepend 锚定结构性冲突，CSS 回退零残留；重开=用户实测卡顿报告，届时带实验数据选型 react-virtuoso 或重写锚定后 cv 重试）** | BLOCK-106/107 遗留候选 |
 | C-12 | **scrna_standard 结果闭环路径**（BLOCK-121 出局项转候选）：seurat-standard/scanpy-advanced 在 `../gewu-pack-bio/plugins.dormant/` 休眠且包内无 scrna 演示数据；重开条件=dormant 激活 + scrna 演示数据入库 + Seurat/scanpy 运行时库在位实证；届时 BLOCK-121 的 flow/工具面（result_summary）直接复用 | BLOCK-121 P0 勘察登记 |
-| C-13 | **符号图 MCP 产品化**——**已编入 BLOCK-124（2026-09-26 立项 active；P0 勘察完成待用户确认后 P1 实现，决策点 D1-D5 见 plan §3.1）**：把 symbol-graph 查询注册为格物 agent 内建工具（代码理解能力） | 触发条件已满足（HK-03 P1 收口 + 产品方向裁决，2026-09-26）；来源=HK 建表批 2026-09-26 |
+| C-13 | **符号图 MCP 产品化——已随 BLOCK-124 completed（2026-09-26 当日立项当日整包收口）**：codegraph_who_imports / codegraph_classify_edges 落地 agent 内建工具轨（七面注册+实机走查 allPass，agent 自主调用完成死导出清理）；plan=docs/block-124-harness-productization-plan.md | 已完成销号（证据 acceptance/block-124/）；来源=HK 建表批 2026-09-26 |
 | C-14 | **RTK 型工具输出压缩**（ZCode hooks 适配 shell 输出压缩，社区口径 60-90%） | 重开条件=实测 token 成本成为痛点 + ZCode hooks 适配验证可行；来源=HK 建表批 2026-09-26 |
 | C-15 | **结果闭环路径扩展（原 BLOCK-122 提案，垂直域）**：从已验证 deseq2 链延伸（bind_artifact 串 volcano-plot / 激活 pca-explorer 独立路径）——用户 2026-09-26 裁决「属于垂直领域的扩展」让位通用编码主线（BLOCK-123） | 重开条件=用户裁决方向回摆生信旗舰倾斜（参照 product-strategy-review-2026-09 §4）；勘察情报=AUDIT-LOG 2026-09-26 行（pack 在本机/deseq2 唯一激活/休眠 15 插件/demo-data 错位盘点） |
 | C-16 | **审阅徽章 ±行数版**（UI-446 v4 计数徽章的升级：入口直接显示 +A −D 行数变化）——权威源=审阅面板 git diff，需后端 shortstat 桥避免第二真相 | 重开条件=用户对文件计数徽章反馈需要更细粒度；走 DEPENDENCY/立项检查单 |

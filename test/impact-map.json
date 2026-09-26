@@ -2192,7 +2192,9 @@
         "core/biof3-server/agent-tools/workspace-tools.js",
         "frontend/src/components/copilot/toolActivity.ts",
         "test/fixtures/tool-activity-labels.json",
-        "test/codegraph-tools.test.mjs"
+        "test/codegraph-tools.test.mjs",
+        "scripts/block124-p1-codegraph-walkthrough.mjs",
+        "acceptance/block-124/**"
       ],
       "tests": [
         "test/codegraph-tools.test.mjs",
@@ -2203,7 +2205,8 @@
         "test/block116-decision-platform.test.mjs"
       ],
       "frontendRelated": true,
-      "classifiesScripts": false
+      "classifiesScripts": true,
+      "scriptRole": "governance"
     },
     {
       "id": "block123-g03-test-session-cleanup",

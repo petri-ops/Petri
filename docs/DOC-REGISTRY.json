@@ -5328,7 +5328,7 @@
       "path": "docs/block-124-harness-productization-plan.md",
       "capability": "harness-productization",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "harness-productization-plan",
       "entrypoint": "docs/README.md",

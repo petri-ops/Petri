@@ -6,12 +6,12 @@ acceptance:
   - C-13 实现（P1）：红绿先行契约测试先落 → agent 工具注册四件套 → dev 栈实机走查（agent 自主调用符号查询完成编码任务）证据落 acceptance/block-124/
   - 台账同步：roadmap/AUDIT-LOG/backlog（C-13 编入注记、C-18/C-19 勘察转候选）同提交
 reopen: 用户裁决产品方向回摆或本线让位其他主线时（参照 product-strategy-review-2026-09 §4）
-status: active
+status: completed
 ---
 
-# BLOCK-124 — Gewu Harness 产品化 · 第一批（P0 勘察）
+# BLOCK-124 — Gewu Harness 产品化 · 第一批（P0 勘察 + P1 C-13 实现）
 
-> 立项：2026-09-26（P0-LAUNCH；用户裁决原话见 §1）。P0 勘察当日完成，**实现动手前等用户确认**（用户明示流程）。
+> 立项：2026-09-26（P0-LAUNCH；用户裁决原话见 §1）。P0 勘察当日完成；用户第二轮裁决「自己来做个全面的校验和确认…开始吧」=确认下放，P1 当日实现并实机走查 allPass → **2026-09-26 整包 completed**（rider=UI-447 待用户实机过目）。
 > 能力：`harness-productization`（HK-04 增量采纳：立项即带 capability front-matter）。
 
 ## 1. 一句话目标与裁决来源
@@ -41,17 +41,34 @@ status: active
 
 **接入点（勘察坐实）**：执行单入口 `core/biof3-server/agent-tools/tool-execution.js` `executeToolCall`（`mcp/registry.js` 是插件/skill MCP 轨即 run_tool→tool_job→artifact 链，**不是**本件归宿）；定义面 `tool-defs.js` facade 按 9 域汇编 `tool-defs/<domain>.js`；结果回 UI 走 `tool-events.js` → 前端 toolActivity 工具行。
 
-**决策点（实现前需用户确认，推荐方案已标注）**：
+**决策点（P1 已全部落定；用户 2026-09-26 第二轮裁决「自己来做个全面的校验和确认…开始吧」=确认权下放，D1-D5 按推荐执行）**：
 
-| # | 决策点 | 选项 | 推荐 |
+| # | 决策点 | 裁决（已落定） | 落地证据 |
 | --- | --- | --- | --- |
-| D1 | typescript 依赖类 | a) devDependencies → dependencies；b) 懒 require + 不可用降级（packaged 静默缺位） | **a**——产品能力正当化；纯 JS 零原生绑定；走 DEPENDENCY-CHANGE-CHECKLIST 需用户显式裁决（默认「不增」例外） |
-| D2 | 代码单源 | a) 库函数迁 `core/biof3-server/`，`scripts/symbol-graph.mjs` 变薄壳，10 条契约追新家；b) core 反向 import scripts（违依赖方向） | **a**——BLOCK-119 judge-core「core 单源 + scripts 薄壳」同款先例；quality:arch 依赖方向约束 |
-| D3 | 工具轨 | a) agent-tools 内建轨新域（只读 `sideEffect=none`）；b) 插件 MCP run_tool 轨 | **a**——`decision_recent/summary`（BK-04）同款：只读查询非 artifact 产出型；四件套=定义+契约注册+contracts 测试+前后端动词/图标 fixture 同步 |
-| D4 | 工具命名 | `codegraph_who_imports` / `codegraph_classify_edges`（或 symbol_* / workspace_* 前缀） | **codegraph_***（语义准确、与 workspace_* 读文件面区分） |
-| D5 | v1 性能边界 | a) 无缓存 + 文件数上限 + 超限诚实报数；b) 加 TTL/增量缓存 | **a**——buildGraph 全量走查解析对中小项目秒级；缓存失效正确性复杂，留观察；UNRESOLVED 盲区语义透传进工具描述（agent 指引） |
+| D1 | typescript 依赖类 | **a）devDependencies → dependencies**——实测包体 23MB 纯 JS 零原生绑定；走 DEPENDENCY-CHANGE-CHECKLIST 留痕（既有依赖迁移节非新增依赖） | package.json（提交 786f27a2）；P6 源绑定含 package.json 哈希，下次重打吸收（BK-08 同款先例） |
+| D2 | 代码单源 | **a）库函数迁 `core/biof3-server/helpers/code-graph.js`，`scripts/symbol-graph.mjs` 变 CLI 薄壳**，13 条契约追新家（判据零弱化 + 3 条新判据） | test/symbol-graph.test.mjs 13/13 |
+| D3 | 工具轨 | **a）agent-tools 内建只读轨**（session 基线域=任何域收窄恒在场；`contract('workspace','none','R0',['project.files'],5000)`；根解析复用 withWorkspace 双闸不吃自由路径） | registry.js HANDLERS/CONTRACTS + codegraph-tools.js |
+| D4 | 工具命名 | `codegraph_who_imports` / `codegraph_classify_edges` | tool-defs/session.js（工具总数 74→76，四处总数钉同步） |
+| D5 | v1 性能边界 | **a）无缓存 + maxFiles=5000 诚实拒绝 + 输出有界（hits≤50/exports≤150/outbound≤60）**；实测基准见 §3.1.1；agent 编辑文件后重查自然拿到新图（无陈旧缓存正确性问题） | codegraph-tools.js + 基准表 |
 
 **搭车能力**：`whoImports` 天然分类 USED_TEST/USED_PROD——agent 问「哪些测试引用这个模块」即免费覆盖，编码任务里「改这个函数要动哪些测试」有直答面。
+
+#### 3.1.1 性能/稳定性基准（P1 前实测，2026-09-26，win32 本机）
+
+| 场景 | 文件数 | 边数 | 耗时 | 内存 |
+| --- | --- | --- | --- | --- |
+| 本仓全仓（worst case 实测） | 1604 | 8644 | 1756ms | 原版峰值堆 +445MB |
+| frontend/src | 458 | 1920 | 405ms | +60MB |
+| core | 387 | 1616 | 386ms | +74MB |
+| 合成小项目（agent 走查典型） | 9 | 7 | 1ms | ~0 |
+| whoImports（图已建） | — | — | 1.4ms | — |
+
+基准驱动三项产品化加固（相对 HK-03 原版，全部有测试背书）：
+1. **流式建图**：逐文件「解析→抽取→丢弃」，SourceFile 不再全量驻留——峰值内存与项目规模解耦（原版 1604 文件冲 445MB，大项目会打爆后端堆）。
+2. **分批让位**：每 50 文件 `setImmediate` 交还事件循环——秒级同步建图不再卡死后端 SSE/REST（CLI 传 `yieldEvery:0` 保持同步语义）。
+3. **通用 tsconfig/jsconfig paths 别名解析**（ts.readConfigFile 处理 JSONC）：替代原版 `@/ → frontend/src` 仓库特化硬编码；无别名配置不猜测，`@/` 如实 UNRESOLVED。
+
+另：maxFiles 上限（工具层 5000/内核安全网 20000，超限抛 `too_many_files` 供工具层 `available:false` 诚实拒绝）+ 单文件读取容错（unreadable 记 parseErrors 跳过不炸全图）。
 
 ### 3.2 资产清单 × 产品化四问
 
@@ -79,20 +96,28 @@ status: active
 
 ## 4. 分批产品化路线图
 
-| 批次 | 内容 | 启动条件 | 载体 |
-| --- | --- | --- | --- |
-| 批次 1（本包 P1） | **C-13 落地**：D1-D5 按确认裁决执行——库函数迁 core 单源 + agent-tools 四件套 + 红绿契约 + 实机走查（agent 自主调用符号查询完成一次删除安全性判定或重构影响面任务） | **用户确认本 P0 报告后** | 本 plan P1；证据 acceptance/block-124/ |
-| 批次 2 | 编码缺口小刀：G-04 exec 错误增形 / C-17a reject→回路 / C-17b 终端反馈面——按真实使用反馈择优，逐项独立登记 | 真实使用反馈触发或用户点名 | 各自独立 UI-###/BLOCK 登记 |
-| 批次 3 | 编码 playbook 资源 skill（产品 skill 轨新建）/ 开发纪律产品回声（红绿先行提示 + YAGNI 自检的行为化评估） | 候选池条件满足 | C-18 / C-19 |
+| 批次 | 内容 | 状态 |
+| --- | --- | --- |
+| 批次 1（本包 P1） | **C-13 落地**：红绿先行（契约先落 ERR_MODULE_NOT_FOUND×14 红→70/70 绿）+ 内核迁 core 单源 + 三项加固 + 七面注册（工具总数 74→76 四处钉同步）+ typescript 迁 dependencies | **✅ 2026-09-26 完成（提交 786f27a2）**；实机走查 allPass（§4.1） |
+| 批次 2 | 编码缺口小刀：G-04 exec 错误增形 / C-17a reject→回路 / C-17b 终端反馈面——按真实使用反馈择优，逐项独立登记 | 候选（C-17 在册） |
+| 批次 3 | 编码 playbook 资源 skill（C-18）/ 开发纪律产品回声（C-19） | 候选池在册 |
 
-## 5. 验收门禁与证据位置
+### 4.1 P1 实机走查（探针 scripts/block124-p1-codegraph-walkthrough.mjs；证据 acceptance/block-124/）
 
-- P1 实现门禁：红绿先行（契约测试先红后绿，证据随收口笔录）+ `npm run test:changed` 定向 + tsc 0 + docs:check + ui:audit:check + closeout 相关门（quality 系）；新脚本 impact-map 登记。
-- 实机走查：dev 栈测试实例，agent 真实编码任务自主调用 codegraph_* 工具，SSE 工具序列 + 任务完成证据落 `acceptance/block-124/`。
-- 完成语义：dev Electron 边界内 verified（当前阶段最高证据等级）。
+任务=「查清 legacyRound 引用关系→确认安全→删→跑测试」（指令不点名工具）。**allPass=true**：真实模型 21 秒完成，工具序列=system_info → workspace_list → **codegraph_who_imports** → workspace_search → read×5 → todo_write → **replace×2（删导出+清无用导入）** → workspace_search → **codegraph_who_imports（删除前复核）** → read×2 → **exec×4（跑测试验证）**——影响面判定→安全清理→验证的教科书序列；工具结果正确回传（`available:true · symbol legacyRound · totalHits 1` + UNUSED 判定）；探针独立复核=导出真删/ui.mjs 导入真清/测试真过。探针侧瑕疵如实登记：S6 最终回答文本采集事件名口径未命中（涩），强证据以 S5 独立复核为准。
 
-## 6. 边界与风险
+## 5. 验收门禁与证据位置（P1 收口实账）
 
-- **WIP 隔离**：会话启动核对到 `eslint-suppressions.json`（M，LeftPanel.test.tsx 抑制计数，来源不明）+ untracked `nul` / `ui446-tes2.txt`（UI-446 会话残留）——本包零触碰，已如实上报用户。
-- typescript 迁依赖类（D1）影响安装体积（纯 JS ~MB 级），G0 不校验 packaged 体积，如实登记待 G1 观察。
+- 红绿先行：test/codegraph-tools.test.mjs（7 测试）+ test/symbol-graph.test.mjs（13 测试）先落 **ERR_MODULE_NOT_FOUND×14 红** → 实现后 70/70 绿（含四处总数钉与先例回归：agent-tool-registry/tool-activity-labels/block109-metadata/block113-prerouting/block116）。
+- 门禁总账：test:changed 全链（Node 定向 + 前端 vitest + docs:check 284 + ui:audit + frontend tsc）+ quality:lint 0 error + quality:knip:check（基线 244→243 棘轮下调）+ quality:arch + gate:arch-cycles + quality:secret + gate:code-size（withWorkspace 导出 +2 行随批重打台账）+ quality:types 0。
+- 实机走查：§4.1（allPass，证据 acceptance/block-124/p1-walkthrough.json + log）。
+- 完成语义：dev Electron 边界内 verified（当前阶段最高证据等级）；**rider=UI-447 工具行呈现待用户实机过目**（台账 in_progress，证据已备）。
+- 存量债顺手清偿三件：block116-decision-platform.test.mjs:281 总数钉存量红（BLOCK-121 漏改 73→74，本批改 76）+ UI-446 未用导入 lint 存量红（conversationChangesStore.unread.test.ts）+ UI-446 残留文件两个（nul / ui446-tes2.txt，ee9b367f 清理遗漏，test:changed 分类冲突拦截坐实）。
+
+## 6. 边界与风险（收口对账）
+
+- **WIP 隔离**：`eslint-suppressions.json`（M，LeftPanel.test.tsx 抑制计数，来源不明）全程零触碰、未入本包提交——遗留待归属会话处置。
+- typescript 迁 dependencies（D1）实测 23MB；G0 不校验 packaged 体积。package.json 哈希在 P6 源绑定集合内，下次 P6 重打吸收（BK-08 同款先例，非本包阻塞）。
+- 远程 ssh 执行目标的项目暂无远程代码图（工具描述已注明本地工作区语义；远程面未来候选）。
+- dev 栈 :3001 后端为本实机走查以新代码重启（`npm --prefix core/biof3-server start` 同款 env），dev Electron 渲染层走自家后端不受影响。
 - G0 开发期常态 · 不外推 packaged/Provider/GA；单工作包串行纪律不变。

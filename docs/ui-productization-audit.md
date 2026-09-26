@@ -4189,5 +4189,5 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **来源**：BLOCK-124 第一批 C-13 符号图产品化（plan=docs/block-124-harness-productization-plan.md）。agent 新增 `codegraph_who_imports` / `codegraph_classify_edges` 两个只读工具（HK-03 内核单源迁 core/biof3-server/helpers/code-graph.js），聊天工具行需同步可读呈现。
 - **改动（本条仅 UI 面）**：`frontend/src/components/copilot/toolActivity.ts` VERBS +2（已查引用/已盘点依赖）+ ICONS +2（git-branch）；`test/fixtures/tool-activity-labels.json` 同步两行（三面同源钉死，UI-437 v5.18 注册表机制零新增面）。
 - **证据（契约）**：test/tool-activity-labels.test.mjs 宇宙 76 双向覆盖绿 + toolActivity.test.ts fixture 行为级断言绿 + tsc 0。
-- 实机走查（agent 真实调用工具行显示）随 BLOCK-124 P1 收口补证据后翻 verified。
+- **实机走查（2026-09-26，BLOCK-124 P1）**：探针 block124-p1-codegraph-walkthrough.mjs allPass——真实模型任务中 codegraph_who_imports 被自主调用×2，工具行事件正常产出（SSE 取证 tool_result：available true · symbol legacyRound · totalHits 1）；证据 acceptance/block-124/p1-walkthrough.json。用户实机过目后翻 verified。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
