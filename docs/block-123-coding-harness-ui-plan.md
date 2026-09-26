@@ -61,9 +61,9 @@ status: active
 
 | 编号 | 判定 | 缺口 | 证据 | 处置 |
 | --- | --- | --- | --- | --- |
-| G-01 | 涩 | **审阅不主动浮现**：agent 完成编辑后，默认视图无「有 N 处变更待审阅」类引导，用户需自行发现右侧「审阅」tab——审阅面完整但发现靠用户（walkthrough S5 `changedHint=null` 佐证） | p0-walkthrough.json S5 + p0-review-innertext.txt | **P1 首项候选**：编辑完成后审阅入口主动引导（角标/横幅/toast，形态届时对账裁决） |
-| G-02 | 观察项 | 工作台默认视图 DOM 未命中终端 tab（`terminalTab=false`）——终端面板可能懒渲染或入口在别处，未人工核对 | p0-workspace-innertext.txt | 人工过目一次即销或立缺口 |
-| G-03 | 观察项 | 测试实例左栏历史会话残留堆积（UI444/UI442 取证、LIVE-VERIFY 等十余条）——测试 userData 会话历史无清理机制；主实例不受影响 | p0-review-innertext.txt 左栏 | 测试卫生候选项（小） |
+| G-01 | 涩 | **审阅不主动浮现**：agent 完成编辑后，默认视图无「有 N 处变更待审阅」类引导，用户需自行发现右侧「审阅」tab——审阅面完整但发现靠用户（walkthrough S5 `changedHint=null` 佐证） | p0-walkthrough.json S5 + p0-review-innertext.txt | **已清偿（UI-446，2026-09-26）**：审阅 tab 未读圆点（对账收窄不复活被裁决移除的卡片，见台账）；待实机过目 |
+| G-02 | 观察项 | 工作台默认视图 DOM 未命中终端 tab（`terminalTab=false`）——终端面板可能懒渲染或入口在别处，未人工核对 | p0-workspace-innertext.txt | **销号（2026-09-26 非缺口）**：终端是默认收起的底部 dock（`bottomTerminalOpen` 缺省 false，Ctrl+`/顶栏开关），走查任务走 `workspace_exec`（输出进工具行）本不需要可见终端——设计如此非缺陷 |
+| G-03 | 观察项 | 测试实例左栏历史会话残留堆积（UI444/UI442 取证、LIVE-VERIFY 等十余条）——测试 userData 会话历史无清理机制；主实例不受影响 | p0-review-innertext.txt 左栏 | **已清偿（2026-09-26）**：`scripts/test-session-cleanup.mjs`（模式匹配只删测试命名、默认干跑、逐项目+全局双扫+项目本体收敛）+契约 test/test-session-cleanup.test.mjs 防误伤；实跑两轮清 30 条（21+9）至 0 命中，项目 22→10 |
 
 探针侧瑕疵（非产品缺口，如实登记）：`screenshotPng` 签名误用致两张截图落成空目录（正确签名=三参 `(client, dir, filename)`，探针代码已修正）；「审阅」文本存在歧义元素（探针首击命中 `_emptyResultLaunchCard` 类按钮），最终以 tab 激活后 innerText 取证为准。
 
