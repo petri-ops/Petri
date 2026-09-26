@@ -1,6 +1,8 @@
 # BioF3 Desktop Current Handoff
 
-最后更新：2026-09-25 深夜四（**BLOCK-121 开发态结果闭环垂直切片立项 active（P0-LAUNCH）**：选定一条插件分析路径端到端收实（插件→Studio 可信结果→Copilot 引用继续）；plan=docs/block-121-result-loop-vertical-plan.md。本日已落地=①D7 领域中立红门清偿（interpret.js 校准文案合法定性入基线+DecisionConfigPanel 卡注迁改对齐单源；2f1314a）②knip 保留面棘轮 quality:knip:check 入 closeout 十一门（c819f144；knip 固定 devDependency 6.38.0——lockfile 已动，Mac 侧 npm install 已由 auto-sync 接管）。**恢复要点**：dev 栈在跑；active=BLOCK-121 P0 勘察（选路径+盘断点+定 flow 断言清单，回填 plan §8）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-26 晨（**BLOCK-121 当日整包 completed（P0+P1+P2）**：deg/deseq2 结果闭环 dev Electron verified——flow 20/20（真实 chat→run_tool→R 执行→可信徽标→Copilot 跨轮引用真值 82/46/36 与 Gene61 等）。**两处真断点修复**：①run_tool 迁 session 基线域（tool-route 收窄曾剔执行入口，模型退化 shell 绕过插件系统）+回归钉；②result_summary 有界只读工具（跨轮读结果内容，74 工具恒等）。**恢复要点**：dev 栈在跑（已重启加载 def/prompt）；flow=`npm run verify -- block121-result-loop`（前置=测试实例 9223+pack deseq2+R 运行时）；队列空，scrna 路径转候选池 C-12。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-25 深夜四（**BLOCK-121 开发态结果闭环垂直切片立项 active（P0-LAUNCH）**：选定一条插件分析路径端到端收实（插件→Studio 可信结果→Copilot 引用继续）；plan=docs/block-121-result-loop-vertical-plan.md。本日已落地=①D7 领域中立红门清偿（interpret.js 校准文案合法定性入基线+DecisionConfigPanel 卡注迁改对齐单源；2f1314a）②knip 保留面棘轮 quality:knip:check 入 closeout 十一门（c819f144；knip 固定 devDependency 6.38.0——lockfile 已动，Mac 侧 npm install 已由 auto-sync 接管）。**恢复要点**：dev 栈在跑；active=BLOCK-121 P0 勘察（选路径+盘断点+定 flow 断言清单，回填 plan §8）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 晚十（**auto-sync 依赖自动同步上线**：FF 含 lockfile 自动 npm install，Mac 侧免手动；失败登记 events 待裁决。**恢复要点**：dev 栈在跑；CK-11 余 1065 条分批推进中。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

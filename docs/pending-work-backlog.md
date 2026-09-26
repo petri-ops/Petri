@@ -5,9 +5,9 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-09-25 深夜四（**阶段切换：清债期收束，产品闭环期开启（用户裁决「可以的 开始吧 一次性搞定」三件套全部落地）**——①D7 领域中立红门清偿（interpret.js 校准文案合法定性入基线+面板卡注迁改对齐单源；2f1314a）②CK-11 保留面冻结为 knip 棘轮 quality:knip:check 入 closeout 十一门（c819f144）③**BLOCK-121 开发态结果闭环垂直切片立项 active（P0-LAUNCH）**。**队列头=BLOCK-121**。）
+最后更新：2026-09-26 晨（**BLOCK-121 开发态结果闭环垂直切片当日整包 completed（P0+P1+P2）**——deg/deseq2 路径 dev Electron 边界内 verified：真实 chat→模型自主 run_tool→R 真实执行→artifactTruth=valid→Studio「可信结果」徽标→Copilot 跨轮追问引用真实基因/数字（flow 20/20）；P1 抓真=run_tool 迁 session 域修复 tool-route 剔除断点+回归钉；P2=result_summary 有界只读工具（74 工具恒等）。**队列=无可推进项；下一步等用户输入**（候选池 scrna_standard 路径已登记重开条件）。）
 
-此前 最后更新：2026-09-25 晚九（**CK-11 首批收口（authClient 14 条收缩，knip 1078→1065）+ electron-builder 26.15.3 major 升级（audit 10→2，critical 清零；真打包回归待 G1）**。**队列=CK-11 余 1065 条分批推进中**（core 后端盲区高危逐案双验证）。）
+此前 最后更新：2026-09-25 深夜四（**阶段切换：清债期收束，产品闭环期开启（用户裁决「可以的 开始吧 一次性搞定」三件套全部落地）**——①D7 领域中立红门清偿（interpret.js 校准文案合法定性入基线+面板卡注迁改对齐单源；2f1314a）②CK-11 保留面冻结为 knip 棘轮 quality:knip:check 入 closeout 十一门（c819f144）③**BLOCK-121 开发态结果闭环垂直切片立项 active（P0-LAUNCH）**。**队列头=BLOCK-121**。）
 
 此前 最后更新：2026-09-25 晚七（**U-02/03/04 代行实机评估完成（用户授权+Jev 裁决 fit=3 PASS）：437/438/440 翻 verified、442 保持 in_progress 待长任务自然取证**。**队列全清；仅余 U-01（Jev key 轮换）待用户**。）
 
@@ -39,7 +39,6 @@
 
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
-| 1 | ▶ BLOCK-121 | **开发态结果闭环垂直切片**——选定一条插件分析路径端到端收实：插件执行 → Result Studio 可信结果 → Copilot 引用该结果继续问答/操作；dev Electron 边界内 verified 为完成语义；plan=docs/block-121-result-loop-vertical-plan.md（P0 勘察中） | 本会话阶段评估三件套之三（用户裁决「可以的 开始吧 一次性搞定」+「开始」） | **队列头** |
 | — | ⛔ CK-08 | **C-03：task_id 数据模型改造——重估收缩转观察**：动机仍实（45 万行 UUID 冗余 16.25MB/库 14%）但 30 天清扫有界+无用户感知收益+契约迁移风险大（7+29 文件）；**重开条件=清扫上限内实测 I/O 痛点或库体积成用户可感知问题** | 本批重估数据（AUDIT-LOG 晚五行） | 观察待证据 |
 | — | 👁 BK-02 | **汇报门 P2 试点观察期盘点**（持续观察，不占队列序）——采纳率/误拦率/延迟增量/fitReplay 触发率随真实轮次累计；观察窗开启中（dev 栈 BIOF3_JEV_REPORT_GUARD=1） | BLOCK-119 收口遗留候选 | 观察（持续） |
 
@@ -47,6 +46,7 @@
 
 | ID | 事项 | 收口 |
 | --- | --- | --- |
+| ✅ BLOCK-121 | **开发态结果闭环垂直切片（P0+P1+P2）** | 2026-09-26 当日整包收口：选定 deg/deseq2 路径 dev Electron verified——flow block121-result-loop **20/20**（真实 chat→模型自主 run_tool→R 真实执行→artifactTruth=valid→Studio「可信结果」徽标→Copilot 跨轮追问引用真实基因/数字）；P1 抓真修复=run_tool 迁 session 域（tool-route 域收窄剔除执行入口的断链+回归钉，ee626e4b）；P2=result_summary 有界只读工具（B1 跨轮引用断点，74 工具恒等，b508bb89）；plan=docs/block-121-result-loop-vertical-plan.md |
 | ✅ BK-01 | 汇报门 fit 分数轮间波动治理（BLOCK-119 加映 4） | 2026-09-24 当日收口：fitReviewBand=0.5 邻域重放 median-of-3（θ 不动/带外零开销/fail-open 不变），契约 24/24 + closeout 十门绿 + 实机真 spawn 轮 fitReplay 端到端；证据=acceptance/block-119/{fit-volatility-review,jiaying4-live}.json，plan=block-119 plan 加映 4 |
 | ✅ BK-03 | 终态对账 v2：条目级归属（BLOCK-120） | 2026-09-24 当日收口：todoRefs 声明制 linkage（快照校验/丢弃回传/params 落库零 migration）+ item_level_mismatch 条目级对账向后兼容；契约 +11（block49+7/reconcile+4）+ 实机 todoRefs 落库零假阳性；plan=docs/block-120-reconciliation-linkage-plan.md §7，证据=acceptance/block-120/live.json |
 | ✅ BK-04 | agent 可见决策工具（BLOCK-116 W2 轻量批） | 2026-09-24 当日收口：decision_summary/decision_recent 只读观测工具（decision-log 单源直调，工具 71→73 三面同步）；实机真模型自主调用正确作答；证据=acceptance/block-116/w2-agent-tools-live.json，台账=UI-437 v5.20 |
@@ -83,6 +83,7 @@
 | ID | 事项 | 重开条件 / 来源 |
 | --- | --- | --- |
 | C-01 | 长列表虚拟化——**已编入 CK-02 → 勘察收缩转观察（2026-09-25：cv 与 prepend 锚定结构性冲突，CSS 回退零残留；重开=用户实测卡顿报告，届时带实验数据选型 react-virtuoso 或重写锚定后 cv 重试）** | BLOCK-106/107 遗留候选 |
+| C-12 | **scrna_standard 结果闭环路径**（BLOCK-121 出局项转候选）：seurat-standard/scanpy-advanced 在 `../gewu-pack-bio/plugins.dormant/` 休眠且包内无 scrna 演示数据；重开条件=dormant 激活 + scrna 演示数据入库 + Seurat/scanpy 运行时库在位实证；届时 BLOCK-121 的 flow/工具面（result_summary）直接复用 | BLOCK-121 P0 勘察登记 |
 | C-02 | 轮询→SSE——**已编入 CK-03** | BLOCK-106 遗留候选 |
 | C-03 | task_id 数据模型改造——**已编入 CK-08** | BLOCK-106 遗留候选 |
 | C-04 | 分段 token 预算——**已编入 CK-04** | BLOCK-109 候选池 |

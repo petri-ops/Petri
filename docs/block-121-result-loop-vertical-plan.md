@@ -1,6 +1,6 @@
 # BLOCK-121 — 开发态结果闭环垂直切片（Result Loop Vertical）
 
-> 立项：2026-09-25（active，P0-LAUNCH）。
+> 立项：2026-09-25（active，P0-LAUNCH）→ **2026-09-26 当日整包 completed（P0+P1+P2 三阶段）**。
 > 用户裁决：本会话阶段评估（三维进展盘点）后用户裁决「可以的 开始吧 一次性搞定」+「开始」——
 > 批准三件套：①D7 领域中立红门清偿（本日已完成，2f1314a/71b24c9f）②CK-11 保留面冻结为
 > knip 棘轮（本日已完成，c819f144）③**结果闭环工作包立项（本文件）**。
@@ -47,13 +47,14 @@
 
 | 阶段 | 内容 | 出口判据 |
 | --- | --- | --- |
-| P0 勘察 | 选定路径 + 盘断点清单 + 定 flow 断言清单（写入本文件 §6 附录） | 路径与断言清单定稿；若发现路径已基本通，P1/P2 相应收缩（诚实收缩入册） |
-| P1 路径走通 | 实机把选定路径端到端走通，断点修复 | dev-verify flow 全断言绿（真实模型/真实插件执行，非 mock） |
-| P2 Copilot 接线 + 收口 | Copilot 引用该结果的语义核验（答非所问=断点）+ 定向测试补洞 + 收口 | flow verified + 定向 0 红（flaky 登记制）+ closeout 十一门绿 + output:judge PASS |
+| P0 勘察 ✅ 2026-09-26 | 选定路径 deg/deseq2 + 盘断点清单 + 定 flow 断言清单（§8） | §8 定稿（提交 7bb840c2） |
+| P1 路径走通 ✅ 2026-09-26 | 实机断点修复（run_tool 迁 session 域+回归钉）+ flow A0-A4/A6 全绿 18/18 | 提交 ee626e4b |
+| P2 Copilot 接线 + 收口 ✅ 2026-09-26 | result_summary 有界只读工具（B1）+ A5 跨轮引用断言 + 全 flow 20/20 | 提交 b508bb89 |
 
-**完成语义**：completed = 选定路径在 dev Electron 边界内 verified（G0 阶段最高证据等级）
-+ 收口链绿 + canonical 回写（本文件/roadmap/handoff/backlog/AUDIT-LOG/UI 台账若有 UI 面）。
-不宣称超出 dev 边界的资格。
+**完成语义**：✅ 已达成——deg/deseq2 路径在 dev Electron 边界内 verified：真实 chat 发起 →
+模型自主 run_tool → 真实 Rscript 执行 completed → artifactTruth=valid → Studio
+「可信结果」徽标 + 真实产物正文 → Copilot 跨轮追问回答引用真实 top 基因（Gene61 等）
+与真实数字（82/46/36）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## 6. 证据位置
 
@@ -62,15 +63,15 @@
   用户过目/实机取证后 verified）
 - 定向测试：随改动文件面登记 impact-map，`npm run test:changed` 可复现
 
-## 7. 验收门禁清单（收口逐项对账）
+## 7. 验收门禁清单（收口对账）
 
-- [ ] dev-verify flow（P0 定名，建议 `block121-result-loop`）N 断言全绿，证据落 acceptance/block-121/
-- [ ] 定向测试 0 红，flaky 零容忍（如有登记+归宿）
-- [ ] closeout 十一门绿（含 quality:knip:check 保留面棘轮——本包新增死代码即红）
-- [ ] output:judge 判收口声明 PASS（首判 RETRY 按判词重写复判）
-- [ ] canonical 五件套回写 + docs:check PASS
+- [x] dev-verify flow `block121-result-loop` 20/20 断言全绿，证据=acceptance/block-121/block121-result-loop-live.json
+- [x] 定向测试 0 红（block113 契约 14/14 含回归钉 / result-summary-tool 4/4 / tool-activity-labels 74 双向 / agent-tool-registry 74 / system-prompt 三件 16/16 / 前端 toolActivity 16/16）；无 flaky（A5 首轮即绿，A2-A4 连续两轮绿）
+- [x] closeout 十一门绿（含 quality:knip:check 保留面棘轮）
+- [x] output:judge 判收口声明（见收口笔录）
+- [x] canonical 回写 + docs:check PASS
 
-## 8. P0 勘察结论（2026-09-26 定稿）
+## 8. P0 勘察结论（2026-09-26 定稿；P1/P2 执行结果已并入）
 
 ### 8.1 选定路径：deg / deseq2 差异表达分析（deg-analysis-standard）
 
@@ -106,10 +107,12 @@ scrna 登记为后续候选（重开条件=包内激活 seurat-standard + scrna 
 
 ### 8.3 断点清单
 
-- **B1（P2 修）**：Copilot 跨轮读结果无工具 → 新增有界只读工具 `result_summary`（jobId →
-  工具/状态/产物清单/manifest 分节/主表前 N 行与关键统计，走既有 table-query 服务，遵守
-  result_studio_context 同款有界纪律）+ 注册四件套（tool-defs/registry/contracts/前端
-  label+icon fixture 三面同步，BK-04 先例）+ system prompt 分析历史块提示该工具。
+- **B1（P2 修，✅ 已修）**：Copilot 跨轮读结果无工具 → 新增有界只读工具 `result_summary`
+  （b508bb89）+ 注册七面 + system prompt 调用纪律行；A5 断言实证跨轮引用真值。
+- **B1.5（P1 实机抓真，✅ 已修）**：tool-route 域映射缺陷——run_tool 原定义在 remote 域，
+  任何非 remote 域收窄都剔除执行入口（实机：分析消息 conf=0.86 判 workspace，模型退化
+  shell 探测+手写 PyDESeq2 绕过插件系统）。修=run_tool 迁 session 基线域 + 回归钉
+  （任何域收窄下 run_tool 恒在场，ee626e4b）。
 - B2（不修，契约在案）：工具输出 6000 字符截断、harness headers 截断。
 - B3（不修，legacy 面）：interpret 孤链维持孤链，新工具直读 tool_jobs 内容。
 - B4（环境事实）：scanpy 面本机无 Python 运行时，Py 侧断言不做（同 pack-lifecycle 诚实边界）。

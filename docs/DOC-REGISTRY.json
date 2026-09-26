@@ -5196,20 +5196,20 @@
       "id": "BLOCK-121-RESULT-LOOP-VERTICAL",
       "path": "docs/block-121-result-loop-vertical-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-121-result-loop-vertical",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-25",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "tags": [
         "block-121",
         "result-loop",
         "vertical-slice",
         "dev-electron"
       ],
-      "notes": "开发态结果闭环垂直切片（用户裁决「可以的 开始吧 一次性搞定」阶段三件套之三）：选定一条插件分析路径端到端收实（插件→Studio 可信结果→Copilot 引用继续），dev Electron 边界内 verified 为完成语义；G0 不外推 packaged/Provider/GA。"
+      "notes": "开发态结果闭环垂直切片（用户裁决「可以的 开始吧 一次性搞定」阶段三件套之三）2026-09-26 当日整包 completed：deg/deseq2 路径 dev Electron 边界内 verified（真实 chat→run_tool→artifactTruth=valid→Studio 可信徽标→Copilot 跨轮引用真值 20/20）；P1 抓真修复=run_tool 迁 session 域（tool-route 收窄不再剔除执行入口+回归钉）；P2=result_summary 有界只读工具 74 工具恒等。G0 不外推 packaged/Provider/GA。"
     },
     {
       "id": "BLOCK-120-RECONCILIATION-LINKAGE",
