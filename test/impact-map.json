@@ -2166,6 +2166,20 @@
       "scriptRole": "governance"
     },
     {
+      "id": "hk03-symbol-graph",
+      "note": "HK-03 符号图/导入边精确分类查询（scripts/symbol-graph.mjs，typescript Compiler API 零新增依赖；选型/回放/DEAD 语义边界=docs/hk03-symbol-graph-selection.md）。补登原因=UI-445 提交 c3387d24 登记 test:changed fail-closed 拦截本脚本未登记，红旗归属 HK-03 收口清偿。",
+      "patterns": [
+        "scripts/symbol-graph.mjs",
+        "test/symbol-graph.test.mjs"
+      ],
+      "tests": [
+        "test/symbol-graph.test.mjs"
+      ],
+      "frontendRelated": false,
+      "classifiesScripts": true,
+      "scriptRole": "governance"
+    },
+    {
       "id": "block111-jev-w1-marker",
       "note": "BLOCK-111-JEV-W1-MARKER-CLASSIFICATION：决策内化弧 W1-1 marker→细胞类型判别二跳。interpret.js CELL_MARKERS 规则表候选生成 + decision-api choice 二跳（D-5 单阈值 θ=0.55 门控，D-4 默认关 BIOF3_JEV_MARKER_GUARD=1 显式开）+ ai-legacy.js /api/ai/interpret cellTypeHintsDetailed additive（cellTypeHints 老契约零变化）。契约=test/block111-marker-classification.test.mjs（现行契约钉/候选推导/请求形状/降级五态/伪造候选拒收/门控边界 14 项）。P0 证据 acceptance/block-111/（calibration.json gate.passed + corpus 104 条）。P2 实机 flow 落地后把脚本加进 patterns。",
       "patterns": [

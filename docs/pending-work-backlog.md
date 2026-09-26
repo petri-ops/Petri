@@ -5,7 +5,9 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-09-26（**HK-03 P0+P1 同日收口（用户 AskUserQuestion 裁决「开工 P1·方案 A」；红绿先行 HK-01 首次行使证据链齐）**——scripts/symbol-graph.mjs（who-imports/classify-edges 两查询，typescript Compiler API 零新增依赖）+契约 10/10；回放校验=**可静态判定集合 2/2 零误判**（getRuntimeBinName/isFunnelEvent 与 CK-11 批次四人工定性一致），3 锚点=运行时构造路径形态（require(resolve(...))/pathToFileURL(path.join(...))）正确归入 CK-11 已登记盲区类、零猜测；**DEAD 语义诚实标注**=静态无已解析使用≠可安全删除，删除裁决仍走 CK-11 三分法人工复核。YAGNI 留痕=命名空间跟踪立项依据 332 处 CJS 命名空间 require、字面量拼接折叠 9 处、调用表达式不折叠。**队列头=HK-04（能力级规格层勘察）**；doc:suggest planDoc 建议=选型文档已承载。）
+最后更新：2026-09-26（**HK-03 红旗清偿 + U-01 销号 + 双前置确认（用户「确定一下…可以继续推进」）**——①**impact-map 补登 hk03-symbol-graph 规则**：UI-445 c3387d24 登记的 test:changed fail-closed 拦截红旗归 HK-03 收口，本批清偿（scripts/symbol-graph.mjs+契约测试归 exactly-one 规则，test:changed:list 复跑零分类冲突）；②**U-01 Jev key 轮换销号**（用户确认已走完；功能性证据=当日三轮 doc:suggest cloud 全通；重开条件在案）；③**UI-444 确认 verified**（48dd1d83 用户实机验收通过+加映二，他包收口）。两前置均满足，**队列头=HK-04（能力级规格层勘察）继续推进**。）
+
+此前 最后更新：2026-09-26（**HK-03 P0+P1 同日收口（用户 AskUserQuestion 裁决「开工 P1·方案 A」；红绿先行 HK-01 首次行使证据链齐）**——scripts/symbol-graph.mjs（who-imports/classify-edges 两查询，typescript Compiler API 零新增依赖）+契约 10/10；回放校验=**可静态判定集合 2/2 零误判**（getRuntimeBinName/isFunnelEvent 与 CK-11 批次四人工定性一致），3 锚点=运行时构造路径形态（require(resolve(...))/pathToFileURL(path.join(...))）正确归入 CK-11 已登记盲区类、零猜测；**DEAD 语义诚实标注**=静态无已解析使用≠可安全删除，删除裁决仍走 CK-11 三分法人工复核。YAGNI 留痕=命名空间跟踪立项依据 332 处 CJS 命名空间 require、字面量拼接折叠 9 处、调用表达式不折叠。**队列头=HK-04（能力级规格层勘察）**；doc:suggest planDoc 建议=选型文档已承载。）
 
 此前 最后更新：2026-09-26（**HK-03 P0 勘察选型当日收口（队列头推进；选型文档 docs/hk03-symbol-graph-selection.md 登记 DOC-REGISTRY+README）**——盘点三产物：typescript 5.9.3 根 devDependency 在位（Compiler API 对 .ts/.tsx/.js/.cjs/.mjs 统一 AST 解析=完整满足）、dependency-cruiser 18.3.1（模块级无符号级）、knip 6.38.0（报告器非查询接口，盲区清单复用）；ts-morph 不在仓。**选型结论=方案 A 零新增依赖**（DEPENDENCY-CHANGE-CHECKLIST 默认「不增」天然满足；ts-morph 新增方案不推荐=仅人体工学收益；cruiser 为主方案不足=答不了「导入但未用」）。需求规格四要素+诚实盲区 UNRESOLVED 口径在文档 §1。**P1 开工待用户裁决**（红绿先行=HK-01 首次行使；回放校验=CK-11 批次四定性账对照集）。doc:suggest planDoc 建议=选型文档已登记承载，无需另立。）
 
@@ -90,7 +92,7 @@
 
 | ID | 事项 | 说明 |
 | --- | --- | --- |
-| U-01 | **Jev key 轮换裁决** | 运行时抓真：decision-config.json 旧 Jev key 已失效（auth_failed→汇报门降级放行，fail-open 语义正确行使），备份 env 的有效 key 已按「只读不回显」纪律同步入 config；现 config 与备份双 key 并存且旧者已死。此前裁决「暂保留后续轮换」，轮换时机由用户定 |
+| — | （当前空；U-01 已销号见下方） | |
 
 ## 🗃 候选池（未排期；启动均需用户裁决 + 立项）
 
@@ -123,6 +125,7 @@
 
 ## ✅ 已核实销号（防重复入册）
 
+- **U-01 Jev key 轮换**（2026-09-26 用户确认已走完）——功能性证据=当日三轮 doc:suggest cloud 供给全通（无 auth_failed，供给健康）；config 双 key 并存无害（旧者已死不被使用）；轮换操作无在案记录（无提交/config 未动），按用户本条裁决销号留痕；重开条件=auth_failed 重现时按「只读不回显」纪律换用备份 env key。
 - **Caveman 式输出压缩**（2026-09-26 外部 harness 评估）——不采纳：极简表达与审计留痕/收口笔录/诚实边界文化直接冲突；子代理中间过程理论可用但收益薄、无落地场景。防重复入册。
 - **U-02/U-03/U-04 实机过目**（2026-09-25）——用户授权 Agent 代行评估 + Jev 裁决（fit=3 PASS）：UI-437/438/440 翻 verified（真实 spawn 任务轮取证 acceptance/ui-eval-agent/）；UI-442 保持 in_progress（运行稳态证据待长任务自然产生，不凑证据）。
 - **灰度开关翻默认裁决**（BIOF3_SERVER_HISTORY_ASSEMBLY / SESSION_COMPACTION / AGENT_RESILIENCE）——`core/biof3-server/helpers/feature-flags.js` `FLAG_DEFAULTS` 现全为 `true`（Git 事实），handoff 2026-09-17「翻默认待用户显式裁决（呈报中）」记载已过时。
