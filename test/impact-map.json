@@ -2200,6 +2200,7 @@
         "scripts/block123-p0-coding-walkthrough.mjs",
         "scripts/block123-p0-review-probe.mjs",
         "scripts/block123-p1-walkthrough-2.mjs",
+        "scripts/block123-p1-walkthrough-3.mjs",
         "acceptance/block-123/**"
       ],
       "tests": [],

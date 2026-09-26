@@ -170,8 +170,8 @@ export function acknowledgeConversationChanges(
   emitChange();
 }
 
-/** useSyncExternalStore 订阅面。 */
-export function subscribeConversationChanges(listener: ChangeListener): () => void {
+/** useSyncExternalStore 订阅面（仅模块内 hook 使用，不导出——knip 保留面纪律）。 */
+function subscribeConversationChanges(listener: ChangeListener): () => void {
   ensureSubscribed();
   listeners.add(listener);
   return () => listeners.delete(listener);
