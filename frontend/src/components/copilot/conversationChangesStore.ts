@@ -11,6 +11,7 @@
 // git working tree 仍是 diff/统计的事实源；本 store 只负责「路径归属」。
 // ============================================================
 
+import { useSyncExternalStore } from 'react';
 import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
 import { getApiPrefix } from '@/lib/env';
 
@@ -35,6 +36,14 @@ const EMPTY: ConversationFileChange[] = [];
 const listeners = new Set<ChangeListener>();
 
 let subscribed = false;
+
+// UI-446 — 单调时间戳：record 与 acknowledge 同毫秒竞态会让未读判定抖动
+// （Date.now 相等时严格 > 判定熄灭/点亮的语义不确定），故保证严格递增。
+let stampTick = 0;
+function nextStamp(): number {
+  stampTick = Math.max(stampTick + 1, Date.now());
+  return stampTick;
+}
 
 function invalidateSnapshot(conversationId: string): void {
   snapshotCache.delete(conversationId);
@@ -94,7 +103,7 @@ export function recordConversationFileChange(
   bucket.set(path, {
     path,
     status,
-    lastChangedAt: Date.now(),
+    lastChangedAt: nextStamp(),
     iteration: attribution?.iteration,
     tool: attribution?.tool,
   });
@@ -125,6 +134,68 @@ export function clearConversationFileChanges(conversationId: string): void {
     invalidateSnapshot(conversationId);
     emitChange();
   }
+}
+
+// ============================================================
+// UI-446 — 审阅 tab 未读圆点判定（BLOCK-123 G-01）
+//
+// 语义：当前会话存在晚于「已读时间戳」的改动 → 未读（圆点亮）；
+// 打开审阅 tab 即 acknowledge（圆点熄灭），之后的新改动重新点亮。
+// 设计边界：不复活 2026-09-09 被用户裁决移除的聊天区改动卡片
+// （c0e92dd0：信息已在工具行与审阅面板呈现，卡片冗余且空会话噪音）——
+// 本判定只服务右栏 tab 药丸上的极轻圆点，不新增聊天区内容。
+// ============================================================
+
+/** 每会话已读时间戳（打开审阅 tab 时写入）。 */
+const acknowledgedAtByConversation = new Map<string, number>();
+
+/** 纯判定：改动列表 + 已读时间戳 → 是否未读。导出供测试直接断言。 */
+export function hasUnreviewedConversationChanges(
+  changes: ConversationFileChange[],
+  acknowledgedAt: number | undefined
+): boolean {
+  if (changes.length === 0) return false;
+  const ack = acknowledgedAt ?? 0;
+  return changes.some((change) => change.lastChangedAt > ack);
+}
+
+/** 打开审阅 tab 即调用：记录已读时间戳（当前时刻）。 */
+export function acknowledgeConversationChanges(
+  conversationId: string | undefined | null
+): void {
+  if (!conversationId) return;
+  ensureSubscribed();
+  acknowledgedAtByConversation.set(conversationId, nextStamp());
+  invalidateSnapshot(conversationId);
+  emitChange();
+}
+
+/** useSyncExternalStore 订阅面。 */
+export function subscribeConversationChanges(listener: ChangeListener): () => void {
+  ensureSubscribed();
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+/** 当前会话是否有未读改动（非钩子取数，测试与消费方共用）。 */
+export function isConversationUnreviewed(
+  conversationId: string | undefined | null
+): boolean {
+  return hasUnreviewedConversationChanges(
+    getConversationFileChanges(conversationId),
+    acknowledgedAtByConversation.get(conversationId ?? '')
+  );
+}
+
+/** 当前会话是否有未读改动（右栏审阅 tab 圆点数据源）。 */
+export function useConversationUnreviewedChanges(
+  conversationId: string | undefined | null
+): boolean {
+  useSyncExternalStore(
+    subscribeConversationChanges,
+    () => getConversationFileChanges(conversationId)
+  );
+  return isConversationUnreviewed(conversationId);
 }
 
 // ============================================================

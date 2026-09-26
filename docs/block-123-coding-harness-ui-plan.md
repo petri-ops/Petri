@@ -42,6 +42,8 @@ status: active
 | P0（本阶段） | **端到端任务对账**：dev 栈测试实例上跑一个真实通用编码任务，六环节逐项记录断点/缺工具/缺反馈 → 缺口清单落盘 | 走查证据 acceptance/block-123/ + 缺口清单入本 plan §5 |
 | P1..Pn | 缺口逐项串行清偿（AGENT-WORKBENCH 修订 3 同款：每项启动前先对照当前代码对账是否已被覆盖） | 每项独立 UI-### 登记 + 实机证据 |
 
+**P1 进展（2026-09-26）**：**G-01 已清偿（UI-446，in_progress 待实机过目）**——对账先行抓真：聊天区改动卡片系 2026-09-09 用户裁决移除（c0e92dd0），不复活；形态收窄为**审阅 tab 未读圆点**（当前会话有未看工作区改动时药丸亮 `--gewu-accent` 圆点，激活审阅 tab 即 acknowledge 熄灭，新改动复亮）。实现=conversationChangesStore 未读判定面（单调时间戳防同毫秒竞态）+TitleBarTab.dot+titlebar 组装+药丸渲染；红绿先行（store 未读测试+RightZone 渲染测试先落 6 红→15/15 绿）；tsc 0+theme 契约 4/4+quality:lint 0 error。
+
 **P0 六环节走查协议**（探针 `scripts/block123-p0-coding-walkthrough.mjs`，复用 block121 flow 驱动姿势：真实 chat + context.accessMode='full' + 测试实例 CDP）：
 
 1. **S1 播种**：临时项目 + 植入带 bug 的小脚本与测试文件（git init，供审阅环节 diff）；

@@ -10,6 +10,8 @@ export interface TitleBarTab {
   label: string;
   icon: IconName;
   closable?: boolean;
+  /** UI-446 — tab 级未读圆点（审阅 tab：当前会话有未看工作区改动时点亮）。 */
+  dot?: boolean;
 }
 
 export interface TitleBarToolItem {

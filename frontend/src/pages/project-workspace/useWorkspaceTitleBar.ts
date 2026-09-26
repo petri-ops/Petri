@@ -3,6 +3,8 @@ import type { Dispatch, SetStateAction } from 'react';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import { RIGHT_PANEL_ITEMS, type RightPanelMode } from './rightPanelTabs';
+// UI-446 — 审阅 tab 未读圆点数据源（当前会话工作区改动索引）
+import { useConversationUnreviewedChanges } from '@/components/copilot/conversationChangesStore';
 
 // BLOCK-92 Wave B-1 — TitleBar 注册 effect 簇外迁（原 ProjectWorkspace 内联，纯搬运零行为变化）。
 // TitleBar 注册 —— 8f3d55a5 曾误删整段（右侧工具菜单「+」/ 标签 pills / 结果
@@ -61,6 +63,9 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
     setRightToolMenuOpen,
   } = options;
 
+  // UI-446 — 审阅 tab 圆点：当前会话存在未看工作区改动时点亮（激活审阅 tab 即熄灭）
+  const reviewUnread = useConversationUnreviewedChanges(activeConvId);
+
   const titleBarTabs = useMemo(
     () =>
       openRightTabs
@@ -72,9 +77,10 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
             label: item?.label || tab,
             icon: item?.icon || 'folder',
             closable: true,
+            dot: tab === 'review' ? reviewUnread : undefined,
           };
         }),
-    [openRightTabs]
+    [openRightTabs, reviewUnread]
   );
   const titleBarResultItems = useMemo(() => conversationJobs.map((job) => {
     const status = job.status === 'done'

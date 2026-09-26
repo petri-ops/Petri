@@ -4165,3 +4165,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据（契约）**：LeftPanel.test 17/17（+3：默认态无搜索框/点钮出现输入框/查询过滤展示+点击直达 switchToProject+handleSwitchConversation 断言/无匹配空态）+ UI-347 旧断言精确名适配（工作台退役搜索入口与新会话搜索钮不冲突）+ tsc 0 + theme 契约 4/4 + quality:lint 0 error（新 mock async 替身 1 槽入基线=既定测试替身豁免类；no-unnecessary-type-assertion 2 槽=规则与 tsc 相悖的误报，断言经 tsc 验证必要）。
 - 待用户实机过目翻 verified。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-446: BLOCK-123 G-01 — 审阅 tab 未读圆点（agent 改完代码主动点亮，打开即熄）(2026-09-26 in_progress，契约已验，实机过目待用户)
+
+- **来源**：BLOCK-123 P0 端到端对账缺口清单 G-01（「涩」：agent 完成编辑后默认视图无审阅引导，用户需自行发现右侧审阅 tab）。**对账先行**：聊天区改动卡片系 2026-09-09 用户裁决移除（c0e92dd0，UI-216/252/255/273 cancelled——信息已在工具行与审阅面板呈现，卡片冗余且空会话噪音），故本项**不复活卡片**，收窄为 tab 药丸级极轻圆点（不新增聊天区内容、无关闭不持久问题）。
+- **改动**（0 新增 IPC / 0 新依赖）：① conversationChangesStore 增未读判定面——`hasUnreviewedConversationChanges` 纯判定（导出供测试）+ `acknowledgeConversationChanges` 已读回写 + `isConversationUnreviewed`/`useConversationUnreviewedChanges` 取数；record/acknowledge 改单调时间戳（防同毫秒竞态抖动）；② `TitleBarTab` 增可选 `dot` 字段 + useWorkspaceTitleBar 组装（tab==='review' 且当前会话未读时点亮）；③ TitleBarRightZone tab 药丸渲染圆点（`--gewu-accent` token，暗色安全）；④ project-workspace 激活审阅 tab 即 acknowledge（圆点熄灭，新改动重新点亮）。
+- **证据（契约）**：conversationChangesStore.unread.test 5/5（纯判定四态 + store 集成 record→亮/acknowledge→熄/再 record→复亮/无会话 no-op）+ TitleBarRightZone.unread.test 2/2（dot 在场/缺省不渲染，工作区路由挂载）+ 既有 hydrate 8/8 零回归 + tsc 0 + theme 契约 4/4。
+- 待用户实机过目翻 verified（走查姿势：跑一个真实编码任务→审阅 tab 亮圆点→点开审阅→圆点熄灭→新改动再点亮）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -60,6 +60,10 @@ export function TitleBarRightZone(): React.ReactElement {
                 >
                   <Icon name={tab.icon} size={14} />
                   <span className={styles.tabPillText}>{tab.label}</span>
+                  {/* UI-446 — tab 级未读圆点（审阅 tab：当前会话有未看工作区改动） */}
+                  {tab.dot && (
+                    <span className={styles.tabPillDot} data-testid="review-tab-dot" aria-hidden="true" />
+                  )}
                 </button>
                 {tab.closable && onCloseTab && (
                   <button

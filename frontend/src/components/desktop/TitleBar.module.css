@@ -593,6 +593,15 @@
   cursor: pointer;
 }
 
+/* UI-446 — 审阅 tab 未读圆点（当前会话有未看工作区改动时点亮） */
+.tabPillDot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gewu-accent);
+}
+
 .pathPillText,
 .tabPillText {
   min-width: 0;

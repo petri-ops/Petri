@@ -6,6 +6,8 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
+// UI-446 — 审阅 tab 圆点已读回写（激活审阅 tab 即 acknowledge 当前会话改动）
+import { acknowledgeConversationChanges } from '@/components/copilot/conversationChangesStore';
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
 import { BottomTerminal } from '@/components/workspace-panels/BottomTerminal';
 import { CenterPanel, type CenterPanelContext, type CenterPanelRefs } from '@/components/workspace-panels/CenterPanel';
@@ -309,6 +311,12 @@ export function ProjectWorkspace(): React.ReactElement {
       openRightPanel('review');
     });
   }, [openRightPanel]);
+  // UI-446 — 激活审阅 tab 即视为已读当前会话改动（tab 圆点熄灭；新改动重新点亮）
+  useEffect(() => {
+    if (rightTab === 'review' && activeConvId) {
+      acknowledgeConversationChanges(activeConvId);
+    }
+  }, [rightTab, activeConvId]);
   // UI-385 — 右栏「智能体」tab：子智能体详情不再弹独立窗。工具行内联卡 /
   // SubAgentsBar（活动条 + 俯瞰 + spawn 自动唤起）/ 续派统一派发本事件，
   // 这里切 tab 并把面板指到该 runId。
