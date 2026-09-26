@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-26 晨（**BLOCK-121 开发态结果闭环垂直切片当日整包 completed（P0+P1+P2；closeout 十一门绿 + flow 20/20 allPass）**——deg/deseq2 路径 dev Electron 边界内 verified：真实 chat→模型自主 run_tool→R 真实执行→artifactTruth=valid→Studio「可信结果」徽标→Copilot 跨轮追问引用真实基因/数字；P1 抓真修复=run_tool 迁 session 域（tool-route 收窄剔除执行入口+回归钉）；P2=result_summary 有界只读工具（74 工具恒等）。**队列=无可推进项**；scrna_standard 路径转候选池 C-12（重开条件在案）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-26（**BLOCK-123 通用编码 harness 使用界面主线立项 active（P0-LAUNCH；用户方向裁决+委派「你来定」）**——方向裁决收口 product-strategy-review-2026-09 §6 观察期约定：通用编码面为开发主线，垂直域扩展转候选池 C-15。P0=dev 栈实机端到端任务对账（真实 chat→workspace 工具改代码→exec 跑验证→工作树审阅→提交，六环节 通/涩/断 走查→缺口清单）；P1..Pn=缺口逐项串行（AGENT-WORKBENCH 修订 3 同款）。plan=docs/block-123-coding-harness-ui-plan.md；工具面/UI 面资产盘点已入 plan §3。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-26 晨（**BLOCK-121 开发态结果闭环垂直切片当日整包 completed（P0+P1+P2；closeout 十一门绿 + flow 20/20 allPass）**——deg/deseq2 路径 dev Electron 边界内 verified：真实 chat→模型自主 run_tool→R 真实执行→artifactTruth=valid→Studio「可信结果」徽标→Copilot 跨轮追问引用真实基因/数字；P1 抓真修复=run_tool 迁 session 域（tool-route 收窄剔除执行入口+回归钉）；P2=result_summary 有界只读工具（74 工具恒等）。**队列=无可推进项**；scrna_standard 路径转候选池 C-12（重开条件在案）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-25 深夜四（**阶段切换：BLOCK-121 开发态结果闭环垂直切片立项 active（P0-LAUNCH）**——清债期收束（CK 表全清+D7 红门清偿 2f1314a+knip 保留面棘轮 c819f144 入 closeout 十一门），下一阶段=把一条插件分析路径端到端收实（插件→Studio 可信结果→Copilot 引用继续）；plan=docs/block-121-result-loop-vertical-plan.md。**队列头=BLOCK-121（P0 勘察中）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

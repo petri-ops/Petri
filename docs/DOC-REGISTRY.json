@@ -5305,8 +5305,25 @@
         "design"
       ],
       "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "BLOCK-123-CODING-HARNESS-UI",
+      "path": "docs/block-123-coding-harness-ui-plan.md",
+      "capability": "coding-harness-ui",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "coding-harness-ui-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-26",
+      "tags": [
+        "BLOCK-123",
+        "coding-harness",
+        "ui"
+      ],
+      "archivePolicy": "retain_stable_path"
     }
   ],
   "lastUpdated": "2026-09-26",
-  "documentCount": 282
+  "documentCount": 283
 }
