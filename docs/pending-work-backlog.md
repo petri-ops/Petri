@@ -5,7 +5,9 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-09-26（**BLOCK-122 结果闭环路径扩展登记队列头（用户「你给个建议 反正不能停下来」；P0 勘察先行情报在案）**——勘察实测：插件包在本机（D:\1.WorkDir\gewu-pack-bio），**deseq2 唯一激活插件**，休眠 15 插件（volcano-plot/wgcna/pca-explorer/gene-correlation/gsea/go-kegg/scrna 系等），pack demo-data 四路在位（consensus-cluster/ml-classifier/ml-feature-select/rsf-survival）但与 dormant 集合错位（对应插件未激活）；run_tool 目录声明 volcano-plot/gene-correlation/pca-explorer 可用工具。**推荐=从已验证 deseq2 链延伸**（A: bind_artifact 串 volcano-plot 吃真实 DE 输出 / B: 激活 pca-explorer 走独立第二路径吃已有 demo counts）避免 C-12 式「休眠+无数据」双缺阻塞。**裁决点=选 A/B/双做，裁决后立项走三件套**；HK 系列 01~04 全清留档；开发栈存活（3001/9222 在听）可随时实机。）
+最后更新：2026-09-26（**方向裁决落账：BLOCK-122 垂直提案收回转候选池 C-15；立 BLOCK-123 通用编码 harness 使用界面主线（用户原话「我觉得不行 这个属于垂直领域的扩展 现在需要的仍旧是通用编码harness使用界面作为开发主要工作项 重新思考」）**——该裁决同时收口 product-strategy-review-2026-09 §6 观察期约定（2026-09-03「方向开放按节奏走」→今日落定：通用编码面为开发主线；§7「底座别再加厚」口径由本主线重新解释=加厚的是**使用界面**不是底座机制）。资产盘点防重复开发：工具面 workspace 五件套+process/system 俱全；UI 面工作台四件套俱全（file tree/标签/终端/审阅 tab，ReviewMode 1310 行 verified）。**BLOCK-123 P0=dev 栈实机端到端任务对账**（真实通用编码任务全链路走查→缺口清单→AGENT-WORKBENCH 修订 3 同款逐项对账串行实做）。doc:suggest planDoc 建议=立项时 plan 承载。）
+
+此前 最后更新：2026-09-26（**BLOCK-122 结果闭环路径扩展登记队列头（用户「你给个建议 反正不能停下来」；P0 勘察先行情报在案）**——勘察实测：插件包在本机（D:\1.WorkDir\gewu-pack-bio），**deseq2 唯一激活插件**，休眠 15 插件（volcano-plot/wgcna/pca-explorer/gene-correlation/gsea/go-kegg/scrna 系等），pack demo-data 四路在位（consensus-cluster/ml-classifier/ml-feature-select/rsf-survival）但与 dormant 集合错位（对应插件未激活）；run_tool 目录声明 volcano-plot/gene-correlation/pca-explorer 可用工具。**推荐=从已验证 deseq2 链延伸**（A: bind_artifact 串 volcano-plot 吃真实 DE 输出 / B: 激活 pca-explorer 走独立第二路径吃已有 demo counts）避免 C-12 式「休眠+无数据」双缺阻塞。**裁决点=选 A/B/双做，裁决后立项走三件套**；HK 系列 01~04 全清留档；开发栈存活（3001/9222 在听）可随时实机。）
 
 此前 最后更新：2026-09-26（**HK-04 P1 试点当日收口——HK 系列（01~04）全部收官（用户委派「你来定」按推荐执行；HK-01 红绿先行第二次行使）**——实现=parseCapabilityFrontMatter 受限解析（零 YAML 依赖）+docs:check 增量校验（**registry capability opt-in 触发**，五类 FRONTMATTER_* issue）+docs:status capability 视图；三份试点（result-loop/output-judge/result-studio）front-matter+registry 全亮；**status 漂移抓真演示**精确红→还原（acceptance/hk04/p1-consistency-demo.txt）；契约 12/12+docs:check 282 份零回归；实现期修正=presence 触发误伤存量 --- 水平线→opt-in（设计稿 §5 留痕）。**增量采纳持续生效：新 plan 立项即带 capability front-matter。队列无可推进项（HK 全清；观察态 CK-08/BK-02 留档）**。）
 
@@ -57,8 +59,7 @@
 
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
-| 1 | ▶ BLOCK-122 | **结果闭环路径扩展（第二垂直切片，产品闭环期主线）**：复用 BLOCK-121 全套基建（run_tool session 域回归钉 + result_summary + block121-result-loop flow 模板）把第二条分析路径走通同款端到端闭环（真实运行→artifactTruth=valid→Studio 可信徽标→Copilot 跨轮引用真实数字）。P0 勘察已在案（2026-09-26）：pack 在本机 `D:\1.WorkDir\gewu-pack-bio`；**deseq2 唯一激活插件**；休眠 15 插件含 volcano-plot/wgcna/pca-explorer/gene-correlation/gsea/go-kegg 等；pack demo-data 四路在位（consensus-cluster/ml-classifier/ml-feature-select/rsf-survival）但对应插件未激活（demo-data 与 dormant 集合错位）；**推荐形态=从已验证 deseq2 链延伸避 C-12 式双缺阻塞**——A) bind_artifact 串联 volcano-plot（吃 deseq2 真实 DE 输出，验证计划联动/bind 机制）或 B) pca-explorer/gene-correlation 独立第二路径（直接吃已有 demo counts.csv，需激活休眠插件）。**裁决点=选 A/B/双做**；启动走立项检查单（三件套+roadmap/handoff 一行） | BLOCK-121 收口登记 + 本批 P0 勘察（pack 实测盘点） | 已勘察待启动（用户裁决路径后立项） |
-| — | （HK 系列全清） | — | — | — |
+| 1 | ▶ BLOCK-123 | **通用编码 harness 使用界面主线（方向裁决落项；P0=端到端任务对账先行）**：用户 2026-09-26 方向裁决「现在需要的仍旧是通用编码harness使用界面作为开发主要工作项」——垂直域扩展让位（原 BLOCK-122 提案转候选池 C-15）；该裁决同时收口 `product-strategy-review-2026-09.md` §6 观察期约定（2026-09-03 方向开放→今日落定：通用编码面为开发主线）。**存量资产盘点（本批勘察，防重复开发）**：工具面=workspace_list/find/search/read/write（workspace.js 域 1521 行）+process_status/stop+system_info+todo_write；UI 面=工作台四件套俱全（RightFileTree+文件标签+TerminalPanel+RightPanel 审阅 tab；ReviewMode 1310 行 verified；SimpleChat 含 plan 审批/steering）。**P0=dev 栈实机端到端任务对账**：跑一个真实通用编码任务全链路（chat→workspace 工具改文件→process/终端跑验证→工作树审阅→提交），逐环节记录断点/缺工具/缺反馈→产出缺口清单→按 AGENT-WORKBENCH 修订 3 同款「逐项对账再实做」串行推进。**明确不做**=不预设架构手术、垂直域不回摊、红海面（chat/流式/agent loop 标配）不加厚 | 用户方向裁决 2026-09-26 + 战略评审 §6/§7 + 本批资产盘点 | 已勘察待启动（用户确认方向即立项三件套） |
 | — | ⛔ CK-08 | **C-03：task_id 数据模型改造——重估收缩转观察**：动机仍实（45 万行 UUID 冗余 16.25MB/库 14%）但 30 天清扫有界+无用户感知收益+契约迁移风险大（7+29 文件）；**重开条件=清扫上限内实测 I/O 痛点或库体积成用户可感知问题** | 本批重估数据（AUDIT-LOG 晚五行） | 观察待证据 |
 | — | 👁 BK-02 | **汇报门 P2 试点观察期盘点**（持续观察，不占队列序）——采纳率/误拦率/延迟增量/fitReplay 触发率随真实轮次累计；观察窗开启中（dev 栈 BIOF3_JEV_REPORT_GUARD=1） | BLOCK-119 收口遗留候选 | 观察（持续） |
 
@@ -110,6 +111,7 @@
 | C-12 | **scrna_standard 结果闭环路径**（BLOCK-121 出局项转候选）：seurat-standard/scanpy-advanced 在 `../gewu-pack-bio/plugins.dormant/` 休眠且包内无 scrna 演示数据；重开条件=dormant 激活 + scrna 演示数据入库 + Seurat/scanpy 运行时库在位实证；届时 BLOCK-121 的 flow/工具面（result_summary）直接复用 | BLOCK-121 P0 勘察登记 |
 | C-13 | **符号图 MCP 产品化**（HK-03 产出后评估）：把 symbol-graph 查询注册为产品 MCP 工具（格物 agent 的代码理解能力） | 重开条件=HK-03 P1 收口 + 用户产品方向裁决（立项三件套照常）；来源=HK 建表批 2026-09-26 |
 | C-14 | **RTK 型工具输出压缩**（ZCode hooks 适配 shell 输出压缩，社区口径 60-90%） | 重开条件=实测 token 成本成为痛点 + ZCode hooks 适配验证可行；来源=HK 建表批 2026-09-26 |
+| C-15 | **结果闭环路径扩展（原 BLOCK-122 提案，垂直域）**：从已验证 deseq2 链延伸（bind_artifact 串 volcano-plot / 激活 pca-explorer 独立路径）——用户 2026-09-26 裁决「属于垂直领域的扩展」让位通用编码主线（BLOCK-123） | 重开条件=用户裁决方向回摆生信旗舰倾斜（参照 product-strategy-review-2026-09 §4）；勘察情报=AUDIT-LOG 2026-09-26 行（pack 在本机/deseq2 唯一激活/休眠 15 插件/demo-data 错位盘点） |
 | C-02 | 轮询→SSE——**已编入 CK-03** | BLOCK-106 遗留候选 |
 | C-03 | task_id 数据模型改造——**已编入 CK-08** | BLOCK-106 遗留候选 |
 | C-04 | 分段 token 预算——**已编入 CK-04** | BLOCK-109 候选池 |
