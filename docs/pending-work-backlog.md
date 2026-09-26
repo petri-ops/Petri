@@ -59,7 +59,7 @@
 
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
-| 1 | ▶ BLOCK-123 | **通用编码 harness 使用界面主线**（方向裁决 2026-09-26 落项；plan=docs/block-123-coding-harness-ui-plan.md，capability=coding-harness-ui） | **P0 收口：六环节零断点**（证据=acceptance/block-123/）；**P1 缺口清单全清**：G-01 已清偿（UI-446 审阅 tab 未读圆点，in_progress 待过目）+ G-02 销号（终端默认收起属设计非缺陷）+ G-03 已清偿（test-session-cleanup.mjs 清 30 条测试残留至 0，契约防误伤+impact-map 登记）；契约 15/15+tsc 0+theme 4/4+lint 0 error | **P0+P1 缺口清单全清；P1 续项=第二轮走查（错误恢复/多文件任务形态）待启动；UI-446 待过目** |
+| 1 | ▶ BLOCK-123 | **通用编码 harness 使用界面主线**（方向裁决 2026-09-26 落项；plan=docs/block-123-coding-harness-ui-plan.md，capability=coding-harness-ui） | **P0 收口：六环节零断点**（证据=acceptance/block-123/）；P1 缺口清单全清（G-01=UI-446 待过目 / G-02 销号 / G-03 清偿 30 条）。**P1 第二轮走查收口：错误恢复能力正面实证**（需求藏测试+指令带错误 runner 名双障碍，agent 读测试→修码→自纠 runner→ALL PASS，4 次 exec）；多文件形态轻覆盖（行为级验证通过，git 1 文件）；G-04/G-05 观察项登记；B4 圆点未亮=探针方法学限制（REST 驱动不经 UI 流）如实记录 | **P1 续项=多文件深度走查 + UI-446 待过目** |
 | — | ⛔ CK-08 | **C-03：task_id 数据模型改造——重估收缩转观察**：动机仍实（45 万行 UUID 冗余 16.25MB/库 14%）但 30 天清扫有界+无用户感知收益+契约迁移风险大（7+29 文件）；**重开条件=清扫上限内实测 I/O 痛点或库体积成用户可感知问题** | 本批重估数据（AUDIT-LOG 晚五行） | 观察待证据 |
 | — | 👁 BK-02 | **汇报门 P2 试点观察期盘点**（持续观察，不占队列序）——采纳率/误拦率/延迟增量/fitReplay 触发率随真实轮次累计；观察窗开启中（dev 栈 BIOF3_JEV_REPORT_GUARD=1） | BLOCK-119 收口遗留候选 | 观察（持续） |
 

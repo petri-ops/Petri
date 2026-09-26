@@ -1,0 +1,45 @@
+{
+  "at": "2026-09-26T09:09:00.740Z",
+  "findings": [
+    {
+      "id": "A1 播种",
+      "verdict": "通",
+      "detail": "基线红=true（0 前缀用例必失败）workspace=D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\projects\\block123-a---1790413695825-mui63592"
+    },
+    {
+      "id": "A2 任务",
+      "verdict": "通",
+      "detail": "terminal=done"
+    },
+    {
+      "id": "A3 执行与恢复",
+      "verdict": "断",
+      "detail": "exec 次数=4 首次即败=true 读测试文件=true 终态测试通过=false 序列=[workspace_list→workspace_find→workspace_read→workspace_read→workspace_exec→workspace_write→workspace_exec→workspace_exec→workspace_read→workspace_exec]"
+    },
+    {
+      "id": "A4 回答接地",
+      "verdict": "通",
+      "detail": "回答面由 chat 终态与工具序列承载（细节见事件快照 p1-scenario-a-events.json）"
+    },
+    {
+      "id": "B1 播种",
+      "verdict": "通",
+      "detail": "基线红=true（硬编码 1≠回退 3）"
+    },
+    {
+      "id": "B2 任务",
+      "verdict": "通",
+      "detail": "terminal=done"
+    },
+    {
+      "id": "B3 跨文件行为",
+      "verdict": "通",
+      "detail": "终态测试通过=true fetcher 读 config=true 变更文件数=1（M fetcher.js）"
+    },
+    {
+      "id": "B4 UI-446 圆点实机",
+      "verdict": "涩（圆点未亮——activeConvId 绑定或时序，如实记录待人工核对）",
+      "detail": "dom=absent"
+    }
+  ]
+}

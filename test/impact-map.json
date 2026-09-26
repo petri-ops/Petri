@@ -2195,10 +2195,11 @@
     },
     {
       "id": "block123-p0-probes",
-      "note": "BLOCK-123 P0 端到端对账探针（实机走查证据工具，非回归测试：block123-p0-coding-walkthrough 真实 chat 六环节走查 / block123-p0-review-probe 审阅面定点取证；证据=acceptance/block-123/）。补登原因=与 hk03 同款 fail-closed 拦截（新脚本未登记）——同一坑二次出现，登记处留痕。",
+      "note": "BLOCK-123 P0/P1 实机对账探针（实机走查证据工具，非回归测试：p0-coding-walkthrough 六环节走查 / p0-review-probe 审阅面定点 / p1-walkthrough-2 错误恢复+多文件；证据=acceptance/block-123/）。",
       "patterns": [
         "scripts/block123-p0-coding-walkthrough.mjs",
         "scripts/block123-p0-review-probe.mjs",
+        "scripts/block123-p1-walkthrough-2.mjs",
         "acceptance/block-123/**"
       ],
       "tests": [],
