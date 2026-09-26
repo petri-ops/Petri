@@ -21,8 +21,6 @@ async function rest(method, p, body) {
   try { data = await resp.json(); } catch {}
   return { ok: resp.ok, data };
 }
-
-const root0 = path.dirname(process.argv[1] || '.');
 let projectId = null;
 
 async function main() {

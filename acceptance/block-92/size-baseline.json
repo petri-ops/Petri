@@ -40,8 +40,8 @@
       "path": "frontend/src/pages/project-workspace.tsx",
       "wave": "B",
       "module": "W-02",
-      "lines": 1064,
-      "sha256": "ca8067052b0a95f11c32dd57871f8aed828d870bc1da35f37f8e1b93b8d151e8"
+      "lines": 1065,
+      "sha256": "6e58b863257c042b4541df4da338d57fe81ad031e8d6b3bc1f18d3f09882b283"
     },
     {
       "path": "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
@@ -159,16 +159,16 @@
       "path": "core/shared-backend/git-adapter.js",
       "wave": "C",
       "module": "P-01",
-      "lines": 1253,
-      "sha256": "32f3f9ebb2fc5b56146f9d958e4cbecf51d1529efa8cbc6b07f19f1162b6ddb2"
+      "lines": 1280,
+      "sha256": "42a2e7888949edbf29f4b0cb3f08bc3f8da327b74c3f50db2223f5f899928fa3"
     },
     {
       "path": "src/ipc/working-tree-review.js",
       "wave": "D",
       "module": "P-01",
-      "lines": 643,
-      "sha256": "8b71ae212779764c3bd0bc0615434d31d48b09254619ce41ecd743b426d10b9e"
+      "lines": 654,
+      "sha256": "b1a8303d2bb09317a09374053757d7a85c716777e2f599c5f3f962cac94508af"
     }
   ],
-  "total": 22192
+  "total": 22231
 }

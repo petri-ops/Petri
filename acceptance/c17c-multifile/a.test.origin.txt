@@ -1,0 +1,5 @@
+const assert = require('assert');
+const { charge } = require('../lib/a');
+assert.deepStrictEqual(charge(1234), { billed: 12.34, source: 'a' });
+assert.deepStrictEqual(charge(125), { billed: 1.25, source: 'a' });
+console.log('a.test ALL PASS');

@@ -2191,7 +2191,9 @@
         "test/git-adapter-shortstat.test.mjs",
         "scripts/c17b-streaming-sse.mjs",
         "scripts/c17b-terminal-feedback.mjs",
-        "acceptance/c17b-terminal/**"
+        "scripts/c17c-multifile-walkthrough.mjs",
+        "acceptance/c17b-terminal/**",
+        "acceptance/c17c-multifile/**"
       ],
       "tests": [
         "test/git-adapter-shortstat.test.mjs"

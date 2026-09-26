@@ -4204,5 +4204,5 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 - **来源**：候选池 C-16（UI-446 v4 计数徽章升级：入口直接显示 +A −D 行数变化；队列逐推模式第四项）。权威源红线=不前端数行，后端 shortstat 桥避免第二真相。
 - **改动**：①后端权威源=git-adapter 新方法 `workingTreeShortstat()`（`git diff HEAD --shortstat` 含暂存区 + untracked porcelain 分开计数，零第二真相）；②IPC 四件套=`git:working-tree-shortstat` 通道（channels.js + working-tree-review.js handler + preload `workingTreeReview.workingTreeShortstat` + electron.d.ts）；③前端=conversationChangesStore 增 `refreshConversationShortstat`（20s TTL 节流+失败回落旧值不抛）与 `useConversationShortstat` hook + `formatShortstatBadge`（「N·+A−D」格式）；④四处入口同源渲染（useWorkspaceTitleBar 组装 tab 药丸/+钮/菜单徽章 + RightPanel→EmptyResult 磁贴），shortstat 缺省回落纯计数（桥失败/浏览器态不渲染坏形态）。
-- **证据（契约）**：红绿先行——adapter 3 红（含测试算术自纠：改 1 行按 +1/−1 计）→3/3 绿 + store/RightZone 4 红→13/13 绿（含 UI-446 v4 存量计数语义零回归）；tsc 0。C-17b 走查附带实证 agent exec 输出流式进工具行（acceptance/c17b-terminal/streaming-sse.json allPass）。
+- **证据（契约）**：红绿先行——adapter 3 红（含测试算术自纠：改 1 行按 +1/−1 计）→3/3 绿 + store/RightZone 4 红→13/13 绿（含 UI-446 v4 存量计数语义零回归）；tsc 0。补注：取数 hook 重写为键控 entry 派生形态（禁 setState 同步进 effect 红线，会话切换即失效无残留闪现）。C-17b 走查附带实证 agent exec 输出流式进工具行（acceptance/c17b-terminal/streaming-sse.json allPass）。
 - 待用户实机过目（有未审改动时四处入口显示「N·+A−D」）。G0 开发期常态 · 不外推 packaged/Provider/GA。

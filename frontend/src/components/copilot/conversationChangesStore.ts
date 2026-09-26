@@ -344,25 +344,23 @@ export function __resetShortstatCacheForTest(): void {
 }
 
 /** UI-449（C-16）— 徽章 ±行数取数 hook：enabled（通常=有未审改动）时拉 shortstat，
- *  带 20s TTL 节流；桥不可用/失败回落 null（徽章回落纯计数）。 */
+ *  带 20s TTL 节流；桥不可用/失败回落 null（徽章回落纯计数）。
+ *  禁 setState 同步进 effect（lint 红线）：键控 entry 派生返回，会话切换即失效，无残留闪现。 */
 export function useConversationShortstat(
   conversationId: string | null,
   projectId: string | null,
   enabled: boolean,
 ): ConversationShortstat | null {
-  const [stat, setStat] = useState<ConversationShortstat | null>(null);
+  const [entry, setEntry] = useState<{ conv: string; stat: ConversationShortstat } | null>(null);
   useEffect(() => {
-    if (!enabled || !conversationId || !projectId) {
-      setStat(null);
-      return;
-    }
+    if (!enabled || !conversationId || !projectId) return;
     let alive = true;
-    refreshConversationShortstat(conversationId, projectId).then((value) => {
-      if (alive) setStat(value);
+    void refreshConversationShortstat(conversationId, projectId).then((value) => {
+      if (alive && value) setEntry({ conv: conversationId, stat: value });
     });
     return () => {
       alive = false;
     };
   }, [conversationId, projectId, enabled]);
-  return stat;
+  return entry && entry.conv === conversationId ? entry.stat : null;
 }

@@ -1,0 +1,4 @@
+const { execFileSync } = require('child_process');
+execFileSync(process.execPath, ['test/a.test.js'], { stdio: 'inherit' });
+execFileSync(process.execPath, ['test/b.test.js'], { stdio: 'inherit' });
+console.log('run-tests ALL PASS');

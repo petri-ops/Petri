@@ -1,0 +1,5 @@
+const assert = require('assert');
+const { refund } = require('../lib/b');
+assert.deepStrictEqual(refund(999), { refunded: 9.99, source: 'b' });
+assert.deepStrictEqual(refund(100), { refunded: 1, source: 'b' });
+console.log('b.test ALL PASS');
