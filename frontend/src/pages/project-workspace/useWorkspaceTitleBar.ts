@@ -107,6 +107,8 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
       title: titleBarTitle,
       tabs: titleBarTabs,
       activeTabId: rightTab === 'home' ? null : rightTab,
+      // UI-446 — 审阅 tab 未打开时圆点挂「+」按钮（当前会话有未看工作区改动）
+      reviewDot: reviewUnread,
       onSelectTab: (tabId) => {
         if (tabId === 'results') {
           handleOpenRightResults();
@@ -153,6 +155,7 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
         title: 'Gewu',
         tabs: [],
         activeTabId: null,
+        reviewDot: false,
         onSelectTab: null,
         onCloseTab: null,
         onMoreAction: null,

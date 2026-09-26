@@ -90,6 +90,10 @@ export function TitleBarRightZone(): React.ReactElement {
               aria-controls="titlebar-tool-menu"
             >
               <Icon name="plus" size={15} />
+              {/* UI-446 — 审阅 tab 未打开时，圆点挂「+」按钮引导入口（点开审阅即熄） */}
+              {panels.titleBar.reviewDot && !tabs.some((tab) => tab.id === 'review') && (
+                <span className={styles.tabPillDot} data-testid="review-menu-dot" aria-hidden="true" />
+              )}
             </button>
             {toolMenuOpen && (
               <>

@@ -34,6 +34,8 @@ export interface TitleBarState {
   // 只在 compact/loading/error/非工作区路由渲染，这些态无真实可拖列，宽度推送成死链。
   tabs: TitleBarTab[];
   activeTabId: string | null;
+  /** UI-446 — 审阅 tab 未打开时，圆点挂「+」工具菜单按钮（当前会话有未看工作区改动）。 */
+  reviewDot?: boolean;
   onSelectTab: ((id: string) => void) | null;
   onCloseTab: ((id: string) => void) | null;
   onMoreAction: (() => void) | null;
@@ -71,6 +73,7 @@ const DEFAULT_TITLE_BAR: TitleBarState = {
   title: 'Gewu',
   tabs: [],
   activeTabId: null,
+  reviewDot: false,
   onSelectTab: null,
   onCloseTab: null,
   onMoreAction: null,
@@ -95,6 +98,7 @@ function titleBarDataEqual(a: TitleBarState, b: TitleBarState): boolean {
     a.canGoBack === b.canGoBack &&
     a.canGoForward === b.canGoForward &&
     JSON.stringify(a.tabs) === JSON.stringify(b.tabs) &&
+    a.reviewDot === b.reviewDot &&
     JSON.stringify(a.toolMenuItems) === JSON.stringify(b.toolMenuItems) &&
     JSON.stringify(a.resultItems) === JSON.stringify(b.resultItems)
   );

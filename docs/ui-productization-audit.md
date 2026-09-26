@@ -4171,6 +4171,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **来源**：BLOCK-123 P0 端到端对账缺口清单 G-01（「涩」：agent 完成编辑后默认视图无审阅引导，用户需自行发现右侧审阅 tab）。**对账先行**：聊天区改动卡片系 2026-09-09 用户裁决移除（c0e92dd0，UI-216/252/255/273 cancelled——信息已在工具行与审阅面板呈现，卡片冗余且空会话噪音），故本项**不复活卡片**，收窄为 tab 药丸级极轻圆点（不新增聊天区内容、无关闭不持久问题）。
 - **改动**（0 新增 IPC / 0 新依赖）：① conversationChangesStore 增未读判定面——`hasUnreviewedConversationChanges` 纯判定（导出供测试）+ `acknowledgeConversationChanges` 已读回写 + `isConversationUnreviewed`/`useConversationUnreviewedChanges` 取数；record/acknowledge 改单调时间戳（防同毫秒竞态抖动）；② `TitleBarTab` 增可选 `dot` 字段 + useWorkspaceTitleBar 组装（tab==='review' 且当前会话未读时点亮）；③ TitleBarRightZone tab 药丸渲染圆点（`--gewu-accent` token，暗色安全）；④ project-workspace 激活审阅 tab 即 acknowledge（圆点熄灭，新改动重新点亮）。
 - **证据（契约）**：conversationChangesStore.unread.test 5/5（纯判定四态 + store 集成 record→亮/acknowledge→熄/再 record→复亮/无会话 no-op）+ TitleBarRightZone.unread.test 2/2（dot 在场/缺省不渲染，工作区路由挂载）+ 既有 hydrate 8/8 零回归 + tsc 0 + theme 契约 4/4。
-- 待用户实机过目翻 verified（走查姿势：跑一个真实编码任务→审阅 tab 亮圆点→点开审阅→圆点熄灭→新改动再点亮）。
 - **收口尾清（2026-09-26，BLOCK-123 整包收口）**：`subscribeConversationChanges` 去导出（knip 棘轮新增死导出清偿——仅模块内 hook 使用）；knip 基线下调 1（TitleBarTab 因 dot 测试 import 转已被使用，棘轮自指示 --update）。本条随 BLOCK-123 整包 completed 为 rider（in_progress 待过目）。
+- **加映 v2（2026-09-26，用户实测抓真「圆点没亮 但确实改了文件」）**：根因=圆点只挂审阅 tab 药丸，**审阅 tab 未打开时无处可挂**，且用户点开审阅即 acknowledge 熄灭（用户窗口 ack 时间线实锤：ack 打点晚于写入，观察窗错过点亮期）——「最需要引导（tab 没开）的场景恰恰失效」。修复=圆点升格双挂点：**审阅 tab 未打开时挂「+」工具菜单按钮**（引导入口本身），已打开时挂 tab 药丸；实现=TitleBarState 增 reviewDot + useWorkspaceTitleBar 组装 + TitleBarRightZone 条件渲染（+钮/药丸互斥）+conversationChangesStore 移除临时诊断出口。
+- **证据（加映 v2）**：TitleBarRightZone.unread.test +4（菜单钮亮/审阅已开不双亮等互斥断言）→ 19/19；tsc 0 + theme 契约 5/5 + quality:lint 0 error。诊断过程沉淀=测试实例 UI 驱动复现（tmp 驱动：composer 真实发送）实证 UI 流记录管线好用（record 计数/存储/未读判定逐环取数），缺陷在挂点前提而非数据链。
+- 待用户按 v2 姿势复测（**无需预先打开审阅 tab**：发改动任务→「+」按钮亮圆点→点开审阅→熄灭）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
