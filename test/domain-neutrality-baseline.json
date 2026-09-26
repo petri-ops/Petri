@@ -56,12 +56,12 @@
     "core/biof3-server/agent-tools/tool-defs/browser.js::km-survival": 1,
     "core/biof3-server/agent-tools/tool-defs/browser.js::seurat": 1,
     "core/biof3-server/agent-tools/tool-defs/browser.js::volcano": 2,
-    "core/biof3-server/agent-tools/tool-defs/remote.js::deseq2": 3,
-    "core/biof3-server/agent-tools/tool-defs/remote.js::volcano": 1,
-    "core/biof3-server/agent-tools/tool-defs/remote.js::wgcna": 1,
     "core/biof3-server/agent-tools/tool-defs/result-studio.js::scanpy": 1,
     "core/biof3-server/agent-tools/tool-defs/result-studio.js::seurat": 1,
+    "core/biof3-server/agent-tools/tool-defs/session.js::deseq2": 3,
     "core/biof3-server/agent-tools/tool-defs/session.js::single-cell": 1,
+    "core/biof3-server/agent-tools/tool-defs/session.js::volcano": 1,
+    "core/biof3-server/agent-tools/tool-defs/session.js::wgcna": 1,
     "core/biof3-server/api-data.js::single-cell": 2,
     "core/biof3-server/db.js::single-cell": 2,
     "core/biof3-server/db/schema.js::single-cell": 2,
@@ -156,5 +156,5 @@
     "src/main/core-utils.js::seurat": 1,
     "src/main/core-utils.js::wgcna": 1
   },
-  "updatedAt": "2026-09-25"
+  "updatedAt": "2026-09-26"
 }

@@ -53,6 +53,40 @@ function setupFileDialogIpc({ mainWindow } = {}) {
     }
   });
 
+  // UI-444 加映（用户反馈「点击了下载但没有窗口出来」）——文本另存为：
+  // 原生保存对话框（用户确认位置/文件名=显式同意）+ 主进程写入所选路径。
+  // 与 downloadFromUrl（静默落 Downloads）并存：需要位置可控的导出走本通道。
+  const SAVE_TEXT_MAX_BYTES = 20 * 1024 * 1024;
+  ipcMain.handle(CHANNELS.file.saveTextFile, async (_event, payload) => {
+    if (!mainWindow) return { ok: false, error: "no main window" };
+    const { defaultName, content } = payload || {};
+    if (typeof defaultName !== "string" || !defaultName.trim()) {
+      return { ok: false, error: "invalid default name" };
+    }
+    // 文件名非法字符校验（含控制字符；用字符码而非正则——no-control-regex 棘轮）
+    const invalidName = /["<>|?*]/.test(defaultName)
+      || defaultName === "." || defaultName === ".."
+      || Array.from(defaultName).some((ch) => ch.charCodeAt(0) <= 0x1f);
+    if (invalidName) {
+      return { ok: false, error: "invalid file name" };
+    }
+    if (typeof content !== "string" || Buffer.byteLength(content, "utf8") > SAVE_TEXT_MAX_BYTES) {
+      return { ok: false, error: "content too large or invalid" };
+    }
+    try {
+      const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
+        defaultPath: defaultName,
+        filters: [{ name: "Markdown", extensions: ["md"] }, { name: "文本文件", extensions: ["txt"] }, { name: "所有文件", extensions: ["*"] }],
+      });
+      if (canceled || !filePath) return { ok: true, canceled: true };
+      fs.writeFileSync(filePath, content, "utf8");
+      return { ok: true, path: filePath };
+    } catch (e) {
+      console.error("[desktop] save text file failed:", e.message);
+      return { ok: false, error: e.message };
+    }
+  });
+
   ipcMain.handle(CHANNELS.file.openDialog, async (event, optionsOrFilters) => {
     if (!mainWindow) return null;
     try {

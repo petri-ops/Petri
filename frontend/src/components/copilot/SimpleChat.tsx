@@ -149,7 +149,7 @@ import {
 import './simple-chat.css';
 import { Icon } from '@/components/icons/Icon';
 import { getBridge } from '@/lib/desktopBridge';
-import { getPlatformApiPrefix } from '@/lib/authClient';
+import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 import { HighlightedCode } from '@/components/ui/CodeHighlight';
 import { INITIAL_NAV_STATE, stepHistoryNavigation } from './chatHistoryNav';
 import {
@@ -231,19 +231,39 @@ export function SimpleChat({
   // CK-01（C-06）— 运行中发送自动 steer 的行内回执提示（几秒自动消退）
   const [steerNotice, setSteerNotice] = useState<string | null>(null);
 
-  // UI-444 — 会话导出 Markdown：后端 /export.md 组合，经 files.downloadFromUrl
-  // 静默落 Downloads（与结果产物导出同一条点击即下载通道）。
+  // UI-444 加映（用户反馈「点击了下载但没有窗口出来」）——改为原生另存为：
+  // fetch 后端组合的 Markdown → files.saveTextFile（原生保存对话框，位置可控、
+  // 确认后写入）→ 行内回执告知路径；浏览器（非桌面）回退 blob 锚点下载。
   const handleExportConversation = useCallback((): void => {
     if (!conversationId) return;
-    const name = `会话导出-${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '')}.md`;
-    void getBridge('files')
-      ?.downloadFromUrl(
-        `${getPlatformApiPrefix()}/ai/conversations/${encodeURIComponent(conversationId)}/export.md`,
-        name,
-      )
-      .then((r) => {
-        if (r && r.ok === false) setSteerNotice('会话导出失败：' + (r.error || '未知原因'));
-      });
+    void (async () => {
+      const url = `${getPlatformApiPrefix()}/ai/conversations/${encodeURIComponent(conversationId)}/export.md`;
+      const token = getToken();
+      let content: string | null = null;
+      try {
+        const resp = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : undefined });
+        if (resp.ok) content = await resp.text();
+      } catch { content = null; }
+      if (content == null) {
+        setSteerNotice('会话导出失败：无法读取会话内容');
+        return;
+      }
+      const name = `会话导出-${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '')}.md`;
+      const bridge = getBridge('files');
+      if (bridge?.saveTextFile) {
+        const r = await bridge.saveTextFile(name, content);
+        if (r && r.ok && r.path) setSteerNotice(`已导出：${r.path}`);
+        else if (r && r.ok && r.canceled) { /* 用户取消，不打扰 */ }
+        else setSteerNotice('会话导出失败：' + ((r && r.error) || '未知原因'));
+        return;
+      }
+      const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    })();
   }, [conversationId]);
   useEffect(() => {
     if (!steerNotice) return undefined;

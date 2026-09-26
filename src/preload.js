@@ -290,6 +290,9 @@ const desktopBridgeSurface = {
     // UI-400-2 — 导出/下载：主进程保存对话框 + 受限本机来源流式写盘
     downloadFromUrl: (url, name) =>
       ipcRenderer.invoke('file:download-from-url', { url, name }),
+    // UI-444 加映 — 文本另存为：原生保存对话框（用户确认位置）+ 主进程写所选路径
+    saveTextFile: (defaultName, content) =>
+      ipcRenderer.invoke('file:save-text-file', { defaultName, content }),
     // BLOCK-53 P1 — 拖拽目录直达创建：把拖入窗口的 File 对象解析为磁盘绝对路径。
     // webUtils.getPathForFile 是 Electron 官方通道（File.path 自 32 起移除）；沙箱
     // 环境或非文件拖入时兜底 file.path（Electron 30 仍可用），都拿不到返回 null。

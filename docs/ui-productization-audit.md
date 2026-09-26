@@ -4152,3 +4152,5 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据（契约+实机）**：组合器契约 4/4（基本组合/空白跳过+未知角色/截断防御标注/formatTs）+ tsc 0 + eslint 0 error；**实机**=CDP 全链取证（acceptance/ui-444/）：真实发送消息→按钮出现→等回复落库→点击导出→Downloads 出现「会话导出-*.md」→内容四断言全过（标题/用户/格物/消息数），截图+证据 JSON 落盘。
 - 待用户实机过目翻 verified。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+- **加映（2026-09-26，用户实测反馈「点击了下载但是没有窗口出来 导出位置是不是应该打开文件管理器确认」）**：导出交互改版——原走 downloadFromUrl 静默落 Downloads（点击无任何反馈=静默成功看起来像坏了，用户抓真成立）；改走**原生另存为**：SimpleChat fetch 后端组合的 Markdown → 新增 `file:save-text-file` IPC（channels+file-dialog handler+preload+electron.d.ts 四件套同步）→ 原生保存对话框（默认文件名带日期、Markdown 过滤器、用户确认位置）→ 主进程写所选路径 → 行内回执「已导出：<path>」（取消不打扰/失败回执）；浏览器（非桌面）回退 blob 锚点下载。防御=文件名非法字符校验（字符码实现避免 no-control-regex 棘轮）+20MB 内容上限。
+- **证据（加映）**：D7 棘轮跟账=run_tool 描述文案随 def 搬家 remote→session（deseq2 3/volcano 1/wgcna 1 净零挪动，非新增领域内容）；ipc-channels-registry 双向守护 7/7；tsc 0；eslint 0 error（新代码字符码校验不触控制字符正则）。待用户点击复验（对话框为原生 OS UI，CDP 不可驱动=用户即验收人）。

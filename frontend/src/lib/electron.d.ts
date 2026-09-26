@@ -379,6 +379,11 @@ declare global {
           url: string,
           name: string
         ) => Promise<{ ok: boolean; path?: string; canceled?: boolean; error?: string }>;
+        /** UI-444 加映 — 文本另存为：原生保存对话框（用户确认位置）+ 主进程写所选路径。 */
+        saveTextFile: (
+          defaultName: string,
+          content: string
+        ) => Promise<{ ok: boolean; path?: string; canceled?: boolean; error?: string }>;
         /** BLOCK-53 P1 — 拖拽目录直达：把拖入窗口的 File 对象解析为磁盘绝对路径（拿不到返回 null）。 */
         pathForFile: (file: File) => string | null;
       };

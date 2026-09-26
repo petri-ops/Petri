@@ -59,6 +59,7 @@ const CHANNELS = {
     openWorkspaceFile: 'file:open-workspace-file',
     downloadFromUrl: 'file:download-from-url',
     saveDialog: 'file:save-dialog',
+    saveTextFile: 'file:save-text-file',
     validateDirectory: 'file:validate-directory',
   },
   gewu: {
