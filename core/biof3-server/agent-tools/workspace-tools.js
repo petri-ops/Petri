@@ -849,6 +849,88 @@ function createWorkspaceTools(options = {}) {
   }
 
   // handlerOptions: BLOCK-33 P3 — 第 3 参携带 { onOutput } 流式回调（可选）
+  // G-04 根治（BLOCK-123 遗留观察项清偿）— workspace_exec 命令不存在反馈增形：
+  // 命令不存在时结果附 commandNotFoundHint（有界候选）+ note 指路，让 agent 一次拿到
+  // 「有什么可用」而不是字面重试绕路（走查证据：G-04 exec#4 绕一次）。
+  // 平台真相（实测）：Windows 走 cmd.exe 包装，not-found 是 cmd 本地化文案（GBK→UTF-8
+  // 解码即乱码）+exit 1，没有 spawn ENOENT 事件——文本探测器在中文 Windows 上必然漏。
+  // 因此主判定=locale 无关的确定性核查：命令首 token 在 cwd/PATH（含 PATHEXT）中确实
+  // 不存在（cmd 内建命令豁免）；POSIX ENOENT 文案作为快路径。真实失败（node 模块缺失等，
+  // token 在 PATH）天然不误伤。候选探测只读（readdir/stat，全 try/catch 静默）。
+  const CMD_BUILTINS = new Set([
+    'cd', 'dir', 'echo', 'type', 'copy', 'del', 'md', 'rd', 'ren', 'move', 'set', 'exit',
+    'for', 'if', 'call', 'cls', 'ver', 'vol', 'where', 'mklink', 'title', 'time', 'date',
+    'start', 'pushd', 'popd', 'goto', 'shift', 'setlocal', 'endlocal', 'pause', 'rem',
+  ]);
+
+  function isCommandNotFoundText(combined) {
+    return /ENOENT|is not recognized|command not found|无法将.*识别|系统找不到指定的文件/i.test(combined || '');
+  }
+
+  function commandQueryToken(command) {
+    const first = String(command || '').trim().split(/\s+/)[0] || '';
+    return first.replace(/^["']+|["']+$/g, '').split(/[\\/]/).pop() || first;
+  }
+
+  async function executableTokenExists(token, cwdRoot) {
+    if (!token || CMD_BUILTINS.has(token.toLowerCase())) return true;
+    const exts = process.platform === 'win32'
+      ? (process.env.PATHEXT || '.COM;.EXE;.BAT;.CMD').split(';').map((e) => e.toLowerCase())
+      : [''];
+    const dirs = [cwdRoot, ...(process.env.PATH || '').split(path.delimiter).filter(Boolean)];
+    for (const dir of dirs) {
+      for (const ext of exts) {
+        try {
+          if ((await fsp.stat(path.join(dir, token.toLowerCase() + ext))).isFile()) return true;
+          if ((await fsp.stat(path.join(dir, token + ext))).isFile()) return true;
+        } catch {}
+      }
+    }
+    return false;
+  }
+
+  async function collectCommandCandidates(dir) {
+    const hint = { npmScripts: [], testFiles: [], runnerFiles: [] };
+    try {
+      const pkg = JSON.parse(await fsp.readFile(path.join(dir, 'package.json'), 'utf8'));
+      hint.npmScripts = Object.keys(pkg.scripts || {}).slice(0, 10);
+    } catch {}
+    try {
+      const rootNames = (await fsp.readdir(dir, { withFileTypes: true }))
+        .filter((d) => d.isFile())
+        .map((d) => d.name);
+      hint.testFiles = rootNames.filter((n) => /\.test\.(js|mjs|cjs|ts)$|\.spec\.(js|mjs|cjs|ts)$/.test(n)).sort().slice(0, 8);
+      const knownRunners = ['run-tests.js', 'Makefile', 'justfile', 'pytest.ini', 'pyproject.toml'];
+      hint.runnerFiles = knownRunners.filter((k) => rootNames.includes(k)).slice(0, 5);
+      try {
+        const testDirNames = (await fsp.readdir(path.join(dir, 'test'), { withFileTypes: true }))
+          .filter((d) => d.isFile())
+          .map((d) => d.name)
+          .filter((n) => /\.(test|spec)\.(js|mjs|cjs|ts)$/.test(n))
+          .sort()
+          .slice(0, 8)
+          .map((n) => `test/${n}`);
+        hint.testFiles = [...hint.testFiles, ...testDirNames].slice(0, 8);
+      } catch {}
+    } catch {}
+    return hint;
+  }
+
+  async function attachCommandNotFoundHint(result, notFoundEvidence, cwdRoot) {
+    const exitCode = Number.isInteger(result.exitCode) ? result.exitCode : 1;
+    const looksNotFound = isCommandNotFoundText(notFoundEvidence)
+      || (exitCode === 1 && !(result.stdout || '').trim() && !(await executableTokenExists(commandQueryToken(result.command), cwdRoot)));
+    if (!looksNotFound) return result;
+    const hint = await collectCommandCandidates(cwdRoot);
+    const parts = [];
+    if (hint.npmScripts.length) parts.push(`npm scripts: ${hint.npmScripts.join(' / ')}`);
+    if (hint.testFiles.length) parts.push(`测试文件: ${hint.testFiles.join(' / ')}`);
+    if (hint.runnerFiles.length) parts.push(`runner: ${hint.runnerFiles.join(' / ')}`);
+    result.commandNotFoundHint = { query: commandQueryToken(result.command), ...hint };
+    result.note = `命令不存在（${result.commandNotFoundHint.query}）。工作区内可用候选 → ${parts.length ? parts.join('；') : '（未发现 package.json scripts / 测试文件）'}`;
+    return result;
+  }
+
   async function executeCommand(args = {}, ctx = {}, handlerOptions = {}) {
     // BLOCK-56 P2 — workspace-write 中间档放行前台命令（黑名单 + cwd 限项目根维持）
     if (ctx.accessMode !== 'full' && ctx.accessMode !== 'workspace-write') {
@@ -918,7 +1000,7 @@ function createWorkspaceTools(options = {}) {
           truncated: spawnResult.truncated,
         };
       }
-      return {
+      let failed = {
         ok: false,
         command,
         cwd: cwdLabel,
@@ -931,6 +1013,9 @@ function createWorkspaceTools(options = {}) {
         stderr: spawnResult.stderr.slice(0, MAX_COMMAND_OUTPUT_BYTES),
         truncated: spawnResult.truncated,
       };
+      if (spawnResult.errorMessage) failed.errorMessage = spawnResult.errorMessage;
+      failed = await attachCommandNotFoundHint(failed, `${spawnResult.errorMessage || ''}\n${spawnResult.stderr || ''}`, cwdRoot);
+      return failed;
     }, { requireCompatible: true });
   }
 
@@ -1064,6 +1149,9 @@ function createWorkspaceTools(options = {}) {
         if (stdoutBudgeted.truncated || stderrBudgeted.truncated) {
           result.outputTruncatedByTokenBudget = true;
           result.note = `输出超出 max_output_tokens=${maxOutputTokens} 预算，已按 token 预算截断（完整输出可改用 exec_background 落日志后 workspace_read）`;
+        }
+        if (!result.ok) {
+          await attachCommandNotFoundHint(result, `${outcome.spawnError || ''}\n${stderrRaw || ''}`, cwdRoot);
         }
         return result;
       }

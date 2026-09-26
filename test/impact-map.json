@@ -2182,7 +2182,7 @@
     },
     {
       "id": "block124-codegraph-tools",
-      "note": "BLOCK-124（C-13）codegraph 双工具注册面：session 域 defs + registry HANDLERS/CONTRACTS + tool-metadata + 动词三面（tool-events / 前端 toolActivity / fixture）；根解析复用 workspace-tools withWorkspace 双闸。工具总数钉 74→76 同步四处（agent-tool-registry×2 / tool-activity-labels / block116 存量红顺手清偿）。内核契约另由 hk03-symbol-graph 规则覆盖。",
+      "note": "BLOCK-124（C-13）codegraph 双工具注册面：session 域 defs + registry HANDLERS/CONTRACTS + tool-metadata + 动词三面（tool-events / 前端 toolActivity / fixture）；根解析复用 workspace-tools withWorkspace 双闸。工具总数钉 74→76 同步四处（agent-tool-registry×2 / tool-activity-labels / block116 存量红顺手清偿）。G-04 根治（BLOCK-123 遗留观察项）：workspace_exec 命令不存在反馈增形（commandNotFoundHint 候选+note 指路，locale 无关确定性判定）+契约测试+实机探针随本规则。内核契约另由 hk03-symbol-graph 规则覆盖。",
       "patterns": [
         "core/biof3-server/agent-tools/codegraph-tools.js",
         "core/biof3-server/agent-tools/tool-defs/session.js",
@@ -2194,10 +2194,13 @@
         "test/fixtures/tool-activity-labels.json",
         "test/codegraph-tools.test.mjs",
         "scripts/block124-p1-codegraph-walkthrough.mjs",
+        "scripts/g04-exec-hint-live.mjs",
+        "test/workspace-exec-error-hint.test.mjs",
         "acceptance/block-124/**"
       ],
       "tests": [
         "test/codegraph-tools.test.mjs",
+        "test/workspace-exec-error-hint.test.mjs",
         "test/agent-tool-registry.test.mjs",
         "test/tool-activity-labels.test.mjs",
         "test/block109-p2-tool-metadata.test.mjs",

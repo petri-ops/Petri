@@ -439,8 +439,11 @@
     }
   },
   "frontend/src/components/workspace-panels/LeftPanel.test.tsx": {
+    "@typescript-eslint/no-unnecessary-type-assertion": {
+      "count": 2
+    },
     "@typescript-eslint/require-await": {
-      "count": 10
+      "count": 11
     },
     "@typescript-eslint/unbound-method": {
       "count": 4
