@@ -31,6 +31,15 @@ const { initRepositoryAt } = require('./working-tree-review/repository-init');
 const { diffForReview, parseDiffFiles, buildReversePatchForReject } = require('./working-tree-review/diff-parse');
 const { _writeRejectEntry } = require('./working-tree-review/reject-store');
 
+// BLOCK-125：拒绝清单根目录解析——与 core/biof3-server/helpers/system-prompt.js
+// resolveWorkingTreeRejectRoot 同优先级（LOCAL_DATA_DIR 优先 / USER_DATA_DIR 回退），
+// 两侧口径由 test/reject-loop-root.test.mjs 源码扫描守卫钉住（本文件受 quality:arch
+// R5 限制不能 require core helper，故内联同逻辑；改解析规则必须两侧同批改）。
+function resolveRejectRootDir() {
+  if (process.env.BIOF3_LOCAL_DATA_DIR) return process.env.BIOF3_LOCAL_DATA_DIR;
+  return app.getPath('userData');
+}
+
 const MAX_FILE_CONTENT_BYTES = 1024 * 1024; // 1MB；超过只返回元信息（行级渲染策略）
 
 /**
@@ -150,7 +159,7 @@ function setupWorkingTreeReviewIpc(options = {}) {
       }
       adapter.applyPatch({ patch: reversePatch });
       // 写入 reject 清单（30 天 TTL）
-      _writeRejectEntry(app.getPath('userData'), {
+      _writeRejectEntry(resolveRejectRootDir(), {
         file: args.file,
         hunkIndex: args.hunkIndex,
         taskId: args.taskId,
@@ -262,7 +271,7 @@ function setupWorkingTreeReviewIpc(options = {}) {
         throw new GitAdapterError('patch_required', 'patch text is required.');
       }
       adapter.applyInverseHunk({ patch: args.patch });
-      _writeRejectEntry(app.getPath('userData'), {
+      _writeRejectEntry(resolveRejectRootDir(), {
         file: args.file,
         hunkIndex: args.hunkIndex,
         taskId: args.taskId,

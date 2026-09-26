@@ -16,7 +16,7 @@
 
 const { estimateRequestTokens } = require('./helpers/token-estimator');
 const { getAiSettings } = require('./helpers/ai-settings');
-const { buildSystemPrompt, loadWorkingTreeRejectEntries } = require('./helpers/system-prompt');
+const { buildSystemPrompt, loadWorkingTreeRejectEntries, resolveWorkingTreeRejectRoot } = require('./helpers/system-prompt');
 const { appendDesktopAgentInstructions } = require('./helpers/desktop-agent-prompt');
 const { renderPluginDemoPathsForPrompt } = require('./helpers/plugin-demo-prompt');
 const llmClient = require('./helpers/llm-client');
@@ -290,15 +290,19 @@ async function runAgentLoop({
   // system-prompt.js 检测到 workingTreeRejects（已构造好的 entries）就直接渲染；
   // 否则用 workingTreeRejectsUserDataDir 自动从磁盘读。两条入口互斥：
   // ctxForPrompt 优先，磁盘读是兜底。
-  if (typeof process !== 'undefined' && process.env && process.env.BIOF3_USER_DATA_DIR) {
-    const userDataDir = process.env.BIOF3_USER_DATA_DIR;
-    try {
-      const entries = loadWorkingTreeRejectEntries(userDataDir, { limit: 10 });
-      if (entries.length > 0) {
-        ctxForPrompt.workingTreeRejects = entries;
+  // BLOCK-125：根目录经 resolveWorkingTreeRejectRoot 解析（LOCAL_DATA_DIR 优先，
+  // USER_DATA_DIR 回退）——修复测试实例/独立后端拓扑下读写两侧目录脑裂。
+  if (typeof process !== 'undefined' && process.env) {
+    const userDataDir = resolveWorkingTreeRejectRoot();
+    if (userDataDir) {
+      try {
+        const entries = loadWorkingTreeRejectEntries(userDataDir, { limit: 10 });
+        if (entries.length > 0) {
+          ctxForPrompt.workingTreeRejects = entries;
+        }
+      } catch {
+        // 拒绝清单读取失败不阻塞 prompt 构建
       }
-    } catch {
-      // 拒绝清单读取失败不阻塞 prompt 构建
     }
   }
 

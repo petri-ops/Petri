@@ -5361,8 +5361,25 @@
       "registeredAt": "2026-09-26",
       "archivePolicy": "archive_when_superseded",
       "phase": "P0-LAUNCH"
+    },
+    {
+      "id": "BLOCK-125-REJECT-LOOP",
+      "path": "docs/block-125-reject-loop-plan.md",
+      "capability": "reject-loop-fix",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "reject-loop-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-26",
+      "tags": [
+        "BLOCK-125",
+        "reject-loop",
+        "C-17a"
+      ],
+      "archivePolicy": "retain_stable_path"
     }
   ],
   "lastUpdated": "2026-09-26",
-  "documentCount": 285
+  "documentCount": 286
 }

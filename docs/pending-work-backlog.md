@@ -119,7 +119,7 @@
 | C-14 | **RTK 型工具输出压缩**（ZCode hooks 适配 shell 输出压缩，社区口径 60-90%） | 重开条件=实测 token 成本成为痛点 + ZCode hooks 适配验证可行；来源=HK 建表批 2026-09-26 |
 | C-15 | **结果闭环路径扩展（原 BLOCK-122 提案，垂直域）**：从已验证 deseq2 链延伸（bind_artifact 串 volcano-plot / 激活 pca-explorer 独立路径）——用户 2026-09-26 裁决「属于垂直领域的扩展」让位通用编码主线（BLOCK-123） | 重开条件=用户裁决方向回摆生信旗舰倾斜（参照 product-strategy-review-2026-09 §4）；勘察情报=AUDIT-LOG 2026-09-26 行（pack 在本机/deseq2 唯一激活/休眠 15 插件/demo-data 错位盘点） |
 | C-16 | **审阅徽章 ±行数版**（UI-446 v4 计数徽章的升级：入口直接显示 +A −D 行数变化）——权威源=审阅面板 git diff，需后端 shortstat 桥避免第二真相 | 重开条件=用户对文件计数徽章反馈需要更细粒度；走 DEPENDENCY/立项检查单 |
-| C-17 | **BLOCK-123 第三轮走查形态深挖**（reject→agent 调整回路 / 终端反馈面体验 / 多文件深度任务续形态）——通用编码 harness 主线续版走查 | 重开条件=用户真实使用反馈触发或点名启动；三轮走查证据=acceptance/block-123/ |
+| C-17 | **BLOCK-123 第三轮走查形态深挖**——**a) reject→agent 调整回路：已随 BLOCK-125 清偿（2026-09-26：拓扑脑裂修复+实机 allPass，plan=docs/block-125-reject-loop-plan.md）；b) 终端反馈面体验 / c) 多文件深度任务续形态 待推进**（队列逐推模式下一项=b） | 队列逐推模式（用户裁决「按顺序逐个推进」）按序推进；三轮走查证据=acceptance/block-123/ |
 | C-18 | **编码 playbook 资源 skill**（产品 skill 轨 `resources/skills/` 新建：项目约定/编码规范注入 agent 编码任务；红线=新建不复制 `.agents` 资产） | 重开条件=编码 harness 主线真实使用反馈显示 agent 缺项目约定承载；来源=BLOCK-124 P0 勘察 2026-09-26 |
 | C-19 | **开发纪律产品回声**（HK-01 红绿先行 / HK-02 YAGNI 自检的 agent 行为化评估：编码任务先测后改提示、完成前自检清单） | 重开条件=真实使用反馈显示 agent 行为需要纪律引导；来源=BLOCK-124 P0 勘察 2026-09-26 |
 | C-02 | 轮询→SSE——**已编入 CK-03** | BLOCK-106 遗留候选 |

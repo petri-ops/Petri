@@ -270,6 +270,25 @@ function _loadWorkingTreeRejectEntries() {
 }
 
 /**
+ * BLOCK-125：拒绝清单根目录解析——BIOF3_LOCAL_DATA_DIR（全拓扑共享：主实例/测试实例/
+ * 独立后端均设置）优先，BIOF3_USER_DATA_DIR（仅 Electron spawn 后端时存在）回退。
+ * 根因：测试实例 userData 独立但复用 :3001 后端，旧逻辑读写两侧指向不同目录=回路断裂
+ * （BLOCK-85 脑裂家族）。写侧（src/ipc/working-tree-review.js，受 quality:arch R5 限制
+ * 不能 require 本 helper）以同优先级内联解析，两侧由 test/reject-loop-root.test.mjs
+ * 源码扫描守卫钉住口径一致——修改解析规则时两侧必须同批改。
+ */
+function resolveWorkingTreeRejectRoot(env = process.env) {
+  if (!env || typeof env !== 'object') return null;
+  if (typeof env.BIOF3_LOCAL_DATA_DIR === 'string' && env.BIOF3_LOCAL_DATA_DIR) {
+    return env.BIOF3_LOCAL_DATA_DIR;
+  }
+  if (typeof env.BIOF3_USER_DATA_DIR === 'string' && env.BIOF3_USER_DATA_DIR) {
+    return env.BIOF3_USER_DATA_DIR;
+  }
+  return null;
+}
+
+/**
  * BLOCK-16 PHASE 3：从 userData/working-tree-review/rejects/*.json 读最近拒绝记录。
  * 调用方（agent-runner.js）传入 userData 绝对路径；本函数只负责排序 + 截断 + 容错。
  * 单文件读取失败不抛错（避免阻塞 prompt 构建）。
@@ -533,6 +552,7 @@ module.exports = {
   renderResultStudioContextForPrompt,
   renderWorkingTreeRejectsForPrompt,
   loadWorkingTreeRejectEntries,
+  resolveWorkingTreeRejectRoot,
   ERROR_I18N,
   getCacheMetrics,
   resetCacheMetrics,

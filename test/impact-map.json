@@ -2166,6 +2166,25 @@
       "scriptRole": "governance"
     },
     {
+      "id": "block125-reject-loop",
+      "note": "BLOCK-125（C-17a）reject→agent 回路拓扑修复：拒绝清单根目录解析统一 BIOF3_LOCAL_DATA_DIR 优先（USER_DATA_DIR 回退）——修复测试实例/独立后端拓扑下读写两侧 userData 脑裂（BLOCK-85 家族）；契约=reject-loop-root（解析优先级+写读收敛+IPC 写侧源码扫描守卫）+存量 system-prompt-rejects 11 契约回归；实机走查=测试实例 CDP 拒绝→共享目录落盘→:3001 下一轮 agent 引用被拒文件（acceptance/block-125/）。",
+      "patterns": [
+        "test/reject-loop-root.test.mjs",
+        "scripts/block125-reject-loop-live.mjs",
+        "acceptance/block-125/**",
+        "src/ipc/working-tree-review.js",
+        "core/biof3-server/agent-runner.js",
+        "core/biof3-server/helpers/system-prompt.js"
+      ],
+      "tests": [
+        "test/reject-loop-root.test.mjs",
+        "test/system-prompt-rejects.test.mjs"
+      ],
+      "frontendRelated": false,
+      "classifiesScripts": true,
+      "scriptRole": "governance"
+    },
+    {
       "id": "hk03-symbol-graph",
       "note": "HK-03 符号图/导入边精确分类查询（typescript Compiler API 零新增依赖；选型/回放/DEAD 语义边界=docs/hk03-symbol-graph-selection.md）。BLOCK-124（C-13）内核单源迁 core/biof3-server/helpers/code-graph.js（scripts/symbol-graph.mjs 只剩 CLI 薄壳），契约测试随迁。补登原因=UI-445 提交 c3387d24 登记 test:changed fail-closed 拦截本脚本未登记，红旗归属 HK-03 收口清偿。",
       "patterns": [
