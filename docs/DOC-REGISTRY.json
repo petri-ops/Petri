@@ -5340,8 +5340,29 @@
         "C-13"
       ],
       "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "UI-448-SIDE-CHAT-DOCK-ALIGNMENT",
+      "path": "docs/ui-448-side-chat-dock-alignment-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "ui-448-side-chat-dock-alignment",
+      "entrypoint": "docs/README.md",
+      "tags": [
+        "ui-448",
+        "side-chat-dock",
+        "simplechat",
+        "center-panel",
+        "ux-alignment",
+        "G0"
+      ],
+      "notes": "侧边聊天悬浮面体验对齐项目摘要。2026-09-26 用户裁决立项（原话「行！ 按照你的建议 开冲」，对主会话实机核查四点不和谐的整体放行）：①单输入面=SideChatDock 开态升共享 store（hooks/sideChatDockStore.ts），中栏 ownsCopilotAsk 实例 composer 让位为提示条（含返回中栏输入动作）；②内容让位=CenterPanel agentMain 开态挂让位类（padding-right min(432px, 100%-320px)），终结 380px 面板拦腰切割；③视觉对齐=圆角 16px/新 token --gewu-shadow-float（亮暗双套，.workspaceSummaryFloat 同值硬编码收编单源）/入场 280ms+prefers-reduced-motion；④窄面适配=悬挂面 SimpleChat compact 短占位符。红绿先行三面契约（SideChatDock/CenterPanel/SimpleChat）。非范围：0.92 半透明不采纳（交互面）、宽度拖拽调节、悬浮面×摘要浮层同屏叠置边界（reopen 条件在案）。把手+44px 间隙结构保留（D1 常驻把手契约）。0 新依赖。证据 acceptance/ui-448/。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+      "registeredAt": "2026-09-26",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH"
     }
   ],
   "lastUpdated": "2026-09-26",
-  "documentCount": 284
+  "documentCount": 285
 }
