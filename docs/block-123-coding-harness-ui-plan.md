@@ -1,9 +1,3 @@
-# BLOCK-123 — 通用编码 harness 使用界面主线（P0 端到端任务对账）
-
-> 立项：2026-09-26（active，P0-LAUNCH；用户裁决「你来定」授权，方向裁决原话见 §1）。
-> 能力：`coding-harness-ui`（capability front-matter 已带）。
-> 阶段定位：G0 开发期 · 产品主线（方向裁决收口 product-strategy-review-2026-09 §6 观察期约定）。
-
 ---
 capability: coding-harness-ui
 goal: 用户在 Gewu 工作台里用一句自然语言驱动 agent 完成一次真实的通用编码任务（改代码→跑验证→审阅→提交），全链路无断点、反馈完整
@@ -13,6 +7,12 @@ acceptance:
 reopen: 方向裁决回摆生信旗舰倾斜时本主线让位（参照 product-strategy-review-2026-09 §4）
 status: active
 ---
+
+# BLOCK-123 — 通用编码 harness 使用界面主线（P0 端到端任务对账）
+
+> 立项：2026-09-26（active，P0-LAUNCH；用户裁决「你来定」授权，方向裁决原话见 §1）。
+> 能力：`coding-harness-ui`（capability front-matter 已带）。
+> 阶段定位：G0 开发期 · 产品主线（方向裁决收口 product-strategy-review-2026-09 §6 观察期约定）。
 
 ## 1. 一句话目标与方向来源
 
