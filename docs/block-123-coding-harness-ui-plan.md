@@ -5,12 +5,12 @@ acceptance:
   - P0 缺口清单落盘（六环节走查证据 acceptance/block-123/）
   - 后续缺口项逐项 UI-### 登记串行清偿
 reopen: 方向裁决回摆生信旗舰倾斜时本主线让位（参照 product-strategy-review-2026-09 §4）
-status: active
+status: completed
 ---
 
 # BLOCK-123 — 通用编码 harness 使用界面主线（P0 端到端任务对账）
 
-> 立项：2026-09-26（active，P0-LAUNCH；用户裁决「你来定」授权，方向裁决原话见 §1）。
+> 立项：2026-09-26（P0-LAUNCH；用户裁决「你来定」授权，方向裁决原话见 §1）→ **2026-09-26 当日整包 completed（P0+P1 三轮走查；closeout 十二门绿）**。
 > 能力：`coding-harness-ui`（capability front-matter 已带）。
 > 阶段定位：G0 开发期 · 产品主线（方向裁决收口 product-strategy-review-2026-09 §6 观察期约定）。
 
@@ -43,6 +43,8 @@ status: active
 | P1..Pn | 缺口逐项串行清偿（AGENT-WORKBENCH 修订 3 同款：每项启动前先对照当前代码对账是否已被覆盖） | 每项独立 UI-### 登记 + 实机证据 |
 
 **P1 进展（2026-09-26）**：**G-01 已清偿（UI-446，in_progress 待实机过目）**——对账先行抓真：聊天区改动卡片系 2026-09-09 用户裁决移除（c0e92dd0），不复活；形态收窄为**审阅 tab 未读圆点**（当前会话有未看工作区改动时药丸亮 `--gewu-accent` 圆点，激活审阅 tab 即 acknowledge 熄灭，新改动复亮）。实现=conversationChangesStore 未读判定面（单调时间戳防同毫秒竞态）+TitleBarTab.dot+titlebar 组装+药丸渲染；红绿先行（store 未读测试+RightZone 渲染测试先落 6 红→15/15 绿）；tsc 0+theme 契约 4/4+quality:lint 0 error。
+
+**整包收口（2026-09-26）**：P0 六环节零断点 + P1 三轮走查四形态闭环（单文件修 bug / 需求在测试+错误 runner 自纠 / 跨文件 TTL 改造带防作弊复核）+ 缺口清单全清（G-01 清偿=UI-446 / G-02 销号 / G-03 清偿 30 条 / G-04 续观非阻塞）。closeout 十二门绿。**riders**：UI-446 in_progress 待用户实机过目（走查姿势见台账）；第三轮走查形态（reject→agent 调整回路/终端反馈面）转候选，按真实使用反馈择优。
 
 **P0 六环节走查协议**（探针 `scripts/block123-p0-coding-walkthrough.mjs`，复用 block121 flow 驱动姿势：真实 chat + context.accessMode='full' + 测试实例 CDP）：
 

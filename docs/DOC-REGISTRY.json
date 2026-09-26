@@ -5311,7 +5311,7 @@
       "path": "docs/block-123-coding-harness-ui-plan.md",
       "capability": "coding-harness-ui",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "coding-harness-ui-plan",
       "entrypoint": "docs/README.md",

@@ -4172,4 +4172,5 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **改动**（0 新增 IPC / 0 新依赖）：① conversationChangesStore 增未读判定面——`hasUnreviewedConversationChanges` 纯判定（导出供测试）+ `acknowledgeConversationChanges` 已读回写 + `isConversationUnreviewed`/`useConversationUnreviewedChanges` 取数；record/acknowledge 改单调时间戳（防同毫秒竞态抖动）；② `TitleBarTab` 增可选 `dot` 字段 + useWorkspaceTitleBar 组装（tab==='review' 且当前会话未读时点亮）；③ TitleBarRightZone tab 药丸渲染圆点（`--gewu-accent` token，暗色安全）；④ project-workspace 激活审阅 tab 即 acknowledge（圆点熄灭，新改动重新点亮）。
 - **证据（契约）**：conversationChangesStore.unread.test 5/5（纯判定四态 + store 集成 record→亮/acknowledge→熄/再 record→复亮/无会话 no-op）+ TitleBarRightZone.unread.test 2/2（dot 在场/缺省不渲染，工作区路由挂载）+ 既有 hydrate 8/8 零回归 + tsc 0 + theme 契约 4/4。
 - 待用户实机过目翻 verified（走查姿势：跑一个真实编码任务→审阅 tab 亮圆点→点开审阅→圆点熄灭→新改动再点亮）。
+- **收口尾清（2026-09-26，BLOCK-123 整包收口）**：`subscribeConversationChanges` 去导出（knip 棘轮新增死导出清偿——仅模块内 hook 使用）；knip 基线下调 1（TitleBarTab 因 dot 测试 import 转已被使用，棘轮自指示 --update）。本条随 BLOCK-123 整包 completed 为 rider（in_progress 待过目）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。

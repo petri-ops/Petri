@@ -5,7 +5,9 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-09-26（**方向裁决落账：BLOCK-122 垂直提案收回转候选池 C-15；立 BLOCK-123 通用编码 harness 使用界面主线（用户原话「我觉得不行 这个属于垂直领域的扩展 现在需要的仍旧是通用编码harness使用界面作为开发主要工作项 重新思考」）**——该裁决同时收口 product-strategy-review-2026-09 §6 观察期约定（2026-09-03「方向开放按节奏走」→今日落定：通用编码面为开发主线；§7「底座别再加厚」口径由本主线重新解释=加厚的是**使用界面**不是底座机制）。资产盘点防重复开发：工具面 workspace 五件套+process/system 俱全；UI 面工作台四件套俱全（file tree/标签/终端/审阅 tab，ReviewMode 1310 行 verified）。**BLOCK-123 P0=dev 栈实机端到端任务对账**（真实通用编码任务全链路走查→缺口清单→AGENT-WORKBENCH 修订 3 同款逐项对账串行实做）。doc:suggest planDoc 建议=立项时 plan 承载。）
+最后更新：2026-09-26（**BLOCK-123 当日整包 completed（用户「按照你的建议来进行」；closeout 十二门绿）**——P0 六环节零断点 + P1 三轮走查四形态闭环（错误恢复双障碍/跨文件 TTL 防作弊复核）+ 缺口全清（G-01=UI-446 审阅 tab 未读圆点 in_progress 待过目/G-02 销号/G-03 清偿 30 条测试会话残留/G-04 续观）。**队列=无可推进项**；riders=UI-446 待过目、第三轮走查形态转候选。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-26（**方向裁决落账：BLOCK-122 垂直提案收回转候选池 C-15；立 BLOCK-123 通用编码 harness 使用界面主线（用户原话「我觉得不行 这个属于垂直领域的扩展 现在需要的仍旧是通用编码harness使用界面作为开发主要工作项 重新思考」）**——该裁决同时收口 product-strategy-review-2026-09 §6 观察期约定（2026-09-03「方向开放按节奏走」→今日落定：通用编码面为开发主线；§7「底座别再加厚」口径由本主线重新解释=加厚的是**使用界面**不是底座机制）。资产盘点防重复开发：工具面 workspace 五件套+process/system 俱全；UI 面工作台四件套俱全（file tree/标签/终端/审阅 tab，ReviewMode 1310 行 verified）。**BLOCK-123 P0=dev 栈实机端到端任务对账**（真实通用编码任务全链路走查→缺口清单→AGENT-WORKBENCH 修订 3 同款逐项对账串行实做）。doc:suggest planDoc 建议=立项时 plan 承载。）
 
 此前 最后更新：2026-09-26（**BLOCK-122 结果闭环路径扩展登记队列头（用户「你给个建议 反正不能停下来」；P0 勘察先行情报在案）**——勘察实测：插件包在本机（D:\1.WorkDir\gewu-pack-bio），**deseq2 唯一激活插件**，休眠 15 插件（volcano-plot/wgcna/pca-explorer/gene-correlation/gsea/go-kegg/scrna 系等），pack demo-data 四路在位（consensus-cluster/ml-classifier/ml-feature-select/rsf-survival）但与 dormant 集合错位（对应插件未激活）；run_tool 目录声明 volcano-plot/gene-correlation/pca-explorer 可用工具。**推荐=从已验证 deseq2 链延伸**（A: bind_artifact 串 volcano-plot 吃真实 DE 输出 / B: 激活 pca-explorer 走独立第二路径吃已有 demo counts）避免 C-12 式「休眠+无数据」双缺阻塞。**裁决点=选 A/B/双做，裁决后立项走三件套**；HK 系列 01~04 全清留档；开发栈存活（3001/9222 在听）可随时实机。）
 
@@ -59,7 +61,7 @@
 
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
-| 1 | ▶ BLOCK-123 | **通用编码 harness 使用界面主线**（方向裁决 2026-09-26 落项；plan=docs/block-123-coding-harness-ui-plan.md，capability=coding-harness-ui） | **P0 六环节零断点 + P1 走查三轮全清**：G-01=UI-446（待过目）/G-02 销号/G-03 清偿 30 条/**G-05 多文件深度走查通**（24s：5 连读→红绿 4 exec→防作弊复核 ALL PASS 断言零弱化，store+api 真跨文件；探针带防作弊验证器）；错误恢复双障碍实证；G-04 续观 | **P1 三轮走查全清；续项=第三轮走查形态择优（reject→agent 调整回路/终端反馈面）或整包收口评估；UI-446 待过目** |
+| — | （当前无可推进项——BLOCK-123 整包 completed，HK 系列全清；等待用户新输入或第三轮走查形态择优） | — | — | — |
 | — | ⛔ CK-08 | **C-03：task_id 数据模型改造——重估收缩转观察**：动机仍实（45 万行 UUID 冗余 16.25MB/库 14%）但 30 天清扫有界+无用户感知收益+契约迁移风险大（7+29 文件）；**重开条件=清扫上限内实测 I/O 痛点或库体积成用户可感知问题** | 本批重估数据（AUDIT-LOG 晚五行） | 观察待证据 |
 | — | 👁 BK-02 | **汇报门 P2 试点观察期盘点**（持续观察，不占队列序）——采纳率/误拦率/延迟增量/fitReplay 触发率随真实轮次累计；观察窗开启中（dev 栈 BIOF3_JEV_REPORT_GUARD=1） | BLOCK-119 收口遗留候选 | 观察（持续） |
 
@@ -67,6 +69,7 @@
 
 | ID | 事项 | 收口 |
 | --- | --- | --- |
+| ✅ BLOCK-123 | **通用编码 harness 使用界面主线（P0 对账+P1 三轮走查，当日整包）** | 2026-09-26 当日整包收口（用户方向裁决+委派「你来定」）：**P0 六环节零断点**（真实模型 12s 修 bug→跑测试，工具序列教科书级，证据 acceptance/block-123/）；**P1 三轮走查四形态闭环**=错误恢复双障碍实证（需求藏测试+错误 runner 自纠 ALL PASS）+跨文件 TTL 改造（24s，防作弊验证器复核断言零弱化）+G-01 清偿（UI-446 审阅 tab 未读圆点，in_progress 待过目）+G-03 清偿（test-session-cleanup 清 30 条测试残留）+G-02 销号+G-04 续观；closeout 十二门绿；plan=docs/block-123-coding-harness-ui-plan.md；riders=后续走查形态转候选 |
 | ✅ HK-04 | **能力级规格层（P0 设计+P1 试点同日；用户委派「你来定」）** | 2026-09-26 当日收口：设计=四键 front-matter（capability/goal/acceptance/reopen+status）+registry capability opt-in 字段+docs:check 增量校验；实现=parseCapabilityFrontMatter 受限解析器（零 YAML 依赖）+第三遍历五类 FRONTMATTER_* issue+docs:status capability 视图；红绿先行 6 契约先落→**12/12 绿**（实现期抓真=presence 触发误伤存量 --- 水平线→修正为 opt-in，设计稿 §5 留痕）；三份试点全亮（result-loop/output-judge/result-studio）+**status 漂移抓真演示**（精确红→还原，acceptance/hk04/p1-consistency-demo.txt）+282 份零回归；**增量采纳持续生效=新 plan 立项即带 capability front-matter**；设计稿=docs/hk04-spec-layer-design.md |
 | ✅ HK-03 | **符号图/导入边查询脚本（方案 A 零新增依赖，P0+P1 同日）** | 2026-09-26 当日收口（P0 勘察选型+P1 实现；用户 AskUserQuestion 裁决「开工 P1·方案 A」）：scripts/symbol-graph.mjs（who-imports/classify-edges 两查询，AST 级，typescript Compiler API）+test/symbol-graph.test.mjs 契约 **10/10**；**红绿先行 HK-01 首次行使**（契约先落→8 红→绿，两实现 bug 当轮抓住；第二轮命名空间访问/字面量拼接两形态先补测试再实现）；**回放校验：可静态判定集合 2/2 零误判**（getRuntimeBinName/isFunnelEvent 与 CK-11 批次四人工定性一致）+3 锚点=运行时构造路径形态正确归入 CK-11 已登记盲区（零猜测）；**DEAD 语义诚实标注**=静态无已解析使用≠可安全删除，删除裁决仍走 CK-11 三分法+人工复核；选型与结果=docs/hk03-symbol-graph-selection.md |
 | ✅ HK-01 | **TDD 红绿先行纪律入 gewu-dev-infra（制度化沉淀）** | 2026-09-26 当日收口：SKILL.md 增「红绿先行」节（适用=新行为契约/缺陷修复先落失败测试，红→绿证据随收口笔录留痕；豁免四类=纯重构/纯类型面治理批/PoC/实机面；不加新门禁，二次出现才按「回归→门禁转化」评估）+委派任务书第 4 节同步字段；素材源=Superpowers TDD 改编内化；**实效验收=下一个实际工作包留红→绿证据**；门禁=hygiene/docs:check/ui:audit 绿 |
