@@ -231,6 +231,7 @@ function renderResultStudioContextForPrompt(context) {
     block += '\n- 需要对这个结果做修改、比较、采用或撤销时，先调用 result_studio_context 获取 contextToken，再调用对应的 *_in_context 工具。';
   }
   block += '\n- 不要向用户索要 jobId、artifactId、revisionId、changeSetId、artifactFamilyId 或 selectionId；这些坐标由后端上下文补齐。';
+  block += '\n- 解读这个结果的内容或数字时，先调 result_summary（toolJobId=当前结果 jobId）读取真值（关键统计/主表前几行），回答中的数字与基因名必须来自工具返回，不得凭记忆或猜测。';
   block += '\n- 不要凭记忆或猜测构造上述任何 id。上下文过期时工具会返回 context_token_stale，此时重新读取上下文并重新规划。';
   block += '\n- 对外只汇报「理解意图 → 判断影响 → 执行/重算 → 验证 → 候选可比较」这五个阶段结论，不展示隐藏推理链或 Git 内部细节。';
   const editRequest = context && context.resultEditRequest;

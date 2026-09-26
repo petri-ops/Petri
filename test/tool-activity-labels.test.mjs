@@ -19,10 +19,10 @@ const fixture = JSON.parse(
 const { TOOL_DEFS } = require(`${repoRoot}/core/biof3-server/agent-tools/tool-defs.js`);
 const { TOOL_ACTIVITY_VERBS, summarizeToolCallForActivity } = require(`${repoRoot}/core/biof3-server/agent-tools/tool-events.js`);
 
-test('fixture 覆盖全量静态工具宇宙（TOOL_DEFS 73 个）', () => {
+test('fixture 覆盖全量静态工具宇宙（TOOL_DEFS 74 个）', () => {
   const universe = TOOL_DEFS.map((t) => t.function.name).sort();
   const fixtureKeys = Object.keys(fixture).sort();
-  assert.equal(universe.length, 73);
+  assert.equal(universe.length, 74);
   assert.deepEqual(fixtureKeys, universe);
 });
 

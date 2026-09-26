@@ -219,6 +219,10 @@
     "label": "已查询",
     "icon": "table"
   },
+  "result_summary": {
+    "label": "已读取结果",
+    "icon": "table"
+  },
   "run_tool": {
     "label": "已运行",
     "icon": "play"

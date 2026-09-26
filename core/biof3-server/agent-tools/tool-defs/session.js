@@ -393,5 +393,24 @@ module.exports = [
         ]
       }
     }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "result_summary",
+      "description": "按 toolJobId 有界读取一次分析结果的真实内容：任务状态 + artifact truth（可信/需复核/阻断）+ 关键统计（如总基因/显著/上调/下调）+ 产物清单 + 主表前几行真值。用户追问「这个结果说明了什么/差异基因有哪些/数字是多少」而结果不是本轮刚跑出时，先调本工具读真值再回答；禁止凭记忆或猜测报告数字。输出有界（产物 ≤20、列 ≤8、行 ≤6），不整表倾倒。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "toolJobId": {
+            "type": "string",
+            "description": "run_tool 返回的 toolJobId（如 tj_xxx）；会话历史里有就传它"
+          }
+        },
+        "required": [
+          "toolJobId"
+        ]
+      }
+    }
   }
 ];

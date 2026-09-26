@@ -115,6 +115,8 @@ const TOOL_METADATA = {
   // ---- 远程执行/通用执行域（高风险串行）----
   delegate_to_gewu_node: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
   run_tool: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
+  // BLOCK-121 P2（B1）— 结果内容只读读取
+  result_summary: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
 
   // ---- skill 元工具（mcp/registry 注册）----
   skill_discover: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },

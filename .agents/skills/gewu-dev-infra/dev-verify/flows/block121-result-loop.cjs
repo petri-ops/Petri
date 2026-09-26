@@ -281,6 +281,39 @@ module.exports = {
     assert('A4b_studio_body_real_content', probe.hasArtifactName === true && probe.hasVisual === true,
       'probe=' + bodyProbe.slice(0, 160) + '（正文含真实产物元素，非占位/未核验态）');
 
+    // ── A5（P2/B1）Copilot 跨轮引用：同会话追问解读，回答必须引用结果真实值 ──
+    // 接地目标=从盘面主表真值提取（padj 升序 top5 基因）+ manifest.summary 关键数字
+    let summary = (result && result.manifest && result.manifest.summary) || {};
+    let topGenes = [];
+    try {
+      const csvLines = fs.readFileSync(primaryPath, 'utf8').split(/\r?\n/).filter((l) => l.length > 0);
+      const header = csvLines[0].split(',').map((s) => s.replace(/"/g, '').trim());
+      const gi = header.indexOf('gene');
+      const pi = header.indexOf('padj');
+      const dataRows = csvLines.slice(1).map((l) => l.split(',').map((s) => s.replace(/"/g, '').trim()));
+      dataRows.sort((a, b) => (parseFloat(a[pi]) || 9e9) - (parseFloat(b[pi]) || 9e9));
+      topGenes = dataRows.slice(0, 5).map((r) => r[gi]).filter(Boolean);
+    } catch { /* 真值提取失败则 A5b 必红，不掩盖 */ }
+    const followUp = await submitAndWait(
+      '这个分析结果说明了什么？差异基因主要有哪些？显著的总共多少个、上调下调各多少？请基于真实结果内容回答，不要猜测。',
+      { projectId, page: 'workspace', pageTitle: '项目工作区', accessMode: 'full', conversationId },
+      TASK_TIMEOUT_MS,
+    );
+    assert('A5a_followup_completed', followUp.terminal === 'completed' || followUp.terminal === 'done', 'terminal=' + followUp.terminal);
+    const msgResp = await rest('GET', '/ai/conversations/' + encodeURIComponent(conversationId) + '/messages?limit=10');
+    const msgList = (msgResp.data && msgResp.data.messages) || [];
+    let reply = '';
+    for (let i = msgList.length - 1; i >= 0; i -= 1) {
+      if (msgList[i] && msgList[i].role === 'assistant') { reply = String(msgList[i].content || ''); break; }
+    }
+    const groundedGene = topGenes.some((g) => reply.includes(g));
+    const keyNums = [summary.sig_genes, summary.up, summary.down].filter((n) => Number.isFinite(n));
+    const groundedNum = keyNums.some((n) => reply.includes(String(n)));
+    assert('A5b_reply_cites_real_content', groundedGene && groundedNum,
+      'groundedGene=' + groundedGene + ' groundedNum=' + groundedNum
+      + ' topGenes=' + topGenes.slice(0, 3).join(',') + ' sig/up/down=' + summary.sig_genes + '/' + summary.up + '/' + summary.down
+      + ' replyLen=' + reply.length);
+
     // ── A6 清理 + 还原 ──
     const cleanup = await cleanupAll();
     assert('A6_cleanup_done', cleanup.length >= 1 && cleanup.every((s) => s.indexOf('true') >= 0), cleanup.join(' '));

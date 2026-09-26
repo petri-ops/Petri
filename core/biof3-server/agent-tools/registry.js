@@ -14,6 +14,7 @@ const { tool_act } = require('./act-tools');
 const { tool_plan } = require('./plan-ui-tools');
 const { tool_todo_write } = require('./todo-tools');
 const { tool_decision_summary, tool_decision_recent } = require('./decision-tools');
+const { tool_result_summary } = require('./result-summary-tools');
 const {
   tool_run_tool,
   tool_generate_methods,
@@ -150,6 +151,8 @@ const HANDLERS = {
   decision_summary: tool_decision_summary,
   decision_recent: tool_decision_recent,
   run_tool: tool_run_tool,
+  // BLOCK-121 P2（B1）— 结果内容只读读取（跨轮引用断点的修复面）
+  result_summary: tool_result_summary,
   delegate_to_gewu_node: tool_delegate_to_gewu_node,
   read_image: tool_read_image,
   generate_methods: tool_generate_methods,
@@ -256,6 +259,8 @@ const CONTRACTS = {
   decision_summary: contract('analysis', 'none', 'R1', ['project.database'], 500),
   decision_recent: contract('analysis', 'none', 'R1', ['project.database'], 500),
   run_tool: contract('analysis', 'execution', 'R2', ['tool_jobs', 'artifacts', 'local.process'], 300000),
+  // BLOCK-121 P2（B1）— 结果内容只读读取：tool_jobs/产物文件，无写面
+  result_summary: contract('analysis', 'none', 'R1', ['tool_jobs', 'artifacts', 'project.files'], 500),
   // BLOCK-85 P3 — 联邦委托：外部请求（对端格物执行），预算 15 分钟（轮询等待）
   delegate_to_gewu_node: contract('agent-management', 'external-request', 'R2', ['project.files'], 900000),
   read_image: contract('vision', 'external-request', 'R1', ['artifacts', 'llm.provider'], 30000),
