@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-26（**BLOCK-123 通用编码 harness 使用界面主线当日整包 completed（P0+P1 三轮走查；closeout 十二门绿）**——P0 端到端对账六环节零断点（真实模型 12s 修 bug→跑测试）；P1 三轮走查四形态闭环（错误恢复双障碍实证/跨文件 TTL 改造防作弊复核断言零弱化）+ 缺口全清（G-01=UI-446 审阅入口计数徽章 verified / G-02 销号 / G-03 清偿 30 条测试会话残留 / G-04 续观）。**riders 全清**；后续走查形态深挖转候选 C-17。plan=docs/block-123-coding-harness-ui-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-26（**BLOCK-124-HARNESS-PRODUCTIZATION 立项 active（P0-LAUNCH）——Gewu Harness 产品化第一批**（用户裁决「启动『Gewu Harness 产品化』第一批工作」；C-13 触发条件当日满足=HK-03 收口+产品方向裁决）：P0 勘察当日完成——资产四问盘点（HK-03 查询✅产品化 / HK-04·HK-01/02·closeout·决策工具·走查探针❌纯开发设施不产品化）+ C-13 决策点 D1-D5 + BLOCK-123 组合勘察缺口 5 项；**实现动手前等用户确认**，P1=C-13 符号图产品化。范围外转候选 C-18/C-19。plan=docs/block-124-harness-productization-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-26（**BLOCK-123 通用编码 harness 使用界面主线当日整包 completed（P0+P1 三轮走查；closeout 十二门绿）**——P0 端到端对账六环节零断点（真实模型 12s 修 bug→跑测试）；P1 三轮走查四形态闭环（错误恢复双障碍实证/跨文件 TTL 改造防作弊复核断言零弱化）+ 缺口全清（G-01=UI-446 审阅入口计数徽章 verified / G-02 销号 / G-03 清偿 30 条测试会话残留 / G-04 续观）。**riders 全清**；后续走查形态深挖转候选 C-17。plan=docs/block-123-coding-harness-ui-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-26（**BLOCK-123 通用编码 harness 使用界面主线立项 active（P0-LAUNCH；用户方向裁决+委派「你来定」）**——方向裁决收口 product-strategy-review-2026-09 §6 观察期约定：通用编码面为开发主线，垂直域扩展转候选池 C-15。P0=dev 栈实机端到端任务对账（真实 chat→workspace 工具改代码→exec 跑验证→工作树审阅→提交，六环节 通/涩/断 走查→缺口清单）；P1..Pn=缺口逐项串行（AGENT-WORKBENCH 修订 3 同款）。plan=docs/block-123-coding-harness-ui-plan.md；工具面/UI 面资产盘点已入 plan §3。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
