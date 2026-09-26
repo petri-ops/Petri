@@ -7,7 +7,7 @@
 
 最后更新：2026-09-26（**UI-446 翻 verified——BLOCK-123 riders 全清，整包无遗留（用户实机复测「可以了 很棒 翻 verified」确认）**：v4 计数徽章四处入口+v5 0 态修复实机确认；ui446 系测试残留文件已清。**队列=无可推进项**；候选=C-16 ±行数版/第三轮走查形态。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
-此前 最后更新：2026-09-26（**BLOCK-123 当日整包 completed（用户「按照你的建议来进行」；closeout 十二门绿）**——P0 六环节零断点 + P1 三轮走查四形态闭环（错误恢复双障碍/跨文件 TTL 防作弊复核）+ 缺口全清（G-01=UI-446 审阅 tab 未读圆点 in_progress 待过目/G-02 销号/G-03 清偿 30 条测试会话残留/G-04 续观）。**队列=无可推进项**；riders=UI-446 待过目、第三轮走查形态转候选。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+此前 最后更新：2026-09-26（**BLOCK-123 当日整包 completed（用户「按照你的建议来进行」；closeout 十二门绿）**——P0 六环节零断点 + P1 三轮走查四形态闭环（错误恢复双障碍/跨文件 TTL 防作弊复核）+ 缺口全清（G-01=UI-446 审阅 tab 未读圆点 in_progress 待过目/G-02 销号/G-03 清偿 30 条测试会话残留/G-04 续观）。**队列=无可推进项**；riders 全清（UI-446 verified）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-26（**方向裁决落账：BLOCK-122 垂直提案收回转候选池 C-15；立 BLOCK-123 通用编码 harness 使用界面主线（用户原话「我觉得不行 这个属于垂直领域的扩展 现在需要的仍旧是通用编码harness使用界面作为开发主要工作项 重新思考」）**——该裁决同时收口 product-strategy-review-2026-09 §6 观察期约定（2026-09-03「方向开放按节奏走」→今日落定：通用编码面为开发主线；§7「底座别再加厚」口径由本主线重新解释=加厚的是**使用界面**不是底座机制）。资产盘点防重复开发：工具面 workspace 五件套+process/system 俱全；UI 面工作台四件套俱全（file tree/标签/终端/审阅 tab，ReviewMode 1310 行 verified）。**BLOCK-123 P0=dev 栈实机端到端任务对账**（真实通用编码任务全链路走查→缺口清单→AGENT-WORKBENCH 修订 3 同款逐项对账串行实做）。doc:suggest planDoc 建议=立项时 plan 承载。）
 
@@ -71,7 +71,7 @@
 
 | ID | 事项 | 收口 |
 | --- | --- | --- |
-| ✅ BLOCK-123 | **通用编码 harness 使用界面主线（P0 对账+P1 三轮走查，当日整包）** | 2026-09-26 当日整包收口（用户方向裁决+委派「你来定」）：**P0 六环节零断点**（真实模型 12s 修 bug→跑测试，工具序列教科书级，证据 acceptance/block-123/）；**P1 三轮走查四形态闭环**=错误恢复双障碍实证（需求藏测试+错误 runner 自纠 ALL PASS）+跨文件 TTL 改造（24s，防作弊验证器复核断言零弱化）+G-01 清偿（UI-446 审阅 tab 未读圆点，in_progress 待过目）+G-03 清偿（test-session-cleanup 清 30 条测试残留）+G-02 销号+G-04 续观；closeout 十二门绿；plan=docs/block-123-coding-harness-ui-plan.md；riders=后续走查形态转候选 |
+| ✅ BLOCK-123 | **通用编码 harness 使用界面主线（P0 对账+P1 三轮走查，当日整包）** | 2026-09-26 当日整包收口（用户方向裁决+委派「你来定」）：**P0 六环节零断点**（真实模型 12s 修 bug→跑测试，工具序列教科书级，证据 acceptance/block-123/）；**P1 三轮走查四形态闭环**=错误恢复双障碍实证（需求藏测试+错误 runner 自纠 ALL PASS）+跨文件 TTL 改造（24s，防作弊验证器复核断言零弱化）+G-01 清偿（UI-446 verified，用户实机复测确认）+G-03 清偿（test-session-cleanup 清 30 条测试残留）+G-02 销号+G-04 续观；closeout 十二门绿；plan=docs/block-123-coding-harness-ui-plan.md；riders=后续走查形态转候选 |
 | ✅ HK-04 | **能力级规格层（P0 设计+P1 试点同日；用户委派「你来定」）** | 2026-09-26 当日收口：设计=四键 front-matter（capability/goal/acceptance/reopen+status）+registry capability opt-in 字段+docs:check 增量校验；实现=parseCapabilityFrontMatter 受限解析器（零 YAML 依赖）+第三遍历五类 FRONTMATTER_* issue+docs:status capability 视图；红绿先行 6 契约先落→**12/12 绿**（实现期抓真=presence 触发误伤存量 --- 水平线→修正为 opt-in，设计稿 §5 留痕）；三份试点全亮（result-loop/output-judge/result-studio）+**status 漂移抓真演示**（精确红→还原，acceptance/hk04/p1-consistency-demo.txt）+282 份零回归；**增量采纳持续生效=新 plan 立项即带 capability front-matter**；设计稿=docs/hk04-spec-layer-design.md |
 | ✅ HK-03 | **符号图/导入边查询脚本（方案 A 零新增依赖，P0+P1 同日）** | 2026-09-26 当日收口（P0 勘察选型+P1 实现；用户 AskUserQuestion 裁决「开工 P1·方案 A」）：scripts/symbol-graph.mjs（who-imports/classify-edges 两查询，AST 级，typescript Compiler API）+test/symbol-graph.test.mjs 契约 **10/10**；**红绿先行 HK-01 首次行使**（契约先落→8 红→绿，两实现 bug 当轮抓住；第二轮命名空间访问/字面量拼接两形态先补测试再实现）；**回放校验：可静态判定集合 2/2 零误判**（getRuntimeBinName/isFunnelEvent 与 CK-11 批次四人工定性一致）+3 锚点=运行时构造路径形态正确归入 CK-11 已登记盲区（零猜测）；**DEAD 语义诚实标注**=静态无已解析使用≠可安全删除，删除裁决仍走 CK-11 三分法+人工复核；选型与结果=docs/hk03-symbol-graph-selection.md |
 | ✅ HK-01 | **TDD 红绿先行纪律入 gewu-dev-infra（制度化沉淀）** | 2026-09-26 当日收口：SKILL.md 增「红绿先行」节（适用=新行为契约/缺陷修复先落失败测试，红→绿证据随收口笔录留痕；豁免四类=纯重构/纯类型面治理批/PoC/实机面；不加新门禁，二次出现才按「回归→门禁转化」评估）+委派任务书第 4 节同步字段；素材源=Superpowers TDD 改编内化；**实效验收=下一个实际工作包留红→绿证据**；门禁=hygiene/docs:check/ui:audit 绿 |
@@ -118,6 +118,7 @@
 | C-14 | **RTK 型工具输出压缩**（ZCode hooks 适配 shell 输出压缩，社区口径 60-90%） | 重开条件=实测 token 成本成为痛点 + ZCode hooks 适配验证可行；来源=HK 建表批 2026-09-26 |
 | C-15 | **结果闭环路径扩展（原 BLOCK-122 提案，垂直域）**：从已验证 deseq2 链延伸（bind_artifact 串 volcano-plot / 激活 pca-explorer 独立路径）——用户 2026-09-26 裁决「属于垂直领域的扩展」让位通用编码主线（BLOCK-123） | 重开条件=用户裁决方向回摆生信旗舰倾斜（参照 product-strategy-review-2026-09 §4）；勘察情报=AUDIT-LOG 2026-09-26 行（pack 在本机/deseq2 唯一激活/休眠 15 插件/demo-data 错位盘点） |
 | C-16 | **审阅徽章 ±行数版**（UI-446 v4 计数徽章的升级：入口直接显示 +A −D 行数变化）——权威源=审阅面板 git diff，需后端 shortstat 桥避免第二真相 | 重开条件=用户对文件计数徽章反馈需要更细粒度；走 DEPENDENCY/立项检查单 |
+| C-17 | **BLOCK-123 第三轮走查形态深挖**（reject→agent 调整回路 / 终端反馈面体验 / 多文件深度任务续形态）——通用编码 harness 主线续版走查 | 重开条件=用户真实使用反馈触发或点名启动；三轮走查证据=acceptance/block-123/ |
 | C-02 | 轮询→SSE——**已编入 CK-03** | BLOCK-106 遗留候选 |
 | C-03 | task_id 数据模型改造——**已编入 CK-08** | BLOCK-106 遗留候选 |
 | C-04 | 分段 token 预算——**已编入 CK-04** | BLOCK-109 候选池 |

@@ -1,6 +1,6 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-26（**BLOCK-123 通用编码 harness 使用界面主线当日整包 completed（P0+P1 三轮走查；closeout 十二门绿）**——P0 端到端对账六环节零断点（真实模型 12s 修 bug→跑测试）；P1 三轮走查四形态闭环（错误恢复双障碍实证/跨文件 TTL 改造防作弊复核断言零弱化）+ 缺口全清（G-01=UI-446 审阅 tab 未读圆点 in_progress 待过目 / G-02 销号 / G-03 清偿 30 条测试会话残留 / G-04 续观）。**riders**=UI-446 待过目、后续走查形态转候选。plan=docs/block-123-coding-harness-ui-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-26（**BLOCK-123 通用编码 harness 使用界面主线当日整包 completed（P0+P1 三轮走查；closeout 十二门绿）**——P0 端到端对账六环节零断点（真实模型 12s 修 bug→跑测试）；P1 三轮走查四形态闭环（错误恢复双障碍实证/跨文件 TTL 改造防作弊复核断言零弱化）+ 缺口全清（G-01=UI-446 审阅入口计数徽章 verified / G-02 销号 / G-03 清偿 30 条测试会话残留 / G-04 续观）。**riders 全清**；后续走查形态深挖转候选 C-17。plan=docs/block-123-coding-harness-ui-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-26（**BLOCK-123 通用编码 harness 使用界面主线立项 active（P0-LAUNCH；用户方向裁决+委派「你来定」）**——方向裁决收口 product-strategy-review-2026-09 §6 观察期约定：通用编码面为开发主线，垂直域扩展转候选池 C-15。P0=dev 栈实机端到端任务对账（真实 chat→workspace 工具改代码→exec 跑验证→工作树审阅→提交，六环节 通/涩/断 走查→缺口清单）；P1..Pn=缺口逐项串行（AGENT-WORKBENCH 修订 3 同款）。plan=docs/block-123-coding-harness-ui-plan.md；工具面/UI 面资产盘点已入 plan §3。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
