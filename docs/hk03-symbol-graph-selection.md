@@ -1,6 +1,6 @@
 # HK-03 P0：符号图/导入边查询脚本——勘察选型
 
-> 状态：P0 勘察收口，选型结论在案（方案 A）；P1 开工待用户裁决（HK 系列项内裁决点）。
+> 状态：**P0+P1 已收口（2026-09-26 当日）**——方案 A 零新增依赖，实现+契约 10/10+回放校验完成；语义边界与回放结论见 §4。
 > 来源：HK 系列 harness 工程实践吸收批（`docs/pending-work-backlog.md` 推进队列）；痛点锚点=CK-11 批次四手工导入边分类 78 条——词法 grep 在 JS 同名密集区全为假证据，当时只能逐条人工解析 require/import 说明符+导入方符号核查。
 > 本文档是选型结论的 canonical（truthDomain: `symbol-graph-selection`）；P1 落地后实现细节与用法回写本文件。
 
@@ -34,14 +34,17 @@
 
 **结论：方案 A。** 依赖裁决点因「零新增」自然满足 CHECKLIST 默认答案；剩余裁决=P1 是否开工（用户）。
 
-## 4. P1 落地要点（裁决通过后执行）
+## 4. P1 落地结果（2026-09-26 当日收口）
 
-- 位置 `scripts/symbol-graph.mjs`（ESM，`import ts from 'typescript'`）；两查询 CLI 面：`node scripts/symbol-graph.mjs who-imports <symbol>` / `classify-edges <file>`。
-- **红绿先行（HK-01 首次行使）**：先落两查询的失败契约测试（`test/symbol-graph.test.mjs`），再写实现转绿；夹具覆盖 .ts/.tsx/.js/.cjs 四形态 + 「导入但未使用」用例。
-- **回放校验（P1 收口判据）**：以 CK-11 批次四定性账为对照集——保留边（40 USED_PROD/3 USED_TEST）重放须仍判 USED；已删死导出重放须判 DEAD/无引用；分歧逐条留痕。
+- **实现**：`scripts/symbol-graph.mjs`（ESM 库 + CLI 双形态：`node scripts/symbol-graph.mjs who-imports <symbol>` / `classify-edges <file>`）；契约测试 `test/symbol-graph.test.mjs` **10/10 绿**。
+- **红绿先行（HK-01 首次行使）证据链**：①契约测试先落 → 8 红（`ERR_MODULE_NOT_FOUND`）→ 实现转绿，途中实现 bug（边对象 `symbols` 未初始化、CLI 漏 `await`）被测试/首跑当轮抓住；②回放校验暴露两形态缺口（命名空间属性访问 `ns.sym`、require 字面量拼接）→ 先补 2 条失败测试再实现 → 10/10。
+- **回放校验（CK-11 批次四锚点对照）**：`getRuntimeBinName`=USED_PROD（r-executor）✅、`isFunnelEvent`=USED_PROD（telemetry.js）✅——可静态判定集合 **2/2 零误判**；`FUNNEL_EVENTS`/`getBackendPorts`/`computeTrustedRendererOrigins` 唯一消费方为运行时构造路径（`require(resolve(...))` / `pathToFileURL(path.join(...))`），静态不可解 → 如实返回空，归 CK-11 已登记盲区类（「测试强制契约」正是 CK-11 的人工核对结论），**3/3 正确归类为不可解、零猜测**。
+- **DEAD 语义诚实标注（重要）**：本工具的 DEAD=「静态无已解析使用」，**≠「可安全删除」**——动态形态消费方存在时（ck10 测试/BLOCK-84 测试正是此类）必须人工复核；CK-11 保留类（测试强制契约/动态调用入口/resources 插件消费方）恰是本工具的盲区集。任何删除裁决仍以 CK-11 三分法+人工复核为准，本工具只负责把「可静态判定面」从人工 grep 升级为 AST 精确查询。
+- **YAGNI 裁决留痕**：命名空间访问跟踪立项依据=全仓 332 处 CJS 命名空间 require（IPC channels 注册表主消费形态）；require/动态 import 的调用表达式参数（`resolve(...)` 等）**不折叠**——需假设运行时语义即猜测，违反诚实盲区原则；字面量拼接折叠立项依据=全仓 9 处、确定性求值。
 - 明确不做（沿队列项）：不建常驻索引服务 / 不做 MCP 产品化（候选 C-13）/ 不引原生依赖 / 不动 knip 与 dependency-cruiser 既有语义。
-- 门禁：新增契约测试 + docs:check + 受影响定向测试；P1 收口按轻量包回写。
+- 门禁：契约测试 10/10 + docs:check；P1 收口按轻量包回写。
 
 ## 5. 裁决记录
 
 - 2026-09-26 P0 勘察收口：选型结论=**方案 A（零新增依赖）**；P1 开工裁决在用户。
+- 2026-09-26 P1 开工：用户 AskUserQuestion 裁决「开工 P1·方案 A（推荐）」；当日收口（本文件 §4）。
