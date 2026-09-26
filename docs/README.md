@@ -218,6 +218,8 @@
 
 - [`ck05-sqlite-evaluation.md`](./ck05-sqlite-evaluation.md) — CK-05 SQLite 评估报告（mmap64 已实施；node:sqlite 迁移与三契约单源化=不采纳，重开条件在案）。
 
+- [`hk03-symbol-graph-selection.md`](./hk03-symbol-graph-selection.md) — HK-03 P0 符号图勘察选型（结论=方案 A 既有 typescript Compiler API 零新增依赖；P1 开工待裁决，回放校验判据在案）。
+
 - **Skills 子文档入口图**（2026-08-16 GATES-4 batch 2 增补）：
 
   - **入口** [`skills-architecture.md`](./architecture/skills-architecture.md) — Skills 层四层架构设计（Skills → Workflows → Plugins → Capabilities），唯一 canonical=true。

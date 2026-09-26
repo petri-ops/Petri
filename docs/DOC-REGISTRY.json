@@ -5270,8 +5270,24 @@
         "evaluation"
       ],
       "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "HK03-SYMBOL-GRAPH-SELECTION",
+      "path": "docs/hk03-symbol-graph-selection.md",
+      "kind": "reference",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "symbol-graph-selection",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-26",
+      "tags": [
+        "HK-03",
+        "symbol-graph",
+        "selection"
+      ],
+      "archivePolicy": "retain_stable_path"
     }
   ],
-  "lastUpdated": "2026-09-24",
-  "documentCount": 276
+  "lastUpdated": "2026-09-26",
+  "documentCount": 281
 }
