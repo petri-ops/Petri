@@ -77,6 +77,13 @@ status: active
 - **G-05（观察）**：多文件形态本轮仅轻覆盖（单文件编辑+跨文件读 config；git 仅 1 文件变更）——真正的多文件并行改造任务走查待后续轮次。
 - **方法学记录**：B4 圆点探针「未亮」系方法学限制非产品缺陷——REST 驱动的任务不经 UI 流（前端改动索引按构造不记录），且审阅 tab 未打开时无药丸可挂点；UI-446 实机验证以用户真实 UI 路径为准（走查姿势不变）。
 
+### 缺口清单 v2 补充（G-05 多文件深度走查，2026-09-26）
+
+探针 `scripts/block123-p1-walkthrough-3.mjs`（带**防作弊验证器**：探针自持原始 runner 副本复核，agent 弱化断言/改测试即现形）。
+
+- **G-05 已清偿（通）**：真·跨文件任务「KV store 加 TTL 过期 + api 会话缓存接入（1s TTL，缺省回退）」，需求全藏预置测试里。**24 秒完成**：先 5 连读（store/api/两测试/runner 全读完才动手）→ exec 红 → 改 store.mjs+api.mjs → **原始 runner 复跑 ALL PASS（断言零弱化、run-tests.mjs 未触碰）**。变更 3 文件（store.mjs/api.mjs + 探针自置 verify-runner.mjs）。
+- **累计走查结论（P0 六环节 + 错误恢复 + 多文件三轮）**：通用编码 harness 在「单文件修 bug、需求在测试、错误 runner 自纠、跨文件 TTL 改造」四种形态下全部闭环，未发现断点级缺口；观察项 G-04（字面重试绕路）续观。
+
 ## 6. 边界与风险
 
 - 测试实例隔离（start-test-instance.sh），不污染用户实例；临时项目 A6 清理必达（block121 同款 cleanup 链）。
