@@ -37,6 +37,8 @@ import {
 import { ScheduledWorkspacePanel } from '@/components/workspace-panels/ScheduledWorkspacePanel';
 import { ResultsLibrary } from '@/components/workspace-panels/ResultsLibrary';
 import { SideChatDock } from '@/components/workspace-panels/SideChatDock';
+// UI-448 — 悬浮聊天面开态：中栏会话内容列让位（不遮切割），与 composer 让位同源
+import { useSideChatDockOpen } from '@/hooks/sideChatDockStore';
 import type { RightPanelMode } from '@/pages/project-workspace/rightPanelTabs';
 import styles from '@/pages/project-workspace.module.css';
 
@@ -136,6 +138,8 @@ export interface CenterPanelProps {
 export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement {
   const { workspaceMode, bottomTerminalOpen, bottomTerminalHeight } = ctx;
   const { centerColRef, sessionFrameRef } = refs;
+  // UI-448 — 悬浮聊天面展开时中栏会话内容列让位（chat 模式才有会话内容可让）
+  const sideChatDockOpen = useSideChatDockOpen();
   const [returnConversationMs, setReturnConversationMs] = React.useState<number | null>(null);
   // Reuse the durable conversation run; the result Composer does not create a
   // second progress store and therefore survives tool switches/stop/failure by
@@ -217,7 +221,11 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
         data-projection="conversation"
       >
         <SessionFrameView ctx={ctx} sessionFrameRef={sessionFrameRef} variant="chat">
-          <div className={styles.agentMain}>
+          <div
+            className={`${styles.agentMain} ${
+              workspaceMode === 'chat' && sideChatDockOpen ? styles.agentMainSideChatYield : ''
+            }`}
+          >
             {ctx.project && ctx.projectId && (
               <SimpleChat
                 // The center conversation is the single owner of copilotAsk: it

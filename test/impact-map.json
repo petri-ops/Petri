@@ -2589,6 +2589,36 @@
       "frontendRelated": true,
       "classifiesScripts": true,
       "scriptRole": "governance"
+    },
+    {
+      "id": "ui448-side-chat-dock-alignment",
+      "note": "UI-448 侧边聊天悬浮面体验对齐项目摘要：hooks/sideChatDockStore.ts 共享开态 + SimpleChat/ComposerYield.tsx 让位提示条 + SimpleChat compact 占位符 + CenterPanel agentMainSideChatYield 让位类 + SideChatDock 视觉对齐（--gewu-shadow-float）+ custom.css token + 摘要浮层阴影收编单源；证据目录 acceptance/ui-448/ 归 exactly-one 规则防 fail-closed 拦截。",
+      "patterns": [
+        "frontend/src/hooks/sideChatDockStore.ts",
+        "frontend/src/hooks/sideChatDockStore.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/ComposerYield.tsx",
+        "frontend/src/components/copilot/SimpleChat/ComposerYield.test.tsx",
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "frontend/src/components/copilot/SimpleChat/types.ts",
+        "frontend/src/components/copilot/simple-chat.css",
+        "frontend/src/components/workspace-panels/SideChatDock.tsx",
+        "frontend/src/components/workspace-panels/SideChatDock.test.tsx",
+        "frontend/src/components/workspace-panels/SideChatDock.module.css",
+        "frontend/src/components/workspace-panels/CenterPanel.tsx",
+        "frontend/src/components/workspace-panels/CenterPanel.test.tsx",
+        "frontend/src/pages/project-workspace.module.css",
+        "frontend/src/styles/custom.css",
+        "acceptance/ui-448/**"
+      ],
+      "tests": [
+        "frontend/src/hooks/sideChatDockStore.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/ComposerYield.test.tsx",
+        "frontend/src/components/workspace-panels/SideChatDock.test.tsx",
+        "frontend/src/components/workspace-panels/CenterPanel.test.tsx",
+        "frontend/src/styles/theme-token-contract.test.ts"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": false
     }
   ]
 }

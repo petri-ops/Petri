@@ -22,10 +22,12 @@ vi.mock('@/lib/copilotContext', () => ({
 }));
 
 import { SideChatDock } from './SideChatDock';
+import { setSideChatDockOpen } from '@/hooks/sideChatDockStore';
 
 describe('UI-417 SideChatDock', () => {
   beforeEach(() => {
     window.localStorage.clear();
+    setSideChatDockOpen(false);
   });
 
   afterEach(() => {
@@ -113,5 +115,38 @@ describe('UI-417 SideChatDock', () => {
     fireEvent.click(screen.getByTestId('side-chat-handle'));
     expect(screen.queryByTestId('side-chat-simplechat')).toBeNull();
     expect(screen.getByTestId('side-chat-surface').textContent).toContain('还没有会话');
+  });
+});
+
+describe('UI-448 SideChatDock 共享开态（sideChatDockStore）', () => {
+  beforeEach(() => {
+    setSideChatDockOpen(false);
+  });
+
+  afterEach(() => {
+    cleanup();
+    setSideChatDockOpen(false);
+  });
+
+  it('外部 set 开态直接展开（中栏让位同源联动），把手呈激活态', () => {
+    render(<SideChatDock projectId="p_1" conversationId="conv_1" onConversationChange={vi.fn()} />);
+    expect(screen.queryByTestId('side-chat-surface')).toBeNull();
+    act(() => {
+      setSideChatDockOpen(true);
+    });
+    expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
+    expect(screen.getByTestId('side-chat-handle').getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByTestId('side-chat-handle').className).toContain('handleActive');
+  });
+
+  it('开态跨挂载持久：store 已开时重新挂载即展开（同一会话单一输入面的真相源）', () => {
+    setSideChatDockOpen(true);
+    const { unmount } = render(
+      <SideChatDock projectId="p_1" conversationId="conv_1" onConversationChange={vi.fn()} />
+    );
+    expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
+    unmount();
+    render(<SideChatDock projectId="p_1" conversationId="conv_1" onConversationChange={vi.fn()} />);
+    expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
   });
 });

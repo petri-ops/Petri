@@ -70,6 +70,8 @@
   --gewu-input-bg: var(--gewu-bg-surface);
   --gewu-overlay: rgba(24, 24, 27, 0.2);
   --gewu-shadow-menu: 0 10px 24px rgba(24, 24, 27, 0.14);
+  /* UI-448 — 悬浮面板族（项目摘要浮层/侧边聊天悬浮面）共用大柔和影；单源防漂移 */
+  --gewu-shadow-float: 0 12px 32px rgba(15, 23, 42, 0.18);
   --gewu-on-accent: #ffffff;
   --gewu-on-solid: #ffffff;
   --gewu-warning-bg: var(--gewu-status-warning-bg);
@@ -202,6 +204,7 @@ html[data-theme='dark'],
   --gewu-input-bg: var(--gewu-bg-surface);
   --gewu-overlay: rgba(2, 6, 23, 0.6);
   --gewu-shadow-menu: 0 14px 36px rgba(0, 0, 0, 0.34);
+  --gewu-shadow-float: 0 12px 32px rgba(0, 0, 0, 0.5);
   --gewu-on-accent: #ffffff;
   --gewu-on-solid: #0b1220;
   --gewu-warning-bg: var(--gewu-status-warning-bg);

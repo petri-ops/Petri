@@ -8,13 +8,17 @@
  * - 复用 SimpleChat 同一会话同一 run：与中央读同一 activeConvId（conversationRunStore
  *   单一真相），仅收窄承载；中央 ownsCopilotAsk 归属不变，悬挂面不承接「问 Agent」；
  * - 外点/Esc/再点把手收起。
+ * UI-448 — 开态升 sideChatDockStore 共享单例（中栏 composer 让位 + 内容让位同源）；
+ *   视觉对齐项目摘要浮层语言（圆角/阴影 token/280ms/reduced-motion）；compact 短占位符。
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
 import { isConversationRunning } from '@/components/copilot/conversationRunStore';
 import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
+// UI-448 — 开态升共享 store：中栏 composer 让位与内容让位类同源联动（单一输入面）
+import { setSideChatDockOpen, useSideChatDockOpen } from '@/hooks/sideChatDockStore';
 import styles from './SideChatDock.module.css';
 
 export function SideChatDock({
@@ -26,9 +30,9 @@ export function SideChatDock({
   conversationId: string | null;
   onConversationChange: (id: string | null) => void;
 }): React.ReactElement {
-  const [open, setOpen] = useState(false);
+  const open = useSideChatDockOpen();
   const surfaceRef = useRef<HTMLDivElement | null>(null);
-  const [agentRunning, setAgentRunning] = useState(false);
+  const [agentRunning, setAgentRunning] = React.useState(false);
 
   // 呼吸灯：当前会话 agent 运行中（conversationRunStore 单一真相；UI-397 同款语言）
   useEffect(() => {
@@ -46,7 +50,7 @@ export function SideChatDock({
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') setSideChatDockOpen(false);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -59,19 +63,19 @@ export function SideChatDock({
       const target = e.target as Node;
       if (surfaceRef.current && !surfaceRef.current.contains(target)) {
         // 把手点击由把手自身 toggle 处理（contains 覆盖把手），其余外点收起
-        setOpen(false);
+        setSideChatDockOpen(false);
       }
     };
     window.addEventListener('mousedown', onDown);
     return () => window.removeEventListener('mousedown', onDown);
   }, [open]);
 
-  const toggle = useCallback(() => setOpen((v) => !v), []);
+  const toggle = useCallback(() => setSideChatDockOpen((v) => !v), []);
 
   // UI-417 入口收编：原右栏 chat tab 的入口（home 空态卡/分析完成跳转）派发
   // sideChatOpen，这里展开悬挂面（无会话时也展开——诚实空态引导中央首条消息）。
   useEffect(
-    () => subscribeGewuEvent(gewuEvents.sideChatOpen, () => setOpen(true)),
+    () => subscribeGewuEvent(gewuEvents.sideChatOpen, () => setSideChatDockOpen(true)),
     []
   );
 
@@ -85,7 +89,7 @@ export function SideChatDock({
             <button
               type="button"
               className={styles.closeBtn}
-              onClick={() => setOpen(false)}
+              onClick={() => setSideChatDockOpen(false)}
               aria-label="收起会话面板"
               title="收起（Esc）"
             >
@@ -99,6 +103,8 @@ export function SideChatDock({
                 conversationId={conversationId}
                 onConversationChange={onConversationChange}
                 inputHeight={88}
+                // UI-448 — 窄面 compact：短占位符，完整键位提示在 380px 内折两行
+                compact
               />
             ) : (
               <div className={styles.emptyHint}>当前项目还没有会话——在中央发送第一条消息后，这里会同步显示同一会话。</div>

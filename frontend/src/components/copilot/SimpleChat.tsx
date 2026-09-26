@@ -194,6 +194,9 @@ import {
 //     surfaces the placeholder (`—`) instead of fake numbers.
 // BLOCK-55 P1/P2/P3 — Spec 门：计划模式开关 + 批准三选一 + 修订批准
 import { PlanApprovalCard } from './SimpleChat/PlanApprovalCard';
+import { ComposerYieldHint, composerPlaceholder, isComposerSuppressed } from './SimpleChat/ComposerYield';
+// UI-448 — 悬浮聊天面开态共享真相：中栏 ownsCopilotAsk 实例据此让位 composer（单一输入面）
+import { setSideChatDockOpen, useSideChatDockOpen } from '@/hooks/sideChatDockStore';
 import { ContextBudgetButton } from './ContextBudgetBar';
 
 // SimpleMessage + restoreSimpleMessage + AgentProgressUpdate + restoreProgressUpdates + MessageMeta moved to
@@ -219,6 +222,7 @@ export function SimpleChat({
   ownsCopilotAsk = false,
   composerOnly = false,
   sendGuard,
+  compact = false,
 }: SimpleChatProps): React.ReactElement {
   const [messages, setMessages] = useState<SimpleMessage[]>([]);
   const [copiedMessageKey, setCopiedMessageKey] = useState<string | null>(null);
@@ -313,6 +317,8 @@ export function SimpleChat({
   // BLOCK-60 — composer 工具栏容器查询窄态（ResizeObserver 只读宽度，不影响弹性宽度逻辑）
   const composerBarRef = useRef<HTMLDivElement | null>(null);
   const [composerNarrow, setComposerNarrow] = useState(false);
+  // UI-448 — 悬浮聊天面开态（共享 store；本实例让位判定在 render 期派生）
+  const sideChatDockOpen = useSideChatDockOpen();
   // BLOCK-81 P2 — 思考档位：会话级态（随会话恢复），默认「标准」＝不发任何上游参数。
   // BLOCK-92 三波拆分 — 296-308 连续簇抽入 useThinkingLevel（调用点原位保持 hook
   // 顺序；Ctrl+T 循环 effect 与簇不连续，仍在下方原位经 setThinkingLevel 驱动）。
@@ -659,6 +665,8 @@ export function SimpleChat({
 
   const inputLength = input.trim().length;
   const composerWidth = Math.min(980, Math.max(720, 720 + Math.sqrt(inputLength) * 42));
+  // UI-448 — 悬浮面展开时中栏 composer 让位（守「同一会话单一输入面」）
+  const composerSuppressed = isComposerSuppressed({ ownsCopilotAsk, dockOpen: sideChatDockOpen });
 
   // Auto-resize textarea height. Width is handled by the composer CSS var.
   const resizeTextarea = useCallback((ta: HTMLTextAreaElement | null) => {
@@ -1324,6 +1332,9 @@ export function SimpleChat({
               )}
             </div>
           )}
+          {composerSuppressed ? (
+            <ComposerYieldHint onReturnToCenter={() => setSideChatDockOpen(false)} />
+          ) : (
           <div
             ref={composerBarRef}
             className={`sc-composer${isDraggingOver ? ' sc-composer-dragging' : ''}`}
@@ -1443,7 +1454,7 @@ export function SimpleChat({
                 className="sc-input"
                 rows={1}
                 value={input}
-                placeholder="输入消息… (Enter 发送, Shift+Enter 换行, ↑/↓ 回溯历史)"
+                placeholder={composerPlaceholder(compact)}
                 onChange={onInputChange}
                 onKeyDown={onKeyDown}
               />
@@ -1672,6 +1683,7 @@ export function SimpleChat({
               </div>
             </div>
           </div>
+          )}
         </div>
       </div>
       </div>

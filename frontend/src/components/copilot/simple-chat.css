@@ -1993,6 +1993,46 @@
   min-width: 0;
 }
 
+/* UI-448 — composer 让位提示条：悬浮聊天面展开时替代中栏输入框，
+   守「同一会话单一输入面」。形态对齐 composer 外壳（同族圆角/边框/底色）。 */
+.sc-composer-yield {
+  width: min(100%, var(--sc-composer-width));
+  max-width: min(100%, 980px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px dashed var(--gewu-border-strong);
+  border-radius: 24px;
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-caption);
+}
+
+.sc-composer-yield-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sc-composer-yield-btn {
+  flex-shrink: 0;
+  border: 1px solid var(--gewu-border);
+  border-radius: 999px;
+  padding: 4px 12px;
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-accent);
+  font-size: var(--gewu-font-size-caption);
+  cursor: pointer;
+}
+
+.sc-composer-yield-btn:hover {
+  background: var(--gewu-hover);
+  border-color: var(--gewu-accent);
+}
+
 /* BLOCK-60 — 容器查询自适应：composer 自身宽度 <680px 时收纳低频/次要控件
    （UI-303 后计划模式走档位菜单不受窄态影响；模型/供应商按钮文字收起见下）。 */
 .sc-composer {

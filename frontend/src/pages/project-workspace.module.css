@@ -1592,7 +1592,9 @@
   max-width: min(312px, calc(100% - 24px));
   overflow: auto;
   border-radius: 16px;
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
+  /* UI-448 — 大柔和影收编 --gewu-shadow-float 单源（原字面量同值，零视觉变化）；
+     侧边聊天悬浮面同用此 token，两个悬浮物说同一套阴影语言 */
+  box-shadow: var(--gewu-shadow-float);
   /* UI-351 加映 — 悬浮态默认轻微透出下层内容，hover 回到实感（渐进不突兀） */
   opacity: 0.92;
   transition: opacity 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
@@ -1636,7 +1638,8 @@
 }
 
 [data-theme='dark'] .workspaceSummaryFloat {
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  /* UI-448 — 暗色档同样收编 token（token 亮暗双套定义于 custom.css） */
+  box-shadow: var(--gewu-shadow-float);
 }
 
 .workspaceSessionInset {
@@ -1759,6 +1762,14 @@
   display: flex;
   flex-direction: column;
   padding-bottom: 0;
+}
+
+/* UI-448 — 侧边聊天悬浮面展开时中栏会话内容列让位：
+   面板 380px + 把手间隙 44px + 8px 呼吸 = 432px 避让量；
+   calc(100% - 320px) 下限保证极窄窗口下会话列仍保留 320px 可读宽度
+   （此时面板按既有 max-width 规则收窄，残余重叠与悬浮面展开前一致）。 */
+.agentMainSideChatYield {
+  padding-right: min(432px, calc(100% - 320px));
 }
 
 .agentMain :global(.sc-root) {

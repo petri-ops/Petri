@@ -2,6 +2,7 @@ import React from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CenterPanel, type CenterPanelContext, type CenterPanelRefs } from './CenterPanel';
+import { setSideChatDockOpen } from '@/hooks/sideChatDockStore';
 
 vi.mock('@/components/copilot/SimpleChat', () => ({
   SimpleChat: () => <div data-testid="persistent-chat">Agent conversation</div>,
@@ -11,6 +12,8 @@ vi.mock('@/components/copilot/conversationRunStore', () => ({
   useConversationTodoList: () => [],
   useConversationCitations: () => [],
   resultEditProgressForContext: () => [],
+  // UI-448 — 让位测试会把悬浮面置为开态，把手呼吸灯路径首次被该测试文件踩到
+  isConversationRunning: () => false,
 }));
 vi.mock('@/hooks/useDurableConversationLoop', () => ({
   useDurableConversationLoop: () => ({ loop: null, summary: null }),
@@ -136,5 +139,21 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     render(<CenterPanel ctx={ctx} refs={refs} />);
     expect(document.querySelector('[class*="workspaceSummaryColumn"]')).toBeTruthy();
     expect(document.querySelector('[class*="workspaceSummaryFloat"]')).toBeNull();
+  });
+
+  // UI-448 — 悬浮面展开时中栏会话内容列让位（不再被 380px 面板拦腰切割）
+  it('narrows the conversation column while the side chat dock is open (UI-448)', () => {
+    setSideChatDockOpen(true);
+    try {
+      const ctx = context('chat');
+      const { unmount } = render(<CenterPanel ctx={ctx} refs={refs} />);
+      expect(document.querySelector('[class*="agentMainSideChatYield"]')).toBeTruthy();
+      unmount();
+    } finally {
+      setSideChatDockOpen(false);
+    }
+    const ctx = context('chat');
+    render(<CenterPanel ctx={ctx} refs={refs} />);
+    expect(document.querySelector('[class*="agentMainSideChatYield"]')).toBeNull();
   });
 });

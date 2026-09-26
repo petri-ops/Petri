@@ -10,7 +10,9 @@
   pointer-events: none;
 }
 
-/* 悬浮面：覆盖在中栏右缘上方，不挤压布局（UI-351 float 先例） */
+/* 悬浮面：覆盖在中栏右缘上方，不挤压布局（UI-351 float 先例）
+   UI-448 — 视觉对齐项目摘要浮层语言：16px 圆角、--gewu-shadow-float 大柔和影、
+   280ms 入场 + prefers-reduced-motion 降级（与 .workspaceSummaryFloat 同族） */
 .surface {
   position: absolute;
   top: 8px;
@@ -22,11 +24,11 @@
   flex-direction: column;
   background: var(--gewu-bg-surface);
   border: 1px solid var(--gewu-border);
-  border-radius: 10px;
-  box-shadow: var(--gewu-shadow-menu);
+  border-radius: 16px;
+  box-shadow: var(--gewu-shadow-float);
   overflow: hidden;
   pointer-events: auto;
-  animation: sideChatSlideIn 160ms ease-out;
+  animation: sideChatSlideIn 280ms ease-out;
 }
 
 @keyframes sideChatSlideIn {
@@ -37,6 +39,12 @@
   to {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .surface {
+    animation: none;
   }
 }
 

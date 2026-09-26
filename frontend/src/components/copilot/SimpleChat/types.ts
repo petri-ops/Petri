@@ -264,6 +264,11 @@ export interface SimpleChatProps {
    * 缺省不拦截，工作区/右栏用法零变化。
    */
   sendGuard?: () => string | null;
+  /**
+   * UI-448 — 窄面 compact 档（380px 悬浮聊天面）：占位符改短提示，
+   * 完整键位提示在窄面内会折两行。缺省 false，中栏用法零变化。
+   */
+  compact?: boolean;
 }
 
 export type PendingApproval = ConversationPendingApproval;
