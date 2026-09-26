@@ -1,0 +1,98 @@
+{
+  "name": "block121-result-loop",
+  "startedAt": "2026-09-26T00:50:05.489Z",
+  "finishedAt": "2026-09-26T00:50:36.976Z",
+  "assertions": [
+    {
+      "name": "A0a_backend_health",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"timestamp\":\"2026-09-26T00:50:05.509Z\",\"version\":\"1.0.0\",\"db_ok\":true}"
+    },
+    {
+      "name": "A0b_r_runtime_present",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\runtimes\\R"
+    },
+    {
+      "name": "A0c_pack_demo_data_present",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\gewu-pack-bio"
+    },
+    {
+      "name": "A1_catalog_deseq2_loaded",
+      "pass": true,
+      "detail": "total=1 ids=deseq2"
+    },
+    {
+      "name": "A2a_temp_project_created",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_muhoahqs_wncr\",\"name\":\"BLOCK121-验收-1790383805517\",\"created_at\":\"2026-09-26T00:50:05.524Z\",\"updated_at\":\"20"
+    },
+    {
+      "name": "A2b_workspace_resolved",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\projects\\block121---1790383805517-muhoahqs"
+    },
+    {
+      "name": "A2c_demo_files_staged",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\projects\\block121---1790383805517-muhoahqs"
+    },
+    {
+      "name": "A2d_chat_task_completed",
+      "pass": true,
+      "detail": "taskId=bc86c868-397d-4abc-a427-f668488a9696 terminal=done"
+    },
+    {
+      "name": "A2e_conversation_bound",
+      "pass": true,
+      "detail": "conversationId=conv_b422b205-aea"
+    },
+    {
+      "name": "A2f_run_tool_called_in_loop",
+      "pass": true,
+      "detail": "events=74 run_tool tool_call 在场=true"
+    },
+    {
+      "name": "A2g_tool_job_found",
+      "pass": true,
+      "detail": "jobId=tj_muhoamsv_m92b"
+    },
+    {
+      "name": "A2h_real_deseq2_completed",
+      "pass": true,
+      "detail": "status=completed detail={\"ok\":true,\"id\":\"tj_muhoamsv_m92b\",\"toolId\":\"deseq2\",\"status\":\"completed\",\"error\":null,\"name\":\"deseq2 via agent\",\"projectId\":\"p_muhoahqs_wncr\",\"conversationId\":\"conv_b422b205-aea\",\"executionTarget\":null,\"params\":{\"counts"
+    },
+    {
+      "name": "A3a_artifact_truth_valid",
+      "pass": true,
+      "detail": "{\"artifactTruthVersion\":1,\"status\":\"valid\",\"blocking\":false,\"resultDir\":\"D:\\\\1.WorkDir\\\\biof3-desktop\\\\.biof3-dev-user-data\\\\data\\\\projects\\\\block121---17903838"
+    },
+    {
+      "name": "A3b_job_has_conversation_owner",
+      "pass": true,
+      "detail": "conversationId=conv_b422b205-aea（Studio 打开归属守卫前提）"
+    },
+    {
+      "name": "A3c_primary_artifact_on_disk",
+      "pass": true,
+      "detail": "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/data/projects/block121---1790383805517-muhoahqs/results/jobs/tj_muhoamsv_m92b/output/deg_table.csv"
+    },
+    {
+      "name": "A4a_studio_trusted_badge",
+      "pass": true,
+      "detail": "badge=可信结果 url=http://localhost:3000/project/p_muhoahqs_wncr?mode=result&job=tj_muhoamsv_m92b"
+    },
+    {
+      "name": "A4b_studio_body_real_content",
+      "pass": true,
+      "detail": "probe={\"hasArtifactName\":true,\"hasUnknown\":false,\"hasVisual\":true}（正文含真实产物元素，非占位/未核验态）"
+    },
+    {
+      "name": "A6_cleanup_done",
+      "pass": true,
+      "detail": "project=true restored=true"
+    }
+  ],
+  "allPass": true
+}

@@ -2449,6 +2449,24 @@
       ],
       "frontendRelated": false,
       "classifiesScripts": false
+    },
+    {
+      "id": "block121-result-loop-vertical",
+      "note": "BLOCK-121 开发态结果闭环垂直切片：flow block121-result-loop（真实 chat→run_tool(deseq2)→artifactTruth→Studio 可信徽标→（P2）Copilot 跨轮引用）+ run_tool 迁 session 域（tool-route 收窄不再剔除执行入口，回归钉在 block113 契约）+（P2）result_summary 有界只读工具。",
+      "patterns": [
+        ".agents/skills/gewu-dev-infra/dev-verify/flows/block121-result-loop.cjs",
+        "acceptance/block-121/**",
+        "docs/block-121-result-loop-vertical-plan.md",
+        "core/biof3-server/agent-tools/tool-defs/remote.js",
+        "core/biof3-server/agent-tools/tool-defs/session.js",
+        "test/block113-tool-prerouting.test.mjs"
+      ],
+      "tests": [
+        "test/block113-tool-prerouting.test.mjs"
+      ],
+      "frontendRelated": false,
+      "classifiesScripts": true,
+      "scriptRole": "governance"
     }
   ]
 }

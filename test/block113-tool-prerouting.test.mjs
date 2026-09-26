@@ -173,3 +173,17 @@ test('收窄器：未知域/缺映射 → 原样全量（保守）', () => {
   assert.equal(narrowToolDefsByFamily(TOOL_DEFS, '不存在域', DOMAIN_TOOL_DEFS), TOOL_DEFS);
   assert.equal(narrowToolDefsByFamily(TOOL_DEFS, 'workspace', undefined), TOOL_DEFS);
 });
+
+test('BLOCK-121 回归钉：任何域收窄下 run_tool（分析执行入口）恒在场', () => {
+  // 实机抓真（2026-09-26，block121-result-loop flow）：run_tool 原归属 remote 域，
+  // 「请运行 DESeq2 差异分析」被 tool_route 以 conf 0.86 判 workspace → 执行入口被
+  // 整轮剔除，模型退化 shell 探测/手写脚本绕过插件系统。修复=run_tool 迁入
+  // session 基线（跨域底座）；本钉保证任何域的收窄结果都含执行入口。
+  for (const family of Object.keys(DOMAIN_TOOL_DEFS)) {
+    const narrowed = narrowToolDefsByFamily(TOOL_DEFS, family, DOMAIN_TOOL_DEFS);
+    const names = new Set(
+      narrowed.filter((t) => t.function && t.function.name).map((t) => t.function.name),
+    );
+    assert.ok(names.has('run_tool'), `family=${family} 收窄后 run_tool 缺席——分析执行入口不得被路由剔除`);
+  }
+});
