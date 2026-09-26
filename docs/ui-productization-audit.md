@@ -4157,3 +4157,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **加映二（2026-09-26，用户实测两轮抓真+修复确认，verified 翻转）**：①静默版无任何提示=「静默成功形同坏了」（用户抓真成立）→ 改原生另存为（file:save-text-file IPC：channels/handler/preload/d.ts 四件套，原生对话框确认位置+主进程写所选路径+行内回执）；②对话框弹出但文件名框空白（用户二次抓真+截图）——根因定位三步：主进程 debug 日志证明 opts 正确下发（defaultPath 绝对路径+filters）→ 最小 Electron 探针隔离环境同参对话框**预填正常**（probe-inview.png）→ 锁定差异=**带父窗口的模态形式在本机 Electron 41 丢弃 defaultPath/filters**，改无父窗口形态（showSaveDialog(opts)）修复；③UI-444 全流程用户实机验收通过（对话框预填默认名→保存→回执「已导出：路径」），**翻 verified**。
 - **证据（加映二）**：用户实机（hello.md 保存至桌面+回执确认）+ 主进程日志（payload/opts 全量正确下发）+ 隔离探针对照截图（acceptance/ui-444/{dlg-pid26220,probe-inview}.png：app 内空对话框 vs 探针正确预填）+ file:save-text-file 通道经 ipc-channels-registry 双向守护 + D7 基线跟账（描述文案随 def 搬家净零）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-445: 左栏会话标题搜索——跨项目过滤、点结果直达会话（自主动作批轻量批）(2026-09-26 in_progress，契约已验，实机过目待用户)
+
+- **来源**：自主动作批（用户授权「你找找其它能做的事情…不想你闲着」）；会话与项目增多后找不到历史会话——左栏仅按项目折叠展示、无任何搜索。
+- **改动**：左栏「项目」头部新增搜索钮（search 图标，与 ssh/新建钮同排）+行内输入框（250ms 防抖）：非空时项目树切换为搜索结果视图——`listConversations('all')` 全量拉取按标题不区分大小写过滤（上限 50），每行=标题+所属项目名（未绑定如实标注）；点结果→`switchToProject`+`handleSwitchConversation` 直达会话；空态「无匹配会话」诚实可见；清空查询恢复项目树。样式走 --gewu-* token（input-bg/border/text 四级）。
+- **证据（契约）**：LeftPanel.test 17/17（+3：默认态无搜索框/点钮出现输入框/查询过滤展示+点击直达 switchToProject+handleSwitchConversation 断言/无匹配空态）+ UI-347 旧断言精确名适配（工作台退役搜索入口与新会话搜索钮不冲突）+ tsc 0 + theme 契约 4/4 + quality:lint 0 error（新 mock async 替身 1 槽入基线=既定测试替身豁免类；no-unnecessary-type-assertion 2 槽=规则与 tsc 相悖的误报，断言经 tsc 验证必要）。
+- 待用户实机过目翻 verified。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

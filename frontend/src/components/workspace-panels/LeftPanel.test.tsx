@@ -10,6 +10,14 @@ vi.mock('@/components/copilot/conversationRunStore', () => ({
   useConversationRun: () => null,
 }));
 
+vi.mock('@/components/copilot/copilotConversationsClient', () => ({
+  listConversations: vi.fn(async () => [
+    { id: 'conv-deseq2', title: 'DESeq2 结果解读', status: 'active', last_page: null, message_count: 4, created_at: '2026-09-26T00:00:00.000Z', updated_at: '2026-09-26T00:00:00.000Z', project_id: 'project-2' },
+    { id: 'conv-deseq2-extra', title: 'DESeq2 补充分析', status: 'active', last_page: null, message_count: 2, created_at: '2026-09-26T00:00:00.000Z', updated_at: '2026-09-26T00:00:00.000Z', project_id: null },
+    { id: 'conv-chat', title: '闲聊一条', status: 'active', last_page: null, message_count: 1, created_at: '2026-09-26T00:00:00.000Z', updated_at: '2026-09-26T00:00:00.000Z', project_id: 'project-1' },
+  ]),
+}));
+
 vi.mock('@/components/icons/Icon', () => ({
   Icon: ({ name }: { name: string }) => <span data-icon={name} />,
 }));
@@ -76,7 +84,9 @@ describe('BLOCK-14 LeftPanel QuickActions a11y', () => {
         <LeftPanel ctx={ctx} />
       </MemoryRouter>,
     );
-    expect(screen.queryByRole('button', { name: /搜索/ })).toBeNull();
+    // UI-347 退役的是工作台「搜索」快捷入口（精确名）；UI-445 的新会话搜索
+    // 按钮在项目树头部（title=搜索会话标题），两者名字不同不冲突。
+    expect(screen.queryByRole('button', { name: '搜索' })).toBeNull();
     // 插件入口仍在（UI-346 修复其假死后保留）
     expect(screen.getByRole('button', { name: /插件/ })).toBeTruthy();
   });
@@ -333,3 +343,55 @@ describe('UI-335 新建任务在工作台分组内', () => {
   });
 });
 
+
+describe('UI-445 会话标题搜索', () => {
+  function buildCtxWithProjects() {
+    const ctx = buildCtx('chat');
+    ctx.visibleProjects = [
+      { id: 'project-1', name: 'Project One', createdAt: '', updatedAt: '' } as Project,
+      { id: 'project-2', name: 'Project Two', createdAt: '', updatedAt: '' } as Project,
+    ];
+    return ctx;
+  }
+
+  function renderPanel(ctx: LeftPanelContext) {
+    return render(
+      <MemoryRouter>
+        <LeftPanel ctx={ctx} />
+      </MemoryRouter>,
+    );
+  }
+
+  async function openSearchAndType(ctx: LeftPanelContext, query: string) {
+    renderPanel(ctx);
+    fireEvent.click(screen.getByRole('button', { name: '搜索会话标题' }));
+    const input = await screen.findByPlaceholderText('搜索会话标题…');
+    fireEvent.change(input, { target: { value: query } });
+    await waitFor(() => expect(screen.getByTestId('conv-search-results')).toBeTruthy());
+  }
+
+  it('默认态无搜索框；点击搜索钮出现输入框', async () => {
+    const ctx = buildCtxWithProjects();
+    renderPanel(ctx);
+    expect(screen.queryByPlaceholderText('搜索会话标题…')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: '搜索会话标题' }));
+    expect(await screen.findByPlaceholderText('搜索会话标题…')).toBeTruthy();
+  });
+
+  it('输入查询：标题匹配的会话按项目过滤展示，点击直达会话', async () => {
+    const ctx = buildCtxWithProjects();
+    await openSearchAndType(ctx, 'DESeq2');
+    expect(await screen.findByText('DESeq2 结果解读')).toBeTruthy();
+    expect(screen.queryByText('闲聊一条')).toBeNull();
+    // 点击结果 → 切项目 + 切会话
+    fireEvent.click(screen.getByText('DESeq2 结果解读'));
+    expect(ctx.switchToProject).toHaveBeenCalledWith('project-2');
+    expect(ctx.handleSwitchConversation).toHaveBeenCalledWith('conv-deseq2');
+  });
+
+  it('无匹配 → 诚实空态', async () => {
+    const ctx = buildCtxWithProjects();
+    await openSearchAndType(ctx, '不存在的标题');
+    expect(await screen.findByText('无匹配会话')).toBeTruthy();
+  });
+});

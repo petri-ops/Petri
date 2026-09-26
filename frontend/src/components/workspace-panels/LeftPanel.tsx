@@ -119,6 +119,9 @@ export function LeftPanel({ ctx, open = true }: LeftPanelProps): React.ReactElem
   const [dropHint, setDropHint] = useState<string | null>(null);
   // UI-327 — 左栏行内 SSH 创建面板（globe 按钮切换；不跳首页）
   const [sshCreateOpen, setSshCreateOpen] = useState(false);
+  // UI-445 — 会话标题搜索（搜索钮切换；跨项目按标题过滤，点结果直达会话）
+  const [convSearchOpen, setConvSearchOpen] = useState(false);
+  const [convSearchQuery, setConvSearchQuery] = useState('');
 
   const handlePanelDrop = async (e: React.DragEvent): Promise<void> => {
     e.preventDefault();
@@ -181,11 +184,33 @@ export function LeftPanel({ ctx, open = true }: LeftPanelProps): React.ReactElem
           ctx={ctx}
           sshCreateOpen={sshCreateOpen}
           onToggleSshCreate={() => setSshCreateOpen((v) => !v)}
+          convSearchOpen={convSearchOpen}
+          onToggleConvSearch={() => {
+            setConvSearchOpen((v) => !v);
+            setConvSearchQuery('');
+          }}
         />
+        {convSearchOpen && (
+          <div className={styles.convSearchBox}>
+            <input
+              className={styles.treeRenameInput}
+              style={{ width: '100%' }}
+              value={convSearchQuery}
+              onChange={(e) => setConvSearchQuery(e.target.value)}
+              placeholder="搜索会话标题…"
+              aria-label="搜索会话标题"
+              autoFocus
+            />
+          </div>
+        )}
         {sshCreateOpen && (
           <SshCreateInlinePanel ctx={ctx} onClose={() => setSshCreateOpen(false)} />
         )}
-        <ProjectTree ctx={ctx} />
+        {convSearchOpen && convSearchQuery.trim() ? (
+          <ConversationSearchResults ctx={ctx} query={convSearchQuery.trim()} />
+        ) : (
+          <ProjectTree ctx={ctx} />
+        )}
         {dropHint && (
           <p className={styles.leftCreateError} role="alert" style={{ padding: '0 12px' }}>{dropHint}</p>
         )}
@@ -369,12 +394,22 @@ function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   );
 }
 
-function ProjectTreeHeader({ ctx, sshCreateOpen, onToggleSshCreate }: { ctx: LeftPanelContext; sshCreateOpen: boolean; onToggleSshCreate: () => void }): React.ReactElement {
+function ProjectTreeHeader({ ctx, sshCreateOpen, onToggleSshCreate, convSearchOpen, onToggleConvSearch }: { ctx: LeftPanelContext; sshCreateOpen: boolean; onToggleSshCreate: () => void; convSearchOpen: boolean; onToggleConvSearch: () => void }): React.ReactElement {
   return (
     <>
       <div className={styles.leftPanelHeader}>
         <span className={styles.leftPanelTitle}>项目</span>
         <div className={styles.leftPanelHeaderActions}>
+          {/* UI-445 — 会话标题搜索开关（跨项目过滤，点结果直达会话） */}
+          <button
+            className={`${styles.iconBtn} ${convSearchOpen ? styles.iconBtnInactive : ''}`}
+            onClick={onToggleConvSearch}
+            title={convSearchOpen ? '收起会话搜索' : '搜索会话标题'}
+            aria-label={convSearchOpen ? '收起会话搜索' : '搜索会话标题'}
+            aria-expanded={convSearchOpen}
+          >
+            <Icon name="search" size={14} />
+          </button>
           {/* UI-327 — ssh 创建入口前置到左栏：行内面板，不跳首页 */}
           <button
             className={`${styles.iconBtn} ${sshCreateOpen ? styles.iconBtnInactive : ''}`}
@@ -423,6 +458,56 @@ function ProjectTree({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
           }
         />
       ))}
+    </div>
+  );
+}
+
+/** UI-445 — 会话标题搜索结果（跨项目；250ms 防抖后全量拉取按标题过滤，上限 50）。 */
+function ConversationSearchResults({ ctx, query }: { ctx: LeftPanelContext; query: string }): React.ReactElement {
+  const [results, setResults] = useState<ConversationSummary[] | null>(null);
+  const projectNameById = React.useMemo(() => {
+    const map = new Map<string, string>();
+    for (const p of ctx.visibleProjects) map.set(p.id, p.name);
+    return map;
+  }, [ctx.visibleProjects]);
+
+  React.useEffect(() => {
+    let alive = true;
+    const timer = setTimeout(() => {
+      listConversations('all', undefined, { includeFederated: true })
+        .then((all) => {
+          if (!alive) return;
+          const q = query.toLowerCase();
+          setResults(all.filter((c) => c.title.toLowerCase().includes(q)).slice(0, 50));
+        })
+        .catch(() => { if (alive) setResults([]); });
+    }, 250);
+    return () => { alive = false; clearTimeout(timer); };
+  }, [query]);
+
+  return (
+    <div className={styles.projectTreeScroll} data-testid="conv-search-results">
+      <ul className={styles.convList}>
+        {results === null && <li className={styles.convEmpty}>搜索中…</li>}
+        {results !== null && results.length === 0 && <li className={styles.convEmpty}>无匹配会话</li>}
+        {results !== null && results.map((c) => (
+          <li
+            key={c.id}
+            className={styles.convItem}
+            onClick={() => {
+              if (c.project_id) ctx.switchToProject(c.project_id);
+              ctx.handleSwitchConversation(c.id);
+            }}
+            title={c.title}
+          >
+            <Icon name="message-circle" size={12} />
+            <span className={styles.convItemTitle}>{c.title}</span>
+            <span className={styles.convEmpty} style={{ marginLeft: 'auto', fontSize: 11 }}>
+              {c.project_id ? (projectNameById.get(c.project_id) || '其他项目') : '未绑定项目'}
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

@@ -7511,3 +7511,22 @@ body:global(.gewu-resizing-columns) * {
   border: 1px solid var(--gewu-border, #e4e4e7);
   background: var(--gewu-bg-subtle, #f4f4f5);
 }
+
+/* UI-445 — 左栏会话标题搜索框（surface 内嵌输入，token 阶梯暗色安全） */
+.convSearchBox {
+  padding: 6px 12px 8px;
+  border-bottom: 1px solid var(--gewu-border);
+}
+
+.convSearchBox input {
+  background: var(--gewu-input-bg, var(--gewu-bg-surface));
+  border: 1px solid var(--gewu-border);
+  border-radius: 6px;
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-caption, 12px);
+  padding: 5px 8px;
+}
+
+.convSearchBox input::placeholder {
+  color: var(--gewu-text-muted);
+}
