@@ -197,7 +197,6 @@
     "types::frontend/src/hooks/useSkillStore/types.ts::ParameterType",
     "types::frontend/src/hooks/useStartupTimeline.ts::StartupReport",
     "types::frontend/src/hooks/useWorkspacePanels.ts::TitleBarState",
-    "types::frontend/src/hooks/useWorkspacePanels.ts::TitleBarToolItem",
     "types::frontend/src/hooks/useWorkspaceRouting.ts::UseWorkspaceRoutingResult",
     "types::frontend/src/lib/artifact-selection.ts::ArtifactIdStrategy",
     "types::frontend/src/lib/artifact-selection.ts::ArtifactInteractionColumn",

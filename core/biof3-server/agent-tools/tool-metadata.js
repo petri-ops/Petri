@@ -117,6 +117,9 @@ const TOOL_METADATA = {
   run_tool: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
   // BLOCK-121 P2（B1）— 结果内容只读读取
   result_summary: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
+  // BLOCK-124（C-13）— 符号图只读查询（全图建在临时内存，无写面；并发安全——只读 fs）
+  codegraph_who_imports: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: 30000 },
+  codegraph_classify_edges: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: 30000 },
 
   // ---- skill 元工具（mcp/registry 注册）----
   skill_discover: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },

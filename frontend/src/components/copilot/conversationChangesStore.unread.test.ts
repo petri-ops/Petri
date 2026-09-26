@@ -6,7 +6,6 @@ import { describe, expect, it } from 'vitest';
 import {
   acknowledgeConversationChanges,
   countUnreviewedConversationChanges,
-  getConversationFileChanges,
   getConversationUnreviewedCount,
   recordConversationFileChange,
 } from './conversationChangesStore';

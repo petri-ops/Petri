@@ -1,6 +1,7 @@
 // HK-03 P1 契约测试 — symbol-graph 两查询（红绿先行：本文件先于实现落盘）
 // 契约锚点：docs/hk03-symbol-graph-selection.md §1 需求规格 / §4 P1 落地要点
-// 夹具自包含（临时目录），覆盖 .ts/.tsx/.js/.cjs 四形态 + 「导入但未使用」+ 变量 require 盲区。
+// BLOCK-124（C-13）迁家：单源迁 core/biof3-server/helpers/code-graph.js（scripts 变薄壳），
+// 追加产品化判据：tsconfig paths 别名解析 / 畸形文件容错 / maxFiles 上限。
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
@@ -11,6 +12,10 @@ let root;
 
 test.before(() => {
   root = mkdtempSync(join(tmpdir(), 'symbol-graph-fx-'));
+  writeFileSync(
+    join(root, 'tsconfig.json'),
+    JSON.stringify({ compilerOptions: { baseUrl: '.', paths: { '@/*': ['src/*'] } } }),
+  );
   mkdirSync(join(root, 'src'), { recursive: true });
   mkdirSync(join(root, 'comp'), { recursive: true });
   writeFileSync(
@@ -57,6 +62,14 @@ test.before(() => {
     join(root, 'src', 'concat-user.cjs'),
     `const { catA } = require('./cjs-lib' + '.cjs');\nmodule.exports.q = catA;\n`,
   );
+  writeFileSync(
+    join(root, 'src', 'alias-user.ts'),
+    `import { usedFn } from '@/lib.js';\nexport const av = usedFn();\n`,
+  );
+  writeFileSync(
+    join(root, 'src', 'broken.ts'),
+    `function {{{ this is not valid typescript !!!\n`,
+  );
 });
 
 test.after(() => {
@@ -64,7 +77,9 @@ test.after(() => {
 });
 
 async function loadModule() {
-  return import('../scripts/symbol-graph.mjs');
+  // BLOCK-124 单源迁家：内核在 core（CJS）；scripts/symbol-graph.mjs 仅剩 CLI 薄壳
+  const imported = await import('../core/biof3-server/helpers/code-graph.js');
+  return imported.default ?? imported;
 }
 
 test('who-imports：ESM 具名导入且使用 → used=true（prod）', async () => {
@@ -161,4 +176,29 @@ test('require 字面量拼接参数可折叠（确定性，非猜测）', async 
   assert.equal(hits[0].used, true);
   assert.equal(hits[0].resolved, true);
   assert.equal(hits[0].target.endsWith('cjs-lib.cjs'), true);
+});
+
+test('BLOCK-124：tsconfig paths 别名可解析（@/ → src/*，通用化替代仓库特化硬编码）', async () => {
+  const m = await loadModule();
+  const graph = await m.buildGraph(root);
+  const hits = m.whoImports(graph, 'usedFn');
+  const aliasHit = hits.find((h) => h.file.endsWith('alias-user.ts'));
+  assert.ok(aliasHit, '别名导入文件有命中');
+  assert.equal(aliasHit.resolved, true);
+  assert.equal(aliasHit.target, 'src/lib.ts');
+});
+
+test('BLOCK-124：畸形文件不炸全图（单文件容错，产出可继续查询）', async () => {
+  const m = await loadModule();
+  const graph = await m.buildGraph(root);
+  const hits = m.whoImports(graph, 'usedFn');
+  assert.ok(hits.length >= 2, 'broken.ts 存在但其余文件查询正常');
+});
+
+test('BLOCK-124：maxFiles 上限 → 抛 too_many_files（带 fileCount/maxFiles，供工具层诚实拒绝）', async () => {
+  const m = await loadModule();
+  await assert.rejects(
+    () => m.buildGraph(root, { maxFiles: 2 }),
+    (e) => e.code === 'too_many_files' && e.fileCount > 2 && e.maxFiles === 2,
+  );
 });

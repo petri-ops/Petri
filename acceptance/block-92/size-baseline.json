@@ -131,8 +131,8 @@
       "path": "core/biof3-server/agent-tools/workspace-tools.js",
       "wave": "C",
       "module": "P-03",
-      "lines": 1520,
-      "sha256": "cc6e8cad75d5af9bce9e275580f3ff326927a911a557ad9d9d93117c202ce1c1"
+      "lines": 1522,
+      "sha256": "82cbc02ab12a37e571fa8d3892dfaf0dd1e2751d3a478ee3957add8b51ab4b30"
     },
     {
       "path": "core/biof3-server/mcp/registry.js",
@@ -170,5 +170,5 @@
       "sha256": "10d3d7cc507a7ae6ddbf8c1a42e296eb6d232147300ef61a29e1f31577e992bc"
     }
   ],
-  "total": 22081
+  "total": 22083
 }

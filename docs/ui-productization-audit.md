@@ -4183,3 +4183,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **verified 翻转（2026-09-26，用户实机复测「可以了 很棒」确认）**：v4 计数徽章（四处入口同源）+ v5 0 态修复实机确认无异常。同批清理=ui446 系测试残留文件（Desktop/仓库根，本验证批自产）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-447: BLOCK-124（C-13）— codegraph 工具行（「已查引用/已盘点依赖」动词 + git-branch 图标）(2026-09-26 in_progress，契约已验，实机走查待补)
+
+- **来源**：BLOCK-124 第一批 C-13 符号图产品化（plan=docs/block-124-harness-productization-plan.md）。agent 新增 `codegraph_who_imports` / `codegraph_classify_edges` 两个只读工具（HK-03 内核单源迁 core/biof3-server/helpers/code-graph.js），聊天工具行需同步可读呈现。
+- **改动（本条仅 UI 面）**：`frontend/src/components/copilot/toolActivity.ts` VERBS +2（已查引用/已盘点依赖）+ ICONS +2（git-branch）；`test/fixtures/tool-activity-labels.json` 同步两行（三面同源钉死，UI-437 v5.18 注册表机制零新增面）。
+- **证据（契约）**：test/tool-activity-labels.test.mjs 宇宙 76 双向覆盖绿 + toolActivity.test.ts fixture 行为级断言绿 + tsc 0。
+- 实机走查（agent 真实调用工具行显示）随 BLOCK-124 P1 收口补证据后翻 verified。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -250,6 +250,7 @@
     "extract-zip": "^2.0.1",
     "node-pty": "1.1.0-beta34",
     "qrcode-generator": "^1.4.4",
+    "typescript": "^5.9.3",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
@@ -267,7 +268,6 @@
     "knip": "6.38.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "typescript": "^5.9.3",
     "typescript-eslint": "^8.70.0"
   },
   "engines": {

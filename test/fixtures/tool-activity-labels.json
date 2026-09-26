@@ -294,5 +294,13 @@
   "decision_recent": {
     "label": "已回放",
     "icon": "clock"
+  },
+  "codegraph_who_imports": {
+    "label": "已查引用",
+    "icon": "git-branch"
+  },
+  "codegraph_classify_edges": {
+    "label": "已盘点依赖",
+    "icon": "git-branch"
   }
 }

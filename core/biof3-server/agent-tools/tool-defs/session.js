@@ -412,5 +412,43 @@ module.exports = [
         ]
       }
     }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "codegraph_who_imports",
+      "description": "查询当前项目里「哪些文件导入了指定符号」的静态引用关系（AST 级：ESM import / require / 动态 import / 命名空间全识别）。每处引用带使用三态：USED_PROD（生产代码在用）/ USED_TEST（仅测试在用）/ UNUSED（导入但未用）。改函数/改签名/删导出前先用它判影响面；「仅测试在用」意味着改动要同步动测试。诚实边界：变量形式动态 require、字符串拼接路径在静态盲区（如实报 UNRESOLVED 不猜测），零命中≠绝对无人引用，删除裁决需复核。项目源文件超 5000 个时拒绝建图并如实返回文件数。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "description": "要查询的导出符号名（如函数名/常量名，精确匹配非模糊）"
+          }
+        },
+        "required": [
+          "symbol"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "codegraph_classify_edges",
+      "description": "对项目内一个文件做依赖盘点：出边（它 import 了谁、各符号是否真实使用）+ 每个导出的入边分类（USED_PROD / USED_TEST / DEAD=静态无已解析使用）。重构/清理单文件前先盘它。DEAD≠可安全删除：动态消费方在静态盲区查不到，删除仍需复核。输出有界（导出 ≤150、出边 ≤60，截断带标记）。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "项目内相对路径（如 src/lib.ts），不允许越出项目根"
+          }
+        },
+        "required": [
+          "file"
+        ]
+      }
+    }
   }
 ];

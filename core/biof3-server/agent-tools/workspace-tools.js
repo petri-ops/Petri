@@ -1478,6 +1478,8 @@ function createWorkspaceTools(options = {}) {
     createResidentTask: routed(createResidentTaskLocal, 'createResidentTask'),
     listResidentTasks: routed(listResidentTasksLocal, 'listResidentTasks'),
     readResidentTask: routed(readResidentTaskLocal, 'readResidentTask'),
+    // BLOCK-124（C-13）— codegraph 只读工具复用根解析双闸（projectId→workspace_path→realpath）
+    withWorkspace,
     preflightTool,
     commandVerdict,
   };

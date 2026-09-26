@@ -2167,9 +2167,10 @@
     },
     {
       "id": "hk03-symbol-graph",
-      "note": "HK-03 符号图/导入边精确分类查询（scripts/symbol-graph.mjs，typescript Compiler API 零新增依赖；选型/回放/DEAD 语义边界=docs/hk03-symbol-graph-selection.md）。补登原因=UI-445 提交 c3387d24 登记 test:changed fail-closed 拦截本脚本未登记，红旗归属 HK-03 收口清偿。",
+      "note": "HK-03 符号图/导入边精确分类查询（typescript Compiler API 零新增依赖；选型/回放/DEAD 语义边界=docs/hk03-symbol-graph-selection.md）。BLOCK-124（C-13）内核单源迁 core/biof3-server/helpers/code-graph.js（scripts/symbol-graph.mjs 只剩 CLI 薄壳），契约测试随迁。补登原因=UI-445 提交 c3387d24 登记 test:changed fail-closed 拦截本脚本未登记，红旗归属 HK-03 收口清偿。",
       "patterns": [
         "scripts/symbol-graph.mjs",
+        "core/biof3-server/helpers/code-graph.js",
         "test/symbol-graph.test.mjs"
       ],
       "tests": [
@@ -2178,6 +2179,31 @@
       "frontendRelated": false,
       "classifiesScripts": true,
       "scriptRole": "governance"
+    },
+    {
+      "id": "block124-codegraph-tools",
+      "note": "BLOCK-124（C-13）codegraph 双工具注册面：session 域 defs + registry HANDLERS/CONTRACTS + tool-metadata + 动词三面（tool-events / 前端 toolActivity / fixture）；根解析复用 workspace-tools withWorkspace 双闸。工具总数钉 74→76 同步四处（agent-tool-registry×2 / tool-activity-labels / block116 存量红顺手清偿）。内核契约另由 hk03-symbol-graph 规则覆盖。",
+      "patterns": [
+        "core/biof3-server/agent-tools/codegraph-tools.js",
+        "core/biof3-server/agent-tools/tool-defs/session.js",
+        "core/biof3-server/agent-tools/registry.js",
+        "core/biof3-server/agent-tools/tool-metadata.js",
+        "core/biof3-server/agent-tools/tool-events.js",
+        "core/biof3-server/agent-tools/workspace-tools.js",
+        "frontend/src/components/copilot/toolActivity.ts",
+        "test/fixtures/tool-activity-labels.json",
+        "test/codegraph-tools.test.mjs"
+      ],
+      "tests": [
+        "test/codegraph-tools.test.mjs",
+        "test/agent-tool-registry.test.mjs",
+        "test/tool-activity-labels.test.mjs",
+        "test/block109-p2-tool-metadata.test.mjs",
+        "test/block113-tool-prerouting.test.mjs",
+        "test/block116-decision-platform.test.mjs"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": false
     },
     {
       "id": "block123-g03-test-session-cleanup",
