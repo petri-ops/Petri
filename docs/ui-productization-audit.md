@@ -4166,7 +4166,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - 待用户实机过目翻 verified。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-446: BLOCK-123 G-01 — 审阅 tab 未读圆点（agent 改完代码主动点亮，打开即熄）(2026-09-26 in_progress，契约已验，实机过目待用户)
+## UI-446: BLOCK-123 G-01 — 审阅入口未审文件数计数徽章（agent 改完代码四处入口点亮，打开审阅即归零）(2026-09-26 verified，用户实机复测通过：v4 计数徽章+v5 0 态修复确认)
 
 - **来源**：BLOCK-123 P0 端到端对账缺口清单 G-01（「涩」：agent 完成编辑后默认视图无审阅引导，用户需自行发现右侧审阅 tab）。**对账先行**：聊天区改动卡片系 2026-09-09 用户裁决移除（c0e92dd0，UI-216/252/255/273 cancelled——信息已在工具行与审阅面板呈现，卡片冗余且空会话噪音），故本项**不复活卡片**，收窄为 tab 药丸级极轻圆点（不新增聊天区内容、无关闭不持久问题）。
 - **改动**（0 新增 IPC / 0 新依赖）：① conversationChangesStore 增未读判定面——`hasUnreviewedConversationChanges` 纯判定（导出供测试）+ `acknowledgeConversationChanges` 已读回写 + `isConversationUnreviewed`/`useConversationUnreviewedChanges` 取数；record/acknowledge 改单调时间戳（防同毫秒竞态抖动）；② `TitleBarTab` 增可选 `dot` 字段 + useWorkspaceTitleBar 组装（tab==='review' 且当前会话未读时点亮）；③ TitleBarRightZone tab 药丸渲染圆点（`--gewu-accent` token，暗色安全）；④ project-workspace 激活审阅 tab 即 acknowledge（圆点熄灭，新改动重新点亮）。
@@ -4180,5 +4180,6 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **加映 v4（2026-09-26，用户提议「直接显示当前审阅按钮中的 + - 数量变化」→ 升格为未审文件数计数徽章）**：圆点升格为计数徽章，四处入口同源显示未审文件数 N（+ 钮/菜单项/空态磁贴/tab 药丸）；实现=conversationChangesStore 增 `countUnreviewedConversationChanges` 纯计数 + `getConversationUnreviewedCount`/`useConversationUnreviewedCount`（v3 布尔判定面收编升级）+ `TitleBarTab.reviewCount`/`TitleBarState.reviewCount`（equality/default/cleanup 同步）+ RightZone 药丸与 + 钮、EmptyResult 磁贴计数渲染（accent tint 底+数字）；acknowledge 语义不变（打开审阅归零，新改动重新累计）。±行数版登记候选池 C-16（权威源=审阅面板 git diff，入口展示需 shortstat 桥避免第二真相）。
 - **证据（加映 v4）**：unread 测试升格计数语义 4/4 + RightZone 计数徽章 4/4（药丸/+ 钮互斥、0/缺省隐藏）+ EmptyResult 3/3 + hydrate 8/8 零回归 + tsc 0 + theme 契约 5/5 + eslint 0 error。
 - **加映 v5（2026-09-26，用户复测抓真「+ 0 默认情况下 0 不应该出现」）**：+ 钮徽章条件用 `reviewCount && ...`，计数为 0 时 React 把 falsy 数字 `0` 渲染了出来（经典 && 渲染陷阱）——修复为 `(reviewCount ?? 0) > 0` 判定 + 0 态回归测试补位（此前未覆盖的洞）；tsc 0。教训入册=**徽章类条件禁用裸 `&&` 接数字**，统一 `> 0` 或 `?:`。
-- 待用户复测（姿势不变：改动任务→四处徽章显示未审文件数→点开审阅→归零）。
+- **verified 翻转（2026-09-26，用户实机复测「可以了 很棒」确认）**：v4 计数徽章（四处入口同源）+ v5 0 态修复实机确认无异常。同批清理=ui446 系测试残留文件（Desktop/仓库根，本验证批自产）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
