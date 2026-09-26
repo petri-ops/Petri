@@ -1,0 +1,19 @@
+{
+  "startedAt": "2026-09-26T01:29:22.390Z",
+  "projectId": "p_muhpp0bw_p5bh",
+  "msg1SentAt": "2026-09-26T01:29:26.456Z",
+  "runSteady": {
+    "secs": 10,
+    "hasWork": true
+  },
+  "afterReloadState": {
+    "btnDisabled": true,
+    "btnTitle": "任务进行中…",
+    "hasRun": false
+  },
+  "msg2SentAt": "2026-09-26T01:29:47.788Z",
+  "steerReceipt": "NOT_CAPTURED",
+  "terminalBadge": "可信结果",
+  "finishedAt": "2026-09-26T01:29:57.868Z",
+  "_note": "UI-442 自然取证（2026-09-26，真实 deseq2 长任务 ~22s）：①运行稳态 title 半边已自然取证（工作中·已运行 10s + 已运行 deseq2 事件行 + 执行中·2 轮，见 ui442-running-steady.png，DOM 断言 secs>=3 且含「工作中」）；②steer 回执仍未自然捕获——两轮尝试抓出窗口语义：streaming 期 Enter=排队（BLOCK-102）、按钮禁用（任务进行中…）；刷新后 composer 重挂流仍属 streaming 态；steer 仅在「任务运行但流已断挂」窄窗口（CK-01 设计面）。按「不凑证据」纪律停止探测，UI-442 维持 in_progress 待 steer 自然发生或用户裁决"
+}
