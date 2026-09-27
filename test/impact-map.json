@@ -2615,7 +2615,6 @@
         "frontend/src/hooks/sideChatDockStore.ts",
         "frontend/src/hooks/sideChatDockStore.test.tsx",
         "frontend/src/components/copilot/SimpleChat/ComposerYield.tsx",
-        "frontend/src/components/copilot/SimpleChat/ComposerYield.test.tsx",
         "frontend/src/components/copilot/SimpleChat.tsx",
         "frontend/src/components/copilot/SimpleChat/types.ts",
         "frontend/src/components/copilot/simple-chat.css",
@@ -2631,7 +2630,6 @@
       ],
       "tests": [
         "frontend/src/hooks/sideChatDockStore.test.tsx",
-        "frontend/src/components/copilot/SimpleChat/ComposerYield.test.tsx",
         "frontend/src/components/workspace-panels/SideChatDock.test.tsx",
         "frontend/src/components/workspace-panels/CenterPanel.test.tsx",
         "frontend/src/styles/theme-token-contract.test.ts"

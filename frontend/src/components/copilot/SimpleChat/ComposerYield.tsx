@@ -4,7 +4,7 @@
 // ============================================================
 
 /** 中栏宽列的完整键位提示。 */
-export const COMPOSER_PLACEHOLDER_FULL = '输入消息… (Enter 发送, Shift+Enter 换行, ↑/↓ 回溯历史)';
+const COMPOSER_PLACEHOLDER_FULL = '输入消息… (Enter 发送, Shift+Enter 换行, ↑/↓ 回溯历史)';
 
 /** compact 档（300px 悬浮面/列区）用短占位符，完整键位提示在窄面内会折两行。 */
 export function composerPlaceholder(compact?: boolean): string {
