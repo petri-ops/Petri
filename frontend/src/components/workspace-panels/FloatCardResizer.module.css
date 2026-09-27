@@ -13,3 +13,21 @@
 .handle:hover {
   background: color-mix(in srgb, var(--gewu-accent) 16%, transparent);
 }
+
+/* v25 补 — 把手可见性：常驻一条 3px 中性指示线（用户反馈「只有悬浮时才可以
+   拖宽吗」——隐形热区不可发现），悬停把手时转主题色明确可拖 */
+.handle::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 14px;
+  bottom: 14px;
+  width: 3px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--gewu-text-tertiary) 35%, transparent);
+  transition: background 0.2s ease;
+}
+
+.handle:hover::after {
+  background: var(--gewu-accent);
+}
