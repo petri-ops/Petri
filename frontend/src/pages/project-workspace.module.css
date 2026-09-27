@@ -1788,6 +1788,7 @@
 }
 
 /* UI-448 加映 v12 — 右轨：摘要钉住列 + 侧聊独立列区垂直堆叠共享右缘 */
+/* UI-448 加映 v14 — 子卡从顶部堆叠（摘要上、会话下），对齐顶栏按钮弹出方向 */
 .workspaceRightRail {
   flex: 0 0 auto;
   min-height: 0;
@@ -1795,7 +1796,6 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  justify-content: space-between;
   gap: 8px;
 }
 

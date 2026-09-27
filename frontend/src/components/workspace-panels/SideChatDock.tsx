@@ -41,6 +41,7 @@ export function SideChatDock({
   sourceConversationId = null,
   variant = 'float',
   surfaceSuppressed = false,
+  belowSummary = false,
 }: {
   projectId: string;
   /**
@@ -56,6 +57,8 @@ export function SideChatDock({
   variant?: 'float' | 'docked';
   /** UI-448 加映 v12 — 宽窗时面板由独立列区承载：悬浮实例只渲染常驻把手。 */
   surfaceSuppressed?: boolean;
+  /** UI-448 加映 v14 — 摘要悬浮同时打开：面板让到其下方下半区，同右缘不叠加。 */
+  belowSummary?: boolean;
 }): React.ReactElement {
   const open = useSideChatDockOpen();
   // UI-448 加映 v3 — 每项目独立侧聊会话（与中栏 activeConvId 完全解耦）。
@@ -151,7 +154,10 @@ export function SideChatDock({
   return (
     <div className={styles.dockRoot} data-testid="side-chat-dock">
       {open && !surfaceSuppressed ? (
-        <div className={styles.surface} data-testid="side-chat-surface">
+        <div
+          className={`${styles.surface} ${belowSummary ? styles.surfaceBelowSummary : ''}`}
+          data-testid="side-chat-surface"
+        >
           {panel}
         </div>
       ) : null}

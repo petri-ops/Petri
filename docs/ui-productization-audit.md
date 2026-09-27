@@ -4276,4 +4276,5 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **修法**：侧聊打开时主会话 composer 不再让位（v2 的「同一会话单一输入面」设定由用户明确反转）；ComposerYieldHint 让位件/契约/CSS 整链退役，ComposerYield 瘦身为 composerPlaceholder 工具（compact 短占位符保留）。
 - **证据**：实机双输入框并存（主 718px 可输入+侧聊 compact 同屏，totalComposers=2，让位提示条消失）；受影响面 47 文件/415 用例绿；前端全量 155 文件/1245 用例 0 红；tsc 0；eslint 0 error；证据=acceptance/ui-448/walkthrough-v14.json+截图。**待用户过目 v14 形态后翻 verified**。
 - 收口补账：impact-map 清残引（ComposerYield.test 删除）＋knip 棘轮抓真（COMPOSER_PLACEHOLDER_FULL 摘 export 清偿）＋code-size 随批重打；closeout 十一门绿。
+- 加映：卡片弹出位置对齐摘要行为（顶栏按钮→卡片从按钮下方弹出，不再挂右下角）；摘要悬浮同开时让到其下方下半区；右轨子卡顶部堆叠。证据补=ui448v14-card-below-toggle.png。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。

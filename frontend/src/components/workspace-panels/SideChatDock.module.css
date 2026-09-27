@@ -18,11 +18,14 @@
    right:0（摘要卡同缘）、开态隐把手 */
 .surface {
   position: absolute;
-  top: auto;
-  bottom: 8px;
+  /* UI-448 加映 v14 — 卡片弹出位置对齐摘要行为：顶栏按钮 → 卡片从按钮下方
+     （会话区右上）出现，不再挂右下角。摘要悬浮同时打开时让到其下方下半区 */
+  top: 8px;
+  bottom: auto;
   /* UI-448 加映 v10 — 挂载点已迁入 workspaceSessionLayout（与摘要悬浮同层），
      right:0 即与摘要卡同缘——参照系结构性同源，无魔法数 */
   right: 0;
+  max-height: calc(50% - 8px);
   height: 50%;
   width: 300px;
   /* 注意：定位容器 .dockRoot 宽度为 0，max-width 百分比参照系不可用——
@@ -174,4 +177,11 @@
 
 .dockedColumn :global(.sc-messages) {
   padding: 0 4px;
+}
+
+/* UI-448 加映 v14 — 摘要悬浮同时打开：侧聊面让到摘要下方（下半区），
+   上摘要下会话同右缘垂直堆叠不叠加 */
+.surfaceBelowSummary {
+  top: calc(50% - 8px);
+  max-height: calc(50% - 8px);
 }

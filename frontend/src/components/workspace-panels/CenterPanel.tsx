@@ -476,6 +476,8 @@ function SessionFrameView({
             sourceConversationId={ctx.activeConvId}
             // 宽窗：面板已由上面的独立列区承载，这里只留常驻把手（图标仍在列区上方）
             surfaceSuppressed={wide && sideChatOpen}
+            // 摘要悬浮同时打开：面板让到摘要下方（同右缘堆叠不叠加）
+            belowSummary={ctx.summaryCardOpen && ctx.summaryVisibility === 'float'}
           />
         )}
       </div>
