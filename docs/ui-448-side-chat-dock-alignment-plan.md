@@ -9,7 +9,7 @@ acceptance:
   - 窄面适配：悬挂面 SimpleChat compact 占位符（短提示不折行）；表格/长 token 三态实机核对（框内滚动+滚动条可见）
   - 台账同步：docs/ui-productization-audit.md UI-448 条目与实现同一提交；实机走查截图证据落 acceptance/ui-448/
 reopen: 用户实机过目后对新形态不满意，或悬浮面与摘要浮层同屏叠置的已知边界升级为真问题时
-status: active
+status: completed
 ---
 
 # UI-448 — 侧边聊天悬浮面体验对齐项目摘要
@@ -254,3 +254,6 @@ HK-01：钉住跳过让位/悬浮保持让位两契约先红后绿；双宽度�
 ### §16.1 加映 v11 实施记录（2026-09-27 当日收口）
 
 红绿先行：钉住跳过让位/悬浮保持让位两契约→13/13 绿。双宽度实机（2481 钉住 / 1000 悬浮）零重叠。诊断工具 scripts/ui448-diagnose-user-window.mjs 入册（只读探针，红线内）。教训两条入册：①窗口宽度是行为面的第一变量——走查必须覆盖用户真实视口（此前只测窄窗悬浮形态）；②有 CDP 就直连用户窗口取证，猜测替代不了测量。验证=13/13+前端全量 155 文件/1242 用例 0 红+tsc 0+eslint 0 error。证据=acceptance/ui-448/walkthrough-v11.json。
+### §16.2 加映 v11 收口（2026-09-27）
+
+实现提交 a61d02bf（impact-map 分类旗与 EOL 归一随收口提交）；closeout 十一门绿。v11 in_progress 待用户过目翻 verified（v6~v10 可同批）。G0 开发期常态 · 不外推 packaged/Provider/GA。

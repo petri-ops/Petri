@@ -2637,7 +2637,8 @@
         "frontend/src/styles/theme-token-contract.test.ts"
       ],
       "frontendRelated": true,
-      "classifiesScripts": false
+      "classifiesScripts": true,
+      "scriptRole": "governance"
     }
   ]
 }
