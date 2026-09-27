@@ -40,7 +40,6 @@ export function SideChatDock({
   sourceConversationId = null,
   variant = 'float',
   surfaceSuppressed = false,
-  belowSummary = false,
   open,
   onOpenChange,
 }: {
@@ -58,8 +57,6 @@ export function SideChatDock({
   variant?: 'float' | 'docked';
   /** UI-448 加映 v12 — 宽窗时面板由独立列区承载：悬浮实例只渲染常驻把手。 */
   surfaceSuppressed?: boolean;
-  /** UI-448 加映 v14 — 摘要悬浮同时打开：面板让到其下方下半区，同右缘不叠加。 */
-  belowSummary?: boolean;
   /** UI-448 加映 v15 — 开态由壳状态传入（sideChatOpen，摘要概览同机制）。 */
   open: boolean;
   /** UI-448 加映 v15 — 收起回调（✕/事件入口统一走它回写壳状态）。 */
@@ -159,7 +156,7 @@ export function SideChatDock({
     <div className={styles.dockRoot} data-testid="side-chat-dock">
       {open && !surfaceSuppressed ? (
         <div
-          className={`${styles.surface} ${belowSummary ? styles.surfaceBelowSummary : ''}`}
+          className={styles.surface}
           data-testid="side-chat-surface"
         >
           {panel}

@@ -1781,14 +1781,22 @@
 }
 
 /* UI-448 加映 v12 — 会话列区开启时摘要钉住列同样封顶上半：
-   同一右轨内垂直堆叠（摘要上、会话下），共享右缘永不叠加 */
+   同一右轨内垂直堆叠（摘要上、会话下），共享右缘永不叠加
+   UI-448 加映 v16 — 会话列推到右轨底部（margin-top:auto），
+   紧贴沉底的入口按钮；摘要列占顶部 */
 .workspaceSessionLayoutSideChatOpen .workspaceSummaryColumn {
-  max-height: calc(50% - 8px);
+  max-height: calc(50% - 44px);
   overflow: hidden;
+}
+
+.workspaceSessionLayoutSideChatOpen .agentMainSideChatYield {
+  /* 钉住列+面板并存：列带已把会话内容与面板隔开，不再叠加让位 */
+  display: none;
 }
 
 /* UI-448 加映 v12 — 右轨：摘要钉住列 + 侧聊独立列区垂直堆叠共享右缘 */
 /* UI-448 加映 v14 — 子卡从顶部堆叠（摘要上、会话下），对齐顶栏按钮弹出方向 */
+/* UI-448 加映 v16 — 右轨底部让出 FAB（气泡入口按钮）高度 */
 .workspaceRightRail {
   flex: 0 0 auto;
   min-height: 0;
@@ -1797,6 +1805,7 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 8px;
+  padding-bottom: 44px;
 }
 
 .agentMain :global(.sc-root) {

@@ -47,13 +47,11 @@ function DockHarness({
   sourceConversationId = null,
   open = false,
   variant,
-  belowSummary = false,
 }: {
   projectId: string;
   sourceConversationId?: string | null;
   open?: boolean;
   variant?: 'float' | 'docked';
-  belowSummary?: boolean;
 }): React.ReactElement {
   const [on, setOn] = useState(open);
   return (
@@ -61,7 +59,6 @@ function DockHarness({
       projectId={projectId}
       sourceConversationId={sourceConversationId}
       variant={variant}
-      belowSummary={belowSummary}
       open={open || on}
       onOpenChange={setOn}
     />

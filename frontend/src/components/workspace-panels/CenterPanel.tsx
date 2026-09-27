@@ -37,6 +37,7 @@ import {
 import { ScheduledWorkspacePanel } from '@/components/workspace-panels/ScheduledWorkspacePanel';
 import { ResultsLibrary } from '@/components/workspace-panels/ResultsLibrary';
 import { SideChatDock } from '@/components/workspace-panels/SideChatDock';
+import { Icon } from '@/components/icons/Icon';
 // UI-448 — 悬浮聊天面开态：中栏会话内容列让位（不遮切割），与 composer 让位同源
 import type { RightPanelMode } from '@/pages/project-workspace/rightPanelTabs';
 import styles from '@/pages/project-workspace.module.css';
@@ -479,6 +480,21 @@ function SessionFrameView({
         )}
         </div>
         ) : null}
+        {/* UI-448 加映 v16 — 入口按钮沉底：右下角常驻小气泡（开/收切换），
+            与顶栏摘要概览按钮上下对应 */}
+        {variant === 'chat' && ctx.projectId && (
+          <button
+            type="button"
+            className={styles.sideChatFab}
+            onClick={() => onSideChatOpenChange?.(!sideChatOpen)}
+            aria-label={sideChatOpen ? '收起侧边聊天' : '侧边聊天'}
+            aria-pressed={sideChatOpen}
+            title={sideChatOpen ? '收起侧边聊天' : '侧边聊天'}
+            data-testid="side-chat-fab"
+          >
+            <Icon name="message-circle" size={16} />
+          </button>
+        )}
         {/* UI-448 加映 v10 — 侧聊悬浮面与摘要卡同定位基准：同在 session layout 内
             right:0，右缘结构性同源（v8/v9 的跨参照系对齐补丁由此退役）。
             UI-448 加映 v12 — 仅窄窗用悬浮变体（宽窗走上面的独立列区）；
@@ -490,8 +506,6 @@ function SessionFrameView({
             sourceConversationId={ctx.activeConvId}
             // 宽窗：面板已由上面的独立列区承载，这里只留常驻把手（图标仍在列区上方）
             surfaceSuppressed={wide && sideChatOpen}
-            // 摘要悬浮同时打开：面板让到摘要下方（同右缘堆叠不叠加）
-            belowSummary={ctx.summaryCardOpen && ctx.summaryVisibility === 'float'}
             open={sideChatOpen}
             onOpenChange={onSideChatOpenChange ?? (() => {})}
           />

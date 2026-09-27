@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
-import { SideChatToggleButton } from './SideChatToggleButton';
 import { useWorkspacePanelsContext } from '../WorkspacePanelsContext';
 import { BranchTabsWrapper } from '@/components/branch/BranchTabsWrapper';
 import styles from '../TitleBar.module.css';
@@ -114,16 +113,6 @@ export function TitleBarCenterZone(): React.ReactElement {
     return !!ws && modeUsesSummaryCard(ws.mode);
   })();
 
-  // UI-448 加映 v13 — 侧聊开关可用性：工作区 chat 模式（面板所在投影层）；
-  // scheduled/结果模式面板不在场，开关是死开关。projectId 供运行呼吸灯取侧聊会话。
-  const { sideChatToggleAvailable, workspaceProjectId } = (() => {
-    const ws = parseWorkspaceRoute(location.pathname);
-    return {
-      sideChatToggleAvailable: !!ws && ws.mode === 'chat',
-      workspaceProjectId: location.pathname.match(/^\/project\/([^/]+)/)?.[1] ?? null,
-    };
-  })();
-
   // UI-377 — 中区右缘分隔线只在「右栏真的在场」时渲染（工作区路由 + 右栏开 +
   // 非投影手机）。此前只看全局 rightOpen 偏好：欢迎页/独立页右栏并不在场，
   // 一条悬空分隔线挂在标题区右缘（用户截图指认「灰色分隔线多余」）。
@@ -218,11 +207,6 @@ export function TitleBarCenterZone(): React.ReactElement {
       {/* UI-360 — 摘要概览开关只在工作区路由的 chat / scheduled 模式渲染
           （摘要卡 showPinnedSummary 同口径）；欢迎页 / 独立页与 plugins/settings
           等全屏工作面无摘要卡，开关是死开关。 */}
-      {/* UI-448 加映 v13 — 侧边聊天开关：主会话外延的工作区级控件，
-          与摘要概览同排（入口不再浮在中栏右缘遮内容） */}
-      {sideChatToggleAvailable && (
-        <SideChatToggleButton projectId={workspaceProjectId} />
-      )}
       {summaryToggleAvailable && (
         <button
           type="button"
