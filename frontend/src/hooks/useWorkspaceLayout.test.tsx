@@ -17,7 +17,7 @@
  *   A5 RO 回调触发即重测（覆盖「无 render 的尺寸变化」，如面板开合）。
  */
 import React from 'react';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, render } from '@testing-library/react';
 import { WorkspacePanelsProvider } from '@/components/desktop/WorkspacePanelsContext';
 import { deriveSummaryVisibility, useWorkspaceLayout } from './useWorkspaceLayout';
@@ -144,8 +144,6 @@ describe('useWorkspaceLayout 会话框测量（UI-371）', () => {
   });
 
   // UI-448 加映 v18 — 长会话丢事件自愈：最小化恢复/切回窗口时强制重测。
-  // Electron 实测存在会话框宽度冻结在旧值的会话（resize 与 RO 整段错过，
-  // 重挂载才自愈）；聚焦/可见性恢复是零成本重测信号。
   it('A6 窗口重新聚焦 / 页面恢复可见时强制重测', () => {
     const view = render(harness([{ id: 'chat', w: 700, h: 600 }]));
     expect(view.getByTestId('w').textContent).toBe('700');
@@ -159,6 +157,32 @@ describe('useWorkspaceLayout 会话框测量（UI-371）', () => {
     node.dataset.w = '400';
     act(() => document.dispatchEvent(new Event('visibilitychange')));
     expect(view.getByTestId('w').textContent).toBe('400');
+  });
+
+  // UI-448 加映 v19 — 布局守望（事件无关自愈）：resize/RO/focus 全部失效的
+  // 病态会话下（Electron 实测），守望器仍按 300ms 节拍读真实 DOM 宽度自愈。
+  it('A7 布局守望器按节拍重测（事件系统全死也能自愈）', () => {
+    vi.useFakeTimers();
+    try {
+      const view = render(harness([{ id: 'chat', w: 700, h: 600 }]));
+      expect(view.getByTestId('w').textContent).toBe('700');
+
+      const node = view.getByTestId('frame-chat');
+      node.dataset.w = '1300';
+      // 不派发任何事件、不触发 RO——只推进时钟
+      act(() => { vi.advanceTimersByTime(350); });
+      expect(view.getByTestId('w').textContent).toBe('1300');
+
+      node.dataset.w = '45';
+      act(() => { vi.advanceTimersByTime(350); });
+      expect(view.getByTestId('w').textContent).toBe('45');
+
+      // 卸载后守望器被清理（不再推进）
+      view.unmount();
+      expect(() => vi.advanceTimersByTime(1000)).not.toThrow();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 

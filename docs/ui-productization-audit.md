@@ -4300,3 +4300,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **修法**（防御两层）：① `deriveSummaryVisibility` 纯函数内加视口钳制——会话框是视口子集，视口 <1120 时钉住形态几何上不可能成立，恒判悬浮；健康会话零行为变化（frameWidth≥1120 必有 viewport≥1120）。② hook 补 `focus`/`visibilitychange` 自愈重测：最小化恢复/切回窗口即拿实时宽度，冻结从「重挂载才自愈」收敛为「切回即自愈」。
 - **证据**：useWorkspaceLayout 8（新增 A6 聚焦/可见性重测 + 派生纯函数四态用例，含冻结病态态 derive(1518,982)→float）+ CenterPanel 13 + SideChatDock 10 全绿；tsc 0；IAB 实机过渡复验一致；docs:check/ui:audit:check 绿。**待用户实机过目后翻 verified（v15–v18 可同批）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-448 加映 v19 (2026-09-27 in_progress，用户复测 v18「还是不行没有悬浮」——事件无关布局守望)
+
+- **活体验尸**（CDP 进用户 Electron 实例）：用户复测失败时其会话内 `frameWidth=22`（<1120）而摘要仍钉住列区——按旧派生也该悬浮，证明渲染层完全收不到测量更新；window 上 5 个 resize 监听器在、派发合成事件无响应（setState 打在被撕裂的旧 fiber 上）；focus 自愈（v18）同样无反应——该会话被当日 v15–v18 多轮 HMR 撕裂模块图，**用户测的一直是修复前/半新半旧代码，且 useMemo 依赖不变则视口钳制同样永不重算**。另证：CDP Emulation 视口模拟在该 Electron 不生效（982 请求读到 1038），最初看似的「复现」实为用户本人在实时拖窗，该轮数据作废。
+- **修法**：hook 增 300ms 布局守望器（`setInterval` + `document.hidden` 跳过）——直接读真实 DOM 宽度，与事件系统零耦合；事件死透的病态会话下任何窗口变化最多滞后一拍自愈，视口钳制/派生随之恢复运转。RO（即时）、focus/visibilitychange（切回）、守望器（兜底）三层递进。
+- **证据**：useWorkspaceLayout 9（A7 守望器节拍自愈：fake timers 推进 350ms 断言宽度跟随、卸载清理）+ CenterPanel 13 + SideChatDock 10 = 32 全绿；tsc 0；docs:check 绿。**需整页重载加载 v19（hook 模块 HMR 不可靠）；待用户实机过目后翻 verified（v15–v19 同批）**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

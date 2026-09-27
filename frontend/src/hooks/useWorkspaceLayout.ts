@@ -223,6 +223,20 @@ export function useWorkspaceLayout(): UseWorkspaceLayoutResult {
     };
   }, [measureSessionFrames]);
 
+  // UI-448 加映 v19 — 布局守望（事件无关自愈）：Electron 实机会话存在
+  // resize/RO 全部失效而页面其余功能正常的病态（多次 HMR 撕裂模块图后实测；
+  // 长会话丢事件类），此时任何事件驱动的重测都不会发生，派生 useMemo 依赖
+  // 永不变化、视口钳制也随之失效。守望器每 300ms 读一次真实 DOM 宽度——
+  // 与事件系统零耦合，只要会话框节点在，任何窗口变化最多滞后一拍自愈。
+  // 隐藏页跳过读取（Chromium 本身会对后台页节流，无需额外配合）。
+  useEffect(() => {
+    const watcher = window.setInterval(() => {
+      if (document.hidden) return;
+      measureSessionFrames();
+    }, 300);
+    return () => window.clearInterval(watcher);
+  }, [measureSessionFrames]);
+
   return {
     leftOpen,
     setLeftOpen,
