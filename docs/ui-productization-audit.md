@@ -4321,3 +4321,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **修法**：① `SideChatDock` 增 `width` prop，CenterPanel 传 `ctx.summaryOpenWidth`——悬浮面宽度与摘要浮卡**同源同值**（缺省回落 300）；② `.surface` 高度从固定 50% 改内容自适应：`min-height: 320px`（聊天可用下限）+ `max-height: calc(50% - 24px)`（与摘要浮卡 v8 规则完全相同的天花板），沉底锚定不变。
 - **证据**：SideChatDock 12（width 透传/缺省回落两用例）+ CenterPanel 13 全绿；tsc 0；IAB 实机对表：窄窗 982 下会话卡 276×320 vs 摘要卡 276×307，sameWidth=true。**待用户实机过目后翻 verified（v15–v21 同批）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-448 加映 v22 (2026-09-27 in_progress，用户截图指认「我要的会话是现在项目摘要的效果」——透出浮层效果同款)
+
+- **根因**：摘要浮卡有 UI-351 加映的标志性效果——`opacity: 0.92` 轻微透出下层内容、hover 回实感并上浮 1px（0.25s 三属性过渡）；会话浮面无此套，实心卡一张，两卡浮层语言不一致。
+- **修法**：`.surface` 原样搬入同规则（opacity 0.92 + hover opacity 1/translateY(-1px) + 同款过渡）；reduced-motion 降级块补 `transition: none`（对齐摘要浮卡降级语义，透出保留、动画关停）。
+- **证据**：IAB 实机截图对比——窄窗双卡同开，computed opacity 均 0.92，两卡透出效果一致；CSS 模块 HMR 即时生效。**待用户实机过目后翻 verified（v15–v22 同批）**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

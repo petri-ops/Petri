@@ -46,6 +46,16 @@
   overflow: hidden;
   pointer-events: auto;
   animation: sideChatSlideIn 280ms ease-out;
+  /* UI-448 加映 v22 — 摘要浮卡同款透出效果（UI-351 加映同规则原样搬入，
+     用户指认「我要的会话是现在项目摘要的效果」）：悬浮态轻微透出下层
+     内容，hover 回到实感并上浮 1px；同款 0.25s 三属性过渡。 */
+  opacity: 0.92;
+  transition: opacity 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.surface:hover {
+  opacity: 1;
+  transform: translateY(-1px);
 }
 
 /* UI-448 加映 v4 — 聊天文字对齐摘要正文档：摘要卡正文实为 --gewu-font-size-sm
@@ -94,6 +104,8 @@
 @media (prefers-reduced-motion: reduce) {
   .surface {
     animation: none;
+    /* v22 — 对齐摘要浮卡降级：过渡一并关停（透出效果保留，动画去掉） */
+    transition: none;
   }
 }
 
