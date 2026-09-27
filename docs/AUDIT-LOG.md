@@ -5,7 +5,9 @@
 > 非主 Agent 发现阻塞、可安全合并或需评估事项时追加到“当前待处理项”，不要把长篇完成历史重新堆回本文件。
 > 入口直链（registry `entrypoint` 指向本台的 canonical 文档，归档轮转不得切断发现路径）：[block-14-left-panel-qa-fix-closeout](./block-14-left-panel-qa-fix-closeout.md) · [block-15-architecture-perf-plan](./block-15-architecture-perf-plan.md) · [block-22-codemirror-inline-diff-plan](./block-22-codemirror-inline-diff-plan.md)
 
-最后更新：2026-09-27（**三个 rider 实机过目全清——UI-447/UI-448/UI-449 翻 verified（用户实机「符合预期」，联测路线一条任务覆盖三点）**：用户晨起「启动软件 准备测试」→全栈冷启动（Vite 独立长活进程按脚本头注姿势手动拉起）+codegraph 冒烟通过→用户按测试路线实测回执「符合预期」。至此队列逐推首批无任何遗留 rider。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-27（**UI-448 加映 v2 当日立项当日收口（实现 78f73b5f；用户三点实机反馈）——去双层背景/右下角半高与摘要卡共存/悬挂面锁只读档**：①`surfaceBody :global(.sc-root)` 中性化（比照中栏 agentMain 同款），面板内 SimpleChat 自带 26px 圆角卡片底不再双层，只剩悬浮面自身 16px 圆角面板；②surface 改贴底 height:50% 右下角半高，实测与摘要浮层同屏零重叠（摘要底 351 < 面板顶 467，间隙 116px），中栏让位原则不变；③`useModelAccessMenus` 增 lockedAccessMode（初始锁定+setter 失效守卫），悬挂面锁 read 档（composer「只读模式」选择器禁用，写/执行类工具前后端双拒=agent-tool-policy 权威门同口径），带项目背景仅聊天不可改/建文件。HK-01 红绿先行=两契约先红（锁档 harness+传参）→28/28 绿；前端全量 155 文件/1237 用例 0 红+tsc 0+eslint 0 error；实机三断言 allPass（acceptance/ui-448/walkthrough-v2.json+3 截图）；closeout 十一门绿（code-size +4 随批重打归属本包）。**状态澄清：UI-448 v1 已于 2026-09-27 晨 verified（并行会话联测，见上上条）；v2 为其后新增量，in_progress 待用户过目 v2 形态后翻 verified**。plan=docs/ui-448-side-chat-dock-alignment-plan.md §8。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-27（**三个 rider 实机过目全清——UI-447/UI-448/UI-449 翻 verified（用户实机「符合预期」，联测路线一条任务覆盖三点）**：用户晨起「启动软件 准备测试」→全栈冷启动（Vite 独立长活进程按脚本头注姿势手动拉起）+codegraph 冒烟通过→用户按测试路线实测回执「符合预期」。至此队列逐推首批无任何遗留 rider。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-26（**队列逐推模式首批全部推完（用户裁决「继续 逐个推完…冲突自己处理」；C-17a 已由 BLOCK-125 承载）**：b) 终端反馈面=exec 流式进工具行实机 verified+终端 dock 用户 PTY 设计分离复核成立；c) 多文件深度任务续形态=抽取共享模块新形态 allPass（20s，自持测试副本复跑断言零弱化，变更 3 文件）；C-16/UI-449=审阅徽章 ±行数版「N·+A−D」四入口（workingTreeShortstat 权威源桥+IPC 四件套+TTL 节流回落）；C-18=编码 playbook 资源 skill 落地（注册表实证 discover=4）；C-19=纪律回声评估收口（守则化采纳+系统级注入 observe）；C-20=skills:check 存量 6 红登记（外置插件包时代漂移）。**与并行 UI-448 会话全程双向零触碰**；rider=UI-447/UI-449（2026-09-27 已全清翻 verified）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
