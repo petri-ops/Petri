@@ -173,6 +173,33 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     expect(document.querySelector('[class*="workspaceSessionLayoutSideChatOpen"]')).toBeNull();
   });
 
+  // UI-448 加映 v11 — 钉住列打开时不再叠加让位（列自身已隔开面板与会话内容）
+  it('skips the content yield while the summary is a pinned column (UI-448 加映 v11)', () => {
+    setSideChatDockOpen(true);
+    try {
+      const ctx = context('chat');
+      ctx.summaryCardOpen = true;
+      ctx.summaryVisibility = 'expanded';
+      const { unmount } = render(<CenterPanel ctx={ctx} refs={refs} />);
+      expect(document.querySelector('[class*="agentMainSideChatYield"]')).toBeNull();
+      unmount();
+    } finally {
+      setSideChatDockOpen(false);
+    }
+  });
+
+  it('keeps the content yield when the summary floats or is closed (UI-448 加映 v11)', () => {
+    setSideChatDockOpen(true);
+    try {
+      const ctx = context('chat');
+      const { unmount } = render(<CenterPanel ctx={ctx} refs={refs} />);
+      expect(document.querySelector('[class*="agentMainSideChatYield"]')).toBeTruthy();
+      unmount();
+    } finally {
+      setSideChatDockOpen(false);
+    }
+  });
+
   // UI-448 加映 v10 — 面板与摘要卡同定位基准：dock 挂载于 session layout 内部
   it('mounts the dock inside the session layout (UI-448 加映 v10 summary-parity)', () => {
     const ctx = context('chat');

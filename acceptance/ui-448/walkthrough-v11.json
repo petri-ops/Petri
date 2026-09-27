@@ -1,0 +1,21 @@
+{
+  "package": "UI-448 加映 v11",
+  "date": "2026-09-27",
+  "env": "直连用户窗口 CDP 诊断（9222 只读探针）+ IAB 双宽度复现",
+  "diagnosis": {
+    "userViewport": { "w": 2481, "h": 1876, "dpr": 0.937 },
+    "rootCause": "用户宽度下 sessionFrameWidth≥1120 → 摘要为钉住列形态（此前全部走查只覆盖窄窗悬浮形态）；钉住列自身已把会话内容与面板隔开（列带 1815-2127，面板 1827-2127，内容止于 1815），但 yield 308px 仍叠加 → 用户所感「推得太狠/问题依旧」",
+    "userWindowCurrentPage": "/settings（诊断时；工作台验证由 IAB 按用户窗口尺寸复现）"
+  },
+  "fix": "yield 让位仅在摘要非钉住时应用（钉住列即隔离带）；钉住态面板嵌列带下半与摘要卡垂直堆叠共享右缘",
+  "measured": {
+    "pinned2481": { "yieldApplied": false, "cardDockOverlap": false, "dockRect": "1827-2127", "summaryRect": "1839-2127 top46-bottom570" },
+    "float1000": { "yieldApplied": true, "yieldPadding": "58px（min 下限兜底窄窗）", "cardDockOverlap": false }
+  },
+  "redGreen": "钉住跳过让位/悬浮保持让位两契约→13/13 绿；前端全量 155 文件/1242 用例 0 红；tsc 0；eslint 0 error",
+  "screenshots": [
+    "ui448v11-pinned-no-yield.png（2481 钉住态零让位零重叠）",
+    "ui448v11-float-yield.png（1000 悬浮态让位保留）"
+  ],
+  "verdict": "allPass"
+}

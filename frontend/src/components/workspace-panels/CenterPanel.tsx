@@ -219,7 +219,12 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
         <SessionFrameView ctx={ctx} sessionFrameRef={sessionFrameRef} variant="chat" sideChatOpen={sideChatDockOpen}>
           <div
             className={`${styles.agentMain} ${
-              workspaceMode === 'chat' && sideChatDockOpen ? styles.agentMainSideChatYield : ''
+              // UI-448 加映 v11 — 仅当摘要不是钉住列时才让位：钉住列自身已把
+              // 会话内容与面板隔开（面板嵌在列带下半部），再让位即「推得太狠」
+              workspaceMode === 'chat' && sideChatDockOpen
+                && !(ctx.summaryCardOpen && ctx.summaryVisibility === 'expanded')
+                ? styles.agentMainSideChatYield
+                : ''
             }`}
           >
             {ctx.project && ctx.projectId && (

@@ -2626,7 +2626,8 @@
         "frontend/src/components/workspace-panels/CenterPanel.test.tsx",
         "frontend/src/pages/project-workspace.module.css",
         "frontend/src/styles/custom.css",
-        "acceptance/ui-448/**"
+        "acceptance/ui-448/**",
+        "scripts/ui448-diagnose-user-window.mjs"
       ],
       "tests": [
         "frontend/src/hooks/sideChatDockStore.test.tsx",
