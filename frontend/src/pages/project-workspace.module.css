@@ -7603,10 +7603,14 @@ body:global(.gewu-resizing-columns) * {
 /* UI-448 加映 v16 — 侧聊入口按钮沉底：右下角常驻小气泡（v7 极简语言），
    与顶栏摘要概览按钮上下对应；面板展开时挂其上方。
    注意：类必须在 project-workspace.module.css（CenterPanel 的 styles 来源），
-   放错模块会导致 className 落空（v16 首版实测）。 */
+   放错模块会导致 className 落空（v16 首版实测）。
+   UI-448 加映 v27 — 对齐修正（用户截图指认「摘要和会话按钮上下不是对齐的」）：
+   原 absolute 锚在会话框内（right:14），顶栏摘要按钮锚在窗口右缘——两者差
+   ~23px 且随右栏开合漂移。改 fixed 窗口右下角定位，与顶栏按钮群同一条
+   右缘基准线，侧栏开合/卡片拖宽都不再影响。 */
 .sideChatFab {
-  position: absolute;
-  right: 14px;
+  position: fixed;
+  right: 6px;
   bottom: 8px;
   width: 28px;
   height: 28px;
