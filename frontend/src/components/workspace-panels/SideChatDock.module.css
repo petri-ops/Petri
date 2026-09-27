@@ -51,6 +51,17 @@
   font-size: var(--gewu-font-size-sm);
 }
 
+/* UI-448 加映 v5 — 内容贴左、去早换行：面板 300px 被三层内缩吃掉 ~60px
+   （sc-body 12px + sc-messages 左 18px〔让位 rail〕右 18px 对称）；悬挂面
+   rail 已隐藏（slimComposer 条件），内边距收窄让正文占满面板宽度 */
+.surfaceBody :global(.sc-body) {
+  padding: 8px 8px 10px;
+}
+
+.surfaceBody :global(.sc-messages) {
+  padding: 0 4px;
+}
+
 /* UI-448 加映 v2 — 去双层背景：面板内 SimpleChat 自带 .sc-root 卡片底
    （26px 圆角 + surface 底 + 阴影）比照中栏 agentMain 同款中性化，
    只保留悬浮面自身圆角面板（与项目摘要卡同特点） */

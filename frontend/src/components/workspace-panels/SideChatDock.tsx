@@ -17,7 +17,7 @@
  *   主会话的编码 agent 内容不再出现在悬挂面，两会话 run 互不干扰。组件签名收缩为只收
  *   projectId。**slimComposer**：composer 只留只读徽标 + 发送键。
  */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
 import { isConversationRunning } from '@/components/copilot/conversationRunStore';
@@ -42,7 +42,6 @@ export function SideChatDock({
   projectId: string;
 }): React.ReactElement {
   const open = useSideChatDockOpen();
-  const surfaceRef = useRef<HTMLDivElement | null>(null);
   const [agentRunning, setAgentRunning] = useState(false);
   // UI-448 加映 v3 — 每项目独立侧聊会话（与中栏 activeConvId 完全解耦）。
   // projectId 切换由 CenterPanel 以 key={projectId} 重挂载承载（State 初始化器
@@ -72,30 +71,6 @@ export function SideChatDock({
     return () => window.clearInterval(timer);
   }, [sideConvId]);
 
-  // Esc 收起
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSideChatDockOpen(false);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open]);
-
-  // 外点收起（overlay 外的mousedown；面板内交互不触发）
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (surfaceRef.current && !surfaceRef.current.contains(target)) {
-        // 把手点击由把手自身 toggle 处理（contains 覆盖把手），其余外点收起
-        setSideChatDockOpen(false);
-      }
-    };
-    window.addEventListener('mousedown', onDown);
-    return () => window.removeEventListener('mousedown', onDown);
-  }, [open]);
-
   const toggle = useCallback(() => setSideChatDockOpen((v) => !v), []);
 
   // UI-417 入口收编：原右栏 chat tab 的入口（home 空态卡/分析完成跳转）派发
@@ -104,11 +79,13 @@ export function SideChatDock({
     () => subscribeGewuEvent(gewuEvents.sideChatOpen, () => setSideChatDockOpen(true)),
     []
   );
+  // UI-448 加映 v5 — 常驻化（摘要卡同款特性）：移除外点收起与 Esc 收起
+  // （Esc 在输入时误触），折叠/展开仅经把手与头部 ✕。
 
   return (
     <div className={styles.dockRoot} data-testid="side-chat-dock">
       {open ? (
-        <div className={styles.surface} ref={surfaceRef} data-testid="side-chat-surface">
+        <div className={styles.surface} data-testid="side-chat-surface">
           <header className={styles.surfaceHeader}>
             <Icon name="message-circle" size={13} />
             <span className={styles.surfaceTitle}>会话</span>

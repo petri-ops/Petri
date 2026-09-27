@@ -4225,3 +4225,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 - **修法**：①surface 宽 380→300px（同摘要）+ right:0 贴右缘 + 开态隐把手（关闭=✕/Esc/外点）；②聊天文字级联降到摘要正文档（caption）；③slim 隐藏名单收缩：模型/供应商选择恢复（窄面板图标化），知识开关仍隐藏；只读锁/独立会话不变。**实机走查 allPass（2026-09-27）**：宽 300（摘要 288 shrink-to-fit）、右缘 delta=0（贴摘要同缘）、消息字级 12.1275px=摘要正文（fontMatch=true）、开态把手隐藏、模型菜单面板内可弹出可选；波折登记=max-width 百分比参照系误用致面板夹塌 2px（改回视口单位）+字档实测纠正（摘要正文是 sm 档非 caption）；红绿 3 红→20/20 绿+前端全量 1238 用例 0 红；证据=acceptance/ui-448/walkthrough-v4.json+2 截图。**待用户过目 v4 形态后翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-448 加映 v5 (2026-09-27 in_progress，用户过目 v4 后两点反馈：内容贴左去早换行/常驻化外点不收起)
+
+- **修法**：①悬挂面隐藏 MessageRail（slimComposer 条件）+ sc-body/sc-messages 内边距 dock scope 收窄（8px/6px），300px 面板内容区扩容 ~30px/侧，终结过早换行；②移除外点收起与 Esc 收起（输入时误触），折叠/展开仅经把手与头部 ✕——与摘要卡同款常驻特性。**实机走查 allPass（2026-09-27）**：点标题栏外部面板仍开（stillOpen=true）、rail 隐藏、bodyPadding 8px/msgPadding 0 4px 实测生效；契约反转 3 红→20/20 绿；前端全量 155 文件/1238 用例 0 红；tsc 0；eslint 0 error；证据=acceptance/ui-448/walkthrough-v5.json。**待用户过目 v5 形态后翻 verified**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

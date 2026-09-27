@@ -48,7 +48,7 @@ describe('UI-417 SideChatDock', () => {
     cleanup();
   });
 
-  it('把手常驻（收起态）、点击滑出 overlay；开态隐把手（加映 v4 贴右缘），Esc 收起后把手回归', async () => {
+  it('把手常驻（收起态）、点击滑出 overlay；开态隐把手（加映 v4 贴右缘），✕ 收起后把手回归（加映 v5 常驻化）', async () => {
     render(<SideChatDock projectId="p_1" />);
     // 收起态：只有把手
     expect(screen.getByTestId('side-chat-handle')).toBeTruthy();
@@ -56,10 +56,10 @@ describe('UI-417 SideChatDock', () => {
 
     fireEvent.click(screen.getByTestId('side-chat-handle'));
     expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
-    // 加映 v4 — 开态贴右缘：把手隐藏（关闭改由 ✕/Esc/外点承载）
+    // 加映 v4 — 开态贴右缘：把手隐藏（关闭改由 ✕/把手承载）
     expect(screen.queryByTestId('side-chat-handle')).toBeNull();
 
-    fireEvent.keyDown(window, { key: 'Escape' });
+    fireEvent.click(screen.getByRole('button', { name: '收起会话面板' }));
     await waitFor(() => expect(screen.queryByTestId('side-chat-surface')).toBeNull());
     expect(screen.getByTestId('side-chat-handle')).toBeTruthy();
   });
@@ -82,15 +82,18 @@ describe('UI-417 SideChatDock', () => {
     expect(sub).not.toHaveBeenCalled();
   });
 
-  it('Esc 收起', () => {
+  it('Esc 不收起（加映 v5 常驻化：输入时 Esc 误触不折叠），由把手/✕ 折叠', () => {
     render(<SideChatDock projectId="p_1" />);
     fireEvent.click(screen.getByTestId('side-chat-handle'));
     expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
     fireEvent.keyDown(window, { key: 'Escape' });
+    expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
+    // 头部 ✕ 折叠
+    fireEvent.click(screen.getByRole('button', { name: '收起会话面板' }));
     expect(screen.queryByTestId('side-chat-surface')).toBeNull();
   });
 
-  it('外点收起（面板内交互不触发）', () => {
+  it('外点不收起（加映 v5 常驻化：与摘要卡同款特性，仅把手/✕ 折叠）', () => {
     render(
       <div>
         <div data-testid="outside" />
@@ -100,10 +103,6 @@ describe('UI-417 SideChatDock', () => {
     fireEvent.click(screen.getByTestId('side-chat-handle'));
     expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
     fireEvent.mouseDown(screen.getByTestId('outside'));
-    expect(screen.queryByTestId('side-chat-surface')).toBeNull();
-    // 面板内 mousedown 不收起
-    fireEvent.click(screen.getByTestId('side-chat-handle'));
-    fireEvent.mouseDown(screen.getByTestId('side-chat-surface'));
     expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
   });
 

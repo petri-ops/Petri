@@ -1695,8 +1695,9 @@ export function SimpleChat({
       </div>
 
       {/* UI-262 — 聊天区左缘用户消息导航条：锚定 sc-outer（会话栏最左边界），
-          会话内容卡片（sc-root）固定宽度居中时 rail 仍贴列缘；悬浮预览、点击跳转对应消息 */}
-      {railItems.length > 0 && <MessageRail items={railItems} onJump={handleRailJump} />}
+          会话内容卡片（sc-root）固定宽度居中时 rail 仍贴列缘；悬浮预览、点击跳转对应消息。
+          UI-448 加映 v5 — 悬挂面（slimComposer）不渲染：300px 面板内刻度条挤占正文宽度 */}
+      {!slimComposer && railItems.length > 0 && <MessageRail items={railItems} onJump={handleRailJump} />}
 
       {/* UI-269 — 右缘自定义滚动条：锚定 sc-outer（会话栏最右边界），与 rail 左右对称；
           隐藏系统原生 thumb，常驻纤细 thumb + 轨道线 */}

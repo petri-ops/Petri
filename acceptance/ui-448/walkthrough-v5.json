@@ -1,0 +1,16 @@
+{
+  "package": "UI-448 加映 v5",
+  "date": "2026-09-27",
+  "env": "dev 栈（localhost:3000，Vite HMR），viewport 1680x950，dark",
+  "feedback": "用户两点：①会话内容没有完全贴窗口左侧导致文字换行过早②点击其它地方会话窗口就折叠了不方便，应该常驻、点图标折叠/展开，像项目摘要一样的特性",
+  "fixes": {
+    "contentFit": "悬挂面隐藏 MessageRail（slimComposer 条件，300px 内刻度条挤占正文）+ sc-body padding 12px→8px/8px/10px + sc-messages 18px×2→4px×2（dock scope 覆写），实测 bodyPadding '8px 8px 10px'、msgPadding '0px 4px'、railHidden=true，正文区扩容 ~28px/侧",
+    "persistent": "移除外点收起与 Esc 收起（Esc 输入时误触），折叠/展开仅经把手与头部 ✕——摘要卡同款常驻特性；实测点击标题栏外部后面板仍开（stillOpen=true）"
+  },
+  "redGreen": "契约反转先红（Esc 不收起+✕ 收起 / 外点不收起）→ 20/20 绿；前端全量 155 文件/1238 用例 0 红；tsc 0；eslint 0 error",
+  "cleanup": "探针残留「新对话」会话已全部回收（remaining=0），localStorage 侧聊指向已清",
+  "screenshots": [
+    "ui448v5-persistent-content-fit.png（外点后面板仍开+rail 隐藏+内边距收窄实证）"
+  ],
+  "verdict": "allPass"
+}

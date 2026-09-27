@@ -9,7 +9,7 @@ acceptance:
   - 窄面适配：悬挂面 SimpleChat compact 占位符（短提示不折行）；表格/长 token 三态实机核对（框内滚动+滚动条可见）
   - 台账同步：docs/ui-productization-audit.md UI-448 条目与实现同一提交；实机走查截图证据落 acceptance/ui-448/
 reopen: 用户实机过目后对新形态不满意，或悬浮面与摘要浮层同屏叠置的已知边界升级为真问题时
-status: completed
+status: active
 ---
 
 # UI-448 — 侧边聊天悬浮面体验对齐项目摘要
@@ -157,3 +157,14 @@ HK-01 红绿先行：开态隐把手 + slim 传参契约重构先红后绿。宽
 ### §10.2 加映 v4 收口（2026-09-27）
 
 实现提交 a176ec77（UI 台账加映段同提交）；closeout 十一门绿。v4 in_progress 待用户过目翻 verified。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 11. 加映 v5（2026-09-27，用户过目 v4 后两点反馈）
+
+用户原话：「会话这里经过了渲染没有完全的贴窗口左侧导致文字换行过早了」「点击其它地方 会话窗口就折叠了 这不方便使用 应该常驻进行点击图标后折叠或展开 要想项目摘要一样的特性」。
+
+1. **内容贴左、去早换行**：面板内 300px 被三层内缩吃掉 ~60px（sc-body 12px + sc-messages 左 18px 右 18px〔左让位 MessageRail 刻度、右对称〕+ rail 本体）——悬挂面隐藏 MessageRail（slimComposer 条件，小面板消息跳转无意义）+ sc-body/sc-messages 内边距收窄（dock scope 覆写 8px/6px）。
+2. **常驻化（摘要卡同特性）**：移除外点收起与 Esc 收起（Esc 在输入时误触），折叠/展开仅经把手与头部 ✕；HK-01 契约反转先红（Esc 不收起/外点不收起/✕ 收起）。
+
+### §11.1 加映 v5 实施记录（2026-09-27 当日收口）
+
+红绿先行：契约反转先红（Esc 不收起+✕ 收起/外点不收起）→ 20/20 绿。实机：外点常驻实证+rail 隐藏+内边距收窄生效。顺带清偿=探针残留「新对话」会话回收（remaining=0）。验证=20/20+前端全量 155 文件/1238 用例 0 红+tsc 0+eslint 0 error。证据=acceptance/ui-448/walkthrough-v5.json。
