@@ -9,7 +9,7 @@ acceptance:
   - 窄面适配：悬挂面 SimpleChat compact 占位符（短提示不折行）；表格/长 token 三态实机核对（框内滚动+滚动条可见）
   - 台账同步：docs/ui-productization-audit.md UI-448 条目与实现同一提交；实机走查截图证据落 acceptance/ui-448/
 reopen: 用户实机过目后对新形态不满意，或悬浮面与摘要浮层同屏叠置的已知边界升级为真问题时
-status: active
+status: completed
 ---
 
 # UI-448 — 侧边聊天悬浮面体验对齐项目摘要
@@ -280,3 +280,6 @@ HK-01：钉住跳过让位/悬浮保持让位两契约先红后绿；双宽度�
 ## 19. 加映 v14（2026-09-27，用户裁决「主会话不要收起来 两者并不冲突」）
 
 撤销 v2「单一输入面」设定（当时为用户要求，现明确反转）：侧聊打开时主会话 composer 不再让位为提示条，两个输入面并存互不干扰；ComposerYieldHint 让位件/契约/CSS 整链退役。保留：compact 短占位符、只读锁、fork 继承、宽窄双形态。实机=主 718px 可输入 + 侧聊 compact 同屏。
+### §19.1 加映 v14 收口（2026-09-27）
+
+实现 279cfe10 + 补账 ec2e94e7/312c0d58（UI 台账同批）；closeout 十一门绿。v14 in_progress 待用户过目翻 verified（v6~v13 可同批）。G0 开发期常态 · 不外推 packaged/Provider/GA。
