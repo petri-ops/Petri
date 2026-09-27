@@ -4342,3 +4342,9 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **修法**：`.surfaceBody` 作用域（仅悬浮面）覆写：头像 `display:none`；用户消息取消 row-reverse/右浮改左对齐（保留气泡底色作身份区分）；assistant 消息宽度放开到满卡。主会话渲染零改动。
 - **证据**：IAB 实机——面板内 40 个头像 computed display 全为 none、用户消息 alignSelf flex-start/flexDirection row；CSS HMR 即时生效。**待用户实机过目后翻 verified（v15–v24 同批）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-448 加映 v25 (2026-09-27 in_progress，用户「会话窗口可以人为调整宽度吗？太拥挤…项目摘要卡也可以变宽」——浮卡左缘拖宽)
+
+- **修法**：新增共用组件 `FloatCardResizer`——右锚定浮卡左缘 10px 拖宽把手（col-resize，向左拖变宽），宽度实时生效、抬手持久化 localStorage（会话卡 `gewu:side-chat-float-width` / 摘要卡 `gewu:summary-float-width`，全局偏好跨会话记忆）；钳制 [240, min(720, 视口-48)]。接入三处：会话浮面（默认回落 v21 的 summaryOpenWidth）、会话列区（默认 300，两形态共用同一偏好，窄宽切换宽度不跳变）、摘要浮卡（默认 summaryOpenWidth，外层 312 帽放宽至 720 兜底）。
+- **证据**：SideChatDock 14（拖拽变宽+持久化+重挂载偏好生效+钳制上界两用例）+ CenterPanel 12 = 26 绿；tsc 0；theme-token-contract 4 绿；IAB 实机：浮面 276→拖宽 576、persisted=576、切宽窗列区继承 576。**待用户实机过目后翻 verified（v15–v25 同批）**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

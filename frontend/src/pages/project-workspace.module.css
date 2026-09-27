@@ -1589,7 +1589,9 @@
   right: 0;
   z-index: 40;
   max-height: calc(100% - 16px);
-  max-width: min(312px, calc(100% - 24px));
+  /* UI-448 加映 v25 — 帽放宽到把手钳制上限（原 312 是摘要默认宽的电气帽；
+     拖宽偏好可达 720，钳制逻辑在 FloatCardResizer，此处只兜底不越视口） */
+  max-width: min(720px, calc(100% - 24px));
   overflow: auto;
   border-radius: 16px;
   /* UI-448 — 大柔和影收编 --gewu-shadow-float 单源（原字面量同值，零视觉变化）；

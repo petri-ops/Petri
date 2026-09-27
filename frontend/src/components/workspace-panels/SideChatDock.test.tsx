@@ -269,3 +269,69 @@ describe('UI-448 加映 v21 悬浮面与摘要浮卡同尺寸语言', () => {
     expect(surface.style.width).toBe('');
   });
 });
+
+describe('UI-448 加映 v25 浮卡拖宽', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    propBag().__sideChatSimpleChatProps = [];
+  });
+
+  afterEach(cleanup);
+
+  const drag = async (surface: HTMLElement, fromX: number, toX: number) => {
+    const handle = surface.querySelector('[data-testid="float-card-resize-handle"]') as HTMLElement;
+    expect(handle).toBeTruthy();
+    fireEvent.pointerDown(handle, { clientX: fromX, button: 0 });
+    await act(async () => {
+      window.dispatchEvent(Object.assign(new Event('pointermove'), { clientX: toX }));
+    });
+    await act(async () => {
+      window.dispatchEvent(new Event('pointerup'));
+    });
+  };
+
+  it('左缘把手向左拖变宽并持久化偏好', async () => {
+    render(
+      <SideChatDock
+        projectId="p_1"
+        sourceConversationId="conv_main"
+        open
+        onOpenChange={vi.fn()}
+        width={288}
+      />
+    );
+    const surface = screen.getByTestId('side-chat-surface') as HTMLElement;
+    await drag(surface, 300, 248); // 向左拖 52px
+    expect(surface.style.width).toBe('340px');
+    expect(window.localStorage.getItem('gewu:side-chat-float-width')).toBe('340');
+
+    // 重挂载后偏好仍生效（优先于 width prop）
+    cleanup();
+    render(
+      <SideChatDock
+        projectId="p_1"
+        sourceConversationId="conv_main"
+        open
+        onOpenChange={vi.fn()}
+        width={288}
+      />
+    );
+    expect((screen.getByTestId('side-chat-surface') as HTMLElement).style.width).toBe('340px');
+  });
+
+  it('拖宽被钳制在 [240, min(720, 视口-48)]', async () => {
+    render(
+      <SideChatDock
+        projectId="p_1"
+        sourceConversationId="conv_main"
+        open
+        onOpenChange={vi.fn()}
+        width={288}
+      />
+    );
+    const surface = screen.getByTestId('side-chat-surface') as HTMLElement;
+    await drag(surface, 300, -2000); // 拖穿屏幕
+    const capped = Math.min(720, Math.max(240, window.innerWidth - 48));
+    expect(surface.style.width).toBe(`${capped}px`);
+  });
+});

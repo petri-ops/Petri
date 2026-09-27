@@ -24,8 +24,16 @@ import { forkConversation } from '@/components/copilot/copilotConversationsClien
 import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
 // UI-448 — 开态升共享 store：中栏 composer 让位与内容让位类同源联动（单一输入面）
 import styles from './SideChatDock.module.css';
+// UI-448 加映 v25 — 浮卡左缘拖宽把手 + 偏好持久化
+import {
+  FloatCardResizeHandle,
+  persistFloatWidth,
+  readPersistedFloatWidth,
+} from './FloatCardResizer';
 
 const sideChatConvKey = (projectId: string) => `gewu:side-chat-conv:${projectId}`;
+/** v25 — 浮面拖宽偏好（全局 UI 偏好，跨项目/跨会话记忆）。 */
+const SIDE_CHAT_FLOAT_WIDTH_KEY = 'gewu:side-chat-float-width';
 
 function readStoredSideConversation(projectId: string): string | null {
   try {
@@ -73,6 +81,22 @@ export function SideChatDock({
   // projectId 切换由 CenterPanel 以 key={projectId} 重挂载承载（State 初始化器
   // 重新读 localStorage），避免同步 setState-in-effect 级联渲染。
   const [sideConvId, setSideConvId] = useState<string | null>(() => readStoredSideConversation(projectId));
+  // UI-448 加映 v25 — 用户拖宽偏好优先；未拖过回落 width（v21 与摘要同源同值）。
+  // 悬浮/列区两形态共用同一偏好（同一张卡，窄宽切换宽度不跳变）；列区缺省 300。
+  const [persistedWidth, setPersistedWidth] = useState<number | null>(
+    () => readPersistedFloatWidth(SIDE_CHAT_FLOAT_WIDTH_KEY)
+  );
+  const effectiveWidth = persistedWidth ?? width;
+  const dockedWidth = persistedWidth ?? 300;
+  const resizeHandlers = {
+    // 拖拽基准宽 = 当前有效宽（未拖过：悬浮=width prop / 列区=300）
+    width: effectiveWidth ?? dockedWidth,
+    onWidthChange: setPersistedWidth,
+    onCommit: (w: number) => {
+      setPersistedWidth(w);
+      persistFloatWidth(SIDE_CHAT_FLOAT_WIDTH_KEY, w);
+    },
+  };
 
   const handleConversationChange = useCallback((id: string | null) => {
     setSideConvId(id);
@@ -153,7 +177,13 @@ export function SideChatDock({
   // 无悬浮把手（列区头部图标即入口）。
   if (variant === 'docked') {
     return (
-      <div className={styles.dockedColumn} data-testid="side-chat-surface">
+      <div
+        className={styles.dockedColumn}
+        data-testid="side-chat-surface"
+        style={{ width: dockedWidth }}
+      >
+        {/* UI-448 加映 v25 — 列区同样可拖宽（用户宽窗下看到的就是这张卡） */}
+        <FloatCardResizeHandle {...resizeHandlers} />
         {panel}
       </div>
     );
@@ -165,8 +195,10 @@ export function SideChatDock({
         <div
           className={styles.surface}
           data-testid="side-chat-surface"
-          style={width ? { width } : undefined}
+          style={effectiveWidth ? { width: effectiveWidth } : undefined}
         >
+          {/* UI-448 加映 v25 — 左缘拖宽把手：向左拖变宽，抬手记忆偏好 */}
+          <FloatCardResizeHandle {...resizeHandlers} />
           {panel}
         </div>
       ) : null}

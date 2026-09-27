@@ -1,0 +1,15 @@
+/* FloatCardResizer — UI-448 加映 v25 — 浮卡左缘拖宽把手 */
+.handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 10px;
+  cursor: col-resize;
+  z-index: 3;
+  touch-action: none;
+}
+
+.handle:hover {
+  background: color-mix(in srgb, var(--gewu-accent) 16%, transparent);
+}

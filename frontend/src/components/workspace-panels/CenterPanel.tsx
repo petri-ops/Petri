@@ -37,6 +37,12 @@ import {
 import { ScheduledWorkspacePanel } from '@/components/workspace-panels/ScheduledWorkspacePanel';
 import { ResultsLibrary } from '@/components/workspace-panels/ResultsLibrary';
 import { SideChatDock } from '@/components/workspace-panels/SideChatDock';
+// UI-448 加映 v25 — 浮卡左缘拖宽把手 + 偏好持久化（摘要浮卡与会话浮面共用）
+import {
+  FloatCardResizeHandle,
+  persistFloatWidth,
+  readPersistedFloatWidth,
+} from '@/components/workspace-panels/FloatCardResizer';
 import { Icon } from '@/components/icons/Icon';
 // UI-448 — 悬浮聊天面开态：中栏会话内容列让位（不遮切割），与 composer 让位同源
 import type { RightPanelMode } from '@/pages/project-workspace/rightPanelTabs';
@@ -363,6 +369,11 @@ function SessionFrameView({
   // UI-448 加映 v12 — 宽窄判定与摘要切换点同源（summaryVisibility 由
   // sessionFrameWidth 纯派生：expanded ⟺ 宽窗/未测量），保证两卡同刻切换。
   const wide = ctx.summaryVisibility === 'expanded';
+  // UI-448 加映 v25 — 摘要浮卡拖宽偏好优先；未拖过回落 summaryOpenWidth
+  const [persistedSummaryWidth, setPersistedSummaryWidth] = React.useState<number | null>(
+    () => readPersistedFloatWidth('gewu:summary-float-width')
+  );
+  const summaryFloatWidth = persistedSummaryWidth ?? ctx.summaryOpenWidth;
 
   return (
     <div
@@ -398,10 +409,12 @@ function SessionFrameView({
         </div>
         {ctx.showPinnedSummary && ctx.summaryCardOpen && ctx.summaryVisibility === 'float' && (
           <div className={styles.workspaceSummaryFloat} aria-label="项目运行摘要（悬浮）">
+            {/* UI-448 加映 v25 — 宽度走拖宽偏好（未拖过回落 summaryOpenWidth），
+                左缘把手向左拖变宽、抬手记忆 */}
             <WorkspaceSummaryCard
               open
               visibility="float"
-              width={ctx.summaryOpenWidth}
+              width={summaryFloatWidth}
               projectName={ctx.project.name}
               project={ctx.project}
               activeJob={ctx.activeJob}
@@ -421,6 +434,14 @@ function SessionFrameView({
               onSelectJob={(jobId) => {
                 ctx.setActiveJobId(jobId);
                 ctx.openRightPanel('results');
+              }}
+            />
+            <FloatCardResizeHandle
+              width={summaryFloatWidth}
+              onWidthChange={setPersistedSummaryWidth}
+              onCommit={(w) => {
+                setPersistedSummaryWidth(w);
+                persistFloatWidth('gewu:summary-float-width', w);
               }}
             />
           </div>
