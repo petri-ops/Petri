@@ -9,7 +9,7 @@ acceptance:
   - 窄面适配：悬挂面 SimpleChat compact 占位符（短提示不折行）；表格/长 token 三态实机核对（框内滚动+滚动条可见）
   - 台账同步：docs/ui-productization-audit.md UI-448 条目与实现同一提交；实机走查截图证据落 acceptance/ui-448/
 reopen: 用户实机过目后对新形态不满意，或悬浮面与摘要浮层同屏叠置的已知边界升级为真问题时
-status: active
+status: completed
 ---
 
 # UI-448 — 侧边聊天悬浮面体验对齐项目摘要
@@ -297,3 +297,6 @@ HK-01：钉住跳过让位/悬浮保持让位两契约先红后绿；双宽度�
 ## 20. 加映 v15（2026-09-27，用户「点击了没有展开」——机制统一裁决）
 
 用户点击无效（热更中间态+双机制并存），且此前多轮已表达「直接使用摘要按钮一样的特性」。**机制统一**：侧聊开关并入 useWorkspacePanels 壳状态（sideChatOpen/toggleSideChat，与摘要概览完全同一套代码路径）；SideChatToggleButton 改用 panels 上下文；SideChatDock 开态改 props（open/onOpenChange）；sideChatDockStore 整体退役删除。右栏 tab 双入口保留（事件改回调 onOpenChange）。
+### §20.1 加映 v15 收口（2026-09-27）
+
+实现提交 19d1b0d5（UI 台账加映段同提交）；closeout 十一门绿。重启 Electron 真实点击实测通过。v15 in_progress 待用户过目翻 verified（v6~v14 可同批）。G0 开发期常态 · 不外推 packaged/Provider/GA。
