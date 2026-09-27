@@ -172,4 +172,14 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     render(<CenterPanel ctx={ctx} refs={refs} />);
     expect(document.querySelector('[class*="workspaceSessionLayoutSideChatOpen"]')).toBeNull();
   });
+
+  // UI-448 加映 v10 — 面板与摘要卡同定位基准：dock 挂载于 session layout 内部
+  it('mounts the dock inside the session layout (UI-448 加映 v10 summary-parity)', () => {
+    const ctx = context('chat');
+    render(<CenterPanel ctx={ctx} refs={refs} />);
+    const dock = document.querySelector("[data-testid='side-chat-dock']");
+    const layout = document.querySelector("[class*='workspaceSessionLayout']");
+    expect(dock).toBeTruthy();
+    expect(layout?.contains(dock ?? null)).toBe(true);
+  });
 });

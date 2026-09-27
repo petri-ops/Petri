@@ -4247,3 +4247,9 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **修法**：①SideChatDock 注入 `--dock-right`（14px 内缩 + 摘要钉住列宽 + 8px 间隙联动），摘要钉住时面板让到列左、悬浮时与摘要卡同缘；②会话面板打开时摘要悬浮 max-height 封顶上半（`workspaceSessionLayoutSideChatOpen`），上摘要下会话永不叠加；③agentMain 让位随钉住扩容（`--side-chat-pinned`）。**实机走查 allPass（2026-09-27）**：悬浮态实测摘要右 1325=面板右 1325（horizontalGap 0）、垂直零重叠（摘要底 351<面板顶 467）；钉住态三断言由契约覆盖（--dock-right=322px/--side-chat-pinned=300px/封顶类）；契约先红→22/22 绿；前端全量 155 文件/1240 用例 0 红；tsc 0；eslint 0 error；证据=acceptance/ui-448/walkthrough-v8.json。收口波折=lint 抓 CenterPanel.test 三处多余断言（no-unnecessary-type-assertion/no-unsafe-call），改 querySelector<HTMLElement> 泛型形态清偿。
 **加映 v9（同日）：v8 钉住联动偏移被实测证伪（computed 状态与实际形态脱节把面板甩到半空），回退为面板恒贴右缘 right:14px（悬浮/钉住通吃），保留摘要悬浮封顶与常驻类；窄窗 1000px 实测右缘 delta=0 零重叠。待用户过目 v9 形态后翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-448 加映 v10 (2026-09-27 in_progress，用户裁决「全方位核查摘要卡片实现 精准识别后调整会话卡片」)
+
+- **修法**：SideChatDock 挂载点迁入 `.workspaceSessionLayout`（与摘要悬浮同层同 `right:0` 基准，结构性同源）；surface 贴 layout 右缘；yield 让位 432→308px 解决「推的太狠」；结果模式面板随 chat 投影隐藏（与摘要行为对齐，plan 留痕）。
+- **实机走查 allPass（2026-09-27）**：同基准实证 dockInsideLayout=true、rightEdgeDeltaVsSummary=0、垂直零重叠；让位 432→308 解决「推的太狠」；结果模式随投影隐藏与摘要行为对齐；契约（挂载位置）先红→22/22 绿；前端全量 155 文件/1240 用例 0 红；tsc 0；eslint 0 error；证据=acceptance/ui-448/walkthrough-v10.json。**待用户过目 v10 形态后翻 verified**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

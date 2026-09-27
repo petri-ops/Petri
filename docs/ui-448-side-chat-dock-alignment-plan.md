@@ -9,7 +9,7 @@ acceptance:
   - 窄面适配：悬挂面 SimpleChat compact 占位符（短提示不折行）；表格/长 token 三态实机核对（框内滚动+滚动条可见）
   - 台账同步：docs/ui-productization-audit.md UI-448 条目与实现同一提交；实机走查截图证据落 acceptance/ui-448/
 reopen: 用户实机过目后对新形态不满意，或悬浮面与摘要浮层同屏叠置的已知边界升级为真问题时
-status: completed
+status: active
 ---
 
 # UI-448 — 侧边聊天悬浮面体验对齐项目摘要
@@ -222,3 +222,18 @@ HK-01 红绿先行：钉住宽度注入契约（dockRoot 变量/yield 变量/封
 ### §14.2 加映 v9 收口（2026-09-27）
 
 实现提交 6e44656b（UI 台账加映段随提交）；closeout 十一门绿。v9 in_progress 待用户过目翻 verified（v6/v7 形态如一并确认可同批翻 verified）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 15. 加映 v10（2026-09-27，用户过目 v9 后裁决「推的太狠了…你应该全方位核查一下项目摘要卡片的实现方式 精准识别之后再调整会话卡片 很明显会话卡片和项目摘要卡片不是一个行为方式」）
+
+**全方位核查结论（摘要卡定位链解剖）**：摘要悬浮的定位基准是 `.workspaceSessionLayout`（`position: relative`，右缘经 `.workspaceSessionFrameChat` 的 `padding: 0 14px 0 8px` 内缩），`right: 0` 贴齐布局右缘——与布局共生，随布局变化自动跟随。会话面板却锚在更外层 `main.centerCol`，靠手写 14px 模拟对齐——参照系不同源，这就是「行为方式不一样」的结构性根源（v8/v9 两轮补丁均在给这个错误参照系打补丁）。
+
+**精准调整**：
+1. SideChatDock 挂载点迁入 `workspaceSessionLayout`（chat 变体内、摘要宿主同层）——与摘要卡共用 `right: 0` 定位基准，结构性同源；surface right 14px→0。
+2. 结果模式跟随摘要行为：chat 投影层隐藏时面板随之隐藏（此前在结果模式常驻，属行为对齐的一部分，plan 留痕）。
+3. yield 让位 432→308px（面板 300 + 8 呼吸；把手已上移面板外不再占右缘）——解决「推的太狠」。
+
+HK-01：布局挂载位置契约（dock 在 session layout 内）先红后绿。
+
+### §15.1 加映 v10 实施记录（2026-09-27 当日收口）
+
+红绿先行：挂载位置契约（dock 在 session layout 内）先红→22/22 绿。实机：rightEdgeDeltaVsSummary=0、dockInsideLayout=true、零重叠、让位收窄生效。行为对齐清单=同基准 right:0/同缘/同悬浮语言（16px 圆角+float 阴影 token）/结果模式随投影隐藏（与摘要一致）/常驻不误关/极简把手挂面板上方。教训=v8/v9 两轮补丁的本质是参照系选错——结构性问题应移动挂载点而不是补偿偏移。验证=22/22+前端全量 155 文件/1240 用例 0 红+tsc 0+eslint 0 error。证据=acceptance/ui-448/walkthrough-v10.json。

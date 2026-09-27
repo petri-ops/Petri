@@ -209,11 +209,8 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
       {/* UI-417 — 侧边聊天悬挂化：常驻把手 + 滑出 overlay。
           UI-448 加映 v3 — 悬挂面自立每项目独立侧聊会话（不再镜像中栏 activeConvId），
           中栏会话与悬挂面互不干扰；ownsCopilotAsk 归属仍在中央 SimpleChat。
-          UI-448 加映 v9 — 面板恒贴右缘（right:14px），不再按摘要钉住态让位——
-          v8 的间接耦合（computed 状态≠实际渲染形态）把面板甩到半空。 */}
-      {ctx.project && ctx.projectId && (
-        <SideChatDock key={ctx.projectId} projectId={ctx.projectId} />
-      )}
+          UI-448 加映 v10 — 挂载点迁入 SessionFrameView 的 session layout
+          （与摘要卡同定位基准、同右缘），见下方 SessionFrameView。 */}
       <div
         className={`${styles.workspaceProjectionLayer} ${workspaceMode === 'chat' ? styles.workspaceProjectionLayerActive : ''}`}
         aria-hidden={workspaceMode !== 'chat'}
@@ -387,7 +384,7 @@ function SessionFrameView({
           <div className={styles.workspaceSummaryFloat} aria-label="项目运行摘要（悬浮）">
             <WorkspaceSummaryCard
               open
-              visibility="float" 
+              visibility="float"
               width={ctx.summaryOpenWidth}
               projectName={ctx.project.name}
               project={ctx.project}
@@ -440,6 +437,12 @@ function SessionFrameView({
               }}
             />
           </div>
+        )}
+        {/* UI-448 加映 v10 — 侧聊面板与摘要卡同定位基准：同在 session layout 内
+            right:0，右缘结构性同源（v8/v9 的跨参照系对齐补丁由此退役）。
+            仅 chat 变体承载（scheduled 变体各自渲染会重复实例）。 */}
+        {variant === 'chat' && ctx.projectId && (
+          <SideChatDock key={ctx.projectId} projectId={ctx.projectId} />
         )}
       </div>
     </div>

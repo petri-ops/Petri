@@ -1,0 +1,22 @@
+{
+  "package": "UI-448 加映 v10",
+  "date": "2026-09-27",
+  "env": "dev 栈（localhost:3000，Vite HMR），viewport 1000x900（窄窗复现用户场景），dark",
+  "feedback": "用户裁决「推的太狠了…全方位核查一下项目摘要卡片的实现方式 精准识别之后再调整会话卡片 很明显不是一个行为方式」",
+  "audit": {
+    "summaryBasis": "摘要悬浮定位基准 = .workspaceSessionLayout（position:relative，右缘经 .workspaceSessionFrameChat padding 0 14px 0 8px 内缩），right:0 贴齐布局右缘，与布局共生",
+    "dockBasisBefore": "锚在更外层 main.centerCol，靠手写 14px 模拟对齐——参照系不同源（行为方式不同的结构性根源，v8/v9 两轮补丁均在给错误参照系打补丁）",
+    "dockBasisAfter": "挂载点迁入 workspaceSessionLayout（摘要宿主同层），right:0 与摘要卡结构性同源"
+  },
+  "fixes": {
+    "sameBasis": "dockInsideLayout=true、rightEdgeDeltaVsSummary=0、rightEdgeDeltaVsLayout=14（两者同吃 FrameChat 14px 内缩，完全一致）",
+    "noOverlap": "摘要底 351 < 面板顶 461，verticalOverlap=false",
+    "yieldTrim": "让位 432→308px（面板 300+8 呼吸；把手已上移面板外），解决「推的太狠」",
+    "resultModeParity": "面板随 chat 投影隐藏（结果模式不再常驻），与摘要行为对齐（plan §15 留痕）"
+  },
+  "redGreen": "挂载位置契约（dock 在 session layout 内）先红→22/22 绿；前端全量 155 文件/1240 用例 0 红；tsc 0；eslint 0 error",
+  "screenshots": [
+    "ui448v10-same-basis-aligned.png（同基准对齐+不叠加实证）"
+  ],
+  "verdict": "allPass"
+}
