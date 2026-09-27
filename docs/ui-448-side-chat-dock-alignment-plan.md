@@ -9,7 +9,7 @@ acceptance:
   - 窄面适配：悬挂面 SimpleChat compact 占位符（短提示不折行）；表格/长 token 三态实机核对（框内滚动+滚动条可见）
   - 台账同步：docs/ui-productization-audit.md UI-448 条目与实现同一提交；实机走查截图证据落 acceptance/ui-448/
 reopen: 用户实机过目后对新形态不满意，或悬浮面与摘要浮层同屏叠置的已知边界升级为真问题时
-status: active
+status: completed
 ---
 
 # UI-448 — 侧边聊天悬浮面体验对齐项目摘要
@@ -190,3 +190,6 @@ HK-01 红绿先行：开态隐把手 + slim 传参契约重构先红后绿。宽
 ### §13.1 加映 v7 实施记录（2026-09-27 当日收口）
 
 红绿先行：呼吸灯契约随形态重构先红（圆点退役断言）→20/20 绿。实机：border 0/transparent 底/无阴影实测、28x28 极简气泡、开态布局不变。验证=20/20+前端全量 155 文件/1238 用例 0 红+tsc 0+eslint 0 error。证据=acceptance/ui-448/walkthrough-v7.json。
+### §13.2 加映 v7 收口（2026-09-27）
+
+实现提交 173847a9（v6 实现被中断后随 bb1075f9 已落，v7 图标极简化并入本提交）；closeout 十一门绿。v7 in_progress 待用户过目翻 verified。G0 开发期常态 · 不外推 packaged/Provider/GA。
