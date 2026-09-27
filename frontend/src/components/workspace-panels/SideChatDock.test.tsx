@@ -5,7 +5,7 @@
  *   组件不再自带把手/内部开态：收起经 onOpenChange(false) 回写壳状态。
  */
 import React, { useState } from 'react';
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/components/copilot/SimpleChat', () => ({
