@@ -9,7 +9,7 @@ acceptance:
   - 窄面适配：悬挂面 SimpleChat compact 占位符（短提示不折行）；表格/长 token 三态实机核对（框内滚动+滚动条可见）
   - 台账同步：docs/ui-productization-audit.md UI-448 条目与实现同一提交；实机走查截图证据落 acceptance/ui-448/
 reopen: 用户实机过目后对新形态不满意，或悬浮面与摘要浮层同屏叠置的已知边界升级为真问题时
-status: active
+status: completed
 ---
 
 # UI-448 — 侧边聊天悬浮面体验对齐项目摘要
@@ -266,3 +266,6 @@ HK-01：钉住跳过让位/悬浮保持让位两契约先红后绿；双宽度�
 2. **响应式双形态**：宽窗（`summaryVisibility==='expanded'`，与摘要同切换点）→ 右轨独立列区（300px，与摘要钉住列垂直堆叠、共享右缘、把手常驻）；窄窗 → 悬浮（右下角浮面 + 把手）。yield 让位仅窄窗悬浮态应用。
 
 红绿先行：fork 三契约 + docked 变体契约 → 28/28 绿；实机双形态 allPass。
+### §17.1 加映 v12 收口（2026-09-27）
+
+实现提交 e18853eb（UI 台账加映段随提交）；closeout 十一门绿。v12 in_progress 待用户过目翻 verified（v6~v11 可同批）。G0 开发期常态 · 不外推 packaged/Provider/GA。
