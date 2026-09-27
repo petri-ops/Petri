@@ -4328,3 +4328,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **修法**：`.surface` 原样搬入同规则（opacity 0.92 + hover opacity 1/translateY(-1px) + 同款过渡）；reduced-motion 降级块补 `transition: none`（对齐摘要浮卡降级语义，透出保留、动画关停）。
 - **证据**：IAB 实机截图对比——窄窗双卡同开，computed opacity 均 0.92，两卡透出效果一致；CSS 模块 HMR 即时生效。**待用户实机过目后翻 verified（v15–v22 同批）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-448 加映 v23 (2026-09-27 in_progress，用户双图对比「项目摘要点击就悬浮了，而会话直接把消息框向左推了」——让位机制退役、纯悬浮)
+
+- **根因**：v12 引入的窄窗让位机制（`agentMainSideChatYield`：padding-right min(432px+钉住列, 100%-320px)）在会话浮面打开时把中栏消息列向左推挤，与摘要浮卡的纯悬浮（盖在内容上、内容不动）行为不一致——用户双图对比明确裁决要摘要的行为。
+- **修法**：让位机制整体退役——CenterPanel 摘除类挂载条件、CSS 删 `.agentMainSideChatYield` 规则（v12 padding 与 v16 display:none 补丁一并废除，留 v23 注释锚点）。浮面覆盖到什么就显示什么，与摘要浮卡同一取舍（浮面自用输入，主输入框 Enter 仍可发送）。
+- **证据**：CenterPanel 11（三个让位分叉用例退役，改 v23 恒定不变式：开/关×钉住/浮层全形态 yield 类恒不存在）+ SideChatDock 12 = 23 绿；IAB 实机：yield 类不存在、浮面半透明盖在全宽内容上。**待用户实机过目后翻 verified（v15–v23 同批）**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

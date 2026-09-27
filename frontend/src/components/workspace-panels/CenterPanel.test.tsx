@@ -141,12 +141,13 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     expect(document.querySelector('[class*="workspaceSummaryFloat"]')).toBeNull();
   });
 
-  // UI-448 — 悬浮面展开时中栏会话内容列让位（不再被 380px 面板拦腰切割）
-  it('narrows the conversation column while the side chat dock is open (UI-448)', () => {
+  // UI-448 加映 v23 — 会话浮面纯悬浮（用户双图对比裁决：摘要点击就悬浮，
+  // 会话却把消息框向左推）——让位机制整体退役，开合态消息列恒全宽。
+  it('never yields the conversation column for the side chat float (UI-448 加映 v23 纯悬浮)', () => {
     const openCtx = context('chat');
     openCtx.sideChatOpen = true;
     const { unmount } = render(<CenterPanel ctx={openCtx} refs={refs} />);
-    expect(document.querySelector('[class*="agentMainSideChatYield"]')).toBeTruthy();
+    expect(document.querySelector('[class*="agentMainSideChatYield"]')).toBeNull();
     unmount();
     const ctx = context('chat');
     render(<CenterPanel ctx={ctx} refs={refs} />);
@@ -165,21 +166,18 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     expect(document.querySelector('[class*="workspaceSessionLayoutSideChatOpen"]')).toBeNull();
   });
 
-  // UI-448 加映 v11 — 钉住列打开时不再叠加让位（列自身已隔开面板与会话内容）
-  it('skips the content yield while the summary is a pinned column (UI-448 加映 v11)', () => {
-    const ctx = context('chat');
-    ctx.sideChatOpen = true;
-    ctx.summaryCardOpen = true;
-    ctx.summaryVisibility = 'expanded';
-    render(<CenterPanel ctx={ctx} refs={refs} />);
-    expect(document.querySelector('[class*="agentMainSideChatYield"]')).toBeNull();
-  });
-
-  it('keeps the content yield when the summary floats or is closed (UI-448 加映 v11)', () => {
-    const ctx = context('chat');
-    ctx.sideChatOpen = true;
-    render(<CenterPanel ctx={ctx} refs={refs} />);
-    expect(document.querySelector('[class*="agentMainSideChatYield"]')).toBeTruthy();
+  // UI-448 加映 v23 — 让位退役后的恒定不变式：摘要钉住列形态同样不推挤
+  // （原 v11「钉住列跳过让位/浮层保留让位」两个分叉用例随机制一并退役）。
+  it('keeps full-width content in every summary form while the side chat is open (v23)', () => {
+    for (const visibility of ['expanded', 'float'] as const) {
+      const ctx = context('chat');
+      ctx.sideChatOpen = true;
+      ctx.summaryCardOpen = true;
+      ctx.summaryVisibility = visibility;
+      const { unmount } = render(<CenterPanel ctx={ctx} refs={refs} />);
+      expect(document.querySelector('[class*="agentMainSideChatYield"]')).toBeNull();
+      unmount();
+    }
   });
 
   // UI-448 加映 v10 — 面板与摘要卡同定位基准：dock 挂载于 session layout 内部

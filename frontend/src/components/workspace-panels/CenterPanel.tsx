@@ -230,13 +230,7 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
           onSideChatOpenChange={setSideChatOpen}
         >
           <div
-            className={`${styles.agentMain} ${
-              // UI-448 加映 v12 — 仅窄窗「悬浮」态需要为覆盖式面板让位；
-              // 宽窗面板已是独立列区（占位），自然隔开，不再叠加让位
-              workspaceMode === 'chat' && sideChatOpen && !wide
-                ? styles.agentMainSideChatYield
-                : ''
-            }`}
+            className={styles.agentMain}
           >
             {ctx.project && ctx.projectId && (
               <SimpleChat
