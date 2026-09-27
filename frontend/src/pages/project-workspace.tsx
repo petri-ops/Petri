@@ -201,6 +201,9 @@ export function ProjectWorkspace(): React.ReactElement {
     bottomTerminalOpen,
     setBottomTerminalOpen,
     summaryOpen,
+    sideChatOpen,
+    setSideChatOpen,
+
     setSummaryOpen,
     centerColRef,
     sessionFrameRef,
@@ -900,6 +903,8 @@ export function ProjectWorkspace(): React.ReactElement {
     onResultEditSubmit: handleResultEditSubmit,
     setBottomTerminalOpen,
     setSummaryOpen,
+    sideChatOpen,
+    setSideChatOpen,
     setLeftOpen,
     setRightOpen,
     handleShowPlugins,

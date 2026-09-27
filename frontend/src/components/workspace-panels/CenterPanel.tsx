@@ -38,7 +38,6 @@ import { ScheduledWorkspacePanel } from '@/components/workspace-panels/Scheduled
 import { ResultsLibrary } from '@/components/workspace-panels/ResultsLibrary';
 import { SideChatDock } from '@/components/workspace-panels/SideChatDock';
 // UI-448 — 悬浮聊天面开态：中栏会话内容列让位（不遮切割），与 composer 让位同源
-import { useSideChatDockOpen } from '@/hooks/sideChatDockStore';
 import type { RightPanelMode } from '@/pages/project-workspace/rightPanelTabs';
 import styles from '@/pages/project-workspace.module.css';
 
@@ -109,6 +108,9 @@ export interface CenterPanelContext {
   setLeftOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
   setRightOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
   setSummaryOpen: (next: boolean | ((prev: boolean) => boolean)) => void;
+  /** UI-448 加映 v15 — 侧聊面板开合（壳状态，摘要概览同机制）。 */
+  sideChatOpen: boolean;
+  setSideChatOpen: (next: boolean | ((prev: boolean) => boolean)) => void;
   handleShowPlugins: () => void;
   handleOpenResult: (jobId: string, projectId?: string | null) => void | Promise<void>;
   handleAskAgent: (prompt: string) => void;
@@ -139,7 +141,8 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
   const { workspaceMode, bottomTerminalOpen, bottomTerminalHeight } = ctx;
   const { centerColRef, sessionFrameRef } = refs;
   // UI-448 — 悬浮聊天面展开时中栏会话内容列让位（chat 模式才有会话内容可让）
-  const sideChatDockOpen = useSideChatDockOpen();
+  const sideChatOpen = ctx.sideChatOpen;
+  const setSideChatOpen = ctx.setSideChatOpen;
   // UI-448 加映 v12 — 宽窄判定（与摘要切换点同源，见 SessionFrameView 同款派生）
   const wide = ctx.summaryVisibility === 'expanded';
   const [returnConversationMs, setReturnConversationMs] = React.useState<number | null>(null);
@@ -218,12 +221,18 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
         aria-hidden={workspaceMode !== 'chat'}
         data-projection="conversation"
       >
-        <SessionFrameView ctx={ctx} sessionFrameRef={sessionFrameRef} variant="chat" sideChatOpen={sideChatDockOpen}>
+        <SessionFrameView
+          ctx={ctx}
+          sessionFrameRef={sessionFrameRef}
+          variant="chat"
+          sideChatOpen={sideChatOpen}
+          onSideChatOpenChange={setSideChatOpen}
+        >
           <div
             className={`${styles.agentMain} ${
               // UI-448 加映 v12 — 仅窄窗「悬浮」态需要为覆盖式面板让位；
               // 宽窗面板已是独立列区（占位），自然隔开，不再叠加让位
-              workspaceMode === 'chat' && sideChatDockOpen && !wide
+              workspaceMode === 'chat' && sideChatOpen && !wide
                 ? styles.agentMainSideChatYield
                 : ''
             }`}
@@ -332,6 +341,7 @@ function SessionFrameView({
   children,
   variant = 'default',
   sideChatOpen = false,
+  onSideChatOpenChange,
 }: {
   ctx: CenterPanelContext;
   sessionFrameRef: React.Ref<HTMLDivElement>;
@@ -339,6 +349,8 @@ function SessionFrameView({
   variant?: 'default' | 'chat';
   /** UI-448 加映 v8 — 会话面板开启时摘要悬浮封顶上半，两面板同屏不叠加。 */
   sideChatOpen?: boolean;
+  /** UI-448 加映 v15 — 侧聊面板收起回调（列区 ✕ 经它回写壳状态）。 */
+  onSideChatOpenChange?: (open: boolean) => void;
 }): React.ReactElement {
   // HLE-C4R: surface the active conversation's durable-loop projection in the
   // pinned summary. Reads the same shared run store the chat renders from, so
@@ -455,12 +467,14 @@ function SessionFrameView({
         {/* UI-448 加映 v12 — 宽窗时侧聊是独立列区（占位、像摘要钉住列一样），
             窄窗时退回悬浮（把手 + 右下角浮面）。切换点与摘要同源
             （summaryVisibility==='expanded' ⟺ 宽窗）。 */}
-        {wide && sideChatOpen && ctx.projectId && (
+        {wide && sideChatOpen && ctx.projectId && onSideChatOpenChange && (
           <SideChatDock
             key={ctx.projectId}
             projectId={ctx.projectId}
             sourceConversationId={ctx.activeConvId}
             variant="docked"
+            open={sideChatOpen}
+            onOpenChange={onSideChatOpenChange ?? (() => {})}
           />
         )}
         </div>
@@ -478,6 +492,8 @@ function SessionFrameView({
             surfaceSuppressed={wide && sideChatOpen}
             // 摘要悬浮同时打开：面板让到摘要下方（同右缘堆叠不叠加）
             belowSummary={ctx.summaryCardOpen && ctx.summaryVisibility === 'float'}
+            open={sideChatOpen}
+            onOpenChange={onSideChatOpenChange ?? (() => {})}
           />
         )}
       </div>

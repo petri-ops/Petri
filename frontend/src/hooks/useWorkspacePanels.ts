@@ -60,14 +60,18 @@ export interface WorkspacePanels {
   rightOpen: boolean;
   bottomTerminalOpen: boolean;
   summaryOpen: boolean;
+  /** UI-448 加映 v15 — 侧边聊天面板开合（与摘要概览同一套壳状态机制）。 */
+  sideChatOpen: boolean;
   setLeftOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setRightOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setBottomTerminalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setSummaryOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setSideChatOpen: React.Dispatch<React.SetStateAction<boolean>>;
   toggleLeft: () => void;
   toggleRight: () => void;
   toggleBottomTerminal: () => void;
   toggleSummary: () => void;
+  toggleSideChat: () => void;
   titleBar: TitleBarState;
   setTitleBar: React.Dispatch<React.SetStateAction<TitleBarState>>;
   updateTitleBar: (patch: Partial<TitleBarState>) => void;
@@ -127,12 +131,15 @@ export function useWorkspacePanels(): WorkspacePanels {
   const [rightOpen, setRightOpen] = useState(!projectionNarrow);
   const [bottomTerminalOpen, setBottomTerminalOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
+  // UI-448 加映 v15 — 侧聊开合并入壳状态（摘要概览按钮同机制），替代独立 store
+  const [sideChatOpen, setSideChatOpen] = useState(false);
   const [titleBar, setTitleBar] = useState<TitleBarState>(DEFAULT_TITLE_BAR);
 
   const toggleLeft = useCallback(() => setLeftOpen((v) => !v), []);
   const toggleRight = useCallback(() => setRightOpen((v) => !v), []);
   const toggleBottomTerminal = useCallback(() => setBottomTerminalOpen((v) => !v), []);
   const toggleSummary = useCallback(() => setSummaryOpen((v) => !v), []);
+  const toggleSideChat = useCallback(() => setSideChatOpen((v) => !v), []);
   const updateTitleBar = useCallback((patch: Partial<TitleBarState>) => {
     setTitleBar((current) => {
       const next = { ...current, ...patch };
@@ -145,14 +152,17 @@ export function useWorkspacePanels(): WorkspacePanels {
     rightOpen,
     bottomTerminalOpen,
     summaryOpen,
+    sideChatOpen,
     setLeftOpen,
     setRightOpen,
     setBottomTerminalOpen,
     setSummaryOpen,
+    setSideChatOpen,
     toggleLeft,
     toggleRight,
     toggleBottomTerminal,
     toggleSummary,
+    toggleSideChat,
     titleBar,
     setTitleBar,
     updateTitleBar,

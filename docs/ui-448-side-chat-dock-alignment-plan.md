@@ -9,7 +9,7 @@ acceptance:
   - 窄面适配：悬挂面 SimpleChat compact 占位符（短提示不折行）；表格/长 token 三态实机核对（框内滚动+滚动条可见）
   - 台账同步：docs/ui-productization-audit.md UI-448 条目与实现同一提交；实机走查截图证据落 acceptance/ui-448/
 reopen: 用户实机过目后对新形态不满意，或悬浮面与摘要浮层同屏叠置的已知边界升级为真问题时
-status: completed
+status: active
 ---
 
 # UI-448 — 侧边聊天悬浮面体验对齐项目摘要
@@ -293,3 +293,7 @@ HK-01：钉住跳过让位/悬浮保持让位两契约先红后绿；双宽度�
 **处置**：CDP 点击覆盖层关闭卡住的菜单 → 真实点击气泡按钮 → 面板立即展开（aria-pressed=true，继承消息在位）。临时探针已清。
 
 **教训入册（供后续探针纪律）**：①自动化点击前必须按当前帧重取坐标，禁止复用历史坐标（窗口移动/缩放后旧坐标会误触邻位控件）；②「我测可以用户不行」优先怀疑真实点击链路上的透明覆盖层（menu overlay/drag region），elementsFromPoint 一测便知。
+
+## 20. 加映 v15（2026-09-27，用户「点击了没有展开」——机制统一裁决）
+
+用户点击无效（热更中间态+双机制并存），且此前多轮已表达「直接使用摘要按钮一样的特性」。**机制统一**：侧聊开关并入 useWorkspacePanels 壳状态（sideChatOpen/toggleSideChat，与摘要概览完全同一套代码路径）；SideChatToggleButton 改用 panels 上下文；SideChatDock 开态改 props（open/onOpenChange）；sideChatDockStore 整体退役删除。右栏 tab 双入口保留（事件改回调 onOpenChange）。

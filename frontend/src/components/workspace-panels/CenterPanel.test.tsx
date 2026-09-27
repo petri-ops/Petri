@@ -2,7 +2,6 @@ import React from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CenterPanel, type CenterPanelContext, type CenterPanelRefs } from './CenterPanel';
-import { setSideChatDockOpen } from '@/hooks/sideChatDockStore';
 
 vi.mock('@/components/copilot/SimpleChat', () => ({
   SimpleChat: () => <div data-testid="persistent-chat">Agent conversation</div>,
@@ -60,6 +59,7 @@ function context(mode: CenterPanelContext['workspaceMode']): CenterPanelContext 
     showPinnedSummary: mode === 'chat' || mode === 'scheduled',
     bottomTerminalOpen: false, bottomTerminalHeight: 0, leftOpen: true, rightOpen: true, inputHeight: 120,
     summaryCardOpen: false, summaryVisibility: 'hidden', summaryOpenWidth: 0,
+    sideChatOpen: false,
     activeJob: { id: 'job-1', tool_id: 'deseq2', status: 'done', created_at: 1 },
     activeWorkflow: { jobStatus: 'done', artifactTruth: { status: 'valid' } },
     activeArtifact: {
@@ -143,15 +143,11 @@ describe('G0-RS-P1 CenterPanel projection', () => {
 
   // UI-448 — 悬浮面展开时中栏会话内容列让位（不再被 380px 面板拦腰切割）
   it('narrows the conversation column while the side chat dock is open (UI-448)', () => {
-    setSideChatDockOpen(true);
-    try {
-      const ctx = context('chat');
-      const { unmount } = render(<CenterPanel ctx={ctx} refs={refs} />);
-      expect(document.querySelector('[class*="agentMainSideChatYield"]')).toBeTruthy();
-      unmount();
-    } finally {
-      setSideChatDockOpen(false);
-    }
+    const openCtx = context('chat');
+    openCtx.sideChatOpen = true;
+    const { unmount } = render(<CenterPanel ctx={openCtx} refs={refs} />);
+    expect(document.querySelector('[class*="agentMainSideChatYield"]')).toBeTruthy();
+    unmount();
     const ctx = context('chat');
     render(<CenterPanel ctx={ctx} refs={refs} />);
     expect(document.querySelector('[class*="agentMainSideChatYield"]')).toBeNull();
@@ -159,15 +155,11 @@ describe('G0-RS-P1 CenterPanel projection', () => {
 
   // UI-448 加映 v9 — 会话面板开启时布局挂常驻类（摘要悬浮封顶上半，两卡不叠加）
   it('marks the session layout while the side chat dock is open (UI-448 加映 v9)', () => {
-    setSideChatDockOpen(true);
-    try {
-      const ctx = context('chat');
-      const { unmount } = render(<CenterPanel ctx={ctx} refs={refs} />);
-      expect(document.querySelector('[class*="workspaceSessionLayoutSideChatOpen"]')).toBeTruthy();
-      unmount();
-    } finally {
-      setSideChatDockOpen(false);
-    }
+    const openCtx = context('chat');
+    openCtx.sideChatOpen = true;
+    const { unmount } = render(<CenterPanel ctx={openCtx} refs={refs} />);
+    expect(document.querySelector('[class*="workspaceSessionLayoutSideChatOpen"]')).toBeTruthy();
+    unmount();
     const ctx = context('chat');
     render(<CenterPanel ctx={ctx} refs={refs} />);
     expect(document.querySelector('[class*="workspaceSessionLayoutSideChatOpen"]')).toBeNull();
@@ -175,29 +167,19 @@ describe('G0-RS-P1 CenterPanel projection', () => {
 
   // UI-448 加映 v11 — 钉住列打开时不再叠加让位（列自身已隔开面板与会话内容）
   it('skips the content yield while the summary is a pinned column (UI-448 加映 v11)', () => {
-    setSideChatDockOpen(true);
-    try {
-      const ctx = context('chat');
-      ctx.summaryCardOpen = true;
-      ctx.summaryVisibility = 'expanded';
-      const { unmount } = render(<CenterPanel ctx={ctx} refs={refs} />);
-      expect(document.querySelector('[class*="agentMainSideChatYield"]')).toBeNull();
-      unmount();
-    } finally {
-      setSideChatDockOpen(false);
-    }
+    const ctx = context('chat');
+    ctx.sideChatOpen = true;
+    ctx.summaryCardOpen = true;
+    ctx.summaryVisibility = 'expanded';
+    render(<CenterPanel ctx={ctx} refs={refs} />);
+    expect(document.querySelector('[class*="agentMainSideChatYield"]')).toBeNull();
   });
 
   it('keeps the content yield when the summary floats or is closed (UI-448 加映 v11)', () => {
-    setSideChatDockOpen(true);
-    try {
-      const ctx = context('chat');
-      const { unmount } = render(<CenterPanel ctx={ctx} refs={refs} />);
-      expect(document.querySelector('[class*="agentMainSideChatYield"]')).toBeTruthy();
-      unmount();
-    } finally {
-      setSideChatDockOpen(false);
-    }
+    const ctx = context('chat');
+    ctx.sideChatOpen = true;
+    render(<CenterPanel ctx={ctx} refs={refs} />);
+    expect(document.querySelector('[class*="agentMainSideChatYield"]')).toBeTruthy();
   });
 
   // UI-448 加映 v10 — 面板与摘要卡同定位基准：dock 挂载于 session layout 内部

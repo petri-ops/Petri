@@ -1,0 +1,15 @@
+{
+  "package": "UI-448 加映 v15",
+  "date": "2026-09-27",
+  "env": "restart-dev-stack 后全新 Electron 实例，直连 CDP 真实鼠标事件验证（用户窗口）",
+  "feedback": "用户「点击了没有展开」「不能直接使用摘要按钮一样的特性吗」——v13/v14 的独立 store 机制被用户裁决废弃，改用摘要按钮同一套壳状态机制",
+  "rootCause": "独立 store（sideChatDockStore）与壳状态并存造成双机制；用户窗口热更经历中间态崩溃后点击链路失效",
+  "fix": "开关并入 useWorkspacePanels（sideChatOpen/toggleSideChat，摘要概览完全同款）；SideChatToggleButton 改用 panels 上下文（摘要按钮同款写法）；SideChatDock 开态改 props（open/onOpenChange）；sideChatDockStore 整体退役删除",
+  "verified": {
+    "topbarToggleRealClick": { "ariaPressed": "true", "panelOpened": true, "panelRect": { "right": 1767, "top": 38, "w": 300 } },
+    "inheritedMsgs": 2,
+    "forkedConversationInSidebar": true
+  },
+  "redGreen": "全量 155 文件/1237 用例 0 红（开关契约重写为 panels 机制）；tsc 0；eslint 0 error",
+  "verdict": "allPass"
+}

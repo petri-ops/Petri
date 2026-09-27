@@ -23,7 +23,6 @@ import { SimpleChat } from '@/components/copilot/SimpleChat';
 import { forkConversation } from '@/components/copilot/copilotConversationsClient';
 import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
 // UI-448 — 开态升共享 store：中栏 composer 让位与内容让位类同源联动（单一输入面）
-import { setSideChatDockOpen, useSideChatDockOpen } from '@/hooks/sideChatDockStore';
 import styles from './SideChatDock.module.css';
 
 const sideChatConvKey = (projectId: string) => `gewu:side-chat-conv:${projectId}`;
@@ -42,6 +41,8 @@ export function SideChatDock({
   variant = 'float',
   surfaceSuppressed = false,
   belowSummary = false,
+  open,
+  onOpenChange,
 }: {
   projectId: string;
   /**
@@ -59,8 +60,11 @@ export function SideChatDock({
   surfaceSuppressed?: boolean;
   /** UI-448 加映 v14 — 摘要悬浮同时打开：面板让到其下方下半区，同右缘不叠加。 */
   belowSummary?: boolean;
+  /** UI-448 加映 v15 — 开态由壳状态传入（sideChatOpen，摘要概览同机制）。 */
+  open: boolean;
+  /** UI-448 加映 v15 — 收起回调（✕/事件入口统一走它回写壳状态）。 */
+  onOpenChange: (open: boolean) => void;
 }): React.ReactElement {
-  const open = useSideChatDockOpen();
   // UI-448 加映 v3 — 每项目独立侧聊会话（与中栏 activeConvId 完全解耦）。
   // projectId 切换由 CenterPanel 以 key={projectId} 重挂载承载（State 初始化器
   // 重新读 localStorage），避免同步 setState-in-effect 级联渲染。
@@ -100,8 +104,8 @@ export function SideChatDock({
   // UI-417 入口收编：原右栏 chat tab 的入口（home 空态卡/分析完成跳转）派发
   // sideChatOpen，这里展开悬挂面（无会话时也展开——诚实空态引导首条消息）。
   useEffect(
-    () => subscribeGewuEvent(gewuEvents.sideChatOpen, () => setSideChatDockOpen(true)),
-    []
+    () => subscribeGewuEvent(gewuEvents.sideChatOpen, () => onOpenChange(true)),
+    [onOpenChange]
   );
   // UI-448 加映 v5 — 常驻化（摘要卡同款特性）：移除外点收起与 Esc 收起
   // （Esc 在输入时误触），折叠/展开仅经把手与头部 ✕。
@@ -114,7 +118,7 @@ export function SideChatDock({
         <button
           type="button"
           className={styles.closeBtn}
-          onClick={() => setSideChatDockOpen(false)}
+          onClick={() => onOpenChange(false)}
           aria-label="收起会话面板"
           title="收起（Esc）"
         >
