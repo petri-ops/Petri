@@ -9,7 +9,7 @@ acceptance:
   - 窄面适配：悬挂面 SimpleChat compact 占位符（短提示不折行）；表格/长 token 三态实机核对（框内滚动+滚动条可见）
   - 台账同步：docs/ui-productization-audit.md UI-448 条目与实现同一提交；实机走查截图证据落 acceptance/ui-448/
 reopen: 用户实机过目后对新形态不满意，或悬浮面与摘要浮层同屏叠置的已知边界升级为真问题时
-status: active
+status: completed
 ---
 
 # UI-448 — 侧边聊天悬浮面体验对齐项目摘要
@@ -154,3 +154,6 @@ HK-01 红绿先行：开态隐把手 + slim 传参契约重构先红后绿。宽
 ### §10.1 加映 v4 实施记录（2026-09-27 当日收口）
 
 红绿先行：契约重构 3 红（开态隐把手×2/呼吸灯与 open 解耦）→ 20/20 绿。波折两条如实登记：①max-width 百分比参照系误用——`.dockRoot` 是零宽定位容器，`calc(100%-24px)` 把面板夹塌成边框 2px，改回视口单位并注释留痕（.dockRoot 定位契约的隐蔽陷阱入册）；②字档纠正——摘要卡正文实测是 `--gewu-font-size-sm`（12.13px@scale1.1025）而非 caption（13.23px），首设 caption 经量测推翻后改正，教训=字级对齐以 computed style 实测为准（skill §3 配方）。端到端：模型菜单在 300px 面板内可弹出可选（withinSurface 实证）；两条探针会话回收清场。验证=20/20+前端全量 155 文件/1238 用例 0 红+tsc 0+eslint 0 error。证据=acceptance/ui-448/walkthrough-v4.json。
+### §10.2 加映 v4 收口（2026-09-27）
+
+实现提交 a176ec77（UI 台账加映段同提交）；closeout 十一门绿。v4 in_progress 待用户过目翻 verified。G0 开发期常态 · 不外推 packaged/Provider/GA。
