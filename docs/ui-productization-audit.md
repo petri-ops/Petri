@@ -4286,3 +4286,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **修法**：开关并入 useWorkspacePanels（sideChatOpen/toggleSideChat，摘要概览完全同款）；SideChatToggleButton 改用 panels 上下文；SideChatDock 开态改 props；sideChatDockStore 整体退役。重启 Electron 实测：真实点击顶栏开关 → 面板展开（aria-pressed=true，继承消息在位，分叉入左栏）。
 - **证据**：全量 155 文件/1237 用例 0 红；tsc 0；eslint 0 error；证据=acceptance/ui-448/walkthrough-v15.json。**待用户过目 v15 形态后翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-448 加映 v17 (2026-09-27 in_progress，用户实机「点开会话按钮后会话区内容没了」——修 v16 回归)
+
+- **根因**：v16 在 project-workspace.module.css 误加 `.workspaceSessionLayoutSideChatOpen .agentMainSideChatYield { display: none }`，意图覆盖「钉住列+面板并存」宽窗态；但让位类只在窄窗（`!wide`）挂载（CenterPanel 挂类条件 `sideChatOpen && !wide`），该规则实际命中的恰是窄窗悬浮态——中栏会话内容整个 display:none，主区全空（用户截图：仅剩右下浮面）。
+- **修法**：删除该 display:none 规则（留 v17 注释锚点）；窄窗恢复 v12 的 padding 让位语义（`min(432px+钉住列, 100%-320px)`，320px 可读下限）。宽窗不受影响（让位类本就不挂载）。
+- **证据**：CenterPanel 13 + SideChatDock 10 + theme-token-contract 4 全绿；gate:code-size PASS（22233=22233，顺提交 v15/v16 遗留的 size-baseline 刷新与 impact-map sideChatDockStore 清理）。组件测试无法覆盖 CSS 模块内部规则（jsdom 无布局），此类回归以实机验收为门。**待用户实机过目后翻 verified（v15/v16/v17 可同批）**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
