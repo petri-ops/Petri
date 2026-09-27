@@ -12,12 +12,15 @@
 
 /* 悬浮面：覆盖在中栏右缘上方，不挤压布局（UI-351 float 先例）
    UI-448 — 视觉对齐项目摘要浮层语言：16px 圆角、--gewu-shadow-float 大柔和影、
-   280ms 入场 + prefers-reduced-motion 降级（与 .workspaceSummaryFloat 同族） */
+   280ms 入场 + prefers-reduced-motion 降级（与 .workspaceSummaryFloat 同族）
+   UI-448 加映 v2 — 不再全高：贴底右下角占一半高度，与右上角摘要浮层同屏共存
+   （摘要 z-40 在上，极端叠置为已知边界，见 plan §8） */
 .surface {
   position: absolute;
-  top: 8px;
-  right: 44px;
+  top: auto;
   bottom: 8px;
+  right: 44px;
+  height: 50%;
   width: 380px;
   max-width: calc(100vw - 120px);
   display: flex;
@@ -29,6 +32,16 @@
   overflow: hidden;
   pointer-events: auto;
   animation: sideChatSlideIn 280ms ease-out;
+}
+
+/* UI-448 加映 v2 — 去双层背景：面板内 SimpleChat 自带 .sc-root 卡片底
+   （26px 圆角 + surface 底 + 阴影）比照中栏 agentMain 同款中性化，
+   只保留悬浮面自身圆角面板（与项目摘要卡同特点） */
+.surfaceBody :global(.sc-root) {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 @keyframes sideChatSlideIn {

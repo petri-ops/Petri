@@ -7,9 +7,12 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/components/copilot/SimpleChat', () => ({
-  SimpleChat: ({ conversationId }: { conversationId: string | null }) => (
-    <div data-testid="side-chat-simplechat">{conversationId}</div>
-  ),
+  SimpleChat: (props: { conversationId: string | null; lockedAccessMode?: string; compact?: boolean }) => {
+    const bag = globalThis as { __sideChatSimpleChatProps?: Array<Record<string, unknown>> };
+    bag.__sideChatSimpleChatProps ??= [];
+    bag.__sideChatSimpleChatProps.push(props);
+    return <div data-testid="side-chat-simplechat">{props.conversationId}</div>;
+  },
 }));
 
 vi.mock('@/components/copilot/conversationRunStore', () => ({
@@ -148,5 +151,15 @@ describe('UI-448 SideChatDock 共享开态（sideChatDockStore）', () => {
     unmount();
     render(<SideChatDock projectId="p_1" conversationId="conv_1" onConversationChange={vi.fn()} />);
     expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
+  });
+
+  it('悬挂面锁只读档：SimpleChat 收到 lockedAccessMode="read" 与 compact（仅聊天不可改文件）', () => {
+    (globalThis as { __sideChatSimpleChatProps?: unknown[] }).__sideChatSimpleChatProps = [];
+    render(<SideChatDock projectId="p_1" conversationId="conv_1" onConversationChange={vi.fn()} />);
+    fireEvent.click(screen.getByTestId('side-chat-handle'));
+    const props = (globalThis as { __sideChatSimpleChatProps?: Array<Record<string, unknown>> })
+      .__sideChatSimpleChatProps?.at(-1);
+    expect(props?.lockedAccessMode).toBe('read');
+    expect(props?.compact).toBe(true);
   });
 });

@@ -9,7 +9,7 @@ acceptance:
   - 窄面适配：悬挂面 SimpleChat compact 占位符（短提示不折行）；表格/长 token 三态实机核对（框内滚动+滚动条可见）
   - 台账同步：docs/ui-productization-audit.md UI-448 条目与实现同一提交；实机走查截图证据落 acceptance/ui-448/
 reopen: 用户实机过目后对新形态不满意，或悬浮面与摘要浮层同屏叠置的已知边界升级为真问题时
-status: completed
+status: active
 ---
 
 # UI-448 — 侧边聊天悬浮面体验对齐项目摘要
@@ -108,3 +108,15 @@ SideChatDock（UI-417）展开后是「同一主视图的第二份拷贝」：38
 **并行协调**：BLOCK-125（reject→agent 回路）同日并行收口（b08bfeb4），文件面零重叠，双方提交互认隔离边界。
 
 **G0 开发期常态 · 不外推 packaged/Provider/GA。**
+
+## 8. 加映 v2（2026-09-27，用户实机三点反馈）
+
+用户原话：「背景好像多了一层 地下应该是圆角的即可 要和项目摘要卡片一样的特点」「这个侧边聊天不应该从上到下占据 应该有右下角占一半的高度和 项目摘要卡片可以共存」「侧边聊天应该是带着项目背景的仅聊天 不应该能编辑和修改新增文件 所以下面的输入框功能要做限定」。
+
+1. **去双层背景**：面板内 SimpleChat 自带 `.sc-root` 卡片底（26px 圆角+surface 底+阴影）未被中性化，与悬浮面自身面板形成双层——比照中栏 `.agentMain :global(.sc-root)` 同款中性化，只保留悬浮面自身圆角面板（与摘要卡同特点）。
+2. **右下角半高 + 与摘要卡共存**：surface 从全高改为贴底 `height: 50%`（右上角摘要浮层 + 右下角聊天面板同屏各占一角）；中栏让位类保持不变（避免内容切割的原则不随高度改变）。
+3. **悬挂面锁只读档**：`useModelAccessMenus` 增 `lockedAccessMode`（初始值锁定 + setAccessMode 失效守卫），SimpleChat 增同名 prop，悬挂面传 `'read'`（read 档=只读工具全放行、全部写入/执行类工具拒绝，后端 agent-tool-policy 权威门禁同口径）；访问档位选择器锁定禁用并提示「文件修改请回中栏」。HK-01 红绿先行：useModelAccessMenus 锁档 harness 契约 + SideChatDock 传参契约先红后绿。
+
+### §8.1 加映 v2 实施记录（2026-09-27 当日收口）
+
+红绿先行：两契约先红（useModelAccessMenus 锁档 harness——锁 read 后初始即 read 且 setAccessMode 失效；SideChatDock 传参——SimpleChat 收到 lockedAccessMode="read"+compact）→ 28/28 绿。前端全量 155 文件/1237 用例 0 红；tsc 0；eslint 0 error。实机三断言 allPass：半高贴底（top 467/bottom 942/h 475）、sc-root 中性化单层面板、只读模式锁定；与摘要卡同屏零重叠（间隙 116px）。证据=acceptance/ui-448/walkthrough-v2.json + 3 截图。

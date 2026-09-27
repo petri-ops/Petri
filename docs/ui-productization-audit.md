@@ -4210,3 +4210,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - 待用户实机过目（有未审改动时四处入口显示「N·+A−D」）。
 - **verified 翻转（2026-09-27，用户实机过目「符合预期」）**：任务完成后顶栏「+」钮/审阅药丸「N·+A−D」徽章确认呈现，审阅归零语义正常。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-448 加映 v2 (2026-09-27 in_progress，用户实机三点反馈：去双层背景/右下角半高与摘要卡共存/悬挂面锁只读档)
+
+- **反馈与修法**：①「背景多了一层」=面板内 SimpleChat 自带 `.sc-root` 卡片底（26px 圆角+surface 底+阴影）未中性化——比照中栏 agentMain 同款 `:global(.sc-root)` 中性化，只留悬浮面自身圆角面板（与摘要卡同特点）；②「不应从上到下占据」=surface 改贴底 `height: 50%` 右下角半高，与右上角摘要浮层同屏共存，中栏让位原则不变；③「仅聊天不能编辑/修改/新增文件」=`useModelAccessMenus` 增 `lockedAccessMode`（初始锁定+setter 失效守卫），悬挂面锁 `read` 档（后端 agent-tool-policy 权威门禁同口径：只读工具放行、全部写入/执行拒绝），访问档位选择器禁用并提示「文件修改请回中栏」。HK-01 红绿先行（锁档 harness 契约+传参契约两红→28/28 绿）。**实机走查 allPass（2026-09-27）**：面板贴底半高（top 467/bottom 942/h 475=视口正 50%）、sc-root 中性化实测（透明底/0 边框/0 圆角=单层面板）、composer「只读模式」无下拉（锁定）、与摘要卡同屏零重叠（摘要底 351 < 面板顶 467，间隙 116px）；前端全量 155 文件/1237 用例 0 红+tsc 0+eslint 0 error；证据=acceptance/ui-448/walkthrough-v2.json + 3 截图。**待用户实机过目后随 v1 一并翻 verified**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

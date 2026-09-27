@@ -5,11 +5,13 @@
  * 形态（D1-D4 按 roadmap 预置推荐落地）：
  * - D1 常驻把手：中栏右缘竖把手（聊天图标 + agent 运行中呼吸灯），点开滑出、再点收起；
  * - D2 overlay 覆盖：~380px 悬浮面叠在中栏右缘上方，不挤压布局（UI-351 float 先例）；
+ *   加映 v2（UI-448）：贴底右下角占一半高度，与右上角摘要浮层同屏共存；
  * - 复用 SimpleChat 同一会话同一 run：与中央读同一 activeConvId（conversationRunStore
  *   单一真相），仅收窄承载；中央 ownsCopilotAsk 归属不变，悬挂面不承接「问 Agent」；
  * - 外点/Esc/再点把手收起。
  * UI-448 — 开态升 sideChatDockStore 共享单例（中栏 composer 让位 + 内容让位同源）；
  *   视觉对齐项目摘要浮层语言（圆角/阴影 token/280ms/reduced-motion）；compact 短占位符。
+ * UI-448 加映 v2 — 悬挂面仅聊天：锁只读档（lockedAccessMode="read"），sc-root 中性化去双层背景。
  */
 
 import React, { useCallback, useEffect, useRef } from 'react';
@@ -105,6 +107,8 @@ export function SideChatDock({
                 inputHeight={88}
                 // UI-448 — 窄面 compact：短占位符，完整键位提示在 380px 内折两行
                 compact
+                // UI-448 加映 v2 — 悬挂面仅聊天：锁只读档，写入/执行类工具被拒（后端权威门同口径）
+                lockedAccessMode="read"
               />
             ) : (
               <div className={styles.emptyHint}>当前项目还没有会话——在中央发送第一条消息后，这里会同步显示同一会话。</div>

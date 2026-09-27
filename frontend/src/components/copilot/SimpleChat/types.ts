@@ -12,6 +12,7 @@ import type { ToolActivityItem } from '../toolActivity';
 import { restoreToolActivities } from '../toolActivity';
 import { resolveToolSummaryPresentation } from '../toolSummaryPresentation';
 import { parseAssistantResultNodes } from '../extraRenderers';
+import type { AccessMode } from './hooks/useModelAccessMenus';
 import type { ConversationMessage } from '../copilotConversationsClient';
 import type { ResultNode } from '../types';
 import type { ConversationLoopState } from '../conversationRunStore';
@@ -269,6 +270,12 @@ export interface SimpleChatProps {
    * 完整键位提示在窄面内会折两行。缺省 false，中栏用法零变化。
    */
   compact?: boolean;
+  /**
+   * UI-448 加映 v2 — 档位锁定（悬挂聊天面仅聊天）：实例的访问档位被锁死
+   * （悬挂面传 'read'），档位选择器禁用。缺省不锁定，中栏用法零变化。
+   * 工具放行口径由后端 agent-tool-policy 权威门禁裁决。
+   */
+  lockedAccessMode?: AccessMode;
 }
 
 export type PendingApproval = ConversationPendingApproval;

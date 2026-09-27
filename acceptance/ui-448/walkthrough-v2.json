@@ -1,0 +1,24 @@
+{
+  "package": "UI-448 加映 v2",
+  "date": "2026-09-27",
+  "env": "dev 栈（localhost:3000，Vite HMR），viewport 1680x950，data-theme=dark",
+  "feedback": "用户三点：①背景多一层，应只剩面板自身圆角（与摘要卡同特点）②不应全高，应右下角半高与摘要卡共存③悬挂面仅聊天不可改/建文件，输入框功能限定",
+  "fixes": {
+    "doubleLayer": ".surfaceBody :global(.sc-root) 中性化（transparent/0 border/0 radius/无阴影），实测 sc-root backgroundColor rgba(0,0,0,0)、border 0px、radius 0px",
+    "halfHeight": "surface top:auto/bottom:8px/height:50%，实测 top=467 bottom=942 h=475（viewport 950 正半高）、anchoredBottom=true",
+    "readonlyLock": "useModelAccessMenus 增 lockedAccessMode（初始锁定+setter 失效），悬挂面锁 read 档：composer 显示「只读模式」且无下拉箭头（选择器禁用），后端 agent-tool-policy 权威门同口径"
+  },
+  "coexist": {
+    "summaryCard": { "top": 46, "bottom": 351 },
+    "sideChat": { "top": 467, "bottom": 942 },
+    "verticalGapPx": 116,
+    "overlap": false
+  },
+  "redGreen": "两契约先红（useModelAccessMenus 锁档 harness + SideChatDock 传参 lockedAccessMode=read/compact）→ 28/28 绿；前端全量 155 文件/1237 用例 0 红；tsc 0；eslint 0 error",
+  "screenshots": [
+    "ui448v2-open-bottom-half.png（半高+单层面板+只读模式）",
+    "ui448v2-readonly-composer-crop.png（composer 只读锁定特写）",
+    "ui448v2-coexist-summary.png（与摘要卡同屏共存实测帧）"
+  ],
+  "verdict": "allPass"
+}

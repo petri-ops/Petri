@@ -50,15 +50,30 @@ export function useModelAccessMenus({
   modelPresets,
   activeModelId,
   setActiveModelId,
+  lockedAccessMode,
 }: {
   modelPresets: ChatModelPreset[];
   activeModelId: string;
   setActiveModelId: (id: string) => Promise<unknown>;
+  /**
+   * UI-448 加映 v2 — 档位锁定（悬挂聊天面仅聊天）：初始档位即锁定值，
+   * setAccessMode 失效（选择器改不动）。锁定档的工具放行口径由后端
+   * agent-tool-policy 权威门禁裁决，前端档位仅同步呈现。
+   */
+  lockedAccessMode?: AccessMode;
 }): ModelAccessMenusController {
   const [modelMenuOpen, setModelMenuOpen] = useState<'supplier' | 'model' | null>(null);
   const [modelSupplierKey, setModelSupplierKey] = useState<string | null>(null);
   const [accessMenuOpen, setAccessMenuOpen] = useState(false);
-  const [accessMode, setAccessMode] = useState<AccessMode>('full');
+  const [accessMode, setAccessModeState] = useState<AccessMode>(lockedAccessMode ?? 'full');
+  const setAccessMode = useCallback<React.Dispatch<React.SetStateAction<AccessMode>>>(
+    (value) => {
+      // UI-448 加映 v2 — 锁定档：setter 失效（含函数式更新一并不受理）
+      if (lockedAccessMode) return;
+      setAccessModeState(value);
+    },
+    [lockedAccessMode]
+  );
   // BLOCK-55 P1 — Spec 门计划模式：只读探索 + 起草计划（写类工具被 policy 拒绝）。
   // UI-303 — 计划模式并入档位菜单成为第四档：planMode 由 accessMode 派生（单一事实源），
   // prePlanAccessModeRef 记录进入计划档前的档位，批准执行后恢复。

@@ -223,6 +223,7 @@ export function SimpleChat({
   composerOnly = false,
   sendGuard,
   compact = false,
+  lockedAccessMode,
 }: SimpleChatProps): React.ReactElement {
   const [messages, setMessages] = useState<SimpleMessage[]>([]);
   const [copiedMessageKey, setCopiedMessageKey] = useState<string | null>(null);
@@ -442,7 +443,7 @@ export function SimpleChat({
     selectedSupplierGroup,
     preferredPresetForSupplier,
     selectModel,
-  } = useModelAccessMenus({ modelPresets, activeModelId, setActiveModelId });
+  } = useModelAccessMenus({ modelPresets, activeModelId, setActiveModelId, lockedAccessMode });
 
   // BLOCK-92 Wave A-3 — 焦点管理簇外迁（挂载聚焦 + 窗口获焦/可打印击键兜底，
   // 仅 copilotAsk 拥有者执行；见 ./SimpleChat/hooks/useComposerFocus.ts）。
@@ -1477,11 +1478,14 @@ export function SimpleChat({
                     type="button"
                     className="sc-access-btn"
                     onClick={() => setAccessMenuOpen((value) => !value)}
-                    title="选择访问模式"
+                    disabled={Boolean(lockedAccessMode)}
+                    title={lockedAccessMode
+                      ? '此面板仅聊天（只读档）：如需修改文件请回中栏输入'
+                      : '选择访问模式'}
                   >
                     <Icon name="shield" size={14} />
                     <span>{accessModeLabel}</span>
-                    <Icon name="chevron-down" size={12} />
+                    {!lockedAccessMode && <Icon name="chevron-down" size={12} />}
                   </button>
                   {accessMenuOpen && (
                     <>
