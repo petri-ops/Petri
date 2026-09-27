@@ -20,9 +20,10 @@
   position: absolute;
   top: auto;
   bottom: 8px;
-  /* UI-448 加映 v4/v8 — 贴右侧边：右偏移走 --dock-right（默认 14px=会话区内缩，
-     与摘要卡同缘；摘要钉住时由 CenterPanel 注入列宽+间隙联动让位） */
-  right: var(--dock-right, 14px);
+  /* UI-448 加映 v4/v9 — 贴右侧边：恒定 14px（会话区内缩），与摘要卡同缘。
+     （v8 曾按摘要钉住宽度动态让位，computed 状态与实际形态脱节会把面板甩到
+     半空——已回退，见 plan §15） */
+  right: 14px;
   height: 50%;
   width: 300px;
   /* 注意：定位容器 .dockRoot 宽度为 0，max-width 百分比参照系不可用——
@@ -143,7 +144,7 @@
      尺寸收缩；运行指示由图标本体色呼吸承担（独立圆点退役） */
   top: auto;
   bottom: calc(50% + 14px);
-  right: calc(var(--dock-right, 14px) - 10px);
+  right: 4px;
   width: 28px;
   height: 28px;
   display: inline-flex;

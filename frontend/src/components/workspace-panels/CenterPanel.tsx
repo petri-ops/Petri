@@ -209,15 +209,10 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
       {/* UI-417 — 侧边聊天悬挂化：常驻把手 + 滑出 overlay。
           UI-448 加映 v3 — 悬挂面自立每项目独立侧聊会话（不再镜像中栏 activeConvId），
           中栏会话与悬挂面互不干扰；ownsCopilotAsk 归属仍在中央 SimpleChat。
-          UI-448 加映 v8 — 摘要钉住列宽传入 dock：两面板共享右缘坐标系不叠加。 */}
+          UI-448 加映 v9 — 面板恒贴右缘（right:14px），不再按摘要钉住态让位——
+          v8 的间接耦合（computed 状态≠实际渲染形态）把面板甩到半空。 */}
       {ctx.project && ctx.projectId && (
-        <SideChatDock
-          key={ctx.projectId}
-          projectId={ctx.projectId}
-          summaryPinnedWidth={
-            ctx.summaryCardOpen && ctx.summaryVisibility === 'expanded' ? ctx.summaryOpenWidth : 0
-          }
-        />
+        <SideChatDock key={ctx.projectId} projectId={ctx.projectId} />
       )}
       <div
         className={`${styles.workspaceProjectionLayer} ${workspaceMode === 'chat' ? styles.workspaceProjectionLayerActive : ''}`}
@@ -229,11 +224,6 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
             className={`${styles.agentMain} ${
               workspaceMode === 'chat' && sideChatDockOpen ? styles.agentMainSideChatYield : ''
             }`}
-            style={
-              ctx.summaryCardOpen && ctx.summaryVisibility === 'expanded'
-                ? { ['--side-chat-pinned' as string]: `${ctx.summaryOpenWidth}px` }
-                : undefined
-            }
           >
             {ctx.project && ctx.projectId && (
               <SimpleChat

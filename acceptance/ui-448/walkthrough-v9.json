@@ -1,0 +1,21 @@
+{
+  "package": "UI-448 加映 v9",
+  "date": "2026-09-27",
+  "env": "dev 栈（localhost:3000，Vite HMR），viewport 1000x900（窄窗复现用户场景），dark",
+  "feedback": "用户质疑 v8 结果「你哦不觉得奇怪吗？？？」——面板被甩到中间偏左、图标孤挂、与摘要卡之间大片空白",
+  "rootCause": "v8 的 --dock-right 按摘要钉住态间接耦合（computed 状态与实际渲染形态脱节），把面板让位到一个谁也不在的位置",
+  "fix": "回退 v8 动态偏移：面板恒贴右缘 right:14px（与摘要卡同缘，悬浮/钉住通吃），删除 --dock-right/--side-chat-pinned 耦合与 summaryPinnedWidth 传递；保留会话开启时摘要悬浮封顶上半（不叠加）",
+  "measured": {
+    "window": "1000x900 窄窗复现",
+    "summary": { "right": 645, "bottom": 351 },
+    "dock": { "right": 645, "left": 345, "top": 442, "width": 300 },
+    "rightEdgeDelta": 0,
+    "verticalOverlap": false,
+    "handleAbovePanel": true
+  },
+  "redGreen": "契约替换（v8 钉住偏移断言退役→布局常驻类断言）21/21 绿；前端全量 155 文件/1239 用例 0 红；tsc 0；eslint 0 error",
+  "screenshots": [
+    "ui448v9-narrow-window-aligned.png（窄窗双面板同右缘不叠加实证）"
+  ],
+  "verdict": "allPass"
+}
