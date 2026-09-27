@@ -4258,3 +4258,9 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 - **修法**：yield 让位只在摘要非钉住时应用（钉住列自身即隔离带）；钉住态面板嵌列带下半与摘要卡垂直堆叠共享右缘；悬浮/关闭态保持 308px 让位。诊断探针 scripts/ui448-diagnose-user-window.mjs（只读，禁导航用户窗口红线内）随包登记。**实机双宽度 allPass（2026-09-27）**：2481 钉住态 yieldApplied=false/cardDockOverlap=false（列带即隔离带、面板嵌列下半与摘要卡垂直堆叠）；1000 悬浮态让位保留零重叠；契约 13/13 绿；前端全量 155 文件/1242 用例 0 红；tsc 0；eslint 0 error；证据=acceptance/ui-448/walkthrough-v11.json+2 截图。**待用户过目 v11 形态后翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-448 加映 v12 (2026-09-27 in_progress，用户裁决：侧聊=独立区域——继承主会话记录但不影响主上下文；宽窗占位/窄窗悬浮)
+
+- **修法**：①首次展开自动 fork 主会话（复制消息的现成原语）→ 继承记录 + 独立演化（不写回/不 steer/不入主上下文），只读锁保留；②宽窗（与摘要同切换点 summaryVisibility==='expanded'）→ 右轨独立列区 300px 与摘要钉住列同轨垂直堆叠共享右缘；窄窗 → 悬浮（把手+右下角浮面）；把手两态常驻；yield 仅窄窗悬浮态应用。
+- **证据**：fork 三契约+docked 变体契约 28/28 绿；前端全量 155 文件/1246 用例 0 红；tsc 0；eslint 0 error；实机双形态 allPass（宽=右轨堆叠/共右缘/继承 38 条记录；窄=悬浮/继承记录）；证据=acceptance/ui-448/walkthrough-v12.json+2 截图。**待用户过目 v12 形态后翻 verified**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

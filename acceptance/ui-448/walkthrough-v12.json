@@ -1,0 +1,25 @@
+{
+  "package": "UI-448 加映 v12",
+  "date": "2026-09-27",
+  "env": "dev 栈，IAB 按用户窗口尺寸 2481×1876（宽）/ 1000×900（窄）双形态",
+  "feedback": "用户两点：①侧聊应是独立区域——继承主会话聊天记录，但不编辑/不操作/不主动影响主会话上下文；②窗口宽度不足时像摘要卡一样悬浮（言下之意：宽窗应为占位独立区域而非悬浮）",
+  "implementation": {
+    "inheritNotAffect": "首次展开自动 forkConversation(主会话,'侧边聊天')（复制消息的现成原语=继承记录+独立演化），此后侧聊往来不写回主会话、不 steer、不入主上下文；只读锁保留（不可改文件）",
+    "responsiveDual": "宽窗（summaryVisibility==='expanded'，与摘要同切换点）→ 右轨独立列区（300px，与摘要钉住列同轨垂直堆叠共享右缘）；窄窗 → 悬浮（把手 + 右下角浮面 300px）；把手两态常驻（宽窗由 surfaceSuppressed 只留把手）",
+    "yieldRule": "让位仅在窄窗悬浮态应用（宽窗列区占位自然隔开）"
+  },
+  "measured": {
+    "wide2481": { "railPresent": true, "dockedColumn": true, "dockRect": "1827-2127 (300px)", "summaryRect": "1839-2127", "rightEdgeShared": true, "stackedNoOverlap": true, "handleVisible": true, "inheritedMsgNodes": 38, "sideConvStored": "conv_c26cd24a-…" },
+    "narrow1000": { "dockedColumnGone": true, "floatSurface": true, "floatWidth": 300, "handleAbovePanel": true, "yieldApplied": true, "inheritedConversationShown": true }
+  },
+  "redGreen": "fork 三契约（首开 fork+持久化/已有不重复/主空不 fork）+ docked 变体契约 → 28/28 绿；前端全量 155 文件/1246 用例 0 红；tsc 0；eslint 0 error",
+  "screenshots": [
+    "ui448v12-docked-inherited.png（宽窗：右轨堆叠+继承记录 38 条）",
+    "ui448v12-float-narrow.png（窄窗：悬浮+继承记录）"
+  ],
+  "honestBoundaries": [
+    "fork 出的侧聊会话是真实项目会话（会出现在左栏列表），与「创建分支」同一机制",
+    "侧聊分叉创建于首次展开时（此后即使主会话继续演进也不重新同步——快照语义）"
+  ],
+  "verdict": "allPass"
+}

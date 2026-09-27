@@ -21,6 +21,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
 import { isConversationRunning } from '@/components/copilot/conversationRunStore';
+import { forkConversation } from '@/components/copilot/copilotConversationsClient';
 import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
 // UI-448 — 开态升共享 store：中栏 composer 让位与内容让位类同源联动（单一输入面）
 import { setSideChatDockOpen, useSideChatDockOpen } from '@/hooks/sideChatDockStore';
@@ -38,8 +39,24 @@ function readStoredSideConversation(projectId: string): string | null {
 
 export function SideChatDock({
   projectId,
+  sourceConversationId = null,
+  variant = 'float',
+  surfaceSuppressed = false,
 }: {
   projectId: string;
+  /**
+   * UI-448 加映 v12 — 主会话 id：侧聊首次展开时 fork 它以「继承主会话的聊天记录」，
+   * 之后独立演化（不写入、不 steer、不影响主会话上下文）。null=主会话为空，
+   * 侧聊保持空态（首发送由 SimpleChat 建话）。
+   */
+  sourceConversationId?: string | null;
+  /**
+   * UI-448 加映 v12 — 形态：'float'=窄窗悬浮（把手 + 绝对定位面板）；
+   * 'docked'=宽窗独立列区（由 CenterPanel 放进右轨，无悬浮把手）。
+   */
+  variant?: 'float' | 'docked';
+  /** UI-448 加映 v12 — 宽窗时面板由独立列区承载：悬浮实例只渲染常驻把手。 */
+  surfaceSuppressed?: boolean;
 }): React.ReactElement {
   const open = useSideChatDockOpen();
   const [agentRunning, setAgentRunning] = useState(false);
@@ -57,6 +74,27 @@ export function SideChatDock({
       // localStorage 不可用时退化为内存态（会话仍可用，仅不跨重启记忆）
     }
   }, [projectId]);
+
+  // UI-448 加映 v12 — 首次展开且尚无侧聊会话时，fork 主会话继承其聊天记录。
+  // 只读语义仍在（lockedAccessMode='read'），且分叉独立——侧聊的任何往来
+  // 都不会写回主会话、不 steer 主任务、不进入主会话上下文（继承但不影响）。
+  useEffect(() => {
+    if (!open || sideConvId || !sourceConversationId) return;
+    let cancelled = false;
+    void (async () => {
+      const forked = await forkConversation(sourceConversationId, '侧边聊天');
+      if (cancelled || !forked?.id) return;
+      setSideConvId(forked.id);
+      try {
+        window.localStorage.setItem(sideChatConvKey(projectId), forked.id);
+      } catch {
+        // localStorage 不可用：退化为内存态
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, sideConvId, sourceConversationId, projectId]);
 
   // 呼吸灯：当前侧聊会话 agent 运行中（conversationRunStore 单一真相；UI-397 同款语言）。
   // UI-448 加映 v4 — 与 open 解耦：收起态把手也要提示「侧聊 agent 在跑」
@@ -82,40 +120,56 @@ export function SideChatDock({
   // UI-448 加映 v5 — 常驻化（摘要卡同款特性）：移除外点收起与 Esc 收起
   // （Esc 在输入时误触），折叠/展开仅经把手与头部 ✕。
 
+  const panel = (
+    <>
+      <header className={styles.surfaceHeader}>
+        <Icon name="message-circle" size={13} />
+        <span className={styles.surfaceTitle}>会话</span>
+        <button
+          type="button"
+          className={styles.closeBtn}
+          onClick={() => setSideChatDockOpen(false)}
+          aria-label="收起会话面板"
+          title="收起（Esc）"
+        >
+          <Icon name="x" size={13} />
+        </button>
+      </header>
+      <div className={styles.surfaceBody}>
+        <SimpleChat
+          key={sideConvId ?? 'side-new'}
+          projectId={projectId}
+          // 加映 v3 — null = 尚无侧聊会话：SimpleChat 内部首发建话（useChatStream
+          // 既有路径）并经 onConversationChange 回写 localStorage
+          conversationId={sideConvId}
+          onConversationChange={handleConversationChange}
+          inputHeight={88}
+          // UI-448 — 窄面 compact：短占位符，完整键位提示在 380px 内折两行
+          compact
+          // UI-448 加映 v2 — 悬挂面仅聊天：锁只读档，写入/执行类工具被拒（后端权威门同口径）
+          lockedAccessMode="read"
+          // UI-448 加映 v3 — composer 删减：只留只读徽标 + 发送键
+          slimComposer
+        />
+      </div>
+    </>
+  );
+
+  // UI-448 加映 v12 — 宽窗独立列区变体：由 CenterPanel 放入右轨（in-flow），
+  // 无悬浮把手（列区头部图标即入口）。
+  if (variant === 'docked') {
+    return (
+      <div className={styles.dockedColumn} data-testid="side-chat-surface">
+        {panel}
+      </div>
+    );
+  }
+
   return (
     <div className={styles.dockRoot} data-testid="side-chat-dock">
-      {open ? (
+      {open && !surfaceSuppressed ? (
         <div className={styles.surface} data-testid="side-chat-surface">
-          <header className={styles.surfaceHeader}>
-            <Icon name="message-circle" size={13} />
-            <span className={styles.surfaceTitle}>会话</span>
-            <button
-              type="button"
-              className={styles.closeBtn}
-              onClick={() => setSideChatDockOpen(false)}
-              aria-label="收起会话面板"
-              title="收起（Esc）"
-            >
-              <Icon name="x" size={13} />
-            </button>
-          </header>
-          <div className={styles.surfaceBody}>
-            <SimpleChat
-              key={sideConvId ?? 'side-new'}
-              projectId={projectId}
-              // 加映 v3 — null = 尚无侧聊会话：SimpleChat 内部首发建话（useChatStream
-              // 既有路径）并经 onConversationChange 回写 localStorage
-              conversationId={sideConvId}
-              onConversationChange={handleConversationChange}
-              inputHeight={88}
-              // UI-448 — 窄面 compact：短占位符，完整键位提示在 380px 内折两行
-              compact
-              // UI-448 加映 v2 — 悬挂面仅聊天：锁只读档，写入/执行类工具被拒（后端权威门同口径）
-              lockedAccessMode="read"
-              // UI-448 加映 v3 — composer 删减：只留只读徽标 + 发送键
-              slimComposer
-            />
-          </div>
+          {panel}
         </div>
       ) : null}
       {/* UI-448 加映 v6 — 把手常驻（摘要概览按钮同款）：开/关两态恒显示，

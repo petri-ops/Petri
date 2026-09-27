@@ -140,6 +140,8 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
   const { centerColRef, sessionFrameRef } = refs;
   // UI-448 — 悬浮聊天面展开时中栏会话内容列让位（chat 模式才有会话内容可让）
   const sideChatDockOpen = useSideChatDockOpen();
+  // UI-448 加映 v12 — 宽窄判定（与摘要切换点同源，见 SessionFrameView 同款派生）
+  const wide = ctx.summaryVisibility === 'expanded';
   const [returnConversationMs, setReturnConversationMs] = React.useState<number | null>(null);
   // Reuse the durable conversation run; the result Composer does not create a
   // second progress store and therefore survives tool switches/stop/failure by
@@ -219,10 +221,9 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
         <SessionFrameView ctx={ctx} sessionFrameRef={sessionFrameRef} variant="chat" sideChatOpen={sideChatDockOpen}>
           <div
             className={`${styles.agentMain} ${
-              // UI-448 加映 v11 — 仅当摘要不是钉住列时才让位：钉住列自身已把
-              // 会话内容与面板隔开（面板嵌在列带下半部），再让位即「推得太狠」
-              workspaceMode === 'chat' && sideChatDockOpen
-                && !(ctx.summaryCardOpen && ctx.summaryVisibility === 'expanded')
+              // UI-448 加映 v12 — 仅窄窗「悬浮」态需要为覆盖式面板让位；
+              // 宽窗面板已是独立列区（占位），自然隔开，不再叠加让位
+              workspaceMode === 'chat' && sideChatDockOpen && !wide
                 ? styles.agentMainSideChatYield
                 : ''
             }`}
@@ -352,6 +353,9 @@ function SessionFrameView({
     ctx.activeConvId,
     activeRun?.loop
   );
+  // UI-448 加映 v12 — 宽窄判定与摘要切换点同源（summaryVisibility 由
+  // sessionFrameWidth 纯派生：expanded ⟺ 宽窗/未测量），保证两卡同刻切换。
+  const wide = ctx.summaryVisibility === 'expanded';
 
   return (
     <div
@@ -414,6 +418,11 @@ function SessionFrameView({
             />
           </div>
         )}
+        {/* UI-448 加映 v12 — 右轨：摘要钉住列与侧聊列区垂直堆叠共享右缘；
+            两者同由 summaryVisibility==='expanded'（宽窗）判定，切换点恒同步 */}
+        {(ctx.showPinnedSummary && ctx.summaryCardOpen && ctx.summaryVisibility !== 'float')
+          || (wide && sideChatOpen && ctx.projectId) ? (
+        <div className={styles.workspaceRightRail}>
         {ctx.showPinnedSummary && ctx.summaryCardOpen && ctx.summaryVisibility !== 'float' && (
           <div className={styles.workspaceSummaryColumn}>
             <WorkspaceSummaryCard
@@ -443,11 +452,31 @@ function SessionFrameView({
             />
           </div>
         )}
-        {/* UI-448 加映 v10 — 侧聊面板与摘要卡同定位基准：同在 session layout 内
+        {/* UI-448 加映 v12 — 宽窗时侧聊是独立列区（占位、像摘要钉住列一样），
+            窄窗时退回悬浮（把手 + 右下角浮面）。切换点与摘要同源
+            （summaryVisibility==='expanded' ⟺ 宽窗）。 */}
+        {wide && sideChatOpen && ctx.projectId && (
+          <SideChatDock
+            key={ctx.projectId}
+            projectId={ctx.projectId}
+            sourceConversationId={ctx.activeConvId}
+            variant="docked"
+          />
+        )}
+        </div>
+        ) : null}
+        {/* UI-448 加映 v10 — 侧聊悬浮面与摘要卡同定位基准：同在 session layout 内
             right:0，右缘结构性同源（v8/v9 的跨参照系对齐补丁由此退役）。
-            仅 chat 变体承载（scheduled 变体各自渲染会重复实例）。 */}
+            UI-448 加映 v12 — 仅窄窗用悬浮变体（宽窗走上面的独立列区）；
+            收起态把手两态共用（宽窗收起时仍给入口）。 */}
         {variant === 'chat' && ctx.projectId && (
-          <SideChatDock key={ctx.projectId} projectId={ctx.projectId} />
+          <SideChatDock
+            key={ctx.projectId}
+            projectId={ctx.projectId}
+            sourceConversationId={ctx.activeConvId}
+            // 宽窗：面板已由上面的独立列区承载，这里只留常驻把手（图标仍在列区上方）
+            surfaceSuppressed={wide && sideChatOpen}
+          />
         )}
       </div>
     </div>

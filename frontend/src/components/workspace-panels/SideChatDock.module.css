@@ -182,3 +182,41 @@
     opacity: 0.35;
   }
 }
+
+/* UI-448 加映 v12 — 宽窗独立列区：由 CenterPanel 放进右轨（in-flow），
+   与摘要钉住列垂直堆叠共享右缘；定宽 300（同摘要列）、高度取右轨一半 */
+.dockedColumn {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 300px;
+  flex-shrink: 0;
+  max-height: calc(50% - 8px);
+  display: flex;
+  flex-direction: column;
+  background: var(--gewu-bg-elevated);
+  border: 1px solid var(--gewu-border);
+  border-radius: 16px;
+  box-shadow: var(--gewu-shadow-float);
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+.dockedColumn :global(.sc-root) {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.dockedColumn :global(.sc-msg-body),
+.dockedColumn :global(.sc-msg-body p) {
+  font-size: var(--gewu-font-size-sm);
+}
+
+.dockedColumn :global(.sc-body) {
+  padding: 8px 8px 10px;
+}
+
+.dockedColumn :global(.sc-messages) {
+  padding: 0 4px;
+}
