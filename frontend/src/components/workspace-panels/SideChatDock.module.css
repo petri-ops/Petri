@@ -80,6 +80,24 @@
   padding: 0 4px;
 }
 
+/* UI-448 加映 v24 — 回复消息去头像直接左对齐（用户指认「消息回复内容沿用的
+   是之前的渲染方式…去掉 消息直接左对齐」）：窄浮卡内沿用主会话的
+   头像+缩进行布局太占宽度。仅悬浮面作用域生效——头像隐藏、用户消息
+   取消右浮气泡改为左对齐（保留气泡底色作身份区分）、宽度放开到满卡。 */
+.surfaceBody :global(.sc-msg-avatar) {
+  display: none;
+}
+
+.surfaceBody :global(.sc-msg-user) {
+  flex-direction: row;
+  align-self: flex-start;
+  max-width: 100%;
+}
+
+.surfaceBody :global(.sc-msg-assistant) {
+  max-width: 100%;
+}
+
 /* UI-448 加映 v2 — 去双层背景：面板内 SimpleChat 自带 .sc-root 卡片底
    （26px 圆角 + surface 底 + 阴影）比照中栏 agentMain 同款中性化，
    只保留悬浮面自身圆角面板（与项目摘要卡同特点） */

@@ -4335,3 +4335,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **修法**：让位机制整体退役——CenterPanel 摘除类挂载条件、CSS 删 `.agentMainSideChatYield` 规则（v12 padding 与 v16 display:none 补丁一并废除，留 v23 注释锚点）。浮面覆盖到什么就显示什么，与摘要浮卡同一取舍（浮面自用输入，主输入框 Enter 仍可发送）。
 - **证据**：CenterPanel 11（三个让位分叉用例退役，改 v23 恒定不变式：开/关×钉住/浮层全形态 yield 类恒不存在）+ SideChatDock 12 = 23 绿；IAB 实机：yield 类不存在、浮面半透明盖在全宽内容上。**待用户实机过目后翻 verified（v15–v23 同批）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-448 加映 v24 (2026-09-27 in_progress，用户「消息回复内容沿用之前的渲染方式…去掉 消息直接左对齐」——窄卡转写体布局)
+
+- **根因**：会话浮面沿用主会话消息行布局（`.sc-msg` flex 行 = 26px 头像块 + 正文缩进；用户消息 row-reverse 右浮气泡）——窄浮卡内头像+缩进太占宽度，用户指认去掉。
+- **修法**：`.surfaceBody` 作用域（仅悬浮面）覆写：头像 `display:none`；用户消息取消 row-reverse/右浮改左对齐（保留气泡底色作身份区分）；assistant 消息宽度放开到满卡。主会话渲染零改动。
+- **证据**：IAB 实机——面板内 40 个头像 computed display 全为 none、用户消息 alignSelf flex-start/flexDirection row；CSS HMR 即时生效。**待用户实机过目后翻 verified（v15–v24 同批）**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
