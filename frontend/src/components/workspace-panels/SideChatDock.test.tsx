@@ -48,20 +48,24 @@ describe('UI-417 SideChatDock', () => {
     cleanup();
   });
 
-  it('把手常驻（收起态）、点击滑出 overlay；开态隐把手（加映 v4 贴右缘），✕ 收起后把手回归（加映 v5 常驻化）', async () => {
-    render(<SideChatDock projectId="p_1" />);
+  it('把手常驻（收起态）、点击滑出 overlay；开态把手恒显于面板上方（加映 v6 摘要按钮同款），再点收起', async () => {
+    const { rerender } = render(<SideChatDock projectId="p_1" />);
     // 收起态：只有把手
     expect(screen.getByTestId('side-chat-handle')).toBeTruthy();
     expect(screen.queryByTestId('side-chat-surface')).toBeNull();
 
     fireEvent.click(screen.getByTestId('side-chat-handle'));
     expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
-    // 加映 v4 — 开态贴右缘：把手隐藏（关闭改由 ✕/把手承载）
-    expect(screen.queryByTestId('side-chat-handle')).toBeNull();
+    // 加映 v6 — 把手恒显：开态呈激活态、aria-expanded=true，面板挂图标下方
+    const handle = screen.getByTestId('side-chat-handle');
+    expect(handle).toBeTruthy();
+    expect(handle.getAttribute('aria-expanded')).toBe('true');
+    expect(handle.className).toContain('handleActive');
 
-    fireEvent.click(screen.getByRole('button', { name: '收起会话面板' }));
+    // 再点收起（D1 契约恢复）
+    fireEvent.click(screen.getByTestId('side-chat-handle'));
     await waitFor(() => expect(screen.queryByTestId('side-chat-surface')).toBeNull());
-    expect(screen.getByTestId('side-chat-handle')).toBeTruthy();
+    void rerender;
   });
 
   it('sideChatOpen 事件展开悬挂面（右栏 chat tab 退役入口收编）', async () => {
@@ -131,14 +135,16 @@ describe('UI-448 SideChatDock 共享开态（sideChatDockStore）', () => {
     setSideChatDockOpen(false);
   });
 
-  it('外部 set 开态直接展开（中栏让位同源联动）；开态把手隐藏（加映 v4 贴右缘）', () => {
+  it('外部 set 开态直接展开（中栏让位同源联动）；把手恒显且呈激活态（加映 v6）', () => {
     render(<SideChatDock projectId="p_1" />);
     expect(screen.queryByTestId('side-chat-surface')).toBeNull();
     act(() => {
       setSideChatDockOpen(true);
     });
     expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
-    expect(screen.queryByTestId('side-chat-handle')).toBeNull();
+    const handle = screen.getByTestId('side-chat-handle');
+    expect(handle.getAttribute('aria-expanded')).toBe('true');
+    expect(handle.className).toContain('handleActive');
   });
 
   it('开态跨挂载持久：store 已开时重新挂载即展开（同一会话单一输入面的真相源）', () => {

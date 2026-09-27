@@ -4230,3 +4230,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 - **修法**：①悬挂面隐藏 MessageRail（slimComposer 条件）+ sc-body/sc-messages 内边距 dock scope 收窄（8px/6px），300px 面板内容区扩容 ~30px/侧，终结过早换行；②移除外点收起与 Esc 收起（输入时误触），折叠/展开仅经把手与头部 ✕——与摘要卡同款常驻特性。**实机走查 allPass（2026-09-27）**：点标题栏外部面板仍开（stillOpen=true）、rail 隐藏、bodyPadding 8px/msgPadding 0 4px 实测生效；契约反转 3 红→20/20 绿；前端全量 155 文件/1238 用例 0 红；tsc 0；eslint 0 error；证据=acceptance/ui-448/walkthrough-v5.json。**待用户过目 v5 形态后翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-448 加映 v6 (2026-09-27 in_progress，用户裁决：侧聊把手像摘要概览按钮一样常驻显示，卡片挂图标下方)
+
+- **修法**：把手开/关两态恒显示（v4 曾开态隐藏），位置锚定面板上方 bottom: calc(50% + 14px)——卡片打开时挂在图标正下方，再点图标收起（D1 契约恢复）；✕ 仍可用。**实机走查 allPass（2026-09-27）**：开态把手常显（handleVisible/ariaExpanded=true）、卡片挂图标下方（handleAbovePanel=true、gap 6px）、再点收起 D1 实证；契约反转先红→20/20 绿；前端全量 155 文件/1238 用例 0 红；tsc 0；eslint 0 error；证据=acceptance/ui-448/walkthrough-v6.json。**待用户过目 v6 形态后翻 verified**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

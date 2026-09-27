@@ -137,9 +137,11 @@
 /* 常驻把手：中栏右缘竖条 */
 .handle {
   position: absolute;
-  top: 50%;
+  /* UI-448 加映 v6 — 把手常驻（摘要概览按钮同款）：开/关两态恒显示；锚定面板
+     上方（面板占下半高，把手底缘距面板顶缘 6px），卡片打开时挂图标正下方 */
+  top: auto;
+  bottom: calc(50% + 14px);
   right: 4px;
-  transform: translateY(-50%);
   width: 30px;
   height: 64px;
   display: inline-flex;
@@ -149,7 +151,7 @@
   gap: 5px;
   border: 1px solid var(--gewu-border);
   border-radius: 8px;
-  background: var(--gewu-bg-surface);
+  background: var(--gewu-bg-elevated);
   color: var(--gewu-text-secondary);
   cursor: pointer;
   pointer-events: auto;

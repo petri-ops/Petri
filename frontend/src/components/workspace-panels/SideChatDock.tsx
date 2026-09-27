@@ -118,21 +118,20 @@ export function SideChatDock({
           </div>
         </div>
       ) : null}
-      {/* UI-448 加映 v4 — 开态贴右缘：把手隐藏，关闭由 ✕/Esc/外点承载；收起后把手回归 */}
-      {!open ? (
-        <button
-          type="button"
-          className={styles.handle}
-          onClick={toggle}
-          aria-label='打开侧边聊天'
-          aria-expanded={open}
-          title='侧边聊天'
-          data-testid="side-chat-handle"
-        >
-          <span className={`${styles.handleDot} ${agentRunning ? styles.handleDotRunning : ''}`} />
-          <Icon name="message-circle" size={14} />
-        </button>
-      ) : null}
+      {/* UI-448 加映 v6 — 把手常驻（摘要概览按钮同款）：开/关两态恒显示，
+          开态呈激活态；面板挂图标正下方，再点图标收起（D1 契约恢复） */}
+      <button
+        type="button"
+        className={`${styles.handle} ${open ? styles.handleActive : ''}`}
+        onClick={toggle}
+        aria-label={open ? '收起侧边聊天' : '打开侧边聊天'}
+        aria-expanded={open}
+        title={open ? '收起侧边聊天' : '侧边聊天'}
+        data-testid="side-chat-handle"
+      >
+        <span className={`${styles.handleDot} ${agentRunning ? styles.handleDotRunning : ''}`} />
+        <Icon name="message-circle" size={14} />
+      </button>
     </div>
   );
 }

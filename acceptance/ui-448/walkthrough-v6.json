@@ -1,0 +1,17 @@
+{
+  "package": "UI-448 加映 v6",
+  "date": "2026-09-27",
+  "env": "dev 栈（localhost:3000，Vite HMR），viewport 1680x950，dark",
+  "feedback": "用户裁决「侧边聊天的图标能不能像摘要图标概览按钮一样一直出现呢 卡片是在图标下方的」",
+  "fixes": {
+    "handleAlwaysVisible": "把手开/关两态恒显示（恢复 handleActive 激活态与 aria-expanded），实测开态 handleVisible=true、ariaExpanded=true",
+    "cardBelowIcon": "把手锚定面板上方 bottom: calc(50% + 14px)（底缘距面板顶缘 6px，实测 gapPx=6、handleAbovePanel=true），卡片打开时挂图标正下方",
+    "d1Restored": "再点图标收起实测通过（closed: surfaceGone=true、把手回归、aria=false），✕ 仍可用"
+  },
+  "redGreen": "开态把手恒显契约反转先红→20/20 绿；前端全量 155 文件/1238 用例 0 红；tsc 0；eslint 0 error",
+  "cleanup": "本轮无探针发送，零残留",
+  "screenshots": [
+    "ui448v6-handle-always-card-below.png（图标常显+卡片挂其下方同框实证）"
+  ],
+  "verdict": "allPass"
+}
