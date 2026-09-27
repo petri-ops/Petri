@@ -9,7 +9,7 @@ acceptance:
   - 窄面适配：悬挂面 SimpleChat compact 占位符（短提示不折行）；表格/长 token 三态实机核对（框内滚动+滚动条可见）
   - 台账同步：docs/ui-productization-audit.md UI-448 条目与实现同一提交；实机走查截图证据落 acceptance/ui-448/
 reopen: 用户实机过目后对新形态不满意，或悬浮面与摘要浮层同屏叠置的已知边界升级为真问题时
-status: active
+status: completed
 ---
 
 # UI-448 — 侧边聊天悬浮面体验对齐项目摘要
@@ -138,3 +138,6 @@ HK-01 红绿先行：SideChatDock 传参契约重构（独立会话初始 null/�
 ### §9.1 加映 v3 实施记录（2026-09-27 当日收口）
 
 红绿先行：SideChatDock 契约重构 5 红（独立会话持久化回读/初始 null/slimComposer 传参/呼吸灯与空态随签名重构改约）→ 29/29 绿。波折两条如实登记：①空态死路自纠——独立会话为 null 时最初只渲染提示文本不挂 SimpleChat，首发建话无入口，改为始终挂载（null 会话由 SimpleChat 内部建话路径处理）；②新增「project 切换同步 localStorage」effect 触发 react-hooks/set-state-in-effect 增量红——改 CenterPanel 以 key={projectId} 重挂载根治，抑制基线未放宽。端到端探针：悬挂面发消息自动建独立会话+read 档只读回答+中栏零扰动（探针会话已回收）。验证=29/29+前端全量 155 文件/1238 用例 0 红+tsc 0+eslint 0 error。证据=acceptance/ui-448/walkthrough-v3.json。
+### §9.2 加映 v3 收口（2026-09-27）
+
+实现提交 57985dcb（UI 台账加映段同提交）；closeout 十一门绿（code-size +2 随批重打归属本包）；端到端探针取证后已回收清场。v3 in_progress 待用户过目翻 verified。G0 开发期常态 · 不外推 packaged/Provider/GA。
