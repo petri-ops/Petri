@@ -219,3 +219,6 @@ HK-01 红绿先行：钉住宽度注入契约（dockRoot 变量/yield 变量/封
 ### §14.1 加映 v9 实施记录（2026-09-27 当日收口）
 
 用户实测证伪 v8 的钉住联动偏移（面板被甩到中间偏左、与摘要卡之间大片空白，截图在案）。根因=以 computed 摘要状态（expanded+summaryOpenWidth）驱动面板偏移，computed 与实际渲染形态可脱节。回退=面板恒贴右缘 right:14px（悬浮/钉住通吃），删除 --dock-right/--side-chat-pinned/summaryPinnedWidth 整条耦合链；保留摘要悬浮封顶与布局常驻类。契约替换 21/21 绿；前端全量 155 文件/1239 用例 0 红；窄窗 1000px 实测右缘 delta=0、零重叠。教训=悬浮定位锚点要用「看得见的参照物」（实际渲染形态）而非间接 computed 状态。证据=acceptance/ui-448/walkthrough-v9.json。
+### §14.2 加映 v9 收口（2026-09-27）
+
+实现提交 6e44656b（UI 台账加映段随提交）；closeout 十一门绿。v9 in_progress 待用户过目翻 verified（v6/v7 形态如一并确认可同批翻 verified）。G0 开发期常态 · 不外推 packaged/Provider/GA。
