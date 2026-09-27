@@ -374,6 +374,15 @@ function SessionFrameView({
     () => readPersistedFloatWidth('gewu:summary-float-width')
   );
   const summaryFloatWidth = persistedSummaryWidth ?? ctx.summaryOpenWidth;
+  // UI-448 加映 v26 — 悬浮/钉住列两形态共用同一拖宽偏好与回调
+  const summaryResizeHandlers = {
+    width: summaryFloatWidth,
+    onWidthChange: setPersistedSummaryWidth,
+    onCommit: (w: number) => {
+      setPersistedSummaryWidth(w);
+      persistFloatWidth('gewu:summary-float-width', w);
+    },
+  };
 
   return (
     <div
@@ -414,8 +423,7 @@ function SessionFrameView({
             <WorkspaceSummaryCard
               open
               visibility="float"
-              width={summaryFloatWidth}
-              projectName={ctx.project.name}
+              width={summaryFloatWidth}              projectName={ctx.project.name}
               project={ctx.project}
               activeJob={ctx.activeJob}
               workflow={ctx.activeWorkflow}
@@ -436,14 +444,7 @@ function SessionFrameView({
                 ctx.openRightPanel('results');
               }}
             />
-            <FloatCardResizeHandle
-              width={summaryFloatWidth}
-              onWidthChange={setPersistedSummaryWidth}
-              onCommit={(w) => {
-                setPersistedSummaryWidth(w);
-                persistFloatWidth('gewu:summary-float-width', w);
-              }}
-            />
+            <FloatCardResizeHandle {...summaryResizeHandlers} />
           </div>
         )}
         {/* UI-448 加映 v12 — 右轨：摘要钉住列与侧聊列区垂直堆叠共享右缘；
@@ -453,10 +454,12 @@ function SessionFrameView({
         <div className={styles.workspaceRightRail}>
         {ctx.showPinnedSummary && ctx.summaryCardOpen && ctx.summaryVisibility !== 'float' && (
           <div className={styles.workspaceSummaryColumn}>
+            {/* UI-448 加映 v26 — 钉住列形态同样可拖宽（v25 只适配了悬浮形态）：
+                宽度与悬浮形态共用同一偏好，窄宽切换不跳变 */}
             <WorkspaceSummaryCard
               open
               visibility={ctx.summaryVisibility}
-              width={ctx.summaryOpenWidth}
+              width={summaryFloatWidth}
               projectName={ctx.project.name}
               project={ctx.project}
               activeJob={ctx.activeJob}
@@ -478,6 +481,7 @@ function SessionFrameView({
                 ctx.openRightPanel('results');
               }}
             />
+            <FloatCardResizeHandle {...summaryResizeHandlers} />
           </div>
         )}
         {/* UI-448 加映 v12 — 宽窗时侧聊是独立列区（占位、像摘要钉住列一样），

@@ -4346,5 +4346,12 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 ## UI-448 加映 v25 (2026-09-27 in_progress，用户「会话窗口可以人为调整宽度吗？太拥挤…项目摘要卡也可以变宽」——浮卡左缘拖宽)
 
 - **修法**：新增共用组件 `FloatCardResizer`——右锚定浮卡左缘 10px 拖宽把手（col-resize，向左拖变宽），宽度实时生效、抬手持久化 localStorage（会话卡 `gewu:side-chat-float-width` / 摘要卡 `gewu:summary-float-width`，全局偏好跨会话记忆）；钳制 [240, min(720, 视口-48)]。接入三处：会话浮面（默认回落 v21 的 summaryOpenWidth）、会话列区（默认 300，两形态共用同一偏好，窄宽切换宽度不跳变）、摘要浮卡（默认 summaryOpenWidth，外层 312 帽放宽至 720 兜底）。**v25 补**（同日，用户问「只有悬浮时才可以拖宽吗」——列区实测本可拖 300→600，病根是把手隐形）：把手加常驻 3px 中性指示线、hover 转主题色（83fff836）。**v25 补2**（用户截图实指列区卡左缘无指示线）：真因=`.dockedColumn` 未建定位上下文，absolute 把手连带指示线逃逸到会话框左缘（且在左侧栏边留 10px 隐形热区）——补 `position: relative` 一行收编，IAB 实机 handleLeft 1246≈卡左 1245、指示线卡缘渲染。
+
+## UI-448 加映 v26 (2026-09-27 in_progress，用户「会话好了 但项目摘要还没有适配」——摘要钉住列形态拖宽补齐)
+
+- **根因**：v25 只给摘要**悬浮形态**装了拖宽把手；宽窗下摘要是**钉住列**形态（workspaceSummaryColumn），无把手无拖宽——用户当前宽窗看到的正是这张，指认「还没有适配」。钉住列容器同 dockedColumn 无 position，接入把手须同步防逃逸。
+- **修法**：钉住列接入 `FloatCardResizeHandle`（与悬浮形态共用 `gewu:summary-float-width` 偏好与 summaryResizeHandlers 回调，窄宽切换宽度不跳变，默认回落 expanded 档 summaryOpenWidth 292–312）；`.workspaceSummaryColumn` 补 `position: relative` 防把手逃逸（教训同 v25 补2）。
+- **证据**：CenterPanel 13（新增钉住列把手存在用例）+ SideChatDock 14 = 27 绿；tsc 0；IAB 实机：钉住列 312→拖宽 562、persisted=562、把手 containedInCard=true 无逃逸。**待用户实机过目后翻 verified（v15–v26 同批）**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
 - **证据**：SideChatDock 14（拖拽变宽+持久化+重挂载偏好生效+钳制上界两用例）+ CenterPanel 12 = 26 绿；tsc 0；theme-token-contract 4 绿；IAB 实机：浮面 276→拖宽 576、persisted=576、切宽窗列区继承 576。**待用户实机过目后翻 verified（v15–v25 同批）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。

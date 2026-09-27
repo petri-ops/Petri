@@ -190,3 +190,15 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     expect(layout?.contains(dock ?? null)).toBe(true);
   });
 });
+
+// UI-448 加映 v26 — 摘要钉住列形态同样带拖宽把手（v25 只适配了悬浮形态）
+it('renders the resize handle on the pinned summary column (UI-448 加映 v26)', () => {
+  const ctx = context('chat');
+  ctx.showPinnedSummary = true;
+  ctx.summaryCardOpen = true;
+  ctx.summaryVisibility = 'expanded';
+  render(<CenterPanel ctx={ctx} refs={refs} />);
+  const column = document.querySelector('[class*="workspaceSummaryColumn"]');
+  expect(column).toBeTruthy();
+  expect(column?.querySelector('[data-testid="float-card-resize-handle"]')).toBeTruthy();
+});

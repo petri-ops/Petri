@@ -1823,6 +1823,9 @@
 }
 
 .workspaceSummaryColumn {
+  /* UI-448 加映 v26 — 建立定位上下文：拖宽把手 absolute 左缘定位
+     （教训同 v25 补2 dockedColumn 逃逸），无 position 会逃逸到会话框左缘 */
+  position: relative;
   flex: 0 0 auto;
   min-width: 0;
   min-height: 0;
