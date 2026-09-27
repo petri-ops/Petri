@@ -4307,3 +4307,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **修法**：hook 增 300ms 布局守望器（`setInterval` + `document.hidden` 跳过）——直接读真实 DOM 宽度，与事件系统零耦合；事件死透的病态会话下任何窗口变化最多滞后一拍自愈，视口钳制/派生随之恢复运转。RO（即时）、focus/visibilitychange（切回）、守望器（兜底）三层递进。
 - **证据**：useWorkspaceLayout 9（A7 守望器节拍自愈：fake timers 推进 350ms 断言宽度跟随、卸载清理）+ CenterPanel 13 + SideChatDock 10 = 32 全绿；tsc 0；docs:check 绿。**需整页重载加载 v19（hook 模块 HMR 不可靠）；待用户实机过目后翻 verified（v15–v19 同批）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-448 加映 v20 (2026-09-27 in_progress，用户「会话窗口能否出现在下方呢目前是在上方的」——列区形态沉底补齐)
+
+- **根因**：v16 注释声称「会话列推到右轨底部（margin-top:auto）」但规则从未落在 `.dockedColumn` 上（注释与实现漂移）——宽窗列区形态下会话卡紧跟摘要列堆在右轨上部，用户实测指认。
+- **修法**：`.dockedColumn` 补 `margin-top: auto`（auto margin 吸收右轨剩余空间，卡片内容高度不变、贴轨底 44px 入口按钮间隙）——与窄窗悬浮面 `bottom:44px` 同语义：会话在下、摘要在上。
+- **证据**：theme-token-contract 4 + SideChatDock 10 全绿；CDP 实机几何验证（用户应用内卡片 bottom 距会话框底 44px、紧贴入口气泡）；CSS 模块 HMR 即时生效无需重载。**待用户实机过目后翻 verified（v15–v20 同批）**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
