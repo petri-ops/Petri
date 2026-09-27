@@ -1,6 +1,6 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-26（**队列逐推模式首批全部推完（用户裁决「继续 逐个推完」；C-17a=BLOCK-125 已收口）**：C-17b 终端反馈面走查收口（exec 流式实机 verified+dock 设计分离复核）/C-17c 多文件深度任务（抽取共享模块新形态 allPass+防作弊验证器）/C-16=UI-449 审阅徽章 ±行数版「N·+A−D」（workingTreeShortstat 权威源桥+IPC 四件套，红绿 7 红→16/16 绿）/C-18=编码 playbook 资源 skill 落地（注册表实证）/C-19=纪律回声评估收口/C-20=skills:check 存量 6 红登记。**并行 UI-448 会话同日整包 completed，全程双向零触碰**；用户侧待过目 rider=UI-447/UI-449。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-26（**队列逐推模式首批全部推完（用户裁决「继续 逐个推完」；C-17a=BLOCK-125 已收口）**：C-17b 终端反馈面走查收口（exec 流式实机 verified+dock 设计分离复核）/C-17c 多文件深度任务（抽取共享模块新形态 allPass+防作弊验证器）/C-16=UI-449 审阅徽章 ±行数版「N·+A−D」（workingTreeShortstat 权威源桥+IPC 四件套，红绿 7 红→16/16 绿）/C-18=编码 playbook 资源 skill 落地（注册表实证）/C-19=纪律回声评估收口/C-20=skills:check 存量 6 红登记。**并行 UI-448 会话同日整包 completed，全程双向零触碰**；rider 全清=UI-447/UI-448/UI-449 经用户实机过目「符合预期」翻 verified（2026-09-27）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-26（**BLOCK-124-HARNESS-PRODUCTIZATION 当日整包 completed（P0 勘察 + P1 C-13 实现 + 实机走查 allPass）——Gewu Harness 产品化第一批**（用户裁决「启动第一批工作」+ 第二轮「自己来做个全面的校验和确认…开始吧」确认权下放）：P0 资产四问盘点（HK-03 查询✅产品化/HK-04·HK-01/02·closeout·决策工具·走查探针❌纯开发设施不产品化）+ C-13 落地=codegraph_who_imports/codegraph_classify_edges 双只读工具（session 基线域七面注册，工具总数 74→76；内核单源迁 core + 流式建图/分批让位/tsconfig 别名/maxFiles 四项产品化加固；typescript 迁 dependencies 实测 23MB）+ 实机走查 allPass（agent 21s 自主调 codegraph_who_imports×2 完成死导出清理，探针独立复核真删真清真过）。红绿先行 14 红→70/70 绿；存量债顺手清偿三件。**rider=UI-447 工具行呈现待用户实机过目**。plan=docs/block-124-harness-productization-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

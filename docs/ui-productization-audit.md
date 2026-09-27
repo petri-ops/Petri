@@ -4184,25 +4184,29 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-447: BLOCK-124（C-13）— codegraph 工具行（「已查引用/已盘点依赖」动词 + git-branch 图标）(2026-09-26 in_progress，契约已验，实机走查待补)
+## UI-447: BLOCK-124（C-13）— codegraph 工具行（「已查引用/已盘点依赖」动词 + git-branch 图标）(2026-09-27 verified，用户实机过目确认)
 
 - **来源**：BLOCK-124 第一批 C-13 符号图产品化（plan=docs/block-124-harness-productization-plan.md）。agent 新增 `codegraph_who_imports` / `codegraph_classify_edges` 两个只读工具（HK-03 内核单源迁 core/biof3-server/helpers/code-graph.js），聊天工具行需同步可读呈现。
 - **改动（本条仅 UI 面）**：`frontend/src/components/copilot/toolActivity.ts` VERBS +2（已查引用/已盘点依赖）+ ICONS +2（git-branch）；`test/fixtures/tool-activity-labels.json` 同步两行（三面同源钉死，UI-437 v5.18 注册表机制零新增面）。
 - **证据（契约）**：test/tool-activity-labels.test.mjs 宇宙 76 双向覆盖绿 + toolActivity.test.ts fixture 行为级断言绿 + tsc 0。
 - **实机走查（2026-09-26，BLOCK-124 P1）**：探针 block124-p1-codegraph-walkthrough.mjs allPass——真实模型任务中 codegraph_who_imports 被自主调用×2，工具行事件正常产出（SSE 取证 tool_result：available true · symbol legacyRound · totalHits 1）；证据 acceptance/block-124/p1-walkthrough.json。用户实机过目后翻 verified。
+- **verified 翻转（2026-09-27，用户实机过目「符合预期」）**：联测路线（真实编码任务）中「已查引用」工具行（git-branch 图标）确认呈现。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448: 侧边聊天悬浮面体验对齐项目摘要（单一输入面 + 内容让位 + 悬浮视觉语言统一 + 窄面 compact）(2026-09-26 in_progress，实机三态走查 allPass，待用户过目)
+## UI-448: 侧边聊天悬浮面体验对齐项目摘要（单一输入面 + 内容让位 + 悬浮视觉语言统一 + 窄面 compact）(2026-09-27 verified，用户实机过目确认)
 
 - **来源**：用户实机反馈「中间会话框的这个按钮点开后的效果很不和谐」并核对裁决「行！ 按照你的建议 开冲」（plan=docs/ui-448-side-chat-dock-alignment-plan.md）。核查坐实四点：①同一会话双份渲染、双 composer 并存（悬浮面 351px + 中栏 718px 同屏、两个「完全访问」工具条）②380px 全高不透明面板拦腰切割中栏内容 ③380px 内窄面无适配（表格横滚/sha256 逐字断行/输入提示折两行）④视觉语言与项目摘要浮层脱节（圆角 10 vs 16/menu 阴影 vs 大柔和影/160ms vs 280ms/缺 reduced-motion）。
 - **改动**：①单一输入面——新增 `frontend/src/hooks/sideChatDockStore.ts`（开态升模块级共享单例），中栏 SimpleChat 的 ownsCopilotAsk 实例在开态下 composer 让位为提示条（`SimpleChat/ComposerYield.tsx`，含「返回中栏输入」一键还原），悬挂面自身 composer 不受影响；②内容让位——CenterPanel 开态挂 `agentMainSideChatYield` 类（`padding-right: min(432px, calc(100% - 320px))`，320px 下限兜底极窄窗），中栏内容列收窄避让不再被切割；③视觉对齐——surface 圆角 16px、新 token `--gewu-shadow-float`（custom.css 亮暗双套；`.workspaceSummaryFloat` 同值硬编码收编为该 token 单源）、入场 280ms、`prefers-reduced-motion` 降级；④窄面适配——SimpleChat 增 `compact` prop，悬挂面短占位符「输入消息…」不折行。把手 + 44px 间隙结构保留（UI-417 D1 常驻把手契约）。HK-01 红绿先行：契约先落 4 文件全红 → 实现 25/25 绿。
 - **证据**：契约 SideChatDock 9 / CenterPanel 8（新增共享开态与让位类两契约）+ sideChatDockStore 3 + ComposerYield 5 = 25/25 绿；前端全量 153 文件/1229 用例 0 红；tsc 0；theme-token-contract 4/4；eslint 0 error。实机三态走查 allPass（dev 栈 dark 主题 1680×950）：开态 composers 2→1、让位类 padding-right 432px、16px 圆角 + 暗档 float 阴影、compact 占位符单行、中栏内容零切割；点「返回中栏输入」dock 收起 + composer 完整占位符还原。截图+断言=acceptance/ui-448/（walkthrough.json + 三态截图 + 提示条特写）。
 - **非范围**：0.92 半透明不采纳（交互面≠只读监控面）、宽度拖拽调节、悬浮面×摘要浮层同屏叠置已知边界（reopen 条件在 plan §3）。
-- 用户实机过目后翻 verified。G0 开发期常态 · 不外推 packaged/Provider/GA。
+- 用户实机过目后翻 verified。
+- **verified 翻转（2026-09-27，用户实机过目「符合预期」）**：经 UI-447/449 联测路线观察点 C 确认悬浮面对齐效果（本条交付物属并行会话同日完成，确认记录由本会话代登）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-449: C-16 — 审阅徽章 ±行数版（「N·+A−D」，权威源=后端 git shortstat 桥）(2026-09-26 in_progress，契约已验，待用户过目)
+## UI-449: C-16 — 审阅徽章 ±行数版（「N·+A−D」，权威源=后端 git shortstat 桥）(2026-09-27 verified，用户实机过目确认)
 
 - **来源**：候选池 C-16（UI-446 v4 计数徽章升级：入口直接显示 +A −D 行数变化；队列逐推模式第四项）。权威源红线=不前端数行，后端 shortstat 桥避免第二真相。
 - **改动**：①后端权威源=git-adapter 新方法 `workingTreeShortstat()`（`git diff HEAD --shortstat` 含暂存区 + untracked porcelain 分开计数，零第二真相）；②IPC 四件套=`git:working-tree-shortstat` 通道（channels.js + working-tree-review.js handler + preload `workingTreeReview.workingTreeShortstat` + electron.d.ts）；③前端=conversationChangesStore 增 `refreshConversationShortstat`（20s TTL 节流+失败回落旧值不抛）与 `useConversationShortstat` hook + `formatShortstatBadge`（「N·+A−D」格式）；④四处入口同源渲染（useWorkspaceTitleBar 组装 tab 药丸/+钮/菜单徽章 + RightPanel→EmptyResult 磁贴），shortstat 缺省回落纯计数（桥失败/浏览器态不渲染坏形态）。
 - **证据（契约）**：红绿先行——adapter 3 红（含测试算术自纠：改 1 行按 +1/−1 计）→3/3 绿 + store/RightZone 4 红→13/13 绿（含 UI-446 v4 存量计数语义零回归）；tsc 0。补注：取数 hook 重写为键控 entry 派生形态（禁 setState 同步进 effect 红线，会话切换即失效无残留闪现）。C-17b 走查附带实证 agent exec 输出流式进工具行（acceptance/c17b-terminal/streaming-sse.json allPass）。
-- 待用户实机过目（有未审改动时四处入口显示「N·+A−D」）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+- 待用户实机过目（有未审改动时四处入口显示「N·+A−D」）。
+- **verified 翻转（2026-09-27，用户实机过目「符合预期」）**：任务完成后顶栏「+」钮/审阅药丸「N·+A−D」徽章确认呈现，审阅归零语义正常。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
