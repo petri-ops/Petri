@@ -9,7 +9,7 @@ acceptance:
   - 窄面适配：悬挂面 SimpleChat compact 占位符（短提示不折行）；表格/长 token 三态实机核对（框内滚动+滚动条可见）
   - 台账同步：docs/ui-productization-audit.md UI-448 条目与实现同一提交；实机走查截图证据落 acceptance/ui-448/
 reopen: 用户实机过目后对新形态不满意，或悬浮面与摘要浮层同屏叠置的已知边界升级为真问题时
-status: active
+status: completed
 ---
 
 # UI-448 — 侧边聊天悬浮面体验对齐项目摘要
@@ -237,3 +237,6 @@ HK-01：布局挂载位置契约（dock 在 session layout 内）先红后绿。
 ### §15.1 加映 v10 实施记录（2026-09-27 当日收口）
 
 红绿先行：挂载位置契约（dock 在 session layout 内）先红→22/22 绿。实机：rightEdgeDeltaVsSummary=0、dockInsideLayout=true、零重叠、让位收窄生效。行为对齐清单=同基准 right:0/同缘/同悬浮语言（16px 圆角+float 阴影 token）/结果模式随投影隐藏（与摘要一致）/常驻不误关/极简把手挂面板上方。教训=v8/v9 两轮补丁的本质是参照系选错——结构性问题应移动挂载点而不是补偿偏移。验证=22/22+前端全量 155 文件/1240 用例 0 红+tsc 0+eslint 0 error。证据=acceptance/ui-448/walkthrough-v10.json。
+### §15.2 加映 v10 收口（2026-09-27）
+
+实现提交 66024634（UI 台账加映段随提交）；closeout 十一门绿。v10 in_progress 待用户过目翻 verified（v6~v9 如一并确认可同批）。G0 开发期常态 · 不外推 packaged/Provider/GA。
