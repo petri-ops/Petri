@@ -48,19 +48,20 @@ describe('UI-417 SideChatDock', () => {
     cleanup();
   });
 
-  it('把手常驻、点击滑出 overlay，再点收起', async () => {
-    const { rerender } = render(<SideChatDock projectId="p_1" />);
+  it('把手常驻（收起态）、点击滑出 overlay；开态隐把手（加映 v4 贴右缘），Esc 收起后把手回归', async () => {
+    render(<SideChatDock projectId="p_1" />);
     // 收起态：只有把手
     expect(screen.getByTestId('side-chat-handle')).toBeTruthy();
     expect(screen.queryByTestId('side-chat-surface')).toBeNull();
 
     fireEvent.click(screen.getByTestId('side-chat-handle'));
     expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
+    // 加映 v4 — 开态贴右缘：把手隐藏（关闭改由 ✕/Esc/外点承载）
+    expect(screen.queryByTestId('side-chat-handle')).toBeNull();
 
-    // 再点收起
-    fireEvent.click(screen.getByTestId('side-chat-handle'));
+    fireEvent.keyDown(window, { key: 'Escape' });
     await waitFor(() => expect(screen.queryByTestId('side-chat-surface')).toBeNull());
-    void rerender;
+    expect(screen.getByTestId('side-chat-handle')).toBeTruthy();
   });
 
   it('sideChatOpen 事件展开悬挂面（右栏 chat tab 退役入口收编）', async () => {
@@ -106,16 +107,15 @@ describe('UI-417 SideChatDock', () => {
     expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
   });
 
-  it('呼吸灯：当前侧聊会话运行中把手圆点变 running 态', () => {
+  it('呼吸灯：侧聊会话运行中，收起态把手圆点变 running 态（加映 v4 起面板常驻会话内容）', () => {
     window.localStorage.setItem(sideConvKey, 'conv_running');
-    const { rerender } = render(<SideChatDock projectId="p_1" />);
-    fireEvent.click(screen.getByTestId('side-chat-handle'));
+    render(<SideChatDock projectId="p_1" />);
     const dot = screen.getByTestId('side-chat-handle').querySelector('span');
     expect(dot?.className).toContain('handleDotRunning');
 
-    rerender(<SideChatDock projectId="p_1" />);
     window.localStorage.setItem(sideConvKey, 'conv_idle');
-    fireEvent.click(screen.getByTestId('side-chat-handle'));
+    cleanup();
+    render(<SideChatDock projectId="p_1" />);
     const dotIdle = screen.getByTestId('side-chat-handle').querySelector('span');
     expect(dotIdle?.className).not.toContain('handleDotRunning');
   });
@@ -132,15 +132,14 @@ describe('UI-448 SideChatDock 共享开态（sideChatDockStore）', () => {
     setSideChatDockOpen(false);
   });
 
-  it('外部 set 开态直接展开（中栏让位同源联动），把手呈激活态', () => {
+  it('外部 set 开态直接展开（中栏让位同源联动）；开态把手隐藏（加映 v4 贴右缘）', () => {
     render(<SideChatDock projectId="p_1" />);
     expect(screen.queryByTestId('side-chat-surface')).toBeNull();
     act(() => {
       setSideChatDockOpen(true);
     });
     expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
-    expect(screen.getByTestId('side-chat-handle').getAttribute('aria-expanded')).toBe('true');
-    expect(screen.getByTestId('side-chat-handle').className).toContain('handleActive');
+    expect(screen.queryByTestId('side-chat-handle')).toBeNull();
   });
 
   it('开态跨挂载持久：store 已开时重新挂载即展开（同一会话单一输入面的真相源）', () => {

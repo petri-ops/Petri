@@ -4220,3 +4220,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 - **反馈与修法**：①悬浮面底色 surface→`--gewu-bg-elevated` 对齐摘要卡，头部对齐摘要顶栏规格（52px/分隔线 color-mix(text 6%)）；②悬挂面**自立每项目独立会话**（localStorage 持久化 + 首发 useChatStream 既有建话路径），不再镜像中栏 activeConvId——主会话编码 agent 内容不再出现在悬挂面，两会话 run 互不干扰；组件签名收缩为只收 projectId；③SimpleChat 增 `slimComposer` prop：隐藏导出/知识开关/上下文环/模型供应商/思考档位，只留只读徽标+发送键。**实机走查 allPass（2026-09-27）**：底色实测 elevated（rgb(29,41,69)）与摘要卡一致、头部 52px 同规格；端到端探针=悬挂面发消息自动建独立会话（localStorage 落 conv id+侧栏独立条目），read 档 1 次只读工具读 package.json 正确作答，中栏会话分毫未动；composer 实测只余只读徽标+发送键（知识开关/模型对 display:none 实证）；探针会话已回收清场。红绿 5 红→29/29 绿；前端全量 155 文件/1238 用例 0 红；tsc 0；eslint 0 error；证据=acceptance/ui-448/walkthrough-v3.json+2 截图。**待用户过目 v3 形态后翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-448 加映 v4 (2026-09-27 in_progress，用户裁决「完全一致：文字大小/宽度/贴右侧边；就是个聊天窗口但可以选择模型」)
+
+- **修法**：①surface 宽 380→300px（同摘要）+ right:0 贴右缘 + 开态隐把手（关闭=✕/Esc/外点）；②聊天文字级联降到摘要正文档（caption）；③slim 隐藏名单收缩：模型/供应商选择恢复（窄面板图标化），知识开关仍隐藏；只读锁/独立会话不变。**实机走查 allPass（2026-09-27）**：宽 300（摘要 288 shrink-to-fit）、右缘 delta=0（贴摘要同缘）、消息字级 12.1275px=摘要正文（fontMatch=true）、开态把手隐藏、模型菜单面板内可弹出可选；波折登记=max-width 百分比参照系误用致面板夹塌 2px（改回视口单位）+字档实测纠正（摘要正文是 sm 档非 caption）；红绿 3 红→20/20 绿+前端全量 1238 用例 0 红；证据=acceptance/ui-448/walkthrough-v4.json+2 截图。**待用户过目 v4 形态后翻 verified**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

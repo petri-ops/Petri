@@ -2040,10 +2040,10 @@
 }
 
 /* UI-448 加映 v3 — slimComposer（悬挂面纯聊天）：工具栏删减，只留档位锁定
-   徽标 + 发送键；知识开关与模型/供应商/思考档位整对隐藏（display:none，
-   中栏不受影响） */
-.sc-composer-slim .sc-knowledge-toggle,
-.sc-composer-slim .sc-model-picker-pair {
+   徽标 + 模型选择 + 发送键；知识开关隐藏（display:none，中栏不受影响）。
+   UI-448 加映 v4 — 模型/供应商选择对恢复显示（用户裁决「就是个聊天窗口
+   但是可以选择模型」）：窄面板下由容器查询自动图标化。 */
+.sc-composer-slim .sc-knowledge-toggle {
   display: none;
 }
 

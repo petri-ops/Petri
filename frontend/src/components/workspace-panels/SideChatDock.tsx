@@ -59,9 +59,10 @@ export function SideChatDock({
     }
   }, [projectId]);
 
-  // 呼吸灯：当前侧聊会话 agent 运行中（conversationRunStore 单一真相；UI-397 同款语言）
+  // 呼吸灯：当前侧聊会话 agent 运行中（conversationRunStore 单一真相；UI-397 同款语言）。
+  // UI-448 加映 v4 — 与 open 解耦：收起态把手也要提示「侧聊 agent 在跑」
   useEffect(() => {
-    if (!open || !sideConvId) {
+    if (!sideConvId) {
       setAgentRunning(false);
       return;
     }
@@ -69,7 +70,7 @@ export function SideChatDock({
     update();
     const timer = window.setInterval(update, 1000);
     return () => window.clearInterval(timer);
-  }, [open, sideConvId]);
+  }, [sideConvId]);
 
   // Esc 收起
   useEffect(() => {
@@ -140,18 +141,21 @@ export function SideChatDock({
           </div>
         </div>
       ) : null}
-      <button
-        type="button"
-        className={`${styles.handle} ${open ? styles.handleActive : ''}`}
-        onClick={toggle}
-        aria-label={open ? '收起侧边聊天' : '打开侧边聊天'}
-        aria-expanded={open}
-        title={open ? '收起侧边聊天' : '侧边聊天'}
-        data-testid="side-chat-handle"
-      >
-        <span className={`${styles.handleDot} ${agentRunning ? styles.handleDotRunning : ''}`} />
-        <Icon name="message-circle" size={14} />
-      </button>
+      {/* UI-448 加映 v4 — 开态贴右缘：把手隐藏，关闭由 ✕/Esc/外点承载；收起后把手回归 */}
+      {!open ? (
+        <button
+          type="button"
+          className={styles.handle}
+          onClick={toggle}
+          aria-label='打开侧边聊天'
+          aria-expanded={open}
+          title='侧边聊天'
+          data-testid="side-chat-handle"
+        >
+          <span className={`${styles.handleDot} ${agentRunning ? styles.handleDotRunning : ''}`} />
+          <Icon name="message-circle" size={14} />
+        </button>
+      ) : null}
     </div>
   );
 }

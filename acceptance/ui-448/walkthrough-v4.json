@@ -1,0 +1,21 @@
+{
+  "package": "UI-448 加映 v4",
+  "date": "2026-09-27",
+  "env": "dev 栈（localhost:3000，Vite HMR），viewport 1680x950，dark",
+  "feedback": "用户裁决「能否完全一致呢 文字大小 宽度 贴右侧边 其实就是个聊天窗口 但是可以选择模型 对不对」",
+  "fixes": {
+    "widthMatch": "surface 380→300px（与摘要卡同声明宽），实测 300 vs 摘要 288（摘要 shrink-to-fit 自身夹紧）",
+    "flushRight": "right:44→14px 与摘要卡同一右缘，实测 rightEdgeDelta=0（14px=workspaceSessionLayout 内缩量，注释留痕）",
+    "fontMatch": ".sc-msg-body 及其 p 层定点覆写 --gewu-font-size-sm，实测消息 12.1275px = 摘要正文 12.1275px（fontMatch=true；波折登记：首设 caption 档实为 13.23px@scale1.1025 不符，量测后改 sm）",
+    "handleHidden": "开态把手隐藏（关闭=✕/Esc/外点），收起态把手回归且呼吸灯与 open 解耦常驻提示",
+    "modelPicker": "slim 隐藏名单收缩：模型/供应商选择对恢复（窄面板图标化），菜单在面板内实测可弹出可选（withinSurface=true, items=1），知识开关仍隐藏"
+  },
+  "maxWidthBug": "max-width 误用 calc(100%-24px) 在零宽定位容器内把面板夹塌成 2px——改回视口单位 calc(100vw-120px) 并注释留痕",
+  "redGreen": "契约重构（开态隐把手/呼吸灯与 open 解耦）3 红→20/20 绿；前端全量 155 文件/1238 用例 0 红；tsc 0；eslint 0 error",
+  "cleanup": "两条探针会话已移入回收站，localStorage 侧聊指向已清",
+  "screenshots": [
+    "ui448v4-flush-font-match.png（贴缘 0px 差+字级一致同框实证）",
+    "ui448v4-model-menu.png（模型菜单面板内可用特写）"
+  ],
+  "verdict": "allPass"
+}

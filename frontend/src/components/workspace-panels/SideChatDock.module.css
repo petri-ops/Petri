@@ -14,14 +14,19 @@
    UI-448 — 视觉对齐项目摘要浮层语言：16px 圆角、--gewu-shadow-float 大柔和影、
    280ms 入场 + prefers-reduced-motion 降级（与 .workspaceSummaryFloat 同族）
    UI-448 加映 v2 — 不再全高：贴底右下角占一半高度，与右上角摘要浮层同屏共存
-   （摘要 z-40 在上，极端叠置为已知边界，见 plan §8） */
+   UI-448 加映 v4 — 与摘要卡完全一致：同宽 300px（同款 max-width 夹紧）、贴右侧边
+   right:0（摘要卡同缘）、开态隐把手 */
 .surface {
   position: absolute;
   top: auto;
   bottom: 8px;
-  right: 44px;
+  /* UI-448 加映 v4 — 贴右侧边＝与摘要卡同一右缘：摘要浮层在会话区内缩 14px
+     （workspaceSessionLayout 内 right:0），对齐该缘即 right:14px */
+  right: 14px;
   height: 50%;
-  width: 380px;
+  width: 300px;
+  /* 注意：定位容器 .dockRoot 宽度为 0，max-width 百分比参照系不可用——
+     必须用视口单位（v3 同款）；calc(100% - 24px) 会把面板夹塌成边框 2px */
   max-width: calc(100vw - 120px);
   display: flex;
   flex-direction: column;
@@ -33,6 +38,17 @@
   overflow: hidden;
   pointer-events: auto;
   animation: sideChatSlideIn 280ms ease-out;
+}
+
+/* UI-448 加映 v4 — 聊天文字对齐摘要正文档：摘要卡正文实为 --gewu-font-size-sm
+   档（实测 12.13px@scale1.1025；caption 档实为 13.23px，勿混）。.sc-msg-body 与
+   其 p 层均有显式字号，继承覆盖不到，需定点覆写 */
+.surfaceBody :global(.sc-msg-body) {
+  font-size: var(--gewu-font-size-sm);
+}
+
+.surfaceBody :global(.sc-msg-body p) {
+  font-size: var(--gewu-font-size-sm);
 }
 
 /* UI-448 加映 v2 — 去双层背景：面板内 SimpleChat 自带 .sc-root 卡片底
