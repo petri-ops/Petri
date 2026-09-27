@@ -4235,3 +4235,9 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 - **修法**：把手开/关两态恒显示（v4 曾开态隐藏），位置锚定面板上方 bottom: calc(50% + 14px)——卡片打开时挂在图标正下方，再点图标收起（D1 契约恢复）；✕ 仍可用。**实机走查 allPass（2026-09-27）**：开态把手常显（handleVisible/ariaExpanded=true）、卡片挂图标下方（handleAbovePanel=true、gap 6px）、再点收起 D1 实证；契约反转先红→20/20 绿；前端全量 155 文件/1238 用例 0 红；tsc 0；eslint 0 error；证据=acceptance/ui-448/walkthrough-v6.json。**待用户过目 v6 形态后翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-448 加映 v7 (2026-09-27 in_progress，用户裁决：把手图标极简化——去外框/底板，只留气泡图标，运行指示由图标色呼吸承担)
+
+- **修法**：把手 30x64 带框竖条→28x28 裸气泡描边图标（border/底板/阴影全去除，例图同款）；独立圆点退役，运行指示改由图标本体色承担（handleRunning=--gewu-status-online 绿呼吸）；激活态=accent 色；锚定面板上方布局不变。
+- **证据**：呼吸灯契约随形态重构先红（圆点退役断言）→20/20 绿；前端全量 155 文件/1238 用例 0 红；tsc 0；eslint 0 error；实机实测 border 0/底 transparent/阴影 none、开态卡片挂图标下方不变；截图=acceptance/ui-448/ui448v7-minimal-icon.png + ui448v7-open-below-icon.png + walkthrough-v7.json。**待用户过目 v7 形态后翻 verified**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

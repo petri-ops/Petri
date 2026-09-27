@@ -1,0 +1,17 @@
+{
+  "package": "UI-448 加映 v7",
+  "date": "2026-09-27",
+  "env": "dev 栈（localhost:3000，Vite HMR），viewport 1680x950，dark",
+  "feedback": "用户裁决「图标有些太大了 去掉外框 只要有个（气泡）就可以」附例图",
+  "fixes": {
+    "minimalIcon": "把手去外框/底板/阴影（border 0px、background transparent、shadow none，实测），尺寸 30x64→28x28，图标 14→16px 裸气泡描边",
+    "runningOnIcon": "独立圆点退役，运行指示改由图标本体色承担（handleRunning=--gewu-status-online 绿呼吸）；激活态=accent 色",
+    "positionKept": "锚定面板上方（v6 布局不变），实测开态 handleAbovePanel=true、ariaExpanded=true"
+  },
+  "redGreen": "呼吸灯契约随形态重构先红（圆点退役断言）→20/20 绿；前端全量 155 文件/1238 用例 0 红；tsc 0；eslint 0 error",
+  "screenshots": [
+    "ui448v7-minimal-icon.png（收起态极简图标特写，例图同款）",
+    "ui448v7-open-below-icon.png（开态卡片挂图标下方全览）"
+  ],
+  "verdict": "allPass"
+}

@@ -122,15 +122,14 @@ export function SideChatDock({
           开态呈激活态；面板挂图标正下方，再点图标收起（D1 契约恢复） */}
       <button
         type="button"
-        className={`${styles.handle} ${open ? styles.handleActive : ''}`}
+        className={`${styles.handle} ${open ? styles.handleActive : ''} ${agentRunning ? styles.handleRunning : ''}`}
         onClick={toggle}
         aria-label={open ? '收起侧边聊天' : '打开侧边聊天'}
         aria-expanded={open}
         title={open ? '收起侧边聊天' : '侧边聊天'}
         data-testid="side-chat-handle"
       >
-        <span className={`${styles.handleDot} ${agentRunning ? styles.handleDotRunning : ''}`} />
-        <Icon name="message-circle" size={14} />
+        <Icon name="message-circle" size={16} />
       </button>
     </div>
   );

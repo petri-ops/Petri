@@ -110,17 +110,18 @@ describe('UI-417 SideChatDock', () => {
     expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
   });
 
-  it('呼吸灯：侧聊会话运行中，收起态把手圆点变 running 态（加映 v4 起面板常驻会话内容）', () => {
+  it('呼吸灯：侧聊会话运行中，把手图标本体变 running 呼吸色（加映 v7 极简形态，圆点退役）', () => {
     window.localStorage.setItem(sideConvKey, 'conv_running');
     render(<SideChatDock projectId="p_1" />);
-    const dot = screen.getByTestId('side-chat-handle').querySelector('span');
-    expect(dot?.className).toContain('handleDotRunning');
+    const handle = screen.getByTestId('side-chat-handle');
+    expect(handle.className).toContain('handleRunning');
 
     window.localStorage.setItem(sideConvKey, 'conv_idle');
     cleanup();
     render(<SideChatDock projectId="p_1" />);
-    const dotIdle = screen.getByTestId('side-chat-handle').querySelector('span');
-    expect(dotIdle?.className).not.toContain('handleDotRunning');
+    const idle = screen.getByTestId('side-chat-handle');
+    expect(idle.className).not.toContain('handleRunning');
+    expect(idle.querySelector('span')).toBeNull();
   });
 });
 

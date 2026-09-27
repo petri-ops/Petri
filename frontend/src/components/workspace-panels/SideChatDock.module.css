@@ -138,24 +138,24 @@
 .handle {
   position: absolute;
   /* UI-448 加映 v6 — 把手常驻（摘要概览按钮同款）：开/关两态恒显示；锚定面板
-     上方（面板占下半高，把手底缘距面板顶缘 6px），卡片打开时挂图标正下方 */
+     上方（面板占下半高，把手底缘距面板顶缘 6px），卡片打开时挂图标正下方
+     UI-448 加映 v7 — 极简化（用户例图=裸气泡描边图标）：去外框/底板/阴影，
+     尺寸收缩；运行指示由图标本体色呼吸承担（独立圆点退役） */
   top: auto;
   bottom: calc(50% + 14px);
   right: 4px;
-  width: 30px;
-  height: 64px;
+  width: 28px;
+  height: 28px;
   display: inline-flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  border: 1px solid var(--gewu-border);
+  padding: 0;
+  border: none;
   border-radius: 8px;
-  background: var(--gewu-bg-elevated);
-  color: var(--gewu-text-secondary);
+  background: transparent;
+  color: var(--gewu-text-tertiary);
   cursor: pointer;
   pointer-events: auto;
-  box-shadow: var(--gewu-shadow-sm);
 }
 
 .handle:hover {
@@ -164,20 +164,12 @@
 }
 
 .handleActive {
-  border-color: var(--gewu-accent);
   color: var(--gewu-accent);
 }
 
-/* agent 运行中呼吸灯（UI-397 同款语言：绿呼吸） */
-.handleDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--gewu-border-strong);
-}
-
-.handleDotRunning {
-  background: var(--gewu-status-online);
+/* agent 运行中：图标本体绿色呼吸（UI-397 同款语言） */
+.handleRunning {
+  color: var(--gewu-status-online);
   animation: sideChatBreath 1.6s ease-in-out infinite;
 }
 
