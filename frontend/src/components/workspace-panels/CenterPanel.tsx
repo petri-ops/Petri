@@ -231,7 +231,7 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
             }`}
             style={
               ctx.summaryCardOpen && ctx.summaryVisibility === 'expanded'
-                ? ({ ['--side-chat-pinned' as string]: `${ctx.summaryOpenWidth}px` } as React.CSSProperties)
+                ? { ['--side-chat-pinned' as string]: `${ctx.summaryOpenWidth}px` }
                 : undefined
             }
           >

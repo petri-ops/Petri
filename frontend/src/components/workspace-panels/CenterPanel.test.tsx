@@ -167,10 +167,10 @@ describe('G0-RS-P1 CenterPanel projection', () => {
       ctx.summaryOpenWidth = 300;
       const { unmount } = render(<CenterPanel ctx={ctx} refs={refs} />);
       // 面板右偏移 = 14px 内缩 + 钉住列宽 300 + 8px 间隙
-      const dock = document.querySelector("[data-testid='side-chat-dock']") as HTMLElement | null;
+      const dock = document.querySelector<HTMLElement>("[data-testid='side-chat-dock']");
       expect(dock?.style.getPropertyValue('--dock-right')).toBe('322px');
       // yield 让位随钉住扩容
-      const yielded = document.querySelector('[class*="agentMainSideChatYield"]') as HTMLElement | null;
+      const yielded = document.querySelector<HTMLElement>('[class*="agentMainSideChatYield"]');
       expect(yielded?.style.getPropertyValue('--side-chat-pinned')).toBe('300px');
       // 摘要悬浮封顶类随钉住列无需生效，但会话开启类必须在布局层
       expect(document.querySelector('[class*="workspaceSessionLayoutSideChatOpen"]')).toBeTruthy();
@@ -185,7 +185,7 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     try {
       const ctx = context('chat');
       const { unmount } = render(<CenterPanel ctx={ctx} refs={refs} />);
-      const dock = document.querySelector("[data-testid='side-chat-dock']") as HTMLElement | null;
+      const dock = document.querySelector<HTMLElement>("[data-testid='side-chat-dock']");
       expect(dock?.style.getPropertyValue('--dock-right')).toBe('14px');
       unmount();
     } finally {
