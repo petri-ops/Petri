@@ -508,6 +508,9 @@ function SessionFrameView({
             surfaceSuppressed={wide && sideChatOpen}
             open={sideChatOpen}
             onOpenChange={onSideChatOpenChange ?? (() => {})}
+            // UI-448 加映 v21 — 悬浮面宽度与摘要浮卡同源同值（v4 的「同宽 300px」
+            // 与摘要实际 276–292 动态宽不一致，用户实测指认；缺省回落 300）
+            width={ctx.summaryOpenWidth}
           />
         )}
       </div>

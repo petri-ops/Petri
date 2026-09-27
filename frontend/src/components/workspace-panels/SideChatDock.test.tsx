@@ -233,3 +233,39 @@ describe('UI-448 加映 v12 docked 变体（宽窗独立列区）', () => {
     expect(document.querySelector("[data-testid='side-chat-dock']")).toBeNull();
   });
 });
+
+describe('UI-448 加映 v21 悬浮面与摘要浮卡同尺寸语言', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    propBag().__sideChatSimpleChatProps = [];
+  });
+
+  afterEach(cleanup);
+
+  it('width 透传为悬浮面内联宽度（与摘要浮卡 summaryOpenWidth 同源同值）', () => {
+    render(
+      <SideChatDock
+        projectId="p_1"
+        sourceConversationId="conv_main"
+        open
+        onOpenChange={vi.fn()}
+        width={288}
+      />
+    );
+    const surface = screen.getByTestId('side-chat-surface') as HTMLElement;
+    expect(surface.style.width).toBe('288px');
+  });
+
+  it('width 缺省时回落 CSS 300px（不写内联样式）', () => {
+    render(
+      <SideChatDock
+        projectId="p_1"
+        sourceConversationId="conv_main"
+        open
+        onOpenChange={vi.fn()}
+      />
+    );
+    const surface = screen.getByTestId('side-chat-surface') as HTMLElement;
+    expect(surface.style.width).toBe('');
+  });
+});

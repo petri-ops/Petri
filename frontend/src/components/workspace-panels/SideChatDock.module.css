@@ -25,8 +25,13 @@
   /* UI-448 加映 v10 — 挂载点已迁入 workspaceSessionLayout（与摘要悬浮同层），
      right:0 即与摘要卡同缘——参照系结构性同源，无魔法数 */
   right: 0;
-  max-height: calc(100% - 130px);
-  height: 50%;
+  /* UI-448 加映 v21 — 与摘要浮卡同尺寸语言（用户实测指认「没有自动悬浮成
+     同样尺寸的」）：高度从固定 50% 改内容自适应——min-height 320 保聊天
+     可用下限，max-height 取与摘要浮卡完全相同的 calc(50% - 24px) 天花板
+     （v8 规则对摘要浮卡的同一道帽），两卡同屏高度家族一致。 */
+  max-height: calc(50% - 24px);
+  height: auto;
+  min-height: 320px;
   width: 300px;
   /* 注意：定位容器 .dockRoot 宽度为 0，max-width 百分比参照系不可用——
      必须用视口单位（v3 同款）；calc(100% - 24px) 会把面板夹塌成边框 2px */

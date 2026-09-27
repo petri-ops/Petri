@@ -42,6 +42,7 @@ export function SideChatDock({
   surfaceSuppressed = false,
   open,
   onOpenChange,
+  width,
 }: {
   projectId: string;
   /**
@@ -61,6 +62,12 @@ export function SideChatDock({
   open: boolean;
   /** UI-448 加映 v15 — 收起回调（✕/事件入口统一走它回写壳状态）。 */
   onOpenChange: (open: boolean) => void;
+  /**
+   * UI-448 加映 v21 — 悬浮面宽度与摘要浮卡同源（CenterPanel 传
+   * ctx.summaryOpenWidth）：窄窗下两卡同宽同缘同尺寸语言，用户实测指认。
+   * 缺省回落 CSS 的 300px。
+   */
+  width?: number;
 }): React.ReactElement {
   // UI-448 加映 v3 — 每项目独立侧聊会话（与中栏 activeConvId 完全解耦）。
   // projectId 切换由 CenterPanel 以 key={projectId} 重挂载承载（State 初始化器
@@ -158,6 +165,7 @@ export function SideChatDock({
         <div
           className={styles.surface}
           data-testid="side-chat-surface"
+          style={width ? { width } : undefined}
         >
           {panel}
         </div>

@@ -4314,3 +4314,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **修法**：`.dockedColumn` 补 `margin-top: auto`（auto margin 吸收右轨剩余空间，卡片内容高度不变、贴轨底 44px 入口按钮间隙）——与窄窗悬浮面 `bottom:44px` 同语义：会话在下、摘要在上。
 - **证据**：theme-token-contract 4 + SideChatDock 10 全绿；CDP 实机几何验证（用户应用内卡片 bottom 距会话框底 44px、紧贴入口气泡）；CSS 模块 HMR 即时生效无需重载。**待用户实机过目后翻 verified（v15–v20 同批）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-448 加映 v21 (2026-09-27 in_progress，用户「窄窗下会话卡没有悬浮成跟项目摘要卡同样尺寸」——浮卡同尺寸语言)
+
+- **根因**：v4 声称「同宽 300px」但摘要浮卡实际是动态宽（summaryOpenWidth float 档 276–292，随会话框 32% 收缩）且高度为内容高；会话浮面固定 300×50% 高——两卡同屏宽差、高差一倍，用户实测指认。
+- **修法**：① `SideChatDock` 增 `width` prop，CenterPanel 传 `ctx.summaryOpenWidth`——悬浮面宽度与摘要浮卡**同源同值**（缺省回落 300）；② `.surface` 高度从固定 50% 改内容自适应：`min-height: 320px`（聊天可用下限）+ `max-height: calc(50% - 24px)`（与摘要浮卡 v8 规则完全相同的天花板），沉底锚定不变。
+- **证据**：SideChatDock 12（width 透传/缺省回落两用例）+ CenterPanel 13 全绿；tsc 0；IAB 实机对表：窄窗 982 下会话卡 276×320 vs 摘要卡 276×307，sameWidth=true。**待用户实机过目后翻 verified（v15–v21 同批）**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
