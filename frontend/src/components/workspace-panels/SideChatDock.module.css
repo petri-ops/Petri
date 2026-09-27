@@ -179,31 +179,3 @@
   padding: 0 4px;
 }
 
-/* UI-448 加映 v16 — 侧聊入口按钮沉底：右下角常驻小气泡（v7 极简语言），
-   与顶栏摘要概览按钮上下对应；面板展开时挂其上方 */
-.sideChatFab {
-  position: absolute;
-  right: 14px;
-  bottom: 8px;
-  width: 28px;
-  height: 28px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--gewu-text-tertiary);
-  cursor: pointer;
-  z-index: 45;
-}
-
-.sideChatFab:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
-}
-
-.sideChatFab[aria-pressed='true'] {
-  color: var(--gewu-accent);
-}
