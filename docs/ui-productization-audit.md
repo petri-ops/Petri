@@ -4293,3 +4293,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **修法**：删除该 display:none 规则（留 v17 注释锚点）；窄窗恢复 v12 的 padding 让位语义（`min(432px+钉住列, 100%-320px)`，320px 可读下限）。宽窗不受影响（让位类本就不挂载）。
 - **证据**：CenterPanel 13 + SideChatDock 10 + theme-token-contract 4 全绿；gate:code-size PASS（22233=22233，顺提交 v15/v16 遗留的 size-baseline 刷新与 impact-map sideChatDockStore 清理）。组件测试无法覆盖 CSS 模块内部规则（jsdom 无布局），此类回归以实机验收为门。**待用户实机过目后翻 verified（v15/v16/v17 可同批）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-448 加映 v18 (2026-09-27 in_progress，用户实机「页面变窄后卡片没自动转悬浮」——测量冻结类缺陷防御)
+
+- **取证**：用户 Electron 实机截图（982×1600 竖窗、双栏收起）摘要/侧聊恒卡钉住列区形态；几何比对（摘要 600px 高=expanded 密度、侧聊 680–1430=右轨堆叠）确认非悬浮形态。CDP（--remote-debugging-port=9222）读态：检查时会话已自愈（1518@2530 测量存活），冻结现场不可复捕。干净会话（IAB 同款 Chromium）矩阵复现全通过：首载窄窗/宽→窄跳变/17 步连续拖拽/用户确切尺寸+双栏收起，共 0 失配——冻结仅发生于长会话 Electron 侧（resize/RO 整段错过类），触发路径未定位。
+- **修法**（防御两层）：① `deriveSummaryVisibility` 纯函数内加视口钳制——会话框是视口子集，视口 <1120 时钉住形态几何上不可能成立，恒判悬浮；健康会话零行为变化（frameWidth≥1120 必有 viewport≥1120）。② hook 补 `focus`/`visibilitychange` 自愈重测：最小化恢复/切回窗口即拿实时宽度，冻结从「重挂载才自愈」收敛为「切回即自愈」。
+- **证据**：useWorkspaceLayout 8（新增 A6 聚焦/可见性重测 + 派生纯函数四态用例，含冻结病态态 derive(1518,982)→float）+ CenterPanel 13 + SideChatDock 10 全绿；tsc 0；IAB 实机过渡复验一致；docs:check/ui:audit:check 绿。**待用户实机过目后翻 verified（v15–v18 可同批）**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

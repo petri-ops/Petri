@@ -20,7 +20,7 @@ import React from 'react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { act, cleanup, render } from '@testing-library/react';
 import { WorkspacePanelsProvider } from '@/components/desktop/WorkspacePanelsContext';
-import { useWorkspaceLayout } from './useWorkspaceLayout';
+import { deriveSummaryVisibility, useWorkspaceLayout } from './useWorkspaceLayout';
 
 type FrameSpec = { id: string; w: number; h: number };
 
@@ -141,5 +141,42 @@ describe('useWorkspaceLayout 会话框测量（UI-371）', () => {
     act(() => observer.trigger());
 
     expect(view.getByTestId('w').textContent).toBe('900');
+  });
+
+  // UI-448 加映 v18 — 长会话丢事件自愈：最小化恢复/切回窗口时强制重测。
+  // Electron 实测存在会话框宽度冻结在旧值的会话（resize 与 RO 整段错过，
+  // 重挂载才自愈）；聚焦/可见性恢复是零成本重测信号。
+  it('A6 窗口重新聚焦 / 页面恢复可见时强制重测', () => {
+    const view = render(harness([{ id: 'chat', w: 700, h: 600 }]));
+    expect(view.getByTestId('w').textContent).toBe('700');
+
+    const node = view.getByTestId('frame-chat');
+    node.dataset.w = '1300';
+    // 不触发 RO、不触发 React render，仅派发聚焦/可见性事件
+    act(() => window.dispatchEvent(new Event('focus')));
+    expect(view.getByTestId('w').textContent).toBe('1300');
+
+    node.dataset.w = '400';
+    act(() => document.dispatchEvent(new Event('visibilitychange')));
+    expect(view.getByTestId('w').textContent).toBe('400');
+  });
+});
+
+// UI-448 加映 v18 — 宽窄形态派生（含视口钳制兜底）。
+// 被测缺陷：Electron 实机 982px 竖窗下会话框测量冻结在旧宽 ≥1120，
+// 摘要/侧聊恒卡钉住列区形态不转悬浮（用户实机截图取证）。
+describe('deriveSummaryVisibility 宽窄派生（UI-448 加映 v18）', () => {
+  it('视口 < 1120 恒悬浮——会话框是视口子集，钉住列区几何上不可能成立', () => {
+    expect(deriveSummaryVisibility(1120, 1119)).toBe('float');
+    // 冻结病态态：测量值停在旧宽 1518、窗口已收窄 → 兜底强制悬浮
+    expect(deriveSummaryVisibility(1518, 982)).toBe('float');
+    expect(deriveSummaryVisibility(0, 900)).toBe('float');
+  });
+
+  it('视口 ≥ 1120 维持原 UI-351 语义（0=未测量按 expanded、≥1120 钉住、其余悬浮）', () => {
+    expect(deriveSummaryVisibility(0, 1920)).toBe('expanded');
+    expect(deriveSummaryVisibility(1120, 1920)).toBe('expanded');
+    expect(deriveSummaryVisibility(1518, 2530)).toBe('expanded');
+    expect(deriveSummaryVisibility(918, 1920)).toBe('float');
   });
 });

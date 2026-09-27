@@ -28,7 +28,7 @@ import {
   useConversationJobs,
 } from '@/hooks/useConversationJobs';
 
-import { useWorkspaceLayout } from '@/hooks/useWorkspaceLayout';
+import { deriveSummaryVisibility, useWorkspaceLayout } from '@/hooks/useWorkspaceLayout';
 import { useWorkspacePanelShortcuts } from '@/hooks/useWorkspacePanelShortcuts';
 import { useRightPanelTabs } from '@/hooks/useRightPanelTabs';
 import { segmentToMode, modeToSegment, type WorkspaceMode } from '@/hooks/useWorkspaceRouting';
@@ -208,6 +208,7 @@ export function ProjectWorkspace(): React.ReactElement {
     centerColRef,
     sessionFrameRef,
     sessionFrameWidth,
+    viewportWidth,
   } = useWorkspaceLayout();
   // UI-359 — Ctrl/Cmd+` 开合底部终端、Ctrl/Cmd+Shift+B 开合右侧栏
   // （VS Code 肌肉记忆）。挂在本组件内=只在面板存在的路由生效。
@@ -257,11 +258,12 @@ export function ProjectWorkspace(): React.ReactElement {
   // UI-351 加映（用户裁决「有遮挡就应该悬浮 / 边界加宽」）：只有中栏宽裕
   // （≥1120px，卡片完全放得下）才钉住展开；一旦会话开始被挤/盖（<1120px）
   // 即转悬浮层——不再保留 780–1120 的「压缩钉住」中间带。
-  const summaryVisibility = useMemo<'hidden' | 'compact' | 'float' | 'expanded'>(() => {
-    if (sessionFrameWidth === 0) return 'expanded';
-    if (sessionFrameWidth >= 1120) return 'expanded';
-    return 'float';
-  }, [sessionFrameWidth]);
+  // UI-448 加映 v18 — 派生收敛为 hook 导出的纯函数：内含视口钳制兜底
+  // （视口 < 1120 恒悬浮，防长会话测量冻结卡死列区形态）。
+  const summaryVisibility = useMemo(
+    () => deriveSummaryVisibility(sessionFrameWidth, viewportWidth),
+    [sessionFrameWidth, viewportWidth],
+  );
   // Bottom-terminal drag comes from useResizableColumns above; we clamp
   // the height to the workspace viewport (140-520) inline so the
   // terminal never eats the entire screen.

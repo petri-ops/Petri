@@ -16,6 +16,25 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 
+/** UI-351 — 中栏宽裕阈值（≥ 才钉住展开摘要/侧聊列区；会话框一旦被挤即转悬浮）。 */
+export const SUMMARY_PIN_MIN_WIDTH = 1120;
+
+/**
+ * UI-351 — 摘要/侧聊宽窄形态派生（窄窗悬浮、宽窗钉住列区）。
+ * UI-448 加映 v18 — 视口钳制兜底：会话框是视口的子集，视口不足阈值时
+ * 「钉住列区」形态在几何上不可能成立，直接判悬浮。防御长会话下测量值
+ * 冻结在旧宽的病态态（此时窗口已收窄、派生若只看会话框会恒卡列区）。
+ */
+export function deriveSummaryVisibility(
+  sessionFrameWidth: number,
+  viewportWidth: number,
+): 'hidden' | 'compact' | 'float' | 'expanded' {
+  if (viewportWidth < SUMMARY_PIN_MIN_WIDTH) return 'float';
+  if (sessionFrameWidth === 0) return 'expanded';
+  if (sessionFrameWidth >= SUMMARY_PIN_MIN_WIDTH) return 'expanded';
+  return 'float';
+}
+
 export interface UseWorkspaceLayoutResult {
   // Panel toggles
   leftOpen: boolean;
@@ -185,9 +204,19 @@ export function useWorkspaceLayout(): UseWorkspaceLayoutResult {
   }, [measureSessionFrames]);
 
   useEffect(() => {
-    window.addEventListener('resize', measureSessionFrames);
+    const remeasure = () => measureSessionFrames();
+    window.addEventListener('resize', remeasure);
+    // UI-448 加映 v18 — 长会话丢事件自愈：最小化恢复 / 切回窗口 / 系统级 DPI
+    // 变化等场景下 resize 与 RO 都可能整段错过（Electron 实测存在会话框宽度
+    // 冻结在旧值、摘要/侧聊恒列区不转悬浮的会话，重挂载才自愈）。
+    // 聚焦与可见性恢复是零成本的重测信号：节点仍在则拿实时宽度，节点已换
+    // 则由 ref 回调补挂。冻结类缺陷从「重挂载才自愈」收敛为「切回即自愈」。
+    document.addEventListener('visibilitychange', remeasure);
+    window.addEventListener('focus', remeasure);
     return () => {
-      window.removeEventListener('resize', measureSessionFrames);
+      window.removeEventListener('resize', remeasure);
+      document.removeEventListener('visibilitychange', remeasure);
+      window.removeEventListener('focus', remeasure);
       sessionFrameObserverRef.current?.disconnect();
       sessionFrameObserverRef.current = null;
       sessionFrameNodesRef.current.clear();
