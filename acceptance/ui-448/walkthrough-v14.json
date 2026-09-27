@@ -6,11 +6,31 @@
   "change": "撤销 v2「单一输入面」设定（其时为用户要求，现被明确反转）：侧聊打开时主会话 composer 不再让位，两者并存；ComposerYieldHint 让位件/契约/CSS 整链退役，ComposerYield 瘦身为 composerPlaceholder 工具",
   "measured": {
     "totalComposers": 2,
-    "centerComposer": { "present": true, "width": 718, "enabled": true, "placeholder": "输入消息… (Enter 发送, Shift+E…（完整键位提示）" },
-    "dockComposer": { "present": true, "placeholder": "输入消息…（compact）" },
+    "centerComposer": {
+      "present": true,
+      "width": 718,
+      "enabled": true,
+      "placeholder": "输入消息… (Enter 发送, Shift+E…（完整键位提示）"
+    },
+    "dockComposer": {
+      "present": true,
+      "placeholder": "输入消息…（compact）"
+    },
     "yieldHintGone": true
   },
   "redGreen": "受影响面 47 文件/415 用例绿；前端全量 155 文件/1245 用例 0 红；tsc 0；eslint 0 error（陈旧抑制槽位 prune）",
-  "screenshots": ["ui448v14-coexist-composers.png（双输入框同屏并存实证）"],
-  "verdict": "allPass"
+  "screenshots": [
+    "ui448v14-coexist-composers.png（双输入框同屏并存实证）",
+    "ui448v14-card-below-toggle.png"
+  ],
+  "verdict": "allPass",
+  "cardPosition": {
+    "wideSummaryClosed": {
+      "cardTop": 38,
+      "toggleBottom": 30,
+      "cardBelowToggle": true,
+      "cardRight": 2127
+    },
+    "note": "v14 加映：卡片弹出位置对齐摘要行为（按钮下方），不再挂右下角"
+  }
 }
