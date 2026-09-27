@@ -1,0 +1,25 @@
+{
+  "package": "UI-448 加映 v3",
+  "date": "2026-09-27",
+  "env": "dev 栈（localhost:3000，Vite HMR），viewport 1680x950，dark",
+  "feedback": "用户三点：①主题风格与摘要面板一致②侧边聊天只是单纯聊天、不加入主会话 agent③composer 工具栏删减（图2）",
+  "fixes": {
+    "themeAlign": "surface 底色 --gewu-bg-surface→--gewu-bg-elevated（实测 rgb(29,41,69)=elevated）；头部对齐摘要顶栏规格（52px/10-13-9/text6% 分隔线）",
+    "independentConversation": "悬挂面不再镜像中栏 activeConvId：每项目 localStorage 持久化独立侧聊会话（gewu:side-chat-conv:<projectId>），空则首发由 useChatStream 既有路径建话；组件签名收缩为只收 projectId（CenterPanel 以 key=projectId 重挂载）",
+    "slimComposer": "SimpleChat 增 slimComposer：导出按钮+ContextBudgetButton JSX 条件移除，知识开关+模型/供应商/思考档位对 CSS display:none（实测 computed display none）；只留只读徽标+发送键"
+  },
+  "e2e": {
+    "probe": "悬挂面发送探针消息：自动建独立会话（localStorage=conv_8e6df3a4…，侧栏出现独立条目），模型以 read 档 1 次只读工具读 package.json 正确回答入口文件；中栏会话内容分毫未动",
+    "cleanup": "探针会话已移入回收站，localStorage 指向已清"
+  },
+  "redGreen": "SideChatDock 契约重构（独立会话持久化回读/初始 null/slimComposer 传参）5 红→29/29 绿；前端全量 155 文件/1238 用例 0 红；tsc 0；eslint 0 error（新 effect 触发 set-state-in-effect 增量以 key=projectId 重挂载方案根治，未放宽基线）",
+  "screenshots": [
+    "ui448v3-independent-empty-slim.png（独立会话空态+slim composer+elevated 底色）",
+    "ui448v3-probe-e2e.png（探针端到端：独立线程回答+中栏不动）"
+  ],
+  "honestBoundaries": [
+    "侧聊会话为真实项目会话，会出现在左栏项目会话列表（复用会话模型的固有面）",
+    "若用户本意是「完全无工具纯 LLM 聊天」，read 锁改直连对话端点为 reopen 路径（plan §9）"
+  ],
+  "verdict": "allPass"
+}

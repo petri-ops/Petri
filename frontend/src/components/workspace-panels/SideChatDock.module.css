@@ -25,7 +25,8 @@
   max-width: calc(100vw - 120px);
   display: flex;
   flex-direction: column;
-  background: var(--gewu-bg-surface);
+  /* UI-448 加映 v3 — 底色对齐摘要卡（--gewu-bg-elevated，原 surface 档偏深） */
+  background: var(--gewu-bg-elevated);
   border: 1px solid var(--gewu-border);
   border-radius: 16px;
   box-shadow: var(--gewu-shadow-float);
@@ -61,12 +62,15 @@
   }
 }
 
+/* UI-448 加映 v3 — 头部对齐摘要卡顶栏规格（.workspacePinnedSummaryTopBar：
+   52px 高 / 10-13-9 padding / text 6% 分隔线），两悬浮面板说同一套头部语言 */
 .surfaceHeader {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 10px;
-  border-bottom: 1px solid var(--gewu-border);
+  min-height: 52px;
+  padding: 10px 13px 9px;
+  border-bottom: 1px solid color-mix(in srgb, var(--gewu-text) 6%, transparent);
   color: var(--gewu-text-secondary);
   font-size: var(--gewu-font-size-caption);
   flex-shrink: 0;
@@ -101,15 +105,6 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-}
-
-.emptyHint {
-  margin: auto;
-  padding: 16px;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-caption);
-  line-height: 1.7;
-  text-align: center;
 }
 
 /* 常驻把手：中栏右缘竖条 */

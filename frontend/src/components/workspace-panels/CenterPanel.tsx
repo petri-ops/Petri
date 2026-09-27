@@ -206,14 +206,11 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
       data-return-conversation-ms={returnConversationMs === null ? undefined : returnConversationMs.toFixed(2)}
     >
       {ctx.columnHeader}
-      {/* UI-417 — 侧边聊天悬挂化：常驻把手 + 滑出 overlay，复用中央同一会话同一 run。
-          ownsCopilotAsk 归属仍在中央 SimpleChat，悬挂面不承接「问 Agent」。 */}
+      {/* UI-417 — 侧边聊天悬挂化：常驻把手 + 滑出 overlay。
+          UI-448 加映 v3 — 悬挂面自立每项目独立侧聊会话（不再镜像中栏 activeConvId），
+          中栏会话与悬挂面互不干扰；ownsCopilotAsk 归属仍在中央 SimpleChat。 */}
       {ctx.project && ctx.projectId && (
-        <SideChatDock
-          projectId={ctx.projectId}
-          conversationId={ctx.activeConvId}
-          onConversationChange={ctx.setActiveConvId}
-        />
+        <SideChatDock key={ctx.projectId} projectId={ctx.projectId} />
       )}
       <div
         className={`${styles.workspaceProjectionLayer} ${workspaceMode === 'chat' ? styles.workspaceProjectionLayerActive : ''}`}

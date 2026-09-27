@@ -2039,6 +2039,14 @@
   container-type: inline-size;
 }
 
+/* UI-448 加映 v3 — slimComposer（悬挂面纯聊天）：工具栏删减，只留档位锁定
+   徽标 + 发送键；知识开关与模型/供应商/思考档位整对隐藏（display:none，
+   中栏不受影响） */
+.sc-composer-slim .sc-knowledge-toggle,
+.sc-composer-slim .sc-model-picker-pair {
+  display: none;
+}
+
 /* BLOCK-49 加映二 — 窄态模型/供应商按钮文字收起（图标化；JS composerNarrow 双保险） */
 @container (max-width: 679px) {
   .sc-composer .sc-model-btn span {

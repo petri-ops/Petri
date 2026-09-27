@@ -276,6 +276,12 @@ export interface SimpleChatProps {
    * 工具放行口径由后端 agent-tool-policy 权威门禁裁决。
    */
   lockedAccessMode?: AccessMode;
+  /**
+   * UI-448 加映 v3 — composer 删减（悬挂面纯聊天）：隐藏导出/知识空间开关/
+   * 上下文用量环/模型与供应商/思考档位，只留档位锁定徽标 + 发送键。
+   * 缺省 false，中栏用法零变化。
+   */
+  slimComposer?: boolean;
 }
 
 export type PendingApproval = ConversationPendingApproval;

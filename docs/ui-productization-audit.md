@@ -4215,3 +4215,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 - **反馈与修法**：①「背景多了一层」=面板内 SimpleChat 自带 `.sc-root` 卡片底（26px 圆角+surface 底+阴影）未中性化——比照中栏 agentMain 同款 `:global(.sc-root)` 中性化，只留悬浮面自身圆角面板（与摘要卡同特点）；②「不应从上到下占据」=surface 改贴底 `height: 50%` 右下角半高，与右上角摘要浮层同屏共存，中栏让位原则不变；③「仅聊天不能编辑/修改/新增文件」=`useModelAccessMenus` 增 `lockedAccessMode`（初始锁定+setter 失效守卫），悬挂面锁 `read` 档（后端 agent-tool-policy 权威门禁同口径：只读工具放行、全部写入/执行拒绝），访问档位选择器禁用并提示「文件修改请回中栏」。HK-01 红绿先行（锁档 harness 契约+传参契约两红→28/28 绿）。**实机走查 allPass（2026-09-27）**：面板贴底半高（top 467/bottom 942/h 475=视口正 50%）、sc-root 中性化实测（透明底/0 边框/0 圆角=单层面板）、composer「只读模式」无下拉（锁定）、与摘要卡同屏零重叠（摘要底 351 < 面板顶 467，间隙 116px）；前端全量 155 文件/1237 用例 0 红+tsc 0+eslint 0 error；证据=acceptance/ui-448/walkthrough-v2.json + 3 截图。（v1 已于 2026-09-27 晨 verified；**v2 为其后新增量，in_progress 待用户过目 v2 形态后翻 verified**）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-448 加映 v3 (2026-09-27 in_progress，用户过目 v2 后三点反馈：主题对齐摘要面板/独立会话不并入主会话 agent/composer 删减)
+
+- **反馈与修法**：①悬浮面底色 surface→`--gewu-bg-elevated` 对齐摘要卡，头部对齐摘要顶栏规格（52px/分隔线 color-mix(text 6%)）；②悬挂面**自立每项目独立会话**（localStorage 持久化 + 首发 useChatStream 既有建话路径），不再镜像中栏 activeConvId——主会话编码 agent 内容不再出现在悬挂面，两会话 run 互不干扰；组件签名收缩为只收 projectId；③SimpleChat 增 `slimComposer` prop：隐藏导出/知识开关/上下文环/模型供应商/思考档位，只留只读徽标+发送键。**实机走查 allPass（2026-09-27）**：底色实测 elevated（rgb(29,41,69)）与摘要卡一致、头部 52px 同规格；端到端探针=悬挂面发消息自动建独立会话（localStorage 落 conv id+侧栏独立条目），read 档 1 次只读工具读 package.json 正确作答，中栏会话分毫未动；composer 实测只余只读徽标+发送键（知识开关/模型对 display:none 实证）；探针会话已回收清场。红绿 5 红→29/29 绿；前端全量 155 文件/1238 用例 0 红；tsc 0；eslint 0 error；证据=acceptance/ui-448/walkthrough-v3.json+2 截图。**待用户过目 v3 形态后翻 verified**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

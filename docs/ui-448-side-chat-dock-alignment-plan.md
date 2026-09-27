@@ -9,7 +9,7 @@ acceptance:
   - 窄面适配：悬挂面 SimpleChat compact 占位符（短提示不折行）；表格/长 token 三态实机核对（框内滚动+滚动条可见）
   - 台账同步：docs/ui-productization-audit.md UI-448 条目与实现同一提交；实机走查截图证据落 acceptance/ui-448/
 reopen: 用户实机过目后对新形态不满意，或悬浮面与摘要浮层同屏叠置的已知边界升级为真问题时
-status: completed
+status: active
 ---
 
 # UI-448 — 侧边聊天悬浮面体验对齐项目摘要
@@ -124,3 +124,17 @@ SideChatDock（UI-417）展开后是「同一主视图的第二份拷贝」：38
 ### §8.2 加映 v2 收口（2026-09-27）
 
 实现提交 78f73b5f（UI 台账加映段同提交）；closeout 十一门绿（code-size +4 随批重打，归属本包锁档接线）；plan/registry 状态维持 completed。加映段与 v1 同一条 UI-448 台账；v1 已于 2026-09-27 晨 verified（并行会话联测），v2 为其后新增量 in_progress 待用户过目 v2 形态。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 9. 加映 v3（2026-09-27，用户过目 v2 后三点反馈——「和预期还有些差距」）
+
+用户原话：「主题风格应该和摘要面板保持一致」「侧边聊天只是单纯的聊天不加入主会话agent」「聊天输入框下面不需要那么多的内容了…适当的删减一下 你看看怎么调整 应该是个比较大的任务」。
+
+1. **主题对齐摘要面板**：悬浮面底色 `--gewu-bg-surface` 与摘要卡 `--gewu-bg-elevated` 存在色差（用户截图可见两卡深浅不一）——surface 底色换 `--gewu-bg-elevated`，头部对齐摘要卡顶栏规格（min-height 52px / padding 10px 13px 9px / 分隔线 color-mix(text 6%)）。
+2. **独立会话（不加入主会话 agent）**：悬挂面不再镜像中栏 activeConvId——改为**每项目独立的侧聊会话**（localStorage 按 projectId 持久化，空则首发自动建话，复用 useChatStream 既有建话路径），组件签名收缩为只收 projectId；中栏会话与悬挂面互不干扰（各自的 run/消息流）。解释口径：仍带项目背景（read 档只读工具可用），但不是主会话的一部分；主会话的编码 agent 内容不再镜像到悬挂面。reopen：若用户本意是「完全无工具纯 LLM 聊天」，撤 read 锁改直连对话端点（另裁）。
+3. **composer 删减**：SimpleChat 增 `slimComposer` prop——隐藏导出/知识空间开关/上下文用量环/模型与供应商/思考档位五组控件，只留「只读模式」锁定徽标 + 发送键。
+
+HK-01 红绿先行：SideChatDock 传参契约重构（独立会话初始 null/持久化回读 + slimComposer=true）先红后绿。
+
+### §9.1 加映 v3 实施记录（2026-09-27 当日收口）
+
+红绿先行：SideChatDock 契约重构 5 红（独立会话持久化回读/初始 null/slimComposer 传参/呼吸灯与空态随签名重构改约）→ 29/29 绿。波折两条如实登记：①空态死路自纠——独立会话为 null 时最初只渲染提示文本不挂 SimpleChat，首发建话无入口，改为始终挂载（null 会话由 SimpleChat 内部建话路径处理）；②新增「project 切换同步 localStorage」effect 触发 react-hooks/set-state-in-effect 增量红——改 CenterPanel 以 key={projectId} 重挂载根治，抑制基线未放宽。端到端探针：悬挂面发消息自动建独立会话+read 档只读回答+中栏零扰动（探针会话已回收）。验证=29/29+前端全量 155 文件/1238 用例 0 红+tsc 0+eslint 0 error。证据=acceptance/ui-448/walkthrough-v3.json。

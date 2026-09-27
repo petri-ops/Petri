@@ -224,6 +224,7 @@ export function SimpleChat({
   sendGuard,
   compact = false,
   lockedAccessMode,
+  slimComposer = false,
 }: SimpleChatProps): React.ReactElement {
   const [messages, setMessages] = useState<SimpleMessage[]>([]);
   const [copiedMessageKey, setCopiedMessageKey] = useState<string | null>(null);
@@ -1338,7 +1339,7 @@ export function SimpleChat({
           ) : (
           <div
             ref={composerBarRef}
-            className={`sc-composer${isDraggingOver ? ' sc-composer-dragging' : ''}`}
+            className={`sc-composer${isDraggingOver ? ' sc-composer-dragging' : ''}${slimComposer ? ' sc-composer-slim' : ''}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
@@ -1464,7 +1465,7 @@ export function SimpleChat({
               <div className="sc-composer-left">
                 {/* BLOCK-60：死控件 + 已移除；刷新/I-O 收进 ⋯ 溢出菜单 */}
                 <div className="sc-access-picker">
-                  {conversationId ? (
+                  {conversationId && !slimComposer ? (
                     <button
                       type="button"
                       className="sc-access-btn"
@@ -1564,8 +1565,9 @@ export function SimpleChat({
               <div className="sc-composer-right">
                 {/* BLOCK-68 / UI-317 —— ⋯ 工具菜单整体移除：刷新文件链接改自动化
                     （订阅 projectWorkspaceChanged），模型 I/O 迁右栏 tab；不预留空壳 */}
-                {/* BLOCK-20: live context-budget ring — UI-301 加映：移到供应商左侧 */}
-                <ContextBudgetButton budget={tokenBudget} activeContextWindow={undefined} />
+                {/* BLOCK-20: live context-budget ring — UI-301 加映：移到供应商左侧；
+                    UI-448 加映 v3 — slimComposer 悬挂面不渲染 */}
+                {!slimComposer && <ContextBudgetButton budget={tokenBudget} activeContextWindow={undefined} />}
                 <div className="sc-model-picker-pair">
                   <div className="sc-model-picker sc-model-picker-footer">
                     <button

@@ -12,9 +12,12 @@
  * UI-448 — 开态升 sideChatDockStore 共享单例（中栏 composer 让位 + 内容让位同源）；
  *   视觉对齐项目摘要浮层语言（圆角/阴影 token/280ms/reduced-motion）；compact 短占位符。
  * UI-448 加映 v2 — 悬挂面仅聊天：锁只读档（lockedAccessMode="read"），sc-root 中性化去双层背景。
+ * UI-448 加映 v3 — **独立会话**：不再镜像中栏 activeConvId，每项目一个独立侧聊会话
+ *   （localStorage 按 projectId 持久化；空则首发由 useChatStream 既有路径自动建话），
+ *   主会话的编码 agent 内容不再出现在悬挂面，两会话 run 互不干扰。组件签名收缩为只收
+ *   projectId。**slimComposer**：composer 只留只读徽标 + 发送键。
  */
-
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
 import { isConversationRunning } from '@/components/copilot/conversationRunStore';
@@ -23,30 +26,50 @@ import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
 import { setSideChatDockOpen, useSideChatDockOpen } from '@/hooks/sideChatDockStore';
 import styles from './SideChatDock.module.css';
 
+const sideChatConvKey = (projectId: string) => `gewu:side-chat-conv:${projectId}`;
+
+function readStoredSideConversation(projectId: string): string | null {
+  try {
+    return window.localStorage.getItem(sideChatConvKey(projectId));
+  } catch {
+    return null;
+  }
+}
+
 export function SideChatDock({
   projectId,
-  conversationId,
-  onConversationChange,
 }: {
   projectId: string;
-  conversationId: string | null;
-  onConversationChange: (id: string | null) => void;
 }): React.ReactElement {
   const open = useSideChatDockOpen();
   const surfaceRef = useRef<HTMLDivElement | null>(null);
-  const [agentRunning, setAgentRunning] = React.useState(false);
+  const [agentRunning, setAgentRunning] = useState(false);
+  // UI-448 加映 v3 — 每项目独立侧聊会话（与中栏 activeConvId 完全解耦）。
+  // projectId 切换由 CenterPanel 以 key={projectId} 重挂载承载（State 初始化器
+  // 重新读 localStorage），避免同步 setState-in-effect 级联渲染。
+  const [sideConvId, setSideConvId] = useState<string | null>(() => readStoredSideConversation(projectId));
 
-  // 呼吸灯：当前会话 agent 运行中（conversationRunStore 单一真相；UI-397 同款语言）
+  const handleConversationChange = useCallback((id: string | null) => {
+    setSideConvId(id);
+    try {
+      if (id) window.localStorage.setItem(sideChatConvKey(projectId), id);
+      else window.localStorage.removeItem(sideChatConvKey(projectId));
+    } catch {
+      // localStorage 不可用时退化为内存态（会话仍可用，仅不跨重启记忆）
+    }
+  }, [projectId]);
+
+  // 呼吸灯：当前侧聊会话 agent 运行中（conversationRunStore 单一真相；UI-397 同款语言）
   useEffect(() => {
-    if (!open || !conversationId) {
+    if (!open || !sideConvId) {
       setAgentRunning(false);
       return;
     }
-    const update = () => setAgentRunning(isConversationRunning(conversationId));
+    const update = () => setAgentRunning(isConversationRunning(sideConvId));
     update();
     const timer = window.setInterval(update, 1000);
     return () => window.clearInterval(timer);
-  }, [open, conversationId]);
+  }, [open, sideConvId]);
 
   // Esc 收起
   useEffect(() => {
@@ -75,7 +98,7 @@ export function SideChatDock({
   const toggle = useCallback(() => setSideChatDockOpen((v) => !v), []);
 
   // UI-417 入口收编：原右栏 chat tab 的入口（home 空态卡/分析完成跳转）派发
-  // sideChatOpen，这里展开悬挂面（无会话时也展开——诚实空态引导中央首条消息）。
+  // sideChatOpen，这里展开悬挂面（无会话时也展开——诚实空态引导首条消息）。
   useEffect(
     () => subscribeGewuEvent(gewuEvents.sideChatOpen, () => setSideChatDockOpen(true)),
     []
@@ -99,20 +122,21 @@ export function SideChatDock({
             </button>
           </header>
           <div className={styles.surfaceBody}>
-            {conversationId ? (
-              <SimpleChat
-                projectId={projectId}
-                conversationId={conversationId}
-                onConversationChange={onConversationChange}
-                inputHeight={88}
-                // UI-448 — 窄面 compact：短占位符，完整键位提示在 380px 内折两行
-                compact
-                // UI-448 加映 v2 — 悬挂面仅聊天：锁只读档，写入/执行类工具被拒（后端权威门同口径）
-                lockedAccessMode="read"
-              />
-            ) : (
-              <div className={styles.emptyHint}>当前项目还没有会话——在中央发送第一条消息后，这里会同步显示同一会话。</div>
-            )}
+            <SimpleChat
+              key={sideConvId ?? 'side-new'}
+              projectId={projectId}
+              // 加映 v3 — null = 尚无侧聊会话：SimpleChat 内部首发建话（useChatStream
+              // 既有路径）并经 onConversationChange 回写 localStorage
+              conversationId={sideConvId}
+              onConversationChange={handleConversationChange}
+              inputHeight={88}
+              // UI-448 — 窄面 compact：短占位符，完整键位提示在 380px 内折两行
+              compact
+              // UI-448 加映 v2 — 悬挂面仅聊天：锁只读档，写入/执行类工具被拒（后端权威门同口径）
+              lockedAccessMode="read"
+              // UI-448 加映 v3 — composer 删减：只留只读徽标 + 发送键
+              slimComposer
+            />
           </div>
         </div>
       ) : null}
