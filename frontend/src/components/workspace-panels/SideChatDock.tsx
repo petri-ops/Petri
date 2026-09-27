@@ -38,10 +38,18 @@ function readStoredSideConversation(projectId: string): string | null {
 
 export function SideChatDock({
   projectId,
+  summaryPinnedWidth = 0,
 }: {
   projectId: string;
+  /**
+   * UI-448 加映 v8 — 摘要钉住列宽（expanded 档且开启时传 summaryOpenWidth，否则 0）。
+   * dockRoot 据此注入 --dock-right：面板与摘要卡共享右缘坐标系——钉住时面板让到
+   * 列左侧（14 内缩 + 列宽 + 8 间隙），悬浮时 14px 与摘要卡同缘，任何状态不叠加。
+   */
+  summaryPinnedWidth?: number;
 }): React.ReactElement {
   const open = useSideChatDockOpen();
+  const dockRight = 14 + summaryPinnedWidth + (summaryPinnedWidth > 0 ? 8 : 0);
   const [agentRunning, setAgentRunning] = useState(false);
   // UI-448 加映 v3 — 每项目独立侧聊会话（与中栏 activeConvId 完全解耦）。
   // projectId 切换由 CenterPanel 以 key={projectId} 重挂载承载（State 初始化器
@@ -83,7 +91,11 @@ export function SideChatDock({
   // （Esc 在输入时误触），折叠/展开仅经把手与头部 ✕。
 
   return (
-    <div className={styles.dockRoot} data-testid="side-chat-dock">
+    <div
+      className={styles.dockRoot}
+      style={{ ['--dock-right' as string]: `${dockRight}px` }}
+      data-testid="side-chat-dock"
+    >
       {open ? (
         <div className={styles.surface} data-testid="side-chat-surface">
           <header className={styles.surfaceHeader}>

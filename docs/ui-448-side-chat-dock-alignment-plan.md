@@ -9,7 +9,7 @@ acceptance:
   - 窄面适配：悬挂面 SimpleChat compact 占位符（短提示不折行）；表格/长 token 三态实机核对（框内滚动+滚动条可见）
   - 台账同步：docs/ui-productization-audit.md UI-448 条目与实现同一提交；实机走查截图证据落 acceptance/ui-448/
 reopen: 用户实机过目后对新形态不满意，或悬浮面与摘要浮层同屏叠置的已知边界升级为真问题时
-status: completed
+status: active
 ---
 
 # UI-448 — 侧边聊天悬浮面体验对齐项目摘要
@@ -193,3 +193,18 @@ HK-01 红绿先行：开态隐把手 + slim 传参契约重构先红后绿。宽
 ### §13.2 加映 v7 收口（2026-09-27）
 
 实现提交 173847a9（v6 实现被中断后随 bb1075f9 已落，v7 图标极简化并入本提交）；closeout 十一门绿。v7 in_progress 待用户过目翻 verified。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 14. 加映 v8（2026-09-27，用户过目 v7 后反馈「点击摘要 会话框向左退了一个距离 点击会话又推了一个距离 这重叠了 项目摘要卡和会话应该共享一个距离 不应该是叠加」）
+
+**根因**：摘要卡（钉住列/悬浮两态）与会话面板分属两个定位参照系（sessionLayout vs centerCol），右缘各自为政——摘要钉住时 300px 列插在会话区右缘，与会话面板（锚定 centerCol 右缘）同域叠加；悬浮态右缘又差 14px 内缩，不共享距离。
+
+**修法（共享右缘坐标系）**：
+1. SideChatDock 增 `summaryPinnedWidth` 入参，dockRoot 注入 `--dock-right: calc(14px + 钉住列宽 + 8px 间隙)`——摘要钉住时面板整体让到列左侧，悬浮时 14px 与摘要卡同缘，任何状态两卡右缘协调不叠加；
+2. 会话面板打开时摘要悬浮封顶（`workspaceSessionLayoutSideChatOpen .workspaceSummaryFloat { max-height: calc(50% - 24px) }`）——上摘要下会话各占一半永不重叠；
+3. yield 让位随钉住扩容（`--side-chat-pinned` 变量加进 agentMainSideChatYield 的 min()），钉住+会话并存时正文仍不被压。
+
+HK-01 红绿先行：钉住宽度注入契约（dockRoot 变量/yield 变量/封顶类）先红后绿。
+
+### §14.1 加映 v8 实施记录（2026-09-27 当日收口）
+
+红绿先行：钉住宽度注入/让位扩容/悬浮封顶三契约先红→22/22 绿。实机：悬浮态摘要右 1325=面板右 1325（horizontalGap 0）、垂直零重叠；sessionLayout 1098<1120 摘要悬浮为 UI-351 正确判定非回归。验证=22/22+前端全量 155 文件/1240 用例 0 红+tsc 0+eslint 0 error。证据=acceptance/ui-448/walkthrough-v8.json。

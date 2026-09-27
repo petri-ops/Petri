@@ -208,20 +208,32 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
       {ctx.columnHeader}
       {/* UI-417 — 侧边聊天悬挂化：常驻把手 + 滑出 overlay。
           UI-448 加映 v3 — 悬挂面自立每项目独立侧聊会话（不再镜像中栏 activeConvId），
-          中栏会话与悬挂面互不干扰；ownsCopilotAsk 归属仍在中央 SimpleChat。 */}
+          中栏会话与悬挂面互不干扰；ownsCopilotAsk 归属仍在中央 SimpleChat。
+          UI-448 加映 v8 — 摘要钉住列宽传入 dock：两面板共享右缘坐标系不叠加。 */}
       {ctx.project && ctx.projectId && (
-        <SideChatDock key={ctx.projectId} projectId={ctx.projectId} />
+        <SideChatDock
+          key={ctx.projectId}
+          projectId={ctx.projectId}
+          summaryPinnedWidth={
+            ctx.summaryCardOpen && ctx.summaryVisibility === 'expanded' ? ctx.summaryOpenWidth : 0
+          }
+        />
       )}
       <div
         className={`${styles.workspaceProjectionLayer} ${workspaceMode === 'chat' ? styles.workspaceProjectionLayerActive : ''}`}
         aria-hidden={workspaceMode !== 'chat'}
         data-projection="conversation"
       >
-        <SessionFrameView ctx={ctx} sessionFrameRef={sessionFrameRef} variant="chat">
+        <SessionFrameView ctx={ctx} sessionFrameRef={sessionFrameRef} variant="chat" sideChatOpen={sideChatDockOpen}>
           <div
             className={`${styles.agentMain} ${
               workspaceMode === 'chat' && sideChatDockOpen ? styles.agentMainSideChatYield : ''
             }`}
+            style={
+              ctx.summaryCardOpen && ctx.summaryVisibility === 'expanded'
+                ? ({ ['--side-chat-pinned' as string]: `${ctx.summaryOpenWidth}px` } as React.CSSProperties)
+                : undefined
+            }
           >
             {ctx.project && ctx.projectId && (
               <SimpleChat
@@ -326,11 +338,14 @@ function SessionFrameView({
   sessionFrameRef,
   children,
   variant = 'default',
+  sideChatOpen = false,
 }: {
   ctx: CenterPanelContext;
   sessionFrameRef: React.Ref<HTMLDivElement>;
   children: React.ReactNode;
   variant?: 'default' | 'chat';
+  /** UI-448 加映 v8 — 会话面板开启时摘要悬浮封顶上半，两面板同屏不叠加。 */
+  sideChatOpen?: boolean;
 }): React.ReactElement {
   // HLE-C4R: surface the active conversation's durable-loop projection in the
   // pinned summary. Reads the same shared run store the chat renders from, so
@@ -348,9 +363,9 @@ function SessionFrameView({
 
   return (
     <div
-      className={`${styles.workspaceSessionFrame} ${
+      className={`${styles.workspaceSessionLayout} ${
         variant === 'chat' ? styles.workspaceSessionFrameChat : ''
-      }`}
+      } ${sideChatOpen ? styles.workspaceSessionLayoutSideChatOpen : ''}`}
       ref={sessionFrameRef}
     >
       <div className={styles.workspaceSessionLayout}>

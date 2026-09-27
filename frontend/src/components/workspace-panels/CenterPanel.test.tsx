@@ -156,4 +156,40 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     render(<CenterPanel ctx={ctx} refs={refs} />);
     expect(document.querySelector('[class*="agentMainSideChatYield"]')).toBeNull();
   });
+
+  // UI-448 加映 v8 — 摘要钉住列与会话面板共享右缘坐标系，互不叠加
+  it('shares the right rail with the pinned summary column (UI-448 加映 v8)', () => {
+    setSideChatDockOpen(true);
+    try {
+      const ctx = context('chat');
+      ctx.summaryCardOpen = true;
+      ctx.summaryVisibility = 'expanded';
+      ctx.summaryOpenWidth = 300;
+      const { unmount } = render(<CenterPanel ctx={ctx} refs={refs} />);
+      // 面板右偏移 = 14px 内缩 + 钉住列宽 300 + 8px 间隙
+      const dock = document.querySelector("[data-testid='side-chat-dock']") as HTMLElement | null;
+      expect(dock?.style.getPropertyValue('--dock-right')).toBe('322px');
+      // yield 让位随钉住扩容
+      const yielded = document.querySelector('[class*="agentMainSideChatYield"]') as HTMLElement | null;
+      expect(yielded?.style.getPropertyValue('--side-chat-pinned')).toBe('300px');
+      // 摘要悬浮封顶类随钉住列无需生效，但会话开启类必须在布局层
+      expect(document.querySelector('[class*="workspaceSessionLayoutSideChatOpen"]')).toBeTruthy();
+      unmount();
+    } finally {
+      setSideChatDockOpen(false);
+    }
+  });
+
+  it('keeps the default dock offset when the summary is not pinned (UI-448 加映 v8)', () => {
+    setSideChatDockOpen(true);
+    try {
+      const ctx = context('chat');
+      const { unmount } = render(<CenterPanel ctx={ctx} refs={refs} />);
+      const dock = document.querySelector("[data-testid='side-chat-dock']") as HTMLElement | null;
+      expect(dock?.style.getPropertyValue('--dock-right')).toBe('14px');
+      unmount();
+    } finally {
+      setSideChatDockOpen(false);
+    }
+  });
 });

@@ -20,9 +20,9 @@
   position: absolute;
   top: auto;
   bottom: 8px;
-  /* UI-448 加映 v4 — 贴右侧边＝与摘要卡同一右缘：摘要浮层在会话区内缩 14px
-     （workspaceSessionLayout 内 right:0），对齐该缘即 right:14px */
-  right: 14px;
+  /* UI-448 加映 v4/v8 — 贴右侧边：右偏移走 --dock-right（默认 14px=会话区内缩，
+     与摘要卡同缘；摘要钉住时由 CenterPanel 注入列宽+间隙联动让位） */
+  right: var(--dock-right, 14px);
   height: 50%;
   width: 300px;
   /* 注意：定位容器 .dockRoot 宽度为 0，max-width 百分比参照系不可用——
@@ -143,7 +143,7 @@
      尺寸收缩；运行指示由图标本体色呼吸承担（独立圆点退役） */
   top: auto;
   bottom: calc(50% + 14px);
-  right: 4px;
+  right: calc(var(--dock-right, 14px) - 10px);
   width: 28px;
   height: 28px;
   display: inline-flex;

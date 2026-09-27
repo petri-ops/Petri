@@ -1767,9 +1767,17 @@
 /* UI-448 — 侧边聊天悬浮面展开时中栏会话内容列让位：
    面板 380px + 把手间隙 44px + 8px 呼吸 = 432px 避让量；
    calc(100% - 320px) 下限保证极窄窗口下会话列仍保留 320px 可读宽度
-   （此时面板按既有 max-width 规则收窄，残余重叠与悬浮面展开前一致）。 */
+   （此时面板按既有 max-width 规则收窄，残余重叠与悬浮面展开前一致）。
+   UI-448 加映 v8 — 面板右偏移改为 --dock-right 坐标系（摘要钉住列联动），
+   让位量随钉住列宽扩容，钉住列+面板并存时正文仍不被压。 */
 .agentMainSideChatYield {
-  padding-right: min(432px, calc(100% - 320px));
+  padding-right: min(calc(432px + var(--side-chat-pinned, 0px)), calc(100% - 320px));
+}
+
+/* UI-448 加映 v8 — 会话面板开启时摘要悬浮封顶上半：
+   上摘要（≤50%-24px）下会话（50%）同屏各占一角，永不叠加 */
+.workspaceSessionLayoutSideChatOpen .workspaceSummaryFloat {
+  max-height: calc(50% - 24px);
 }
 
 .agentMain :global(.sc-root) {

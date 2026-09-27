@@ -1,0 +1,22 @@
+{
+  "package": "UI-448 加映 v8",
+  "date": "2026-09-27",
+  "env": "dev 栈（localhost:3000，Vite HMR），viewport 1680x950，dark",
+  "feedback": "用户反馈「点击摘要 会话框向左退了一个距离 点击会话又推了一个距离 这重叠了 项目摘要卡和会话应该共享一个距离 不应该是叠加」",
+  "rootCause": "摘要卡（钉住列/悬浮）与会话面板分属 sessionLayout 与 centerCol 两个定位参照系，右缘各自为政：悬浮差 14px 内缩、钉住列直接与面板同域叠加",
+  "fixes": {
+    "sharedRightRail": "dockRoot 注入 --dock-right 坐标系（默认 14px 与摘要悬浮同缘；摘要钉住时 14+列宽+8 让到列左侧），CenterPanel 按 summaryCardOpen×summaryVisibility×summaryOpenWidth 计算",
+    "noOverlap": "会话面板开启时摘要悬浮封顶上半（workspaceSessionLayoutSideChatOpen .workspaceSummaryFloat max-height calc(50%-24px)），上摘要下会话永不叠加",
+    "yieldGrowth": "agentMainSideChatYield 让位量随钉住列宽扩容（--side-chat-pinned 变量加入 min()），钉住列+面板并存正文不被压"
+  },
+  "measured": {
+    "floatMode": { "summaryRight": 1325, "dockRight": 1325, "horizontalGap": 0, "verticalOverlap": false, "summaryBottom": 351, "dockTop": 467 },
+    "layoutWidth": 1098,
+    "note": "本窗宽下摘要为悬浮态（sessionLayout 1098<1120，UI-351 规则正确判定）；钉住态由契约测试覆盖（--dock-right=322px/--side-chat-pinned=300px/封顶类三断言）"
+  },
+  "redGreen": "钉住宽度注入/让位扩容/悬浮封顶契约先红→22/22 绿；前端全量 155 文件/1240 用例 0 红；tsc 0；eslint 0 error",
+  "screenshots": [
+    "ui448v8-shared-rail.png（摘要悬浮+会话面板同右缘同屏不叠加实证）"
+  ],
+  "verdict": "allPass"
+}

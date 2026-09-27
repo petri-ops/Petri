@@ -4241,3 +4241,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **修法**：把手 30x64 带框竖条→28x28 裸气泡描边图标（border/底板/阴影全去除，例图同款）；独立圆点退役，运行指示改由图标本体色承担（handleRunning=--gewu-status-online 绿呼吸）；激活态=accent 色；锚定面板上方布局不变。
 - **证据**：呼吸灯契约随形态重构先红（圆点退役断言）→20/20 绿；前端全量 155 文件/1238 用例 0 红；tsc 0；eslint 0 error；实机实测 border 0/底 transparent/阴影 none、开态卡片挂图标下方不变；截图=acceptance/ui-448/ui448v7-minimal-icon.png + ui448v7-open-below-icon.png + walkthrough-v7.json。**待用户过目 v7 形态后翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-448 加映 v8 (2026-09-27 in_progress，用户反馈：摘要与会话面板右缘应共享距离、不应叠加)
+
+- **修法**：①SideChatDock 注入 `--dock-right`（14px 内缩 + 摘要钉住列宽 + 8px 间隙联动），摘要钉住时面板让到列左、悬浮时与摘要卡同缘；②会话面板打开时摘要悬浮 max-height 封顶上半（`workspaceSessionLayoutSideChatOpen`），上摘要下会话永不叠加；③agentMain 让位随钉住扩容（`--side-chat-pinned`）。**实机走查 allPass（2026-09-27）**：悬浮态实测摘要右 1325=面板右 1325（horizontalGap 0）、垂直零重叠（摘要底 351<面板顶 467）；钉住态三断言由契约覆盖（--dock-right=322px/--side-chat-pinned=300px/封顶类）；契约先红→22/22 绿；前端全量 155 文件/1240 用例 0 红；tsc 0；eslint 0 error；证据=acceptance/ui-448/walkthrough-v8.json。**待用户过目 v8 形态后翻 verified**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
