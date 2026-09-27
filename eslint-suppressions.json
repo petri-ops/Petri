@@ -482,11 +482,6 @@
       "count": 1
     }
   },
-  "frontend/src/components/workspace-panels/SideChatDock.tsx": {
-    "react-hooks/set-state-in-effect": {
-      "count": 1
-    }
-  },
   "frontend/src/components/workspace-panels/WorkspaceSummaryCard.test.tsx": {
     "@typescript-eslint/require-await": {
       "count": 22

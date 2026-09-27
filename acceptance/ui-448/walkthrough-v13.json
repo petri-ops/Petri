@@ -1,0 +1,23 @@
+{
+  "package": "UI-448 加映 v13",
+  "date": "2026-09-27",
+  "env": "dev 栈，IAB 按用户窗口 2481×1876（宽）/ 1000×900（窄）",
+  "question": "用户：侧边聊天图标位置是不是不太友好？它是主会话区的外延、整个项目开发过程问答用——哪里更合适？",
+  "answer": "入口归位工作台顶栏（摘要概览开关邻居）：侧聊是工作区级控件，顶栏是本仓同类开关（摘要概览/更多工具/底部终端）的既有归属；中栏右缘浮动图标既不叙事又遮内容，退役。",
+  "implementation": {
+    "newToggle": "titlebar/SideChatToggleButton（iconBtn 族、aria-pressed、运行呼吸色 v7 语言迁入，仅工作区 chat 模式渲染）",
+    "handleRetired": "SideChatDock 中栏浮动把手整体退役（组件只留浮面/列区两形态；把手 CSS 与测试同步清理）",
+    "keptEntries": "顶栏开关 + 右栏「侧边聊天」tab（既有 sideChatOpen 事件入口）双入口；✕ 关闭不变"
+  },
+  "measured": {
+    "wide2481": { "togglePos": [2071, 7], "summaryPos": [2108, 5], "sameToolbarRow": true, "floatingIconGone": true, "clickOpens": "dockedColumn=true right=2127 w=300 aria-pressed=true" },
+    "narrow1000": { "toggleInToolbar": true, "togglePos": [590, 7], "dockedColumnGone": true, "floatPanel": "right=645 top=461 w=300", "floatingHandleGone": true }
+  },
+  "redGreen": "dock 测试改造（把手退役）+ 新按钮契约 4 例 → 27/27 + 33/33 绿；前端全量 156 文件/1249 用例 0 红；tsc 0；eslint 0 error（陈旧抑制槽位 --prune-suppressions 收缩 5 条）",
+  "cleanup": "测试产生的「侧边聊天」分叉会话全部回收（3 条）+ localStorage 侧聊键已清",
+  "screenshots": [
+    "ui448v13-toolbar-toggle-docked.png（宽窗：顶栏开关开合 + 右轨列区）",
+    "ui448v13-toolbar-toggle-float.png（窄窗：顶栏开关 + 悬浮面）"
+  ],
+  "verdict": "allPass"
+}

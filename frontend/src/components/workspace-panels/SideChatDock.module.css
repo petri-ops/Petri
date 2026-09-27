@@ -134,54 +134,9 @@
   flex-direction: column;
 }
 
-/* 常驻把手：中栏右缘竖条 */
-.handle {
-  position: absolute;
-  /* UI-448 加映 v6 — 把手常驻（摘要概览按钮同款）：开/关两态恒显示；锚定面板
-     上方（面板占下半高，把手底缘距面板顶缘 6px），卡片打开时挂图标正下方
-     UI-448 加映 v7 — 极简化（用户例图=裸气泡描边图标）：去外框/底板/阴影，
-     尺寸收缩；运行指示由图标本体色呼吸承担（独立圆点退役） */
-  top: auto;
-  bottom: calc(50% + 14px);
-  right: 0;
-  width: 28px;
-  height: 28px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--gewu-text-tertiary);
-  cursor: pointer;
-  pointer-events: auto;
-}
 
-.handle:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
-}
 
-.handleActive {
-  color: var(--gewu-accent);
-}
 
-/* agent 运行中：图标本体绿色呼吸（UI-397 同款语言） */
-.handleRunning {
-  color: var(--gewu-status-online);
-  animation: sideChatBreath 1.6s ease-in-out infinite;
-}
-
-@keyframes sideChatBreath {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.35;
-  }
-}
 
 /* UI-448 加映 v12 — 宽窗独立列区：由 CenterPanel 放进右轨（in-flow），
    与摘要钉住列垂直堆叠共享右缘；定宽 300（同摘要列）、高度取右轨一半 */

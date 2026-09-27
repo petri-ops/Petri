@@ -76,3 +76,19 @@
   --titlebar-left-bg: var(--titlebar-bg);
   --titlebar-pill-bg: color-mix(in srgb, var(--gewu-bg-elevated) 70%, transparent 30%);
 }
+
+/* UI-448 加映 v13 — 侧聊开关运行呼吸：侧聊 agent 运行中图标取在线色（v7 语言迁入顶栏） */
+.sideChatRunning {
+  color: var(--gewu-status-online);
+  animation: sideChatToggleBreath 1.6s ease-in-out infinite;
+}
+
+@keyframes sideChatToggleBreath {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}

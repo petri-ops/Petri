@@ -54,22 +54,16 @@ describe('UI-417 SideChatDock', () => {
     cleanup();
   });
 
-  it('把手常驻（收起态）、点击滑出 overlay；开态把手恒显于面板上方（加映 v6 摘要按钮同款），再点收起', async () => {
+  it('收起态无面板；store 开启即滑出 overlay（加映 v13：入口迁顶栏，组件不再自带把手）', async () => {
     const { rerender } = render(<SideChatDock projectId="p_1" sourceConversationId="conv_main" />);
-    // 收起态：只有把手
-    expect(screen.getByTestId('side-chat-handle')).toBeTruthy();
     expect(screen.queryByTestId('side-chat-surface')).toBeNull();
+    // 加映 v13 — 中栏浮动把手退役（入口在顶栏 SideChatToggleButton）
+    expect(screen.queryByTestId('side-chat-handle')).toBeNull();
 
-    fireEvent.click(screen.getByTestId('side-chat-handle'));
+    act(() => setSideChatDockOpen(true));
     expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
-    // 加映 v6 — 把手恒显：开态呈激活态、aria-expanded=true，面板挂图标下方
-    const handle = screen.getByTestId('side-chat-handle');
-    expect(handle).toBeTruthy();
-    expect(handle.getAttribute('aria-expanded')).toBe('true');
-    expect(handle.className).toContain('handleActive');
 
-    // 再点收起（D1 契约恢复）
-    fireEvent.click(screen.getByTestId('side-chat-handle'));
+    act(() => setSideChatDockOpen(false));
     await waitFor(() => expect(screen.queryByTestId('side-chat-surface')).toBeNull());
     void rerender;
   });
@@ -92,9 +86,9 @@ describe('UI-417 SideChatDock', () => {
     expect(sub).not.toHaveBeenCalled();
   });
 
-  it('Esc 不收起（加映 v5 常驻化：输入时 Esc 误触不折叠），由把手/✕ 折叠', () => {
+  it('Esc 不收起（加映 v5 常驻化：输入时 Esc 误触不折叠），由顶栏开关/✕ 折叠', () => {
     render(<SideChatDock projectId="p_1" sourceConversationId="conv_main" />);
-    fireEvent.click(screen.getByTestId('side-chat-handle'));
+    act(() => setSideChatDockOpen(true));
     expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
     fireEvent.keyDown(window, { key: 'Escape' });
     expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
@@ -103,32 +97,20 @@ describe('UI-417 SideChatDock', () => {
     expect(screen.queryByTestId('side-chat-surface')).toBeNull();
   });
 
-  it('外点不收起（加映 v5 常驻化：与摘要卡同款特性，仅把手/✕ 折叠）', () => {
+  it('外点不收起（加映 v5 常驻化：与摘要卡同款特性，仅顶栏开关/✕ 折叠）', () => {
     render(
       <div>
         <div data-testid="outside" />
         <SideChatDock projectId="p_1" sourceConversationId="conv_main" />
       </div>
     );
-    fireEvent.click(screen.getByTestId('side-chat-handle'));
+    act(() => setSideChatDockOpen(true));
     expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
     fireEvent.mouseDown(screen.getByTestId('outside'));
     expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
   });
 
-  it('呼吸灯：侧聊会话运行中，把手图标本体变 running 呼吸色（加映 v7 极简形态，圆点退役）', () => {
-    window.localStorage.setItem(sideConvKey, 'conv_running');
-    render(<SideChatDock projectId="p_1" sourceConversationId="conv_main" />);
-    const handle = screen.getByTestId('side-chat-handle');
-    expect(handle.className).toContain('handleRunning');
-
-    window.localStorage.setItem(sideConvKey, 'conv_idle');
-    cleanup();
-    render(<SideChatDock projectId="p_1" sourceConversationId="conv_main" />);
-    const idle = screen.getByTestId('side-chat-handle');
-    expect(idle.className).not.toContain('handleRunning');
-    expect(idle.querySelector('span')).toBeNull();
-  });
+  // 加映 v13 — 运行呼吸迁至顶栏开关（SideChatToggleButton 契约承载）
 });
 
 describe('UI-448 SideChatDock 共享开态（sideChatDockStore）', () => {
@@ -142,16 +124,14 @@ describe('UI-448 SideChatDock 共享开态（sideChatDockStore）', () => {
     setSideChatDockOpen(false);
   });
 
-  it('外部 set 开态直接展开（中栏让位同源联动）；把手恒显且呈激活态（加映 v6）', () => {
+  it('外部 set 开态直接展开（中栏让位同源联动；加映 v13 无把手变体）', () => {
     render(<SideChatDock projectId="p_1" sourceConversationId="conv_main" />);
     expect(screen.queryByTestId('side-chat-surface')).toBeNull();
     act(() => {
       setSideChatDockOpen(true);
     });
     expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
-    const handle = screen.getByTestId('side-chat-handle');
-    expect(handle.getAttribute('aria-expanded')).toBe('true');
-    expect(handle.className).toContain('handleActive');
+    expect(screen.queryByTestId('side-chat-handle')).toBeNull();
   });
 
   it('开态跨挂载持久：store 已开时重新挂载即展开（同一会话单一输入面的真相源）', () => {
@@ -179,7 +159,7 @@ describe('UI-448 加映 v3 独立会话 + slimComposer', () => {
   it('独立会话：SimpleChat 绑定 localStorage 持久化的侧聊会话，不接收中栏会话', () => {
     window.localStorage.setItem(sideConvKey, 'conv_side');
     render(<SideChatDock projectId="p_1" sourceConversationId="conv_main" />);
-    fireEvent.click(screen.getByTestId('side-chat-handle'));
+    act(() => setSideChatDockOpen(true));
     const props = propBag().__sideChatSimpleChatProps?.at(-1);
     expect(props?.conversationId).toBe('conv_side');
     expect(screen.getByTestId('side-chat-simplechat').textContent).toBe('conv_side');
@@ -187,14 +167,14 @@ describe('UI-448 加映 v3 独立会话 + slimComposer', () => {
 
   it('无持久化会话时 conversationId 为 null（首发由 SimpleChat 建话并回写）', () => {
     render(<SideChatDock projectId="p_1" sourceConversationId="conv_main" />);
-    fireEvent.click(screen.getByTestId('side-chat-handle'));
+    act(() => setSideChatDockOpen(true));
     const props = propBag().__sideChatSimpleChatProps?.at(-1);
     expect(props?.conversationId).toBeNull();
   });
 
   it('slimComposer：composer 只留只读徽标 + 发送键（锁档 + compact 同传）', () => {
     render(<SideChatDock projectId="p_1" sourceConversationId="conv_main" />);
-    fireEvent.click(screen.getByTestId('side-chat-handle'));
+    act(() => setSideChatDockOpen(true));
     const props = propBag().__sideChatSimpleChatProps?.at(-1);
     expect(props?.slimComposer).toBe(true);
     expect(props?.lockedAccessMode).toBe('read');
@@ -218,7 +198,7 @@ describe('UI-448 加映 v12 继承主会话记录（fork）+ 钉住变体', () =
   it('首次展开自动 fork 主会话（继承记录）并持久化分叉 id', async () => {
     const { forkConversation } = await import('@/components/copilot/copilotConversationsClient');
     render(<SideChatDock projectId="p_1" sourceConversationId="conv_main" />);
-    fireEvent.click(screen.getByTestId('side-chat-handle'));
+    act(() => setSideChatDockOpen(true));
     await waitFor(() => expect(screen.getByTestId('side-chat-simplechat').textContent).toBe('conv_forked'));
     expect(forkConversation).toHaveBeenCalledWith('conv_main', expect.any(String));
     expect(window.localStorage.getItem(sideConvKey)).toBe('conv_forked');
@@ -228,7 +208,7 @@ describe('UI-448 加映 v12 继承主会话记录（fork）+ 钉住变体', () =
     const { forkConversation } = await import('@/components/copilot/copilotConversationsClient');
     window.localStorage.setItem(sideConvKey, 'conv_existing');
     render(<SideChatDock projectId="p_1" sourceConversationId="conv_main" />);
-    fireEvent.click(screen.getByTestId('side-chat-handle'));
+    act(() => setSideChatDockOpen(true));
     await waitFor(() => expect(screen.getByTestId('side-chat-simplechat').textContent).toBe('conv_existing'));
     expect(forkConversation).not.toHaveBeenCalled();
   });
@@ -236,7 +216,7 @@ describe('UI-448 加映 v12 继承主会话记录（fork）+ 钉住变体', () =
   it('主会话为空时不 fork，保持空态（首发送由 SimpleChat 建话）', async () => {
     const { forkConversation } = await import('@/components/copilot/copilotConversationsClient');
     render(<SideChatDock projectId="p_1" sourceConversationId={null} />);
-    fireEvent.click(screen.getByTestId('side-chat-handle'));
+    act(() => setSideChatDockOpen(true));
     await new Promise((r) => setTimeout(r, 20));
     expect(forkConversation).not.toHaveBeenCalled();
     expect(propBag().__sideChatSimpleChatProps?.at(-1)?.conversationId).toBeNull();
@@ -247,7 +227,6 @@ describe('UI-448 加映 v12 继承主会话记录（fork）+ 钉住变体', () =
       <SideChatDock projectId="p_1" sourceConversationId="conv_main" variant="docked" />
     );
     expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
-    expect(screen.queryByTestId('side-chat-handle')).toBeNull();
     expect(document.querySelector("[data-testid='side-chat-dock']")).toBeNull();
   });
 });

@@ -20,7 +20,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
-import { isConversationRunning } from '@/components/copilot/conversationRunStore';
 import { forkConversation } from '@/components/copilot/copilotConversationsClient';
 import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
 // UI-448 — 开态升共享 store：中栏 composer 让位与内容让位类同源联动（单一输入面）
@@ -59,7 +58,6 @@ export function SideChatDock({
   surfaceSuppressed?: boolean;
 }): React.ReactElement {
   const open = useSideChatDockOpen();
-  const [agentRunning, setAgentRunning] = useState(false);
   // UI-448 加映 v3 — 每项目独立侧聊会话（与中栏 activeConvId 完全解耦）。
   // projectId 切换由 CenterPanel 以 key={projectId} 重挂载承载（State 初始化器
   // 重新读 localStorage），避免同步 setState-in-effect 级联渲染。
@@ -95,21 +93,6 @@ export function SideChatDock({
       cancelled = true;
     };
   }, [open, sideConvId, sourceConversationId, projectId]);
-
-  // 呼吸灯：当前侧聊会话 agent 运行中（conversationRunStore 单一真相；UI-397 同款语言）。
-  // UI-448 加映 v4 — 与 open 解耦：收起态把手也要提示「侧聊 agent 在跑」
-  useEffect(() => {
-    if (!sideConvId) {
-      setAgentRunning(false);
-      return;
-    }
-    const update = () => setAgentRunning(isConversationRunning(sideConvId));
-    update();
-    const timer = window.setInterval(update, 1000);
-    return () => window.clearInterval(timer);
-  }, [sideConvId]);
-
-  const toggle = useCallback(() => setSideChatDockOpen((v) => !v), []);
 
   // UI-417 入口收编：原右栏 chat tab 的入口（home 空态卡/分析完成跳转）派发
   // sideChatOpen，这里展开悬挂面（无会话时也展开——诚实空态引导首条消息）。
@@ -172,19 +155,8 @@ export function SideChatDock({
           {panel}
         </div>
       ) : null}
-      {/* UI-448 加映 v6 — 把手常驻（摘要概览按钮同款）：开/关两态恒显示，
-          开态呈激活态；面板挂图标正下方，再点图标收起（D1 契约恢复） */}
-      <button
-        type="button"
-        className={`${styles.handle} ${open ? styles.handleActive : ''} ${agentRunning ? styles.handleRunning : ''}`}
-        onClick={toggle}
-        aria-label={open ? '收起侧边聊天' : '打开侧边聊天'}
-        aria-expanded={open}
-        title={open ? '收起侧边聊天' : '侧边聊天'}
-        data-testid="side-chat-handle"
-      >
-        <Icon name="message-circle" size={16} />
-      </button>
+      {/* UI-448 加映 v13 — 中栏浮动图标退役：入口迁至顶栏（摘要概览按钮邻居，
+          见 titlebar/SideChatToggleButton），面板本体只保留浮面/列区两形态。 */}
     </div>
   );
 }
