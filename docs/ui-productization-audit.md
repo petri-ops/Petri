@@ -4351,7 +4351,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 - **根因**：v25 只给摘要**悬浮形态**装了拖宽把手；宽窗下摘要是**钉住列**形态（workspaceSummaryColumn），无把手无拖宽——用户当前宽窗看到的正是这张，指认「还没有适配」。钉住列容器同 dockedColumn 无 position，接入把手须同步防逃逸。
 - **修法**：钉住列接入 `FloatCardResizeHandle`（与悬浮形态共用 `gewu:summary-float-width` 偏好与 summaryResizeHandlers 回调，窄宽切换宽度不跳变，默认回落 expanded 档 summaryOpenWidth 292–312）；`.workspaceSummaryColumn` 补 `position: relative` 防把手逃逸（教训同 v25 补2）。
-- **证据**：CenterPanel 13（新增钉住列把手存在用例）+ SideChatDock 14 = 27 绿；tsc 0；IAB 实机：钉住列 312→拖宽 562、persisted=562、把手 containedInCard=true 无逃逸。**待用户实机过目后翻 verified（v15–v26 同批）**。
+- **证据**：CenterPanel 13（新增钉住列把手存在用例）+ SideChatDock 14 = 27 绿；tsc 0；IAB 实机：钉住列 312→拖宽 562、persisted=562、把手 containedInCard=true 无逃逸。**v26 补**（用户截图实指「指示线应该在卡片区域内部…摘要卡有多余的另一层？」——猜测正确）：钉住列宿主比可见卡宽 ~24px（卡片根 `max-width: calc(100% - 24px)` 右预留，UI-370 只修了悬浮态宿主）→ 指示线落在卡外空隙；补 `.workspaceSummaryColumn .workspacePinnedSummary { max-width: 100% }` 铺满同款，IAB 实机 handleLeft==cardLeft==983、lineOnCardEdge=true。**待用户实机过目后翻 verified（v15–v26 同批）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 - **证据**：SideChatDock 14（拖拽变宽+持久化+重挂载偏好生效+钳制上界两用例）+ CenterPanel 12 = 26 绿；tsc 0；theme-token-contract 4 绿；IAB 实机：浮面 276→拖宽 576、persisted=576、切宽窗列区继承 576。**待用户实机过目后翻 verified（v15–v25 同批）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
