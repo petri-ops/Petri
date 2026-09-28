@@ -35,6 +35,12 @@ export type FileTreeDialog =
 
 export type FileTreeMenuAction = 'rename' | 'move' | 'copy' | 'delete' | 'mkdir';
 
+/** UI-451 加映 v2 (P1-1) — 操作成功回调携带结果：宿主据此同步文件 tab（重命名重定向/删除关闭）。 */
+export type FileTreeOpResult =
+  | { kind: 'delete'; paths: string[] }
+  | { kind: 'rename' | 'move' | 'copy'; fromPath: string; toPath: string }
+  | { kind: 'mkdir' };
+
 /** 右键菜单：fixed 定位于触发点；整层 backdrop 捕获外部点击/Escape 关闭。 */
 export function FileTreeContextMenu({
   target,
@@ -191,7 +197,7 @@ function DirPicker({
   );
 }
 
-/** 弹层宿主：按 dialog.kind 渲染确认/输入/选择器；成功后 onDone（宿主负责刷新与关闭）。 */
+/** 弹层宿主：按 dialog.kind 渲染确认/输入/选择器；成功后 onDone(result)（宿主负责 tab 同步与刷新关闭）。 */
 export function FileTreeDialogHost({
   dialog,
   projectId,
@@ -202,7 +208,7 @@ export function FileTreeDialogHost({
   dialog: FileTreeDialog;
   projectId: string;
   fetchDir: (prefix: string) => Promise<FileEntry[]>;
-  onDone: () => void;
+  onDone: (result: FileTreeOpResult) => void;
   onClose: () => void;
 }): React.ReactElement {
   const [text, setText] = useState(() => (dialog.kind === 'rename' ? dialog.name : ''));
@@ -217,12 +223,12 @@ export function FileTreeDialogHost({
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  const runOp = useCallback(async (fn: () => Promise<unknown>) => {
+  const runOp = useCallback(async (fn: () => Promise<unknown>, result: FileTreeOpResult) => {
     setBusy(true);
     setError('');
     try {
       await fn();
-      onDone();
+      onDone(result);
     } catch (e) {
       setError((e as Error).message || '操作失败');
     } finally {
@@ -245,7 +251,8 @@ export function FileTreeDialogHost({
 
   const handleSubmit = useCallback(() => {
     if (dialog.kind === 'delete') {
-      void runOp(() => fsDelete(projectId, dialog.targets.map((target) => target.path)));
+      const paths = dialog.targets.map((target) => target.path);
+      void runOp(() => fsDelete(projectId, paths), { kind: 'delete', paths });
       return;
     }
     if (dialog.kind === 'rename') {
@@ -255,7 +262,8 @@ export function FileTreeDialogHost({
         setError(invalid);
         return;
       }
-      void runOp(() => fsMove(projectId, dialog.path, joinPath(parent, text.trim())));
+      const toPath = joinPath(parent, text.trim());
+      void runOp(() => fsMove(projectId, dialog.path, toPath), { kind: 'rename', fromPath: dialog.path, toPath });
       return;
     }
     if (dialog.kind === 'mkdir') {
@@ -264,7 +272,7 @@ export function FileTreeDialogHost({
         setError(invalid);
         return;
       }
-      void runOp(() => fsMkdir(projectId, joinPath(dialog.parent, text.trim())));
+      void runOp(() => fsMkdir(projectId, joinPath(dialog.parent, text.trim())), { kind: 'mkdir' });
     }
     // kind === 'target'：确认按钮由 DirPicker 承载
   }, [dialog, projectId, text, runOp]);
@@ -315,10 +323,12 @@ export function FileTreeDialogHost({
             onCancel={onClose}
             onConfirm={(dir) => {
               const toPath = joinPath(dir, dialog.name);
-              void runOp(() =>
-                dialog.action === 'move'
-                  ? fsMove(projectId, dialog.path, toPath)
-                  : fsCopy(projectId, dialog.path, toPath),
+              void runOp(
+                () =>
+                  dialog.action === 'move'
+                    ? fsMove(projectId, dialog.path, toPath)
+                    : fsCopy(projectId, dialog.path, toPath),
+                { kind: dialog.action, fromPath: dialog.path, toPath },
               );
             }}
           />

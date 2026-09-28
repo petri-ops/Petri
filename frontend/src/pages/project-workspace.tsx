@@ -102,6 +102,7 @@ export function ProjectWorkspace(): React.ReactElement {
     handleActivateWorkspaceFile,
     handleCloseWorkspaceFiles,
     handleReorderWorkspaceFiles,
+    handleRenameWorkspaceFile,
   } = useWorkspaceFileTabs(projectId);
   // G0-RS-P4/G0-RS-P3 的 Result Studio 编辑上下文状态簇
   // （resultContextState/resultEditControls/resultEditSubmitting/resultAgentDrafts）
@@ -229,10 +230,37 @@ export function ProjectWorkspace(): React.ReactElement {
     setRightToolMenuOpen,
     browserUrl,
     setBrowserUrl,
-    closeRightPanelTab,
+    closeRightPanelTab: closeRightPanelTabRaw,
     // openRightPanel is NOT returned — it lives in project-workspace
     // with compactLayout awareness (setLeftOpen).
   } = useRightPanelTabs();
+  // UI-451 加映 v2 (P1-2) — 关右栏「文件」tab 的脏守卫：tab 条自身关闭有确认链，
+  // 标题栏 × 这条旁路原先直接卸载 RightFileTree 静默丢草稿——此处统一拦确认。
+  const workspaceFileDirtyCountRef = React.useRef(0);
+  // 弹层存「打开时的脏计数快照」（number|null）：渲染期不读 ref（react-hooks/refs）
+  const [pendingFilesPanelClose, setPendingFilesPanelClose] = React.useState<number | null>(null);
+  const handleWorkspaceFileDirtyCountChange = React.useCallback((count: number) => {
+    workspaceFileDirtyCountRef.current = count;
+  }, []);
+  const closeRightPanelTab = React.useCallback((tab: RightPanelMode) => {
+    if (tab === 'files') {
+      const dirtyCount = workspaceFileDirtyCountRef.current;
+      if (dirtyCount > 0) {
+        setPendingFilesPanelClose(dirtyCount);
+        return;
+      }
+    }
+    closeRightPanelTabRaw(tab);
+  }, [closeRightPanelTabRaw]);
+  useEffect(() => {
+    if (pendingFilesPanelClose === null) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setPendingFilesPanelClose(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [pendingFilesPanelClose]);
+
   // Every right-side tool shares one width. Switching to Results must not
   // jump to a separately constrained layout or change the drag feel.
   const effectiveRightWidth = rightWidth;
@@ -979,6 +1007,8 @@ export function ProjectWorkspace(): React.ReactElement {
     handleActivateWorkspaceFile,
     handleCloseWorkspaceFiles,
     handleReorderWorkspaceFiles,
+    handleRenameWorkspaceFile,
+    handleWorkspaceFileDirtyCountChange,
     handleOpenResult,
     handleOpenRightResults,
     handleOpenRightBrowser,
@@ -1047,6 +1077,47 @@ export function ProjectWorkspace(): React.ReactElement {
           workspaceMode={workspaceMode}
           onResize={startColumnResize('right')}
         />
+        {/* UI-451 加映 v2 (P1-2) — 关右栏「文件」tab 的脏确认弹层（复用 fileTreeDialog 样式族） */}
+        {pendingFilesPanelClose !== null && (
+          <div
+            className={styles.fileTreeDialogBackdrop}
+            data-testid="file-panel-close-dialog"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) setPendingFilesPanelClose(null);
+            }}
+          >
+            <div className={styles.fileTreeDialog}>
+              <p className={styles.fileTreeDialogTitle}>关闭「文件」页？</p>
+              <div className={styles.fileTreeDeleteList}>
+                <p className={styles.fileTreeDialogHint}>
+                  {pendingFilesPanelClose > 1
+                    ? `${pendingFilesPanelClose} 个标签页有未保存的修改，关闭「文件」页将丢弃这些修改（自动保存已落盘的内容不受影响）。`
+                    : '当前标签页有未保存的修改，关闭「文件」页将丢弃修改（自动保存已落盘的内容不受影响）。'}
+                </p>
+              </div>
+              <div className={styles.fileTreeDialogActions}>
+                <button
+                  type="button"
+                  className={styles.fileTreeDialogButton}
+                  onClick={() => setPendingFilesPanelClose(null)}
+                >
+                  取消
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.fileTreeDialogButton} ${styles.fileTreeDialogButtonDanger}`}
+                  data-testid="file-panel-close-confirm"
+                  onClick={() => {
+                    setPendingFilesPanelClose(null);
+                    closeRightPanelTabRaw('files');
+                  }}
+                >
+                  放弃修改并关闭
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         <BottomTerminal
           open={bottomTerminalOpen}
           height={bottomTerminalHeight}

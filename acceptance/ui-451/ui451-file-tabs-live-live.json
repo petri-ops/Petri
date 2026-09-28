@@ -1,12 +1,12 @@
 {
   "name": "ui451-file-tabs-live",
-  "startedAt": "2026-09-28T03:16:21.772Z",
-  "finishedAt": "2026-09-28T03:16:50.080Z",
+  "startedAt": "2026-09-28T05:00:17.377Z",
+  "finishedAt": "2026-09-28T05:01:13.729Z",
   "assertions": [
     {
       "name": "T0_seed_uploaded",
       "pass": true,
-      "detail": "a=200 b=200 c=200"
+      "detail": "a=200 b=200 c=200 dup1=200 dup2=200"
     },
     {
       "name": "V0_files_tab_opened",
@@ -16,7 +16,7 @@
     {
       "name": "T1_first_file_tab",
       "pass": true,
-      "detail": "click=clicked:预览 ui451-tab-a.txt {\"strip\":true,\"tabs\":1,\"first\":\"ui451-tab-a.txt\"}"
+      "detail": "click=clicked:ui451-tab-a.txt {\"strip\":true,\"tabs\":1,\"first\":\"ui451-tab-a.txt\"}"
     },
     {
       "name": "T2_three_tabs_order_abc",
@@ -67,6 +67,36 @@
       "name": "T8_geometry_visibility",
       "pass": true,
       "detail": "{\"stripH\":33,\"stripBelowToolbar\":true,\"activeVisible\":true,\"hiddenCount\":1,\"hiddenInvisible\":true}"
+    },
+    {
+      "name": "T9_dup_name_dir_qualifier",
+      "pass": true,
+      "detail": "[{\"path\":\"ui451-dup/x.md\",\"text\":\"x.mdui451-dup\"},{\"path\":\"ui451-dir/ui451-dup/x.md\",\"text\":\"x.mdui451-dir/ui451-dup\"}]"
+    },
+    {
+      "name": "T10_rename_redirects_tab",
+      "pass": true,
+      "detail": "flow=submitted {\"tabs\":[\"ui451-dup/x.md\",\"ui451-dir/ui451-dup/x.md\",\"ui451-renamed-a.txt\"],\"renamedActive\":true,\"oldGone\":true}"
+    },
+    {
+      "name": "T11_reveal_menu_locates_row",
+      "pass": true,
+      "detail": "tab=menu row=true"
+    },
+    {
+      "name": "T12_shortcuts_cycle_and_guard",
+      "pass": true,
+      "detail": "before=ui451-renamed-a.txt after=ui451-dup/x.md wDialog=true dirty=dirty"
+    },
+    {
+      "name": "T13_delete_closes_open_tab",
+      "pass": true,
+      "detail": "flow=submitted {\"tabs\":[\"ui451-dup/x.md\",\"ui451-dir/ui451-dup/x.md\",\"ui451-renamed-a.txt\"],\"gone\":true,\"dialog\":false}"
+    },
+    {
+      "name": "T14_panel_close_dirty_guard",
+      "pass": true,
+      "detail": "dialog=true cancel=cancel stillOpen=true closed=true"
     }
   ],
   "allPass": true

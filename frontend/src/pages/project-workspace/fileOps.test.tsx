@@ -124,6 +124,7 @@ describe('RightFileTree 文件操作', () => {
         onActivateFile={vi.fn()}
         onCloseFiles={vi.fn()}
         onReorderFiles={vi.fn()}
+        onRenameFile={vi.fn()}
       />,
     );
 
@@ -140,22 +141,25 @@ describe('RightFileTree 文件操作', () => {
     });
   });
 
-  it('右键文件 → 重命名 → POST fs/move 带新路径', async () => {
+  it('右键文件 → 重命名 → POST fs/move 带新路径 + onRenameFile 重定向已打开 tab（UI-451 v2 P1-1）', async () => {
     const { calls, fn } = makeFetch({
       '': [{ name: 'a.txt', type: 'file' }],
     });
     vi.stubGlobal('fetch', fn);
+    const onRenameFile = vi.fn();
+    const opened = { path: 'a.txt', name: 'a.txt', url: 'http://mock/a.txt' };
 
     render(
       <RightFileTree
         project={project}
         active
-        openFiles={[]}
-        activeFile={null}
+        openFiles={[opened]}
+        activeFile={opened}
         onOpenFile={vi.fn()}
         onActivateFile={vi.fn()}
         onCloseFiles={vi.fn()}
         onReorderFiles={vi.fn()}
+        onRenameFile={onRenameFile}
       />,
     );
 
@@ -171,6 +175,49 @@ describe('RightFileTree 文件操作', () => {
       expect(move).toBeTruthy();
       expect(move?.body).toEqual({ fromPath: 'a.txt', toPath: 'renamed.txt' });
     });
+    await waitFor(() => {
+      expect(onRenameFile).toHaveBeenCalledTimes(1);
+    });
+    const [oldPath, nextFile] = onRenameFile.mock.calls[0] as [
+      string,
+      { path: string; url: string },
+    ];
+    expect(oldPath).toBe('a.txt');
+    expect(nextFile.path).toBe('renamed.txt');
+    expect(nextFile.url).toContain('renamed.txt');
+  });
+
+  it('删除已打开文件的 tab：fs/delete 成功后直接关闭（无脏确认，UI-451 v2 P1-1）', async () => {
+    const { fn } = makeFetch({
+      '': [{ name: 'a.txt', type: 'file' }],
+    });
+    vi.stubGlobal('fetch', fn);
+    const onCloseFiles = vi.fn();
+    const opened = { path: 'a.txt', name: 'a.txt', url: 'http://mock/a.txt' };
+
+    render(
+      <RightFileTree
+        project={project}
+        active
+        openFiles={[opened]}
+        activeFile={opened}
+        onOpenFile={vi.fn()}
+        onActivateFile={vi.fn()}
+        onCloseFiles={onCloseFiles}
+        onReorderFiles={vi.fn()}
+        onRenameFile={vi.fn()}
+      />,
+    );
+
+    const row = await screen.findByRole('treeitem', { name: /a\.txt/ });
+    fireEvent.contextMenu(row);
+    fireEvent.click(await screen.findByTestId('file-tree-menu-delete'));
+    fireEvent.click(await screen.findByTestId('file-tree-dialog-confirm'));
+
+    await waitFor(() => {
+      expect(onCloseFiles).toHaveBeenCalledWith(['a.txt']);
+    });
+    expect(document.querySelector('[data-testid="file-tab-close-dialog"]')).toBeNull();
   });
 
   it('拖文件到目录行 → POST fs/move；同名冲突自动 -2 后缀', async () => {
@@ -190,6 +237,7 @@ describe('RightFileTree 文件操作', () => {
         onActivateFile={vi.fn()}
         onCloseFiles={vi.fn()}
         onReorderFiles={vi.fn()}
+        onRenameFile={vi.fn()}
       />,
     );
 
@@ -223,6 +271,7 @@ describe('RightFileTree 文件操作', () => {
         onActivateFile={vi.fn()}
         onCloseFiles={vi.fn()}
         onReorderFiles={vi.fn()}
+        onRenameFile={vi.fn()}
       />,
     );
 

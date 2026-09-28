@@ -17,6 +17,9 @@ export interface ActiveWorkspaceFile {
   workspaceKind?: 'local' | 'ssh';
   /** BLOCK-67：载入时的远程 mtime 基线（保存前冲突检测 D3） */
   modifiedAt?: number;
+  /** UI-451 加映 v2 — tab 稳定键：openTab 追加时分配，rename/move 重定向时携带，
+   *  keep-alive 实例按它 key（path 变化不换实例，滚动/MD 视图态存活；文本仍按新 path 重载） */
+  tabId?: string;
 }
 
 // UI-305 P1 — 文件树条目（原 project-workspace.tsx 内联声明，FileTreeList /

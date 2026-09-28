@@ -7,6 +7,7 @@ import {
   closeWorkspaceFileTabs,
   moveWorkspaceFileTab,
   openWorkspaceFileTab,
+  renameWorkspaceFileTab,
 } from './workspaceFileTabOps';
 
 function file(path: string): ActiveWorkspaceFile {
@@ -25,16 +26,57 @@ describe('openWorkspaceFileTab', () => {
   });
 
   it('已存在 path 原位替换为新对象（顺序不变、身份更新）', () => {
+    const seeded = openWorkspaceFileTab([], A);
     const reopened = { ...A, modifiedAt: 42 };
-    const next = openWorkspaceFileTab([A, B], reopened);
+    const next = openWorkspaceFileTab([seeded[0], B], reopened);
     expect(next).toHaveLength(2);
-    expect(next[0]).toBe(reopened);
-    expect(next[0]).not.toBe(A);
+    expect(next[0].path).toBe('a.txt');
+    expect(next[0].modifiedAt).toBe(42);
+    expect(next[0]).not.toBe(reopened);
     expect(next[1]).toBe(B);
   });
 
-  it('空数组打开即为单元素', () => {
-    expect(openWorkspaceFileTab([], A)).toEqual([A]);
+  it('空数组打开即为单元素（带分配的 tabId）', () => {
+    const next = openWorkspaceFileTab([], A);
+    expect(next).toHaveLength(1);
+    expect(next[0].path).toBe('a.txt');
+    expect(next[0].tabId).toBeTruthy();
+  });
+
+  it('UI-451 v2：追加时分配稳定 tabId；原位替换保留既有 tabId；两次追加 id 互异', () => {
+    const first = openWorkspaceFileTab([], A);
+    expect(typeof first[0].tabId).toBe('string');
+    expect(first[0].tabId).toBeTruthy();
+    const second = openWorkspaceFileTab(first, B);
+    expect(second[1].tabId).toBeTruthy();
+    expect(second[1].tabId).not.toBe(second[0].tabId);
+    const replaced = openWorkspaceFileTab(second, { ...B, modifiedAt: 9 });
+    expect(replaced[1].tabId).toBe(second[1].tabId);
+    expect(replaced[1].modifiedAt).toBe(9);
+  });
+});
+
+describe('renameWorkspaceFileTab (UI-451 v2 P1-1)', () => {
+  it('旧 path 原位重定向到新对象并携带旧 tabId（实例存活）', () => {
+    const seeded = openWorkspaceFileTab([], A);
+    const withB = openWorkspaceFileTab(seeded, B);
+    const moved = { ...C, path: 'c-moved.json' };
+    const next = renameWorkspaceFileTab(withB, 'a.txt', moved);
+    expect(next.map((item) => item.path)).toEqual(['c-moved.json', 'b.md']);
+    expect(next[0].tabId).toBe(withB[0].tabId);
+  });
+
+  it('活动语义由 hook 承载：目标 path 已有另一 tab 时去重保留重定向位', () => {
+    const seeded = openWorkspaceFileTab([], A);
+    const withB = openWorkspaceFileTab(seeded, B);
+    const next = renameWorkspaceFileTab(withB, 'a.txt', { ...B });
+    expect(next.map((item) => item.path)).toEqual(['b.md']);
+    expect(next[0].tabId).toBe(withB[0].tabId);
+  });
+
+  it('oldPath 未打开：原数组原样返回（同引用）', () => {
+    const files = openWorkspaceFileTab([], A);
+    expect(renameWorkspaceFileTab(files, 'x.txt', { ...B })).toBe(files);
   });
 });
 

@@ -13,7 +13,7 @@ import styles from '../project-workspace.module.css';
 import type { ActiveWorkspaceFile, FileEntry } from './types';
 import { FileTreeList } from './FileTreeList';
 import { WorkspaceFilePreview } from './WorkspaceFilePreview';
-import { FileTreeContextMenu, FileTreeDialogHost, type FileTreeDialog, type FileTreeMenuAction, type FileTreeMenuTarget } from './FileTreeOpsOverlay';
+import { FileTreeContextMenu, FileTreeDialogHost, type FileTreeDialog, type FileTreeMenuAction, type FileTreeMenuTarget, type FileTreeOpResult } from './FileTreeOpsOverlay';
 import { WorkspaceFileTabStrip, type FileTabMenuAction as FileTabMenuActionKind } from './WorkspaceFileTabStrip';
 import { fsImportFrom, fsMkdir, fsMove, fsCopy, fsUpload, joinPath, uniqueTargetName, type DraggedTreeItem } from './fileOps';
 import { TREE_DRAG_MIME } from './FileTreeItem';
@@ -33,6 +33,8 @@ export function RightFileTree({
   onActivateFile,
   onCloseFiles,
   onReorderFiles,
+  onRenameFile,
+  onDirtyCountChange,
 }: {
   project: Project;
   active: boolean;
@@ -42,6 +44,10 @@ export function RightFileTree({
   onActivateFile: (file: ActiveWorkspaceFile) => void;
   onCloseFiles: (paths: string[]) => void;
   onReorderFiles: (fromPath: string, toIndex: number) => void;
+  /** UI-451 加映 v2 (P1-1) — rename/move 成功后重定向 tab（宿主=hook 的 handleRenameWorkspaceFile） */
+  onRenameFile: (oldPath: string, nextFile: ActiveWorkspaceFile) => void;
+  /** UI-451 加映 v2 (P1-2) — 脏 tab 计数上抛：宿主在关右栏「文件」tab 前据此拦确认 */
+  onDirtyCountChange?: (count: number) => void;
 }): React.ReactElement {
   const [tree, setTree] = useState<FileEntry[]>([]);
   const [expandedDirs, setExpandedDirs] = useState<Set<string>>(new Set());
@@ -71,6 +77,19 @@ export function RightFileTree({
   // 重新 loadDir）——ssh 项目下每次点开文件都是 N 个目录的网络往返刷新。
   const activeFileRef = useRef<ActiveWorkspaceFile | null>(activeFile);
   activeFileRef.current = activeFile;
+
+  // UI-451 加映 v2 — refreshFiles 身份必须稳定（UI-399 教训），openFiles/dirtyPaths 经
+  // ref 镜像读取（渲染期写 ref 违反 react-hooks/refs，同步走 effect）。
+  const openFilesRef = useRef(openFiles);
+  useEffect(() => { openFilesRef.current = openFiles; }, [openFiles]);
+  const dirtyPathsRef = useRef(dirtyPaths);
+  useEffect(() => { dirtyPathsRef.current = dirtyPaths; }, [dirtyPaths]);
+
+  // UI-451 加映 v2 (P1-2) — 脏 tab 计数上抛宿主（卸载时清零，防陈旧计数卡守卫）
+  useEffect(() => {
+    onDirtyCountChange?.(Object.values(dirtyPaths).filter(Boolean).length);
+    return () => onDirtyCountChange?.(0);
+  }, [dirtyPaths, onDirtyCountChange]);
 
   // BLOCK-89 / UI-378 — 文件操作（右键菜单 + 拖拽）状态
   const [menuTarget, setMenuTarget] = useState<FileTreeMenuTarget | null>(null);
@@ -171,10 +190,22 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
     const previous = activeFileSignatureRef.current;
     activeFileSignatureRef.current = signature;
     if (forcePreview || (previous !== null && previous !== signature)) {
-      const targetPath = activeFileRef.current?.path;
-      if (targetPath) {
-        setPreviewVersions((prev) => ({ ...prev, [targetPath]: (prev[targetPath] ?? 0) + 1 }));
-      }
+      // UI-451 加映 v2 (P2-1) — forcePreview（手动刷新/agent 写档）除活动 tab 外连带刷新
+      // 全部**非脏**后台 tab（无草稿可丢，消除切回时的陈旧内容）；本地 2s 轮询的签名
+      // 变化只验证活动文件 → 维持只 bump 活动 tab（语义不变）。
+      const activePath = activeFileRef.current?.path;
+      setPreviewVersions((prev) => {
+        const next = { ...prev };
+        const bump = (p: string) => { next[p] = (next[p] ?? 0) + 1; };
+        if (activePath) bump(activePath);
+        if (forcePreview) {
+          for (const file of openFilesRef.current) {
+            if (file.path === activePath || dirtyPathsRef.current[file.path]) continue;
+            bump(file.path);
+          }
+        }
+        return next;
+      });
     }
   }, [fetchDir, fetchDirPage]);
 
@@ -299,14 +330,63 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
     }
   }, [menuTarget]);
 
-  // 拖拽落点：目标目录预检唯一名（冲突自动 -2 后缀）后走 move/copy
+  // ── UI-451 加映 v2 (P1-1) — rename/move 后的 tab 同步 ──
+  const buildActiveFile = useCallback((path: string): ActiveWorkspaceFile => ({
+    path,
+    name: path.split('/').pop() || path,
+    url: getApiPrefix() + `/workspaces/${encodeURIComponent(project.id)}/file?path=${encodeURIComponent(path)}`,
+    workspaceDir: project.workspacePath,
+    workspaceKind: project.workspaceKind,
+  }), [project.id, project.workspacePath, project.workspaceKind]);
+
+  // 旧 path 的脏点/刷新 token 一并清除（实例按 tabId 存活，内容按新 path 重载）
+  const handleTabFileRenamed = useCallback((oldPath: string, nextPath: string) => {
+    setPreviewVersions((prev) => {
+      const next = { ...prev };
+      delete next[oldPath];
+      return next;
+    });
+    setDirtyPaths((prev) => {
+      const next = { ...prev };
+      delete next[oldPath];
+      return next;
+    });
+    onRenameFile(oldPath, buildActiveFile(nextPath));
+  }, [buildActiveFile, onRenameFile]);
+
+  // 拖拽落点：目标目录预检唯一名（冲突自动 -2 后缀）后走 move/copy；
+  // 移动成功后重定向已打开 tab（复制不影响原 tab）（UI-451 加映 v2 P1-1）
   const handleDropToDir = useCallback(async (item: DraggedTreeItem, targetDir: string, copy: boolean) => {
     setOpsError('');
     const entries = await fetchDir(targetDir);
     const toPath = joinPath(targetDir, uniqueTargetName(entries, item.name));
     const op = copy ? fsCopy : fsMove;
-    await runTreeOp(() => op(project.id, item.path, toPath));
-  }, [fetchDir, project.id, runTreeOp]);
+    const ok = await runTreeOp(() => op(project.id, item.path, toPath));
+    if (ok && !copy) handleTabFileRenamed(item.path, toPath);
+  }, [fetchDir, project.id, runTreeOp, handleTabFileRenamed]);
+
+  // UI-451 加映 v2 (P2-5) — 在树中定位 tab：展开祖先目录 + 行滚入视野（懒加载迟到带重试）
+  const revealPathInTree = useCallback((path: string) => {
+    setTreeOpen(true);
+    const segments = path.split('/').filter(Boolean);
+    segments.pop();
+    setExpandedDirs((current) => {
+      const next = new Set(current);
+      segments.forEach((_segment, index) => {
+        next.add(segments.slice(0, index + 1).join('/'));
+      });
+      return next;
+    });
+    const escaped = typeof CSS !== 'undefined' && CSS.escape ? CSS.escape(path) : path;
+    const attemptScroll = (attempt: number) => {
+      window.setTimeout(() => {
+        const row = document.querySelector(`[data-file-path="${escaped}"]`);
+        if (row) row.scrollIntoView?.({ block: 'nearest' });
+        else if (attempt < 8) attemptScroll(attempt + 1);
+      }, 220);
+    };
+    attemptScroll(0);
+  }, []);
 
   // UI-400-3 — 根目录落点（树面板容器级）：目录行自身接受 drop 并 stopPropagation，
   // 冒泡到这里的只有背景空区/文件行/非目录行 → 语义=移动（Ctrl=复制）到根路径。
@@ -535,10 +615,12 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
       requestCloseFiles(openFiles.filter((item) => item.path !== path).map((item) => item.path));
     } else if (action === 'closeRight') {
       requestCloseFiles(openFiles.slice(index + 1).map((item) => item.path));
+    } else if (action === 'reveal') {
+      revealPathInTree(path);
     } else {
       requestCloseFiles(openFiles.map((item) => item.path));
     }
-  }, [openFiles, requestCloseFiles]);
+  }, [openFiles, requestCloseFiles, revealPathInTree]);
 
   const confirmCloseDirty = useCallback(() => {
     if (!closeConfirm) return;
@@ -557,6 +639,35 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [closeConfirm]);
+
+  // UI-451 加映 v2 (P2-2) — 文件 tab 键盘快捷键（右栏「文件」tab 激活时）：
+  // Ctrl/Cmd+W 关当前 tab（复用脏确认链）；Ctrl+Tab / Ctrl+Shift+Tab 循环切换。
+  // 终端让位：焦点在 xterm 内时跳过（readline Ctrl+W=删词，终端语义优先）。
+  useEffect(() => {
+    if (!active) return;
+    const onKey = (event: KeyboardEvent) => {
+      const focusEl = document.activeElement as HTMLElement | null;
+      if (focusEl && typeof focusEl.closest === 'function' && focusEl.closest('.xterm')) return;
+      if ((event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey
+          && event.key.toLowerCase() === 'w') {
+        event.preventDefault();
+        if (event.repeat) return;
+        const current = activeFileRef.current;
+        if (current) requestCloseFiles([current.path]);
+        return;
+      }
+      if (event.ctrlKey && !event.metaKey && event.key === 'Tab') {
+        if (openFiles.length < 2) return;
+        event.preventDefault();
+        const currentIndex = openFiles.findIndex((item) => item.path === activeFileRef.current?.path);
+        const step = event.shiftKey ? -1 : 1;
+        const next = openFiles[(currentIndex + step + openFiles.length) % openFiles.length];
+        if (next) onActivateFile(next);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [active, openFiles, onActivateFile, requestCloseFiles]);
 
   const breadcrumbSegments = useMemo(
     () => activeFile?.path.split('/').filter(Boolean) || [],
@@ -735,7 +846,7 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
                 const isActive = file.path === activeFile?.path;
                 return (
                   <div
-                    key={file.path}
+                    key={file.tabId ?? file.path}
                     data-file-preview-path={file.path}
                     className={`${styles.workspaceFilePreviewKeepAlive}${isActive ? ` ${styles.workspaceFilePreviewKeepAliveActive}` : ''}`}
                   >
@@ -831,8 +942,16 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
           dialog={dialog}
           projectId={project.id}
           fetchDir={fetchDir}
-          onDone={() => {
+          onDone={(result: FileTreeOpResult) => {
             closeOverlays();
+            // UI-451 加映 v2 (P1-1) — 文件操作与 tab 同步：rename/move 重定向（保实例）；
+            // delete 直接关闭已删文件的 tab（文件已不存在，无草稿可保，不走脏确认）。
+            if (result.kind === 'delete') {
+              const openDeleted = openFiles.filter((item) => result.paths.includes(item.path));
+              if (openDeleted.length > 0) onCloseFiles(openDeleted.map((item) => item.path));
+            } else if (result.kind === 'rename' || result.kind === 'move') {
+              handleTabFileRenamed(result.fromPath, result.toPath);
+            }
             notifyTreeChanged();
           }}
           onClose={() => setDialog(null)}

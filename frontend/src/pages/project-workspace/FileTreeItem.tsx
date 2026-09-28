@@ -140,6 +140,8 @@ export function FileTreeItem({
       <button
         type="button"
         data-tree-dir={isDropTarget ? fullPath : undefined}
+        data-tree-path={fullPath}
+        data-file-path={entry.type === 'file' ? fullPath : undefined}
         className={`${styles.fileTreeRow} ${isActive ? styles.fileTreeRowActive : ''} ${dropActive ? styles.fileTreeRowDropTarget : ''}`}
         style={{ paddingLeft: 5 + depth * 16 }}
         draggable={Boolean(onDropToDir)}

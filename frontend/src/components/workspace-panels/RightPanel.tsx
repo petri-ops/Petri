@@ -94,6 +94,10 @@ export interface RightPanelContext {
   handleCloseWorkspaceFiles: (paths: string[]) => void;
   /** UI-451 — tab 拖拽重排。 */
   handleReorderWorkspaceFiles: (fromPath: string, toIndex: number) => void;
+  /** UI-451 加映 v2 (P1-1) — rename/move 成功后重定向 tab。 */
+  handleRenameWorkspaceFile: (oldPath: string, nextFile: ActiveWorkspaceFile) => void;
+  /** UI-451 加映 v2 (P1-2) — 脏 tab 计数上抛（关右栏 files tab 守卫消费；稳定引用）。 */
+  handleWorkspaceFileDirtyCountChange: (count: number) => void;
   handleOpenResult: (jobId: string, projectId?: string | null) => void | Promise<void>;
   handleOpenRightResults: () => void;
   handleOpenRightBrowser: () => void;
@@ -225,6 +229,8 @@ export function RightPanel({
                     onActivateFile={ctx.handleActivateWorkspaceFile}
                     onCloseFiles={ctx.handleCloseWorkspaceFiles}
                     onReorderFiles={ctx.handleReorderWorkspaceFiles}
+                    onRenameFile={ctx.handleRenameWorkspaceFile}
+                    onDirtyCountChange={ctx.handleWorkspaceFileDirtyCountChange}
                   />
                 )}
                 {tab === 'browser' && (

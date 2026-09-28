@@ -7,8 +7,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ActiveWorkspaceFile } from './types';
 import { FILE_TAB_DRAG_MIME, WorkspaceFileTabStrip } from './WorkspaceFileTabStrip';
 
-function file(path: string): ActiveWorkspaceFile {
-  return { path, name: path.split('/').pop() || path, url: `http://mock/${path}` };
+function file(path: string, name?: string): ActiveWorkspaceFile {
+  return { path, name: name || path.split('/').pop() || path, url: `http://mock/${path}` };
 }
 
 const A = file('a.txt');
@@ -191,5 +191,58 @@ describe('WorkspaceFileTabStrip 拖拽排序', () => {
     fireEvent.dragOver(screen.getByRole('tab', { name: /a\.txt/ }), { dataTransfer: dataTransferStub(), clientX: 10 });
     fireEvent.drop(screen.getByRole('tab', { name: /a\.txt/ }), { dataTransfer: dataTransferStub('a.txt'), clientX: 10 });
     expect(props.onReorder).not.toHaveBeenCalled();
+  });
+});
+
+// UI-451 加映 v2 — 同名去重（P2-3）/ reveal 菜单（P2-5）/ 激活滚入（P2-4）
+describe('WorkspaceFileTabStrip 加映 v2', () => {
+  it('同名文件显示父目录限定，唯一名不显示；title 仍为全路径', () => {
+    const dup1 = file('src/a/x.ts');
+    const dup2 = file('lib/b/x.ts');
+    const unique = file('readme.md');
+    renderStrip({ files: [dup1, dup2, unique], activePath: 'readme.md' });
+    const tab1 = screen.getByRole('tab', { name: /x\.ts.*a/ });
+    const tab2 = screen.getByRole('tab', { name: /x\.ts.*b/ });
+    expect(tab1.textContent).toContain('a');
+    expect(tab2.textContent).toContain('b');
+    const tab3 = screen.getByRole('tab', { name: /readme/ });
+    expect(tab3.textContent).not.toContain('根目录');
+    expect(tab1.getAttribute('title')).toBe('src/a/x.ts');
+  });
+
+  it('根目录同名文件限定显示「根目录」', () => {
+    renderStrip({ files: [file('x.txt'), file('dir/x.txt')], activePath: 'x.txt' });
+    const rootTab = document.querySelector('[data-file-tab-path="x.txt"]');
+    const dirTab = document.querySelector('[data-file-tab-path="dir/x.txt"]');
+    expect(rootTab?.textContent).toContain('根目录');
+    expect(dirTab?.textContent).toContain('dir');
+  });
+
+  it('右键菜单含「在树中显示」并回调 onMenuAction(reveal, path)', () => {
+    const { props } = renderStrip();
+    fireEvent.contextMenu(screen.getByRole('tab', { name: /b\.md/ }));
+    const item = screen.getByTestId('file-tab-menu-reveal');
+    expect(item).toBeTruthy();
+    fireEvent.click(item);
+    expect(props.onMenuAction).toHaveBeenCalledWith('reveal', 'b.md');
+  });
+
+  it('激活 tab 变化时滚入视野（scrollIntoView 被调用）', () => {
+    const { view } = renderStrip();
+    const tabC = screen.getByRole('tab', { name: /c\.json/ });
+    const scrollSpy = vi.fn();
+    tabC.scrollIntoView = scrollSpy;
+    view.rerender(
+      <WorkspaceFileTabStrip
+        files={[A, B, C]}
+        activePath="c.json"
+        dirtyPaths={{}}
+        onActivate={vi.fn()}
+        onRequestClose={vi.fn()}
+        onMenuAction={vi.fn()}
+        onReorder={vi.fn()}
+      />,
+    );
+    expect(scrollSpy).toHaveBeenCalled();
   });
 });

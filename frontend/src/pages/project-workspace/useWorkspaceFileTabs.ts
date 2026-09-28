@@ -5,6 +5,7 @@ import {
   closeWorkspaceFileTabs,
   moveWorkspaceFileTab,
   openWorkspaceFileTab,
+  renameWorkspaceFileTab,
 } from './workspaceFileTabOps';
 
 // BLOCK-92 Wave B-1 — 工作区文件 tab 状态簇外迁（原 ProjectWorkspace 内联）。
@@ -18,6 +19,7 @@ export function useWorkspaceFileTabs(projectId: string | null | undefined): {
   handleActivateWorkspaceFile: (file: ActiveWorkspaceFile) => void;
   handleCloseWorkspaceFiles: (pathsToClose: string[]) => void;
   handleReorderWorkspaceFiles: (fromPath: string, toIndex: number) => void;
+  handleRenameWorkspaceFile: (oldPath: string, nextFile: ActiveWorkspaceFile) => void;
 } {
   const [openWorkspaceFiles, setOpenWorkspaceFiles] = useState<ActiveWorkspaceFile[]>([]);
   const [activeWorkspaceFile, setActiveWorkspaceFile] = useState<ActiveWorkspaceFile | null>(null);
@@ -66,6 +68,15 @@ export function useWorkspaceFileTabs(projectId: string | null | undefined): {
     setOpenWorkspaceFiles((prev) => moveWorkspaceFileTab(prev, fromPath, toIndex));
   }, []);
 
+  // UI-451 加映 v2（P1-1）— rename/move 成功后重定向 tab（携 tabId 保实例，活动 tab 同步换指向）
+  const handleRenameWorkspaceFile = useCallback((oldPath: string, nextFile: ActiveWorkspaceFile) => {
+    setOpenWorkspaceFiles((prev) => {
+      const next = renameWorkspaceFileTab(prev, oldPath, nextFile);
+      if (activeRef.current?.path === oldPath) setActiveWorkspaceFile(nextFile);
+      return next;
+    });
+  }, []);
+
   return {
     openWorkspaceFiles,
     activeWorkspaceFile,
@@ -74,5 +85,6 @@ export function useWorkspaceFileTabs(projectId: string | null | undefined): {
     handleActivateWorkspaceFile,
     handleCloseWorkspaceFiles,
     handleReorderWorkspaceFiles,
+    handleRenameWorkspaceFile,
   };
 }

@@ -7518,6 +7518,14 @@ body:global(.gewu-resizing-columns) * {
   text-overflow: ellipsis;
 }
 
+/* UI-451 加映 v2 (P2-3) — 同名 tab 的父目录限定（弱化次要信息） */
+.workspaceFileTabDir {
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--gewu-text-tertiary);
+}
+
 .workspaceFileTabDot {
   width: 6px;
   height: 6px;

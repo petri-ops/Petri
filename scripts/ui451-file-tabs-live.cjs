@@ -58,13 +58,18 @@ function restCall(method, apiPath, body) {
   });
 }
 
-async function clickTreeFile(name) {
+async function clickTreeFile(fullPath) {
+  // 树行 title 只含文件名（「预览 x.md」），嵌套路径匹配不到——优先 data-file-path 精确命中
+  const escaped = fullPath.replace(/"/g, '\\"');
+  const baseName = (fullPath.split('/').pop() || '').replace(/"/g, '\\"');
   let clicked = 'none';
   for (let round = 0; round < 4 && clicked === 'none'; round++) {
     clicked = await EVAL(
       `(function(){
+        var row=document.querySelector('[data-file-path="${escaped}"]');
+        if(row){row.click();return 'clicked:'+row.getAttribute('data-file-path');}
         var rows=document.querySelectorAll('[role="treeitem"]');
-        for(var i=0;i<rows.length;i++){var t=rows[i].getAttribute('title')||'';if(t.indexOf('${name}')>=0){rows[i].click();return 'clicked:'+t;}}
+        for(var i=0;i<rows.length;i++){var t=rows[i].getAttribute('title')||'';if(t.indexOf('预览 ${baseName}')>=0){rows[i].click();return 'clicked:'+t;}}
         return 'none';
       })()`);
     if (clicked === 'none') await sleep(1800);
@@ -85,17 +90,24 @@ const tabOrder = () => EVAL(
   client = await attach();
 
   // ── T0 播种（先删后传，内容确定性）──
-  await restCall('POST', `/api/workspaces/${PROJECT_ID}/fs/delete`, { paths: [FILE_A, FILE_B, FILE_C] });
-  const seedBody = (name) => ({
+  // 逐路径清理并容忍失败（上一轮 rename 会移走 FILE_A，批量 delete 遇 missing 整体失败会残留 renamed）
+  for (const p of [FILE_A, FILE_B, FILE_C, 'ui451-dup', 'ui451-dir', 'ui451-renamed-a.txt']) {
+    await restCall('POST', `/api/workspaces/${PROJECT_ID}/fs/delete`, { paths: [p] });
+  }
+  const seedBody = (name, marker) => ({
     toPath: name,
-    dataB64: Buffer.from(`UI-451 tab 样例：${name}\n` + '内容行。\n'.repeat(6), 'utf8').toString('base64'),
+    dataB64: Buffer.from(`UI-451 tab 样例：${name}\n${marker || ''}\n` + '内容行。\n'.repeat(6), 'utf8').toString('base64'),
     offset: 0,
   });
   const upA = await restCall('POST', `/api/workspaces/${PROJECT_ID}/fs/upload`, seedBody(FILE_A));
   const upB = await restCall('POST', `/api/workspaces/${PROJECT_ID}/fs/upload`, seedBody(FILE_B));
   const upC = await restCall('POST', `/api/workspaces/${PROJECT_ID}/fs/upload`, seedBody(FILE_C));
-  run.assert('T0_seed_uploaded', upA.status === 200 && upB.status === 200 && upC.status === 200,
-    `a=${upA.status} b=${upB.status} c=${upC.status}`);
+  // v2 播种：同名文件对（不同目录）+ 嵌套文件（供同名去重 / reveal 断言）
+  const dup1 = await restCall('POST', `/api/workspaces/${PROJECT_ID}/fs/upload`, seedBody('ui451-dup/x.md', '同名甲'));
+  const dup2 = await restCall('POST', `/api/workspaces/${PROJECT_ID}/fs/upload`, seedBody('ui451-dir/ui451-dup/x.md', '同名乙'));
+  run.assert('T0_seed_uploaded', upA.status === 200 && upB.status === 200 && upC.status === 200
+    && dup1.status === 200 && dup2.status === 200,
+    `a=${upA.status} b=${upB.status} c=${upC.status} dup1=${dup1.status} dup2=${dup2.status}`);
 
   // ── 打开右栏「文件」tab（药丸不在场时走「+」工具菜单兜底）──
   let filesOpened = await EVAL(
@@ -369,6 +381,195 @@ const tabOrder = () => EVAL(
     JSON.stringify(t8));
   await front();
   await lib.screenshotPng(client, EVIDENCE_DIR, 'ui451-final.png').catch(() => {});
+
+  // ── v2 (P2-3) T9 同名去重：打开两个同名 x.md → tab 标签含目录限定 ──
+  await front();
+  await EVAL(`location.reload()`);
+  await sleep(4000);
+  client = await attach();
+  await front();
+  // reload 后右栏 tab 状态重置：药丸不在场时走「+」工具菜单兜底（同 V0）
+  await EVAL(`(function(){var b=document.querySelectorAll('button, [role=tab]');for(var i=b.length-1;i>=0;i--){if((b[i].textContent||'').trim()==='文件'){b[i].click();return 'ok';}}return 'none';})()`);
+  await sleep(1500);
+  let t9TreeVisible = await EVAL(`!!document.querySelector('[data-testid="file-tree-refresh"]')`);
+  if (!t9TreeVisible) {
+    await EVAL(`(function(){var b=document.querySelector('[aria-label="展开更多工具"]');if(b)b.click();return 'menu';})()`);
+    await sleep(600);
+    await EVAL(`(function(){var items=document.querySelectorAll('#titlebar-tool-menu [role="menuitem"]');for(var i=0;i<items.length;i++){if((items[i].textContent||'').trim()==='文件'){items[i].click();return 'opened';}}return 'none';})()`);
+    await sleep(2000);
+    t9TreeVisible = await EVAL(`!!document.querySelector('[data-testid="file-tree-refresh"]')`);
+  }
+  await sleep(1200);
+  // 展开目录链（目录行 click=toggle）：ui451-dup → ui451-dir → ui451-dir/ui451-dup
+  const expandDir = async (fullDirPath) => {
+    const escaped = fullDirPath.replace(/"/g, '\\"');
+    await EVAL(`(function(){
+      var row=document.querySelector('[data-tree-path="${escaped}"]');
+      if(row){var t=row.getAttribute('title')||'';if(t.indexOf('展开')===0){row.click();return 'expanded';}return 'already';}
+      return 'no_row';
+    })()`);
+    await sleep(1500);
+  };
+  await expandDir('ui451-dup');
+  await clickTreeFile('ui451-dup/x.md');
+  await sleep(1200);
+  await expandDir('ui451-dir');
+  await expandDir('ui451-dir/ui451-dup');
+  await clickTreeFile('ui451-dir/ui451-dup/x.md');
+  await sleep(1500);
+  const dupProbe = JSON.parse(await EVAL(
+    `(function(){
+      var tabs=Array.from(document.querySelectorAll('[data-file-tab-path]')).map(function(el){
+        return { path: el.getAttribute('data-file-tab-path'), text: (el.textContent||'').trim() };
+      });
+      return JSON.stringify(tabs.filter(function(t){return t.path && t.path.indexOf('x.md')>=0;}));
+    })()`));
+  const dupOk = dupProbe.length === 2
+    && dupProbe.some((t) => t.path === 'ui451-dup/x.md' && t.text.indexOf('ui451-dup') >= 0 && t.text.indexOf('ui451-dir') < 0)
+    && dupProbe.some((t) => t.path === 'ui451-dir/ui451-dup/x.md' && t.text.indexOf('ui451-dir') >= 0);
+  run.assert('T9_dup_name_dir_qualifier', dupOk, JSON.stringify(dupProbe));
+
+  // ── v2 (P1-1) T10 rename 重定向：右键 a.txt 重命名 → tab 原位换新 path ──
+  await front();
+  await clickTreeFile(FILE_A);
+  await sleep(1500);
+  const renameFlow = await EVAL(
+    `(async function(){
+      var rows=document.querySelectorAll('[role="treeitem"][title*="${FILE_A}"]');
+      if(!rows.length) return 'no_row';
+      rows[0].dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true}));
+      await new Promise(function(r){setTimeout(r,400);});
+      var mi=document.querySelector('[data-testid="file-tree-menu-rename"]');
+      if(!mi) return 'no_menu';
+      mi.click();
+      await new Promise(function(r){setTimeout(r,400);});
+      var input=document.querySelector('[data-testid="file-tree-dialog-input"]');
+      if(!input) return 'no_input';
+      var setter=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;
+      setter.call(input,'ui451-renamed-a.txt');
+      input.dispatchEvent(new Event('input',{bubbles:true}));
+      await new Promise(function(r){setTimeout(r,200);});
+      var ok=document.querySelector('[data-testid="file-tree-dialog-confirm"]');
+      if(!ok) return 'no_confirm';
+      ok.click();
+      return 'submitted';
+    })()`);
+  let t10 = {};
+  for (let i = 0; i < 10; i++) {
+    await sleep(800);
+    const probe = await EVAL(
+      `(function(){
+        var tabs=Array.from(document.querySelectorAll('[data-file-tab-path]')).map(function(el){return el.getAttribute('data-file-tab-path');});
+        var host=document.querySelector('[data-file-preview-path="ui451-renamed-a.txt"][class*="workspaceFilePreviewKeepAliveActive"]');
+        return JSON.stringify({tabs:tabs, renamedActive:!!host, oldGone:tabs.indexOf('${FILE_A}')<0});
+      })()`);
+    try { t10 = JSON.parse(probe); } catch {}
+    if (t10.oldGone && t10.renamedActive) break;
+  }
+  run.assert('T10_rename_redirects_tab', String(renameFlow) === 'submitted'
+    && t10.oldGone === true && t10.tabs.includes('ui451-renamed-a.txt') && t10.renamedActive === true,
+    `flow=${String(renameFlow)} ${JSON.stringify(t10)}`);
+
+  // ── v2 (P2-5) T11 reveal：右键 tab「在树中显示」→ 树里该行在场 ──
+  await front();
+  const t11Tab = await EVAL(`(function(){var el=document.querySelector('[data-file-tab-path="ui451-renamed-a.txt"]');if(!el)return 'no_tab';el.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true}));return 'menu';})()`);
+  await sleep(400);
+  await EVAL(`(function(){var b=document.querySelector('[data-testid="file-tab-menu-reveal"]');if(b)b.click();return 'clicked';})()`);
+  await sleep(2500);
+  const revealOk = await EVAL(`!!document.querySelector('[data-file-path="ui451-renamed-a.txt"]')`);
+  run.assert('T11_reveal_menu_locates_row', String(t11Tab) === 'menu' && (revealOk === true || revealOk === 'true'),
+    `tab=${String(t11Tab)} row=${String(revealOk)}`);
+
+  // ── v2 (P2-2) T12 快捷键：Ctrl+Tab 切换；Ctrl+W 涉脏弹确认（先补开第二个 tab）──
+  await front();
+  const t12TabsBefore = JSON.parse(await tabOrder());
+  if (t12TabsBefore.length < 2) {
+    await clickTreeFile(FILE_B);
+    await sleep(1500);
+  }
+  const beforeTab = await EVAL(`(function(){var el=document.querySelector('[data-file-tab-path][aria-selected="true"]');return el?el.getAttribute('data-file-tab-path'):null;})()`);
+  await EVAL(`(function(){window.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',ctrlKey:true,bubbles:true,cancelable:true}));return 'key';})()`);
+  await sleep(600);
+  const afterTab = await EVAL(`(function(){var el=document.querySelector('[data-file-tab-path][aria-selected="true"]');return el?el.getAttribute('data-file-tab-path'):null;})()`);
+  const cycleOk = beforeTab !== afterTab && !!afterTab;
+  // 打脏前切回 text 族 tab（md 预览态无 contenteditable，.txt 恒为 CodeMirror）
+  await EVAL(`(function(){var el=document.querySelector('[data-file-tab-path="ui451-renamed-a.txt"]');if(el)el.click();return 'act';})()`);
+  await sleep(700);
+  const dirtyMark = await EVAL(`(function(){
+    var act=document.querySelector('[data-file-tab-path][aria-selected="true"]');
+    if(!act) return 'no_active';
+    var host=document.querySelector('[data-file-preview-path="'+act.getAttribute('data-file-tab-path')+'"][class*="workspaceFilePreviewKeepAliveActive"]');
+    var ed=host?host.querySelector('[contenteditable="true"]'):null;
+    if(ed){ed.focus();document.execCommand('insertText',false,'UI451W');return 'dirty';}
+    return 'no_editor';
+  })()`);
+  await sleep(500);
+  await EVAL(`(function(){window.dispatchEvent(new KeyboardEvent('keydown',{key:'w',ctrlKey:true,bubbles:true,cancelable:true}));return 'key';})()`);
+  await sleep(600);
+  const wDialog = await EVAL(`!!document.querySelector('[data-testid="file-tab-close-dialog"]')`);
+  await EVAL(`(function(){var b=Array.from(document.querySelectorAll('[data-testid="file-tab-close-dialog"] button')).find(function(x){return (x.textContent||'').trim()==='取消';});if(b)b.click();return 'cancel';})()`);
+  await sleep(400);
+  run.assert('T12_shortcuts_cycle_and_guard', cycleOk && wDialog === true && String(dirtyMark) === 'dirty',
+    `before=${String(beforeTab)} after=${String(afterTab)} wDialog=${String(wDialog)} dirty=${String(dirtyMark)}`);
+
+  // ── v2 (P1-1) T13 删除已打开文件 → tab 直接关（无脏确认）──
+  await front();
+  const delFlow = await EVAL(
+    `(async function(){
+      var rows=document.querySelectorAll('[role="treeitem"][title*="${FILE_B}"]');
+      if(!rows.length) return 'no_row';
+      rows[0].dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true}));
+      await new Promise(function(r){setTimeout(r,400);});
+      var mi=document.querySelector('[data-testid="file-tree-menu-delete"]');
+      if(!mi) return 'no_menu';
+      mi.click();
+      await new Promise(function(r){setTimeout(r,400);});
+      var ok=document.querySelector('[data-testid="file-tree-dialog-confirm"]');
+      if(!ok) return 'no_confirm';
+      ok.click();
+      return 'submitted';
+    })()`);
+  let t13 = {};
+  for (let i = 0; i < 8; i++) {
+    await sleep(800);
+    const probe = await EVAL(
+      `(function(){
+        var tabs=Array.from(document.querySelectorAll('[data-file-tab-path]')).map(function(el){return el.getAttribute('data-file-tab-path');});
+        return JSON.stringify({tabs:tabs, gone:tabs.indexOf('${FILE_B}')<0, dialog:!!document.querySelector('[data-testid="file-tab-close-dialog"]')});
+      })()`);
+    try { t13 = JSON.parse(probe); } catch {}
+    if (t13.gone) break;
+  }
+  run.assert('T13_delete_closes_open_tab', String(delFlow) === 'submitted' && t13.gone === true && t13.dialog === false,
+    `flow=${String(delFlow)} ${JSON.stringify(t13)}`);
+
+  // ── v2 (P1-2) T14 关右栏「文件」tab 守卫：涉脏先弹确认，取消保留，确认关闭 ──
+  await front();
+  await EVAL(`(function(){
+    var el=document.querySelector('[data-file-tab-path][aria-selected="true"]');
+    if(!el) return 'no_active';
+    var host=document.querySelector('[data-file-preview-path="'+el.getAttribute('data-file-tab-path')+'"][class*="workspaceFilePreviewKeepAliveActive"]');
+    var ed=host?host.querySelector('[contenteditable="true"]'):null;
+    if(ed){ed.focus();document.execCommand('insertText',false,'UI451P');return 'dirty';}
+    return 'no_editor';
+  })()`);
+  await sleep(600);
+  await EVAL(`(function(){var b=document.querySelector('[aria-label="关闭文件"]');if(b)b.click();return 'clicked';})()`);
+  await sleep(600);
+  const panelDialog = await EVAL(`!!document.querySelector('[data-testid="file-panel-close-dialog"]')`);
+  await front();
+  await lib.screenshotPng(client, EVIDENCE_DIR, 'ui451-panel-close-guard.png').catch(() => {});
+  const cancelKeep = await EVAL(`(function(){var b=Array.from(document.querySelectorAll('[data-testid="file-panel-close-dialog"] button')).find(function(x){return (x.textContent||'').trim()==='取消';});if(b)b.click();return 'cancel';})()`);
+  await sleep(600);
+  const stillOpen = await EVAL(`!!document.querySelector('[data-testid="file-tree-refresh"]')`);
+  await EVAL(`(function(){var b=document.querySelector('[aria-label="关闭文件"]');if(b)b.click();return 'clicked';})()`);
+  await sleep(500);
+  await EVAL(`(function(){var b=document.querySelector('[data-testid="file-panel-close-confirm"]');if(b)b.click();return 'confirmed';})()`);
+  await sleep(800);
+  const closedNow = await EVAL(`!document.querySelector('[data-testid="file-tree-refresh"]')`);
+  run.assert('T14_panel_close_dirty_guard', panelDialog === true && String(cancelKeep) === 'cancel'
+    && stillOpen === true && closedNow === true,
+    `dialog=${String(panelDialog)} cancel=${String(cancelKeep)} stillOpen=${String(stillOpen)} closed=${String(closedNow)}`);
 
   run.finish();
   process.exit(run.allPass ? 0 : 1);

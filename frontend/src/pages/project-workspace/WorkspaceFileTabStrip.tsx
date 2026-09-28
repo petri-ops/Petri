@@ -5,7 +5,7 @@
 // TREE_DRAG_MIME 互不误伤）、右键批量关闭菜单（复用 fileTreeMenu 样式族，模式同
 // FileTreeContextMenu）。
 // ============================================================
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Icon, type IconName } from '@/components/icons/Icon';
 import styles from '../project-workspace.module.css';
 import type { ActiveWorkspaceFile } from './types';
@@ -13,7 +13,8 @@ import type { ActiveWorkspaceFile } from './types';
 /** 独立 MIME：与文件树拖拽（TREE_DRAG_MIME）隔离，tab 条不接受树行拖入。 */
 export const FILE_TAB_DRAG_MIME = 'application/x-gewu-file-tab';
 
-export type FileTabMenuAction = 'close' | 'closeOthers' | 'closeRight' | 'closeAll';
+// UI-451 加映 v2 — reveal = 在文件树中定位该 tab（展开祖先目录 + 行滚入视野）
+export type FileTabMenuAction = 'close' | 'closeOthers' | 'closeRight' | 'closeAll' | 'reveal';
 
 type DragHint = { path: string; half: 'left' | 'right' } | null;
 
@@ -36,6 +37,22 @@ export function WorkspaceFileTabStrip({
 }): React.ReactElement {
   const [dragHint, setDragHint] = useState<DragHint>(null);
   const [menu, setMenu] = useState<{ x: number; y: number; path: string } | null>(null);
+  const stripRef = useRef<HTMLDivElement | null>(null);
+
+  // UI-451 加映 v2 (P2-4) — 激活 tab 滚入视野（tab 条横向滚动时新激活/新开 tab 不藏在条外）
+  useEffect(() => {
+    if (!activePath || !stripRef.current) return;
+    const escaped = typeof CSS !== 'undefined' && CSS.escape ? CSS.escape(activePath) : activePath;
+    const el = stripRef.current.querySelector(`[data-file-tab-path="${escaped}"]`);
+    el?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+  }, [activePath]);
+
+  // UI-451 加映 v2 (P2-3) — 同名文件去重显示：重名时附加父目录限定（terminalTabs「名+目录」先例）
+  const nameCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const file of files) counts.set(file.name, (counts.get(file.name) || 0) + 1);
+    return counts;
+  }, [files]);
 
   // Esc 关右键菜单；外点由整层 backdrop 的 mousedown 处理（模式同 FileTreeContextMenu）
   useEffect(() => {
@@ -102,12 +119,14 @@ export function WorkspaceFileTabStrip({
     if (files.length > 1) items.push({ key: 'closeOthers', label: '关闭其他', icon: 'minus' });
     if (index !== -1 && index < files.length - 1) items.push({ key: 'closeRight', label: '关闭右侧标签页', icon: 'arrow-right' });
     items.push({ key: 'closeAll', label: '关闭全部', icon: 'square-stack' });
+    items.push({ key: 'reveal', label: '在树中显示', icon: 'sidebar' });
     return items;
   };
 
   return (
     <>
       <div
+        ref={stripRef}
         className={`${styles.workspaceFileTabStrip}${dragHint?.path === '' ? ` ${styles.workspaceFileTabStripDropTail}` : ''}`}
         data-testid="file-tab-strip"
         onDragOver={handleStripDragOver}
@@ -154,6 +173,11 @@ export function WorkspaceFileTabStrip({
             >
               <Icon name="file" size={12} />
               <span className={styles.workspaceFileTabName}>{file.name}</span>
+              {(nameCounts.get(file.name) || 0) > 1 && (
+                <span className={styles.workspaceFileTabDir} title={file.path}>
+                  {file.path.split('/').slice(0, -1).filter(Boolean).join('/') || '根目录'}
+                </span>
+              )}
               {isDirty && <span className={styles.workspaceFileTabDot} data-testid="file-tab-dirty" />}
               <button
                 type="button"
