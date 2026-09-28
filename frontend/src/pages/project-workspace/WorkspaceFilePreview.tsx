@@ -40,8 +40,7 @@ import { WorkspacePdfPreview } from './WorkspacePdfPreview';
 import { OfficePreviewPane } from './OfficePreviewPane';
 import { isCsvFile, isPdfFile, isHtmlFile, isJsonFile, withReportTheme, detectOfficeKind } from './helpers';
 
-// UI-400-6 — Markdown 目录解析：1-3 级标题，跳过 ```/~~~ 围栏内伪标题。
-// 点击跳转按 DOM 顺序对齐（渲染后的 h1-h3 顺序即解析顺序），不做 id 注入。
+// UI-400-6 — Markdown 目录解析：1-3 级 ATX 标题，跳过 ```/~~~ 围栏内伪标题。
 function parseMdHeadings(text: string): Array<{ level: 1 | 2 | 3; text: string }> {
   const items: Array<{ level: 1 | 2 | 3; text: string }> = [];
   let inFence = false;
@@ -190,15 +189,17 @@ export function WorkspaceFilePreview({
     setMdTocOpen(true);
   }, [file?.path]);
 
-  // UI-400-6 — MD 目录：预览态解析 1-3 级标题；跳转按渲染 DOM 的 h1-h3 顺序对齐
+  // UI-400-6 补——目录条目仍由源码解析（上）；跳转改经 mdPreviewRef 直接查 h1-h3。
+  // 原实现按字面量类名 `.workspaceMarkdownPreview` 查 DOM，CSS Modules 会把类名哈希成
+  // `workspaceMarkdownPreview_xxxx`（dist 实测），选择器零匹配 → 点击目录毫无反应（用户实报）。
+  // ref 查询不依赖类名字面量，与解析顺序（渲染后 h1-h3 即源码 ATX 顺序）天然对齐。
+  const mdPreviewRef = useRef<HTMLDivElement | null>(null);
   const mdTocItems = useMemo(
     () => (isMarkdown && mdView === 'preview' && status === 'ready' ? parseMdHeadings(text) : []),
     [isMarkdown, mdView, status, text]
   );
   const jumpToMdHeading = useCallback((index: number) => {
-    const nodes = previewBodyRef.current?.querySelectorAll(
-      '.workspaceMarkdownPreview h1, .workspaceMarkdownPreview h2, .workspaceMarkdownPreview h3'
-    );
+    const nodes = mdPreviewRef.current?.querySelectorAll('h1, h2, h3');
     nodes?.[index]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, []);
 
@@ -365,7 +366,10 @@ export function WorkspaceFilePreview({
           </div>
         )}
         {status === 'ready' && fallbackKind === 'markdown' && mdView === 'preview' && (
-          <div className={styles.workspaceMarkdownPreview}>
+          <div
+            ref={mdPreviewRef}
+            className={`${styles.workspaceMarkdownPreview}${mdTocOpen && mdTocItems.length > 0 ? ` ${styles.workspaceMarkdownPreviewTocGutter}` : ''}`}
+          >
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeHighlight, [rehypeSanitize, markdownSanitizeSchema]]}
@@ -462,7 +466,8 @@ export function WorkspaceFilePreview({
           {saveError}
         </div>
       )}
-      {/* UI-400-6 — MD 预览左侧悬浮目录：开关悬挂左上角，点击隐藏/再展开，条目点击平滑跳转 */}
+      {/* UI-400-6 补——目录开关挪到右上角与编辑/预览切换归拢（原左上角悬浮时压住标题首字）；
+          目录面板展开时正文经 TocGutter 预留左侧空间，浮层只落在空隙上，不再遮挡正文 */}
       {isMarkdown && status === 'ready' && mdView === 'preview' && mdTocItems.length > 0 && (
         <>
           <button

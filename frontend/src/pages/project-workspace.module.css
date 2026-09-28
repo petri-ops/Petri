@@ -6641,7 +6641,11 @@ body:global(.gewu-resizing-columns) * {
   flex: 1;
   height: 100%;
   min-height: 0;
-  padding: 18px;
+  /* 顶部 46px = 右上角悬浮钮簇（md 目录开关 + 编辑/预览切换）的安全带：
+     任何栏宽下长标题首行都不伸进按钮区（沿用 UI-323 悬浮设计，不设常驻工具条行） */
+  padding: 46px 18px 18px;
+  /* UI-400-6 补——目录展开/收起时左侧预留空间平滑过渡 */
+  transition: padding-left 0.18s ease;
   background: var(--gewu-bg-surface);
   color: var(--gewu-text);
   font-size: var(--gewu-font-size-body-sm);
@@ -6650,12 +6654,23 @@ body:global(.gewu-resizing-columns) * {
   box-sizing: border-box;
 }
 
+/* UI-400-6 补——目录面板（left:10 + width）展开时正文左移让位，浮层只落在空隙上不遮挡正文。
+   窄栏自适应：面板 min(220px,56%)、让位 min(252px, calc(56% + 12px))——让位恒 ≥ 面板左偏 10px +
+   面板宽 56% 再加 2px 净空，任意栏宽（含 <250px 极窄栏）面板永不压住正文首字；
+   宽栏（≥420px）取值与初版 220/252 完全一致。实机教训：右栏 270px 时固定 252px 让位 +
+   border-box 把正文挤成 0 宽（每段折 46 行细条、scrollHeight 9.4k→95k），故必须比例封顶。 */
+.workspaceMarkdownPreviewTocGutter {
+  padding-left: min(252px, calc(56% + 12px));
+}
+
 .workspaceMarkdownPreview h1,
 .workspaceMarkdownPreview h2,
 .workspaceMarkdownPreview h3 {
   margin: 1.1em 0 0.55em;
   color: var(--gewu-text);
   line-height: 1.25;
+  /* 目录跳转落点 = 右上角悬浮钮带（~36px）下方，满宽标题行着陆也不垫在按钮下 */
+  scroll-margin-top: 48px;
 }
 
 .workspaceMarkdownPreview h1 {
@@ -6751,7 +6766,8 @@ body:global(.gewu-resizing-columns) * {
   left: 0;
   right: 0;
   z-index: 5;
-  padding: 6px 48px 6px 12px;
+  /* 右侧 78px 让位右上角悬浮钮簇（mdViewToggle 14-40 + mdTocToggle 48-74） */
+  padding: 6px 78px 6px 12px;
   background: color-mix(in srgb, var(--gewu-danger) 9%, transparent);
   color: var(--gewu-danger);
   font-size: var(--gewu-font-size-sm);
@@ -7455,7 +7471,9 @@ body:global(.gewu-resizing-columns) * {
 .workspaceMdTocToggle {
   position: absolute;
   top: 10px;
-  left: 10px;
+  /* UI-400-6 补——与编辑/预览切换归拢为右上角按钮簇（right:14 为 mdViewToggle，本钮居左相邻），
+     原左上角悬浮会压住 h1 标题首字 */
+  right: 48px;
   z-index: 6;
   display: inline-flex;
   align-items: center;
@@ -7482,7 +7500,7 @@ body:global(.gewu-resizing-columns) * {
   top: 42px;
   left: 10px;
   bottom: 14px;
-  width: 220px;
+  width: min(220px, 56%);
   z-index: 5;
   overflow: auto;
   display: flex;
@@ -7605,12 +7623,14 @@ body:global(.gewu-resizing-columns) * {
    注意：类必须在 project-workspace.module.css（CenterPanel 的 styles 来源），
    放错模块会导致 className 落空（v16 首版实测）。
    UI-448 加映 v27 — 对齐修正（用户截图指认「摘要和会话按钮上下不是对齐的」）：
-   原 absolute 锚在会话框内（right:14），顶栏摘要按钮锚在窗口右缘——两者差
-   ~23px 且随右栏开合漂移。改 fixed 窗口右下角定位，与顶栏按钮群同一条
-   右缘基准线，侧栏开合/卡片拖宽都不再影响。 */
+   absolute 锚会话框时与顶栏按钮差 ~23px（会话框 padding 14 vs 按钮内缩 5）；
+   v27 改 fixed 窗口角后又错位到软件角落（用户指正「右下角是中间栏分隔线的
+   那个角度」）。v28 定版：absolute 回会话框 + right:5px——与摘要按钮相对
+   分隔线的内缩量（5px）一致，两钮中心线精确重合（实测 center 637==637），
+   且同锚中栏容器，右栏开合/窗口尺寸变化恒对齐。 */
 .sideChatFab {
-  position: fixed;
-  right: 6px;
+  position: absolute;
+  right: 5px;
   bottom: 8px;
   width: 28px;
   height: 28px;

@@ -204,3 +204,49 @@ describe('UI-323 回归修复：file=null → file 转换不破坏 Hook 顺序',
     errorSpy.mockRestore();
   });
 });
+
+// UI-400-6 补——MD 目录双重回归：
+// ① 点击不导航：跳转曾按字面量类名 `.workspaceMarkdownPreview` 查 DOM，CSS Modules 哈希后
+//    （dist 实测 `workspaceMarkdownPreview_1nxrm_6588`）零匹配；现跳转经 mdPreviewRef 直接查 h1-h3。
+// ② 浮层遮挡正文：目录展开时正文挂 TocGutter 让位类，收起后浮层与让位类一并消失。
+describe('UI-400-6 补：MD 目录点击跳转与正文避让', () => {
+  it('目录条目解析自源码（围栏伪标题不进目录）；点击条目经 ref 查询精确滚动到对应标题', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(new Response('# 标题一\n\n正文\n\n```sh\n# 不是标题\n```\n\n## 标题二\n\n内容\n', { status: 200 }))),
+    );
+    renderPreview();
+    await waitFor(() => expect(screen.getByTitle('标题一')).toBeTruthy());
+    expect(screen.getByTitle('标题二')).toBeTruthy();
+    expect(screen.queryByTitle('不是标题')).toBeNull();
+
+    const h1 = document.querySelector('h1') as HTMLElement;
+    const h2 = document.querySelector('h2') as HTMLElement;
+    const scrollH1 = vi.fn();
+    const scrollH2 = vi.fn();
+    h1.scrollIntoView = scrollH1;
+    h2.scrollIntoView = scrollH2;
+    fireEvent.click(screen.getByTitle('标题二'));
+    expect(scrollH2).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+    expect(scrollH1).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTitle('标题一'));
+    expect(scrollH1).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+  });
+
+  it('目录展开时正文挂 TocGutter 让位类；收起后浮层消失、让位类移除', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(new Response('# 标题一\n\n正文\n\n## 标题二\n\n内容\n', { status: 200 }))),
+    );
+    renderPreview();
+    await waitFor(() => expect(screen.getByTitle('标题一')).toBeTruthy());
+    expect(document.querySelector('[class*="workspaceMarkdownPreviewTocGutter"]')).toBeTruthy();
+    fireEvent.click(screen.getByTestId('md-toc-toggle'));
+    expect(screen.queryByTitle('标题一')).toBeNull();
+    expect(document.querySelector('[class*="workspaceMarkdownPreviewTocGutter"]')).toBeNull();
+    // 再展开恢复
+    fireEvent.click(screen.getByTestId('md-toc-toggle'));
+    expect(screen.getByTitle('标题一')).toBeTruthy();
+    expect(document.querySelector('[class*="workspaceMarkdownPreviewTocGutter"]')).toBeTruthy();
+  });
+});
