@@ -140,6 +140,7 @@ module.exports = {
 
     // 子模块注册（顺序与原 routes/result-studio.js 端点声明顺序一致）
     require('./repository').register(app, { repo });
+    require('./lineage').register(app, { repo, sqlite });
     require('./interaction').register(app, {
       repo, baselineWork, databasePath,
     });

@@ -289,6 +289,22 @@ function createResultStudioRepository(db, options = {}) {
       );
     },
 
+    // BLOCK-127（BIO-3 P1）：按项目列出全部权威工作流图，updated_at 降序
+    //（最新优先）——lineage 投影端点据此找包含目标 job 的图。
+    listProjectWorkflowGraphs(projectId) {
+      if (!projectId) return [];
+      const rows = db.prepare(
+        'SELECT * FROM result_workflow_graphs WHERE project_id = ? ORDER BY updated_at DESC, graph_id DESC'
+      ).all(projectId);
+      const graphs = [];
+      for (const row of rows) {
+        try {
+          graphs.push(readWorkflowGraphRow(row));
+        } catch { /* 单图载荷损坏不拖垮整列表，跳过 */ }
+      }
+      return graphs.filter(Boolean);
+    },
+
     // -------------------------------------------------------------- change set
 
     /**

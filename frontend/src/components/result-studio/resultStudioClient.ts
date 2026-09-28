@@ -421,3 +421,33 @@ export function submitExistingRepositoryConsent(projectId: string): Promise<Exis
     body: JSON.stringify({ projectId, allowExistingRepository: true }),
   });
 }
+
+
+export interface ResultLineageNode {
+  toolJobId: string;
+  toolId: string | null;
+  isCurrent: boolean;
+}
+
+export interface ResultLineage {
+  chain: ResultLineageNode[];
+  downstreamCount: number;
+}
+
+export interface ResultLineageResponse {
+  ok: boolean;
+  projectId?: string;
+  graphId?: string;
+  lineage: ResultLineage | null;
+  note?: string;
+}
+
+/**
+ * BLOCK-127（BIO-3 P1）：结果血缘链只读投影——目标 job 在权威工作流图中的
+ * 祖先链（上游在前）+ 直接下游数。无持久化图时 lineage=null（诚实，不猜）。
+ */
+export function fetchResultLineage(jobId: string, projectId: string | null): Promise<ResultLineageResponse> {
+  const query = new URLSearchParams({ jobId });
+  if (projectId) query.set('projectId', projectId);
+  return requestJson('/lineage?' + query.toString());
+}

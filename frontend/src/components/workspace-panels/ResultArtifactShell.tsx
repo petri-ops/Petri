@@ -43,6 +43,7 @@ import {
 import { getResultScrollPosition, setResultScrollPosition } from '@/components/result-studio/resultScrollMemory';
 import { ScientificInteractionViewer } from '@/components/result-studio/ScientificInteractionViewer';
 import { CompactResultNavigator } from '@/components/result-studio/CompactResultNavigator';
+import { LineageStrip } from '@/components/result-studio/LineageStrip';
 import {
   beginResultSurfaceMeasure,
   chooseResultArtifactName,
@@ -1037,6 +1038,7 @@ export function ResultArtifactShell({
     return (
       <div className={containerClass}>
         {mode === 'result' && resultToolbar}
+        {mode === 'result' && <LineageStrip projectId={project.id} jobId={job.id} />}
         {workflowBar}
         {recoveryConfirmation}
         <div className={styles.resultHeader}>

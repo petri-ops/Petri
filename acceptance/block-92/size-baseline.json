@@ -47,8 +47,8 @@
       "path": "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
       "wave": "B",
       "module": "W-04",
-      "lines": 1204,
-      "sha256": "e81ea92491d18ab2d42a790f65f1cd14a6e23d567778e39c7e25a64ae650bc32"
+      "lines": 1206,
+      "sha256": "047e0a3fadd8b3cfe2fb135b7d9750161a04721f561f3d340858e57736cb1f73"
     },
     {
       "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx",
@@ -124,8 +124,8 @@
       "path": "core/shared-backend/result-studio-repository.js",
       "wave": "C",
       "module": "W-04",
-      "lines": 1773,
-      "sha256": "6294ac4a72fdf24d4fe334722d6d92d98f26677da0e9fc741447f05c639165e2"
+      "lines": 1789,
+      "sha256": "2e1b578c61fcddea194cbd080b4b4e104d87a16b4e39394b128675e44b9a03ac"
     },
     {
       "path": "core/biof3-server/agent-tools/workspace-tools.js",
@@ -170,5 +170,5 @@
       "sha256": "b1a8303d2bb09317a09374053757d7a85c716777e2f599c5f3f962cac94508af"
     }
   ],
-  "total": 22465
+  "total": 22483
 }

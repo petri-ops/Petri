@@ -4474,6 +4474,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：quality:types 0+test:changed Node 42/0+前端定向全绿（本轮改动面无组件测试=BIO-1 评估已登记的壳级测试缺口维持）；code-size project-workspace.tsx 1223→1232+ResultArtifactShell 1193→1204 显式重打（含 UI-454 分页接线）。**端到端验证交用户过目**：CDP 自动化对「新项目首开的视图形态机」（TitleBar pill 仅特定形态渲染/空态启动卡/深链 ?mode= 竞争）步进成本超出收益，实测三形态两入口点击均未达库列表（打开链修复前的同路径亦不可达=视图形态问题独立于本修复，未再深挖）；修复后用户在 app 点任意结果（含旧 HTTP job）一次即真值验证。
 - **边界**：放行仅查看（不写会话/不产对话消息）；深链 ?mode= 竞争归一现象未随本修复消失（mode 归一化 effect 与 auto-open effect 的时序竞争，独立现象登记候选）；BIO-3 余下（P1 lineage 投影端点+血缘条、P2 继续分析按钮）未开工保持 planned。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## UI-456: 结果血缘条——lineage 投影端点 + 前端祖先链（BIO-3 P1）(2026-09-28 in_progress，契约级全绿；实机待栈重启+真实跨 Job 链数据)
+
+- **来源**：G0-BIO plan §3 BIO-3「lineage 可视化」+ 垂直评估「链在库里用户看不见」（result_workflow_graphs 真值完整、无暴露端点、前端零消费——数据侧零缺口纯投影工作）。
+- **三件**：①**投影纯函数** `core/shared-backend/result-studio-lineage.js`（buildLineageChain：目标 job 沿 dependsOn BFS 向上收集祖先，按距当前依赖深度降序=上游在前当前末尾，直接下游计数；环 visited 防御；job 不在图诚实 null）；②**仓库方法+端点**：repository.listProjectWorkflowGraphs（updated_at 降序，单图损坏跳过不拖垮列表）+ `GET /api/result-studio/lineage?jobId=&projectId=`（找包含目标 job 的最新图投影；无图/无项目归属诚实 note 不虚构）；③**前端血缘条** LineageStrip（catalog 工具名渲染、当前节点高亮、节点点击走 projectOpenResult 事件=UI-455 打开链、单节点链/无图/端点失败均不渲染不冒充血缘；挂 ResultArtifactShell result 模式工具栏下）。
+- **证据**：红绿先行（模块缺失红在册→绿；fixture 走 workflowGraphDigest 内容寻址派生+自动派生合法 artifact 边——verifyWorkflowGraphIntegrity 五重硬校验全过）；block127 契约 5/5（链序/下游计数/环防御/缺节点 null/仓库排序+命中）+LineageStrip 4/4（链渲染/当前高亮/点击事件 detail/三种诚实不渲染）+viewer 回归+theme 4/4+tsc 0+test:changed Node 617/0+code-size 重打（ResultArtifactShell +2 行接线）。
+- **待验**：实机需 dev 栈重启（后端新端点）+**真实跨 Job 血缘数据**（当前 dev 库 deseq2 单 Job 无下游依赖=链单节点不渲染属正确行为；跨 Job 链随 BIO-4 解冻 go-kegg/volcano 后自然产生，或 selection→富集操作触发）。P2「继续分析显式按钮」随 BIO-4（下游工具解冻前无真实目标）。
+- **边界**：投影只读（不建第二真相）；链排序按依赖深度非时间（同深度 toolJobId 稳定序）；无会话 job 同样可投影（图真值不含会话维度）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-454: 交互上限与降级链——散点 backing 600 点 + 热图解除前端自缚 + 静态 CSV 本地分页 + 日志端点项目目录兜底 (2026-09-28 in_progress，组件级全绿；实机项待 dev 栈重启后验)
 - **来源**：G0-BIO BIO-2 阶段种子（plan §3；2026-09-28 垂直评估「交互上限与降级链」差距）。用户裁决「继续」按 G0 Goal 交织序推进（第 3 项交付位）。
 - **四件**：①**plot backing 有界窗口 250→600**（`interaction.js`——前端 SVG 可承受；仍按文件顺序取，**非显著性排序**：top-N 真排序需插件 descriptor 声明排序字段的契约，登记 BIO-3 候选不猜语义）；②**热图解除前端自缚**（`ScientificInteractionViewer` matrix 分支：列 `slice(0,24)`/行 `slice(0,40)` 移除——后端 backing 本就有界（行 100/列不截断），全量渲染交给网格横向滚动，caveat 改为如实标注「渲染后端有界矩阵窗口 N 行×M 列」）；③**静态 CSV 预览本地分页**（新纯函数 `lib/csv-preview-pagination`（50 行/页，页码越界钳制不渲染空页）+壳内分页控件（上一页/下一页/页码/总行数，previewData 更新重置页码，标注「预览文本预算内」诚实口径）——原 24 行硬截断退役；静态预览是无交互清单的降级路径，无服务端分页通道可复用故走前端本地分页）；④**日志端点项目目录兜底**（`tools-metadata.js`：`resolveProjectRunLayout` 失败不再静默只回全局目录——项目行仍在时按 `workspace_path` 拼执行链同款目录约定兜底，失败原因透出 note——修 BLOCK-126 验收发现的既有缺陷 AUDIT-LOG 🟡）。
