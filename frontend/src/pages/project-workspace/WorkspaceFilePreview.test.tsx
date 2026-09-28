@@ -205,6 +205,42 @@ describe('UI-323 回归修复：file=null → file 转换不破坏 Hook 顺序',
   });
 });
 
+// UI-451 — 脏检测外露：宿主 tab 条圆点/关闭确认消费 onDirtyChange。
+// 锁三条语义：初始/加载期不误报；编辑后 true；保存成功后回落 false。
+describe('UI-451 onDirtyChange 脏检测外露', () => {
+  it('编辑 → true；自动保存成功 → false；挂载初始不误报', async () => {
+    writeTextFileMock.mockResolvedValue({ ok: true });
+    mockPreviewFetch();
+    const onDirtyChange = vi.fn();
+    render(
+      <ThemeProvider>
+        <WorkspaceFilePreview
+          file={mdFile()}
+          refreshVersion={0}
+          openError=""
+          opening={false}
+          onOpen={() => {}}
+          onDownload={() => {}}
+          projectId="p_x"
+          onDirtyChange={onDirtyChange}
+        />
+      </ThemeProvider>,
+    );
+    await waitFor(() => expect(screen.getByLabelText('编辑')).toBeTruthy());
+    // 初始：ready 且 text===textSaved，最近一次上报应为 false
+    expect(onDirtyChange).toHaveBeenLastCalledWith(false);
+
+    fireEvent.click(screen.getByLabelText('编辑'));
+    const editor = await waitFor(() => screen.getByTestId('mock-editor'));
+    fireEvent.change(editor, { target: { value: '# check.md\n\n草稿内容\n' } });
+    await waitFor(() => expect(onDirtyChange).toHaveBeenCalledWith(true));
+
+    // 自动保存（停顿 ~1.2s）成功后回落 false
+    await waitFor(() => expect(writeTextFileMock).toHaveBeenCalled(), { timeout: 3000 });
+    await waitFor(() => expect(onDirtyChange).toHaveBeenLastCalledWith(false));
+  });
+});
+
 // UI-400-6 补——MD 目录双重回归：
 // ① 点击不导航：跳转曾按字面量类名 `.workspaceMarkdownPreview` 查 DOM，CSS Modules 哈希后
 //    （dist 实测 `workspaceMarkdownPreview_1nxrm_6588`）零匹配；现跳转经 mdPreviewRef 直接查 h1-h3。

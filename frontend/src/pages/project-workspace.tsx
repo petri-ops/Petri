@@ -99,7 +99,9 @@ export function ProjectWorkspace(): React.ReactElement {
     activeWorkspaceFile,
     setActiveWorkspaceFile,
     handleOpenWorkspaceFile,
-    handleCloseWorkspaceFile,
+    handleActivateWorkspaceFile,
+    handleCloseWorkspaceFiles,
+    handleReorderWorkspaceFiles,
   } = useWorkspaceFileTabs(projectId);
   // G0-RS-P4/G0-RS-P3 的 Result Studio 编辑上下文状态簇
   // （resultContextState/resultEditControls/resultEditSubmitting/resultAgentDrafts）
@@ -974,7 +976,9 @@ export function ProjectWorkspace(): React.ReactElement {
     setActiveConvId,
     handleAskAgent,
     handleOpenWorkspaceFile,
-    handleCloseWorkspaceFile,
+    handleActivateWorkspaceFile,
+    handleCloseWorkspaceFiles,
+    handleReorderWorkspaceFiles,
     handleOpenResult,
     handleOpenRightResults,
     handleOpenRightBrowser,

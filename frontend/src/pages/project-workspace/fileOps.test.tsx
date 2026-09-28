@@ -121,7 +121,9 @@ describe('RightFileTree 文件操作', () => {
         openFiles={[]}
         activeFile={null}
         onOpenFile={vi.fn()}
-        onCloseFile={vi.fn()}
+        onActivateFile={vi.fn()}
+        onCloseFiles={vi.fn()}
+        onReorderFiles={vi.fn()}
       />,
     );
 
@@ -151,7 +153,9 @@ describe('RightFileTree 文件操作', () => {
         openFiles={[]}
         activeFile={null}
         onOpenFile={vi.fn()}
-        onCloseFile={vi.fn()}
+        onActivateFile={vi.fn()}
+        onCloseFiles={vi.fn()}
+        onReorderFiles={vi.fn()}
       />,
     );
 
@@ -183,7 +187,9 @@ describe('RightFileTree 文件操作', () => {
         openFiles={[]}
         activeFile={null}
         onOpenFile={vi.fn()}
-        onCloseFile={vi.fn()}
+        onActivateFile={vi.fn()}
+        onCloseFiles={vi.fn()}
+        onReorderFiles={vi.fn()}
       />,
     );
 
@@ -214,7 +220,9 @@ describe('RightFileTree 文件操作', () => {
         openFiles={[]}
         activeFile={null}
         onOpenFile={vi.fn()}
-        onCloseFile={vi.fn()}
+        onActivateFile={vi.fn()}
+        onCloseFiles={vi.fn()}
+        onReorderFiles={vi.fn()}
       />,
     );
 

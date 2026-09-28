@@ -64,6 +64,7 @@ export function WorkspaceFilePreview({
   onDownload,
   onOpenFile,
   projectId,
+  onDirtyChange,
 }: {
   file: ActiveWorkspaceFile | null;
   refreshVersion: number;
@@ -73,6 +74,7 @@ export function WorkspaceFilePreview({
   onDownload: () => void;
   onOpenFile?: (file: ActiveWorkspaceFile) => void;
   projectId?: string;
+  onDirtyChange?: (dirty: boolean) => void;
 }): React.ReactElement {
   const { resolvedTheme } = useTheme();
   const [text, setText] = useState('');
@@ -278,6 +280,19 @@ export function WorkspaceFilePreview({
       if (text !== textSaved) void handleSaveCurrent();
     }
   }, [text, textSaved, handleSaveCurrent]);
+
+  // UI-451 — 脏检测外露：宿主 tab 条的未保存圆点与关闭确认消费（脏 = 既有
+  // text !== textSaved，不新增状态源；status==='ready' 门闩挡掉刷新/loading 过渡期
+  // text 暂空的假脏）。经 ref 转发回调（渲染期写 ref 违反 react-hooks/refs，同步走
+  // effect），父组件每渲染换函数不触发脏上报 effect 重跑。
+  const dirty = !!file && status === 'ready' && text !== textSaved;
+  const onDirtyChangeRef = useRef(onDirtyChange);
+  useEffect(() => {
+    onDirtyChangeRef.current = onDirtyChange;
+  });
+  useEffect(() => {
+    onDirtyChangeRef.current?.(dirty);
+  }, [dirty]);
 
   if (!file) {
     return (

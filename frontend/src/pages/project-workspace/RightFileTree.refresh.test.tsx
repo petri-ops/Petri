@@ -64,7 +64,9 @@ function renderTree(activeFile: ActiveWorkspaceFile | null) {
       openFiles={activeFile ? [activeFile] : []}
       activeFile={activeFile}
       onOpenFile={() => {}}
-      onCloseFile={() => {}}
+      onActivateFile={() => {}}
+      onCloseFiles={() => {}}
+      onReorderFiles={() => {}}
     />
   );
 }
@@ -89,7 +91,9 @@ describe('RightFileTree 刷新触发面 (UI-399)', () => {
         openFiles={[makeFile('a.txt')]}
         activeFile={makeFile('a.txt')}
         onOpenFile={() => {}}
-        onCloseFile={() => {}}
+        onActivateFile={() => {}}
+        onCloseFiles={() => {}}
+        onReorderFiles={() => {}}
       />
     );
     await new Promise((r) => setTimeout(r, 60));
@@ -103,7 +107,9 @@ describe('RightFileTree 刷新触发面 (UI-399)', () => {
         openFiles={[makeFile('a.txt'), makeFile('b.txt')]}
         activeFile={makeFile('b.txt')}
         onOpenFile={() => {}}
-        onCloseFile={() => {}}
+        onActivateFile={() => {}}
+        onCloseFiles={() => {}}
+        onReorderFiles={() => {}}
       />
     );
     await new Promise((r) => setTimeout(r, 60));

@@ -88,7 +88,12 @@ export interface RightPanelContext {
   setActiveConvId: (id: string | null) => void;
   handleAskAgent: (prompt: string) => boolean | void;
   handleOpenWorkspaceFile: (file: ActiveWorkspaceFile) => void;
-  handleCloseWorkspaceFile: (path: string) => void;
+  /** UI-451 — tab 点击激活（传数组既有对象，身份不变 → 预览不重载 → 草稿保留）。 */
+  handleActivateWorkspaceFile: (file: ActiveWorkspaceFile) => void;
+  /** UI-451 — 批量关闭（含单关；活动被关时相邻回退语义在 hook 内）。 */
+  handleCloseWorkspaceFiles: (paths: string[]) => void;
+  /** UI-451 — tab 拖拽重排。 */
+  handleReorderWorkspaceFiles: (fromPath: string, toIndex: number) => void;
   handleOpenResult: (jobId: string, projectId?: string | null) => void | Promise<void>;
   handleOpenRightResults: () => void;
   handleOpenRightBrowser: () => void;
@@ -217,7 +222,9 @@ export function RightPanel({
                     openFiles={ctx.openWorkspaceFiles}
                     activeFile={ctx.activeWorkspaceFile}
                     onOpenFile={ctx.handleOpenWorkspaceFile}
-                    onCloseFile={ctx.handleCloseWorkspaceFile}
+                    onActivateFile={ctx.handleActivateWorkspaceFile}
+                    onCloseFiles={ctx.handleCloseWorkspaceFiles}
+                    onReorderFiles={ctx.handleReorderWorkspaceFiles}
                   />
                 )}
                 {tab === 'browser' && (

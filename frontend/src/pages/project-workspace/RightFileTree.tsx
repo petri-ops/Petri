@@ -14,6 +14,7 @@ import type { ActiveWorkspaceFile, FileEntry } from './types';
 import { FileTreeList } from './FileTreeList';
 import { WorkspaceFilePreview } from './WorkspaceFilePreview';
 import { FileTreeContextMenu, FileTreeDialogHost, type FileTreeDialog, type FileTreeMenuAction, type FileTreeMenuTarget } from './FileTreeOpsOverlay';
+import { WorkspaceFileTabStrip, type FileTabMenuAction as FileTabMenuActionKind } from './WorkspaceFileTabStrip';
 import { fsImportFrom, fsMkdir, fsMove, fsCopy, fsUpload, joinPath, uniqueTargetName, type DraggedTreeItem } from './fileOps';
 import { TREE_DRAG_MIME } from './FileTreeItem';
 
@@ -29,14 +30,18 @@ export function RightFileTree({
   openFiles,
   activeFile,
   onOpenFile,
-  onCloseFile,
+  onActivateFile,
+  onCloseFiles,
+  onReorderFiles,
 }: {
   project: Project;
   active: boolean;
   openFiles: ActiveWorkspaceFile[];
   activeFile: ActiveWorkspaceFile | null;
   onOpenFile: (file: ActiveWorkspaceFile) => void;
-  onCloseFile: (path: string) => void;
+  onActivateFile: (file: ActiveWorkspaceFile) => void;
+  onCloseFiles: (paths: string[]) => void;
+  onReorderFiles: (fromPath: string, toIndex: number) => void;
 }): React.ReactElement {
   const [tree, setTree] = useState<FileEntry[]>([]);
   const [expandedDirs, setExpandedDirs] = useState<Set<string>>(new Set());
@@ -49,7 +54,14 @@ export function RightFileTree({
   });
 
   const [refreshVersion, setRefreshVersion] = useState(0);
-  const [previewVersion, setPreviewVersion] = useState(0);
+  // UI-451 — 预览刷新 token 按 path 计：手动刷新 / agent 写档（projectWorkspaceChanged
+  // forcePreview）/ 本地轮询签名变化只 bump 活动 tab 的 token，其余 tab 不重载（草稿保留）。
+  const [previewVersions, setPreviewVersions] = useState<Record<string, number>>({});
+  // UI-451 — 各 tab 未保存草稿标记（WorkspaceFilePreview.onDirtyChange 上报）：
+  // 驱动 tab 圆点 + 关闭确认；单 state 源仍是组件内 text !== textSaved。
+  const [dirtyPaths, setDirtyPaths] = useState<Record<string, boolean>>({});
+  // UI-451 — 关闭涉及脏 tab 时的确认弹层（复用 fileTreeDialog 样式族）。
+  const [closeConfirm, setCloseConfirm] = useState<{ paths: string[]; dirtyNames: string[] } | null>(null);
   const [openError, setOpenError] = useState('');
   const [opening, setOpening] = useState(false);
   const activeFileSignatureRef = useRef<string | null>(null);
@@ -159,7 +171,10 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
     const previous = activeFileSignatureRef.current;
     activeFileSignatureRef.current = signature;
     if (forcePreview || (previous !== null && previous !== signature)) {
-      setPreviewVersion((value) => value + 1);
+      const targetPath = activeFileRef.current?.path;
+      if (targetPath) {
+        setPreviewVersions((prev) => ({ ...prev, [targetPath]: (prev[targetPath] ?? 0) + 1 }));
+      }
     }
   }, [fetchDir, fetchDirPage]);
 
@@ -186,6 +201,18 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
     setLoading(true);
     void refreshFiles();
   }, [project.id, refreshFiles]);
+
+  // UI-451 — 换项目清 tab 周边映射：跨项目同名 path 的脏点/刷新 token 不得串扰。
+  // 用 React 官方「props 变化即调整 state」渲染期模式（同步 setState 进 effect 违反
+  // react-hooks/set-state-in-effect；也不并入 [project.id, refreshFiles] effect——
+  // refreshFiles 身份随 showHidden 等依赖变化，误清 token 会令全部 tab 重载丢草稿）。
+  const [tabMapsProjectId, setTabMapsProjectId] = useState(project.id);
+  if (tabMapsProjectId !== project.id) {
+    setTabMapsProjectId(project.id);
+    setPreviewVersions({});
+    setDirtyPaths({});
+    setCloseConfirm(null);
+  }
 
   useEffect(() => {
     if (!active) return;
@@ -415,8 +442,9 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
   const activePreviewUrl = useMemo(() => {
     if (!activeFile?.url) return '';
     const separator = activeFile.url.includes('?') ? '&' : '?';
-    return `${activeFile.url}${separator}workspaceRevision=${previewVersion}`;
-  }, [activeFile?.url, previewVersion]);
+    const version = previewVersions[activeFile.path] ?? 0;
+    return `${activeFile.url}${separator}workspaceRevision=${version}`;
+  }, [activeFile?.path, activeFile?.url, previewVersions]);
 
   const openWithSystemApp = useCallback(async () => {
     if (!activeFile || !project.workspacePath) return;
@@ -470,6 +498,65 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
       setOpsError(`下载失败：${(error as Error).message || '未知错误'}`);
     }
   }, [activeFile, activePreviewUrl]);
+
+  // ── UI-451 — 多 tab 常驻：脏标记上抛、关闭确认链与 tab 右键批量动作 ──
+  const handleDirtyChange = useCallback((path: string, dirty: boolean) => {
+    setDirtyPaths((prev) => (prev[path] === dirty ? prev : { ...prev, [path]: dirty }));
+  }, []);
+
+  const clearDirtyPaths = useCallback((paths: string[]) => {
+    setDirtyPaths((prev) => {
+      const next = { ...prev };
+      for (const path of paths) delete next[path];
+      return next;
+    });
+  }, []);
+
+  // 关闭入口统一走这里：涉及脏 tab 先确认（列出文件名），干净 tab 直接关。
+  const requestCloseFiles = useCallback((paths: string[]) => {
+    if (paths.length === 0) return;
+    const dirtyList = paths.filter((path) => dirtyPaths[path]);
+    if (dirtyList.length > 0) {
+      setCloseConfirm({
+        paths,
+        dirtyNames: dirtyList.map((path) => openFiles.find((item) => item.path === path)?.name || path),
+      });
+      return;
+    }
+    clearDirtyPaths(paths);
+    onCloseFiles(paths);
+  }, [clearDirtyPaths, dirtyPaths, onCloseFiles, openFiles]);
+
+  const handleTabMenuAction = useCallback((action: FileTabMenuActionKind, path: string) => {
+    const index = openFiles.findIndex((item) => item.path === path);
+    if (action === 'close') {
+      requestCloseFiles([path]);
+    } else if (action === 'closeOthers') {
+      requestCloseFiles(openFiles.filter((item) => item.path !== path).map((item) => item.path));
+    } else if (action === 'closeRight') {
+      requestCloseFiles(openFiles.slice(index + 1).map((item) => item.path));
+    } else {
+      requestCloseFiles(openFiles.map((item) => item.path));
+    }
+  }, [openFiles, requestCloseFiles]);
+
+  const confirmCloseDirty = useCallback(() => {
+    if (!closeConfirm) return;
+    const { paths } = closeConfirm;
+    setCloseConfirm(null);
+    clearDirtyPaths(paths);
+    onCloseFiles(paths);
+  }, [clearDirtyPaths, closeConfirm, onCloseFiles]);
+
+  // 关闭确认弹层 Esc（backdrop 外点在 JSX 上处理，模式同 FileTreeDialogHost）
+  useEffect(() => {
+    if (!closeConfirm) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setCloseConfirm(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [closeConfirm]);
 
   const breadcrumbSegments = useMemo(
     () => activeFile?.path.split('/').filter(Boolean) || [],
@@ -603,8 +690,8 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
           <button
             type="button"
             className={styles.workspaceTreeToggle}
-            onClick={() => onCloseFile(activeFile.path)}
-            title={openFiles.length > 1 ? `关闭当前文件（另有 ${openFiles.length - 1} 个已打开文件）` : '关闭当前文件'}
+            onClick={() => requestCloseFiles([activeFile.path])}
+            title="关闭当前文件"
             aria-label="关闭当前文件"
           >
             <Icon name="x" size={13} />
@@ -613,16 +700,61 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
       </div>
       <div className={styles.workspaceFilesMain}>
         <div className={styles.workspaceFilePreviewPane}>
-          <WorkspaceFilePreview
-            file={activeFile}
-            refreshVersion={previewVersion}
-            openError={openError}
-            opening={opening}
-            onOpen={openWithSystemApp}
-            onDownload={() => void downloadActiveFile()}
-            onOpenFile={handleOpenFile}
-            projectId={project.id}
-          />
+          {/* UI-451 — 多 tab 常驻：tab 条 + keep-alive 预览栈。每个打开文件一个常驻
+              实例，非活动实例 visibility:hidden（保草稿/滚动/编辑器状态，模式同右栏
+              tab 内容 rightPanelTabContent）；空态沿用 WorkspaceFilePreview 的
+              file=null 空面。openError/opening 只挂活动实例（语义上只描述活动文件的
+              系统打开动作）。 */}
+          <div className={styles.workspaceFileTabbedPreview}>
+            {openFiles.length > 0 && (
+              <WorkspaceFileTabStrip
+                files={openFiles}
+                activePath={activeFile?.path || null}
+                dirtyPaths={dirtyPaths}
+                onActivate={onActivateFile}
+                onRequestClose={(path) => requestCloseFiles([path])}
+                onMenuAction={handleTabMenuAction}
+                onReorder={onReorderFiles}
+              />
+            )}
+            <div className={styles.workspaceFilePreviewStack} data-testid="file-preview-stack">
+              {openFiles.length === 0 && (
+                <div className={`${styles.workspaceFilePreviewKeepAlive} ${styles.workspaceFilePreviewKeepAliveActive}`}>
+                  <WorkspaceFilePreview
+                    file={null}
+                    refreshVersion={0}
+                    openError={openError}
+                    opening={opening}
+                    onOpen={openWithSystemApp}
+                    onDownload={() => void downloadActiveFile()}
+                    projectId={project.id}
+                  />
+                </div>
+              )}
+              {openFiles.map((file) => {
+                const isActive = file.path === activeFile?.path;
+                return (
+                  <div
+                    key={file.path}
+                    data-file-preview-path={file.path}
+                    className={`${styles.workspaceFilePreviewKeepAlive}${isActive ? ` ${styles.workspaceFilePreviewKeepAliveActive}` : ''}`}
+                  >
+                    <WorkspaceFilePreview
+                      file={file}
+                      refreshVersion={previewVersions[file.path] ?? 0}
+                      openError={isActive ? openError : ''}
+                      opening={isActive ? opening : false}
+                      onOpen={openWithSystemApp}
+                      onDownload={() => void downloadActiveFile()}
+                      onOpenFile={handleOpenFile}
+                      projectId={project.id}
+                      onDirtyChange={(dirty) => handleDirtyChange(file.path, dirty)}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
         {treeOpen && (
           <aside
@@ -705,6 +837,52 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
           }}
           onClose={() => setDialog(null)}
         />
+      )}
+      {/* UI-451 — 脏 tab 关闭确认（复用 fileTreeDialog 样式族，按钮用 danger 色表达「丢弃」） */}
+      {closeConfirm && (
+        <div
+          className={styles.fileTreeDialogBackdrop}
+          data-testid="file-tab-close-dialog"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setCloseConfirm(null);
+          }}
+        >
+          <div className={styles.fileTreeDialog}>
+            <p className={styles.fileTreeDialogTitle}>
+              {closeConfirm.paths.length === 1
+                ? `关闭「${closeConfirm.dirtyNames[0]}」？`
+                : `关闭 ${closeConfirm.paths.length} 个标签页？`}
+            </p>
+            <div className={styles.fileTreeDeleteList}>
+              {closeConfirm.dirtyNames.map((name) => (
+                <p key={name} className={styles.fileTreeDeleteItem}>
+                  <Icon name="file" size={13} />
+                  {name}
+                </p>
+              ))}
+              <p className={styles.fileTreeDialogHint}>
+                以上标签页有未保存的修改，关闭后将丢弃（自动保存已落盘的内容不受影响）。
+              </p>
+            </div>
+            <div className={styles.fileTreeDialogActions}>
+              <button
+                type="button"
+                className={styles.fileTreeDialogButton}
+                onClick={() => setCloseConfirm(null)}
+              >
+                取消
+              </button>
+              <button
+                type="button"
+                className={`${styles.fileTreeDialogButton} ${styles.fileTreeDialogButtonDanger}`}
+                data-testid="file-tab-close-confirm"
+                onClick={confirmCloseDirty}
+              >
+                放弃修改并关闭
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

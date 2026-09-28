@@ -1,0 +1,73 @@
+{
+  "name": "ui451-file-tabs-live",
+  "startedAt": "2026-09-28T03:16:21.772Z",
+  "finishedAt": "2026-09-28T03:16:50.080Z",
+  "assertions": [
+    {
+      "name": "T0_seed_uploaded",
+      "pass": true,
+      "detail": "a=200 b=200 c=200"
+    },
+    {
+      "name": "V0_files_tab_opened",
+      "pass": true,
+      "detail": "first=clicked treeVisible=true"
+    },
+    {
+      "name": "T1_first_file_tab",
+      "pass": true,
+      "detail": "click=clicked:预览 ui451-tab-a.txt {\"strip\":true,\"tabs\":1,\"first\":\"ui451-tab-a.txt\"}"
+    },
+    {
+      "name": "T2_three_tabs_order_abc",
+      "pass": true,
+      "detail": "order=[\"ui451-tab-a.txt\",\"ui451-tab-b.md\",\"ui451-tab-c.txt\"] active=ui451-tab-c.txt"
+    },
+    {
+      "name": "T3a_dirty_dot_on_edit",
+      "pass": true,
+      "detail": "insert=inserted:true dots=1"
+    },
+    {
+      "name": "T3b_draft_preserved_after_switch",
+      "pass": true,
+      "detail": "switch=on_b {\"back\":true,\"hasDraft\":true,\"dots\":1}"
+    },
+    {
+      "name": "T4_drag_reorder",
+      "pass": true,
+      "detail": "drag=dragging/dropped:true order=[\"ui451-tab-c.txt\",\"ui451-tab-a.txt\",\"ui451-tab-b.md\"]"
+    },
+    {
+      "name": "T5a_menu_items_present",
+      "pass": true,
+      "detail": "{\"menu\":true,\"close\":true,\"closeOthers\":true,\"closeRight\":true,\"closeAll\":true}"
+    },
+    {
+      "name": "T5b_cancel_keeps_tabs",
+      "pass": true,
+      "detail": "dialog=true cancel=canceled {\"tabs\":3,\"dots\":1,\"dialog\":false}"
+    },
+    {
+      "name": "T5c_confirm_close_others",
+      "pass": true,
+      "detail": "{\"tabs\":[\"ui451-tab-c.txt\"],\"activePath\":\"ui451-tab-c.txt\",\"dots\":0}"
+    },
+    {
+      "name": "T6_x_close_to_empty",
+      "pass": true,
+      "detail": "{\"tabs\":0,\"empty\":true,\"strip\":false}"
+    },
+    {
+      "name": "T7a_tab_draft_survives_right_tab_switch",
+      "pass": true,
+      "detail": "insert=inserted:true away=away:结果 hiddenWhileAway=hidden {\"tabs\":[\"ui451-tab-a.txt\",\"ui451-tab-b.md\"],\"dots\":1,\"hasDraft\":true,\"aActive\":true}"
+    },
+    {
+      "name": "T8_geometry_visibility",
+      "pass": true,
+      "detail": "{\"stripH\":33,\"stripBelowToolbar\":true,\"activeVisible\":true,\"hiddenCount\":1,\"hiddenInvisible\":true}"
+    }
+  ],
+  "allPass": true
+}

@@ -7437,3 +7437,137 @@ body:global(.gewu-resizing-columns) * {
 .sideChatFab[aria-pressed='true'] {
   color: var(--gewu-accent);
 }
+
+/* ============================================================
+   UI-451 — 文件面板多 tab 常驻：tab 条 + keep-alive 预览栈。
+   颜色全部走 --gewu-* token（亮暗自动跟随）；隐藏实例沿用右栏 tab 内容同款
+   visibility 机制（保布局保滚动，出 tabindex/无障碍树）。
+   ============================================================ */
+.workspaceFileTabbedPreview {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.workspaceFileTabStrip {
+  display: flex;
+  align-items: flex-end;
+  flex-shrink: 0;
+  gap: 2px;
+  min-height: 30px;
+  padding: 4px 6px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-bottom: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-subtle);
+  scrollbar-width: thin;
+}
+
+.workspaceFileTabStripDropTail {
+  box-shadow: inset -2px 0 0 0 var(--gewu-accent);
+}
+
+.workspaceFileTab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 6px;
+  max-width: 180px;
+  min-height: 26px;
+  padding: 3px 6px 3px 8px;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  background: transparent;
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.workspaceFileTab:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
+}
+
+.workspaceFileTab:focus-visible {
+  outline: 1px solid var(--gewu-accent);
+  outline-offset: -1px;
+}
+
+.workspaceFileTabActive {
+  background: var(--gewu-bg-surface);
+  border-color: var(--gewu-border);
+  color: var(--gewu-accent);
+}
+
+.workspaceFileTabDropLeft {
+  box-shadow: inset 2px 0 0 0 var(--gewu-accent);
+}
+
+.workspaceFileTabDropRight {
+  box-shadow: inset -2px 0 0 0 var(--gewu-accent);
+}
+
+.workspaceFileTabName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workspaceFileTabDot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--gewu-accent);
+}
+
+.workspaceFileTabClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--gewu-text-tertiary);
+  cursor: pointer;
+}
+
+.workspaceFileTabClose:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
+}
+
+.workspaceFilePreviewStack {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.workspaceFilePreviewKeepAlive {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  visibility: hidden;
+}
+
+.workspaceFilePreviewKeepAlive > * {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.workspaceFilePreviewKeepAliveActive {
+  visibility: visible;
+  z-index: 1;
+}
