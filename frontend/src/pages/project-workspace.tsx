@@ -617,11 +617,14 @@ export function ProjectWorkspace(): React.ReactElement {
     return unsub;
   }, [updateWorkspaceMode, refreshConversations, refreshOtherConversations]);
   const activeJob = useMemo(() => {
-    if (!activeConvId || !activeJobId) return null;
+    if (!activeJobId) return null;
     const candidate = conversationJobs.find((job) => job.id === activeJobId)
       || jobs.find((job) => job.id === activeJobId)
       || null;
-    return candidate?.conversationId === activeConvId ? candidate : null;
+    if (!candidate) return null;
+    // BLOCK-127：会话归属 job 必须匹配当前会话；无会话 job（HTTP/API 直跑）
+    // 按项目结果查看放行（打开链不切会话，不存在混入）。
+    return candidate.conversationId ? (candidate.conversationId === activeConvId ? candidate : null) : candidate;
   }, [activeConvId, activeJobId, conversationJobs, jobs]);
   useEffect(() => {
     if (!activeJob || activeJob.status !== 'done') {
@@ -790,9 +793,15 @@ export function ProjectWorkspace(): React.ReactElement {
       return;
     }
     if (!nextJob.conversationId) {
-      bindActiveJob(null);
-      setWorkspaceNotice('这个旧结果没有可信的会话归属，不能混入当前会话。');
-      if (!options?.preserveWorkspaceMode) updateWorkspaceMode('chat', true, null);
+      // BLOCK-127（BIO-3）：无会话归属的 job（HTTP/API/联邦直跑）按「项目结果」
+      // 放行查看——不切会话、不混入对话，仅绑定结果视图。原「不能混入当前会话」
+      // 阻断退役（AUDIT-LOG 🟡 2026-09-28：四条打开路径不可达的根因）。
+      bindActiveJob(nextJob.id);
+      setRightOpen(true);
+      openRightPanel('results');
+      if (!options?.preserveWorkspaceMode) {
+        updateWorkspaceMode('result', true, nextJob.id);
+      }
       return;
     }
     if (nextJob) {

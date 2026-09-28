@@ -4467,8 +4467,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：文件名框在新式 Windows 保存框不在 UIA 树内（无法程序化读值），预填以截图为主证据 + 标题断言为机械回归；对话框非模态（去 parent 的权衡）；本机 Electron+Windows 组合的对话框实现差异属宿主环境事实（最小脚本双证），换机若行为不同门禁会如实报警。**待用户实机过目后翻 verified。**
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-454: 交互上限与降级链——散点 backing 600 点 + 热图解除前端自缚 + 静态 CSV 本地分页 + 日志端点项目目录兜底 (2026-09-28 in_progress，组件级全绿；实机项待 dev 栈重启后验)
+## UI-455: 打开链修复——无会话归属 job 按「项目结果」放行查看（BIO-3 P0 首刀）(2026-09-28 in_progress，代码级交付；待用户实机过目翻 verified)
 
+- **来源**：AUDIT-LOG 🟡 2026-09-28（UI-452 走查发现：HTTP/API 直跑的无会话 job 四条打开路径均不可达）。根因两处显式守卫：①handleOpenResult 对 !conversationId 直接拒绝（「不能混入当前会话」历史设计）回退 chat；②activeJob memo 要求 activeConvId 在场且 job 会话匹配当前会话——深链 URL 归零现象同根因（requestedJobId effect 走同一打开链被拒后 updateWorkspaceMode('chat') 归一 URL）。
+- **修法两处**（project-workspace.tsx）：①无会话 job 放行为「项目结果查看」——不切会话、不 setActiveConvId（不存在混入），仅 bindActiveJob+开右栏 results+result 模式；②activeJob memo 放宽——会话归属 job 仍必须匹配当前会话，无会话 job 直接放行（jobs state 本就是 listProjectJobs 项目全量，数据一直在场）。
+- **证据**：quality:types 0+test:changed Node 42/0+前端定向全绿（本轮改动面无组件测试=BIO-1 评估已登记的壳级测试缺口维持）；code-size project-workspace.tsx 1223→1232+ResultArtifactShell 1193→1204 显式重打（含 UI-454 分页接线）。**端到端验证交用户过目**：CDP 自动化对「新项目首开的视图形态机」（TitleBar pill 仅特定形态渲染/空态启动卡/深链 ?mode= 竞争）步进成本超出收益，实测三形态两入口点击均未达库列表（打开链修复前的同路径亦不可达=视图形态问题独立于本修复，未再深挖）；修复后用户在 app 点任意结果（含旧 HTTP job）一次即真值验证。
+- **边界**：放行仅查看（不写会话/不产对话消息）；深链 ?mode= 竞争归一现象未随本修复消失（mode 归一化 effect 与 auto-open effect 的时序竞争，独立现象登记候选）；BIO-3 余下（P1 lineage 投影端点+血缘条、P2 继续分析按钮）未开工保持 planned。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-454: 交互上限与降级链——散点 backing 600 点 + 热图解除前端自缚 + 静态 CSV 本地分页 + 日志端点项目目录兜底 (2026-09-28 in_progress，组件级全绿；实机项待 dev 栈重启后验)
 - **来源**：G0-BIO BIO-2 阶段种子（plan §3；2026-09-28 垂直评估「交互上限与降级链」差距）。用户裁决「继续」按 G0 Goal 交织序推进（第 3 项交付位）。
 - **四件**：①**plot backing 有界窗口 250→600**（`interaction.js`——前端 SVG 可承受；仍按文件顺序取，**非显著性排序**：top-N 真排序需插件 descriptor 声明排序字段的契约，登记 BIO-3 候选不猜语义）；②**热图解除前端自缚**（`ScientificInteractionViewer` matrix 分支：列 `slice(0,24)`/行 `slice(0,40)` 移除——后端 backing 本就有界（行 100/列不截断），全量渲染交给网格横向滚动，caveat 改为如实标注「渲染后端有界矩阵窗口 N 行×M 列」）；③**静态 CSV 预览本地分页**（新纯函数 `lib/csv-preview-pagination`（50 行/页，页码越界钳制不渲染空页）+壳内分页控件（上一页/下一页/页码/总行数，previewData 更新重置页码，标注「预览文本预算内」诚实口径）——原 24 行硬截断退役；静态预览是无交互清单的降级路径，无服务端分页通道可复用故走前端本地分页）；④**日志端点项目目录兜底**（`tools-metadata.js`：`resolveProjectRunLayout` 失败不再静默只回全局目录——项目行仍在时按 `workspace_path` 拼执行链同款目录约定兜底，失败原因透出 note——修 BLOCK-126 验收发现的既有缺陷 AUDIT-LOG 🟡）。
 - **范围裁决留痕**：mojibake（manifest 中文 label GBK 乱码）**移 BIO-4**（根因在 pack 仓 R 脚本输出编码，跨仓改动归解冻主战场，本仓侧修属贴膏药）；top-N 显著性排序**移 BIO-3**（需插件 descriptor 排序字段声明契约）。

@@ -98,10 +98,12 @@ const waitFor = async (expr, { timeoutMs = 15000, label = '' } = {}) => {
   // ---------- Phase B：CDP 走查 ----------
   client = await attach();
   try { await client.send('Page.bringToFront'); } catch { /* ignore */ }
-  // 打开结果页用 block121 flow 验证过的深链形态（?mode=result&job=，经
-  // legacy 归一化 effect 进 result 模式；子路径直写与 projectOpenResult 事件
-  // 对无会话 job 均未生效，实验记录见台账）。
-  await EVAL("location.href = 'http://localhost:3000/project/" + projectId + "?mode=result&job=" + " + JSON.stringify(submit.jobId) + " + "'; 'nav'");
+  // 用户真实路径：TitleBar「结果」pill → 中栏 result 模式 ResultsLibrary →
+  // 点 job 行（BLOCK-127 打开链修复前：无会话 job 被会话守卫拒绝回退 chat）。
+  await EVAL("location.href = 'http://localhost:3000/project/" + projectId + "'; 'nav'");
+  await waitFor("(() => { const pills = [...document.querySelectorAll('button')].filter(b => (b.textContent || '').trim() === '结果'); if (!pills.length) return null; pills[pills.length - 1].click(); return true; })()", { label: 'open results pill', timeoutMs: 30000 });
+  const jobRow = await waitFor("(() => { const rows = [...document.querySelectorAll('button, li, div')].filter(el => el.textContent && el.textContent.includes('deseq2') && el.children.length < 8); const row = rows[rows.length - 1]; if (!row) return null; row.click(); return true; })()", { label: 'click library job row', timeoutMs: 25000 });
+  await sleep(1200);
   // T1 产物下拉 + 表格交互视图（deg_table 为 table 类主面=自动交互）
   await waitFor(`!!document.querySelector('select') && !!document.querySelector('[aria-label="科学结果表格"]')`,
     { label: 'result shell + table viewer', timeoutMs: 30000 });
