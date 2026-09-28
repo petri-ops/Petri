@@ -4281,93 +4281,93 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - 加映：卡片弹出位置对齐摘要行为（顶栏按钮→卡片从按钮下方弹出，不再挂右下角）；摘要悬浮同开时让到其下方下半区；右轨子卡顶部堆叠。证据补=ui448v14-card-below-toggle.png。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v15 (2026-09-27 in_progress，用户「点击无效」——机制统一：侧聊开关并入壳状态)
+## UI-448 加映 v15 (2026-09-27 verified，用户「点击无效」——机制统一：侧聊开关并入壳状态)
 
 - **修法**：开关并入 useWorkspacePanels（sideChatOpen/toggleSideChat，摘要概览完全同款）；SideChatToggleButton 改用 panels 上下文；SideChatDock 开态改 props；sideChatDockStore 整体退役。重启 Electron 实测：真实点击顶栏开关 → 面板展开（aria-pressed=true，继承消息在位，分叉入左栏）。
-- **证据**：全量 155 文件/1237 用例 0 红；tsc 0；eslint 0 error；证据=acceptance/ui-448/walkthrough-v15.json。**待用户过目 v15 形态后翻 verified**。
+- **证据**：全量 155 文件/1237 用例 0 红；tsc 0；eslint 0 error；证据=acceptance/ui-448/walkthrough-v15.json。**用户已实机过目确认（2026-09-28 整批翻 verified）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v17 (2026-09-27 in_progress，用户实机「点开会话按钮后会话区内容没了」——修 v16 回归)
+## UI-448 加映 v17 (2026-09-27 verified，用户实机「点开会话按钮后会话区内容没了」——修 v16 回归)
 
 - **根因**：v16 在 project-workspace.module.css 误加 `.workspaceSessionLayoutSideChatOpen .agentMainSideChatYield { display: none }`，意图覆盖「钉住列+面板并存」宽窗态；但让位类只在窄窗（`!wide`）挂载（CenterPanel 挂类条件 `sideChatOpen && !wide`），该规则实际命中的恰是窄窗悬浮态——中栏会话内容整个 display:none，主区全空（用户截图：仅剩右下浮面）。
 - **修法**：删除该 display:none 规则（留 v17 注释锚点）；窄窗恢复 v12 的 padding 让位语义（`min(432px+钉住列, 100%-320px)`，320px 可读下限）。宽窗不受影响（让位类本就不挂载）。
-- **证据**：CenterPanel 13 + SideChatDock 10 + theme-token-contract 4 全绿；gate:code-size PASS（22233=22233，顺提交 v15/v16 遗留的 size-baseline 刷新与 impact-map sideChatDockStore 清理）。组件测试无法覆盖 CSS 模块内部规则（jsdom 无布局），此类回归以实机验收为门。**待用户实机过目后翻 verified（v15/v16/v17 可同批）**。
+- **证据**：CenterPanel 13 + SideChatDock 10 + theme-token-contract 4 全绿；gate:code-size PASS（22233=22233，顺提交 v15/v16 遗留的 size-baseline 刷新与 impact-map sideChatDockStore 清理）。组件测试无法覆盖 CSS 模块内部规则（jsdom 无布局），此类回归以实机验收为门。**用户已实机过目确认（2026-09-28 整批翻 verified）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v18 (2026-09-27 in_progress，用户实机「页面变窄后卡片没自动转悬浮」——测量冻结类缺陷防御)
+## UI-448 加映 v18 (2026-09-27 verified，用户实机「页面变窄后卡片没自动转悬浮」——测量冻结类缺陷防御)
 
 - **取证**：用户 Electron 实机截图（982×1600 竖窗、双栏收起）摘要/侧聊恒卡钉住列区形态；几何比对（摘要 600px 高=expanded 密度、侧聊 680–1430=右轨堆叠）确认非悬浮形态。CDP（--remote-debugging-port=9222）读态：检查时会话已自愈（1518@2530 测量存活），冻结现场不可复捕。干净会话（IAB 同款 Chromium）矩阵复现全通过：首载窄窗/宽→窄跳变/17 步连续拖拽/用户确切尺寸+双栏收起，共 0 失配——冻结仅发生于长会话 Electron 侧（resize/RO 整段错过类），触发路径未定位。
 - **修法**（防御两层）：① `deriveSummaryVisibility` 纯函数内加视口钳制——会话框是视口子集，视口 <1120 时钉住形态几何上不可能成立，恒判悬浮；健康会话零行为变化（frameWidth≥1120 必有 viewport≥1120）。② hook 补 `focus`/`visibilitychange` 自愈重测：最小化恢复/切回窗口即拿实时宽度，冻结从「重挂载才自愈」收敛为「切回即自愈」。
-- **证据**：useWorkspaceLayout 8（新增 A6 聚焦/可见性重测 + 派生纯函数四态用例，含冻结病态态 derive(1518,982)→float）+ CenterPanel 13 + SideChatDock 10 全绿；tsc 0；IAB 实机过渡复验一致；docs:check/ui:audit:check 绿。**待用户实机过目后翻 verified（v15–v18 可同批）**。
+- **证据**：useWorkspaceLayout 8（新增 A6 聚焦/可见性重测 + 派生纯函数四态用例，含冻结病态态 derive(1518,982)→float）+ CenterPanel 13 + SideChatDock 10 全绿；tsc 0；IAB 实机过渡复验一致；docs:check/ui:audit:check 绿。**用户已实机过目确认（2026-09-28 整批翻 verified）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v19 (2026-09-27 in_progress，用户复测 v18「还是不行没有悬浮」——事件无关布局守望)
+## UI-448 加映 v19 (2026-09-27 verified，用户复测 v18「还是不行没有悬浮」——事件无关布局守望)
 
 - **活体验尸**（CDP 进用户 Electron 实例）：用户复测失败时其会话内 `frameWidth=22`（<1120）而摘要仍钉住列区——按旧派生也该悬浮，证明渲染层完全收不到测量更新；window 上 5 个 resize 监听器在、派发合成事件无响应（setState 打在被撕裂的旧 fiber 上）；focus 自愈（v18）同样无反应——该会话被当日 v15–v18 多轮 HMR 撕裂模块图，**用户测的一直是修复前/半新半旧代码，且 useMemo 依赖不变则视口钳制同样永不重算**。另证：CDP Emulation 视口模拟在该 Electron 不生效（982 请求读到 1038），最初看似的「复现」实为用户本人在实时拖窗，该轮数据作废。
 - **修法**：hook 增 300ms 布局守望器（`setInterval` + `document.hidden` 跳过）——直接读真实 DOM 宽度，与事件系统零耦合；事件死透的病态会话下任何窗口变化最多滞后一拍自愈，视口钳制/派生随之恢复运转。RO（即时）、focus/visibilitychange（切回）、守望器（兜底）三层递进。
-- **证据**：useWorkspaceLayout 9（A7 守望器节拍自愈：fake timers 推进 350ms 断言宽度跟随、卸载清理）+ CenterPanel 13 + SideChatDock 10 = 32 全绿；tsc 0；docs:check 绿。**需整页重载加载 v19（hook 模块 HMR 不可靠）；待用户实机过目后翻 verified（v15–v19 同批）**。
+- **证据**：useWorkspaceLayout 9（A7 守望器节拍自愈：fake timers 推进 350ms 断言宽度跟随、卸载清理）+ CenterPanel 13 + SideChatDock 10 = 32 全绿；tsc 0；docs:check 绿。**需整页重载加载 v19（hook 模块 HMR 不可靠）；用户已实机过目确认（2026-09-28 整批翻 verified）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v20 (2026-09-27 in_progress，用户「会话窗口能否出现在下方呢目前是在上方的」——列区形态沉底补齐)
+## UI-448 加映 v20 (2026-09-27 verified，用户「会话窗口能否出现在下方呢目前是在上方的」——列区形态沉底补齐)
 
 - **根因**：v16 注释声称「会话列推到右轨底部（margin-top:auto）」但规则从未落在 `.dockedColumn` 上（注释与实现漂移）——宽窗列区形态下会话卡紧跟摘要列堆在右轨上部，用户实测指认。
 - **修法**：`.dockedColumn` 补 `margin-top: auto`（auto margin 吸收右轨剩余空间，卡片内容高度不变、贴轨底 44px 入口按钮间隙）——与窄窗悬浮面 `bottom:44px` 同语义：会话在下、摘要在上。
-- **证据**：theme-token-contract 4 + SideChatDock 10 全绿；CDP 实机几何验证（用户应用内卡片 bottom 距会话框底 44px、紧贴入口气泡）；CSS 模块 HMR 即时生效无需重载。**待用户实机过目后翻 verified（v15–v20 同批）**。
+- **证据**：theme-token-contract 4 + SideChatDock 10 全绿；CDP 实机几何验证（用户应用内卡片 bottom 距会话框底 44px、紧贴入口气泡）；CSS 模块 HMR 即时生效无需重载。**用户已实机过目确认（2026-09-28 整批翻 verified）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v21 (2026-09-27 in_progress，用户「窄窗下会话卡没有悬浮成跟项目摘要卡同样尺寸」——浮卡同尺寸语言)
+## UI-448 加映 v21 (2026-09-27 verified，用户「窄窗下会话卡没有悬浮成跟项目摘要卡同样尺寸」——浮卡同尺寸语言)
 
 - **根因**：v4 声称「同宽 300px」但摘要浮卡实际是动态宽（summaryOpenWidth float 档 276–292，随会话框 32% 收缩）且高度为内容高；会话浮面固定 300×50% 高——两卡同屏宽差、高差一倍，用户实测指认。
 - **修法**：① `SideChatDock` 增 `width` prop，CenterPanel 传 `ctx.summaryOpenWidth`——悬浮面宽度与摘要浮卡**同源同值**（缺省回落 300）；② `.surface` 高度从固定 50% 改内容自适应：`min-height: 320px`（聊天可用下限）+ `max-height: calc(50% - 24px)`（与摘要浮卡 v8 规则完全相同的天花板），沉底锚定不变。
-- **证据**：SideChatDock 12（width 透传/缺省回落两用例）+ CenterPanel 13 全绿；tsc 0；IAB 实机对表：窄窗 982 下会话卡 276×320 vs 摘要卡 276×307，sameWidth=true。**待用户实机过目后翻 verified（v15–v21 同批）**。
+- **证据**：SideChatDock 12（width 透传/缺省回落两用例）+ CenterPanel 13 全绿；tsc 0；IAB 实机对表：窄窗 982 下会话卡 276×320 vs 摘要卡 276×307，sameWidth=true。**用户已实机过目确认（2026-09-28 整批翻 verified）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v22 (2026-09-27 in_progress，用户截图指认「我要的会话是现在项目摘要的效果」——透出浮层效果同款)
+## UI-448 加映 v22 (2026-09-27 verified，用户截图指认「我要的会话是现在项目摘要的效果」——透出浮层效果同款)
 
 - **根因**：摘要浮卡有 UI-351 加映的标志性效果——`opacity: 0.92` 轻微透出下层内容、hover 回实感并上浮 1px（0.25s 三属性过渡）；会话浮面无此套，实心卡一张，两卡浮层语言不一致。
 - **修法**：`.surface` 原样搬入同规则（opacity 0.92 + hover opacity 1/translateY(-1px) + 同款过渡）；reduced-motion 降级块补 `transition: none`（对齐摘要浮卡降级语义，透出保留、动画关停）。
-- **证据**：IAB 实机截图对比——窄窗双卡同开，computed opacity 均 0.92，两卡透出效果一致；CSS 模块 HMR 即时生效。**待用户实机过目后翻 verified（v15–v22 同批）**。
+- **证据**：IAB 实机截图对比——窄窗双卡同开，computed opacity 均 0.92，两卡透出效果一致；CSS 模块 HMR 即时生效。**用户已实机过目确认（2026-09-28 整批翻 verified）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v23 (2026-09-27 in_progress，用户双图对比「项目摘要点击就悬浮了，而会话直接把消息框向左推了」——让位机制退役、纯悬浮)
+## UI-448 加映 v23 (2026-09-27 verified，用户双图对比「项目摘要点击就悬浮了，而会话直接把消息框向左推了」——让位机制退役、纯悬浮)
 
 - **根因**：v12 引入的窄窗让位机制（`agentMainSideChatYield`：padding-right min(432px+钉住列, 100%-320px)）在会话浮面打开时把中栏消息列向左推挤，与摘要浮卡的纯悬浮（盖在内容上、内容不动）行为不一致——用户双图对比明确裁决要摘要的行为。
 - **修法**：让位机制整体退役——CenterPanel 摘除类挂载条件、CSS 删 `.agentMainSideChatYield` 规则（v12 padding 与 v16 display:none 补丁一并废除，留 v23 注释锚点）。浮面覆盖到什么就显示什么，与摘要浮卡同一取舍（浮面自用输入，主输入框 Enter 仍可发送）。
-- **证据**：CenterPanel 11（三个让位分叉用例退役，改 v23 恒定不变式：开/关×钉住/浮层全形态 yield 类恒不存在）+ SideChatDock 12 = 23 绿；IAB 实机：yield 类不存在、浮面半透明盖在全宽内容上。**待用户实机过目后翻 verified（v15–v23 同批）**。
+- **证据**：CenterPanel 11（三个让位分叉用例退役，改 v23 恒定不变式：开/关×钉住/浮层全形态 yield 类恒不存在）+ SideChatDock 12 = 23 绿；IAB 实机：yield 类不存在、浮面半透明盖在全宽内容上。**用户已实机过目确认（2026-09-28 整批翻 verified）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v24 (2026-09-27 in_progress，用户「消息回复内容沿用之前的渲染方式…去掉 消息直接左对齐」——窄卡转写体布局)
+## UI-448 加映 v24 (2026-09-27 verified，用户「消息回复内容沿用之前的渲染方式…去掉 消息直接左对齐」——窄卡转写体布局)
 
 - **根因**：会话浮面沿用主会话消息行布局（`.sc-msg` flex 行 = 26px 头像块 + 正文缩进；用户消息 row-reverse 右浮气泡）——窄浮卡内头像+缩进太占宽度，用户指认去掉。
 - **修法**：`.surfaceBody` 作用域（仅悬浮面）覆写：头像 `display:none`；用户消息取消 row-reverse/右浮改左对齐（保留气泡底色作身份区分）；assistant 消息宽度放开到满卡。主会话渲染零改动。
-- **证据**：IAB 实机——面板内 40 个头像 computed display 全为 none、用户消息 alignSelf flex-start/flexDirection row；CSS HMR 即时生效。**待用户实机过目后翻 verified（v15–v24 同批）**。
+- **证据**：IAB 实机——面板内 40 个头像 computed display 全为 none、用户消息 alignSelf flex-start/flexDirection row；CSS HMR 即时生效。**用户已实机过目确认（2026-09-28 整批翻 verified）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v25 (2026-09-27 in_progress，用户「会话窗口可以人为调整宽度吗？太拥挤…项目摘要卡也可以变宽」——浮卡左缘拖宽)
+## UI-448 加映 v25 (2026-09-27 verified，用户「会话窗口可以人为调整宽度吗？太拥挤…项目摘要卡也可以变宽」——浮卡左缘拖宽)
 
 - **修法**：新增共用组件 `FloatCardResizer`——右锚定浮卡左缘 10px 拖宽把手（col-resize，向左拖变宽），宽度实时生效、抬手持久化 localStorage（会话卡 `gewu:side-chat-float-width` / 摘要卡 `gewu:summary-float-width`，全局偏好跨会话记忆）；钳制 [240, min(720, 视口-48)]。接入三处：会话浮面（默认回落 v21 的 summaryOpenWidth）、会话列区（默认 300，两形态共用同一偏好，窄宽切换宽度不跳变）、摘要浮卡（默认 summaryOpenWidth，外层 312 帽放宽至 720 兜底）。**v25 补**（同日，用户问「只有悬浮时才可以拖宽吗」——列区实测本可拖 300→600，病根是把手隐形）：把手加常驻 3px 中性指示线、hover 转主题色（83fff836）。**v25 补2**（用户截图实指列区卡左缘无指示线）：真因=`.dockedColumn` 未建定位上下文，absolute 把手连带指示线逃逸到会话框左缘（且在左侧栏边留 10px 隐形热区）——补 `position: relative` 一行收编，IAB 实机 handleLeft 1246≈卡左 1245、指示线卡缘渲染。
 
-## UI-448 加映 v26 (2026-09-27 in_progress，用户「会话好了 但项目摘要还没有适配」——摘要钉住列形态拖宽补齐)
+## UI-448 加映 v26 (2026-09-27 verified，用户「会话好了 但项目摘要还没有适配」——摘要钉住列形态拖宽补齐)
 
 - **根因**：v25 只给摘要**悬浮形态**装了拖宽把手；宽窗下摘要是**钉住列**形态（workspaceSummaryColumn），无把手无拖宽——用户当前宽窗看到的正是这张，指认「还没有适配」。钉住列容器同 dockedColumn 无 position，接入把手须同步防逃逸。
 - **修法**：钉住列接入 `FloatCardResizeHandle`（与悬浮形态共用 `gewu:summary-float-width` 偏好与 summaryResizeHandlers 回调，窄宽切换宽度不跳变，默认回落 expanded 档 summaryOpenWidth 292–312）；`.workspaceSummaryColumn` 补 `position: relative` 防把手逃逸（教训同 v25 补2）。
-- **证据**：CenterPanel 13（新增钉住列把手存在用例）+ SideChatDock 14 = 27 绿；tsc 0；IAB 实机：钉住列 312→拖宽 562、persisted=562、把手 containedInCard=true 无逃逸。**v26 补**（用户截图实指「指示线应该在卡片区域内部…摘要卡有多余的另一层？」——猜测正确）：钉住列宿主比可见卡宽 ~24px（卡片根 `max-width: calc(100% - 24px)` 右预留，UI-370 只修了悬浮态宿主）→ 指示线落在卡外空隙；补 `.workspaceSummaryColumn .workspacePinnedSummary { max-width: 100% }` 铺满同款，IAB 实机 handleLeft==cardLeft==983、lineOnCardEdge=true。**待用户实机过目后翻 verified（v15–v26 同批）**。
+- **证据**：CenterPanel 13（新增钉住列把手存在用例）+ SideChatDock 14 = 27 绿；tsc 0；IAB 实机：钉住列 312→拖宽 562、persisted=562、把手 containedInCard=true 无逃逸。**v26 补**（用户截图实指「指示线应该在卡片区域内部…摘要卡有多余的另一层？」——猜测正确）：钉住列宿主比可见卡宽 ~24px（卡片根 `max-width: calc(100% - 24px)` 右预留，UI-370 只修了悬浮态宿主）→ 指示线落在卡外空隙；补 `.workspaceSummaryColumn .workspacePinnedSummary { max-width: 100% }` 铺满同款，IAB 实机 handleLeft==cardLeft==983、lineOnCardEdge=true。**用户已实机过目确认（2026-09-28 整批翻 verified）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v28 (2026-09-28 in_progress，用户「右下角是中间栏分隔线的那个角度 同时和摘要按钮保持上下对齐」——v27 fixed 窗口角错位返工)
+## UI-448 加映 v28 (2026-09-28 verified，用户「右下角是中间栏分隔线的那个角度 同时和摘要按钮保持上下对齐」——v27 fixed 窗口角错位返工)
 
 - **根因**：v27 的 fixed 窗口角定位理解偏了——用户要的角是**中栏与右轨分隔线的夹角**，且与顶栏摘要按钮上下同线；fixed 钉软件角直接错位。
 - **修法**：FAB 从内层布局 div（被外层 padding-right:14 推进且 overflow:hidden，对齐所需负偏移必被剪）**移挂到外层带 padding 的 frame**（position:relative、padding-box 右缘=分隔线），CSS 定格 `absolute; right:5px`——5px=摘要按钮相对分隔线的内缩量，两钮中心线精确重合；同锚中栏容器，右栏开合/窗口尺寸变化恒对齐。
-- **证据**：CenterPanel 12+SideChatDock 14=26 绿（结构重排无断言变化）；tsc 0；IAB 实机 fabCenter==summaryCenter==1540、delta=0。**待用户实机过目后翻 verified（v15–v28 同批）**。
+- **证据**：CenterPanel 12+SideChatDock 14=26 绿（结构重排无断言变化）；tsc 0；IAB 实机 fabCenter==summaryCenter==1540、delta=0。**用户已实机过目确认（2026-09-28 整批翻 verified）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v27 (2026-09-27 in_progress，用户截图指认「摘要和会话按钮上下不是对齐的」——FAB 窗口角定位)
+## UI-448 加映 v27 (2026-09-27 verified，用户截图指认「摘要和会话按钮上下不是对齐的」——FAB 窗口角定位)
 
 - **根因**：会话 FAB `absolute; right:14` 锚在会话框内，顶栏摘要/工具按钮群锚在窗口右缘——两套参照系差 ~23px 且随右栏开合漂移（v16「上下对应」从未真正成立）。
 - **修法**：`.sideChatFab` 改 `position: fixed; right: 6px; bottom: 8px`——钉在窗口右下角，与顶栏按钮群同一条右缘基准线；侧栏开合/卡片拖宽/模式切换均不影响（IAB 实机：右栏开合前后 FAB centerX 恒 1880 不漂移；祖先无持久 transform，fixed 不退化）。
-- **证据**：IAB 实机 fabFromRight=6 恒定、右栏 toggle 后位置不变；CSS-only 无测试面变化。**待用户实机过目后翻 verified（v15–v27 同批）**。
+- **证据**：IAB 实机 fabFromRight=6 恒定、右栏 toggle 后位置不变；CSS-only 无测试面变化。**用户已实机过目确认（2026-09-28 整批翻 verified）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
-- **证据**：SideChatDock 14（拖拽变宽+持久化+重挂载偏好生效+钳制上界两用例）+ CenterPanel 12 = 26 绿；tsc 0；theme-token-contract 4 绿；IAB 实机：浮面 276→拖宽 576、persisted=576、切宽窗列区继承 576。**待用户实机过目后翻 verified（v15–v25 同批）**。
+- **证据**：SideChatDock 14（拖拽变宽+持久化+重挂载偏好生效+钳制上界两用例）+ CenterPanel 12 = 26 绿；tsc 0；theme-token-contract 4 绿；IAB 实机：浮面 276→拖宽 576、persisted=576、切宽窗列区继承 576。**用户已实机过目确认（2026-09-28 整批翻 verified）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## UI-400 补——MD 目录点击导航修复 + 浮层避让正文 (2026-09-28 verified，用户实机过目确认「可以的 翻verified」)
