@@ -242,6 +242,32 @@ describe('ScientificInteractionViewer', () => {
     expect(onSelectionChange.mock.calls[1][0]!.entityIds.sort()).toEqual(['EGFR', 'TP53']);
   });
 
+  it('renders the full bounded matrix window instead of clipping to 24 columns', () => {
+    const onSelectionChange = vi.fn<(selection: ArtifactSelection | null) => void>();
+    const columnCount = 30;
+    const query = {
+      ...tableQuery(0),
+      rows: Array.from({ length: 50 }, (_, rowIndex) => {
+        const row: Record<string, string> = { gene: `G${rowIndex}` };
+        for (let c = 1; c <= columnCount; c += 1) row[`s${c}`] = String(((rowIndex + c) % 20) / 10);
+        return row;
+      }),
+      columns: [
+        { field: 'gene', type: 'string', sortable: true, filterable: true },
+        ...Array.from({ length: columnCount }, (_, i) => ({ field: `s${i + 1}`, type: 'number' as const, sortable: true, filterable: true })),
+      ],
+    } satisfies ResultTableQuery;
+    const { container } = render(<ScientificInteractionViewer language="r" jobId="job_1" artifactName="heatmap.png" manifest={matrixManifest()} backingTable={query} selection={null} onSelectionChange={onSelectionChange} />);
+    // 列按钮（title=选择 sN）与行按钮（文本 GN）均不得再被前端自缚截断。
+    const allButtons = [...container.querySelectorAll('button')];
+    const columnButtons = allButtons.filter((b) => (b.getAttribute('title') || '').startsWith('选择 s'));
+    expect(columnButtons.length).toBe(columnCount);
+    const rowButtons = allButtons.filter((b) => /^G\d+$/.test(b.textContent || ''));
+    expect(rowButtons.length).toBe(50);
+    expect(screen.getByTitle('选择 s30')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'G49' })).toBeTruthy();
+  });
+
   it('maps heatmap rows to genes and columns to samples', () => {
     const onSelectionChange = vi.fn<(selection: ArtifactSelection | null) => void>();
     const query = {

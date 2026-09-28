@@ -232,11 +232,25 @@ function createToolsMetadataRoutes({db, getUserId, jobsDir = ''}) {
           }
         } catch { /* ssh 读面失败回退本地镜像链 */ }
         const dirs = [];
+        let layoutFallbackNote = null;
         if (job.project_id) {
           try {
             const layout = resolveProjectRunLayout({ projectId: job.project_id, toolJobId: job.id, db, skipPermissionCheck: true, ensureDirs: false });
             if (layout && layout.outputDir) dirs.push(layout.outputDir);
-          } catch { /* 布局解析失败时继续走全局目录 */ }
+          } catch (layoutError) {
+            // UI-454（BLOCK-126 验收发现的既有缺陷）：布局解析失败时不再静默
+            // 只回全局目录——项目行仍在（如脚本/HTTP 自建项目）时用
+            // workspace_path 按执行链同款目录约定兜底，失败原因透出到 note。
+            layoutFallbackNote = layoutError.message;
+            try {
+              const projectRow = await db
+                .prepare('SELECT workspace_path FROM projects WHERE id = ?')
+                .get(job.project_id);
+              if (projectRow && projectRow.workspace_path) {
+                dirs.push(path.join(projectRow.workspace_path, 'results', 'jobs', job.id, 'output'));
+              }
+            } catch { /* 兜底失败维持全局目录链 */ }
+          }
         }
         dirs.push(path.join(jobsDir, job.id, 'output'));
         const LOG_TAIL_BYTES = 32 * 1024;
@@ -275,9 +289,10 @@ function createToolsMetadataRoutes({db, getUserId, jobsDir = ''}) {
               }
             } catch { /* live 面故障回退诚实语义 */ }
           }
-          return res.json({ ok: true, source: null, live: false, log: '', note: running ? '作业运行中，日志将在结束时写入 run.log' : '该作业没有可用日志文件' });
+          const baseNote = running ? '作业运行中，日志将在结束时写入 run.log' : '该作业没有可用日志文件';
+          return res.json({ ok: true, source: null, live: false, log: '', note: layoutFallbackNote ? `${baseNote}（布局解析失败：${layoutFallbackNote}）` : baseNote });
         }
-        res.json({ ok: true, ...found });
+        res.json({ ok: true, ...found, ...(layoutFallbackNote ? { note: `布局解析失败已按项目目录约定兜底（${layoutFallbackNote}）` } : {}) });
       } catch (e) {
         res.status(500).json({error: e.message});
       }

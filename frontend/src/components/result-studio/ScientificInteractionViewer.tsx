@@ -506,8 +506,10 @@ function ScientificMatrix({ manifest, query, selection, onSelectionChange }: {
   onSelectionChange: (selection: ArtifactSelection | null) => void;
 }): React.ReactElement {
   const rowField = manifest.mapping?.rowIdField || manifest.idField || query.columns[0]?.field;
-  const columns = query.columns.map((column) => column.field).filter((field) => field !== rowField).slice(0, 24);
-  const rows = query.rows.slice(0, 40);
+  // UI-454：解除前端自缚——后端 backing 已有界（行 100/列不截断），
+  // 这里全量渲染交给网格滚动；有界口径由 caveat 如实标注。
+  const columns = query.columns.map((column) => column.field).filter((field) => field !== rowField);
+  const rows = query.rows;
   const values = rows.flatMap((row) => columns.map((field) => numeric(row[field])).filter((value): value is number => value !== null));
   const min = Math.min(...values); const max = Math.max(...values);
   const rowManifest = { ...manifest, idField: rowField, entityType: manifest.mapping?.rowEntityType || manifest.entityType, selectionDurable: true };
@@ -528,7 +530,7 @@ function ScientificMatrix({ manifest, query, selection, onSelectionChange }: {
           </React.Fragment>
         ))}
       </div>
-      <small className={styles.caveat}>行选择映射为 {manifest.mapping?.rowEntityType}，列选择映射为 {manifest.mapping?.columnEntityType}；仅渲染有界矩阵窗口。</small>
+      <small className={styles.caveat}>行选择映射为 {manifest.mapping?.rowEntityType}，列选择映射为 {manifest.mapping?.columnEntityType}；渲染后端有界矩阵窗口（{rows.length} 行 × {columns.length} 列），完整数据见原文件。</small>
     </div>
   );
 }

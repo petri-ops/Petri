@@ -244,7 +244,10 @@ module.exports = {
               filePath: backing.absolutePath,
               expectedSha256: backing.expectedSha256,
               idField: mapping.idField || mapping.rowIdField || null,
-              limit: 250,
+              // UI-454（G0-BIO BIO-2）：plot backing 有界窗口 250→600（前端 SVG
+              // 可承受；仍按文件顺序取，非显著性排序——top-N 排序需插件
+              // descriptor 声明排序字段，登记 BIO-3 契约候选）。
+              limit: 600,
             });
             const backingAfterRead = verifyArtifactRecordBytes(backing.artifactRecord, backing.absolutePath);
             if (backingAfterRead.error) return sendArtifactResolutionError(res, backingAfterRead.error);

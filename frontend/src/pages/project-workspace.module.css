@@ -5453,6 +5453,23 @@ body:global(.gewu-resizing-columns) * {
   overflow: auto;
 }
 
+.csvPreviewPager {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-top: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
+}
+
+.csvPreviewPager span {
+  flex: 1;
+}
+
 .csvPreviewBody table {
   width: 100%;
   border-collapse: collapse;

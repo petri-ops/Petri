@@ -4466,3 +4466,12 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：**新增自动化回归门禁 `scripts/ui453-download-dialog-live.cjs` 3/3 allPass**（UI Automation 读真实对话框标题断言==「下载到…」= options 生效的直接证据；配套 `scripts/ui453-dialog-probe.ps1` 探针+WM_CLOSE 收口；证据 `acceptance/ui-453/ui453-download-dialog-live-live.json`），**截图真值 `ui453-download-dialog.png` 人工可查：标题「下载到…」/地址「下载」/文件名预填 `DIALOG-GATE.R`/保存类型「R 文件 (*.r)」四项全对**。tsc 0 + eslint 触碰面 0 error + ipc-channels-registry 5/5 + code-size 门禁绿。
 - **边界**：文件名框在新式 Windows 保存框不在 UIA 树内（无法程序化读值），预填以截图为主证据 + 标题断言为机械回归；对话框非模态（去 parent 的权衡）；本机 Electron+Windows 组合的对话框实现差异属宿主环境事实（最小脚本双证），换机若行为不同门禁会如实报警。**待用户实机过目后翻 verified。**
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-454: 交互上限与降级链——散点 backing 600 点 + 热图解除前端自缚 + 静态 CSV 本地分页 + 日志端点项目目录兜底 (2026-09-28 in_progress，组件级全绿；实机项待 dev 栈重启后验)
+
+- **来源**：G0-BIO BIO-2 阶段种子（plan §3；2026-09-28 垂直评估「交互上限与降级链」差距）。用户裁决「继续」按 G0 Goal 交织序推进（第 3 项交付位）。
+- **四件**：①**plot backing 有界窗口 250→600**（`interaction.js`——前端 SVG 可承受；仍按文件顺序取，**非显著性排序**：top-N 真排序需插件 descriptor 声明排序字段的契约，登记 BIO-3 候选不猜语义）；②**热图解除前端自缚**（`ScientificInteractionViewer` matrix 分支：列 `slice(0,24)`/行 `slice(0,40)` 移除——后端 backing 本就有界（行 100/列不截断），全量渲染交给网格横向滚动，caveat 改为如实标注「渲染后端有界矩阵窗口 N 行×M 列」）；③**静态 CSV 预览本地分页**（新纯函数 `lib/csv-preview-pagination`（50 行/页，页码越界钳制不渲染空页）+壳内分页控件（上一页/下一页/页码/总行数，previewData 更新重置页码，标注「预览文本预算内」诚实口径）——原 24 行硬截断退役；静态预览是无交互清单的降级路径，无服务端分页通道可复用故走前端本地分页）；④**日志端点项目目录兜底**（`tools-metadata.js`：`resolveProjectRunLayout` 失败不再静默只回全局目录——项目行仍在时按 `workspace_path` 拼执行链同款目录约定兜底，失败原因透出 note——修 BLOCK-126 验收发现的既有缺陷 AUDIT-LOG 🟡）。
+- **范围裁决留痕**：mojibake（manifest 中文 label GBK 乱码）**移 BIO-4**（根因在 pack 仓 R 脚本输出编码，跨仓改动归解冻主战场，本仓侧修属贴膏药）；top-N 显著性排序**移 BIO-3**（需插件 descriptor 排序字段声明契约）。
+- **证据**：红绿先行——matrix 全渲染用例红（CSS Modules hash 类选择器踩坑后修 title 过滤）→绿；csv 分页 4 用例红（模块缺失）→绿；前端定向 4 文件 **32/32**（含 UI-452 回归）；后端 `artifact-interaction` 契约 26/26（limit 600 零契约破坏）+node --check；test:changed 全链 **Node 640 pass/0 fail+前端 22 文件全绿**；tsc 0；theme 4/4；docs:check 289；impact-map 补登记（block126/ui452 脚本与证据目录入 script-block-live-drivers 规则——分类冲突红一次后修复）；顺带清理 UI-453 会话下载测试残留在仓库根的 untracked 产物（coldata/counts/results/）。
+- **待验（in_progress）**：②③④的实机走查与 ① 的实机生效均需 **dev 栈重启**（后端 interaction/tools-metadata 变更须重启；当前栈为并行会话所起不重启）——重启后复跑 `scripts/block126-perception-live.mjs` 的 log_endpoint 记录项应见 `source:'run.log'`（端点兜底生效的现成探针）；热图/分页可随 UI-452 六面过目一并看。
+- **边界**：散点 600 仍是文件顺序有界窗口（排序契约在 BIO-3）；静态 CSV 分页受预览文本预算（12K 字符）上界（口径已标注）；日志端点兜底只覆盖项目行存在的形态（项目已删仍如实报无日志+原因）。G0 开发期常态 · 不外推 packaged/Provider/GA。

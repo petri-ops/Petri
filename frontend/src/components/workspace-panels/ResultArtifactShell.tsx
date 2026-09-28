@@ -8,6 +8,7 @@ import type { Project, ToolJob } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 import { findCatalogTool, useToolCatalog } from '@/lib/tool-catalog';
 import { buildPreviewTable } from '@/lib/file-preview/buildPreviewTable';
+import { csvPreviewPageCount, csvPreviewPageRows } from '@/lib/csv-preview-pagination';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import { useTheme } from '@/themes/ThemeProvider';
@@ -151,6 +152,8 @@ export function ResultArtifactShell({
   const [selectedName, setSelectedName] = useState('');
   const [previewText, setPreviewText] = useState<string | null>(null);
   const [previewData, setPreviewData] = useState<string[][] | null>(null);
+  // UI-454：静态 CSV 预览本地分页页码；previewData 更新时在读取 effect 内重置。
+  const [csvPreviewPage, setCsvPreviewPage] = useState(0);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewRetryVersion, setPreviewRetryVersion] = useState(0);
   const [previewAvailability, setPreviewAvailability] = useState<PreviewAvailability>({
@@ -665,6 +668,7 @@ export function ResultArtifactShell({
         setPreviewAvailability({ key: previewAvailabilityKey, status: 'available', reason: null });
         if (/\.(csv|tsv)$/i.test(selectedArtifactName)) {
           setPreviewData(buildPreviewTable(text, selectedArtifactName));
+          setCsvPreviewPage(0);
           setPreviewText(null);
           return;
         }
@@ -805,6 +809,8 @@ export function ResultArtifactShell({
     }
     if (viewerAdapter === 'table' && previewData && previewData.length > 0) {
       const [header, ...rows] = previewData;
+      const pageCount = csvPreviewPageCount(rows.length);
+      const pageRows = csvPreviewPageRows(rows, csvPreviewPage);
       return (
         <div className={styles.csvPreviewBody}>
           <table>
@@ -816,7 +822,7 @@ export function ResultArtifactShell({
               </tr>
             </thead>
             <tbody>
-              {rows.slice(0, 24).map((row, rowIndex) => (
+              {pageRows.map((row, rowIndex) => (
                 <tr key={rowIndex}>
                   {header.map((_, cellIndex) => (
                     <td key={cellIndex}>{row[cellIndex] || '—'}</td>
@@ -825,6 +831,11 @@ export function ResultArtifactShell({
               ))}
             </tbody>
           </table>
+          <div className={styles.csvPreviewPager}>
+            <span>共 {rows.length.toLocaleString()} 行（预览文本预算内） · 第 {Math.min(csvPreviewPage, pageCount - 1) + 1}/{pageCount} 页</span>
+            <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={csvPreviewPage <= 0} onClick={() => setCsvPreviewPage((p) => Math.max(0, p - 1))}>上一页</button>
+            <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={csvPreviewPage >= pageCount - 1} onClick={() => setCsvPreviewPage((p) => Math.min(pageCount - 1, p + 1))}>下一页</button>
+          </div>
         </div>
       );
     }
