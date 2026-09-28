@@ -107,7 +107,10 @@ function createToolsExecutor({
   getUserId,
   isSmokeTestRequest,
 }) {
-  const activeToolJobs = new Map();
+  // BLOCK-128：activeToolJobs 改用进程级共享登记表——agent/MCP 同步路径
+  //（run-plugin-script）与 HTTP 异步路径共用同一 owner 装置（心跳/硬超时/
+  // 僵尸扫描/取消链对两条路径同等生效）。生产单进程单 executor，语义等价。
+  const { activeToolJobs } = require('./tool-job-lifecycle-registry');
   // BLOCK-76 P5 — 直跑作业取消登记：jobId → { runner, pid }（killLocalToolJob 对账用）
   const activeDirectJobs = new Map();
   const defaultLocalRoot =

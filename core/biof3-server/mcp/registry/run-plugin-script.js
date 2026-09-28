@@ -6,6 +6,19 @@
 
 const { execFile } = require('child_process');
 const { publishJobTerminalState } = require('../../helpers/job-events');
+const {
+  armActiveToolJobLifecycle,
+  claimActiveToolJob,
+  clearActiveToolJobLifecycleTimers,
+  releaseActiveToolJob,
+} = require('../../helpers/tools-executor/active-job');
+const { resolveLifecycleDurations } = require('../../helpers/process-lifecycle');
+const { activeToolJobs, countActiveUserToolJobs } = require('../../helpers/tool-job-lifecycle-registry');
+// 装置层（心跳/硬超时）直接走 better-sqlite3 原句柄；db 参数是高层模块。
+let lifecycleDb = null;
+try {
+  lifecycleDb = require('../../db').db || null;
+} catch { /* db 模块不可用时装置退化为无心跳（硬超时仍生效，error 面已 catch） */ }
 const fs = require('fs');
 const path = require('path');
 const {
@@ -66,6 +79,16 @@ async function _runPluginScript(
     // 这样用户能在 history 看到，客户端能按 jobId 加载）。
     let toolJobId = existingToolJobId || null;
     if (db) {
+      // BLOCK-128：并发准入与 HTTP 路径同语义——每用户 pending+running 超上限
+      // 即拒绝（429 max_concurrent 契约字样保持一致），不再绕过装置独跑。
+      const maxConcurrent = Number(process.env.BIOF3_TOOL_MAX_CONCURRENT || 2);
+      if (Number.isFinite(maxConcurrent) && maxConcurrent > 0
+        && countActiveUserToolJobs(lifecycleDb, userId) >= maxConcurrent) {
+        return resolve({
+          content: [{ type: 'text', text: `执行失败: 已达每用户并发上限（max_concurrent=${maxConcurrent}，pending+running 计入）。请等待在途作业完成或取消后再试。` }],
+          isError: true,
+        });
+      }
       try {
         if (existingToolJobId) {
           const existing = typeof db.getToolJob === 'function' ? db.getToolJob(existingToolJobId) : null;
@@ -687,14 +710,37 @@ async function _runPluginScript(
       })();
     }
 
-    execFile(
+    // BLOCK-128（PL-1 执行语义统一）：本地 execFile 路径并入共享 owner 装置
+    // ——claim 登记进进程级 activeToolJobs（心跳/硬超时/僵尸扫描/取消链与
+    // HTTP 异步路径同装置），execFile 内建 300s 退役（timeout: 0），硬预算
+    // 统一走 BIOF3_TOOL_HARD_TIMEOUT_MS（默认 30min）。
+    const owner = claimActiveToolJob(activeToolJobs, { jobId: toolJobId, toolId: plugin.id });
+    if (!owner) {
+      return resolve({
+        content: [{ type: 'text', text: `执行失败: tool_job ${toolJobId} 已有在途执行登记（重入拒绝）。` }],
+        isError: true,
+        toolJobId,
+      });
+    }
+    const child = execFile(
       runCmd[0],
       runCmd.slice(1),
-      { timeout: 300000, maxBuffer: 10 * 1024 * 1024, env: runEnv },
+      { timeout: 0, maxBuffer: 10 * 1024 * 1024, env: runEnv },
       async (err, stdout, stderr) => {
+        clearActiveToolJobLifecycleTimers(owner);
+        releaseActiveToolJob(activeToolJobs, toolJobId, owner);
         await finalizePluginRun(err, stdout, stderr);
       }
     );
+    owner.process = child;
+    const { hardTimeoutMs, heartbeatIntervalMs } = resolveLifecycleDurations();
+    armActiveToolJobLifecycle({
+      active: owner,
+      jobId: toolJobId,
+      db: lifecycleDb,
+      heartbeatIntervalMs,
+      hardTimeoutMs,
+    });
   });
 }
 

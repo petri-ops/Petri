@@ -5443,8 +5443,28 @@
         "live-log"
       ],
       "notes": "G0-PLATFORM PL-2 种子 2026-09-28 当日收口 completed：P1 终态失效事件（CAS 原语单点接线+MCP 8 处补发，实机 SSE 到达·延迟 1-2ms）+ P2 运行期日志流（spawn 化+行缓冲，实机 live 尾部+run.log 文件链保持）；契约 10/10+回归 25/25+test:changed 237/0+实机 allPass 6/6（scripts/block126-perception-live.mjs 可复跑）。附带发现：日志端点项目 job 定位缺陷登记 AUDIT-LOG 🟡 归 BIO-2/PL-4。"
+    },
+    {
+      "id": "BLOCK-128-EXECUTION-UNIFICATION",
+      "capability": "execution-unification",
+      "path": "docs/block-128-execution-unification-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-128-execution-unification",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-29",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH",
+      "tags": [
+        "block-128",
+        "g0-platform",
+        "pl-1",
+        "execution-unification"
+      ],
+      "notes": "G0-PLATFORM PL-1 种子（用户裁决「继续」）。MCP 同步路径并入共享 owner 装置（进程级 activeToolJobs 单例+并发准入+心跳/硬超时/僵尸/取消全覆盖），300s 内建上限退役对齐 30min 硬预算。契约 4/4+定向回归 0 红；实机待栈重启。"
     }
   ],
-  "lastUpdated": "2026-09-28",
-  "documentCount": 289
+  "lastUpdated": "2026-09-29",
+  "documentCount": 290
 }

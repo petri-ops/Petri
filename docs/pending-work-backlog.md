@@ -73,6 +73,7 @@
 | 1b | BIO-2 / UI-454 | **交互上限与降级链**（散点 backing 250→600/热图解除前端自缚全量渲染/静态 CSV 本地分页 50 行页/日志端点项目目录兜底修 BLOCK-126 发现缺陷；组件级 32/32+Node 640/0——**实机生效待 dev 栈重启**，重启后复跑 perception-live 即见端点 run.log 兜底；mojibake 移 BIO-4、top-N 排序移 BIO-3 留痕） | G0-BIO plan §3 BIO-2；台账 UI-454 | in_progress（实机待栈重启） |
 | 1c | BIO-3 / UI-455（P0 首刀） | **打开链修复**：无会话归属 job 按「项目结果」放行查看（handleOpenResult 会话守卫退役+activeJob memo 放宽；深链归零同根因）——AUDIT-LOG 🟡 销号路径；**待用户实机过目**（app 点任意结果一次即真值验证） | G0-BIO plan §3 BIO-3；台账 UI-455；🟡 待处置记录 | in_progress（过目待用户） |
 | 1d | BIO-3 / UI-456（P1） | **结果血缘条**：lineage 投影纯函数+listProjectWorkflowGraphs 仓库方法+GET /lineage 端点+前端 LineageStrip（契约 5/5+组件 4/4+Node 617/0）——实机待栈重启+真实跨 Job 链数据（随 BIO-4 解冻产生）；P2 继续分析按钮随 BIO-4 | G0-BIO plan §3 BIO-3；台账 UI-456 | in_progress（实机待数据） |
+| 1e | PL-1 / BLOCK-128 | **执行语义统一**（契约 4/4+定向回归 0 红；实机待栈重启：心跳可见/取消可达/长任务不再 5min 死）——BIO-4 硬前提已就位 | G0-PLATFORM plan §3 PL-1；plan docs/block-128-execution-unification-plan.md | active（实机待栈重启） |
 | 2 | PL-2 / BLOCK-126 | **感知实时性（2026-09-28 整包 completed）**：终态 jobs 失效事件（CAS 原语单点接线+MCP 8 处补发）+ 运行期日志行缓冲（executeJob spawn 化+日志端点 live 尾部）；契约 10/10+回归 25/25+**实机 allPass 6/6（SSE 到达延迟 1-2ms·live 实时 R 输出·run.log 链保持，scripts/block126-perception-live.mjs 可复跑）**；附带发现=日志端点项目 job 定位缺陷登记 AUDIT-LOG 🟡 归 BIO-2/PL-4 | plan §5.1 + acceptance/block-126/ | completed |
 | 3 | BIO-2 | 交互上限与降级链：250 点 top-N 语义/静态 24 行分页/热图窗口/mojibake | G0-BIO plan §3 | planned |
 | 4 | BIO-3 | lineage 可视化 + 继续分析显式化（吸收 C-15 前半） | G0-BIO plan §3 | planned |

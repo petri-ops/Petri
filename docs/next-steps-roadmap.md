@@ -1,5 +1,7 @@
 # BioF3 Desktop — Current Next Steps
 
+最后更新：2026-09-29（**PL-1/BLOCK-128 执行语义统一交付 active**（用户裁决「继续」交织序）：MCP 同步路径并入共享 owner 装置——进程级 activeToolJobs 单例（executor 工厂局部 Map 换共享）+并发准入同 HTTP 语义+claim/arm/release 全接线（心跳/硬超时 30min/僵尸扫描/取消链两路径同等生效）+300s 内建上限退役（timeout:0 硬预算统一）；契约 4/4+定向回归 0 红；实机待栈重启。**BIO-4 硬前提已就位——下一步=BIO-D1 解冻范围裁决（在你）后开 BIO-4 bulk 链解冻**；真异步产品形态登记 PL-3 候选。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-09-28（**BIO-2/UI-454 交互上限与降级链交付 in_progress**（用户裁决「继续」交织序第 3 位）：散点 backing 600 点/热图解除自缚/静态 CSV 分页/日志端点兜底——组件级 32/32+Node 640/0 全绿，实机生效待 dev 栈重启（并行会话栈不动）；mojibake 移 BIO-4、top-N 排序移 BIO-3 范围裁决留痕。**队列下一项=BIO-3 lineage 可视化+继续分析显式化**；UI-452/UI-454 实机与用户过目待栈窗口。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-28（**BLOCK-126 整包 completed——实机 allPass 6/6**（dev 栈环境恢复后复跑 scripts/block126-perception-live.mjs：真实 deseq2 job 终态 SSE invalidate 到达延迟 1-2ms·运行窗口日志端点 live 实时 R 输出尾部·终态后 run.log 三段格式物理落盘保持；验收项目清理；附带发现=日志端点对自建/已删项目 job 的 run.log 定位回退误报，登记 AUDIT-LOG 🟡 归 BIO-2/PL-4）。**队列下一项=BIO-2 交互上限与降级链**；UI-452 实机走查待补（栈在跑，条件已具备）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
