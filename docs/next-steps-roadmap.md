@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-28（**G0 Goal 交织序双包推进：BIO-1/UI-452 结果信息密度包已交付（`509d3eaa`，六件+契约 27/27，台账 in_progress 实机待补）；队列第 2 项 PL-2/BLOCK-126 感知实时性 active（用户裁决「可以的 开干！」）——终态 jobs 失效事件（CAS 原语单点接线+MCP 8 处补发）+ 运行期日志行缓冲（executeJob spawn 化+日志端点 live 尾部），契约 10/10+定向回归 25/25，实机待补**。队列登记在 pending-work-backlog G0 Goal 系列区。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-28（**BLOCK-126 实机验收进展：P1 终态失效事件两轮实证（SSE invalidate(jobs) 到达·落库→事件延迟 1ms，acceptance/block-126/perception-live.json）；P2 live 日志实机被 dev 栈 R 环境阻塞（无 BIOF3_R_HOME，preflight 失败于 spawn 前属既有语义非本包回归），重开条件=带 env 的栈复跑 scripts/block126-perception-live.mjs 翻绿即收口。dev 栈状态异动：旧栈退出+新 3001 无 R env+3000 被外部进程占用致 npm run dev fail-fast（待占用解除）**。BIO-1/UI-452 实机走查仍待补。队列不变：下一项 BIO-2。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-28（**G0 Goal 交织序双包推进：BIO-1/UI-452 结果信息密度包已交付（`509d3eaa`，六件+契约 27/27，台账 in_progress 实机待补）；队列第 2 项 PL-2/BLOCK-126 感知实时性 active（用户裁决「可以的 开干！」）——终态 jobs 失效事件（CAS 原语单点接线+MCP 8 处补发）+ 运行期日志行缓冲（executeJob spawn 化+日志端点 live 尾部），契约 10/10+定向回归 25/25，实机待补**。队列登记在 pending-work-backlog G0 Goal 系列区。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-28（**G0 Goal 系列推进启动：队列头=BIO-1/UI-452 结果信息密度包 active（用户裁决「可以的 按照你的建议来逐个推进」=两 Goal plan §4 交织序预授权，项内裁决点单独问）**——六件：散点数值 tooltip（基因名+log2FC+padj）/基因搜索定位高亮/阈值参考线/表格组合筛选子句构建器/数值科学计数格式化/Lightbox 缩放平移；UI 轨形态（单体验面、呈现重组既有通道与数据）；后续队列 PL-2 → BIO-2 → BIO-3 → PL-1 → BIO-4 → …登记在 pending-work-backlog G0 Goal 系列区。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

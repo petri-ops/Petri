@@ -70,7 +70,7 @@
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
 | 1 | BIO-1 / UI-452 | **结果信息密度包**（六件交付 `509d3eaa`；台账 in_progress——dev Electron 实机走查待补后翻 verified） | G0-BIO plan §3 BIO-1 | 实机待补 |
-| 2 | PL-2 / BLOCK-126 | **感知实时性**：终态 jobs 失效事件（CAS 原语单点接线+MCP 8 处补发）+ 运行期日志行缓冲（executeJob spawn 化+日志端点 live 尾部）；契约 10/10+定向回归 25/25 | G0-PLATFORM plan §3 PL-2；**active（开发收口中，实机待补）** | active |
+| 2 | PL-2 / BLOCK-126 | **感知实时性**：终态 jobs 失效事件（CAS 原语单点接线+MCP 8 处补发）+ 运行期日志行缓冲（executeJob spawn 化+日志端点 live 尾部）；契约 10/10+定向回归 25/25；**实机进展 2026-09-28：P1 终态事件两轮实证（SSE 到达·延迟 1ms）；P2 live 日志待 R env 栈（重开条件=带 BIOF3_R_HOME 的 dev 栈，复跑 scripts/block126-perception-live.mjs 翻绿即整包收口）** | G0-PLATFORM plan §3 PL-2；plan §5.1 | active（P2 实机待环境） |
 | 3 | BIO-2 | 交互上限与降级链：250 点 top-N 语义/静态 24 行分页/热图窗口/mojibake | G0-BIO plan §3 | planned |
 | 4 | BIO-3 | lineage 可视化 + 继续分析显式化（吸收 C-15 前半） | G0-BIO plan §3 | planned |
 | 5 | PL-1 | 执行语义统一（agent/MCP 300s 同步路径并入 tool_jobs 装置；**BIO-4 硬前提**） | G0-PLATFORM plan §3 | planned |

@@ -55,6 +55,12 @@ status: active
 - `npm run test:changed` + docs:check；impact-map 补登记（若新文件未被通配覆盖）。
 - 实机（dev 栈可用时）：真实 job 终态→SSE 秒级失效；运行中日志端点 live 尾部。
 
+## 5.1 实机进展（2026-09-28，`acceptance/block-126/perception-live.json`）
+
+- **P1 终态失效事件实机两轮实证**：SSE `/api/events` 收到 `invalidate(jobs, {toolJobId, state})`，**落库→事件到达延迟 1ms**（两轮同值；脚本 `scripts/block126-perception-live.mjs` 可复跑）。
+- **P2 live 日志实机被环境阻塞**：验收时 dev 栈无 `BIOF3_R_HOME`（Rscript preflight 失败于 spawn 前=既有语义非本包回归；含本包代码的栈当日 15:29 曾成功跑 deseq2 五例）。**重开条件=带数据根 `runtimes/R` env 的 dev 栈在跑后复跑本脚本**，期望 live_log/final_runlog 两项翻绿后整包收口。
+- 验收临时项目已清理；两条快速失败 job（preflight 路径）反证了失败终态同样发事件。
+
 ## 6. 台账关系
 
 - G0-PLATFORM plan §3 PL-2 阶段种子 ← 本包；backlog G0 Goal 系列区状态同步；收口回写两处。
