@@ -4447,3 +4447,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：实机 `scripts/ui453-dragout-live.cjs` **6/6 allPass**——新增 T1 断言 token 在场、T5 守卫三态（Origin:null 无 token→403 / +token→200 且字节数与源文件一致）；后端已按新代码恢复运行实测四态（no-Origin 200 / Origin:null 403 / +token 200 / renderer Origin 200）。block67 增 token 三态用例（9/9）+ dragout 组件断言补 token（3/3）+ 定向 11 文件 83 用例全绿 + tsc 0 + lint 净。
 - **过程事故如实记**：为让 token 守卫生效杀 :3001 后端，发现该 dev 后端系**终端独立进程**（非 Electron supervisor 子进程，杀后无人重拉，supervisor 未接管）——已按主进程同款 env（BIOF3_LOCAL_DATA_DIR/DB 指向 .biof3-dev-user-data）手动拉起恢复，项目数据核对无恙；另见 :3005 端口占用噪音（疑有残留后端实例，不影响 :3001 服务）。**对话框预填修复属主进程代码，需重启 dev 栈（npm run dev）后生效；拖出修复即时可试（渲染层 HMR + 后端已新）。**
 - **边界**：token 仅挂在拖出 DownloadURL 的 URL 上（预览 fetch 通道不变）；保存对话框/拖到桌面落盘两个 OS 级交互待用户重启后实机过目收口 verified。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-453 加映二: 拖出切 webContents.startDrag 真文件拖拽 + 下载链路诊断日志 (2026-09-28 in_progress，dev Electron；OS 级行为待用户过目)
+
+- **来源**：用户重启 dev 栈后两测皆败（拖桌面不落盘/预填不生效）。诊断：主进程日志零痕迹无法定位下载链路；DownloadURL 方案虽服务端通路全通（token 守卫四态验证）但 Windows 实测两次不落盘——判定弃用。
+- **修法两件**：①**拖出切 Electron 官方 `webContents.startDrag`**——新通道 `file:start-drag`（channels 登记+preload 包装+d.ts 声明），主进程 handler：本地项目直接拖源文件（OS 级复制语义零拷贝）；ssh/远程先经本机 REST（附 token）拉临时文件再拖（>16MB 端点 413 诚实）；icon 用 app.getFileIcon 取系统文件图标（失败回落空图）。渲染层 FileTreeItem dragstart 对文件行 preventDefault 后 IPC 请主进程接管（dragOutBusyRef 防重入；目录行树内拖拽不受影响）。②**下载 handler 四点诊断日志**（invoked/picked/canceled/saved）——判别实验实锤链路通：页面直调 IPC 后主进程日志即时出现 `invoked: diag-sample.md` 并卡在 showSaveDialog 等待交互（新代码 + 新对话框在跑，defaultPath 绝对路径已带）。
+- **证据**：dragout 组件测试重写为 startDrag 语义 3/3（本地收 localPath 不写 DownloadURL/ssh 收附 token 的 URL/目录行不触发）+ 定向 11 文件 83 用例全绿 + tsc 0 + ipc-channels-registry 双向守护 5/5 + lint 净。OS 级真拖放与保存对话框预填行为 CDP 不可模拟，待用户实机过目。
+- **边界**：DownloadURL 拖出方案退役（macOS 曾验过、Windows 两次实测失败）；ssh 大文件拖出受 16MB 端点上限诚实约束；startDrag 期间用户松手过早则拖出取消（Chromium 行为）。G0 开发期常态 · 不外推 packaged/Provider/GA。

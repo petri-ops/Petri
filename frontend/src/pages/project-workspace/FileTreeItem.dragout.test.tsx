@@ -7,6 +7,13 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { FileEntry } from './types';
 import { FileTreeItem } from './FileTreeItem';
 
+// UI-453 加映二 — 拖出经主进程 webContents.startDrag（真文件拖拽），mock 桥观察载荷
+type DragPayload = { name: string; localPath?: string; url?: string };
+const startFileDragMock = vi.fn((_payload: DragPayload) => Promise.resolve({ ok: true }));
+vi.mock('@/lib/desktopBridge', () => ({
+  getBridge: () => ({ startFileDrag: startFileDragMock }),
+}));
+
 const entry: FileEntry = { name: '样本 文件.md', type: 'file', size: 12, modifiedAt: 42 };
 const dirEntry: FileEntry = { name: 'docs', type: 'dir' };
 
@@ -48,33 +55,35 @@ function renderItem(e: FileEntry, kind: 'local' | 'ssh' = 'local') {
 
 afterEach(cleanup);
 
-describe('UI-453 拖出 DownloadURL 统一 REST', () => {
-  it('文件行 dragstart：DownloadURL 为预览同源 REST 形态（本地项目也是，无 file://）', () => {
+describe('UI-453 加映二 拖出经 startDrag 真文件拖拽', () => {
+  it('本地项目文件行 dragstart：主进程 startDrag 收 localPath（OS 级复制语义），不写 DownloadURL', () => {
     const view = renderItem(entry, 'local');
-    const row = view.getByRole('treeitem');
     const dt = dataTransferStub();
-    fireEvent.dragStart(row, { dataTransfer: dt });
-    const downloadUrl = dt.setData.mock.calls.find(([mime]) => mime === 'DownloadURL')?.[1] ?? '';
-    expect(downloadUrl).toContain('application/octet-stream:样本 文件.md:http://localhost:3001/api/workspaces/p1/file?path=');
-    // UI-453 加映：附拖出通道 token（Origin:null 的下载请求经 token 组合守卫放行）
-    expect(downloadUrl).toContain('&token=desktop-local');
-    expect(downloadUrl).not.toContain('file://');
-    expect(downloadUrl).not.toContain('D:');
+    fireEvent.dragStart(view.getByRole('treeitem'), { dataTransfer: dt });
+    expect(startFileDragMock).toHaveBeenCalledTimes(1);
+    expect(startFileDragMock.mock.calls[0][0]).toEqual({
+      name: '样本 文件.md',
+      localPath: 'D:\\工作 目录/样本 文件.md',
+    });
+    expect(dt.setData.mock.calls.some(([mime]) => mime === 'DownloadURL')).toBe(false);
   });
 
-  it('ssh 项目同构：同样 REST 形态（工作目录不进 URL）', () => {
+  it('ssh 项目：startDrag 收 REST URL（附 token），无 localPath', () => {
     const view = renderItem(entry, 'ssh');
     const dt = dataTransferStub();
     fireEvent.dragStart(view.getByRole('treeitem'), { dataTransfer: dt });
-    const downloadUrl = dt.setData.mock.calls.find(([mime]) => mime === 'DownloadURL')?.[1] ?? '';
-    expect(downloadUrl).toMatch(/^application\/octet-stream:.+:http:\/\/localhost:3001\/api\//);
+    expect(startFileDragMock).toHaveBeenCalledTimes(1);
+    const payload = startFileDragMock.mock.calls[0]?.[0] as DragPayload;
+    expect(payload.localPath).toBeUndefined();
+    expect(payload.url).toContain('http://localhost:3001/api/workspaces/p1/file?path=');
+    expect(payload.url).toContain('token=desktop-local');
   });
 
-  it('目录行不携带 DownloadURL（只挂树内 MIME）', () => {
+  it('目录行不触发 startDrag（只挂树内 MIME）', () => {
     const view = renderItem(dirEntry);
     const dt = dataTransferStub();
     fireEvent.dragStart(view.getByRole('treeitem'), { dataTransfer: dt });
-    expect(dt.setData.mock.calls.some(([mime]) => mime === 'DownloadURL')).toBe(false);
+    expect(startFileDragMock).not.toHaveBeenCalled();
     expect(dt.setData.mock.calls.some(([mime]) => mime === 'application/x-gewu-tree-item')).toBe(true);
   });
 });

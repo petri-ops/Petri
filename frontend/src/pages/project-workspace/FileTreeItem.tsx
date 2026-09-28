@@ -7,6 +7,7 @@ import { Icon } from '@/components/icons/Icon';
 import { WorkspaceFileIcon } from '@/components/workspace-panels/WorkspaceFileIcon';
 import styles from '../project-workspace.module.css';
 import { getToken } from '@/lib/authClient';
+import { getBridge } from '@/lib/desktopBridge';
 import type { ActiveWorkspaceFile, FileEntry } from './types';
 import { FileTreeList } from './FileTreeList';
 import { formatSize } from './helpers';
@@ -83,20 +84,32 @@ export function FileTreeItem({
   }, [more, loadingMore, loadDir]);
 
   const fileUrl = fileUrlFor(fullPath);
+  // UI-453 加映二 — 拖出进行中标记：startDrag 接管期间避免重复发起
+  const dragOutBusyRef = React.useRef(false);
   const isActive = entry.type === 'file' && activePath === fullPath;
   const DRAG_MIME = TREE_DRAG_MIME;
   const isDropTarget = entry.type === 'dir' && Boolean(onDropToDir);
 
   const handleDragStart = useCallback((event: React.DragEvent) => {
     event.dataTransfer.setData(DRAG_MIME, JSON.stringify({ path: fullPath, name: entry.name, type: entry.type }));
-    // BLOCK-90/91 → UI-453 — OS 拖出导出统一走预览同源 REST URL：原本地 file:// 直连在
-    // Windows 上路径未编码（盘符/反斜杠/中文直拼进 URL）从未验收过；REST 化后本地=回环
-    // 下载（效果等同复制）、ssh=远程拉流，本地/ssh 同构一套逻辑。树内 drop 读的是上方
-    // 内部 MIME，互不影响。UI-453 加映：附 query token——拖出下载的 GET 带 Origin:null
-    // 被源白名单 403（实机抓真），token 通道放行（服务端 fileDownloadGuard 消费）。
-    if (entry.type === 'file' && fileUrl) {
-      const downloadUrl = `${fileUrl}${fileUrl.includes('?') ? '&' : '?'}token=${encodeURIComponent(getToken())}`;
-      event.dataTransfer.setData('DownloadURL', `application/octet-stream:${entry.name}:${downloadUrl}`);
+    // BLOCK-90/91 → UI-453 → 加映二 — OS 拖出导出改主进程真文件拖拽：DownloadURL 方案
+    // 服务端通路全通但 Windows 实测仍不落盘（用户两次实测），切 Electron 官方
+    // webContents.startDrag——本地项目直接拖源文件（OS 级复制语义），ssh 先拉临时文件
+    // 再拖（URL 附 token 过 fileDownloadGuard）。preventDefault 阻断 HTML5 拖拽由主进程
+    // 接管；目录行不受影响（仍走树内 MIME，与本通道互不影响）。
+    if (entry.type === 'file' && !dragOutBusyRef.current) {
+      const bridge = getBridge('files');
+      if (bridge?.startFileDrag) {
+        event.preventDefault();
+        dragOutBusyRef.current = true;
+        const payload = workspaceDir
+          ? { name: entry.name, localPath: `${workspaceDir}/${fullPath}` }
+          : { name: entry.name, url: `${fileUrl}${fileUrl.includes('?') ? '&' : '?'}token=${encodeURIComponent(getToken())}` };
+        bridge.startFileDrag(payload)
+          .catch(() => { /* 拖出失败静默（413/断网等树侧无打扰面） */ })
+          .finally(() => { dragOutBusyRef.current = false; });
+        return;
+      }
     }
     event.dataTransfer.effectAllowed = 'copyMove';
   }, [entry.name, entry.type, fullPath, fileUrl]);

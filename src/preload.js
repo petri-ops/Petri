@@ -290,6 +290,10 @@ const desktopBridgeSurface = {
     // UI-400-2 — 导出/下载：主进程保存对话框 + 受限本机来源流式写盘
     downloadFromUrl: (url, name) =>
       ipcRenderer.invoke('file:download-from-url', { url, name }),
+    // UI-453 加映二 — OS 拖出导出：dragstart 时请主进程接管为真文件拖拽
+    // （webContents.startDrag；本地直接拖源文件=复制语义，ssh 先拉临时文件）
+    startFileDrag: (payload) =>
+      ipcRenderer.invoke('file:start-drag', payload),
     // UI-444 加映 — 文本另存为：原生保存对话框（用户确认位置）+ 主进程写所选路径
     saveTextFile: (defaultName, content) =>
       ipcRenderer.invoke('file:save-text-file', { defaultName, content }),

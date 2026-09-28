@@ -16,7 +16,7 @@ const CHANNELS = require('./channels');
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
-const { app, ipcMain, dialog, net, shell } = require("electron");
+const { app, ipcMain, dialog, net, shell, nativeImage } = require("electron");
 
 /**
  * File-type whitelist for the file:open-path IPC channel (SEC-002).
@@ -227,6 +227,7 @@ function setupFileDialogIpc({ mainWindow } = {}) {
       ) {
         return { ok: false, error: "url origin not allowed" };
       }
+      console.log("[desktop] download-from-url invoked:", name);
       // UI-453 — 原生保存对话框：选路径确认后流式落盘（覆盖确认由对话框自身处理）；
       // 取消静默返回 canceled（前端不显示错误）。
       // defaultPath 给绝对路径（join 下载目录 + 文件名）：裸文件名在 Windows 上实测
@@ -239,9 +240,11 @@ function setupFileDialogIpc({ mainWindow } = {}) {
         ? await dialog.showSaveDialog(mainWindow, dialogOptions)
         : await dialog.showSaveDialog(dialogOptions);
       if (picked.canceled || !picked.filePath) {
+        console.log("[desktop] download-from-url canceled by user");
         return { ok: false, canceled: true };
       }
       const filePath = picked.filePath;
+      console.log("[desktop] download-from-url picked:", filePath);
 
       await new Promise((resolve, reject) => {
         const request = net.request(url);
@@ -263,9 +266,78 @@ function setupFileDialogIpc({ mainWindow } = {}) {
       });
       // 成功反馈：在系统文件管理器中定位并高亮该文件（失败不阻塞成功语义）
       try { shell.showItemInFolder(filePath); } catch { /* ignore */ }
+      console.log("[desktop] download-from-url saved:", filePath);
       return { ok: true, path: filePath };
     } catch (e) {
       console.error("[desktop] download from url failed:", e.message);
+      return { ok: false, error: e.message };
+    }
+  });
+
+  // UI-453 加映二 — OS 拖出导出：dragstart 时渲染层请主进程接管为真文件拖拽
+  // （webContents.startDrag，Electron 官方文件拖出通道）。本地项目直接拖源文件
+  // （OS 级复制语义，零拷贝）；ssh 项目先经本机 REST 拉到临时文件再拖（>16MB 端点
+  // 诚实 413，拖出失败可见）。DownloadURL 方案（Windows 实测不落盘）就此退役。
+  ipcMain.handle(CHANNELS.file.startFileDrag, async (event, payload) => {
+    try {
+      const { localPath, url, name } = payload || {};
+      if (typeof name !== "string" || !name) {
+        return { ok: false, error: "invalid drag payload" };
+      }
+      let filePath = null;
+      if (typeof localPath === "string" && localPath) {
+        filePath = localPath;
+      } else if (typeof url === "string" && url) {
+        let parsed;
+        try {
+          parsed = new URL(url);
+        } catch {
+          return { ok: false, error: "invalid url" };
+        }
+        if (
+          !["http:", "https:"].includes(parsed.protocol) ||
+          !["127.0.0.1", "localhost"].includes(parsed.hostname)
+        ) {
+          return { ok: false, error: "url origin not allowed" };
+        }
+        // ssh/远程：先拉到临时文件（用户仍按住鼠标；下载完成即接管拖拽）
+        const tempDir = path.join(app.getPath("temp"), "gewu-dragout");
+        fs.mkdirSync(tempDir, { recursive: true });
+        filePath = path.join(tempDir, `${Date.now()}-${name}`);
+        await new Promise((resolve, reject) => {
+          const request = net.request(url);
+          const file = fs.createWriteStream(filePath);
+          request.on("response", (response) => {
+            if (response.statusCode !== 200) {
+              file.destroy();
+              reject(new Error(`HTTP ${response.statusCode}`));
+              request.abort();
+              return;
+            }
+            response.on("error", reject);
+            response.pipe(file);
+          });
+          request.on("error", reject);
+          file.on("error", reject);
+          file.on("finish", resolve);
+          request.end();
+        });
+      } else {
+        return { ok: false, error: "localPath or url required" };
+      }
+      if (!fs.existsSync(filePath)) {
+        return { ok: false, error: "source file not found" };
+      }
+      let icon;
+      try {
+        icon = await app.getFileIcon(filePath, { size: "normal" });
+      } catch {
+        icon = nativeImage.createEmpty();
+      }
+      event.sender.startDrag({ file: filePath, icon });
+      return { ok: true };
+    } catch (e) {
+      console.error("[desktop] start-drag failed:", e.message);
       return { ok: false, error: e.message };
     }
   });

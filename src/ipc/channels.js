@@ -58,6 +58,8 @@ const CHANNELS = {
     openPath: 'file:open-path',
     openWorkspaceFile: 'file:open-workspace-file',
     downloadFromUrl: 'file:download-from-url',
+    // UI-453 加映二 — OS 拖出导出：webContents.startDrag（真文件拖拽）
+    startFileDrag: 'file:start-drag',
     saveDialog: 'file:save-dialog',
     saveTextFile: 'file:save-text-file',
     validateDirectory: 'file:validate-directory',

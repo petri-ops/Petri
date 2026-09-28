@@ -379,6 +379,8 @@ declare global {
           url: string,
           name: string
         ) => Promise<{ ok: boolean; path?: string; canceled?: boolean; error?: string }>;
+        // UI-453 加映二 — OS 拖出（webContents.startDrag 接管为真文件拖拽）
+        startFileDrag: (payload: { localPath?: string; url?: string; name: string }) => Promise<{ ok: boolean; error?: string }>;
         /** UI-444 加映 — 文本另存为：原生保存对话框（用户确认位置）+ 主进程写所选路径。 */
         saveTextFile: (
           defaultName: string,
