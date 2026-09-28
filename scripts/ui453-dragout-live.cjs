@@ -88,56 +88,29 @@ function restCall(method, apiPath, body) {
   })()`);
   await sleep(1800);
 
-  // ── T1 dragstart：DownloadURL 形态 ──
-  await front();
-  const t1 = JSON.parse(await EVAL(
-    `(function(){
-      var row=document.querySelector('[data-file-path="${FILE_NAME.replace(/"/g, '\\"')}"]');
-      if(!row) return JSON.stringify({row:false});
-      var dt=new DataTransfer();
-      row.dispatchEvent(new DragEvent('dragstart',{bubbles:true,cancelable:true,dataTransfer:dt}));
-      var url=dt.getData('DownloadURL')||'';
-      return JSON.stringify({
-        row:true,
-        hasUrl:url.length>0,
-        isRest:url.indexOf(':http://localhost:')>0 && url.indexOf('/api/workspaces/')>0,
-        hasToken:url.indexOf('token=desktop-local')>=0,
-        hasFileScheme:url.indexOf('file://')>=0,
-        hasDriveLetter:/[A-Z]:\\\\/.test(url) || url.indexOf(':D')>=0,
-        urlFull:url
-      });
-    })()`));
-  const t1Ok = t1.row && t1.hasUrl && t1.isRest && t1.hasToken && !t1.hasFileScheme && !t1.hasDriveLetter;
-  run.assert('T1_dragout_rest_download_url', t1Ok === true, JSON.stringify(t1));
+  // ── T1 拖出桥在场（startDrag 方案：合成 dragstart 会触发主进程真拖拽接管，不可派发；
+  //     拖出载荷契约由组件测试覆盖：本地 localPath/ssh 附 token URL/目录行不触发）──
+  const t1 = await EVAL(`(function(){
+    var b=window.biof3Desktop && window.biof3Desktop.files;
+    return JSON.stringify({bridge:!!b, startDrag: !!(b && typeof b.startFileDrag==='function'), download: !!(b && typeof b.downloadFromUrl==='function')});
+  })()`);
+  let t1p = {}; try { t1p = JSON.parse(t1); } catch {}
+  run.assert('T1_drag_bridges_present', t1p.bridge === true && t1p.startDrag === true && t1p.download === true, String(t1));
 
-  // ── T2 取数 URL 无鉴权 GET 200 + 字节一致 ──
+  // ── T2 取数 URL 无鉴权 GET 200 + 字节一致（startDrag 方案下 URL 由主进程消费，
+  //     此处直接构造同源 REST+token URL 验证数据完整性通路）──
   const fetchProbe = await EVAL(
     `(async function(){
-      var row=document.querySelector('[data-file-path="${FILE_NAME.replace(/"/g, '\\"')}"]');
-      if(!row) return JSON.stringify({row:false});
-      var dt=new DataTransfer();
-      row.dispatchEvent(new DragEvent('dragstart',{bubbles:true,cancelable:true,dataTransfer:dt}));
-      var parts=(dt.getData('DownloadURL')||'').split(':');
-      var url=parts.slice(2).join(':');
-      var resp=await fetch(url,{cache:'no-store'});
-      var buf=await resp.arrayBuffer();
-      return JSON.stringify({status:resp.status, bytes:buf.byteLength});
+      var base = (window.biof3Desktop && window.biof3Desktop.backendConfig && window.biof3Desktop.backendConfig.rApiBase) || 'http://localhost:3001/api';
+      var url = base + '/workspaces/${PROJECT_ID}/file?path=' + encodeURIComponent('${FILE_NAME.replace(/'/g, "'")}') + '&token=desktop-local';
+      var resp = await fetch(url, { cache: 'no-store' });
+      var buf = await resp.arrayBuffer();
+      return JSON.stringify({ status: resp.status, bytes: buf.byteLength });
     })()`);
   let t2 = {};
   try { t2 = JSON.parse(fetchProbe); } catch {}
   run.assert('T2_url_fetch_ok_bytes_match', t2.status === 200 && t2.bytes === Buffer.byteLength(content, 'utf8'),
     `probe=${String(fetchProbe).slice(0, 200)}`);
-
-  // ── T3 目录行无 DownloadURL ──
-  const t3 = JSON.parse(await EVAL(
-    `(function(){
-      var dir=document.querySelector('[data-tree-path="ui453 dir"]');
-      if(!dir) return JSON.stringify({dir:false});
-      var dt=new DataTransfer();
-      dir.dispatchEvent(new DragEvent('dragstart',{bubbles:true,cancelable:true,dataTransfer:dt}));
-      return JSON.stringify({dir:true, hasUrl:(dt.getData('DownloadURL')||'').length>0, hasTreeMime:(dt.getData('application/x-gewu-tree-item')||'').length>0});
-    })()`));
-  run.assert('T3_dir_row_no_download_url', t3.dir && t3.hasUrl === false && t3.hasTreeMime === true, JSON.stringify(t3));
 
   // ── T4 下载通道契约：preload bridge 在场（OS 级保存对话框由用户实机过目）──
   const t4 = await EVAL(`typeof window.biof3Desktop !== 'undefined' && typeof window.biof3Desktop.files !== 'undefined' && typeof window.biof3Desktop.files.downloadFromUrl === 'function'`);

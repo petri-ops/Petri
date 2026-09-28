@@ -1,7 +1,7 @@
 {
   "name": "ui453-dragout-live",
-  "startedAt": "2026-09-28T08:43:22.102Z",
-  "finishedAt": "2026-09-28T08:43:38.707Z",
+  "startedAt": "2026-09-28T09:13:39.759Z",
+  "finishedAt": "2026-09-28T09:15:03.985Z",
   "assertions": [
     {
       "name": "T0_seed_uploaded",
@@ -9,19 +9,14 @@
       "detail": "HTTP 200"
     },
     {
-      "name": "T1_dragout_rest_download_url",
+      "name": "T1_drag_bridges_present",
       "pass": true,
-      "detail": "{\"row\":true,\"hasUrl\":true,\"isRest\":true,\"hasToken\":true,\"hasFileScheme\":false,\"hasDriveLetter\":false,\"urlFull\":\"application/octet-stream:拖出 样本.md:http://localhost:64347/api/workspaces/p_mu5ftn3a_wxnq/file?path=ui453%20dir%2F%E6%8B%96%E5%87%BA%20%E6%A0%B7%E6%9C%AC.md&token=desktop-local\"}"
+      "detail": "{\"bridge\":true,\"startDrag\":true,\"download\":true}"
     },
     {
       "name": "T2_url_fetch_ok_bytes_match",
       "pass": true,
       "detail": "probe={\"status\":200,\"bytes\":1140}"
-    },
-    {
-      "name": "T3_dir_row_no_download_url",
-      "pass": true,
-      "detail": "{\"dir\":true,\"hasUrl\":false,\"hasTreeMime\":true}"
     },
     {
       "name": "T4_download_bridge_present",
