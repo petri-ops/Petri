@@ -5,14 +5,15 @@
  * 宽度实时回调 + 抬手持久化（localStorage 全局偏好，跨会话记忆）。
  * 宽度钳制 [240, 720] 且不越过视口右缘；主会话/钉住列渲染零改动。
  */
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import styles from './FloatCardResizer.module.css';
 
-export const FLOAT_CARD_MIN_WIDTH = 240;
-export const FLOAT_CARD_MAX_WIDTH = 720;
+// UI-448 清偿（AUDIT-LOG 🔴 销号）：仅模块内使用，按 knip 棘轮去导出（行为不变）
+const FLOAT_CARD_MIN_WIDTH = 240;
+const FLOAT_CARD_MAX_WIDTH = 720;
 
 /** 钳制：[240, 720] 且不超过视口宽（浮卡右锚定，左边必须留出可视区）。 */
-export function clampFloatCardWidth(w: number): number {
+function clampFloatCardWidth(w: number): number {
   const viewport = typeof window !== 'undefined' ? window.innerWidth : FLOAT_CARD_MAX_WIDTH;
   const max = Math.min(FLOAT_CARD_MAX_WIDTH, Math.max(FLOAT_CARD_MIN_WIDTH, viewport - 48));
   return Math.round(Math.min(max, Math.max(FLOAT_CARD_MIN_WIDTH, w)));
@@ -53,8 +54,11 @@ export function FloatCardResizeHandle({
   onCommit: (w: number) => void;
 }): React.ReactElement {
   const dragRef = useRef<{ x: number; w: number } | null>(null);
+  // 同步走 effect（渲染期写 ref 违反 react-hooks/refs；pointerdown 等用户事件在 commit 后触发，值恒新）
   const currentRef = useRef(width);
-  currentRef.current = width;
+  useEffect(() => {
+    currentRef.current = width;
+  });
 
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {

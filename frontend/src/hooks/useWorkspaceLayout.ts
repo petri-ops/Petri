@@ -17,7 +17,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 
 /** UI-351 — 中栏宽裕阈值（≥ 才钉住展开摘要/侧聊列区；会话框一旦被挤即转悬浮）。 */
-export const SUMMARY_PIN_MIN_WIDTH = 1120;
+// UI-448 清偿（AUDIT-LOG 🔴 销号）：仅模块内使用，按 knip 棘轮去导出（行为不变）
+const SUMMARY_PIN_MIN_WIDTH = 1120;
 
 /**
  * UI-351 — 摘要/侧聊宽窄形态派生（窄窗悬浮、宽窗钉住列区）。

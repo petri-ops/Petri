@@ -150,8 +150,6 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
   // UI-448 — 悬浮聊天面展开时中栏会话内容列让位（chat 模式才有会话内容可让）
   const sideChatOpen = ctx.sideChatOpen;
   const setSideChatOpen = ctx.setSideChatOpen;
-  // UI-448 加映 v12 — 宽窄判定（与摘要切换点同源，见 SessionFrameView 同款派生）
-  const wide = ctx.summaryVisibility === 'expanded';
   const [returnConversationMs, setReturnConversationMs] = React.useState<number | null>(null);
   // Reuse the durable conversation run; the result Composer does not create a
   // second progress store and therefore survives tool switches/stop/failure by

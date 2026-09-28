@@ -4405,3 +4405,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：实机 `scripts/ui451-file-tabs-live.cjs` **19/19 allPass**（acceptance/ui-451/ json+截图×4，dev Electron 真项目）——原 13 项全保留 + T9 同名双 tab 限定 `ui451-dup` vs `ui451-dir/ui451-dup` 可区分、T10 rename 后 tab 原位换新 path 且旧 path 消失、T11 reveal 定位到树行、T12 Ctrl+Tab 切换+Ctrl+W 涉脏弹确认（脏标记打标成功前置）、T13 删除已打开文件 tab 直接关无确认、T14 关右栏 files tab：守卫弹层出现→取消树仍在→确认树卸载。新增单测 16（ops 4 + TabStrip 4 + shortcuts 5 + fileOps 强化 2 + 断言适配）+ 定向 10 文件 71 用例全绿 + tsc 0 + theme 4/4 + eslint 触碰面 0 error（自引入的渲染期 ref 读改 state 快照消除，连带暴露的 915/990 存量读随触发点移除消失）+ code-size project-workspace.tsx 1076→1147（守卫+弹层+ctx）显式重打 + window-manager 38/38（Jev 增量）。
 - **候选登记（不实施留痕）**：P2-6 切项目丢草稿无确认——声明式 `<Routes>` 非 data router 无 useBlocker，拦截需 router 迁移或遍历导航源，比例失衡（1.2s 自动保存部分兜底）降级候选；P2-7 tab 数上限/LRU（终端 MAX_TERMINAL_TABS=4 先例，文件 tab 每实例 CodeMirror+≤120KB 文本）；P2-8 整窗关闭无 beforeunload/close 拦截；Minor：tablist/aria-controls/roving tabindex、双击 tab 关闭、Ctrl+Shift+T 重开历史。
 - **边界**：rename 后 tab 内容按新 path 重载（fsMove 已把自动保存落盘的内容带到新位置；最后 <1.2s 未落盘击键不保——与删除/关闭语义一致）；Ctrl+W 在终端聚焦时让位；显式确认关闭右栏 files tab 后草稿丢弃（确认弹层明示）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-448 加映 v29: 域内 lint/knip 存量清偿（AUDIT-LOG 🔴 销号）(2026-09-28 verified，dev Electron；纯债清偿零行为变化)
+
+- **来源**：UI-451 全维度核查发现的 🔴（lint 12 error + knip 4 死导出，BLOCK-125 行与 UI-450 条目三次挂账归属本域）由 UI-451 会话按审计纪律当日清偿。三分类逐条定性：真缺陷修 2（FloatCardResizer 渲染期写 ref 移入 effect 同步；CenterPanel 死绑定 wide 删除——154 行重复派生、371 行正主在用）、化石删 10（SideChatDock.test 5 多余 `as HTMLElement` 断言 + 3 async 无 await 转同步；useWorkspaceLayout.test 2 act 浮承诺 `void` 弃值）、knip 4 去 export 私有化（FLOAT_CARD_MIN/MAX_WIDTH、clampFloatCardWidth、SUMMARY_PIN_MIN_WIDTH，仅模块内使用）。
+- **修法**：全部为规则合规化与死面收缩，零 UI 行为变化；useWorkspaceLayout.test 原型 patch 改 Object.defineProperty 形态（unbound-method 规则合规，getBoundingClientRect receiver 语义不变）。**抑制基线零触碰、零新增豁免**（未走 --suppress-all，无需重扫）。
+- **证据**：quality:lint exit 0 + quality:knip:check PASS（保留面 243 键无新增）+ SideChatDock 14/CenterPanel 13/useWorkspaceLayout 三文件 36 用例全绿 + tsc 0 + closeout 十一门链自 v18 引债后首次全绿（详见 AUDIT-LOG 销号行）。
+- **边界**：v15–v28 交付面维持原状待用户过目节奏不变，本条只承载债清偿。G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -143,7 +143,7 @@ describe('UI-448 SideChatDock 开合（壳状态 props）', () => {
         onOpenChange={onOpenChange}
       />
     );
-    await act(async () => {
+    act(() => {
       window.dispatchEvent(new CustomEvent('gewu:side-chat-open'));
     });
     expect(onOpenChange).toHaveBeenCalledWith(true);
@@ -252,7 +252,7 @@ describe('UI-448 加映 v21 悬浮面与摘要浮卡同尺寸语言', () => {
         width={288}
       />
     );
-    const surface = screen.getByTestId('side-chat-surface') as HTMLElement;
+    const surface = screen.getByTestId('side-chat-surface');
     expect(surface.style.width).toBe('288px');
   });
 
@@ -265,7 +265,7 @@ describe('UI-448 加映 v21 悬浮面与摘要浮卡同尺寸语言', () => {
         onOpenChange={vi.fn()}
       />
     );
-    const surface = screen.getByTestId('side-chat-surface') as HTMLElement;
+    const surface = screen.getByTestId('side-chat-surface');
     expect(surface.style.width).toBe('');
   });
 });
@@ -278,19 +278,21 @@ describe('UI-448 加映 v25 浮卡拖宽', () => {
 
   afterEach(cleanup);
 
-  const drag = async (surface: HTMLElement, fromX: number, toX: number) => {
-    const handle = surface.querySelector('[data-testid="float-card-resize-handle"]') as HTMLElement;
+  // 事件派发同步，act 同步形态即可（v29 清偿：require-await）
+  const drag = (surface: HTMLElement, fromX: number, toX: number) => {
+    const handle = surface.querySelector('[data-testid="float-card-resize-handle"]');
     expect(handle).toBeTruthy();
+    if (!handle) return; // TS 窄化（querySelector 含 null；toBeTruthy 已保证失败面可读）
     fireEvent.pointerDown(handle, { clientX: fromX, button: 0 });
-    await act(async () => {
+    act(() => {
       window.dispatchEvent(Object.assign(new Event('pointermove'), { clientX: toX }));
     });
-    await act(async () => {
+    act(() => {
       window.dispatchEvent(new Event('pointerup'));
     });
   };
 
-  it('左缘把手向左拖变宽并持久化偏好', async () => {
+  it('左缘把手向左拖变宽并持久化偏好', () => {
     render(
       <SideChatDock
         projectId="p_1"
@@ -300,8 +302,8 @@ describe('UI-448 加映 v25 浮卡拖宽', () => {
         width={288}
       />
     );
-    const surface = screen.getByTestId('side-chat-surface') as HTMLElement;
-    await drag(surface, 300, 248); // 向左拖 52px
+    const surface = screen.getByTestId('side-chat-surface');
+    drag(surface, 300, 248); // 向左拖 52px
     expect(surface.style.width).toBe('340px');
     expect(window.localStorage.getItem('gewu:side-chat-float-width')).toBe('340');
 
@@ -316,10 +318,10 @@ describe('UI-448 加映 v25 浮卡拖宽', () => {
         width={288}
       />
     );
-    expect((screen.getByTestId('side-chat-surface') as HTMLElement).style.width).toBe('340px');
+    expect(screen.getByTestId('side-chat-surface').style.width).toBe('340px');
   });
 
-  it('拖宽被钳制在 [240, min(720, 视口-48)]', async () => {
+  it('拖宽被钳制在 [240, min(720, 视口-48)]', () => {
     render(
       <SideChatDock
         projectId="p_1"
@@ -329,8 +331,8 @@ describe('UI-448 加映 v25 浮卡拖宽', () => {
         width={288}
       />
     );
-    const surface = screen.getByTestId('side-chat-surface') as HTMLElement;
-    await drag(surface, 300, -2000); // 拖穿屏幕
+    const surface = screen.getByTestId('side-chat-surface');
+    drag(surface, 300, -2000); // 拖穿屏幕
     const capped = Math.min(720, Math.max(240, window.innerWidth - 48));
     expect(surface.style.width).toBe(`${capped}px`);
   });

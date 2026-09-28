@@ -150,12 +150,12 @@ describe('useWorkspaceLayout 会话框测量（UI-371）', () => {
 
     const node = view.getByTestId('frame-chat');
     node.dataset.w = '1300';
-    // 不触发 RO、不触发 React render，仅派发聚焦/可见性事件
-    act(() => window.dispatchEvent(new Event('focus')));
+    // 不触发 RO、不触发 React render，仅派发聚焦/可见性事件（void 弃值：act 类型含 Thenable 联合，派发本同步）
+    void act(() => window.dispatchEvent(new Event('focus')));
     expect(view.getByTestId('w').textContent).toBe('1300');
 
     node.dataset.w = '400';
-    act(() => document.dispatchEvent(new Event('visibilitychange')));
+    void act(() => document.dispatchEvent(new Event('visibilitychange')));
     expect(view.getByTestId('w').textContent).toBe('400');
   });
 
