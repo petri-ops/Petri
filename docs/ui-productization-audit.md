@@ -4423,7 +4423,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：P2-6 维持缓期（理由如上，登记于本条）；浏览器后退/前进与程序化跳转不在 P2-8 守卫面（beforeunload 只拦整窗关闭）；重开历史容量 8、会话内有效不持久化。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-452: 结果信息密度包——散点数值 tooltip + 基因搜索 + 阈值参考线 + 表格组合筛选 + 科学计数格式化 + Lightbox 缩放平移 (2026-09-28 in_progress，组件级全绿；实机走查待补)
+## UI-452: 结果信息密度包——散点数值 tooltip + 基因搜索 + 阈值参考线 + 表格组合筛选 + 科学计数格式化 + Lightbox 缩放平移 (2026-09-28 in_progress，组件级全绿；六面端到端走查被「无会话 job 打不开结果页」阻塞——两条实证路径与四条打开尝试登记 AUDIT-LOG 🟡；用户实机过目任意会话内 deseq2 结果六面可翻 verified)
 
 - **来源**：G0-BIO Goal 线 BIO-1 阶段种子（docs/g0-bio-delivery-goal-plan.md §3；2026-09-28 垂直评估「结果查看专业信息密度不及格」差距表）。用户裁决「可以的 按照你的建议来逐个推进」=两 Goal 交织序队列头启动。
 - **六件**（全部为既有通道与数据的呈现重组，选择协议/artifact-selection 契约零改动）：①**散点数值 tooltip**——ScientificScatter 每点 `<title>` 从裸基因 ID 扩为 ID+xField 值+yField 值+legend 值（数据来自已拉取的 backing 行，零新请求）；②**基因搜索定位**——散点工具条搜索框（aria-label 搜索实体），子串不区分大小写匹配稳定实体 ID，命中点放大+描边（data-search-hit），caveat 显示命中数，Enter 将全部命中点写为 point_select 选择（走既有 buildPointSelection 契约）；③**阈值参考线**——可开关（默认开），x=±|log2FC|（默认 1 可调）竖虚线两条 + yTransform=neg_log10 时 padj（默认 0.05 可调）横虚线，越界不画（诚实），明确标注「展示辅助」不回写分析参数（按 job params 投影 cutoff 留后续接线）；④**表格组合筛选**——单字段 contains 升级为子句构建器：多条件 AND，每条=字段+操作符（包含/=/≠/>/≥/</≤，协议 SelectionFilterClause 既有 op 集）+值；数值比较操作符值不可解析时该子句不生效（不猜语义）；⑤**数值科学计数格式化**——新纯函数 lib/format-scientific-value（|x|≥1e6 或 <1e-3 两位科学计数，常规 4 位有效数字，非数值原样返回不猜测），表格 number 列显示层套用，title 保留原始字符串；⑥**Lightbox 缩放平移**——滚轮缩放（1..8 夹紧，原生非 passive 监听钉 preventDefault）、拖拽平移（位移>3px 判拖拽不触发关闭，近零位移=点击关闭）、双击复位、Esc 关闭保留、操作提示常驻。

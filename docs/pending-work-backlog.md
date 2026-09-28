@@ -69,7 +69,7 @@
 
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
-| 1 | BIO-1 / UI-452 | **结果信息密度包**（六件交付 `509d3eaa`；台账 in_progress——dev Electron 实机走查待补后翻 verified） | G0-BIO plan §3 BIO-1 | 实机待补 |
+| 1 | BIO-1 / UI-452 | **结果信息密度包**（六件交付 `509d3eaa`；组件级 27/27；端到端走查 2026-09-28 尝试受阻：HTTP 直跑无会话 job 四条打开路径均未进结果页=产品发现登记 AUDIT-LOG 🟡 归 BIO-3/PL-7 修；**翻 verified 捷径=用户实机过目会话内 deseq2 结果六面**，或后续借 block121 会话造数复跑 scripts/ui452-density-live.cjs） | G0-BIO plan §3 BIO-1 | in_progress（过目待用户） |
 | 2 | PL-2 / BLOCK-126 | **感知实时性（2026-09-28 整包 completed）**：终态 jobs 失效事件（CAS 原语单点接线+MCP 8 处补发）+ 运行期日志行缓冲（executeJob spawn 化+日志端点 live 尾部）；契约 10/10+回归 25/25+**实机 allPass 6/6（SSE 到达延迟 1-2ms·live 实时 R 输出·run.log 链保持，scripts/block126-perception-live.mjs 可复跑）**；附带发现=日志端点项目 job 定位缺陷登记 AUDIT-LOG 🟡 归 BIO-2/PL-4 | plan §5.1 + acceptance/block-126/ | completed |
 | 3 | BIO-2 | 交互上限与降级链：250 点 top-N 语义/静态 24 行分页/热图窗口/mojibake | G0-BIO plan §3 | planned |
 | 4 | BIO-3 | lineage 可视化 + 继续分析显式化（吸收 C-15 前半） | G0-BIO plan §3 | planned |
