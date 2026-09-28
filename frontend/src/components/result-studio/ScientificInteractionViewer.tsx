@@ -1,3 +1,4 @@
+import { formatScientificValue } from '@/lib/format-scientific-value';
 import { unknownText } from '@/lib/unknownText';
 import React from 'react';
 import {
@@ -11,6 +12,7 @@ import {
   readEntityId,
   type ArtifactInteractionManifest,
   type ArtifactSelection,
+  type SelectionFilterClause,
   type SelectionFilterExpression,
   type SelectionSortSpec,
 } from '@/lib/artifact-selection';
@@ -26,6 +28,17 @@ const VIEW_ROWS = 18;
 const SCATTER_WIDTH = 600;
 const SCATTER_HEIGHT = 350;
 const SCATTER_PLOT = Object.freeze({ left: 58, right: 576, top: 28, bottom: 310 });
+
+/** 表格筛选子句构建器的可选操作符；数值比较的值合法性由子句归一化兜底。 */
+const FILTER_OPS: Array<{ value: SelectionFilterClause['op']; label: string }> = [
+  { value: 'contains', label: '包含' },
+  { value: 'eq', label: '=' },
+  { value: 'ne', label: '≠' },
+  { value: 'gt', label: '>' },
+  { value: 'gte', label: '≥' },
+  { value: 'lt', label: '<' },
+  { value: 'lte', label: '≤' },
+];
 
 function scatterPointerPosition(svg: SVGSVGElement, clientX: number, clientY: number): { x: number; y: number } {
   const matrix = svg.getScreenCTM?.();
@@ -137,8 +150,7 @@ function VirtualScientificTable({
   const [query, setQuery] = React.useState<ResultTableQuery | null>(null);
   const [offset, setOffset] = React.useState(0);
   const [viewportStart, setViewportStart] = React.useState(0);
-  const [filterField, setFilterField] = React.useState('');
-  const [filterValue, setFilterValue] = React.useState('');
+  const [filterClauses, setFilterClauses] = React.useState<Array<{ field: string; op: SelectionFilterClause['op']; value: string }>>([{ field: '', op: 'contains', value: '' }]);
   const [sort, setSort] = React.useState<SelectionSortSpec[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState('');
@@ -146,10 +158,19 @@ function VirtualScientificTable({
   const viewportRef = React.useRef<HTMLDivElement | null>(null);
   const filterExpression = React.useMemo<SelectionFilterExpression>(() => ({
     logic: 'and',
-    clauses: filterField && filterValue
-      ? [{ field: filterField, op: 'contains', value: filterValue }]
-      : [],
-  }), [filterField, filterValue]);
+    clauses: filterClauses.flatMap((clause): Array<{ field: string; op: SelectionFilterClause['op']; value: string | number }> => {
+      if (!clause.field || !clause.value) return [];
+      if (clause.op === 'contains') return [{ field: clause.field, op: 'contains', value: clause.value }];
+      const numericValue = Number(clause.value);
+      // 数值比较操作符遇到不可解析的值时整条子句不生效，不猜测语义。
+      if (!Number.isFinite(numericValue)) return [];
+      return [{ field: clause.field, op: clause.op, value: numericValue }];
+    }),
+  }), [filterClauses]);
+
+  const updateClause = (index: number, patch: Partial<{ field: string; op: SelectionFilterClause['op']; value: string }>) => {
+    setFilterClauses((current) => current.map((clause, i) => (i === index ? { ...clause, ...patch } : clause)));
+  };
 
   React.useEffect(() => {
     let cancelled = false;
@@ -238,12 +259,23 @@ function VirtualScientificTable({
 
   return (
     <div className={styles.viewer} data-mode="table">
-      <div className={styles.tableToolbar}>
-        <select value={filterField} onChange={(event) => { setFilterField(event.target.value); resetViewport(); }} aria-label="筛选字段">
-          <option value="">筛选字段</option>
-          {columns.map((column) => <option key={column.field} value={column.field}>{column.field}</option>)}
-        </select>
-        <input value={filterValue} onChange={(event) => { setFilterValue(event.target.value); resetViewport(); }} placeholder="输入筛选内容" aria-label="筛选内容" />
+      <div className={styles.tableToolbar} role="group" aria-label="表格筛选">
+        {filterClauses.map((clause, index) => (
+          <div className={styles.filterClauseRow} key={index}>
+            <select value={clause.field} onChange={(event) => { updateClause(index, { field: event.target.value }); resetViewport(); }} aria-label={`筛选字段 ${index + 1}`}>
+              <option value="">筛选字段</option>
+              {columns.map((column) => <option key={column.field} value={column.field}>{column.field}</option>)}
+            </select>
+            <select value={clause.op} onChange={(event) => { updateClause(index, { op: event.target.value as SelectionFilterClause['op'] }); resetViewport(); }} aria-label={`筛选操作 ${index + 1}`}>
+              {FILTER_OPS.map((op) => <option key={op.value} value={op.value}>{op.label}</option>)}
+            </select>
+            <input value={clause.value} onChange={(event) => { updateClause(index, { value: event.target.value }); resetViewport(); }} placeholder="筛选值" aria-label={`筛选条件 ${index + 1}`} />
+            {filterClauses.length > 1 && (
+              <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" aria-label={`移除筛选条件 ${index + 1}`} onClick={() => setFilterClauses((current) => current.filter((_, i) => i !== index))}>×</button>
+            )}
+          </div>
+        ))}
+        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => setFilterClauses((current) => [...current, { field: '', op: 'contains', value: '' }])}>添加筛选条件</button>
         <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={!query?.selectionEvidence.entityIdsHash} onClick={selectAllFiltered}>选择全部筛选结果</button>
         <span>{query ? `${query.matchedCount.toLocaleString()} / ${query.totalRows.toLocaleString()} 行` : '读取中'}</span>
       </div>
@@ -295,7 +327,11 @@ function VirtualScientificTable({
                 style={{ top: (queryOffset + localViewportStart + index) * ROW_HEIGHT, gridTemplateColumns: `34px repeat(${columns.length}, minmax(112px, 1fr))` }}
               >
                 <input type="checkbox" checked={checked} disabled={!id} onChange={() => toggleRow(row)} aria-label={id ? `选择 ${id}` : '该行无稳定 ID'} />
-                {columns.map((column) => <span key={column.field} title={String(row[column.field] ?? '')}>{String(row[column.field] ?? '—')}</span>)}
+                {columns.map((column) => {
+                  const raw = row[column.field];
+                  const display = column.type === 'number' ? formatScientificValue(raw) : String(raw ?? '—');
+                  return <span key={column.field} title={String(raw ?? '')}>{display}</span>;
+                })}
               </div>
             );
           })}
@@ -324,10 +360,59 @@ function ScientificScatter({ manifest, query, selection, onSelectionChange }: {
   const py = (value: number) => SCATTER_PLOT.bottom
     - ((value - minY) / (maxY - minY || 1)) * (SCATTER_PLOT.bottom - SCATTER_PLOT.top);
   const [drag, setDrag] = React.useState<{ x0: number; y0: number; x1: number; y1: number } | null>(null);
+  const [search, setSearch] = React.useState('');
+  const [showThresholds, setShowThresholds] = React.useState(true);
+  const [thresholdX, setThresholdX] = React.useState(1);
+  const [thresholdP, setThresholdP] = React.useState(0.05);
   const legends = mapping.legendField ? [...new Set(query.rows.map((row) => row[mapping.legendField!]).filter(Boolean))] : [];
+  const searchQuery = search.trim().toLowerCase();
+  const searchHits = React.useMemo(() => {
+    if (!searchQuery) return null;
+    const ids = new Set<string>();
+    for (const point of points) {
+      const id = readEntityId(manifest, point.row);
+      if (id && id.toLowerCase().includes(searchQuery)) ids.add(id);
+    }
+    return ids;
+  }, [manifest, points, searchQuery]);
+  // 参考线是展示辅助，不回写任何分析参数；y 阈值仅在 -log10(p) 变换下有 padj 语义。
+  const thresholdY = mapping.yTransform === 'neg_log10' && thresholdP > 0 && thresholdP < 1 ? -Math.log10(thresholdP) : null;
   return (
     <div className={styles.viewer} data-mode="scatter">
       <SelectionBar selection={selection} onClear={() => onSelectionChange(null)} />
+      <div className={styles.scatterTools}>
+        <input
+          type="text"
+          value={search}
+          placeholder={`搜索${manifest.entityType}…`}
+          aria-label="搜索实体"
+          onChange={(event) => setSearch(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key !== 'Enter' || !searchHits || searchHits.size === 0) return;
+            event.preventDefault();
+            onSelectionChange(buildPointSelection(manifest, points
+              .filter((point) => searchHits.has(readEntityId(manifest, point.row) || ''))
+              .map((point) => point.row)));
+          }}
+        />
+        <label>
+          <input type="checkbox" checked={showThresholds} onChange={(event) => setShowThresholds(event.target.checked)} aria-label="显示参考线" />
+          参考线
+        </label>
+        {showThresholds && (
+          <>
+            <label>
+              |{mapping.xField}| <input type="number" step="0.1" min="0" value={thresholdX} onChange={(event) => setThresholdX(Math.abs(Number(event.target.value) || 0))} aria-label="log2FC 阈值" />
+            </label>
+            {mapping.yTransform === 'neg_log10' && (
+              <label>
+                padj <input type="number" step="0.01" min="0" max="1" value={thresholdP} onChange={(event) => setThresholdP(Math.min(1, Math.max(0, Number(event.target.value) || 0)))} aria-label="padj 阈值" />
+              </label>
+            )}
+            <em>展示辅助</em>
+          </>
+        )}
+      </div>
       {legends.length > 0 && <div className={styles.legend}>{legends.map((legend) => (
         <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" key={legend} type="button" onClick={() => onSelectionChange(buildLegendSelection(manifest, query.rows.filter((row) => row[mapping.legendField!] === legend)))}>{legend}</button>
       ))}</div>}
@@ -357,17 +442,28 @@ function ScientificScatter({ manifest, query, selection, onSelectionChange }: {
       >
         <line x1={SCATTER_PLOT.left} y1={SCATTER_PLOT.bottom} x2={SCATTER_PLOT.right} y2={SCATTER_PLOT.bottom} />
         <line x1={SCATTER_PLOT.left} y1={SCATTER_PLOT.top} x2={SCATTER_PLOT.left} y2={SCATTER_PLOT.bottom} />
+        {showThresholds && thresholdX > 0 && minX <= -thresholdX && (
+          <line data-threshold="x" className={styles.thresholdLine} x1={px(-thresholdX)} y1={SCATTER_PLOT.top} x2={px(-thresholdX)} y2={SCATTER_PLOT.bottom} />
+        )}
+        {showThresholds && thresholdX > 0 && maxX >= thresholdX && (
+          <line data-threshold="x" className={styles.thresholdLine} x1={px(thresholdX)} y1={SCATTER_PLOT.top} x2={px(thresholdX)} y2={SCATTER_PLOT.bottom} />
+        )}
+        {showThresholds && thresholdY !== null && thresholdY >= minY && thresholdY <= maxY && (
+          <line data-threshold="y" className={styles.thresholdLine} x1={SCATTER_PLOT.left} y1={py(thresholdY)} x2={SCATTER_PLOT.right} y2={py(thresholdY)} />
+        )}
         {points.map((point) => {
           const id = readEntityId(manifest, point.row) || '';
           const active = !!id && selection?.entityIds.includes(id);
+          const searchHit = !!id && !!searchHits?.has(id);
           const selectPoint = () => onSelectionChange(buildPointSelection(manifest, [point.row]));
           return (
             <circle
               key={id || `${point.x}-${point.y}`}
               cx={px(point.x)}
               cy={py(point.y)}
-              r={active ? 5 : 3}
+              r={active || searchHit ? 5 : 3}
               data-active={active}
+              data-search-hit={searchHit ? 'true' : undefined}
               role="button"
               tabIndex={id ? 0 : -1}
               aria-label={id ? `选择 ${id}` : '该散点无稳定 ID'}
@@ -380,7 +476,12 @@ function ScientificScatter({ manifest, query, selection, onSelectionChange }: {
                 selectPoint();
               }}
             >
-              <title>{id}</title>
+              <title>{[
+                id,
+                mapping.xField ? `${mapping.xField}: ${point.row[mapping.xField]}` : '',
+                mapping.yField ? `${mapping.yField}: ${point.row[mapping.yField]}` : '',
+                mapping.legendField ? `${mapping.legendField}: ${point.row[mapping.legendField]}` : '',
+              ].filter(Boolean).join('\n')}</title>
             </circle>
           );
         })}
@@ -395,7 +496,7 @@ function ScientificScatter({ manifest, query, selection, onSelectionChange }: {
           {mapping.yTransform === 'neg_log10' ? `-log10(${mapping.yField})` : mapping.yField}
         </text>
       </svg>
-      <small className={styles.caveat}>显示 {points.length} 个有界 backing-data 点；点选、框选和图例均回写稳定 {manifest.entityType} ID。</small>
+      <small className={styles.caveat}>{searchHits ? `搜索命中 ${searchHits.size}；` : ''}显示 {points.length} 个有界 backing-data 点；点选、框选和图例均回写稳定 {manifest.entityType} ID；参考线为展示辅助。</small>
     </div>
   );
 }

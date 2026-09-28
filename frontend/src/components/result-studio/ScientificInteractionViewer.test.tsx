@@ -281,6 +281,99 @@ describe('ScientificInteractionViewer', () => {
     expect(screen.getByText('插件没有提供稳定实体映射。')).toBeTruthy();
   });
 
+  it('shows gene id and numeric values in the scatter point tooltip', () => {
+    const onSelectionChange = vi.fn<(selection: ArtifactSelection | null) => void>();
+    const query = {
+      ...tableQuery(0),
+      rows: [{ gene: 'TP53', log2FoldChange: '2.5', pvalue: '0.001' }],
+      columns: [
+        { field: 'gene', type: 'string', sortable: true, filterable: true },
+        { field: 'log2FoldChange', type: 'number', sortable: true, filterable: true },
+        { field: 'pvalue', type: 'number', sortable: true, filterable: true },
+      ],
+    } satisfies ResultTableQuery;
+    const { container } = render(<ScientificInteractionViewer language="r" jobId="job_1" artifactName="volcano.png" manifest={manifest('scatter')} backingTable={query} selection={null} onSelectionChange={onSelectionChange} />);
+    const title = container.querySelector('circle title');
+    expect(title?.textContent).toContain('TP53');
+    expect(title?.textContent).toContain('log2FoldChange: 2.5');
+    expect(title?.textContent).toContain('pvalue: 0.001');
+  });
+
+  it('highlights searched genes in the scatter and selects hits on Enter', () => {
+    const onSelectionChange = vi.fn<(selection: ArtifactSelection | null) => void>();
+    const query = {
+      ...tableQuery(0),
+      rows: [
+        { gene: 'TP53', log2FoldChange: '2', pvalue: '0.001' },
+        { gene: 'TPI1', log2FoldChange: '1.5', pvalue: '0.01' },
+        { gene: 'EGFR', log2FoldChange: '-1', pvalue: '0.05' },
+      ],
+      columns: [
+        { field: 'gene', type: 'string', sortable: true, filterable: true },
+        { field: 'log2FoldChange', type: 'number', sortable: true, filterable: true },
+        { field: 'pvalue', type: 'number', sortable: true, filterable: true },
+      ],
+    } satisfies ResultTableQuery;
+    const { container } = render(<ScientificInteractionViewer language="r" jobId="job_1" artifactName="volcano.png" manifest={manifest('scatter')} backingTable={query} selection={null} onSelectionChange={onSelectionChange} />);
+    const search = screen.getByRole('textbox', { name: '搜索实体' });
+    fireEvent.change(search, { target: { value: 'TP' } });
+    expect(container.querySelectorAll('circle[data-search-hit="true"]')).toHaveLength(2);
+    expect(screen.getByText(/搜索命中 2/)).toBeTruthy();
+    fireEvent.keyDown(search, { key: 'Enter' });
+    expect(onSelectionChange.mock.calls[0][0]!.origin).toBe('point_select');
+    expect(onSelectionChange.mock.calls[0][0]!.entityIds.sort()).toEqual(['TP53', 'TPI1']);
+  });
+
+  it('draws toggleable significance reference lines on the scatter', () => {
+    const query = {
+      ...tableQuery(0),
+      rows: [
+        { gene: 'TP53', log2FoldChange: '2', pvalue: '0.001' },
+        { gene: 'EGFR', log2FoldChange: '-1', pvalue: '0.05' },
+      ],
+      columns: [
+        { field: 'gene', type: 'string', sortable: true, filterable: true },
+        { field: 'log2FoldChange', type: 'number', sortable: true, filterable: true },
+        { field: 'pvalue', type: 'number', sortable: true, filterable: true },
+      ],
+    } satisfies ResultTableQuery;
+    const first = render(<ScientificInteractionViewer language="r" jobId="job_1" artifactName="volcano.png" manifest={manifest('scatter')} backingTable={query} selection={null} onSelectionChange={() => {}} />);
+    expect(first.container.querySelectorAll('line[data-threshold="x"]')).toHaveLength(2);
+    expect(first.container.querySelector('line[data-threshold="y"]')).toBeTruthy();
+    fireEvent.click(screen.getByRole('checkbox', { name: '显示参考线' }));
+    expect(first.container.querySelector('line[data-threshold="x"]')).toBeNull();
+    expect(first.container.querySelector('line[data-threshold="y"]')).toBeNull();
+  });
+
+  it('builds a multi-clause numeric filter with the clause builder', async () => {
+    queryResultStudioTable.mockResolvedValue(tableQuery());
+    render(<ScientificInteractionViewer language="r" jobId="job_1" artifactName="deg_table.csv" manifest={manifest('table')} selection={null} onSelectionChange={() => {}} />);
+    await waitFor(() => expect(screen.getByText('100,000 / 100,000 行')).toBeTruthy());
+    fireEvent.change(screen.getByRole('combobox', { name: '筛选字段 1' }), { target: { value: 'padj' } });
+    fireEvent.change(screen.getByRole('combobox', { name: '筛选操作 1' }), { target: { value: 'lt' } });
+    fireEvent.change(screen.getByRole('textbox', { name: '筛选条件 1' }), { target: { value: '0.05' } });
+    fireEvent.click(screen.getByRole('button', { name: '添加筛选条件' }));
+    fireEvent.change(screen.getByRole('combobox', { name: '筛选字段 2' }), { target: { value: 'gene' } });
+    fireEvent.change(screen.getByRole('textbox', { name: '筛选条件 2' }), { target: { value: 'TP' } });
+    await waitFor(() => {
+      const call = queryResultStudioTable.mock.calls.at(-1)![0] as { filterExpression: { clauses: Array<{ field: string; op: string; value: unknown }> } };
+      expect(call.filterExpression.clauses).toEqual([
+        { field: 'padj', op: 'lt', value: 0.05 },
+        { field: 'gene', op: 'contains', value: 'TP' },
+      ]);
+    });
+  });
+
+  it('renders numeric cells in scientific notation while keeping raw values in titles', async () => {
+    queryResultStudioTable.mockResolvedValue({
+      ...tableQuery(1),
+      rows: [{ gene: 'TP53', padj: '1.23456789e-08' }],
+    });
+    render(<ScientificInteractionViewer language="r" jobId="job_1" artifactName="deg_table.csv" manifest={manifest('table')} selection={null} onSelectionChange={() => {}} />);
+    const cell = await screen.findByTitle('1.23456789e-08');
+    expect(cell.textContent).toBe('1.23e-8');
+  });
+
   it('keeps 100k-table scroll, selection, sort and filter feedback inside the 100ms renderer budget', async () => {
     queryResultStudioTable.mockResolvedValue(tableQuery());
     function ControlledViewer(): React.ReactElement {
@@ -317,8 +410,8 @@ describe('ScientificInteractionViewer', () => {
     expect(screen.getByRole('button', { name: 'gene ↑' })).toBeTruthy();
     samples.sortFeedbackMs = performance.now() - started;
 
-    fireEvent.change(screen.getByRole('combobox', { name: '筛选字段' }), { target: { value: 'gene' } });
-    const filter = screen.getByRole<HTMLInputElement>('textbox', { name: '筛选内容' });
+    fireEvent.change(screen.getByRole('combobox', { name: '筛选字段 1' }), { target: { value: 'gene' } });
+    const filter = screen.getByRole<HTMLInputElement>('textbox', { name: '筛选条件 1' });
     started = performance.now();
     fireEvent.change(filter, { target: { value: 'G1' } });
     expect(filter.value).toBe('G1');

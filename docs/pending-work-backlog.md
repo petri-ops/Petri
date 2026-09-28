@@ -5,7 +5,9 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-09-28（**两 Goal 线成对立项（规划动作，非工作包启动）——G0-PLATFORM 通用 agent 平台工程强化 + G0-BIO 生信垂直交付能力**（用户裁决原话「行！现在就是分成 通用agent平台和垂直领域的生信平台两个视角了 接下来就是具体的执行更新迭代 是否要做两个大的计划 尽可能的考虑全面 用于后面两个大部分的工作推进」；源自同日「结果与分析链路企业级交付差距评估」六路只读探查，通用视角+垂直视角两轮）：G0-PLATFORM 种子 PL-1~PL-7（执行语义统一/感知实时性/调度可靠性/数据生命周期/性能卫生/安全卫生/任务中心叙事），G0-BIO 种子 BIO-1~BIO-7（信息密度/交互上限/lineage 可视化+继续分析/bulk 链解冻/输入显式化/解读层/领域深化池）；**硬依赖=PL-1→BIO-4**；**C-15 本日编入 G0-BIO（BIO-3/BIO-4）、C-12 转 BIO-7 池**（重开条件「方向回摆」由本次裁决触发）。**推进队列当前无可执行排队项——两 Goal 阶段种子的启动序待用户逐个裁决**（每阶段照常过立项检查单；裁决后入本表队列区）。plan=docs/g0-platform-goal-plan.md + docs/g0-bio-delivery-goal-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-28（**G0 Goal 系列推进启动：队列头=BIO-1/UI-452 结果信息密度包 active（用户裁决「可以的 按照你的建议来逐个推进」）**——六件=散点数值 tooltip/基因搜索定位/阈值参考线/表格组合筛选/数值科学计数格式化/Lightbox 缩放平移；G0 Goal 系列区建成（预授权推进序+项内裁决点单独问纪律）。plan=docs/g0-bio-delivery-goal-plan.md §3 BIO-1。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-28（**两 Goal 线成对立项（规划动作，非工作包启动）——G0-PLATFORM 通用 agent 平台工程强化 + G0-BIO 生信垂直交付能力**（用户裁决原话「行！现在就是分成 通用agent平台和垂直领域的生信平台两个视角了 接下来就是具体的执行更新迭代 是否要做两个大的计划 尽可能的考虑全面 用于后面两个大部分的工作推进」；源自同日「结果与分析链路企业级交付差距评估」六路只读探查，通用视角+垂直视角两轮）：G0-PLATFORM 种子 PL-1~PL-7（执行语义统一/感知实时性/调度可靠性/数据生命周期/性能卫生/安全卫生/任务中心叙事），G0-BIO 种子 BIO-1~BIO-7（信息密度/交互上限/lineage 可视化+继续分析/bulk 链解冻/输入显式化/解读层/领域深化池）；**硬依赖=PL-1→BIO-4**；**C-15 本日编入 G0-BIO（BIO-3/BIO-4）、C-12 转 BIO-7 池**（重开条件「方向回摆」由本次裁决触发）。**推进队列当前无可执行排队项——两 Goal 阶段种子的启动序待用户逐个裁决**（每阶段照常过立项检查单；裁决后入本表队列区）。plan=docs/g0-platform-goal-plan.md + docs/g0-bio-delivery-goal-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-26（**BLOCK-124-HARNESS-PRODUCTIZATION 当日整包 completed——Gewu Harness 产品化第一批**：C-13 符号图产品化落地并实机走查 allPass（agent 自主调 codegraph_who_imports×2 完成死导出清理）；资产四问盘点+组合勘察缺口已落 plan；范围外转候选 C-18/C-19 在册。**rider=UI-447 待用户实机过目**。plan=docs/block-124-harness-productization-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
@@ -63,9 +65,17 @@
 
 > **HK 系列（2026-09-26 用户裁决）**：「需要改进…是否需要更详细和全面精准的改进队列项呢」=外部 harness 方法论（OpenSpec/Superpowers/CodeGraph/Ponytail/Caveman/RTK）吸收评估落成的推进序；性质=**开发 harness 层工程实践**（skills/治理/脚本），非产品工作包；排序原则=小刀规范类 → 工具类中刀 → 勘察裁决类；每项启动照常走立项检查单，项内裁决点单独问。**HK-01~04 已全部收口（2026-09-26）；增量规范持续生效=新 plan 立项即带 capability front-matter（docs/hk04-spec-layer-design.md §4）**。
 
+> **G0 Goal 系列（2026-09-28 用户裁决）**：「可以的 按照你的建议来逐个推进」=按两 Goal plan §4 交织建议 v1 的预授权推进序（BIO-1 → PL-2 → BIO-2 → BIO-3 → PL-1 → BIO-4 → PL-3 → BIO-5 → BIO-6 → PL-4/5/6 穿插 → BIO-7 池）；每项启动仍走立项检查单，**项内产品语义裁决点单独问**（BIO-D1 解冻范围/PL-D1~D4/PL-D2 retention 数值等登记在两 plan §5）。
+
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
-| — | （当前无可推进项——BLOCK-123 整包 completed，HK 系列全清；等待用户新输入或第三轮走查形态择优） | — | — | — |
+| 1 | BIO-1 / UI-452 | **结果信息密度包**：散点数值 tooltip（基因名+log2FC+padj）/基因搜索定位高亮/阈值参考线（可开关可调，默认 ±1·padj0.05）/表格组合筛选子句构建器（协议既有 eq/lt/gt 补控件）/数值列科学计数格式化/Lightbox 滚轮缩放+拖拽平移 | G0-BIO plan §3 BIO-1 + 2026-09-28 垂直评估差距表；启动登记 2026-09-28 | **active（开发中）** |
+| 2 | PL-2 | 感知实时性：tools-executor 终态发 jobs 失效事件消 60s 盲窗 + 运行期日志行流 | G0-PLATFORM plan §3 PL-2；CK-03 通道已在 | planned |
+| 3 | BIO-2 | 交互上限与降级链：250 点 top-N 语义/静态 24 行分页/热图窗口/mojibake | G0-BIO plan §3 | planned |
+| 4 | BIO-3 | lineage 可视化 + 继续分析显式化（吸收 C-15 前半） | G0-BIO plan §3 | planned |
+| 5 | PL-1 | 执行语义统一（agent/MCP 300s 同步路径并入 tool_jobs 装置；**BIO-4 硬前提**） | G0-PLATFORM plan §3 | planned |
+| 6 | BIO-4 | bulk 主链解冻（吸收 C-15 后半；解冻范围 BIO-D1 待裁决） | G0-BIO plan §3 | planned |
+| 7+ | PL-3 / BIO-5 / BIO-6 / PL-4~6 穿插 / BIO-7 池 | 后续按交织序推进；PL-7 候选池性质 | 两 Goal plan §3/§4 | planned |
 | — | ⛔ CK-08 | **C-03：task_id 数据模型改造——重估收缩转观察**：动机仍实（45 万行 UUID 冗余 16.25MB/库 14%）但 30 天清扫有界+无用户感知收益+契约迁移风险大（7+29 文件）；**重开条件=清扫上限内实测 I/O 痛点或库体积成用户可感知问题** | 本批重估数据（AUDIT-LOG 晚五行） | 观察待证据 |
 | — | 👁 BK-02 | **汇报门 P2 试点观察期盘点**（持续观察，不占队列序）——采纳率/误拦率/延迟增量/fitReplay 触发率随真实轮次累计；观察窗开启中（dev 栈 BIOF3_JEV_REPORT_GUARD=1） | BLOCK-119 收口遗留候选 | 观察（持续） |
 

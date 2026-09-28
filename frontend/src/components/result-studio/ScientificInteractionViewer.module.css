@@ -38,6 +38,15 @@
 .scatter .axisLabel { font-size: var(--gewu-font-size-sm); }
 .legend { display: flex; flex-wrap: wrap; gap: 5px; padding: 7px 9px 0; }
 .legend button { padding: 0 8px; font-size: var(--gewu-font-size-xs); }
+.filterClauseRow { display: flex; min-width: 260px; flex: 1 1 100%; flex-wrap: wrap; align-items: center; gap: 6px; }
+.filterClauseRow input { min-width: 90px; flex: 0 1 150px; }
+.scatterTools { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 7px 9px 0; color: var(--gewu-text-secondary); font-size: var(--gewu-font-size-xs); }
+.scatterTools input[type='text'] { min-width: 120px; min-height: 27px; padding: 0 7px; border: 1px solid var(--gewu-border); border-radius: 6px; background: transparent; color: inherit; font: inherit; }
+.scatterTools input[type='number'] { width: 64px; min-height: 27px; padding: 0 4px; border: 1px solid var(--gewu-border); border-radius: 6px; background: transparent; color: inherit; font: inherit; }
+.scatterTools label { display: inline-flex; align-items: center; gap: 4px; }
+.scatterTools em { color: var(--gewu-text-tertiary); font-style: normal; }
+.scatter .thresholdLine { stroke: var(--gewu-text-tertiary); stroke-dasharray: 5 4; stroke-width: 1; }
+.scatter circle[data-search-hit='true'] { stroke: var(--gewu-accent); stroke-width: 2; }
 .caveat { padding: 4px 9px 8px; color: var(--gewu-text-tertiary); font-size: var(--gewu-font-size-xs); }
 .matrix { display: grid; max-width: 100%; flex: 1; align-content: start; gap: 1px; padding: 8px; overflow: auto; }
 .matrix button { min-width: 0; height: 28px; overflow: hidden; border: 0; background: transparent; color: var(--gewu-text-secondary); cursor: pointer; font: inherit; font-size: var(--gewu-font-size-xs); text-overflow: ellipsis; white-space: nowrap; }
@@ -51,6 +60,7 @@
 .tableHeader button:focus-visible,
 .virtualRow input:focus-visible,
 .legend button:focus-visible,
+.scatterTools input:focus-visible,
 .matrix button:focus-visible {
   outline: 2px solid var(--gewu-accent);
   outline-offset: 2px;
