@@ -4412,3 +4412,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **修法**：全部为规则合规化与死面收缩，零 UI 行为变化；useWorkspaceLayout.test 原型 patch 改 Object.defineProperty 形态（unbound-method 规则合规，getBoundingClientRect receiver 语义不变）。**抑制基线零触碰、零新增豁免**（未走 --suppress-all，无需重扫）。
 - **证据**：quality:lint exit 0 + quality:knip:check PASS（保留面 243 键无新增）+ SideChatDock 14/CenterPanel 13/useWorkspaceLayout 三文件 36 用例全绿 + tsc 0 + closeout 十一门链自 v18 引债后首次全绿（详见 AUDIT-LOG 销号行）。
 - **边界**：v15–v28 交付面维持原状待用户过目节奏不变，本条只承载债清偿。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-451 加映 v3: 候选池第一波——软上限 LRU 淘汰 + 整窗关闭守卫 + a11y/重开/双击 (2026-09-28 in_progress，dev Electron 实机 24/24 allPass)
+
+- **来源**：用户裁决「继续推进候选池中的内容」。探路实锤：全仓 7+ 个项目切换入口（AppRail/AppRailContext×4/home×2/useHomeCreateFlows）全部为程序化 `navigate()`、零 `<Link>` 锚点——P2-6 链路捕获守卫覆盖不了任何真实入口，**维持缓期**（正解=createBrowserRouter 迁移启 useBlocker，属独立工作包需用户裁决）；本轮实施其余五项。
+- **修法五件**：①**P2-7 软上限 12 + LRU 非脏淘汰**——MAX_FILE_TABS=12（终端 MAX=4 先例的文件域放宽），超出时按 LRU 使用序淘汰最旧**非脏**后台 tab（不淘汰刚打开的；全脏诚实超额放行），淘汰者进关闭历史可重开；LRU 序在 hook 内随打开/激活移尾、关闭/重命名同步维护；脏位图从 v2 的计数版升级为 map 版上抛（RightFileTree→ProjectWorkspace ref→hook options getter），右栏 files tab 守卫/淘汰环/整窗守卫三处共用同一真相。②**P2-8 整窗关闭守卫**——beforeunload 拦截（Electron preventDefault 可取消关闭含 app.quit 链；浏览器态触发原生确认条），涉脏弹确认（取消/bypass 旗标+window.close 防死循环）。③**Minor a11y**——tab 条挂 role=tablist+aria-label，tab↔面板 aria-controls 经 fileTabPanelId 配对（tabId 优先回退 path 净化），roving tabindex（活动 0/其余 -1）+方向键左右激活并移焦（WAI-ARIA tabs 模式）。④**Minor 双击关闭**——双击 tab 走 onRequestClose（复用脏确认链）。⑤**Minor Ctrl/Cmd+Shift+T 重开**——hook 维护关闭历史（容量 8，关闭+淘汰双源），重开最近关闭且未重新打开的 tab 并激活；右键菜单「重新打开已关闭的标签页」仅历史可用时显示。
+- **证据**：实机 `scripts/ui451-file-tabs-live.cjs` **24/24 allPass**（acceptance/ui-451/ json+截图×5，含新 app-close-guard 截图；新增清场步骤防上轮残留串扰）——T15 十三连开后 tab=12、最旧非脏 lru-1 被淘汰、脏 lru-2 存活带圆点、最新在场；T16a tablist/aria-controls 全配/activeTabindex=0/ArrowRight 激活+移焦同 tab；T16b 双击关 tab（12→11）；T17 菜单 reopen 项在场+Ctrl+Shift+T 重开 lru-3 并成为活动；T18 合成 beforeunload→关窗确认弹层→取消消失（真实关窗路径=旗标+window.close 代码评审覆盖，live 不真关 dev 窗）。新增单测 9（ops 4：LRU 淘汰三态+面板 id；TabStrip 4：tablist/roving/双击/reopen 门控；shortcuts 1：Ctrl+Shift+T）+ 定向 11 文件 80 用例全绿 + tsc 0 + theme 4/4 + eslint 触碰面 0 error + code-size project-workspace.tsx 1147→1196 显式重打。
+- **边界**：P2-6 维持缓期（理由如上，登记于本条）；浏览器后退/前进与程序化跳转不在 P2-8 守卫面（beforeunload 只拦整窗关闭）；重开历史容量 8、会话内有效不持久化。**待用户实机过目后翻 verified。**
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

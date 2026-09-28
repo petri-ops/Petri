@@ -125,6 +125,7 @@ describe('RightFileTree 文件操作', () => {
         onCloseFiles={vi.fn()}
         onReorderFiles={vi.fn()}
         onRenameFile={vi.fn()}
+        onReopenFile={vi.fn()}
       />,
     );
 
@@ -160,6 +161,7 @@ describe('RightFileTree 文件操作', () => {
         onCloseFiles={vi.fn()}
         onReorderFiles={vi.fn()}
         onRenameFile={onRenameFile}
+        onReopenFile={vi.fn()}
       />,
     );
 
@@ -206,6 +208,7 @@ describe('RightFileTree 文件操作', () => {
         onCloseFiles={onCloseFiles}
         onReorderFiles={vi.fn()}
         onRenameFile={vi.fn()}
+        onReopenFile={vi.fn()}
       />,
     );
 
@@ -238,6 +241,7 @@ describe('RightFileTree 文件操作', () => {
         onCloseFiles={vi.fn()}
         onReorderFiles={vi.fn()}
         onRenameFile={vi.fn()}
+        onReopenFile={vi.fn()}
       />,
     );
 
@@ -272,6 +276,7 @@ describe('RightFileTree 文件操作', () => {
         onCloseFiles={vi.fn()}
         onReorderFiles={vi.fn()}
         onRenameFile={vi.fn()}
+        onReopenFile={vi.fn()}
       />,
     );
 

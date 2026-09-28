@@ -9,12 +9,14 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Icon, type IconName } from '@/components/icons/Icon';
 import styles from '../project-workspace.module.css';
 import type { ActiveWorkspaceFile } from './types';
+import { fileTabPanelId } from './workspaceFileTabOps';
 
 /** 独立 MIME：与文件树拖拽（TREE_DRAG_MIME）隔离，tab 条不接受树行拖入。 */
 export const FILE_TAB_DRAG_MIME = 'application/x-gewu-file-tab';
 
 // UI-451 加映 v2 — reveal = 在文件树中定位该 tab（展开祖先目录 + 行滚入视野）
-export type FileTabMenuAction = 'close' | 'closeOthers' | 'closeRight' | 'closeAll' | 'reveal';
+// UI-451 加映 v3 — reopen = 重开最近关闭的 tab（历史存在时才出现在菜单）
+export type FileTabMenuAction = 'close' | 'closeOthers' | 'closeRight' | 'closeAll' | 'reveal' | 'reopen';
 
 type DragHint = { path: string; half: 'left' | 'right' } | null;
 
@@ -26,6 +28,7 @@ export function WorkspaceFileTabStrip({
   onRequestClose,
   onMenuAction,
   onReorder,
+  canReopen,
 }: {
   files: ActiveWorkspaceFile[];
   activePath: string | null;
@@ -34,6 +37,8 @@ export function WorkspaceFileTabStrip({
   onRequestClose: (path: string) => void;
   onMenuAction: (action: FileTabMenuAction, path: string) => void;
   onReorder: (fromPath: string, toIndex: number) => void;
+  /** UI-451 加映 v3（Minor）— 存在可重开的关闭历史时才显示「重新打开已关闭的标签页」 */
+  canReopen?: boolean;
 }): React.ReactElement {
   const [dragHint, setDragHint] = useState<DragHint>(null);
   const [menu, setMenu] = useState<{ x: number; y: number; path: string } | null>(null);
@@ -119,6 +124,7 @@ export function WorkspaceFileTabStrip({
     if (files.length > 1) items.push({ key: 'closeOthers', label: '关闭其他', icon: 'minus' });
     if (index !== -1 && index < files.length - 1) items.push({ key: 'closeRight', label: '关闭右侧标签页', icon: 'arrow-right' });
     items.push({ key: 'closeAll', label: '关闭全部', icon: 'square-stack' });
+    if (canReopen) items.push({ key: 'reopen', label: '重新打开已关闭的标签页', icon: 'restore' });
     items.push({ key: 'reveal', label: '在树中显示', icon: 'sidebar' });
     return items;
   };
@@ -127,6 +133,8 @@ export function WorkspaceFileTabStrip({
     <>
       <div
         ref={stripRef}
+        role="tablist"
+        aria-label="打开的文件"
         className={`${styles.workspaceFileTabStrip}${dragHint?.path === '' ? ` ${styles.workspaceFileTabStripDropTail}` : ''}`}
         data-testid="file-tab-strip"
         onDragOver={handleStripDragOver}
@@ -145,7 +153,8 @@ export function WorkspaceFileTabStrip({
               data-file-tab-path={file.path}
               role="tab"
               aria-selected={isActive}
-              tabIndex={0}
+              aria-controls={fileTabPanelId(file)}
+              tabIndex={isActive ? 0 : -1}
               className={`${styles.workspaceFileTab}${isActive ? ` ${styles.workspaceFileTabActive}` : ''}${dropClass ? ` ${dropClass}` : ''}`}
               title={isDirty ? `${file.path}（有未保存修改）` : file.path}
               draggable
@@ -154,10 +163,27 @@ export function WorkspaceFileTabStrip({
               onDrop={handleTabDrop}
               onDragEnd={() => setDragHint(null)}
               onClick={() => onActivate(file)}
+              onDoubleClick={(event) => {
+                event.stopPropagation();
+                onRequestClose(file.path);
+              }}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault();
                   onActivate(file);
+                  return;
+                }
+                // UI-451 加映 v3（Minor a11y）— roving 方向键：激活并移焦到相邻 tab（WAI-ARIA tabs 模式）
+                if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+                  event.preventDefault();
+                  const index = files.findIndex((item) => item.path === file.path);
+                  const step = event.key === 'ArrowRight' ? 1 : -1;
+                  const target = files[(index + step + files.length) % files.length];
+                  if (!target) return;
+                  onActivate(target);
+                  const escaped = typeof CSS !== 'undefined' && CSS.escape ? CSS.escape(target.path) : target.path;
+                  const nextEl = stripRef.current?.querySelector(`[data-file-tab-path="${escaped}"]`);
+                  if (nextEl instanceof HTMLElement) nextEl.focus();
                 }
               }}
               onAuxClick={(event) => {

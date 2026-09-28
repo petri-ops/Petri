@@ -103,7 +103,12 @@ export function ProjectWorkspace(): React.ReactElement {
     handleCloseWorkspaceFiles,
     handleReorderWorkspaceFiles,
     handleRenameWorkspaceFile,
-  } = useWorkspaceFileTabs(projectId);
+    handleReopenClosedFile,
+    hasReopenableClosedFile,
+  } = useWorkspaceFileTabs(projectId, {
+    // UI-451 加映 v3（P2-7）— 软上限淘汰环的脏位图（RightFileTree 上抛的同一真相）
+    getDirtyPaths: () => workspaceFileDirtyMapRef.current,
+  });
   // G0-RS-P4/G0-RS-P3 的 Result Studio 编辑上下文状态簇
   // （resultContextState/resultEditControls/resultEditSubmitting/resultAgentDrafts）
   // 外迁至 ./project-workspace/useResultStudioEditContext.ts，调用点在
@@ -234,24 +239,28 @@ export function ProjectWorkspace(): React.ReactElement {
     // openRightPanel is NOT returned — it lives in project-workspace
     // with compactLayout awareness (setLeftOpen).
   } = useRightPanelTabs();
-  // UI-451 加映 v2 (P1-2) — 关右栏「文件」tab 的脏守卫：tab 条自身关闭有确认链，
-  // 标题栏 × 这条旁路原先直接卸载 RightFileTree 静默丢草稿——此处统一拦确认。
-  const workspaceFileDirtyCountRef = React.useRef(0);
+  // UI-451 加映 v2 (P1-2) / v3 (P2-7/P2-8) — 脏位图单一真相：右栏 files tab 关闭守卫、
+  // 软上限淘汰环（经 hook options）、整窗关闭守卫三处共用（RightFileTree 上抛）。
+  const workspaceFileDirtyMapRef = React.useRef<Record<string, boolean>>({});
+  const workspaceFileDirtyCount = React.useCallback(
+    () => Object.values(workspaceFileDirtyMapRef.current).filter(Boolean).length,
+    [],
+  );
   // 弹层存「打开时的脏计数快照」（number|null）：渲染期不读 ref（react-hooks/refs）
   const [pendingFilesPanelClose, setPendingFilesPanelClose] = React.useState<number | null>(null);
-  const handleWorkspaceFileDirtyCountChange = React.useCallback((count: number) => {
-    workspaceFileDirtyCountRef.current = count;
+  const handleWorkspaceFileDirtyMapChange = React.useCallback((dirtyMap: Record<string, boolean>) => {
+    workspaceFileDirtyMapRef.current = dirtyMap;
   }, []);
   const closeRightPanelTab = React.useCallback((tab: RightPanelMode) => {
     if (tab === 'files') {
-      const dirtyCount = workspaceFileDirtyCountRef.current;
+      const dirtyCount = workspaceFileDirtyCount();
       if (dirtyCount > 0) {
         setPendingFilesPanelClose(dirtyCount);
         return;
       }
     }
     closeRightPanelTabRaw(tab);
-  }, [closeRightPanelTabRaw]);
+  }, [closeRightPanelTabRaw, workspaceFileDirtyCount]);
   useEffect(() => {
     if (pendingFilesPanelClose === null) return;
     const onKey = (event: KeyboardEvent) => {
@@ -260,6 +269,29 @@ export function ProjectWorkspace(): React.ReactElement {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [pendingFilesPanelClose]);
+  // UI-451 加映 v3 (P2-8) — 整窗关闭脏守卫：Electron 里 beforeunload preventDefault 可取消
+  // 关闭（含 app.quit 链）；确认后置 bypass 旗标再关避免死循环。浏览器态触发原生确认条。
+  const [pendingAppClose, setPendingAppClose] = React.useState(false);
+  const appCloseBypassRef = React.useRef(false);
+  useEffect(() => {
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (appCloseBypassRef.current) return;
+      if (workspaceFileDirtyCount() === 0) return;
+      event.preventDefault();
+      event.returnValue = '';
+      setPendingAppClose(true);
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [workspaceFileDirtyCount]);
+  useEffect(() => {
+    if (!pendingAppClose) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setPendingAppClose(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [pendingAppClose]);
 
   // Every right-side tool shares one width. Switching to Results must not
   // jump to a separately constrained layout or change the drag feel.
@@ -1008,7 +1040,9 @@ export function ProjectWorkspace(): React.ReactElement {
     handleCloseWorkspaceFiles,
     handleReorderWorkspaceFiles,
     handleRenameWorkspaceFile,
-    handleWorkspaceFileDirtyCountChange,
+    handleReopenWorkspaceFile: handleReopenClosedFile,
+    hasReopenableWorkspaceFile: hasReopenableClosedFile,
+    handleWorkspaceFileDirtyMapChange,
     handleOpenResult,
     handleOpenRightResults,
     handleOpenRightBrowser,
@@ -1077,6 +1111,48 @@ export function ProjectWorkspace(): React.ReactElement {
           workspaceMode={workspaceMode}
           onResize={startColumnResize('right')}
         />
+        {/* UI-451 加映 v3 (P2-8) — 整窗关闭脏守卫确认弹层（beforeunload 拦下后出现） */}
+        {pendingAppClose && (
+          <div
+            className={styles.fileTreeDialogBackdrop}
+            data-testid="file-app-close-dialog"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) setPendingAppClose(false);
+            }}
+          >
+            <div className={styles.fileTreeDialog}>
+              <p className={styles.fileTreeDialogTitle}>关闭窗口？</p>
+              <div className={styles.fileTreeDeleteList}>
+                <p className={styles.fileTreeDialogHint}>
+                  {workspaceFileDirtyCount() > 1
+                    ? `${workspaceFileDirtyCount()} 个文件标签页有未保存的修改，关闭窗口将丢弃这些修改（自动保存已落盘的内容不受影响）。`
+                    : '当前文件标签页有未保存的修改，关闭窗口将丢弃修改（自动保存已落盘的内容不受影响）。'}
+                </p>
+              </div>
+              <div className={styles.fileTreeDialogActions}>
+                <button
+                  type="button"
+                  className={styles.fileTreeDialogButton}
+                  onClick={() => setPendingAppClose(false)}
+                >
+                  取消
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.fileTreeDialogButton} ${styles.fileTreeDialogButtonDanger}`}
+                  data-testid="file-app-close-confirm"
+                  onClick={() => {
+                    setPendingAppClose(false);
+                    appCloseBypassRef.current = true;
+                    window.close();
+                  }}
+                >
+                  放弃修改并关闭
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {/* UI-451 加映 v2 (P1-2) — 关右栏「文件」tab 的脏确认弹层（复用 fileTreeDialog 样式族） */}
         {pendingFilesPanelClose !== null && (
           <div

@@ -49,6 +49,7 @@ function renderTree(overrides?: { active?: boolean }) {
   const props = {
     onCloseFiles: vi.fn(),
     onActivateFile: vi.fn(),
+    onReopenFile: vi.fn(),
   };
   const view = render(
     <RightFileTree
@@ -61,6 +62,7 @@ function renderTree(overrides?: { active?: boolean }) {
       onCloseFiles={props.onCloseFiles}
       onReorderFiles={vi.fn()}
       onRenameFile={vi.fn()}
+      onReopenFile={props.onReopenFile}
     />,
   );
   return { view, props };
@@ -105,6 +107,13 @@ describe('UI-451 v2 文件 tab 快捷键', () => {
     pressKey('Tab', { ctrl: true });
     expect(props.onCloseFiles).not.toHaveBeenCalled();
     expect(props.onActivateFile).not.toHaveBeenCalled();
+  });
+
+  it('Ctrl+Shift+T：重开最近关闭的 tab（UI-451 v3 Minor）', async () => {
+    const { props } = renderTree();
+    await waitFor(() => expect(document.querySelector('[data-testid="file-tab-strip"]')).toBeTruthy());
+    pressKey('t', { ctrl: true, shift: true });
+    expect(props.onReopenFile).toHaveBeenCalledTimes(1);
   });
 
   it('焦点在 xterm 内让位：不关 tab 不切换', async () => {

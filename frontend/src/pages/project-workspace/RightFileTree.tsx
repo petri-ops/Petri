@@ -15,6 +15,7 @@ import { FileTreeList } from './FileTreeList';
 import { WorkspaceFilePreview } from './WorkspaceFilePreview';
 import { FileTreeContextMenu, FileTreeDialogHost, type FileTreeDialog, type FileTreeMenuAction, type FileTreeMenuTarget, type FileTreeOpResult } from './FileTreeOpsOverlay';
 import { WorkspaceFileTabStrip, type FileTabMenuAction as FileTabMenuActionKind } from './WorkspaceFileTabStrip';
+import { fileTabPanelId } from './workspaceFileTabOps';
 import { fsImportFrom, fsMkdir, fsMove, fsCopy, fsUpload, joinPath, uniqueTargetName, type DraggedTreeItem } from './fileOps';
 import { TREE_DRAG_MIME } from './FileTreeItem';
 
@@ -34,7 +35,9 @@ export function RightFileTree({
   onCloseFiles,
   onReorderFiles,
   onRenameFile,
-  onDirtyCountChange,
+  onReopenFile,
+  onDirtyMapChange,
+  canReopen,
 }: {
   project: Project;
   active: boolean;
@@ -46,8 +49,12 @@ export function RightFileTree({
   onReorderFiles: (fromPath: string, toIndex: number) => void;
   /** UI-451 加映 v2 (P1-1) — rename/move 成功后重定向 tab（宿主=hook 的 handleRenameWorkspaceFile） */
   onRenameFile: (oldPath: string, nextFile: ActiveWorkspaceFile) => void;
-  /** UI-451 加映 v2 (P1-2) — 脏 tab 计数上抛：宿主在关右栏「文件」tab 前据此拦确认 */
-  onDirtyCountChange?: (count: number) => void;
+  /** UI-451 加映 v3（Minor）— 重开最近关闭的 tab（Ctrl+Shift+T / 菜单项共用） */
+  onReopenFile: () => void;
+  /** UI-451 加映 v3（P2-7）— 脏位图上抛（v2 的计数版升级）：宿主守卫/淘汰环共用同一真相 */
+  onDirtyMapChange?: (dirtyMap: Record<string, boolean>) => void;
+  /** UI-451 加映 v3（Minor）— 存在可重开的关闭历史（hook 派生，右键菜单项可见性） */
+  canReopen?: boolean;
 }): React.ReactElement {
   const [tree, setTree] = useState<FileEntry[]>([]);
   const [expandedDirs, setExpandedDirs] = useState<Set<string>>(new Set());
@@ -85,11 +92,11 @@ export function RightFileTree({
   const dirtyPathsRef = useRef(dirtyPaths);
   useEffect(() => { dirtyPathsRef.current = dirtyPaths; }, [dirtyPaths]);
 
-  // UI-451 加映 v2 (P1-2) — 脏 tab 计数上抛宿主（卸载时清零，防陈旧计数卡守卫）
+  // UI-451 加映 v3 — 脏位图上抛宿主（v2 计数版升级：守卫/软上限淘汰环共用；卸载清空防陈旧）
   useEffect(() => {
-    onDirtyCountChange?.(Object.values(dirtyPaths).filter(Boolean).length);
-    return () => onDirtyCountChange?.(0);
-  }, [dirtyPaths, onDirtyCountChange]);
+    onDirtyMapChange?.(dirtyPaths);
+    return () => onDirtyMapChange?.({});
+  }, [dirtyPaths, onDirtyMapChange]);
 
   // BLOCK-89 / UI-378 — 文件操作（右键菜单 + 拖拽）状态
   const [menuTarget, setMenuTarget] = useState<FileTreeMenuTarget | null>(null);
@@ -617,10 +624,12 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
       requestCloseFiles(openFiles.slice(index + 1).map((item) => item.path));
     } else if (action === 'reveal') {
       revealPathInTree(path);
+    } else if (action === 'reopen') {
+      onReopenFile();
     } else {
       requestCloseFiles(openFiles.map((item) => item.path));
     }
-  }, [openFiles, requestCloseFiles, revealPathInTree]);
+  }, [openFiles, requestCloseFiles, revealPathInTree, onReopenFile]);
 
   const confirmCloseDirty = useCallback(() => {
     if (!closeConfirm) return;
@@ -656,6 +665,14 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
         if (current) requestCloseFiles([current.path]);
         return;
       }
+      // UI-451 加映 v3（Minor）— Ctrl/Cmd+Shift+T 重开最近关闭的 tab
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && !event.altKey
+          && event.key.toLowerCase() === 't') {
+        event.preventDefault();
+        if (event.repeat) return;
+        onReopenFile();
+        return;
+      }
       if (event.ctrlKey && !event.metaKey && event.key === 'Tab') {
         if (openFiles.length < 2) return;
         event.preventDefault();
@@ -667,7 +684,7 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [active, openFiles, onActivateFile, requestCloseFiles]);
+  }, [active, openFiles, onActivateFile, requestCloseFiles, onReopenFile]);
 
   const breadcrumbSegments = useMemo(
     () => activeFile?.path.split('/').filter(Boolean) || [],
@@ -826,6 +843,7 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
                 onRequestClose={(path) => requestCloseFiles([path])}
                 onMenuAction={handleTabMenuAction}
                 onReorder={onReorderFiles}
+                canReopen={canReopen}
               />
             )}
             <div className={styles.workspaceFilePreviewStack} data-testid="file-preview-stack">
@@ -847,6 +865,9 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
                 return (
                   <div
                     key={file.tabId ?? file.path}
+                    id={fileTabPanelId(file)}
+                    role="tabpanel"
+                    aria-label={file.name}
                     data-file-preview-path={file.path}
                     className={`${styles.workspaceFilePreviewKeepAlive}${isActive ? ` ${styles.workspaceFilePreviewKeepAliveActive}` : ''}`}
                   >

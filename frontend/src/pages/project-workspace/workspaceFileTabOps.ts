@@ -7,6 +7,32 @@ import type { ActiveWorkspaceFile } from './types';
 /** UI-451 加映 v2 — tab 稳定键序号（进程内唯一即可，不持久化） */
 let tabSeq = 0;
 
+/** UI-451 加映 v3（P2-7）— 软上限：超出后按 LRU 淘汰**非脏**后台 tab；全脏时诚实超额放行 */
+export const MAX_FILE_TABS = 12;
+
+/** UI-451 加映 v3（P2-7）— LRU 淘汰位选择：lruOrder（旧→新）里第一个仍打开、非脏、非保留的 path；无可淘汰返回 null */
+export function pickLruEviction(
+  files: ActiveWorkspaceFile[],
+  lruOrder: string[],
+  dirtyPaths: Record<string, boolean>,
+  keepPaths: string[],
+): string | null {
+  const open = new Set(files.map((item) => item.path));
+  const keep = new Set(keepPaths);
+  for (const path of lruOrder) {
+    if (!open.has(path) || keep.has(path)) continue;
+    if (dirtyPaths[path]) continue;
+    return path;
+  }
+  return null;
+}
+
+/** UI-451 加映 v3（Minor a11y）— tab↔面板 aria-controls 配对 id（tabId 优先，回退 path 净化） */
+export function fileTabPanelId(file: ActiveWorkspaceFile): string {
+  const key = file.tabId || file.path.replace(/[^a-zA-Z0-9_-]/g, '_');
+  return `file-tab-panel-${key}`;
+}
+
 /**
  * 打开（或重新打开）一个文件 tab：
  * - 新 path 追加尾部并分配稳定 tabId（keep-alive 实例 key）；

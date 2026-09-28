@@ -5,8 +5,10 @@ import { describe, expect, it } from 'vitest';
 import type { ActiveWorkspaceFile } from './types';
 import {
   closeWorkspaceFileTabs,
+  fileTabPanelId,
   moveWorkspaceFileTab,
   openWorkspaceFileTab,
+  pickLruEviction,
   renameWorkspaceFileTab,
 } from './workspaceFileTabOps';
 
@@ -163,5 +165,31 @@ describe('moveWorkspaceFileTab', () => {
     expect(moveWorkspaceFileTab([A, B, C], 'a.txt', -5).map((item) => item.path)).toEqual(['a.txt', 'b.md', 'c.json']);
     const files = [A, B];
     expect(moveWorkspaceFileTab(files, 'x.txt', 0)).toBe(files);
+  });
+});
+
+describe('pickLruEviction (UI-451 v3 P2-7)', () => {
+  const f = (p: string) => file(p);
+  it('选 LRU 序里第一个仍打开且非脏非保留的 path', () => {
+    const files = [f('a'), f('b'), f('c'), f('d')];
+    const lru = ['b', 'c', 'a', 'd']; // b 最久未用
+    expect(pickLruEviction(files, lru, {}, ['d'])).toBe('b');
+  });
+  it('跳过脏位与保留位，落到次旧', () => {
+    const files = [f('a'), f('b'), f('c'), f('d')];
+    const lru = ['b', 'c', 'a', 'd'];
+    expect(pickLruEviction(files, lru, { b: true }, ['d', 'c'])).toBe('a');
+  });
+  it('全脏或无可淘汰：返回 null（诚实超额放行）', () => {
+    const files = [f('a'), f('b')];
+    expect(pickLruEviction(files, ['a', 'b'], { a: true, b: true }, [])).toBeNull();
+    expect(pickLruEviction(files, ['zzz'], {}, [])).toBeNull();
+  });
+});
+
+describe('fileTabPanelId (UI-451 v3 Minor a11y)', () => {
+  it('tabId 优先；无 tabId 时净化 path 为合法 id', () => {
+    expect(fileTabPanelId({ ...A, tabId: 'wftab-3' })).toBe('file-tab-panel-wftab-3');
+    expect(fileTabPanelId(file('src/a x.txt'))).toBe('file-tab-panel-src_a_x_txt');
   });
 });

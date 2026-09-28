@@ -96,8 +96,12 @@ export interface RightPanelContext {
   handleReorderWorkspaceFiles: (fromPath: string, toIndex: number) => void;
   /** UI-451 加映 v2 (P1-1) — rename/move 成功后重定向 tab。 */
   handleRenameWorkspaceFile: (oldPath: string, nextFile: ActiveWorkspaceFile) => void;
-  /** UI-451 加映 v2 (P1-2) — 脏 tab 计数上抛（关右栏 files tab 守卫消费；稳定引用）。 */
-  handleWorkspaceFileDirtyCountChange: (count: number) => void;
+  /** UI-451 加映 v3（Minor）— 重开最近关闭的 tab。 */
+  handleReopenWorkspaceFile: () => void;
+  /** UI-451 加映 v3（Minor）— 存在可重开的关闭历史（菜单项可见性）。 */
+  hasReopenableWorkspaceFile: boolean;
+  /** UI-451 加映 v3（P2-7/P2-8）— 脏位图上抛（守卫/淘汰环/关窗共用同一真相；稳定引用）。 */
+  handleWorkspaceFileDirtyMapChange: (dirtyMap: Record<string, boolean>) => void;
   handleOpenResult: (jobId: string, projectId?: string | null) => void | Promise<void>;
   handleOpenRightResults: () => void;
   handleOpenRightBrowser: () => void;
@@ -230,7 +234,9 @@ export function RightPanel({
                     onCloseFiles={ctx.handleCloseWorkspaceFiles}
                     onReorderFiles={ctx.handleReorderWorkspaceFiles}
                     onRenameFile={ctx.handleRenameWorkspaceFile}
-                    onDirtyCountChange={ctx.handleWorkspaceFileDirtyCountChange}
+                    onReopenFile={ctx.handleReopenWorkspaceFile}
+                    canReopen={ctx.hasReopenableWorkspaceFile}
+                    onDirtyMapChange={ctx.handleWorkspaceFileDirtyMapChange}
                   />
                 )}
                 {tab === 'browser' && (

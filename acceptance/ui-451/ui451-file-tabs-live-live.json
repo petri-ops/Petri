@@ -1,7 +1,7 @@
 {
   "name": "ui451-file-tabs-live",
-  "startedAt": "2026-09-28T05:00:17.377Z",
-  "finishedAt": "2026-09-28T05:01:13.729Z",
+  "startedAt": "2026-09-28T06:21:05.704Z",
+  "finishedAt": "2026-09-28T06:22:24.728Z",
   "assertions": [
     {
       "name": "T0_seed_uploaded",
@@ -76,7 +76,7 @@
     {
       "name": "T10_rename_redirects_tab",
       "pass": true,
-      "detail": "flow=submitted {\"tabs\":[\"ui451-dup/x.md\",\"ui451-dir/ui451-dup/x.md\",\"ui451-renamed-a.txt\"],\"renamedActive\":true,\"oldGone\":true}"
+      "detail": "flow=submitted {\"tabs\":[\"ui451-renamed-a.txt\",\"ui451-tab-b.md\",\"ui451-dup/x.md\",\"ui451-dir/ui451-dup/x.md\"],\"renamedActive\":true,\"oldGone\":true}"
     },
     {
       "name": "T11_reveal_menu_locates_row",
@@ -86,17 +86,42 @@
     {
       "name": "T12_shortcuts_cycle_and_guard",
       "pass": true,
-      "detail": "before=ui451-renamed-a.txt after=ui451-dup/x.md wDialog=true dirty=dirty"
+      "detail": "before=ui451-renamed-a.txt after=ui451-tab-b.md wDialog=true dirty=dirty"
     },
     {
       "name": "T13_delete_closes_open_tab",
       "pass": true,
-      "detail": "flow=submitted {\"tabs\":[\"ui451-dup/x.md\",\"ui451-dir/ui451-dup/x.md\",\"ui451-renamed-a.txt\"],\"gone\":true,\"dialog\":false}"
+      "detail": "flow=submitted {\"tabs\":[\"ui451-renamed-a.txt\",\"ui451-dup/x.md\",\"ui451-dir/ui451-dup/x.md\"],\"gone\":true,\"dialog\":false}"
     },
     {
       "name": "T14_panel_close_dirty_guard",
       "pass": true,
       "detail": "dialog=true cancel=cancel stillOpen=true closed=true"
+    },
+    {
+      "name": "T15_lru_soft_cap_eviction",
+      "pass": true,
+      "detail": "{\"count\":12,\"hasOldest\":false,\"hasDirty2\":true,\"hasNewest\":true,\"dots\":1}"
+    },
+    {
+      "name": "T16a_tablist_roving_arrows",
+      "pass": true,
+      "detail": "a={\"tablist\":true,\"tabCount\":12,\"controls\":true,\"activeTabindex\":\"0\"} arrow=arrow b={\"activePath\":\"ui451-lru-2.txt\",\"focusedPath\":\"ui451-lru-2.txt\"}"
+    },
+    {
+      "name": "T16b_dblclick_closes_tab",
+      "pass": true,
+      "detail": "dbl=dbl {\"gone\":true,\"count\":11}"
+    },
+    {
+      "name": "T17_reopen_closed_tab",
+      "pass": true,
+      "detail": "item=true {\"back\":true,\"count\":12,\"activePath\":\"ui451-lru-3.txt\"}"
+    },
+    {
+      "name": "T18_app_close_dirty_guard",
+      "pass": true,
+      "detail": "dispatch=dispatched dialog=true cancel=cancel gone=true"
     }
   ],
   "allPass": true

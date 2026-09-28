@@ -91,7 +91,8 @@ const tabOrder = () => EVAL(
 
   // ── T0 播种（先删后传，内容确定性）──
   // 逐路径清理并容忍失败（上一轮 rename 会移走 FILE_A，批量 delete 遇 missing 整体失败会残留 renamed）
-  for (const p of [FILE_A, FILE_B, FILE_C, 'ui451-dup', 'ui451-dir', 'ui451-renamed-a.txt']) {
+  const lruSeeds = Array.from({ length: 13 }, (_v, i) => `ui451-lru-${i + 1}.txt`);
+  for (const p of [FILE_A, FILE_B, FILE_C, 'ui451-dup', 'ui451-dir', 'ui451-renamed-a.txt', ...lruSeeds]) {
     await restCall('POST', `/api/workspaces/${PROJECT_ID}/fs/delete`, { paths: [p] });
   }
   const seedBody = (name, marker) => ({
@@ -125,6 +126,24 @@ const tabOrder = () => EVAL(
   }
   run.assert('V0_files_tab_opened', treeVisible === true || treeVisible === 'true', `first=${String(filesOpened)} treeVisible=${String(treeVisible)}`);
   client = await attach();
+
+  // ── 清场：上一轮残留的 tab（含脏）一律关闭——每轮从零开始，防断言串扰 ──
+  const residualTabs = Number(await EVAL(`document.querySelectorAll('[data-file-tab-path]').length`) || 0);
+  if (residualTabs > 0) {
+    await front();
+    await EVAL(`(function(){var el=document.querySelector('[role="tab"][aria-selected="true"]');if(!el)return 'no_tab';el.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true}));return 'menu';})()`);
+    await sleep(400);
+    await EVAL(`(function(){var b=document.querySelector('[data-testid="file-tab-menu-closeAll"]');if(b)b.click();return 'closed';})()`);
+    await sleep(500);
+    // 残留含脏时弹确认 → 放弃并关闭
+    await EVAL(`(function(){var b=document.querySelector('[data-testid="file-tab-close-confirm"]');if(b)b.click();return 'confirmed';})()`);
+    await sleep(800);
+    const afterClear = Number(await EVAL(`document.querySelectorAll('[data-file-tab-path]').length`) || 0);
+    if (afterClear > 0) {
+      run.assert('V1_residual_tabs_cleared', false, `residual=${residualTabs} afterClear=${afterClear}`);
+    }
+  }
+
 
   // ── T1 点开文件 a → tab 条出现 ──
   const clickA = await clickTreeFile(FILE_A);
@@ -545,6 +564,9 @@ const tabOrder = () => EVAL(
 
   // ── v2 (P1-2) T14 关右栏「文件」tab 守卫：涉脏先弹确认，取消保留，确认关闭 ──
   await front();
+  // 打脏前先切到 text 族 tab（md 预览态无 contenteditable，活动位随 T12/T13 时序漂移）
+  await EVAL(`(function(){var el=document.querySelector('[data-file-tab-path="ui451-renamed-a.txt"]');if(el)el.click();return 'act';})()`);
+  await sleep(700);
   await EVAL(`(function(){
     var el=document.querySelector('[data-file-tab-path][aria-selected="true"]');
     if(!el) return 'no_active';
@@ -570,6 +592,132 @@ const tabOrder = () => EVAL(
   run.assert('T14_panel_close_dirty_guard', panelDialog === true && String(cancelKeep) === 'cancel'
     && stillOpen === true && closedNow === true,
     `dialog=${String(panelDialog)} cancel=${String(cancelKeep)} stillOpen=${String(stillOpen)} closed=${String(closedNow)}`);
+
+  // ── v3 (P2-7) T15 软上限 12 + LRU 非脏淘汰：13 个 LRU 文件逐个打开，最旧非脏被淘汰、脏者存活 ──
+  await front();
+  await EVAL(`(function(){var b=document.querySelector('[aria-label="展开更多工具"]');if(b)b.click();return 'menu';})()`);
+  await sleep(600);
+  await EVAL(`(function(){var items=document.querySelectorAll('#titlebar-tool-menu [role="menuitem"]');for(var i=0;i<items.length;i++){if((items[i].textContent||'').trim()==='文件'){items[i].click();return 'opened';}}return 'none';})()`);
+  await sleep(2200);
+  for (const seed of lruSeeds) {
+    await restCall('POST', `/api/workspaces/${PROJECT_ID}/fs/upload`, {
+      toPath: seed,
+      dataB64: Buffer.from(`LRU ${seed}\n`, 'utf8').toString('base64'),
+      offset: 0,
+    });
+  }
+  await EVAL(`(function(){var b=document.querySelector('[data-testid="file-tree-refresh"]');if(b)b.click();return 'refreshed';})()`);
+  await sleep(2000);
+  // 逐个打开 13 个；第 2 个打开后打脏（须存活）
+  for (let i = 0; i < lruSeeds.length; i++) {
+    await front();
+    await clickTreeFile(lruSeeds[i]);
+    await sleep(650);
+    if (i === 1) {
+      await EVAL(`(function(){
+        var host=document.querySelector('[data-file-preview-path="${lruSeeds[1]}"][class*="workspaceFilePreviewKeepAliveActive"]');
+        var ed=host?host.querySelector('[contenteditable="true"]'):null;
+        if(ed){ed.focus();document.execCommand('insertText',false,'UI451LRU');return 'dirty';}
+        return 'no_editor';
+      })()`);
+      await sleep(400);
+    }
+  }
+  await sleep(1500);
+  const t15 = JSON.parse(await EVAL(
+    `(function(){
+      var tabs=Array.from(document.querySelectorAll('[data-file-tab-path]')).map(function(el){return el.getAttribute('data-file-tab-path');});
+      return JSON.stringify({
+        count: tabs.length,
+        hasOldest: tabs.indexOf('${lruSeeds[0]}')>=0,
+        hasDirty2: tabs.indexOf('${lruSeeds[1]}')>=0,
+        hasNewest: tabs.indexOf('${lruSeeds[12]}')>=0,
+        dots: document.querySelectorAll('[data-testid="file-tab-dirty"]').length
+      });
+    })()`));
+  run.assert('T15_lru_soft_cap_eviction', t15.count === 12 && t15.hasOldest === false
+    && t15.hasDirty2 === true && t15.hasNewest === true && Number(t15.dots) === 1,
+    JSON.stringify(t15));
+
+  // ── v3 (Minor a11y/双击) T16：tablist 语义 + ArrowRight roving + 双击关 tab ──
+  await front();
+  const t16a = JSON.parse(await EVAL(
+    `(function(){
+      var strip=document.querySelector('[data-testid="file-tab-strip"]');
+      var tabs=Array.from(document.querySelectorAll('[role="tab"]'));
+      var active=document.querySelector('[role="tab"][aria-selected="true"]');
+      return JSON.stringify({
+        tablist: strip.getAttribute('role')==='tablist',
+        tabCount: tabs.length,
+        controls: tabs.every(function(t){return !!t.getAttribute('aria-controls');}),
+        activeTabindex: active?active.getAttribute('tabindex'):null
+      });
+    })()`));
+  const arrowProbe = await EVAL(
+    `(function(){
+      var active=document.querySelector('[role="tab"][aria-selected="true"]');
+      if(!active) return 'no_active';
+      active.focus();
+      active.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true,cancelable:true}));
+      return 'arrow';
+    })()`);
+  await sleep(600);
+  const t16b = JSON.parse(await EVAL(
+    `(function(){
+      var active=document.querySelector('[role="tab"][aria-selected="true"]');
+      return JSON.stringify({
+        activePath: active?active.getAttribute('data-file-tab-path'):null,
+        focusedPath: (document.activeElement&&document.activeElement.getAttribute)?document.activeElement.getAttribute('data-file-tab-path'):null
+      });
+    })()`));
+  const arrowMoved = t16b.activePath !== null && t16b.focusedPath === t16b.activePath && t16b.activePath !== '';
+  run.assert('T16a_tablist_roving_arrows', t16a.tablist && t16a.controls && t16a.activeTabindex === '0'
+    && String(arrowProbe) === 'arrow' && arrowMoved && t16b.focusedPath !== null,
+    `a=${JSON.stringify(t16a)} arrow=${String(arrowProbe)} b=${JSON.stringify(t16b)}`);
+  // 双击关闭一个干净 tab（LRU-3）
+  await front();
+  const dblTarget = await EVAL(`(function(){var el=document.querySelector('[data-file-tab-path="${lruSeeds[2]}"]');if(!el)return 'no_tab';el.dispatchEvent(new MouseEvent('dblclick',{bubbles:true,cancelable:true}));return 'dbl';})()`);
+  await sleep(700);
+  const t16c = JSON.parse(await EVAL(
+    `(function(){
+      var tabs=Array.from(document.querySelectorAll('[data-file-tab-path]')).map(function(el){return el.getAttribute('data-file-tab-path');});
+      return JSON.stringify({gone:tabs.indexOf('${lruSeeds[2]}')<0, count:tabs.length});
+    })()`));
+  run.assert('T16b_dblclick_closes_tab', String(dblTarget) === 'dbl' && t16c.gone === true && t16c.count === 11,
+    `dbl=${String(dblTarget)} ${JSON.stringify(t16c)}`);
+
+  // ── v3 (Minor) T17 重开：菜单项在场 → Ctrl+Shift+T 重开最近关闭 ──
+  await front();
+  await EVAL(`(function(){var el=document.querySelector('[role="tab"][aria-selected="true"]');el.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true}));return 'menu';})()`);
+  await sleep(400);
+  const reopenItem = await EVAL(`!!document.querySelector('[data-testid="file-tab-menu-reopen"]')`);
+  await EVAL(`(function(){var b=document.querySelector('[data-testid="file-tab-menu-reveal"]');if(b)b.click();return 'dismiss';})()`);
+  await sleep(300);
+  await EVAL(`(function(){var el=document.querySelector('[role="tab"][aria-selected="true"]');if(!el)return 'no_active';window.dispatchEvent(new KeyboardEvent('keydown',{key:'t',ctrlKey:true,shiftKey:true,bubbles:true,cancelable:true}));return 'key';})()`);
+  await sleep(900);
+  const t17 = JSON.parse(await EVAL(
+    `(function(){
+      var tabs=Array.from(document.querySelectorAll('[data-file-tab-path]')).map(function(el){return el.getAttribute('data-file-tab-path');});
+      var active=document.querySelector('[role="tab"][aria-selected="true"]');
+      return JSON.stringify({back:tabs.indexOf('${lruSeeds[2]}')>=0, count:tabs.length, activePath:active?active.getAttribute('data-file-tab-path'):null});
+    })()`));
+  run.assert('T17_reopen_closed_tab', (reopenItem === true || reopenItem === 'true')
+    && t17.back === true && t17.count === 12 && t17.activePath === lruSeeds[2],
+    `item=${String(reopenItem)} ${JSON.stringify(t17)}`);
+
+  // ── v3 (P2-8) T18 整窗关闭脏守卫：合成 beforeunload → 弹确认 → 取消（不真关窗）──
+  await front();
+  const t18dispatch = await EVAL(`(function(){window.dispatchEvent(new Event('beforeunload',{cancelable:true}));return 'dispatched';})()`);
+  await sleep(600);
+  const t18dialog = await EVAL(`!!document.querySelector('[data-testid="file-app-close-dialog"]')`);
+  await front();
+  await lib.screenshotPng(client, EVIDENCE_DIR, 'ui451-app-close-guard.png').catch(() => {});
+  const t18cancel = await EVAL(`(function(){var b=Array.from(document.querySelectorAll('[data-testid="file-app-close-dialog"] button')).find(function(x){return (x.textContent||'').trim()==='取消';});if(b)b.click();return 'cancel';})()`);
+  await sleep(500);
+  const t18gone = await EVAL(`!document.querySelector('[data-testid="file-app-close-dialog"]')`);
+  run.assert('T18_app_close_dirty_guard', String(t18dispatch) === 'dispatched' && t18dialog === true
+    && String(t18cancel) === 'cancel' && t18gone === true,
+    `dispatch=${String(t18dispatch)} dialog=${String(t18dialog)} cancel=${String(t18cancel)} gone=${String(t18gone)}`);
 
   run.finish();
   process.exit(run.allPass ? 0 : 1);

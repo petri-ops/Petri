@@ -227,6 +227,43 @@ describe('WorkspaceFileTabStrip 加映 v2', () => {
     expect(props.onMenuAction).toHaveBeenCalledWith('reveal', 'b.md');
   });
 
+  it('v3 a11y：容器 role=tablist、tab aria-controls 指向面板 id、非活动 tab 出 tabindex 序', () => {
+    renderStrip();
+    const strip = screen.getByTestId('file-tab-strip');
+    expect(strip.getAttribute('role')).toBe('tablist');
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs.every((t) => !!t.getAttribute('aria-controls'))).toBe(true);
+    expect(tabs.map((t) => t.getAttribute('tabindex'))).toEqual(['-1', '0', '-1']);
+  });
+
+  it('v3 a11y：ArrowRight 激活并移焦下一 tab（roving）', () => {
+    const { props } = renderStrip();
+    const tabA = screen.getByRole('tab', { name: /a\.txt/ });
+    tabA.focus();
+    fireEvent.keyDown(tabA, { key: 'ArrowRight' });
+    expect(props.onActivate).toHaveBeenCalledWith(B);
+    expect(document.activeElement?.getAttribute('data-file-tab-path')).toBe('b.md');
+  });
+
+  it('v3 双击 tab 触发关闭请求（走脏确认链）', () => {
+    const { props } = renderStrip();
+    fireEvent.dblClick(screen.getByRole('tab', { name: /c\.json/ }));
+    expect(props.onRequestClose).toHaveBeenCalledWith('c.json');
+  });
+
+  it('v3 菜单：canReopen 时显示「重新打开已关闭的标签页」并回调；默认不显示', () => {
+    const { props } = renderStrip();
+    fireEvent.contextMenu(screen.getByRole('tab', { name: /a\.txt/ }));
+    expect(screen.queryByTestId('file-tab-menu-reopen')).toBeNull();
+    fireEvent.keyDown(window, { key: 'Escape' });
+    cleanup();
+    const second = renderStrip({ canReopen: true });
+    fireEvent.contextMenu(screen.getByRole('tab', { name: /a\.txt/ }));
+    fireEvent.click(screen.getByTestId('file-tab-menu-reopen'));
+    expect(second.props.onMenuAction).toHaveBeenCalledWith('reopen', 'a.txt');
+    void props;
+  });
+
   it('激活 tab 变化时滚入视野（scrollIntoView 被调用）', () => {
     const { view } = renderStrip();
     const tabC = screen.getByRole('tab', { name: /c\.json/ });
