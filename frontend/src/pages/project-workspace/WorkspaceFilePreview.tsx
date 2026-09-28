@@ -466,8 +466,8 @@ export function WorkspaceFilePreview({
           {saveError}
         </div>
       )}
-      {/* UI-400-6 补——目录开关挪到右上角与编辑/预览切换归拢（原左上角悬浮时压住标题首字）；
-          目录面板展开时正文经 TocGutter 预留左侧空间，浮层只落在空隙上，不再遮挡正文 */}
+      {/* UI-400-6 补——目录开关贴左上角与所控面板同列（用户裁决）；正文经 TocGutter 预留左侧
+          空间 + 顶部 46px 安全带，浮层与钮带均不遮挡正文 */}
       {isMarkdown && status === 'ready' && mdView === 'preview' && mdTocItems.length > 0 && (
         <>
           <button

@@ -6766,8 +6766,8 @@ body:global(.gewu-resizing-columns) * {
   left: 0;
   right: 0;
   z-index: 5;
-  /* 右侧 78px 让位右上角悬浮钮簇（mdViewToggle 14-40 + mdTocToggle 48-74） */
-  padding: 6px 78px 6px 12px;
+  /* 右侧 48px 让位右上角 mdViewToggle 悬浮钮（目录开关已按用户裁决移回左上角） */
+  padding: 6px 48px 6px 12px;
   background: color-mix(in srgb, var(--gewu-danger) 9%, transparent);
   color: var(--gewu-danger);
   font-size: var(--gewu-font-size-sm);
@@ -7470,10 +7470,10 @@ body:global(.gewu-resizing-columns) * {
 /* UI-400-6 — Markdown 预览目录（TOC）：左上角悬浮开关 + 左侧悬浮面板 */
 .workspaceMdTocToggle {
   position: absolute;
+  /* 用户裁决：贴左上角与所控目录面板同列（left 与面板 left:10 对齐成一条竖线）；
+     正文顶部 46px 安全带保证钮带下无内容，不再复现早前左上角压 h1 首字的问题 */
   top: 10px;
-  /* UI-400-6 补——与编辑/预览切换归拢为右上角按钮簇（right:14 为 mdViewToggle，本钮居左相邻），
-     原左上角悬浮会压住 h1 标题首字 */
-  right: 48px;
+  left: 10px;
   z-index: 6;
   display: inline-flex;
   align-items: center;

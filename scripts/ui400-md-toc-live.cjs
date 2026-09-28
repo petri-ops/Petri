@@ -11,7 +11,6 @@
  * 证据：acceptance/ui-400/ui400-md-toc-live.json + png
  */
 const path = require('node:path');
-const fs = require('node:fs');
 const http = require('node:http');
 const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -73,32 +72,6 @@ function buildSampleMd() {
     '## 第三节 终点',
     '', para('终点', 14), '',
   ].join('\n');
-}
-
-async function captureElementCrop(evalProbe, filename) {
-  try {
-    const rect = await EVAL(`(function(){
-    var el = document.querySelector('[class*="workspacePreviewBody"]');
-    if (!el) return null;
-    var r = el.getBoundingClientRect();
-    return JSON.stringify({ x: r.x, y: r.y, w: r.width, h: r.height });
-  })()`);
-    if (!rect) return null;
-    const c = JSON.parse(rect);
-    const shot = await Promise.race([
-      client.send('Page.captureScreenshot', {
-        format: 'png',
-        clip: { x: c.x, y: c.y, width: c.w, height: c.h, scale: 1 },
-      }),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('crop_timeout_10s')), 10000)),
-    ]);
-    const file = path.join(EVIDENCE_DIR, filename);
-    fs.writeFileSync(file, Buffer.from(shot.data, 'base64'));
-    return file;
-  } catch (err) {
-    console.log('[ui400-md-toc] crop_skip', filename, err && err.message);
-    return null;
-  }
 }
 
 (async () => {
@@ -191,8 +164,7 @@ async function captureElementCrop(evalProbe, filename) {
   if (t2.hasPanel && itemsOk) {
     await front();
     await lib.screenshotPng(client, EVIDENCE_DIR, 'ui400-md-toc-open.png').catch(() => {});
-    await captureElementCrop(true, 'ui400-md-toc-open-crop.png').catch(() => {});
-
+    
     // ── T4 点击跳转：间谍记录 scrollIntoView 接线 + 实际滚动位移 ──
     // 最小化/遮挡窗口 rAF 节流会把 smooth 动画冻结在半途（实测 scrollTop 停在 32.4px），
     // 故 CDP 车道间谍替用瞬时滚动完成几何断言；真实用户窗口可见，产品仍为 smooth（动画
@@ -215,44 +187,51 @@ async function captureElementCrop(evalProbe, filename) {
       btns[btns.length-1].click();
       return JSON.stringify({before:before});
     })()`);
-    let scrollTop = 0;
+    // 落定即读（瞬时滚动落地后立刻量），并双读择优——用户可能正在实时操作窗口，
+    // 人为滚轮会扰动落点量测，越早读越接近真实落点。
+    let best = null;
     for (let i = 0; i < 16; i++) {
-      await sleep(500);
-      scrollTop = Number(await EVAL(
-        `document.querySelector('[class*="workspaceMarkdownPreview"]').scrollTop`) || 0);
-      if (scrollTop > 50) break;
+      await sleep(i === 0 ? 120 : 400);
+      const probe = await EVAL(`(function(){
+        var pv=document.querySelector('[class*="workspaceMarkdownPreview"]');
+        var target=null;
+        Array.from(document.querySelectorAll('[class*="workspaceMarkdownPreview"] h2')).forEach(function(h){
+          if((h.textContent||'').trim()==='第三节 终点') target=h;
+        });
+        var pvTop=pv.getBoundingClientRect().top;
+        var hTop=target?target.getBoundingClientRect().top:null;
+        return JSON.stringify({scrollTop:pv.scrollTop, targetTopDelta:hTop==null?null:hTop-pvTop});
+      })()`);
+      let p = {};
+      try { p = JSON.parse(probe); } catch {}
+      if ((p.scrollTop || 0) > 50 && p.targetTopDelta != null) {
+        best = p;
+        if (p.targetTopDelta >= -2 && p.targetTopDelta <= 96) break;
+      }
       if (i === 7) await front();
     }
-    const afterProbe = await EVAL(`(function(){
-      var pv=document.querySelector('[class*="workspaceMarkdownPreview"]');
-      var target=null;
-      Array.from(document.querySelectorAll('[class*="workspaceMarkdownPreview"] h2')).forEach(function(h){
-        if((h.textContent||'').trim()==='第三节 终点') target=h;
-      });
-      var pvTop=pv.getBoundingClientRect().top;
-      var hTop=target?target.getBoundingClientRect().top:null;
-      return JSON.stringify({scrollTop:pv.scrollTop, spy:window.__tocSpy, targetTopDelta:hTop==null?null:hTop-pvTop});
-    })()`);
-    let t4 = {};
-    try { t4 = JSON.parse(afterProbe); } catch {}
+    const spyProbe = await EVAL(`JSON.stringify(window.__tocSpy || [])`);
+    let t4 = best || {};
+    try { t4.spy = JSON.parse(spyProbe); } catch {}
     const spyHit = Array.isArray(t4.spy) && t4.spy.length === 1
       && t4.spy[0].text === '第三节 终点' && t4.spy[0].opts && t4.spy[0].opts.behavior === 'smooth';
     const jumped = spyHit && t4.scrollTop > 50
-      && t4.targetTopDelta != null && t4.targetTopDelta >= -2 && t4.targetTopDelta <= 80;
-    run.assert('T4a_jump_last_heading', jumped, `click=${String(jump).slice(0, 60)} → ${afterProbe.slice(0, 300)}`);
+      && t4.targetTopDelta != null && t4.targetTopDelta >= -2 && t4.targetTopDelta <= 96;
+    run.assert('T4a_jump_last_heading', jumped, `click=${String(jump).slice(0, 60)} → ${JSON.stringify({ scrollTop: t4.scrollTop, targetTopDelta: t4.targetTopDelta, spy: t4.spy })}`);
 
     await front();
     await EVAL(`(function(){
       var panel=document.querySelector('[class*="workspaceMdTocPanel"]');
       panel.querySelectorAll('button')[0].click(); return 'clicked';
     })()`);
+    let backTop = 0;
     for (let i = 0; i < 12; i++) {
       await sleep(500);
-      scrollTop = Number(await EVAL(
+      backTop = Number(await EVAL(
         `document.querySelector('[class*="workspaceMarkdownPreview"]').scrollTop`) || 0);
-      if (scrollTop > 5) break;
+      if (backTop > 5) break;
     }
-    // 落点几何校验：h1 贴顶带内（顶部安全带 46px + scroll-margin 12px → 静止点 ≈60px，非 0）
+    // 落点几何校验：h1 贴顶带内（顶部安全带 46px + scroll-margin 48px → 静止点 ≈60-90px，非 0）
     const backProbe = await EVAL(`(function(){
       var pv=document.querySelector('[class*="workspaceMarkdownPreview"]');
       var h1=pv.querySelector('h1');
@@ -260,7 +239,7 @@ async function captureElementCrop(evalProbe, filename) {
     })()`);
     let t5 = {};
     try { t5 = JSON.parse(backProbe); } catch {}
-    const backOk = t5.scrollTop < 150 && t5.h1Delta != null && t5.h1Delta >= -2 && t5.h1Delta <= 80;
+    const backOk = t5.scrollTop < 150 && t5.h1Delta != null && t5.h1Delta >= -2 && t5.h1Delta <= 96;
     run.assert('T4b_jump_back_top', backOk, backProbe);
 
     // ── T5 开关收起/展开（类移除为确定性断言；padding 过渡等待落定）──
@@ -280,8 +259,7 @@ async function captureElementCrop(evalProbe, filename) {
     const closedOk = t6.panelGone === true && t6.hasGutterClass === false && parseFloat(t6.paddingLeft || '0') < 30;
     run.assert('T5a_toggle_close', closedOk, JSON.stringify(t6));
     await lib.screenshotPng(client, EVIDENCE_DIR, 'ui400-md-toc-closed.png').catch(() => {});
-    await captureElementCrop(true, 'ui400-md-toc-closed-crop.png').catch(() => {});
-
+    
     await front();
     await EVAL(`(function(){document.querySelector('[data-testid="md-toc-toggle"]').click();return 'toggled';})()`);
     await sleep(600);

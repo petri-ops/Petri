@@ -1,12 +1,12 @@
 {
   "name": "ui400-md-toc-live",
-  "startedAt": "2026-09-28T01:28:38.768Z",
-  "finishedAt": "2026-09-28T01:29:05.043Z",
+  "startedAt": "2026-09-28T01:52:42.538Z",
+  "finishedAt": "2026-09-28T01:52:55.751Z",
   "assertions": [
     {
       "name": "T0_sample_uploaded",
       "pass": true,
-      "detail": "HTTP 200 {\"ok\":true,\"entry\":{\"type\":\"file\",\"size\":11032,\"mtimeMs\":1790558925000}}"
+      "detail": "HTTP 200 {\"ok\":true,\"entry\":{\"type\":\"file\",\"size\":11032,\"mtimeMs\":1790560369000}}"
     },
     {
       "name": "V0_files_tab_opened",
@@ -21,27 +21,27 @@
     {
       "name": "T2_toc_panel_items",
       "pass": true,
-      "detail": "{\"preview\":true,\"hasPanel\":true,\"items\":[\"格物目录验证文档\",\"第一节 基础概念\",\"1.1 子小节甲\",\"第二节 滚动验证\",\"2.1 子小节乙\",\"第三节 终点\"],\"paddingLeft\":\"136.308px\",\"previewTop\":78.5321273803711,\"panelRight\":1236.8810272216797,\"scrollHeight\":24589,\"clientHeight\":624}"
+      "detail": "{\"preview\":true,\"hasPanel\":true,\"items\":[\"格物目录验证文档\",\"第一节 基础概念\",\"1.1 子小节甲\",\"第二节 滚动验证\",\"2.1 子小节乙\",\"第三节 终点\"],\"paddingLeft\":\"251.998px\",\"previewTop\":78.95330047607422,\"panelRight\":999.7208099365234,\"scrollHeight\":4439,\"clientHeight\":934}"
     },
     {
       "name": "T3a_gutter_padding",
       "pass": true,
-      "detail": "{\"paddingLeft\":136.308,\"pvW\":222} expected≈136"
+      "detail": "{\"paddingLeft\":251.998,\"pvW\":863} expected≈252"
     },
     {
       "name": "T3b_panel_clear_of_text",
       "pass": true,
-      "detail": "{\"clear\":true,\"h1Left\":1238.88232421875,\"panelRight\":1236.8810272216797}"
+      "detail": "{\"clear\":true,\"h1Left\":1021.7263793945312,\"panelRight\":999.7208099365234}"
     },
     {
       "name": "T4a_jump_last_heading",
       "pass": true,
-      "detail": "click={\"before\":0} → {\"scrollTop\":19697.81640625,\"spy\":[{\"tag\":\"H2\",\"text\":\"第三节 终点\",\"opts\":{\"behavior\":\"smooth\",\"block\":\"start\"}}],\"targetTopDelta\":48.24237060546875}"
+      "detail": "click={\"before\":0} → {\"scrollTop\":3504.733154296875,\"targetTopDelta\":88.00733184814453,\"spy\":[{\"tag\":\"H2\",\"text\":\"第三节 终点\",\"opts\":{\"behavior\":\"smooth\",\"block\":\"start\"}}]}"
     },
     {
       "name": "T4b_jump_back_top",
       "pass": true,
-      "detail": "{\"scrollTop\":24.860063552856445,\"h1Delta\":47.81171417236328}"
+      "detail": "{\"scrollTop\":24.606470108032227,\"h1Delta\":48.067047119140625}"
     },
     {
       "name": "T5a_toggle_close",
