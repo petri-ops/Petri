@@ -4430,3 +4430,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：红绿先行（HK-01）——新契约测试 11 红在册后实现翻绿；定向 3 文件 **27/27**（viewer 16 含既有回归+Lightbox 5 新建+format 5 新建）；tsc 0（quality:types）；theme-token-contract 4/4；impact-map 对新源文件 format-scientific-value.ts fail-closed 识别（frontend-source+p6 绑定）。**in_progress 待办**：dev Electron 实机走查（散点 tooltip/搜索/参考线/组合筛选/格式化/Lightbox 六面）+ P6 源绑定集合重打。
 - **known-red 如实登记**：quality:lint 全量红均位于 project-workspace.tsx 系并行 UI-451 加映在制 WIP 文件（非本包触碰面，本包文件触碰面 0 error）；frontend 本地严格规则集在 viewer 的存量形态（effect 内 setLoading/渲染期 ref 访问/测试 mock 工厂）为 BK-06 书面豁免域存量，本批仅行号平移零新增。
 - **边界**：参考线默认值（±1/padj0.05）为展示辅助非分析真值（job params 投影留加映候选）；搜索为 ID 子串匹配非模糊/拼音；表格数值格式化仅显示层（title/协议载荷保留原值）；Lightbox 不做图片旋转/标注。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-453: 文件树拖出导出统一 REST + 下载按钮保存对话框化 + ssh 大文件诚实拒绝 (2026-09-28 in_progress，dev Electron 实机 5/5 allPass)
+
+- **来源**：用户问「文件（ssh/本地）从文件树拖到桌面应该可以下载下来的是吗？本地应该是复制」+ 报「下载按钮点击后没有反馈，按理应弹文件管理器选路径」。核查：拖出机制 BLOCK-90/91 已存在但本地分支 file:// 路径未编码（Windows 从未验收、大概率不可用）、ssh 分支零实机证据且有 16MB 静默截断；下载按钮为设计性静默落 Downloads（无任何 UI 反馈）——「无反馈」体感与代码一致。用户裁决「行 整起来」。
+- **修法三件**：①**拖出统一 REST**——FileTreeItem dragstart 的 DownloadURL 本地/ssh 统一走预览同源 REST URL（无 Origin 的 GET 实测在受信白名单放行内 200；本地=回环下载效果等同复制，ssh=远程拉流，同构一套逻辑）；原本地 `file://${workspaceDir}` 未编码分支（盘符/反斜杠/中文直拼）退役；顺手修 deps 漏 fileUrl 的陈旧闭包。②**下载按钮保存对话框化**——file-dialog.js 的 download-from-url handler 改原生 showSaveDialog（默认文件名预填、取消静默返回 canceled、覆盖确认由对话框自身处理），落盘后 shell.showItemInFolder 在资源管理器中高亮；原「静默落 Downloads + 重名 -2」退役（UI-444 时文本导出已因同款反馈加过对话框，本条为同类第二次）。③**ssh 16MB 诚实化**——file GET 端点 read 前先 stat，超 16MB 返回 413 明确报错（原先静默截断会拖出损坏文件）；stat 失败维持原 read 报错语义。
+- **证据**：实机 `scripts/ui453-dragout-live.cjs` **5/5 allPass**（acceptance/ui-453/ json+png）——T1 文件行 dragstart 的 DownloadURL 为 REST 形态（中文名+空格目录实测，无 file:// 无盘符）；T2 该 URL 无鉴权 GET 200 且字节数与上传一致（落盘数据完整性通路）；T3 目录行只挂树内 MIME；T4 preload 下载桥在场。新增测试：dragout 组件 3（本地/ssh 同构 REST、目录行无 DownloadURL）+ block67 413 用例（8/8）+ 定向 11 文件 83 用例全绿 + tsc 0 + eslint 触碰面 0 error + code-size 补账（含顺带固化并行 BLOCK-126 已提交内容的指纹欠账，如实注明）。**保存对话框为 OS 级原生窗口，CDP 不可操作，弹框/选路径/资源管理器高亮行为待用户实机过目验证。**
+- **边界**：拖出到桌面=Chromium 下载协议（本地项目经回环取数，效果等同复制但非 OS 级 copy——渲染进程拿不到桌面落点，平台唯一开放协议）；>16MB ssh 文件下载/拖出诚实 413（流式通道为后续候选）；保存对话框行为由用户过目收口。**待用户实机过目后翻 verified。**
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

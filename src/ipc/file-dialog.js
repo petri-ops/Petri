@@ -200,9 +200,12 @@ function setupFileDialogIpc({ mainWindow } = {}) {
     }
   });
 
-  // UI-400-2 — 文件导出/下载到本地：渲染层把预览同源 API URL 交给主进程，
+  // UI-400-2 → UI-453 — 文件导出/下载到本地：渲染层把预览同源 API URL 交给主进程，
   // 保存对话框 + 受限来源（仅本机 API 主机名）流式写盘。blob 下载在 Electron
   // 里会以 GUID.tmp 落盘且无文件名，故下载收尾必须在主进程完成。
+  // UI-453（用户裁决「按理说应该是弹出个文件管理器 我们选择对应的路径确定后
+  // 这个文件可以到对应路径下」）：原「静默落 Downloads」退役，改原生保存对话框
+  // 选路径（默认文件名预填、取消静默），落盘后在资源管理器中高亮该文件。
   ipcMain.handle(CHANNELS.file.downloadFromUrl, async (_event, payload) => {
     const { url, name } = payload || {};
     try {
@@ -224,15 +227,16 @@ function setupFileDialogIpc({ mainWindow } = {}) {
       ) {
         return { ok: false, error: "url origin not allowed" };
       }
-      // 浏览器式静默落 Downloads（重名自动 -2/-3 后缀）；不弹保存对话框——
-      // 点击即下载的心智，另存为交给「系统应用打开后另存」路径。
-      const downloads = app.getPath("downloads");
-      const ext = path.extname(name);
-      const stem = name.slice(0, name.length - ext.length);
-      let filePath = path.join(downloads, name);
-      for (let n = 2; fs.existsSync(filePath); n += 1) {
-        filePath = path.join(downloads, `${stem}-${n}${ext}`);
+      // UI-453 — 原生保存对话框：选路径确认后流式落盘（覆盖确认由对话框自身处理）；
+      // 取消静默返回 canceled（前端不显示错误）。
+      const dialogOptions = { title: "下载到…", defaultPath: name };
+      const picked = mainWindow && !mainWindow.isDestroyed()
+        ? await dialog.showSaveDialog(mainWindow, dialogOptions)
+        : await dialog.showSaveDialog(dialogOptions);
+      if (picked.canceled || !picked.filePath) {
+        return { ok: false, canceled: true };
       }
+      const filePath = picked.filePath;
 
       await new Promise((resolve, reject) => {
         const request = net.request(url);
@@ -252,6 +256,8 @@ function setupFileDialogIpc({ mainWindow } = {}) {
         file.on("finish", resolve);
         request.end();
       });
+      // 成功反馈：在系统文件管理器中定位并高亮该文件（失败不阻塞成功语义）
+      try { shell.showItemInFolder(filePath); } catch { /* ignore */ }
       return { ok: true, path: filePath };
     } catch (e) {
       console.error("[desktop] download from url failed:", e.message);

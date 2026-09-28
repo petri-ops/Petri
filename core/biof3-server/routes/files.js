@@ -201,6 +201,15 @@ module.exports = function registerFileRoutes(app) {
             // D2 体感预算：省一次 stat 往返（fs_read 对目录/缺失路径会以
             // not_found / 空载诚实回退，无需先 stat 验型）。
             const MAX_PREVIEW_BYTES = 16 * 1024 * 1024;
+            // UI-453 — 超 16MB 诚实拒绝（413）：原先静默截断，拖出/下载场景会落出
+            // 损坏文件且无提示。stat 失败（null）时维持原 read 行为（not_found 等由 read 报）。
+            const st = await backend.stat(abs).catch(() => null);
+            if (st && typeof st.size === 'number' && st.size > MAX_PREVIEW_BYTES) {
+              return res.status(413).json({
+                status: 'error',
+                error: `文件 ${(st.size / 1024 / 1024).toFixed(1)}MB 超过远程读取上限 16MB，暂不支持预览/下载/拖出（流式通道为后续候选）`,
+              });
+            }
             const data = await backend.read(abs, { length: MAX_PREVIEW_BYTES });
             res.setHeader('Content-Type', contentTypeFor(abs));
             return res.send(data);

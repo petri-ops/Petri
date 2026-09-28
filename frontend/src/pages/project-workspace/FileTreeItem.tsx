@@ -88,19 +88,15 @@ export function FileTreeItem({
 
   const handleDragStart = useCallback((event: React.DragEvent) => {
     event.dataTransfer.setData(DRAG_MIME, JSON.stringify({ path: fullPath, name: entry.name, type: entry.type }));
-    // BLOCK-90/91 — OS 拖出导出：文件行附带 DownloadURL，拖到 Finder/桌面即落盘。
-    // 本地项目用 file:// 直连（即时）；ssh 项目用预览同源 HTTP URL（落盘时服务端流式
-    // 下载，无需物化本地副本——plan D5）。树内 drop 读的是上方内部 MIME，互不影响。
-    if (entry.type === 'file') {
-      if (workspaceKind === 'local' && workspaceDir) {
-        const absolute = `file://${workspaceDir}/${fullPath}`;
-        event.dataTransfer.setData('DownloadURL', `application/octet-stream:${entry.name}:${absolute}`);
-      } else if (fileUrl) {
-        event.dataTransfer.setData('DownloadURL', `application/octet-stream:${entry.name}:${fileUrl}`);
-      }
+    // BLOCK-90/91 → UI-453 — OS 拖出导出统一走预览同源 REST URL（无 Origin 的 GET 在
+    // 受信白名单放行内，实测 200）：原本地 file:// 直连在 Windows 上路径未编码（盘符/
+    // 反斜杠/中文直拼进 URL）从未验收过；REST 化后本地=回环下载（效果等同复制）、
+    // ssh=远程拉流，本地/ssh 同构一套逻辑。树内 drop 读的是上方内部 MIME，互不影响。
+    if (entry.type === 'file' && fileUrl) {
+      event.dataTransfer.setData('DownloadURL', `application/octet-stream:${entry.name}:${fileUrl}`);
     }
     event.dataTransfer.effectAllowed = 'copyMove';
-  }, [entry.name, entry.type, fullPath, workspaceDir, workspaceKind]);
+  }, [entry.name, entry.type, fullPath, fileUrl]);
 
   const handleDragEnter = useCallback((event: React.DragEvent) => {
     if (!isDropTarget || !event.dataTransfer.types.includes(DRAG_MIME)) return;

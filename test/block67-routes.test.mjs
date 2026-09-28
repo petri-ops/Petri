@@ -59,6 +59,13 @@ before(async () => {
         e.classified = { kind: 'transport.network', retryable: true };
         return { backend: { async list() { throw e; }, async stat() { throw e; }, async read() { throw e; }, async write() { throw e; } }, root: project.remote_path };
       }
+      if (project.ssh_host === 'big') {
+        // UI-453 — 超 16MB 诚实拒绝：stat 报大文件 → GET file 413（不再静默截断）
+        return { backend: {
+          async stat() { return { type: 'file', size: 17 * 1024 * 1024, mtimeMs: 42 }; },
+          async read() { throw new Error('should not read oversized file'); },
+        }, root: project.remote_path };
+      }
       if (project.ssh_host === 'conflict') {
         return { backend: { async stat() { return { type: 'file', mtimeMs: 1 }; }, async write() { const err = new Error('remote_file_changed'); err.code = 'remote_file_changed'; throw err; } }, root: project.remote_path };
       }
@@ -145,4 +152,11 @@ test('local 项目零回归：tree/file 仍走本地 fs', async (t) => {
   assert.deepStrictEqual(tree.body.entries.map((e) => e.name), ['sub', 'z.md']);
   const file = await req(`/api/workspaces/${p.id}/file?path=z.md`);
   assert.strictEqual(file.body.toString(), '本地');
+});
+
+test('file GET: ssh 超 16MB 诚实 413（UI-453，不静默截断）', async () => {
+  const p = db.createProject({ name: 'r-big', workspaceKind: 'ssh', sshHost: 'big', remotePath: '/srv/big' });
+  const r = await req(`/api/workspaces/${p.id}/file?path=docs/huge.h5ad`);
+  assert.strictEqual(r.status, 413);
+  assert.ok(String(r.body.error).includes('16MB'));
 });
