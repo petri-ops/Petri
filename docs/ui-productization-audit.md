@@ -4438,3 +4438,12 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：实机 `scripts/ui453-dragout-live.cjs` **5/5 allPass**（acceptance/ui-453/ json+png）——T1 文件行 dragstart 的 DownloadURL 为 REST 形态（中文名+空格目录实测，无 file:// 无盘符）；T2 该 URL 无鉴权 GET 200 且字节数与上传一致（落盘数据完整性通路）；T3 目录行只挂树内 MIME；T4 preload 下载桥在场。新增测试：dragout 组件 3（本地/ssh 同构 REST、目录行无 DownloadURL）+ block67 413 用例（8/8）+ 定向 11 文件 83 用例全绿 + tsc 0 + eslint 触碰面 0 error + code-size 补账（含顺带固化并行 BLOCK-126 已提交内容的指纹欠账，如实注明）。**保存对话框为 OS 级原生窗口，CDP 不可操作，弹框/选路径/资源管理器高亮行为待用户实机过目验证。**
 - **边界**：拖出到桌面=Chromium 下载协议（本地项目经回环取数，效果等同复制但非 OS 级 copy——渲染进程拿不到桌面落点，平台唯一开放协议）；>16MB ssh 文件下载/拖出诚实 413（流式通道为后续候选）；保存对话框行为由用户过目收口。**待用户实机过目后翻 verified。**
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-453 加映: 用户实机反馈两件修复——保存对话框文件名预填 + 拖出 403 根因（Origin:null） (2026-09-28 in_progress，dev Electron 实机 6/6 allPass)
+
+- **来源**：用户实机试后反馈「点击下载能有弹窗了，但需要手动输入文件名才能保存（应默认填好）」+「鼠标拖拽到本地桌面不成功」。
+- **根因两件**：①defaultPath 只给了裸文件名——Windows 上实测不预填文件名框（同文件 save-text-file 先例 L79 早已踩坑用 join(downloads, name) 绝对路径，本条照抄补齐）；②拖出 403——**Chromium DownloadURL 拖出下载发起的 GET 带 `Origin: null`**，被 local-request-boundary 源白名单直接 403（curl 无 Origin 放行 ≠ 拖出请求形态，首版评估漏了这层）——实锤复现：`curl -H "Origin: null"` → 403。
+- **修法**：①defaultPath 改 `path.join(app.getPath("downloads"), name)` 绝对路径（预填文件名 + 起始目录=下载文件夹）；②file GET 端点换组合守卫 `fileDownloadGuard`：Origin 可信 **或** 携带本机 query token（`?token=desktop-local`，与前端 getToken() 同一常量；Host 白名单已限回环、与 Bearer 常量同权级，无新增攻击面）——仅此端点，其它端点不动；前端拖出 URL 附 token（FileTreeItem dragstart 拼 `&token=`）。
+- **证据**：实机 `scripts/ui453-dragout-live.cjs` **6/6 allPass**——新增 T1 断言 token 在场、T5 守卫三态（Origin:null 无 token→403 / +token→200 且字节数与源文件一致）；后端已按新代码恢复运行实测四态（no-Origin 200 / Origin:null 403 / +token 200 / renderer Origin 200）。block67 增 token 三态用例（9/9）+ dragout 组件断言补 token（3/3）+ 定向 11 文件 83 用例全绿 + tsc 0 + lint 净。
+- **过程事故如实记**：为让 token 守卫生效杀 :3001 后端，发现该 dev 后端系**终端独立进程**（非 Electron supervisor 子进程，杀后无人重拉，supervisor 未接管）——已按主进程同款 env（BIOF3_LOCAL_DATA_DIR/DB 指向 .biof3-dev-user-data）手动拉起恢复，项目数据核对无恙；另见 :3005 端口占用噪音（疑有残留后端实例，不影响 :3001 服务）。**对话框预填修复属主进程代码，需重启 dev 栈（npm run dev）后生效；拖出修复即时可试（渲染层 HMR + 后端已新）。**
+- **边界**：token 仅挂在拖出 DownloadURL 的 URL 上（预览 fetch 通道不变）；保存对话框/拖到桌面落盘两个 OS 级交互待用户重启后实机过目收口 verified。G0 开发期常态 · 不外推 packaged/Provider/GA。

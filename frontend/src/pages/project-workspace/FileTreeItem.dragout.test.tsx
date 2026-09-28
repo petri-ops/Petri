@@ -56,6 +56,8 @@ describe('UI-453 拖出 DownloadURL 统一 REST', () => {
     fireEvent.dragStart(row, { dataTransfer: dt });
     const downloadUrl = dt.setData.mock.calls.find(([mime]) => mime === 'DownloadURL')?.[1] ?? '';
     expect(downloadUrl).toContain('application/octet-stream:样本 文件.md:http://localhost:3001/api/workspaces/p1/file?path=');
+    // UI-453 加映：附拖出通道 token（Origin:null 的下载请求经 token 组合守卫放行）
+    expect(downloadUrl).toContain('&token=desktop-local');
     expect(downloadUrl).not.toContain('file://');
     expect(downloadUrl).not.toContain('D:');
   });

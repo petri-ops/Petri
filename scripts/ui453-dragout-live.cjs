@@ -101,12 +101,13 @@ function restCall(method, apiPath, body) {
         row:true,
         hasUrl:url.length>0,
         isRest:url.indexOf(':http://localhost:')>0 && url.indexOf('/api/workspaces/')>0,
+        hasToken:url.indexOf('token=desktop-local')>=0,
         hasFileScheme:url.indexOf('file://')>=0,
         hasDriveLetter:/[A-Z]:\\\\/.test(url) || url.indexOf(':D')>=0,
         urlFull:url
       });
     })()`));
-  const t1Ok = t1.row && t1.hasUrl && t1.isRest && !t1.hasFileScheme && !t1.hasDriveLetter;
+  const t1Ok = t1.row && t1.hasUrl && t1.isRest && t1.hasToken && !t1.hasFileScheme && !t1.hasDriveLetter;
   run.assert('T1_dragout_rest_download_url', t1Ok === true, JSON.stringify(t1));
 
   // ── T2 取数 URL 无鉴权 GET 200 + 字节一致 ──
@@ -141,6 +142,26 @@ function restCall(method, apiPath, body) {
   // ── T4 下载通道契约：preload bridge 在场（OS 级保存对话框由用户实机过目）──
   const t4 = await EVAL(`typeof window.biof3Desktop !== 'undefined' && typeof window.biof3Desktop.files !== 'undefined' && typeof window.biof3Desktop.files.downloadFromUrl === 'function'`);
   run.assert('T4_download_bridge_present', t4 === true || t4 === 'true', String(t4));
+
+  // ── T5 拖出通道守卫三态（UI-453 加映：Chromium 拖出下载的 GET 带 Origin:null）──
+  const guardPath = `/api/workspaces/${PROJECT_ID}/file?path=${encodeURIComponent(FILE_NAME)}`;
+  const guardCall = (headers, withToken) => new Promise((resolve, reject) => {
+    const req = http.request({
+      host: '127.0.0.1', port: 3001,
+      path: withToken ? `${guardPath}&token=desktop-local` : guardPath,
+      method: 'GET', headers,
+    }, (res) => {
+      let n = 0; res.on('data', (c) => { n += c.length; });
+      res.on('end', () => resolve({ status: res.statusCode, bytes: n }));
+    });
+    req.on('error', reject);
+    req.end();
+  });
+  const gNull = await guardCall({ Origin: 'null' }, false);
+  const gTok = await guardCall({ Origin: 'null' }, true);
+  run.assert('T5_dragout_guard_states',
+    gNull.status === 403 && gTok.status === 200 && gTok.bytes === Buffer.byteLength(content, 'utf8'),
+    `originNull=${JSON.stringify(gNull)} withToken=${JSON.stringify(gTok)}`);
 
   await front();
   // 截图带硬超时：本轮实测截图步骤可悬死（拖垮 finish 落盘证据），证据 JSON 优先

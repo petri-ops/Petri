@@ -87,8 +87,8 @@ after(async () => {
   try { rmSync(tempRoot, { recursive: true, force: true }); } catch {}
 });
 
-async function req(pathname, { method = 'GET', body } = {}) {
-  const r = await fetch(`${baseUrl}${pathname}`, { method, headers: { 'content-type': 'application/json' }, ...(body ? { body: JSON.stringify(body) } : {}) });
+async function req(pathname, { method = 'GET', body, headers } = {}) {
+  const r = await fetch(`${baseUrl}${pathname}`, { method, headers: { 'content-type': 'application/json', ...headers }, ...(body ? { body: JSON.stringify(body) } : {}) });
   return { status: r.status, headers: r.headers, body: r.headers.get('content-type')?.includes('json') ? await r.json() : Buffer.from(await r.arrayBuffer()) };
 }
 
@@ -159,4 +159,18 @@ test('file GET: ssh 超 16MB 诚实 413（UI-453，不静默截断）', async ()
   const r = await req(`/api/workspaces/${p.id}/file?path=docs/huge.h5ad`);
   assert.strictEqual(r.status, 413);
   assert.ok(String(r.body.error).includes('16MB'));
+});
+
+test('file GET: 拖出通道 token 组合守卫（UI-453 加映）', async () => {
+  writeFileSync(join(tempRoot, 'token-sample.md'), 'tok');
+  const p = db.createProject({ name: 'r-tok', workspaceKind: 'local', workspacePath: tempRoot });
+  // Origin:null 无 token → 403（防 file:// 页面语义保持）
+  const denied = await req(`/api/workspaces/${p.id}/file?path=token-sample.md`, { headers: { origin: 'null' } });
+  assert.strictEqual(denied.status, 403);
+  // Origin:null + 正确 token → 200（Chromium 拖出下载的请求形态）
+  const allowed = await req(`/api/workspaces/${p.id}/file?path=token-sample.md&token=desktop-local`, { headers: { origin: 'null' } });
+  assert.strictEqual(allowed.status, 200);
+  // 错误 token → 403
+  const wrong = await req(`/api/workspaces/${p.id}/file?path=token-sample.md&token=evil`, { headers: { origin: 'null' } });
+  assert.strictEqual(wrong.status, 403);
 });

@@ -229,7 +229,12 @@ function setupFileDialogIpc({ mainWindow } = {}) {
       }
       // UI-453 — 原生保存对话框：选路径确认后流式落盘（覆盖确认由对话框自身处理）；
       // 取消静默返回 canceled（前端不显示错误）。
-      const dialogOptions = { title: "下载到…", defaultPath: name };
+      // defaultPath 给绝对路径（join 下载目录 + 文件名）：裸文件名在 Windows 上实测
+      // 不预填文件名框（用户反馈「需要输入文件名才能保存」）；save-text-file 同款先例。
+      const dialogOptions = {
+        title: "下载到…",
+        defaultPath: path.join(app.getPath("downloads"), name),
+      };
       const picked = mainWindow && !mainWindow.isDestroyed()
         ? await dialog.showSaveDialog(mainWindow, dialogOptions)
         : await dialog.showSaveDialog(dialogOptions);

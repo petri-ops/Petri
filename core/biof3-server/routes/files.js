@@ -188,7 +188,16 @@ module.exports = function registerFileRoutes(app) {
       }
     });
 
-    app.get('/api/workspaces/:projectId/file', requireTrustedDesktopOrigin, async (req, res) => {
+    // UI-453 加映 — 拖出下载通道守卫：Chromium DownloadURL 拖到 OS 桌面时发起的 GET
+    // 带 Origin:null（实机抓真「拖到桌面不成功」根因：源白名单 403）。放行组合 =
+    // Origin 可信 或 携带本机 query token（与前端 getToken() 同一常量；Host 白名单
+    // 已限回环，与 Bearer 常量同权级，无新增攻击面）。仅此端点，其它端点不动。
+    const DRAG_OUT_TOKEN = 'desktop-local';
+    const fileDownloadGuard = (req, res, next) => {
+      if (req.query && req.query.token === DRAG_OUT_TOKEN) return next();
+      return requireTrustedDesktopOrigin(req, res, next);
+    };
+    app.get('/api/workspaces/:projectId/file', fileDownloadGuard, async (req, res) => {
       try {
         // BLOCK-67：ssh 项目预览 = Gateway fs_read（二进制 base64 往返，Content-Type 按扩展名同构）。
         const project = getProjectRecord(req.params.projectId);

@@ -6,6 +6,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { WorkspaceFileIcon } from '@/components/workspace-panels/WorkspaceFileIcon';
 import styles from '../project-workspace.module.css';
+import { getToken } from '@/lib/authClient';
 import type { ActiveWorkspaceFile, FileEntry } from './types';
 import { FileTreeList } from './FileTreeList';
 import { formatSize } from './helpers';
@@ -88,12 +89,14 @@ export function FileTreeItem({
 
   const handleDragStart = useCallback((event: React.DragEvent) => {
     event.dataTransfer.setData(DRAG_MIME, JSON.stringify({ path: fullPath, name: entry.name, type: entry.type }));
-    // BLOCK-90/91 → UI-453 — OS 拖出导出统一走预览同源 REST URL（无 Origin 的 GET 在
-    // 受信白名单放行内，实测 200）：原本地 file:// 直连在 Windows 上路径未编码（盘符/
-    // 反斜杠/中文直拼进 URL）从未验收过；REST 化后本地=回环下载（效果等同复制）、
-    // ssh=远程拉流，本地/ssh 同构一套逻辑。树内 drop 读的是上方内部 MIME，互不影响。
+    // BLOCK-90/91 → UI-453 — OS 拖出导出统一走预览同源 REST URL：原本地 file:// 直连在
+    // Windows 上路径未编码（盘符/反斜杠/中文直拼进 URL）从未验收过；REST 化后本地=回环
+    // 下载（效果等同复制）、ssh=远程拉流，本地/ssh 同构一套逻辑。树内 drop 读的是上方
+    // 内部 MIME，互不影响。UI-453 加映：附 query token——拖出下载的 GET 带 Origin:null
+    // 被源白名单 403（实机抓真），token 通道放行（服务端 fileDownloadGuard 消费）。
     if (entry.type === 'file' && fileUrl) {
-      event.dataTransfer.setData('DownloadURL', `application/octet-stream:${entry.name}:${fileUrl}`);
+      const downloadUrl = `${fileUrl}${fileUrl.includes('?') ? '&' : '?'}token=${encodeURIComponent(getToken())}`;
+      event.dataTransfer.setData('DownloadURL', `application/octet-stream:${entry.name}:${downloadUrl}`);
     }
     event.dataTransfer.effectAllowed = 'copyMove';
   }, [entry.name, entry.type, fullPath, fileUrl]);
