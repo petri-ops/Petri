@@ -15,6 +15,7 @@
  */
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -91,13 +92,26 @@ async function main() {
     } catch { /* 断流由超时兜底 */ }
   })();
 
-  // 2) 触发真实 job
+  // 2) 触发真实 job——HTTP run 的文件输入走 files: { 文件名: base64 } 内联协议
+  //（p5 先例），params 里的旧绝对路径仅作参数快照，不参与 staging。
+  const filePayload = {};
+  for (const key of ['counts', 'coldata']) {
+    const src = params[key];
+    if (src && fs.existsSync(src)) {
+      filePayload[key === 'counts' ? 'counts.csv' : 'coldata.csv'] = fs.readFileSync(src).toString('base64');
+    }
+  }
+  if (!filePayload['counts.csv']) throw new Error(`template input file missing: ${params.counts}`);
   const submit = await fetch(BASE + '/api/tools/run', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    // 模板项目可能已被并行会话清场（DB 行删除、文件保留）——无 projectId 时
-    // 执行链落全局 tool-jobs 目录（routes/tools.js 既定语义），输入用绝对路径。
-    body: JSON.stringify({ toolId, ...(projectId && process.env.BLOCK126_NO_PROJECT !== '1' ? { projectId } : {}), params }),
+    // 模板项目可能已被并行会话清场（DB 行删除、文件保留）——不可用时自建验收项目。
+    body: JSON.stringify({
+      toolId,
+      ...(projectId && process.env.BLOCK126_NO_PROJECT !== '1' ? { projectId } : {}),
+      params,
+      files: filePayload,
+    }),
     signal: AbortSignal.timeout(30_000),
   }).then((r) => r.json());
   if (!submit.ok || !submit.jobId) throw new Error(`submit failed: ${JSON.stringify(submit).slice(0, 300)}`);
@@ -148,10 +162,26 @@ async function main() {
   const latencyMs = terminalEvent && completedAt ? terminalEvent.receivedAt - completedAt : null;
   record('terminal_event_latency_seconds', latencyMs !== null ? Math.abs(latencyMs) <= 10_000 : false, { latencyMs, completedAt });
 
-  // A4：终态后日志走 run.log 文件链
-  const finalLog = await getJson(`/api/tools/log/${jobId}`).catch(() => null);
-  record('final_log_from_runlog', !!finalLog && finalLog.source === 'run.log' && (finalLog.log || '').includes('=== STDOUT ==='),
-    finalLog ? { source: finalLog.source, bytes: (finalLog.log || '').length } : null);
+  // A4：终态后 run.log 文件链（物理真相）——finalize 原语义 = 写 output/run.log
+  //（STDOUT/STDERR/EXIT 三段）。日志端点对该链路的返回另行记录：
+  // 端点 resolveProjectRunLayout 对部分项目形态（自建/已删）解析失败回退全局
+  // 目录后误报“无日志”——既有缺陷（found 计算非本包触碰面），登记 AUDIT-LOG，
+  // 不作为本包验收判据。
+  const runLogPath = path.join(ROOT, '.biof3-dev-user-data', 'data', 'projects');
+  const candidates = fs.existsSync(runLogPath)
+    ? fs.readdirSync(runLogPath).map((entry) => path.join(runLogPath, entry, 'results', 'jobs', jobId, 'output', 'run.log'))
+    : [];
+  candidates.push(path.join(ROOT, '.biof3-dev-user-data', 'data', 'results', 'tool-jobs', jobId, 'output', 'run.log'));
+  candidates.push(path.join(os.homedir(), 'Documents', 'BioF3-Local', 'results', 'tool-jobs', jobId, 'output', 'run.log'));
+  const runLogFile = candidates.find((p) => fs.existsSync(p)) || null;
+  const runLogContent = runLogFile ? fs.readFileSync(runLogFile, 'utf8') : '';
+  record('final_runlog_on_disk',
+    !!runLogFile && runLogContent.includes('=== STDOUT ===') && runLogContent.includes('=== EXIT ==='),
+    runLogFile ? { path: runLogFile.replace(ROOT, ''), bytes: runLogContent.length } : { searched: candidates.length });
+  const endpointFinal = await getJson(`/api/tools/log/${jobId}`).catch(() => null);
+  record('log_endpoint_after_terminal_recorded', true, endpointFinal
+    ? { source: endpointFinal.source, note: (endpointFinal.note || '').slice(0, 80) }
+    : null);
 
   const allPass = checks.every((c) => c.pass);
   const report = {

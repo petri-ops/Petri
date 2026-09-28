@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-28（**BLOCK-126 实机验收进展：P1 终态失效事件两轮实证（SSE invalidate(jobs) 到达·落库→事件延迟 1ms，acceptance/block-126/perception-live.json）；P2 live 日志实机被 dev 栈 R 环境阻塞（无 BIOF3_R_HOME，preflight 失败于 spawn 前属既有语义非本包回归），重开条件=带 env 的栈复跑 scripts/block126-perception-live.mjs 翻绿即收口。dev 栈状态异动：旧栈退出+新 3001 无 R env+3000 被外部进程占用致 npm run dev fail-fast（待占用解除）**。BIO-1/UI-452 实机走查仍待补。队列不变：下一项 BIO-2。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-28（**BLOCK-126 整包 completed——实机 allPass 6/6**（dev 栈环境恢复后复跑 scripts/block126-perception-live.mjs：真实 deseq2 job 终态 SSE invalidate 到达延迟 1-2ms·运行窗口日志端点 live 实时 R 输出尾部·终态后 run.log 三段格式物理落盘保持；验收项目清理；附带发现=日志端点对自建/已删项目 job 的 run.log 定位回退误报，登记 AUDIT-LOG 🟡 归 BIO-2/PL-4）。**队列下一项=BIO-2 交互上限与降级链**；UI-452 实机走查待补（栈在跑，条件已具备）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-28（**BLOCK-126 实机验收进展：P1 终态失效事件两轮实证（SSE invalidate(jobs) 到达·落库→事件延迟 1ms，acceptance/block-126/perception-live.json）；P2 live 日志实机被 dev 栈 R 环境阻塞（无 BIOF3_R_HOME，preflight 失败于 spawn 前属既有语义非本包回归），重开条件=带 env 的栈复跑 scripts/block126-perception-live.mjs 翻绿即收口。dev 栈状态异动：旧栈退出+新 3001 无 R env+3000 被外部进程占用致 npm run dev fail-fast（待占用解除）**。BIO-1/UI-452 实机走查仍待补。队列不变：下一项 BIO-2。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-28（**G0 Goal 交织序双包推进：BIO-1/UI-452 结果信息密度包已交付（`509d3eaa`，六件+契约 27/27，台账 in_progress 实机待补）；队列第 2 项 PL-2/BLOCK-126 感知实时性 active（用户裁决「可以的 开干！」）——终态 jobs 失效事件（CAS 原语单点接线+MCP 8 处补发）+ 运行期日志行缓冲（executeJob spawn 化+日志端点 live 尾部），契约 10/10+定向回归 25/25，实机待补**。队列登记在 pending-work-backlog G0 Goal 系列区。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

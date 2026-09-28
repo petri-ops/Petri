@@ -290,6 +290,7 @@
 
 | 状态 | 日期 | 事项 | 处置边界 |
 | --- | --- | --- | --- |
+| 🟡建议 | 2026-09-28 | **日志端点 `/api/tools/log/:id` 对项目 job 的 run.log 定位与执行链不一致（既有缺陷，BLOCK-126 实机验收发现）**：`routes/tools-metadata.js` 的 pick 链先 `resolveProjectRunLayout({projectId…})`，对「脚本/HTTP 自建项目」与「已删除项目」的 job 解析失败（Project not found / baseline 兼容性 throw）后**静默回退全局 jobsDir**→误报「该作业没有可用日志文件」；同一 job 的 run.log 物理在项目 `results/jobs/<id>/output/` 已被 finalize 正确写入（实机证据 acceptance/block-126/perception-live.json：run.log 1507B 三段格式在盘、端点 source:null）。live 分支（BLOCK-126）与 SSH 分支不受影响 | 建议归 G0-BIO BIO-2 或 PL-4 顺带修：pick 失败时按项目目录 glob 兜底或把 layout 失败原因透出到 note（诚实化）；非阻塞（用户主链经前端拿到的 projectId 形态未见复现，自建项目是脚本形态） |
 | 🟡建议 | 2026-09-28 | **quality:lint 5 error 位于 `frontend/src/pages/project-workspace.tsx`（react-hooks/immutability ×1 :252 + react-hooks/refs ×4 :951/:1026/:1127/:1128），随 UI-451 加映 v3 提交（`11172bf8`）入库**——该提交交付笔录声称「eslint 触碰面 0 error」，与仓库级 `npm run quality:lint` 实测 5 error 不符（推测其验证为 frontend 局部配置或触碰面子集口径）。发现者=G0-BIO/UI-452 会话（本会话触碰面 0 error 实证对照） | 归属 **UI-451 域会话**收口清偿：按三分类处置（真缺陷修/化石删/误报豁免走 `--suppress-all` 重扫入库留痕）；清偿前其他包收口 quality:lint 按 known-red 单独登记。非阻塞（react-hooks 新规则族，BK-06 书面豁免域边缘形态） |
 | 🟡延期 | 2026-08-03 |
 | 🟡延期 | 2026-08-03 | **G0-RS-P7 Honest Product Requalification。** 用户裁决发布级资格工作后移；Result Studio 保持 `implemented_unverified / experimental`，没有 canonical P7 PASS evidence | 重开前必须先解决 selection→enrichment 无 candidate/compare/lifecycle、existing Git consent UI、五条独立 task trace、双 Provider、packaged 六格与 literal OS reboot；历史 RS9、P4R/P6 开发态证据不得冒充资格 |

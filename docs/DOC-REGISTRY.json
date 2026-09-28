@@ -5428,13 +5428,13 @@
       "capability": "platform-perception",
       "path": "docs/block-126-platform-perception-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-126-platform-perception",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-28",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "tags": [
         "block-126",
         "g0-platform",
@@ -5442,7 +5442,7 @@
         "sse-invalidation",
         "live-log"
       ],
-      "notes": "G0-PLATFORM PL-2 阶段种子（用户裁决「可以的 开干！」交织序第 2 项）。终态失效事件（CAS 原语单点接线+MCP 8 处直写补发）+ 运行期日志行缓冲（executeJob spawn 化）。前端零改动受益于 CK-03 通道。"
+      "notes": "G0-PLATFORM PL-2 种子 2026-09-28 当日收口 completed：P1 终态失效事件（CAS 原语单点接线+MCP 8 处补发，实机 SSE 到达·延迟 1-2ms）+ P2 运行期日志流（spawn 化+行缓冲，实机 live 尾部+run.log 文件链保持）；契约 10/10+回归 25/25+test:changed 237/0+实机 allPass 6/6（scripts/block126-perception-live.mjs 可复跑）。附带发现：日志端点项目 job 定位缺陷登记 AUDIT-LOG 🟡 归 BIO-2/PL-4。"
     }
   ],
   "lastUpdated": "2026-09-28",

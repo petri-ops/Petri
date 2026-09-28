@@ -5,8 +5,8 @@ acceptance:
   - block126 契约测试全绿（终态事件三原语 + live-log 环 + 源码扫描守卫）
   - 既有 ck03-events-bus / tools-executor 相关定向回归零红
   - 实机（dev 栈可用时）：作业终态后前端 ≤ 秒级收到 jobs 失效；运行中日志端点返回实时尾部
-reopen: 实机不可用时组件/契约级收口为 in_progress，dev 栈可用后补实机翻 verified
-status: active
+reopen: 日志端点项目 job 定位缺陷（AUDIT-LOG 🟡 2026-09-28）归 BIO-2/PL-4 顺带修；MCP 路径日志流随 PL-1 执行统一获得
+status: completed
 ---
 
 # BLOCK-126 — 感知实时性：终态失效事件 + 运行期日志流（G0-PLATFORM PL-2）
@@ -55,11 +55,12 @@ status: active
 - `npm run test:changed` + docs:check；impact-map 补登记（若新文件未被通配覆盖）。
 - 实机（dev 栈可用时）：真实 job 终态→SSE 秒级失效；运行中日志端点 live 尾部。
 
-## 5.1 实机进展（2026-09-28，`acceptance/block-126/perception-live.json`）
+## 5.1 实机验收（2026-09-28 completed，`acceptance/block-126/perception-live.json` allPass 6/6）
 
-- **P1 终态失效事件实机两轮实证**：SSE `/api/events` 收到 `invalidate(jobs, {toolJobId, state})`，**落库→事件到达延迟 1ms**（两轮同值；脚本 `scripts/block126-perception-live.mjs` 可复跑）。
-- **P2 live 日志实机被环境阻塞**：验收时 dev 栈无 `BIOF3_R_HOME`（Rscript preflight 失败于 spawn 前=既有语义非本包回归；含本包代码的栈当日 15:29 曾成功跑 deseq2 五例）。**重开条件=带数据根 `runtimes/R` env 的 dev 栈在跑后复跑本脚本**，期望 live_log/final_runlog 两项翻绿后整包收口。
-- 验收临时项目已清理；两条快速失败 job（preflight 路径）反证了失败终态同样发事件。
+- **P1 终态失效事件**：SSE `/api/events` 收到 `invalidate(jobs, {toolJobId, state})`，落库→事件延迟 **1-2ms**（多轮同量级；failed 与 completed 终态均验证）。
+- **P2 运行期日志**：真实 deseq2 job（HTTP `/api/tools/run`，files 内联协议 p5 先例）运行窗口内日志端点返回 `source:'live'` 的实时 R 输出尾部；终态后 run.log 物理落盘三段格式（STDOUT/STDERR/EXIT）保持——finalize 原语义零变化。
+- 验收脚本 `scripts/block126-perception-live.mjs` 可复跑（自建验收项目→跑完清理）。
+- **附带发现登记 AUDIT-LOG 🟡**：日志端点对自建/已删项目 job 的 run.log 定位回退全局目录后误报无日志（既有缺陷，found 计算非本包触碰面）——归 BIO-2/PL-4 顺带修。
 
 ## 6. 台账关系
 

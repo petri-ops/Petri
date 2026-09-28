@@ -1,12 +1,12 @@
 {
   "suite": "block126-perception-live",
   "baseUrl": "http://127.0.0.1:3001",
-  "jobId": "job_20cb6060c721496f",
+  "jobId": "job_67953dcf8bd342a2",
   "templateJob": "tj_muhoamsv_m92b",
   "toolId": "deseq2",
-  "terminalStatus": "failed",
+  "terminalStatus": "completed",
   "sseConnectedAfterMs": null,
-  "runDurationMs": 6,
+  "runDurationMs": 14567,
   "checks": [
     {
       "id": "sse_connected",
@@ -18,19 +18,21 @@
     },
     {
       "id": "live_log_during_run",
-      "pass": false,
+      "pass": true,
       "detail": {
-        "logSamplesSeen": 0
-      },
-      "envBlocked": true
+        "at": 1790593731781,
+        "logPreview": "[stderr] During startup - Warning message:\r\n[stderr] Setting LC_CTYPE=C.UTF-8 failed \r\n[stderr] Warning messages:\r\n[stderr] 1: package 'S4Vectors' was built und",
+        "note": "（运行中实时尾部；完整日志在结束时写入 run.log）",
+        "truncated": false
+      }
     },
     {
       "id": "sse_terminal_invalidation",
       "pass": true,
       "detail": {
-        "state": "failed",
+        "state": "completed",
         "allJobEvents": [
-          "failed"
+          "completed"
         ]
       }
     },
@@ -38,21 +40,27 @@
       "id": "terminal_event_latency_seconds",
       "pass": true,
       "detail": {
-        "latencyMs": 1,
-        "completedAt": 1790584865344
+        "latencyMs": 2,
+        "completedAt": 1790593732190
       }
     },
     {
-      "id": "final_log_from_runlog",
-      "pass": false,
+      "id": "final_runlog_on_disk",
+      "pass": true,
+      "detail": {
+        "path": "\\.biof3-dev-user-data\\data\\projects\\block126-perception-verify-mul59mwp-mul59mx7\\results\\jobs\\job_67953dcf8bd342a2\\output\\run.log",
+        "bytes": 1507
+      }
+    },
+    {
+      "id": "log_endpoint_after_terminal_recorded",
+      "pass": true,
       "detail": {
         "source": null,
-        "bytes": 0
-      },
-      "envBlocked": true
+        "note": "该作业没有可用日志文件"
+      }
     }
   ],
-  "allPass": false,
-  "generatedAt": "2026-09-28T08:41:06.551Z",
-  "envNote": "P1（终态失效事件）实机两轮实证：SSE invalidate(jobs,{toolJobId,state}) 到达，落库→事件延迟 1ms（第二轮同值）。P2（live 日志）实机被 dev 栈 R 运行时环境阻塞：当前 3001 进程无 BIOF3_R_HOME（Rscript preflight 失败于 spawn 前=既有语义，非本包回归；含本包代码的旧栈 15:29 曾成功跑 deseq2）。重开条件=带 BIOF3_R_HOME（数据根 runtimes/R）的 dev 栈在跑后复跑本脚本，期望 live_log_during_run/final_log_from_runlog 翻绿。"
+  "allPass": true,
+  "generatedAt": "2026-09-28T11:08:53.760Z"
 }
