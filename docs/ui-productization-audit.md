@@ -4431,7 +4431,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **known-red 如实登记**：quality:lint 全量红均位于 project-workspace.tsx 系并行 UI-451 加映在制 WIP 文件（非本包触碰面，本包文件触碰面 0 error）；frontend 本地严格规则集在 viewer 的存量形态（effect 内 setLoading/渲染期 ref 访问/测试 mock 工厂）为 BK-06 书面豁免域存量，本批仅行号平移零新增。
 - **边界**：参考线默认值（±1/padj0.05）为展示辅助非分析真值（job params 投影留加映候选）；搜索为 ID 子串匹配非模糊/拼音；表格数值格式化仅显示层（title/协议载荷保留原值）；Lightbox 不做图片旋转/标注。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-453: 文件树拖出导出统一 REST + 下载按钮保存对话框化 + ssh 大文件诚实拒绝 (2026-09-28 in_progress，dev Electron 实机 5/5 allPass)
+## UI-453: 文件树拖出导出 + 下载按钮保存对话框 + ssh 大文件诚实拒绝 (2026-09-28 verified，用户实机过目「无误」；演进终态见加映三：拖出=startDrag 真文件拖拽、对话框=无 parent 形态，REST/DownloadURL 为中间态)
 
 - **来源**：用户问「文件（ssh/本地）从文件树拖到桌面应该可以下载下来的是吗？本地应该是复制」+ 报「下载按钮点击后没有反馈，按理应弹文件管理器选路径」。核查：拖出机制 BLOCK-90/91 已存在但本地分支 file:// 路径未编码（Windows 从未验收、大概率不可用）、ssh 分支零实机证据且有 16MB 静默截断；下载按钮为设计性静默落 Downloads（无任何 UI 反馈）——「无反馈」体感与代码一致。用户裁决「行 整起来」。
 - **修法三件**：①**拖出统一 REST**——FileTreeItem dragstart 的 DownloadURL 本地/ssh 统一走预览同源 REST URL（无 Origin 的 GET 实测在受信白名单放行内 200；本地=回环下载效果等同复制，ssh=远程拉流，同构一套逻辑）；原本地 `file://${workspaceDir}` 未编码分支（盘符/反斜杠/中文直拼）退役；顺手修 deps 漏 fileUrl 的陈旧闭包。②**下载按钮保存对话框化**——file-dialog.js 的 download-from-url handler 改原生 showSaveDialog（默认文件名预填、取消静默返回 canceled、覆盖确认由对话框自身处理），落盘后 shell.showItemInFolder 在资源管理器中高亮；原「静默落 Downloads + 重名 -2」退役（UI-444 时文本导出已因同款反馈加过对话框，本条为同类第二次）。③**ssh 16MB 诚实化**——file GET 端点 read 前先 stat，超 16MB 返回 413 明确报错（原先静默截断会拖出损坏文件）；stat 失败维持原 read 报错语义。
@@ -4439,7 +4439,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：拖出到桌面=Chromium 下载协议（本地项目经回环取数，效果等同复制但非 OS 级 copy——渲染进程拿不到桌面落点，平台唯一开放协议）；>16MB ssh 文件下载/拖出诚实 413（流式通道为后续候选）；保存对话框行为由用户过目收口。**待用户实机过目后翻 verified。**
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-453 加映: 用户实机反馈两件修复——保存对话框文件名预填 + 拖出 403 根因（Origin:null） (2026-09-28 in_progress，dev Electron 实机 6/6 allPass)
+## UI-453 加映: 用户实机反馈两件修复——保存对话框文件名预填 + 拖出 403 根因（Origin:null） (2026-09-28 verified，随主条目过目；token 守卫沿用至 startDrag 终态)
 
 - **来源**：用户实机试后反馈「点击下载能有弹窗了，但需要手动输入文件名才能保存（应默认填好）」+「鼠标拖拽到本地桌面不成功」。
 - **根因两件**：①defaultPath 只给了裸文件名——Windows 上实测不预填文件名框（同文件 save-text-file 先例 L79 早已踩坑用 join(downloads, name) 绝对路径，本条照抄补齐）；②拖出 403——**Chromium DownloadURL 拖出下载发起的 GET 带 `Origin: null`**，被 local-request-boundary 源白名单直接 403（curl 无 Origin 放行 ≠ 拖出请求形态，首版评估漏了这层）——实锤复现：`curl -H "Origin: null"` → 403。
@@ -4448,7 +4448,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **过程事故如实记**：为让 token 守卫生效杀 :3001 后端，发现该 dev 后端系**终端独立进程**（非 Electron supervisor 子进程，杀后无人重拉，supervisor 未接管）——已按主进程同款 env（BIOF3_LOCAL_DATA_DIR/DB 指向 .biof3-dev-user-data）手动拉起恢复，项目数据核对无恙；另见 :3005 端口占用噪音（疑有残留后端实例，不影响 :3001 服务）。**对话框预填修复属主进程代码，需重启 dev 栈（npm run dev）后生效；拖出修复即时可试（渲染层 HMR + 后端已新）。**
 - **边界**：token 仅挂在拖出 DownloadURL 的 URL 上（预览 fetch 通道不变）；保存对话框/拖到桌面落盘两个 OS 级交互待用户重启后实机过目收口 verified。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-453 加映二: 拖出切 webContents.startDrag 真文件拖拽 + 下载链路诊断日志 (2026-09-28 in_progress，dev Electron；OS 级行为待用户过目)
+## UI-453 加映二: 拖出切 webContents.startDrag 真文件拖拽 + 下载链路诊断日志 (2026-09-28 verified，用户实机确认拖拽成功「拖拽确实可以了」)
 
 - **来源**：用户重启 dev 栈后两测皆败（拖桌面不落盘/预填不生效）。诊断：主进程日志零痕迹无法定位下载链路；DownloadURL 方案虽服务端通路全通（token 守卫四态验证）但 Windows 实测两次不落盘——判定弃用。
 - **修法两件**：①**拖出切 Electron 官方 `webContents.startDrag`**——新通道 `file:start-drag`（channels 登记+preload 包装+d.ts 声明），主进程 handler：本地项目直接拖源文件（OS 级复制语义零拷贝）；ssh/远程先经本机 REST（附 token）拉临时文件再拖（>16MB 端点 413 诚实）；icon 用 app.getFileIcon 取系统文件图标（失败回落空图）。渲染层 FileTreeItem dragstart 对文件行 preventDefault 后 IPC 请主进程接管（dragOutBusyRef 防重入；目录行树内拖拽不受影响）。②**下载 handler 四点诊断日志**（invoked/picked/canceled/saved）——判别实验实锤链路通：页面直调 IPC 后主进程日志即时出现 `invoked: diag-sample.md` 并卡在 showSaveDialog 等待交互（新代码 + 新对话框在跑，defaultPath 绝对路径已带）。
@@ -4456,7 +4456,9 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **补（用户第三轮实测：拖拽✓已成功，弹窗仍不预填）**：主进程日志实锤弹窗即本 handler（invoked→canceled 全程在录，name 传参正确）——根因锁定为 **Windows showSaveDialog 无 filters 时文件名框不回填 defaultPath** 的平台怪癖；补按扩展名 filters（`{name:'XX 文件',extensions:[ext]}`+所有文件兜底）后构成 Windows 保存框完整形态。live 脚本同步适配 startDrag 方案（T1 桥在场/T2 构造 URL 数据完整性/T5 守卫三态，5/5 allPass；合成 dragstart 会触发主进程真拖拽接管故不再派发，拖出载荷契约由组件测试承载）。
 - **边界**：DownloadURL 拖出方案退役（macOS 曾验过、Windows 两次实测失败）；ssh 大文件拖出受 16MB 端点上限诚实约束；startDrag 期间用户松手过早则拖出取消（Chromium 行为）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-453 加映三: 保存对话框预填失败的真正根因——parent 参数触发 Windows 通用「另存为」外壳 (2026-09-28 in_progress，dev Electron；回归门禁 3/3 allPass + 截图真值双证)
+## UI-453 加映三: 保存对话框预填失败的真正根因——parent 参数触发 Windows 通用「另存为」外壳 (2026-09-28 verified，用户实机过目「无误」)
+
+- **verified 翻转（2026-09-28，用户终测确认；整包含主条目+三轮加映一并收口）。**
 
 - **来源**：用户第三轮实机反馈「点击下载按钮 出来的弹窗并没有预填下载文件的名字」（filters 修复后仍失败），并指示「你来测试 请彻底解决」。
 - **诊断链（自测到位，非猜测）**：①主进程日志实锤弹窗即本 handler 且 name 传参正确、options 日志（title/defaultPath/filters/hasParent）全量打印**完全正确**；②全屏截图 + Windows UI Automation 读窗口实况：弹出的框标题=「另存为」（非我们的「下载到…」）、地址=桌面、文件名框空、保存类型=All Files——**options 整体未生效**；③最小 Electron 脚本 A/B 对照实验（同一 electron 二进制同一 options）：**无 parent → 弹「下载到…」正常；带 parent（BrowserWindow）→ 弹「另存为」全失效** —— 唯一变量=parent 参数，铁证。
