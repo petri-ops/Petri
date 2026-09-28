@@ -5,7 +5,9 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-09-26（**BLOCK-124-HARNESS-PRODUCTIZATION 当日整包 completed——Gewu Harness 产品化第一批**：C-13 符号图产品化落地并实机走查 allPass（agent 自主调 codegraph_who_imports×2 完成死导出清理）；资产四问盘点+组合勘察缺口已落 plan；范围外转候选 C-18/C-19 在册。**rider=UI-447 待用户实机过目**。plan=docs/block-124-harness-productization-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-28（**两 Goal 线成对立项（规划动作，非工作包启动）——G0-PLATFORM 通用 agent 平台工程强化 + G0-BIO 生信垂直交付能力**（用户裁决原话「行！现在就是分成 通用agent平台和垂直领域的生信平台两个视角了 接下来就是具体的执行更新迭代 是否要做两个大的计划 尽可能的考虑全面 用于后面两个大部分的工作推进」；源自同日「结果与分析链路企业级交付差距评估」六路只读探查，通用视角+垂直视角两轮）：G0-PLATFORM 种子 PL-1~PL-7（执行语义统一/感知实时性/调度可靠性/数据生命周期/性能卫生/安全卫生/任务中心叙事），G0-BIO 种子 BIO-1~BIO-7（信息密度/交互上限/lineage 可视化+继续分析/bulk 链解冻/输入显式化/解读层/领域深化池）；**硬依赖=PL-1→BIO-4**；**C-15 本日编入 G0-BIO（BIO-3/BIO-4）、C-12 转 BIO-7 池**（重开条件「方向回摆」由本次裁决触发）。**推进队列当前无可执行排队项——两 Goal 阶段种子的启动序待用户逐个裁决**（每阶段照常过立项检查单；裁决后入本表队列区）。plan=docs/g0-platform-goal-plan.md + docs/g0-bio-delivery-goal-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-26（**BLOCK-124-HARNESS-PRODUCTIZATION 当日整包 completed——Gewu Harness 产品化第一批**：C-13 符号图产品化落地并实机走查 allPass（agent 自主调 codegraph_who_imports×2 完成死导出清理）；资产四问盘点+组合勘察缺口已落 plan；范围外转候选 C-18/C-19 在册。**rider=UI-447 待用户实机过目**。plan=docs/block-124-harness-productization-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-26（**BLOCK-123 当日整包 completed（用户「按照你的建议来进行」；closeout 十二门绿）**——P0 六环节零断点 + P1 三轮走查四形态闭环（错误恢复双障碍/跨文件 TTL 防作弊复核）+ 缺口全清（G-01=UI-446 审阅 tab 未读圆点 in_progress 待过目/G-02 销号/G-03 清偿 30 条测试会话残留/G-04 续观）。**队列=无可推进项**；riders 全清（UI-446 verified）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
@@ -114,10 +116,10 @@
 | ID | 事项 | 重开条件 / 来源 |
 | --- | --- | --- |
 | C-01 | 长列表虚拟化——**已编入 CK-02 → 勘察收缩转观察（2026-09-25：cv 与 prepend 锚定结构性冲突，CSS 回退零残留；重开=用户实测卡顿报告，届时带实验数据选型 react-virtuoso 或重写锚定后 cv 重试）** | BLOCK-106/107 遗留候选 |
-| C-12 | **scrna_standard 结果闭环路径**（BLOCK-121 出局项转候选）：seurat-standard/scanpy-advanced 在 `../gewu-pack-bio/plugins.dormant/` 休眠且包内无 scrna 演示数据；重开条件=dormant 激活 + scrna 演示数据入库 + Seurat/scanpy 运行时库在位实证；届时 BLOCK-121 的 flow/工具面（result_summary）直接复用 | BLOCK-121 P0 勘察登记 |
+| C-12 | **scrna_standard 结果闭环路径——已转 G0-BIO BIO-7 领域深化池（2026-09-28）**：原 BLOCK-121 出局项（seurat-standard/scanpy-advanced 在 `../gewu-pack-bio/plugins.dormant/` 休眠且包内无 scrna 演示数据）；届时 BLOCK-121 的 flow/工具面（result_summary）直接复用；启动仍需逐项裁决 | BLOCK-121 P0 勘察登记；2026-09-28 编入 G0-BIO |
 | C-13 | **符号图 MCP 产品化——已随 BLOCK-124 completed（2026-09-26 当日立项当日整包收口）**：codegraph_who_imports / codegraph_classify_edges 落地 agent 内建工具轨（七面注册+实机走查 allPass，agent 自主调用完成死导出清理）；plan=docs/block-124-harness-productization-plan.md | 已完成销号（证据 acceptance/block-124/）；来源=HK 建表批 2026-09-26 |
 | C-14 | **RTK 型工具输出压缩**（ZCode hooks 适配 shell 输出压缩，社区口径 60-90%） | 重开条件=实测 token 成本成为痛点 + ZCode hooks 适配验证可行；来源=HK 建表批 2026-09-26 |
-| C-15 | **结果闭环路径扩展（原 BLOCK-122 提案，垂直域）**：从已验证 deseq2 链延伸（bind_artifact 串 volcano-plot / 激活 pca-explorer 独立路径）——用户 2026-09-26 裁决「属于垂直领域的扩展」让位通用编码主线（BLOCK-123） | 重开条件=用户裁决方向回摆生信旗舰倾斜（参照 product-strategy-review-2026-09 §4）；勘察情报=AUDIT-LOG 2026-09-26 行（pack 在本机/deseq2 唯一激活/休眠 15 插件/demo-data 错位盘点） |
+| C-15 | **结果闭环路径扩展——已编入 G0-BIO（2026-09-28）**：原 BLOCK-122 提案（垂直域）内容收编=BIO-3（lineage 可视化+继续分析显式化，bind_artifact 串 volcano-plot 面）+ BIO-4（bulk 主链解冻，激活下游工具面）；重开条件「用户裁决方向回摆生信旗舰倾斜」由 2026-09-28 两 Goal 立项裁决触发，勘察情报（pack 在本机/deseq2 唯一激活/休眠 15 插件/demo-data 错位盘点）已并入 G0-BIO plan §2 | 2026-09-26 登记；2026-09-28 编入 |
 | C-16 | **审阅徽章 ±行数版——已落地（2026-09-26 队列逐推；UI-449）**：git-adapter.workingTreeShortstat 权威源桥（diff HEAD --shortstat+untracked 分开计数）+IPC 四件套+前端「N·+A−D」四入口同源（回落纯计数）；红绿 adapter 3+store/RightZone 4 全绿；**UI-449 verified（2026-09-27 用户实机过目「符合预期」）** | 队列逐推模式落地；来源=UI-446 v4 用户提议 |
 | C-17 | **BLOCK-123 第三轮走查形态深挖——已全部清偿销号（2026-09-26 队列逐推）**：a) reject→agent 调整回路=BLOCK-125 拓扑脑裂修复+实机 allPass（plan=docs/block-125-reject-loop-plan.md）；b) 终端反馈面=exec 流式进工具行实机 verified（acceptance/c17b-terminal/streaming-sse.json allPass）+终端 dock 用户 PTY 设计分离复核成立（CDP 腿被并行会话占用按阶梯第 2 级如实分级）；c) 多文件深度任务续形态=抽取共享模块新形态 allPass（scripts/c17c-multifile-walkthrough.mjs：20s 完成 roundMoney 去重抽取，自持测试副本复跑断言零弱化，变更 3 文件，acceptance/c17c-multifile/） | 队列逐推模式（用户裁决「按顺序逐个推进」）全部推完销号；原始三轮走查证据=acceptance/block-123/ |
 | C-18 | **编码 playbook 资源 skill——已落地（2026-09-26 队列逐推；轻量批 plan=本条目）**：`resources/skills/coding-playbook/`（skill.json 零插件+README+内联守则六条：项目约定优先/先读后改/小步最小改动/验证闭环/诚实汇报/依赖默认不加）+manifest 登记；**注册表实证 discover=4 可发现可读取**；skills:check 本 skill 零问题 | 队列逐推模式落地；来源=BLOCK-124 P0 勘察 2026-09-26 |
