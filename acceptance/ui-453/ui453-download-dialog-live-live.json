@@ -1,0 +1,23 @@
+{
+  "name": "ui453-download-dialog-live",
+  "startedAt": "2026-09-28T10:43:24.775Z",
+  "finishedAt": "2026-09-28T10:44:02.749Z",
+  "assertions": [
+    {
+      "name": "T0_download_bridge_present",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "T1_download_dialog_title_effective",
+      "pass": true,
+      "detail": "new=[\"下载到…\"] expected=\"下载到…\" all=[\"下载到…\"] shot=D:\\1.WorkDir\\biof3-desktop\\acceptance\\ui-453\\ui453-download-dialog.png"
+    },
+    {
+      "name": "T2_dialog_closed_no_hang",
+      "pass": true,
+      "detail": "left=[]"
+    }
+  ],
+  "allPass": true
+}

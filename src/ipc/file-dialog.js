@@ -244,9 +244,17 @@ function setupFileDialogIpc({ mainWindow } = {}) {
             ]
           : [{ name: "所有文件", extensions: ["*"] }],
       };
-      const picked = mainWindow && !mainWindow.isDestroyed()
-        ? await dialog.showSaveDialog(mainWindow, dialogOptions)
-        : await dialog.showSaveDialog(dialogOptions);
+      const hasParent = Boolean(mainWindow && !mainWindow.isDestroyed());
+      console.log("[desktop] save-dialog options:", JSON.stringify({
+        title: dialogOptions.title,
+        defaultPath: dialogOptions.defaultPath,
+        filters: dialogOptions.filters,
+        hasParent,
+      }));
+      // UI-453 加映三（实机抓真）— 【不传 parent】：传 BrowserWindow 时本机 Windows
+      // 弹的是通用「另存为」外壳（title/filters/文件名预填全失效，地址落桌面），
+      // 不传 parent 时同一 options 完整生效（最小脚本 A/B 对照实验双证）。
+      const picked = await dialog.showSaveDialog(dialogOptions);
       if (picked.canceled || !picked.filePath) {
         console.log("[desktop] download-from-url canceled by user");
         return { ok: false, canceled: true };

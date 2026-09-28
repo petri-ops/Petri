@@ -4455,3 +4455,12 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：dragout 组件测试重写为 startDrag 语义 3/3（本地收 localPath 不写 DownloadURL/ssh 收附 token 的 URL/目录行不触发）+ 定向 11 文件 83 用例全绿 + tsc 0 + ipc-channels-registry 双向守护 5/5 + lint 净。OS 级真拖放与保存对话框预填行为 CDP 不可模拟，待用户实机过目。
 - **补（用户第三轮实测：拖拽✓已成功，弹窗仍不预填）**：主进程日志实锤弹窗即本 handler（invoked→canceled 全程在录，name 传参正确）——根因锁定为 **Windows showSaveDialog 无 filters 时文件名框不回填 defaultPath** 的平台怪癖；补按扩展名 filters（`{name:'XX 文件',extensions:[ext]}`+所有文件兜底）后构成 Windows 保存框完整形态。live 脚本同步适配 startDrag 方案（T1 桥在场/T2 构造 URL 数据完整性/T5 守卫三态，5/5 allPass；合成 dragstart 会触发主进程真拖拽接管故不再派发，拖出载荷契约由组件测试承载）。
 - **边界**：DownloadURL 拖出方案退役（macOS 曾验过、Windows 两次实测失败）；ssh 大文件拖出受 16MB 端点上限诚实约束；startDrag 期间用户松手过早则拖出取消（Chromium 行为）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-453 加映三: 保存对话框预填失败的真正根因——parent 参数触发 Windows 通用「另存为」外壳 (2026-09-28 in_progress，dev Electron；回归门禁 3/3 allPass + 截图真值双证)
+
+- **来源**：用户第三轮实机反馈「点击下载按钮 出来的弹窗并没有预填下载文件的名字」（filters 修复后仍失败），并指示「你来测试 请彻底解决」。
+- **诊断链（自测到位，非猜测）**：①主进程日志实锤弹窗即本 handler 且 name 传参正确、options 日志（title/defaultPath/filters/hasParent）全量打印**完全正确**；②全屏截图 + Windows UI Automation 读窗口实况：弹出的框标题=「另存为」（非我们的「下载到…」）、地址=桌面、文件名框空、保存类型=All Files——**options 整体未生效**；③最小 Electron 脚本 A/B 对照实验（同一 electron 二进制同一 options）：**无 parent → 弹「下载到…」正常；带 parent（BrowserWindow）→ 弹「另存为」全失效** —— 唯一变量=parent 参数，铁证。
+- **修法**：`downloadFromUrl` handler 的 `dialog.showSaveDialog(mainWindow, options)` 改 `dialog.showSaveDialog(options)`（不传 parent）。本机 Windows 在传 owner 窗口时 Electron 走的对话框实现被降级为通用「另存为」壳（title/filters/预填/初始目录全丢）；不传 parent 时同一 options 完整生效。副作用=对话框不再与主窗口模态绑定（可接受权衡，登记边界）。
+- **证据**：**新增自动化回归门禁 `scripts/ui453-download-dialog-live.cjs` 3/3 allPass**（UI Automation 读真实对话框标题断言==「下载到…」= options 生效的直接证据；配套 `scripts/ui453-dialog-probe.ps1` 探针+WM_CLOSE 收口；证据 `acceptance/ui-453/ui453-download-dialog-live-live.json`），**截图真值 `ui453-download-dialog.png` 人工可查：标题「下载到…」/地址「下载」/文件名预填 `DIALOG-GATE.R`/保存类型「R 文件 (*.r)」四项全对**。tsc 0 + eslint 触碰面 0 error + ipc-channels-registry 5/5 + code-size 门禁绿。
+- **边界**：文件名框在新式 Windows 保存框不在 UIA 树内（无法程序化读值），预填以截图为主证据 + 标题断言为机械回归；对话框非模态（去 parent 的权衡）；本机 Electron+Windows 组合的对话框实现差异属宿主环境事实（最小脚本双证），换机若行为不同门禁会如实报警。**待用户实机过目后翻 verified。**
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
