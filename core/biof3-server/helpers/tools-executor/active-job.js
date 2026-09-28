@@ -5,6 +5,7 @@ const {
   scheduleHardTimeout,
   terminateChildProcess,
 } = require('../process-lifecycle');
+const { publishJobTerminalState } = require('../job-events');
 
 function claimActiveToolJob(activeToolJobs, { jobId, toolId, now = Date.now } = {}) {
   if (activeToolJobs.has(jobId)) return null;
@@ -179,9 +180,11 @@ async function transitionToolJobToFailed({
   error,
   completedAt = Date.now(),
 } = {}) {
-  return db
+  const result = await db
     .prepare('UPDATE tool_jobs SET status=?, error=?, completed_at=? WHERE id=? AND status IN (?,?)')
     .run('failed', error, completedAt, jobId, 'pending', 'running');
+  if (result && result.changes >= 1) publishJobTerminalState(jobId, 'failed');
+  return result;
 }
 
 async function transitionToolJobToCompleted({
@@ -190,9 +193,11 @@ async function transitionToolJobToCompleted({
   result,
   completedAt = Date.now(),
 } = {}) {
-  return db
+  const updated = await db
     .prepare('UPDATE tool_jobs SET status=?, result_json=?, completed_at=? WHERE id=? AND status=?')
     .run('completed', JSON.stringify(result), completedAt, jobId, 'running');
+  if (updated && updated.changes >= 1) publishJobTerminalState(jobId, 'completed');
+  return updated;
 }
 
 async function settleConfirmedToolCancellation({
@@ -201,7 +206,7 @@ async function settleConfirmedToolCancellation({
   result,
   completedAt = Date.now(),
 } = {}) {
-  return db
+  const settled = await db
     .prepare(
       'UPDATE tool_jobs SET status=?, error=?, result_json=?, completed_at=?, process_pid=?, heartbeat_at=? '
       + 'WHERE id=? AND status IN (?,?,?)',
@@ -218,6 +223,8 @@ async function settleConfirmedToolCancellation({
       'running',
       'cancelled',
     );
+  if (settled && settled.changes >= 1) publishJobTerminalState(jobId, 'cancelled');
+  return settled;
 }
 
 async function handleActiveToolJobSetupFailure({

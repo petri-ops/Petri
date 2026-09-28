@@ -1,6 +1,8 @@
 # BioF3 Desktop — Current Next Steps
 
-最后更新：2026-09-28（**G0 Goal 系列推进启动：队列头=BIO-1/UI-452 结果信息密度包 active（用户裁决「可以的 按照你的建议来逐个推进」=两 Goal plan §4 交织序预授权，项内裁决点单独问）**——六件：散点数值 tooltip（基因名+log2FC+padj）/基因搜索定位高亮/阈值参考线/表格组合筛选子句构建器/数值科学计数格式化/Lightbox 缩放平移；UI 轨形态（单体验面、呈现重组既有通道与数据）；后续队列 PL-2 → BIO-2 → BIO-3 → PL-1 → BIO-4 → …登记在 pending-work-backlog G0 Goal 系列区。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-09-28（**G0 Goal 交织序双包推进：BIO-1/UI-452 结果信息密度包已交付（`509d3eaa`，六件+契约 27/27，台账 in_progress 实机待补）；队列第 2 项 PL-2/BLOCK-126 感知实时性 active（用户裁决「可以的 开干！」）——终态 jobs 失效事件（CAS 原语单点接线+MCP 8 处补发）+ 运行期日志行缓冲（executeJob spawn 化+日志端点 live 尾部），契约 10/10+定向回归 25/25，实机待补**。队列登记在 pending-work-backlog G0 Goal 系列区。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+此前 最后更新：2026-09-28（**G0 Goal 系列推进启动：队列头=BIO-1/UI-452 结果信息密度包 active（用户裁决「可以的 按照你的建议来逐个推进」=两 Goal plan §4 交织序预授权，项内裁决点单独问）**——六件：散点数值 tooltip（基因名+log2FC+padj）/基因搜索定位高亮/阈值参考线/表格组合筛选子句构建器/数值科学计数格式化/Lightbox 缩放平移；UI 轨形态（单体验面、呈现重组既有通道与数据）；后续队列 PL-2 → BIO-2 → BIO-3 → PL-1 → BIO-4 → …登记在 pending-work-backlog G0 Goal 系列区。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 此前 最后更新：2026-09-28（**两 Goal 线成对立项（规划动作，非工作包启动）——G0-PLATFORM 通用 agent 平台工程强化 + G0-BIO 生信垂直交付能力**（用户裁决「行！现在就是分成 通用agent平台和垂直领域的生信平台两个视角了 接下来就是具体的执行更新迭代 是否要做两个大的计划 尽可能的考虑全面 用于后面两个大部分的工作推进」；源自同日「结果与分析链路企业级交付差距评估」六路只读探查）：G0-PLATFORM 下辖 PL-1~PL-7 种子（执行语义统一/感知实时性/调度可靠性/生命周期/性能卫生/安全卫生/任务中心叙事），G0-BIO 下辖 BIO-1~BIO-7 种子（信息密度/交互上限/lineage 可视化+继续分析/bulk 链解冻/输入显式化/解读层/领域深化池）；**硬依赖=PL-1（执行语义统一）→ BIO-4（长任务解冻）**；候选池 C-15 本日编入 G0-BIO（BIO-3/BIO-4）、C-12 转 BIO-7 池。**当前立即任务不变：无 active 工作包，两 Goal 阶段种子启动序待用户逐个裁决**（每阶段照常过立项检查单）。plan=docs/g0-platform-goal-plan.md + docs/g0-bio-delivery-goal-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

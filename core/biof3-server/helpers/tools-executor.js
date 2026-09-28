@@ -4,7 +4,14 @@ const fs = require('fs');
 const path = require('path');
 const { createResultArchive } = require('./result-archive');
 const { v4: uuidv4 } = require('uuid');
-const { execFile } = require('child_process');
+const { execFile, spawn } = require('child_process');
+const { StringDecoder } = require('node:string_decoder');
+const { publishJobTerminalState } = require('./job-events');
+const {
+  appendJobLiveLog,
+  clearJobLiveLog,
+  endJobLiveLog,
+} = require('./job-live-log');
 const {
   artifactContentTypeHint,
   captureStagedInputSnapshots,
@@ -1414,12 +1421,15 @@ function createToolsExecutor({
       // BLOCK-57：远程分派窗口长（探测+上传需数秒），durable cancel 抑制启动后
       // 必须行级收敛为 cancelled——与 cancel 路由的行级 UPDATE 同语义，防作业行滞留 running。
       try {
-        await db
+        const settledCancel = await db
           .prepare(
             'UPDATE tool_jobs SET status=?, error=NULL, completed_at=?, process_pid=NULL, heartbeat_at=NULL '
             + 'WHERE id=? AND status IN (?,?,?)'
           )
           .run('cancelled', Date.now(), jobId, 'pending', 'running', 'cancelled');
+        if (settledCancel && settledCancel.changes >= 1) {
+          publishJobTerminalState(jobId, 'cancelled');
+        }
       } catch (error) {
         console.warn('[tools] suppressed-launch cancellation convergence failed:', error.message);
       }
@@ -1516,14 +1526,63 @@ function createToolsExecutor({
       return;
     }
 
-    const child = execFile(
+    // BLOCK-126 P2：execFile → spawn——stdout/stderr 逐块收集（全量供 finalize 原
+    // API）并喂运行期日志行缓冲（日志端点运行中返回 live 尾部）。行为等价钉住：
+    // maxBuffer 10MB 超限同语义失败、err.code/err.killed 契约保持、
+    // owner.process/child.pid/生命周期链零适配（ChildProcess 同接口）。
+    const child = spawn(
       runCmd[0],
       runCmd.slice(1),
-      { timeout: 0, maxBuffer: 10 * 1024 * 1024, env: runEnv },
-      async (err, stdout, stderr) => {
-        await finalizeJobRun({ err, stdout, stderr, sampledResources: await collectSampledResources() });
-      }
+      { env: runEnv, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] },
     );
+    const MAX_SPAWN_BUFFER = 10 * 1024 * 1024;
+    const outDecoder = new StringDecoder('utf8');
+    const errDecoder = new StringDecoder('utf8');
+    let stdoutAll = '';
+    let stderrAll = '';
+    let spawnSettled = false;
+    const settleSpawn = (err) => {
+      if (spawnSettled) return;
+      spawnSettled = true;
+      stdoutAll += outDecoder.end();
+      stderrAll += errDecoder.end();
+      endJobLiveLog(jobId);
+      void (async () => {
+        try {
+          await finalizeJobRun({ err, stdout: stdoutAll, stderr: stderrAll, sampledResources: await collectSampledResources() });
+        } catch (finalizeError) {
+          console.warn('[tools] Job ' + jobId + ' finalize after spawn failed:', finalizeError.message);
+        } finally {
+          clearJobLiveLog(jobId);
+        }
+      })();
+    };
+    const enforceSpawnBuffer = (stream) => {
+      if (stdoutAll.length <= MAX_SPAWN_BUFFER && stderrAll.length <= MAX_SPAWN_BUFFER) return;
+      const exceeded = new Error(`spawn ${stream}/maxBuffer exceeded`);
+      exceeded.code = 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER';
+      try { child.kill('SIGKILL'); } catch { /* close 事件兜底 */ }
+      settleSpawn(exceeded);
+    };
+    child.stdout.on('data', (chunk) => {
+      stdoutAll += outDecoder.write(chunk);
+      appendJobLiveLog(jobId, 'stdout', chunk);
+      enforceSpawnBuffer('stdout');
+    });
+    child.stderr.on('data', (chunk) => {
+      stderrAll += errDecoder.write(chunk);
+      appendJobLiveLog(jobId, 'stderr', chunk);
+      enforceSpawnBuffer('stderr');
+    });
+    child.on('error', (err) => settleSpawn(err));
+    child.on('close', (code, signal) => {
+      if (code === 0) return settleSpawn(null);
+      const exitError = new Error(`Process exited with ${signal ? `signal ${signal}` : `code ${code}`}`);
+      exitError.code = code ?? null;
+      exitError.signal = signal ?? null;
+      exitError.killed = Boolean(signal);
+      settleSpawn(exitError);
+    });
     owner.process = child;
     owner.phase = 'running';
     owner.lastHeartbeatAt = Date.now();

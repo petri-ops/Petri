@@ -5422,8 +5422,29 @@
         "workflow-lineage"
       ],
       "notes": "2026-09-28 用户裁决两视角成对立项。Goal 线下辖工作包种子 BIO-1~BIO-7（信息密度/交互上限/lineage 可视化+继续分析/bulk 链解冻/输入显式化/解读层/领域深化池）；吸收候选池 C-15（本日编入 BIO-3/BIO-4）与 C-12（转 BIO-7 池）；BIO-4 硬依赖 G0-PLATFORM PL-1；dormant 插件解冻（BIO-D1）未经用户裁决不得预激活。"
+    },
+    {
+      "id": "BLOCK-126-PLATFORM-PERCEPTION",
+      "capability": "platform-perception",
+      "path": "docs/block-126-platform-perception-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-126-platform-perception",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-09-28",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH",
+      "tags": [
+        "block-126",
+        "g0-platform",
+        "pl-2",
+        "sse-invalidation",
+        "live-log"
+      ],
+      "notes": "G0-PLATFORM PL-2 阶段种子（用户裁决「可以的 开干！」交织序第 2 项）。终态失效事件（CAS 原语单点接线+MCP 8 处直写补发）+ 运行期日志行缓冲（executeJob spawn 化）。前端零改动受益于 CK-03 通道。"
     }
   ],
   "lastUpdated": "2026-09-28",
-  "documentCount": 288
+  "documentCount": 289
 }

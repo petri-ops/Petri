@@ -69,8 +69,8 @@
 
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
-| 1 | BIO-1 / UI-452 | **结果信息密度包**：散点数值 tooltip（基因名+log2FC+padj）/基因搜索定位高亮/阈值参考线（可开关可调，默认 ±1·padj0.05）/表格组合筛选子句构建器（协议既有 eq/lt/gt 补控件）/数值列科学计数格式化/Lightbox 滚轮缩放+拖拽平移 | G0-BIO plan §3 BIO-1 + 2026-09-28 垂直评估差距表；启动登记 2026-09-28 | **active（开发中）** |
-| 2 | PL-2 | 感知实时性：tools-executor 终态发 jobs 失效事件消 60s 盲窗 + 运行期日志行流 | G0-PLATFORM plan §3 PL-2；CK-03 通道已在 | planned |
+| 1 | BIO-1 / UI-452 | **结果信息密度包**（六件交付 `509d3eaa`；台账 in_progress——dev Electron 实机走查待补后翻 verified） | G0-BIO plan §3 BIO-1 | 实机待补 |
+| 2 | PL-2 / BLOCK-126 | **感知实时性**：终态 jobs 失效事件（CAS 原语单点接线+MCP 8 处补发）+ 运行期日志行缓冲（executeJob spawn 化+日志端点 live 尾部）；契约 10/10+定向回归 25/25 | G0-PLATFORM plan §3 PL-2；**active（开发收口中，实机待补）** | active |
 | 3 | BIO-2 | 交互上限与降级链：250 点 top-N 语义/静态 24 行分页/热图窗口/mojibake | G0-BIO plan §3 | planned |
 | 4 | BIO-3 | lineage 可视化 + 继续分析显式化（吸收 C-15 前半） | G0-BIO plan §3 | planned |
 | 5 | PL-1 | 执行语义统一（agent/MCP 300s 同步路径并入 tool_jobs 装置；**BIO-4 硬前提**） | G0-PLATFORM plan §3 | planned |

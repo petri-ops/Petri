@@ -5,6 +5,7 @@
 // 经接缝参数传入（调用点同步穿参），函数体逐字未动。
 
 const { execFile } = require('child_process');
+const { publishJobTerminalState } = require('../../helpers/job-events');
 const fs = require('fs');
 const path = require('path');
 const {
@@ -130,6 +131,7 @@ async function _runPluginScript(
             error: errText,
             completedAt: Date.now(),
           });
+          publishJobTerminalState(toolJobId, 'failed');
           if (plans) plans.syncPlanStepStatusFromToolJob(toolJobId, 'failed', errText);
         } catch {}
       }
@@ -175,6 +177,7 @@ async function _runPluginScript(
                 error: errText,
                 completedAt: Date.now(),
               });
+              publishJobTerminalState(toolJobId, 'failed');
             } catch {}
           }
           return resolve({
@@ -199,6 +202,7 @@ async function _runPluginScript(
             error: errText,
             completedAt: Date.now(),
           });
+          publishJobTerminalState(toolJobId, 'failed');
         } catch {}
       }
       return resolve({
@@ -313,6 +317,7 @@ async function _runPluginScript(
             },
             completedAt: Date.now(),
           });
+          publishJobTerminalState(toolJobId, 'failed');
           if (plans) plans.syncPlanStepStatusFromToolJob(toolJobId, 'failed', errText);
         } catch (e) {
           console.warn('[mcp-registry] updateToolJob(runtime failed) failed:', e.message);
@@ -405,6 +410,7 @@ async function _runPluginScript(
                 resultJson: failureResult,
                 completedAt: Date.now(),
               });
+              publishJobTerminalState(toolJobId, 'failed');
               // 同步 plan step 状态（方案 C，agent-led Task 2）
               if (plans) plans.syncPlanStepStatusFromToolJob(toolJobId, 'failed', errText);
             } catch (e) {
@@ -563,6 +569,7 @@ async function _runPluginScript(
                 resultJson: summary,
                 completedAt: Date.now(),
               });
+              publishJobTerminalState(toolJobId, 'failed');
               if (plans) plans.syncPlanStepStatusFromToolJob(toolJobId, 'failed', truthError);
             } catch (e) {
               console.warn(
@@ -586,6 +593,7 @@ async function _runPluginScript(
               resultJson: summary,
               completedAt: Date.now(),
             });
+            publishJobTerminalState(toolJobId, 'completed');
             // 同步 plan step 状态（方案 C，agent-led Task 2）
             if (plans) plans.syncPlanStepStatusFromToolJob(toolJobId, 'completed');
           } catch (e) {
@@ -647,6 +655,7 @@ async function _runPluginScript(
                 resultJson: remoteOutcome.directSummary,
                 completedAt: Date.now(),
               });
+              publishJobTerminalState(toolJobId, 'completed');
               if (plans) plans.syncPlanStepStatusFromToolJob(toolJobId, 'completed');
             } catch (e) {
               console.warn('[mcp-registry] direct summary persistence failed:', e.message);

@@ -255,6 +255,26 @@ function createToolsMetadataRoutes({db, getUserId, jobsDir = ''}) {
         const found = pick('remote-runner.log') || pick('run.log');
         if (!found) {
           const running = job.status === 'running' || job.status === 'pending';
+          // BLOCK-126 P2：运行窗口内返回 spawn 行缓冲的实时尾部（source: 'live'）。
+          // 全量真相仍是 finalize 落盘的 run.log；缓冲无内容时维持诚实 no_log 语义。
+          if (running) {
+            try {
+              const { readJobLiveLogTail } = require('../helpers/job-live-log');
+              const live = readJobLiveLogTail(job.id, LOG_TAIL_BYTES);
+              if (live && live.log) {
+                return res.json({
+                  ok: true,
+                  source: 'live',
+                  live: true,
+                  truncated: live.truncated,
+                  log: live.log,
+                  note: live.droppedLines > 0
+                    ? `（运行中实时尾部；更早 ${live.droppedLines} 行已滚动丢弃，完整日志在结束时写入 run.log）`
+                    : '（运行中实时尾部；完整日志在结束时写入 run.log）',
+                });
+              }
+            } catch { /* live 面故障回退诚实语义 */ }
+          }
           return res.json({ ok: true, source: null, live: false, log: '', note: running ? '作业运行中，日志将在结束时写入 run.log' : '该作业没有可用日志文件' });
         }
         res.json({ ok: true, ...found });
