@@ -20,11 +20,6 @@ vi.mock('./WorkspaceFilePreview', () => ({
   WorkspaceFilePreview: () => <div data-testid="preview-stub" />,
 }));
 
-vi.mock('@/components/workspace-panels/DataIntakeControl', () => ({
-  DataIntakeControl: () => <div data-testid="intake-stub" />,
-
-}));
-
 const project = {
   id: 'p1',
   name: '演示项目',
@@ -127,7 +122,6 @@ describe('RightFileTree 文件操作', () => {
         activeFile={null}
         onOpenFile={vi.fn()}
         onCloseFile={vi.fn()}
-        onAskAgent={vi.fn()}
       />,
     );
 
@@ -158,7 +152,6 @@ describe('RightFileTree 文件操作', () => {
         activeFile={null}
         onOpenFile={vi.fn()}
         onCloseFile={vi.fn()}
-        onAskAgent={vi.fn()}
       />,
     );
 
@@ -191,7 +184,6 @@ describe('RightFileTree 文件操作', () => {
         activeFile={null}
         onOpenFile={vi.fn()}
         onCloseFile={vi.fn()}
-        onAskAgent={vi.fn()}
       />,
     );
 
@@ -223,7 +215,6 @@ describe('RightFileTree 文件操作', () => {
         activeFile={null}
         onOpenFile={vi.fn()}
         onCloseFile={vi.fn()}
-        onAskAgent={vi.fn()}
       />,
     );
 

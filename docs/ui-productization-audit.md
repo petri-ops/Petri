@@ -4378,3 +4378,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **verified 翻转（2026-09-28，用户实机过目「可以的 翻verified」）**：含同日增补（开关贴左上角与面板同列）一并过目。G0 开发期常态 · 不外推 packaged/Provider/GA.
 - **增补（同日，用户看截图裁决「目录控制按钮位置 是不是应该移到左侧贴边」）**：目录开关从右上角钮簇移回**左上角贴边**（top:10/left:10，与所控目录面板 left:10 同列成一条竖线，控制钮与面板位置呼应）；正文顶部 46px 安全带已覆盖整条钮带，早前左上角压 h1 首字的问题不复现；右上角只剩编辑/预览切换，保存错误条右让位回调回 48px。实机重验 10/10 allPass（亮色主题 + 宽栏 863px 态，T4b 落点 h1Delta=48.07≈scroll-margin 设计值）；组件 11/11 + theme 4/4。
 - **边界**：目录条目仍为源码 ATX 1-3 级解析（setext 标题不进目录，出账即如此）；最小化/遮挡窗口下平滑滚动动画被 Blink 节流属环境特性，真实可见窗口不受影响。G0 开发期常态 · 不外推 packaged/Provider/GA.
+
+
+## UI-450: 移除文件页「导入数据」入口整链（历史 SDC1 数据分析流的退役）(2026-09-28 verified，用户裁决「确认用不上了 后端也不需要保留了」)
+
+- **来源**：用户问「文件页面中有个导入数据按钮 + 这个有什么实际意义吗？没有是不是可以取消了」。核查结论如实上报：链路活着（选 CSV/TSV → POST /import 落项目 data/ 目录 + 服务端 Data Profiler 结构画像 → 就绪门 → buildFirstAnalysisPrompt 经 copilotAsk 发起首析），但属 BioF3 时代「表达数据分析工作台」定位的历史产物——就绪门要求计数矩阵+样本信息双角色识别，真实场景极窄，且与现行分析主路（Result Studio/插件工具/知识空间摄取）互不相干。用户确认用不上，裁决前后端一并移除。
+- **移除面**：前端＝DataIntakeControl 组件+测试、data-profile.ts lib+测试、RightFileTree 挂载与 onAskAgent prop（RightPanel 传参/fileOps mock/refresh 测试同步）、dataIntake* CSS 31 选择器 217 行、AnalysisLaunchPanel 历史注释更词；后端＝routes/files.js 的 /profile + /import 两端点与 projectDataImport multer/safeImportedFilename/copyImportWithoutOverwrite/removeUploadedFiles 助手及其导出、shared-backend/data-profiler.js 模块、test/data-profiler+workspace-data-import+sdc1-complete 三测试、scripts/check-sdc-complete+g0-sdc1-acceptance、package.json 六个 g0:sdc1*/g0:sdc:complete* 脚本、test/fixtures/sdc1-a 夹具、impact-map sdc1-data-to-first-result 规则修剪（保留 g0-sdc1-local-gateway/electron-driver——被 Result Studio ux1h 门共用，test-affected SDC1 用例改写为只覆盖保留脚本）。
+- **证据**：tsc 0；受影响前端测试 fileOps 7/7 + RightFileTree.refresh 1/1 + RightPanel 1/1 + theme 4/4；后端 test-affected/g0-sdc1-local-gateway/block67-routes/workspace-os-import/g0-chf0-http 39/39；eslint 改动文件 0 error；残留引用零（grep DataIntakeControl/data-profile/data-profiler 全净）。**known-red 如实登记**：quality:knip:check 存量红 4 处（FloatCardResizer FLOAT_CARD_*_WIDTH/clampFloatCardWidth、useWorkspaceLayout SUMMARY_PIN_MIN_WIDTH）系并行工作包 UI-448 v18/v25（8ddd1b14/89fb8b5a）引入且基线未收录，非本条移除面造成，归属该包处置。
+- **边界**：agent 侧 preflight/confirmation→run_tool 链路不动；copilotAsk/refreshFiles 事件机制不动（DataIntakeControl 只是 dispatch 源之一）；RightPanel onAskAgent→handleAskAgent 主链保留（ResultView/分析 tab 在用）。G0 开发期常态 · 不外推 packaged/Provider/GA.

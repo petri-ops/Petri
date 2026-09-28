@@ -65,7 +65,6 @@ function renderTree(activeFile: ActiveWorkspaceFile | null) {
       activeFile={activeFile}
       onOpenFile={() => {}}
       onCloseFile={() => {}}
-      onAskAgent={() => {}}
     />
   );
 }
@@ -91,7 +90,6 @@ describe('RightFileTree 刷新触发面 (UI-399)', () => {
         activeFile={makeFile('a.txt')}
         onOpenFile={() => {}}
         onCloseFile={() => {}}
-        onAskAgent={() => {}}
       />
     );
     await new Promise((r) => setTimeout(r, 60));
@@ -106,7 +104,6 @@ describe('RightFileTree 刷新触发面 (UI-399)', () => {
         activeFile={makeFile('b.txt')}
         onOpenFile={() => {}}
         onCloseFile={() => {}}
-        onAskAgent={() => {}}
       />
     );
     await new Promise((r) => setTimeout(r, 60));

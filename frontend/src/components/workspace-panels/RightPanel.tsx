@@ -218,7 +218,6 @@ export function RightPanel({
                     activeFile={ctx.activeWorkspaceFile}
                     onOpenFile={ctx.handleOpenWorkspaceFile}
                     onCloseFile={ctx.handleCloseWorkspaceFile}
-                    onAskAgent={ctx.handleAskAgent}
                   />
                 )}
                 {tab === 'browser' && (

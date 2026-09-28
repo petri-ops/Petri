@@ -42,19 +42,15 @@ test('frontend Vitest inputs stay out of the Node impact bundle', () => {
   ]);
 });
 
-test('SDC1 scripts have one maintained classification and select the focused data contract bundle', () => {
+test('SDC1 scripts have one maintained classification and select the focused gateway test', () => {
   for (const file of [
     'scripts/g0-sdc1-local-gateway.mjs',
     'scripts/g0-sdc1-electron-driver.cjs',
-    'scripts/g0-sdc1-acceptance.mjs',
   ]) {
     const plan = resolveImpact([file]);
     assert.deepEqual(plan.unknown, []);
     assert.ok(plan.reasons[file].includes('script-g0-maintained'));
-    assert.ok(plan.reasons[file].includes('sdc1-data-to-first-result'));
     assert.ok(plan.tests.includes('test/g0-sdc1-local-gateway.test.mjs'));
-    assert.ok(plan.tests.includes('test/data-profiler.test.mjs'));
-    assert.ok(plan.tests.includes('test/workspace-data-import.test.mjs'));
   }
 });
 

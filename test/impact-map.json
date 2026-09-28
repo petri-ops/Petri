@@ -259,16 +259,10 @@
       "id": "sdc1-data-to-first-result",
       "note": "SDC1-A keeps project-local import, bounded structural profiling, fail-closed readiness, the existing Agent handoff, and its development Electron observer under one focused regression bundle; it does not qualify SDC-2+ or P7. Frontend tests are selected through frontendRelated and run by Vitest.",
       "patterns": [
-        "core/shared-backend/data-profiler.js",
         "core/biof3-server/routes/files.js",
-        "frontend/src/lib/data-profile.ts",
-        "frontend/src/components/workspace-panels/DataIntakeControl.tsx",
-        "scripts/g0-sdc1-*",
-        "test/fixtures/sdc1-a/**"
+        "scripts/g0-sdc1-*"
       ],
       "tests": [
-        "test/data-profiler.test.mjs",
-        "test/workspace-data-import.test.mjs",
         "test/g0-sdc1-local-gateway.test.mjs"
       ],
       "classifiesScripts": false
@@ -1663,8 +1657,7 @@
         "test/workspace-os-import.test.mjs",
         "test/block67-node-agent-fs.test.js",
         "test/block67-routes.test.mjs",
-        "test/block73-hidden-files.test.mjs",
-        "test/workspace-data-import.test.mjs"
+        "test/block73-hidden-files.test.mjs"
       ],
       "frontendRelated": true,
       "classifiesScripts": true,

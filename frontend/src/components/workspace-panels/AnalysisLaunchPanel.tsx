@@ -20,7 +20,7 @@ export interface AnalysisLaunchPanelProps {
 
 /**
  * UI-147 / T84 — 分析入口面板：工作台内统一的分析启动/编排入口。
- * 把分散在 DataIntakeControl「开始分析」与聊天框输入里的分析启动能力，
+ * 把分散在聊天框输入里的分析启动能力，
  * 收敛为一个可发现、按类别分组、可一键启动的分析目录。点击「运行」即把
  * 该分析作为请求发送给 Agent（onLaunch），由 Agent 负责数据就绪检查与执行。
  * 仅依赖 props 与 onLaunch 回调，不持有状态、不反向依赖 RightPanel。

@@ -5,7 +5,6 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { SshStatusDot } from '@/components/workspace-panels/SshStatusDot';
-import { DataIntakeControl } from '@/components/workspace-panels/DataIntakeControl';
 import type { Project } from '@/lib/project-types';
 import { getApiPrefix } from '@/lib/authClient';
 import { gewuEvents, subscribeGewuEvent, dispatchGewuEvent } from '@/lib/events';
@@ -31,7 +30,6 @@ export function RightFileTree({
   activeFile,
   onOpenFile,
   onCloseFile,
-  onAskAgent,
 }: {
   project: Project;
   active: boolean;
@@ -39,7 +37,6 @@ export function RightFileTree({
   activeFile: ActiveWorkspaceFile | null;
   onOpenFile: (file: ActiveWorkspaceFile) => void;
   onCloseFile: (path: string) => void;
-  onAskAgent: (prompt: string) => boolean | void;
 }): React.ReactElement {
   const [tree, setTree] = useState<FileEntry[]>([]);
   const [expandedDirs, setExpandedDirs] = useState<Set<string>>(new Set());
@@ -547,7 +544,6 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
           })}
           {!activeFile && <span className={styles.workspaceBreadcrumbEmpty}>选择文件预览</span>}
         </div>
-        <DataIntakeControl projectId={project.id} onAskAgent={onAskAgent} />
         {/* UI-397 — 远程连接呼吸灯（仅 SSH 项目）：绿=在线 黄=连接中 红=断联，点击手动重试 */}
         {project.workspaceKind === 'ssh' && <SshStatusDot projectId={project.id} withLabel />}
         {/* UI-327 加映 — 手动刷新（ssh 项目取消轮询后，外部变更靠此按钮 / agent 写档事件刷新） */}
