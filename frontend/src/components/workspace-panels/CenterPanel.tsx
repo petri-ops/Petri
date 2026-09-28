@@ -499,21 +499,6 @@ function SessionFrameView({
         )}
         </div>
         ) : null}
-        {/* UI-448 加映 v16 — 入口按钮沉底：右下角常驻小气泡（开/收切换），
-            与顶栏摘要概览按钮上下对应 */}
-        {variant === 'chat' && ctx.projectId && (
-          <button
-            type="button"
-            className={styles.sideChatFab}
-            onClick={() => onSideChatOpenChange?.(!sideChatOpen)}
-            aria-label={sideChatOpen ? '收起侧边聊天' : '侧边聊天'}
-            aria-pressed={sideChatOpen}
-            title={sideChatOpen ? '收起侧边聊天' : '侧边聊天'}
-            data-testid="side-chat-fab"
-          >
-            <Icon name="message-circle" size={16} />
-          </button>
-        )}
         {/* UI-448 加映 v10 — 侧聊悬浮面与摘要卡同定位基准：同在 session layout 内
             right:0，右缘结构性同源（v8/v9 的跨参照系对齐补丁由此退役）。
             UI-448 加映 v12 — 仅窄窗用悬浮变体（宽窗走上面的独立列区）；
@@ -533,6 +518,26 @@ function SessionFrameView({
           />
         )}
       </div>
+        {/* UI-448 加映 v16 — 入口按钮沉底：右下角常驻小气泡（开/收切换），
+            与顶栏摘要概览按钮上下对应。
+            UI-448 加映 v28 — FAB 挂到外层（带 padding 的 frame）而非内层布局：
+            内层被外层 padding-right:14 推进且 overflow:hidden 会剪掉越界部分，
+            与摘要按钮对齐所需的负偏移必被剪。外层 padding-box 右缘=分隔线，
+            right:5px 与摘要按钮相对分隔线的内缩量一致 → 两钮中心线精确重合
+            （IAB 实测 fabCenter==summaryCenter）。 */}
+        {variant === 'chat' && ctx.projectId && (
+          <button
+            type="button"
+            className={styles.sideChatFab}
+            onClick={() => onSideChatOpenChange?.(!sideChatOpen)}
+            aria-label={sideChatOpen ? '收起侧边聊天' : '侧边聊天'}
+            aria-pressed={sideChatOpen}
+            title={sideChatOpen ? '收起侧边聊天' : '侧边聊天'}
+            data-testid="side-chat-fab"
+          >
+            <Icon name="message-circle" size={16} />
+          </button>
+        )}
     </div>
   );
 }

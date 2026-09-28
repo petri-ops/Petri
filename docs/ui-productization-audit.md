@@ -4354,6 +4354,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：CenterPanel 13（新增钉住列把手存在用例）+ SideChatDock 14 = 27 绿；tsc 0；IAB 实机：钉住列 312→拖宽 562、persisted=562、把手 containedInCard=true 无逃逸。**v26 补**（用户截图实指「指示线应该在卡片区域内部…摘要卡有多余的另一层？」——猜测正确）：钉住列宿主比可见卡宽 ~24px（卡片根 `max-width: calc(100% - 24px)` 右预留，UI-370 只修了悬浮态宿主）→ 指示线落在卡外空隙；补 `.workspaceSummaryColumn .workspacePinnedSummary { max-width: 100% }` 铺满同款，IAB 实机 handleLeft==cardLeft==983、lineOnCardEdge=true。**待用户实机过目后翻 verified（v15–v26 同批）**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## UI-448 加映 v28 (2026-09-28 in_progress，用户「右下角是中间栏分隔线的那个角度 同时和摘要按钮保持上下对齐」——v27 fixed 窗口角错位返工)
+
+- **根因**：v27 的 fixed 窗口角定位理解偏了——用户要的角是**中栏与右轨分隔线的夹角**，且与顶栏摘要按钮上下同线；fixed 钉软件角直接错位。
+- **修法**：FAB 从内层布局 div（被外层 padding-right:14 推进且 overflow:hidden，对齐所需负偏移必被剪）**移挂到外层带 padding 的 frame**（position:relative、padding-box 右缘=分隔线），CSS 定格 `absolute; right:5px`——5px=摘要按钮相对分隔线的内缩量，两钮中心线精确重合；同锚中栏容器，右栏开合/窗口尺寸变化恒对齐。
+- **证据**：CenterPanel 12+SideChatDock 14=26 绿（结构重排无断言变化）；tsc 0；IAB 实机 fabCenter==summaryCenter==1540、delta=0。**待用户实机过目后翻 verified（v15–v28 同批）**。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-448 加映 v27 (2026-09-27 in_progress，用户截图指认「摘要和会话按钮上下不是对齐的」——FAB 窗口角定位)
 
 - **根因**：会话 FAB `absolute; right:14` 锚在会话框内，顶栏摘要/工具按钮群锚在窗口右缘——两套参照系差 ~23px 且随右栏开合漂移（v16「上下对应」从未真正成立）。
