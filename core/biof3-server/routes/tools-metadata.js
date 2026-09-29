@@ -200,6 +200,10 @@ function createToolsMetadataRoutes({db, getUserId, jobsDir = ''}) {
           params: publicRecoveryParams(parseJsonMaybe(job.params_json, {})),
           recoveryHistory: parseJsonMaybe(job.params_json, {}).__harnessRecovery || [],
           ackStatus: job.ack_status || null,
+          // BLOCK-128 加映：心跳可观察性——运行中作业的心跳时间戳与进程 PID
+          // 进 status 投影（此前只有 DB 行有、API 不可见，实机验收观察不到）。
+          heartbeatAt: job.heartbeat_at || null,
+          processPid: job.process_pid || null,
           createdAt: job.created_at,
           completedAt: job.completed_at,
           result: reconciled.result,

@@ -1848,6 +1848,23 @@ function createToolsExecutor({
       return res.status(400).json({ ok: false, error: validationError });
     }
 
+    // BLOCK-131（BIO-5 P1）：域级校验执行化——counts 矩阵/样本元数据的
+    // 值级规则（非负整数/唯一标识/样本对齐）在提交前 fail-closed，消息
+    // 可操作（点名重复值/违规值/未对齐样本）。
+    const { validateDomainUploads } = require('./upload-domain-validation');
+    const domain = validateDomainUploads(jobDir, Object.keys(files || {}));
+    if (domain.findings.length > 0) {
+      try {
+        fs.rmSync(jobDir, { recursive: true, force: true });
+      } catch {}
+      return res.status(400).json({
+        ok: false,
+        error: 'domain_validation_failed',
+        findings: domain.findings,
+        message: domain.findings.map((f) => f.message).join('；'),
+      });
+    }
+
     if (!isTest) {
       const running = await db
         .prepare(

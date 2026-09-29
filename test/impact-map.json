@@ -1286,7 +1286,10 @@
         "scripts/block126-perception-live.mjs",
         "scripts/ui452-density-live.cjs",
         "acceptance/block-126/**",
-        "acceptance/ui-452/**"
+        "acceptance/ui-452/**",
+        "scripts/block129-bulk-chain-live.mjs",
+        "acceptance/block-129/**",
+        "acceptance/os-dialog/**"
       ],
       "tests": [
         "test/test-affected.test.mjs"

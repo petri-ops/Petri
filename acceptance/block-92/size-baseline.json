@@ -110,8 +110,8 @@
       "path": "core/biof3-server/helpers/tools-executor.js",
       "wave": "C",
       "module": "P-03",
-      "lines": 1917,
-      "sha256": "f79d9ff4131dd9b73ad229133059dce85390b6f5e864fdad672e8001dbc8f560"
+      "lines": 2010,
+      "sha256": "39bec7d97b30b0fab23367e14b6fedb16da08c97691bd4d6f9d3ddb41254d558"
     },
     {
       "path": "core/biof3-server/db.js",
@@ -170,5 +170,5 @@
       "sha256": "b1a8303d2bb09317a09374053757d7a85c716777e2f599c5f3f962cac94508af"
     }
   ],
-  "total": 22483
+  "total": 22576
 }

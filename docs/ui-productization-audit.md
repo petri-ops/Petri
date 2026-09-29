@@ -4482,6 +4482,15 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **待验**：实机需 dev 栈重启（后端新端点）+**真实跨 Job 血缘数据**（当前 dev 库 deseq2 单 Job 无下游依赖=链单节点不渲染属正确行为；跨 Job 链随 BIO-4 解冻 go-kegg/volcano 后自然产生，或 selection→富集操作触发）。P2「继续分析显式按钮」随 BIO-4（下游工具解冻前无真实目标）。
 - **边界**：投影只读（不建第二真相）；链排序按依赖深度非时间（同深度 toolJobId 稳定序）；无会话 job 同样可投影（图真值不含会话维度）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## UI-457: 输入显式化——上传域校验执行化 + 分析面板参数配置表单（BIO-5 P1+P2）(2026-09-29 in_progress，契约+实机双证；用户过目翻 verified)
+
+- **来源**：G0-BIO plan §3 BIO-5（2026-09-28 垂直评估 D1/D4 差距：跑分析全靠对话隐式+值级校验真空）。
+- **P1 域校验执行化**（后端）：新 `helpers/upload-domain-validation.js`——artifact-profiles 声明的 counts-matrix/sample-metadata 值级规则在 HTTP 提交路径执行（handleToolRun 通用嗅探之后）：非负整数（负数/小数/文本点名行列）/特征标识唯一（重复点名两行号）/样本列唯一/样本对齐（双向：表里有矩阵没有+矩阵有表没有）/condition 非缺失——**fail-closed 400 + findings[] + 中文可操作消息**；按文件名前缀识别域文件（counts|coldata|metadata 约定，非域文件不做域校验不虚构）；大文件 5 万行采样如实标注。
+- **P2 参数配置表单**（前端）：AnalysisLaunchPanel 卡片新增「配置」展开——插件输入契约投影成表单：文件输入枚举工作区 CSV/TSV 下拉（projectId 自动拉 /tree 顶层 200 项，拉取失败=空选项不阻断）、文本/数值参数带默认回填、「按以上参数运行」组装**携带显式参数的启动 prompt**（counts=文件名、padj_cutoff=值…点名进指令）；旧「运行」一键路径原样保留（无参数直达 Agent）；「配置/收起」可折叠。
+- **证据**：block131 契约 7/7（好数据零发现/重复+负值+小数+样本对齐双向拒+非域文件不虚构+接线顺序守卫）红绿先行；AnalysisLaunchPanel 组件 4/4（表单投影/显式参数 prompt 组合/收起回旧路径/文件枚举选择）；**实机双证（栈重启后）**：坏 counts 提交 400 domain_validation_failed 三 findings 全中（「G1 重复（第 2 行与第 3 行）」「-3（第 4 行 WT_1 列）」「KO_9 在 counts.csv 列中不存在」），好数据 200 提交正常走执行链；tsc 0+lint 0+code-size 重打（+93 行预算内）+test:changed 389/0（顺带修并行会话遗留 os-dialog 证据未注册 impact-map 的 1 红+block129 脚本注册）。
+- **待办**：P2 表单实机过目（analyze tab 展开 deseq2 配置→选文件→按参数运行——栈已在跑随时可看）；profile 识别为文件名前缀约定（结构化 inputBindings→profile 映射留加映）。
+- **边界**：域校验只覆盖 HTTP 提交路径（MCP/agent 路径的文件来自工作区已落盘文件——其校验由工具自身 preflight+validator 插件承载）；非 counts/coldata 命名的矩阵不做域校验（通用嗅探兜底）；表单参数透传 Agent prompt 非直接执行（执行仍走受控 run_tool 链）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-454: 交互上限与降级链——散点 backing 600 点 + 热图解除前端自缚 + 静态 CSV 本地分页 + 日志端点项目目录兜底 (2026-09-29 in_progress→大部分实机：④日志端点兜底实证（block126-perception-live 6/6 source=run.log+失败原因透出）+③CSV 分页实机（ui452 走查 T2 控件在场+39 行标注）；①②热图/散点实机随交互清单缺口同批——组件级 32/32 在册)
 - **来源**：G0-BIO BIO-2 阶段种子（plan §3；2026-09-28 垂直评估「交互上限与降级链」差距）。用户裁决「继续」按 G0 Goal 交织序推进（第 3 项交付位）。
 - **四件**：①**plot backing 有界窗口 250→600**（`interaction.js`——前端 SVG 可承受；仍按文件顺序取，**非显著性排序**：top-N 真排序需插件 descriptor 声明排序字段的契约，登记 BIO-3 候选不猜语义）；②**热图解除前端自缚**（`ScientificInteractionViewer` matrix 分支：列 `slice(0,24)`/行 `slice(0,40)` 移除——后端 backing 本就有界（行 100/列不截断），全量渲染交给网格横向滚动，caveat 改为如实标注「渲染后端有界矩阵窗口 N 行×M 列」）；③**静态 CSV 预览本地分页**（新纯函数 `lib/csv-preview-pagination`（50 行/页，页码越界钳制不渲染空页）+壳内分页控件（上一页/下一页/页码/总行数，previewData 更新重置页码，标注「预览文本预算内」诚实口径）——原 24 行硬截断退役；静态预览是无交互清单的降级路径，无服务端分页通道可复用故走前端本地分页）；④**日志端点项目目录兜底**（`tools-metadata.js`：`resolveProjectRunLayout` 失败不再静默只回全局目录——项目行仍在时按 `workspace_path` 拼执行链同款目录约定兜底，失败原因透出 note——修 BLOCK-126 验收发现的既有缺陷 AUDIT-LOG 🟡）。

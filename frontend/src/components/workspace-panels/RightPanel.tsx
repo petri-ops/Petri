@@ -253,8 +253,9 @@ export function RightPanel({
                   <AnalysisLaunchPanel
                     tools={catalogTools}
                     loading={catalogLoading}
-                    onLaunch={(tool) => {
-                      ctx.handleAskAgent(`请运行「${tool.title}」分析（${tool.category}）。`);
+                    projectId={ctx.project ? ctx.project.id : null}
+                    onLaunch={(tool, launchPrompt) => {
+                      ctx.handleAskAgent(launchPrompt || `请运行「${tool.title}」分析（${tool.category}）。`);
                       ctx.handleOpenRightChat();
                     }}
                   />
