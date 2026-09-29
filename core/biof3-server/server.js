@@ -283,6 +283,10 @@ installBackendExitLifecycle({ db });
 try {
   const { scheduleRetentionSweep } = require('./jobs/retention-sweeper');
   scheduleRetentionSweep({ db });
+  // PL-6a — stale-running 兜底对账器：进程内无 owner 且心跳超时的 running 行
+  // 标 failed（兜死终态持久化失败的滞留路径）；owner 在场一律不动（防误杀长跑）。
+  const { scheduleStaleRunningReconciler } = require('./helpers/stale-running-reconciler');
+  scheduleStaleRunningReconciler({ db });
 } catch (e) {
   console.warn('[retention] scheduler not started:', e && e.message ? e.message : e);
 }

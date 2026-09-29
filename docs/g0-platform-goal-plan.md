@@ -128,3 +128,12 @@ Artifact Truth 读取时自愈、provenance 全链留痕、取消升级链、无
 - 当前立即任务：`next-steps-roadmap.md`。
 - UI 面阶段（PL-5 部分）同提交更新 `ui-productization-audit.md`。
 - 收口语义：单阶段收口回写本计划阶段表 + backlog 已完成区；Goal 整体收口时 registry status 翻 completed 并跑 docs:reconcile。
+
+## 8. 实施记录
+
+### PL-6a stale-running 兜底对账器（2026-09-29 completed·首刀）
+
+- **范围**：新增 `helpers/stale-running-reconciler.js` 挂载 server.js（retention-sweep 同装配区）——周期 60s 扫描 status='running' 行，**进程内无 owner**（tool-job-lifecycle-registry 的 activeToolJobs 不含该 id）且心跳超时（10min=30s 心跳间隔 20 倍余量）或无心跳超启动宽限（5min）的，行级幂等 UPDATE → failed（error='terminal_persistence_lost: reconciled by stale-running check'）+ publishJobTerminalState + notifyScheduler——**一次性兜死勘察 PL-6 第 6 节全部六条滞留路径**（终态写失败仅 warn 后放弃的各场景）。
+- **防误杀设计**（勘察风险项落实）：判定主据=activeToolJobs 有无 owner（进程活着在跑绝不动——心跳写失败静默属已知路径，owner 在场而心跳停更不是滞留）；pending 不扫（调度泵自治域）；对账器自身故障 warn 可观测不重蹈「泵静默吞」。
+- **边界与后续**：tools-executor.js 内四处点状修补（ssh-direct 926/adopt 990/settleSpawn 1598/泵日志 610）**因并行会话 WIP 占用文件，登记为 WIP 合入后加映**——其后果（滞留 running）已由本对账器兜底，风险清零非延期裸奔。
+- **验证**：契约测试 4/4（无主收口+幂等/有 owner 绝不动含心跳停更十倍超时场景/无心跳宽限/不扫 pending）+ eslint 0 + test:changed 分类无冲突。G0 开发期常态 · 不外推 packaged/Provider/GA。
