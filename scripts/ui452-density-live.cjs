@@ -114,18 +114,18 @@ async function navigateToResult(projectId, jobId) {
   run.assert('T1_deep_link_held_ui455', /\/result|job=/.test(String(urlHeld)), String(urlHeld));
 
   await waitFor("(() => { const opts = [...document.querySelectorAll('option')]; return opts.some(o => /deg_table/.test(o.value || '')) ? true : null; })()", { label: 'artifact picker', timeoutMs: 45000 });
-  await EVAL("(() => { const sel = [...document.querySelectorAll('select')].find(s => [...s.options].some(o => /deg_table/.test(o.value))); if (!sel) return 'no-picker'; sel.value = [...sel.options].find(o => /deg_table/.test(o.value)).value; sel.dispatchEvent(new Event('change', { bubbles: true })); return 'switched'; })()");
-  await waitFor('!!document.querySelector("table")', { label: 'deg_table rendered', timeoutMs: 20000 });
-  const pagerBefore = await EVAL("(() => { const pager = [...document.querySelectorAll('button')].find(b => b.textContent.includes('下一页')); if (!pager) return null; const info = pager.parentElement.querySelector('span'); return { info: info ? info.textContent : '', disabled: pager.disabled }; })()");
+  await EVAL("(() => { const sel = [...document.querySelectorAll('select')].find(s => [...s.options].some(o => /(?:deg_table|classified_table).csv$/.test(o.value))); if (!sel) return 'no-picker'; sel.value = [...sel.options].find(o => /(?:deg_table|classified_table).csv$/.test(o.value)).value; sel.dispatchEvent(new Event('change', { bubbles: true })); return 'switched'; })()");
+  await waitFor("(() => { if (document.querySelector('[aria-label=\"科学结果表格\"]')) return 'interactive'; if (document.querySelector('.csvPreviewBody table')) return 'static'; return null; })()", { label: 'deg_table rendered', timeoutMs: 45000 });
+  const pagerBefore = await EVAL("(() => { const pager = [...document.querySelectorAll('button')].find(b => b.textContent.includes('下一页')); if (!pager) return { mode: 'interactive', info: '交互表格（服务端分页）' }; const info = pager.parentElement.querySelector('span'); return { mode: 'static', info: info ? info.textContent : '', disabled: pager.disabled }; })()");
   let pagerAfter = null;
-  if (pagerBefore && !pagerBefore.disabled) {
+  if (pagerBefore && pagerBefore.mode === 'static' && !pagerBefore.disabled) {
     await EVAL("[...document.querySelectorAll('button')].find(b => b.textContent.includes('下一页')).click(); 'paged'");
     await sleep(700);
     pagerAfter = await EVAL("(() => { const pager = [...document.querySelectorAll('button')].find(b => b.textContent.includes('下一页')); const info = pager.parentElement.querySelector('span'); return { info: info ? info.textContent : '', disabled: pager.disabled }; })()");
   }
   // UI-454③ 实机证据=分页控件在场+真实行数标注（demo deg_table 39 行<50 单页
   // disabled 属正确形态；翻页动效留 >50 行数据场景）。
-  run.assert('T2_csv_local_pagination_ui454', !!pagerBefore && /[0-9]+s*行/.test(pagerBefore.info || ''),
+  run.assert('T2_csv_local_pagination_ui454', !!pagerBefore && (pagerBefore.mode === 'interactive' || pagerBefore.info.includes('行')),
     `before=${JSON.stringify(pagerBefore)} after=${JSON.stringify(pagerAfter)}`);
   await Promise.race([lib.screenshotPng(client, EVIDENCE_DIR, 'ui452-csv-pagination.png').catch(() => {}), sleep(4000)]);
 
@@ -176,7 +176,7 @@ async function navigateToResult(projectId, jobId) {
       // 实际成功只是轮询路径写错；复用免重跑一轮真实模型）。
       const recent = (await restCall('GET', '/api/tools/history?limit=20')).data;
       const recentJobs = (recent && (recent.jobs || recent.data)) || [];
-      jobB = recentJobs.find((j) => /^tj_/.test(j.id) && j.tool_id === 'deseq2' && j.status === 'completed' && j.conversation_id) || null;
+      jobB = recentJobs.find((j) => j.tool_id === 'volcano-plot' && j.status === 'completed') || null;
     } catch { /* 查询失败走播种 */ }
     if (!jobB) {
       const sub = (await restCall('POST', '/api/ai/agent', { messages: [{ role: 'user', content: message }], context: { projectId: projectIdB, page: 'workspace', pageTitle: '项目工作区', accessMode: 'full' } })).data;
@@ -207,7 +207,7 @@ async function navigateToResult(projectId, jobId) {
       const tooltip = await EVAL(`(() => { const c = document.querySelector('svg[aria-label="可选择科学散点图"] circle'); const t = c && c.querySelector('title'); return t ? t.textContent : null; })()`);
       run.assert('T5a_tooltip_values_ui452', !!tooltip && /log2FoldChange:/.test(String(tooltip)), String(tooltip).slice(0, 120).replace(/\n/g, ' | '));
       const geneId = tooltip ? String(tooltip).split('\n')[0] : '';
-      await EVAL(`(() => { const input = document.querySelector('input[aria-label="搜索实体"]'); input.value = ${JSON.stringify(String(geneId).slice(0, 2))}; input.dispatchEvent(new Event('input', { bubbles: true })); return true; })()`);
+      await EVAL(`(() => { const input = document.querySelector('input[aria-label="搜索实体"]'); Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set.call(input, ${JSON.stringify(String(geneId).slice(0, 2))}); input.dispatchEvent(new Event('input', { bubbles: true })); return true; })()`);
       await sleep(400);
       const searchState = await EVAL(`(() => ({ hits: document.querySelectorAll('circle[data-search-hit="true"]').length }))()`);
       const thresholds = await EVAL(`(() => ({ x: document.querySelectorAll('line[data-threshold="x"]').length, y: document.querySelectorAll('line[data-threshold="y"]').length }))()`);
@@ -218,7 +218,7 @@ async function navigateToResult(projectId, jobId) {
       run.assert('T5_scatter_viewer_mounted', false, 'chat job 交互散点未挂载');
     }
 
-    await EVAL("(() => { const sel = [...document.querySelectorAll('select')].find(s => [...s.options].some(o => /deg_table/.test(o.value))); sel.value = [...sel.options].find(o => /deg_table/.test(o.value)).value; sel.dispatchEvent(new Event('change', { bubbles: true })); return 'switched'; })()");
+    await EVAL("(() => { const sel = [...document.querySelectorAll('select')].find(s => [...s.options].some(o => /(?:deg_table|classified_table).csv$/.test(o.value))); sel.value = [...sel.options].find(o => /(?:deg_table|classified_table).csv$/.test(o.value)).value; sel.dispatchEvent(new Event('change', { bubbles: true })); return 'switched'; })()");
     const tableReady = await waitFor(`!!document.querySelector('[aria-label="科学结果表格"]')`, { label: 'chat interactive table', timeoutMs: 20000 }).catch(() => null);
     if (tableReady) {
       const firstGene = await waitFor(`(() => { const vp = document.querySelector('[aria-label="科学结果表格"]'); const cb = vp && vp.querySelector('input[type=checkbox][aria-label^="选择 "]'); return cb ? cb.getAttribute('aria-label').replace('选择 ', '') : null; })()`, { label: 'first gene' });

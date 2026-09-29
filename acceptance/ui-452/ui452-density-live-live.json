@@ -1,22 +1,22 @@
 {
   "name": "ui452-density-live",
-  "startedAt": "2026-09-29T01:05:06.865Z",
-  "finishedAt": "2026-09-29T01:06:10.576Z",
+  "startedAt": "2026-09-29T01:35:17.991Z",
+  "finishedAt": "2026-09-29T01:35:40.783Z",
   "assertions": [
     {
       "name": "T0_seed_http_deseq2",
       "pass": true,
-      "detail": "project=p_mulz5d8z_njob job=job_1c1d45fe06414fed"
+      "detail": "project=p_mum086q2_oyzb job=job_3add78bb348f41d3"
     },
     {
       "name": "T1_deep_link_held_ui455",
       "pass": true,
-      "detail": "/project/p_mulz5d8z_njob/result?job=job_1c1d45fe06414fed"
+      "detail": "/project/p_mum086q2_oyzb/result?job=job_3add78bb348f41d3"
     },
     {
       "name": "T2_csv_local_pagination_ui454",
-      "pass": false,
-      "detail": "before={\"info\":\"共 39 行（预览文本预算内） · 第 1/1 页\",\"disabled\":true} after=null"
+      "pass": true,
+      "detail": "before={\"mode\":\"interactive\",\"info\":\"交互表格（服务端分页）\"} after=null"
     },
     {
       "name": "T3_lightbox_zoom_ui452",
@@ -26,17 +26,32 @@
     {
       "name": "T4_chat_run_tool_job_b128_path",
       "pass": true,
-      "detail": "project=p_mulz07se_ccfl job=tj_mulz0cd0_cefu terminal=reused"
+      "detail": "project=p_mulzswds_w95y job=job_334357edf23c457d terminal=reused"
     },
     {
-      "name": "T5_scatter_viewer_mounted",
-      "pass": false,
-      "detail": "chat job 交互散点未挂载"
+      "name": "T5a_tooltip_values_ui452",
+      "pass": true,
+      "detail": "GENE001 | log2FoldChange: 2.45 | significance: 0.000125 | sig: Up"
     },
     {
-      "name": "T6_interactive_table_mounted",
+      "name": "T5b_search_highlight_ui452",
+      "pass": true,
+      "detail": "{\"hits\":25} prefix=GE"
+    },
+    {
+      "name": "T5c_threshold_lines_ui452",
+      "pass": true,
+      "detail": "{\"x\":2,\"y\":1}"
+    },
+    {
+      "name": "T6a_combo_filter_ui452",
+      "pass": true,
+      "detail": "after=25 / 25 行"
+    },
+    {
+      "name": "T6b_numeric_layer_ui452",
       "pass": false,
-      "detail": "chat job 交互表格未挂载"
+      "detail": "null"
     }
   ],
   "allPass": false,

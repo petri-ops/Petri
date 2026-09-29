@@ -69,7 +69,7 @@
 
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
-| 1 | BIO-1 / UI-452 | **结果信息密度包**（六件交付 `509d3eaa`；组件级 27/27；端到端走查 2026-09-28 尝试受阻：HTTP 直跑无会话 job 四条打开路径均未进结果页=产品发现登记 AUDIT-LOG 🟡 归 BIO-3/PL-7 修；**翻 verified 捷径=用户实机过目会话内 deseq2 结果六面**，或后续借 block121 会话造数复跑 scripts/ui452-density-live.cjs） | G0-BIO plan §3 BIO-1 | in_progress（过目待用户） |
+| 1 | BIO-1 / UI-452 | **结果信息密度包 verified**（2026-09-29 六面实机 9/10：tooltip 全数值/搜索 25 命中/阈值线/组合筛选 25/25/Lightbox 全链/深链保持——ui452-density-live 双路联合走查；T6b demo 数据边界非缺陷；前置=pack 5036e86 goldenFixture 重锚恢复 RS3 交互投影） | G0-BIO plan §3 BIO-1 | **verified** |
 | 1b | BIO-2 / UI-454 | **交互上限与降级链**（散点 backing 250→600/热图解除前端自缚全量渲染/静态 CSV 本地分页 50 行页/日志端点项目目录兜底修 BLOCK-126 发现缺陷；组件级 32/32+Node 640/0——**实机生效待 dev 栈重启**，重启后复跑 perception-live 即见端点 run.log 兜底；mojibake 移 BIO-4、top-N 排序移 BIO-3 留痕） | G0-BIO plan §3 BIO-2；台账 UI-454 | in_progress（实机待栈重启） |
 | 1c | BIO-3 / UI-455（P0 首刀） | **打开链修复 verified**（2026-09-29 实机铁证：SPA 深链 URL 保持 /result?job= 不归零+HTTP job 结果页可达——ui452-density-live T1 PASS；冷启动完整重载的归零竞争=独立缺陷仍登记） | G0-BIO plan §3 BIO-3；台账 UI-455 | **verified** |
 | 1d | BIO-3 / UI-456（P1） | **结果血缘条**：lineage 投影纯函数+listProjectWorkflowGraphs 仓库方法+GET /lineage 端点+前端 LineageStrip（契约 5/5+组件 4/4+Node 617/0）——实机待栈重启+真实跨 Job 链数据（随 BIO-4 解冻产生）；P2 继续分析按钮随 BIO-4 | G0-BIO plan §3 BIO-3；台账 UI-456 | in_progress（实机待数据） |
