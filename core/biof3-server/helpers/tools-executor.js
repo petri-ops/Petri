@@ -110,7 +110,7 @@ function createToolsExecutor({
   // BLOCK-128：activeToolJobs 改用进程级共享登记表——agent/MCP 同步路径
   //（run-plugin-script）与 HTTP 异步路径共用同一 owner 装置（心跳/硬超时/
   // 僵尸扫描/取消链对两条路径同等生效）。生产单进程单 executor，语义等价。
-  const { activeToolJobs } = require('./tool-job-lifecycle-registry');
+  const { activeToolJobs, setSchedulerPump } = require('./tool-job-lifecycle-registry');
   // BLOCK-76 P5 — 直跑作业取消登记：jobId → { runner, pid }（killLocalToolJob 对账用）
   const activeDirectJobs = new Map();
   const defaultLocalRoot =
@@ -563,6 +563,51 @@ function createToolsExecutor({
       5 * 60 * 1000
     );
   }
+
+  // BLOCK-130（PL-3 队列化）：终态调度泵——槽位释放后按创建序拉起排队的
+  // pending 作业。一次泵只拉一个（executeJob 的 CAS 起跑是异步的，连续
+  // 拉起会基于陈旧计数超发；每个终态都会触发泵，多释放=多泵消化）。
+  function resolveQueuedJobRoot(row) {
+    if (row.project_id) {
+      try {
+        return resolveProjectRunLayout({
+          projectId: row.project_id,
+          toolJobId: row.id,
+          db: dbMod,
+          skipPermissionCheck: true,
+          ensureDirs: false,
+        }).jobRoot;
+      } catch { return null; }
+    }
+    return path.join(jobsDir, row.id);
+  }
+
+  async function pumpQueuedToolJobs() {
+    const maxConcurrent = Number(process.env.BIOF3_TOOL_MAX_CONCURRENT || 2);
+    const rows = db
+      .prepare("SELECT id, user_id, tool_id, project_id FROM tool_jobs WHERE status = 'pending' AND is_test_run = 0 ORDER BY created_at ASC LIMIT 50")
+      .all();
+    for (const row of rows) {
+      const active = db
+        .prepare("SELECT COUNT(*) AS n FROM tool_jobs WHERE user_id = ? AND status IN ('pending','running') AND is_test_run = 0")
+        .get(row.user_id);
+      if (!active || active.n >= maxConcurrent) continue;
+      const jobRoot = resolveQueuedJobRoot(row);
+      if (!jobRoot || !fs.existsSync(jobRoot)) continue;
+      // staged 输入重建：入队时 jobDir 顶层只有上传件（脚本复制发生在
+      // executeJob 内部），按文件枚举即恢复 staged 列表（重启安全）。
+      const staged = fs.readdirSync(jobRoot)
+        .filter((name) => { try { return fs.statSync(path.join(jobRoot, name)).isFile(); } catch { return false; } })
+        .map((name) => path.join(jobRoot, name));
+      console.log('[tools] Queue pump starting job ' + row.id + ' (user=' + row.user_id + ')');
+      void executeJob(row.id, row.tool_id, jobRoot, staged)
+        .catch((error) => handleActiveToolJobSetupFailure({ activeToolJobs, jobId: row.id, error, markFailed: markJobFailed }))
+        .catch((error) => console.warn('[tools] Queue pump start failed for job ' + row.id + ':', error.message));
+      return;
+    }
+  }
+
+  setSchedulerPump(() => { void pumpQueuedToolJobs().catch(() => { /* 泵故障由下一终态再触发 */ }); });
 
   async function markJobFailed(jobId, errorMsg, stage) {
     const raw = String(errorMsg || '');
@@ -1687,6 +1732,8 @@ function createToolsExecutor({
     const { toolId, files, projectId } = req.body || {};
     if (!toolId) return res.status(400).json({ error: 'missing_tool_id' });
     const isTest = isSmokeTestRequest(req);
+    // BLOCK-130：满载入队标志（准入分支置位；入队=建行 pending 不立即执行）。
+    let shouldQueue = false;
 
     // BLOCK-57：executionTargetId 为 params 保留键——作业级 ExecutionTarget，
     // 服务端剥离后不入 params.json（脚本参数面零污染）；未知目标 fail-closed。
@@ -1807,11 +1854,22 @@ function createToolsExecutor({
           "SELECT COUNT(*) as cnt FROM tool_jobs WHERE user_id = ? AND status IN ('pending','running') AND is_test_run = 0"
         )
         .get(uid);
-      if (running && running.cnt >= 2)
-        return res.status(429).json({
-          error: 'max_concurrent',
-          message: '最多同时运行 2 个分析任务，请等待当前任务完成',
-        });
+      if (running && running.cnt >= 2) {
+        // BLOCK-130（PL-3 队列化）：满载不再直接拒绝——入队（建行 pending、
+        // 不立即执行，终态泵拉起）。只有排队深度也达上限才 429（防无界）。
+        const queuedCount = await db
+          .prepare(
+            "SELECT COUNT(*) as cnt FROM tool_jobs WHERE user_id = ? AND status = 'pending' AND is_test_run = 0"
+          )
+          .get(uid);
+        const depthLimit = Number(process.env.BIOF3_TOOL_QUEUE_DEPTH_LIMIT || 50);
+        if (queuedCount && queuedCount.cnt >= depthLimit)
+          return res.status(429).json({
+            error: 'max_concurrent',
+            message: `并发与排队均已满（在途 2 + 排队 ${depthLimit}），请等待队列消化后再试`,
+          });
+        shouldQueue = true;
+      }
     }
 
     const toolNames = {
@@ -1858,6 +1916,21 @@ function createToolsExecutor({
         projectId || null,
         executionTargetId
       );
+    if (shouldQueue) {
+      // BLOCK-130（PL-3）：入队——不启动，等终态泵；返回队列位置（同用户
+      // 在我之前排队的数量+1）。staged 文件路径不依赖内存：jobDir 顶层
+      // 上传件即 staged 输入（泵拉起时按此重建）。
+      const ahead = await db
+        .prepare(
+          "SELECT COUNT(*) as cnt FROM tool_jobs WHERE user_id = ? AND status = 'pending' AND is_test_run = 0 AND created_at < ?"
+        )
+        .get(uid, Date.now());
+      const queuePosition = (ahead && ahead.cnt ? ahead.cnt : 0) + 1;
+      console.log(
+        `[tools] Job ${jobId} queued (tool=${toolId} rid=${req.requestId} user=${uid} position=${queuePosition})`
+      );
+      return res.json({ ok: true, jobId, status: 'pending', queued: true, queuePosition, isTestRun: isTest, requestId: req.requestId });
+    }
     void executeJob(jobId, toolId, jobDir, uploadResult.entries.map((entry) => entry.filePath), sshContext)
       .catch((error) => handleActiveToolJobSetupFailure({
         activeToolJobs,

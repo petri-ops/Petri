@@ -6,6 +6,7 @@ const {
   terminateChildProcess,
 } = require('../process-lifecycle');
 const { publishJobTerminalState } = require('../job-events');
+const { notifyScheduler } = require('../tool-job-lifecycle-registry');
 
 function claimActiveToolJob(activeToolJobs, { jobId, toolId, now = Date.now } = {}) {
   if (activeToolJobs.has(jobId)) return null;
@@ -184,6 +185,7 @@ async function transitionToolJobToFailed({
     .prepare('UPDATE tool_jobs SET status=?, error=?, completed_at=? WHERE id=? AND status IN (?,?)')
     .run('failed', error, completedAt, jobId, 'pending', 'running');
   if (result && result.changes >= 1) publishJobTerminalState(jobId, 'failed');
+  notifyScheduler();
   return result;
 }
 
@@ -197,6 +199,7 @@ async function transitionToolJobToCompleted({
     .prepare('UPDATE tool_jobs SET status=?, result_json=?, completed_at=? WHERE id=? AND status=?')
     .run('completed', JSON.stringify(result), completedAt, jobId, 'running');
   if (updated && updated.changes >= 1) publishJobTerminalState(jobId, 'completed');
+  notifyScheduler();
   return updated;
 }
 
@@ -224,6 +227,7 @@ async function settleConfirmedToolCancellation({
       'cancelled',
     );
   if (settled && settled.changes >= 1) publishJobTerminalState(jobId, 'cancelled');
+  notifyScheduler();
   return settled;
 }
 

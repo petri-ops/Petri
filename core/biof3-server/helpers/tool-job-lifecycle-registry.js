@@ -26,4 +26,28 @@ function countActiveUserToolJobs(db, userId) {
   }
 }
 
-module.exports = { activeToolJobs, countActiveUserToolJobs };
+/**
+ * BLOCK-130（PL-3 队列化）：终态调度泵挂点。executor 工厂注册泵函数，
+ * 状态机终态原语释放槽位后触发——排队中的 pending 作业由泵拉起。
+ * 永不 throw（泵故障不阻断终态收敛），fire-and-forget。
+ */
+let schedulerPump = null;
+
+function setSchedulerPump(pump) {
+  schedulerPump = typeof pump === 'function' ? pump : null;
+}
+
+function notifyScheduler() {
+  try {
+    if (schedulerPump) schedulerPump();
+  } catch (error) {
+    console.warn('[tools] queue pump notify failed:', error.message);
+  }
+}
+
+module.exports = {
+  activeToolJobs,
+  countActiveUserToolJobs,
+  setSchedulerPump,
+  notifyScheduler,
+};
