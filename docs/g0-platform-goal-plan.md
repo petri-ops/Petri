@@ -137,3 +137,10 @@ Artifact Truth 读取时自愈、provenance 全链留痕、取消升级链、无
 - **防误杀设计**（勘察风险项落实）：判定主据=activeToolJobs 有无 owner（进程活着在跑绝不动——心跳写失败静默属已知路径，owner 在场而心跳停更不是滞留）；pending 不扫（调度泵自治域）；对账器自身故障 warn 可观测不重蹈「泵静默吞」。
 - **边界与后续**：tools-executor.js 内四处点状修补（ssh-direct 926/adopt 990/settleSpawn 1598/泵日志 610）**因并行会话 WIP 占用文件，登记为 WIP 合入后加映**——其后果（滞留 running）已由本对账器兜底，风险清零非延期裸奔。
 - **验证**：契约测试 4/4（无主收口+幂等/有 owner 绝不动含心跳停更十倍超时场景/无心跳宽限/不扫 pending）+ eslint 0 + test:changed 分类无冲突。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+### PL-4a tool_jobs retention 策略（2026-09-29 completed·出口判据「retention 在册」达成）
+
+- **范围**：tool_jobs 纳入 retention-sweeper 在册（终态 completed/failed + completed_at 超 90 天窗口，对齐 copilotMessages 保守值）——每次分析 1 行（result_json manifest 数十 KB）+ 一个 job 目录（inputs 副本 + all_results.zip 双份）的无界增长止血。**保护面**：is_public=1 与 PUBLIC_DEMO_JOB_IDS 双保险；pending/running（含对账器管辖域）绝不删。**目录级联**：删除前行 SELECT (id, project_id) → 项目内布局 resolveProjectRunLayout 解析 jobRoot（与 tools-executor 的 cleanupLocalToolJobDir 同语义，该函数为工厂闭包不可直接复用故内联等价实现）+ 全局 jobsDir 回退；目录清理失败不阻塞行删除（warn 留痕）。
+- **实机抓真两课**（测试先红暴露）：①completed_at 是 INTEGER 毫秒——不能复用 isoDaysAgo 的 datetime() 字符串（SQLite 类型序 INTEGER < TEXT 恒真，会把所有终态行当超窗；既有表是 TEXT 时间才适用）；②DELETE 误写 NOT IN victims（自己排除自己，目录清了行不删）。
+- **软引用风险**：scientific_task_specs.tool_job_id / lineage / truth-projection 对已删行按 .get() 容错（lineage 实证 null→「无血缘可投影」诚实回退）；与既有单条删除端点 DELETE /api/tools/job/:id 同后果同风险等级。
+- **验证**：pl4a 契约测试 3/3（超窗终态删+活跃/终态外永不删+目录级联 / is_public+demo 双保护 / 目录缺失不炸）+ block106 存量 retention 测试 6/6 零回归 + eslint 0 + 分类无冲突。PL-4b（治理 UI）另刀。G0 开发期常态 · 不外推 packaged/Provider/GA。

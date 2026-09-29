@@ -47,6 +47,11 @@ const RETENTION_DAYS = {
   loopEvidence: 30,
   loopDecisions: 30,
   loopStateSnapshots: 30,
+  // PL-4a（2026-09-29）— tool_jobs 终态行 90 天窗口（对齐 copilotMessages 保守值）：
+  // 每次分析 = 1 行（result_json manifest 数十 KB）+ 一个 job 目录（inputs 副本 +
+  // all_results.zip 双份等），无界增长在此止血。demo/公开资产与活跃作业（无
+  // completed_at 的终态外状态）永不删；目录级联清理与软引用风险见下方实现注释。
+  toolJobs: 90,
 };
 
 function isoDaysAgo(days) {
@@ -62,7 +67,7 @@ function isoDaysAgo(days) {
  * @param {Function} [deps.warn]  logger (defaults to console.warn)
  * @returns {{ scanned: string[], deleted: Record<string,number>, failures: Array<{table: string, reason: string}> }}
  */
-function runRetentionSweep({ db, warn = console.warn } = {}) {
+function runRetentionSweep({ db, warn = console.warn, jobsDir: jobsDirParam } = {}) {
   if (!db) {
     return { scanned: [], deleted: {}, failures: [{ table: '<sweep>', reason: 'db_not_provided' }] };
   }
@@ -89,6 +94,80 @@ function runRetentionSweep({ db, warn = console.warn } = {}) {
     const msg = e && e.message ? e.message : String(e);
     warn(`retention-purge: failed at copilot_messages, reason=${msg}`);
     failures.push({ table: 'copilot_messages', reason: msg });
+  }
+
+  // ---- tool_jobs: PL-4a — 终态（completed/failed）+ completed_at 超 90 天窗口。
+  // 保护面：is_public=1（含 public demo 资产）与 PUBLIC_DEMO_JOB_IDS 双保险；
+  // 非终态（pending/running——含对账器管辖域）绝不删。
+  // 目录级联：删除前行先 SELECT 出 (id, project_id)，项目内布局经
+  // resolveProjectRunLayout 解析 jobRoot（与 tools-executor 的
+  // cleanupLocalToolJobDir 同语义；该函数为工厂闭包不可直接复用，此处内联
+  // 等价实现），全局回退 jobsDir/<jobId>；目录清理失败不阻塞行删除（下次
+  // sweep 不再命中该行——孤儿目录风险登记：以 jobsDir 落盘为准）。
+  // 软引用：scientific_task_specs.tool_job_id / lineage / truth-projection 对
+  // 已删行均按 .get() 容错（lineage 实证 null→「无血缘可投影」诚实回退）；
+  // 与既有单条删除端点 DELETE /api/tools/job/:id 同后果同风险等级。
+  scanned.push('tool_jobs');
+  try {
+    const fsMod = require('node:fs');
+    const pathMod = require('node:path');
+    const osMod = require('node:os');
+    const { resolveProjectRunLayout } = require('../../shared-backend/project-run-layout');
+    const { config } = require('../../shared-backend/config-helper');
+    const { PUBLIC_DEMO_JOB_IDS } = require('../helpers/tools-assets');
+    const jobsDir = jobsDirParam || pathMod.join(
+      config.localResultsDir || pathMod.join(osMod.homedir(), 'Documents', 'BioF3-Local', 'results'),
+      'tool-jobs',
+    );
+    // completed_at 是 INTEGER 毫秒——不能用 isoDaysAgo 的 datetime() 字符串（类型序
+    // 下 INTEGER < TEXT 恒真会把所有行当超窗；既有表是 TEXT 时间才适用该助手）
+    const cutoffMs = Date.now() - RETENTION_DAYS.toolJobs * 24 * 60 * 60 * 1000;
+    const victims = db.prepare(`
+      SELECT id, project_id FROM tool_jobs
+      WHERE status IN ('completed','failed')
+        AND completed_at IS NOT NULL
+        AND completed_at < ${cutoffMs}
+        AND is_public = 0
+    `).all().filter((row) => !PUBLIC_DEMO_JOB_IDS.has(row.id));
+    let dirsRemoved = 0;
+    for (const row of victims) {
+      try {
+        let jobDir = null;
+        if (row.project_id) {
+          try {
+            const layout = resolveProjectRunLayout({
+              projectId: row.project_id,
+              toolJobId: row.id,
+              db: db,
+              skipPermissionCheck: true,
+              ensureDirs: false,
+            });
+            jobDir = layout.jobRoot;
+          } catch { /* 布局解析失败落全局回退 */ }
+        }
+        if (!jobDir) jobDir = pathMod.join(jobsDir, row.id);
+        if (fsMod.existsSync(jobDir)) {
+          fsMod.rmSync(jobDir, { recursive: true, force: true });
+          dirsRemoved += 1;
+        }
+      } catch (e) {
+        warn(`retention-purge: tool_jobs dir cleanup failed id=${row.id} reason=${e && e.message}`);
+      }
+    }
+    const res = db.prepare(`
+      DELETE FROM tool_jobs
+      WHERE status IN ('completed','failed')
+        AND completed_at IS NOT NULL
+        AND completed_at < ${cutoffMs}
+        AND is_public = 0
+        AND id IN (${victims.length ? victims.map(() => '?').join(',') : "''"})
+    `).run(...victims.map((row) => row.id));
+    deleted.tool_jobs = res.changes || 0;
+    deleted.tool_jobs_dirs = dirsRemoved;
+  } catch (e) {
+    const msg = e && e.message ? e.message : String(e);
+    warn(`retention-purge: failed at tool_jobs, reason=${msg}`);
+    failures.push({ table: 'tool_jobs', reason: msg });
   }
 
   // ---- loop ledger: only sweep terminal loop_runs (completed / failed /

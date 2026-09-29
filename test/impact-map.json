@@ -1178,6 +1178,7 @@
    "patterns": [
     "scripts/ui399-*",
     "scripts/ui453-*",
+    "test/pl4a-*",
     "test/pl6a-*",
     "scripts/ui451-*",
     "scripts/ui400-*",
