@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { createResultArchive } = require('./result-archive');
 const { v4: uuidv4 } = require('uuid');
-const { execFile, spawn } = require('child_process');
+const { spawn } = require('child_process');
 const { StringDecoder } = require('node:string_decoder');
 const { publishJobTerminalState } = require('./job-events');
 const { decodeRDeparseManifest } = require('../../shared-backend/r-deparse-decode');
@@ -49,6 +49,12 @@ const {
   markUnownedStaleJobs,
   recoverStaleActiveJobs,
 } = require('../helpers/process-lifecycle');
+// BLOCK-135（PL-3 二刀）：分析级重试策略——纯函数分类 + env 门（默认关闭），见 tool-retry-policy.js
+const {
+  classifyToolJobFailure,
+  getRetryMax,
+  isRetryEnabled,
+} = require('./tool-retry-policy');
 const { createTargetRegistry } = require('./remote-execution/target-registry');
 const { createRemoteJobRunner, AGENT_SCRIPT_HASH } = require('./remote-execution/remote-job-runner');
 const { createSshDirectRunner, captureREnv } = require('./remote-execution/ssh-direct-runner');
@@ -111,7 +117,7 @@ function createToolsExecutor({
   // BLOCK-128：activeToolJobs 改用进程级共享登记表——agent/MCP 同步路径
   //（run-plugin-script）与 HTTP 异步路径共用同一 owner 装置（心跳/硬超时/
   // 僵尸扫描/取消链对两条路径同等生效）。生产单进程单 executor，语义等价。
-  const { activeToolJobs, setSchedulerPump } = require('./tool-job-lifecycle-registry');
+  const { activeToolJobs, setSchedulerPump, notifyScheduler } = require('./tool-job-lifecycle-registry');
   // BLOCK-76 P5 — 直跑作业取消登记：jobId → { runner, pid }（killLocalToolJob 对账用）
   const activeDirectJobs = new Map();
   const defaultLocalRoot =
@@ -557,12 +563,16 @@ function createToolsExecutor({
 
   function startZombieRecovery() {
     recoverZombieJobs({ startup: true });
-    setInterval(
+    const timer = setInterval(
       () => {
         void recoverZombieJobs({ startup: false });
       },
       5 * 60 * 1000
     );
+    // 后台清扫不拥有进程生命周期（与 event-bus.js:45 / federation-terminal.js:66 /
+    // resident-revisit.js:233 同惯例）：server 进程存活由监听套接字决定，清扫定时器
+    // unref 后不再独自吊住事件循环——否则构造本工厂的测试进程永不退出。
+    if (typeof timer.unref === 'function') timer.unref();
   }
 
   // BLOCK-130（PL-3 队列化）：终态调度泵——槽位释放后按创建序拉起排队的
@@ -585,11 +595,14 @@ function createToolsExecutor({
 
   async function pumpQueuedToolJobs() {
     const maxConcurrent = Number(process.env.BIOF3_TOOL_MAX_CONCURRENT || 2);
-    const rows = db
+    // db 是 async facade（db/connection.js）：all()/get() 返回 Promise，必须 await——
+    // 漏 await 时 rows 是 Promise，for-of 直接 TypeError 且被注册处 .catch 静默吞掉，
+    // 泵整体假死（BLOCK-135 复核发现：BLOCK-130 既有缺陷，重试闭环依赖此泵）。
+    const rows = await db
       .prepare("SELECT id, user_id, tool_id, project_id FROM tool_jobs WHERE status = 'pending' AND is_test_run = 0 ORDER BY created_at ASC LIMIT 50")
       .all();
     for (const row of rows) {
-      const active = db
+      const active = await db
         .prepare("SELECT COUNT(*) AS n FROM tool_jobs WHERE user_id = ? AND status IN ('pending','running') AND is_test_run = 0")
         .get(row.user_id);
       if (!active || active.n >= maxConcurrent) continue;
@@ -608,7 +621,13 @@ function createToolsExecutor({
     }
   }
 
-  setSchedulerPump(() => { void pumpQueuedToolJobs().catch(() => { /* 泵故障由下一终态再触发 */ }); });
+  setSchedulerPump(() => {
+    void pumpQueuedToolJobs().catch((error) => {
+      // 泵故障不阻断终态收敛（下一终态再触发），但不许静默——漏 await 的
+      // TypeError 长期假死正是被这里的空 catch 吞掉（BLOCK-135 复核发现）。
+      console.warn('[tools] queue pump failed:', error.message);
+    });
+  });
 
   async function markJobFailed(jobId, errorMsg, stage) {
     const raw = String(errorMsg || '');
@@ -1075,6 +1094,54 @@ function createToolsExecutor({
 
         const executionFailure = err || active.setupFailure;
         if (executionFailure) {
+          // BLOCK-135（PL-3 二刀）：重试计数读取（列由 db/schema.js additive 迁移保证；
+          // db 是 async facade（db/connection.js createAsyncDatabaseFacade），get 返回
+          // Promise——漏 await 时 Promise?.retry_count 恒 undefined，retryCount 恒 0，
+          // 重试预算永不耗尽。await 后查询失败才真正落 catch 按 0 处理=不重试，
+          // 不阻断既有失败收敛。
+          let retryCount = 0;
+          try {
+            retryCount =
+              (await db.prepare('SELECT retry_count FROM tool_jobs WHERE id=?').get(jobId))?.retry_count ?? 0;
+          } catch {}
+          // BLOCK-135：分析级重试——默认关闭（BIOF3_TOOL_RETRY_MAX>0 才启用），加法式接入。
+          // 取消与 executor setup 失败不接（确定性路径语义不变）；仅「外部 SIGKILL 且非取消
+          // 请求」判瞬态（系统 OOM/资源挤占）。分类判定见 helpers/tool-retry-policy.js。
+          if (!active?.setupFailure && !active?.cancelRequested && isRetryEnabled()) {
+            const retryClassification = classifyToolJobFailure({
+              exitCode: err?.code ?? null,
+              signal: err?.signal ?? null,
+              timedOut: Boolean(active?.timedOut),
+              setupFailure: Boolean(active?.setupFailure),
+              cancelRequested: Boolean(active?.cancelRequested),
+              recoveryRequested: Boolean(active?.recoveryRequested),
+            });
+            const retryMax = getRetryMax();
+            let retried = null;
+            if (retryClassification.transient && retryCount < retryMax) {
+              try {
+                // is_test_run = 0：泵的候选 SELECT 同滤测试作业——测试作业重排会
+                // 被泵永久忽略、搁浅在 pending 直到僵尸扫描误标 failed（并发槽
+                // 同被占用）。测试作业不重排，随既有失败语义收敛。
+                retried = await db
+                  .prepare(
+                    "UPDATE tool_jobs SET status='pending', retry_count=retry_count+1, error=NULL, heartbeat_at=NULL WHERE id=? AND status='running' AND is_test_run = 0",
+                  )
+                  .run(jobId);
+              } catch (error) {
+                console.warn('[tools] Job ' + jobId + ' retry requeue failed:', error.message);
+              }
+            }
+            if (retried && retried.changes >= 1) {
+              console.log('[tools] Job ' + jobId + ' 进入重试 (' + (retryCount + 1) + '/' + retryMax + ')：瞬态原因 ' + retryClassification.reason);
+              // owner 必须先于泵释放：notifyScheduler 同步直达 claimActiveToolJob，
+              // 迟释放会让重跑被「already has an active execution owner」吞掉
+              //（finally 的幂等 release 不受影响）。
+              releaseActiveToolJob(activeToolJobs, jobId, owner);
+              notifyScheduler();
+              return;
+            }
+          }
           let failed = null;
           try {
             failed = buildProvenance();
@@ -1111,9 +1178,13 @@ function createToolsExecutor({
             await finalizeCancellation(failed);
             return;
           }
-          const failureMessage = active?.timedOut
+          const baseFailureMessage = active?.timedOut
             ? `任务超过最大运行预算 ${hardTimeoutMs}ms；子进程退出已确认`
             : active.setupFailure?.message || stderr || err?.message || '';
+          // BLOCK-135：重试额度耗尽才走到终态收敛；经历过重试的失败消息如实注明次数。
+          const failureMessage = retryCount > 0
+            ? baseFailureMessage + `（已重试 ${retryCount} 次后仍失败）`
+            : baseFailureMessage;
           await markJobFailed(jobId, failureMessage, 'execute');
           return;
         }
@@ -1890,33 +1961,35 @@ function createToolsExecutor({
       }
     }
 
-    const toolNames = {
-      deseq2: 'DESeq2',
-      'go-kegg': 'GO/KEGG ORA',
-      'km-survival': 'KM生存',
-      gsea: 'GSEA',
-      'bindea-immune': '免疫浸润',
-      wgcna: 'WGCNA',
-      'lasso-cox': 'LASSO Cox',
-      'seurat-standard': 'Seurat',
-      complexheatmap: 'ComplexHeatmap',
-      'maftools-mutation': 'maftools',
-      cellchat: 'CellChat',
-      'ml-feature-select': 'ML特征选择',
-      'ml-classifier': 'ML分类器',
-      'rsf-survival': 'RSF生存森林',
-      'shap-explain': 'SHAP',
-      'consensus-cluster': '一致性聚类',
-      'ml-scvi-annotate': 'scVI',
-      'mo-mofa': 'MOFA2',
-      'mo-snf': 'SNF',
-    };
+    // 静态白名单查表用 Map：get() 无计算成员访问面（security/detect-object-injection 干净），
+    // toolId 是请求侧输入，查不到时原样回退。
+    const toolNames = new Map([
+      ['deseq2', 'DESeq2'],
+      ['go-kegg', 'GO/KEGG ORA'],
+      ['km-survival', 'KM生存'],
+      ['gsea', 'GSEA'],
+      ['bindea-immune', '免疫浸润'],
+      ['wgcna', 'WGCNA'],
+      ['lasso-cox', 'LASSO Cox'],
+      ['seurat-standard', 'Seurat'],
+      ['complexheatmap', 'ComplexHeatmap'],
+      ['maftools-mutation', 'maftools'],
+      ['cellchat', 'CellChat'],
+      ['ml-feature-select', 'ML特征选择'],
+      ['ml-classifier', 'ML分类器'],
+      ['rsf-survival', 'RSF生存森林'],
+      ['shap-explain', 'SHAP'],
+      ['consensus-cluster', '一致性聚类'],
+      ['ml-scvi-annotate', 'scVI'],
+      ['mo-mofa', 'MOFA2'],
+      ['mo-snf', 'SNF'],
+    ]);
     const existCount = await db
       .prepare('SELECT COUNT(*) as cnt FROM tool_jobs WHERE user_id = ? AND tool_id = ?')
       .get(uid, toolId);
     const labelPrefix = isTest ? '🧪 ' : '';
     const jobName =
-      labelPrefix + (toolNames[toolId] || toolId) + ' #' + ((existCount ? existCount.cnt : 0) + 1);
+      labelPrefix + (toolNames.get(toolId) || toolId) + ' #' + ((existCount ? existCount.cnt : 0) + 1);
 
     await db
       .prepare(

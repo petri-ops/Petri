@@ -347,6 +347,30 @@ function validateUploadedFiles(toolId, jobDir, files) {
   return null;
 }
 
+/**
+ * C-21（批量导出布局兜底，与 UI-454 日志端点同语义）：导出打包的候选目录链。
+ * 有 project_id 的 Job 产物落在项目布局 jobRoot（<workspace>/results/jobs/<id>），
+ * 全局 tool-jobs 目录只是历史/兜底位置；按序取第一个「存在的」候选由调用方
+ * 完成——本函数纯解析，不做任何 IO（不 existsSync、不查库）。
+ *
+ * @param {Object} options
+ * @param {Object|null} options.job - tool_job 行（至少含 id / project_id）
+ * @param {string} options.jobsDir - 全局 tool-jobs 根目录
+ * @param {(projectId: string) => string|null|undefined} options.getProjectWorkspacePath
+ *   按 projectId 取 workspace_path 的同步函数（项目行缺失/无路径时返回 falsy）
+ * @returns {string[]} 按优先级排列的候选目录；job.id 非法（防穿越）或缺 jobsDir 时为空
+ */
+function resolveToolJobExportDirs({ job, jobsDir, getProjectWorkspacePath }) {
+  if (!job || !isSafeFlatFilename(String(job.id || '')) || !jobsDir) return [];
+  const globalDir = path.join(jobsDir, String(job.id));
+  if (!job.project_id || typeof getProjectWorkspacePath !== 'function') {
+    return [globalDir];
+  }
+  const workspacePath = getProjectWorkspacePath(String(job.project_id));
+  if (typeof workspacePath !== 'string' || !workspacePath) return [globalDir];
+  return [path.join(workspacePath, 'results', 'jobs', String(job.id)), globalDir];
+}
+
 function hydrateExecutionJob(row) {
   if (!row || typeof row !== 'object') return null;
   let params = {};
@@ -405,5 +429,6 @@ module.exports = {
   writeUploadedFiles,
   validateUploadedFiles,
   hydrateExecutionJob,
+  resolveToolJobExportDirs,
   resolveProducedResultDirectory,
 };

@@ -1,5 +1,9 @@
 # BioF3 Desktop — Current Next Steps
 
+最后更新：2026-09-29（**BLOCK-135 续线交付：PL-3 二刀重试策略 + C-21 export 兜底收口**（/workflow 续线第二发动）：两修复员并行落盘+冷复核 6 发现——2 高危（retryCount 漏 await 恒 0/队列泵 facade 漏 await 整体假死=BLOCK-130 既有缺陷）返工修复实证，F3（分类器补失活恢复第三形态）F4（export 打包补 output/ 子目录）主代理终审补齐，F5/F6 登记候选；block135 11/11+block130 回归 5/5+tsc 0+test:changed 120/0。**至此 G0-PLATFORM 高优先队列清完：PL-1/2/3(一二刀)/5a/6 全收口，PL-4 由并行 PL-4b+本线覆盖**；剩余=BIO-6 interpret 收敛（BIO-D4 裁决）/BIO-7 池。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-09-29（**PL-5/PL-5a 收口（BLOCK-134）**：动态工作流三版收口后主代理核验——评估前提已被并行 UI-456 上游消解（useResultStore/resultBridge/独立页删除+result-handlers 已删）→ 转化执行 **PL-5a 首刀 result:* 数据层退役**（删 untracked 死模块 result-db.js+singleton 测试改 branch 单角色契约 4/4+knip 239 键 PASS+test:changed 34/0+tsc 0）；复核员 4 发现随退役失效/转化（F3=退役依据）。工作流首战经验沉淀：两轮零改动空转（指令自由度过高）→指令化重写后一次到位；Windows 门禁命令需 .cmd 形态。**队列剩余：PL-3 二刀/BIO-6 interpret 收敛（BIO-D4）/BIO-7 池/C-21 export 兜底**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-09-29（**mojibake 加映二根治（BLOCK-133 e872378d+pack db6be21 成对）**：字节级归因=paste0 剥 UTF-8 标记→高位剥离（坏形态=UTF-8 字节 XOR 0x80 逐字节实证）——pack 侧 rapply 重打标记保码点+core 侧 deparse 读取解码，终验 30 labels/0 残留/26 真实中文；**PL-5 性能卫生两刀转动态工作流执行中**（第三版：首轮两修复员零改动+二轮空转卷入范围外——按规程两次 Amend 换写指令化 ask 破缓存重跑）；工作流复核员产出真发现 C-21（export 只扫全局目录）已核实登记。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-09-29（**PL-6/BLOCK-132 token 出 URL 交付**（用户裁决「继续」自主安排）：事实核查修正修法——'desktop-local' 为前端常量且后端 authMiddleware 无条件放行（真边界=回环+Host 白名单），URL query token 无鉴权价值纯污染——四处拔除（revisionArtifactUrl/壳 buildUrl/scientificScriptUrl/SSE URL）+files.js DRAG_OUT_TOKEN（有真实判定语义）守卫钉住保留；守卫 3/3+相关前端 170/170。**BIO-6b 窗口扩容已由并行会话完成（e9fddf88）**；并行 PL-4b job governance 在制（untracked 测试——test:changed 2 红为其 WIP 非本刀）。**队列剩余：PL-3 二刀/BIO-6 interpret 收敛（BIO-D4 裁决）/PL-5 性能卫生/BIO-7 池**。G0 开发期常态 · 不外推 packaged/Provider/GA。）

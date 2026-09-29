@@ -11,6 +11,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -68,4 +69,82 @@ test('queue position semantics: same-user pending rows created earlier count ahe
   ).get('u1');
   assert.equal(active.n, 3, 'active count = running + queued');
   sqlite.close();
+});
+
+test('queue pump drives pending rows through the async db facade (BLOCK-135 复核回归：漏 await 的 facade 让泵静默假死)', async () => {
+  // 生产注入形态复刻：routes/tools.js 的 db = dbMod.getAsyncDatabase()（get/all/run
+  // 返回 Promise）。旧缺陷：泵内 all()/get() 未 await → rows 是 Promise → for-of
+  // TypeError → 被注册处空 .catch 吞掉 → 泵从未拉起过任何排队作业。
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-pump-facade-'));
+  process.env.BIOF3_DB_PATH = path.join(tempDir, 'pump.db');
+  // db.js 模块顶层即 prepare projects（与 agent-runner-facade.test.mjs 同一前提）：
+  // 先跑生产 migration 链再加载 db 模块。
+  const { runMigrations } = require('../src/migration-runner');
+  await runMigrations(process.env.BIOF3_DB_PATH, path.join(ROOT, 'src', 'migrations'));
+  const dbMod = require('../core/biof3-server/db.js');
+  const db = dbMod.getAsyncDatabase();
+
+  // 计数包装保持 async 契约（与真 facade 同构），按 SQL 精确计数观察泵的迭代进度
+  //（构造期一次性 zombie 扫描也走 db，不能混入计数）。
+  const counters = { pumpSelectCalls: 0, perUserCountCalls: 0 };
+  const countingDb = {
+    prepare(sql) {
+      const stmt = db.prepare(sql);
+      return {
+        run: (...p) => stmt.run(...p),
+        get: (...p) => {
+          if (sql.includes('SELECT COUNT(*) AS n FROM tool_jobs WHERE user_id = ?')) counters.perUserCountCalls += 1;
+          return stmt.get(...p);
+        },
+        all: (...p) => {
+          if (sql.includes('ORDER BY created_at ASC LIMIT 50')) counters.pumpSelectCalls += 1;
+          return stmt.all(...p);
+        },
+      };
+    },
+  };
+
+  const { createToolsExecutor } = require('../core/biof3-server/helpers/tools-executor.js');
+  const jobsDir = path.join(tempDir, 'tool-jobs'); // 故意不创建：jobRoot 缺失 → 泵迭代后跳过，不真执行作业
+  createToolsExecutor({
+    db: countingDb,
+    dbMod,
+    config: { localResultsDir: tempDir },
+    notify: {},
+    jobsDir,
+    scriptsDir: path.join(tempDir, 'tool-scripts'),
+    publicDemoJobIds: [],
+    safeJoinUnder: (_root, p) => p,
+    getUserId: () => 'u1',
+    isSmokeTestRequest: () => false,
+  });
+  // 行在构造之后插入：工厂构造期有一次启动 zombie 扫描（async 一发即忘），
+  // 先让它对空表跑完，避免与测试行竞态（探针实证：先插行会被扫改状态）。
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  const insert = dbMod.db.prepare(
+    "INSERT INTO tool_jobs (id, user_id, tool_id, status, is_test_run, created_at) VALUES (?, ?, 'deseq2', 'pending', ?, ?)"
+  );
+  // 两个非测试 pending（泵应逐一迭代）+ 一个测试 pending（候选 SELECT 排除）
+  insert.run('pump-j1', 'u1', 0, Date.now());
+  insert.run('pump-j2', 'u1', 0, Date.now() + 1);
+  insert.run('pump-j3', 'u1', 1, Date.now() + 2);
+  const { notifyScheduler, setSchedulerPump } = require('../core/biof3-server/helpers/tool-job-lifecycle-registry.js');
+  try {
+    notifyScheduler(); // 工厂已注册真泵到共享 registry
+    const deadline = Date.now() + 3000;
+    while (counters.perUserCountCalls < 2 && Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    assert.equal(counters.pumpSelectCalls, 1, 'pump must run its candidate SELECT exactly once per invocation');
+    // 差异断言面：旧代码 perUserCountCalls 恒 0（for-of 在迭代前已 TypeError）
+    assert.equal(
+      counters.perUserCountCalls,
+      2,
+      'pump must iterate both non-test pending rows (test-run row stays outside the candidate SELECT)'
+    );
+  } finally {
+    setSchedulerPump(null); // 不把本文件注册的泵留给后续测试
+    dbMod.closeDatabase();
+    try { fs.rmSync(tempDir, { recursive: true, force: true }); } catch { /* Windows 短暂持锁时容忍 */ }
+  }
 });

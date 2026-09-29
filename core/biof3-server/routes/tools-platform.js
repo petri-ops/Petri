@@ -236,6 +236,9 @@ function createToolsPlatformRoutes({
     });
 
     // 聚合导出：所选终态 job 的 job 目录打包单 zip 流式下载（archiver 仓内既有依赖）。
+    // C-21：目录按 job 解析候选链（项目布局 jobRoot 优先、全局 tool-jobs 兜底），
+    // 与 UI-454 日志端点 layout 兜底同语义——有 project_id 的 job 不再被全局
+    // existsSync 静默跳过（导出为空/缺件）。
     app.post('/api/tools/jobs/export', express.json({ limit: '64kb' }), async (req, res) => {
       try {
         const ids = Array.isArray(req.body?.ids) ? req.body.ids.filter((x) => typeof x === 'string' && x) : [];
@@ -250,6 +253,16 @@ function createToolsPlatformRoutes({
           config.localResultsDir || pathMod.join(osMod.homedir(), 'Documents', 'BioF3-Local', 'results'),
           'tool-jobs',
         );
+        const { resolveToolJobExportDirs } = require('../helpers/tools-executor/result-files');
+        // C-21：workspace_path 查询失败不致命——退回全局目录链（UI-454 同语义）。
+        const getProjectWorkspacePath = (projectId) => {
+          try {
+            const row = db
+              .prepare('SELECT workspace_path FROM projects WHERE id = ?')
+              .get(projectId);
+            return row && row.workspace_path ? String(row.workspace_path) : null;
+          } catch { return null; }
+        };
         const { ZipArchive } = await import('archiver');
         const archive = new ZipArchive({ zlib: { level: 6 } });
         res.setHeader('content-type', 'application/zip');
@@ -261,12 +274,24 @@ function createToolsPlatformRoutes({
         for (const id of ids) {
           const job = await db.prepare('SELECT * FROM tool_jobs WHERE id = ?').get(id);
           if (!job || !canAccessToolJob(req, job)) continue;
-          const dir = pathMod.join(jobsDir, id);
-          if (!fsMod.existsSync(dir)) continue;
+          // C-21：候选链按序取第一个存在的目录（项目布局 jobRoot 优先、全局兜底）。
+          const dir = resolveToolJobExportDirs({ job, jobsDir, getProjectWorkspacePath })
+            .find((candidate) => fsMod.existsSync(candidate));
+          if (!dir) continue;
           for (const entry of fsMod.readdirSync(dir, { withFileTypes: true })) {
             if (!entry.isFile()) continue;
             archive.file(pathMod.join(dir, entry.name), { name: `${id}/${entry.name}` });
             packed += 1;
+          }
+          // BLOCK-135 复核 F4：产物与 run.log 都在 output/ 子目录
+          //（tools-executor.js resultDir=jobDir/output）——只收顶层会漏掉全部产物。
+          const outputDir = pathMod.join(dir, 'output');
+          if (fsMod.existsSync(outputDir)) {
+            for (const entry of fsMod.readdirSync(outputDir, { withFileTypes: true })) {
+              if (!entry.isFile()) continue;
+              archive.file(pathMod.join(outputDir, entry.name), { name: `${id}/output/${entry.name}` });
+              packed += 1;
+            }
           }
         }
         if (packed === 0 && !res.headersSent) {

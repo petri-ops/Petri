@@ -443,6 +443,8 @@ try {
   try { db.exec('ALTER TABLE tool_jobs ADD COLUMN project_id TEXT'); } catch {}
   try { db.exec('ALTER TABLE tool_jobs ADD COLUMN process_pid INTEGER'); } catch {}
   try { db.exec('ALTER TABLE tool_jobs ADD COLUMN heartbeat_at BIGINT'); } catch {}
+  // BLOCK-135（PL-3 二刀）：分析级重试计数（0=未重试；瞬态判定策略见 helpers/tool-retry-policy.js）
+  try { db.exec('ALTER TABLE tool_jobs ADD COLUMN retry_count INTEGER NOT NULL DEFAULT 0'); } catch {}
   try { db.exec('CREATE INDEX IF NOT EXISTS idx_tool_jobs_project ON tool_jobs(project_id)'); } catch {}
   // BLOCK-57：远程执行目标（作业级 ExecutionTarget，本地永远是默认——列为 NULL 即本地路径）
   try {
