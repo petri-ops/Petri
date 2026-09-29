@@ -5463,6 +5463,17 @@
         "execution-unification"
       ],
       "notes": "G0-PLATFORM PL-1 种子（用户裁决「继续」）。MCP 同步路径并入共享 owner 装置（进程级 activeToolJobs 单例+并发准入+心跳/硬超时/僵尸/取消全覆盖），300s 内建上限退役对齐 30min 硬预算。契约 4/4+定向回归 0 红；实机待栈重启。"
+    },
+    {
+      "id": "G0-GOAL-STAGE-EXPANSION-RECON-2026-09",
+      "path": "docs/g0-goal-stage-expansion-recon-2026-09.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": null,
+      "archivePolicy": "archive_after_completion",
+      "notes": "五粒种子（PL-4/5/6+BIO-5/6）拆包勘察素材：11 子包可裁决单元+关键发现；素材性质（权威在两 Goal plan+backlog），backlog 展开后转 archived。2026-09-29 UI-451~453 会话三路只读勘察产出。",
+      "entrypoint": "docs/README.md"
     }
   ],
   "lastUpdated": "2026-09-29",
