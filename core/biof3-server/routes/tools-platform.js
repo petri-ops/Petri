@@ -10,6 +10,7 @@ const express = require('express');
  */
 function createToolsPlatformRoutes({
   db,
+  jobsDir: jobsDirOverride,
   canAccessToolJob,
   isCancellableJob,
   handleToolRun,
@@ -153,6 +154,128 @@ function createToolsPlatformRoutes({
         res.json({ ok: true, localCleanup });
       } catch (e) {
         res.status(500).json({ error: e.message });
+      }
+    });
+
+    // ---- PL-4b（2026-09-29）结果治理三端点：批量删除 / 存储概览 / 聚合导出 ----
+
+    // 批量删除：仅终态（completed/failed/cancelled/done）可删；公开 demo 拒删（同单删语义）；
+    // 目录级联复用 cleanupLocalToolJobDir；逐条结果返回（部分失败不毒化整批）。
+    app.post('/api/tools/jobs/batch-delete', express.json({ limit: '64kb' }), async (req, res) => {
+      try {
+        const ids = Array.isArray(req.body?.ids) ? req.body.ids.filter((x) => typeof x === 'string' && x) : [];
+        if (ids.length === 0) return res.status(400).json({ error: 'missing_ids' });
+        if (ids.length > 200) return res.status(400).json({ error: 'too_many_ids', message: '单批上限 200' });
+        const results = [];
+        for (const id of ids) {
+          try {
+            const job = await db.prepare('SELECT * FROM tool_jobs WHERE id = ?').get(id);
+            if (!job) { results.push({ id, ok: false, error: 'not_found' }); continue; }
+            if (!canAccessToolJob(req, job)) { results.push({ id, ok: false, error: 'forbidden' }); continue; }
+            const { PUBLIC_DEMO_JOB_IDS } = require('../helpers/tools-assets');
+            if (job.is_public || PUBLIC_DEMO_JOB_IDS.has(id)) { results.push({ id, ok: false, error: 'cannot_delete_public_demo' }); continue; }
+            if (!['completed', 'failed', 'cancelled', 'done'].includes(job.status)) {
+              results.push({ id, ok: false, error: 'job_not_terminal', status: job.status });
+              continue;
+            }
+            const localCleanup = cleanupLocalToolJobDir(id);
+            await db.prepare('DELETE FROM tool_jobs WHERE id = ?').run(id);
+            results.push({ id, ok: true, localCleanup });
+          } catch (e) {
+            results.push({ id, ok: false, error: e.message });
+          }
+        }
+        const deleted = results.filter((r) => r.ok).length;
+        res.json({ ok: true, deleted, results });
+      } catch (e) {
+        res.status(500).json({ error: e.message });
+      }
+    });
+
+    // 存储概览：jobsDir 一次 walk（目录数/字节数，有界——目录数截 500）+ 行数统计
+    app.get('/api/tools/storage-summary', async (req, res) => {
+      try {
+        const fsMod = require('node:fs');
+        const pathMod = require('node:path');
+        const osMod = require('node:os');
+        // config-helper 导出 Proxy（字段访问直通 getConfig()，无 {config} 具名导出）
+        const config = require('../../shared-backend/config-helper');
+        const jobsDir = jobsDirOverride || pathMod.join(
+          config.localResultsDir || pathMod.join(osMod.homedir(), 'Documents', 'BioF3-Local', 'results'),
+          'tool-jobs',
+        );
+        let jobDirs = 0;
+        let bytes = 0;
+        let truncated = false;
+        try {
+          const entries = fsMod.readdirSync(jobsDir, { withFileTypes: true });
+          for (const entry of entries.slice(0, 500)) {
+            if (!entry.isDirectory()) continue;
+            jobDirs += 1;
+            try {
+              const dirPath = pathMod.join(jobsDir, entry.name);
+              for (const f of fsMod.readdirSync(dirPath)) {
+                try { bytes += fsMod.statSync(pathMod.join(dirPath, f)).size; } catch { /* 单文件失败跳过 */ }
+              }
+            } catch { /* 单目录失败跳过 */ }
+          }
+          if (entries.length > 500) truncated = true;
+        } catch { /* jobsDir 不存在=空概览 */ }
+        const counts = await db.prepare(
+          "SELECT status, COUNT(*) n FROM tool_jobs GROUP BY status",
+        ).all();
+        res.json({
+          ok: true,
+          jobsDir,
+          disk: { jobDirs, bytes, truncated },
+          rows: Object.fromEntries(counts.map((r) => [r.status, r.n])),
+        });
+      } catch (e) {
+        res.status(500).json({ error: e.message });
+      }
+    });
+
+    // 聚合导出：所选终态 job 的 job 目录打包单 zip 流式下载（archiver 仓内既有依赖）。
+    app.post('/api/tools/jobs/export', express.json({ limit: '64kb' }), async (req, res) => {
+      try {
+        const ids = Array.isArray(req.body?.ids) ? req.body.ids.filter((x) => typeof x === 'string' && x) : [];
+        if (ids.length === 0) return res.status(400).json({ error: 'missing_ids' });
+        if (ids.length > 50) return res.status(400).json({ error: 'too_many_ids', message: '导出单批上限 50' });
+        const fsMod = require('node:fs');
+        const pathMod = require('node:path');
+        const osMod = require('node:os');
+        // config-helper 导出 Proxy（字段访问直通 getConfig()，无 {config} 具名导出）
+        const config = require('../../shared-backend/config-helper');
+        const jobsDir = jobsDirOverride || pathMod.join(
+          config.localResultsDir || pathMod.join(osMod.homedir(), 'Documents', 'BioF3-Local', 'results'),
+          'tool-jobs',
+        );
+        const { ZipArchive } = await import('archiver');
+        const archive = new ZipArchive({ zlib: { level: 6 } });
+        res.setHeader('content-type', 'application/zip');
+        res.setHeader('content-disposition', `attachment; filename="gewu-results-${Date.now()}.zip"`);
+        archive.on('warning', () => { /* archiver 警告不中断 */ });
+        archive.on('error', () => { if (!res.headersSent) res.status(500).end(); else res.end(); });
+        archive.pipe(res);
+        let packed = 0;
+        for (const id of ids) {
+          const job = await db.prepare('SELECT * FROM tool_jobs WHERE id = ?').get(id);
+          if (!job || !canAccessToolJob(req, job)) continue;
+          const dir = pathMod.join(jobsDir, id);
+          if (!fsMod.existsSync(dir)) continue;
+          for (const entry of fsMod.readdirSync(dir, { withFileTypes: true })) {
+            if (!entry.isFile()) continue;
+            archive.file(pathMod.join(dir, entry.name), { name: `${id}/${entry.name}` });
+            packed += 1;
+          }
+        }
+        if (packed === 0 && !res.headersSent) {
+          // 无可打包内容：以空 zip 正常收尾（诚实空导出而非 500）
+        }
+        await archive.finalize();
+      } catch (e) {
+        if (!res.headersSent) res.status(500).json({ error: e.message });
+        else res.end();
       }
     });
 

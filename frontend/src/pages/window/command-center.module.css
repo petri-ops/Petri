@@ -383,3 +383,54 @@
   font-size: 11px;
   color: var(--gewu-text-tertiary, inherit);
 }
+
+/* PL-4b — 结果治理条 */
+.govBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 6px 2px;
+  border-bottom: 1px solid var(--gewu-border);
+  margin-bottom: 6px;
+}
+
+.govStorage {
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
+  flex: 1 1 auto;
+  min-width: 200px;
+}
+
+.govBtn,
+.govBtnDanger {
+  border: 1px solid var(--gewu-border);
+  border-radius: 6px;
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-caption);
+  padding: 3px 10px;
+  cursor: pointer;
+}
+
+.govBtn:hover {
+  background: var(--gewu-hover);
+}
+
+.govBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.govBtnDanger {
+  color: var(--gewu-danger);
+}
+
+.govBtnDanger:hover:not(:disabled) {
+  background: var(--gewu-hover);
+}
+
+.tileSelected {
+  outline: 2px solid var(--gewu-accent);
+  outline-offset: -2px;
+}

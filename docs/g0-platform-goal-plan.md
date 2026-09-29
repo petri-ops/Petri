@@ -144,3 +144,10 @@ Artifact Truth 读取时自愈、provenance 全链留痕、取消升级链、无
 - **实机抓真两课**（测试先红暴露）：①completed_at 是 INTEGER 毫秒——不能复用 isoDaysAgo 的 datetime() 字符串（SQLite 类型序 INTEGER < TEXT 恒真，会把所有终态行当超窗；既有表是 TEXT 时间才适用）；②DELETE 误写 NOT IN victims（自己排除自己，目录清了行不删）。
 - **软引用风险**：scientific_task_specs.tool_job_id / lineage / truth-projection 对已删行按 .get() 容错（lineage 实证 null→「无血缘可投影」诚实回退）；与既有单条删除端点 DELETE /api/tools/job/:id 同后果同风险等级。
 - **验证**：pl4a 契约测试 3/3（超窗终态删+活跃/终态外永不删+目录级联 / is_public+demo 双保护 / 目录缺失不炸）+ block106 存量 retention 测试 6/6 零回归 + eslint 0 + 分类无冲突。PL-4b（治理 UI）另刀。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+### PL-4b 结果治理 UI+API（2026-09-29 completed·出口判据「桌面结果可批量管理/导出」达成，PL-4 三判据齐）
+
+- **范围**：①后端三端点（tools-platform，装配不变）：`POST /api/tools/jobs/batch-delete`（终态门 done/completed/failed/cancelled + is_public 与 PUBLIC_DEMO_JOB_IDS 双保护 + 目录级联复用 cleanupLocalToolJobDir + 逐条结果部分失败不毒化，单批上限 200）/ `GET /api/tools/storage-summary`（jobsDir 一次 walk 有界 500 目录 + 行数分组）/ `POST /api/tools/jobs/export`（所选 job 目录聚合 zip 流式下载，archiver 仓内既有依赖，单批上限 50，空集诚实空 zip）；jobsDir 可注入（工厂参数，测试用）。②前端 JobsWall 治理条：存储概览文本 + 全选/清空 + 导出所选 + 删除所选（confirm 两步）+ 终态瓦片多选框（外层 div 包裹防 button 嵌套交互冲突，选中态 accent 描边）；选择集随轮询刷新做渲染期派生收敛。
+- **history 分页延期**：端点在 tools-metadata.js（并行会话 WIP 占用），登记 WIP 合入后加映；MAX_TILES=12 截断下分页非本面阻塞。
+- **实机抓真**：config-helper 是 Proxy 导出（无 {config} 具名解构——storage-summary 500 复现修正）；批量删首版漏 PUBLIC_DEMO 名单检查（契约测试 3!==2 抓真补双保险）；后端残留在动态口 60720（启动瞬间 3001 被占自动改口，前端 preload 注入同口功能不受影响）。
+- **验证**：pl4b 契约测试 3/3（batch 六分类逐条/export PK 魔数+空 ids 400/summary 形状）+ 前端 window 定向 6/6 + tsc 0 + eslint 净（set-state-in-effect 两处重构：取数函数返回文本回调 setState、选择集渲染期派生）+ **实机三端点全通**（概览 7 目录/261KB/138 行实测；导出 200 PK 魔数 22 字节 zip；batch 空_ids 400）+ 分类无冲突。G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -66,6 +66,10 @@ export function CommandCenterJobsWall({
   const [logJobId, setLogJobId] = useState<string | null>(null);
   const [logView, setLogView] = useState<LogView | null>(null);
   const [cancelArmedId, setCancelArmedId] = useState<string | null>(null);
+  // PL-4b — 结果治理：终态瓦片多选 + 批量删除/导出 + 存储概览
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [govNote, setGovNote] = useState<string | null>(null);
+  const [storageText, setStorageText] = useState<string | null>(null);
   const jobsRef = useRef<ToolJob[]>([]);
   jobsRef.current = jobs;
   const logJobRef = useRef<string | null>(null);
@@ -82,6 +86,103 @@ export function CommandCenterJobsWall({
       setLoadingError(e instanceof Error ? e.message : '作业状态获取失败');
     }
   }, [projectId]);
+
+  // PL-4b — 存储概览（挂载拉一次；纯取数函数返回文本，setState 只在 effect 回调——
+  // 规则红线：不得在 effect 同步段调含 setState 的函数）
+  const fetchStorageText = useCallback(async (): Promise<string> => {
+    try {
+      const resp = await fetch(`${getApiPrefix()}/tools/storage-summary`, {
+        headers: getToken() ? { Authorization: `Bearer ${getToken()}` } : {},
+      });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = (await resp.json()) as {
+        disk?: { jobDirs?: number; bytes?: number; truncated?: boolean };
+        rows?: Record<string, number>;
+      };
+      const mb = ((data.disk?.bytes ?? 0) / 1024 / 1024).toFixed(1);
+      const rows = data.rows || {};
+      const parts = Object.entries(rows).map(([k, v]) => `${k}:${v}`).join(' ');
+      return `结果存储：${data.disk?.jobDirs ?? 0} 个作业目录 / ${mb}MB${data.disk?.truncated ? '+' : ''}（${parts}）`;
+    } catch {
+      return '结果存储：概览不可用';
+    }
+  }, []);
+  useEffect(() => {
+    let alive = true;
+    void fetchStorageText().then((text) => {
+      if (alive) setStorageText(text);
+    });
+    return () => { alive = false; };
+  }, [fetchStorageText]);
+
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const handleBatchDelete = useCallback(async () => {
+    const ids = [...selectedIds];
+    if (ids.length === 0) return;
+    if (!window.confirm(`删除所选 ${ids.length} 个已完成/失败作业及其全部产物文件？此操作不可撤销。`)) return;
+    setGovNote('批量删除中…');
+    try {
+      const resp = await fetch(`${getApiPrefix()}/tools/jobs/batch-delete`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) },
+        body: JSON.stringify({ ids }),
+      });
+      const data = (await resp.json()) as { deleted?: number; results?: Array<{ id: string; ok: boolean; error?: string }> };
+      const failed = (data.results || []).filter((r) => !r.ok);
+      setGovNote(`已删除 ${data.deleted ?? 0}/${ids.length}${failed.length ? `；${failed.length} 个未删（${failed[0].error}）` : ''}`);
+      setSelectedIds(new Set());
+      void refresh();
+      void fetchStorageText().then((t) => setStorageText(t));
+    } catch (e) {
+      setGovNote(`批量删除失败：${e instanceof Error ? e.message : '未知'}`);
+    }
+  }, [selectedIds, refresh, fetchStorageText]);
+
+  const handleBatchExport = useCallback(async () => {
+    const ids = [...selectedIds];
+    if (ids.length === 0) return;
+    setGovNote('导出打包中…');
+    try {
+      const resp = await fetch(`${getApiPrefix()}/tools/jobs/export`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) },
+        body: JSON.stringify({ ids }),
+      });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `gewu-results-${Date.now()}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
+      setGovNote(`已导出 ${ids.length} 个作业的产物 zip`);
+    } catch (e) {
+      setGovNote(`导出失败：${e instanceof Error ? e.message : '未知'}`);
+    }
+  }, [selectedIds]);
+
+  // 选择集随瓦片刷新同步：已消失的 id 剔除（渲染期派生调整模式——同步 setState
+  // 进 effect 违反 react-hooks/set-state-in-effect；集合相等时返回原引用零重渲染）
+  const aliveIds = new Set(jobs.map((j) => j.id));
+  const effectiveSelection = selectedIds.size === 0
+    ? selectedIds
+    : (() => {
+        const next = new Set([...selectedIds].filter((id) => aliveIds.has(id)));
+        return next.size === selectedIds.size ? selectedIds : next;
+      })();
+  if (effectiveSelection !== selectedIds) {
+    setSelectedIds(effectiveSelection);
+  }
 
   // 只读真相轮询：5s 粒度（瓦片实时进度的诚实形态 = 状态 + 已耗时，
   // tool_jobs 无百分比概念，不虚构进度条）
@@ -236,10 +337,49 @@ export function CommandCenterJobsWall({
     onStatsChangeRef.current?.(stats);
   }, [stats.active, stats.history]);
 
+  const terminalJobs = jobs.filter((job) => !isActiveJob(job));
+
   return (
     <div className={styles.gridWrap}>
       {loadError && <div className={styles.loadError} role="alert">{loadError}</div>}
       {drillNote && <div className={styles.drillNote} role="status">{drillNote}</div>}
+      {govNote && <div className={styles.drillNote} role="status" data-testid="cc-gov-note">{govNote}</div>}
+      {/* PL-4b — 存储概览 + 批量治理条 */}
+      <div className={styles.govBar} data-testid="cc-gov-bar">
+        <span className={styles.govStorage} data-testid="cc-storage-text">{storageText ?? '结果存储：统计中…'}</span>
+        {terminalJobs.length > 0 && (
+          <>
+            <button
+              type="button"
+              className={styles.govBtn}
+              data-testid="cc-gov-select-all"
+              onClick={() => setSelectedIds((prev) =>
+                prev.size === terminalJobs.length ? new Set() : new Set(terminalJobs.map((j) => j.id)),
+              )}
+            >
+              {selectedIds.size === terminalJobs.length && terminalJobs.length > 0 ? '清空选择' : '全选已完成'}
+            </button>
+            <button
+              type="button"
+              className={styles.govBtn}
+              data-testid="cc-gov-export"
+              disabled={selectedIds.size === 0}
+              onClick={() => void handleBatchExport()}
+            >
+              导出所选
+            </button>
+            <button
+              type="button"
+              className={styles.govBtnDanger}
+              data-testid="cc-gov-delete"
+              disabled={selectedIds.size === 0}
+              onClick={() => void handleBatchDelete()}
+            >
+              删除所选
+            </button>
+          </>
+        )}
+      </div>
       {jobs.length === 0 && !loadError && (
         <div className={styles.empty}>{emptyText}</div>
       )}
@@ -328,19 +468,34 @@ export function CommandCenterJobsWall({
               </div>
             );
           }
+          const checked = selectedIds.has(job.id);
           return (
-            <button
+            <div
               key={job.id}
-              type="button"
-              className={styles.tile}
+              className={`${styles.tile}${checked ? ` ${styles.tileSelected}` : ''}`}
               data-status={job.status}
               data-job-id={job.id}
               data-testid="cc-tile-history"
-              onClick={() => void handleDrill(job)}
-              title="点击下钻到结果独立窗"
+              style={{ position: 'relative' }}
             >
-              {body}
-            </button>
+              <input
+                type="checkbox"
+                aria-label={`选择 ${job.name || job.id}`}
+                checked={checked}
+                onChange={() => toggleSelect(job.id)}
+                onClick={(e) => e.stopPropagation()}
+                style={{ position: 'absolute', top: 6, right: 6, zIndex: 2 }}
+                data-testid="cc-tile-select"
+              />
+              <button
+                type="button"
+                onClick={() => void handleDrill(job)}
+                title="点击下钻到结果独立窗"
+                style={{ all: 'unset', cursor: 'pointer', display: 'block', width: '100%', height: '100%' }}
+              >
+                {body}
+              </button>
+            </div>
           );
         })}
       </div>

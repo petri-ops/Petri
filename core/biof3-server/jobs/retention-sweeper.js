@@ -113,7 +113,8 @@ function runRetentionSweep({ db, warn = console.warn, jobsDir: jobsDirParam } = 
     const pathMod = require('node:path');
     const osMod = require('node:os');
     const { resolveProjectRunLayout } = require('../../shared-backend/project-run-layout');
-    const { config } = require('../../shared-backend/config-helper');
+    // config-helper 导出 Proxy（字段访问直通 getConfig()，无 {config} 具名导出）
+    const config = require('../../shared-backend/config-helper');
     const { PUBLIC_DEMO_JOB_IDS } = require('../helpers/tools-assets');
     const jobsDir = jobsDirParam || pathMod.join(
       config.localResultsDir || pathMod.join(osMod.homedir(), 'Documents', 'BioF3-Local', 'results'),
