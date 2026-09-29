@@ -1,5 +1,7 @@
 # BioF3 Desktop — Current Next Steps
 
+最后更新：2026-09-29（**PL-6/BLOCK-132 token 出 URL 交付**（用户裁决「继续」自主安排）：事实核查修正修法——'desktop-local' 为前端常量且后端 authMiddleware 无条件放行（真边界=回环+Host 白名单），URL query token 无鉴权价值纯污染——四处拔除（revisionArtifactUrl/壳 buildUrl/scientificScriptUrl/SSE URL）+files.js DRAG_OUT_TOKEN（有真实判定语义）守卫钉住保留；守卫 3/3+相关前端 170/170。**BIO-6b 窗口扩容已由并行会话完成（e9fddf88）**；并行 PL-4b job governance 在制（untracked 测试——test:changed 2 红为其 WIP 非本刀）。**队列剩余：PL-3 二刀/BIO-6 interpret 收敛（BIO-D4 裁决）/PL-5 性能卫生/BIO-7 池**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-09-29（**BIO-5/UI-457 输入显式化交付 in_progress**（用户裁决「你来继续推」自主安排）：P1 域校验执行化（上传路径 counts/metadata 值级规则 fail-closed——实机双证坏数据 400 三 findings 全中/好数据过）+P2 分析面板参数配置表单（输入契约投影+文件下拉+显式参数 prompt——组件 4/4 待用户过目）+B128 加映（heartbeatAt/processPid 进 status 投影——心跳可观察）；顺修并行会话遗留 os-dialog impact-map 红+block129 脚本注册。**队列剩余：PL-3 二刀（重试）/BIO-6 解读层/PL-4~6 卫生族+BIO-7 池**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-09-29（**自主冲刺阶段二收官：RS3 交互投影缺口根因修复+UI-452 六面实机 verified**——根因链：BIO-4 的 UTF-8 改造→三件插件源码哈希漂移→goldenFixture 校验拒→resultStudio 整体置 null（交互映射连坐）→pack 5036e86 重锚三件 fixture 哈希→valid=true→栈重启后 volcano-plot job 交互端点恢复 scatter 全量 mapping→**UI-452 联合走查 9/10 六面实机全证**（tooltip 全数值「GENE001|log2FoldChange:2.45|significance:0.000125|sig:Up」/搜索 25 命中/阈值线/组合筛选/ Lightbox/深链；T6b demo 数据边界非缺陷）→**UI-452 翻 verified**。冲刺总账：两阶段清掉积压 7 项中 6 项（B126 复验+BIO-4 六件+UI-455 verified+UI-452 verified+UI-454 ③④①实机+B128 双链跑通）；剩余：UI-454②热图实机（deseq2 heatmap 无 matrix 声明待 pack 域）+label 拼接乱码加映二+B128 心跳精确观察+冷启动深链竞争。队列代码面：PL-3 二刀/BIO-5。G0 开发期常态 · 不外推 packaged/Provider/GA。）
