@@ -27,7 +27,6 @@ const CONSUMERS = [
   'src/ipc/harness-capabilities.js',
   'src/ipc/pack.js',
   'src/ipc/plugin.js',
-  'src/ipc/result-handlers.js',
   'src/ipc/runtime-status.js',
   'src/ipc/ssh-host.js',
   'src/ipc/telemetry.js',
@@ -46,7 +45,7 @@ const CH_RE = /^(?:[a-z][a-z0-9-]*)(?::[a-zA-Z0-9-]+)+$/;
 /**
  * 主进程已登记但 preload 刻意不暴露的通道（preload.js L369 注记：「不暴露
  * branch-handlers.js 里的 project/message 通道；d.ts 契约仅含以下 6 个」）。
- * result:createWithBranch 无任何渲染层包装/消费方（扫描时点如实登记）。
+ * （UI-457：result:* 全域已退役，MAIN_ONLY 相应收缩。）
  */
 const MAIN_ONLY = new Set([
   'branch:children',
@@ -61,7 +60,6 @@ const MAIN_ONLY = new Set([
   'message:delete',
   'message:get',
   'message:list',
-  'result:createWithBranch',
 ]);
 
 /** 非 IPC 通道的协议类型 tag（canonical=frontend/src/lib/events.ts），reflux 白名单。 */

@@ -537,7 +537,6 @@ async function main() {
   const { setupDataManagementIpc } = require("./ipc/data-management");
   const { setupBranchIpc } = require("./ipc/branch-handlers");
   const { setupWorkingTreeReviewIpc } = require("./ipc/working-tree-review");
-  const { setupResultIpc } = require("./ipc/result-handlers");
   setupAiSettingsIpc({ mainWindow: () => mainWindow });
   setupTelemetryIpc();
   setupHarnessCapabilitiesIpc();
@@ -548,7 +547,6 @@ async function main() {
   // options.mainWindow（isDestroyed()/webContents.send），此前传 thunk 函数导致
   // 调用时 "options.mainWindow.isDestroyed is not a function"。sender-guard 双形态兼容。
   setupWorkingTreeReviewIpc({ mainWindow });
-  setupResultIpc({ mainWindow: () => mainWindow });
   // BLOCK-9.1 PHASE 2: mid-risk setup functions with dependency injection
    const { setupRuntimeIpc } = require("./ipc/runtime-status");
    // BLOCK-51 回归修复：plumber 清理时误删了本 require 但保留了 L465 调用，

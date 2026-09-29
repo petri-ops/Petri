@@ -1179,12 +1179,18 @@ export function ResultArtifactShell({
       className={styles.resultView}
       ref={resultViewRef}
       onScroll={(e) => setResultScrollPosition(job?.id, e.currentTarget.scrollTop)}
-      data-artifact-switch-ms={artifactSwitchMs === null ? undefined : artifactSwitchMs.toFixed(2)}
-      data-debug-selected-name={selectedArtifactName || null}
-      data-debug-artifact-count={artifacts.length}
-      data-debug-job-status={effectiveJobStatus}
-      data-debug-viewer={viewerAdapter}
-      data-debug-revision={viewedRevision?.revisionId || null}
+      {.../* UI-457（PL-5b）— debug 属性 DEV 门控：生产剥离（曾泄入 dist）；dev 保留供 P6 压测驱动 */ (
+        import.meta.env.DEV
+        ? {
+            'data-artifact-switch-ms': artifactSwitchMs === null ? undefined : artifactSwitchMs.toFixed(2),
+            'data-debug-selected-name': selectedArtifactName || null,
+            'data-debug-artifact-count': artifacts.length,
+            'data-debug-job-status': effectiveJobStatus,
+            'data-debug-viewer': viewerAdapter,
+            'data-debug-revision': viewedRevision?.revisionId || null,
+          }
+        : {}
+      )}
     >
       {mode === 'result' && resultToolbar}
       {shellBody}

@@ -57,30 +57,6 @@ type BranchRowRecord = {
   updated_at: number;
   is_active: number | boolean;
 };
-type ResultRecord = {
-  id: string;
-  projectId: string;
-  type: 'chart' | 'table' | 'code' | 'text' | 'file' | 'conversation_export';
-  name: string;
-  data: unknown;
-  config?: Record<string, unknown>;
-  sourceBranchId: string | null;
-  createdAt: number;
-  updatedAt: number;
-};
-type ResultSummaryRecord = Pick<
-  ResultRecord,
-  'id' | 'projectId' | 'type' | 'name' | 'sourceBranchId' | 'updatedAt'
->;
-type ResultVersionRecord = {
-  id: string;
-  resultId: string;
-  version: number;
-  data: unknown;
-  config?: Record<string, unknown>;
-  createdAt: number;
-  createdByBranchId: string | null;
-};
 
 declare global {
   interface Window {
@@ -790,75 +766,6 @@ declare global {
         delete: (params: { id: string }) => Promise<ResultIpcEnvelope<undefined>>;
         rename: (params: { id: string; newName: string }) => Promise<ResultIpcEnvelope<BranchRowRecord>>;
         getActive: (params: { projectId: string }) => Promise<ResultIpcEnvelope<BranchRowRecord | null>>;
-      };
-      // Phase 2: Result Studio - shared results across branches
-      // Phase 4: Added conversation_export type and createFromConversation
-      result: {
-        create: (params: {
-          projectId: string;
-          type: ResultRecord['type'];
-          name: string;
-          data: unknown;
-          config?: Record<string, unknown>;
-          sourceBranchId?: string;
-        }) => Promise<ResultIpcEnvelope<ResultRecord>>;
-        get: (params: { id: string }) => Promise<ResultIpcEnvelope<ResultRecord | null>>;
-        list: (params: {
-          projectId: string;
-          options?: {
-            type?: ResultRecord['type'];
-            limit?: number;
-            offset?: number;
-            sortBy?: 'updatedAt' | 'createdAt' | 'name';
-            sortDir?: 'asc' | 'desc';
-          };
-        }) => Promise<ResultIpcEnvelope<ResultSummaryRecord[]>>;
-        update: (params: {
-          id: string;
-          updates: {
-            name?: string;
-            data?: unknown;
-            config?: Record<string, unknown>;
-          };
-        }) => Promise<ResultIpcEnvelope<ResultRecord | null>>;
-        delete: (params: { id: string }) => Promise<ResultIpcEnvelope<undefined>>;
-        byProject: (params: {
-          projectId: string;
-          options?: {
-            type?: ResultRecord['type'];
-            limit?: number;
-            offset?: number;
-          };
-        }) => Promise<ResultIpcEnvelope<ResultRecord[]>>;
-        // Phase 4: Export conversation to result
-        createFromConversation: (params: {
-          projectId: string;
-          branchId: string;
-          options?: {
-            name?: string;
-            includeMessages?: boolean;
-            generateSummary?: boolean;
-          };
-        }) => Promise<ResultIpcEnvelope<ResultRecord>>;
-        version: {
-          create: (params: {
-            resultId: string;
-            data: unknown;
-            config?: Record<string, unknown>;
-            createdByBranchId?: string;
-          }) => Promise<ResultIpcEnvelope<ResultVersionRecord>>;
-          get: (params: { id: string }) => Promise<ResultIpcEnvelope<ResultVersionRecord | null>>;
-          // Phase 4: Get version by resultId and version number
-          getByNumber: (params: {
-            resultId: string;
-            version: number;
-          }) => Promise<ResultIpcEnvelope<ResultVersionRecord | null>>;
-          list: (params: {
-            resultId: string;
-            limit?: number;
-            offset?: number;
-          }) => Promise<ResultIpcEnvelope<ResultVersionRecord[]>>;
-        };
       };
     };
     /** BLOCK-61 兼容别名：与 gewu 同一 surface（preload 双暴露）。 */

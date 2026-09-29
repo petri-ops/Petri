@@ -6,7 +6,7 @@
  * BLOCK-10 PHASE 1.1 — A-007 + PR-012 + E-019 full.
  *
  * Why this file exists:
- *   src/database/branch-db.js and src/database/result-db.js both opened the
+ *   src/database/branch-db.js and (the now-retired UI-457) result-db.js both opened the
  *   same `biof3.db` file with their own _dbCache + new Database() + close
  *   pair — 30 lines of infrastructure duplicated verbatim (A-007). Worse,
  *   each call to `new Database(filePath)` opens another sqlite3 handle; in

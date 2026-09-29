@@ -23,8 +23,6 @@
     "exports::.agents/skills/gewu-dev-infra/dev-verify/lib.cjs::selectPageTarget",
     "exports::.agents/skills/gewu-dev-infra/dev-verify/lib.cjs::withInputShield",
     "exports::src/database/branch-db.js::getDatabasePath",
-    "exports::src/database/result-db.js::closeDatabase",
-    "exports::src/database/result-db.js::getDatabasePath",
     "exports::src/main/core-utils.js::BASE_PY_PACKAGES",
     "exports::src/main/core-utils.js::BASE_R_PACKAGES",
     "exports::src/main/core-utils.js::IS_DEV",
