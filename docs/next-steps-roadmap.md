@@ -1,5 +1,7 @@
 # BioF3 Desktop — Current Next Steps
 
+最后更新：2026-09-29（**BIO-4 最小集解冻批交付（用户裁决「最小集」=bulk 主链 6 件；pack 仓 `d1deb96`）**：validator/expression-qc/deg-standardizer/go-kegg/gsea/volcano-plot 恢复激活+platform 补 windows-x64+mojibake 根治（31 处 R 输出显式 UTF-8 连接——Windows GBK 写盘根源）+legacy 双源清理（TOOLS 移除 go-kegg/gsea）；MCP/agent 路径现栈即生效，HTTP 路径待栈重启——重启后 6 件跑通+中文 label 无乱码即翻 verified。**积压实机窗口清单已达 7 项**（UI-452/454/455 过目+456+B126 端点探针+B128 心跳/长任务+BIO-4 六件）全部压在「dev 栈重启+用户过目」——建议下一动作=重启栈批量实机收口，代码面下一项=PL-3 队列化或 BIO-5 输入显式化。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-09-29（**PL-1/BLOCK-128 执行语义统一交付 active**（用户裁决「继续」交织序）：MCP 同步路径并入共享 owner 装置——进程级 activeToolJobs 单例（executor 工厂局部 Map 换共享）+并发准入同 HTTP 语义+claim/arm/release 全接线（心跳/硬超时 30min/僵尸扫描/取消链两路径同等生效）+300s 内建上限退役（timeout:0 硬预算统一）；契约 4/4+定向回归 0 红；实机待栈重启。**BIO-4 硬前提已就位——下一步=BIO-D1 解冻范围裁决（在你）后开 BIO-4 bulk 链解冻**；真异步产品形态登记 PL-3 候选。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-09-28（**BIO-2/UI-454 交互上限与降级链交付 in_progress**（用户裁决「继续」交织序第 3 位）：散点 backing 600 点/热图解除自缚/静态 CSV 分页/日志端点兜底——组件级 32/32+Node 640/0 全绿，实机生效待 dev 栈重启（并行会话栈不动）；mojibake 移 BIO-4、top-N 排序移 BIO-3 范围裁决留痕。**队列下一项=BIO-3 lineage 可视化+继续分析显式化**；UI-452/UI-454 实机与用户过目待栈窗口。G0 开发期常态 · 不外推 packaged/Provider/GA。）
