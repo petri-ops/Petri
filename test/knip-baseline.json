@@ -6,7 +6,7 @@
     "types",
     "files"
   ],
-  "updatedAt": "2026-09-26",
+  "updatedAt": "2026-09-29",
   "keys": [
     "exports::.agents/skills/gewu-dev-infra/dev-verify/lib.cjs::DEFAULT_PORT",
     "exports::.agents/skills/gewu-dev-infra/dev-verify/lib.cjs::TEST_INSTANCE_PORT",
@@ -95,6 +95,7 @@
     "files::.agents/skills/gewu-dev-infra/dev-verify/flows/block94-knowledge.cjs",
     "files::.agents/skills/gewu-dev-infra/dev-verify/flows/block96-ssh-channel.cjs",
     "files::.agents/skills/gewu-dev-infra/dev-verify/flows/block99-knowledge-multispace.cjs",
+    "files::.agents/skills/gewu-dev-infra/dev-verify/flows/os-dialog-snapshot.cjs",
     "files::.agents/skills/gewu-dev-infra/dev-verify/flows/os-save-dialog.cjs",
     "files::.agents/skills/gewu-dev-infra/dev-verify/flows/pack-lifecycle.cjs",
     "files::.agents/skills/gewu-dev-infra/dev-verify/flows/ui341-welcome-chat.cjs",
@@ -200,7 +201,6 @@
     "types::frontend/src/hooks/useWorkspaceRouting.ts::UseWorkspaceRoutingResult",
     "types::frontend/src/lib/artifact-selection.ts::ArtifactIdStrategy",
     "types::frontend/src/lib/artifact-selection.ts::ArtifactInteractionColumn",
-    "types::frontend/src/lib/artifact-selection.ts::SelectionFilterClause",
     "types::frontend/src/lib/artifact-selection.ts::SelectionOrigin",
     "types::frontend/src/lib/chat-file-references.ts::FileReferenceFetcher",
     "types::frontend/src/lib/chat-file-references.ts::LinkKind",
@@ -243,13 +243,11 @@
     "types::frontend/src/lib/result-studio-interaction-client.ts::ResultStudioContextDiagnostic",
     "types::frontend/src/lib/result-studio-interaction-client.ts::ResultStudioEditControlGroup",
     "types::frontend/src/lib/result-studio-interaction-client.ts::ResultTableColumn",
-    "types::frontend/src/lib/tool-catalog.ts::CatalogInputField",
     "types::frontend/src/lib/tool-catalog.ts::CatalogOutputDef",
     "types::frontend/src/pages/home/useHomeCreateFlows.ts::PendingWorkspace",
     "types::frontend/src/pages/project-workspace/fileOps.ts::FileOpAction",
     "types::frontend/src/themes/ThemeProvider.tsx::AccentId",
     "types::frontend/src/themes/ThemeProvider.tsx::ResolvedTheme",
-    "types::frontend/src/types/branch.types.ts::Message",
-    "types::frontend/src/types/result.types.ts::ResultType"
+    "types::frontend/src/types/branch.types.ts::Message"
   ]
 }

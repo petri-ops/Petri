@@ -4498,3 +4498,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：红绿先行——matrix 全渲染用例红（CSS Modules hash 类选择器踩坑后修 title 过滤）→绿；csv 分页 4 用例红（模块缺失）→绿；前端定向 4 文件 **32/32**（含 UI-452 回归）；后端 `artifact-interaction` 契约 26/26（limit 600 零契约破坏）+node --check；test:changed 全链 **Node 640 pass/0 fail+前端 22 文件全绿**；tsc 0；theme 4/4；docs:check 289；impact-map 补登记（block126/ui452 脚本与证据目录入 script-block-live-drivers 规则——分类冲突红一次后修复）；顺带清理 UI-453 会话下载测试残留在仓库根的 untracked 产物（coldata/counts/results/）。
 - **待验（in_progress）**：②③④的实机走查与 ① 的实机生效均需 **dev 栈重启**（后端 interaction/tools-metadata 变更须重启；当前栈为并行会话所起不重启）——重启后复跑 `scripts/block126-perception-live.mjs` 的 log_endpoint 记录项应见 `source:'run.log'`（端点兜底生效的现成探针）；热图/分页可随 UI-452 六面过目一并看。
 - **边界**：散点 600 仍是文件顺序有界窗口（排序契约在 BIO-3）；静态 CSV 分页受预览文本预算（12K 字符）上界（口径已标注）；日志端点兜底只覆盖项目行存在的形态（项目已删仍如实报无日志+原因）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-456: 双轨结果 UI 收敛——独立结果页退役（G0-PLATFORM PL-4c 首刀） (2026-09-29 verified，dev Electron 实机 LIVE_PASS)
+
+- **来源**：用户裁决「计划内工作安排可能有些少了」→ 存量展开批（勘察文档 g0-goal-stage-expansion-recon-2026-09）产出 11 子包菜单，用户「继续」按推荐首刀推进 PL-4c（勘察判「几乎白送」）。
+- **修法**：①退役 `/project/:id/results` 死路由（勘察+独立复核双证：全前端零导航入口、useResultStore/resultBridge 的唯一消费方就是该页）——Route 改 `LegacyResultsRedirect`（params 显式跳 `/project/:id`；实机抓真两课：`to=".."` 按 route 层级解析落到根、IIFE 里 useParams 读父层空 params 得 /project/undefined，最终真组件形态）；②删 7 文件：ResultStudioPage.tsx（JSON dump 原型面随之消除）、components/ResultVersionHistory.tsx、ResultStudio.module.css、hooks/useResultStore.ts(+test)、lib/resultBridge.ts(+test)；③顺带清 knip 死面：types/result.types.ts 删除、resultStudioClient 的 ResultLineageNode 去导出；App.tsx 工作区壳判定去 results 特判；④**数据层 IPC（channels/preload/result-handlers/result-db）按勘察范围声明保留**——去留另行裁决（knip 对该面不报，属主进程盲区已知）。
+- **证据**：tsc 0 + knip 棘轮 PASS（基线 243→241 键净收缩：+os-dialog-snapshot flow 动态入口定性收录，-3 死类型其中 2 个系并行 BLOCK-131 WIP 表单激活的自然下调）+ eslint 触碰面 0 error + test:changed 375 项 0 红（2 skip 存量）+ code-size PASS（删文件不在 manifest，无基线扰动）+ 实机 LIVE_PASS（旧 URL `/results` → 5s 内回落 `/project/p_mu5ftn3a_wxnq` 且工作区壳在场 rightCol=true）。
+- **边界**：主进程 result:* IPC 面与 result-db 保留（无前端消费方，数据层裁决时一并处理——PL-5a 若推进将一并核此面）；branchBridge 注释更新留痕。G0 开发期常态 · 不外推 packaged/Provider/GA。

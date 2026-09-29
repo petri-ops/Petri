@@ -7,7 +7,7 @@ import React, { useEffect, lazy, Suspense } from 'react';
 const GewuOpenFileDevBridge = lazy(() =>
   import('./components/editor/integration/GewuOpenFileDevBridge')
 );
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import { TitleBar } from '@/components/desktop/TitleBar';
 import { TestInstanceBadge } from '@/components/desktop/TestInstanceBadge';
 import { WorkspacePanelsProvider, useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
@@ -29,8 +29,14 @@ const HomePage = lazy(() => import('@/pages/home').then((m) => ({ default: m.def
 // NOTE: Legacy pages (tools, admin, docs, figcode, single-cell, spatial) have been removed
 // as the desktop application now uses the Agent-based workflow through ProjectWorkspace.
 const ProjectWorkspace = lazy(() => import('@/pages/project-workspace').then((m) => ({ default: m.ProjectWorkspace })));
-const ResultStudioPage = lazy(() => import('@/pages/result-studio/ResultStudioPage').then((m) => ({ default: m.ResultStudioPage })));
 const SkillsPage = lazy(() => import('@/pages/skills').then((m) => ({ default: m.default })));
+
+// UI-456（PL-4c）— 旧独立结果页 URL 优雅回落工作区（hook 必须在真组件内：
+// IIFE 里 useParams 读到的是父层空 params，实机抓真 /project/undefined）
+function LegacyResultsRedirect(): React.ReactElement {
+  const { projectId } = useParams();
+  return <Navigate replace to={`/project/${projectId ?? ''}`} />;
+}
 const PluginsPage = lazy(() => import('@/pages/plugins').then((m) => ({ default: m.default })));
 const SettingsPage = lazy(() => import('@/pages/settings').then((m) => ({ default: m.default })));
 const KnowledgePage = lazy(() => import('@/pages/knowledge').then((m) => ({ default: m.default })));
@@ -68,7 +74,7 @@ function AppShell(): React.ReactElement {
   const isColumnizedWorkspace = (() => {
     const path = location.pathname.replace(/\/+$/, '') || '/';
     const m = path.match(/^\/project\/[^/]+(?:\/(.*))?$/);
-    return !!m && m[1] !== 'results';
+    return !!m;
   })();
   // BLOCK-87 L3 — 投影+窄屏（手机浏览器）：壳层 AppRail 转抽屉浮层。
   // L3-2（用户裁决「左上角的左侧展开栏就直接控制左侧栏的展开和收缩」）：
@@ -150,9 +156,10 @@ function AppShell(): React.ReactElement {
             <Route path="/knowledge" element={<KnowledgePage />} />
             {/* BLOCK-28 — main-area code review mode (VS Code SCM style) */}
             <Route path="/review" element={<ReviewModePage />} />
-            {/* Result Studio — standalone results view with branch tabs in TitleBar */}
-            {/* MUST come before the wildcard /* route, otherwise it never matches */}
-            <Route path="/project/:projectId/results" element={<ResultStudioPage />} />
+            {/* UI-456（PL-4c）— 独立结果页退役：旧 URL/收藏优雅回落工作区（双轨收敛，
+                JSON dump 原型面随之消除；数据层 IPC 去留另行裁决，见勘察文档）。
+                相对 to 按 route 层级解析不可用（`..` 会落到根），params 显式跳转。 */}
+            <Route path="/project/:projectId/results" element={<LegacyResultsRedirect />} />
             {/* T85: `*` splat lets `/project/:projectId/<mode>` resolve to the
                 same workspace; mode is read from the sub-path, not `?mode=`. */}
             <Route path="/project/:projectId/*" element={<ProjectWorkspace />} />

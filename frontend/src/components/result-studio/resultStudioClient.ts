@@ -423,7 +423,8 @@ export function submitExistingRepositoryConsent(projectId: string): Promise<Exis
 }
 
 
-export interface ResultLineageNode {
+// UI-456 — 随 resultBridge 退役去导出（仅本文件 ResultLineage 内部消费）
+interface ResultLineageNode {
   toolJobId: string;
   toolId: string | null;
   isCurrent: boolean;

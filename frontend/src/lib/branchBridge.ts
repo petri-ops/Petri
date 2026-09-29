@@ -7,7 +7,7 @@
 // UI-P2-001 — branch:* handler 统一返回 fail-closed 信封 { ok, data?, error? }
 // （与 result:* 的 UI-311 同型），本桥是 branch 命名空间的唯一拆包 + 行映射点：
 // handler 落库行是 snake_case（project_id / is_active / created_at …），
-// 消费方（useBranchStore / ResultStudioPage）见裸 camelCase Branch 契约。
+// 消费方（useBranchStore；ResultStudioPage 已随 UI-456 退役）见裸 camelCase Branch 契约。
 // 此前无人拆包，/project/:id/results 首次加载即把信封当数组用
 // （branches.find is not a function），分支 tab 永不渲染；且 switch/delete/
 // rename 的参数键与 handler 契约不符（缺 projectId / branchId≠id），
