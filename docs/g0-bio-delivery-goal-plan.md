@@ -134,3 +134,12 @@ BLOCK-83 P4（2026-09-12）领域中立化后，生信分析全部迁至兄弟�
 - UI 面阶段（BIO-1/BIO-2 前端部分）同提交更新 `ui-productization-audit.md`。
 - 域包仓库：`D:\1.WorkDir\gewu-pack-bio`（本 Goal 的 BIO-4 阶段主要施工面之一，跨仓改动时按其仓内治理执行）。
 - 收口语义：同 G0-PLATFORM §7。
+
+## 8. 实施记录
+
+### BIO-6b result_summary 真值窗口有界扩容（2026-09-29 completed）
+
+- **范围**：MAX_ROWS 6→20（3.3 倍），出口判据「可见行数有界提升且截断口径如实」达成——截断口径字段（truncated 双标志/message「前 N 行真值（共 M 行）」）均为动态量自动跟随。
+- **选型留痕**：6k 字符模型投影预算内实测安全（新增**字符预算硬钉**：worst-case 20 行×8 列×24 字符完整 envelope JSON.stringify ≤6000，超限先红禁止静默放宽——度量用 JSON.stringify 与 serialize 的 fitValidJson 同口径，因 serialize require 链在测试环境拉 db 不可直调）；更宽窗口（50+ 行）需专属投影通道，**与 BIO-D4（interpret/result_summary 收敛裁决）一并定**，未擅自扩张。
+- **验证**：result-summary-tool 测试 5/5（行截 20/预算钉/其余零回归）+ eslint 触碰面 0 + test:changed 分类无冲突。
+- **边界**：列窗 8/单元格 24 字/表 8MB 上限不动；只读契约与「不整表倾倒」纪律维持。G0 开发期常态 · 不外推 packaged/Provider/GA。

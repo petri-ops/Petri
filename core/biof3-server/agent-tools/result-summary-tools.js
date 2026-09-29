@@ -21,7 +21,11 @@ const path = require('node:path');
 
 const MAX_ARTIFACTS = 20;
 const MAX_COLS = 8;
-const MAX_ROWS = 6;
+// BIO-6b（2026-09-29）— 真值窗口有界扩容 6→20：分析场景 padj 排序后前 20 行通常覆盖
+// 主要 hit。6k 字符模型投影预算内安全（预算钉见 result-summary-tool.test.mjs：
+// worst-case 20 行×8 列×24 字符序列化 <6000 实测锁定）；更宽窗口走专属投影通道，
+// 与 BIO-D4（interpret/result_summary 收敛）一并裁决。
+const MAX_ROWS = 20;
 const MAX_CELL_CHARS = 24;
 const MAX_TABLE_BYTES = 8 * 1024 * 1024;
 
