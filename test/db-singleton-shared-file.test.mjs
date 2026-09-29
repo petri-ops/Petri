@@ -29,14 +29,15 @@ createRequire(path.join(coreServerRoot, 'package.json'));
 const rootReq = createRequire(path.join(root, 'package.json'));
 
 import { openDb, closeAll, _reset } from '../src/database/_db-singleton.js';
-import { getDatabase, closeDatabase } from '../src/database/branch-db.js';
-import { getDatabase as getResultDatabase } from '../src/database/result-db.js';
+import { getDatabase, closeDatabase, getDatabasePath } from '../src/database/branch-db.js';
+// PL-5a（2026-09-29）：result-db.js 已随 result:* 数据层退役删除——本文件改为
+// 验证 branch 角色自身的单例去重契约（PR-012 的机制不变，实例面只剩 branch）。
 
 function mkTmp() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-db-shared-'));
 }
 
-test('PR-012.1 branch-db.getDatabasePath() === result-db.getDatabasePath() under legacy single-file layout', (t) => {
+test('PR-012.1 branch-db resolves the legacy single-file biof3.db path (result 侧已退役)', (t) => {
   const tmp = mkTmp();
   process.env.BIOF3_LOCAL_DATA_DIR = tmp;
   process.env.BIOF3_BETTER_SQLITE3_ROOT = coreServerRoot;
@@ -50,15 +51,12 @@ test('PR-012.1 branch-db.getDatabasePath() === result-db.getDatabasePath() under
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {}
   });
 
-  // Both modules must agree on the same legacy file path so PR-012 dedup
-  // can collapse them into a single handle.
-  const branchPath = rootReq('./src/database/branch-db.js').getDatabasePath();
-  const resultPath = rootReq('./src/database/result-db.js').getDatabasePath();
-  assert.strictEqual(branchPath, resultPath, 'branch + result must resolve to the same biof3.db path');
+  const branchPath = getDatabasePath();
   assert.ok(branchPath.endsWith('biof3.db'), 'path must keep the legacy biof3.db filename');
+  assert.strictEqual(rootReq('./src/database/branch-db.js').getDatabasePath(), branchPath, '重复 require 同一单例路径');
 });
 
-test('PR-012.2 openDb(branch) and openDb(result) return the same Database instance', (t) => {
+test('PR-012.2 openDb 双次调用与 legacy shim 返回同一 Database 实例（去重机制）', (t) => {
   const tmp = mkTmp();
   process.env.BIOF3_LOCAL_DATA_DIR = tmp;
   process.env.BIOF3_BETTER_SQLITE3_ROOT = coreServerRoot;
@@ -73,23 +71,13 @@ test('PR-012.2 openDb(branch) and openDb(result) return the same Database instan
   });
 
   const branch = openDb('branch');
-  const result = openDb('result');
-  assert.strictEqual(
-    branch,
-    result,
-    'openDb(branch) and openDb(result) must dedup to the same Database (PR-012 fix)',
-  );
-
-  // The legacy public shims from branch-db / result-db must agree too —
-  // otherwise biof3-server/mcp/branch-context.js would still see two distinct
-  // handles via the legacy API surface.
+  const again = openDb('branch');
+  assert.strictEqual(branch, again, 'openDb 重复调用必须去重到同一实例（PR-012 机制）');
   const legacyBranch = getDatabase();
-  const legacyResult = getResultDatabase();
-  assert.strictEqual(legacyBranch, legacyResult, 'branch-db.getDatabase === result-db.getDatabase');
   assert.strictEqual(legacyBranch, branch, 'legacy shim must forward to the singleton');
 });
 
-test('PR-012.3 writes via branch-db are visible to result-db (single shared handle)', (t) => {
+test('PR-012.3 同一单例句柄上的写读一致（单共享句柄机制）', (t) => {
   const tmp = mkTmp();
   process.env.BIOF3_LOCAL_DATA_DIR = tmp;
   process.env.BIOF3_BETTER_SQLITE3_ROOT = coreServerRoot;
@@ -114,16 +102,12 @@ test('PR-012.3 writes via branch-db are visible to result-db (single shared hand
   `);
   branchHandle.prepare('INSERT INTO shared_probe (id, payload) VALUES (?, ?)').run(1, 'via-branch-db');
 
-  // Read it back from the result handle. If PR-012 dedup is correct,
-  // both handles point at the same connection and the row is visible.
-  const resultHandle = getResultDatabase();
-  const row = resultHandle.prepare('SELECT id, payload FROM shared_probe WHERE id = ?').get(1);
-  assert.ok(row, 'row written via branch-db handle must be visible via result-db handle');
+  // 同一单例的第二个引用读取——若 PR-012 去重正确，行可见。
+  const secondHandle = getDatabase();
+  const row = secondHandle.prepare('SELECT id, payload FROM shared_probe WHERE id = ?').get(1);
+  assert.ok(row, '单例第二引用必须读到第一引用写的行');
   assert.strictEqual(row.payload, 'via-branch-db');
-
-  // Cleanup the probe table so we don't leave schema behind for the
-  // real schema-migration test suites.
-  resultHandle.exec('DROP TABLE IF EXISTS shared_probe');
+  secondHandle.exec('DROP TABLE IF EXISTS shared_probe');
 });
 
 test('PR-012 backward-compat shims: branch-db.closeDatabase closes the singleton for both roles', (t) => {
@@ -140,13 +124,12 @@ test('PR-012 backward-compat shims: branch-db.closeDatabase closes the singleton
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {}
   });
 
-  // open via result (any role) — both roles share the same handle.
-  const resultHandle = getResultDatabase();
-  assert.ok(resultHandle.open, 'result handle must start open');
+  // open via legacy shim——单例共享同一句柄。
+  const resultHandle = getDatabase();
+  assert.ok(resultHandle.open, 'handle must start open');
 
-  // close via the branch shim — this should also invalidate the result
-  // handle because PR-012 dedup means they're literally the same
-  // Database object.
+  // close via the branch shim — this must invalidate the handle because
+  // PR-012 dedup means every reference is literally the same Database object.
   closeDatabase();
-  assert.ok(!resultHandle.open, 'closing via branch-db shim must also close the result handle');
+  assert.ok(!resultHandle.open, 'closing via branch-db shim must close the shared handle');
 });
