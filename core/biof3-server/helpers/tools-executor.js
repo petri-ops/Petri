@@ -7,6 +7,7 @@ const { v4: uuidv4 } = require('uuid');
 const { execFile, spawn } = require('child_process');
 const { StringDecoder } = require('node:string_decoder');
 const { publishJobTerminalState } = require('./job-events');
+const { decodeRDeparseManifest } = require('../../shared-backend/r-deparse-decode');
 const {
   appendJobLiveLog,
   clearJobLiveLog,
@@ -1154,7 +1155,7 @@ function createToolsExecutor({
         let result = {};
         if (fs.existsSync(manifestPath)) {
           try {
-            const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+            const manifest = decodeRDeparseManifest(JSON.parse(fs.readFileSync(manifestPath, 'utf-8'))); // BLOCK-133：R deparse <U+XXXX> 解码
             result = { ...manifest, manifest };
           } catch {}
         } else {

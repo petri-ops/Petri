@@ -1,12 +1,12 @@
 {
   "suite": "block126-perception-live",
   "baseUrl": "http://127.0.0.1:3001",
-  "jobId": "job_67953dcf8bd342a2",
+  "jobId": "job_0c78c139a5df421c",
   "templateJob": "tj_muhoamsv_m92b",
   "toolId": "deseq2",
   "terminalStatus": "completed",
   "sseConnectedAfterMs": null,
-  "runDurationMs": 14567,
+  "runDurationMs": 8542,
   "checks": [
     {
       "id": "sse_connected",
@@ -20,7 +20,7 @@
       "id": "live_log_during_run",
       "pass": true,
       "detail": {
-        "at": 1790593731781,
+        "at": 1790642536252,
         "logPreview": "[stderr] During startup - Warning message:\r\n[stderr] Setting LC_CTYPE=C.UTF-8 failed \r\n[stderr] Warning messages:\r\n[stderr] 1: package 'S4Vectors' was built und",
         "note": "（运行中实时尾部；完整日志在结束时写入 run.log）",
         "truncated": false
@@ -40,27 +40,27 @@
       "id": "terminal_event_latency_seconds",
       "pass": true,
       "detail": {
-        "latencyMs": 2,
-        "completedAt": 1790593732190
+        "latencyMs": 1,
+        "completedAt": 1790642536594
       }
     },
     {
       "id": "final_runlog_on_disk",
       "pass": true,
       "detail": {
-        "path": "\\.biof3-dev-user-data\\data\\projects\\block126-perception-verify-mul59mwp-mul59mx7\\results\\jobs\\job_67953dcf8bd342a2\\output\\run.log",
-        "bytes": 1507
+        "path": "\\.biof3-dev-user-data\\data\\projects\\block126-perception-verify-mulybtax-mulybtaz\\results\\jobs\\job_0c78c139a5df421c\\output\\run.log",
+        "bytes": 1610
       }
     },
     {
       "id": "log_endpoint_after_terminal_recorded",
       "pass": true,
       "detail": {
-        "source": null,
-        "note": "该作业没有可用日志文件"
+        "source": "run.log",
+        "note": "布局解析失败已按项目目录约定兜底（[project-run-layout] db instance with getProject method is requ"
       }
     }
   ],
   "allPass": true,
-  "generatedAt": "2026-09-28T11:08:53.760Z"
+  "generatedAt": "2026-09-29T00:42:18.206Z"
 }

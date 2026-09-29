@@ -6,6 +6,7 @@
 
 const { execFile } = require('child_process');
 const { publishJobTerminalState } = require('../../helpers/job-events');
+const { decodeRDeparseManifest } = require('../../../shared-backend/r-deparse-decode');
 const {
   armActiveToolJobLifecycle,
   claimActiveToolJob,
@@ -481,7 +482,7 @@ async function _runPluginScript(
         let manifest = null;
         try {
           if (fs.existsSync(manifestPath)) {
-            manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+            manifest = decodeRDeparseManifest(JSON.parse(fs.readFileSync(manifestPath, 'utf8'))); // BLOCK-133：R deparse <U+XXXX> 解码
           }
         } catch {}
         // manifest 有两种格式：(a) {outputs:[{id,filename,...}]} (b) {files:[{name,type,...}]}
