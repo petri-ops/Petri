@@ -1,5 +1,7 @@
 # BioF3 Desktop — Current Next Steps
 
+最后更新：2026-09-29（**mojibake 加映二根治（BLOCK-133 e872378d+pack db6be21 成对）**：字节级归因=paste0 剥 UTF-8 标记→高位剥离（坏形态=UTF-8 字节 XOR 0x80 逐字节实证）——pack 侧 rapply 重打标记保码点+core 侧 deparse 读取解码，终验 30 labels/0 残留/26 真实中文；**PL-5 性能卫生两刀转动态工作流执行中**（第三版：首轮两修复员零改动+二轮空转卷入范围外——按规程两次 Amend 换写指令化 ask 破缓存重跑）；工作流复核员产出真发现 C-21（export 只扫全局目录）已核实登记。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-09-29（**PL-6/BLOCK-132 token 出 URL 交付**（用户裁决「继续」自主安排）：事实核查修正修法——'desktop-local' 为前端常量且后端 authMiddleware 无条件放行（真边界=回环+Host 白名单），URL query token 无鉴权价值纯污染——四处拔除（revisionArtifactUrl/壳 buildUrl/scientificScriptUrl/SSE URL）+files.js DRAG_OUT_TOKEN（有真实判定语义）守卫钉住保留；守卫 3/3+相关前端 170/170。**BIO-6b 窗口扩容已由并行会话完成（e9fddf88）**；并行 PL-4b job governance 在制（untracked 测试——test:changed 2 红为其 WIP 非本刀）。**队列剩余：PL-3 二刀/BIO-6 interpret 收敛（BIO-D4 裁决）/PL-5 性能卫生/BIO-7 池**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-09-29（**BIO-5/UI-457 输入显式化交付 in_progress**（用户裁决「你来继续推」自主安排）：P1 域校验执行化（上传路径 counts/metadata 值级规则 fail-closed——实机双证坏数据 400 三 findings 全中/好数据过）+P2 分析面板参数配置表单（输入契约投影+文件下拉+显式参数 prompt——组件 4/4 待用户过目）+B128 加映（heartbeatAt/processPid 进 status 投影——心跳可观察）；顺修并行会话遗留 os-dialog impact-map 红+block129 脚本注册。**队列剩余：PL-3 二刀（重试）/BIO-6 解读层/PL-4~6 卫生族+BIO-7 池**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
