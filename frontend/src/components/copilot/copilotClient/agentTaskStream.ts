@@ -141,8 +141,7 @@ async function subscribeAgentTaskOnce(
   const { signal, onDone, kind } = opts;
   // token 放 query（fetch 也能带 header，但 query 兼容 EventSource 未来切换）
   const authHeader = getAuthHeader();
-  const token = authHeader.Authorization?.replace('Bearer ', '');
-  const url = `${getApiPrefix()}/ai/agent/task/${taskId}?afterSeq=${afterSeq}${token ? '&token=' + encodeURIComponent(token) : ''}`;
+  const url = `${getApiPrefix()}/ai/agent/task/${taskId}?afterSeq=${afterSeq}`;
   let resp: Response;
   try {
     resp = await fetch(url, { method: 'GET', headers: { ...authHeader }, signal });

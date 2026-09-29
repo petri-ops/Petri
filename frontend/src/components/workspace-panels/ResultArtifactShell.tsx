@@ -198,17 +198,15 @@ export function ResultArtifactShell({
     (name: string) => {
       if (!job) return '';
       const base = getApiPrefix(lang);
-      const token = getToken();
-      const tokenQs = token ? `?token=${encodeURIComponent(token)}` : '';
-      return `${base}/tools/file/${job.id}/${encodeURIComponent(name)}${tokenQs}`;
+      // BLOCK-132（PL-6）：token 常量无鉴权价值（后端无条件放行）——URL 不再携带。
+      return `${base}/tools/file/${job.id}/${encodeURIComponent(name)}`;
     },
     [job?.id, lang]
   );
   const scientificScriptUrl = useMemo(() => {
     if (!job || !result?.deliveryManifest) return '';
-    const token = getToken();
-    const query = token ? `?token=${encodeURIComponent(token)}` : '';
-    return `${getApiPrefix(lang)}/harness/scientific-task-by-job/${encodeURIComponent(job.id)}/script${query}`;
+    // BLOCK-132（PL-6）：token 常量无鉴权价值（后端无条件放行）——URL 不再携带。
+    return `${getApiPrefix(lang)}/harness/scientific-task-by-job/${encodeURIComponent(job.id)}/script`;
   }, [job?.id, lang, result?.deliveryManifest]);
 
   useEffect(() => {

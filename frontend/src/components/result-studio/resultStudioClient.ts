@@ -373,8 +373,9 @@ export function restoreArtifactRevision(revisionId: string): Promise<{ ok: true;
 }
 
 export function revisionArtifactUrl(revisionId: string): string {
-  const token = getToken();
-  return `${getPlatformApiPrefix()}/result-studio/revisions/${encodeURIComponent(revisionId)}/artifact${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+  // BLOCK-132（PL-6）：token 常量无鉴权价值（authMiddleware 无条件放行，
+  // 真边界=回环+Host 白名单）——URL 不再携带，消除日志/引用污染。
+  return `${getPlatformApiPrefix()}/result-studio/revisions/${encodeURIComponent(revisionId)}/artifact`;
 }
 
 export interface RepositoryBindingConsent {
