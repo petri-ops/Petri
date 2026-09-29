@@ -46,6 +46,16 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-09-29 PL-4b 结果治理三端点 + JobsWall 治理条（f6e58d04，feat(PL-4b)）：提交时
+  // 漏带 UI-### 与同提交台账（前端 JobsWall/CommandCenter 治理面），零行为回退风险；
+  // 台账=UI-460 由本修正提交补登对账（先例 2f1314a/8bec1397/670de5e）；不重写共享历史。
+  'f6e58d0403c4cd752e077a4db39ccb448e40d75f',
+
+  // 2026-09-29 BLOCK-132 token 出 URL（f9cf2f5c，fix(BLOCK-132)）：UI 面仅 URL 构造点拔除
+  // （零视觉/交互行为变化），提交走 BLOCK 轨无 UI-###；台账=UI-461 归属登记由本修正提交
+  // 补登对账（该域后续自行补登以该域为准）；不重写共享历史。
+  'f9cf2f5c9646a5420f42e0a5f6e11419c0c47d00',
+
 
   // 2026-09-25 D7 领域中立棘轮红门清偿（2f1314a，fix(D7): interpret.js 决策 state
   // 文案合法定性入基线 + DecisionConfigPanel 卡注迁改对齐单源 label）：UI 面仅设置
@@ -386,6 +396,11 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-09-29 PL-4b / BLOCK-132 同上两笔：同提交未同步台账，台账=UI-460/UI-461
+  // 由修正提交补登对账（先例 8bec1397/6ab142d3）。
+  'f6e58d0403c4cd752e077a4db39ccb448e40d75f',
+  'f9cf2f5c9646a5420f42e0a5f6e11419c0c47d00',
+
 
   // 2026-09-26 UI-446 收口尾清（8bec1397，fix(UI-446)）：knip 棘轮双抓后的
   // 去导出修复同提交未同步台账；台账=UI-446 条目收口尾清注记由后续提交
