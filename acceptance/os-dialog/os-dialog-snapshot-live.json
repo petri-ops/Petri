@@ -1,0 +1,23 @@
+{
+  "name": "os-dialog-snapshot",
+  "startedAt": "2026-09-29T02:23:56.429Z",
+  "finishedAt": "2026-09-29T02:23:58.532Z",
+  "assertions": [
+    {
+      "name": "probe_executable",
+      "pass": true,
+      "detail": "[\"下载到…\"]"
+    },
+    {
+      "name": "expected_title_present",
+      "pass": true,
+      "detail": "expect=\"下载到…\" actual=[\"下载到…\"]"
+    },
+    {
+      "name": "dialog_closed",
+      "pass": true,
+      "detail": "left=[]"
+    }
+  ],
+  "allPass": true
+}
