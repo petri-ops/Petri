@@ -1,5 +1,7 @@
 # BioF3 Desktop — Current Next Steps
 
+最后更新：2026-09-29（**自主冲刺批量实机收口（用户授权连续作业）**：栈重启（带 R env）后一次收掉积压——①BLOCK-126 复跑 6/6+端点兜底实证（source=run.log）；②BIO-4 六件 Windows 全 completed（加映一 pack 67507db 修三钉+环境补装 GO.db/org.Hs.eg.db；label 拼接形态三件残留登记加映二）；③UI-455 翻 verified（深链 URL 保持铁证）；UI-452 实机三面（深链/Lightbox 全链/分页在场）；UI-454 ③④实机；④BLOCK-128 两执行链端到端 completed（chat MCP 链+HTTP 链）——心跳中间值精确观察与取消链留加映（status 投影不含 heartbeat 字段+需慢任务窗口）。**遗留缺口集中登记：交互清单 RS3 链对插件产物未投影 mapping（散点/热图实机的共同阻塞）+label 拼接乱码+冷启动深链竞争**——三者构成下一个高价值包（BIO 加映或 RS3 域小包）。队列代码面：PL-3 二刀/BIO-5。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-09-29（**PL-3 一刀/队列化交付**（用户裁决「继续」）：满载入队不拒（shouldQueue 建行 pending+终态泵 pumpQueuedToolJobs 按创建序拉起——registry scheduler slot 挂在三终态原语后，一次一泵+jobDir 顶层重建 staged 重启安全）+queued/queuePosition 提交响应+深度上限 BIOF3_TOOL_QUEUE_DEPTH_LIMIT 默认 50/user 才 429——「并发满即拒」变「排队可见」；契约 4/4（守卫型+行为测，非先红如实登记）+回归 108/0；重试策略留 PL-3 二刀，MCP 同步路径维持拒绝（边界登记）。**实机积压 7 项不变（全压栈重启+用户过目）**；代码面下一项=BIO-5 输入显式化或 PL-3 二刀。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-09-29（**BIO-4 最小集解冻批交付（用户裁决「最小集」=bulk 主链 6 件；pack 仓 `d1deb96`）**：validator/expression-qc/deg-standardizer/go-kegg/gsea/volcano-plot 恢复激活+platform 补 windows-x64+mojibake 根治（31 处 R 输出显式 UTF-8 连接——Windows GBK 写盘根源）+legacy 双源清理（TOOLS 移除 go-kegg/gsea）；MCP/agent 路径现栈即生效，HTTP 路径待栈重启——重启后 6 件跑通+中文 label 无乱码即翻 verified。**积压实机窗口清单已达 7 项**（UI-452/454/455 过目+456+B126 端点探针+B128 心跳/长任务+BIO-4 六件）全部压在「dev 栈重启+用户过目」——建议下一动作=重启栈批量实机收口，代码面下一项=PL-3 队列化或 BIO-5 输入显式化。G0 开发期常态 · 不外推 packaged/Provider/GA。）

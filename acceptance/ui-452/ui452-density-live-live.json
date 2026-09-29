@@ -1,0 +1,46 @@
+{
+  "name": "ui452-density-live",
+  "startedAt": "2026-09-29T01:05:06.865Z",
+  "finishedAt": "2026-09-29T01:06:10.576Z",
+  "assertions": [
+    {
+      "name": "T0_seed_http_deseq2",
+      "pass": true,
+      "detail": "project=p_mulz5d8z_njob job=job_1c1d45fe06414fed"
+    },
+    {
+      "name": "T1_deep_link_held_ui455",
+      "pass": true,
+      "detail": "/project/p_mulz5d8z_njob/result?job=job_1c1d45fe06414fed"
+    },
+    {
+      "name": "T2_csv_local_pagination_ui454",
+      "pass": false,
+      "detail": "before={\"info\":\"共 39 行（预览文本预算内） · 第 1/1 页\",\"disabled\":true} after=null"
+    },
+    {
+      "name": "T3_lightbox_zoom_ui452",
+      "pass": true,
+      "detail": "{\"z0\":\"1\",\"z1\":\"1.15\",\"z2\":\"1\",\"p2\":\"0,0\",\"closed\":true}"
+    },
+    {
+      "name": "T4_chat_run_tool_job_b128_path",
+      "pass": true,
+      "detail": "project=p_mulz07se_ccfl job=tj_mulz0cd0_cefu terminal=reused"
+    },
+    {
+      "name": "T5_scatter_viewer_mounted",
+      "pass": false,
+      "detail": "chat job 交互散点未挂载"
+    },
+    {
+      "name": "T6_interactive_table_mounted",
+      "pass": false,
+      "detail": "chat job 交互表格未挂载"
+    }
+  ],
+  "allPass": false,
+  "extra": {
+    "phaseB": "ok"
+  }
+}

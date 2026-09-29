@@ -1,0 +1,175 @@
+{
+  "suite": "block129-bulk-chain-live",
+  "projectId": "p_mulzcudk_mdf9",
+  "checks": [
+    {
+      "id": "A1_sample-metadata-validator_completed",
+      "pass": true,
+      "detail": {
+        "jobId": "job_ac7d60400f774194"
+      }
+    },
+    {
+      "id": "A2_sample-metadata-validator_labels_utf8",
+      "pass": true,
+      "detail": {
+        "labels": 6,
+        "sample": [
+          "对齐后的 metadata",
+          "样本对齐详情",
+          "设计摘要",
+          "校验诊断"
+        ],
+        "bad": []
+      }
+    },
+    {
+      "id": "A1_expression-qc_completed",
+      "pass": true,
+      "detail": {
+        "jobId": "job_55f2744b9fb84255"
+      }
+    },
+    {
+      "id": "A2_expression-qc_labels_utf8",
+      "pass": true,
+      "detail": {
+        "labels": 10,
+        "sample": [
+          "QC 摘要",
+          "基因过滤统计",
+          "Library size",
+          "样本相关性矩阵"
+        ],
+        "bad": []
+      }
+    },
+    {
+      "id": "A1_deg-standardizer_completed",
+      "pass": true,
+      "detail": {
+        "jobId": "job_2210496855da493d"
+      }
+    },
+    {
+      "id": "A2_deg-standardizer_labels_utf8",
+      "pass": true,
+      "detail": {
+        "labels": 7,
+        "sample": [
+          "标准化 DEG 表",
+          "显著上调基因",
+          "显著下调基因",
+          "排序基因列表 (全量)"
+        ],
+        "bad": []
+      }
+    },
+    {
+      "id": "A1_go-kegg_completed",
+      "pass": true,
+      "detail": {
+        "jobId": "job_d05271965c354888"
+      }
+    },
+    {
+      "id": "A2_go-kegg_labels_utf8",
+      "pass": false,
+      "detail": {
+        "labels": 37,
+        "sample": [
+          "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
+          "GO-BP 结果表",
+          "GO-MF g;\u0013f\u001e\u001ch!(",
+          "GO-CC g;\u0013f\u001e\u001ch!("
+        ],
+        "bad": [
+          "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
+          "GO-MF g;\u0013f\u001e\u001ch!(",
+          "GO-CC g;\u0013f\u001e\u001ch!(",
+          "e\u001f:e\u001b  ID h=,f\r\"",
+          "GO-BP f0\u0014f3!e\u001b> (PDF)",
+          "GO-BP f\u001d!e=\"e\u001b> (PNG)",
+          "GO-BP f\u001d!e=\"e\u001b> (PDF)",
+          "GO-BP e\u001f:e\u001b g=\u0011g;\u001c (PNG)",
+          "GO-BP e\u001f:e\u001b g=\u0011g;\u001c (PDF)",
+          "GO-BP e/\fi\u001b\u0006f \u0011e\u001b> (PNG)",
+          "GO-BP e/\fi\u001b\u0006f \u0011e\u001b> (PDF)",
+          "GO-BP g\u0003-e\u001b> (PNG)",
+          "GO-BP g\u0003-e\u001b> (PDF)",
+          "GO-BP e/\fi\u001b\u0006g=\u0011g;\u001c (PNG)",
+          "GO-BP e/\fi\u001b\u0006g=\u0011g;\u001c (PDF)",
+          "GO-MF f0\u0014f3!e\u001b> (PNG)",
+          "GO-MF f0\u0014f3!e\u001b> (PDF)",
+          "GO-CC f0\u0014f3!e\u001b> (PNG)",
+          "GO-CC f0\u0014f3!e\u001b> (PDF)",
+          "KEGG f0\u0014f3!e\u001b> (PDF)",
+          "KEGG f\u001d!e=\"e\u001b> (PNG)",
+          "KEGG f\u001d!e=\"e\u001b> (PDF)",
+          "GO-BP f\u00150f\r.",
+          "GO-MF f\u00150f\r.",
+          "GO-CC f\u00150f\r.",
+          "KEGG f\u00150f\r.",
+          "e\u001f:e\u001b e\b\u0017h!("
+        ]
+      }
+    },
+    {
+      "id": "A1_gsea_completed",
+      "pass": true,
+      "detail": {
+        "jobId": "job_850e66f5f9004549"
+      }
+    },
+    {
+      "id": "A2_gsea_labels_utf8",
+      "pass": false,
+      "detail": {
+        "labels": 25,
+        "sample": [
+          "分析摘要",
+          "GSEA 结果表",
+          "e\u001f:e\u001b  ID h=,f\r\"",
+          "GSEA f0\u0014f3!e\u001b> (PNG)"
+        ],
+        "bad": [
+          "e\u001f:e\u001b  ID h=,f\r\"",
+          "GSEA f0\u0014f3!e\u001b> (PNG)",
+          "e/\fi\u001b\u0006g=\u0011g;\u001ce\u001b> (PNG)",
+          "e/\fi\u001b\u0006g=\u0011g;\u001ce\u001b> (PDF)",
+          "e\u001f:e\u001b g=\u0011g;\u001ce\u001b> (PNG)",
+          "e\u001f:e\u001b g=\u0011g;\u001ce\u001b> (PDF)",
+          "e/\fi\u001b\u0006f \u0011e\u001b> (PNG)",
+          "e/\fi\u001b\u0006f \u0011e\u001b> (PDF)",
+          "f\u000e\u0012e:\u000fe\u001f:e\u001b e\b\u0017h!("
+        ]
+      }
+    },
+    {
+      "id": "A1_volcano-plot_completed",
+      "pass": true,
+      "detail": {
+        "jobId": "job_4e1d8a803e4a4686"
+      }
+    },
+    {
+      "id": "A2_volcano-plot_labels_utf8",
+      "pass": false,
+      "detail": {
+        "labels": 5,
+        "sample": [
+          "i\"\u0004h'\bf\n%e\u0011\n",
+          "火山图",
+          "火山图 SVG",
+          "分类结果表"
+        ],
+        "bad": [
+          "i\"\u0004h'\bf\n%e\u0011\n",
+          "g\u0001+e11e\u001b> PDF"
+        ]
+      }
+    }
+  ],
+  "allPass": false,
+  "generatedAt": "2026-09-29T01:12:45.368Z"
+}

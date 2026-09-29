@@ -4423,7 +4423,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：P2-6 维持缓期（理由如上，登记于本条）；浏览器后退/前进与程序化跳转不在 P2-8 守卫面（beforeunload 只拦整窗关闭）；重开历史容量 8、会话内有效不持久化。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-452: 结果信息密度包——散点数值 tooltip + 基因搜索 + 阈值参考线 + 表格组合筛选 + 科学计数格式化 + Lightbox 缩放平移 (2026-09-28 in_progress，组件级全绿；六面端到端走查被「无会话 job 打不开结果页」阻塞——两条实证路径与四条打开尝试登记 AUDIT-LOG 🟡；用户实机过目任意会话内 deseq2 结果六面可翻 verified)
+## UI-452: 结果信息密度包——散点数值 tooltip + 基因搜索 + 阈值参考线 + 表格组合筛选 + 科学计数格式化 + Lightbox 缩放平移 (2026-09-29 in_progress，实机三面过：深链打开链/Lightbox 全链 zoom-reset-close/CSV 分页在场——ui452-density-live T1/T3 PASS+T2 部分；散点五面组件级 27/27（交互清单 RS3 链对 HTTP/MCP job 均未投影 mapping=独立缺口登记 BIO 加映；用户过目任意结果页可补)
 
 - **来源**：G0-BIO Goal 线 BIO-1 阶段种子（docs/g0-bio-delivery-goal-plan.md §3；2026-09-28 垂直评估「结果查看专业信息密度不及格」差距表）。用户裁决「可以的 按照你的建议来逐个推进」=两 Goal 交织序队列头启动。
 - **六件**（全部为既有通道与数据的呈现重组，选择协议/artifact-selection 契约零改动）：①**散点数值 tooltip**——ScientificScatter 每点 `<title>` 从裸基因 ID 扩为 ID+xField 值+yField 值+legend 值（数据来自已拉取的 backing 行，零新请求）；②**基因搜索定位**——散点工具条搜索框（aria-label 搜索实体），子串不区分大小写匹配稳定实体 ID，命中点放大+描边（data-search-hit），caveat 显示命中数，Enter 将全部命中点写为 point_select 选择（走既有 buildPointSelection 契约）；③**阈值参考线**——可开关（默认开），x=±|log2FC|（默认 1 可调）竖虚线两条 + yTransform=neg_log10 时 padj（默认 0.05 可调）横虚线，越界不画（诚实），明确标注「展示辅助」不回写分析参数（按 job params 投影 cutoff 留后续接线）；④**表格组合筛选**——单字段 contains 升级为子句构建器：多条件 AND，每条=字段+操作符（包含/=/≠/>/≥/</≤，协议 SelectionFilterClause 既有 op 集）+值；数值比较操作符值不可解析时该子句不生效（不猜语义）；⑤**数值科学计数格式化**——新纯函数 lib/format-scientific-value（|x|≥1e6 或 <1e-3 两位科学计数，常规 4 位有效数字，非数值原样返回不猜测），表格 number 列显示层套用，title 保留原始字符串；⑥**Lightbox 缩放平移**——滚轮缩放（1..8 夹紧，原生非 passive 监听钉 preventDefault）、拖拽平移（位移>3px 判拖拽不触发关闭，近零位移=点击关闭）、双击复位、Esc 关闭保留、操作提示常驻。
@@ -4467,7 +4467,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：文件名框在新式 Windows 保存框不在 UIA 树内（无法程序化读值），预填以截图为主证据 + 标题断言为机械回归；对话框非模态（去 parent 的权衡）；本机 Electron+Windows 组合的对话框实现差异属宿主环境事实（最小脚本双证），换机若行为不同门禁会如实报警。**待用户实机过目后翻 verified。**
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-455: 打开链修复——无会话归属 job 按「项目结果」放行查看（BIO-3 P0 首刀）(2026-09-28 in_progress，代码级交付；待用户实机过目翻 verified)
+## UI-455: 打开链修复——无会话归属 job 按「项目结果」放行查看（BIO-3 P0 首刀）(2026-09-29 verified，实机铁证：SPA 深链 /project/:id/result?job= URL 保持不归零——ui452-density-live T1 PASS，此前同形态四路径全不可达；HTTP 直跑 job 结果页可达+产物下拉渲染+翻页可用)
 
 - **来源**：AUDIT-LOG 🟡 2026-09-28（UI-452 走查发现：HTTP/API 直跑的无会话 job 四条打开路径均不可达）。根因两处显式守卫：①handleOpenResult 对 !conversationId 直接拒绝（「不能混入当前会话」历史设计）回退 chat；②activeJob memo 要求 activeConvId 在场且 job 会话匹配当前会话——深链 URL 归零现象同根因（requestedJobId effect 走同一打开链被拒后 updateWorkspaceMode('chat') 归一 URL）。
 - **修法两处**（project-workspace.tsx）：①无会话 job 放行为「项目结果查看」——不切会话、不 setActiveConvId（不存在混入），仅 bindActiveJob+开右栏 results+result 模式；②activeJob memo 放宽——会话归属 job 仍必须匹配当前会话，无会话 job 直接放行（jobs state 本就是 listProjectJobs 项目全量，数据一直在场）。
@@ -4482,7 +4482,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **待验**：实机需 dev 栈重启（后端新端点）+**真实跨 Job 血缘数据**（当前 dev 库 deseq2 单 Job 无下游依赖=链单节点不渲染属正确行为；跨 Job 链随 BIO-4 解冻 go-kegg/volcano 后自然产生，或 selection→富集操作触发）。P2「继续分析显式按钮」随 BIO-4（下游工具解冻前无真实目标）。
 - **边界**：投影只读（不建第二真相）；链排序按依赖深度非时间（同深度 toolJobId 稳定序）；无会话 job 同样可投影（图真值不含会话维度）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-454: 交互上限与降级链——散点 backing 600 点 + 热图解除前端自缚 + 静态 CSV 本地分页 + 日志端点项目目录兜底 (2026-09-28 in_progress，组件级全绿；实机项待 dev 栈重启后验)
+## UI-454: 交互上限与降级链——散点 backing 600 点 + 热图解除前端自缚 + 静态 CSV 本地分页 + 日志端点项目目录兜底 (2026-09-29 in_progress→大部分实机：④日志端点兜底实证（block126-perception-live 6/6 source=run.log+失败原因透出）+③CSV 分页实机（ui452 走查 T2 控件在场+39 行标注）；①②热图/散点实机随交互清单缺口同批——组件级 32/32 在册)
 - **来源**：G0-BIO BIO-2 阶段种子（plan §3；2026-09-28 垂直评估「交互上限与降级链」差距）。用户裁决「继续」按 G0 Goal 交织序推进（第 3 项交付位）。
 - **四件**：①**plot backing 有界窗口 250→600**（`interaction.js`——前端 SVG 可承受；仍按文件顺序取，**非显著性排序**：top-N 真排序需插件 descriptor 声明排序字段的契约，登记 BIO-3 候选不猜语义）；②**热图解除前端自缚**（`ScientificInteractionViewer` matrix 分支：列 `slice(0,24)`/行 `slice(0,40)` 移除——后端 backing 本就有界（行 100/列不截断），全量渲染交给网格横向滚动，caveat 改为如实标注「渲染后端有界矩阵窗口 N 行×M 列」）；③**静态 CSV 预览本地分页**（新纯函数 `lib/csv-preview-pagination`（50 行/页，页码越界钳制不渲染空页）+壳内分页控件（上一页/下一页/页码/总行数，previewData 更新重置页码，标注「预览文本预算内」诚实口径）——原 24 行硬截断退役；静态预览是无交互清单的降级路径，无服务端分页通道可复用故走前端本地分页）；④**日志端点项目目录兜底**（`tools-metadata.js`：`resolveProjectRunLayout` 失败不再静默只回全局目录——项目行仍在时按 `workspace_path` 拼执行链同款目录约定兜底，失败原因透出 note——修 BLOCK-126 验收发现的既有缺陷 AUDIT-LOG 🟡）。
 - **范围裁决留痕**：mojibake（manifest 中文 label GBK 乱码）**移 BIO-4**（根因在 pack 仓 R 脚本输出编码，跨仓改动归解冻主战场，本仓侧修属贴膏药）；top-N 显著性排序**移 BIO-3**（需插件 descriptor 排序字段声明契约）。
