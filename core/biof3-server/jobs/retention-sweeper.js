@@ -171,6 +171,47 @@ function runRetentionSweep({ db, warn = console.warn, jobsDir: jobsDirParam } = 
     failures.push({ table: 'tool_jobs', reason: msg });
   }
 
+  // ---- tool_jobs retention（BLOCK-136 · PL-4 机制先行，默认关闭）——环境变量
+  // 驱动的第二把扫帚，挂在下方既有清扫节拍（scheduleRetentionSweep 的递归
+  // setTimeout → 本函数）上。上方 PL-4a 内联段保持原样：completed/failed +
+  // completed_at 90 天常开，契约测试 pl4a-tool-jobs-retention.test.mjs 钉住。
+  // 本段职责（PL-D2「retention 默认策略数值」属用户裁决，机制先行、默认值留
+  // 裁决；与 BLOCK-135 重试默认关闭同一姿势）：
+  //   - BIOF3_TOOL_JOBS_RETENTION_DAYS（默认 0=关闭）实时读取（非法值按 0）；
+  //   - created_at 时间窗 + 终态三态（含 cancelled，比 PL-4a 面宽）；
+  //   - 保护清单同源：helpers/tools-assets 的 PUBLIC_DEMO_JOB_IDS（公开演示
+  //     作业，与上方内联段同一 require 源）；is_public 列过滤不在本段（两段
+  //     保护面差异已注明，PL-D2 统合时一并裁决）；
+  //   - 目录只清全局布局 <jobsDir>/<jobId>，项目布局目录归项目 GC 域不动。
+  scanned.push('tool_jobs_retention');
+  try {
+    const rawDays = Number(process.env.BIOF3_TOOL_JOBS_RETENTION_DAYS);
+    const { retentionSweep } = require('../helpers/tool-jobs-retention');
+    const { PUBLIC_DEMO_JOB_IDS } = require('../helpers/tools-assets');
+    const pathMod = require('node:path');
+    const osMod = require('node:os');
+    // config-helper 导出 Proxy（字段访问直通 getConfig()，无 {config} 具名导出）
+    const config = require('../../shared-backend/config-helper');
+    // 目录不存在由 retentionSweep 的 rmSync force:true 容忍，无需先探测
+    const retentionJobsDir = jobsDirParam || pathMod.join(
+      config.localResultsDir || pathMod.join(osMod.homedir(), 'Documents', 'BioF3-Local', 'results'),
+      'tool-jobs',
+    );
+    const result = retentionSweep({
+      db,
+      retentionDays: Number.isFinite(rawDays) ? rawDays : 0,
+      jobsDir: retentionJobsDir,
+      protectedJobIds: [...PUBLIC_DEMO_JOB_IDS],
+    });
+    if (result.reason !== 'disabled') {
+      deleted.tool_jobs_retention = result.deleted;
+    }
+  } catch (e) {
+    const msg = e && e.message ? e.message : String(e);
+    warn(`retention-purge: failed at tool_jobs_retention, reason=${msg}`);
+    failures.push({ table: 'tool_jobs_retention', reason: msg });
+  }
+
   // ---- loop ledger: only sweep terminal loop_runs (completed / failed /
   // cancelled). planned / running must keep their full audit trail so a
   // multi-turn task can resume. Loop iterations / actions / evidence /

@@ -4482,6 +4482,15 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **待验**：实机需 dev 栈重启（后端新端点）+**真实跨 Job 血缘数据**（当前 dev 库 deseq2 单 Job 无下游依赖=链单节点不渲染属正确行为；跨 Job 链随 BIO-4 解冻 go-kegg/volcano 后自然产生，或 selection→富集操作触发）。P2「继续分析显式按钮」随 BIO-4（下游工具解冻前无真实目标）。
 - **边界**：投影只读（不建第二真相）；链排序按依赖深度非时间（同深度 toolJobId 稳定序）；无会话 job 同样可投影（图真值不含会话维度）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## UI-458: 继续分析显式入口 + tool_jobs retention 机制（BIO-3 P2 + PL-4；BLOCK-136 动态工作流交付）(2026-09-30 in_progress，组件级全绿+接线契约；实机走查待补)
+
+- **来源**：G0-BIO plan §3 BIO-3 P2（评估：上游喂下游全靠对话隐式）+ G0-PLATFORM plan §3 PL-4（评估：tool_jobs 无保留策略表无界增长）。动态工作流两修复员并行+冷复核 6 发现（2 高危返工）+主代理终审（含 D7 领域中立棘轮抓真一处改造）。
+- **两件**：①**「继续分析」显式入口**——CompactResultNavigator actions 区新增菜单，列出插件目录全部带文件输入的已装分析（useToolCatalog 目录驱动，BLOCK-83 D7 合规：核心前端零领域工具 ID 硬编码——首版硬编码 go-kegg/gsea/volcano 被 domain-neutrality 棘轮抓真后改造为目录驱动，新装分析自动出现）；点击组装携带 jobId/artifactName/tool 三要素的显式中文 prompt 经 gewu:copilot-ask 投递，Agent 侧 bind_artifact 血统链 fail-closed 兜底。②**tool_jobs retention 机制**——helpers/tool-jobs-retention.js 纯函数（只删终态/保护静态演示清单/**is_public=1 动态公开同口径保护**（复核 F1）/分批 LIMIT/全局目录 best-effort）+挂 retention-sweeper 既有节拍；**默认关闭**（BIOF3_TOOL_JOBS_RETENTION_DAYS），数值 PL-D2 留用户裁决（与重试默认关闭同姿势）。
+- **证据**：ContinueAnalysisMenu 组件 4/4（目录驱动渲染/prompt 三要素/gamma 无文件输入排除/挂载入口）+block136 契约 8/8（含 runRetentionSweep 接线 env 双分支契约=复核 F2 修补+is_public 保护经生产线入口实证）+D7 棘轮 2/2+block130/135 回归+test:changed 617/0+tsc 0。
+- **待验**：菜单实机走查（结果页展开→选项=已装分析→点击 prompt 进 composer）；retention 长跑节拍（需环境）。
+- **边界**：菜单不预判下游语义（全目录列出，输错由 Agent 输入契约拒——血统绑定 fail-closed 兜底）；retention 只删 DB 行+全局目录（项目布局目录归项目 GC 域）；created_at 窗口锚点（复核 F3 建议 COALESCE completed_at）随 PL-D2 一并裁决。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-457: 输入显式化——上传域校验执行化 + 分析面板参数配置表单（BIO-5 P1+P2）(2026-09-29 in_progress，契约+实机双证；用户过目翻 verified)
 
 - **来源**：G0-BIO plan §3 BIO-5（2026-09-28 垂直评估 D1/D4 差距：跑分析全靠对话隐式+值级校验真空）。
