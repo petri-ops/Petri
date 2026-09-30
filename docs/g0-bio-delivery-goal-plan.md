@@ -116,7 +116,7 @@ BLOCK-83 P4（2026-09-12）领域中立化后，生信分析全部迁至兄弟�
 | BIO-D1 | dormant 解冻范围（BIO-4） | 最小=bulk-rna-core 链 6 插件 vs 扩展=wgcna/scrna 系；逐个还是成批 |
 | BIO-D2 | 17 个断链 R 脚本处置 | 插件化接线 vs 明确退役（registry 条目清除）；涉及 skills:check C-20 存量 6 红的基准归属 |
 | BIO-D3 | Windows 平台支持 | 域包平台声明补 win32 的验证深度（本地实测 vs 声明级） |
-| BIO-D4 | interpretation 供给形态 | 既有模板直连 vs 统一并入 Agent result_summary 扩容（避免第二解读真相） |
+| BIO-D4 | interpretation 供给形态——**已裁决（2026-09-30 用户授权主代理裁）=形态 (b) 统一并入 Agent result_summary 链（单一解读真相）**：解读入口 prompt 锚定 result_summary 有界真值（UI-459 实装），遗留 /api/ai/interpret 模板路由留 reference 不接前端不删；更宽真值窗口（50+ 行）的专属投影通道仍随本裁决后续另评估 | 裁决记录=UI-459 台账+本行 |
 | BIO-D5 | 多因子 design（BIO-7 池首项） | R 公式语法暴露程度与防呆深度 |
 
 ## 6. 非范围（红线）

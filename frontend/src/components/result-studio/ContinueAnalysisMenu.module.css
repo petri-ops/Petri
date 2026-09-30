@@ -1,0 +1,93 @@
+.menu {
+  position: relative;
+}
+
+.menu > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--gewu-text-tertiary);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--gewu-font-size-xs);
+  list-style: none;
+  white-space: nowrap;
+}
+
+.menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.menu > summary:hover,
+.menu[open] > summary {
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
+}
+
+.popup {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 20;
+  width: min(280px, calc(100vw - 32px));
+  padding: 8px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 6px;
+  background: var(--gewu-bg-surface);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
+}
+
+.popupLabel {
+  padding: 2px 6px 6px;
+  border-bottom: 1px solid var(--gewu-border-subtle);
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
+  font-weight: 650;
+}
+
+.items {
+  display: grid;
+  gap: 2px;
+  margin-top: 6px;
+}
+
+.items button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 28px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--gewu-text-secondary);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.items button:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
+}
+
+.items button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.items button small {
+  flex: 0 0 auto;
+  color: var(--gewu-text-tertiary);
+  font-family: var(--gewu-font-mono);
+  font-size: var(--gewu-font-size-xs);
+}

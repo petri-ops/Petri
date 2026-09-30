@@ -4491,6 +4491,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：菜单不预判下游语义（全目录列出，输错由 Agent 输入契约拒——血统绑定 fail-closed 兜底）；retention 只删 DB 行+全局目录（项目布局目录归项目 GC 域）；created_at 窗口锚点（复核 F3 建议 COALESCE completed_at）随 PL-D2 一并裁决。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## UI-459: 解读入口统一 result_summary 锚定（BIO-6/BIO-D4=(b)）+ UI-457/458 实机走查（BLOCK-137 动态工作流收尾双件）(2026-09-30 in_progress，实现线门禁全绿+走查 6/7；T5 状态门控残留观察)
+
+- **来源**：G0-BIO plan §3 BIO-6 + BIO-D4 裁决（2026-09-30 用户授权主代理裁=形态 (b) 单一真相：解读统一走 Agent+result_summary 链——result_summary 是 BLOCK-121 建的跨轮真值通道、BIO-6b 已扩窗口 6→20 行；不接遗留 /api/ai/interpret 模板造第二解读真相，遗留路由留 reference 不删）。
+- **实现**（前端组装点升级）：「解释当前结果」prompt 组装升级为 result_summary 锚定解读指令——先调 result_summary 读有界真值、基于返回数据解读结论/可信边界/下一步、引用数字必须来自工具返回不得编造（先 grep 组装点在 CenterPanel/ResultStudioSurface，最小改）。动态工作流实现线交付（vitest 定向 resultSurface/ResultStudioSurface/CenterPanel 全绿+tsc 0+eslint 0）。
+- **实机走查**（scripts/ui457-ui458-live.cjs，动态工作流走查线交付+主代理终审四修）：UI-457 表单实机全证（T1 表单挂载：2 文件下拉+「<选择文件>」占位+padj 0.05/lfc 1 默认值+运行钮；T2 显式参数 prompt 组装实测「counts=counts.csv，coldata=coldata.csv，design=condition…padj_cutoff=0.05」）；UI-458 菜单实机全证（T3 继续分析入口在场；T4a 目录驱动菜单列出全部已装分析；T4b prompt 三要素+血统绑定语义实测）。走查脚本自身经冷复核 4 发现+主代理终审 4 修（F1 prompt 捕获监听导航后重挂/F2 死代码 template 分支删/F3 T0 纳入清理面/F4 软硬证据拆分断言）。
+- **T5 残留观察（如实登记）**：解读入口点击的 prompt 捕获=null——组件测已证组装正确；实机未捕获疑 conversationRunStore 运行态门控（T4 菜单点击发起真实 agent run 后，下一点击走「仍在处理上一个请求」通知分支）与脚本时序交互，非实现缺失；已试 T5 前置取消 agent 任务仍未捕获，登记残留观察项待实机过目时人工核（结果页点「询问 Agent」看对话是否收到 result_summary 锚定 prompt）。
+- **边界**：不接 interpret 模板（遗留路由 reference 保留）；OS 级对话框行为不可自动化；未跑全量 test:changed。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-457: 输入显式化——上传域校验执行化 + 分析面板参数配置表单（BIO-5 P1+P2）(2026-09-29 in_progress，契约+实机双证；用户过目翻 verified)
 
 - **来源**：G0-BIO plan §3 BIO-5（2026-09-28 垂直评估 D1/D4 差距：跑分析全靠对话隐式+值级校验真空）。

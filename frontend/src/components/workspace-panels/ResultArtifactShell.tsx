@@ -1008,6 +1008,8 @@ export function ResultArtifactShell({
           ? selectedArtifactUrl
           : undefined
       }
+      jobId={viewedRevision?.toolJobId || job.id}
+      artifactKind={selectedArtifactKind}
       relatedSections={compactRelatedSections}
       secondaryActions={toolbarSecondaryActions}
       truth={describeTruthStatus(toolbarTruthStatus, effectiveJobStatus)}

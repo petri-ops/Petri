@@ -146,4 +146,30 @@ describe('G0-RS-P1 Result Studio surface', () => {
     fireEvent.click(screen.getByRole('button', { name: /检查并恢复文件/ }));
     expect(onAsk).toHaveBeenCalledWith(expect.stringContaining('不要覆盖原始数据'));
   });
+
+  // BIO-6（BIO-D4 裁决 b：单一真相）— 「解释当前结果」prompt 必须锚定任务与
+  // 产物坐标，并强制 Agent 先经 result_summary 读有界真值再解读，不接遗留模板。
+  it('解释当前结果 prompt 锚定任务坐标并强制 result_summary 真值（BIO-6）', () => {
+    const onAsk = vi.fn();
+    render(
+      <ResultStudioInspector
+        artifact={{
+          jobId: 'job-9', toolId: 'deseq2', name: 'deg_table.csv', type: 'table',
+          label: '差异表达结果',
+        }}
+        jobStatus="done"
+        truthStatus="valid"
+        onAskAgent={onAsk}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /解释当前结果/ }));
+    expect(onAsk).toHaveBeenCalledTimes(1);
+    const prompt = String(onAsk.mock.calls[0][0]);
+    expect(prompt).toContain('result_summary');
+    expect(prompt).toContain('job-9');
+    expect(prompt).toContain('deg_table.csv');
+    expect(prompt).toContain('不得编造');
+    // 遗留模板措辞退役：解读真相只剩 Agent + result_summary 链一条
+    expect(prompt).not.toContain('请解释当前结果');
+  });
 });

@@ -1,0 +1,47 @@
+{
+  "name": "ui457-ui458",
+  "startedAt": "2026-09-30T11:54:24.370Z",
+  "finishedAt": "2026-09-30T11:54:57.599Z",
+  "assertions": [
+    {
+      "name": "T0_seed_http_deseq2",
+      "pass": true,
+      "detail": "project=p_muo1s7p3_lyfb job=job_fa3c35574f0e48ef workspace=ui457-458-verify-muo1s7oz-muo1s7p3"
+    },
+    {
+      "name": "T1_ui457_form_mounted",
+      "pass": true,
+      "detail": "{\"selects\":2,\"placeholder\":true,\"padjDefault\":\"0.05\",\"lfcDefault\":\"1\",\"runBtn\":true}"
+    },
+    {
+      "name": "T2_ui457_prompt_params",
+      "pass": true,
+      "detail": "prompt=请运行「DESeq2 差异分析」分析。输入与参数：counts=counts.csv，coldata=coldata.csv，design=condition，contrast_ref=WT，contrast_treat=KO，padj_cutoff=0.05，lfc_cutoff=1。输入文件请从项目工作区解析；完成后报告任务 ID。"
+    },
+    {
+      "name": "T3_ui458_menu_present",
+      "pass": true,
+      "detail": "summary[aria-label=继续分析]在场"
+    },
+    {
+      "name": "T4a_ui458_menu_lists_catalog",
+      "pass": true,
+      "detail": "items=[\"DEG 标准化deg-standardizer\",\"DESeq2 差异分析deseq2\",\"表达矩阵质量控制expression-qc\",\"GO/KEGG 富集分析go-kegg\",\"GSEA 基因集富集分析gsea\",\"样本元数据校验sample-metadata-validator\",\"火山图绘制volcano-plot\"]"
+    },
+    {
+      "name": "T4b_ui458_prompt_three_keys",
+      "pass": true,
+      "detail": "prompt=请基于任务 job_fa3c35574f0e48ef 的结果 volcano.png 运行「DEG 标准化」分析：从该结果的表格产物取输入（如 DEG 表），完成血统绑定后执行；完成后报告新任务 ID。"
+    },
+    {
+      "name": "T5_ui458_ask_agent_result_summary",
+      "pass": false,
+      "detail": "known-gap：投递 prompt 未含 result_summary 指令（实现线 prompt 组装升级时序）——prompt=null"
+    }
+  ],
+  "allPass": false,
+  "extra": {
+    "stackMode": "dev-electron",
+    "seededJobId": "job_fa3c35574f0e48ef"
+  }
+}

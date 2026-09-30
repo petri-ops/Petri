@@ -23,6 +23,7 @@ import {
 } from '@/components/result-studio/ResultAgentComposer';
 import type { ResultEditSubmission } from '@/components/result-studio/ResultEditPanel';
 import {
+  buildResultInterpretationPrompt,
   completeResultSurfaceMeasure,
   describeSelection,
   describeTruthStatus,
@@ -177,9 +178,14 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
   );
 
   const askAboutCurrentResult = React.useCallback(() => {
-    ctx.handleAskAgent(`请解释当前结果“${contextTitle}”的主要结论、可信边界和最合适的下一步。`);
+    // BIO-6（BIO-D4 裁决 b）— 解读统一走 Agent + result_summary 链，prompt 经
+    // resultSurface 单一构造器出词：锚定任务与产物坐标，不接遗留模板。
+    ctx.handleAskAgent(buildResultInterpretationPrompt({
+      jobId: ctx.activeJob?.id,
+      artifactName: ctx.activeArtifact?.name || contextTitle,
+    }));
     ctx.updateWorkspaceMode('chat');
-  }, [contextTitle, ctx.handleAskAgent, ctx.updateWorkspaceMode]);
+  }, [contextTitle, ctx.activeJob, ctx.activeArtifact, ctx.handleAskAgent, ctx.updateWorkspaceMode]);
 
   const onRevisionAgentRequest = React.useCallback((request: 'explain' | 'modify' | 'replay') => {
     if (ctx.resultContext?.status !== 'ready' || !ctx.resultContext.contextToken) return;

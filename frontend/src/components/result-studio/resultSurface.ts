@@ -212,3 +212,25 @@ export function describeSelection(selection: SelectionProjectionInput | null | u
   if (count > 0) return `已选择 ${count} 个对象 · ${scope}`;
   return `已选择 ${fieldCount} 列 · ${scope}`;
 }
+
+/**
+ * BIO-6（BIO-D4 裁决 b：单一真相）— 「解释当前结果」解读 prompt 的唯一出词口。
+ *
+ * 解读统一走 Agent + result_summary 链：prompt 锚定任务与产物坐标，要求
+ * Agent 先调用 result_summary 读取有界真值再解读，引用的数字必须来自工具
+ * 返回。不接遗留 /api/ai/interpret 模板，也不允许各入口各自拼 prompt 造
+ * 第二解读真相——CenterPanel（询问 Agent）与 ResultStudioInspector（解释
+ * 当前结果）两个入口都经本构造器取词。jobId 缺失的退化路径不伪造任务锚点，
+ * 但保持同一条 result_summary 纪律（Agent 侧 bind_artifact 血统链兜底）。
+ */
+export function buildResultInterpretationPrompt(input: {
+  jobId?: string | null;
+  artifactName?: string | null;
+}): string {
+  const jobId = String(input.jobId || '').trim();
+  const artifactName = String(input.artifactName || '').trim();
+  const target = jobId
+    ? `任务 ${jobId} 的结果 ${artifactName || '当前产物'}`
+    : `当前结果${artifactName ? `“${artifactName}”` : ''}`;
+  return `请解读${target}：先调用 result_summary 工具读取该结果的有界真值，基于返回数据解读主要结论、可信边界与建议的下一步；引用的数字必须来自工具返回，不得编造。`;
+}

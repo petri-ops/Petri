@@ -2,6 +2,7 @@ import React from 'react';
 import { Icon } from '@/components/icons/Icon';
 import type { ArtifactSelection } from '@/lib/artifact-selection';
 import {
+  buildResultInterpretationPrompt,
   completeResultSurfaceMeasure,
   describeSelection,
   describeTruthStatus,
@@ -246,7 +247,9 @@ export function ResultStudioInspector({
       <div className={styles.inspectorActions}>
         <button className="gewu-btn gewu-btn--ghost gewu-btn--sm"
           type="button"
-          onClick={() => onAskAgent(`请解释当前结果“${title}”的主要结论、可信边界和最合适的下一步。`)}
+          // BIO-6（BIO-D4 裁决 b）— 解读统一走 Agent + result_summary 链，
+          // prompt 经 resultSurface 单一构造器出词，锚定任务与产物坐标。
+          onClick={() => onAskAgent(buildResultInterpretationPrompt({ jobId: artifact.jobId, artifactName: artifact.name }))}
         >
           <Icon name="sparkles" size={13} />
           解释当前结果

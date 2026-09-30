@@ -1,5 +1,7 @@
 # BioF3 Desktop — Current Next Steps
 
+最后更新：2026-09-30（**BLOCK-137 收尾双件交付（/workflow 续推）+ 池分诊确认**：①BIO-6 解读入口=BIO-D4 裁决落账形态 (b)（解读统一 Agent+result_summary 单一真相链，「解释当前结果」prompt 升级 result_summary 锚定+引用数字必须来自工具返回；UI-459 台账 in_progress）；②UI-457/458 实机走查 6/7（UI-457 表单实机全证：2 下拉+占位+默认值+显式参数 prompt 实测；UI-458 菜单实机全证：目录驱动列出全部已装分析+三要素 prompt；T5 解读入口 prompt 捕获=conversationRunStore 状态门控残留观察，组件测 4/4 在册）；走查脚本经冷复核 4 发现+主代理终审 4 修；③**池分诊确认：BIO-7 领域深化池与 PL-7 任务中心池维持「启动需裁决+立项」池态即其正确状态**——池条目完整性核对无漏（BIO-7 七项/PL-7 一项均有重开条件），无提级无销号。**两 Goal 可执行项至此全部收口**；剩余全是裁决/过目/池项：BIO-D2（17 条脚本随扩展集）/PL-D2（retention 数值）/实机过目（UI-457/458/459）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-09-29（**BLOCK-135 续线交付：PL-3 二刀重试策略 + C-21 export 兜底收口**（/workflow 续线第二发动）：两修复员并行落盘+冷复核 6 发现——2 高危（retryCount 漏 await 恒 0/队列泵 facade 漏 await 整体假死=BLOCK-130 既有缺陷）返工修复实证，F3（分类器补失活恢复第三形态）F4（export 打包补 output/ 子目录）主代理终审补齐，F5/F6 登记候选；block135 11/11+block130 回归 5/5+tsc 0+test:changed 120/0。**至此 G0-PLATFORM 高优先队列清完：PL-1/2/3(一二刀)/5a/6 全收口，PL-4 由并行 PL-4b+本线覆盖**；剩余=BIO-6 interpret 收敛（BIO-D4 裁决）/BIO-7 池。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-09-29（**PL-5/PL-5a 收口（BLOCK-134）**：动态工作流三版收口后主代理核验——评估前提已被并行 UI-456 上游消解（useResultStore/resultBridge/独立页删除+result-handlers 已删）→ 转化执行 **PL-5a 首刀 result:* 数据层退役**（删 untracked 死模块 result-db.js+singleton 测试改 branch 单角色契约 4/4+knip 239 键 PASS+test:changed 34/0+tsc 0）；复核员 4 发现随退役失效/转化（F3=退役依据）。工作流首战经验沉淀：两轮零改动空转（指令自由度过高）→指令化重写后一次到位；Windows 门禁命令需 .cmd 形态。**队列剩余：PL-3 二刀/BIO-6 interpret 收敛（BIO-D4）/BIO-7 池/C-21 export 兜底**。G0 开发期常态 · 不外推 packaged/Provider/GA。）

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildResultInterpretationPrompt,
   chooseResultArtifactName,
   chooseResultSectionLandingName,
   RESULT_SURFACE_PERFORMANCE_BUDGETS,
@@ -166,5 +167,23 @@ describe('G0-RS-P1 result surface projection', () => {
       returnConversationMs: 250,
       maxToggleHeapGrowthBytes: 67108864,
     });
+  });
+
+  // BIO-6（BIO-D4 裁决 b：单一真相）— 解读 prompt 只此一个出词口：两个入口
+  // （CenterPanel 询问 Agent / Inspector 解释当前结果）都经它取词，锚定任务与
+  // 产物坐标并强制 result_summary 有界真值，不接遗留 /api/ai/interpret 模板。
+  it('interpretation prompt anchors job coordinates and forces the result_summary bounded truth', () => {
+    expect(buildResultInterpretationPrompt({ jobId: 'job-9', artifactName: 'deg_table.csv' })).toBe(
+      '请解读任务 job-9 的结果 deg_table.csv：先调用 result_summary 工具读取该结果的有界真值，'
+      + '基于返回数据解读主要结论、可信边界与建议的下一步；引用的数字必须来自工具返回，不得编造。',
+    );
+  });
+
+  it('interpretation prompt without a jobId never fakes a task anchor but keeps the truth discipline', () => {
+    const prompt = buildResultInterpretationPrompt({ jobId: null, artifactName: 'deg.csv' });
+    expect(prompt).toContain('result_summary');
+    expect(prompt).toContain('deg.csv');
+    expect(prompt).toContain('不得编造');
+    expect(prompt).not.toContain('任务');
   });
 });

@@ -120,6 +120,22 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     expect(ctx.updateWorkspaceMode).toHaveBeenCalledWith('history', true, 'job-1');
   });
 
+  // BIO-6（BIO-D4 裁决 b：单一真相）— 询问 Agent 的解读 prompt 必须锚定任务
+  // 与产物坐标，并强制 Agent 先经 result_summary 读有界真值，不接遗留模板。
+  it('询问 Agent prompt 锚定任务与产物坐标并强制 result_summary 真值（BIO-6）', () => {
+    const ctx = context('compare');
+    render(<CenterPanel ctx={ctx} refs={refs} />);
+    fireEvent.click(screen.getByRole('button', { name: '询问 Agent' }));
+    expect(ctx.handleAskAgent).toHaveBeenCalledTimes(1);
+    const prompt = String((ctx.handleAskAgent as ReturnType<typeof vi.fn>).mock.calls[0][0]);
+    expect(prompt).toContain('result_summary');
+    expect(prompt).toContain('job-1');
+    expect(prompt).toContain('deg.csv');
+    expect(prompt).toContain('不得编造');
+    // 遗留模板措辞退役：解读真相只剩 Agent + result_summary 链一条
+    expect(prompt).not.toContain('请解释当前结果');
+  });
+
   // UI-351 — 中栏过窄时摘要卡转悬浮层（绝对定位），不再占列宽也不再整体消失
   it('renders the summary card in a floating overlay when visibility is float (UI-351)', () => {
     const ctx = context('chat');
