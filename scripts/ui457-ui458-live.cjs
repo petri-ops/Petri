@@ -31,7 +31,6 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'ui-457-458');
 const DEMO_DIR = path.join(__dirname, '..', '..', 'gewu-pack-bio', 'plugins', 'deseq2', 'demo-data');
-const TEMPLATE_JOB = process.env.UI452_TEMPLATE_JOB || 'tj_muhoamsv_m92b';
 const AUTH = 'Bearer desktop-local';
 let client;
 const EVAL = (expr) => lib.evalJs(client, expr);

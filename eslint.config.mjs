@@ -28,6 +28,9 @@ export default tseslint.config(
       // 生成抑制基线的 Windows 侧无此目录）——不属本项目代码面，与 codex//_external-ref/ 同类。
       'openclaw/**',
       'tmp/**',
+      // .zcode/ = ZCode 工作流引擎运行时目录（gitignore；workflow-runs/*.mjs 为引擎自动生成的
+      // 瞬态运行日志脚本，非本项目代码面，且每次运行 ID 变化重新生成——不进抑制基线，同 tmp/ 先例）
+      '.zcode/**',
       'frontend/dist/**',
       // skill 资产目录：dev-verify flows 用 node 全局但无包上下文，且含合法占位模板
       '.agents/**',

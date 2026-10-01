@@ -73,7 +73,7 @@ describe('UI-453 加映二 拖出经 startDrag 真文件拖拽', () => {
     const dt = dataTransferStub();
     fireEvent.dragStart(view.getByRole('treeitem'), { dataTransfer: dt });
     expect(startFileDragMock).toHaveBeenCalledTimes(1);
-    const payload = startFileDragMock.mock.calls[0]?.[0] as DragPayload;
+    const payload = startFileDragMock.mock.calls[0]?.[0];
     expect(payload.localPath).toBeUndefined();
     expect(payload.url).toContain('http://localhost:3001/api/workspaces/p1/file?path=');
     expect(payload.url).toContain('token=desktop-local');

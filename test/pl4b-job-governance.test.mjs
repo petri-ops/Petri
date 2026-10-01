@@ -41,14 +41,6 @@ function makeApp(db, jobsDir) {
   return { app, removed };
 }
 
-function req(app, method, path, body) {
-  return new Promise((resolve, reject) => {
-    const handler = (err, res) => (err ? reject(err) : resolve(res));
-    if (method === 'get') return app.inject ? app.inject(path) : void import('supertest').catch(() => { reject(new Error('no supertest')); });
-    reject(new Error('use raw server'));
-  });
-}
-
 test('batch-delete：终态删/活跃拒/公开拒/缺失报 not_found，逐条结果', async () => {
   const { db, dir } = makeFixture();
   const jobsDir = join(dir, 'tool-jobs'); mkdirSync(jobsDir, { recursive: true });

@@ -10,7 +10,7 @@ import { Icon } from '@/components/icons/Icon';
 import { acknowledgeConversationChanges } from '@/components/copilot/conversationChangesStore';
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
 import { BottomTerminal } from '@/components/workspace-panels/BottomTerminal';
-import { CenterPanel, type CenterPanelContext, type CenterPanelRefs } from '@/components/workspace-panels/CenterPanel';
+import { CenterPanel, type CenterPanelContext } from '@/components/workspace-panels/CenterPanel';
 import { RightPanel, type RightPanelContext } from '@/components/workspace-panels/RightPanel';
 import { ColumnHeader } from '@/components/desktop/titlebar/ColumnizedTitleBar';
 import { TitleBar } from '@/components/desktop/TitleBar';

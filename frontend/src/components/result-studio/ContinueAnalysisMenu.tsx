@@ -34,7 +34,6 @@ function buildContinuePrompt(jobId: string, artifactName: string, toolTitle: str
 export function ContinueAnalysisMenu({
   jobId,
   artifactName,
-  artifactKind,
 }: ContinueAnalysisMenuProps): React.ReactElement | null {
   const detailsRef = useRef<HTMLDetailsElement | null>(null);
   const { tools: catalogTools } = useToolCatalog();

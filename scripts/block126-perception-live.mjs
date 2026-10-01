@@ -63,7 +63,6 @@ async function main() {
   // 1) SSE 订阅（先连后触发，防错过事件）
   const events = [];
   const controller = new AbortController();
-  const sseStartedAt = Date.now();
   const sse = await fetch(BASE + '/api/events', { signal: controller.signal });
   if (!sse.ok || !(sse.headers.get('content-type') || '').includes('event-stream')) {
     throw new Error(`SSE handshake failed: ${sse.status}`);

@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { LineageStrip } from './LineageStrip';
 import type { ResultLineageResponse } from './resultStudioClient';
 
-const fetchResultLineage = vi.fn();
+const fetchResultLineage = vi.fn<(...args: unknown[]) => Promise<ResultLineageResponse>>();
 vi.mock('./resultStudioClient', () => ({
   fetchResultLineage: (...args: unknown[]) => fetchResultLineage(...args),
 }));
