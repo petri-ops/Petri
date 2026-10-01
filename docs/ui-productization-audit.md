@@ -1394,7 +1394,7 @@ BLOCK-22 PHASE 2 落地：rejectHunk 从整文件 revert 改为真正的 per-hun
 **状态**: in_progress (dev Electron 边界内 verified 待实机过目).
 
 
-## UI-198: BLOCK-22-P4.10 — hunkAccepted / hunkRejected typed event bus (2026-08-27 active)
+## UI-198: BLOCK-22-P4.10 — hunkAccepted / hunkRejected typed event bus (2026-08-27 → 2026-09-03 superseded · BLOCK-43 整链退休，业务由 UI-206 hunkControls 承担)
 
 BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed event，给未来业务侧订阅留好钩子。
 
@@ -1414,7 +1414,9 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **不动** `acceptRejectWidget.ts` / `DiffActionBar.tsx` / 既有 `CodeMirrorEditor.test.tsx`（mock 桥接契约零变更）/ 不动 integration 桥接层 / 不动 `App.tsx` / `TitleBar.tsx` / `desktop.css` / 不动 IPC 端 (`src/`) / 不引入新依赖。
 
-**状态**: in_progress (dev Electron 边界内 verified 待实机过目；业务侧订阅方尚未接入 — 派发与订阅两侧契约已锁，后续 P5+ 消费侧接 `subscribeBioF3Event(biof3Events.hunkAccepted, ...)` 即可零改动启用).
+**状态**: superseded（BLOCK-43 整链退休：BLOCK-22 通用 hunk 链路随 f57089cb 退休——useCodeMirrorEditor 派发点与 events.ts 键随整链删除，生产代码零引用；业务路径 = UI-206 hunkControls + BLOCK-28 /review 主区，hunkAccepted/hunkRejected typed event bus 不再保留）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+2026-09-30 勘正：状态字样滞后同步（复核证据=f57089cb）——功能已被 BLOCK-43 整链退休、由 UI-206 承担，标题与状态行按 UI-193 同型先例标 superseded。
 
 ## UI-200: BLOCK-23 — Working Tree Review 面板渲染层 CodeMirror 升级 (2026-08-28 active)
 
@@ -1526,7 +1528,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **状态**: verified (dev Electron 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-204: BLOCK-28 P1 — 主区一级审阅模式骨架（/review 路由 + 抽屉退役） (2026-08-29 in_progress)
+## UI-204: BLOCK-28 P1 — 主区一级审阅模式骨架（/review 路由 + 抽屉退役） (2026-08-29 verified)
 
 **目标**（BLOCK-28 方案 B）：把代码审阅从 TitleBar 侧边抽屉升级为主区一级审阅模式（对标 VS Code SCM 空间与动线）。
 
@@ -1541,6 +1543,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **验证**：tsc --noEmit 0；定向 vitest 13/13 通过（ReviewMode.test.tsx 3 新增 + CodeMirrorDiffView.test.tsx 10）；TitleBar.test.tsx 8 failed 为 pre-existing（干净 HEAD `80f9d62` stash 复测同样 8 failed | 7 passed，属 mac 窗口控件标签旧债，非 BLOCK-28 引入）。**2026-08-29 dev Electron 实机 verified（UI-204 全包统一取证）**：CDP 驱动——TitleBar 按钮点击进入 `/review`（pathname + .rvw-container + aria 断言）、Esc 返回上一页；证据 `acceptance/ui-204/electron-review-mode-dev.json` + 3 截图。
 
 **状态**: verified (dev Electron 边界内)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+2026-09-30 勘正：状态字样滞后同步（复核证据=f034d36b）——标题 in_progress 与上方实机 verified 取证及状态行不一致，标题同步 verified。
 
 ## UI-205: BLOCK-28 P2 — 文件树（目录分组 / 每文件 +N −M / 已审标记） (2026-08-29 verified)
 
@@ -2581,7 +2585,9 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：新增 `copilotClient.streamReconnect.test.ts` 6/6（截断→afterSeq 续传重连→failed+resumable 终态 = 免刷新亮按钮核心判据 / 读流中途断开保留 lastSeq + 退避序列 1s→2s / 重试耗尽 25 次连接如实上抛 / 截断耗尽不误调 onDone / HTTP 4xx 不重试 / abort 不重试不触发 onError）/ conversationRunStore vitest 33/33（新增重连 statusMessage 置位与清理）/ copilot 全目录 218/218 / tsc 0。
 
-**状态**: in_progress（P4 dev Electron 实机收口待做：kill -9 :3001 → 不刷新 → 自动亮按钮 → 续跑全链，证据存 `acceptance/ui-276/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**状态**: verified（dev Electron 边界内；实机收口 kill -9 :3001 → 免刷新自动亮按钮 → 续跑全链，证据存 `acceptance/ui-276/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+2026-09-30 勘正：状态字样滞后同步（复核证据=ccc9adf3）——标题已 verified 而状态行仍 in_progress（实机收口待做字样滞后），状态行同步 verified。
 
 ## UI-275: Agent 任务中断续跑——「继续执行」入口（BLOCK-38 P2） (2026-09-02 verified)
 
@@ -2970,6 +2976,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **门禁**：tsc 0；新增 WorkspaceFilePreview 组件定向测试 3/3（头部按钮行移除断言 / 自动保存防抖后 writeTextFile 收到新内容 / Ctrl+S 立即保存）；既有集成测试（WorkspaceFilePreviewBridge/P4.2/ChatCardLinkBridge）无按钮行断言不受影响。
 
 **实机状态（诚实登记）**：CDP 验收脚本 `scripts/ui323-preview-header-live.cjs` 已入库（可复跑），但与本日并行的 BLOCK-67 P3 会话共享同一主窗且其在制文件（project-workspace.tsx）HMR 高频重挂右栏，验收窗口被持续踩空——按纪律不假标 verified，**保持 in_progress**；待 BLOCK-67 会话空闲后复跑脚本（一次通过即转 verified）。组件级行为证据（3/3）已锁自动保存/Ctrl+S/按钮移除三契约。G0 开发期常态 · 不外推 packaged / Provider / GA。
+
+2026-09-30 勘正：状态字样滞后同步（复核证据=98dd5fa6）——本行「保持 in_progress」系 2026-09-09 中间态诚实登记，次日实机复跑 5/5 已转 verified（见下「实机（2026-09-10）」与状态行），中间态字样随状态行同步。
 
 **加映（2026-09-10 用户三选一裁决：悬浮铅笔图标）**：按钮行移除后 md 因「编辑/预览」tabs 仍常驻一条工具条行——头部又回来了。改版：md 切换收为右上角悬浮铅笔（预览态 aria-label=编辑，进 CodeMirror）/ 眼睛（编辑态 aria-label=预览，回渲染）图标钮（data-testid="md-view-toggle"），不占行；工具条行整体退役（`workspaceMarkdownDiffToolbar/Tabs/Tab/TabActive/Hint` CSS 随删，`DiffActions` 保留——ResultArtifactShell 仍用）；保存失败红字条改顶部悬浮 overlay（仅出错时出现，ssh-save-error testid 保留）。组件测试同步 aria-label 定位 + 工具条行消失 + 双向切换断言（5/5）+ tsc 0。**实机抓真修**：验收脚本原用 CDP `Input.insertText`，焦点不在编辑器时不达（且误落聊天输入框）——改 `block67-p1-live` 同款 `cm.focus()` + `document.execCommand('insertText')` 配方。
 
@@ -4111,13 +4119,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据（实机 · v5.18）**：契约=Node 侧新增 `test/tool-activity-labels.test.mjs` 5/5（fixture=TOOL_DEFS 宇宙双向覆盖/后端 verbs 一致/逐工具产出/定制宾语采样/兜底）+ 前端 fixture 对齐契约 + v5.4 断言升级（query/todo_write/plan 入册）+ copilot 350/350 + theme 4/4 + tsc 0 + test:changed 202+81 全绿；**实机**：重启 dev 后端后真跑三轮任务（system_info/knowledge_search/todo_write），行头实测 `已思考/已查询/已检索/已记录` 全部生效（快照对账后仍在=后端 recorder 同步），截图 `ui437-v518-verb-registry{,-crop}.png`。抓真=首轮标签仍旧系后端进程未重启（快照对账覆盖实时标签），restart-dev-stack 后消除。待用户实机过目。
 - **加映 v5.19（同日深夜，收口债清偿批——非行为质量修复，提交 670de5e）**：加映批次的门禁债清偿——①`gate:code-size` 复活：台账 manifest 移除 UI-438 已删的 `useTerminalSubAgentResults.ts` 死条目（此前门禁直接抛异常、closeout 第七门不可运行）+ 24 文件基线重打；②`quality:lint` 21 error 真修清零（未用参 `_` 前缀×3、无效断言删×2、`JSON.parse` any 界定 `Record<string, unknown>`×2、`getByDisplayValue` 泛型化、ANSI CSI 正则 `String.fromCharCode(27)` 预编译去控制字面量、`[object Object]` 兜底改空串×3）；③v5.11/v5.16 证据复跑漂移补提交（V6 断言三行全过）。**Jev dogfood 附注**：doc:suggest（Jev 云）确定性 uiAudit 规则提前命中本批需同步台账——本条目即其落实。
 - **证据（契约 · v5.19）**：组件 51/51（ToolActivityList/LoopStatusPanel/toolActivity/DecisionConfigPanel 四件，全部原断言不动=零 UI 行为变化锚定）+ tsc 0 + quality:lint 0 error + gate:code-size PASS + hygiene PASS。待用户实机过目（与 v5.13–v5.18 同批验收）。
-- **UI-439（2026-09-25，composer 底栏尺寸平衡，in_progress）**：用户截图反馈「上下文用量和发送消息的按钮图标太大，显得很失衡」——核查=上下文环按钮 28×28（内环 SVG 24/描边 2.5）与发送 CTA 28×28 深色实心，在同排 34px 高文字选择器旁因深色实心+满圆光学显重。修=两者统一降至 24×24、环 SVG 18/描边 2（ContextBudgetBar RING_SIZE/RING_STROKE 常量 + 按钮内联尺寸 + .sc-send-cta CSS 三处），深色元素光学变轻与文字选择器视觉重量对齐。
+- **UI-439（2026-09-25，composer 底栏尺寸平衡，verified）**：用户截图反馈「上下文用量和发送消息的按钮图标太大，显得很失衡」——核查=上下文环按钮 28×28（内环 SVG 24/描边 2.5）与发送 CTA 28×28 深色实心，在同排 34px 高文字选择器旁因深色实心+满圆光学显重。修=两者统一降至 24×24、环 SVG 18/描边 2（ContextBudgetBar RING_SIZE/RING_STROKE 常量 + 按钮内联尺寸 + .sc-send-cta CSS 三处），深色元素光学变轻与文字选择器视觉重量对齐。
 - **UI-442（2026-09-25，CK-03/C-02 轮询→SSE 失效通知第一批：jobs 域，in_progress）**：会话任务列表刷新从纯轮询改为「SSE 失效通知驱动 + 低频兜底」——后端新增 GET /api/events 通道（失效信号不推数据，数据面零改动）+ agent-task-store 4 发布点（create/终态三态）；前端 useInvalidationStream（fetch-SSE 解析 + 指数退避重连）；消费方=useConversationJobs（15s→60s 兜底）、project-workspace fetchData（15s→60s 兜底）、WorkspaceSummaryCard liveJobsPreview（5s→15s 兜底）。用户可见变化=任务状态变化的感知从「下一轮轮询」变为「秒级推送」。非 jobs 域轮询（draft plans/终端会话/usage/storage）不动。
 - **证据（契约+实机 · UI-442）**：ck03 契约 4/4（真实 Express+DB 自举：401/hello/广播到达/断开清理/终态发布点/心跳帧）+ 前端全量 147/1205 + tsc 0 + 实机 /api/events hello 到达（dev 栈重启后 200 text/event-stream）。接线收尾（fix(UI-442)）：project-workspace 补 jobs 失效订阅；WorkspaceSummaryCard liveJobsPreview 回滚 5s（load 定义于 useEffect 内部 hook 外不可达，接入留增量批）。待用户实机过目（观察任务状态变化秒级感知）翻 verified。
 - **UI-440（2026-09-25，CK-01/C-06 运行中发送自动 steer，in_progress）**：候选池 C-06 落地（用户预授权 CK 表逐项推进）——运行中再发消息不再被静默吞掉：send 的 isConversationRunning 分支改为 POST `task/:id/steer`（BLOCK-98 M4 既有通道）自动入队，下一轮模型请求边界注入；行内回执提示「已转向当前任务（排队第 N 位）：预览」（4s 自动消退），失败回退原行为（文本退回输入框保留）；发送按钮 title 运行中态显式化「发送 · 将转向当前任务」。诚实边界=steer 入队即不可撤（推荐形态「可撤销 2 秒」修正为「即时 steer+回执」，伪撤销不做）。
 - **证据（契约 · UI-440）**：useChatStream 契约 8/8（+3：steer 成功入队不启动新 run / POST 失败文本保留 / 无 taskId 极旧态静默回归）+ 前端全量 147 文件/1205 用例 + tsc 0。待实机过目翻 verified。
 - **证据（契约+实机 · UI-439）**：CDP 量测三断言 PASS（send 24×24 / ringBtn 24×24 / ringSvg 18）+ 元素级裁剪截图过目（acceptance/ui-439/ui436-composer-row-crop.png，环与发送钮明显小于 34px 选择器、失衡消除）；theme-token-contract 4/4 + ContextBudgetBar/SimpleChat 组件 6/6 + tsc 0。
 - **verified 翻转（2026-09-25，用户授权代行评估 + Jev 裁决）**：CDP 量测（24/24/18）+ 全窗截图视觉核对（与 34px 选择器平衡）——acceptance/ui-eval-agent/。
+- 2026-09-30 勘正：状态字样滞后同步（复核证据=3a0ff3e6）——标题行 in_progress 与上方代行评估 verified 翻转注记不一致，标题行同步 verified。
 - **加映 v5.20（2026-09-24，BLOCK-116 W2/BK-04 伴随增量，提交 a23ab0f）**：决策观测工具的动词/图标注册——后端新增 `decision_summary`（已统计）/`decision_recent`（已回放）两工具（agent 可见决策台账只读查询面，工具总数 71→73），前后端动词表与域感知图标（settings/clock）+ `test/fixtures/tool-activity-labels.json` 单源同步；无新增 UI 组件、无既有行为变化（时间线对新工具自然渲染行内动词行）。
 - **证据（契约 · v5.20）**：tool-activity-labels 5/5（宇宙 73 双向覆盖）+ 前端 toolActivity 16/16（fixture 对齐含新两件）+ tsc 0；实机=真模型调用 decision_recent 轮（acceptance/block-116/w2-agent-tools-live.json，行内动词行随之生效）。
 - **加映 v5.21（2026-09-26，BLOCK-121 P2 伴随增量）**：`result_summary`（已读取结果/table）动词/图标注册——结果内容只读读取工具（BLOCK-121 B1 断点修复面：跨轮无工具可读结果内容；工具总数 73→74），前后端动词表与域感知图标（table）+ `test/fixtures/tool-activity-labels.json` 单源同步；无新增 UI 组件、无既有行为变化（时间线对新工具自然渲染行内动词行）。
@@ -4129,12 +4138,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **实机验收（2026-09-23）**：用户实机截图确认整体节奏「看起来比较清爽 区分度明显」；✓ 字形与灰底/对齐微调为末处修正。**翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-438: 子智能体呈现收敛到时间线行内——下线「阶段汇总」组卡（轻量批）(2026-09-23 in_progress，组件契约已验，实机过目待补)
+## UI-438: 子智能体呈现收敛到时间线行内——下线「阶段汇总」组卡（轻量批）(2026-09-23 verified)
 
 - **来源**：用户实测反馈「阶段汇总子智能体，现在的位置不对总是挂在会话的最后……子智能体应该以图标的形式存在于对应会话阶段出现的地方……点开智能体图标就自动展开详细信息了，所以不需要目前的这种详情卡片来占地方」。
 - **改动**：SimpleChat 移除消息尾部的 `SubAgentResultGroup` 组卡渲染与 `useTerminalSubAgentResults` 数据源（组卡脱离时序位置 + 与运行级折叠双重冗余）；删除 `SubAgentResultGroup.tsx`/`SubAgentResultCard.tsx` 及其测试与 CSS。子智能体呈现收敛到**派发源头的时间线行内**（UI-382 既有能力）：bot 图标行出现在发生的轮次位置（随运行摘要折叠/展开），点行展开 职能 emoji + 需求描述 + 状态 + 停止/详情 按钮，「详情」跳右栏智能体面板看实时工作流与终态摘要。
 - **证据（契约）**：前端全量 148 文件 1190/1190（移除组卡 6 文件后净减 6 例）+ tsc 0 + test:changed 0（block109 编排规则改挂 flow 文件）+ docs/ui 门禁绿。block109-agent-panel flow A4 断言同步修订（组卡可见 → 派发行内「详情」按钮可达）。
 - **verified 翻转（2026-09-25，用户授权代行评估 + Jev 裁决）**：真实 spawn 轮取证（acceptance/ui-eval-agent/）——派发源头行内 bot 行+终态「子智能体已返回结果」汇报收敛实证，组卡零残留。
+- 2026-09-30 勘正：状态字样滞后同步（复核证据=3a0ff3e6）——标题 in_progress 与上方 verified 翻转注记不一致，标题同步 verified。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## UI-443: 路由级错误边界——页面渲染异常不再白屏整树（健壮性兜底轻量批）(2026-09-26 in_progress，契约已验+dev 栈旁证，实机过目待补)
