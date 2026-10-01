@@ -2641,6 +2641,18 @@
    "frontendRelated": true,
    "classifiesScripts": true,
    "scriptRole": "governance"
+  },
+  {
+   "id": "ui457-ui458-live",
+   "note": "UI-457/458 实机走查证据脚本 scripts/ui457-ui458-live.cjs（CDP 驱动 T1-T5：UI-457 表单挂载与显式参数 prompt / UI-458 继续分析菜单入口与目录驱动列 / prompt 三要素捕获）与证据目录 acceptance/ui-457-458/。53062eda 提交新增脚本漏登记 impact-map，test-affected「恰好一规则」校验 exit 2；按既有 ui4xx 实机走查条目同形态补登（一次性实机证据脚本按 development-smoke 分类，对标 ui437-expanded-live / block123-p0-probes）。",
+   "patterns": [
+    "scripts/ui457-*",
+    "acceptance/ui-457-458/**"
+   ],
+   "tests": [],
+   "frontendRelated": false,
+   "classifiesScripts": true,
+   "scriptRole": "development-smoke"
   }
  ]
 }
