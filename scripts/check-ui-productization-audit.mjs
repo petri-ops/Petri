@@ -396,6 +396,15 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-10-01 全仓 lint 债清偿批（1796cb06，fix(lint) AUD-295 扩面）：前端 UI surface
+  // 仅三处「删除未使用绑定」纯机械修复——project-workspace.tsx:13 删 CK-06 拆分后化石
+  // import type CenterPanelRefs、ContinueAnalysisMenu.tsx:37（UI-458 域）删 D7 目录驱动
+  // 改造后未用的 artifactKind 解构（接口契约与调用方不动）、LineageStrip.test.tsx:9 测试
+  // mock vi.fn 泛型收口（非产品面）；零 UI 行为变化。subject fix(lint) 无 UI-### 但
+  // body 引用在册 UI-451/UI-457，subject 门天然过，故仅登记本名单（先例 301ee83a 系
+  // UI-437 v5.x）；台账=UI-451 条目归注由本豁免登记提交补登对账；不重写共享历史。
+  '1796cb06f39a2642b070cca57b04d18aedfb2b07',
+
   // 2026-09-29 PL-4b / BLOCK-132 同上两笔：同提交未同步台账，台账=UI-460/UI-461
   // 由修正提交补登对账（先例 8bec1397/6ab142d3）。
   'f6e58d0403c4cd752e077a4db39ccb448e40d75f',
