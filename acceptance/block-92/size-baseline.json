@@ -41,14 +41,14 @@
       "wave": "B",
       "module": "W-02",
       "lines": 1232,
-      "sha256": "d34516223b355ef9b6cafefe85bcbdfd091aa945b380bb1203e73e04acea40fe"
+      "sha256": "7ca1bf76de68b2bf12a3136e5316788c46aa4c5696f176ba5920b25a093cfd97"
     },
     {
       "path": "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
       "wave": "B",
       "module": "W-04",
       "lines": 1212,
-      "sha256": "cce4cf7a41fda1ba88f15c599290a5212275b4d537fbd12465613f7bad845aa9"
+      "sha256": "a72704628e0f924746fb1e0b4a2c86a51081e04ef005ab1e8e1e233f3458377c"
     },
     {
       "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx",
@@ -110,8 +110,8 @@
       "path": "core/biof3-server/helpers/tools-executor.js",
       "wave": "C",
       "module": "P-03",
-      "lines": 2010,
-      "sha256": "39bec7d97b30b0fab23367e14b6fedb16da08c97691bd4d6f9d3ddb41254d558"
+      "lines": 2084,
+      "sha256": "1389715efd8abf766b7816bb58419170f431cc2fa2807ada9e39e4ac068ba690"
     },
     {
       "path": "core/biof3-server/db.js",
@@ -170,5 +170,5 @@
       "sha256": "b1a8303d2bb09317a09374053757d7a85c716777e2f599c5f3f962cac94508af"
     }
   ],
-  "total": 22582
+  "total": 22656
 }
