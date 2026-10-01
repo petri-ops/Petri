@@ -75,3 +75,11 @@ Result Studio 的渲染面从「写死的 switch + 单血缘条带」收敛为�
 - 节奏：预计两刀（P0 一刀/P1 一刀）或单会话连做，开工时按状态定。
 - 环境：fnm Node 24；dev 栈（Vite :3000 + Electron + core 后端）按 dev-infra 脚本头注姿势；后端若扩 lineage 投影字段须重启后端再实机。
 - 排队现状：2026-10-01 用户裁决「按照计划有序推进」启动本包（P0-LAUNCH）；BLOCK-128（PL-1）active 的实机三件 rider 属零代码面验收，与本包文件面（frontend result-studio 域 + frontend/package.json）零触碰并行。
+
+## 8. P0/P1 实现落账（2026-10-01 · 实现完成，实机走查待）
+
+- **P0 ✓**：viewerRegistry.ts（注册表+能力位+兜底，契约 18/18）+ resultSurface.ts 薄委托零行为平迁（RS 面 21 文件/195 测试基线绿）。先红证据在被接替首 run（dwfrun-2acf08eb）p0-red 记录。
+- **P1 ✓**：@xyflow/react ^12.12.0 + lineageProjection.ts + LineageGraph.tsx/.module.css + LineageViewSwitch.tsx/.module.css + 组件/投影测试；挂 ResultArtifactShell result 模式（LineageStrip 位）。定向回归 36 文件/313 测试绿（含 theme 契约）。
+- **门禁**：types 0/lint 0 error/code-size 棘轮重打（ResultArtifactShell 1213 指纹）/knip 238 键/test:changed=P6 绑定源门 accepted-red（fail-closed 设计，集成提交刷新后转绿——BLOCK-107 先例）。
+- **评审处置**：0 P1；P2=LineageViewSwitch 假覆盖→补组件测试 3/3+impact-map tests 补登（已修）；Minor①knip -1 键（branch-db getDatabasePath）与 probe 死 require 清理=棘轮自指示收缩与死码清理，reason 本节留痕；**Minor②=切换器空态常驻**（无链/单节点时按钮组可见）——D1 未裁决形态，**登记 R-1 rider**（修法=lineage 有无上提 switch 层或回调通知，或空态隐藏切换器；属后续加映）；**Minor③=plan 验收项「code-size 棘轮登记 @xyflow/react 增量」如实降格**——code-size 台账机制只管行数/指纹，不追踪依赖 bundle 体积，本次仅 ResultArtifactShell 指纹重打；bundle 增量 ~100-150KB gz 未被任何门禁记录（**R-2**：若需真登记应另立 bundle 体积基线，属后续包）。
+- **收口剩件**：实机走查三断言（DAG 渲染/节点点击/形态切换，acceptance/block-138/）+ 本台账 UI-460 过目翻 verified。

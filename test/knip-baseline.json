@@ -6,7 +6,7 @@
     "types",
     "files"
   ],
-  "updatedAt": "2026-09-29",
+  "updatedAt": "2026-10-01",
   "keys": [
     "exports::.agents/skills/gewu-dev-infra/dev-verify/lib.cjs::DEFAULT_PORT",
     "exports::.agents/skills/gewu-dev-infra/dev-verify/lib.cjs::TEST_INSTANCE_PORT",
@@ -22,7 +22,6 @@
     "exports::.agents/skills/gewu-dev-infra/dev-verify/lib.cjs::screenshotPng",
     "exports::.agents/skills/gewu-dev-infra/dev-verify/lib.cjs::selectPageTarget",
     "exports::.agents/skills/gewu-dev-infra/dev-verify/lib.cjs::withInputShield",
-    "exports::src/database/branch-db.js::getDatabasePath",
     "exports::src/main/core-utils.js::BASE_PY_PACKAGES",
     "exports::src/main/core-utils.js::BASE_R_PACKAGES",
     "exports::src/main/core-utils.js::IS_DEV",

@@ -2665,6 +2665,32 @@
       "frontendRelated": false,
       "classifiesScripts": true,
       "scriptRole": "governance"
+    },
+    {
+      "id": "block138-artifact-plane-kernel",
+      "note": "BLOCK-138 成果面（artifact plane）内核+血缘画布：P0 切片 A=viewer 注册表（kind→viewer 解析自 resultSurface.ts 收编进 viewerRegistry.ts，零行为平迁 + canSelect/canCompare/canExport 能力声明位）+ P1 切片 B=血缘 DAG 画布（lineageProjection 纯函数投影 /lineage 权威响应、LineageGraph @xyflow/react 只读画布、LineageViewSwitch 条带/画布切换挂 ResultArtifactShell result 模式）。测试与源码同目录；改任一登记文件即跑四件契约测试（含 LineageViewSwitch 切换器覆盖——评审 P2 补口）。",
+      "patterns": [
+        "frontend/src/components/result-studio/viewerRegistry.ts",
+        "frontend/src/components/result-studio/viewerRegistry.test.ts",
+        "frontend/src/components/result-studio/lineageProjection.ts",
+        "frontend/src/components/result-studio/lineageProjection.test.ts",
+        "frontend/src/components/result-studio/LineageGraph.tsx",
+        "frontend/src/components/result-studio/LineageGraph.test.tsx",
+        "frontend/src/components/result-studio/LineageGraph.module.css",
+        "frontend/src/components/result-studio/LineageViewSwitch.tsx",
+        "frontend/src/components/result-studio/LineageViewSwitch.module.css",
+        "frontend/src/components/result-studio/resultSurface.ts",
+        "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
+        "frontend/src/components/result-studio/LineageViewSwitch.test.tsx"
+      ],
+      "tests": [
+        "frontend/src/components/result-studio/viewerRegistry.test.ts",
+        "frontend/src/components/result-studio/lineageProjection.test.ts",
+        "frontend/src/components/result-studio/LineageGraph.test.tsx",
+        "frontend/src/components/result-studio/LineageViewSwitch.test.tsx"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": false
     }
   ]
 }

@@ -13,7 +13,6 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
-const lib = require('../.agents/skills/gewu-dev-infra/dev-verify/lib.cjs');
 const Database = require('better-sqlite3');
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');

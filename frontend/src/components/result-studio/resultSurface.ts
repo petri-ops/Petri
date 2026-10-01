@@ -1,8 +1,11 @@
 import type { ResultArtifactKind } from '@/lib/result-manifest';
-import { isTextFile } from '@/lib/previewFileUtils';
+import { resolveResultViewer, type ResultViewerAdapter } from './viewerRegistry';
+
+// BLOCK-138 P0（切片 A）：kind→viewer 解析逻辑已收编进 ./viewerRegistry
+// （零行为平迁，行为基线 = 既有 RS 面测试）；本模块对既有调用面继续导出该类型。
+export type { ResultViewerAdapter };
 
 export type ResultSurfaceMode = 'result' | 'code' | 'compare' | 'history';
-export type ResultViewerAdapter = 'report' | 'image' | 'table' | 'json' | 'text' | 'binary';
 export type ResultTruthTone = 'valid' | 'degraded' | 'blocked' | 'running' | 'unknown';
 
 export const RESULT_SURFACE_PERFORMANCE_BUDGETS = Object.freeze({
@@ -71,16 +74,9 @@ export function resolveResultViewerAdapter(input: {
   fileName: string;
   preview?: boolean;
 }): ResultViewerAdapter {
-  const name = input.fileName.toLowerCase();
-  if (input.preview === false) return 'binary';
-  if (input.kind === 'report' || /\.html?$/.test(name)) return 'report';
-  if (/\.pdf$/.test(name)) return 'binary';
-  if (input.kind === 'plot' || /\.(png|jpe?g|gif|svg|webp)$/.test(name)) return 'image';
-  if (/\.xlsx?$/.test(name)) return 'binary';
-  if (input.kind === 'table' || /\.(csv|tsv)$/.test(name)) return 'table';
-  if (/\.json$/.test(name)) return 'json';
-  if (input.kind === 'text' || isTextFile(name)) return 'text';
-  return 'binary';
+  // BLOCK-138 P0：解析链已收编进 viewerRegistry（含能力声明位与未知 kind 兜底），
+  // 本函数保留为既有调用面（ResultArtifactShell 等）的薄委托，行为零变化。
+  return resolveResultViewer(input).adapter;
 }
 
 /**
