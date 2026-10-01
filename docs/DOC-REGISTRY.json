@@ -5474,8 +5474,50 @@
       "archivePolicy": "archive_after_completion",
       "notes": "五粒种子（PL-4/5/6+BIO-5/6）拆包勘察素材：11 子包可裁决单元+关键发现；素材性质（权威在两 Goal plan+backlog），backlog 展开后转 archived。2026-09-29 UI-451~453 会话三路只读勘察产出。",
       "entrypoint": "docs/README.md"
+    },
+    {
+      "id": "ARTIFACT-PLANE-DIRECTION",
+      "capability": "artifact-plane",
+      "path": "docs/artifact-plane-direction.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "artifact-plane",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-01",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "artifact-plane",
+        "direction",
+        "result-studio",
+        "viewer-registry",
+        "lineage",
+        "domain-neutral"
+      ],
+      "notes": "2026-10-01 用户裁决方向立项（通用 agent+垂直生信+未来领域；灵活+有效三判据=内核领域无关/垂直域配方入驻/每切片对已立案痛点）。三层契约=对象层 artifact 模型/渲染层 viewer 注册表/回路层选择总线+画布视图；切片 A-E；领域入驻配方=工具包+skill 包+viewer 包，内核零改动判据；反目标六条（不引 tldraw/不推翻 isSingleActiveMode/registry 非第二真相/不预置未来领域代码等）。首包 BLOCK-138 承载切片 A+B；切片启动逐个过立项检查单，本文件不预设推进序。"
+    },
+    {
+      "id": "BLOCK-138-ARTIFACT-PLANE-KERNEL",
+      "capability": "artifact-plane-kernel",
+      "path": "docs/block-138-artifact-plane-kernel-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-138-artifact-plane-kernel",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-01",
+      "archivePolicy": "archive_when_superseded",
+      "tags": [
+        "block-138",
+        "artifact-plane",
+        "viewer-registry",
+        "lineage-dag",
+        "react-flow",
+        "result-studio"
+      ],
+      "notes": "成果面系列首包（planned 排队，实现待用户过目 plan 后发令；active 槽位属 BLOCK-128）。P0=viewer registry 契约固化+六类 adapter 零行为平迁（BLOCK-92 拆前基线先例）；P1=@xyflow/react 只读血缘 DAG（复用 UI-456 GET /lineage + listProjectWorkflowGraphs，节点点击打开 artifact）。唯一新依赖 @xyflow/react ^12.12.0 MIT（四问+用户裁决留痕 plan §4）。非范围：切片 C/D/E、编辑型 DAG、插件 viewer 运行时接线、通用编码工作台。"
     }
   ],
-  "lastUpdated": "2026-09-29",
-  "documentCount": 290
+  "lastUpdated": "2026-10-01",
+  "documentCount": 293
 }

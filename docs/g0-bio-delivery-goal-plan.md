@@ -92,6 +92,8 @@ BLOCK-83 P4（2026-09-12）领域中立化后，生信分析全部迁至兄弟�
 | BIO-6 | 解读层接线 | `/api/ai/interpret` 模板接前端 + `result_summary` 真值窗口扩容（有界） | BLOCK 小包 | 无 |
 | BIO-7 | 领域深化池 | 多因子 design / edgeR·limma / 热图聚类·z-score / scRNA 链解冻（**吸收 C-12**）/ TPM·FPKM / 任意两 run 对比 / 多组学 | 候选池性质，逐项裁决 | BIO-4 + PL-1 |
 
+> 注记（2026-10-01）：BIO-3 出口判据（「DAG 或面包屑」）已由 UI-455（打开链）+UI-456（血缘条）满足；**DAG 画布形态升级归属成果面系列 BLOCK-138**（见 [`artifact-plane-direction.md`](./artifact-plane-direction.md) 切片 B），BIO-3 P2「继续分析显式化」仍在原位推进——防重复开发。
+
 ### 阶段出口判据（摘要）
 
 - **BIO-1**：实机走查——火山图点选显示基因名+log2FC+padj；输入基因名可定位高亮；阈值线按插件参数（lfc_cutoff/padj_cutoff）绘制；表格可组合 `padj<0.05 AND |lfc|>1` 筛选；padj 列科学计数法；Lightbox 滚轮缩放。组件测试 + theme 门禁绿。
