@@ -5449,20 +5449,20 @@
       "capability": "execution-unification",
       "path": "docs/block-128-execution-unification-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-128-execution-unification",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-09-29",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "tags": [
         "block-128",
         "g0-platform",
         "pl-1",
         "execution-unification"
       ],
-      "notes": "G0-PLATFORM PL-1 种子（用户裁决「继续」）。MCP 同步路径并入共享 owner 装置（进程级 activeToolJobs 单例+并发准入+心跳/硬超时/僵尸/取消全覆盖），300s 内建上限退役对齐 30min 硬预算。契约 4/4+定向回归 0 红；实机待栈重启。"
+      "notes": "G0-PLATFORM PL-1 种子（用户裁决「继续」）。MCP 同步路径并入共享 owner 装置（进程级 activeToolJobs 单例+并发准入+心跳/硬超时/僵尸/取消全覆盖），300s 内建上限退役对齐 30min 硬预算。契约 4/4+定向回归 0 红；实机待栈重启。 2026-10-01 收口 completed：实机三件当日落账（chat MCP 链 deseq2 心跳推进✓/Jobs Wall 活动瓦片✓/owner REST 取消 SIGTERM 击杀✓，证据 acceptance/block-128/ + 探针 scripts/block128-acceptance-live.mjs·block128-diag-final.mjs）；缺陷🟡=取消终态被 artifact 校验误分类 failed、墙面板取消跨后端可达性未定（双后端脑裂家族）、process_pid 落库 null——登记 AUDIT-LOG，加映候选。真异步产品形态留 PL-3 候选池。"
     },
     {
       "id": "G0-GOAL-STAGE-EXPANSION-RECON-2026-09",
@@ -5501,7 +5501,7 @@
       "capability": "artifact-plane-kernel",
       "path": "docs/block-138-artifact-plane-kernel-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "active",
       "canonical": true,
       "truthDomain": "block-138-artifact-plane-kernel",
       "entrypoint": "docs/README.md",
@@ -5515,7 +5515,8 @@
         "react-flow",
         "result-studio"
       ],
-      "notes": "成果面系列首包（planned 排队，实现待用户过目 plan 后发令；active 槽位属 BLOCK-128）。P0=viewer registry 契约固化+六类 adapter 零行为平迁（BLOCK-92 拆前基线先例）；P1=@xyflow/react 只读血缘 DAG（复用 UI-456 GET /lineage + listProjectWorkflowGraphs，节点点击打开 artifact）。唯一新依赖 @xyflow/react ^12.12.0 MIT（四问+用户裁决留痕 plan §4）。非范围：切片 C/D/E、编辑型 DAG、插件 viewer 运行时接线、通用编码工作台。"
+      "notes": "成果面系列首包（planned 排队，实现待用户过目 plan 后发令；active 槽位属 BLOCK-128）。P0=viewer registry 契约固化+六类 adapter 零行为平迁（BLOCK-92 拆前基线先例）；P1=@xyflow/react 只读血缘 DAG（复用 UI-456 GET /lineage + listProjectWorkflowGraphs，节点点击打开 artifact）。唯一新依赖 @xyflow/react ^12.12.0 MIT（四问+用户裁决留痕 plan §4）。非范围：切片 C/D/E、编辑型 DAG、插件 viewer 运行时接线、通用编码工作台。 2026-10-01 用户裁决「按照计划有序推进」发令翻 active（P0-LAUNCH）；实现流水线=dynamic workflow（串行红绿+确定性门禁+独立评审），主代理终审后集成台账与提交，工作流内不提交；BLOCK-128（core/src 面）零触碰。",
+      "phase": "P0-LAUNCH"
     }
   ],
   "lastUpdated": "2026-10-01",

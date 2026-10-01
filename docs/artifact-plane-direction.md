@@ -81,4 +81,4 @@ status: reference
 
 ## 8. 切片登记现状
 
-首包 **BLOCK-138-ARTIFACT-PLANE-KERNEL**（切片 A+B，plan=`block-138-artifact-plane-kernel-plan.md`）2026-10-01 立项 **planned 排队**——实现待用户过目 plan 后发令（用户流程约定原话：「plan完全定之后 我们再开始干活」）。切片 C/D/E 未立项，启动均需用户裁决+立项检查单。
+首包 **BLOCK-138-ARTIFACT-PLANE-KERNEL**（切片 A+B，plan=`block-138-artifact-plane-kernel-plan.md`）2026-10-01 立项，同日用户裁决「按照计划有序推进」发令翻 **active（P0-LAUNCH）**。切片 C/D/E 未立项，启动均需用户裁决+立项检查单。

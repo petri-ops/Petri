@@ -1,0 +1,18 @@
+project=p_mupdiy7c_eetk 200k genes ready
+taskId=8f6907ab-c1a7-4974-8c49-c75030d81d59
+job=tj_mupdj2hg_vkls
+cancel sent → {"ok":false,"status":"failed","error":"job_no_longer_cancellable","local":{"active":true,"killed":true,"processStarted":
+--- timeline（每 3 条采样 1） ---
+t=6s status=running pid=null hb=null rscript=0
+t=12s status=running pid=null hb=null rscript=0
+t=18s status=running pid=null hb=null rscript=0
+t=24s status=running pid=null hb=null rscript=0
+t=30s status=running pid=null hb=null rscript=0
+t=37s status=running pid=null hb=10:11:29 rscript=0
+t=43s status=running pid=null hb=10:11:29 rscript=0
+t=49s status=running pid=null hb=10:11:29 rscript=0
+t=55s status=running pid=null hb=10:11:29 rscript=0
+t=61s status=running pid=null hb=10:11:29 rscript=0
+t=67s status=running pid=null hb=10:11:59 rscript=0
+
+SUMMARY: jobId=tj_mupdj2hg_vkls heartbeat_distinct=2 advancing=true rscript_seen=false cancelSent=true

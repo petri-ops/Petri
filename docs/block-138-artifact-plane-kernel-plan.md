@@ -6,8 +6,8 @@ acceptance:
   - P1：LineageGraph 组件测试（投影纯函数+渲染+节点交互）+ theme 门禁绿 + test:changed 定向 0 红
   - 实机（dev Electron）：真实跨 Job 链（BIO-4 解冻后 bulk 主链）DAG 渲染 + 节点点击打开 artifact + 条带/DAG 形态切换，断言落 acceptance/block-138/
   - code-size 棘轮登记 @xyflow/react 增量 + knip 棘轮新导出登记
-reopen: plan 状态 planned——实现待用户过目后发令；条带（LineageStrip）去留在 P1 实机后按体感裁决（D1）
-status: planned
+reopen: 条带（LineageStrip）去留在 P1 实机后按体感裁决（D1）
+status: active
 ---
 
 # BLOCK-138 — 成果面内核 + 血缘 DAG 画布（成果面系列首包）
@@ -15,6 +15,7 @@ status: planned
 > 立项：2026-10-01（planned 排队，非 active——唯一 active 槽位现被 BLOCK-128 占用，且用户流程约定「plan完全定之后 我们再开始干活」）。
 > 裁决链：2026-10-01 用户原话①「很不错…毕竟我们的项目是通用agent和垂直领域的生信agent或者后期延伸为其它领域的agent 我希望这次关于这些方面的应用和扩展有灵活性 同时也确实有效」（方向要求）→②「可以 接下来你就开始吧 定下来 plan完全定之后 我们再开始干活」（立项放行，实现待发令）。
 > 方向父文档：[`artifact-plane-direction.md`](./artifact-plane-direction.md)（切片 A-E 序列、三层契约不变量、反目标）。中文名「成果面」为主 Agent 受托定名（用户未指定）。
+> 启动：2026-10-01 用户裁决「按照计划有序推进」（/workflow 指令）=发令，当日翻 active（P0-LAUNCH）；实现由 dynamic workflow 流水线承载（串行红绿+确定性门禁+独立评审），主代理终审后集成台账与提交，工作流内不提交。
 > 阶段：G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## 1. 一句话目标
@@ -73,4 +74,4 @@ Result Studio 的渲染面从「写死的 switch + 单血缘条带」收敛为�
 - 完成语义：两切片各自独立可收口；P0 先行（即使 P1 遇阻，registry 收口本身成立）。
 - 节奏：预计两刀（P0 一刀/P1 一刀）或单会话连做，开工时按状态定。
 - 环境：fnm Node 24；dev 栈（Vite :3000 + Electron + core 后端）按 dev-infra 脚本头注姿势；后端若扩 lineage 投影字段须重启后端再实机。
-- 排队现状：BLOCK-128（PL-1）active 待实机三件收口；backlog 队列 PL-3 二刀/BIO-6/PL-5 等交织推进中；本包 planned，**启动=用户过目本 plan 后发令**。
+- 排队现状：2026-10-01 用户裁决「按照计划有序推进」启动本包（P0-LAUNCH）；BLOCK-128（PL-1）active 的实机三件 rider 属零代码面验收，与本包文件面（frontend result-studio 域 + frontend/package.json）零触碰并行。

@@ -6,7 +6,7 @@ acceptance:
   - test:changed 定向回归 0 红（共享 Map 行为敏感改动的全量对账）
   - 实机（栈重启后）：agent 对话跑分析→job 行有心跳推进+Jobs Wall 可见+取消可达
 reopen: 实机待 dev 栈重启；真异步产品形态（对话内提交-跨轮查询回执）登记 PL-3 候选
-status: active
+status: completed
 ---
 
 # BLOCK-128 — 执行语义统一（G0-PLATFORM PL-1）
@@ -38,3 +38,13 @@ status: active
 
 - `test/block128-execution-unification.test.mjs` 4 用例（源码守卫+行为）。
 - test:changed 定向 0 红；实机待栈重启（心跳可见+取消可达+长任务不再 5min 死）。
+
+## 6. 收口（2026-10-01 · 实机三件当日落账）
+
+- **A1 对话跑分析 ✓**：chat 链（POST /api/ai/agent → agent 调 run_tool op=run）发起真实 deseq2（120k 基因×24 样本合成输入，新建验收项目），job tj_mupdf1qc_o81b 创建并执行——MCP 路径经共享 executor 实证。
+- **A2 job 行心跳推进 ✓**：运行中 `tool_jobs.heartbeat_at` 由 null→值（t=34s 单拍，acceptance-live.json samples）；30s 整间隔两拍（t=37 hb=10:11:29 → t=67 hb=10:11:59，全程 running）见 `acceptance/block-128/heartbeat-timeline.txt`（block128-diag-final.mjs 产出）。装置 armActiveToolJobLifecycle 生效实锤。
+- **A3 Jobs Wall 可见 ✓**：Command Center 独立窗活动瓦片在场（data-testid=cc-tile-active，含「查日志/取消」操作钮），截图 `jobs-wall-running.png`。
+- **A4 取消可达 ✓（带缺陷登记）**：owner（:3001）REST 取消响应 `{ok:true,status:'cancelled',local:{active:true,killed:true,signal:'SIGTERM',terminationResult:{terminated:true}}}`——注册表内存持有+击杀+job 48s 终止。
+- **缺陷/观察 🟡（登记 AUDIT-LOG，加映候选）**：①取消终态被 finalize 的 artifact 完整性校验覆盖为 failed（"Required artifact… not produced"），取消语义丢失；②Jobs Wall 取消钮打 rApiBase（:53542 Electron 自spawn 后端）对 :3001 owner job 15s 未生效——双后端脑裂家族（dev-infra §76），durable flag 30s 慢路径被 fallback 掩蔽未能排除；③`process_pid` 落库恒 null（内存持有由取消响应佐证）。
+- 探针：`scripts/block128-acceptance-live.mjs`（验收三件）+ `scripts/block128-diag-final.mjs`（心跳诊断）；证据目录 `acceptance/block-128/`。环境：Mac darwin · Node 24.16 · R 4.5.2 · dev 栈（本批拉起）。
+- 真异步产品形态（提交回执+跨轮查询）维持 PL-3 候选池。G0 开发期常态 · 不外推 packaged/Provider/GA。

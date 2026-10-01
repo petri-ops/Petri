@@ -1,0 +1,79 @@
+{
+  "suite": "block128-acceptance-live",
+  "baseUrl": "http://127.0.0.1:3001",
+  "dbFile": "/.biof3-dev-user-data/data/biof3.db",
+  "toolId": "deseq2",
+  "projectId": "p_mupdezdn_gks6",
+  "jobId": "tj_mupdf1qc_o81b",
+  "taskId": "257655aa-a979-46ed-aabc-d3a491c6e739",
+  "terminalStatus": null,
+  "heartbeatSamples": [
+    {
+      "at": 34,
+      "value": 1790849301717
+    }
+  ],
+  "observations": {
+    "processPidDuringRun": "null（ownership 落库 pid 未见值；注册表内存持有由 cancel 响应 local.active=true 佐证）——登记观察项"
+  },
+  "checks": [
+    {
+      "id": "chat_mcp_submit",
+      "pass": true,
+      "detail": {
+        "taskId": "257655aa-a979-46ed-aabc-d3a491c6e739"
+      }
+    },
+    {
+      "id": "chat_mcp_run",
+      "pass": true,
+      "detail": {
+        "jobId": "tj_mupdf1qc_o81b",
+        "toolId": "deseq2",
+        "naturalTerminal": null
+      }
+    },
+    {
+      "id": "heartbeat_advance",
+      "pass": true,
+      "detail": {
+        "samples": [
+          {
+            "at": 34,
+            "value": 1790849301717
+          }
+        ],
+        "note": "运行中 job 行 heartbeat_at 由 null→值（推进）；30s 整间隔两拍时间线见 acceptance/block-128/heartbeat-timeline.txt（block128-diag-final.mjs）"
+      }
+    },
+    {
+      "id": "jobs_wall_visible",
+      "pass": true,
+      "detail": {
+        "found": true,
+        "status": "running",
+        "text": "deseq2 via agent\ndeseq2\np_mupdezdn_gks6\n运行中\n已 31s\n查日志\n取消",
+        "rApiBase": "http://localhost:53542/api"
+      }
+    },
+    {
+      "id": "cancel_fallback_owner_rest",
+      "pass": false,
+      "detail": {
+        "request": "{\"ok\":true,\"status\":\"cancelled\",\"local\":{\"active\":true,\"killed\":true,\"processStarted\":true,\"signal\":\"SIGTERM\",\"terminationResult\":{\"terminated\":true,\"code\":null,\"signal\":\"SIGTERM\"}}}",
+        "terminal": "failed"
+      }
+    },
+    {
+      "id": "cancel_terminal",
+      "pass": false,
+      "detail": {
+        "via": null,
+        "finalStatus": null,
+        "expect": "cancelled"
+      }
+    }
+  ],
+  "allPass": false,
+  "generatedAt": "2026-10-01T10:08:43.250Z"
+}
