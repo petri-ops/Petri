@@ -1,0 +1,97 @@
+{
+  "name": "block138-chain-attempt3-selection-path",
+  "date": "2026-10-02",
+  "goal": "为 BLOCK-138 实机走查获得一条真实跨 Job 血缘链（≥2 节点）；主攻 selection→go-kegg 路径（UI-456 待验记载的链触发方式）",
+  "method": "failed",
+  "chainInfo": {
+    "graphId": "",
+    "terminalJobId": "tj_muqfdsd8_pjl9",
+    "projectId": "p_muqfdayj_422a",
+    "nodeCount": 1,
+    "tools": ["deseq2"]
+  },
+  "attempts": [
+    {
+      "id": "attempt-3a",
+      "agentTaskId": "dc33f89c-9db6-489c-95ac-6eaa56573088",
+      "status": "failed",
+      "terminal": "run_terminal status=failed error='socket hang up'（loop 先进入 waiting_for_user/USER_INPUT_REQUIRED 后流断）",
+      "toolEvidence": [
+        "result_studio_context → 错误: context_artifact_not_open（iteration 1 与 3 两次）",
+        "run_tool {op:'list', toolId:'go-kegg'} → 错误: unknown_tool",
+        "act {type:'open_tool', toolId:'deseq2'} → 已打开 DESeq2 差异分析 工具面板（窗口状态副作用）",
+        "result_summary tj_muqfdsd8_pjl9 → available true"
+      ]
+    },
+    {
+      "id": "attempt-3b",
+      "agentTaskId": "4a99ac08-a71f-40e7-b0cd-b4fcc205e886",
+      "status": "completed",
+      "terminal": "completed/done，filesChanged:0，10s；agent 如实确认两条阻塞原文后按指令停止",
+      "toolEvidence": [
+        "result_studio_context → context_artifact_not_open（原文：当前没有已建立正式版本的结果处于打开状态；请先让用户在主画布打开一个结果。）",
+        "run_tool {op:'list', toolId:'go-kegg'} → unknown_tool（原文：未知工具: go-kegg）",
+        "run_tool {op:'list'} → count 22，分析工具仅 deseq2；模板 deg-result-refinement available=false supportedStepCount=0，bulk-rna-core supportedStepCount=1 available=false",
+        "query {resource:'analyses', parentId:'p_muqfdayj_422a'} → 返回 0 条",
+        "未建立 SelectionContext、未触发富集、无绕行重试"
+      ]
+    }
+  ],
+  "rootCauseBlockers": [
+    {
+      "blocker": "B1 · deseq2 job 没有正式 ArtifactRevision，且无任何从裸 job 首次登记 revision 的产品路径",
+      "evidence": [
+        "SELECT * FROM artifact_revisions WHERE tool_job_id='tj_muqfdsd8_pjl9' → 0 行（全库 27 行全属 p_mtlnsv0f_xpjb，artifact_id 均非 deg_table）",
+        "GET /api/result-studio/context-envelope?projectId=p_muqfdayj_422a&jobId=tj_muqfdsd8_pjl9&artifact=deg_table.csv → 409 {error:'context_artifact_not_open'}（core/biof3-server/agent-tools/result-context-tools.js:168-179 fail-closed）",
+        "revision 唯一创建入口是 repository.appendRevisionBatch（core/shared-backend/result-studio-repository.js:543），仅被 result-changeset-service.js:627 调用，且要求已存在的 sourceRevision——先有鸡还是先有蛋"
+      ]
+    },
+    {
+      "blocker": "B2 · go-kegg 工具未注册",
+      "evidence": [
+        "GET /api/tools/catalog → 目录仅 1 个分析工具 deseq2",
+        "agent run_tool go-kegg → unknown_tool（两次尝试均实测）",
+        "selection 路径实现 core/biof3-server/agent-tools/result-selection-tools.js:603-612 固定 runTool toolId='go-kegg'——即使 B1 解决也会在此失败"
+      ]
+    },
+    {
+      "blocker": "B3 · 权威图边要求 lineage 记录解析到已持久化 ArtifactRevision",
+      "evidence": [
+        "core/shared-backend/result-workflow-graph.js:9-13（边仅在子 Job 携带服务端 lineage 记录时产生）与 :305-313（sourceRevisionId 必须 repository.getRevision 命中，否则 workflow_source_revision_drift）",
+        "全库 28 个 completed job 的 result_json 均无 inputLineage 记录（readonly 扫描）"
+      ]
+    }
+  ],
+  "planBindForensics": {
+    "toolJobsSchema": "PRAGMA table_info(tool_jobs) → 无 step_id 类列（id,user_id,tool_id,params_json,status,created_at,name,is_test_run,is_public,result_json,completed_at,error,conversation_id,ack_token,ack_status,ack_expires_at,project_id,process_pid,heartbeat_at,execution_target_id,retry_count）；计划/步骤状态只活在 task_events 与 loop_* 表",
+    "agentTask": "b257756d-8422-4e49-8f38-46f641c4ad00（type=agent_loop，completed，2026-10-02T03:50:31Z→03:51:16Z）",
+    "bindTrace": [
+      "seq 1025 tool_call run_tool {op:'bind_artifact', fromStepId:'differential', fromToolJobId:'tj_muqfdsd8_pjl9', inputId:'deg_results', toStepId:'deg-standardization'}",
+      "seq 1025 工作流计划中 deg-standardization 步骤原始快照：{status:'blocked', blockedReason:'tool_not_available', toolId:null, toolJobId:null, toolCandidates:['deg-standardizer'], dependsOn:['differential'], inputBindings:[{inputId:'deg_results', fromStepId:'differential', artifactProfile:'biof3.deg.v1'}], inputs:{}}",
+      "seq 1433 agent_progress：绑定成功，differential → deg-standardization 真实血缘边产生（artifact deg_table，truth=valid），步骤 blocked→ready，但 toolId=null、blockedReason 仍为 tool_not_available",
+      "seq 1638-1639：op='run' stepId='deg-standardization' → missing_toolId（op=run 需要 toolId）；显式 toolId='deg-standardizer' → 工具未注册",
+      "根因（产品 finding）：bind 生效但下游未解锁 = 模板声明的下游步骤没有已注册工具承载（目录仅 deseq2，bulk-rna-core supportedStepCount=1 available=false）；计划内血缘边不落 result_workflow_graphs（该表仅由 selection/enrichment/changeset 三条受信路径经 persistVerifiedWorkflowGraph 写入）"
+    ]
+  },
+  "inventoryChecks": {
+    "resultWorkflowGraphs": "7 张，全部 1 节点 0 边（validation=valid），走查前后计数不变；maxNodes=1",
+    "toolJobsInProject": "p_muqfdayj_422a 恒为 1 个（tj_muqfdsd8_pjl9，deseq2，completed，artifactTruth valid，23 产物含 deg_table）",
+    "selections": "全库 1 条（sel_1932cafd…，属 p_mtlnsv0f_xpjb/classified_table，2026-09-04 创建，先于本 run）；p_muqfdayj_422a 为 0",
+    "lineageEndpoint": "GET /api/result-studio/lineage?jobId=tj_muqfdsd8_pjl9&projectId=p_muqfdayj_422a → {ok:true, lineage:null, note:'该项目暂无持久化工作流血缘（跨 Job 的选择/富集等操作执行后生成）。'}",
+    "toolsStatus": "GET /api/tools/status/tj_muqfdsd8_pjl9 → {ok:true, toolId:'deseq2', status:'completed', projectId:'p_muqfdayj_422a'}"
+  },
+  "sideEffects": [
+    "会话 conv_5f230af4-9ea 追加两轮 chat（attempt-3a/3b），产生 agent task dc33f89c… 与 4a99ac08…",
+    "attempt-3a 经 act open_tool 打开了 DESeq2 工具面板（dev Electron 窗口状态变化）",
+    "未新增/删除任何 tool_job、workflow graph、selection；未 git commit；未改 docs/test/src/core/frontend",
+    "本 run 写盘仅限 acceptance/block-138/：chain-attempt3-command-center.png、chain-attempt3-project-window.png、本 JSON"
+  ],
+  "assertions": [
+    { "name": "存量 7 张图全部单节点", "pass": true, "detail": "readonly 解析 nodes_json/edges_json：7×(1 node, 0 edges)" },
+    { "name": "attempt-3a/3b 均未产生 ≥2 节点链", "pass": true, "detail": "两次尝试后 graphs 仍 7 张全单节点；项目内无新 job/selection" },
+    { "name": "lineage 端点对终端 job 无 ≥2 链", "pass": true, "detail": "lineage:null（项目无持久化血缘）" },
+    { "name": "tools/status 终端 job 可达", "pass": true, "detail": "ok:true deseq2 completed" },
+    { "name": "截图随断言落盘", "pass": true, "detail": "chain-attempt3-command-center.png / chain-attempt3-project-window.png" }
+  ],
+  "allPass": true
+}

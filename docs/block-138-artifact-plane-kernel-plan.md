@@ -83,3 +83,5 @@ Result Studio 的渲染面从「写死的 switch + 单血缘条带」收敛为�
 - **门禁**：types 0/lint 0 error/code-size 棘轮重打（ResultArtifactShell 1213 指纹）/knip 238 键/test:changed=P6 绑定源门 accepted-red（fail-closed 设计，集成提交刷新后转绿——BLOCK-107 先例）。
 - **评审处置**：0 P1；P2=LineageViewSwitch 假覆盖→补组件测试 3/3+impact-map tests 补登（已修）；Minor①knip -1 键（branch-db getDatabasePath）与 probe 死 require 清理=棘轮自指示收缩与死码清理，reason 本节留痕；**Minor②=切换器空态常驻**（无链/单节点时按钮组可见）——D1 未裁决形态，**登记 R-1 rider**（修法=lineage 有无上提 switch 层或回调通知，或空态隐藏切换器；属后续加映）；**Minor③=plan 验收项「code-size 棘轮登记 @xyflow/react 增量」如实降格**——code-size 台账机制只管行数/指纹，不追踪依赖 bundle 体积，本次仅 ResultArtifactShell 指纹重打；bundle 增量 ~100-150KB gz 未被任何门禁记录（**R-2**：若需真登记应另立 bundle 体积基线，属后续包）。
 - **收口剩件**：实机走查三断言（DAG 渲染/节点点击/形态切换，acceptance/block-138/）+ 本台账 UI-460 过目翻 verified。
+
+- **R-4（2026-10-02 实机走查抓真，BIO-3 域 finding）**：血缘边硬依赖 ArtifactRevision 持久化（result-workflow-graph.js:305-313），chat/agent 分析链产物不产生 Revision → 散跑无边/plan/bind 生效不解锁/selection 拒开三条路径全断；实机三断言 reopen=F1 修复（方向待用户裁决：产物 Revision 化 vs 投影兼容 job-artifact truth）。证据=acceptance/block-138/chain-* + AUDIT-LOG 🟡 行。

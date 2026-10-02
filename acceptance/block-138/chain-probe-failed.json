@@ -1,0 +1,99 @@
+{
+  "suite": "block138-chain-probe",
+  "generatedAt": "2026-10-02T03:35:00+08:00",
+  "purpose": "BLOCK-138 实机走查：选定真实跨 Job 血缘链（库内检索 + chat 补产 ≤2 次）",
+  "conclusion": "method=failed：库内无 ≥2 节点图（7 张全 1 节点）；chat 补产 2 次尝试均零作业（调用方缺 accessMode → 只读轮）；且代码层面证实该 dev 栈结构性不可产 lineage 边（详见 blockers）。",
+  "bestAvailableGraph": {
+    "graphId": "wfg_6964fb639a2ad32dec13803e",
+    "projectId": "p_mtlnsv0f_xpjb",
+    "rootToolJobId": "tj_mtnxhti6_v9ik",
+    "nodeCount": 1,
+    "validationStatus": "valid",
+    "createdAt": "2026-09-05T05:26:29.099Z"
+  },
+  "dbSurvey": {
+    "database": ".biof3-dev-user-data/data/biof3.db (better-sqlite3 readonly)",
+    "totalGraphs": 7,
+    "nodeCountMin": 1,
+    "nodeCountMax": 1,
+    "graphs": [
+      { "graphId": "wfg_c52af71a27a6012d5ef85945", "projectId": "p_mtlnsv0f_xpjb", "root": "tj_mtlnsv38_yk04", "nodes": 1, "tool": "volcano-plot" },
+      { "graphId": "wfg_b360a1b7a4af2ef2906256a1", "projectId": "p_mtlnsv0f_xpjb", "root": "tj_mtlntnvl_79w0", "nodes": 1, "tool": "volcano-plot" },
+      { "graphId": "wfg_bbf208654d5ae54cf573cbe8", "projectId": "p_mtlnsv0f_xpjb", "root": "tj_mtlnw3ki_ppf7", "nodes": 1, "tool": "volcano-plot" },
+      { "graphId": "wfg_577c308fe3f97da32f792238", "projectId": "p_mtlnsv0f_xpjb", "root": "tj_mtlnwhd9_3gs1", "nodes": 1, "tool": "volcano-plot" },
+      { "graphId": "wfg_88d227ab830246a4e50bcc96", "projectId": "p_mtlnsv0f_xpjb", "root": "tj_mtnoazzh_mssk", "nodes": 1, "tool": "volcano-plot" },
+      { "graphId": "wfg_755997d0a86ad634967e59b6", "projectId": "p_mtlnsv0f_xpjb", "root": "tj_mtnoncpb_m9p6", "nodes": 1, "tool": "volcano-plot" },
+      { "graphId": "wfg_6964fb639a2ad32dec13803e", "projectId": "p_mtlnsv0f_xpjb", "root": "tj_mtnxhti6_v9ik", "nodes": 1, "tool": "volcano-plot" }
+    ],
+    "finalSnapshotAt": "2026-10-02T03:30:00+08:00（补产尝试后总量仍为 7，探测项目 0 作业）"
+  },
+  "lineageEndpointCheck": {
+    "endpoint": "GET http://127.0.0.1:3001/api/result-studio/lineage?jobId=tj_mtnxhti6_v9ik&projectId=p_mtlnsv0f_xpjb",
+    "auth": "Bearer desktop-local",
+    "httpOk": true,
+    "response": {
+      "ok": true,
+      "projectId": "p_mtlnsv0f_xpjb",
+      "graphId": "wfg_6964fb639a2ad32dec13803e",
+      "lineage": {
+        "chain": [{ "toolJobId": "tj_mtnxhti6_v9ik", "toolId": "volcano-plot", "isCurrent": true }],
+        "downstreamCount": 0
+      }
+    },
+    "chainLength": 1,
+    "upstreamFirst": "trivially（单节点自身在末位，isCurrent=true），不满足 chain ≥2 的走查要求",
+    "honestNullBranch": {
+      "endpoint": "GET /api/result-studio/lineage?jobId=tj_mupdc5iz_9yx4&projectId=p_mupdc3db_a1bj（无图 job）",
+      "response": { "ok": true, "projectId": "p_mupdc3db_a1bj", "lineage": null, "note": "该项目暂无持久化工作流血缘（跨 Job 的选择/富集等操作执行后生成）。" }
+    }
+  },
+  "toolsStatusCheck": {
+    "endpoint": "GET http://127.0.0.1:3001/api/tools/status/tj_mtnxhti6_v9ik",
+    "httpOk": true,
+    "reachable": true,
+    "summary": { "ok": true, "id": "tj_mtnxhti6_v9ik", "toolId": "volcano-plot", "status": "completed", "projectId": "p_mtlnsv0f_xpjb", "name": "volcano-plot via agent" }
+  },
+  "productionAttempts": [
+    {
+      "attempt": 1,
+      "channel": "POST /api/ai/agent (task 模式)",
+      "taskId": "20071132-1440-44b2-a30a-b70ba7f27f9e",
+      "conversationId": "conv_b8aa259d-0ca",
+      "projectId": "p_muqe395w_j46s",
+      "messageIntent": "deseq2 demo 跑第一步 → completed 后下游工具消费上游产物路径",
+      "outcome": "零 toolJob；agent 自行只读核实（run_tool op=list count=22，唯一分析工具 deseq2；workflowTemplates 全部 available:false；volcano-plot/enrichment 均 unknown_tool）后拒绝执行，理由：本轮只读约束 + 无下游工具",
+      "toolJobsCreated": 0
+    },
+    {
+      "attempt": 2,
+      "channel": "POST /api/ai/agent (task 模式，消息明示“这不是只读请求，请实际提交执行”)",
+      "taskId": "e8e25cd1-e5d9-4dea-9b47-c8485f178084",
+      "conversationId": "conv_b8aa259d-0ca",
+      "projectId": "p_muqe395w_j46s",
+      "outcome": "零 toolJob（filesChangedCount:0）；agent 仍未发起 run（只做 op=list / workspace_list），指出只读约束是会话运行模式（ctx.accessMode）设定、消息声明无法解除，并指出 deseq2 产物无一可作第二作业的科学输入",
+      "toolJobsCreated": 0
+    }
+  ],
+  "attemptFailureRootCause": {
+    "invocation": "两次 POST /api/ai/agent 均未携带 context.accessMode；inferExecutionPolicy 以 ctx.accessMode 为唯一决策源，缺省 'read'（core/biof3-server/helpers/agent-execution-policy.js:23-33），allowExecution=false 时 agent-runner.js:562-565 注入「本轮只读约束」system 段 → agent 正确遵守、拒绝 run_tool(op=run)。",
+    "note": "这是本 run 调用方偏差（UI 全权聊天会随请求带 accessMode），不是栈缺陷；按任务书 2 次上限止步，未做第 3 次。"
+  },
+  "structuralBlockers": [
+    "lineage 元数据（input.lineage）仅服务端 Result Studio 动作可写，模型可见的 run_tool 参数无法设置（core/shared-backend/artifact-manifest.js:37-40 注释 + collectExecutionInputs 实现）。",
+    "受信跨 Job lineage 写入面全部汇聚到 go-kegg 下游：tool_result_selection_run（result-selection-tools.js:425 起，action 只允许 go_kegg）、tool_result_enrichment_from_revision（同文件 :308 起，固定 toolId go-kegg）、changeset/科学编辑 direct child（result-changeset-service.js:409 downstreamLineage + result-edit-tools projectDirectEnrichmentSubgraph）。",
+    "go-kegg（及 volcano-plot 等 14 个插件）处于 plugins.dormant/ 封存区：用户裁决（2026-09-15，gewu-pack-bio/plugins.dormant/README.md）保留 deseq2 为唯一活跃参考实现，激活需用户裁决 → 本 run 不得激活。",
+    "deseq2 插件无 resultStudio descriptor（gewu-pack-bio/plugins/deseq2/plugin.json resultStudio=null），无选择/富集交互面。",
+    "普通工具运行不持久化任何工作流图：saveWorkflowGraph 仅在 result-selection-tools.js:225 与 result-edit-tools.js:69 被调用；纯 run 完成后无图落库 → 即便跑两次 deseq2 也不会出现 ≥2 节点图，lineage 端点将返回 lineage:null。"
+  ],
+  "uiEvidence": {
+    "screenshot": "acceptance/block-138/lineage-canvas-single-node.png",
+    "observed": "CDP 驱动主窗口到 /project/p_mtlnsv0f_xpjb/result?job=tj_mtnxhti6_v9ik：结果壳正常加载（火山图 · 结果 · block52-p3-09031507），但该 job 产物文件不可用（旧 workspace 根 .biof3-dev-user-data 于 desktop/ 下缺失），ResultArtifactShell 处于「文件不可用」态 → LineageViewSwitch（条带/画布切换，BLOCK-138 P1）未挂载，画布无从渲染；与 LineageViewSwitch.tsx 注释的「诚实自隐/状态门控」一致。"
+  },
+  "sideEffects": [
+    "新建探测项目 p_muqe395w_j46s（block138-chain-live-111427，POST /api/data/projects）+ 会话 conv_b8aa259d-0ca（POST /api/ai/conversations）；按红线未删除，留作审计。",
+    "dev Electron command-center 窗口曾被误导航加 hash，已用 history.replaceState 恢复为 http://localhost:3000/window/command-center。",
+    "dev Electron 主窗口由 /project/p_mupdiy7c_eetk 导航至 /project/p_mtlnsv0f_xpjb/result?job=tj_mtnxhti6_v9ik 取证，已恢复为 /project/p_mupdiy7c_eetk。",
+    "两次 chat 补产在其会话内留下 user/assistant 消息（agent 零工具执行、零 job 创建）。",
+    "未 git commit；未改 docs/test/src/core/frontend；未删任何数据。"
+  ]
+}
