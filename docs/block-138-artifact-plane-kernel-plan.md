@@ -7,7 +7,7 @@ acceptance:
   - 实机（dev Electron）：真实跨 Job 链（BIO-4 解冻后 bulk 主链）DAG 渲染 + 节点点击打开 artifact + 条带/DAG 形态切换，断言落 acceptance/block-138/
   - code-size 棘轮登记 @xyflow/react 增量 + knip 棘轮新导出登记
 reopen: 条带（LineageStrip）去留在 P1 实机后按体感裁决（D1）
-status: active
+status: completed
 ---
 
 # BLOCK-138 — 成果面内核 + 血缘 DAG 画布（成果面系列首包）
@@ -82,9 +82,9 @@ Result Studio 的渲染面从「写死的 switch + 单血缘条带」收敛为�
 - **P1 ✓**：@xyflow/react ^12.12.0 + lineageProjection.ts + LineageGraph.tsx/.module.css + LineageViewSwitch.tsx/.module.css + 组件/投影测试；挂 ResultArtifactShell result 模式（LineageStrip 位）。定向回归 36 文件/313 测试绿（含 theme 契约）。
 - **门禁**：types 0/lint 0 error/code-size 棘轮重打（ResultArtifactShell 1213 指纹）/knip 238 键/test:changed=P6 绑定源门 accepted-red（fail-closed 设计，集成提交刷新后转绿——BLOCK-107 先例）。
 - **评审处置**：0 P1；P2=LineageViewSwitch 假覆盖→补组件测试 3/3+impact-map tests 补登（已修）；Minor①knip -1 键（branch-db getDatabasePath）与 probe 死 require 清理=棘轮自指示收缩与死码清理，reason 本节留痕；**Minor②=切换器空态常驻**（无链/单节点时按钮组可见）——D1 未裁决形态，**登记 R-1 rider**（修法=lineage 有无上提 switch 层或回调通知，或空态隐藏切换器；属后续加映）；**Minor③=plan 验收项「code-size 棘轮登记 @xyflow/react 增量」如实降格**——code-size 台账机制只管行数/指纹，不追踪依赖 bundle 体积，本次仅 ResultArtifactShell 指纹重打；bundle 增量 ~100-150KB gz 未被任何门禁记录（**R-2**：若需真登记应另立 bundle 体积基线，属后续包）。
-- **收口剩件**：实机走查三断言（DAG 渲染/节点点击/形态切换，acceptance/block-138/）+ 本台账 UI-460 过目翻 verified。
+- **收口剩件 ✓（2026-10-03 全清）**：实机走查三断言=R2 复走全过（walkthrough-v2.json+三截图，acceptance/block-138/）；UI-460 用户真窗过目认可翻 verified（主代理会话原话「可以了 没什么问题」）→ **本包 completed**。R-4 已随 F1 修复关闭（§9）；R-1/R-2 riders 在册属后续加映。
 
-- **R-4（2026-10-02 实机走查抓真，BIO-3 域 finding）**：血缘边硬依赖 ArtifactRevision 持久化（result-workflow-graph.js:305-313），chat/agent 分析链产物不产生 Revision → 散跑无边/plan/bind 生效不解锁/selection 拒开三条路径全断；实机三断言 reopen=F1 修复（方向待用户裁决：产物 Revision 化 vs 投影兼容 job-artifact truth）。证据=acceptance/block-138/chain-* + AUDIT-LOG 🟡 行。
+- **R-4（2026-10-02 实机走查抓真，BIO-3 域 finding）**：血缘边硬依赖 ArtifactRevision 持久化（result-workflow-graph.js:305-313），chat/agent 分析链产物不产生 Revision → 散跑无边/plan/bind 生效不解锁/selection 拒开三条路径全断；实机三断言 reopen=F1 修复（方向待用户裁决：产物 Revision 化 vs 投影兼容 job-artifact truth）。证据=acceptance/block-138/chain-* + AUDIT-LOG 🟡 行。→ **已关闭（2026-10-03）**：用户裁决方向 1 并落地（§9，ea765eea+d3ae13a3，主代理终审 518a07fd），finding 随 UI-460 verified 销号。
 
 ## 9. 加映：F1 修复——链形成点注册 pending 信任层（2026-10-03，实现启动）
 
