@@ -1,57 +1,59 @@
 {
   "suite": "block138-ui460-walkthrough-v2",
-  "generatedAt": "2026-10-03T17:30:00+08:00",
-  "purpose": "UI-460 三断言实机走查（attempt-7）：F1 修复（attempt-6 产出 3 节点真实血缘链）之后的栈上，在 dev Electron 主画布 result 模式走查 条带/画布形态切换、DAG 渲染、节点点击打开链",
-  "route": "dev Electron 主窗（CDP 9222，走查目的本身）SPA 深链 http://localhost:3000/project/p_mus4u230_wvib/result?job=tj_mus4vpzy_ztwn —— location.assign 整页加载后 URL 保持不归零、直落 result 模式主画布（火山图结果详情渲染）。深链形态判定依据：frontend/src/hooks/useWorkspaceRouting.ts:8,24-33（mode 子路径 /project/:id/<mode>，?job= 深链参数保留）+ docs/ui-productization-audit.md UI-455 条目（/project/:id/result?job= 历史深链可用）；实际渲染链 App.tsx:165（/project/:projectId/* splat）→ CenterPanel.tsx:261-315（resultMode 投影层 ResultStudioCanvas + ResultView mode=workspaceMode）→ ResultArtifactShell mode='result'。Command Center popout 下钻备选路未动用（深链直达足够）",
+  "generatedAt": "2026-10-03T18:30:30+08:00",
+  "purpose": "UI-460 三断言 R2 复走（attempt-8）：d3ae13a3 完成态挂载补齐（LineageViewSwitch 移挂 ResultArtifactShell shellBody 顶部）+ Vite HMR 生效后，在真实 3 节点血缘链（tj_mus4vpzy_ztwn 链）上重走 形态切换 / DAG 渲染 / 节点点击打开链。第一轮（attempt-7，本文件被本轮覆写，原内容在 git 历史）三断言全 FAIL，根因=切换器仅挂 loading 瞬态区",
+  "route": "dev Electron 主窗（CDP 9222，走查目的本身）SPA 深链 http://localhost:3000/project/p_mus4u230_wvib/result?job=tj_mus4vpzy_ztwn —— location.assign 整页加载后 URL 保持含 job 参数不归零、直落 result 模式完成态主画布（火山图结果详情）。深链形态判定依据：frontend/src/hooks/useWorkspaceRouting.ts:8,24-33（mode 子路径 /project/:id/<mode>，?job= 深链参数保留）+ docs/ui-productization-audit.md UI-455 条目（/project/:id/result?job= 历史深链可用，grep 行 4482）；实际渲染链 App.tsx → project-workspace.tsx → ResultArtifactShell mode='result'。Command Center popout 下钻备选路未动用（深链直达足够）",
   "preconditionsVerifiedThisSession": {
     "lineageEndpoint": {
       "command": "curl -s -H 'Authorization: Bearer desktop-local' 'http://127.0.0.1:3001/api/result-studio/lineage?jobId=tj_mus4vpzy_ztwn&projectId=p_mus4u230_wvib'",
       "http": 200,
       "response": { "ok": true, "projectId": "p_mus4u230_wvib", "graphId": "wfg_d05e23f47638c43cbf2f70bf", "lineage": { "chain": [ { "toolJobId": "tj_mus4uxjq_s69m", "toolId": "deseq2", "isCurrent": false }, { "toolJobId": "tj_mus4vg1b_tf2r", "toolId": "deg-standardizer", "isCurrent": false }, { "toolJobId": "tj_mus4vpzy_ztwn", "toolId": "volcano-plot", "isCurrent": true } ], "downstreamCount": 0 } },
-      "verdict": "链=3、上游在前、终端 isCurrent=true——数据面前提 PASS（本会话实跑复核，非沿用 attempt-6 记录）"
+      "verdict": "链=3、上游在前、终端 isCurrent=true——数据面前提 PASS（本会话实跑复核）"
     },
-    "stack": "core :3001 /api/health=200；Vite :3000=200；CDP :9222 Chrome/146.0.7680.216（dev Electron pid 25499，--dev --remote-debugging-port=9222）",
-    "jobStatus": "终端 job volcano-plot completed、5 产物（data-debug-job-status=done / data-debug-viewer=image / data-debug-artifact-count=5 / data-debug-selected-name=volcano.png 实读）"
+    "stack": "core :3001 /api/health=200；Vite :3000=200；CDP :9222（dev Electron pid 25499，--dev --remote-debugging-port=9222，d3ae13a3 工作区未提交即走查=与实机 HMR 一致）；输入事件走 CDP Input.dispatchMouseEvent（mouseMoved/mousePressed/mouseReleased 真实输入管线），断言与截图走 Runtime.evaluate/Page.captureScreenshot",
+    "fixUnderTest": "git show d3ae13a3：LineageViewSwitch 挂载点自非完成态 stateBlock（旧 ResultArtifactShell.tsx:1042）迁移至 shellBody 顶部同位——完成态主渲染路径在场；本走查即其完成态实机验证",
+    "windowState": "走查窗口为真实用户在用机器：走查中用户两次并发操作（导航到 /project/p_mus4u230_wvib、随后窗口被移出可视区/最小化致 document.visibilityState=hidden、rAF 0 tick）；走查员经 app 自身 IPC（window.gewu.windowManager.openResultInMainWindow → src/ipc/window-manager.js:485-499 main.restore()+show()+focus()，payload=终端 job 自身 artifact，白名单类型）恢复主窗可见后，在可见窗条件下一轮原子脚本完成全部三断言。窗口可见性对 React Flow 为硬前提（见 environmentFinding）"
   },
   "checks": [
     {
-      "id": "T0-deeplink-result-view",
-      "pass": true,
-      "detail": "深链 /project/p_mus4u230_wvib/result?job=tj_mus4vpzy_ztwn 整页加载后打开 result 视图：URL 保持含 job 参数（UI-455 深链不归零实机复现）；result 模式主画布渲染完成态结果详情（DOM 实证：div[data-debug-job-status=done][data-debug-viewer=image][data-debug-artifact-count=5]，CompactResultNavigator 工具栏 + 结果报告 section + 右侧 inspector）。命令：node /tmp/b138-diag.mjs / b138-diag3.mjs（lib.cjs pollTargets/connectTarget/evalJs）"
-    },
-    {
       "id": "T1-form-switch",
-      "pass": false,
-      "detail": "FAIL——切换器（div[role=group][aria-label=血缘形态]）在 result 模式完成态稳定面不在场，仅 loading 瞬态短暂在场后即被卸载。(1) 稳定面 DOM 实证：document.querySelector('div[role=\"group\"][aria-label=\"血缘形态\"]')=null、nav[aria-label=结果血缘链]=null、全文无『血缘』文本；shell 子节点仅 _navigator_ + _resultReportSection（node /tmp/b138-diag3.mjs）。(2) 瞬态采样实证（node /tmp/b138-transient.mjs，120ms 间隔）：t=273ms 切换器不在；t=450ms 切换器在场（shell 子节点含 _lineageView_ + _resultHeader_ + _resultPlaceholder_='加载结果中…'，即 stateBlock loading 态）；t=715ms 起完成态渲染（data-debug-job-status=done），切换器消失且 12s 内不再出现——瞬态窗口 ~265ms，人手不可用。(3) 根因（代码锚点）：LineageViewSwitch 唯一挂载点是 ResultArtifactShell.tsx:1042 的 stateBlock 内（mode==='result' 分支），而 stateBlock（:1037-1054）只被 running/pending（:1056）/failed（:1067）/loading（:1075）/结果加载失败（:1086,1095）五个非完成态调用；完成态主渲染路径（:1178-1199 final return）只挂 resultToolbar+shellBody，无 LineageViewSwitch。git show 230b7e44 实证 UI-460 提交是对 BLOCK-127 LineageStrip 同位置 1:1 替换——挂载盲区继承自条带（此前被『库内从无 ≥2 节点链』掩盖，attempt-6 链产出后暴露）。(4) 组件本身工作正常：瞬态帧截图 form-switch-default.png 可见『条带/画布』按钮组、条带高亮（默认 view='strip'，LineageViewSwitch.tsx:20,28）——缺的是完成态挂载，不是组件。『默认条带 aria-pressed=true』仅在瞬态帧可观察（截图视觉证据+组件默认态代码），稳定面断言不成立"
+      "pass": true,
+      "detail": "PASS——完成态稳定面三段实证（窗口可见、jobStatus=done）。(1) 切换器在场：div[role=group][aria-label=血缘形态] 在完成态稳定面持续在场（d3ae13a3 修复生效；对照第一轮：仅 loading 瞬态 ~265ms 在场）。(2) 默认条带：组内按钮 scoped 枚举 [{条带,aria-pressed=true},{画布,aria-pressed=false}]（组件默认 view='strip'，LineageViewSwitch.tsx:20,28）；同帧 .react-flow 不存在（条带形态）；nav[aria-label=结果血缘链] 在场渲染 3 节点链（DESeq2 差异分析→DEG 标准化→火山图绘制，当前高亮）。截图 form-switch-default.png=默认态实拍。(3) 点「画布」：CDP Input 真实点击按钮中心 → aria-pressed 翻转为 [{条带,false},{画布,true}]，.react-flow 容器与 section[aria-label=结果血缘图] 出现。命令：node /tmp/b138/walk-atomic.mjs（原子脚本，本 attempt 一次通过）",
+      "evidence": { "defaultButtons": [{ "t": "条带", "p": "true" }, { "t": "画布", "p": "false" }], "flowBefore": false, "afterClickButtons": [{ "t": "条带", "p": "false" }, { "t": "画布", "p": "true" }] }
     },
     {
       "id": "T2-dag-render",
-      "pass": false,
-      "detail": "FAIL（blocked，未取得截图 dag-canvas.png）——画布形态在稳定面不可达，.react-flow__node/.react-flow__edge 无法出现。诊断性抢窗实验（node /tmp/b138-race-probe.mjs，30ms 间隔轮询+立即点击）：CDP 于 t=437ms 瞬态窗口内成功点击『画布』按钮（clicked=true，点击确实落在按钮上），但下一采样拍完成态已替换整个 stateBlock——.react-flow 全程未出现（flowPresent=false，nodeCount=0，edgeCount=0，switchStill=false，shellStatus=done）。即 view='graph' 状态随宿主卸载湮灭，React Flow 连首帧都未及渲染。数据面前提本已具备（/lineage chain=3 本会话实跑 200；LineageGraph.tsx:49 仅 chain<=1 自隐，3 节点链本应渲染 3 节点 2 边）——阻断纯因挂载点缺失"
+      "pass": true,
+      "detail": "PASS——点击「画布」后 ≤6s 内 .react-flow 稳定渲染：.react-flow__node=3（≥2）× .react-flow__edge=2（≥1）（edges 组内 path=4=2 可见边+2 interaction 宽路径，React Flow 标准结构）；节点文本 DESeq2 差异分析 / DEG 标准化 / 火山图绘制，当前节点 _nodeCurrent_ 样式类在场；节点均 visibility:visible（已测量）。对照第一轮：画布形态机械不可达（挂载盲区）。截图 dag-canvas.png=DAG 实拍（3 节点 2 边+下方火山图）。命令：node /tmp/b138/walk-atomic.mjs 同一 attempt",
+      "evidence": { "nodeCount": 3, "edgeCount": 2, "edgePathCount": 4, "section": true, "nodeIds": ["tj_mus4uxjq_s69m", "tj_mus4vg1b_tf2r", "tj_mus4vpzy_ztwn"] }
     },
     {
       "id": "T3-node-click-open",
-      "pass": false,
-      "detail": "FAIL（blocked，未取得截图 node-click-opened.png）——稳定面无 DAG 节点可点，祖先 job（tj_mus4uxjq_s69m，deseq2）点击打开链未获实机验证。打开链代码在位：LineageGraph.tsx:59-61 节点点击 dispatchGewuEvent(projectOpenResult,{toolJobId,projectId}) → useWorkspaceOpenEffects.ts:127-136 订阅 → project-workspace.tsx:740-800 handleOpenResult → :341-367 updateWorkspaceMode 导航 /project/:id/result?job=<祖先>（URL 可观察变化即断言证据，未及执行）。与 T2 同根因：画布不可达即节点不可点"
+      "pass": true,
+      "detail": "PASS——DAG 画布上真实点击非当前祖先节点（DESeq2 差异分析，tj_mus4uxjq_s69m，节点中心 CDP Input mousePressed/mouseReleased）→ projectOpenResult 打开链生效，URL/视图双实据：location.href 自 /project/p_mus4u230_wvib/result?job=tj_mus4vpzy_ztwn 变为 /project/p_mus4u230_wvib/result?job=tj_mus4uxjq_s69m（≤6s 内，updateWorkspaceMode 写 ?job=，project-workspace.tsx:341-366）；结果视图切换为祖先 job 的产物详情（页面标题「火山图 (PNG)」、右侧 inspector 来源=deseq2、版本=原始结果、jobStatus=done）；伴随可观察行为：LineageViewSwitch 随 job 切换重挂载回默认条带（[{条带,true},{画布,false}]、.react-flow 卸载）——组件语义（view 状态不跨 job 存续）非缺陷。打开链代码路径：LineageGraph.tsx:59-61 dispatchGewuEvent(projectOpenResult) → useWorkspaceOpenEffects.ts:127-136 → project-workspace.tsx:740-818 handleOpenResult。截图 node-click-opened.png=打开后实拍（来源=deseq2 可读）。命令：node /tmp/b138/walk-atomic.mjs 同一 attempt",
+      "evidence": { "clickedNode": "tj_mus4uxjq_s69m", "urlBefore": "/project/p_mus4u230_wvib/result?job=tj_mus4vpzy_ztwn", "urlAfter": "/project/p_mus4u230_wvib/result?job=tj_mus4uxjq_s69m", "jobStatus": "done", "viewAfter": { "strip": true, "flow": false, "pressed": ["条带:true", "画布:false"] } }
     }
   ],
   "screenshots": [
     "acceptance/block-138/form-switch-default.png",
-    "acceptance/block-138/walkthrough-v2-completed-no-lineage-ui.png"
+    "acceptance/block-138/dag-canvas.png",
+    "acceptance/block-138/node-click-opened.png"
   ],
   "screenshotNotes": {
-    "form-switch-default.png": "瞬态帧（t≈450ms，stateBlock loading 态）：主画布『volcano-plot via agent 完成』标题+『加载结果中…』占位，右上『条带（高亮）/画布』切换器在场——唯一能拍到切换器的状态，非稳定面；稳定面完成态无此 UI，故该文件记录的是瞬态证据而非 PASS 态",
-    "walkthrough-v2-completed-no-lineage-ui.png": "完成态稳定面（data-debug-job-status=done）：完整火山图结果视图（工具栏 结果/代码/审查/历史、产物 viewer、右侧 inspector、继续分析 composer）——无血缘条、无切换器、无任何血缘 UI，本走查缺陷的主证",
-    "dag-canvas.png": "未捕获——画布形态机械不可达（T2 detail），不伪造",
-    "node-click-opened.png": "未捕获——无稳定节点可点（T3 detail），不伪造"
+    "form-switch-default.png": "完成态默认条带态：右上「条带（高亮）/画布」切换器在场（稳定面，非瞬态）、血缘条 3 节点链（火山图绘制高亮）、火山图结果详情——第一轮该文件只能拍到瞬态帧，本轮为稳定面实拍",
+    "dag-canvas.png": "画布形态：DAG 3 节点 2 边（自左向右：DESeq2 差异分析→DEG 标准化→火山图绘制，底部 source→顶部 target 曲线边+箭头）、画布按钮高亮、下方火山图与右侧 inspector——第一轮未捕获（画布不可达），本轮实拍",
+    "node-click-opened.png": "点击 deseq2 祖先节点后：结果视图已切换至祖先 job 产物（标题「火山图 (PNG)」、inspector 来源=deseq2、版本=原始结果）、切换器重挂回默认条带——打开链 URL 变化的伴随视觉证据。第一轮未捕获（无稳定节点可点）"
   },
-  "allPass": false,
-  "verdict": "UI-460 三断言在 attempt-6 真实 3 节点链栈上全部不可达——F1（血缘数据不落图）已解，但暴露第二道独立阻断：LineageViewSwitch/LineageStrip 挂载点只覆盖非完成态 stateBlock（ResultArtifactShell.tsx:1042），完成态主渲染路径（:1178-1199）不挂载；真实链产物全是 completed job，用户在完成态 result 模式看不到任何血缘 UI。reopen 条件=完成态路径补挂载（或挂载点迁移）后重走三断言",
+  "allPass": true,
+  "verdict": "UI-460 三断言在 d3ae13a3 修复后真实 3 节点链上全部 PASS（T1 条带/画布形态切换 · T2 DAG 3 节点 2 边渲染 · T3 节点点击 projectOpenResult 打开祖先 job）——第一轮 reopen 条件（完成态路径补挂载）已满足并实机验证。走查环境注意事项（非产品缺陷、如实登记）：React Flow 节点测量依赖 ResizeObserver/渲染帧，Chromium 对不可见窗口（document.visibilityState=hidden，如最小化/被遮挡/他 Space）暂停 rAF 与 RO 派发，此时画布节点停留 visibility:hidden 且边不渲染——窗口恢复可见后新挂载即正常（本轮可见窗条件全部断言通过实证）；用户在用机器上的并发操作（导航/移窗）会中断走查态，需重置深链后重走",
+  "environmentFinding": "诊断链（供后续参考，不构成断言）：走查中段窗口被用户移出可视区后，已挂载 flow 的节点停留 hidden（RO 初始通知在隐藏期丢失）；经 CDP store 探针证实 edges 在 store 中存在（2 条、hidden:false）而 EdgeWrapper 因 node.internals.handleBounds 缺失返回 null（@xyflow/react 12.12.0 dist/esm getEdgePosition→isNodeInitialized gate）——window.bringToFront/osascript set frontmost/visible 与 Page.bringToFront 均无法令已隐藏挂载的 flow 恢复测量，唯一可靠恢复=app 自身 IPC restore+show+focus（window-manager.js:485-499）后重新挂载画布。此行为与产品代码无关，系 Chromium 渲染管线可见性门控",
   "sideEffects": [
-    "dev Electron 主窗窗口状态变化（走查目的本身，如实登记）：location 自 http://localhost:3000/ 经 4 次整页导航至同一深链 /project/p_mus4u230_wvib/result?job=tj_mus4vpzy_ztwn（诊断脚本 b138-diag/transient×2/race 各 1 次）；瞬态帧内 CDP 点击『画布』按钮 1 次（点击落在随即卸载的 stateBlock 上，无持久效果）；无其他 UI 状态残留",
-    "零后端写路径：全程仅 GET /api/*（health/lineage/tools/status）与前端只读 fetch；3 个 pending ChangeSet（cs_b19c…/cs_5296…/cs_a364…）原样 preview_ready、零 adopt、零 revert、is_current 集合零触碰",
-    "新增证据文件 2 张截图：acceptance/block-138/form-switch-default.png、acceptance/block-138/walkthrough-v2-completed-no-lineage-ui.png（+ 本 JSON）",
-    "未改 docs/**、frontend/**、src/**、core/**、test/**；未 git commit；后端/Vite/进程未动；未删任何数据"
+    "dev Electron 主窗窗口状态变化（走查目的本身，如实登记）：location.assign 共 3 次导航至深链 /project/p_mus4u230_wvib/result?job=tj_mus4vpzy_ztwn（初始复位、T3 后复位）+1 次 assign 至 ?job=tj_mus4uxjq_s69m 后被 T3 的 event 打开链导航覆盖（T3 断言本体）；真实点击合计：条带/画布按钮多次（含诊断期）、DESeq2 节点 1 次（T3 成功点击）、诊断期落 pane 空点 3 次（无效果）；app 状态净残留=T3 后已复位回终端 job 深链",
+    "并发用户操作如实登记：走查中段用户将窗口移出可视区（visibilityState=hidden）并曾导航至 /project/p_mus4u230_wvib（chat），期间出现一次计划外结果视图变化（activeJob 变为 deg-standardizer tj_mus4vg1b_tf2r 后又离开）——非走查员输入所致（脚本点击坐标均在按钮/pane 上，不在任何节点上），疑似用户物理交互；该状态未被采信为任何断言证据，随后均以深链整页加载重置",
+    "窗口恢复动作用了 app 自身 IPC：window.gewu.windowManager.openResultInMainWindow({type:'gewu:project-open-artifact', jobId:'tj_mus4vpzy_ztwn', artifactName:'volcano.png', projectId:'p_mus4u230_wvib'}) 两次（诊断期 1 次 + 走查脚本每次 attempt 前各 1 次，共 5 次调用）——effect=主窗 restore/show/focus + 右栏打开终端 job 的 volcano.png 产物；全部指向终端 job 自身，无跨 job 状态污染",
+    "诊断性 store 探针（React Flow 内部 store 读取 + 一次 store.updateNodeInternals 强制测量）在隐藏窗诊断期执行——仅读为主，强制测量 1 次发生在诊断期旧 flow 实例上（该实例随后被正常重挂载替换），不影响最终断言（最终断言全部在可见窗无干预条件下取得）",
+    "零后端写路径：全程仅 GET /api/*（health/lineage）与前端只读 fetch；未触碰任何 ChangeSet、未 adopt、未 revert",
+    "证据文件：覆写 acceptance/block-138/form-switch-default.png（第一轮瞬态帧→本轮稳定面实拍）+ 新增 dag-canvas.png、node-click-opened.png + 本 JSON（覆写第一轮全 FAIL 版本，原内容在 git 历史）；未改 docs/**、frontend/**、src/**、core/**、test/**；未 git commit"
   ],
-  "driverScripts": "/tmp/b138-diag.mjs、/tmp/b138-diag2.mjs、/tmp/b138-diag3.mjs、/tmp/b138-transient.mjs、/tmp/b138-race-probe.mjs（公共原语 .agents/skills/gewu-dev-infra/dev-verify/lib.cjs：pollTargets/connectTarget/evalJs/screenshotPng；原始采样 /tmp/b138-walkthrough-v2-raw.json 未生成——首跑脚本在切换器等待超时处抛出，采样证据改由 transient/race 脚本输出与本文 JSON 承载）"
+  "driverScripts": "/tmp/b138/cdp.mjs（CDP eval/shot 原语）、/tmp/b138/click.mjs（Input.dispatchMouseEvent 真实点击）、/tmp/b138/store-probe.mjs、store-probe2.mjs、force-internals.mjs（隐藏窗诊断三件）、/tmp/b138/t3-atomic.mjs、t3-atomic2.mjs（T3 原子化两版，被 walk-atomic 覆盖）、/tmp/b138/walk-atomic.mjs（最终走查原子脚本：activate→restoreMain→深链复位→T1 默认断言+截图→点画布→T2 断言+截图→点 deseq2 节点→URL 轮询断言+截图→复位；本 attempt 1 次通过）"
 }

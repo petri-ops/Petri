@@ -95,3 +95,5 @@ Result Studio 的渲染面从「写死的 switch + 单血缘条带」收敛为�
 - **验收**：①契约测试红绿（bind→ready→2 节点 1 边 graph；幂等；零 adopt）；②门禁五门（test:changed P6 绑定门 accepted-red 沿用既定模式，集成提交刷新）；③链产验证（chat plan/bind 链 /lineage chain ≥2，后端重启加载修复后）；④实机走查三断言（补 UI-460 剩件，acceptance/block-138/）。
 - **已知语义后果（用户知情）**：agent 链会在审阅队列产生 pending ChangeSet 条目（待人工 adopt）——把 RS 审阅语义自然延伸到 agent 链。
 - 台账：本节即加映登记（AUDIT-LOG 同步）；实机与集成提交后 UI-460 补记。
+
+- **§9 收口（2026-10-03）**：F1 修复两批集成提交——ea765eea（chain-preview.js pending 注册+三链形成点接线+契约 6/6〔含补刃两案：inputLineage 物化+图自动落库〕）+ d3ae13a3（走查抓真的挂载点缺陷修复：LineageViewSwitch 完成态 shellBody 同位补挂载）。链产 /lineage chain=3 实证；实机三断言 R2 复走全过+换眼复核 confirmed；P6 绑定门两次集成提交均刷新 13/13。Mac 侧域插件激活（gewu-pack-bio 本地 2f3d474，不推送——Windows 线合并对账留 BIO-4 域）。已知语义后果已兑现：agent 链 pending ChangeSet 进审阅队列（walk-attempt5-review-queue.png 实证）。
