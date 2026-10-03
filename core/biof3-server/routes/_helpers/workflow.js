@@ -5,7 +5,6 @@
  *
  * 抽自 `core/biof3-server/routes/result-studio.js` PHASE 2.1a 拆分 commit。
  * 类别：跨 repository / interaction / selection / context / artifact 状态机的胶水函数。
- *   - attachExistingRepositoryWithExplicitConsent(...) → 已有仓库绑定
  *   - resolveInteractionBaselineRevision(...)         → interaction baseline 选择
  *   - baselineFailureDiagnostic(error)                 → 失败诊断格式化
  *   - resolveInteractionDescriptor(...)                → plugin → artifact 映射
@@ -29,81 +28,10 @@ const {
 const {
   queryResultTable,
 } = require('../../../shared-backend/result-studio-table-query');
-const {
-  bindProjectRepository,
-} = require('../../../shared-backend/git-repository-binding');
 
 const repository = require('./repository');
 const validate = require('./validate');
 require('./storage');
-
-function attachExistingRepositoryWithExplicitConsent(input, dependencies = {}) {
-  const projectId = String(input?.projectId || '').trim();
-  const workspaceRoot = String(input?.workspaceRoot || '').trim();
-  const allowExistingRepository = input?.allowExistingRepository === true;
-  if (!projectId || !workspaceRoot) {
-    return { ok: false, status: 400, code: 'project_context_required' };
-  }
-  if (!allowExistingRepository) {
-    return { ok: false, status: 400, code: 'explicit_existing_repository_consent_required' };
-  }
-  const repositoryInstance = dependencies.repository;
-  const binder = dependencies.bindProjectRepository || bindProjectRepository;
-  if (!repositoryInstance?.saveExistingRepositoryConsent || !repositoryInstance?.saveRepositoryBinding) {
-    return { ok: false, status: 500, code: 'repository_consent_store_unavailable' };
-  }
-  const binding = binder({
-    workspaceRoot,
-    projectId,
-    preferManaged: false,
-    allowExistingRepository,
-    createManagedIfMissing: false,
-  });
-  if (binding?.mode !== 'existing') {
-    return {
-      ok: false,
-      status: 409,
-      code: binding?.inspection?.managed?.exists
-        ? 'managed_repository_already_initialized'
-        : 'existing_repository_not_found',
-    };
-  }
-  if (!binding.adapter) {
-    return {
-      ok: false,
-      status: 409,
-      code: binding.reason || binding.status || 'repository_binding_failed',
-      bindingStatus: binding.status || null,
-    };
-  }
-  const consent = repositoryInstance.saveExistingRepositoryConsent({
-    projectId,
-    allowExistingRepository,
-    decisionSource: 'explicit_api',
-  });
-  const savedBinding = repositoryInstance.saveRepositoryBinding({
-    projectId,
-    mode: binding.mode,
-    workspaceRoot: binding.workspaceRoot,
-    gitDir: binding.adapter.gitDir,
-    workTree: binding.adapter.workTree,
-    managedPaths: binding.managedPaths,
-    status: binding.status,
-    reason: binding.reason,
-    gitVersion: binding.inspection?.runtime?.versionRaw || null,
-  });
-  return {
-    ok: binding.status === 'ready',
-    status: binding.status === 'ready' ? 200 : 409,
-    code: binding.status === 'ready' ? null : binding.reason || binding.status,
-    bindingStatus: binding.status,
-    mode: savedBinding.mode,
-    consent: {
-      allowExistingRepository: consent.allowExistingRepository,
-      decisionSource: consent.decisionSource,
-    },
-  };
-}
 
 function resolveInteractionBaselineRevision({
   repository: repositoryInstance,
@@ -409,7 +337,6 @@ function bindAuthoritativeQuerySelection({ req, project, selection, repository: 
 }
 
 module.exports = {
-  attachExistingRepositoryWithExplicitConsent,
   resolveInteractionBaselineRevision,
   baselineFailureDiagnostic,
   resolveInteractionDescriptor,

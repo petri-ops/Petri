@@ -4,7 +4,6 @@ import type { BackendStatus } from '@/lib/electron';
 import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import { ResultStudioInspector } from '@/components/result-studio/ResultStudioSurface';
-import { GitRepositoryConsent } from '@/components/result-studio/GitRepositoryConsent';
 import {
   ResultEditAdvancedDrawer,
   type ResultEditSubmission,
@@ -190,9 +189,6 @@ export function RightPanel({
                     projectId={ctx.projectId}
                     emptyText="本项目暂无作业——运行一个分析后，瓦片会出现在这里。"
                   />
-                )}
-                {tab === 'results' && ctx.projectId && (
-                  <GitRepositoryConsent projectId={ctx.projectId} />
                 )}
                 {tab === 'results' && (
                   <ResultStudioInspector

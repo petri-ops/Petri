@@ -41,7 +41,6 @@ const workflow = require('./_helpers/workflow');
 
 module.exports = registerResultStudioRoutes;
 module.exports._test = {
-  attachExistingRepositoryWithExplicitConsent: workflow.attachExistingRepositoryWithExplicitConsent,
   baselineFailureDiagnostic: workflow.baselineFailureDiagnostic,
   bindAuthoritativeQuerySelection: workflow.bindAuthoritativeQuerySelection,
   buildContextBoundPreviewBudget: context.buildContextBoundPreviewBudget,

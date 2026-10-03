@@ -38,7 +38,6 @@ const {
   computeResultRefTransactionHash,
   ensureResultRefTransactionSchema,
 } = require('./result-ref-transaction-schema');
-const { ensureGitRepositoryConsentSchema } = require('./git-repository-consent-schema');
 const {
   getResultStudioRuntimeLease,
   isResultStudioRuntimeLease,
@@ -76,7 +75,6 @@ function createResultStudioRepository(db, options = {}) {
     ensureResultStudioSchema(db);
     ensureResultWorkflowGraphSchema(db);
     ensureResultRefTransactionSchema(db);
-    ensureGitRepositoryConsentSchema(db);
   }
 
   const transaction = typeof db.transaction === 'function'
@@ -185,45 +183,9 @@ function createResultStudioRepository(db, options = {}) {
   const api = {
     // ---------------------------------------------------------------- bindings
 
-    /** Runtime binding is not consent; persist only an explicit affirmative API decision. */
-    saveExistingRepositoryConsent({ projectId, allowExistingRepository, decisionSource }) {
-      if (!projectId || allowExistingRepository !== true || decisionSource !== 'explicit_api') {
-        throw new ResultStudioRepositoryError(
-          'existing_repository_consent_invalid',
-          'Existing repository consent must be an explicit affirmative API decision.'
-        );
-      }
-      const timestamp = nowIso();
-      db.prepare(`INSERT INTO git_repository_consents (
-          project_id, contract_version, allow_existing_repository, decision_source, created_at, updated_at
-        ) VALUES (?, 1, 1, 'explicit_api', ?, ?)
-        ON CONFLICT(project_id) DO UPDATE SET
-          allow_existing_repository = 1,
-          decision_source = 'explicit_api',
-          updated_at = excluded.updated_at`)
-        .run(projectId, timestamp, timestamp);
-      return api.getExistingRepositoryConsent(projectId);
-    },
-
-    getExistingRepositoryConsent(projectId) {
-      const row = db.prepare(`SELECT project_id, contract_version, allow_existing_repository,
-          decision_source, created_at, updated_at
-        FROM git_repository_consents WHERE project_id = ?`).get(projectId);
-      if (!row) return null;
-      return {
-        projectId: row.project_id,
-        contractVersion: row.contract_version,
-        allowExistingRepository: row.allow_existing_repository === 1,
-        decisionSource: row.decision_source,
-        createdAt: row.created_at,
-        updatedAt: row.updated_at,
-      };
-    },
-
-    hasExistingRepositoryConsent(projectId) {
-      const consent = api.getExistingRepositoryConsent(projectId);
-      return consent?.allowExistingRepository === true && consent.decisionSource === 'explicit_api';
-    },
+    // 2026-10-03 用户裁决（UI-462）：「接入用户自有仓库」能力退役，consent 存取
+    // 已删除；历史 git_repository_consents 表保留但不再被任何路径读写，
+    // 旧 consent 行对绑定行为零影响（绑定恒为 managed）。
 
     /** 记录 RS1 的绑定结果。同一 project 只保留最新一条。 */
     saveRepositoryBinding(binding) {

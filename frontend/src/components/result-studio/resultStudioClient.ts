@@ -378,50 +378,10 @@ export function revisionArtifactUrl(revisionId: string): string {
   return `${getPlatformApiPrefix()}/result-studio/revisions/${encodeURIComponent(revisionId)}/artifact`;
 }
 
-export interface RepositoryBindingConsent {
-  allowExistingRepository: boolean;
-  decisionSource: string;
-}
+// UI-462（2026-10-03 用户裁决）：「接入用户自有 Git 仓库」能力整体退役——
+// Result Studio 版本历史只进受管理私有存储（.biof3/git），与用户项目仓库无关，
+// 无 consent 端点、无绑定状态查询、无 UI 提示。
 
-export interface RepositoryBindingStatus {
-  ok: boolean;
-  projectId: string;
-  existingRepositoryDetected: boolean;
-  existingRepositoryDirty: boolean;
-  managedRepositoryExists: boolean;
-  decisionRequired: boolean;
-  existingRepositoryConsent: RepositoryBindingConsent | null;
-  binding: { mode: string; status: string; reason: string | null } | null;
-}
-
-export interface ExistingRepositoryConsentResult {
-  ok: boolean;
-  projectId: string;
-  bindingStatus: string | null;
-  mode: string | null;
-  consent: RepositoryBindingConsent | null;
-}
-
-/**
- * 读取项目 Git 仓库绑定状态。后端在 `e14a8e6` 已把"是否授权附加到用户自有
- * 仓库"收敛为独立持久 consent truth，生产调用零硬编码 `true`。前端只消费这份
- * 投影，不得用直接 API 调用冒充用户同意。
- */
-export function fetchRepositoryBinding(projectId: string): Promise<RepositoryBindingStatus> {
-  return requestJson(`/repository-binding?projectId=${encodeURIComponent(projectId)}`);
-}
-
-/**
- * 提交对用户自有仓库的显式 opt-in。后端要求 `allowExistingRepository === true`，
- * 否则返回 400 `explicit_existing_repository_consent_required`——绝不在前端伪造
- * 同意。落库 `decisionSource: 'explicit_api'`。
- */
-export function submitExistingRepositoryConsent(projectId: string): Promise<ExistingRepositoryConsentResult> {
-  return requestJson('/repository-binding/consent', {
-    method: 'POST',
-    body: JSON.stringify({ projectId, allowExistingRepository: true }),
-  });
-}
 
 
 // UI-456 — 随 resultBridge 退役去导出（仅本文件 ResultLineage 内部消费）

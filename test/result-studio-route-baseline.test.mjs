@@ -16,7 +16,6 @@ const route = require('../core/biof3-server/routes/result-studio');
 const { readVerifiedFileSnapshot } = require('../core/biof3-server/helpers/verified-file-snapshot');
 const { queryResultTable } = require('../core/shared-backend/result-studio-table-query');
 const {
-  attachExistingRepositoryWithExplicitConsent,
   baselineFailureDiagnostic,
   bindAuthoritativeQuerySelection,
   buildContextBoundPreviewBudget,
@@ -27,67 +26,10 @@ const {
   resolveInteractionBaselineRevision,
 } = route._test;
 
-test('P7 existing Git attachment requires explicit affirmative consent before binding or persistence', () => {
-  let bindCalls = 0;
-  let consentWrites = 0;
-  let bindingWrites = 0;
-  const repository = {
-    saveExistingRepositoryConsent: () => { consentWrites += 1; },
-    saveRepositoryBinding: () => { bindingWrites += 1; },
-  };
-  const binder = () => { bindCalls += 1; return null; };
-
-  const denied = attachExistingRepositoryWithExplicitConsent({
-    projectId: 'p_1', workspaceRoot: '/tmp/project', allowExistingRepository: false,
-  }, { repository, bindProjectRepository: binder });
-  assert.deepEqual(denied, {
-    ok: false, status: 400, code: 'explicit_existing_repository_consent_required',
-  });
-  assert.equal(bindCalls, 0);
-  assert.equal(consentWrites, 0);
-  assert.equal(bindingWrites, 0);
-});
-
-test('P7 explicit Git attachment persists consent and binding only after inspecting existing mode', () => {
-  let bindOptions = null;
-  const repository = {
-    saveExistingRepositoryConsent: (decision) => ({
-      ...decision,
-      createdAt: '2026-08-03T00:00:00.000Z',
-      updatedAt: '2026-08-03T00:00:00.000Z',
-    }),
-    saveRepositoryBinding: (binding) => ({ ...binding, createdAt: 'now', updatedAt: 'now' }),
-  };
-  const result = attachExistingRepositoryWithExplicitConsent({
-    projectId: 'p_1', workspaceRoot: '/tmp/project', allowExistingRepository: true,
-  }, {
-    repository,
-    bindProjectRepository: (options) => {
-      bindOptions = options;
-      return {
-        status: 'ready', mode: 'existing', reason: null,
-        workspaceRoot: '/tmp/project', managedPaths: ['analysis/scripts'],
-        adapter: { gitDir: '/tmp/project/.git', workTree: '/tmp/project' },
-        inspection: { runtime: { versionRaw: 'git version 2.50.1' } },
-      };
-    },
-  });
-  assert.equal(bindOptions.allowExistingRepository, true);
-  assert.equal(bindOptions.createManagedIfMissing, false);
-  assert.deepEqual(result, {
-    ok: true,
-    status: 200,
-    code: null,
-    bindingStatus: 'ready',
-    mode: 'existing',
-    consent: { allowExistingRepository: true, decisionSource: 'explicit_api' },
-  });
-});
-
-test('P7 production Git callers derive existing-repository access instead of hard-coding it', () => {
-  // PHASE 2.1b: routes/result-studio.js is a thin facade (no app code), so the
-  // production Git callers now live in result-studio/index.js (projectContext
-  // closure) and the result-edit/result-selection agent-tools files.
+test('UI-462 production Git callers never reference existing-repository consent (capability retired)', () => {
+  // UI-462（2026-10-03 用户裁决）：Result Studio 历史只进受管理私有仓库（.biof3/git）。
+  // 生产 Git 调用方（projectContext 闭包 + background child + agent-tools）
+  // 不得再出现 consent 存取或 existing 附加路径的任何引用。
   for (const relative of [
     '../core/biof3-server/routes/result-studio/index.js',
     '../core/shared-backend/result-studio-background-child.js',
@@ -95,8 +37,8 @@ test('P7 production Git callers derive existing-repository access instead of har
     '../core/biof3-server/agent-tools/result-selection-tools.js',
   ]) {
     const source = readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), relative), 'utf8');
-    assert.doesNotMatch(source, /allowExistingRepository\s*:\s*true/);
-    assert.match(source, /hasExistingRepositoryConsent/);
+    assert.doesNotMatch(source, /allowExistingRepository|hasExistingRepositoryConsent|saveExistingRepositoryConsent/);
+    assert.doesNotMatch(source, /mode === 'existing'/);
   }
 });
 const routeDb = require('../core/biof3-server/db').db;

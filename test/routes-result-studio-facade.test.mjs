@@ -26,9 +26,8 @@ const require = createRequire(import.meta.url);
 const routePath = '../core/biof3-server/routes/result-studio';
 const route = require(routePath);
 
-test('routes/result-studio facade expose all 10 _test helpers (100% backward compat)', () => {
+test('routes/result-studio facade expose all 9 _test helpers (100% backward compat)', () => {
   const expected = [
-    'attachExistingRepositoryWithExplicitConsent',
     'baselineFailureDiagnostic',
     'bindAuthoritativeQuerySelection',
     'buildContextBoundPreviewBudget',
@@ -122,10 +121,9 @@ test('_helpers/storage.js exposes hashing / csv / open snapshot', () => {
   assert.deepEqual(storage.splitCsvLine('a,"b,c",d', ','), ['a', 'b,c', 'd']);
 });
 
-test('_helpers/workflow.js exposes 7 workflow helpers', () => {
+test('_helpers/workflow.js exposes 6 workflow helpers', () => {
   const w = require('../core/biof3-server/routes/_helpers/workflow');
   for (const name of [
-    'attachExistingRepositoryWithExplicitConsent',
     'resolveInteractionBaselineRevision',
     'baselineFailureDiagnostic',
     'resolveInteractionDescriptor',
@@ -148,7 +146,7 @@ test('routes/result-studio/index.js facade exposes required surfaces', () => {
   assert.equal(typeof index.register, 'function');
   assert.ok(index._submodules, 'must expose _submodules');
   assert.ok(index._helpers, 'must expose _helpers');
-  for (const name of ['repository', 'interaction', 'selection', 'context', 'changesets', 'revisions', 'storage', 'workspace', 'preview-budget']) {
+  for (const name of ['interaction', 'selection', 'context', 'changesets', 'revisions', 'storage', 'workspace', 'preview-budget']) {
     assert.equal(typeof index._submodules[name], 'function', `_submodules.${name} missing`);
   }
   for (const name of ['validate', 'repository', 'format', 'context', 'storage', 'workflow']) {
@@ -156,8 +154,8 @@ test('routes/result-studio/index.js facade exposes required surfaces', () => {
   }
 });
 
-test('routes/result-studio 9 subdomain stubs are all loadable', () => {
-  const subs = ['repository', 'interaction', 'selection', 'context', 'changesets', 'revisions', 'storage', 'workspace', 'preview-budget'];
+test('routes/result-studio 8 subdomain stubs are all loadable', () => {
+  const subs = ['interaction', 'selection', 'context', 'changesets', 'revisions', 'storage', 'workspace', 'preview-budget'];
   for (const name of subs) {
     const sub = require(`../core/biof3-server/routes/result-studio/${name}`);
     assert.equal(typeof sub.register, 'function', `${name}.register missing`);

@@ -24,9 +24,6 @@ const {
   ensureResultRefTransactionSchema,
 } = require('../core/shared-backend/result-ref-transaction-schema');
 const {
-  ensureGitRepositoryConsentSchema,
-} = require('../core/shared-backend/git-repository-consent-schema');
-const {
   createResultStudioRepository,
 } = require('../core/shared-backend/result-studio-repository');
 
@@ -99,7 +96,6 @@ function fixture() {
   // without mutating its schema. Keep this fixture at the same migration
   // boundary now that lifecycle inspection reads the durable ref journal.
   ensureResultRefTransactionSchema(sqlite);
-  ensureGitRepositoryConsentSchema(sqlite);
   const repository = createResultStudioRepository(sqlite, { ensureSchema: false });
 
   const artifactPath = path.join(workspaceRoot, 'results', 'plot.png');

@@ -38,7 +38,8 @@ const { canAccessProject } = require('../_helpers/validate');
 const sqlite = db.db;
 
 /**
- * PHASE 2.1b register(app, options) 注册全部 9 个子域文件。
+ * PHASE 2.1b register(app, options) 注册全部 8 个子域文件
+ * （原 repository 子域已随 UI-462「自有仓库接入退役」删除）。
  *
  * 注意：原 routes/result-studio.js 作为 thin facade，会 require('./index').register 并
  * 透传给 routes/index.js 的 routes 列表。register(app) 不需要 options 参数——所有共享
@@ -73,14 +74,11 @@ module.exports = {
       if (!canAccessProject(req, project)) return { error: { status: 403, code: 'forbidden' } };
       if (!git) return { project, binding: null, repository: repo(), gitPathPrefix: '' };
       const repository = repo();
-      const allowExistingRepository = repository.hasExistingRepositoryConsent(projectId);
       const binding = bindProjectRepository({
         workspaceRoot: project.workspace_path,
         projectId,
-        preferManaged: false,
-        allowExistingRepository,
-        // Read-only history/compare/status requests may inspect an existing
-        // repository but must not initialize .biof3/git as a side effect.
+        // Read-only history/compare/status requests must not initialize
+        // .biof3/git as a side effect.
         createManagedIfMissing: write,
       });
       if (!binding?.adapter || (write && binding.status !== 'ready')) {
@@ -114,9 +112,7 @@ module.exports = {
         project,
         binding,
         repository,
-        gitPathPrefix: binding.mode === 'existing'
-          ? binding.inspection?.existing?.workspaceRelativeToRepository
-          : '',
+        gitPathPrefix: '',
       };
     }
 
@@ -139,7 +135,6 @@ module.exports = {
     };
 
     // 子模块注册（顺序与原 routes/result-studio.js 端点声明顺序一致）
-    require('./repository').register(app, { repo });
     require('./lineage').register(app, { repo, sqlite });
     require('./interaction').register(app, {
       repo, baselineWork, databasePath,
@@ -157,8 +152,7 @@ module.exports = {
 
   // 子模块引用（PHASE 2.1b 主文件降 thin facade 后会用到）
   _submodules: {
-    repository: () => require('./repository'),
-    interaction: () => require('./interaction'),
+      interaction: () => require('./interaction'),
     selection: () => require('./selection'),
     context: () => require('./context'),
     changesets: () => require('./changesets'),

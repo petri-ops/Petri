@@ -468,7 +468,7 @@ test('RS6 Agent review tools share project scope and the canonical services', as
   assert.equal(calls.every(([, input]) => input.projectId === 'p_1'), true);
 });
 
-test('RS6 Agent can read history in a dirty existing repository but cannot write it', async () => {
+test('RS6 Agent can read history while the managed repository is blocked but cannot write it', async () => {
   const repository = {
     saveRepositoryBinding: () => {},
     getChangeSet: () => ({ changeSetId: 'cs_1', projectId: 'p_1' }),
@@ -483,14 +483,14 @@ test('RS6 Agent can read history in a dirty existing repository but cannot write
     },
     createResultStudioRepository: () => repository,
     bindProjectRepository: () => ({
-      status: 'blocked', mode: 'existing', workspaceRoot: '/tmp/p_1', managedPaths: [],
-      reason: 'blocked_dirty_conflict', inspection: { runtime: {}, existing: { workspaceRelativeToRepository: 'project' } },
-      adapter: { gitDir: '/tmp/git', workTree: '/tmp/repo' },
+      status: 'blocked', mode: 'managed', workspaceRoot: '/tmp/p_1', managedPaths: [],
+      reason: 'index_lock_present', inspection: { runtime: {} },
+      adapter: { gitDir: '/tmp/p_1/.biof3/git', workTree: '/tmp/p_1' },
     }),
     compareResultChangeSet: () => ({ summary: { status: 'preview_ready' } }),
   });
   const ctx = { projectId: 'p_1', userId: 'u_1' };
   assert.equal((await tools.compare({ changeSetId: 'cs_1' }, ctx)).ok, true);
   assert.equal((await tools.listRevisions({ artifactFamilyId: 'family' }, ctx)).ok, true);
-  assert.equal((await tools.adopt({ changeSetId: 'cs_1' }, ctx)).error, 'blocked_dirty_conflict');
+  assert.equal((await tools.adopt({ changeSetId: 'cs_1' }, ctx)).error, 'index_lock_present');
 });

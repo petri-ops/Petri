@@ -257,12 +257,9 @@ function verifyImmutableRevision({ projectId, project, revision, repository, sou
   let binding = dependencies.repositoryBinding || null;
   if (!dependencies.adapter && !binding) {
     const bindRepository = dependencies.bindProjectRepository || bindProjectRepository;
-    const allowExistingRepository = repository.hasExistingRepositoryConsent?.(projectId) === true;
     binding = bindRepository({
       workspaceRoot: project.workspace_path,
       projectId,
-      preferManaged: false,
-      allowExistingRepository,
       createManagedIfMissing: false,
     });
   }
@@ -277,11 +274,7 @@ function verifyImmutableRevision({ projectId, project, revision, repository, sou
     const projection = verifier({ projectId, revision }, {
       repository,
       adapter,
-      gitPathPrefix: dependencies.gitPathPrefix != null
-        ? dependencies.gitPathPrefix
-        : binding?.mode === 'existing'
-          ? binding.inspection?.existing?.workspaceRelativeToRepository
-          : '',
+      gitPathPrefix: dependencies.gitPathPrefix != null ? dependencies.gitPathPrefix : '',
       workspaceRoot: project.workspace_path,
       getToolJob: dependencies.getToolJob || (() => sourceJob),
     });

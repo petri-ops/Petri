@@ -86,7 +86,9 @@ const SOURCE_SCRIPT_ORIGINS = Object.freeze(['canonical_plugin', 'execution_snap
 
 const CHANGE_SET_ORIGINS = Object.freeze(['user', 'agent']);
 
-const BINDING_PERSIST_MODES = Object.freeze(['managed', 'existing']);
+// UI-462（2026-10-03 用户裁决）：「existing」绑定模式已随「自有仓库接入退役」移除，
+// 绑定模式只剩 managed。
+const BINDING_PERSIST_MODES = Object.freeze(['managed']);
 
 /** 选择实体类型。允许插件扩展，因此校验只要求非空字符串。 */
 const KNOWN_ENTITY_TYPES = Object.freeze([

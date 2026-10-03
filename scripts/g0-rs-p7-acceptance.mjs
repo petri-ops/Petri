@@ -49,7 +49,7 @@ const SOURCE_FILES = Object.freeze([
   'scripts/g0-rs-p5-acceptance.mjs',
   'core/shared-backend/result-studio-qualification.js',
   'core/shared-backend/result-studio-evidence-bundle.js',
-  'core/shared-backend/git-repository-consent-schema.js',
+  // git-repository-consent-schema.js removed by UI-462 (existing-repository retirement)
   'src/migrations/004_git_repository_consent.sql',
   'core/biof3-server/helpers/ai-settings.js',
   'core/biof3-server/agent-runner.js',

@@ -21,7 +21,6 @@ const require = createRequire(import.meta.url);
 const Database = require('better-sqlite3');
 const { ensureResultStudioSchema, inspectResultStudioSchema } = require('../core/shared-backend/result-studio-schema');
 const { ensureResultRefTransactionSchema } = require('../core/shared-backend/result-ref-transaction-schema');
-const { ensureGitRepositoryConsentSchema } = require('../core/shared-backend/git-repository-consent-schema');
 const {
   createResultStudioRepository,
   ResultStudioRepositoryError,
@@ -40,7 +39,6 @@ function makeRepo(context) {
   context.after(() => { try { db.close(); } catch { /* already closed */ } rmSync(root, { recursive: true, force: true }); });
   ensureResultStudioSchema(db);
   ensureResultRefTransactionSchema(db);
-  ensureGitRepositoryConsentSchema(db);
   return { db, repo: createResultStudioRepository(db, { ensureSchema: false }), root };
 }
 
@@ -638,52 +636,22 @@ test('RS2 persists a git repository binding per project', (context) => {
   // 同一项目重复绑定是更新，不是插入第二条
   repo.saveRepositoryBinding({
     projectId: 'project_1',
-    mode: 'existing',
+    mode: 'managed',
     workspaceRoot: '/tmp/ws',
-    gitDir: '/tmp/ws/.git',
+    gitDir: '/tmp/ws/.biof3/git',
     workTree: '/tmp/ws',
-    managedPaths: ['analysis/scripts'],
-    status: 'blocked_dirty_conflict',
-    reason: 'managed_paths_have_uncommitted_changes',
+    managedPaths: ['analysis/scripts', 'analysis/workflows'],
+    status: 'blocked_git_unavailable',
+    reason: 'git_unavailable',
   });
   const updated = repo.getRepositoryBinding('project_1');
-  assert.equal(updated.mode, 'existing');
-  assert.equal(updated.status, 'blocked_dirty_conflict');
-});
+  assert.equal(updated.mode, 'managed');
+  assert.equal(updated.status, 'blocked_git_unavailable');
 
-test('P7 persists explicit existing-repository consent separately from runtime binding', (context) => {
-  const { repo } = makeRepo(context);
-  assert.equal(repo.hasExistingRepositoryConsent('project_1'), false);
-  repo.saveRepositoryBinding({
-    projectId: 'project_1',
-    mode: 'existing',
-    workspaceRoot: '/tmp/ws',
-    gitDir: '/tmp/ws/.git',
-    workTree: '/tmp/ws',
-    managedPaths: ['analysis/scripts'],
-    status: 'ready',
-  });
-  assert.equal(
-    repo.hasExistingRepositoryConsent('project_1'),
-    false,
-    'a runtime binding row alone must never become consent',
-  );
-  assert.throws(
-    () => repo.saveExistingRepositoryConsent({
-      projectId: 'project_1', allowExistingRepository: false, decisionSource: 'explicit_api',
-    }),
-    (error) => error instanceof ResultStudioRepositoryError
-      && error.code === 'existing_repository_consent_invalid',
-  );
-  const consent = repo.saveExistingRepositoryConsent({
-    projectId: 'project_1', allowExistingRepository: true, decisionSource: 'explicit_api',
-  });
-  assert.deepEqual(
-    { allowExistingRepository: consent.allowExistingRepository, decisionSource: consent.decisionSource },
-    { allowExistingRepository: true, decisionSource: 'explicit_api' },
-  );
-  assert.equal(repo.hasExistingRepositoryConsent('project_1'), true);
-  assert.equal(repo.getRepositoryBinding('project_1').mode, 'existing');
+  // UI-462（2026-10-03 用户裁决）：「接入用户自有仓库」能力退役——
+  // consent 存取 API 不复存在，绑定不再有任何 consent 前置。
+  assert.equal(repo.saveExistingRepositoryConsent, undefined);
+  assert.equal(repo.hasExistingRepositoryConsent, undefined);
 });
 
 // ---------------------------------------------------------------------------

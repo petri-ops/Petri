@@ -184,12 +184,9 @@ function loadAuthoritativePayload(payload, sqlite, operation) {
 }
 
 function bind(payload, repository, { write }) {
-  const allowExistingRepository = repository.hasExistingRepositoryConsent?.(payload.projectId) === true;
   const binding = bindProjectRepository({
     workspaceRoot: payload.workspaceRoot,
     projectId: payload.projectId,
-    preferManaged: false,
-    allowExistingRepository,
     createManagedIfMissing: write,
   });
   if (!binding || !binding.adapter || (write && binding.status !== 'ready')) {
@@ -222,9 +219,7 @@ function ensureBaseline(payload, repository, sqlite) {
   return ensureBaseline(payload.input, {
     repository,
     adapter: binding.adapter,
-    gitPathPrefix: binding.mode === 'existing'
-      ? binding.inspection?.existing?.workspaceRelativeToRepository
-      : '',
+    gitPathPrefix: '',
     getResultStudioDescriptor: (toolId) => (
       trustedDescriptor && toolId === payload.input.pluginId ? trustedDescriptor : null
     ),
@@ -234,9 +229,7 @@ function ensureBaseline(payload, repository, sqlite) {
 
 function inspectWorkspace(payload, repository, sqlite) {
   const binding = bind(payload, repository, { write: false });
-  const gitPathPrefix = binding.mode === 'existing'
-    ? binding.inspection?.existing?.workspaceRelativeToRepository || ''
-    : '';
+  const gitPathPrefix = '';
   return {
     lifecycle: inspectResultStudioWorkspace({
       repository,
@@ -260,9 +253,7 @@ function inspectWorkspace(payload, repository, sqlite) {
 
 function recoverWorkspace(payload, repository, sqlite) {
   const binding = bind(payload, repository, { write: true });
-  const gitPathPrefix = binding.mode === 'existing'
-    ? binding.inspection?.existing?.workspaceRelativeToRepository || ''
-    : '';
+  const gitPathPrefix = '';
   return recoverResultStudioWorkspace({
     workspaceRoot: payload.workspaceRoot,
     projectId: payload.projectId,

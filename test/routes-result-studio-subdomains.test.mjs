@@ -36,7 +36,6 @@ await runMigrations(process.env.BIOF3_DB_PATH, path.join(path.dirname(__filename
  */
 
 const SUBDOMAINS = [
-  'repository',
   'interaction',
   'selection',
   'context',
@@ -47,13 +46,10 @@ const SUBDOMAINS = [
   'preview-budget',
 ];
 
-// 期望 9 子域中所有 15 端点的 path + method（PHASE 2.1b 下沉目标；与调研报告 §3 一致）
-// 注意：调研报告说 27 端点，但当前主文件实际是 15 端点（plan v0.1 vs 实际差异）。
-// 本测试只覆盖 PHASE 2.1b 实际下沉的 15 端点；future commit（PHASE 2.1c/2.2）会下沉更多。
+// 期望 8 子域中所有 13 端点的 path + method（PHASE 2.1b 下沉目标；与调研报告 §3 一致）。
+// UI-462（2026-10-03 用户裁决）退役「自有仓库接入」后，repository 子域及其
+// 2 个端点（GET /repository-binding、POST /repository-binding/consent）已删除。
 const EXPECTED_ENDPOINTS = [
-  // repository 子域（2）
-  { subdomain: 'repository', method: 'GET', path: '/api/result-studio/repository-binding' },
-  { subdomain: 'repository', method: 'POST', path: '/api/result-studio/repository-binding/consent' },
   // interaction 子域（2）
   { subdomain: 'interaction', method: 'GET', path: '/api/result-studio/interaction' },
   { subdomain: 'interaction', method: 'POST', path: '/api/result-studio/table/query' },
@@ -94,7 +90,7 @@ function makeFakeApp() {
   };
 }
 
-test('9 subdomain files are all require()-able and export register()', () => {
+test('8 subdomain files are all require()-able and export register()', () => {
   for (const name of SUBDOMAINS) {
     const sub = require(`../core/biof3-server/routes/result-studio/${name}`);
     assert.equal(typeof sub.register, 'function', `${name}.register must be a function`);
@@ -111,7 +107,7 @@ test('routes/result-studio/index.js register() accepts an Express app and runs w
     `index should register at least ${EXPECTED_ENDPOINTS.length} endpoints, got ${app._entries.length}`);
 });
 
-test('routes/result-studio/index.js register() mounts 9 subdomains in declared order', () => {
+test('routes/result-studio/index.js register() mounts 8 subdomains in declared order', () => {
   const index = require('../core/biof3-server/routes/result-studio/index');
   const app = makeFakeApp();
   index.register(app);
@@ -127,10 +123,9 @@ test('main file routes/result-studio.js still exports a callable register functi
   assert.equal(typeof main, 'function', 'main export must be a callable register function');
 });
 
-test('main file facade _test field exposes 10 helpers for backward compat', () => {
+test('main file facade _test field exposes 9 helpers for backward compat', () => {
   const main = require('../core/biof3-server/routes/result-studio');
   const expected = [
-    'attachExistingRepositoryWithExplicitConsent',
     'baselineFailureDiagnostic',
     'bindAuthoritativeQuerySelection',
     'buildContextBoundPreviewBudget',
@@ -155,7 +150,7 @@ test('main file is a thin facade (line count significantly reduced)', () => {
   const content = fs.readFileSync(mainPath, 'utf8');
   const lineCount = content.split('\n').length;
   assert.ok(lineCount <= 80, `main file should be ≤ 80 lines (thin facade), got ${lineCount}`);
-  // 同时保证它不是空 facade，至少 30 行（含 doc comment + 10 _test 字段）
+  // 同时保证它不是空 facade，至少 30 行（含 doc comment + 9 _test 字段）
   assert.ok(lineCount >= 30, `main file should be ≥ 30 lines (doc + _test), got ${lineCount}`);
 });
 

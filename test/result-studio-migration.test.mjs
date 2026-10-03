@@ -45,16 +45,13 @@ const {
   RESULT_REF_TRANSACTION_MIGRATION_VERSION,
   buildResultRefTransactionMigrationSql,
 } = require('../core/shared-backend/result-ref-transaction-schema');
-const {
-  GIT_REPOSITORY_CONSENT_MIGRATION_VERSION,
-  buildGitRepositoryConsentMigrationSql,
-} = require('../core/shared-backend/git-repository-consent-schema');
 
 const REAL_MIGRATIONS_DIR = join(REPO_ROOT, 'src', 'migrations');
 const MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '001_result_studio.sql');
 const WORKFLOW_GRAPH_MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '002_result_workflow_graph.sql');
 const REF_TRANSACTION_MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '003_result_ref_transactions.sql');
-const REPOSITORY_CONSENT_MIGRATION_FILE = join(REAL_MIGRATIONS_DIR, '004_git_repository_consent.sql');
+// UI-462（2026-10-03 用户裁决）退役「自有仓库接入」后，consent generator 模块已删除；
+// 004 迁移文件本身保留（历史迁移不可回撤），其 additive 形态守卫随之撤销。
 // runner 真相=src/migrations/ 内全部 .sql 的数字前缀；此处同源推导，
 // 避免新增迁移（如 009_knowledge_space）时硬编码版本号静默漂移。
 const LATEST_MIGRATION_VERSION = Math.max(
@@ -153,22 +150,6 @@ test('P6 ref transaction migration is generated from its schema module and is ad
   assert.equal(/\bresult_ref_transactions\b/i.test(sql), true);
 });
 
-test('P7 Git repository consent migration is generated and additive', () => {
-  assert.equal(
-    readFileSync(REPOSITORY_CONSENT_MIGRATION_FILE, 'utf8'),
-    buildGitRepositoryConsentMigrationSql(),
-  );
-  const sql = readFileSync(REPOSITORY_CONSENT_MIGRATION_FILE, 'utf8')
-    .split('\n')
-    .filter((line) => !line.trim().startsWith('--'))
-    .join('\n');
-  assert.equal(/^\s*BEGIN\b/im.test(sql), false);
-  assert.equal(/^\s*COMMIT\b/im.test(sql), false);
-  assert.equal(/\bDROP\s+TABLE\b/i.test(sql), false);
-  assert.equal(/\bALTER\s+TABLE\b/i.test(sql), false);
-  assert.equal(/\bgit_repository_consents\b/i.test(sql), true);
-});
-
 // ---------------------------------------------------------------------------
 // 2-4. 真实 runner 行为
 // ---------------------------------------------------------------------------
@@ -204,7 +185,7 @@ test('RS2 runner installs the schema into an empty database', async (context) =>
     RESULT_STUDIO_MIGRATION_VERSION,
     RESULT_WORKFLOW_GRAPH_MIGRATION_VERSION,
     RESULT_REF_TRANSACTION_MIGRATION_VERSION,
-    GIT_REPOSITORY_CONSENT_MIGRATION_VERSION,
+    4, // 004_git_repository_consent.sql（UI-462 后 generator 模块退役，版本以迁移文件名为准）
   ]) {
     assert.equal(applied.includes(named), true, `missing named migration ${named}`);
   }

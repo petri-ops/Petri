@@ -198,10 +198,8 @@ function createGitAdapter(options = {}) {
         || fs.existsSync(path.join(resolvedGitDir, 'rebase-apply'));
       const hasSubmodules = fs.existsSync(path.join(resolvedWorkTree, '.gitmodules'));
       // 下面三个字段各需一次 git 子进程，而上面的锁/中途操作/submodule 判断
-      // 全是 fs.existsSync。`bindProjectRepository()` 在 managed 模式下只读
-      // fs 那几项（git-repository-binding.js:301-317），
-      // linkedWorktreeCount 仅在 `mode === 'existing'` 分支使用，
-      // 因此只读请求过去白付三次 fork。
+      // 全是 fs.existsSync。`bindProjectRepository()`（UI-462 后 managed-only）
+      // 只读 fs 那几项，因此只读请求过去白付三次 fork。
       //
       // 改为惰性求值：对象形状与字段语义不变，读到才 fork，读一次缓存一次。
       // 写路径（result-changeset-service.js:242 读 headCommit）照常付出代价。

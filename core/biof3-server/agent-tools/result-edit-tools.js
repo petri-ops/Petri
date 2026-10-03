@@ -331,12 +331,9 @@ function createResultChangeSetTools(options = {}) {
     if (!authorizeProject(project, ctx.userId, dbModule)) return { error: 'source_project_mismatch' };
     const repository = makeRepository(dbModule.db || dbModule.getDatabase());
     if (!git) return { projectId, project, repository, binding: null };
-    const allowExistingRepository = repository.hasExistingRepositoryConsent?.(projectId) === true;
     const binding = bindRepository({
       workspaceRoot: project.workspace_path,
       projectId,
-      preferManaged: false,
-      allowExistingRepository,
       createManagedIfMissing: write,
     });
     if (!binding?.adapter || (write && binding.status !== 'ready')) {
@@ -420,9 +417,7 @@ function createResultChangeSetTools(options = {}) {
       const projected = projectRevisionSource({ projectId: scoped.projectId, revision: sourceRevision }, {
         repository: scoped.repository,
         adapter: scoped.binding.adapter,
-        gitPathPrefix: scoped.binding.mode === 'existing'
-          ? scoped.binding.inspection?.existing?.workspaceRelativeToRepository
-          : '',
+        gitPathPrefix: '',
         workspaceRoot: scoped.project.workspace_path,
         getToolJob: dbModule.getToolJob,
       });
@@ -446,9 +441,7 @@ function createResultChangeSetTools(options = {}) {
       }, {
         repository: scoped.repository,
         adapter: scoped.binding.adapter,
-        gitPathPrefix: scoped.binding.mode === 'existing'
-          ? scoped.binding.inspection?.existing?.workspaceRelativeToRepository
-          : '',
+        gitPathPrefix: '',
         getToolJob: dbModule.getToolJob,
         getResultStudioDescriptor,
         authoritativeSubgraphTrusted: authoritativeSubgraph !== null,
@@ -518,9 +511,7 @@ function createResultChangeSetTools(options = {}) {
         }, {
           repository: scoped.repository,
           adapter: scoped.binding.adapter,
-          gitPathPrefix: scoped.binding.mode === 'existing'
-            ? scoped.binding.inspection?.existing?.workspaceRelativeToRepository
-            : '',
+          gitPathPrefix: '',
         }),
       };
     } catch (error) {
@@ -541,9 +532,7 @@ function createResultChangeSetTools(options = {}) {
         }, {
           repository: scoped.repository,
           adapter: scoped.binding.adapter,
-          gitPathPrefix: scoped.binding.mode === 'existing'
-            ? scoped.binding.inspection?.existing?.workspaceRelativeToRepository
-            : '',
+          gitPathPrefix: '',
           getToolJob: dbModule.getToolJob,
         }),
       };
@@ -596,9 +585,7 @@ function createResultChangeSetTools(options = {}) {
         }, {
           repository: scoped.repository,
           adapter: scoped.binding.adapter,
-          gitPathPrefix: scoped.binding.mode === 'existing'
-            ? scoped.binding.inspection?.existing?.workspaceRelativeToRepository
-            : '',
+          gitPathPrefix: '',
           getToolJob: dbModule.getToolJob,
           getResultStudioDescriptor,
         }),
