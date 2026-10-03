@@ -1101,6 +1101,9 @@ export function ResultArtifactShell({
 
   const shellBody = (
     <>
+      {/* BLOCK-138 加映：完成态稳定面与 stateBlock（loading/running/failed）同位挂载——
+          走查实证切换器此前仅在瞬态区在场，完成态被替换后画布形态不可达 */}
+      {mode === 'result' && <LineageViewSwitch projectId={project.id} jobId={job.id} />}
       {mode === 'result' && workflowBar}
       {mode === 'result' && recoveryConfirmation}
       {(mode === 'compare' || mode === 'history') && versionFamilyId && (

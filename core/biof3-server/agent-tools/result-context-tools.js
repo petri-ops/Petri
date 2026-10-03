@@ -182,6 +182,7 @@ function resolveResultStudioContext(ctx = {}, dependencies = {}) {
             getToolJob: dependencies.getToolJob
               ? dependencies.getToolJob
               : (toolJobId) => dbModule.getToolJob(toolJobId),
+            listProjectToolJobs: (id) => dbModule.listProjectToolJobsForWorkflow(id),
           });
           if (chain && chain.ok) {
             revision = repository.findRevisionByJobArtifact({

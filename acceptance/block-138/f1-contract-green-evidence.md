@@ -135,3 +135,94 @@ helper 定义与既有 ready 守卫兼容。真实步骤执行后的注册路径
   实现与测试零改动。撤档安全性实测：`node --test <不存在路径>` → `Could not find …`、exit 0
   （不产生失败测试项）；复跑契约 4/4 + related 69/67/0（2 既有 skip）保持绿。
 - 未跑 gate:code-size/docs:check（零 docs 改动；体积台账登记按 plan §9 验收②留集成提交刷新）。
+
+## 7. 补刃轮（第 1→2 轮）红→绿证据 + 红侧断言勘误（原 f1-blade2-red/green-evidence.md，同款撤档并入）
+
+> 补刃契约：§9 方向 1 两件——①plan 链 run 路径下游输入 lineage（attempt-5 实证根因：
+> 下游 job manifest 输入无 lineage 元数据）；②ensureChainRevisions 注册成功后权威图落库
+> （attempt-5 实证：changesets ×3 preview_ready 在而 result_workflow_graphs 0 行，
+> /lineage 读不到图）。契约⑤⑥（工作区红侧 +235 行先行落盘）。
+> 本节内容收敛自 f1-blade2-red-evidence.md / f1-blade2-green-evidence.md
+> （第 2 轮脚本把它们当 node --test 目标执行判红——与 §6 第 2 轮同款事故，处置同款撤档并入）。
+
+### 7.1 红证据（实现前实跑）
+
+命令（仓根）：`node --test test/block138-f1-chain-pending-registration.test.mjs`
+→ `tests 6 / pass 4 / fail 2`（exit=1）。①-④绿（F1 既有实现零回归）；⑤⑥红在补刃断言本体：
+
+```
+✖ F1 补刃⑤ plan 链 run：下游 job manifest 输入带 lineage（经 resultStudioInputLineage 选项）且权威图 ≥1 边
+  AssertionError: F1 补刃⑤a：plan 链 run 必须把 bound 上游的 lineage 经 resultStudioInputLineage 传入执行器（当前代码缺解析 → 红）
+    actual: null
+    expected: { deg_results: { lineageVersion: 1, kind: 'artifact', sourceRevisionId: 'rev_…', sourceToolJobId: 'tj_…', sourceArtifactId: 'deg_table', sourceOutputHash: '13d97c…', materializationHash: '13d97c…' } }
+✖ F1 补刃⑥ ensureChainRevisions 注册成功后权威图落库：graph 行存在且节点数随链增长
+  AssertionError: F1 补刃⑥：bind 注册成功后项目必须落库权威图（当前代码 0 行 → 红）：0
+    actual: 0
+    expected: 1
+```
+
+各自用例的 F1 前置链（plan/bind/注册/假执行器承接）均通过——红即补刃缺口本体，非夹具缺陷。
+
+### 7.2 实现面（触碰文件；未 git commit）
+
+- **补刃 A·plan 链 run 下游输入 lineage**：learning.js 新增 `resolvePlanStepInputLineage`
+  （解析 plan.lineage 中 toStepId===stepId 的绑定 → findRevisionByJobArtifact 只认链形成点
+  已注册 revision，未注册即跳过，**绝不启发式造边** → 组 validateLineage 合同形状 map；
+  fail-closed 附加，解析失败回退既有无边状态）；op='run' plan 分支解析后经四执行点统一
+  `planStepInputLineage || (ctx && ctx.resultStudioInputLineage) || null` 传入（非 plan 链零行为
+  变化）；经既有 `_executeRunTool` → registry.callTool options 透传 → 生产 collectExecutionInputs
+  （artifact-manifest.js:27-28）按 inputId 挂进下游 manifest。
+- **补刃 B·注册成功后权威图落库**：chain-preview.js 新增 `persistChainWorkflowGraph` +
+  `withChainGraphPersist`，三个 ok:true 返回（新注册+两条幂等路径）以该 job 为 source
+  buildAuthoritativeWorkflowGraph（只读 Job/Revision 真值）→ repository.saveWorkflowGraph
+  （persistWorkflowGraph 按 project+source_digest 幂等、不覆写历史）；四处宿主接线点
+  （learning.js bind/run、result-context-tools.js、result-selection-tools.js）注入
+  `listProjectToolJobs`；依赖缺失或失败仅附加 graphPersisted:false+reason 如实透出，
+  绝不回滚注册、绝不触碰 adopt/is_current。
+
+### 7.3 绿证据（实现后实跑，仓根）
+
+```
+$ node --test test/block138-f1-chain-pending-registration.test.mjs
+✔ F1 契约①…④ + ✔ F1 补刃⑤ + ✔ F1 补刃⑥
+ℹ tests 6 / pass 6 / fail 0（exit 0）
+
+$ node --test test/agent-workflow-phase6.test.mjs test/result-changeset-service.test.mjs \
+    test/result-selection-tools.test.mjs test/result-studio-agent-binding.test.mjs \
+    test/agent-approval.test.mjs test/block83-task-confirmation-hooks.test.mjs \
+    test/result-studio-context.test.mjs test/result-studio-repository.test.mjs
+ℹ tests 148 / pass 146 / fail 0 / skipped 2（exit 0；2 skip=agent-workflow-phase6 既有环境项）
+
+$ npx eslint <5 个触碰文件>   # learning.js / chain-preview.js / result-context-tools.js / result-selection-tools.js / 契约测试
+0 errors（25 warnings 均 security/detect-object-injection 提示级，仓内存量同级）
+
+$ npm run quality:knip:check
+[knip-ratchet] PASS（保留面 238 键冻结，无新增；『已减少 1 处』提示=并行 UI-462 会话删除，基线下调留集成提交）
+```
+
+### 7.4 红侧断言勘误（case⑥:877，如实记录）
+
+红侧 `grown.rootToolJobId === run.toolJobId`（期望增长图以下游=source 为根）与平台权威语义
+**结构性冲突**，实现后第一次绿跑实证该断言红（actual=上游 job id）：
+
+- `buildAuthoritativeWorkflowGraph` 写死 `graph.rootToolJobId = authoritativeRootJobId`
+  （拓扑根=唯一无入边上游，result-workflow-graph.js:601,671，非调用参 sourceToolJobId）；
+- `persistWorkflowGraph` 落库前强制 `verifyWorkflowGraphIntegrity`
+  （result-studio-repository.js:70-82，digest 按 rootToolJobId+nodes+edges 内容寻址重算）——
+  **root=source 的行根本无法落库**（integrity_failed），不存在合法实现能满足该断言；
+- /lineage 消费端按「包含目标 job 的图」查找（result-studio-repository.js:253-255），
+  不依赖 root=source——补刃意图（图可读、节点随链增长、历史不覆写）全部满足；
+- case⑥ 自身 :855（bind 单节点图）断言 root=上游与权威语义一致——:877 属 source/root 混淆笔误。
+
+勘误内容：断言改为 `grown.rootToolJobId === fx.upstreamJob.id`（权威上游根）+ 新增
+`grown.nodes` 含 `job:<下游>` 断言。非造假绕过：图行本体（2 节点 1 边、digest 寻址、
+幂等不覆写）由平台不变量强制验证，勘误仅对齐元数据语义。
+
+### 7.5 边界（未跑项，如实）
+
+- 未跑五门全量与 test:all:workspace（test:changed+impact-map 登记留集成提交刷新）；
+  零 docs/** 改动；未 git commit。真实 R 执行未跑（需 R 运行时）——plan 链执行器语义由生产
+  manifest 管线（collectExecutionInputs + createExecutionProvenance）在契约⑤⑥假执行器中同构覆盖。
+- 第 2 轮脚本判定失败根因与处置（本节开头）：filesCreated 含证据 md → 被当 node --test 目标
+  （77 = 契约 6 + related 69 + 证据 md 2 失败；真测试 73 pass + 2 skip 全绿）。
+  处置=两 md 撤档、内容并入本文件（§7），实现与测试零改动，复跑判定绿。

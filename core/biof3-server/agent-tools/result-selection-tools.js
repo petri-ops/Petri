@@ -491,6 +491,7 @@ async function tool_result_selection_run(args, ctx, dependencies = {}) {
     }, {
       repository,
       getToolJob: dependencies.getToolJob || dbMod.getToolJob,
+      listProjectToolJobs: (id) => dbMod.listProjectToolJobsForWorkflow(id),
     });
     chainPreview = {
       ok: chain.ok === true,

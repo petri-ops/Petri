@@ -1,0 +1,67 @@
+{
+  "suite": "block138-f1-attempt6-chain-produced",
+  "generatedAt": "2026-10-03T16:40:00+08:00",
+  "purpose": "BLOCK-138 第 6 轮（attempt-6）：补刃第二件（chain-preview persistChainWorkflowGraph 图落库 + learning.js resolvePlanStepInputLineage provenance lineage）后的栈上，经 chat plan/bind 链获得 ≥2 节点真实血缘链",
+  "conclusion": "method=produced：plan/bind 链首次尝试即产出 3 节点真实血缘链（deseq2 → deg-standardizer → volcano-plot，2 条真实边、validation=valid），权威血缘端点 /api/result-studio/lineage 对终端 job 返回 chain 长度=3、上游在前、终端 isCurrent=true；同时 3 个 pending ChangeSet（各带 preview revisions）进入审阅队列，零 adopt、is_current 集合零触碰。selection 备选路未动用（ask 的条件是 plan/bind 卡住才走）。enrichment 第 4 步如实 blocked（go-kegg/gsea 未激活，用户裁决休眠面未触碰）。",
+  "stackState": {
+    "backend": "core/biof3-server/server.js pid 25662（2026-10-03 16:23 启动），晚于补刃文件 mtime 16:13-16:14：core/shared-backend/result-changeset-service/chain-preview.js（persistChainWorkflowGraph/withChainGraphPersist）、core/biof3-server/agent-tools/learning.js（resolvePlanStepInputLineage + listProjectToolJobs 注入 + 四执行点 resultStudioInputLineage 接线）、result-context-tools.js / result-selection-tools.js（各 +1 行 listProjectToolJobs 注入）——修复代码确认在跑进程内",
+    "pluginCatalog": "GET /api/tools/catalog → ok=true,count=3（deseq2/deg-standardizer/volcano-plot，source=installed-plugins）",
+    "inputFiles": "block52 9/29 跑通输入实存：.biof3-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f/inputs/{counts.csv 61419B,coldata.csv 147B}",
+    "lineageWiring": "learning.js plan 链 run 把 plan.lineage 解析为 {kind:'artifact',sourceRevisionId,sourceToolJobId,sourceArtifactId,sourceOutputHash,materializationHash} 经 registry.js:928 → run-plugin-script.js:305 写入下游 job provenance"
+  },
+  "projectAndChatChain": {
+    "projectId": "p_mus4u230_wvib",
+    "projectName": "block138-f1-verify-163053",
+    "projectCreate": "POST /api/data/projects（Bearer desktop-local，name=block138-f1-verify-163053，modality=bulk）→ status=ok",
+    "channel": "POST /api/ai/agent（task 模式，context={projectId,page:'workspace',pageTitle:'项目工作区',accessMode:'full'}）",
+    "taskId": "f570d618-4373-4940-ae5a-a68e7f734012",
+    "conversationId": "conv_a1ead47d-d6a",
+    "poll": "GET /api/ai/agent/task/f570d618-4373-4940-ae5a-a68e7f734012/meta 间隔 5s，08:31:28Z 创建 → 08:32:24Z finishedAt（~60s），status=completed/agentStatus=done",
+    "driverScript": "/tmp/block138-f1-attempt6.mjs（会话转储 /tmp/block138-f1-attempt6-conversation.json、结果 /tmp/block138-f1-attempt6.json）",
+    "agentInstruction": "op='plan'（templateId='bulk-rna-core'，initialInputs=counts/coldata 绝对路径+design='condition'+contrast_ref='Control'+contrast_treat='Treatment'）→ differential 终态后 op='bind_artifact'（differential→deg-standardization inputId=deg_results）→ 按 readyStepIds 逐个 op='run'（workflowPlan+stepId）→ volcano 前再 bind（deg-standardization→volcano inputId=deg_table，agent 显式 artifactId=deg_standardized 绑全量表）",
+    "jobs": [
+      { "stepId": "differential", "toolId": "deseq2", "toolJobId": "tj_mus4uxjq_s69m", "status": "completed", "artifactTruth": "valid（23/23，issue=0）", "artifacts": 23 },
+      { "stepId": "deg-standardization", "toolId": "deg-standardizer", "toolJobId": "tj_mus4vg1b_tf2r", "status": "completed", "artifacts": 6 },
+      { "stepId": "volcano", "toolId": "volcano-plot", "toolJobId": "tj_mus4vpzy_ztwn", "status": "completed", "artifacts": 5 },
+      { "stepId": "enrichment", "toolId": null, "status": "blocked", "blockedReason": "tool_not_available（go-kegg/gsea 休眠，未触碰）" }
+    ],
+    "agentSelfReport": "plan 终态 terminal=false、completedCount=3/4、readyStepIds=[]、status=blocked（仅 enrichment 工具缺失）；两次 bind chainPreview 均 ok=true,idempotent=true（run 时已注册），changeSetId=cs_b19c2b95…（bind#1）/cs_5296811a…（bind#2）；一处自动修复：agent 首跑 deg-standardization 误把 inputs.deg_results 复述为相对名被 missing_required_file_inputs 挡下，改用 bind 返回的原样 plan 重跑成功"
+  },
+  "finalChecks": {
+    "lineageEndpoint": {
+      "command": "curl -s -H 'Authorization: Bearer desktop-local' 'http://127.0.0.1:3001/api/result-studio/lineage?jobId=tj_mus4vpzy_ztwn&projectId=p_mus4u230_wvib'",
+      "http": 200,
+      "response": { "ok": true, "projectId": "p_mus4u230_wvib", "graphId": "wfg_d05e23f47638c43cbf2f70bf", "lineage": { "chain": [ { "toolJobId": "tj_mus4uxjq_s69m", "toolId": "deseq2", "isCurrent": false }, { "toolJobId": "tj_mus4vg1b_tf2r", "toolId": "deg-standardizer", "isCurrent": false }, { "toolJobId": "tj_mus4vpzy_ztwn", "toolId": "volcano-plot", "isCurrent": true } ], "downstreamCount": 0 } },
+      "verdict": "chain 长度=3 ≥2 且上游在前（deseq2→deg-standardizer→volcano-plot），PASS",
+      "middleJobProbe": "jobId=tj_mus4vg1b_tf2r → 同 graphId，chain=2（deseq2→deg-standardizer，isCurrent 于中节点），downstreamCount=1",
+      "rootJobProbe": "jobId=tj_mus4uxjq_s69m → chain=1（deseq2），downstreamCount=1"
+    },
+    "terminalJobStatus": "GET /api/tools/status/tj_mus4vpzy_ztwn → ok=true,status=completed,toolId=volcano-plot,artifactCount=5（report.html/volcano.png/volcano.svg/classified_table.csv/volcano.pdf）",
+    "reviewQueueVisibility": {
+      "api": "GET /api/result-studio/changesets?projectId=p_mus4u230_wvib&status=preview_ready → 3 行全部 preview_ready：cs_b19c2b95c4f36c3cb069b6a19c52d94f（chain-preview:tj_mus4uxjq_s69m，46 changedPaths）/ cs_5296811ae8cd2b2f049ab1b0a3ffa7ff（chain-preview:tj_mus4vg1b_tf2r，12）/ cs_a364d87fb5b7126a67b35e0216176b64（chain-preview:tj_mus4vpzy_ztwn，10），adopted_at 均 None",
+      "dbCorroboration": "better-sqlite3 readonly .biof3-dev-user-data/data/biof3.db：scientific_change_sets 项目内 3 行 status='preview_ready'、adopted_at=NULL；artifact_revisions 项目内 34 行 SUM(is_current)=0、validation_status 全 'valid'（信任层红线：零 adopt、is_current 集合零触碰）"
+    },
+    "graphCorroboration": {
+      "db": "result_workflow_graphs 项目内 3 行（08:31:43/08:31:59/08:32:13，随链增长 1→2→3 节点），库内总数 7→10（本轮新增 3）；终端图 wfg_d05e23f47638c43cbf2f70bf validation='valid'",
+      "terminalGraphEdges": [
+        { "from": "job:tj_mus4uxjq_s69m", "to": "job:tj_mus4vg1b_tf2r", "sourceRevisionId": "rev_98203ee6998effa3fe503a3865d3ffbf" },
+        { "from": "job:tj_mus4vg1b_tf2r", "to": "job:tj_mus4vpzy_ztwn", "sourceRevisionId": "rev_1785c473f7333d6472fca18352bb2411" }
+      ]
+    },
+    "provenanceLineageCorroboration": "tool_jobs.result_json executionProvenance.inputs（DB readonly 实读）：tj_mus4vg1b_tf2r inputs=[{id:'deg_results',lineage:{kind:'artifact',sourceRevisionId:'rev_98203ee6…',sourceToolJobId:'tj_mus4uxjq_s69m',sourceArtifactId:'deg_table'}}]；tj_mus4vpzy_ztwn inputs=[{id:'deg_table',lineage:{kind:'artifact',sourceRevisionId:'rev_1785c473…',sourceToolJobId:'tj_mus4vg1b_tf2r',sourceArtifactId:'deg_standardized'}}]——attempt-5 断链根因（provenance 无 lineage）已修复实证"
+  },
+  "attempt5RootCauseDisposition": [
+    "plan 链不落图 → 已修（chain-preview.js persistChainWorkflowGraph：注册成功后 buildAuthoritativeWorkflowGraph + repository.saveWorkflowGraph，按 project+source_digest 幂等；本轮 3 张图即 3 次落库实证）",
+    "job provenance inputs 无 lineage → 已修（learning.js resolvePlanStepInputLineage：只认链形成点已注册 ArtifactRevision，未注册即跳过绝不启发式造边；本轮两个下游 job provenance lineage 实读非空）",
+    "三插件 resultStudio=None → 未变（selection/enrichment 动作门仍在位）；本轮未走 selection 路故未触发",
+    "pending revision 非 current → 未变（adopt 是人的审阅动作；本轮 34 revisions SUM(is_current)=0）"
+  ],
+  "sideEffects": [
+    "新建验收项目 p_mus4u230_wvib（block138-f1-verify-163053，modality=bulk）",
+    "1 个 agent task（f570d618）+ 会话 conv_a1ead47d-d6a",
+    "3 个新 completed job：tj_mus4uxjq_s69m（deseq2）/ tj_mus4vg1b_tf2r（deg-standardizer）/ tj_mus4vpzy_ztwn（volcano-plot）",
+    "3 个 pending ChangeSet（cs_b19c…/cs_5296…/cs_a364…，各带 preview revisions 共 34 行）进入审阅队列等待人的裁决；零 adopt、零 revert、is_current 集合零触碰",
+    "3 个新 result_workflow_graphs 行（1/2/3 节点各一，validation=valid）",
+    "未激活任何休眠插件；未改 docs/**；未 git commit；后端进程未动；未删任何项目/作业数据"
+  ]
+}

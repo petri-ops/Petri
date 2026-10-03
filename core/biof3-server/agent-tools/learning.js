@@ -699,6 +699,48 @@ function sameJsonValue(left, right) {
     && leftKeys.every((key, index) => key === rightKeys[index] && sameJsonValue(left[key], right[key]));
 }
 
+// BLOCK-138 §9 方向 1（补刃）：plan 链 run——把 bound 上游的产物引用解析成
+// 服务端 lineage（inputId → validateLineage 合同形状），经既有 resultStudioInputLineage
+// 选项随执行传入，使下游 job manifest 输入携带 lineage 元数据、权威图可成边
+// （attempt-5 实证根因：下游 manifest 输入无 lineage → 三链 0 边）。
+// 只认链形成点已注册的 ArtifactRevision（findRevisionByJobArtifact 命中）——
+// 未注册即跳过该输入，绝不启发式造边；解析失败回退既有无边状态（fail-closed 附加，
+// 不阻断执行）。materializationHash=上游产物 hash：plan 输入值即上游产物文件路径，
+// 物化字节=上游产物字节（kind='artifact' 精确交接合同，契约⑤b 钉死）。
+function resolvePlanStepInputLineage(plan, stepId, projectId) {
+  try {
+    const entries = Array.isArray(plan && plan.lineage) ? plan.lineage : [];
+    if (entries.length === 0) return null;
+    const repository = createResultStudioRepository(dbMod.getDatabase());
+    const inputLineage = {};
+    for (const entry of entries) {
+      if (!entry || entry.toStepId !== stepId) continue;
+      const inputId = String(entry.inputId || '').trim();
+      const fromToolJobId = String(entry.fromToolJobId || '').trim();
+      const artifactId = String(entry.artifactId || '').trim();
+      if (!inputId || !fromToolJobId || !artifactId) continue;
+      const revision = repository.findRevisionByJobArtifact({
+        projectId,
+        toolJobId: fromToolJobId,
+        artifactId,
+      });
+      if (!revision || !revision.revisionId || !revision.outputHash) continue;
+      inputLineage[inputId] = {
+        lineageVersion: 1,
+        kind: 'artifact',
+        sourceRevisionId: revision.revisionId,
+        sourceToolJobId: fromToolJobId,
+        sourceArtifactId: artifactId,
+        sourceOutputHash: revision.outputHash,
+        materializationHash: revision.outputHash,
+      };
+    }
+    return Object.keys(inputLineage).length > 0 ? inputLineage : null;
+  } catch {
+    return null;
+  }
+}
+
 async function tool_run_tool(args, ctx) {
   const userId = ctx && ctx.userId;
   if (!userId) throw new Error('未授权');
@@ -819,6 +861,7 @@ async function tool_run_tool(args, ctx) {
           repository: createResultStudioRepository(dbMod.getDatabase()),
           getToolJob: (id) => dbMod.getToolJob(id),
           getProject: (id) => dbMod.getProject(id),
+          listProjectToolJobs: (id) => dbMod.listProjectToolJobsForWorkflow(id),
         });
         chainPreview = {
           ok: chain.ok === true,
@@ -843,6 +886,9 @@ async function tool_run_tool(args, ctx) {
   if (op === 'run') {
     let toolId = args && args.toolId;
     let params = (args && args.params) || {};
+    // 补刃：plan 链步骤的上游输入 lineage（resolvePlanStepInputLineage 解析，
+    // 非 plan 链恒 null → 四执行点回退既有 ctx 透传行为）。
+    let planStepInputLineage = null;
     if (args && args.workflowPlan && args.stepId) {
       const { projectWorkflowPlan, runToolJobs } = require('../../shared-backend/agent-workflow');
       const scopedPlan = sanitizeWorkflowPlanJobRefs(args.workflowPlan, ctx, userId);
@@ -858,6 +904,7 @@ async function tool_run_tool(args, ctx) {
       }
       toolId = step.toolId;
       params = { ...step.inputs, ...params };
+      planStepInputLineage = resolvePlanStepInputLineage(scopedPlan, args.stepId, trustedProjectId(ctx));
     }
     if (!toolId) return { error: 'missing_toolId', message: 'op=run 需要 toolId' };
 
@@ -879,6 +926,7 @@ async function tool_run_tool(args, ctx) {
           repository: createResultStudioRepository(dbMod.getDatabase()),
           getToolJob: (id) => dbMod.getToolJob(id),
           getProject: (id) => dbMod.getProject(id),
+          listProjectToolJobs: (id) => dbMod.listProjectToolJobsForWorkflow(id),
         });
         return {
           ...executed,
@@ -966,7 +1014,7 @@ async function tool_run_tool(args, ctx) {
         version: Number(ref.version || 1),
       }, {
         conversationId: trustedConversationId(ctx),
-        resultStudioInputLineage: ctx && ctx.resultStudioInputLineage || null,
+        resultStudioInputLineage: planStepInputLineage || (ctx && ctx.resultStudioInputLineage) || null,
       }));
       return { ...executed, scientificTaskRef: { taskId: ref.taskId, version: Number(ref.version || 1) } };
     }
@@ -991,7 +1039,7 @@ async function tool_run_tool(args, ctx) {
       if (shouldAutoExecuteLocalAnalysis(ctx) && !args.ackToken) {
         const executed = registerChainPreviewAfterRun(await runToolExecutor(ctx)(toolId, params, userId, null, trustedProjectId(ctx), null, {
           conversationId: trustedConversationId(ctx),
-          resultStudioInputLineage: ctx && ctx.resultStudioInputLineage || null,
+          resultStudioInputLineage: planStepInputLineage || (ctx && ctx.resultStudioInputLineage) || null,
         }));
         return {
           ...executed,
@@ -1008,7 +1056,7 @@ async function tool_run_tool(args, ctx) {
         if (job && job.ack_status === 'approved') {
           return registerChainPreviewAfterRun(await _executeRunTool(toolId, params, userId, args.ackToken, trustedProjectId(ctx), null, {
             conversationId: trustedConversationId(ctx),
-            resultStudioInputLineage: ctx && ctx.resultStudioInputLineage || null,
+            resultStudioInputLineage: planStepInputLineage || (ctx && ctx.resultStudioInputLineage) || null,
           }));
         }
         if (job && job.ack_status === 'rejected') {
@@ -1046,7 +1094,7 @@ async function tool_run_tool(args, ctx) {
     // 非重操作：直接跑（原逻辑）
     return registerChainPreviewAfterRun(await _executeRunTool(toolId, params, userId, null, trustedProjectId(ctx), null, {
       conversationId: trustedConversationId(ctx),
-      resultStudioInputLineage: ctx && ctx.resultStudioInputLineage || null,
+      resultStudioInputLineage: planStepInputLineage || (ctx && ctx.resultStudioInputLineage) || null,
     }));
   }
   if (op === 'status') {

@@ -1,0 +1,57 @@
+{
+  "suite": "block138-ui460-walkthrough-v2",
+  "generatedAt": "2026-10-03T17:30:00+08:00",
+  "purpose": "UI-460 三断言实机走查（attempt-7）：F1 修复（attempt-6 产出 3 节点真实血缘链）之后的栈上，在 dev Electron 主画布 result 模式走查 条带/画布形态切换、DAG 渲染、节点点击打开链",
+  "route": "dev Electron 主窗（CDP 9222，走查目的本身）SPA 深链 http://localhost:3000/project/p_mus4u230_wvib/result?job=tj_mus4vpzy_ztwn —— location.assign 整页加载后 URL 保持不归零、直落 result 模式主画布（火山图结果详情渲染）。深链形态判定依据：frontend/src/hooks/useWorkspaceRouting.ts:8,24-33（mode 子路径 /project/:id/<mode>，?job= 深链参数保留）+ docs/ui-productization-audit.md UI-455 条目（/project/:id/result?job= 历史深链可用）；实际渲染链 App.tsx:165（/project/:projectId/* splat）→ CenterPanel.tsx:261-315（resultMode 投影层 ResultStudioCanvas + ResultView mode=workspaceMode）→ ResultArtifactShell mode='result'。Command Center popout 下钻备选路未动用（深链直达足够）",
+  "preconditionsVerifiedThisSession": {
+    "lineageEndpoint": {
+      "command": "curl -s -H 'Authorization: Bearer desktop-local' 'http://127.0.0.1:3001/api/result-studio/lineage?jobId=tj_mus4vpzy_ztwn&projectId=p_mus4u230_wvib'",
+      "http": 200,
+      "response": { "ok": true, "projectId": "p_mus4u230_wvib", "graphId": "wfg_d05e23f47638c43cbf2f70bf", "lineage": { "chain": [ { "toolJobId": "tj_mus4uxjq_s69m", "toolId": "deseq2", "isCurrent": false }, { "toolJobId": "tj_mus4vg1b_tf2r", "toolId": "deg-standardizer", "isCurrent": false }, { "toolJobId": "tj_mus4vpzy_ztwn", "toolId": "volcano-plot", "isCurrent": true } ], "downstreamCount": 0 } },
+      "verdict": "链=3、上游在前、终端 isCurrent=true——数据面前提 PASS（本会话实跑复核，非沿用 attempt-6 记录）"
+    },
+    "stack": "core :3001 /api/health=200；Vite :3000=200；CDP :9222 Chrome/146.0.7680.216（dev Electron pid 25499，--dev --remote-debugging-port=9222）",
+    "jobStatus": "终端 job volcano-plot completed、5 产物（data-debug-job-status=done / data-debug-viewer=image / data-debug-artifact-count=5 / data-debug-selected-name=volcano.png 实读）"
+  },
+  "checks": [
+    {
+      "id": "T0-deeplink-result-view",
+      "pass": true,
+      "detail": "深链 /project/p_mus4u230_wvib/result?job=tj_mus4vpzy_ztwn 整页加载后打开 result 视图：URL 保持含 job 参数（UI-455 深链不归零实机复现）；result 模式主画布渲染完成态结果详情（DOM 实证：div[data-debug-job-status=done][data-debug-viewer=image][data-debug-artifact-count=5]，CompactResultNavigator 工具栏 + 结果报告 section + 右侧 inspector）。命令：node /tmp/b138-diag.mjs / b138-diag3.mjs（lib.cjs pollTargets/connectTarget/evalJs）"
+    },
+    {
+      "id": "T1-form-switch",
+      "pass": false,
+      "detail": "FAIL——切换器（div[role=group][aria-label=血缘形态]）在 result 模式完成态稳定面不在场，仅 loading 瞬态短暂在场后即被卸载。(1) 稳定面 DOM 实证：document.querySelector('div[role=\"group\"][aria-label=\"血缘形态\"]')=null、nav[aria-label=结果血缘链]=null、全文无『血缘』文本；shell 子节点仅 _navigator_ + _resultReportSection（node /tmp/b138-diag3.mjs）。(2) 瞬态采样实证（node /tmp/b138-transient.mjs，120ms 间隔）：t=273ms 切换器不在；t=450ms 切换器在场（shell 子节点含 _lineageView_ + _resultHeader_ + _resultPlaceholder_='加载结果中…'，即 stateBlock loading 态）；t=715ms 起完成态渲染（data-debug-job-status=done），切换器消失且 12s 内不再出现——瞬态窗口 ~265ms，人手不可用。(3) 根因（代码锚点）：LineageViewSwitch 唯一挂载点是 ResultArtifactShell.tsx:1042 的 stateBlock 内（mode==='result' 分支），而 stateBlock（:1037-1054）只被 running/pending（:1056）/failed（:1067）/loading（:1075）/结果加载失败（:1086,1095）五个非完成态调用；完成态主渲染路径（:1178-1199 final return）只挂 resultToolbar+shellBody，无 LineageViewSwitch。git show 230b7e44 实证 UI-460 提交是对 BLOCK-127 LineageStrip 同位置 1:1 替换——挂载盲区继承自条带（此前被『库内从无 ≥2 节点链』掩盖，attempt-6 链产出后暴露）。(4) 组件本身工作正常：瞬态帧截图 form-switch-default.png 可见『条带/画布』按钮组、条带高亮（默认 view='strip'，LineageViewSwitch.tsx:20,28）——缺的是完成态挂载，不是组件。『默认条带 aria-pressed=true』仅在瞬态帧可观察（截图视觉证据+组件默认态代码），稳定面断言不成立"
+    },
+    {
+      "id": "T2-dag-render",
+      "pass": false,
+      "detail": "FAIL（blocked，未取得截图 dag-canvas.png）——画布形态在稳定面不可达，.react-flow__node/.react-flow__edge 无法出现。诊断性抢窗实验（node /tmp/b138-race-probe.mjs，30ms 间隔轮询+立即点击）：CDP 于 t=437ms 瞬态窗口内成功点击『画布』按钮（clicked=true，点击确实落在按钮上），但下一采样拍完成态已替换整个 stateBlock——.react-flow 全程未出现（flowPresent=false，nodeCount=0，edgeCount=0，switchStill=false，shellStatus=done）。即 view='graph' 状态随宿主卸载湮灭，React Flow 连首帧都未及渲染。数据面前提本已具备（/lineage chain=3 本会话实跑 200；LineageGraph.tsx:49 仅 chain<=1 自隐，3 节点链本应渲染 3 节点 2 边）——阻断纯因挂载点缺失"
+    },
+    {
+      "id": "T3-node-click-open",
+      "pass": false,
+      "detail": "FAIL（blocked，未取得截图 node-click-opened.png）——稳定面无 DAG 节点可点，祖先 job（tj_mus4uxjq_s69m，deseq2）点击打开链未获实机验证。打开链代码在位：LineageGraph.tsx:59-61 节点点击 dispatchGewuEvent(projectOpenResult,{toolJobId,projectId}) → useWorkspaceOpenEffects.ts:127-136 订阅 → project-workspace.tsx:740-800 handleOpenResult → :341-367 updateWorkspaceMode 导航 /project/:id/result?job=<祖先>（URL 可观察变化即断言证据，未及执行）。与 T2 同根因：画布不可达即节点不可点"
+    }
+  ],
+  "screenshots": [
+    "acceptance/block-138/form-switch-default.png",
+    "acceptance/block-138/walkthrough-v2-completed-no-lineage-ui.png"
+  ],
+  "screenshotNotes": {
+    "form-switch-default.png": "瞬态帧（t≈450ms，stateBlock loading 态）：主画布『volcano-plot via agent 完成』标题+『加载结果中…』占位，右上『条带（高亮）/画布』切换器在场——唯一能拍到切换器的状态，非稳定面；稳定面完成态无此 UI，故该文件记录的是瞬态证据而非 PASS 态",
+    "walkthrough-v2-completed-no-lineage-ui.png": "完成态稳定面（data-debug-job-status=done）：完整火山图结果视图（工具栏 结果/代码/审查/历史、产物 viewer、右侧 inspector、继续分析 composer）——无血缘条、无切换器、无任何血缘 UI，本走查缺陷的主证",
+    "dag-canvas.png": "未捕获——画布形态机械不可达（T2 detail），不伪造",
+    "node-click-opened.png": "未捕获——无稳定节点可点（T3 detail），不伪造"
+  },
+  "allPass": false,
+  "verdict": "UI-460 三断言在 attempt-6 真实 3 节点链栈上全部不可达——F1（血缘数据不落图）已解，但暴露第二道独立阻断：LineageViewSwitch/LineageStrip 挂载点只覆盖非完成态 stateBlock（ResultArtifactShell.tsx:1042），完成态主渲染路径（:1178-1199）不挂载；真实链产物全是 completed job，用户在完成态 result 模式看不到任何血缘 UI。reopen 条件=完成态路径补挂载（或挂载点迁移）后重走三断言",
+  "sideEffects": [
+    "dev Electron 主窗窗口状态变化（走查目的本身，如实登记）：location 自 http://localhost:3000/ 经 4 次整页导航至同一深链 /project/p_mus4u230_wvib/result?job=tj_mus4vpzy_ztwn（诊断脚本 b138-diag/transient×2/race 各 1 次）；瞬态帧内 CDP 点击『画布』按钮 1 次（点击落在随即卸载的 stateBlock 上，无持久效果）；无其他 UI 状态残留",
+    "零后端写路径：全程仅 GET /api/*（health/lineage/tools/status）与前端只读 fetch；3 个 pending ChangeSet（cs_b19c…/cs_5296…/cs_a364…）原样 preview_ready、零 adopt、零 revert、is_current 集合零触碰",
+    "新增证据文件 2 张截图：acceptance/block-138/form-switch-default.png、acceptance/block-138/walkthrough-v2-completed-no-lineage-ui.png（+ 本 JSON）",
+    "未改 docs/**、frontend/**、src/**、core/**、test/**；未 git commit；后端/Vite/进程未动；未删任何数据"
+  ],
+  "driverScripts": "/tmp/b138-diag.mjs、/tmp/b138-diag2.mjs、/tmp/b138-diag3.mjs、/tmp/b138-transient.mjs、/tmp/b138-race-probe.mjs（公共原语 .agents/skills/gewu-dev-infra/dev-verify/lib.cjs：pollTargets/connectTarget/evalJs/screenshotPng；原始采样 /tmp/b138-walkthrough-v2-raw.json 未生成——首跑脚本在切换器等待超时处抛出，采样证据改由 transient/race 脚本输出与本文 JSON 承载）"
+}

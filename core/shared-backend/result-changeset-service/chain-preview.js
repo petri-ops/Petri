@@ -41,8 +41,50 @@ const {
   startResultEditChangeSet,
   transitionResultEditWithCheckpoint,
 } = require('./checkpoints');
+const { buildAuthoritativeWorkflowGraph } = require('../result-workflow-graph');
 
 const CHAIN_PREVIEW_INTENT_REF_PREFIX = 'chain-preview:';
+
+/**
+ * 补刃第二件：注册成功后以该 job 为 source 构建权威工作流图并落库
+ * （attempt-5 实证：changesets preview_ready 在而 result_workflow_graphs 0 行，
+ * /lineage 投影端点读不到图）。buildAuthoritativeWorkflowGraph 只读
+ * Job/Revision/Selection 真值；repository.saveWorkflowGraph（persistWorkflowGraph）
+ * 按 project+source_digest 幂等、不覆写历史行。落图是附加语义：依赖未注入
+ * （既有单测假 repository）或 build/save 失败时只如实返回原因，绝不回滚注册、
+ * 绝不向宿主抛错。
+ */
+function persistChainWorkflowGraph({ repository, projectId, toolJobId, listProjectToolJobs }) {
+  if (!repository || typeof repository.saveWorkflowGraph !== 'function'
+      || typeof listProjectToolJobs !== 'function') {
+    return { ok: false, reason: 'chain_preview_graph_persist_unavailable' };
+  }
+  try {
+    const graph = buildAuthoritativeWorkflowGraph({
+      projectId,
+      sourceToolJobId: toolJobId,
+      jobs: listProjectToolJobs(projectId),
+      repository,
+    });
+    if (!graph || graph.ok !== true || !graph.graph) {
+      return { ok: false, reason: 'chain_preview_graph_build_failed' };
+    }
+    repository.saveWorkflowGraph(graph.graph);
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, reason: (error && error.code) || 'chain_preview_graph_persist_failed' };
+  }
+}
+
+/** 把落图结果并进 ensureChainRevisions 的成功返回（附加键，不改变既有字段语义）。 */
+function withChainGraphPersist(result, persistInput) {
+  const persist = persistChainWorkflowGraph(persistInput);
+  return {
+    ...result,
+    graphPersisted: persist.ok === true,
+    ...(persist.ok === true ? {} : { graphPersistReason: persist.reason }),
+  };
+}
 
 /** 注入不完整（既有单测的假 repository 等）时零副作用跳过，绝不让宿主路径抛错。 */
 function chainRepositoryCapability(repository) {
@@ -155,12 +197,13 @@ function ensureChainRevisions(input = {}, dependencies = {}) {
     return { ok: false, registered: false, idempotent: false, reason: 'chain_preview_artifacts_unprovable' };
   }
 
-  // 3) 幂等快路径：全部可证明产物已有 Revision → 直接返回，零 git/写副作用。
+  // 3) 幂等快路径：全部可证明产物已有 Revision → 直接返回，零 git/Revision 写副作用
+  //    （权威图落库按 source_digest 幂等：首跑补落、重跑零新行）。
   const existingByArtifactId = new Map(provable.map((entry) => [entry.artifactId,
     repository.findRevisionByJobArtifact({ projectId, toolJobId, artifactId: entry.artifactId })]));
   if (provable.every((entry) => existingByArtifactId.get(entry.artifactId))) {
     const revisions = provable.map((entry) => existingByArtifactId.get(entry.artifactId));
-    return {
+    return withChainGraphPersist({
       ok: true,
       registered: false,
       idempotent: true,
@@ -169,7 +212,7 @@ function ensureChainRevisions(input = {}, dependencies = {}) {
         ? revisions.find((revision) => revision.artifactId === requestedArtifactId) || null
         : revisions[0],
       revisions,
-    };
+    }, { repository, projectId, toolJobId, listProjectToolJobs: dependencies.listProjectToolJobs });
   }
 
   const toolId = String(sourceJob.tool_id || sourceJob.toolId || '').trim() || 'unknown-tool';
@@ -250,7 +293,7 @@ function ensureChainRevisions(input = {}, dependencies = {}) {
       const revisions = provable.map((entry) => repository.findRevisionByJobArtifact({
         projectId, toolJobId, artifactId: entry.artifactId,
       }));
-      return {
+      return withChainGraphPersist({
         ok: true,
         registered: false,
         idempotent: true,
@@ -259,7 +302,7 @@ function ensureChainRevisions(input = {}, dependencies = {}) {
           ? revisions.find((revision) => revision && revision.artifactId === requestedArtifactId) || null
           : revisions[0] || null,
         revisions,
-      };
+      }, { repository, projectId, toolJobId, listProjectToolJobs: dependencies.listProjectToolJobs });
     }
 
     const baseCommit = resolveBaseCommit(adapter, projectId);
@@ -399,7 +442,7 @@ function ensureChainRevisions(input = {}, dependencies = {}) {
     // 信任层红线：注册到此为止——绝不调用 adoptChangeSet / durable ref。
     // ChangeSet 停在 preview_ready，等待人的审阅动作。
     const revisions = revisionInputs.map((revision) => repository.getRevision(revision.revisionId));
-    return {
+    return withChainGraphPersist({
       ok: true,
       registered: true,
       idempotent: false,
@@ -408,7 +451,7 @@ function ensureChainRevisions(input = {}, dependencies = {}) {
         ? revisions.find((revision) => revision.artifactId === requestedArtifactId) || null
         : revisions[0] || null,
       revisions,
-    };
+    }, { repository, projectId, toolJobId, listProjectToolJobs: dependencies.listProjectToolJobs });
   } catch (error) {
     if (error instanceof ResultChangeSetError && error.code === 'chain_preview_cohort_conflict') {
       return { ok: false, registered: false, idempotent: false, reason: error.code };

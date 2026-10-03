@@ -27,6 +27,13 @@
 //      is_current 语义不被本路径触碰
 //   ③ 幂等：同 job 重复注册不翻倍
 //   ④ selection→enrichment 场景的 lineage 可解析（pending revision 上锚定 selection）
+//   ⑤ 补刃·plan 链 run 路径下游输入 lineage：op='run' 执行 plan 步骤时从 plan.lineage
+//      解析 F1 注册 revision → 哈希校验上游物化字节 → 组 inputLineage 经既有
+//      resultStudioInputLineage 选项传入执行器 → 下游 job manifest 输入带 lineage
+//      且 buildAuthoritativeWorkflowGraph 出 ≥1 边
+//   ⑥ 补刃·图落库：ensureChainRevisions 注册成功后以该 job 为 source 构建权威图并
+//      saveWorkflowGraph 落库（persistWorkflowGraph 按 project+source_digest 幂等、
+//      不覆写历史）——项目 graph 行存在且节点数随链增长（bind 1 节点 → 下游跑完 2 节点 1 边）
 //
 // 红绿协议：F1 未实现时本文件必须全红（红证据见 acceptance/block-138/）；
 // F1 实现后须全绿。不测 adopt 语义/审阅流（§9 非范围）；
@@ -187,13 +194,26 @@ for (const plugin of [
     actions: ['recompute'],
     interactionMappings: [{ artifactId: 'enrichment_table', mode: 'table', entityType: 'pathway', idField: 'ID' }],
   }),
+  // bulk-rna-core 模板 deg-standardization 步的 toolCandidates——plan 链 run 路径
+  // 需要 plan 把该步投影到已注册工具（learning.js:859 toolId = step.toolId）。
+  writeChainPlugin(F1_PLUGINS_DIR, {
+    id: 'deg-standardizer',
+    title: '链下游标准化（中性）',
+    semanticType: 'chain_deg_standardized',
+    entity: { type: 'gene_row', idField: 'gene', fields: { gene: 'string', log2FoldChange: 'number', padj: 'number' } },
+    inputs: [{ id: 'deg_results', label: 'DEG 结果', type: 'file', required: true, accept: '.csv' }],
+    outputs: [{ id: 'deg_standardized', filename: 'deg_standardized.csv', type: 'table', label: '标准化 DEG 表' }],
+    inputBindings: [{ inputId: 'deg_results', required: true, acceptsArtifactTypes: ['table'], semanticRole: 'input_measurements' }],
+    actions: ['recompute'],
+    interactionMappings: [{ artifactId: 'deg_standardized', mode: 'table', entityType: 'gene', idField: 'gene' }],
+  }),
 ]) {
   globalThis._biof3Plugins.set(plugin.id, plugin);
 }
 
-// 夹具自检：两个中性插件的 resultStudio descriptor 必须真实可解析
+// 夹具自检：三个中性插件的 resultStudio descriptor 必须真实可解析
 // （否则 F1 descriptor 路径无法工作，属测试夹具缺陷而非被测契约）。
-for (const pluginId of ['chain-metrics', 'chain-enrich']) {
+for (const pluginId of ['chain-metrics', 'chain-enrich', 'deg-standardizer']) {
   const manifest = pluginLoader.getPluginManifest(pluginId);
   assert.ok(manifest, `夹具自检：插件 ${pluginId} manifest 应可解析`);
   assert.equal(
@@ -647,4 +667,227 @@ test('F1 契约④ selection→enrichment：selection 链形成点注册 pending
   assert.equal(saved.edges[0].sourceRevisionId, revision.revisionId, '边必须解析到 selection 链形成点注册的 pending revision');
   assert.equal(saved.edges[0].selectionId, selection.selectionId);
   assertPendingPreviewRegistration(fx, revision, '契约④(下游成边后)');
+});
+
+// ---------------------------------------------------------------------------
+// plan 链假执行器（契约⑤/⑥共用）：patch mcp/registry 的 callTool——只替 R 执行。
+// manifest/provenance 组装走生产代码：collectExecutionInputs（按 inputId 挂
+// inputLineage 选项）+ createExecutionProvenance（签名 provenance），与
+// run-plugin-script.js:291-317 provenanceFor 同构，job 落库 completed。
+// ---------------------------------------------------------------------------
+function installChainRunFakeExecutor(fx, context, captured) {
+  const registryModule = require(join(REPO_ROOT, 'core', 'biof3-server', 'mcp', 'registry'));
+  const { collectExecutionInputs } = require(join(REPO_ROOT, 'core', 'shared-backend', 'artifact-manifest'));
+  const { createExecutionProvenance } = require(join(REPO_ROOT, 'core', 'shared-backend', 'execution-provenance'));
+  const originalCallTool = registryModule.callTool;
+  registryModule.callTool = async function fakeChainRunCallTool(toolId, params, options = {}) {
+    captured.calls.push({ toolId, params, options });
+    const manifest = pluginLoader.getPluginManifest(toolId);
+    const job = db.createToolJob({
+      toolId,
+      userId: options.userId,
+      projectId: options.projectId,
+      conversationId: options.conversationId,
+      params,
+      status: 'running',
+      name: `${toolId}（契约⑤ plan 链假执行：生产 manifest 管线 + R 执行替身）`,
+    });
+    assert.ok(job?.id, '假执行器：tool_job 应能落库');
+    const jobDir = join(fx.workspaceRoot, 'results', 'jobs', job.id);
+    const outputDir = join(jobDir, 'output');
+    mkdirSync(outputDir, { recursive: true });
+    const runScriptAbs = join(jobDir, 'run-script.R');
+    const runScriptBytes = `# ${toolId} fake run\nprint("${toolId}")\n`;
+    writeFileSync(runScriptAbs, runScriptBytes);
+    // 生产同款（run-plugin-script.js:301-306）：inputs 由 collectExecutionInputs 组装，
+    // resultStudioInputLineage 选项按 inputId 挂 lineage。
+    const inputs = collectExecutionInputs({
+      inputDefinitions: (manifest && Array.isArray(manifest.inputs)) ? manifest.inputs : [],
+      params,
+      jobDir,
+      inputLineage: options.resultStudioInputLineage || null,
+    });
+    const artifactRecords = [];
+    for (const output of (manifest && Array.isArray(manifest.outputs)) ? manifest.outputs : []) {
+      const outputAbs = join(outputDir, output.filename);
+      writeFileSync(outputAbs, `gene,log2FoldChange,padj\nTP53,2,0.01\nEGFR,1.5,0.02\n`);
+      artifactRecords.push({
+        id: output.id,
+        name: output.filename,
+        path: outputAbs,
+        type: output.type,
+        sha256: sha256(readFileSync(outputAbs)),
+      });
+    }
+    const provenance = createExecutionProvenance({
+      toolJobId: job.id,
+      projectId: options.projectId,
+      plugin: { id: toolId, version: '1.0.0', language: 'r' },
+      params,
+      runtime: { name: 'r', ready: true },
+      runScriptPath: runScriptAbs,
+      command: null,
+      artifacts: artifactRecords,
+      inputs,
+      startedAt: new Date().toISOString(),
+      completedAt: new Date().toISOString(),
+    });
+    db.updateToolJob(job.id, {
+      status: 'completed',
+      resultJson: {
+        artifactTruth: { status: 'valid', blocking: false, validCount: artifactRecords.length },
+        artifacts: artifactRecords,
+        executionProvenance: provenance,
+      },
+      completedAt: Date.now(),
+    });
+    return {
+      content: [{ type: 'text', text: JSON.stringify({ ok: true, toolId, jobId: job.id }) }],
+      isError: false,
+      toolJobId: job.id,
+    };
+  };
+  context.after(() => {
+    registryModule.callTool = originalCallTool;
+  });
+  return registryModule;
+}
+
+// ---------------------------------------------------------------------------
+// ⑤ 补刃·plan 链 run 路径下游输入 lineage：op='run' 执行 plan 步骤时解析 plan.lineage
+//    → F1 注册 revision → 上游物化字节哈希校验 → inputLineage 经既有
+//    resultStudioInputLineage 选项传入 → 下游 job manifest 输入带 lineage
+//    且 buildAuthoritativeWorkflowGraph 出 ≥1 边。
+// ---------------------------------------------------------------------------
+test('F1 补刃⑤ plan 链 run：下游 job manifest 输入带 lineage（经 resultStudioInputLineage 选项）且权威图 ≥1 边', async (context) => {
+  const fx = f1Fixture(context);
+  const { bound } = await f1PlanAndBind(fx);
+  const upstreamRevision = fx.repository.findRevisionByJobArtifact({
+    projectId: fx.projectId,
+    toolJobId: fx.upstreamJob.id,
+    artifactId: 'deg_table',
+  });
+  assert.ok(upstreamRevision, '夹具前置：bind 应已注册上游 revision（F1 既有行为）');
+  const expectedLineage = {
+    lineageVersion: 1,
+    kind: 'artifact',
+    sourceRevisionId: upstreamRevision.revisionId,
+    sourceToolJobId: fx.upstreamJob.id,
+    sourceArtifactId: 'deg_table',
+    sourceOutputHash: upstreamRevision.outputHash,
+    materializationHash: upstreamRevision.outputHash,
+  };
+
+  const captured = { calls: [] };
+  installChainRunFakeExecutor(fx, context, captured);
+
+  const run = await learning.tool_run_tool({
+    op: 'run',
+    workflowPlan: bound.plan,
+    stepId: 'deg-standardization',
+  }, fx.ctx);
+  assert.equal(run.ok, true, `op=run plan 步骤应执行成功（假执行器承接 R 执行）：${JSON.stringify(run).slice(0, 300)}`);
+  assert.ok(run.toolJobId, 'op=run 应透传 toolJobId');
+  assert.equal(captured.calls.length, 1, '假执行器应恰好承接一次下游执行');
+  assert.equal(captured.calls[0].toolId, 'deg-standardizer');
+
+  // ⑤a：run 路径把 plan 链解析出的 inputLineage 经既有选项传入执行器
+  // （当前代码只透传 ctx.resultStudioInputLineage=null → 此处红）
+  assert.deepEqual(
+    captured.calls[0].options.resultStudioInputLineage,
+    { deg_results: expectedLineage },
+    'F1 补刃⑤a：plan 链 run 必须把 bound 上游的 lineage 经 resultStudioInputLineage 传入执行器（当前代码缺解析 → 红）',
+  );
+
+  // ⑤b：下游 job 持久化 manifest 输入带 lineage（生产 collectExecutionInputs 挂载，
+  // 与 attempt-5 实证缺 metadata 的形状互为镜像）。materializationHash 必须=输入文件
+  // 实际字节哈希=上游产物哈希（kind='artifact' 精确交接合同）。
+  const downstreamJob = db.getToolJob(run.toolJobId);
+  const manifestInput = (downstreamJob.result.executionProvenance.inputs || [])
+    .find((input) => input.id === 'deg_results');
+  assert.ok(manifestInput, '下游 job manifest 应含 deg_results 输入');
+  assert.deepEqual(
+    manifestInput.lineage,
+    expectedLineage,
+    'F1 补刃⑤b：下游 job manifest 输入必须携带 lineage 元数据（当前代码 lineage=null → 红）',
+  );
+  assert.equal(manifestInput.sha256, expectedLineage.materializationHash, 'manifest 输入 sha256 必须等于 materializationHash');
+
+  // ⑤c：权威图从持久化真相解析出 ≥1 边（当前代码 manifest 无 lineage → 0 边 → 红）
+  const graph = buildAuthoritativeWorkflowGraph({
+    projectId: fx.projectId,
+    sourceToolJobId: fx.upstreamJob.id,
+    jobs: db.listProjectToolJobsForWorkflow(fx.projectId),
+    repository: fx.repository,
+    requiredToolJobIds: [run.toolJobId],
+  });
+  assert.equal(
+    graph.ok,
+    true,
+    `权威图必须能经下游 manifest lineage 解析成边：${JSON.stringify(graph.diagnostics || [])}`,
+  );
+  assert.ok(graph.graph.edges.length >= 1, `权威图应 ≥1 边：${JSON.stringify(graph.graph.edges)}`);
+  assert.equal(graph.graph.edges[0].kind, 'artifact');
+  assert.equal(graph.graph.edges[0].sourceRevisionId, upstreamRevision.revisionId, '边必须解析到链形成点注册的 pending revision');
+  assert.equal(graph.graph.edges[0].toNodeId, `job:${run.toolJobId}`);
+});
+
+// ---------------------------------------------------------------------------
+// ⑥ 补刃·图落库：ensureChainRevisions 注册成功后以该 job 为 source 构建权威图并
+//    saveWorkflowGraph 落库（attempt-5 实证：changesets ×3 在而 graph 0 行，
+//    /lineage 读不到图）。断言：bind 后项目 graph 行存在（1 节点）→ 下游跑完后
+//    节点数随链增长（2 节点 1 边），历史行不覆写。
+// ---------------------------------------------------------------------------
+test('F1 补刃⑥ ensureChainRevisions 注册成功后权威图落库：graph 行存在且节点数随链增长', async (context) => {
+  const fx = f1Fixture(context);
+  assert.equal(
+    fx.repository.listProjectWorkflowGraphs(fx.projectId).length, 0,
+    '夹具前置：bind 前项目应无 graph 行',
+  );
+
+  // bind 链形成点 → ensureChainRevisions 成功 → 图落库（attempt-5 死点：只注册不落图）
+  const { bound } = await f1PlanAndBind(fx);
+  const graphsAfterBind = fx.repository.listProjectWorkflowGraphs(fx.projectId);
+  assert.equal(
+    graphsAfterBind.length, 1,
+    `F1 补刃⑥：bind 注册成功后项目必须落库权威图（当前代码 0 行 → 红）：${JSON.stringify(graphsAfterBind.length)}`,
+  );
+  assert.equal(graphsAfterBind[0].rootToolJobId, fx.upstreamJob.id, 'bind 后图以首步 job 为根');
+  assert.equal(graphsAfterBind[0].nodes.length, 1, 'bind 后图为单节点（仅首步 job）');
+  assert.equal(graphsAfterBind[0].validationStatus, 'valid');
+
+  // 下游跑完（假执行器）→ run 链形成点注册下游 job → 图节点数随链增长
+  const captured = { calls: [] };
+  installChainRunFakeExecutor(fx, context, captured);
+  const run = await learning.tool_run_tool({
+    op: 'run',
+    workflowPlan: bound.plan,
+    stepId: 'deg-standardization',
+  }, fx.ctx);
+  assert.equal(run.ok, true, `op=run plan 步骤应执行成功：${JSON.stringify(run).slice(0, 300)}`);
+
+  const graphsAfterRun = fx.repository.listProjectWorkflowGraphs(fx.projectId);
+  const grown = graphsAfterRun.find((graph) => graph.nodes.length === 2);
+  assert.ok(
+    grown,
+    `F1 补刃⑥：下游链形成点注册后图节点数必须随链增长到 2（当前代码无落库 → 红）：${JSON.stringify(graphsAfterRun.map((graph) => graph.nodes.length))}`,
+  );
+  assert.equal(grown.edges.length, 1, `增长图应为 1 边：${JSON.stringify(grown.edges)}`);
+  assert.equal(grown.edges[0].kind, 'artifact');
+  // 勘误（红侧规格修正）：rootToolJobId 的平台权威语义=拓扑根（唯一无入边上游），
+  // 由 buildAuthoritativeWorkflowGraph 写死（result-workflow-graph.js:671 authoritativeRootJobId）
+  // 并由 persistWorkflowGraph 的 content-addressed integrity 校验强制
+  // （result-studio-repository.js:70-82，digest 按 rootToolJobId+nodes+edges 重算——
+  // root=source 的行根本落不了库）。2 节点 1 边链的权威根=首步上游 job；
+  // 下游在图内由 nodes/edges 断言钉死（lineage 闭包含上游=上游为根）。
+  assert.equal(grown.rootToolJobId, fx.upstreamJob.id, '增长图以权威上游根为根（拓扑根=唯一无入边首步 job，下游经 lineage 闭包含入）');
+  assert.ok(
+    grown.nodes.some((node) => node.id === `job:${run.toolJobId}`),
+    '增长图必须包含下游 job 节点（/lineage 投影按包含目标 job 的图查找）',
+  );
+  // 不覆写历史：bind 时的 1 节点图行仍在（persistWorkflowGraph 按 project+source_digest 幂等）
+  assert.ok(
+    graphsAfterRun.some((graph) => graph.nodes.length === 1 && graph.rootToolJobId === fx.upstreamJob.id),
+    'bind 时的 1 节点历史图行不得被覆写',
+  );
 });
