@@ -85,3 +85,13 @@ Result Studio 的渲染面从「写死的 switch + 单血缘条带」收敛为�
 - **收口剩件**：实机走查三断言（DAG 渲染/节点点击/形态切换，acceptance/block-138/）+ 本台账 UI-460 过目翻 verified。
 
 - **R-4（2026-10-02 实机走查抓真，BIO-3 域 finding）**：血缘边硬依赖 ArtifactRevision 持久化（result-workflow-graph.js:305-313），chat/agent 分析链产物不产生 Revision → 散跑无边/plan/bind 生效不解锁/selection 拒开三条路径全断；实机三断言 reopen=F1 修复（方向待用户裁决：产物 Revision 化 vs 投影兼容 job-artifact truth）。证据=acceptance/block-138/chain-* + AUDIT-LOG 🟡 行。
+
+## 9. 加映：F1 修复——链形成点注册 pending 信任层（2026-10-03，实现启动）
+
+> 用户裁决「按照你的建议来推进 最终是解决这个问题」（/workflow 指令）=方向 1 放行（勘察结论见上轮：F1 根因=Revision 只在 RS changeset 生命周期创建（insertRevision 强制 changeSetId，result-studio-repository.js:139-175），chat/agent 链产物从不进入 → validateLineage（result-workflow-graph.js:291-340）验不过 → 无边；validateLineage 仅要求 revision 行存在（getRevision），pending 未 adopt 即可解锁血缘）。
+
+- **范围**：plan/bind 与 selection 两条链形成点接入信任层注册——job 产物经 result-changeset-service 既有管线注册为 **pending ChangeSet+preview revisions**（幂等；**绝不自动 adopt**，adopt 仍是人的审阅动作）；使下游 step 解锁、血缘边可形成。契约测试红绿先行。
+- **非范围**：不改 adopt 语义/审阅流；不做启发式无验证边（方向 2 拒绝）；不动 RS-P7 deferred 域其他面；前端零改动。
+- **验收**：①契约测试红绿（bind→ready→2 节点 1 边 graph；幂等；零 adopt）；②门禁五门（test:changed P6 绑定门 accepted-red 沿用既定模式，集成提交刷新）；③链产验证（chat plan/bind 链 /lineage chain ≥2，后端重启加载修复后）；④实机走查三断言（补 UI-460 剩件，acceptance/block-138/）。
+- **已知语义后果（用户知情）**：agent 链会在审阅队列产生 pending ChangeSet 条目（待人工 adopt）——把 RS 审阅语义自然延伸到 agent 链。
+- 台账：本节即加映登记（AUDIT-LOG 同步）；实机与集成提交后 UI-460 补记。
