@@ -6,7 +6,7 @@
     "types",
     "files"
   ],
-  "updatedAt": "2026-10-01",
+  "updatedAt": "2026-10-03",
   "keys": [
     "exports::.agents/skills/gewu-dev-infra/dev-verify/lib.cjs::DEFAULT_PORT",
     "exports::.agents/skills/gewu-dev-infra/dev-verify/lib.cjs::TEST_INSTANCE_PORT",
@@ -175,7 +175,6 @@
     "types::frontend/src/components/result-studio/ResultStudioChangeSetPanel/display.tsx::EnrichmentDirectionEntry",
     "types::frontend/src/components/result-studio/resultBodyState.ts::StatusSource",
     "types::frontend/src/components/result-studio/resultStudioClient.ts::ChangeSetStatus",
-    "types::frontend/src/components/result-studio/resultStudioClient.ts::RepositoryBindingConsent",
     "types::frontend/src/components/result-studio/resultStudioClient.ts::ResultStudioTaskResourceSummary",
     "types::frontend/src/components/result-studio/resultSurface.ts::ResultTruthTone",
     "types::frontend/src/components/workspace-panels/CenterPanel.tsx::ActiveArtifact",

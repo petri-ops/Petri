@@ -396,6 +396,15 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-10-03 BLOCK-138 F1 加映两笔（主代理终审批登记）：ea765eea（F1 链形成点
+  // pending 信任层注册，触碰 LineageViewSwitch.test.tsx lint 收口）与 d3ae13a3
+  // （走查抓真挂载点修复，ResultArtifactShell.tsx +3 行）均由另一会话 dynamic
+  // workflow 交付，同提交未同步台账；台账=UI-460 条目已由后续 f475959e 补登对账
+  // （实机三断言 R2 证据段）。subject 均含 UI-###（UI-460），编号门天然过；
+  // 先例 f6e58d04/f9cf2f5c；不重写共享历史。
+  'ea765eea7b00ec3d9bf87700b20a29a405acfd16',
+  'd3ae13a33bfe6045353dab585b3f933f743d0046',
+
   // 2026-10-01 全仓 lint 债清偿批（1796cb06，fix(lint) AUD-295 扩面）：前端 UI surface
   // 仅三处「删除未使用绑定」纯机械修复——project-workspace.tsx:13 删 CK-06 拆分后化石
   // import type CenterPanelRefs、ContinueAnalysisMenu.tsx:37（UI-458 域）删 D7 目录驱动
