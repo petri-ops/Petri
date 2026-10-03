@@ -19,6 +19,7 @@
 const dbMod = require('../db');
 const pluginLoader = require('../plugin-loader');
 const { createResultStudioRepository } = require('../../shared-backend/result-studio-repository');
+const { ensureChainRevisions } = require('../../shared-backend/result-changeset-service');
 const {
   assessSelectionCompatibility,
   summarizeSelection,
@@ -163,6 +164,34 @@ function resolveResultStudioContext(ctx = {}, dependencies = {}) {
         toolJobId: hintJobId,
         artifactId: matches[0].id,
       });
+      if (!revision) {
+        // BLOCK-138 §9 方向 1（F1）：selection 链形成点——裸 job 产物首次被打开时，
+        // 经既有 changeset 管线注册 pending ChangeSet+preview revisions（幂等、
+        // 绝不自动 adopt；AUDIT-LOG 🟡 2026-10-02 blocker B1/attempt-3 的拒开点），
+        // 使 context 可建立、selection 可锚定、血缘边可解析。注册失败保持既有
+        // context_artifact_not_open fail-closed 行为。唯一 sanctioned 例外：
+        // 上方“打开结果不写 SQLite”不变量针对工作流快照投影，不覆盖本信任层注册。
+        try {
+          const chain = ensureChainRevisions({
+            projectId,
+            toolJobId: hintJobId,
+            artifactId: matches[0].id,
+            workspaceRoot: project.workspace_path,
+          }, {
+            repository,
+            getToolJob: dependencies.getToolJob
+              ? dependencies.getToolJob
+              : (toolJobId) => dbModule.getToolJob(toolJobId),
+          });
+          if (chain && chain.ok) {
+            revision = repository.findRevisionByJobArtifact({
+              projectId,
+              toolJobId: hintJobId,
+              artifactId: matches[0].id,
+            });
+          }
+        } catch { /* 注册失败 → 维持既有 fail-closed 上下文拒绝 */ }
+      }
     }
   }
   if (!revision) {

@@ -53,9 +53,8 @@ const {
   applyExactScriptPatch,
   materializeResultEdit,
 } = require('./result-changeset-service/materialize');
-const {
-  deriveTrustedPreviewResourceEstimate,
-} = require('./result-changeset-service/resource-model');
+const { deriveTrustedPreviewResourceEstimate } = require('./result-changeset-service/resource-model');
+const { ensureChainRevisions } = require('./result-changeset-service/chain-preview');
 
 // BLOCK-92 Wave C-1：原 2783 行巨文件按接缝拆入 result-changeset-service/ 子模块
 // （internal / resource-model / materialize / projections / checkpoints /
@@ -763,6 +762,7 @@ module.exports = {
   ensureBaselineArtifactRevision,
   buildResultEditCheckpoint,
   createResultChangeSet,
+  ensureChainRevisions,
   saveResultEditCheckpoint,
   inspectResultEditRecovery,
   _test: { resolveExactFormalSourceRevision },

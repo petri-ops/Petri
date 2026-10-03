@@ -12,6 +12,7 @@ const { queryResultTable } = require('../../shared-backend/result-studio-table-q
 const { buildAuthoritativeWorkflowGraph } = require('../../shared-backend/result-workflow-graph');
 const { bindProjectRepository } = require('../../shared-backend/git-repository-binding');
 const { verifyRevisionSourceMaterial } = require('../../shared-backend/result-revision-source');
+const { ensureChainRevisions } = require('../../shared-backend/result-changeset-service');
 
 const MAX_DOWNSTREAM_ENTITY_IDS = 20_000;
 const SAFE_SELECTION_ID = /^sel_[A-Za-z0-9_-]{1,160}$/;
@@ -475,6 +476,32 @@ async function tool_result_selection_run(args, ctx, dependencies = {}) {
     projectId, project, revision, repository, sourceJob, dependencies,
   });
   if (!sourceVerification.ok) return sourceVerification;
+  // BLOCK-138 §9 方向 1（F1）：selection→enrichment 消费上游产物的物化点——
+  // 消费前把上游 job 产物经既有 changeset 管线补注册为 pending ChangeSet+preview
+  // revisions（幂等、绝不自动 adopt）。selection 的 revision 已解析时通常为幂等
+  // no-op；注入不完整（假 repository）时原语零副作用跳过，注册失败不阻断本次
+  // 既有 selection 语义（chainPreview 附加透出）。
+  let chainPreview = null;
+  try {
+    const chain = ensureChainRevisions({
+      projectId,
+      toolJobId: revision.toolJobId,
+      artifactId: revision.artifactId,
+      workspaceRoot,
+    }, {
+      repository,
+      getToolJob: dependencies.getToolJob || dbMod.getToolJob,
+    });
+    chainPreview = {
+      ok: chain.ok === true,
+      registered: chain.registered === true,
+      idempotent: chain.idempotent === true,
+      ...(chain.reason ? { reason: chain.reason } : {}),
+      ...(chain.changeSetId ? { changeSetId: chain.changeSetId } : {}),
+    };
+  } catch (error) {
+    chainPreview = { ok: false, registered: false, reason: (error && error.code) || 'chain_preview_failed' };
+  }
   let backingName = path.basename(revision.outputPath);
   if (mapping.dataFile) backingName = mapping.dataFile;
   else if (mapping.dataArtifactId) {
@@ -617,6 +644,7 @@ async function tool_result_selection_run(args, ctx, dependencies = {}) {
   if (workflowFailure) return workflowFailure;
   return {
     ...executed,
+    chainPreview,
     selectionAction: {
       selectionId,
       action,

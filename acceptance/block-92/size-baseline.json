@@ -104,7 +104,7 @@
       "wave": "C",
       "module": "W-04",
       "lines": 769,
-      "sha256": "9c6f31ed91a1ea8a6e449cf944ccdb77b134489bebe39d0c937b4c48471ef674"
+      "sha256": "3d43f4a3070c03250e7765b38cdfb70595b0502ee27cc53a909e36e1f6e711f9"
     },
     {
       "path": "core/biof3-server/helpers/tools-executor.js",

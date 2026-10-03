@@ -12,7 +12,9 @@ import React from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-const calls = vi.hoisted(() => ({ strip: 0, graph: 0, lastProps: {} as Record<string, unknown> }));
+const calls = vi.hoisted<{ strip: number; graph: number; lastProps: Record<string, unknown> }>(
+  () => ({ strip: 0, graph: 0, lastProps: {} }),
+);
 
 vi.mock('./LineageStrip', (): Record<string, unknown> => ({
   LineageStrip: (props: Record<string, unknown>) => {

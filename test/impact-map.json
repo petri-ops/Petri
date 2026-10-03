@@ -2691,6 +2691,24 @@
       ],
       "frontendRelated": true,
       "classifiesScripts": false
+    },
+    {
+      "id": "block138-f1-fix",
+      "note": "BLOCK-138 F1 修复批（方向 1=链形成点经既有 changeset 管线注册 pending ChangeSet+preview revisions，幂等、绝不自动 adopt）：新增 chain-preview.js 子模块 + 三处 chat 链形成点接线（learning/result-context-tools/result-selection-tools），契约测试 test/block138-f1-chain-pending-registration.test.mjs（HK-01 红绿先行），验收证据落 acceptance/block-138/。改任一登记文件即跑新契约测试。",
+      "patterns": [
+        "core/shared-backend/result-changeset-service.js",
+        "core/shared-backend/result-changeset-service/chain-preview.js",
+        "core/biof3-server/agent-tools/learning.js",
+        "core/biof3-server/agent-tools/result-context-tools.js",
+        "core/biof3-server/agent-tools/result-selection-tools.js",
+        "test/block138-f1-chain-pending-registration.test.mjs",
+        "acceptance/block-138/**"
+      ],
+      "tests": [
+        "test/block138-f1-chain-pending-registration.test.mjs"
+      ],
+      "frontendRelated": false,
+      "classifiesScripts": false
     }
   ]
 }

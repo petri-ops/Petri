@@ -6,6 +6,8 @@
 const dbMod = require('../db');
 const { withSessionExecutionTarget } = require('../helpers/remote-execution/session-target');
 const { runTaskConfirmationHooks } = require('../../shared-backend/task-confirmation-hooks');
+const { createResultStudioRepository } = require('../../shared-backend/result-studio-repository');
+const { ensureChainRevisions } = require('../../shared-backend/result-changeset-service');
 const sqlite = dbMod.getDatabase();
 // SUGGEST_NEXT_STEPS_BRIDGE_v1 marker
 
@@ -797,15 +799,42 @@ async function tool_run_tool(args, ctx) {
           step.id === args.fromStepId ? { ...step, toolJobId: fromToolJobId } : step
         ),
       };
+      const boundPlan = bindVerifiedArtifact(linkedPlan, {
+        fromStepId: args.fromStepId,
+        toStepId: args.toStepId,
+        inputId: args.inputId,
+        artifact,
+        artifactTruth,
+      });
+      // BLOCK-138 §9 方向 1（F1）：plan/bind 链形成点——绑定即把来源 job 产物经既有
+      // changeset 管线注册为 pending ChangeSet+preview revisions（幂等、绝不自动 adopt），
+      // 使下游血缘边可解析。注册失败不回退既有 bind 行为（fail-closed 附加，原因如实透出）。
+      let chainPreview;
+      try {
+        const chain = ensureChainRevisions({
+          projectId: trustedProjectId(ctx),
+          toolJobId: fromToolJobId,
+          artifactId: args.artifactId || null,
+        }, {
+          repository: createResultStudioRepository(dbMod.getDatabase()),
+          getToolJob: (id) => dbMod.getToolJob(id),
+          getProject: (id) => dbMod.getProject(id),
+        });
+        chainPreview = {
+          ok: chain.ok === true,
+          registered: chain.registered === true,
+          idempotent: chain.idempotent === true,
+          ...(chain.reason ? { reason: chain.reason } : {}),
+          ...(chain.changeSetId ? { changeSetId: chain.changeSetId } : {}),
+          ...(chain.revision && chain.revision.revisionId ? { revisionId: chain.revision.revisionId } : {}),
+        };
+      } catch (error) {
+        chainPreview = { ok: false, registered: false, reason: (error && error.code) || 'chain_preview_failed' };
+      }
       return {
         ok: true,
-        plan: bindVerifiedArtifact(linkedPlan, {
-          fromStepId: args.fromStepId,
-          toStepId: args.toStepId,
-          inputId: args.inputId,
-          artifact,
-          artifactTruth,
-        }),
+        chainPreview,
+        plan: boundPlan,
       };
     } catch (error) {
       return { ok: false, error: 'artifact_binding_failed', message: error.message };
@@ -831,6 +860,43 @@ async function tool_run_tool(args, ctx) {
       params = { ...step.inputs, ...params };
     }
     if (!toolId) return { error: 'missing_toolId', message: 'op=run 需要 toolId' };
+
+    // BLOCK-138 §9 方向 1（F1）：plan 链（op='run' + workflowPlan+stepId）步骤执行完成后，
+    // 把该步 job 产物经既有 changeset 管线注册为 pending ChangeSet+preview revisions
+    // （幂等、绝不自动 adopt），使下游血缘边可解析。注册失败不阻断已完成的执行结果
+    // （fail-closed 附加：chainPreview 如实透出原因，系统行为回退为既有无边状态）。
+    const isPlanStepRun = Boolean(args && args.workflowPlan && args.stepId);
+    const registerChainPreviewAfterRun = (executed) => {
+      if (!isPlanStepRun || !executed || executed.ok !== true
+          || !executed.toolJobId || executed.needApproval === true) {
+        return executed;
+      }
+      try {
+        const chain = ensureChainRevisions({
+          projectId: trustedProjectId(ctx),
+          toolJobId: executed.toolJobId,
+        }, {
+          repository: createResultStudioRepository(dbMod.getDatabase()),
+          getToolJob: (id) => dbMod.getToolJob(id),
+          getProject: (id) => dbMod.getProject(id),
+        });
+        return {
+          ...executed,
+          chainPreview: {
+            ok: chain.ok === true,
+            registered: chain.registered === true,
+            idempotent: chain.idempotent === true,
+            ...(chain.reason ? { reason: chain.reason } : {}),
+            ...(chain.changeSetId ? { changeSetId: chain.changeSetId } : {}),
+          },
+        };
+      } catch (error) {
+        return {
+          ...executed,
+          chainPreview: { ok: false, registered: false, reason: (error && error.code) || 'chain_preview_failed' },
+        };
+      }
+    };
 
     // An ACK token is a capability for one exact heavy-operation request. It
     // must be checked before target-tool validation or any execution policy so
@@ -895,13 +961,13 @@ async function tool_run_tool(args, ctx) {
       if (taskConversationId !== trustedConversationId(ctx)) {
         return { ok: false, error: 'scientific_task_conversation_mismatch', message: 'ScientificTask 必须在其确认的会话中执行。' };
       }
-      const executed = await _executeRunTool(toolId, params, userId, null, trustedProjectId(ctx), {
+      const executed = registerChainPreviewAfterRun(await _executeRunTool(toolId, params, userId, null, trustedProjectId(ctx), {
         taskId: ref.taskId,
         version: Number(ref.version || 1),
       }, {
         conversationId: trustedConversationId(ctx),
         resultStudioInputLineage: ctx && ctx.resultStudioInputLineage || null,
-      });
+      }));
       return { ...executed, scientificTaskRef: { taskId: ref.taskId, version: Number(ref.version || 1) } };
     }
 
@@ -923,10 +989,10 @@ async function tool_run_tool(args, ctx) {
     // path stays available for callers that do not carry this delegation.
     if (HEAVY_TOOLS.has(toolId)) {
       if (shouldAutoExecuteLocalAnalysis(ctx) && !args.ackToken) {
-        const executed = await runToolExecutor(ctx)(toolId, params, userId, null, trustedProjectId(ctx), null, {
+        const executed = registerChainPreviewAfterRun(await runToolExecutor(ctx)(toolId, params, userId, null, trustedProjectId(ctx), null, {
           conversationId: trustedConversationId(ctx),
           resultStudioInputLineage: ctx && ctx.resultStudioInputLineage || null,
-        });
+        }));
         return {
           ...executed,
           automationDecision: {
@@ -940,10 +1006,10 @@ async function tool_run_tool(args, ctx) {
       if (args.ackToken) {
         const job = approvalContinuationJob;
         if (job && job.ack_status === 'approved') {
-          return await _executeRunTool(toolId, params, userId, args.ackToken, trustedProjectId(ctx), null, {
+          return registerChainPreviewAfterRun(await _executeRunTool(toolId, params, userId, args.ackToken, trustedProjectId(ctx), null, {
             conversationId: trustedConversationId(ctx),
             resultStudioInputLineage: ctx && ctx.resultStudioInputLineage || null,
-          });
+          }));
         }
         if (job && job.ack_status === 'rejected') {
           return { ok: false, error: 'user_rejected', message: '用户取消了该重操作', toolId };
@@ -978,10 +1044,10 @@ async function tool_run_tool(args, ctx) {
     }
 
     // 非重操作：直接跑（原逻辑）
-    return await _executeRunTool(toolId, params, userId, null, trustedProjectId(ctx), null, {
+    return registerChainPreviewAfterRun(await _executeRunTool(toolId, params, userId, null, trustedProjectId(ctx), null, {
       conversationId: trustedConversationId(ctx),
       resultStudioInputLineage: ctx && ctx.resultStudioInputLineage || null,
-    });
+    }));
   }
   if (op === 'status') {
     // Phase 6: project workflow plan status from real tool jobs in DB.
