@@ -213,6 +213,14 @@ export interface ResultStudioContextResult {
   status: 'ready' | 'blocked';
   agentView: ResultStudioContextAgentView | null;
   editControls: ResultStudioEditControls | null;
+  /**
+   * BLOCK-139 T2 — ready 时后端 envelope 重投影出的权威 Revision 坐标
+   * （envelope.artifact.artifactId + envelope.revision.revisionId，与 agent
+   * 上下文同一真相源）。交互 manifest 缺 revisionId（validator fail-closed）
+   * 时由调用方以它补锚选择；调用方必须核对 artifactId 一致才可采纳。
+   * blocked / 坐标缺失时为 null——前端绝不伪造 revision 身份。
+   */
+  resolvedRevision: { artifactId: string; revisionId: string } | null;
   diagnostics: ResultStudioContextDiagnostic[];
 }
 
@@ -248,12 +256,27 @@ export async function fetchResultStudioContext(input: {
           code: typeof data.error === 'string' && data.error ? data.error : 'context_unavailable',
           message: typeof data.message === 'string' && data.message ? data.message : '无法读取当前结果上下文。',
         }];
-    return { status: 'blocked', agentView: null, editControls: null, diagnostics };
+    return { status: 'blocked', agentView: null, editControls: null, resolvedRevision: null, diagnostics };
   }
+  // BLOCK-139 T2：端点同时返回完整 envelope（context.js 直接透出 resolved.envelope）。
+  // 这里只取重投影出的 Revision 坐标供交互 manifest 补锚；坐标缺一即不透出。
+  const envelope = data.envelope as {
+    artifact?: { artifactId?: unknown };
+    revision?: { revisionId?: unknown };
+  } | null;
+  const envelopeArtifactId = typeof envelope?.artifact?.artifactId === 'string'
+    ? envelope.artifact.artifactId.trim()
+    : '';
+  const envelopeRevisionId = typeof envelope?.revision?.revisionId === 'string'
+    ? envelope.revision.revisionId.trim()
+    : '';
   return {
     status: 'ready',
     agentView: (data.agentView as ResultStudioContextAgentView) || null,
     editControls: (data.editControls as ResultStudioEditControls) || null,
+    resolvedRevision: envelopeArtifactId && envelopeRevisionId
+      ? { artifactId: envelopeArtifactId, revisionId: envelopeRevisionId }
+      : null,
     diagnostics: [],
   };
 }

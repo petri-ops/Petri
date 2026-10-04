@@ -4,6 +4,7 @@ import type { Project, ToolJob } from '@/lib/project-types';
 import {
   deleteResultStudioSelection,
   fetchArtifactInteraction,
+  fetchResultStudioContext,
   restoreResultStudioSelection,
   saveResultStudioSelection,
   type ResultTableQuery,
@@ -114,16 +115,42 @@ export function useArtifactInteractionSelection(options: UseArtifactInteractionS
         });
         if (cancelled) return;
         if (data?.manifest) {
-          setInteractionManifest(data.manifest);
+          // BLOCK-139 T2 修复——两路 revision 口径对齐。validator fail-closed 插件
+          // （如 deseq2）在 interaction 路由的 baseline 校验拿不到 revision，
+          // manifest.revisionId=null；而 agent 上下文链经 F1 ensureChainRevisions
+          // 注册了 chain revision。口径分裂时选择以 revisionId='' 落库，
+          // context-envelope 一律评估 stale/revision_changed（composer「当前选择
+          // 已过期」），selection 运行链也无法绑定正式 Revision。此处经既有
+          // context-envelope 投影（与 agent 上下文同一真相源，幂等触发 F1 注册）
+          // 补锚权威 revisionId：仅当 artifactId 与本 manifest 一致时采纳；
+          // 投影不可得时维持原样，不比既有行为更宽。词汇不变（仍是
+          // ArtifactInteractionManifest.revisionId，artifact-selection.ts 镜像）。
+          let manifest = data.manifest;
+          if (!manifest.revisionId && manifest.selectionDurable) {
+            const projection = await fetchResultStudioContext({
+              language: lang,
+              projectId: project.id,
+              jobId: viewedRevision?.toolJobId || job.id,
+              artifact: selectedArtifactName,
+            }).catch(() => null);
+            if (cancelled) return;
+            const resolved = projection && projection.status === 'ready'
+              ? projection.resolvedRevision
+              : null;
+            if (resolved && resolved.artifactId === manifest.artifactId) {
+              manifest = { ...manifest, revisionId: resolved.revisionId };
+            }
+          }
+          setInteractionManifest(manifest);
           setInteractionRevision(toArtifactRevision(data.revision));
           setInteractionBackingTable(data.backingTable || null);
           const restored = await restoreResultStudioSelection({
             language: lang,
             projectId: project.id,
             conversationId,
-            artifactId: data.manifest.artifactId,
-            revisionId: data.manifest.revisionId,
-            selectionDurable: data.manifest.selectionDurable,
+            artifactId: manifest.artifactId,
+            revisionId: manifest.revisionId,
+            selectionDurable: manifest.selectionDurable,
           });
           if (!cancelled && selectionMutationEpochRef.current === epoch) {
             visibleSelectionRef.current = restored;

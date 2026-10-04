@@ -21,14 +21,16 @@ const fetchArtifactInteraction = vi.fn<(...args: unknown[]) => unknown>();
 const restoreResultStudioSelection = vi.fn<(...args: unknown[]) => unknown>();
 const saveResultStudioSelection = vi.fn<(...args: unknown[]) => unknown>();
 const deleteResultStudioSelection = vi.fn<(...args: unknown[]) => unknown>();
+const fetchResultStudioContext = vi.fn<(...args: unknown[]) => unknown>();
 vi.mock('@/lib/result-studio-interaction-client', () => ({
   fetchArtifactInteraction: (...args: unknown[]) => fetchArtifactInteraction(...args),
   restoreResultStudioSelection: (...args: unknown[]) => restoreResultStudioSelection(...args),
   saveResultStudioSelection: (...args: unknown[]) => saveResultStudioSelection(...args),
   deleteResultStudioSelection: (...args: unknown[]) => deleteResultStudioSelection(...args),
+  fetchResultStudioContext: (...args: unknown[]) => fetchResultStudioContext(...args),
 }));
 
-function manifestFor(artifactId: string, revisionId: string = 'rev_1'): ArtifactInteractionManifest {
+function manifestFor(artifactId: string, revisionId: string | null = 'rev_1'): ArtifactInteractionManifest {
   return {
     interactionVersion: 1,
     artifactId,
@@ -77,8 +79,10 @@ beforeEach(() => {
   restoreResultStudioSelection.mockReset();
   saveResultStudioSelection.mockReset();
   deleteResultStudioSelection.mockReset();
+  fetchResultStudioContext.mockReset();
   restoreResultStudioSelection.mockResolvedValue(null);
   saveResultStudioSelection.mockImplementation((...args: unknown[]) => (args[0] as { selection: unknown }).selection);
+  fetchResultStudioContext.mockResolvedValue({ status: 'blocked', resolvedRevision: null });
   setSelectionBusArtifact({ artifactId: '', revisionId: null });
   setSelectionBusSelection(null);
 });
@@ -141,5 +145,91 @@ describe('BLOCK-139 生产线接总线（评审 P1-1）', () => {
       result.current.resetInteractionSelection();
     });
     await waitFor(() => expect(getSelectionBusState().selection).toBeNull());
+  });
+});
+
+// ============================================================================
+// BLOCK-139 T2 修复契约 — 两路 revision 口径对齐（interaction manifest vs F1 chain）
+//
+// 被钉契约：validator fail-closed 插件（如 deseq2）的 interaction manifest 带
+// revisionId=null，而 agent 上下文链经 F1 ensureChainRevisions 注册了 chain
+// revision。hook 须在 manifest.revisionId 缺失且选择可持久时，经既有
+// context-envelope 投影（与 agent 上下文同一真相源）补锚权威 revisionId——
+// 绑定/保存/恢复/总线同源；artifactId 不一致或投影不可得时不采纳
+// （fail-closed，不比既有行为宽）；manifest 自带 revisionId 时零额外请求。
+// ============================================================================
+
+describe('BLOCK-139 T2 修复：manifest.revisionId 缺失时经 context-envelope 投影补锚', () => {
+  it('补锚贯通四口：manifest 绑定、总线 artifact、恢复入参、保存载荷同一 revisionId', async () => {
+    fetchArtifactInteraction.mockResolvedValue({ manifest: manifestFor('deg_table', null), revision: null });
+    fetchResultStudioContext.mockResolvedValue({
+      status: 'ready',
+      resolvedRevision: { artifactId: 'deg_table', revisionId: 'rev_chain_f1' },
+    });
+    const { result } = mountHook('deg_table.csv');
+
+    await waitFor(() => expect(result.current.boundInteractionManifest?.revisionId).toBe('rev_chain_f1'));
+    await waitFor(() => expect(getSelectionBusState().revisionId).toBe('rev_chain_f1'));
+    expect(fetchResultStudioContext).toHaveBeenCalledWith(expect.objectContaining({
+      language: 'r',
+      projectId: 'proj_1',
+      jobId: 'job_1',
+      artifact: 'deg_table.csv',
+    }));
+    expect(restoreResultStudioSelection).toHaveBeenCalledWith(expect.objectContaining({
+      artifactId: 'deg_table',
+      revisionId: 'rev_chain_f1',
+    }));
+
+    // viewer 生产路径：从 boundInteractionManifest 构建选择（baseSelection 读
+    // manifest.revisionId），落库载荷必须携带补锚后的 revisionId。
+    act(() => {
+      result.current.handleSelectionChange(
+        buildRowSelection(result.current.boundInteractionManifest!, geneRows(3)).selection,
+      );
+    });
+    await waitFor(() => expect(saveResultStudioSelection).toHaveBeenCalled());
+    const saved = (saveResultStudioSelection.mock.calls[0][0] as { selection: { revisionId: string | null } }).selection;
+    expect(saved.revisionId).toBe('rev_chain_f1');
+  });
+
+  it('投影 artifactId 与 manifest 不一致时不采纳（不锚到别的 artifact 上）', async () => {
+    fetchArtifactInteraction.mockResolvedValue({ manifest: manifestFor('deg_table', null), revision: null });
+    fetchResultStudioContext.mockResolvedValue({
+      status: 'ready',
+      resolvedRevision: { artifactId: 'other_table', revisionId: 'rev_other' },
+    });
+    const { result } = mountHook('deg_table.csv');
+
+    await waitFor(() => expect(result.current.boundInteractionManifest?.artifactId).toBe('deg_table'));
+    expect(result.current.boundInteractionManifest?.revisionId).toBeNull();
+    expect(getSelectionBusState().revisionId).toBeNull();
+    expect(restoreResultStudioSelection).toHaveBeenCalledWith(expect.objectContaining({ revisionId: null }));
+  });
+
+  it('投影不可得（异常/blocked）时维持原样，选择仍可保存（不比既有行为窄）', async () => {
+    fetchArtifactInteraction.mockResolvedValue({ manifest: manifestFor('deg_table', null), revision: null });
+    fetchResultStudioContext.mockRejectedValue(new Error('envelope unavailable'));
+    const { result } = mountHook('deg_table.csv');
+
+    await waitFor(() => expect(result.current.boundInteractionManifest?.artifactId).toBe('deg_table'));
+    expect(result.current.boundInteractionManifest?.revisionId).toBeNull();
+
+    act(() => {
+      result.current.handleSelectionChange(
+        buildRowSelection(result.current.boundInteractionManifest!, geneRows(2)).selection,
+      );
+    });
+    await waitFor(() => expect(saveResultStudioSelection).toHaveBeenCalled());
+    const saved = (saveResultStudioSelection.mock.calls[0][0] as { selection: { revisionId: string | null } }).selection;
+    expect(saved.revisionId).toBeNull();
+  });
+
+  it('manifest 自带 revisionId（validator-ok 插件）时不发 envelope 投影请求（零行为变化）', async () => {
+    fetchArtifactInteraction.mockResolvedValue({ manifest: manifestFor('deg_table', 'rev_1'), revision: null });
+    const { result } = mountHook('deg_table.csv');
+
+    await waitFor(() => expect(result.current.boundInteractionManifest?.revisionId).toBe('rev_1'));
+    expect(fetchResultStudioContext).not.toHaveBeenCalled();
   });
 });
