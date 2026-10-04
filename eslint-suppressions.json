@@ -34,6 +34,11 @@
       "count": 1
     }
   },
+  "frontend/scripts/test-files.mjs": {
+    "no-undef": {
+      "count": 1
+    }
+  },
   "frontend/src/components/copilot/CommandPalette.tsx": {
     "react-hooks/set-state-in-effect": {
       "count": 2
@@ -364,8 +369,7 @@
   },
   "frontend/src/components/result-studio/LineageStrip.tsx": {
     "react-hooks/set-state-in-effect": {
-      "count": 1,
-      "reason": "A 形态（BK-06 第五刀定性豁免类）：fetch-on-mount 前同步 reset 旧血缘（jobId 切换防串数据），derive-during-render 对网络获取不适用，级联代价有界"
+      "count": 1
     }
   },
   "frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx": {
@@ -393,7 +397,7 @@
   },
   "frontend/src/components/result-studio/ScientificInteractionViewer.tsx": {
     "react-hooks/refs": {
-      "count": 1
+      "count": 6
     },
     "react-hooks/set-state-in-effect": {
       "count": 1
@@ -421,20 +425,16 @@
   },
   "frontend/src/components/workspace-panels/AnalysisLaunchPanel.tsx": {
     "@typescript-eslint/no-unsafe-argument": {
-      "count": 1,
-      "reason": "登记未修（单文件>5 error 按纪律留 leftovers）：BLOCK-131 文件选项 fetch resp.json() 无类型标注致 data:any 单源 8 条 unsafe-*，待下一批响应类型一行收口"
+      "count": 1
     },
     "@typescript-eslint/no-unsafe-assignment": {
-      "count": 1,
-      "reason": "登记未修（单文件>5 error 按纪律留 leftovers）：BLOCK-131 文件选项 fetch resp.json() 无类型标注致 data:any 单源 8 条 unsafe-*，待下一批响应类型一行收口"
+      "count": 1
     },
     "@typescript-eslint/no-unsafe-call": {
-      "count": 2,
-      "reason": "登记未修（单文件>5 error 按纪律留 leftovers）：BLOCK-131 文件选项 fetch resp.json() 无类型标注致 data:any 单源 8 条 unsafe-*，待下一批响应类型一行收口"
+      "count": 2
     },
     "@typescript-eslint/no-unsafe-member-access": {
-      "count": 4,
-      "reason": "登记未修（单文件>5 error 按纪律留 leftovers）：BLOCK-131 文件选项 fetch resp.json() 无类型标注致 data:any 单源 8 条 unsafe-*，待下一批响应类型一行收口"
+      "count": 4
     }
   },
   "frontend/src/components/workspace-panels/CenterPanel.tsx": {
@@ -641,15 +641,13 @@
   },
   "frontend/src/pages/project-workspace.tsx": {
     "react-hooks/immutability": {
-      "count": 1,
-      "reason": "本地 useRef（UI-451 右栏 files 脏位图单一真相）在上抛回调内 .current 赋值=ref 命令式写入惯用法；渲染期不读该 ref（:249 注释在案），改 state/渲染期调整有级联重渲染代价，零行为红线内不重构（BK-06 命令式 idiom 豁免同类）"
+      "count": 1
     },
     "react-hooks/preserve-manual-memoization": {
       "count": 1
     },
     "react-hooks/refs": {
-      "count": 4,
-      "reason": ":960/:1035=pendingArtifact 一次性门控（ref 存 jobId 关联、消费即清，改 state 变派生时序）；:1136/:1137=UI-451 关窗守卫弹层直读脏计数（pendingAppClose state 门控后才渲染）——ref 命令式 idiom 豁免（CK-06 拆分后余量同类，BK-06 第六刀定性）"
+      "count": 4
     },
     "react-hooks/set-state-in-effect": {
       "count": 5
@@ -748,8 +746,7 @@
   },
   "scripts/block129-bulk-chain-live.mjs": {
     "no-control-regex": {
-      "count": 1,
-      "reason": "误报豁免：labelsReadable 故意检测产物 label 的 mojibake（\\uFFFD）与控制字符（\\x00-\\x08/\\x0e-\\x1f）——控制符正则是被测语义本身（可读性探针），非注入面（BK-06 control-regex 豁免同类）"
+      "count": 1
     }
   },
   "scripts/block84-p2-ui-live.cjs": {

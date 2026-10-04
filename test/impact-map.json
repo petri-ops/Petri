@@ -30,7 +30,8 @@
     {
       "id": "frontend-source",
       "patterns": [
-        "frontend/src/**"
+        "frontend/src/**",
+        "frontend/scripts/**"
       ],
       "commands": [
         "ui-audit",

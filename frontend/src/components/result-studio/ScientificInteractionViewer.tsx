@@ -20,6 +20,7 @@ import {
   queryResultStudioTable,
   type ResultTableQuery,
 } from '@/lib/result-studio-interaction-client';
+import { setSelectionBusSelection, useSelectionBus } from '@/lib/selectionBus';
 import styles from './ScientificInteractionViewer.module.css';
 
 const ROW_HEIGHT = 32;
@@ -90,7 +91,7 @@ export function ScientificInteractionViewer({
   artifactName,
   manifest,
   backingTable,
-  selection,
+  selection: selectionProp,
   onSelectionChange,
 }: {
   language: 'r' | 'python';
@@ -98,9 +99,24 @@ export function ScientificInteractionViewer({
   artifactName: string;
   manifest: ArtifactInteractionManifest;
   backingTable?: ResultTableQuery | null;
-  selection: ArtifactSelection | null;
-  onSelectionChange: (selection: ArtifactSelection | null) => void;
+  // BLOCK-139 P0-3 平迁：两 prop 收窄为可选。提供 onSelectionChange = 既有回调
+  // 面（零回归）；未提供 = 总线模式——交互出口把 ArtifactSelection 写进总线
+  //（D1 单选择真相，坐标来自 manifest），选中回显从总线读取并随总线清除同步消失。
+  selection?: ArtifactSelection | null;
+  onSelectionChange?: (selection: ArtifactSelection | null) => void;
 }): React.ReactElement {
+  const busState = useSelectionBus();
+  // BLOCK-139 P1 mark-to-entity：总线出口写入时随 context 携带 manifest.idField
+  //（entityType 在选择对象自身词汇里）；回调模式原样透传，零回归。
+  const emitSelection = onSelectionChange
+    ?? ((next: ArtifactSelection | null) => setSelectionBusSelection(next, { idField: manifest.idField }));
+  // 总线回显按 artifactId 归位：总线只持有当前活跃 artifact 的选择（D1），
+  // 其他 artifact 的选择不在本 viewer 回显。
+  const selection = onSelectionChange
+    ? selectionProp ?? null
+    : busState.selection && busState.selection.artifactId === manifest.artifactId
+      ? busState.selection
+      : null;
   const mode = manifest.interactionMode || 'read_only';
   if (mode === 'table') {
     return (
@@ -110,15 +126,15 @@ export function ScientificInteractionViewer({
         artifactName={artifactName}
         manifest={manifest}
         selection={selection}
-        onSelectionChange={onSelectionChange}
+        onSelectionChange={emitSelection}
       />
     );
   }
   if (mode === 'scatter' && backingTable) {
-    return <ScientificScatter manifest={withQueryColumns(manifest, backingTable)} query={backingTable} selection={selection} onSelectionChange={onSelectionChange} />;
+    return <ScientificScatter manifest={withQueryColumns(manifest, backingTable)} query={backingTable} selection={selection} onSelectionChange={emitSelection} />;
   }
   if (mode === 'matrix' && backingTable) {
-    return <ScientificMatrix manifest={withQueryColumns(manifest, backingTable)} query={backingTable} selection={selection} onSelectionChange={onSelectionChange} />;
+    return <ScientificMatrix manifest={withQueryColumns(manifest, backingTable)} query={backingTable} selection={selection} onSelectionChange={emitSelection} />;
   }
   return (
     <div className={styles.readOnlyNotice}>
@@ -156,6 +172,21 @@ function VirtualScientificTable({
   const [error, setError] = React.useState('');
   const selectedRows = React.useRef(new Map<string, Record<string, unknown>>());
   const viewportRef = React.useRef<HTMLDivElement | null>(null);
+  // 选择真相 → 行勾选回显的同步在渲染期进行（BLOCK-139 P0-3 平迁）：总线模式下
+  // 「清除选择」只有一次重渲染，若留在 effect 里清 ref，本次提交的 checkbox 仍按
+  // 旧 ref 渲染且清 ref 不触发重渲染，回显会滞留。渲染期同步使同一帧内 ref 与
+  // selection 一致；行勾选累积/恢复语义与既有回调面完全相同。
+  const hydratedSelectionRef = React.useRef<ArtifactSelection | null | undefined>(undefined);
+  if (hydratedSelectionRef.current !== selection) {
+    hydratedSelectionRef.current = selection;
+    if (!selection) {
+      selectedRows.current.clear();
+    } else if (selection.origin === 'row_select' && manifest.idField) {
+      selectedRows.current = new Map(
+        selection.entityIds.map((entityId) => [entityId, { [manifest.idField!]: entityId }]),
+      );
+    }
+  }
   const filterExpression = React.useMemo<SelectionFilterExpression>(() => ({
     logic: 'and',
     clauses: filterClauses.flatMap((clause): Array<{ field: string; op: SelectionFilterClause['op']; value: string | number }> => {
@@ -194,17 +225,6 @@ function VirtualScientificTable({
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; controller.abort(); };
   }, [artifactName, filterExpression, jobId, language, offset, sort]);
-
-  React.useEffect(() => {
-    if (!selection) {
-      selectedRows.current.clear();
-      return;
-    }
-    if (selection.origin !== 'row_select' || !manifest.idField) return;
-    selectedRows.current = new Map(
-      selection.entityIds.map((entityId) => [entityId, { [manifest.idField!]: entityId }]),
-    );
-  }, [manifest.artifactId, manifest.idField, selection]);
 
   const effectiveManifest = query ? withQueryColumns(manifest, query) : manifest;
   const columns = query?.columns || [];

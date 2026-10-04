@@ -8,6 +8,7 @@
 */
 
 import type { CopilotContext } from '@/lib/copilotContext';
+import type { SelectionBusState } from '@/lib/selectionBus';
 
 export const gewuEvents = {
   /** Fired by main.js preload on Cmd+R; listened by project-workspace to refetch state */
@@ -129,6 +130,14 @@ export const gewuEvents = {
    * 会话驱动操作共同的数据面）。
    */
   knowledgeConsoleSync: 'gewu:knowledge-console-sync',
+
+  /**
+   * BLOCK-139 P0-1（选择总线，D1）：selectionBus 每次状态写入后由总线派发最新
+   * 快照（detail=SelectionBusState，与 getSelectionBusState() 一致）；跨 viewer
+   * 与非 React 消费面经此读取「当前活跃 artifact 的当前选择」。React 消费面走
+   * useSelectionBus()（内部订阅，不依赖本事件时序）。
+   */
+  selectionBus: 'gewu:selection-bus',
 } as const;
 
 export interface ConversationForkedDetail {
@@ -200,6 +209,12 @@ export interface CopilotAskDetail {
   /**
    * P4R-3: 结果 Composer 的原子上下文快照。token 不写入 prompt;
    * SimpleChat 将该快照覆盖到本轮请求 context,避免异步建会话期间漂移。
+   *
+   * BLOCK-139 评审修订：不设 selection 负载（D2 防第二注入通道；copilot-ask
+   * 监听面只消费 prompt/analysisMode/resultContext）。选择实体坐标到达 Agent
+   * 的既有通道 = 结果选择持久化（saveResultStudioSelection → selectionId →
+   * selection/current / tool_result_selection_run）+ composer 组装链的
+   * activeArtifact.selection 摘要（≤12 有界）。
    */
   resultContext?: {
     contextToken: string;
@@ -285,6 +300,7 @@ export type GewuEventMap = {
   [gewuEvents.conversationTopicShift]: ConversationTopicShiftDetail;
   [gewuEvents.conversationCreated]: ConversationCreatedDetail;
   [gewuEvents.knowledgeConsoleSync]: undefined;
+  [gewuEvents.selectionBus]: SelectionBusState;
 };
 
 /** BLOCK-34 P3: 后台进程启动事件载荷。 */

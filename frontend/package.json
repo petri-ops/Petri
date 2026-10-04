@@ -13,7 +13,7 @@
     "test": "vitest run --changed",
     "test:changed": "vitest run --changed",
     "test:related": "vitest related --run",
-    "test:files": "vitest run",
+    "test:files": "node scripts/test-files.mjs",
     "test:all": "vitest run",
     "test:watch": "vitest"
   },

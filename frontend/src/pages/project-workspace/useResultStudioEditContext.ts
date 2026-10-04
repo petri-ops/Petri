@@ -9,6 +9,7 @@ import { summarizeSelectionForAgent } from '@/lib/artifact-selection';
 import { isResultStudioContextToken } from '@/lib/result-edit-agent-bridge';
 import { buildResultEditCopilotAsk } from '@/lib/result-edit-agent-bridge';
 import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
+import { useSelectionBus } from '@/lib/selectionBus';
 import { isConversationRunning } from '@/components/copilot/conversationRunStore';
 
 // BLOCK-92 Wave B-1 — Result Studio 编辑上下文簇外迁（原 ProjectWorkspace 内联，纯搬运零行为变化）。
@@ -155,12 +156,25 @@ export function useResultStudioEditContext(options: UseResultStudioEditContextOp
     });
   }, [resultAgentDraftKey]);
 
+  // BLOCK-139 P0-2（D2 单注入通道）：选择坐标的真相源是选择总线（D1 单选择真相）。
+  // shell 已投影选择时沿用既有 prop 链语义（零回归）；shell 未投影
+  //（activeArtifact.selection 为空）而总线持有当前活跃 artifact 的选择时，
+  // 坐标经同一条组装链注入——不另开注入通道（防第二注入真相）。
+  // 兼容语义不得比既有链更宽：显式 compatibility ≠ compatible（stale/invalid）
+  // 的选择一律 selection=null；总线新写入的交互选择无 compatibility 标记，
+  // 视为当前有效（fresh），与既有链「乐观投影 compatible」同口径。
+  const selectionBusState = useSelectionBus();
   const copilotActiveArtifact = useMemo<NonNullable<CopilotContext['activeArtifact']> | null>(() => {
     if (!activeArtifact) return null;
     const contextToken = effectiveResultContextState?.status === 'ready'
       && isResultStudioContextToken(effectiveResultContextState.contextToken)
       ? effectiveResultContextState.contextToken
       : null;
+    const propSelection = activeArtifact.selection;
+    const propSelectionUsable = propSelection?.compatibility === 'compatible';
+    const busSelection = selectionBusState.selection;
+    const busSelectionUsable = !!busSelection
+      && (!busSelection.compatibility || busSelection.compatibility === 'compatible');
     return {
       jobId: activeArtifact.jobId,
       toolId: activeArtifact.toolId,
@@ -172,16 +186,14 @@ export function useResultStudioEditContext(options: UseResultStudioEditContextOp
       artifactFamilyId: activeArtifact.artifactFamilyId,
       entityType: activeArtifact.entityType,
       idField: activeArtifact.idField,
-      selectionId: activeArtifact.selection?.compatibility === 'compatible'
-        ? activeArtifact.selectionId
-        : null,
-      selection: activeArtifact.selection?.compatibility === 'compatible'
-        ? summarizeSelectionForAgent(activeArtifact.selection)
-        : null,
-      selectionCompatibility: activeArtifact.selection?.compatibility || null,
+      selectionId: propSelectionUsable ? activeArtifact.selectionId : null,
+      selection: propSelection
+        ? (propSelectionUsable ? summarizeSelectionForAgent(propSelection) : null)
+        : (busSelectionUsable ? summarizeSelectionForAgent(busSelection) : null),
+      selectionCompatibility: propSelection?.compatibility || busSelection?.compatibility || null,
       contextToken,
     };
-  }, [activeArtifact, effectiveResultContextState?.contextToken, effectiveResultContextState?.status]);
+  }, [activeArtifact, effectiveResultContextState?.contextToken, effectiveResultContextState?.status, selectionBusState.selection]);
 
   useEffect(() => {
     setActiveArtifact(null);

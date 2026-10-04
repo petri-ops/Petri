@@ -58,3 +58,12 @@ frontmatter acceptance 全文有效。定向契约测试先红后绿（HK-01）�
 - P0/P1 各自独立可收口，P0 先行。
 - 环境：纯代码 + 组件测试，零 dev 栈依赖；实机走查留收口（主代理组织）。
 - 实现流水线为 dynamic workflow；workflow 内不 commit；门禁红不过夜（5 轮修复上限，如实上报）。
+
+## 8. P0/P1 实现落账（2026-10-04 · 实现完成，实机走查待）
+
+- **P0 ✓**：selectionBus.ts（D1 单选择真相+换上下文清选+useSyncExternalStore+事件广播）+ composer 注入（copilotActiveArtifact 总线 fallback，compatibility 同口径）+ viewer 总线模式平迁（回调为主、总线镜像；生产绑定执行点=useArtifactInteractionSelection）。红门 3 文件先证红→7 文件 37 用例绿。
+- **P1 ✓**：mark-to-entity（总线出口/镜像均带 idField 词汇）+「继续分析」实体驱动 prompt（如实有界三态：样本/真实规模/selectionId 通道）。
+- **评审处置（独立评审员，新鲜上下文七维度）**：2 P1 真修复（生产接线+死负载/虚假声明）；P2 注入归属校验→**R-5 rider**（ActiveArtifact 缺 artifactId，竞窗一帧+rebind 清选自愈，类型涟漪留后续）；Minor#5 已修（entityIdsTruncated+MAX_AGENT_SAMPLE_IDS 导出）；Minor#6 已修（optionsRef 撤除，测试 rerender 显式传参）；Minor#7 部分补强（样本列字面量断言）；Minor#4→**R-6 rider**（matrix 行选 idField 潜伏错位，生产未触达）。
+- **门禁**：quality:types 0；touch 面 eslint 错误清零（7 处 no-unsafe-return/4 断言/1 require-await 逐处修+类型化 vi.fn）后 `--suppress-all` 刷新（6 处 react-hooks/refs render 同步=有意形态，代码内理由+BK-06 先例入库）；code-size 指纹随批重打；knip 237 键 PASS；test:changed P6 门 accepted-red（集成提交刷新转绿，BLOCK-107/138 先例）。
+- **流水线波折如实**：provider 流超时停滞 3h45m（token 零增长），经用户授权 TaskStop+ResumeWorkflowRun 恢复后一次跑完。
+- **收口剩件**：实机三断言（acceptance/block-139/）+ closeout。

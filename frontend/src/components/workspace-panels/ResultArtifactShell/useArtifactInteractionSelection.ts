@@ -9,6 +9,7 @@ import {
   type ResultTableQuery,
 } from '@/lib/result-studio-interaction-client';
 import type { ArtifactInteractionManifest, ArtifactSelection } from '@/lib/artifact-selection';
+import { setSelectionBusArtifact, setSelectionBusSelection } from '@/lib/selectionBus';
 import { shouldRequestArtifactInteraction, shouldSurfaceInteractionFailure, type ResultViewerAdapter } from '@/components/result-studio/resultSurface';
 import type { ArtifactRevision } from '@/components/result-studio/resultStudioClient';
 import { toArtifactRevision } from '@/components/workspace-panels/ResultView/helpers';
@@ -215,6 +216,23 @@ export function useArtifactInteractionSelection(options: UseArtifactInteractionS
     visibleSelectionRef.current = null;
     committedSelectionRef.current = null;
   }, []);
+
+  // BLOCK-139（评审 P1-1 生产接线）：本 hook 是选择总线的生产绑定执行点与镜像源。
+  // ① D1「切换 artifact 即换上下文」在此发生：交互 manifest 绑定/解绑时同步
+  //    setSelectionBusArtifact（同上下文重复绑定幂等，不会清掉活跃选择）。
+  // ② shell 可见选择（用户写入 / 后端恢复 / 清除 / 保存回滚）统一镜像进总线，
+  //    生产下游（composer 注入、继续分析）读到的即生产真相。
+  // ③ viewer 保持回调模式：摘两 prop 会绕过 saveResultStudioSelection 持久化流
+  //    （保存/删除/回滚 + selectionId 戳记）；总线是镜像读真相，不是第二写入通道。
+  useEffect(() => {
+    setSelectionBusArtifact(boundInteractionManifest
+      ? { artifactId: boundInteractionManifest.artifactId, revisionId: boundInteractionManifest.revisionId }
+      : { artifactId: '', revisionId: null });
+  }, [boundInteractionManifest]);
+
+  useEffect(() => {
+    setSelectionBusSelection(boundArtifactSelection, { idField: boundInteractionManifest?.idField ?? null });
+  }, [boundArtifactSelection, boundInteractionManifest]);
 
   return {
     interactionBindingKey,

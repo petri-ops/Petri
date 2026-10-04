@@ -18,8 +18,8 @@ import { unknownText } from './unknownText';
 /** 与后端 SelectionContext v1 的 MAX_PERSISTED_ENTITY_IDS 保持一致。 */
 export const MAX_PERSISTED_ENTITY_IDS = 2000;
 
-/** 交给 Agent 的样本 ID 上限。 */
-const MAX_AGENT_SAMPLE_IDS = 12;
+/** 交给 Agent 的样本 ID 上限。唯一书写处——消费方从此导入，不得复制字面量（BLOCK-139 D3）。 */
+export const MAX_AGENT_SAMPLE_IDS = 12;
 
 export type ArtifactIdStrategy = 'declared_column' | 'inferred_column' | 'positional';
 
