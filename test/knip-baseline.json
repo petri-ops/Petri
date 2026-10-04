@@ -6,7 +6,7 @@
     "types",
     "files"
   ],
-  "updatedAt": "2026-10-03",
+  "updatedAt": "2026-10-04",
   "keys": [
     "exports::.agents/skills/gewu-dev-infra/dev-verify/lib.cjs::DEFAULT_PORT",
     "exports::.agents/skills/gewu-dev-infra/dev-verify/lib.cjs::TEST_INSTANCE_PORT",
@@ -100,6 +100,7 @@
     "files::.agents/skills/gewu-dev-infra/dev-verify/flows/workspace-file-ops.cjs",
     "files::.agents/skills/gewu-dev-infra/dev-verify/flows/workspace-panel-motion.cjs",
     "files::.agents/skills/gewu-dev-infra/scripts/normalize-eol.mjs",
+    "files::acceptance/block-139/block139-selection-walk.cjs",
     "files::acceptance/block-65/block65-verify.cjs",
     "files::acceptance/ui-276/resume-verify-script.mjs",
     "files::acceptance/ui-ledger-closeout/ui156-uiattch-verify.cjs",
@@ -195,9 +196,6 @@
     "types::frontend/src/hooks/useStartupTimeline.ts::StartupReport",
     "types::frontend/src/hooks/useWorkspacePanels.ts::TitleBarState",
     "types::frontend/src/hooks/useWorkspaceRouting.ts::UseWorkspaceRoutingResult",
-    "types::frontend/src/lib/artifact-selection.ts::ArtifactIdStrategy",
-    "types::frontend/src/lib/artifact-selection.ts::ArtifactInteractionColumn",
-    "types::frontend/src/lib/artifact-selection.ts::SelectionOrigin",
     "types::frontend/src/lib/chat-file-references.ts::FileReferenceFetcher",
     "types::frontend/src/lib/chat-file-references.ts::LinkKind",
     "types::frontend/src/lib/chat-file-references.ts::ReferenceResolution",
