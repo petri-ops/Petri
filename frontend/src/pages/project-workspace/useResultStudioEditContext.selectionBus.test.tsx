@@ -179,4 +179,46 @@ describe('BLOCK-139 P0-2 composer 结构化注入（D2 既有组装链扩展）'
     );
     expect(result.current.copilotActiveArtifact!.selection).toBeNull();
   });
+
+  it('双通道合成（R2-S1 抓真）：prop 选择 stale + 总线选择 fresh → 注入总线且 compatibility 跟随注入通道（不透传被弃 prop 的 stale）', async () => {
+    // 场景（实机走查 dwfrun-332b6002 S1 refuted 实证）：后端 envelope 投影的 prop
+    // 选择带 compatibility='stale'（旧 contextToken 通道），而用户刚在 viewer 里
+    // 做了新选择落总线（fresh）。D2 注入必须取总线（S2 已证继续分析携实体清单），
+    // composer 的 compatibility 也必须跟随注入通道——否则「注入正常但 UI 自称
+    // 不会交给 Agent」双通道矛盾。
+    const stalePropArtifact: ActiveArtifact = {
+      ...shellArtifactWithoutSelection(),
+      selection: {
+        ...buildRowSelection(tableManifest('deg_table'), geneRows(3)).selection,
+        compatibility: 'stale' as const,
+      },
+    };
+    const initialProps = {
+      projectId: 'proj_1',
+      activeConvId: 'conv_1',
+      activeArtifact: stalePropArtifact,
+      setActiveArtifact: vi.fn(),
+      activeJobId: 'job_1',
+      activeConversationRun: null,
+      setWorkspaceNotice: vi.fn(),
+    };
+    const hook = renderHook((props: typeof initialProps) => useResultStudioEditContext(props), {
+      initialProps,
+    });
+    const rerender = () => hook.rerender(initialProps);
+    await waitFor(() => expect(hook.result.current.copilotActiveArtifact?.contextToken).toBe(CONTEXT_TOKEN));
+
+    act(() => {
+      setSelectionBusArtifact({ artifactId: 'deg_table', revisionId: 'rev_1' });
+      setSelectionBusSelection(buildRowSelection(tableManifest('deg_table'), geneRows(3)).selection);
+    });
+    rerender();
+    await waitFor(() => expect(hook.result.current.copilotActiveArtifact?.selection).not.toBeNull());
+
+    // 注入的是总线 fresh 选择（实体清单在场、有界）
+    const projection = hook.result.current.copilotActiveArtifact!.selection!;
+    expect(projection.entityIdCount).toBe(3);
+    // compatibility 跟随注入通道：总线 fresh → null（composer 不再误报 stale）
+    expect(hook.result.current.copilotActiveArtifact!.selectionCompatibility).toBeNull();
+  });
 });

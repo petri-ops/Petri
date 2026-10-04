@@ -157,12 +157,12 @@ export function useResultStudioEditContext(options: UseResultStudioEditContextOp
   }, [resultAgentDraftKey]);
 
   // BLOCK-139 P0-2（D2 单注入通道）：选择坐标的真相源是选择总线（D1 单选择真相）。
-  // shell 已投影选择时沿用既有 prop 链语义（零回归）；shell 未投影
-  //（activeArtifact.selection 为空）而总线持有当前活跃 artifact 的选择时，
-  // 坐标经同一条组装链注入——不另开注入通道（防第二注入真相）。
-  // 兼容语义不得比既有链更宽：显式 compatibility ≠ compatible（stale/invalid）
-  // 的选择一律 selection=null；总线新写入的交互选择无 compatibility 标记，
-  // 视为当前有效（fresh），与既有链「乐观投影 compatible」同口径。
+  // 注入优先级=可用性：shell 投影 compatible 时沿用 prop 链（零回归）；shell 投影
+  // 过期（stale/invalid）而总线持有 fresh 选择时，总线胜——compatibility 跟随
+  // **实际被注入的通道**（走查 R2-S1 抓真：旧写法把被弃 prop 的 stale 透给
+  // composer，造成「注入正常但 UI 自称不会交给 Agent」的双通道矛盾）。
+  // 两通道皆不可用=不注入，compatibility 如实透出原因。总线 stale 依旧不注入
+  // （不比既有链更宽）。
   const selectionBusState = useSelectionBus();
   const copilotActiveArtifact = useMemo<NonNullable<CopilotContext['activeArtifact']> | null>(() => {
     if (!activeArtifact) return null;
@@ -175,6 +175,11 @@ export function useResultStudioEditContext(options: UseResultStudioEditContextOp
     const busSelection = selectionBusState.selection;
     const busSelectionUsable = !!busSelection
       && (!busSelection.compatibility || busSelection.compatibility === 'compatible');
+    const injectedSelection = propSelectionUsable
+      ? summarizeSelectionForAgent(propSelection)
+      : busSelectionUsable
+        ? summarizeSelectionForAgent(busSelection)
+        : null;
     return {
       jobId: activeArtifact.jobId,
       toolId: activeArtifact.toolId,
@@ -187,10 +192,12 @@ export function useResultStudioEditContext(options: UseResultStudioEditContextOp
       entityType: activeArtifact.entityType,
       idField: activeArtifact.idField,
       selectionId: propSelectionUsable ? activeArtifact.selectionId : null,
-      selection: propSelection
-        ? (propSelectionUsable ? summarizeSelectionForAgent(propSelection) : null)
-        : (busSelectionUsable ? summarizeSelectionForAgent(busSelection) : null),
-      selectionCompatibility: propSelection?.compatibility || busSelection?.compatibility || null,
+      selection: injectedSelection,
+      selectionCompatibility: propSelectionUsable
+        ? (propSelection?.compatibility ?? null)
+        : busSelectionUsable
+          ? (busSelection?.compatibility ?? null)
+          : (propSelection?.compatibility ?? busSelection?.compatibility ?? null),
       contextToken,
     };
   }, [activeArtifact, effectiveResultContextState?.contextToken, effectiveResultContextState?.status, selectionBusState.selection]);

@@ -1,0 +1,165 @@
+{
+  "generatedAt": "2026-10-04T13:10:30.222Z",
+  "startedAt": "2026-10-04T13:10:23.516Z",
+  "route": "/project/p_mus4u230_wvib/result?job=tj_mus4uxjq_s69m",
+  "deepLink": "http://localhost:3000/project/p_mus4u230_wvib/result?job=tj_mus4uxjq_s69m",
+  "targetJob": {
+    "jobId": "tj_mus4uxjq_s69m",
+    "toolId": "deseq2",
+    "status": "completed",
+    "projectId": "p_mus4u230_wvib",
+    "source": "sqlite readonly: .biof3-dev-user-data/data/biof3.db tool_jobs WHERE tool_id='deseq2' AND status='completed' ORDER BY completed_at DESC LIMIT 1（最近 completed deseq2，2026-10-03 16:31:42）",
+    "artifact": "deg_table.csv（差异基因表；manifest HTTP 实证 artifactId=deg_table/entityType=gene/idField=gene/interactionMode=table/selectionDurable=true）"
+  },
+  "checks": [
+    {
+      "id": "P0_cdp_attached",
+      "pass": true,
+      "detail": "target=http://localhost:3000/project/p_mus4u230_wvib/result?job=tj_mus4vg1b_tf2r"
+    },
+    {
+      "id": "P1_route_deeplink",
+      "pass": true,
+      "detail": "route=/project/p_mus4u230_wvib/result?job=tj_mus4uxjq_s69m deepLink=http://localhost:3000/project/p_mus4u230_wvib/result?job=tj_mus4uxjq_s69m"
+    },
+    {
+      "id": "P3_interactive_table_mounted",
+      "pass": true,
+      "detail": "{\"checkboxes\":18}"
+    },
+    {
+      "id": "P4_bus_artifact_bound",
+      "pass": true,
+      "detail": "busBindingEvent={artifactId:deg_table, selectionAtBind:true, tailArtifactId:deg_table, eventCount:9}（gewu:selection-bus 事件流实证 setSelectionBusArtifact 生产绑定=useArtifactInteractionSelection.ts:227-231；事件通道为实例无关真相——模块动态 import 裸 URL 会因 Vite HMR t-戳得到第二实例，首轮走查实抓后改为按 performance 资源 URL 解析）"
+    },
+    {
+      "id": "S3_mark_to_entity_bus",
+      "pass": true,
+      "detail": "busState={artifactId:deg_table, entityType:gene, idField:gene, count:3, ids:[\"Gene61\",\"Gene73\",\"Gene77\"], origin:row_select} clicked=[\"Gene61\",\"Gene73\",\"Gene77\"] —— mark-to-entity P1 契约：选择落总线带 entityType（selection 词汇）+ idField=gene（setSelectionBusSelection(selection,{idField:manifest.idField})，镜像点 useArtifactInteractionSelection.ts:233-235，manifest HTTP 实证 entityType=gene/idField=gene）"
+    },
+    {
+      "id": "S3b_agent_projection_identity",
+      "pass": true,
+      "detail": "agentProjection={\"artifactId\":\"deg_table\",\"revisionId\":null,\"entityType\":\"gene\",\"origin\":\"row_select\",\"entityIdCount\":3,\"truncated\":false,\"durable\":true,\"sampleEntityIds\":[\"Gene61\",\"Gene73\",\"Gene77\"],\"entityIdsHash\":\"a926ddcb7980cecd\",\"fields\":[],\"hasFilter\":false,\"filterDescription\":null,\"sort\":[]}（summarizeSelectionForAgent 恒等投影：实体类型+样本 3 条 ≤12 有界）"
+    },
+    {
+      "id": "S1_composer_structured_injection",
+      "pass": true,
+      "detail": "copilotContext.activeArtifact={jobId:tj_mus4uxjq_s69m, name:deg_table.csv, entityType:gene, idField:gene, selectionId:sel_080c4ca1-0017-4e87-900f-006b9ed0c596} selection={\"artifactId\":\"deg_table\",\"revisionId\":null,\"entityType\":\"gene\",\"origin\":\"row_select\",\"entityIdCount\":3,\"truncated\":false,\"durable\":true,\"sampleEntityIds\":[\"Gene61\",\"Gene73\",\"Gene77\"],\"entityIdsHash\":\"f17a3431ce6396421f78f203883c084d3555a03b18adc1c3ff4fce9dd6047427\",\"fields\":[],\"hasFilter\":false,\"filterDescription\":null,\"sort\":[]} —— D2 注入通道（useResultStudioEditContext.ts:167-196 copilotActiveArtifact → useSetCopilotContext）SelectionContext v1 投影：实体类型 gene+样本 3 条（≤12 有界不泛滥）+entityIdsHash SHA-256 坐标"
+    },
+    {
+      "id": "S1b_viewer_dom_echo",
+      "pass": true,
+      "detail": "checkedRows=[\"Gene61\",\"Gene73\",\"Gene77\"] chip=[\"已选择 3 个 gene清除\"]"
+    },
+    {
+      "id": "P5_continue_menu_present",
+      "pass": true,
+      "detail": "menu={\"items\":[\"DEG 标准化\",\"DESeq2 差异分析\",\"火山图绘制\"]}"
+    },
+    {
+      "id": "S2_continue_analysis_entities",
+      "pass": true,
+      "detail": "cond={\"dispatched\":true,\"jobId\":true,\"artifact\":true,\"countPhrase\":true,\"idFieldPhrase\":true,\"samplesAll\":true,\"tail\":true} askBefore=0 askAfter=1 copilot-ask payload prompt=\"请基于任务 tj_mus4uxjq_s69m 的结果 deg_table.csv 运行「DEG 标准化」分析：从该结果的表格产物取输入（如 DEG 表），完成血统绑定后执行；完成后报告新任务 ID。用户已选中 3 个 gene（标记列 gene）：Gene61、Gene73、Gene77——完整实体列表已随选择保存（selectionId: sel_080c4ca1-0017-4e87-900f-006b9ed0c596），可经结果选择通道读取，请优先基于所选实体执行分析。\" samplesHit=[\"Gene61\",\"Gene73\",\"Gene77\"]（组装层实据：ContinueAnalysisMenu.runDownstream → appendSelectionToPrompt（ContinueAnalysisMenu.tsx:35-52/80-88），计数+entityType+标记列+≤12 样本+selectionId 通道三态如实，零 LLM 发送）"
+    },
+    {
+      "id": "S2b_send_blocked_no_llm",
+      "pass": true,
+      "detail": "interceptor={\"armed\":true} request=POST http://localhost:57312/api/ai/agent bodyHasEntities=false bodyHasActiveArtifactSelectionContext=false —— 真实发送已在网络层阻断（BlockedByClient），本走查零 LLM 消耗（rApiBase=http://localhost:57312/api）"
+    }
+  ],
+  "screenshots": [
+    "acceptance/block-139/mark-to-entity.png",
+    "acceptance/block-139/selection-context-composer.png",
+    "acceptance/block-139/continue-analysis-menu.png"
+  ],
+  "allPass": true,
+  "sideEffects": [
+    "【意外真实 LLM 运行·第一轮走查】首轮 S2 菜单点击（「DEG 标准化」）触发了真实 agent run：首轮拦截器按 :3001 配置而实际 rApiBase 是动态端口 :57312，POST 未被拦下 → agent 经既有会话 conv_a1ead47d 真实执行 deg-standardizer job tj_muttw6pl_e4a7（2026-10-04 21:00:09 创建、21:00:10 completed，DB 实证）。LLM 消耗已发生，如实记录；产物留在验收项目 p_mus4u230_wvib 内。",
+    "【第二轮走查】拦截器误拦 inflight GET（/api/ai/agent/tasks/inflight，BlockedByClient），发送链在该会话内失败；未产生新 tool job（DB 盘点 2026-10-04 仅 tj_muttw6pl_e4a7 一个新 job）。脚本退出后 CDP 拦截随之失效，无遗留发送。",
+    "【终轮走查·本 JSON 所录】S2 菜单点击触发会话发送链（copilot-ask → SimpleChat send）：POST http://localhost:57312/api/ai/agent 被 CDP Fetch 拦截以 BlockedByClient 失败——无 LLM 运行；会话侧出现一条发送失败记录，留在验收项目 p_mus4u230_wvib 内。",
+    "走查前置：勾选交互表前清除了该 artifact 上已持久化的历史选择（selectionDurable=true 恢复了 [Gene61,Gene73,Gene77]，清除经既有 deleteResultStudioSelection 持久化流），随后重新勾选同 3 行；选择留存在验收项目内。",
+    "【观察项·非本包断言】result-edit composer（ResultAgentComposer）的 contextToken 通道持续显示「当前选择已过期，不会交给 Agent」：慢速单选正常节奏 5s 后仍复现（判别探针实证），而同刻 D2 注入通道 copilotContext.activeArtifact.selection 为 compatible。该 readiness 来自后端 context-envelope 的 agentView.selectionState（P4R-3/既有面，BLOCK-139 提交未触及该链），建议主代理另行归因（潜在既有缺陷或 envelope 投影缺口）。"
+  ],
+  "final": {
+    "busEventCount": 17,
+    "busModuleSnapshot": {
+      "snapshot": {
+        "artifactId": "deg_table",
+        "revisionId": null,
+        "selection": {
+          "contractVersion": 1,
+          "artifactId": "deg_table",
+          "revisionId": null,
+          "entityType": "gene",
+          "origin": "row_select",
+          "entityIds": [
+            "Gene61",
+            "Gene73",
+            "Gene77"
+          ],
+          "entityIdCount": 3,
+          "entityIdsTruncated": false,
+          "entityIdsHash": "f17a3431ce6396421f78f203883c084d3555a03b18adc1c3ff4fce9dd6047427",
+          "filterHash": null,
+          "fields": [],
+          "filterExpression": null,
+          "sort": [],
+          "region": null,
+          "durable": true,
+          "createdAt": "2026-10-04T13:10:26.689Z",
+          "selectionId": "sel_080c4ca1-0017-4e87-900f-006b9ed0c596",
+          "compatibility": "compatible"
+        },
+        "agentProjection": {
+          "artifactId": "deg_table",
+          "revisionId": null,
+          "entityType": "gene",
+          "origin": "row_select",
+          "entityIdCount": 3,
+          "truncated": false,
+          "durable": true,
+          "sampleEntityIds": [
+            "Gene61",
+            "Gene73",
+            "Gene77"
+          ],
+          "entityIdsHash": "f17a3431ce6396421f78f203883c084d3555a03b18adc1c3ff4fce9dd6047427",
+          "fields": [],
+          "hasFilter": false,
+          "filterDescription": null,
+          "sort": []
+        },
+        "idField": "gene"
+      },
+      "via": "http://localhost:3000/src/lib/selectionBus.ts(stamped)"
+    },
+    "activeArtifactSelection": {
+      "artifactId": "deg_table",
+      "revisionId": null,
+      "entityType": "gene",
+      "origin": "row_select",
+      "entityIdCount": 3,
+      "truncated": false,
+      "durable": true,
+      "sampleEntityIds": [
+        "Gene61",
+        "Gene73",
+        "Gene77"
+      ],
+      "entityIdsHash": "f17a3431ce6396421f78f203883c084d3555a03b18adc1c3ff4fce9dd6047427",
+      "fields": [],
+      "hasFilter": false,
+      "filterDescription": null,
+      "sort": []
+    },
+    "interceptedRequests": [
+      {
+        "url": "http://localhost:57312/api/ai/agent",
+        "method": "POST",
+        "postData": null,
+        "at": "2026-10-04T13:10:27.217Z"
+      }
+    ]
+  }
+}
