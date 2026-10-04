@@ -5517,6 +5517,29 @@
       ],
       "notes": "成果面系列首包（planned 排队，实现待用户过目 plan 后发令；active 槽位属 BLOCK-128）。P0=viewer registry 契约固化+六类 adapter 零行为平迁（BLOCK-92 拆前基线先例）；P1=@xyflow/react 只读血缘 DAG（复用 UI-456 GET /lineage + listProjectWorkflowGraphs，节点点击打开 artifact）。唯一新依赖 @xyflow/react ^12.12.0 MIT（四问+用户裁决留痕 plan §4）。非范围：切片 C/D/E、编辑型 DAG、插件 viewer 运行时接线、通用编码工作台。 2026-10-01 用户裁决「按照计划有序推进」发令翻 active（P0-LAUNCH）；实现流水线=dynamic workflow（串行红绿+确定性门禁+独立评审），主代理终审后集成台账与提交，工作流内不提交；BLOCK-128（core/src 面）零触碰。",
       "phase": "P0-LAUNCH"
+    },
+    {
+      "id": "BLOCK-139-SELECTION-LOOP",
+      "capability": "artifact-plane-selection-loop",
+      "path": "docs/block-139-selection-loop-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-139-selection-loop",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-03",
+      "archivePolicy": "archive_when_superseded",
+      "tags": [
+        "block-139",
+        "artifact-plane",
+        "selection-loop",
+        "composer-injection",
+        "mark-to-entity"
+      ],
+      "domainTags": [
+        "frontend"
+      ],
+      "notes": "成果面切片 D 选择回路（方向文档 §3）：viewer 声明 selection schema→前端选择总线→composer 结构化注入，继续分析由真实实体列表驱动；收 G0-RS §22.2 #1/#2/#3。用户发令「你看看呢 可以的 开冲」当日 active P0-LAUNCH；实现=dynamic workflow 串行红绿+world.run 门禁+独立评审，工作流内不提交。后端零改动；与 BIO-3 P2（下游工具白名单）互补不重叠。"
     }
   ],
   "lastUpdated": "2026-10-01",

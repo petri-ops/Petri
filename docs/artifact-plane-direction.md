@@ -81,4 +81,4 @@ status: reference
 
 ## 8. 切片登记现状
 
-首包 **BLOCK-138-ARTIFACT-PLANE-KERNEL**（切片 A+B，plan=`block-138-artifact-plane-kernel-plan.md`）2026-10-01 立项，同日用户裁决「按照计划有序推进」发令翻 **active（P0-LAUNCH）**。切片 C/D/E 未立项，启动均需用户裁决+立项检查单。
+首包 **BLOCK-138-ARTIFACT-PLANE-KERNEL**（切片 A+B，plan=`block-138-artifact-plane-kernel-plan.md`）2026-10-01 立项，同日用户裁决「按照计划有序推进」发令翻 **active（P0-LAUNCH）**。切片 C/D/E 未立项，启动均需用户裁决+立项检查单。**更新（2026-10-03）**：切片 D 选择回路立项为 **BLOCK-139-SELECTION-LOOP**（用户发令「你看看呢 可以的 开冲」当日 active P0-LAUNCH；plan=`block-139-selection-loop-plan.md`；切片 C/E 仍未立项）。
