@@ -5523,7 +5523,7 @@
       "capability": "artifact-plane-selection-loop",
       "path": "docs/block-139-selection-loop-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-139-selection-loop",
       "entrypoint": "docs/README.md",
@@ -5539,7 +5539,8 @@
       "domainTags": [
         "frontend"
       ],
-      "notes": "成果面切片 D 选择回路（方向文档 §3）：viewer 声明 selection schema→前端选择总线→composer 结构化注入，继续分析由真实实体列表驱动；收 G0-RS §22.2 #1/#2/#3。用户发令「你看看呢 可以的 开冲」当日 active P0-LAUNCH；实现=dynamic workflow 串行红绿+world.run 门禁+独立评审，工作流内不提交。后端零改动；与 BIO-3 P2（下游工具白名单）互补不重叠。"
+      "notes": "成果面切片 D 选择回路（方向文档 §3）：viewer 声明 selection schema→前端选择总线→composer 结构化注入，继续分析由真实实体列表驱动；收 G0-RS §22.2 #1/#2/#3。用户发令「你看看呢 可以的 开冲」当日 active P0-LAUNCH；实现=dynamic workflow 串行红绿+world.run 门禁+独立评审，工作流内不提交。后端零改动；与 BIO-3 P2（下游工具白名单）互补不重叠。 2026-10-04 收口 completed：实机走查 S2/S3 confirmed+S1 抓真修复（双通道合成 compatibility 跟随实际注入通道，契约 4/4 红→绿）；closeout 十一门 PASS（6569f692）；UI-463 待用户过目翻 verified；riders R-5/R-6 在册。",
+      "phase": "COMPLETED"
     }
   ],
   "lastUpdated": "2026-10-01",

@@ -7,7 +7,7 @@ acceptance:
   - 实机（dev Electron，收口阶段）：viewer 内选中 → composer 可见结构化上下文 → 继续分析携实体列表，断言落 acceptance/block-139/
   - 门禁：closeout 十一门（主代理集成时跑）；theme 契约测试随触碰面
 reopen: 切片 C 多 artifact 分屏与切片 E renderer 补课独立立项；D1 rider（空态切换器形态）仍属 BLOCK-138 台账，不在本包
-status: active
+status: completed
 ---
 
 # BLOCK-139 — 选择回路（成果面切片 D）
@@ -67,3 +67,10 @@ frontmatter acceptance 全文有效。定向契约测试先红后绿（HK-01）�
 - **门禁**：quality:types 0；touch 面 eslint 错误清零（7 处 no-unsafe-return/4 断言/1 require-await 逐处修+类型化 vi.fn）后 `--suppress-all` 刷新（6 处 react-hooks/refs render 同步=有意形态，代码内理由+BK-06 先例入库）；code-size 指纹随批重打；knip 237 键 PASS；test:changed P6 门 accepted-red（集成提交刷新转绿，BLOCK-107/138 先例）。
 - **流水线波折如实**：provider 流超时停滞 3h45m（token 零增长），经用户授权 TaskStop+ResumeWorkflowRun 恢复后一次跑完。
 - **收口剩件**：实机三断言（acceptance/block-139/）+ closeout。
+
+## 收口（2026-10-04）
+
+- **P0 ✓**：selectionBus 单选择真相+composer 结构化注入（D2 既有组装链扩展），契约先红后绿；**P1 ✓**：mark-to-entity+继续分析实体驱动；独立评审 2 P1 真修（生产接线/死负载虚假声明）。集成提交 b857f467。
+- **实机走查（dwfrun-332b6002，acceptance/block-139/selection-walk.json+三截图）**：S2 ✓ confirmed（继续分析 prompt 逐字携实体清单+selectionId）；S3 ✓ confirmed（总线态 entityType/idField/ids，生产链 useArtifactInteractionSelection.ts:233-235）；**S1 refuted 抓真**=被弃 prop 通道的 stale 透传给 composer → useResultStudioEditContext 双通道合成修复（compatibility 跟随实际注入通道；总线 fresh 胜 prop stale；总线 stale 仍不注入），双通道契约 4/4 红→绿。S1 画面复核并入用户过目。
+- **closeout 十一门 PASS**（6569f692 后复跑；knip 238→235 棘轮自指示下调：S1 修复重构致 artifact-selection 三类型自然收缩；test:changed 首跑撞复走 run 迟到中间文件为一次性竞态，复跑 0.8s 绿）。P6 绑定门随集成提交刷新。
+- **剩件**：UI-463 用户真窗过目翻 verified（取证≠验收）；riders R-5（注入归属校验）/R-6（matrix idField）在册；pending adopt 流属 RS 审阅域未走查。G0 开发期常态 · 不外推 packaged/Provider/GA。
