@@ -5562,8 +5562,30 @@
         "rider-r1"
       ],
       "notes": "成果面切片 C（用户裁决「整下一个工作包」接受推荐切片 C+R-1）。P0 分屏骨架（钉住+主区切换）+R-1 空态切换器（自 BLOCK-138 台账迁入）+P1 lineage 节点钉住。零新依赖/后端零改动/不推翻 isSingleActiveMode。实现=dynamic workflow，主代理终审集成。 2026-10-05 收口 completed：P0 分屏+R-1 空态切换器+P1 节点钉住全链交付（契约 5/5+7/7+24 绿，RS 面 133+ 回归绿）；实机三断言全过+换眼复核 confirmed（698d10a9，P6 门 13/13 刷新）；UI-464 待用户过目翻 verified；hle-c5r skip 守卫环境感知扩展（主线裁决 B）；R-2 拖拽分隔条留后续。"
+    },
+    {
+      "id": "BLOCK-141-RIDERS-CLEARING",
+      "capability": "riders-clearing",
+      "path": "docs/block-141-riders-clearing-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-141-riders-clearing",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-05",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH",
+      "tags": [
+        "block-141",
+        "riders",
+        "r-2",
+        "r-5",
+        "r-6",
+        "block-128-addendum"
+      ],
+      "notes": "清尾批（用户裁决「开启新的工作继续 搞完」）：R-2 bundle 体积基线机制+锚定 / R-5 D2 注入归属校验 / R-6 matrix idField 加固 / BLOCK-128-①取消终态竞窗分类修复+③ process_pid 核实。轻量批扩形（四项单验收边界：在册 riders/加映清零）。非范围=②墙面板跨后端（结构性）/BK-08/adopt 流 UI。实现=dynamic workflow 三并行实现员（文件面互斥），主代理终审集成。"
     }
   ],
   "lastUpdated": "2026-10-05",
-  "documentCount": 295
+  "documentCount": 296
 }
