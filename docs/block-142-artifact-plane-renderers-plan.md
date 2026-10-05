@@ -7,7 +7,7 @@ acceptance:
   - 实机走查（fixture 产物三件套渲染三截图）落 acceptance/block-142/
   - 门禁五门（bundle 基线新依赖增量按已裁决 --write 重锚）+ closeout（集成提交后）
 reopen: 后续 md 安全策略细化（rehype 插件白名单）独立裁决；xlsx 写回不在本包
-status: active
+status: completed
 ---
 
 # BLOCK-142 — 成果面切片 E：renderer 补课（md/xlsx/pdf）
