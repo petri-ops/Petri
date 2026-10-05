@@ -5584,8 +5584,31 @@
         "block-128-addendum"
       ],
       "notes": "清尾批（用户裁决「开启新的工作继续 搞完」）：R-2 bundle 体积基线机制+锚定 / R-5 D2 注入归属校验 / R-6 matrix idField 加固 / BLOCK-128-①取消终态竞窗分类修复+③ process_pid 核实。轻量批扩形（四项单验收边界：在册 riders/加映清零）。非范围=②墙面板跨后端（结构性）/BK-08/adopt 流 UI。实现=dynamic workflow 三并行实现员（文件面互斥），主代理终审集成。 2026-10-05 收口 completed：四项全闭环（契约红绿+五门+closeout 十一门 PASS）；集成 b21db4d6（P6 门 13/13 刷新）+R-2 真构建锚定 45 键。BLOCK-128-① closed、③ 已核实；②墙面板跨后端留结构性。"
+    },
+    {
+      "id": "BLOCK-142-ARTIFACT-PLANE-RENDERERS",
+      "capability": "artifact-plane-renderers",
+      "path": "docs/block-142-artifact-plane-renderers-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-142-artifact-plane-renderers",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-05",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH",
+      "tags": [
+        "block-142",
+        "artifact-plane",
+        "slice-e",
+        "renderers",
+        "markdown",
+        "xlsx",
+        "pdf"
+      ],
+      "notes": "成果面切片 E（用户裁决「开启新的工作继续 搞完」+依赖 AskUserQuestion「全批 md+xlsx+pdf（推荐）」）。P0=md/xlsx/pdf 三 viewer 注册（viewerRegistry 三条新规则+Shell renderPreview 接线）+react-markdown/remark-gfm/exceljs 三新依赖（四问留痕 plan §2；pdfjs-dist 零新增复用）。兼作切片 A 扩展性判据验收。非范围=xlsx 写回/raw HTML/selection 接线。实现=dynamic workflow，主代理终审集成。"
     }
   ],
   "lastUpdated": "2026-10-05",
-  "documentCount": 296
+  "documentCount": 297
 }
