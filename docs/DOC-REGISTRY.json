@@ -5541,8 +5541,29 @@
       ],
       "notes": "成果面切片 D 选择回路（方向文档 §3）：viewer 声明 selection schema→前端选择总线→composer 结构化注入，继续分析由真实实体列表驱动；收 G0-RS §22.2 #1/#2/#3。用户发令「你看看呢 可以的 开冲」当日 active P0-LAUNCH；实现=dynamic workflow 串行红绿+world.run 门禁+独立评审，工作流内不提交。后端零改动；与 BIO-3 P2（下游工具白名单）互补不重叠。 2026-10-04 收口 completed：实机走查 S2/S3 confirmed+S1 抓真修复（双通道合成 compatibility 跟随实际注入通道，契约 4/4 红→绿）；closeout 十一门 PASS（6569f692）；UI-463 待用户过目翻 verified；riders R-5/R-6 在册。",
       "phase": "COMPLETED"
+    },
+    {
+      "id": "BLOCK-140-ARTIFACT-PLANE-SPLIT",
+      "capability": "artifact-plane-split",
+      "path": "docs/block-140-artifact-plane-split-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-140-artifact-plane-split",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-05",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "P0-LAUNCH",
+      "tags": [
+        "block-140",
+        "artifact-plane",
+        "slice-c",
+        "split-view",
+        "rider-r1"
+      ],
+      "notes": "成果面切片 C（用户裁决「整下一个工作包」接受推荐切片 C+R-1）。P0 分屏骨架（钉住+主区切换）+R-1 空态切换器（自 BLOCK-138 台账迁入）+P1 lineage 节点钉住。零新依赖/后端零改动/不推翻 isSingleActiveMode。实现=dynamic workflow，主代理终审集成。"
     }
   ],
-  "lastUpdated": "2026-10-01",
-  "documentCount": 293
+  "lastUpdated": "2026-10-05",
+  "documentCount": 295
 }
