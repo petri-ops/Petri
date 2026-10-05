@@ -410,6 +410,11 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   'ea765eea7b00ec3d9bf87700b20a29a405acfd16',
   'd3ae13a33bfe6045353dab585b3f933f743d0046',
 
+  // 2026-10-05 BLOCK-142 切片 E（dbece735，subject 含 UI-465）：md/xlsx/pdf 三
+  // viewer 注册（dynamic workflow 交付）；台账=UI-465 条目已由 9e3ff038 补登对账
+  // （实机走查三断言+换眼复核证据段）。先例 ea765eea/d3ae13a3/698d10a；不重写共享历史。
+  'dbece7350df0aac3eddb7eb421442a567b39a905',
+
   // 2026-10-05 BLOCK-140/BLOCK-141 两笔（dynamic workflow 交付，同提交未同步台账）：
   // 698d10a（切片 C 分屏实现，subject 含 UI-464；台账=UI-464 条目已由 d244ae0a 补登）
   // 与 b21db4d（BLOCK-141 清尾批 R-5/R-6 前端修复，subject 走 BLOCK 轨无 UI-###；
