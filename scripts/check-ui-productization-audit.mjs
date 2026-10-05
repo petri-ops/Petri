@@ -46,6 +46,11 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-10-05 BLOCK-141 清尾批（b21db4d，feat(block-141)）：subject 走 BLOCK 轨无
+  // UI-###；前端触碰=R-5/R-6（选择回路行为修复，归属 UI-463 域），台账=UI-463
+  // riders 闭环注记已由 6c87a937 补登对账（先例 f6e58d04/f9cf2f5c）；不重写共享历史。
+  'b21db4d66422ce8bf5c74fe7fc06e65a7ab33121',
+
   // 2026-09-29 PL-4b 结果治理三端点 + JobsWall 治理条（f6e58d04，feat(PL-4b)）：提交时
   // 漏带 UI-### 与同提交台账（前端 JobsWall/CommandCenter 治理面），零行为回退风险；
   // 台账=UI-460 由本修正提交补登对账（先例 2f1314a/8bec1397/670de5e）；不重写共享历史。
@@ -404,6 +409,14 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 先例 f6e58d04/f9cf2f5c；不重写共享历史。
   'ea765eea7b00ec3d9bf87700b20a29a405acfd16',
   'd3ae13a33bfe6045353dab585b3f933f743d0046',
+
+  // 2026-10-05 BLOCK-140/BLOCK-141 两笔（dynamic workflow 交付，同提交未同步台账）：
+  // 698d10a（切片 C 分屏实现，subject 含 UI-464；台账=UI-464 条目已由 d244ae0a 补登）
+  // 与 b21db4d（BLOCK-141 清尾批 R-5/R-6 前端修复，subject 走 BLOCK 轨无 UI-###；
+  // 台账=UI-463 riders 闭环注记已由 6c87a937 补登对账）。先例 ea765eea/d3ae13a3；
+  // 不重写共享历史。
+  '698d10a91c72bb903f7a6fcf7919e3d6c0bd9642',
+  'b21db4d66422ce8bf5c74fe7fc06e65a7ab33121',
 
   // 2026-10-01 全仓 lint 债清偿批（1796cb06，fix(lint) AUD-295 扩面）：前端 UI surface
   // 仅三处「删除未使用绑定」纯机械修复——project-workspace.tsx:13 删 CK-06 拆分后化石
