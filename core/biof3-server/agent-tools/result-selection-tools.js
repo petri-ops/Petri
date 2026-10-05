@@ -416,6 +416,38 @@ async function tool_result_enrichment_from_revision(args, ctx, dependencies = {}
   };
 }
 
+// BLOCK-143（BIO-3 P2）——selection 下游消费者注册表：action 门从 go_kegg 硬编码
+// 泛化为注册表（BIO-3 出口判据「selection 下游 ≥2 个工具」）。两个 gene-list 消费者
+// 共享同一条物化与 lineage 携带链（gene-list.csv + resultStudioInputLineage），
+// 仅 toolId/params 形状不同；新增消费者=注册表加一行，不改执行链。
+// gsea 运行时激活随 BIO-4 Mac 对账（本机 dormant：clusterProfiler 等 R 重依赖未装）。
+const SELECTION_DOWNSTREAM_CONSUMERS = {
+  go_kegg: {
+    toolId: 'go-kegg',
+    entityType: 'gene',
+    entityUnsupportedMessage: 'GO/KEGG 目前只接受 gene 选择',
+    buildParams: ({ geneFile, args }) => ({
+      deg_table: geneFile,
+      species: args?.species || 'human',
+      gene_id_type: args?.geneIdType || 'auto',
+      analysis_type: args?.analysisType || 'all',
+    }),
+  },
+  gsea: {
+    toolId: 'gsea',
+    entityType: 'gene',
+    entityUnsupportedMessage: 'GSEA 目前只接受 gene 选择',
+    buildParams: ({ geneFile, args }) => ({
+      deg_table: geneFile,
+      species: args?.species || 'human',
+      gene_id_type: args?.geneIdType || 'auto',
+      gene_set: args?.geneSet || 'all',
+      min_size: args?.minSize ?? 15,
+      max_size: args?.maxSize ?? 500,
+    }),
+  },
+};
+
 async function tool_result_selection_run(args, ctx, dependencies = {}) {
   const selectionId = String(args?.selectionId || '').trim();
   const action = String(args?.action || 'go_kegg').trim();
@@ -423,7 +455,14 @@ async function tool_result_selection_run(args, ctx, dependencies = {}) {
   if (!ctx?.userId) return fail('unauthorized', '未授权');
   if (!selectionId || !projectId) return fail('selection_and_project_required', '需要 selectionId 和当前 projectId');
   if (!SAFE_SELECTION_ID.test(selectionId)) return fail('selection_id_invalid', 'SelectionContext id 不能用于项目路径');
-  if (action !== 'go_kegg') return fail('selection_action_unsupported', '当前只允许已声明的 GO/KEGG 下游动作');
+  // BLOCK-143（BIO-3 P2）：selection 下游消费者注册表——action 门从 go_kegg 硬编码
+  // 泛化为注册表（BIO-3 出口判据「selection 下游 ≥2 个工具」）。两个 gene-list
+  // 消费者共享同一条物化与 lineage 携带链（gene-list.csv + resultStudioInputLineage），
+  // 仅 toolId/params 形状不同；新增消费者=注册表加一行，不改执行链。
+  const consumer = SELECTION_DOWNSTREAM_CONSUMERS[action];
+  if (!consumer) {
+    return fail('selection_action_unsupported', `当前支持的下游动作：${Object.keys(SELECTION_DOWNSTREAM_CONSUMERS).join('、')}`);
+  }
 
   const sqlite = dependencies.sqlite || dbMod.getDatabase();
   const repository = dependencies.repository || createResultStudioRepository(sqlite);
@@ -431,7 +470,7 @@ async function tool_result_selection_run(args, ctx, dependencies = {}) {
   if (!selection) return fail('selection_not_found', '没有找到该 SelectionContext');
   if (selection.projectId !== projectId) return fail('selection_project_mismatch', '选择不属于当前项目');
   if (selection.displayState?.durable === false) return fail('selection_not_durable', '该选择没有稳定实体映射');
-  if (selection.entityType !== 'gene') return fail('selection_entity_unsupported', 'GO/KEGG 目前只接受 gene 选择');
+  if (selection.entityType !== consumer.entityType) return fail('selection_entity_unsupported', consumer.entityUnsupportedMessage);
 
   const revision = selection.revisionId ? repository.getRevision(selection.revisionId) : null;
   if (!revision || revision.projectId !== projectId || revision.artifactId !== selection.artifactId) {
@@ -623,13 +662,8 @@ async function tool_result_selection_run(args, ctx, dependencies = {}) {
   };
   const executed = await runTool({
     op: 'run',
-    toolId: 'go-kegg',
-    params: {
-      deg_table: geneFile,
-      species: args?.species || 'human',
-      gene_id_type: args?.geneIdType || 'auto',
-      analysis_type: args?.analysisType || 'all',
-    },
+    toolId: consumer.toolId,
+    params: consumer.buildParams({ geneFile, args }),
   }, { ...ctx, resultStudioInputLineage });
 
   // Once the real downstream Job is terminal, snapshot the graph projected

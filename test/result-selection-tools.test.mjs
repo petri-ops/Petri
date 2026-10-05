@@ -348,3 +348,68 @@ test('P5 direct enrichment fails closed after execution when DAG persistence fai
   assert.equal(result.detail.executionCompleted, true);
   assert.equal(result.detail.diagnostics[0].code, 'workflow_graph_write_failed');
 });
+
+
+// ============================================================================
+// BLOCK-143（BIO-3 P2）——selection 下游消费者注册表：
+//   1. action 门从 go_kegg 硬编码泛化为注册表（出口判据「下游 ≥2 个工具」）；
+//   2. gsea 消费者与 go_kegg 共享 gene-list 物化与 lineage 携带，仅 toolId/params
+//      形状不同（gsea: gene_set/min_size/max_size）；
+//   3. 未知 action 拒绝并列出当前支持集。
+// ============================================================================
+
+test('BLOCK-143: gsea 消费者走同一物化链并以 gsea 形状调 run_tool', async (context) => {
+  const fx = fixture(context);
+  let call = null;
+  fx.dependencies.runTool = async (args, ctx) => {
+    call = { args, ctx };
+    return { ok: true, toolJobId: 'job_gsea', artifactTruth: { status: 'valid' } };
+  };
+  const result = await tool_result_selection_run({
+    selectionId: 'sel_1', action: 'gsea', species: 'human', geneIdType: 'auto',
+    geneSet: 'all', minSize: 10, maxSize: 500,
+  }, { userId: 'user_1', projectId: 'project_1', accessMode: 'full' }, fx.dependencies);
+  assert.equal(result.ok, true);
+  assert.equal(call.args.op, 'run');
+  assert.equal(call.args.toolId, 'gsea');
+  assert.match(call.args.params.deg_table, /gene-list\.csv$/);
+  assert.equal(call.args.params.gene_set, 'all');
+  assert.equal(call.args.params.min_size, 10);
+  assert.equal(call.args.params.max_size, 500);
+  // selection lineage 携带与 go_kegg 同链（kind=selection + 物化哈希）
+  const lineage = call.ctx.resultStudioInputLineage.deg_table;
+  assert.equal(lineage.kind, 'selection');
+  assert.equal(lineage.selectionId, 'sel_1');
+  assert.ok(lineage.materializationHash);
+  assert.equal(result.selectionAction.action, 'gsea');
+  assert.equal(result.selectionAction.executorTruth, 'run_tool → tool_job → artifact truth');
+});
+
+test('BLOCK-143: 未知 action 拒绝并列出当前支持集（注册表驱动）', async (context) => {
+  const fx = fixture(context);
+  let called = false;
+  fx.dependencies.runTool = async () => { called = true; return { ok: true }; };
+  const result = await tool_result_selection_run({ selectionId: 'sel_1', action: ' volcano' }, {
+    userId: 'user_1', projectId: 'project_1', accessMode: 'full',
+  }, fx.dependencies);
+  assert.equal(result.ok, false);
+  assert.equal(result.error, 'selection_action_unsupported');
+  assert.match(result.message, /go_kegg、gsea/);
+  assert.equal(called, false);
+});
+
+test('BLOCK-143: go_kegg 既有行为零变化（注册表化回归锚）', async (context) => {
+  const fx = fixture(context);
+  let call = null;
+  fx.dependencies.runTool = async (args, ctx) => {
+    call = { args, ctx };
+    return { ok: true, toolJobId: 'job_enrichment', artifactTruth: { status: 'valid' } };
+  };
+  const result = await tool_result_selection_run({
+    selectionId: 'sel_1', action: 'go_kegg', species: 'human', geneIdType: 'auto',
+  }, { userId: 'user_1', projectId: 'project_1', accessMode: 'full' }, fx.dependencies);
+  assert.equal(result.ok, true);
+  assert.equal(call.args.toolId, 'go-kegg');
+  assert.equal(call.args.params.analysis_type, 'all');
+  assert.equal(call.args.params.species, 'human');
+});
