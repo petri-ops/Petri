@@ -36,6 +36,12 @@ vi.mock('@xyflow/react', (): Record<string, unknown> => {
                 (onNodeClick as (event: unknown, node: unknown) => void)(event, node);
               }
             }}
+            onContextMenu={(event) => {
+              const onNodeContextMenu = props.onNodeContextMenu;
+              if (typeof onNodeContextMenu === 'function') {
+                (onNodeContextMenu as (event: unknown, node: unknown) => void)(event, node);
+              }
+            }}
           >
             {node.data?.label ?? node.id}
           </button>
@@ -131,5 +137,24 @@ describe('LineageGraph（BLOCK-138 P1 血缘 DAG 画布）', () => {
     const { container } = render(<LineageGraph projectId="p1" jobId="j1" />);
     await waitFor(() => expect(fetchResultLineage).toHaveBeenCalled());
     expect(container.querySelector('[aria-label="结果血缘图"]')).toBeNull();
+  });
+});
+
+describe('LineageGraph 节点钉住入口（BLOCK-140 P1 第二刀·右键，HK-01 先红）', () => {
+  it('右键节点=「钉住」次级动作：回调带该节点 toolJobId/projectId；普通点击打开链不变', async () => {
+    const onPinArtifact = vi.fn();
+    const dispatchSpy = vi.fn();
+    window.dispatchEvent = dispatchSpy;
+    fetchResultLineage.mockResolvedValue(lineageOf(upstreamChain));
+    render(<LineageGraph projectId="p1" jobId="j2" onPinArtifact={onPinArtifact} />);
+    fireEvent.contextMenu(await screen.findByTestId('flow-node-j1'));
+    expect(onPinArtifact).toHaveBeenCalledTimes(1);
+    expect(onPinArtifact).toHaveBeenCalledWith({ projectId: 'p1', toolJobId: 'j1' });
+    // 既有打开链保留：普通点击仍走 projectOpenResult
+    fireEvent.click(screen.getByTestId('flow-node-j1'));
+    const target = dispatchSpy.mock.calls
+      .map((call) => call[0] as Event)
+      .find((evt) => evt.type === 'gewu:project-open-result');
+    expect(target, 'projectOpenResult event must be dispatched').toBeTruthy();
   });
 });

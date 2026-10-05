@@ -1,0 +1,139 @@
+/* BLOCK-140 P0 — 分屏骨架样式（主 60 / 副栏 40，plan D2 固定比例，拖拽留后续）。
+   颜色一律 --gewu-* token（gewu-css-theme 铁律 1）；副栏底=subtle（层级方向铁律 4：
+   所在页面=surface，卡内嵌面用 subtle，不越级到 canvas）；min-width:0 贯穿
+   grid 两列（视觉验收红线 4，长内容不越出列）。 */
+
+.artifactPinSplit {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 8px;
+  align-items: start;
+}
+
+.artifactPinMain {
+  min-width: 0;
+}
+
+.artifactPinSide {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 8px;
+  background: var(--gewu-bg-subtle);
+}
+
+.artifactPinHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.artifactPinLabel {
+  flex-shrink: 0;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--gewu-accent-bg);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
+}
+
+.artifactPinName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs);
+}
+
+.artifactPinHeader .gewu-btn {
+  flex-shrink: 0;
+}
+
+.artifactPinBody {
+  min-width: 0;
+  min-height: 0;
+}
+
+.artifactPinText {
+  margin: 0;
+  padding: 10px;
+  max-height: 400px;
+  overflow: auto;
+  border: 1px solid var(--gewu-border);
+  border-radius: 6px;
+  background: var(--gewu-bg-canvas);
+  color: var(--gewu-text);
+  font-family: var(--gewu-font-mono);
+  font-size: var(--gewu-font-size-caption);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.artifactPinTableScroll {
+  max-height: 400px;
+  overflow: auto;
+  border: 1px solid var(--gewu-border);
+  border-radius: 6px;
+  /* 画布 inset（铁律 1/4）：表格体沉到 canvas，表头走 hover 提亮 */
+  background: var(--gewu-bg-canvas);
+}
+
+.artifactPinTableScroll table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-caption);
+}
+
+.artifactPinTableScroll th {
+  position: sticky;
+  top: 0;
+  padding: 4px 8px;
+  text-align: left;
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.artifactPinTableScroll td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--gewu-border);
+  color: var(--gewu-text-secondary);
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.artifactPinImage {
+  display: block;
+  max-width: 100%;
+  max-height: 400px;
+  margin: 0 auto;
+  border: 1px solid var(--gewu-border);
+  border-radius: 6px;
+  background: var(--gewu-bg-canvas);
+}
+
+.artifactPinFrame {
+  width: 100%;
+  height: 400px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 6px;
+  background: var(--gewu-bg-canvas);
+}
+
+.artifactPinPlaceholder {
+  padding: 12px;
+  border: 1px dashed var(--gewu-border);
+  border-radius: 6px;
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
+}

@@ -1,0 +1,66 @@
+{
+  "route": "http://localhost:3000/project/p_mus4u230_wvib/result?job=tj_mus4vpzy_ztwn（深链实际落位 /project/p_mus4u230_wvib/result?job=tj_mus4vpzy_ztwn；W2 段 route=/project/p_murymf8c_6ao0/result?job=tj_murysfdj_vytq）",
+  "checks": [
+    {
+      "id": "P0_route_deeplink",
+      "pass": true,
+      "detail": "route=/project/p_mus4u230_wvib/result?job=tj_mus4vpzy_ztwn deepLink=http://localhost:3000/project/p_mus4u230_wvib/result?job=tj_mus4vpzy_ztwn（深链 /result?job= 打开 result 视图；前端为本 run 新实现，Vite HMR 即时生效）"
+    },
+    {
+      "id": "P0_lineage_truth_endpoints",
+      "pass": true,
+      "detail": "GET http://localhost:57312/api/result-studio/lineage: W1W3(tj_mus4vpzy_ztwn) chain=3 graphId=wfg_18e640880240dc87d7523ca4；W2(tj_murysfdj_vytq) lineage=null note=\"该项目暂无持久化工作流血缘（跨 Job 的选择/富集等操作执行后生成）。\" —— R-1 判空与切换器同源端点（fetchResultLineage → /result-studio/lineage）"
+    },
+    {
+      "id": "W1_pin_button_present",
+      "pass": true,
+      "detail": "「钉住」按钮=更多结果操作菜单 secondaryActions 内（ResultArtifactShell.tsx:952，disabled=previewLoading）：{\"found\":true,\"disabled\":false,\"text\":\"钉住\"}"
+    },
+    {
+      "id": "W1_split_pane_appears",
+      "pass": true,
+      "detail": "钉住后副栏 aside[data-testid=artifact-pin-pane]：aria-label=\"钉住的产物：volcano.png\" title(jobId)=tj_mus4vpzy_ztwn 主区在场=true 副栏宽占比=0.396（60/40 固定比例 D2，40%±4pp）副栏在右=true 副栏含 volcano.png 快照渲染=true（ArtifactPinPane.tsx:96-121）"
+    },
+    {
+      "id": "W1_pinned_keep_on_switch",
+      "pass": true,
+      "detail": "主区切到 classified_table.csv（data-debug-selected-name=classified_table.csv，plain-table 探针=false——该 CSV 以科学交互表格网格渲染而非裸 <table>，见 split-pinned.png）后副栏不变：aria-label=\"钉住的产物：volcano.png\" 快照 img 仍在=true —— 钉住=视图级快照（pinnedArtifact 归宿主持有，主区 setSelectedName 不触碰，ResultArtifactShell.tsx:187/883-894）"
+    },
+    {
+      "id": "W1_unpin_restores_single",
+      "pass": true,
+      "detail": "解除钉住后 aside 与 [class*=artifactPinSplit] 均不在场（单栏恢复），主区保持 classified_table.csv=classified_table.csv（ArtifactPinPane.tsx:44 未钉住即 return children，副栏 DOM 彻底不在场）"
+    },
+    {
+      "id": "W2_empty_state_hidden",
+      "pass": true,
+      "detail": "无图 job（/lineage 实证 lineage=null，见 P0_lineage_truth_endpoints）完成态（job-status=done artifacts=23 placeholder=\"\"）下 9s settle 窗口轮询 23 次全程无 [aria-label=\"血缘形态\"]/结果血缘链/结果血缘图（everSeen=null）—— R-1 生效：切换器整组不在场（LineageViewSwitch.tsx:57 !observation.ready → null），对照 BLOCK-138 时期空态常驻缺陷"
+    },
+    {
+      "id": "W3_switcher_present_with_chain",
+      "pass": true,
+      "detail": "链上 job 切换器在场：role=group[aria-label=血缘形态] 按钮=[{\"t\":\"条带\",\"pressed\":\"true\"},{\"t\":\"画布\",\"pressed\":\"false\"}] 条带节点数=3（chain=3 同源 /lineage）data-downstream=0 —— R-1 未误伤（chain≥2 维持渲染，LineageViewSwitch.tsx:44-46）"
+    },
+    {
+      "id": "W3_pin_entry_hover_visible",
+      "pass": true,
+      "detail": "条带节点「钉住」入口悬停可见：aria-label=\"钉住 DESeq2 差异分析\" 文本=钉住 opacity 0→1 wrap:hover=true（真实 CDP mousemove @514,118，尝试 1 次；nodeWrap:hover → .nodePin opacity 1，LineageStrip.module.css:73-76；LineageStrip.tsx:58-68）rect=28×16.9"
+    },
+    {
+      "id": "W3b_lineage_pin_crossjob_snapshot",
+      "pass": true,
+      "detail": "点击条带「钉住」(\"钉住 DESeq2 差异分析\") → 副栏 aside[title=jobId]=tj_mus4uxjq_s69m aria-label=\"钉住的产物：volcano.png\" 快照体=rendered —— 血缘节点钉住=跨 job 视图级快照（handleLineagePin → fetchCrossJobPinSnapshot 一次取数，ResultArtifactShell.tsx:224-228；目标上游节点 tj_mus4uxjq_s69m）"
+    }
+  ],
+  "screenshots": [
+    "acceptance/block-140/split-pinned.png",
+    "acceptance/block-140/empty-state-hidden.png",
+    "acceptance/block-140/lineage-pin.png"
+  ],
+  "allPass": true,
+  "sideEffects": [
+    "W3b 收尾：已点击「解除钉住」复原单栏；跨 job 钉住为视图级组件状态（零持久化、零写入）。"
+  ],
+  "generatedAt": "2026-10-05T01:53:36.626Z",
+  "startedAt": "2026-10-05T01:52:50.911Z"
+}

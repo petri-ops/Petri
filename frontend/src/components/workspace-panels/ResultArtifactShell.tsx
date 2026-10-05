@@ -45,6 +45,10 @@ import { ScientificInteractionViewer } from '@/components/result-studio/Scientif
 import { CompactResultNavigator } from '@/components/result-studio/CompactResultNavigator';
 // BLOCK-138 P1 — 血缘形态切换（条带默认 + LineageGraph 画布并存，plan D1）
 import { LineageViewSwitch } from '@/components/result-studio/LineageViewSwitch';
+// BLOCK-140 P0 — 多 artifact 分屏：钉住=视图级快照（plan D1），副栏 result 模式专属
+import { ArtifactPinPane, type ArtifactPinSnapshot } from './ArtifactPinPane';
+// BLOCK-140 P1 — 跨 job 钉住：血缘节点「钉住」→ 按既有打开链同源数据源构建快照
+import { fetchCrossJobPinSnapshot } from './crossJobPinSnapshot';
 import {
   beginResultSurfaceMeasure,
   chooseResultArtifactName,
@@ -177,6 +181,10 @@ export function ResultArtifactShell({
   }
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [artifactSwitchMs, setArtifactSwitchMs] = useState<number | null>(null);
+  // BLOCK-140 P0 — 钉住副栏快照：pin 时刻捕获当前产物渲染载荷（视图级快照，
+  // 非第二数据通道）；主区切换产物/版本不触碰此状态，mode≠result 时副栏由
+  // ArtifactPinPane 自隐（快照保留，回到 result 恢复双栏），解除钉住恢复单栏。
+  const [pinnedArtifact, setPinnedArtifact] = useState<ArtifactPinSnapshot | null>(null);
 
   // BLOCK-83 D4：工具 manifest 从插件目录投影取，不再依赖核心静态清单。
   const { tools: catalogTools } = useToolCatalog();
@@ -209,6 +217,15 @@ export function ResultArtifactShell({
     // BLOCK-132（PL-6）：token 常量无鉴权价值（后端无条件放行）——URL 不再携带。
     return `${getApiPrefix(lang)}/harness/scientific-task-by-job/${encodeURIComponent(job.id)}/script`;
   }, [job?.id, lang, result?.deliveryManifest]);
+
+  // BLOCK-140 P1 — 跨 job 钉住：血缘节点「钉住」→ 拉目标 job 产物构建视图级快照
+  // （一次取数；副栏照常零取数渲染）；失败静默（诚实不猜，不动现有钉住态）。
+  // 位于早退守卫之前（react-hooks/rules-of-hooks：不得条件调用）。
+  const handleLineagePin = useCallback((request: { projectId: string | null; toolJobId: string }) => {
+    void fetchCrossJobPinSnapshot({ toolJobId: request.toolJobId, lang }).then((snapshot) => {
+      if (snapshot) setPinnedArtifact(snapshot);
+    });
+  }, [lang]);
 
   useEffect(() => {
     if (!job) {
@@ -861,6 +878,20 @@ export function ResultArtifactShell({
     artifactPickerGroups,
     selectedArtifactName,
   )?.option || null;
+  // BLOCK-140 P0 — 「钉住」动作：捕获当前查看产物的渲染载荷（renderPreview 同一
+  // 渲染路径的现值），副栏据此离线渲染；预览仍在加载时不允许钉出空快照。
+  const handlePinArtifact = () => {
+    if (!selectedArtifact) return;
+    setPinnedArtifact({
+      jobId: viewedRevision?.toolJobId || job.id,
+      artifactName: selectedArtifactName,
+      label: selectedArtifact?.label || selectedArtifact?.title || selectedArtifactName,
+      viewerAdapter,
+      previewText,
+      previewData,
+      url: selectedArtifactUrl,
+    });
+  };
   // BLOCK-92 Wave B-2 — 恢复动作/报告生成/复现包导出回调已随
   // useArtifactRecovery / useResultReportActions 外迁。
 
@@ -916,6 +947,10 @@ export function ResultArtifactShell({
 
   const toolbarSecondaryActions = result ? (
     <>
+      {/* BLOCK-140 P0 — 「钉住」：把当前查看产物钉入副栏（视图级快照） */}
+      {selectedArtifact && (
+        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={previewLoading} onClick={handlePinArtifact}>钉住</button>
+      )}
       {selectedArtifactName && (
         <span className={styles.resultReportTechnicalName}>{selectedArtifactName}</span>
       )}
@@ -1039,7 +1074,7 @@ export function ResultArtifactShell({
     return (
       <div className={containerClass}>
         {mode === 'result' && resultToolbar}
-        {mode === 'result' && <LineageViewSwitch projectId={project.id} jobId={job.id} />}
+        {mode === 'result' && <LineageViewSwitch projectId={project.id} jobId={job.id} onPinArtifact={handleLineagePin} />}
         {workflowBar}
         {recoveryConfirmation}
         <div className={styles.resultHeader}>
@@ -1099,11 +1134,11 @@ export function ResultArtifactShell({
     );
   }
 
-  const shellBody = (
+  const shellBodyMain = (
     <>
       {/* BLOCK-138 加映：完成态稳定面与 stateBlock（loading/running/failed）同位挂载——
           走查实证切换器此前仅在瞬态区在场，完成态被替换后画布形态不可达 */}
-      {mode === 'result' && <LineageViewSwitch projectId={project.id} jobId={job.id} />}
+      {mode === 'result' && <LineageViewSwitch projectId={project.id} jobId={job.id} onPinArtifact={handleLineagePin} />}
       {mode === 'result' && workflowBar}
       {mode === 'result' && recoveryConfirmation}
       {(mode === 'compare' || mode === 'history') && versionFamilyId && (
@@ -1176,6 +1211,17 @@ export function ResultArtifactShell({
       )
       )}
     </>
+  );
+  // BLOCK-140 P0 — 双栏接线：钉住态=主区（现流 renderPreview 投影）+ 副栏快照；
+  // mode≠result 或未钉住 → 单栏（ArtifactPinPane 自隐副栏，快照保留归宿主）。
+  const shellBody = (
+    <ArtifactPinPane
+      mode={mode}
+      snapshot={pinnedArtifact}
+      onUnpin={() => setPinnedArtifact(null)}
+    >
+      {shellBodyMain}
+    </ArtifactPinPane>
   );
 
   return (

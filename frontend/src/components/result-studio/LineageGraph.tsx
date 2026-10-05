@@ -18,9 +18,11 @@ import { findCatalogTool, useToolCatalog } from '@/lib/tool-catalog';
 import { dispatchGewuEvent, gewuEvents } from '@/lib/events';
 import styles from './LineageGraph.module.css';
 
-export function LineageGraph({ projectId, jobId }: {
+export function LineageGraph({ projectId, jobId, onPinArtifact }: {
   projectId: string | null;
   jobId: string;
+  /** BLOCK-140 P1 — 「钉住」次级动作（右键节点，xyflow 下最轻形态）：钉该节点 job 产物入副栏。 */
+  onPinArtifact?: (request: { projectId: string | null; toolJobId: string }) => void;
 }): React.ReactElement | null {
   const [lineage, setLineage] = React.useState<ResultLineage | null>(null);
   const [failed, setFailed] = React.useState(false);
@@ -60,6 +62,12 @@ export function LineageGraph({ projectId, jobId }: {
     dispatchGewuEvent(gewuEvents.projectOpenResult, { toolJobId: node.id, projectId });
   };
 
+  // BLOCK-140 P1 — 右键=钉住次级动作（主点击打开链不变）
+  const handleNodeContextMenu = (event: React.MouseEvent, node: Node<LineageGraphNodeData>): void => {
+    event.preventDefault();
+    onPinArtifact?.({ projectId, toolJobId: node.id });
+  };
+
   return (
     <section className={styles.lineageGraph} aria-label="结果血缘图">
       <ReactFlow
@@ -70,6 +78,7 @@ export function LineageGraph({ projectId, jobId }: {
         nodesConnectable={false}
         elementsSelectable={false}
         onNodeClick={handleNodeClick}
+        onNodeContextMenu={onPinArtifact ? handleNodeContextMenu : undefined}
         defaultEdgeOptions={{
           style: { stroke: 'var(--gewu-border-strong)' },
           markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--gewu-border-strong)' },

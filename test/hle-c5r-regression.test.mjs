@@ -27,6 +27,11 @@ import { existsSync } from 'node:fs';
 
 // BLOCK-104 P3 — 环境门：外部插件仓不在本机时对应用例 skip（可见计数）。
 const SKIP_EXTERNAL_PACK = !existsSync(path.join(process.cwd(), '..', 'gewu-pack-bio', 'plugins', 'deg-standardizer')) && '外部插件仓 gewu-pack-bio 缺 plugins/deg-standardizer（本机环境缺失，BLOCK-104 P3 环境门）';
+// GSEA 环境门（BLOCK-140 轮主线裁决授权，镜像上方探针写法）：gsea 已被 BLOCK-86 用户裁决封存进
+// plugins.dormant/（Mac 侧 clusterProfiler/GO.db/org.Hs.eg.db 等 R 重依赖未装，激活会假可用），故以
+// tool-definition.json 可达为准——不可达=环境感知 skip，不是删覆盖：gsea 已装环境（如 Windows dev 栈）
+// 照常执行断言；Mac 侧激活随 BIO-4 Mac 交付对账（含 R 环境补装）另行处理。
+const SKIP_EXTERNAL_GSEA = !existsSync(path.join(process.cwd(), '..', 'gewu-pack-bio', 'plugins', 'gsea', 'tool-definition.json')) && '外部插件仓 gewu-pack-bio 缺 plugins/gsea/tool-definition.json（BLOCK-86 用户裁决封存于 plugins.dormant/，本机 R 重依赖未装；gsea 已装环境照常执行，Mac 激活随 BIO-4 对账另行处理）';
 import os from 'node:os';
 import fs from 'node:fs';
 
@@ -492,7 +497,7 @@ describe('HLE-C5R-7: Plugin Contract Lint detects contract mismatches', () => {
     assert.ok(hasStandardized, 'deg-standardizer must have deg_standardized output');
   });
 
-  it('GSEA tool-definition declares gene_id_type parameter', { skip: SKIP_EXTERNAL_PACK }, async () => {
+  it('GSEA tool-definition declares gene_id_type parameter', { skip: SKIP_EXTERNAL_GSEA }, async () => {
     const def = JSON.parse(fs.readFileSync(
       path.join(process.cwd(), '..', 'gewu-pack-bio', 'plugins', 'gsea', 'tool-definition.json'),
       'utf8',

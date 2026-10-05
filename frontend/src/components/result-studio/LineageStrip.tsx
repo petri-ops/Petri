@@ -13,9 +13,11 @@ import { findCatalogTool, useToolCatalog } from '@/lib/tool-catalog';
 import { dispatchGewuEvent, gewuEvents } from '@/lib/events';
 import styles from './LineageStrip.module.css';
 
-export function LineageStrip({ projectId, jobId }: {
+export function LineageStrip({ projectId, jobId, onPinArtifact }: {
   projectId: string | null;
   jobId: string;
+  /** BLOCK-140 P1 — 「钉住」次级动作（悬停小钮）：把该节点 job 的产物钉入副栏对比。 */
+  onPinArtifact?: (request: { projectId: string | null; toolJobId: string }) => void;
 }): React.ReactElement | null {
   const [lineage, setLineage] = React.useState<ResultLineage | null>(null);
   const [failed, setFailed] = React.useState(false);
@@ -37,20 +39,37 @@ export function LineageStrip({ projectId, jobId }: {
   return (
     <nav className={styles.lineage} aria-label="结果血缘链" data-downstream={lineage.downstreamCount}>
       <span className={styles.caption}>血缘</span>
-      {lineage.chain.map((node, index) => (
-        <React.Fragment key={node.toolJobId}>
-          {index > 0 && <span className={styles.arrow} aria-hidden>→</span>}
-          <button
-            type="button"
-            className={styles.node}
-            aria-current={node.isCurrent ? 'true' : undefined}
-            title={node.isCurrent ? `当前结果（直接下游 ${lineage.downstreamCount} 个）` : `打开上游 ${node.toolId || node.toolJobId}`}
-            onClick={() => dispatchGewuEvent(gewuEvents.projectOpenResult, { toolJobId: node.toolJobId, projectId })}
-          >
-            {node.toolId ? (findCatalogTool(catalogTools, node.toolId)?.title || node.toolId) : node.toolJobId}
-          </button>
-        </React.Fragment>
-      ))}
+      {lineage.chain.map((node, index) => {
+        const label = node.toolId ? (findCatalogTool(catalogTools, node.toolId)?.title || node.toolId) : node.toolJobId;
+        return (
+          <React.Fragment key={node.toolJobId}>
+            {index > 0 && <span className={styles.arrow} aria-hidden>→</span>}
+            <span className={styles.nodeWrap}>
+              <button
+                type="button"
+                className={styles.node}
+                aria-current={node.isCurrent ? 'true' : undefined}
+                title={node.isCurrent ? `当前结果（直接下游 ${lineage.downstreamCount} 个）` : `打开上游 ${node.toolId || node.toolJobId}`}
+                onClick={() => dispatchGewuEvent(gewuEvents.projectOpenResult, { toolJobId: node.toolJobId, projectId })}
+              >
+                {label}
+              </button>
+              {/* BLOCK-140 P1 — 钉住次级动作：悬停/聚焦显现，主点击打开链不变 */}
+              {onPinArtifact && (
+                <button
+                  type="button"
+                  className={styles.nodePin}
+                  aria-label={`钉住 ${label}`}
+                  title="把该结果的产物钉入副栏对比"
+                  onClick={() => onPinArtifact({ projectId, toolJobId: node.toolJobId })}
+                >
+                  钉住
+                </button>
+              )}
+            </span>
+          </React.Fragment>
+        );
+      })}
     </nav>
   );
 }
