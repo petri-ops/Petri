@@ -4581,7 +4581,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **待验**：dev Electron 实机复认（results tab 无任何仓库提示、历史/版本功能正常）随下次 dev 栈会话；不外推 packaged/Provider/GA（G0 开发期常态 · 不外推 packaged/Provider/GA）。
 - **边界**：影响面=打开位于 Git 仓库内的项目时 results tab 不再出现「检测到已有 Git 仓库」卡（原 opt-in 弹窗与只读提示两种形态均消失）；存量 DB 中历史 `git_repository_consents` 行与 `git_repository_bindings` existing 行成为惰性历史，对现行绑定零影响。
 
-## UI-463: 选择回路 P0+P1——selectionBus 单选择真相 + composer 结构化注入 + mark-to-entity（BLOCK-139 切片 D）(2026-10-04 in_progress，实机三断言 S2/S3 全过+S1 抓真已修；待用户真窗过目翻 verified)
+## UI-463: 选择回路 P0+P1——selectionBus 单选择真相 + composer 结构化注入 + mark-to-entity（BLOCK-139 切片 D）(2026-10-04 **verified**，用户真窗过目认可「可以了 继续下去」2026-10-05；实机三断言 S2/S3 全过+S1 抓真已修)
 
 - **来源**：BLOCK-139（plan=[`block-139-selection-loop-plan.md`](./block-139-selection-loop-plan.md)，切片 D 按方向文档 §3 勘正编号；用户发令「你看看呢 可以的 开冲」；实现=dynamic workflow dwfrun-aa9f95ff 串行红绿+world.run 门禁+独立评审，中途 provider 流超时停滞经用户授权停-恢复一次）。收 G0-RS §22.2 #1/#2/#3。
 - **交付**：①`selectionBus.ts`——单选择真相 store（`setSelectionBusArtifact` 换上下文即清选=防泄漏唯一执行点；`setSelectionBusSelection` 恒等 summarizeSelectionForAgent 投影；`useSelectionBus`=useSyncExternalStore；`gewu:selection-bus` 事件注册表键）；②composer 注入——`useResultStudioEditContext.copilotActiveArtifact` 在 shell 未投影选择时读总线（compatibility 口径与既有链同宽，D2 单通道不另开）；③viewer 平迁——`ScientificInteractionViewer` 保持回调为主（持久化流不被绕过），总线为镜像读真相+可选模式；生产绑定执行点=`useArtifactInteractionSelection`（rebind 即 setSelectionBusArtifact+选择镜像）；④P1 mark-to-entity——总线出口携带 manifest.idField；⑤「继续分析」——prompt 携真实实体列表（≤12 样本+真实规模+selectionId 持久化通道如实注明，MAX_AGENT_SAMPLE_IDS 导出单一书写）。
@@ -4592,7 +4592,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：后端零改动、零新依赖、不引状态库；pending adopt 审阅流不在本包；matrix idField 潜伏错位（行选 rowField）登记 plan rider R-6。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 
-## UI-464: 成果面切片 C——多 artifact 分屏（钉住副栏）+ R-1 空态切换器（BLOCK-140）(2026-10-05 in_progress，实机三断言全过经换眼复核；待用户真窗过目翻 verified)
+## UI-464: 成果面切片 C——多 artifact 分屏（钉住副栏）+ R-1 空态切换器（BLOCK-140）(2026-10-05 **verified**，用户真窗过目认可「可以了 继续下去」；实机三断言全过经换眼复核)
 
 - **来源**：BLOCK-140（plan=[`block-140-artifact-plane-split-plan.md`](./block-140-artifact-plane-split-plan.md)，方向文档 §3 切片 C；用户裁决「整下一个工作包」接受推荐切片 C+R-1；R-1 自 BLOCK-138 台账迁入两账注记）。实现=dynamic workflow dwfrun-1dea4da6（串行红绿+world.run 门禁+实机走查+换眼复核），主代理终审集成 698d10a9。零新依赖/后端零改动。
 - **交付三件**：①**P0 分屏**——ArtifactPinPane（视图级快照渲染+解除钉住，40% 副栏）+「钉住」动作（ResultArtifactShell 更多操作菜单，捕获当前产物渲染载荷）+主区自由切换副栏保持+mode≠result 副栏自隐快照保留；②**R-1 空态切换器**——LineageViewSwitch 自取 fetchResultLineage（D3 判空与 builder 真值同源）：lineage null/chain<2/加载中/取数失败整组不渲染（observation key 防旧链闪现），有链回归不误伤；③**P1 lineage 节点钉住**——条带悬停小钮/画布右键→crossJobPinSnapshot 按既有打开链同源数据源一次取数构建快照（副栏零取数；失败静默诚实）。
@@ -4601,7 +4601,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：钉住=视图级快照（D1，非第二数据通道）；副栏 40% 固定（D2，拖拽留后续）；R-1 判空以 /lineage 为准（D3 同源）；跨 job 钉住失败静默（不动既有钉住态）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 
-## UI-465: 成果面切片 E——renderer 补课 md/xlsx/pdf 三 viewer 注册（BLOCK-142）(2026-10-05 in_progress，实机三断言全过经换眼复核；待用户真窗过目翻 verified)
+## UI-465: 成果面切片 E——renderer 补课 md/xlsx/pdf 三 viewer 注册（BLOCK-142）(2026-10-05 **verified**，用户真窗过目认可「可以了 继续下去」；实机三断言全过经换眼复核)
 
 - **来源**：BLOCK-142（plan=[`block-142-artifact-plane-renderers-plan.md`](./block-142-artifact-plane-renderers-plan.md)，方向文档 §3 切片 E；用户裁决「开启新的工作继续 搞完」+ 依赖 AskUserQuestion 裁决「全批 md+xlsx+pdf（推荐）」；BLOCK-141 清尾后接棒）。实现=dynamic workflow dwfrun-c2cfc326 系（串行红绿+六门含 bundle 基线首用+实机走查+换眼复核），主代理终审集成 dbece735。
 - **依赖裁决（四问留痕 plan §2）**：react-markdown ^9（替代自研/marked+dompurify：无 innerHTML 天然防 XSS）+ remark-gfm ^4（GFM 标准）+ exceljs ^4（替代 SheetJS npm 停更版：MIT 活跃）；pdfjs-dist 4.10.38 零新增复用；bundle 增量按 R-2 机制 --write 重锚（46 键，exceljs.min.js 248KB gz 在册）。
