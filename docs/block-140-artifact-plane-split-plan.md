@@ -44,3 +44,10 @@ D1：钉住=视图级快照（同 renderPreview 路径），非第二数据通�
 ## 7. 完成语义与节奏
 
 预计两刀（P0+R-1 一刀、P1 一刀）或单会话连做。实现=dynamic workflow（串行红绿+world.run 门禁+实机走查+换眼复核），工作流内不提交，主代理终审集成。
+
+## 收口（2026-10-05）
+
+- **P0 ✓**：分屏骨架（ArtifactPinPane 123 行+Shell 接线，契约 5/5 先红后绿+RS 面 66 绿）；**R-1 ✓**：空态切换器（自取 /lineage 判空，7/7 含既有不破+RS 面 84 绿）；**P1 ✓**：lineage 节点钉住（crossJobPinSnapshot，24 绿+theme 4/4）。集成提交 698d10a9（P6 门 13/13 刷新）。
+- **实机走查 ✓（dwfrun-1dea4da6）**：W1 分屏+钉住保持（split-pinned.png）/W2 空态隐藏（empty-state-hidden.png，对照 BLOCK-138 空态常驻缺陷）/W3 有链回归+跨 job 钉住快照（lineage-pin.png）——三截图换眼复核全 confirmed，证据 acceptance/block-140/。
+- **门禁**：五门=types 0/lint 0 error/code-size 22666 重打/knip 235/test:changed P6 门 accepted-red→698d10a9 刷新 13/13。hle-c5r skip 守卫环境感知扩展（主线裁决 B 一次性授权，gsea 封存态如实 skip；Mac 激活随 BIO-4 对账）。
+- **剩件**：UI-464 用户真窗过目翻 verified；riders R-2（bundle 基线）在册；拖拽分隔条/compare 升级=非范围独立裁决。G0 开发期常态 · 不外推 packaged/Provider/GA。

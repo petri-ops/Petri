@@ -4590,3 +4590,12 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **R2 独立复走（2026-10-05，本会话 dwfrun-53306943，与 R1 并行双流交叉验证）**：T1/T2/T3 全过+换眼复核 3/3 confirmed（证据=acceptance/block-139/walkthrough-r2.json+selection-r2-t1/t2/t3.png；R1 原件从 c1302bff 恢复保留，R2 覆写已各归各位）。**抓真 T2 第二 facet 修复**（与 S1 的 compatibility 透传互补）：validator fail-closed 插件（deseq2）交互 manifest 缺 revisionId 与 F1 chain revision 口径分裂→选择落库 revision_id 为空、envelope 恒 stale/revision_changed；修=fetchResultStudioContext 透出 envelope 重投影 resolvedRevision（坐标缺一即 null 绝不伪造）+useArtifactInteractionSelection 三重护栏补锚（仅缺 revisionId 且 selectionDurable 触发/artifactId 核对一致才采纳/投影不可得维持原样）+restore 链口径同步+客户端契约测试。复走实证翻转：总线镜像 revisionId=null→rev_98203ee6…、SQLite result_selection_contexts.revision_id 落值、context-envelope stale/revision_changed/usableByAgent=false→compatible/same_revision/true、composer 告警消失（selection-r2-t3.png 同帧保留修复前旧应答对照）。修复 diff 主代理终审零 P1；换眼 concerns=探针断言按 ask 约束未复跑+1 处截图低分辨率误读，无实质。
 - **待验**：仅剩用户本人真窗过目翻 verified（S1 修复为契约级证据+画面复核并入用户过目）；P2 总线注入归属校验（竞窗一帧+总线自愈）登记 plan rider R-5。
 - **边界**：后端零改动、零新依赖、不引状态库；pending adopt 审阅流不在本包；matrix idField 潜伏错位（行选 rowField）登记 plan rider R-6。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+
+## UI-464: 成果面切片 C——多 artifact 分屏（钉住副栏）+ R-1 空态切换器（BLOCK-140）(2026-10-05 in_progress，实机三断言全过经换眼复核；待用户真窗过目翻 verified)
+
+- **来源**：BLOCK-140（plan=[`block-140-artifact-plane-split-plan.md`](./block-140-artifact-plane-split-plan.md)，方向文档 §3 切片 C；用户裁决「整下一个工作包」接受推荐切片 C+R-1；R-1 自 BLOCK-138 台账迁入两账注记）。实现=dynamic workflow dwfrun-1dea4da6（串行红绿+world.run 门禁+实机走查+换眼复核），主代理终审集成 698d10a9。零新依赖/后端零改动。
+- **交付三件**：①**P0 分屏**——ArtifactPinPane（视图级快照渲染+解除钉住，40% 副栏）+「钉住」动作（ResultArtifactShell 更多操作菜单，捕获当前产物渲染载荷）+主区自由切换副栏保持+mode≠result 副栏自隐快照保留；②**R-1 空态切换器**——LineageViewSwitch 自取 fetchResultLineage（D3 判空与 builder 真值同源）：lineage null/chain<2/加载中/取数失败整组不渲染（observation key 防旧链闪现），有链回归不误伤；③**P1 lineage 节点钉住**——条带悬停小钮/画布右键→crossJobPinSnapshot 按既有打开链同源数据源一次取数构建快照（副栏零取数；失败静默诚实）。
+- **证据**：HK-01 红绿（P0 契约 5/5 组件不存在红→绿+RS 面 66 绿；R-1 7/7 含 3 既有不破+RS 面 84 绿；P1 24 绿+theme 4/4）；门禁五门（types 0/lint 0 error/code-size 22666 重打/knip 235/test:changed P6 绑定门 accepted-red→698d10a9 刷新 13/13）；**实机走查**（dwfrun-1dea4da6）：W1 双产物同屏（钉住 volcano.png 40% 副栏+主区切 classified_table.csv 副栏保持+解除恢复单栏）/W2 空态隐藏（无图 job 切换器整组不在场，对照 BLOCK-138 空态常驻缺陷）/W3 有链回归+跨 job 钉住（点击条带祖先节点→副栏 tj_mus4uxjq_s69m 快照）——三截图换眼复核全 confirmed。
+- **待验**：仅剩用户本人真窗过目翻 verified。拖拽分隔条/compare 差异计算升级=plan 非范围。
+- **边界**：钉住=视图级快照（D1，非第二数据通道）；副栏 40% 固定（D2，拖拽留后续）；R-1 判空以 /lineage 为准（D3 同源）；跨 job 钉住失败静默（不动既有钉住态）。G0 开发期常态 · 不外推 packaged/Provider/GA。
