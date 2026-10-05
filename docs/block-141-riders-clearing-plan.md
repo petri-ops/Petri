@@ -8,7 +8,7 @@ acceptance:
   - BLOCK-128-①：取消终态竞窗分类修复契约红绿（击杀后 finalize 落 cancelled 而非 failed）+ ③ process_pid 核实结论留痕
   - 门禁五门（P6 accepted-red 随集成提交刷新）
 reopen: ②墙面板跨后端取消（结构性，dev-infra §76③）不在本包；BK-08 Mac 冷启动取证独立事项
-status: active
+status: completed
 ---
 
 # BLOCK-141 — 清尾批：R-2 / R-5 / R-6 / BLOCK-128-①③
