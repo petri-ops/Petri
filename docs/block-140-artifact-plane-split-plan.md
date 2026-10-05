@@ -7,7 +7,7 @@ acceptance:
   - 实机（dev Electron）：分屏双产物可见、钉住后主区切换保持、空态隐藏、既有单链回归，断言落 acceptance/block-140/
   - 门禁：五门（P6 绑定源门 accepted-red 随集成提交刷新）+ closeout 十一门（主代理集成时跑）
 reopen: 拖拽分隔条/跨 job 钉住深化独立裁决；R-2 bundle 基线仍属后续包
-status: active
+status: completed
 ---
 
 # BLOCK-140 — 成果面切片 C：多 artifact 分屏 + R-1 空态切换器
