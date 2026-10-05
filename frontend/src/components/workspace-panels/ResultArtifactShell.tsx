@@ -49,6 +49,10 @@ import { LineageViewSwitch } from '@/components/result-studio/LineageViewSwitch'
 import { ArtifactPinPane, type ArtifactPinSnapshot } from './ArtifactPinPane';
 // BLOCK-140 P1 — 跨 job 钉住：血缘节点「钉住」→ 按既有打开链同源数据源构建快照
 import { fetchCrossJobPinSnapshot } from './crossJobPinSnapshot';
+// BLOCK-142 切片 E — md/xlsx/pdf 三 viewer（注册表 spreadsheet/markdown/pdf adapter 的挂载面）
+import { MarkdownResultViewer } from './MarkdownResultViewer';
+import { SpreadsheetResultViewer } from './SpreadsheetResultViewer';
+import { PdfResultViewer } from './PdfResultViewer';
 import {
   beginResultSurfaceMeasure,
   chooseResultArtifactName,
@@ -822,6 +826,32 @@ export function ResultArtifactShell({
             </button>
           </div>
         </div>
+      );
+    }
+    // BLOCK-142 切片 E — markdown/spreadsheet/pdf 三分支：组件自取数（产物 URL 同
+    // 既有分支 selectedArtifactUrl），故置于 shell previewText 载荷闸门之前。
+    if (viewerAdapter === 'markdown' && selectedArtifactUrl) {
+      return (
+        <MarkdownResultViewer
+          url={selectedArtifactUrl}
+          name={selectedArtifactLabel || selectedArtifact.name}
+        />
+      );
+    }
+    if (viewerAdapter === 'spreadsheet' && selectedArtifactUrl) {
+      return (
+        <SpreadsheetResultViewer
+          url={selectedArtifactUrl}
+          name={selectedArtifactLabel || selectedArtifact.name}
+        />
+      );
+    }
+    if (viewerAdapter === 'pdf' && selectedArtifactUrl) {
+      return (
+        <PdfResultViewer
+          url={selectedArtifactUrl}
+          name={selectedArtifactLabel || selectedArtifact.name}
+        />
       );
     }
     if (previewLoading && !previewText && !previewData) {

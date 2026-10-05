@@ -1,0 +1,104 @@
+/* BLOCK-142 切片 E — Excel 产物 viewer（只读网格）。
+   主题纪律（gewu-css-theme）：颜色一律 var(--gewu-*)；表格元素显式 scoped 定样式
+   中性化 global.css 元素级溅射；长内容滚动条显式可见。 */
+
+.sheetViewer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.sheetTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.sheetTab {
+  border: 1px solid var(--gewu-border);
+  border-radius: 6px;
+  background: var(--gewu-bg-surface);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
+  padding: 3px 10px;
+  cursor: pointer;
+}
+
+.sheetTab:hover {
+  background: var(--gewu-hover);
+}
+
+.sheetTabActive,
+.sheetTabActive:hover {
+  background: var(--gewu-accent-bg);
+  border-color: var(--gewu-accent);
+  color: var(--gewu-accent);
+}
+
+/* 有界截断如实标注：次级文字，不抢网格视觉 */
+.sheetTruncateNote {
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-caption);
+}
+
+.sheetGridScroll {
+  overflow: auto;
+  border: 1px solid var(--gewu-border);
+  border-radius: 8px;
+  min-height: 0;
+}
+
+.sheetGrid {
+  border-collapse: collapse;
+  width: max-content;
+  min-width: 100%;
+  background: var(--gewu-bg-surface);
+}
+
+.sheetGrid th,
+.sheetGrid td {
+  border: 1px solid var(--gewu-border);
+  padding: 4px 10px;
+  text-align: left;
+  font-size: var(--gewu-font-size-body-sm);
+  color: var(--gewu-text);
+  white-space: nowrap;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sheetGrid th {
+  background: var(--gewu-bg-subtle);
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+}
+
+.sheetGridScroll::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.sheetGridScroll::-webkit-scrollbar-thumb {
+  background: var(--gewu-border-strong);
+  border-radius: 4px;
+}
+
+.sheetLoading {
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-body-sm);
+}
+
+.sheetError {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--gewu-status-error-border);
+  border-radius: 8px;
+  background: var(--gewu-status-error-bg);
+  color: var(--gewu-status-error-fg);
+  font-size: var(--gewu-font-size-body-sm);
+}

@@ -20,10 +20,10 @@ describe('G0-RS-P1 result surface projection', () => {
   it('routes every supported artifact into an explicit viewer adapter', () => {
     expect(resolveResultViewerAdapter({ kind: 'report', fileName: 'report.html' })).toBe('report');
     expect(resolveResultViewerAdapter({ kind: 'plot', fileName: 'volcano.svg' })).toBe('image');
-    expect(resolveResultViewerAdapter({ kind: 'plot', fileName: 'volcano.pdf' })).toBe('binary');
+    expect(resolveResultViewerAdapter({ kind: 'plot', fileName: 'volcano.pdf' })).toBe('pdf'); // BLOCK-142：原 binary 位替换为 pdf
     expect(resolveResultViewerAdapter({ kind: 'table', fileName: 'deg.csv' })).toBe('table');
     expect(resolveResultViewerAdapter({ kind: 'text', fileName: 'summary.json' })).toBe('json');
-    expect(resolveResultViewerAdapter({ kind: 'text', fileName: 'notes.md' })).toBe('text');
+    expect(resolveResultViewerAdapter({ kind: 'text', fileName: 'notes.md' })).toBe('markdown'); // BLOCK-142：md 先于 text 规则
     expect(resolveResultViewerAdapter({ kind: 'data', fileName: 'matrix.rds' })).toBe('binary');
     expect(resolveResultViewerAdapter({ kind: 'file', fileName: 'archive.zip', preview: false })).toBe('binary');
   });
@@ -36,8 +36,8 @@ describe('G0-RS-P1 result surface projection', () => {
   });
 
   it('does not claim Excel workbooks have an inline table viewer', () => {
-    expect(resolveResultViewerAdapter({ kind: 'table', fileName: 'results.xlsx' })).toBe('binary');
-    expect(resolveResultViewerAdapter({ kind: 'file', fileName: 'legacy.xls' })).toBe('binary');
+    expect(resolveResultViewerAdapter({ kind: 'table', fileName: 'results.xlsx' })).toBe('spreadsheet'); // BLOCK-142：xlsx 交给 spreadsheet viewer
+    expect(resolveResultViewerAdapter({ kind: 'file', fileName: 'legacy.xls' })).toBe('binary'); // .xls 存量保留 binary（exceljs 不解析）
   });
 
   it.each([

@@ -1,0 +1,58 @@
+{
+  "route": "/project/p_mus4u230_wvib/result?job=tj_mus4vpzy_ztwn",
+  "checks": [
+    {
+      "id": "fixture-discovery-mechanism",
+      "pass": true,
+      "detail": "产物列表机制确认为「manifest 声明 + 磁盘扫描合并」：status 端点每次请求重跑 reconcileToolJobArtifacts（core/biof3-server/routes/tools-metadata.js:175-181）→ listActualFiles readdirSync 扫描结果目录，未声明磁盘文件以 _source:'disk' 追加（core/biof3-server/helpers/artifact-truth.js:320-322,167-175）→ 签名变化即回写 DB（tools-metadata.js:152-160）→ 文件端点 declaredResultFilenames 放行（core/biof3-server/helpers/tools-executor/result-files.js:9,122-129）→ 前端 collectArtifacts 把 result.artifacts 合并进 manifest 列表（frontend/src/lib/result-manifest.ts:140-152）。实测：向 job 输出目录写入三 fixture 后 curl status，artifact 数 5→8（report-notes.md[text]/sample-matrix.xlsx[table]/spec-sheet.pdf[plot] 全部被发现），artifactTruth.status=valid 未阻断；未改 manifest.json、未走『替换既有产物』手法。"
+    },
+    {
+      "id": "fixture-file-serving",
+      "pass": true,
+      "detail": "文件端点实测：GET /api/tools/file/tj_mus4vpzy_ztwn/{report-notes.md,sample-matrix.xlsx,spec-sheet.pdf} 三件全 HTTP 200，content-type 分别 text/markdown、application/vnd.openxmlformats-officedocument.spreadsheetml.sheet、application/pdf，字节数 589/79053/700 与落盘一致。"
+    },
+    {
+      "id": "deep-link-result-view",
+      "pass": true,
+      "detail": "深链 /project/p_mus4u230_wvib/result?job=tj_mus4vpzy_ztwn&artifact=<name> 直接落位指定产物：ResultArtifactShell DEV 调试属性实测 data-debug-job-status=done、data-debug-artifact-count=8、data-debug-selected-name=<fixture 名>、data-debug-viewer 随产物切换（report-notes.md→markdown / sample-matrix.xlsx→spreadsheet / spec-sheet.pdf→pdf），与 viewerRegistry.ts:84,88,96 的扩展名规则一致。"
+    },
+    {
+      "id": "md-viewer-rich-render",
+      "pass": true,
+      "detail": "V1：[data-testid=markdown-viewer] 在场（aria-label『Markdown 预览：report-notes.md』）；ReactMarkdown+remark-gfm 富渲染实测 DOM——h1『BLOCK-142 走查笔记（report-notes.md）』、GFM 表格 table/thead/th（表头 基因|log2FC|显著）+ tbody 3 行、首行 TP53|2.41|是、strong×1、行内 code×1、GFM 任务列表 checkbox×2。截图 markdown-viewer.png。"
+    },
+    {
+      "id": "md-xss-raw-html-not-executed",
+      "pass": true,
+      "detail": "V1 安全面：fixture 内嵌 <img src=block142.invalid onerror=...> 与 <script>window.__block142ScriptFired=true</script> 探针——viewer 内 img 元素 0、script 元素 0、全文档带 on* 属性元素 0、window.__block142XssFired/__block142ScriptFired 双 flag 未触发（childNodes 枚举证实 raw HTML 以 nodeType=3 惰性文本节点落 DOM，React textContent 语义，非元素、不执行；截图可见其字面量纯文本）。契约『不加 rehype-raw』成立。"
+    },
+    {
+      "id": "xlsx-grid-matches-fixture",
+      "pass": true,
+      "detail": "V2：[data-testid=spreadsheet-viewer] 在场；默认首工作表『概览』网格与 fixture 精确一致——表头 th=样本|分组|值、tbody 5 行、首行 S1|对照|10，且 6×3 未超限时不显示截断标注（hasTruncatedNoteDefault=false，不伪造截断）。多工作表 tab（概览/全量）在场，aria-selected 切换正常。截图 spreadsheet-viewer.png。"
+    },
+    {
+      "id": "xlsx-truncation-note-honest",
+      "pass": true,
+      "detail": "V2 截断：切到『全量』工作表（fixture 215 行×55 列，超 200/50 界）→ [data-testid=spreadsheet-truncated] 在场且数字真实：『共 215 行 × 55 列，预览截断至前 200 行 × 50 列』；渲染网格实测 th=50（列1..列50）、tbody=199 行（+表头=200 行），与 SpreadsheetResultViewer.tsx:14-15 MAX_ROWS=200/MAX_COLS=50 边界精确一致。"
+    },
+    {
+      "id": "pdf-canvas-rendered",
+      "pass": true,
+      "detail": "V3：[data-testid=pdf-preview] 在场（aria-label『PDF 预览：spec-sheet.pdf』），pdfjs 渲染 canvas×1（648×838，class=_workspacePdfPage_d5g23_7400），canvasPainted=true（getImageData 采样非空白），页 meta『共 1 页』；截图 pdf-viewer.png 可见 fixture 标题『BLOCK-142 spec-sheet.pdf fixture』与矩形描边实际 raster 出图。"
+    },
+    {
+      "id": "pdf-render-environment-incident",
+      "pass": true,
+      "detail": "走查过程如实记录：本机长跑 dev Electron 会话（10/3 启动）pdfjs page.render 永久悬挂（组件状态『渲染中 0/1 页』，无任何 console/Log 报错；已知好产物 volcano.pdf 同样悬挂，与 fixture 无关）。对照实验定位根因：同二进制裸实例（无 CSP）57ms 渲染成功；裸实例注入同款 app CSP 头仍 222ms 成功（排除 CSP/eval/FontFace：isEvalSupported:false、disableFontFace:true 均仍悬挂）；真实 app 代码+全新 Chromium profile 渲染成功（组件 canvas=1）；同 profile --disable-gpu 渲染成功。最终定位：老化 .biof3-dev-user-data profile 的 Local State 中 GPU 偏好/规避状态使 pdfjs GPU 光栅化路径楔死；移除 Local State 后 GPU 正常渲染（canvas=1『共 1 页』），备份存 /tmp/walk142-localstate.bak。属环境级退化，非 BLOCK-142 三 viewer 实现缺陷；最终走查证据全部取自修复后的真实 app 实例。"
+    }
+  ],
+  "screenshots": [
+    "acceptance/block-142/markdown-viewer.png",
+    "acceptance/block-142/spreadsheet-viewer.png",
+    "acceptance/block-142/pdf-viewer.png"
+  ],
+  "allPass": true,
+  "sideEffects": "① fixture 三件写入 job 输出目录 .biof3-dev-user-data/data/projects/block138-f1-verify-163053-mus4u230/results/jobs/tj_mus4vpzy_ztwn/（report-notes.md=含 GFM 表格+双 XSS 探针、sample-matrix.xlsx=exceljs 双工作表『概览』6×3+『全量』215×55、spec-sheet.pdf=手craft 单页 PDF）；生成脚本在 /tmp/block142-fixture-gen.mjs，未入仓库；产物一旦随该 job 清理会一并消失。② 重启了 dev Electron：原 10/3 启动的实例 pdfjs 渲染楔死已 kill；诊断中先后以裸实例（/tmp/electron-repro，独立 userData，已退）与真实代码+全新 profile 实例（已退）做对照；期间清除了 .biof3-dev-user-data 的可再生缓存（Cache/Code Cache/GPUCache/DawnGraphiteCache/DawnWebGPUCache/Shared Dictionary）并移除 Local State（备份 /tmp/walk142-localstate.bak），Cookies/Local Storage/data/biof3.db 未动。③ 当前 9222 上留有一个直启的真实 app 实例（同 profile、GPU 正常、pdf 渲染正常，token=walk142-heal），dev-launch-token.json 已同步登记；下次 npm run dev:electron 按 wrapper 既有语义接管。④ 新增文件仅 acceptance/block-142/（本 JSON+三截图）；git 工作树其余与任务开始时一致，未改 docs/**、src/**、core/**、无关 test/**，未 commit。",
+  "generatedAt": "2026-10-05T16:20:00+08:00"
+}

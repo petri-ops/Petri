@@ -12,7 +12,7 @@
  */
 
 import React from 'react';
-import type { ResultSurfaceMode } from '@/components/result-studio/resultSurface';
+import type { ResultSurfaceMode, ResultViewerAdapter } from '@/components/result-studio/resultSurface';
 import styles from './ArtifactPinPane.module.css';
 
 /** 钉住时刻捕获的视图级快照：产物名 + renderPreview 渲染载荷（非取数句柄）。 */
@@ -20,7 +20,8 @@ export type ArtifactPinSnapshot = {
   jobId: string;
   artifactName: string;
   label?: string | null;
-  viewerAdapter: 'report' | 'image' | 'table' | 'json' | 'text' | 'binary';
+  /** BLOCK-142：跟随注册表 ResultViewerAdapter 联合（原手抄旧六成员，扩员即漂移）；新 adapter 钉住载荷未接线前落本组件占位分支。 */
+  viewerAdapter: ResultViewerAdapter;
   previewText: string | null;
   previewData: string[][] | null;
   url: string;

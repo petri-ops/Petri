@@ -47,8 +47,8 @@
       "path": "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
       "wave": "B",
       "module": "W-04",
-      "lines": 1265,
-      "sha256": "327d2efeb86ac725f290b267b01772bc319cf594ab194cf2afb43f0e32d3cfb9"
+      "lines": 1295,
+      "sha256": "7c887f5ac029e0cd7fedfe11c7e8842b5f66abf7b220c8579c3f258469bdab42"
     },
     {
       "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx",
@@ -170,5 +170,5 @@
       "sha256": "b1a8303d2bb09317a09374053757d7a85c716777e2f599c5f3f962cac94508af"
     }
   ],
-  "total": 22669
+  "total": 22699
 }

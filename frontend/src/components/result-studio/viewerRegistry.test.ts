@@ -15,14 +15,18 @@ import { resolveResultViewer } from './viewerRegistry';
  *     canExport: boolean,
  *   }
  *
- * adapter 解析语义必须与现状 resolveResultViewerAdapter（resultSurface.ts:69-84）
- * 逐分支等价——零行为平迁：
+ * adapter 解析语义源自现状 resolveResultViewerAdapter（resultSurface.ts:69-84）
+ * 逐分支平迁；BLOCK-142（切片 E）按 plan §1.4 原位替换三处映射（其余零变化）：
+ *   .pdf → pdf（原 binary 位）；.xlsx/.xlsm → spreadsheet（原 binary 位，先于 table）；
+ *   .md/.markdown → markdown（先于 text 规则；isTextFile 表中相应让位）。
+ *   .xls 存量拆分保留 binary（exceljs 不解析 legacy .xls）。
+ * 平迁基线（BLOCK-142 前的 resultSurface 锚点）：
  *   :74 文件名先 toLowerCase 再匹配（扩展名匹配对大小写不敏感，kind 匹配大小写敏感）
  *   :75 preview === false -> binary（短路，先于一切其它分支）
  *   :76 kind==='report' 或 /\.html?$/ -> report（扩展名分支对任意 kind 生效）
- *   :77 /\.pdf$/ -> binary
+ *   :77 /\.pdf$/ -> （BLOCK-142 起 pdf）
  *   :78 kind==='plot' 或 .png/.jpe?g/.gif/.svg/.webp -> image
- *   :79 /\.xlsx?$/ -> binary
+ *   :79 /\.xlsx?$/ -> （BLOCK-142 起 .xlsx/.xlsm→spreadsheet、.xls→binary 存量保留）
  *   :80 kind==='table' 或 /\.(csv|tsv)$/ -> table
  *   :81 /\.json$/ -> json
  *   :82 kind==='text' 或 isTextFile(name) -> text（isTextFile 扩展名表见 previewFileUtils.ts:15-24）
@@ -77,12 +81,12 @@ describe('viewerRegistry（BLOCK-138 P0 切片A）adapter 解析 = resultSurface
     expect(resolveAdapter({ kind: 'data', fileName: 'Matrix.PNG' })).toBe('image');
   });
 
-  it('.pdf 恒判 binary——先于 image 分支（resultSurface.ts:77 顺序敏感）', () => {
-    expect(resolveAdapter({ kind: 'plot', fileName: 'volcano.pdf' })).toBe('binary');
-    expect(resolveAdapter({ kind: 'table', fileName: 'paper.pdf' })).toBe('binary');
-    expect(resolveAdapter({ kind: 'text', fileName: 'paper.pdf' })).toBe('binary');
-    expect(resolveAdapter({ kind: 'data', fileName: 'paper.pdf' })).toBe('binary');
-    expect(resolveAdapter({ kind: 'file', fileName: 'paper.pdf' })).toBe('binary');
+  it('.pdf 落 pdf——先于 image 分支（BLOCK-142 原位替换 resultSurface.ts:77 的 binary 位）', () => {
+    expect(resolveAdapter({ kind: 'plot', fileName: 'volcano.pdf' })).toBe('pdf');
+    expect(resolveAdapter({ kind: 'table', fileName: 'paper.pdf' })).toBe('pdf');
+    expect(resolveAdapter({ kind: 'text', fileName: 'paper.pdf' })).toBe('pdf');
+    expect(resolveAdapter({ kind: 'data', fileName: 'paper.pdf' })).toBe('pdf');
+    expect(resolveAdapter({ kind: 'file', fileName: 'paper.pdf' })).toBe('pdf');
   });
 
   it("kind==='plot' 与图片扩展名 .png/.jpg/.jpeg/.gif/.svg/.webp 都落 image（resultSurface.ts:78）", () => {
@@ -101,13 +105,18 @@ describe('viewerRegistry（BLOCK-138 P0 切片A）adapter 解析 = resultSurface
     expect(resolveAdapter({ kind: 'plot', fileName: 'sheet.xlsx' })).toBe('image');
   });
 
-  it('.xls/.xlsx 恒判 binary——先于 table 分支（resultSurface.ts:79 顺序敏感）', () => {
-    // 即使 kind table：Excel 工作簿没有内联表格查看器
-    expect(resolveAdapter({ kind: 'table', fileName: 'results.xlsx' })).toBe('binary');
+  it('.xlsx/.xlsm 落 spreadsheet——先于 table 分支（BLOCK-142 原位替换 resultSurface.ts:79 的 binary 位）', () => {
+    // xlsx/xlsm 交给 spreadsheet viewer，不再落 binary
+    expect(resolveAdapter({ kind: 'table', fileName: 'results.xlsx' })).toBe('spreadsheet');
+    expect(resolveAdapter({ kind: 'text', fileName: 'results.xlsx' })).toBe('spreadsheet');
+    expect(resolveAdapter({ kind: 'file', fileName: 'results.xlsx' })).toBe('spreadsheet');
+    expect(resolveAdapter({ kind: 'data', fileName: 'macro.xlsm' })).toBe('spreadsheet');
+  });
+
+  it('.xls 存量保留 binary——先于 table 分支（BLOCK-142 拆分保留：exceljs 不解析 legacy .xls）', () => {
     expect(resolveAdapter({ kind: 'table', fileName: 'legacy.xls' })).toBe('binary');
-    expect(resolveAdapter({ kind: 'text', fileName: 'results.xlsx' })).toBe('binary');
     expect(resolveAdapter({ kind: 'data', fileName: 'legacy.xls' })).toBe('binary');
-    expect(resolveAdapter({ kind: 'file', fileName: 'results.xlsx' })).toBe('binary');
+    expect(resolveAdapter({ kind: 'file', fileName: 'legacy.xls' })).toBe('binary');
   });
 
   it("kind==='table' 与 .csv/.tsv 都落 table，且先于 text 判定（resultSurface.ts:80 顺序敏感）", () => {
@@ -135,9 +144,10 @@ describe('viewerRegistry（BLOCK-138 P0 切片A）adapter 解析 = resultSurface
 
   it('isTextFile 扩展名表（previewFileUtils.ts:15-24）逐个按现状落点解析（resultSurface.ts:82）', () => {
     // isTextFile 全表 40 扩展名；csv/tsv 先命中 table（:80）、html/htm 先命中
-    // report（:76）、json 先命中 json（:81，分支顺序），其余落 text（:82）。
+    // report（:76）、json 先命中 json（:81）、md/markdown 先命中 markdown（BLOCK-142
+    // 规则，分支顺序），其余落 text（:82）。
     const isTextFileTable: Array<[string, ResultViewerAdapter]> = [
-      ['txt', 'text'], ['md', 'text'], ['markdown', 'text'],
+      ['txt', 'text'], ['md', 'markdown'], ['markdown', 'markdown'],
       ['csv', 'table'], ['tsv', 'table'], ['tab', 'text'],
       ['json', 'json'], ['jsonl', 'text'], ['log', 'text'],
       ['r', 'text'], ['py', 'text'], ['sh', 'text'], ['bash', 'text'], ['zsh', 'text'],
@@ -186,7 +196,7 @@ describe('viewerRegistry（BLOCK-138 P0）能力声明位（占位，本包不�
     ['plot', 'volcano.svg', 'image'],
     ['table', 'deg.csv', 'table'],
     ['text', 'summary.json', 'json'],
-    ['text', 'notes.md', 'text'],
+    ['text', 'notes.md', 'markdown'],
     ['data', 'matrix.rds', 'binary'],
   ];
 

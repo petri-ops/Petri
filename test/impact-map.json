@@ -2787,6 +2787,34 @@
       "frontendRelated": true,
       "classifiesScripts": true,
       "scriptRole": "governance"
+    },
+    {
+      "id": "block142-renderers",
+      "note": "BLOCK-142 成果面切片 E·renderer 补课（md/xlsx/pdf）：viewerRegistry 三条扩展名规则（.pdf→pdf 包装 WorkspacePdfPreview、.xlsx/.xlsm→exceljs 动态 import 有界网格、.md→react-markdown+remark-gfm 无 rehype-raw 防 XSS）+ 三个新 viewer（MarkdownResultViewer/PdfResultViewer/SpreadsheetResultViewer，样式只走 --gewu-* token）+ Shell 挂载面接线。改任一登记文件即跑四条新契约测试（注册表 block142 + 三 viewer 组件）；前端面经 frontendRelated + frontend/src 自动路由进 vitest（改动源文件走 test:related 反查，ArtifactPinPane 并行受 block140 规则覆盖）。",
+      "patterns": [
+        "frontend/src/components/result-studio/viewerRegistry.block142.test.ts",
+        "frontend/src/components/result-studio/viewerRegistry.test.ts",
+        "frontend/src/components/result-studio/viewerRegistry.ts",
+        "frontend/src/components/workspace-panels/ArtifactPinPane.tsx",
+        "frontend/src/components/workspace-panels/MarkdownResultViewer.module.css",
+        "frontend/src/components/workspace-panels/MarkdownResultViewer.test.tsx",
+        "frontend/src/components/workspace-panels/MarkdownResultViewer.tsx",
+        "frontend/src/components/workspace-panels/PdfResultViewer.test.tsx",
+        "frontend/src/components/workspace-panels/PdfResultViewer.tsx",
+        "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
+        "frontend/src/components/workspace-panels/SpreadsheetResultViewer.module.css",
+        "frontend/src/components/workspace-panels/SpreadsheetResultViewer.test.tsx",
+        "frontend/src/components/workspace-panels/SpreadsheetResultViewer.tsx",
+        "frontend/src/components/result-studio/resultSurface.test.ts"
+      ],
+      "tests": [
+        "frontend/src/components/result-studio/viewerRegistry.block142.test.ts",
+        "frontend/src/components/workspace-panels/MarkdownResultViewer.test.tsx",
+        "frontend/src/components/workspace-panels/PdfResultViewer.test.tsx",
+        "frontend/src/components/workspace-panels/SpreadsheetResultViewer.test.tsx"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": false
     }
   ]
 }
