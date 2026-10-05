@@ -40,3 +40,10 @@ xlsx 写回/编辑（只读预览）；md raw HTML 渲染（安全默认禁用�
 ## 4. 验收与节奏
 
 契约测试红绿（注册表规则+三 viewer 组件）+ RS 面回归 + tsc 0 + 实机走查（fixture 产物三件套）+ 五门（bundle 基线按已裁决增量 --write 重锚）+ closeout（集成提交后）。实现=dynamic workflow（红绿+实机走查+换眼复核），工作流内不提交。
+
+## 收口（2026-10-05）
+
+- **三 viewer ✓**：注册表三条新规则（原位行号锚点）+ 三组件（契约 17+组件套件）+ Shell 三分支接线；RS 面回归绿；六门绿（types 0/lint 0 error/code-size 22699/knip 236/bundle-baseline 46 键——R-2 机制首用，新依赖增量已裁决 --write 重锚/test:changed P6 门 accepted-red→dbece735 刷新 13/13）。
+- **实机走查 ✓（dwfrun-c2cfc326 系）**：fixture 三件套（md 含 XSS 探针/xlsx 215×55/pdf）注入 job 产物目录——「manifest+磁盘扫描合并」机制实证新文件免 manifest 即被发现+HTTP 200 content-type 正确；V1 md 富渲染+XSS 三零；V2 xlsx 网格精确一致+截断逐字；V3 pdf canvas 出图；换眼复核全 confirmed。证据 acceptance/block-142/（renderers-walk.json+三截图）。
+- **环境事件（非代码缺陷）**：长跑 dev Electron 老化 profile 致 pdfjs page.render 悬挂——对照实验排除 CSP/GPU/代码面，fresh profile 正常；处置=dev 栈重启即愈。
+- **剩件**：UI-465 用户真窗过目翻 verified；非范围=写回/raw HTML/selection 接线。G0 开发期常态 · 不外推 packaged/Provider/GA。

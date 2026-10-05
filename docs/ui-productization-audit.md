@@ -4599,3 +4599,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：HK-01 红绿（P0 契约 5/5 组件不存在红→绿+RS 面 66 绿；R-1 7/7 含 3 既有不破+RS 面 84 绿；P1 24 绿+theme 4/4）；门禁五门（types 0/lint 0 error/code-size 22666 重打/knip 235/test:changed P6 绑定门 accepted-red→698d10a9 刷新 13/13）；**实机走查**（dwfrun-1dea4da6）：W1 双产物同屏（钉住 volcano.png 40% 副栏+主区切 classified_table.csv 副栏保持+解除恢复单栏）/W2 空态隐藏（无图 job 切换器整组不在场，对照 BLOCK-138 空态常驻缺陷）/W3 有链回归+跨 job 钉住（点击条带祖先节点→副栏 tj_mus4uxjq_s69m 快照）——三截图换眼复核全 confirmed。
 - **待验**：仅剩用户本人真窗过目翻 verified。拖拽分隔条/compare 差异计算升级=plan 非范围。
 - **边界**：钉住=视图级快照（D1，非第二数据通道）；副栏 40% 固定（D2，拖拽留后续）；R-1 判空以 /lineage 为准（D3 同源）；跨 job 钉住失败静默（不动既有钉住态）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+
+## UI-465: 成果面切片 E——renderer 补课 md/xlsx/pdf 三 viewer 注册（BLOCK-142）(2026-10-05 in_progress，实机三断言全过经换眼复核；待用户真窗过目翻 verified)
+
+- **来源**：BLOCK-142（plan=[`block-142-artifact-plane-renderers-plan.md`](./block-142-artifact-plane-renderers-plan.md)，方向文档 §3 切片 E；用户裁决「开启新的工作继续 搞完」+ 依赖 AskUserQuestion 裁决「全批 md+xlsx+pdf（推荐）」；BLOCK-141 清尾后接棒）。实现=dynamic workflow dwfrun-c2cfc326 系（串行红绿+六门含 bundle 基线首用+实机走查+换眼复核），主代理终审集成 dbece735。
+- **依赖裁决（四问留痕 plan §2）**：react-markdown ^9（替代自研/marked+dompurify：无 innerHTML 天然防 XSS）+ remark-gfm ^4（GFM 标准）+ exceljs ^4（替代 SheetJS npm 停更版：MIT 活跃）；pdfjs-dist 4.10.38 零新增复用；bundle 增量按 R-2 机制 --write 重锚（46 键，exceljs.min.js 248KB gz 在册）。
+- **交付三件**：①**md viewer**——新 adapter markdown（.md/.markdown 先于 text 规则）+ MarkdownResultViewer（ReactMarkdown+remarkGfm，默认禁 raw HTML）；②**xlsx viewer**——新 adapter spreadsheet（.xlsx/.xlsm 替换 binary 位）+ SpreadsheetResultViewer（exceljs 解析+多工作表 tab+行 200/列 50 有界+截断如实）；③**pdf viewer**——新 adapter pdf（.pdf 替换 binary 位先于 image）+ PdfResultViewer（pdfjs-dist 复用，canvas 出图）。viewerRegistry 三条规则带原位行号锚点注释；能力声明位定值（markdown/pdf canExport=true，spreadsheet selection 接线后续包占位）。
+- **证据**：HK-01 红绿（注册表契约 17 用例）；门禁六门（types 0/lint 0 error/code-size 22699 重打/knip 236/bundle-baseline 46 键绿——R-2 机制首用/test:changed P6 门 accepted-red→dbece735 刷新 13/13）；**实机走查**（fixture 三件套注入 job 产物目录——产物列表「manifest+磁盘扫描合并」机制实证新文件免 manifest 即被发现）：V1 md 富渲染（GFM 表格/任务列表）+XSS 探针三零（img/script/on* 全零，raw HTML 惰性文本不执行）/V2 xlsx 网格精确一致（概览 5 行+全量 215×55→200×50 截断逐字）+多工作表 tab/V3 pdf canvas 出图（648×838 非空白）——三截图换眼复核全 confirmed。
+- **待验**：仅剩用户本人真窗过目翻 verified。**环境事件（非代码缺陷）**：长跑 dev Electron（10/3 启动）老化 profile 致 pdfjs page.render 悬挂——对照实验排除 CSP/GPU/代码面，fresh profile 正常；处置=dev 栈重启即愈，生产 packaged 不受影响。
+- **边界**：xlsx 只读（写回后续）；md raw HTML 禁用（rehype 白名单后续）；spreadsheet selection 接线后续包（canSelect 占位 false）。G0 开发期常态 · 不外推 packaged/Provider/GA。

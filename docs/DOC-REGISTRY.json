@@ -5590,13 +5590,13 @@
       "capability": "artifact-plane-renderers",
       "path": "docs/block-142-artifact-plane-renderers-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-142-artifact-plane-renderers",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-10-05",
       "archivePolicy": "archive_when_superseded",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "tags": [
         "block-142",
         "artifact-plane",
@@ -5606,7 +5606,7 @@
         "xlsx",
         "pdf"
       ],
-      "notes": "成果面切片 E（用户裁决「开启新的工作继续 搞完」+依赖 AskUserQuestion「全批 md+xlsx+pdf（推荐）」）。P0=md/xlsx/pdf 三 viewer 注册（viewerRegistry 三条新规则+Shell renderPreview 接线）+react-markdown/remark-gfm/exceljs 三新依赖（四问留痕 plan §2；pdfjs-dist 零新增复用）。兼作切片 A 扩展性判据验收。非范围=xlsx 写回/raw HTML/selection 接线。实现=dynamic workflow，主代理终审集成。"
+      "notes": "成果面切片 E（用户裁决「开启新的工作继续 搞完」+依赖 AskUserQuestion「全批 md+xlsx+pdf（推荐）」）。P0=md/xlsx/pdf 三 viewer 注册（viewerRegistry 三条新规则+Shell renderPreview 接线）+react-markdown/remark-gfm/exceljs 三新依赖（四问留痕 plan §2；pdfjs-dist 零新增复用）。兼作切片 A 扩展性判据验收。非范围=xlsx 写回/raw HTML/selection 接线。实现=dynamic workflow，主代理终审集成。 2026-10-05 收口 completed：三 viewer 注册+实机走查三断言全过（fixture 三件套+换眼 confirmed）；六门绿（bundle 基线 46 键首用重锚）；集成 dbece735（P6 门 13/13 刷新）；环境事件=老化 dev profile pdfjs 悬挂（非代码缺陷，重启即愈）。"
     }
   ],
   "lastUpdated": "2026-10-05",
