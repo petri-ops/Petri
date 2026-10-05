@@ -1,0 +1,12 @@
+{
+  "_about": "R-2 bundle 体积基线（BLOCK-141）：vite build 后 frontend/dist/assets 下 *.js 的 gzip 字节（资产键已剥 vite 哈希段）。门禁=scripts/bundle-size-baseline.mjs --measure：单资产增幅 >20% 或新增资产 gzip >100KB 即红；已裁决增量用 --write 重锚（@xyflow/react 增量就此入册），禁止手改 assets 数字。",
+  "schemaVersion": 1,
+  "anchored": false,
+  "limits": {
+    "growthPct": 20,
+    "newAssetGzipBytes": 102400
+  },
+  "updatedAt": "2026-10-05",
+  "assets": {},
+  "totalGzipBytes": 0
+}

@@ -35,6 +35,14 @@ export interface ActiveArtifact {
    */
   revisionOrdinal?: number | null;
   artifactFamilyId?: string | null;
+  /**
+   * BLOCK-141 R-5 — viewer interaction manifest 的 artifactId（后端库记录 id，
+   * 前端不可由 jobId+name 合成）。D2 注入归属校验的可比来源：选择总线的
+   * artifactId 与本字段同源才可注入当前 artifact 的 Agent 上下文。交互清单
+   * 未绑定（产物不支持交互）时为 null——此时不启用归属校验，维持 BLOCK-139
+   * 既有注入契约。
+   */
+  artifactId?: string | null;
   semanticKind?: ResultArtifactKind;
   entityType?: string | null;
   idField?: string | null;

@@ -2721,6 +2721,15 @@
       "classifiesScripts": false
     },
     {
+      "id": "block140-evidence",
+      "note": "BLOCK-140 成果面切片 C 实机证据目录（UI-464 分屏/空态切换器实机走查 evidence.json + 截图；无 Node 测试读者，复现驱动=目录内 block140-split-walk.cjs。收口提交带入 acceptance/block-140/ 时漏登记 impact-map，test-affected 全映射门存量 unknown——BLOCK-141 门禁修复批顺手清债，对标 block139-evidence 先例）。",
+      "patterns": [
+        "acceptance/block-140/**"
+      ],
+      "tests": [],
+      "classifiesScripts": false
+    },
+    {
       "id": "block140-artifact-plane-split",
       "note": "BLOCK-140 成果面切片 C——result 模式内多 artifact 分屏：ArtifactPinPane（钉住=视图级快照，renderPreview 同路载荷离线渲染零取数；副栏 result 模式专属；解除钉住恢复单栏；60/40 固定比例）+ ResultArtifactShell 接线（resultToolbar「钉住」动作捕获当前产物 → shellBody 双栏）。测试与源码同目录（HK-01 先红后绿）；改任一登记文件即跑契约+RS 面测试。",
       "patterns": [
@@ -2753,6 +2762,31 @@
       ],
       "frontendRelated": true,
       "classifiesScripts": false
+    },
+    {
+      "id": "block141-riders-clearing",
+      "note": "BLOCK-141 清尾批立项（R-2/R-5/R-6/BLOCK-128-① 四项在册残项一次闭环）：R-2 bundle 体积基线机制（scripts/bundle-size-baseline.mjs 计量比对门 + acceptance/bundle-size-baseline.json 基线锚，--write 唯一重锚通道）+ BLOCK-128-① 取消终态竞窗分类（run-plugin-script.js finalize 取消优先，契约测试 block141-cancel-classification）+ R-5/R-6 前端残项（ScientificInteractionViewer matrixRowIdField / activeArtifactProjection / ResultView types / useResultStudioEditContext）。改任一登记文件即跑两条新契约测试；前端面经 frontendRelated + frontend/src 自动路由进 vitest。",
+      "patterns": [
+        "scripts/bundle-size-baseline.mjs",
+        "acceptance/bundle-size-baseline.json",
+        "core/biof3-server/mcp/registry/run-plugin-script.js",
+        "frontend/src/components/result-studio/ScientificInteractionViewer.tsx",
+        "frontend/src/components/result-studio/ScientificInteractionViewer.matrixRowIdField.test.tsx",
+        "frontend/src/components/result-studio/activeArtifactProjection.ts",
+        "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
+        "frontend/src/components/workspace-panels/ResultView/types.ts",
+        "frontend/src/pages/project-workspace/useResultStudioEditContext.ts",
+        "frontend/src/pages/project-workspace/useResultStudioEditContext.selectionBus.test.tsx",
+        "test/block141-bundle-baseline.test.mjs",
+        "test/block141-cancel-classification.test.mjs"
+      ],
+      "tests": [
+        "test/block141-bundle-baseline.test.mjs",
+        "test/block141-cancel-classification.test.mjs"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true,
+      "scriptRole": "governance"
     }
   ]
 }

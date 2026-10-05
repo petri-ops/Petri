@@ -525,14 +525,22 @@ function ScientificMatrix({ manifest, query, selection, onSelectionChange }: {
   manifest: ArtifactInteractionManifest; query: ResultTableQuery; selection: ArtifactSelection | null;
   onSelectionChange: (selection: ArtifactSelection | null) => void;
 }): React.ReactElement {
-  const rowField = manifest.mapping?.rowIdField || manifest.idField || query.columns[0]?.field;
+  // BLOCK-141 R-6（plan §1.3）：行选 idField 回退链只认**后端声明的**稳定 ID 列
+  //（mapping.rowIdField → manifest.idField）。columns[0] 只是"第一列数据"，不是
+  // 身份列——两级声明列都缺失时行选拒绝注入（按钮禁用 + 点击产 null），不得把
+  // 数据列单元格值冒充稳定实体 ID 写进选择（fabricated entityIds 会经选择总线 /
+  // D2 注入流到 Agent 上下文）。展示用的行标题回退 columns[0] 保留（展示不是
+  // 身份），但不再进入 rowManifest。
+  const declaredRowIdField = manifest.mapping?.rowIdField || manifest.idField || null;
+  // 展示兜底空串（零列查询是边角；key/标签随之为空，不参与选择身份）。
+  const displayRowField = declaredRowIdField || query.columns[0]?.field || '';
   // UI-454：解除前端自缚——后端 backing 已有界（行 100/列不截断），
   // 这里全量渲染交给网格滚动；有界口径由 caveat 如实标注。
-  const columns = query.columns.map((column) => column.field).filter((field) => field !== rowField);
+  const columns = query.columns.map((column) => column.field).filter((field) => field !== declaredRowIdField);
   const rows = query.rows;
   const values = rows.flatMap((row) => columns.map((field) => numeric(row[field])).filter((value): value is number => value !== null));
   const min = Math.min(...values); const max = Math.max(...values);
-  const rowManifest = { ...manifest, idField: rowField, entityType: manifest.mapping?.rowEntityType || manifest.entityType, selectionDurable: true };
+  const rowManifest = { ...manifest, idField: declaredRowIdField, entityType: manifest.mapping?.rowEntityType || manifest.entityType, selectionDurable: true };
   const columnManifest = { ...manifest, entityType: manifest.mapping?.columnEntityType || 'column', columns: columns.map((field) => ({ field })), selectionDurable: true };
   return (
     <div className={styles.viewer} data-mode="matrix">
@@ -541,11 +549,17 @@ function ScientificMatrix({ manifest, query, selection, onSelectionChange }: {
         <span />
         {columns.map((field) => <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" key={field} type="button" title={`选择 ${field}`} onClick={() => onSelectionChange(buildColumnSelection(columnManifest, [field]))}>{field}</button>)}
         {rows.map((row) => (
-          <React.Fragment key={row[rowField]}>
-            <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => onSelectionChange(buildRowSelection(rowManifest, [row]).selection)}>{row[rowField]}</button>
+          <React.Fragment key={row[displayRowField]}>
+            <button
+              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              type="button"
+              disabled={!declaredRowIdField}
+              title={declaredRowIdField ? undefined : '该矩阵没有稳定行 ID 列，无法按行选择科学实体'}
+              onClick={() => onSelectionChange(declaredRowIdField ? buildRowSelection(rowManifest, [row]).selection : null)}
+            >{row[displayRowField]}</button>
             {columns.map((field) => {
               const value = numeric(row[field]); const ratio = value === null ? .5 : (value - min) / (max - min || 1);
-              return <span key={field} title={`${row[rowField]} × ${field}: ${row[field]}`} style={{ ['--matrix-value' as string]: ratio }} />;
+              return <span key={field} title={`${row[displayRowField]} × ${field}: ${row[field]}`} style={{ ['--matrix-value' as string]: ratio }} />;
             })}
           </React.Fragment>
         ))}

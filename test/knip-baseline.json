@@ -6,7 +6,7 @@
     "types",
     "files"
   ],
-  "updatedAt": "2026-10-04",
+  "updatedAt": "2026-10-05",
   "keys": [
     "exports::.agents/skills/gewu-dev-infra/dev-verify/lib.cjs::DEFAULT_PORT",
     "exports::.agents/skills/gewu-dev-infra/dev-verify/lib.cjs::TEST_INSTANCE_PORT",
@@ -101,6 +101,7 @@
     "files::.agents/skills/gewu-dev-infra/dev-verify/flows/workspace-panel-motion.cjs",
     "files::.agents/skills/gewu-dev-infra/scripts/normalize-eol.mjs",
     "files::acceptance/block-139/block139-selection-walk.cjs",
+    "files::acceptance/block-140/block140-split-walk.cjs",
     "files::acceptance/block-65/block65-verify.cjs",
     "files::acceptance/ui-276/resume-verify-script.mjs",
     "files::acceptance/ui-ledger-closeout/ui156-uiattch-verify.cjs",

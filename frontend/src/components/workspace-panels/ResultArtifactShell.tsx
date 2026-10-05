@@ -629,6 +629,9 @@ export function ResultArtifactShell({
       revisionId: viewedRevision?.revisionId ?? boundInteractionManifest?.revisionId ?? null,
       revisionOrdinal: viewedRevision?.revisionOrdinal ?? boundInteractionRevision?.revisionOrdinal ?? null,
       artifactFamilyId: viewedRevision?.artifactFamilyId ?? boundInteractionManifest?.artifactFamilyId ?? null,
+      // BLOCK-141 R-5：viewer interaction manifest 的 artifactId 上投影——
+      // D2 注入归属校验（useResultStudioEditContext）的可比来源。
+      artifactId: boundInteractionManifest?.artifactId ?? null,
       entityType: boundInteractionManifest?.entityType ?? null,
       idField: boundInteractionManifest?.idField ?? null,
       selectionDurable: boundInteractionManifest?.selectionDurable ?? false,

@@ -14,7 +14,7 @@ const {
   releaseActiveToolJob,
 } = require('../../helpers/tools-executor/active-job');
 const { resolveLifecycleDurations } = require('../../helpers/process-lifecycle');
-const { activeToolJobs, countActiveUserToolJobs } = require('../../helpers/tool-job-lifecycle-registry');
+const { activeToolJobs, countActiveUserToolJobs, notifyScheduler } = require('../../helpers/tool-job-lifecycle-registry');
 // 装置层（心跳/硬超时）直接走 better-sqlite3 原句柄；db 参数是高层模块。
 let lifecycleDb = null;
 try {
@@ -387,7 +387,63 @@ async function _runPluginScript(
     const startedAt = new Date().toISOString();
     // BLOCK-57：插件执行收尾统一入口——本地 execFile 与远程直跑共用同一条
     // 产物/清单/状态落库链路（Artifact Truth 单一真相）。
-    const finalizePluginRun = async (err, stdout, stderr) => {
+    const finalizePluginRun = async (err, stdout, stderr, cancelEvidence = null) => {
+        // BLOCK-128-①（BLOCK-141 清尾转绿）——取消分类先于失败/artifact 校验分支。
+        // 与本地执行链 finalizeJobRun 入口检查同语义（tools-executor.js:1086 flag /
+        // :1090 durable）：取消击杀链（killLocalToolJob→requestActiveToolJobCancellation
+        // 置位 flag→SIGTERM，active-job.js:69 为全仓唯一写入点，硬超时走 timedOut
+        // 不串线）与取消路由 durable 落库（routes/tools-platform.js:97-112）之间
+        // child close 先到时，finalize 按取消收敛，不再落 failed/"Required artifact"
+        // 误分类（实机两种交错均出现：acceptance/block-128/acceptance-live.json 与
+        // heartbeat-timeline.txt）。判据双通道 = kill 来源（release 前捕获的 flag）+
+        // durable 取消标记（跨进程可见）；取消 API 语义零改动。
+        let durableCancelled = false;
+        if (db && toolJobId && typeof db.getToolJob === 'function') {
+            try {
+                const row = db.getToolJob(toolJobId);
+                durableCancelled = !!(row && row.status === 'cancelled');
+            } catch { /* 行读取失败按无 durable 标记处理（kill flag 通道仍在） */ }
+        }
+        const cancelKillConfirmed = !!(cancelEvidence && cancelEvidence.killFlag);
+        if (cancelKillConfirmed || durableCancelled) {
+            const cancelledResult = {
+                toolJobId,
+                jobDir,
+                outputDir,
+                tool: { id: plugin.id, version: plugin.version || null, language: plugin.language || null },
+                status: 'cancelled',
+                cancellation: {
+                    classifiedBy: cancelKillConfirmed ? 'cancel_kill_flag' : 'durable_cancelled_mark',
+                    killSignal: (err && err.signal)
+                        || (cancelEvidence && cancelEvidence.terminationResult && cancelEvidence.terminationResult.signal)
+                        || null,
+                    exitCode: err ? (err.code ?? null) : null,
+                },
+                execution: initialExecutionContext,
+                stdout: String(stdout || '').slice(-2000),
+            };
+            if (db && toolJobId) {
+                try {
+                    db.updateToolJob(toolJobId, {
+                        status: 'cancelled',
+                        resultJson: cancelledResult,
+                        completedAt: Date.now(),
+                    });
+                    publishJobTerminalState(toolJobId, 'cancelled');
+                    if (plans) plans.syncPlanStepStatusFromToolJob(toolJobId, 'cancelled');
+                } catch (e) {
+                    console.warn('[mcp-registry] updateToolJob(cancelled) failed:', e.message);
+                }
+            }
+            notifyScheduler();
+            console.log('[mcp-registry] Job ' + toolJobId + ' cancellation confirmed by finalize (kill/durable race window)');
+            return resolve({
+                content: [{ type: 'text', text: JSON.stringify(cancelledResult) }],
+                isError: false,
+                _jobDir: jobDir,
+                toolJobId,
+            });
+        }
         if (err) {
           const errText = `执行失败: ${err.killed ? '超时（>300s）' : stderr || err.message}\n\nSTDOUT:\n${stdout || ''}`;
           const blockedManifestPath = [
@@ -728,9 +784,16 @@ async function _runPluginScript(
       runCmd.slice(1),
       { timeout: 0, maxBuffer: 10 * 1024 * 1024, env: runEnv },
       async (err, stdout, stderr) => {
+        // BLOCK-141：release 前捕获取消击杀证据——cancelRequested 挂在共享装置的
+        // owner 上，release 后即不可达；finalize 据此做取消分类（见 finalizePluginRun
+        // 入口注释）。硬超时（timedOut）/外部击杀不置此 flag，分类不受影响。
+        const cancelEvidence = {
+          killFlag: owner.cancelRequested === true,
+          terminationResult: owner.lastTerminationResult || null,
+        };
         clearActiveToolJobLifecycleTimers(owner);
         releaseActiveToolJob(activeToolJobs, toolJobId, owner);
-        await finalizePluginRun(err, stdout, stderr);
+        await finalizePluginRun(err, stdout, stderr, cancelEvidence);
       }
     );
     owner.process = child;

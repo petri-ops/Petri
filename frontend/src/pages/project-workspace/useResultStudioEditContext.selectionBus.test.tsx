@@ -2,6 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildRowSelection, type ArtifactInteractionManifest } from '@/lib/artifact-selection';
 import {
+  getSelectionBusState,
   setSelectionBusArtifact,
   setSelectionBusSelection,
 } from '@/lib/selectionBus';
@@ -220,5 +221,87 @@ describe('BLOCK-139 P0-2 composer 结构化注入（D2 既有组装链扩展）'
     expect(projection.entityIdCount).toBe(3);
     // compatibility 跟随注入通道：总线 fresh → null（composer 不再误报 stale）
     expect(hook.result.current.copilotActiveArtifact!.selectionCompatibility).toBeNull();
+  });
+});
+
+// ============================================================================
+// BLOCK-141 R-5 — D2 注入归属校验（plan §1.2）
+//
+// 被钉裁决（此刻尚无实现，测试必须真实失败）：
+// - 竞窗：换 artifact 后、ResultArtifactShell 的总线重绑 effect 落地前，总线仍
+//   持有**上一个** artifact 的选择（useArtifactInteractionSelection 的重绑依赖
+//   异步 interaction manifest，窗口可横跨整个 fetch）。D2 注入前必须校验总线
+//   选择的 artifactId 与当前 activeArtifact 的 manifest artifactId 同源；
+//   不同源 → 不注入 + 总线自愈清选——旧 artifact 的选择不得附着到新 artifact
+//   的 Agent 上下文。
+// - 可比来源：manifest.artifactId 是后端库记录 id（routes 里 artifactRecord.id），
+//   无法由 jobId+name 在前端合成，因此契约要求该字段经 viewer interaction
+//   manifest 投影到 activeArtifact。实现落地前 ActiveArtifact 尚未声明该字段，
+//   测试面先行钉住投影契约（本文件内以交集类型表达，实现补字段后自然收敛）。
+// ============================================================================
+
+type ActiveArtifactWithManifestArtifactId = ActiveArtifact & { artifactId?: string | null };
+
+describe('BLOCK-141 R-5 D2 注入归属校验（竞窗之异源态）', () => {
+  const PREV_ARTIFACT_ID = 'art_prev_deg';
+  const NEXT_ARTIFACT_ID = 'art_next_volcano';
+
+  function shellArtifactWithManifestId(artifactId: string, name: string): ActiveArtifactWithManifestArtifactId {
+    return {
+      jobId: 'job_1',
+      toolId: 'deg_tool',
+      name,
+      type: 'table',
+      revisionId: 'rev_1',
+      artifactId,
+    };
+  }
+
+  it('activeArtifact 已切下一 artifact 而总线仍持有上一个 artifact 的选择 → 不注入 + 总线自愈清选；重绑后注入恢复', async () => {
+    const prevArtifact = shellArtifactWithManifestId(PREV_ARTIFACT_ID, 'deg_table.csv');
+    const nextArtifact = shellArtifactWithManifestId(NEXT_ARTIFACT_ID, 'volcano_table.csv');
+    const initialProps = {
+      projectId: 'proj_1',
+      activeConvId: 'conv_1',
+      activeArtifact: prevArtifact,
+      setActiveArtifact: vi.fn(),
+      activeJobId: 'job_1',
+      activeConversationRun: null,
+      setWorkspaceNotice: vi.fn(),
+    };
+    const hook = renderHook((props: typeof initialProps) => useResultStudioEditContext(props), {
+      initialProps,
+    });
+    await waitFor(() => expect(hook.result.current.copilotActiveArtifact?.contextToken).toBe(CONTEXT_TOKEN));
+
+    // 基线（竞窗前·同源态）：总线绑定 prev 且持有其 fresh 选择 → 正常注入
+    // （归属校验不得削弱 D2 主链；同源态已由 BLOCK-139 用例钉住，这里留作对照）。
+    act(() => {
+      setSelectionBusArtifact({ artifactId: PREV_ARTIFACT_ID, revisionId: 'rev_1' });
+      setSelectionBusSelection(buildRowSelection(tableManifest(PREV_ARTIFACT_ID), geneRows(3)).selection);
+    });
+    hook.rerender(initialProps);
+    await waitFor(() => expect(hook.result.current.copilotActiveArtifact?.selection).not.toBeNull());
+    expect(hook.result.current.copilotActiveArtifact!.selection!.artifactId).toBe(PREV_ARTIFACT_ID);
+
+    // 竞窗一帧：activeArtifact 已切到 next（viewer interaction manifest 的
+    // artifactId 与总线所持选择不同源），shell 的总线重绑 effect 尚未落地。
+    const raceProps = { ...initialProps, activeArtifact: nextArtifact };
+    hook.rerender(raceProps);
+
+    // 契约①：异源选择不得注入（换 artifact 一帧内旧选择不得附着到新 artifact）。
+    await waitFor(() => expect(hook.result.current.copilotActiveArtifact?.selection).toBeNull());
+    // 契约②：总线自愈清选（异源旧选择不得跨 artifact 存活）。
+    await waitFor(() => expect(getSelectionBusState().selection).toBeNull());
+
+    // 契约③：自愈不杀死通道——next artifact 重绑 + 新选择 → 注入恢复且坐标同源。
+    act(() => {
+      setSelectionBusArtifact({ artifactId: NEXT_ARTIFACT_ID, revisionId: 'rev_1' });
+      setSelectionBusSelection(buildRowSelection(tableManifest(NEXT_ARTIFACT_ID), geneRows(2)).selection);
+    });
+    hook.rerender(raceProps);
+    await waitFor(() =>
+      expect(hook.result.current.copilotActiveArtifact!.selection!.artifactId).toBe(NEXT_ARTIFACT_ID),
+    );
   });
 });

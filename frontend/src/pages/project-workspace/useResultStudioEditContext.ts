@@ -9,7 +9,7 @@ import { summarizeSelectionForAgent } from '@/lib/artifact-selection';
 import { isResultStudioContextToken } from '@/lib/result-edit-agent-bridge';
 import { buildResultEditCopilotAsk } from '@/lib/result-edit-agent-bridge';
 import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
-import { useSelectionBus } from '@/lib/selectionBus';
+import { useSelectionBus, setSelectionBusSelection } from '@/lib/selectionBus';
 import { isConversationRunning } from '@/components/copilot/conversationRunStore';
 
 // BLOCK-92 Wave B-1 — Result Studio 编辑上下文簇外迁（原 ProjectWorkspace 内联，纯搬运零行为变化）。
@@ -173,7 +173,17 @@ export function useResultStudioEditContext(options: UseResultStudioEditContextOp
     const propSelection = activeArtifact.selection;
     const propSelectionUsable = propSelection?.compatibility === 'compatible';
     const busSelection = selectionBusState.selection;
+    // BLOCK-141 R-5（D2 注入归属校验）：总线选择必须与当前活跃 artifact **同源**
+    //（busSelection.artifactId === activeArtifact.artifactId，后者来自 viewer
+    // interaction manifest，经 ResultArtifactShell 投影）才可注入。竞窗：换
+    // artifact 后、shell 重绑总线前（依赖异步 manifest fetch），总线仍持有上一
+    // artifact 的选择——不同源不注入（自愈清选见下方 effect），旧 artifact 的
+    // 选择不得附着到新 artifact 的 Agent 上下文。清单未绑定（artifactId 未知、
+    // 产物不支持交互）时不启用校验，维持 BLOCK-139 既有注入契约（不比既有链更严）。
+    const busSelectionSameSource = !activeArtifact.artifactId
+      || busSelection?.artifactId === activeArtifact.artifactId;
     const busSelectionUsable = !!busSelection
+      && busSelectionSameSource
       && (!busSelection.compatibility || busSelection.compatibility === 'compatible');
     const injectedSelection = propSelectionUsable
       ? summarizeSelectionForAgent(propSelection)
@@ -201,6 +211,17 @@ export function useResultStudioEditContext(options: UseResultStudioEditContextOp
       contextToken,
     };
   }, [activeArtifact, effectiveResultContextState?.contextToken, effectiveResultContextState?.status, selectionBusState.selection]);
+
+  // BLOCK-141 R-5 自愈：竞窗内异源选择就地清选（旧 artifact 的选择不跨 artifact
+  // 存活）。外部 store 写入放 effect，不在渲染期广播；同源或清单未绑定时不动作，
+  // 清选后 selection 为 null 自然短路，无循环。
+  useEffect(() => {
+    const busSelection = selectionBusState.selection;
+    if (!busSelection || !activeArtifact?.artifactId) return;
+    if (busSelection.artifactId !== activeArtifact.artifactId) {
+      setSelectionBusSelection(null);
+    }
+  }, [activeArtifact?.artifactId, selectionBusState.selection]);
 
   useEffect(() => {
     setActiveArtifact(null);

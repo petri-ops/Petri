@@ -15,6 +15,8 @@ export interface ActiveArtifactProjection {
   revisionId?: string | null;
   revisionOrdinal?: number | null;
   artifactFamilyId?: string | null;
+  /** BLOCK-141 R-5：viewer interaction manifest 的 artifactId（归属校验可比来源）。 */
+  artifactId?: string | null;
   semanticKind?: ResultArtifactKind;
   entityType?: string | null;
   idField?: string | null;
@@ -78,6 +80,7 @@ export function isSameActiveArtifactProjection(
     && (left.revisionId ?? null) === (right.revisionId ?? null)
     && (left.revisionOrdinal ?? null) === (right.revisionOrdinal ?? null)
     && (left.artifactFamilyId ?? null) === (right.artifactFamilyId ?? null)
+    && (left.artifactId ?? null) === (right.artifactId ?? null)
     && (left.semanticKind ?? null) === (right.semanticKind ?? null)
     && (left.entityType ?? null) === (right.entityType ?? null)
     && (left.idField ?? null) === (right.idField ?? null)
