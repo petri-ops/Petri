@@ -385,9 +385,11 @@ function compareResultChangeSet(input = {}, dependencies = {}) {
   };
 }
 
-function verifyRevisionForAdoption({ revision, parent, workspaceRoot, adapter, gitPathPrefix, getToolJob, candidateCommit }) {
-  if (!parent) throw new ResultCompareError('parent_revision_missing', 'Candidate Revision has no recoverable parent.');
-  if (revision.projectId !== parent.projectId || revision.artifactFamilyId !== parent.artifactFamilyId) {
+function verifyRevisionForAdoption({ revision, parent, familyFirst = false, workspaceRoot, adapter, gitPathPrefix, getToolJob, candidateCommit }) {
+  // BLOCK-143：family 首版（无父链、family 尚无 current）合法——parent 匹配校验仅在
+  // 有 parent 时适用；文件存在/candidate commit/Job truth 校验与 parent 无关，照常。
+  if (!parent && !familyFirst) throw new ResultCompareError('parent_revision_missing', 'Candidate Revision has no recoverable parent.');
+  if (parent && (revision.projectId !== parent.projectId || revision.artifactFamilyId !== parent.artifactFamilyId)) {
     throw new ResultCompareError('parent_revision_mismatch', 'Candidate Revision parent belongs to another project or Artifact family.');
   }
   if (!candidateCommit || revision.sourceCommit !== candidateCommit) {
@@ -535,12 +537,17 @@ function adoptResultChangeSet(input = {}, dependencies = {}) {
     }
     const parent = revision.parentRevisionIds.map((id) => repository.getRevision(id)).find(Boolean) || null;
     const current = repository.getCurrentRevision(revision.artifactFamilyId, input.projectId);
-    if (!parent || !current || current.revisionId !== parent.revisionId) {
+    // BLOCK-143：family 首版（parent 空）且 family 尚无 current —— preview 即首个
+    // current，adopt 合法（F1 链形成点注册的 pending revisions 即此形态）；
+    // family 已有 current 而 preview 的 parent 与之不符才判 stale（既有语义不变）。
+    if (current && (!parent || current.revisionId !== parent.revisionId)) {
       throw new ResultCompareError('adoption_base_stale', 'Current result changed after this preview was created.');
     }
+    const familyFirst = !parent && !current;
     verifyRevisionForAdoption({
       revision,
       parent,
+      familyFirst,
       workspaceRoot: input.workspaceRoot,
       adapter,
       gitPathPrefix: dependencies.gitPathPrefix,

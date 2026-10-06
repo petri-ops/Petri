@@ -1,0 +1,87 @@
+{
+  "changesetId": "cs_97336b7a773e959db43d638d9198cb1f",
+  "adoptPath": "failed",
+  "dbStatusAfter": "preview_ready",
+  "currentRevisions": [],
+  "lineageIntact": true,
+  "checks": [
+    {
+      "id": "db_pre_pending",
+      "pass": true,
+      "detail": "走查前 DB 基线（better-sqlite3 readonly，.biof3-dev-user-data/data/biof3.db）：scientific_change_sets.status='preview_ready'，adopted_at=null"
+    },
+    {
+      "id": "db_pre_revisions_not_current",
+      "pass": true,
+      "detail": "走查前该 cs 名下 23 条 artifact_revisions 全部 is_current=0"
+    },
+    {
+      "id": "result_view_completed_state",
+      "pass": true,
+      "detail": "CDP(9222) 主窗 Page.navigate 深链 /project/p_muwsyqt5_5yqt/result?job=tj_muwt2h31_mf57 → 完成态（'可信结果' 文案 + 审查按钮在位，URL 保持 /result?job=…）"
+    },
+    {
+      "id": "result_deep_link_compare_mode_bounce",
+      "pass": true,
+      "detail": "实测 /project/:id/compare?job= 深链会被弹回 /result?job=（frontend/src/pages/project-workspace.tsx:803,814 handleOpenResult 两分支均硬编码 updateWorkspaceMode('result')）→ 正路径改为 result 深链 + 点工具栏「审查」按钮（CompactResultNavigator.tsx:81）切 compare"
+    },
+    {
+      "id": "compare_panel_rendered",
+      "pass": true,
+      "detail": "点「审查」后 section[aria-label=\"Result Studio 版本与变更\"][data-mode=compare] 渲染，徽标 data-state=preview_ready/待采用，审查记录 picker value=cs_97336b7a773e959db43d638d9198cb1f（该 family 下唯一选项）"
+    },
+    {
+      "id": "cs_selected_in_panel",
+      "pass": true,
+      "detail": "目标 cs 即面板自动选中项（picker.value 断言一致），「采用此版本」按钮在位且 enabled → 截图 review-queue.png"
+    },
+    {
+      "id": "adopt_via_ui",
+      "pass": false,
+      "detail": "2026-10-06T15:19:08Z UI 点击「采用此版本」成功发出，轮询 scientific_change_sets.status 15s（每秒 1 次）未翻转 adopted；面板 [role=alert] 显示 'Current result changed after this preview was created.'"
+    },
+    {
+      "id": "rest_adopt_key_fields",
+      "pass": false,
+      "detail": "REST 兜底 POST /api/result-studio/changesets/cs_97336b7a773e959db43d638d9198cb1f/adopt（同 UI 按钮端点，Bearer desktop-local）→ HTTP 409 {error:'adoption_base_stale', message:'Current result changed after this preview was created.', detail:null}；关键字段 changeSetId 缺失，fail-fast 如实上报"
+    },
+    {
+      "id": "verify_status_adopted",
+      "pass": false,
+      "detail": "走查后 DB 复查：status 仍='preview_ready'，adopted_at 仍=null——采用未发生"
+    },
+    {
+      "id": "verify_revisions_is_current",
+      "pass": false,
+      "detail": "走查后 DB 复查：23 条 revisions 中 is_current=1 的为 0 条（要求为全部翻转）——因采用被拒，无任何 revision 转正"
+    },
+    {
+      "id": "verify_lineage_intact",
+      "pass": true,
+      "detail": "GET /api/result-studio/lineage?jobId=tj_muwt2h31_mf57&projectId=p_muwsyqt5_5yqt → ok:true，chain=[{toolJobId:'tj_muwt2h31_mf57',toolId:'deseq2',isCurrent:true}]，downstreamCount:1——链完整（拒绝未破坏 lineage）"
+    },
+    {
+      "id": "ui_adopted_state_visible",
+      "pass": false,
+      "detail": "面板始终未呈现已采用态（徽标保持 preview_ready/待采用）；截 adopt-refused.png 为诚实终态：错误告警可见、按钮仍在。review-adopted.png 因采用未发生而不存在（不造假）"
+    },
+    {
+      "id": "root_cause_structural",
+      "pass": true,
+      "detail": "根因定性（DB 实查）：目标 cs 的 23 条 revision parent_revision_ids_json 全为空（family 首版、无父链）→ core/shared-backend/result-compare-service.js:536-541 guard 'if (!parent || !current || current.revisionId !== parent.revisionId) throw adoption_base_stale' 无条件命中——该 changeset 从未处于可采用状态，与 15:10:37 cs_678afae0(baseline:cohort) 的采用无因果；产品内无 re-base/刷新预览通道（面板仅 adopt/revert/restore/recover，recover 因 lifecycle.interrupted=[] 不可达）"
+    },
+    {
+      "id": "workspace_lifecycle_observation",
+      "pass": true,
+      "detail": "GET /workspace/status?projectId=… → lifecycle.status='blocked'（pendingIssues=[recovery_checkpoint_state_drift]，3 个 pendingDecisions=3 条 preview_ready 链预览，checkpoint=15:10:37 baseline cohort adopted，revisionIntegrity intact）——blocked 为走查前既有状态，与本次拒绝（adoption_base_stale）相互独立"
+    }
+  ],
+  "allPass": false,
+  "screenshots": [
+    "acceptance/block-139/result-view.png",
+    "acceptance/block-139/review-queue.png",
+    "acceptance/block-139/adopt-refused.png"
+  ],
+  "generatedAt": "2026-10-06T15:24:30.000Z",
+  "notes": "正路径走完但采用被产品信任层守卫拒绝：UI 按钮与 REST 同端点均 409 adoption_base_stale；结构根因=该 chain-preview changeset 的 23 条 candidate revisions 全部无 parent_revision_ids，guard（core/shared-backend/result-compare-service.js:539）要求 parent=当前 revision 才放行。此 cs 在当前 DB 形态下通过任何产品路径均不可采用（ revert cs_678afae0 也不解：guard 需 parent 非空，与本批 family 上是否有 v2 无关）。DB/HTTP/DOM 三方实据一致，无造假。"
+}
