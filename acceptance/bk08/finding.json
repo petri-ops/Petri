@@ -1,0 +1,14 @@
+{
+  "coldStartBlocked": true,
+  "blockedWindows": "biof3-server.log [event-loop] 全量 3436 条（2026-08-30T16:16Z→2026-10-07T11:06Z）：<5s 1434 / 5-30s 894 / 30s-1min 92 / 1-5min 265 / 5-20min 747 / >20min 4。pmset 覆盖段（09-30T13:39Z 起 579 个睡眠区间）内 1237 条：563 条 ≥95% 落在 macOS 睡眠窗口内（秒级吻合，如 sleep 15:09:22→DarkWake 15:26:21 +0800 ↔ blocked ~1017148ms recovered 07:26:21.938Z），睡眠可解释 blocked 时长 115.78h，未解释仅 75.9min——分钟级『阻塞』洪水是监视器以 Date.now() 墙钟漂移把进程冻结（合盖 Maintenance Sleep/DarkWake 16 分钟周期）误报为阻塞，非产品卡顿。真实事件循环阻塞两类：①冷启动块，会话起点 +1s 处，典型 2.1-4.4s（09-15 以来几乎每个会话），09-30T12:25 会话实测 9.5s（即 ~10s 报告本体）；②运行期 3.1-6.4s 块以 38.2s 均值节奏连发（09-30 白天 106 个连续间隔，n=128）。当前轮（10-06T15:45Z 启动至今）冷启动块实测 2.6s；取证时进程活跃 145s 探测零阻塞（隧道稳定期无重连）。",
+  "rootCauseIdentified": true,
+  "rootCause": "冷启动 ~10s 阻塞 = mobile-tunnel 隧道启动的同步 ssh 清场：core/biof3-server/server.js:373 startIfEnabled() → core/biof3-server/mobile-gateway/tunnel.js:296 spawnTunnel() → tunnel.js:202-211 remotePortSweep() 以 cpSpawnSync('ssh', ['-o','ConnectTimeout=10','-o','BatchMode=yes','aliyun','pid=$(ss -tlnp sport = :2234 …); kill …; sleep 1; true'], {timeout:25000}) 同步阻塞事件循环——到 aliyun:2234 中转的完整 ssh 握手往返 + 远端强制 sleep 1，全部算进单线程。时序吻合：09-30 会话块窗口 12:25:15.9→26.4Z 恰夹在 [mobile-tunnel] connecting→aliyun:2234 与块恢复线之间，位置在 app.listen 回调排队队列前端（+1s）；实测本机 ssh 往返 aliyun 热态 0.33-1.04s ×3，加 sleep 1 → 热态 sweep ≈1.3-2.1s（即典型会话 +1s 处 2.1-4.4s 块），冷态（ConnectTimeout=10 预算内连接滞留数秒）即 09-30 的 9.5s。38.2s 运行期周期块 = 隧道 ssh 存活约 4s 后退出 → 重连退避封顶 30s（tunnel.js:23 RECONNECT_BACKOFF_MS=[1,2,5,10,30]s）→ 每次重连重复同一次 ~4s 同步 sweep：30+4+4≈38s（tunnel 退出按设计不落日志，故日志只见 event-loop 线；此触发环节为机制推断、非直接日志实证）。已排除的两嫌疑（stale-running 对账器、tool_jobs retention sweeper）首跑在启动 +60s，与 +1s 块位置不符，排除结论维持成立。Electron/渲染侧无秒级阻塞（手工 CDP 冷启动两次实测 T1≈366-370ms、DOM load ≈+254ms）。修复方向（未实施，属后续工作包）：remotePortSweep 改异步（spawn 异步+竞态护栏）或首启跳过/降频 sweep；event-loop 监视器墙钟口径在睡眠场景的误报可另立小改进（clock 排除或 pgrep 前置判断），非本轮范围。",
+  "evidenceFiles": [
+    "acceptance/bk08/finding.json",
+    "acceptance/bk08/evidence-event-loop-blocks.log",
+    "acceptance/bk08/evidence-pmset-correlation.txt",
+    "acceptance/bk08/evidence-profiler-cdp.txt"
+  ],
+  "inconclusive": false,
+  "notes": "取证命令全部实跑：grep/awk 解析 biof3-server.log 3436 条 [event-loop] 线（含分布与逐会话冷启动偏移）；pmset -g log 与块区间逐秒对齐（脚本 /tmp/bk08-correlate.mjs，115.78h/75.9min 定量）；ssh 往返校准 `/usr/bin/time -p ssh -o ConnectTimeout=10 -o BatchMode=yes aliyun true` ×3（1.04/0.42/0.33s，只读无害变体，未执行 sweep 的远端 kill）；插件重扫嫌疑已测伪（loadPluginsFromDisk 0-12ms，tools-metadata.js:392 每请求扫盘存在但非阻塞源，如实记录为排除项）；145s 活跃窗口 stall 探测零命中。dev-electron-profile.mjs --cdp 按任务书实跑但脚本自身缺陷必败（line 261 import('node:ws') 非内建模块；9222 与 dev 栈冲突需 --port 改指），T0-T4 由等价手工 CDP 采集补齐（两次冷启动，一次性 userData，本人 spawn 的进程树已全部清理，dev 栈 1507/1889 未触碰）。边界如实申报：pmset 历史仅覆盖 09-30T13:39Z 之后，08-30~09-29 的分钟级块未做睡眠对齐（同机制高概率但未逐条实证）；38.2s 周期块的 ssh 退出触发因 tunnel 静默设计无直接日志；未改任何源码/门禁，无 git push。"
+}

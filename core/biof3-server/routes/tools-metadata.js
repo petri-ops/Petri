@@ -7,6 +7,9 @@ const {
 } = require('../helpers/artifact-truth');
 const { publicRecoveryParams } = require('../helpers/harness-workflow-recovery');
 const { resolveProjectRunLayout } = require('../../shared-backend/project-run-layout');
+// C-22（BLOCK-144）：项目布局契约单源——日志端点 UI-454 兜底不再手拼
+// <workspace>/results/jobs/<id>，复用导出端 C-21 同款候选链纯函数。
+const { resolveToolJobExportDirs } = require('../helpers/tools-executor/result-files');
 
 function selectArtifactResultDir({ job, result, jobsDir = '' } = {}) {
   const persistedResultDir = result?.artifactTruth?.resultDir;
@@ -251,7 +254,16 @@ function createToolsMetadataRoutes({db, getUserId, jobsDir = ''}) {
                 .prepare('SELECT workspace_path FROM projects WHERE id = ?')
                 .get(job.project_id);
               if (projectRow && projectRow.workspace_path) {
-                dirs.push(path.join(projectRow.workspace_path, 'results', 'jobs', job.id, 'output'));
+                // C-22 收敛：项目布局兜底候选由 resolveToolJobExportDirs 单源产出
+                //（有 workspace_path 时首项=项目布局 jobRoot <ws>/results/jobs/<id>），
+                // 日志面在其下探 output/ 子目录——与执行链 outputDir 布局同构、
+                // 与导出端 C-21 同源。行为零变化（C22-1/C22-5 快照锚定）。
+                const [projectJobRoot] = resolveToolJobExportDirs({
+                  job,
+                  jobsDir,
+                  getProjectWorkspacePath: () => projectRow.workspace_path,
+                });
+                if (projectJobRoot) dirs.push(path.join(projectJobRoot, 'output'));
               }
             } catch { /* 兜底失败维持全局目录链 */ }
           }

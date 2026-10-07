@@ -2730,6 +2730,15 @@
       "classifiesScripts": false
     },
     {
+      "id": "block142-evidence",
+      "note": "BLOCK-142 成果面切片 E 实机证据目录（UI-465 renderer 补课三 viewer 实机走查 renderers-walk.json + 截图；无 Node 测试读者，复现驱动=目录内相邻规则 block142-renderers 的前端契约测试。收口提交 dbece735 带入 acceptance/block-142/ 时漏登记 impact-map，test-affected 全映射门红（acceptance/block-142/evidence.json unknown）——BLOCK-144 门禁修复批第 1 轮顺手清债，对标 block139-evidence/block140-evidence 先例）。",
+      "patterns": [
+        "acceptance/block-142/**"
+      ],
+      "tests": [],
+      "classifiesScripts": false
+    },
+    {
       "id": "block140-artifact-plane-split",
       "note": "BLOCK-140 成果面切片 C——result 模式内多 artifact 分屏：ArtifactPinPane（钉住=视图级快照，renderPreview 同路载荷离线渲染零取数；副栏 result 模式专属；解除钉住恢复单栏；60/40 固定比例）+ ResultArtifactShell 接线（resultToolbar「钉住」动作捕获当前产物 → shellBody 双栏）。测试与源码同目录（HK-01 先红后绿）；改任一登记文件即跑契约+RS 面测试。",
       "patterns": [
@@ -2814,6 +2823,22 @@
         "frontend/src/components/workspace-panels/SpreadsheetResultViewer.test.tsx"
       ],
       "frontendRelated": true,
+      "classifiesScripts": false
+    },
+    {
+      "id": "block144-tech-debt",
+      "note": "BLOCK-144 技术债清尾批（C-22/C-23 清偿）：C-22 tool-jobs 布局拼接第三处收敛（tools-metadata.js /api/tools/log/:id 兜底分支接 resolveToolJobExportDirs 候选链，契约测试 block144-c22-log-layout-convergence 钉 tools-metadata.js 源码+HTTP 行为双面）+ C-23 finalizeJobRun/pumpQueuedToolJobs 行为级补测五路径（block144-tool-jobs-behavior，真 SQLite+真工厂+真子进程）。改任一登记源文件即跑两条新契约测试。",
+      "patterns": [
+        "core/biof3-server/helpers/tools-executor.js",
+        "core/biof3-server/routes/tools-metadata.js",
+        "test/block144-c22-log-layout-convergence.test.mjs",
+        "test/block144-tool-jobs-behavior.test.mjs"
+      ],
+      "tests": [
+        "test/block144-c22-log-layout-convergence.test.mjs",
+        "test/block144-tool-jobs-behavior.test.mjs"
+      ],
+      "frontendRelated": false,
       "classifiesScripts": false
     }
   ]

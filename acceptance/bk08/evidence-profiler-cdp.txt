@@ -1,0 +1,25 @@
+# BK-08 evidence: scripts/dev-electron-profile.mjs --cdp 采集 T0-T4
+# date: 2026-10-07T14:06:02Z | node v24.16.0 | darwin 25.6.0 arm64
+
+== 1) 脚本实跑（按任务书）==
+$ PATH="$PWD/node_modules/.bin:$PATH" BIOF3_ELECTRON_USER_DATA_DIR=/tmp/bk08-profile-user-data node scripts/dev-electron-profile.mjs --cdp --port 9223 --output json --timeout 45000
+output:
+  [CDP] Spawning electron with --remote-debugging-port=9223...
+  ERROR: ws_unavailable: Node.js built-in WebSocket not found. Ensure Node.js >= 21, or install the "ws" package: npm install --save-dev ws
+
+== 2) 缺陷定位 ==
+scripts/dev-electron-profile.mjs:261 — await import('node:ws')
+注释声称用 Node>=21 内建 WebSocket（line 38/189/259），实际 import 的是不存在的内建模块 'node:ws'；
+Node 24.16.0 内建的是全局 WebSocket（实测 typeof WebSocket === 'function'），'ws' npm 包未安装（零新依赖红线）。
+→ --cdp 模式按现状必然失败；且失败路径（client.connect 抛错）不经过 electronProcess.kill()，泄漏其 spawn 的 Electron 实例（本次实测残留 pid 66845/66846，已由取证员手工清理）。
+另记：本机 9222 端口已被 dev 栈 Electron（pid 1755，--remote-debugging-port=9222）占用，脚本默认 --port 9222 会连到 dev 栈的 CDP，测量语义被污染——重跑须指定空闲端口。
+
+== 3) 手工等价采集（零依赖 /tmp 脚本，spawn 语义与脚本一致：electron . --dev --remote-debugging-port=9224，一次性 userData）==
+两次独立冷启动实测：
+  run1: T1(CDP endpoint up ≈ app ready)≈~370ms; renderer navTiming: domContentLoadedEventEnd≈252.6ms, loadEventEnd≈254.2ms（自导航起始）
+  run2: T1=366.3ms; renderer navTiming: domContentLoadedEventEnd≈264.4ms, loadEventEnd≈254.2ms
+lifecycle 事件（firstPaint/DOMContentLoaded/load）在 WS attach 前已发完 → 采集到 null（与脚本同样盲区），以 navTiming 兜底。
+
+== 结论 ==
+Electron 主进程 + 渲染进程冷启动相位全部亚秒级（T1≈0.37s，T0→T4 全程 <1s 量级），无秒级阻塞；
+~10s 冷启动阻塞不在 Electron/renderer，而在后端 biof3-server 进程（mobile-tunnel spawnSync，见 finding）。

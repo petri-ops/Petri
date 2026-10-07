@@ -602,8 +602,15 @@ function createToolsExecutor({
       .prepare("SELECT id, user_id, tool_id, project_id FROM tool_jobs WHERE status = 'pending' AND is_test_run = 0 ORDER BY created_at ASC LIMIT 50")
       .all();
     for (const row of rows) {
+      // C-23（BLOCK-144 行为测暴露，HK-01 红转绿）：占用计数只算 running。
+      // 旧计数 `status IN ('pending','running')` 把候选行自身与其它排队行也算进
+      // 并发占用：A/B 运行 + C/D 排队时，A 完成后 C 的计数=B+C+D=3≥max 跳过，
+      // B 完成后仍=C+D=2≥max 跳过——队列永久搁浅（zombie 扫描只会把搁浅行标
+      // failed，无重跑），违背本泵「槽位释放后按创建序拉起」的自述契约。
+      // pending 是排队深度不是执行占用；超发防护仍由「一次泵只拉一个 +
+      // executeJob 的 pending→running CAS」（本函数头注）承担。
       const active = await db
-        .prepare("SELECT COUNT(*) AS n FROM tool_jobs WHERE user_id = ? AND status IN ('pending','running') AND is_test_run = 0")
+        .prepare("SELECT COUNT(*) AS n FROM tool_jobs WHERE user_id = ? AND status = 'running' AND is_test_run = 0")
         .get(row.user_id);
       if (!active || active.n >= maxConcurrent) continue;
       const jobRoot = resolveQueuedJobRoot(row);
