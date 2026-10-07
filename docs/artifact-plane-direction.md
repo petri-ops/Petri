@@ -81,4 +81,18 @@ status: reference
 
 ## 8. 切片登记现状
 
-首包 **BLOCK-138-ARTIFACT-PLANE-KERNEL**（切片 A+B，plan=`block-138-artifact-plane-kernel-plan.md`）2026-10-01 立项，同日用户裁决「按照计划有序推进」发令翻 **active（P0-LAUNCH）**。切片 C/D/E 未立项，启动均需用户裁决+立项检查单。**更新（2026-10-03）**：切片 D 选择回路立项为 **BLOCK-139-SELECTION-LOOP**（用户发令「你看看呢 可以的 开冲」当日 active P0-LAUNCH；plan=`block-139-selection-loop-plan.md`；切片 C/E 仍未立项）。
+**更新（2026-10-08）：本方向五个切片（A/B/C/D/E）全部交付完毕，均已收口 completed。** 下表为各切片立项与收口对照，「本文件登记滞后一日」的账已清偿——此前 §8 长期停在 2026-10-03「切片 C/E 未立项」，而实际 C/E 已于 2026-10-05 交付 verified。
+
+| 切片 | 工作包 | plan | 立项 | 收口 | UI |
+| --- | --- | --- | --- | --- | --- |
+| A 内核收口 + B 血缘 DAG 画布 | BLOCK-138-ARTIFACT-PLANE-KERNEL（含 F1 加映） | `block-138-artifact-plane-kernel-plan.md` | 2026-10-01 active | 2026-10-03 completed | UI-460 **verified**（用户真窗过目） |
+| D 选择回路 | BLOCK-139-SELECTION-LOOP | `block-139-selection-loop-plan.md` | 2026-10-03 active | 2026-10-04 completed | UI-463 **verified** |
+| C 多 artifact 分屏 | BLOCK-140（+BLOCK-141 riders 清尾） | `block-140-artifact-plane-split-plan.md` / `block-141-riders-clearing-plan.md` | 2026-10-05 active | 2026-10-05 completed | UI-464 **verified** |
+| E renderer 补课 | BLOCK-142 | `block-142-artifact-plane-renderers-plan.md` | 2026-10-05 active | 2026-10-05 completed | UI-465 **verified** |
+
+**切片外延（不属于 A~E 五片，但同属成果面主线）**：
+
+- **BIO-3 P2 / BLOCK-143-SELECTION-DOWNSTREAM**（2026-10-06~07 completed）——selection→下游 action 门从 go_kegg 硬编码泛化为消费者注册表（go_kegg + gsea 两个 gene-list 消费者），**BIO-3 出口判据「selection 下游 ≥2 个工具」达成**；随批修复 chain-preview parent 链接 family current + result-compare family 首版放行。
+- **BLOCK-144 / BLOCK-145**（2026-10-07~08 completed）——技术债清尾批（C-22/C-23/BK-08）与裁决批（D1~D7），纯工程债治理，不新增本方向切片。
+
+**当前状态**：本方向无待启动切片；后续若有新切片（如 compare 并排+联动选择在切片 C 中的深化、或新领域 viewer 入驻）仍需用户裁决+立项检查单。G0 开发期常态 · 不外推 packaged/Provider/GA。
