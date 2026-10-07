@@ -1,87 +1,75 @@
 {
-  "changesetId": "cs_97336b7a773e959db43d638d9198cb1f",
-  "adoptPath": "failed",
-  "dbStatusAfter": "preview_ready",
-  "currentRevisions": [],
-  "lineageIntact": true,
+  "changesetId": "cs_60b48df4ccaea953ec9472af1b463ea2",
+  "adoptPath": "rest",
+  "dbStatusAfter": "scientific_change_sets.status='adopted'（adopted_at=2026-10-07T11:24:12.307Z）。adopt 后即时 DB 复核 23/23 条 candidate artifact_revisions is_current=1；11:28:51 打开审阅面触发的 UI 设计内 ensureBaselineArtifactCohort（core/shared-backend/result-studio-background-child.js:210-224 → baseline-cohort.js:456）创建 cs_c40b17277f2ea776474a8fc2d10b48de（intent=baseline:tj_muy0kkv1_geii:cohort）并以 baseline_adopt 落库，其 5 条 v2 revision 的 parent 恰为本 changeset 被采纳的 v1（rev_f3035697/rev_92e4cc89/rev_a4fb130b/rev_ff82984d/rev_4cca0143），链未断裂；终查本 changeset 名下 23 条 revision 中 18 条仍 is_current=1（>0）",
+  "currentRevisions": [
+    "rev_f3035697219094524b12b8f3160235d9",
+    "rev_e929aa93abe110b2d707c939e48d3509",
+    "rev_3afdfee82342a1002bdc0771ee503c5e",
+    "rev_92e4cc891eafbc83de6a47d33f69c32c",
+    "rev_e66daf4b7ba046aeaa660299d6b7b3ba",
+    "rev_a4fb130b25f5e1227094646a82d3f52c",
+    "rev_b531d5ee19b9406a7853b4d3ed9a5e10",
+    "rev_ff82984d738f7c93bb4c98a80b1ff13a",
+    "rev_d18b1d910b1ce5c700498ffc5f5ea76c",
+    "rev_4f3603a3fd510e8f8f22488da36ddfdd",
+    "rev_127db93883ab12c320acdc3c9a514fbe",
+    "rev_6e6df4a66f9df15403c6f0626633c90d",
+    "rev_1a3bdbb663776b90f80de35344e8e515",
+    "rev_640398f753449362088efaa7480f3d07",
+    "rev_4796f28ee44625ea1d4f950440510b55",
+    "rev_ae4ab118145fb7587dad9f351ceade5e",
+    "rev_aebe4175a084f968507ce9d715eb5caa",
+    "rev_a090536c8fae009e5b75bb96c5ae2026",
+    "rev_e0ddcc1fa1445cea8e453b4a81906e7f",
+    "rev_cefbd2c4446db076def31f5ef6339141",
+    "rev_03787e8c01975a4ca0f443597f7b1a56",
+    "rev_4cca01437d3f16968a1779574228052a",
+    "rev_8fd48453d659a969a175583012d568da"
+  ],
+  "lineageChainLength": 3,
   "checks": [
     {
-      "id": "db_pre_pending",
+      "id": "rest_adopt_http_200",
       "pass": true,
-      "detail": "走查前 DB 基线（better-sqlite3 readonly，.biof3-dev-user-data/data/biof3.db）：scientific_change_sets.status='preview_ready'，adopted_at=null"
+      "detail": "POST http://127.0.0.1:3001/api/result-studio/changesets/cs_60b48df4ccaea953ec9472af1b463ea2/adopt（Authorization: Bearer desktop-local, body {}）→ HTTP 200，一次通过，无 409 adoption_base_stale（无需重试）：{ok:true, changeSet.status:\"adopted\", adoptedAt:\"2026-10-07T11:24:12.307Z\", adoptedRevisionIds 23 条, idempotent:false}。端点契约：core/biof3-server/routes/result-studio/changesets.js:86-104；F1 首版放行判定（parent 空+family 无 current 不判 stale，4513078f 修复）：core/shared-backend/result-compare-service.js:540-546"
     },
     {
-      "id": "db_pre_revisions_not_current",
+      "id": "response_shape_assertions",
       "pass": true,
-      "detail": "走查前该 cs 名下 23 条 artifact_revisions 全部 is_current=0"
+      "detail": "fail-fast 逐层断言 7/7 PASS：ok===true；changeSet.changeSetId===cs_60b48df4ccaea953ec9472af1b463ea2；changeSet.status==='adopted'；adoptedRevisionIds.length=23>0；currentRevisions.length=23 与之一致且全部 isCurrent===true；idempotent===false"
     },
     {
-      "id": "result_view_completed_state",
+      "id": "db_changeset_adopted",
       "pass": true,
-      "detail": "CDP(9222) 主窗 Page.navigate 深链 /project/p_muwsyqt5_5yqt/result?job=tj_muwt2h31_mf57 → 完成态（'可信结果' 文案 + 审查按钮在位，URL 保持 /result?job=…）"
+      "detail": "better-sqlite3 readonly 打开 .biof3-dev-user-data/data/biof3.db：scientific_change_sets WHERE change_set_id='cs_60b48df4ccaea953ec9472af1b463ea2' → status='adopted'，adopted_at='2026-10-07T11:24:12.307Z'，status_reason=null；result_ref_transactions 记录 2026-10-07T11:24:11.980Z adopt preview_ready->adopted"
     },
     {
-      "id": "result_deep_link_compare_mode_bounce",
+      "id": "db_revisions_current_gt0",
       "pass": true,
-      "detail": "实测 /project/:id/compare?job= 深链会被弹回 /result?job=（frontend/src/pages/project-workspace.tsx:803,814 handleOpenResult 两分支均硬编码 updateWorkspaceMode('result')）→ 正路径改为 result 深链 + 点工具栏「审查」按钮（CompactResultNavigator.tsx:81）切 compare"
+      "detail": "adopt 后即时复核：23/23 条 candidate revision is_current=1（project p_muy0kgp1_13ca 全量 current 恰为该 cohort 23 条）；终查（CDP 截图后）：18/23 仍 is_current=1，>0 判据持续成立。5 条被顶替系 cs_c40b17277f2ea776474a8fc2d10b48de（baseline:tj_muy0kkv1_geii:cohort，2026-10-07T11:28:51.502Z baseline_adopt）的 v2 子代，parent_revision_ids 均指向本 changeset 的 v1——演进链完整，非回滚非丢失"
     },
     {
-      "id": "compare_panel_rendered",
+      "id": "lineage_integrity",
       "pass": true,
-      "detail": "点「审查」后 section[aria-label=\"Result Studio 版本与变更\"][data-mode=compare] 渲染，徽标 data-state=preview_ready/待采用，审查记录 picker value=cs_97336b7a773e959db43d638d9198cb1f（该 family 下唯一选项）"
+      "detail": "GET /api/result-studio/lineage?jobId=tj_muy0lbls_ostq&projectId=p_muy0kgp1_13ca → HTTP 200 {ok:true, graphId:\"wfg_ad8bde4ab8e681d6abfddf37\", chain:[deseq2(tj_muy0kkv1_geii)→deg-standardizer(tj_muy0kyrv_ob45)→volcano-plot(tj_muy0lbls_ostq,isCurrent:true)], downstreamCount:0}，链长 3（上游在前、terminal 在末尾）；图持久化核验：result_workflow_graphs 该图 3 nodes/2 edges，validation_status=valid"
     },
     {
-      "id": "cs_selected_in_panel",
+      "id": "cdp_review_panel_adopted",
       "pass": true,
-      "detail": "目标 cs 即面板自动选中项（picker.value 断言一致），「采用此版本」按钮在位且 enabled → 截图 review-queue.png"
+      "detail": "CDP(9222, .agents/skills/gewu-dev-infra/dev-verify/lib.cjs pollTargets/connectTarget/evalJs/screenshotPng) 主窗深链 http://localhost:3000/project/p_muy0kgp1_13ca/history?job=tj_muy0kkv1_geii → 审阅面板 section[aria-label=\"Result Studio 版本与变更\"] data-mode=\"history\" 渲染：「结果版本 当前 v2」+2 条版本行（v2·正在查看｜原始版本·当前正式版本·valid·volcano.png；v1｜历史版本·valid·volcano.png）→ review-adopted.png。UI 正路（compact navigator「审查」tab，CompactResultNavigator.tsx:81）进 compare → 徽章 data-state=\"adopted\" 文案「已采用」+「撤销本次采用」按钮（ResultStudioChangeSetPanel.tsx:289,413-416）+ 审查记录「已采用 · 2026/10/7 19:24:12」+ 结果修改候选摘要（Agent 修改·验证通过·46 个文件·+10649 −0）与 volcano/pca 前后对比渲染 → review-adopted-compare.png。注：compare 深链会被 useWorkspaceOpenEffects.ts:106-108 → project-workspace.tsx:811 updateWorkspaceMode('result') 弹回 result（与 2026-10-06 负路径走查记录一致），compare 证据经真实 UI 点击采集"
     },
     {
-      "id": "adopt_via_ui",
-      "pass": false,
-      "detail": "2026-10-06T15:19:08Z UI 点击「采用此版本」成功发出，轮询 scientific_change_sets.status 15s（每秒 1 次）未翻转 adopted；面板 [role=alert] 显示 'Current result changed after this preview was created.'"
-    },
-    {
-      "id": "rest_adopt_key_fields",
-      "pass": false,
-      "detail": "REST 兜底 POST /api/result-studio/changesets/cs_97336b7a773e959db43d638d9198cb1f/adopt（同 UI 按钮端点，Bearer desktop-local）→ HTTP 409 {error:'adoption_base_stale', message:'Current result changed after this preview was created.', detail:null}；关键字段 changeSetId 缺失，fail-fast 如实上报"
-    },
-    {
-      "id": "verify_status_adopted",
-      "pass": false,
-      "detail": "走查后 DB 复查：status 仍='preview_ready'，adopted_at 仍=null——采用未发生"
-    },
-    {
-      "id": "verify_revisions_is_current",
-      "pass": false,
-      "detail": "走查后 DB 复查：23 条 revisions 中 is_current=1 的为 0 条（要求为全部翻转）——因采用被拒，无任何 revision 转正"
-    },
-    {
-      "id": "verify_lineage_intact",
+      "id": "baseline_coevolution_observed",
       "pass": true,
-      "detail": "GET /api/result-studio/lineage?jobId=tj_muwt2h31_mf57&projectId=p_muwsyqt5_5yqt → ok:true，chain=[{toolJobId:'tj_muwt2h31_mf57',toolId:'deseq2',isCurrent:true}]，downstreamCount:1——链完整（拒绝未破坏 lineage）"
-    },
-    {
-      "id": "ui_adopted_state_visible",
-      "pass": false,
-      "detail": "面板始终未呈现已采用态（徽标保持 preview_ready/待采用）；截 adopt-refused.png 为诚实终态：错误告警可见、按钮仍在。review-adopted.png 因采用未发生而不存在（不造假）"
-    },
-    {
-      "id": "root_cause_structural",
-      "pass": true,
-      "detail": "根因定性（DB 实查）：目标 cs 的 23 条 revision parent_revision_ids_json 全为空（family 首版、无父链）→ core/shared-backend/result-compare-service.js:536-541 guard 'if (!parent || !current || current.revisionId !== parent.revisionId) throw adoption_base_stale' 无条件命中——该 changeset 从未处于可采用状态，与 15:10:37 cs_678afae0(baseline:cohort) 的采用无因果；产品内无 re-base/刷新预览通道（面板仅 adopt/revert/restore/recover，recover 因 lifecycle.interrupted=[] 不可达）"
-    },
-    {
-      "id": "workspace_lifecycle_observation",
-      "pass": true,
-      "detail": "GET /workspace/status?projectId=… → lifecycle.status='blocked'（pendingIssues=[recovery_checkpoint_state_drift]，3 个 pendingDecisions=3 条 preview_ready 链预览，checkpoint=15:10:37 baseline cohort adopted，revisionIntegrity intact）——blocked 为走查前既有状态，与本次拒绝（adoption_base_stale）相互独立"
+      "detail": "观察项（设计内行为，非缺陷）：CDP 深链打开该项目审阅面时，Result Studio 工作区绑定写路径执行 ensureBaseline（core/shared-backend/result-studio-background-child.js:210-224），对 5 个可视/文本产物补建 baseline v2（parent=本 cohort v1）并 adopt——adopt 正路径后链继续演进的实机实证。面板红字「版本存储需要处理（恢复记录不完整、损坏或仍属于另一个运行实例，已停止自动处理）」为该 dev 工作区先存的陈旧恢复现场 lifecycle 态（走查前已在，与本次 REST adopt 无因果），已如实入镜"
     }
   ],
-  "allPass": false,
   "screenshots": [
-    "acceptance/block-139/result-view.png",
-    "acceptance/block-139/review-queue.png",
-    "acceptance/block-139/adopt-refused.png"
+    "acceptance/block-139/review-adopted.png",
+    "acceptance/block-139/review-adopted-compare.png"
   ],
-  "generatedAt": "2026-10-06T15:24:30.000Z",
-  "notes": "正路径走完但采用被产品信任层守卫拒绝：UI 按钮与 REST 同端点均 409 adoption_base_stale；结构根因=该 chain-preview changeset 的 23 条 candidate revisions 全部无 parent_revision_ids，guard（core/shared-backend/result-compare-service.js:539）要求 parent=当前 revision 才放行。此 cs 在当前 DB 形态下通过任何产品路径均不可采用（ revert cs_678afae0 也不解：guard 需 parent 非空，与本批 family 上是否有 v2 无关）。DB/HTTP/DOM 三方实据一致，无造假。"
+  "allPass": true,
+  "generatedAt": "2026-10-07T11:45:44.000Z",
+  "notes": "本文件取代 2026-10-06T15:24Z 的负路径走查存证（cs_97336b7a773e959db43d638d9198cb1f，409 adoption_base_stale，adopt-refused.png）——该负路径的结构根因已由 commit 4513078f（adopt 基线校验 family 首版放行）修复，本轮在 cs_60b48df4ccaea953ec9472af1b463ea2（project=p_muy0kgp1_13ca，链 root job=tj_muy0kkv1_geii）实证修复后 REST 正路径一次通过。DB/HTTP/DOM 三方实据一致；未 git commit、未改 docs/test/src/core/frontend 源码、未杀后端进程；探针调试期的 2 张 NOTREADY 中间截图已删除并在此如实登记"
 }

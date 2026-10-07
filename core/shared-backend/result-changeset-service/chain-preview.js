@@ -357,9 +357,14 @@ function ensureChainRevisions(input = {}, dependencies = {}) {
       }).commit;
     }
 
+    const currentRevisions = repository.listCurrentRevisions(projectId);
     const revisionInputs = provable.map((entry) => {
       const artifactFamilyId = deterministicId('af', projectId, toolJobId, entry.artifactId);
       const revisionId = deterministicId('rev', 'chain-preview-v1', changeSetId, entry.artifactId, entry.outputHash);
+      // BLOCK-143：parent 链接 family 现行 revision（跨 run 复用同 family 时）——
+      // 使 adopt 基线校验（parent===current）可解析；family 首版保持空父链合法。
+      // 不挂 parent 会导致 adopt 恒 409 adoption_base_stale（BLOCK-143 走查 A2 实证）。
+      const familyCurrent = currentRevisions.find((rev) => rev.artifactFamilyId === artifactFamilyId) || null;
       const managedBase = path.posix.join('analysis/scripts', artifactFamilyId, revisionId);
       const scriptRelativePath = path.posix.join(managedBase, `${safeSegment(entry.artifactId, 'artifact_id')}.${extension}`);
       return {
@@ -367,7 +372,7 @@ function ensureChainRevisions(input = {}, dependencies = {}) {
         projectId,
         artifactFamilyId,
         artifactId: entry.artifactId,
-        parentRevisionIds: [],
+        parentRevisionIds: familyCurrent ? [familyCurrent.revisionId] : [],
         sourceCommit: candidateCommit,
         sourceScriptRef: {
           relativePath: scriptRelativePath,
