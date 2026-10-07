@@ -245,6 +245,7 @@
       "tests": [
         "test/scientific-task-spec.test.mjs",
         "test/scientific-task-planner.test.mjs",
+        "test/deseq2-multifactor-design.test.mjs",
         "test/scientific-task-confirmation.test.mjs",
         "test/scientific-task-persistence.test.mjs",
         "test/execution-provenance.test.mjs",
@@ -2739,6 +2740,15 @@
       "classifiesScripts": false
     },
     {
+      "id": "block144-bk08-evidence",
+      "note": "BLOCK-144 BK-08 冷启动取证目录（event-loop 阻塞 profiler CDP 采样 + 日志/pmset 关联证据 + finding.json；无 Node 测试读者，根因修复守卫=block145-adjudication 规则的 block145-tunnel-async 契约测试。收口提交 969f1ff6 带入 acceptance/bk08/ 时漏登记 impact-map，test-affected 全映射门红（acceptance/bk08/evidence.json unknown）——BLOCK-145 门禁修复批第 1 轮顺手清债，对标 block139-evidence/block140-evidence/block142-evidence 先例）。",
+      "patterns": [
+        "acceptance/bk08/**"
+      ],
+      "tests": [],
+      "classifiesScripts": false
+    },
+    {
       "id": "block140-artifact-plane-split",
       "note": "BLOCK-140 成果面切片 C——result 模式内多 artifact 分屏：ArtifactPinPane（钉住=视图级快照，renderPreview 同路载荷离线渲染零取数；副栏 result 模式专属；解除钉住恢复单栏；60/40 固定比例）+ ResultArtifactShell 接线（resultToolbar「钉住」动作捕获当前产物 → shellBody 双栏）。测试与源码同目录（HK-01 先红后绿）；改任一登记文件即跑契约+RS 面测试。",
       "patterns": [
@@ -2837,6 +2847,30 @@
       "tests": [
         "test/block144-c22-log-layout-convergence.test.mjs",
         "test/block144-tool-jobs-behavior.test.mjs"
+      ],
+      "frontendRelated": false,
+      "classifiesScripts": false
+    },
+    {
+      "id": "block145-adjudication",
+      "note": "BLOCK-145 裁决批（D1/D2/D3=DO）：D1 tunnel 异步化（BK-08 根因修复，remotePortSweep 同步 ssh 下线，block145-tunnel-async 钉 tunnel.js+server.js 冷启动链源码守卫+启动非阻塞行为）；D2 注册表死链退役（tool-registry-script-links 钉「声明脚本必须存在」机械守卫，17 条 legacy 条目指向已删 desktop 侧 tool-scripts）；D3 多因子 design（deseq2-multifactor-design 钉 desktop 校验链 scientific-task-planner.js designFormula/designTerms + pack 侧 deseq2.R 因子项解析，Rscript 不在位显式 skip）；另含 D5 skills 面改动登记（coding-playbook/deg-analysis-standard skill.json、prompts/system.md、skill-scaffold.mjs）。改任一登记源文件即跑三条新契约测试。",
+      "patterns": [
+        "core/biof3-server/mobile-gateway/tunnel.js",
+        "core/biof3-server/server.js",
+        "core/shared-backend/scientific-task-planner.js",
+        "core/shared-backend/skill-registry.js",
+        "resources/skills/coding-playbook/skill.json",
+        "resources/skills/coding-playbook/prompts/system.md",
+        "resources/skills/deg-analysis-standard/skill.json",
+        "scripts/skill-scaffold.mjs",
+        "test/block145-tunnel-async.test.mjs",
+        "test/deseq2-multifactor-design.test.mjs",
+        "test/tool-registry-script-links.test.mjs"
+      ],
+      "tests": [
+        "test/block145-tunnel-async.test.mjs",
+        "test/deseq2-multifactor-design.test.mjs",
+        "test/tool-registry-script-links.test.mjs"
       ],
       "frontendRelated": false,
       "classifiesScripts": false

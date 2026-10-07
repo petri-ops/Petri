@@ -356,7 +356,6 @@ app.listen(PORT, '127.0.0.1', () => {
 // 关闭态零行为：不监听、不建实例；启动失败不影响主后端。
 try {
   const { startMobileGateway } = require('./mobile-gateway');
-  const { getTunnelManager } = require('./mobile-gateway/tunnel');
   const mobileDataDir = process.env.BIOF3_LOCAL_DATA_DIR;
   if (mobileDataDir) {
     const gatewayRoutes = (mobileApp) => {
@@ -366,9 +365,18 @@ try {
     };
     const gateway = startMobileGateway({ dataDir: mobileDataDir, mountRoutes: gatewayRoutes });
     if (!gateway.started) console.log('[mobile-gateway] disabled (default off)');
-    // P3：反向隧道按持久化配置自恢复（enabled 才拉起；断线退避重连在管理器内）。
-    const tunnelStatus = getTunnelManager(mobileDataDir).startIfEnabled();
-    if (tunnelStatus.enabled) console.log(`[mobile-tunnel] ${tunnelStatus.state} → ${tunnelStatus.host}:${tunnelStatus.remotePort}`);
+    // BLOCK-145 D1（BK-08 根因修复）：隧道引导移出冷启动关键路径——listen 注册后的
+    // 下一轮 event loop 异步触发（管理器内部清场链亦已异步化）。引导失败只如实记
+    // 日志，隧道是增强门而非关键路径，任何失败都不影响主后端服务。
+    setImmediate(() => {
+      try {
+        const { getTunnelManager } = require('./mobile-gateway/tunnel');
+        const tunnelStatus = getTunnelManager(mobileDataDir).startIfEnabled();
+        if (tunnelStatus.enabled) console.log(`[mobile-tunnel] ${tunnelStatus.state} → ${tunnelStatus.host}:${tunnelStatus.remotePort}`);
+      } catch (e) {
+        console.error('[mobile-tunnel] boot failed (non-fatal, tunnel stays down):', e && e.message);
+      }
+    });
   } else {
     console.log('[mobile-gateway] skipped: BIOF3_LOCAL_DATA_DIR not set');
   }

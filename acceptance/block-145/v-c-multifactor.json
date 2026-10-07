@@ -1,0 +1,145 @@
+{
+  "check": "V-C multifactor deseq2 real run (REST, full stack after restart)",
+  "formula": "~ batch + condition",
+  "pass": true,
+  "projectId": "p_muyb9ef1_4xlk",
+  "jobId": "job_9e4850fdbc1a4c82",
+  "jobDir": ".biof3-dev-user-data/data/projects/block145-vc-multifactor-202610071617-muyb9ef1/results/jobs/job_9e4850fdbc1a4c82",
+  "projectName": "block145-vc-multifactor-202610071617",
+  "paramsSent": {
+    "design": "~ batch + condition",
+    "contrast_ref": "Control",
+    "contrast_treat": "Treatment"
+  },
+  "paramsEchoFromStatus": {
+    "design": "~ batch + condition",
+    "contrast_ref": "Control",
+    "contrast_treat": "Treatment"
+  },
+  "statusTransitions": [
+    {
+      "status": "running",
+      "at": "2026-10-07T16:17:29.557Z"
+    },
+    {
+      "status": "completed",
+      "at": "2026-10-07T16:17:34.582Z"
+    }
+  ],
+  "degTableRows": 1979,
+  "artifactsChecked": [
+    "deg_table.csv",
+    "volcano.png",
+    "report.html",
+    "manifest.json",
+    "summary.txt",
+    "up_genes.csv",
+    "down_genes.csv",
+    "vst_matrix.csv",
+    "coldata_info.csv"
+  ],
+  "completedAt": 1791389852805,
+  "capturedAt": "2026-10-07T16:17:34.589Z",
+  "steps": [
+    {
+      "id": "data-counts-source",
+      "pass": true,
+      "detail": "counts 表头(前120字符)=\"gene\",\"Sample1\",\"Sample2\",\"Sample3\",\"Sample4\",\"Sample5\",\"Sample6\""
+    },
+    {
+      "id": "data-coldata-built",
+      "pass": true,
+      "detail": "合成 coldata：2 batch × 3 样本，condition Control/Treatment，与 counts 样本集一致"
+    },
+    {
+      "id": "project-http-200",
+      "pass": true,
+      "detail": "POST /api/data/projects → HTTP 200 body={\"status\":\"ok\",\"project\":{\"id\":\"p_muyb9ef1_4xlk\",\"name\":\"block145-vc-multifactor-202610071617\",\"created_at\":\"2026-10-07T16:17:24.541Z\",\"updated_at\":\"2026-10-07T16:17:24.541Z\",\"description\":\"BLOCK-145 "
+    },
+    {
+      "id": "project-status-ok",
+      "pass": true,
+      "detail": "body.status=\"ok\""
+    },
+    {
+      "id": "project-id-string",
+      "pass": true,
+      "detail": "projectId=p_muyb9ef1_4xlk"
+    },
+    {
+      "id": "run-http-200",
+      "pass": true,
+      "detail": "POST /api/tools/run → HTTP 200 body={\"ok\":true,\"jobId\":\"job_9e4850fdbc1a4c82\",\"status\":\"pending\",\"isTestRun\":false,\"requestId\":\"0b7ba817-ae8\"}"
+    },
+    {
+      "id": "run-ok-true",
+      "pass": true,
+      "detail": "body.ok=true"
+    },
+    {
+      "id": "run-jobid-string",
+      "pass": true,
+      "detail": "jobId=job_9e4850fdbc1a4c82"
+    },
+    {
+      "id": "poll-terminal-completed",
+      "pass": true,
+      "detail": "终态=completed error=null 迁移链=running→completed"
+    },
+    {
+      "id": "status-result-present",
+      "pass": true,
+      "detail": "result keys=files,summary,manifest,toolJobId,jobDir,outputDir,resultDir,canonicalJobDir,canonicalOutputDir,canonicalResultDir"
+    },
+    {
+      "id": "status-params-design",
+      "pass": true,
+      "detail": "status.params.design=\"~ batch + condition\""
+    },
+    {
+      "id": "status-params-contrast-ref",
+      "pass": true,
+      "detail": "status.params.contrast_ref=\"Control\""
+    },
+    {
+      "id": "status-params-contrast-treat",
+      "pass": true,
+      "detail": "status.params.contrast_treat=\"Treatment\""
+    },
+    {
+      "id": "disk-jobdir-found",
+      "pass": true,
+      "detail": "jobDir=/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/biof3-desktop-fresh/.biof3-dev-user-data/data/projects/block145-vc-multifactor-202610071617-muyb9ef1/results/jobs/job_9e4850fdbc1a4c82（匹配 1 个）"
+    },
+    {
+      "id": "disk-params-design",
+      "pass": true,
+      "detail": "params.json.design=\"~ batch + condition\""
+    },
+    {
+      "id": "disk-artifacts-present",
+      "pass": true,
+      "detail": "output/ 产物 9/9 在位"
+    },
+    {
+      "id": "disk-degtable-rows",
+      "pass": true,
+      "detail": "deg_table.csv 1979 行（含表头）"
+    },
+    {
+      "id": "log-design-formula",
+      "pass": true,
+      "detail": "run log 设计行=[deseq2] Preflight passed: 6 samples (Control=3, Treatment=3), design='~ batch + condition'"
+    },
+    {
+      "id": "log-preflight-passed",
+      "pass": true,
+      "detail": "run log preflight=[deseq2] Preflight passed: 6 samples (Control=3, Treatment=3), design='~ batch + condition'"
+    },
+    {
+      "id": "report-design-formula",
+      "pass": true,
+      "detail": "report.html 含公式 \"~ batch + condition\"=true"
+    }
+  ]
+}

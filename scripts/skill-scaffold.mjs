@@ -14,7 +14,8 @@
  *     不建第二套字段校验真相
  *   - id 与目录名一致；README.md 存在；prompts 引用的文件存在
  *   - 顶层 resources/skills/manifest.json 已登记且 version 一致（双向核对）
- *   - plugins.required/optional 引用的插件在 resources/built-in-plugins/ 真实存在
+ *   - plugins.required 引用的插件真实存在：desktop 内置目录（resources/built-in-plugins/，
+ *     若在）∪ pack 仓 gewu-pack-bio plugins*（BIO-D2 2026-10-07 基线重锚，见 collectPluginRoots）
  *
  * 退出码：0 = 全部通过；1 = 存在校验失败；2 = 参数错误。
  */
@@ -41,6 +42,29 @@ function readJson(file) {
   }
 }
 
+// BIO-D2 2026-10-07 基线重锚（reason 留痕）：BLOCK-83 P4 领域中立化后，分析插件的
+// 真实交付面是外部领域包 gewu-pack-bio（plugins/ 活跃 + plugins.dormant/ 冻结，
+// 见 docs/g0-bio-delivery-goal-plan.md §2.0），desktop 侧 resources/built-in-plugins/
+// 已随域内实现迁出而移除。required 存在性判据由「仅 desktop 内置目录」重锚为
+// 「desktop 内置目录（若在）∪ pack 仓 plugins* 各插件目录」，pack 发现单源复用
+// core/shared-backend/pack-registry.js。pack 仓缺失时判据自然转红（fail-closed），
+// 不静默放行。
+function collectPluginRoots() {
+  const roots = [];
+  if (fs.existsSync(PLUGINS_DIR)) roots.push(PLUGINS_DIR);
+  const { discoverAvailablePacks } = require(
+    path.join(ROOT, 'core', 'shared-backend', 'pack-registry.js'),
+  );
+  for (const pack of discoverAvailablePacks({ projectRoot: ROOT })) {
+    for (const entry of fs.readdirSync(pack.packRoot, { withFileTypes: true })) {
+      if (entry.isDirectory() && entry.name.startsWith('plugins')) {
+        roots.push(path.join(pack.packRoot, entry.name));
+      }
+    }
+  }
+  return roots;
+}
+
 function checkAll() {
   const problems = [];
   if (!fs.existsSync(SKILLS_DIR)) {
@@ -51,6 +75,7 @@ function checkAll() {
   const dirs = entries.filter((e) => e.isDirectory()).map((e) => e.name).sort();
   const topLevelManifest = readJson(path.join(SKILLS_DIR, 'manifest.json'));
   if (!topLevelManifest?.skills) problems.push('顶层 manifest.json 缺失或无 skills 字段');
+  const pluginRoots = collectPluginRoots();
 
   for (const dir of dirs) {
     const skillDir = path.join(SKILLS_DIR, dir);
@@ -73,11 +98,14 @@ function checkAll() {
       if (!fs.existsSync(path.join(skillDir, rel))) problems.push(`${label}: prompts.${key} 指向不存在的文件 ${rel}`);
     }
 
-    // required = 硬依赖，必须是真实存在的内置插件；optional 允许 R 包能力名（如 enrichplot），不查存在性
+    // required = 硬依赖，必须是真实存在的插件（desktop 内置或 pack 仓 plugins*，见
+    // collectPluginRoots 的 BIO-D2 重锚注记）；optional 允许 R 包能力名（如 enrichplot），不查存在性
     for (const pluginId of skill.plugins?.required || []) {
       if (!/^[a-z0-9][a-z0-9-]*$/.test(pluginId)) continue;
-      if (!fs.existsSync(path.join(PLUGINS_DIR, pluginId, 'tool-definition.json'))) {
-        problems.push(`${label}: plugins.required 引用插件 "${pluginId}" 在 built-in-plugins 中不存在`);
+      const found = pluginRoots.some((rootDir) =>
+        fs.existsSync(path.join(rootDir, pluginId, 'tool-definition.json')));
+      if (!found) {
+        problems.push(`${label}: plugins.required 引用插件 "${pluginId}" 在 built-in-plugins/pack 插件源中不存在`);
       }
     }
 

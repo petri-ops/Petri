@@ -52,6 +52,7 @@
     "core/biof3-server/agent-tools/query-tools.js::单细胞": 1,
     "core/biof3-server/agent-tools/result-context-edit-tools.js::volcano": 2,
     "core/biof3-server/agent-tools/result-selection-tools.js::go-kegg": 2,
+    "core/biof3-server/agent-tools/result-selection-tools.js::gsea": 3,
     "core/biof3-server/agent-tools/tool-defs/browser.js::deseq2": 2,
     "core/biof3-server/agent-tools/tool-defs/browser.js::km-survival": 1,
     "core/biof3-server/agent-tools/tool-defs/browser.js::seurat": 1,
@@ -156,5 +157,5 @@
     "src/main/core-utils.js::seurat": 1,
     "src/main/core-utils.js::wgcna": 1
   },
-  "updatedAt": "2026-09-26"
+  "updatedAt": "2026-10-07"
 }

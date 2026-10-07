@@ -81,9 +81,11 @@ test('BLOCK-70 P3 tunnel state machine connects, reconnects with backoff, stops 
       now: () => clock,
       spawnProcess,
       killStale: () => [],
+      remoteSweep: async () => {}, // BLOCK-145 D1：清场链异步化，注入假清场（不拉真 ssh）
       backoffSteps: [10, 20],
       stableConnectedMs: 100,
     });
+    await sleep(0); // 等异步清场链（microtask）跑完，spawn 落地后再断言状态机
 
     // 启动即 connecting；存活过 stable 阈值 → connected
     assert.equal(manager.status().state, 'connecting');
@@ -111,6 +113,7 @@ test('BLOCK-70 P3 tunnel state machine connects, reconnects with backoff, stops 
 
     // 重新启用 → connecting → connected
     manager.apply({ enabled: true, host: 'aliyun' });
+    await sleep(0); // BLOCK-145 D1：apply 的清场链已异步化，等 spawn 落地
     clock += 200;
     assert.equal(manager.status().state, 'connected');
     manager.stop();
@@ -133,6 +136,7 @@ test('BLOCK-70 P3 admin REST round-trips tunnel config through the shared manage
       now: () => clock,
       spawnProcess: fakeProcessFactory(spawned),
       killStale: () => [],
+      remoteSweep: async () => {}, // BLOCK-145 D1：注入假清场（不拉真 ssh）
       backoffSteps: [10],
       stableConnectedMs: 50,
     });

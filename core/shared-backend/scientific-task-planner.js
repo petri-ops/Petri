@@ -104,17 +104,40 @@ function planScientificTask({ taskSpec, evidence = [], plugins = [], runtime = n
   }
   if (!counts) gaps.push({ code: 'counts_input_missing', message: '没有识别到 counts 表。' });
   // HLE-C5R: Explicit contrast detection for Bulk RNA coldata binding
+  // BLOCK-145 D3（多因子 design）：taskSpec.design（scientific-task-spec 既有 groups/covariates
+  // 词汇）显式声明设计时，coldataBinding 必须完整携带公式与因子项，不再静默收窄为单列；
+  // 公式最后一项为 contrast 列，contrast 仍限两水平。声明列缺失时 fail-closed（design_column_missing）。
+  const designSpec = taskSpec.design && typeof taskSpec.design === 'object' ? taskSpec.design : null;
+  const declaredCovariates = Array.isArray(designSpec?.covariates) ? designSpec.covariates.map(text).filter(Boolean) : [];
+  const declaredGroups = Array.isArray(designSpec?.groups) ? designSpec.groups.map(text).filter(Boolean) : [];
+  const declaredTerms = [...declaredCovariates, ...declaredGroups];
+  const declaredFormula = declaredTerms.length > 0 ? `~ ${declaredTerms.join(' + ')}` : null;
+  const declaredContrastCol = declaredGroups.length > 0 ? declaredGroups[declaredGroups.length - 1] : null;
+  const declaredMissing = metadata?.snapshot && declaredTerms.length > 0
+    ? declaredTerms.filter((term) => !metadata.snapshot.headers.map((h) => String(h).toLowerCase()).includes(term.toLowerCase()))
+    : [];
+  if (declaredMissing.length > 0) {
+    gaps.push({
+      code: 'design_column_missing',
+      message: `design 公式 '${declaredFormula}' 中的列 '${declaredMissing.join("', '")}' 不存在于 metadata 表头，需补齐 coldata 列或修正 design 声明。`,
+    });
+  }
   let coldataBinding = null;
-  if (metadata?.snapshot && !hasHeader([metadata.snapshot], ['condition', 'group', 'treatment', 'control'])) {
+  if (metadata?.snapshot && declaredTerms.length === 0
+      && !hasHeader([metadata.snapshot], ['condition', 'group', 'treatment', 'control'])) {
     gaps.push({ code: 'contrast_column_missing', message: 'metadata 中没有可识别的处理/对照分组列，不能可靠推断 contrast。' });
   } else if (metadata?.snapshot && counts) {
-    const contrastCol = detectContrastLevels([metadata.snapshot]);
-    if (contrastCol) {
+    const contrastCol = declaredContrastCol || detectContrastLevels([metadata.snapshot]);
+    const bindingUsable = declaredTerms.length > 0
+      ? Boolean(declaredContrastCol) && declaredMissing.length === 0
+      : Boolean(contrastCol);
+    if (bindingUsable) {
       coldataBinding = {
         metadataFile: metadata.relativePath,
         coldataFile: metadata.relativePath,
         designColumn: contrastCol,
-        note: `DESeq2 coldata 来自 metadata 文件 '${metadata.relativePath}'，design 列 '${contrastCol}'。contrast_ref/contrast_treat 具体值必须来自 sample-metadata-validator 验证结果，禁止 Agent 自行推断。`,
+        ...(declaredFormula ? { designFormula: declaredFormula, designTerms: declaredTerms } : {}),
+        note: `DESeq2 coldata 来自 metadata 文件 '${metadata.relativePath}'，${declaredFormula ? `design 公式 '${declaredFormula}'（contrast 列 '${contrastCol}'，contrast_ref/contrast_treat 仍限两水平）` : `design 列 '${contrastCol}'`}。contrast_ref/contrast_treat 具体值必须来自 sample-metadata-validator 验证结果，禁止 Agent 自行推断。`,
         requiredValidator: 'sample-metadata-validator',
       };
     }

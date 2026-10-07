@@ -11,7 +11,10 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const packRegistry = require('../core/shared-backend/pack-registry.js');
 const toolRegistry = require('../core/biof3-server/tool-registry.js');
 
-const REAL_PACK = 'D:/1.WorkDir/gewu-pack-bio';
+// 真包定位：pack 仓与 desktop 仓同级（AGENTS.md/ask 事实「pack 仓在 ../gewu-pack-bio」）。
+// 勿硬编码机器绝对路径——block-84 原版写死 D:/1.WorkDir/gewu-pack-bio（作者 Windows 机），
+// 换机即 pack_json_missing 三连红；同级解析在原机上落点不变，跨机可移植。
+const REAL_PACK = path.resolve(root, '..', 'gewu-pack-bio');
 
 function tempDataDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'block84-packs-'));
@@ -65,7 +68,12 @@ test('BLOCK-84 tool-registry supports additive domain registration (dev env + pa
   // 叠加注册：同 id 覆盖、别名合并、接口语义不变
   const result = toolRegistry.registerDomainToolsFile(path.join(REAL_PACK, 'registry', 'tool-registry.json'));
   assert.equal(result.ok, true);
-  assert.equal(result.merged, 23);
+  // merged 数=登记文件 TOOLS 实际条目数（机械真相，勿写死——BLOCK-145 D2 退役 17 条
+  // legacy 死链后 23→6；写死计数会在下次登记面编辑时再次假红）。
+  const registeredEntries = Object.keys(
+    JSON.parse(fs.readFileSync(path.join(REAL_PACK, 'registry', 'tool-registry.json'), 'utf8')).TOOLS,
+  ).length;
+  assert.equal(result.merged, registeredEntries);
   assert.equal(toolRegistry.resolveToolId('deseq2'), 'deseq2');
   assert.equal(toolRegistry.resolveToolId('enrichment'), 'go-kegg');
   assert.equal(toolRegistry.getToolConfig('deseq2').lang, 'r');

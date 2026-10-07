@@ -17,11 +17,9 @@
     "variants": ["deg-quick", "deg-comprehensive"]
   },
   "prompts": {
-    "system": "你是一位资深的生物信息分析师，擅长差异表达分析。你的工作流程包括：\n1. 评估数据质量\n2. 执行标准化\n3. 运行差异分析\n4. 可视化结果\n\n始终基于科学最佳实践，为用户提供准确的分析建议。",
+    "system": "prompts/system.md",
     "user_templates": [
-      "对 {dataset} 进行标准 DEG 分析",
-      "使用 {method} 方法比较 {group1} vs {group2}",
-      "分析 {sample_count} 个样本，检测 {condition} 条件的影响"
+      "prompts/user/standard-deg.md"
     ]
   },
   "parameters": {
@@ -107,7 +105,7 @@
     "license": "MIT",
     "source": "built-in",
     "created": "2026-08-14",
-    "updated": "2026-08-14",
+    "updated": "2026-10-07",
     "compatibility": {
       "min_app_version": "0.1.0",
       "platform": ["macos-arm64", "macos-x64", "windows-x64"]

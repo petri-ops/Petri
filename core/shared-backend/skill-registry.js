@@ -28,8 +28,13 @@ const SKILL_MANIFEST_VERSION = 1;
 /** 可选的参数类型 */
 const PARAM_TYPES = new Set(['select', 'number', 'string', 'boolean', 'file']);
 
-/** 可选的输出类型 */
-const OUTPUT_TYPES = new Set(['plot', 'table', 'html', 'json', 'text', 'file']);
+/**
+ * 可选的输出类型。
+ * BIO-D2 2026-10-07 基线重锚（reason 留痕）：markdown 是 Skill 报告产出的真实形态
+ * （如 resources/skills/go-enrichment-analysis 的 analysis_report「分析报告」），与既有的
+ * html/text/file 同属报告类，补入合法集；不是放宽门禁，是校验基线对齐现实现。
+ */
+const OUTPUT_TYPES = new Set(['plot', 'table', 'html', 'json', 'text', 'file', 'markdown']);
 
 // ── 内存注册表 ─────────────────────────────────────────────────────────────
 
