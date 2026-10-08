@@ -1,0 +1,64 @@
+{
+  "block": "BLOCK-146-ANALYSIS-CHAIN-CORRECTNESS",
+  "closedAt": "2026-10-08",
+  "form": "审视批裁决首批（dwfrun-6724f75c 双视角审视 → 6 批裁决之首；用户 /workflow「开」发令）",
+  "implementation": "dynamic workflow dwfrun-7b79e0fa 三轨（A→B 串行 / C 并行）+ 独立评审 P1=0 + 统一五门；主代理终审集成",
+  "tracks": {
+    "A": {
+      "scope": "#8 平台解析根修 + #9 bundle 结构化失败归因 + #4 required file fail-fast",
+      "files": [
+        "core/shared-backend/capability-bundles.js",
+        "core/biof3-server/mcp/registry/run-plugin-script.js",
+        "core/biof3-server/helpers/tools-executor.js"
+      ],
+      "tests": [
+        "test/capability-bundles.test.mjs（24/24，含 #8 红绿轮 17/7→24/0）",
+        "test/block146-bundle-failfast-required-input.test.mjs（8/8，红绿轮 2/6→8/0）"
+      ]
+    },
+    "B": {
+      "scope": "#7 域校验主路径化（_runPluginScript 暂存段后单源复用 validateDomainUploads；HTTP multipart 零改动）",
+      "tests": [
+        "test/block146-agent-domain-validation.test.mjs（5/5，红绿轮 3/2→5/0）",
+        "定向回归 61/61 + 17/17（block141×2 / block131 / block146×2 / capability-bundles / block126/128/133/138）"
+      ]
+    },
+    "C": {
+      "scope": "#10 pack 指纹锚 + Rscript 检测对齐 RExecutor.binPath；#6 本机 pack 仓补齐 parse_design_terms",
+      "tests": [
+        "test/deseq2-multifactor-design.test.mjs（2 pass / 7 skip / 0 fail；指纹锚红绿轮：缺 parse_design_terms 红 → 实现后绿）"
+      ],
+      "packCommits": [
+        "70e37fe registry(pack): D2 死链退役本机同步（17 条 script 置空走插件通道 + RETIREMENT-LOG；镜像 Mac 5589026 意图）",
+        "8e6055e feat(deseq2): D3 多因子 design 本机重放（parse_design_terms + tool-definition design_formula_invalid + golden 重锚；镜像 Mac 3f3c5e8 意图）"
+      ]
+    }
+  },
+  "gates": {
+    "workflowUnified": {
+      "quality:secret": "exit=0",
+      "quality:arch": "exit=0",
+      "quality:lint": "exit=0",
+      "quality:types": "exit=0",
+      "test:changed": "首轮红=tool-registry-script-links 17 死链（本机 pack 缺 Mac D2 退役提交的环境红）——集成阶段本机同步 D2 后转绿，根因与处置见 pack RETIREMENT-LOG"
+    },
+    "closeout": "主代理集成提交后跑 npm run closeout（十一门），结果记入收口台账"
+  },
+  "integrationExtras": [
+    "test/impact-map.json +block145-evidence（工作流门禁修复轮顺手清债：BLOCK-145 收口带入 acceptance/block-145/ 漏登记致 test-affected 全映射门红）",
+    "test/impact-map.json +block146-evidence（本批证据目录登记）",
+    "pack 仓 D2 本机同步（主代理终审阶段执行，非工作流内）"
+  ],
+  "review": {
+    "p1": 0,
+    "p2Disposition": [
+      "新契约测试 impact-map 登记——已在集成落定（block146 两条规则随 feat 提交；block145-evidence 清债）",
+      "R 侧零机器执行边界——如实保留：本机 Rscript 三处确无（PATH/Program Files/runtimes 均空，RExecutor.binPath=null 与 app 同源），deseq2.R 行为仅经代码级复查，待 Mac 侧或装 R 后复验（7 个诚实 skip 在案）",
+      "平台→键映射三份副本（deriveHostPlatform / build-r-bundle currentPlatform / plugin runtime.js detectPlatform）——登记重构候选，收口台账记录，不在本批"
+    ]
+  },
+  "notCovered": [
+    "实机走查（dev Electron 真跑分析链）留收口后按需补（本批验证=定向测试级）",
+    "pack 仓不推送（BIO-4 惯例）；Mac 侧 3f3c5e8/5589026 与本机 70e37fe/8e6055e 为同意图双端实现，对账以测试契约为准"
+  ]
+}

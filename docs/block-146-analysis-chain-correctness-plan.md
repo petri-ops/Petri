@@ -11,7 +11,7 @@ acceptance:
   - C 轨#6：本机 pack 仓（D:\1.WorkDir\gewu-pack-bio）补齐 D3 R 侧 parse_design_terms 多因子（直收 ~ batch + condition、单列向后兼容、preflight 逐项 fail-closed），对照 desktop 契约 scientific-task-planner.js designFormula/designTerms；pack 仓本地提交（BIO-4 惯例不推送，hash 留痕）；R 侧真实跑通验证，Rscript 不可用则如实登记边界不编造
   - 统一门禁：test:changed + quality:secret/arch/lint/types 全绿；收口 closeout 十一门（主代理集成提交后）
 reopen: bundle「必需性」静态判据若后续出现第二插件形态需求再泛化；#11/#12（B9 表单下拉/demo 数据）与 A2 工作台三条属审视批后续批次，按序列另立项
-status: active
+status: completed
 ---
 
 # BLOCK-146 分析执行链正确性与 pack 对账（审视批裁决首批）
@@ -68,3 +68,13 @@ status: active
 ## 7. 完成语义
 
 三轨交付 + 独立评审 P1 清零 + 统一五门绿 + 主代理终审集成提交 + closeout 十一门 PASS + 台账五件回写（plan/DOC-REGISTRY/backlog/roadmap/AUDIT-LOG）+ pack 仓本地提交对账留痕。R 侧若受 Rscript 边界限制，验证边界如实登记不冒充通过。
+
+## 8. 收口笔录（2026-10-08 当日立项当日收口）
+
+- **三轨交付**（dwfrun-7b79e0fa，A→B 串行 / C 并行）：A=#8 平台解析根修（deriveHostPlatform 宿主推导 + getBundleDescriptor 携带解析平台 + installTarGzBundle 平台三元组拒装 bundle_platform_mismatch；win32 不再命中 macos-arm64，resolve null→unknown 拒下载）+ #9 formatRequiredBundleFailure 单源（agent/MCP 与 HTTP 两路径并入 job 失败文案，markJobFailed 'dependencies' + 释放槽位）+ #4 required file fail-fast（中文可操作消息，非 required 跳过语义不变）；B=#7 域校验主路径化（_runPluginScript 暂存段后单源复用 validateDomainUploads，agent run_tool/UI 表单/远程分派同覆盖，HTTP multipart 零改动 400 对照钉住）；C=#10 pack 指纹锚（deseq2.R 缺 parse_design_terms 即红而非 skip）+ Rscript 检测对齐 RExecutor.binPath + #6 本机 pack 仓 D3 重放（8e6055e）。
+- **红绿先行全留痕**：#8 17红→24/0；#9+#4 6红→8/8；#7 2红→5/5；#10 指纹锚红→2 pass/7 skip/0 fail。定向回归 61/61+17/17。
+- **独立评审 P1=0**；P2 三条处置在案：①新契约测试 impact-map 登记（集成落定：block146 生产文件规则随 feat 提交 + block146-evidence 证据规则）②R 侧零机器执行边界如实保留（本机 Rscript 三处确无，RExecutor.binPath=null 与 app 同源；deseq2.R 仅代码级复查，待 Mac 侧/装 R 后复验，7 诚实 skip）③平台→键映射三份副本登记重构候选（deriveHostPlatform / build-r-bundle / plugin runtime.js，一致性契约测试可后续补）。
+- **集成加映（主代理终审阶段）**：pack 仓 D2 死链退役本机同步（70e37fe：17 条 TOOLS script 置空走插件通道 + RETIREMENT-LOG 留痕，镜像 Mac 5589026 意图）——根因=Windows pack 克隆停在 db6be21 缺 Mac 本地退役提交，tool-registry-script-links 在本机恒红；顺手清债=impact-map +block145-evidence（BLOCK-145 收口带入 acceptance/block-145/ 漏登记）。
+- **门禁**：统一五门（secret/arch/lint/types 绿；test:changed 首轮红=上述 pack 环境红，同步后绿）+ closeout 十一门 PASS（code-size 棘轮随 #9 新行为契约重锚：tools-executor 2091→2101 走 --write 登记，R-2 机制先例）。
+- **pack 对账**：本机 70e37fe（D2 同步）+ 8e6055e（D3 重放）本地不推送（BIO-4 惯例）；Mac 侧 5589026/3f3c5e8 与本机为同意图双端实现，对账以测试契约（tool-registry-script-links + deseq2-multifactor-design 指纹锚）为准。
+- 证据=acceptance/block-146/evidence.json。G0 开发期常态 · 不外推 packaged/Provider/GA。
