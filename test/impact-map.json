@@ -2931,6 +2931,16 @@
       ],
       "frontendRelated": false,
       "classifiesScripts": false
+    },
+    {
+      "id": "block149-evidence",
+      "note": "BLOCK-149 收口证据目录（红绿/门禁/P2 处置/nul 复现留痕；复现驱动=block149-retention 规则两测试+plugin-runtime 规则锚测试+前端 MobileSync 契约）。",
+      "patterns": [
+        "acceptance/block-149/**"
+      ],
+      "tests": [],
+      "frontendRelated": false,
+      "classifiesScripts": false
     }
   ]
 }

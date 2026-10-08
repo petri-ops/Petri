@@ -1,0 +1,25 @@
+{
+  "block": "BLOCK-149-TUNNEL-HONESTY-PLATFORM-PATCH",
+  "closedAt": "2026-10-08",
+  "form": "审视批序列第 4 批·收官（A5 隧道诚实化+平台域修补；「按顺序直接推进 尽可能的走远」批量发令）",
+  "implementation": "dynamic workflow dwfrun-e6674578 双轨并行（A 徽标诚实化 / P 平台三件）+ 独立评审 P1=0 + 统一门禁全绿；主代理终审集成批处置评审 P2 四条",
+  "delivered": {
+    "A 轨 #5 隧道徽标诚实化": "前端消费 TunnelStatus.stateSinceTs（后端零改动）；三态宣称——未连接/连接建立中（<15min「尚未确认公网可用」琥珀）/持续连接（≥15min+60s 时钟裕量才「公网可用」绿，宁晚勿假）；缺失/非法/未来时刻从紧永不宣称",
+    "P1 PL-D2": "BIOF3_TOOL_JOBS_RETENTION_DAYS 缺省 0（无限）→30 天（主代理按推荐代裁，对齐 task_events 30 天先例，roadmap/立项行留痕）；resolveToolJobsRetentionDays 纯函数（env 覆盖透传/非法 fail-closed=关闭）；g0-platform §8 裁决点对账注记",
+    "P2 nul 根修": "全仓定位=无 committed 源头（真 cmd.exe 调用属设备语义）；真源=git-bash 把 nul 当文件名的 Windows 风格重定向（仓库外复现实证）；hygiene:check 兜底实证有效（造 nul→FAIL→清→PASS）；留痕=dev-infra SKILL Windows 纪律第 10 条（禁 >nul 重定向+勿 gitignore 红线）",
+    "P3 平台映射锚": "test/platform-id-single-source-anchor.test.mjs：deriveHostPlatform 四组合 ⊆ PLATFORM_IDS 逐键锚+fail-closed 键形态（跨源 require 实测不触 arch 红线，无需降级）；impact-map 接线进 plugin-runtime 规则"
+  },
+  "reviewP2Disposition": [
+    "P2-1 impact-map 未接线（锚+retention 面）——已修（plugin-runtime 规则扩两文件+锚测试；新 block149-retention 规则路由 block136+pl4a）",
+    "P2-2 BLOCK-148 契约测试漏入库——已修（chore 9776ea64 补账，feat 提交当时只 add 了 impact-map 的教训在案）",
+    "P2-3 两处 canonical 台账旧事实——已修（ui-audit UI-458 行 30 天新事实+handoff 待办③ 划线对账）",
+    "P2-4 nul 留痕半未发生——已修（本 evidence + dev-infra skill 第 10 条）"
+  ],
+  "redGreen": "A 轨 MobileSync 新四测红→8/8；P1 block136 2 红（缺省 30 窗口删+resolver 导出）→11/11+pl4a 3/3；P2 复现实证（非红绿型如实）；P3 绿锚豁免（纯契约锚零行为变更，头注书面理由）；test:changed Node 113/0/2skip+前端 25/25",
+  "gates": { "workflowUnified": "types/lint/secret/arch/knip 冻结全绿", "closeout": "十一门 PASS" },
+  "uiLedger": "UI-468 in_progress（组件 8/8，实机走查待）；UI-458 retention 行对账新事实",
+  "boundaries": [
+    "隧道实机验证（真窗三态/15 分钟跨阈翻转）待；徽标无定时器（翻转随下次 refresh，从紧可接受，候选=pairing 续码节拍顺带）",
+    "后端 publicUrl 自探活与平台映射三副本合并重构非范围（候选在册）"
+  ]
+}

@@ -9,7 +9,7 @@ acceptance:
   - 平台映射锚：契约测试断言 deriveHostPlatform 输出键 ⊆ 平台键约定集合且与 plugin-schema PLATFORM_IDS 一致（core 测试引 src 若触 arch 红线则降级为文件内锚+注释指向 canonical，取舍留痕）
   - 定向门禁：test:changed + quality:types/lint/secret/arch 全绿 + 前端定向；closeout 十一门（集成提交后）
 reopen: 后端周期性 publicUrl 自探活（端到端 probe 门控）留后续；平台映射三副本收敛为单源属重构候选
-status: active
+status: completed
 ---
 
 # BLOCK-149 A5 隧道诚实化 + 平台域点状修补批（审视批序列第 4 批·收官）
@@ -53,3 +53,12 @@ dynamic workflow 双轨并行实现员（A 轨/P 轨）→ 独立评审 → 统�
 ## 7. 完成语义
 
 四项交付 + 评审 P1 清零 + 统一门禁绿 + 主代理终审集成 + closeout 十一门 PASS + 台账五件回写（含 PL-D2 裁决对账）。至此审视批序列四批全部收口，剩余仅观察项/池态/用户过目项。
+
+## 8. 收口笔录（2026-10-08 当日立项当日收口）
+
+- **双轨交付**（dwfrun-e6674578）：A=#5 徽标 stateSinceTs 三态（≥15min+60s 裕量才宣称公网可用，后端零改动，UI-468 in_progress）；P1=PL-D2 缺省 30 天（resolver 纯函数 fail-closed，g0-platform 裁决点对账）；P2=nul 根修（源头=git-bash Windows 风格重定向，hygiene 兜底实证，dev-infra 纪律第 10 条留痕）；P3=平台映射锚（跨源 require 不触 arch）。
+- **评审 P1=0；P2 四条集成批全处置**：impact-map 双接线（plugin-runtime 扩面+block149-retention 新规则）/ BLOCK-148 契约测试补账入库（chore 9776ea64——148 feat 提交只 add 了 impact-map 的抓真）/ UI-458+handoff 两处台账旧事实对账 / nul 留痕三件（evidence+skill 条款+红线注记）。
+- **门禁**：统一门禁全绿 + closeout 十一门 PASS。
+- **红绿**：A 轨 4红→8/8；P1 2红→11/11+pl4a 3/3；P2 复现实证；P3 绿锚豁免（头注书面理由）。
+- **边界**：隧道实机三态待走查；后端自探活/三副本合并重构非范围。**至此审视批四批序列（BLOCK-146/147/148/149）全部收口**；剩余=观察项/池态/UI-457/466/467/468 四笔用户过目与实机走查。
+- 证据=acceptance/block-149/evidence.json。G0 开发期常态 · 不外推 packaged/Provider/GA。
