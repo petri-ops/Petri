@@ -4501,7 +4501,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 ## UI-458: 继续分析显式入口 + tool_jobs retention 机制（BIO-3 P2 + PL-4；BLOCK-136 动态工作流交付）(2026-09-30 in_progress，组件级全绿+接线契约；实机走查待补)
 
 - **来源**：G0-BIO plan §3 BIO-3 P2（评估：上游喂下游全靠对话隐式）+ G0-PLATFORM plan §3 PL-4（评估：tool_jobs 无保留策略表无界增长）。动态工作流两修复员并行+冷复核 6 发现（2 高危返工）+主代理终审（含 D7 领域中立棘轮抓真一处改造）。
-- **两件**：①**「继续分析」显式入口**——CompactResultNavigator actions 区新增菜单，列出插件目录全部带文件输入的已装分析（useToolCatalog 目录驱动，BLOCK-83 D7 合规：核心前端零领域工具 ID 硬编码——首版硬编码 go-kegg/gsea/volcano 被 domain-neutrality 棘轮抓真后改造为目录驱动，新装分析自动出现）；点击组装携带 jobId/artifactName/tool 三要素的显式中文 prompt 经 gewu:copilot-ask 投递，Agent 侧 bind_artifact 血统链 fail-closed 兜底。②**tool_jobs retention 机制**——helpers/tool-jobs-retention.js 纯函数（只删终态/保护静态演示清单/**is_public=1 动态公开同口径保护**（复核 F1）/分批 LIMIT/全局目录 best-effort）+挂 retention-sweeper 既有节拍；**默认关闭**（BIOF3_TOOL_JOBS_RETENTION_DAYS），数值 PL-D2 留用户裁决（与重试默认关闭同姿势）。
+- **两件**：①**「继续分析」显式入口**——CompactResultNavigator actions 区新增菜单，列出插件目录全部带文件输入的已装分析（useToolCatalog 目录驱动，BLOCK-83 D7 合规：核心前端零领域工具 ID 硬编码——首版硬编码 go-kegg/gsea/volcano 被 domain-neutrality 棘轮抓真后改造为目录驱动，新装分析自动出现）；点击组装携带 jobId/artifactName/tool 三要素的显式中文 prompt 经 gewu:copilot-ask 投递，Agent 侧 bind_artifact 血统链 fail-closed 兜底。②**tool_jobs retention 机制**——helpers/tool-jobs-retention.js 纯函数（只删终态/保护静态演示清单/**is_public=1 动态公开同口径保护**（复核 F1）/分批 LIMIT/全局目录 best-effort）+挂 retention-sweeper 既有节拍；**默认 30 天删除**（BIOF3_TOOL_JOBS_RETENTION_DAYS 未设时缺省 30；2026-10-08 PL-D2 已裁决=30 天对齐 task_events 先例，BLOCK-149 落地——env 显式覆盖与非法值 fail-closed 语义见 retention-sweeper 的 resolveToolJobsRetentionDays）。
 - **证据**：ContinueAnalysisMenu 组件 4/4（目录驱动渲染/prompt 三要素/gamma 无文件输入排除/挂载入口）+block136 契约 8/8（含 runRetentionSweep 接线 env 双分支契约=复核 F2 修补+is_public 保护经生产线入口实证）+D7 棘轮 2/2+block130/135 回归+test:changed 617/0+tsc 0。
 - **待验（部分覆盖 2026-10-08 对账批）**：菜单实机走查已由 BLOCK-137/UI-459 走查证据覆盖（T3 入口/T4a 目录驱动/T4b prompt 三要素实机全证，scripts/ui457-ui458-live.cjs）；**retention 长跑节拍取证仍待**——随 PL-D2 retention 裁决落地后取证，不受本注记影响
 - **边界**：菜单不预判下游语义（全目录列出，输错由 Agent 输入契约拒——血统绑定 fail-closed 兜底）；retention 只删 DB 行+全局目录（项目布局目录归项目 GC 域）；created_at 窗口锚点（复核 F3 建议 COALESCE completed_at）随 PL-D2 一并裁决。
@@ -4628,3 +4628,21 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：HK-01 红绿——Node `test/block148-tree-reachability.test.mjs` 5 红→7/7（inputExtensions 投影/递归三重界/ssh 分支）；前端 AnalysisLaunchPanel 5 红→9/9 + demo-data 契约 4/4（自愈/降级/再撞/目录）；test:changed exit=0（Node 387/0+前端路由）；types 0/lint 0 error（基线收缩 24 行）/secret/arch 绿；theme-token-contract 4/4（CSS 零触碰，复用 gewu-btn）。
 - **待验**：dev Electron 实机走查（.txt/.xlsx 上传后下拉可选/子目录文件带相对路径/demo 按钮落盘后下拉即现/500+ 文件工作区提示行）+ 主代理终审集成后 closeout；UI-457 参数表单过目同批联动（该条目 2026-10-08 已记 BLOCK-148 增量注记）。
 - **边界**：完整文件树 UI（懒加载/搜索）与 demo 数据集扩充非本批（plan §3）；plugins 目录本机不存在，demo 端点真实数据流端到端未实跑（清单/字节契约级已锚）。
+
+
+## UI-468: 真远程隧道徽标诚实化——connected 不再等同「公网可用」，持续 ≥15min 才宣称（BLOCK-149 A5）(2026-10-08 in_progress，组件级全绿；实机走查随 BLOCK-149 收口)
+
+- **来源**：BLOCK-149 隧道诚实化+平台域修补批 A5（审视批发现 #5）。实现=dynamic workflow A 轨交付（本工作树 WIP，主代理终审后集成提交）。
+- **依据**：后端 `state=connected` 是「转发已建立」的 10s 强启发（`core/biof3-server/mobile-gateway/tunnel.js:33` STABLE_CONNECTED_MS），反代未配好/半开 TCP 时手机实际打不开——原徽标 connected 恒绿「公网可用」是假宣称。
+- **交付**：前端消费 `TunnelStatus.stateSinceTs`（后端 `tunnel.js:341` status() 已返回，后端零改动）：①接口补 `stateSinceTs: number`；②徽标三态——disabled/connecting/reconnecting 沿用原文案；state=connected 且持续 <15min 显示「● 连接建立中 · 尚未确认公网可用」（琥珀 tunnelBadgeWarn）；表观持续 ≥15min+1min 时钟偏差裕量（≥16min，宁晚勿假）才显示「● 已连接 · 公网可用」（绿色 tunnelBadgeOn）；③判定收在模块级函数 `isTunnelPublicReady`（时间读取不入 render）；stateSinceTs 缺失/非法（旧后端）从紧永不宣称。
+- **证据**：HK-01 红绿——MobileSync.test.tsx 新增四测先红（tunnel-state-badge 不存在、旧徽标恒绿）→绿（Test Files 1 passed, Tests 8/8）：5min 不宣称/17min 宣称/15.5min 落裕量内仍不宣称/stateSinceTs 缺失从紧。门禁：types 0/lint 0 error/arch 0 违规/secret PASS（A 轨自述）；test:changed 链复跑 Node 113 pass/0 fail+前端 MobileSync 8/8（门禁修复员 2026-10-08 实跑，含本台账登记后）。
+- **待验**：dev Electron 实机走查 + 主代理终审集成提交（subject 标 UI-468）。
+- **边界**：零 CSS 改动（复用既有 tunnelBadgeWarn，其裸 hex 为存量非本次引入）；徽标随 re-render 更新未加定时器（最小面——琥珀→绿翻转可能滞后到下次交互，从紧方向可接受）；时钟偏差裕量取舍=阈值方案从紧（未采 ≥14min 宽松方向，理由注释在 MobileSync.tsx）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-468: 隧道徽标诚实化——stateSinceTs 三态分级宣称（A5 #5/BLOCK-149）(2026-10-08 in_progress，组件 8/8；实机走查随 BLOCK-149 收口)
+
+- **来源**：审视批 A5 高影响发现 #5（dwfrun-6724f75c）；plan=[`block-149-tunnel-honesty-platform-patch-plan.md`](./block-149-tunnel-honesty-platform-patch-plan.md)。
+- **交付**：前端消费 TunnelStatus.stateSinceTs（后端 tunnel.js:341 既有字段，后端零改动）；徽标三态——未连接（原文案）／连接建立中 <15min「● 连接建立中 · 尚未确认公网可用」（琥珀）／持续连接 ≥15min+60s 时钟裕量才「● 已连接 · 公网可用」（绿，宁晚勿假）；stateSinceTs 缺失/非法/未来时刻从紧永不宣称。对齐台账健康判据（dev-infra skill 端口纪律节「存活跨 15 分钟，不是 state=connected」），消灭 10 秒启发假活恒绿。
+- **证据**：HK-01 红绿——MobileSync.test.tsx 新四测红（tunnel-state-badge 不存在）→ 8/8 绿；types 0/lint 0 error/arch 0 违规。
+- **待验**：dev Electron 实机（真窗三态 + 隧道 15 分钟跨阈值翻转观察）；后端 publicUrl 周期自探活为后续批非范围。
+- **边界**：徽标无定时器，amber→绿翻转随下次 refresh/交互（方向从紧可接受，候选=复用 pairing 续码节拍顺带 refresh）。

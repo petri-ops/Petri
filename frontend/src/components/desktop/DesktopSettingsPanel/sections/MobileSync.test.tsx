@@ -128,3 +128,73 @@ describe('MobileSyncPanel 手机连接面板（BLOCK-70 / UI-354）', () => {
     expect(screen.queryByTestId('mobile-revoke-all')).toBeNull();
   });
 });
+
+// BLOCK-149 A5（审视发现 #5）—— 真远程徽标三态诚实化：
+// 后端 state=connected 是「转发已建立」的 10s 强启发（tunnel.js STABLE_CONNECTED_MS），
+// 反代挂掉/半开 TCP 时手机实际打不开。前端消费 stateSinceTs：连接持续 ≥15min
+// （含时钟偏差裕量，从紧）才宣称「公网可用」；此前如实显示「尚未确认」。
+describe('MobileSyncPanel 真远程徽标三态（BLOCK-149 A5）', () => {
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+  });
+
+  function connectedTunnel(stateSinceTs: number) {
+    return {
+      configured: true, enabled: true, state: 'connected', host: 'aliyun',
+      remotePort: 2233, localPort: 3005, publicUrl: 'https://gw.example.com',
+      lastError: '', pid: 4321, stateSinceTs,
+    };
+  }
+
+  function mockFetchWithTunnel(tunnel: Record<string, unknown>) {
+    return vi.fn((input: string) => {
+      const url = String(input);
+      if (url.endsWith('/mobile/status')) {
+        return fetchJson({
+          ok: true, enabled: false, port: 3005, restartHint: 'x', lanAddresses: [],
+          activeDevices: 0, devices: [], pairingPending: 0,
+        });
+      }
+      if (url.endsWith('/mobile/tunnel')) {
+        return fetchJson({ ok: true, tunnel, profiles: [] });
+      }
+      throw new Error(`unexpected fetch ${url}`);
+    });
+  }
+
+  it('连接刚建立（5min < 15min）：不宣称「公网可用」，如实显示「尚未确认」，徽标不取绿色', async () => {
+    vi.stubGlobal('fetch', mockFetchWithTunnel(connectedTunnel(Date.now() - 5 * 60_000)));
+    render(<MobileSyncPanel />);
+    const badge = await waitFor(() => screen.getByTestId('tunnel-state-badge'));
+    expect(badge.textContent).toBe('● 连接建立中 · 尚未确认公网可用');
+    expect(badge.className).not.toContain('tunnelBadgeOn');
+    expect(badge.className).toContain('tunnelBadgeWarn');
+  });
+
+  it('持续连接跨过阈值（17min ≥ 15min+裕量）：才显示「公网可用」，徽标取绿色', async () => {
+    vi.stubGlobal('fetch', mockFetchWithTunnel(connectedTunnel(Date.now() - 17 * 60_000)));
+    render(<MobileSyncPanel />);
+    const badge = await waitFor(() => screen.getByTestId('tunnel-state-badge'));
+    expect(badge.textContent).toBe('● 已连接 · 公网可用');
+    expect(badge.className).toContain('tunnelBadgeOn');
+    expect(badge.className).not.toContain('tunnelBadgeWarn');
+  });
+
+  it('边界从紧：15.5min 已过 15min 但落在时钟偏差裕量内 → 仍不宣称「公网可用」', async () => {
+    vi.stubGlobal('fetch', mockFetchWithTunnel(connectedTunnel(Date.now() - 15.5 * 60_000)));
+    render(<MobileSyncPanel />);
+    const badge = await waitFor(() => screen.getByTestId('tunnel-state-badge'));
+    expect(badge.textContent).toBe('● 连接建立中 · 尚未确认公网可用');
+    expect(badge.className).not.toContain('tunnelBadgeOn');
+  });
+
+  it('stateSinceTs 缺失/非法（旧后端）：从紧永不宣称「公网可用」', async () => {
+    const withoutTs = { ...connectedTunnel(0) };
+    delete (withoutTs as Partial<typeof withoutTs>).stateSinceTs;
+    vi.stubGlobal('fetch', mockFetchWithTunnel(withoutTs));
+    render(<MobileSyncPanel />);
+    const badge = await waitFor(() => screen.getByTestId('tunnel-state-badge'));
+    expect(badge.textContent).toBe('● 连接建立中 · 尚未确认公网可用');
+  });
+});

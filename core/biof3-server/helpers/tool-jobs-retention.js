@@ -4,10 +4,11 @@
  * tool-jobs-retention.js — BLOCK-136（G0-PLATFORM PL-4 机制先行·tool_jobs 保留清扫）。
  *
  * 纯函数：给定 db 与保留天数，删除 tool_jobs 中超窗的**终态**行，并对全局
- * 目录做 best-effort 级联清理。默认关闭（retentionDays<=0 直接返回 disabled
- * 且不查库）——保留策略数值属 PL-D2 用户裁决，机制先行、默认值留裁决；与
- * BLOCK-135 重试默认关闭（BIOF3_TOOL_RETRY_MAX 默认 0）同一姿势。生产接线
- * 在 jobs/retention-sweeper.js（BIOF3_TOOL_JOBS_RETENTION_DAYS，默认 0=关闭）。
+ * 目录做 best-effort 级联清理。retentionDays<=0 视为关闭（直接返回 disabled
+ * 且不查库）。保留策略数值=PL-D2 裁决：2026-10-08 已裁决缺省 30 天删除（主
+ * 代理按推荐代裁，用户批量推进授权；先例=task_events TASK_EVENTS_RETENTION_DAYS=30）。
+ * 生产接线在 jobs/retention-sweeper.js（BIOF3_TOOL_JOBS_RETENTION_DAYS 缺省
+ * 30 天，见 resolveToolJobsRetentionDays；显式设 0/负数=关闭，非法值按 0 关闭）。
  *
  * 保护边界（绝不逾越）：
  * - 绝不碰非终态行：status NOT IN ('completed','failed','cancelled')——

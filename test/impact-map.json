@@ -454,7 +454,9 @@
         "core/biof3-server/mcp/**",
         "core/biof3-server/tool-registry.js",
         "core/biof3-server/tool-scripts/**",
-        "src/plugin-manager.js"
+        "src/plugin-manager.js",
+        "src/plugin-schema.js",
+        "core/shared-backend/capability-bundles.js"
       ],
       "tests": [
         "test/plugin-sdk.test.mjs",
@@ -467,7 +469,8 @@
         "test/mcp-builtin-discovery.test.mjs",
         "test/mcp-tool-registry.test.mjs",
         "test/harness-manifest.test.mjs",
-        "test/harness-tool-template.test.mjs"
+        "test/harness-tool-template.test.mjs",
+        "test/platform-id-single-source-anchor.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -2912,6 +2915,20 @@
         "acceptance/block-148/**"
       ],
       "tests": [],
+      "frontendRelated": false,
+      "classifiesScripts": false
+    },
+    {
+      "id": "block149-retention",
+      "note": "BLOCK-149 PL-D2 落地面：retention-sweeper（resolveToolJobsRetentionDays 纯函数+接线）与 tool-jobs-retention helper 的行为契约由 block136（终态窗口删/保护清单）与 pl4a（纯函数六分支）双测试锚定；改任一文件即跑两条。",
+      "patterns": [
+        "core/biof3-server/jobs/retention-sweeper.js",
+        "core/biof3-server/helpers/tool-jobs-retention.js"
+      ],
+      "tests": [
+        "test/block136-retention.test.mjs",
+        "test/pl4a-tool-jobs-retention.test.mjs"
+      ],
       "frontendRelated": false,
       "classifiesScripts": false
     }

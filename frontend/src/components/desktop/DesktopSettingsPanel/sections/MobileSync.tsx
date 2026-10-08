@@ -59,6 +59,24 @@ interface TunnelStatus {
   localPort: number;
   publicUrl: string;
   lastError: string;
+  /** 当前状态起始时刻（后端时钟，epoch ms；tunnel.js status() 已返回）。 */
+  stateSinceTs: number;
+}
+
+// BLOCK-149 A5（审视发现 #5）—— 隧道徽标诚实化：
+// 后端 state=connected 是「转发已建立」的 10s 强启发（tunnel.js STABLE_CONNECTED_MS，
+// ExitOnForwardFailure + 存活），不是端到端探活——反代未配好/半开 TCP 时手机实际打不开。
+// 「公网可用」只在连接持续 ≥15min（对齐台账健康判据）后宣称；此前如实显示「尚未确认」。
+const PUBLIC_READY_MS = 15 * 60 * 1000;
+// 时钟偏差取舍（plan §6）：stateSinceTs 是后端时钟、判定用前端时钟。同机双进程偏差
+// 趋近 0，但拿不准从紧——表观时长偏大 1min 裕量内仍不宣称（宁晚勿假，不宣称优于假宣称）。
+const CLOCK_SKEW_MARGIN_MS = 60 * 1000;
+
+/** 连接持续时长是否跨过「公网可用」宣称阈值（纯时长判定；时间读取收在组件外，同 formatRelativeTime）。 */
+function isTunnelPublicReady(tunnel: TunnelStatus): boolean {
+  return tunnel.state === 'connected'
+    && Number.isFinite(tunnel.stateSinceTs)
+    && Date.now() - tunnel.stateSinceTs >= PUBLIC_READY_MS + CLOCK_SKEW_MARGIN_MS;
 }
 
 // BLOCK-87 — 中转服务器档案（配过的服务器存档，切换免重填）
@@ -361,21 +379,27 @@ export function MobileSyncPanel(): React.ReactElement {
         </>
       )}
 
-      {tunnel && (
+      {tunnel && (() => {
+        // BLOCK-149 A5：连接持续 ≥15min（含 1min 时钟偏差裕量，从紧）才宣称「公网可用」；
+        // stateSinceTs 缺失/非法（旧后端）同样从紧——按「连接建立中」呈现，绝不假宣称。
+        const publicReady = isTunnelPublicReady(tunnel);
+        return (
         <div className={styles.tunnelSection} data-testid="mobile-tunnel-section">
           <div className={styles.tunnelHead}>
             <h4 className={styles.tunnelTitle}>真远程</h4>
             <span
+              data-testid="tunnel-state-badge"
               className={[
                 styles.tunnelBadge,
-                tunnel.state === 'connected' ? styles.tunnelBadgeOn : '',
-                tunnel.state === 'reconnecting' || tunnel.state === 'connecting' ? styles.tunnelBadgeWarn : '',
+                publicReady ? styles.tunnelBadgeOn : '',
+                !publicReady && tunnel.state !== 'disabled' ? styles.tunnelBadgeWarn : '',
               ].join(' ')}
             >
-              {tunnel.state === 'connected' ? '● 已连接 · 公网可用'
-                : tunnel.state === 'connecting' ? '连接中'
-                  : tunnel.state === 'reconnecting' ? `重连中${tunnel.lastError ? ` · ${tunnel.lastError}` : ''}`
-                    : '未启用'}
+              {publicReady ? '● 已连接 · 公网可用'
+                : tunnel.state === 'connected' ? '● 连接建立中 · 尚未确认公网可用'
+                  : tunnel.state === 'connecting' ? '连接中'
+                    : tunnel.state === 'reconnecting' ? `重连中${tunnel.lastError ? ` · ${tunnel.lastError}` : ''}`
+                      : '未启用'}
             </span>
           </div>
           <p className={styles.tunnelHint}>
@@ -446,7 +470,8 @@ export function MobileSyncPanel(): React.ReactElement {
             </button>
           </div>
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
