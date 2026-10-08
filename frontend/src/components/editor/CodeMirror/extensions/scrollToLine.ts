@@ -107,7 +107,7 @@ export function createScrollToLineApi(view: EditorView): ScrollApi {
 
       view.dispatch({
         selection: { anchor: pos, head: pos },
-        effects: EditorView.scrollIntoView(pos, { y: 'center' }),
+        effects: EditorView.scrollIntoView(pos, { y: target.y ?? 'center' }),
       });
 
       const pulseMs = target.pulseMs ?? (target.highlight ? 3000 : 0);

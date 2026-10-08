@@ -147,4 +147,91 @@ describe('CodeMirrorDiffView', () => {
     expect(missing?.textContent).toContain('文件已不在工作区与 HEAD 中');
     expect(document.querySelector('[role="alert"]')).toBeNull();
   });
+
+  // ============================================================
+  // BLOCK-147 #3 — 焦点 hunk 视觉反馈：
+  // focusedHunkIndex 变化 → scrollToLine 联动（cm-pulse-highlight 注入 DOM）
+  // + 焦点 hunk 悬浮控件/标记条持续高亮（is-focused）
+  // ============================================================
+  it('focusedHunkIndex 联动滚动 pulse 并高亮焦点 hunk 控件（BLOCK-147 #3）', async () => {
+    fileContentMock.mockImplementation((params: { ref?: 'HEAD' | 'WORKTREE' }) =>
+      fileResult(params.ref === 'HEAD' ? 'line1\n' : 'line1\nline2\n')
+    );
+    const hunks = [
+      { oldStart: 1, newStart: 1, lines: [{ type: 'ctx' as const, text: 'line1' }] },
+      { oldStart: 5, newStart: 2, lines: [{ type: 'add' as const, text: 'line2' }] },
+    ];
+
+    const { rerender } = render(
+      <CodeMirrorDiffView
+        filePath="sample.py"
+        isBinary={false}
+        hunks={hunks}
+        hunkDecisions={[null, null]}
+        onAcceptHunk={vi.fn()}
+        onRejectHunk={vi.fn()}
+        focusedHunkIndex={0}
+      />
+    );
+
+    await waitFor(() => {
+      expect(document.querySelector('[data-block-22-codemirror]')).not.toBeNull();
+    });
+
+    // 初始焦点（↑↓ 流的默认落点）：hunk 0 控件持续高亮 + 滚动脉冲注入
+    await waitFor(() => {
+      expect(
+        document.querySelector('.wt-hunk-controls[data-hunk-control="0"]')?.classList.contains('is-focused')
+      ).toBe(true);
+    });
+    expect(document.querySelector('.cm-pulse-highlight')).not.toBeNull();
+    // 标记条同步焦点态
+    expect(document.querySelector('.wt-diff-marker.is-focused')).not.toBeNull();
+
+    // 切换焦点到 hunk 1（↑↓/j/k）：高亮随焦点迁移 + 再次滚动 pulse
+    rerender(
+      <CodeMirrorDiffView
+        filePath="sample.py"
+        isBinary={false}
+        hunks={hunks}
+        hunkDecisions={[null, null]}
+        onAcceptHunk={vi.fn()}
+        onRejectHunk={vi.fn()}
+        focusedHunkIndex={1}
+      />
+    );
+    await waitFor(() => {
+      expect(
+        document.querySelector('.wt-hunk-controls[data-hunk-control="1"]')?.classList.contains('is-focused')
+      ).toBe(true);
+    });
+    expect(
+      document.querySelector('.wt-hunk-controls[data-hunk-control="0"]')?.classList.contains('is-focused')
+    ).toBe(false);
+    expect(document.querySelector('.cm-pulse-highlight')).not.toBeNull();
+  });
+
+  it('focusedHunkIndex 缺省（-1）不触发焦点 UI（只读预览等场景）', async () => {
+    fileContentMock.mockImplementation((params: { ref?: 'HEAD' | 'WORKTREE' }) =>
+      fileResult(params.ref === 'HEAD' ? 'line1\n' : 'line1\nline2\n')
+    );
+
+    render(
+      <CodeMirrorDiffView
+        filePath="sample.py"
+        isBinary={false}
+        hunks={[{ oldStart: 1, newStart: 2, lines: [{ type: 'add', text: 'line2' }] }]}
+        hunkDecisions={[null]}
+        onAcceptHunk={vi.fn()}
+        onRejectHunk={vi.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(document.querySelector('[data-block-22-codemirror]')).not.toBeNull();
+      expect(document.querySelector('.wt-hunk-controls[data-hunk-control="0"]')).not.toBeNull();
+    });
+    expect(document.querySelector('.wt-hunk-controls.is-focused')).toBeNull();
+    expect(document.querySelector('.cm-pulse-highlight')).toBeNull();
+  });
 });

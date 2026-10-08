@@ -105,6 +105,12 @@ export interface UseWorkingTreeReviewReturn {
   setSelectedFilePath: (path: string | null) => void;
   decisions: Record<string, HunkDecision>;
   pendingCount: number;
+  /**
+   * BLOCK-147 #2 — 未决 hunk 按文件明细（当前 diff 的 hunk 全集 − 已决策键集合，
+   * 内容寻址后天然准确；与 UI 渲染同源：staged 行走 stagedDiff，unstaged 行走组合 diff）。
+   * pendingCount 为其条数合计。
+   */
+  pendingHunks: Array<{ path: string; count: number }>;
   appliedCount: number;
   rejectedCount: number;
   loading: boolean;

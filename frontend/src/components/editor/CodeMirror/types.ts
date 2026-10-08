@@ -86,6 +86,8 @@ export interface ScrollTarget {
   highlight?: boolean;
   /** 自定义 pulse 持续毫秒；`highlight` 优先。 */
   pulseMs?: number;
+  /** 滚动对齐偏好：'center'（默认，既有调用方不变）居中定心；'nearest' 仅在目标出视口时滚动（BLOCK-147 P2-1：键盘焦点联动防抖动）。 */
+  y?: 'center' | 'nearest';
 }
 
 /**

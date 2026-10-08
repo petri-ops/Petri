@@ -490,6 +490,19 @@
   color: var(--gewu-text-muted);
 }
 
+/* ===== BLOCK-147 #3 — 键盘焦点 hunk 视觉反馈（↑↓/j/k 流） ===== */
+/* 焦点 hunk 控件卡片：accent 描边 + 柔光圈（组件级 class 限定，避免 infima 特异性冲突） */
+.wt-hunk-controls.is-focused {
+  border-color: var(--gewu-accent);
+  box-shadow: var(--gewu-shadow-menu), 0 0 0 2px var(--gewu-accent-soft);
+}
+
+/* 标记条当前焦点位：accent 光圈 + 不透明 */
+.wt-diff-marker.is-focused {
+  opacity: 1;
+  box-shadow: 0 0 0 2px var(--gewu-accent-soft);
+}
+
 /* ===== P4 — 底部内嵌提交框（VS Code SCM 风格） ===== */
 /* BLOCK-28.9 — 提交条按需出现（hasDecisions 才渲染），单行紧凑布局：
    meta 统计行 + 输入行 + 提交按钮 */
@@ -539,6 +552,11 @@
 
 .rvw-commitbox-stat-reject {
   color: var(--gewu-status-error-fg);
+}
+
+/* BLOCK-147 #2 — 未决 hunk 计数：警示色（既有 token，带降级） */
+.rvw-commitbox-stat-pending {
+  color: var(--gewu-status-warning-fg, var(--gewu-text-muted));
 }
 
 .rvw-commitbox-error {

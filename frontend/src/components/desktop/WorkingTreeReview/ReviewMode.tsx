@@ -28,6 +28,8 @@ import {
   computeFileDiffStats,
   groupDisplayName,
   groupFilesByDirectory,
+  hunkDecisionKey,
+  hunkDecisionList,
   isFileReviewed,
 } from './reviewModeHelpers';
 import './WorkingTreeReview.css';
@@ -170,8 +172,11 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
         setFocusedHunk((prev) => Math.max(prev - 1, 0));
       } else if (e.key === 'a' || e.key === 'A' || e.key === 'y' || e.key === 'Y') {
         e.preventDefault();
-        const key = `${file.path}#${focusedHunk}`;
-        if (review.decisions[key] !== 'accept') void review.decideHunk(file.path, focusedHunk, 'accept');
+        // BLOCK-147 #1 — 去重检查按 hunk 内容寻址（与 decideHunk 记账同键）
+        const focusedH = file.hunks[focusedHunk];
+        if (focusedH && review.decisions[hunkDecisionKey(file.path, focusedH)] !== 'accept') {
+          void review.decideHunk(file.path, focusedHunk, 'accept');
+        }
       } else if (e.key === 'r' || e.key === 'R') {
         e.preventDefault();
         void review.decideHunk(file.path, focusedHunk, 'reject');
@@ -216,6 +221,24 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
     stagedFilePaths: stagedFiles,
     onCommitSuccess: setCommitSuccess,
   });
+  // BLOCK-147 P2-2 — staged 提交框同款未决拦截：暂存文件仍有未决策 hunk 时先确认
+  // （commitIndex 提交整个暂存区无 pathspec，未决 hunk 会随暂存区一并提交，不能无声放行）。
+  const handleStagedCommitGuarded = async () => {
+    const stagedSet = new Set(stagedFiles.map((f) => f.path));
+    const stagedPending = review.pendingHunks.filter((p) => stagedSet.has(p.path));
+    const stagedPendingCount = stagedPending.reduce((n, p) => n + p.count, 0);
+    if (stagedPendingCount > 0) {
+      const PENDING_FILE_CAP = 8;
+      const lines = stagedPending.slice(0, PENDING_FILE_CAP).map((p) => `${p.path} ×${p.count}`);
+      if (stagedPending.length > PENDING_FILE_CAP) lines.push(`…等共 ${stagedPending.length} 个文件`);
+      const proceed = window.confirm(
+        `暂存文件中仍有 ${stagedPendingCount} 个 hunk 未决：\n${lines.join('\n')}\n\n仍要提交整个暂存区？` +
+        '未决改动将随暂存区一并提交；取消则回去继续审阅。'
+      );
+      if (!proceed) return;
+    }
+    await handleStagedCommit();
+  };
   const stagedGroups = useMemo(() => groupFilesByDirectory(stagedFiles), [review.status]); // eslint-disable-line react-hooks/exhaustive-deps
   const unstagedGroups = useMemo(() => groupFilesByDirectory(unstagedFiles), [review.status]); // eslint-disable-line react-hooks/exhaustive-deps
   const fileGroups = useMemo(() => groupFilesByDirectory(statusFiles), [review.status]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -289,6 +312,22 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
       setCommitError('Commit message is required.');
       textareaRef.current?.focus();
       return;
+    }
+    // BLOCK-147 #2 — 未决拦截：当前 diff 仍有未决策 hunk 时先确认（列文件与条数），
+    // 用户可显式继续或取消回去审；⌘+Enter 与提交按钮同走本路径，不绕过拦截。
+    if (review.pendingCount > 0) {
+      const PENDING_FILE_CAP = 8;
+      const lines = review.pendingHunks
+        .slice(0, PENDING_FILE_CAP)
+        .map((p) => `${p.path} ×${p.count}`);
+      if (review.pendingHunks.length > PENDING_FILE_CAP) {
+        lines.push(`…等共 ${review.pendingHunks.length} 个文件`);
+      }
+      const proceed = window.confirm(
+        `仍有 ${review.pendingCount} 个 hunk 未决：\n${lines.join('\n')}\n\n仍要提交？` +
+          '未决改动可能随所属文件一并提交；取消则回去继续审阅。'
+      );
+      if (!proceed) return;
     }
     setCommitError(null);
     try {
@@ -926,11 +965,10 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                           filePath={f.path}
                           isBinary={diffFile.binary}
                           hunks={diffFile.hunks}
-                          hunkDecisions={diffFile.hunks.map(
-                            (_, i) => review.decisions[`${f.path}#${i}`] ?? null,
-                          )}
+                          hunkDecisions={hunkDecisionList(diffFile, review.decisions)}
                           onAcceptHunk={(i) => void review.decideHunk(f.path, i, 'accept')}
                           onRejectHunk={(i) => void review.decideHunk(f.path, i, 'reject')}
+                          focusedHunkIndex={review.selectedFilePath === f.path ? focusedHunk : -1}
                         />
                       ) : (
                         <UntrackedFilePreview path={f.path} />
@@ -1147,11 +1185,10 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                 filePath={selectedFile.path}
                 isBinary={selectedFile.binary}
                 hunks={selectedFile.hunks}
-                hunkDecisions={selectedFile.hunks.map(
-                  (_, i) => review.decisions[`${selectedFile.path}#${i}`] ?? null,
-                )}
+                hunkDecisions={hunkDecisionList(selectedFile, review.decisions)}
                 onAcceptHunk={(i) => void review.decideHunk(selectedFile.path, i, 'accept')}
                 onRejectHunk={(i) => void review.decideHunk(selectedFile.path, i, 'reject')}
+                focusedHunkIndex={focusedHunk}
               />
             </div>
           )}
@@ -1167,7 +1204,11 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
           <div className="rvw-commitbox-meta">
             <span className="rvw-commitbox-stat">接受 {acceptedCount}</span>
             <span className="rvw-commitbox-stat rvw-commitbox-stat-reject">拒绝 {rejectedCount}</span>
-            {review.pendingCount > 0 && <span className="rvw-commitbox-stat">待定 {review.pendingCount}</span>}
+            {review.pendingCount > 0 && (
+              <span className="rvw-commitbox-stat rvw-commitbox-stat-pending" data-testid="rvw-pending-stat">
+                待定 {review.pendingCount}
+              </span>
+            )}
             {review.diff?.truncated && <span className="wt-warning">输出已截断</span>}
             {review.loading && <span>加载中…</span>}
             {commitError && (
@@ -1224,7 +1265,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
             onKeyDown={(e) => {
               if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault();
-                void handleStagedCommit();
+                void handleStagedCommitGuarded();
               }
             }}
             placeholder={`提交信息（⌘+Enter 提交暂存的 ${stagedFiles.length} 个文件）`}
@@ -1233,7 +1274,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
           <button
             type="button"
             className={`wt-btn wt-btn-commit${!stagedCommitMsg.trim() ? ' wt-btn-disabled' : ''}`}
-            onClick={() => void handleStagedCommit()}
+            onClick={() => void handleStagedCommitGuarded()}
             disabled={!stagedCommitMsg.trim() || stagedCommitting}
             title={`提交暂存的 ${stagedFiles.length} 个文件`}
           >

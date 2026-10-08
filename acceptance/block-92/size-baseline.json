@@ -54,8 +54,8 @@
       "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx",
       "wave": "B",
       "module": "W-04",
-      "lines": 1307,
-      "sha256": "d3b8f55d8c588595491049bae936054f1d03271d7633ce13c878f481919aa6af"
+      "lines": 1330,
+      "sha256": "209fb46820899ae5b8882549c20a69781a036eebb1d8cc31ae9917d0d5dd71ab"
     },
     {
       "path": "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
@@ -82,8 +82,8 @@
       "path": "frontend/src/components/desktop/WorkingTreeReview/useWorkingTreeReview.ts",
       "wave": "B",
       "module": "W-04",
-      "lines": 632,
-      "sha256": "bb9629f88b3f2bc22bcbf0822ac3b8ef7f682950336aaf1c13299256275d0f68"
+      "lines": 661,
+      "sha256": "1167ca6033037640fa97d9a13df3a9a57a8a0659e266c26dfde09f2dec4e6170"
     },
     {
       "path": "frontend/src/hooks/useSkillStore.ts",
@@ -170,5 +170,5 @@
       "sha256": "b1a8303d2bb09317a09374053757d7a85c716777e2f599c5f3f962cac94508af"
     }
   ],
-  "total": 22716
+  "total": 22768
 }

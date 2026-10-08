@@ -21,12 +21,14 @@ import {
 } from '@codemirror/view';
 
 export interface HunkControlInfo {
-  /** git hunk 序号（决策键 `path#index`）。 */
+  /** git hunk 序号（BLOCK-147 #1 起决策键为内容寻址，此序号仅作控件定位）。 */
   hunkIndex: number;
   /** hunk 在新文件（=modified doc）中的 1-based 行号。 */
   line: number;
   /** 当前决策状态（null = pending）。 */
   decided: 'accept' | 'reject' | null;
+  /** BLOCK-147 #3 — 键盘流（↑↓/j/k）当前聚焦此 hunk（持续高亮）。 */
+  focused?: boolean;
 }
 
 export interface HunkControlsHandlers {
@@ -48,13 +50,20 @@ class HunkControlWidget extends WidgetType {
   }
 
   override eq(other: HunkControlWidget): boolean {
-    return other.info.hunkIndex === this.info.hunkIndex && other.info.decided === this.info.decided;
+    return (
+      other.info.hunkIndex === this.info.hunkIndex
+      && other.info.decided === this.info.decided
+      // BLOCK-147 #3 — 焦点态变化需重建 DOM（高亮 class 迁移）
+      && other.info.focused === this.info.focused
+    );
   }
 
   override toDOM(): HTMLElement {
     const wrap = document.createElement('span');
     wrap.className = 'wt-hunk-controls';
     wrap.setAttribute(DATA_HUNK_CONTROL, String(this.info.hunkIndex));
+    // BLOCK-147 #3 — 键盘流焦点 hunk 持续高亮
+    if (this.info.focused) wrap.classList.add('is-focused');
     if (this.info.decided) {
       wrap.classList.add(this.info.decided === 'accept' ? 'is-accepted' : 'is-rejected');
       const label = document.createElement('span');
@@ -99,7 +108,8 @@ class HunkControlWidget extends WidgetType {
 }
 
 function signatureOf(infos: HunkControlInfo[]): string {
-  return infos.map((i) => `${i.hunkIndex}:${i.line}:${i.decided ?? ''}`).join('|');
+  // BLOCK-147 #3 — focused 进签名：焦点迁移时强制重建 decorations
+  return infos.map((i) => `${i.hunkIndex}:${i.line}:${i.decided ?? ''}:${i.focused ? 'f' : ''}`).join('|');
 }
 
 function buildDecorations(

@@ -1,10 +1,62 @@
 // ============================================================
 // reviewModeHelpers — BLOCK-28 主区审阅模式纯函数助手
 //
-// 仅做确定性计算（文件统计 / 已审判定 / 目录分组），不触 IPC。
+// 仅做确定性计算（文件统计 / 已审判定 / 目录分组 / hunk 决策键），不触 IPC。
 // ============================================================
 
-import type { DiffFile } from './useWorkingTreeReview';
+// BLOCK-147 — 类型从叶子模块直取（不经 useWorkingTreeReview.ts barrel）：
+// barrel 现反向 import 本模块的决策键助手，经 barrel 会构成 arch-cycles 环。
+import type { DiffFile, Hunk, HunkDecision } from './useWorkingTreeReview/types';
+
+// ============================================================
+// BLOCK-147 #1 — hunk 决策键内容寻址
+//
+// 旧键 `file.path#hunkIndex` 在 refresh 重解析 diff 后会错位：
+// reject 会回退 working tree → 被拒 hunk 从后续 diff 消失 →
+// 同文件后续 hunk 索引前移 → 旧索引键挂到未审 hunk。
+//
+// 内容寻址键 = `file.path#h{oldStart}-{内容指纹}`：
+// - oldStart 锚定 HEAD 行号——working tree 回退不改 HEAD，
+//   幸存 hunk 的 oldStart 稳定；同一 diff 内两 hunk 不共享 oldStart（区间不相交）。
+// - 内容指纹（FNV-1a over 行 type+text，base36）覆盖上下文与增删行。
+// - newStart 不参与：前序 hunk 被拒回退会让后续 hunk 的 newStart 前移。
+//
+// 后端契约兼容：commitReview 以 `key.lastIndexOf('#')` 取文件路径
+// （src/ipc/working-tree-review.js），索引段本就不被解析——
+// 本键形态 `${path}#${signature}` 保持该切分语义，签名内不含 '#'。
+// ============================================================
+
+/** BLOCK-147 #1 — hunk 内容指纹：FNV-1a over 行 type+text，base36 输出。 */
+export function hunkSignature(hunk: Hunk): string {
+  let hash = 0x811c9dc5;
+  for (const line of hunk.lines) {
+    const s = `${line.type.charCodeAt(0)}:${line.text}\n`;
+    for (let i = 0; i < s.length; i += 1) {
+      hash ^= s.charCodeAt(i);
+      hash = Math.imul(hash, 0x01000193) >>> 0;
+    }
+  }
+  return `h${hunk.oldStart}-${hash.toString(36)}`;
+}
+
+/** BLOCK-147 #1 — hunk 决策键（内容寻址）：`path#h{oldStart}-{指纹}`。 */
+export function hunkDecisionKey(path: string, hunk: Hunk): string {
+  return `${path}#${hunkSignature(hunk)}`;
+}
+
+/**
+ * BLOCK-147 #1 — 文件 hunks → 决策数组（与 CodeMirrorDiffView.hunkDecisions 对齐，
+ * null = 未决）。按 hunk 内容寻址取决策，refresh 后索引前移不会串账。
+ */
+export function hunkDecisionList(
+  file: DiffFile,
+  decisions: Record<string, HunkDecision>,
+): Array<'accept' | 'reject' | null> {
+  return file.hunks.map((hunk) => {
+    const d = decisions[hunkDecisionKey(file.path, hunk)];
+    return d === 'accept' || d === 'reject' ? d : null;
+  });
+}
 
 export interface FileDiffStats {
   added: number;
@@ -37,11 +89,8 @@ export function isFileReviewed(
 ): boolean {
   if (!diffFile) return false;
   if (diffFile.binary || diffFile.hunks.length === 0) return true;
-  for (let i = 0; i < diffFile.hunks.length; i += 1) {
-    const d = decisions[`${diffFile.path}#${i}`];
-    if (d !== 'accept' && d !== 'reject') return false;
-  }
-  return true;
+  // BLOCK-147 #1 — 逐 hunk 内容寻址对账（hunkDecisionList）
+  return hunkDecisionList(diffFile, decisions).every((d) => d !== null);
 }
 
 export interface FileTreeGroup<T extends { path: string }> {

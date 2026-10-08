@@ -315,7 +315,9 @@ function setupWorkingTreeReviewIpc(options = {}) {
         throw new GitAdapterError('commit_message_required', 'Commit message is required.');
       }
 
-      const decisions = args.decisions; // Record<`${path}#${hunkIndex}`, 'accept'|'reject'|'pending'>
+      // BLOCK-147：键形态已改内容寻址 `${path}#${hunkSignature}`（oldStart+内容指纹）；
+      // 本端以 lastIndexOf('#') 取路径，索引段不被解析，与旧 file#index 形态行为兼容。
+      const decisions = args.decisions; // Record<`${path}#${hunkSignature}`, 'accept'|'reject'|'pending'>
       const message = args.message.trim();
 
       // 收集 accepted 文件列表（去重）

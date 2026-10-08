@@ -17,13 +17,19 @@ export interface CodeMirrorDiffViewProps {
   hunks?: Hunk[];
   /**
    * BLOCK-28 — 与 hunks 等长的决策数组（null = pending）。
-   * 来自 useWorkingTreeReview.decisions 的 `path#index` 键。
+   * BLOCK-147 #1 — 决策键内容寻址后由 reviewModeHelpers.hunkDecisionList 生成。
    */
   hunkDecisions?: Array<HunkDecision | null>;
   /** BLOCK-28 — 悬浮控件 Accept 回调（hunkIndex 语义）。 */
   onAcceptHunk?: (hunkIndex: number) => void;
   /** BLOCK-28 — 悬浮控件 Reject 回调（hunkIndex 语义）。 */
   onRejectHunk?: (hunkIndex: number) => void;
+  /**
+   * BLOCK-147 #3 — 键盘流（↑↓/j/k）当前聚焦的 hunk 序号。
+   * 变化时联动 scrollToLine（滚动 + pulse 高亮）并给焦点 hunk 控件/标记条
+   * 持续高亮；缺省或 -1 表示无焦点（只读预览等场景）。
+   */
+  focusedHunkIndex?: number;
   /**
    * BLOCK-29 — 外部直接提供的 diff revision（提交历史只读查看）。
    * 提供时跳过 HEAD/WORKTREE 桥加载；hunk 控件仍由 onAccept/onReject 是否传入决定。
@@ -46,6 +52,7 @@ export function CodeMirrorDiffView({
   onAcceptHunk,
   onRejectHunk,
   revisionOverride,
+  focusedHunkIndex = -1,
 }: CodeMirrorDiffViewProps) {
   const [revision, setRevision] = useState<DiffRevision | null>(null);
   const [loading, setLoading] = useState(false);
@@ -139,9 +146,24 @@ export function CodeMirrorDiffView({
       decided: hunkDecisions?.[i] === 'accept' || hunkDecisions?.[i] === 'reject'
         ? hunkDecisions[i]
         : null,
+      // BLOCK-147 #3 — 键盘流焦点态（持续高亮 + 滚动联动的落点）
+      focused: i === focusedHunkIndex,
     })),
-    [hunks, hunkDecisions, totalLines],
+    [hunks, hunkDecisions, totalLines, focusedHunkIndex],
   );
+
+  // BLOCK-147 #3 — focusedHunkIndex 变化 → scrollToLine 联动（滚动到焦点 hunk + pulse）。
+  // revision 就绪前编辑器未挂载，进依赖等加载完成后补触发。
+  useEffect(() => {
+    if (focusedHunkIndex < 0 || !revision) return;
+    const hunk = hunks?.[focusedHunkIndex];
+    if (!hunk) return;
+    const line = Math.max(1, Math.min(hunk.newStart || 1, Math.max(totalLines, 1)));
+    try {
+      // P2-1：nearest——焦点 hunk 已在可视区内时不重定心视口（防每次按键抖动）。
+      apiRef.current?.scrollToLine({ line, highlight: true, y: 'nearest' });
+    } catch { /* view 可能已销毁 */ }
+  }, [focusedHunkIndex, hunks, revision, totalLines]);
 
   // BLOCK-28 — extraExtensions：hunk 悬浮控件（签名变化时插件内部刷新）
   const extraExtensions = useMemo(() => {
@@ -192,7 +214,7 @@ export function CodeMirrorDiffView({
               <button
                 key={i}
                 type="button"
-                className={`wt-diff-marker${decided === 'accept' ? ' is-accepted' : decided === 'reject' ? ' is-rejected' : ''}`}
+                className={`wt-diff-marker${decided === 'accept' ? ' is-accepted' : decided === 'reject' ? ' is-rejected' : ''}${i === focusedHunkIndex ? ' is-focused' : ''}`}
                 style={{ top: `${ratio * 100}%` }}
                 title={`Hunk ${i + 1}（第 ${h.newStart} 行）`}
                 aria-label={`跳转到 hunk ${i + 1}`}

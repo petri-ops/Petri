@@ -3,6 +3,18 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ReviewMode } from './ReviewMode';
+// BLOCK-147 #1 — 决策键内容寻址：测试期望值经同一助手计算（hunk 头+内容指纹）
+import { hunkDecisionKey } from './reviewModeHelpers';
+import type { Hunk } from './useWorkingTreeReview';
+
+const REVIEW_HUNK_0: Hunk = {
+  oldStart: 1,
+  newStart: 1,
+  lines: [
+    { type: 'ctx', text: 'line1' },
+    { type: 'add', text: 'line2-new' },
+  ],
+};
 
 const { getBridgeMock } = vi.hoisted(() => ({
   getBridgeMock: vi.fn(),
@@ -168,8 +180,9 @@ describe('ReviewMode (BLOCK-28 main-area review mode)', () => {
     fireEvent.keyDown(input, { key: 'Enter', metaKey: true });
 
     await waitFor(() => {
+      // BLOCK-147 #1 — 决策键为内容寻址键（path#h{oldStart}-{指纹}）
       expect(commitReview).toHaveBeenCalledWith(
-        { decisions: { 'src/a.py#0': 'accept' }, message: 'test commit message' },
+        { decisions: { [hunkDecisionKey('src/a.py', REVIEW_HUNK_0)]: 'accept' }, message: 'test commit message' },
       );
     });
     // 面板内轻提示替代独立对话框

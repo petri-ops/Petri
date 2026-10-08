@@ -7,10 +7,11 @@
 // 严格通过 desktopBridge / biof3Desktop.workingTreeReview 通道访问 IPC。
 // ============================================================
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { getBridge } from '@/lib/desktopBridge';
 import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
+import { hunkDecisionKey, hunkDecisionList } from './reviewModeHelpers';
 
 // BLOCK-92 Wave B-3 — 类型定义外迁 ./useWorkingTreeReview/types.ts（原 15-207 行，纯搬运零行为变化）。
 // 原导入路径保持全部类型 re-export：消费方 import 零改动。
@@ -147,7 +148,13 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     if (!bridge) return;
     // BLOCK-41 — staged 文件选中时 hunk 来自 stagedDiff（HEAD→index），优先匹配
     const hunk = (stagedDiffRef.current?.files.find((f) => f.path === file) ?? diff?.files.find((f) => f.path === file))?.hunks[hunkIndex];
-    const key = `${file}#${hunkIndex}`;
+    // BLOCK-147 #1 — 决策键内容寻址：无 hunk 载荷就无法锚定内容，
+    // fail-closed 拒绝记账（宁可不记也不错位挂账），提示刷新后重试。
+    if (!hunk) {
+      setError('当前 diff 中找不到该 hunk，请刷新后重试。');
+      return;
+    }
+    const key = hunkDecisionKey(file, hunk);
     setDecisions((prev) => ({ ...prev, [key]: action === 'accept' ? 'accept' : 'reject' }));
     try {
       const res = await bridge.applyHunk({
@@ -185,7 +192,12 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     if (!bridge) return;
     // BLOCK-41 — staged 文件选中时 hunk 来自 stagedDiff（HEAD→index），优先匹配
     const hunk = (stagedDiffRef.current?.files.find((f) => f.path === file) ?? diff?.files.find((f) => f.path === file))?.hunks[hunkIndex];
-    const key = `${file}#${hunkIndex}`;
+    // BLOCK-147 #1 — 决策键内容寻址（同 decideHunk 的 fail-closed 语义）
+    if (!hunk) {
+      setError('当前 diff 中找不到该 hunk，请刷新后重试。');
+      return;
+    }
+    const key = hunkDecisionKey(file, hunk);
     setDecisions((prev) => ({ ...prev, [key]: 'reject' }));
     try {
       // 若调用方未传 patch 但 hunk 存在，前端兜底拼一份（与 splitSideDiff 输出兼容）
@@ -577,7 +589,23 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     }
   }, [refresh, loadRemoteStatus, loadHistory]);
 
-  const pendingCount = Object.values(decisions).filter((d) => d === 'pending').length;
+  // BLOCK-147 #2 — 未决 hunk 对账：当前 diff 的 hunk 全集 − 已决策键集合。
+  // 判定基准与 UI 渲染同源（staged 行走 stagedDiff HEAD→index，unstaged 行走组合 diff，
+  // diff 未覆盖的条目如纯 untracked 无 hunk 可决，不计入）；
+  // 决策键内容寻址（BLOCK-147 #1）后 refresh 重解析不会串账。
+  const pendingHunks = useMemo(() => {
+    const out: Array<{ path: string; count: number }> = [];
+    for (const f of status?.files ?? []) {
+      const diffFile = f.staged
+        ? stagedDiff?.files.find((d) => d.path === f.path) ?? diff?.files.find((d) => d.path === f.path)
+        : diff?.files.find((d) => d.path === f.path);
+      if (!diffFile || diffFile.binary) continue;
+      const count = hunkDecisionList(diffFile, decisions).filter((d) => d === null).length;
+      if (count > 0) out.push({ path: f.path, count });
+    }
+    return out;
+  }, [status, diff, stagedDiff, decisions]);
+  const pendingCount = pendingHunks.reduce((n, p) => n + p.count, 0);
   const appliedCount = Object.values(decisions).filter((d) => d === 'accept').length;
   const rejectedCount = Object.values(decisions).filter((d) => d === 'reject').length;
 
@@ -591,6 +619,7 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     setSelectedFilePath,
     decisions,
     pendingCount,
+    pendingHunks,
     appliedCount,
     rejectedCount,
     loading,
