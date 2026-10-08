@@ -5690,8 +5690,34 @@
         "review-batch-4"
       ],
       "notes": "审视批序列第 4 批·收官（A5 隧道诚实化+平台域点状修补：#5 徽标分级/PL-D2=30 天/nul 根修/平台映射锚）。双轨并行，工作流内不提交。 2026-10-08 当日收口 completed：双轨红绿全留痕+评审 P2 四条集成处置+closeout 十一门 PASS；UI-468 in_progress 待实机。审视批序列（146-149）至此全部收口。"
+    },
+    {
+      "id": "BLOCK-150-REVIEW-ABSORB-WAVE1",
+      "capability": "review-absorb-wave1",
+      "path": "docs/block-150-review-batch-absorb-wave1-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-150-review-absorb",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-09",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "ACTIVE",
+      "tags": [
+        "block-150",
+        "review-absorb",
+        "wave1",
+        "a1",
+        "a3",
+        "a5",
+        "b7",
+        "b8",
+        "b9",
+        "c10"
+      ],
+      "notes": "审视吸收批第一波（13 项三轨：平台消费链 6/生信品质 5/内核盲性 2；用户「继续」发令）。逐项先验证现状再红绿实现；工作流内不提交。"
     }
   ],
-  "lastUpdated": "2026-10-08",
-  "documentCount": 301
+  "lastUpdated": "2026-10-09",
+  "documentCount": 302
 }
