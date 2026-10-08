@@ -19,7 +19,12 @@ import Database from 'better-sqlite3';
 
 const require = createRequire(import.meta.url);
 const { retentionSweep } = require('../core/biof3-server/helpers/tool-jobs-retention.js');
-const { runRetentionSweep } = require('../core/biof3-server/jobs/retention-sweeper.js');
+const {
+  runRetentionSweep,
+  // PL-D2（BLOCK-149）——实现面新增导出：env 缺省解析器 + 缺省常量（红阶段尚不存在）
+  resolveToolJobsRetentionDays,
+  DEFAULT_TOOL_JOBS_RETENTION_DAYS,
+} = require('../core/biof3-server/jobs/retention-sweeper.js');
 
 const DAY = 24 * 60 * 60 * 1000;
 // 固定 now：边界（恰好等于 retentionDays 天龄）可精确断言，不依赖真实时钟
@@ -169,14 +174,55 @@ function mkSweepDb() {
   return db;
 }
 
-test('runRetentionSweep 接线：env 未设=disabled 零删除', () => {
+test('runRetentionSweep 接线：env 未设=按缺省 30 天窗口删超龄终态（PL-D2 2026-10-08 裁决）', () => {
   const backup = process.env[ENV_KEY];
   delete process.env[ENV_KEY];
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'pld2-default-'));
+  try {
+    const db = mkSweepDb();
+    const now = Date.now();
+    db.prepare("INSERT INTO tool_jobs VALUES ('over', 'completed', ?, 0)").run(now - 40 * 86400000);
+    db.prepare("INSERT INTO tool_jobs VALUES ('within', 'completed', ?, 0)").run(now - 20 * 86400000);
+    db.prepare("INSERT INTO tool_jobs VALUES ('pub', 'completed', ?, 1)").run(now - 40 * 86400000);
+    // jobsDir 显式给临时目录：缺省开启后接线段会对被删 id 做 rmSync，
+    // null 回退会落到真实用户 home 的 tool-jobs 目录（既有 env=1 测试同款隐患，
+    // 本批一并收口——测试不得触碰真实用户数据目录）
+    const report = runRetentionSweep({ db, jobsDir: path.join(root, 'tool-jobs') });
+    assert.ok((report.deleted.tool_jobs_retention || 0) >= 1, JSON.stringify(report));
+    assert.equal(db.prepare("SELECT COUNT(*) AS n FROM tool_jobs WHERE id='over'").get().n, 0, '缺省 30 天：超窗终态应删');
+    assert.equal(db.prepare("SELECT COUNT(*) AS n FROM tool_jobs WHERE id='within'").get().n, 1, '窗内（20 天）应保留');
+    assert.equal(db.prepare("SELECT COUNT(*) AS n FROM tool_jobs WHERE id='pub'").get().n, 1, 'F1：is_public=1 动态公开作业同口径保护');
+    db.close();
+  } finally {
+    if (backup === undefined) delete process.env[ENV_KEY];
+    else process.env[ENV_KEY] = backup;
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('runRetentionSweep 接线：env=0=显式关闭零删除（覆盖语义不变）', () => {
+  const backup = process.env[ENV_KEY];
+  process.env[ENV_KEY] = '0';
   try {
     const db = mkSweepDb();
     db.prepare("INSERT INTO tool_jobs VALUES ('old', 'completed', 0, 0)").run();
     const report = runRetentionSweep({ db, jobsDir: null });
-    assert.equal(report.deleted.tool_jobs_retention, undefined, 'disabled 不得产生删除计数');
+    assert.equal(report.deleted.tool_jobs_retention, undefined, '显式 0 关闭不得产生删除计数');
+    db.close();
+  } finally {
+    if (backup === undefined) delete process.env[ENV_KEY];
+    else process.env[ENV_KEY] = backup;
+  }
+});
+
+test('runRetentionSweep 接线：env 非法值=fail-closed 关闭零删除', () => {
+  const backup = process.env[ENV_KEY];
+  process.env[ENV_KEY] = 'not-a-number';
+  try {
+    const db = mkSweepDb();
+    db.prepare("INSERT INTO tool_jobs VALUES ('old', 'completed', 0, 0)").run();
+    const report = runRetentionSweep({ db, jobsDir: null });
+    assert.equal(report.deleted.tool_jobs_retention, undefined, '非法值按 0 关闭（fail-closed：宁可少删不多删）');
     db.close();
   } finally {
     if (backup === undefined) delete process.env[ENV_KEY];
@@ -187,13 +233,14 @@ test('runRetentionSweep 接线：env 未设=disabled 零删除', () => {
 test('runRetentionSweep 接线：env=1 删超龄终态、保留新作业', () => {
   const backup = process.env[ENV_KEY];
   process.env[ENV_KEY] = '1';
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'pld2-env1-'));
   try {
     const db = mkSweepDb();
     const now = Date.now();
     db.prepare("INSERT INTO tool_jobs VALUES ('gone', 'completed', ?, 0)").run(now - 10 * 86400000);
     db.prepare("INSERT INTO tool_jobs VALUES ('fresh', 'completed', ?, 0)").run(now - 1000);
     db.prepare("INSERT INTO tool_jobs VALUES ('pub', 'completed', ?, 1)").run(now - 10 * 86400000);
-    const report = runRetentionSweep({ db, jobsDir: null });
+    const report = runRetentionSweep({ db, jobsDir: path.join(root, 'tool-jobs') });
     assert.ok((report.deleted.tool_jobs_retention || 0) >= 1, JSON.stringify(report));
     assert.equal(db.prepare("SELECT COUNT(*) AS n FROM tool_jobs WHERE id='gone'").get().n, 0);
     assert.equal(db.prepare("SELECT COUNT(*) AS n FROM tool_jobs WHERE id='fresh'").get().n, 1);
@@ -202,5 +249,23 @@ test('runRetentionSweep 接线：env=1 删超龄终态、保留新作业', () =>
   } finally {
     if (backup === undefined) delete process.env[ENV_KEY];
     else process.env[ENV_KEY] = backup;
+    fs.rmSync(root, { recursive: true, force: true });
   }
+});
+
+// PL-D2（BLOCK-149 · 2026-10-08 裁决落定）——env 缺省解析纯函数契约：
+// 未设=30（对齐 task_events TASK_EVENTS_RETENTION_DAYS=30 先例，主代理按推荐
+// 代裁+用户批量推进授权）；显式覆盖语义不变——合法数值（含 0/负数=显式关闭）
+// 透传给纯函数按 <=0 disabled 判；非法值/空串 fail-closed 按 0 关闭。
+test('resolveToolJobsRetentionDays 契约：未设=30、数值透传、0/负数=显式关闭、非法/空串 fail-closed=0', () => {
+  assert.equal(typeof resolveToolJobsRetentionDays, 'function', '解析器必须导出（PL-D2 实现面）');
+  assert.equal(DEFAULT_TOOL_JOBS_RETENTION_DAYS, 30, '缺省保留天数=30（PL-D2 裁决）');
+  assert.equal(resolveToolJobsRetentionDays(undefined), 30, '未设=缺省 30');
+  assert.equal(resolveToolJobsRetentionDays('45'), 45, '显式覆盖透传');
+  assert.equal(resolveToolJobsRetentionDays('7'), 7);
+  assert.equal(resolveToolJobsRetentionDays('0'), 0, '显式 0=关闭（用户可一句话关回）');
+  assert.equal(resolveToolJobsRetentionDays('-7'), -7, '负数透传（纯函数域 <=0 disabled）');
+  assert.equal(resolveToolJobsRetentionDays('abc'), 0, '非法值 fail-closed=0');
+  assert.equal(resolveToolJobsRetentionDays(''), 0, '空串 fail-closed=0（与旧行为一致）');
+  assert.equal(resolveToolJobsRetentionDays('12.5'), 12.5, '数值透传不取整（窗口语义交纯函数）');
 });

@@ -4630,15 +4630,6 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：完整文件树 UI（懒加载/搜索）与 demo 数据集扩充非本批（plan §3）；plugins 目录本机不存在，demo 端点真实数据流端到端未实跑（清单/字节契约级已锚）。
 
 
-## UI-468: 真远程隧道徽标诚实化——connected 不再等同「公网可用」，持续 ≥15min 才宣称（BLOCK-149 A5）(2026-10-08 in_progress，组件级全绿；实机走查随 BLOCK-149 收口)
-
-- **来源**：BLOCK-149 隧道诚实化+平台域修补批 A5（审视批发现 #5）。实现=dynamic workflow A 轨交付（本工作树 WIP，主代理终审后集成提交）。
-- **依据**：后端 `state=connected` 是「转发已建立」的 10s 强启发（`core/biof3-server/mobile-gateway/tunnel.js:33` STABLE_CONNECTED_MS），反代未配好/半开 TCP 时手机实际打不开——原徽标 connected 恒绿「公网可用」是假宣称。
-- **交付**：前端消费 `TunnelStatus.stateSinceTs`（后端 `tunnel.js:341` status() 已返回，后端零改动）：①接口补 `stateSinceTs: number`；②徽标三态——disabled/connecting/reconnecting 沿用原文案；state=connected 且持续 <15min 显示「● 连接建立中 · 尚未确认公网可用」（琥珀 tunnelBadgeWarn）；表观持续 ≥15min+1min 时钟偏差裕量（≥16min，宁晚勿假）才显示「● 已连接 · 公网可用」（绿色 tunnelBadgeOn）；③判定收在模块级函数 `isTunnelPublicReady`（时间读取不入 render）；stateSinceTs 缺失/非法（旧后端）从紧永不宣称。
-- **证据**：HK-01 红绿——MobileSync.test.tsx 新增四测先红（tunnel-state-badge 不存在、旧徽标恒绿）→绿（Test Files 1 passed, Tests 8/8）：5min 不宣称/17min 宣称/15.5min 落裕量内仍不宣称/stateSinceTs 缺失从紧。门禁：types 0/lint 0 error/arch 0 违规/secret PASS（A 轨自述）；test:changed 链复跑 Node 113 pass/0 fail+前端 MobileSync 8/8（门禁修复员 2026-10-08 实跑，含本台账登记后）。
-- **待验**：dev Electron 实机走查 + 主代理终审集成提交（subject 标 UI-468）。
-- **边界**：零 CSS 改动（复用既有 tunnelBadgeWarn，其裸 hex 为存量非本次引入）；徽标随 re-render 更新未加定时器（最小面——琥珀→绿翻转可能滞后到下次交互，从紧方向可接受）；时钟偏差裕量取舍=阈值方案从紧（未采 ≥14min 宽松方向，理由注释在 MobileSync.tsx）。G0 开发期常态 · 不外推 packaged/Provider/GA。
-
 ## UI-468: 隧道徽标诚实化——stateSinceTs 三态分级宣称（A5 #5/BLOCK-149）(2026-10-08 in_progress，组件 8/8；实机走查随 BLOCK-149 收口)
 
 - **来源**：审视批 A5 高影响发现 #5（dwfrun-6724f75c）；plan=[`block-149-tunnel-honesty-platform-patch-plan.md`](./block-149-tunnel-honesty-platform-patch-plan.md)。
