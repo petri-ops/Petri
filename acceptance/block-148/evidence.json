@@ -1,0 +1,26 @@
+{
+  "block": "BLOCK-148-ANALYSIS-INPUT-REACHABILITY",
+  "closedAt": "2026-10-08",
+  "form": "审视批序列第 3 批（B9 分析输入可达性；「按顺序直接推进 尽可能的走远」批量发令）",
+  "implementation": "dynamic workflow dwfrun-68fb5ea8（provider 限额 1308 一次中断后 Resume 续跑）单实现员串行+独立评审 P1=0+统一门禁；主代理终审集成批修 P2 三条+Minor 一字修",
+  "delivered": {
+    "#11 表单下拉可达性": "白名单单源（UPLOAD_FILE_EXTENSIONS 常量→tree inputExtensions 投影→前端零第二份清单）；tree?recursive=1 有界递归（深度3/排除 results·jobs·output·node_modules/500 条 truncated 显式，local+ssh 双分支同契约）；option value=完整 path 消同名歧义",
+    "#12 demo 一键载入": "demoDataUrl 契约信号→GET /api/tools/demo/:toolId 清单+demo-data/:toolId/:filename 字节（零新端点）→BLOCK-90 分片落盘 demo-data/<toolId>/；「用示例数据试跑」按钮落完 bump treeVersion 下拉即现"
+  },
+  "reviewP2Disposition": [
+    "P2-1 契约测试未入 impact-map——已修（block148-tree-reachability 入 block89-workspace-file-ops 规则 tests）",
+    "P2-2 409 残缺残留误判跳过——已修（fs/delete 自愈重传一次，删失败/再撞 409 降级 skipped；契约测试三形态 4/4）",
+    "P2-3 truncated 信号 UI 丢弃——已修（treeTruncated 下传 ToolLaunchForm，500 项诚实提示行）",
+    "Minor：sortDirents a.isDirectory 一字修（目录优先排序从 no-op 变生效）；TREE_* 导出无消费者/local-ssh 错误不对称/状态码文案——注记不改"
+  ],
+  "redGreen": "#11 Node 5 红→7/7（投影/递归三重界/ssh）；前端 5 红→9/9；#12 demo-data 契约 4/4（含 P2-2 自愈/降级/再撞三形态）；test:changed exit=0（Node 387/0）",
+  "gates": {
+    "workflowUnified": "types/lint（基线收缩 24 行）/secret/arch/theme-token-contract 绿；test:changed 首轮 exit=1=评审员与门禁并行跑测试互踩（评审员复跑 387/0 全过、主代理干净树复跑 exit=0 坐实）",
+    "closeout": "十一门 PASS（含 UI-467 台账同提交同步——ui:audit 首轮抓真 UI 编号缺失后 amend 补正）"
+  },
+  "uiLedger": "UI-467 in_progress（契约级全绿，实机走查待）；UI-457 同批增量注记、维持 in_progress 待用户过目",
+  "boundaries": [
+    "plugins/ 目录本机不存在——demo 端点真实数据流端到端未实跑（清单/字节契约级已锚）",
+    "完整文件树 UI 与 demo 数据扩充非范围（plan §3）"
+  ]
+}

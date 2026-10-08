@@ -2904,6 +2904,16 @@
       "tests": [],
       "frontendRelated": false,
       "classifiesScripts": false
+    },
+    {
+      "id": "block148-evidence",
+      "note": "BLOCK-148 分析输入可达性批收口证据目录（红绿/门禁/P2 处置；无 Node 测试读者，复现驱动=block148-tree-reachability（已入 block89 规则）+前端 AnalysisLaunchPanel/demo-data 契约测试）。",
+      "patterns": [
+        "acceptance/block-148/**"
+      ],
+      "tests": [],
+      "frontendRelated": false,
+      "classifiesScripts": false
     }
   ]
 }

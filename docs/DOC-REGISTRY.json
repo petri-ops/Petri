@@ -5653,13 +5653,13 @@
       "capability": "analysis-input-reachability",
       "path": "docs/block-148-analysis-input-reachability-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-148-analysis-input-reachability",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-10-08",
       "archivePolicy": "archive_when_superseded",
-      "phase": "ACTIVE",
+      "phase": "COMPLETED",
       "tags": [
         "block-148",
         "b9",
@@ -5667,7 +5667,7 @@
         "demo-data",
         "review-batch-3"
       ],
-      "notes": "审视批序列第 3 批（B9 分析输入可达性；用户「按顺序直接推进 尽可能的走远」批量发令，接棒 BLOCK-147）：#11 表单下拉白名单对齐+子目录+path 消歧 / #12 demo 数据一键载入（demoDataUrl 契约消费）。UI-457 过目并入验收。单实现员串行红绿，工作流内不提交。"
+      "notes": "审视批序列第 3 批（B9 分析输入可达性；用户「按顺序直接推进 尽可能的走远」批量发令，接棒 BLOCK-147）：#11 表单下拉白名单对齐+子目录+path 消歧 / #12 demo 数据一键载入（demoDataUrl 契约消费）。UI-457 过目并入验收。单实现员串行红绿，工作流内不提交。 2026-10-08 当日收口 completed：两项红绿全留痕+评审 P2 三条集成批修掉+closeout 十一门 PASS；UI-467 in_progress 待实机走查、UI-457 待用户过目。"
     }
   ],
   "lastUpdated": "2026-10-08",

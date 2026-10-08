@@ -8,7 +8,7 @@ acceptance:
   - UI-457 联动：参数配置表单实机过目并入本批验收（用户过目或 dev-verify flow 二选一，未过目前 UI-457 台账不翻 verified）
   - 定向门禁：test:changed + quality:types/lint/secret/arch + 前端定向测试全绿；closeout 十一门（集成提交后）
 reopen: 文件浏览器完整树 UI 化（懒加载/搜索）属后续；demo 数据集扩充属 BIO-7 池
-status: active
+status: completed
 ---
 
 # BLOCK-148 B9 分析输入可达性批（审视批序列第 3 批）
@@ -55,3 +55,12 @@ status: active
 ## 7. 完成语义
 
 两项交付 + 评审 P1 清零 + 统一门禁绿 + 主代理终审集成提交 + closeout 十一门 PASS + 台账五件回写 + UI-457 过目状态如实登记。序列下一批（A5 隧道诚实化 + 平台域修补批，含 PL-D2=30 天落地）接续。
+
+## 8. 收口笔录（2026-10-08 当日立项当日收口）
+
+- **两项交付**（dwfrun-68fb5ea8，曾因 provider 限额 1308 中断一次、Resume 续跑）：#11 白名单单源投影（UPLOAD_FILE_EXTENSIONS→tree inputExtensions→前端零第二份清单）+recursive=1 有界递归（深度3/排除产物目录/500 条 truncated）+path 消歧；#12 demo 一键载入（demoDataUrl 信号+既有端点+BLOCK-90 分片落盘，demo-data/<toolId>/ 命名空间）。
+- **评审 P1=0；P2 三条集成批全修**：impact-map 登记（block89 规则）/ 409 残缺自愈（fs/delete 后重传一次，三形态契约测试 4/4）/ truncated 诚实提示（treeTruncated 下传）；Minor sortDirents 一字修（目录优先排序生效）。
+- **门禁**：统一门禁绿 + closeout 十一门 PASS；波折如实两条——①workflow 门禁 test:changed 首轮 exit=1=评审员与门禁并行跑测试互踩（干净树复跑 exit=0 坐实）；②ui:audit 首轮抓真 UI 编号缺失 → UI-467 台账补正 amend 同提交（in_progress，实机走查待）。
+- **红绿**：#11 Node 5红→7/7、前端 5红→9/9；#2x demo 契约 4/4；test:changed Node 387/0。
+- **边界**：plugins 目录本机不存在，demo 端点真实数据流端到端未实跑（契约级已锚）；UI-457 维持 in_progress 待用户过目（本批增量注记在案）。
+- 证据=acceptance/block-148/evidence.json。G0 开发期常态 · 不外推 packaged/Provider/GA。
