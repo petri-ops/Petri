@@ -90,7 +90,7 @@ BLOCK-83 P4（2026-09-12）领域中立化后，生信分析全部迁至兄弟�
 | BIO-4 | bulk 主链解冻 | validator/QC/deg-standardizer/go-kegg/gsea/volcano-plot 从 dormant 恢复 + 17 断链脚本处置 + Windows 平台支持声明 | BLOCK（**吸收 C-15 后半；依赖 PL-1**） | G0-PLATFORM PL-1 |
 | BIO-5 | 输入显式化与领域校验执行化 | run_tool 输入契约投影成表单 + 上传路径执行 counts-matrix/metadata profiles 规则 | BLOCK | BIO-4（validator 插件在链上） |
 | BIO-6 | 解读层接线 | `/api/ai/interpret` 模板接前端 + `result_summary` 真值窗口扩容（有界） | BLOCK 小包 | 无 |
-| BIO-7 | 领域深化池 | 多因子 design / edgeR·limma / 热图聚类·z-score / scRNA 链解冻（**吸收 C-12**）/ TPM·FPKM / 任意两 run 对比 / 多组学 | 候选池性质，逐项裁决 | BIO-4 + PL-1 |
+| BIO-7 | 领域深化池 | 多因子 design（✅ 已交付：BLOCK-145 D3 deseq2.R parse_design_terms 真实 R 跑 19/19 + BLOCK-146 C 轨本机重放 pack 8e6055e——2026-10-08 对账批标注） / edgeR·limma / 热图聚类·z-score / scRNA 链解冻（**吸收 C-12**）/ TPM·FPKM / 任意两 run 对比 / 多组学 | 候选池性质，逐项裁决 | BIO-4 + PL-1 |
 
 > 注记（2026-10-01）：BIO-3 出口判据（「DAG 或面包屑」）已由 UI-455（打开链）+UI-456（血缘条）满足；**DAG 画布形态升级归属成果面系列 BLOCK-138**（见 [`artifact-plane-direction.md`](./artifact-plane-direction.md) 切片 B），BIO-3 P2「继续分析显式化」仍在原位推进——防重复开发。
 

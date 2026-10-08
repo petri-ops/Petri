@@ -4489,12 +4489,12 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：quality:types 0+test:changed Node 42/0+前端定向全绿（本轮改动面无组件测试=BIO-1 评估已登记的壳级测试缺口维持）；code-size project-workspace.tsx 1223→1232+ResultArtifactShell 1193→1204 显式重打（含 UI-454 分页接线）。**端到端验证交用户过目**：CDP 自动化对「新项目首开的视图形态机」（TitleBar pill 仅特定形态渲染/空态启动卡/深链 ?mode= 竞争）步进成本超出收益，实测三形态两入口点击均未达库列表（打开链修复前的同路径亦不可达=视图形态问题独立于本修复，未再深挖）；修复后用户在 app 点任意结果（含旧 HTTP job）一次即真值验证。
 - **边界**：放行仅查看（不写会话/不产对话消息）；深链 ?mode= 竞争归一现象未随本修复消失（mode 归一化 effect 与 auto-open effect 的时序竞争，独立现象登记候选）；BIO-3 余下（P1 lineage 投影端点+血缘条、P2 继续分析按钮）未开工保持 planned。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-456: 结果血缘条——lineage 投影端点 + 前端祖先链（BIO-3 P1）(2026-09-28 in_progress，契约级全绿；实机待栈重启+真实跨 Job 链数据)
+## UI-456: 结果血缘条——lineage 投影端点 + 前端祖先链（BIO-3 P1）(2026-09-28 in_progress → 2026-10-08 **verified**〔由 UI-460 走查覆盖核销：2026-10-03 R2 复走 /lineage chain=3 真实跨 Job 链（wfg_d05e23f4）+ LineageStrip 默认条带形态实机证据 + 用户真窗过目三环齐〕; 原状态 2026-09-28 in_progress，契约级全绿；实机待栈重启+真实跨 Job 链数据)
 
 - **来源**：G0-BIO plan §3 BIO-3「lineage 可视化」+ 垂直评估「链在库里用户看不见」（result_workflow_graphs 真值完整、无暴露端点、前端零消费——数据侧零缺口纯投影工作）。
 - **三件**：①**投影纯函数** `core/shared-backend/result-studio-lineage.js`（buildLineageChain：目标 job 沿 dependsOn BFS 向上收集祖先，按距当前依赖深度降序=上游在前当前末尾，直接下游计数；环 visited 防御；job 不在图诚实 null）；②**仓库方法+端点**：repository.listProjectWorkflowGraphs（updated_at 降序，单图损坏跳过不拖垮列表）+ `GET /api/result-studio/lineage?jobId=&projectId=`（找包含目标 job 的最新图投影；无图/无项目归属诚实 note 不虚构）；③**前端血缘条** LineageStrip（catalog 工具名渲染、当前节点高亮、节点点击走 projectOpenResult 事件=UI-455 打开链、单节点链/无图/端点失败均不渲染不冒充血缘；挂 ResultArtifactShell result 模式工具栏下）。
 - **证据**：红绿先行（模块缺失红在册→绿；fixture 走 workflowGraphDigest 内容寻址派生+自动派生合法 artifact 边——verifyWorkflowGraphIntegrity 五重硬校验全过）；block127 契约 5/5（链序/下游计数/环防御/缺节点 null/仓库排序+命中）+LineageStrip 4/4（链渲染/当前高亮/点击事件 detail/三种诚实不渲染）+viewer 回归+theme 4/4+tsc 0+test:changed Node 617/0+code-size 重打（ResultArtifactShell +2 行接线）。
-- **待验**：实机需 dev 栈重启（后端新端点）+**真实跨 Job 血缘数据**（当前 dev 库 deseq2 单 Job 无下游依赖=链单节点不渲染属正确行为；跨 Job 链随 BIO-4 解冻 go-kegg/volcano 后自然产生，或 selection→富集操作触发）。P2「继续分析显式按钮」随 BIO-4（下游工具解冻前无真实目标）。
+- **待验→已覆盖（2026-10-08 对账批）**：两条件（dev 栈重启后端点在场 + 真实跨 Job 链数据）均由 UI-460 verified 走查满足——chain=3 真实跨 Job 血缘 /lineage 实证（2026-10-03）+ 默认条带形态 form-switch-default.png 在案；用户如需亲验条带形态可另过目（可选，不阻塞）
 - **边界**：投影只读（不建第二真相）；链排序按依赖深度非时间（同深度 toolJobId 稳定序）；无会话 job 同样可投影（图真值不含会话维度）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## UI-458: 继续分析显式入口 + tool_jobs retention 机制（BIO-3 P2 + PL-4；BLOCK-136 动态工作流交付）(2026-09-30 in_progress，组件级全绿+接线契约；实机走查待补)
@@ -4502,7 +4502,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **来源**：G0-BIO plan §3 BIO-3 P2（评估：上游喂下游全靠对话隐式）+ G0-PLATFORM plan §3 PL-4（评估：tool_jobs 无保留策略表无界增长）。动态工作流两修复员并行+冷复核 6 发现（2 高危返工）+主代理终审（含 D7 领域中立棘轮抓真一处改造）。
 - **两件**：①**「继续分析」显式入口**——CompactResultNavigator actions 区新增菜单，列出插件目录全部带文件输入的已装分析（useToolCatalog 目录驱动，BLOCK-83 D7 合规：核心前端零领域工具 ID 硬编码——首版硬编码 go-kegg/gsea/volcano 被 domain-neutrality 棘轮抓真后改造为目录驱动，新装分析自动出现）；点击组装携带 jobId/artifactName/tool 三要素的显式中文 prompt 经 gewu:copilot-ask 投递，Agent 侧 bind_artifact 血统链 fail-closed 兜底。②**tool_jobs retention 机制**——helpers/tool-jobs-retention.js 纯函数（只删终态/保护静态演示清单/**is_public=1 动态公开同口径保护**（复核 F1）/分批 LIMIT/全局目录 best-effort）+挂 retention-sweeper 既有节拍；**默认关闭**（BIOF3_TOOL_JOBS_RETENTION_DAYS），数值 PL-D2 留用户裁决（与重试默认关闭同姿势）。
 - **证据**：ContinueAnalysisMenu 组件 4/4（目录驱动渲染/prompt 三要素/gamma 无文件输入排除/挂载入口）+block136 契约 8/8（含 runRetentionSweep 接线 env 双分支契约=复核 F2 修补+is_public 保护经生产线入口实证）+D7 棘轮 2/2+block130/135 回归+test:changed 617/0+tsc 0。
-- **待验**：菜单实机走查（结果页展开→选项=已装分析→点击 prompt 进 composer）；retention 长跑节拍（需环境）。
+- **待验（部分覆盖 2026-10-08 对账批）**：菜单实机走查已由 BLOCK-137/UI-459 走查证据覆盖（T3 入口/T4a 目录驱动/T4b prompt 三要素实机全证，scripts/ui457-ui458-live.cjs）；**retention 长跑节拍取证仍待**——随 PL-D2 retention 裁决落地后取证，不受本注记影响
 - **边界**：菜单不预判下游语义（全目录列出，输错由 Agent 输入契约拒——血统绑定 fail-closed 兜底）；retention 只删 DB 行+全局目录（项目布局目录归项目 GC 域）；created_at 窗口锚点（复核 F3 建议 COALESCE completed_at）随 PL-D2 一并裁决。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
