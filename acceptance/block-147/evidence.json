@@ -1,0 +1,26 @@
+{
+  "block": "BLOCK-147-REVIEW-CORRECTNESS",
+  "closedAt": "2026-10-08",
+  "form": "审视批序列第 2 批（A2 审阅正确性；用户「按顺序直接推进 尽可能的走远」批量发令）",
+  "implementation": "dynamic workflow dwfrun-39d8ec9a 单实现员串行三项 + 独立评审 P1=0 + 统一门禁全绿（含 theme-token-contract）；主代理终审集成批追加修复评审 P2 三条",
+  "delivered": {
+    "#1 决策键内容寻址": "path#h{oldStart}-{FNV-1a 指纹}——refresh 重解析后被拒 hunk 消失不再错位；后端 commitReview lastIndexOf('#') 切分天然兼容零改动；decisions 无持久层，升级瞬间无旧键面（丢弃重建取舍留痕）",
+    "#2 未决可见+提交拦截": "pendingHunks=当前 diff hunk 全集−已决策键（按文件明细）；handleCommitConfirm 拦截（⌘Enter 与按钮同路径）；集成批补 staged 提交框同款拦截（handleStagedCommitGuarded）",
+    "#3 焦点视觉反馈": "focusedHunkIndex→scrollToLine pulse 联动 + is-focused 持续高亮（纯 token：accent/accent-soft/shadow-menu/status-warning-fg，零字面量）；集成批修 P2-1：scrollToLine 增 y 偏好透传（默认 center 不变），焦点联动用 nearest 防可视区抖动"
+  },
+  "reviewP2Disposition": [
+    "P2-1 滚动抖动——已修（y:'nearest' 透传）",
+    "P2-2 staged 提交绕拦截——已修（同款 confirm 拦截，两调用点齐换；未附独立红绿，形态与主路径拦截同款且主路径已有测试锁定，如实注记）",
+    "P2-3 键形态无机械守卫——已修（reviewModeHelpers.test.ts 形态锚：/^path#h\\d+-[0-9a-z]+$/ + 签名段不含 #）",
+    "Minor：后端注释漂移已修；两条测试名实不符注记在案不改"
+  ],
+  "redGreen": "三项红→绿证据见 impl-report 卡片（错位复现/未决计数与拦截取消放行/焦点迁移 pulse）；定向 5 文件 52/52（含 theme-token-contract 4/4）；外围 RightPanel+CodeMirrorEditor 26 绿；test:changed exit 0（Node 159+前端 47）",
+  "gates": {
+    "workflowUnified": "test:changed/types/lint/secret/arch/theme-token-contract 全绿",
+    "closeout": "十一门 PASS（code-size 棘轮两次重锚：工作流交付面 + 主代理 P2 集成面，均 R-2 机制登记）"
+  },
+  "boundaries": [
+    "实机走查（dev Electron 真窗键盘流手感）未做——UI-466 台账 in_progress 待过目或 dev-verify flow",
+    "后端 hunk 级 stage 明确非范围（plan §3，另立批）"
+  ]
+}

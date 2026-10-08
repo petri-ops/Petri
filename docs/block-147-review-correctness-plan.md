@@ -8,7 +8,7 @@ acceptance:
   - #3 focusedHunk 变化联动滚动（scrollToLine/jumpToHunk 现成 api）+ 焦点 hunk 高亮；样式走既有 token 阶梯（禁十六进制/slate 字面量），theme-token-contract 契约测试绿
   - 定向门禁：test:changed + quality:types/lint/secret/arch 全绿 + 前端定向测试（npm run test:files --prefix frontend）；closeout 十一门（集成提交后）
 reopen: hunk 级后端 stage（文件级 stage 的根本改造）另立批；reject→regenerate 回路优化属后续
-status: active
+status: completed
 ---
 
 # BLOCK-147 A2 审阅正确性批（审视批序列第 2 批）
@@ -55,3 +55,12 @@ status: active
 ## 7. 完成语义
 
 三项交付 + 评审 P1 清零 + 统一门禁绿 + 主代理终审集成提交 + closeout 十一门 PASS + 台账五件回写。序列下一批（B9 分析输入可达性批）在同序列发令下由主代理接续立项。
+
+## 8. 收口笔录（2026-10-08 当日立项当日收口）
+
+- **三项交付**（dwfrun-39d8ec9a 单实现员串行+红绿先行）：#1 决策键内容寻址 `path#h{oldStart}-{FNV-1a}`——refresh 后被拒 hunk 消失不再错位挂未审 hunk，后端 lastIndexOf 契约兼容零改动，无持久层故升级瞬间无旧键面；#2 未决计数真实可见（diff hunk 全集−已决键，按文件明细）+ 提交确认拦截（⌘Enter/按钮同路径）；#3 焦点滚动联动+is-focused 持续高亮（纯 token，theme-token-contract 4/4）。
+- **独立评审 P1=0**；P2 三条在主代理集成批全部修掉：scrollToLine y 偏好透传（焦点联动 nearest 防抖动，既有调用方默认 center 不变）/ staged 提交框同款未决拦截（handleStagedCommitGuarded，两调用点齐换；未附独立红绿——形态与主路径拦截同款且主路径已测，如实注记）/ 键形态锚测试（签名段不含 # 的机械守卫）；后端注释漂移顺手修。
+- **门禁**：统一门禁全绿（test:changed/types/lint/secret/arch/theme-token-contract）+ closeout 十一门 PASS；code-size 棘轮两次 R-2 重锚（工作流交付面 + P2 集成面，IPC 文件 +2 行为注释）。
+- **红绿证据**：错位复现（状态化 diff mock：reject 后 A 消失、B 前移）/ 未决计数与拦截取消放行 / 焦点迁移 pulse——三项红→绿两轮输出在 impl-report 卡片；定向 52/52。
+- **边界**：实机走查未做（UI-466 in_progress 待过目或 dev-verify flow）；后端 hunk 级 stage 非范围。序列下一批（B9 分析输入可达性批）按「按顺序直接推进」授权接续立项。
+- 证据=acceptance/block-147/evidence.json。G0 开发期常态 · 不外推 packaged/Provider/GA。

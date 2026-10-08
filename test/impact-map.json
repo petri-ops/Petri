@@ -2893,6 +2893,16 @@
       "tests": [],
       "frontendRelated": false,
       "classifiesScripts": false
+    },
+    {
+      "id": "block147-evidence",
+      "note": "BLOCK-147 审阅正确性批收口证据目录（红绿/门禁/P2 处置；无 Node 测试读者，复现驱动=本批前端契约测试 block147/helpers/ReviewMode/CodeMirrorDiffView/theme-token-contract，均在生产文件规则面登记）。",
+      "patterns": [
+        "acceptance/block-147/**"
+      ],
+      "tests": [],
+      "frontendRelated": false,
+      "classifiesScripts": false
     }
   ]
 }

@@ -5633,20 +5633,20 @@
       "capability": "review-correctness",
       "path": "docs/block-147-review-correctness-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-147-review-correctness",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-10-08",
       "archivePolicy": "archive_when_superseded",
-      "phase": "ACTIVE",
+      "phase": "COMPLETED",
       "tags": [
         "block-147",
         "review-correctness",
         "a2",
         "review-batch-2"
       ],
-      "notes": "审视批序列第 2 批（A2 审阅正确性；用户 2026-10-08「按顺序直接推进 尽可能的走远」批量发令）：#1 hunk 决策键内容寻址 / #2 未决可见+提交拦截 / #3 键盘焦点视觉反馈。单实现员串行+红绿先行，工作流内不提交，主代理终审集成。"
+      "notes": "审视批序列第 2 批（A2 审阅正确性；用户 2026-10-08「按顺序直接推进 尽可能的走远」批量发令）：#1 hunk 决策键内容寻址 / #2 未决可见+提交拦截 / #3 键盘焦点视觉反馈。单实现员串行+红绿先行，工作流内不提交，主代理终审集成。 2026-10-08 当日收口 completed：三项红绿全留痕+评审 P1=0+P2 三条集成批修掉+closeout 十一门 PASS（code-size 两次 R-2 重锚）；UI-466 in_progress 待实机过目。"
     }
   ],
   "lastUpdated": "2026-10-08",

@@ -54,8 +54,8 @@
       "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx",
       "wave": "B",
       "module": "W-04",
-      "lines": 1330,
-      "sha256": "209fb46820899ae5b8882549c20a69781a036eebb1d8cc31ae9917d0d5dd71ab"
+      "lines": 1348,
+      "sha256": "36821b74eb4ae1ca9dabf3b6228241ef8e608b9fef8272fc15068efb432707e6"
     },
     {
       "path": "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
@@ -166,9 +166,9 @@
       "path": "src/ipc/working-tree-review.js",
       "wave": "D",
       "module": "P-01",
-      "lines": 654,
-      "sha256": "b1a8303d2bb09317a09374053757d7a85c716777e2f599c5f3f962cac94508af"
+      "lines": 656,
+      "sha256": "8da73f37f51c1f738da74ff3785f3719649021d15f44cdf837c5296630f962b6"
     }
   ],
-  "total": 22768
+  "total": 22788
 }
