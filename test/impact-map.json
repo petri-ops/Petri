@@ -2874,6 +2874,25 @@
       ],
       "frontendRelated": false,
       "classifiesScripts": false
+    },
+    {
+      "id": "block145-evidence",
+      "note": "BLOCK-145 裁决批收口实机证据目录（D1 v-a-cold-start.txt 冷启动实机取证 + D3 v-c-multifactor.json 多因子实机证据；无 Node 测试读者，复现驱动=相邻规则 block145-adjudication 的三条契约测试。收口提交 ec2abf8a 带入 acceptance/block-145/ 时漏登记 impact-map，test-affected 全映射门红（acceptance/block-145/evidence.json unknown）——BLOCK-146 门禁修复顺手清债，对标 block139-evidence/block142-evidence/block144-bk08-evidence 先例）。",
+      "patterns": [
+        "acceptance/block-145/**"
+      ],
+      "tests": [],
+      "classifiesScripts": false
+    },
+    {
+      "id": "block146-evidence",
+      "note": "BLOCK-146 分析链正确性批收口证据目录（红绿/门禁/pack 对账 hash；无 Node 测试读者，复现驱动=本批五条契约测试 block146×2+capability-bundles+deseq2-multifactor+tool-registry-script-links，均已在生产文件规则面登记）。",
+      "patterns": [
+        "acceptance/block-146/**"
+      ],
+      "tests": [],
+      "frontendRelated": false,
+      "classifiesScripts": false
     }
   ]
 }

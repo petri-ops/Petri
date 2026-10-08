@@ -37,8 +37,33 @@ const { execFile } = require('child_process');
  */
 
 const BUNDLE_HOST = 'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com';
+// 平台键约定单一来源：src/plugin-schema.js PLATFORM_IDS（'macos-arm64' |
+// 'macos-x64' | 'windows-x64' | 'linux-x64'）。DEFAULT_PLATFORM 只描述
+// 「当前已发布 archive 的构建平台」（registry 数据面，见下方描述符），不再
+// 充当查找缺省值——查找缺省值由 deriveHostPlatform() 按宿主推导（BLOCK-146 #8）。
 const DEFAULT_PLATFORM = 'macos-arm64';
 const DEFAULT_VERSION = '1.0.0';
+
+/**
+ * BLOCK-146 #8 — 按宿主 process.platform/arch 推导平台键。
+ *
+ * 审视发现 #8：此前 getBundleDescriptor 的缺省平台硬编码 'macos-arm64'，
+ * 两个生产调用点（run-plugin-script.js / tools-executor.js）不传 platform，
+ * Windows 宿主会判 ready 并下载 mac 二进制（sha256 是真实发布值 → 校验必过，
+ * ledger 持久化 ready 不自愈）。根修：缺省平台按宿主推导；宿主平台无对应
+ * registry 键时 getBundleDescriptor 返回 null（status 'unknown'，拒绝下载），
+ * fail-closed 不造键。键集合与 scripts/build-r-bundle.mjs currentPlatform /
+ * src/plugin/runtime.js detectPlatform 同一约定。
+ *
+ * 经 module.exports 引用（调用点写 `module.exports.deriveHostPlatform()`），
+ * 测试可 monkeypatch 模拟任意宿主。
+ */
+function deriveHostPlatform(platform = process.platform, arch = process.arch) {
+  if (platform === 'darwin') return arch === 'arm64' ? 'macos-arm64' : 'macos-x64';
+  if (platform === 'win32') return 'windows-x64';
+  if (platform === 'linux') return arch === 'arm64' ? 'linux-arm64' : 'linux-x64';
+  return `${platform}-${arch}`;
+}
 
 function bundleUrl(bundleId, version, platform) {
   return `${BUNDLE_HOST}/bundles/${bundleId}-${version}-${platform}.tar.gz`;
@@ -80,7 +105,8 @@ const BUNDLE_REGISTRY = Object.freeze({
 
 /**
  * Classify a descriptor's publication status.
- *   - 'unknown'     — no such bundleId in the registry
+ *   - 'unknown'     — no such bundleId in the registry, OR no descriptor for the
+ *                     resolved platform (host-derived/explicit; BLOCK-146 #8)
  *   - 'unpublished' — registered but sha256 is null (not built/signed yet)
  *   - 'ready'       — registered and has a sha256 (verifiable, downloadable)
  */
@@ -93,6 +119,14 @@ function bundleStatus(descriptor) {
  * Look up a bundle descriptor by id. Returns null for an unknown bundle or when
  * the descriptor does not support the requested platform.
  *
+ * Platform resolution order (BLOCK-146 #8): explicit `opts.platform` override →
+ * host-derived `deriveHostPlatform()`. A host platform with no matching
+ * registry key resolves to null (never fabricates a key, never downloads).
+ *
+ * The returned copy carries `platform` (the resolved single platform key) next
+ * to `platforms` (the descriptor's full support list), so install-time
+ * assertions can pin the exact platform the fetch was for.
+ *
  * @param {string} bundleId
  * @param {{platform?: string, version?: string}} [opts]
  * @returns {object|null} a shallow copy of the descriptor, or null
@@ -102,7 +136,7 @@ function getBundleDescriptor(bundleId, opts = {}) {
   const base = BUNDLE_REGISTRY[bundleId];
   if (!base) return null;
 
-  const platform = opts.platform || DEFAULT_PLATFORM;
+  const platform = opts.platform || module.exports.deriveHostPlatform();
   if (Array.isArray(base.platforms) && !base.platforms.includes(platform)) {
     return null;
   }
@@ -111,7 +145,7 @@ function getBundleDescriptor(bundleId, opts = {}) {
   // (the caller may want the descriptor to compare); we surface the registered
   // descriptor and let the readiness/provisioning layer enforce version match.
   const version = opts.version || base.version;
-  const platformMismatchSafe = { ...base, platforms: [...base.platforms] };
+  const platformMismatchSafe = { ...base, platforms: [...base.platforms], platform };
   if (version !== base.version) {
     // Re-derive the URL for the requested version so callers building a
     // per-version fetch get a consistent URL; sha256 stays null (we only have a
@@ -211,6 +245,26 @@ function installTarGzBundle(archivePath, installDir, expected = {}) {
         ) {
           const failure = new Error('bundle_manifest_mismatch');
           failure.code = 'bundle_manifest_mismatch';
+          rejectAndClean(failure);
+          return;
+        }
+        // BLOCK-146 #8：平台三元组一致性——archive 内 bundle-manifest.json 声明的
+        // platform 必须与本次解析出的期望平台（descriptor.platform，由宿主推导或
+        // 显式覆盖）一致。manifest 缺 platform 字段而期望已给出时同样拒装：
+        // 无法验证一致性的 archive 不落地（fail-closed）。expected.platform 缺席
+        // （如测试直接调 installTarGzBundle 只传 bundleId/version）则维持既有
+        // 校验面，不新增断言。
+        if (
+          expected.platform &&
+          manifest.platform !== expected.platform
+        ) {
+          const failure = new Error(
+            `bundle_platform_mismatch: archive manifest declares platform `
+            + `'${manifest.platform}' but the fetch was resolved for '${expected.platform}'`
+          );
+          failure.code = 'bundle_platform_mismatch';
+          failure.declaredPlatform = manifest.platform ?? null;
+          failure.expectedPlatform = expected.platform;
           rejectAndClean(failure);
           return;
         }
@@ -321,6 +375,10 @@ async function ensureBundlesForPlugin(pluginCfg, options = {}) {
         installTarGzBundle(archivePath, installDir, {
           bundleId: descriptor.bundleId,
           version: descriptor.version,
+          // BLOCK-146 #8：把解析出的平台穿进安装期望——archive manifest 声明的
+          // platform 与本次 fetch 实际面向的平台不一致时拒装（防止 sha256 碰巧
+          // 校验通过的错误平台二进制被记为 ready R library）。
+          platform: descriptor.platform,
         });
     }
     const prov = await cp.provisionCapability(capability, provisionOptions);
@@ -338,12 +396,62 @@ async function ensureBundlesForPlugin(pluginCfg, options = {}) {
   return { ok: results.every((r) => r.ok), results };
 }
 
+/**
+ * BLOCK-146 #9 — 必需 bundle 未就绪的结构化失败文案（单源，两条执行路径共用：
+ * mcp/registry/run-plugin-script.js 与 helpers/tools-executor.js）。
+ *
+ * 语义判据：plugin.json 的 requiresBundle 声明即「必需」——normalizeRequiredBundles
+ * 把声明列表全量视作 required，当前不存在 optional bundle 形态（可选形态出现时，
+ * 其合法回退语义不受本函数影响）。文案对照 helpers/tool-dependencies.js
+ * missingPackagesMessage 范式：缺什么（bundleId/status/error）+ 怎么办（可行动
+ * 中文指引）。
+ *
+ * @param {string} toolId 工具/插件 id（用于点名）
+ * @param {{ok:boolean, results:Array<{bundleId:string, ok:boolean, status:string, error?:string, message?:string}>}} ensureResult
+ * @returns {string} 多行中文失败文案（可直接进 tool_jobs.error / MCP content）
+ */
+function formatRequiredBundleFailure(toolId, ensureResult) {
+  const results = ensureResult && Array.isArray(ensureResult.results) ? ensureResult.results : [];
+  const lines = [];
+  for (const r of results) {
+    if (r && r.ok) continue;
+    const bundleId = (r && r.bundleId) || '(unknown)';
+    const status = (r && r.status) || 'unknown';
+    let hint;
+    if (status === 'unknown' && BUNDLE_REGISTRY[bundleId]) {
+      const supported = ((BUNDLE_REGISTRY[bundleId] || {}).platforms || []).join(', ') || '无';
+      hint = `当前系统平台（${module.exports.deriveHostPlatform()}）没有该 bundle 的已发布版本（可用平台：${supported}）`;
+    } else if (status === 'unknown') {
+      hint = 'bundleId 未登记在 bundle 注册表';
+    } else if (status === 'unpublished') {
+      hint = '该 bundle 尚未发布（无已验证 sha256 描述符，fail-closed 不下载）';
+    } else if (status === 'provision_failed') {
+      hint = '该 bundle 下载/校验/安装失败';
+    } else {
+      hint = '该 bundle 未就绪';
+    }
+    const detail = [`status=${status}`];
+    if (r && r.error) detail.push(`error=${r.error}`);
+    if (r && r.message) detail.push(`message=${r.message}`);
+    lines.push(`- ${bundleId}：${hint}（${detail.join(' / ')}）`);
+  }
+  if (lines.length === 0) lines.push('-（ensureBundlesForPlugin 未返回明细）');
+  return [
+    `执行失败: 插件 ${toolId} 必需的 capability bundle 未就绪，已停止执行：`,
+    ...lines,
+    '指引：平台不符时请在受支持的平台（如 macOS Apple Silicon）运行该分析——本机不会下载与当前平台不符的'
+      + '预编译二进制；下载/校验/安装失败请检查网络与磁盘后重试。',
+  ].join('\n');
+}
+
 module.exports = {
   BUNDLE_REGISTRY,
+  deriveHostPlatform,
   getBundleDescriptor,
   resolveBundlesForPlugin,
   ensureBundlesForPlugin,
   bundleStatus,
   installTarGzBundle,
+  formatRequiredBundleFailure,
   TAR_FORCE_LOCAL,
 };

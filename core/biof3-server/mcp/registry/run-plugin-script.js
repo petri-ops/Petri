@@ -28,11 +28,12 @@ const {
 } = require('../../helpers/artifact-truth');
 const { checkAllowedDownstream } = require('../../agent-tools/agent-tool-policy');
 const { createResultArchive } = require('../../helpers/result-archive');
+const { validateDomainUploads } = require('../../helpers/upload-domain-validation');
 
 const { createExecutionProvenance, attachProvenanceToResult } = require('../../../shared-backend/execution-provenance');
 const { collectExecutionInputs, writeArtifactManifest } = require('../../../shared-backend/artifact-manifest');
 const { resolveRLibsForPlugin } = require('../../../shared-backend/r-libs-resolver');
-const { ensureBundlesForPlugin } = require('../../../shared-backend/capability-bundles');
+const { ensureBundlesForPlugin, formatRequiredBundleFailure } = require('../../../shared-backend/capability-bundles');
 const { R_SERVER, SHARED_BACKEND } = require('./runtime-paths');
 const { _normalizeArtifacts, _resolveStagedInputPath } = require('./artifact-normalize');
 const pluginLoader = require(path.join(R_SERVER, 'plugin-loader.js'));
@@ -56,20 +57,27 @@ async function _runPluginScript(
   const { resolveJobLayout, createMcpExecutionContext, runPluginToolRemote } = seams;
   // Stage 3 B2 part2: auto-provision required capability bundle(s) before
   // assembling R_LIBS_USER, so a freshly-downloaded bundle is visible to the
-  // resolveRLibsForPlugin readiness check below. Best-effort only: an
-  // unpublished/unknown bundle (or any provisioning failure) MUST NOT fail the
-  // job — resolveRLibsForPlugin simply won't find the lib and we run on the
-  // base runtime, identical to today's behavior.
+  // resolveRLibsForPlugin readiness check below.
+  // BLOCK-146 #9：requiresBundle 声明即插件必需依赖（ensureBundlesForPlugin 语义
+  // ——声明列表全量视作 required，当前无 optional 形态）。必需 bundle 未就绪
+  // （unknown/unpublished/provision_failed/…）不再 warn 后裸跑 base runtime——
+  // 审视发现 #9：那会让作业最终以晦涩的 R library 报错收场且无归因。改为把
+  // {bundleId, status, error} + 可行动中文指引（formatRequiredBundleFailure 单源）
+  // 并入 job 失败文案 fail-fast。await 必须先于 Promise 构造（executor 不可
+  // async），结果经闭包传入——job 建档后立即落 failed，历史与 plan 同步可见。
+  let requiredBundleFailureText = null;
   if (plugin && plugin.language === 'r' && plugin.requiresBundle) {
     try {
       const ensureResult = await ensureBundlesForPlugin(plugin);
       if (ensureResult && !ensureResult.ok) {
+        requiredBundleFailureText = formatRequiredBundleFailure(plugin.id, ensureResult);
         console.warn(
-          `[mcp-registry] capability bundle(s) not ready for ${plugin.id}, running on base runtime:`,
+          `[mcp-registry] capability bundle(s) not ready for ${plugin.id}, failing the job:`,
           JSON.stringify(ensureResult.results)
         );
       }
     } catch (e) {
+      requiredBundleFailureText = `执行失败: capability bundle 预检异常（${plugin.id}）: ${e.message}`;
       console.warn(`[mcp-registry] ensureBundlesForPlugin failed for ${plugin.id}:`, e.message);
     }
   }
@@ -134,6 +142,28 @@ async function _runPluginScript(
       }
     }
 
+    // BLOCK-146 #9：必需 bundle 未就绪 → 建档后立即失败（历史可见 + plan 步骤
+    // 归因同步），不派生脚本进程。
+    if (requiredBundleFailureText) {
+      const errText = requiredBundleFailureText;
+      if (db && toolJobId) {
+        try {
+          db.updateToolJob(toolJobId, {
+            status: 'failed',
+            error: errText,
+            completedAt: Date.now(),
+          });
+          publishJobTerminalState(toolJobId, 'failed');
+          if (plans) plans.syncPlanStepStatusFromToolJob(toolJobId, 'failed', errText);
+        } catch {}
+      }
+      return resolve({
+        content: [{ type: 'text', text: errText }],
+        isError: true,
+        toolJobId,
+      });
+    }
+
     // Phase 3: 以 tool_job.id 作为物理目录主键（项目沙盒或全局 tool-jobs）。
     let jobDir;
     let outputDir;
@@ -182,13 +212,40 @@ async function _runPluginScript(
     //   (b) deseq2: list.files(job_dir, pattern="^counts") 在 jobDir 找文件
     // 为兼容两者，file input 既保留在 params（路径），又复制到 jobDir/<id>。
     // 复刻 tools-executor.js:572-578 的 files 写入约定（文件名 = input id）。
+    // BLOCK-146 #4：required file 输入路径不存在 → fail-fast（此前静默 continue
+    // 裸跑，脚本侧以晦涩的读文件报错收场、agent 无归因）；非 required 输入
+    // 维持跳过（可选输入合法回退语义不变）。
     const toolDef = pluginLoader.getToolDefinition(plugin.id);
     const stagedInputFiles = [];
     if (toolDef && Array.isArray(toolDef.inputs)) {
       for (const inp of toolDef.inputs) {
         if (inp.type !== 'file' || !inp.id) continue;
         const srcPath = args && args[inp.id];
-        if (typeof srcPath !== 'string' || !fs.existsSync(srcPath)) continue;
+        if (typeof srcPath !== 'string' || !fs.existsSync(srcPath)) {
+          if (inp.required) {
+            const shownPath = typeof srcPath === 'string'
+              ? srcPath
+              : `<未提供（收到 ${srcPath === undefined ? 'undefined' : typeof srcPath} 类型）>`;
+            const errText = `执行失败: 输入 ${inp.id} 路径不存在: ${shownPath}（需本地绝对路径）`;
+            if (db && toolJobId) {
+              try {
+                db.updateToolJob(toolJobId, {
+                  status: 'failed',
+                  error: errText,
+                  completedAt: Date.now(),
+                });
+                publishJobTerminalState(toolJobId, 'failed');
+                if (plans) plans.syncPlanStepStatusFromToolJob(toolJobId, 'failed', errText);
+              } catch {}
+            }
+            return resolve({
+              content: [{ type: 'text', text: errText }],
+              isError: true,
+              toolJobId,
+            });
+          }
+          continue;
+        }
         // 文件名 = input id（+ 原扩展名），deseq2 的 list.files("^counts") 才能命中。
         // Descriptor id is still untrusted plugin data, so contain it before writing.
         const staged = _resolveStagedInputPath(jobDir, inp.id, srcPath);
@@ -213,6 +270,42 @@ async function _runPluginScript(
         fs.copyFileSync(srcPath, staged.stagedPath);
         stagedInputFiles.push(staged.stagedPath);
       }
+    }
+
+    // 1c. BLOCK-146 B 轨（审视发现 #7）：域校验主路径化——暂存进 jobDir 的
+    // file 型输入与 HTTP 上传路径（tools-executor.js handleToolRun，BLOCK-131）
+    // 同源过 validateDomainUploads（单源复用，规则体零复制）。此前域校验只在
+    // HTTP multipart 直跑路径触发，agent run_tool（MCP/会话）与 UI 表单链
+    // （AnalysisLaunchPanel 组装 prompt → 会话 → run_tool → 本函数）不触发，
+    // 小数 counts 被脚本静默 round 后出假成功。识别=单源模块的文件名约定
+    // （暂存名=<input_id><原扩展名>，即「在册插件输入白名单」起版；deseq2 的
+    // counts/coldata 命中，deg_table 等非域命名不做域校验不虚构）。findings
+    // 非空 → 中文 fail-closed（带文件名+规则名，UI-457 同源消息体），失败
+    // 形态与 #4/#9 一致：job failed + plans 同步 + 不派生脚本进程。
+    const domainFindings = validateDomainUploads(
+      jobDir,
+      stagedInputFiles.map((stagedPath) => path.basename(stagedPath))
+    ).findings;
+    if (domainFindings.length > 0) {
+      const errText = `执行失败: 输入数据域校验未通过（${domainFindings
+        .map((finding) => `${finding.code}｜${finding.message}`)
+        .join('；')}）——请修正上述输入文件后重试`;
+      if (db && toolJobId) {
+        try {
+          db.updateToolJob(toolJobId, {
+            status: 'failed',
+            error: errText,
+            completedAt: Date.now(),
+          });
+          publishJobTerminalState(toolJobId, 'failed');
+          if (plans) plans.syncPlanStepStatusFromToolJob(toolJobId, 'failed', errText);
+        } catch {}
+      }
+      return resolve({
+        content: [{ type: 'text', text: errText }],
+        isError: true,
+        toolJobId,
+      });
     }
     let stagedInputSnapshots;
     try {

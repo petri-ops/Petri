@@ -36,7 +36,7 @@ const { resolveRLibsForPlugin } = require('../../shared-backend/r-libs-resolver'
 const {
   scriptExtensionFor,
 } = require('../../shared-backend/script-host-languages');
-const { ensureBundlesForPlugin } = require('../../shared-backend/capability-bundles');
+const { ensureBundlesForPlugin, formatRequiredBundleFailure } = require('../../shared-backend/capability-bundles');
 const { attachProvenanceToResult } = require('../../shared-backend/execution-provenance');
 const { writeArtifactManifest } = require('../../shared-backend/artifact-manifest');
 const { createRuntimeResourceSnapshot } = require('../../shared-backend/runtime-resource-snapshot');
@@ -1508,24 +1508,34 @@ function createToolsExecutor({
         // 三段式组装逻辑抽到 shared-backend/r-libs-resolver.js（与 mcp/registry.js 共用）。
         if (cfg._isPlugin) {
           // Stage 3 B2 part2：在组装 R_LIBS_USER 之前，先确保插件声明的 capability
-          // bundle 已就绪（缺则按需下载）。ensureBundlesForPlugin 对 unpublished /
-          // unknown bundle 不下载、不抛错；任何非 ok 结果只 warn，随后照常继续用基础
-          // runtime 跑（与接线前行为完全一致——resolveRLibsForPlugin 找不到即返回 null）。
-          // 绝不因 bundle 未就绪而中断 job。await 确保已下载的 bundle 能被随后的
+          // bundle 已就绪（缺则按需下载）。await 确保已下载的 bundle 能被随后的
           // resolveRLibsForPlugin → checkCapabilityReady 命中。
+          // BLOCK-146 #9：requiresBundle 声明即插件必需依赖（ensureBundlesForPlugin
+          // 语义——声明列表全量视作 required，当前无 optional 形态）。必需 bundle
+          // 未就绪不再 warn 后裸跑 base runtime（审视发现 #9：最终以晦涩的 R
+          // library 报错收场、无归因），改为 markJobFailed('dependencies') 携带
+          // {bundleId, status, error} + 可行动中文指引（对照 tool-dependencies.js
+          // missingPackagesMessage 范式；文案单源 formatRequiredBundleFailure）。
+          // 预检抛错（装置层意外）同样按从紧原则失败，不静默回退。
           if (cfg.requiresBundle) {
+            let ensured = null;
             try {
-              const ensured = await ensureBundlesForPlugin(cfg);
-              if (ensured && !ensured.ok) {
-                console.warn(
-                  '[tools] capability bundle not fully ready for',
-                  toolId,
-                  '— continuing with base runtime:',
-                  JSON.stringify(ensured.results)
-                );
-              }
+              ensured = await ensureBundlesForPlugin(cfg);
             } catch (e) {
-              console.warn('[tools] ensureBundlesForPlugin failed for', toolId, ':', e.message);
+              await markJobFailed(jobId, `执行失败: capability bundle 预检异常: ${e.message}`, 'dependencies');
+              releaseActiveToolJob(activeToolJobs, jobId, owner);
+              return;
+            }
+            if (ensured && !ensured.ok) {
+              console.warn(
+                '[tools] capability bundle(s) not ready for',
+                toolId,
+                '— failing the job:',
+                JSON.stringify(ensured.results)
+              );
+              await markJobFailed(jobId, formatRequiredBundleFailure(toolId, ensured), 'dependencies');
+              releaseActiveToolJob(activeToolJobs, jobId, owner);
+              return;
             }
           }
           const resolvedEnv = resolveRLibsForPlugin(cfg);

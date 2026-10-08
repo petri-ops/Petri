@@ -91,7 +91,9 @@ test('BUNDLE_REGISTRY contains the two real bundle entries', () => {
 // ── 2. getBundleDescriptor: hit / unknown ─────────────────────────────────────
 
 test('getBundleDescriptor: returns descriptor for a known bundle', () => {
-  const d = bundles.getBundleDescriptor('r-enrichment');
+  // BLOCK-146 #8 后缺省平台按宿主推导——测「已知 bundle 命中」须显式钉住
+  // 已发布描述符的平台（macos-arm64），保持测试在任意宿主上确定。
+  const d = bundles.getBundleDescriptor('r-enrichment', { platform: 'macos-arm64' });
   assert.ok(d);
   assert.equal(d.bundleId, 'r-enrichment');
   assert.equal(d.sha256, 'a857831d0d548cc6f9d856684ccec32c0241af018521c5d0641349ade0be1820');
@@ -110,7 +112,11 @@ test('getBundleDescriptor: returns null for an unsupported platform', () => {
 // ── 3. resolveBundlesForPlugin variants ───────────────────────────────────────
 
 test('resolveBundlesForPlugin: single published bundle → one ready entry', () => {
-  const out = bundles.resolveBundlesForPlugin({ requiresBundle: 'r-enrichment', requiresBundleVersion: '1.0.0' });
+  // 显式钉住 macos-arm64（已发布描述符平台），宿主无关（BLOCK-146 #8）。
+  const out = bundles.resolveBundlesForPlugin(
+    { requiresBundle: 'r-enrichment', requiresBundleVersion: '1.0.0' },
+    { platform: 'macos-arm64' },
+  );
   assert.equal(out.length, 1);
   assert.equal(out[0].bundleId, 'r-enrichment');
   assert.equal(out[0].status, 'ready');
@@ -118,7 +124,10 @@ test('resolveBundlesForPlugin: single published bundle → one ready entry', () 
 });
 
 test('resolveBundlesForPlugin: multiple bundles (array)', () => {
-  const out = bundles.resolveBundlesForPlugin({ requiresBundle: ['r-enrichment', 'r-wgcna'] });
+  const out = bundles.resolveBundlesForPlugin(
+    { requiresBundle: ['r-enrichment', 'r-wgcna'] },
+    { platform: 'macos-arm64' },
+  );
   assert.equal(out.length, 2);
   assert.deepEqual(out.map((r) => r.bundleId).sort(), ['r-enrichment', 'r-wgcna']);
   assert.ok(out.every((r) => r.status === 'ready'));
@@ -145,7 +154,9 @@ test('ensureBundlesForPlugin: unpublished bundle does NOT download and returns s
   const result = await bundles.ensureBundlesForPlugin(
     // No verified descriptor exists for this requested version.
     { requiresBundle: 'r-enrichment', requiresBundleVersion: '9.9.9' },
-    { runtimesDir, download: makeDownload(CONTENT, counter) },
+    // 显式钉住 macos-arm64：本测试证「请求版本无已验证描述符 → unpublished」，
+    // 平台命中是前提（BLOCK-146 #8 后缺省按宿主推导）。
+    { platform: 'macos-arm64', runtimesDir, download: makeDownload(CONTENT, counter) },
   );
   assert.equal(result.ok, false);
   assert.equal(result.results.length, 1);
@@ -288,6 +299,170 @@ test('installTarGzBundle rejects a manifest for a different bundle', async () =>
     }),
     (error) => error && error.code === 'bundle_manifest_mismatch'
   );
+});
+
+// ── 9. BLOCK-146 #8：缺省平台按宿主推导（deriveHostPlatform，见生产侧注释）──
+//
+// 审视发现 #8：DEFAULT_PLATFORM='macos-arm64' 硬编码，两个生产调用点
+// （mcp/registry/run-plugin-script.js:65、helpers/tools-executor.js:1518）
+// 不传 platform → Windows 宿主判 ready 并下载 mac 二进制（sha256 是真实发布值，
+// 校验必过、ledger 持久化 ready 不自愈）。契约：缺省平台必须按宿主推导；
+// 宿主平台无对应描述符键时 resolve 为 unknown/null 拒绝下载（fail-closed 不造键）；
+// options.platform 显式覆盖保留；installTarGzBundle 校验 manifest 平台一致性。
+// 通过 monkeypatch deriveHostPlatform 模拟宿主，测试在任何宿主上都确定。
+
+test('#8 deriveHostPlatform: 平台键与 plugin-schema PLATFORM_IDS / build-r-bundle currentPlatform 约定对齐', () => {
+  assert.equal(bundles.deriveHostPlatform('win32', 'x64'), 'windows-x64');
+  assert.equal(bundles.deriveHostPlatform('darwin', 'arm64'), 'macos-arm64');
+  assert.equal(bundles.deriveHostPlatform('darwin', 'x64'), 'macos-x64');
+  assert.equal(bundles.deriveHostPlatform('linux', 'x64'), 'linux-x64');
+  assert.equal(bundles.deriveHostPlatform('linux', 'arm64'), 'linux-arm64');
+  // 缺省参数读真实宿主（不抛错、返回字符串键）。
+  assert.equal(typeof bundles.deriveHostPlatform(), 'string');
+});
+
+test('#8 win32 宿主语境：r-enrichment 缺省解析为 null（非 ready，不造键）', () => {
+  const original = bundles.deriveHostPlatform;
+  bundles.deriveHostPlatform = () => 'windows-x64';
+  try {
+    assert.equal(bundles.getBundleDescriptor('r-enrichment'), null,
+      'win32 宿主不得默认命中 macos-arm64 描述符');
+    const resolved = bundles.resolveBundlesForPlugin(
+      { requiresBundle: 'r-enrichment', requiresBundleVersion: '1.0.0' },
+    );
+    assert.equal(resolved.length, 1);
+    assert.equal(resolved[0].status, 'unknown');
+    assert.equal(resolved[0].descriptor, null);
+  } finally {
+    bundles.deriveHostPlatform = original;
+  }
+});
+
+test('#8 win32 宿主语境：ensureBundlesForPlugin 拒绝下载（零 download 调用）', async () => {
+  const original = bundles.deriveHostPlatform;
+  bundles.deriveHostPlatform = () => 'windows-x64';
+  try {
+    const runtimesDir = tmpDir();
+    const counter = { calls: 0 };
+    const result = await bundles.ensureBundlesForPlugin(
+      { requiresBundle: 'r-enrichment', requiresBundleVersion: '1.0.0' },
+      { runtimesDir, download: makeDownload(CONTENT, counter) },
+    );
+    assert.equal(result.ok, false);
+    assert.equal(result.results[0].status, 'unknown');
+    assert.equal(counter.calls, 0,
+      'Windows 宿主绝不能下载 macos-arm64 bundle——其 sha256 是真实发布值，下载后校验必过（#8 实证）');
+  } finally {
+    bundles.deriveHostPlatform = original;
+  }
+});
+
+test('#8 显式 platform 覆盖保留：win32 宿主上显式请求 macos-arm64 仍取到描述符', () => {
+  const original = bundles.deriveHostPlatform;
+  bundles.deriveHostPlatform = () => 'windows-x64';
+  try {
+    const d = bundles.getBundleDescriptor('r-enrichment', { platform: 'macos-arm64' });
+    assert.ok(d, '显式 platform 覆盖必须继续生效');
+    assert.equal(d.platform, 'macos-arm64');
+    assert.equal(d.sha256, 'a857831d0d548cc6f9d856684ccec32c0241af018521c5d0641349ade0be1820');
+  } finally {
+    bundles.deriveHostPlatform = original;
+  }
+});
+
+test('#8 mac 宿主语境（对照）：缺省解析命中 macos-arm64 且描述符携带 resolved platform', () => {
+  const original = bundles.deriveHostPlatform;
+  bundles.deriveHostPlatform = () => 'macos-arm64';
+  try {
+    const d = bundles.getBundleDescriptor('r-enrichment');
+    assert.ok(d, 'macOS Apple Silicon 宿主缺省解析必须继续命中');
+    assert.equal(d.platform, 'macos-arm64');
+  } finally {
+    bundles.deriveHostPlatform = original;
+  }
+});
+
+test('#8 installTarGzBundle：manifest 平台与期望不一致拒装（bundle_platform_mismatch）', async () => {
+  const root = tmpDir();
+  const source = path.join(root, 'source');
+  const installDir = path.join(root, 'installed');
+  const archive = path.join(root, 'bundle.tar.gz');
+  fs.mkdirSync(source, { recursive: true });
+  fs.writeFileSync(
+    path.join(source, 'bundle-manifest.json'),
+    JSON.stringify({ schemaVersion: 1, bundleId: 'r-enrichment', bundleVersion: '1.0.0', platform: 'macos-arm64' })
+  );
+  tarGz(archive, source);
+
+  await assert.rejects(
+    bundles.installTarGzBundle(archive, installDir, {
+      bundleId: 'r-enrichment',
+      version: '1.0.0',
+      platform: 'windows-x64',
+    }),
+    (error) => error && error.code === 'bundle_platform_mismatch',
+    '期望平台与 manifest 声明平台不一致的 archive 必须拒装'
+  );
+});
+
+test('#8 installTarGzBundle：expected.platform 缺席时维持既有校验面（不新增平台断言）', async () => {
+  const root = tmpDir();
+  const source = path.join(root, 'source');
+  const installDir = path.join(root, 'installed');
+  const archive = path.join(root, 'bundle.tar.gz');
+  fs.mkdirSync(path.join(source, 'demoPkg'), { recursive: true });
+  fs.writeFileSync(
+    path.join(source, 'bundle-manifest.json'),
+    JSON.stringify({ schemaVersion: 1, bundleId: 'r-enrichment', bundleVersion: '1.0.0' })
+  );
+  fs.writeFileSync(path.join(source, 'demoPkg', 'DESCRIPTION'), 'Package: demoPkg\n');
+  tarGz(archive, source);
+
+  await bundles.installTarGzBundle(archive, installDir, {
+    bundleId: 'r-enrichment',
+    version: '1.0.0',
+  });
+  assert.ok(fs.existsSync(path.join(installDir, 'bundle-manifest.json')));
+});
+
+test('#8 ensureBundlesForPlugin：resolved platform 穿入安装期望——平台不符的 archive 装失败', async () => {
+  const root = tmpDir();
+  const source = path.join(root, 'source');
+  const archive = path.join(root, 'r-enrichment-1.0.0-windows-x64.tar.gz');
+  const runtimesDir = path.join(root, 'runtimes');
+  fs.mkdirSync(path.join(source, 'demoPkg'), { recursive: true });
+  // archive 内 manifest 声明 macos-arm64，描述符却按 windows-x64 解析 → 拒装。
+  fs.writeFileSync(
+    path.join(source, 'bundle-manifest.json'),
+    JSON.stringify({ schemaVersion: 1, bundleId: 'r-enrichment', bundleVersion: '1.0.0', platform: 'macos-arm64' })
+  );
+  fs.writeFileSync(path.join(source, 'demoPkg', 'DESCRIPTION'), 'Package: demoPkg\n');
+  tarGz(archive, source);
+
+  const original = bundles.getBundleDescriptor;
+  bundles.getBundleDescriptor = () => ({
+    bundleId: 'r-enrichment',
+    version: '1.0.0',
+    platform: 'windows-x64',
+    url: 'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/bundles/r-enrichment-1.0.0-windows-x64.tar.gz',
+    sha256: crypto.createHash('sha256').update(fs.readFileSync(archive)).digest('hex'),
+    sizeBytes: fs.statSync(archive).size,
+    platforms: ['windows-x64'],
+  });
+  try {
+    const result = await bundles.ensureBundlesForPlugin(
+      { requiresBundle: 'r-enrichment', requiresBundleVersion: '1.0.0' },
+      {
+        runtimesDir,
+        download: async (_url, destPath) => fs.copyFileSync(archive, destPath),
+      }
+    );
+    assert.equal(result.ok, false, JSON.stringify(result));
+    assert.equal(result.results[0].ok, false);
+    assert.equal(result.results[0].error, 'bundle_platform_mismatch');
+  } finally {
+    bundles.getBundleDescriptor = original;
+  }
 });
 
 test('ensureBundlesForPlugin uses the real tar.gz installer by default', async () => {
