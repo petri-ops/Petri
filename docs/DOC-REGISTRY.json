@@ -5627,8 +5627,28 @@
         "review-batch-1"
       ],
       "notes": "审视批裁决首批（dwfrun-6724f75c 双视角十角度审视，用户 2026-10-08 /workflow「开」发令）：分析执行链正确性与 pack 对账。三轨 A 平台解析根修/失败归因/required-file fail-fast（#8#9#4）、B 域校验主路径化（#7）、C pack 指纹对账+本机多因子补齐（#6#10）。A→B 串行、C 并行；dynamic workflow 实现+红绿先行，工作流内不提交，主代理终审集成。 2026-10-08 当日收口 completed：三轨红绿全留痕+独立评审 P1=0+closeout 十一门 PASS（code-size 棘轮随 #9 重锚）；pack 仓本机 70e37fe（D2 死链同步）+8e6055e（D3 多因子重放）本地不推送（BIO-4）；R 侧零机器执行边界如实登记（7 诚实 skip，待 Mac/装 R 复验）。"
+    },
+    {
+      "id": "BLOCK-147-REVIEW-CORRECTNESS",
+      "capability": "review-correctness",
+      "path": "docs/block-147-review-correctness-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-147-review-correctness",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-08",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "ACTIVE",
+      "tags": [
+        "block-147",
+        "review-correctness",
+        "a2",
+        "review-batch-2"
+      ],
+      "notes": "审视批序列第 2 批（A2 审阅正确性；用户 2026-10-08「按顺序直接推进 尽可能的走远」批量发令）：#1 hunk 决策键内容寻址 / #2 未决可见+提交拦截 / #3 键盘焦点视觉反馈。单实现员串行+红绿先行，工作流内不提交，主代理终审集成。"
     }
   ],
   "lastUpdated": "2026-10-08",
-  "documentCount": 298
+  "documentCount": 299
 }
