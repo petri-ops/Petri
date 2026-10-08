@@ -99,25 +99,147 @@ function isSafeStorageKey(key) {
   return !key.split(/[\\/]+/).some((segment) => segment === '..' || segment === '.');
 }
 
+// BLOCK-148 #11：上传白名单单一真相——multer fileFilter 与 tree 响应投影（inputExtensions）
+// 同源读此常量，禁止任何一侧复制第二份清单；前端下拉过滤只消费 tree 响应里的投影。
+const UPLOAD_FILE_EXTENSIONS = ['.csv', '.tsv', '.txt', '.rds', '.rda', '.xlsx', '.h5', '.hdf5', '.gz'];
+
 const upload = multer({
   dest: path.join(TEMP_DIR, 'uploads'),
   limits: { fileSize: 500 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const allowed = ['.csv', '.tsv', '.txt', '.rds', '.rda', '.xlsx', '.h5', '.hdf5', '.gz'];
     const ext = path.extname(file.originalname).toLowerCase();
-    if (allowed.includes(ext)) {
+    if (UPLOAD_FILE_EXTENSIONS.includes(ext)) {
       cb(null, true);
     } else {
-      cb(new Error(`不支持的文件格式: ${ext}，支持: ${allowed.join(', ')}`));
+      cb(new Error(`不支持的文件格式: ${ext}，支持: ${UPLOAD_FILE_EXTENSIONS.join(', ')}`));
     }
   },
 });
+
+// ── BLOCK-148 #11：tree 有界递归（表单下拉子目录可达）──────────────────────
+// 三重界防下拉被工作区深层产物淹没：深度上限（root=0，展开 depth<3 的目录，
+// 即最多列出 3 段相对路径——demo-data/<toolId>/<file> 恰好可达）/ 产物目录排除
+// / 条目上限（触顶 truncated 显式标记，与 BLOCK-96 分页语义同构不静默截断）。
+// 递归模式下 limit/offset 不作页大小（递归自带上限），取舍见 BLOCK-148 notes。
+const TREE_RECURSIVE_MAX_DEPTH = 3;
+const TREE_RECURSIVE_MAX_ENTRIES = 500;
+const TREE_RECURSIVE_EXCLUDED_DIRS = new Set(['results', 'jobs', 'output', 'node_modules']);
+
+function toPosixRel(p) {
+  return String(p).split(path.sep).filter(Boolean).join('/');
+}
+
+/** 递归条目排序：目录优先、同层按名（与 flat 模式排序约定同构）。 */
+function sortDirents(dirents) {
+  return dirents.sort((a, b) => {
+    // BLOCK-148 P2 修复：dirent.isDirectory 是方法——须调用取值（原 `a.isDirectory ? 1 : 0`
+    // 函数引用恒真值，目录优先排序实际是 no-op）。
+    const aDir = a.isDirectory() ? 1 : 0;
+    const bDir = b.isDirectory() ? 1 : 0;
+    if (aDir !== bDir) return bDir - aDir;
+    return a.name.localeCompare(b.name);
+  });
+}
+
+/** local 递归（BFS，同步 fs）。返回 { entries, truncated }，条目带 workspace 相对 path。 */
+function listRecursiveLocal(rootDir, startRel, showHiddenEntries) {
+  const entries = [];
+  let truncated = false;
+  const startRelPosix = toPosixRel(startRel);
+  const queue = [{ dir: rootDir, rel: startRelPosix, depth: 0 }];
+  while (queue.length > 0 && !truncated) {
+    const { dir, rel, depth } = queue.shift();
+    let dirents;
+    try {
+      dirents = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const entry of sortDirents(dirents)) {
+      if (!showHiddenEntries && entry.name.startsWith('.')) continue;
+      const isDir = entry.isDirectory();
+      if (isDir && TREE_RECURSIVE_EXCLUDED_DIRS.has(entry.name.toLowerCase())) continue;
+      if (entries.length >= TREE_RECURSIVE_MAX_ENTRIES) {
+        truncated = true;
+        break;
+      }
+      const full = path.join(dir, entry.name);
+      const relPath = rel ? `${rel}/${entry.name}` : entry.name;
+      let stat = null;
+      try { stat = fs.statSync(full); } catch {}
+      entries.push({
+        name: entry.name,
+        type: isDir ? 'dir' : 'file',
+        size: !isDir && stat && stat.isFile() ? stat.size : undefined,
+        modifiedAt: stat ? stat.mtimeMs : undefined,
+        path: relPath,
+      });
+      if (isDir && depth + 1 < TREE_RECURSIVE_MAX_DEPTH) {
+        queue.push({ dir: full, rel: relPath, depth: depth + 1 });
+      }
+    }
+  }
+  return { entries, truncated };
+}
+
+/**
+ * ssh 递归（BFS，逐层 await backend.list——每层一次往返，深度上限 3 保证有界）。
+ * backend.list 条目形状 { name, type, size, mtimeMs }（与 flat ssh 分支同源）。
+ */
+async function listRecursiveRemote(listFn, startAbs, startRel) {
+  const entries = [];
+  let truncated = false;
+  const startRelPosix = toPosixRel(startRel);
+  const queue = [{ abs: startAbs, rel: startRelPosix, depth: 0 }];
+  while (queue.length > 0 && !truncated) {
+    const { abs, rel, depth } = queue.shift();
+    let raw;
+    try {
+      raw = await listFn(abs);
+    } catch (e) {
+      if (e && (e.remoteError === 'not_found' || e.code === 'ENOENT')) continue;
+      throw e;
+    }
+    const children = (Array.isArray(raw) ? raw : [])
+      .filter((e) => e && typeof e.name === 'string' && !e.name.includes('/') && !e.name.includes('\0'))
+      .sort((a, b) => {
+        const aDir = a.type === 'dir' ? 1 : 0;
+        const bDir = b.type === 'dir' ? 1 : 0;
+        if (aDir !== bDir) return bDir - aDir;
+        return a.name.localeCompare(b.name);
+      });
+    for (const child of children) {
+      const isDir = child.type === 'dir';
+      if (isDir && TREE_RECURSIVE_EXCLUDED_DIRS.has(child.name.toLowerCase())) continue;
+      if (entries.length >= TREE_RECURSIVE_MAX_ENTRIES) {
+        truncated = true;
+        break;
+      }
+      const relPath = rel ? `${rel}/${child.name}` : child.name;
+      entries.push({
+        name: child.name,
+        type: isDir ? 'dir' : 'file',
+        size: !isDir ? child.size : undefined,
+        modifiedAt: child.mtimeMs,
+        path: relPath,
+      });
+      if (isDir && depth + 1 < TREE_RECURSIVE_MAX_DEPTH) {
+        queue.push({ abs: `${abs.replace(/\/+$/, '')}/${child.name}`, rel: relPath, depth: depth + 1 });
+      }
+    }
+  }
+  return { entries, truncated };
+}
 
 module.exports = function registerFileRoutes(app) {
   // ── 桌面版本地文件服务 ──────────────────────────────────────
   // /api/files/<key> → 从本地 results 目录读取文件并返回
   app.get('/api/workspaces/:projectId/tree', requireTrustedDesktopOrigin, async (req, res) => {
       try {
+        // BLOCK-148 #11：?recursive=1 有界递归（子目录文件带 workspace 相对 path）；
+        // 白名单投影（inputExtensions）在所有分支同源输出——与 multer fileFilter
+        // 读同一常量 UPLOAD_FILE_EXTENSIONS（单一真相，前端下拉据此过滤）。
+        const recursive = req.query.recursive === '1';
         // BLOCK-67：ssh 项目树 = Gateway fs_list（条目契约与本地同构：name/type/size/mtimeMs）。
         const project = getProjectRecord(req.params.projectId);
         if (project && project.workspace_kind === 'ssh') {
@@ -126,6 +248,12 @@ module.exports = function registerFileRoutes(app) {
           const abs = workspaceGateway.safeRemoteJoin(root, String(req.query.prefix || ''));
           if (!abs) return res.status(400).json({ ok: false, error: '非法路径' });
           try {
+            if (recursive) {
+              const { entries, truncated } = await listRecursiveRemote(
+                (dir) => backend.list(dir), abs, String(req.query.prefix || ''),
+              );
+              return res.json({ ok: true, entries, total: entries.length, truncated, inputExtensions: UPLOAD_FILE_EXTENSIONS });
+            }
             // BLOCK-96 F2 — ?limit=N 分页（不传 = 全量，响应形状逐字节兼容）；
             // truncated 显式标记而非静默截断。前端游标加载按 offset 续拉。
             const limit = Number(req.query.limit || 0);
@@ -138,10 +266,10 @@ module.exports = function registerFileRoutes(app) {
             });
             if (limit > 0) {
               const page = await backend.listPage(abs, { limit, offset });
-              return res.json({ ok: true, entries: page.entries.map(mapEntry), total: page.total, truncated: page.truncated });
+              return res.json({ ok: true, entries: page.entries.map(mapEntry), total: page.total, truncated: page.truncated, inputExtensions: UPLOAD_FILE_EXTENSIONS });
             }
             const rawEntries = await backend.list(abs);
-            return res.json({ ok: true, entries: rawEntries.map(mapEntry) });
+            return res.json({ ok: true, entries: rawEntries.map(mapEntry), inputExtensions: UPLOAD_FILE_EXTENSIONS });
           } catch (e) {
             if (e.remoteError === 'not_found') return res.status(404).json({ ok: false, error: '目录不存在' });
             if (e.classified) return res.status(502).json({ ok: false, error: `远程连接失败: ${e.classified.kind}`, retryable: e.classified.retryable === true });
@@ -158,6 +286,10 @@ module.exports = function registerFileRoutes(app) {
         }
         // BLOCK-73：?showHidden=1 时不过滤点开头条目（前端「显示隐藏文件」开关；默认关维持现状体感）
         const showHiddenEntries = req.query.showHidden === '1';
+        if (recursive) {
+          const { entries, truncated } = listRecursiveLocal(dir, String(req.query.prefix || ''), showHiddenEntries);
+          return res.json({ ok: true, entries, total: entries.length, truncated, inputExtensions: UPLOAD_FILE_EXTENSIONS });
+        }
         const entries = fs
           .readdirSync(dir, { withFileTypes: true })
           .filter((entry) => showHiddenEntries || !entry.name.startsWith('.'))
@@ -180,9 +312,9 @@ module.exports = function registerFileRoutes(app) {
         const offset = Number(req.query.offset || 0);
         if (limit > 0) {
           const page = workspaceGateway.paginateEntries(entries, { limit, offset });
-          return res.json({ ok: true, entries: page.entries, total: page.total, truncated: page.truncated });
+          return res.json({ ok: true, entries: page.entries, total: page.total, truncated: page.truncated, inputExtensions: UPLOAD_FILE_EXTENSIONS });
         }
-        res.json({ ok: true, entries });
+        res.json({ ok: true, entries, inputExtensions: UPLOAD_FILE_EXTENSIONS });
       } catch (e) {
         res.status(500).json({ ok: false, error: e.message });
       }
@@ -560,3 +692,7 @@ module.exports = function registerFileRoutes(app) {
 };
 
 module.exports.isSafeStorageKey = isSafeStorageKey;
+// BLOCK-148 #11：上传白名单单一真相导出（契约测试锚：tree 投影 === multer fileFilter 同源常量）。
+module.exports.UPLOAD_FILE_EXTENSIONS = UPLOAD_FILE_EXTENSIONS;
+module.exports.TREE_RECURSIVE_MAX_DEPTH = TREE_RECURSIVE_MAX_DEPTH;
+module.exports.TREE_RECURSIVE_MAX_ENTRIES = TREE_RECURSIVE_MAX_ENTRIES;

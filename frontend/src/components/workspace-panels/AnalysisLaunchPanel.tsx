@@ -1,6 +1,7 @@
 import React from 'react';
 import type { CatalogInputField, CatalogTool } from '@/lib/tool-catalog';
 import { getApiPrefix, getToken } from '@/lib/authClient';
+import { demoDataTargetDir, loadDemoDataIntoWorkspace } from '@/lib/demo-data';
 import styles from '@/pages/project-workspace.module.css';
 
 function groupByCategory(tools: CatalogTool[]): Array<{ category: string; items: CatalogTool[] }> {
@@ -12,17 +13,48 @@ function groupByCategory(tools: CatalogTool[]): Array<{ category: string; items:
   return [...map.entries()].map(([category, items]) => ({ category, items }));
 }
 
+/** BLOCK-148 #11：tree?recursive=1 响应形状（与后端 files.js 契约同构）。 */
+interface WorkspaceTreeResponse {
+  entries?: Array<{ name?: string; type?: string; path?: string }>;
+  inputExtensions?: unknown[];
+  /** BLOCK-148 P2-3：500 条触顶的诚实截断信号——true 时下拉只含前 500 项，须提示。 */
+  truncated?: boolean;
+}
+
+/** BLOCK-148 #11：按 tree 响应投影的白名单（inputExtensions，与上传面同源）过滤可选文件。
+ * 无第二份清单——扩展名列表只来自后端投影，缺省（旧响应/拉取失败）= 无可选项。 */
+function filterByInputExtensions(
+  files: Array<{ path: string; name: string }>,
+  extensions: string[],
+): Array<{ path: string; name: string }> {
+  if (extensions.length === 0) return [];
+  const lowers = extensions.map((ext) => ext.toLowerCase());
+  return files.filter((f) => {
+    const name = f.name.toLowerCase();
+    return lowers.some((ext) => name.endsWith(ext));
+  });
+}
+
 /**
  * BLOCK-131（BIO-5 P2）：把插件输入契约投影为显式参数表单——文件输入
- * 枚举工作区 CSV/TSV 供选择（未选=「<选择文件>」占位，由 Agent 侧数据
+ * 枚举工作区文件供选择（未选=「<选择文件>」占位，由 Agent 侧数据
  * 就绪检查兜底），文本/数值输入带默认值回填；「按以上参数运行」组装
  * 携带显式参数的启动 prompt（文件名与参数值点名进指令），保留「配置/
  * 收起」与旧「运行」一键路径（无参数直达 Agent）。
+ *
+ * BLOCK-148 #11：文件选项 value 改用 workspace 相对完整 path（同名不同
+ * 目录消歧），显示名即 path（子目录文件带相对目录）。
+ * BLOCK-148 #12：demoDataUrl 声明的工具提供「用示例数据试跑」——demo
+ * 输入文件一键落工作区 demo-data/<toolId>/，落完即出现在上方下拉。
  */
-function ToolLaunchForm({ tool, workspaceFiles, onLaunchWithPrompt }: {
+function ToolLaunchForm({ tool, workspaceFiles, projectId, onLaunchWithPrompt, onWorkspaceFilesRefreshed, treeTruncated }: {
   tool: CatalogTool;
   workspaceFiles: Array<{ path: string; name: string }>;
+  projectId?: string | null;
   onLaunchWithPrompt: (tool: CatalogTool, prompt: string) => void;
+  onWorkspaceFilesRefreshed?: () => void;
+  /** BLOCK-148 P2-3：tree 500 条触顶信号——true 时文件下拉仅含前 500 项，须诚实提示。 */
+  treeTruncated?: boolean;
 }): React.ReactElement {
   const fileInputs = tool.inputs.filter((input) => input.type === 'file');
   const paramInputs = tool.inputs.filter((input) => input.type !== 'file');
@@ -34,8 +66,8 @@ function ToolLaunchForm({ tool, workspaceFiles, onLaunchWithPrompt }: {
     }
     return initial;
   });
-
-  const csvFiles = workspaceFiles.filter((f) => /\.(csv|tsv)$/i.test(f.name));
+  const [demoBusy, setDemoBusy] = React.useState(false);
+  const [demoMessage, setDemoMessage] = React.useState<string | null>(null);
 
   const composePrompt = () => {
     const parts: string[] = [];
@@ -49,10 +81,34 @@ function ToolLaunchForm({ tool, workspaceFiles, onLaunchWithPrompt }: {
     return `请运行「${tool.title}」分析。输入与参数：${parts.join('，')}。输入文件请从项目工作区解析；完成后报告任务 ID。`;
   };
 
+  const handleLoadDemo = async () => {
+    if (demoBusy || !projectId) return;
+    setDemoBusy(true);
+    setDemoMessage(null);
+    try {
+      const summary = await loadDemoDataIntoWorkspace(projectId, tool.id);
+      if (summary.listed === 0) {
+        setDemoMessage('该工具未提供示例数据');
+      } else {
+        setDemoMessage(`已载入 ${summary.loaded} 个示例文件到 ${demoDataTargetDir(tool.id)}/，可在上方文件下拉中选择${summary.skipped > 0 ? `（${summary.skipped} 个已存在跳过）` : ''}`);
+        onWorkspaceFilesRefreshed?.();
+      }
+    } catch (error) {
+      setDemoMessage(`示例数据载入失败：${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      setDemoBusy(false);
+    }
+  };
+
   return (
     <div className={styles.analysisLaunchForm} data-tool={tool.id}>
       {fileInputs.length > 0 && (
         <div role="group" aria-label={`${tool.title} 文件输入`}>
+          {treeTruncated && (
+            <p className={styles.analysisLaunchHint} role="note">
+              工作区文件较多，仅列出前 500 项——若找不到目标文件，可先整理工作区或用子目录收纳。
+            </p>
+          )}
           {fileInputs.map((input: CatalogInputField) => (
             <label key={input.id} className={styles.analysisLaunchField}>
               <span>{input.label || input.id}{input.required !== false ? '（必填）' : ''}</span>
@@ -62,7 +118,7 @@ function ToolLaunchForm({ tool, workspaceFiles, onLaunchWithPrompt }: {
                 onChange={(event) => setFileSelection((prev) => ({ ...prev, [input.id]: event.target.value }))}
               >
                 <option value="">&lt;选择文件&gt;</option>
-                {csvFiles.map((file) => <option key={file.path} value={file.name}>{file.name}</option>)}
+                {workspaceFiles.map((file) => <option key={file.path} value={file.path}>{file.path}</option>)}
               </select>
             </label>
           ))}
@@ -79,6 +135,19 @@ function ToolLaunchForm({ tool, workspaceFiles, onLaunchWithPrompt }: {
           />
         </label>
       ))}
+      {fileInputs.length > 0 && tool.demoDataUrl && projectId && (
+        <div>
+          <button
+            type="button"
+            className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+            disabled={demoBusy}
+            onClick={() => { void handleLoadDemo(); }}
+          >
+            {demoBusy ? '正在载入示例数据…' : '用示例数据试跑'}
+          </button>
+          {demoMessage && <span role="status">{demoMessage}</span>}
+        </div>
+      )}
       <button
         type="button"
         className={styles.analysisLaunchRun}
@@ -95,9 +164,10 @@ export interface AnalysisLaunchPanelProps {
   onLaunch: (tool: CatalogTool, launchPrompt?: string) => void;
   /** 目录尚在拉取中（区别于「已确认无插件」）。 */
   loading?: boolean;
-  /** BLOCK-131：工作区文件清单（文件输入显式选择的选项源）。 */
+  /** BLOCK-131：工作区文件清单（文件输入显式选择的选项源；显式提供时为调用方策展清单，不再按白名单过滤）。 */
   workspaceFiles?: Array<{ path: string; name: string }>;
-  /** BLOCK-131：项目 id——提供时自动拉取工作区顶层 CSV/TSV 作为文件选项。 */
+  /** BLOCK-131 / BLOCK-148 #11：项目 id——提供时自动拉取工作区树（recursive=1，子目录可达）
+   * 作为文件选项，白名单跟随响应 inputExtensions（与上传面同源）。 */
   projectId?: string | null;
 }
 
@@ -115,26 +185,37 @@ export interface AnalysisLaunchPanelProps {
  */
 export function AnalysisLaunchPanel({ tools, onLaunch, loading = false, workspaceFiles: workspaceFilesProp, projectId = null }: AnalysisLaunchPanelProps): React.ReactElement {
   const groups = React.useMemo(() => groupByCategory(tools), [tools]);
-  // BLOCK-131：文件选项源——显式 props 优先；否则按项目拉顶层 CSV/TSV。
+  // BLOCK-148 #11：文件选项源 + 下拉白名单（inputExtensions，后端与上传面同源投影）。
+  // 显式 props 优先作为文件清单（调用方策展，不再过滤）；tree 拉取改 recursive=1
+  // （子目录文件可达，条目 path = workspace 相对路径）。demo 载入后 bump version 重拉。
   const [treeFiles, setTreeFiles] = React.useState<Array<{ path: string; name: string }>>([]);
+  const [treeTruncated, setTreeTruncated] = React.useState(false);
+  const [inputExtensions, setInputExtensions] = React.useState<string[]>([]);
+  const [treeVersion, setTreeVersion] = React.useState(0);
   React.useEffect(() => {
-    if (workspaceFilesProp || !projectId) return;
+    if (!projectId) return;
     let cancelled = false;
-    fetch(`${getApiPrefix()}/workspaces/${encodeURIComponent(projectId)}/tree?limit=200`, {
+    fetch(`${getApiPrefix()}/workspaces/${encodeURIComponent(projectId)}/tree?recursive=1`, {
       headers: getToken() ? { Authorization: `Bearer ${getToken()}` } : {},
     })
-      .then((resp) => (resp.ok ? resp.json() : { entries: [] }))
+      .then(async (resp): Promise<WorkspaceTreeResponse> => (resp.ok ? (await resp.json()) as WorkspaceTreeResponse : { entries: [] }))
       .then((data) => {
         if (cancelled) return;
         const entries = Array.isArray(data.entries) ? data.entries : [];
-        setTreeFiles(entries
-          .filter((entry: { name?: string; type?: string }) => entry && entry.name && (!entry.type || entry.type === 'file'))
-          .map((entry: { path?: string; name: string }) => ({ path: entry.path || entry.name, name: entry.name })));
+        const files: Array<{ path: string; name: string }> = [];
+        for (const entry of entries) {
+          if (!entry || !entry.name) continue;
+          if (entry.type && entry.type !== 'file') continue;
+          files.push({ path: entry.path || entry.name, name: entry.name });
+        }
+        setTreeFiles(files);
+        setInputExtensions(Array.isArray(data.inputExtensions) ? data.inputExtensions.map((ext) => String(ext)) : []);
+        setTreeTruncated(data.truncated === true);
       })
       .catch(() => { /* 文件清单失败=选项为空，不阻断表单 */ });
     return () => { cancelled = true; };
-  }, [projectId, workspaceFilesProp]);
-  const workspaceFiles = workspaceFilesProp || treeFiles;
+  }, [projectId, treeVersion]);
+  const workspaceFiles = workspaceFilesProp || filterByInputExtensions(treeFiles, inputExtensions);
   const isEmpty = tools.length === 0;
   const [expandedTool, setExpandedTool] = React.useState<string | null>(null);
 
@@ -201,10 +282,13 @@ export function AnalysisLaunchPanel({ tools, onLaunch, loading = false, workspac
                       <ToolLaunchForm
                         tool={tool}
                         workspaceFiles={workspaceFiles}
+                        projectId={projectId}
                         onLaunchWithPrompt={(t, prompt) => {
                           setExpandedTool(null);
                           onLaunch(t, prompt);
                         }}
+                        onWorkspaceFilesRefreshed={() => setTreeVersion((v) => v + 1)}
+                        treeTruncated={treeTruncated}
                       />
                     )}
                   </li>

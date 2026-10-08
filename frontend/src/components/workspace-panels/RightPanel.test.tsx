@@ -1,6 +1,6 @@
 import React from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { RightPanel, type RightPanelContext } from './RightPanel';
 
 vi.mock('@/components/copilot/SimpleChat', () => ({ SimpleChat: () => <div>chat</div> }));
@@ -20,7 +20,19 @@ vi.mock('@/components/desktop/WorkspacePanelsContext', () => ({
   useWorkspacePanelsContext: () => ({}),
 }));
 
-afterEach(cleanup);
+// RightPanel 渲染树内 useToolCatalog 装载即拉 /api/tools/catalog——无 fetch 桩时
+// 真实连接 http://localhost:3001（getApiPrefix 缺省值），后端不在场则向门禁日志
+// 泄漏 AggregateError(ECONNREFUSED) 异步栈（BLOCK-148 把本文件经 vitest related
+// 拉进 test:changed 影响面后实测）。桩死网络面：目录拉取失败 → 组件回落空目录
+// 诚实空态，本文件断言（抽屉/检查器层级）不依赖目录内容。
+beforeEach(() => {
+  vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({ ok: false, status: 599 } as unknown as Response)));
+});
+
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 describe('P4R-3 RightPanel editing hierarchy', () => {
   it('keeps only a default-closed advanced parameter drawer; natural language lives in result focus', () => {
