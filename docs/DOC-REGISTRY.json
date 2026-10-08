@@ -5607,8 +5607,28 @@
         "pdf"
       ],
       "notes": "成果面切片 E（用户裁决「开启新的工作继续 搞完」+依赖 AskUserQuestion「全批 md+xlsx+pdf（推荐）」）。P0=md/xlsx/pdf 三 viewer 注册（viewerRegistry 三条新规则+Shell renderPreview 接线）+react-markdown/remark-gfm/exceljs 三新依赖（四问留痕 plan §2；pdfjs-dist 零新增复用）。兼作切片 A 扩展性判据验收。非范围=xlsx 写回/raw HTML/selection 接线。实现=dynamic workflow，主代理终审集成。 2026-10-05 收口 completed：三 viewer 注册+实机走查三断言全过（fixture 三件套+换眼 confirmed）；六门绿（bundle 基线 46 键首用重锚）；集成 dbece735（P6 门 13/13 刷新）；环境事件=老化 dev profile pdfjs 悬挂（非代码缺陷，重启即愈）。"
+    },
+    {
+      "id": "BLOCK-146-ANALYSIS-CHAIN-CORRECTNESS",
+      "capability": "analysis-chain-correctness",
+      "path": "docs/block-146-analysis-chain-correctness-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-146-analysis-chain-correctness",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-08",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "ACTIVE",
+      "tags": [
+        "block-146",
+        "analysis-chain",
+        "pack-reconciliation",
+        "review-batch-1"
+      ],
+      "notes": "审视批裁决首批（dwfrun-6724f75c 双视角十角度审视，用户 2026-10-08 /workflow「开」发令）：分析执行链正确性与 pack 对账。三轨 A 平台解析根修/失败归因/required-file fail-fast（#8#9#4）、B 域校验主路径化（#7）、C pack 指纹对账+本机多因子补齐（#6#10）。A→B 串行、C 并行；dynamic workflow 实现+红绿先行，工作流内不提交，主代理终审集成。"
     }
   ],
-  "lastUpdated": "2026-10-05",
-  "documentCount": 297
+  "lastUpdated": "2026-10-08",
+  "documentCount": 298
 }
