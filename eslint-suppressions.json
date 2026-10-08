@@ -357,16 +357,6 @@
       "count": 11
     }
   },
-  "frontend/src/components/result-studio/GitRepositoryConsent.test.tsx": {
-    "@typescript-eslint/require-await": {
-      "count": 5
-    }
-  },
-  "frontend/src/components/result-studio/GitRepositoryConsent.tsx": {
-    "react-hooks/set-state-in-effect": {
-      "count": 1
-    }
-  },
   "frontend/src/components/result-studio/LineageStrip.tsx": {
     "react-hooks/set-state-in-effect": {
       "count": 1
@@ -421,20 +411,6 @@
   "frontend/src/components/window/WindowShell.tsx": {
     "react-hooks/set-state-in-effect": {
       "count": 1
-    }
-  },
-  "frontend/src/components/workspace-panels/AnalysisLaunchPanel.tsx": {
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-assignment": {
-      "count": 1
-    },
-    "@typescript-eslint/no-unsafe-call": {
-      "count": 2
-    },
-    "@typescript-eslint/no-unsafe-member-access": {
-      "count": 4
     }
   },
   "frontend/src/components/workspace-panels/CenterPanel.tsx": {
