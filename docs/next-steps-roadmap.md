@@ -1,5 +1,7 @@
 # BioF3 Desktop — Current Next Steps
 
+最后更新：2026-10-09（**BLOCK-155-CHAT-VISION-INLINE 真·单通道立项发令 active（轻量批，plan=AUDIT-LOG 本条目）**——用户「/workflow 真·单通道增强 整起来」：聊天渠道勾视觉能力时当前轮图片直进聊天请求体（服务端内联 image_url parts，loop-orchestrator reqBody 副本点），省 read_image 一跳；无能力渠道保留原跳。双轨红绿（后端内联链/前端 UI-475 门放宽 UI-478）+独立评审+统一门禁，dynamic workflow 承载，工作流内不提交；实机=deepseek-flash 渠道贴图直答。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-10-09（**BLOCK-154 收官 completed + BLOCK-150 vision 面用户实机收官（对账批，零代码改动）**：UI-473 用户复认「可以了不闪了」翻 verified（runActive run 级+簇级 forceOpen 双层修复实机确认）——BLOCK-154 优化落地序列全链闭环（P1 三波+P2 四项+过目批）；BLOCK-150 vision 面对账：UI-476 换绑实效翻 verified（deepseek-flash 渠道 12:26 读图实录 694 字符回流）+UI-477 内联图翻 verified（四轮用户实机加映迭代收官），UI-475 阻断路径维持 in_progress（无自然复现面，单测锁定如实）；ui:audit:check PASS+doc:suggest 零建议（docs_or_evidence_only）。接棒：BLOCK-155 真·单通道 vision（/workflow 发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-10-09（**BLOCK-154 波次 3 SimpleChat 行渲染 memo 化收口 completed（当日立项当日收口）**：前提核实修正〔BLOCK-95 B2 后端窗口化分页已在〕→ 真实热点=流式 tick 全列表重渲染；行 JSX 抽取 SimpleChatMessageRow（React.memo，DOM 逐行保留）+timeline 分段 WeakMap 缓存+冷却采样 cooldownNow；HK-01 红绿 3 用例（CopilotMarkdown 探针 bail-out 契约）+tsc 0+定向 37/37+build:check 0+closeout 十一门 PASS；UI-473 in_progress 待实机流畅度抽查。**P1 三波（highlight.js 按需化/冷启动异步化/行 memo 化）全部落地**；P2 结构项（暗色 token/CSS 双轨/大文件棘轮/manualChunks）待逐波裁决推进。G0 开发期常态 · 不外推 packaged/Provider/GA。）
