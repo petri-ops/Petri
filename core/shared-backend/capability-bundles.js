@@ -3,6 +3,10 @@
 const fs = require('fs');
 const path = require('path');
 const { execFile } = require('child_process');
+// BLOCK-152 P 轨收敛：宿主→平台键推导单源（deriveHostPlatform），三副本
+// （本文件 / scripts/build-r-bundle.mjs / src/plugin/runtime.js）统一至此。
+// 下方仍经 module.exports 再导出，既有消费方与宿主 monkeypatch 测试面不变。
+const { deriveHostPlatform } = require('./host-platform');
 
 /**
  * Capability Bundle Registry — Stage 3 B1/B2 (single source of truth).
@@ -45,25 +49,20 @@ const DEFAULT_PLATFORM = 'macos-arm64';
 const DEFAULT_VERSION = '1.0.0';
 
 /**
- * BLOCK-146 #8 — 按宿主 process.platform/arch 推导平台键。
+ * BLOCK-146 #8 — 缺省平台按宿主推导（BLOCK-152 起实现单源化到
+ * ./host-platform.js，此处经 require 引入并再导出）。
  *
  * 审视发现 #8：此前 getBundleDescriptor 的缺省平台硬编码 'macos-arm64'，
  * 两个生产调用点（run-plugin-script.js / tools-executor.js）不传 platform，
  * Windows 宿主会判 ready 并下载 mac 二进制（sha256 是真实发布值 → 校验必过，
  * ledger 持久化 ready 不自愈）。根修：缺省平台按宿主推导；宿主平台无对应
  * registry 键时 getBundleDescriptor 返回 null（status 'unknown'，拒绝下载），
- * fail-closed 不造键。键集合与 scripts/build-r-bundle.mjs currentPlatform /
- * src/plugin/runtime.js detectPlatform 同一约定。
+ * fail-closed 不造键。键约定 canonical = src/plugin-schema.js PLATFORM_IDS。
  *
- * 经 module.exports 引用（调用点写 `module.exports.deriveHostPlatform()`），
- * 测试可 monkeypatch 模拟任意宿主。
+ * 兼容契约（勿拆）：下方调用点写 `module.exports.deriveHostPlatform()`，
+ * 测试可 monkeypatch 本模块导出模拟任意宿主（capability-bundles.test.mjs #8 /
+ * block146-bundle-failfast-required-input.test.mjs 依赖此面）。
  */
-function deriveHostPlatform(platform = process.platform, arch = process.arch) {
-  if (platform === 'darwin') return arch === 'arm64' ? 'macos-arm64' : 'macos-x64';
-  if (platform === 'win32') return 'windows-x64';
-  if (platform === 'linux') return arch === 'arm64' ? 'linux-arm64' : 'linux-x64';
-  return `${platform}-${arch}`;
-}
 
 function bundleUrl(bundleId, version, platform) {
   return `${BUNDLE_HOST}/bundles/${bundleId}-${version}-${platform}.tar.gz`;

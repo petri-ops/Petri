@@ -133,17 +133,21 @@ describe('MobileSyncPanel 手机连接面板（BLOCK-70 / UI-354）', () => {
 // 后端 state=connected 是「转发已建立」的 10s 强启发（tunnel.js STABLE_CONNECTED_MS），
 // 反代挂掉/半开 TCP 时手机实际打不开。前端消费 stateSinceTs：连接持续 ≥15min
 // （含时钟偏差裕量，从紧）才宣称「公网可用」；此前如实显示「尚未确认」。
+// BLOCK-152 T（隧道 publicUrl 周期自探活，#468 留方向）—— 消费升级为「时长 + 探活」：
+// probe fail（公网门实测打不通）时即使 ≥15min 也不宣称，降级「公网未确认」（从紧）；
+// probe unknown / 旧后端缺省维持 stateSinceTs 原判据。
 describe('MobileSyncPanel 真远程徽标三态（BLOCK-149 A5）', () => {
   afterEach(() => {
     cleanup();
     vi.unstubAllGlobals();
   });
 
-  function connectedTunnel(stateSinceTs: number) {
+  function connectedTunnel(stateSinceTs: number, probeState?: 'ok' | 'fail' | 'unknown') {
     return {
       configured: true, enabled: true, state: 'connected', host: 'aliyun',
       remotePort: 2233, localPort: 3005, publicUrl: 'https://gw.example.com',
       lastError: '', pid: 4321, stateSinceTs,
+      ...(probeState ? { probeState, probedAt: stateSinceTs } : {}),
     };
   }
 
@@ -196,5 +200,41 @@ describe('MobileSyncPanel 真远程徽标三态（BLOCK-149 A5）', () => {
     render(<MobileSyncPanel />);
     const badge = await waitFor(() => screen.getByTestId('tunnel-state-badge'));
     expect(badge.textContent).toBe('● 连接建立中 · 尚未确认公网可用');
+  });
+
+  // ── BLOCK-152 T：徽标消费叠加端到端探活证据（tunnel.js status() probeState）──
+
+  it('BLOCK-152 T probe fail：即使 ≥15min 也不宣称「公网可用」，降级「公网未确认」（从紧）', async () => {
+    vi.stubGlobal('fetch', mockFetchWithTunnel(connectedTunnel(Date.now() - 17 * 60_000, 'fail')));
+    render(<MobileSyncPanel />);
+    const badge = await waitFor(() => screen.getByTestId('tunnel-state-badge'));
+    expect(badge.textContent).toBe('● 连接建立中 · 公网未确认');
+    expect(badge.className).not.toContain('tunnelBadgeOn');
+    expect(badge.className).toContain('tunnelBadgeWarn');
+  });
+
+  it('BLOCK-152 T probe ok + ≥15min：宣称「公网可用」（时长 + 探活双判据齐备）', async () => {
+    vi.stubGlobal('fetch', mockFetchWithTunnel(connectedTunnel(Date.now() - 17 * 60_000, 'ok')));
+    render(<MobileSyncPanel />);
+    const badge = await waitFor(() => screen.getByTestId('tunnel-state-badge'));
+    expect(badge.textContent).toBe('● 已连接 · 公网可用');
+    expect(badge.className).toContain('tunnelBadgeOn');
+    expect(badge.className).not.toContain('tunnelBadgeWarn');
+  });
+
+  it('BLOCK-152 T probe ok + <15min：仍「尚未确认」（时长判据独立保持）', async () => {
+    vi.stubGlobal('fetch', mockFetchWithTunnel(connectedTunnel(Date.now() - 5 * 60_000, 'ok')));
+    render(<MobileSyncPanel />);
+    const badge = await waitFor(() => screen.getByTestId('tunnel-state-badge'));
+    expect(badge.textContent).toBe('● 连接建立中 · 尚未确认公网可用');
+    expect(badge.className).not.toContain('tunnelBadgeOn');
+  });
+
+  it('BLOCK-152 T probeState 缺失（旧后端）：维持 stateSinceTs 判定（17min → 公网可用，向后兼容）', async () => {
+    vi.stubGlobal('fetch', mockFetchWithTunnel(connectedTunnel(Date.now() - 17 * 60_000)));
+    render(<MobileSyncPanel />);
+    const badge = await waitFor(() => screen.getByTestId('tunnel-state-badge'));
+    expect(badge.textContent).toBe('● 已连接 · 公网可用');
+    expect(badge.className).toContain('tunnelBadgeOn');
   });
 });

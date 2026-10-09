@@ -18,17 +18,23 @@ const fs = require('fs');
 const path = require('path');
 const { getRuntimeBinCandidates } = require('../platform-compat');
 const { getPythonRuntimeExecutable } = require(path.join(__dirname, '..', '..', 'core', 'shared-backend', 'runtime-paths'));
+// BLOCK-152 P 轨收敛：宿主→平台键推导单源。静态 require（不用上方 path.join
+// 形态）让 quality:arch 真实裁决这条 src→core/shared-backend 边——R5 只拦
+// core/biof3-server，core/shared-backend 合法（2026-10-09 实测绿，见工作包留痕）。
+const { deriveHostPlatform } = require('../../core/shared-backend/host-platform');
 const {
   RUNTIMES_DIR,
 } = require('./paths');
 
+/**
+ * 平台键推导（BLOCK-152 起薄委托 core/shared-backend/host-platform.js 单源，
+ * 原 BLOCK-9.2 本地副本已删）。语义统一到 canonical：win32 任何 arch 都映射
+ * windows-x64 键（此前本地副本在 win32+arm64 落空出伪造键 win32-arm64，
+ * 匹配不到任何 manifest artifact，必然 ARTIFACT_MISSING）；其余宿主行为不变。
+ * 键约定 canonical = src/plugin-schema.js PLATFORM_IDS（block149 锚守护）。
+ */
 function detectPlatform() {
-  const platform = process.platform;
-  const arch = process.arch;
-  if (platform === 'win32' && arch === 'x64') return 'windows-x64';
-  if (platform === 'darwin' && arch === 'arm64') return 'macos-arm64';
-  if (platform === 'darwin' && arch === 'x64') return 'macos-x64';
-  return `${platform}-${arch}`;
+  return deriveHostPlatform();
 }
 
 function getRuntimeStatus() {

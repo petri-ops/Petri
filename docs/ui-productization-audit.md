@@ -4662,3 +4662,18 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：A 轨 /m 3红→4/4+相邻 19/19；lastSeq 1红→68/68；loadOlder 摘守卫对照 1红→10/10；B 三行为项红→31/31+邻域 86/86；C ScientificInteractionViewer 1红→19/19+act 契约 2红→3/3（集成批补 30 秒措辞钉住）；五门全绿。
 - **待验**：dev Electron 实机（导出出口/钉住占位/对比图空态/title 悬浮语义）。
 - **边界**：mergeKeepOlderPrefix 核心语义与 B7 报告模板扩充非范围；跨 job 钉住静默失败与 lineage 空态两条 skipped 留痕（plan §2 处置数组）。
+
+## UI-468 加映: 徽标宣称叠加端到端探活证据——时长+probe 双判据（BLOCK-152 T）(2026-10-09 in_progress，组件 12/12；实机走查随 BLOCK-152 收口)
+
+- **来源**：BLOCK-152 重构候选批 T 轨（plan=[`block-152-refactor-candidates-plan.md`](./block-152-refactor-candidates-plan.md)）；即主条目「待验」行预留的「后端 publicUrl 周期自探活」，本批落地后端+前端消费两半。
+- **交付**：后端 `tunnel.js`——connected 后每 60s 经公网门 GET `/api/mobile/status` 期待 401（会话门活=端到端通；redirect:manual 按反代误配 3xx=fail），probeState ok/fail/unknown + probedAt 入 status()；单计时器串行绝不叠加、unref 不吊 event loop、断连即作废证据、在途结论陈旧不回写。前端 `MobileSync.tsx`——`isTunnelPublicReady` 升级「时长+探活」双判据：probe fail 即使 ≥15min 也不宣称，降级「● 连接建立中 · 公网未确认」；probe ok/unknown/旧后端缺省维持 stateSinceTs 原判据（向后兼容，从紧不变）。
+- **证据**：`MobileSync.test.tsx` 8/8 → 12/12（probe fail 降级／ok+≥15min 宣称／ok+<15min 时长独立／probeState 缺省向后兼容四测）；隧道探活契约 `test/block152-tunnel-probe.test.mjs` 5 项（三态/调度不叠加/冷启动零探活/unref/断连作废）；门禁修复员会话实跑 `npm run test:changed` Node 腿 381 tests 0 fail（13 skipped 存量）+ 前端 MobileSync 12/12。
+- **待验**：dev Electron 实机走查（真窗徽标 probe fail 降级与翻转）+ 主代理终审集成提交 + closeout 台账五件回写归并。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-471: 隧道徽标端到端自探活——probe 三态消费，probe 失败即使 ≥15min 也不宣称公网可用（BLOCK-152 T 轨）(2026-10-09 in_progress，契约级全绿；实机走查随收口)
+
+- **来源**：BLOCK-149 非范围留痕方向（468 深化）；plan=[`block-152-refactor-candidates-plan.md`](./block-152-refactor-candidates-plan.md)。
+- **交付**：tunnel.js connected 态周期 probe publicUrl（60s/5s 超时/401=活，单计时器串行不叠加、unref 不进冷启动、断连即废证据）→ status() 增 probeState/probedAt；MobileSync 徽标消费从紧——公网可用=probe ok 且 ≥15min；probe fail 降级「连接建立中 · 公网未确认」；unknown 维持 149 判据（向后兼容）。
+- **证据**：红绿两轮——tunnel probe 0/5→5/5（mock 三态+调度不叠加）；MobileSync 1红（probe fail+17min 假宣称，正是本轨要杀的）→12/12；隧道族回归 14/14（block145 非阻塞契约保绿=probe 未进关键路径）。
+- **待验**：真隧道/真公网门的 probe 翻转实机观察（断反代验证降级）。
+- **边界**：probe 纯 fetch 只读不碰端口不 spawn（与 remotePortSweep 清场互不踩）；redirect:manual 反代误配按 3xx 判 fail。

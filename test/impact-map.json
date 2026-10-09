@@ -114,12 +114,14 @@
       "note": "Git backend changes run lifecycle/repository tests; the now-green P4R source/replay invariant is selected by Result Studio production paths rather than every low-level adapter edit.",
       "patterns": [
         "core/shared-backend/git-adapter.js",
+        "src/ipc/working-tree-review/review-stage.js",
         "core/shared-backend/git-repository-binding.js",
         "core/shared-backend/git-repository-consent-schema.js",
         "src/migrations/004_git_repository_consent.sql"
       ],
       "tests": [
         "test/git-adapter.test.mjs",
+        "test/block152-hunk-stage.test.mjs",
         "test/result-studio-lifecycle.test.mjs",
         "test/result-studio-migration.test.mjs",
         "test/result-studio-repository.test.mjs",
@@ -131,10 +133,12 @@
       "id": "working-tree-review-ipc",
       "note": "BLOCK-16/20 working tree review IPC（diff 解析 / hunk accept-reject / revert / file-content）。UI-180 实机验收发现 reject 反向 patch 因 phantom 空 ctx 行被 git apply 拒绝，修复后此映射保证回归不被漏测。",
       "patterns": [
-        "src/ipc/working-tree-review.js"
+        "src/ipc/working-tree-review.js",
+        "src/ipc/working-tree-review/review-stage.js"
       ],
       "tests": [
         "test/working-tree-review-hunk-apply.test.mjs",
+        "test/block152-hunk-stage.test.mjs",
         "test/working-tree-review-file-content.test.mjs",
         "test/working-tree-review-init.test.mjs",
         "test/git-adapter-block20-per-hunk.test.mjs"
@@ -456,7 +460,10 @@
         "core/biof3-server/tool-scripts/**",
         "src/plugin-manager.js",
         "src/plugin-schema.js",
-        "core/shared-backend/capability-bundles.js"
+        "core/shared-backend/capability-bundles.js",
+        "core/shared-backend/host-platform.js",
+        "src/plugin/runtime.js",
+        "src/plugin/uninstall.js"
       ],
       "tests": [
         "test/plugin-sdk.test.mjs",

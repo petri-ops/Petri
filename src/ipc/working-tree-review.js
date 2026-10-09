@@ -30,6 +30,8 @@ const { safeInvoke, resolveGitAdapter, getProjectWorkspacePath } = require('./wo
 const { initRepositoryAt } = require('./working-tree-review/repository-init');
 const { diffForReview, parseDiffFiles, buildReversePatchForReject } = require('./working-tree-review/diff-parse');
 const { _writeRejectEntry } = require('./working-tree-review/reject-store');
+// BLOCK-152 H 轨 — commitReview hunk 级 stage 面分类（纯函数：签名复算/diff 切片/patch 构造）。
+const { classifyReviewStageSurface } = require('./working-tree-review/review-stage');
 
 // BLOCK-125：拒绝清单根目录解析——与 core/biof3-server/helpers/system-prompt.js
 // resolveWorkingTreeRejectRoot 同优先级（LOCAL_DATA_DIR 优先 / USER_DATA_DIR 回退），
@@ -296,12 +298,21 @@ function setupWorkingTreeReviewIpc(options = {}) {
   // ============================================================
   // BLOCK-20 — Commit Review：收集审阅结果并提交
   //
-  // 语义：用户逐 hunk 审阅后，点 "Commit Review" 将所有 accepted hunks
+  // 语义：用户逐 hunk 审阅后，点 "Commit Review" 将 accepted hunks
   // stage 并 commit。commit message 由用户在 dialog 中填写。
   //
   // decisions 格式：Record<`${file}#${hunkIndex}`, 'accept'|'reject'|'pending'>
-  // 提交时只 stage accepted 文件；rejected 文件保持 working tree 不变。
   // 返回 { ok, commit, files, message, stats }。
+  //
+  // BLOCK-152 H 轨根修复 — stage 面按 hunk 粒度精确化（旧实现整文件 stage，
+  // 未决 hunk 会随所属文件静默入提交；前端 BLOCK-147 拦截保留为第二道防线）：
+  //   - 全 hunk accept 文件 = 整文件 git add（现状保绿）；
+  //   - 混合（accept + reject/未决）= 仅含 accept hunk 的 patch 经
+  //     git apply --cached 入隔离 index（commitFromIsolatedIndex），
+  //     提交后真实 index 对齐新 HEAD，未决 hunk 留在工作树为未暂存改动；
+  //   - 全 reject/未决 = 不 stage；stale（对不上当前 diff）的 accept 键
+  //     一律不 stage，只如实上报 staleDecisionKeys；
+  //   - patch 应用失败 = fail-closed 结构化错误，不静默整文件降级。
   // ============================================================
   ipcMain.handle(CHANNELS.git.commitReview, async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;
@@ -320,7 +331,7 @@ function setupWorkingTreeReviewIpc(options = {}) {
       const decisions = args.decisions; // Record<`${path}#${hunkSignature}`, 'accept'|'reject'|'pending'>
       const message = args.message.trim();
 
-      // 收集 accepted 文件列表（去重）
+      // 收集 accepted / rejected 文件列表（去重；rejected 仅用于回执留痕）
       const acceptedFiles = new Set();
       const rejectedFiles = new Set();
       for (const [key, decision] of Object.entries(decisions)) {
@@ -336,13 +347,51 @@ function setupWorkingTreeReviewIpc(options = {}) {
         throw new GitAdapterError('no_files_to_commit', 'No accepted files to commit.');
       }
 
-      const filesToStage = [...acceptedFiles];
+      // 以当前 fresh diff（工作树 vs HEAD，与审阅面板同一基线）对账决策键
+      const diffText = diffForReview(adapter, [...acceptedFiles], false).patch || '';
+      const surface = classifyReviewStageSurface({ decisions, diffText });
+      const committedFiles = [...surface.wholeFiles, ...surface.patches.map((p) => p.path)];
 
-      // stage accepted 文件
-      adapter.stage({ paths: filesToStage });
+      if (committedFiles.length === 0) {
+        // 治本语义：accept 键全部 stale（hunk 已回退/变更）时不得整文件降级入提交。
+        throw new GitAdapterError('no_files_to_commit', 'No accepted hunks matched the current diff.');
+      }
 
-      // 路径受限提交（--only 保证不带入其他内容）
-      const commitResult = adapter.commit({ message, paths: filesToStage });
+      // BLOCK-152 P1 — staged rename 配对修复：R 条目（porcelain `R old -> new`）在
+      // 面板上只有 new 侧（parsePorcelainZ 单条目 + pathspec diff 破坏 rename 配对），
+      // 用户审的只有 new 侧一个面；隔离 index 自 read-tree HEAD 出发仍持有 old 侧，
+      // 只 add new 侧会把 old 以旧内容带进提交（rename 半套提交）。凡提交面覆盖
+      // R 条目 new 侧的，其 originalPath 必须从隔离树移除。C（copy）条目不同：
+      // copy 源本就应留在树里（read-tree HEAD 已含、未动即正确），不移除。
+      // 真实 index 侧无需处理：indexStatus=R 的定义即真实 index 已删 originalPath
+      // （git mv/index rm 后 add），提交后天然与新 HEAD 一致（场景 8/9 status 干净断言兜底）。
+      const committedPathSet = new Set(committedFiles);
+      const renameOriginalPaths = adapter
+        .repositoryStatus({ untracked: 'all' })
+        .entries
+        .filter((entry) => entry.indexStatus === 'R' && entry.originalPath && committedPathSet.has(entry.path))
+        .map((entry) => entry.originalPath);
+
+      // 整文件面：真实 index 先行（与旧实现同一 stage 调用，全 accept 路径保绿）
+      if (surface.wholeFiles.length > 0) {
+        adapter.stage({ paths: surface.wholeFiles });
+      }
+
+      // 隔离 index 提交：临时 index 自 HEAD 出发，rename original 侧 force-remove +
+      // 整文件 add + per-hunk patch apply --cached，write-tree/commit-tree/
+      // update-ref(CAS) 落提交。不走 commit --only——它取工作树内容，
+      // 会把未决 hunk 一起带进提交。
+      const commitResult = adapter.commitFromIsolatedIndex({
+        message,
+        stagePaths: surface.wholeFiles,
+        patches: surface.patches,
+        removePaths: renameOriginalPaths,
+      });
+
+      // 混合文件对账：真实 index 对齐新 HEAD，未决改动以未暂存形态留在工作树
+      if (surface.patches.length > 0) {
+        adapter.unstage({ paths: surface.patches.map((p) => p.path) });
+      }
 
       // 刷新工作区状态
       const newStatus = adapter.repositoryStatus({ untracked: 'all' });
@@ -350,11 +399,13 @@ function setupWorkingTreeReviewIpc(options = {}) {
       return {
         ok: true,
         commit: commitResult.commit,
-        files: filesToStage,
+        files: committedFiles,
         message,
         rejectedFiles: [...rejectedFiles],
+        // BLOCK-152 — 内容寻址对不上当前 diff 的 accept 键（stale），未入提交（additive）
+        staleDecisionKeys: surface.staleKeys,
         stats: {
-          acceptedFiles: acceptedFiles.size,
+          acceptedFiles: committedFiles.length,
           rejectedFiles: rejectedFiles.size,
           totalWorkingTree: newStatus.entries.length,
         },

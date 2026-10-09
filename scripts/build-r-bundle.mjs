@@ -35,6 +35,12 @@ import {
 import { tmpdir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { createRequire } from 'node:module';
+
+// BLOCK-152 P 轨收敛：宿主→平台键推导单源（core/shared-backend/host-platform.js），
+// 本脚本历史副本 currentPlatform() 已删，构建侧与 bundle 域 / 桌面主进程同源。
+const require = createRequire(import.meta.url);
+const { deriveHostPlatform } = require('../core/shared-backend/host-platform.js');
 
 const DEFAULT_PLATFORM = 'macos-arm64';
 const DEFAULT_VERSION = '1.0.0';
@@ -103,17 +109,6 @@ function parseArgs(argv) {
     }
   }
   return args;
-}
-
-function currentPlatform() {
-  if (process.platform === 'darwin') {
-    return process.arch === 'arm64' ? 'macos-arm64' : 'macos-x64';
-  }
-  if (process.platform === 'win32') return 'windows-x64';
-  if (process.platform === 'linux') {
-    return process.arch === 'arm64' ? 'linux-arm64' : 'linux-x64';
-  }
-  return `${process.platform}-${process.arch}`;
 }
 
 function runR(program, { capture = true } = {}) {
@@ -314,7 +309,7 @@ async function main() {
     fail(`unknown bundle-id "${args.bundleId}"`);
   }
 
-  const hostPlatform = currentPlatform();
+  const hostPlatform = deriveHostPlatform();
   if (args.platform !== hostPlatform) {
     fail(
       `cannot cross-build ${args.platform} on ${hostPlatform}; run on the target architecture`

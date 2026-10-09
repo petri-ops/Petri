@@ -61,6 +61,10 @@ interface TunnelStatus {
   lastError: string;
   /** 当前状态起始时刻（后端时钟，epoch ms；tunnel.js status() 已返回）。 */
   stateSinceTs: number;
+  /** BLOCK-152 T — publicUrl 周期自探活结论（tunnel.js status()；旧后端缺省 → 按 unknown 处理）。 */
+  probeState?: 'ok' | 'fail' | 'unknown';
+  /** BLOCK-152 T — 最近一次探活取证时刻（后端时钟，epoch ms；无结论为 null）。 */
+  probedAt?: number | null;
 }
 
 // BLOCK-149 A5（审视发现 #5）—— 隧道徽标诚实化：
@@ -72,10 +76,16 @@ const PUBLIC_READY_MS = 15 * 60 * 1000;
 // 趋近 0，但拿不准从紧——表观时长偏大 1min 裕量内仍不宣称（宁晚勿假，不宣称优于假宣称）。
 const CLOCK_SKEW_MARGIN_MS = 60 * 1000;
 
-/** 连接持续时长是否跨过「公网可用」宣称阈值（纯时长判定；时间读取收在组件外，同 formatRelativeTime）。 */
+/**
+ * 是否可宣称「公网可用」（BLOCK-152 T：时长 + 端到端探活双判据，从紧）：
+ * - probeState='fail'（公网门实测打不通：非 401/超时/网络错）→ 即使时长跨线也不宣称；
+ * - probeState='ok' / 'unknown' / 旧后端缺省 → 维持 BLOCK-149 A5 的 stateSinceTs 时长判据
+ *   （unknown = 后端尚无探活结论或未配 publicUrl，时长证据仍是可用下界）。
+ */
 function isTunnelPublicReady(tunnel: TunnelStatus): boolean {
-  return tunnel.state === 'connected'
-    && Number.isFinite(tunnel.stateSinceTs)
+  if (tunnel.state !== 'connected') return false;
+  if (tunnel.probeState === 'fail') return false;
+  return Number.isFinite(tunnel.stateSinceTs)
     && Date.now() - tunnel.stateSinceTs >= PUBLIC_READY_MS + CLOCK_SKEW_MARGIN_MS;
 }
 
@@ -380,8 +390,9 @@ export function MobileSyncPanel(): React.ReactElement {
       )}
 
       {tunnel && (() => {
-        // BLOCK-149 A5：连接持续 ≥15min（含 1min 时钟偏差裕量，从紧）才宣称「公网可用」；
-        // stateSinceTs 缺失/非法（旧后端）同样从紧——按「连接建立中」呈现，绝不假宣称。
+        // BLOCK-149 A5 + BLOCK-152 T：连接持续 ≥15min（含 1min 时钟偏差裕量，从紧）
+        // 且探活未见 fail，才宣称「公网可用」；probe fail（公网门实测打不通）降级
+        // 「公网未确认」；stateSinceTs 缺失/非法（旧后端）同样从紧——绝不假宣称。
         const publicReady = isTunnelPublicReady(tunnel);
         return (
         <div className={styles.tunnelSection} data-testid="mobile-tunnel-section">
@@ -396,7 +407,8 @@ export function MobileSyncPanel(): React.ReactElement {
               ].join(' ')}
             >
               {publicReady ? '● 已连接 · 公网可用'
-                : tunnel.state === 'connected' ? '● 连接建立中 · 尚未确认公网可用'
+                : tunnel.state === 'connected'
+                  ? (tunnel.probeState === 'fail' ? '● 连接建立中 · 公网未确认' : '● 连接建立中 · 尚未确认公网可用')
                   : tunnel.state === 'connecting' ? '连接中'
                     : tunnel.state === 'reconnecting' ? `重连中${tunnel.lastError ? ` · ${tunnel.lastError}` : ''}`
                       : '未启用'}

@@ -34,6 +34,10 @@ const BASELINE = new Set([
   'core/biof3-server/mobile-gateway/index.js',
   'core/biof3-server/mobile-gateway/tunnel.js',
   'core/shared-backend/capability-bundles.js',
+  // BLOCK-152 P 轨：宿主→平台键推导单源（deriveHostPlatform 缺省参数读宿主），
+  // 三副本收敛落点——capability-bundles.js / build-r-bundle.mjs / runtime.js 的
+  // 平台映射分支均迁入此处，登记即留痕。
+  'core/shared-backend/host-platform.js',
   'core/shared-backend/executors/py-executor.js',
   'core/shared-backend/executors/r-executor.js',
   'core/shared-backend/result-studio-background.js',
@@ -45,7 +49,9 @@ const BASELINE = new Set([
   'scripts/block63-p1-live.mjs',
   'scripts/block63-p4-live.cjs',
   'scripts/block83-p1-plugin-live.cjs',
-  'scripts/build-r-bundle.mjs',
+  // BLOCK-152 P 轨收缩：build-r-bundle.mjs 的 currentPlatform 副本已删（改
+  // require core/shared-backend/host-platform.js 单源），文件内已无
+  // process.platform 读取，按基线存活纪律同步移出。
   'scripts/build-win-r-runtime-artifact.mjs',
   'scripts/build-win-runtime-artifact.mjs',
   'scripts/cdp-wrap.cjs',

@@ -997,6 +997,124 @@ function createGitAdapter(options = {}) {
       }
     },
 
+    /**
+     * BLOCK-152 H 轨 — 隔离 index 提交：临时 index 自 HEAD 出发
+     * （read-tree HEAD → force-remove removePaths → add stagePaths →
+     * git apply --cached 逐 patch），经 write-tree / commit-tree /
+     * update-ref(CAS old=HEAD) 落提交。
+     * 真实 index 与工作树全程不动；任一 patch 应用失败 → fail-closed
+     * 结构化错误（review_patch_apply_failed，detail.failures 列文件与 stderr），
+     * 不静默整文件降级（plan §6）。与 commitVirtualFiles 同一
+     * GIT_INDEX_FILE + plumbing 隔离形态；绕开 `commit --only` 的
+     * 「取工作树内容」语义——那是整文件 stage 的根，hunk 级 stage 必须走 index。
+     *
+     * 已知边界（与 commitVirtualFiles 同级取舍）：commit-tree 不触发
+     * commit.gpgSign 签名（本仓 commit 面本就 --no-verify 免 hook）。
+     *
+     * @param {{ message: string, stagePaths?: string[], patches?: Array<{ path: string, patch: string }>,
+     *   removePaths?: string[] }} options
+     * @returns {{ commit: string, tree: string, ref: string, staged: string[], patched: string[], removed: string[] }}
+     */
+    commitFromIsolatedIndex({ message, stagePaths = [], patches = [], removePaths = [] } = {}) {
+      if (typeof message !== 'string' || message.trim() === '') {
+        throw new GitAdapterError('commit_message_required', 'Commit message is required.');
+      }
+      if (!Array.isArray(stagePaths) || !Array.isArray(patches)) {
+        throw new GitAdapterError('args_invalid', 'stagePaths and patches must be arrays.');
+      }
+      for (const item of patches) {
+        if (!item || typeof item.path !== 'string' || !item.path
+          || typeof item.patch !== 'string' || item.patch.length === 0) {
+          throw new GitAdapterError('patch_required', 'Each patch requires path and non-empty patch text.');
+        }
+      }
+      const head = this.revParse('HEAD');
+      if (!head) {
+        throw new GitAdapterError('head_unborn', 'Isolated review commit requires an existing HEAD.');
+      }
+      const branch = this.repositoryState().headRef;
+      if (!branch) {
+        throw new GitAdapterError('head_detached', 'Isolated review commit requires a current branch.');
+      }
+      const ref = `refs/heads/${branch}`;
+      const safeStage = stagePaths.length > 0 ? assertSafePathspecs(stagePaths, scope) : [];
+      const safeRemove = removePaths.length > 0 ? assertSafePathspecs(removePaths, scope) : [];
+      const indexPath = path.join(resolvedGitDir, `biof3-review-index-${randomUUID()}`);
+      const isolatedEnv = { GIT_INDEX_FILE: indexPath };
+      try {
+        const readTree = run(['read-tree', 'HEAD'], { allowFailure: true, env: isolatedEnv });
+        if (!readTree.ok) {
+          throw new GitAdapterError('git_read_tree_failed', 'Cannot initialize isolated review index.', readTree);
+        }
+        // BLOCK-152 P1 — staged rename（porcelain `R old -> new`）删除侧必须随提交离开树：
+        // diff pathspec 只认 new 侧（rename 配对被破坏、呈 new file 形态），read-tree HEAD
+        // 出发的隔离 index 仍持有 old 侧，只 add new 侧即「rename 半套提交」（old 以旧内容
+        // 复活进提交树）。update-index --force-remove 只动隔离 index（不触工作树/真实
+        // index），路径不在 index 时幂等成功；置于 add 之前，若与 stagePaths 相交则 add 侧
+        // 结果胜出（防御位，正常调用两集合不相交）。
+        if (safeRemove.length > 0) {
+          const removed = run(['update-index', '--force-remove', '--', ...safeRemove], {
+            allowFailure: true,
+            env: isolatedEnv,
+          });
+          if (!removed.ok) {
+            throw new GitAdapterError('git_stage_failed', 'Isolated review index remove failed.', removed);
+          }
+        }
+        if (safeStage.length > 0) {
+          const add = run(['add', '--', ...safeStage], { allowFailure: true, env: isolatedEnv });
+          if (!add.ok) throw new GitAdapterError('git_stage_failed', 'Isolated review index add failed.', add);
+        }
+        const failures = [];
+        for (const item of patches) {
+          const applied = run(['apply', '--cached', '--whitespace=nowarn'], {
+            allowFailure: true,
+            env: isolatedEnv,
+            input: item.patch,
+          });
+          if (!applied.ok) {
+            failures.push({
+              path: item.path,
+              stderr: applied.stderr || applied.stdout || 'git apply failed',
+              code: applied.code || null,
+            });
+          }
+        }
+        if (failures.length > 0) {
+          throw new GitAdapterError(
+            'review_patch_apply_failed',
+            'git apply --cached rejected review patch(es); nothing was committed.',
+            { failures }
+          );
+        }
+        const tree = run(['write-tree'], { allowFailure: true, env: isolatedEnv });
+        if (!tree.ok || !/^[a-f0-9]{40}$/.test(tree.stdout.trim())) {
+          throw new GitAdapterError('git_write_tree_failed', 'Cannot write isolated review tree.', tree);
+        }
+        const commitArgs = [...identityArgs(), 'commit-tree', tree.stdout.trim(), '-p', head, '-m', message];
+        const commit = run(commitArgs, { allowFailure: true, env: isolatedEnv });
+        if (!commit.ok || !/^[a-f0-9]{40}$/.test(commit.stdout.trim())) {
+          throw new GitAdapterError('git_commit_tree_failed', 'Cannot create isolated review commit.', commit);
+        }
+        const newSha = commit.stdout.trim();
+        const updateRef = run(['update-ref', '-m', message, ref, newSha, head], { allowFailure: true });
+        if (!updateRef.ok) {
+          throw new GitAdapterError('git_ref_conflict', 'Branch moved during isolated review commit.', updateRef);
+        }
+        return {
+          commit: newSha,
+          tree: tree.stdout.trim(),
+          ref,
+          staged: safeStage,
+          patched: patches.map((item) => item.path),
+          removed: safeRemove,
+        };
+      } finally {
+        try { fs.unlinkSync(indexPath); } catch { /* temporary index may not exist */ }
+        try { fs.unlinkSync(`${indexPath}.lock`); } catch { /* best effort */ }
+      }
+    },
+
     applyPatch({ patch, dryRun = false } = {}) {
       if (typeof patch !== 'string' || patch.length === 0) {
         throw new GitAdapterError('patch_required', 'patch text is required.');

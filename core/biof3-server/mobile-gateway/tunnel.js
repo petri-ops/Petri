@@ -36,6 +36,12 @@ const HOST_PATTERN = /^[A-Za-z0-9._-]{1,120}$/;
 const REMOTE_SWEEP_TIMEOUT_MS = 25_000;
 const LIST_SSH_PIDS_WIN_TIMEOUT_MS = 10_000;
 const LIST_SSH_PIDS_POSIX_TIMEOUT_MS = 5_000;
+// BLOCK-152 T — publicUrl 周期自探活（BLOCK-149 #468 留的方向）：connected 后每
+// PROBE_INTERVAL_MS 经公网门 GET 一次 /api/mobile/status，期待 401（网关会话门活，
+// mobile-gateway D4 门）= 端到端通。频率保守（60s 起步，plan §6）；自签 CA 走既有
+// NODE_EXTRA_CA_CERTS 链路（后端进程已设），不新增证书处理。
+const PROBE_INTERVAL_MS = 60 * 1000;
+const PROBE_TIMEOUT_MS = 5 * 1000;
 
 function tunnelConfigPath(dataDir) {
   return path.join(dataDir, 'mobile', 'tunnel.json');
@@ -222,6 +228,9 @@ function createTunnelManager({
   remoteSweep = null, // (host, remotePort) => Promise；注入点（测试）。null → startRemoteSweep 默认实现
   backoffSteps = RECONNECT_BACKOFF_MS,
   stableConnectedMs = STABLE_CONNECTED_MS,
+  probeIntervalMs = PROBE_INTERVAL_MS,
+  probeTimeoutMs = PROBE_TIMEOUT_MS,
+  probeFetch = null, // (url, init) => Promise<Response>；null → globalThis.fetch 迟绑定（注入点，测试用）
 } = {}) {
   let config = readTunnelConfig(dataDir);
   let child = null;
@@ -237,6 +246,11 @@ function createTunnelManager({
   // BLOCK-145 D1：在途远端清场句柄（stop 可撤销）与冷启动链代际号（旧链自弃）。
   let inFlightSweep = null;
   let bootEpoch = 0;
+  // BLOCK-152 T：探活证据与调度（单计时器串行链，绝不叠加）。
+  let probeState = 'unknown';
+  let probedAt = null;
+  let probeTimer = null;
+  let probeInFlight = false;
 
   function killAllTracked() {
     for (const proc of liveChildren) {
@@ -248,6 +262,10 @@ function createTunnelManager({
   function setState(next) {
     state = next;
     stateSinceTs = now();
+    // BLOCK-152 T：状态转移即作废旧探活证据——证据只属于上一条转发，断连后
+    // 绝不带进新连接（诚实边界；下一轮 probe 重新取证）。
+    probeState = 'unknown';
+    probedAt = null;
   }
 
   // 远端清场（保留原函数名，供源码守卫锚定冷启动链）：host 为空即跳过（与旧实现
@@ -321,6 +339,56 @@ function createTunnelManager({
     if (state === 'connecting' && child && now() - stateSinceTs >= stableConnectedMs) {
       setState('connected');
       backoffIndex = 0;
+      scheduleProbe(); // BLOCK-152 T：进入连接态即起探活链（unref 计时器，不进关键路径）
+    }
+  }
+
+  // ── BLOCK-152 T：publicUrl 周期自探活 ─────────────────────────────────
+  // 只读公网门（fetch GET），不 spawn、不 kill、不碰端口——与 killStale /
+  // remotePortSweep 异步清场链互不踩（plan §6 T 轨风险项）。单计时器 +
+  // 在途守卫 + 完成后再排下一轮：调度绝不叠加；计时器 unref 不吊 event loop。
+  function probeEligible() {
+    return !stopped && config.enabled && state === 'connected' && Boolean(config.publicUrl);
+  }
+
+  function scheduleProbe() {
+    if (probeTimer) { clearTimeout(probeTimer); probeTimer = null; }
+    if (!probeEligible()) return;
+    probeTimer = setTimeout(() => {
+      probeTimer = null;
+      void runProbe();
+    }, probeIntervalMs);
+    if (probeTimer.unref) probeTimer.unref();
+  }
+
+  async function runProbe() {
+    if (probeInFlight || !probeEligible()) return;
+    probeInFlight = true;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), probeTimeoutMs);
+    if (timeout.unref) timeout.unref();
+    try {
+      const doFetch = probeFetch || ((url, init) => globalThis.fetch(url, init));
+      const response = await doFetch(`${config.publicUrl.replace(/\/+$/, '')}/api/mobile/status`, {
+        method: 'GET',
+        redirect: 'manual', // 反代误配跳走时按 3xx 判 fail，绝不跟到别的源上取证
+        signal: controller.signal,
+      });
+      // 消费 body 还连接（keep-alive 可复用），不阻塞判定；401 body 只有几字节。
+      void Promise.resolve(response.arrayBuffer?.()).catch(() => {});
+      if (probeEligible()) { // 在途期间断连：陈旧结论不回写（先经 setState 复位）
+        probeState = response.status === 401 ? 'ok' : 'fail';
+        probedAt = now();
+      }
+    } catch {
+      if (probeEligible()) { // 超时 / 网络错 / DNS 失败 = 未确认
+        probeState = 'fail';
+        probedAt = now();
+      }
+    } finally {
+      clearTimeout(timeout);
+      probeInFlight = false;
+      scheduleProbe(); // 完成后再排下一轮（串行链，天然不叠加）
     }
   }
 
@@ -339,6 +407,9 @@ function createTunnelManager({
         lastError,
         pid: child ? child.pid : null,
         stateSinceTs,
+        // BLOCK-152 T — publicUrl 自探活证据：ok=401 端到端通；fail=未确认；unknown=尚无结论
+        probeState,
+        probedAt,
       };
     },
 
@@ -381,6 +452,7 @@ function createTunnelManager({
       stopped = true;
       bootEpoch += 1; // 在途冷启动链自弃
       if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+      if (probeTimer) { clearTimeout(probeTimer); probeTimer = null; } // BLOCK-152 T：撤销探活调度
       if (inFlightSweep) { inFlightSweep.cancel(); inFlightSweep = null; }
       killAllTracked();
       child = null;
@@ -403,6 +475,8 @@ module.exports = {
   TUNNEL_CONFIG_VERSION,
   RECONNECT_BACKOFF_MS,
   STABLE_CONNECTED_MS,
+  PROBE_INTERVAL_MS,
+  PROBE_TIMEOUT_MS,
   HOST_PATTERN,
   tunnelConfigPath,
   normalizeTunnelConfig,
