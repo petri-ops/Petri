@@ -1,4 +1,5 @@
 # Gewu Desktop（格物）文档入口
+178. [`block-152-refactor-candidates-plan.md`](./block-152-refactor-candidates-plan.md) — 2026-10-09 立项发令 active → 同日 **completed**（重构候选批·内功）：平台映射三副本收敛单源（锚升级+WoA 统一登记）/hunk 级后端 stage 根修复（隔离 index+评审两轮 10 场临时仓亲验）/隧道 publicUrl 60s 自探活喂徽标；预算例外登记 2026-11-30；closeout 十一门 PASS；UI-471 in_progress 待实机；H 边缘 P2 三条归下波。收口笔录 plan §8，证据 acceptance/block-152/。
 177. [](./block-152-refactor-candidates-plan.md) — 2026-10-09 立项发令 **active**（重构候选批·内功；「继续 按顺序都搞完」批量授权）：平台映射三副本收敛单源 / hunk 级后端 stage（147 根改造，前端拦截保留双防线）/ 隧道 publicUrl 周期自探活喂徽标。三轨红绿先行。
 176. [`block-151-review-absorb-wave2-plan.md`](./block-151-review-absorb-wave2-plan.md) — 2026-10-09 立项发令 active → 同日 **completed**（审视吸收批·第二波）：20 条清点 15/1/4/0 三轨（A1 会话守卫从紧核心未动+/m 竞态/A4 成果面四件/B7 统计语义 title/A3 act 对齐+30 秒钉住）；评审 P1=0，P2 携带集成修掉；closeout 十一门 PASS；UI-470 in_progress 待实机。收口笔录 plan §8，证据 acceptance/block-151/。
 175. [](./block-151-review-absorb-wave2-plan.md) — 2026-10-09 立项发令 **active**（审视吸收批·第二波；「继续 按顺序都搞完」批量授权 151→152→153）：A1 深水区守卫（从紧不动核心语义）+/m 竞态 / A4 成果面七条 / B7+A3 解读层与工具描述；三轨有界重审视 ≤7 条/轨双态清账。

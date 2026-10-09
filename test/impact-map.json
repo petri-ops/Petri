@@ -2972,6 +2972,16 @@
       "classifiesScripts": false
     },
     {
+      "id": "block152-evidence",
+      "note": "BLOCK-152 重构候选批证据目录（三轨根修复/评审两轮 10 场临时仓/预算例外；复现驱动=block152-hunk-stage+block152-tunnel-probe+platform-id-single-source-anchor（已入 plugin-runtime 规则）+capability-bundles 面）。",
+      "patterns": [
+        "acceptance/block-152/**"
+      ],
+      "tests": [],
+      "frontendRelated": false,
+      "classifiesScripts": false
+    },
+    {
       "id": "block150-bio-track",
       "note": "BLOCK-150 审视吸收批第一波 B 轨：data-management 明细中文名（labels 字段+消费端渲染）+ R 缺包守卫契约测试（兄弟仓 gewu-pack-bio/plugins 三插件 R 脚本的守卫存在性指纹锚+三源依赖声明一致性；pack 仓文件不在本仓 pattern 面，测试触发以本仓文件与证据目录为准）。ScientificInteractionViewer caveat 因果句复用 block141 规则面，不重复登记。",
       "patterns": [

@@ -5745,13 +5745,13 @@
       "capability": "refactor-candidates",
       "path": "docs/block-152-refactor-candidates-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-152-refactor",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-10-09",
       "archivePolicy": "archive_when_superseded",
-      "phase": "ACTIVE",
+      "phase": "COMPLETED",
       "tags": [
         "block-152",
         "refactor",
@@ -5759,7 +5759,7 @@
         "hunk-stage",
         "tunnel-probe"
       ],
-      "notes": "重构候选批（平台映射三副本收敛/hunk 级后端 stage/隧道 publicUrl 自探活；用户「继续 按顺序都搞完」批量授权）。三轨并行红绿先行，工作流内不提交。"
+      "notes": "重构候选批（平台映射三副本收敛/hunk 级后端 stage/隧道 publicUrl 自探活；用户「继续 按顺序都搞完」批量授权）。三轨并行红绿先行，工作流内不提交。 2026-10-09 当日收口 completed：三轨根修复+评审两轮 P1 修复（10 场临时仓亲验）+closeout 十一门 PASS（预算例外登记 expires 2026-11-30）；UI-471 in_progress 待实机；H 边缘 P2 三条归下波候选。"
     }
   ],
   "lastUpdated": "2026-10-09",

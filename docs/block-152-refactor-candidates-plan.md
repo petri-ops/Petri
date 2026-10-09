@@ -8,7 +8,7 @@ acceptance:
   - ③probe 结果进 tunnel status()（probeState/probedAt 字段）+ MobileSync 徽标消费（probe 失败时即使 ≥15min 也不宣称公网可用——从紧）；自签 CA 依赖既有 NODE_EXTRA_CA_CERTS 链路
   - 定向门禁 + closeout 十一门（集成提交后）
 reopen: src 侧薄实现合并（若本批证实 arch 允许则本波内做，不允许则维持锚守护形态）
-status: active
+status: completed
 ---
 
 # BLOCK-152 重构候选批（审视序列第 7 波·内功）
@@ -48,3 +48,11 @@ dynamic workflow 三轨并行 → 独立评审（P1 必修；H 轨重点审 patc
 ## 7. 完成语义
 
 三轨交付 + 评审 P1 清零 + 门禁绿 + 主代理集成提交 + closeout 十一门 PASS + 台账五件回写。收官后接 BLOCK-153 两 Goal 收口对账。
+
+## 8. 收口笔录（2026-10-09 当日立项当日收口）
+
+- **三轨根修复**（dwfrun-ec4eeeb6）：P=host-platform.js 单源收敛（src 侧 arch 实测采纳，锚升级 37/37 含身份断言+文本门；WoA 伪造键边缘统一如实登记）；H=hunk 级 stage 根修复（review-stage 逐字节切片+隔离 index 原语+rename removePaths，前端拦截保留双防线；评审两轮 P1 经 10 场临时仓亲验）；T=publicUrl 60s 自探活三态喂徽标（probe fail 从紧不宣称）。
+- **评审 P1=1（rename 删除侧）→ 修复复核（removePaths 防御位+F2/F/R 系列场景）**；P2 携带三条 H 边缘登记（键基线不对称/staged 删除 pathspec/apply 失败已 stage 遗留）归下波候选。
+- **门禁**：统一五门全绿 + closeout 十一门 PASS；working-tree-review.js 707>700 预算例外登记（expires 2026-11-30，拆分评估归下波——review-stage.js 已承接纯函数主体）+code-size R-2 重锚。
+- **提交**：602a5ee8（16 文件，UI-471 in_progress）+ e2065448（重锚）+ 32fdbb7f（例外）。
+- 证据=acceptance/block-152/evidence.json。序列收官批 BLOCK-153 两 Goal 对账。G0 开发期常态 · 不外推 packaged/Provider/GA。

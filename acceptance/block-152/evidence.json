@@ -1,0 +1,23 @@
+{
+  "block": "BLOCK-152-REFACTOR-CANDIDATES",
+  "closedAt": "2026-10-09",
+  "form": "重构候选批（审视序列第 7 波·内功；「继续 按顺序都搞完」批量授权）",
+  "implementation": "dynamic workflow dwfrun-ec4eeeb6 三轨并行+独立评审两轮（P1 rename 删除侧修复经 10 场临时仓亲验复核）+统一门禁；主代理终审集成（预算例外登记）",
+  "delivered": {
+    "P 平台映射收敛": "core/shared-backend/host-platform.js 单源（deriveHostPlatform+HOST_PLATFORM_KEYS 单推导路径）；capability-bundles 再导出（monkeypatch 面兼容）+build-r-bundle require 单源+src/plugin/runtime.js 薄委托（quality:arch 实测绿采纳收敛形态）；锚升级 2 绿锚（键集合⇔PLATFORM_IDS 逐键一致+单源身份断言+文本门锁副本不复活）；WoA 边缘语义统一（win32-arm64 伪造键→canonical windows-x64）如实登记",
+    "H hunk 级 stage": "review-stage.js（前端 FNV-1a 签名逐位移植+原始 diff 逐字节切片保留 \\ No newline/rename/mode 头+accept 子集 patch newStart 重算+fresh diff 分类）+git-adapter commitFromIsolatedIndex（GIT_INDEX_FILE 隔离 index read-tree→add→apply --cached→write-tree→commit-tree→update-ref CAS，真实 index/工作树全程不动）+commitReview 接线（wholeFiles 整 stage 保绿/混合走 patch/全 reject 与 stale 不 stage 上报 staleDecisionKeys/apply 失败 fail-closed review_patch_apply_failed）；rename 删除侧 removePaths（评审 P1）；前端 147 拦截保留双防线"
+  },
+  "deliveredT": {
+    "T 隧道自探活": "tunnel.js connected 态周期 probe publicUrl（60s/5s AbortController/401=活/单计时器串行不叠加/unref 不进冷启动/断连废证据）→status() probeState+probedAt；MobileSync 徽标从紧消费（probe fail 即使 ≥15min 降级「公网未确认」；unknown 向后兼容 149 判据）；redirect:manual 反代误配 3xx 判 fail"
+  },
+  "redGreen": "P：改前基线 35/35→重构后 37/37（+2 绿锚，身份断言抓复制式假收敛）；H：2/5 红→7/7+回归 67/67+评审独立 10 场临时仓全过（含 P1 两场景修复前真红）；T：probe 0/5→5/5+MobileSync 1红（probe fail+17min 假宣称）→12/12+隧道族 14/14",
+  "carriedItems": [
+    "H 边缘 P2 三条登记（评审建议随下波）：staged+再编辑文件键基线不对称（面板 stagedDiff vs commitReview working-tree）/staged 删除文件全 accept 走 git add pathspec fatal（需 rm --cached 形态）/apply 失败路径 wholeFiles 已先行入真实 index（重试自愈无损失）",
+    "WoA 边缘：detectPlatform 原副本伪造键语义已统一，无既有测试覆盖（收敛后由锚守护）"
+  ],
+  "gates": {
+    "closeout": "十一门 PASS；working-tree-review.js 707>700 预算例外登记（reason+expires 2026-11-30，拆分评估归下波）+code-size R-2 重锚一次"
+  },
+  "mainCommits": ["602a5ee8 feat 16 文件（UI-471 台账 in_progress）", "e2065448 棘轮重锚", "32fdbb7f 预算例外"],
+  "boundaries": ["实机验证（真隧道 probe 翻转/hunk stage 真实提交流）待", "UI-471 in_progress"]
+}
