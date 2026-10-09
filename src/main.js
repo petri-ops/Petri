@@ -37,7 +37,7 @@ if (process.platform === "win32") {
 }
 const path = require("path");
 const fs = require("fs");
-const { spawnSync } = require("child_process");
+const { spawn } = require("child_process");
 
 require("./platform-compat");
 
@@ -424,47 +424,52 @@ async function main() {
   // better-sqlite3 inside Electron would require a different native ABI and
   // would break the system-Node copy used by Harness/backend processes.
   // BLOCK-100 P1 — 测试实例跳过：主实例拥有 DB 生命周期，migration 已由其执行。
-  try {
+  // BLOCK-154 波次 2 — spawnSync → 异步 spawn：迁移期间主进程事件循环不再被同步
+  // 阻塞（同步形态最坏 30s timeout 全冻结窗口/IPC；BK-08 缺陷类第二现，由
+  // test/block154-startup-async.test.mjs 机械门禁守护 main.js 零同步子进程）。
+  // 时序不变：startRServer 前仍 await 完成态；失败仍不阻断启动（initSchema 兜底）。
+  const migrationPromise = (async () => {
     const migDir = path.join(__dirname, "migrations");
     const dbPath = process.env.BIOF3_DB_PATH;
-    if (dbPath && !IS_TEST_INSTANCE) {
-      fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-      const migrationEnv = { ...process.env, ELECTRON_RUN_AS_NODE: "1" };
-      // Dev: migration child runs under the *system* Node (ABI 137), so it must load
-      // Core's better-sqlite3 (Node-ABI copy), not root's electron-rebuilt copy.
+    if (!dbPath || IS_TEST_INSTANCE) return;
+    fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+    const migrationEnv = { ...process.env, ELECTRON_RUN_AS_NODE: "1" };
+    // Dev: migration child runs under the *system* Node (ABI 137), so it must load
+    // Core's better-sqlite3 (Node-ABI copy), not root's electron-rebuilt copy.
 
-      // Packaged: the child runs under Electron's embedded Node (ABI 145), so it must load the
-      // root copy (which afterPack rebuilt against Electron); delete the override to restore default.
-      // NOTE: read `app.isPackaged` at runtime here — do NOT trust the module-load-time
-      // `IS_DEV` constant: since Electron 41, `require("electron").app` can be undefined
-      // during module evaluation, which silently degrades IS_DEV to false and skips this branch.
+    // Packaged: the child runs under Electron's embedded Node (ABI 145), so it must load the
+    // root copy (which afterPack rebuilt against Electron); delete the override to restore default.
+    // NOTE: read `app.isPackaged` at runtime here — do NOT trust the module-load-time
+    // `IS_DEV` constant: since Electron 41, `require("electron").app` can be undefined
+    // during module evaluation, which silently degrades IS_DEV to false and skips this branch.
 
-      if (!app.isPackaged) {
-        migrationEnv.BIOF3_BETTER_SQLITE3_ROOT = resolveCore("biof3-server");
-      } else {
-        delete migrationEnv.BIOF3_BETTER_SQLITE3_ROOT;
-      }
-      const migration = spawnSync(
+    if (!app.isPackaged) {
+      migrationEnv.BIOF3_BETTER_SQLITE3_ROOT = resolveCore("biof3-server");
+    } else {
+      delete migrationEnv.BIOF3_BETTER_SQLITE3_ROOT;
+    }
+    await new Promise((resolve, reject) => {
+      const migration = spawn(
         NODE_BIN,
         [path.join(__dirname, "migration-runner.js"), dbPath, migDir],
-        {
-          cwd: PROJECT_ROOT,
-          encoding: "utf8",
-          timeout: 30000,
-          env: migrationEnv,
-        },
+        { cwd: PROJECT_ROOT, env: migrationEnv, timeout: 30000 },
       );
-      if (migration.error) throw migration.error;
-      if (migration.status !== 0) {
-        throw new Error((migration.stderr || migration.stdout || "migration child failed").trim());
-      }
-      const migrationOutput = String(migration.stdout || "").trim();
-      if (migrationOutput) console.log(migrationOutput);
-    }
-  } catch (e) {
-    console.error("[desktop] migration failed:", e.message);
-    // 不阻断启动——biof3-server 的 initSchema() 仍会兜底建表
-  }
+      let stdoutText = "";
+      let stderrText = "";
+      migration.stdout.on("data", (chunk) => { stdoutText += chunk; });
+      migration.stderr.on("data", (chunk) => { stderrText += chunk; });
+      migration.on("error", reject);
+      migration.on("close", (code) => {
+        if (code !== 0) {
+          reject(new Error((stderrText || stdoutText || "migration child failed").trim()));
+          return;
+        }
+        const migrationOutput = stdoutText.trim();
+        if (migrationOutput) console.log(migrationOutput);
+        resolve();
+      });
+    });
+  })();
 
   // 1. 启动后端服务
   // biof3-server 常驻（BLOCK-30 P1/P2：唯一业务后端，Python 工具经执行器注册表
@@ -494,6 +499,13 @@ async function main() {
       return;
     }
   } else {
+    // BLOCK-154 波次 2 — migration 完成态在此收口（时序不变：schema 先于后端打开 DB）；
+    // 失败不阻断启动——biof3-server 的 initSchema() 仍会兜底建表。
+    try {
+      await migrationPromise;
+    } catch (e) {
+      console.error("[desktop] migration failed:", e?.message || e);
+    }
     await startRServer();
   }
 

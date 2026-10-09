@@ -52,6 +52,24 @@ function setupWindowManagerIpc({
   const statePath = () =>
     path.join(app.getPath("userData"), "window-manager-state.json");
 
+  let exiting = false;
+  // BLOCK-154 波次 2 rider — 窗口状态持久化异步化：注入的 saveState 与降格轨道
+  // 写盘由同步 writeFileSync 改串行异步链（事件循环不再被磁盘 IO 阻塞；链式串行
+  // 保序，防旧状态晚写覆盖新状态）。exiting 检查放链内回调：before-quit 置位后
+  // 未起跑的排队写立即作废，退出最终态由 before-quit 同步写落盘（退出耐久性）。
+  // 残余窗口如实：已在途的单笔 writeFile 理论上仍可能晚于同步写落地且快照略旧
+  // ——窗口几何场景下次 geometry 更新自愈，不值得为它上跨进程级方案。
+  let stateWriteChain = Promise.resolve();
+  const persistStateAsync = (serialized) => {
+    stateWriteChain = stateWriteChain.then(async () => {
+      if (exiting) return;
+      try {
+        await fs.promises.mkdir(path.dirname(statePath()), { recursive: true });
+        await fs.promises.writeFile(statePath(), JSON.stringify(serialized));
+      } catch {}
+    });
+  };
+
   const core = createWindowManagerCore({
     loadState: () => {
       try {
@@ -61,10 +79,7 @@ function setupWindowManagerIpc({
       }
     },
     saveState: (serialized) => {
-      try {
-        fs.mkdirSync(path.dirname(statePath()), { recursive: true });
-        fs.writeFileSync(statePath(), JSON.stringify(serialized));
-      } catch {}
+      persistStateAsync(serialized);
     },
   });
 
@@ -74,7 +89,6 @@ function setupWindowManagerIpc({
   // hover 卡预览；隐藏状态下不重截（静态结果窗内容不变，终端/agent 卡
   // 标注「快照于降格时」）。remove/return 时清理。
   const thumbnails = new Map();
-  let exiting = false;
 
   // ── Trusted-sender scoping ────────────────────────────────────
   // Main window may act on every content id; the rail window acts
@@ -567,9 +581,7 @@ function setupWindowManagerIpc({
       if (!rec.win.isDestroyed()) rec.win.destroy();
       windows.delete(id);
     }
-    try {
-      fs.writeFileSync(statePath(), JSON.stringify(core.serialize()));
-    } catch {}
+    persistStateAsync(core.serialize());
     return result;
   });
 
