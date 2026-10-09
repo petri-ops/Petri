@@ -208,6 +208,12 @@ export interface StreamChatOptions {
   onConversation?: (info: { conversationId: string; title?: string }) => void;
   /** Server detected the user has pivoted to a new topic mid-conversation */
   onTopicShift?: (info: { conversationId: string; reason: string }) => void;
+  /**
+   * BLOCK-150 ③ — 后端 conversation-adapter 持久化本轮回复失败时发出
+   * （BLOCK-102 P1 引入的事件，此前前端零消费=用户对「未保存」无感）。
+   * 消费方：conversationRunStore 落会话级 notice 诚实呈现。
+   */
+  onMessagePersistFailed?: (info: { conversationId: string; role: string }) => void;
   /** HLE-C4: Loop Controller phase change (started / cancelled / blocked / completed) */
   onLoopPhase?: (info: { phase: string; loopRunId?: string; publicConclusion?: string; reason?: string; automationMode?: string; executionIntent?: 'task_draft' | 'task_execute' }) => void;
   /** HLE-C4: Loop Controller iteration recorded after each agent turn */

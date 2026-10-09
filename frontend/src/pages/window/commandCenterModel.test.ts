@@ -2,7 +2,7 @@
 // commandCenterModel.test — BLOCK-64 P1-b 活跃置顶分层纯函数回归。
 // ============================================================
 import { describe, expect, it } from 'vitest';
-import { isActiveJob, orderJobsForWall } from './commandCenterModel';
+import { computeQueuePositions, isActiveJob, orderJobsForWall } from './commandCenterModel';
 import type { ToolJob } from '@/lib/project-types';
 
 function job(partial: Partial<ToolJob> & { id: string }): ToolJob {
@@ -53,5 +53,27 @@ describe('orderJobsForWall（活跃置顶，BLOCK-64 §3 #4）', () => {
     expect(isActiveJob(job({ id: 'b', status: 'pending' }))).toBe(true);
     expect(isActiveJob(job({ id: 'c', status: 'done' }))).toBe(false);
     expect(isActiveJob(job({ id: 'd', status: 'failed' }))).toBe(false);
+  });
+});
+
+// BLOCK-150 ① — 排队位次重投影（BLOCK-130 PL-3 队列化的任务墙消费）。
+describe('computeQueuePositions（排队位次，BLOCK-150 ①）', () => {
+  it('pending 按 created_at 升序编号（1 起），running/终态不编号', () => {
+    const positions = computeQueuePositions([
+      job({ id: 'late', status: 'pending', created_at: 2000 }),
+      job({ id: 'done', status: 'done', created_at: 1500 }),
+      job({ id: 'early', status: 'pending', created_at: 1000 }),
+      job({ id: 'running', status: 'running', created_at: 500 }),
+    ]);
+    expect(positions.get('early')).toBe(1);
+    expect(positions.get('late')).toBe(2);
+    expect(positions.has('running')).toBe(false);
+    expect(positions.has('done')).toBe(false);
+  });
+
+  it('无 pending 时返回空表；单 pending 位次恒 1', () => {
+    expect(computeQueuePositions([job({ id: 'done', status: 'done', created_at: 1 })]).size).toBe(0);
+    expect(computeQueuePositions([]).size).toBe(0);
+    expect(computeQueuePositions([job({ id: 'only', status: 'pending', created_at: 1 })]).get('only')).toBe(1);
   });
 });

@@ -43,6 +43,7 @@ import {
   resumeInterruptedConversation,
   shouldClearReconciledConversationRun,
   getChildFinishedNotices,
+  getConversationFallbackNotice,
   startConversationRun,
   startSubAgentTask,
   stopConversationRun,
@@ -1052,6 +1053,46 @@ describe('BLOCK-97 task_todo projection (conversation-level store)', () => {
     // 下一轮 run 开始 → 清除（生命周期=单次 agent 任务运行）
     start('conv-todo-2', '第二轮');
     expect(getConversationTodoList('conv-todo-2')).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// BLOCK-150 ③ — message_persist_failed 诚实呈现（BLOCK-102 P1 后端事件消费侧）
+// 后端 conversation-adapter 落库失败时 emit message_persist_failed；前端此前零消费
+// （用户对「回复未保存」无感）。接线 = 会话级 notice（复用 BLOCK-56 降级提示通道，
+// 附着最后一条助手消息，run 终态对账清 run 后仍可见，下一轮 run 开始清除）。
+// ---------------------------------------------------------------------------
+
+describe('BLOCK-150 ③ message_persist_failed notice', () => {
+  beforeEach(() => {
+    __resetConversationRunsForTests();
+    streamChatMock.mockReset();
+    streamChatMock.mockResolvedValue(undefined);
+  });
+
+  it('onMessagePersistFailed 落会话级 notice，文案点破「未保存、刷新将丢失」', () => {
+    start('conv-persist', '帮我总结');
+    const callbacks = streamCallOpts(0);
+    expect(typeof callbacks.onMessagePersistFailed).toBe('function');
+
+    callbacks.onMessagePersistFailed?.({ conversationId: 'conv-persist', role: 'assistant' });
+    const notice = getConversationFallbackNotice('conv-persist');
+    expect(notice).toBeTruthy();
+    expect(notice).toContain('未能保存');
+  });
+
+  it('notice 存活于 run 终态对账（clearConversationRun）之后，下一轮 run 开始清除', () => {
+    start('conv-persist-2', '第一轮');
+    streamCallOpts(0).onMessagePersistFailed?.({ conversationId: 'conv-persist-2', role: 'assistant' });
+    expect(getConversationFallbackNotice('conv-persist-2')).toBeTruthy();
+
+    stopConversationRun('conv-persist-2');
+    clearConversationRun('conv-persist-2');
+    expect(getConversationRunSnapshot('conv-persist-2')).toBeNull();
+    expect(getConversationFallbackNotice('conv-persist-2')).toBeTruthy();
+
+    start('conv-persist-2', '第二轮');
+    expect(getConversationFallbackNotice('conv-persist-2')).toBeNull();
   });
 });
 

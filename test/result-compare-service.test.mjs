@@ -384,6 +384,63 @@ test('RS6 adoption fails closed when the preview parent is stale', (context) => 
   assert.equal(fx.repository.getChangeSet('cs_candidate').status, 'preview_ready');
 });
 
+// BLOCK-150 边界锚：与上一条测试双向钉死 BLOCK-143 豁免的精确形态——
+// family 首版（parent 空 + family 无 current）adopt 合法；parent 非空而
+// current 被清（上一条）仍 fail-closed 判 adoption_base_stale。
+test('RS6 adoption keeps the family-first preview (no parent, no current) adoptable', (context) => {
+  const fx = makeFixture(context);
+  const firstScript = 'plot <- "first"\n';
+  const firstParams = '{\n  "plot": "first"\n}\n';
+  const firstScriptPath = 'analysis/scripts/family_first/rev_first/artifact.R';
+  const firstParamsPath = 'analysis/scripts/family_first/rev_first/parameters.json';
+  const first = fx.adapter.commitVirtualFiles({
+    parentCommit: fx.base.commit,
+    ref: 'refs/heads/biof3/changeset/cs_first', expectedOld: '0'.repeat(40),
+    message: 'RS6 family-first preview',
+    files: [
+      { path: firstScriptPath, content: firstScript },
+      { path: firstParamsPath, content: firstParams },
+    ],
+  });
+  const firstOutput = join(fx.workspaceRoot, 'results/jobs/tj_first/output/plot.csv');
+  mkdirSync(join(firstOutput, '..'), { recursive: true });
+  writeFileSync(firstOutput, 'x,y\n1,2\n');
+  const firstHash = sha256(readFileSync(firstOutput));
+  fx.repository.createChangeSet({
+    changeSetId: 'cs_first', projectId: 'p_rs6', baseCommit: fx.base.commit,
+    workingBranchRef: 'refs/heads/biof3/changeset/cs_first', createdBy: 'agent',
+  });
+  fx.repository.transitionChangeSet({ changeSetId: 'cs_first', to: 'running' });
+  fx.repository.appendRevision({
+    revisionId: 'rev_first', projectId: 'p_rs6', artifactFamilyId: 'family_first', artifactId: 'plot',
+    parentRevisionIds: [], sourceCommit: first.commit,
+    sourceScriptRef: {
+      relativePath: firstScriptPath, sha256: sha256(firstScript), entryPoint: 'artifact.R',
+      artifactId: 'plot', rendererId: 'plugin:plot', language: 'r', origin: 'project_materialized',
+    },
+    inputArtifactRefs: [], parametersRef: firstParamsPath, parametersHash: sha256(firstParams),
+    toolJobId: 'tj_first', outputPath: 'results/jobs/tj_first/output/plot.csv', outputHash: firstHash,
+    validationStatus: 'valid', reproducibilityStatus: 'available', changeSetId: 'cs_first',
+  });
+  fx.repository.transitionChangeSet({
+    changeSetId: 'cs_first', to: 'preview_ready', candidateCommit: first.commit,
+    jobRefs: ['tj_first'], candidateArtifactRefs: ['rev_first'],
+    validationSummary: { artifactTruthStatus: 'valid' },
+  });
+  const adopted = adoptResultChangeSet(
+    { projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, changeSetId: 'cs_first' },
+    {
+      repository: fx.repository, adapter: fx.adapter,
+      getToolJob: (id) => (id === 'tj_first' ? {
+        id: 'tj_first', project_id: 'p_rs6', tool_id: 'fixture-tool', status: 'completed',
+        result: { artifactTruth: { status: 'valid', blocking: false } },
+      } : fx.getToolJob(id)),
+    }
+  );
+  assert.equal(adopted.changeSet.status, 'adopted');
+  assert.equal(fx.repository.getCurrentRevision('family_first', 'p_rs6').revisionId, 'rev_first');
+});
+
 test('RS6 adoption keeps SQLite unchanged when the current Git ref fails CAS', (context) => {
   const fx = makeFixture(context);
   fx.adapter.updateRefCas({

@@ -67,6 +67,30 @@ function makeOpts(overrides: Partial<StreamChatOptions> = {}): StreamChatOptions
 }
 
 describe('BLOCK-39 agent 事件流断线重连', () => {
+  it('message_persist_failed 事件分发到 onMessagePersistFailed（BLOCK-150 ③ 前端消费接线）', async () => {
+    vi.useFakeTimers();
+    const fetchMock = vi.fn().mockResolvedValueOnce(
+      sseResponse([
+        'data: {"seq":1,"eventType":"delta","payload":{"delta":"部分回答"}}\n\n',
+        'data: {"event":"message_persist_failed","conversationId":"conv-1","role":"assistant"}\n\n',
+        'data: {"event":"done"}\n\n',
+        'data: [DONE]\n\n',
+      ])
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const onMessagePersistFailed = vi.fn();
+    const opts = makeOpts({ onMessagePersistFailed });
+    const promise = subscribeAgentTask('t-persist', opts, 0);
+    await vi.runAllTimersAsync();
+    await promise;
+
+    expect(onMessagePersistFailed).toHaveBeenCalledTimes(1);
+    expect(onMessagePersistFailed).toHaveBeenCalledWith(
+      expect.objectContaining({ conversationId: 'conv-1', role: 'assistant' }),
+    );
+  });
+
   it('流截断后以 afterSeq=lastSeq 重连，收到 failed+resumable 终态（免刷新亮按钮核心判据）', async () => {
     vi.useFakeTimers();
     const fetchMock = vi

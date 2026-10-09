@@ -335,6 +335,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     | 'onLoopPhase'
     | 'onLoopIteration'
     | 'onTopicShift'
+    | 'onMessagePersistFailed'
     | 'onConversation'
     | 'onDone'
     | 'onError'
@@ -589,6 +590,15 @@ export function startConversationRun(options: StartConversationRunOptions): bool
       } catch {
         // 事件总线失败不阻塞流处理
       }
+    },
+    // BLOCK-150 ③ — 持久化失败诚实呈现（BLOCK-102 P1 后端事件此前前端零消费，
+    // 用户对「本轮回复未保存」无感）：复用 BLOCK-56 会话级 notice 通道（附着最后
+    // 一条助手消息渲染），run 终态对账清 run 后仍可见，下一轮 run 开始清除。
+    onMessagePersistFailed: () => {
+      setFallbackNotice(
+        conversationId,
+        '注意：本轮回复未能保存到会话历史（持久化失败），刷新后将丢失'
+      );
     },
     // 会话创建 SSE 事件（后端 getOrCreateActiveConversation 新建时发）→ 广播给
     // 左栏项目树即时刷新（子 agent / copilotAsk / 联邦委托等后端建会话路径）。

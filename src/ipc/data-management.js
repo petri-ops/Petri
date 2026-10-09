@@ -13,6 +13,20 @@ const fs = require("fs");
 const path = require("path");
 const { ipcMain, shell } = require("electron");
 
+// BLOCK-150 ⑨：空间占用明细的中文名（可操作文案）。
+// breakdown 的键必须是磁盘上的真实目录/文件名（path.join 直接用），不能中文化；
+// 用户可读名称经 labels 字段随 payload 下发，前端按 labels[key] ?? key 渲染。
+const BREAKDOWN_LABELS = {
+  runtimes: "运行时（R / Python）",
+  plugins: "插件",
+  results: "分析结果",
+  uploads: "上传文件",
+  logs: "日志",
+  tmp: "临时文件",
+  "biof3.db": "本地数据库",
+  "ai-settings.json": "AI 配置",
+};
+
 function setupDataManagementIpc() {
   // 递归计算目录大小（字节）
   function getDirSize(dir) {
@@ -69,7 +83,11 @@ function setupDataManagementIpc() {
         } catch {}
       }
       const total = Object.values(breakdown).reduce((a, b) => a + b, 0);
-      return { ok: true, dataDir, total, breakdown };
+      const labels = {};
+      for (const key of Object.keys(breakdown)) {
+        if (BREAKDOWN_LABELS[key]) labels[key] = BREAKDOWN_LABELS[key];
+      }
+      return { ok: true, dataDir, total, breakdown, labels };
     } catch (e) {
       return { ok: false, error: e.message };
     }

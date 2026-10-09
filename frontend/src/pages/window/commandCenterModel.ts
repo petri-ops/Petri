@@ -31,3 +31,22 @@ export function orderJobsForWall(jobs: ToolJob[]): WallPartition {
 export function isActiveJob(job: ToolJob): boolean {
   return job.status === 'running' || job.status === 'pending';
 }
+
+/**
+ * BLOCK-150 ① — 排队位次（BLOCK-130 PL-3 队列化的前端消费）。
+ *
+ * 后端入队时返回 queuePosition=同用户 pending 中先于本作业的数量+1
+ * （tools-executor.js 入队分支），但该值只在 run 响应里、不落列；任务墙的
+ * 唯一真相是 /api/tools/history（全量未 scope 的用户作业投影，不含测试行），
+ * 故位次在消费侧从同一真相重投影：pending 按 created_at 升序的位次（1 起）。
+ * 同毫秒并列时与后端 `created_at < ?` 口径可能有 ±1 误差——展示位次是排队
+ * 深度的诚实近似，不是调度承诺。
+ */
+export function computeQueuePositions(jobs: ToolJob[]): ReadonlyMap<string, number> {
+  const positions = new Map<string, number>();
+  jobs
+    .filter((job) => job.status === 'pending')
+    .sort((a, b) => a.created_at - b.created_at)
+    .forEach((job, index) => positions.set(job.id, index + 1));
+  return positions;
+}

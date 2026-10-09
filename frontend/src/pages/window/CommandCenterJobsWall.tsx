@@ -16,7 +16,8 @@ import { getBridge } from '@/lib/desktopBridge';
 import { listAllJobs, listProjects } from '@/lib/project-store';
 import type { ToolJob } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
-import { isActiveJob, orderJobsForWall } from './commandCenterModel';
+import { useInvalidationStream } from '@/hooks/useInvalidationStream';
+import { computeQueuePositions, isActiveJob, orderJobsForWall } from './commandCenterModel';
 import styles from './command-center.module.css';
 
 const POLL_MS = 5000;
@@ -59,6 +60,8 @@ export function CommandCenterJobsWall({
   onStatsChange,
 }: CommandCenterJobsWallProps): React.ReactElement {
   const [jobs, setJobs] = useState<ToolJob[]>([]);
+  // BLOCK-150 ① — 排队位次表（jobId → 1 起位次），随 refresh 从全量真相重投影
+  const [queuePositions, setQueuePositions] = useState<ReadonlyMap<string, number>>(new Map());
   const [loadError, setLoadingError] = useState('');
   const [drillNote, setDrillNote] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
@@ -78,6 +81,9 @@ export function CommandCenterJobsWall({
   const refresh = useCallback(async () => {
     try {
       const data = await listAllJobs();
+      // BLOCK-150 ① — 排队位次从全量（未 scope）真相重投影：位次语义=同用户
+      // 队列全局排序（与后端入队口径一致），项目绑定视图的截断子集算不出全局位次。
+      setQueuePositions(computeQueuePositions(data));
       const scoped = projectId ? data.filter((job) => job.project_id === projectId) : data;
       // 活跃置顶后截 12：running/pending 不再被连续历史作业挤出墙（§3 #4）
       setJobs(orderJobsForWall(scoped).ordered.slice(0, MAX_TILES));
@@ -194,6 +200,15 @@ export function CommandCenterJobsWall({
     }, POLL_MS);
     return () => window.clearInterval(timer);
   }, [refresh]);
+
+  // BLOCK-150 ② — 终态失效流消费（BLOCK-126 P1 事件源的前端接线）：SSE
+  // invalidate(jobs) 即时 refresh，轮询降为兜底（与 useConversationJobs 同款姿势）。
+  // 墙零本地任务状态缓存（BLOCK-59 plan §10 红线），refresh 全量重投影即
+  // 「刷新对应瓦片」的正确形态——不按 toolJobId 单瓦片补丁（那会造第二真相）。
+  useInvalidationStream(true, useCallback(
+    (info) => { if (info.domain === 'jobs') void refresh(); },
+    [refresh],
+  ));
 
   // P1-a：项目归属标注（job.project_id → 项目名；失败静默降级为裸 id）。
   // 仅全局俯瞰需要（项目绑定视图单项目，无标注意义）。
@@ -412,7 +427,11 @@ export function CommandCenterJobsWall({
                 </div>
               )}
               <div className={styles.tileStatus}>
-                <span data-status={job.status}>{STATUS_LABEL[job.status] || job.status}</span>
+                <span data-status={job.status}>
+                  {job.status === 'pending' && queuePositions.has(job.id)
+                    ? `排队中 #${queuePositions.get(job.id)}`
+                    : STATUS_LABEL[job.status] || job.status}
+                </span>
                 <span>
                   {job.status === 'running' || job.status === 'pending'
                     ? `已 ${formatElapsed(job.created_at, now)}`

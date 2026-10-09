@@ -40,6 +40,7 @@ const require = createRequire(import.meta.url);
 const toolMetadataMod = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'tool-metadata.js'));
 const { TOOL_METADATA, METADATA_KEYS, RISK_LEVELS, getToolMetadata } = toolMetadataMod;
 const toolDefsMod = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'tool-defs.js'));
+const { getToolRegistry } = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'registry.js'));
 const { runAgentToolCallBatch } = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'agent-loop-control.js'));
 
 // skill 元工具（skill_discover/get/execute）注册在 mcp/registry（getSkillToolDefinitions），
@@ -103,6 +104,32 @@ test('P2 一致性 — destructive ⇒ 串行；readOnly ⇒ 非破坏；spawn �
     assert.equal(TOOL_METADATA[name].concurrentSafe, false, `${name} 必须串行（P2-5）`);
   }
   assert.equal(getToolMetadata('不存在的工具').concurrentSafe, false, '未知工具保守缺省=串行非只读');
+});
+
+// BLOCK-150 ④ — CONTRACTS×TOOL_METADATA 跨表一致性锚。
+// 两张表各司其职（CONTRACTS=执行契约/schema 侧，模块加载时对 TOOL_DEFS 校验；
+// TOOL_METADATA=调度/审批声明侧），但语义轴必须不打架：
+// metadata.readOnly=true ⇒ 契约 sideEffect ∈ {none, external-request}
+//（none=零副作用；external-request=只发起外部请求不写本地状态——search/read_page/read_image 属此形态）。
+// 历史漂移两处（审视 BLOCK-150 坐实）：plan（真身 INSERT/UPDATE copilot_plans，
+// 契约 state-write）与 computer_screenshot（真身把截图落 <workspace>/computer-use/，
+// 契约 workspace-write）曾标 readOnly=true —— 调度器据 readOnly 并行分组，
+// 假只读会把写表/写文件工具放进并行组。反向不锚（ro=false + sideEffect=none 属
+// 头注声明的保守缺省，非漂移）。
+test('BLOCK-150 ④ — metadata.readOnly ⇒ 契约 sideEffect 无写面（跨表一致性）', () => {
+  const contractByName = new Map(
+    getToolRegistry().map((entry) => [entry.definition.function.name, entry.contract]),
+  );
+  const violations = [];
+  for (const [name, meta] of Object.entries(TOOL_METADATA)) {
+    if (!meta.readOnly) continue;
+    const contractMeta = contractByName.get(name);
+    if (!contractMeta) continue; // skill_* 注册在 mcp/registry，无 agent CONTRACTS 条目（既有豁免）
+    if (!['none', 'external-request'].includes(contractMeta.sideEffect)) {
+      violations.push(`${name}: metadata.readOnly=true 但契约 sideEffect=${contractMeta.sideEffect}`);
+    }
+  }
+  assert.deepEqual(violations, [], `readOnly 声明与契约写面冲突：\n- ${violations.join('\n- ')}`);
 });
 
 test('P2 调度行为 — 并行组真并发、串行组保序、结果按原序重组', async () => {

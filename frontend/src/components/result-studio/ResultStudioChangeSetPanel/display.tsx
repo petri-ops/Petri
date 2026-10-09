@@ -174,6 +174,9 @@ export function executedNodeIds(value: unknown): string[] {
     : [];
 }
 
+// BLOCK-150 ⑫ 渲染层领域盲契约（docs/artifact-plane-direction.md §2）：行标签用
+// 中性统计词汇（条目 / 效应量），不得回退为「基因 / padj / log2FC」等领域词；
+// 领域语义由数据键与 producer schema 承载，不进渲染文案。
 export function ScientificDifference({ scientific }: { scientific: NonNullable<ResultStudioComparison['artifacts'][number]['scientific']> }): ReactElement {
   if (scientific.status === 'unavailable') {
     return <p className={styles.scientificUnavailable}>科学差异暂不可用：{scientific.reason || '来源表缺少可验证的语义契约。'}</p>;
@@ -181,10 +184,10 @@ export function ScientificDifference({ scientific }: { scientific: NonNullable<R
   if (scientific.kind === 'differential_expression' && scientific.significantGenes) {
     const { before, after, membership } = scientific.significantGenes;
     return <table className={styles.tableCompare}><tbody>
-      <tr><td>显著基因</td><td>{before.significantCount} → {after.significantCount}</td></tr>
+      <tr><td>显著条目</td><td>{before.significantCount} → {after.significantCount}</td></tr>
       <tr><td>上调 / 下调</td><td>{before.upCount} / {before.downCount} → {after.upCount} / {after.downCount}</td></tr>
-      <tr><td>关键基因变化</td><td>新增 {membership.gainedCount}，移除 {membership.lostCount}；{[...membership.gained, ...membership.lost].join('、') || '无'}</td></tr>
-      {scientific.thresholds && <tr><td>阈值 (padj / |log2FC|)</td><td>{scientific.thresholds.before.padjCutoff} / {scientific.thresholds.before.lfcCutoff} → {scientific.thresholds.after.padjCutoff} / {scientific.thresholds.after.lfcCutoff}</td></tr>}
+      <tr><td>关键条目变化</td><td>新增 {membership.gainedCount}，移除 {membership.lostCount}；{[...membership.gained, ...membership.lost].join('、') || '无'}</td></tr>
+      {scientific.thresholds && <tr><td>阈值 (调整 p / |效应量|)</td><td>{scientific.thresholds.before.padjCutoff} / {scientific.thresholds.before.lfcCutoff} → {scientific.thresholds.after.padjCutoff} / {scientific.thresholds.after.lfcCutoff}</td></tr>}
     </tbody></table>;
   }
   if (scientific.kind === 'volcano_classification' && scientific.classifications) {
@@ -192,7 +195,7 @@ export function ScientificDifference({ scientific }: { scientific: NonNullable<R
     return <table className={styles.tableCompare}><tbody>
       <tr><td>显著分类</td><td>{before.significantCount} → {after.significantCount}</td></tr>
       <tr><td>上调 / 下调</td><td>{before.upCount} / {before.downCount} → {after.upCount} / {after.downCount}</td></tr>
-      <tr><td>标记基因变化</td><td>新增 {membership.gainedCount}，移除 {membership.lostCount}；{[...membership.gained, ...membership.lost].join('、') || '无'}</td></tr>
+      <tr><td>标记条目变化</td><td>新增 {membership.gainedCount}，移除 {membership.lostCount}；{[...membership.gained, ...membership.lost].join('、') || '无'}</td></tr>
     </tbody></table>;
   }
   if (scientific.kind === 'functional_enrichment' && scientific.terms) {

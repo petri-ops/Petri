@@ -271,6 +271,7 @@ function _dispatchSseEvent(obj: AgentSseEvent, opts: StreamChatOptions): void {
     onInputQueued,
     onConversation,
     onTopicShift,
+    onMessagePersistFailed,
     onLoopPhase,
     onLoopIteration,
     onChildFinished,
@@ -314,6 +315,15 @@ function _dispatchSseEvent(obj: AgentSseEvent, opts: StreamChatOptions): void {
   }
   if (obj.event === 'topic_shift') {
     onTopicShift?.({ conversationId: obj.conversationId as string, reason: (obj.reason as string) || '' });
+    return;
+  }
+  // BLOCK-150 ③ — 持久化失败诚实呈现：后端 appendAssistantMessage 落库失败时
+  // emit（BLOCK-102 P1 事件），转发给 store 落会话级 notice。
+  if (obj.event === 'message_persist_failed') {
+    onMessagePersistFailed?.({
+      conversationId: obj.conversationId as string,
+      role: typeof obj.role === 'string' && obj.role ? obj.role : 'assistant',
+    });
     return;
   }
   // HLE-C4: Loop Controller events

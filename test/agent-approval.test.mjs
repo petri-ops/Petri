@@ -245,10 +245,40 @@ test('volcano-plot（非重操作）不拦截，直接跑', async () => {
   assert.notEqual(r.error, 'approval_invalid');
 });
 
+// BLOCK-150 ⑤ — HEAVY_TOOLS 死链守卫：白名单成员必须真实可发现
+// （pack manifest ∪ 中性夹具 manifest）。历史漂移 9 个成员（ml-feature-select /
+// ml-classifier / rsf-survival / lasso-cox / consensus-cluster / ml-scvi-annotate /
+// mo-mofa / mo-snf / maftools-mutation）随 BLOCK-83 P4 生信包迁出核心后失去载体，
+// 引用面核查：unknown_tool 检查先于 heavy 门（learning.js 注册表校验在前），
+// 死成员不可达=纯误导性死代码。锚测试防再次堆积。
+test('HEAVY_TOOLS 白名单成员必须真实存在（pack manifest ∪ 中性夹具）——死链守卫', (t) => {
+  const fsx = req('node:fs');
+  const pthx = req('node:path');
+  assert.ok(learning.HEAVY_TOOLS instanceof Set, 'learning.js 应导出 HEAVY_TOOLS（治理审计面）');
+  const fixtureManifestPath = pthx.resolve(__dirname, 'fixtures', 'neutral-plugins', 'manifest.json');
+  const fixtureIds = new Set(
+    Object.keys(JSON.parse(fsx.readFileSync(fixtureManifestPath, 'utf8')).plugins || {}),
+  );
+  // 生信插件真源在同级 pack 仓（BIO-4 惯例）；仓缺席的环境（浅克隆）跳过 pack 侧
+  // 检查——此时只锚夹具成员，避免环境性红。
+  const packManifestPath = pthx.resolve(__dirname, '..', '..', 'gewu-pack-bio', 'plugins', 'manifest.json');
+  if (!fsx.existsSync(packManifestPath)) {
+    return t.skip('同级 gewu-pack-bio 仓不在位，pack 侧死链检查跳过');
+  }
+  const packIds = new Set(
+    Object.keys(JSON.parse(fsx.readFileSync(packManifestPath, 'utf8')).plugins || {}),
+  );
+  const discoverable = new Set([...fixtureIds, ...packIds]);
+  const dead = [...learning.HEAVY_TOOLS].filter((id) => !discoverable.has(id));
+  assert.deepEqual(dead, [], `HEAVY_TOOLS 死链成员（不存在于 pack manifest/中性夹具）：${dead.join(', ')}`);
+});
+
 test('未注册的重工具不会生成待确认 tool_job', async () => {
-  // ml-classifier 在 HEAVY_TOOLS 白名单里，但未打包成 built-in 插件（不可发现），
-  // 因此走 callTool 应直接 unknown_tool，跑前不落 ack_status='pending' 的 tool_job。
-  // （wgcna 曾用于此断言，Stage 3 打包成 built-in 插件后已可发现，故换成仍未注册的重工具）
+  // ml-classifier 未打包成插件（不可发现）→ 注册表检查直接 unknown_tool，
+  // 跑前不落 ack_status='pending' 的 tool_job。BLOCK-150 ⑤ 后它也已移出
+  // HEAVY_TOOLS 白名单（死链清理）——本断言语义不受白名单成员影响：
+  // unknown_tool 检查先于 heavy 门，未注册工具永远走不到确认分支。
+  // （wgcna 曾用于此断言，Stage 3 打包成 built-in 插件后已可发现，故换成未注册的重工具）
   const sqlite = db.getDatabase();
   const countJobs = sqlite.prepare("SELECT COUNT(*) AS count FROM tool_jobs WHERE tool_id='ml-classifier'");
   const before = countJobs.get().count;

@@ -516,7 +516,10 @@ function ScientificScatter({ manifest, query, selection, onSelectionChange }: {
           {mapping.yTransform === 'neg_log10' ? `-log10(${mapping.yField})` : mapping.yField}
         </text>
       </svg>
-      <small className={styles.caveat}>{searchHits ? `搜索命中 ${searchHits.size}；` : ''}显示 {points.length} 个有界 backing-data 点；点选、框选和图例均回写稳定 {manifest.entityType} ID；参考线为展示辅助。</small>
+      <small className={styles.caveat}>
+        {searchHits ? `搜索命中 ${searchHits.size}；` : ''}显示 {points.length} 个有界 backing-data 点；点选、框选和图例均回写稳定 {manifest.entityType} ID；参考线为展示辅助。
+        点数与搜索命中均只统计当前有界窗口——后端交互能力按界回传数据、不整表渲染，未显示不代表全表没有该 {manifest.entityType}，完整结果见原始文件与报告图。
+      </small>
     </div>
   );
 }

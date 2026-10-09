@@ -108,6 +108,10 @@ function degThresholds(params) {
     : null;
 }
 
+// BLOCK-150 ⑫: the gene/padj/lfc aliases below pin the admitted producer
+// schemas — domain knowledge deliberately lives at this registry edge only.
+// The compare rendering layer consuming these summaries stays domain-blind
+// (docs/artifact-plane-direction.md §2); do not leak the aliases into UI copy.
 function classifyDeg(table, thresholds) {
   const geneColumn = findColumn(table.columns, ['gene', 'gene_id']);
   const lfcColumn = findColumn(table.columns, ['log2FoldChange', 'log2FC']);

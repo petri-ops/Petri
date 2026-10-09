@@ -16,6 +16,7 @@ export function DataManagement(): React.ReactElement | null {
     dataDir?: string;
     total?: number;
     breakdown?: Record<string, number>;
+    labels?: Record<string, string>;
   } | null>(null);
   const [opening, setOpening] = useState(false);
 
@@ -58,7 +59,7 @@ export function DataManagement(): React.ReactElement | null {
     <div className="gewu-data-section">
       <label className="gewu-field__label">本地数据目录</label>
       <p className="gewu-field__hint">
-        分析结果、上传文件、AI 配置、执行配置、运行时都存在这里。卸载应用时此目录会保留，不会自动删除。
+        分析结果、上传文件、插件、运行时、日志、临时文件、本地数据库与 AI 配置都存在这里。卸载应用时此目录会保留，不会自动删除。
       </p>
       {info?.dataDir && (
         <div className="gewu-data-dir-path" title={info.dataDir}>
@@ -67,12 +68,17 @@ export function DataManagement(): React.ReactElement | null {
       )}
       {sortedEntries.length > 0 && (
         <div className="gewu-data-breakdown">
-          {sortedEntries.map(([name, size]) => (
-            <div key={name} className="gewu-data-breakdown-row">
-              <span className="gewu-data-breakdown-name">{name}</span>
-              <span className="gewu-data-breakdown-size">{formatSize(size)}</span>
-            </div>
-          ))}
+          {sortedEntries.map(([name, size]) => {
+            // BLOCK-150 ⑨：展示中文名（源侧 labels），原始目录/文件名留在 title 里
+            // 供与磁盘数据目录对照；未知键回退原名不硬编码。
+            const label = info?.labels?.[name];
+            return (
+              <div key={name} className="gewu-data-breakdown-row">
+                <span className="gewu-data-breakdown-name" title={name}>{label ?? name}</span>
+                <span className="gewu-data-breakdown-size">{formatSize(size)}</span>
+              </div>
+            );
+          })}
           <div className="gewu-data-breakdown-row gewu-data-breakdown-row--total">
             <span>合计</span>
             <span>{formatSize(info?.total)}</span>

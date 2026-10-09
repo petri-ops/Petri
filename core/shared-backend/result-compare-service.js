@@ -537,13 +537,17 @@ function adoptResultChangeSet(input = {}, dependencies = {}) {
     }
     const parent = revision.parentRevisionIds.map((id) => repository.getRevision(id)).find(Boolean) || null;
     const current = repository.getCurrentRevision(revision.artifactFamilyId, input.projectId);
+    const familyFirst = !parent && !current;
     // BLOCK-143：family 首版（parent 空）且 family 尚无 current —— preview 即首个
-    // current，adopt 合法（F1 链形成点注册的 pending revisions 即此形态）；
-    // family 已有 current 而 preview 的 parent 与之不符才判 stale（既有语义不变）。
-    if (current && (!parent || current.revisionId !== parent.revisionId)) {
+    // current，adopt 合法（F1 链形成点注册的 pending revisions 即此形态）。
+    // BLOCK-150：仅 familyFirst 豁免——chain-preview 的 parent 恒取自 family 现行
+    // revision（chain-preview.js），parent 非空 ⇒ preview 时刻必存在 current ⇒
+    // adopt 时刻 current=null 即基线指针丢失，恢复 fail-closed 判 stale
+    // （RS6 契约：与已采纳幂等路径 assertAdoptedCohortIsCurrent 对 null current
+    // 判 stale 的姿态对齐；修 BLOCK-143 放宽时误开的「parent 非空+current 被清」孔）。
+    if (!familyFirst && (!parent || !current || current.revisionId !== parent.revisionId)) {
       throw new ResultCompareError('adoption_base_stale', 'Current result changed after this preview was created.');
     }
-    const familyFirst = !parent && !current;
     verifyRevisionForAdoption({
       revision,
       parent,

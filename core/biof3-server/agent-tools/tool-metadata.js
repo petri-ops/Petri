@@ -86,7 +86,10 @@ const TOOL_METADATA = {
   // ---- 会话/工具栏域 ----
   system_info: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
   todo_write: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: false, riskLevel: 'low', timeoutMs: null },
-  plan: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
+  // BLOCK-150 ④ 漂移修齐：plan 真身写 copilot_plans/plan_steps/plan_revisions
+  // （plan-ui-tools.js INSERT/UPDATE，契约 state-write/R1）——曾误标 readOnly=true
+  // 会被调度器放进只读并行组；改非只读串行（concurrentSafe 随只读轴一并收串行）。
+  plan: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: false, riskLevel: 'low', timeoutMs: null },
   // ---- 决策观测域（BLOCK-116 W2 / BK-04）：只读台账查询（纯读并发；变更面不对模型开放）----
   decision_summary: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
   decision_recent: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
@@ -96,7 +99,10 @@ const TOOL_METADATA = {
   resident_task_read: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
 
   // ---- OS 自动化域（computer_*：只读也不并发——单一输入设备）----
-  computer_screenshot: { readOnly: true, destructive: false, concurrentSafe: false, needsApproval: false, riskLevel: 'medium', timeoutMs: null },
+  // BLOCK-150 ④ 漂移修齐：screenshot 产物落 <workspace>/computer-use/（契约
+  // vision/workspace-write，computer-use-tools.js resolveScreenshotOutPath 白名单），
+  // 曾误标 readOnly=true 与「不改变文件系统」字段定义相抵。
+  computer_screenshot: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: false, riskLevel: 'medium', timeoutMs: null },
   computer_snapshot: { readOnly: true, destructive: false, concurrentSafe: false, needsApproval: false, riskLevel: 'medium', timeoutMs: null },
   computer_wait: { readOnly: true, destructive: false, concurrentSafe: false, needsApproval: false, riskLevel: 'low', timeoutMs: null },
   computer_click: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },

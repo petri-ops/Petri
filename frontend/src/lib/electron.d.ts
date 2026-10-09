@@ -387,6 +387,8 @@ declare global {
           dataDir?: string;
           total?: number;
           breakdown?: Record<string, number>;
+          // BLOCK-150 ⑨：明细键的中文名（源侧 data-management.js 提供，键=breakdown 键）
+          labels?: Record<string, string>;
         }>;
         openDir: () => Promise<{ ok: boolean; error?: string }>;
       };

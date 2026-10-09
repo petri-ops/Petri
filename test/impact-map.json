@@ -2938,8 +2938,22 @@
       "patterns": [
         "acceptance/block-149/**"
       ],
-      "tests": [],
+       "tests": [],
       "frontendRelated": false,
+      "classifiesScripts": false
+    },
+    {
+      "id": "block150-bio-track",
+      "note": "BLOCK-150 审视吸收批第一波 B 轨：data-management 明细中文名（labels 字段+消费端渲染）+ R 缺包守卫契约测试（兄弟仓 gewu-pack-bio/plugins 三插件 R 脚本的守卫存在性指纹锚+三源依赖声明一致性；pack 仓文件不在本仓 pattern 面，测试触发以本仓文件与证据目录为准）。ScientificInteractionViewer caveat 因果句复用 block141 规则面，不重复登记。",
+      "patterns": [
+        "src/ipc/data-management.js",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/DataManagement.tsx",
+        "acceptance/block-150/**"
+      ],
+      "tests": [
+        "test/block150-bio-r-guard-and-deps.test.mjs"
+      ],
+      "frontendRelated": true,
       "classifiesScripts": false
     }
   ]
