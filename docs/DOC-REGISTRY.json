@@ -5716,8 +5716,31 @@
         "c10"
       ],
       "notes": "审视吸收批第一波（13 项三轨：平台消费链 6/生信品质 5/内核盲性 2；用户「继续」发令）。逐项先验证现状再红绿实现；工作流内不提交。 2026-10-09 当日收口 completed：13/13 清账（⑫ 经评审 P1 补做）+closeout 十一门 PASS；UI-469 in_progress 待实机；pack 6a5ef8a 本地。"
+    },
+    {
+      "id": "BLOCK-151-REVIEW-ABSORB-WAVE2",
+      "capability": "review-absorb-wave2",
+      "path": "docs/block-151-review-absorb-wave2-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-151-review-absorb",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-09",
+      "archivePolicy": "archive_when_superseded",
+      "phase": "ACTIVE",
+      "tags": [
+        "block-151",
+        "review-absorb",
+        "wave2",
+        "a1",
+        "a3",
+        "a4",
+        "b7"
+      ],
+      "notes": "审视吸收批第二波（A1 深水区最小修+/m 竞态、A4 成果面、B7+A3 解读层与工具描述；用户「继续 按顺序都搞完」批量授权 151→152→153）。三轨有界重审视 ≤7 条/轨，A1 从紧只补守卫与测试。"
     }
   ],
   "lastUpdated": "2026-10-09",
-  "documentCount": 302
+  "documentCount": 303
 }
