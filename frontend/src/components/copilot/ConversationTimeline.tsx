@@ -154,7 +154,10 @@ export function ConversationTimeline({
         <ToolsSegmentBlock
           key={`tools:${segment.iteration}`}
           segment={segment}
-          forceOpen={runExpanded && !runRunning}
+          // BLOCK-150 加映 — runActive 也传 forceOpen：run 进行中簇内禁落定折叠
+          // （落定簇换装成摘要按钮=每工具一次「卡片→摘要行→新卡片」闪烁残根，
+          // 换装与 run 级折叠是两层）。run 结束后仍按设计折叠为运行摘要行。
+          forceOpen={runExpanded || runRunning || runActive}
         />
       );
       continue;

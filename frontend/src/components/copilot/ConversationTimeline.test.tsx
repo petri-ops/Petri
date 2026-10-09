@@ -234,3 +234,24 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     expect(container.querySelector('.sc-timeline-reasoning')).toBeNull();
   });
 });
+
+describe('BLOCK-150 加映：runActive 期间簇内禁换装（运行中行只增不换）', () => {
+  it('runActive 期间落定簇保持卡片形态——不换成摘要按钮（簇级换装=间隙闪烁残根）', () => {
+    // 间隙态：簇已 settled 但 run 未结束。UI-473 修了 run 级折叠，但簇级
+    // collapseWhenSettled 仍把活动卡片换成 .sc-tool-activity-summary 摘要按钮
+    // —— 每工具一次「卡片→摘要行→新卡片」换装。runActive 下应保持卡片。
+    const { container } = render(
+      <ConversationTimeline segments={[reasoningSegment, toolsSegment, progressSegment]} runActive />
+    );
+    expect(container.querySelector('.sc-tool-activity-summary')).toBeNull();
+    expect(container.querySelector('.sc-timeline-cluster .sc-tool-activity-inline')).toBeTruthy();
+  });
+
+  it('run 结束后（runActive 缺省）仍折叠为运行摘要行——设计语义不变', () => {
+    const { container } = render(
+      <ConversationTimeline segments={[reasoningSegment, toolsSegment]} />
+    );
+    expect(container.querySelector('.sc-run-fold-line')).toBeTruthy();
+    expect(container.querySelector('.sc-tool-activity-inline')).toBeNull();
+  });
+});

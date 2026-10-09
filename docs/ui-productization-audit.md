@@ -4702,3 +4702,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **交付**：desktop.css 左侧 dock（toggle/btn hover+active）与 ghost 按钮 hover 的暗色覆盖冗余硬编码色收敛为语义 token：亮色 hover `background` 由 `var(--gewu-bg-subtle)` 改 `var(--gewu-hover)`（亮色值 #f4f4f5 与原 bg-subtle 一致零回归，暗色 token 自带 rgba(230,237,243,0.07)）；暗色 `[data-theme='dark']` 块中 `background: rgba(230,237,243,0.06)` 与 `rgba(67,209,174,0.14)`（=暗色 `--gewu-mint` 精确值）两行删除，仅保留颜色差异覆盖。
 - **证据**：theme-token-contract 4/4 + frontend build 成功 + tsc 0 + **2026-10-09 dev Electron CDP 过目**（`block154-ui-pass` flow）：亮/暗双主题 dock 区截图落盘 `acceptance/block-154/dock-light.png` + `dock-dark.png`；CDP 遍历全部样式表断言 dock hover 硬编码 `rgba(230,237,243,0.06)` 残留=0（亮色与暗色均 0），确认 token 收敛已生效、无回潮。
 - **边界**：仅 desktop.css 3 处 hover + 1 处 active；border 类硬编码（rgba(230,237,243,0.08/0.1/0.15)）无精确对应 token 暂保留；nav-panel 恒暗面板硬编码不动；其余 plain CSS 文件未触碰。
+
+## UI-473 加映（2026-10-09·主代理跨会话协作）：簇级换装闪烁残根修复——runActive 传导至簇内 forceOpen
+
+- **背景**：UI-473 首修（runActive 压 run 级折叠）后用户实机仍报「思考/执行折叠不丝滑」。主代理 CDP 实测复现：300ms 采样显示间隙期落定簇**换装**成 `.sc-tool-activity-summary` 摘要按钮（卡片行消失→下张卡片弹出），与 run 级折叠是两层。
+- **修复**：ConversationTimeline ToolsSegmentBlock `forceOpen={runExpanded || runRunning || runActive}`——run 进行中簇内禁落定折叠（行只增不换）；run 结束仍折叠为运行摘要行（UI-437 v4 设计不变，历史消息语义不变）。另加 `.sc-timeline-cluster` 180ms 入场过渡（纯动画属性，prefers-reduced-motion 降级）。
+- **证据**：HK-01 红绿——新增 2 用例先红（runActive 下 summary 在场=红；结束后 run-fold 锚定）→16/16 绿；邻域 46/46（ToolActivityList/SimpleChatMessageRow）+theme 契约 4/4+types 0+code-size PASS；**CDP 实测复验**：修复前间隙闪烁 2 次（rows 3→1/5→1 无摘要替代）→修复后消息内行单调 1→2→3→4→5→收尾折叠（塌落点均为消息边界设计内折叠）。
+- **待验**：用户实机流式体感复核（刷新即生效）。

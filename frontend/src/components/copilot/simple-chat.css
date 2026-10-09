@@ -1132,6 +1132,21 @@
   margin: 2px 0 4px;
 }
 
+/* BLOCK-150 加映 — 簇入场轻过渡：新工具簇淡入下移，替代生硬弹出
+   （纯动画属性无颜色字面量；prefers-reduced-motion 走全局降级） */
+@keyframes sc-cluster-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.sc-timeline-cluster {
+  animation: sc-cluster-in 180ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sc-timeline-cluster {
+    animation: none;
+  }
+}
+
 /* UI-272 增补 — 两级折叠行头：思考/执行条目默认收起，点击展开详情 */
 .sc-tool-row-head {
   display: flex;
