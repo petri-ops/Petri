@@ -405,7 +405,8 @@
         "core/biof3-server/routes/ai-agent/**",
         "frontend/src/components/copilot/SimpleChat.tsx",
         "frontend/src/components/copilot/SimpleChat/attachments.ts",
-        "scripts/block155-*.mjs"
+        "scripts/block155-*.mjs",
+        "acceptance/block-155/**"
       ],
       "tests": [
         "test/block155-chat-vision-inline.test.mjs",
