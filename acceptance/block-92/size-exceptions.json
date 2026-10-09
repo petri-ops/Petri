@@ -1,6 +1,25 @@
 {
-  "schema": "biof3/block109-size-exceptions.v1",
-  "note": "P3-1 裁决：超 700 行预算的存量巨型文件逐个授予例外，expires 到期未清即红；续期=更新 expires+理由；拆分降至预算内后应移除例外。",
+  "schema": "biof3/block109-size-exceptions.v2",
+  "note": "P3-1 裁决：超 700 行预算的存量巨型文件逐个授予例外，expires 到期未清即红；续期=更新 expires+理由；拆分降至预算内后应移除例外。BLOCK-154 P2-3 只出不进棘轮：allowedExceptionPaths 冻结白名单=P3-1 授予的 17 条遗留路径集合，例外只能从此白名单移除（拆分达标后），不得向白名单追加新路径；非白名单文件超预算必须拆分，不得登记例外。",
+  "allowedExceptionPaths": [
+    "frontend/src/components/copilot/conversationRunStore.ts",
+    "frontend/src/components/copilot/SimpleChat.tsx",
+    "frontend/src/pages/project-workspace.tsx",
+    "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
+    "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx",
+    "frontend/src/components/desktop/PluginStorePanel.tsx",
+    "frontend/src/pages/home.tsx",
+    "core/shared-backend/result-changeset-service.js",
+    "core/biof3-server/helpers/tools-executor.js",
+    "core/biof3-server/db.js",
+    "core/shared-backend/result-studio-repository.js",
+    "core/biof3-server/agent-tools/workspace-tools.js",
+    "core/biof3-server/mcp/registry.js",
+    "core/shared-backend/result-studio-lifecycle.js",
+    "core/shared-backend/result-replay-service.js",
+    "core/shared-backend/git-adapter.js",
+    "src/ipc/working-tree-review.js"
+  ],
   "exceptions": [
     {
       "path": "frontend/src/components/copilot/conversationRunStore.ts",

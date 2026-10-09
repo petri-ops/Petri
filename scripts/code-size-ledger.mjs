@@ -13,6 +13,13 @@
  *     到期未清（仍超预算）即红；续期=更新 expires 并登记理由。例外可选 sha256 锚定
  *     （冻结文件场景：锚后任何改动即红）。
  *
+ * v2.1 新增（BLOCK-154 P2-3 裁决：大文件例外「只出不进」棘轮）：
+ *   - exceptions schema 升 v2，新增 allowedExceptionPaths（冻结白名单=P3-1 授予的 17 条
+ *     BLOCK-92 遗留例外路径集合）。判据：①例外条目路径必须在白名单内（不得新增例外）；
+ *     ②非白名单文件超预算直接报「必须拆分至预算内」，不再提示「请登记例外」。
+ *     白名单条目随文件拆分降至预算内后从 exceptions 数组移除（出），但不得向白名单
+ *     追加新路径（不进）。续期=更新 expires+理由，仍受白名单约束。
+ *
  * 用法：
  *   node scripts/code-size-ledger.mjs                 # 打印当前度量 JSON（可复现）
  *   node scripts/code-size-ledger.mjs --write         # 重打 v2 基线（含 sha256）
@@ -94,7 +101,21 @@ export function evaluateGate({ current, baseline, exceptions, today }) {
   const warnings = [];
   const baseMap = new Map(baseline.files.map((f) => [f.path, f]));
   const currentMap = new Map(current.files.map((f) => [f.path, f]));
-  const exceptionMap = new Map((exceptions.exceptions || []).map((e) => [e.path, e]));
+  const excList = exceptions.exceptions || [];
+  const exceptionMap = new Map(excList.map((e) => [e.path, e]));
+
+  // 只出不进白名单（BLOCK-154 P2-3）：v2 schema 要求 allowedExceptionPaths；
+  // 缺失即红（fail-closed），例外条目路径必须在白名单内（不得新增例外）。
+  const allowed = exceptions.allowedExceptionPaths;
+  const allowedSet = Array.isArray(allowed) ? new Set(allowed) : null;
+  if (exceptions.schema === 'biof3/block109-size-exceptions.v2' && !allowedSet) {
+    violations.push('size-exceptions.json: v2 schema 必须提供 allowedExceptionPaths（只出不进白名单）');
+  }
+  for (const [p] of exceptionMap) {
+    if (allowedSet && !allowedSet.has(p)) {
+      violations.push(`${p}: 例外路径不在只出不进白名单——不得新增例外，必须拆分至预算内`);
+    }
+  }
 
   // 例外登记卫生：未知路径的例外即红（清单已不含该文件时须显式移除例外）
   for (const [p] of exceptionMap) {
@@ -119,7 +140,12 @@ export function evaluateGate({ current, baseline, exceptions, today }) {
     if (file.lines > BUDGET_LINES) {
       const exc = exceptionMap.get(file.path);
       if (!exc) {
-        violations.push(`${file.path}: ${file.lines} 行超预算 ${BUDGET_LINES} 且无例外——请登记 {reason, expires} 或拆分降至预算内`);
+        const inAllowed = allowedSet ? allowedSet.has(file.path) : true;
+        if (!inAllowed) {
+          violations.push(`${file.path}: ${file.lines} 行超预算 ${BUDGET_LINES} 且不在只出不进白名单——必须拆分至预算内，不得新增例外`);
+        } else {
+          violations.push(`${file.path}: ${file.lines} 行超预算 ${BUDGET_LINES} 且无例外——请登记 {reason, expires} 或拆分降至预算内`);
+        }
       } else if (!/^\d{4}-\d{2}-\d{2}$/.test(String(exc.expires || ''))) {
         violations.push(`${file.path}: 例外 expires 缺失或非 YYYY-MM-DD`);
       } else if (exc.expires < today) {

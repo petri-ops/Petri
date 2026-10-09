@@ -92,6 +92,58 @@ test('P3 自测 — 红样本：行数棘轮 / 指纹漂移 / 超预算无例外
   assert.match(r.violations.join('\n'), /未刷新基线/);
 });
 
+test('P3 自测 — 只出不进棘轮（BLOCK-154 P2-3）：v2 缺白名单红 / 例外路径越界红 / 非白名单超预算红', () => {
+  const base = [fileOf('a.js', 500, 'shaA'), fileOf('b.js', 900, 'shaB')];
+  const baseline = baselineFrom(base);
+  const mk = (files) => ({ schema: 'v2', files, total: 0 });
+  const v2exceptions = (list, allowed) => ({
+    schema: 'biof3/block109-size-exceptions.v2',
+    allowedExceptionPaths: allowed,
+    exceptions: list,
+  });
+
+  // 绿：v2 + 白名单 + 例外在白名单内
+  let r = evaluateGate({
+    current: mk(base), baseline,
+    exceptions: v2exceptions(
+      [{ path: 'b.js', reason: 'r', expires: '2026-12-31' }],
+      ['b.js'],
+    ), today: TODAY,
+  });
+  assert.equal(r.ok, true, JSON.stringify(r.violations));
+
+  // 红：v2 schema 缺 allowedExceptionPaths
+  r = evaluateGate({
+    current: mk(base), baseline,
+    exceptions: v2exceptions(
+      [{ path: 'b.js', reason: 'r', expires: '2026-12-31' }],
+      undefined,
+    ), today: TODAY,
+  });
+  assert.match(r.violations.join('\n'), /必须提供 allowedExceptionPaths/);
+
+  // 红：例外路径不在白名单（不得新增例外）
+  r = evaluateGate({
+    current: mk(base), baseline,
+    exceptions: v2exceptions(
+      [{ path: 'a.js', reason: 'r', expires: '2026-12-31' }],
+      ['b.js'],
+    ), today: TODAY,
+  });
+  assert.match(r.violations.join('\n'), /不在只出不进白名单——不得新增例外/);
+
+  // 红：非白名单文件超预算且无例外 → 必须拆分（不提示「请登记」）
+  const overBudget = [fileOf('a.js', 800, 'shaA')]; // a.js 超预算且不在白名单
+  r = evaluateGate({
+    current: mk(overBudget),
+    baseline: baselineFrom(overBudget),
+    exceptions: v2exceptions([], ['b.js']),
+    today: TODAY,
+  });
+  assert.match(r.violations.join('\n'), /不在只出不进白名单——必须拆分至预算内，不得新增例外/);
+  assert.doesNotMatch(r.violations.join('\n'), /请登记/);
+});
+
 test('P3 自测 — 环签名规范化：同环不同起点同签名', () => {
   const a = ['x/y.js', 'x/a.js', 'x/m.js'];
   const b = ['x/a.js', 'x/m.js', 'x/y.js'];
