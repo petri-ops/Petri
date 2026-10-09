@@ -4748,3 +4748,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：HK-01 红绿——attachments.test 新增 5 用例先红（imageInputAllowed 未实现/贴图+拖图放行断言红）→9/9 绿；邻域 4 文件 26/26+tsc 0+触碰面 lint 0 error；后端四件套 19/17 绿（2 为 RUN_LIVE 实机用例设计内 skip）+⑧ runLoop 直测（messages 本体零突变/reqBody 出 parts/关闭恒等）。
 - **已验**（主代理实机代测，用户裁决「你能来测试吗」）：`scripts/block155-vision-inline-live.mjs` 探针七连跑（dev 栈真 deepseek-flash 渠道）——assistant 直答图片内容（红/蓝矩形六轮全中）、transcript 实锤 chat 请求体最后一条 user 消息为 text+image_url parts（dataUrlLen=614）、**vision 角色调用=0**（模型偶发重复调 read_image 由 BLOCK-155 工具门确定性短路，零二次视觉成本）；证据 acceptance/block-155/inline-live.json ALL PASS。
 - **边界**：UI 面只动输入门；发送管线/附件行格式/内联渲染零改动。
+
+## UI-479: 侧栏自适应收起——窗口/列宽低于阈值自动折叠（带还原·迟滞·手动优先）(2026-10-09 in_progress，契约级全绿；实机 CDP 待验)
+
+- **来源**：用户需求「窗口变小或左右侧栏宽度变小到一定程度时自动收起，应是自然的过程」——对 UI-341 加映二（2026-09-11「侧栏只由用户主动点击改变」裁决）的定向反转；当年移除自动收起的根因（自动消失不还原/边界抖动/与用户打架）由三护栏吸收。
+- **交付**：新 hook `useResponsivePanelCollapse`（挂 WorkspacePanelsProvider 全壳单实例，经 useAppRailOptional 读 AppRail 列宽单真相；裸 Provider 场景 enabled=false 旁路零变化）+ 纯函数 `deriveResponsivePanels`。三触发：①侧栏拖窄 <140px → 该侧收起（重开时宽度回弹默认值防「重开即再收」死循环）；②中栏可用宽（视口−开放栏宽）<560 → 先右后左让位收起；③宽裕还原（判据=还原后仍 ≥640，迟滞带防边界抖动）。**手动优先**：窄窗手动重开挂 manual-open-narrow 哨兵不再压回（两侧全放得下才恢复自动行为）；手动收起永不弹回；selfAction 双槽意图表区分自动/手动开合转换。compact ≤960 浮层区不参与视口判定（浮层不占中栏）。零新增 CSS（复用既有收起路径：宽归 0+0.22s 过渡+列头开关内联+把手隐藏）。
+- **证据**：HK-01 红绿——纯函数九态+hook 四态 13/13（缩窗收/手动重开不打架/变宽还原/拖窄收·重开回弹 240/手动收起不弹回）；实现中抓真两笔=selfAction 单槽位同轮双变互相覆盖（改双槽位表）+测试 fixture 纯对象 setter 不触发重渲染致转换检测失真（改真 useState harness）；邻域 67/67（useWorkspaceLayout/useResizableColumns/TitleBar 裸 Provider 零回归）；types 0+lint 0 error+theme 契约 4/4+code-size 指纹重锚（1231<1232 基线）。
+- **待验**：实机 CDP（缩窗→右栏收起/变宽→还原/拖窄→收起三断言）+ 用户过目自然度。
+- **边界**：路由模式仍不触碰侧栏（UI-341 加映二语义维持，两处旧裁决注释已更新为 UI-479 反转语境）；摘要卡/侧聊的宽窄形态切换不在本条目（各有既有机制）。

@@ -128,6 +128,12 @@ export function useAppRail(): AppRailState {
   return ctx;
 }
 
+/** UI-479 — 可选访问（WorkspacePanelsProvider 读列宽用）：无 AppRail 外层时返 null，
+ * 调用方跳过响应式收起接线（TitleBar.test 等裸 Provider 场景行为零变化）。 */
+export function useAppRailOptional(): AppRailState | null {
+  return useContext(AppRailCtx);
+}
+
 
 /** 从路由推导当前项目 id（/project/:id[/...]）——壳层与工作区共用的唯一来源。 */
 function projectIdFromPath(pathname: string): string | null {

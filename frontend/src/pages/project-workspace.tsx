@@ -221,11 +221,10 @@ export function ProjectWorkspace(): React.ReactElement {
   // UI-359 — Ctrl/Cmd+` 开合底部终端、Ctrl/Cmd+Shift+B 开合右侧栏
   // （VS Code 肌肉记忆）。挂在本组件内=只在面板存在的路由生效。
   useWorkspacePanelShortcuts();
-  // UI-341 加映二（用户裁决 2026-09-11）——侧栏常驻：进入结果族模式
-  // （result/code/compare/history）**不再自动收起左右栏**。原实现把两侧栏
-  // 一起关掉，导致「打开某页面左栏消失、列内 header 随之消失像全屏盖住导航」。
-  // 现规则：侧栏只由用户主动点击改变（compact 窄屏浮层模式除外，见
-  // useWorkspaceLayout 的 compact 自适应收起/还原）。
+  // UI-341 加映二（2026-09-11）——侧栏常驻：进入结果族模式不自动收起左右栏
+  //（原实现两侧栏一起关掉，导致「打开某页面左栏消失像全屏盖住导航」）。
+  // UI-479（2026-10-09）另立宽度触发自动收起（useResponsivePanelCollapse，
+  // 带还原/迟滞/手动优先）；路由模式仍不触碰侧栏，本注释语义维持。
   const {
     rightTab,
     setRightTab,

@@ -128,11 +128,13 @@ export function useWorkspaceLayout(): UseWorkspaceLayoutResult {
     return () => window.removeEventListener('resize', updateViewportWidth);
   }, []);
 
-  // compactLayout 只驱动「浮层渲染样式」（≤960px 时侧栏变浮层 + backdrop），
-  // **不再自动收起侧栏**（UI-341 加映二 用户裁决 2026-09-11：侧栏常驻打开，
-  // 只由用户主动点击关闭）。原实现在进 compact 时 setLeftOpen/setRightOpen(false)，
-  // 于是窄窗口下每次进入页面都表现为「左栏自己消失 + 页面像全屏盖住导航」，
-  // 且变宽后不还原（状态残留）。
+  // compactLayout 只驱动「浮层渲染样式」（≤960px 时侧栏变浮层 + backdrop）。
+  // UI-341 加映二（2026-09-11）曾裁决「侧栏常驻、只由用户主动点击关闭」——
+  // 2026-10-09 用户需求（UI-479）对「宽度触发的自动收起」做定向反转：窗口/列宽
+  // 低于阈值时侧栏自动收起。实现吸取当年教训（自动消失+不还原+与用户打架），
+  // 挂在 useResponsivePanelCollapse（WorkspacePanelsProvider 单实例）：带自动
+  // 还原、560/640 迟滞带、窄窗手动重开哨兵；本 hook 的 compactLayout 仍只管
+  // 浮层样式，≤960 浮层区不参与视口收起判定。
 
   // Measure center column width.
   useEffect(() => {

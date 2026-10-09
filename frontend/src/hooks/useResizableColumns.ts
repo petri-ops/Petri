@@ -46,6 +46,11 @@ const DEFAULTS = {
   bottomTerminalHeight: DEFAULT_BOTTOM_TERMINAL_HEIGHT,
 };
 
+// UI-479 — 侧栏自适应收起的手动重开宽度回弹值（width 收起后重开时若仍低于
+// 收起阈值会「重开即再收」，回弹到默认宽打破循环；与 DEFAULTS 同源单一定义）。
+export const DEFAULT_LEFT_WIDTH = DEFAULTS.leftWidth;
+export const DEFAULT_RIGHT_WIDTH = DEFAULTS.rightWidth;
+
 function loadDims(initial: Partial<{
   leftWidth: number; rightWidth: number; resultRightWidth: number; inputHeight: number; bottomTerminalHeight: number;
 }> = {}): StoredDims {
