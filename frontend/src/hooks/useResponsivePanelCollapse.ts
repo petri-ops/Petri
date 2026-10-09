@@ -21,15 +21,15 @@ import { useEffect, useRef, useState } from 'react';
 import { DEFAULT_LEFT_WIDTH, DEFAULT_RIGHT_WIDTH } from './useResizableColumns';
 
 /** 侧栏自身拖窄于此 → 该侧自动收起（拖窄=收起意图；MIN 拖拽钳 96 之上留手感带）。 */
-export const SIDEBAR_AUTO_COLLAPSE_WIDTH = 140;
+const SIDEBAR_AUTO_COLLAPSE_WIDTH = 140;
 /** 中栏可用宽（视口 − 两侧开放栏宽）低于此 → 收侧栏让位（右先左后）。 */
-export const CENTER_SPACE_COLLAPSE_BELOW = 560;
+const CENTER_SPACE_COLLAPSE_BELOW = 560;
 /** 迟滞带上沿：还原判据 = 还原后中栏可用宽仍 ≥ 此值。 */
-export const CENTER_SPACE_RESTORE_ABOVE = 640;
+const CENTER_SPACE_RESTORE_ABOVE = 640;
 /** compact 断点（≤960 侧栏转浮层不占中栏）——该区不参与视口判定。 */
-export const VIEWPORT_TRIGGER_MAX = 960;
+const VIEWPORT_TRIGGER_MAX = 960;
 
-export type PanelAutoFlag = 'width' | 'viewport' | 'manual-open-narrow' | null;
+type PanelAutoFlag = 'width' | 'viewport' | 'manual-open-narrow' | null;
 
 export interface ResponsivePanelFlags {
   left: PanelAutoFlag;
