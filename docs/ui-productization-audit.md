@@ -4736,3 +4736,5 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 ### UI-477 加映（2026-10-09·悬挂式+点击放大）：小图按钮 96px cover + 悬浮阴影靠右悬挂（不占正文主区），点击复用 ImagePreviewModal 全屏放大（缩放/关闭控件齐）；实机 CDP 三验全过（按钮在位/click 弹层开启/阴影 0 12px 32px）。
 
 ### UI-477 加映二（全屏灯箱）：放大弹层从 90vw 卡片浮窗改 100vw×100vh 全屏透明容器（页眉/页脚暗遮罩白字化、窄屏 MQ 同步、min-width 兜底 flex 收缩）；实机 CDP=容器 2477×1354 铺满视口。
+
+### UI-477 加映三（根因修复）：放大弹层 createPortal 到 document.body——position:fixed 遮罩此前被消息行内某祖先（filter/contain 类包含块）困在 157px 容器里（用户截图「小窗」的真正根因，非弹层设计问题）；portal 后遮罩全视口 3143×1719、卡片 1200px 与输入区预览同款。全屏灯箱加映二回退（按用户裁决恢复卡片形态）。

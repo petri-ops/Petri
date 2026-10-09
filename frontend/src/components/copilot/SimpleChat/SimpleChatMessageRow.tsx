@@ -16,6 +16,7 @@
 // 流式 tick 恒定（现有 hooks 均满足；新增调用方若传入不稳定回调，memo 退化为
 // 现状行为，无正确性风险）。
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Icon } from '@/components/icons/Icon';
 import { HighlightedCode } from '@/components/ui/CodeHighlight';
 import { CopilotMarkdown } from '../copilotMarkdown';
@@ -194,7 +195,7 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
               ))}
             </div>
           )}
-          {zoomedImage && (
+          {zoomedImage && createPortal(
             <ImagePreviewModal
               attachment={{
                 id: `inline-${zoomedImage.path}`,
@@ -205,7 +206,8 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
                 previewUrl: workspaceFileUrl(projectId, zoomedImage.path),
               }}
               onClose={() => setZoomedImage(null)}
-            />
+            />,
+            document.body,
           )}
           {m.error && m.role === 'assistant' && (() => {
             // UI-AGENTWB-### / chat-error-rendering: prefer the

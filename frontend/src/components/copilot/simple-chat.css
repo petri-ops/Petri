@@ -3450,16 +3450,12 @@
 .sc-preview-container {
   display: flex;
   flex-direction: column;
-  /* UI-477 加映（用户裁决「应该是全屏」）：卡片浮窗改全屏灯箱——
-     透明容器铺满暗色遮罩，图片区占满视口（去圆角/边框/卡片底） */
-  width: 100vw;
-  min-width: 100vw;
-  height: 100vh;
-  border-radius: 0;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  color: #fff;
+  width: min(90vw, 1200px);
+  max-height: 90vh;
+  border-radius: 12px;
+  background: var(--gewu-bg-elevated);
+  border: 1px solid var(--gewu-border);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
   overflow: hidden;
   animation: sc-preview-slide-up 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -3480,8 +3476,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 16px;
-  border-bottom: 1px solid rgb(255 255 255 / 14%);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--gewu-border);
   background: var(--gewu-bg-surface);
   flex-shrink: 0;
 }
@@ -3575,8 +3571,8 @@
 }
 
 .sc-preview-image {
-  max-width: calc(100vw - 48px);
-  max-height: calc(100vh - 96px);
+  max-width: 100%;
+  max-height: calc(90vh - 100px);
   object-fit: contain;
   transition: transform 0.2s ease;
   cursor: grab;
@@ -3590,9 +3586,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
-  border-top: 1px solid rgb(255 255 255 / 14%);
-  background: transparent;
+  padding: 8px 14px;
+  border-top: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-surface);
   flex-shrink: 0;
 }
 
@@ -3627,10 +3623,9 @@
 /* Responsive */
 @media (max-width: 640px) {
   .sc-preview-container {
-    width: 100vw;
-    height: 100vh;
-    max-height: none;
-    border-radius: 0;
+    width: 95vw;
+    max-height: 95vh;
+    border-radius: 10px;
   }
 
   .sc-preview-header {
