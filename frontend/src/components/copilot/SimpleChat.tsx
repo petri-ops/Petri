@@ -1263,9 +1263,13 @@ export function SimpleChat({
                         <Icon name="file" size={20} />
                       </div>
                     )}
-                    <span className="sc-attachment-name" title={att.name}>
-                      {att.name}
-                    </span>
+                    {/* UI-477 加映（用户裁决「直接是个缩小的图就行」）：图片附件
+                        不再显示文件名（缩略图即语义）；非图片文件保留文件名。 */}
+                    {!att.previewUrl && (
+                      <span className="sc-attachment-name" title={att.name}>
+                        {att.name}
+                      </span>
+                    )}
                     <button
                       type="button"
                       className="sc-attachment-remove"

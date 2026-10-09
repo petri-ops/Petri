@@ -4278,3 +4278,35 @@
   height: 96px;
   object-fit: cover;
 }
+
+/* UI-477 加映 — 图片附件芯片：无文件名形态（缩略图+悬浮移除），紧凑圆角 */
+.sc-attachment:has(.sc-attachment-preview-btn) {
+  padding: 2px;
+  gap: 0;
+  background: transparent;
+}
+
+.sc-attachment:has(.sc-attachment-preview-btn) .sc-attachment-remove {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--gewu-border);
+  background: var(--gewu-bg-elevated);
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.sc-attachment:has(.sc-attachment-preview-btn) {
+  position: relative;
+}
+
+.sc-attachment:has(.sc-attachment-preview-btn):hover .sc-attachment-remove {
+  opacity: 1;
+}

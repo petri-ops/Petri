@@ -4738,3 +4738,5 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 ### UI-477 加映二（全屏灯箱）：放大弹层从 90vw 卡片浮窗改 100vw×100vh 全屏透明容器（页眉/页脚暗遮罩白字化、窄屏 MQ 同步、min-width 兜底 flex 收缩）；实机 CDP=容器 2477×1354 铺满视口。
 
 ### UI-477 加映三（根因修复）：放大弹层 createPortal 到 document.body——position:fixed 遮罩此前被消息行内某祖先（filter/contain 类包含块）困在 157px 容器里（用户截图「小窗」的真正根因，非弹层设计问题）；portal 后遮罩全视口 3143×1719、卡片 1200px 与输入区预览同款。全屏灯箱加映二回退（按用户裁决恢复卡片形态）。
+
+### UI-477 加映四（输入区图片芯片）：粘贴图片不再显示文件名（用户裁决「直接是个缩小的图就行」）——36px 缩略图纯图形态，移除钮转悬浮角标（hover 显形），非图片附件保留文件名；实机 CDP 验证 hasName=false。
