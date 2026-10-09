@@ -2938,7 +2938,17 @@
       "patterns": [
         "acceptance/block-149/**"
       ],
-       "tests": [],
+      "tests": [],
+      "frontendRelated": false,
+      "classifiesScripts": false
+    },
+    {
+      "id": "block150-evidence",
+      "note": "BLOCK-150 吸收一波证据目录（13 项双态清账/红绿/携带登记；复现驱动=block150-bio-r-guard-and-deps（已入 block89 面测试锚）+各轨行为测试文件+前端定向）。",
+      "patterns": [
+        "acceptance/block-150/**"
+      ],
+      "tests": [],
       "frontendRelated": false,
       "classifiesScripts": false
     },

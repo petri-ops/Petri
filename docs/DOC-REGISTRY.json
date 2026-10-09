@@ -5696,13 +5696,13 @@
       "capability": "review-absorb-wave1",
       "path": "docs/block-150-review-batch-absorb-wave1-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-150-review-absorb",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-10-09",
       "archivePolicy": "archive_when_superseded",
-      "phase": "ACTIVE",
+      "phase": "COMPLETED",
       "tags": [
         "block-150",
         "review-absorb",
@@ -5715,7 +5715,7 @@
         "b9",
         "c10"
       ],
-      "notes": "审视吸收批第一波（13 项三轨：平台消费链 6/生信品质 5/内核盲性 2；用户「继续」发令）。逐项先验证现状再红绿实现；工作流内不提交。"
+      "notes": "审视吸收批第一波（13 项三轨：平台消费链 6/生信品质 5/内核盲性 2；用户「继续」发令）。逐项先验证现状再红绿实现；工作流内不提交。 2026-10-09 当日收口 completed：13/13 清账（⑫ 经评审 P1 补做）+closeout 十一门 PASS；UI-469 in_progress 待实机；pack 6a5ef8a 本地。"
     }
   ],
   "lastUpdated": "2026-10-09",

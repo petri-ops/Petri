@@ -7,7 +7,7 @@ acceptance:
   - 定向门禁：test:changed + quality:types/lint/secret/arch 全绿 + 前端定向；closeout 十一门（集成提交后）
   - pack 仓改动（R 守卫）本地提交不推送（BIO-4 惯例）
 reopen: A1 深水区（会话恢复合并语义）、A4 成果面七条、B7 解读层其余条目——待下一波或随对应域批
-status: active
+status: completed
 ---
 
 # BLOCK-150 审视吸收批·第一波（审视序列第 5 波）
@@ -50,3 +50,12 @@ dynamic workflow 三轨并行（文件面互斥：A=frontend copilot/任务墙+a
 ## 7. 完成语义
 
 13 项逐条「已修/已销号（已修）」双态清账 + 评审 P1 清零 + 门禁绿 + 主代理集成提交 + closeout 十一门 PASS + 台账五件回写。第一波收官后剩余卡片条目续波。
+
+## 8. 收口笔录（2026-10-09 当日立项当日收口）
+
+- **13/13 双态清账**（dwfrun-bfc725e3 三轨并行；⑫ 首版零落地被评审 P1 抓真后补做并复核通过——display.tsx 四标签中立化+classifyDeg 注释钉边，零行为变更）：A 平台 6 项全 fixed（三项前端消费接线+漂移修齐+死链清理+/m 页 token 拔除）；B 生信 5 项全 fixed（pack 三插件守卫+go-kegg 收敛+主仓文案三件）；C 内核 2 项全 fixed（中立化+报告图兜底）。
+- **评审 P1=1（⑫ 零落地）→ 补做复核通过；P2 携带两条如实登记**：/m 页流切换竞态（帧分发无 taskId 守卫）归下一波 A5 域批；agent-approval 实测 14/14（自述 15/15 口径误以本笔录为准）。pre-existing RS6 存量败 1 非本波引入。
+- **门禁**：统一五门全绿 + closeout 十一门 PASS（code-size 棘轮随消费链新代码 R-2 重锚）；Minor-6 impact-map 缩进集成批顺手修。
+- **提交**：主仓 9dcdb5c9（26 文件，UI-469 台账 in_progress 同步）+ pack 仓 6a5ef8a（8 文件，本地不推送 BIO-4）。
+- **边界**：实机走查待（UI-469）；剩余卡片条目（A1 深水区/A4 七条/B7 解读层/A3 enum、/m 竞态）归下一波。
+- 证据=acceptance/block-150/evidence.json。G0 开发期常态 · 不外推 packaged/Provider/GA。

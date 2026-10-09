@@ -1,0 +1,25 @@
+{
+  "block": "BLOCK-150-REVIEW-ABSORB-WAVE1",
+  "closedAt": "2026-10-09",
+  "form": "审视吸收批·第一波（13 项三轨；用户「继续」接续批量推进授权）",
+  "implementation": "dynamic workflow dwfrun-bfc725e3 三轨并行+逐项先验证现状+独立评审（P1=0，其中 ⑫ 零落地被评审抓真后补做并复核通过）+统一门禁全绿；主代理终审集成（含 Minor-6 缩进修复）",
+  "delivered": {
+    "A 平台消费链 6": "①queuePosition 任务墙「排队中 #N」②Jobs Wall 接终态失效流（gewuEvents 既有通道）③message_persist_failed 会话链呈现④CONTRACTS×TOOL_METADATA 漂移 2 处修齐⑤HEAVY_TOOLS 死链 9 成员清理⑥/m 页任务 SSE token-in-URL 拔除（对齐 BLOCK-132）",
+    "B 生信品质 5": "⑦volcano-plot/go-kegg/gsea 三插件 R 缺包守卫（deg-standardizer 范式；deseq2 按令本波不加）⑧go-kegg environment.json 依赖声明收敛（三源矛盾）⑨data-management 英文键中文化 ⑩DataManagement 话术 ⑪散点 caveat 因果点破",
+    "C 内核盲性 2": "⑫compare 面领域词中立化（display.tsx 四标签「显著基因→显著条目」等+result-scientific-compare classifyDeg 注释钉边；零行为变更，compare 契约 7/7+面板 21/21 绿）——首版零落地被评审 P1 抓真后补做；⑬deseq2 报告模板图缺位 onerror 兜底（pack 仓，8 用例含红绿）"
+  },
+  "counts": { "fixed": 13, "alreadyFixed": 0, "skipped": 0, "note": "⑫ 处置数组记 skipped 系首版状态，经 P1 补做后实质 fixed——以评审复核为准" },
+  "carriedItems": [
+    "P2-1 /m 页流切换竞态（openTaskStream 帧分发无 taskId 闭包守卫/AbortController）——按评审二选一择「登记」：留痕本笔录，归下一波 A5 域批",
+    "P2-2 红绿账数字修正：agent-approval.test.mjs 实测 14/14（工作流自述 15/15 系口径误，本笔录为准）",
+    "pre-existing：result-compare-service RS6 adoption_base_stale 存量败 1（源头早于本波，solo 复现一致，非本波引入，test:changed 744/753 口径）"
+  ],
+  "redGreen": "A 轨七项新测试先红后绿（墙排队位/失效流 handler/持久失败回调/SSE 分发/跨表锚/死链守卫/token 断言）；B 轨 3 红→3 绿（守卫+environment png）+文案项回归 28/28；C 轨 pack 侧报告模板红→8/8+compare 基线 7/7+21/21；统一门禁五件全绿",
+  "gates": { "closeout": "十一门 PASS（code-size 棘轮随消费链新代码 R-2 重锚一次）" },
+  "packCommits": ["6a5ef8a 三插件守卫+go-kegg 收敛+deseq2 报告兜底（本地不推送 BIO-4）"],
+  "mainCommits": ["9dcdb5c9 feat 26 文件（UI-469 台账 in_progress）"],
+  "boundaries": [
+    "实机走查（事件接线/文案呈现）待；UI-469 in_progress",
+    "剩余卡片中低影响条目归下一波（含 /m 竞态、A1 深水区、A4 七条、B7 解读层、A3 enum）"
+  ]
+}

@@ -95,7 +95,7 @@
 | 1p | 审阅正确性 / BLOCK-147 | **completed（2026-10-08 当日立项当日收口）**：#1 决策键内容寻址（refresh 错位根治，红=错位复现两用例）/#2 未决计数激活+提交拦截（含集成批补的 staged 框同款拦截）/#3 焦点滚动+token 高亮（P2-1 nearest 防抖动修复）；评审 P1=0/P2 三条全修；定向 52/52+closeout 十一门 PASS；UI-466 in_progress 待实机过目 | acceptance/block-147/evidence.json + plan §8 | **completed** |
 | 1q | 分析输入可达性 / BLOCK-148 | **completed（2026-10-08 当日立项当日收口）**：#11 白名单单源+有界递归+path 消歧 / #12 demo 一键载入（409 自愈）；评审 P2 三条集成批修掉；Node 387/0+closeout 十一门 PASS；UI-467 in_progress 待实机、UI-457 待用户过目 | acceptance/block-148/evidence.json + plan §8 | **completed** |
 | 1r | 隧道诚实化+平台修补 / BLOCK-149 | **completed（2026-10-08 当日立项当日收口·审视批序列收官）**：#5 徽标三态（≥15min 才宣称）/ PL-D2=30 天落地 / nul 根修留痕 / 平台映射锚；评审 P2 四条集成处置（含 148 契约测试补账）；closeout 十一门 PASS；UI-468 待实机 | acceptance/block-149/evidence.json + plan §8 | **completed** |
-| 1s | 审视吸收一波 / BLOCK-150 | **active（2026-10-09「继续」发令）**：13 项三轨（平台消费链 6/生信品质 5/内核盲性 2），逐项先验证现状再修 | docs/block-150-review-batch-absorb-wave1-plan.md | **active** |
+| 1s | 审视吸收一波 / BLOCK-150 | **completed（2026-10-09 当日立项当日收口）**：13/13 清账（A 消费链 6/B 生信 5/C 盲性 2；⑫ 经评审 P1 补做）；P2 携带两条登记（/m 竞态归下波/agent-approval 14/14 口径修正）；closeout 十一门 PASS；UI-469 in_progress 待实机 | acceptance/block-150/evidence.json + plan §8 | **completed** |
 | 2 | PL-2 / BLOCK-126 | **感知实时性 completed（含 2026-09-29 复验）**：终态 jobs 失效事件+运行期日志行缓冲；实机 allPass 6/6 两轮+端点兜底修复后复跑 6/6（source=run.log） | plan §5.1 + acceptance/block-126/ | completed |
 | 3 | BIO-2 | 交互上限与降级链：250 点 top-N 语义/静态 24 行分页/热图窗口/mojibake | G0-BIO plan §3 | planned |
 | 4 | BIO-3 | lineage 可视化 + 继续分析显式化（吸收 C-15 前半） | G0-BIO plan §3 | planned |
