@@ -4734,3 +4734,5 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **待验**：用户过目（HMR 已生效，当前会话即可看）；点击放大（ImagePreviewModal 复用）留后续小加映。
 
 ### UI-477 加映（2026-10-09·悬挂式+点击放大）：小图按钮 96px cover + 悬浮阴影靠右悬挂（不占正文主区），点击复用 ImagePreviewModal 全屏放大（缩放/关闭控件齐）；实机 CDP 三验全过（按钮在位/click 弹层开启/阴影 0 12px 32px）。
+
+### UI-477 加映二（全屏灯箱）：放大弹层从 90vw 卡片浮窗改 100vw×100vh 全屏透明容器（页眉/页脚暗遮罩白字化、窄屏 MQ 同步、min-width 兜底 flex 收缩）；实机 CDP=容器 2477×1354 铺满视口。
