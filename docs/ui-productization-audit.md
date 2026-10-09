@@ -4684,6 +4684,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **交付**：CodeHighlight 动态 import 由全量 highlight.js 改引 `./_hljsCurated`（highlight.js/lib/core + 40 语言注册，全仓唯一注册位；保留 BLOCK-106「覆盖不退化」初衷——LaTeX/Julia/dockerfile 等在列，清单外语言沿用既有「降级纯文本」语义不崩）；新增 `lib/highlight-js-core.d.ts`（exports map 无 types 条目的子路径补齐）。
 - **证据**：HK-01 红绿——CodeHighlight 定向 4/4（新锚 latex/julia/dockerfile/go 在列 + elixir 清单外降级，红→绿）；build:check（tsc -b+vite build）0；bundle 门禁绿（总量 1,397→1,273.5KB gzip 净缩 91KB，es.js 移除，新增资产全部 ≤100KB 在限内）；基线 --write 重锚 46 键。
 - **待验**：实机聊天/文件预览代码块上色抽查（清单内视觉零差异；随 UI-457 等过目批同窗）。
+- **实机测试路线（第 4 级 · 人确认）**：① 在会话中发送一条请求，让模型输出含代码块的回复（指定语言如 python / r / javascript / latex / go / dockerfile）；② 观察代码块是否有语法高亮（关键字/字符串/注释颜色区分）；③ 清单内语言应正常上色，视觉与改动前一致；④ 清单外语言（如 elixir）降级为纯文本但不报错、不白屏。结论回复确认即过目。
 - **边界**：语言清单内 UI 表现零变化；rehype-highlight（lowlight common，WorkspaceFilePreview+MDX 构建面）为独立消费面不在本波；注册清单扩展约定见 `_hljsCurated.ts` 头注释。
 
 ## UI-473: SimpleChat 行渲染 memo 化——流式 tick 未变行零重渲染（BLOCK-154 波次 3）(2026-10-09 in_progress，契约级全绿；实机抽查随过目批)
@@ -4692,11 +4693,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **交付**：行 JSX（~180 行）抽取为 `SimpleChat/SimpleChatMessageRow.tsx`（React.memo 渲染边界，DOM/语义逐行保留：topicShift 分隔/timeline renderProgress/错误/续跑/总结重试 IIFE/操作行）；timeline 分段 WeakMap 身份缓存（历史消息对象引用恒定→分段数组复用）；冷却计时改父级采样 cooldownNow（retryTick 调度点不变，tick 不击穿行 memo）；EMPTY_ROW_SEGMENTS 共享空数组（`?? []` 新建会击穿 memo）。
 - **证据**：HK-01 红绿——SimpleChatMessageRow.test 3 用例（vi.mock CopilotMarkdown 探针：相同 props 重渲染 3 次调用→bail-out 1 次；m 身份变化必须重渲染；不稳定回调保守击穿语义）；tsc 0+lint 0 error+SimpleChat/ConversationTimeline/markdown/resume 套件 37/37+build:check（tsc -b+vite build）0。
 - **待验**：实机长会话流式打字流畅度主观对比（随 UI-457 等过目批同窗）。
+- **实机测试路线（第 4 级 · 人确认）**：① 打开一个已有多条历史消息的会话（≥10 条）；② 发送一个需要较长回复的问题触发流式；③ 观察流式过程中：已渲染的历史行是否有重渲染闪烁/抖动、新 token 追加是否平滑、滚动是否跟手；④ 体感结论（流畅/偶卡/明显卡）回复确认即过目。CDP 已截当前非流式态（`acceptance/block-154/streaming-state.png` 仅在流式中生成）。
 - **边界**：后端分页/滚动守卫/会话切换语义零改动；memo 退化为现状重渲染（无正确性风险）；DOM 结构与拆分前逐行一致。
 
-## UI-474: 暗色 token 收敛——desktop.css dock/ghost 硬编码色→语义 token（BLOCK-154 P2-1）(2026-10-09 in_progress，构建+token 契约全绿；实机暗/亮切换抽查随过目批)
+## UI-474: 暗色 token 收敛——desktop.css dock/ghost 硬编码色→语义 token（BLOCK-154 P2-1）(2026-10-09 verified，dev Electron 边界内 CDP 过目)
 - **来源**：BLOCK-154 优化梳理清单 P2-1 暗色 token 收敛（light/dark 成对硬编码规则→语义 token）；用户裁决「按 3→4→2→1 推进」。
 - **交付**：desktop.css 左侧 dock（toggle/btn hover+active）与 ghost 按钮 hover 的暗色覆盖冗余硬编码色收敛为语义 token：亮色 hover `background` 由 `var(--gewu-bg-subtle)` 改 `var(--gewu-hover)`（亮色值 #f4f4f5 与原 bg-subtle 一致零回归，暗色 token 自带 rgba(230,237,243,0.07)）；暗色 `[data-theme='dark']` 块中 `background: rgba(230,237,243,0.06)` 与 `rgba(67,209,174,0.14)`（=暗色 `--gewu-mint` 精确值）两行删除，仅保留颜色差异覆盖。
-- **证据**：theme-token-contract 4/4（token 定义/引用闭环、slate 家族禁回潮、暗色 ifm 特异性）+ frontend build 成功+ tsc 0。
-- **待验**：实机亮/暗主题切换 dock 按钮 hover/active 视觉一致性（暗色 hover 由 0.06→0.07 极微差，需主观确认无感知差异）。
+- **证据**：theme-token-contract 4/4 + frontend build 成功 + tsc 0 + **2026-10-09 dev Electron CDP 过目**（`block154-ui-pass` flow）：亮/暗双主题 dock 区截图落盘 `acceptance/block-154/dock-light.png` + `dock-dark.png`；CDP 遍历全部样式表断言 dock hover 硬编码 `rgba(230,237,243,0.06)` 残留=0（亮色与暗色均 0），确认 token 收敛已生效、无回潮。
 - **边界**：仅 desktop.css 3 处 hover + 1 处 active；border 类硬编码（rgba(230,237,243,0.08/0.1/0.15)）无精确对应 token 暂保留；nav-panel 恒暗面板硬编码不动；其余 plain CSS 文件未触碰。

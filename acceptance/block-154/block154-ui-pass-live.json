@@ -1,0 +1,38 @@
+{
+  "name": "block154-ui-pass",
+  "startedAt": "2026-10-09T08:14:59.716Z",
+  "finishedAt": "2026-10-09T08:15:01.036Z",
+  "assertions": [
+    {
+      "name": "UI-472_hljs_rendered",
+      "pass": false,
+      "detail": "当前会话无代码块消息（hljsCount=0），无可测目标——需含代码块的会话复跑"
+    },
+    {
+      "name": "UI-474_dock_light_screenshot",
+      "pass": true,
+      "detail": "dock light 截图: D:\\1.WorkDir\\biof3-desktop\\acceptance\\block-154\\dock-light.png"
+    },
+    {
+      "name": "UI-474_no_hardcoded_dock_hover_rgba",
+      "pass": true,
+      "detail": "dock hover 硬编码 rgba(230,237,243,0.06) 残留=0"
+    },
+    {
+      "name": "UI-474_dock_dark_screenshot",
+      "pass": true,
+      "detail": "dock dark 截图: D:\\1.WorkDir\\biof3-desktop\\acceptance\\block-154\\dock-dark.png"
+    },
+    {
+      "name": "UI-474_dark_no_hardcoded_dock_hover",
+      "pass": true,
+      "detail": "暗色 dock hover 硬编码残留=0"
+    },
+    {
+      "name": "UI-473_streaming_state_captured",
+      "pass": true,
+      "detail": "当前是否流式中=false（流畅度体感需人确认，见测试路线）"
+    }
+  ],
+  "allPass": false
+}
