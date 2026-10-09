@@ -4685,3 +4685,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：HK-01 红绿——CodeHighlight 定向 4/4（新锚 latex/julia/dockerfile/go 在列 + elixir 清单外降级，红→绿）；build:check（tsc -b+vite build）0；bundle 门禁绿（总量 1,397→1,273.5KB gzip 净缩 91KB，es.js 移除，新增资产全部 ≤100KB 在限内）；基线 --write 重锚 46 键。
 - **待验**：实机聊天/文件预览代码块上色抽查（清单内视觉零差异；随 UI-457 等过目批同窗）。
 - **边界**：语言清单内 UI 表现零变化；rehype-highlight（lowlight common，WorkspaceFilePreview+MDX 构建面）为独立消费面不在本波；注册清单扩展约定见 `_hljsCurated.ts` 头注释。
+
+## UI-473: SimpleChat 行渲染 memo 化——流式 tick 未变行零重渲染（BLOCK-154 波次 3）(2026-10-09 in_progress，契约级全绿；实机抽查随过目批)
+
+- **来源**：BLOCK-154 优化梳理清单 P1-2 下行范围（现状核实修正前提：BLOCK-95 B2 已有后端窗口化历史分页〔older.windowOffset〕，非「无分页全量渲染」；真实热点=流式每个 delta 经 conversationRunStore 通知整体重渲染 → 全部历史行重走 JSX + CopilotMarkdown 重解析）；用户裁决「按照建议逐个推进」。
+- **交付**：行 JSX（~180 行）抽取为 `SimpleChat/SimpleChatMessageRow.tsx`（React.memo 渲染边界，DOM/语义逐行保留：topicShift 分隔/timeline renderProgress/错误/续跑/总结重试 IIFE/操作行）；timeline 分段 WeakMap 身份缓存（历史消息对象引用恒定→分段数组复用）；冷却计时改父级采样 cooldownNow（retryTick 调度点不变，tick 不击穿行 memo）；EMPTY_ROW_SEGMENTS 共享空数组（`?? []` 新建会击穿 memo）。
+- **证据**：HK-01 红绿——SimpleChatMessageRow.test 3 用例（vi.mock CopilotMarkdown 探针：相同 props 重渲染 3 次调用→bail-out 1 次；m 身份变化必须重渲染；不稳定回调保守击穿语义）；tsc 0+lint 0 error+SimpleChat/ConversationTimeline/markdown/resume 套件 37/37+build:check（tsc -b+vite build）0。
+- **待验**：实机长会话流式打字流畅度主观对比（随 UI-457 等过目批同窗）。
+- **边界**：后端分页/滚动守卫/会话切换语义零改动；memo 退化为现状重渲染（无正确性风险）；DOM 结构与拆分前逐行一致。

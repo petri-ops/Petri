@@ -1,5 +1,7 @@
 # BioF3 Desktop — Current Next Steps
 
+最后更新：2026-10-09（**BLOCK-154 波次 3 SimpleChat 行渲染 memo 化收口 completed（当日立项当日收口）**：前提核实修正〔BLOCK-95 B2 后端窗口化分页已在〕→ 真实热点=流式 tick 全列表重渲染；行 JSX 抽取 SimpleChatMessageRow（React.memo，DOM 逐行保留）+timeline 分段 WeakMap 缓存+冷却采样 cooldownNow；HK-01 红绿 3 用例（CopilotMarkdown 探针 bail-out 契约）+tsc 0+定向 37/37+build:check 0+closeout 十一门 PASS；UI-473 in_progress 待实机流畅度抽查。**P1 三波（highlight.js 按需化/冷启动异步化/行 memo 化）全部落地**；P2 结构项（暗色 token/CSS 双轨/大文件棘轮/manualChunks）待逐波裁决推进。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-10-09（**BLOCK-154 波次 2 冷启动异步化收口 completed（当日立项当日收口）**：main.js migration spawnSync→异步 spawn（事件循环不再同步阻塞、时序不变、initSchema 兜底）+window-manager 持久化串行异步链（exiting 守卫+before-quit 同步写保耐久）+**BK-08 缺陷类第二现转机械门禁** test/block154-startup-async.test.mjs（main.js 零同步子进程，HK-01 红绿）；门禁=block154+block59 43/43+chf0 26/26+block145 4/4+closeout 十一门 PASS（hygiene 首轮红=CRLF 漂移已归一）。**波次 3 SimpleChat 消息列表虚拟化接续推进**，随后 P2 结构项逐波。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-10-09（**BLOCK-154 波次 1 highlight.js 按需注册收口 completed（当日立项当日收口）**：es.js（291,911 gzip 全站最大单资产）退役 → `./_hljsCurated` core+40 语言宽清单（唯一注册位，覆盖不退化初衷保留、清单外降级纯文本）+highlight-js-core.d.ts 类型补齐；HK-01 红绿 4/4+build:check 0+bundle 门禁绿（总量净缩 91KB gzip）+基线重锚 46 键+closeout 十一门 PASS+docs:reconcile 0 待审；UI-472 in_progress 待实机上色抽查。**波次 2 冷启动迁移异步化接续推进**（main.js spawnSync migration 移出窗口创建前关键路径+window-manager 同步写 rider），随后波次 3 SimpleChat 消息虚拟化、P2 结构项逐波。G0 开发期常态 · 不外推 packaged/Provider/GA。）

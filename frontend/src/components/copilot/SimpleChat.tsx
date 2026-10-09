@@ -44,8 +44,6 @@ import {
 } from './SimpleChat/types';
 import {
   useDomainExamplePrompts,
-  MessageMeta,
-  MessageTime,
   ExamplePrompts,
   compactStageConclusion,
 } from './SimpleChat/helpers';
@@ -75,10 +73,10 @@ import { ChatScrollbar } from './ChatScrollbar';
 // ResultEditProgressList / ErrorBanner / ApprovalCard+ApprovalRepairHint），
 // 零行为变化；ResultEditProgressList 按惯例在此再导出保持导入路径兼容。
 import { LoopStatusPanel } from './SimpleChat/LoopStatusPanel';
-import { AgentProgressPendingRow } from './SimpleChat/AgentProgress';
-import { ErrorBanner } from './SimpleChat/ErrorBanner';
 import { ApprovalCard } from './SimpleChat/ApprovalCard';
 import { ResultEditProgressList } from './SimpleChat/ResultEditProgressList';
+// BLOCK-154 波次 3 — 消息行组件（memo 渲染边界，契约见该文件头与 SimpleChatMessageRow.test.tsx）。
+import { SimpleChatMessageRow } from './SimpleChat/SimpleChatMessageRow';
 import { useSummaryRetry } from './SimpleChat/hooks/useSummaryRetry';
 import { useModelAccessMenus } from './SimpleChat/hooks/useModelAccessMenus';
 import { useConversationResume } from './SimpleChat/hooks/useConversationResume';
@@ -121,7 +119,6 @@ import type { ExtractContext, FileReferenceClickDetail } from '@/lib/chat-file-r
 // SYSTEM_OPEN_FILE_EXTENSIONS + shouldOpenWithSystemApp moved to ./SimpleChat/types.ts (BLOCK-9.2 PHASE 4).
 
 import { useAiSettings } from '@/hooks/useAiSettings';
-import { CopilotMarkdown } from './copilotMarkdown';
 // BLOCK-81 P2 — 思考档位（会话级持久化 + 词表）；载入/持久化 helper 已随
 // useThinkingLevel 簇迁至 SimpleChat/hooks/useThinkingLevel.ts
 import {
@@ -130,27 +127,24 @@ import {
   nextThinkingLevel,
   saveThinkingLevel,
 } from './thinkingLevel';
-import { ConversationTimeline } from './ConversationTimeline';
 import { buildConversationSegments } from './conversationSegments';
 import type { ConversationSegment } from './conversationSegments';
 import {
-  resumeInterruptedConversation,
   useConversationRun,
   useSubAgentTasksForConversation,
   resumeOrphanAgentTasks,
 } from './conversationRunStore';
-import { ResumePrompt } from './SimpleChat/ResumePrompt';
 import { useErrorFormatter } from './useErrorFormatter';
 import { useDurableConversationLoop } from '@/hooks/useDurableConversationLoop';
-import {
-  AssistantResultNodes,
-  useExtraRenderersFlag,
-} from './extraRenderers';
+import { useExtraRenderersFlag } from './extraRenderers';
 import './simple-chat.css';
 import { Icon } from '@/components/icons/Icon';
+
+// BLOCK-154 波次 3 — 无 timeline 分段消息的共享空数组（行 memo 的 segments prop
+// 需要稳定引用；`?? []` 每次新建会击穿 memo）。
+const EMPTY_ROW_SEGMENTS: ConversationSegment[] = [];
 import { getBridge } from '@/lib/desktopBridge';
 import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
-import { HighlightedCode } from '@/components/ui/CodeHighlight';
 import { INITIAL_NAV_STATE, stepHistoryNavigation } from './chatHistoryNav';
 import {
   clearConversationDraft,
@@ -477,6 +471,7 @@ export function SimpleChat({
     summaryRetryAttempts,
     summaryRetryCooldownUntil,
     MAX_SUMMARY_RETRIES,
+    retryTick,
   } = useSummaryRetry({
     conversationId,
     projectId,
@@ -485,6 +480,11 @@ export function SimpleChat({
     refreshConversations,
     appendAssistantMessage: (message) => setMessages((current) => [...current, message]),
   });
+
+  // BLOCK-154 波次 3 — 冷却计时采样：retryTick 变化时刷新采样点，行组件以
+  // cooldownNow 计算「冷却中 Ns」。tick 调度点（minUntil）不变，标签刷新精度等价；
+  // 四个 retry record 的身份不因 tick 变化，行 memo 不被冷却期 tick 击穿。
+  const cooldownNow = useMemo(() => Date.now(), [retryTick]);
 
   // Error formatter hook for user-friendly error display
   const { formatError, getTechnicalDetails } = useErrorFormatter();
@@ -585,17 +585,27 @@ export function SimpleChat({
   // BLOCK-107 P1c — 每条 assistant 消息的时间线分段（D1=c：思考/工具按 iteration
   // 交错）。纯派生且与 displayMessages 同一 useMemo 语义：仅在消息真数据变化时
   // 重算，composer keystroke 等无关 state 不触发（沿用 BLOCK-95 A2 的教训）。
+  // BLOCK-154 波次 3 — WeakMap 身份缓存：displayMessages 数组每个流式 tick 重建
+  // （尾消息替换/推送致新数组），本 map 随之重建；历史消息对象引用恒定，WeakMap
+  // 命中即复用原分段数组——行 memo 的 segments prop 身份稳定，未变行零重算零重渲染。
+  const timelineSegmentsCacheRef = useRef(new WeakMap<SimpleMessage, ConversationSegment[]>());
   const timelineSegmentsByMessage = useMemo(() => {
+    const segmentsCache = timelineSegmentsCacheRef.current;
     const map = new Map<string, ConversationSegment[]>();
     displayMessages.forEach((message, index) => {
       if (message.role !== 'assistant') return;
-      map.set(message.id ?? `idx:${index}`, buildConversationSegments({
-        content: message.content,
-        toolActivities: message.toolActivities,
-        reasoningByIteration: message.reasoningByIteration,
-        // D5（P2c）：阶段进度一并入模，由 ConversationTimeline 按 iteration 上轴。
-        progressUpdates: message.progressUpdates,
-      }));
+      let messageSegments = segmentsCache.get(message);
+      if (!messageSegments) {
+        messageSegments = buildConversationSegments({
+          content: message.content,
+          toolActivities: message.toolActivities,
+          reasoningByIteration: message.reasoningByIteration,
+          // D5（P2c）：阶段进度一并入模，由 ConversationTimeline 按 iteration 上轴。
+          progressUpdates: message.progressUpdates,
+        });
+        segmentsCache.set(message, messageSegments);
+      }
+      map.set(message.id ?? `idx:${index}`, messageSegments);
     });
     return map;
   }, [displayMessages]);
@@ -1053,183 +1063,42 @@ export function SimpleChat({
               )}
             </div>
           )}
+          {/* BLOCK-154 波次 3 — 行渲染走 memo 化 SimpleChatMessageRow：历史消息对象
+              引用恒定（派生链 slice+尾替换）+ 回调/记录身份稳定 → 流式 tick 只重渲染
+              实际变化的行；topicShift 分隔与行 DOM 结构逐行保留在行组件内。 */}
           {displayMessages.map((m, i) => {
             const key = m.ts ? `${m.role}-${m.ts}-${i}` : `${m.role}-${i}`;
             return (
-              <React.Fragment key={key}>
-                {i === topicShiftIndex && (
-                  <div className="sc-topic-shift" role="separator" aria-label="话题转换">
-                    <Icon name="layers" size={13} />
-                    <span className="sc-topic-shift-label">话题转换{topicShiftReason ? ` · ${topicShiftReason}` : ''}</span>
-                  </div>
-                )}
-                <div className={`sc-msg sc-msg-${m.role}`}>
-                  <div className="sc-msg-avatar">
-                    {m.role === 'user' ? (
-                      <Icon name="user" size={16} />
-                    ) : (
-                      <Icon name="cpu" size={16} />
-                    )}
-                  </div>
-                  <div className="sc-msg-body">
-                    {/* BLOCK-107 P1c — 时间线化（D1=c）：思考节点与工具簇按 iteration
-                        交错排列，取代「一个摘要条收编全部工具、思考内嵌其中」。narrative
-                        仍由下方正文位渲染，本组件不重复产出（见 ConversationTimeline 文件头）。
-                        P2c（D5）：阶段进度作为独立分段上轴、插在对应工具簇之后，
-                        UI-305 的两条语义（首条=意图故省略、运行中补标记）在此判定。 */}
-                    <ConversationTimeline
-                      segments={timelineSegmentsByMessage.get(m.id ?? `idx:${i}`) ?? []}
-                      renderProgress={(segment, meta) => {
-                        // BLOCK-108 P2 — 过渡叙述正文式渲染（Qoder 形态「模型说话 →
-                        // 模型做事」）：全部显示、含首条（UI-305「首条意图省略」在时间线
-                        // 呈现上被取代，block-108 plan §7.2）；纯文本 pre-wrap，文件引用
-                        // 链接化随最终正文保留、过渡段不做。
-                        const text = segment.content.trim();
-                        const transition = text ? (
-                          <div className="sc-timeline-transition-text">{text}</div>
-                        ) : null;
-                        const runningMarker = meta.isLast && m.pending
-                          ? <AgentProgressPendingRow />
-                          : null;
-                        if (!transition && !runningMarker) return null;
-                        return <>{transition}{runningMarker}</>;
-                      }}
-                    />
-                    {m.role === 'assistant' && <MessageMeta modelName={m.modelName} />}
-                    {m.role === 'assistant' && m.loop && m.loop.loopRunId && (
-                      <LoopStatusPanel loop={m.loop} pending={Boolean(m.pending)} />
-                    )}
-                    {m.resultEditProgress && m.resultEditProgress.length > 0 && (
-                      <ResultEditProgressList events={m.resultEditProgress} />
-                    )}
-                    {extraRenderersFlag && m.resultNodes && m.resultNodes.length > 0 && (
-                      <AssistantResultNodes nodes={m.resultNodes} />
-                    )}
-                    {m.role === 'assistant' && m.modelFallbackNotice && (
-                      <div className="sc-msg-fallback-notice" role="status">
-                        <Icon name="info" size={14} />
-                        {m.modelFallbackNotice}
-                      </div>
-                    )}
-                    <CopilotMarkdown
-                      text={m.content || m.statusMessage || (m.pending ? '…' : '')}
-                      onFileReferenceClick={handleFileReferenceClick}
-                      resolveContext={m.pending || (m.role === 'assistant' && streaming) ? null : settledContext}
-                      resolveNonce={resolveNonce}
-                      highlightCode={m.role === 'assistant' ? ((code, language) => (
-                        <HighlightedCode code={code} language={language} />
-                      )) : undefined}
-                    />
-                    {m.error && m.role === 'assistant' && (() => {
-                      // UI-AGENTWB-### / chat-error-rendering: prefer the
-                      // raw stack captured by conversationRunStore.finish;
-                      // fall back to m.content (legacy: Error instance
-                      // passed through). formatError still classifies for
-                      // userMessage + severity.
-                      const formatted = formatError(m.content);
-                      const techDetails = m.technicalDetails || getTechnicalDetails(m.content);
-                      return (
-                        <ErrorBanner
-                          message={formatted.userMessage}
-                          severity={formatted.severity}
-                          showDetails={formatted.showDetails}
-                          technicalDetails={techDetails}
-                        />
-                      );
-                    })()}
-                    {/* BLOCK-38 P2 / UI-275 — 仅服务中断任务显示「继续执行」（非中断失败诚实走 retry 链路） */}
-                    {conversationId && m.role === 'assistant' && m.error && m.resumable && m.taskId && (() => {
-                      const resumeTaskId = m.taskId;
-                      const activeConversationId = conversationId;
-                      return (
-                        <ResumePrompt
-                          taskId={resumeTaskId}
-                          onConfirm={async () => {
-                            await resumeInterruptedConversation(activeConversationId, projectId);
-                          }}
-                        />
-                      );
-                    })()}
-                    {m.role === 'assistant' && m.summaryUnavailable && m.retryToolJobId && summaryRetryState[m.retryToolJobId] !== 'done' && (() => {
-                      const tj = m.retryToolJobId;
-                      const attempts = summaryRetryAttempts[tj] ?? 0;
-                      const cooling = Date.now() < (summaryRetryCooldownUntil[tj] ?? 0);
-                      const exhausted = attempts >= MAX_SUMMARY_RETRIES;
-                      const running = summaryRetryState[tj] === 'running';
-                      if (exhausted) {
-                        return (
-                          <div className="sc-msg-actions sc-msg-actions-summary">
-                            <span className="sc-msg-action-error">已达重试上限，请稍后再试</span>
-                          </div>
-                        );
-                      }
-                      const remaining = cooling ? Math.max(0, Math.ceil((summaryRetryCooldownUntil[tj] - Date.now()) / 1000)) : 0;
-                      return (
-                        <div className="sc-msg-actions sc-msg-actions-summary">
-                          <button
-                            type="button"
-                            className="sc-msg-action"
-                            onClick={() => void retrySummary(tj)}
-                            disabled={running || cooling}
-                            title="仅重新生成 AI 总结，不会再次运行分析工具"
-                          >
-                            <Icon name="refresh" size={14} />
-                            {running
-                              ? '正在重试总结'
-                              : cooling
-                                ? `冷却中 ${remaining}s`
-                                : `重试 AI 总结（剩 ${MAX_SUMMARY_RETRIES - attempts} 次）`}
-                          </button>
-                          {summaryRetryErrors[tj] && (
-                            <span className="sc-msg-action-error">{summaryRetryErrors[tj]}</span>
-                          )}
-                        </div>
-                      );
-                    })()}
-                    {m.role === 'assistant' && m.content && !m.pending && (
-                      <div className="sc-msg-actions">
-                        <button
-                          type="button"
-                          className="sc-msg-action"
-                          onClick={() => void copyMessage(key, m.content)}
-                          title="复制回复"
-                          aria-label="复制回复"
-                        >
-                          <Icon name={copiedMessageKey === key ? 'check' : 'copy'} size={14} />
-                          {copiedMessageKey === key ? '已复制' : '复制'}
-                        </button>
-                        <span className="sc-msg-action-divider" aria-hidden="true" />
-                        <button
-                          type="button"
-                          className="sc-msg-action"
-                          onClick={() => void regenerate()}
-                          disabled={streaming}
-                          title="用当前模型重新生成这条回复"
-                          aria-label="重新生成回复"
-                        >
-                          <Icon name="repeat" size={14} />
-                          重新生成
-                        </button>
-                        <span className="sc-msg-action-divider" aria-hidden="true" />
-                        <button
-                          type="button"
-                          className="sc-msg-action"
-                          onClick={() => void handleForkAt(older.windowOffset + i)}
-                          disabled={forkingAtIndex !== null}
-                          title={`以此消息为终点创建分支（新分支将包含从开始到这条回复的所有消息）`}
-                          aria-label="创建分支"
-                        >
-                          <Icon name="git-branch" size={14} />
-                          {forkingAtIndex === older.windowOffset + i ? '创建中…' : '创建分支'}
-                        </button>
-                        {/* UI-271 增补：回复时间移至操作行「创建分支」右侧 */}
-                        <span className="sc-msg-action-divider" aria-hidden="true" />
-                        <MessageTime ts={m.ts} />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </React.Fragment>
+              <SimpleChatMessageRow
+                key={key}
+                m={m}
+                messageKey={key}
+                isTopicShiftStart={i === topicShiftIndex}
+                topicShiftReason={topicShiftReason}
+                segments={timelineSegmentsByMessage.get(m.id ?? `idx:${i}`) ?? EMPTY_ROW_SEGMENTS}
+                streaming={streaming}
+                settledContext={settledContext}
+                resolveNonce={resolveNonce}
+                extraRenderersFlag={extraRenderersFlag}
+                conversationId={conversationId}
+                projectId={projectId}
+                copiedMessageKey={copiedMessageKey}
+                forkingAtIndex={forkingAtIndex}
+                forkAbsoluteIndex={older.windowOffset + i}
+                summaryRetryState={summaryRetryState}
+                summaryRetryErrors={summaryRetryErrors}
+                summaryRetryAttempts={summaryRetryAttempts}
+                summaryRetryCooldownUntil={summaryRetryCooldownUntil}
+                cooldownNow={cooldownNow}
+                maxSummaryRetries={MAX_SUMMARY_RETRIES}
+                formatError={formatError}
+                getTechnicalDetails={getTechnicalDetails}
+                onFileReferenceClick={handleFileReferenceClick}
+                onCopyMessage={copyMessage}
+                onRegenerate={regenerate}
+                onForkAt={handleForkAt}
+                onRetrySummary={retrySummary}
+              />
             );
           })}
           {standaloneDurableLoop && (
