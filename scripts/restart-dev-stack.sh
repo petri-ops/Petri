@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 # platform: windows（BLOCK-104 P4 双端同形门；当前实现含 taskkill/PowerShell 链——Mac 侧等价脚本待补，BLOCK-88 P4 教训在案）
 # restart-dev-stack.sh — BLOCK-77 P4 phase2 编排：干净重启 dev 栈并等就绪。
-# ⚠️ vite（:3000）是跨重启长活进程：本脚本只重启 electron/后端，不杀不拉 vite。
-# 若 vite 被误杀，本脚本照常「就绪」但窗口黑屏（ERR_CONNECTION_REFUSED :3000）。
-# 恢复：cd frontend && npm run dev（后台）→ 等 :3000 监听 → 主窗重新导航 :3000
-#（chrome 错误页上 location.reload 无效，需显式 location.href='http://localhost:3000/'）。
-# 2026-09-22 深夜实案（清僵尸进程误杀 vite 后黑屏）。
+# vite（:3000）：历史假设「跨重启长活、本脚本不杀不拉」——2026-09-22 与 2026-10-09
+# 两次实案证明该假设失配时（vite 从未启动/被清场误杀）脚本照常「就绪」但窗口黑屏
+#（ERR_CONNECTION_REFUSED :3000），后端探针全绿造成「测试绿/屏幕黑」双面假象。
+# 同类第二次 → 按治理纪律转机械门禁（BLOCK-155 收官沉淀，用户裁决「3000 和 3001 都启动」）：
+#   ① vite 缺席时本脚本自动拉起（frontend npm run dev）并等 :3000 就绪后才启 Electron；
+#   ② READY 判定纳入 :3000=200（pages+api+vite 三面齐才算就绪）。
+# 人工恢复路径（脚本外的栈）：cd frontend && npm run dev → 等 :3000 监听 → 主窗
+# **显式** location.href='http://localhost:3000/'（chrome 错误页上 location.reload 无效）。
 # 2026-09-11 沉淀（当次踩坑三连）：
 #   1) detached backend 会逃逸 electron 树杀 → 必须 kill 3001 监听者（僵尸）；
 #   2) dev 栈数据面在 BIOF3_DB_PATH / BIOF3_LOCAL_DATA_DIR（.biof3-dev-user-data/data），
@@ -97,6 +100,24 @@ if [ -n "${BIOF3_SESSION_COMPACTION}" ]; then echo "block95: env override BIOF3_
 #    require('electron') 返路径串、app 变 undefined → main.js:148 requestSingleInstanceLock 崩。
 #    Start-Process 从当前 shell 继承环境，故此处显式清掉（PowerShell -Environment 不可用，改用 Remove-Item Env:）。
 if [ -n "${ELECTRON_RUN_AS_NODE:-}" ]; then unset ELECTRON_RUN_AS_NODE; echo "stripped leaked ELECTRON_RUN_AS_NODE from env"; fi
+
+# BLOCK-155 收官沉淀（2026-10-09 实案，同类第二次）——vite(:3000) 保障前置：
+# 缺席时自动拉起并等就绪，**之后才启 Electron**（避免主窗在 vite 起来前加载落进
+# chrome 错误页——错误页 location.reload 无效，只能显式重导航）。
+vite_code=$(curl -s -m 5 http://127.0.0.1:3000/ -w '\n%{http_code}' 2>/dev/null | tail -n1)
+if [ "${vite_code}" != "200" ]; then
+  echo "vite(:3000) not responding (code=${vite_code:-000}) - starting frontend dev server"
+  powershell -NoProfile -Command "Start-Process -FilePath 'C:\Users\Admin\AppData\Roaming\fnm\node-versions\v24.20.0\installation\npm.cmd' -ArgumentList 'run','dev' -WorkingDirectory 'D:\1.WorkDir\biof3-desktop\frontend' -WindowStyle Minimized"
+  vite_ok=""
+  for vi in $(seq 1 30); do
+    sleep 2
+    vc=$(curl -s -m 5 http://127.0.0.1:3000/ -w '\n%{http_code}' 2>/dev/null | tail -n1)
+    if [ "${vc}" = "200" ]; then vite_ok=1; echo "vite ready (t+$((vi*2))s)"; break; fi
+  done
+  if [ -z "${vite_ok}" ]; then
+    echo "ABORT: vite(:3000) 未能就绪: 继续启动只会得到黑屏窗口(见文件头黑屏纪律), 先修前端栈"; exit 4
+  fi
+fi
 powershell -NoProfile -Command "Remove-Item Env:ELECTRON_RUN_AS_NODE -ErrorAction SilentlyContinue; Start-Process -FilePath 'C:\Users\Admin\AppData\Roaming\fnm\node-versions\v24.20.0\installation\node.exe' -ArgumentList 'node_modules\electron\cli.js','.','--dev','--remote-debugging-port=${CDP_PORT}' -WorkingDirectory 'D:\1.WorkDir\biof3-desktop' -WindowStyle Minimized -RedirectStandardOutput 'D:\1.WorkDir\biof3-desktop\.dev-stack-live.log' -RedirectStandardError 'D:\1.WorkDir\biof3-desktop\.dev-stack-err.log'"
 echo "start dispatched"
 
@@ -107,8 +128,9 @@ for i in $(seq 1 36); do
   #    `curl -o /dev/null` exit=23（写 NUL 失败）→ 配合 `|| echo 000` 会把结果拼成
   #    `200000`，于是 `= "200"` 永不成立 → 明明就绪也必然 TIMEOUT。改为读末行 http_code。
   code=$(curl -s -m 10 -H 'Authorization: Bearer desktop-local' 'http://127.0.0.1:3001/api/data/projects' -w '\n%{http_code}' 2>/dev/null | tail -n1)
-  echo "t+$((i*5))s pages=${pages} api=${code}"
-  if [ "${pages:-0}" -ge 1 ] 2>/dev/null && [ "${code}" = "200" ]; then
+  vite=$(curl -s -m 8 http://127.0.0.1:3000/ -w '\n%{http_code}' 2>/dev/null | tail -n1)
+  echo "t+$((i*5))s pages=${pages} api=${code} vite=${vite}"
+  if [ "${pages:-0}" -ge 1 ] 2>/dev/null && [ "${code}" = "200" ] && [ "${vite}" = "200" ]; then
     # 数据面对账：连到的库必须非空（防再次连错库）
     n=$(curl -s -m 10 -H 'Authorization: Bearer desktop-local' 'http://127.0.0.1:3001/api/data/projects' | grep -o '"id"' | wc -l)
     echo "projects in api response: ${n}"
