@@ -1,4 +1,5 @@
 # Gewu Desktop（格物）文档入口
+176. [`block-151-review-absorb-wave2-plan.md`](./block-151-review-absorb-wave2-plan.md) — 2026-10-09 立项发令 active → 同日 **completed**（审视吸收批·第二波）：20 条清点 15/1/4/0 三轨（A1 会话守卫从紧核心未动+/m 竞态/A4 成果面四件/B7 统计语义 title/A3 act 对齐+30 秒钉住）；评审 P1=0，P2 携带集成修掉；closeout 十一门 PASS；UI-470 in_progress 待实机。收口笔录 plan §8，证据 acceptance/block-151/。
 175. [](./block-151-review-absorb-wave2-plan.md) — 2026-10-09 立项发令 **active**（审视吸收批·第二波；「继续 按顺序都搞完」批量授权 151→152→153）：A1 深水区守卫（从紧不动核心语义）+/m 竞态 / A4 成果面七条 / B7+A3 解读层与工具描述；三轨有界重审视 ≤7 条/轨双态清账。
 174. [`block-150-review-batch-absorb-wave1-plan.md`](./block-150-review-batch-absorb-wave1-plan.md) — 2026-10-09 立项发令 active → 同日 **completed**（审视吸收批·第一波；用户「继续」）：13/13 清账三轨（平台消费链 6/生信品质 5/内核盲性 2；⑫ 经评审 P1 补做复核）；P2 携带两条登记；closeout 十一门 PASS；UI-469 in_progress 待实机；pack 6a5ef8a 本地不推送。收口笔录 plan §8，证据 acceptance/block-150/。
 173. [](./block-150-review-batch-absorb-wave1-plan.md) — 2026-10-09 立项发令 **active**（审视吸收批·第一波；用户「继续」）：审视报告中低影响第一波 13 条三轨（平台消费链/生信品质/内核盲性），逐项先验证现状再红绿实现。明细全量在审视报告卡片续波。

@@ -5722,13 +5722,13 @@
       "capability": "review-absorb-wave2",
       "path": "docs/block-151-review-absorb-wave2-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-151-review-absorb",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-10-09",
       "archivePolicy": "archive_when_superseded",
-      "phase": "ACTIVE",
+      "phase": "COMPLETED",
       "tags": [
         "block-151",
         "review-absorb",
@@ -5738,7 +5738,7 @@
         "a4",
         "b7"
       ],
-      "notes": "审视吸收批第二波（A1 深水区最小修+/m 竞态、A4 成果面、B7+A3 解读层与工具描述；用户「继续 按顺序都搞完」批量授权 151→152→153）。三轨有界重审视 ≤7 条/轨，A1 从紧只补守卫与测试。"
+      "notes": "审视吸收批第二波（A1 深水区最小修+/m 竞态、A4 成果面、B7+A3 解读层与工具描述；用户「继续 按顺序都搞完」批量授权 151→152→153）。三轨有界重审视 ≤7 条/轨，A1 从紧只补守卫与测试。 2026-10-09 当日收口 completed：20 条清点 15/1/4/0+A1 从紧复核通过+P2 携带集成修掉+closeout 十一门 PASS；UI-470 in_progress 待实机。"
     }
   ],
   "lastUpdated": "2026-10-09",

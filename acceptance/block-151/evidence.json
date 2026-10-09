@@ -1,0 +1,23 @@
+{
+  "block": "BLOCK-151-REVIEW-ABSORB-WAVE2",
+  "closedAt": "2026-10-09",
+  "form": "审视吸收批·第二波（三轨有界重审视 ≤7 条/轨；「继续 按顺序都搞完」批量授权）",
+  "implementation": "dynamic workflow dwfrun-70613edf 三轨并行+独立评审 P1=0（A1 从紧纪律复核：mergeKeepOlderPrefix 核心未动，守卫与测试为主）+统一门禁全绿；主代理终审集成（修 P2 携带的 30 秒措辞并钉契约）",
+  "counts": { "fixed": 15, "alreadyFixed": 1, "skipped": 4, "escalated": 0 },
+  "delivered": {
+    "A 会话与移动": "/m 页 openTaskStream 竞态（taskId 闭包守卫+AbortController，150 携带项）/agentTaskStream 重连 lastSeq 回退守卫/loadOlder 会话切换竞窗守卫（摘守卫对照红证）/mergeKeepOlderPrefix 行为测锁（重放+分叉场景）/queue+drain 守卫簇测锁——核心语义未动零 escalated",
+    "B 成果面": "ViewerExportAction 导出出口接线（canExport=true 零消费关闭）/钉住快照占位态/ChangeSet 对比图空态兜底/继续分析 artifactKind 死 prop 清理（types 抓出漏网调用点即修）",
+    "C 解读与描述": "padj/效应量输入统计语义 title+三条阈值参考线 SVG title+「展示辅助」点破（不回写不筛数据点）；act description 与 schema 对齐（16 型如实两类+撤销声明限定子集）+ act↔enum↔派发三方一致契约"
+  },
+  "integrationExtras": ["P2 携带修复：browser.js「5 秒内撤销」→「30 秒内」（act-tool.js:43 阈值事实）+ 契约测试 /30 秒内撤销/ 钉住与 /5 秒/ 反向断言"],
+  "redGreen": "A：/m 3红→4/4+相邻 19/19；lastSeq 1红→68/68；loadOlder 摘守卫对照 1红→10/10；绿锚豁免书面理由在测（mergeKeep/drain 现状正确缺锁）。B：3红→31/31+邻域 86/86（types 抓漏网调用点即修）。C：ScientificViewer 1红→19/19；act 契约 2红→3/3（+集成钉住）",
+  "skippedLedger": [
+    "跨 job 钉住失败静默（Shell :228-232）——留痕下波",
+    "lineage 切换导航空态与操作提示——留痕下波",
+    "会话恢复核心语义重设计——plan §3 非范围",
+    "ResultArtifactShell 三段——already-fixed（146-150 已覆盖）",
+    "interpret/format 复用核查——现状无可复用缺口，skipped 如实"
+  ],
+  "gates": { "closeout": "十一门 PASS（code-size R-2 重锚一次：成果面新代码）" },
+  "boundaries": ["实机走查待（UI-470 in_progress）", "B7 报告模板扩充非范围"]
+}

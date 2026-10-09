@@ -6,7 +6,7 @@ acceptance:
   - 行为契约项红绿先行；文案/呈现项回归覆盖；A1 深水区从紧——只补守卫与行为测，不动恢复合并语义核心（mergeKeepOlderPrefix），发现需改核心即升级登记不硬改
   - 定向门禁：test:changed + quality:types/lint/secret/arch + theme-token-contract 全绿；closeout 十一门（集成提交后）
 reopen: B7 报告模板内容扩充（pack 域）、A1 会话恢复核心语义重设计（若本波触发升级登记）
-status: active
+status: completed
 ---
 
 # BLOCK-151 审视吸收批·第二波（审视序列第 6 波）
@@ -47,3 +47,11 @@ dynamic workflow 三轨并行（文件面互斥）→ 每轨有界重审视（�
 ## 7. 完成语义
 
 三轨逐条双态清账 + 评审 P1 清零 + 门禁绿 + 主代理集成提交 + closeout 十一门 PASS + 台账五件回写。收官后接 BLOCK-152 重构候选批。
+
+## 8. 收口笔录（2026-10-09 当日立项当日收口）
+
+- **20 条清点：15 fixed / 1 already-fixed / 4 skipped / 0 escalated**（dwfrun-70613edf 三轨并行；A1 从紧纪律经评审复核——mergeKeepOlderPrefix 核心未动，全程守卫与行为测）：A=/m 竞态（150 携带）+lastSeq 回退+loadOlder 竞窗+mergeKeep/queue-drain 行为测锁；B=导出出口接线+钉住占位+对比图空态+死 prop 清理；C=统计语义 title 四件+act 描述对齐与三方一致契约。
+- **评审 P1=0；P2 携带集成批修掉**：browser.js「5 秒内撤销」→「30 秒内」（act-tool.js:43 事实）+契约测试 /30 秒内撤销/ 钉住与 /5 秒/ 反向断言。skipped 四条留痕（跨 job 钉住静默/lineage 空态归下波；核心语义重设计非范围；Shell 三段 already-fixed）。
+- **门禁**：统一五门全绿 + closeout 十一门 PASS（code-size R-2 重锚一次）。红绿亮点=loadOlder 摘守卫对照红证（守卫真实被钉）。
+- **提交**：292f5f62（28 文件，UI-470 in_progress 同步）+ 5d4a13b6（棘轮重锚）。
+- 证据=acceptance/block-151/evidence.json。序列下一批 BLOCK-152 重构候选批。G0 开发期常态 · 不外推 packaged/Provider/GA。
