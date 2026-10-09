@@ -113,6 +113,11 @@
       "expires": "2026-12-31",
       "sha256": null,
       "linesAtGrant": 1253
+    },
+    {
+      "path": "src/ipc/working-tree-review.js",
+      "reason": "BLOCK-152 hunk 级 stage 根修复接线（commitReview 分类+隔离提交调用+staleDecisionKeys 上报）——147 双防线治本面；拆分评估归下波（review-stage.js 已承接纯函数主体，剩余为 handler 装配）",
+      "expires": "2026-11-30"
     }
   ]
 }
