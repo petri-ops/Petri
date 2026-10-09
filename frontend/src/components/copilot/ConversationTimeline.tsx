@@ -96,6 +96,14 @@ export interface ProgressSegmentMeta {
 export interface ConversationTimelineProps {
   segments: ConversationSegment[];
   /**
+   * BLOCK-154 UI-473 — run 仍在进行（宿主传消息 pending 态）。运行中工具与工具
+   * 之间存在「无 running 活动」的间隙（模型推理中），仅靠 runRunning 判据会在
+   * 间隙期翻转 false → 整段时间线收成运行摘要、下个工具启动又展开（每工具一次
+   * 折叠闪烁）。runActive=true 时压住运行级折叠；run 结束（pending=false）仍按
+   * UI-437 v4 设计折叠为运行摘要。缺省 false（历史完成消息语义不变）。
+   */
+  runActive?: boolean;
+  /**
    * 阶段进度上轴（D5 裁决：作为独立分段插在对应工具簇之后）。不传时 progress
    * 分段**被跳过**——宿主若仍在别处渲染阶段进度，保持不传以免重复展示。
    * 返回 null / false 时该分段不产出节点（首条意图与空结论走这条路径）。
@@ -112,6 +120,7 @@ export function ConversationTimeline({
   segments,
   renderProgress,
   className,
+  runActive = false,
 }: ConversationTimelineProps): React.ReactElement | null {
   // UI-437 v4 — 运行级折叠：一次任务的多轮工具段收敛为一行运行摘要。
   const toolsSegments = segments.filter((segment): segment is ToolsSegment => segment.kind === 'tools');
@@ -121,7 +130,8 @@ export function ConversationTimeline({
   );
   const [runExpanded, setRunExpanded] = useState(false);
   // 运行中（实时流式）或本段无工具时不折叠；完成后默认收起为运行摘要行。
-  const runOpen = !hasTools || runRunning || runExpanded;
+  // BLOCK-154 UI-473 — runActive（消息 pending）穿过工具间隙，修复每工具折叠闪烁。
+  const runOpen = !hasTools || runRunning || runExpanded || runActive;
 
   const totalCalls = toolsSegments.reduce((n, s) => n + (s.totalCount ?? s.activities?.length ?? 0), 0);
   const totalFailed = toolsSegments.reduce((n, s) => n + (s.failedCount ?? 0), 0);

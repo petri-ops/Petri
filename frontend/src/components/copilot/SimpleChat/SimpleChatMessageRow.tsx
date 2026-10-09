@@ -122,6 +122,7 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
               UI-305 的两条语义（首条=意图故省略、运行中补标记）在此判定。 */}
           <ConversationTimeline
             segments={segments}
+            runActive={Boolean(m.pending)}
             renderProgress={(segment, meta) => {
               // BLOCK-108 P2 — 过渡叙述正文式渲染（Qoder 形态「模型说话 →
               // 模型做事」）：全部显示、含首条（UI-305「首条意图省略」在时间线

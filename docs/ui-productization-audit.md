@@ -4678,12 +4678,12 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **待验**：真隧道/真公网门的 probe 翻转实机观察（断反代验证降级）。
 - **边界**：probe 纯 fetch 只读不碰端口不 spawn（与 remotePortSweep 清场互不踩）；redirect:manual 反代误配按 3xx 判 fail。
 
-## UI-472: highlight.js 按需注册——es.js 全量 chunk 退役，core+40 语言宽清单（BLOCK-154 波次 1）(2026-10-09 in_progress，构建计量+定向测试全绿)
+## UI-472: highlight.js 按需注册——es.js 全量 chunk 退役，core+40 语言宽清单（BLOCK-154 波次 1）(2026-10-09 verified，用户实机确认)
 
 - **来源**：BLOCK-154 优化梳理清单 P1-1（同日主代理全方位梳理四路探查实证：es.js 291,911 gzip 为全站最大单资产，占总量 21%）；用户裁决「BLOCK-152 已经完成了 按照建议逐个推进」。
 - **交付**：CodeHighlight 动态 import 由全量 highlight.js 改引 `./_hljsCurated`（highlight.js/lib/core + 40 语言注册，全仓唯一注册位；保留 BLOCK-106「覆盖不退化」初衷——LaTeX/Julia/dockerfile 等在列，清单外语言沿用既有「降级纯文本」语义不崩）；新增 `lib/highlight-js-core.d.ts`（exports map 无 types 条目的子路径补齐）。
 - **证据**：HK-01 红绿——CodeHighlight 定向 4/4（新锚 latex/julia/dockerfile/go 在列 + elixir 清单外降级，红→绿）；build:check（tsc -b+vite build）0；bundle 门禁绿（总量 1,397→1,273.5KB gzip 净缩 91KB，es.js 移除，新增资产全部 ≤100KB 在限内）；基线 --write 重锚 46 键。
-- **待验**：实机聊天/文件预览代码块上色抽查（清单内视觉零差异；随 UI-457 等过目批同窗）。
+- **待验**：~~实机聊天/文件预览代码块上色抽查~~ **2026-10-09 用户实机确认「UI-472 过」→ verified**。
 - **实机测试路线（第 4 级 · 人确认）**：① 在会话中发送一条请求，让模型输出含代码块的回复（指定语言如 python / r / javascript / latex / go / dockerfile）；② 观察代码块是否有语法高亮（关键字/字符串/注释颜色区分）；③ 清单内语言应正常上色，视觉与改动前一致；④ 清单外语言（如 elixir）降级为纯文本但不报错、不白屏。结论回复确认即过目。
 - **边界**：语言清单内 UI 表现零变化；rehype-highlight（lowlight common，WorkspaceFilePreview+MDX 构建面）为独立消费面不在本波；注册清单扩展约定见 `_hljsCurated.ts` 头注释。
 
@@ -4693,6 +4693,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **交付**：行 JSX（~180 行）抽取为 `SimpleChat/SimpleChatMessageRow.tsx`（React.memo 渲染边界，DOM/语义逐行保留：topicShift 分隔/timeline renderProgress/错误/续跑/总结重试 IIFE/操作行）；timeline 分段 WeakMap 身份缓存（历史消息对象引用恒定→分段数组复用）；冷却计时改父级采样 cooldownNow（retryTick 调度点不变，tick 不击穿行 memo）；EMPTY_ROW_SEGMENTS 共享空数组（`?? []` 新建会击穿 memo）。
 - **证据**：HK-01 红绿——SimpleChatMessageRow.test 3 用例（vi.mock CopilotMarkdown 探针：相同 props 重渲染 3 次调用→bail-out 1 次；m 身份变化必须重渲染；不稳定回调保守击穿语义）；tsc 0+lint 0 error+SimpleChat/ConversationTimeline/markdown/resume 套件 37/37+build:check（tsc -b+vite build）0。
 - **待验**：实机长会话流式打字流畅度主观对比（随 UI-457 等过目批同窗）。
+- **过目批发现与修复（2026-10-09）**：用户实机确认「流式过程执行时间线自动折叠，但每个工具执行一下折叠行为闪烁一次，体验不稳定」。归因=**UI-437 v4 既有语义缺陷，非波次 3 memo 化回归**（ConversationTimeline 内部状态零改动；`runRunning` 判据在工具间隙——模型推理期无 running 活动——翻转 false → 整段时间线收成运行摘要，下个工具启动又展开，每工具一次巨幅折叠闪烁）。修复（HK-01 红绿）：ConversationTimeline 新增 `runActive` prop（源=`m.pending`，run 全程 true 含间隙），`runOpen` 判据加入 runActive 压住间隙期折叠；run 结束仍按设计折叠为运行摘要；历史完成消息（runActive 缺省）语义不变。红→绿：新用例「工具间隙不折叠」1 红→ConversationTimeline+SimpleChat 套件 91/91 绿 + 回归护栏（runActive 缺省仍折叠）+ tsc 0 + lint 0 error。**待用户复认流式不再闪烁**。
 - **实机测试路线（第 4 级 · 人确认）**：① 打开一个已有多条历史消息的会话（≥10 条）；② 发送一个需要较长回复的问题触发流式；③ 观察流式过程中：已渲染的历史行是否有重渲染闪烁/抖动、新 token 追加是否平滑、滚动是否跟手；④ 体感结论（流畅/偶卡/明显卡）回复确认即过目。CDP 已截当前非流式态（`acceptance/block-154/streaming-state.png` 仅在流式中生成）。
 - **边界**：后端分页/滚动守卫/会话切换语义零改动；memo 退化为现状重渲染（无正确性风险）；DOM 结构与拆分前逐行一致。
 

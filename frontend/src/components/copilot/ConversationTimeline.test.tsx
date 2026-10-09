@@ -213,4 +213,24 @@ describe('BLOCK-107 会话时间线渲染（P1b）', () => {
     expect(live.container.querySelector('.sc-tool-activity-inline')).toBeTruthy();
     expect(live.container.querySelectorAll('.sc-tool-qoder-row').length).toBe(1);
   });
+
+  it('BLOCK-154 UI-473：流式运行的工具间隙不折叠（runActive 穿过无运行工具的间隙，修复每工具折叠闪烁）', () => {
+    // 间隙态：全部簇 settled（无 running 工具）但 run 未结束（消息 pending=true）
+    // —— UI-437 v4 的 runRunning 判据在间隙期翻转 false → 整段时间线收成运行摘要，
+    // 下个工具启动又展开 = 每工具一次折叠闪烁。runActive 让「run 仍在进行」压住折叠。
+    const { container } = render(
+      <ConversationTimeline segments={[reasoningSegment, toolsSegment, progressSegment]} runActive />
+    );
+    expect(container.querySelector('.sc-timeline-reasoning')).toBeTruthy();
+    expect(container.querySelector('.sc-timeline-cluster')).toBeTruthy();
+    expect(container.textContent).not.toContain('执行工具 1 次 · 1 轮');
+  });
+
+  it('BLOCK-154 UI-473 回归护栏：runActive 缺省（历史完成消息）仍默认折叠为运行摘要', () => {
+    const { container } = render(
+      <ConversationTimeline segments={[reasoningSegment, toolsSegment]} />
+    );
+    expect(container.querySelector('.sc-run-fold-line')).toBeTruthy();
+    expect(container.querySelector('.sc-timeline-reasoning')).toBeNull();
+  });
 });
