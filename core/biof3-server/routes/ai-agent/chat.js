@@ -75,6 +75,27 @@ module.exports = {
           : selectedPreset && selectedPreset.model;
         const baseUrl = selectedPreset && selectedPreset.baseUrl;
         const apiKey = getChatModelCredential(selectedPreset);
+        // BLOCK-155 — 真·单通道 vision：所选渠道经网关同一解析入口单源解析
+        //（modelGateway.resolve = resolveModelProfile(normalizeModelConfig(settings))，
+        // 与 loop 实际调用 callChatProvider 的 profile 解析同源，不自造第二套
+        // provider/capability 判断）。声明 vision 能力且 provider 的 chat 链吃
+        // image_url 部件（openai 系 + anthropic）→ visionInline=true，本轮用户
+        // 图片附件内联进请求体。解析失败/无渠道信息 fail-closed 回旧路径（false）。
+        let visionInline = false;
+        const visionProfileId = selectedPreset && selectedPreset.id;
+        if (visionProfileId) {
+          try {
+            const { modelGateway } = require('../../helpers/llm-client');
+            const { chatVisionInlineCapable } = require('../../agent-tools/vision-inline');
+            const resolved = modelGateway.resolve('agent', visionProfileId);
+            if (resolved && !resolved.error && resolved.profile) {
+              visionInline = chatVisionInlineCapable(resolved.profile);
+            }
+          } catch (e) {
+            // fail-closed 回旧 read_image 路径；留一行诊断便于「勾了视觉却不直发」排查
+            console.warn('[block155] vision inline profile resolve failed:', e && e.message);
+          }
+        }
         const { runAgentLoop } = require('../../agent-runner');
         const agentTaskStore = require('../../agent-task-store');
         const { aiTaskConcurrencyAcquire, aiTaskConcurrencyRelease } = require('../../helpers/runtime');
@@ -266,6 +287,10 @@ module.exports = {
               baseUrl: baseUrl || undefined,
               // BLOCK-81 P1 — 档位随任务参数落库：降级续跑/恢复续跑按任务参数继承
               thinkingLevel: thinkingLevel || undefined,
+              // BLOCK-155 — 真·单通道 vision：内联开关随任务参数落库（truthy 才存）。
+              // 留痕/审计用：resume 续跑链不回读（同 thinkingLevel 形态），
+              // 续跑任务 visionInline=false fail-closed 回旧 read_image 路径。
+              visionInline: visionInline || undefined,
             },
           }).taskId;
         } catch (e) {
@@ -324,6 +349,8 @@ module.exports = {
               parentLoopRunId: parentLoopRunId || null,
               // BLOCK-81 P1 — 思考档位进 agent loop（网关按 profile 能力位门控）
               thinkingLevel,
+              // BLOCK-155 — 真·单通道 vision：内联开关进 agent loop（loopConfig）
+              visionInline,
               onEvent: () => {},
               shouldAbort: () => agentTaskStore.isAgentTaskCancellationRequested(taskId),
             }).catch((e) => {

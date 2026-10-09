@@ -70,7 +70,7 @@ export function onDrop(
   e: React.DragEvent,
   setAttachments: React.Dispatch<React.SetStateAction<AttachmentFile[]>>,
   setIsDraggingOver: (value: boolean) => void,
-  options?: { visionEnabled?: boolean }
+  options?: ImageInputGateOptions
 ): string | void {
   e.preventDefault();
   e.stopPropagation();
@@ -79,8 +79,10 @@ export function onDrop(
   const files = Array.from(e.dataTransfer.files);
   if (files.length === 0) return;
 
-  // BLOCK-150 加映 — 识图未配置：图片文件前置阻断（非图片附件不受影响——不经视觉解读）。
-  if (options && options.visionEnabled === false && files.some((file) => file.type.startsWith('image/'))) {
+  // BLOCK-150 加映 / BLOCK-155 放宽 — 图片输入前置门（判据单源 imageInputAllowed：
+  // 识图角色 || 聊天渠道视觉能力，两者皆无才阻断。非图片附件不受影响——不经视觉解读）。
+  if (options && !imageInputAllowed(options.visionEnabled, options.chatVisionCapable)
+      && files.some((file) => file.type.startsWith('image/'))) {
     return VISION_NOT_CONFIGURED_NOTICE;
   }
 
@@ -130,6 +132,27 @@ export function onDrop(
 export const VISION_NOT_CONFIGURED_NOTICE =
   '识图模型未配置：图片输入已停用（设置 → AI 设置 配置视觉模型 / API Key 后可用）';
 
+/** onPaste/onDrop 共用的图片输入门参数。 */
+type ImageInputGateOptions = {
+  /** 识图角色能力位（后端 /ai/settings vision_configured）。缺省=未知，保守不阻断。 */
+  visionEnabled?: boolean;
+  /** BLOCK-155 真·单通道 vision — 聊天渠道自身视觉能力（activeModel.capabilities 含 'vision'）。
+   *  渠道声明视觉能力时当前轮图片直接内联进聊天请求体，无需识图角色。 */
+  chatVisionCapable?: boolean;
+};
+
+/** BLOCK-155 真·单通道 vision — 图片粘贴/拖入放行判据（单源）：
+ * 识图角色已配置（vision_configured）或 聊天渠道自身声明视觉能力 任一为真即放行；
+ * 「两者皆无」才阻断。onPaste/onDrop 的前置门内部消费本函数（SimpleChat 侧只传
+ * visionEnabled/chatVisionCapable 两个原始输入位，不直接调用）。 */
+export function imageInputAllowed(
+  visionConfigured: boolean | undefined,
+  chatVisionCapable: boolean | undefined
+): boolean {
+  if (visionConfigured === false && chatVisionCapable !== true) return false;
+  return true;
+}
+
 /** BLOCK-150 加映 — 载荷里是否含图片（粘贴 items 或拖拽 files 任一命中）。 */
 export function hasImagePayload(
   dataTransfer: { items?: ArrayLike<{ type: string }>; files?: ArrayLike<File> } | null | undefined
@@ -144,7 +167,7 @@ export function hasImagePayload(
 export function onPaste(
   e: React.ClipboardEvent,
   setAttachments: React.Dispatch<React.SetStateAction<AttachmentFile[]>>,
-  options?: { visionEnabled?: boolean }
+  options?: ImageInputGateOptions
 ): string | void {
   const items = e.clipboardData?.items;
   if (!items) return;
@@ -155,8 +178,9 @@ export function onPaste(
 
   e.preventDefault();
 
-  // BLOCK-150 加映 — 识图未配置：图片输入前置阻断（后置 vision_failed 变前置诚实提示）。
-  if (options && options.visionEnabled === false) {
+  // BLOCK-150 加映 / BLOCK-155 放宽 — 图片输入前置门（判据单源 imageInputAllowed：
+  // 识图角色 || 聊天渠道视觉能力，两者皆无才阻断；后置 vision_failed 变前置诚实提示）。
+  if (options && !imageInputAllowed(options.visionEnabled, options.chatVisionCapable)) {
     return VISION_NOT_CONFIGURED_NOTICE;
   }
 

@@ -276,6 +276,9 @@ async function runAgentLoop({
   disableProviderFallback = false,
   // BLOCK-81 P1 — 思考档位（off/standard/high；未传＝standard＝不发参）
   thinkingLevel = null,
+  // BLOCK-155 — 真·单通道 vision：本轮用户图片附件已在请求体侧内联为 image_url
+  // 部件（chat.js 按所选渠道单源解析；未传/false = 旧 read_image 双通道路径）
+  visionInline = false,
   // BLOCK-93 P1 — 子智能体角色软约束指令片段（spawn 链自注册表渲染；未传＝零注入）
   roleDirective = null,
 }) {
@@ -475,6 +478,13 @@ async function runAgentLoop({
     '\n- 当用户在 FigCode 页面要求修改代码时（例如"换成横向条形图"/"配色改成 Nature 风格"/"加 facet"等），不要让用户自己复制粘贴。直接调用 act(type="update_figcode_editor", code="<完整新代码>", autoRun=true)，前端会自动替换并运行。';
   systemPrompt +=
     '\n- agent 看图（read_image）：当用户问图内容（如"图里上调基因集中在哪""这张图说明了什么"），调 read_image(toolJobId) 让 vision 角色模型解读图，返回的 description 可直接据此回答。token 较贵，仅用户明确问图内容时调，不要每次出图都读。';
+  // BLOCK-155 — 真·单通道 vision：本轮用户图片已直接附在最后一条用户消息里
+  //（image_url 部件随请求体直发），提示模型无需再调 read_image 重复读当前轮
+  // 图片；历史轮图片与结果图（toolJobId）仍走 read_image。
+  if (visionInline) {
+    systemPrompt +=
+      '\n- 本轮用户的图片附件已直接附在最后一条用户消息里（无需再调 read_image 读取当前轮图片，直接根据消息内图片回答）；仅历史轮图片或结果图（toolJobId）仍用 read_image。';
+  }
   systemPrompt += '\n\n=== 学习路径推荐 ===';
   systemPrompt += '\n不要调用旧版学习路径推荐工具。';
   systemPrompt += '\n不要先解释一大段再调用，直接调用，把结果用人话讲给用户。';
@@ -722,6 +732,9 @@ async function runAgentLoop({
     disableProviderFallback,
     // BLOCK-81 P1 — 思考档位进 loop（网关侧按 profile 能力位门控后映射上游参数）
     thinkingLevel,
+    // BLOCK-155 — 真·单通道 vision：loop 组 reqBody 时把最后一条 user 消息的
+    // 图片附件行内联为 image_url 部件（loop-orchestrator 侧实现，messages 不突变）
+    visionInline,
   };
 
   // ---------- Run loop via orchestrator ----------

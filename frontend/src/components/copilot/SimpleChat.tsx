@@ -229,6 +229,9 @@ export function SimpleChat({
   // BLOCK-150 加映 — 识图能力位：后端 /ai/settings vision_configured=false 时图片输入
   // 前置阻断（贴图/拖图即提示配置去向，替代发出去之后的 vision_failed）。缺省 true：
   // 仅在后端明确回报不可用时才阻断（取数失败/旧后端无字段 → 维持旧行为）。
+  // BLOCK-155 放宽 — 本位不再是图片输入的唯一放行条件：聊天渠道自身声明视觉能力
+  // （chatVisionCapable，见 useAiSettings 解构之后）时同样放行，合并判据单源
+  // imageInputAllowed（两者皆无才阻断）。
   const [visionConfigured, setVisionConfigured] = useState(true);
   useEffect(() => {
     // 能力位必须问「将执行识图的聊天后端」——dev 双后端形态下 rApiBase 才是执行方
@@ -465,6 +468,12 @@ export function SimpleChat({
   // 避免对不支持的渠道出现「假开关」。后端仍会二次门控。
   const reasoningSupported = Array.isArray(activeModel?.capabilities)
     && activeModel.capabilities.includes('reasoning');
+  // BLOCK-155 真·单通道 vision — 聊天渠道自身视觉能力位（同源读 activeModel.capabilities，
+  // 对齐上方 reasoning 能力位读取先例）：渠道声明 vision 时当前轮图片直接内联进聊天请求体，
+  // 识图角色未配置（vision_configured=false）也不必前置阻断贴图/拖图。合并放行判据
+  // （vision_configured || 渠道视觉能力）单源在 attachments.ts 的 imageInputAllowed。
+  const chatVisionCapable = Array.isArray(activeModel?.capabilities)
+    && activeModel.capabilities.includes('vision');
   // Ctrl+T 循环档位（对齐 ZCode 习惯）；未声明能力的渠道不响应
   useEffect(() => {
     if (!reasoningSupported) return undefined;
@@ -743,15 +752,16 @@ export function SimpleChat({
   }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
-    // BLOCK-150 加映 — 识图未配置时图片前置阻断（返回提示文案则落 attachmentNotice）
-    const notice = onDrop(e, setAttachments, setIsDraggingOver, { visionEnabled: visionConfigured });
+    // BLOCK-150 加映 / BLOCK-155 放宽 — 图片前置门（放行判据单源 imageInputAllowed：
+    // vision_configured || 聊天渠道视觉能力，两者皆无才阻断；返回提示文案则落 attachmentNotice）
+    const notice = onDrop(e, setAttachments, setIsDraggingOver, { visionEnabled: visionConfigured, chatVisionCapable });
     if (notice) setAttachmentNotice(notice);
-  }, [visionConfigured]);
+  }, [visionConfigured, chatVisionCapable]);
 
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
-    const notice = onPaste(e, setAttachments, { visionEnabled: visionConfigured });
+    const notice = onPaste(e, setAttachments, { visionEnabled: visionConfigured, chatVisionCapable });
     if (notice) setAttachmentNotice(notice);
-  }, [visionConfigured]);
+  }, [visionConfigured, chatVisionCapable]);
 
   const removeAttachment = useCallback((id: string) => {
     removeAttachmentById(id, setAttachments);

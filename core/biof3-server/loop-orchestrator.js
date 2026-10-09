@@ -86,6 +86,10 @@ const {
 const { estimateRequestTokens } = require('./helpers/token-estimator');
 const { trimMessagesToBudget } = require('./helpers/message-trimmer');
 const { createFreshnessTracker, applyFreshnessMark } = require('./helpers/context-freshness');
+// BLOCK-155 — 真·单通道 vision：用户图片附件行在请求体侧内联为 image_url 部件
+//（纯变换，messages 本体不突变）；读图与 read_image 工具同源（vision-image-io）。
+const { inlineVisionImagesForRequest } = require('./agent-tools/vision-inline');
+const { readWorkspaceImageDataUrl } = require('./agent-tools/vision-image-io');
 
 /**
  * Run the agent loop state machine.
@@ -163,6 +167,9 @@ async function runLoop({
     executionPolicy,
     contextWindow,
     thinkingLevel,
+    // BLOCK-155 — 真·单通道 vision：chat.js 按所选渠道单源解析出（openai 系/
+    // anthropic 且声明 vision 能力）；false/未传 = 恒等回旧 read_image 双通道
+    visionInline,
   } = config;
 
   // ---------- Loop state variables (6 closures) ----------
@@ -178,6 +185,27 @@ async function runLoop({
   // 这里做兜底归一（0/undefined → 64000），与 agent-runner 的 token_budget 口径一致。
   const loopContextWindow = (typeof contextWindow === 'number' && contextWindow > 0) ? contextWindow : 64000;
   let contextBudgetTrimmed = false;
+  // BLOCK-155 — vision 内联读图：与 read_image 工具同一条 resolveWorkspaceImagePath
+  // 解析链（本地/SSH 双变体 + 4MB/白名单守卫）；data URL 按 attachment 相对路径
+  // 记忆化，多轮迭代不重复读盘（fail-soft：任何失败返回 null，跳过该图）。
+  // null 也记忆化：单 run 内瞬态读失败（如 SSH 抖动）不重试——read_image 兜底是
+  // 不共享本缓存的独立链路，实际影响有限（换眼评审 Minor-4，取舍留痕）。
+  const visionImageCache = new Map();
+  const readWorkspaceImageCached = async (relativePath) => {
+    if (!visionImageCache.has(relativePath)) {
+      let dataUrl = null;
+      try {
+        dataUrl = await readWorkspaceImageDataUrl(
+          { projectId: context && context.projectId, userId },
+          relativePath,
+        );
+      } catch {
+        dataUrl = null;
+      }
+      visionImageCache.set(relativePath, dataUrl);
+    }
+    return visionImageCache.get(relativePath);
+  };
   const assistantProgress = createAgentProgressRecorder();
   const toolResultEventsByCallId = {};
   const loopArtifactCache = {};
@@ -629,9 +657,28 @@ async function runLoop({
         }
       }
 
+      // BLOCK-155 — 真·单通道 vision：visionInline 开启时，本轮用户消息里的图片
+      // 附件行（[附件: path（大小）]）在**请求体侧**内联为 image_url 部件。只影响
+      // reqBody——messages 本体（agent-runner 持有的 fullMessages）绝不突变，
+      // 上下文断路器/trim/事件面继续看到字符串 content。纯函数恒等场景（无图片行/
+      // 全部读失败）返回原数组引用；任何异常 fail-closed 回旧路径（模型仍可走
+      // read_image 工具兜底）。每轮迭代重算（消息数组会追加 assistant/tool 消息），
+      // 磁盘/远端读经 visionImageCache 记忆化。
+      let requestMessages = messages;
+      if (visionInline) {
+        try {
+          requestMessages = await inlineVisionImagesForRequest(messages, {
+            readImageDataUrl: readWorkspaceImageCached,
+          });
+        } catch (e) {
+          try { console.warn('[block155] vision inline failed, falling back to plain messages:', e && e.message); } catch {}
+          requestMessages = messages;
+        }
+      }
+
       const reqBody = {
         ...(modelName ? { model: modelName } : {}),
-        messages,
+        messages: requestMessages,
         temperature: 0.4,
         max_tokens: 16384, // 方案 B：用足够大的值让模型自然停止，而不是物理截断
         tools: finalizing ? undefined : config.tools,

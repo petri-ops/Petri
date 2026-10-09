@@ -67,7 +67,7 @@ test('BLOCK-150 加映三 — openai 系响应归一化：vision 结果从原始
   const r = await gw.vision({ body: { messages: [{ role: 'user', content: [{ type: 'text', text: 't' }, { type: 'image', image: 'data:x' }] }] } });
   assert.equal(r.error, undefined);
   assert.equal(r.content, '图里是一个散点图', 'content 必须从 choices[0].message.content 归一化');
-  test2: {
+  {
     const gw2 = gatewayWithProfile(
       { id: 'oc', provider: 'openai-compatible', model: 'm', credentialRef: 'c', capabilities: ['vision'] },
       { chat: async () => ({ choices: [{ message: { content: '', reasoning_content: '只有推理时回退推理文本' } }] }) },

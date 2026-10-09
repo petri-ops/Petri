@@ -438,4 +438,4 @@ class ModelGateway {
   }
 }
 
-module.exports = { ModelGateway, gatewayError, isRetryableProviderError };
+module.exports = { ModelGateway, gatewayError, isRetryableProviderError, OPENAI_FAMILY_PROVIDERS };

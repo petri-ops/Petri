@@ -134,6 +134,37 @@ describe('io-transcript sink (BLOCK-37 P1)', () => {
     assert.ok(JSON.stringify(record).length <= 1024 * 1024 + 4096, 'record should be near cap');
   });
 
+  it('BLOCK-155 P2-2：image_url 部件的 data URL 超限逐条截断（chat 内联链多轮落盘防放大）', () => {
+    const dataUrl = `data:image/png;base64,${'A'.repeat(600 * 1024)}`;
+    const record = {
+      request: {
+        messages: [
+          { role: 'system', content: 'sys' },
+          { role: 'user', content: [{ type: 'text', text: '看图' }, { type: 'image_url', image_url: { url: dataUrl } }] },
+          { role: 'user', content: [{ type: 'text', text: '再看' }, { type: 'image_url', image_url: { url: dataUrl } }] },
+        ],
+      },
+      response: { content: 'ok' },
+      frames: [],
+      framesCount: 0,
+      framesTruncated: false,
+      truncated: false,
+      messagesTruncated: 0,
+    };
+    applyTruncation(record, 256 * 1024); // 256KB 上限：两条 600KB data URL 必然超限
+    assert.equal(record.truncated, true);
+    for (const m of record.request.messages) {
+      if (!Array.isArray(m.content)) continue;
+      for (const part of m.content) {
+        if (part && part.type === 'image_url' && part.image_url) {
+          assert.ok(part.image_url.url.length <= 2000 + 32, `image_url.url 应被截断到 clip 上限，实际 ${part.image_url.url.length}`);
+          assert.ok(part.image_url.url.endsWith('…[BLOCK-37 截断]'), '截断标记在场');
+        }
+      }
+    }
+    assert.ok(JSON.stringify(record).length <= 256 * 1024 + 4096, 'record should be near cap');
+  });
+
   it('collapses message middle when message count exceeds head+tail keep window', () => {
     const big = 'y'.repeat(300 * 1024);
     const messages = [{ role: 'system', content: 'sys' }];

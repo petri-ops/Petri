@@ -1,8 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { hasImagePayload, onDrop, onPaste, VISION_NOT_CONFIGURED_NOTICE, type AttachmentFile } from './attachments';
-
-type SetAttachments = React.Dispatch<React.SetStateAction<AttachmentFile[]>>;
+import {
+  hasImagePayload,
+  imageInputAllowed,
+  onDrop,
+  onPaste,
+  VISION_NOT_CONFIGURED_NOTICE,
+} from './attachments';
 
 function fakePasteEvent(types: string[]) {
   const preventDefault = vi.fn();
@@ -69,5 +73,58 @@ describe('BLOCK-150 加映 — 识图未配置时图片输入前置阻断', () =
       { visionEnabled: false },
     );
     expect(textOnly).not.toBe(VISION_NOT_CONFIGURED_NOTICE);
+  });
+});
+
+describe('BLOCK-155 真·单通道 vision — 放行判据单源（vision_configured || 聊天渠道视觉能力）', () => {
+  it('imageInputAllowed 判据矩阵：两者皆无才阻断', () => {
+    expect(imageInputAllowed(false, false)).toBe(false);
+    expect(imageInputAllowed(false, undefined)).toBe(false);
+    expect(imageInputAllowed(false, true)).toBe(true);
+    expect(imageInputAllowed(true, false)).toBe(true);
+    expect(imageInputAllowed(true, true)).toBe(true);
+    // 取数失败/旧后端无字段（vision_configured 未知）→ 保守放行（BLOCK-150 语义不回归）
+    expect(imageInputAllowed(undefined, false)).toBe(true);
+  });
+
+  it('识图未配置 + 聊天渠道 capabilities 含 vision → onPaste 放行：无阻断文案、正常进入附件读取', () => {
+    const setAttachments = vi.fn();
+    const { event, preventDefault } = fakePasteEvent(['image/png']);
+    const notice = onPaste(event, setAttachments, { visionEnabled: false, chatVisionCapable: true });
+    expect(notice).toBeUndefined();
+    expect(preventDefault).toHaveBeenCalled();
+    expect(setAttachments).not.toHaveBeenCalled(); // FileReader 异步，同步阶段不落（与既有默认行为用例同口径）
+  });
+
+  it('识图未配置 + 聊天渠道 capabilities 含 vision → onDrop 放行：图片文件正常入列、不返回阻断文案', () => {
+    const setAttachments = vi.fn();
+    const setIsDraggingOver = vi.fn();
+    const result = onDrop(
+      fakeDropEvent([new File(['x'], 'a.png', { type: 'image/png' })]).event,
+      setAttachments,
+      setIsDraggingOver,
+      { visionEnabled: false, chatVisionCapable: true },
+    );
+    expect(result).not.toBe(VISION_NOT_CONFIGURED_NOTICE);
+    expect(setIsDraggingOver).toHaveBeenCalledWith(false);
+    expect(setAttachments).toHaveBeenCalled();
+  });
+
+  it('识图未配置 + 聊天渠道无 vision → 仍阻断（chatVisionCapable 缺省=false 同口径）', () => {
+    const withFalse = onPaste(
+      fakePasteEvent(['image/png']).event,
+      vi.fn(),
+      { visionEnabled: false, chatVisionCapable: false },
+    );
+    expect(withFalse).toBe(VISION_NOT_CONFIGURED_NOTICE);
+  });
+
+  it('识图已配置 + 聊天渠道无 vision → 放行（识图角色独立成立，回归锚）', () => {
+    const notice = onPaste(
+      fakePasteEvent(['image/png']).event,
+      vi.fn(),
+      { visionEnabled: true, chatVisionCapable: false },
+    );
+    expect(notice).toBeUndefined();
   });
 });

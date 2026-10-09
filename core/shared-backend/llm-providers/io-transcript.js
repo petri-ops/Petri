@@ -85,6 +85,14 @@ function clipMessageForBudget(message) {
       if (part && typeof part === 'object' && typeof part.text === 'string' && part.text.length > MESSAGE_CONTENT_CLIP) {
         return { ...part, text: `${part.text.slice(0, MESSAGE_CONTENT_CLIP)}…[BLOCK-37 截断]` };
       }
+      // BLOCK-155 P2-2：image_url 部件的 data URL 同样逐条截断——chat 内联链每轮
+      // 迭代重新内联，不裁则同一张图（≤4MB→≈5.4MB base64）在 N 轮 loop 里落盘 N 次
+      if (
+        part && typeof part === 'object' && part.type === 'image_url' && part.image_url
+        && typeof part.image_url.url === 'string' && part.image_url.url.length > MESSAGE_CONTENT_CLIP
+      ) {
+        return { ...part, image_url: { ...part.image_url, url: `${part.image_url.url.slice(0, MESSAGE_CONTENT_CLIP)}…[BLOCK-37 截断]` } };
+      }
       return part;
     });
   }

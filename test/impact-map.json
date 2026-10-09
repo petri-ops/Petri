@@ -394,6 +394,28 @@
       "classifiesScripts": false
     },
     {
+      "id": "block155-chat-vision-inline",
+      "note": "BLOCK-155 真·单通道 vision：聊天渠道声明视觉能力时当前轮用户图片在 loop-orchestrator 请求体组装点内联为 image_url 部件（messages 本体不动）；vision-image-io 与 read_image 同源读图；前端输入门放宽 vision_configured||渠道视觉。",
+      "patterns": [
+        "core/biof3-server/agent-tools/vision-inline.js",
+        "core/biof3-server/agent-tools/vision-image-io.js",
+        "core/biof3-server/agent-tools/vision-tools.js",
+        "core/biof3-server/loop-orchestrator.js",
+        "core/biof3-server/agent-runner.js",
+        "core/biof3-server/routes/ai-agent/**",
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "frontend/src/components/copilot/SimpleChat/attachments.ts"
+      ],
+      "tests": [
+        "test/block155-chat-vision-inline.test.mjs",
+        "test/agent-vision.test.mjs",
+        "test/block150-vision-rebind.test.mjs",
+        "test/block150-vision-configured-flag.test.mjs",
+        "frontend/src/components/copilot/SimpleChat/attachments.test.ts"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "diagnostic-redaction",
       "note": "Agent result and evidence redaction changes must exercise both generic diagnostic scrubbing and Agent tool-result projections.",
       "patterns": [

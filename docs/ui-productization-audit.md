@@ -4740,3 +4740,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 ### UI-477 加映三（根因修复）：放大弹层 createPortal 到 document.body——position:fixed 遮罩此前被消息行内某祖先（filter/contain 类包含块）困在 157px 容器里（用户截图「小窗」的真正根因，非弹层设计问题）；portal 后遮罩全视口 3143×1719、卡片 1200px 与输入区预览同款。全屏灯箱加映二回退（按用户裁决恢复卡片形态）。
 
 ### UI-477 加映四（输入区图片芯片）：粘贴图片不再显示文件名（用户裁决「直接是个缩小的图就行」）——36px 缩略图纯图形态，移除钮转悬浮角标（hover 显形），非图片附件保留文件名；实机 CDP 验证 hasName=false。
+
+## UI-478: 图片输入门放宽——聊天渠道视觉能力即可放行（BLOCK-155 真·单通道）(2026-10-09 in_progress，契约级全绿+门禁组绿；实机直答待用户)
+
+- **来源**：用户裁决「/workflow 真·单通道增强 整起来」——聊天渠道勾视觉能力时图片直进聊天请求体，识图角色未配置也不必阻断贴图/拖图。
+- **交付**：放行判据单源 `imageInputAllowed`（attachments.ts）——vision_configured（识图角色）或 activeModel.capabilities 含 'vision'（聊天渠道，:466-467 reasoning 位同源读取先例）其一为真即放行，两者皆无才阻断（提示文案沿用 VISION_NOT_CONFIGURED_NOTICE 语义不变）；onDrop/onPaste 前置门消费该函数，SimpleChat 传参 chatVisionCapable（deps 同步）；缺省保守不阻断语义保持。配套后端内联链（loop-orchestrator 请求体侧 image_url 部件/chat.js 单源 visionInline/系统提示条件句/vision-image-io 共享读图）随 BLOCK-155 交付，非 UI 面不在此条目展开。
+- **证据**：HK-01 红绿——attachments.test 新增 5 用例先红（imageInputAllowed 未实现/贴图+拖图放行断言红）→9/9 绿；邻域 4 文件 26/26+tsc 0+触碰面 lint 0 error；后端四件套 19/17 绿（2 为 RUN_LIVE 实机用例设计内 skip）+⑧ runLoop 直测（messages 本体零突变/reqBody 出 parts/关闭恒等）。
+- **待验**：实机——重启 dev 后端，deepseek-flash 渠道（已勾视觉）直接贴图提问，预期模型不调 read_image 直答图内容；「识图角色未配置+渠道有视觉」放行路径过目。
+- **边界**：UI 面只动输入门；发送管线/附件行格式/内联渲染零改动。
