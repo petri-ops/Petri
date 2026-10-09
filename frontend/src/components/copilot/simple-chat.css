@@ -4246,3 +4246,20 @@
   color: var(--gewu-success);
   border-color: var(--gewu-success);
 }
+
+/* BLOCK-150 加映（UI-477）— 用户消息图片附件内联渲染 */
+.sc-msg-inline-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.sc-msg-inline-image {
+  max-width: 260px;
+  max-height: 200px;
+  border-radius: 8px;
+  border: 1px solid var(--gewu-border);
+  object-fit: contain;
+  cursor: zoom-in;
+}

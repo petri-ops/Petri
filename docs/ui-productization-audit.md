@@ -4725,3 +4725,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：HK-01 红绿——后端 3 用例（转换/原生直传/能力门保留）；前端 VisionRoleBinding 3 用例（vision 过滤/回调/无候选指引）；types 0/lint 0/theme 契约 4/4；实机 CDP=选择器渲染+表头 10 列确认（无候选指引文案在位）。
 - **待验**：用户勾选 deepseek-flash 渠道「视觉」能力→选择器换绑→贴图实走其网关（网关须真支持 image_url 多模态，不支持则诚实报错可一键换回）。
 - **配套语境**：凭据显式化（env 路已移除）后，vision_configured 能力位随换绑动态反映。
+
+## UI-477: 用户消息图片附件内联渲染——[附件: 路径]文本行变图片本体（BLOCK-150 加映）(2026-10-09 in_progress，契约级全绿+实机已验)
+
+- **来源**：用户实机反馈「这个是附件的形式给到聊天框 我觉得这样并不好 直接是图片发送是否可以呢」。
+- **交付**：渲染层解析（发送管线不动，模型/vision 按路径读图架构不变）——SimpleChatMessageRow 用户分支把正文中的图片附件行（`[附件: path（大小）]`）抽出，经 GET /api/workspaces/:id/file?path= 内联 <img>（max 260px/token 边框/懒加载）；非图片附件行保留原文；**历史消息渲染时同样生效**（已发的旧消息就地变图）。
+- **证据**：HK-01 红绿——attachmentInline 4 用例（图片判定/抽行保留非图片/零成本路径/URL 编码）；行组件回归 7/7+theme 契约 4/4+types 0+lint 0；**实机 CDP=用户刚发的消息 .sc-msg-inline-image 加载成功（naturalWidth=958）**。
+- **待验**：用户过目（HMR 已生效，当前会话即可看）；点击放大（ImagePreviewModal 复用）留后续小加映。

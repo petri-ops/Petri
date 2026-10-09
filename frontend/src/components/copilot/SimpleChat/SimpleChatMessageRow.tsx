@@ -32,6 +32,7 @@ import { resumeInterruptedConversation } from '../conversationRunStore';
 import type { SimpleMessage } from './types';
 import type { ExtractContext, FileReferenceClickDetail } from '@/lib/chat-file-references';
 import type { FormattedError } from '../useErrorFormatter';
+import { parseInlineAttachments, workspaceFileUrl } from './attachmentInline';
 
 export interface SimpleChatMessageRowProps {
   m: SimpleMessage;
@@ -98,6 +99,9 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
   onForkAt,
   onRetrySummary,
 }: SimpleChatMessageRowProps): React.ReactElement {
+  // BLOCK-150 加映（UI-477）— 用户消息图片附件内联渲染：图片附件行抽成 <img>
+  //（经 /file 端点按路径取图），不再停留为「[附件: 路径]」文本行。
+  const inlineImages = m.role === 'user' ? parseInlineAttachments(m.content || '') : { text: '', images: [] };
   return (
     <>
       {isTopicShiftStart && (
@@ -156,7 +160,9 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
             </div>
           )}
           <CopilotMarkdown
-            text={m.content || m.statusMessage || (m.pending ? '…' : '')}
+            text={m.role === 'user' && inlineImages.images.length > 0
+              ? (inlineImages.text || m.statusMessage || (m.pending ? '…' : ''))
+              : (m.content || m.statusMessage || (m.pending ? '…' : ''))}
             onFileReferenceClick={onFileReferenceClick}
             resolveContext={m.pending || (m.role === 'assistant' && streaming) ? null : settledContext}
             resolveNonce={resolveNonce}
@@ -164,6 +170,19 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
               <HighlightedCode code={code} language={language} />
             )) : undefined}
           />
+          {m.role === 'user' && inlineImages.images.length > 0 && (
+            <div className="sc-msg-inline-images">
+              {inlineImages.images.map((img) => (
+                <img
+                  key={img.path}
+                  className="sc-msg-inline-image"
+                  src={workspaceFileUrl(projectId, img.path)}
+                  alt={img.name}
+                  loading="lazy"
+                />
+              ))}
+            </div>
+          )}
           {m.error && m.role === 'assistant' && (() => {
             // UI-AGENTWB-### / chat-error-rendering: prefer the
             // raw stack captured by conversationRunStore.finish;
