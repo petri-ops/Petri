@@ -212,6 +212,24 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
+    // BLOCK-154 P2-4 manualChunks：仅拆分极稳定的核心运行时 react/react-dom/scheduler
+    // 为 vendor-react 独立 chunk。
+    //   - index.js 减负（React 运行时从 app shell 剥离，冷启动 JS 解析更快）
+    //   - React 版本极少变更，独立 chunk 缓存命中更高（Electron 本地仍受益于 HTTP 缓存）
+    //   - 仅命中 node_modules 下的 react/react-dom/scheduler，其余第三方依赖维持
+    //     Vite 默认按动态 import 边界拆分，不破坏路由懒加载语义
+    //   - 与 resolve.dedupe:['react','react-dom'] 不冲突：同一图内单实例，manualChunks
+    //     只控制输出分组不改变模块图
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')
+            && /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) {
+            return 'vendor-react';
+          }
+        },
+      },
+    },
   },
   optimizeDeps: {
     entries: ['./src/main.tsx'],
