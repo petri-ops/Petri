@@ -159,16 +159,16 @@
       "path": "core/shared-backend/git-adapter.js",
       "wave": "C",
       "module": "P-01",
-      "lines": 1278,
-      "sha256": "a179ce209166e309695f39ca7c67c96078c74e542039fbb6abce179f117c2fce"
+      "lines": 1396,
+      "sha256": "befe4696ee14220f17288b0a8b48665a753a61c51f4578a34e63f1988de23b4f"
     },
     {
       "path": "src/ipc/working-tree-review.js",
       "wave": "D",
       "module": "P-01",
-      "lines": 656,
-      "sha256": "8da73f37f51c1f738da74ff3785f3719649021d15f44cdf837c5296630f962b6"
+      "lines": 707,
+      "sha256": "62261e61f058f627b8442987f4b567b2f08a44a6f3281909bdab27a8124aa664"
     }
   ],
-  "total": 22837
+  "total": 23006
 }
