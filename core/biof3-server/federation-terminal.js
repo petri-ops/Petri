@@ -101,7 +101,18 @@ function createTerminalEngine() {
           // conpty_console_list_agent——经 cmd.exe /c 包装（console 归 cmd）。
           const alias = String(ssh.alias).replace(/[^A-Za-z0-9._-]/g, '');
           const remotePath = String(ssh.remotePath).replace(/[^A-Za-z0-9._/@ +-]/g, '');
-          const sshArgv = ['-o', 'ConnectTimeout=10', '-tt', alias, `cd "${remotePath}" && exec $SHELL -l`];
+          // BLOCK-154 终端保活（2026-10-09 用户反馈 SSH 频繁断连又自动恢复）：
+          // 三层链路（Win→ECS ProxyJump→frps 隧道→dell sshd）任一环 NAT/防火墙
+          // 空闲超时都会静默掐掉无心跳的 ssh -tt 连接；任务通道（ssh-multiplexer.js）
+          // 已有同款保活（UI-397），终端通道漏了。CountMax=4（判死窗口 60s）比任务
+          // 通道 CountMax=2（30s）多一倍窗口——交互式会话断开恢复代价高，多给容忍。
+          const sshArgv = [
+            '-o', 'ServerAliveInterval=15',
+            '-o', 'ServerAliveCountMax=4',
+            '-o', 'ConnectTimeout=10',
+            '-tt', alias,
+            `cd "${remotePath}" && exec $SHELL -l`,
+          ];
           ptyProc = process.platform === 'win32'
             ? ptyModule.spawn('cmd.exe', ['/c', 'ssh', ...sshArgv], {
               name: 'xterm-256color', cols: 100, rows: 28,
