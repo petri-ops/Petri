@@ -5,7 +5,7 @@ acceptance:
   - 各阶段按种子立项后以对应 BLOCK/UI 验收为准（阶段表出口判据）
   - Goal 线整体收口时：执行语义单轨化（无不受可靠性装置覆盖的执行路径）+ 终态秒级可见 + 队列/重试在册
 reopen: 用户裁决启动任一阶段时按立项检查单开包；Goal 级重估条件=两 Goal 交织队列整体重排
-status: planned
+status: completed
 ---
 
 # G0-PLATFORM — 通用 Agent 平台工程强化 Goal 线
@@ -151,3 +151,10 @@ Artifact Truth 读取时自愈、provenance 全链留痕、取消升级链、无
 - **history 分页延期**：端点在 tools-metadata.js（并行会话 WIP 占用），登记 WIP 合入后加映；MAX_TILES=12 截断下分页非本面阻塞。
 - **实机抓真**：config-helper 是 Proxy 导出（无 {config} 具名解构——storage-summary 500 复现修正）；批量删首版漏 PUBLIC_DEMO 名单检查（契约测试 3!==2 抓真补双保险）；后端残留在动态口 60720（启动瞬间 3001 被占自动改口，前端 preload 注入同口功能不受影响）。
 - **验证**：pl4b 契约测试 3/3（batch 六分类逐条/export PK 魔数+空 ids 400/summary 形状）+ 前端 window 定向 6/6 + tsc 0 + eslint 净（set-state-in-effect 两处重构：取数函数返回文本回调 setState、选择集渲染期派生）+ **实机三端点全通**（概览 7 目录/261KB/138 行实测；导出 200 PK 魔数 22 字节 zip；batch 空_ids 400）+ 分类无冲突。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 9. Goal 收口对账（2026-10-09 · BLOCK-153）
+
+- **出口判据核验**：①执行语义单轨化=PL-1 BLOCK-128（agent/MCP 并入 tool_jobs 装置+心跳/硬超时/取消链两路径同等）+BLOCK-146 消费链加固；②终态秒级可见=PL-2 BLOCK-126（终态失效事件+日志行缓冲，实机 allPass 6/6 两轮）；③队列/重试在册=PL-3 BLOCK-130/135（满载入队+分类重试+queuePosition，150 波前端消费接线）。
+- **种子对账**：PL-1 completed / PL-2 completed（复验 2026-09-29）/ PL-3 一二刀 completed / PL-4 治理三端点+export 兜底+PL-D2 retention 30 天落地（BLOCK-149）/ PL-5a 数据层退役 completed / PL-6 token 出 URL completed（/m 页残留由 BLOCK-151 拔除）/ PL-7 候选池性质。
+- **收口后尾巴登记**：A1 深水区核心语义（151 从紧未动）、H 边缘三条（152 登记）已入候选池 C-24。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

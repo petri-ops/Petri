@@ -194,3 +194,5 @@
 - **U-02/U-03/U-04 实机过目**（2026-09-25）——用户授权 Agent 代行评估 + Jev 裁决（fit=3 PASS）：UI-437/438/440 翻 verified（真实 spawn 任务轮取证 acceptance/ui-eval-agent/）；UI-442 保持 in_progress（运行稳态证据待长任务自然产生，不凑证据）。
 - **灰度开关翻默认裁决**（BIOF3_SERVER_HISTORY_ASSEMBLY / SESSION_COMPACTION / AGENT_RESILIENCE）——`core/biof3-server/helpers/feature-flags.js` `FLAG_DEFAULTS` 现全为 `true`（Git 事实），handoff 2026-09-17「翻默认待用户显式裁决（呈报中）」记载已过时。
 - **汇报门重写丢运行中 steering 指令行**（AUDIT-LOG 🟡 2026-09-23）——BLOCK-119 加映 3 已修（report-guard steeringLines + 重写 prompt「必须逐字保留」段 + 契约），该 🟡 行已从 AUDIT-LOG 待处理表清除。
+
+| C-24 | **审视吸收三波余量候选（2026-10-09 BLOCK-153 登记）**：A4 两条（跨 job 钉住失败静默 Shell :228-232／lineage 切换导航空态与操作提示）+B7 报告模板内容扩充（pack 域）+H 边缘三条（staged 再编辑键基线不对称／staged 删除 pathspec rm --cached 形态／apply 失败已 stage 遗留）+A1 会话恢复核心语义（151 从紧未动）——全部审视/评审实证在案，重开条件=用户裁决吸收三波或触碰对应域时随批 | BLOCK-150/151/152 收口笔录携带登记 | 候选（逐项裁决） |

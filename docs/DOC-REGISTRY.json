@@ -5389,7 +5389,7 @@
       "capability": "platform-reliability",
       "path": "docs/g0-platform-goal-plan.md",
       "kind": "living-plan",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "g0-platform-reliability",
       "entrypoint": "docs/README.md",
@@ -5401,14 +5401,14 @@
         "reliability",
         "execution-unification"
       ],
-      "notes": "2026-09-28 用户裁决两视角（通用 agent 平台 / 生信垂直）成对立项。Goal 线下辖工作包种子 PL-1~PL-7（执行语义统一/感知实时性/调度可靠性/数据生命周期/性能卫生/安全卫生/任务中心叙事）；全局推进序仍在 pending-work-backlog.md，单工作包串行不变，阶段启动需用户逐个裁决过立项检查单。PL-1 是 G0-BIO BIO-4 的硬前提。"
+      "notes": "2026-09-28 用户裁决两视角（通用 agent 平台 / 生信垂直）成对立项。Goal 线下辖工作包种子 PL-1~PL-7（执行语义统一/感知实时性/调度可靠性/数据生命周期/性能卫生/安全卫生/任务中心叙事）；全局推进序仍在 pending-work-backlog.md，单工作包串行不变，阶段启动需用户逐个裁决过立项检查单。PL-1 是 G0-BIO BIO-4 的硬前提。 2026-10-09 BLOCK-153 Goal 收口对账：出口判据 verified 证据背书（详见 plan §9），池态/尾巴入候选池 C-24。"
     },
     {
       "id": "G0-BIO",
       "capability": "bio-delivery",
       "path": "docs/g0-bio-delivery-goal-plan.md",
       "kind": "living-plan",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "g0-bio-delivery",
       "entrypoint": "docs/README.md",
@@ -5421,7 +5421,7 @@
         "result-experience",
         "workflow-lineage"
       ],
-      "notes": "2026-09-28 用户裁决两视角成对立项。Goal 线下辖工作包种子 BIO-1~BIO-7（信息密度/交互上限/lineage 可视化+继续分析/bulk 链解冻/输入显式化/解读层/领域深化池）；吸收候选池 C-15（本日编入 BIO-3/BIO-4）与 C-12（转 BIO-7 池）；BIO-4 硬依赖 G0-PLATFORM PL-1；dormant 插件解冻（BIO-D1）未经用户裁决不得预激活。"
+      "notes": "2026-09-28 用户裁决两视角成对立项。Goal 线下辖工作包种子 BIO-1~BIO-7（信息密度/交互上限/lineage 可视化+继续分析/bulk 链解冻/输入显式化/解读层/领域深化池）；吸收候选池 C-15（本日编入 BIO-3/BIO-4）与 C-12（转 BIO-7 池）；BIO-4 硬依赖 G0-PLATFORM PL-1；dormant 插件解冻（BIO-D1）未经用户裁决不得预激活。 2026-10-09 BLOCK-153 Goal 收口对账：出口判据 verified 证据背书（详见 plan §9），池态/尾巴入候选池 C-24。"
     },
     {
       "id": "BLOCK-126-PLATFORM-PERCEPTION",

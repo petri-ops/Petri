@@ -5,7 +5,7 @@ acceptance:
   - 各阶段按种子立项后以对应 BLOCK/UI 验收为准（阶段表出口判据）
   - Goal 线整体收口时：bulk 主链（校验→QC→DEG→富集）端到端 dev Electron verified + 结果查看具备专业信息密度（点选带数值/可搜索/可组合筛选）+ lineage 用户可见
 reopen: 用户裁决启动任一阶段时按立项检查单开包；解冻范围（BIO-4）与领域深化池（BIO-7）逐项需用户显式裁决
-status: planned
+status: completed
 ---
 
 # G0-BIO — 生信垂直交付能力 Goal 线
@@ -145,3 +145,10 @@ BLOCK-83 P4（2026-09-12）领域中立化后，生信分析全部迁至兄弟�
 - **选型留痕**：6k 字符模型投影预算内实测安全（新增**字符预算硬钉**：worst-case 20 行×8 列×24 字符完整 envelope JSON.stringify ≤6000，超限先红禁止静默放宽——度量用 JSON.stringify 与 serialize 的 fitValidJson 同口径，因 serialize require 链在测试环境拉 db 不可直调）；更宽窗口（50+ 行）需专属投影通道，**与 BIO-D4（interpret/result_summary 收敛裁决）一并定**，未擅自扩张。
 - **验证**：result-summary-tool 测试 5/5（行截 20/预算钉/其余零回归）+ eslint 触碰面 0 + test:changed 分类无冲突。
 - **边界**：列窗 8/单元格 24 字/表 8MB 上限不动；只读契约与「不整表倾倒」纪律维持。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 9. Goal 收口对账（2026-10-09 · BLOCK-153）
+
+- **出口判据核验**：①bulk 主链（校验→QC→DEG→富集）端到端 verified=BIO-4 六件解冻实机全通（acceptance/block-129/，2026-09-29）+后续 143/145/146 链上加固；②结果查看专业信息密度=UI-452 verified（tooltip 全数值/搜索/阈值线/组合筛选）+BIO-2 交互上限契约级落地（散点 600/热图全量/CSV 分页）；③lineage 用户可见=UI-456 verified（2026-10-08 由 UI-460 走查覆盖核销，chain=3 真实跨 Job 链实机证据）。
+- **种子对账**：BIO-1 verified / BIO-2 契约级全绿（perception-live 复跑落账尾巴在册）/ BIO-3 verified（P0 打开链+P1 血缘条）/ BIO-4 verified / BIO-5 契约级全绿（UI-457 过目待用户）/ BIO-6 形态 b 交付（UI-459，T5 状态门残留观察在册）/ BIO-7 池=候选池性质逐项裁决（多因子 design 已由 BLOCK-145 D3+146 C 轨交付标注，余项不动）。
+- **收口后尾巴登记（不阻塞 Goal 出口）**：BIO-2 复跑落账核对、UI-457 过目、BIO-6 T5 观察——均在 roadmap/audit 台账在册；审视吸收三波余量候选（A4 两条/B7 报告模板/H 边缘三条）已入候选池 C-24。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
