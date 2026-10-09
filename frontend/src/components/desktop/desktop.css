@@ -556,14 +556,15 @@
     minmax(160px, 1.1fr)
     96px
     72px
+    64px
     120px
     40px;
   align-items: center;
   gap: 6px;
-  /* 表头与渠道行共用同一最小宽度（9 列合计 1088 + 8×6 gap = 1136，取 1146 留余量）：
+  /* 表头与渠道行共用同一最小宽度（10 列合计 1152 + 9×6 gap = 1206，取 1216 留余量；BLOCK-150 加映第 10 列「视觉」64px，思考列同款先例）：
      容器变窄时两者一起横向滚动（.gewu-model-list overflow-x:auto），避免此前的
      表头 1040 而渠道行无下限造成的列错位 */
-  min-width: 1146px;
+  min-width: 1216px;
 }
 
 /* P1 — 渠道级「支持思考档位」开关单元格（第 9 列） */
@@ -2130,4 +2131,20 @@ html.gewu-desktop.gewu-desktop-docs-sidebar-open #gewu-docs-sidebar-host {
 #gewu-docs-sidebar-host .sidebarLogo,
 #gewu-docs-sidebar-host .collapseButton {
   display: none !important;
+}
+
+/* BLOCK-150 加映（UI-476）— 识图模型角色选择器行 */
+.gewu-model-role-binding {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 10px;
+}
+
+.gewu-model-role-binding__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--gewu-text-secondary);
 }

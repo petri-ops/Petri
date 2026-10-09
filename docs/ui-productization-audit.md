@@ -4717,3 +4717,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：HK-01 红绿——attachments.test 3 红→4/4（阻断/默认行为/非图片放行/载荷探测）；后端 block150-vision-configured-flag 4/4（有档有据 true/双空 false〔用户实机形态〕/无档 false/roles 兜底）；lint 0/types 0/arch 0/secret PASS；实机=能力位 true 路径放行验证（阻断路径单测锁定，当前栈 env 带 key 无法自然复现）。
 - **待验**：用户实机贴图过目（当前 vision 已因栈重启恢复可用；阻断形态在 env 缺失链路重启时自动顶上）。
 - **边界**：只断图片输入不断文本；vision 角色绑定与凭据配置归用户设置域（三选一路径已告知）。
+
+## UI-476: 识图模型可换绑——设置页角色选择器+渠道视觉能力声明+网关 image_url 协议转换（BLOCK-150 加映）(2026-10-09 in_progress，契约级全绿；实机渲染已验，换绑实效待用户)
+
+- **来源**：用户裁决「不想用 Qwen VL Max 渠道 毕竟 deepseek-flash 也可以的 设置上有个选择设置按钮不就可以了吗」。
+- **交付三件**：①设置→模型区新增「识图模型（视觉理解）」角色选择器（只列声明 vision 能力的渠道；无候选时前置指引）；②渠道行第 10 列「视觉」能力勾选（思考列同款先例，grid 10 列重排）；③网关 image_url 协议转换（vision 绑 openai 系通道时 {type:image}→{type:image_url}，dashscope-vision 原生直传不转换；能力门 model_capability_mismatch 保留为诚实守卫）。
+- **证据**：HK-01 红绿——后端 3 用例（转换/原生直传/能力门保留）；前端 VisionRoleBinding 3 用例（vision 过滤/回调/无候选指引）；types 0/lint 0/theme 契约 4/4；实机 CDP=选择器渲染+表头 10 列确认（无候选指引文案在位）。
+- **待验**：用户勾选 deepseek-flash 渠道「视觉」能力→选择器换绑→贴图实走其网关（网关须真支持 image_url 多模态，不支持则诚实报错可一键换回）。
+- **配套语境**：凭据显式化（env 路已移除）后，vision_configured 能力位随换绑动态反映。

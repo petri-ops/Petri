@@ -31,6 +31,35 @@ function errorCode(result) {
   return String(result.error.code || result.error.type || 'api_error');
 }
 
+/**
+ * BLOCK-150 加映（用户裁决「不想用 Qwen VL Max 渠道，设置上可选择」）—
+ * vision 角色可绑 openai 系通道（deepseek/openai-compatible/ollama/lmstudio/vllm）。
+ * vision 调用体是 dashscope 原生图片部件（{type:'image', image:<url>}）；这些通道
+ * 的 chat 原样 JSON.stringify 透传（OpenAI 规范为 image_url）——此处统一转换，
+ * 让「换绑识图模型」真正可用。dashscope-vision / anthropic 不在白名单，原生直传。
+ */
+const OPENAI_FAMILY_PROVIDERS = new Set(['deepseek', 'openai', 'openai-compatible', 'ollama', 'lmstudio', 'vllm']);
+
+function convertVisionBodyForProvider(body, providerName) {
+  if (!OPENAI_FAMILY_PROVIDERS.has(providerName) || !body || !Array.isArray(body.messages)) return body;
+  let converted = false;
+  const messages = body.messages.map((message) => {
+    if (!message || !Array.isArray(message.content)) return message;
+    const parts = message.content;
+    const hasNativeImage = parts.some((p) => p && p.type === 'image');
+    const hasImageUrl = parts.some((p) => p && p.type === 'image_url');
+    if (!hasNativeImage || hasImageUrl) return message;
+    converted = true;
+    return {
+      ...message,
+      content: parts.map((p) => (p && p.type === 'image'
+        ? { type: 'image_url', image_url: { url: p.image || p.url || '' } }
+        : p)),
+    };
+  });
+  return converted ? { ...body, messages } : body;
+}
+
 function isRetryableProviderError(result) {
   const code = errorCode(result);
   if (!code || code === 'aborted' || code === 'no_api_key' || code === 'serialize_error') return false;
@@ -307,7 +336,7 @@ class ModelGateway {
         const fallback = this._recordFallback('vision', previousProfileId, profile.id, previousReason);
         if (typeof onEvent === 'function') onEvent({ type: 'model_fallback', ...fallback });
       }
-      const visionBody = { ...(body || {}), model: profile.model };
+      const visionBody = convertVisionBodyForProvider({ ...(body || {}), model: profile.model }, profile.provider);
       const startedAt = Date.now();
       const result = await provider.chat(
         apiKey,

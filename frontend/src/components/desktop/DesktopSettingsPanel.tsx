@@ -19,6 +19,7 @@ import {
 } from '@/lib/model-provider-options';
 import { parseContextWindow, formatContextWindow } from '@/lib/format-context-window';
 import { getBridge } from '@/lib/desktopBridge';
+import { VisionRoleBinding, hasVisionCapability } from './DesktopSettingsPanel/VisionRoleBinding';
 import { ExperimentalFeaturesSection } from '@/components/settings/ExperimentalFeaturesSection';
 // UI-393 — 返回按钮样式单一真源（与 Skills/知识空间页头同款 backBtn）
 import backStyles from '@/pages/global-page.module.css';
@@ -58,6 +59,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
     saved,
     modelProfiles,
     roleBindings,
+    setRoleBindings,
     fallbackEnabled,
     setFallbackEnabled,
     fallbackBindings,
@@ -222,6 +224,11 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
               </p>
               <p className="gewu-field__hint">Key 默认隐藏，可点击眼睛显示或复制；导出前会确认是否把 Key 写入文件，请仅保存到安全位置。</p>
             </div>
+            <VisionRoleBinding
+              profiles={userModelProfiles}
+              value={roleBindings.vision}
+              onChange={(profileId) => setRoleBindings((prev) => ({ ...prev, vision: profileId }))}
+            />
             <div className="gewu-model-list">
               {userModelProfiles.length > 0 && (
                 <div className="gewu-endpoint-list-header" aria-hidden="true">
@@ -232,6 +239,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                   <span>默认模型</span>
                   <span>上下文</span>
                   <span>思考</span>
+                  <span>视觉</span>
                   <span>连通性</span>
                   <span />
                 </div>
@@ -392,6 +400,24 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                           updateProfile(profile.id, { capabilities: next });
                         }}
                         aria-label={`${profile.label || '自定义渠道'} 支持思考档位`}
+                      />
+                    </label>
+                    <span className="gewu-endpoint-field-label" aria-hidden="true">视觉</span>
+                    <label
+                      className="gewu-endpoint-reasoning"
+                      title="声明该渠道支持图片输入（识图）：勾选后可在上方「识图模型」换绑；网关须真正支持 image_url 多模态，否则识图调用诚实报错"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={hasVisionCapability(profile)}
+                        onChange={(e) => {
+                          const current = profile.capabilities || ['chat', 'streaming', 'tools'];
+                          const next = e.target.checked
+                            ? Array.from(new Set([...current, 'vision']))
+                            : current.filter((cap) => cap !== 'vision');
+                          updateProfile(profile.id, { capabilities: next });
+                        }}
+                        aria-label={`${profile.label || '自定义渠道'} 支持识图（视觉输入）`}
                       />
                     </label>
                     <span className="gewu-endpoint-field-label" aria-hidden="true">连通性</span>
