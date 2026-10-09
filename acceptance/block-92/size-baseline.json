@@ -47,8 +47,8 @@
       "path": "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
       "wave": "B",
       "module": "W-04",
-      "lines": 1295,
-      "sha256": "7c887f5ac029e0cd7fedfe11c7e8842b5f66abf7b220c8579c3f258469bdab42"
+      "lines": 1305,
+      "sha256": "b90a45b13fbf08ea138f001670295b58db51e7ea7a0493a4dadc38faa35d8e60"
     },
     {
       "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx",
@@ -96,8 +96,8 @@
       "path": "frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx",
       "wave": "B",
       "module": "W-04",
-      "lines": 532,
-      "sha256": "f6e55259767ebb949c788f9a38ce1241c88d9549b5517a2081580b209860cf7d"
+      "lines": 561,
+      "sha256": "3155a7308c3318c81b6bd840838eafb0a83a19814b801dbe1f3c5fe29f336ce4"
     },
     {
       "path": "core/shared-backend/result-changeset-service.js",
@@ -170,5 +170,5 @@
       "sha256": "8da73f37f51c1f738da74ff3785f3719649021d15f44cdf837c5296630f962b6"
     }
   ],
-  "total": 22798
+  "total": 22837
 }
