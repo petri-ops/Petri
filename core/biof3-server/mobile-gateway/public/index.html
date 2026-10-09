@@ -165,12 +165,20 @@
   // （重连不再从 0 重放，顺带修掉旧 EventSource 固定 afterSeq=0 的重复回放）。
   function openTaskStream(taskId) {
     var stopped = false;
+    // BLOCK-151（BLOCK-150 P2-1 携带）— close() 不能只翻 stopped 标志：
+    // 在途 pump 会继续读流，旧任务的迟到帧经 handleStreamLine 落进新详情。
+    // AbortController 让 close() 真正取消在途 fetch（旧 WebView 无此全局时优雅降级）。
+    var aborter = typeof AbortController === 'function' ? new AbortController() : null;
+    // 分发归属守卫：帧只允许写进「本任务」的详情——切换详情/返回任务墙后，
+    // 旧任务迟到帧（含 needApproval/大 seq）不得污染新视图或抬高其 lastSeq。
+    function detailLive() { return !!(state.detail && state.detail.taskId === taskId); }
     function connect() {
       if (stopped) return;
       // afterSeq 取 detail 上记录的 lastSeq（首连 0；重连续传不重放）
       var afterSeq = (state.detail && state.detail.taskId === taskId && state.detail.lastSeq) || 0;
       fetch('/api/ai/agent/task/' + encodeURIComponent(taskId) + '?afterSeq=' + afterSeq, {
         headers: { Authorization: 'Bearer ' + sessionToken(), Accept: 'text/event-stream' },
+        signal: aborter ? aborter.signal : undefined,
       }).then(function (resp) {
         if (!resp.ok || !resp.body) throw new Error('HTTP ' + resp.status);
         var reader = resp.body.getReader();
@@ -188,7 +196,7 @@
               for (var i = 0; i < lines.length; i++) {
                 var m = lines[i].match(/^data:\s?(.*)$/);
                 // [DONE] 是协议哨兵非事件（主链同款教训：不跳过会当正文渲染）
-                if (m && m[1] && m[1] !== '[DONE]') handleStreamLine(m[1]);
+                if (m && m[1] && m[1] !== '[DONE]' && detailLive()) handleStreamLine(m[1]);
               }
             }
             return pump();
@@ -197,13 +205,18 @@
         return pump();
       }).catch(function () {
         // 断线退避重连（任务详情仍开着才续；afterSeq 由 lastSeq 续传）
-        if (!stopped && state.detail && state.detail.taskId === taskId) {
+        if (!stopped && detailLive()) {
           setTimeout(connect, 2000);
         }
       });
     }
     connect();
-    return { close: function () { stopped = true; } };
+    return {
+      close: function () {
+        stopped = true;
+        if (aborter) { try { aborter.abort(); } catch (e) { /* 已关闭即幂等 */ } }
+      },
+    };
   }
 
   function openTask(taskId) {

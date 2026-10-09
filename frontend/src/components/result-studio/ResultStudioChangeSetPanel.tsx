@@ -37,6 +37,33 @@ import {
 } from "./ResultStudioChangeSetPanel/display";
 
 
+/**
+ * VisualCompareFigure — BLOCK-151 B 轨（审视吸收二波·A4 面「ChangeSet 面板」）：
+ * 前后对比图读取失败（revision artifact 不可读/已回收）显诚实空态，不留裂图死面；
+ * fallback 只作用于出错的那一张，未出错的另一张保持在场。src 换图即重试
+ * （state 以 src 为派生键：src 变化视为新图，恢复 img 尝试）。
+ */
+function VisualCompareFigure({ src, caption, alt }: {
+  src: string;
+  caption: string;
+  alt: string;
+}): React.ReactElement {
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const failed = failedSrc === src;
+  return (
+    <figure className={styles.visualFigure}>
+      <figcaption>{caption}</figcaption>
+      {failed ? (
+        <div className={styles.visualFigureUnavailable} role="img" aria-label={alt}>
+          对比图无法读取
+        </div>
+      ) : (
+        <img src={src} alt={alt} onError={() => setFailedSrc(src)} />
+      )}
+    </figure>
+  );
+}
+
 export function ResultStudioChangeSetPanel({
   projectId,
   artifactFamilyId,
@@ -450,15 +477,17 @@ export function ResultStudioChangeSetPanel({
               <h4>{artifact.artifactId} · 前后对比</h4>
               <div className={styles.visualGrid}>
                 {artifact.beforeRevisionId && (
-                  <figure className={styles.visualFigure}>
-                    <figcaption>修改前</figcaption>
-                    <img src={revisionArtifactUrl(artifact.beforeRevisionId)} alt={`${artifact.artifactId} 修改前`} />
-                  </figure>
+                  <VisualCompareFigure
+                    src={revisionArtifactUrl(artifact.beforeRevisionId)}
+                    caption="修改前"
+                    alt={`${artifact.artifactId} 修改前`}
+                  />
                 )}
-                <figure className={styles.visualFigure}>
-                  <figcaption>候选结果 · {artifact.validationStatus}</figcaption>
-                  <img src={revisionArtifactUrl(artifact.afterRevisionId)} alt={`${artifact.artifactId} 修改后`} />
-                </figure>
+                <VisualCompareFigure
+                  src={revisionArtifactUrl(artifact.afterRevisionId)}
+                  caption={`候选结果 · ${artifact.validationStatus}`}
+                  alt={`${artifact.artifactId} 修改后`}
+                />
               </div>
             </section>
           ))}

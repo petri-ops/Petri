@@ -422,14 +422,14 @@ function ScientificScatter({ manifest, query, selection, onSelectionChange }: {
         {showThresholds && (
           <>
             <label>
-              |{mapping.xField}| <input type="number" step="0.1" min="0" value={thresholdX} onChange={(event) => setThresholdX(Math.abs(Number(event.target.value) || 0))} aria-label="log2FC 阈值" />
+              |{mapping.xField}| <input type="number" step="0.1" min="0" value={thresholdX} onChange={(event) => setThresholdX(Math.abs(Number(event.target.value) || 0))} aria-label="log2FC 阈值" title={`x 轴是效应量（${mapping.xField}，对数倍数变化）：参考线画在 ±${thresholdX}，线外的点倍数变化更大。展示辅助，不回写分析参数`} />
             </label>
             {mapping.yTransform === 'neg_log10' && (
               <label>
-                padj <input type="number" step="0.01" min="0" max="1" value={thresholdP} onChange={(event) => setThresholdP(Math.min(1, Math.max(0, Number(event.target.value) || 0)))} aria-label="padj 阈值" />
+                padj <input type="number" step="0.01" min="0" max="1" value={thresholdP} onChange={(event) => setThresholdP(Math.min(1, Math.max(0, Number(event.target.value) || 0)))} aria-label="padj 阈值" title="padj 是多重检验校正后的 p 值，越小越显著；横线画在其 -log10 位置，线上方的点校正后越显著。展示辅助，不回写分析参数" />
               </label>
             )}
-            <em>展示辅助</em>
+            <em title="参考线只帮助读图：不回写分析参数，也不筛掉任何数据点。">展示辅助</em>
           </>
         )}
       </div>
@@ -463,13 +463,19 @@ function ScientificScatter({ manifest, query, selection, onSelectionChange }: {
         <line x1={SCATTER_PLOT.left} y1={SCATTER_PLOT.bottom} x2={SCATTER_PLOT.right} y2={SCATTER_PLOT.bottom} />
         <line x1={SCATTER_PLOT.left} y1={SCATTER_PLOT.top} x2={SCATTER_PLOT.left} y2={SCATTER_PLOT.bottom} />
         {showThresholds && thresholdX > 0 && minX <= -thresholdX && (
-          <line data-threshold="x" className={styles.thresholdLine} x1={px(-thresholdX)} y1={SCATTER_PLOT.top} x2={px(-thresholdX)} y2={SCATTER_PLOT.bottom} />
+          <line data-threshold="x" className={styles.thresholdLine} x1={px(-thresholdX)} y1={SCATTER_PLOT.top} x2={px(-thresholdX)} y2={SCATTER_PLOT.bottom}>
+            <title>{`|${mapping.xField}| = ${thresholdX} 效应量阈值——线外点倍数变化更大（展示辅助，不回写分析参数）`}</title>
+          </line>
         )}
         {showThresholds && thresholdX > 0 && maxX >= thresholdX && (
-          <line data-threshold="x" className={styles.thresholdLine} x1={px(thresholdX)} y1={SCATTER_PLOT.top} x2={px(thresholdX)} y2={SCATTER_PLOT.bottom} />
+          <line data-threshold="x" className={styles.thresholdLine} x1={px(thresholdX)} y1={SCATTER_PLOT.top} x2={px(thresholdX)} y2={SCATTER_PLOT.bottom}>
+            <title>{`|${mapping.xField}| = ${thresholdX} 效应量阈值——线外点倍数变化更大（展示辅助，不回写分析参数）`}</title>
+          </line>
         )}
         {showThresholds && thresholdY !== null && thresholdY >= minY && thresholdY <= maxY && (
-          <line data-threshold="y" className={styles.thresholdLine} x1={SCATTER_PLOT.left} y1={py(thresholdY)} x2={SCATTER_PLOT.right} y2={py(thresholdY)} />
+          <line data-threshold="y" className={styles.thresholdLine} x1={SCATTER_PLOT.left} y1={py(thresholdY)} x2={SCATTER_PLOT.right} y2={py(thresholdY)}>
+            <title>{`padj = ${thresholdP} 显著性阈值（-log10 = ${thresholdY.toFixed(2)}）——线上方的点校正后 p 值更小、更显著（展示辅助，不回写分析参数）`}</title>
+          </line>
         )}
         {points.map((point) => {
           const id = readEntityId(manifest, point.row) || '';

@@ -69,6 +69,8 @@ import styles from '@/pages/project-workspace.module.css';
 import { useArtifactRecovery } from './ResultArtifactShell/useArtifactRecovery';
 import { useResultReportActions } from './ResultArtifactShell/useResultReportActions';
 import { useArtifactInteractionSelection } from './ResultArtifactShell/useArtifactInteractionSelection';
+// BLOCK-151 B 轨（审视吸收二波）— viewerRegistry canExport 声明位消费面。
+import { ViewerExportAction } from './ResultArtifactShell/ViewerExportAction';
 import { isTextFile, isMarkdownFile, formatPreviewText } from '@/lib/previewFileUtils';
 import {
   artifactName,
@@ -830,12 +832,18 @@ export function ResultArtifactShell({
     }
     // BLOCK-142 切片 E — markdown/spreadsheet/pdf 三分支：组件自取数（产物 URL 同
     // 既有分支 selectedArtifactUrl），故置于 shell previewText 载荷闸门之前。
+    // BLOCK-151 B 轨：markdown/pdf 分支叠加 ViewerExportAction（viewerRegistry
+    // canExport=true 档案消费——此前声明位零消费，挂载面无打开/导出出口）；
+    // spreadsheet 档案 canExport=false → 出口自然不在场。viewer 渲染面不变。
     if (viewerAdapter === 'markdown' && selectedArtifactUrl) {
       return (
-        <MarkdownResultViewer
-          url={selectedArtifactUrl}
-          name={selectedArtifactLabel || selectedArtifact.name}
-        />
+        <>
+          <ViewerExportAction adapter={viewerAdapter} url={selectedArtifactUrl} />
+          <MarkdownResultViewer
+            url={selectedArtifactUrl}
+            name={selectedArtifactLabel || selectedArtifact.name}
+          />
+        </>
       );
     }
     if (viewerAdapter === 'spreadsheet' && selectedArtifactUrl) {
@@ -848,10 +856,13 @@ export function ResultArtifactShell({
     }
     if (viewerAdapter === 'pdf' && selectedArtifactUrl) {
       return (
-        <PdfResultViewer
-          url={selectedArtifactUrl}
-          name={selectedArtifactLabel || selectedArtifact.name}
-        />
+        <>
+          <ViewerExportAction adapter={viewerAdapter} url={selectedArtifactUrl} />
+          <PdfResultViewer
+            url={selectedArtifactUrl}
+            name={selectedArtifactLabel || selectedArtifact.name}
+          />
+        </>
       );
     }
     if (previewLoading && !previewText && !previewData) {
@@ -1078,7 +1089,6 @@ export function ResultArtifactShell({
           : undefined
       }
       jobId={viewedRevision?.toolJobId || job.id}
-      artifactKind={selectedArtifactKind}
       relatedSections={compactRelatedSections}
       secondaryActions={toolbarSecondaryActions}
       truth={describeTruthStatus(toolbarTruthStatus, effectiveJobStatus)}

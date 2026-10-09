@@ -257,3 +257,93 @@ describe('useChatStream 运行中发送自动 steer（CK-01）', () => {
     vi.unstubAllGlobals();
   });
 });
+
+// ============================================================
+// BLOCK-151 A1 — queue+drain 行为锁（BLOCK-102 P2 守卫簇此前零行为测）。
+// 锁现状语义（绿锚）：归属过滤 / 对账门 / 失败即弃不重试。不改生产行为。
+// ============================================================
+describe('useChatStream 排队追问 drain（BLOCK-102 P2 守卫行为锁）', () => {
+  it('只 drain 当前会话的条目，其他会话条目保留在队列', async () => {
+    const setQueuedPrompts = vi.fn();
+    renderHook(() => useChatStream(makeArgs({
+      conversationId: 'conv_test',
+      queuedPrompts: [
+        { conversationId: 'conv_other', text: '别的会话的追问' },
+        { conversationId: 'conv_test', text: '当前会话的追问' },
+      ],
+      setQueuedPrompts,
+    })));
+    await act(async () => {});
+    expect(startConversationRunMock).toHaveBeenCalledTimes(1);
+    const runOptions = startConversationRunMock.mock.calls[0][0] as { userContent: string };
+    expect(runOptions.userContent).toBe('当前会话的追问');
+    // 消费当前会话条目后，conv_other 的条目必须原样留在队列
+    expect(setQueuedPrompts).toHaveBeenCalledTimes(1);
+    const kept = setQueuedPrompts.mock.calls[0][0] as Array<{ conversationId: string; text: string }>;
+    expect(kept).toEqual([{ conversationId: 'conv_other', text: '别的会话的追问' }]);
+  });
+
+  it('对账门：run 完结但尚未从 SQLite 对账时不 drain；对账标记写入后才发送', async () => {
+    const setQueuedPrompts = vi.fn();
+    const reconciledRunRef = { current: null as string | null };
+    const base = makeArgs({
+      conversationId: 'conv_test',
+      queuedPrompts: [{ conversationId: 'conv_test', text: '等对账的追问' }],
+      setQueuedPrompts,
+      reconciledRunRef,
+      activeRun: { status: 'done', completedAt: 12345 } as never,
+    });
+    const { rerender } = renderHook((props: UseChatStreamArgs) => useChatStream(props), { initialProps: base });
+    await act(async () => {});
+    expect(startConversationRunMock).not.toHaveBeenCalled();
+
+    // 对账完成（useConversationResume 写入 reconciliationId）→ 下一轮渲染放行
+    reconciledRunRef.current = 'conv_test:12345';
+    act(() => {
+      rerender({ ...base, activeRun: { status: 'done', completedAt: 12345 } as never });
+    });
+    expect(startConversationRunMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('drain 边界：send 失败（startConversationRun 拒绝）时条目已消费且不重试', async () => {
+    // 现状语义书面留痕：drain 先移出队列再 send；send 返回 false（如并发拒绝/
+    // 守卫拦截）时条目**不回队**——回队会被 effect deps（queuedPrompts 变化）
+    // 重新触发，失败持续即构成自激重试循环，故「失败即弃」是有意设计。
+    startConversationRunMock.mockReturnValue(false);
+    const setQueuedPrompts = vi.fn();
+    renderHook(() => useChatStream(makeArgs({
+      conversationId: 'conv_test',
+      queuedPrompts: [{ conversationId: 'conv_test', text: '会被丢弃的追问' }],
+      setQueuedPrompts,
+    })));
+    await act(async () => {});
+    expect(setQueuedPrompts).toHaveBeenCalledTimes(1);
+    expect(startConversationRunMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('queue 仅在 streaming 时受理并带会话归属；非 streaming 时零消费', () => {
+    const setQueuedPrompts = vi.fn();
+    const setInput = vi.fn();
+    const { result, rerender } = renderHook((props: UseChatStreamArgs) => useChatStream(props), {
+      initialProps: makeArgs({ conversationId: 'conv_test', setQueuedPrompts, setInput }),
+    });
+    act(() => {
+      result.current.queue('不该入队');
+    });
+    expect(setQueuedPrompts).not.toHaveBeenCalled();
+
+    rerender(makeArgs({
+      conversationId: 'conv_test',
+      setQueuedPrompts,
+      setInput,
+      activeRun: { status: 'running' } as never,
+    }));
+    act(() => {
+      result.current.queue('流中追问');
+    });
+    expect(setQueuedPrompts).toHaveBeenCalledTimes(1);
+    const updater = setQueuedPrompts.mock.calls[0][0] as (current: Array<{ conversationId: string; text: string }>) => Array<{ conversationId: string; text: string }>;
+    expect(updater([])).toEqual([{ conversationId: 'conv_test', text: '流中追问' }]);
+    expect(setInput).toHaveBeenCalledWith('');
+  });
+});

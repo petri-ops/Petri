@@ -152,6 +152,14 @@
 .visualFigure { margin: 0; min-width: 0; }
 .visualFigure figcaption { color: var(--gewu-text-tertiary); font-size: var(--gewu-font-size-xs); margin-bottom: 4px; }
 .visualFigure img { border: 1px solid var(--gewu-border); display: block; max-height: 280px; object-fit: contain; width: 100%; }
+.visualFigureUnavailable {
+  border: 1px dashed var(--gewu-border);
+  border-radius: 4px;
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs);
+  padding: 12px;
+  text-align: center;
+}
 
 .tableCompare {
   border-collapse: collapse;

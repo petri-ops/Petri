@@ -50,6 +50,8 @@ export interface ResolvedResultViewer {
  * 九类 adapter 的能力声明档案。BLOCK-138 P0 六类仍全部 false 占位（取值决策属切片 C/D）；
  * BLOCK-142 三新档案按 plan §1.4 定值：markdown/pdf canExport=true（原文可导出），
  * spreadsheet 三位暂 false 占位——canSelect 接选择总线属后续包。
+ * BLOCK-151 B 轨（审视吸收二波）：canExport 位经 viewerProfileCanExport 接线消费
+ * （Shell 挂载面「打开原文件」出口）；canSelect/canCompare 仍为占位。
  */
 const VIEWER_PROFILES: Record<ResultViewerAdapter, Omit<ResolvedResultViewer, 'adapter'>> = {
   report: { canSelect: false, canCompare: false, canExport: false },
@@ -97,6 +99,15 @@ const ADAPTER_RULES: readonly AdapterRule[] = [
   // resultSurface.ts:82 — text kind 恒胜；isTextFile 扩展名表落 text（.md/.markdown 已被上一行抢先）
   { adapter: 'text', kind: 'text', textExtension: true },
 ];
+
+/**
+ * 能力声明消费面（BLOCK-151 B 轨）：adapter 是否声明「原文可导出」。
+ * 取值唯一来源=上方档案表（不复制布尔）；canExport=true 的消费形态是
+ * ResultArtifactShell/ViewerExportAction 的「打开原文件」出口。
+ */
+export function viewerProfileCanExport(adapter: ResultViewerAdapter): boolean {
+  return VIEWER_PROFILES[adapter].canExport;
+}
 
 export function resolveResultViewer(input: {
   kind: ResultArtifactKind;

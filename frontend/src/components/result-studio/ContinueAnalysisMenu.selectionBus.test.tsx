@@ -79,7 +79,7 @@ function copilotAskEventsFrom(spy: MockInstance<typeof window.dispatchEvent>): A
 
 async function clickAlphaAnalysis(): Promise<Array<CustomEvent<CopilotAskDetail>>> {
   const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
-  render(<ContinueAnalysisMenu jobId="job-123" artifactName="deg_table.csv" artifactKind="table" />);
+  render(<ContinueAnalysisMenu jobId="job-123" artifactName="deg_table.csv" />);
   fireEvent.click(screen.getByLabelText('继续分析'));
   fireEvent.click(await screen.findByRole('button', { name: 'Alpha 分析' }));
   const events = copilotAskEventsFrom(dispatchSpy);

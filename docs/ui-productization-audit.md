@@ -4646,3 +4646,19 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：三轨红绿六项随轨自述（①位次渲染/②失效流刷新非 jobs 域不刷新/③SSE 分发/④readOnly 跨表不变量/⑤死链守卫/⑥禁 ?session=+Bearer 形态，各自组件级新测红→绿）；统一门禁集成实跑（本会话）：`npm run test:changed` Node 腿 754 tests/746 pass/0 fail（8 skipped）+ 前端 68/68 绿；集成中抓存量红一处在册修复（result-compare-service RS6 stale 判定被 BLOCK-143 误放宽，详见该测试文件 BLOCK-150 边界锚）。
 - **待验**：dev Electron 实机走查（排队 #N 位次/终态事件即时刷新/持久化失败 notice 呈现/DataManagement 话术/caveat 文案/compare 面文案六处）+ 主代理终审集成提交 + closeout 十一门。
 - **边界**：A①「工具行」位次面=run 走 agent 的 run_tool 无前端消费面，任务墙是唯一有意义显示面（如实登记不硬造）；A③ 锚点纠错=errorMessages.ts 从无 message_persist_failed 键，缺口在后端事件零前端消费；⑥/m 页终态后 2s 重连循环与旧 EventSource 行为等价。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-470: 成果面流畅四件——viewerRegistry canExport 声明位接线/钉住占位态出口/对比图诚实空态/继续分析菜单死 prop 摘除（BLOCK-151 B 轨 UI 项）(2026-10-09 in_progress，契约级全绿；实机走查随 BLOCK-151 收口)
+
+- **来源**：BLOCK-151 审视吸收批·第二波 B 轨（plan=[`block-151-review-absorb-wave2-plan.md`](./block-151-review-absorb-wave2-plan.md)，dwfrun-6724f75c 审视 A4 面七条有界重审落地 4 条；用户「继续 按顺序都搞完」批量授权）。dynamic workflow 子代理轨（工作流内不提交，主代理终审集成）。
+- **交付（UI 面 4 件）**：①**viewerRegistry canExport 声明位接线**——新增 `viewerProfileCanExport` 消费面 + `ResultArtifactShell/ViewerExportAction`：Shell 挂载面 markdown/pdf 分支（renderPreview BLOCK-142 三分支段）叠加「打开原文件」出口，此前 canExport=true（BLOCK-142 定值「原文可导出」）零消费、挂载面无打开/导出路径（兜底分支出口只服务落兜底 adapter）；viewer 渲染面零变更，spreadsheet 档案 false 出口自然不在场。②**ArtifactPinPane 占位态出口**——BLOCK-142 三新 adapter（markdown/spreadsheet/pdf）快照占位态「钉住快照无内嵌预览载荷」携带「打开原文件」纯链接（零取数，D1 不破；与主区兜底分支同款），不再死面。③**ResultStudioChangeSetPanel 前后对比图诚实空态**——revision artifact 读取失败显「对比图无法读取」（VisualCompareFigure，fallback 只作用出错一张，src 键控换图恢复尝试）。④**ContinueAnalysisMenu artifactKind 死 prop 摘除**——BLOCK-83 D7 目录驱动后产物分类从不过滤菜单项，原「决定下游分析项」声明与实现不符；menu/navigator/Shell 三层链清，菜单挂载门收敛为 jobId。
+- **证据**：红绿三项（ViewerExportAction 契约 3 用例先红后绿/ArtifactPinPane ④占位出口先红后绿/ChangeSetPanel 对比图空态先红后绿）；定向 9 文件 86 测试绿（含 crossJobPinSnapshot/viewerRegistry×2/menu×2/CompactResultNavigator 回归不破）+ quality:types 0 + theme-token-contract 4/4。
+- **待验**：dev Electron 实机走查（markdown/pdf 挂载面「打开原文件」/钉住 markdown 产物占位出口/对比图断链空态/继续分析入口挂载）+ 主代理终审集成提交 + closeout 十一门。
+- **边界**：跨 job 钉住失败静默=UI-464 verified 边界不翻；lineage 切换器/条带/画布空态复核为已覆盖（三取数结构=R-1 verified 设计 D3 同源，不动）；Shell 三段（:180-260 加载/:680-720 预览取数/:778-808 图像交互）复核为已覆盖无缺口；A4 余量三条（pin 失败反馈/lineage 取数合并/Graph 节点操作提示）如实在册未落地。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-470: 审视吸收二波 UI 面——成果面流畅四件 + 解读语义 title 四件 + A1 会话守卫（BLOCK-151）(2026-10-09 in_progress，契约级全绿；实机走查随收口)
+
+- **来源**：审视 A4/A1/B7 余量（dwfrun-6724f75c）；plan=[`block-151-review-absorb-wave2-plan.md`](./block-151-review-absorb-wave2-plan.md)。
+- **交付**：B 成果面四件（ViewerExportAction 导出出口接线/钉住快照占位态/ChangeSet 前后对比图空态兜底/继续分析 artifactKind 死 prop 清理）+ C 解读四件（padj 阈值与效应量输入统计语义 title、三条阈值参考线 SVG title、「展示辅助」说明——不回写参数不筛数据点点破）+ A1 会话守卫（/m 页 taskId+AbortController、agentTaskStream lastSeq 回退、loadOlder 切会话竞窗守卫、mergeKeepOlderPrefix 行为测锁——核心语义未动）。
+- **证据**：A 轨 /m 3红→4/4+相邻 19/19；lastSeq 1红→68/68；loadOlder 摘守卫对照 1红→10/10；B 三行为项红→31/31+邻域 86/86；C ScientificInteractionViewer 1红→19/19+act 契约 2红→3/3（集成批补 30 秒措辞钉住）；五门全绿。
+- **待验**：dev Electron 实机（导出出口/钉住占位/对比图空态/title 悬浮语义）。
+- **边界**：mergeKeepOlderPrefix 核心语义与 B7 报告模板扩充非范围；跨 job 钉住静默失败与 lineage 空态两条 skipped 留痕（plan §2 处置数组）。

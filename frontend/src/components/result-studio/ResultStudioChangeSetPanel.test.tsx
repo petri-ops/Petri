@@ -426,6 +426,16 @@ describe('ResultStudioChangeSetPanel', () => {
     expect(client.listResultChangeSets).toHaveBeenCalledTimes(2);
   });
 
+  it('keeps compare figures honest when a revision artifact cannot be read', async () => {
+    render(<ResultStudioChangeSetPanel projectId="p_1" artifactFamilyId="family" mode="compare" />);
+    expect(await screen.findByText('plot · 前后对比')).toBeTruthy();
+    const before = screen.getByAltText('plot 修改前');
+    fireEvent.error(before);
+    expect(await screen.findByText('对比图无法读取')).toBeTruthy();
+    // 未出错的候选图保持在场（fallback 只作用于出错的那一张）
+    expect(screen.getByAltText('plot 修改后')).toBeTruthy();
+  });
+
   it('keeps workspace inspection failure separate and retryable', async () => {
     client.getResultStudioWorkspaceStatus
       .mockRejectedValueOnce(new Error('storage offline'))

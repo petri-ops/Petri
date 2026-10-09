@@ -1624,6 +1624,7 @@
         "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/MobileSync.tsx",
         "test/block70-*.test.mjs",
+        "test/block151-mobile-task-stream-race.test.mjs",
         "scripts/block70-*",
         "scripts/ui354-*",
         "scripts/ui355-*",
@@ -1634,7 +1635,8 @@
         "acceptance/block-70/**"
       ],
       "tests": [
-        "test/block70-mobile-gateway.test.mjs"
+        "test/block70-mobile-gateway.test.mjs",
+        "test/block151-mobile-task-stream-race.test.mjs"
       ],
       "classifiesScripts": true
     },

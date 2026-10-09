@@ -90,7 +90,17 @@ export function ArtifactPinPane({
     if ((snapshot.viewerAdapter === 'json' || snapshot.viewerAdapter === 'text') && snapshot.previewText) {
       return <pre className={styles.artifactPinText}>{snapshot.previewText}</pre>;
     }
-    return <div className={styles.artifactPinPlaceholder}>钉住快照无内嵌预览载荷</div>;
+    // BLOCK-151 B 轨：BLOCK-142 三新 adapter（markdown/spreadsheet/pdf）快照载荷
+    // 未接线——占位态不留死面，url 在场时给「打开原文件」出口（与主区兜底分支
+    // 同款纯链接，零取数，D1 不破）。
+    return (
+      <div className={styles.artifactPinPlaceholder}>
+        <span>钉住快照无内嵌预览载荷</span>
+        {snapshot.url && (
+          <a href={snapshot.url} target="_blank" rel="noreferrer">打开原文件</a>
+        )}
+      </div>
+    );
   };
 
   return (

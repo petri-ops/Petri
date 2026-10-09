@@ -2,7 +2,6 @@ import React, { useRef } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { dispatchGewuEvent, gewuEvents } from '@/lib/events';
 import { useToolCatalog } from '@/lib/tool-catalog';
-import type { ResultArtifactKind } from '@/lib/result-manifest';
 import { MAX_AGENT_SAMPLE_IDS, MAX_PERSISTED_ENTITY_IDS, type ArtifactSelection } from '@/lib/artifact-selection';
 import { useSelectionBus } from '@/lib/selectionBus';
 import styles from './ContinueAnalysisMenu.module.css';
@@ -12,8 +11,9 @@ export interface ContinueAnalysisMenuProps {
   jobId: string;
   /** 当前结果产物文件名。 */
   artifactName: string;
-  /** 当前产物分类（result-manifest classifyArtifact 结果）。 */
-  artifactKind: ResultArtifactKind;
+  // BLOCK-151 B 轨：artifactKind prop 移除——自 BLOCK-83 D7 起菜单目录驱动
+  // （文件输入过滤），产物分类从不过滤菜单项；原「决定下游分析项」声明与
+  // 实现不符（死 prop），一并摘除。
 }
 
 /** 组装发给 Agent 的显式中文指令（jobId/artifactName/tool 三要素齐全）。 */

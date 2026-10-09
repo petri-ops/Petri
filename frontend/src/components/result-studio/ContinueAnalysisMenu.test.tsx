@@ -42,7 +42,7 @@ function copilotAskEventsFrom(
 describe('ContinueAnalysisMenu', () => {
   it('目录驱动：带文件输入的已装分析都成为菜单项', () => {
     render(
-      <ContinueAnalysisMenu jobId="job-123" artifactName="deg_table.csv" artifactKind="table" />,
+      <ContinueAnalysisMenu jobId="job-123" artifactName="deg_table.csv" />,
     );
     fireEvent.click(screen.getByLabelText('继续分析'));
     expect(screen.getByRole('button', { name: 'Alpha 分析' })).toBeTruthy();
@@ -53,7 +53,7 @@ describe('ContinueAnalysisMenu', () => {
   it('点击菜单项派发 copilot-ask，prompt 含 jobId/artifactName/tool 三要素', () => {
     const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
     render(
-      <ContinueAnalysisMenu jobId="job-123" artifactName="deg_table.csv" artifactKind="table" />,
+      <ContinueAnalysisMenu jobId="job-123" artifactName="deg_table.csv" />,
     );
     fireEvent.click(screen.getByLabelText('继续分析'));
     fireEvent.click(screen.getByRole('button', { name: 'Alpha 分析' }));
@@ -95,8 +95,8 @@ describe('CompactResultNavigator 继续分析入口', () => {
     );
   }
 
-  it('传入 jobId 与 artifactKind 时 actions 区出现「继续分析」入口', () => {
-    mountNavigator({ jobId: 'job-123', artifactKind: 'table' });
+  it('传入 jobId 时 actions 区出现「继续分析」入口（BLOCK-151 B 轨：artifactKind 死 prop 已摘除）', () => {
+    mountNavigator({ jobId: 'job-123' });
     expect(screen.getByLabelText('继续分析')).toBeTruthy();
   });
 

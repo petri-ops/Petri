@@ -70,6 +70,19 @@ const imageSnapshot: ArtifactPinSnapshot = {
   url: '/api/r/tools/file/job-1/volcano.png',
 };
 
+// BLOCK-151 B 轨：BLOCK-142 三新 adapter（markdown/spreadsheet/pdf）的快照载荷
+// 未接线（previewText/previewData 恒 null）——占位态不得是死面，url 在场时必须
+// 携带「打开原文件」出口（与主区兜底分支同款、零取数）。
+const markdownSnapshot: ArtifactPinSnapshot = {
+  jobId: 'job-2',
+  artifactName: 'summary-report.md',
+  label: '分析摘要',
+  viewerAdapter: 'markdown',
+  previewText: null,
+  previewData: null,
+  url: '/api/r/tools/file/job-2/summary-report.md',
+};
+
 describe('ArtifactPinPane（BLOCK-140 P0 分屏骨架）', () => {
   let fetchSpy: ReturnType<typeof vi.fn>;
   let onUnpin: Mock<() => void>;
@@ -139,6 +152,22 @@ describe('ArtifactPinPane（BLOCK-140 P0 分屏骨架）', () => {
     expect(within(pane).getByText('volcano.png')).toBeTruthy();
     const img = within(pane).getByRole('img');
     expect(img.getAttribute('src')).toBe(imageSnapshot.url);
+  });
+
+  it('④无内嵌载荷快照（markdown 占位分支）：占位态携带「打开原文件」出口且零取数', () => {
+    render(
+      <ArtifactPinPane mode="result" snapshot={markdownSnapshot} onUnpin={onUnpin}>
+        <div data-testid="main-projection" />
+      </ArtifactPinPane>,
+    );
+
+    const pane = screen.getByTestId('artifact-pin-pane');
+    expect(within(pane).getByText('钉住快照无内嵌预览载荷')).toBeTruthy();
+    const link = within(pane).getByRole('link', { name: '打开原文件' });
+    expect(link.getAttribute('href')).toBe(markdownSnapshot.url);
+    expect(link.getAttribute('target')).toBe('_blank');
+    // D1：副栏零取数——出口是纯链接，不发起任何 fetch
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
   it('②解除钉住：按钮回调 onUnpin；snapshot 置空恢复单栏（副栏离场、主区保留）', () => {

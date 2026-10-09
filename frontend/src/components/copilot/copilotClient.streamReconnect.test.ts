@@ -248,4 +248,54 @@ describe('BLOCK-39 agent 事件流断线重连', () => {
     expect(opts.onError).not.toHaveBeenCalled();
     expect(opts.onStreamReconnecting).not.toHaveBeenCalled();
   });
+
+  it('BLOCK-151 A1：服务端 seq 回退（重放旧 seq）不得回退 lastSeq，重连 afterSeq 取单调最大值', async () => {
+    // 场景：后端重启后 seq 计数器回退（或代理重放）——同一连接内先收 1,2 再收重放
+    // 的 1。lastSeq 若被拉回 1，断线重连会从 afterSeq=1 续传 → seq=2 的事件重复
+    // 下发（assistant 增量重复拼接 / tool_call 重复渲染）。
+    vi.useFakeTimers();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        sseResponse([
+          'data: {"seq":1,"eventType":"delta","payload":{"delta":"a"}}\n\n',
+          'data: {"seq":2,"eventType":"delta","payload":{"delta":"b"}}\n\n',
+          'data: {"seq":1,"eventType":"delta","payload":{"delta":"b-回放"}}\n\n',
+        ])
+      )
+      .mockResolvedValueOnce(sseResponse(['data: [DONE]\n\n']));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const opts = makeOpts();
+    const promise = subscribeAgentTask('t-seq-rollback', opts, 0);
+    await vi.runAllTimersAsync();
+    await promise;
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    // 回退的 seq=1 不得覆盖 lastSeq=2：重连必须从 afterSeq=2 续传
+    expect(String(fetchMock.mock.calls[1][0])).toContain('afterSeq=2');
+    expect(opts.onDone).toHaveBeenCalledTimes(1);
+  });
+
+  it('BLOCK-151 A1 绿锚：单调 seq 正常流转不受守卫影响（重连仍按最后一条续传）', async () => {
+    vi.useFakeTimers();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        sseResponse([
+          'data: {"seq":1,"choices":[{"delta":{"content":"a"}}]}\n\n',
+          'data: {"seq":2,"choices":[{"delta":{"content":"b"}}]}\n\n',
+        ])
+      )
+      .mockResolvedValueOnce(sseResponse(['data: [DONE]\n\n']));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const opts = makeOpts();
+    const promise = subscribeAgentTask('t-seq-monotonic', opts, 0);
+    await vi.runAllTimersAsync();
+    await promise;
+
+    expect(String(fetchMock.mock.calls[1][0])).toContain('afterSeq=2');
+    expect(opts.onDelta).toHaveBeenCalledTimes(2);
+  });
 });

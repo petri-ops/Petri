@@ -131,6 +131,9 @@
 }
 
 .artifactPinPlaceholder {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
   padding: 12px;
   border: 1px dashed var(--gewu-border);
   border-radius: 6px;

@@ -205,4 +205,127 @@ describe('BLOCK-95 A1 mergeKeepOlderPrefix（重建链保留更旧前缀）', ()
     expect(mergeKeepOlderPrefix([], persisted)).toBe(persisted);
     expect(mergeKeepOlderPrefix(persisted, [])).toEqual([]);
   });
+
+  // BLOCK-151 A1 — 重放/本地分叉边界的行为锁（现状语义锚定，算法不动）。
+  it('重放场景：persisted 重复覆盖 current 同 id 消息（不因更旧 ts 重复入列）', () => {
+    const current = [
+      { id: 'm1', role: 'user', content: '旧版内容', ts: '2026-09-17T00:00:00.000Z' },
+      { id: 'm1', role: 'user', content: '重放同 id', ts: '2026-09-17T01:00:00.000Z' },
+    ] as never[];
+    const persisted = [
+      { id: 'm1', role: 'user', content: '持久层权威内容', ts: '2026-09-17T01:00:00.000Z' },
+    ] as never[];
+    // 两条 m1（一旧一窗口内）都被 id 去重排除，SQLite 版本唯一保留
+    const merged = mergeKeepOlderPrefix(current, persisted);
+    expect(merged.map((m) => (m as { id: string }).id)).toEqual(['m1']);
+    expect((merged[0] as { content: string }).content).toBe('持久层权威内容');
+  });
+
+  it('本地分叉场景：ts >= 窗口边界的本地-only 消息被 SQLite 权威覆盖（现状语义）', () => {
+    // 现状契约：mergeKeepOlderPrefix 只保留「比 persisted 窗口更旧的已加载前缀」，
+    // 窗口内（ts >= boundary）的本地-only 消息（乐观气泡/错误卡等未持久化面）
+    // 一律让位 SQLite 权威——对账语义就是「以持久层重建」。改动此语义属于
+    // 恢复合并核心重设计（plan §3 升级登记面），不在守卫批范围。
+    const current = [
+      { id: 'old1', role: 'user', content: '更旧1', ts: '2026-09-17T00:00:00.000Z' },
+      { id: 'local-new', role: 'assistant', content: '本地乐观气泡', ts: '2026-09-17T01:30:00.000Z' },
+    ] as never[];
+    const persisted = [
+      { id: 'w1', role: 'user', content: '窗口首条', ts: '2026-09-17T01:00:00.000Z' },
+    ] as never[];
+    const merged = mergeKeepOlderPrefix(current, persisted);
+    expect(merged.map((m) => (m as { id: string }).id)).toEqual(['old1', 'w1']);
+    expect(merged.some((m) => (m as { id: string }).id === 'local-new')).toBe(false);
+  });
+
+  it('ts 边界：ts === boundary 不保留（严格小于），缺 ts 消息不保留', () => {
+    const boundary = '2026-09-17T01:00:00.000Z';
+    const current = [
+      { id: 'eq', role: 'user', content: '恰好等于边界', ts: boundary },
+      { id: 'no-ts', role: 'assistant', content: '无时间戳', ts: undefined },
+      { id: 'older', role: 'user', content: '严格更旧', ts: '2026-09-17T00:59:59.999Z' },
+    ] as never[];
+    const persisted = [{ id: 'w1', role: 'user', content: '窗口首条', ts: boundary }] as never[];
+    const merged = mergeKeepOlderPrefix(current, persisted);
+    expect(merged.map((m) => (m as { id: string }).id)).toEqual(['older', 'w1']);
+  });
+});
+
+// BLOCK-151 A1 — loadOlder 会话切换竞态守卫的行为锁（BLOCK-102 P2：
+// useConversationResume.ts 在途补页返回时会话已切换 → 整页丢弃，旧会话的
+// 消息/游标不得写入新会话 state）。此前该守卫零行为测，绿锚锁现状。
+describe('BLOCK-151 A1 loadOlder 会话切换竞态守卫（BLOCK-102 P2 现状锁）', () => {
+  afterEach(() => {
+    cleanup();
+    vi.clearAllMocks();
+  });
+
+  it('补页在途时切会话：返回后整页丢弃（不 prepend、游标不写）', async () => {
+    let releaseOlderPage: (value: unknown) => void = () => {};
+    const olderPagePromise = new Promise((resolve) => { releaseOlderPage = resolve; });
+    mocks.getConversationMessagesPage.mockImplementation((convId: string, _limit?: number, before?: number) => {
+      if (convId === 'conv_a' && before === 42) return olderPagePromise; // 手控：补页挂起
+      if (convId === 'conv_a') {
+        return Promise.resolve({
+          messages: [{ id: 'a1', role: 'user', content: 'A 最新', ts: '2026-09-17T02:00:00.000Z' }],
+          hasMore: true, nextBefore: 42, windowOffset: 0,
+        });
+      }
+      if (convId === 'conv_b') {
+        return Promise.resolve({
+          messages: [{ id: 'b1', role: 'user', content: 'B 最新', ts: '2026-09-17T02:00:00.000Z' }],
+          hasMore: false, nextBefore: null, windowOffset: 0,
+        });
+      }
+      return Promise.resolve({ messages: [], hasMore: false, nextBefore: null, windowOffset: 0 });
+    });
+    const setMessages = vi.fn();
+    const noop = () => {};
+    const noopAsync = async () => {};
+    function RaceHarness({ convId }: { convId: string }): React.ReactElement {
+      const { older } = useConversationResume({
+        conversationId: convId,
+        projectId: 'p_race',
+        activeRun: null,
+        refreshConversations: noopAsync,
+        setMessages,
+        setLoading: noop,
+      });
+      const firedRef = React.useRef(false);
+      React.useEffect(() => {
+        if (older.hasMore && !older.loadingMore && !firedRef.current) {
+          firedRef.current = true;
+          void older.loadOlder();
+        }
+      }, [older]);
+      return <div />;
+    }
+    const { rerender } = render(<RaceHarness convId="conv_a" />);
+    await act(async () => {});
+    // conv_a 初始加载完成 → 自动补页（挂在手控 deferred 上）
+    expect(mocks.getConversationMessagesPage).toHaveBeenCalledWith('conv_a', 200, 42);
+
+    // 补页在途时切到 conv_b：切换 effect 清空消息
+    rerender(<RaceHarness convId="conv_b" />);
+    await act(async () => {});
+    expect(setMessages).toHaveBeenCalledWith([]);
+
+    // 挂起的 conv_a 补页此刻返回：守卫必须整页丢弃
+    const callsAtSwitch = setMessages.mock.calls.length;
+    act(() => {
+      releaseOlderPage({
+        messages: [{ id: 'a-old', role: 'user', content: 'A 的更旧页', ts: '2026-09-17T00:00:00.000Z' }],
+        hasMore: false, nextBefore: null, windowOffset: 0,
+      });
+    });
+    // 同步 act 不 flush 微任务：release 之后 loadOlder 的续延（守卫判定 +
+    // setMessages 调用）还在微任务队列里，必须先让渡一拍再断言——否则断言
+    // 跑在污染发生之前，摘守卫也不红（假绿锁）。
+    await act(async () => {});
+    expect(setMessages.mock.calls.length).toBe(callsAtSwitch);
+    const flat = setMessages.mock.calls.flatMap(
+      (c): Array<{ id?: string }> => (Array.isArray(c[0]) ? (c[0] as Array<{ id?: string }>) : [])
+    );
+    expect(flat.some((m) => m.id === 'a-old')).toBe(false);
+  });
 });

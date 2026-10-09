@@ -1,0 +1,6 @@
+/* ViewerExportAction — 出口行动作行（无色彩定义，只走既有全局 gewu-btn 系） */
+.actionsRow {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 8px;
+}

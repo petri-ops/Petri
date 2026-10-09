@@ -5,7 +5,7 @@ import {
   findResultArtifactPickerOption,
   type ResultArtifactPickerGroup,
 } from '@/lib/result-artifact-display';
-import type { ResultArtifactKind, ResultArtifactNavSection } from '@/lib/result-manifest';
+import type { ResultArtifactNavSection } from '@/lib/result-manifest';
 import type { ResultSurfaceMode, ResultTruthProjection } from './resultSurface';
 import { ContinueAnalysisMenu } from './ContinueAnalysisMenu';
 import styles from './CompactResultNavigator.module.css';
@@ -17,10 +17,8 @@ export interface CompactResultNavigatorProps {
   selectedKindLabel: string;
   selectedIcon: IconName;
   selectedArtifactUrl?: string;
-  /** BIO-3 P2 — 当前结果所属工具任务 ID（与 artifactKind 同传时挂「继续分析」入口）。 */
+  /** BIO-3 P2 — 当前结果所属工具任务 ID（在场即挂「继续分析」入口；BLOCK-151 B 轨起不再要求 artifactKind 同传——该 prop 死声明已摘除）。 */
   jobId?: string;
-  /** BIO-3 P2 — 当前产物分类（classifyArtifact 结果），决定下游分析项。 */
-  artifactKind?: ResultArtifactKind;
   relatedSections: ResultArtifactNavSection[];
   secondaryActions?: React.ReactNode;
   truth?: ResultTruthProjection;
@@ -45,7 +43,6 @@ export function CompactResultNavigator({
   selectedIcon,
   selectedArtifactUrl,
   jobId,
-  artifactKind,
   relatedSections,
   secondaryActions,
   truth,
@@ -164,11 +161,10 @@ export function CompactResultNavigator({
       )}
 
       <div className={styles.actions}>
-        {jobId && artifactKind && (
+        {jobId && (
           <ContinueAnalysisMenu
             jobId={jobId}
             artifactName={selectedArtifactName}
-            artifactKind={artifactKind}
           />
         )}
         {canUseInteraction && onInteractionToggle && (

@@ -192,7 +192,10 @@ async function subscribeAgentTaskOnce(
           const obj = JSON.parse(data) as AgentSseEvent;
           // task 模式事件包成 {seq, eventType, payload}，取 payload 走原解析
           const evt = obj.payload ? obj.payload : obj;
-          if (typeof obj.seq === 'number') lastSeq = obj.seq;
+          // BLOCK-151 A1 — lastSeq 单调守卫：只前进不回退。服务端重启后 seq 计数
+          // 回退（或代理重放旧事件）时，回退赋值会让重连 afterSeq 倒退 → 已收事件
+          // 重复下发（增量重复拼接/工具行重复渲染）。seq 天然单调，等值/回退均忽略。
+          if (typeof obj.seq === 'number' && obj.seq > lastSeq) lastSeq = obj.seq;
           if (evt && evt.event === 'done' && Array.isArray(evt.filesChanged)) {
             doneFiles = evt.filesChanged as Array<{ path: string; status: string }>;
           }

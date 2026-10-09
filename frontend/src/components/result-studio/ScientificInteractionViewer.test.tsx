@@ -371,6 +371,48 @@ describe('ScientificInteractionViewer', () => {
     expect(first.container.querySelector('line[data-threshold="y"]')).toBeNull();
   });
 
+  // BLOCK-151 B7 — 统计语义呈现：padj/log2FC/阈值/效应量在 hover/读屏可及的文案里讲清。
+  // Scientific viewer 属合法领域域：领域词保留，只补解释，不做中立化。
+  it('explains statistical semantics on the threshold inputs, reference lines and display-aid hint', () => {
+    const query = {
+      ...tableQuery(0),
+      rows: [
+        { gene: 'TP53', log2FoldChange: '2', pvalue: '0.001' },
+        { gene: 'EGFR', log2FoldChange: '-1', pvalue: '0.05' },
+      ],
+      columns: [
+        { field: 'gene', type: 'string', sortable: true, filterable: true },
+        { field: 'log2FoldChange', type: 'number', sortable: true, filterable: true },
+        { field: 'pvalue', type: 'number', sortable: true, filterable: true },
+      ],
+    } satisfies ResultTableQuery;
+    const { container } = render(<ScientificInteractionViewer language="r" jobId="job_1" artifactName="volcano.png" manifest={manifest('scatter')} backingTable={query} selection={null} onSelectionChange={() => {}} />);
+    // 效应量阈值输入：讲清 x 轴含义、线画在哪、线外点意味着什么
+    const xInput = screen.getByRole('spinbutton', { name: 'log2FC 阈值' });
+    expect(xInput.title).toContain('效应量');
+    expect(xInput.title).toContain('log2FoldChange');
+    expect(xInput.title).toContain('不回写');
+    // padj 阈值输入：讲清多重检验校正语义与显著性方向
+    const padjInput = screen.getByRole('spinbutton', { name: 'padj 阈值' });
+    expect(padjInput.title).toContain('校正');
+    expect(padjInput.title).toContain('越显著');
+    // 参考线本体：hover 有语义 title（含当前阈值与显著性方向）
+    const yLine = container.querySelector('line[data-threshold="y"]');
+    const yTitle = yLine?.querySelector('title')?.textContent ?? '';
+    expect(yTitle).toContain('padj = 0.05');
+    expect(yTitle).toContain('1.30');
+    expect(yTitle).toContain('更显著');
+    for (const xLine of Array.from(container.querySelectorAll('line[data-threshold="x"]'))) {
+      const xTitle = xLine.querySelector('title')?.textContent ?? '';
+      expect(xTitle).toContain('|log2FoldChange| = 1');
+      expect(xTitle).toContain('不回写');
+    }
+    // 「展示辅助」提示：点破参考线不回写分析参数、不筛数据
+    const hint = screen.getByText('展示辅助');
+    expect(hint.title).toContain('不回写');
+    expect(hint.title).toContain('不');
+  });
+
   it('builds a multi-clause numeric filter with the clause builder', async () => {
     queryResultStudioTable.mockResolvedValue(tableQuery());
     render(<ScientificInteractionViewer language="r" jobId="job_1" artifactName="deg_table.csv" manifest={manifest('table')} selection={null} onSelectionChange={() => {}} />);

@@ -98,7 +98,7 @@ module.exports = [
     "type": "function",
     "function": {
       "name": "act",
-      "description": "ACT_TOOL_v1 — 在用户的 BioF3 账户上执行写操作。受白名单限制，所有操作都会被审计记录，并支持 5 秒内撤销。支持的 type： rename_project / rename_dataset / rename_analysis（重命名）; update_analysis_params（修改分析参数）。不允许：删除、跨用户操作、上传数据。删除请让用户自己在 UI 中操作。",
+      "description": "ACT_TOOL_v1 — 在用户的 BioF3 账户上执行写操作。受白名单限制（下方 type 枚举即全部支持的操作，共 16 种，无隐藏动作），所有操作都会被审计记录。其中仅重命名与参数修改支持 30 秒内撤销，其余操作不支持撤销。type 分两类：①数据库写操作（直接生效、可撤销）——rename_project / rename_dataset / rename_analysis（重命名）、update_analysis_params（合并修改分析参数，不会自动重跑）；②界面引导操作（驱动页面跳转或弹窗，多数需用户在界面上确认提交）——update_figcode_editor（重写绘图代码，默认自动运行）、switch_result_tab（切换结果页 tab）、focus_cluster（聚焦 cluster）、highlight_gene（按基因着色）、select_cells（按条件选中细胞，可存子集）、filter_table（筛选表格行）、label_cells（打开细胞标注对话框）、merge_datasets（打开数据集合并对话框）、open_replot（打开在线重绘）、upload_data_hint（定位到上传入口，不代用户上传）、open_figcode_plot（打开绘图卡片在线绘制）、open_tool（打开工具页）。部分界面引导操作要求当前已在对应页面，不满足时返回 wrong_page 并提示先导航。不允许：删除、跨用户操作、代用户上传数据。删除请让用户自己在 UI 中操作。",
       "parameters": {
         "type": "object",
         "properties": {
