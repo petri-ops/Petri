@@ -1,0 +1,33 @@
+{
+  "name": "ui-479-responsive-collapse-live",
+  "at": "2026-10-09T16:05:24.356Z",
+  "realVw": 977,
+  "assertions": [
+    {
+      "name": "real_window_977_right_autocollapsed_before_test",
+      "pass": true,
+      "detail": "realVw=977 asides=[{\"w\":0,\"aria\":\"true\"},{\"w\":0,\"aria\":\"true\"}]（用户实测路径：右栏自动收起在场）"
+    },
+    {
+      "name": "baseline_both_open",
+      "pass": true,
+      "detail": "[{\"w\":268,\"aria\":\"false\"},{\"w\":340,\"aria\":\"false\"}]"
+    },
+    {
+      "name": "shrink_collapses_right_keeps_left",
+      "pass": true,
+      "detail": "[{\"w\":268,\"aria\":\"false\"},{\"w\":0,\"aria\":\"true\"}]"
+    },
+    {
+      "name": "widen_auto_restores",
+      "pass": true,
+      "detail": "[{\"w\":268,\"aria\":\"false\"},{\"w\":340,\"aria\":\"false\"}]"
+    },
+    {
+      "name": "drag_narrow_collapses",
+      "pass": true,
+      "detail": "[{\"w\":268,\"aria\":\"false\"},{\"w\":0,\"aria\":\"true\"}]"
+    }
+  ],
+  "allPass": true
+}
