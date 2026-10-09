@@ -1,0 +1,18 @@
+{
+  "schema": "biof3/block154-css-plain-ratchet.v1",
+  "plainCssPaths": [
+    "frontend/src/components/auth/LoginModal.css",
+    "frontend/src/components/copilot/LlmTranscriptViewer.css",
+    "frontend/src/components/copilot/simple-chat.css",
+    "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.css",
+    "frontend/src/components/desktop/WorkingTreeReview/WorkingTreeReview.css",
+    "frontend/src/components/desktop/accent-control.css",
+    "frontend/src/components/desktop/desktop.css",
+    "frontend/src/components/desktop/theme-control.css",
+    "frontend/src/components/ui/Lightbox.css",
+    "frontend/src/components/ui/PageHeader.css",
+    "frontend/src/components/ui/code-highlight.css",
+    "frontend/src/styles/custom.css",
+    "frontend/src/styles/global.css"
+  ]
+}

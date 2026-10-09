@@ -1722,15 +1722,18 @@
     },
     {
       "id": "block92-code-modularization",
-      "note": "BLOCK-92 巨型文件模块化二期：行数台账/棘轮（scripts/code-size-ledger.mjs 清单驱动）+ 22 文件分波拆分 + IPC 通道注册表（src/ipc/channels.js，preload 漂移双向守护）。台账与基线变更属治理工具面。",
+      "note": "BLOCK-92 巨型文件模块化二期：行数台账/棘轮（scripts/code-size-ledger.mjs 清单驱动）+ 22 文件分波拆分 + IPC 通道注册表（src/ipc/channels.js，preload 漂移双向守护）+ BLOCK-154 P2-2 CSS Modules 棘轮（scripts/css-modules-ratchet.mjs，plain CSS 只出不进）。台账与基线变更属治理工具面。",
       "patterns": [
         "scripts/code-size-ledger.mjs",
+        "scripts/css-modules-ratchet.mjs",
         "acceptance/block-92/**",
         "src/ipc/channels.js",
-        "test/ipc-channels-registry.test.mjs"
+        "test/ipc-channels-registry.test.mjs",
+        "test/block154-css-modules-ratchet.test.mjs"
       ],
       "tests": [
-        "test/ipc-channels-registry.test.mjs"
+        "test/ipc-channels-registry.test.mjs",
+        "test/block154-css-modules-ratchet.test.mjs"
       ],
       "commands": [
         "docs-check"
