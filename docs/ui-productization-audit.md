@@ -4677,3 +4677,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：红绿两轮——tunnel probe 0/5→5/5（mock 三态+调度不叠加）；MobileSync 1红（probe fail+17min 假宣称，正是本轨要杀的）→12/12；隧道族回归 14/14（block145 非阻塞契约保绿=probe 未进关键路径）。
 - **待验**：真隧道/真公网门的 probe 翻转实机观察（断反代验证降级）。
 - **边界**：probe 纯 fetch 只读不碰端口不 spawn（与 remotePortSweep 清场互不踩）；redirect:manual 反代误配按 3xx 判 fail。
+
+## UI-472: highlight.js 按需注册——es.js 全量 chunk 退役，core+40 语言宽清单（BLOCK-154 波次 1）(2026-10-09 in_progress，构建计量+定向测试全绿)
+
+- **来源**：BLOCK-154 优化梳理清单 P1-1（同日主代理全方位梳理四路探查实证：es.js 291,911 gzip 为全站最大单资产，占总量 21%）；用户裁决「BLOCK-152 已经完成了 按照建议逐个推进」。
+- **交付**：CodeHighlight 动态 import 由全量 highlight.js 改引 `./_hljsCurated`（highlight.js/lib/core + 40 语言注册，全仓唯一注册位；保留 BLOCK-106「覆盖不退化」初衷——LaTeX/Julia/dockerfile 等在列，清单外语言沿用既有「降级纯文本」语义不崩）；新增 `lib/highlight-js-core.d.ts`（exports map 无 types 条目的子路径补齐）。
+- **证据**：HK-01 红绿——CodeHighlight 定向 4/4（新锚 latex/julia/dockerfile/go 在列 + elixir 清单外降级，红→绿）；build:check（tsc -b+vite build）0；bundle 门禁绿（总量 1,397→1,273.5KB gzip 净缩 91KB，es.js 移除，新增资产全部 ≤100KB 在限内）；基线 --write 重锚 46 键。
+- **待验**：实机聊天/文件预览代码块上色抽查（清单内视觉零差异；随 UI-457 等过目批同窗）。
+- **边界**：语言清单内 UI 表现零变化；rehype-highlight（lowlight common，WorkspaceFilePreview+MDX 构建面）为独立消费面不在本波；注册清单扩展约定见 `_hljsCurated.ts` 头注释。

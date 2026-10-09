@@ -31,6 +31,13 @@ describe('CodeHighlight', () => {
     expect(normalizeCodeLanguage('shell')).toBe('bash');
     expect(normalizeCodeLanguage('language-ts')).toBe('typescript');
     expect(normalizeCodeLanguage('tree')).toBeNull();
+    // BLOCK-154 波次 1：core+宽清单按需注册。原 BLOCK-106「覆盖不退化」初衷保留——
+    // 科学计算/生物信息面语言必须在列（红绿先行锚：清单外语言须诚实降级纯文本）。
+    expect(normalizeCodeLanguage('latex')).toBe('latex');
+    expect(normalizeCodeLanguage('julia')).toBe('julia');
+    expect(normalizeCodeLanguage('dockerfile')).toBe('dockerfile');
+    expect(normalizeCodeLanguage('go')).toBe('go');
+    expect(normalizeCodeLanguage('elixir')).toBeNull();
   });
 
   it('highlights known code without interpreting source as markup', () => {

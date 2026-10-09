@@ -2,17 +2,19 @@ import React, { useEffect, useState } from 'react';
 import './code-highlight.css';
 
 /**
- * BLOCK-106 P1 — highlight.js 移出首屏关键 chunk。
+ * BLOCK-106 P1 — highlight.js 移出首屏关键 chunk；BLOCK-154 波次 1 — 全量包改 core+宽清单按需注册。
  *
  * 全量 highlight.js（190 种语言，源码 ~1.5 MB）此前经 `import hljs from 'highlight.js'`
  * 静态进主 chunk（实测主 chunk 1,873,300 B 中最大单项），而聊天首屏（SimpleChat →
- * HighlightedCode）就要解析它。改为动态引入 + 模块加载即并行预取：关键路径不再解析
- * 该库，语言覆盖一份不减（不做 common 子集，避免 LaTeX/Julia/dockerfile 等退化）。
+ * HighlightedCode）就要解析它。BLOCK-106 改为动态引入 + 模块加载即并行预取，但保留
+ * 全量包（es.js chunk 实测 291,911 gzip，为全站最大单资产）；BLOCK-154 经用户批量授权
+ * 改引 `./_hljsCurated`（core + 宽语言清单，清单与维护约定见该文件），保留 BLOCK-106
+ * 「科学计算/全栈覆盖不退化」初衷——LaTeX/Julia/dockerfile 等仍在列，仅长尾语言降级。
  *
  * 降级形态：hljs 未就位时 `HighlightedCode` 渲染纯文本 `<code>`，就位后重渲染上色；
  * `normalizeCodeLanguage` / `codeLanguageForFile` 在未就位时返回 null（=「暂不高亮」），
- * 就位后同一输入返回准确语言。刻意不做乐观返回、也不内置语言清单——注册表只有
- * hljs 一个真相源，调用方拿 null 走纯文本即旧语义。
+ * 就位后清单外语言同样返回 null——调用方拿 null 走纯文本即旧语义。注册表仍只有
+ * hljs 一个真相源（getLanguage 判定），本文件不内置语言清单。
  */
 type HljsInstance = typeof import('highlight.js').default;
 
@@ -23,7 +25,7 @@ const hljsReadyListeners = new Set<() => void>();
 function loadHljs(): Promise<HljsInstance | null> {
   if (hljsInstance) return Promise.resolve(hljsInstance);
   if (!hljsLoading) {
-    hljsLoading = import('highlight.js')
+    hljsLoading = import('./_hljsCurated')
       .then((mod) => {
         hljsInstance = mod.default ?? (mod as unknown as HljsInstance);
         for (const listener of hljsReadyListeners) listener();
