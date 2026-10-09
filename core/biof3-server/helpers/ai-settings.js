@@ -2,7 +2,13 @@
  * helpers/ai-settings.js — AI 配置本地存储（桌面版）
  *
  * 桌面版用户在设置页填入 API key，密钥由 credential-store 单独保存。
- * Web 版不使用此模块（走 process.env.DEEPSEEK_API_KEY / DASHSCOPE_API_KEY）。
+ * Web 版不使用本模块。
+ *
+ * BLOCK-150 加映（用户裁决 2026-10-09「杜绝走 env 这个就应该显式的设置」）：
+ * 凭据唯一来源 = credential store（设置页显式配置）。原 `|| process.env[*_API_KEY]`
+ * 兜底路已移除——隐性 env 通道会随栈重启链路漂移（识图时好时坏的根因），
+ * 且绕过用户可见的配置面。.biof3-secrets 中的 AI key 自此对本模块失活（其余
+ * env 用途如 NODE_EXTRA_CA_CERTS 不受影响）。
  *
  * 文件位置：~/Documents/BioF3-Local/ai-settings.json
  *
@@ -187,9 +193,9 @@ function getChatModelCredential(preset) {
  * @returns {string} - API key 或空字符串
  */
 function getApiKey(provider) {
-  const id = normalizeProvider(provider);
-  const envKey = `${id.toUpperCase().replace(/[^A-Z0-9]/g, '_')}_API_KEY`;
-  return credentialStore.get(id) || process.env[envKey] || '';
+  // BLOCK-150 加映 — 显式配置唯一来源：只读 credential store，不落 env 兜底
+  //（用户裁决「杜绝走 env」；env 通道随重启链路漂移是识图时好时坏的根因）。
+  return credentialStore.get(normalizeProvider(provider));
 }
 
 /**

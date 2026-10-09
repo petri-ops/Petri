@@ -59,13 +59,15 @@ export BIOF3_LOCAL_DATA_DIR='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\dat
 # DEPTH_ZERO_SELF_SIGNED_CERT，见 dev-infra SKILL「端口与后端实例纪律」第 6 条）
 # BLOCK-110-JEV — 决策 API 凭据注入（key 不入仓；文件在 gitignored 区，用户裁决
 # 「key 暂保留后续轮换」，替换时只改 jev.env 并重启后端）。缺文件静默跳过。
-# 部署密钥（.biof3-secrets，env 格式，gitignored——「不要 commit 到 git」）：
-# 含 DASHSCOPE_API_KEY（知识嵌入）等。后端凭据链读 env，故启动前 source。
+# 部署密钥（.biof3-secrets，env 格式，gitignored——「不要 commit 到 git」）。
+# BLOCK-150 加映：AI key 已不进后端凭据链（用户裁决「杜绝走 env 显式设置」——
+# 设置页 credential store 是唯一来源，见 helpers/ai-settings.js getApiKey）；本文件
+# 仅保留非 AI 用途（NODE_EXTRA_CA_CERTS 等）与 OPENAI_COMPATIBLE_* 渠道端点。
 if [ -f "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/.biof3-secrets" ]; then
   set -a
   . "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/.biof3-secrets"
   set +a
-  echo "deploy secrets: .biof3-secrets sourced (DASHSCOPE_API_KEY present)"
+  echo "deploy secrets: .biof3-secrets sourced"
 fi
 # BLOCK-116 P5 — 决策模型供给（端点/Key/模型）已迁移至 data/decision-config.json
 # （设置页「决策原语→模型接口」可视管理；用户裁决取消 env 依赖）。

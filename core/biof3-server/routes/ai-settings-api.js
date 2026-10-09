@@ -11,7 +11,7 @@ const { getAiSettings, saveAiSettings, testApiKey, getChatProviderName, getEmbed
 /**
  * BLOCK-150 加映 — vision 角色是否可用（档位在场且凭据可解析）。
  * 前端据此对图片输入做前置阻断（未配置时贴图/拖图即提示，替代后置 vision_failed）。
- * getCredential 可注入（测试）；生产走 model-gateway 同源解析（credential store → env）。
+ * getCredential 可注入（测试）；生产走 model-gateway 同源解析（credential store 显式配置唯一来源，env 兜底已移除）。
  */
 function computeVisionConfigured(settings, getCredentialFn) {
   try {
