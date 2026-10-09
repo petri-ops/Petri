@@ -4709,3 +4709,11 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **修复**：ConversationTimeline ToolsSegmentBlock `forceOpen={runExpanded || runRunning || runActive}`——run 进行中簇内禁落定折叠（行只增不换）；run 结束仍折叠为运行摘要行（UI-437 v4 设计不变，历史消息语义不变）。另加 `.sc-timeline-cluster` 180ms 入场过渡（纯动画属性，prefers-reduced-motion 降级）。
 - **证据**：HK-01 红绿——新增 2 用例先红（runActive 下 summary 在场=红；结束后 run-fold 锚定）→16/16 绿；邻域 46/46（ToolActivityList/SimpleChatMessageRow）+theme 契约 4/4+types 0+code-size PASS；**CDP 实测复验**：修复前间隙闪烁 2 次（rows 3→1/5→1 无摘要替代）→修复后消息内行单调 1→2→3→4→5→收尾折叠（塌落点均为消息边界设计内折叠）。
 - **待验**：用户实机流式体感复核（刷新即生效）。
+
+## UI-475: 识图未配置时图片输入前置阻断——贴图/拖图即提示配置去向（BLOCK-150 加映·主代理跨会话协作）(2026-10-09 in_progress，契约级全绿；实机过目随用户)
+
+- **来源**：用户实机报 vision_failed（后置报错）+ 用户裁决「聊天框无法输入图片是否可以呢？这样就把不支持识图模型的输入阻断前置了」——采纳为前置阻断形态。
+- **交付**：后端 `/api/ai/settings` 增 `vision_configured` 能力位（computeVisionConfigured：vision 角色档在场且凭据可解析，store→env 同源）；前端 SimpleChat 按 rApiBase（**执行识图的聊天后端**，dev 双后端防脑裂）拉取能力位，`vision_configured=false` 时 onPaste/onDrop 图片载荷前置阻断并落既有 attachmentNotice 提示「识图模型未配置：图片输入已停用（设置 → AI 设置 配置视觉模型 / API Key 后可用）」；非图片附件不受影响；取数失败/旧后端无字段保守放行（维持旧行为）。
+- **证据**：HK-01 红绿——attachments.test 3 红→4/4（阻断/默认行为/非图片放行/载荷探测）；后端 block150-vision-configured-flag 4/4（有档有据 true/双空 false〔用户实机形态〕/无档 false/roles 兜底）；lint 0/types 0/arch 0/secret PASS；实机=能力位 true 路径放行验证（阻断路径单测锁定，当前栈 env 带 key 无法自然复现）。
+- **待验**：用户实机贴图过目（当前 vision 已因栈重启恢复可用；阻断形态在 env 缺失链路重启时自动顶上）。
+- **边界**：只断图片输入不断文本；vision 角色绑定与凭据配置归用户设置域（三选一路径已告知）。

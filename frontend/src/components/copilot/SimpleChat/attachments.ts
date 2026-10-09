@@ -69,14 +69,20 @@ export function onDragLeave(
 export function onDrop(
   e: React.DragEvent,
   setAttachments: React.Dispatch<React.SetStateAction<AttachmentFile[]>>,
-  setIsDraggingOver: (value: boolean) => void
-): void {
+  setIsDraggingOver: (value: boolean) => void,
+  options?: { visionEnabled?: boolean }
+): string | void {
   e.preventDefault();
   e.stopPropagation();
   setIsDraggingOver(false);
 
   const files = Array.from(e.dataTransfer.files);
   if (files.length === 0) return;
+
+  // BLOCK-150 加映 — 识图未配置：图片文件前置阻断（非图片附件不受影响——不经视觉解读）。
+  if (options && options.visionEnabled === false && files.some((file) => file.type.startsWith('image/'))) {
+    return VISION_NOT_CONFIGURED_NOTICE;
+  }
 
   // BLOCK-91 — 上限守卫 + 拖入文件保留原始句柄（发送前由 uploadAttachment 读取）；
   // 图片异步读取 dataUrl（与粘贴行为对齐，此前拖入图片无内容载荷、发送即丢失）。
@@ -120,10 +126,26 @@ export function onDrop(
 }
 
 /** Paste: read clipboard image items as data URLs and append them to the attachment list. */
+/** BLOCK-150 加映 — 识图未配置时的前置阻断提示（onPaste/onDrop 共用，SimpleChat 落 attachmentNotice）。 */
+export const VISION_NOT_CONFIGURED_NOTICE =
+  '识图模型未配置：图片输入已停用（设置 → AI 设置 配置视觉模型 / API Key 后可用）';
+
+/** BLOCK-150 加映 — 载荷里是否含图片（粘贴 items 或拖拽 files 任一命中）。 */
+export function hasImagePayload(
+  dataTransfer: { items?: ArrayLike<{ type: string }>; files?: ArrayLike<File> } | null | undefined
+): boolean {
+  if (!dataTransfer) return false;
+  const items = dataTransfer.items;
+  if (items && Array.from(items).some((item) => item.type.startsWith('image/'))) return true;
+  const files = dataTransfer.files;
+  return !!files && Array.from(files).some((file) => file.type.startsWith('image/'));
+}
+
 export function onPaste(
   e: React.ClipboardEvent,
-  setAttachments: React.Dispatch<React.SetStateAction<AttachmentFile[]>>
-): void {
+  setAttachments: React.Dispatch<React.SetStateAction<AttachmentFile[]>>,
+  options?: { visionEnabled?: boolean }
+): string | void {
   const items = e.clipboardData?.items;
   if (!items) return;
 
@@ -132,6 +154,11 @@ export function onPaste(
   if (imageItems.length === 0) return;
 
   e.preventDefault();
+
+  // BLOCK-150 加映 — 识图未配置：图片输入前置阻断（后置 vision_failed 变前置诚实提示）。
+  if (options && options.visionEnabled === false) {
+    return VISION_NOT_CONFIGURED_NOTICE;
+  }
 
   imageItems.forEach((item) => {
     const file = item.getAsFile();

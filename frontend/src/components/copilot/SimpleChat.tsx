@@ -226,6 +226,27 @@ export function SimpleChat({
   const [attachments, setAttachments] = useState<AttachmentFile[]>([]);
   // BLOCK-91 — 附件发送失败/守卫提示（诚实可见，不再静默丢弃）。
   const [attachmentNotice, setAttachmentNotice] = useState<string | null>(null);
+  // BLOCK-150 加映 — 识图能力位：后端 /ai/settings vision_configured=false 时图片输入
+  // 前置阻断（贴图/拖图即提示配置去向，替代发出去之后的 vision_failed）。缺省 true：
+  // 仅在后端明确回报不可用时才阻断（取数失败/旧后端无字段 → 维持旧行为）。
+  const [visionConfigured, setVisionConfigured] = useState(true);
+  useEffect(() => {
+    // 能力位必须问「将执行识图的聊天后端」——dev 双后端形态下 rApiBase 才是执行方
+    // （BLOCK-85 端口纪律①：跨进程状态同源；问错侧=能力位与执行位脑裂）。
+    const rApiBase = (window as unknown as { biof3Desktop?: { backendConfig?: { rApiBase?: string } } })
+      ?.biof3Desktop?.backendConfig?.rApiBase;
+    const apiBase = rApiBase || (import.meta.env.DEV ? 'http://localhost:3001/api' : '/api');
+    let cancelled = false;
+    fetch(`${apiBase}/ai/settings`)
+      .then((resp) => (resp.ok ? resp.json() as Promise<{ settings?: { vision_configured?: boolean } } | null> : Promise.resolve(null)))
+      .then((data) => {
+        if (!cancelled && data?.settings && typeof data.settings.vision_configured === 'boolean') {
+          setVisionConfigured(data.settings.vision_configured);
+        }
+      })
+      .catch(() => { /* 保守：取数失败不阻断 */ });
+    return () => { cancelled = true; };
+  }, []);
   // CK-01（C-06）— 运行中发送自动 steer 的行内回执提示（几秒自动消退）
   const [steerNotice, setSteerNotice] = useState<string | null>(null);
 
@@ -722,12 +743,15 @@ export function SimpleChat({
   }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
-    onDrop(e, setAttachments, setIsDraggingOver);
-  }, []);
+    // BLOCK-150 加映 — 识图未配置时图片前置阻断（返回提示文案则落 attachmentNotice）
+    const notice = onDrop(e, setAttachments, setIsDraggingOver, { visionEnabled: visionConfigured });
+    if (notice) setAttachmentNotice(notice);
+  }, [visionConfigured]);
 
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
-    onPaste(e, setAttachments);
-  }, []);
+    const notice = onPaste(e, setAttachments, { visionEnabled: visionConfigured });
+    if (notice) setAttachmentNotice(notice);
+  }, [visionConfigured]);
 
   const removeAttachment = useCallback((id: string) => {
     removeAttachmentById(id, setAttachments);

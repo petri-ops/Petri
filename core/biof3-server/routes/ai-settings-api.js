@@ -8,6 +8,29 @@
 const express = require('express');
 const { getAiSettings, saveAiSettings, testApiKey, getChatProviderName, getEmbedProviderName } = require('../helpers/ai-settings');
 
+/**
+ * BLOCK-150 加映 — vision 角色是否可用（档位在场且凭据可解析）。
+ * 前端据此对图片输入做前置阻断（未配置时贴图/拖图即提示，替代后置 vision_failed）。
+ * getCredential 可注入（测试）；生产走 model-gateway 同源解析（credential store → env）。
+ */
+function computeVisionConfigured(settings, getCredentialFn) {
+  try {
+    if (typeof getCredentialFn !== 'function') {
+      // 延迟 require：避免测试环境拉起完整 gateway 装配
+      // eslint-disable-next-line global-require
+      getCredentialFn = require('../helpers/model-gateway').getCredential;
+    }
+    const bindings = settings.model_role_bindings || {};
+    const profiles = settings.model_profiles || [];
+    const profile = profiles.find((p) => p.id === bindings.vision)
+      || profiles.find((p) => (p.roles || []).includes('vision'));
+    if (!profile) return false;
+    return !!getCredentialFn(profile.credentialRef, profile);
+  } catch {
+    return false;
+  }
+}
+
 function registerAiSettingsRoutes(app) {
   // 获取当前 AI 设置。密钥已与普通设置分离，因此这里不会出现明文 key。
   app.get('/api/ai/settings', (req, res) => {
@@ -18,6 +41,7 @@ function registerAiSettingsRoutes(app) {
         ...settings,
         chat_provider: getChatProviderName(),
         embed_provider: getEmbedProviderName(),
+        vision_configured: computeVisionConfigured(settings),
       },
     });
   });
@@ -41,4 +65,4 @@ function registerAiSettingsRoutes(app) {
   });
 }
 
-module.exports = { registerAiSettingsRoutes };
+module.exports = { registerAiSettingsRoutes, computeVisionConfigured };
