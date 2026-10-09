@@ -40,6 +40,24 @@ function errorCode(result) {
  */
 const OPENAI_FAMILY_PROVIDERS = new Set(['deepseek', 'openai', 'openai-compatible', 'ollama', 'lmstudio', 'vllm']);
 
+/**
+ * BLOCK-150 加映三 — openai 系 vision 响应归一化：DeepSeek 系 chat() 返回原始
+ * API 信封（choices[0].message），而 vision 消费方（agent-tools/vision-tools.js）
+ * 读 result.content——字段错位曾致「消耗 token 却空描述」。content 空时回退
+ * reasoning_content（推理型模型把答案写进推理字段的形态）。dashscope-vision
+ * provider 本就返回归一化形态，不在白名单不动。
+ */
+function normalizeVisionResultForProvider(result, providerName) {
+  if (!OPENAI_FAMILY_PROVIDERS.has(providerName) || !result || result.error || !Array.isArray(result.choices)) {
+    return result;
+  }
+  const message = (result.choices[0] && result.choices[0].message) || {};
+  const content = typeof message.content === 'string' && message.content.trim()
+    ? message.content
+    : (typeof message.reasoning_content === 'string' ? message.reasoning_content : '');
+  return { ...result, content };
+}
+
 function convertVisionBodyForProvider(body, providerName) {
   if (!OPENAI_FAMILY_PROVIDERS.has(providerName) || !body || !Array.isArray(body.messages)) return body;
   let converted = false;
@@ -359,7 +377,7 @@ class ModelGateway {
         lastResult = result;
         continue;
       }
-      return this._withRouting(result, 'vision', profile.id, index > 0 ? previousProfileId : undefined, previousReason);
+      return this._withRouting(normalizeVisionResultForProvider(result, profile.provider), 'vision', profile.id, index > 0 ? previousProfileId : undefined, previousReason);
     }
     return lastResult;
   }
