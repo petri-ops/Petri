@@ -404,7 +404,8 @@
         "core/biof3-server/agent-runner.js",
         "core/biof3-server/routes/ai-agent/**",
         "frontend/src/components/copilot/SimpleChat.tsx",
-        "frontend/src/components/copilot/SimpleChat/attachments.ts"
+        "frontend/src/components/copilot/SimpleChat/attachments.ts",
+        "scripts/block155-*.mjs"
       ],
       "tests": [
         "test/block155-chat-vision-inline.test.mjs",
@@ -413,7 +414,7 @@
         "test/block150-vision-configured-flag.test.mjs",
         "frontend/src/components/copilot/SimpleChat/attachments.test.ts"
       ],
-      "classifiesScripts": false
+      "classifiesScripts": true
     },
     {
       "id": "diagnostic-redaction",
