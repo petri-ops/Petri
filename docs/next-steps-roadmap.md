@@ -1,5 +1,7 @@
 # BioF3 Desktop — Current Next Steps
 
+最后更新：2026-10-09（**BLOCK-155 真·单通道 vision 收官 completed（实现+实机全链，UI-478 verified）**：主代理代用户实机七轮探针（dev 栈真 deepseek-flash 渠道）三面断言全过——直答图片内容/transcript 实锤 image_url 内联进 chat 请求体/vision 角色调用=0；实机抓真两连（模型偶发重复调 read_image：提示词条件化降概率不归零→确定性工具门短路，契约 ⑨⑩ 红绿钉住）；证据 acceptance/block-155/inline-live.json ALL PASS。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-10-09（**BLOCK-155 真·单通道 vision 实现收口（实现面 completed；实机待用户→UI-478）**：聊天渠道勾视觉能力时当前轮图片服务端内联进聊天请求体（loop-orchestrator reqBody 组装点 image_url parts/messages 本体零突变），无能力渠道保留 read_image 跳。workflow 因调度层并发槽位饥饿停用后 Agent 通道重派双轨完成；换眼双评审 P1=0，P2 两条当场红绿修复（svg 白名单收窄防主链 400/transcript image_url 截断防落盘放大）、fallback 边界登记候选；后端 41/39+前端 9/9+types/lint/arch/secret/knip/code-size/hygiene 全绿；顺手清偿三笔存量门禁漂移（lint 化石/knip 基线/code-size 基线，前包遗留如实声明）；实机=重启 dev 后端 deepseek-flash 贴图直答。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-10-09（**BLOCK-155-CHAT-VISION-INLINE 真·单通道立项发令 active（轻量批，plan=AUDIT-LOG 本条目）**——用户「/workflow 真·单通道增强 整起来」：聊天渠道勾视觉能力时当前轮图片直进聊天请求体（服务端内联 image_url parts，loop-orchestrator reqBody 副本点），省 read_image 一跳；无能力渠道保留原跳。双轨红绿（后端内联链/前端 UI-475 门放宽 UI-478）+独立评审+统一门禁，dynamic workflow 承载，工作流内不提交；实机=deepseek-flash 渠道贴图直答。G0 开发期常态 · 不外推 packaged/Provider/GA。）

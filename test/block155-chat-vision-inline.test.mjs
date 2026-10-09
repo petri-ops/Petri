@@ -308,3 +308,54 @@ test('BLOCK-155 ⑧ 反例：visionInline 未开启 → reqBody 原样字符串 
   assert.equal(sentLastUser.role, 'user');
   assert.equal(sentLastUser.content, userText, '关闭时请求体仍是字符串 content（恒等）');
 });
+
+// ---------- ⑨ read_image 工具门：当前轮已内联图片确定性短路 ----------
+const { tool_read_image } = require('../core/biof3-server/agent-tools/vision-tools.js');
+const { lastUserAttachmentImagePaths } = require('../core/biof3-server/agent-tools/vision-inline.js');
+
+test('BLOCK-155 ⑨ 工具门：filePath 命中内联集合→短路重定向（不触解析链/不花视觉调用）；未命中→照常走解析', async () => {
+  const inlined = new Set(['.chat-attachments/umap.png']);
+  // 命中：ctx 无 projectId——若无门，resolveWorkspaceImagePath 会返回 project_required 错误；
+  // 有门则短路返回重定向（证明既没走解析链也不会发起第二次视觉请求）。
+  const hit = await tool_read_image(
+    { filePath: '.chat-attachments/umap.png', question: '图里有什么' },
+    { block155InlinedImagePaths: inlined },
+  );
+  assert.equal(hit.ok, true, '命中内联集合应短路成功');
+  assert.ok(String(hit.description).includes('内联'), '重定向话术应说明图片已内联');
+  assert.ok(hit._note && hit._note.includes('未产生额外视觉请求'), '应标注未产生额外视觉请求');
+
+  // './' 前缀归一化后同样命中（模型可能带 ./ 传路径）
+  const dotted = await tool_read_image(
+    { filePath: './.chat-attachments/umap.png', question: 'q' },
+    { block155InlinedImagePaths: inlined },
+  );
+  assert.equal(dotted.ok, true, './ 前缀归一化后同样短路');
+
+  // 未命中：照常走解析链（无 projectId → project_required，证明门有选择性、旧路径保留）
+  const miss = await tool_read_image(
+    { filePath: '.chat-attachments/other.png', question: 'q' },
+    { block155InlinedImagePaths: inlined },
+  );
+  assert.equal(miss.error, 'project_required', '未命中集合应照常走解析链（历史图/结果图路径不受影响）');
+
+  // 集合缺席（非 visionInline run）：行为与旧版一致
+  const noGate = await tool_read_image({ filePath: '.chat-attachments/umap.png', question: 'q' }, {});
+  assert.equal(noGate.error, 'project_required', '无内联集合时行为与旧版一致');
+});
+
+// ---------- ⑩ lastUserAttachmentImagePaths：只取最后一条 user 的图片行 ----------
+test('BLOCK-155 ⑩ lastUserAttachmentImagePaths：最后一条 user 的图片附件路径（顺序保留），无则空', () => {
+  const messages = [
+    { role: 'user', content: '[附件: .chat-attachments/old.png（9KB）]' },
+    { role: 'assistant', content: '答' },
+    { role: 'user', content: '两张\n[附件: .chat-attachments/a.png（1KB）]\n[附件: .chat-attachments/notes.txt（2KB）]\n[附件: pics/b.jpg]' },
+  ];
+  assert.deepStrictEqual(
+    lastUserAttachmentImagePaths(messages),
+    ['.chat-attachments/a.png', 'pics/b.jpg'],
+    '只取最后一条 user 的图片行（txt 过滤、顺序保留、早前 user 不取）',
+  );
+  assert.deepStrictEqual(lastUserAttachmentImagePaths([{ role: 'user', content: '无附件' }]), [], '无图片行→空');
+  assert.deepStrictEqual(lastUserAttachmentImagePaths([]), [], '空消息→空');
+});

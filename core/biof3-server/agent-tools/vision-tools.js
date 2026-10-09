@@ -43,6 +43,22 @@ async function tool_read_image(args, ctx) {
     return { error: 'missing_toolJobId', message: '需要 toolJobId 或 filePath（二选一）' };
   }
 
+  // BLOCK-155 真·单通道：当前轮用户图片已内联进聊天请求体时，模型仍可能对同一张图
+  // 调 read_image（实测提示词只能降概率不能归零）。此处确定性短路：命中内联集合
+  // 直接返回重定向结果，不花第二次视觉调用；历史轮图片与结果图（toolJobId）不受影响。
+  const inlineSet = ctx && ctx.block155InlinedImagePaths;
+  if (filePath && inlineSet && typeof inlineSet.has === 'function' && inlineSet.size > 0) {
+    const norm = String(filePath).trim().replace(/^\.\//, '');
+    if (inlineSet.has(norm)) {
+      return {
+        ok: true,
+        fileName: norm,
+        description: '这张图片已经直接附在你收到的当前轮用户消息里（image_url 内联，真·单通道 vision）。请直接依据消息内的图片本身作答，无需再次读图。',
+        _note: 'BLOCK-155 内联短路：当前轮图片已在聊天请求体内联，本次调用未产生额外视觉请求。',
+      };
+    }
+  }
+
   let imgPath = null;
   let targetName = null;
   let sshReadFn = null;

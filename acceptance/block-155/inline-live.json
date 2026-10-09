@@ -1,0 +1,65 @@
+{
+  "name": "block155-vision-inline-live",
+  "startedAt": "2026-10-09T15:15:47.778Z",
+  "finishedAt": "2026-10-09T15:16:15.882Z",
+  "preset": {
+    "id": "deepseek-chat",
+    "model": "deepseek-flash",
+    "provider": "openai-compatible"
+  },
+  "taskId": "79775b77-7f8e-4a94-8e70-fdba3be8ed20",
+  "conversationId": "conv_bcd4df82-ce5",
+  "projectId": "p_mv13xvca_jk2v",
+  "imageBytes": 442,
+  "assistantReply": "图中有两个矩形：左边一个红色矩形，右边一个蓝色矩形。",
+  "transcriptChatRecords": 3,
+  "inlineProof": {
+    "urlLen": 614,
+    "textPart": "附件图片里有哪些形状和颜色？用一句话回答。\n[附件: .chat-attachments/b155-shapes.png（1KB）]"
+  },
+  "visionRoleCalls": 0,
+  "readImageToolCalls": 1,
+  "assertions": [
+    {
+      "name": "dev_stack_api_ready",
+      "pass": true,
+      "detail": "GET /api/data/projects → 200"
+    },
+    {
+      "name": "vision_capable_preset_found",
+      "pass": true,
+      "detail": "preset=deepseek-chat model=deepseek-flash provider=openai-compatible"
+    },
+    {
+      "name": "temp_project_created",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "agent_task_accepted",
+      "pass": true,
+      "detail": "status=200 body={\"taskId\":\"79775b77-7f8e-4a94-8e70-fdba3be8ed20\",\"status\":\"running\",\"kind\":\"primary\",\"parentTaskId\":null,\"conversationId"
+    },
+    {
+      "name": "task_completed",
+      "pass": true,
+      "detail": "status=completed agent=done"
+    },
+    {
+      "name": "assistant_describes_image",
+      "pass": true,
+      "detail": "reply=图中有两个矩形：左边一个红色矩形，右边一个蓝色矩形。"
+    },
+    {
+      "name": "transcript_shows_inline_image_url",
+      "pass": true,
+      "detail": "dataUrlLen=614 textPart=附件图片里有哪些形状和颜色？用一句话回答。\n[附件: .chat-attachments/b155-shapes.png（1KB）]"
+    },
+    {
+      "name": "no_second_vision_call",
+      "pass": true,
+      "detail": "vision 角色调用=0；read_image 工具调用（已短路计零成本）=1"
+    }
+  ],
+  "allPass": true
+}

@@ -88,7 +88,7 @@ const { trimMessagesToBudget } = require('./helpers/message-trimmer');
 const { createFreshnessTracker, applyFreshnessMark } = require('./helpers/context-freshness');
 // BLOCK-155 — 真·单通道 vision：用户图片附件行在请求体侧内联为 image_url 部件
 //（纯变换，messages 本体不突变）；读图与 read_image 工具同源（vision-image-io）。
-const { inlineVisionImagesForRequest } = require('./agent-tools/vision-inline');
+const { inlineVisionImagesForRequest, lastUserAttachmentImagePaths } = require('./agent-tools/vision-inline');
 const { readWorkspaceImageDataUrl } = require('./agent-tools/vision-image-io');
 
 /**
@@ -673,6 +673,15 @@ async function runLoop({
         } catch (e) {
           try { console.warn('[block155] vision inline failed, falling back to plain messages:', e && e.message); } catch {}
           requestMessages = messages;
+        }
+        // BLOCK-155 工具门：把「本 run 已成功内联的路径集合」挂到 toolCtx——模型若仍对
+        // 当前轮已内联图片调 read_image（实测降概率不归零），vision-tools 门确定性短路，
+        // 不花第二次视觉调用；历史轮图片与结果图（toolJobId）不受影响。
+        if (requestMessages !== messages && toolCtx && typeof toolCtx === 'object') {
+          const inlined = new Set(
+            lastUserAttachmentImagePaths(messages).filter((p) => visionImageCache.get(p)),
+          );
+          if (inlined.size > 0) toolCtx.block155InlinedImagePaths = inlined;
         }
       }
 

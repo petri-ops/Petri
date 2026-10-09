@@ -52,6 +52,22 @@ function extractAttachmentImagePaths(text) {
 }
 
 /**
+ * 最后一条 user 消息的图片附件路径（BLOCK-155 工具门用）：loop 侧据此把
+ * 「已成功内联的路径集合」挂到 toolCtx，read_image 对当前轮已内联图片的
+ * 重复调用可确定性短路（见 vision-tools.js 工具门）。
+ */
+function lastUserAttachmentImagePaths(messages) {
+  if (!Array.isArray(messages)) return [];
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const message = messages[i];
+    if (!message || message.role !== 'user') continue;
+    if (typeof message.content !== 'string') return [];
+    return extractAttachmentImagePaths(message.content);
+  }
+  return [];
+}
+
+/**
  * 内联变换：定位 messages 中最后一条 role==='user' 的消息；其 content 为字符串
  * 且含图片类附件行时，返回新数组（该消息替换为 content 部件数组——首元素
  * type text 保留原字符串全文，其后每个**可读**图一个 type image_url 元素）。
@@ -110,4 +126,5 @@ function chatVisionInlineCapable(profile) {
 module.exports = {
   inlineVisionImagesForRequest,
   chatVisionInlineCapable,
+  lastUserAttachmentImagePaths,
 };

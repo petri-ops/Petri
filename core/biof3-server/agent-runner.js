@@ -476,14 +476,15 @@ async function runAgentLoop({
     '\n- 创建 plan(create) 时，把触发该计划的用户原话（一句话总结即可）作为 chatExcerpt 字段传入，方便用户日后回顾。';
   systemPrompt +=
     '\n- 当用户在 FigCode 页面要求修改代码时（例如"换成横向条形图"/"配色改成 Nature 风格"/"加 facet"等），不要让用户自己复制粘贴。直接调用 act(type="update_figcode_editor", code="<完整新代码>", autoRun=true)，前端会自动替换并运行。';
-  systemPrompt +=
-    '\n- agent 看图（read_image）：当用户问图内容（如"图里上调基因集中在哪""这张图说明了什么"），调 read_image(toolJobId) 让 vision 角色模型解读图，返回的 description 可直接据此回答。token 较贵，仅用户明确问图内容时调，不要每次出图都读。';
-  // BLOCK-155 — 真·单通道 vision：本轮用户图片已直接附在最后一条用户消息里
-  //（image_url 部件随请求体直发），提示模型无需再调 read_image 重复读当前轮
-  // 图片；历史轮图片与结果图（toolJobId）仍走 read_image。
+  // BLOCK-155 — 真·单通道 vision：read_image 指引整段条件化。实机两轮实测教训：
+  // 旧指引与追加补丁句并存时模型行为不稳定（一轮直答、一轮仍重复调 read_image
+  // 重复读图）。visionInline 时单条强指引取代旧句，消除竞争指令。
   if (visionInline) {
     systemPrompt +=
-      '\n- 本轮用户的图片附件已直接附在最后一条用户消息里（无需再调 read_image 读取当前轮图片，直接根据消息内图片回答）；仅历史轮图片或结果图（toolJobId）仍用 read_image。';
+      '\n- agent 看图（read_image）：仅用于历史轮次的图片与工具产出的结果图（toolJobId）——当前轮用户的图片已直接附在最后一条用户消息里（image_url 部件），回答当前轮图片内容时直接依据消息内图片作答，不要对当前轮用户图片调用 read_image（重复读图浪费 token）。';
+  } else {
+    systemPrompt +=
+      '\n- agent 看图（read_image）：当用户问图内容（如"图里上调基因集中在哪""这张图说明了什么"），调 read_image(toolJobId) 让 vision 角色模型解读图，返回的 description 可直接据此回答。token 较贵，仅用户明确问图内容时调，不要每次出图都读。';
   }
   systemPrompt += '\n\n=== 学习路径推荐 ===';
   systemPrompt += '\n不要调用旧版学习路径推荐工具。';
