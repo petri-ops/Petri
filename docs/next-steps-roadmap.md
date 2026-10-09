@@ -1,5 +1,7 @@
 # BioF3 Desktop — Current Next Steps
 
+最后更新：2026-10-09（**BLOCK-154 收官 completed + BLOCK-150 vision 面用户实机收官（对账批，零代码改动）**：UI-473 用户复认「可以了不闪了」翻 verified（runActive run 级+簇级 forceOpen 双层修复实机确认）——BLOCK-154 优化落地序列全链闭环（P1 三波+P2 四项+过目批）；BLOCK-150 vision 面对账：UI-476 换绑实效翻 verified（deepseek-flash 渠道 12:26 读图实录 694 字符回流）+UI-477 内联图翻 verified（四轮用户实机加映迭代收官），UI-475 阻断路径维持 in_progress（无自然复现面，单测锁定如实）；ui:audit:check PASS+doc:suggest 零建议（docs_or_evidence_only）。接棒：BLOCK-155 真·单通道 vision（/workflow 发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-10-09（**BLOCK-154 波次 3 SimpleChat 行渲染 memo 化收口 completed（当日立项当日收口）**：前提核实修正〔BLOCK-95 B2 后端窗口化分页已在〕→ 真实热点=流式 tick 全列表重渲染；行 JSX 抽取 SimpleChatMessageRow（React.memo，DOM 逐行保留）+timeline 分段 WeakMap 缓存+冷却采样 cooldownNow；HK-01 红绿 3 用例（CopilotMarkdown 探针 bail-out 契约）+tsc 0+定向 37/37+build:check 0+closeout 十一门 PASS；UI-473 in_progress 待实机流畅度抽查。**P1 三波（highlight.js 按需化/冷启动异步化/行 memo 化）全部落地**；P2 结构项（暗色 token/CSS 双轨/大文件棘轮/manualChunks）待逐波裁决推进。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-10-09（**BLOCK-154 波次 2 冷启动异步化收口 completed（当日立项当日收口）**：main.js migration spawnSync→异步 spawn（事件循环不再同步阻塞、时序不变、initSchema 兜底）+window-manager 持久化串行异步链（exiting 守卫+before-quit 同步写保耐久）+**BK-08 缺陷类第二现转机械门禁** test/block154-startup-async.test.mjs（main.js 零同步子进程，HK-01 红绿）；门禁=block154+block59 43/43+chf0 26/26+block145 4/4+closeout 十一门 PASS（hygiene 首轮红=CRLF 漂移已归一）。**波次 3 SimpleChat 消息列表虚拟化接续推进**，随后 P2 结构项逐波。G0 开发期常态 · 不外推 packaged/Provider/GA。）

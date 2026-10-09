@@ -4687,13 +4687,13 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **实机测试路线（第 4 级 · 人确认）**：① 在会话中发送一条请求，让模型输出含代码块的回复（指定语言如 python / r / javascript / latex / go / dockerfile）；② 观察代码块是否有语法高亮（关键字/字符串/注释颜色区分）；③ 清单内语言应正常上色，视觉与改动前一致；④ 清单外语言（如 elixir）降级为纯文本但不报错、不白屏。结论回复确认即过目。
 - **边界**：语言清单内 UI 表现零变化；rehype-highlight（lowlight common，WorkspaceFilePreview+MDX 构建面）为独立消费面不在本波；注册清单扩展约定见 `_hljsCurated.ts` 头注释。
 
-## UI-473: SimpleChat 行渲染 memo 化——流式 tick 未变行零重渲染（BLOCK-154 波次 3）(2026-10-09 in_progress，契约级全绿；实机抽查随过目批)
+## UI-473: SimpleChat 行渲染 memo 化——流式 tick 未变行零重渲染（BLOCK-154 波次 3）(2026-10-09 verified，实机复认不闪)
 
 - **来源**：BLOCK-154 优化梳理清单 P1-2 下行范围（现状核实修正前提：BLOCK-95 B2 已有后端窗口化历史分页〔older.windowOffset〕，非「无分页全量渲染」；真实热点=流式每个 delta 经 conversationRunStore 通知整体重渲染 → 全部历史行重走 JSX + CopilotMarkdown 重解析）；用户裁决「按照建议逐个推进」。
 - **交付**：行 JSX（~180 行）抽取为 `SimpleChat/SimpleChatMessageRow.tsx`（React.memo 渲染边界，DOM/语义逐行保留：topicShift 分隔/timeline renderProgress/错误/续跑/总结重试 IIFE/操作行）；timeline 分段 WeakMap 身份缓存（历史消息对象引用恒定→分段数组复用）；冷却计时改父级采样 cooldownNow（retryTick 调度点不变，tick 不击穿行 memo）；EMPTY_ROW_SEGMENTS 共享空数组（`?? []` 新建会击穿 memo）。
 - **证据**：HK-01 红绿——SimpleChatMessageRow.test 3 用例（vi.mock CopilotMarkdown 探针：相同 props 重渲染 3 次调用→bail-out 1 次；m 身份变化必须重渲染；不稳定回调保守击穿语义）；tsc 0+lint 0 error+SimpleChat/ConversationTimeline/markdown/resume 套件 37/37+build:check（tsc -b+vite build）0。
-- **待验**：实机长会话流式打字流畅度主观对比（随 UI-457 等过目批同窗）。
-- **过目批发现与修复（2026-10-09）**：用户实机确认「流式过程执行时间线自动折叠，但每个工具执行一下折叠行为闪烁一次，体验不稳定」。归因=**UI-437 v4 既有语义缺陷，非波次 3 memo 化回归**（ConversationTimeline 内部状态零改动；`runRunning` 判据在工具间隙——模型推理期无 running 活动——翻转 false → 整段时间线收成运行摘要，下个工具启动又展开，每工具一次巨幅折叠闪烁）。修复（HK-01 红绿）：ConversationTimeline 新增 `runActive` prop（源=`m.pending`，run 全程 true 含间隙），`runOpen` 判据加入 runActive 压住间隙期折叠；run 结束仍按设计折叠为运行摘要；历史完成消息（runActive 缺省）语义不变。红→绿：新用例「工具间隙不折叠」1 红→ConversationTimeline+SimpleChat 套件 91/91 绿 + 回归护栏（runActive 缺省仍折叠）+ tsc 0 + lint 0 error。**待用户复认流式不再闪烁**。
+- **已验**：实机长会话流式主观复认通过（2026-10-09 用户「可以了不闪了」——runActive run 级+簇级 forceOpen 双层修复后体感不闪）。
+- **过目批发现与修复（2026-10-09）**：用户实机确认「流式过程执行时间线自动折叠，但每个工具执行一下折叠行为闪烁一次，体验不稳定」。归因=**UI-437 v4 既有语义缺陷，非波次 3 memo 化回归**（ConversationTimeline 内部状态零改动；`runRunning` 判据在工具间隙——模型推理期无 running 活动——翻转 false → 整段时间线收成运行摘要，下个工具启动又展开，每工具一次巨幅折叠闪烁）。修复（HK-01 红绿）：ConversationTimeline 新增 `runActive` prop（源=`m.pending`，run 全程 true 含间隙），`runOpen` 判据加入 runActive 压住间隙期折叠；run 结束仍按设计折叠为运行摘要；历史完成消息（runActive 缺省）语义不变。红→绿：新用例「工具间隙不折叠」1 红→ConversationTimeline+SimpleChat 套件 91/91 绿 + 回归护栏（runActive 缺省仍折叠）+ tsc 0 + lint 0 error。**用户复认通过（2026-10-09「可以了不闪了」）**。
 - **实机测试路线（第 4 级 · 人确认）**：① 打开一个已有多条历史消息的会话（≥10 条）；② 发送一个需要较长回复的问题触发流式；③ 观察流式过程中：已渲染的历史行是否有重渲染闪烁/抖动、新 token 追加是否平滑、滚动是否跟手；④ 体感结论（流畅/偶卡/明显卡）回复确认即过目。CDP 已截当前非流式态（`acceptance/block-154/streaming-state.png` 仅在流式中生成）。
 - **边界**：后端分页/滚动守卫/会话切换语义零改动；memo 退化为现状重渲染（无正确性风险）；DOM 结构与拆分前逐行一致。
 
@@ -4708,7 +4708,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **背景**：UI-473 首修（runActive 压 run 级折叠）后用户实机仍报「思考/执行折叠不丝滑」。主代理 CDP 实测复现：300ms 采样显示间隙期落定簇**换装**成 `.sc-tool-activity-summary` 摘要按钮（卡片行消失→下张卡片弹出），与 run 级折叠是两层。
 - **修复**：ConversationTimeline ToolsSegmentBlock `forceOpen={runExpanded || runRunning || runActive}`——run 进行中簇内禁落定折叠（行只增不换）；run 结束仍折叠为运行摘要行（UI-437 v4 设计不变，历史消息语义不变）。另加 `.sc-timeline-cluster` 180ms 入场过渡（纯动画属性，prefers-reduced-motion 降级）。
 - **证据**：HK-01 红绿——新增 2 用例先红（runActive 下 summary 在场=红；结束后 run-fold 锚定）→16/16 绿；邻域 46/46（ToolActivityList/SimpleChatMessageRow）+theme 契约 4/4+types 0+code-size PASS；**CDP 实测复验**：修复前间隙闪烁 2 次（rows 3→1/5→1 无摘要替代）→修复后消息内行单调 1→2→3→4→5→收尾折叠（塌落点均为消息边界设计内折叠）。
-- **待验**：用户实机流式体感复核（刷新即生效）。
+- **已验**：用户实机体感复认通过（2026-10-09「可以了不闪了」）。
 
 ## UI-475: 识图未配置时图片输入前置阻断——贴图/拖图即提示配置去向（BLOCK-150 加映·主代理跨会话协作）(2026-10-09 in_progress，契约级全绿；实机过目随用户)
 
@@ -4718,20 +4718,20 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **待验**：用户实机贴图过目（当前 vision 已因栈重启恢复可用；阻断形态在 env 缺失链路重启时自动顶上）。
 - **边界**：只断图片输入不断文本；vision 角色绑定与凭据配置归用户设置域（三选一路径已告知）。
 
-## UI-476: 识图模型可换绑——设置页角色选择器+渠道视觉能力声明+网关 image_url 协议转换（BLOCK-150 加映）(2026-10-09 in_progress，契约级全绿；实机渲染已验，换绑实效待用户)
+## UI-476: 识图模型可换绑——设置页角色选择器+渠道视觉能力声明+网关 image_url 协议转换（BLOCK-150 加映）(2026-10-09 verified，实机换绑实效)
 
 - **来源**：用户裁决「不想用 Qwen VL Max 渠道 毕竟 deepseek-flash 也可以的 设置上有个选择设置按钮不就可以了吗」。
 - **交付三件**：①设置→模型区新增「识图模型（视觉理解）」角色选择器（只列声明 vision 能力的渠道；无候选时前置指引）；②渠道行第 10 列「视觉」能力勾选（思考列同款先例，grid 10 列重排）；③网关 image_url 协议转换（vision 绑 openai 系通道时 {type:image}→{type:image_url}，dashscope-vision 原生直传不转换；能力门 model_capability_mismatch 保留为诚实守卫）。
 - **证据**：HK-01 红绿——后端 3 用例（转换/原生直传/能力门保留）；前端 VisionRoleBinding 3 用例（vision 过滤/回调/无候选指引）；types 0/lint 0/theme 契约 4/4；实机 CDP=选择器渲染+表头 10 列确认（无候选指引文案在位）。
-- **待验**：用户勾选 deepseek-flash 渠道「视觉」能力→选择器换绑→贴图实走其网关（网关须真支持 image_url 多模态，不支持则诚实报错可一键换回）。
+- **已验**：用户实机勾选 deepseek-flash 渠道「视觉」能力→选择器换绑→贴图实走其网关成功——2026-10-09 12:26 读图实录（deepseek-chat/openai-compatible/deepseek-flash）描述 694 字符完整回流，网关 image_url 多模态实走确认。
 - **配套语境**：凭据显式化（env 路已移除）后，vision_configured 能力位随换绑动态反映。
 
-## UI-477: 用户消息图片附件内联渲染——[附件: 路径]文本行变图片本体（BLOCK-150 加映）(2026-10-09 in_progress，契约级全绿+实机已验)
+## UI-477: 用户消息图片附件内联渲染——[附件: 路径]文本行变图片本体（BLOCK-150 加映）(2026-10-09 verified，四轮用户实机加映迭代收官)
 
 - **来源**：用户实机反馈「这个是附件的形式给到聊天框 我觉得这样并不好 直接是图片发送是否可以呢」。
 - **交付**：渲染层解析（发送管线不动，模型/vision 按路径读图架构不变）——SimpleChatMessageRow 用户分支把正文中的图片附件行（`[附件: path（大小）]`）抽出，经 GET /api/workspaces/:id/file?path= 内联 <img>（max 260px/token 边框/懒加载）；非图片附件行保留原文；**历史消息渲染时同样生效**（已发的旧消息就地变图）。
 - **证据**：HK-01 红绿——attachmentInline 4 用例（图片判定/抽行保留非图片/零成本路径/URL 编码）；行组件回归 7/7+theme 契约 4/4+types 0+lint 0；**实机 CDP=用户刚发的消息 .sc-msg-inline-image 加载成功（naturalWidth=958）**。
-- **待验**：用户过目（HMR 已生效，当前会话即可看）；点击放大（ImagePreviewModal 复用）留后续小加映。
+- **已验**：用户实机过目驱动四轮加映迭代（悬挂式+点击放大→全屏灯箱→portal 根修恢复卡片→输入芯片纯缩略图），最终形态用户无再诉即认可；点击放大已随加映交付（CDP 三验全过）。
 
 ### UI-477 加映（2026-10-09·悬挂式+点击放大）：小图按钮 96px cover + 悬浮阴影靠右悬挂（不占正文主区），点击复用 ImagePreviewModal 全屏放大（缩放/关闭控件齐）；实机 CDP 三验全过（按钮在位/click 弹层开启/阴影 0 12px 32px）。
 
