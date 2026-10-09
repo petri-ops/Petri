@@ -4693,3 +4693,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：HK-01 红绿——SimpleChatMessageRow.test 3 用例（vi.mock CopilotMarkdown 探针：相同 props 重渲染 3 次调用→bail-out 1 次；m 身份变化必须重渲染；不稳定回调保守击穿语义）；tsc 0+lint 0 error+SimpleChat/ConversationTimeline/markdown/resume 套件 37/37+build:check（tsc -b+vite build）0。
 - **待验**：实机长会话流式打字流畅度主观对比（随 UI-457 等过目批同窗）。
 - **边界**：后端分页/滚动守卫/会话切换语义零改动；memo 退化为现状重渲染（无正确性风险）；DOM 结构与拆分前逐行一致。
+
+## UI-474: 暗色 token 收敛——desktop.css dock/ghost 硬编码色→语义 token（BLOCK-154 P2-1）(2026-10-09 in_progress，构建+token 契约全绿；实机暗/亮切换抽查随过目批)
+- **来源**：BLOCK-154 优化梳理清单 P2-1 暗色 token 收敛（light/dark 成对硬编码规则→语义 token）；用户裁决「按 3→4→2→1 推进」。
+- **交付**：desktop.css 左侧 dock（toggle/btn hover+active）与 ghost 按钮 hover 的暗色覆盖冗余硬编码色收敛为语义 token：亮色 hover `background` 由 `var(--gewu-bg-subtle)` 改 `var(--gewu-hover)`（亮色值 #f4f4f5 与原 bg-subtle 一致零回归，暗色 token 自带 rgba(230,237,243,0.07)）；暗色 `[data-theme='dark']` 块中 `background: rgba(230,237,243,0.06)` 与 `rgba(67,209,174,0.14)`（=暗色 `--gewu-mint` 精确值）两行删除，仅保留颜色差异覆盖。
+- **证据**：theme-token-contract 4/4（token 定义/引用闭环、slate 家族禁回潮、暗色 ifm 特异性）+ frontend build 成功+ tsc 0。
+- **待验**：实机亮/暗主题切换 dock 按钮 hover/active 视觉一致性（暗色 hover 由 0.06→0.07 极微差，需主观确认无感知差异）。
+- **边界**：仅 desktop.css 3 处 hover + 1 处 active；border 类硬编码（rgba(230,237,243,0.08/0.1/0.15)）无精确对应 token 暂保留；nav-panel 恒暗面板硬编码不动；其余 plain CSS 文件未触碰。

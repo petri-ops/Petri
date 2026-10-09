@@ -83,14 +83,14 @@
   margin-left: 6px;
 }
 .gewu-desktop-dock__toggle:hover {
-  background: var(--gewu-bg-subtle);
+  background: var(--gewu-hover);
   color: var(--gewu-teal);
 }
 [data-theme='dark'] .gewu-desktop-dock__toggle {
   color: var(--gewu-text-tertiary);
 }
 [data-theme='dark'] .gewu-desktop-dock__toggle:hover {
-  background: rgba(230, 237, 243, 0.06);
+  /* BLOCK-154 P2-1：hover 背景走 --gewu-hover（亮/暗双主题值），删除冗余硬编码 */
   color: var(--gewu-mint-bright);
 }
 
@@ -125,7 +125,7 @@
 }
 
 .gewu-desktop-dock__btn:hover {
-  background: var(--gewu-bg-subtle);
+  background: var(--gewu-hover);
   color: var(--gewu-teal);
 }
 
@@ -139,12 +139,12 @@
 }
 
 [data-theme='dark'] .gewu-desktop-dock__btn:hover {
-  background: rgba(230, 237, 243, 0.06);
+  /* BLOCK-154 P2-1：hover 背景走 --gewu-hover（亮/暗双主题值），删除冗余硬编码 */
   color: var(--gewu-mint-bright);
 }
 
 [data-theme='dark'] .gewu-desktop-dock__btn.active {
-  background: rgba(67, 209, 174, 0.14);
+  /* BLOCK-154 P2-1：active 背景走 --gewu-mint（暗色值恰为 rgba(67,209,174,0.14)），删除冗余硬编码 */
   color: var(--gewu-mint-bright);
 }
 
@@ -1156,7 +1156,7 @@
   border: 1px solid var(--gewu-border-strong, var(--gewu-border-strong));
 }
 .gewu-btn--ghost:hover:not(:disabled) {
-  background: var(--gewu-bg-subtle);
+  background: var(--gewu-hover);
 }
 
 [data-theme='dark'] .gewu-btn--ghost {
@@ -1164,7 +1164,7 @@
   border-color: rgba(230, 237, 243, 0.15);
 }
 [data-theme='dark'] .gewu-btn--ghost:hover:not(:disabled) {
-  background: rgba(230, 237, 243, 0.06);
+  /* BLOCK-154 P2-1：hover 背景走 --gewu-hover（亮/暗双主题值），删除冗余硬编码 */
 }
 
 .gewu-btn--danger-ghost {
