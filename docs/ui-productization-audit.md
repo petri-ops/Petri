@@ -4732,3 +4732,5 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **交付**：渲染层解析（发送管线不动，模型/vision 按路径读图架构不变）——SimpleChatMessageRow 用户分支把正文中的图片附件行（`[附件: path（大小）]`）抽出，经 GET /api/workspaces/:id/file?path= 内联 <img>（max 260px/token 边框/懒加载）；非图片附件行保留原文；**历史消息渲染时同样生效**（已发的旧消息就地变图）。
 - **证据**：HK-01 红绿——attachmentInline 4 用例（图片判定/抽行保留非图片/零成本路径/URL 编码）；行组件回归 7/7+theme 契约 4/4+types 0+lint 0；**实机 CDP=用户刚发的消息 .sc-msg-inline-image 加载成功（naturalWidth=958）**。
 - **待验**：用户过目（HMR 已生效，当前会话即可看）；点击放大（ImagePreviewModal 复用）留后续小加映。
+
+### UI-477 加映（2026-10-09·悬挂式+点击放大）：小图按钮 96px cover + 悬浮阴影靠右悬挂（不占正文主区），点击复用 ImagePreviewModal 全屏放大（缩放/关闭控件齐）；实机 CDP 三验全过（按钮在位/click 弹层开启/阴影 0 12px 32px）。

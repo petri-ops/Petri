@@ -4247,19 +4247,34 @@
   border-color: var(--gewu-success);
 }
 
-/* BLOCK-150 加映（UI-477）— 用户消息图片附件内联渲染 */
+/* BLOCK-150 加映（UI-477）— 用户消息图片附件内联渲染：悬挂式小图不占正文主区 */
 .sc-msg-inline-images {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 6px;
   margin-top: 6px;
 }
 
-.sc-msg-inline-image {
-  max-width: 260px;
-  max-height: 200px;
-  border-radius: 8px;
+.sc-msg-inline-image-btn {
+  padding: 0;
   border: 1px solid var(--gewu-border);
-  object-fit: contain;
+  border-radius: 8px;
+  background: var(--gewu-surface, transparent);
+  box-shadow: var(--gewu-shadow-float, 0 4px 12px rgb(0 0 0 / 12%));
   cursor: zoom-in;
+  overflow: hidden;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.sc-msg-inline-image-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--gewu-shadow-float, 0 6px 16px rgb(0 0 0 / 18%));
+}
+
+.sc-msg-inline-image {
+  display: block;
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
 }

@@ -15,7 +15,7 @@
 // （子组件不重执行）；m 对象身份变化必须重渲染。父级传入的回调/记录身份必须跨
 // 流式 tick 恒定（现有 hooks 均满足；新增调用方若传入不稳定回调，memo 退化为
 // 现状行为，无正确性风险）。
-import React from 'react';
+import React, { useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { HighlightedCode } from '@/components/ui/CodeHighlight';
 import { CopilotMarkdown } from '../copilotMarkdown';
@@ -32,7 +32,8 @@ import { resumeInterruptedConversation } from '../conversationRunStore';
 import type { SimpleMessage } from './types';
 import type { ExtractContext, FileReferenceClickDetail } from '@/lib/chat-file-references';
 import type { FormattedError } from '../useErrorFormatter';
-import { parseInlineAttachments, workspaceFileUrl } from './attachmentInline';
+import { parseInlineAttachments, workspaceFileUrl, type InlineAttachmentImage } from './attachmentInline';
+import { ImagePreviewModal } from './ImagePreviewModal';
 
 export interface SimpleChatMessageRowProps {
   m: SimpleMessage;
@@ -102,6 +103,8 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
   // BLOCK-150 加映（UI-477）— 用户消息图片附件内联渲染：图片附件行抽成 <img>
   //（经 /file 端点按路径取图），不再停留为「[附件: 路径]」文本行。
   const inlineImages = m.role === 'user' ? parseInlineAttachments(m.content || '') : { text: '', images: [] };
+  // UI-477 加映 — 点击放大（复用 ImagePreviewModal）；悬挂式小图不占正文主区。
+  const [zoomedImage, setZoomedImage] = useState<InlineAttachmentImage | null>(null);
   return (
     <>
       {isTopicShiftStart && (
@@ -173,15 +176,36 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
           {m.role === 'user' && inlineImages.images.length > 0 && (
             <div className="sc-msg-inline-images">
               {inlineImages.images.map((img) => (
-                <img
+                <button
                   key={img.path}
-                  className="sc-msg-inline-image"
-                  src={workspaceFileUrl(projectId, img.path)}
-                  alt={img.name}
-                  loading="lazy"
-                />
+                  type="button"
+                  className="sc-msg-inline-image-btn"
+                  onClick={() => setZoomedImage(img)}
+                  aria-label={`放大查看 ${img.name}`}
+                  title="点击放大"
+                >
+                  <img
+                    className="sc-msg-inline-image"
+                    src={workspaceFileUrl(projectId, img.path)}
+                    alt={img.name}
+                    loading="lazy"
+                  />
+                </button>
               ))}
             </div>
+          )}
+          {zoomedImage && (
+            <ImagePreviewModal
+              attachment={{
+                id: `inline-${zoomedImage.path}`,
+                name: zoomedImage.name,
+                type: 'image/png',
+                size: 0,
+                dataUrl: workspaceFileUrl(projectId, zoomedImage.path),
+                previewUrl: workspaceFileUrl(projectId, zoomedImage.path),
+              }}
+              onClose={() => setZoomedImage(null)}
+            />
           )}
           {m.error && m.role === 'assistant' && (() => {
             // UI-AGENTWB-### / chat-error-rendering: prefer the
