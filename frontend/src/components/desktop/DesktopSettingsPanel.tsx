@@ -31,6 +31,8 @@ import { useEndpointProfilesEditor } from './DesktopSettingsPanel/useEndpointPro
 import { UsageResourcePanel } from './DesktopSettingsPanel/sections/UsageResourcePanel';
 // BLOCK-163 W3 P9（MDL-4）— 按模型成本/用量面板（usage-mine models 聚合）
 import { UsageCostPanel } from './DesktopSettingsPanel/sections/UsageCostPanel';
+// BLOCK-163 W3 P10（KNW-5）— 记忆治理面板（facts 单条遗忘+摘要清除）
+import { MemoryPanel } from './DesktopSettingsPanel/sections/MemoryPanel';
 import { DecisionUsagePanel } from './DesktopSettingsPanel/sections/DecisionUsagePanel';
 // BLOCK-160 W2 P2（ORC-1）— Agent 用户规则面板（rules.json CRUD 读面）
 import { AgentRulesPanel } from './DesktopSettingsPanel/sections/AgentRulesPanel';
@@ -573,6 +575,13 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
         {activeSection === 'decisions' && (
           <section className="gewu-settings-section">
             <AgentRulesPanel />
+          </section>
+        )}
+
+        {/* BLOCK-163 W3 P10（KNW-5）— 记忆治理节（同区相邻：治理面集中） */}
+        {activeSection === 'decisions' && (
+          <section className="gewu-settings-section">
+            <MemoryPanel />
           </section>
         )}
 
