@@ -3031,6 +3031,51 @@
       ],
       "frontendRelated": true,
       "classifiesScripts": false
+    },
+    {
+      "id": "block156-ext-hub-mcp-client",
+      "note": "BLOCK-156 扩展中心重组与 MCP 客户端：/extensions 四货架（D2 分类学 extensionShelves 单源）+MCP stdio 连接管理（client-manager/mcp-settings）+/api/mcp/servers* 路由 + mcp_<server>_<tool> 动态投影进 agent 工具集（execution+R2 档位）；投影层只追加动态面，静态 76 恒等契约不动。",
+      "patterns": [
+        "frontend/src/lib/extensionShelves.ts",
+        "frontend/src/pages/extensions/**",
+        "frontend/src/hooks/useMcpServers.ts",
+        "core/biof3-server/helpers/mcp-settings.js",
+        "core/biof3-server/mcp/client-manager.js",
+        "core/biof3-server/routes/mcp-client.js",
+        "core/biof3-server/agent-tools/mcp-projection.js",
+        "test/fixtures/mcp-fixture-server.cjs",
+        "scripts/block156-*.mjs",
+        "acceptance/block-156/**"
+      ],
+      "tests": [
+        "test/mcp-client-settings.test.mjs",
+        "test/mcp-client-manager.test.mjs",
+        "test/mcp-projection.test.mjs",
+        "frontend/src/lib/extensionShelves.test.ts",
+        "frontend/src/pages/extensions/index.test.tsx",
+        "frontend/src/pages/extensions/McpShelfPane.test.tsx",
+        "test/agent-tool-registry.test.mjs",
+        "test/agent-tool-policy.test.mjs"
+      ],
+      "classifiesScripts": true
+    },
+    {
+      "id": "ui-479-responsive-collapse",
+      "note": "UI-479 侧栏自适应收起（2026-10-09 verified）：useResponsivePanelCollapse + deriveResponsivePanels 纯函数；补登记 acceptance/ui-479 读者映射（昨日收口后目录新增未随 closeout 重跑 test:changed，BLOCK-156 收口链抓真，机械补账）。",
+      "patterns": [
+        "frontend/src/hooks/useResponsivePanelCollapse.ts",
+        "frontend/src/hooks/useWorkspaceLayout.ts",
+        "frontend/src/hooks/useResizableColumns.ts",
+        "frontend/src/components/desktop/AppRailContext.tsx",
+        "frontend/src/components/desktop/WorkspacePanelsContext.tsx",
+        "acceptance/ui-479/**"
+      ],
+      "tests": [
+        "frontend/src/hooks/useResponsivePanelCollapse.test.tsx",
+        "frontend/src/hooks/useWorkspaceLayout.test.tsx",
+        "frontend/src/hooks/useResizableColumns.test.ts"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

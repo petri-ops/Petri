@@ -44,7 +44,6 @@ export type {
   ParameterType,
   Skill,
   SkillExecution,
-  SkillSource,
 } from './useSkillStore/types';
 export { __getProgressUnsubsSize } from './useSkillStore/executionMonitor';
 interface DiscoverResult {

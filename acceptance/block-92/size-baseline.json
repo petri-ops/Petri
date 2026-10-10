@@ -40,8 +40,8 @@
       "path": "frontend/src/pages/project-workspace.tsx",
       "wave": "B",
       "module": "W-02",
-      "lines": 1231,
-      "sha256": "292223cb2cfb86ab5253878f8fc7d08dbf2ebd290ef2a0aa289c0daa8461bb80"
+      "lines": 1232,
+      "sha256": "4b9a7dc1c88a04e8791007f6e016b650d288ab7d9a2825b1d4c0402e136ff729"
     },
     {
       "path": "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
@@ -68,8 +68,8 @@
       "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
       "wave": "B",
       "module": "W-01",
-      "lines": 788,
-      "sha256": "46762ca5d2dae982575b682b42a657103b4b2cad98a5ec394d0e1a053cb9fd6c"
+      "lines": 792,
+      "sha256": "ca71f7d84235d349c38a215f7f94b0f171fced26926ef2ac243a5c844bff5dc3"
     },
     {
       "path": "frontend/src/pages/home.tsx",
@@ -89,8 +89,8 @@
       "path": "frontend/src/hooks/useSkillStore.ts",
       "wave": "B",
       "module": "W-02",
-      "lines": 529,
-      "sha256": "0b16011cfdab1b1a72602d7bb2df35f0e41ed104edd574aa318010fbda0cb22f"
+      "lines": 528,
+      "sha256": "67c6d37f003518c2eb0467dc47fd76ce2362a1470d7fe3d2c01b9308eeb092a7"
     },
     {
       "path": "frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx",
@@ -139,7 +139,7 @@
       "wave": "C",
       "module": "P-02",
       "lines": 965,
-      "sha256": "ef8265f83f91d6b0e95927c52b846d62053b96e13ba3fc188041e46c0a8b87fe"
+      "sha256": "b3a56a109f770a0e14f15a1601268ffea77b279db62e9bd1def2ee5841dc41a4"
     },
     {
       "path": "core/shared-backend/result-studio-lifecycle.js",
@@ -170,5 +170,5 @@
       "sha256": "62261e61f058f627b8442987f4b567b2f08a44a6f3281909bdab27a8124aa664"
     }
   ],
-  "total": 22938
+  "total": 22942
 }

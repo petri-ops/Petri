@@ -31,6 +31,17 @@ export interface McpServerDraft {
   env?: Record<string, string>;
 }
 
+/** 任意错误面转可读文本（避免 unknown 直接 String 化成 [object Object]）。 */
+function errText(value: unknown, fallback: string): string {
+  if (typeof value === 'string' && value.length > 0) return value;
+  if (value instanceof Error) return value.message;
+  try {
+    const serialized = JSON.stringify(value);
+    if (serialized && serialized !== '{}') return serialized;
+  } catch { /* 不可序列化走 fallback */ }
+  return fallback;
+}
+
 async function apiJson(path: string, init?: RequestInit): Promise<Record<string, unknown>> {
   const resp = await fetch(`${getApiPrefix()}${path}`, {
     ...init,
@@ -43,7 +54,7 @@ async function apiJson(path: string, init?: RequestInit): Promise<Record<string,
     data = {};
   }
   if (!resp.ok) {
-    throw new Error(String(data.error ?? `HTTP ${resp.status}`));
+    throw new Error(errText(data.error, `HTTP ${resp.status}`));
   }
   return data;
 }
@@ -82,14 +93,16 @@ export function useMcpServers(): {
         setError(null);
       }
     } catch (e) {
-      if (alive.current) setError(e instanceof Error ? e.message : String(e));
+      if (alive.current) setError(errText(e instanceof Error ? e.message : e, '加载失败'));
     } finally {
       if (alive.current) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    void refresh();
+    // 挂载加载延一拍（set-state-in-effect 语义：effect 同步面零 setState）
+    const t = setTimeout(() => void refresh(), 0);
+    return () => clearTimeout(t);
   }, [refresh]);
 
   // 连接中的 server 轮询状态（连接是异步过程，最长 20s；2s 步进）
@@ -111,7 +124,7 @@ export function useMcpServers(): {
         await refresh();
         return true;
       } catch (e) {
-        setNotice(e instanceof Error ? e.message : String(e));
+        setNotice(errText(e instanceof Error ? e.message : e, '操作失败'));
         return false;
       }
     },
@@ -127,7 +140,7 @@ export function useMcpServers(): {
         await refresh();
         return true;
       } catch (e) {
-        setNotice(e instanceof Error ? e.message : String(e));
+        setNotice(errText(e instanceof Error ? e.message : e, '操作失败'));
         return false;
       } finally {
         setBusyId(null);
@@ -144,7 +157,7 @@ export function useMcpServers(): {
         const data = await apiJson(`/mcp/servers/${encodeURIComponent(id)}/connect`, { method: 'POST' });
         setNotice(`已连接 ${id}（${Number(data.toolCount ?? 0)} 个工具）`);
       } catch (e) {
-        setNotice(`连接失败：${e instanceof Error ? e.message : String(e)}`);
+        setNotice(`连接失败：${errText(e instanceof Error ? e.message : e, '未知错误')}`);
       } finally {
         setBusyId(null);
         await refresh();
@@ -160,7 +173,7 @@ export function useMcpServers(): {
         await apiJson(`/mcp/servers/${encodeURIComponent(id)}/disconnect`, { method: 'POST' });
         setNotice(`已断开 ${id}`);
       } catch (e) {
-        setNotice(e instanceof Error ? e.message : String(e));
+        setNotice(errText(e instanceof Error ? e.message : e, '操作失败'));
       } finally {
         setBusyId(null);
         await refresh();

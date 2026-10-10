@@ -11,31 +11,41 @@ import { McpShelfPane } from './McpShelfPane';
 
 type FetchMock = ReturnType<typeof vi.fn>;
 
+interface DraftBody {
+  id?: string;
+  command?: string;
+  args?: string[];
+  autoConnect?: boolean;
+}
+
 function withServers(servers: unknown[]): FetchMock {
-  const mock: FetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-    const url = String(input);
-    const method = init?.method ?? 'GET';
-    if (url.endsWith('/mcp/servers') && method === 'GET') {
-      return new Response(JSON.stringify({ status: 'ok', servers }), { status: 200 });
-    }
-    if (url.endsWith('/mcp/servers') && method === 'POST') {
-      const body = JSON.parse(String(init?.body ?? '{}'));
-      if (!body.id || !body.command) {
-        return new Response(JSON.stringify({ status: 'error', error: 'missing_command' }), { status: 400 });
+  const mock: FetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) =>
+    Promise.resolve(new Response('ok', { status: 200 })).then((): Response => {
+      const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+      const method = init?.method ?? 'GET';
+      const rawBody = init?.body;
+      const body: DraftBody =
+        typeof rawBody === 'string' ? (JSON.parse(rawBody) as DraftBody) : {};
+      if (url.endsWith('/mcp/servers') && method === 'GET') {
+        return new Response(JSON.stringify({ status: 'ok', servers }), { status: 200 });
       }
-      return new Response(JSON.stringify({ status: 'ok', server: body }), { status: 200 });
-    }
-    if (/\/mcp\/servers\/[^/]+\/connect$/.test(url)) {
-      return new Response(JSON.stringify({ status: 'ok', toolCount: 3 }), { status: 200 });
-    }
-    if (/\/mcp\/servers\/[^/]+\/disconnect$/.test(url)) {
-      return new Response(JSON.stringify({ status: 'ok' }), { status: 200 });
-    }
-    if (/\/mcp\/servers\/[^/]+$/.test(url) && method === 'DELETE') {
-      return new Response(JSON.stringify({ status: 'ok' }), { status: 200 });
-    }
-    return new Response(JSON.stringify({ status: 'error', error: `unmocked ${method} ${url}` }), { status: 500 });
-  });
+      if (url.endsWith('/mcp/servers') && method === 'POST') {
+        if (!body.id || !body.command) {
+          return new Response(JSON.stringify({ status: 'error', error: 'missing_command' }), { status: 400 });
+        }
+        return new Response(JSON.stringify({ status: 'ok', server: body }), { status: 200 });
+      }
+      if (/\/mcp\/servers\/[^/]+\/connect$/.test(url)) {
+        return new Response(JSON.stringify({ status: 'ok', toolCount: 3 }), { status: 200 });
+      }
+      if (/\/mcp\/servers\/[^/]+\/disconnect$/.test(url)) {
+        return new Response(JSON.stringify({ status: 'ok' }), { status: 200 });
+      }
+      if (/\/mcp\/servers\/[^/]+$/.test(url) && method === 'DELETE') {
+        return new Response(JSON.stringify({ status: 'ok' }), { status: 200 });
+      }
+      return new Response(JSON.stringify({ status: 'error', error: `unmocked ${method} ${url}` }), { status: 500 });
+    }));
   vi.stubGlobal('fetch', mock);
   return mock;
 }
@@ -80,7 +90,7 @@ describe('BLOCK-156 McpShelfPane', () => {
     render(<McpShelfPane />);
     await waitFor(() => expect(screen.getByTestId('mcp-card-ok-srv')).toBeTruthy());
     expect(screen.getByTestId('mcp-card-ok-srv').getAttribute('data-status')).toBe('connected');
-    expect(screen.getByText('5 个工具 · agent 可用集已投影')).toBeTruthy();
+    expect(screen.getByText('5 个工具')).toBeTruthy();
     expect(screen.getByTestId('mcp-disconnect-ok-srv')).toBeTruthy();
     expect(screen.getByTestId('mcp-card-bad-srv').getAttribute('data-status')).toBe('error');
     expect(screen.getByTitle('spawn ENOENT')).toBeTruthy();
@@ -110,7 +120,8 @@ describe('BLOCK-156 McpShelfPane', () => {
     await waitFor(() => expect(screen.getByTestId('mcp-notice').textContent).toContain('已添加 fs'));
     const posts = (mock.mock.calls as Array<[string, RequestInit | undefined]>)
       .filter(([u, i]) => String(u).endsWith('/mcp/servers') && i?.method === 'POST');
-    const body = JSON.parse(String(posts[0][1]?.body));
+    const rawBody = posts[0][1]?.body;
+    const body: DraftBody = typeof rawBody === 'string' ? (JSON.parse(rawBody) as DraftBody) : {};
     expect(body.id).toBe('fs');
     expect(body.args).toEqual(['-y', '@mcp/fs', '/tmp']);
     expect(body.autoConnect).toBe(false);

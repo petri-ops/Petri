@@ -60,7 +60,7 @@ function listMcpServers() {
     const seen = new Set();
     const out = [];
     for (const entry of servers) {
-      const { server, error } = normalizeServerEntry(entry);
+      const { server } = normalizeServerEntry(entry);
       if (!server || seen.has(server.id)) continue; // 损坏/重复条目静默跳过（读取侧 fail-open）
       seen.add(server.id);
       out.push(server);

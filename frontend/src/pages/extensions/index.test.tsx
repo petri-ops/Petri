@@ -43,7 +43,7 @@ vi.mock('@/lib/desktopBridge', () => ({
   getBridge: (ns: string) => {
     if (ns === 'skills') {
       return {
-        discover: vi.fn(async () => discoverResult),
+        discover: vi.fn(() => Promise.resolve(discoverResult)),
         execute: vi.fn(),
         cancel: vi.fn(),
         getExecution: vi.fn(),
@@ -52,20 +52,20 @@ vi.mock('@/lib/desktopBridge', () => ({
     }
     if (ns === 'plugins') {
       return {
-        listInstalled: vi.fn(async () => []),
-        listRemote: vi.fn(async () => ({ plugins: {} })),
-        install: vi.fn(async () => ({ ok: true })),
-        uninstall: vi.fn(async () => ({ ok: true })),
-        checkUpdates: vi.fn(async () => []),
+        listInstalled: vi.fn(() => Promise.resolve([])),
+        listRemote: vi.fn(() => Promise.resolve({ plugins: {} })),
+        install: vi.fn(() => Promise.resolve({ ok: true })),
+        uninstall: vi.fn(() => Promise.resolve({ ok: true })),
+        checkUpdates: vi.fn(() => Promise.resolve([])),
       };
     }
     if (ns === 'runtime') {
-      return { status: vi.fn(async () => null) };
+      return { status: vi.fn(() => Promise.resolve(null)) };
     }
     if (ns === 'packs') {
       return {
-        listInstalled: vi.fn(async () => ({ packs: [] })),
-        listAvailable: vi.fn(async () => ({ packs: [] })),
+        listInstalled: vi.fn(() => Promise.resolve({ packs: [] })),
+        listAvailable: vi.fn(() => Promise.resolve({ packs: [] })),
         installFromDialog: vi.fn(),
         installPath: vi.fn(),
         uninstallPlan: vi.fn(),
@@ -80,9 +80,9 @@ vi.mock('@/lib/desktopBridge', () => ({
 import ExtensionsPage from './index';
 
 // P2 起 MCP 货架走后端 HTTP（useMcpServers）——默认空清单
-vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
+vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response(JSON.stringify({
   status: 'ok', servers: [],
-}), { status: 200 })));
+}), { status: 200 }))));
 
 afterEach(() => {
   cleanup();
@@ -136,8 +136,7 @@ describe('BLOCK-156 扩展中心页', () => {
 
   it('MCP 货签 P2 配置面在场（空态 + 添加入口）', async () => {
     renderAt('/extensions?tab=mcp');
-    await waitFor(() => expect(screen.getByTestId('mcp-shelf')).toBeTruthy());
-    expect(screen.getByTestId('mcp-empty')).toBeTruthy();
+    await waitFor(() => expect(screen.getByTestId('mcp-empty')).toBeTruthy());
     expect(screen.getByTestId('mcp-add-toggle')).toBeTruthy();
   });
 

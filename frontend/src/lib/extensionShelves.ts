@@ -22,7 +22,7 @@ export type SkillShelfId = 'domain-skills' | 'general-skills';
  * 领域 category 前缀表（D2 裁决：当前唯一领域 = 生信）。
  * 匹配规则：category === prefix 或 category 以 `${prefix}/` 开头。
  */
-export const DOMAIN_CATEGORY_PREFIXES: readonly string[] = ['bioinformatics'];
+const DOMAIN_CATEGORY_PREFIXES: readonly string[] = ['bioinformatics'];
 
 /** 按 category 判定技能货架（D2 单源；前端唯一判定入口）。 */
 export function classifySkillShelf(category: string): SkillShelfId {

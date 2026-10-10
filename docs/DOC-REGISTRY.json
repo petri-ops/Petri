@@ -5766,7 +5766,7 @@
       "path": "docs/block-156-ext-hub-mcp-client-plan.md",
       "capability": "extensions-hub-mcp-client",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "ext-hub-mcp-client-plan",
       "entrypoint": "docs/README.md",
@@ -5777,7 +5777,8 @@
         "mcp-client",
         "skills"
       ],
-      "archivePolicy": "retain_stable_path"
+      "archivePolicy": "retain_stable_path",
+      "notes": "2026-10-10 同日整包收口：P1 货架重组/P2 MCP 客户端基座/P3 工具投影三阶段连打；实机 8+9+12 断言 ALL PASS；设计偏差四条登记 plan §8.2。"
     }
   ],
   "lastUpdated": "2026-10-10",

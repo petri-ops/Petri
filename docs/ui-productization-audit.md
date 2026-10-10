@@ -4766,4 +4766,4 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 ### UI-480 加映（2026-10-10·BLOCK-156 P2）：MCP 货架从占位翻真配置面——server 清单卡片（状态徽标 connected/connecting/disconnected/error 四态+工具计数+错误透出）/添加表单（ID 校验·命令·参数空格切分）/连接·断开·移除动作流（notice 反馈+connecting 2s 轮询）；数据面走后端 HTTP（useMcpServers hook，resolveApiBase 直连先例）。证据=McpShelfPane 4/4（空态校验/四态卡片/连接流 notice 带工具数/添加流 args 切分）+实机回环九断言中的 UI 在场断言（acceptance/block-156/p2-mcp-shelf-connected.png）。
 
-### UI-480 加映二（2026-10-10·BLOCK-156 P3）：已连接卡片工具计数文案接通投影事实（「N 个工具」），投影层本体在后端（mcp-projection，非 UI 面）；agent 全链实机十二断言含工具调用可视化链路（transcript toolCalls 按名）。第三方技能本地导入未随包交付（转 C-EXT-4 候选，plan §8.3）。
+### UI-480 加映二（2026-10-10·BLOCK-156 P3）：已连接卡片工具计数文案接通投影事实（「N 个工具」），投影层本体在后端（mcp-projection，非 UI 面）；agent 全链实机十二断言含工具调用可视化链路（transcript toolCalls 按名）。第三方技能本地导入未随包交付（转 C-EXT-4 候选，plan §8.3）。收口批 lint 加固（挂载加载延拍/errText 单源/测试 mock 去裸 async 与类型收窄）随收口提交同步台账。

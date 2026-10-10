@@ -18,7 +18,6 @@ import {
   isExtensionShelfId,
   type ExtensionShelfId,
 } from '@/lib/extensionShelves';
-import { useMcpServers } from '@/hooks/useMcpServers';
 import { SkillCard } from './SkillCard';
 import { SkillDetail } from './SkillDetail';
 import { McpShelfPane } from './McpShelfPane';

@@ -7,12 +7,13 @@ acceptance:
   - P2 MCP 客户端基座：channels.js 登记 mcp:* 通道族 + preload 包装 + 连接管理器（stdio）+ 配置持久化 + 扩展页/设置面 UI；连接生命周期测试 + ipc-channels-registry 双向守护 + 实机断言（以自家 biof3-mcp stdio server 为回环被连对象，connect→listTools→disconnect）
   - P3 工具投影与审批策略：第三方工具按 mcp_<server>_<tool> 命名空间投影进 agent-tools 注册表（每工具声明 contract sideEffect/riskTier）+ 复用 agent-tool-policy 档位闸（不开第二套权限系统）；投影契约测试 + policy 档位测试 + block109-p2 恒等对账 + 实机 agent 会话调用 MCP 工具断言
 reopen: 用户裁决货架分类学回摆（领域/通用边界变化）或 MCP 客户端方向变化时
-status: active
+status: completed
 ---
 
-# BLOCK-156 — 扩展中心重组与 MCP 客户端（P0 勘察完成 · D1-D7 待裁决）
+# BLOCK-156 — 扩展中心重组与 MCP 客户端（整包 completed）
 
-> 立项：2026-10-10（P0-LAUNCH）。用户方向裁决（原话见 §1）确认「领域/通用」两分扩展分类学与 MCP 客户端必要性；本包按约定节奏先出 P0 勘察报告，用户确认决策点后方可进实现。
+> 立项：2026-10-10（P0-LAUNCH）。用户方向裁决（原话见 §1）确认「领域/通用」两分扩展分类学与 MCP 客户端必要性。
+> **收口：2026-10-10 同日整包 completed**（用户裁决「全按推荐 搞完」= D1-D7 全推荐 ⓐ + 三阶段一次会话连打；P1 1842c2ee（含 amend：git mv 半程致 skills/ 旧路径四件双份化石清理，worktree 一直正确）/ P2 7d4f9f97 / P3 7599abc5，收口笔录见 §8）。
 > 能力：`extensions-hub-mcp-client`。
 
 ## 1. 一句话目标与裁决来源
@@ -88,3 +89,31 @@ status: active
 - C-EXT-1：MCP HTTP/SSE 传输 + server 级信任配置（D3/D4 的 v2 演进）。
 - C-EXT-2：marketplace 远程技能市场（清单基建参照插件 manifest-source 先例）。
 - C-EXT-3：预路由 `mcp` 域收窄（D6 的 v2，需决策配置中心接线证据后评估）。
+
+
+## 8. 收口笔录（2026-10-10）
+
+### 8.1 三阶段总账
+
+| 阶段 | 提交 | 定向测试 | 实机断言 | 证据 |
+|---|---|---|---|---|
+| P1 货架重组 | 1842c2ee | extensionShelves 5/5 + 扩展中心页 5/5 + LeftPanel 断言更新 + 邻域 62/18 + theme 4/4 + tsc 0 | CDP 八断言 ALL PASS（四货签在场/默认领域插件/嵌入无双重页头/D2 双向隔离/MCP 占位/旧深链 /plugins /skills 双重定向） | acceptance/block-156/block156-extensions-hub-live.json + p1-hub-domain-plugins.png |
+| P2 客户端基座 | 7d4f9f97 | settings 5/5 + manager 4/4 + McpShelfPane 4/4 + tsc 0 | 回环九断言 ALL PASS（夹具确定性 1 工具 + 自家 biof3-mcp 被连真实发现 28 工具 + UI 在场卡片 + 断开回落 + 清场复原） | acceptance/block-156/block156-mcp-client-live.json + p2-mcp-shelf-connected.png |
+| P3 投影与策略 | 7599abc5 | 投影契约 6/6 + 回归 75 项 0 红（agent-tool-registry/block116/tool-activity-labels/block109-p2/policy/mcp-tool-registry/block113） | agent 全链十二断言 ALL PASS（真实 deepseek-flash 自主调 mcp_fixture_fixture_echo·echo 回流 assistant·transcript toolCalls 按名·流式帧在场·断开清面 409·清场） | acceptance/block-156/mcp-agent-loop-live.json |
+
+UI 台账：UI-480（扩展中心四货架）verified + 加映 P2/P3（MCP 配置面与投影）。工具总数钉：静态 76 不动（投影为动态追加层，76 钉全数保持绿）。
+
+### 8.2 设计落地偏差登记（对 §4/§5 的实现期细化，裁决意图不变）
+
+1. **P2 通道形态**：plan §5 原写「channels mcp:* 通道族 + preload 包装」；实现改为**后端进程持有连接 + /api/mcp/servers\* HTTP 路由**（routes/mcp-client.js，前端 resolveApiBase 直连先例）。理由：MCP 连接必须与 agent 工具执行同进程（P3 callTool 进程内直达，跨进程无回路）；Electron main 侧 IPC 方案会让 P3 需要后端→main 反向调用通道。ipc-channels-registry 五闸因零新增通道天然绿。
+2. **D4 落地面**：plan §4 D4 写「sideEffect=external-request + R2」；实现取 **execution + R2**。理由：policy 的 MUTATING_SIDE_EFFECTS 集合不含 external-request（既有 external-request 工具均为只读检索族 read_page/search 等），execution 语义才产生 D4 意图的档位行为（read/plan/workspace-write 禁、full 可用）——单测四档钉住。
+3. **home 逃生通道**：plan §5 P1 列「home 入口收敛」；实现保持后端未就绪逃生通道直接嵌入 PluginStorePanel 浮层（即领域插件货架内容本体，无死链），不改路由——改路由反而劣化该场景 UX（栈未起时路由页无意义）。
+4. **P3 投影为动态层而非 tool-defs/mcp.js 静态域**：plan §5 原写「tool-defs/mcp.js 域 + registry 汇编」；实现为 mcp-projection.js 动态投影（getProviderToolDefs 追加 + getToolEntry 兜底）。理由：MCP 工具随连接动态生灭，进静态域会破坏启动 fail-fast 三方一致性语义（defs/handlers 启动时必须齐备）；动态层零连接=零投影（R1），静态 76 恒等契约与全部总数钉不动。block109-p2 ⋃DOMAIN_TOOL_DEFS===TOOL_DEFS 保持绿（两者均为静态面）。
+
+### 8.3 遗留与候选池
+
+- C-EXT-1（HTTP/SSE 传输 + server 级信任）、C-EXT-2（远程技能市场）、C-EXT-3（预路由 mcp 域）维持 §7 原状。
+- 新增观察：MCP 工具的 toolActivity 动词走「已调用 name」兜底（tool-events default 分支本就为动态工具预留）；若实际使用中 MCP 工具高频出现，再评估按 server 维度注册动词。
+- 通用技能本地导入（D7 v1=本地目录导入）**未在本包实现**——P1 只交付了通用技能货架与分类学；导入入口转 C-EXT-4 候选（安装面与 pack installFromDialog 同构，工作量小但属新 UI 面，不夹带）。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。
