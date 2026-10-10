@@ -67,7 +67,13 @@ module.exports = function mountMisc(app) {
       // BLOCK-79 P2 — 按供应商的输出速率分组（端到端平均输出速率口径；embedding
       // 排除；completion=0 的渠道 measurable=false 前端显「不可算」）。
       const providers = require('../helpers/ai-usage').summarizeProviderUsage({ userId, since: cutoff });
-      res.json({status:'ok', days, ...total, providers});
+      // BLOCK-163 W3 P9（MDL-4）— 按模型聚合（成本面板数据源；additive 字段）
+      const models = adb.prepare(`SELECT COALESCE(model,'(unknown)') AS model, COUNT(*) AS calls,
+        SUM(prompt_tokens) AS prompt_tokens, SUM(completion_tokens) AS completion_tokens,
+        SUM(COALESCE(cost_cny,0)) AS estimated_cost_cny
+        FROM ai_usage WHERE user_id=? AND ts >= ? GROUP BY COALESCE(model,'(unknown)')
+        ORDER BY estimated_cost_cny DESC, calls DESC LIMIT 20`).all(userId, cutoff);
+      res.json({status:'ok', days, ...total, providers, models});
     } catch (e) { res.status(500).json({status:'error', error: e.message}); }
   });
 
