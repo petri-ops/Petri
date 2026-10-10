@@ -96,12 +96,16 @@ extraResources:
     filter:
       - "**/*"
       - "!**/.DS_Store"
-  # 内置插件（插件商店默认可用，无需联网）
-  - from: ./resources/built-in-plugins
-    to: built-in-plugins
+  # BLOCK-163 W3 P12（DIST-4）— resources/skills 纳入 extraResources：
+  # 修打包态内置技能供给断链（BUILT_IN_SKILLS_DIR 解析 <Resources>/skills）
+  - from: ./resources/skills
+    to: skills
     filter:
       - "**/*"
       - "!**/.DS_Store"
+  # BLOCK-163 W3 P12（DIST-4）— 原「内置插件」extraResources 退役：目录已在
+  # BLOCK-83 P4 从树中删除（electron-builder.yml 曾保留陈旧引用），此处一并清偿；
+  # 领域插件分发 = 领域包通道（pack:install-from-dialog/install-path）。
   # fix-r-paths.mjs + shell helper — R Runtime 安装时调用（修正 dylib 路径）
   - from: ./scripts/fix-r-paths.mjs
     to: scripts/fix-r-paths.mjs
