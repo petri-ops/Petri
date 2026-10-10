@@ -46,6 +46,8 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-10-10 BLOCK-165 P1 全仓机械改名（66b3970）：--gewu-*→--petri-* token 前缀迁移视觉零变化，走 BLOCK 轨；台账=UI-485 已补登。
+  '66b3970655d95a918a50fa1f13df4990a73eee38',
   // 2026-10-10 BLOCK-160/163 W2+W3 批（24fc126）：subject 走 BLOCK 轨无 UI-###；台账=UI-483 已补登。
   '24fc1261b1404ce02d6aa071ac99abddff449b88',
   // 2026-10-10 BLOCK-160/163 W2+W3 批（082f464）：subject 走 BLOCK 轨无 UI-###；台账=UI-483 已补登。
@@ -430,6 +432,8 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-10-10 BLOCK-165 P1 全仓机械改名（66b3970）：同提交漏 docs/ui-productization-audit.md 同步；台账=UI-485 已补登。
+  '66b3970655d95a918a50fa1f13df4990a73eee38',
   // 2026-10-10 BLOCK-164 W2/W3 整包收口（b784fa37）：联邦面板「委托记录」卡随包入库漏台账同步；台账=UI-484 已补登对账（BLOCK-165 基线时按先例修复）。
   'b784fa3746c6c354ba1fce17fec281200408550f',
   // 2026-10-10 BLOCK-160/163 W2+W3 批：subject 走 BLOCK 轨无 UI-###；台账=UI-483 已补登。

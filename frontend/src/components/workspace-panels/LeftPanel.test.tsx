@@ -230,7 +230,7 @@ describe('UI-327 左栏 globe 行内创建向导（终端式路径输入）', ()
     void pathInput;
   });
 
-  it('Tab 补全：输入 /root/ge → Tab → 自动完成 /root/petri-block67-demo/', async () => {
+  it('Tab 补全：输入 /root/pe → Tab → 自动完成 /root/petri-block67-demo/', async () => {
     const ctx = buildCtx('chat');
     render(
       <MemoryRouter>
@@ -250,7 +250,7 @@ describe('UI-327 左栏 globe 行内创建向导（终端式路径输入）', ()
       setter?.call(pathInput, v);
       pathInput.dispatchEvent(new Event('input', { bubbles: true }));
     };
-    setVal('/root/ge');
+    setVal('/root/pe');
     fireEvent.keyDown(pathInput, { key: 'Tab', bubbles: true, cancelable: true });
     await waitFor(() => expect(pathInput.value).toBe('/root/petri-block67-demo/'));
   });
@@ -319,7 +319,7 @@ describe('UI-327 Tab 多候选：补全到公共前缀', () => {
       setter?.call(pathInput, v);
       pathInput.dispatchEvent(new Event('input', { bubbles: true }));
     };
-    setVal('/root/ge');
+    setVal('/root/pe');
     fireEvent.keyDown(pathInput, { key: 'Tab', bubbles: true, cancelable: true });
     await waitFor(() => expect(pathInput.value).toBe('/root/petri-'));
   });

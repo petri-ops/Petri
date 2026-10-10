@@ -4791,3 +4791,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 ## UI-484: 联邦面板「委托记录」卡（2026-10-10 in_progress，BLOCK-164 W2·基线补登）
 
 联邦协作的委托此前只在「发送瞬间」回流一次性摘要，历史不可查。本条目交付联邦面板「委托记录」卡：GET /api/federation/delegations 聚合端点（task_events 中 delegate_to_petri_node 的 tool_call/tool_result 对 JOIN tasks，输出 task/peerName/状态〔ok→done/error→failed/无结果→running〕/回复头/conversationId/projectId，limit 50，user_id 过滤）+ 前端卡片（空态引导/状态标签/回复摘要/刷新）。证据=block164 聚合契约测试（done/running/归属/回复头）+ 实机 delegations 端点聚合出 2026-09-18 BLOCK-85 双真机历史委托记录；双真机「查节点→委托→记录可见」全链走查（rider）待用户过目翻 verified。补登说明=UI 面随 b784fa37（BLOCK-164 整包收口）入库、同提交漏台账同步，BLOCK-165 基线时按 LEGACY_AUDIT_SYNC_EXEMPTIONS 先例补登+豁免登记（fb5174ee 同款）。
+
+## UI-485: 全仓设计 token 前缀迁移 --gewu-* → --petri-*（2026-10-10 in_progress，BLOCK-165 P1·基线补登）
+
+换库开源改名的 UI 面组成部分：全部设计 token（border/accent/text/text-secondary/text-tertiary/bg-surface/font-size 阶梯/shadow 等约 40+ 变体、236 文件）与 CSS 类名前缀 `gewu-` → `petri-` 机械迁移，**视觉零变化**（纯标识符替换，值不动）；theme-token-contract 契约 4/4 同步改前缀后绿。同批 UI 关联面：GewuOpenFileDevBridge→PetriOpenFileDevBridge、html class `petri-desktop`、LoginModal 等类名前缀。补登说明=token/类名迁移随 66b3970（P1 机械替换）入库、同提交走 BLOCK 轨漏 UI-### 与台账同步，BLOCK-165 全量复验时按 LEGACY 先例补登+双豁免登记（fb5174ee 同款）；实机=改名后 dev 栈重启全窗走查（P6 冒烟）待过目翻 verified。

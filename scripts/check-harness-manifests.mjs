@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import path from 'node:path';
+import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
@@ -12,7 +13,11 @@ const pluginLoader = require(path.join(REPO_ROOT, 'core', 'petri-server', 'plugi
 const { inspectPluginSources } = require(path.join(REPO_ROOT, 'core', 'shared-backend', 'plugin-sdk.js'));
 
 function defaultSources({ root, installedRoot, developmentRoots = [] } = {}) {
-  const sources = [{ type: 'builtin', root: root || BUILT_IN_DIR, required: true }];
+  // BLOCK-158 裁决：插件分发唯一通道=领域包，核心仓零内置插件（目录 BLOCK-83 P4 起不在树）。
+  // builtin 目录缺席时诚实降级为非必需空源（不再报 plugin_source_missing），领域包夹具经 env/PETRI_HARNESS_MANIFEST_DIR 注入。
+  const builtinRoot = root || BUILT_IN_DIR;
+  const builtinRequired = root != null || fs.existsSync(builtinRoot);
+  const sources = [{ type: 'builtin', root: builtinRoot, required: builtinRequired }];
   if (installedRoot) sources.push({ type: 'installed', root: installedRoot });
   for (const developmentRoot of developmentRoots) {
     sources.push({ type: 'development', root: developmentRoot, required: true });

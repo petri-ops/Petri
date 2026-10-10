@@ -6,9 +6,9 @@
 // test/brand-identity.test.mjs 契约锁一致），再跑一次机械同步。
 // 业务代码禁止裸写品牌字面量——一律 import 本模块。
 //
-// 协议命名空间（非品牌，plan §4）：core/petri-server 路径、
-// .petri-* 用户数据目录、PETRI_* 环境变量前缀——这些是
-// 稳定协议，不随品牌改名（数据连续性 + 外部脚本兼容）。
+// BLOCK-165：Gewu/BioF3 → Petri 开源改名。协议面（core/petri-server
+// 路径、.petri-* 用户数据目录、PETRI_* 环境变量前缀）随改名机械同步；
+// 历史名链 BioF3 → Gewu → Petri 由 LEGACY_* 常量承载（旧数据目录探测）。
 // ============================================================
 
 'use strict';
@@ -18,12 +18,12 @@ const BRAND = Object.freeze({
   APP_NAME: "Petri",
   /** 中文名。 */
   APP_NAME_ZH: "格物",
-  /** 历史名——仅用于兼容识别（如旧数据目录探测），不用于展示。 */
-  LEGACY_APP_NAME: "Petri",
+  /** 上一代历史名——仅用于兼容识别（如旧数据目录探测），不用于展示。 */
+  LEGACY_APP_NAME: "Gewu",
   /** 用户 Documents 下的工作目录名（新装环境）。 */
   LOCAL_DIR_NAME: "Petri-Local",
   /** 上一代 Documents 目录名（既有环境数据连续性优先）。 */
-  LEGACY_LOCAL_DIR_NAME: "Petri-Local",
+  LEGACY_LOCAL_DIR_NAME: "Gewu-Local",
 });
 
 /**

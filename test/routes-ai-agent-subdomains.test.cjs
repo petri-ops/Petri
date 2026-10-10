@@ -33,6 +33,8 @@ function makeMockApp() {
   const app = {
     post(ph) { routes.push({ method: 'POST', path: ph }); },
     get(ph) { routes.push({ method: 'GET', path: ph }); },
+    // BLOCK-116 decisions.js REST CRUD 起 index.register 挂 PUT 路由（桩随契约对齐，BLOCK-165 全量复验）
+    put(ph) { routes.push({ method: 'PUT', path: ph }); },
   };
   return { app, routes };
 }

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# platform: posix（bash/npm 工具链脚本，MSYS/Git-Bash 下同构可跑；BLOCK-165 全量复验补登记）
 # quality-baseline.sh — BLOCK-105 P0 四项体检基线重扫（可复跑）
 #
 # 用法: bash scripts/quality-baseline.sh

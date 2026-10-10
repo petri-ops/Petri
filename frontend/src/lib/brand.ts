@@ -4,6 +4,7 @@
 // 主进程侧权威在 src/main/brand.js；渲染进程不能 require 主进程
 // 模块，此文件为镜像，test/brand-identity.test.mjs 契约锁两文件
 // 常量逐字段一致。业务代码禁止裸写品牌字面量——一律 import 本模块。
+// BLOCK-165：Gewu/BioF3 → Petri；历史名链由 LEGACY_* 承载。
 // ============================================================
 
 export const BRAND = Object.freeze({
@@ -11,18 +12,18 @@ export const BRAND = Object.freeze({
   APP_NAME: 'Petri',
   /** 中文名。 */
   APP_NAME_ZH: '格物',
-  /** 历史名——仅用于兼容识别，不用于展示。 */
-  LEGACY_APP_NAME: 'Petri',
+  /** 上一代历史名——仅用于兼容识别，不用于展示。 */
+  LEGACY_APP_NAME: 'Gewu',
   /** 用户 Documents 下的工作目录名（新装环境）。 */
   LOCAL_DIR_NAME: 'Petri-Local',
   /** 上一代 Documents 目录名（既有环境数据连续性优先）。 */
-  LEGACY_LOCAL_DIR_NAME: 'Petri-Local',
+  LEGACY_LOCAL_DIR_NAME: 'Gewu-Local',
 } as const);
 
 /**
  * 品牌命名空间下的 localStorage 读写：写入一律用新前缀 `petri-`；
- * 读取依次回退 `petri-${key}` → 历史三种分隔形态（`petri-${key}` /
- * `petri.${key}` / `petri_${key}`）——既有用户偏好零丢失，读到旧形态
+ * 读取依次回退上一代 `gewu-${key}` → 更早三种分隔形态（`biof3-${key}` /
+ * `biof3.${key}` / `biof3_${key}`）——既有用户偏好零丢失，读到旧形态
  * 后顺手迁移写入新 key。
  */
 export function readBrandStorage(key: string): string | null {
@@ -30,7 +31,7 @@ export function readBrandStorage(key: string): string | null {
   try {
     const fresh = window.localStorage.getItem(`petri-${key}`);
     if (fresh != null) return fresh;
-    for (const legacyKey of [`petri-${key}`, `petri.${key}`, `petri_${key}`]) {
+    for (const legacyKey of [`gewu-${key}`, `biof3-${key}`, `biof3.${key}`, `biof3_${key}`]) {
       const legacy = window.localStorage.getItem(legacyKey);
       if (legacy != null) {
         try {

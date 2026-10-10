@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# platform: linux（在中转服务器上运行，非本仓库开发机；BLOCK-159 家族 · 轻量批）
+# platform: posix（在中转服务器上运行，非本仓库开发机；BLOCK-159 家族 · 轻量批；BLOCK-165 对齐门禁取值集 darwin/posix/windows/dual）
 # block159-relay-watchdog.sh — mobile 中转看门狗一键加固（软件独立性：与具体 IP/云厂商无关）。
 #
 # 目标（docs/guides/mobile-tunnel-aliyun-setup.md §⑥）：把中转机上的软件栈

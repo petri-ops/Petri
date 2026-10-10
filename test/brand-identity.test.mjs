@@ -27,9 +27,9 @@ describe('品牌身份契约（BLOCK-61）', () => {
   test('主进程品牌模块常量符合定名裁决', () => {
     assert.equal(BRAND.APP_NAME, 'Petri');
     assert.equal(BRAND.APP_NAME_ZH, '格物');
-    assert.equal(BRAND.LEGACY_APP_NAME, 'Petri');
+    assert.equal(BRAND.LEGACY_APP_NAME, 'Gewu');
     assert.equal(BRAND.LOCAL_DIR_NAME, 'Petri-Local');
-    assert.equal(BRAND.LEGACY_LOCAL_DIR_NAME, 'Petri-Local');
+    assert.equal(BRAND.LEGACY_LOCAL_DIR_NAME, 'Gewu-Local');
     assert.ok(Object.isFrozen(BRAND), 'BRAND 必须冻结');
   });
 
@@ -53,38 +53,23 @@ describe('品牌身份契约（BLOCK-61）', () => {
       'utf8',
     );
     assert.match(shared, /return BRAND\.APP_NAME;/, 'getFallbackTitle 兜底必须返回 BRAND.APP_NAME');
-    assert.doesNotMatch(shared, /return '(Petri|Petri)'/, '不得裸写品牌字面量');
+    assert.doesNotMatch(shared, /return '(Gewu|BioF3)'/, '不得裸写品牌字面量');
     const titlebar = fs.readFileSync(
       path.join(ROOT, 'frontend', 'src', 'components', 'desktop', 'TitleBar.tsx'),
       'utf8',
     );
-    assert.doesNotMatch(titlebar, /return '(Petri|Petri)'/, '不得裸写品牌字面量');
+    assert.doesNotMatch(titlebar, /return '(Gewu|BioF3)'/, '不得裸写品牌字面量');
   });
 
   test('历史品牌名不得裸写在业务代码中（白名单外）', () => {
-    // 白名单：品牌模块自身（LEGACY 常量）+ 协议命名空间 + 兼容别名
+    // BLOCK-165 改名后：needle 仍是历史名（gewu/biof3）——本测试职责就是防旧名回流。
+    // 白名单：品牌模块自身（LEGACY 常量承载历史名链 BioF3→Gewu→Petri）。
     const ALLOWLIST_FILES = new Set([
       'src/main/brand.js',
       'frontend/src/lib/brand.ts',
     ]);
-    // 这些子串是协议/兼容标识（plan §4），含品牌历史词但不是品牌展示面
-    const ALLOWED_SUBSTRINGS = [
-      'petriDesktop',      // preload 旧桥别名（兼容保留）
-      'core/petri-server', // 后端协议路径
-      'petri-server',      // 同上（路径分段出现）
-      '.petri-dev-user-data', // 用户数据目录（数据连续性）
-      'petri-r-toolchain', // R 预编译包插件 id（插件生态标识）
-      'petri-mcp',         // MCP server 协议名（P2 改为 petri-mcp 后应消失——临时白名单）
-      'petri_agent_task',  // 会话内 localStorage 旧 key（读旧兼容）
-      'window.petri?',     // petri agent-workbench 旗标桥（独立小桥，别名保留）
-      // BLOCK-104 P1 对账扩充：以下均为协议/数据连续性标识，非用户可见品牌展示面
-      'PETRI_',             // 环境变量前缀（部署/启动协议面，改名即破坏用户环境）
-      '_petri',             // globalThis 全局旗标（content-sync 等内部事件钩子）
-      'petri.db',           // 数据库文件名（数据连续性，改名即「丢库」）
-      'petri.com',          // telemetry 端点域名（遥测协议面）
-      'petri-uploads',      // OSS 上传桶域名（历史数据可达性）
-      "'petri'",            // preload exposeInMainWorld 旧桥命名空间（兼容保留）
-    ];
+    // 旧协议/兼容标识（gewuDesktop、BIOF3_* 等）已随 BLOCK-165 全仓机械改名，
+    // 白名单清空：任何 gewu/biof3 字面量回流业务代码即红。
 
     const scanDirs = ['src', 'frontend/src'];
     const offenders = [];
@@ -100,13 +85,12 @@ describe('品牌身份契约（BLOCK-61）', () => {
         const rel = path.relative(ROOT, full).split(path.sep).join('/');
         if (ALLOWLIST_FILES.has(rel)) return;
         const text = fs.readFileSync(full, 'utf8');
-        if (!/petri/i.test(text)) return;
+        if (!/gewu|biof3/i.test(text)) return;
         for (const line of text.split('\n')) {
-          if (!/petri/i.test(line)) continue;
+          if (!/gewu|biof3/i.test(line)) continue;
           // 注释行放行（历史说明允许提及旧名）
           const trimmed = line.trim();
           if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*')) continue;
-          if (ALLOWED_SUBSTRINGS.some((s) => line.includes(s))) continue;
           offenders.push(`${rel}: ${trimmed.slice(0, 120)}`);
         }
       }

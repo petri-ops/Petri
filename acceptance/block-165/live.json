@@ -1,0 +1,17 @@
+{
+  "capturedAt": "2026-10-10T15:31:00Z",
+  "block": "BLOCK-165-PETRI-OSS-RENAME",
+  "stage": "P6",
+  "env": "dev Electron 栈（bash scripts/restart-dev-stack.sh 改造版重启，PETRI_* env 族 + 旧名 userData 回退）",
+  "probes": [
+    { "id": "P1", "name": "vite :3000", "result": "HTTP 200", "pass": true },
+    { "id": "P2", "name": "后端 :3001 /api/health", "result": "{\"status\":\"ok\",\"db_ok\":true}", "pass": true },
+    { "id": "P3", "name": "D3 全新 petri.db 落位", "result": ".biof3-dev-user-data/data/petri.db 339968 bytes（旧目录回退 + 新库名，migrations 自建）", "pass": true },
+    { "id": "P4", "name": "Electron 进程", "result": "electron.exe ×2 在跑（主窗+渲染）", "pass": true },
+    { "id": "P5", "name": "领域包 catalog", "result": "/api/plugins/catalog ok:true + petri-r-runtime manifest（工具链改名后契约通）", "pass": true },
+    { "id": "P6", "name": "/skills 路由", "result": "HTTP 200", "pass": true },
+    { "id": "P7", "name": "CDP 窗口标题", "result": "\"title\": \"Petri\"（品牌上窗实证）", "pass": true }
+  ],
+  "allPass": true,
+  "notes": "projects=0 为 D3 全新库预期行为（restart 脚本 WARN 如实）；探针原 P5 /api/tools 路径猜错由 catalog 探针替代；全量 test:all 3688 项 12 红均为登记在案存量/env 债（行数棘轮 ×2 拆分重构债 + BLOCK-63 ×10 需 .NET 8 SDK）；前端全量 1554 项 4 红 = streamReconnect 抖动确定性（BLOCK-159 今日新债，归属其家族）；npm run check 推进至 G0-RS7 遗产门（BLOCK-83 起存量红，RS 门待领域包化改造，如实登记）。G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

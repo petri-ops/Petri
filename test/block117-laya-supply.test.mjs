@@ -49,7 +49,7 @@ test('P0 线兼容：真实 Laya 响应 fixtures 通过 decision-api 请求/响�
   }
 });
 
-test('P0 红线：七接点 Jev 注册表零漂移（本包不改任何 Jev 供给阈值/证据绑定）', () => {
+test('P0 红线：Jev 注册表零漂移（本包不改任何 Jev 供给阈值/证据绑定）', () => {
   const PINNED = {
     'topic-shift': { gates: { yes: 0.85, no: 0.5 }, evidence: 'acceptance/block-110/calibration.json', model: 'jev-1.13.0' },
     'knowledge-guard': { gates: { relevantMin: 0.5, injectionMax: 0.7 }, evidence: 'acceptance/block-110/calibration.json', model: 'jev-1.13.0' },
@@ -58,8 +58,18 @@ test('P0 红线：七接点 Jev 注册表零漂移（本包不改任何 Jev 供�
     'tool-route': { threshold: 0.8, evidence: 'acceptance/block-113/calibration.json', model: 'jev-1.13.0' },
     'failure-triage': { threshold: 0.7, evidence: 'acceptance/block-114/calibration.json', model: 'jev-1.13.0' },
     'test-suggest': { threshold: 0.8, evidence: 'acceptance/block-115/calibration.json', model: 'jev-1.13.0' },
+    // BLOCK-118 P1 起注册表实际含 doc-suggest（当时钉住未随更，BLOCK-165 全量复验对账补齐）
+    'doc-suggest': { gates: { planDoc: 0.5 }, evidence: 'acceptance/block-118/calibration-doc-suggest-cloud.json', model: 'jev-1.13.0' },
+    // BLOCK-119 起注册表实际含 output-judge（同上对账补齐）
+    'output-judge': {
+      evidence: 'acceptance/block-119/calibration-judge-fit.json',
+      evidenceFaithfulGoal: 'acceptance/block-119/calibration-judge-faithful-goal.json',
+      evidenceFitVolatility: 'acceptance/block-119/fit-volatility-review.json',
+      gates: { faithfulPass: 0.3, fitPass: 3, fitRetry: 2.5, fitReviewBand: 0.5, goalPass: 0.5 },
+      model: 'jev-1.13.0'
+    },
   };
-  assert.deepEqual(thresholds, { thresholdForPoint: thresholds.thresholdForPoint, ...PINNED },
+  assert.deepEqual(thresholds, { thresholdForPoint: thresholds.thresholdForPoint, configForPoint: thresholds.configForPoint, ...PINNED },
     '注册表与钉住值逐键一致（含函数成员外的全部接点）');
   for (const [point, entry] of Object.entries(PINNED)) {
     assert.ok(fs.existsSync(path.join(root, entry.evidence)), `${point} 证据文件在位`);

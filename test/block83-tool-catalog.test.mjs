@@ -53,5 +53,6 @@ test('BLOCK-83 D4 catalog route registers a GET endpoint and reports its source'
   const routes = [];
   const app = { get: (route) => routes.push(route) };
   catalog.createToolsCatalogRoutes()(app);
-  assert.deepEqual(routes, ['/api/tools/catalog']);
+  // BLOCK-160 P3 起同路由族挂 workflow-templates（斜杠菜单双来源）——期望随契约对齐
+  assert.deepEqual(routes, ['/api/tools/catalog', '/api/tools/workflow-templates']);
 });

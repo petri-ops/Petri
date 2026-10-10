@@ -39,7 +39,13 @@ function relativeEvidencePath(filePath) {
 function assertSafeRelativePath(value, label) {
   assert(typeof value === 'string' && value.length > 0, `${label} must be a non-empty string`);
   assert(!path.isAbsolute(value), `${label} must be repository-relative`);
-  assert(!value.split(/[\\/]/).includes('..'), `${label} must not escape the repository`);
+  // BLOCK-83 起演示数据迁入兄弟领域包仓（本脚本 benchmarkIndex 同源解析 ../petri-pack-bio），
+  // 该唯一前缀为经裁决的 sanctioned sibling；其余 .. 逃逸仍然拒绝（BLOCK-165 全量复验对账）。
+  const sanctioned = value.replace(/\\/g, '/').startsWith('../petri-pack-bio/');
+  assert(
+    sanctioned || !value.split(/[\\/]/).includes('..'),
+    `${label} must not escape the repository`
+  );
   assert(!/(?:api[_-]?key|secret|token|password)/i.test(value), `${label} contains a sensitive-looking path`);
 }
 

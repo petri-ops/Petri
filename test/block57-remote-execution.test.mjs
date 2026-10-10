@@ -224,8 +224,8 @@ test('tools-executor keeps local path untouched and remote branch additive', () 
   assert.match(src, /if \(!remoteDispatch\) \{\s*\n\s*const \{ getExecutor \}/);
   // 远程分派只由 execution_target_id 触发
   assert.match(src, /if \(job\.execution_target_id\) \{\s*\n\s*remoteDispatch = await resolveRemoteTargetForJob/);
-  // 本地 execFile 仍存在（远程路径不替换本地执行器）
-  assert.match(src, /const child = execFile\(/);
+  // 本地执行器仍存在（远程路径不替换本地执行器；BLOCK-126 P2 起 execFile→spawn 化，锚随实现演进）
+  assert.match(src, /const child = spawn\(/);
   // 远程作业豁免本地 zombie stale-fail
   assert.match(src, /excludeRemoteTargets: true/);
   // 保留键剥离：params.json 零污染

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+// platform: windows — UI Automation 对话框探针（Windows 专属实机门；BLOCK-165 全量复验补登记）
 /**
  * ui453-download-dialog-live.cjs — UI-453 加映三回归门禁：下载保存对话框 options 生效性
  *
