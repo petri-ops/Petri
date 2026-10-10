@@ -368,6 +368,7 @@ const TOOL_ACTIVITY_VERBS = Object.freeze({
   "computer_type": "已输入",
   "computer_wait": "已等待",
   "delegate_to_gewu_node": "已委派",
+  "federation_list_peers": "已查询协作节点",
   "followup_task": "已派发",
   "generate_methods": "已生成",
   "interrupt_agent": "已中断",
@@ -484,6 +485,8 @@ function summarizeToolCallSwitch(name, args = {}) {
       return { actionLabel: TOOL_ACTIVITY_VERBS.read_image, actionDetail: compactActivityDetail(args.filePath || args.toolJobId) || '图像' };
     case 'delegate_to_gewu_node':
       return { actionLabel: TOOL_ACTIVITY_VERBS.delegate_to_gewu_node, actionDetail: compactActivityDetail(args.task) || '协作节点' };
+    case 'federation_list_peers':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.federation_list_peers, actionDetail: '联邦节点' };
     default: {
       // UI-437 v5.18 — 已登记工具：动词取注册表、detail 用参数摘要（无工具名
       // 前缀，与登记工具同构）；未登记（MCP/插件动态工具）保持

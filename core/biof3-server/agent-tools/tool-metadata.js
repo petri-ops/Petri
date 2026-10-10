@@ -120,6 +120,8 @@ const TOOL_METADATA = {
 
   // ---- 远程执行/通用执行域（高风险串行）----
   delegate_to_gewu_node: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
+  // BLOCK-164 W1 — 节点清单只读聚合
+  federation_list_peers: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: 8000 },
   run_tool: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
   // BLOCK-121 P2（B1）— 结果内容只读读取
   result_summary: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },

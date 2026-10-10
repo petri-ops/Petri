@@ -5927,8 +5927,28 @@
       ],
       "archivePolicy": "retain_stable_path",
       "notes": "成熟度蓝图 W3 波整波承载（用户发令「开冲到W3波末」+ 波内零停顿）：12 单元天花板收尾+蓝图五层画像对账。"
+    },
+    {
+      "id": "BLOCK-164-FEDERATION-UX-CLOSEOUT",
+      "path": "docs/block-164-federation-ux-closeout-plan.md",
+      "capability": "mobile-gateway",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-164-federation-ux-closeout-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-10",
+      "tags": [
+        "BLOCK-164",
+        "federation",
+        "delegation-ux",
+        "peer-heartbeat",
+        "delegation-history"
+      ],
+      "archivePolicy": "retain_stable_path",
+      "notes": "（并行插队批，注册态 planned，收口翻 completed）联邦协作体验收口三波：W1 federation_list_peers 工具（委托入口可自足，解模型拿不到 peerId）/W2 联邦委托历史视图（真值=conversations origin=federation-delegation）/W3 节点定时探活在线态自动化（+fed: 友名映射搭车）。对标=无同类 P2P 形态（Codex Cloud/Copilot agent 为中心化云委托，ZCode=SSH attach 无协作面）。"
     }
   ],
   "lastUpdated": "2026-10-10",
-  "documentCount": 312
+  "documentCount": 313
 }

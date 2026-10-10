@@ -13,6 +13,7 @@ const path = require('node:path');
 
 const DELEGATE_POLL_INTERVAL_MS = 5_000;
 const REQUEST_TIMEOUT_MS = 20_000;
+const GRANTED_FETCH_TIMEOUT_MS = 3_000;
 
 function resolveFederationDataDir() {
   return process.env.BIOF3_LOCAL_DATA_DIR
@@ -42,18 +43,60 @@ async function peerFetch(peer, token, pathName, { method = 'GET', body = null, t
 
 const TERMINAL_AGENT_STATUSES = new Set(['completed', 'failed', 'cancelled', 'done', 'error']);
 
+
+// BLOCK-164 W1 — 委托入口可自足：列协作节点（在线态/署名/对端授权项目）与本机授权概览，
+// 模型据此自取 peerId/projectId，不再要求用户提供 gpeer_* ID。只读聚合（peers/grants 本地
+// 真值 + 对端 granted-projects 3s 尽力探测），无写面。
+async function tool_federation_list_peers() {
+  const federation = require('../../shared-backend/federation-peers');
+  const grantsMod = require('../../shared-backend/federation-grants');
+  const dataDir = resolveFederationDataDir();
+  const { peers } = federation.loadPeers(dataDir);
+  let myGrants = [];
+  try {
+    myGrants = grantsMod.listGrants(dataDir) || []; // listGrants 直接返回 grants 数组
+  } catch { /* 授权概览拿不到时诚实空表 */ }
+
+  const now = Date.now();
+  const nodes = await Promise.all(peers.map(async (peer) => {
+    const lastActiveAt = peer.lastProbeAt || peer.lastSeenAt || null;
+    const staleMs = lastActiveAt ? now - new Date(lastActiveAt).getTime() : Infinity;
+    const online = staleMs < 2 * 60 * 1000;
+    let grantedToMe = null;
+    try {
+      const token = federation.getPeerToken(dataDir, peer.peerId) || '';
+      const mine = await peerFetch(peer, token, '/federation/api/granted-projects', { timeoutMs: GRANTED_FETCH_TIMEOUT_MS });
+      if (mine.status === 200 && mine.data?.ok) grantedToMe = mine.data.projects || [];
+    } catch { grantedToMe = null; }
+    return {
+      peerId: peer.peerId,
+      name: peer.name || null,
+      identity: peer.identity || null,
+      online,
+      lastActiveAt,
+      grantedToMe,
+      ...(grantedToMe === null ? { note: '对端不可达，可授权项目未知（委托仍可尝试；纯问答类任务无需授权）' } : {}),
+    };
+  }));
+
+  if (nodes.length === 0) {
+    return { ok: true, nodes: [], myGrants, message: '尚未配对任何协作节点。可在桌面端左栏「联邦」面板生成配对邀请，与另一台格物配对后即可委托。' };
+  }
+  return { ok: true, nodes, myGrants };
+}
+
 async function tool_delegate_to_gewu_node(args = {}) {
   const peerId = String(args.peerId || '').trim();
   const task = String(args.task || '').trim();
   const projectId = typeof args.projectId === 'string' ? args.projectId.trim() : '';
   const timeoutMs = Math.min(Math.max(Number(args.timeoutMinutes) || 10, 1), 30) * 60_000;
-  if (!peerId) return { error: 'missing_peer_id', message: '缺少 peerId（协作成员 ID，联邦面板可见）' };
+  if (!peerId) return { error: 'missing_peer_id', message: '缺少 peerId（协作成员 ID）——可先调用 federation_list_peers 工具查询协作成员清单及其授权项目' };
   if (!task) return { error: 'missing_task', message: '缺少 task（要委托给对方 agent 的工作描述）' };
 
   const federation = require('../../shared-backend/federation-peers');
   const dataDir = resolveFederationDataDir();
   const peer = federation.getPeer(dataDir, peerId);
-  if (!peer) return { error: 'unknown_peer', message: '协作成员不存在或已移除：' + peerId };
+  if (!peer) return { error: 'unknown_peer', message: '协作成员不存在或已移除：' + peerId + '——可先调用 federation_list_peers 查询有效清单' };
   const token = federation.getPeerToken(dataDir, peerId) || '';
 
   // 0. BLOCK-88 P3（D4）— 发现面：列本工程师在对端的被授权项目（附项目名），
@@ -143,4 +186,5 @@ async function tool_delegate_to_gewu_node(args = {}) {
 
 module.exports = {
   tool_delegate_to_gewu_node,
+  tool_federation_list_peers,
 };

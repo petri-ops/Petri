@@ -1,5 +1,7 @@
 # BioF3 Desktop — Current Next Steps
 
+最后更新：2026-10-10（**BLOCK-164-FEDERATION-UX-CLOSEOUT 立项登记 planned（并行插队批；用户裁决「需要立包」）**：联邦协作体验收口三波——W1 federation_list_peers 工具委托入口可自足/W2 联邦委托历史视图/W3 节点定时探活+友名映射；对标无同类 P2P 形态（Codex Cloud=中心化云委托、ZCode=SSH attach）；链路双真机 60 断言全绿不动，纯 UX 收口。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-10-10（**BLOCK-162-MOBILE-WS-TRANSPORT 当日立项当日收口 completed（并行插队批 planned→completed；plan=docs/block-162-mobile-ws-transport-plan.md §6）**——用户裁决「WS 化…能搞咱就 搞起来」：agent 任务流 SSE+500ms DB 轮询 → 单条 WebSocket（零依赖 RFC6455 自写 WS 服务端/agent-task-store 进程内事件总线推送地板归零/网关 /m/api/ws 会话门+水位回放+即时推送+2s 兜底/前端投影 WS-first 3 连失败回退 SSE，水位续传复用 BLOCK-159）；测试=后端 13+前端 3+邻域 58 全绿；**实机=dev 栈重启后 WS 四探全绿**；非范围=终端流/数据桥 WS 化、桌面端切 WS（另裁）；并行隔离=W2 波 agent-tools/skills/mcp 零相交。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-10-10（**BLOCK-162-MOBILE-WS-TRANSPORT 立项发令 active（plan=docs/block-162-mobile-ws-transport-plan.md）**——用户裁决「WS 化…能搞咱就 搞起来」：手机面 agent 任务流 SSE+500ms DB 轮询 → 单条 WebSocket——零依赖 RFC6455 最小 WS 服务端（自写，分片帧显式拒绝）/agent-task-store 进程内事件总线（落库后 emit，推送地板归零）/网关 /m/api/ws（upgrade 三源会话门+afterSeq 回放+即时推送+2s 兜底+终态帧对齐 SSE）/前端投影 WS-first 三连失败回退 SSE（水位续传复用 BLOCK-159）；非范围=终端流/数据桥 WS 化、桌面端切 WS；编号 162=160/161 被并行会话占用顺延。G0 开发期常态 · 不外推 packaged/Provider/GA。）

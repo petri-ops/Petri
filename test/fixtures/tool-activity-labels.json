@@ -308,5 +308,9 @@
   },
   "skill_get": {
     "label": "已读技能"
+  },
+  "federation_list_peers": {
+    "label": "已查询协作节点",
+    "icon": "globe"
   }
 }

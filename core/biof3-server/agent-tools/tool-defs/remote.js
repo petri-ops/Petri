@@ -15,7 +15,7 @@ module.exports = [
         "properties": {
           "peerId": {
             "type": "string",
-            "description": "协作成员 ID（gpeer_ 开头，来自联邦协作成员列表）"
+            "description": "协作成员 ID（gpeer_ 开头，来自 federation_list_peers 查询结果）"
           },
           "task": {
             "type": "string",
@@ -34,6 +34,18 @@ module.exports = [
           "peerId",
           "task"
         ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "federation_list_peers",
+      "description": "BLOCK-164 W1 格物联邦节点清单：列出已配对的协作节点（名称/工程师署名/在线态/对端授权给本机的项目）与本机授权概览。委托前必查——delegate_to_gewu_node 所需的 peerId 与可选 projectId 都从这里取，不要让用户提供 gpeer_* ID。",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
       }
     }
   }

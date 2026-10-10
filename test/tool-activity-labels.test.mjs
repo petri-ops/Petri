@@ -22,7 +22,7 @@ const { TOOL_ACTIVITY_VERBS, summarizeToolCallForActivity } = require(`${repoRoo
 test('fixture 覆盖全量静态工具宇宙（TOOL_DEFS 78 个）', () => {
   const universe = TOOL_DEFS.map((t) => t.function.name).sort();
   const fixtureKeys = Object.keys(fixture).sort();
-  assert.equal(universe.length, 78);
+  assert.equal(universe.length, 79);
   assert.deepEqual(fixtureKeys, universe);
 });
 

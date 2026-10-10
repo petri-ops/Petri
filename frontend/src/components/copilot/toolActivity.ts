@@ -238,6 +238,10 @@ const TOOL_ACTIVITY_VERBS: Readonly<Record<string, string>> = {
   "computer_type": "已输入",
   "computer_wait": "已等待",
   "delegate_to_gewu_node": "已委派",
+
+  "federation_list_peers": "已查询协作节点",
+  "skill_discover": "已列技能",
+  "skill_get": "已读技能",
   "followup_task": "已派发",
   "generate_methods": "已生成",
   "interrupt_agent": "已中断",
@@ -319,6 +323,7 @@ export const TOOL_ACTIVITY_ICONS: Readonly<Record<string, IconName>> = {
   "computer_type": "eye",
   "computer_wait": "eye",
   "delegate_to_gewu_node": "globe",
+  "federation_list_peers": "globe",
   "followup_task": "bot",
   "generate_methods": "table",
   "interrupt_agent": "bot",
@@ -424,6 +429,12 @@ function summarizeToolCallSwitch(
       return { actionLabel: TOOL_ACTIVITY_VERBS.read_image, actionDetail: compactDetail(args.filePath || args.toolJobId) || '图像' };
     case 'delegate_to_gewu_node':
       return { actionLabel: TOOL_ACTIVITY_VERBS.delegate_to_gewu_node, actionDetail: compactDetail(args.task) || '协作节点' };
+      case 'federation_list_peers':
+        return { actionLabel: TOOL_ACTIVITY_VERBS.federation_list_peers, actionDetail: '联邦节点' };
+      case 'skill_discover':
+        return { actionLabel: TOOL_ACTIVITY_VERBS.skill_discover, actionDetail: compactDetail(args?.categoryFilter) || '技能台' };
+      case 'skill_get':
+        return { actionLabel: TOOL_ACTIVITY_VERBS.skill_get, actionDetail: compactDetail(args?.name) || '技能手册' };
     case 'workspace_read': {
       const path = compactDetail(args.path) || '文件';
       const start = Number.isInteger(args.startLine) ? ` · 第 ${Number(args.startLine)} 行起` : '';
