@@ -1,8 +1,21 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { getBridge } from '@/lib/desktopBridge';
 import type { RemotePlugin } from '@/hooks/usePluginStore';
 import { formatSize, type AvailablePack, type InstalledPack, type UninstallPlan } from './types';
+
+// BLOCK-163 W3 P7（DIST-5）— 宽松版本比较（数字段数值序，缺失段=0）：'1.2.10' > '1.2.9'。
+function compareVersionsLoose(a: string, b: string): number {
+  const pa = String(a || '0').split('.');
+  const pb = String(b || '0').split('.');
+  const len = Math.max(pa.length, pb.length);
+  for (let i = 0; i < len; i++) {
+    const na = parseInt(pa[i] || '0', 10) || 0;
+    const nb = parseInt(pb[i] || '0', 10) || 0;
+    if (na !== nb) return na - nb;
+  }
+  return 0;
+}
 
 // BLOCK-92 Wave B-5 — 领域包装/卸状态簇外迁（原 PluginStorePanel.tsx 内联，纯搬运零行为变化）。
 // BLOCK-84 记录制装/卸 + BLOCK-86 P1/P2 契约与展开态 + UI-374 三档卸载确认与运行时进度。
@@ -32,6 +45,11 @@ export function useDomainPacks(options: UseDomainPacksOptions): {
   confirmDeletePackSource: boolean;
   setConfirmDeletePackSource: (next: boolean) => void;
   refreshPacks: () => Promise<void>;
+  /** BLOCK-163 W3 P7（DIST-5）— 包更新徽标数据源（packId → 版本对） */
+  packUpdates: Map<string, { installedVersion: string; latestVersion: string }>;
+  packUpdateCount: number;
+  /** BLOCK-163 W3 P7（DIST-5）— 一键更新（覆盖装，同一安装链） */
+  handlePackUpdate: (pack: AvailablePack) => Promise<void>;
   /** BLOCK-158 — 运行时补装（包卡片「必需 · 缺失」；进度走 onInstallProgress 事件） */
   handleRuntimeTopUp: (pluginId: string) => Promise<void>;
   /** BLOCK-157 加映（UI-481）— 整包启停（乐观翻转本地缓存；重启后端生效） */
@@ -86,6 +104,47 @@ export function useDomainPacks(options: UseDomainPacksOptions): {
   }, []);
 
   useEffect(() => { void refreshPacks(); }, [refreshPacks]);
+
+  // BLOCK-163 W3 P7（DIST-5）— 领域包更新体验：已装版本 < 包根当前版本 → 更新徽标；
+  // 更新 = 重走 installPath 覆盖装（同一安装链，运行时缺项照常补装提示）。
+  const packUpdates = useMemo(() => {
+    const map = new Map<string, { installedVersion: string; latestVersion: string }>();
+    const installedById = new Map(installedPacks.map((p) => [p.packId, p]));
+    for (const avail of availablePacks) {
+      const inst = installedById.get(avail.packId);
+      if (!inst) continue;
+      const a = String(avail.version || '0');
+      const b = String(inst.version || '0');
+      if (compareVersionsLoose(a, b) > 0) {
+        map.set(avail.packId, { installedVersion: b, latestVersion: a });
+      }
+    }
+    return map;
+  }, [availablePacks, installedPacks]);
+
+  const packUpdateCount = packUpdates.size;
+
+  async function handlePackUpdate(pack: AvailablePack) {
+    setPackBusy(pack.packId);
+    setPackNotice(null);
+    setPackRuntimeProgress({});
+    try {
+      const update = packUpdates.get(pack.packId);
+      const result = await getBridge('packs')?.installPath(pack.packRoot);
+      if (result?.ok) {
+        let notice = `「${pack.name}」已更新`;
+        if (update) notice += `（${update.installedVersion} → ${update.latestVersion}）`;
+        setPackNotice(`${notice}——重启应用后生效`);
+      } else {
+        setPackNotice(`更新失败：${result?.error ?? '未知错误'}`);
+      }
+      await refreshPacks();
+      setExpandedPackId(pack.packId);
+    } finally {
+      setPackBusy(null);
+      setPackRuntimeProgress({});
+    }
+  }
 
   // UI-374 — 包安装的运行时下载进度（主进程 → pack:install-progress → 这里）
   useEffect(() => {
@@ -256,6 +315,9 @@ export function useDomainPacks(options: UseDomainPacksOptions): {
     confirmDeletePackSource,
     setConfirmDeletePackSource,
     refreshPacks,
+    packUpdates,
+    packUpdateCount,
+    handlePackUpdate,
     handleRuntimeTopUp,
     handlePackSetEnabled,
     handlePackInstall,

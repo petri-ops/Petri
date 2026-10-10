@@ -57,6 +57,8 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
     confirmDeletePackSource,
     setConfirmDeletePackSource,
     refreshPacks,
+    packUpdates,
+    handlePackUpdate,
     handleRuntimeTopUp,
     handlePackInstall,
     handlePackSetEnabled,
@@ -241,6 +243,19 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                             {pack.installed && (
                               <span style={{ marginLeft: 8, fontSize: 'var(--gewu-font-size-caption, 12px)', color: 'var(--gewu-accent, #3b82f6)' }}>已安装</span>
                             )}
+                            {pack.installed && (() => {
+                              // BLOCK-163 W3 P7（DIST-5）— 更新徽标：包根版本 > 已装版本
+                              const update = packUpdates.get(pack.packId);
+                              return update ? (
+                                <span
+                                  data-testid={`pack-update-${pack.packId}`}
+                                  style={{ marginLeft: 6, fontSize: 'var(--gewu-font-size-caption, 12px)', color: 'var(--gewu-warning, #d97706)' }}
+                                  title={`有新版本 v${update.latestVersion}（当前 v${update.installedVersion}）`}
+                                >
+                                  ↑ v{update.latestVersion}
+                                </span>
+                              ) : null;
+                            })()}
                           </div>
                           <div style={{ color: 'var(--gewu-text-tertiary)', fontSize: 'var(--gewu-font-size-caption, 12px)' }}>
                             {contents
@@ -263,6 +278,22 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                                   onClick={() => void handlePackSetEnabled(pack.packId, !isEnabled)}
                                 >
                                   {packBusy === pack.packId ? '处理中…' : isEnabled ? '停用' : '启用'}
+                                </button>
+                              );
+                            })()}
+                            {(() => {
+                              const update = packUpdates.get(pack.packId);
+                              if (!update) return null;
+                              return (
+                                <button
+                                  type="button"
+                                  className="gewu-btn gewu-btn--primary"
+                                  data-testid={`pack-update-btn-${pack.packId}`}
+                                  title={`更新到 v${update.latestVersion}（覆盖装，同一安装链）`}
+                                  disabled={packBusy !== null}
+                                  onClick={() => void handlePackUpdate(pack)}
+                                >
+                                  {packBusy === pack.packId ? '处理中…' : `更新到 v${update.latestVersion}`}
                                 </button>
                               );
                             })()}
