@@ -5842,8 +5842,30 @@
       ],
       "archivePolicy": "retain_stable_path",
       "notes": "手机远程传输层优化（用户裁决「立项 马上解决」，当日立项当日收口）：P0×5 生产 gzip/隧道探活自愈+ServerAlive 收紧/agent SSE 心跳/审计异步写/清场并行+退避抖动 + P1×4 agent 流水位续传/限流按会话分桶/projectionLink 回前台 resync/断连横幅 UI-482（in_progress 待真机过目）。门禁=定向后端13+前端23+邻域32 全绿+tsc 0+docs/ui-audit/lint/secret/arch/knip 绿；test:changed/code-size 两门被 BLOCK-158 并行在途产物阻塞归因留痕（等价证据=点名直跑全绿）；projectionDataBridges.ts getJson 断连上报 hunks 随 BLOCK-158 提交 36be342b 整文件入库（内容 intact，归属注记）。"
+    },
+    {
+      "id": "BLOCK-160-MATURITY-WAVE2",
+      "path": "docs/block-160-maturity-wave2-plan.md",
+      "capability": "agent-maturity",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-160-maturity-wave2-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-10",
+      "tags": [
+        "BLOCK-160",
+        "maturity-wave2",
+        "dynamic-guard",
+        "user-rules",
+        "slash-commands",
+        "env-encryption",
+        "skill-md"
+      ],
+      "archivePolicy": "retain_stable_path",
+      "notes": "成熟度蓝图 W2 波整波承载（用户发令「开冲到W2波末」+ 波内零停顿）：P1 ORC-2 动态审批两维/P2 ORC-1 用户规则层/P3 KNW-3 斜杠命令/P4 CAP-2 env 密文化/P5 KNW-4⇄DIST-2 共轨；波末五出口断言+蓝图/backlog 回写。"
     }
   ],
   "lastUpdated": "2026-10-10",
-  "documentCount": 308
+  "documentCount": 309
 }
