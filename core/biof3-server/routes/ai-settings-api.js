@@ -63,6 +63,47 @@ function registerAiSettingsRoutes(app) {
     const result = await testApiKey(profile || provider, apiKey);
     res.json(result);
   });
+
+  // BLOCK-160 W2 P2（ORC-1）— 用户 Agent 规则 CRUD（rules.json 持久化，
+  // 拦截器经 helper 缓存读取；整单 PUT + 单条 DELETE，校验在 helper saveUserRules）
+  app.get('/api/ai/agent-rules', (req, res) => {
+    try {
+      const rules = require('../helpers/agent-user-rules').loadUserRules();
+      res.json({ status: 'ok', rules });
+    } catch (error) {
+      res.status(500).json({ status: 'error', error: error.message });
+    }
+  });
+
+  app.put('/api/ai/agent-rules', express.json(), (req, res) => {
+    try {
+      const result = require('../helpers/agent-user-rules').saveUserRules(
+        Array.isArray(req.body && req.body.rules) ? req.body.rules : []
+      );
+      if (!result.ok) {
+        res.status(400).json({ status: 'error', error: result.error });
+        return;
+      }
+      res.json({ status: 'ok', count: result.count });
+    } catch (error) {
+      res.status(500).json({ status: 'error', error: error.message });
+    }
+  });
+
+  app.delete('/api/ai/agent-rules/:id', (req, res) => {
+    try {
+      const helper = require('../helpers/agent-user-rules');
+      const remaining = helper.loadUserRules().filter((r) => r.id !== req.params.id);
+      const result = helper.saveUserRules(remaining);
+      if (!result.ok) {
+        res.status(400).json({ status: 'error', error: result.error });
+        return;
+      }
+      res.json({ status: 'ok', count: result.count });
+    } catch (error) {
+      res.status(500).json({ status: 'error', error: error.message });
+    }
+  });
 }
 
 module.exports = { registerAiSettingsRoutes, computeVisionConfigured };

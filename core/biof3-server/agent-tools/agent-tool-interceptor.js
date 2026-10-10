@@ -95,6 +95,12 @@ function createAgentToolInterceptor(options = {}) {
     // context. Inject before required-field validation; explicit model tokens
     // are never replaced, so stale writes still fail closed in the handler.
     const args = bindResultStudioContextToken(name, argsObj == null ? {} : argsObj, ctx);
+    // BLOCK-160 W2 P2（ORC-1）— 用户规则注入（fail-soft 缓存读；零文件=零规则零行为）
+    if (!ctx.userRules) {
+      try {
+        ctx = { ...ctx, userRules: require('../helpers/agent-user-rules').loadUserRules() };
+      } catch { /* 规则层故障不阻断调用（fail-soft） */ }
+    }
     const argumentErrors = validateToolArguments(args, entry.definition.function.parameters);
     if (argumentErrors.length) {
       return {

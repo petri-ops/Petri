@@ -30,6 +30,8 @@ import { Props, SettingsSection, SETTINGS_SECTIONS } from './DesktopSettingsPane
 import { useEndpointProfilesEditor } from './DesktopSettingsPanel/useEndpointProfilesEditor';
 import { UsageResourcePanel } from './DesktopSettingsPanel/sections/UsageResourcePanel';
 import { DecisionUsagePanel } from './DesktopSettingsPanel/sections/DecisionUsagePanel';
+// BLOCK-160 W2 P2（ORC-1）— Agent 用户规则面板（rules.json CRUD 读面）
+import { AgentRulesPanel } from './DesktopSettingsPanel/sections/AgentRulesPanel';
 import { DecisionConfigPanel } from './DesktopSettingsPanel/sections/DecisionConfigPanel';
 import { UpdateChecker } from './DesktopSettingsPanel/sections/UpdateChecker';
 import { ExportDiagnostic } from './DesktopSettingsPanel/sections/ExportDiagnostic';
@@ -560,6 +562,13 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
             <UsageResourcePanel />
             {/* BLOCK-116 W2 — 决策原语观测面（decision_log 聚合，additive） */}
             <DecisionUsagePanel />
+          </section>
+        )}
+
+        {/* BLOCK-160 W2 P2（ORC-1）— Agent 用户规则节（与决策观测节相邻） */}
+        {activeSection === 'decisions' && (
+          <section className="gewu-settings-section">
+            <AgentRulesPanel />
           </section>
         )}
 

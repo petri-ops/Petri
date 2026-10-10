@@ -267,6 +267,26 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
     return deny('policy_denied', 'policy_denied', '该工具风险等级不允许由 Agent 执行。');
   }
 
+  // BLOCK-160 W2 P2（ORC-1）— 用户规则层（判定序第二层，first-match 先到先判）：
+  // deny = 直接拦截；require-ack = 拦截并要求确认（ctx.dynamicGuardAcks 含
+  // `rule:<id>` 键放行——与动态防护共用统一确认通道）。规则经 ctx.userRules 注入
+  //（拦截器 fail-soft 缓存读），policy 保持纯函数。
+  if (operation.mutating) {
+    const match = evaluateUserRules(name, args, ctx);
+    if (match) {
+      const acked = isGuardAcked(ctx, match.guardKey);
+      if (match.rule.action === 'deny' || !acked) {
+        return deny(
+          match.rule.action === 'deny' ? 'user_rule_denied' : 'user_rule_require_ack',
+          'user_rule_triggered',
+          `用户规则拦截：规则「${match.rule.id}」（${match.rule.action === 'deny' ? '动作=拒绝' : '动作=需确认'}）。` +
+          `（guardKey=${match.guardKey}）`,
+          { ruleId: match.rule.id, guardKey: match.guardKey }
+        );
+      }
+    }
+  }
+
   // BLOCK-160 W2 P1（ORC-2）— 动态维度（判定序第三层，取最严）：mutating 调用
   // 命中系统破坏命令/敏感路径 → deny+guardKey；ctx.dynamicGuardAcks 含键则放行
   //（统一确认通道：ORC-1 require-ack 规则与未来确认 UI 共用）。
@@ -337,9 +357,15 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
   });
 }
 
+function evaluateUserRules(name, args, ctx = {}) {
+  // 纯函数委托：规则数组来自 ctx.userRules（拦截器注入），policy 不做 I/O。
+  return require('../helpers/agent-user-rules').evaluateUserRules(name, args, ctx && ctx.userRules);
+}
+
 module.exports = {
   decideAgentToolCall,
   effectiveOperation,
+  evaluateUserRules,
   evaluateDynamicGuards,
   isProtectedScientificSource,
   checkAllowedDownstream,
