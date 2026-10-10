@@ -32,6 +32,10 @@ function openAIContentToAnthropic(content) {
           type: 'image',
           source: { type: 'base64', media_type: match[1], data: match[2] },
         });
+      } else if (/^https:\/\//.test(String(url || ''))) {
+        // BLOCK-163 MDL-3 — Anthropic API 原生支持 URL source；http(s) 不再静默丢弃
+        //（file:// 等非 http(s) 仍丢弃 fail-soft）
+        blocks.push({ type: 'image', source: { type: 'url', url: String(url) } });
       }
     }
   }
