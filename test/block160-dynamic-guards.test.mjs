@@ -19,7 +19,6 @@ const ROOT = path.resolve('.');
 const policy = require(path.join(ROOT, 'core/biof3-server/agent-tools/agent-tool-policy'));
 
 const EXEC_CONTRACT = { sideEffect: 'execution', riskTier: 'R2' };
-const WRITE_CONTRACT = { sideEffect: 'workspace-write', riskTier: 'R2' };
 const FULL = { accessMode: 'full' };
 
 test('BLOCK-160 ORC-2 命令维度：系统破坏命令首 token 命中（full 档也拦）', () => {

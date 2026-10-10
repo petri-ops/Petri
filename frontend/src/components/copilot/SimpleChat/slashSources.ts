@@ -12,10 +12,8 @@
 import { getBridge } from '@/lib/desktopBridge';
 import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 
-export type SlashEntryKind = 'action' | 'skill' | 'template';
-
 export interface SlashEntry {
-  kind: SlashEntryKind;
+  kind: 'action' | 'skill' | 'template';
   id: string;
   label: string;
   description: string;
@@ -23,7 +21,6 @@ export interface SlashEntry {
 
 const CACHE_TTL_MS = 60_000;
 let cache: { entries: SlashEntry[]; loadedAt: number } = { entries: [], loadedAt: 0 };
-
 /** 产品 Skills → /<skill-id> 条目（bridge discover；不可用=空）。 */
 export function buildSkillEntries(skills: Array<{ id: string; name: string; description: string; category?: string }>): SlashEntry[] {
   return skills.map((skill) => ({
@@ -92,9 +89,4 @@ export function slashIntentTemplate(entry: SlashEntry): string {
     return `请用 run_tool 规划标准流程（op="plan", templateId="${entry.id}"）：`;
   }
   return '';
-}
-
-/** 测试辅助：清模块缓存。 */
-export function __resetSlashSourceCacheForTests(): void {
-  cache = { entries: [], loadedAt: 0 };
 }

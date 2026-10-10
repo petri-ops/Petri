@@ -5848,7 +5848,7 @@
       "path": "docs/block-160-maturity-wave2-plan.md",
       "capability": "agent-maturity",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-160-maturity-wave2-plan",
       "entrypoint": "docs/README.md",
@@ -5863,9 +5863,51 @@
         "skill-md"
       ],
       "archivePolicy": "retain_stable_path",
-      "notes": "成熟度蓝图 W2 波整波承载（用户发令「开冲到W2波末」+ 波内零停顿）：P1 ORC-2 动态审批两维/P2 ORC-1 用户规则层/P3 KNW-3 斜杠命令/P4 CAP-2 env 密文化/P5 KNW-4⇄DIST-2 共轨；波末五出口断言+蓝图/backlog 回写。"
+      "notes": "2026-10-10 当日整波收口：五种子全交付+波末五出口断言 ALL PASS（10 断言）+门禁全绿（残红归属 BLOCK-159 已提交面与 BLOCK-161/162 在制，均非本批）；riders=确认 UI 弹卡/KNW-3 chip v2。"
+    },
+    {
+      "id": "BLOCK-161-UI-DESIGN-SYSTEM-GOVERNANCE",
+      "path": "docs/block-161-ui-design-system-governance-plan.md",
+      "capability": "design-system",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-161-ui-design-system-governance-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-10",
+      "tags": [
+        "BLOCK-161",
+        "design-system",
+        "design-tokens",
+        "accessibility",
+        "contrast",
+        "bundle-size",
+        "virtualization"
+      ],
+      "archivePolicy": "retain_stable_path",
+      "notes": "UI 设计体系治理（BLOCK 轨四波，用户裁决「B」=等 BLOCK-160 收口后立项不并行）：承接 2026-10-10 UI/UX 全面审计（51 条问题，实测证据）分四波落地——W1 速赢（P0：CommandPalette 误引入 CSS 删除首屏 391→150KB / 4 处对比度改色 / Tab 困陷修 focus-within / 375 行死 CSS 清理）/ W2 档位体系+门禁棘轮（间距 8 档+圆角 4 档+z-index 7 档+阴影收敛+契约测试补 4 条断言）/ W3 缩放闭环（112 处裸 font-size 清零使设置面板字号真生效+24 个明暗未配对 token 补齐+accent 接回 62 处 ifm-primary）/ W4 性能（WorkspaceSummaryCard 止血 0 useMemo+6 interval→memo+单 tick / 长列表虚拟化 react-window 0 处 / 首屏骨架）。形态判定=BLOCK 非 UI 增量（文件面四区+四波多裁决项+跨会话，§1 判据自检）。启动前置=BLOCK-160 收口腾出唯一 active 槽位；W4 虚拟化依赖须先评估自研 spacer 免新增 npm 依赖。证据=acceptance/ui-ux-audit-2026-10-10/ + acceptance/block-161/。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-162-MOBILE-WS-TRANSPORT",
+      "path": "docs/block-162-mobile-ws-transport-plan.md",
+      "capability": "mobile-gateway",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-162-mobile-ws-transport-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-10",
+      "tags": [
+        "BLOCK-162",
+        "websocket",
+        "mobile-gateway",
+        "instant-push",
+        "agent-stream"
+      ],
+      "archivePolicy": "retain_stable_path",
+      "notes": "（并行插队批：唯一 active 槽位被 BLOCK-160 占用；用户显式裁决「能搞咱就搞起来」插队，文件面隔离=mobile-gateway+agentTaskStream，与 W2 波 agent-tools/skills/mcp 不相交；收口时翻 completed）手机面传输 WS 化：零依赖 RFC6455 最小 WS 服务端 + agent-task-store 进程内事件总线 + 网关 /m/api/ws + 前端投影 WS-first 回退 SSE。"
     }
   ],
   "lastUpdated": "2026-10-10",
-  "documentCount": 309
+  "documentCount": 311
 }

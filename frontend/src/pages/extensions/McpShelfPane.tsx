@@ -211,7 +211,8 @@ export function McpShelfPane(): React.ReactElement {
           type="button"
           className={styles.mcpRefresh}
           title="从 JSON 文件导入 MCP server 配置（{servers:[…]} 或数组；坏条目跳过并提示）"
-          onClick={async () => {
+          onClick={() => {
+            void (async () => {
             const bridge = (window as unknown as { biof3Desktop?: { mcpConfigImportDialog?: () => Promise<{ ok: boolean; canceled?: boolean; imported?: number; skipped?: Array<{ id: string; error: string }>; error?: string }> } }).biof3Desktop;
             if (!bridge?.mcpConfigImportDialog) return;
             const result = await bridge.mcpConfigImportDialog();
@@ -223,6 +224,7 @@ export function McpShelfPane(): React.ReactElement {
             } else if (result?.error) {
               setFormError(`导入失败：${result.error}`);
             }
+            })();
           }}
         >
           <Icon name="file" size={12} />

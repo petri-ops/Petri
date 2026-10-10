@@ -42,17 +42,24 @@ export function AgentRulesPanel(): React.ReactElement {
   const [action, setAction] = useState<'deny' | 'require-ack'>('require-ack');
   const [note, setNote] = useState('');
 
-  async function refresh(): Promise<void> {
-    const response = await fetch(`${getPlatformApiPrefix()}/ai/agent-rules`, {
-      headers: authHeaders(),
-    });
-    const data = (await response.json()) as RulesResponse;
-    if (!response.ok || data?.status !== 'ok') throw new Error(data?.error || '规则读取失败');
-    setRules(Array.isArray(data.rules) ? data.rules : []);
-  }
-
   useEffect(() => {
-    refresh().catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)));
+    // DecisionUsagePanel 同款：fetch 内联 effect，then 里才 setState（规避级联渲染规则）
+    let cancelled = false;
+    void fetch(`${getPlatformApiPrefix()}/ai/agent-rules`, {
+      headers: authHeaders(),
+    }).then(async (response) => {
+      const data = (await response.json()) as RulesResponse;
+      if (!response.ok || data?.status !== 'ok') throw new Error(data?.error || '规则读取失败');
+      if (!cancelled) {
+        setRules(Array.isArray(data.rules) ? data.rules : []);
+        setError('');
+      }
+    }).catch((reason) => {
+      if (!cancelled) setError(reason instanceof Error ? reason.message : String(reason));
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function addRule(): Promise<void> {

@@ -5,7 +5,9 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-10-10（**BLOCK-158 商店面退役 completed（轻量批；用户裁决「清 尽可能的纯净」）**：商店写面四通道+OSS 远程抓取半边+商店卡片 UI 全链移除；运行时供应链保留+pack:install-runtime 补装新链；插件分发唯一通道=领域包；蓝图 DIST-5 改道=领域包更新体验（pack 清单版本比对）、DIST-1 收敛=pack 通道唯一启停面；残红归属=BLOCK-159 在制（docs:check/knip/test×1）+P1.4 干净树预红，均非本批。）
+最后更新：2026-10-10（**BLOCK-160 W2 波当日整波收口 completed（用户发令「开冲到W2波末」，plan=docs/block-160-maturity-wave2-plan.md §7）**：ORC-2 动态审批两维/ORC-1 用户规则层/KNW-3 斜杠命令双来源/CAP-2 env 密文化/KNW-4⇄DIST-2 共轨五种子全交付；**波末五出口断言 ALL PASS**（真实模型 dynamic_guard 拦截/用户规则拦截/斜杠菜单 7 徽标 CDP 实开/env 落盘零明文往返/SKILL.md 管线 5/5，acceptance/block-160/wave2-live.json）；残红归属=BLOCK-159 已提交面（lint agentTaskStream 系）+BLOCK-161/162 在制（test:changed 阻塞）+P1.4 main 预红，均非本批；riders=确认 UI 弹卡/KNW-3 chip v2 候选；蓝图六种子翻 completed；**队列头交棒 W3 首件 ORC-3**。）
+
+此前 最后更新：2026-10-10（**BLOCK-158 商店面退役 completed（轻量批；用户裁决「清 尽可能的纯净」）**：商店写面四通道+OSS 远程抓取半边+商店卡片 UI 全链移除；运行时供应链保留+pack:install-runtime 补装新链；插件分发唯一通道=领域包；蓝图 DIST-5 改道=领域包更新体验（pack 清单版本比对）、DIST-1 收敛=pack 通道唯一启停面；残红归属=BLOCK-159 在制（docs:check/knip/test×1）+P1.4 干净树预红，均非本批。）
 
 此前 最后更新：2026-10-10（**BLOCK-157 W1 波当日整波收口 completed（用户发令「开冲到W1波末」+ 波内零停顿条款）**：KNW-1 Skills 可见性投影（76→78）/KNW-2 渐进披露（索引有界注入）/CAP-1 MCP annotations 粒度审批（readOnlyHint→retrieval/none，默认 D4 不变）/DIST-1 插件启停粒度全交付；实机抓真修复插件目录拓扑脑裂（BLOCK-125 家族 resolveInstalledPluginsDir 收敛）；**波末三出口断言 ALL PASS**（真实模型 read 档自主 skill_discover/get 引用 skill/workspace-write 档 readOnly MCP 工具回流/插件停用不注册·启用免重装 8→7→8，acceptance/block-157/wave1-live.json）；closeout 十一门 PASS（D7 领域中立棘轮+lint/code-size 抓真清偿随包）；riders=UI-481 待过目；蓝图 §2 四种子翻 completed、§3.2 W1 出口达成；**队列头交棒 W2 首件 ORC-2**（依赖 CAP-1 已解锁）。）
 
@@ -110,7 +112,7 @@
 | 1w | 蓝图 W1 / KNW-2 | 渐进披露闭环 completed（BLOCK-157 P2，23ad1154）：agent-runner 技能索引常驻注入（≤12 条/整块 ≤2200/空清单零注入/源码扫描接线钉）+skill_get 正文触发加载（8000 字符截断） | 蓝图 §2④ | **completed** |
 | 1x | 蓝图 W1 / CAP-1 | MCP 粒度审批 completed（BLOCK-157 P3，5cd195d7）：readOnlyHint→retrieval/none/R1（read/plan 档可用），无注释保守维持 execution/R2；实机 workspace-write 档 readOnly 工具回流（波末断言②）——**ORC-2 前置已解锁** | 蓝图 §2③ | **completed** |
 | 1y | 蓝图 W1 / DIST-1 | 插件启停粒度 completed（BLOCK-157 P4，4ef6d666+拓扑修复 cd7c58ac）：installed enabled 标志+加载器尊重+plugin:set-enabled IPC+货架开关；三态重启实机 在场→消失→复现（波末断言③）；**实机抓真=插件目录拓扑脑裂修复（BLOCK-125 家族）**；UI-481 in_progress 待过目 | 蓝图 §2⑤ | **completed** |
-| — | 蓝图 W2/W3（汇总行） | W2=ORC-2（依赖 1x **已解锁，队列头**）→ ORC-1 → KNW-3 → CAP-2 → KNW-4⇄DIST-2（共轨；C-EXT-4 的 skill.json 导入半边已由 BLOCK-156 D7 交付 4479aecf，剩余=SKILL.md 兼容+插件/MCP 配置导入）；W3=ORC-3 → ORC-4 → CAP-3（承接 C-EXT-1）→ MDL-1 → MDL-2 → DIST-3⇄CAP-5（共轨）→ DIST-5 → MDL-3 → MDL-4 → KNW-5 → KNW-6 → DIST-4 | 蓝图 §3 波次表+出口判据 | 候选（按波递进；波内零停顿条款在案） |
+| — | 蓝图 W2（汇总行） | **W2 全波 completed（2026-10-10 BLOCK-160，五种子+五断言 ALL PASS，acceptance/block-160/wave2-live.json；收口笔录 plan §7）**；W3=ORC-3 → ORC-4 → CAP-3（承接 C-EXT-1）→ MDL-1 → MDL-2 → DIST-3⇄CAP-5（共轨）→ DIST-5 → MDL-3 → MDL-4 → KNW-5 → KNW-6 → DIST-4 | 蓝图 §3 波次表+出口判据 | 候选（按波递进；波内零停顿条款在案） |
 | 2 | PL-2 / BLOCK-126 | **感知实时性 completed（含 2026-09-29 复验）**：终态 jobs 失效事件+运行期日志行缓冲；实机 allPass 6/6 两轮+端点兜底修复后复跑 6/6（source=run.log） | plan §5.1 + acceptance/block-126/ | completed |
 | 3 | BIO-2 | 交互上限与降级链：250 点 top-N 语义/静态 24 行分页/热图窗口/mojibake | G0-BIO plan §3 | planned |
 | 4 | BIO-3 | lineage 可视化 + 继续分析显式化（吸收 C-15 前半） | G0-BIO plan §3 | planned |

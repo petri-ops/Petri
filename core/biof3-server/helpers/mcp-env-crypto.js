@@ -15,6 +15,7 @@
 
 const crypto = require('node:crypto');
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 
 const PREFIX = 'enc:v1:';

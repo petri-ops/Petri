@@ -48,8 +48,8 @@ status: reference
 
 | 种子 | 范围 | 验收锚点 | 依赖 | 状态 |
 | --- | --- | --- | --- | --- |
-| ORC-1 | 用户规则层：领域确认 hook 注册表之上加用户可配置规则（glob 路径 / 命令模式 / 必确认清单），first-veto 语义不变 | 规则命中真实拦截实机验证 | — | 候选 |
-| ORC-2 | 动态审批粒度：审批档位从 per-tool 静态 → 「契约 × 参数 × 路径」动态判定（含 MCP 半边） | 只读 MCP 工具在 read/plan 档可用 | CAP-1（硬；built-in 半边可拆先行） | 候选 |
+| ORC-1 | 用户规则层：用户可配置规则（path-glob / command-token + deny / require-ack） | 规则命中真实拦截实机验证 | — | **completed（2026-10-10 BLOCK-160 P2，rules.json+REST CRUD+设置面；实机 curl deny 规则拦截）** |
+| ORC-2 | 动态审批粒度：审批档位从 per-tool 静态 → 「契约 × 参数 × 路径」动态判定 | 实机参数/路径级案例生效 | CAP-1（硬） | **completed（2026-10-10 BLOCK-160 P1，两维动态防护 deny+guardKey+ack 通道；MCP 参数全量扫描留 v2）** |
 | ORC-3 | 子 Agent 事件驱动聚合：wait_agent 1s 轮询 → 终态事件回调（并发软上限 3 不动） | 行为等价 + 聚合延迟可测下降 | — | 候选 |
 | ORC-4 | 编排统一：spawn 派生与 run_tool workflowPlan 收敛单模型（血缘 DAG 画布已有渲染先例） | 两条链共用一套 checkpoint/恢复语义 | ORC-3（软·强建议） | 候选 |
 | ORC-5 | 循环预算用户可配：时间/token 软上限作为 run 级配置 | 超限走既有 finalization 语义 | ORC-1（软，共用设置面形态） | 候选 |
@@ -61,7 +61,7 @@ status: reference
 | 种子 | 范围 | 验收锚点 | 依赖 | 状态 |
 | --- | --- | --- | --- | --- |
 | CAP-1 | MCP 工具粒度审批：读 MCP annotations（readOnly/destructive hints），投影契约从一刀切 execution/R2 分级为「只读检索族（read/plan 可用）/ 执行族（full）」 | 只读第三方工具低档可用，实机全链 | — | **completed（2026-10-10 BLOCK-157 P3，readOnlyHint→retrieval/none/R1+低档实机回流）** |
-| CAP-2 | env 密文化：mcp-servers.json 明文 → Electron safeStorage（block-156 登记债） | 落盘零明文 + 存量迁移自愈 | — | 候选 |
+| CAP-2 | env 密文化：mcp-servers.json 落盘加密（机制=AES-256-GCM 本地密钥，safeStorage 语义偏离已登记） | 落盘零明文 + 存量迁移自愈 | — | **completed（2026-10-10 BLOCK-160 P4，实机磁盘零明文+往返+密钥丢失降级）** |
 | CAP-3 | MCP 传输扩展：streamable HTTP/SSE（承接 C-EXT-1 传输半边）+ 连接健康面板（状态/超时统计） | 多传输连接 + 健康统计可视 | — | 候选 |
 | CAP-4 | 工具选择质量：BLOCK-113 tool-route 决策预路由在 76+40 规模下精度加固（承接 C-EXT-3，其「决策配置中心接线证据」重开条件保留） | 路由精度校准门 | CAP-1（软，终态工具宇宙上校准） | 候选 |
 | CAP-5 | 插件权限声明：manifest permissions + 安装时展示 + 执行器尊重（与 DIST-3 共轨合并立项；承接 C-EXT-1「server 级信任」半边） | 装前知情面 | — | 候选 |
@@ -74,8 +74,8 @@ status: reference
 | --- | --- | --- | --- | --- |
 | KNW-1 | Skills 可见性：skill_discover/skill_get 投影进 agent-tools（或 system prompt 注入技能摘要清单）——模型第一次「看到」产品 skills（当前最大断链：4 技能纯显式执行，agent 感知不到） | 实机 agent 自主发现并引用一个 skill | — | **completed（2026-10-10 BLOCK-157 P1，实机 read 档自主引用实证）** |
 | KNW-2 | 渐进披露闭环：描述常驻 + 正文触发加载（对齐 SKILL.md 渐进披露模式） | 触发加载契约 + token 预算有界 | KNW-1（硬） | **completed（2026-10-10 BLOCK-157 P2，索引有界注入+skill_get 截断加载）** |
-| KNW-3 | 斜杠命令层：composer /xxx → 技能与 run_tool 模板统一入口（CommandPalette 保持 UI 动作不动） | 双来源单入口实机 | KNW-1（软，在场后更完整） | 候选 |
-| KNW-4 | SKILL.md 兼容导入：格式兼容（本地目录导入管线已由 BLOCK-156 D7 补做以 skill.json 形态交付，2026-10-10 `4479aecf`；本种子剩余面 = SKILL.md 兼容并复用该管线；与 DIST-2 共轨一包） | 外部 SKILL.md 技能导入即用 + skills:check 扩契约 | KNW-1、KNW-2（硬链） | 候选（范围收缩注记） |
+| KNW-3 | 斜杠命令层：composer /xxx → 技能与 run_tool 模板统一入口 | 双来源单入口实机 | KNW-1（软） | **completed（2026-10-10 BLOCK-160 P3，CDP 菜单实开 7 来源徽标）** |
+| KNW-4 | SKILL.md 兼容导入：front-matter 受限解析 + body→手册，复用 D7 目录导入管线（与 DIST-2 共轨一包） | 外部 SKILL.md 技能导入即用 | KNW-1、KNW-2（硬链） | **completed（2026-10-10 BLOCK-160 P5，合成/迁移/回滚/冲突单测 5/5）** |
 | KNW-5 | 记忆治理面：facts/summary/vectors 细粒度查看/编辑/单条遗忘（现只有 wipe；管理 API 已有） | 治理 UI 实机 | — | 候选 |
 | KNW-6 | 知识→流程联动：RAG 命中建议相关技能（citations 事件已有挂点） | 联动建议实机 | KNW-2（软，复用触发加载机制） | 候选 |
 
@@ -86,7 +86,7 @@ status: reference
 | 种子 | 范围 | 验收锚点 | 依赖 | 状态 |
 | --- | --- | --- | --- | --- |
 | DIST-1 | 启停粒度：installed.json 增 enabled 状态 + 加载器尊重 + 货架 UI 开关 | 停用即不注册、启用免重装 | — | **completed（2026-10-10 BLOCK-157 P4；同日 BLOCK-158 商店面退役后收敛=领域包整包启停为唯一启停面（pack 通道），UI-481 包卡片开关待用户过目）** |
-| DIST-2 | 本地导入（与 KNW-4 共轨）：技能目录导入 v1 已由 BLOCK-156 D7 交付（`4479aecf`），剩余面 = 插件 / MCP 配置导入随批 | 插件/MCP 配置导入 → 在场 → 可用全链 | DIST-1（软）+ KNW-4 共轨 | 候选（范围收缩注记） |
+| DIST-2 | 本地导入（与 KNW-4 共轨）：MCP 配置文件导入（对话框/直路径双通道）；插件导入随批收敛（商店通道 BLOCK-158 退役、pack 对话框已在） | 导入 → 在场 → 可用全链 | DIST-1（软）+ KNW-4 共轨 | **completed（2026-10-10 BLOCK-160 P5，双形态单测+货架导入按钮 UI 在场）** |
 | DIST-3 | 插件权限声明（与 CAP-5 共轨合并立项） | 装前知情面 | — | 候选 |
 | DIST-4 | 打包卫生债（登记型）：electron-builder 陈旧 built-in-plugins 引用清偿 + resources/skills 纳入 extraResources（配置面修复，非 packaged 验证） | 配置面修复 + 卫生门绿 | — | 候选 |
 | DIST-5 | 更新体验：**领域包版本更新**（pack 清单版本比对 + 重装；2026-10-10 BLOCK-158 商店面退役后 checkUpdates 链已移除，原「复用商店安装链」路径不存在） | 包版本徽标 → 一键更新实机 | — | 候选（范围改道注记） |

@@ -1,0 +1,59 @@
+{
+  "live": {
+    "part": "live",
+    "finishedAt": "2026-10-10T09:33:19.317Z",
+    "assertions": [
+      {
+        "name": "dev_stack_api_ready",
+        "pass": true,
+        "detail": "status=200"
+      },
+      {
+        "name": "chat_preset_available",
+        "pass": true,
+        "detail": "presets=4"
+      },
+      {
+        "name": "A_project_created",
+        "pass": true,
+        "detail": ""
+      },
+      {
+        "name": "A_dynamic_guard_triggered",
+        "pass": true,
+        "detail": "transcript 含 dynamic_guard 标记；reply=我不能这么做。\n\n原因有两点，都是硬性的：\n\n1. **workspace_write 只接受项目工作区内的相对路径**，会拒绝任何越出项目根的路径（`..`、绝对路径、盘符路径等）。你给的 `C:\\Windows\\System32\\con"
+      },
+      {
+        "name": "A_task_completed",
+        "pass": true,
+        "detail": "status=completed"
+      },
+      {
+        "name": "B_user_rule_denied_triggered",
+        "pass": true,
+        "detail": "transcript 含规则拦截标记"
+      },
+      {
+        "name": "C_workflow_templates_route_ok",
+        "pass": true,
+        "detail": "count=3"
+      },
+      {
+        "name": "D_server_with_env_added",
+        "pass": true,
+        "detail": "status=200"
+      },
+      {
+        "name": "D_disk_zero_plaintext",
+        "pass": true,
+        "detail": "磁盘含 enc:v1: 且无明文"
+      },
+      {
+        "name": "D_read_roundtrip_plaintext",
+        "pass": true,
+        "detail": "读取侧明文往返"
+      }
+    ],
+    "allPass": true
+  }
+}

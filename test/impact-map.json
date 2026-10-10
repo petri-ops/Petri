@@ -3152,7 +3152,7 @@
     },
     {
       "id": "block159-mobile-remote-transport",
-      "note": "BLOCK-159 手机远程传输层优化：生产投影 gzip（compress.js，零依赖）/隧道探活连败自愈+ServerAlive 15→10/agent SSE 15s 心跳/审计异步写/限流按会话 token 分桶/agent 流水位续传（删 90s 硬预算）/投影 link 状态+回前台 resync/断连横幅 UI-482。读者含 mobile-gateway 邻域契约（block70/145/152）。 家族轻量批增补：scripts/block159-relay-watchdog.sh（中转服务器看门狗，软件独立性=零 IP/厂商写死）。",
+      "note": "BLOCK-159 手机远程传输层优化：生产投影 gzip（compress.js，零依赖）/隧道探活连败自愈+ServerAlive 15→10/agent SSE 15s 心跳/审计异步写/限流按会话 token 分桶/agent 流水位续传（删 90s 硬预算）/投影 link 状态+回前台 resync/断连横幅 UI-482。读者含 mobile-gateway 邻域契约（block70/145/152）。 家族轻量批增补：scripts/block159-relay-watchdog.sh（中转服务器看门狗，软件独立性=零 IP/厂商写死）。（BLOCK-160 收口代登记：两个在制脚本补 exactly-one 分类，归属 BLOCK-159）",
       "patterns": [
         "core/biof3-server/mobile-gateway/**",
         "core/biof3-server/routes/ai-agent/events.js",
@@ -3163,7 +3163,9 @@
         "frontend/src/components/desktop/_ProjectionLinkBanner.tsx",
         "frontend/src/components/desktop/_ProjectionLinkBanner.module.css",
         "acceptance/block-159/**",
-        "scripts/block159-*"
+        "scripts/block159-*",
+        "scripts/block159-relay-watchdog.sh",
+        "scripts/ui-audit-probe.cjs"
       ],
       "tests": [
         "test/block159-gateway-compress.test.mjs",
@@ -3177,7 +3179,43 @@
         "frontend/src/components/copilot/copilotClient/agentTaskStream.reconnect.test.ts"
       ],
       "frontendRelated": true,
-      "classifiesScripts": false
+      "classifiesScripts": true
+    },
+    {
+      "id": "block160-maturity-wave2",
+      "note": "BLOCK-160 成熟度蓝图 W2 波：ORC-2 动态审批两维（policy evaluateDynamicGuards）/ORC-1 用户规则层（agent-user-rules+REST+设置面）/KNW-3 斜杠菜单双来源（slashSources+workflow-templates 路由）/CAP-2 mcp env 加密（mcp-env-crypto+mcp-settings 接线）/KNW-4⇄DIST-2（SKILL.md 合成导入+mcp-config-import+import IPC）。",
+      "patterns": [
+        "core/biof3-server/agent-tools/agent-tool-policy.js",
+        "core/biof3-server/agent-tools/agent-tool-interceptor.js",
+        "core/biof3-server/helpers/agent-user-rules.js",
+        "core/biof3-server/helpers/mcp-env-crypto.js",
+        "core/biof3-server/helpers/mcp-settings.js",
+        "core/biof3-server/helpers/mcp-config-import.js",
+        "core/biof3-server/routes/ai-settings-api.js",
+        "core/biof3-server/routes/tools-catalog.js",
+        "core/shared-backend/skill-registry.js",
+        "src/ipc/pack.js",
+        "frontend/src/hooks/usePluginStore.ts",
+        "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/**",
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "frontend/src/components/copilot/SimpleChat/slashSources.ts",
+        "frontend/src/pages/extensions/McpShelfPane.tsx",
+        "frontend/src/lib/projectionDataBridges.ts",
+        "frontend/src/lib/electron.d.ts",
+        "scripts/block160-*.mjs",
+        "acceptance/block-160/**"
+      ],
+      "tests": [
+        "test/block160-dynamic-guards.test.mjs",
+        "test/block160-user-rules.test.mjs",
+        "test/block160-mcp-env-crypto.test.mjs",
+        "test/block160-skillmd-import.test.mjs",
+        "test/mcp-client-settings.test.mjs",
+        "test/mcp-client-manager.test.mjs",
+        "test/ipc-channels-registry.test.mjs"
+      ],
+      "classifiesScripts": true
     }
   ]
 }

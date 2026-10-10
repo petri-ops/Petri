@@ -9,7 +9,7 @@ acceptance:
   - KNW-4⇄DIST-2：SKILL.md 格式兼容导入（复用 D7 目录导入管线）+ MCP 配置文件导入；外部技能导入即用
   - 波末：五出口断言 + closeout 门禁 + 蓝图/backlog 状态回写
 reopen: 波内零停顿条款（蓝图 §3.4）——预裁决缺省即生效波报复认；整波范围改判需用户裁决
-status: active
+status: completed
 ---
 
 # BLOCK-160：成熟度蓝图 W2 波（动态审批 + 用户规则 + 斜杠命令 + env 密文 + SKILL.md 导入）
@@ -57,6 +57,16 @@ status: active
 
 逐阶段红绿 + 定向测试 + tsc（触前端）；波末 closeout 门禁 + 实机探针五断言。
 
-## 7. 收口笔录
+## 7. 收口笔录（2026-10-10 当日整波收口 completed）
 
-（波末填写）
+**交付**：P1 ORC-2（`f607b647`）policy `evaluateDynamicGuards` 两维动态审批 + P2 ORC-1（`24fc1261`）用户规则层（rules.json + REST CRUD + 设置面 AgentRulesPanel）+ P3 KNW-3（`082f4640`）斜杠菜单双来源 + P4 CAP-2（`29bf3e56`）mcp env 密文化 + P5 KNW-4⇄DIST-2（`e1e66507`）SKILL.md 合成导入 + MCP 配置导入全链。
+
+**波末五出口断言 ALL PASS**（acceptance/block-160/wave2-live.json，真实 deepseek 渠道主代理代跑，10 断言）：①A full 档敏感路径写入被动态防护拦截（transcript dynamic_guard+guardKey 实锤）；②B deny 规则（command-token curl）命中真实拦截（user_rule_denied）；③C 模板目录路由 200（3 模板）+ CDP 斜杠菜单实开（7 来源徽标=4 技能+3 模板，items 含真实技能名）；④D env 落盘零明文（enc:v1: 磁盘形态+读取明文往返）；⑤E SKILL.md 导入管线单测 5/5（合成/迁移/回滚/冲突）+ MCP 导入按钮 UI 在场（CDP 截图）。临时项目已清场、规则文件已复原。
+
+**门禁**：逐阶段红绿（ORC-2 5/5+ORC-1 11/11+CAP-2 4/4+KNW-4 5/5）+前端邻域（settings 29/29+extensions 10/10+SimpleChat 94/94+mcp 全家桶 21/21）+tsc 0+IPC 守卫 5/5+docs:check 311+knip 零新增+hygiene PASS；lint 触碰面 0 error（六笔孤儿随删清偿：mcp-env-crypto os/测试未用常量/AgentRulesPanel effect setState 级联+refresh 死函数/McpShelfPane async onClick）；code-size 两轮重锚随提交留痕。**残红如实归属=均非本批**：lint 10 error=BLOCK-159 已提交面（agentTaskStream 系 5+BLOCK-161/162 在制）；test:changed 全局门被 BLOCK-161/162 在制未登记面阻塞（等价证据=点名直跑：四 suite+邻域全绿）；P1.4=main 预红（stash 实证）。**多会话并行**：与 BLOCK-159（已收口）、BLOCK-161/162（在制）三线互认文件面零触碰。
+
+**设计偏离**（plan §2 预裁决，波报复认）：CAP-2 机制 safeStorage→core 侧 AES-256-GCM（进程架构所定，效果等价）；KNW-3 v1=文本模板注入；ORC-2 不含 rm/del；插件导入不随批。
+
+**riders**：确认 UI 弹卡（dynamicGuardAcks 通道的消费面）登记候选；KNW-3 结构化 chip 注入 v2。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。
