@@ -46,11 +46,29 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-10-10 BLOCK-163 P5 KNW-4⇄DIST-2 共轨（SKILL.md 合成导入+MCP 配置导入+货架按钮）（e1e66507）：subject 走 BLOCK 轨无 UI-###；台账=UI-483 已由 a062879a 补登对账。
+  'e1e66507a962f611b4ea419258b3aa778369c4a4',
+  // 2026-10-10 BLOCK-163 W2+W3 波整波收口提交（feat(block-163)）：subject 走 BLOCK 轨无 UI-###；UI 面触及=斜杠菜单徽标/AgentRulesPanel/MemoryPanel/UsageCostPanel/McpShelfPane（全部 BLOCK-163 各 P 阶段增量），台账=UI-483 已同步。多会话三线并行收口提交。
+  'a062879a590a87a1bcc238a683ca787b57f61209',
   // 2026-10-10 BLOCK-163 P10 KNW-5 记忆治理面（5464d1a，feat(block-163)）：subject 走
   // BLOCK 轨无 UI-###；UI 面仅设置面 MemoryPanel 节（管理 API 只读+删除消费，治理面
   // 与 AgentRulesPanel 同分区），台账=UI-483 已由收口提交 a062879a 补登对账；
   // 不重写共享历史。
   '5464d1a65cf2520afa3312f8dd5d1ab31c39d8d9',
+
+  // 2026-10-10 BLOCK-163 P9 MDL-4 成本面板（dc74e7e，feat(block-163)）：subject 走
+  // BLOCK 轨无 UI-###；UI 面仅设置面 UsageCostPanel 节（usage-mine models 聚合只读
+  // 消费），台账=UI-483 已由 a062879a 补登对账。
+  'dc74e7e82ee15fd1561dd9703f5421e8a1a19ac0',
+
+  // 2026-10-10 BLOCK-163 P7 DIST-5 领域包更新体验（13ae460，feat(block-163)）：subject 走
+  // BLOCK 轨无 UI-###；UI 面仅设置面 packUpdates 徽标+一键更新按钮（覆盖装），台账=UI-483 已由 a062879a 补登对账。
+  '13ae46048e1e8d349318355d77bb3262ebf1131e',
+
+  // 2026-10-10 BLOCK-162 手机面传输 WS 化（0c8cf74，并行会话）：subject 走 BLOCK 轨无
+  // UI-###；UI 面仅投影断连横幅 _ProjectionLinkBanner（App.tsx 挂载仅投影渲染），
+  // 台账=UI-482 已由 BLOCK-162 会话自行登记。代登记豁免随 BLOCK-163 收口（多会话并行互认）。
+  '0c8cf74dc1a5c7b23064d51301d063f20aa0ed9a',
   // 2026-10-05 BLOCK-141 清尾批（b21db4d，feat(block-141)）：subject 走 BLOCK 轨无
   // UI-###；前端触碰=R-5/R-6（选择回路行为修复，归属 UI-463 域），台账=UI-463
   // riders 闭环注记已由 6c87a937 补登对账（先例 f6e58d04/f9cf2f5c）；不重写共享历史。
@@ -408,6 +426,11 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 2026-10-10 BLOCK-163 P10 KNW-5 记忆治理面（5464d1a）：同提交漏 docs/ui-productization-audit.md 同步；台账=UI-483 已由 a062879a 补登对账（LEGACY_MESSAGE_EXEMPTIONS 同哈希）。
   '5464d1a65cf2520afa3312f8dd5d1ab31c39d8d9',
+  'dc74e7e82ee15fd1561dd9703f5421e8a1a19ac0',
+  'e1e66507a962f611b4ea419258b3aa778369c4a4',
+  'a062879a590a87a1bcc238a683ca787b57f61209',
+  '0c8cf74dc1a5c7b23064d51301d063f20aa0ed9a',
+  '13ae46048e1e8d349318355d77bb3262ebf1131e',
   // 2026-10-03 BLOCK-138 F1 加映两笔（主代理终审批登记）：ea765eea（F1 链形成点
   // pending 信任层注册，触碰 LineageViewSwitch.test.tsx lint 收口）与 d3ae13a3
   // （走查抓真挂载点修复，ResultArtifactShell.tsx +3 行）均由另一会话 dynamic
