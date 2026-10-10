@@ -4795,3 +4795,5 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 ## UI-485: 全仓设计 token 前缀迁移 --gewu-* → --petri-*（2026-10-10 in_progress，BLOCK-165 P1·基线补登）
 
 换库开源改名的 UI 面组成部分：全部设计 token（border/accent/text/text-secondary/text-tertiary/bg-surface/font-size 阶梯/shadow 等约 40+ 变体、236 文件）与 CSS 类名前缀 `gewu-` → `petri-` 机械迁移，**视觉零变化**（纯标识符替换，值不动）；theme-token-contract 契约 4/4 同步改前缀后绿。同批 UI 关联面：GewuOpenFileDevBridge→PetriOpenFileDevBridge、html class `petri-desktop`、LoginModal 等类名前缀。补登说明=token/类名迁移随 66b3970（P1 机械替换）入库、同提交走 BLOCK 轨漏 UI-### 与台账同步，BLOCK-165 全量复验时按 LEGACY 先例补登+双豁免登记（fb5174ee 同款）；实机=改名后 dev 栈重启全窗走查（P6 冒烟）待过目翻 verified。
+
+### UI-485 加映（2026-10-10·BLOCK-165 P7 尾笔）：mini 旗标桥撞名解耦 petriAgentFlags——case-aware 改名把 preload 双暴露 'biof3'（旗标桥）+ 'gewu'（全量 surface）双双坍缩为同名 'petri'（同键二次暴露+Window 接口重复成员，tsc TS2339 ×4 红、CI frontend check 红）；旗标桥迁独立键 `petriAgentFlags`（preload 暴露/electron.d.ts 声明/消费面 extraRenderers+DesktopSettingsPanel/测试桩 ×4 处），实机 CDP 渲染层探针双桥 `object|object` + 窗标题 Petri；tsc 0+三测试件 39/39 绿。

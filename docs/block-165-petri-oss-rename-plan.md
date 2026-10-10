@@ -10,8 +10,8 @@ acceptance:
   - quality:secret 复扫 + 个人标识扫描（petri-ops/个人路径/内网信息）清零或豁免登记
   - LICENSE + 根 README（EN 主 + 中文副标）+ About 描述与 topics；新仓 CI 首跑绿
   - 旧 origin 退役（不再推 biof3 路径）；docs:reconcile + docs:check PASS；closeout 十一门
-reopen: 阻塞（已解除：D0-D7 已裁决）= 无；用户已裁决「一次搞完」豁免 dry-run 中途过目门
-status: active
+reopen: 无遗留阻塞；登记在案移交债=行数棘轮 ×2（拆分重构）/BLOCK-63 ×10（.NET 8 SDK env）/streamReconnect jitter ×4（BLOCK-159 家族）/RS7 门包化改造（RS 家族）
+status: completed
 ---
 
 # BLOCK-165：Petri 换库开源改名（Gewu/BioF3 → Petri + petri-ops/Petri）
@@ -134,3 +134,6 @@ status: active
 
 - 2026-10-10 立项（planned）：影响面勘察（§4 实数）+ 本 plan + DOC-REGISTRY/roadmap/AUDIT-LOG 登记；doc:suggest 零建议（如实）；待 D0-D7 裁决后进入 P0。
 - 2026-10-10 启动（active，P0-LAUNCH）：用户裁决「D0-D7 全按推荐 一次搞完」= 全按推荐 + 豁免 dry-run 中途过目门（checklist 豁免条款，§7 留痕）；D5 处置=161 三件材料零改动独立入库（app-health-live.json 留树不触）；P0→P7 连续执行，各阶段门禁与证据照常留档。
+- 2026-10-10 P0-P5 落地：基线快照（p0-baseline.md）+codemod（内容 1680 文件/27912 处+目录 18+文件 20 git mv）+P1 提交 66b3970+P5 提交 f7e6f252（MIT LICENSE/根 README/tagline/107 文件个人标识清扫/运维脚本 ROOT 自定位）；P2-P3 行为锚与四基线（code-size --write 重锚 24 文件）；存量对账三件=163 registry 陈旧 active 翻 completed+b784fa37 补登 UI-484+双豁免。
+- 2026-10-10 P6 全量复验+实机（提交 2a54834e）：test:all 3688 项 3587 绿/12 红全对账（行数棘轮 ×2+BLOCK-63 ×10，均 b784fa37 即红的存量/env 债）；改名真雷清偿=brand LEGACY 语义+brand-identity needle 复原+**mini 旗标桥撞名**（preload 双暴露 'biof3'+'gewu' 坍缩同名 'petri'，迁 petriAgentFlags 独立键，CDP 渲染层双桥实证 object|object）；存量漂移对账 9 处（Jev 钉住 doc-suggest+output-judge+configForPoint、catalog workflow-templates、platform ×3、routes put 桩、block57 spawn 锚）；前端 7 红清偿 3（LeftPanel 前缀 ×2 改名破绽）+4 红归属 BLOCK-159 今日 jitter 新债；实机七探 allPass（live.json，CDP 标题=Petri）。
+- 2026-10-10 P7 换库+CI+收口（提交 2c182445/b93eacb0/2c182445 后继）：petri-ops/Petri 推送完成（无亲缘合入脚手架 init 96e1267，不 force-push；tags 58 枚；About 描述+7 topics 经 API 落位；public/main）；旧 origin 改名 origin-biof3 保留（D6）；CI stability Phase 7 拆双轨（确定性面 CI 常跑 harness:check+phase6+8 单测 99/99 绿、活体 acceptance 移 provisioned 环境）+G0-RS7 诚实跳过档（RS-P7 deferred 语义域，包化改造登记 RS 家族）→ **新仓 CI conclusion=success（head 2c182445）**；改名真雷尾笔=mini 旗标桥撞名 petriAgentFlags 解耦（tsc 2339 ×4 清零+渲染层 CDP 双桥实证）；移交债登记=行数棘轮 ×2（拆分重构）/BLOCK-63 ×10（.NET 8 SDK env）/streamReconnect ×4（BLOCK-159 今日 jitter 新债）/RS7 门包化（RS 家族）；异常报备=并行 Gen-UI 会话两件产物（docs/gen-ui-migration-prompt.md、docs/block-166-gen-ui-sandbox-plan.md）经本包 git add -A 顺带入公仓，归属 Gen-UI 会话处置；一次性异常=四件运维脚本曾在窗口期被未知方自盘面删除，已自 HEAD 恢复且 60s 观察未复发。G0 开发期常态 · 不外推 packaged/Provider/GA。
