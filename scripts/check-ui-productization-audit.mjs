@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 /**
- * scripts/check-ui-p  '082f4640a60abadb2bb76268cf1f06eb2d1fa085',
-  '24fc1261b1404ce02d6aa071ac99abddff449b88',
-roductization-audit.mjs — UI 实现与审计台账同步门禁
+ * scripts/check-ui-productization-audit.mjs — UI 实现与审计台账同步门禁
  *
  * 检查 `docs/ui-productization-audit.md` 与 Git 历史的同步性：
  *   1. 工作区含 UI 改动但未同步 `ui-productization-audit.md` → FAIL
@@ -434,6 +432,8 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 2026-10-10 BLOCK-160/163 W2+W3 批：subject 走 BLOCK 轨无 UI-###；台账=UI-483 已补登。
   'f5011827b1f8eae24369f09707e9e2b3365331ad',
+  '24fc1261b1404ce02d6aa071ac99abddff449b88',
+  '082f4640a60abadb2bb76268cf1f06eb2d1fa085',
   // 2026-10-10 BLOCK-163 P10 KNW-5 记忆治理面（5464d1a）：同提交漏 docs/ui-productization-audit.md 同步；台账=UI-483 已由 a062879a 补登对账（LEGACY_MESSAGE_EXEMPTIONS 同哈希）。
   '5464d1a65cf2520afa3312f8dd5d1ab31c39d8d9',
   'dc74e7e82ee15fd1561dd9703f5421e8a1a19ac0',
