@@ -33,7 +33,8 @@ test('BLOCK-156 connect → tools/list 含 fixture_echo → callTool 回显', as
 
   const conn = await manager.connectServer('fixture');
   assert.equal(conn.ok, true, JSON.stringify(conn));
-  assert.equal(conn.toolCount, 1);
+  // BLOCK-157 CAP-1 — 夹具双工具（fixture_echo + fixture_lookup_readonly）
+  assert.equal(conn.toolCount, 2);
 
   const tools = manager.listServerTools('fixture');
   assert.equal(tools.ok, true);

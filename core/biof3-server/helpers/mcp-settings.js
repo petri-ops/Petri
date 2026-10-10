@@ -16,6 +16,8 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+// BLOCK-160 W2 P4（CAP-2）— env 落盘加密（磁盘密文/内存明文；存量明文迁移）
+const envCrypto = require('./mcp-env-crypto');
 
 const SETTINGS_DIR = process.env.BIOF3_LOCAL_DATA_DIR ||
   path.join(os.homedir(), 'Documents', 'BioF3-Local');
@@ -63,7 +65,13 @@ function listMcpServers() {
       const { server } = normalizeServerEntry(entry);
       if (!server || seen.has(server.id)) continue; // 损坏/重复条目静默跳过（读取侧 fail-open）
       seen.add(server.id);
-      out.push(server);
+      // CAP-2 — env 密文还原明文（enc:v1: 前缀解密；明文透传=存量迁移）
+      out.push({
+        ...server,
+        env: Object.fromEntries(
+          Object.entries(server.env).map(([k, v]) => [k, envCrypto.decryptSecret(v)]),
+        ),
+      });
     }
     return out;
   } catch {
@@ -85,7 +93,14 @@ function saveMcpServers(servers) {
     normalized.push(server);
   }
   _ensureDir();
-  const payload = { version: 1, savedAt: new Date().toISOString(), servers: normalized };
+  // CAP-2 — env 落盘加密（normalized 的内存副本保持明文返回给调用方）
+  const persisted = normalized.map((server) => ({
+    ...server,
+    env: Object.fromEntries(
+      Object.entries(server.env).map(([k, v]) => [k, envCrypto.encryptSecret(v)]),
+    ),
+  }));
+  const payload = { version: 1, savedAt: new Date().toISOString(), servers: persisted };
   fs.writeFileSync(SETTINGS_FILE, JSON.stringify(payload, null, 2) + '\n', 'utf8');
   return { servers: normalized };
 }
