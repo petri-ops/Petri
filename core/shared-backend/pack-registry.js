@@ -25,10 +25,25 @@ function readInstalledPacks(dataDir) {
   try {
     const parsed = JSON.parse(fs.readFileSync(file, 'utf-8'));
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((item) => item && item.packId && item.packRoot);
+    // BLOCK-157 加映（UI-481）— 整包启停：enabled 缺省 = 启用（存量零破坏），仅 false = 停用。
+    return parsed
+      .filter((item) => item && item.packId && item.packRoot)
+      .map((item) => ({ ...item, enabled: item.enabled !== false }));
   } catch {
     return [];
   }
+}
+
+/**
+ * BLOCK-157 加映（UI-481）— 整包启停：翻转 packs/installed.json 记录级 enabled 标志。
+ * 停用 = 包文件不动（免重装），core 装配循环跳过该包（插件源与 tool-registry 注册整体不生效）。
+ */
+function setPackEnabled(dataDir, packId, enabled) {
+  const packs = readInstalledPacks(dataDir);
+  const row = packs.find((p) => p.packId === packId);
+  if (!row) return { ok: false, error: 'pack_not_installed', message: `未安装领域包：${packId}` };
+  writeInstalledPacks(dataDir, packs.map((p) => (p.packId === packId ? { ...p, enabled: enabled !== false } : p)));
+  return { ok: true, packId, enabled: enabled !== false, restartRequired: true };
 }
 
 function writeInstalledPacks(dataDir, packs) {
@@ -201,6 +216,7 @@ function describePackContents(packRoot) {
 module.exports = {
   packsRecordFile,
   readInstalledPacks,
+  setPackEnabled,
   writeInstalledPacks,
   normalizeRequiresRuntimes,
   validatePackDir,

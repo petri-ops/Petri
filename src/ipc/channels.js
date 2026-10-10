@@ -123,6 +123,7 @@ const CHANNELS = {
     installProgress: 'pack:install-progress',
     listAvailable: 'pack:list-available',
     listInstalled: 'pack:list-installed',
+    setEnabled: 'pack:set-enabled',
     uninstall: 'pack:uninstall',
     uninstallPlan: 'pack:uninstall-plan',
   },

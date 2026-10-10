@@ -32,6 +32,8 @@ export function useDomainPacks(options: UseDomainPacksOptions): {
   confirmDeletePackSource: boolean;
   setConfirmDeletePackSource: (next: boolean) => void;
   refreshPacks: () => Promise<void>;
+  /** BLOCK-157 加映（UI-481）— 整包启停（乐观翻转本地缓存；重启后端生效） */
+  handlePackSetEnabled: (packId: string, enabled: boolean) => Promise<void>;
   handlePackInstall: (pack: AvailablePack) => Promise<void>;
   beginPackUninstall: (pack: AvailablePack) => Promise<void>;
   handlePackUninstall: (pack: AvailablePack, options: { deleteRuntimes?: boolean; deletePackSource?: boolean }) => Promise<void>;
@@ -101,6 +103,29 @@ export function useDomainPacks(options: UseDomainPacksOptions): {
     const size = remote.plugins?.[pluginId]?.size;
     const label = formatSize(size);
     return label ? `约 ${label}` : '';
+  }
+
+  // BLOCK-157 加映（UI-481）— 整包启停：翻转 enabled 标志（包文件不动免重装；
+  // 乐观更新本地缓存 + notice 提示重启生效；失败回刷还原）
+  async function handlePackSetEnabled(packId: string, enabled: boolean) {
+    setPackBusy(packId);
+    setPackNotice(null);
+    try {
+      const bridge = getBridge('packs');
+      const result = bridge?.setEnabled ? await bridge.setEnabled(packId, enabled) : null;
+      if (result?.ok) {
+        setInstalledPacks((prev) => prev.map((p) => (p.packId === packId ? { ...p, enabled } : p)));
+        setPackNotice(`已${enabled ? '启用' : '停用'}该领域包——重启应用后${enabled ? '恢复' : '不再注册'}其分析插件（免重装）`);
+      } else {
+        setPackNotice(`切换失败：${result?.error ?? '桥接不可用'}`);
+        await refreshPacks();
+      }
+    } catch (e) {
+      setPackNotice(`切换失败：${e instanceof Error ? e.message : '未知错误'}`);
+      await refreshPacks();
+    } finally {
+      setPackBusy(null);
+    }
   }
 
   async function handlePackInstall(pack: AvailablePack) {
@@ -213,6 +238,7 @@ export function useDomainPacks(options: UseDomainPacksOptions): {
     confirmDeletePackSource,
     setConfirmDeletePackSource,
     refreshPacks,
+    handlePackSetEnabled,
     handlePackInstall,
     beginPackUninstall,
     handlePackUninstall,

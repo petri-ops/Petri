@@ -65,4 +65,6 @@ status: completed
 
 **riders**：UI-481 插件启停开关 in_progress 待用户实机过目翻 verified；KNW-2 注入段的用户体感核验（技能索引在会话中的可见性）随日常使用观察。
 
+**加映（UI-481 过目抓真，同日）**：用户反馈「开关没看到」——CDP 探查实证用户货架插件面=**包交付插件行**（pack 体系；OSS 商店清单不可达→商店卡片为零），P4 主件的商店安装卡片开关在用户可见面缺席。加映交付**领域包整包启停**：packs/installed.json 记录级 enabled（缺省启用）+pack:set-enabled IPC+server.js 装配循环跳过停用包（插件源与 tool-registry 注册整体不生效）+包卡片「停用/启用」按钮（与卸载并列）。红 4→4/4 绿+面板 9/9+tsc 0+CDP 实机在场断言（pack-toggle-gewu-pack-bio 在场，acceptance/ui-481/pack-toggle-visible.png）；双通道语义=商店卡片开关治理 installed.json 安装源、包卡片开关治理 pack 安装源。测试钉=block157-pack-enabled（含 server 接线源码扫描守卫+IPC 双侧登记钉）。
+
 G0 开发期常态 · 不外推 packaged/Provider/GA。

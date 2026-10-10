@@ -87,6 +87,13 @@ function registerPackIpc() {
   });
 
   // BLOCK-86 P1 — 卸载影响预览：确认弹层三档数据源（运行时回收体积/共享保留/包源）
+  // BLOCK-157 加映（UI-481）— 整包启停（停用即不接线/启用免重装；重启后生效）
+  ipcMain.handle(CHANNELS.pack.setEnabled, async (_event, packId, enabled) => {
+    if (!packId || typeof packId !== 'string') return { ok: false, error: 'pack_id_required' };
+    const packRegistry = require('../../core/shared-backend/pack-registry');
+    return packRegistry.setPackEnabled(getDataDir(), packId, enabled);
+  });
+
   ipcMain.handle(CHANNELS.pack.uninstallPlan, async (_event, packId) => {
     if (!packId || typeof packId !== 'string') return { ok: false, error: 'pack_id_required' };
     return lifecycle.buildUninstallPlan(getDataDir(), packId);

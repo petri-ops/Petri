@@ -251,6 +251,8 @@ const desktopBridgeSurface = {
     installPath: (packRoot) => ipcRenderer.invoke('pack:install-path', packRoot),
     uninstallPlan: (packId) => ipcRenderer.invoke('pack:uninstall-plan', packId),
     uninstall: (packId, options) => ipcRenderer.invoke('pack:uninstall', packId, options),
+    // BLOCK-157 加映（UI-481）— 整包启停（停用即不接线/启用免重装；重启后生效）
+    setEnabled: (packId, enabled) => ipcRenderer.invoke('pack:set-enabled', packId, enabled),
     onInstallProgress: (callback) => {
       const listener = (_event, payload) => callback(payload);
       ipcRenderer.on('pack:install-progress', listener);

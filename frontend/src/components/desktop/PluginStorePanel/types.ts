@@ -15,6 +15,8 @@ export interface PackContents {
   demoDataCount: number;
 }
 export interface InstalledPack {
+  /** BLOCK-157 加映（UI-481）— 整包启停（缺省 true=启用） */
+  enabled?: boolean;
   packId: string; name?: string; packRoot: string; version: string; installedAt: string;
   requiresRuntimes?: RuntimeRequirement[];
   contents?: PackContents;

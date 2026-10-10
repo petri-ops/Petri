@@ -3101,7 +3101,9 @@
         "test/fixtures/mcp-fixture-server.cjs",
         "test/fixtures/tool-activity-labels.json",
         "acceptance/block-157/**",
-        "scripts/block157-*.mjs"
+        "scripts/block157-*.mjs",
+        "scripts/ui481-toggle-visible.cjs",
+        "acceptance/ui-481/**"
       ],
       "tests": [
         "test/block157-skill-visibility.test.mjs",
@@ -3112,7 +3114,8 @@
         "test/agent-tool-registry.test.mjs",
         "test/block116-decision-platform.test.mjs",
         "test/block113-tool-prerouting.test.mjs",
-        "test/ipc-channels-registry.test.mjs"
+        "test/ipc-channels-registry.test.mjs",
+        "test/block157-pack-enabled.test.mjs"
       ],
       "classifiesScripts": true
     }

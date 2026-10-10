@@ -74,6 +74,12 @@ try {
     if (dataDir) {
       const toolRegistryModule = require('./tool-registry');
       for (const installedPack of packRegistryModule.readInstalledPacks(dataDir)) {
+        // BLOCK-157 加映（UI-481）— 整包启停：停用包整体不接线（插件源与
+        // tool-registry 注册都不生效 → run_tool/MCP/catalog 天然不出现；启用免重装）
+        if (installedPack.enabled === false) {
+          console.log('[pack-registry] pack disabled by user, skipping: ' + installedPack.packId);
+          continue;
+        }
         const packPluginsDir = path.join(installedPack.packRoot, 'plugins');
         if (fs.existsSync(path.join(packPluginsDir, 'installed.json'))) {
           console.log('[pack-registry] wiring installed pack: ' + installedPack.packId);

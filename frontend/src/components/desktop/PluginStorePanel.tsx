@@ -81,6 +81,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
     setConfirmDeletePackSource,
     refreshPacks,
     handlePackInstall,
+    handlePackSetEnabled,
     beginPackUninstall,
     handlePackUninstall,
     runtimeTitleOf,
@@ -449,14 +450,32 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                           </div>
                         </div>
                         {pack.installed ? (
-                          <button
-                            type="button"
-                            className="gewu-btn"
-                            disabled={packBusy !== null}
-                            onClick={() => void beginPackUninstall(pack)}
-                          >
-                            {packBusy === pack.packId ? '处理中…' : '卸载'}
-                          </button>
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            {(() => {
+                              const row = installedPacks.find((p) => p.packId === pack.packId);
+                              const isEnabled = row ? row.enabled !== false : true;
+                              return (
+                                <button
+                                  type="button"
+                                  className="gewu-btn gewu-btn--ghost"
+                                  data-testid={`pack-toggle-${pack.packId}`}
+                                  title={isEnabled ? '停用后重启生效：该包全部分析插件不再注册到 run_tool/MCP/目录（可随时启用，免重装）' : '启用后重启生效（免重装）'}
+                                  disabled={packBusy !== null}
+                                  onClick={() => void handlePackSetEnabled(pack.packId, !isEnabled)}
+                                >
+                                  {packBusy === pack.packId ? '处理中…' : isEnabled ? '停用' : '启用'}
+                                </button>
+                              );
+                            })()}
+                            <button
+                              type="button"
+                              className="gewu-btn"
+                              disabled={packBusy !== null}
+                              onClick={() => void beginPackUninstall(pack)}
+                            >
+                              {packBusy === pack.packId ? '处理中…' : '卸载'}
+                            </button>
+                          </div>
                         ) : (
                           <button
                             type="button"

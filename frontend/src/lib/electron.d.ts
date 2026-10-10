@@ -203,6 +203,8 @@ declare global {
         listInstalled: () => Promise<Array<{
           packId: string; packRoot: string; version: string; installedAt: string;
           name?: string;
+          /** BLOCK-157 加映（UI-481）— 整包启停（缺省 true=启用） */
+          enabled?: boolean;
           requiresRuntimes?: Array<{ pluginId: string; version?: string }>;
           contents?: { pluginCount: number; plugins: Array<{ id: string; language: string | null; version: string | null }>; pluginIds: string[]; scriptCount: number; demoDataCount: number };
         }>>;
@@ -213,6 +215,8 @@ declare global {
         }>>;
         installFromDialog: () => Promise<{ ok: boolean; canceled?: boolean; pack?: { packId: string }; runtimes?: Array<{ pluginId: string; ok: boolean; skipped?: string; error?: string }>; requiresRestart?: boolean; error?: string }>;
         installPath: (packRoot: string) => Promise<{ ok: boolean; pack?: { packId: string }; runtimes?: Array<{ pluginId: string; ok: boolean; skipped?: string; error?: string }>; requiresRestart?: boolean; error?: string }>;
+        /** BLOCK-157 加映（UI-481）— 整包启停（停用即不接线/启用免重装；重启后生效） */
+        setEnabled: (packId: string, enabled: boolean) => Promise<{ ok: boolean; packId?: string; enabled?: boolean; restartRequired?: boolean; error?: string }>;
         uninstallPlan: (packId: string) => Promise<{
           ok: boolean;
           packId?: string;
