@@ -76,6 +76,24 @@ function normalizeRequiresRuntimes(requires) {
   return { ok: true, runtimes };
 }
 
+// BLOCK-163 W3 P6（DIST-3⇄CAP-5）— 插件权限词表（预裁决六词）：pack.json 可选
+// permissions[]；不声明=现状全权（存量零破坏）；未知词/形状错=拒装（fail-closed）。
+const PERMISSION_VOCABULARY = new Set([
+  'filesystem:read', 'filesystem:write', 'network',
+  'process:spawn', 'runtime-install', 'data:demo',
+]);
+
+function normalizePermissions(permissions) {
+  if (permissions === undefined) return { ok: true, permissions: undefined };
+  if (!Array.isArray(permissions)) return { ok: false, error: 'pack_permissions_invalid' };
+  for (const item of permissions) {
+    if (typeof item !== 'string' || !PERMISSION_VOCABULARY.has(item)) {
+      return { ok: false, error: 'pack_permissions_unknown:' + String(item) };
+    }
+  }
+  return { ok: true, permissions: permissions.slice() };
+}
+
 /** 校验一个包目录：pack.json 契约 + 可装载性硬证据。返回 { ok, pack?, error? }。 */
 function validatePackDir(packRoot) {
   const packJsonPath = path.join(packRoot, 'pack.json');
@@ -96,6 +114,9 @@ function validatePackDir(packRoot) {
   }
   const runtimes = normalizeRequiresRuntimes(pack.requires);
   if (!runtimes.ok) return runtimes;
+  // BLOCK-163 W3 P6（DIST-3⇄CAP-5）— 权限词表校验（未知词拒装）
+  const perms = normalizePermissions(pack.permissions);
+  if (!perms.ok) return perms;
   return {
     ok: true,
     pack: {
@@ -106,6 +127,7 @@ function validatePackDir(packRoot) {
       description: pack.description || '',
       provides: pack.provides || {},
       requiresRuntimes: runtimes.runtimes,
+      permissions: perms.permissions,
       packRoot: path.resolve(packRoot),
     },
   };
@@ -137,6 +159,7 @@ function installPack(dataDir, packRoot) {
   const existing = packs.findIndex((p) => p.packId === validated.pack.packId);
   const record = {
     packId: validated.pack.packId,
+    ...(validated.pack.permissions ? { permissions: validated.pack.permissions } : {}),
     // BLOCK-86 P2 — 显示名随记录存档（缺失提示文案挂包名用；旧记录无此字段回退 packId）
     name: validated.pack.name,
     packRoot: validated.pack.packRoot,
