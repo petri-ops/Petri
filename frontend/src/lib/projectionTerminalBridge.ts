@@ -9,6 +9,7 @@
  * 自动切换到本桥。
  */
 import { getToken } from '@/lib/authClient';
+import { installProjectionResyncListener, markProjectionBridgeFailure, markProjectionBridgeSuccess, onProjectionResync } from '@/lib/projectionLink';
 
 interface ProjectionTerminalBridge {
   startSession: (cwd: string | null, tabId: string, ssh?: unknown) => Promise<{ ok: boolean; sessionId?: string; error?: string }>;
@@ -38,6 +39,10 @@ function attachStream(tabId: string, sessionId: string) {
   // gw_session cookie（sessionAuth 的 readCookieToken 分支鉴权）。
   const url = `/m/api/terminal/${encodeURIComponent(sessionId)}/stream`;
   const source = new EventSource(url);
+  source.addEventListener('open', () => {
+    // BLOCK-159 P1-9 — 终端流连上即链路活的强信号（帮断连横幅复位）
+    markProjectionBridgeSuccess();
+  });
   source.addEventListener('terminal:data', (event) => {
     try {
       const payload = JSON.parse((event as MessageEvent<string>).data) as { data: string };
@@ -53,13 +58,35 @@ function attachStream(tabId: string, sessionId: string) {
     sourceByTab.delete(tabId);
   });
   source.onerror = () => {
-    // EventSource 自动重连；环形缓冲会在重连时重放
+    // EventSource 自动重连；环形缓冲会在重连时重放。
+    // BLOCK-159 P1-9 — 断线如实上报（断连横幅），不再纯静默。
+    markProjectionBridgeFailure('terminal stream error');
   };
   sourceByTab.set(tabId, source);
 }
 
+// BLOCK-159 P1-8 — 回前台 resync：锁屏/切后台会杀 SSE 连接，EventSource 的
+// 盲重试窗口内体验是黑终端；回可见时对仍存活的会话立即重挂（服务端环形
+// 缓冲重放，会话驻留 core 进程不丢）。终端桥首次使用时注册幂等 resync 监听。
+let resyncInstalled = false;
+function ensureResyncWiring() {
+  if (resyncInstalled) return;
+  resyncInstalled = true;
+  installProjectionResyncListener();
+  onProjectionResync(() => {
+    for (const [tabId, sessionId] of sessionByTab) {
+      const source = sourceByTab.get(tabId);
+      if (source && source.readyState === EventSource.CLOSED) {
+        sourceByTab.delete(tabId);
+        attachStream(tabId, sessionId);
+      }
+    }
+  });
+}
+
 const bridge: ProjectionTerminalBridge = {
   async startSession(cwd, tabId, ssh) {
+    ensureResyncWiring();
     const sshInfo = ssh as { alias?: string; remotePath?: string } | undefined;
     try {
       const response = await fetch('/m/api/terminal/start', {

@@ -1,0 +1,29 @@
+.banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--gewu-border);
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  background: var(--gewu-bg-elevated);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-body-sm);
+  box-shadow: var(--gewu-shadow-sm);
+  pointer-events: none;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gewu-warning-text);
+  flex: 0 0 auto;
+}

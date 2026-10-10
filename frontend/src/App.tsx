@@ -14,6 +14,7 @@ import { WorkspacePanelsProvider, useWorkspacePanelsContext } from '@/components
 import { AppRail } from '@/components/desktop/AppRail';
 import { AppRailProvider } from '@/components/desktop/AppRailContext';
 import { isProjectionMobile } from '@/components/desktop/titlebar/shared';
+import { ProjectionLinkBanner } from '@/components/desktop/_ProjectionLinkBanner';
 import { BackendStatusProvider } from '@/components/backend/BackendStatusProvider';
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { getBridge } from '@/lib/desktopBridge';
@@ -234,6 +235,8 @@ export default function App(): React.ReactElement {
 
   return (
     <BackendStatusProvider>
+      {/* BLOCK-159 P1-9 / UI-482 — 投影断连横幅（仅投影环境渲染，桌面零行为） */}
+      <ProjectionLinkBanner />
       <AppRailProvider>
         <WorkspacePanelsProvider>
           <AppShell />

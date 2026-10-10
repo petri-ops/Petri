@@ -22,6 +22,7 @@ const zlib = require('node:zlib');
 const { getStores } = require('./pairing');
 const { sanitizeEngineerIdentity } = require('../../shared-backend/engineer-identity');
 const { readConfig, resolveEnabled, resolvePort, lanAddresses } = require('./config');
+const { createGzipResponseMiddleware, mountGzipStaticAssets } = require('./compress');
 const crypto = require('node:crypto');
 
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
@@ -46,28 +47,53 @@ function createAuditWriter(auditPath) {
     try {
       const line = JSON.stringify({ ts: new Date().toISOString(), ...entry });
       if (Buffer.byteLength(line, 'utf8') <= AUDIT_MAX_LINE_BYTES) {
-        fs.appendFileSync(auditPath, `${line}\n`, 'utf8');
+        // BLOCK-159 P0-4 — 异步 fire-and-forget：appendFileSync 在每请求路径上
+        // 是事件循环抖动源（GW-PERF 曾抓真 sessions.json 同型根因）；审计写失败
+        // 绝不影响请求处理（fail-open 仅限审计自身），行 ≤4KB 在 O_APPEND 下原子。
+        fs.appendFile(auditPath, `${line}\n`, 'utf8', () => {});
       }
     } catch {
-      // 审计写失败绝不影响请求处理（fail-open 仅限审计自身）。
+      // 序列化失败静默（fail-open 仅限审计自身）。
     }
   };
 }
 
-function createRateLimiter({ windowMs = RATE_LIMIT_WINDOW_MS, max = RATE_LIMIT_MAX_REQUESTS, now = () => Date.now() } = {}) {
-  const hits = new Map(); // ip -> [timestamps]
+// BLOCK-159 P1-7 — 限流桶键按会话 token 分桶：经隧道时全部设备源 IP 都是
+// 127.0.0.1（ssh -R 本地转发），按 IP 分桶=全体设备共享一个 600/min 桶
+// （BLOCK-87 240/min 时代就误伤过）。会话 token（cookie/Bearer/?session=）
+// 原始值 sha256 短哈希为键——不落 token 本体（与审计 D9 同门）；无 token
+// （配对面 / 匿名）退回 IP。
+function readSessionTokenRaw(req) {
+  const cookieToken = String((req.headers.cookie || '')
+    .split(/;\s*/)
+    .find((pair) => pair.startsWith('gw_session='))
+    ?.split('=').slice(1).join('=') || '');
+  if (cookieToken) return cookieToken;
+  const header = String(req.headers.authorization || '');
+  if (header.startsWith('Bearer ')) return header.slice(7);
+  return String(req.query?.session || '');
+}
+
+function defaultBucketKeyOf(req) {
+  const token = readSessionTokenRaw(req);
+  if (token) return `s:${crypto.createHash('sha256').update(token).digest('hex').slice(0, 16)}`;
+  return `ip:${req.ip || req.socket?.remoteAddress || 'unknown'}`;
+}
+
+function createRateLimiter({ windowMs = RATE_LIMIT_WINDOW_MS, max = RATE_LIMIT_MAX_REQUESTS, now = () => Date.now(), bucketKeyOf = defaultBucketKeyOf } = {}) {
+  const hits = new Map(); // bucket -> [timestamps]
   setInterval(() => hits.clear(), windowMs).unref?.();
   return function rateLimit(req, res, next) {
     const isApi = RATE_LIMITED_PREFIXES.some((prefix) => req.path.startsWith(prefix));
     if (!isApi) return next();
-    const ip = req.ip || req.socket?.remoteAddress || 'unknown';
-    const stamps = (hits.get(ip) || []).filter((ts) => now() - ts < windowMs);
+    const bucket = bucketKeyOf(req);
+    const stamps = (hits.get(bucket) || []).filter((ts) => now() - ts < windowMs);
     if (stamps.length >= max) {
       res.status(429).json({ ok: false, error: 'rate_limited', message: '请求过于频繁，请稍后再试' });
       return;
     }
     stamps.push(now());
-    hits.set(ip, stamps);
+    hits.set(bucket, stamps);
     next();
   };
 }
@@ -103,6 +129,11 @@ function buildMobileGateway({
     });
     next();
   });
+
+  // BLOCK-159 P0-1 — 生产路径 gzip：buffered JSON/文本响应按 accept-encoding
+  // 压缩（阈值/跳过规则见 compress.js）。三处 SSE 走 res.write 天然不经过；
+  // dev Vite 代理路径的既有 gzip 保持不变。
+  app.use(createGzipResponseMiddleware());
 
   // 静态移动页（/m）。fallthrough 保持默认 true：/m/api/* 必须穿透到下方
   // API 中间件链，不能被静态中间件吞掉。
@@ -391,6 +422,9 @@ function buildMobileGateway({
         res.status(404).send('dist index missing (npm run build:spa)');
       }
     };
+    // BLOCK-159 P0-1 — dist 哈希资产请求时 gzip（有界缓存、mtime 失效），
+    // 非 gzip 客户端 next() 透传到下方 express.static，行为不变。
+    mountGzipStaticAssets(app, desktopDist);
     // dist 哈希资产内容寻址：永久缓存（Vite 不可达落 dist 时刷新不再全量重拉）
     app.use(express.static(desktopDist, {
       index: false,

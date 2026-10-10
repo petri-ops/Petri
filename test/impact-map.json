@@ -3148,6 +3148,34 @@
         "test/ipc-channels-registry.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block159-mobile-remote-transport",
+      "note": "BLOCK-159 手机远程传输层优化：生产投影 gzip（compress.js，零依赖）/隧道探活连败自愈+ServerAlive 15→10/agent SSE 15s 心跳/审计异步写/限流按会话 token 分桶/agent 流水位续传（删 90s 硬预算）/投影 link 状态+回前台 resync/断连横幅 UI-482。读者含 mobile-gateway 邻域契约（block70/145/152）。",
+      "patterns": [
+        "core/biof3-server/mobile-gateway/**",
+        "core/biof3-server/routes/ai-agent/events.js",
+        "frontend/src/lib/projectionLink.ts",
+        "frontend/src/lib/projectionTerminalBridge.ts",
+        "frontend/src/lib/projectionDataBridges.ts",
+        "frontend/src/components/copilot/copilotClient/agentTaskStream.ts",
+        "frontend/src/components/desktop/_ProjectionLinkBanner.tsx",
+        "frontend/src/components/desktop/_ProjectionLinkBanner.module.css",
+        "acceptance/block-159/**"
+      ],
+      "tests": [
+        "test/block159-gateway-compress.test.mjs",
+        "test/block159-tunnel-selfheal.test.mjs",
+        "test/block159-agent-stream-resume.test.mjs",
+        "test/block70-mobile-gateway.test.mjs",
+        "test/block70-tunnel.test.mjs",
+        "test/block145-tunnel-async.test.mjs",
+        "test/block152-tunnel-probe.test.mjs",
+        "frontend/src/lib/projectionLink.test.ts",
+        "frontend/src/components/copilot/copilotClient/agentTaskStream.reconnect.test.ts"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": false
     }
   ]
 }

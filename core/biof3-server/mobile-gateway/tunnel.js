@@ -30,7 +30,13 @@ const execFileP = promisify(execFile);
 
 const TUNNEL_CONFIG_VERSION = 1;
 const RECONNECT_BACKOFF_MS = Object.freeze([1000, 2000, 5000, 10000, 30000]);
+// BLOCK-159 P0-2 — 退避抖动：±30%（rng 注入，测试确定性）。多设备/多窗口
+// 同时断线时避免同步重连踩同一清场窗口。
+const BACKOFF_JITTER_RATIO = 0.3;
 const STABLE_CONNECTED_MS = 10 * 1000;
+// BLOCK-159 P0-2 — 探活连败自愈阈值：连续 N 次 fail 才强杀重连（单次抖动
+// ——公网门 DNS 抖一下——不触发）。阈值 2 = 首轮 fail 后给一轮复测机会。
+const PROBE_FAIL_RECONNECT_THRESHOLD = 2;
 const HOST_PATTERN = /^[A-Za-z0-9._-]{1,120}$/;
 // 清场超时上限（与旧同步实现逐值一致：远端清场 25s、win 进程清单 10s、posix 5s）
 const REMOTE_SWEEP_TIMEOUT_MS = 25_000;
@@ -192,12 +198,20 @@ function buildSshArgs(config) {
     'ssh', '-N', '-T',
     '-o', 'BatchMode=yes',
     '-o', 'ExitOnForwardFailure=yes',
-    '-o', 'ServerAliveInterval=15',
+    // BLOCK-159 P0-2 — 判死窗口 45s→30s（15s×3→10s×3）：半开隧道期间手机端
+    // 全部请求在黑洞里超时，「易断」观感的主源之一；CountMax=3 保持。
+    '-o', 'ServerAliveInterval=10',
     '-o', 'ServerAliveCountMax=3',
     '-o', 'ConnectTimeout=10',
     '-R', `127.0.0.1:${config.remotePort}:127.0.0.1:${config.localPort}`,
     config.host,
   ];
+}
+
+/** BLOCK-159 P0-2 — 退避延迟 ±30% 抖动（rng 注入；下限 1ms 防归零，注入测试的小档退避语义不变）。 */
+function jitteredDelay(ms, rng = Math.random) {
+  const jitter = 1 + (rng() * 2 - 1) * BACKOFF_JITTER_RATIO;
+  return Math.max(1, Math.round(ms * jitter));
 }
 
 const managersByDataDir = new Map();
@@ -231,6 +245,7 @@ function createTunnelManager({
   probeIntervalMs = PROBE_INTERVAL_MS,
   probeTimeoutMs = PROBE_TIMEOUT_MS,
   probeFetch = null, // (url, init) => Promise<Response>；null → globalThis.fetch 迟绑定（注入点，测试用）
+  rng = Math.random, // BLOCK-159 P0-2 — 退避抖动随机源（注入点，测试确定性）
 } = {}) {
   let config = readTunnelConfig(dataDir);
   let child = null;
@@ -251,6 +266,8 @@ function createTunnelManager({
   let probedAt = null;
   let probeTimer = null;
   let probeInFlight = false;
+  // BLOCK-159 P0-2 — 探活连败计数（阈值触发自愈重连）。
+  let probeFailStreak = 0;
 
   function killAllTracked() {
     for (const proc of liveChildren) {
@@ -266,6 +283,7 @@ function createTunnelManager({
     // 绝不带进新连接（诚实边界；下一轮 probe 重新取证）。
     probeState = 'unknown';
     probedAt = null;
+    probeFailStreak = 0; // BLOCK-159 P0-2：连败计数同样只属于上一条转发
   }
 
   // 远端清场（保留原函数名，供源码守卫锚定冷启动链）：host 为空即跳过（与旧实现
@@ -285,24 +303,25 @@ function createTunnelManager({
     }
   }
 
-  // BLOCK-145 D1：冷启动链异步化。清场顺序与旧同步实现一致：
-  // killStale(孤儿) → killAllTracked(在册孩子) → remotePortSweep(远端端口) → spawn，
-  // 清场完成前绝不 spawn 正式 ssh（端口抢跑竞态被顺序排除，与旧行为相同）。
-  // 唯一变化：等待不再阻塞 event loop。bootEpoch 使 stop()/apply() 期间在途的旧链
-  // 自弃（旧同步实现不可中断，此守卫只收敛异步化引入的新交错，不改稳态语义）；
-  // 清场链自身异常如实记入 lastError，不终止隧道生命周期。
+  // BLOCK-145 D1：冷启动链异步化。清场顺序不变量保持「清场完成前绝不 spawn」；
+  // BLOCK-159 P0-5 — killStale（本机孤儿）与 remotePortSweep（远端端口）互不
+  // 依赖（不同机器），改并行：断线重连固有开销从两者之和降为两者之最大
+  // （最坏 15-35s → 最坏 25s），「易断」恢复窗口直接收窄。killAllTracked 在
+  // spawn 前单独执行（须在 killStale 的 excludePids 采样之后）。
   function spawnTunnel() {
     const args = buildSshArgs(config);
     const epoch = ++bootEpoch;
     const excludePids = [...liveChildren].map((proc) => proc.pid);
     setState('connecting');
     void Promise.resolve()
-      .then(() => killStale(dataDir, config, excludePids))
+      .then(() => Promise.all([
+        killStale(dataDir, config, excludePids),
+        remotePortSweep(),
+      ]))
       .then(() => {
         if (epoch !== bootEpoch) return;
         killAllTracked();
       })
-      .then(() => remotePortSweep())
       .then(() => {
         if (epoch !== bootEpoch || stopped || !config.enabled) return;
         const proc = spawnProcess(args);
@@ -318,9 +337,12 @@ function createTunnelManager({
           // Windows 上 exit 事件可能迟到/乱序：只要还有任一活孩子（哪怕不是当前
           // 指针指向的），说明隧道在它手里正常工作，绝不能触发重连去杀它。
           if (liveChildren.size > 0) return;
+          // BLOCK-159 P0-5 — 已有在途重连排程（探活自愈路径已接管）：不覆盖、
+          // 不重复 setState（stateSinceTs 抖动会让徽标「公网可用」计时反复清零）。
+          if (reconnectTimer) return;
           lastError = `ssh exited (code=${code == null ? 'signal' : code})`;
           setState('reconnecting');
-          const delay = backoffSteps[Math.min(backoffIndex, backoffSteps.length - 1)];
+          const delay = jitteredDelay(backoffSteps[Math.min(backoffIndex, backoffSteps.length - 1)], rng);
           backoffIndex += 1;
           reconnectTimer = setTimeout(() => {
             reconnectTimer = null;
@@ -361,6 +383,39 @@ function createTunnelManager({
     if (probeTimer.unref) probeTimer.unref();
   }
 
+  // BLOCK-159 P0-2 — 探活连败自愈：连续 PROBE_FAIL_RECONNECT_THRESHOLD 次
+  // fail（端到端不通而 ssh 进程可能还活着=假活）→ 强杀 tracked 孩子并走既有
+  // 退避重连。此前 probe fail 只记证据不自愈（BLOCK-152 T 交付的诚实边界），
+  // 半开隧道要挂到 ServerAlive 判死为止——自愈速度是「易断」的主根因之一。
+  function forceReconnect(reason) {
+    if (stopped || !config.enabled) return;
+    if (reconnectTimer) return; // 已有重连在途（exit 路径或上一轮自愈）
+    lastError = reason;
+    setState('reconnecting');
+    killAllTracked();
+    child = null;
+    const delay = jitteredDelay(backoffSteps[Math.min(backoffIndex, backoffSteps.length - 1)], rng);
+    backoffIndex += 1;
+    reconnectTimer = setTimeout(() => {
+      reconnectTimer = null;
+      if (!stopped && config.enabled && liveChildren.size === 0) spawnTunnel();
+    }, delay);
+    if (reconnectTimer.unref) reconnectTimer.unref();
+  }
+
+  function recordProbeOutcome(ok) {
+    probeState = ok ? 'ok' : 'fail';
+    probedAt = now();
+    if (ok) {
+      probeFailStreak = 0;
+      return;
+    }
+    probeFailStreak += 1;
+    if (probeFailStreak >= PROBE_FAIL_RECONNECT_THRESHOLD) {
+      forceReconnect(`probe failed ${probeFailStreak}x consecutively (publicUrl unreachable)`);
+    }
+  }
+
   async function runProbe() {
     if (probeInFlight || !probeEligible()) return;
     probeInFlight = true;
@@ -377,13 +432,11 @@ function createTunnelManager({
       // 消费 body 还连接（keep-alive 可复用），不阻塞判定；401 body 只有几字节。
       void Promise.resolve(response.arrayBuffer?.()).catch(() => {});
       if (probeEligible()) { // 在途期间断连：陈旧结论不回写（先经 setState 复位）
-        probeState = response.status === 401 ? 'ok' : 'fail';
-        probedAt = now();
+        recordProbeOutcome(response.status === 401);
       }
     } catch {
       if (probeEligible()) { // 超时 / 网络错 / DNS 失败 = 未确认
-        probeState = 'fail';
-        probedAt = now();
+        recordProbeOutcome(false);
       }
     } finally {
       clearTimeout(timeout);
@@ -474,6 +527,8 @@ function createTunnelManager({
 module.exports = {
   TUNNEL_CONFIG_VERSION,
   RECONNECT_BACKOFF_MS,
+  BACKOFF_JITTER_RATIO,
+  PROBE_FAIL_RECONNECT_THRESHOLD,
   STABLE_CONNECTED_MS,
   PROBE_INTERVAL_MS,
   PROBE_TIMEOUT_MS,
@@ -483,6 +538,7 @@ module.exports = {
   readTunnelConfig,
   writeTunnelConfig,
   buildSshArgs,
+  jitteredDelay,
   selectStaleSshPids,
   killStaleTunnelProcesses,
   getTunnelManager,

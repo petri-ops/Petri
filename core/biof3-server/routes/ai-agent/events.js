@@ -61,6 +61,13 @@ module.exports = {
           res.write('data: [DONE]\n\n');
         } catch {}
       };
+      // BLOCK-159 P0-3 — 15s SSE 注释帧心跳（与终端流 mobile-gateway/index.js
+      // 同款）：空闲期（模型思考中）零字节流动，中转 nginx 默认 60s 读超时会
+      // 掐断长任务流。注释行对 EventSource 与手工解析器（^data: 匹配）天然透明。
+      const heartbeat = setInterval(() => {
+        try { res.write(': ping\n\n'); } catch { /* closed */ }
+      }, 15_000);
+      const stopHeartbeat = () => clearInterval(heartbeat);
 
       let lastSeq = afterSeq;
       const isTerminal = (t) => t && ['done', 'failed', 'cancelled'].includes(t.agent_status);
@@ -114,6 +121,7 @@ module.exports = {
           // BLOCK-31 P1: done 事件携带权威 filesChanged 清单
           sseSend({ event: 'done', filesChanged: freshTask.filesChanged || [] });
         }
+        stopHeartbeat();
         sseDone();
         return res.end();
       }
@@ -138,6 +146,7 @@ module.exports = {
               // BLOCK-31 P1: done 事件携带权威 filesChanged 清单
               sseSend({ event: 'done', filesChanged: t.filesChanged || [] });
             }
+            stopHeartbeat();
             sseDone();
             res.end();
           }
@@ -146,8 +155,10 @@ module.exports = {
         }
       }, 500);
 
-      // 用户关闭订阅：只清 interval，不影响后台 loop（loop 继续跑，事件写 task_events 待重连）
+      // 用户关闭订阅：只清 interval 与心跳，不影响后台 loop（loop 继续跑，
+      // 事件写 task_events 待重连后按 afterSeq 补齐——BLOCK-159 P1-6 水位续传）。
       req.on('close', () => {
+        stopHeartbeat();
         clearInterval(poll);
       });
     });

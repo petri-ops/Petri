@@ -28,10 +28,23 @@ export class AgentStreamDisconnectedError extends Error {
   }
 }
 
-/** 有界退避重连：起始 1s 指数至 4s 封顶，总窗口约 90s（覆盖 dev 后端重启 + 富余）。 */
-const STREAM_RECONNECT_MAX_ATTEMPTS = 24;
+/**
+ * BLOCK-159 P1-6 — 水位续传使重连安全（服务端 DB 按 afterSeq 持久回放 +
+ * 前端 BLOCK-151 单调 seq 守卫已在），重试不再设硬上限：隧道长断恢复后照常
+ * 补齐事件收口，而不是旧 24 次/90s 烧窗后误判「任务在完成前中断」。
+ * 退避 1s 指数到 30s 封顶 + ±30% 抖动（多设备同时回连不踩同一瞬）。
+ */
 const STREAM_RECONNECT_BASE_DELAY_MS = 1000;
-const STREAM_RECONNECT_MAX_DELAY_MS = 4000;
+const STREAM_RECONNECT_MAX_DELAY_MS = 30_000;
+
+function streamRetryDelayMs(attempt: number): number {
+  const capped = Math.min(
+    STREAM_RECONNECT_BASE_DELAY_MS * 2 ** attempt,
+    STREAM_RECONNECT_MAX_DELAY_MS
+  );
+  const jitter = 1 + (Math.random() * 2 - 1) * 0.3;
+  return Math.max(250, Math.round(capped * jitter));
+}
 
 /**
  * SSE wire 事件形状（BLOCK-105 §7 Batch-5 类型化；JSON.parse 出站边界契约文档）。
@@ -100,7 +113,7 @@ function abortableDelay(ms: number, signal?: AbortSignal): Promise<void> {
   });
 }
 
-/** GET /ai/agent/task/:taskId 订阅事件流（afterSeq 支持续传；断线有界退避重连） */
+/** GET /ai/agent/task/:taskId 订阅事件流（afterSeq 支持续传；断线水位重试不设硬上限） */
 export async function subscribeAgentTask(
   taskId: string,
   opts: StreamChatOptions,
@@ -112,16 +125,12 @@ export async function subscribeAgentTask(
       seq = await subscribeAgentTaskOnce(taskId, opts, seq);
       return;
     } catch (err: unknown) {
-      if (
-        err instanceof AgentStreamDisconnectedError &&
-        attempt < STREAM_RECONNECT_MAX_ATTEMPTS
-      ) {
-        // 断线时已收到的最后 seq（可能大于进入时的 afterSeq），重连从其后续传
+      if (err instanceof AgentStreamDisconnectedError) {
+        // 断线时已收到的最后 seq（可能大于进入时的 afterSeq），重连从其后续传。
+        // 终态任务重连会回放 done/error/[DONE] 正常收口；非水位可续错误
+        // （HTTP 4xx/5xx、用户 abort）不是本类型，照旧上抛不重试。
         seq = err.lastSeq;
-        const nextRetryMs = Math.min(
-          STREAM_RECONNECT_BASE_DELAY_MS * 2 ** attempt,
-          STREAM_RECONNECT_MAX_DELAY_MS
-        );
+        const nextRetryMs = streamRetryDelayMs(attempt);
         // 等待期间用户主动停止 → AbortError 上抛（调用方静默处理）
         opts.onStreamReconnecting?.({ taskId, attempt: attempt + 1, lastSeq: seq, nextRetryMs });
         await abortableDelay(nextRetryMs, opts.signal);
