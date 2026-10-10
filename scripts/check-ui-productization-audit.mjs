@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 /**
- * scripts/check-ui-productization-audit.mjs — UI 实现与审计台账同步门禁
+ * scripts/check-ui-p  '082f4640a60abadb2bb76268cf1f06eb2d1fa085',
+  '24fc1261b1404ce02d6aa071ac99abddff449b88',
+roductization-audit.mjs — UI 实现与审计台账同步门禁
  *
  * 检查 `docs/ui-productization-audit.md` 与 Git 历史的同步性：
  *   1. 工作区含 UI 改动但未同步 `ui-productization-audit.md` → FAIL
@@ -46,6 +48,12 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-10-10 BLOCK-160/163 W2+W3 批（24fc126）：subject 走 BLOCK 轨无 UI-###；台账=UI-483 已补登。
+  '24fc1261b1404ce02d6aa071ac99abddff449b88',
+  // 2026-10-10 BLOCK-160/163 W2+W3 批（082f464）：subject 走 BLOCK 轨无 UI-###；台账=UI-483 已补登。
+  '082f4640a60abadb2bb76268cf1f06eb2d1fa085',
+  // 2026-10-10 BLOCK-160/163 W2+W3 批（f501182）：subject 走 BLOCK 轨无 UI-###；台账=UI-483 已补登。
+  'f5011827b1f8eae24369f09707e9e2b3365331ad',
   // 2026-10-10 BLOCK-163 P5 KNW-4⇄DIST-2 共轨（SKILL.md 合成导入+MCP 配置导入+货架按钮）（e1e66507）：subject 走 BLOCK 轨无 UI-###；台账=UI-483 已由 a062879a 补登对账。
   'e1e66507a962f611b4ea419258b3aa778369c4a4',
   // 2026-10-10 BLOCK-163 W2+W3 波整波收口提交（feat(block-163)）：subject 走 BLOCK 轨无 UI-###；UI 面触及=斜杠菜单徽标/AgentRulesPanel/MemoryPanel/UsageCostPanel/McpShelfPane（全部 BLOCK-163 各 P 阶段增量），台账=UI-483 已同步。多会话三线并行收口提交。
@@ -424,6 +432,8 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-10-10 BLOCK-160/163 W2+W3 批：subject 走 BLOCK 轨无 UI-###；台账=UI-483 已补登。
+  'f5011827b1f8eae24369f09707e9e2b3365331ad',
   // 2026-10-10 BLOCK-163 P10 KNW-5 记忆治理面（5464d1a）：同提交漏 docs/ui-productization-audit.md 同步；台账=UI-483 已由 a062879a 补登对账（LEGACY_MESSAGE_EXEMPTIONS 同哈希）。
   '5464d1a65cf2520afa3312f8dd5d1ab31c39d8d9',
   'dc74e7e82ee15fd1561dd9703f5421e8a1a19ac0',
