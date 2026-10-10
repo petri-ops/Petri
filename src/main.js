@@ -247,6 +247,28 @@ function setupSkillsIpc() {
     }
   });
 
+  // BLOCK-156 D7 — 第三方技能本地目录导入（复刻 pack installFromDialog 先例：主进程对话框+安装一条龙）
+  ipcMain.handle(CHANNELS.skills.importDirectory, async (event) => {
+    if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };
+    const result = await dialog.showOpenDialog({
+      title: "选择技能目录（含 skill.json）",
+      properties: ["openDirectory"],
+    });
+    if (result.canceled || !result.filePaths.length) {
+      return { ok: false, canceled: true };
+    }
+    const { installSkillFromDir } = require(resolveCore("shared-backend", "skill-registry.js"));
+    return installSkillFromDir(result.filePaths[0]);
+  });
+
+  // 直路径安装（测试/探针通道；与 importDirectory 共用同一安装函数）
+  ipcMain.handle(CHANNELS.skills.importPath, async (event, dir) => {
+    if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };
+    if (!dir || typeof dir !== "string") return { ok: false, error: "dir_required" };
+    const { installSkillFromDir } = require(resolveCore("shared-backend", "skill-registry.js"));
+    return installSkillFromDir(dir);
+  });
+
   ipcMain.handle(CHANNELS.skills.execute, async (event, skillId, params) => {
     if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };
     try {

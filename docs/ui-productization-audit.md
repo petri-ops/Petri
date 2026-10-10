@@ -4767,3 +4767,5 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 ### UI-480 加映（2026-10-10·BLOCK-156 P2）：MCP 货架从占位翻真配置面——server 清单卡片（状态徽标 connected/connecting/disconnected/error 四态+工具计数+错误透出）/添加表单（ID 校验·命令·参数空格切分）/连接·断开·移除动作流（notice 反馈+connecting 2s 轮询）；数据面走后端 HTTP（useMcpServers hook，resolveApiBase 直连先例）。证据=McpShelfPane 4/4（空态校验/四态卡片/连接流 notice 带工具数/添加流 args 切分）+实机回环九断言中的 UI 在场断言（acceptance/block-156/p2-mcp-shelf-connected.png）。
 
 ### UI-480 加映二（2026-10-10·BLOCK-156 P3）：已连接卡片工具计数文案接通投影事实（「N 个工具」），投影层本体在后端（mcp-projection，非 UI 面）；agent 全链实机十二断言含工具调用可视化链路（transcript toolCalls 按名）。第三方技能本地导入未随包交付（转 C-EXT-4 候选，plan §8.3）。收口批 lint 加固（挂载加载延拍/errText 单源/测试 mock 去裸 async 与类型收窄）随收口提交同步台账。
+
+### UI-480 加映三（2026-10-10·BLOCK-156 D7 补做）：通用技能货架「导入本地技能目录」按钮（主进程文件对话框一条龙，复刻 pack installFromDialog 先例；import-path 直路径通道与对话框共用安装函数供探针/测试）——成功即重发现装载、失败/取消 notice 反馈、领域技能货签无此按钮；空态文案改导入引导。证据=index.test 导入链路用例（按钮在场且仅在通用货签/点击→importDirectory→ok 后重发现渲染新技能，含 store 模块缓存下 mock 竞态修正）+实机四断言 ALL PASS（acceptance/block-156/block156-skill-import-live.json：IPC 装载 ok→货架卡片可见+按钮在场→卸载→目录/manifest 零残留；对话框本体属 OS 层 UI 不在合成断言面，如实登记）。

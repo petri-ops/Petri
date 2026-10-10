@@ -142,6 +142,9 @@ const CHANNELS = {
     execute: 'skills:execute',
     getExecution: 'skills:getExecution',
     progress: 'skills:progress',
+    // BLOCK-156 D7 — 第三方技能本地目录导入（对话框一条龙/直路径，复刻 pack 先例）
+    importDirectory: 'skills:import-directory',
+    importPath: 'skills:import-path',
   },
   ssh: {
     registerHost: 'ssh:register-host',

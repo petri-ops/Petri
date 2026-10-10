@@ -285,6 +285,10 @@ declare global {
         }>;
         // PHASE 1 A：cancel + onProgress 桥接（G0 UI-157 IPC 桥接通；2026-08-16）
         cancel: (executionId: string) => Promise<{ ok: boolean; cancelled?: boolean; error?: string }>;
+        /** BLOCK-156 D7 — 导入本地技能目录（主进程文件对话框一条龙；canceled=用户取消）。 */
+        importDirectory: () => Promise<{ ok: boolean; skillId?: string; canceled?: boolean; error?: string; message?: string; errors?: string[] }>;
+        /** BLOCK-156 D7 — 按路径导入（测试/探针通道，与对话框共用安装函数）。 */
+        importPath: (dir: string) => Promise<{ ok: boolean; skillId?: string; error?: string; message?: string; errors?: string[] }>;
         /** 订阅 SkillsSDK 进度推送。Callback 收到 main.js 通过 webContents.send('skills:progress') 推送的 payload；返回 unsubscribe 函数。 */
         onProgress: (callback: (payload: {
           executionId: string;

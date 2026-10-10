@@ -3034,7 +3034,7 @@
     },
     {
       "id": "block156-ext-hub-mcp-client",
-      "note": "BLOCK-156 扩展中心重组与 MCP 客户端：/extensions 四货架（D2 分类学 extensionShelves 单源）+MCP stdio 连接管理（client-manager/mcp-settings）+/api/mcp/servers* 路由 + mcp_<server>_<tool> 动态投影进 agent 工具集（execution+R2 档位）；投影层只追加动态面，静态 76 恒等契约不动。",
+      "note": "BLOCK-156 扩展中心重组与 MCP 客户端：/extensions 四货架（D2 分类学 extensionShelves 单源）+MCP stdio 连接管理（client-manager/mcp-settings）+/api/mcp/servers* 路由 + mcp_<server>_<tool> 动态投影进 agent 工具集（execution+R2 档位）；投影层只追加动态面，静态 76 恒等契约不动。 D7 补做：第三方技能本地目录导入（installSkillFromDir/import-directory·import-path IPC+通用技能货架导入按钮+discover 缓存语义修正）。",
       "patterns": [
         "frontend/src/lib/extensionShelves.ts",
         "frontend/src/pages/extensions/**",
@@ -3045,7 +3045,8 @@
         "core/biof3-server/agent-tools/mcp-projection.js",
         "test/fixtures/mcp-fixture-server.cjs",
         "scripts/block156-*.mjs",
-        "acceptance/block-156/**"
+        "acceptance/block-156/**",
+        "core/shared-backend/skill-registry.js"
       ],
       "tests": [
         "test/mcp-client-settings.test.mjs",
@@ -3055,7 +3056,8 @@
         "frontend/src/pages/extensions/index.test.tsx",
         "frontend/src/pages/extensions/McpShelfPane.test.tsx",
         "test/agent-tool-registry.test.mjs",
-        "test/agent-tool-policy.test.mjs"
+        "test/agent-tool-policy.test.mjs",
+        "test/skill-import-directory.test.mjs"
       ],
       "classifiesScripts": true
     },

@@ -383,6 +383,9 @@ const desktopBridgeSurface = {
       ipcRenderer.invoke('skills:getExecution', String(executionId ?? '')),
     cancel: (executionId) =>
       ipcRenderer.invoke('skills:cancel', String(executionId ?? '')),
+    // BLOCK-156 D7 — 第三方技能本地目录导入（对话框一条龙；canceled=用户取消非错误）
+    importDirectory: () => ipcRenderer.invoke('skills:import-directory'),
+    importPath: (dir) => ipcRenderer.invoke('skills:import-path', String(dir ?? '')),
     onProgress: (callback) => {
       if (typeof callback !== 'function') return () => {};
       // BLOCK-4 B5: callback 抛错 try/catch 隔离，避免污染后续 progress 事件链

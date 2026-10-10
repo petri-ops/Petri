@@ -11,6 +11,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 // ── IPC mock：技能发现（含领域+通用两类 category）与插件商店桥 ──────────────
+// BLOCK-156 D7 — discover/importDirectory 可寻址（导入链路测试改写返回值/断言调用）
+const skillsDiscoverMock = vi.fn(() => Promise.resolve(discoverResult));
+const skillsImportDirectoryMock = vi.fn();
 const discoverResult = {
   ok: true,
   skills: [
@@ -43,11 +46,13 @@ vi.mock('@/lib/desktopBridge', () => ({
   getBridge: (ns: string) => {
     if (ns === 'skills') {
       return {
-        discover: vi.fn(() => Promise.resolve(discoverResult)),
+        discover: skillsDiscoverMock,
         execute: vi.fn(),
         cancel: vi.fn(),
         getExecution: vi.fn(),
         onProgress: vi.fn(() => () => {}),
+        importDirectory: skillsImportDirectoryMock,
+        importPath: vi.fn(),
       };
     }
     if (ns === 'plugins') {
@@ -138,6 +143,45 @@ describe('BLOCK-156 扩展中心页', () => {
     renderAt('/extensions?tab=mcp');
     await waitFor(() => expect(screen.getByTestId('mcp-empty')).toBeTruthy());
     expect(screen.getByTestId('mcp-add-toggle')).toBeTruthy();
+  });
+
+  it('D7 通用技能货架：导入按钮在场且只在通用货签；点击→importDirectory→ok 后重发现', async () => {
+    const importedSkill = {
+      id: 'my-general-skill',
+      name: '我的通用技能',
+      version: '1.0.0',
+      description: '本地导入',
+      category: 'productivity',
+      source: 'installed',
+      tags: [],
+      parameters: { required: [], optional: {} },
+      plugins: { required: [], optional: [] },
+    };
+    // 以「导入是否已发生」分流：store 模块缓存 loaded 后 mount 不再自动拉，
+    // 点击后的 discover() 是本用例唯一一次拉取——直接返回含新技能的清单
+    skillsDiscoverMock.mockImplementation(() =>
+      Promise.resolve({
+        ok: true,
+        skills: skillsImportDirectoryMock.mock.calls.length > 0
+          ? [...discoverResult.skills, importedSkill]
+          : [...discoverResult.skills],
+      }),
+    );
+    skillsImportDirectoryMock.mockResolvedValue({ ok: true, skillId: 'my-general-skill' });
+
+    renderAt('/extensions?tab=general-skills');
+    await waitFor(() => expect(screen.getByTestId('skill-shelf-general-skills')).toBeTruthy());
+
+    const importBtn = screen.getByTestId('skill-import-directory');
+    fireEvent.click(importBtn);
+
+    await waitFor(() => expect(skillsImportDirectoryMock).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(screen.getByText('我的通用技能')).toBeTruthy());
+    expect(screen.getByText(/已导入技能 my-general-skill/)).toBeTruthy();
+
+    // 领域技能货签无导入按钮
+    fireEvent.click(screen.getByRole('tab', { name: '领域技能' }));
+    await waitFor(() => expect(screen.queryByTestId('skill-import-directory')).toBeNull());
   });
 
   it('非法 tab 参数 fail-closed 回落领域插件货签', () => {

@@ -1,0 +1,28 @@
+{
+  "name": "block156-skill-import",
+  "startedAt": "2026-10-10T03:31:25.807Z",
+  "finishedAt": "2026-10-10T03:31:28.439Z",
+  "assertions": [
+    {
+      "name": "import_path_ipc_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"skillId\":\"b156-live-general-skill\",\"version\":\"1.0.0\"}"
+    },
+    {
+      "name": "imported_skill_visible_on_general_shelf",
+      "pass": true,
+      "detail": "{\"pane\":true,\"importedVisible\":true,\"importBtn\":true}"
+    },
+    {
+      "name": "cleanup_uninstalled",
+      "pass": true,
+      "detail": "{\"ok\":true,\"removed\":\"b156-live-general-skill\"}"
+    },
+    {
+      "name": "cleanup_zero_leftover",
+      "pass": true,
+      "detail": "dir=false manifestClean=true"
+    }
+  ],
+  "allPass": true
+}

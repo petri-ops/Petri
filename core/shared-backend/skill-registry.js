@@ -172,6 +172,9 @@ function parseSkillManifest(manifest, source, baseDir) {
 function validateSkillManifest(skill) {
   const errors = [];
 
+  if (skill.skillManifestVersion !== SKILL_MANIFEST_VERSION) {
+    errors.push(`skillManifestVersion must be ${SKILL_MANIFEST_VERSION}`);
+  }
   if (!skill.id) errors.push('Missing required field: id');
   if (!skill.name) errors.push('Missing required field: name');
   if (!skill.version) errors.push('Missing required field: version');
@@ -286,6 +289,83 @@ function getInstalledSkillsDir() {
 }
 
 /**
+ * BLOCK-156 D7 — 第三方技能本地目录导入：校验 skill.json 后复制进 installed
+ * 目录并 upsert installed manifest（discoverSkills 即刻可见，source='installed'）。
+ * fail-closed：manifest 缺失/校验不过/built-in id 冲突一律拒绝且零写入。
+ * 同 id 重复导入 = 覆盖更新（v1 语义：以最新导入为准）。
+ * @param {string} sourceDir - 含 skill.json 的技能目录（用户经文件对话框选择）
+ */
+function installSkillFromDir(sourceDir) {
+  try {
+    if (!sourceDir || typeof sourceDir !== 'string') {
+      return { ok: false, error: 'source_dir_required' };
+    }
+    const manifest = readJson(path.join(sourceDir, 'skill.json'));
+    if (!manifest) {
+      return { ok: false, error: 'skill_manifest_missing', message: '所选目录缺少 skill.json' };
+    }
+    const validation = validateSkillManifest(manifest);
+    if (!validation.ok) {
+      return { ok: false, error: 'skill_manifest_invalid', errors: validation.errors };
+    }
+    // built-in id 冲突拒绝（loadInstalledSkills 会跳过 built-in 占用 id——导入等于静默不可见，须前置拦截）
+    const builtIn = loadBuiltInSkills();
+    if (builtIn.some((s) => s.id === manifest.id)) {
+      return { ok: false, error: 'skill_id_conflicts_builtin', message: `内置技能已占用 id: ${manifest.id}` };
+    }
+    const installedDir = getInstalledSkillsDir();
+    fs.mkdirSync(installedDir, { recursive: true });
+    const destDir = path.join(installedDir, manifest.id);
+    if (fs.existsSync(destDir)) {
+      fs.rmSync(destDir, { recursive: true, force: true });
+    }
+    fs.cpSync(sourceDir, destDir, { recursive: true });
+    // 装后回读护栏：parse 必须能装载（防「装了却 discover 不可见」的静默失败）；失败回滚零残留
+    if (!loadSkillFromDir(destDir, 'installed')) {
+      fs.rmSync(destDir, { recursive: true, force: true });
+      return { ok: false, error: 'skill_manifest_unloadable', message: 'manifest 可过校验但无法装载（对照 parseSkillManifest 契约，如 skillManifestVersion）' };
+    }
+    // installed manifest upsert（装载侧 loadInstalledSkills 只认此清单）
+    const manifestPath = path.join(installedDir, 'manifest.json');
+    const installedManifest = readJson(manifestPath) || { skills: {} };
+    if (!installedManifest.skills || typeof installedManifest.skills !== 'object') {
+      installedManifest.skills = {};
+    }
+    installedManifest.skills[manifest.id] = {
+      version: manifest.version,
+      importedAt: new Date().toISOString(),
+      sourceDir,
+    };
+    fs.writeFileSync(manifestPath, JSON.stringify(installedManifest, null, 2) + '\n', 'utf8');
+    return { ok: true, skillId: manifest.id, version: manifest.version };
+  } catch (e) {
+    return { ok: false, error: 'install_failed', message: e && e.message ? e.message : String(e) };
+  }
+}
+
+/**
+ * BLOCK-156 D7 — 按 id 卸载已导入技能（清目录 + manifest 条目；仅供导入回路清理）。
+ */
+function uninstallImportedSkill(skillId) {
+  try {
+    if (!skillId || typeof skillId !== 'string') return { ok: false, error: 'skill_id_required' };
+    const installedDir = getInstalledSkillsDir();
+    const manifestPath = path.join(installedDir, 'manifest.json');
+    const installedManifest = readJson(manifestPath);
+    if (!installedManifest || !installedManifest.skills || !(skillId in installedManifest.skills)) {
+      return { ok: false, error: 'skill_not_imported' };
+    }
+    delete installedManifest.skills[skillId];
+    fs.writeFileSync(manifestPath, JSON.stringify(installedManifest, null, 2) + '\n', 'utf8');
+    const destDir = path.join(installedDir, skillId);
+    if (fs.existsSync(destDir)) fs.rmSync(destDir, { recursive: true, force: true });
+    return { ok: true, removed: skillId };
+  } catch (e) {
+    return { ok: false, error: 'uninstall_failed', message: e && e.message ? e.message : String(e) };
+  }
+}
+
+/**
  * 加载已安装的 Skills
  * @returns {SkillEntry[]}
  */
@@ -298,8 +378,9 @@ function loadInstalledSkills() {
 
   const skills = [];
   for (const id of Object.keys(manifest.skills)) {
-    // 跳过已被 built-in 占用的
-    if (_registry.has(id)) continue;
+    // 跳过已被 built-in 占用的（BLOCK-156 D7：原 _registry.has 会把 installed
+    // 自身的上次发现缓存误判为占用——导入更新后二次发现被跳过，改为只认 built-in）
+    if (_sourceMap.get(id) === 'built-in') continue;
 
     const skillDir = path.join(installedDir, id);
     const skill = loadSkillFromDir(skillDir, 'installed');
@@ -326,10 +407,20 @@ function discoverSkills() {
 
   // 2. 已安装 Skills
   const installed = loadInstalledSkills();
+  const installedIds = new Set(installed.map((skill) => skill.id));
   for (const skill of installed) {
     skills.push(skill);
     _registry.set(skill.id, skill);
     _sourceMap.set(skill.id, 'installed');
+  }
+
+  // BLOCK-156 D7 — installed 残留清理：manifest 已不含的条目从注册表移除
+  //（卸载/覆盖降级后 discover 不再返回旧条目；built-in 与手动 register 不受影响）
+  for (const id of Array.from(_sourceMap.keys())) {
+    if (_sourceMap.get(id) === 'installed' && !installedIds.has(id)) {
+      _sourceMap.delete(id);
+      _registry.delete(id);
+    }
   }
 
   return skills;
@@ -347,13 +438,12 @@ class SkillRegistry {
   }
 
   /**
-   * 初始化注册表（惰性加载）
+   * 初始化注册表（BLOCK-156 D7：discover 已改为每次全量重发现，此钩子仅为
+   * 兼容既有调用点保留；_initialized 不再拦截发现——导入/卸载后即刻可见）
    */
   _ensureInitialized() {
-    if (!this._initialized) {
-      discoverSkills();
-      this._initialized = true;
-    }
+    discoverSkills();
+    this._initialized = true;
   }
 
   /**
@@ -601,6 +691,8 @@ module.exports = {
   loadSkillFromDir,
   loadBuiltInSkills,
   loadInstalledSkills,
+  installSkillFromDir,
+  uninstallImportedSkill,
   discoverSkills,
 
   // 常量导出

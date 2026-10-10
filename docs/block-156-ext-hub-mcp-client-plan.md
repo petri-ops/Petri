@@ -114,6 +114,11 @@ UI 台账：UI-480（扩展中心四货架）verified + 加映 P2/P3（MCP 配�
 
 - C-EXT-1（HTTP/SSE 传输 + server 级信任）、C-EXT-2（远程技能市场）、C-EXT-3（预路由 mcp 域）维持 §7 原状。
 - 新增观察：MCP 工具的 toolActivity 动词走「已调用 name」兜底（tool-events default 分支本就为动态工具预留）；若实际使用中 MCP 工具高频出现，再评估按 server 维度注册动词。
-- 通用技能本地导入（D7 v1=本地目录导入）**未在本包实现**——P1 只交付了通用技能货架与分类学；导入入口转 C-EXT-4 候选（安装面与 pack installFromDialog 同构，工作量小但属新 UI 面，不夹带）。
+- ~~通用技能本地导入（D7 v1=本地目录导入）未在本包实现~~ → **2026-10-10 D7 补做交付**（完成校验器抓真：D7 推荐原文属「全按推荐」范围，自我缩圈转 C-EXT-4 不成立）：
+  - 后端：`skill-registry.installSkillFromDir/uninstallImportedSkill`（validateSkillManifest 增 skillManifestVersion 契约检查 + 装后回读护栏防「装了却不可见」+ built-in id 冲突拒绝 + 重复导入覆盖）；
+  - 通道：`skills:import-directory`（主进程对话框一条龙，复刻 pack installFromDialog 先例）+ `skills:import-path`（直路径，探针/测试与对话框共用安装函数）；channels/preload/electron.d.ts 三件套 + ipc-channels-registry 五闸绿；
+  - 前端：通用技能货架导入按钮（成功即重发现/取消静默/失败 notice；领域货签无此钮）；
+  - **缓存语义修正（存量行为面，D7 必要前置）**：loadInstalledSkills 跳过条件 `_registry.has` → `_sourceMap==='built-in'`（原条件把 installed 自身上次发现缓存误判为占用，导入更新后二次发现被跳过）；discoverSkills 尾部清 installed 残留（卸载后不返回旧条目）；SkillRegistry.discover 去一次性 `_initialized` 缓存（导入/卸载即可见）。skill 消费者回归 26 项（唯一红=block84 本机漂移存量）；
+  - 验证：单测 4/4（合法装载/缺 manifest·坏 manifest·built-in 冲突 fail-closed/覆盖更新+卸载清净）+ 前端导入链路用例（含 store 模块缓存下 mock 竞态修正）+ **实机四断言 ALL PASS**（block156-skill-import flow：临时目录→renderer import-path IPC→通用技能货架卡片可见+按钮在场→宿主侧卸载零残留；对话框本体属 OS 层 UI 不在合成断言面）。C-EXT-4 销号。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -12,6 +12,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { useSkillStore, type Skill } from '@/hooks/useSkillStore';
+import { getBridge } from '@/lib/desktopBridge';
 import {
   EXTENSION_SHELVES,
   classifySkillShelf,
@@ -102,10 +103,36 @@ export default function ExtensionsPage(): React.ReactElement {
 
 /** 技能货架：按 D2 分类学过滤 + 搜索 + 卡片网格 + 执行详情弹层。 */
 function SkillShelfPane({ shelfId }: { shelfId: 'domain-skills' | 'general-skills' }): React.ReactElement {
-  const { skills, loading, error, execute } = useSkillStore({ autoLoad: true });
+  const { skills, loading, error, execute, discover } = useSkillStore({ autoLoad: true });
   const [query, setQuery] = useState('');
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
   const [executingSkillId, setExecutingSkillId] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importNotice, setImportNotice] = useState<string | null>(null);
+
+  // BLOCK-156 D7 — 本地技能目录导入（主进程对话框一条龙；成功后重发现）
+  const handleImport = useCallback(async () => {
+    setImporting(true);
+    setImportNotice(null);
+    try {
+      const skillsBridge = getBridge('skills');
+      if (!skillsBridge) {
+        setImportNotice('导入失败：桌面桥不可用');
+        return;
+      }
+      const result = await skillsBridge.importDirectory();
+      if (result.ok) {
+        setImportNotice(`已导入技能 ${result.skillId ?? ''}`);
+        await discover();
+      } else if (!result.canceled) {
+        setImportNotice(`导入失败：${result.message ?? result.error ?? '未知错误'}`);
+      }
+    } catch (e) {
+      setImportNotice(`导入失败：${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setImporting(false);
+    }
+  }, [discover]);
 
   const shelfSkills = useMemo(
     () => skills.filter((s) => classifySkillShelf(s.category) === shelfId),
@@ -150,6 +177,24 @@ function SkillShelfPane({ shelfId }: { shelfId: 'domain-skills' | 'general-skill
 
   return (
     <div className={styles.shelfPane} data-testid={`skill-shelf-${shelfId}`}>
+      {shelfId === 'general-skills' && (
+        <div className={styles.mcpHeaderRow}>
+          <span className={styles.mcpIntro}>
+            <Icon name="download" size={14} />
+            <span>{importNotice ?? '通用技能不绑领域；从本地目录导入含 skill.json 的技能'}</span>
+          </span>
+          <button
+            type="button"
+            className={styles.mcpAddBtn}
+            disabled={importing}
+            onClick={() => void handleImport()}
+            data-testid="skill-import-directory"
+          >
+            <Icon name="plus" size={14} />
+            <span>{importing ? '导入中…' : '导入本地技能目录'}</span>
+          </button>
+        </div>
+      )}
       <div className={skillStyles.searchRow}>
         <div className={skillStyles.searchInputWrapper}>
           <Icon name="search" size={16} className={skillStyles.searchIcon} />
@@ -181,7 +226,7 @@ function SkillShelfPane({ shelfId }: { shelfId: 'domain-skills' | 'general-skill
           <h3 className={skillStyles.emptyTitle}>暂无匹配的{shelfLabel}</h3>
           <p className={skillStyles.emptyText}>
             {shelfId === 'general-skills'
-              ? '通用技能通过本地目录导入安装（规划中）；内置通用技能会出现在这里'
+              ? '还没有通用技能——点上方「导入本地技能目录」接入第一个（含 skill.json 的目录）'
               : '尝试调整搜索条件，或从领域包安装分析能力'}
           </p>
         </div>

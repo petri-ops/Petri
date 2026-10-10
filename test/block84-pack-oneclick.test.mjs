@@ -75,7 +75,9 @@ test('BLOCK-84 tool-registry supports additive domain registration (dev env + pa
   ).length;
   assert.equal(result.merged, registeredEntries);
   assert.equal(toolRegistry.resolveToolId('deseq2'), 'deseq2');
-  assert.equal(toolRegistry.resolveToolId('enrichment'), 'go-kegg');
+  // BIO-4（pack d1deb96）裁决：go-kegg 解冻走插件通道，tool-registry TOOLS/别名
+  // 一并退役——desktop 侧期望 2026-10-10 随 BLOCK-156 D7 closeout 抓真补齐（存量过期断言）
+  assert.equal(toolRegistry.resolveToolId('enrichment'), null);
   assert.equal(toolRegistry.getToolConfig('deseq2').lang, 'r');
   // 缺文件=诚实失败不阻塞
   assert.equal(toolRegistry.registerDomainToolsFile(path.join(os.tmpdir(), 'block84-nope.json')).error, 'registry_file_missing');
