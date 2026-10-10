@@ -18,6 +18,8 @@ const { estimateRequestTokens } = require('./helpers/token-estimator');
 const { getAiSettings } = require('./helpers/ai-settings');
 const { buildSystemPrompt, loadWorkingTreeRejectEntries, resolveWorkingTreeRejectRoot } = require('./helpers/system-prompt');
 const { appendDesktopAgentInstructions } = require('./helpers/desktop-agent-prompt');
+// BLOCK-157 W1 P2（KNW-2）— 技能索引常驻注入（渐进披露闭环）
+const { buildSkillsIndexBlock, tool_skill_discover } = require('./agent-tools/skill-tools');
 const { renderPluginDemoPathsForPrompt } = require('./helpers/plugin-demo-prompt');
 const llmClient = require('./helpers/llm-client');
 const agentResilience = require('./helpers/agent-resilience');
@@ -379,6 +381,18 @@ async function runAgentLoop({
     const pluginBlock = renderContentPluginsForPrompt(1200);
     if (pluginBlock) systemPrompt += pluginBlock;
   } catch {}
+
+  // BLOCK-157 W1 P2（KNW-2）— 技能索引常驻注入（渐进披露：描述常驻有界、正文经 skill_get 触发加载；
+  // 空清单零注入；装载失败 fail-soft 不破轮）
+  try {
+    const skillsListing = await tool_skill_discover({});
+    if (skillsListing && skillsListing.ok && Array.isArray(skillsListing.skills)) {
+      const skillsBlock = buildSkillsIndexBlock(skillsListing.skills);
+      if (skillsBlock) systemPrompt += '\n\n' + skillsBlock;
+    }
+  } catch (e) {
+    console.warn('[agent-runner] skills index injection failed:', e && e.message ? e.message : e);
+  }
 
   try {
     if (userId) {
