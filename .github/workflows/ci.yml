@@ -34,8 +34,15 @@ jobs:
           test/harness-file-index.test.mjs
           test/mcp-tool-registry.test.mjs
 
-      - name: Run Phase 7 Harness quality gate
-        run: npm run harness:phase7
+      # BLOCK-165：Phase 7 拆双轨——确定性面（harness 清单+phase6+工具单测）在 CI 常跑；
+      # 活体 acceptance（harness:phase7:acceptance）需已供给的 DB（含项目/迁移）与
+      # 领域包插件源，纯 checkout runner 不具备，留在 provisioned dev 环境执行
+      # （npm run harness:phase7 全链），避免公网 CI 假红/假绿。
+      - name: Run Phase 7 Harness deterministic gate
+        run: |-
+          npm run harness:check
+          npm run harness:phase6
+          node --test test/agent-tool-registry.test.mjs test/agent-tool-policy.test.mjs test/harness-workspace-tools.test.mjs test/agent-tool-result.test.mjs test/agent-provider-boundary.test.mjs test/agent-approval.test.mjs test/project-memory-isolation.test.mjs test/diagnostic-redaction.test.mjs
 
       - name: Check frontend and build SPA
         run: |
