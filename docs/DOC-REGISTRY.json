@@ -5801,8 +5801,28 @@
       ],
       "archivePolicy": "retain_stable_path",
       "notes": "2026-10-10 用户裁决落档（五层成熟度评估三路只读探查为据）：满级=G0 天花板定义 + 25 种子目录（MDL×4/ORC×5/CAP×5/KNW×6/DIST×5）+ 依赖 DAG 与三波推进序（出口判据/插队规则）；排队序唯一台账在 pending-work-backlog.md（C-EXT-1~4 已归并注记），单工作包串行不变，逐包发令；G1+ 画线（Provider 矩阵实机验证/签名公证/远程市场/packaged 分发）不越界。"
+    },
+    {
+      "id": "BLOCK-157-MATURITY-WAVE1",
+      "path": "docs/block-157-maturity-wave1-plan.md",
+      "capability": "agent-maturity",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-157-maturity-wave1-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-10",
+      "tags": [
+        "BLOCK-157",
+        "maturity-wave1",
+        "skills-visibility",
+        "mcp-annotations",
+        "plugin-enabled"
+      ],
+      "archivePolicy": "retain_stable_path",
+      "notes": "成熟度蓝图 W1 波整波承载（用户发令「开冲到W1波末」+ 波内零停顿）：P1 KNW-1 Skills 可见性 / P2 KNW-2 渐进披露 / P3 CAP-1 MCP annotations 粒度审批 / P4 DIST-1 插件启停；波末三出口断言+蓝图/backlog 回写。"
     }
   ],
   "lastUpdated": "2026-10-10",
-  "documentCount": 306
+  "documentCount": 307
 }
