@@ -5807,7 +5807,7 @@
       "path": "docs/block-157-maturity-wave1-plan.md",
       "capability": "agent-maturity",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-157-maturity-wave1-plan",
       "entrypoint": "docs/README.md",

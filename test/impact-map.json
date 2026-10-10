@@ -3078,6 +3078,43 @@
         "frontend/src/hooks/useResizableColumns.test.ts"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block157-maturity-wave1",
+      "note": "BLOCK-157 成熟度蓝图 W1 波：KNW-1/KNW-2 Skills 可见性与渐进披露（skill-tools/tool-defs skill 域/agent-runner 索引注入，静态工具 76→78）+CAP-1 MCP annotations 粒度审批（readOnlyHint→retrieval/none，默认 D4 不变）+DIST-1 插件启停粒度（installed enabled 标志+加载器尊重+plugin:set-enabled IPC+货架开关）+插件目录拓扑收敛（resolveInstalledPluginsDir 单源，BLOCK-125 家族修复）。 探针脚本经本规则 classifiesScripts 分类（platform-branch-freeze 的 scripts/** 为 classifiesScripts:false 不参与 exactly-one）。",
+      "patterns": [
+        "core/biof3-server/agent-tools/skill-tools.js",
+        "core/biof3-server/agent-tools/tool-defs/skill.js",
+        "core/biof3-server/agent-tools/tool-defs.js",
+        "core/biof3-server/agent-tools/registry.js",
+        "core/biof3-server/agent-tools/tool-events.js",
+        "core/biof3-server/agent-tools/mcp-projection.js",
+        "core/biof3-server/agent-runner.js",
+        "core/biof3-server/plugin-loader.js",
+        "core/biof3-server/server.js",
+        "src/plugin/installed.js",
+        "src/ipc/channels.js",
+        "src/ipc/plugin.js",
+        "src/preload.js",
+        "frontend/src/hooks/usePluginStore.ts",
+        "frontend/src/components/desktop/PluginStorePanel.tsx",
+        "test/fixtures/mcp-fixture-server.cjs",
+        "test/fixtures/tool-activity-labels.json",
+        "acceptance/block-157/**",
+        "scripts/block157-*.mjs"
+      ],
+      "tests": [
+        "test/block157-skill-visibility.test.mjs",
+        "test/block157-skill-index.test.mjs",
+        "test/block157-plugin-enabled.test.mjs",
+        "test/mcp-projection.test.mjs",
+        "test/tool-activity-labels.test.mjs",
+        "test/agent-tool-registry.test.mjs",
+        "test/block116-decision-platform.test.mjs",
+        "test/block113-tool-prerouting.test.mjs",
+        "test/ipc-channels-registry.test.mjs"
+      ],
+      "classifiesScripts": true
     }
   ]
 }

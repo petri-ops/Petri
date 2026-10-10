@@ -60,7 +60,7 @@ status: reference
 
 | 种子 | 范围 | 验收锚点 | 依赖 | 状态 |
 | --- | --- | --- | --- | --- |
-| CAP-1 | MCP 工具粒度审批：读 MCP annotations（readOnly/destructive hints），投影契约从一刀切 execution/R2 分级为「只读检索族（read/plan 可用）/ 执行族（full）」 | 只读第三方工具低档可用，实机全链 | — | 候选 |
+| CAP-1 | MCP 工具粒度审批：读 MCP annotations（readOnly/destructive hints），投影契约从一刀切 execution/R2 分级为「只读检索族（read/plan 可用）/ 执行族（full）」 | 只读第三方工具低档可用，实机全链 | — | **completed（2026-10-10 BLOCK-157 P3，readOnlyHint→retrieval/none/R1+低档实机回流）** |
 | CAP-2 | env 密文化：mcp-servers.json 明文 → Electron safeStorage（block-156 登记债） | 落盘零明文 + 存量迁移自愈 | — | 候选 |
 | CAP-3 | MCP 传输扩展：streamable HTTP/SSE（承接 C-EXT-1 传输半边）+ 连接健康面板（状态/超时统计） | 多传输连接 + 健康统计可视 | — | 候选 |
 | CAP-4 | 工具选择质量：BLOCK-113 tool-route 决策预路由在 76+40 规模下精度加固（承接 C-EXT-3，其「决策配置中心接线证据」重开条件保留） | 路由精度校准门 | CAP-1（软，终态工具宇宙上校准） | 候选 |
@@ -72,8 +72,8 @@ status: reference
 
 | 种子 | 范围 | 验收锚点 | 依赖 | 状态 |
 | --- | --- | --- | --- | --- |
-| KNW-1 | Skills 可见性：skill_discover/skill_get 投影进 agent-tools（或 system prompt 注入技能摘要清单）——模型第一次「看到」产品 skills（当前最大断链：4 技能纯显式执行，agent 感知不到） | 实机 agent 自主发现并引用一个 skill | — | 候选 |
-| KNW-2 | 渐进披露闭环：描述常驻 + 正文触发加载（对齐 SKILL.md 渐进披露模式） | 触发加载契约 + token 预算有界 | KNW-1（硬） | 候选 |
+| KNW-1 | Skills 可见性：skill_discover/skill_get 投影进 agent-tools（或 system prompt 注入技能摘要清单）——模型第一次「看到」产品 skills（当前最大断链：4 技能纯显式执行，agent 感知不到） | 实机 agent 自主发现并引用一个 skill | — | **completed（2026-10-10 BLOCK-157 P1，实机 read 档自主引用实证）** |
+| KNW-2 | 渐进披露闭环：描述常驻 + 正文触发加载（对齐 SKILL.md 渐进披露模式） | 触发加载契约 + token 预算有界 | KNW-1（硬） | **completed（2026-10-10 BLOCK-157 P2，索引有界注入+skill_get 截断加载）** |
 | KNW-3 | 斜杠命令层：composer /xxx → 技能与 run_tool 模板统一入口（CommandPalette 保持 UI 动作不动） | 双来源单入口实机 | KNW-1（软，在场后更完整） | 候选 |
 | KNW-4 | SKILL.md 兼容导入：格式兼容（本地目录导入管线已由 BLOCK-156 D7 补做以 skill.json 形态交付，2026-10-10 `4479aecf`；本种子剩余面 = SKILL.md 兼容并复用该管线；与 DIST-2 共轨一包） | 外部 SKILL.md 技能导入即用 + skills:check 扩契约 | KNW-1、KNW-2（硬链） | 候选（范围收缩注记） |
 | KNW-5 | 记忆治理面：facts/summary/vectors 细粒度查看/编辑/单条遗忘（现只有 wipe；管理 API 已有） | 治理 UI 实机 | — | 候选 |
@@ -85,7 +85,7 @@ status: reference
 
 | 种子 | 范围 | 验收锚点 | 依赖 | 状态 |
 | --- | --- | --- | --- | --- |
-| DIST-1 | 启停粒度：installed.json 增 enabled 状态 + 加载器尊重 + 货架 UI 开关 | 停用即不注册、启用免重装 | — | 候选 |
+| DIST-1 | 启停粒度：installed.json 增 enabled 状态 + 加载器尊重 + 货架 UI 开关 | 停用即不注册、启用免重装 | — | **completed（2026-10-10 BLOCK-157 P4，三态重启实机 8→7→8；附插件目录拓扑脑裂修复 BLOCK-125 家族；UI-481 开关待用户过目）** |
 | DIST-2 | 本地导入（与 KNW-4 共轨）：技能目录导入 v1 已由 BLOCK-156 D7 交付（`4479aecf`），剩余面 = 插件 / MCP 配置导入随批 | 插件/MCP 配置导入 → 在场 → 可用全链 | DIST-1（软）+ KNW-4 共轨 | 候选（范围收缩注记） |
 | DIST-3 | 插件权限声明（与 CAP-5 共轨合并立项） | 装前知情面 | — | 候选 |
 | DIST-4 | 打包卫生债（登记型）：electron-builder 陈旧 built-in-plugins 引用清偿 + resources/skills 纳入 extraResources（配置面修复，非 packaged 验证） | 配置面修复 + 卫生门绿 | — | 候选 |
@@ -170,8 +170,8 @@ W1 四件（KNW-1/KNW-2/CAP-1/DIST-1）无产品语义裁决点，零停顿天�
 - 蓝图达成判据 = §2 五层满级画像逐项被对应工作包收口证据覆盖，或经用户显式裁决移入 G1+（该条目标注出籍）。达成时本文件转 completed-grade reference，状态头更新。
 - 每包启动：立项检查单照走；授权模式 = 整波授权、波内零停顿（§3.4，2026-10-10 用户裁决），四处产品语义裁决点按 §3.4 预裁决缺省执行、波报集中复认。
 
-## 8. 首包启动前置（KNW-1，W1 队列头）
+## 8. W1 波执行记录（2026-10-10 当日立项当日整波收口）
 
-- 范围预告：skill_discover/skill_get 投影进 agent-tools（或摘要注入 system prompt）；预计文件面 = core/biof3-server/agent-tools/ + core/shared-backend/skill-registry.js + 前端展示面。
-- **前置警告**：截至本文件落档，工作树存在 `core/shared-backend/skill-registry.js` 未提交在制 WIP（另一会话，+74 行，正落在本包核心文件面）；首包开工前须先核实/收口该 WIP，避免同文件面冲突。
-- 启动 = 用户发令后按立项检查单开包（W1 波次预授权已在案）。
+- W1 波已由 BLOCK-157 整波承载并收口（plan=block-157-maturity-wave1-plan.md §6；用户发令「开冲到W1波末」+ 波内零停顿条款）：KNW-1/KNW-2/CAP-1/DIST-1 全部 completed，三出口断言 ALL PASS（acceptance/block-157/wave1-live.json），closeout 十一门 PASS。
+- 实机加映修复：插件目录跨进程拓扑脑裂（BLOCK-125 家族，resolveInstalledPluginsDir 收敛）。
+- 本节首包启动前置（skill-registry.js WIP）已随 BLOCK-156 D7 收口消失；§8 保留作波次执行审计锚点，下一波（W2）队列头=ORC-2（backlog 队列区）。

@@ -8,7 +8,7 @@ acceptance:
   - DIST-1：installed.json 增 enabled 标志（装=启用默认，存量缺省=启用零破坏）+ 核心加载器尊重（run_tool 清单/执行与 MCP listToolsForMCP 不注册停用件）+ 货架 UI 开关；验收=停用即不注册、启用免重装
   - 波末：三出口断言（agent 自主引 skill / 只读 MCP 低档可用实机链 / 插件停用不注册启用免重装）+ closeout 门禁全绿 + 蓝图/backlog 状态回写
 reopen: 波内零停顿条款（蓝图 §3.4）——预裁决缺省即生效波报复认；单阶段测试红→修复重跑不算停顿；整波范围改判需用户裁决
-status: active
+status: completed
 ---
 
 # BLOCK-157：成熟度蓝图 W1 波（Skills 在场 + MCP 粒度审批 + 插件启停）
@@ -51,6 +51,18 @@ status: active
 
 逐阶段：红绿先行证据 + 定向测试 + tsc（触前端时）；波末：closeout 门禁 + 实机探针三断言。
 
-## 6. 收口笔录
+## 6. 收口笔录（2026-10-10 当日整波收口 completed）
 
-（波末填写）
+**交付**：P1 KNW-1（`a3969190`）skill_discover/skill_get 投影静态面 76→78 + P2 KNW-2（`23ad1154`）agent-runner 技能索引常驻注入（有界/空清单零注入/源码扫描接线钉）+ P3 CAP-1（`5cd195d7`）mcp-projection 读 annotations.readOnlyHint 分级（只读→retrieval/none/R1，默认 D4 零漂移）+ P4 DIST-1（`4ef6d666`）installed enabled 标志+加载器尊重+plugin:set-enabled IPC+货架开关（UI-481）。
+
+**实机抓真修复**：插件目录跨进程拓扑脑裂（BLOCK-125 家族）——主进程装插件写 `$BIOF3_LOCAL_DATA_DIR/plugins` 而 core 后端只认 `BIOF3_PLUGINS_DIR || ~/Documents/BioF3-Local/plugins`，装了读不到（探针插件 catalog 缺席实证）；收敛=resolveInstalledPluginsDir 单源三点接线（`cd7c58ac`，未设 env 行为零变化）。
+
+**波末三出口断言 ALL PASS**（acceptance/block-157/wave1-live.json，真实模型 deepseek 渠道，主代理代跑实机）：①read 档 agent 自主 skill_discover+skill_get 并引用 coding-playbook（transcript toolCalls 按名实锤）；②workspace-write 档调 readOnlyHint MCP 工具原样回流 `lookup: p53… (readonly)`；③探针插件 启用在场→停用+重启消失→启用+重启复现（停用即不注册/启用免重装，catalog 8→7→8）。临时项目/探针插件已清场复原（catalog 回 7 件 pack 域）。
+
+**门禁**：定向红绿（KNW-1 5/5 + KNW-2 5/5 + DIST-1 4/4 + CAP-1 8/8）+ 邻域回归（labels/registry/116/113/projection 57/57）+ 前端 18/18 + tsc 0 + IPC 守卫 5/5 + closeout 十一门 PASS（hygiene EOL 归一 3 文件/code-size PluginStorePanel 792→825 重锚随提交留痕/lint 抓真 2 error 清偿：plugin-loader os 残留+本包测试未用变量）+ D7 领域中立棘轮抓真（skill.js 描述「单细胞」领域词残留改中性措辞）。test:changed 103/105（2 skip 设计内）。test:suggest 立项时零建议；doc:suggest 收口零建议（http_error 降级如实）；output:judge 降级放行（http_error，如实）。
+
+**设计偏差**（plan §2 预裁决缺省执行零推翻；补充两条）：①skill_discover 参数名 categoryFilter（provider 投影契约黑名单 collectKeys 键名防泄漏，MCP 侧不受限）；②skill 域入 DOMAIN_TOOL_DEFS 十域但不入 TOOL_FAMILIES 九域决策分类学（θ=0.80 校准契约不动，D6 宁全勿缺保守保留）。
+
+**riders**：UI-481 插件启停开关 in_progress 待用户实机过目翻 verified；KNW-2 注入段的用户体感核验（技能索引在会话中的可见性）随日常使用观察。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。

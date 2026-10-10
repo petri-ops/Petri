@@ -5,7 +5,9 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-10-10（**G0 五层成熟度蓝图落档 reference + 候选池合并**（用户裁决「做好全方位的推进方案 接下来很长的一个阶段 就是按照此蓝图逐步推进 依赖链要做好 递进关系哦」）：蓝图 = docs/g0-agent-maturity-blueprint.md（25 种子 MDL×4/ORC×5/CAP×5/KNW×6/DIST×5 + 依赖 DAG + 三波递进 + 波次出口判据）；队列区 1v~1y = 第一波四件（KNW-1 队列头待发令，启动前置 = skill-registry.js 在制 WIP 收口），W2/W3 以汇总行挂蓝图 §3；C-EXT-1~4 归并注记入候选池（C-EXT-2 维持 deferred G1 邻界）；DOC-REGISTRY（306）+ README entry 180 登记。）
+最后更新：2026-10-10（**BLOCK-157 W1 波当日整波收口 completed（用户发令「开冲到W1波末」+ 波内零停顿条款）**：KNW-1 Skills 可见性投影（76→78）/KNW-2 渐进披露（索引有界注入）/CAP-1 MCP annotations 粒度审批（readOnlyHint→retrieval/none，默认 D4 不变）/DIST-1 插件启停粒度全交付；实机抓真修复插件目录拓扑脑裂（BLOCK-125 家族 resolveInstalledPluginsDir 收敛）；**波末三出口断言 ALL PASS**（真实模型 read 档自主 skill_discover/get 引用 skill/workspace-write 档 readOnly MCP 工具回流/插件停用不注册·启用免重装 8→7→8，acceptance/block-157/wave1-live.json）；closeout 十一门 PASS（D7 领域中立棘轮+lint/code-size 抓真清偿随包）；riders=UI-481 待过目；蓝图 §2 四种子翻 completed、§3.2 W1 出口达成；**队列头交棒 W2 首件 ORC-2**（依赖 CAP-1 已解锁）。）
+
+此前 最后更新：2026-10-10（**G0 五层成熟度蓝图落档 reference + 候选池合并**（用户裁决「做好全方位的推进方案 接下来很长的一个阶段 就是按照此蓝图逐步推进 依赖链要做好 递进关系哦」）：蓝图 = docs/g0-agent-maturity-blueprint.md（25 种子 MDL×4/ORC×5/CAP×5/KNW×6/DIST×5 + 依赖 DAG + 三波递进 + 波次出口判据）；队列区 1v~1y = 第一波四件（KNW-1 队列头待发令，启动前置 = skill-registry.js 在制 WIP 收口），W2/W3 以汇总行挂蓝图 §3；C-EXT-1~4 归并注记入候选池（C-EXT-2 维持 deferred G1 邻界）；DOC-REGISTRY（306）+ README entry 180 登记。）
 
 此前 最后更新：2026-10-08（**对账批（剩余工作地图 dwfrun-25f8657a 落账）**：C-20/C-22/C-23 销号 + 1j/1k/1m verified 注记补齐 + UI-456 由 UI-460 覆盖证据核销翻 verified + UI-458 菜单实机子项覆盖注记 + BIO-7 池首项多因子标注已交付。剩余工作三线：审视批高影响余量 6 条（A2×3/A5×1/B9×2）收敛为三批价值主线 + 平台域点状修补批，全部待用户发令；用户动作仅剩 UI-457 表单过目 + PL-D2 retention 裁决。）
 此前 最后更新：2026-10-03（**队列头 1i BLOCK-138 收口 completed（UI-460 用户过目翻 verified）——唯一 active 槽位空出，下一工作包待用户裁决选举**。plan=docs/block-138-artifact-plane-kernel-plan.md（status: completed）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -102,11 +104,11 @@
 | 1s | 审视吸收一波 / BLOCK-150 | **completed（2026-10-09 当日立项当日收口）**：13/13 清账（A 消费链 6/B 生信 5/C 盲性 2；⑫ 经评审 P1 补做）；P2 携带两条登记（/m 竞态归下波/agent-approval 14/14 口径修正）；closeout 十一门 PASS；UI-469 in_progress 待实机 | acceptance/block-150/evidence.json + plan §8 | **completed** |
 | 1t | 审视吸收二波 / BLOCK-151 | **completed（2026-10-09 当日立项当日收口）**：20 条清点 15 fixed/1 销号/4 skipped/0 escalated（A1 从紧核心未动+/m 竞态/A4 四件/B7 title 四件/A3 act 对齐+30 秒措辞钉住）；评审 P1=0；closeout 十一门 PASS；UI-470 in_progress 待实机 | acceptance/block-151/evidence.json + plan §8 | **completed** |
 | 1u | 重构候选批 / BLOCK-152 | **completed（2026-10-09 当日立项当日收口）**：P 平台映射单源收敛（锚 37/37+WoA 统一登记）/H hunk 级 stage 根修复（隔离 index+rename 修复 10 场亲验）/T 隧道 60s 自探活喂徽标；评审 P1=1 修复复核；H 边缘 P2 三条归下波；预算例外登记 2026-11-30；closeout 十一门 PASS；UI-471 待实机 | acceptance/block-152/evidence.json + plan §8 | **completed** |
-| 1v | 蓝图 W1 / KNW-1 | **Skills 可见性投影**：skill_discover/get 投影进 agent-tools 或摘要注入 system prompt——模型第一次「看到」产品 skills（评估确认的最大断链：4 技能纯显式执行，agent 感知不到） | 蓝图 §2④；验收=实机 agent 自主发现并引用 skill | planned（**队列头待发令**；启动前置=skill-registry.js 在制 WIP 收口） |
-| 1w | 蓝图 W1 / KNW-2 | 渐进披露闭环：描述常驻 + 正文触发加载（对齐 SKILL.md 渐进披露） | 蓝图 §2④；验收=触发加载契约+token 预算有界 | planned（硬依赖 1v） |
-| 1x | 蓝图 W1 / CAP-1 | MCP 工具粒度审批：读 annotations 分级投影（只读检索族 read/plan 可用/执行族 full），替代一刀切 execution+R2 | 蓝图 §2③；验收=只读第三方工具低档可用实机全链 | planned |
-| 1y | 蓝图 W1 / DIST-1 | 插件启停粒度：installed.json 增 enabled + 加载器尊重 + 货架 UI 开关 | 蓝图 §2⑤；验收=停用即不注册、启用免重装 | planned |
-| — | 蓝图 W2/W3（汇总行） | W2=ORC-2（依赖 1x）→ ORC-1 → KNW-3 → CAP-2 → KNW-4⇄DIST-2（共轨；C-EXT-4 的 skill.json 导入半边已由 BLOCK-156 D7 交付 4479aecf，剩余=SKILL.md 兼容+插件/MCP 配置导入）；W3=ORC-3 → ORC-4 → CAP-3（承接 C-EXT-1）→ MDL-1 → MDL-2 → DIST-3⇄CAP-5（共轨）→ DIST-5 → MDL-3 → MDL-4 → KNW-5 → KNW-6 → DIST-4 | 蓝图 §3 波次表+出口判据 | 候选（按波递进，逐包发令） |
+| 1v | 蓝图 W1 / KNW-1 | **Skills 可见性投影 completed（2026-10-10 BLOCK-157 P1，a3969190）**：skill_discover/get 进 agent-tools 静态面 76→78（retrieval/none/R0 全档）；实机 read 档 agent 自主发现并引用 coding-playbook（波末断言①） | 蓝图 §2④ | **completed** |
+| 1w | 蓝图 W1 / KNW-2 | 渐进披露闭环 completed（BLOCK-157 P2，23ad1154）：agent-runner 技能索引常驻注入（≤12 条/整块 ≤2200/空清单零注入/源码扫描接线钉）+skill_get 正文触发加载（8000 字符截断） | 蓝图 §2④ | **completed** |
+| 1x | 蓝图 W1 / CAP-1 | MCP 粒度审批 completed（BLOCK-157 P3，5cd195d7）：readOnlyHint→retrieval/none/R1（read/plan 档可用），无注释保守维持 execution/R2；实机 workspace-write 档 readOnly 工具回流（波末断言②）——**ORC-2 前置已解锁** | 蓝图 §2③ | **completed** |
+| 1y | 蓝图 W1 / DIST-1 | 插件启停粒度 completed（BLOCK-157 P4，4ef6d666+拓扑修复 cd7c58ac）：installed enabled 标志+加载器尊重+plugin:set-enabled IPC+货架开关；三态重启实机 在场→消失→复现（波末断言③）；**实机抓真=插件目录拓扑脑裂修复（BLOCK-125 家族）**；UI-481 in_progress 待过目 | 蓝图 §2⑤ | **completed** |
+| — | 蓝图 W2/W3（汇总行） | W2=ORC-2（依赖 1x **已解锁，队列头**）→ ORC-1 → KNW-3 → CAP-2 → KNW-4⇄DIST-2（共轨；C-EXT-4 的 skill.json 导入半边已由 BLOCK-156 D7 交付 4479aecf，剩余=SKILL.md 兼容+插件/MCP 配置导入）；W3=ORC-3 → ORC-4 → CAP-3（承接 C-EXT-1）→ MDL-1 → MDL-2 → DIST-3⇄CAP-5（共轨）→ DIST-5 → MDL-3 → MDL-4 → KNW-5 → KNW-6 → DIST-4 | 蓝图 §3 波次表+出口判据 | 候选（按波递进；波内零停顿条款在案） |
 | 2 | PL-2 / BLOCK-126 | **感知实时性 completed（含 2026-09-29 复验）**：终态 jobs 失效事件+运行期日志行缓冲；实机 allPass 6/6 两轮+端点兜底修复后复跑 6/6（source=run.log） | plan §5.1 + acceptance/block-126/ | completed |
 | 3 | BIO-2 | 交互上限与降级链：250 点 top-N 语义/静态 24 行分页/热图窗口/mojibake | G0-BIO plan §3 | planned |
 | 4 | BIO-3 | lineage 可视化 + 继续分析显式化（吸收 C-15 前半） | G0-BIO plan §3 | planned |

@@ -1,0 +1,101 @@
+{
+  "part1": {
+    "part": "part1",
+    "startedAt": "2026-10-10T05:22:50.020Z",
+    "finishedAt": "2026-10-10T05:23:00.467Z",
+    "assertions": [
+      {
+        "name": "dev_stack_api_ready",
+        "pass": true,
+        "detail": "status=200"
+      },
+      {
+        "name": "chat_preset_available",
+        "pass": true,
+        "detail": "presets=4"
+      },
+      {
+        "name": "temp_project_a",
+        "pass": true,
+        "detail": ""
+      },
+      {
+        "name": "A_task_completed",
+        "pass": true,
+        "detail": "status=completed"
+      },
+      {
+        "name": "A_agent_called_skill_discover",
+        "pass": true,
+        "detail": "transcript response.toolCalls 含 skill_discover"
+      },
+      {
+        "name": "A_agent_called_skill_get",
+        "pass": true,
+        "detail": "transcript response.toolCalls 含 skill_get"
+      },
+      {
+        "name": "A_agent_references_coding_playbook",
+        "pass": true,
+        "detail": "reply=当前系统共 4 个可用技能：\n\n| id | 名称 | 分类 | 用途 |\n|---|---|---|---|\n| `deg-analysis-standard` | 标准差异表达分析 | bioinformatics/ngs | 从原始计数矩阵到火山图的完整 DEG 流程（质控→标准化→差异分析→可视化） |\n| `"
+      },
+      {
+        "name": "B_fixture_added",
+        "pass": true,
+        "detail": "status=200"
+      },
+      {
+        "name": "B_fixture_connected_toolcount_2",
+        "pass": true,
+        "detail": "status=200 body={\"status\":\"ok\",\"id\":\"fixture\",\"toolCount\":2}"
+      },
+      {
+        "name": "B_task_completed",
+        "pass": true,
+        "detail": "status=completed"
+      },
+      {
+        "name": "B_readonly_tool_low_mode_success",
+        "pass": true,
+        "detail": "reply=工具调用成功，返回文本原样如下：\n\n```\nlookup: p5376370 (readonly)\n```\n\n补充说明（可核对）：`status: success`，`sideEffects.type: none`（只读，无副作用），`truncated: false`。"
+      },
+      {
+        "name": "B_model_called_readonly_by_name",
+        "pass": true,
+        "detail": "transcript toolCalls 含 mcp_fixture_fixture_lookup_readonly"
+      },
+      {
+        "name": "C1_enabled_plugin_in_catalog",
+        "pass": true,
+        "detail": "catalog={\"ok\":true,\"source\":\"installed-plugins\",\"count\":8,\"catalog\":[{\"id\":\"b157-probe-plugin\",\"title\":\"BLOCK-157 波末探针工具\",\"subtitle\":\"\",\"description\":\"启停粒度断言探针（无真实分析）。\",\"category\":\"analysis\",\"language\":\"pytho"
+      }
+    ],
+    "allPass": true
+  },
+  "part2": {
+    "part": "part2",
+    "startedAt": "2026-10-10T05:24:27.726Z",
+    "finishedAt": "2026-10-10T05:24:27.757Z",
+    "assertions": [
+      {
+        "name": "C2_disabled_plugin_absent_from_catalog",
+        "pass": true,
+        "detail": "catalog={\"ok\":true,\"source\":\"installed-plugins\",\"count\":7,\"catalog\":[{\"id\":\"deg-standardizer\",\"title\":\"DEG 标准化\",\"subtitle\":\"差异分析结果转换为标准 DEG Artifact\",\"description\":\"将 DESeq2、limma 或兼容差异结果表转换为稳定、可供下游插件消费的标准 DE"
+      }
+    ],
+    "allPass": true
+  },
+  "recheck": {
+    "part": "recheck",
+    "startedAt": "2026-10-10T05:25:56.591Z",
+    "finishedAt": "2026-10-10T05:25:56.622Z",
+    "assertions": [
+      {
+        "name": "C3_reenabled_plugin_back_in_catalog",
+        "pass": true,
+        "detail": "catalog={\"ok\":true,\"source\":\"installed-plugins\",\"count\":8,\"catalog\":[{\"id\":\"b157-probe-plugin\",\"title\":\"BLOCK-157 波末探针工具\",\"subtitle\":\"\",\"description\":\"启停粒度断言探针（无真实分析）。\",\"category\":\"analysis\",\"language\":\"pytho"
+      }
+    ],
+    "allPass": true
+  }
+}

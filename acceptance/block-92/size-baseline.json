@@ -68,8 +68,8 @@
       "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
       "wave": "B",
       "module": "W-01",
-      "lines": 792,
-      "sha256": "ca71f7d84235d349c38a215f7f94b0f171fced26926ef2ac243a5c844bff5dc3"
+      "lines": 825,
+      "sha256": "fc5d63e87e53f441f6a4f51a65c7c67cabab098eeb002555c0e58059c316ea17"
     },
     {
       "path": "frontend/src/pages/home.tsx",
@@ -170,5 +170,5 @@
       "sha256": "62261e61f058f627b8442987f4b567b2f08a44a6f3281909bdab27a8124aa664"
     }
   ],
-  "total": 22942
+  "total": 22975
 }

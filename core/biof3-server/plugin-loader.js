@@ -704,7 +704,6 @@ function loadBuiltInPlugins(builtInDir) {
 // 非启动期消费者惰性加载使用，避免各处重复实现三源发现。
 function resolveDefaultPluginSources() {
   const path = require('path');
-  const os = require('os');
   const developmentDirs = String(process.env.BIOF3_DEVELOPMENT_PLUGIN_DIRS || '')
     .split(path.delimiter)
     .map((item) => item.trim())
