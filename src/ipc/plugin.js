@@ -77,6 +77,18 @@ function setupPluginIpc(options = {}) {
     }
   });
 
+  // BLOCK-157 DIST-1 — 插件启停粒度（停用=enabled 标志，文件不动免重装；
+  // 核心加载器尊重 → run_tool/MCP 工具面停用即不注册；重启后生效与装卸同 UX）
+  ipcMain.handle(CHANNELS.plugin.setEnabled, async (event, pluginId, enabled) => {
+    const deny = assertSender(event); if (deny) return deny;
+    try {
+      const { setPluginEnabled } = require("../plugin/installed");
+      return setPluginEnabled(pluginId, enabled);
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+
   // ── M2-9：content-plugin 文档桥 ──────────────────────────────
   // docs.tsx 运行时通过这些 IPC 拉取已装 content-plugin 的文档树与正文
   ipcMain.handle(CHANNELS.contentPlugin.list, async (event) => {

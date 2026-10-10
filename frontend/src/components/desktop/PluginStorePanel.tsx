@@ -42,6 +42,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
     checkingUpdates,
     install: hookInstall,
     uninstall: hookUninstall,
+    setEnabled: hookSetEnabled,
     checkUpdates: hookCheckUpdates,
   } = usePluginStore();
   const [installing, setInstalling] = useState<string | null>(null);
@@ -49,6 +50,8 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
     Record<string, { ratio: number; received: number; total: number }>
   >({});
   const [uninstalling, setUninstalling] = useState<string | null>(null);
+  // BLOCK-157 DIST-1 — 启停粒度（停用即不注册、启用免重装；重启后生效）
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [runtimeJustInstalled, setRuntimeJustInstalled] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<CategoryId>('all');
@@ -161,6 +164,20 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
       setError(e instanceof Error ? e.message : '卸载失败');
     } finally {
       setUninstalling(null);
+    }
+  }
+
+  // BLOCK-157 DIST-1 — 启停粒度翻转（乐观缓存更新在 hook 内；重启后加载器生效）
+  async function handleSetEnabled(pluginId: string, enabled: boolean) {
+    setTogglingId(pluginId);
+    setError(null);
+    try {
+      const result = await hookSetEnabled(pluginId, enabled);
+      if (!result.ok) setError(result.error || (enabled ? '启用失败' : '停用失败'));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : (enabled ? '启用失败' : '停用失败'));
+    } finally {
+      setTogglingId(null);
     }
   }
 
@@ -696,6 +713,22 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                                 </div>
                               </div>
                             )}
+                            {(() => {
+                              const row = installedById.get(id);
+                              const isEnabled = row ? row.enabled !== false : true;
+                              return (
+                                <button
+                                  type="button"
+                                  className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                                  data-testid={`plugin-toggle-${id}`}
+                                  title={isEnabled ? '停用后重启生效：run_tool 与 MCP 工具面不再注册（可随时启用，免重装）' : '启用后重启生效（免重装）'}
+                                  onClick={() => void handleSetEnabled(id, !isEnabled)}
+                                  disabled={togglingId === id}
+                                >
+                                  {togglingId === id ? '切换中…' : isEnabled ? '停用' : '启用'}
+                                </button>
+                              );
+                            })()}
                             <button
                               type="button"
                               className="gewu-btn gewu-btn--danger-ghost gewu-btn--sm"

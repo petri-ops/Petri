@@ -172,9 +172,16 @@ declare global {
             currentFingerprint?: string | null;
             manifestDrift?: boolean;
             driftReason?: string | null;
+            /** BLOCK-157 DIST-1 — 启停粒度（缺省 true=启用） */
+            enabled?: boolean;
           }>
         >;
         listRemote: () => Promise<{ plugins: Record<string, RemotePlugin> }>;
+        /** BLOCK-157 DIST-1 — 启停粒度（停用即不注册、启用免重装；重启后生效） */
+        setEnabled: (
+          pluginId: string,
+          enabled: boolean
+        ) => Promise<{ ok: boolean; id?: string; enabled?: boolean; restartRequired?: boolean; error?: string }>;
         install: (
           pluginId: string,
           onProgress?: (data: {

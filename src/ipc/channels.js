@@ -131,6 +131,7 @@ const CHANNELS = {
     install: 'plugin:install',
     listInstalled: 'plugin:list-installed',
     listRemote: 'plugin:list-remote',
+    setEnabled: 'plugin:set-enabled',
     uninstall: 'plugin:uninstall',
   },
   runtime: {

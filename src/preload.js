@@ -235,6 +235,8 @@ const desktopBridgeSurface = {
       return ipcRenderer.invoke('plugin:install', pluginId);
     },
     uninstall: (pluginId) => ipcRenderer.invoke('plugin:uninstall', pluginId),
+    // BLOCK-157 DIST-1 — 启停粒度（停用即不注册、启用免重装；重启后生效）
+    setEnabled: (pluginId, enabled) => ipcRenderer.invoke('plugin:set-enabled', pluginId, enabled),
     checkUpdates: () => ipcRenderer.invoke('plugin:check-updates'),
   },
 

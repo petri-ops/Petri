@@ -49,6 +49,8 @@ export interface InstalledPlugin {
   currentFingerprint?: string | null;
   manifestDrift?: boolean;
   driftReason?: string | null;
+  /** BLOCK-157 DIST-1 — 启停粒度（缺省 true=启用；停用即不注册，重启后生效） */
+  enabled?: boolean;
 }
 
 export interface RemotePlugin {
@@ -165,6 +167,9 @@ export interface UsePluginStoreResult {
   /** Uninstall a plugin via the electron bridge. Cache refresh
    *  happens on success. */
   uninstall: (pluginId: string) => Promise<{ ok: boolean; error?: string }>;
+  /** BLOCK-157 DIST-1 — 启停粒度：翻转 enabled 标志（文件不动免重装；
+   *  本地乐观更新 installed 缓存，重启后加载器生效）。 */
+  setEnabled: (pluginId: string, enabled: boolean) => Promise<{ ok: boolean; error?: string }>;
 }
 
 export function usePluginStore(
@@ -259,6 +264,21 @@ export function usePluginStore(
     return result;
   }, []);
 
+  // BLOCK-157 DIST-1 — 启停粒度：乐观翻转本地缓存行（重启后端才改注册面，
+  // 无需拉远端重刷）；投影环境无 setEnabled 桥时诚实失败。
+  const setEnabled = useCallback(async (pluginId: string, enabled: boolean) => {
+    const bridge = getBridge('plugins');
+    if (!bridge?.setEnabled) return { ok: false, error: 'bridge unavailable' };
+    const result = await bridge.setEnabled(pluginId, enabled);
+    if (result.ok) {
+      setSnapshot((prev) => ({
+        ...prev,
+        installed: prev.installed.map((p) => (p.id === pluginId ? { ...p, enabled } : p)),
+      }));
+    }
+    return result;
+  }, []);
+
   return {
     installed: snapshot.installed,
     remote: snapshot.remote,
@@ -270,6 +290,7 @@ export function usePluginStore(
     checkUpdates,
     install,
     uninstall,
+    setEnabled,
   };
 }
 
