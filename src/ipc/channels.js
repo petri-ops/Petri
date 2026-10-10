@@ -148,6 +148,12 @@ const CHANNELS = {
     importDirectory: 'skills:import-directory',
     importPath: 'skills:import-path',
   },
+  // BLOCK-160 W2 P5（DIST-2）— MCP 配置文件导入（对话框/直路径；写面走 core
+  // mcp-settings helper 经 CAP-2 加密落盘，读面 HTTP /api/mcp/servers 不变）
+  mcpConfig: {
+    importDialog: 'mcp-config:import-dialog',
+    importPath: 'mcp-config:import-path',
+  },
   ssh: {
     registerHost: 'ssh:register-host',
   },

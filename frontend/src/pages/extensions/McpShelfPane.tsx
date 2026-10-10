@@ -205,15 +205,39 @@ export function McpShelfPane(): React.ReactElement {
         </div>
       )}
 
-      <button
-        type="button"
-        className={styles.mcpRefresh}
-        onClick={() => void refresh()}
-        title="刷新状态"
-      >
-        <Icon name="refresh" size={12} />
-        <span>刷新</span>
-      </button>
+      <div style={{ display: 'flex', gap: 8 }}>
+        {/* BLOCK-160 W2 P5（DIST-2）— MCP 配置文件导入（对话框一条龙，skills 导入先例） */}
+        <button
+          type="button"
+          className={styles.mcpRefresh}
+          title="从 JSON 文件导入 MCP server 配置（{servers:[…]} 或数组；坏条目跳过并提示）"
+          onClick={async () => {
+            const bridge = (window as unknown as { biof3Desktop?: { mcpConfigImportDialog?: () => Promise<{ ok: boolean; canceled?: boolean; imported?: number; skipped?: Array<{ id: string; error: string }>; error?: string }> } }).biof3Desktop;
+            if (!bridge?.mcpConfigImportDialog) return;
+            const result = await bridge.mcpConfigImportDialog();
+            if (result?.canceled) return;
+            if (result?.ok) {
+              const skippedNote = result.skipped?.length ? `，跳过 ${result.skipped.length} 条（${result.skipped.map((x) => `${x.id}:${x.error}`).join('；')}）` : '';
+              setFormError(`导入完成：${result.imported} 条${skippedNote}`);
+              void refresh();
+            } else if (result?.error) {
+              setFormError(`导入失败：${result.error}`);
+            }
+          }}
+        >
+          <Icon name="file" size={12} />
+          <span>导入配置</span>
+        </button>
+        <button
+          type="button"
+          className={styles.mcpRefresh}
+          onClick={() => void refresh()}
+          title="刷新状态"
+        >
+          <Icon name="refresh" size={12} />
+          <span>刷新</span>
+        </button>
+      </div>
     </div>
   );
 }

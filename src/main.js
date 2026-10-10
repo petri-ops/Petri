@@ -269,6 +269,29 @@ function setupSkillsIpc() {
     return installSkillFromDir(dir);
   });
 
+  // BLOCK-160 W2 P5（DIST-2）— MCP 配置文件导入（对话框/直路径；逐条 upsert 经
+  // CAP-2 加密落盘；坏条目 skipped 诚实列出，不阻断整批）
+  ipcMain.handle(CHANNELS.mcpConfig.importDialog, async (event) => {
+    if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };
+    const result = await dialog.showOpenDialog({
+      title: "选择 MCP 配置文件（JSON）",
+      properties: ["openFile"],
+      filters: [{ name: "JSON", extensions: ["json"] }],
+    });
+    if (result.canceled || !result.filePaths.length) {
+      return { ok: false, canceled: true };
+    }
+    const { importMcpConfigFile } = require(resolveCore("biof3-server", "helpers", "mcp-config-import.js"));
+    return importMcpConfigFile(result.filePaths[0]);
+  });
+
+  ipcMain.handle(CHANNELS.mcpConfig.importPath, async (event, filePath) => {
+    if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };
+    if (!filePath || typeof filePath !== "string") return { ok: false, error: "file_path_required" };
+    const { importMcpConfigFile } = require(resolveCore("biof3-server", "helpers", "mcp-config-import.js"));
+    return importMcpConfigFile(filePath);
+  });
+
   ipcMain.handle(CHANNELS.skills.execute, async (event, skillId, params) => {
     if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };
     try {

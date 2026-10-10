@@ -295,15 +295,66 @@ function getInstalledSkillsDir() {
  * 同 id 重复导入 = 覆盖更新（v1 语义：以最新导入为准）。
  * @param {string} sourceDir - 含 skill.json 的技能目录（用户经文件对话框选择）
  */
+/**
+ * BLOCK-160 W2 P5（KNW-4）— SKILL.md 受限解析（零 YAML 依赖，HK-04 解析器同思路）：
+ * front-matter 仅认 name/description/version/category 四键；body = 手册正文。
+ * id 从目录名归一（非法字符→'-'）；返回 { manifest, systemPrompt } 或 null。
+ */
+function parseSkillMd(sourceDir) {
+  try {
+    const file = path.join(sourceDir, 'SKILL.md');
+    if (!fs.existsSync(file)) return null;
+    const raw = fs.readFileSync(file, 'utf8');
+    let front = {};
+    let body = raw;
+    if (raw.startsWith('---')) {
+      const frontEnd = raw.indexOf('\n---', 3);
+      if (frontEnd > 0) {
+        for (const line of raw.slice(3, frontEnd).split('\n')) {
+          const m = line.match(/^([A-Za-z_][\w-]*):\s*(.*)$/);
+          if (m) front[m[1].toLowerCase()] = m[2].trim().replace(/^["']|["']$/g, '');
+        }
+        body = raw.slice(frontEnd + 4).trim();
+      }
+    }
+    const dirName = (path.basename(sourceDir).toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '')) || 'imported-skill';
+    const firstLine = body.split('\n').map((l) => l.trim()).find((l) => l && !l.startsWith('#')) || '';
+    return {
+      manifest: {
+        skillManifestVersion: 1,
+        id: dirName,
+        name: front.name || dirName,
+        version: front.version || '0.1.0',
+        description: String(front.description || firstLine || `SKILL.md 导入技能 ${dirName}`).slice(0, 200),
+        category: front.category || 'imported',
+        tags: ['imported'],
+        plugins: { required: [], optional: [] },
+        workflows: { default: 'default' },
+        prompts: { system: 'prompts/system.md', user_templates: [`按技能 ${dirName} 完成任务：{task}`] },
+        parameters: { required: [], optional: {} },
+      },
+      systemPrompt: body || `# ${front.name || dirName}
+`,
+    };
+  } catch {
+    return null;
+  }
+}
+
 function installSkillFromDir(sourceDir) {
   try {
     if (!sourceDir || typeof sourceDir !== 'string') {
       return { ok: false, error: 'source_dir_required' };
     }
-    const manifest = readJson(path.join(sourceDir, 'skill.json'));
-    if (!manifest) {
-      return { ok: false, error: 'skill_manifest_missing', message: '所选目录缺少 skill.json' };
+    // BLOCK-160 W2 P5（KNW-4）— SKILL.md 兼容：目录缺 skill.json 但含 SKILL.md 时
+    // 合成清单（front-matter 受限解析 + body→prompts/system.md；合成文件写 dest，
+    // 源目录不可变）。无两者 = 维持原 fail-closed。
+    let manifest = readJson(path.join(sourceDir, 'skill.json'));
+    const synthesized = manifest ? null : parseSkillMd(sourceDir);
+    if (!manifest && !synthesized) {
+      return { ok: false, error: 'skill_manifest_missing', message: '所选目录缺少 skill.json 或 SKILL.md' };
     }
+    if (synthesized) manifest = synthesized.manifest;
     const validation = validateSkillManifest(manifest);
     if (!validation.ok) {
       return { ok: false, error: 'skill_manifest_invalid', errors: validation.errors };
@@ -320,6 +371,17 @@ function installSkillFromDir(sourceDir) {
       fs.rmSync(destDir, { recursive: true, force: true });
     }
     fs.cpSync(sourceDir, destDir, { recursive: true });
+    // KNW-4 — SKILL.md 合成件写入 dest（skill.json + prompts/system.md），源目录不可变
+    if (synthesized) {
+      try {
+        fs.writeFileSync(path.join(destDir, 'skill.json'), JSON.stringify(synthesized.manifest, null, 2));
+        fs.mkdirSync(path.join(destDir, 'prompts'), { recursive: true });
+        fs.writeFileSync(path.join(destDir, 'prompts', 'system.md'), synthesized.systemPrompt);
+      } catch (e) {
+        fs.rmSync(destDir, { recursive: true, force: true });
+        return { ok: false, error: 'skill_md_synthesis_failed', message: e.message };
+      }
+    }
     // 装后回读护栏：parse 必须能装载（防「装了却 discover 不可见」的静默失败）；失败回滚零残留
     if (!loadSkillFromDir(destDir, 'installed')) {
       fs.rmSync(destDir, { recursive: true, force: true });

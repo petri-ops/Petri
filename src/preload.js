@@ -381,6 +381,9 @@ const desktopBridgeSurface = {
     // BLOCK-156 D7 — 第三方技能本地目录导入（对话框一条龙；canceled=用户取消非错误）
     importDirectory: () => ipcRenderer.invoke('skills:import-directory'),
     importPath: (dir) => ipcRenderer.invoke('skills:import-path', String(dir ?? '')),
+    // BLOCK-160 W2 P5（DIST-2）— MCP 配置文件导入（对话框/直路径）
+    mcpConfigImportDialog: () => ipcRenderer.invoke('mcp-config:import-dialog'),
+    mcpConfigImportPath: (filePath) => ipcRenderer.invoke('mcp-config:import-path', String(filePath ?? '')),
     onProgress: (callback) => {
       if (typeof callback !== 'function') return () => {};
       // BLOCK-4 B5: callback 抛错 try/catch 隔离，避免污染后续 progress 事件链
