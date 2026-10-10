@@ -15,6 +15,91 @@ const SCIENTIFIC_SOURCE_EXTENSIONS = new Set([
 ]);
 const DERIVED_DATA_PREFIXES = ['results/', 'derived/', 'outputs/', 'work/', '.biof3/'];
 
+// BLOCK-160 W2 P1（ORC-2）— 动态审批两维（预裁决缺省，蓝图 §3.4）。
+// 命令维度 = 系统级破坏命令首 token（**不含 rm/del 等常规命令**——日常操作不拦，
+// 用户需更严由 ORC-1 规则自配；静态黑名单已兜底最坏面）。
+const DANGEROUS_FIRST_TOKENS = new Set([
+  'format', 'mkfs', 'dd', 'diskpart', 'fsutil', 'cipher',
+  'vssadmin', 'bcdedit', 'wipefs', 'shutdown',
+]);
+// 路径维度 = 敏感系统/凭证目录子串模式（大小写不敏感；刻意排除 /usr/bin、
+// Program Files 等高频合法前缀，控制误报面）。
+const SENSITIVE_PATH_PATTERNS = [
+  '\\windows\\', '/windows/', 'system32', '/etc/', '/boot/', '/proc/',
+  '/sys/kernel', '.ssh', '.gnupg', '.aws', '$recycle.bin',
+];
+
+function firstToken(command) {
+  const raw = String(command || '').trim().split(/\s+/)[0]?.toLowerCase() || '';
+  // 归一化：剥可执行后缀与派生名（format.com→format / mkfs.ext4→mkfs）
+  const base = raw.replace(/\.(exe|com|cmd|bat)$/, '');
+  return base.includes('.') ? base.split('.')[0] : base;
+}
+
+function normalizePathLike(value) {
+  return String(value || '').replaceAll('\\', '/').toLowerCase();
+}
+
+function matchesSensitivePath(value) {
+  const normalized = normalizePathLike(value);
+  return SENSITIVE_PATH_PATTERNS.some((pattern) => normalized.includes(pattern));
+}
+
+/** PATH_ARG_FIELDS：显式路径字段的内建工具映射（v1；MCP 参数无标准字段，留 v2）。 */
+const PATH_ARG_FIELDS = {
+  workspace_write: ['path'],
+  workspace_replace: ['path'],
+  workspace_exec: ['cwd'],
+  workspace_exec_background: ['cwd'],
+};
+
+/**
+ * ORC-2 动态维度评估（纯函数）：仅对 mutating 调用生效；命中返回
+ * { flagged:true, dimension, guardKey, detail }，否则 { flagged:false }。
+ * guardKey 形如 `cmd:format` / `path:c:/windows/system32/x`，供
+ * ctx.dynamicGuardAcks（Set 或 {key:true} 对象）按键确认放行。
+ */
+function evaluateDynamicGuards(name, args = {}) {
+  if (name === 'workspace_exec' || name === 'workspace_exec_background') {
+    const command = String(args.command || '');
+    const token = firstToken(command);
+    if (token && DANGEROUS_FIRST_TOKENS.has(token)) {
+      return {
+        flagged: true, dimension: 'command', guardKey: `cmd:${token}`,
+        detail: `命令「${token}」命中系统级破坏命令维度`,
+      };
+    }
+    if (matchesSensitivePath(command)) {
+      return {
+        flagged: true, dimension: 'path', guardKey: `path:${normalizePathLike(command).slice(0, 120)}`,
+        detail: '命令文本包含敏感系统/凭证路径',
+      };
+    }
+  }
+  const fields = PATH_ARG_FIELDS[name];
+  if (fields) {
+    for (const field of fields) {
+      const value = args[field];
+      if (typeof value === 'string' && value && matchesSensitivePath(value)) {
+        return {
+          flagged: true, dimension: 'path',
+          guardKey: `path:${normalizePathLike(value).slice(0, 120)}`,
+          detail: `参数 ${field} 指向敏感系统/凭证路径`,
+        };
+      }
+    }
+  }
+  return { flagged: false };
+}
+
+/** ORC-1/确认 UI 共用：ctx.dynamicGuardAcks（Set 或 {key:true}）是否含该键。 */
+function isGuardAcked(ctx, guardKey) {
+  const acks = ctx && ctx.dynamicGuardAcks;
+  if (!acks) return false;
+  if (typeof acks.has === 'function') return acks.has(guardKey);
+  return acks[guardKey] === true;
+}
+
 function isProtectedScientificSource(relativePath) {
   const normalized = String(relativePath || '').replaceAll('\\', '/').replace(/^\.\/+/, '');
   if (!normalized || DERIVED_DATA_PREFIXES.some((prefix) => normalized.startsWith(prefix))) return false;
@@ -182,6 +267,22 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
     return deny('policy_denied', 'policy_denied', '该工具风险等级不允许由 Agent 执行。');
   }
 
+  // BLOCK-160 W2 P1（ORC-2）— 动态维度（判定序第三层，取最严）：mutating 调用
+  // 命中系统破坏命令/敏感路径 → deny+guardKey；ctx.dynamicGuardAcks 含键则放行
+  //（统一确认通道：ORC-1 require-ack 规则与未来确认 UI 共用）。
+  if (operation.mutating) {
+    const guard = evaluateDynamicGuards(name, args);
+    if (guard.flagged && !isGuardAcked(ctx, guard.guardKey)) {
+      return deny(
+        'dynamic_guard',
+        'dynamic_guard_triggered',
+        `动态防护拦截：${guard.detail}（guardKey=${guard.guardKey}）。` +
+        '该调用命中动态审批维度；如属误判请调整调用方式，放行需经用户确认通道。',
+        { guardKey: guard.guardKey, dimension: guard.dimension }
+      );
+    }
+  }
+
   // The interceptor calls the pure policy once before I/O so read-only denials
   // remain deterministic, then again with workspace preflight facts.
   if (!preflight) {
@@ -239,6 +340,7 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
 module.exports = {
   decideAgentToolCall,
   effectiveOperation,
+  evaluateDynamicGuards,
   isProtectedScientificSource,
   checkAllowedDownstream,
 };
