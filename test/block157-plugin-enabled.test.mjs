@@ -84,3 +84,24 @@ test('BLOCK-157 DIST-1 加载器尊重：停用件不注册（run_tool/MCP 工�
   pluginLoader.loadPluginsFromDisk(pluginsDir);
   assert.equal(pluginLoader.getPlugin('p-off'), undefined, '再停用再扫仍不注册');
 });
+
+test('BLOCK-157 DIST-1 拓扑收敛：installed 目录缺省解析优先 BIOF3_LOCAL_DATA_DIR（BLOCK-125 脑裂家族修复）', () => {
+  // 本文件头部已设 BIOF3_LOCAL_DATA_DIR=tmpDir；pluginsDir 即 $LOCAL_DATA_DIR/plugins。
+  // 主进程装插件写 $BIOF3_LOCAL_DATA_DIR/plugins（src/plugin/paths.js），core 后端
+  // 此前只认 BIOF3_PLUGINS_DIR || ~/Documents/BioF3-Local/plugins → dev 拓扑分裂。
+  const prev = process.env.BIOF3_PLUGINS_DIR;
+  delete process.env.BIOF3_PLUGINS_DIR;
+  try {
+    const loader2 = require(path.join(ROOT, 'core/biof3-server/plugin-loader.js'));
+    assert.equal(
+      loader2.resolveInstalledPluginsDir(),
+      pluginsDir,
+      'BIOF3_PLUGINS_DIR 缺省时应回落 $BIOF3_LOCAL_DATA_DIR/plugins'
+    );
+    // 同语义落地：无参 loadPluginsFromDisk() 应从同一目录装载（p-on 在册）
+    loader2.loadPluginsFromDisk();
+    assert.ok(loader2.getPlugin('p-on'), '无参装载应从 LOCAL_DATA_DIR/plugins 读到启用件');
+  } finally {
+    if (prev !== undefined) process.env.BIOF3_PLUGINS_DIR = prev;
+  }
+});

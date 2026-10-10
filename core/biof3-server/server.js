@@ -93,7 +93,9 @@ try {
       path.resolve(__dirname, '..', '..', 'resources', 'built-in-plugins') },
     { type: 'installed', root:
       process.env.BIOF3_PLUGINS_DIR ||
-      path.join(os.homedir(), 'Documents', 'BioF3-Local', 'plugins') },
+      (process.env.BIOF3_LOCAL_DATA_DIR
+        ? path.join(process.env.BIOF3_LOCAL_DATA_DIR, 'plugins')
+        : path.join(os.homedir(), 'Documents', 'BioF3-Local', 'plugins')) },
     ...developmentDirs.map((root) => ({ type: 'development', root })),
     ...packSourcesFromPacks,
   ]);

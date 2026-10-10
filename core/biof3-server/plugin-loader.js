@@ -13,7 +13,19 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const os = require('os');
 const logger = require('../shared-backend/logger');
+
+// BLOCK-157 DIST-1 — installed 插件目录单源解析（BLOCK-125 拓扑脑裂家族修复）：
+// 主进程装插件写 $BIOF3_LOCAL_DATA_DIR/plugins（src/plugin/paths.js），core 后端
+// 此前只认 BIOF3_PLUGINS_DIR || ~/Documents/BioF3-Local/plugins → dev 拓扑分裂、
+// 装了读不到。收敛序 = BIOF3_PLUGINS_DIR > $BIOF3_LOCAL_DATA_DIR/plugins > 旧默认；
+// 未设 env 时行为不变（生产行为零变化）。
+function resolveInstalledPluginsDir() {
+  if (process.env.BIOF3_PLUGINS_DIR) return process.env.BIOF3_PLUGINS_DIR;
+  if (process.env.BIOF3_LOCAL_DATA_DIR) return path.join(process.env.BIOF3_LOCAL_DATA_DIR, 'plugins');
+  return path.join(os.homedir(), 'Documents', 'BioF3-Local', 'plugins');
+}
 const { validateResultStudioDescriptor } = require('../shared-backend/result-studio-plugin-sdk');
 // BLOCK-83 D3 过渡装配：凡装载带 Result Studio descriptor 的插件，即注册科学任务确认钩子——
 // 核心其余层只认钩子注册表（零 RS 插件 = 零注册 = 零确认直通）。P3/P4 生信包建仓后本装配随 scientific-task-* 迁出核心。
@@ -540,12 +552,10 @@ function reloadAllPlugins() {
  * 读取 installed.json → 逐个读 plugin.json → 注册到 _biof3Plugins。
  */
 function loadPluginsFromDisk(pluginsDir) {
-  const os = require('os');
   const dir =
     pluginsDir ||
     _lastPluginsDir ||
-    process.env.BIOF3_PLUGINS_DIR ||
-    path.join(os.homedir(), 'Documents', 'BioF3-Local', 'plugins');
+    resolveInstalledPluginsDir();
   _lastPluginsDir = dir;
   const installedFile = path.join(dir, 'installed.json');
   let installed = [];
@@ -703,9 +713,7 @@ function resolveDefaultPluginSources() {
     builtInDir:
       process.env.BIOF3_BUILT_IN_PLUGINS_DIR ||
       path.resolve(__dirname, '..', '..', 'resources', 'built-in-plugins'),
-    installedDir:
-      process.env.BIOF3_PLUGINS_DIR ||
-      path.join(os.homedir(), 'Documents', 'BioF3-Local', 'plugins'),
+    installedDir: resolveInstalledPluginsDir(),
     developmentDirs,
   };
 }
@@ -846,6 +854,7 @@ module.exports = {
   checkPluginPackages,
   reloadAllPlugins,
   loadPluginsFromDisk,
+  resolveInstalledPluginsDir,
   loadBuiltInPlugins,
   loadPluginsFromSources,
   loadFromSourcesArray,
