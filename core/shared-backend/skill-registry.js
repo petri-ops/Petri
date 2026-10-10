@@ -2,7 +2,7 @@
  * shared-backend/skill-registry.js — Skills 注册与发现机制
  *
  * 实现四层架构中的 Layer 4: Skills 层的注册与发现能力。
- * 支持三来源发现：built-in(10) / installed(20) / marketplace(30)
+ * 支持两来源发现：built-in(10) / installed(20)
  *
  * 设计依据：
  * - docs/skills-architecture.md — 四层架构设计
@@ -15,11 +15,11 @@ const path = require('path');
 
 // ── 常量定义 ────────────────────────────────────────────────────────────────
 
-/** Skill 来源优先级（数值越小优先级越高） */
+/** Skill 来源优先级（数值越小优先级越高）。
+ * BLOCK-156 D7 — marketplace 残迹清除（无加载代码的死值）；远程技能市场转候选池 C-EXT-2。 */
 const SOURCE_PRIORITY = {
   'built-in': 10,
   'installed': 20,
-  'marketplace': 30,
 };
 
 /** Skill Manifest 版本 */
@@ -43,11 +43,6 @@ const _registry = new Map();
 
 /** @type {Map<string, string>} skillId → source */
 const _sourceMap = new Map();
-
-/** 缓存的 marketplace manifest */
-let _marketplaceCache = null;
-let _marketplaceCacheTime = 0;
-const MARKETPLACE_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 小时
 
 // ── 内置 Skill 清单（来自 resources/skills/manifest.json） ────────────────────
 
@@ -587,8 +582,6 @@ class SkillRegistry {
   clear() {
     _registry.clear();
     _sourceMap.clear();
-    _marketplaceCache = null;
-    _marketplaceCacheTime = 0;
     this._initialized = false;
   }
 }
@@ -613,5 +606,4 @@ module.exports = {
   // 常量导出
   SOURCE_PRIORITY,
   SKILL_MANIFEST_VERSION,
-  MARKETPLACE_CACHE_TTL,
 };

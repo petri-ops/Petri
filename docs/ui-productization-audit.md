@@ -4756,3 +4756,10 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：HK-01 红绿——纯函数九态+hook 四态 13/13（缩窗收/手动重开不打架/变宽还原/拖窄收·重开回弹 240/手动收起不弹回）；实现中抓真两笔=selfAction 单槽位同轮双变互相覆盖（改双槽位表）+测试 fixture 纯对象 setter 不触发重渲染致转换检测失真（改真 useState harness）；邻域 67/67（useWorkspaceLayout/useResizableColumns/TitleBar 裸 Provider 零回归）；types 0+lint 0 error+theme 契约 4/4+code-size 指纹重锚（1231<1232 基线）。
 - **已验**（主代理实机 CDP，acceptance/ui-479/inline-live.json ALL PASS 五断言）：①真实窗口 977px 下右栏已自动收起（用户实测路径的产品事实，测试前在场证据）；②合成视口 1000（中栏 392<560）→ 右收左留；③回 1400 → 自动还原；④真实鼠标拖拽右把手（宽度变至 640 挤占中栏 492<560）→ 收起——顺带验证「拖宽挤占」对称路径（拖窄 <140 路径由单测钉住+重开回弹 240 契约）；⑤基线/清理复原（用户列宽/开合态/innerWidth 全还原）。自然度主观过目欢迎用户试玩反馈，阈值（140/560/640）已常量化导出可调。
 - **边界**：路由模式仍不触碰侧栏（UI-341 加映二语义维持，两处旧裁决注释已更新为 UI-479 反转语境）；摘要卡/侧聊的宽窄形态切换不在本条目（各有既有机制）。
+
+## UI-480: 扩展中心——插件+Skills 归并四货架单入口（领域插件/领域技能/通用技能/MCP 服务）(2026-10-10 verified，实机 CDP 八断言全过)
+
+- **来源**：用户方向裁决「目前的 插件和skills都属于生信垂直领域 应该合并归到领域中 新增 skills和mcp服务 对应通用agent」（BLOCK-156 D1/D2 裁决全推荐 ⓐ）。
+- **交付**：新页 `/extensions`（四货签 tab，?tab= 参数守卫 fail-closed 回落领域插件）——领域插件货签嵌入 PluginStorePanel（新 `embedded` 模式收起自带页头，独立页/浮层宿主行为不变）；领域/通用技能货签复用 SkillCard/SkillDetail + D2 分类学单源 `lib/extensionShelves.ts`（category 前缀规则 `bioinformatics/*`=领域、其余=通用，零 manifest 迁移；coding-playbook 天然落通用）；MCP 服务货签 P1 占位（P2 填充）。旧 `/plugins` `/skills` 深链 Navigate 重定向对应货签；入口收敛=LeftPanel 插件+Skills 两钮并「扩展」单钮（AppRail handleShowExtensions）+项目工作区运行时横幅指向领域插件货签；home 后端未就绪逃生通道保持直接嵌商店面板（同货架内容，无死链）。D7 残迹清理=skill-registry marketplace 优先级值/缓存字段、mcp skill_discover enum、前端 SkillSource 类型/SOURCE_OPTIONS/SOURCE_LABELS/死 CSS 类。
+- **证据**：extensionShelves 单测 5/5（前缀边界 bioinformatics-x 不误伤）+扩展中心页测试 5/5（四货签在场/D2 接线双向隔离/MCP 占位/非法 tab 回落/搜索过滤）+LeftPanel 断言更新（扩展在、插件/Skills 旧钮不在）+邻域 62/62（PluginStorePanel/usePluginStore/useSkillStore/CenterPanel/home）+theme 契约+tsc 0；**实机 CDP 八断言 ALL PASS**（acceptance/block-156/block156-extensions-hub-live.json：四货签在场+默认领域插件/嵌入商店无双重页头（region 化+单返回钮）/D2 双向隔离（领域只见 DEG·通用只见 coding）/MCP 占位/旧深链 /plugins /skills 双重定向落对应货签），截图 p1-hub-domain-plugins.png。
+- **边界**：货架合并是入口层合并——plugin-loader/skill-registry 两运行时不动（红线）；领域包 pack 机制原样；MCP 配置 UI 归 P2；第三方技能本地导入归 P2 后续。

@@ -18,13 +18,11 @@ interface SkillCardProps {
 const SOURCE_LABELS: Record<string, string> = {
   'built-in': '内置',
   'installed': '已安装',
-  'marketplace': '商店',
 };
 
 const SOURCE_COLORS: Record<string, string> = {
   'built-in': 'sourceBuiltin',
   'installed': 'sourceInstalled',
-  'marketplace': 'sourceMarketplace',
 };
 
 export function SkillCard({

@@ -1,0 +1,48 @@
+{
+  "name": "block156-extensions-hub",
+  "startedAt": "2026-10-10T01:29:06.499Z",
+  "finishedAt": "2026-10-10T01:29:17.401Z",
+  "assertions": [
+    {
+      "name": "extensions_hub_four_shelves_present",
+      "pass": true,
+      "detail": "[\"领域插件\",\"领域技能\",\"通用技能\",\"MCP 服务\"]"
+    },
+    {
+      "name": "default_shelf_domain_plugins",
+      "pass": true,
+      "detail": "[{\"label\":\"领域插件\",\"selected\":\"true\"},{\"label\":\"领域技能\",\"selected\":\"false\"},{\"label\":\"通用技能\",\"selected\":\"false\"},{\"label\":\"MCP 服务\",\"selected\":\"false\"}]"
+    },
+    {
+      "name": "plugin_store_embedded_no_double_header",
+      "pass": true,
+      "detail": "pageHeader=true panelRole=region storeTitle=false backBtns=1"
+    },
+    {
+      "name": "domain_skills_shelf_bioinformatics_only",
+      "pass": true,
+      "detail": "clicked=true pane=true deg=true coding=false"
+    },
+    {
+      "name": "general_skills_shelf_coding_playbook_only",
+      "pass": true,
+      "detail": "pane=true coding=true deg=false"
+    },
+    {
+      "name": "mcp_shelf_placeholder_present",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "legacy_plugins_deep_link_redirects",
+      "pass": true,
+      "detail": "{\"url\":\"/extensions?tab=domain-plugins\",\"hub\":true,\"domainPluginsSelected\":\"true\"}"
+    },
+    {
+      "name": "legacy_skills_deep_link_redirects",
+      "pass": true,
+      "detail": "{\"url\":\"/extensions?tab=domain-skills\",\"hub\":true,\"domainSkillsSelected\":\"true\"}"
+    }
+  ],
+  "allPass": true
+}

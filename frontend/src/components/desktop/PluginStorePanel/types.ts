@@ -39,6 +39,9 @@ export interface Props {
   onClose: () => void;
   /** UI-347 — 返回按钮文案（与各宿主页面返回语义一致；缺省「返回」）。 */
   backLabel?: string;
+  /** BLOCK-156 — 嵌入扩展中心「领域插件」货签时收起自带页头（返回钮/图标/标题），
+   * 只留搜索行；宿主页头承载返回。独立页/浮层宿主不传，行为不变。 */
+  embedded?: boolean;
 }
 
 export type CategoryId = 'all' | 'tool';

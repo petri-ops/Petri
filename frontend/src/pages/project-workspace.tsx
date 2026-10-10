@@ -458,7 +458,8 @@ export function ProjectWorkspace(): React.ReactElement {
   // UI-365 — 设置独立页化（/settings）：设备级能力不绑项目，不再切工作区模式。
   // UI-364 — 插件商店独立页化（/plugins）：运行时缺失横幅与左栏入口都
   // 跳独立页，不再切工作区模式（设备级能力不绑项目）。
-  const handleShowPlugins = useCallback(() => { void navigate('/plugins'); }, [navigate]);
+  // BLOCK-156 — 运行时缺失横幅「去插件商店」→ 扩展中心领域插件货签（语义不变，路由收敛）
+  const handleShowPlugins = useCallback(() => { void navigate('/extensions?tab=domain-plugins'); }, [navigate]);
   // BLOCK-72 / UI-320 — 全局工作台页入口（知识空间/后端迁出右栏）
   // UI-366 — handleNavigateToBackend 随 /backend 页退役移除（诊断并入设置）
   // UI-335/336 — 「新建任务」入口：/ 欢迎页（BLOCK-80）；携带当前项目 id 供

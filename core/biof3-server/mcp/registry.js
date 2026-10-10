@@ -76,7 +76,7 @@ function getSkillToolDefinitions() {
           },
           source: {
             type: 'string',
-            enum: ['built-in', 'installed', 'marketplace'],
+            enum: ['built-in', 'installed'], // BLOCK-156 D7 — marketplace 残迹移除（无加载代码）
             description: 'Filter by skill source',
           },
           search: {

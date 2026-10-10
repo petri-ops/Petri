@@ -238,7 +238,7 @@ declare global {
             version: string;
             description: string;
             category: string;
-            source: 'built-in' | 'installed' | 'marketplace';
+            source: 'built-in' | 'installed';
             tags: string[];
             capabilities?: string[];
             parameters: {

@@ -29,8 +29,9 @@ export interface OutputArtifact {
   requires_plugin?: string;
 }
 
-/** Skill source priority (mirrors backend SOURCE_PRIORITY). */
-export type SkillSource = 'built-in' | 'installed' | 'marketplace';
+/** Skill source priority (mirrors backend SOURCE_PRIORITY).
+ * BLOCK-156 D7 — marketplace 残迹移除（后端无加载代码；远程市场转候选池 C-EXT-2）。 */
+export type SkillSource = 'built-in' | 'installed';
 
 /** A single Skill entry. */
 export interface Skill {

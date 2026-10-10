@@ -70,9 +70,9 @@ export interface LeftPanelContext {
   // Workspace routing
   workspaceMode: WorkspaceMode;
   handleShowScheduled: () => void;
-  handleShowPlugins: () => void;
+  /** BLOCK-156 — 插件/Skills 两入口收敛为扩展中心单入口（四货架） */
+  handleShowExtensions: () => void;
   handleShowSettings: () => void;
-  handleNavigateToSkills: () => void;
   /** BLOCK-72 / UI-320 — 全局工作台页入口（知识空间/后端为设备级全局能力，非项目关联） */
   handleNavigateToKnowledge: () => void;
   // UI-366 — handleNavigateToBackend 随 /backend 页退役移除
@@ -323,8 +323,8 @@ function LeftSidebarFooter({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
 
 function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   const items: Array<{
-    // UI-364 — 'plugins' 从 WorkspaceMode 联合移入独立页 key 联合（/plugins 独立页）
-    key: WorkspaceMode | 'skills' | 'knowledge' | 'backend' | 'newtask' | 'plugins';
+    // BLOCK-156 — 'plugins'/'skills' 收敛为 'extensions'（扩展中心四货架）
+    key: WorkspaceMode | 'skills' | 'knowledge' | 'backend' | 'newtask' | 'extensions';
     mode: WorkspaceMode | null;
     label: string;
     icon: Parameters<typeof Icon>[0]['name'];
@@ -341,24 +341,14 @@ function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
       title: '新建任务：在工作台选择项目路径（本地目录 / 手动路径 / SSH 远程）',
     },
     {
-      // UI-347 — 左栏「搜索」入口移除（用户裁决：无实际意义）；搜索面（
-      // WorkspaceSearchPanel + search 模式）一并退役，不预留空壳。
-      // UI-364 — 插件商店独立页化（/plugins）：设备级能力不绑项目，
-      // 不再挂工作区 mode（原 mode: 'plugins' 用于工作态高亮，已无意义）。
-      key: 'plugins',
+      // BLOCK-156 — 插件+Skills 两入口收敛为「扩展」单入口：扩展中心四货架
+      // （领域插件/领域技能/通用技能/MCP 服务），设备级能力不绑项目。
+      key: 'extensions',
       mode: null,
-      label: '插件',
+      label: '扩展',
       icon: 'puzzle',
-      onClick: ctx.handleShowPlugins,
-      title: '插件',
-    },
-    {
-      key: 'skills',
-      mode: null,
-      label: 'Skills',
-      icon: 'sparkles',
-      onClick: ctx.handleNavigateToSkills,
-      title: 'Skills',
+      onClick: ctx.handleShowExtensions,
+      title: '扩展中心（领域插件 / 领域技能 / 通用技能 / MCP 服务）',
     },
     {
       key: 'knowledge',

@@ -33,7 +33,7 @@ import {
 } from './PluginStorePanel/types';
 import { useDomainPacks } from './PluginStorePanel/useDomainPacks';
 
-export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): React.ReactElement {
+export function PluginStorePanel({ onClose, backLabel = '返回', embedded = false }: Props): React.ReactElement {
   const {
     installed,
     remote,
@@ -262,27 +262,31 @@ export function PluginStorePanel({ onClose, backLabel = '返回' }: Props): Reac
   return (
     <div
       className="gewu-desktop-panel gewu-plugin-store-panel"
-      role="dialog"
+      role={embedded ? 'region' : 'dialog'}
       aria-label="插件商店"
     >
-      {/* Header */}
+      {/* Header — BLOCK-156 embedded 模式收起返回钮/图标/标题（宿主页头承载返回），搜索行保留 */}
       <div className="gewu-plugin-store__header">
-        {/* UI-347 — 返回风格与其它页面对齐（定时分析面同款左上角文字按钮，
-            替代原右上角 × 关闭） */}
-        <button
-          type="button"
-          className={backStyles.scheduledWorkspaceBack}
-          onClick={onClose}
-          title={backLabel}
-          aria-label={backLabel}
-        >
-          <Icon name="arrow-left" size={14} />
-          <span>{backLabel}</span>
-        </button>
-        <span className="gewu-plugin-store__icon">
-          <Icon name="puzzle" size={18} />
-        </span>
-        <h2 className="gewu-plugin-store__title">插件商店</h2>
+        {!embedded && (
+          <>
+            {/* UI-347 — 返回风格与其它页面对齐（定时分析面同款左上角文字按钮，
+                替代原右上角 × 关闭） */}
+            <button
+              type="button"
+              className={backStyles.scheduledWorkspaceBack}
+              onClick={onClose}
+              title={backLabel}
+              aria-label={backLabel}
+            >
+              <Icon name="arrow-left" size={14} />
+              <span>{backLabel}</span>
+            </button>
+            <span className="gewu-plugin-store__icon">
+              <Icon name="puzzle" size={18} />
+            </span>
+            <h2 className="gewu-plugin-store__title">插件商店</h2>
+          </>
+        )}
         <div className="gewu-plugin-store__search">
           <input
             type="text"

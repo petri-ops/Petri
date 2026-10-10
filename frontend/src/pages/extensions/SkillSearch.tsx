@@ -26,7 +26,6 @@ const SOURCE_OPTIONS: Array<{ value: SkillSource | 'all'; label: string }> = [
   { value: 'all', label: '全部来源' },
   { value: 'built-in', label: '内置' },
   { value: 'installed', label: '已安装' },
-  { value: 'marketplace', label: '商店' },
 ];
 
 export function SkillSearch({

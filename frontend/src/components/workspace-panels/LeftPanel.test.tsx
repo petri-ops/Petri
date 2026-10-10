@@ -62,9 +62,8 @@ function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext & { project: P
     sshRegisterHost: vi.fn(async () => ({ ok: true, alias: 'gewu-1-2-3-4' })),
     sshCreateAt: vi.fn(async () => ({ ok: true })),
     handleShowScheduled: vi.fn(),
-    handleShowPlugins: vi.fn(),
+    handleShowExtensions: vi.fn(),
     handleShowSettings: vi.fn(),
-    handleNavigateToSkills: vi.fn(),
     handleNavigateToKnowledge: vi.fn(),
     // UI-366 — handleNavigateToBackend 随 /backend 页退役移除
     handleNavigateToHome: vi.fn(),
@@ -87,8 +86,10 @@ describe('BLOCK-14 LeftPanel QuickActions a11y', () => {
     // UI-347 退役的是工作台「搜索」快捷入口（精确名）；UI-445 的新会话搜索
     // 按钮在项目树头部（title=搜索会话标题），两者名字不同不冲突。
     expect(screen.queryByRole('button', { name: '搜索' })).toBeNull();
-    // 插件入口仍在（UI-346 修复其假死后保留）
-    expect(screen.getByRole('button', { name: /插件/ })).toBeTruthy();
+    // BLOCK-156 — 插件+Skills 收敛为「扩展」单入口（扩展中心四货架）
+    expect(screen.getByRole('button', { name: '扩展' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: '插件' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Skills' })).toBeNull();
   });
 
   it('calls onOpen when the + button is clicked (UI-304 简化版 - 直接触发原生面板)', () => {
@@ -336,9 +337,9 @@ describe('UI-335 新建任务在工作台分组内', () => {
     const btn = screen.getByRole('button', { name: '新建任务' });
     fireEvent.click(btn);
     expect(ctx.handleNavigateToHome).toHaveBeenCalledTimes(1);
-    // 归组断言：工作台标签之后、插件之前（UI-347 起搜索项已退役）
+    // 归组断言：工作台标签之后、扩展之前（UI-347 起搜索项已退役；BLOCK-156 插件并入扩展）
     const group = btn.closest('[class*="leftQuickActions"]');
-    expect(group?.textContent.indexOf('新建任务')).toBeLessThan(group!.textContent.indexOf('插件'));
+    expect(group?.textContent.indexOf('新建任务')).toBeLessThan(group!.textContent.indexOf('扩展'));
     expect(group?.textContent).toContain('工作台');
   });
 });

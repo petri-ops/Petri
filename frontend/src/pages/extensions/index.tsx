@@ -1,0 +1,232 @@
+/**
+ * Extensions 页 — BLOCK-156 扩展中心（四货架单入口）。
+ *
+ * D1 裁决：/extensions 单页四货签（领域插件 / 领域技能 / 通用技能 / MCP 服务），
+ * 旧 /plugins、/skills 路由 fail-closed 重定向到对应货签（App.tsx 层 Navigate）。
+ * D2 裁决：领域/通用界定 = category 前缀规则（extensionShelves 单源，零 manifest 迁移）。
+ * 红线：货架合并是入口层合并——插件与技能的运行时（plugin-loader / skill-registry）不动。
+ */
+
+import React, { useCallback, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Icon } from '@/components/icons/Icon';
+import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
+import { useSkillStore, type Skill } from '@/hooks/useSkillStore';
+import {
+  EXTENSION_SHELVES,
+  classifySkillShelf,
+  isExtensionShelfId,
+  type ExtensionShelfId,
+} from '@/lib/extensionShelves';
+import { SkillCard } from './SkillCard';
+import { SkillDetail } from './SkillDetail';
+import globalStyles from '../global-page.module.css';
+import styles from './extensions.module.css';
+import skillStyles from './styles.module.css';
+
+export default function ExtensionsPage(): React.ReactElement {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab') ?? '';
+  const activeShelf: ExtensionShelfId = isExtensionShelfId(tabParam)
+    ? tabParam
+    : 'domain-plugins';
+
+  const navigate = useNavigate();
+  const handleReturn = useCallback(() => {
+    // 与既有独立页同语义：回上一页，无历史则回欢迎页
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      void navigate('/');
+    }
+  }, [navigate]);
+
+  const handleSelectShelf = useCallback(
+    (id: ExtensionShelfId) => {
+      setSearchParams(id === 'domain-plugins' ? {} : { tab: id }, { replace: true });
+    },
+    [setSearchParams]
+  );
+
+  return (
+    <div className={globalStyles.page} data-testid="extensions-page">
+      <header className={globalStyles.header}>
+        <button
+          type="button"
+          className={globalStyles.backBtn}
+          onClick={handleReturn}
+          title="返回"
+          aria-label="返回"
+        >
+          <Icon name="arrow-left" size={16} />
+          <span>返回</span>
+        </button>
+        <div className={globalStyles.pageIcon}>
+          <Icon name="puzzle" size={22} />
+        </div>
+        <div className={globalStyles.titleWrap}>
+          <span className={globalStyles.title}>扩展中心</span>
+          <span className={globalStyles.subtitle}>领域扩展 · 通用技能 · MCP 服务</span>
+        </div>
+      </header>
+
+      <nav className={styles.shelfBar} role="tablist" aria-label="扩展货架">
+        {EXTENSION_SHELVES.map((shelf) => (
+          <button
+            key={shelf.id}
+            type="button"
+            role="tab"
+            aria-selected={shelf.id === activeShelf}
+            className={`${styles.shelfTab} ${shelf.id === activeShelf ? styles.shelfTabActive : ''}`}
+            onClick={() => handleSelectShelf(shelf.id)}
+            title={shelf.description}
+            data-testid={`extensions-tab-${shelf.id}`}
+          >
+            {shelf.label}
+          </button>
+        ))}
+      </nav>
+
+      <div className={globalStyles.body}>
+        {activeShelf === 'domain-plugins' && (
+          <PluginStorePanel embedded onClose={handleReturn} backLabel="返回" />
+        )}
+        {activeShelf === 'domain-skills' && <SkillShelfPane shelfId="domain-skills" />}
+        {activeShelf === 'general-skills' && <SkillShelfPane shelfId="general-skills" />}
+        {activeShelf === 'mcp' && <McpShelfPane />}
+      </div>
+    </div>
+  );
+}
+
+/** 技能货架：按 D2 分类学过滤 + 搜索 + 卡片网格 + 执行详情弹层。 */
+function SkillShelfPane({ shelfId }: { shelfId: 'domain-skills' | 'general-skills' }): React.ReactElement {
+  const { skills, loading, error, execute } = useSkillStore({ autoLoad: true });
+  const [query, setQuery] = useState('');
+  const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
+  const [executingSkillId, setExecutingSkillId] = useState<string | null>(null);
+
+  const shelfSkills = useMemo(
+    () => skills.filter((s) => classifySkillShelf(s.category) === shelfId),
+    [skills, shelfId]
+  );
+
+  const visibleSkills = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return shelfSkills;
+    return shelfSkills.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.id.toLowerCase().includes(q) ||
+        s.description.toLowerCase().includes(q) ||
+        s.category.toLowerCase().includes(q)
+    );
+  }, [shelfSkills, query]);
+
+  const handleExecute = useCallback(
+    async (skill: Skill, params: Record<string, unknown>) => {
+      setExecutingSkillId(skill.id);
+      try {
+        const result = await execute(skill.id, params);
+        if (result.ok) {
+          // 与原 Skills 页同节奏：短暂成功反馈后收起详情弹层
+          setTimeout(() => {
+            setExecutingSkillId(null);
+            setSelectedSkill(null);
+          }, 800);
+        } else {
+          setExecutingSkillId(null);
+        }
+      } catch {
+        setExecutingSkillId(null);
+      }
+    },
+    [execute]
+  );
+
+  const shelfLabel =
+    shelfId === 'domain-skills' ? '领域技能' : '通用技能';
+
+  return (
+    <div className={styles.shelfPane} data-testid={`skill-shelf-${shelfId}`}>
+      <div className={skillStyles.searchRow}>
+        <div className={skillStyles.searchInputWrapper}>
+          <Icon name="search" size={16} className={skillStyles.searchIcon} />
+          <input
+            type="text"
+            className={skillStyles.searchInput}
+            placeholder={`搜索${shelfLabel}…`}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            aria-label={`搜索${shelfLabel}`}
+          />
+        </div>
+        <span className={styles.shelfCount}>{shelfSkills.length} 项</span>
+      </div>
+
+      {loading ? (
+        <div className={skillStyles.skillsEmpty}>
+          <h3 className={skillStyles.emptyTitle}>加载中…</h3>
+        </div>
+      ) : error ? (
+        <div className={skillStyles.skillsEmpty}>
+          <h3 className={skillStyles.emptyTitle}>{error}</h3>
+        </div>
+      ) : visibleSkills.length === 0 ? (
+        <div className={skillStyles.skillsEmpty}>
+          <div className={skillStyles.emptyIcon}>
+            <Icon name="search" size={24} />
+          </div>
+          <h3 className={skillStyles.emptyTitle}>暂无匹配的{shelfLabel}</h3>
+          <p className={skillStyles.emptyText}>
+            {shelfId === 'general-skills'
+              ? '通用技能通过本地目录导入安装（规划中）；内置通用技能会出现在这里'
+              : '尝试调整搜索条件，或从领域包安装分析能力'}
+          </p>
+        </div>
+      ) : (
+        <div className={skillStyles.skillsGrid}>
+          {visibleSkills.map((skill) => (
+            <SkillCard
+              key={skill.id}
+              skill={skill}
+              onViewDetail={setSelectedSkill}
+              onExecute={(s) => setSelectedSkill(s)}
+              canExecute={executingSkillId === null}
+            />
+          ))}
+        </div>
+      )}
+
+      {selectedSkill && (
+        <SkillDetail
+          skill={selectedSkill}
+          onClose={() => setSelectedSkill(null)}
+          onExecute={(skill, params) => void handleExecute(skill, params)}
+          canExecute={executingSkillId === null}
+          isExecuting={executingSkillId === selectedSkill.id}
+        />
+      )}
+    </div>
+  );
+}
+
+/**
+ * MCP 服务货架 — P1 占位空态（BLOCK-156 P2 填充配置/连接 UI）。
+ * 占位而非隐藏：货架四分类学从第一天完整在场，P2 只换内容不动骨架。
+ */
+function McpShelfPane(): React.ReactElement {
+  return (
+    <div className={styles.shelfPane} data-testid="mcp-shelf-placeholder">
+      <div className={skillStyles.skillsEmpty}>
+        <div className={skillStyles.emptyIcon}>
+          <Icon name="zap" size={24} />
+        </div>
+        <h3 className={skillStyles.emptyTitle}>MCP 服务接入（建设中）</h3>
+        <p className={skillStyles.emptyText}>
+          应用将作为 MCP 客户端连接第三方 MCP server，工具自动进入 agent 可用集
+        </p>
+      </div>
+    </div>
+  );
+}

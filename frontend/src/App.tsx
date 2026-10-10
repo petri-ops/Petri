@@ -29,7 +29,8 @@ const HomePage = lazy(() => import('@/pages/home').then((m) => ({ default: m.def
 // NOTE: Legacy pages (tools, admin, docs, figcode, single-cell, spatial) have been removed
 // as the desktop application now uses the Agent-based workflow through ProjectWorkspace.
 const ProjectWorkspace = lazy(() => import('@/pages/project-workspace').then((m) => ({ default: m.ProjectWorkspace })));
-const SkillsPage = lazy(() => import('@/pages/skills').then((m) => ({ default: m.default })));
+// BLOCK-156 — 扩展中心（四货架单入口）；旧 /skills /plugins 独立页退役为重定向
+const ExtensionsPage = lazy(() => import('@/pages/extensions').then((m) => ({ default: m.default })));
 
 // UI-456（PL-4c）— 旧独立结果页 URL 优雅回落工作区（hook 必须在真组件内：
 // IIFE 里 useParams 读到的是父层空 params，实机抓真 /project/undefined）
@@ -37,7 +38,6 @@ function LegacyResultsRedirect(): React.ReactElement {
   const { projectId } = useParams();
   return <Navigate replace to={`/project/${projectId ?? ''}`} />;
 }
-const PluginsPage = lazy(() => import('@/pages/plugins').then((m) => ({ default: m.default })));
 const SettingsPage = lazy(() => import('@/pages/settings').then((m) => ({ default: m.default })));
 const KnowledgePage = lazy(() => import('@/pages/knowledge').then((m) => ({ default: m.default })));
 // BLOCK-28 — main-area code review mode (VS Code SCM style)
@@ -145,10 +145,11 @@ function AppShell(): React.ReactElement {
             {/* BLOCK-80 — / 为欢迎页（问候+项目/分支+首问直发）；原工作台（项目卡+创建流）退役至 /projects 项目管理 */}
             <Route path="/" element={<WelcomePage />} />
             <Route path="/projects" element={<HomePage />} />
-            {/* Skills management page */}
-            <Route path="/skills" element={<SkillsPage />} />
-            {/* UI-364 — 插件商店独立页（设备级能力，不绑项目；与 /skills 同形态） */}
-            <Route path="/plugins" element={<PluginsPage />} />
+            {/* BLOCK-156 — 扩展中心（领域插件/领域技能/通用技能/MCP 服务四货架，
+                D1 裁决单页货签）；旧 /skills /plugins 深链 fail-closed 重定向保底 */}
+            <Route path="/extensions" element={<ExtensionsPage />} />
+            <Route path="/skills" element={<Navigate to="/extensions?tab=domain-skills" replace />} />
+            <Route path="/plugins" element={<Navigate to="/extensions?tab=domain-plugins" replace />} />
             {/* UI-365 — 设置独立页（设备级能力，不绑项目；与 /skills 同形态） */}
             <Route path="/settings" element={<SettingsPage />} />
             {/* BLOCK-72 / UI-320 → UI-366 — 知识空间保留全局页；「后端」页退役，

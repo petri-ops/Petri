@@ -1,0 +1,56 @@
+/* extensions.module.css — BLOCK-156 扩展中心（货签栏 + 货架容器）
+   主题纪律：全部走 --gewu-* token；选中态 = accent 语义（不与 hover 混用）。 */
+
+.shelfBar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 18px 0;
+  border-bottom: 1px solid var(--gewu-border);
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+
+.shelfTab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-base, 13px);
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.shelfTab:hover {
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
+}
+
+.shelfTabActive {
+  color: var(--gewu-accent);
+  border-bottom-color: var(--gewu-accent);
+}
+
+.shelfPane {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  padding: 14px 18px;
+  overflow-y: auto;
+}
+
+.shelfCount {
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs, 12px);
+  flex-shrink: 0;
+}

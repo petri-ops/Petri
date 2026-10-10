@@ -106,9 +106,9 @@ export function AppRail(): React.ReactElement {
     handleShowScheduled: () => openWorkspaceMode('scheduled'),
     // UI-364/365 — 插件与设置独立页化：设备级能力不绑项目，不再经工作区模式
     // （原 openWorkspaceMode 会隐式激活当前项目）
-    handleShowPlugins: () => void navigate('/plugins'),
+    // BLOCK-156 — 插件/Skills 两入口收敛为扩展中心单入口（/extensions 四货架）
+    handleShowExtensions: () => void navigate('/extensions'),
     handleShowSettings: () => void navigate('/settings'),
-    handleNavigateToSkills: () => void navigate('/skills'),
     handleNavigateToKnowledge: () => void navigate('/knowledge'),
     // UI-366 — 后端页退役：诊断并入设置「运行时与诊断」分区，一级入口移除
     handleNavigateToHome: handleNewTask,
