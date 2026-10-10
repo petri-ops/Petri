@@ -5800,7 +5800,7 @@
         "distribution-layer"
       ],
       "archivePolicy": "retain_stable_path",
-      "notes": "2026-10-10 用户裁决落档（五层成熟度评估三路只读探查为据）：满级=G0 天花板定义 + 25 种子目录（MDL×4/ORC×5/CAP×5/KNW×6/DIST×5）+ 依赖 DAG 与三波推进序（出口判据/插队规则）；排队序唯一台账在 pending-work-backlog.md（C-EXT-1~4 已归并注记），单工作包串行不变，逐包发令；G1+ 画线（Provider 矩阵实机验证/签名公证/远程市场/packaged 分发）不越界。"
+      "notes": "2026-10-10 **当日达成**（用户裁决蓝图+三波连打 BLOCK-157/160/163 同日全收口）：满级=G0 天花板定义 + 25 种子全部 completed + 五层画像逐项覆盖（§7.1 蓝图达成宣告）；残余差距=G1+ 画线项（§6 出籍）；W1 内嵌 BLOCK-157/W2=BLOCK-160/W3=BLOCK-163 三包收口笔录链。蓝图留 reference 态作方向 canonical（后续种子迭代在 G1+ 或用户新裁决下另行立项）。"
     },
     {
       "id": "BLOCK-157-MATURITY-WAVE1",

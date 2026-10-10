@@ -5,7 +5,9 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-10-10（**BLOCK-160 W2 波当日整波收口 completed（用户发令「开冲到W2波末」，plan=docs/block-160-maturity-wave2-plan.md §7）**：ORC-2 动态审批两维/ORC-1 用户规则层/KNW-3 斜杠命令双来源/CAP-2 env 密文化/KNW-4⇄DIST-2 共轨五种子全交付；**波末五出口断言 ALL PASS**（真实模型 dynamic_guard 拦截/用户规则拦截/斜杠菜单 7 徽标 CDP 实开/env 落盘零明文往返/SKILL.md 管线 5/5，acceptance/block-160/wave2-live.json）；残红归属=BLOCK-159 已提交面（lint agentTaskStream 系）+BLOCK-161/162 在制（test:changed 阻塞）+P1.4 main 预红，均非本批；riders=确认 UI 弹卡/KNW-3 chip v2 候选；蓝图六种子翻 completed；**队列头交棒 W3 首件 ORC-3**。）
+最后更新：2026-10-10（**G0 五层成熟度蓝图当日达成宣告（蓝图对账 §7.1）**：W1/W2/W3 三波全部收口（BLOCK-157/160/163），25 种子全 completed，五层画像逐项覆盖（§7.1 对照表）；残余差距=G1+ 画线项已出籍；蓝图留 reference 态作方向 canonical；**成熟度蓝图系列=蓝图达成态，后续种子迭代需 G1+ 或用户新裁决另立**。）
+
+此前 最后更新：2026-10-10（**BLOCK-160 W2 波当日整波收口 completed（用户发令「开冲到W2波末」，plan=docs/block-160-maturity-wave2-plan.md §7）**：ORC-2 动态审批两维/ORC-1 用户规则层/KNW-3 斜杠命令双来源/CAP-2 env 密文化/KNW-4⇄DIST-2 共轨五种子全交付；**波末五出口断言 ALL PASS**（真实模型 dynamic_guard 拦截/用户规则拦截/斜杠菜单 7 徽标 CDP 实开/env 落盘零明文往返/SKILL.md 管线 5/5，acceptance/block-160/wave2-live.json）；残红归属=BLOCK-159 已提交面（lint agentTaskStream 系）+BLOCK-161/162 在制（test:changed 阻塞）+P1.4 main 预红，均非本批；riders=确认 UI 弹卡/KNW-3 chip v2 候选；蓝图六种子翻 completed；**队列头交棒 W3 首件 ORC-3**。）
 
 此前 最后更新：2026-10-10（**BLOCK-158 商店面退役 completed（轻量批；用户裁决「清 尽可能的纯净」）**：商店写面四通道+OSS 远程抓取半边+商店卡片 UI 全链移除；运行时供应链保留+pack:install-runtime 补装新链；插件分发唯一通道=领域包；蓝图 DIST-5 改道=领域包更新体验（pack 清单版本比对）、DIST-1 收敛=pack 通道唯一启停面；残红归属=BLOCK-159 在制（docs:check/knip/test×1）+P1.4 干净树预红，均非本批。）
 
