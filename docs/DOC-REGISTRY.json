@@ -5760,8 +5760,26 @@
         "tunnel-probe"
       ],
       "notes": "重构候选批（平台映射三副本收敛/hunk 级后端 stage/隧道 publicUrl 自探活；用户「继续 按顺序都搞完」批量授权）。三轨并行红绿先行，工作流内不提交。 2026-10-09 当日收口 completed：三轨根修复+评审两轮 P1 修复（10 场临时仓亲验）+closeout 十一门 PASS（预算例外登记 expires 2026-11-30）；UI-471 in_progress 待实机；H 边缘 P2 三条归下波候选。"
+    },
+    {
+      "id": "BLOCK-156-EXT-HUB-MCP-CLIENT",
+      "path": "docs/block-156-ext-hub-mcp-client-plan.md",
+      "capability": "extensions-hub-mcp-client",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "ext-hub-mcp-client-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-10",
+      "tags": [
+        "BLOCK-156",
+        "extensions-hub",
+        "mcp-client",
+        "skills"
+      ],
+      "archivePolicy": "retain_stable_path"
     }
   ],
-  "lastUpdated": "2026-10-09",
-  "documentCount": 304
+  "lastUpdated": "2026-10-10",
+  "documentCount": 305
 }
