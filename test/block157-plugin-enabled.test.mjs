@@ -23,9 +23,9 @@ process.env.BIOF3_LOCAL_DATA_DIR = tmpDir; // src/plugin/paths.js 纯 Node 加�
 const pluginsDir = path.join(tmpDir, 'plugins');
 fs.mkdirSync(path.join(pluginsDir, 'p-on', 'scripts'), { recursive: true });
 fs.mkdirSync(path.join(pluginsDir, 'p-off', 'scripts'), { recursive: true });
-for (const [id, extra] of [
-  ['p-on', {}],
-  ['p-off', { enabled: false }],
+for (const [id] of [
+  ['p-on'],
+  ['p-off'],
 ]) {
   fs.writeFileSync(
     path.join(pluginsDir, id, 'plugin.json'),
