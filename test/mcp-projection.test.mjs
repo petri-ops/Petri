@@ -61,9 +61,10 @@ test('BLOCK-156 连接夹具后投影齐备：defs + entry 三件套 + registry 
   assert.equal(conn.ok, true);
 
   const defs = projection.projectMcpToolDefs();
-  assert.equal(defs.length, 1);
+  assert.equal(defs.length, 2);
   assert.equal(defs[0].function.name, 'mcp_fixture_fixture_echo');
   assert.equal(defs[0].function.parameters.required[0], 'message');
+  assert.equal(defs[1].function.name, 'mcp_fixture_fixture_lookup_readonly');
 
   // registry 集成：getProviderToolDefs 追加（78 静态 + 1 投影）；getToolEntry 兜底命中
   const providerDefs = registry.getProviderToolDefs();
@@ -101,6 +102,30 @@ test('BLOCK-156 D4 档位行为：execution+R2 → read/plan/workspace-write 禁
 
   const fullDecision = policy.decideAgentToolCall({ name, args, ctx: { accessMode: 'full' }, contract });
   assert.equal(fullDecision.decision, 'allow');
+});
+
+test('BLOCK-157 CAP-1：annotations.readOnlyHint=true → 投影 retrieval/none/R1，read/plan 档 policy allow', async () => {
+  const name = 'mcp_fixture_fixture_lookup_readonly';
+  const entry = registry.getToolEntry(name);
+  assert.ok(entry, 'readOnly 夹具工具应被投影');
+  assert.equal(entry.contract.category, 'retrieval', JSON.stringify(entry.contract));
+  assert.equal(entry.contract.sideEffect, 'none');
+  assert.equal(entry.contract.riskTier, 'R1');
+  for (const accessMode of ['read', 'plan', 'workspace-write', 'full']) {
+    const d = policy.decideAgentToolCall({ name, args: { query: 'x' }, ctx: { accessMode }, contract: entry.contract });
+    assert.equal(d.decision, 'allow', `${accessMode}: ${JSON.stringify(d)}`);
+  }
+  // 无注释工具维持 D4 保守档（对照）
+  const echoEntry = registry.getToolEntry('mcp_fixture_fixture_echo');
+  assert.equal(echoEntry.contract.sideEffect, 'execution');
+  assert.equal(echoEntry.contract.riskTier, 'R2');
+});
+
+test('BLOCK-157 CAP-1：readOnly 夹具经真实 stdio 回流', async () => {
+  const entry = registry.getToolEntry('mcp_fixture_fixture_lookup_readonly');
+  const result = await entry.handler({ query: 'p53' });
+  assert.equal(result.ok, true);
+  assert.equal(result.text, 'lookup: p53 (readonly)');
 });
 
 test('BLOCK-156 knowledge-console 白名单子集自动排除 mcp_* 工具', async () => {

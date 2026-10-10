@@ -53,6 +53,16 @@ rl.on('line', (line) => {
               required: ['message'],
             },
           },
+          {
+            name: 'fixture_lookup_readonly',
+            description: '只读查询夹具（BLOCK-157 CAP-1：annotations.readOnlyHint=true → read/plan 档可用）',
+            inputSchema: {
+              type: 'object',
+              properties: { query: { type: 'string', description: '查询词' } },
+              required: ['query'],
+            },
+            annotations: { readOnlyHint: true },
+          },
         ],
       });
       break;
@@ -62,6 +72,10 @@ rl.on('line', (line) => {
       if (name === 'fixture_echo') {
         result(id, {
           content: [{ type: 'text', text: `echo: ${String(args.message ?? '')}` }],
+        });
+      } else if (name === 'fixture_lookup_readonly') {
+        result(id, {
+          content: [{ type: 'text', text: `lookup: ${String(args.query ?? '')} (readonly)` }],
         });
       } else {
         send({ jsonrpc: '2.0', id, error: { code: -32602, message: `unknown tool: ${name}` } });

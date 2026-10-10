@@ -24,8 +24,23 @@ const manager = require('../mcp/client-manager');
 /** 投影上限：防大量 server 连接把 provider prompt 撑爆（宁可少投影不撑爆）。 */
 const MAX_PROJECTED_TOOLS = 40;
 
-/** D4 统一 contract（与静态 contract 同构——policy/interceptor 直接消费）。 */
-function mcpToolContract() {
+/** D4 统一 contract（与静态 contract 同构——policy/interceptor 直接消费）。
+ * BLOCK-157 CAP-1 分级：tool.annotations.readOnlyHint === true 时投影为
+ * retrieval/none/R1（只读检索族 → read/plan 档可用，与内置只读工具同待遇）；
+ * 无注释/destructive 倾向保守维持 execution/R2（D4 默认零漂移）。 */
+function mcpToolContract(tool) {
+  const annotations = tool && typeof tool === 'object' ? tool.annotations : null;
+  if (annotations && annotations.readOnlyHint === true) {
+    return {
+      contractVersion: '1.0.0',
+      category: 'retrieval',
+      sideEffect: 'none',
+      riskTier: 'R1',
+      resources: ['mcp.server'],
+      estimatedDurationMs: 60_000,
+      notes: 'BLOCK-157 CAP-1: annotations.readOnlyHint=true → read/plan 档可用（只读检索族）',
+    };
+  }
   return {
     contractVersion: '1.0.0',
     category: 'action',
@@ -33,7 +48,7 @@ function mcpToolContract() {
     riskTier: 'R2',
     resources: ['mcp.server'],
     estimatedDurationMs: 60_000,
-    notes: 'BLOCK-156 P3 projection: third-party MCP server tool (D4 uniform tier)',
+    notes: 'BLOCK-156 P3 projection: third-party MCP server tool（D4 保守默认；CAP-1 仅 readOnlyHint 降档）',
   };
 }
 
@@ -114,7 +129,7 @@ function getMcpToolEntry(name) {
         ? { ok: false, error: 'mcp_tool_error', message: text || 'MCP server returned isError' }
         : { ok: true, server: row.serverId, tool: row.toolName, text };
     },
-    contract: mcpToolContract(),
+    contract: mcpToolContract(row.tool),
   };
 }
 
