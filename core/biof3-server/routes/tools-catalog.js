@@ -56,6 +56,18 @@ function createToolsCatalogRoutes() {
         res.status(500).json({ ok: false, error: (error && error.message) || 'tool_catalog_projection_failed' });
       }
     });
+
+    // BLOCK-160 W2 P3（KNW-3）— 工作流模板目录（composer 斜杠菜单第二来源；
+    // available 按当前已装插件集合判定，与 run_tool op=list 同源同口径）
+    app.get('/api/tools/workflow-templates', (req, res) => {
+      try {
+        const { listAgentWorkflowTemplates } = require('../../shared-backend/agent-workflow');
+        const toolIds = pluginLoader.getAllPluginManifests().map((m) => m.id);
+        res.json({ status: 'ok', templates: listAgentWorkflowTemplates(toolIds) });
+      } catch (error) {
+        res.status(500).json({ status: 'error', error: (error && error.message) || 'workflow_templates_failed' });
+      }
+    });
   };
 }
 

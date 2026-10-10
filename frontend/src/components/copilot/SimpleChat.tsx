@@ -42,6 +42,9 @@ import {
   type ErrorBannerProps,
   type PendingApproval,
 } from './SimpleChat/types';
+// BLOCK-160 W2 P3（KNW-3）— 斜杠菜单动态数据源（产品 Skills + run_tool 模板；
+// 选中注入执行意图文本模板，v1 不跳页不自动执行）
+import { fetchSlashEntries, filterSlashEntries, slashIntentTemplate, type SlashEntry } from './SimpleChat/slashSources';
 import {
   useDomainExamplePrompts,
   ExamplePrompts,
@@ -365,17 +368,20 @@ export function SimpleChat({
   // Slash command state
   const [slashOpen, setSlashOpen] = useState(false);
   const [slashQuery, setSlashQuery] = useState('');
+  // BLOCK-160 W2 P3（KNW-3）— 斜杠动态条目（Skills+模板；面板打开时拉取，模块级 60s 缓存）
+  const [dynamicSlashEntries, setDynamicSlashEntries] = useState<SlashEntry[]>([]);
   const [slashFocusedIndex, setSlashFocusedIndex] = useState(0);
   const slashPanelRef = useRef<HTMLDivElement>(null);
   const slashListRef = useRef<HTMLDivElement>(null);
   // Filtered commands based on query
-  const filteredCommands = useMemo(() => {
-    if (!slashQuery) return SLASH_COMMANDS;
-    const q = slashQuery.toLowerCase();
-    return SLASH_COMMANDS.filter(
-      (cmd) => cmd.id.includes(q) || cmd.label.toLowerCase().includes(q) || cmd.description.toLowerCase().includes(q)
-    );
-  }, [slashQuery]);
+  const combinedSlashEntries = useMemo(
+    () => [
+      ...SLASH_COMMANDS.map((cmd) => ({ kind: 'action' as const, id: cmd.id, label: cmd.label, description: cmd.description })),
+      ...dynamicSlashEntries,
+    ],
+    [dynamicSlashEntries]
+  );
+  const filteredCommands = useMemo(() => filterSlashEntries(combinedSlashEntries, slashQuery), [combinedSlashEntries, slashQuery]);
   // 输入框 ↑/↓ 历史回溯的导航态（null = 未进入导航，输入框即实时草稿）。
   const historyNavRef = useRef<typeof INITIAL_NAV_STATE>(INITIAL_NAV_STATE);
   const activeRun = useConversationRun(conversationId);
@@ -735,6 +741,7 @@ export function SimpleChat({
       setSlashQuery(query);
       setSlashOpen(true);
       setSlashFocusedIndex(0);
+      void fetchSlashEntries().then((entries) => setDynamicSlashEntries(entries));
     } else {
       setSlashOpen(false);
       setSlashQuery('');
@@ -1034,6 +1041,25 @@ export function SimpleChat({
         setSlashQuery('');
         break;
     }
+    // BLOCK-160 W2 P3（KNW-3）— 执行意图条目：注入文本模板而非执行 UI 动作
+    if (commandId.startsWith('skill:') || commandId.startsWith('template:')) {
+      const kind = commandId.startsWith('skill:') ? 'skill' : 'template';
+      const id = commandId.slice(kind.length + 1);
+      const template = slashIntentTemplate({ kind, id, label: '', description: '' });
+      setInput(template);
+      saveConversationDraft(projectId, conversationId, template);
+      setSlashOpen(false);
+      setSlashQuery('');
+      historyNavRef.current = INITIAL_NAV_STATE;
+      requestAnimationFrame(() => {
+        if (taRef.current) {
+          taRef.current.focus();
+          taRef.current.setSelectionRange(template.length, template.length);
+          resizeTextarea(taRef.current);
+        }
+      });
+      return;
+    }
     // Close panel and clear input
     setSlashOpen(false);
     setSlashQuery('');
@@ -1041,7 +1067,7 @@ export function SimpleChat({
     historyNavRef.current = INITIAL_NAV_STATE;
     clearConversationDraft(projectId, conversationId);
     if (taRef.current) taRef.current.style.height = 'auto';
-  }, [newConversation, projectId, conversationId, displayMessages]);
+  }, [newConversation, projectId, conversationId, displayMessages, resizeTextarea]);
 
   // Close slash panel on outside click
   useEffect(() => {
@@ -1214,12 +1240,20 @@ export function SimpleChat({
                 ) : (
                   filteredCommands.map((cmd, index) => (
                     <button
-                      key={cmd.id}
+                      key={`${cmd.kind}:${cmd.id}`}
                       type="button"
                       className={`sc-slash-item ${index === slashFocusedIndex ? 'sc-slash-item-focused' : ''}`}
-                      onClick={() => executeSlashCommand(cmd.id)}
+                      onClick={() => executeSlashCommand(cmd.kind === 'action' ? cmd.id : `${cmd.kind}:${cmd.id}`)}
                       onMouseEnter={() => setSlashFocusedIndex(index)}
                     >
+                      {cmd.kind !== 'action' && (
+                        <span
+                          className="sc-slash-item-label"
+                          style={{ marginRight: 6, fontSize: 'var(--gewu-font-size-caption, 12px)', color: 'var(--gewu-accent, #3b82f6)' }}
+                        >
+                          {cmd.kind === 'skill' ? '技能' : '模板'}
+                        </span>
+                      )}
                       <span className="sc-slash-item-label">{cmd.label}</span>
                       <span className="sc-slash-item-desc">{cmd.description}</span>
                     </button>

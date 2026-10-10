@@ -3138,7 +3138,8 @@
         "frontend/src/components/desktop/PluginStorePanel.tsx",
         "frontend/src/components/desktop/PluginStorePanel/**",
         "frontend/src/lib/projectionDataBridges.ts",
-        "frontend/src/lib/electron.d.ts"
+        "frontend/src/lib/electron.d.ts",
+        "frontend/src/components/copilot/SimpleChat/slashSources.ts"
       ],
       "tests": [
         "test/block157-plugin-enabled.test.mjs",
