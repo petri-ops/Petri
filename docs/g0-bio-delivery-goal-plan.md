@@ -134,7 +134,7 @@ BLOCK-83 P4（2026-09-12）领域中立化后，生信分析全部迁至兄弟�
 - 全局推进序：`pending-work-backlog.md`（C-15/C-12 本日改编入指向本计划；阶段种子入队时逐行登记）。
 - 当前立即任务：`next-steps-roadmap.md`。
 - UI 面阶段（BIO-1/BIO-2 前端部分）同提交更新 `ui-productization-audit.md`。
-- 域包仓库：`D:\1.WorkDir\petri-pack-bio`（本 Goal 的 BIO-4 阶段主要施工面之一，跨仓改动时按其仓内治理执行）。
+- 域包仓库：`D:\<workdir>\petri-pack-bio`（本 Goal 的 BIO-4 阶段主要施工面之一，跨仓改动时按其仓内治理执行）。
 - 收口语义：同 G0-PLATFORM §7。
 
 ## 8. 实施记录

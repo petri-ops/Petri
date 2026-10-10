@@ -550,7 +550,7 @@ acceptance/g0-scientific-data-contract/
 你正在开发 Petri Desktop。
 
 仓库：
-/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop
+<repo>
 
 目标：
 按 docs/g0-scientific-data-contract-plan.md 实施当前允许启动的第一个未完成 SDC 工作包。核心目标是让不规则用户数据经过 Profiler、Semantic Binding、可复现 Adapter、Plugin I/O Contract 和 typed DAG 后再进入科学插件；不能等待 R/Python 报错后临时修文件，也不能用自动格式转换猜测关键科学设计。

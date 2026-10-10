@@ -16,7 +16,7 @@
     {
       "name": "drag-out: file row exposes DownloadURL",
       "pass": true,
-      "detail": "\"application/octet-stream:dragout-sample.txt:file:///Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/.petri-dev-user-data/data/workspaces/block9"
+      "detail": "\"application/octet-stream:dragout-sample.txt:file://<repo>/.petri-dev-user-data/data/workspaces/block9"
     },
     {
       "name": "drag-out: internal tree MIME still present (tree moves unaffected)",

@@ -10,8 +10,8 @@ tags: [typesafe, jev, system-one, decision-model, ai-agent, routing, guardrails,
 
 > 本文是技术调研参考，不构成工作包，不改变 `next-steps-roadmap.md` 的当前优先级；
 > 是否启动任何落地项以 roadmap / 工作包正式裁决为准。
-> 调研日期：2026-09-21。资料镜像：`D:\1.WorkDir\typesafe-docs\`（官方 docs.typesafe.ai 全部 109 页 markdown）；
-> 参考实现 clone：`D:\1.WorkDir\jev-ultrafast\`。
+> 调研日期：2026-09-21。资料镜像：`D:\<workdir>\typesafe-docs\`（官方 docs.typesafe.ai 全部 109 页 markdown）；
+> 参考实现 clone：`D:\<workdir>\jev-ultrafast\`。
 
 ## 0. TL;DR
 
@@ -142,7 +142,7 @@ GET  https://api.typesafe.ai/v1/models
 
 `typesafe-ai/skills`（Claude Code：`claude plugin marketplace add typesafe-ai/skills` + `claude plugin install typesafe@typesafe-ai`；其他 agent：`npx skills add typesafe-ai/skills --skill typesafe-ai`）。教学内容：识别「prompt-and-parse 能换成结构化决策」的位置；select-from-candidates 优于 generate；"Typed output guarantees the interface, not truth"。
 
-### 4.4 参考实现 browser-use/jev-ultrafast（本地 `D:\1.WorkDir\jev-ultrafast\`）
+### 4.4 参考实现 browser-use/jev-ultrafast（本地 `D:\<workdir>\jev-ultrafast\`）
 
 总计 850 行 Python + 107 行 JS 的浏览器 agent，7.1 秒完成真实 Google Flights 搜索。架构五件套：
 
@@ -204,7 +204,7 @@ GET  https://api.typesafe.ai/v1/models
 
 ## 8. 本地资料索引与实测记录
 
-- 文档镜像：`D:\1.WorkDir\typesafe-docs\`（109 篇 .md，含全部 cookbook/pattern/sdk/api；索引 `llms.txt`）。
-- 参考实现：`D:\1.WorkDir\jev-ultrafast\`（browser-use/jev-ultrafast @ 1231850）。
+- 文档镜像：`D:\<workdir>\typesafe-docs\`（109 篇 .md，含全部 cookbook/pattern/sdk/api；索引 `llms.txt`）。
+- 参考实现：`D:\<workdir>\jev-ultrafast\`（browser-use/jev-ultrafast @ 1231850）。
 - 实测记录（2026-09-21，直连）：① 英文 urgency noul → 0.98（301 in/23 out tok）；② 中文客服消息 choice+noul → route=technical confidence 1.0、urgent=0.98（433 in/56 out tok）；③ GET /v1/models → jev-latest / jev-preview（均指 jev-1.13.0，2026-09-10 发布）。
 - 安全注记：测试所用 API key 曾在会话中明文出现，已建议在 console.typesafe.ai 撤销轮换；**本仓库任何文件不得写入真实 key**（`quality:secret` 门禁 fail-closed）。

@@ -6,17 +6,17 @@
     {
       "name": "A0a_pack_repo_present",
       "pass": true,
-      "detail": "D:\\1.WorkDir\\petri-pack-bio"
+      "detail": "D:\\<workdir>\\petri-pack-bio"
     },
     {
       "name": "A0b_data_root_present",
       "pass": true,
-      "detail": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\packs\\installed.json"
+      "detail": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\packs\\installed.json"
     },
     {
       "name": "A0c_r_runtime_asset_present",
       "pass": true,
-      "detail": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\runtimes\\R"
+      "detail": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\runtimes\\R"
     },
     {
       "name": "A0d_pack_installed_at_boot",
@@ -71,7 +71,7 @@
     {
       "name": "A5_uninstall_dialog_three_tiers",
       "pass": true,
-      "detail": "rSizeMB=796 text=卸载「格物 · 生信分析包」卸载后需重启应用生效。请确认以下处置（可逐项勾选）：删除运行时基础环境（R 运行时（基础环境），约回收 796MB）同时删除包源目录（D:\\1.WorkDir\\petri-pack-bio，约 5MB）内含分析插件、脚本与演示数据；默认保留results、项目文件与数据库不受影响——用户数据永"
+      "detail": "rSizeMB=796 text=卸载「格物 · 生信分析包」卸载后需重启应用生效。请确认以下处置（可逐项勾选）：删除运行时基础环境（R 运行时（基础环境），约回收 796MB）同时删除包源目录（D:\\<workdir>\\petri-pack-bio，约 5MB）内含分析插件、脚本与演示数据；默认保留results、项目文件与数据库不受影响——用户数据永"
     },
     {
       "name": "A6a_record_removed",

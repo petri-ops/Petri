@@ -11,7 +11,7 @@
     {
       "name": "T1_download_dialog_title_effective",
       "pass": true,
-      "detail": "new=[\"下载到…\"] expected=\"下载到…\" all=[\"下载到…\"] shot=D:\\1.WorkDir\\petri-desktop\\acceptance\\ui-453\\ui453-download-dialog.png"
+      "detail": "new=[\"下载到…\"] expected=\"下载到…\" all=[\"下载到…\"] shot=D:\\<workdir>\\petri-desktop\\acceptance\\ui-453\\ui453-download-dialog.png"
     },
     {
       "name": "T2_dialog_closed_no_hang",

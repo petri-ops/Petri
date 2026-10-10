@@ -6,21 +6,21 @@
       "wave": "A",
       "module": "W-03",
       "lines": 812,
-      "sha256": "182d3f8843326e59819ff2ef0816830127236af75343c58d4e32f3b15cf111a3"
+      "sha256": "6753b87e53b65bb5874d3b3df8811a4d8b14edbe4461f0abc2fd5821d4cc15aa"
     },
     {
       "path": "frontend/src/components/copilot/copilotClient.ts",
       "wave": "A",
       "module": "W-03",
       "lines": 131,
-      "sha256": "12e14987eb126b1c89fc4632a6c247ba2df30a471f112e3e35f2e3ac52679358"
+      "sha256": "d8e1f3797e4fb201a0a505dc916a4714f82427e0bf6e21e04552226c5583569d"
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat.tsx",
       "wave": "A",
       "module": "W-03",
       "lines": 1654,
-      "sha256": "4d9ab3fb0e90843ddd9cf69ce99246d3d8e22a73b207a5cc1fe7de69daf19c03"
+      "sha256": "25053852c30d9f28b0af53b54242e3e9a39a8caf70fff07e815f455ae57593cf"
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat/hooks/useThinkingLevel.ts",
@@ -41,134 +41,134 @@
       "wave": "B",
       "module": "W-02",
       "lines": 1232,
-      "sha256": "4b9a7dc1c88a04e8791007f6e016b650d288ab7d9a2825b1d4c0402e136ff729"
+      "sha256": "b427f10b02a95eab74b2b1ca43b7d871fa5ae58ba3bee043c9f33d4b8bcad5a0"
     },
     {
       "path": "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
       "wave": "B",
       "module": "W-04",
       "lines": 1305,
-      "sha256": "b90a45b13fbf08ea138f001670295b58db51e7ea7a0493a4dadc38faa35d8e60"
+      "sha256": "cf8d52cb6b535d95449dd946984c4d9a7f12e9dcbf7f95996a4b0ac40d3b0f77"
     },
     {
       "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx",
       "wave": "B",
       "module": "W-04",
       "lines": 1348,
-      "sha256": "36821b74eb4ae1ca9dabf3b6228241ef8e608b9fef8272fc15068efb432707e6"
+      "sha256": "0fa179a79ba5e45f3cefc113a4c8f411e25fbf3a6c21fe52d618f7db101ed469"
     },
     {
       "path": "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
       "wave": "B",
       "module": "W-01",
-      "lines": 672,
-      "sha256": "250eb562721aebd02b5cf07ef45fd7f89f6bbb901d9df3a99ccc11abba4e7460"
+      "lines": 685,
+      "sha256": "fcc10ded20f3b9f03576c4460a6f2de3de346e67e220acd606f03ebb35054b24"
     },
     {
       "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
       "wave": "B",
       "module": "W-01",
-      "lines": 495,
-      "sha256": "08da87599858f654c6b6bf72870b6d214b4bcbe2f643df386b369172a26c2a58"
+      "lines": 526,
+      "sha256": "d730613a0474c0a1263414038d4d3d4abbb2fc656082b694ce2a70d364910fb9"
     },
     {
       "path": "frontend/src/pages/home.tsx",
       "wave": "B",
       "module": "W-02",
       "lines": 753,
-      "sha256": "7dcd74c123a139de2b214ed4a8fa5866ac7b347cab887a67ee721a392d68cc1a"
+      "sha256": "185f2ba82b0f8192e51d3e7107819194bb6215dfab0ae6cad6669d967b2de21a"
     },
     {
       "path": "frontend/src/components/desktop/WorkingTreeReview/useWorkingTreeReview.ts",
       "wave": "B",
       "module": "W-04",
       "lines": 661,
-      "sha256": "1167ca6033037640fa97d9a13df3a9a57a8a0659e266c26dfde09f2dec4e6170"
+      "sha256": "7353280e02a577cc05c96e636bd335b3ee5e605346d5868ba0ecda1ff5c1b69e"
     },
     {
       "path": "frontend/src/hooks/useSkillStore.ts",
       "wave": "B",
       "module": "W-02",
       "lines": 528,
-      "sha256": "67c6d37f003518c2eb0467dc47fd76ce2362a1470d7fe3d2c01b9308eeb092a7"
+      "sha256": "55156f42fc22e44598b9885885c6aa0f7e265f25f154ff5ec6b44a4cc17ebdfb"
     },
     {
       "path": "frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx",
       "wave": "B",
       "module": "W-04",
       "lines": 561,
-      "sha256": "3155a7308c3318c81b6bd840838eafb0a83a19814b801dbe1f3c5fe29f336ce4"
+      "sha256": "0abc71f5c0adf116edcf0353c4fc0893de0b770439ed8e5ac43f884547f7e985"
     },
     {
       "path": "core/shared-backend/result-changeset-service.js",
       "wave": "C",
       "module": "W-04",
       "lines": 769,
-      "sha256": "3d43f4a3070c03250e7765b38cdfb70595b0502ee27cc53a909e36e1f6e711f9"
+      "sha256": "da25d586118b5fb6168b4d8f5eda3151aa72c20a9f304a3b401a66380af8bd3f"
     },
     {
       "path": "core/petri-server/helpers/tools-executor.js",
       "wave": "C",
       "module": "P-03",
       "lines": 2101,
-      "sha256": "2e43c1aa4a6531df5879a36f5a732e5f2f584cced4ca6271970c211f3e80ff9c"
+      "sha256": "4bc2686e619d5cc25718beb5f308e3fcef722faa7c7ff51b3324882c22fe5ab7"
     },
     {
       "path": "core/petri-server/db.js",
       "wave": "C",
       "module": "P-01",
       "lines": 1476,
-      "sha256": "b8f9dafd22aef85a7aaaa5ea6b6b95e0f8cc6163d636ecfa16e2b5093d9fd1f1"
+      "sha256": "11ac8ea194bddeae364c99a49e34c70a170baea711153d4e241993e74b2476a9"
     },
     {
       "path": "core/shared-backend/result-studio-repository.js",
       "wave": "C",
       "module": "W-04",
       "lines": 1751,
-      "sha256": "2f2a6349a19f49d43012434c05e07e12f506b41ef67c148aab1dc514b2726db9"
+      "sha256": "ad0e0c3f1551078791d53cb22a8c30a501a30f6c12ced822bcad99b68992e7a7"
     },
     {
       "path": "core/petri-server/agent-tools/workspace-tools.js",
       "wave": "C",
       "module": "P-03",
       "lines": 1610,
-      "sha256": "b30db6bef5e95fe13a572e0fa49108591965c7827cb6d94ef114cdcd2cfafd80"
+      "sha256": "f32031504b46f8f591a7f45f6743cacfb764fae0362c48cc584474f77d5b1f67"
     },
     {
       "path": "core/petri-server/mcp/registry.js",
       "wave": "C",
       "module": "P-02",
       "lines": 965,
-      "sha256": "b3a56a109f770a0e14f15a1601268ffea77b279db62e9bd1def2ee5841dc41a4"
+      "sha256": "95701981a1d57130843f9c83929cd97b6123d78618a7cf6a485cd92c6a8021a4"
     },
     {
       "path": "core/shared-backend/result-studio-lifecycle.js",
       "wave": "C",
       "module": "W-04",
       "lines": 936,
-      "sha256": "7f7d0e566c4947315de01fea650d076d4162e36eb2bdbc3c38f7bcf2fda0b487"
+      "sha256": "4f267fd825c91db336df7284f0079888ef14eba7c8c733bc24e3a47e8b34316a"
     },
     {
       "path": "core/shared-backend/result-replay-service.js",
       "wave": "C",
       "module": "W-04",
       "lines": 708,
-      "sha256": "c0e5eeb48782a08a5e1c6968dd2d1a894c21e380510054487bf277260170a234"
+      "sha256": "046873362abb311aae993902918c5f3ee9765ffb2cb6e7d3afeaf9233c4ef66b"
     },
     {
       "path": "core/shared-backend/git-adapter.js",
       "wave": "C",
       "module": "P-01",
       "lines": 1396,
-      "sha256": "befe4696ee14220f17288b0a8b48665a753a61c51f4578a34e63f1988de23b4f"
+      "sha256": "ce84f61f37ca15d45b20417b97ed9d6cd3c845585b369180fbbe969abc3c1571"
     },
     {
       "path": "src/ipc/working-tree-review.js",
       "wave": "D",
       "module": "P-01",
       "lines": 707,
-      "sha256": "62261e61f058f627b8442987f4b567b2f08a44a6f3281909bdab27a8124aa664"
+      "sha256": "d5e33883e756e238608c0eb4073e17561e854ead26a38c913f19957893a76bc3"
     }
   ],
-  "total": 22688
+  "total": 22732
 }

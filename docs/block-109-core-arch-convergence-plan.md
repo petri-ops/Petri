@@ -1,7 +1,7 @@
 # BLOCK-109-CORE-ARCH-CONVERGENCE — 会话核心链路架构收敛（单一事实源）
 
 **状态**：`completed（2026-09-21 当日四阶段整包收口：P0 基线+清偿（e110f561）→ P1 事件单一事实源+组装唯一化+legacy 退役（50e1e030/3f25ffc3/c029b616/8857c574，flow 7/7）→ P2 工具元数据化+调度分组+九域拆分（2d258278，契约 4/4）→ P3 架构门禁基线化（code-size v2 sha256+例外 expires、arch-cycles 14 环入册新环即红、双门入 closeout 链、自测红/绿样本 5/5）；验收 §4 逐项对账绿 + closeout 十门全绿；立项=2026-09-21 用户裁决「基于这些点 开一个或多个block系统性优化petri」，基于 ZCode 对比审计；D1–D6 按 §7 留痕）`
-**立项**：2026-09-21（对比审计报告存在于立项会话；证据 file:line 全部落在本仓与参考仓可复现——Mac `/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/reference/ZCode`；Windows `D:\1.WorkDir\reference\ZCode`（2026-09-21 全量 clone：上游公开史仅 2 commits——`77432b6` Initial commit → `872ad96` feat: open source，包版本 v3.14.0，无 tag））
+**立项**：2026-09-21（对比审计报告存在于立项会话；证据 file:line 全部落在本仓与参考仓可复现——Mac `<user-home>/Documents/<workdir>/Petri-workspace/reference/ZCode`；Windows `D:\<workdir>\reference\ZCode`（2026-09-21 全量 clone：上游公开史仅 2 commits——`77432b6` Initial commit → `872ad96` feat: open source，包版本 v3.14.0，无 tag））
 **修订**：2026-09-21（用户核查裁决「立项时未考虑已收口的 BLOCK-109-AGENT-ORCHESTRATION-UX」成立——立项提交 `5427a489` 14:52 早于其四件套落地 `dddd135c` 15:09；本次吸收四件套为基线输入与零退化红线，D1–D6 与四阶段划分不变）
 **修订 2**：2026-09-21（用户实测三裁决之二「按你的建议来」：P0 拆前基线并入实机故障场景——run `80669989` 7 子智能体 3 败的证据链，见 §1 P0-2）
 **责任轨道**：BLOCK（多工作面：后端事件模型 + 前端消费链 + 工具定义层 + 门禁基建，跨会话串行分阶段，含数据契约裁决）

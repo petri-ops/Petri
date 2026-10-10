@@ -1,12 +1,12 @@
 {
   "generatedAt": "2026-09-12T05:00:15.228Z",
   "block": "BLOCK-83-P4-PACK-SOURCE",
-  "packRoot": "D:\\1.WorkDir\\petri-pack-bio",
+  "packRoot": "D:\\<workdir>\\petri-pack-bio",
   "packId": "petri-pack-bio",
   "env": {
     "node": "v24.20.0",
     "builtInSource": "C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-empty-builtin-s0i5Gd",
-    "installedSource": "D:\\1.WorkDir\\petri-pack-bio\\plugins"
+    "installedSource": "D:\\<workdir>\\petri-pack-bio\\plugins"
   },
   "totals": {
     "pass": 5,

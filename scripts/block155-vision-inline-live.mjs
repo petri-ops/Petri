@@ -19,7 +19,7 @@ import zlib from 'node:zlib';
 
 const API = 'http://127.0.0.1:3001';
 const HDRS = { Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' };
-const LOCAL_DATA_DIR = 'D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data';
+const LOCAL_DATA_DIR = 'D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data';
 const ASSERTIONS = [];
 let failed = 0;
 function assert(name, pass, detail = '') {

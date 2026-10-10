@@ -23,7 +23,7 @@ const { execFileSync } = require('child_process');
 const root = path.resolve(__dirname, '..');
 const packRegistry = require(path.join(root, 'core/shared-backend/pack-registry.js'));
 
-const REAL_PACK = 'D:/1.WorkDir/petri-pack-bio';
+const REAL_PACK = 'D:/<workdir>/petri-pack-bio';
 const FIXTURE_PLUGINS = path.join(root, 'test/fixtures/neutral-plugins');
 const results = [];
 

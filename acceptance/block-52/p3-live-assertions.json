@@ -47,7 +47,7 @@
     {
       "name": "重跑 Job 参数含 point_size=3.2（自然语言→参数 Patch）",
       "pass": true,
-      "detail": "[{\"params_json\":\"{\\\"deg_table\\\":\\\"/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/.petri-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f/inputs/demo_deg.csv\\\",\\\"fc_threshold\\\":1,\\\"gene_col\\\":\\\"gene\\\",\\\"lfc_col\\\":\\\"log2FC\\\",\\\"pval_col\\\":\\\"padj\\\",\\\"pval_threshold\\\":1.3,\\\"top_"
+      "detail": "[{\"params_json\":\"{\\\"deg_table\\\":\\\"<repo>/.petri-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f/inputs/demo_deg.csv\\\",\\\"fc_threshold\\\":1,\\\"gene_col\\\":\\\"gene\\\",\\\"lfc_col\\\":\\\"log2FC\\\",\\\"pval_col\\\":\\\"padj\\\",\\\"pval_threshold\\\":1.3,\\\"top_"
     }
   ],
   "beforeRevisions": [

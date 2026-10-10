@@ -16,7 +16,7 @@
     {
       "name": "V3_float_card_visible",
       "pass": true,
-      "detail": "悬浮卡片可见（cardVisible=true，内容预览=项目摘要1.WorkDir空闲任务无活动暂无运行）"
+      "detail": "悬浮卡片可见（cardVisible=true，内容预览=项目摘要<workdir>空闲任务无活动暂无运行）"
     },
     {
       "name": "V4_restore_pinned",
@@ -32,7 +32,7 @@
       "pinned": true,
       "floating": false,
       "cardVisible": true,
-      "cardText": "项目摘要1.WorkDir空闲任务无活动暂无运行任务还没有数据集——先上传数据，"
+      "cardText": "项目摘要<workdir>空闲任务无活动暂无运行任务还没有数据集——先上传数据，"
     },
     "narrow": {
       "layoutW": 812,
@@ -40,7 +40,7 @@
       "pinned": false,
       "floating": true,
       "cardVisible": true,
-      "cardText": "项目摘要1.WorkDir空闲任务无活动暂无运行任务还没有数据集——先上传数据，"
+      "cardText": "项目摘要<workdir>空闲任务无活动暂无运行任务还没有数据集——先上传数据，"
     },
     "restored": {
       "layoutW": 1609,
@@ -48,7 +48,7 @@
       "pinned": true,
       "floating": false,
       "cardVisible": true,
-      "cardText": "项目摘要1.WorkDir空闲任务无活动暂无运行任务还没有数据集——先上传数据，"
+      "cardText": "项目摘要<workdir>空闲任务无活动暂无运行任务还没有数据集——先上传数据，"
     }
   }
 }

@@ -25,7 +25,7 @@ Desktop
 Desktop
 SingleCell
 YST
-1.WorkDir
+<workdir>
 petri
 devah
 联邦

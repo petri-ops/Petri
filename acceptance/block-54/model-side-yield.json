@@ -1,6 +1,6 @@
 {
   "startedAt": "2026-09-03T17:12:26.636Z",
-  "workspace": "/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop",
+  "workspace": "<repo>",
   "assertions": [
     {
       "name": "短命令 yield 预算内完整返回（无 yielded 标记）",

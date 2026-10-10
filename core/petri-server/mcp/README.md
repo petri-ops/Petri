@@ -36,7 +36,7 @@ mcp/registry.js（已有，listTools / callTool）
   "mcpServers": {
     "petri": {
       "command": "node",
-      "args": ["/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/core/petri-server/mcp/server.js"]
+      "args": ["<user-home>/Documents/<workdir>/Petri-workspace/core/petri-server/mcp/server.js"]
     }
   }
 }
@@ -53,7 +53,7 @@ mcp/registry.js（已有，listTools / callTool）
   "mcpServers": {
     "petri": {
       "command": "node",
-      "args": ["/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/core/petri-server/mcp/server.js"]
+      "args": ["<user-home>/Documents/<workdir>/Petri-workspace/core/petri-server/mcp/server.js"]
     }
   }
 }

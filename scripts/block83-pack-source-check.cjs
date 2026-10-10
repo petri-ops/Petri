@@ -6,7 +6,7 @@
  *
  * 用法（需 fnm Node 24）：
  *   node scripts/block83-pack-source-check.cjs <packRoot>
- *   # 例：node scripts/block83-pack-source-check.cjs D:/1.WorkDir/petri-pack-bio
+ *   # 例：node scripts/block83-pack-source-check.cjs D:/<workdir>/petri-pack-bio
  *
  * 断言：
  *   P1 内置源指向空目录时，插件仍可全部从包的 plugins/ 加载（核心不依赖内置生信内容）

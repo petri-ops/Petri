@@ -80,12 +80,23 @@ if [ "$(uname -s)" = "Darwin" ]; then
     > .petri-test-instance.log 2> .petri-test-instance.err.log &
   echo "start dispatched (darwin nohup pid $!)"
 else
-  export PATH="/c/Users/Admin/AppData/Roaming/fnm/node-versions/v24.20.0/installation:$PATH"
-  export PETRI_DB_PATH='D:\1.WorkDir\petri-desktop\.petri-dev-user-data\data\petri.db'
-  export PETRI_LOCAL_DATA_DIR='D:\1.WorkDir\petri-desktop\.petri-dev-user-data\data'
+  # BLOCK-165 — 仓库根/userData 自定位（同 restart-dev-stack：旧名目录优先回退，D3/D7 见其注释）
+  ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+  UD="$ROOT/.biof3-dev-user-data"
+  [ -d "$UD" ] || UD="$ROOT/.petri-dev-user-data"
+  WROOT="$(cygpath -w "$ROOT" 2>/dev/null || echo "$ROOT")"
+  FNMR="/c/Users/Admin/AppData/Roaming/fnm/node-versions/v24.20.0/installation"
+  if [ -d "$FNMR" ]; then
+    export PATH="$FNMR:$PATH"
+    NODE_EXE="$(cygpath -w "$FNMR" 2>/dev/null || echo "$FNMR")\\node.exe"
+  else
+    NODE_EXE='node.exe'
+  fi
+  export PETRI_DB_PATH="$UD/data/petri.db"
+  export PETRI_LOCAL_DATA_DIR="$UD/data"
   # 4) 分离启动（Start-Process 家法：hidden 会让页面 visibilityState=hidden；
   #    这里 minimized 只最小化 node 控制台，Electron 窗口由主进程离屏定位）
-  powershell -NoProfile -Command "Remove-Item Env:ELECTRON_RUN_AS_NODE -ErrorAction SilentlyContinue; Start-Process -FilePath 'C:\Users\Admin\AppData\Roaming\fnm\node-versions\v24.20.0\installation\node.exe' -ArgumentList 'node_modules\electron\cli.js','.','--dev','--remote-debugging-port=9223' -WorkingDirectory 'D:\1.WorkDir\petri-desktop' -WindowStyle Minimized -RedirectStandardOutput 'D:\1.WorkDir\petri-desktop\.petri-test-instance.log' -RedirectStandardError 'D:\1.WorkDir\petri-desktop\.petri-test-instance.err.log'"
+  powershell -NoProfile -Command "Remove-Item Env:ELECTRON_RUN_AS_NODE -ErrorAction SilentlyContinue; Start-Process -FilePath '$NODE_EXE' -ArgumentList 'node_modules\\electron\\cli.js','.','--dev','--remote-debugging-port=9223' -WorkingDirectory '$WROOT' -WindowStyle Minimized -RedirectStandardOutput '$WROOT\\.petri-test-instance.log' -RedirectStandardError '$WROOT\\.petri-test-instance.err.log'"
   echo "start dispatched"
 fi
 

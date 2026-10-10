@@ -22,6 +22,9 @@ export default tseslint.config(
       'acceptance/**',
       '.petri-*/**',
       '**/.petri-*/**',
+      // BLOCK-165 改名前旧名运行时数据目录：留盘回溯（D3），与上方 .petri-* 同遮蔽语义
+      '.biof3-*/**',
+      '**/.biof3-*/**',
       'codex/**',
       '_external-ref/**',
       // openclaw/ = OpenClaw 外部参考镜像（研究对标用，~6.7GB，经 .git/info/exclude 本地排除不入仓，

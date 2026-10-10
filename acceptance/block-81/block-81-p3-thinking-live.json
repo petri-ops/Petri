@@ -164,7 +164,7 @@
         "reasoningRowsInDom": 0,
         "activityExpandClick": null,
         "reasoningRowsInDomExpanded": null,
-        "transcriptFile": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\llm-transcripts\\conv_9a4e5873-92e.jsonl",
+        "transcriptFile": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\llm-transcripts\\conv_9a4e5873-92e.jsonl",
         "upstreamRecords": [
           {
             "ts": "2026-09-11T12:45:30.593Z",
@@ -221,7 +221,7 @@
         "reasoningRowsInDom": 0,
         "activityExpandClick": null,
         "reasoningRowsInDomExpanded": null,
-        "transcriptFile": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\llm-transcripts\\conv_1b3b9f83-37a.jsonl",
+        "transcriptFile": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\llm-transcripts\\conv_1b3b9f83-37a.jsonl",
         "upstreamRecords": [
           {
             "ts": "2026-09-11T12:45:43.778Z",
@@ -281,7 +281,7 @@
         "reasoningRowsInDom": 1,
         "activityExpandClick": "clicked",
         "reasoningRowsInDomExpanded": 1,
-        "transcriptFile": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\llm-transcripts\\conv_e8bcee49-c5d.jsonl",
+        "transcriptFile": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\llm-transcripts\\conv_e8bcee49-c5d.jsonl",
         "upstreamRecords": [
           {
             "ts": "2026-09-11T12:45:55.895Z",

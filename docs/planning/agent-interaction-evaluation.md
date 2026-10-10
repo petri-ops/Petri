@@ -26,7 +26,7 @@
 
 系统实际执行序列：
 
-1. **状态探查（执行前）**：并行读取 `git status` / `git branch -vv` / `git remote -v` / `git log`，确认"在 main 分支、工作树干净、远程为 ShengXinF3/petri-desktop"。
+1. **状态探查（执行前）**：并行读取 `git status` / `git branch -vv` / `git remote -v` / `git log`，确认"在 main 分支、工作树干净、远程为 petri-ops/petri-desktop"。
 2. **危险操作前置校验**：`reset --hard` 属于破坏性指令，系统在确认"工作树 clean"后才允许执行——**未因用户说"直接覆盖"就跳过安全检查**。
 3. **fetch 后差异判定**：`git rev-list --left-right --count main...origin/main` → `0 70`，识别出本地无独有提交、origin 前进 70 个提交，属于**安全快进**，而非历史分叉。
 4. **显式覆盖执行**：`git reset --hard origin/main` → HEAD 落到 `aaa0e2d`。

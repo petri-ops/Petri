@@ -6,7 +6,7 @@
 你现在负责在 Petri Desktop 中开发第一批基础生信分析插件模块。
 
 工作目录：
-/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop
+<repo>
 
 目标：
 按照 Harness 插件规范开发可复用、可验证、可复现的基础分析插件。插件开发完成后回到 Harness 主线，不修改 Harness Core 的任务状态机、执行器、Job 表、Artifact Truth 或会话系统。

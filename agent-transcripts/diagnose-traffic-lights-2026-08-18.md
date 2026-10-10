@@ -9,7 +9,7 @@
 ## 1. dev Electron 状态
 
 ```
-PID 56333  Electron /Users/zhangdiandian/.../desktop --dev --remote-debugging-port=9222
+PID 56333  Electron <user-home>/.../desktop --dev --remote-debugging-port=9222
 PID 56383  Electron Helper (GPU)
 PID 56384  Electron Helper --type=utility
 PID 56443  Electron Helper (Renderer)
@@ -77,7 +77,7 @@ CDP `Runtime.consoleAPICalled` 在主窗口 webContents 抓到两条错误（exe
 
 ```
 [error] Unable to load preload script:
-  /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/src/preload.js
+  <repo>/src/preload.js
 
 [error] Error: module not found: ./main/env-coordinator
     at preloadRequire (node:electron/js2c/sandbox_bundle:2:82852)

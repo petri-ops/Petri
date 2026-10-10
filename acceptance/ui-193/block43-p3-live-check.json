@@ -6,7 +6,7 @@
     "devElectron": true,
     "cdpPort": 9222,
     "project": "p_mthvakv3_fffw (tinkspace)",
-    "workspace": "/Users/zhangdiandian/Documents/2.OpenWork/ThinkSpace",
+    "workspace": "<user-home>/Documents/2.OpenWork/ThinkSpace",
     "targetFile": "login.html（双 hunk scratch 改动：SCRATCH HUNK A 近 <head>、SCRATCH HUNK B 近注册链接）"
   },
   "fixVerified": {

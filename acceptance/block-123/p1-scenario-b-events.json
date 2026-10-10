@@ -8,7 +8,7 @@
   {
     "event": "conversation",
     "conversationId": "conv_99a774b8-a73",
-    "title": "工作区 D:\\1.WorkDir\\petri-desktop\\.petri-de"
+    "title": "工作区 D:\\<workdir>\\petri-desktop\\.petri-de"
   },
   {
     "event": "token_budget",

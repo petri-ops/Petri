@@ -3,7 +3,7 @@
   "title": "本会话改动按执行步骤（agent 迭代轮次）分组归属",
   "date": "2026-09-02",
   "env": "dev Electron (CDP 9222) + 新后端 :3001（09:50 启动，晚于 agent-files-changed.js mtime 09:33，确认新代码）",
-  "project": "p_mthvakv3_fffw (linkspace/tinkspace, workspace /Users/zhangdiandian/Documents/2.OpenWork/ThinkSpace)",
+  "project": "p_mthvakv3_fffw (linkspace/tinkspace, workspace <user-home>/Documents/2.OpenWork/ThinkSpace)",
   "steps": [
     {
       "id": "S1",

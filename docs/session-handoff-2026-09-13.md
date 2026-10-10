@@ -10,7 +10,7 @@
 ```
 你是 Petri Desktop（格物，原名 Petri）项目的开发 Agent。继续在本仓库推进开发。
 
-工作目录：D:\1.WorkDir\petri-desktop
+工作目录：D:\<workdir>\petri-desktop
 当前分支：main（与 origin/main 同步，工作区干净）
 
 # 一、开工前必读（顺序不可变）

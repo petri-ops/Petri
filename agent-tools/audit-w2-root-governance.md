@@ -39,7 +39,7 @@
 
 | 检查项 | 现状 | 证据 | 建议 |
 | --- | --- | --- | --- |
-| 根目录 README.md 是否存在 | ❌ 不存在 | `ls /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/README.md` → File not found | 建议：若项目需要根 README（如 npm 展示、GitHub 仓库首页），应创建并引用 `docs/README.md` 作为完整入口；或在 `docs/README.md` 顶部加"根目录另有 `AGENTS.md` 为 Agent 入口"的说明 |
+| 根目录 README.md 是否存在 | ❌ 不存在 | `ls <repo>/README.md` → File not found | 建议：若项目需要根 README（如 npm 展示、GitHub 仓库首页），应创建并引用 `docs/README.md` 作为完整入口；或在 `docs/README.md` 顶部加"根目录另有 `AGENTS.md` 为 Agent 入口"的说明 |
 | 是否被 AGENTS.md 或 docs/README.md 引用 | ⚠️ AGENTS.md 未引用根 README；CLAUDE.md 引用的是 `docs/README.md`（不是根目录） | AGENTS.md 第 136 行："项目当前文档从 `docs/README.md` 进入"；根 README.md 不存在，无引用 | 同上 |
 | docs/README.md 内容 | ✅ 存在且内容相关 | 2026-08-15 更新，与 `next-steps-roadmap.md` 一致 | 无 |
 | 过时阶段描述/Commit 引用 | 无根 README，无法检查 | 不适用 | 不适用 |

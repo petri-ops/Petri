@@ -6,5 +6,11 @@
 ' swallow line breaks and turn the whole script into comments - 2026-09-19 lesson).
 ' Runs the watchdog powershell with window style 0 (hidden), wait=True so
 ' LastTaskResult stays truthful in schtasks.
+' BLOCK-165: repo root resolved relative to this script; userData dir falls back
+' from the pre-rename legacy name to the new name (see restart-dev-stack.sh D3/D7 note).
 Set shell = CreateObject("WScript.Shell")
-shell.Run "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ""D:\1.WorkDir\petri-desktop\.petri-dev-user-data\stack-watchdog.ps1""", 0, True
+Set fso = CreateObject("Scripting.FileSystemObject")
+root = fso.GetParentFolderName(fso.GetParentFolderName(WScript.ScriptFullName))
+ud = root & "\.biof3-dev-user-data"
+If Not fso.FolderExists(ud) Then ud = root & "\.petri-dev-user-data"
+shell.Run "powershell.exe -NoProfile -ExecutionPolicy Bypass -File """ & ud & "\stack-watchdog.ps1""", 0, True

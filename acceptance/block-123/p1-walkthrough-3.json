@@ -4,7 +4,7 @@
     {
       "id": "M1 播种",
       "verdict": "通",
-      "detail": "基线红=true（TTL 未实现必红）D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\projects\\block123-g05---1790415142415-mui6y5gj"
+      "detail": "基线红=true（TTL 未实现必红）D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\projects\\block123-g05---1790415142415-mui6y5gj"
     },
     {
       "id": "M2 任务",

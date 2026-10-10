@@ -41,7 +41,7 @@
     {
       "name": "status_falls_back_to_disconnected",
       "pass": true,
-      "detail": "{\"id\":\"b156-fixture\",\"command\":\"C:\\\\Users\\\\Admin\\\\AppData\\\\Roaming\\\\fnm\\\\node-versions\\\\v24.20.0\\\\installation\\\\node.exe\",\"args\":[\"D:\\\\1.WorkDir\\\\petri-desktop\\"
+      "detail": "{\"id\":\"b156-fixture\",\"command\":\"C:\\\\Users\\\\Admin\\\\AppData\\\\Roaming\\\\fnm\\\\node-versions\\\\v24.20.0\\\\installation\\\\node.exe\",\"args\":[\"D:\\\\<workdir>\\\\petri-desktop\\"
     },
     {
       "name": "cleanup_no_b156_leftovers",

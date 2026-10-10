@@ -607,7 +607,7 @@ const _embedCallLog = new Map();
 1. **未跑时插桩 / flame graph** —— G0 阶段不建议调整运行时；本文纯静态。
 2. **未审查运行 / dev / 构建脚本细节** —— `scripts/install-core-deps.mjs` 等已经熟悉，集中在 `scripts/` 106 个脚本。本审查只检查 `scripts/test-affected.mjs` 等关键几个。
 3. **未深入前端 UI 组件** —— `frontend/src/pages/result-studio/` / `components/branch/` 等仅看 IPC boundary，不审 component prop 树。
-4. **未审 `/Users/zhangdiandian/.cursor` 配置或 `electron-builder.yml` 打包配置** —— G1+ 阶段事项。
+4. **未审 `<user-home>/.cursor` 配置或 `electron-builder.yml` 打包配置** —— G1+ 阶段事项。
 5. **未审 `docs/audit-log.md` 等 audit 历史** —— AGENTS.md 明确不读 archive，除非追溯具体问题。
 6. **未审 R/Python 实际脚本 `core/r-server/tool-scripts/*.R`** —— 已是另一层 audit。
 

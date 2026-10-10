@@ -21,7 +21,7 @@
     {
       "name": "P2-3 result present (peer truth)",
       "pass": true,
-      "detail": "{\"files\":[{\"name\":\"deg_table.csv\",\"type\":\"table\",\"label\":\"差异基因表\",\"filename\":\"deg_table.csv\",\"path\":\"D:\\\\1.WorkDir\\\\petri-desktop\\\\.petri-dev-user-data\\\\data\\\\results\\\\tool-jobs\\\\job_a7ade42394874d1e\\\\output\\\\deg_table.csv\",\"canonicalPath\":\"/work/petri/tool-jobs/job_a7ade42394874d1e/output/deg_table."
+      "detail": "{\"files\":[{\"name\":\"deg_table.csv\",\"type\":\"table\",\"label\":\"差异基因表\",\"filename\":\"deg_table.csv\",\"path\":\"D:\\\\<workdir>\\\\petri-desktop\\\\.petri-dev-user-data\\\\data\\\\results\\\\tool-jobs\\\\job_a7ade42394874d1e\\\\output\\\\deg_table.csv\",\"canonicalPath\":\"/work/petri/tool-jobs/job_a7ade42394874d1e/output/deg_table."
     }
   ],
   "submitResponse": {
@@ -57,7 +57,7 @@
           "type": "table",
           "label": "差异基因表",
           "filename": "deg_table.csv",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\deg_table.csv",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\deg_table.csv",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/deg_table.csv",
           "id": "deg_table",
           "title": "差异基因表",
@@ -68,7 +68,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "deg_table"
           }
@@ -78,7 +78,7 @@
           "type": "table",
           "label": "d8\nh0\u0003e\u001f:e\u001b ",
           "filename": "up_genes.csv",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\up_genes.csv",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\up_genes.csv",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/up_genes.csv",
           "id": "artifact_2",
           "title": "d8\nh0\u0003e\u001f:e\u001b ",
@@ -89,7 +89,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_2"
           }
@@ -99,7 +99,7 @@
           "type": "table",
           "label": "d8\u000bh0\u0003e\u001f:e\u001b ",
           "filename": "down_genes.csv",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\down_genes.csv",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\down_genes.csv",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/down_genes.csv",
           "id": "artifact_3",
           "title": "d8\u000bh0\u0003e\u001f:e\u001b ",
@@ -110,7 +110,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_3"
           }
@@ -120,7 +120,7 @@
           "type": "plot",
           "label": "火山图",
           "filename": "volcano.png",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.png",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.png",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/volcano.png",
           "id": "volcano",
           "title": "火山图",
@@ -131,7 +131,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "volcano"
           }
@@ -141,7 +141,7 @@
           "type": "file",
           "label": "g\u0001+e11e\u001b> (PDF)",
           "filename": "volcano.pdf",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.pdf",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.pdf",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/volcano.pdf",
           "id": "artifact_5",
           "title": "g\u0001+e11e\u001b> (PDF)",
@@ -152,7 +152,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_5"
           }
@@ -162,7 +162,7 @@
           "type": "plot",
           "label": "PCA 图",
           "filename": "pca.png",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.png",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.png",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/pca.png",
           "id": "pca",
           "title": "PCA 图",
@@ -173,7 +173,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "pca"
           }
@@ -183,7 +183,7 @@
           "type": "file",
           "label": "PCA e\u001b> (PDF)",
           "filename": "pca.pdf",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.pdf",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.pdf",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/pca.pdf",
           "id": "artifact_7",
           "title": "PCA e\u001b> (PDF)",
@@ -194,7 +194,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_7"
           }
@@ -204,7 +204,7 @@
           "type": "plot",
           "label": "Top50 热图",
           "filename": "heatmap.png",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.png",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.png",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/heatmap.png",
           "id": "heatmap",
           "title": "Top50 热图",
@@ -215,7 +215,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "heatmap"
           }
@@ -225,7 +225,7 @@
           "type": "file",
           "label": "Top50 g\u0003-e\u001b> (PDF)",
           "filename": "heatmap.pdf",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.pdf",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.pdf",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/heatmap.pdf",
           "id": "artifact_9",
           "title": "Top50 g\u0003-e\u001b> (PDF)",
@@ -236,7 +236,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_9"
           }
@@ -246,7 +246,7 @@
           "type": "plot",
           "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
           "filename": "library_size.png",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.png",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.png",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/library_size.png",
           "id": "artifact_10",
           "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
@@ -257,7 +257,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_10"
           }
@@ -267,7 +267,7 @@
           "type": "file",
           "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
           "filename": "library_size.pdf",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.pdf",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.pdf",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/library_size.pdf",
           "id": "artifact_11",
           "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
@@ -278,7 +278,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_11"
           }
@@ -288,7 +288,7 @@
           "type": "plot",
           "label": "g&;f\u0015#e:&d<0h.! (PNG)",
           "filename": "dispersion.png",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.png",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.png",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/dispersion.png",
           "id": "artifact_12",
           "title": "g&;f\u0015#e:&d<0h.! (PNG)",
@@ -299,7 +299,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_12"
           }
@@ -309,7 +309,7 @@
           "type": "file",
           "label": "g&;f\u0015#e:&d<0h.! (PDF)",
           "filename": "dispersion.pdf",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.pdf",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.pdf",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/dispersion.pdf",
           "id": "artifact_13",
           "title": "g&;f\u0015#e:&d<0h.! (PDF)",
@@ -320,7 +320,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_13"
           }
@@ -330,7 +330,7 @@
           "type": "plot",
           "label": "MA e\u001b> (PNG)",
           "filename": "ma_plot.png",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.png",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.png",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/ma_plot.png",
           "id": "artifact_14",
           "title": "MA e\u001b> (PNG)",
@@ -341,7 +341,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_14"
           }
@@ -351,7 +351,7 @@
           "type": "file",
           "label": "MA e\u001b> (PDF)",
           "filename": "ma_plot.pdf",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.pdf",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.pdf",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/ma_plot.pdf",
           "id": "artifact_15",
           "title": "MA e\u001b> (PDF)",
@@ -362,7 +362,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_15"
           }
@@ -372,7 +372,7 @@
           "type": "plot",
           "label": "f 7f\u001c,h7\u001dg&; (PNG)",
           "filename": "sample_distance.png",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.png",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.png",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/sample_distance.png",
           "id": "artifact_16",
           "title": "f 7f\u001c,h7\u001dg&; (PNG)",
@@ -383,7 +383,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_16"
           }
@@ -393,7 +393,7 @@
           "type": "file",
           "label": "f 7f\u001c,h7\u001dg&; (PDF)",
           "filename": "sample_distance.pdf",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.pdf",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.pdf",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/sample_distance.pdf",
           "id": "artifact_17",
           "title": "f 7f\u001c,h7\u001dg&; (PDF)",
@@ -404,7 +404,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_17"
           }
@@ -414,7 +414,7 @@
           "type": "data",
           "label": "VST 矩阵",
           "filename": "vst_matrix.csv",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\vst_matrix.csv",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\vst_matrix.csv",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/vst_matrix.csv",
           "id": "vst_matrix",
           "title": "VST 矩阵",
@@ -425,7 +425,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "vst_matrix"
           }
@@ -435,7 +435,7 @@
           "type": "table",
           "label": "f 7f\u001c,d<bf>!f\u0001/",
           "filename": "coldata_info.csv",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\coldata_info.csv",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\coldata_info.csv",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/coldata_info.csv",
           "id": "artifact_19",
           "title": "f 7f\u001c,d<bf>!f\u0001/",
@@ -446,7 +446,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_19"
           }
@@ -456,7 +456,7 @@
           "type": "table",
           "label": "g&;f\u0015#e:&f\u00150f\r.",
           "filename": "dispersion_data.csv",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion_data.csv",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion_data.csv",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/dispersion_data.csv",
           "id": "artifact_20",
           "title": "g&;f\u0015#e:&f\u00150f\r.",
@@ -467,7 +467,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_20"
           }
@@ -477,7 +477,7 @@
           "type": "text",
           "label": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
           "filename": "summary.txt",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\summary.txt",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\summary.txt",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/summary.txt",
           "id": "artifact_21",
           "title": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
@@ -488,7 +488,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_21"
           }
@@ -498,7 +498,7 @@
           "type": "report",
           "label": "解读报告",
           "filename": "report.html",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\report.html",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\report.html",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/report.html",
           "id": "report",
           "title": "解读报告",
@@ -509,7 +509,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "report"
           }
@@ -521,7 +521,7 @@
           "label": "全部结果打包下载",
           "name": "all_results.zip",
           "title": "全部结果打包下载",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\all_results.zip",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\all_results.zip",
           "size": 558681,
           "sha256": "9d2052cbbfc00e26a72b3935299268fe8fc69b1bc553670e2b0df71ff4609753",
           "required": true,
@@ -530,7 +530,7 @@
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/all_results.zip",
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "zip"
           }
@@ -542,7 +542,7 @@
           "type": "text",
           "label": "run.log",
           "title": "run.log",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\run.log",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\run.log",
           "size": 2384,
           "sha256": "91f52e1b68bac76825e16dfc81d90f349e4deb1014a46ee73e011652da40a560",
           "required": false,
@@ -551,7 +551,7 @@
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/run.log",
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_24"
           }
@@ -688,9 +688,9 @@
         }
       },
       "toolJobId": "job_a7ade42394874d1e",
-      "jobDir": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e",
-      "outputDir": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
-      "resultDir": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
+      "jobDir": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e",
+      "outputDir": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
+      "resultDir": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
       "canonicalJobDir": "/work/petri/tool-jobs/job_a7ade42394874d1e",
       "canonicalOutputDir": "/work/petri/tool-jobs/job_a7ade42394874d1e/output",
       "canonicalResultDir": "/work/petri/tool-jobs/job_a7ade42394874d1e/output",
@@ -707,15 +707,15 @@
         "runtimeReady": {
           "runtime": "r",
           "ready": true,
-          "command": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\runtimes\\R\\bin\\Rscript.exe",
+          "command": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\runtimes\\R\\bin\\Rscript.exe",
           "reason": null
         },
-        "workDir": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e",
+        "workDir": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e",
         "canonicalWorkDir": "/work/petri/tool-jobs/job_a7ade42394874d1e",
-        "executionWorkDir": "D:/1.WorkDir/petri-desktop/.petri-dev-user-data/data/results/tool-jobs/job_a7ade42394874d1e",
-        "outputDir": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
+        "executionWorkDir": "D:/<workdir>/petri-desktop/.petri-dev-user-data/data/results/tool-jobs/job_a7ade42394874d1e",
+        "outputDir": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
         "canonicalOutputDir": "/work/petri/tool-jobs/job_a7ade42394874d1e/output",
-        "resultDir": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
+        "resultDir": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
         "canonicalResultDir": "/work/petri/tool-jobs/job_a7ade42394874d1e/output"
       },
       "resourceUsage": {
@@ -800,7 +800,7 @@
         "artifactTruthVersion": 1,
         "status": "valid",
         "blocking": false,
-        "resultDir": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
+        "resultDir": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
         "declaredCount": 24,
         "actualCount": 24,
         "validCount": 24,
@@ -819,7 +819,7 @@
           "type": "table",
           "label": "差异基因表",
           "filename": "deg_table.csv",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\deg_table.csv",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\deg_table.csv",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/deg_table.csv",
           "id": "deg_table",
           "title": "差异基因表",
@@ -830,7 +830,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "deg_table"
           }
@@ -840,7 +840,7 @@
           "type": "table",
           "label": "d8\nh0\u0003e\u001f:e\u001b ",
           "filename": "up_genes.csv",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\up_genes.csv",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\up_genes.csv",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/up_genes.csv",
           "id": "artifact_2",
           "title": "d8\nh0\u0003e\u001f:e\u001b ",
@@ -851,7 +851,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_2"
           }
@@ -861,7 +861,7 @@
           "type": "table",
           "label": "d8\u000bh0\u0003e\u001f:e\u001b ",
           "filename": "down_genes.csv",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\down_genes.csv",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\down_genes.csv",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/down_genes.csv",
           "id": "artifact_3",
           "title": "d8\u000bh0\u0003e\u001f:e\u001b ",
@@ -872,7 +872,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_3"
           }
@@ -882,7 +882,7 @@
           "type": "plot",
           "label": "火山图",
           "filename": "volcano.png",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.png",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.png",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/volcano.png",
           "id": "volcano",
           "title": "火山图",
@@ -893,7 +893,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "volcano"
           }
@@ -903,7 +903,7 @@
           "type": "file",
           "label": "g\u0001+e11e\u001b> (PDF)",
           "filename": "volcano.pdf",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.pdf",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.pdf",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/volcano.pdf",
           "id": "artifact_5",
           "title": "g\u0001+e11e\u001b> (PDF)",
@@ -914,7 +914,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_5"
           }
@@ -924,7 +924,7 @@
           "type": "plot",
           "label": "PCA 图",
           "filename": "pca.png",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.png",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.png",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/pca.png",
           "id": "pca",
           "title": "PCA 图",
@@ -935,7 +935,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "pca"
           }
@@ -945,7 +945,7 @@
           "type": "file",
           "label": "PCA e\u001b> (PDF)",
           "filename": "pca.pdf",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.pdf",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.pdf",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/pca.pdf",
           "id": "artifact_7",
           "title": "PCA e\u001b> (PDF)",
@@ -956,7 +956,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_7"
           }
@@ -966,7 +966,7 @@
           "type": "plot",
           "label": "Top50 热图",
           "filename": "heatmap.png",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.png",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.png",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/heatmap.png",
           "id": "heatmap",
           "title": "Top50 热图",
@@ -977,7 +977,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "heatmap"
           }
@@ -987,7 +987,7 @@
           "type": "file",
           "label": "Top50 g\u0003-e\u001b> (PDF)",
           "filename": "heatmap.pdf",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.pdf",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.pdf",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/heatmap.pdf",
           "id": "artifact_9",
           "title": "Top50 g\u0003-e\u001b> (PDF)",
@@ -998,7 +998,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_9"
           }
@@ -1008,7 +1008,7 @@
           "type": "plot",
           "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
           "filename": "library_size.png",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.png",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.png",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/library_size.png",
           "id": "artifact_10",
           "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
@@ -1019,7 +1019,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_10"
           }
@@ -1029,7 +1029,7 @@
           "type": "file",
           "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
           "filename": "library_size.pdf",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.pdf",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.pdf",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/library_size.pdf",
           "id": "artifact_11",
           "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
@@ -1040,7 +1040,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_11"
           }
@@ -1050,7 +1050,7 @@
           "type": "plot",
           "label": "g&;f\u0015#e:&d<0h.! (PNG)",
           "filename": "dispersion.png",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.png",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.png",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/dispersion.png",
           "id": "artifact_12",
           "title": "g&;f\u0015#e:&d<0h.! (PNG)",
@@ -1061,7 +1061,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_12"
           }
@@ -1071,7 +1071,7 @@
           "type": "file",
           "label": "g&;f\u0015#e:&d<0h.! (PDF)",
           "filename": "dispersion.pdf",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.pdf",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.pdf",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/dispersion.pdf",
           "id": "artifact_13",
           "title": "g&;f\u0015#e:&d<0h.! (PDF)",
@@ -1082,7 +1082,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_13"
           }
@@ -1092,7 +1092,7 @@
           "type": "plot",
           "label": "MA e\u001b> (PNG)",
           "filename": "ma_plot.png",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.png",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.png",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/ma_plot.png",
           "id": "artifact_14",
           "title": "MA e\u001b> (PNG)",
@@ -1103,7 +1103,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_14"
           }
@@ -1113,7 +1113,7 @@
           "type": "file",
           "label": "MA e\u001b> (PDF)",
           "filename": "ma_plot.pdf",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.pdf",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.pdf",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/ma_plot.pdf",
           "id": "artifact_15",
           "title": "MA e\u001b> (PDF)",
@@ -1124,7 +1124,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_15"
           }
@@ -1134,7 +1134,7 @@
           "type": "plot",
           "label": "f 7f\u001c,h7\u001dg&; (PNG)",
           "filename": "sample_distance.png",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.png",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.png",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/sample_distance.png",
           "id": "artifact_16",
           "title": "f 7f\u001c,h7\u001dg&; (PNG)",
@@ -1145,7 +1145,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_16"
           }
@@ -1155,7 +1155,7 @@
           "type": "file",
           "label": "f 7f\u001c,h7\u001dg&; (PDF)",
           "filename": "sample_distance.pdf",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.pdf",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.pdf",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/sample_distance.pdf",
           "id": "artifact_17",
           "title": "f 7f\u001c,h7\u001dg&; (PDF)",
@@ -1166,7 +1166,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_17"
           }
@@ -1176,7 +1176,7 @@
           "type": "data",
           "label": "VST 矩阵",
           "filename": "vst_matrix.csv",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\vst_matrix.csv",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\vst_matrix.csv",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/vst_matrix.csv",
           "id": "vst_matrix",
           "title": "VST 矩阵",
@@ -1187,7 +1187,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "vst_matrix"
           }
@@ -1197,7 +1197,7 @@
           "type": "table",
           "label": "f 7f\u001c,d<bf>!f\u0001/",
           "filename": "coldata_info.csv",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\coldata_info.csv",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\coldata_info.csv",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/coldata_info.csv",
           "id": "artifact_19",
           "title": "f 7f\u001c,d<bf>!f\u0001/",
@@ -1208,7 +1208,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_19"
           }
@@ -1218,7 +1218,7 @@
           "type": "table",
           "label": "g&;f\u0015#e:&f\u00150f\r.",
           "filename": "dispersion_data.csv",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion_data.csv",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion_data.csv",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/dispersion_data.csv",
           "id": "artifact_20",
           "title": "g&;f\u0015#e:&f\u00150f\r.",
@@ -1229,7 +1229,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_20"
           }
@@ -1239,7 +1239,7 @@
           "type": "text",
           "label": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
           "filename": "summary.txt",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\summary.txt",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\summary.txt",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/summary.txt",
           "id": "artifact_21",
           "title": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
@@ -1250,7 +1250,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_21"
           }
@@ -1260,7 +1260,7 @@
           "type": "report",
           "label": "解读报告",
           "filename": "report.html",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\report.html",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\report.html",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/report.html",
           "id": "report",
           "title": "解读报告",
@@ -1271,7 +1271,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "report"
           }
@@ -1283,7 +1283,7 @@
           "label": "全部结果打包下载",
           "name": "all_results.zip",
           "title": "全部结果打包下载",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\all_results.zip",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\all_results.zip",
           "size": 558681,
           "sha256": "9d2052cbbfc00e26a72b3935299268fe8fc69b1bc553670e2b0df71ff4609753",
           "required": true,
@@ -1292,7 +1292,7 @@
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/all_results.zip",
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "zip"
           }
@@ -1304,7 +1304,7 @@
           "type": "text",
           "label": "run.log",
           "title": "run.log",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\run.log",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\run.log",
           "size": 2384,
           "sha256": "91f52e1b68bac76825e16dfc81d90f349e4deb1014a46ee73e011652da40a560",
           "required": false,
@@ -1313,7 +1313,7 @@
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/run.log",
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_24"
           }
@@ -1325,7 +1325,7 @@
           "type": "table",
           "label": "差异基因表",
           "filename": "deg_table.csv",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\deg_table.csv",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\deg_table.csv",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/deg_table.csv",
           "id": "deg_table",
           "title": "差异基因表",
@@ -1336,7 +1336,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "deg_table"
           }
@@ -1346,7 +1346,7 @@
           "type": "table",
           "label": "d8\nh0\u0003e\u001f:e\u001b ",
           "filename": "up_genes.csv",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\up_genes.csv",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\up_genes.csv",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/up_genes.csv",
           "id": "artifact_2",
           "title": "d8\nh0\u0003e\u001f:e\u001b ",
@@ -1357,7 +1357,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_2"
           }
@@ -1367,7 +1367,7 @@
           "type": "table",
           "label": "d8\u000bh0\u0003e\u001f:e\u001b ",
           "filename": "down_genes.csv",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\down_genes.csv",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\down_genes.csv",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/down_genes.csv",
           "id": "artifact_3",
           "title": "d8\u000bh0\u0003e\u001f:e\u001b ",
@@ -1378,7 +1378,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_3"
           }
@@ -1388,7 +1388,7 @@
           "type": "plot",
           "label": "火山图",
           "filename": "volcano.png",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.png",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.png",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/volcano.png",
           "id": "volcano",
           "title": "火山图",
@@ -1399,7 +1399,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "volcano"
           }
@@ -1409,7 +1409,7 @@
           "type": "file",
           "label": "g\u0001+e11e\u001b> (PDF)",
           "filename": "volcano.pdf",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.pdf",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.pdf",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/volcano.pdf",
           "id": "artifact_5",
           "title": "g\u0001+e11e\u001b> (PDF)",
@@ -1420,7 +1420,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_5"
           }
@@ -1430,7 +1430,7 @@
           "type": "plot",
           "label": "PCA 图",
           "filename": "pca.png",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.png",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.png",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/pca.png",
           "id": "pca",
           "title": "PCA 图",
@@ -1441,7 +1441,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "pca"
           }
@@ -1451,7 +1451,7 @@
           "type": "file",
           "label": "PCA e\u001b> (PDF)",
           "filename": "pca.pdf",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.pdf",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.pdf",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/pca.pdf",
           "id": "artifact_7",
           "title": "PCA e\u001b> (PDF)",
@@ -1462,7 +1462,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_7"
           }
@@ -1472,7 +1472,7 @@
           "type": "plot",
           "label": "Top50 热图",
           "filename": "heatmap.png",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.png",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.png",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/heatmap.png",
           "id": "heatmap",
           "title": "Top50 热图",
@@ -1483,7 +1483,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "heatmap"
           }
@@ -1493,7 +1493,7 @@
           "type": "file",
           "label": "Top50 g\u0003-e\u001b> (PDF)",
           "filename": "heatmap.pdf",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.pdf",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.pdf",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/heatmap.pdf",
           "id": "artifact_9",
           "title": "Top50 g\u0003-e\u001b> (PDF)",
@@ -1504,7 +1504,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_9"
           }
@@ -1514,7 +1514,7 @@
           "type": "plot",
           "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
           "filename": "library_size.png",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.png",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.png",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/library_size.png",
           "id": "artifact_10",
           "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
@@ -1525,7 +1525,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_10"
           }
@@ -1535,7 +1535,7 @@
           "type": "file",
           "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
           "filename": "library_size.pdf",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.pdf",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.pdf",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/library_size.pdf",
           "id": "artifact_11",
           "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
@@ -1546,7 +1546,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_11"
           }
@@ -1556,7 +1556,7 @@
           "type": "plot",
           "label": "g&;f\u0015#e:&d<0h.! (PNG)",
           "filename": "dispersion.png",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.png",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.png",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/dispersion.png",
           "id": "artifact_12",
           "title": "g&;f\u0015#e:&d<0h.! (PNG)",
@@ -1567,7 +1567,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_12"
           }
@@ -1577,7 +1577,7 @@
           "type": "file",
           "label": "g&;f\u0015#e:&d<0h.! (PDF)",
           "filename": "dispersion.pdf",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.pdf",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.pdf",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/dispersion.pdf",
           "id": "artifact_13",
           "title": "g&;f\u0015#e:&d<0h.! (PDF)",
@@ -1588,7 +1588,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_13"
           }
@@ -1598,7 +1598,7 @@
           "type": "plot",
           "label": "MA e\u001b> (PNG)",
           "filename": "ma_plot.png",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.png",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.png",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/ma_plot.png",
           "id": "artifact_14",
           "title": "MA e\u001b> (PNG)",
@@ -1609,7 +1609,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_14"
           }
@@ -1619,7 +1619,7 @@
           "type": "file",
           "label": "MA e\u001b> (PDF)",
           "filename": "ma_plot.pdf",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.pdf",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.pdf",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/ma_plot.pdf",
           "id": "artifact_15",
           "title": "MA e\u001b> (PDF)",
@@ -1630,7 +1630,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_15"
           }
@@ -1640,7 +1640,7 @@
           "type": "plot",
           "label": "f 7f\u001c,h7\u001dg&; (PNG)",
           "filename": "sample_distance.png",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.png",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.png",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/sample_distance.png",
           "id": "artifact_16",
           "title": "f 7f\u001c,h7\u001dg&; (PNG)",
@@ -1651,7 +1651,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_16"
           }
@@ -1661,7 +1661,7 @@
           "type": "file",
           "label": "f 7f\u001c,h7\u001dg&; (PDF)",
           "filename": "sample_distance.pdf",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.pdf",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.pdf",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/sample_distance.pdf",
           "id": "artifact_17",
           "title": "f 7f\u001c,h7\u001dg&; (PDF)",
@@ -1672,7 +1672,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_17"
           }
@@ -1682,7 +1682,7 @@
           "type": "data",
           "label": "VST 矩阵",
           "filename": "vst_matrix.csv",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\vst_matrix.csv",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\vst_matrix.csv",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/vst_matrix.csv",
           "id": "vst_matrix",
           "title": "VST 矩阵",
@@ -1693,7 +1693,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "vst_matrix"
           }
@@ -1703,7 +1703,7 @@
           "type": "table",
           "label": "f 7f\u001c,d<bf>!f\u0001/",
           "filename": "coldata_info.csv",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\coldata_info.csv",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\coldata_info.csv",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/coldata_info.csv",
           "id": "artifact_19",
           "title": "f 7f\u001c,d<bf>!f\u0001/",
@@ -1714,7 +1714,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_19"
           }
@@ -1724,7 +1724,7 @@
           "type": "table",
           "label": "g&;f\u0015#e:&f\u00150f\r.",
           "filename": "dispersion_data.csv",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion_data.csv",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion_data.csv",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/dispersion_data.csv",
           "id": "artifact_20",
           "title": "g&;f\u0015#e:&f\u00150f\r.",
@@ -1735,7 +1735,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_20"
           }
@@ -1745,7 +1745,7 @@
           "type": "text",
           "label": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
           "filename": "summary.txt",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\summary.txt",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\summary.txt",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/summary.txt",
           "id": "artifact_21",
           "title": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
@@ -1756,7 +1756,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_21"
           }
@@ -1766,7 +1766,7 @@
           "type": "report",
           "label": "解读报告",
           "filename": "report.html",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\report.html",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\report.html",
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/report.html",
           "id": "report",
           "title": "解读报告",
@@ -1777,7 +1777,7 @@
           "download": true,
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "report"
           }
@@ -1789,7 +1789,7 @@
           "label": "全部结果打包下载",
           "name": "all_results.zip",
           "title": "全部结果打包下载",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\all_results.zip",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\all_results.zip",
           "size": 558681,
           "sha256": "9d2052cbbfc00e26a72b3935299268fe8fc69b1bc553670e2b0df71ff4609753",
           "required": true,
@@ -1798,7 +1798,7 @@
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/all_results.zip",
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "zip"
           }
@@ -1810,7 +1810,7 @@
           "type": "text",
           "label": "run.log",
           "title": "run.log",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\run.log",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\run.log",
           "size": 2384,
           "sha256": "91f52e1b68bac76825e16dfc81d90f349e4deb1014a46ee73e011652da40a560",
           "required": false,
@@ -1819,7 +1819,7 @@
           "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/run.log",
           "provenance": {
             "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-            "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+            "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
             "toolJobId": "job_a7ade42394874d1e",
             "reproductionTarget": "artifact_24"
           }
@@ -1848,7 +1848,7 @@
         },
         "runtime": {
           "name": "r",
-          "command": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\runtimes\\R\\bin\\Rscript.exe",
+          "command": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\runtimes\\R\\bin\\Rscript.exe",
           "version": "4.5.2",
           "versionSource": "runtime_probe",
           "readiness": true
@@ -1890,17 +1890,17 @@
           }
         ],
         "script": {
-          "snapshotPath": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\run-script.R",
+          "snapshotPath": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\run-script.R",
           "sha256": "7c6bac471c53137bb69bfd6e112dffb71a0ade47cbea525b421bce15b9326dbb",
           "entryPoint": null
         },
         "command": {
-          "executable": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\runtimes\\R\\bin\\Rscript.exe",
+          "executable": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\runtimes\\R\\bin\\Rscript.exe",
           "args": [
-            "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\run-script.R",
-            "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e"
+            "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\run-script.R",
+            "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e"
           ],
-          "cwd": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e"
+          "cwd": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e"
         },
         "startedAt": "2026-09-18T15:22:46.849Z",
         "completedAt": "2026-09-18T15:22:54.745Z",
@@ -2078,7 +2078,7 @@
       },
       "provenanceRef": {
         "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
         "toolJobId": "job_a7ade42394874d1e"
       }
     }
@@ -2090,7 +2090,7 @@
         "type": "table",
         "label": "差异基因表",
         "filename": "deg_table.csv",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\deg_table.csv",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\deg_table.csv",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/deg_table.csv",
         "id": "deg_table",
         "title": "差异基因表",
@@ -2101,7 +2101,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "deg_table"
         }
@@ -2111,7 +2111,7 @@
         "type": "table",
         "label": "d8\nh0\u0003e\u001f:e\u001b ",
         "filename": "up_genes.csv",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\up_genes.csv",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\up_genes.csv",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/up_genes.csv",
         "id": "artifact_2",
         "title": "d8\nh0\u0003e\u001f:e\u001b ",
@@ -2122,7 +2122,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_2"
         }
@@ -2132,7 +2132,7 @@
         "type": "table",
         "label": "d8\u000bh0\u0003e\u001f:e\u001b ",
         "filename": "down_genes.csv",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\down_genes.csv",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\down_genes.csv",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/down_genes.csv",
         "id": "artifact_3",
         "title": "d8\u000bh0\u0003e\u001f:e\u001b ",
@@ -2143,7 +2143,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_3"
         }
@@ -2153,7 +2153,7 @@
         "type": "plot",
         "label": "火山图",
         "filename": "volcano.png",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.png",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.png",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/volcano.png",
         "id": "volcano",
         "title": "火山图",
@@ -2164,7 +2164,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "volcano"
         }
@@ -2174,7 +2174,7 @@
         "type": "file",
         "label": "g\u0001+e11e\u001b> (PDF)",
         "filename": "volcano.pdf",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.pdf",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.pdf",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/volcano.pdf",
         "id": "artifact_5",
         "title": "g\u0001+e11e\u001b> (PDF)",
@@ -2185,7 +2185,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_5"
         }
@@ -2195,7 +2195,7 @@
         "type": "plot",
         "label": "PCA 图",
         "filename": "pca.png",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.png",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.png",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/pca.png",
         "id": "pca",
         "title": "PCA 图",
@@ -2206,7 +2206,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "pca"
         }
@@ -2216,7 +2216,7 @@
         "type": "file",
         "label": "PCA e\u001b> (PDF)",
         "filename": "pca.pdf",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.pdf",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.pdf",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/pca.pdf",
         "id": "artifact_7",
         "title": "PCA e\u001b> (PDF)",
@@ -2227,7 +2227,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_7"
         }
@@ -2237,7 +2237,7 @@
         "type": "plot",
         "label": "Top50 热图",
         "filename": "heatmap.png",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.png",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.png",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/heatmap.png",
         "id": "heatmap",
         "title": "Top50 热图",
@@ -2248,7 +2248,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "heatmap"
         }
@@ -2258,7 +2258,7 @@
         "type": "file",
         "label": "Top50 g\u0003-e\u001b> (PDF)",
         "filename": "heatmap.pdf",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.pdf",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.pdf",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/heatmap.pdf",
         "id": "artifact_9",
         "title": "Top50 g\u0003-e\u001b> (PDF)",
@@ -2269,7 +2269,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_9"
         }
@@ -2279,7 +2279,7 @@
         "type": "plot",
         "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
         "filename": "library_size.png",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.png",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.png",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/library_size.png",
         "id": "artifact_10",
         "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
@@ -2290,7 +2290,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_10"
         }
@@ -2300,7 +2300,7 @@
         "type": "file",
         "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
         "filename": "library_size.pdf",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.pdf",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.pdf",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/library_size.pdf",
         "id": "artifact_11",
         "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
@@ -2311,7 +2311,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_11"
         }
@@ -2321,7 +2321,7 @@
         "type": "plot",
         "label": "g&;f\u0015#e:&d<0h.! (PNG)",
         "filename": "dispersion.png",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.png",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.png",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/dispersion.png",
         "id": "artifact_12",
         "title": "g&;f\u0015#e:&d<0h.! (PNG)",
@@ -2332,7 +2332,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_12"
         }
@@ -2342,7 +2342,7 @@
         "type": "file",
         "label": "g&;f\u0015#e:&d<0h.! (PDF)",
         "filename": "dispersion.pdf",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.pdf",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.pdf",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/dispersion.pdf",
         "id": "artifact_13",
         "title": "g&;f\u0015#e:&d<0h.! (PDF)",
@@ -2353,7 +2353,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_13"
         }
@@ -2363,7 +2363,7 @@
         "type": "plot",
         "label": "MA e\u001b> (PNG)",
         "filename": "ma_plot.png",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.png",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.png",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/ma_plot.png",
         "id": "artifact_14",
         "title": "MA e\u001b> (PNG)",
@@ -2374,7 +2374,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_14"
         }
@@ -2384,7 +2384,7 @@
         "type": "file",
         "label": "MA e\u001b> (PDF)",
         "filename": "ma_plot.pdf",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.pdf",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.pdf",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/ma_plot.pdf",
         "id": "artifact_15",
         "title": "MA e\u001b> (PDF)",
@@ -2395,7 +2395,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_15"
         }
@@ -2405,7 +2405,7 @@
         "type": "plot",
         "label": "f 7f\u001c,h7\u001dg&; (PNG)",
         "filename": "sample_distance.png",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.png",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.png",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/sample_distance.png",
         "id": "artifact_16",
         "title": "f 7f\u001c,h7\u001dg&; (PNG)",
@@ -2416,7 +2416,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_16"
         }
@@ -2426,7 +2426,7 @@
         "type": "file",
         "label": "f 7f\u001c,h7\u001dg&; (PDF)",
         "filename": "sample_distance.pdf",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.pdf",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.pdf",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/sample_distance.pdf",
         "id": "artifact_17",
         "title": "f 7f\u001c,h7\u001dg&; (PDF)",
@@ -2437,7 +2437,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_17"
         }
@@ -2447,7 +2447,7 @@
         "type": "data",
         "label": "VST 矩阵",
         "filename": "vst_matrix.csv",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\vst_matrix.csv",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\vst_matrix.csv",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/vst_matrix.csv",
         "id": "vst_matrix",
         "title": "VST 矩阵",
@@ -2458,7 +2458,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "vst_matrix"
         }
@@ -2468,7 +2468,7 @@
         "type": "table",
         "label": "f 7f\u001c,d<bf>!f\u0001/",
         "filename": "coldata_info.csv",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\coldata_info.csv",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\coldata_info.csv",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/coldata_info.csv",
         "id": "artifact_19",
         "title": "f 7f\u001c,d<bf>!f\u0001/",
@@ -2479,7 +2479,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_19"
         }
@@ -2489,7 +2489,7 @@
         "type": "table",
         "label": "g&;f\u0015#e:&f\u00150f\r.",
         "filename": "dispersion_data.csv",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion_data.csv",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion_data.csv",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/dispersion_data.csv",
         "id": "artifact_20",
         "title": "g&;f\u0015#e:&f\u00150f\r.",
@@ -2500,7 +2500,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_20"
         }
@@ -2510,7 +2510,7 @@
         "type": "text",
         "label": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
         "filename": "summary.txt",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\summary.txt",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\summary.txt",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/summary.txt",
         "id": "artifact_21",
         "title": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
@@ -2521,7 +2521,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_21"
         }
@@ -2531,7 +2531,7 @@
         "type": "report",
         "label": "解读报告",
         "filename": "report.html",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\report.html",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\report.html",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/report.html",
         "id": "report",
         "title": "解读报告",
@@ -2542,7 +2542,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "report"
         }
@@ -2554,7 +2554,7 @@
         "label": "全部结果打包下载",
         "name": "all_results.zip",
         "title": "全部结果打包下载",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\all_results.zip",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\all_results.zip",
         "size": 558681,
         "sha256": "9d2052cbbfc00e26a72b3935299268fe8fc69b1bc553670e2b0df71ff4609753",
         "required": true,
@@ -2563,7 +2563,7 @@
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/all_results.zip",
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "zip"
         }
@@ -2575,7 +2575,7 @@
         "type": "text",
         "label": "run.log",
         "title": "run.log",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\run.log",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\run.log",
         "size": 2384,
         "sha256": "91f52e1b68bac76825e16dfc81d90f349e4deb1014a46ee73e011652da40a560",
         "required": false,
@@ -2584,7 +2584,7 @@
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/run.log",
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_24"
         }
@@ -2721,9 +2721,9 @@
       }
     },
     "toolJobId": "job_a7ade42394874d1e",
-    "jobDir": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e",
-    "outputDir": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
-    "resultDir": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
+    "jobDir": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e",
+    "outputDir": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
+    "resultDir": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
     "canonicalJobDir": "/work/petri/tool-jobs/job_a7ade42394874d1e",
     "canonicalOutputDir": "/work/petri/tool-jobs/job_a7ade42394874d1e/output",
     "canonicalResultDir": "/work/petri/tool-jobs/job_a7ade42394874d1e/output",
@@ -2740,15 +2740,15 @@
       "runtimeReady": {
         "runtime": "r",
         "ready": true,
-        "command": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\runtimes\\R\\bin\\Rscript.exe",
+        "command": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\runtimes\\R\\bin\\Rscript.exe",
         "reason": null
       },
-      "workDir": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e",
+      "workDir": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e",
       "canonicalWorkDir": "/work/petri/tool-jobs/job_a7ade42394874d1e",
-      "executionWorkDir": "D:/1.WorkDir/petri-desktop/.petri-dev-user-data/data/results/tool-jobs/job_a7ade42394874d1e",
-      "outputDir": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
+      "executionWorkDir": "D:/<workdir>/petri-desktop/.petri-dev-user-data/data/results/tool-jobs/job_a7ade42394874d1e",
+      "outputDir": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
       "canonicalOutputDir": "/work/petri/tool-jobs/job_a7ade42394874d1e/output",
-      "resultDir": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
+      "resultDir": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
       "canonicalResultDir": "/work/petri/tool-jobs/job_a7ade42394874d1e/output"
     },
     "resourceUsage": {
@@ -2833,7 +2833,7 @@
       "artifactTruthVersion": 1,
       "status": "valid",
       "blocking": false,
-      "resultDir": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
+      "resultDir": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output",
       "declaredCount": 24,
       "actualCount": 24,
       "validCount": 24,
@@ -2852,7 +2852,7 @@
         "type": "table",
         "label": "差异基因表",
         "filename": "deg_table.csv",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\deg_table.csv",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\deg_table.csv",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/deg_table.csv",
         "id": "deg_table",
         "title": "差异基因表",
@@ -2863,7 +2863,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "deg_table"
         }
@@ -2873,7 +2873,7 @@
         "type": "table",
         "label": "d8\nh0\u0003e\u001f:e\u001b ",
         "filename": "up_genes.csv",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\up_genes.csv",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\up_genes.csv",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/up_genes.csv",
         "id": "artifact_2",
         "title": "d8\nh0\u0003e\u001f:e\u001b ",
@@ -2884,7 +2884,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_2"
         }
@@ -2894,7 +2894,7 @@
         "type": "table",
         "label": "d8\u000bh0\u0003e\u001f:e\u001b ",
         "filename": "down_genes.csv",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\down_genes.csv",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\down_genes.csv",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/down_genes.csv",
         "id": "artifact_3",
         "title": "d8\u000bh0\u0003e\u001f:e\u001b ",
@@ -2905,7 +2905,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_3"
         }
@@ -2915,7 +2915,7 @@
         "type": "plot",
         "label": "火山图",
         "filename": "volcano.png",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.png",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.png",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/volcano.png",
         "id": "volcano",
         "title": "火山图",
@@ -2926,7 +2926,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "volcano"
         }
@@ -2936,7 +2936,7 @@
         "type": "file",
         "label": "g\u0001+e11e\u001b> (PDF)",
         "filename": "volcano.pdf",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.pdf",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.pdf",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/volcano.pdf",
         "id": "artifact_5",
         "title": "g\u0001+e11e\u001b> (PDF)",
@@ -2947,7 +2947,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_5"
         }
@@ -2957,7 +2957,7 @@
         "type": "plot",
         "label": "PCA 图",
         "filename": "pca.png",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.png",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.png",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/pca.png",
         "id": "pca",
         "title": "PCA 图",
@@ -2968,7 +2968,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "pca"
         }
@@ -2978,7 +2978,7 @@
         "type": "file",
         "label": "PCA e\u001b> (PDF)",
         "filename": "pca.pdf",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.pdf",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.pdf",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/pca.pdf",
         "id": "artifact_7",
         "title": "PCA e\u001b> (PDF)",
@@ -2989,7 +2989,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_7"
         }
@@ -2999,7 +2999,7 @@
         "type": "plot",
         "label": "Top50 热图",
         "filename": "heatmap.png",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.png",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.png",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/heatmap.png",
         "id": "heatmap",
         "title": "Top50 热图",
@@ -3010,7 +3010,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "heatmap"
         }
@@ -3020,7 +3020,7 @@
         "type": "file",
         "label": "Top50 g\u0003-e\u001b> (PDF)",
         "filename": "heatmap.pdf",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.pdf",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.pdf",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/heatmap.pdf",
         "id": "artifact_9",
         "title": "Top50 g\u0003-e\u001b> (PDF)",
@@ -3031,7 +3031,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_9"
         }
@@ -3041,7 +3041,7 @@
         "type": "plot",
         "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
         "filename": "library_size.png",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.png",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.png",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/library_size.png",
         "id": "artifact_10",
         "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
@@ -3052,7 +3052,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_10"
         }
@@ -3062,7 +3062,7 @@
         "type": "file",
         "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
         "filename": "library_size.pdf",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.pdf",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.pdf",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/library_size.pdf",
         "id": "artifact_11",
         "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
@@ -3073,7 +3073,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_11"
         }
@@ -3083,7 +3083,7 @@
         "type": "plot",
         "label": "g&;f\u0015#e:&d<0h.! (PNG)",
         "filename": "dispersion.png",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.png",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.png",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/dispersion.png",
         "id": "artifact_12",
         "title": "g&;f\u0015#e:&d<0h.! (PNG)",
@@ -3094,7 +3094,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_12"
         }
@@ -3104,7 +3104,7 @@
         "type": "file",
         "label": "g&;f\u0015#e:&d<0h.! (PDF)",
         "filename": "dispersion.pdf",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.pdf",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.pdf",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/dispersion.pdf",
         "id": "artifact_13",
         "title": "g&;f\u0015#e:&d<0h.! (PDF)",
@@ -3115,7 +3115,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_13"
         }
@@ -3125,7 +3125,7 @@
         "type": "plot",
         "label": "MA e\u001b> (PNG)",
         "filename": "ma_plot.png",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.png",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.png",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/ma_plot.png",
         "id": "artifact_14",
         "title": "MA e\u001b> (PNG)",
@@ -3136,7 +3136,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_14"
         }
@@ -3146,7 +3146,7 @@
         "type": "file",
         "label": "MA e\u001b> (PDF)",
         "filename": "ma_plot.pdf",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.pdf",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.pdf",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/ma_plot.pdf",
         "id": "artifact_15",
         "title": "MA e\u001b> (PDF)",
@@ -3157,7 +3157,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_15"
         }
@@ -3167,7 +3167,7 @@
         "type": "plot",
         "label": "f 7f\u001c,h7\u001dg&; (PNG)",
         "filename": "sample_distance.png",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.png",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.png",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/sample_distance.png",
         "id": "artifact_16",
         "title": "f 7f\u001c,h7\u001dg&; (PNG)",
@@ -3178,7 +3178,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_16"
         }
@@ -3188,7 +3188,7 @@
         "type": "file",
         "label": "f 7f\u001c,h7\u001dg&; (PDF)",
         "filename": "sample_distance.pdf",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.pdf",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.pdf",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/sample_distance.pdf",
         "id": "artifact_17",
         "title": "f 7f\u001c,h7\u001dg&; (PDF)",
@@ -3199,7 +3199,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_17"
         }
@@ -3209,7 +3209,7 @@
         "type": "data",
         "label": "VST 矩阵",
         "filename": "vst_matrix.csv",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\vst_matrix.csv",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\vst_matrix.csv",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/vst_matrix.csv",
         "id": "vst_matrix",
         "title": "VST 矩阵",
@@ -3220,7 +3220,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "vst_matrix"
         }
@@ -3230,7 +3230,7 @@
         "type": "table",
         "label": "f 7f\u001c,d<bf>!f\u0001/",
         "filename": "coldata_info.csv",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\coldata_info.csv",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\coldata_info.csv",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/coldata_info.csv",
         "id": "artifact_19",
         "title": "f 7f\u001c,d<bf>!f\u0001/",
@@ -3241,7 +3241,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_19"
         }
@@ -3251,7 +3251,7 @@
         "type": "table",
         "label": "g&;f\u0015#e:&f\u00150f\r.",
         "filename": "dispersion_data.csv",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion_data.csv",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion_data.csv",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/dispersion_data.csv",
         "id": "artifact_20",
         "title": "g&;f\u0015#e:&f\u00150f\r.",
@@ -3262,7 +3262,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_20"
         }
@@ -3272,7 +3272,7 @@
         "type": "text",
         "label": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
         "filename": "summary.txt",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\summary.txt",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\summary.txt",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/summary.txt",
         "id": "artifact_21",
         "title": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
@@ -3283,7 +3283,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_21"
         }
@@ -3293,7 +3293,7 @@
         "type": "report",
         "label": "解读报告",
         "filename": "report.html",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\report.html",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\report.html",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/report.html",
         "id": "report",
         "title": "解读报告",
@@ -3304,7 +3304,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "report"
         }
@@ -3316,7 +3316,7 @@
         "label": "全部结果打包下载",
         "name": "all_results.zip",
         "title": "全部结果打包下载",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\all_results.zip",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\all_results.zip",
         "size": 558681,
         "sha256": "9d2052cbbfc00e26a72b3935299268fe8fc69b1bc553670e2b0df71ff4609753",
         "required": true,
@@ -3325,7 +3325,7 @@
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/all_results.zip",
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "zip"
         }
@@ -3337,7 +3337,7 @@
         "type": "text",
         "label": "run.log",
         "title": "run.log",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\run.log",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\run.log",
         "size": 2384,
         "sha256": "91f52e1b68bac76825e16dfc81d90f349e4deb1014a46ee73e011652da40a560",
         "required": false,
@@ -3346,7 +3346,7 @@
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/run.log",
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_24"
         }
@@ -3358,7 +3358,7 @@
         "type": "table",
         "label": "差异基因表",
         "filename": "deg_table.csv",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\deg_table.csv",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\deg_table.csv",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/deg_table.csv",
         "id": "deg_table",
         "title": "差异基因表",
@@ -3369,7 +3369,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "deg_table"
         }
@@ -3379,7 +3379,7 @@
         "type": "table",
         "label": "d8\nh0\u0003e\u001f:e\u001b ",
         "filename": "up_genes.csv",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\up_genes.csv",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\up_genes.csv",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/up_genes.csv",
         "id": "artifact_2",
         "title": "d8\nh0\u0003e\u001f:e\u001b ",
@@ -3390,7 +3390,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_2"
         }
@@ -3400,7 +3400,7 @@
         "type": "table",
         "label": "d8\u000bh0\u0003e\u001f:e\u001b ",
         "filename": "down_genes.csv",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\down_genes.csv",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\down_genes.csv",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/down_genes.csv",
         "id": "artifact_3",
         "title": "d8\u000bh0\u0003e\u001f:e\u001b ",
@@ -3411,7 +3411,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_3"
         }
@@ -3421,7 +3421,7 @@
         "type": "plot",
         "label": "火山图",
         "filename": "volcano.png",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.png",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.png",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/volcano.png",
         "id": "volcano",
         "title": "火山图",
@@ -3432,7 +3432,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "volcano"
         }
@@ -3442,7 +3442,7 @@
         "type": "file",
         "label": "g\u0001+e11e\u001b> (PDF)",
         "filename": "volcano.pdf",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.pdf",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\volcano.pdf",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/volcano.pdf",
         "id": "artifact_5",
         "title": "g\u0001+e11e\u001b> (PDF)",
@@ -3453,7 +3453,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_5"
         }
@@ -3463,7 +3463,7 @@
         "type": "plot",
         "label": "PCA 图",
         "filename": "pca.png",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.png",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.png",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/pca.png",
         "id": "pca",
         "title": "PCA 图",
@@ -3474,7 +3474,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "pca"
         }
@@ -3484,7 +3484,7 @@
         "type": "file",
         "label": "PCA e\u001b> (PDF)",
         "filename": "pca.pdf",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.pdf",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\pca.pdf",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/pca.pdf",
         "id": "artifact_7",
         "title": "PCA e\u001b> (PDF)",
@@ -3495,7 +3495,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_7"
         }
@@ -3505,7 +3505,7 @@
         "type": "plot",
         "label": "Top50 热图",
         "filename": "heatmap.png",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.png",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.png",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/heatmap.png",
         "id": "heatmap",
         "title": "Top50 热图",
@@ -3516,7 +3516,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "heatmap"
         }
@@ -3526,7 +3526,7 @@
         "type": "file",
         "label": "Top50 g\u0003-e\u001b> (PDF)",
         "filename": "heatmap.pdf",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.pdf",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\heatmap.pdf",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/heatmap.pdf",
         "id": "artifact_9",
         "title": "Top50 g\u0003-e\u001b> (PDF)",
@@ -3537,7 +3537,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_9"
         }
@@ -3547,7 +3547,7 @@
         "type": "plot",
         "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
         "filename": "library_size.png",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.png",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.png",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/library_size.png",
         "id": "artifact_10",
         "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PNG)",
@@ -3558,7 +3558,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_10"
         }
@@ -3568,7 +3568,7 @@
         "type": "file",
         "label": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
         "filename": "library_size.pdf",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.pdf",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\library_size.pdf",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/library_size.pdf",
         "id": "artifact_11",
         "title": "f\u0016\u0007e:\u0013e$'e0\u000f (PDF)",
@@ -3579,7 +3579,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_11"
         }
@@ -3589,7 +3589,7 @@
         "type": "plot",
         "label": "g&;f\u0015#e:&d<0h.! (PNG)",
         "filename": "dispersion.png",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.png",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.png",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/dispersion.png",
         "id": "artifact_12",
         "title": "g&;f\u0015#e:&d<0h.! (PNG)",
@@ -3600,7 +3600,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_12"
         }
@@ -3610,7 +3610,7 @@
         "type": "file",
         "label": "g&;f\u0015#e:&d<0h.! (PDF)",
         "filename": "dispersion.pdf",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.pdf",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion.pdf",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/dispersion.pdf",
         "id": "artifact_13",
         "title": "g&;f\u0015#e:&d<0h.! (PDF)",
@@ -3621,7 +3621,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_13"
         }
@@ -3631,7 +3631,7 @@
         "type": "plot",
         "label": "MA e\u001b> (PNG)",
         "filename": "ma_plot.png",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.png",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.png",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/ma_plot.png",
         "id": "artifact_14",
         "title": "MA e\u001b> (PNG)",
@@ -3642,7 +3642,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_14"
         }
@@ -3652,7 +3652,7 @@
         "type": "file",
         "label": "MA e\u001b> (PDF)",
         "filename": "ma_plot.pdf",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.pdf",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\ma_plot.pdf",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/ma_plot.pdf",
         "id": "artifact_15",
         "title": "MA e\u001b> (PDF)",
@@ -3663,7 +3663,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_15"
         }
@@ -3673,7 +3673,7 @@
         "type": "plot",
         "label": "f 7f\u001c,h7\u001dg&; (PNG)",
         "filename": "sample_distance.png",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.png",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.png",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/sample_distance.png",
         "id": "artifact_16",
         "title": "f 7f\u001c,h7\u001dg&; (PNG)",
@@ -3684,7 +3684,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_16"
         }
@@ -3694,7 +3694,7 @@
         "type": "file",
         "label": "f 7f\u001c,h7\u001dg&; (PDF)",
         "filename": "sample_distance.pdf",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.pdf",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\sample_distance.pdf",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/sample_distance.pdf",
         "id": "artifact_17",
         "title": "f 7f\u001c,h7\u001dg&; (PDF)",
@@ -3705,7 +3705,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_17"
         }
@@ -3715,7 +3715,7 @@
         "type": "data",
         "label": "VST 矩阵",
         "filename": "vst_matrix.csv",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\vst_matrix.csv",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\vst_matrix.csv",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/vst_matrix.csv",
         "id": "vst_matrix",
         "title": "VST 矩阵",
@@ -3726,7 +3726,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "vst_matrix"
         }
@@ -3736,7 +3736,7 @@
         "type": "table",
         "label": "f 7f\u001c,d<bf>!f\u0001/",
         "filename": "coldata_info.csv",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\coldata_info.csv",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\coldata_info.csv",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/coldata_info.csv",
         "id": "artifact_19",
         "title": "f 7f\u001c,d<bf>!f\u0001/",
@@ -3747,7 +3747,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_19"
         }
@@ -3757,7 +3757,7 @@
         "type": "table",
         "label": "g&;f\u0015#e:&f\u00150f\r.",
         "filename": "dispersion_data.csv",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion_data.csv",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\dispersion_data.csv",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/dispersion_data.csv",
         "id": "artifact_20",
         "title": "g&;f\u0015#e:&f\u00150f\r.",
@@ -3768,7 +3768,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_20"
         }
@@ -3778,7 +3778,7 @@
         "type": "text",
         "label": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
         "filename": "summary.txt",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\summary.txt",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\summary.txt",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/summary.txt",
         "id": "artifact_21",
         "title": "e\b\u0006f\u001e\u0010f\u0011\u0018h&\u0001",
@@ -3789,7 +3789,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_21"
         }
@@ -3799,7 +3799,7 @@
         "type": "report",
         "label": "解读报告",
         "filename": "report.html",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\report.html",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\report.html",
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/report.html",
         "id": "report",
         "title": "解读报告",
@@ -3810,7 +3810,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "report"
         }
@@ -3822,7 +3822,7 @@
         "label": "全部结果打包下载",
         "name": "all_results.zip",
         "title": "全部结果打包下载",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\all_results.zip",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\all_results.zip",
         "size": 558681,
         "sha256": "9d2052cbbfc00e26a72b3935299268fe8fc69b1bc553670e2b0df71ff4609753",
         "required": true,
@@ -3831,7 +3831,7 @@
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/all_results.zip",
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "zip"
         }
@@ -3843,7 +3843,7 @@
         "type": "text",
         "label": "run.log",
         "title": "run.log",
-        "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\run.log",
+        "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\output\\run.log",
         "size": 2384,
         "sha256": "91f52e1b68bac76825e16dfc81d90f349e4deb1014a46ee73e011652da40a560",
         "required": false,
@@ -3852,7 +3852,7 @@
         "canonicalPath": "/work/petri/tool-jobs/job_a7ade42394874d1e/output/run.log",
         "provenance": {
           "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-          "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+          "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
           "toolJobId": "job_a7ade42394874d1e",
           "reproductionTarget": "artifact_24"
         }
@@ -3881,7 +3881,7 @@
       },
       "runtime": {
         "name": "r",
-        "command": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\runtimes\\R\\bin\\Rscript.exe",
+        "command": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\runtimes\\R\\bin\\Rscript.exe",
         "version": "4.5.2",
         "versionSource": "runtime_probe",
         "readiness": true
@@ -3923,17 +3923,17 @@
         }
       ],
       "script": {
-        "snapshotPath": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\run-script.R",
+        "snapshotPath": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\run-script.R",
         "sha256": "7c6bac471c53137bb69bfd6e112dffb71a0ade47cbea525b421bce15b9326dbb",
         "entryPoint": null
       },
       "command": {
-        "executable": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\runtimes\\R\\bin\\Rscript.exe",
+        "executable": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\runtimes\\R\\bin\\Rscript.exe",
         "args": [
-          "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\run-script.R",
-          "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e"
+          "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\run-script.R",
+          "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e"
         ],
-        "cwd": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e"
+        "cwd": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e"
       },
       "startedAt": "2026-09-18T15:22:46.849Z",
       "completedAt": "2026-09-18T15:22:54.745Z",
@@ -4111,7 +4111,7 @@
     },
     "provenanceRef": {
       "provenanceHash": "b5bc6cdd4f91826a056c061607c565fc5bf149e2f0033c6f7dd76c83562c1ef8",
-      "path": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
+      "path": "D:\\<workdir>\\petri-desktop\\.petri-dev-user-data\\data\\results\\tool-jobs\\job_a7ade42394874d1e\\provenance.json",
       "toolJobId": "job_a7ade42394874d1e"
     }
   },

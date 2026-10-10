@@ -8,7 +8,7 @@
   "state": {
     "hasXterm": true,
     "rowCount": 8,
-    "text": "drwxr-xr-x@   3 zhangdiandian  staff     96  5月 28 20:26 sample-data|drwxr-xr-x@  10 zhangdiandian  staff    320  5月 28 22:13 src|-rw-------@   1 zhangdiandian  staff     10  9月  2 08:57 u272-probe.tx"
+    "text": "drwxr-xr-x@   3 <user>  staff     96  5月 28 20:26 sample-data|drwxr-xr-x@  10 <user>  staff    320  5月 28 22:13 src|-rw-------@   1 <user>  staff     10  9月  2 08:57 u272-probe.tx"
   },
   "alive": "alive /project/p_mthvakv3_fffw",
   "crash": {

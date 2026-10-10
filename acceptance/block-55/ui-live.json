@@ -2,7 +2,7 @@
   "startedAt": "2026-09-04T10:30:00.456Z",
   "page": "http://localhost:3000/project/p_mtlnsv0f_xpjb",
   "projectId": "p_mtlnsv0f_xpjb",
-  "dbPath": "/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/.petri-dev-user-data/data/petri.db",
+  "dbPath": "<repo>/.petri-dev-user-data/data/petri.db",
   "assertions": [
     {
       "name": "UI「计划模式」开关可点击且进入激活态（aria-pressed=true）",

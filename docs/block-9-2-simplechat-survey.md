@@ -924,7 +924,7 @@ export type {
 
 ```bash
 # 1. TypeScript 0 错误
-cd /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/frontend && npx tsc --noEmit
+cd <repo>/frontend && npx tsc --noEmit
 
 # 2. 直接 SimpleChat 测试 23/23 PASS（不能退化）
 npx vitest run src/components/copilot/SimpleChat.test.tsx \
@@ -933,7 +933,7 @@ npx vitest run src/components/copilot/SimpleChat.test.tsx \
               src/components/copilot/simple-chat-file-open.test.ts
 
 # 3. 影响范围测试（按 test/impact-map.json 选）
-cd /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop && npm run test:changed:list
+cd <repo> && npm run test:changed:list
 
 # 4. 治理门（4 项必跑）
 npm run docs:check          # 文档数 PASS
@@ -945,13 +945,13 @@ npm run docs:reconcile      # 0 issues
 
 ```bash
 # 5. Vite build（产物大小应保持 ~2308 kB）
-cd /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop && npm run build --prefix frontend
+cd <repo> && npm run build --prefix frontend
 
 # 6. chf0-critical 不退化（plugin IPC contract）
 node --test test/chf0-critical/*
 
 # 7. vitest 75 文件 630 tests 0 失败（影响范围内）
-cd /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop && npm run test:changed
+cd <repo> && npm run test:changed
 
 # 8. 4 个 import 客户端 0 改动（git diff 应为空）
 git diff --stat HEAD -- frontend/src/components/workspace-panels/CenterPanel.tsx \

@@ -6,7 +6,7 @@
     {
       "name": "block101_startup_timeline_allPass",
       "pass": false,
-      "detail": "exit=1 t-O\n[block101] sample5: mainReady=50ms preload=346ms windowShown=528ms didLoad=529ms firstPaint=268ms dataReady=453ms projects=4\n/bin/sh: powershell: command not found\n[block101] kill probe skipped: Command failed: powershell -NoProfile -Command \"Get-CimInstance Win32_Process -Filter \\\"Name='electron.exe'\\\" | Select-O\n[block101] FAIL /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/"
+      "detail": "exit=1 t-O\n[block101] sample5: mainReady=50ms preload=346ms windowShown=528ms didLoad=529ms firstPaint=268ms dataReady=453ms projects=4\n/bin/sh: powershell: command not found\n[block101] kill probe skipped: Command failed: powershell -NoProfile -Command \"Get-CimInstance Win32_Process -Filter \\\"Name='electron.exe'\\\" | Select-O\n[block101] FAIL <user-home>/Documents/<workdir>/Petri-workspace/"
     }
   ],
   "allPass": false

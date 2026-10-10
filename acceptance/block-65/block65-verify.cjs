@@ -8,7 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const ROOT = 'D:/1.WorkDir/petri-desktop';
+const ROOT = 'D:/<workdir>/petri-desktop';
 const OUT = path.join(ROOT, 'acceptance', 'block-65');
 
 async function cdpConnect(targetUrlMatch) {

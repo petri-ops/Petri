@@ -7,7 +7,7 @@ acceptance:
   - 行为锚红绿：biof3.db→petri.db 不变式、BIOF3_*/biof3_* env 族、gewuevents 事件桥、--gewu-* CSS token 契约、MCP serverInfo、ci/release.yml、electron-builder appId/productName
   - 全量 `npm run test:all:workspace` 与 `npm run check` 各一次（全仓触及面例外，串行不并发）
   - dev 栈重启实机七探（启动/聊天/工具/Skills/插件/联邦/Result Studio）证据落 acceptance/block-165/
-  - quality:secret 复扫 + 个人标识扫描（ShengXinF3/个人路径/内网信息）清零或豁免登记
+  - quality:secret 复扫 + 个人标识扫描（petri-ops/个人路径/内网信息）清零或豁免登记
   - LICENSE + 根 README（EN 主 + 中文副标）+ About 描述与 topics；新仓 CI 首跑绿
   - 旧 origin 退役（不再推 biof3 路径）；docs:reconcile + docs:check PASS；closeout 十一门
 reopen: 阻塞（已解除：D0-D7 已裁决）= 无；用户已裁决「一次搞完」豁免 dry-run 中途过目门
@@ -31,7 +31,7 @@ status: active
 4. 4 个 `.agents/skills/gewu-*` 技能改名 + `.claude/skills`、`.codebuddy/skills` 发现桥重建 + AGENTS.md/CLAUDE.md 同步。
 5. 基线重锚四件：test/impact-map.json、test/knip-baseline.json、eslint-suppressions.json、code-size 台账指纹。
 6. OSS 三件套：LICENSE（D4）、根 README.md（当前无根 README，EN 主 + 中文副标）、release-contract.json tagline、GitHub About 描述 + topics。
-7. OSS 卫生：quality:secret 复扫 + 个人标识扫描（ShengXinF3 出现于 5 个文档；`Admin`/`1.WorkDir` 类个人路径；内网 host/IP/邮箱）。
+7. OSS 卫生：quality:secret 复扫 + 个人标识扫描（petri-ops 出现于 5 个文档；`Admin`/`<workdir>` 类个人路径；内网 host/IP/邮箱）。
 8. 换库：新 remote 推送 petri-ops/Petri（全历史 per D1）+ 旧 origin 退役 + 新仓 CI 首跑验证。
 
 **非范围（exclusions）**：
@@ -39,7 +39,7 @@ status: active
 - BLOCK-161 四波内容（对比度/档位体系/缩放/性能）——排队包另启。
 - packaged 打包产物、公证、Provider、GA——G0 开发期常态 · 不外推。
 - CONTRIBUTING/ISSUE 模板等社区治理文件（可选 rider，不默认）。
-- 本地目录 `D:\1.WorkDir\biof3-desktop` 改名（D7，用户本机自选，工具链不依赖目录名）。
+- 本地目录 `D:\<workdir>\biof3-desktop` 改名（D7，用户本机自选，工具链不依赖目录名）。
 
 ## §3 命名映射表（D0 待确认）
 
@@ -60,7 +60,7 @@ status: active
 | `gewuevents` / `gewuevent` | `petrievents` / `petrievent` | 前端事件桥 |
 | `.agents/skills/gewu-*`（4 个） | `.agents/skills/petri-*` | + 双发现桥重建 |
 | appId `com.biof3.local` / productName `BioF3` | `com.petriops.local` / `Petri` | electron-builder.yml |
-| `https://github.com/ShengXinF3/biof3-desktop.git` | `https://github.com/petri-ops/Petri.git` | remote 更换 |
+| `https://github.com/petri-ops/biof3-desktop.git` | `https://github.com/petri-ops/Petri.git` | remote 更换 |
 
 ## §4 影响面盘点（2026-10-10 勘察实数）
 
@@ -68,7 +68,7 @@ status: active
 **B. 行为锚（非纯机械，需红绿）**：①`biof3.db` 文件名不变式（`src/database/_db-singleton.js` 注释明确双侧锁同一文件名）＋`BIOF3_USER_DATA_DIR` 注入链（`src/main/backend-proc-manager.js`）；②env 族（`src/main/env-coordinator.js` 等）；③`gewuevents` 桥（welcome/home/project-workspace/WorkspaceSummaryCard）；④CSS token 定义（`frontend/src/styles/global.css`、`custom.css`、`global-page.module.css`、`extensions.module.css`）+ theme-token-contract.test.ts 断言 + `$gewu-css-theme` 技能文档内 token 名；⑤MCP serverInfo/registry（`src/mcp-server.js`、`core/biof3-server/mcp/registry.js`）；⑥`.github/workflows/ci.yml`（BioF3 注释）与 release.yml、release-contract.json tagline；⑦electron-builder.yml appId/productName；⑧`test/ipc-channels-registry.test.mjs` 与 `src/ipc/channels.js`（P1 复核是否存在旧名通道字面量）。
 **C. 基线/配置**：impact-map.json、knip-baseline.json、eslint-suppressions.json、knip.json、startup-perf-budget.json、release-contract.json、package-lock.json（重生成不手改）。
 **D. 台账/证据**：docs 234 + acceptance 171 文件含旧名（含 AUDIT-LOG/roadmap/DOC-REGISTRY 自身）；agent-transcripts 10 文件（历史 transcript，按「统统改」处理，D1 保留历史可回溯原件）。
-**E. OSS 卫生命中**：ShengXinF3 5 个 docs 文件；无 LICENSE、无根 README、无 CONTRIBUTING。
+**E. OSS 卫生命中**：petri-ops 5 个 docs 文件；无 LICENSE、无根 README、无 CONTRIBUTING。
 
 ## §5 阶段计划（P0-P7）
 

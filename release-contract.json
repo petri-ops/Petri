@@ -1,7 +1,7 @@
 {
   "channel": "beta",
   "version": "v0.1.0-beta",
-  "tagline": "Petri 是一个本地优先的生物信息学项目工作台，AI 在项目上下文中帮助用户运行分析、检查产物并生成报告。",
+  "tagline": "Petri · 格物 —— 通用 AI Agent 桌面应用：通用内核 + 垂直内容。内置全组学学习与实战内容包，MCP 原生调用工具，本地执行、数据不出本机——像一只培养皿，让技能在你机器上生长。",
   "goldenPath": {
     "name": "demo-deseq2-report",
     "dataset": "内置小型 DESeq2 demo (resources/demo-data/deseq2-sample)",

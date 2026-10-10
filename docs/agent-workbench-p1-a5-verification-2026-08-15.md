@@ -3,7 +3,7 @@
 最后更新：2026-08-15
 状态：**A5 收口**（UI-AGENTWB-003 / UI-AGENTWB-004 转 `verified`）
 源绑定：`db2e04b feat(agent-workbench): P1.3 chart/image 渲染器注册 + A4 SimpleChat 注入桥`
-工作目录：`/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop`
+工作目录：`<repo>`
 
 ## 1. 范围与边界
 

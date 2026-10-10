@@ -389,7 +389,7 @@ PHASE 1 will need a **new** `require('./skill-bridge')` (or inlined module) wrap
 
 ```bash
 # Plan + required reading
-read /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/docs/block-2-ui-157-review-plan.md
+read <repo>/docs/block-2-ui-157-review-plan.md
 read src/preload.js
 read frontend/src/lib/desktopBridge.ts
 read frontend/src/pages/skills/index.tsx

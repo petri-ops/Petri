@@ -298,15 +298,15 @@ This collapses `skills:get`, `skills:search`, `skills:canExecute`, `skills:list`
 
 ```bash
 # File inventory
-wc -l /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/core/shared-backend/workflow-engine.js
+wc -l <repo>/core/shared-backend/workflow-engine.js
 #  -> 688
 
 # Source reads
-Read /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/core/shared-backend/workflow-engine.js
-Read /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/core/shared-backend/skills-sdk.js (full)
-Read /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/core/shared-backend/skill-registry.js (first 100 + exits)
-Read /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/core/shared-backend/skill-runtime.js (key sections: 80-220, 1100-1127)
-Read /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/core/r-server/mcp/registry.js (first 80 + 200-280)
+Read <repo>/core/shared-backend/workflow-engine.js
+Read <repo>/core/shared-backend/skills-sdk.js (full)
+Read <repo>/core/shared-backend/skill-registry.js (first 100 + exits)
+Read <repo>/core/shared-backend/skill-runtime.js (key sections: 80-220, 1100-1127)
+Read <repo>/core/r-server/mcp/registry.js (first 80 + 200-280)
 
 # Glob scans
 Glob 'core/shared-backend/*'                       # 86 files
@@ -314,8 +314,8 @@ Glob 'core/r-server/mcp/registry.js'
 Glob 'src/main.js'
 
 # Test discovery
-find /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/test -name "*workflow*" -o -name "*skill*" -o -name "*engine*"
-find /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/frontend/src -name "*.test.*"
+find <repo>/test -name "*workflow*" -o -name "*skill*" -o -name "*engine*"
+find <repo>/frontend/src -name "*.test.*"
 
 # Grep checks
 Grep -A0 'ipcMain\.(handle|on)' src/main.js          # 50+ handlers

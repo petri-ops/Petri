@@ -12,7 +12,7 @@ const packRegistry = require('../core/shared-backend/pack-registry.js');
 const toolRegistry = require('../core/petri-server/tool-registry.js');
 
 // 真包定位：pack 仓与 desktop 仓同级（AGENTS.md/ask 事实「pack 仓在 ../petri-pack-bio」）。
-// 勿硬编码机器绝对路径——block-84 原版写死 D:/1.WorkDir/petri-pack-bio（作者 Windows 机），
+// 勿硬编码机器绝对路径——block-84 原版写死 D:/<workdir>/petri-pack-bio（作者 Windows 机），
 // 换机即 pack_json_missing 三连红；同级解析在原机上落点不变，跨机可移植。
 const REAL_PACK = path.resolve(root, '..', 'petri-pack-bio');
 

@@ -22,7 +22,7 @@ test('block165 复合标识符路径映射', () => {
   assert.equal(css.text, 'var(--petri-text-muted)');
   const events = mapLine('window.gewuevents.dispatch("gewuevent:x")');
   assert.equal(events.text, 'window.petrievents.dispatch("petrievent:x")');
-  const special = mapLine('git clone https://github.com/ShengXinF3/biof3-desktop.git');
+  const special = mapLine('git clone https://github.com/petri-ops/biof3-desktop.git');
   assert.equal(special.text, 'git clone https://github.com/petri-ops/Petri.git');
 });
 

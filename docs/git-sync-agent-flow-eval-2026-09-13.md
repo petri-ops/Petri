@@ -2,7 +2,7 @@
 
 > 类型：**评估报告**（非工作包、非计划、不改生产代码）
 > 评估日期：2026-09-13
-> 评估对象：`D:\1.WorkDir\petri-desktop`（Petri Desktop，原名 Petri）
+> 评估对象：`D:\<workdir>\petri-desktop`（Petri Desktop，原名 Petri）
 > 评估时点基线：`main` @ `81069a3b`，与 `origin/main` 同步，工作区干净
 > 方法：只读侦察（Git 元数据 / 治理文档 / 门禁脚本 / 文件系统实态）
 > 阶段声明：G0 长期开发期。本报告不外推 packaged / Provider / GA。

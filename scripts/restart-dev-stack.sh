@@ -54,9 +54,25 @@ for p in 3001 "${CDP_PORT}"; do
   fi
 done
 
-export PATH="/c/Users/Admin/AppData/Roaming/fnm/node-versions/v24.20.0/installation:$PATH"
-export PETRI_DB_PATH='D:\1.WorkDir\petri-desktop\.petri-dev-user-data\data\petri.db'
-export PETRI_LOCAL_DATA_DIR='D:\1.WorkDir\petri-desktop\.petri-dev-user-data\data'
+# BLOCK-165 — 仓库根自定位（去本机绝对路径硬编码，OSS 化后任何克隆位置可用）；
+# userData 目录旧名优先回退（D3：petri.db 新库名天然全新起；.petri-secrets/证书等
+# 非库数据随旧目录延续，本地目录改名〔D7 用户自选〕后自动切新名）。
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+UD="$ROOT/.biof3-dev-user-data"
+[ -d "$UD" ] || UD="$ROOT/.petri-dev-user-data"
+FNMR="/c/Users/Admin/AppData/Roaming/fnm/node-versions/v24.20.0/installation"
+[ -d "$FNMR" ] && export PATH="$FNMR:$PATH"
+WROOT="$(cygpath -w "$ROOT" 2>/dev/null || echo "$ROOT")"
+if [ -d "$FNMR" ]; then
+  WFNM="$(cygpath -w "$FNMR" 2>/dev/null || echo "$FNMR")"
+  NODE_EXE="$WFNM\\node.exe"
+  NPM_EXE="$WFNM\\npm.cmd"
+else
+  NODE_EXE='node.exe'
+  NPM_EXE='npm.cmd'
+fi
+export PETRI_DB_PATH="$UD/data/petri.db"
+export PETRI_LOCAL_DATA_DIR="$UD/data"
 # BLOCK-85 双真机 — 跨端公网门自签证书 CA 信任（后端 fetch 8442/8443 必须；
 # 证书=ECS /etc/nginx/ssl/petri.crt 的本机拷贝。忘设=重启后跨端互访突然全断
 # DEPTH_ZERO_SELF_SIGNED_CERT，见 dev-infra SKILL「端口与后端实例纪律」第 6 条）
@@ -66,23 +82,23 @@ export PETRI_LOCAL_DATA_DIR='D:\1.WorkDir\petri-desktop\.petri-dev-user-data\dat
 # BLOCK-150 加映：AI key 已不进后端凭据链（用户裁决「杜绝走 env 显式设置」——
 # 设置页 credential store 是唯一来源，见 helpers/ai-settings.js getApiKey）；本文件
 # 仅保留非 AI 用途（NODE_EXTRA_CA_CERTS 等）与 OPENAI_COMPATIBLE_* 渠道端点。
-if [ -f "D:/1.WorkDir/petri-desktop/.petri-dev-user-data/.petri-secrets" ]; then
+if [ -f "$UD/.petri-secrets" ]; then
   set -a
-  . "D:/1.WorkDir/petri-desktop/.petri-dev-user-data/.petri-secrets"
+  . "$UD/.petri-secrets"
   set +a
   echo "deploy secrets: .petri-secrets sourced"
 fi
 # BLOCK-116 P5 — 决策模型供给（端点/Key/模型）已迁移至 data/decision-config.json
 # （设置页「决策原语→模型接口」可视管理；用户裁决取消 env 依赖）。
 # 如需应急回退：恢复 .petri-dev-user-data/jev.env.bak-by-user-request 并取消下方注释。
-# if [ -f "D:/1.WorkDir/petri-desktop/.petri-dev-user-data/jev.env" ]; then
+# if [ -f "$UD/jev.env" ]; then
 #   set -a
-#   . "D:/1.WorkDir/petri-desktop/.petri-dev-user-data/jev.env"
+#   . "$UD/jev.env"
 #   set +a
 #   echo "block110: jev.env loaded (TYPESAFE_API_KEY present)"
 # fi
-if [ -f "D:/1.WorkDir/petri-desktop/.petri-dev-user-data/ecs-petri.crt" ]; then
-  export NODE_EXTRA_CA_CERTS='D:\1.WorkDir\petri-desktop\.petri-dev-user-data\ecs-petri.crt'
+if [ -f "$UD/ecs-petri.crt" ]; then
+  export NODE_EXTRA_CA_CERTS="$(cygpath -w "$UD/ecs-petri.crt" 2>/dev/null || echo "$UD/ecs-petri.crt")"
   echo "block85: NODE_EXTRA_CA_CERTS set (ecs-petri.crt)"
 fi
 # BLOCK-95 三开关 2026-09-18 已翻默认开（feature-flags.js 单一真相 + 设置页 UI-403）。
@@ -107,7 +123,7 @@ if [ -n "${ELECTRON_RUN_AS_NODE:-}" ]; then unset ELECTRON_RUN_AS_NODE; echo "st
 vite_code=$(curl -s -m 5 http://127.0.0.1:3000/ -w '\n%{http_code}' 2>/dev/null | tail -n1)
 if [ "${vite_code}" != "200" ]; then
   echo "vite(:3000) not responding (code=${vite_code:-000}) - starting frontend dev server"
-  powershell -NoProfile -Command "Start-Process -FilePath 'C:\Users\Admin\AppData\Roaming\fnm\node-versions\v24.20.0\installation\npm.cmd' -ArgumentList 'run','dev' -WorkingDirectory 'D:\1.WorkDir\petri-desktop\frontend' -WindowStyle Minimized"
+  powershell -NoProfile -Command "Start-Process -FilePath '$NPM_EXE' -ArgumentList 'run','dev' -WorkingDirectory '$WROOT\\frontend' -WindowStyle Minimized"
   vite_ok=""
   for vi in $(seq 1 30); do
     sleep 2
@@ -118,7 +134,7 @@ if [ "${vite_code}" != "200" ]; then
     echo "ABORT: vite(:3000) 未能就绪: 继续启动只会得到黑屏窗口(见文件头黑屏纪律), 先修前端栈"; exit 4
   fi
 fi
-powershell -NoProfile -Command "Remove-Item Env:ELECTRON_RUN_AS_NODE -ErrorAction SilentlyContinue; Start-Process -FilePath 'C:\Users\Admin\AppData\Roaming\fnm\node-versions\v24.20.0\installation\node.exe' -ArgumentList 'node_modules\electron\cli.js','.','--dev','--remote-debugging-port=${CDP_PORT}' -WorkingDirectory 'D:\1.WorkDir\petri-desktop' -WindowStyle Minimized -RedirectStandardOutput 'D:\1.WorkDir\petri-desktop\.dev-stack-live.log' -RedirectStandardError 'D:\1.WorkDir\petri-desktop\.dev-stack-err.log'"
+powershell -NoProfile -Command "Remove-Item Env:ELECTRON_RUN_AS_NODE -ErrorAction SilentlyContinue; Start-Process -FilePath '$NODE_EXE' -ArgumentList 'node_modules\\electron\\cli.js','.','--dev','--remote-debugging-port=${CDP_PORT}' -WorkingDirectory '$WROOT' -WindowStyle Minimized -RedirectStandardOutput '$WROOT\\.dev-stack-live.log' -RedirectStandardError '$WROOT\\.dev-stack-err.log'"
 echo "start dispatched"
 
 for i in $(seq 1 36); do

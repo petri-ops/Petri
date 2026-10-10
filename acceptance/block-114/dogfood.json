@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "generatedAt": "2026-09-22T08:45:32.643Z",
   "sourceCommit": "27d6f96c8673ee9e4963a6553cc1da4e97430ff8",
-  "input": "D:\\1.WorkDir\\petri-desktop\\acceptance\\block-114\\dogfood-input.json",
+  "input": "D:\\<workdir>\\petri-desktop\\acceptance\\block-114\\dogfood-input.json",
   "registerSize": 6,
   "total": 6,
   "summary": {

@@ -7,5 +7,5 @@
   "testFile": "frontend/src/lib/data-profile.test.ts",
   "ok": true,
   "durationMs": 741,
-  "output": "\n> petri-desktop-frontend@0.0.1-rc.7 test:files\n> vitest run src/lib/data-profile.test.ts\n\n\n RUN  v2.1.9 /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/frontend\n\n ✓ src/lib/data-profile.test.ts (10 tests) 6ms\n\n Test Files  1 passed (1)\n      Tests  10 passed (10)\n   Start at  13:55:24\n   Duration  276ms (transform 34ms, setup 0ms, collect 36ms, tests 6ms, environment 55ms, prepare 31ms)\n\n"
+  "output": "\n> petri-desktop-frontend@0.0.1-rc.7 test:files\n> vitest run src/lib/data-profile.test.ts\n\n\n RUN  v2.1.9 <repo>/frontend\n\n ✓ src/lib/data-profile.test.ts (10 tests) 6ms\n\n Test Files  1 passed (1)\n      Tests  10 passed (10)\n   Start at  13:55:24\n   Duration  276ms (transform 34ms, setup 0ms, collect 36ms, tests 6ms, environment 55ms, prepare 31ms)\n\n"
 }

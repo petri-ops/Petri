@@ -26,7 +26,7 @@
     {
       "name": "A5 数据真实：DOM 项目名与后端 API 返回一致且非空",
       "pass": true,
-      "detail": "dom=[YST|1.WorkDir|petri|devah|petri-desktop] api=5 项"
+      "detail": "dom=[YST|<workdir>|petri|devah|petri-desktop] api=5 项"
     },
     {
       "name": "A6 壳层在场：AppRail 项目树容器在 DOM（排除整块未渲染的假绿）",
@@ -52,7 +52,7 @@
   "expectedTick3Ms": 7000,
   "domNames": [
     "YST",
-    "1.WorkDir",
+    "<workdir>",
     "petri",
     "devah",
     "petri-desktop"

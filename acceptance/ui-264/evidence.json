@@ -5,7 +5,7 @@
   "capturedAt": "2026-09-01T05:20:00Z",
   "environment": "dev Electron (CDP 9222) + petri-server :52397（PETRI_ELECTRON_USER_DATA_DIR/PETRI_LOCAL_DATA_DIR 指向 .petri-dev-user-data）",
   "projects": {
-    "tinkspace": "p_mthvakv3_fffw → /Users/zhangdiandian/Documents/2.OpenWork/ThinkSpace（独立 git 仓库）",
+    "tinkspace": "p_mthvakv3_fffw → <user-home>/Documents/2.OpenWork/ThinkSpace（独立 git 仓库）",
     "desktop": "p_mt15b0aw_f0xa → 应用仓库本体"
   },
   "scenarios": [

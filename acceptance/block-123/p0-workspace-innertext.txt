@@ -26,14 +26,14 @@ Desktop
 Desktop
 SingleCell
 YST
-1.WorkDir
+<workdir>
 petri
 devah
 联邦
 设置
 BLOCK123-走验-1790409252970
 
-工作区 D:\1.WorkDir\petri-desktop\.petri-dev-user-data\data\projects\block123---1790409252970-mui3fx4f 里有两个文件 utils.js 和 utils.test.js。utils.js 的 divide 函数有 bug：divide(1, 0) 返回 Infinity 而不是抛错。请修复这个 bug（除数为 0 时抛出包含 zero 的错误），然后运行 node utils.test.js 验证，并告诉我测试是否全部通过。
+工作区 D:\<workdir>\petri-desktop\.petri-dev-user-data\data\projects\block123---1790409252970-mui3fx4f 里有两个文件 utils.js 和 utils.test.js。utils.js 的 divide 函数有 bug：divide(1, 0) 返回 Infinity 而不是抛错。请修复这个 bug（除数为 0 时抛出包含 zero 的错误），然后运行 node utils.test.js 验证，并告诉我测试是否全部通过。
 
 ✓
 执行工具 8 次 · 4 轮

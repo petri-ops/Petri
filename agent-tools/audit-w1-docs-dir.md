@@ -251,7 +251,7 @@
 - [x] 没有 commit / amend / push / mv / rm / sed
 - [x] 没有触碰 `.agents/` / `.claude/` / `.codex/` / `core/` / `frontend/` / `src/` / `test/` / `scripts/` / `migrations/` 内部文件
 - [x] 仅做只读 audit（cat / grep / find / wc / stat / diff / npm run docs:status / docs:check）
-- [x] 报告路径：`/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/agent-tools/audit-w1-docs-dir.md`
+- [x] 报告路径：`<repo>/agent-tools/audit-w1-docs-dir.md`
 - [x] 与 worker-A2 / A3 / A4 / A5 切片边界清晰：本文不写 governance 政策改动 / script 改动 / DOC-REGISTRY 改动 / archive 实际搬迁
 - [x] 引用基线：与 `docs/next-steps-roadmap.md`（2026-08-16 同步）+ `docs/project-workspace-handoff.md`（2026-08-16 mtime / 2026-08-11 头部日期）+ `docs/AUDIT-LOG.md`（2026-08-15 头部 / 2026-08-16 mtime）+ `docs/DOC-REGISTRY.json`（62 条登记项）核对一致
 - [x] 阶段纪律：未外推 packaged / Provider / GA / dist staleness 与"qualificationEligible" 状态；未提议启动新工作包

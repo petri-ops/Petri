@@ -6,7 +6,7 @@
   "stackState": {
     "health": "core :3001 /api/health=200；Vite :3000=200；CDP :9222 petri-desktop/0.0.1-rc.7 Electron/41.10.7",
     "pluginCatalog": "GET /api/tools/catalog → ok=true,count=3（deg-standardizer/deg-standardizer,deseq2,volcano-plot，source=installed-plugins）——attempt-4 时为 count=1，本轮前置条件满足",
-    "pluginDescriptors": "python3 实读 /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/petri-pack-bio/plugins/{deseq2,deg-standardizer,volcano-plot}/plugin.json → 三者 resultStudio 均为 None（attempt-4 blocker #2 未变化）"
+    "pluginDescriptors": "python3 实读 <user-home>/Documents/<workdir>/Petri-workspace/petri-pack-bio/plugins/{deseq2,deg-standardizer,volcano-plot}/plugin.json → 三者 resultStudio 均为 None（attempt-4 blocker #2 未变化）"
   },
   "mainPathPlanBindChain": {
     "channel": "POST /api/ai/agent（task 模式，context={projectId,page:'workspace',pageTitle:'项目工作区',accessMode:'full'}）",

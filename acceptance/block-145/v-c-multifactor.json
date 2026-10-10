@@ -109,7 +109,7 @@
     {
       "id": "disk-jobdir-found",
       "pass": true,
-      "detail": "jobDir=/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/petri-desktop-fresh/.petri-dev-user-data/data/projects/block145-vc-multifactor-202610071617-muyb9ef1/results/jobs/job_9e4850fdbc1a4c82（匹配 1 个）"
+      "detail": "jobDir=<user-home>/Documents/<workdir>/Petri-workspace/petri-desktop-fresh/.petri-dev-user-data/data/projects/block145-vc-multifactor-202610071617-muyb9ef1/results/jobs/job_9e4850fdbc1a4c82（匹配 1 个）"
     },
     {
       "id": "disk-params-design",

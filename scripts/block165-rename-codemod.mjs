@@ -24,7 +24,7 @@ const BINARY_EXT = new Set([
 ]);
 // 优先于通用规则的整串特例（改名目标与通用规则形状不同时在此登记）
 const SPECIAL_RULES = [
-  [/github\.com\/ShengXinF3\/biof3-desktop/gi, 'github.com/petri-ops/Petri'],
+  [/github\.com\/petri-ops\/biof3-desktop/gi, 'github.com/petri-ops/Petri'],
 ];
 const RE = /biof3|gewu/gi;
 

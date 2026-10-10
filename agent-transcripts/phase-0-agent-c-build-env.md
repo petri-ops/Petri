@@ -388,7 +388,7 @@ PHASE 1 plan file (`docs/block-2-ui-157-review-plan.md`) should clarify which pa
 
 ## §9 Reference Commands (executed during PHASE 0)
 
-All commands executed at repo root `/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop`. Wall-clock times captured.
+All commands executed at repo root `<repo>`. Wall-clock times captured.
 
 ```bash
 # §4 — Targeted gate verification

@@ -319,7 +319,7 @@ if (toolDef && Array.isArray(toolDef.inputs)) {
   - 火山图用 `read.csv(params$deg_table)` 吃绝对路径。
 - **风险**：
   - `params$expr_matrix` 是用户提供的绝对路径，**没有任何白名单或沙箱限制**——只要 `fs.existsSync(srcPath)` 通过，R 脚本可以 `read.csv` 任意位置的文件。
-  - 攻击场景：用户通过 chat 让 AI 跑 gene-correlation，AI 收到 prompt injection 调用 `args = { expr_matrix: "/Users/zhangdiandian/.ssh/id_rsa" }`——不会报错，但 `read.csv` 会读取 SSH 私钥到内存（虽然不会写出，但会触发下游 `cor()` / `pheatmap` 的 warning "NAs introduced by coercion"，可能间接影响 plot 输出）。
+  - 攻击场景：用户通过 chat 让 AI 跑 gene-correlation，AI 收到 prompt injection 调用 `args = { expr_matrix: "<user-home>/.ssh/id_rsa" }`——不会报错，但 `read.csv` 会读取 SSH 私钥到内存（虽然不会写出，但会触发下游 `cor()` / `pheatmap` 的 warning "NAs introduced by coercion"，可能间接影响 plot 输出）。
 - **建议修复方向**：
   - 强制统一约定：file input **只接受 staged path**（`args[inputId] = relative_to_jobDir`），不传绝对路径。
   - 在 callTool 入口把 file input 强制 rewrite 为 `stagedPath`，并把 `srcPath` 仅在 `_resolveStagedInputPath` 内部使用，不写回 args。

@@ -5,9 +5,9 @@
  * BLOCK-83 P1 出口实机验收：15 生信插件链在 P1 改动（D1 改名 / D2 SDK 放宽 / D3 钩子化）后完好。
  *
  * 运行（对标 BLOCK-79/82 in-process 驱动先例，需 fnm Node 24 + dev 数据面 env）：
- *   export PATH="/c/Users/Admin/AppData/Roaming/fnm/node-versions/v24.20.0/installation:$PATH"
- *   export PETRI_DB_PATH='D:\1.WorkDir\petri-desktop\.petri-dev-user-data\data\petri.db'
- *   export PETRI_LOCAL_DATA_DIR='D:\1.WorkDir\petri-desktop\.petri-dev-user-data\data'
+ *   export PATH="<user-home>/AppData/Roaming/fnm/node-versions/v24.20.0/installation:$PATH"
+ *   export PETRI_DB_PATH='D:\<workdir>\petri-desktop\.petri-dev-user-data\data\petri.db'
+ *   export PETRI_LOCAL_DATA_DIR='D:\<workdir>\petri-desktop\.petri-dev-user-data\data'
  *   node scripts/block83-p1-plugin-live.cjs
  *
  * 断言：

@@ -200,9 +200,6 @@
   "frontend/src/components/desktop/DesktopSettingsPanel/sections/Federation.tsx": {
     "react-hooks/purity": {
       "count": 1
-    },
-    "react-hooks/set-state-in-effect": {
-      "count": 1
     }
   },
   "frontend/src/components/desktop/DesktopSettingsPanel/sections/HarnessEnvironment.tsx": {

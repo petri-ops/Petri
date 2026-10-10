@@ -19,7 +19,7 @@
     {
       "name": "B3 跨项目会话列表",
       "pass": true,
-      "detail": "15 个会话全部可见，带 📁 项目名徽章（1.WorkDir/petri-desktop/petri-desktop/devah）与消息数"
+      "detail": "15 个会话全部可见，带 📁 项目名徽章（<workdir>/petri-desktop/petri-desktop/devah）与消息数"
     },
     {
       "name": "B4 会话消息阅读",

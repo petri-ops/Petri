@@ -7,12 +7,12 @@
     {
       "name": "PRE_real_pack_exists",
       "ok": true,
-      "detail": "D:/1.WorkDir/petri-pack-bio"
+      "detail": "D:/<workdir>/petri-pack-bio"
     },
     {
       "name": "PRE_fixture_plugins_exist",
       "ok": true,
-      "detail": "D:\\1.WorkDir\\petri-desktop\\test\\fixtures\\neutral-plugins"
+      "detail": "D:\\<workdir>\\petri-desktop\\test\\fixtures\\neutral-plugins"
     },
     {
       "name": "P4a_zero_wiring_count",

@@ -136,7 +136,7 @@
 
 ## §4 Reference Commands
 
-All commands run from `/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop`.
+All commands run from `<repo>`.
 
 ### V1 — SkillsSidebar deletion
 
@@ -272,7 +272,7 @@ $ git diff 01c5e0b..HEAD -- frontend/src/App.tsx
 
 ## Final Verdict
 
-**File written**: `/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/agent-transcripts/phase-0-agent-d-ui161-verification.md`
+**File written**: `<repo>/agent-transcripts/phase-0-agent-d-ui161-verification.md`
 **Line count**: (computed below)
 
 **One-line verdict**: UI-161 cleanup fully intact at HEAD `0a3fc46`; all 5 changes present, zero drift since `01c5e0b`, no PHASE-1 IPC bridge risk introduced.

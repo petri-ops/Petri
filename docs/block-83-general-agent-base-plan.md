@@ -88,7 +88,7 @@ v1.0 现状盘点（§2）与 D1-D11 继续有效，阶段微调（§4）。
 
 **P4 尾部清债（2026-09-13，用户夜间授权「遗留 A 一次清干净」）**：① A 类 9 个核心旧副本删除（cellchat/celltypist/seurat-standard/scanpy-advanced/scvi-tools 五 smoke + deseq2-report + g0-chf0-science + p4r-corpus + harness-file-index；包仓副本在彼处运行，删除前核心侧基线实测 119 测试/99 红）；② C 类 2 项按本节语义改造——`g0-rs-p5-acceptance` 源绑定删 17 条生信路径 + 描述符/夹具经 `findBioPackRoot()`（兄弟仓或 `PETRI_BIO_PACK_ROOT`）解析 + 主入口包缺失显式 SKIP；`g0-rs-p6-electron-pressure-prototype` 源绑定删 7 条生信路径 + go-kegg 夹具包根解析 + producer 测试包缺失显式 skip；③ 悬空引用清理（`g0-chf0-acceptance.mjs` 移除已删源条目与 SCI 契约→核心门 SEC-1/SEC-2/BE-5 3/3 转绿（自 P4 删文件起首次可运行）；`g0-rs-p4r-acceptance.mjs`/package.json/impact-map 移除已删测试引用）。**基线对照**：`g0-rs-p6-product-acceptance` 7 红→2 红（净改善 5）；余 2 红属 D8 例外（P6 证据重采属 G0-RS）。**登记归属 G0-RS**：`g0:result-studio:p4r:perf` 的 corpus 生成链需包感知化改造（go-kegg 夹具/插件源指向包根+真实 R 运行时）——结构性 RS 线工作，非测试债。
 
-**D9 包仓库事实（切片 1）**：本地路径 `D:\1.WorkDir\petri-pack-bio`（与核心仓平级，独立 git 仓，初始提交 `2a51b73`）；包契约 `pack.json` 声明提供物（plugins/scripts/demoData/languages/confirmationHooks/artifactTypes）与所需核心能力；核心侧装卸缝 = `PETRI_PLUGINS_DIR`（installed 源，需 `plugins/installed.json` 索引，由包内 `tools/generate-installed-index.cjs` 生成）。
+**D9 包仓库事实（切片 1）**：本地路径 `D:\<workdir>\petri-pack-bio`（与核心仓平级，独立 git 仓，初始提交 `2a51b73`）；包契约 `pack.json` 声明提供物（plugins/scripts/demoData/languages/confirmationHooks/artifactTypes）与所需核心能力；核心侧装卸缝 = `PETRI_PLUGINS_DIR`（installed 源，需 `plugins/installed.json` 索引，由包内 `tools/generate-installed-index.cjs` 生成）。
 | **P5** ✅ completed（2026-09-12） | 收口对账：D7 硬门（棘轮 2/2，基线 144=延续清理监控面）+ D13 第二租户证明（P4 出口 8/8 内）+ 零生信态实机（catalog=0 诚实空态/runtime 幸存/文件零残留）+ 装卸结构回归（包 15 装载/卸载即回零态）+ 台账五件套回写 | hygiene/docs:check 231/ui-audit/tsc 0/D7 2/2/契约 14/14 全绿 |
 
 ### D7 残留清单（P2 出口盘点，P3 起点）

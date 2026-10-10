@@ -36,7 +36,7 @@
     {
       "name": "p0-7 dialog_screenshot_captured",
       "pass": true,
-      "detail": "out=D:\\1.WorkDir\\petri-desktop\\acceptance\\block-75\\p0-dialog.png"
+      "detail": "out=D:\\<workdir>\\petri-desktop\\acceptance\\block-75\\p0-dialog.png"
     },
     {
       "name": "p0-8 cancel_clicked",

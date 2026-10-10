@@ -20,7 +20,7 @@
   "sourceCommitMatchesSourceHashes": true,
   "sourceMismatches": [],
   "pack": {
-    "root": "/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/petri-pack-bio",
+    "root": "<user-home>/Documents/<workdir>/Petri-workspace/petri-pack-bio",
     "commit": "21d610cd7214fcedc736c7ad7244918181073983",
     "files": {
       "deseq2Definition": "plugins/deseq2/tool-definition.json",

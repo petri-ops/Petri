@@ -11,7 +11,7 @@
     {
       "name": "UI-474_dock_light_screenshot",
       "pass": true,
-      "detail": "dock light 截图: D:\\1.WorkDir\\petri-desktop\\acceptance\\block-154\\dock-light.png"
+      "detail": "dock light 截图: D:\\<workdir>\\petri-desktop\\acceptance\\block-154\\dock-light.png"
     },
     {
       "name": "UI-474_no_hardcoded_dock_hover_rgba",
@@ -21,7 +21,7 @@
     {
       "name": "UI-474_dock_dark_screenshot",
       "pass": true,
-      "detail": "dock dark 截图: D:\\1.WorkDir\\petri-desktop\\acceptance\\block-154\\dock-dark.png"
+      "detail": "dock dark 截图: D:\\<workdir>\\petri-desktop\\acceptance\\block-154\\dock-dark.png"
     },
     {
       "name": "UI-474_dark_no_hardcoded_dock_hover",

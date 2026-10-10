@@ -7,4 +7,7 @@
 ' NOTE: keep this file pure ASCII. WSH reads .vbs as ANSI (GBK codepage on this
 ' machine); UTF-8 Chinese comments get mojibake-eaten (a trailing UTF-8 byte swallows
 ' the newline) and silently turn the whole script into comments - exit 0, no-op.
-CreateObject("Wscript.Shell").Run """D:\1.WorkDir\petri-desktop\scripts\auto-sync-remote.cmd""", 0, True
+' BLOCK-165: repo root resolved relative to this script (scripts/ -> repo root).
+Set fso = CreateObject("Scripting.FileSystemObject")
+root = fso.GetParentFolderName(fso.GetParentFolderName(WScript.ScriptFullName))
+CreateObject("Wscript.Shell").Run """" & root & "\scripts\auto-sync-remote.cmd""", 0, True

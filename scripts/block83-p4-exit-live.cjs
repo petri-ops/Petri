@@ -43,7 +43,7 @@ function runProbe({ builtInDir, pluginsDir }) {
 (async () => {
   const zeroDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-zero-builtin-'));
   const emptyDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-empty-plugins-'));
-  const packPlugins = 'D:/1.WorkDir/petri-pack-bio/plugins';
+  const packPlugins = 'D:/<workdir>/petri-pack-bio/plugins';
   const fixturePlugins = path.join(root, 'test/fixtures/neutral-plugins');
 
   assert('PRE_pack_installed_json', fs.existsSync(path.join(packPlugins, 'installed.json')), packPlugins);

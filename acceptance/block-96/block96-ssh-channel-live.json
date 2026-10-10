@@ -6,7 +6,7 @@
     {
       "name": "live_probe_executed",
       "pass": true,
-      "detail": "PASS  exec_timeout_grandchild_reaped  {\"code\":137,\"orphansBefore\":\"0\",\"orphansAfter\":\"0\"} |  | ALL PASS → D:\\1.WorkDir\\petri-desktop\\acceptance\\block-96\\block96-p1-live.json"
+      "detail": "PASS  exec_timeout_grandchild_reaped  {\"code\":137,\"orphansBefore\":\"0\",\"orphansAfter\":\"0\"} |  | ALL PASS → D:\\<workdir>\\petri-desktop\\acceptance\\block-96\\block96-p1-live.json"
     },
     {
       "name": "live_probe_all_pass",

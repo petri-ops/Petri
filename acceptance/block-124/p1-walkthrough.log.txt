@@ -1,4 +1,4 @@
-[通] S1 播种 — projectId=p_muif95zc_687u workspace=D:\1.WorkDir\petri-desktop\.petri-dev-user-data\data\projects\block124---1790429093246-muif95zc（legacyRound=死导出场景：ui.mjs 导入未用）
+[通] S1 播种 — projectId=p_muif95zc_687u workspace=D:\<workdir>\petri-desktop\.petri-dev-user-data\data\projects\block124---1790429093246-muif95zc（legacyRound=死导出场景：ui.mjs 导入未用）
 
 [通] S2 指令 — taskId=9d3f48a0-af24-4c37-861a-fff7908aba34 terminal=done 耗时=21s
 
