@@ -57,7 +57,6 @@ assert(existsSync(contractPath), 'release-contract.json missing');
 
 const {
   ALLOWED_RUNTIME_HOSTS,
-  normalizeRemotePluginEntry,
   selectArtifact,
   assertAllowedUrl,
   validateManifest,
@@ -199,32 +198,6 @@ for (const pid of ['biof3-r-runtime', 'biof3-py-runtime']) {
   );
 }
 console.log(`✓ Runtime archives have SHA-256/size descriptors and no stale placeholders`);
-
-// ── 6. legacy remote Runtime entries normalize to the current artifact schema ──
-const normalizedRuntime = normalizeRemotePluginEntry(
-  'biof3-r-runtime',
-  {
-    title: 'R Runtime',
-    version: '1.0.0',
-    type: 'runtime',
-    language: 'r',
-    url: 'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/macos-arm64.zip',
-    size: 154050101,
-    checksum: 'sha256:007b6c5436e7986dd60bed0457b431dce30aef25b8bee2d49cbe97e839c8a1d2',
-    platform: ['macos-arm64'],
-  },
-  manifest.plugins['biof3-r-runtime']
-);
-assert.equal(normalizedRuntime.id, 'biof3-r-runtime');
-assert.equal(normalizedRuntime.kind, 'runtime');
-assert.equal(normalizedRuntime._builtIn, false);
-assert.deepEqual(normalizedRuntime.artifacts['macos-arm64'], {
-  url: 'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/macos-arm64.zip',
-  sha256: '007b6c5436e7986dd60bed0457b431dce30aef25b8bee2d49cbe97e839c8a1d2',
-  sizeBytes: 154050101,
-});
-assert.equal(validateManifest({ version: '1.0.0', plugins: { 'biof3-r-runtime': normalizedRuntime } }).valid, true);
-console.log(`✓ legacy remote Runtime entry normalizes to per-platform artifacts`);
 
 // ── 7. assertAllowedUrl built-in:// is allowed; non-whitelisted host throws ──
 assertAllowedUrl('built-in://sample-metrics');

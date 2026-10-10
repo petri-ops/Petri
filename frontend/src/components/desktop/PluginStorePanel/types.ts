@@ -1,5 +1,3 @@
-import type { IconName } from '@/components/icons/Icon';
-import type { RemotePlugin } from '@/hooks/usePluginStore';
 
 // BLOCK-92 Wave B-5 — 插件商店类型与分类常量外迁（原 PluginStorePanel.tsx，纯搬运零行为变化）。
 // 原导入路径 './PluginStorePanel' 的组件导出面不变。
@@ -46,30 +44,7 @@ export interface Props {
   embedded?: boolean;
 }
 
-export type CategoryId = 'all' | 'tool';
-
-export interface Category {
-  id: CategoryId;
-  label: string;
-  icon: IconName;
-  filter: (id: string, info: RemotePlugin) => boolean;
-}
-
-// UI-374 — 独立「运行时」分类收编进包视图：运行时不再单列，改在包卡片内渲染
-export const CATEGORIES: Category[] = [
-  { id: 'all', label: '全部', icon: 'puzzle', filter: () => true },
-  {
-    id: 'tool',
-    label: '分析工具',
-    icon: 'bar-chart',
-    filter: (_, info) => !info.type || info.type !== 'runtime',
-  },
-];
-
-export function getCategoryIcon(info: RemotePlugin): IconName {
-  if (info.type === 'runtime') return 'cpu';
-  return 'bar-chart';
-}
+// BLOCK-158 商店面退役 — 分类导航（CATEGORIES/CategoryId/getCategoryIcon）随商店卡片移除。
 
 export function formatSize(bytes?: number | null): string {
   if (!bytes) return '';

@@ -12,7 +12,7 @@
  * 卸载流程：删除专属包 → 删除脚本/数据 → 注销 → 记录
  *
  * BLOCK-9.2 PHASE 3: 1457 → ~360 lines. The 4 install* orchestrators
- * + checkUpdates / loadAllPlugins / uninstallPlugin stay in this file
+ * + loadAllPlugins stays in this file（BLOCK-158：checkUpdates/uninstallPlugin 随商店面移除）
  * (they cross-reference each other + onProgress callbacks + multiple
  * SHARED_BACKEND_DIR requires that would create a fragile dependency
  * graph if every helper were its own module). The plumbing helpers
@@ -31,7 +31,6 @@ const {
   RUNTIMES_DIR,
   INSTALLED_FILE,
   BUILT_IN_PLUGINS_DIR,
-  MANIFEST_URL,
   SHARED_BACKEND_DIR,
   PROJECT_ROOT,
   getFixRPathsScript,
@@ -81,11 +80,11 @@ const {
   listAllContentPlugins,
 } = require('./plugin/content-plugin');
 const { registerPluginInServer } = require('./plugin/registry');
+// BLOCK-158 商店面退役 — uninstallPlugin/checkUpdates 随商店面移除；
+// uninstallRuntime（包三档卸载的运行时回收单点）与 loadAllPlugins 保留。
 const {
-  uninstallPlugin,
   uninstallRuntime,
   removePackage,
-  checkUpdates,
   loadAllPlugins,
 } = require('./plugin/uninstall');
 
@@ -512,8 +511,6 @@ module.exports = {
   getInstalledPlugins,
   getRemoteManifest,
   installPlugin,
-  uninstallPlugin,
-  checkUpdates,
   loadAllPlugins,
   detectPlatform,
   getRuntimeStatus,
@@ -553,7 +550,6 @@ module.exports = {
   PROJECT_ROOT,
   INSTALLED_FILE,
   BUILT_IN_PLUGINS_DIR,
-  MANIFEST_URL,
 };
 
 // (No unused imports to suppress — re-exports above reach the public API

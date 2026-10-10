@@ -32,6 +32,8 @@ export function useDomainPacks(options: UseDomainPacksOptions): {
   confirmDeletePackSource: boolean;
   setConfirmDeletePackSource: (next: boolean) => void;
   refreshPacks: () => Promise<void>;
+  /** BLOCK-158 — 运行时补装（包卡片「必需 · 缺失」；进度走 onInstallProgress 事件） */
+  handleRuntimeTopUp: (pluginId: string) => Promise<void>;
   /** BLOCK-157 加映（UI-481）— 整包启停（乐观翻转本地缓存；重启后端生效） */
   handlePackSetEnabled: (packId: string, enabled: boolean) => Promise<void>;
   handlePackInstall: (pack: AvailablePack) => Promise<void>;
@@ -125,6 +127,22 @@ export function useDomainPacks(options: UseDomainPacksOptions): {
       await refreshPacks();
     } finally {
       setPackBusy(null);
+    }
+  }
+
+  // BLOCK-158 — 运行时补装（供应链唯一 IPC 写面 pack:install-runtime；notice/进度面复用既有）
+  async function handleRuntimeTopUp(pluginId: string) {
+    setPackNotice(null);
+    try {
+      const bridge = getBridge('packs');
+      const result = bridge?.installRuntime ? await bridge.installRuntime(pluginId) : null;
+      if (result?.ok) {
+        setPackNotice(`「${runtimeTitleOf(pluginId)}」安装成功——重启应用后生效`);
+      } else {
+        setPackNotice(`补装失败：${result?.error ?? '桥接不可用'}`);
+      }
+    } catch (e) {
+      setPackNotice(`补装失败：${e instanceof Error ? e.message : '未知错误'}`);
     }
   }
 
@@ -238,6 +256,7 @@ export function useDomainPacks(options: UseDomainPacksOptions): {
     confirmDeletePackSource,
     setConfirmDeletePackSource,
     refreshPacks,
+    handleRuntimeTopUp,
     handlePackSetEnabled,
     handlePackInstall,
     beginPackUninstall,

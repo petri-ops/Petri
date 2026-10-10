@@ -12,7 +12,6 @@
 // Constants exposed:
 // - USER_DATA_DIR / PLUGINS_DIR / RUNTIMES_DIR / INSTALLED_FILE
 // - RESOURCES_PATH / BUILT_IN_PLUGINS_DIR
-// - MANIFEST_URL (env-overrideable)
 // - SHARED_BACKEND_DIR / PROJECT_ROOT (resolved at module load by main.js
 //   to keep these heavy disk probes single-shot; helpers below re-resolve
 //   on demand)
@@ -71,10 +70,8 @@ function getFixRPathsScript() {
 
 const BUILT_IN_PLUGINS_DIR = path.join(RESOURCES_PATH, 'built-in-plugins');
 
-// 远程 manifest URL（插件商店清单）
-const MANIFEST_URL =
-  process.env.BIOF3_PLUGIN_MANIFEST_URL ||
-  'https://gewu-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/manifest.json';
+// BLOCK-158 商店面退役 — 远程插件清单 URL 随商店通道退役（OSS bucket 基建不动，
+// G1 恢复在线商店时在此挂点恢复 BIOF3_PLUGIN_MANIFEST_URL 语义）。
 
 // Init shared backend (was in plugin-manager.js L63-67). Idempotent; safe to
 // require at module load.
@@ -102,5 +99,4 @@ module.exports = {
   RUNTIMES_DIR,
   INSTALLED_FILE,
   BUILT_IN_PLUGINS_DIR,
-  MANIFEST_URL,
 };

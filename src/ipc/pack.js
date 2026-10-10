@@ -86,6 +86,20 @@ function registerPackIpc() {
     });
   });
 
+  // BLOCK-158 商店面退役 — 运行时补装（包卡片「必需 · 缺失」的补装按钮）：
+  // 原商店卡片 plugin:install 退役后，运行时供应链的 IPC 写面收敛到 pack 域；
+  // 执行体 = installPlugin（runtime manifest 单源），进度经 pack:install-progress 事件喂包卡片进度条。
+  ipcMain.handle(CHANNELS.pack.installRuntime, async (event, pluginId) => {
+    if (!pluginId || typeof pluginId !== 'string') return { ok: false, error: 'plugin_id_required' };
+    try {
+      const { installPlugin } = require('../plugin-manager');
+      await installPlugin(pluginId, (progress) => forwardRuntimeProgress(event, pluginId, progress));
+      return { ok: true, pluginId, restartRequired: true };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+
   // BLOCK-86 P1 — 卸载影响预览：确认弹层三档数据源（运行时回收体积/共享保留/包源）
   // BLOCK-157 加映（UI-481）— 整包启停（停用即不接线/启用免重装；重启后生效）
   ipcMain.handle(CHANNELS.pack.setEnabled, async (_event, packId, enabled) => {

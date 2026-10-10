@@ -89,47 +89,6 @@ function assertAllowedUrl(url) {
 // into the per-platform artifact shape used by current clients. The fallback
 // entry is the built-in manifest record, so fields added by newer clients are
 // retained while an older remote catalog is still being phased out.
-function normalizeRemotePluginEntry(id, remoteEntry, fallbackEntry = null) {
-  if (!remoteEntry || typeof remoteEntry !== 'object') return fallbackEntry;
-  const fallback = fallbackEntry && typeof fallbackEntry === 'object' ? fallbackEntry : {};
-  let artifacts = remoteEntry.artifacts;
-
-  if (!artifacts && typeof remoteEntry.url === 'string') {
-    const platforms = Array.isArray(remoteEntry.platform) ? remoteEntry.platform : [];
-    const platformId = platforms.find((value) => PLATFORM_IDS.includes(value));
-    if (platformId) {
-      artifacts = {
-        [platformId]: {
-          url: remoteEntry.url,
-          sha256:
-            typeof remoteEntry.checksum === 'string'
-              ? remoteEntry.checksum.replace(/^sha256:/i, '').trim().toLowerCase()
-              : null,
-          sizeBytes: Number.isInteger(remoteEntry.size) ? remoteEntry.size : null,
-        },
-      };
-    }
-  }
-
-  const kind =
-    remoteEntry.kind ||
-    fallback.kind ||
-    (remoteEntry.type === 'runtime' ? 'runtime' : 'plugin');
-  return {
-    ...fallback,
-    ...remoteEntry,
-    id,
-    kind,
-    artifacts: artifacts || fallback.artifacts || {},
-    checksumAlgorithm:
-      remoteEntry.checksumAlgorithm || fallback.checksumAlgorithm || 'sha256',
-    _builtIn: false,
-  };
-}
-
-// Validate a parsed manifest against the per-platform schema.
-// Returns { valid: boolean, issues: string[] }.
-// Hand-rolled (no ajv in dependencies — see package.json).
 function validateManifest(parsed) {
   const issues = [];
   if (!parsed || typeof parsed !== 'object') {
@@ -223,7 +182,6 @@ function validateManifest(parsed) {
 module.exports = {
   PLATFORM_IDS,
   ALLOWED_RUNTIME_HOSTS,
-  normalizeRemotePluginEntry,
   selectArtifact,
   assertAllowedUrl,
   validateManifest,

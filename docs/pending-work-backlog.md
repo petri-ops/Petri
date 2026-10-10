@@ -5,7 +5,9 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-10-10（**BLOCK-157 W1 波当日整波收口 completed（用户发令「开冲到W1波末」+ 波内零停顿条款）**：KNW-1 Skills 可见性投影（76→78）/KNW-2 渐进披露（索引有界注入）/CAP-1 MCP annotations 粒度审批（readOnlyHint→retrieval/none，默认 D4 不变）/DIST-1 插件启停粒度全交付；实机抓真修复插件目录拓扑脑裂（BLOCK-125 家族 resolveInstalledPluginsDir 收敛）；**波末三出口断言 ALL PASS**（真实模型 read 档自主 skill_discover/get 引用 skill/workspace-write 档 readOnly MCP 工具回流/插件停用不注册·启用免重装 8→7→8，acceptance/block-157/wave1-live.json）；closeout 十一门 PASS（D7 领域中立棘轮+lint/code-size 抓真清偿随包）；riders=UI-481 待过目；蓝图 §2 四种子翻 completed、§3.2 W1 出口达成；**队列头交棒 W2 首件 ORC-2**（依赖 CAP-1 已解锁）。）
+最后更新：2026-10-10（**BLOCK-158 商店面退役 completed（轻量批；用户裁决「清 尽可能的纯净」）**：商店写面四通道+OSS 远程抓取半边+商店卡片 UI 全链移除；运行时供应链保留+pack:install-runtime 补装新链；插件分发唯一通道=领域包；蓝图 DIST-5 改道=领域包更新体验（pack 清单版本比对）、DIST-1 收敛=pack 通道唯一启停面；残红归属=BLOCK-159 在制（docs:check/knip/test×1）+P1.4 干净树预红，均非本批。）
+
+此前 最后更新：2026-10-10（**BLOCK-157 W1 波当日整波收口 completed（用户发令「开冲到W1波末」+ 波内零停顿条款）**：KNW-1 Skills 可见性投影（76→78）/KNW-2 渐进披露（索引有界注入）/CAP-1 MCP annotations 粒度审批（readOnlyHint→retrieval/none，默认 D4 不变）/DIST-1 插件启停粒度全交付；实机抓真修复插件目录拓扑脑裂（BLOCK-125 家族 resolveInstalledPluginsDir 收敛）；**波末三出口断言 ALL PASS**（真实模型 read 档自主 skill_discover/get 引用 skill/workspace-write 档 readOnly MCP 工具回流/插件停用不注册·启用免重装 8→7→8，acceptance/block-157/wave1-live.json）；closeout 十一门 PASS（D7 领域中立棘轮+lint/code-size 抓真清偿随包）；riders=UI-481 待过目；蓝图 §2 四种子翻 completed、§3.2 W1 出口达成；**队列头交棒 W2 首件 ORC-2**（依赖 CAP-1 已解锁）。）
 
 此前 最后更新：2026-10-10（**G0 五层成熟度蓝图落档 reference + 候选池合并**（用户裁决「做好全方位的推进方案 接下来很长的一个阶段 就是按照此蓝图逐步推进 依赖链要做好 递进关系哦」）：蓝图 = docs/g0-agent-maturity-blueprint.md（25 种子 MDL×4/ORC×5/CAP×5/KNW×6/DIST×5 + 依赖 DAG + 三波递进 + 波次出口判据）；队列区 1v~1y = 第一波四件（KNW-1 队列头待发令，启动前置 = skill-registry.js 在制 WIP 收口），W2/W3 以汇总行挂蓝图 §3；C-EXT-1~4 归并注记入候选池（C-EXT-2 维持 deferred G1 邻界）；DOC-REGISTRY（306）+ README entry 180 登记。）
 
@@ -208,6 +210,7 @@
 
 | C-24 | **审视吸收三波余量候选（2026-10-09 BLOCK-153 登记）**：A4 两条（跨 job 钉住失败静默 Shell :228-232／lineage 切换导航空态与操作提示）+B7 报告模板内容扩充（pack 域）+H 边缘三条（staged 再编辑键基线不对称／staged 删除 pathspec rm --cached 形态／apply 失败已 stage 遗留）+A1 会话恢复核心语义（151 从紧未动）——全部审视/评审实证在案，重开条件=用户裁决吸收三波或触碰对应域时随批 | BLOCK-150/151/152 收口笔录携带登记 | 候选（逐项裁决） |
 | C-EXT-1 | **MCP HTTP/SSE 传输 + server 级信任配置——已归并成熟度蓝图（2026-10-10）**：传输半边 → CAP-3（W3）；server 级信任半边 → CAP-5⇄DIST-3 共轨（W3） | 来源=BLOCK-156 收口 §7；归档指针=docs/g0-agent-maturity-blueprint.md §5 |
+| C-EXT-5 | **桌面端商店安装面退役——已完成（2026-10-10 BLOCK-158，用户裁决「清 尽可能的纯净 后期有需要我们再来调整」）**：商店卡片/plugin:install·uninstall·checkUpdates/OSS 远程抓取半边全链移除；OSS bucket+manifest 基建不动，G1 恢复在线商店在 manifest-source 挂点重接远程半边即可；更新体验改道=领域包版本比对（蓝图 DIST-5） | 用户裁决 2026-10-10；docs/AUDIT-LOG BLOCK-158 条目 |
 | C-EXT-2 | **marketplace 远程技能市场——维持 deferred（G1 邻界）**：蓝图 §6 画线内不排期；重开条件=G1+ 阶段启动或用户显式裁决 | 来源=BLOCK-156 收口 §7；蓝图 §5/§6 |
 | C-EXT-3 | **预路由 mcp 域收窄——已归并成熟度蓝图 CAP-4（W3）**：原重开条件（决策配置中心接线证据）随包保留 | 来源=BLOCK-156 收口 §7；蓝图 §2③ |
 | C-EXT-4 | **第三方技能本地导入——已交付销号（2026-10-10 BLOCK-156 D7 补做，4479aecf）**：skill.json 形态本地目录导入一条龙（installSkillFromDir/skills:import-directory/货架导入按钮，实机四断言）已落地；**剩余面归蓝图**——SKILL.md 格式兼容 → KNW-4，插件/MCP 配置导入 → DIST-2（W2 共轨包范围相应收缩） | 来源=BLOCK-156 收口 §8；归档指针=蓝图 §2④⑤ |

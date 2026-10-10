@@ -15,6 +15,7 @@
  * 同形状，消费方 unpackPacks 双形态兼容。
  */
 import { getToken } from '@/lib/authClient';
+import { markProjectionBridgeFailure, markProjectionBridgeSuccess } from '@/lib/projectionLink';
 
 function authHeaders(): Record<string, string> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -24,7 +25,20 @@ function authHeaders(): Record<string, string> {
 }
 
 async function getJson(path: string): Promise<{ status: number; data: Record<string, unknown> }> {
-  const response = await fetch(path, { headers: authHeaders() });
+  let response: Response;
+  try {
+    response = await fetch(path, { headers: authHeaders() });
+  } catch (error) {
+    // BLOCK-159 P1-9 — 网络失败如实上报断连（横幅呈现），不再静默返空；
+    // 错误照旧上抛给调用方（各桥自有的 catch 降级路径不变）。
+    markProjectionBridgeFailure(error instanceof Error ? error.message : 'network');
+    throw error;
+  }
+  if (response.status === 429 || response.status >= 500) {
+    markProjectionBridgeFailure(`HTTP ${response.status}`);
+  } else {
+    markProjectionBridgeSuccess();
+  }
   const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
   return { status: response.status, data };
 }
@@ -77,12 +91,7 @@ const pluginsBridge = {
       return { plugins: {} };
     }
   },
-  install(_pluginId: string, _onProgress?: unknown) {
-    return Promise.resolve({ ok: false as const, error: '投影环境暂不支持安装插件，请在桌面端操作' });
-  },
-  uninstall(_pluginId: string) {
-    return Promise.resolve({ ok: false as const, error: '投影环境暂不支持卸载插件，请在桌面端操作' });
-  },
+  // BLOCK-158 商店面退役 — 安装/卸载面随商店退役；插件分发 = 领域包通道 packsBridge。
 };
 
 // 领域包（BLOCK-84）：读面真数据，写面诚实禁用（安装需桌面目录选择 + 重启生效）。
@@ -108,6 +117,9 @@ const packsBridge = {
     } catch {
       return { ok: false, packs: [] };
     }
+  },
+  installRuntime(_pluginId: string) {
+    return Promise.resolve({ ok: false as const, error: '投影环境暂不支持安装运行时，请在桌面端操作' });
   },
   installFromDialog() {
     return Promise.resolve({ ok: false as const, error: '投影环境暂不支持安装领域包，请在桌面端操作' });

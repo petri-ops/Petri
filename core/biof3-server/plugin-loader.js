@@ -578,14 +578,6 @@ function loadPluginsFromDisk(pluginsDir) {
     // 没有 plugin.json，跳过（由 plugin-manager.js 管理环境变量）
     if (plug.type === 'runtime') continue;
 
-    // BLOCK-157 DIST-1 — 启停粒度：enabled === false 的已装条目不注册
-    //（停用即不注册 → run_tool 清单/执行与 MCP listToolsForMCP 天然不出现；
-    // 重新启用免重装：文件仍在，重扫即恢复）。缺省（无字段）= 启用，存量零破坏。
-    if (plug && plug.enabled === false) {
-      logger.info(`[plugin-loader] ${plug.id}: disabled by user, skipping registration`);
-      continue;
-    }
-
     const canonicalBuiltIn = _getCanonicalBuiltInPlugin(plug.id);
     if (canonicalBuiltIn) {
       const existing = map.get(plug.id);

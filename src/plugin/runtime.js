@@ -58,24 +58,9 @@ function getRuntimeStatus() {
   };
 }
 
-function parseVersion(v) {
-  return v.split('.').map((x) => parseInt(x, 10) || 0);
-}
 
-function compareVersions(a, b) {
-  const pa = parseVersion(a);
-  const pb = parseVersion(b);
-  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
-    const da = pa[i] || 0;
-    const db = pb[i] || 0;
-    if (da > db) return 1;
-    if (da < db) return -1;
-  }
-  return 0;
-}
 
 module.exports = {
   detectPlatform,
   getRuntimeStatus,
-  compareVersions,
 };

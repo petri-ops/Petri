@@ -121,6 +121,7 @@ const CHANNELS = {
     installFromDialog: 'pack:install-from-dialog',
     installPath: 'pack:install-path',
     installProgress: 'pack:install-progress',
+    installRuntime: 'pack:install-runtime',
     listAvailable: 'pack:list-available',
     listInstalled: 'pack:list-installed',
     setEnabled: 'pack:set-enabled',
@@ -128,12 +129,11 @@ const CHANNELS = {
     uninstallPlan: 'pack:uninstall-plan',
   },
   plugin: {
-    checkUpdates: 'plugin:check-updates',
-    install: 'plugin:install',
+    // BLOCK-158 商店面退役：仅存目录读面（listInstalled/listRemote=运行时目录投影，
+    // 供包卡片运行时标题/体积）；install/uninstall/checkUpdates 随商店面移除，
+    // 插件分发 = 领域包通道（pack:*），运行时安装 = 包一键内链 installPlugin。
     listInstalled: 'plugin:list-installed',
     listRemote: 'plugin:list-remote',
-    setEnabled: 'plugin:set-enabled',
-    uninstall: 'plugin:uninstall',
   },
   runtime: {
     status: 'runtime:status',

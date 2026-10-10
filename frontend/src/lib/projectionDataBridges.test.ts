@@ -97,13 +97,12 @@ describe('projectionDataBridges', () => {
     expect(Object.keys(remote.plugins).sort()).toEqual(['biof3-py-runtime', 'biof3-r-runtime']);
   });
 
-  it('plugins install/uninstall are honestly disabled in projection', async () => {
-    const bridge = getProjectionPluginsBridge();
-    const install = await bridge.install('alpha');
-    const uninstall = await bridge.uninstall('alpha');
-    expect(install.ok).toBe(false);
-    expect(install.error).toContain('桌面端');
-    expect(uninstall.ok).toBe(false);
+  it('BLOCK-158 商店面退役：投影 plugins 桥不再有 install/uninstall 写面', () => {
+    const bridge = getProjectionPluginsBridge() as Record<string, unknown>;
+    expect(bridge.install).toBeUndefined();
+    expect(bridge.uninstall).toBeUndefined();
+    expect(typeof bridge.listInstalled).toBe('function');
+    expect(typeof bridge.listRemote).toBe('function');
   });
 
   it('packs bridges return the { ok, packs } envelope per pack:list-* contract', async () => {

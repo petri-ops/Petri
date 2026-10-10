@@ -31,7 +31,6 @@ const {
   PLUGINS_DIR,
   RUNTIMES_DIR,
   PROJECT_ROOT,
-  SHARED_BACKEND_DIR,
 } = require('./paths');
 const pluginLoader = require(path.join(PROJECT_ROOT, 'biof3-server', 'plugin-loader.js'));
 const {
@@ -39,70 +38,9 @@ const {
   removeInstalledPlugin,
   addInstalledPlugin,
 } = require('./installed');
-const { getRemoteManifest } = require('./manifest-source');
-const { compareVersions, detectPlatform } = require('./runtime');
-const { registerContentPlugin, unregisterContentPlugin } = require('./content-plugin');
+const { detectPlatform } = require('./runtime');
+const { registerContentPlugin } = require('./content-plugin');
 const { registerPluginInServer } = require('./registry');
-
-async function uninstallPlugin(pluginId) {
-  // Runtime 类型走特殊卸载路径
-  const installed = getInstalledPlugins();
-  const plug = installed.find((p) => p.id === pluginId);
-  if (plug && plug.type === 'runtime') {
-    return uninstallRuntime(pluginId, plug);
-  }
-
-  // Content 插件类型：删目录 + 注销 globalThis 桥 + 记录
-  if (plug && plug.type === 'content-plugin') {
-    const pluginDir = path.join(PLUGINS_DIR, pluginId);
-    if (fs.existsSync(pluginDir)) fs.rmSync(pluginDir, { recursive: true, force: true });
-    unregisterContentPlugin(pluginId);
-    removeInstalledPlugin(pluginId);
-    console.log(`[plugin] content-plugin uninstalled: ${pluginId}`);
-    return;
-  }
-
-  const pluginDir = path.join(PLUGINS_DIR, pluginId);
-  if (!fs.existsSync(pluginDir)) {
-    throw new Error(`插件 ${pluginId} 未安装`);
-  }
-
-  // 读取 plugin.json 获取包列表
-  const metaPath = path.join(pluginDir, 'plugin.json');
-  let meta = {};
-  try {
-    meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
-  } catch {}
-
-  // 删除专属包（不删共享包）
-  const language = meta.language;
-  if (meta.packages && meta.packages[language]) {
-    const { getExecutor } = require(path.join(SHARED_BACKEND_DIR, 'executors'));
-    const executor = getExecutor(language);
-    // packages 可能是 array（figcode-pack）或 object（工具插件）
-    const pkgList = Array.isArray(meta.packages[language])
-      ? meta.packages[language]
-      : Object.keys(meta.packages[language]);
-    for (const pkgName of pkgList) {
-      removePackage(executor, language, pkgName);
-    }
-  }
-
-  // 删除插件目录
-  fs.rmSync(pluginDir, { recursive: true, force: true });
-
-  // 从服务器注销
-  if (globalThis._biof3Plugins) {
-    globalThis._biof3Plugins.delete(pluginId);
-  }
-
-  // 更新已装清单
-  removeInstalledPlugin(pluginId);
-
-  console.log(`[plugin] uninstalled: ${pluginId}`);
-}
-
-// ── 卸载 Runtime ───────────────────────────────────────────────
 
 async function uninstallRuntime(pluginId, plug) {
   const lang = plug.language;
@@ -143,28 +81,6 @@ function removePackage(executor, language, pkgName) {
 }
 
 // ── 检查更新 ───────────────────────────────────────────────────
-
-async function checkUpdates() {
-  const installed = getInstalledPlugins();
-  const manifest = await getRemoteManifest();
-  const updates = [];
-
-  for (const plug of installed) {
-    const remote = manifest.plugins && manifest.plugins[plug.id];
-    if (remote && compareVersions(remote.version, plug.version) > 0) {
-      updates.push({
-        id: plug.id,
-        currentVersion: plug.version,
-        latestVersion: remote.version,
-        changelog: remote.changelog || '',
-        size: remote.size || 0,
-      });
-    }
-  }
-  return updates;
-}
-
-// ── 加载所有已装插件（启动时调用）──────────────────────────────
 
 async function loadAllPlugins() {
   const installed = getInstalledPlugins();
@@ -244,9 +160,7 @@ async function loadAllPlugins() {
 void execFile;
 
 module.exports = {
-  uninstallPlugin,
   uninstallRuntime,
   removePackage,
-  checkUpdates,
   loadAllPlugins,
 };

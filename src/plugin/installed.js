@@ -23,13 +23,11 @@ function getInstalledPlugins() {
   try {
     const raw = JSON.parse(fs.readFileSync(INSTALLED_FILE, 'utf8'));
     if (!Array.isArray(raw)) return [];
-    // BLOCK-157 DIST-1 — enabled 规格化：无字段=启用（存量零破坏），仅 false=停用。
     return raw.map((plug) => {
       if (!plug || typeof plug !== 'object') return plug;
-      const enabledNormalized = { ...plug, enabled: plug.enabled !== false };
       if (plug.type === 'runtime') {
         return {
-          ...enabledNormalized,
+          ...plug,
           installedFingerprint: plug.scriptFingerprint || plug.manifestFingerprint || plug.fingerprint || null,
           currentFingerprint: null,
           manifestDrift: false,
@@ -41,7 +39,7 @@ function getInstalledPlugins() {
       const metaPath = path.join(pluginDir, 'plugin.json');
       if (!plug.id || !fs.existsSync(metaPath)) {
         return {
-          ...enabledNormalized,
+          ...plug,
           installedFingerprint: plug.scriptFingerprint || plug.manifestFingerprint || plug.fingerprint || null,
           currentFingerprint: null,
           manifestDrift: false,
@@ -70,7 +68,7 @@ function getInstalledPlugins() {
           installedFingerprint !== currentFingerprint
         );
         return {
-          ...enabledNormalized,
+          ...plug,
           installedFingerprint,
           currentFingerprint,
           manifestDrift,
@@ -78,7 +76,7 @@ function getInstalledPlugins() {
         };
       } catch {
         return {
-          ...enabledNormalized,
+          ...plug,
           installedFingerprint: plug.scriptFingerprint || plug.manifestFingerprint || plug.fingerprint || null,
           currentFingerprint: null,
           manifestDrift: false,
@@ -120,25 +118,11 @@ function removeInstalledPlugin(pluginId) {
   saveInstalledPlugins(list);
 }
 
-// BLOCK-157 DIST-1 — 启停粒度：停用=enabled:false 标志（文件不动，免重装）；
-// 核心加载器 loadPluginsFromDisk 尊重该标志（停用即不注册）。
-function setPluginEnabled(pluginId, enabled) {
-  const list = getInstalledPlugins();
-  const row = list.find((p) => p && p.id === pluginId);
-  if (!row) {
-    return { ok: false, error: 'plugin_not_installed', message: `未安装插件：${pluginId}` };
-  }
-  if (row.type === 'runtime') {
-    return { ok: false, error: 'runtime_not_togglable', message: 'runtime 类型条目不支持启停（由运行时管理）。' };
-  }
-  saveInstalledPlugins(list.map((p) => (p.id === pluginId ? { ...p, enabled: enabled !== false } : p)));
-  return { ok: true, id: pluginId, enabled: enabled !== false, restartRequired: true };
-}
-
+// BLOCK-158 商店面退役 — setPluginEnabled（商店卡片启停）随商店面移除；
+// 插件启停 = 领域包整包启停（pack-registry.setPackEnabled + server.js 装配门）。
 module.exports = {
   getInstalledPlugins,
   saveInstalledPlugins,
   addInstalledPlugin,
   removeInstalledPlugin,
-  setPluginEnabled,
 };

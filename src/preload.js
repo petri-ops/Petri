@@ -223,21 +223,10 @@ const desktopBridgeSurface = {
     list: () => ipcRenderer.invoke('harness-capabilities:list'),
   },
 
-  // 插件管理
+  // 插件管理（BLOCK-158 商店面退役：仅存目录读面；安装/卸载/更新 = 领域包通道 pack:*）
   plugins: {
     listInstalled: () => ipcRenderer.invoke('plugin:list-installed'),
     listRemote: () => ipcRenderer.invoke('plugin:list-remote'),
-    install: (pluginId, onProgress) => {
-      // Progress is passed through the invoke result or a callback (IPC event channel
-      // plugin:install-progress is not currently wired on the main side; progress
-      // callbacks are passed directly). Kept for future main-side send wiring.
-      void onProgress;
-      return ipcRenderer.invoke('plugin:install', pluginId);
-    },
-    uninstall: (pluginId) => ipcRenderer.invoke('plugin:uninstall', pluginId),
-    // BLOCK-157 DIST-1 — 启停粒度（停用即不注册、启用免重装；重启后生效）
-    setEnabled: (pluginId, enabled) => ipcRenderer.invoke('plugin:set-enabled', pluginId, enabled),
-    checkUpdates: () => ipcRenderer.invoke('plugin:check-updates'),
   },
 
   // BLOCK-84：领域包一键装/卸桥（记录制；装/卸后需重启生效）
@@ -250,6 +239,8 @@ const desktopBridgeSurface = {
     installFromDialog: () => ipcRenderer.invoke('pack:install-from-dialog'),
     installPath: (packRoot) => ipcRenderer.invoke('pack:install-path', packRoot),
     uninstallPlan: (packId) => ipcRenderer.invoke('pack:uninstall-plan', packId),
+    // BLOCK-158 — 运行时补装（包卡片「必需 · 缺失」补装；进度走 onInstallProgress 事件）
+    installRuntime: (pluginId) => ipcRenderer.invoke('pack:install-runtime', pluginId),
     uninstall: (packId, options) => ipcRenderer.invoke('pack:uninstall', packId, options),
     // BLOCK-157 加映（UI-481）— 整包启停（停用即不接线/启用免重装；重启后生效）
     setEnabled: (packId, enabled) => ipcRenderer.invoke('pack:set-enabled', packId, enabled),

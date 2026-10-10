@@ -183,15 +183,14 @@ describe('PluginStorePanel 领域包改版 (UI-374)', () => {
     expect(screen.queryByText(/需要.*运行时/)).toBeNull();
   });
 
-  it('包交付插件在商店可见并标注来源包（分析工具分类同样可见）', async () => {
+  it('BLOCK-158 商店面退役：包交付插件行常显并标注来源包（分类导航已随商店移除）', async () => {
     renderStore();
     await waitFor(() => expect(screen.getByTestId('pack-delivered-plugins')).toBeTruthy());
     const section = screen.getByTestId('pack-delivered-plugins');
     expect(section.textContent).toContain('deseq2');
     expect(section.textContent).toContain('来源包：格物 · 生信分析包');
-    // 分析工具分类下同样可见
-    fireEvent.click(screen.getByText('分析工具'));
-    await waitFor(() => expect(screen.getByTestId('pack-delivered-plugins')).toBeTruthy());
+    // 分类导航随商店安装卡片退役：侧栏不存在，交付行无需切分类即常显
+    expect(screen.queryByText('分析工具')).toBeNull();
   });
 
   it('模块清单行：包卡片折叠态显示 分析插件/脚本/演示数据 计数', async () => {

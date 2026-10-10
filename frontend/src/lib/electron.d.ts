@@ -161,6 +161,8 @@ declare global {
         list: () => Promise<{ ok: boolean; capabilities: HarnessCapabilityEntry[]; error?: string }>;
       };
       plugins: {
+        // BLOCK-158 商店面退役 — 仅存目录读面（listRemote=运行时目录投影，
+        // 供包卡片运行时标题/体积）；安装/卸载/更新 = 领域包通道 packs.*。
         listInstalled: () => Promise<
           Array<{
             id: string;
@@ -172,29 +174,9 @@ declare global {
             currentFingerprint?: string | null;
             manifestDrift?: boolean;
             driftReason?: string | null;
-            /** BLOCK-157 DIST-1 — 启停粒度（缺省 true=启用） */
-            enabled?: boolean;
           }>
         >;
         listRemote: () => Promise<{ plugins: Record<string, RemotePlugin> }>;
-        /** BLOCK-157 DIST-1 — 启停粒度（停用即不注册、启用免重装；重启后生效） */
-        setEnabled: (
-          pluginId: string,
-          enabled: boolean
-        ) => Promise<{ ok: boolean; id?: string; enabled?: boolean; restartRequired?: boolean; error?: string }>;
-        install: (
-          pluginId: string,
-          onProgress?: (data: {
-            pluginId: string;
-            ratio: number;
-            received: number;
-            total: number;
-          }) => void
-        ) => Promise<{ ok: boolean; error?: string }>;
-        uninstall: (pluginId: string) => Promise<{ ok: boolean; error?: string }>;
-        checkUpdates: () => Promise<
-          Array<{ id: string; currentVersion: string; latestVersion: string }>
-        >;
       };
       // BLOCK-84：领域包一键装/卸桥
       // BLOCK-86 P1/P2：requires.runtimes 契约 + contents 内容概要 +
@@ -217,6 +199,8 @@ declare global {
         installPath: (packRoot: string) => Promise<{ ok: boolean; pack?: { packId: string }; runtimes?: Array<{ pluginId: string; ok: boolean; skipped?: string; error?: string }>; requiresRestart?: boolean; error?: string }>;
         /** BLOCK-157 加映（UI-481）— 整包启停（停用即不接线/启用免重装；重启后生效） */
         setEnabled: (packId: string, enabled: boolean) => Promise<{ ok: boolean; packId?: string; enabled?: boolean; restartRequired?: boolean; error?: string }>;
+        /** BLOCK-158 — 运行时补装（包卡片「必需 · 缺失」补装；进度走 onInstallProgress） */
+        installRuntime: (pluginId: string) => Promise<{ ok: boolean; pluginId?: string; restartRequired?: boolean; error?: string }>;
         uninstallPlan: (packId: string) => Promise<{
           ok: boolean;
           packId?: string;

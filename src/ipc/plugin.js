@@ -46,49 +46,6 @@ function setupPluginIpc(options = {}) {
     }
   });
 
-  ipcMain.handle(CHANNELS.plugin.checkUpdates, async (event) => {
-    const deny = assertSender(event); if (deny) return deny;
-    try {
-      const { checkUpdates } = require("../plugin-manager");
-      return await checkUpdates();
-    } catch (e) {
-      console.warn("[desktop] plugin:check-updates failed:", e.message);
-      return [];
-    }
-  });
-
-  ipcMain.handle(CHANNELS.plugin.install, async (event, pluginId) => {
-    const deny = assertSender(event); if (deny) return deny;
-    try {
-      const { installPlugin } = require("../plugin-manager");
-      return await installPlugin(pluginId);
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
-
-  ipcMain.handle(CHANNELS.plugin.uninstall, async (event, pluginId) => {
-    const deny = assertSender(event); if (deny) return deny;
-    try {
-      const { uninstallPlugin } = require("../plugin-manager");
-      return await uninstallPlugin(pluginId);
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
-
-  // BLOCK-157 DIST-1 — 插件启停粒度（停用=enabled 标志，文件不动免重装；
-  // 核心加载器尊重 → run_tool/MCP 工具面停用即不注册；重启后生效与装卸同 UX）
-  ipcMain.handle(CHANNELS.plugin.setEnabled, async (event, pluginId, enabled) => {
-    const deny = assertSender(event); if (deny) return deny;
-    try {
-      const { setPluginEnabled } = require("../plugin/installed");
-      return setPluginEnabled(pluginId, enabled);
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
-
   // ── M2-9：content-plugin 文档桥 ──────────────────────────────
   // docs.tsx 运行时通过这些 IPC 拉取已装 content-plugin 的文档树与正文
   ipcMain.handle(CHANNELS.contentPlugin.list, async (event) => {

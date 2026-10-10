@@ -11,18 +11,15 @@
 // with a 15s timeout; on network/timeout/error falls back to built-ins only.
 // Merges remote + built-in with built-ins marked `_builtIn: true`, and
 // normalizes legacy {url,checksum,size,platform} entries to the current
-// per-platform artifacts contract via normalizeRemotePluginEntry.
+// BLOCK-158 商店面退役后本模块 = 运行时目录读面（BLOCK-158 前含 OSS 远程合并半边，已退役）。
 // ============================================================
 
 const fs = require('fs');
 const path = require('path');
-const https = require('https');
 const {
   BUILT_IN_PLUGINS_DIR,
-  MANIFEST_URL,
 } = require('./paths');
 const {
-  normalizeRemotePluginEntry,
   validateManifest,
 } = require('../plugin-schema');
 
@@ -52,58 +49,19 @@ function getBuiltInManifest() {
   return { plugins: {}, version: '0.0.0' };
 }
 
-// 合并远程 + 内置 manifest（内置插件标记 _builtIn: true）
+// BLOCK-158 商店面退役 — 原「远程 OSS + 内置」合并语义收敛为**运行时目录**单源：
+// 只读 resources/runtime/manifest.json（biof3-r-runtime / biof3-py-runtime，
+// 供给链 = 领域包一键安装的运行时下载）。OSS 远程插件清单抓取已随商店面退役，
+// OSS bucket/清单基建不动（G1 恢复在线商店时在挂点重新合并 remote 半边即可）。
 async function getRemoteManifest() {
   const builtIn = getBuiltInManifest();
-  const builtInPlugins = {};
+  const plugins = {};
   if (builtIn.plugins) {
     for (const [id, info] of Object.entries(builtIn.plugins)) {
-      builtInPlugins[id] = { ...info, _builtIn: true };
+      plugins[id] = { ...info, _builtIn: true };
     }
   }
-  // 尝试远程
-  const remote = await new Promise((resolve) => {
-    let buf = '';
-    const req = https.get(MANIFEST_URL, { timeout: 15000 }, (res) => {
-      if (res.statusCode !== 200) {
-        return resolve({ plugins: {} });
-      }
-      res.on('data', (c) => (buf += c));
-      res.on('end', () => {
-        try {
-          resolve(JSON.parse(buf));
-        } catch {
-          resolve({ plugins: {} });
-        }
-      });
-    });
-    req.on('error', () => resolve({ plugins: {} }));
-    req.on('timeout', () => {
-      try {
-        req.destroy();
-      } catch {}
-      resolve({ plugins: {} });
-    });
-  });
-  // 合并：远程优先，但先把旧版 {url, checksum, size, platform} 条目规范化
-  // 为当前 per-platform artifacts 契约。否则旧 OSS 清单会整条覆盖内置
-  // Runtime 条目，导致 selectArtifact 在全新用户首装时失败。
-  const mergedPlugins = { ...builtInPlugins };
-  for (const [id, info] of Object.entries(remote.plugins || {})) {
-    mergedPlugins[id] = normalizeRemotePluginEntry(id, info, builtInPlugins[id]);
-  }
-  const merged = {
-    version: remote.version || builtIn.version,
-    plugins: mergedPlugins,
-  };
-  // 规范化后的合并结果必须满足当前契约。远程失败时仍保留内置 fallback。
-  if (remote.plugins && Object.keys(remote.plugins).length > 0) {
-    const v = validateManifest(merged);
-    if (!v.valid) {
-      console.warn(`[plugin] remote manifest validation failed: ${v.issues.join('; ')}`);
-    }
-  }
-  return merged;
+  return { version: builtIn.version, plugins };
 }
 
 module.exports = {
