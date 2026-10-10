@@ -15,6 +15,8 @@ const { tool_plan } = require('./plan-ui-tools');
 const { tool_todo_write } = require('./todo-tools');
 const { tool_decision_summary, tool_decision_recent } = require('./decision-tools');
 const { tool_result_summary } = require('./result-summary-tools');
+// BLOCK-157 W1 P1（KNW-1）— 产品 Skills 会话台只读工具（渐进披露：discover 无正文 / get 有界手册）
+const { tool_skill_discover, tool_skill_get } = require('./skill-tools');
 // BLOCK-124（C-13）— 符号图只读查询（内核单源 helpers/code-graph）
 const { tool_codegraph_who_imports, tool_codegraph_classify_edges } = require('./codegraph-tools');
 const {
@@ -203,6 +205,9 @@ const HANDLERS = {
   knowledge_space_delete: tool_knowledge_space_delete,
   knowledge_space_clear: tool_knowledge_space_clear,
   knowledge_doc_delete: tool_knowledge_doc_delete,
+  // BLOCK-157 W1 P1（KNW-1）— 产品 Skills 会话台（只读；执行面不投影，plan §2 裁决）
+  skill_discover: tool_skill_discover,
+  skill_get: tool_skill_get,
 };
 
 function contract(category, sideEffect, riskTier, resources, estimatedDurationMs) {
@@ -313,6 +318,10 @@ const CONTRACTS = {
   knowledge_space_delete: contract('action', 'state-write', 'R2', ['knowledge.index'], 2000),
   knowledge_space_clear: contract('action', 'state-write', 'R2', ['knowledge.index'], 2000),
   knowledge_doc_delete: contract('action', 'state-write', 'R2', ['knowledge.index'], 2000),
+  // BLOCK-157 W1 P1（KNW-1）— 技能台只读两件：注册表在应用级目录（非项目资源，resources 留空），
+  // retrieval/none/R0 → 全档可用（read/plan 亦可，与知识检索同族）
+  skill_discover: contract('retrieval', 'none', 'R0', [], 500),
+  skill_get: contract('retrieval', 'none', 'R0', [], 500),
 };
 
 function cloneJson(value) {

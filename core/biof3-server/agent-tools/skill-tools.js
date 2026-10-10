@@ -1,0 +1,184 @@
+'use strict';
+
+/**
+ * agent-tools/skill-tools.js — 产品 Skills 会话台只读工具（BLOCK-157 W1 P1/KNW-1）。
+ *
+ * 把 MCP server 侧既有的 skill_discover/skill_get 语义投影进 agent 工具集：
+ * 模型第一次「看到」产品 Skills（此前 4 技能只有 Skills 页显式执行与外部
+ * MCP 客户端两条通道，agent 感知不到——蓝图评估确认的最大断链）。
+ *
+ * 渐进披露边界（KNW-2 与本文件共同承载）：
+ *  - discover 行不带 prompts 正文（只有 id/描述/参数契约摘要）；
+ *  - get 才返回完整手册（prompts），且 prompt 内容有界截断——正文加载永远
+ *    由模型按需触发，不整本倾倒进上下文。
+ *  - 不投影 skill_execute：执行面 v1 维持 Skills 页显式触发与外部 MCP 客户端
+ *    通道；模型只读手册不自动执行（BLOCK-157 plan §2 裁决）。
+ *
+ * 数据源单源 = core/shared-backend/skill-registry.js（与 Skills 页、skills:check、
+ * MCP server 侧同一注册表；懒加载单例，加载失败如实降级不抛）。
+ */
+
+const DISCOVER_HARD_LIMIT = 50;
+const DISCOVER_DESC_LIMIT = 160;
+const PROMPT_CHAR_BUDGET = 8000;
+const TRUNCATION_MARKER = '…[truncated]';
+
+let _registry = null;
+
+function getRegistry() {
+  if (_registry !== null) {
+    return _registry;
+  }
+  try {
+    const { SkillRegistry } = require('../../shared-backend/skill-registry');
+    _registry = new SkillRegistry();
+  } catch (e) {
+    console.warn('[skill-tools] SkillRegistry require failed:', e && e.message);
+    _registry = null;
+  }
+  return _registry;
+}
+
+/** discover 行有界投影（纯函数，测试直打）：截断标记诚实、正文永不携带。 */
+function boundDiscoverRows(skills, limit = DISCOVER_HARD_LIMIT) {
+  const rows = (Array.isArray(skills) ? skills : []).slice(0, limit).map((skill) => ({
+    id: skill.id,
+    name: skill.name,
+    version: skill.version,
+    source: skill.source,
+    category: skill.category,
+    tags: skill.tags,
+    description: String(skill.description || '').slice(0, DISCOVER_DESC_LIMIT),
+    capabilities: skill.capabilities,
+    plugins: {
+      required: skill.plugins && Array.isArray(skill.plugins.required) ? skill.plugins.required : [],
+    },
+    parameters: {
+      required: skill.parameters && skill.parameters.required ? skill.parameters.required : {},
+      optional: skill.parameters && skill.parameters.optional ? skill.parameters.optional : {},
+    },
+  }));
+  const total = Array.isArray(skills) ? skills.length : 0;
+  return { rows, total, truncated: total > rows.length };
+}
+
+/** prompt 正文有界截断（纯函数，测试直打）：超预算截断带标记。 */
+function boundSkillPrompts(skill, budget = PROMPT_CHAR_BUDGET) {
+  const prompts = skill && skill.prompts ? JSON.parse(JSON.stringify(skill.prompts)) : undefined;
+  if (prompts && typeof prompts.system === 'string' && prompts.system.length > budget) {
+    prompts.system = prompts.system.slice(0, budget) + TRUNCATION_MARKER;
+  }
+  return { ...skill, prompts };
+}
+
+/**
+ * skill_discover — 列产品技能（内置 + 已安装），支持 source/category/search 过滤。
+ * @param {{source?: string, category?: string, search?: string}} args
+ */
+async function tool_skill_discover(args = {}) {
+  const registry = getRegistry();
+  if (!registry) {
+    return { ok: false, error: 'skill_registry_unavailable', message: '技能注册表不可用（加载失败），请检查安装完整性。' };
+  }
+  try {
+    let skills = registry.discover();
+    if (args.source) {
+      skills = skills.filter((s) => s.source === args.source);
+    }
+    if (args.categoryFilter) {
+      const cat = String(args.categoryFilter).toLowerCase();
+      skills = skills.filter(
+        (s) => String(s.category).toLowerCase() === cat || String(s.category).toLowerCase().startsWith(cat + '/')
+      );
+    }
+    if (args.search) {
+      const q = String(args.search).toLowerCase();
+      skills = skills.filter(
+        (s) =>
+          String(s.id).toLowerCase().includes(q) ||
+          String(s.name).toLowerCase().includes(q) ||
+          String(s.description || '').toLowerCase().includes(q) ||
+          (Array.isArray(s.tags) && s.tags.some((tag) => String(tag).toLowerCase().includes(q)))
+      );
+    }
+    const { rows, total, truncated } = boundDiscoverRows(skills);
+    return {
+      ok: true,
+      skills: rows,
+      total,
+      truncated,
+      message: truncated
+        ? `共 ${total} 个技能，仅返回前 ${rows.length} 个；请用 search/category 收窄。`
+        : `共 ${total} 个技能。任务匹配某技能时，用 skill_get <id> 读取完整手册后再按手册执行。`,
+    };
+  } catch (e) {
+    console.error('[skill-tools] discover error:', e);
+    return { ok: false, error: 'skill_discover_failed', message: e && e.message ? e.message : 'unknown' };
+  }
+}
+
+/**
+ * skill_get — 读单个技能完整信息（含 prompts 手册；prompt 内容有界截断）。
+ * @param {{id: string}} args
+ */
+async function tool_skill_get(args = {}) {
+  const id = args && typeof args.id === 'string' ? args.id.trim() : '';
+  if (!id) {
+    return { ok: false, error: 'invalid_args', message: 'id 必填：先用 skill_discover 找到技能 id。' };
+  }
+  const registry = getRegistry();
+  if (!registry) {
+    return { ok: false, error: 'skill_registry_unavailable', message: '技能注册表不可用（加载失败）。' };
+  }
+  try {
+    const skill = registry.get(id);
+    if (!skill) {
+      return { ok: false, error: 'skill_not_found', message: `未找到技能：${id}（用 skill_discover 查看在册清单）。` };
+    }
+    const bounded = boundSkillPrompts(skill);
+    return {
+      ok: true,
+      skill: bounded,
+      message: '已加载完整手册；请把 prompts 内容作为该任务的执行指引（步骤/参数/恢复策略按手册走）。',
+    };
+  } catch (e) {
+    console.error('[skill-tools] get error:', e);
+    return { ok: false, error: 'skill_get_failed', message: e && e.message ? e.message : 'unknown' };
+  }
+}
+
+/**
+ * KNW-2 — 技能索引常驻块（agent-runner 注入；纯函数，测试直打）。
+ * 有界：≤12 条 × 描述 ≤100 字符，整块 ≤2200 字符；空清单返回 null（零注入）。
+ */
+function buildSkillsIndexBlock(skills) {
+  const list = Array.isArray(skills) ? skills : [];
+  if (list.length === 0) return null;
+  const lines = list.slice(0, 12).map((s) => {
+    const desc = String(s.description || '').replace(/\s+/g, ' ').slice(0, 100);
+    return `- ${s.id}（${s.category}）：${desc}`;
+  });
+  let block = [
+    '=== 可用技能（产品标准流程包）===',
+    ...lines,
+    list.length > 12 ? `（另有 ${list.length - 12} 个未列出，可用 skill_discover 查询）` : '',
+    '纪律：用户的任务与某技能匹配时，先 skill_get <id> 读完整手册，再按手册的步骤/参数约定执行；不匹配则忽略本节。',
+  ]
+    .filter(Boolean)
+    .join('\n');
+  if (block.length > 2200) {
+    block = block.slice(0, 2200) + TRUNCATION_MARKER;
+  }
+  return block;
+}
+
+module.exports = {
+  DISCOVER_HARD_LIMIT,
+  DISCOVER_DESC_LIMIT,
+  PROMPT_CHAR_BUDGET,
+  boundDiscoverRows,
+  boundSkillPrompts,
+  buildSkillsIndexBlock,
+  tool_skill_discover,
+  tool_skill_get,
+};

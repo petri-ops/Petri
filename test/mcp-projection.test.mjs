@@ -65,9 +65,9 @@ test('BLOCK-156 连接夹具后投影齐备：defs + entry 三件套 + registry 
   assert.equal(defs[0].function.name, 'mcp_fixture_fixture_echo');
   assert.equal(defs[0].function.parameters.required[0], 'message');
 
-  // registry 集成：getProviderToolDefs 追加（76 静态 + 1 投影）；getToolEntry 兜底命中
+  // registry 集成：getProviderToolDefs 追加（78 静态 + 1 投影）；getToolEntry 兜底命中
   const providerDefs = registry.getProviderToolDefs();
-  assert.ok(providerDefs.length > 76, `投影应追加（实际 ${providerDefs.length}）`);
+  assert.ok(providerDefs.length > 78, `投影应追加（实际 ${providerDefs.length}）`);
   assert.ok(providerDefs.some((d) => d.function.name === 'mcp_fixture_fixture_echo'));
 
   const entry = registry.getToolEntry('mcp_fixture_fixture_echo');

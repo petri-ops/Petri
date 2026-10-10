@@ -19,6 +19,7 @@ const domainModules = {
   'resident': require('./tool-defs/resident'),
   'result-studio': require('./tool-defs/result-studio'),
   'session': require('./tool-defs/session'),
+  'skill': require('./tool-defs/skill'),
   'workspace': require('./tool-defs/workspace'),
 };
 
@@ -31,6 +32,7 @@ const TOOL_DEFS = [
   ...domainModules['resident'],
   ...domainModules['result-studio'],
   ...domainModules['session'],
+  ...domainModules['skill'],
   ...domainModules['workspace'],
 ];
 

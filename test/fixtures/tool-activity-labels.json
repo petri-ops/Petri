@@ -302,5 +302,11 @@
   "codegraph_classify_edges": {
     "label": "已盘点依赖",
     "icon": "git-branch"
+  },
+  "skill_discover": {
+    "label": "已列技能"
+  },
+  "skill_get": {
+    "label": "已读技能"
   }
 }
