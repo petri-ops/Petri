@@ -42,11 +42,11 @@ ipcRenderer.on(AGENT_WORKBENCH_FLAG_CHANNEL, (_event, payload) => {
   AGENT_WORKBENCH_FLAGS.extraRenderers = payload.extraRenderers;
 });
 
-contextBridge.exposeInMainWorld('petri', {
+contextBridge.exposeInMainWorld('petriAgentFlags', {
   agentWorkbenchFlags: {
     // contextBridge freezes getters on the renderer side and rebinds them
     // to a frozen snapshot of the snapshot taken at first access — using a
-    // plain getter causes `window.petri.agentWorkbenchFlags.extraRenderers`
+    // plain getter causes `window.petriAgentFlags.agentWorkbenchFlags.extraRenderers`
     // to permanently read `false` even after the user flips the toggle in
     // packaged Electron. Expose a synchronous method instead so each call
     // returns the live value from the closure.

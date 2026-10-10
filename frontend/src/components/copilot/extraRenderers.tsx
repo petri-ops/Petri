@@ -5,7 +5,7 @@
 //
 // This module owns the A4 contract surface only:
 //   1. A feature flag hook (`useExtraRenderersFlag`) that resolves
-//      `window.petri.agentWorkbenchFlags.getExtraRenderers()` first, then
+//      `window.petriAgentFlags.agentWorkbenchFlags.getExtraRenderers()` first, then
 //      the localStorage key for the standalone development SPA, and
 //      defaults to **off** when neither source enables it.
 //   2. A tolerant `parseAssistantResultNodes` parser that turns
@@ -56,7 +56,7 @@ const ALLOWED_VARIANTS: ReadonlyArray<ResultCardVariant> = [
 export function resolveInitialFlag(): boolean {
   if (typeof window === 'undefined') return false;
 
-  const bridgeFlags = window.petri?.agentWorkbenchFlags;
+  const bridgeFlags = window.petriAgentFlags?.agentWorkbenchFlags;
   if (bridgeFlags && typeof bridgeFlags.getExtraRenderers === 'function') {
     return bridgeFlags.getExtraRenderers() === true;
   }
@@ -82,7 +82,7 @@ export function useExtraRenderersFlag(): boolean {
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
     const refresh = () => setFlag(readExtraRenderersFlag());
-    const unsubscribe = window.petri?.agentWorkbenchFlags?.onChange?.(refresh);
+    const unsubscribe = window.petriAgentFlags?.agentWorkbenchFlags?.onChange?.(refresh);
     window.addEventListener('focus', refresh);
     window.addEventListener('storage', refresh);
     return () => {

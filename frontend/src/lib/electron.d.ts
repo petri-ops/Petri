@@ -777,7 +777,8 @@ declare global {
         NODE_ENV?: string;
       };
     };
-    petri?: {
+    /** BLOCK-165：mini 旗标桥独立键（原与全量 surface 同名 petri 撞名，解耦）。 */
+    petriAgentFlags?: {
       agentWorkbenchFlags: {
         getExtraRenderers: () => boolean;
         set: (value: boolean) => Promise<{ ok: boolean; extraRenderers: boolean; error?: string }>;

@@ -6,7 +6,7 @@ import styles from './ExperimentalFeaturesSection.module.css';
 export const EXPERIMENTAL_FEATURES_LABEL = 'Experimental Features';
 export const EXTRA_RENDERERS_LABEL = 'Agent 工作台：ResultCard 渲染';
 
-type AgentWorkbenchFlagBridge = NonNullable<Window['petri']>['agentWorkbenchFlags'];
+type AgentWorkbenchFlagBridge = NonNullable<Window['petriAgentFlags']>['agentWorkbenchFlags'];
 
 type Props = {
   bridge?: AgentWorkbenchFlagBridge;

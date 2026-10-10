@@ -658,7 +658,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
               <h3>实验特性</h3>
               <p>长会话与长任务开关已实机验证并默认开启（2026-09-18 裁决）；其余实验开关默认关闭，打开前请确认你的使用场景。</p>
             </div>
-            <ExperimentalFeaturesSection bridge={window.petri?.agentWorkbenchFlags} />
+            <ExperimentalFeaturesSection bridge={window.petriAgentFlags?.agentWorkbenchFlags} />
           </section>
         )}
         </div>

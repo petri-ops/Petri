@@ -26,7 +26,7 @@ import {
 } from './ExperimentalFeaturesSection';
 import { EXTRA_RENDERERS_STORAGE_KEY } from '@/components/copilot/extraRenderers';
 
-type AgentWorkbenchFlagBridge = NonNullable<Window['petri']>['agentWorkbenchFlags'];
+type AgentWorkbenchFlagBridge = NonNullable<Window['petriAgentFlags']>['agentWorkbenchFlags'];
 
 afterEach(() => {
   cleanup();
@@ -97,7 +97,7 @@ describe('ExperimentalFeaturesSection', () => {
   it('initialises from the bridge value when both bridge and localStorage are present', () => {
     window.localStorage.setItem(EXTRA_RENDERERS_STORAGE_KEY, 'true');
     const { bridge } = makeBridge(false, { ok: true, extraRenderers: false });
-    (window as { petri?: unknown }).petri = { agentWorkbenchFlags: bridge };
+    (window as { petriAgentFlags?: unknown }).petriAgentFlags = { agentWorkbenchFlags: bridge };
     render(<ExperimentalFeaturesSection bridge={bridge} />);
     const toggle = screen.getByRole<HTMLInputElement>('switch', { name: EXTRA_RENDERERS_LABEL });
     expect(toggle.checked).toBe(false);
