@@ -55,6 +55,12 @@ module.exports = async function registerRoutes(app) {
     ['User prefs', () => require('./user-prefs')(app)],
     // BLOCK-87 L4：投影页面数据 HTTP 化（Skills 清单 / 已装插件——投影环境替代 IPC）。
     ['Projection data', () => require('./projection-data')(app)],
+    // BLOCK-156 P2：MCP 客户端管理面（扩展中心 MCP 货架；连接与 agent 同进程）。
+    // 挂载即异步拉起 autoConnect server（fire-and-forget，不阻塞 boot）。
+    ['MCP client', () => {
+      require('./mcp-client').registerMcpClientRoutes(app);
+      void require('../mcp/client-manager').autoConnectConfigured().catch(() => {});
+    }],
   ];
 
   for (const [name, fn] of routes) {

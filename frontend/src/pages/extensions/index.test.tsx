@@ -79,6 +79,11 @@ vi.mock('@/lib/desktopBridge', () => ({
 
 import ExtensionsPage from './index';
 
+// P2 起 MCP 货架走后端 HTTP（useMcpServers）——默认空清单
+vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
+  status: 'ok', servers: [],
+}), { status: 200 })));
+
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
@@ -129,10 +134,11 @@ describe('BLOCK-156 扩展中心页', () => {
     expect(generalText).not.toContain('DEG 标准流程');
   });
 
-  it('MCP 货签 P1 占位在场（P2 填充前不空货架）', () => {
+  it('MCP 货签 P2 配置面在场（空态 + 添加入口）', async () => {
     renderAt('/extensions?tab=mcp');
-    expect(screen.getByTestId('mcp-shelf-placeholder')).toBeTruthy();
-    expect(screen.getByText('MCP 服务接入（建设中）')).toBeTruthy();
+    await waitFor(() => expect(screen.getByTestId('mcp-shelf')).toBeTruthy());
+    expect(screen.getByTestId('mcp-empty')).toBeTruthy();
+    expect(screen.getByTestId('mcp-add-toggle')).toBeTruthy();
   });
 
   it('非法 tab 参数 fail-closed 回落领域插件货签', () => {

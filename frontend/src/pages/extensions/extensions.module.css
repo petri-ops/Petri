@@ -54,3 +54,222 @@
   font-size: var(--gewu-font-size-xs, 12px);
   flex-shrink: 0;
 }
+
+/* ── MCP 服务货架（BLOCK-156 P2）────────────────────────────── */
+
+.mcpHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.mcpIntro {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs, 12px);
+  min-width: 0;
+}
+
+.mcpAddBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 8px;
+  background: var(--gewu-bg-subtle);
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-caption, 12px);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.mcpAddBtn:hover {
+  background: var(--gewu-hover);
+}
+
+.mcpAddBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.mcpForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 10px;
+  background: var(--gewu-bg-subtle);
+  flex-shrink: 0;
+}
+
+.mcpFormRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+
+.mcpField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.mcpField > span {
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs, 12px);
+}
+
+.mcpField > input {
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 8px;
+  background: var(--gewu-input-bg, var(--gewu-bg-surface));
+  color: var(--gewu-text);
+  font-size: var(--gewu-font-size-caption, 12px);
+  min-width: 0;
+}
+
+.mcpField > input:focus {
+  outline: 1px solid var(--gewu-accent);
+}
+
+.mcpFieldGrow {
+  flex: 1;
+}
+
+.mcpFormError,
+.mcpErrorText {
+  color: var(--gewu-accent);
+  font-size: var(--gewu-font-size-xs, 12px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mcpNotice {
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs, 12px);
+}
+
+.mcpList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.mcpCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 10px;
+  background: var(--gewu-bg-subtle);
+}
+
+.mcpCardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mcpCardId {
+  font-weight: 600;
+  color: var(--gewu-text);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mcpStatusBadge {
+  flex-shrink: 0;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1px solid var(--gewu-border);
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs, 12px);
+}
+
+.mcpStatus_connected {
+  border-color: var(--gewu-accent);
+  color: var(--gewu-accent);
+  background: var(--gewu-accent-surface);
+}
+
+.mcpStatus_error {
+  color: var(--gewu-accent);
+}
+
+.mcpCardCmd {
+  color: var(--gewu-text-secondary);
+  font-family: var(--gewu-font-mono);
+  font-size: var(--gewu-font-size-xs, 12px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mcpCardMeta {
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs, 12px);
+  min-width: 0;
+}
+
+.mcpCardActions {
+  display: flex;
+  gap: 8px;
+}
+
+.mcpCardActions > button {
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--gewu-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--gewu-text-secondary);
+  font-size: var(--gewu-font-size-xs, 12px);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.mcpCardActions > button:hover:not(:disabled) {
+  background: var(--gewu-hover);
+  color: var(--gewu-text);
+}
+
+.mcpCardActions > button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.mcpRefresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  border: none;
+  background: transparent;
+  color: var(--gewu-text-tertiary);
+  font-size: var(--gewu-font-size-xs, 12px);
+  cursor: pointer;
+}
+
+.mcpRefresh:hover {
+  color: var(--gewu-text);
+}

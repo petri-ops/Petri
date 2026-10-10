@@ -18,8 +18,10 @@ import {
   isExtensionShelfId,
   type ExtensionShelfId,
 } from '@/lib/extensionShelves';
+import { useMcpServers } from '@/hooks/useMcpServers';
 import { SkillCard } from './SkillCard';
 import { SkillDetail } from './SkillDetail';
+import { McpShelfPane } from './McpShelfPane';
 import globalStyles from '../global-page.module.css';
 import styles from './extensions.module.css';
 import skillStyles from './styles.module.css';
@@ -211,22 +213,3 @@ function SkillShelfPane({ shelfId }: { shelfId: 'domain-skills' | 'general-skill
   );
 }
 
-/**
- * MCP 服务货架 — P1 占位空态（BLOCK-156 P2 填充配置/连接 UI）。
- * 占位而非隐藏：货架四分类学从第一天完整在场，P2 只换内容不动骨架。
- */
-function McpShelfPane(): React.ReactElement {
-  return (
-    <div className={styles.shelfPane} data-testid="mcp-shelf-placeholder">
-      <div className={skillStyles.skillsEmpty}>
-        <div className={skillStyles.emptyIcon}>
-          <Icon name="zap" size={24} />
-        </div>
-        <h3 className={skillStyles.emptyTitle}>MCP 服务接入（建设中）</h3>
-        <p className={skillStyles.emptyText}>
-          应用将作为 MCP 客户端连接第三方 MCP server，工具自动进入 agent 可用集
-        </p>
-      </div>
-    </div>
-  );
-}

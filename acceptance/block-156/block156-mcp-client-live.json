@@ -1,0 +1,53 @@
+{
+  "name": "block156-mcp-client",
+  "startedAt": "2026-10-10T02:04:15.165Z",
+  "finishedAt": "2026-10-10T02:04:18.552Z",
+  "assertions": [
+    {
+      "name": "fixture_server_added",
+      "pass": true,
+      "detail": "{\"ok\":true,\"status\":200,\"data\":{\"status\":\"ok\",\"server\":{\"id\":\"b156-fixture\",\"command\":\"C:\\\\Users\\\\Admin\\\\AppData\\\\Roaming\\\\fnm\\\\node-versions\\\\v24.20.0\\\\install"
+    },
+    {
+      "name": "self_server_added",
+      "pass": true,
+      "detail": "{\"ok\":true,\"status\":200,\"data\":{\"status\":\"ok\",\"server\":{\"id\":\"b156-self\",\"command\":\"C:\\\\Users\\\\Admin\\\\AppData\\\\Roaming\\\\fnm\\\\node-versions\\\\v24.20.0\\\\installati"
+    },
+    {
+      "name": "fixture_connect_toolcount_1",
+      "pass": true,
+      "detail": "{\"ok\":true,\"status\":200,\"data\":{\"status\":\"ok\",\"id\":\"b156-fixture\",\"toolCount\":1}}"
+    },
+    {
+      "name": "fixture_tools_list_has_fixture_echo",
+      "pass": true,
+      "detail": "[\"fixture_echo\"]"
+    },
+    {
+      "name": "self_mcp_loopback_connect_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"status\":200,\"data\":{\"status\":\"ok\",\"id\":\"b156-self\",\"toolCount\":28}}"
+    },
+    {
+      "name": "mcp_shelf_ui_present_with_connected_cards",
+      "pass": true,
+      "detail": "shelf=true fixture=connected self=connected"
+    },
+    {
+      "name": "disconnect_returns_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"status\":200,\"data\":{\"status\":\"ok\",\"id\":\"b156-fixture\"}}"
+    },
+    {
+      "name": "status_falls_back_to_disconnected",
+      "pass": true,
+      "detail": "{\"id\":\"b156-fixture\",\"command\":\"C:\\\\Users\\\\Admin\\\\AppData\\\\Roaming\\\\fnm\\\\node-versions\\\\v24.20.0\\\\installation\\\\node.exe\",\"args\":[\"D:\\\\1.WorkDir\\\\biof3-desktop\\"
+    },
+    {
+      "name": "cleanup_no_b156_leftovers",
+      "pass": true,
+      "detail": "[]"
+    }
+  ],
+  "allPass": true
+}
