@@ -23,8 +23,8 @@ const path = require('node:path');
 const { spawn } = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, '..');
-const B_BASE = process.env.BIOF3_B_BASE || 'http://127.0.0.1:3001';
-const B_GATEWAY = process.env.BIOF3_B_GATEWAY || 'http://127.0.0.1:3005';
+const B_BASE = process.env.PETRI_B_BASE || 'http://127.0.0.1:3001';
+const B_GATEWAY = process.env.PETRI_B_GATEWAY || 'http://127.0.0.1:3005';
 const ENGINEER = { displayName: '工程师 A', device: 'macOS' };
 
 const startedAt = new Date().toISOString();
@@ -52,7 +52,7 @@ function listen(app) {
 
 async function ensureTestInstance() {
   // 已在跑则直接用；否则 bash scripts/start-test-instance.sh 拉起（fail-fast 语义自带）。
-  const lib = require(path.join(ROOT, '.agents/skills/gewu-dev-infra/dev-verify/lib.cjs'));
+  const lib = require(path.join(ROOT, '.agents/skills/petri-dev-infra/dev-verify/lib.cjs'));
   try {
     await lib.pollTargets({ port: lib.TEST_INSTANCE_PORT, timeoutMs: 2000 });
     return { booted: false };
@@ -81,12 +81,12 @@ async function main() {
   const pairingUrl = `http://127.0.0.1:3005/pair?token=${invite.data.token}`;
 
   // ── P2 A 端带署名配对（真实 federation-admin + 独立 dataDir）──
-  const cmdRoot = mkdtempSync(path.join(tmpdir(), 'gewu-block88-cmd-'));
+  const cmdRoot = mkdtempSync(path.join(tmpdir(), 'petri-block88-cmd-'));
   let cmdServer = null;
   try {
     const express = require('express');
     const cmdApp = express();
-    require(path.join(ROOT, 'core/biof3-server/routes/federation-admin.js'))(cmdApp, { dataDir: cmdRoot });
+    require(path.join(ROOT, 'core/petri-server/routes/federation-admin.js'))(cmdApp, { dataDir: cmdRoot });
     cmdServer = await listen(cmdApp);
     const cmdBase = `http://127.0.0.1:${cmdServer.address().port}`;
 
@@ -125,7 +125,7 @@ async function main() {
 
     // ── P5 UI 走查：测试实例联邦面板「协作成员」可见（9223，禁碰 9222）──
     await ensureTestInstance();
-    const lib = require(path.join(ROOT, '.agents/skills/gewu-dev-infra/dev-verify/lib.cjs'));
+    const lib = require(path.join(ROOT, '.agents/skills/petri-dev-infra/dev-verify/lib.cjs'));
     const client = await lib.connectTestTarget({});
     const evalJs = async (expr) => {
       const r = await client.send('Runtime.evaluate', { expression: expr, returnByValue: true, awaitPromise: true });

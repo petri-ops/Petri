@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ToolActivityList } from './ToolActivityList';
 import { groupToolActivities } from './toolActivity';
 import assert from 'node:assert/strict';
-import { gewuEvents } from '@/lib/events';
+import { petriEvents } from '@/lib/events';
 import { mergeToolResultActivity, summarizeToolCall, type ToolActivityItem } from './toolActivity';
 
 function activity(
@@ -142,11 +142,11 @@ describe('ToolActivityList (UI-271 内联手风琴)', () => {
     const listener = (e: Event) => {
       seen.push((e as CustomEvent<{ filePath: string }>).detail);
     };
-    window.addEventListener(gewuEvents.reviewOpenFile, listener);
+    window.addEventListener(petriEvents.reviewOpenFile, listener);
     try {
       fireEvent.click(fileRow);
     } finally {
-      window.removeEventListener(gewuEvents.reviewOpenFile, listener);
+      window.removeEventListener(petriEvents.reviewOpenFile, listener);
     }
     expect(seen).toEqual([{ filePath: 'src/u273.ts' }]);
   });

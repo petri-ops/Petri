@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const eventBus = require('../core/biof3-server/helpers/event-bus');
+const eventBus = require('../core/petri-server/helpers/event-bus');
 
 function withBusSpy(run) {
   const original = eventBus.publishInvalidation;
@@ -31,7 +31,7 @@ function withBusSpy(run) {
 
 test('publishJobTerminalState broadcasts a jobs-domain invalidation with terminal payload', async () => {
   const calls = await withBusSpy(async () => {
-    const { publishJobTerminalState } = require('../core/biof3-server/helpers/job-events');
+    const { publishJobTerminalState } = require('../core/petri-server/helpers/job-events');
     publishJobTerminalState('tj_1', 'completed');
     publishJobTerminalState('tj_2', 'failed', { reason: 'hard_timeout' });
   });
@@ -48,7 +48,7 @@ test('publishJobTerminalState never throws even when the bus breaks', async () =
   const original = eventBus.publishInvalidation;
   eventBus.publishInvalidation = () => { throw new Error('bus down'); };
   try {
-    const { publishJobTerminalState } = require('../core/biof3-server/helpers/job-events');
+    const { publishJobTerminalState } = require('../core/petri-server/helpers/job-events');
     assert.doesNotThrow(() => publishJobTerminalState('tj_3', 'cancelled'));
   } finally {
     eventBus.publishInvalidation = original;
@@ -68,7 +68,7 @@ test('terminal CAS primitives publish only when the row actually transitions', a
     }),
   };
   const calls = await withBusSpy(async () => {
-    const activeJob = require('../core/biof3-server/helpers/tools-executor/active-job');
+    const activeJob = require('../core/petri-server/helpers/tools-executor/active-job');
     await activeJob.transitionToolJobToCompleted({ db, jobId: 'tj_a', result: { ok: true } });
     await activeJob.transitionToolJobToFailed({ db, jobId: 'tj_a', error: 'boom' });
     await activeJob.settleConfirmedToolCancellation({ db, jobId: 'tj_a', result: {} });
@@ -82,10 +82,10 @@ test('terminal CAS primitives publish only when the row actually transitions', a
 
 test('source-scan guard: every direct terminal write path stays wired to publication', () => {
   const read = (rel) => fs.readFileSync(path.join(__dirname, '..', rel), 'utf8');
-  const executorSrc = read('core/biof3-server/helpers/tools-executor.js');
-  const mcpSrc = read('core/biof3-server/mcp/registry/run-plugin-script.js');
-  const metadataSrc = read('core/biof3-server/routes/tools-metadata.js');
-  const activeJobSrc = read('core/biof3-server/helpers/tools-executor/active-job.js');
+  const executorSrc = read('core/petri-server/helpers/tools-executor.js');
+  const mcpSrc = read('core/petri-server/mcp/registry/run-plugin-script.js');
+  const metadataSrc = read('core/petri-server/routes/tools-metadata.js');
+  const activeJobSrc = read('core/petri-server/helpers/tools-executor/active-job.js');
 
   // CAS 原语层三态接线在位（防后续重构漏发）。
   for (const state of ['completed', 'failed', 'cancelled']) {

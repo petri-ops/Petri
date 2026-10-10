@@ -6,7 +6,7 @@
  *
  * 覆盖：
  *   1. scripts/qa-smoke.mjs 跑得起来 + exit 0
- *   2. JSON 输出口径符合 biof3/qa-smoke.v1
+ *   2. JSON 输出口径符合 petri/qa-smoke.v1
  *   3. 关键检查项能在前端现状下通过
  *   4. --check <name> 单跑模式返回一条记录
  */
@@ -31,11 +31,11 @@ function runQa(args = []) {
   return { code: r.status, stdout: r.stdout, stderr: r.stderr };
 }
 
-test('qa-smoke exit=0 且输出 schema biof3/qa-smoke.v1', () => {
+test('qa-smoke exit=0 且输出 schema petri/qa-smoke.v1', () => {
   const r = runQa(['--json']);
   assert.equal(r.code, 0, `qa-smoke exit: ${r.code}\n${r.stderr}`);
   const summary = JSON.parse(r.stdout);
-  assert.equal(summary.schema, 'biof3/qa-smoke.v1');
+  assert.equal(summary.schema, 'petri/qa-smoke.v1');
   assert.equal(summary.total, 7);
   assert.equal(summary.failed, 0);
   assert.equal(summary.passed, summary.total);

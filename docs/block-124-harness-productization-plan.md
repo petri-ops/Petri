@@ -9,7 +9,7 @@ reopen: 用户裁决产品方向回摆或本线让位其他主线时（参照 pr
 status: completed
 ---
 
-# BLOCK-124 — Gewu Harness 产品化 · 第一批（P0 勘察 + P1 C-13 实现）
+# BLOCK-124 — Petri Harness 产品化 · 第一批（P0 勘察 + P1 C-13 实现）
 
 > 立项：2026-09-26（P0-LAUNCH；用户裁决原话见 §1）。P0 勘察当日完成；用户第二轮裁决「自己来做个全面的校验和确认…开始吧」=确认下放，P1 当日实现并实机走查 allPass → **2026-09-26 整包 completed**（rider=UI-447 待用户实机过目）。
 > 能力：`harness-productization`（HK-04 增量采纳：立项即带 capability front-matter）。
@@ -18,7 +18,7 @@ status: completed
 
 把开发侧 harness 资产（HK 系列、closeout 门禁、决策工具、走查探针）逐项过「产品化四问」，产出分批路线图；第一批实现件 = **C-13 符号图产品化**——symbol-graph 的 who-imports / classify-edges 查询注册为格物 agent 的内建工具，agent 在编码任务里能自主查询符号引用关系。
 
-**用户裁决（2026-09-26 原话）**：「启动『Gewu Harness 产品化』第一批工作」+ 授权前置「2026-09-26 方向裁决：通用编码 harness 使用界面 = 开发主线（BLOCK-123 已整包 completed）」+「候选池 C-13 触发条件今日全部满足：HK-03 已收口 + 产品方向裁决落定」+ 流程约束「P0 勘察报告先给我看，确认后再进入实现」。
+**用户裁决（2026-09-26 原话）**：「启动『Petri Harness 产品化』第一批工作」+ 授权前置「2026-09-26 方向裁决：通用编码 harness 使用界面 = 开发主线（BLOCK-123 已整包 completed）」+「候选池 C-13 触发条件今日全部满足：HK-03 已收口 + 产品方向裁决落定」+ 流程约束「P0 勘察报告先给我看，确认后再进入实现」。
 
 **红线（用户明示）**：
 1. 开发侧 `.agents/skills` 与产品 `resources/skills` 两轨不混；产品化走资源 skill 轨**新建**，不复制文件。
@@ -39,14 +39,14 @@ status: completed
 
 **产品工具面空位已证实**：agent 内建工具 71 个（9 域），**零代码理解/符号查询工具**——search/query 均为知识空间/浏览器检索。C-13 填的是明确空位。
 
-**接入点（勘察坐实）**：执行单入口 `core/biof3-server/agent-tools/tool-execution.js` `executeToolCall`（`mcp/registry.js` 是插件/skill MCP 轨即 run_tool→tool_job→artifact 链，**不是**本件归宿）；定义面 `tool-defs.js` facade 按 9 域汇编 `tool-defs/<domain>.js`；结果回 UI 走 `tool-events.js` → 前端 toolActivity 工具行。
+**接入点（勘察坐实）**：执行单入口 `core/petri-server/agent-tools/tool-execution.js` `executeToolCall`（`mcp/registry.js` 是插件/skill MCP 轨即 run_tool→tool_job→artifact 链，**不是**本件归宿）；定义面 `tool-defs.js` facade 按 9 域汇编 `tool-defs/<domain>.js`；结果回 UI 走 `tool-events.js` → 前端 toolActivity 工具行。
 
 **决策点（P1 已全部落定；用户 2026-09-26 第二轮裁决「自己来做个全面的校验和确认…开始吧」=确认权下放，D1-D5 按推荐执行）**：
 
 | # | 决策点 | 裁决（已落定） | 落地证据 |
 | --- | --- | --- | --- |
 | D1 | typescript 依赖类 | **a）devDependencies → dependencies**——实测包体 23MB 纯 JS 零原生绑定；走 DEPENDENCY-CHANGE-CHECKLIST 留痕（既有依赖迁移节非新增依赖） | package.json（提交 786f27a2）；P6 源绑定含 package.json 哈希，下次重打吸收（BK-08 同款先例） |
-| D2 | 代码单源 | **a）库函数迁 `core/biof3-server/helpers/code-graph.js`，`scripts/symbol-graph.mjs` 变 CLI 薄壳**，13 条契约追新家（判据零弱化 + 3 条新判据） | test/symbol-graph.test.mjs 13/13 |
+| D2 | 代码单源 | **a）库函数迁 `core/petri-server/helpers/code-graph.js`，`scripts/symbol-graph.mjs` 变 CLI 薄壳**，13 条契约追新家（判据零弱化 + 3 条新判据） | test/symbol-graph.test.mjs 13/13 |
 | D3 | 工具轨 | **a）agent-tools 内建只读轨**（session 基线域=任何域收窄恒在场；`contract('workspace','none','R0',['project.files'],5000)`；根解析复用 withWorkspace 双闸不吃自由路径） | registry.js HANDLERS/CONTRACTS + codegraph-tools.js |
 | D4 | 工具命名 | `codegraph_who_imports` / `codegraph_classify_edges` | tool-defs/session.js（工具总数 74→76，四处总数钉同步） |
 | D5 | v1 性能边界 | **a）无缓存 + maxFiles=5000 诚实拒绝 + 输出有界（hits≤50/exports≤150/outbound≤60）**；实测基准见 §3.1.1；agent 编辑文件后重查自然拿到新图（无陈旧缓存正确性问题） | codegraph-tools.js + 基准表 |
@@ -119,5 +119,5 @@ status: completed
 - **WIP 隔离**：`eslint-suppressions.json`（M，LeftPanel.test.tsx 抑制计数，来源不明）全程零触碰、未入本包提交——遗留待归属会话处置。
 - typescript 迁 dependencies（D1）实测 23MB；G0 不校验 packaged 体积。package.json 哈希在 P6 源绑定集合内，下次 P6 重打吸收（BK-08 同款先例，非本包阻塞）。
 - 远程 ssh 执行目标的项目暂无远程代码图（工具描述已注明本地工作区语义；远程面未来候选）。
-- dev 栈 :3001 后端为本实机走查以新代码重启（`npm --prefix core/biof3-server start` 同款 env），dev Electron 渲染层走自家后端不受影响。
+- dev 栈 :3001 后端为本实机走查以新代码重启（`npm --prefix core/petri-server start` 同款 env），dev Electron 渲染层走自家后端不受影响。
 - G0 开发期常态 · 不外推 packaged/Provider/GA；单工作包串行纪律不变。

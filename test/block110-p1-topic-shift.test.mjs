@@ -20,21 +20,21 @@ const require = createRequire(import.meta.url);
 // 内存 DB 自举（conversations.js 顶层建表）
 {
   const Database = require('better-sqlite3');
-  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'biof3-b110-p1-'));
-  const db = new Database(path.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'petri-b110-p1-'));
+  const db = new Database(path.join(tempDbDir, 'petri.db'));
   const migrationsDir = path.join(root, 'src', 'migrations');
   for (const file of fssync.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     db.exec(fssync.readFileSync(path.join(migrationsDir, file), 'utf8'));
   }
   db.close();
-  process.env.BIOF3_DB_PATH = path.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try { fssync.rmSync(tempDbDir, { recursive: true, force: true }); } catch { /* 句柄延迟释放 */ }
   });
 }
 
-const DECISION_PATH = require.resolve(path.join(root, 'core', 'biof3-server', 'helpers', 'decision-api.js'));
-const MODEL_TASKS_PATH = require.resolve(path.join(root, 'core', 'biof3-server', 'helpers', 'model-tasks.js'));
+const DECISION_PATH = require.resolve(path.join(root, 'core', 'petri-server', 'helpers', 'decision-api.js'));
+const MODEL_TASKS_PATH = require.resolve(path.join(root, 'core', 'petri-server', 'helpers', 'model-tasks.js'));
 
 // mock 注入（在 require conversations 之前装 require.cache）
 const mocks = {
@@ -65,11 +65,11 @@ function installMocks() {
 }
 installMocks();
 
-const conv = require(path.join(root, 'core', 'biof3-server', 'helpers', 'conversations.js'));
+const conv = require(path.join(root, 'core', 'petri-server', 'helpers', 'conversations.js'));
 
 const USER = 'u-p1';
 function seedConversation(messageCount = 10) {
-  const db = require('better-sqlite3')(process.env.BIOF3_DB_PATH);
+  const db = require('better-sqlite3')(process.env.PETRI_DB_PATH);
   const convId = 'conv-p1-' + Math.random().toString(36).slice(2, 8);
   db.prepare(`INSERT INTO copilot_conversations (id, user_id, title, status, message_count, created_at, updated_at)
     VALUES (?, ?, 'P1 测试', 'active', ?, ?, ?)`)
@@ -86,7 +86,7 @@ function resetMocks(impl) {
   mocks.askDecisionCalls.length = 0;
   mocks.callModelTaskCalls.length = 0;
   mocks.askDecisionImpl = impl || null;
-  delete process.env.BIOF3_JEV_TOPIC_SHIFT;
+  delete process.env.PETRI_JEV_TOPIC_SHIFT;
 }
 
 const noulAnswer = (v) => ({ ok: true, answers: { topic_shift: { type: 'noul', noul: v } } });
@@ -99,7 +99,7 @@ test('P1 — Jev noul ≥0.85：直替成立（shifted+reason，不调大模型�
   assert.ok(r && r.shifted === true, 'shifted=true');
   assert.match(r.reason, /Jev 判定话题切换/);
   assert.equal(mocks.callModelTaskCalls.length, 0, '大模型路径未被调用（直替成立）');
-  const db = require('better-sqlite3')(process.env.BIOF3_DB_PATH);
+  const db = require('better-sqlite3')(process.env.PETRI_DB_PATH);
   const row = db.prepare('SELECT last_topic_shift_reason FROM copilot_conversations WHERE id=?').get(convId);
   db.close();
   assert.match(row.last_topic_shift_reason, /Jev 判定话题切换/);
@@ -134,14 +134,14 @@ test('P1 — Jev 降级（askDecision !ok）→ 回退大模型路径', async ()
   assert.equal(mocks.callModelTaskCalls.length, 1, '降级后走大模型路径');
 });
 
-test('P1 — 杀开关 BIOF3_JEV_TOPIC_SHIFT=0：Jev 零调用，直走大模型', async () => {
+test('P1 — 杀开关 PETRI_JEV_TOPIC_SHIFT=0：Jev 零调用，直走大模型', async () => {
   resetMocks();
-  process.env.BIOF3_JEV_TOPIC_SHIFT = '0';
+  process.env.PETRI_JEV_TOPIC_SHIFT = '0';
   const convId = seedConversation(10);
   await conv._maybeDetectTopicShift(convId, USER);
   assert.equal(mocks.askDecisionCalls.length, 0, '杀开关下 Jev 零调用');
   assert.equal(mocks.callModelTaskCalls.length, 1, '直接走大模型路径');
-  delete process.env.BIOF3_JEV_TOPIC_SHIFT;
+  delete process.env.PETRI_JEV_TOPIC_SHIFT;
 });
 
 test('P1 — 门禁保留：消息数不足（<10）时零调用直接 null', async () => {

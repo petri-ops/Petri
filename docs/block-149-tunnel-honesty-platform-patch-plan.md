@@ -4,7 +4,7 @@ goal: BLOCK-149 A5 隧道诚实化+平台域点状修补——隧道徽标按 st
 acceptance:
   - 各项红绿先行（HK-01）：先失败测试再实现，红→绿证据随收口笔录留痕
   - A5#5：前端消费 TunnelStatus.stateSinceTs（字段已在 tunnel.js:341 返回），徽标三态——未连接/连接建立中（<15min，不宣称公网可用）/持续连接（≥15min 才显示「公网可用」）；文案不得谎报（台账判据 SKILL.md §3 为准）；后端零改动优先（纯前端消费），如需后端补字段留痕取舍
-  - PL-D2：tool-jobs-retention 默认保留天数 0（无限）→ 30（BIOF3_TOOL_JOBS_RETENTION_DAYS 缺省值；显式 env 覆盖语义不变）；契约测试锁定默认值=30 与 env 覆盖；g0-platform §8 裁决点台账对账行补「已裁决 30 天删除（主代理按推荐代裁，用户批量推进授权）」
+  - PL-D2：tool-jobs-retention 默认保留天数 0（无限）→ 30（PETRI_TOOL_JOBS_RETENTION_DAYS 缺省值；显式 env 覆盖语义不变）；契约测试锁定默认值=30 与 env 覆盖；g0-platform §8 裁决点台账对账行补「已裁决 30 天删除（主代理按推荐代裁，用户批量推进授权）」
   - nul 根修：定位产生仓库根 nul 游离文件的命令源头（spawn shell 重定向类），修源头；不可定位则 hygiene:check 加 nul 检出兜底并留痕
   - 平台映射锚：契约测试断言 deriveHostPlatform 输出键 ⊆ 平台键约定集合且与 plugin-schema PLATFORM_IDS 一致（core 测试引 src 若触 arch 红线则降级为文件内锚+注释指向 canonical，取舍留痕）
   - 定向门禁：test:changed + quality:types/lint/secret/arch 全绿 + 前端定向；closeout 十一门（集成提交后）
@@ -24,7 +24,7 @@ status: completed
 | 轨 | 项 | 内容 | 主文件 |
 | --- | --- | --- | --- |
 | A（隧道诚实化） | #5 | 徽标按 stateSinceTs 三态分级；「公网可用」仅持续连接 ≥15min 宣称 | frontend/.../MobileSync.tsx:53-62/375（TunnelStatus 消费）；core/.../mobile-gateway/tunnel.js 只读（字段已在） |
-| P1（保留策略） | PL-D2 | 默认 0→30 天；env 覆盖语义不变；g0-platform 裁决点对账 | core/biof3-server/helpers/tool-jobs-retention.js:10 + 契约测试 + g0-platform-goal-plan.md §8 |
+| P1（保留策略） | PL-D2 | 默认 0→30 天；env 覆盖语义不变；g0-platform 裁决点对账 | core/petri-server/helpers/tool-jobs-retention.js:10 + 契约测试 + g0-platform-goal-plan.md §8 |
 | P2（nul 根修） | 卫生 | 定位游离 nul 文件产生源（spawn/shell 重定向）修之；兜底 hygiene 检出 | 待定位（scripts/ 或 spawn 面全仓 grep） |
 | P3（映射锚） | BLOCK-146 P2-3 余项 | deriveHostPlatform ↔ PLATFORM_IDS 一致性契约测试 | test/ 新增 + src/plugin-schema.js（只读） |
 

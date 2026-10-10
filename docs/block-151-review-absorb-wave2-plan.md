@@ -21,7 +21,7 @@ status: completed
 
 | 轨 | 面 | 锚点 |
 | --- | --- | --- |
-| A 会话与移动 | A1 深水区（恢复合并/流中断/长会话一致性的守卫与测试面）+ /m 页 openTaskStream 竞态（taskId 闭包守卫 + AbortController，BLOCK-150 P2-1 携带） | SimpleChat.tsx、useConversationResume.ts（mergeKeepOlderPrefix :25-52）、copilotClient.ts:75-125、useChatStream.ts:420-467、conversationRunStore.ts、agentTaskStream.ts；core/biof3-server/mobile-gateway/public/index.html |
+| A 会话与移动 | A1 深水区（恢复合并/流中断/长会话一致性的守卫与测试面）+ /m 页 openTaskStream 竞态（taskId 闭包守卫 + AbortController，BLOCK-150 P2-1 携带） | SimpleChat.tsx、useConversationResume.ts（mergeKeepOlderPrefix :25-52）、copilotClient.ts:75-125、useChatStream.ts:420-467、conversationRunStore.ts、agentTaskStream.ts；core/petri-server/mobile-gateway/public/index.html |
 | B 成果面流畅 | A4 七条（viewer 能力声明一致性/钉住快照/lineage 切换导航/继续分析菜单等——有界重审后落地） | ArtifactPinPane.tsx、crossJobPinSnapshot.ts、ResultArtifactShell.tsx（:180-260/:680-720/:778-808/:833-856）、LineageViewSwitch/LineageStrip/LineageGraph/lineageProjection、ContinueAnalysisMenu.tsx、CompactResultNavigator.tsx、viewerRegistry.ts、ResultStudioChangeSetPanel.tsx:420-479 |
 | C 解读层+工具描述 | B7 余量（统计语义 tooltip/呈现——Scientific viewer 属合法领域域，做语义讲清不做中立化）+ A3 run_tool act 描述（enum 16 项/隐藏 12 动作的描述与披露形态） | ScientificInteractionViewer.tsx（:375-524）、interpret.js:130-210、format-scientific-value.ts；tool-defs/browser.js act 段、tool-defs/session.js run_tool、plugin-loader failureModes 面 |
 

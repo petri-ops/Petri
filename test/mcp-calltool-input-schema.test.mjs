@@ -30,9 +30,9 @@ const {
   McpValidationError,
   _validateValue,
   _valueType,
-} = require('../core/biof3-server/mcp/_validate-tool-args.js');
+} = require('../core/petri-server/mcp/_validate-tool-args.js');
 
-const pluginLoader = require('../core/biof3-server/plugin-loader.js');
+const pluginLoader = require('../core/petri-server/plugin-loader.js');
 
 // ── Test 1: valid args pass ──────────────────────────────────────────────────
 
@@ -221,7 +221,7 @@ test('PL-001.9: null / undefined schema skips validation (backward compatible)',
 
 test('PL-001.10: integration — plugin-loader.getInputSchema + validateToolArgs fail-closed on tool with bad args', () => {
   // 1. 设置临时 plugin 目录（用不会被 built-in 抢占的 ID）
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-pl001-'));
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-pl001-'));
   const pluginDir = path.join(tmpDir, 'pl001-test-tool');
   const scriptsDir = path.join(pluginDir, 'scripts');
   fs.mkdirSync(scriptsDir, { recursive: true });
@@ -267,9 +267,9 @@ test('PL-001.10: integration — plugin-loader.getInputSchema + validateToolArgs
   fs.writeFileSync(path.join(scriptsDir, 'pl001-test-tool.R'), 'cat("pl001-test-tool\\n")\n');
 
   // 2. 注入 plugin map
-  const previousMap = globalThis._biof3Plugins;
+  const previousMap = globalThis._petriPlugins;
   try {
-    globalThis._biof3Plugins = new Map();
+    globalThis._petriPlugins = new Map();
     pluginLoader.loadPluginsFromDisk(tmpDir);
 
     // 3. 取 schema
@@ -319,7 +319,7 @@ test('PL-001.10: integration — plugin-loader.getInputSchema + validateToolArgs
     const missing = pluginLoader.getInputSchema('nonexistent_tool');
     assert.equal(missing, null);
   } finally {
-    globalThis._biof3Plugins = previousMap || new Map();
+    globalThis._petriPlugins = previousMap || new Map();
     try {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     } catch {

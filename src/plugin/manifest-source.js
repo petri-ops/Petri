@@ -50,7 +50,7 @@ function getBuiltInManifest() {
 }
 
 // BLOCK-158 商店面退役 — 原「远程 OSS + 内置」合并语义收敛为**运行时目录**单源：
-// 只读 resources/runtime/manifest.json（biof3-r-runtime / biof3-py-runtime，
+// 只读 resources/runtime/manifest.json（petri-r-runtime / petri-py-runtime，
 // 供给链 = 领域包一键安装的运行时下载）。OSS 远程插件清单抓取已随商店面退役，
 // OSS bucket/清单基建不动（G1 恢复在线商店时在挂点重新合并 remote 半边即可）。
 async function getRemoteManifest() {

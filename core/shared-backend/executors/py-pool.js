@@ -27,10 +27,10 @@ const { getExecutor } = require('./index');
 function _poolConfig() {
   const cfg = configHelper.getConfig();
   return {
-    pyHome: cfg.pyHome || process.env.BIOF3_PY_HOME || '',
+    pyHome: cfg.pyHome || process.env.PETRI_PY_HOME || '',
     localDataDir:
-      process.env.BIOF3_LOCAL_DATA_DIR ||
-      path.dirname(cfg.tempDir || '/tmp/biof3-tmp'),
+      process.env.PETRI_LOCAL_DATA_DIR ||
+      path.dirname(cfg.tempDir || '/tmp/petri-tmp'),
     poolSize: parseInt(process.env.PY_POOL_SIZE || '2', 10),
     runTimeoutMs: parseInt(process.env.PY_RUN_TIMEOUT_MS || '30000', 10),
   };
@@ -206,7 +206,7 @@ os.chdir(${JSON.stringify(workDir)})
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-# 将 scanpy/squidpy 数据集缓存到本地 BioF3 数据目录，避免每个会话重复下载。
+# 将 scanpy/squidpy 数据集缓存到本地 Petri 数据目录，避免每个会话重复下载。
 try:
     import scanpy as _sc
     _ds = ${JSON.stringify(datasetCacheDir)}

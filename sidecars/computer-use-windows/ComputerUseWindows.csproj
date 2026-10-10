@@ -10,7 +10,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <InvariantGlobalization>true</InvariantGlobalization>
-    <AssemblyName>gewu-computer-use-windows</AssemblyName>
+    <AssemblyName>petri-computer-use-windows</AssemblyName>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <!-- axfixture 子项目不在本程序集内（其 obj 生成文件含同名平台特性，双重编译即崩） -->
     <DefaultItemExcludes>$(DefaultItemExcludes);axfixture/**</DefaultItemExcludes>

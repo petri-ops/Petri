@@ -11,17 +11,17 @@ import os from 'node:os';
 
 const path = { join };
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const R_SERVER = resolve(__dirname, '..', 'core', 'biof3-server');
+const R_SERVER = resolve(__dirname, '..', 'core', 'petri-server');
 const req = createRequire(import.meta.url);
-const TEST_DB_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-agent-run-tool-'));
-process.env.BIOF3_DB_PATH = path.join(TEST_DB_DIR, 'biof3.db');
+const TEST_DB_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-agent-run-tool-'));
+process.env.PETRI_DB_PATH = path.join(TEST_DB_DIR, 'petri.db');
 
 // db.js 是 CJS，用 createRequire 拿到 module.exports 的具名函数（await import 只能拿 default）
 
 // BLOCK-49 加映清债 —— 应用全量 migrations（原仅设 DB 路径未建表）
 {
   const Database = req(R_SERVER + '/node_modules/better-sqlite3');
-  const boot = new Database(process.env.BIOF3_DB_PATH);
+  const boot = new Database(process.env.PETRI_DB_PATH);
   const migrationsDir = resolve(__dirname, '..', 'src', 'migrations');
   for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fs.readFileSync(migrationsDir + '/' + f, 'utf8'));
@@ -183,7 +183,7 @@ test('P5 Workflow Truth query is not truncated by the 200-row UI listing limit',
 // === Harness execution context（非 live，默认跑）===
 
 test('MCP run_tool execution context 映射本地 jobDir 到 canonical workDir', async () => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-mcp-context-'));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-mcp-context-'));
   const jobDir = path.join(root, 'mcp-tool-jobs', 'mcp_1');
   const outputDir = path.join(jobDir, 'output');
   fs.mkdirSync(outputDir, { recursive: true });
@@ -194,25 +194,25 @@ test('MCP run_tool execution context 映射本地 jobDir 到 canonical workDir',
     runtime: 'r',
     runtimeCommand: '/opt/R/bin/Rscript',
     localRoot: root,
-    canonicalRoot: '/work/biof3',
+    canonicalRoot: '/work/petri',
   });
 
   assert.equal(context.adapter.kind, 'local');
   assert.equal(context.runtime, 'r');
   assert.equal(context.runtimeReady.ready, true);
   assert.equal(context.workDir, jobDir);
-  assert.equal(context.canonicalWorkDir, '/work/biof3/mcp-tool-jobs/mcp_1');
-  assert.equal(context.canonicalOutputDir, '/work/biof3/mcp-tool-jobs/mcp_1/output');
-  assert.equal(canonicalizePath(path.join(outputDir, 'plot.png')), '/work/biof3/mcp-tool-jobs/mcp_1/output/plot.png');
+  assert.equal(context.canonicalWorkDir, '/work/petri/mcp-tool-jobs/mcp_1');
+  assert.equal(context.canonicalOutputDir, '/work/petri/mcp-tool-jobs/mcp_1/output');
+  assert.equal(canonicalizePath(path.join(outputDir, 'plot.png')), '/work/petri/mcp-tool-jobs/mcp_1/output/plot.png');
 });
 
 test('MCP artifact summary 带 canonicalPath，供后续 Agent/平台抽象稳定引用', async () => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-mcp-artifacts-'));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-mcp-artifacts-'));
   const resultDir = path.join(root, 'mcp-tool-jobs', 'mcp_2', 'output');
   fs.mkdirSync(resultDir, { recursive: true });
 
   const canonicalizePath = (value) =>
-    _test.canonicalizePath(value, { localRoot: root, canonicalRoot: '/work/biof3' });
+    _test.canonicalizePath(value, { localRoot: root, canonicalRoot: '/work/petri' });
   const artifacts = _test.normalizeArtifacts({
     manifestItems: [{ id: 'plot', name: 'volcano.png', type: 'plot', label: 'Volcano Plot' }],
     outFiles: ['volcano.png', 'table.csv'],
@@ -222,13 +222,13 @@ test('MCP artifact summary 带 canonicalPath，供后续 Agent/平台抽象稳�
 
   assert.equal(artifacts.length, 2);
   assert.equal(artifacts[0].path, path.join(resultDir, 'volcano.png'));
-  assert.equal(artifacts[0].canonicalPath, '/work/biof3/mcp-tool-jobs/mcp_2/output/volcano.png');
+  assert.equal(artifacts[0].canonicalPath, '/work/petri/mcp-tool-jobs/mcp_2/output/volcano.png');
   assert.equal(artifacts[1].type, 'table');
-  assert.equal(artifacts[1].canonicalPath, '/work/biof3/mcp-tool-jobs/mcp_2/output/table.csv');
+  assert.equal(artifacts[1].canonicalPath, '/work/petri/mcp-tool-jobs/mcp_2/output/table.csv');
 });
 
 test('MCP file-input staging contains plugin ids and rejects reserved control filenames', () => {
-  const jobDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-mcp-input-stage-'));
+  const jobDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-mcp-input-stage-'));
   const safe = _test.resolveStagedInputPath(jobDir, 'expr_matrix', '/uploads/source.csv');
   assert.deepEqual(safe, {
     ok: true,
@@ -250,14 +250,14 @@ test('MCP existing tool_job rejects user/project/conversation/tool identity drif
   // 必须在执行前被拒」。
   //
   // 两处装配要点（此前失败形态的根因）：
-  // 1. 插件源必须经 BIOF3_BUILT_IN_PLUGINS_DIR 指向中性夹具父目录——旧的
-  //    `globalThis._biof3Plugins` mock 在 BLOCK-83 重构后已淘汰，registry.js 实际走
+  // 1. 插件源必须经 PETRI_BUILT_IN_PLUGINS_DIR 指向中性夹具父目录——旧的
+  //    `globalThis._petriPlugins` mock 在 BLOCK-83 重构后已淘汰，registry.js 实际走
   //    `pluginLoader.getPlugin(name)`。
   // 2. 必须真建 project——身份校验通过后仍会解析项目结果目录，缺 project 会先撞
   //    `Project not found`，掩盖被测的身份漂移分支。
   const neutralPluginsDir = resolve(__dirname, 'fixtures', 'neutral-plugins');
-  const previousBuiltInDir = process.env.BIOF3_BUILT_IN_PLUGINS_DIR;
-  process.env.BIOF3_BUILT_IN_PLUGINS_DIR = neutralPluginsDir;
+  const previousBuiltInDir = process.env.PETRI_BUILT_IN_PLUGINS_DIR;
+  process.env.PETRI_BUILT_IN_PLUGINS_DIR = neutralPluginsDir;
   // createProject 自行生成 id 并真实落 workspace 目录；本测试只需它存在即可让
   // 项目结果目录解析通过（workspace 随临时 DB 目录一并清理）。
   const project = db.createProject({ name: 'MCP identity drift fixture' });
@@ -296,8 +296,8 @@ test('MCP existing tool_job rejects user/project/conversation/tool identity drif
   } finally {
     db.getDatabase().prepare('DELETE FROM tool_jobs WHERE id=?').run(job.id);
     db.getDatabase().prepare('DELETE FROM projects WHERE id=?').run(projectId);
-    if (previousBuiltInDir === undefined) delete process.env.BIOF3_BUILT_IN_PLUGINS_DIR;
-    else process.env.BIOF3_BUILT_IN_PLUGINS_DIR = previousBuiltInDir;
+    if (previousBuiltInDir === undefined) delete process.env.PETRI_BUILT_IN_PLUGINS_DIR;
+    else process.env.PETRI_BUILT_IN_PLUGINS_DIR = previousBuiltInDir;
   }
 });
 
@@ -305,8 +305,8 @@ test('MCP plugin execution fails closed when a new tool_job cannot be persisted'
   // BLOCK-83 P4：同上一测试，载体改用中性夹具（原 resources/built-in-plugins/volcano-plot
   // 目录已随包移出核心仓，指向它会让测试在到达 fail-closed 断言前就因插件不存在而失败）。
   const builtInDir = resolve(__dirname, 'fixtures', 'neutral-plugins', 'sample-metrics');
-  globalThis._biof3Plugins = new Map();
-  globalThis._biof3Plugins.set('sample-metrics', {
+  globalThis._petriPlugins = new Map();
+  globalThis._petriPlugins.set('sample-metrics', {
     id: 'sample-metrics',
     version: '1.0.0',
     language: 'r',
@@ -328,7 +328,7 @@ test('MCP plugin execution fails closed when a new tool_job cannot be persisted'
     assert.match(result.content[0].text, /tool_job 持久化校验失败/);
   } finally {
     db.createToolJob = originalCreateToolJob;
-    globalThis._biof3Plugins = new Map();
+    globalThis._petriPlugins = new Map();
   }
 });
 
@@ -338,8 +338,8 @@ const RUN_LIVE = process.env.RUN_AGENT_LIVE === '1';
 test('callTool 跑通 volcano-plot 返回 toolJobId（live）', { skip: !RUN_LIVE }, async () => {
   const builtInDir = resolve(__dirname, '..', 'resources', 'built-in-plugins', 'volcano-plot');
   const demoCsv = path.join(builtInDir, 'demo-data', 'demo_deg.csv');
-  globalThis._biof3Plugins = new Map();
-  globalThis._biof3Plugins.set('volcano-plot', {
+  globalThis._petriPlugins = new Map();
+  globalThis._petriPlugins.set('volcano-plot', {
     id: 'volcano-plot',
     version: '1.0.0',
     language: 'r',
@@ -362,7 +362,7 @@ test('callTool 跑通 volcano-plot 返回 toolJobId（live）', { skip: !RUN_LIV
     assert.equal(job.status, 'completed');
     assert.ok(job.result, 'result_json 应有值');
   } finally {
-    globalThis._biof3Plugins = new Map();
+    globalThis._petriPlugins = new Map();
   }
 });
 

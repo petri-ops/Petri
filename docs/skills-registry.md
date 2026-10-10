@@ -1,4 +1,4 @@
-# BioF3 Desktop Skills 注册与发现机制
+# Petri Desktop Skills 注册与发现机制
 
 > 状态：**设计稿**（待实现）
 >
@@ -129,7 +129,7 @@ Skills 的发现遵循与 Plugins 相同的三来源模式：
 
 ### 2.3 marketplace manifest
 
-远程 `manifest.json` 示例（`https://marketplace.biof3.com/skills/manifest.json`）：
+远程 `manifest.json` 示例（`https://marketplace.petri.com/skills/manifest.json`）：
 
 ```json
 {
@@ -144,7 +144,7 @@ Skills 的发现遵循与 Plugins 相同的三来源模式：
       "kind": "skill",
       "artifacts": {
         "macos-arm64": { 
-          "url": "https://cdn.biof3.com/skills/single-cell-trajectory/2.1.0/macos-arm64.tar.gz",
+          "url": "https://cdn.petri.com/skills/single-cell-trajectory/2.1.0/macos-arm64.tar.gz",
           "sha256": "def456...",
           "sizeBytes": 15728640
         }
@@ -159,7 +159,7 @@ Skills 的发现遵循与 Plugins 相同的三来源模式：
       "kind": "skill",
       "artifacts": {
         "macos-arm64": {
-          "url": "https://cdn.biof3.com/skills/spatial-transcriptomics/1.0.0/macos-arm64.tar.gz",
+          "url": "https://cdn.petri.com/skills/spatial-transcriptomics/1.0.0/macos-arm64.tar.gz",
           "sha256": "ghi789...",
           "sizeBytes": 20971520
         }
@@ -299,8 +299,8 @@ async function installSkill(id, version) {
 // src/mcp-server.js 新增工具
 
 const skillTools = {
-  name: "biof3_skills",
-  description: "BioF3 Desktop Skills 管理与执行",
+  name: "petri_skills",
+  description: "Petri Desktop Skills 管理与执行",
   tools: [
     {
       name: "list_skills",

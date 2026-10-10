@@ -7,12 +7,12 @@ import test from 'node:test';
 import { bootstrapTestDb } from './helpers/bootstrap-db.mjs';
 
 const require = createRequire(import.meta.url);
-const tempRoot = mkdtempSync(join(tmpdir(), 'biof3-project-memory-migration-'));
-process.env.BIOF3_DB_PATH = join(tempRoot, 'memory.db');
+const tempRoot = mkdtempSync(join(tmpdir(), 'petri-project-memory-migration-'));
+process.env.PETRI_DB_PATH = join(tempRoot, 'memory.db');
 
 
 bootstrapTestDb();
-const dbMod = require('../core/biof3-server/db.js');
+const dbMod = require('../core/petri-server/db.js');
 const sqlite = dbMod.getDatabase();
 const now = new Date().toISOString();
 
@@ -46,7 +46,7 @@ sqlite.prepare('INSERT INTO copilot_conversations(id,user_id,title,status,projec
 sqlite.prepare('INSERT INTO memory_vectors(id,user_id,kind,content,embedding,ts,created_at,conversation_id) VALUES (?,?,?,?,?,?,?,?)')
   .run('mem-a', 'user-a', 'chat_turn', '可安全迁移的旧记忆', Buffer.from(new Float32Array([1, 0]).buffer), now, now, 'conv-a');
 
-require('../core/biof3-server/helpers/memory-vectors.js');
+require('../core/petri-server/helpers/memory-vectors.js');
 
 test.after(() => {
   try { sqlite.close(); } catch {}

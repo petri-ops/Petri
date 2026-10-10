@@ -5,11 +5,11 @@
  * Coverage:
  *   A-010.1 getCoreEnv() default busyTimeoutMs === 10000
  *   A-010.2 getCoreEnv() returns all 6 documented fields
- *   A-010.3 env override flows through (BIOF3_R_HOME → coreEnv.rHome)
+ *   A-010.3 env override flows through (PETRI_R_HOME → coreEnv.rHome)
  *   A-010.4 getCoreEnv() snapshot is frozen (cannot be mutated by caller)
  *   A-010.5 getEnv(KEY, fallback) falls back to literal when env unset
  *   A-010.6 getEnv treats empty-string env as unset (returns fallback)
- *   A-010.7 6 core env reads in core/biof3-server/config.js no longer hit
+ *   A-010.7 6 core env reads in core/petri-server/config.js no longer hit
  *             process.env directly
  *
  * 运行：cd desktop && node --test test/config-helper-centralized.test.mjs
@@ -43,11 +43,11 @@ const req = createRequire(path.join(root, 'package.json'));
 
 // 6 core env keys the helper owns. Save + restore around every test.
 const CORE_ENV_KEYS = [
-  'BIOF3_R_HOME',
-  'BIOF3_LOCAL_RESULTS_DIR',
-  'BIOF3_LOCAL_UPLOADS_DIR',
-  'BIOF3_TEMP_DIR',
-  'BIOF3_DB_PATH',
+  'PETRI_R_HOME',
+  'PETRI_LOCAL_RESULTS_DIR',
+  'PETRI_LOCAL_UPLOADS_DIR',
+  'PETRI_TEMP_DIR',
+  'PETRI_DB_PATH',
 ];
 
 function snapshotEnv() {
@@ -85,19 +85,19 @@ test('A-010.2 getCoreEnv() returns all 6 documented fields', () => {
   ]) {
     assert.ok(key in core, `getCoreEnv() must include \`${key}\``);
   }
-  assert.strictEqual(core.tempDir, '/tmp/biof3-tmp', 'tempDir fallback must match');
+  assert.strictEqual(core.tempDir, '/tmp/petri-tmp', 'tempDir fallback must match');
 });
 
 test('A-010.3 env override flows through getCoreEnv()', () => {
   const saved = snapshotEnv();
-  process.env.BIOF3_R_HOME = '/custom/R';
-  process.env.BIOF3_DB_PATH = '/custom/biof3.db';
-  process.env.BIOF3_TEMP_DIR = '/custom/tmp';
-  process.env.BIOF3_LOCAL_RESULTS_DIR = '/custom/results';
-  process.env.BIOF3_LOCAL_UPLOADS_DIR = '/custom/uploads';
+  process.env.PETRI_R_HOME = '/custom/R';
+  process.env.PETRI_DB_PATH = '/custom/petri.db';
+  process.env.PETRI_TEMP_DIR = '/custom/tmp';
+  process.env.PETRI_LOCAL_RESULTS_DIR = '/custom/results';
+  process.env.PETRI_LOCAL_UPLOADS_DIR = '/custom/uploads';
   const core = getCoreEnv();
   assert.strictEqual(core.rHome, '/custom/R');
-  assert.strictEqual(core.dbPath, '/custom/biof3.db');
+  assert.strictEqual(core.dbPath, '/custom/petri.db');
   assert.strictEqual(core.tempDir, '/custom/tmp');
   assert.strictEqual(core.localResultsDir, '/custom/results');
   assert.strictEqual(core.localUploadsDir, '/custom/uploads');
@@ -113,38 +113,38 @@ test('A-010.4 getCoreEnv() snapshot is frozen', () => {
 
 test('A-010.5 getEnv(KEY, fallback) returns literal when env unset', () => {
   const saved = snapshotEnv();
-  delete process.env.BIOF3_R_HOME;
-  assert.strictEqual(getEnv('BIOF3_R_HOME', '[fallback]'), '[fallback]');
+  delete process.env.PETRI_R_HOME;
+  assert.strictEqual(getEnv('PETRI_R_HOME', '[fallback]'), '[fallback]');
   restoreEnv(saved);
 });
 
 test('A-010.6 getEnv treats empty-string env as unset', () => {
-  process.env.BIOF3_R_HOME = '';
+  process.env.PETRI_R_HOME = '';
   try {
     assert.strictEqual(
-      getEnv('BIOF3_R_HOME', '[fallback]'),
+      getEnv('PETRI_R_HOME', '[fallback]'),
       '[fallback]',
       'empty-string env must not silently win against the documented fallback',
     );
   } finally {
-    delete process.env.BIOF3_R_HOME;
+    delete process.env.PETRI_R_HOME;
   }
 });
 
-test('A-010.7 6 core env reads in core/biof3-server/config.js no longer hit process.env directly', () => {
+test('A-010.7 6 core env reads in core/petri-server/config.js no longer hit process.env directly', () => {
   // The 6 fields routed through getCoreEnv() in config.js must no longer
   // read process.env.X directly. We assert source-text against the new
   // pattern: `rHome: _coreEnv.rHome` (or similar). The legacy literal
-  // `process.env.BIOF3_R_HOME || ''` must be gone.
+  // `process.env.PETRI_R_HOME || ''` must be gone.
   const configSource = fs.readFileSync(
-    path.join(root, 'core/biof3-server/config.js'),
+    path.join(root, 'core/petri-server/config.js'),
     'utf8',
   );
 
   // Positive: the helper is referenced.
   assert.ok(
     configSource.includes('getCoreEnv'),
-    'core/biof3-server/config.js must read core env through config-helper.getCoreEnv()',
+    'core/petri-server/config.js must read core env through config-helper.getCoreEnv()',
   );
 
   // Negative: the 6 directly-read env fields must no longer appear in
@@ -152,38 +152,38 @@ test('A-010.7 6 core env reads in core/biof3-server/config.js no longer hit proc
   // behaviour are fine (they describe the migration), but executable code
   // must route through the helper.
   const legacyReadPatterns = [
-    /process\.env\.BIOF3_R_HOME\s*\|\|/,
-    /process\.env\.BIOF3_LOCAL_RESULTS_DIR\s*\|\|/,
-    /process\.env\.BIOF3_LOCAL_UPLOADS_DIR\s*\|\|/,
-    /process\.env\.BIOF3_TEMP_DIR\s*\|\|/,
-    /process\.env\.BIOF3_DB_PATH\s*\|\|/,
+    /process\.env\.PETRI_R_HOME\s*\|\|/,
+    /process\.env\.PETRI_LOCAL_RESULTS_DIR\s*\|\|/,
+    /process\.env\.PETRI_LOCAL_UPLOADS_DIR\s*\|\|/,
+    /process\.env\.PETRI_TEMP_DIR\s*\|\|/,
+    /process\.env\.PETRI_DB_PATH\s*\|\|/,
   ];
   for (const re of legacyReadPatterns) {
     assert.ok(
       !re.test(configSource),
-      `core/biof3-server/config.js must not carry legacy \`${re}\``,
+      `core/petri-server/config.js must not carry legacy \`${re}\``,
     );
   }
 
   // Sanity: the helper-backed fields are still observable through the
   // config object. We require() the CJS config.js fresh so the new env
   // values are picked up at module load time.
-  process.env.BIOF3_R_HOME = '/sanity/R';
-  process.env.BIOF3_TEMP_DIR = '/sanity/tmp';
-  process.env.BIOF3_DB_PATH = '/sanity/biof3.db';
+  process.env.PETRI_R_HOME = '/sanity/R';
+  process.env.PETRI_TEMP_DIR = '/sanity/tmp';
+  process.env.PETRI_DB_PATH = '/sanity/petri.db';
   try {
     // Bust the require cache so config.js re-evaluates with the new env.
     const configPath = req.resolve(
-      path.join(root, 'core/biof3-server/config.js'),
+      path.join(root, 'core/petri-server/config.js'),
     );
     delete req.cache[configPath];
     const freshConfig = req(configPath);
     assert.strictEqual(freshConfig.rHome, '/sanity/R');
     assert.strictEqual(freshConfig.tempDir, '/sanity/tmp');
-    assert.strictEqual(freshConfig.dbPath, '/sanity/biof3.db');
+    assert.strictEqual(freshConfig.dbPath, '/sanity/petri.db');
   } finally {
-    delete process.env.BIOF3_R_HOME;
-    delete process.env.BIOF3_TEMP_DIR;
-    delete process.env.BIOF3_DB_PATH;
+    delete process.env.PETRI_R_HOME;
+    delete process.env.PETRI_TEMP_DIR;
+    delete process.env.PETRI_DB_PATH;
   }
 });

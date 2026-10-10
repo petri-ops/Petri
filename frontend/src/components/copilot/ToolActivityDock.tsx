@@ -6,8 +6,8 @@ import {
   type BackgroundProcessView,
 } from './backgroundProcesses';
 import {
-  gewuEvents,
-  subscribeGewuEvent,
+  petriEvents,
+  subscribePetriEvent,
   type AgentBackgroundProcessDetail,
 } from '@/lib/events';
 import styles from './ToolActivityDock.module.css';
@@ -73,8 +73,8 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
   // 后台进程事件：绑定到当前会话才弹出
   useEffect(() => {
     if (!conversationId) return;
-    return subscribeGewuEvent(
-      gewuEvents.agentBackgroundProcess,
+    return subscribePetriEvent(
+      petriEvents.agentBackgroundProcess,
       (detail: AgentBackgroundProcessDetail) => {
         if (detail.conversationId && detail.conversationId !== conversationId) return;
         setDismissed(false);

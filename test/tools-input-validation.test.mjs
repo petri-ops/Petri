@@ -10,10 +10,10 @@ const {
   resolveUploadedFiles,
   writeUploadedFiles,
   validateUploadedFiles,
-} = require('../core/biof3-server/helpers/tools-executor')._test;
+} = require('../core/petri-server/helpers/tools-executor')._test;
 
 function jobWithFile(name, content) {
-  const jobDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-input-validation-'));
+  const jobDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-input-validation-'));
   fs.writeFileSync(path.join(jobDir, name), content);
   return jobDir;
 }
@@ -35,7 +35,7 @@ test('GSEA still rejects a one-column ranked-list input', () => {
 });
 
 test('tool uploads reject unsafe file maps before any upload file is written', (t) => {
-  const jobDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-upload-path-'));
+  const jobDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-upload-path-'));
   const outsidePath = path.join(path.dirname(jobDir), 'outside.csv');
   const encoded = Buffer.from('gene\nTP53\n').toString('base64');
   t.after(() => fs.rmSync(jobDir, { recursive: true, force: true }));
@@ -70,7 +70,7 @@ test('tool uploads reject unsafe file maps before any upload file is written', (
 });
 
 test('tool uploads retain flat valid filenames and validation resolves the same path', (t) => {
-  const jobDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-upload-flat-'));
+  const jobDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-upload-flat-'));
   const encoded = Buffer.from('gene\nTP53\nBRCA1\n').toString('base64');
   t.after(() => fs.rmSync(jobDir, { recursive: true, force: true }));
 

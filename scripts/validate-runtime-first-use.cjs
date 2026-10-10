@@ -7,14 +7,14 @@ const fs = require("fs");
 const path = require("path");
 const { app } = require("electron");
 
-const dataDir = process.env.BIOF3_LOCAL_DATA_DIR;
+const dataDir = process.env.PETRI_LOCAL_DATA_DIR;
 if (!dataDir) {
-  console.error("[runtime-first-use] BIOF3_LOCAL_DATA_DIR is required");
+  console.error("[runtime-first-use] PETRI_LOCAL_DATA_DIR is required");
   process.exit(2);
 }
 
 const resolvedDataDir = path.resolve(dataDir);
-const defaultDataDir = path.join(app.getPath("documents"), "BioF3-Local");
+const defaultDataDir = path.join(app.getPath("documents"), "Petri-Local");
 if (resolvedDataDir === path.resolve(defaultDataDir)) {
   console.error("[runtime-first-use] refusing to use the default user data directory");
   process.exit(2);
@@ -47,7 +47,7 @@ async function main() {
     throw new Error(`runtime first-use artifact is not published for ${platform}`);
   }
 
-  for (const id of ["biof3-r-runtime", "biof3-py-runtime"]) {
+  for (const id of ["petri-r-runtime", "petri-py-runtime"]) {
     const entry = manifest.plugins[id];
     if (!entry) throw new Error(`manifest entry missing: ${id}`);
     let lastPercent = -1;
@@ -74,7 +74,7 @@ async function main() {
   const pythonVersion = run(python, ["--version"]);
   const installed = pluginManager.getInstalledPlugins();
   const installedIds = new Set(installed.map((entry) => entry.id));
-  for (const id of ["biof3-r-runtime", "biof3-py-runtime"]) {
+  for (const id of ["petri-r-runtime", "petri-py-runtime"]) {
     if (!installedIds.has(id)) throw new Error(`installed ledger missing: ${id}`);
   }
 

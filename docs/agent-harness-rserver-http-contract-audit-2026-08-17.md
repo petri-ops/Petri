@@ -1,4 +1,4 @@
-# BioF3 Desktop — r-server HTTP API 契约一致性审查报告
+# Petri Desktop — r-server HTTP API 契约一致性审查报告
 
 **审查日期**: 2026-08-17
 **审查范围**: core/r-server/ 全部 HTTP 路由（独立子任务，与既有 IPC 契约审计平行）
@@ -80,7 +80,7 @@
 | `cors({ origin: corsOrigin })` | `bootstrap.js:52` | CORS 同源白名单 |
 | `express.json({ limit: '200mb' })` | `bootstrap.js:53` | 解析 JSON body；个别端点再覆盖 |
 | `requestIdMiddleware` | `bootstrap.js:54` | 给每个请求分配 ID |
-| `requestTimingMiddleware` | `bootstrap.js:55` | 性能采样（仅 `BIOF3_PERF_PROBE=1`） |
+| `requestTimingMiddleware` | `bootstrap.js:55` | 性能采样（仅 `PETRI_PERF_PROBE=1`） |
 | `localIdentityMiddleware` | `bootstrap.js:58` | 写入 `req.user = LOCAL_USER`（即 local-user/admin） |
 | `moduleGate` | `bootstrap.js:62` | 按 HTTP method+path 检查用户对模块（copilot/tools/single-cell/spatial）的权限 |
 | `requireTrustedDesktopOrigin` | `helpers/local-request-boundary.js` | 同源白名单（desktop only） |

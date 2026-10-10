@@ -91,7 +91,7 @@
 |--------|------|---------|
 | 1 | db-singleton | 抽 `_db-singleton.js` 后 getDatabase 行为 + 同一 dbName 返回同一 instance + 不同 dbName 返回不同 instance |
 | 2 | db-singleton | `_resetAllForTests` 清空 cache + test setup/teardown |
-| 3 | db-singleton | branch-db + result-db 通过 `_db-singleton` 共享同一 biof3.db handle |
+| 3 | db-singleton | branch-db + result-db 通过 `_db-singleton` 共享同一 petri.db handle |
 | 4 | db-singleton | agent-task-store.js 改用 `_db-singleton` 后 busy_timeout = 10000ms |
 | 5 | db-singleton | db.js 改用 `_db-singleton` 后 busy_timeout = 10000ms 一致 |
 | 6 | env-coordinator-port | `backendPorts.r` 默认值统一（3003 或 3001 选一） |
@@ -99,7 +99,7 @@
 | 8 | env-coordinator-port | 启动 r-server 前自检脚本 `getBackendPorts().r === process.env.R_SERVER_PORT` warn 一次 |
 | 9 | config-helper-centralized | 6 处 `process.env.*` → `getConfig()` 后行为不变 |
 | 10 | config-helper-centralized | `getConfig().busyTimeout` 返回 10000ms |
-| 11 | config-helper-centralized | `getConfig().dbPath` 返回 `BIOF3_DB_PATH` 注入路径 |
+| 11 | config-helper-centralized | `getConfig().dbPath` 返回 `PETRI_DB_PATH` 注入路径 |
 
 ### §3.2 PHASE 2 新测试（3 files / 15+ tests）
 
@@ -358,7 +358,7 @@ node --test \
 | A-002 + A-005 http 契约 100% 不变 | 拆分后必须确保所有 26+ + 7 端点响应一致 | 既有 chf0-http + result-studio + harness + ai-agent 测试是契约边界证据；PHASE 2 拆分后必须 0 退化 |
 | A-001 agent loop 状态机 0 变化 | 拆分后必须确保所有 4 大类 require 行为完全一致 | 既有 chf0-critical + agent-runner 测试是契约边界证据；PHASE 3.1 拆分后必须 0 退化 |
 | A-006 部分 singleton 迁 SQLite 写入者竞争 | 5 处迁 SQLite 后必须确保既有 agent_task_events 表写入者不冲突 | 既有 agent-task-cancellation 测试是边界证据；PHASE 3.3 拆完后必须 0 退化 |
-| A-007 + PR-012 + E-019 full 进程边界不破坏 | desktop main 进程 + r-server 进程同时打开 biof3.db | 既有 chf0-critical IPC contract 33 项是契约边界证据；PHASE 1.1 拆完后必须 0 退化 |
+| A-007 + PR-012 + E-019 full 进程边界不破坏 | desktop main 进程 + r-server 进程同时打开 petri.db | 既有 chf0-critical IPC contract 33 项是契约边界证据；PHASE 1.1 拆完后必须 0 退化 |
 
 ### §6.3 BLOCK-10-AUDIT-CLOSEOUT 测试沿用
 

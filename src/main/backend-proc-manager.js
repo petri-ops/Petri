@@ -1,6 +1,6 @@
 // ============================================================
 // Backend process manager — central registry for the backend
-// child process (biof3-server；BLOCK-30 P1 起 py-server 已摘除，
+// child process (petri-server；BLOCK-30 P1 起 py-server 已摘除，
 // BLOCK-51 P3 起 plumber 空壳已清理——R 为 tools-executor 单轨)
 // plus its log streams and supervisor.
 //
@@ -104,8 +104,8 @@ const NODE_BIN = resolveNodeBinLocal();
 const _logStreams = {};
 
 function getLogDir() {
-  const dir = process.env.BIOF3_LOCAL_DATA_DIR
-    ? path.join(process.env.BIOF3_LOCAL_DATA_DIR, "logs")
+  const dir = process.env.PETRI_LOCAL_DATA_DIR
+    ? path.join(process.env.PETRI_LOCAL_DATA_DIR, "logs")
     : path.join(app.getPath("documents"), resolveLocalDirName(app), "logs");
   try {
     fs.mkdirSync(dir, { recursive: true });
@@ -174,33 +174,33 @@ function markBackendAttached(port) {
 
 // ── startRServer (with supervisor) ─────────────────────────────
 const rServerSupervisor = createOwnedBackendSupervisor({
-  name: "biof3-server",
+  name: "petri-server",
   spawnProcess: () => {
-    const rServerPath = resolveCore("biof3-server", "server.js");
+    const rServerPath = resolveCore("petri-server", "server.js");
     const child = spawn(NODE_BIN, [rServerPath], {
-      // BLOCK-16 PHASE 3: 把 Electron userData 路径显式注入给 biof3-server subprocess，
+      // BLOCK-16 PHASE 3: 把 Electron userData 路径显式注入给 petri-server subprocess，
       // 让 system-prompt 能读 working-tree-review/rejects/（30 天 TTL 拒绝清单）。
       env: {
         ...process.env,
         ELECTRON_RUN_AS_NODE: "1",
-        BIOF3_USER_DATA_DIR: app.getPath("userData"),
+        PETRI_USER_DATA_DIR: app.getPath("userData"),
       },
       stdio: ["ignore", "pipe", "pipe"],
     });
 
-    _createLogStream("biof3-server");
+    _createLogStream("petri-server");
     child.stdout.on("data", (d) => {
       const text = d.toString().trim();
       if (text) {
-        console.log(`[biof3-server] ${text}`);
-        _writeLog("biof3-server", `[biof3-server] ${text}`);
+        console.log(`[petri-server] ${text}`);
+        _writeLog("petri-server", `[petri-server] ${text}`);
       }
     });
     child.stderr.on("data", (d) => {
       const text = d.toString().trim();
       if (text) {
-        console.error(`[biof3-server] ${text}`);
-        _writeLog("biof3-server", `[biof3-server:ERR] ${text}`);
+        console.error(`[petri-server] ${text}`);
+        _writeLog("petri-server", `[petri-server:ERR] ${text}`);
       }
     });
     return child;
@@ -213,27 +213,27 @@ const rServerSupervisor = createOwnedBackendSupervisor({
 });
 
 function startRServer(reason = "boot") {
-  // BLOCK-66 P1 — R 硬门摘除：biof3-server 是纯 Node 进程，不依赖 R；
+  // BLOCK-66 P1 — R 硬门摘除：petri-server 是纯 Node 进程，不依赖 R；
   // R 缺失照常启动，R 类插件执行时由 tools-executor runtime preflight
   // 诚实失败 + 商店指引（详见 docs/block-66-runtime-decouple-plan.md）。
   // 函数名 startRServer 为历史遗留（plumber/py-server 时代），保留以减 diff。
-  if (!process.env.BIOF3_R_HOME) {
+  if (!process.env.PETRI_R_HOME) {
     console.log(
-      "[desktop] biof3-server starting without R runtime — R analysis features unavailable until installed",
+      "[desktop] petri-server starting without R runtime — R analysis features unavailable until installed",
     );
   }
 
-  const rServerPath = resolveCore("biof3-server", "server.js");
+  const rServerPath = resolveCore("petri-server", "server.js");
   if (!fs.existsSync(rServerPath)) {
-    console.error("[desktop] biof3-server not found:", rServerPath);
-    return { ok: false, error: "biof3-server script not found" };
+    console.error("[desktop] petri-server not found:", rServerPath);
+    return { ok: false, error: "petri-server script not found" };
   }
 
   const result = rServerSupervisor.start(reason);
 
   if (result.ok && !result.alreadyRunning) {
     console.log(
-      `[desktop] biof3-server spawned (pid=${result.pid}) on :${process.env.R_SERVER_PORT} — reason=${reason}`,
+      `[desktop] petri-server spawned (pid=${result.pid}) on :${process.env.R_SERVER_PORT} — reason=${reason}`,
     );
   }
   return result;
@@ -241,7 +241,7 @@ function startRServer(reason = "boot") {
 
 // ── startPyServer / stopPyServer ───────────────────────────────
 // BLOCK-30 P1: removed with the py-server HTTP service. Python tool
-// execution runs inside biof3-server via the shared-backend executor
+// execution runs inside petri-server via the shared-backend executor
 // registry (spawn 内嵌 python)，无需独立 Python 后端进程。
 //
 // ── startPlumber / stopPlumber ─────────────────────────────────

@@ -22,18 +22,18 @@ const fs = require('node:fs');
 const os = require('node:os');
 const dbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'b163-orch-'));
 {
-  const Database = require(path.join(ROOT, 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const boot = new Database(path.join(dbDir, 'biof3.db'));
+  const Database = require(path.join(ROOT, 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const boot = new Database(path.join(dbDir, 'petri.db'));
   const migrationsDir = path.join(ROOT, 'src', 'migrations');
   for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fs.readFileSync(path.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = path.join(dbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(dbDir, 'petri.db');
 }
 
-const spawnTools = require(path.join(ROOT, 'core/biof3-server/agent-tools/spawn-agent-tools.js'));
-const agentTaskStore = require(path.join(ROOT, 'core/biof3-server/agent-task-store.js'));
+const spawnTools = require(path.join(ROOT, 'core/petri-server/agent-tools/spawn-agent-tools.js'));
+const agentTaskStore = require(path.join(ROOT, 'core/petri-server/agent-task-store.js'));
 
 let currentTask = null;
 let cancelRequested = false;

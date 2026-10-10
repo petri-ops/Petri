@@ -64,8 +64,8 @@ const CHANNELS = {
     saveTextFile: 'file:save-text-file',
     validateDirectory: 'file:validate-directory',
   },
-  gewu: {
-    agentWorkbenchFlags: 'gewu:agent-workbench-flags',
+  petri: {
+    agentWorkbenchFlags: 'petri:agent-workbench-flags',
   },
   startup: {
     // BLOCK-101 P0 — 启动 timeline 度量：渲染层把四段 marks 汇总上报（send），
@@ -199,7 +199,7 @@ const CHANNELS = {
     restore: 'window:restore',
     return: 'window:return',
     self: 'window:self',
-    // BLOCK-100/UI-411 — 测试实例窗口管理（handler 有 BIOF3_TEST_INSTANCE 守卫，
+    // BLOCK-100/UI-411 — 测试实例窗口管理（handler 有 PETRI_TEST_INSTANCE 守卫，
     // 用户实例调用恒拒绝）：置顶切换 + 鼠标穿透开关（forward:true）。
     setAlwaysOnTop: 'window:set-always-on-top',
     setIgnoreMouseEvents: 'window:set-ignore-mouse-events',

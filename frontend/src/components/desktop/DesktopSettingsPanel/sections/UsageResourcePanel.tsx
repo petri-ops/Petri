@@ -37,24 +37,24 @@ export function UsageResourcePanel(): React.ReactElement {
   const formatLatency = (ms: number | undefined) =>
     ms != null && Number.isFinite(Number(ms)) ? `${(Number(ms) / 1000).toFixed(2)} s` : '—';
   return (
-    <div className="gewu-usage-resource">
-      <div className="gewu-metric-grid">
+    <div className="petri-usage-resource">
+      <div className="petri-metric-grid">
         <div><small>30 天调用</small><strong>{usage?.calls ?? '—'}</strong></div>
         <div><small>输入 / 输出 Token</small><strong>{usage ? `${usage.prompt_tokens || 0} / ${usage.completion_tokens || 0}` : '—'}</strong></div>
         <div><small>缓存命中</small><strong>{usage ? `${((usage.cache_hit_rate || 0) * 100).toFixed(1)}%` : '—'}</strong></div>
         <div><small>估算成本</small><strong>{usage ? `¥${Number(usage.estimated_cost_cny || 0).toFixed(4)}` : '—'}</strong></div>
       </div>
-      <p className="gewu-field__hint">
+      <p className="petri-field__hint">
         {usageError || (usage?.cost_status === 'partial' ? `${usage.unknown_cost_calls} 次调用缺少可靠价格，金额仅为部分估算。` : '成本来自已知价格表；供应商未返回价格时不会伪造金额。')}
       </p>
       {/* BLOCK-79 — 按供应商的输出速率（统一展示面） */}
-      <div className="gewu-resource-heading">
+      <div className="petri-resource-heading">
         <div><strong>供应商速率（30 天）</strong><p>输出 tokens/s = 端到端平均输出速率（含首 token 前处理与网络，为解码速度下限）</p></div>
       </div>
       {providers.length === 0 ? (
-        <p className="gewu-field__hint">暂无可统计的调用记录。</p>
+        <p className="petri-field__hint">暂无可统计的调用记录。</p>
       ) : (
-        <div className="gewu-metric-grid">
+        <div className="petri-metric-grid">
           {providers.map((row) => {
             const speed = row.measurable && row.tokensPerSecond != null
               ? `${row.tokensPerSecond} tok/s`
@@ -74,18 +74,18 @@ export function UsageResourcePanel(): React.ReactElement {
           </div>
         </div>
       )}
-      <hr className="gewu-section-divider" />
-      <div className="gewu-resource-heading">
+      <hr className="petri-section-divider" />
+      <div className="petri-resource-heading">
         <div><strong>{resourceLabel}</strong><p>{snapshot ? `${snapshot.platform} · 观测于 ${new Date(snapshot.observedAt).toLocaleTimeString()}` : error || '正在读取机器状态'}</p></div>
-        <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" disabled={loading} onClick={() => void refresh()}>刷新</button>
+        <button type="button" className="petri-btn petri-btn--ghost petri-btn--sm" disabled={loading} onClick={() => void refresh()}>刷新</button>
       </div>
-      <div className="gewu-metric-grid">
+      <div className="petri-metric-grid">
         <div><small>CPU</small><strong>{snapshot ? `${snapshot.cpu.logicalCores} 核 · ${snapshot.cpu.load1m?.toFixed(2) ?? '—'}` : '—'}</strong></div>
         <div><small>可用内存</small><strong>{formatMetricBytes(snapshot?.memory.availableBytes)}</strong></div>
         <div><small>可用磁盘</small><strong>{formatMetricBytes(snapshot?.disk.availableBytes)}</strong></div>
         <div><small>活跃 Job</small><strong>{snapshot?.activeJobs ?? '—'}</strong></div>
       </div>
-      <p className="gewu-field__hint">资源快照每 10 秒刷新、30 秒失效。GPU 仅在运行时能够可靠探测时展示。</p>
+      <p className="petri-field__hint">资源快照每 10 秒刷新、30 秒失效。GPU 仅在运行时能够可靠探测时展示。</p>
     </div>
   );
 }

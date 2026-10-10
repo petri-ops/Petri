@@ -1,4 +1,4 @@
-# BioF3 Desktop Skills 与工作流集成
+# Petri Desktop Skills 与工作流集成
 
 > 状态：**设计稿**（待实现）
 >
@@ -229,7 +229,7 @@ Skill 参数到 Plugin 参数的映射：
 
 // 新增 Skills 相关工具
 const skillsTools = {
-  name: "biof3_skills",
+  name: "petri_skills",
   tools: [
     {
       name: "list_skills",
@@ -289,7 +289,7 @@ const skillsTools = {
 
 // 现有工具保持不变
 const pluginTools = {
-  name: "biof3_plugins",
+  name: "petri_plugins",
   tools: [
     {
       name: "list_tools",

@@ -48,7 +48,7 @@
       "id": "final_runlog_on_disk",
       "pass": true,
       "detail": {
-        "path": "\\.biof3-dev-user-data\\data\\projects\\block126-perception-verify-mulybtax-mulybtaz\\results\\jobs\\job_0c78c139a5df421c\\output\\run.log",
+        "path": "\\.petri-dev-user-data\\data\\projects\\block126-perception-verify-mulybtax-mulybtaz\\results\\jobs\\job_0c78c139a5df421c\\output\\run.log",
         "bytes": 1610
       }
     },

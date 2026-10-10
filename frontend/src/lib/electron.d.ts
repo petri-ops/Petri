@@ -1,5 +1,5 @@
-// Gewu 桌面版原生 shell — Electron preload 桥
-// 桌面版前端通过 window.biof3Desktop 访问 Electron IPC
+// Petri 桌面版原生 shell — Electron preload 桥
+// 桌面版前端通过 window.petriDesktop 访问 Electron IPC
 // （从 desktop-app/src/preload.js 暴露的 API）
 
 // M1-1：后端就绪感知层返回结构
@@ -9,9 +9,9 @@ export interface BackendStatus {
    *  "未知"误判成"缺失"，导致偶发 IPC 异常时错弹首次配置引导页。 */
   rRuntime: boolean | null;
   pyRuntime: boolean | null;
-  /** BLOCK-66 P1：历史名，语义 = biof3-server up（与 serverUp 同值，保留兼容）。 */
+  /** BLOCK-66 P1：历史名，语义 = petri-server up（与 serverUp 同值，保留兼容）。 */
   rServerUp: boolean;
-  /** BLOCK-66 P1 additive：biof3-server 就绪（与 R 运行时安装状态解绑——
+  /** BLOCK-66 P1 additive：petri-server 就绪（与 R 运行时安装状态解绑——
    *  R 缺失时应用全功能可用，isReady 不再因 rRuntime=false 而为 false）。
    *  optional：历史 fixture 无需逐个补字段。 */
   serverUp?: boolean;
@@ -61,7 +61,7 @@ type BranchRowRecord = {
 declare global {
   interface Window {
     /** BLOCK-61 品牌桥主全局名。 */
-    gewu?: {
+    petri?: {
       isDesktop: true;
       platform: string;
       arch: string;
@@ -145,7 +145,7 @@ declare global {
           ) => void
         ) => () => void;
       };
-      /** 应用级控制 —— 装完运行时后需整体重启（BIOF3_R_HOME 在 main 启动时固化）。 */
+      /** 应用级控制 —— 装完运行时后需整体重启（PETRI_R_HOME 在 main 启动时固化）。 */
       app: {
         relaunch: () => Promise<{ ok: boolean; error?: string }>;
       };
@@ -769,15 +769,15 @@ declare global {
         getActive: (params: { projectId: string }) => Promise<ResultIpcEnvelope<BranchRowRecord | null>>;
       };
     };
-    /** BLOCK-61 兼容别名：与 gewu 同一 surface（preload 双暴露）。 */
-    biof3Desktop?: Window['gewu'];
+    /** BLOCK-61 兼容别名：与 petri 同一 surface（preload 双暴露）。 */
+    petriDesktop?: Window['petri'];
     process?: {
       env: {
-        BIOF3_DESKTOP?: string;
+        PETRI_DESKTOP?: string;
         NODE_ENV?: string;
       };
     };
-    biof3?: {
+    petri?: {
       agentWorkbenchFlags: {
         getExtraRenderers: () => boolean;
         set: (value: boolean) => Promise<{ ok: boolean; extraRenderers: boolean; error?: string }>;

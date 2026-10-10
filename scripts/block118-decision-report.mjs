@@ -6,7 +6,7 @@
  *   npm run decision:report [-- --since=2026-09-23] [--hours=24] [--point=test-suggest] [--json]
  *
  * 数据源=decision_log 台账（BLOCK-116 记账面 + 012 input_tokens 列）；只读查询零副作用。
- * DB 锚定与建议器包装同策略：缺 BIOF3_DB_PATH 时锚定 dev 数据面，无 dev 数据面则如实报错。
+ * DB 锚定与建议器包装同策略：缺 PETRI_DB_PATH 时锚定 dev 数据面，无 dev 数据面则如实报错。
  * 成本估算按 Jev 云只收输入 token（$42/百万 token × 1e-6 = $42/Btok）计；Laya 本地=0。
  */
 import fs from 'node:fs';
@@ -22,9 +22,9 @@ const SEPARATOR = String.fromCharCode(10);
 const JEVDOLLARS_PER_TOKEN = 42 / 1e9;
 
 function anchorDecisionDbPath() {
-  if (process.env.BIOF3_DB_PATH) return;
-  const candidate = path.join(root, '.biof3-dev-user-data', 'data', 'biof3.db');
-  if (fs.existsSync(candidate)) process.env.BIOF3_DB_PATH = candidate;
+  if (process.env.PETRI_DB_PATH) return;
+  const candidate = path.join(root, '.petri-dev-user-data', 'data', 'petri.db');
+  if (fs.existsSync(candidate)) process.env.PETRI_DB_PATH = candidate;
 }
 
 function parseArgs(argv) {
@@ -51,9 +51,9 @@ function parseArgs(argv) {
 function main() {
   const { since, point, json } = parseArgs(process.argv.slice(2));
   anchorDecisionDbPath();
-  const dbPath = process.env.BIOF3_DB_PATH;
+  const dbPath = process.env.PETRI_DB_PATH;
   if (!dbPath || !fs.existsSync(dbPath)) {
-    console.error('decision:report：找不到决策台账 DB（未设 BIOF3_DB_PATH 且无 dev 数据面）。');
+    console.error('decision:report：找不到决策台账 DB（未设 PETRI_DB_PATH 且无 dev 数据面）。');
     process.exit(3);
   }
   const Database = require('better-sqlite3');

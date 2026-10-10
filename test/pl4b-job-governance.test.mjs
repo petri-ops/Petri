@@ -9,9 +9,9 @@ import { join } from 'node:path';
 import express from 'express';
 
 const nodeRequire = createRequire(import.meta.url);
-const Database = nodeRequire('../core/biof3-server/node_modules/better-sqlite3');
-const { createToolsPlatformRoutes } = nodeRequire('../core/biof3-server/routes/tools-platform.js');
-const { PUBLIC_DEMO_JOB_IDS } = nodeRequire('../core/biof3-server/helpers/tools-assets.js');
+const Database = nodeRequire('../core/petri-server/node_modules/better-sqlite3');
+const { createToolsPlatformRoutes } = nodeRequire('../core/petri-server/routes/tools-platform.js');
+const { PUBLIC_DEMO_JOB_IDS } = nodeRequire('../core/petri-server/helpers/tools-assets.js');
 
 function makeFixture() {
   const dir = mkdtempSync(join(tmpdir(), 'pl4b-governance-'));

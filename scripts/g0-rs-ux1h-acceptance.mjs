@@ -50,7 +50,7 @@ const SOURCE_FILES = Object.freeze([
   'scripts/g0-sdc1-local-gateway.mjs',
   'scripts/g0-sdc1-electron-driver.cjs',
   'core/shared-backend/llm-providers/deepseek.js',
-  'core/biof3-server/routes/ai-agent.js',
+  'core/petri-server/routes/ai-agent.js',
   'resources/built-in-plugins/deseq2/plugin.json',
   'resources/built-in-plugins/deseq2/scripts/deseq2.R',
   'test/g0-rs-ux1h-acceptance.test.mjs',
@@ -130,7 +130,7 @@ function writeAiSettings(env, gatewayBaseUrl) {
     model_role_bindings: Object.fromEntries(profile.roles.map((role) => [role, id])),
     model_fallback_enabled: false,
   };
-  const target = path.join(env.BIOF3_LOCAL_DATA_DIR, 'ai-settings.json');
+  const target = path.join(env.PETRI_LOCAL_DATA_DIR, 'ai-settings.json');
   mkdirSync(path.dirname(target), { recursive: true });
   writeFileSync(target, `${JSON.stringify(settings, null, 2)}\n`, { mode: 0o600 });
 }
@@ -343,13 +343,13 @@ export async function observeUx1h({
       port: backendPort,
       beforeStart: ({ env }) => {
         const origin = `http://127.0.0.1:${uiPort}`;
-        const bundledRHome = process.env.BIOF3_R_HOME
-          || path.join(process.env.USERPROFILE || '', 'Documents', 'BioF3-Local', 'runtimes', 'R');
+        const bundledRHome = process.env.PETRI_R_HOME
+          || path.join(process.env.USERPROFILE || '', 'Documents', 'Petri-Local', 'runtimes', 'R');
         if (existsSync(path.join(bundledRHome, 'bin', process.platform === 'win32' ? 'Rscript.exe' : 'Rscript'))) {
-          env.BIOF3_R_HOME = bundledRHome;
+          env.PETRI_R_HOME = bundledRHome;
         }
-        env.BIOF3_RENDERER_DEV_URL = origin;
-        env.BIOF3_TRUSTED_DESKTOP_ORIGINS = origin;
+        env.PETRI_RENDERER_DEV_URL = origin;
+        env.PETRI_TRUSTED_DESKTOP_ORIGINS = origin;
         env.OPENAI_COMPATIBLE_API_KEY = 'ux1h-local-adapter-only';
         writeAiSettings(env, gateway.baseUrl);
       },
@@ -407,9 +407,9 @@ export async function observeUx1h({
         env: {
           ...process.env,
           ...runtime.env,
-          BIOF3_DESKTOP: '1',
+          PETRI_DESKTOP: '1',
           R_SERVER_PORT: String(backendPort),
-          BIOF3_SDC1_DRIVER_CONFIG: configPath,
+          PETRI_SDC1_DRIVER_CONFIG: configPath,
         },
         stdio: ['ignore', 'ignore', 'pipe'],
       });

@@ -9,22 +9,22 @@ const {
   toInternalUri,
   hasUsableArtifactTruth,
   isRealPathInsideRoot,
-} = require('../core/biof3-server/helpers/chat-file-references.js');
+} = require('../core/petri-server/helpers/chat-file-references.js');
 const {
   renderFileReferenceHints,
-} = require('../core/biof3-server/helpers/system-prompt.js');
+} = require('../core/petri-server/helpers/system-prompt.js');
 
 test('decodes internal artifact and workspace paths segment by segment', () => {
   assert.deepEqual(
-    normalizeReference('biof3://artifact/job-1/%E5%B7%AE%E5%BC%82%20%E5%9F%BA%E5%9B%A0.csv'),
+    normalizeReference('petri://artifact/job-1/%E5%B7%AE%E5%BC%82%20%E5%9F%BA%E5%9B%A0.csv'),
     {
-      reference: 'biof3://artifact/job-1/%E5%B7%AE%E5%BC%82%20%E5%9F%BA%E5%9B%A0.csv',
+      reference: 'petri://artifact/job-1/%E5%B7%AE%E5%BC%82%20%E5%9F%BA%E5%9B%A0.csv',
       kind: 'artifact',
       normalized: 'job-1/差异 基因.csv',
     },
   );
   assert.equal(
-    normalizeReference('biof3://workspace/proj-1/data/%E6%A0%B7%E6%9C%AC%20A.csv')?.normalized,
+    normalizeReference('petri://workspace/proj-1/data/%E6%A0%B7%E6%9C%AC%20A.csv')?.normalized,
     'proj-1/data/样本 A.csv',
   );
 });
@@ -42,7 +42,7 @@ test('normalizes tools file URLs and preserves the job id', () => {
 });
 
 test('rejects malformed encoding and dangerous protocols without throwing', () => {
-  assert.equal(normalizeReference('biof3://artifact/job-1/bad%ZZ.csv'), null);
+  assert.equal(normalizeReference('petri://artifact/job-1/bad%ZZ.csv'), null);
   assert.equal(normalizeReference('javascript:alert(1)'), null);
   assert.equal(normalizeReference('file:///etc/passwd'), null);
   assert.equal(normalizeReference('data:text/html,boom'), null);
@@ -62,11 +62,11 @@ test('classifies traversal and absolute paths for the route containment gate', (
 test('encodes internal URIs without exposing local paths', () => {
   assert.equal(
     toInternalUri({ kind: 'artifact', jobId: 'job 1', artifactName: '差异 基因.csv' }),
-    'biof3://artifact/job%201/%E5%B7%AE%E5%BC%82%20%E5%9F%BA%E5%9B%A0.csv',
+    'petri://artifact/job%201/%E5%B7%AE%E5%BC%82%20%E5%9F%BA%E5%9B%A0.csv',
   );
   assert.equal(
     toInternalUri({ kind: 'workspace', projectId: 'proj 1', relativePath: 'data/样本 A.csv' }),
-    'biof3://workspace/proj%201/data/%E6%A0%B7%E6%9C%AC%20A.csv',
+    'petri://workspace/proj%201/data/%E6%A0%B7%E6%9C%AC%20A.csv',
   );
 });
 
@@ -86,8 +86,8 @@ test('agent prompt mirrors the internal URI contract without changing action car
     activeJobHarnessSummary: { entries: [{ relativePath: 'output/report.html' }] },
   });
   assert.match(hints, /CHAT_FILE_REF_URI_v1/);
-  assert.match(hints, /biof3:\/\/artifact\/job-1\/report\.html/);
-  assert.match(hints, /biof3:\/\/workspace\/<projectId>\/<relativePath>/);
+  assert.match(hints, /petri:\/\/artifact\/job-1\/report\.html/);
+  assert.match(hints, /petri:\/\/workspace\/<projectId>\/<relativePath>/);
   assert.match(hints, /不要写真机绝对路径/);
   assert.match(hints, /Action Card/);
 });

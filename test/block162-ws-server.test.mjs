@@ -22,7 +22,7 @@ import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const WS_PATH = path.join(ROOT, 'core/biof3-server/mobile-gateway/ws.js');
+const WS_PATH = path.join(ROOT, 'core/petri-server/mobile-gateway/ws.js');
 
 const { acceptKey, attachWsServer, encodeFrame } = require(WS_PATH);
 const { WsTestClient } = require('./block162-ws-client.mjs');

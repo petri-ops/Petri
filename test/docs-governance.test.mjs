@@ -25,7 +25,7 @@ test('repository document registry is internally consistent and complete', async
 });
 
 test('validator reports duplicate identities and invalid lifecycle state', async (context) => {
-  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'biof3-doc-governance-'));
+  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'petri-doc-governance-'));
   context.after(() => fs.rm(tempRoot, { recursive: true, force: true }));
   await fs.mkdir(path.join(tempRoot, 'docs'), { recursive: true });
   await fs.writeFile(path.join(tempRoot, 'docs', 'README.md'), '# Index\n\n[Plan](./plan.md)\n', 'utf8');
@@ -79,7 +79,7 @@ test('validator reports duplicate identities and invalid lifecycle state', async
 });
 
 test('validator enforces at most one active work package (document-governance §2.1)', async (context) => {
-  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'biof3-doc-single-active-'));
+  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'petri-doc-single-active-'));
   context.after(() => fs.rm(tempRoot, { recursive: true, force: true }));
   await fs.mkdir(path.join(tempRoot, 'docs'), { recursive: true });
   await fs.writeFile(path.join(tempRoot, 'docs', 'wp-a.md'), '# WP A\n', 'utf8');
@@ -112,7 +112,7 @@ test('validator enforces at most one active work package (document-governance §
 });
 
 test('validator flags active review artefacts whose owning work package is retired', async (context) => {
-  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'biof3-doc-orphan-review-'));
+  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'petri-doc-orphan-review-'));
   context.after(() => fs.rm(tempRoot, { recursive: true, force: true }));
   await fs.mkdir(path.join(tempRoot, 'docs'), { recursive: true });
   await fs.writeFile(path.join(tempRoot, 'docs', 'wp-c.md'), '# WP C\n', 'utf8');
@@ -149,7 +149,7 @@ test('validator flags active review artefacts whose owning work package is retir
 });
 
 test('validator rejects path traversal even when normalization would return inside the repository', async (context) => {
-  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'biof3-doc-path-'));
+  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'petri-doc-path-'));
   context.after(() => fs.rm(tempRoot, { recursive: true, force: true }));
   await fs.mkdir(path.join(tempRoot, 'docs'), { recursive: true });
   await fs.writeFile(path.join(tempRoot, 'docs', 'plan.md'), '# Plan\n', 'utf8');
@@ -204,7 +204,7 @@ function buildFrontMatterFixtureRegistry(docBody, docOverrides = {}) {
 }
 
 async function writeFrontMatterFixture(context, docBody) {
-  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'biof3-frontmatter-'));
+  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'petri-frontmatter-'));
   context.after(() => fs.rm(tempRoot, { recursive: true, force: true }));
   await fs.mkdir(path.join(tempRoot, 'docs'), { recursive: true });
   await fs.writeFile(path.join(tempRoot, 'docs', 'pilot.md'), docBody, 'utf8');

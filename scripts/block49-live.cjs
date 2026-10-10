@@ -18,31 +18,31 @@ const path = require('node:path');
 const http = require('node:http');
 
 // env 必须在 require db/ai-settings 之前设置（单例解析）
-const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block49-live-'));
-process.env.BIOF3_DB_PATH = path.join(tmpRoot, 'live.db');
-process.env.BIOF3_LOCAL_DATA_DIR = path.join(tmpRoot, 'local-data');
+const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block49-live-'));
+process.env.PETRI_DB_PATH = path.join(tmpRoot, 'live.db');
+process.env.PETRI_LOCAL_DATA_DIR = path.join(tmpRoot, 'local-data');
 
 // 新鲜 DB 先应用 src/migrations 全量（projects/copilot 等用户数据表由迁移管理；
 // db.js 模块加载即预编译 projects 语句）。与 test/block49-spawn-agent-tools.test.mjs 同一自举手法。
 const ROOT = path.join(__dirname, '..');
 const EVIDENCE_DIR = path.join(ROOT, 'acceptance', 'block-49');
 {
-  const Database = require(ROOT + '/core/biof3-server/node_modules/better-sqlite3');
+  const Database = require(ROOT + '/core/petri-server/node_modules/better-sqlite3');
   const migrationsDir = path.join(ROOT, 'src', 'migrations');
-  const boot = new Database(process.env.BIOF3_DB_PATH);
+  const boot = new Database(process.env.PETRI_DB_PATH);
   for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fs.readFileSync(path.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
 }
 
-const { saveAiSettings } = require(ROOT + '/core/biof3-server/helpers/ai-settings');
-const agentTaskStore = require(ROOT + '/core/biof3-server/agent-task-store');
-const dbMod = require(ROOT + '/core/biof3-server/db');
-const { runAgentLoop } = require(ROOT + '/core/biof3-server/agent-runner');
-const { spawn_agent } = require(ROOT + '/core/biof3-server/agent-tools/spawn-agent-tools');
-const { aiTaskConcurrencyAcquire, aiTaskConcurrencyRelease } = require(ROOT + '/core/biof3-server/helpers/runtime');
-const { getAssistantMessageByTaskId } = require(ROOT + '/core/biof3-server/helpers/conversations');
+const { saveAiSettings } = require(ROOT + '/core/petri-server/helpers/ai-settings');
+const agentTaskStore = require(ROOT + '/core/petri-server/agent-task-store');
+const dbMod = require(ROOT + '/core/petri-server/db');
+const { runAgentLoop } = require(ROOT + '/core/petri-server/agent-runner');
+const { spawn_agent } = require(ROOT + '/core/petri-server/agent-tools/spawn-agent-tools');
+const { aiTaskConcurrencyAcquire, aiTaskConcurrencyRelease } = require(ROOT + '/core/petri-server/helpers/runtime');
+const { getAssistantMessageByTaskId } = require(ROOT + '/core/petri-server/helpers/conversations');
 
 const USER_ID = 'u_block49_live';
 const PARENT_PROMPT = 'LIVE-PARENT: 请派生一个子 agent 计算 7 乘 6，等待它完成后把它的结论原样汇报给我。';
@@ -168,7 +168,7 @@ async function main() {
 
   const mock = await startMockServer();
 
-  // 真设置落盘（临时 BIOF3_LOCAL_DATA_DIR，不碰用户真实配置）
+  // 真设置落盘（临时 PETRI_LOCAL_DATA_DIR，不碰用户真实配置）
   saveAiSettings({
     model_profiles: [
       {

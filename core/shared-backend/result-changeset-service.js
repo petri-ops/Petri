@@ -201,7 +201,7 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
   const baseCommit = sourceRevision.sourceCommit && adapter.revParse(sourceRevision.sourceCommit)
     ? sourceRevision.sourceCommit
     : resolveBaseCommit(adapter, projectId);
-  const workingBranchRef = `refs/heads/biof3/changeset/${safeSegment(changeSetId, 'change_set_id')}`;
+  const workingBranchRef = `refs/heads/petri/changeset/${safeSegment(changeSetId, 'change_set_id')}`;
   const progress = [];
   const emit = (stage, status, detail = {}) => {
     const event = { resultEditProgressVersion: 1, sequence: progress.length + 1, changeSetId, stage, status, ...detail };
@@ -267,7 +267,7 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
       parentCommit: baseCommit,
       ref: workingBranchRef,
       expectedOld: '0'.repeat(40),
-      message: `BioF3 ChangeSet ${changeSetId}: ${input.intent.requestedOutcome}\n\nArtifact: ${sourceRevision.artifactId}`,
+      message: `Petri ChangeSet ${changeSetId}: ${input.intent.requestedOutcome}\n\nArtifact: ${sourceRevision.artifactId}`,
       files: materialized.gitFiles.map((file) => ({
         ...file,
         path: gitPathPrefix ? path.posix.join(gitPathPrefix, file.path) : file.path,
@@ -475,7 +475,7 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
         parentCommit: candidate.commit,
         ref: workingBranchRef,
         expectedOld: candidate.commit,
-        message: `BioF3 ChangeSet ${changeSetId}: verified downstream materialization`,
+        message: `Petri ChangeSet ${changeSetId}: verified downstream materialization`,
         files: downstreamCandidates.flatMap((entry) => entry.materialization.gitFiles).map((file) => ({
           ...file,
           path: gitPathPrefix ? path.posix.join(gitPathPrefix, file.path) : file.path,

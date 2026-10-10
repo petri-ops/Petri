@@ -18,7 +18,7 @@
 | `start` | `electron .` — production launch from packaged/built frontend. |
 | `dev` | `node scripts/dev-electron.js` — Vite + Electron launcher (HMR + dev-tools). |
 | `dev:electron` | `electron . --dev` — direct Electron launch (loads built `frontend/dist/`). |
-| `mcp:server` | Runs `src/mcp-server.js` as standalone CLI (`biof3-mcp` bin). |
+| `mcp:server` | Runs `src/mcp-server.js` as standalone CLI (`petri-mcp` bin). |
 | `prebuild` | `node --check` syntax-check on `main.js`, `preload.js`, `plugin-manager.js`, `core/r-server/plugin-loader.js`. |
 | `build:spa` | `cd frontend && npm run build` — Vite SPA build. |
 | `build:site` | No-op placeholder (Docusaurus site removed in desktop repo). |
@@ -61,7 +61,7 @@
 
 **`3000`** (`frontend/vite.config.ts` line 191; `strictPort: true` — exits if busy).
 
-`scripts/dev-electron.js` line 20: default `BIOF3_RENDERER_DEV_URL` is `http://localhost:3000` and `waitForUrl()` polls until the server is up before launching Electron. Re-running `npm run dev` while 3000 is already serving a port-conflict error (§1 L202-207).
+`scripts/dev-electron.js` line 20: default `PETRI_RENDERER_DEV_URL` is `http://localhost:3000` and `waitForUrl()` polls until the server is up before launching Electron. Re-running `npm run dev` while 3000 is already serving a port-conflict error (§1 L202-207).
 
 ---
 
@@ -92,18 +92,18 @@
       "@/*":              ["./src/*"],
       "@site/src/*":      ["./src/*"],
       "@docusaurus/useBaseUrl": ["./src/lib/useBaseUrl-mock.ts"],
-      "@biof3/shared":            ["../core/packages/shared-copilot/index.ts"],
-      "@biof3/shared/types":       ["../core/packages/shared-copilot/types.ts"],
-      "@biof3/shared/context":     ["../core/packages/shared-copilot/context.ts"],
-      "@biof3/shared/trace":       ["../core/packages/shared-copilot/trace.ts"],
-      "@biof3/shared/helpers":     ["../core/packages/shared-copilot/helpers.ts"],
-      "@biof3/shared/actions":     ["../core/packages/shared-copilot/actions.ts"],
-      "@biof3/shared/actionBus":   ["../core/packages/shared-copilot/actionBus.ts"],
-      "@biof3/shared/error":       ["../core/packages/shared-copilot/error.ts"],
-      "@biof3/shared/api-inject":  ["../core/packages/shared-copilot/api-inject.ts"],
-      "@biof3/shared/copilotMarkdown": ["../core/packages/shared-copilot/copilotMarkdown.tsx"],
-      "@biof3/shared/ActResultCard":    ["../core/packages/shared-copilot/ActResultCard.tsx"],
-      "@biof3/shared/ActionCard":       ["../core/packages/shared-copilot/ActionCard.tsx"]
+      "@petri/shared":            ["../core/packages/shared-copilot/index.ts"],
+      "@petri/shared/types":       ["../core/packages/shared-copilot/types.ts"],
+      "@petri/shared/context":     ["../core/packages/shared-copilot/context.ts"],
+      "@petri/shared/trace":       ["../core/packages/shared-copilot/trace.ts"],
+      "@petri/shared/helpers":     ["../core/packages/shared-copilot/helpers.ts"],
+      "@petri/shared/actions":     ["../core/packages/shared-copilot/actions.ts"],
+      "@petri/shared/actionBus":   ["../core/packages/shared-copilot/actionBus.ts"],
+      "@petri/shared/error":       ["../core/packages/shared-copilot/error.ts"],
+      "@petri/shared/api-inject":  ["../core/packages/shared-copilot/api-inject.ts"],
+      "@petri/shared/copilotMarkdown": ["../core/packages/shared-copilot/copilotMarkdown.tsx"],
+      "@petri/shared/ActResultCard":    ["../core/packages/shared-copilot/ActResultCard.tsx"],
+      "@petri/shared/ActionCard":       ["../core/packages/shared-copilot/ActionCard.tsx"]
     }
   },
   "include": ["src"]
@@ -120,11 +120,11 @@
 
 ### `frontend/src/lib/electron.d.ts` — preload typings
 
-- 319 lines, full global `Window.biof3Desktop` augmentation.
+- 319 lines, full global `Window.petriDesktop` augmentation.
 - Already declares the **`skills` sub-bridge** (lines 114–169) with `discover / execute / getExecution` typed against the same shape `useSkillStore.ts` consumes. **No new types are needed in `electron.d.ts` for PHASE 1**.
 - Already declares `computeSettings`, `aiSettings`, `plugins`, `contentPlugins`, `runtime`, `backend`, `py`, `plumber`, `files`, `diagnostic`, `telemetry`, `data`, `terminal`, `updater`, `harnessCapabilities`, `window`, `app` — Skills reuses the same well-typed path.
-- Window env augmentation includes `process.env.BIOF3_DESKTOP` / `NODE_ENV` (line 304-307).
-- `biof3.agentWorkbenchFlags` augmentation at line 309–315 — only consumer is `getExtraRenderers/set/onChange`.
+- Window env augmentation includes `process.env.PETRI_DESKTOP` / `NODE_ENV` (line 304-307).
+- `petri.agentWorkbenchFlags` augmentation at line 309–315 — only consumer is `getExtraRenderers/set/onChange`.
 
 ---
 
@@ -149,8 +149,8 @@ export default defineConfig({
 - `globals: false` — every test must `import { describe, it, expect, vi, beforeEach, … }` from `'vitest'` (confirmed in all 74 test files).
 - `environment: 'happy-dom'` — DOM is mocked; `window` and `document` exist; Node features (net, fs) do NOT.
 - `include: src/**/*.test.{ts,tsx}` — only this pattern is picked up. Co-located tests only.
-- `setupFiles: []` — no global setup. Each test sets its own `window.biof3Desktop` install/uninstall.
-- `@` alias is the only one defined for tests. (The `tsconfig.json` aliases for `@biof3/shared/*` are NOT mirrored in vitest config — tests can't import from the shared package directly. This is why `usePluginStore.test.ts` uses the bare `@/hooks/usePluginStore` import.)
+- `setupFiles: []` — no global setup. Each test sets its own `window.petriDesktop` install/uninstall.
+- `@` alias is the only one defined for tests. (The `tsconfig.json` aliases for `@petri/shared/*` are NOT mirrored in vitest config — tests can't import from the shared package directly. This is why `usePluginStore.test.ts` uses the bare `@/hooks/usePluginStore` import.)
 
 ### Existing test files in `frontend/src/pages/skills/`
 
@@ -175,28 +175,28 @@ export default defineConfig({
 
 | Path | Bridge used | Pattern |
 |---|---|---|
-| `frontend/src/lib/desktopBridge.test.ts` | n/a | Tests the accessor itself — installs/uninstalls `window.biof3Desktop` directly; does NOT use `vi.mock`. |
-| `frontend/src/hooks/usePluginStore.test.ts` | `plugins` | Direct `window.biof3Desktop` install via `installBridge()` helper. **This is the canonical pattern** PHASE 1 must mirror. |
+| `frontend/src/lib/desktopBridge.test.ts` | n/a | Tests the accessor itself — installs/uninstalls `window.petriDesktop` directly; does NOT use `vi.mock`. |
+| `frontend/src/hooks/usePluginStore.test.ts` | `plugins` | Direct `window.petriDesktop` install via `installBridge()` helper. **This is the canonical pattern** PHASE 1 must mirror. |
 | `frontend/src/hooks/useAiSettings.test.ts` | `aiSettings` | Same pattern. |
 | `frontend/src/hooks/useTerminalSession.test.ts` | `terminal` | Same pattern, exercises event callbacks. |
 | `frontend/src/hooks/useConversationJobs.test.ts` | mixed | Same pattern. |
 | `frontend/src/lib/copilotContextProvider.test.tsx` | mixed | Direct `window` stub. |
 
-**No `vi.mock('@/lib/desktopBridge')` exists anywhere in the codebase.** Search returned 0 matches. The convention is to install a fake `window.biof3Desktop` sub-handle and let `getBridge()` resolve through the real accessor — this exercises the type contract from `electron.d.ts` end-to-end. PHASE 1 should adopt the same pattern (do NOT introduce `vi.mock` — it would diverge from the rest of the codebase and break the type-guard test in `desktopBridge.test.ts`).
+**No `vi.mock('@/lib/desktopBridge')` exists anywhere in the codebase.** Search returned 0 matches. The convention is to install a fake `window.petriDesktop` sub-handle and let `getBridge()` resolve through the real accessor — this exercises the type contract from `electron.d.ts` end-to-end. PHASE 1 should adopt the same pattern (do NOT introduce `vi.mock` — it would diverge from the rest of the codebase and break the type-guard test in `desktopBridge.test.ts`).
 
 ### Canonical install-bridge helper (precedent for new Skill tests)
 
 ```ts
 function installBridge(overrides: Partial<BridgeHandles> = {}): BridgeHandles {
   // ...builds vi.fn() mocks...
-  (window as unknown as { biof3Desktop: unknown }).biof3Desktop = {
+  (window as unknown as { petriDesktop: unknown }).petriDesktop = {
     plugins: { listInstalled, listRemote, install, uninstall, checkUpdates },
     runtime,
   };
   return { /* handles for assertions */ };
 }
 function uninstallBridge() {
-  delete (window as unknown as { biof3Desktop?: unknown }).biof3Desktop;
+  delete (window as unknown as { petriDesktop?: unknown }).petriDesktop;
 }
 beforeEach(() => { __resetPluginStoreCacheForTests(); uninstallBridge(); });
 ```
@@ -259,15 +259,15 @@ None of these files exist yet — PHASE 1 starts with a green test surface for S
 "dev:electron": "electron . --dev",
 ```
 
-Direct Electron launch **without** the `dev-electron.js` wrapper. **Pre-condition**: `frontend/dist/` must already exist (i.e. `npm run build:spa` first). The Electron `main.js` will load `http://localhost:3000` only when `BIOF3_RENDERER_DEV_URL` is set; otherwise it loads the bundled `frontend/dist/index.html`.
+Direct Electron launch **without** the `dev-electron.js` wrapper. **Pre-condition**: `frontend/dist/` must already exist (i.e. `npm run build:spa` first). The Electron `main.js` will load `http://localhost:3000` only when `PETRI_RENDERER_DEV_URL` is set; otherwise it loads the bundled `frontend/dist/index.html`.
 
 ### Wrapper script (line 15) — `npm run dev` (recommended)
 
 `scripts/dev-electron.js` orchestrates:
-1. Polls `http://localhost:3000` — fails fast if already serving (`urlIsAvailable()` line 161-173, aborts with "Close the previous BioF3 dev process" at L202-207).
+1. Polls `http://localhost:3000` — fails fast if already serving (`urlIsAvailable()` line 161-173, aborts with "Close the previous Petri dev process" at L202-207).
 2. Spawns `npm --prefix frontend run dev` (Vite) in a child process.
 3. Waits for 3000 to be live (`waitForUrl()` line 175-196, default 30 s).
-4. On macOS: invokes `/usr/bin/open -n -a <Electron.app>` with env vars (`ELECTRON_IS_DEV=1`, `NODE_ENV=development`, `BIOF3_RENDERER_DEV_URL=http://localhost:3000`, `BIOF3_ELECTRON_USER_DATA_DIR=.biof3-dev-user-data`, `BIOF3_LOCAL_DATA_DIR=…`) — this keeps the dev session out of the user's production Electron user-data and writes `biof3-electron-main.log` / `*.error` to `$TMPDIR`.
+4. On macOS: invokes `/usr/bin/open -n -a <Electron.app>` with env vars (`ELECTRON_IS_DEV=1`, `NODE_ENV=development`, `PETRI_RENDERER_DEV_URL=http://localhost:3000`, `PETRI_ELECTRON_USER_DATA_DIR=.petri-dev-user-data`, `PETRI_LOCAL_DATA_DIR=…`) — this keeps the dev session out of the user's production Electron user-data and writes `petri-electron-main.log` / `*.error` to `$TMPDIR`.
 5. On non-darwin: spawns `npx electron . --dev` directly.
 
 ### Extra Electron CLI args (the UI-126 hook)
@@ -275,7 +275,7 @@ Direct Electron launch **without** the `dev-electron.js` wrapper. **Pre-conditio
 `scripts/dev-electron.js` lines 215-218 and 258:
 
 ```js
-const extraElectronArgs = (process.env.BIOF3_DEV_ELECTRON_ARGS || '')
+const extraElectronArgs = (process.env.PETRI_DEV_ELECTRON_ARGS || '')
   .split(' ').map((s) => s.trim()).filter(Boolean);
 // ...
 openArgs.push('--args', projectRoot, '--dev', ...extraElectronArgs);
@@ -284,7 +284,7 @@ openArgs.push('--args', projectRoot, '--dev', ...extraElectronArgs);
 So the documented invocation to expose the Chrome DevTools Protocol for Playwright is:
 
 ```bash
-BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev
+PETRI_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev
 ```
 
 This is what the work package (UI-126 evidence) refers to. The wrapper **passes through any extra flag**, including `--remote-debugging-port=9222` for CDP/Playwright. There is NO flag baked into the wrapper itself; the env var is the only knob.
@@ -300,11 +300,11 @@ This is what the work package (UI-126 evidence) refers to. The wrapper **passes 
 **Critical finding** — search of `src/main.js` for `workflow-engine|skills-sdk|skills:` returned **0 matches**. The Skills bridge has not yet been wired into Electron's main process:
 
 - `src/main.js` does NOT `require()` `core/shared-backend/workflow-engine.js` or `core/shared-backend/skills-sdk.js`.
-- `src/preload.js` (246 lines) does NOT expose a `skills` namespace on `window.biof3Desktop` (search returned 0 matches for `skills`).
+- `src/preload.js` (246 lines) does NOT expose a `skills` namespace on `window.petriDesktop` (search returned 0 matches for `skills`).
 
-**Consequence**: as of PHASE 0, even a perfectly running dev Electron will hand `useSkillStore.ts` `getBridge('skills') === null` because `window.biof3Desktop.skills` doesn't exist. The Skills page will render the existing **empty/bridge-unavailable** state (per the error handler at `useSkillStore.ts` L362-367). PHASE 1 must address this — either:
+**Consequence**: as of PHASE 0, even a perfectly running dev Electron will hand `useSkillStore.ts` `getBridge('skills') === null` because `window.petriDesktop.skills` doesn't exist. The Skills page will render the existing **empty/bridge-unavailable** state (per the error handler at `useSkillStore.ts` L362-367). PHASE 1 must address this — either:
 1. **Scope clarification**: UI-157 only changes frontend code (no preload/main changes), in which case PHASE 3 cannot demonstrate real Skill IPC traffic and must rely on **fixture-style bridge install + Playwright driving the dev URL** (Vite SPA without Electron).
-2. **Scope expansion**: PHASE 1 also wires `preload.js` + `main.js` Skills handlers, in which case a real Electron run is needed and `BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev` is the way in.
+2. **Scope expansion**: PHASE 1 also wires `preload.js` + `main.js` Skills handlers, in which case a real Electron run is needed and `PETRI_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev` is the way in.
 
 PHASE 1 plan file (`docs/block-2-ui-157-review-plan.md`) should clarify which path applies. Recommendation: **scope path 2 only if BLOCK-2 explicitly demands live IPC; otherwise run with mock-installed bridge**.
 
@@ -322,17 +322,17 @@ PHASE 1 plan file (`docs/block-2-ui-157-review-plan.md`) should clarify which pa
 
 1. **Start dev Electron with CDP exposed**:
    ```bash
-   BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev
+   PETRI_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev
    ```
-   This boots Vite on 3000 + Electron via `open -a` + the `BIOF3_ELECTRON_USER_DATA_DIR=.biof3-dev-user-data` scratch profile. Logs go to `$TMPDIR/biof3-electron-main.log` / `*.error`.
+   This boots Vite on 3000 + Electron via `open -a` + the `PETRI_ELECTRON_USER_DATA_DIR=.petri-dev-user-data` scratch profile. Logs go to `$TMPDIR/petri-electron-main.log` / `*.error`.
 
 2. **Wait for renderer-ready signal**:
    - `curl -s http://localhost:9222/json/version` returns Chrome DevTools version JSON (CDP live).
-   - `curl -s http://localhost:9222/json` lists targets; the BioF3 window has `webSocketDebuggerUrl` for Playwright.
+   - `curl -s http://localhost:9222/json` lists targets; the Petri window has `webSocketDebuggerUrl` for Playwright.
 
 3. **Attach Playwright MCP to the renderer**:
    - The Playwright MCP (`plugin-playwright-playwright`) supports `browser_navigate` to **either** the dev URL (`http://localhost:3000`) **or** a `chrome://`-equivalent CDP endpoint via `wsEndpoint`. Recommendation: navigate `http://localhost:3000/skills` (the Vite-served SPA) — same React tree, no Electron wrapper, full React-Testing-Library equivalent assertions possible.
-   - If renderer-only IPC verification is needed, use `browser_snapshot` / `browser_console_messages` after navigating directly to `http://localhost:3000` (Vite) — `getBridge('skills')` will be null unless `window.biof3Desktop.skills` is faked in dev. Workaround: monkey-patch via `browser_evaluate` with the install-bridge helper from §3 above, scoped to the page session.
+   - If renderer-only IPC verification is needed, use `browser_snapshot` / `browser_console_messages` after navigating directly to `http://localhost:3000` (Vite) — `getBridge('skills')` will be null unless `window.petriDesktop.skills` is faked in dev. Workaround: monkey-patch via `browser_evaluate` with the install-bridge helper from §3 above, scoped to the page session.
 
 4. **Capture evidence**:
    - **Screenshots**: `browser_take_screenshot` after each interaction (search, filter, click skill, click execute).
@@ -341,7 +341,7 @@ PHASE 1 plan file (`docs/block-2-ui-157-review-plan.md`) should clarify which pa
    - **Failure path**: navigate `http://localhost:3000/skills`, install a stub bridge that returns `{ ok: false, error: 'simulated failure' }` for `execute`, click an execute button → expect the "Retry" / error toast UI.
 
 5. **Trigger failure path**:
-   - Override `window.biof3Desktop.skills.execute` via `browser_evaluate` to resolve `{ ok: false, error: 'IPC timeout' }` and trigger the retry button path.
+   - Override `window.petriDesktop.skills.execute` via `browser_evaluate` to resolve `{ ok: false, error: 'IPC timeout' }` and trigger the retry button path.
    - Or click execute, then in DevTools disconnect the renderer from preload (e.g. via `ipcRenderer.send` interruption) — but this requires main-process restart, less clean.
 
 ### Option B — Vite-only dev server (mock bridge)
@@ -350,7 +350,7 @@ PHASE 1 plan file (`docs/block-2-ui-157-review-plan.md`) should clarify which pa
 2. **Navigate Playwright MCP** to `http://localhost:3000/skills`.
 3. **Inject mock bridge** via `browser_evaluate`:
    ```js
-   window.biof3Desktop = {
+   window.petriDesktop = {
      isDesktop: true,
      platform: 'darwin',
      arch: 'arm64',
@@ -374,7 +374,7 @@ PHASE 1 plan file (`docs/block-2-ui-157-review-plan.md`) should clarify which pa
 | # | Risk / Open Question | Severity | Notes |
 |---|---|---|---|
 | 1 | **`useSkillStore.test.*` does NOT exist.** PHASE 1 must author it (or test-only prep must). | **HIGH** | The test-only helper `__resetSkillStoreCacheForTests()` is already exported (line 580), so the precedent is in place — but no spec exists yet. |
-| 2 | **No `vi.mock('@/lib/desktopBridge')` precedent.** The codebase uniformly uses **direct `window.biof3Desktop` install** (see `usePluginStore.test.ts` line 38). New Skill tests MUST follow this pattern; introducing `vi.mock` would diverge from project convention and break the type-guard contract. | MEDIUM | If PHASE 1 author uses `vi.mock`, it will look like a unit test but will silently bypass `electron.d.ts` typing and the real `getBridge` branching logic. |
+| 2 | **No `vi.mock('@/lib/desktopBridge')` precedent.** The codebase uniformly uses **direct `window.petriDesktop` install** (see `usePluginStore.test.ts` line 38). New Skill tests MUST follow this pattern; introducing `vi.mock` would diverge from project convention and break the type-guard contract. | MEDIUM | If PHASE 1 author uses `vi.mock`, it will look like a unit test but will silently bypass `electron.d.ts` typing and the real `getBridge` branching logic. |
 | 3 | **`preload.js` does not expose `skills`.** Search returned 0 matches in `src/preload.js` for `skills`. `src/main.js` does not `require('./workflow-engine')`. So **any real IPC traffic is impossible without preload+main changes**. | **HIGH** | PHASE 3 must either (a) accept that live IPC isn't achievable and use Option B (mock bridge over Vite), or (b) BLOCK-2 scope explicitly widens to preload+main. |
 | 4 | **`core/shared-backend/workflow-engine.js` has no Node-side test.** (0 matches in `test/`.) Backend changes have zero coverage today. If PHASE 1 modifies workflow-engine, prefer adding `test/workflow-engine.test.mjs` in the same commit. | MEDIUM | Mirrors existing `test/*.test.mjs` pattern (Node `--test` runner, no external deps). |
 | 5 | **Race between `npm run dev` and renderer attach.** `scripts/dev-electron.js` line 175-196 polls for 30 s; if Vite takes >30 s (cold `node_modules`, first MDX compile), the launcher aborts. Playwright MCP attachment must wait for both `curl http://localhost:3000` and `curl http://localhost:9222/json/version` (CDP) to be live before issuing `browser_navigate`. | LOW | Mitigation: poll loop in the PHASE 3 driver before driving. |
@@ -388,7 +388,7 @@ PHASE 1 plan file (`docs/block-2-ui-157-review-plan.md`) should clarify which pa
 
 ## §9 Reference Commands (executed during PHASE 0)
 
-All commands executed at repo root `/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop`. Wall-clock times captured.
+All commands executed at repo root `/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop`. Wall-clock times captured.
 
 ```bash
 # §4 — Targeted gate verification
@@ -425,5 +425,5 @@ grep -i "workflow-engine|skills-sdk" src/main.js  # 0 matches
 ## PHASE 1 Readiness — Key Findings (3 bullets)
 
 - **All four governance gates are GREEN at PHASE 0** (`tsc --noEmit`, `ui:audit:check`, `docs:check`, `docs:reconcile`). PHASE 1's minimum CI surface is the same four commands — sub-15 s total and safe on every commit.
-- **No `useSkillStore.test.*` exists.** PHASE 1 must author it as the first deliverable. The precedent to mirror is `frontend/src/hooks/usePluginStore.test.ts` (195 lines, 9 tests, direct `window.biof3Desktop` install pattern — **no `vi.mock` anywhere in the codebase**). The test-only helper `__resetSkillStoreCacheForTests` is already exported from `useSkillStore.ts` line 580.
-- **`src/preload.js` does NOT expose a `skills` namespace**, and `src/main.js` does NOT require `core/shared-backend/workflow-engine.js` or `skills-sdk.js`. Real Skill IPC traffic is impossible until those wires are added. PHASE 3 evidence collection should default to **Vite-only + Playwright MCP + mocked `window.biof3Desktop.skills` bridge** (`http://localhost:3000/skills`) unless BLOCK-2 scope explicitly widens to preload/main; only then use `BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev` for live IPC.
+- **No `useSkillStore.test.*` exists.** PHASE 1 must author it as the first deliverable. The precedent to mirror is `frontend/src/hooks/usePluginStore.test.ts` (195 lines, 9 tests, direct `window.petriDesktop` install pattern — **no `vi.mock` anywhere in the codebase**). The test-only helper `__resetSkillStoreCacheForTests` is already exported from `useSkillStore.ts` line 580.
+- **`src/preload.js` does NOT expose a `skills` namespace**, and `src/main.js` does NOT require `core/shared-backend/workflow-engine.js` or `skills-sdk.js`. Real Skill IPC traffic is impossible until those wires are added. PHASE 3 evidence collection should default to **Vite-only + Playwright MCP + mocked `window.petriDesktop.skills` bridge** (`http://localhost:3000/skills`) unless BLOCK-2 scope explicitly widens to preload/main; only then use `PETRI_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev` for live IPC.

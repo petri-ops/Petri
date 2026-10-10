@@ -12,7 +12,7 @@
     "createdAt": "2026-09-05T05:26:29.099Z"
   },
   "dbSurvey": {
-    "database": ".biof3-dev-user-data/data/biof3.db (better-sqlite3 readonly)",
+    "database": ".petri-dev-user-data/data/petri.db (better-sqlite3 readonly)",
     "totalGraphs": 7,
     "nodeCountMin": 1,
     "nodeCountMax": 1,
@@ -75,19 +75,19 @@
     }
   ],
   "attemptFailureRootCause": {
-    "invocation": "两次 POST /api/ai/agent 均未携带 context.accessMode；inferExecutionPolicy 以 ctx.accessMode 为唯一决策源，缺省 'read'（core/biof3-server/helpers/agent-execution-policy.js:23-33），allowExecution=false 时 agent-runner.js:562-565 注入「本轮只读约束」system 段 → agent 正确遵守、拒绝 run_tool(op=run)。",
+    "invocation": "两次 POST /api/ai/agent 均未携带 context.accessMode；inferExecutionPolicy 以 ctx.accessMode 为唯一决策源，缺省 'read'（core/petri-server/helpers/agent-execution-policy.js:23-33），allowExecution=false 时 agent-runner.js:562-565 注入「本轮只读约束」system 段 → agent 正确遵守、拒绝 run_tool(op=run)。",
     "note": "这是本 run 调用方偏差（UI 全权聊天会随请求带 accessMode），不是栈缺陷；按任务书 2 次上限止步，未做第 3 次。"
   },
   "structuralBlockers": [
     "lineage 元数据（input.lineage）仅服务端 Result Studio 动作可写，模型可见的 run_tool 参数无法设置（core/shared-backend/artifact-manifest.js:37-40 注释 + collectExecutionInputs 实现）。",
     "受信跨 Job lineage 写入面全部汇聚到 go-kegg 下游：tool_result_selection_run（result-selection-tools.js:425 起，action 只允许 go_kegg）、tool_result_enrichment_from_revision（同文件 :308 起，固定 toolId go-kegg）、changeset/科学编辑 direct child（result-changeset-service.js:409 downstreamLineage + result-edit-tools projectDirectEnrichmentSubgraph）。",
-    "go-kegg（及 volcano-plot 等 14 个插件）处于 plugins.dormant/ 封存区：用户裁决（2026-09-15，gewu-pack-bio/plugins.dormant/README.md）保留 deseq2 为唯一活跃参考实现，激活需用户裁决 → 本 run 不得激活。",
-    "deseq2 插件无 resultStudio descriptor（gewu-pack-bio/plugins/deseq2/plugin.json resultStudio=null），无选择/富集交互面。",
+    "go-kegg（及 volcano-plot 等 14 个插件）处于 plugins.dormant/ 封存区：用户裁决（2026-09-15，petri-pack-bio/plugins.dormant/README.md）保留 deseq2 为唯一活跃参考实现，激活需用户裁决 → 本 run 不得激活。",
+    "deseq2 插件无 resultStudio descriptor（petri-pack-bio/plugins/deseq2/plugin.json resultStudio=null），无选择/富集交互面。",
     "普通工具运行不持久化任何工作流图：saveWorkflowGraph 仅在 result-selection-tools.js:225 与 result-edit-tools.js:69 被调用；纯 run 完成后无图落库 → 即便跑两次 deseq2 也不会出现 ≥2 节点图，lineage 端点将返回 lineage:null。"
   ],
   "uiEvidence": {
     "screenshot": "acceptance/block-138/lineage-canvas-single-node.png",
-    "observed": "CDP 驱动主窗口到 /project/p_mtlnsv0f_xpjb/result?job=tj_mtnxhti6_v9ik：结果壳正常加载（火山图 · 结果 · block52-p3-09031507），但该 job 产物文件不可用（旧 workspace 根 .biof3-dev-user-data 于 desktop/ 下缺失），ResultArtifactShell 处于「文件不可用」态 → LineageViewSwitch（条带/画布切换，BLOCK-138 P1）未挂载，画布无从渲染；与 LineageViewSwitch.tsx 注释的「诚实自隐/状态门控」一致。"
+    "observed": "CDP 驱动主窗口到 /project/p_mtlnsv0f_xpjb/result?job=tj_mtnxhti6_v9ik：结果壳正常加载（火山图 · 结果 · block52-p3-09031507），但该 job 产物文件不可用（旧 workspace 根 .petri-dev-user-data 于 desktop/ 下缺失），ResultArtifactShell 处于「文件不可用」态 → LineageViewSwitch（条带/画布切换，BLOCK-138 P1）未挂载，画布无从渲染；与 LineageViewSwitch.tsx 注释的「诚实自隐/状态门控」一致。"
   },
   "sideEffects": [
     "新建探测项目 p_muqe395w_j46s（block138-chain-live-111427，POST /api/data/projects）+ 会话 conv_b8aa259d-0ca（POST /api/ai/conversations）；按红线未删除，留作审计。",

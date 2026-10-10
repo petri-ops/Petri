@@ -49,7 +49,7 @@ async function pingOnce(projectId: string): Promise<void> {
   }
   setState(projectId, { status: 'connecting' });
   try {
-    const token = localStorage.getItem('gewu_token') ?? localStorage.getItem('biof3_token');
+    const token = localStorage.getItem('petri_token') ?? localStorage.getItem('petri_token');
     const controller = new AbortController();
     const abortTimer = setTimeout(() => controller.abort(), PING_TIMEOUT_MS);
     const resp = await fetch(`${getPlatformApiPrefix()}/workspaces/${encodeURIComponent(projectId)}/ssh-ping`, {

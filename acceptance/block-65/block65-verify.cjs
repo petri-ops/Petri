@@ -8,7 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const ROOT = 'D:/1.WorkDir/biof3-desktop';
+const ROOT = 'D:/1.WorkDir/petri-desktop';
 const OUT = path.join(ROOT, 'acceptance', 'block-65');
 
 async function cdpConnect(targetUrlMatch) {
@@ -137,7 +137,7 @@ async function sendChat(main, text) {
 
   // ── STEP 6: wait for terminal (poll meta via HTTP) ──
   const token = (() => { try { return JSON.parse(fs.readFileSync(path.join(DATA_PATH(), 'local-identity.json'), 'utf8')).token || ''; } catch { return ''; } })();
-  function DATA_PATH() { return path.join(ROOT, '.biof3-dev-user-data', 'data'); }
+  function DATA_PATH() { return path.join(ROOT, '.petri-dev-user-data', 'data'); }
   let meta = null;
   for (let i = 0; i < 60; i++) {
     await sleep(3000);

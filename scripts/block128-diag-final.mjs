@@ -34,7 +34,7 @@ async function rest(method, p, body, timeoutMs = 30_000) {
 
 function psSample() {
   try {
-    const out = execSync('ps -axo pid,ppid,command | grep -E "Rscript|biof3-server/server.js" | grep -v grep', { encoding: 'utf8' });
+    const out = execSync('ps -axo pid,ppid,command | grep -E "Rscript|petri-server/server.js" | grep -v grep', { encoding: 'utf8' });
     return out.trim().split('\n').map((l) => l.trim().slice(0, 130));
   } catch { return []; }
 }
@@ -43,7 +43,7 @@ async function main() {
   // 项目 + 200k 正确合成输入（node 单循环，无双逗号）
   const created = await rest('POST', '/api/data/projects', { name: `block128-diag-${Date.now().toString(36)}`, modality: 'bulk' });
   const projectId = (created.project || created).id;
-  const inputsDir = path.join(ROOT, '.biof3-dev-user-data', 'data', 'projects', projectId, 'inputs');
+  const inputsDir = path.join(ROOT, '.petri-dev-user-data', 'data', 'projects', projectId, 'inputs');
   fs.mkdirSync(inputsDir, { recursive: true });
   const GENES = 200000, SAMPLES = 12;
   const conditions = [...Array(6).fill('Control'), ...Array(6).fill('Treatment')];
@@ -77,7 +77,7 @@ async function main() {
   console.log('taskId=' + (sub.taskId || sub.task_id));
   const startedAt = Date.now();
 
-  const db = new Database(path.join(ROOT, '.biof3-dev-user-data', 'data', 'biof3.db'));
+  const db = new Database(path.join(ROOT, '.petri-dev-user-data', 'data', 'petri.db'));
   const getRow = db.prepare("SELECT id, status, process_pid, heartbeat_at FROM tool_jobs WHERE tool_id='deseq2' AND created_at >= ? ORDER BY created_at DESC LIMIT 1");
 
   const timeline = [];

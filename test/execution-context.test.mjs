@@ -16,20 +16,20 @@ test('maps host result paths to stable canonical paths', () => {
     toolId: 'deseq2',
     runtime: 'r',
     runtimeCommand: '/opt/R/bin/Rscript',
-    workDir: '/tmp/biof3/jobs/job-1',
-    outputDir: '/tmp/biof3/jobs/job-1/output',
-    resultDir: '/tmp/biof3/jobs/job-1/output',
-    localRoot: '/tmp/biof3',
-    canonicalRoot: '/work/biof3',
+    workDir: '/tmp/petri/jobs/job-1',
+    outputDir: '/tmp/petri/jobs/job-1/output',
+    resultDir: '/tmp/petri/jobs/job-1/output',
+    localRoot: '/tmp/petri',
+    canonicalRoot: '/work/petri',
   });
 
   assert.equal(context.executionContextVersion, EXECUTION_CONTEXT_VERSION);
   assert.equal(context.adapter.kind, 'local');
-  assert.equal(context.canonicalWorkDir, '/work/biof3/jobs/job-1');
-  assert.equal(context.executionWorkDir, '/tmp/biof3/jobs/job-1');
+  assert.equal(context.canonicalWorkDir, '/work/petri/jobs/job-1');
+  assert.equal(context.executionWorkDir, '/tmp/petri/jobs/job-1');
   assert.equal(
-    canonicalizePath('/tmp/biof3/jobs/job-1/output/a.csv'),
-    '/work/biof3/jobs/job-1/output/a.csv'
+    canonicalizePath('/tmp/petri/jobs/job-1/output/a.csv'),
+    '/work/petri/jobs/job-1/output/a.csv'
   );
 });
 
@@ -41,7 +41,7 @@ test('result files inherit stable host and canonical paths', () => {
     workDir: '/srv/jobs/job-2',
     resultDir: '/srv/jobs/job-2/output',
     localRoot: '/srv/jobs',
-    canonicalRoot: '/work/biof3/jobs',
+    canonicalRoot: '/work/petri/jobs',
   });
   const result = attachExecutionMetadata(
     { files: [{ name: 'markers.csv' }] },
@@ -55,5 +55,5 @@ test('result files inherit stable host and canonical paths', () => {
     result.files[0].path,
     path.join(path.resolve('/srv/jobs/job-2/output'), 'markers.csv').split(path.sep).join('/'),
   );
-  assert.equal(result.files[0].canonicalPath, '/work/biof3/jobs/job-2/output/markers.csv');
+  assert.equal(result.files[0].canonicalPath, '/work/petri/jobs/job-2/output/markers.csv');
 });

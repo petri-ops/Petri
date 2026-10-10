@@ -2,7 +2,7 @@
   "ui": "UI-272",
   "title": "模型思考过程全链路（reasoning_content 采集 → SSE 透传 → meta 持久化 → 执行记录内联展示）",
   "verifiedAt": "2026-09-02",
-  "environment": "dev Electron (CDP 9222) + biof3-server :3001（新代码重启后验证）",
+  "environment": "dev Electron (CDP 9222) + petri-server :3001（新代码重启后验证）",
   "task": "真实 DeepSeek agent 任务：三步工具调用（workspace_exec ls → workspace_write u272-probe.txt → workspace_exec cat）",
   "model": "deepseek-v4-flash-vision-exp",
   "checks": [

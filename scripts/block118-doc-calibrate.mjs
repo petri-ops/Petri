@@ -18,15 +18,15 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const decisionApi = require('../core/biof3-server/helpers/decision-api.js');
+const decisionApi = require('../core/petri-server/helpers/decision-api.js');
 const { DOC_TARGETS, buildDocSuggestDecisionRequest } = require('../scripts/block118-doc-suggest.mjs');
 const { mapWithConcurrency, round4, sha256File } = await import('./lib/calibration-common.mjs');
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
 const CORPUS_FILE = path.join(root, 'acceptance', 'block-118', 'corpus-doc-suggest.json');
-const DEV_CONFIG = path.join(root, '.biof3-dev-user-data', 'data', 'decision-config.json');
-const BACKUP_ENV = path.join(root, '.biof3-dev-user-data', 'jev.env.bak-by-user-request');
+const DEV_CONFIG = path.join(root, '.petri-dev-user-data', 'data', 'decision-config.json');
+const BACKUP_ENV = path.join(root, '.petri-dev-user-data', 'jev.env.bak-by-user-request');
 
 const THETA_MIN = 0.05, THETA_MAX = 0.95, THETA_STEP = 0.05;
 const PRECISION_GATE = 0.80, COVERAGE_FLOOR = 0.30;
@@ -166,7 +166,7 @@ async function main() {
     version: '1.0.0',
     capturedAt: new Date().toISOString(),
     sourceCommit: require('node:child_process').execSync('git rev-parse HEAD', { cwd: root }).toString().trim(),
-    wrapper: 'core/biof3-server/helpers/decision-api.js',
+    wrapper: 'core/petri-server/helpers/decision-api.js',
     decisionPoint: 'doc-suggest（dev-time，BLOCK-118 P1）',
     supply,
     result,

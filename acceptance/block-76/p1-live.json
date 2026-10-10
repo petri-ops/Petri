@@ -5,7 +5,7 @@
     {
       "name": "P1-0 dell node ready (Rscript + project dir)",
       "pass": true,
-      "detail": "/root/gewu-block76-demo"
+      "detail": "/root/petri-block76-demo"
     },
     {
       "name": "P1-1 ssh project created (dell)",

@@ -13,12 +13,12 @@
 ## 2. 方案（单 PHASE，UI-216）
 
 - 新增 `AgentChangesCard`（copilot/，挂 SimpleChat 输入区上方）：
-  订阅 `biof3:agent-task-done` + 挂载时拉取 `git:working-tree-status` +
+  订阅 `petri:agent-task-done` + 挂载时拉取 `git:working-tree-status` +
   `git:diff-for-review`，`computeFileDiffStats` 算每文件 +N −M；git 为唯一
   事实源（提交/还原后重查自动消失/更新）。非 desktop（bridge 缺失）整卡隐藏。
 - 卡片结构：头行（折叠/展开 + 「N 个文件」+ 总 ± + 关闭 X）+ 明细行
   （状态字母徽标 A/M/D/? + 路径 + 每文件 ±）+「打开审阅查看全部改动」尾行。
-- 点击跳转：新增事件 `biof3:review-open-file { filePath }`——
+- 点击跳转：新增事件 `petri:review-open-file { filePath }`——
   ProjectWorkspace 监听 → `openRightPanel('review')`；
   useWorkingTreeReview 监听 → `setSelectedFilePath(filePath)` + refresh。
   「查看全部」派发空 filePath（仅开 tab，不选中）。

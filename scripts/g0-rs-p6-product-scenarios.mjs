@@ -42,7 +42,7 @@ const WORKER_TIMEOUT_MS = 5 * 60 * 1000;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/;
 
 const Database = require(require.resolve('better-sqlite3', {
-  paths: [path.join(ROOT, 'core', 'biof3-server'), ROOT],
+  paths: [path.join(ROOT, 'core', 'petri-server'), ROOT],
 }));
 const {
   ModelGateway,
@@ -86,16 +86,16 @@ export const P6_PRODUCT_SCENARIO_SOURCE_FILES = Object.freeze({
   providerStreamAggregate: 'core/shared-backend/llm-providers/stream-aggregate.js',
   aiUsageHelper: 'core/shared-backend/ai-usage-helper.js',
   sharedLogger: 'core/shared-backend/logger.js',
-  rServerLogger: 'core/biof3-server/logger.js',
-  resultEditTools: 'core/biof3-server/agent-tools/result-edit-tools.js',
-  resultContextEditTools: 'core/biof3-server/agent-tools/result-context-edit-tools.js',
+  rServerLogger: 'core/petri-server/logger.js',
+  resultEditTools: 'core/petri-server/agent-tools/result-edit-tools.js',
+  resultContextEditTools: 'core/petri-server/agent-tools/result-context-edit-tools.js',
   changeSetService: 'core/shared-backend/result-changeset-service.js',
   compareService: 'core/shared-backend/result-compare-service.js',
   resultStudioContracts: 'core/shared-backend/result-studio-contracts.js',
   resultStudioSchema: 'core/shared-backend/result-studio-schema.js',
   scientificTaskSpec: 'core/shared-backend/scientific-task-spec.js',
   lifecycle: 'core/shared-backend/result-studio-lifecycle.js',
-  routes: 'core/biof3-server/routes/result-studio.js',
+  routes: 'core/petri-server/routes/result-studio.js',
 });
 
 function invariant(condition, code, detail = null) {
@@ -288,17 +288,17 @@ function workerSummary(result, planned) {
 async function runScenarioWorkerMain() {
   const payloadIndex = process.argv.indexOf('--scenario-worker') + 1;
   const spec = JSON.parse(Buffer.from(process.argv[payloadIndex], 'base64url').toString('utf8'));
-  const db = require(path.join(ROOT, 'core/biof3-server/db.js'));
-  const mcpRegistry = require(path.join(ROOT, 'core/biof3-server/mcp/registry.js'));
+  const db = require(path.join(ROOT, 'core/petri-server/db.js'));
+  const mcpRegistry = require(path.join(ROOT, 'core/petri-server/mcp/registry.js'));
   const {
     createResultChangeSetTools,
-  } = require(path.join(ROOT, 'core/biof3-server/agent-tools/result-edit-tools.js'));
+  } = require(path.join(ROOT, 'core/petri-server/agent-tools/result-edit-tools.js'));
   const {
     createResultChangeSet,
   } = require(path.join(ROOT, 'core/shared-backend/result-changeset-service.js'));
   const {
     createResultContextEditTools,
-  } = require(path.join(ROOT, 'core/biof3-server/agent-tools/result-context-edit-tools.js'));
+  } = require(path.join(ROOT, 'core/petri-server/agent-tools/result-context-edit-tools.js'));
 
   const project = db.getProject(spec.projectId);
   invariant(project?.id === spec.projectId, 'p6_product_worker_project_missing');
@@ -542,11 +542,11 @@ function checkpointRowHashMatches(row) {
 
 function currentRefs(workspaceRoot) {
   const result = spawnSync('git', [
-    `--git-dir=${path.join(workspaceRoot, '.biof3/git')}`,
+    `--git-dir=${path.join(workspaceRoot, '.petri/git')}`,
     `--work-tree=${workspaceRoot}`,
     'for-each-ref',
     '--format=%(refname) %(objectname)',
-    'refs/heads/biof3/current/',
+    'refs/heads/petri/current/',
   ], { encoding: 'utf8', maxBuffer: 4 * 1024 * 1024 });
   invariant(result.status === 0, 'p6_product_current_ref_read_failed');
   return String(result.stdout || '').trim().split('\n').filter(Boolean).sort();
@@ -667,7 +667,7 @@ async function readColdTruth(baseUrl, dbPath, workspaceRoot, projectId, conversa
 function runManagedGitGc(workspaceRoot) {
   const startedAt = Date.now();
   const result = spawnSync('git', [
-    `--git-dir=${path.join(workspaceRoot, '.biof3/git')}`,
+    `--git-dir=${path.join(workspaceRoot, '.petri/git')}`,
     `--work-tree=${workspaceRoot}`,
     'gc',
     '--prune=now',
@@ -704,25 +704,25 @@ export async function captureP6LiveProductScenarios({ keep = false, verbose = fa
     const baseline = baselines.volcano;
     const projectId = runtime.project.id;
     const conversationId = runtime.conversation.id;
-    const sourceParametersBefore = readJobParameterDigest(runtime.env.BIOF3_DB_PATH, baseline.jobId);
+    const sourceParametersBefore = readJobParameterDigest(runtime.env.PETRI_DB_PATH, baseline.jobId);
 
     // The memory branch uses the descriptor's largest valid raster parameters.
     // The service, rather than this runner, converts those trusted dimensions
     // plus Job/Artifact Truth into the resource estimate.
-    const memoryBlockedCountsBefore = readProjectCounts(runtime.env.BIOF3_DB_PATH, projectId);
+    const memoryBlockedCountsBefore = readProjectCounts(runtime.env.PETRI_DB_PATH, projectId);
     const memoryBlockedWorker = startScenarioWorker(runtime, budgetSpec(runtime, baseline, {
       color_up: '#d55e00', color_down: '#56b4e9', point_size: 3,
       plot_width: 20, plot_height: 20, export_dpi: 1200,
     }, null, 'memory-blocked'));
     handles.push(memoryBlockedWorker);
     const memoryBlockedResult = await memoryBlockedWorker.promise;
-    const memoryBlockedCountsAfter = readProjectCounts(runtime.env.BIOF3_DB_PATH, projectId);
+    const memoryBlockedCountsAfter = readProjectCounts(runtime.env.PETRI_DB_PATH, projectId);
 
     // Filling the host disk would be destructive and nondeterministic. This is
     // a controlled filesystem-stat fault at the same service dependency that
     // obtains fs.statfsSync in production; all input/output/raster estimates
     // still come from the real baseline Job and admitted descriptor.
-    const diskBlockedCountsBefore = readProjectCounts(runtime.env.BIOF3_DB_PATH, projectId);
+    const diskBlockedCountsBefore = readProjectCounts(runtime.env.PETRI_DB_PATH, projectId);
     const diskBlockedWorker = startScenarioWorker(runtime, budgetSpec(runtime, baseline, {
       color_up: '#0072b2', color_down: '#e69f00', point_size: 2.2,
     }, {
@@ -730,7 +730,7 @@ export async function captureP6LiveProductScenarios({ keep = false, verbose = fa
     }, 'disk-blocked'));
     handles.push(diskBlockedWorker);
     const diskBlockedResult = await diskBlockedWorker.promise;
-    const diskBlockedCountsAfter = readProjectCounts(runtime.env.BIOF3_DB_PATH, projectId);
+    const diskBlockedCountsAfter = readProjectCounts(runtime.env.PETRI_DB_PATH, projectId);
 
     const barrierRoot = path.join(runtime.root, 'p6-product-barriers');
     mkdirSync(barrierRoot, { recursive: true });
@@ -754,16 +754,16 @@ export async function captureP6LiveProductScenarios({ keep = false, verbose = fa
     }, secondBarrier, 'second'));
     handles.push(secondHolder);
     const secondRunningId = await waitForBarrier(secondHolder, secondBarrier.readyPath);
-    const saturatedCounts = readProjectCounts(runtime.env.BIOF3_DB_PATH, projectId);
+    const saturatedCounts = readProjectCounts(runtime.env.PETRI_DB_PATH, projectId);
     invariant(saturatedCounts.runningChangeSets >= 2, 'p6_product_active_preview_saturation_missing', saturatedCounts);
 
-    const queuedCountsBefore = readProjectCounts(runtime.env.BIOF3_DB_PATH, projectId);
+    const queuedCountsBefore = readProjectCounts(runtime.env.PETRI_DB_PATH, projectId);
     const queuedWorker = startScenarioWorker(runtime, budgetSpec(runtime, baseline, {
       color_up: '#e69f00', color_down: '#0072b2', point_size: 2.8,
     }, null, 'queued'));
     handles.push(queuedWorker);
     const queuedResult = await queuedWorker.promise;
-    const queuedCountsAfter = readProjectCounts(runtime.env.BIOF3_DB_PATH, projectId);
+    const queuedCountsAfter = readProjectCounts(runtime.env.PETRI_DB_PATH, projectId);
 
     releaseBarrier(firstBarrier.releasePath);
     releaseBarrier(secondBarrier.releasePath);
@@ -779,7 +779,7 @@ export async function captureP6LiveProductScenarios({ keep = false, verbose = fa
       && secondCandidate.changeSet.changeSetId === secondRunningId,
     'p6_product_barrier_candidate_drift');
 
-    const sourceParametersAfter = readJobParameterDigest(runtime.env.BIOF3_DB_PATH, baseline.jobId);
+    const sourceParametersAfter = readJobParameterDigest(runtime.env.PETRI_DB_PATH, baseline.jobId);
     const adoptedSecond = await postJsonResponse(
       runtime.baseUrl,
       `/api/result-studio/changesets/${encodeURIComponent(secondCandidate.changeSet.changeSetId)}/adopt`,
@@ -788,7 +788,7 @@ export async function captureP6LiveProductScenarios({ keep = false, verbose = fa
     invariant(adoptedSecond.ok && adoptedSecond.data?.changeSet?.status === 'adopted',
       'p6_product_second_candidate_adoption_failed', adoptedSecond.data);
     const beforeStaleDigest = adoptionMutationDigest(
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       runtime.project.workspace_path,
       projectId,
     );
@@ -798,11 +798,11 @@ export async function captureP6LiveProductScenarios({ keep = false, verbose = fa
       {},
     );
     const afterStaleDigest = adoptionMutationDigest(
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       runtime.project.workspace_path,
       projectId,
     );
-    const candidateState = readCandidateState(runtime.env.BIOF3_DB_PATH, projectId, [
+    const candidateState = readCandidateState(runtime.env.PETRI_DB_PATH, projectId, [
       firstCandidate.changeSet.changeSetId,
       secondCandidate.changeSet.changeSetId,
     ]);
@@ -813,7 +813,7 @@ export async function captureP6LiveProductScenarios({ keep = false, verbose = fa
       .map((revision) => revision.artifact_family_id);
     const truthBeforeGc = await readColdTruth(
       runtime.baseUrl,
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       runtime.project.workspace_path,
       projectId,
       conversationId,
@@ -847,7 +847,7 @@ export async function captureP6LiveProductScenarios({ keep = false, verbose = fa
     invariant(coldServer.baseUrl === retained.baseUrl, 'p6_product_cold_boot_url_drift');
     const truthAfterGc = await readColdTruth(
       coldServer.baseUrl,
-      retained.env.BIOF3_DB_PATH,
+      retained.env.PETRI_DB_PATH,
       retained.projectWorkspace,
       projectId,
       conversationId,

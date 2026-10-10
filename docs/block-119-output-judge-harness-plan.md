@@ -28,7 +28,7 @@ status: completed
 - **稳定性是测出来的不是判出来的**：k 次重放 + 一致率统计（BLOCK-110/111 A/B 方法论固化），非单次判断。
 - 无 reference 锚定的「泛泛好坏」判词**只观测不门控**（fluency bias）。
 - 评判门 fail-open：Jev 失败/低置信=放行+记账，绝不比现状更差；RETRY 上限 1 次，ESCALATE 上限 1 次。
-- **隐私红线**：校准语料与证据只存指针（conv/record 索引）+ 哈希 + 分数；transcript 原文不离开 gitignored `.biof3-dev-user-data/`（区别于 BLOCK-110 公开语料先例——本点语料源是真实会话记录）。
+- **隐私红线**：校准语料与证据只存指针（conv/record 索引）+ 哈希 + 分数；transcript 原文不离开 gitignored `.petri-dev-user-data/`（区别于 BLOCK-110 公开语料先例——本点语料源是真实会话记录）。
 
 ## 2. 架构：三态推进门
 
@@ -47,8 +47,8 @@ LLM 输出（限定提示词 or 多轮会话结果）
 | 阶段 | 内容 | 落点 |
 | --- | --- | --- |
 | P0 | 内核 + 校准 | `scripts/lib/harness/judge-core.mjs`（judgeOutput/buildJudgeRequest/parseVerdict 三态）+ `scripts/lib/harness/stability-core.mjs`（probeStability：k 次重放一致率/方差，界=2/3 多数）+ `scripts/block119-build-judge-corpus.mjs`（llm-transcripts 结果信号挖掘：下一条用户消息含纠错/不满词=弱负例、会话终止或新话题=弱正例、跨会话 mismatch=硬负例；语料只存指针）+ `scripts/block119-judge-calibrate.mjs`（fit 维度 θ 扫描，判据沿 block115：precision≥0.80/coverage≥0.50）+ 注册表 `output-judge` 接点（仅校准过的维度落门控值，未校准维度缺键=observe-only）+ 契约 `test/block119-output-judge.test.mjs` |
-| P1 | 开发侧接线 | `npm run output:judge`（block119 CLI：--transcript/--output+--request/--reference/--goals，输出三态判词+逐维度分；probeStability --probe k）+ gewu-dev-infra 指引（多轮会话关键结论/收口声明前跑评判门；限定提示词脚本接稳定性探针）+ impact-map 登记 + dogfood 证据 |
-| P2 | 产品侧单点试点 | 子智能体汇报门（UI-433 汇报收敛面）：汇报文本在回传父级前过 judgeOutput（goals=子任务需求要点），fail-open + RETRY×1（带判词）+ ESCALATE（原样透传，仅标注）；默认关+显式开（BIOF3_JEV_REPORT_GUARD=1，D-4 先例）；decision_log 记账观测。试点证据（采纳率/误拦率/延迟增量）合格才谈横向复制，不合格停在 P1 |
+| P1 | 开发侧接线 | `npm run output:judge`（block119 CLI：--transcript/--output+--request/--reference/--goals，输出三态判词+逐维度分；probeStability --probe k）+ petri-dev-infra 指引（多轮会话关键结论/收口声明前跑评判门；限定提示词脚本接稳定性探针）+ impact-map 登记 + dogfood 证据 |
+| P2 | 产品侧单点试点 | 子智能体汇报门（UI-433 汇报收敛面）：汇报文本在回传父级前过 judgeOutput（goals=子任务需求要点），fail-open + RETRY×1（带判词）+ ESCALATE（原样透传，仅标注）；默认关+显式开（PETRI_JEV_REPORT_GUARD=1，D-4 先例）；decision_log 记账观测。试点证据（采纳率/误拦率/延迟增量）合格才谈横向复制，不合格停在 P1 |
 
 ## 4. 非范围（exclusions）
 
@@ -73,7 +73,7 @@ LLM 输出（限定提示词 or 多轮会话结果）
 
 ## P2 试点实录（2026-09-23 深夜，用户裁决「开起来…最好有个对比」）
 
-- 开启：BIOF3_JEV_REPORT_GUARD=1 + dev 栈重启（env 全链继承实证）+ 供给切 Jev 云（快照 decision-config.json.pre-p119-pilot 可还原）。
+- 开启：PETRI_JEV_REPORT_GUARD=1 + dev 栈重启（env 全链继承实证）+ 供给切 Jev 云（快照 decision-config.json.pre-p119-pilot 可还原）。
 - 真实轮：spawn_agent 子任务（B109-spawn 项目，accessMode=full）→ report-guard 台账落行 fit=3.42 ≥ θ=3 → PASS 原样放行（1501ms/812 tokens/零降级）——好汇报零误拦实证。
 - 对比：同一真实汇报 fit=3.61 PASS vs 跑偏版（背景科普+答非所问+编造数字）fit=0.55 ESCALATE 带判词（judge-good/drifted.json）。
 - 抓真三条：read_only 拒 spawn（须 accessMode:full；被拒轮父级幻觉转告=门作用域外如实登记）/ fit 轮间波动放大（同一文本 5 判 2.91~3.61 跨 θ 两侧，probe 0.33——RETRY 非硬拦语义正确性实证，误重写率入试点指标）/ npm run --probe 后 -o 丢失（direct node 规避）。

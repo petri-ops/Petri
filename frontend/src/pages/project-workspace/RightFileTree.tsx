@@ -7,7 +7,7 @@ import { Icon } from '@/components/icons/Icon';
 import { SshStatusDot } from '@/components/workspace-panels/SshStatusDot';
 import type { Project } from '@/lib/project-types';
 import { getApiPrefix } from '@/lib/authClient';
-import { gewuEvents, subscribeGewuEvent, dispatchGewuEvent } from '@/lib/events';
+import { petriEvents, subscribePetriEvent, dispatchPetriEvent } from '@/lib/events';
 import { getBridge } from '@/lib/desktopBridge';
 import styles from '../project-workspace.module.css';
 import type { ActiveWorkspaceFile, FileEntry } from './types';
@@ -63,7 +63,7 @@ export function RightFileTree({
   const [treeWidth, setTreeWidth] = useState(220);
   // BLOCK-73 / UI-322 — 「显示隐藏文件」开关（方案 A）：默认关维持现状体感；偏好持久化。
   const [showHidden, setShowHidden] = useState<boolean>(() => {
-    try { return window.localStorage.getItem('gewu.fileTree.showHidden') === '1'; } catch { return false; }
+    try { return window.localStorage.getItem('petri.fileTree.showHidden') === '1'; } catch { return false; }
   });
 
   const [refreshVersion, setRefreshVersion] = useState(0);
@@ -266,7 +266,7 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
         if (!document.hidden) void refreshFiles();
       }, 2000);
     }
-    const unsubscribe = subscribeGewuEvent(gewuEvents.projectWorkspaceChanged, (detail) => {
+    const unsubscribe = subscribePetriEvent(petriEvents.projectWorkspaceChanged, (detail) => {
       if (detail.projectId === project.id) {
         void refreshFiles(true);
       }
@@ -292,7 +292,7 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
 
   // ── BLOCK-89 / UI-378 文件操作（本地/ssh 双后端同构，前端零感知 workspaceKind）──
   const notifyTreeChanged = useCallback(() => {
-    dispatchGewuEvent(gewuEvents.projectWorkspaceChanged, { projectId: project.id, source: 'manual' });
+    dispatchPetriEvent(petriEvents.projectWorkspaceChanged, { projectId: project.id, source: 'manual' });
   }, [project.id]);
 
   const closeOverlays = useCallback(() => {
@@ -433,7 +433,7 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
   // ssh 项目：源在桌面机、工作区在远端 → renderer 64KB 分片读 + fs/upload 串行追加；
   // 目录经 webkitGetAsEntry 递归走树逐个 mkdir+upload。
   const pathForOf = useCallback((file: File): string | null => {
-    const pathFor = window.biof3Desktop?.files?.pathForFile;
+    const pathFor = window.petriDesktop?.files?.pathForFile;
     if (typeof pathFor === 'function') {
       try { const p = pathFor(file); if (p) return p; } catch { /* fall through */ }
     }
@@ -510,7 +510,7 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
         const anyItem = item as DataTransferItem & { webkitGetAsEntry?: () => FileSystemEntry | null };
         return typeof anyItem.webkitGetAsEntry === 'function' ? anyItem.webkitGetAsEntry() : null;
       });
-      const seamPath = event.dataTransfer?.getData('application/x-gewu-source-path') || null;
+      const seamPath = event.dataTransfer?.getData('application/x-petri-source-path') || null;
       const paired = droppedFiles.map((file, index) => ({
         file,
         entry: droppedEntries[index] ?? null,
@@ -779,7 +779,7 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
           onClick={() => {
             const next = !showHidden;
             setShowHidden(next);
-            try { window.localStorage.setItem('gewu.fileTree.showHidden', next ? '1' : '0'); } catch { /* ignore */ }
+            try { window.localStorage.setItem('petri.fileTree.showHidden', next ? '1' : '0'); } catch { /* ignore */ }
           }}
           aria-pressed={showHidden}
           data-testid="file-tree-show-hidden"

@@ -181,7 +181,7 @@
       "group": "feat",
       "subject": "feat(UI-437 v5.6 后端侧): recorder 快照补参数摘要与 resultData（抓真：快照对账丢「返回」块根因）+ 真实事件链契约测试",
       "files": [
-        "core/biof3-server/agent-tools/tool-events.js",
+        "core/petri-server/agent-tools/tool-events.js",
         "test/block34-tool-activities-persist.test.mjs"
       ],
       "gold": {
@@ -233,7 +233,7 @@
       "group": "feat",
       "subject": "feat(UI-437 加映 v5.5): 后端 tool_result 对象结果 digest（top-3 键取代 ok，样板剔除）+ 前端行内「参数摘要 → 结果摘要」组合——实机证据 acceptance/ui-437/v55-digest-evidence.json",
       "files": [
-        "core/biof3-server/agent-tools/tool-events.js",
+        "core/petri-server/agent-tools/tool-events.js",
         "frontend/src/components/copilot/ToolActivityList.test.tsx",
         "frontend/src/components/copilot/ToolActivityList.tsx",
         "test/block34-tool-activities-persist.test.mjs"
@@ -281,9 +281,9 @@
     {
       "id": "3bc09859f9",
       "group": "docs",
-      "subject": "docs(gewu-css-theme): 铁律补第 6 条——全局元素级规则的溅射（code 灰底漏进时间线行事故制度化：组件内用语义元素须显式中性化或换中性元素；global 元素规则变更须评估溅射面）",
+      "subject": "docs(petri-css-theme): 铁律补第 6 条——全局元素级规则的溅射（code 灰底漏进时间线行事故制度化：组件内用语义元素须显式中性化或换中性元素；global 元素规则变更须评估溅射面）",
       "files": [
-        ".agents/skills/gewu-css-theme/SKILL.md"
+        ".agents/skills/petri-css-theme/SKILL.md"
       ],
       "gold": {
         "roadmap": 0,
@@ -345,7 +345,7 @@
       "group": "feat",
       "subject": "feat(UI-438): 子智能体呈现收敛到时间线行内——下线「阶段汇总」组卡（bot 图标行随发生位置折叠/展开，点行看需求/状态，详情跳右栏面板）；block109 flow A4 同步修订",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block109-agent-panel.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block109-agent-panel.cjs",
         "frontend/src/components/copilot/SimpleChat.tsx",
         "frontend/src/components/copilot/SimpleChat/hooks/useTerminalSubAgentResults.ts",
         "frontend/src/components/copilot/SubAgentResultCard.module.css",
@@ -371,8 +371,8 @@
       "group": "feat",
       "subject": "feat(UI-437 加映 v4): 运行级折叠——整段任务收成一行运行摘要（✓ N次·X轮·耗时·需注意），点开才是每轮思考+执行细节；思考行与工具行同款骨架（brain 图标）；block107/108 flow 增展开步骤",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block107-timeline-live.cjs",
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block108-qoder-stream.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block107-timeline-live.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block108-qoder-stream.cjs",
         "frontend/src/components/copilot/ConversationTimeline.test.tsx",
         "frontend/src/components/copilot/ConversationTimeline.tsx",
         "frontend/src/components/copilot/ToolActivityList.tsx",
@@ -409,8 +409,8 @@
       "group": "feat",
       "subject": "feat(UI-437 加映 v2): 时间线纯流水——完成簇去「执行工具 N 次」簇头摘要（总结味下线），事件行即时间线；思考行去预览/去轮次号；block107/108 flow 契约同步修订",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block107-timeline-live.cjs",
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block108-qoder-stream.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block107-timeline-live.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block108-qoder-stream.cjs",
         "frontend/src/components/copilot/ConversationTimeline.test.tsx",
         "frontend/src/components/copilot/ToolActivityList.test.tsx",
         "frontend/src/components/copilot/ToolActivityList.tsx",
@@ -483,7 +483,7 @@
       "group": "feat",
       "subject": "feat(block-117): 本地 Laya 供给接入验证——线兼容契约 2/2 + 三接点校准裁决 0/3 可采纳（维持 Jev，注册表零改动）+ 实机 flow 7/7（laya 落账 56ms）→ closeout 十门全绿",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block117-layasupply-live.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block117-layasupply-live.cjs",
         "scripts/block111-p0-calibrate.mjs",
         "scripts/block112-p0-calibrate.mjs",
         "scripts/block113-p0-calibrate.mjs",
@@ -519,10 +519,10 @@
       "group": "feat",
       "subject": "feat(block-116): P5 决策模型接口配置——provider 端点/Key/模型 UI+持久化（file>env 优先级、GET 打码、env→文件一次性迁移）+ 本地 Laya 同类供给支持",
       "files": [
-        "core/biof3-server/helpers/decision-api.js",
-        "core/biof3-server/helpers/decision-config.js",
-        "core/biof3-server/helpers/tool-router.js",
-        "core/biof3-server/routes/ai-agent/decisions.js",
+        "core/petri-server/helpers/decision-api.js",
+        "core/petri-server/helpers/decision-config.js",
+        "core/petri-server/helpers/tool-router.js",
+        "core/petri-server/routes/ai-agent/decisions.js",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/DecisionConfigPanel.tsx",
         "scripts/restart-dev-stack.sh",
         "test/block116-decision-platform.test.mjs"
@@ -602,11 +602,11 @@
       "group": "feat",
       "subject": "feat(block-116): P4 决策配置中心+设置页「决策原语」节——config 端点/持久化/五接点卡片（截图证据 flow 6/6）→ UI-435 verified",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block116-config-live.cjs",
-        "core/biof3-server/helpers/decision-config.js",
-        "core/biof3-server/helpers/intent-router.js",
-        "core/biof3-server/helpers/interpret.js",
-        "core/biof3-server/routes/ai-agent/decisions.js",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block116-config-live.cjs",
+        "core/petri-server/helpers/decision-config.js",
+        "core/petri-server/helpers/intent-router.js",
+        "core/petri-server/helpers/interpret.js",
+        "core/petri-server/routes/ai-agent/decisions.js",
         "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/DecisionConfigPanel.test.tsx",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/DecisionConfigPanel.tsx",
@@ -662,9 +662,9 @@
       "group": "feat",
       "subject": "feat(block-116): P3 决策台账逐条回放——recent 端点+面板回放列表（契约 9/9）+ flow block116-replay-live 4/4 实机过目（截图证据）→ UI-434 verified",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block116-replay-live.cjs",
-        "core/biof3-server/helpers/decision-log.js",
-        "core/biof3-server/routes/ai-agent/decisions.js",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block116-replay-live.cjs",
+        "core/petri-server/helpers/decision-log.js",
+        "core/petri-server/routes/ai-agent/decisions.js",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/DecisionUsagePanel.tsx",
         "test/block116-decision-platform.test.mjs"
       ],
@@ -681,7 +681,7 @@
       "group": "chore",
       "subject": "chore(block-116): lint 清理（面板 json 断言/calibrate 未用 crypto）",
       "files": [
-        "core/biof3-server/routes/ai-agent/decisions.js",
+        "core/petri-server/routes/ai-agent/decisions.js",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/DecisionUsagePanel.tsx",
         "scripts/block115-p0-calibrate.mjs"
       ],
@@ -728,17 +728,17 @@
       "group": "feat",
       "subject": "feat(block-116): P0+P1+P2——decision_log 台账（migration 011+wrapper meta 记账）+ 阈值注册表（七接点证据绑定）+ 观测面（summary 端点+设置面板）+ 校准共享库 + 契约 7/7 + flow",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block116-decision-platform-live.cjs",
-        "core/biof3-server/helpers/conversations.js",
-        "core/biof3-server/helpers/decision-api.js",
-        "core/biof3-server/helpers/decision-log.js",
-        "core/biof3-server/helpers/decision-thresholds.js",
-        "core/biof3-server/helpers/intent-router.js",
-        "core/biof3-server/helpers/interpret.js",
-        "core/biof3-server/helpers/knowledge-space.js",
-        "core/biof3-server/helpers/tool-router.js",
-        "core/biof3-server/routes/ai-agent/decisions.js",
-        "core/biof3-server/routes/ai-agent/index.js",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block116-decision-platform-live.cjs",
+        "core/petri-server/helpers/conversations.js",
+        "core/petri-server/helpers/decision-api.js",
+        "core/petri-server/helpers/decision-log.js",
+        "core/petri-server/helpers/decision-thresholds.js",
+        "core/petri-server/helpers/intent-router.js",
+        "core/petri-server/helpers/interpret.js",
+        "core/petri-server/helpers/knowledge-space.js",
+        "core/petri-server/helpers/tool-router.js",
+        "core/petri-server/routes/ai-agent/decisions.js",
+        "core/petri-server/routes/ai-agent/index.js",
         "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/DecisionUsagePanel.tsx",
         "scripts/block115-p0-calibrate.mjs",
@@ -848,9 +848,9 @@
       "group": "fix",
       "subject": "fix(block-113): 断依赖环——域映射改经 agent-tools index 既有边（arch-cycles 基线同构环），tool-router 零 agent-tools 依赖；tool_route 事件通道 + flow 事件断言",
       "files": [
-        "core/biof3-server/agent-runner.js",
-        "core/biof3-server/agent-tools/index.js",
-        "core/biof3-server/helpers/tool-router.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/agent-tools/index.js",
+        "core/petri-server/helpers/tool-router.js",
         "test/block113-tool-prerouting.test.mjs"
       ],
       "gold": {
@@ -866,8 +866,8 @@
       "group": "feat",
       "subject": "feat(block-113): P2 实机腿 flow 3/3——tool_route 事件通道观测（workspace conf=1 defs=14/71）+ 路由后任务正常终态 + all 弃权实证",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block113-toolroute-live.cjs",
-        "core/biof3-server/agent-runner.js"
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block113-toolroute-live.cjs",
+        "core/petri-server/agent-runner.js"
       ],
       "gold": {
         "roadmap": 0,
@@ -882,7 +882,7 @@
       "group": "feat",
       "subject": "feat(block-113): P2 flow block113-toolroute-live + impact-map 登记",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block113-toolroute-live.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block113-toolroute-live.cjs",
         "test/impact-map.json"
       ],
       "gold": {
@@ -898,9 +898,9 @@
       "group": "feat",
       "subject": "feat(block-113): P0+P1——工具九域预路由校准 gate.passed（111 条 overall 91.9%、θ=0.80 精度 98.75% 覆盖 80.8% all 零误采纳）+ tool-router 决策接点 + DOMAIN_TOOL_DEFS 导出（71 工具恒等钉住）+ agent-runner 下发链挂钩 + 契约 12/12",
       "files": [
-        "core/biof3-server/agent-runner.js",
-        "core/biof3-server/agent-tools/tool-defs.js",
-        "core/biof3-server/helpers/tool-router.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/agent-tools/tool-defs.js",
+        "core/petri-server/helpers/tool-router.js",
         "scripts/block113-p0-calibrate.mjs",
         "test/block113-tool-prerouting.test.mjs"
       ],
@@ -932,7 +932,7 @@
       "group": "feat",
       "subject": "feat(block-112): P2 实机腿 flow block112-intent-live 6/6——闲聊快路径（run_started/delta 无工具事件+回复落库标记）+ 任务正常 loop",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block112-intent-live.cjs"
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block112-intent-live.cjs"
       ],
       "gold": {
         "roadmap": 0,
@@ -947,10 +947,10 @@
       "group": "feat",
       "subject": "feat(block-112): P0+P1——意图路由四类校准 gate.passed（117 条 overall 98.3% θ=0.70 task 零误采纳）+ chat.js 提交链挂钩 + chitchat 快路径（事件回放镜像 agent-runner）+ 契约 13/13",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block112-intent-live.cjs",
-        "core/biof3-server/helpers/chitchat-fast-path.js",
-        "core/biof3-server/helpers/intent-router.js",
-        "core/biof3-server/routes/ai-agent/chat.js",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block112-intent-live.cjs",
+        "core/petri-server/helpers/chitchat-fast-path.js",
+        "core/petri-server/helpers/intent-router.js",
+        "core/petri-server/routes/ai-agent/chat.js",
         "scripts/block112-p0-calibrate.mjs",
         "test/block112-intent-routing.test.mjs",
         "test/impact-map.json"
@@ -1006,7 +1006,7 @@
       "group": "feat",
       "subject": "feat(block-111): P2 实机收口——A/B 生产路径 gate.passed（gated 1.0/endToEnd 0.925≥legacy 0.8375）+ flow block111-marker-live 7/7（真实 Jev adopted+零候选边界+老契约零变化）",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block111-marker-live.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block111-marker-live.cjs",
         "scripts/block111-p1-ab.mjs",
         "test/impact-map.json"
       ],
@@ -1023,8 +1023,8 @@
       "group": "feat",
       "subject": "feat(block-111): P1 接线——marker 判别 choice 二跳（θ=0.55 门控，默认关显式开）+ cellTypeHintsDetailed additive + 契约 14/14 + test:changed 159 项 0 红（D-1~D-5 按推荐先行留痕）",
       "files": [
-        "core/biof3-server/helpers/interpret.js",
-        "core/biof3-server/routes/ai-legacy.js",
+        "core/petri-server/helpers/interpret.js",
+        "core/petri-server/routes/ai-legacy.js",
         "scripts/block111-p0-calibrate.mjs",
         "test/block111-marker-classification.test.mjs",
         "test/impact-map.json"
@@ -1057,7 +1057,7 @@
       "group": "chore",
       "subject": "chore(lint): P2 二跳未用 catch 绑定清理",
       "files": [
-        "core/biof3-server/helpers/knowledge-space.js"
+        "core/petri-server/helpers/knowledge-space.js"
       ],
       "gold": {
         "roadmap": 0,
@@ -1118,8 +1118,8 @@
       "group": "feat",
       "subject": "feat(block-110): P2 实机腿 7/7 + P1/P2 收口——Jev 知识库二跳实机验证 + 台账回写",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block110-knowledge-guard-live.cjs",
-        "core/biof3-server/routes/knowledge.js",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block110-knowledge-guard-live.cjs",
+        "core/petri-server/routes/knowledge.js",
         "scripts/restart-dev-stack.sh"
       ],
       "gold": {
@@ -1135,7 +1135,7 @@
       "group": "feat",
       "subject": "feat(block-110): P2 知识库 Jev 二跳——语义复核+注入拦截（默认关+显式开启，D-A 裁决）",
       "files": [
-        "core/biof3-server/helpers/knowledge-space.js",
+        "core/petri-server/helpers/knowledge-space.js",
         "test/block110-p2-knowledge-guard.test.mjs",
         "test/impact-map.json"
       ],
@@ -1152,7 +1152,7 @@
       "group": "feat",
       "subject": "feat(block-110): P1 话题漂移 Jev noul 直替——双阈值三区间 + A/B 对账 100 条（coverage 100% 一致率 0.955）",
       "files": [
-        "core/biof3-server/helpers/conversations.js",
+        "core/petri-server/helpers/conversations.js",
         "scripts/block110-p1-ab.mjs",
         "test/block110-p1-topic-shift.test.mjs",
         "test/impact-map.json"
@@ -1170,7 +1170,7 @@
       "group": "fix",
       "subject": "fix(block-110): P0 hotfix——askDecision overrides 缺省默认值（校准 harness 实测抓真）+ 校准证据入册 + P0 收口记录",
       "files": [
-        "core/biof3-server/helpers/decision-api.js",
+        "core/petri-server/helpers/decision-api.js",
         "test/block110-decision-api.test.mjs"
       ],
       "gold": {
@@ -1201,7 +1201,7 @@
       "group": "feat",
       "subject": "feat(block-110): P0 地基——decision-api 裸 HTTP wrapper + 降级契约 + 中文校准语料/harness",
       "files": [
-        "core/biof3-server/helpers/decision-api.js",
+        "core/petri-server/helpers/decision-api.js",
         "scripts/block110-calibrate.mjs",
         "test/block109-stream-retry.test.mjs",
         "test/block110-decision-api.test.mjs",
@@ -1250,9 +1250,9 @@
       "group": "feat",
       "subject": "feat(ui-433): 汇报收敛+对账实机自动化验收 flow 5/5——UI-433 翻 verified + 对账口径 v1.5 + 重启脚本自愈",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block109-reporting-live.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block109-reporting-live.cjs",
         ".tmp-s2-live.mjs",
-        "core/biof3-server/helpers/agent-reconciliation.js",
+        "core/petri-server/helpers/agent-reconciliation.js",
         "scripts/restart-dev-stack.sh",
         "test/block109-reporting-reconcile.test.mjs"
       ],
@@ -1269,7 +1269,7 @@
       "group": "fix",
       "subject": "fix(block-109): 流中断重试覆盖——provider errorsAsRejections 开关 + loop 调用开启（P1-6 补完，实机双验证）",
       "files": [
-        "core/biof3-server/loop-orchestrator.js",
+        "core/petri-server/loop-orchestrator.js",
         "core/shared-backend/llm-providers/deepseek.js",
         "test/block109-stream-retry.test.mjs",
         "test/domain-neutrality-baseline.json",
@@ -1288,10 +1288,10 @@
       "group": "feat",
       "subject": "feat(ui-433): 三候选包落地——汇报收敛纪律/终态对账 v1/自动计划意图恢复（用户裁决「这四个搞起」）",
       "files": [
-        "core/biof3-server/agent-runner.js",
-        "core/biof3-server/agent-tools/tool-defs/agent-orchestration.js",
-        "core/biof3-server/helpers/agent-reconciliation.js",
-        "core/biof3-server/helpers/plan-intent.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/agent-tools/tool-defs/agent-orchestration.js",
+        "core/petri-server/helpers/agent-reconciliation.js",
+        "core/petri-server/helpers/plan-intent.js",
         "test/block109-reporting-reconcile.test.mjs",
         "test/impact-map.json"
       ],
@@ -1453,20 +1453,20 @@
       "group": "feat",
       "subject": "feat(block-109): P2 收口——工具执行元数据+调度分组+按域拆分（74 工具六字段全量，完备性门禁入链）",
       "files": [
-        "core/biof3-server/agent-tools/agent-loop-control.js",
-        "core/biof3-server/agent-tools/index.js",
-        "core/biof3-server/agent-tools/tool-defs.js",
-        "core/biof3-server/agent-tools/tool-defs/agent-orchestration.js",
-        "core/biof3-server/agent-tools/tool-defs/browser.js",
-        "core/biof3-server/agent-tools/tool-defs/computer.js",
-        "core/biof3-server/agent-tools/tool-defs/knowledge.js",
-        "core/biof3-server/agent-tools/tool-defs/remote.js",
-        "core/biof3-server/agent-tools/tool-defs/resident.js",
-        "core/biof3-server/agent-tools/tool-defs/result-studio.js",
-        "core/biof3-server/agent-tools/tool-defs/session.js",
-        "core/biof3-server/agent-tools/tool-defs/workspace.js",
-        "core/biof3-server/agent-tools/tool-metadata.js",
-        "core/biof3-server/mcp/registry.js",
+        "core/petri-server/agent-tools/agent-loop-control.js",
+        "core/petri-server/agent-tools/index.js",
+        "core/petri-server/agent-tools/tool-defs.js",
+        "core/petri-server/agent-tools/tool-defs/agent-orchestration.js",
+        "core/petri-server/agent-tools/tool-defs/browser.js",
+        "core/petri-server/agent-tools/tool-defs/computer.js",
+        "core/petri-server/agent-tools/tool-defs/knowledge.js",
+        "core/petri-server/agent-tools/tool-defs/remote.js",
+        "core/petri-server/agent-tools/tool-defs/resident.js",
+        "core/petri-server/agent-tools/tool-defs/result-studio.js",
+        "core/petri-server/agent-tools/tool-defs/session.js",
+        "core/petri-server/agent-tools/tool-defs/workspace.js",
+        "core/petri-server/agent-tools/tool-metadata.js",
+        "core/petri-server/mcp/registry.js",
         "test/block109-p2-tool-metadata.test.mjs",
         "test/impact-map.json"
       ],
@@ -1483,7 +1483,7 @@
       "group": "feat",
       "subject": "feat(block-109): P1 阶段收口——事件单一事实源+恢复单源+legacy 退役（flow 7/7 九门绿）",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block109-single-truth-live.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block109-single-truth-live.cjs",
         "eslint-suppressions.json"
       ],
       "gold": {
@@ -1514,7 +1514,7 @@
       "group": "feat",
       "subject": "feat(block-109): P1.4 legacy SSE 双轨物理退役——组装单链收敛 history-assembly（附录A D4/E5）",
       "files": [
-        "core/biof3-server/routes/ai-agent/chat.js",
+        "core/petri-server/routes/ai-agent/chat.js",
         "frontend/src/components/copilot/copilotClient.ts",
         "frontend/src/components/copilot/copilotClient/agentTaskStream.ts",
         "test/block109-p1-events.test.mjs",
@@ -1565,8 +1565,8 @@
       "group": "feat",
       "subject": "feat(block-109): P1.2 前端恢复换单一后端源——localStorage 双轨退役（附录A E2/E5）",
       "files": [
-        "core/biof3-server/agent-task-store.js",
-        "core/biof3-server/routes/ai-agent/task-actions.js",
+        "core/petri-server/agent-task-store.js",
+        "core/petri-server/routes/ai-agent/task-actions.js",
         "frontend/src/components/copilot/SimpleChat/hooks/useConversationResume.test.tsx",
         "frontend/src/components/copilot/SimpleChat/hooks/useConversationResume.ts",
         "frontend/src/components/copilot/conversationRunStore.test.ts",
@@ -1590,8 +1590,8 @@
       "group": "feat",
       "subject": "feat(block-109): P1.1 后端事件模型——生命周期事件 + 终态 delta 透明合并（附录A E1/E3 落地，用户裁决「按推荐来」）",
       "files": [
-        "core/biof3-server/agent-runner.js",
-        "core/biof3-server/agent-task-store.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/agent-task-store.js",
         "test/block109-p1-events.test.mjs",
         "test/impact-map.json"
       ],
@@ -1608,10 +1608,10 @@
       "group": "feat",
       "subject": "feat(block-109): P0 阶段——拆前行为基线 3/3 + UI-431 实机清偿 verified + 卫生清偿 + 附录A 事件模型评审稿",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block109-agent-panel.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block109-agent-panel.cjs",
         ".gitignore",
         ".tmp-merge-reg.cjs",
-        "core/biof3-server/biof3.db",
+        "core/petri-server/petri.db",
         "eslint-suppressions.json",
         "src/main.js",
         "test/block109-p0-baseline.test.mjs",
@@ -1631,8 +1631,8 @@
       "subject": "feat(block-109): 子智能体编排呈现与韧性四件套——瞬断重试/并行度软上限/结果卡组化/概览孤儿过滤——UI-432",
       "files": [
         ".tmp-merge-reg.cjs",
-        "core/biof3-server/agent-tools/spawn-agent-tools.js",
-        "core/biof3-server/loop-orchestrator.js",
+        "core/petri-server/agent-tools/spawn-agent-tools.js",
+        "core/petri-server/loop-orchestrator.js",
         "eslint-suppressions.json",
         "frontend/src/components/copilot/SimpleChat.tsx",
         "frontend/src/components/copilot/SimpleChat/hooks/useTerminalSubAgentResults.ts",
@@ -1656,7 +1656,7 @@
     {
       "id": "3f9efa2ab5",
       "group": "chore",
-      "subject": "chore(infra): Gewu-StackWatchdog 退役（用户裁决「软件启动就活着 不主动启动就没必要活着」）——计划任务 /DISABLE + vbs 头注留痕",
+      "subject": "chore(infra): Petri-StackWatchdog 退役（用户裁决「软件启动就活着 不主动启动就没必要活着」）——计划任务 /DISABLE + vbs 头注留痕",
       "files": [
         "scripts/stack-watchdog-hidden.vbs"
       ],
@@ -1691,7 +1691,7 @@
       "group": "test",
       "subject": "test(ui-430): 实机补跑 7/7 全绿翻 verified + flow 发送路径定版——UI-430",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block108-qoder-stream.cjs"
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block108-qoder-stream.cjs"
       ],
       "gold": {
         "roadmap": 0,
@@ -1706,7 +1706,7 @@
       "group": "feat",
       "subject": "feat(ui-430): 合并簇呈现密度——相邻工具轮并簇 + 单工具簇头摘要 + 零耗时隐藏——UI-430",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block107-timeline-live.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block107-timeline-live.cjs",
         "frontend/src/components/copilot/ToolActivityList.test.tsx",
         "frontend/src/components/copilot/ToolActivityList.tsx",
         "frontend/src/components/copilot/conversationSegments.test.ts",
@@ -1726,7 +1726,7 @@
       "group": "fix",
       "subject": "fix(loop-orchestrator): 恢复 runLoop 契约名 emitToolResult/conversationState（合并基线存量红清偿）——UI-429",
       "files": [
-        "core/biof3-server/loop-orchestrator.js",
+        "core/petri-server/loop-orchestrator.js",
         "eslint-suppressions.json"
       ],
       "gold": {
@@ -1742,9 +1742,9 @@
       "group": "feat",
       "subject": "feat(block-108): P1 收口——过渡叙述持久化穿参 + dev server 双断链修复 + 实机 7/7 + 九门收口——UI-429",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block108-qoder-stream.cjs",
-        "core/biof3-server/agent-runner.js",
-        "core/biof3-server/loop-orchestrator.js",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block108-qoder-stream.cjs",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/loop-orchestrator.js",
         "frontend/index.html",
         "frontend/src/components/copilot/simple-chat.css",
         "frontend/vite.config.ts",
@@ -1816,8 +1816,8 @@
       "group": "feat",
       "subject": "feat(block-107): P3 三宿主面 + 长会话分页腿实机 PASS + 整包 completed（closeout 八门绿）——UI-428",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block107-timeline-hosts.cjs",
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block107-timeline-long.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block107-timeline-hosts.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block107-timeline-long.cjs",
         "test/impact-map.json"
       ],
       "gold": {
@@ -1833,7 +1833,7 @@
       "group": "docs",
       "subject": "docs(governance): BLOCK-105 §7 Batch-4 收口笔录（批级 1061绿/0红/14skip + P6 锚 d81f794b + closeout 九门绿）",
       "files": [
-        ".agents/skills/gewu-dev-infra/SKILL.md"
+        ".agents/skills/petri-dev-infra/SKILL.md"
       ],
       "gold": {
         "roadmap": 1,
@@ -1848,7 +1848,7 @@
       "group": "test",
       "subject": "test(block-107): P3 实况腿实机 flow 落地并 PASS 7/7——UI-428",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block107-timeline-live.cjs"
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block107-timeline-live.cjs"
       ],
       "gold": {
         "roadmap": 1,
@@ -1901,7 +1901,7 @@
         "frontend/src/components/desktop/WorkingTreeReview/UntrackedFilePreview.tsx",
         "frontend/src/components/desktop/WorkingTreeReview/useWorkingTreeReview.ts",
         "frontend/src/components/editor/CodeMirror/CodeMirrorEditor.tsx",
-        "frontend/src/components/editor/integration/GewuOpenFileDevBridge.tsx",
+        "frontend/src/components/editor/integration/PetriOpenFileDevBridge.tsx",
         "frontend/src/components/knowledge/useKnowledgeConsole.ts",
         "frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx",
         "frontend/src/components/settings/ExperimentalFeaturesSection.test.tsx",
@@ -1932,7 +1932,7 @@
       "group": "test",
       "subject": "test(block-107): P3 历史腿实机 flow 落地并 PASS 5/5——UI-428",
       "files": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block107-timeline-history.cjs"
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block107-timeline-history.cjs"
       ],
       "gold": {
         "roadmap": 0,
@@ -1988,7 +1988,7 @@
       "group": "docs",
       "subject": "docs(governance): 类型债 + quality:types 门禁入链收口笔录（八门→九门 / P6 重锚 efe86507 / Lint 存量 2150）",
       "files": [
-        ".agents/skills/gewu-dev-infra/SKILL.md",
+        ".agents/skills/petri-dev-infra/SKILL.md",
         "AGENTS.md"
       ],
       "gold": {
@@ -2261,46 +2261,46 @@
       "group": "chore",
       "subject": "chore(lint): BLOCK-105 §7 Batch-3 抑制基线收缩 2783→2162（−621：no-unused-vars 622→0 清零，用户裁决「继续」续接队列①）",
       "files": [
-        "core/biof3-server/agent-runner.js",
-        "core/biof3-server/agent-tools/computer-use-tools.js",
-        "core/biof3-server/agent-tools/federation-tools.js",
-        "core/biof3-server/agent-tools/knowledge-tools.js",
-        "core/biof3-server/agent-tools/plugin-loader.js",
-        "core/biof3-server/agent-tools/result-context-tools.js",
-        "core/biof3-server/agent-tools/result-selection-tools.js",
-        "core/biof3-server/agent-tools/system-info-tools.js",
-        "core/biof3-server/agent-tools/tool-events.js",
-        "core/biof3-server/agent-tools/vision-tools.js",
-        "core/biof3-server/agent-tools/workspace-ssh-surface.js",
-        "core/biof3-server/agent-tools/workspace-tools.js",
-        "core/biof3-server/agent-tools/workspace-tools/internals.js",
-        "core/biof3-server/config.js",
-        "core/biof3-server/conversation-adapter.js",
-        "core/biof3-server/db.js",
-        "core/biof3-server/db/connection.js",
-        "core/biof3-server/db/schema.js",
-        "core/biof3-server/federation-terminal.js",
-        "core/biof3-server/helpers/ai-usage.js",
-        "core/biof3-server/helpers/circuit-breaker.js",
-        "core/biof3-server/helpers/conversation-compaction.js",
-        "core/biof3-server/helpers/knowledge-parsers.js",
-        "core/biof3-server/helpers/message-trimmer.js",
-        "core/biof3-server/helpers/model-context-windows.js",
-        "core/biof3-server/helpers/remote-execution/node-agent.js",
-        "core/biof3-server/helpers/remote-execution/target-registry.js",
-        "core/biof3-server/helpers/report-theme.js",
-        "core/biof3-server/helpers/tools-executor.js",
-        "core/biof3-server/helpers/tools-executor/active-job.js",
-        "core/biof3-server/helpers/tools-executor/preflight.js",
-        "core/biof3-server/jobs/retention-sweeper.js",
-        "core/biof3-server/loop-orchestrator.js",
-        "core/biof3-server/mcp/branch-context.js",
-        "core/biof3-server/mcp/ide-tools/file.js",
-        "core/biof3-server/mcp/ide-tools/git-diff.js",
-        "core/biof3-server/mcp/ide-tools/search.js",
-        "core/biof3-server/mcp/ide-tools/terminal.js",
-        "core/biof3-server/mcp/registry.js",
-        "core/biof3-server/mcp/registry/runtime-paths.js"
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/agent-tools/computer-use-tools.js",
+        "core/petri-server/agent-tools/federation-tools.js",
+        "core/petri-server/agent-tools/knowledge-tools.js",
+        "core/petri-server/agent-tools/plugin-loader.js",
+        "core/petri-server/agent-tools/result-context-tools.js",
+        "core/petri-server/agent-tools/result-selection-tools.js",
+        "core/petri-server/agent-tools/system-info-tools.js",
+        "core/petri-server/agent-tools/tool-events.js",
+        "core/petri-server/agent-tools/vision-tools.js",
+        "core/petri-server/agent-tools/workspace-ssh-surface.js",
+        "core/petri-server/agent-tools/workspace-tools.js",
+        "core/petri-server/agent-tools/workspace-tools/internals.js",
+        "core/petri-server/config.js",
+        "core/petri-server/conversation-adapter.js",
+        "core/petri-server/db.js",
+        "core/petri-server/db/connection.js",
+        "core/petri-server/db/schema.js",
+        "core/petri-server/federation-terminal.js",
+        "core/petri-server/helpers/ai-usage.js",
+        "core/petri-server/helpers/circuit-breaker.js",
+        "core/petri-server/helpers/conversation-compaction.js",
+        "core/petri-server/helpers/knowledge-parsers.js",
+        "core/petri-server/helpers/message-trimmer.js",
+        "core/petri-server/helpers/model-context-windows.js",
+        "core/petri-server/helpers/remote-execution/node-agent.js",
+        "core/petri-server/helpers/remote-execution/target-registry.js",
+        "core/petri-server/helpers/report-theme.js",
+        "core/petri-server/helpers/tools-executor.js",
+        "core/petri-server/helpers/tools-executor/active-job.js",
+        "core/petri-server/helpers/tools-executor/preflight.js",
+        "core/petri-server/jobs/retention-sweeper.js",
+        "core/petri-server/loop-orchestrator.js",
+        "core/petri-server/mcp/branch-context.js",
+        "core/petri-server/mcp/ide-tools/file.js",
+        "core/petri-server/mcp/ide-tools/git-diff.js",
+        "core/petri-server/mcp/ide-tools/search.js",
+        "core/petri-server/mcp/ide-tools/terminal.js",
+        "core/petri-server/mcp/registry.js",
+        "core/petri-server/mcp/registry/runtime-paths.js"
       ],
       "gold": {
         "roadmap": 0,
@@ -2315,10 +2315,10 @@
       "group": "fix",
       "subject": "fix(block-106): P2 数据层规模债与可评审性 completed——清扫 SCAN→SEARCH + ISO 契约根治 + 控制字节门禁",
       "files": [
-        ".agents/skills/gewu-dev-infra/SKILL.md",
-        ".agents/skills/gewu-dev-infra/scripts/hygiene-check.mjs",
+        ".agents/skills/petri-dev-infra/SKILL.md",
+        ".agents/skills/petri-dev-infra/scripts/hygiene-check.mjs",
         "AGENTS.md",
-        "core/biof3-server/agent-task-store.js",
+        "core/petri-server/agent-task-store.js",
         "sidecars/computer-use-windows/build.ps1",
         "src/ipc/file-dialog.js",
         "test/block106-task-events-retention.test.mjs",
@@ -2337,7 +2337,7 @@
       "group": "fix",
       "subject": "fix(remote-exec): Mac 侧七红清偿——node-agent base64 位置参数可移植化（4 红原生转绿）+ 3 处 Linux 语义面可见平台门（用户裁决「继续」续接 Mac 待办第 3 项）",
       "files": [
-        "core/biof3-server/helpers/remote-execution/node-agent.js",
+        "core/petri-server/helpers/remote-execution/node-agent.js",
         "test/block67-node-agent-fs.test.js",
         "test/block67-ssh-mux.test.mjs",
         "test/impact-map.json",
@@ -2407,8 +2407,8 @@
       "group": "fix",
       "subject": "fix(mcp): P0 Wave C-6 拆分断链修复——run-plugin-script 7 裸标识符未穿参/未导入致 R 插件作业执行全平台必 ReferenceError（deseq2 等全部插件脚本工具，Windows 侧因 p4r SIGTERM skip 从未暴露，2026-09-20 Mac Batch-2 首跑 p4r-baseline 抓真）——seam 对象穿参（resolveJobLayout/createMcpExecutionContext/runPluginToolRemote，缺失 fail-closed 即抛 mcp_job_layout_seam_missing）+artifact-normalize 直 require+fs/path/pluginLoader 补导入+删 resolveProjectRunLayout 死导入；p4r 2/2 绿（真实 deseq2 语料端到端）。顺带 test-affected 路由修真=rule.tests 内 frontend/*.tsx（ui-404-408/block101/block91 三规则在册）误入 node --test 批必 ERR_UNKNOWN_FILE_EXTENSION，改路由进 vitest test:related 通道（test-affected 16/16 绿）",
       "files": [
-        "core/biof3-server/mcp/registry.js",
-        "core/biof3-server/mcp/registry/run-plugin-script.js",
+        "core/petri-server/mcp/registry.js",
+        "core/petri-server/mcp/registry/run-plugin-script.js",
         "scripts/test-affected.mjs"
       ],
       "gold": {
@@ -2509,9 +2509,9 @@
       "group": "fix",
       "subject": "fix(lint): BLOCK-105 §7 Batch-1 抑制基线收缩 2914→2890 + Mac 首跑 quality 三门全绿（用户裁决「开整」预授权续接，接手 CodeBuddy 停止处第 6-7 项）——①真缺陷 2 件：capability-bundles `--force-local` 无条件附加在 macOS bsdtar 直接拒绝（`Option --force-local is not supported` 实测）致 R 能力包安装 Mac 全挂，BLOCK-104 配方「POSIX tar 空操作」对 BSD 系不成立→win32 条件化 TAR_FORCE_LOCAL 导出+测试复用单一知识源（16/16 绿，Windows 行为逐字等价）；ide-tools/diff.js 单引号内 'C:\\Program Files\\Git' 的 \\P→\\G 被 JS 吃成 P/G 致 Windows 回退路径字符串损坏（existsSync 永不命中）→双反斜杠。②逻辑类化石/空壳 8 项：dupe-keys×2（resident-revisit/scientific-task-spec 重复导出列）+no-redeclare（block48 delay 逐字重复声明）+constant-binary（ui365 模板串恒真死 || '{}'）+useless-catch 空壳×3（agentTaskStream 删壳保注释；loop-repair test×3 改 assert.ok+非可选链，消除短路 TypeError 伪装）③no-useless-escape 16 项手工清（模板串 \\$ 去转义×5/字符类 \\/×2/\\\"×2/\\<×1 等；其中 ui400 注入面 \\.pdf 被模板串吃反斜杠退化为 /.pdf$/ 顺手修真→\\\\.）；--prune-suppressions 收缩根 2914→2890+frontend 2126→2125（操作姿势=修一批后 prune，--suppress-all 不清过期条目，已回写 plan §7）。④impact-map 补登记 scripts/audit-log-compact.mjs→script-governance（71dd5d98 注册遗漏=任何改动 test:changed 恒红）。⑤继承 CodeBuddy 停止前 WIP 2 件并核实：eslint.config openclaw/** 忽略（Mac 本地 6.8G 镜像 exclude 排除，Windows 无此目录）+compact 脚本死代码清理（幂等复跑验证）。门禁=docs:check PASS(259)+audit:compact 幂等+hygiene PASS+gate:code-size PASS+secret PASS+arch 1214 模块 0 违规+lint EXIT 0（0 错误/1313 report-only warning）+test:changed 572 绿/8 红全在册（block67/mux/sys_resource×7 BSD coreutils//proc 语义面=handoff 第 3 条已登记 Mac 侧才可处置；P6 重打×1 需 dev 栈专门会话）+streamReconnect 7/7+loop-repair/spec 56/56。Edit 管道吃 \\${ 反斜杠在 Mac 侧复现 1 次（SKILL 纪律 #5 同型），落盘字节级修复+内容断言恢复。G0 开发期常态 · 不外推 packaged/Provider/GA",
       "files": [
-        "core/biof3-server/helpers/remote-execution/node-agent.js",
-        "core/biof3-server/helpers/remote-execution/resident-revisit.js",
-        "core/biof3-server/mcp/ide-tools/diff.js",
+        "core/petri-server/helpers/remote-execution/node-agent.js",
+        "core/petri-server/helpers/remote-execution/resident-revisit.js",
+        "core/petri-server/mcp/ide-tools/diff.js",
         "core/shared-backend/capability-bundles.js",
         "core/shared-backend/scientific-task-spec.js",
         "eslint-suppressions.json",
@@ -2542,8 +2542,8 @@
       "group": "fix",
       "subject": "fix(infra): 漂移清偿批 completed（会话启动全方位核查查出六处，用户裁决「解决」）",
       "files": [
-        ".agents/skills/gewu-dev-infra/SKILL.md",
-        ".agents/skills/gewu-dev-infra/scripts/hygiene-check.mjs",
+        ".agents/skills/petri-dev-infra/SKILL.md",
+        ".agents/skills/petri-dev-infra/scripts/hygiene-check.mjs",
         "AGENTS.md",
         "scripts/audit-log-compact.mjs",
         "src/migration-runner.js",
@@ -2560,12 +2560,12 @@
     {
       "id": "5900702efc",
       "group": "feat",
-      "subject": "feat(infra): 补齐 CodeBuddy skill 发现桥 + 发现桥纪律入册（用户裁决「该带的都带上 确保开发的稳定和一致性」）——①.codebuddy/skills/ 4 个同名相对符号链接（指向 ../../.agents/skills/<name>，与 .claude/skills/ 同形，canonical 仍只在 .agents/skills/ 无第二份副本），实测 use_skill gewu-dev-infra 运行时即加载（Base directory=.codebuddy/skills/gewu-dev-infra，无需重启 IDE）；②AGENTS.md 新增「Agent Skill 发现桥」纪律行：新增/改名/删除 Agent skill 必须同步补齐全部发现桥，否则对应宿主静默 not found；③.gitignore 加 .codebuddy 忽略规则（skills 白名单放行，IDE 运行时数据不入库），check-ignore 实测 IGNORED/TRACKABLE 分类正确；④handoff 增补第 10 条登记（含其他宿主无需桥的依据：Cursor=rules/.mdc、Trae/Kiro/WorkBuddy=documents/hooks/memory、.aionrs=本地 CLI 链接已 ignore）。门禁=docs:check PASS(259)+hygiene:check PASS",
+      "subject": "feat(infra): 补齐 CodeBuddy skill 发现桥 + 发现桥纪律入册（用户裁决「该带的都带上 确保开发的稳定和一致性」）——①.codebuddy/skills/ 4 个同名相对符号链接（指向 ../../.agents/skills/<name>，与 .claude/skills/ 同形，canonical 仍只在 .agents/skills/ 无第二份副本），实测 use_skill petri-dev-infra 运行时即加载（Base directory=.codebuddy/skills/petri-dev-infra，无需重启 IDE）；②AGENTS.md 新增「Agent Skill 发现桥」纪律行：新增/改名/删除 Agent skill 必须同步补齐全部发现桥，否则对应宿主静默 not found；③.gitignore 加 .codebuddy 忽略规则（skills 白名单放行，IDE 运行时数据不入库），check-ignore 实测 IGNORED/TRACKABLE 分类正确；④handoff 增补第 10 条登记（含其他宿主无需桥的依据：Cursor=rules/.mdc、Trae/Kiro/WorkBuddy=documents/hooks/memory、.aionrs=本地 CLI 链接已 ignore）。门禁=docs:check PASS(259)+hygiene:check PASS",
       "files": [
-        ".codebuddy/skills/gewu-code-review",
-        ".codebuddy/skills/gewu-css-theme",
-        ".codebuddy/skills/gewu-dev-infra",
-        ".codebuddy/skills/gewu-project-governance",
+        ".codebuddy/skills/petri-code-review",
+        ".codebuddy/skills/petri-css-theme",
+        ".codebuddy/skills/petri-dev-infra",
+        ".codebuddy/skills/petri-project-governance",
         ".gitignore",
         "AGENTS.md"
       ],
@@ -2595,9 +2595,9 @@
     {
       "id": "71dd5d98b9",
       "group": "feat",
-      "subject": "feat(infra): AUDIT-LOG 自动精简 + 预授权开工模式入 skill（用户裁决「AUDIT-LOG 的规范和精简应该是自动化的过程，仅保留必要的内容」+「直接说开始，工作自动跟踪」）。①scripts/audit-log-compact.mjs + npm run audit:compact：幂等自动精简（最近处理记录每包仅留最新一条+最新5条兜底，淘汰行自动追加 archive/checkpoints 带来源声明，当前待处理项全量保留，无变化时 already compact 零副作用），首跑实测淘汰4行、二跑幂等证明；②AUDIT-LOG 尾部滚动归档规则更新为脚本化（原手工剪切纪律作废，行为等价）；③gewu-dev-infra SKILL.md 两处沉淀：「预授权连续工作模式」节（启动三步→按推荐直接开工，预授权即有效裁决留痕，决策点才停）+「AUDIT-LOG 自动精简」节（audit:compact 幂等/50KB硬阈必须先跑/docs:check 验直链）；④impact-map 补 quality-baseline/secret-scan 登记；docs:check PASS(259)",
+      "subject": "feat(infra): AUDIT-LOG 自动精简 + 预授权开工模式入 skill（用户裁决「AUDIT-LOG 的规范和精简应该是自动化的过程，仅保留必要的内容」+「直接说开始，工作自动跟踪」）。①scripts/audit-log-compact.mjs + npm run audit:compact：幂等自动精简（最近处理记录每包仅留最新一条+最新5条兜底，淘汰行自动追加 archive/checkpoints 带来源声明，当前待处理项全量保留，无变化时 already compact 零副作用），首跑实测淘汰4行、二跑幂等证明；②AUDIT-LOG 尾部滚动归档规则更新为脚本化（原手工剪切纪律作废，行为等价）；③petri-dev-infra SKILL.md 两处沉淀：「预授权连续工作模式」节（启动三步→按推荐直接开工，预授权即有效裁决留痕，决策点才停）+「AUDIT-LOG 自动精简」节（audit:compact 幂等/50KB硬阈必须先跑/docs:check 验直链）；④impact-map 补 quality-baseline/secret-scan 登记；docs:check PASS(259)",
       "files": [
-        ".agents/skills/gewu-dev-infra/SKILL.md",
+        ".agents/skills/petri-dev-infra/SKILL.md",
         "package.json",
         "scripts/audit-log-compact.mjs"
       ],
@@ -2612,9 +2612,9 @@
     {
       "id": "53a266cfbb",
       "group": "docs",
-      "subject": "docs(governance): BLOCK-105 沉淀收尾——质量门禁规范完整入册。①AGENTS.md：检查节补 quality:* 五命令族（secret/arch/lint/knip/baseline）+ closeout 描述更新为八门 + 新增功能清单补「渲染 IPC 走 desktopBridge（quality:arch 会拦）」+ 新增「Lint 债务纪律（棘轮）」节（三分类处置/豁免登记/批量收缩/新桥登记）；②gewu-dev-infra SKILL.md：closeout 行更新八门 + 新增「代码质量门禁纪律」节（secret 白名单登记制/arch 五规则新桥 pathNot 登记制/lint 抑制基线棘轮三分类+先清化石再建基线/quality:baseline 重扫）；③scripts/quality-baseline.sh + npm run quality:baseline——P0 四项体检脚本化可复跑（Knip/jscpd/audit/密钥，结果落 baseline-<日期>/ 人工裁决后更新正式基线），impact-map 登记新脚本",
+      "subject": "docs(governance): BLOCK-105 沉淀收尾——质量门禁规范完整入册。①AGENTS.md：检查节补 quality:* 五命令族（secret/arch/lint/knip/baseline）+ closeout 描述更新为八门 + 新增功能清单补「渲染 IPC 走 desktopBridge（quality:arch 会拦）」+ 新增「Lint 债务纪律（棘轮）」节（三分类处置/豁免登记/批量收缩/新桥登记）；②petri-dev-infra SKILL.md：closeout 行更新八门 + 新增「代码质量门禁纪律」节（secret 白名单登记制/arch 五规则新桥 pathNot 登记制/lint 抑制基线棘轮三分类+先清化石再建基线/quality:baseline 重扫）；③scripts/quality-baseline.sh + npm run quality:baseline——P0 四项体检脚本化可复跑（Knip/jscpd/audit/密钥，结果落 baseline-<日期>/ 人工裁决后更新正式基线），impact-map 登记新脚本",
       "files": [
-        ".agents/skills/gewu-dev-infra/SKILL.md",
+        ".agents/skills/petri-dev-infra/SKILL.md",
         "AGENTS.md",
         "package.json",
         "scripts/quality-baseline.sh",
@@ -2671,9 +2671,9 @@
       "group": "fix",
       "subject": "fix(block-105): P2 存量归因清偿第一轮 completed——棘轮闭合。真缺陷修复 2 件（workspace-tools listResidentTasksLocal 漏 require fs 即调即崩；act-tools _getImpliedPage 裸调用未定义符号 FIGCODE_PAGE_RACE_FIX_v1 兜底分支失效，改 _core 引入）；eslint --fix 机械修复 77 文件（安全类：多余类型断言移除等，净 -1 行，Node 2251 绿 exit 0 + 前端 1146/1146 双验证零回归）；规则级归因（no-empty allowEmptyCatch=本仓 best-effort catch 模式；detect-non-literal-fs-filename off=桌面应用动态路径常态靠 allowlist 约束；detect-object-injection 维持 warn 1220 处架构常态）；抑制基线棘轮闭合（eslint-suppressions.json 入库，新增违规即 fail，自测通过）；quality:lint 转 blocking（去 report-only 旁路）；impact-map 登记 block105-code-quality 规则（secret-scan 新脚本未分类曾触发 test-affected fail-closed 级联 35 红，登记后 16/16 恢复——门禁按设计工作）",
       "files": [
-        "core/biof3-server/agent-tools/act-tools.js",
-        "core/biof3-server/agent-tools/workspace-tools.js",
-        "core/biof3-server/mcp/ide-tools/audit-log.js",
+        "core/petri-server/agent-tools/act-tools.js",
+        "core/petri-server/agent-tools/workspace-tools.js",
+        "core/petri-server/mcp/ide-tools/audit-log.js",
         "core/shared-backend/llm-providers/deepseek.js",
         "core/shared-backend/workflow-engine.js",
         "eslint.config.mjs",
@@ -2742,9 +2742,9 @@
     {
       "id": "6f7079ea59",
       "group": "fix",
-      "subject": "fix(block-104): 第二增量——P4 缩水门禁补齐+等待纪律入 skill（用户裁决「跟踪触发而不是没目的的等待」）。①process.platform 散落分支冻结门禁（test/platform-branch-freeze.test.mjs）：85 文件基线内嵌（src/core/scripts/test 口径排除 node_modules），基线外新增读取 fail-closed 提示走 platform-compat.js 或显式登记留痕，基线收缩 informational 防僵化，自测=合成新文件被抓出；②12 个 windows 命令调用脚本分类处置：8 真win-only 入口护栏（process.platform!==win32 fail-fast exit 2；教训=插入内容不得推挤 shebang 首行）+4 platform-note 标注（dual×3/windows-library×1），scripts-platform-contract 门禁 informational→强制（护栏或标注二选一）12/12 合规；③block88-project-grants 挂起归因修正（修正 fa01758b 误归因）：实证纯 REST/store 契约层无模型调用，真因=node:test runner 该文件形态收尾怪癖（_getActiveHandles 除 stdio 全净+裸跑/--test 双形态均挂），after 钩子 300ms drain 缩小窗口+官方防挂旗标兜底；④环境敏感集成靶在册：block63-sidecar-tools（fixture 真窗口桌面焦点）+federation-terminal（node-pty conpty AttachConsole 竞态，与 ide-tools-terminal 同根因），连续三轮全量 0/1/1 红互不重复且单跑均绿，flame 率约 1/轮，全量判定惯例=同位重跑确认；⑤等待纪律入 gewu-dev-infra SKILL.md 新节：后台任务禁 sleep 盲等（本仓实测连两轮 sleep 420 反面教材），事件驱动=启动后继续干活等 task-notification 或 TaskOutput block 阻塞原语，唯一合法 sleep=被测系统自身时序（drain/退避/就绪宽限）。closeout 口径=2250 绿+0-1 已知环境敏感 flake；docs:check PASS(258)",
+      "subject": "fix(block-104): 第二增量——P4 缩水门禁补齐+等待纪律入 skill（用户裁决「跟踪触发而不是没目的的等待」）。①process.platform 散落分支冻结门禁（test/platform-branch-freeze.test.mjs）：85 文件基线内嵌（src/core/scripts/test 口径排除 node_modules），基线外新增读取 fail-closed 提示走 platform-compat.js 或显式登记留痕，基线收缩 informational 防僵化，自测=合成新文件被抓出；②12 个 windows 命令调用脚本分类处置：8 真win-only 入口护栏（process.platform!==win32 fail-fast exit 2；教训=插入内容不得推挤 shebang 首行）+4 platform-note 标注（dual×3/windows-library×1），scripts-platform-contract 门禁 informational→强制（护栏或标注二选一）12/12 合规；③block88-project-grants 挂起归因修正（修正 fa01758b 误归因）：实证纯 REST/store 契约层无模型调用，真因=node:test runner 该文件形态收尾怪癖（_getActiveHandles 除 stdio 全净+裸跑/--test 双形态均挂），after 钩子 300ms drain 缩小窗口+官方防挂旗标兜底；④环境敏感集成靶在册：block63-sidecar-tools（fixture 真窗口桌面焦点）+federation-terminal（node-pty conpty AttachConsole 竞态，与 ide-tools-terminal 同根因），连续三轮全量 0/1/1 红互不重复且单跑均绿，flame 率约 1/轮，全量判定惯例=同位重跑确认；⑤等待纪律入 petri-dev-infra SKILL.md 新节：后台任务禁 sleep 盲等（本仓实测连两轮 sleep 420 反面教材），事件驱动=启动后继续干活等 task-notification 或 TaskOutput block 阻塞原语，唯一合法 sleep=被测系统自身时序（drain/退避/就绪宽限）。closeout 口径=2250 绿+0-1 已知环境敏感 flake；docs:check PASS(258)",
       "files": [
-        ".agents/skills/gewu-dev-infra/SKILL.md",
+        ".agents/skills/petri-dev-infra/SKILL.md",
         "scripts/block101-startup-timeline-live.cjs",
         "scripts/block63-p1-live.mjs",
         "scripts/block63-p4-live.cjs",
@@ -2771,9 +2771,9 @@
     {
       "id": "44354281c6",
       "group": "fix",
-      "subject": "fix(block-104): K 簇红名单清偿增量——全量套件历史首次真实 exit 0（2250 绿/0 红，直采退出码）。逐文件归因处置 12 文件：①产品缺陷修复 1 件=ide_file_diff 硬编码 /usr/bin/diff（Windows ENOENT），改平台自适应解析（GEWU_DIFF_BIN env > Git for Windows usr/bin/diff.exe 推导 > POSIX 固定路径）；②僵尸测试删除 1 件=demo-data（守卫的 resources/demo-data 已随 BLOCK-83 P4 核心树生信内容删除迁移包生态）；③漂移对账 4 件=result-handlers（字面量→CHANNELS.result.* 常量）、release-contract（goldenPath tool 断言跟随 SPI 化迁至技能清单）、plugin-schema（IPC catalog 绝对路径跨平台对账）、g0-rs-p7（completion guard 断言跟随 BLOCK-92 facade 拆分迁至 chat.js，agent-runner durable 路径仅剩引入=真实漂移如实标注归 RS 域）；④环境/装包门 skip 可见 5 文件=agent-tool-result+agent-workflow-phase6（deseq2/deg-standardization 需装领域包，BLOCK-83/86 迁移在案，装包自动恢复）、ide-tools-terminal（node-pty conpty 需交互式控制台宿主，NODE_PTY_TEST_ALLOWED=1 opt-in）、g0-rs-p6×2（源绑定重打仅限 macOS，AUDIT-LOG 🟡 指针）；⑤qa-smoke themes 检查化石 biof3- 前缀对账为 --gewu-*（7/7 exit 0）。closeout 五门绿；G0 开发期常态 · 不外推 packaged/Provider/GA",
+      "subject": "fix(block-104): K 簇红名单清偿增量——全量套件历史首次真实 exit 0（2250 绿/0 红，直采退出码）。逐文件归因处置 12 文件：①产品缺陷修复 1 件=ide_file_diff 硬编码 /usr/bin/diff（Windows ENOENT），改平台自适应解析（PETRI_DIFF_BIN env > Git for Windows usr/bin/diff.exe 推导 > POSIX 固定路径）；②僵尸测试删除 1 件=demo-data（守卫的 resources/demo-data 已随 BLOCK-83 P4 核心树生信内容删除迁移包生态）；③漂移对账 4 件=result-handlers（字面量→CHANNELS.result.* 常量）、release-contract（goldenPath tool 断言跟随 SPI 化迁至技能清单）、plugin-schema（IPC catalog 绝对路径跨平台对账）、g0-rs-p7（completion guard 断言跟随 BLOCK-92 facade 拆分迁至 chat.js，agent-runner durable 路径仅剩引入=真实漂移如实标注归 RS 域）；④环境/装包门 skip 可见 5 文件=agent-tool-result+agent-workflow-phase6（deseq2/deg-standardization 需装领域包，BLOCK-83/86 迁移在案，装包自动恢复）、ide-tools-terminal（node-pty conpty 需交互式控制台宿主，NODE_PTY_TEST_ALLOWED=1 opt-in）、g0-rs-p6×2（源绑定重打仅限 macOS，AUDIT-LOG 🟡 指针）；⑤qa-smoke themes 检查化石 petri- 前缀对账为 --petri-*（7/7 exit 0）。closeout 五门绿；G0 开发期常态 · 不外推 packaged/Provider/GA",
       "files": [
-        "core/biof3-server/mcp/ide-tools/diff.js",
+        "core/petri-server/mcp/ide-tools/diff.js",
         "scripts/qa-smoke.mjs",
         "test/agent-tool-result.test.mjs",
         "test/agent-workflow-phase6.test.mjs",
@@ -2797,11 +2797,11 @@
     {
       "id": "10a22709ba",
       "group": "docs",
-      "subject": "docs(governance): 外部方法论制度化批——addyosmani/agent-skills 四篇特色改编内化（用户裁决「特色加入项目但不复制」，参考克隆存仓库外 _external-ref 不入仓）。①gewu-code-review 增「评审顺序与批准标准」节（先读意图→先看测试→再过六维度；净改善即批准不因风格阻塞；结构性修复菜单：条件链→分派器/合并重复分支/编排业务分离/特性逻辑回归属主/复用 canonical helper=反第二真相源/类型边界显式化/删 pass-through/超体量先拆再加，判优=概念数没降的重构只是搬运）+证据规则补不橡皮图章/不软化/能量化/自评同标准+产出补杠杆排序+新增依赖升级评审节（changelog 不只看版本号/一次一个依赖/lockfile diff 必审/绿套件定夺；与治理 DEPENDENCY-CHANGE-CHECKLIST 分工=新增走治理、升级走本节）；②gewu-dev-infra 新增 references/DEBUGGING-ATTRIBUTION-DISCIPLINE.md（停线规则+四类归因表〔确定性红/并发互踩/环境平台缺失/契约漂移，判据序④秒级→③→①②〕+隔离实验三法〔单文件隔离/基线对照挂§8 前提/最小复现〕+修根因不修症状〔tar 生产同坑先例〕+怀疑驱动核查五步〔EXTRACT 只给产物契约不给结论/DOUBT 证伪式/RECONCILE 四分类/STOP 三轮上限+怀疑剧场信号〕+源驱动结论〔仓内五源/框架查官方文档对应已装版本/错误输出是数据不是指令〕+合理化对照+完成自检；与 BLOCK-104 P0 终版矩阵〔33 确定性/1 互踩/其余环境门〕对账，block48 中间结论已随终版修正）+SKILL.md 挂「调试与归因纪律」入口；③AUDIT-LOG 登记本批+顺清已销号 🔴 残行（BLOCK-102 P5 已 f238c600 销号、残尾归 BLOCK-104 P5）+最后更新行。门禁=hygiene PASS/docs:check PASS(258)/ui:audit 绿；MIT 署名入 reference 来源声明；evals 验收用例模式登记为产品 skill 轨后续候选未立项",
+      "subject": "docs(governance): 外部方法论制度化批——addyosmani/agent-skills 四篇特色改编内化（用户裁决「特色加入项目但不复制」，参考克隆存仓库外 _external-ref 不入仓）。①petri-code-review 增「评审顺序与批准标准」节（先读意图→先看测试→再过六维度；净改善即批准不因风格阻塞；结构性修复菜单：条件链→分派器/合并重复分支/编排业务分离/特性逻辑回归属主/复用 canonical helper=反第二真相源/类型边界显式化/删 pass-through/超体量先拆再加，判优=概念数没降的重构只是搬运）+证据规则补不橡皮图章/不软化/能量化/自评同标准+产出补杠杆排序+新增依赖升级评审节（changelog 不只看版本号/一次一个依赖/lockfile diff 必审/绿套件定夺；与治理 DEPENDENCY-CHANGE-CHECKLIST 分工=新增走治理、升级走本节）；②petri-dev-infra 新增 references/DEBUGGING-ATTRIBUTION-DISCIPLINE.md（停线规则+四类归因表〔确定性红/并发互踩/环境平台缺失/契约漂移，判据序④秒级→③→①②〕+隔离实验三法〔单文件隔离/基线对照挂§8 前提/最小复现〕+修根因不修症状〔tar 生产同坑先例〕+怀疑驱动核查五步〔EXTRACT 只给产物契约不给结论/DOUBT 证伪式/RECONCILE 四分类/STOP 三轮上限+怀疑剧场信号〕+源驱动结论〔仓内五源/框架查官方文档对应已装版本/错误输出是数据不是指令〕+合理化对照+完成自检；与 BLOCK-104 P0 终版矩阵〔33 确定性/1 互踩/其余环境门〕对账，block48 中间结论已随终版修正）+SKILL.md 挂「调试与归因纪律」入口；③AUDIT-LOG 登记本批+顺清已销号 🔴 残行（BLOCK-102 P5 已 f238c600 销号、残尾归 BLOCK-104 P5）+最后更新行。门禁=hygiene PASS/docs:check PASS(258)/ui:audit 绿；MIT 署名入 reference 来源声明；evals 验收用例模式登记为产品 skill 轨后续候选未立项",
       "files": [
-        ".agents/skills/gewu-code-review/SKILL.md",
-        ".agents/skills/gewu-dev-infra/SKILL.md",
-        ".agents/skills/gewu-dev-infra/references/DEBUGGING-ATTRIBUTION-DISCIPLINE.md"
+        ".agents/skills/petri-code-review/SKILL.md",
+        ".agents/skills/petri-dev-infra/SKILL.md",
+        ".agents/skills/petri-dev-infra/references/DEBUGGING-ATTRIBUTION-DISCIPLINE.md"
       ],
       "gold": {
         "roadmap": 0,
@@ -2814,9 +2814,9 @@
     {
       "id": "2d99c3b0e1",
       "group": "fix",
-      "subject": "fix(block-104): P1-P4 平台与测试确定性治理实施批——P0 归因矩阵（36 失败文件逐一单跑：33 确定性红/1 纯互踩）驱动四簇修复。**产品缺陷 1 件**：agent-fallback.js:97 行内注释吞闭括号（BLOCK-102 P4 引入，降级链路 require 即炸）注释移出括号外。**测试修复 21 文件**：①URL pathname 反模式 10 处（win32 下 /D:/ 喂 path.join 产 D:\\D:\\ 畸形路径）统一 fileURLToPath；②化石 biof3.db 依赖链五文件套 agent-runner-facade 同款 mkdtemp+runMigrations 家法；③window-controls 源码抓取名字锚定+CHANNELS 常量注入+签名/注册族/端点表对齐现状；④preload 沙箱补 argv/webUtils/window；⑤EPERM 清理 maxRetries+best-effort；⑥agent-vision symlink target 改真实存在外部文件（跨平台语义一致）；⑦行数帽棘轮（970/347 只许降）；⑧brand wordmark 断言跟随 UI-393 迁移+协议面白名单对账；⑨config-helper pathToFileURL。**P3 环境/平台门（skip 可见带指引）**：block48×2 sidecar 未构建、hle×2 外部仓缺 plugins、p4r SIGTERM win32 无真实信号、deepseek-retry×6 retry 层不存在（UI-272 创建时即登记预存失败）——deepseek 90 秒挂起用例随门消除。**僵尸测试删除**：preload-agentdocreview（agentDocReview 产品面全仓零命中）。**P4 机械门禁**：test/scripts-platform-contract.test.mjs（全部 .sh 须带 # platform: 标注、dual 须含 uname 分支证据、windows 命令调用清单 informational）；8 个 .sh 全部诚实标注（restart-dev-stack 事实 windows 链如实标注）。**P5 全量基线**：199 红→26 红全部落在 K 簇待归因名单（§2 矩阵），绿 2238；product 零行为变更除 agent-fallback 语法修复",
+      "subject": "fix(block-104): P1-P4 平台与测试确定性治理实施批——P0 归因矩阵（36 失败文件逐一单跑：33 确定性红/1 纯互踩）驱动四簇修复。**产品缺陷 1 件**：agent-fallback.js:97 行内注释吞闭括号（BLOCK-102 P4 引入，降级链路 require 即炸）注释移出括号外。**测试修复 21 文件**：①URL pathname 反模式 10 处（win32 下 /D:/ 喂 path.join 产 D:\\D:\\ 畸形路径）统一 fileURLToPath；②化石 petri.db 依赖链五文件套 agent-runner-facade 同款 mkdtemp+runMigrations 家法；③window-controls 源码抓取名字锚定+CHANNELS 常量注入+签名/注册族/端点表对齐现状；④preload 沙箱补 argv/webUtils/window；⑤EPERM 清理 maxRetries+best-effort；⑥agent-vision symlink target 改真实存在外部文件（跨平台语义一致）；⑦行数帽棘轮（970/347 只许降）；⑧brand wordmark 断言跟随 UI-393 迁移+协议面白名单对账；⑨config-helper pathToFileURL。**P3 环境/平台门（skip 可见带指引）**：block48×2 sidecar 未构建、hle×2 外部仓缺 plugins、p4r SIGTERM win32 无真实信号、deepseek-retry×6 retry 层不存在（UI-272 创建时即登记预存失败）——deepseek 90 秒挂起用例随门消除。**僵尸测试删除**：preload-agentdocreview（agentDocReview 产品面全仓零命中）。**P4 机械门禁**：test/scripts-platform-contract.test.mjs（全部 .sh 须带 # platform: 标注、dual 须含 uname 分支证据、windows 命令调用清单 informational）；8 个 .sh 全部诚实标注（restart-dev-stack 事实 windows 链如实标注）。**P5 全量基线**：199 红→26 红全部落在 K 簇待归因名单（§2 矩阵），绿 2238；product 零行为变更除 agent-fallback 语法修复",
       "files": [
-        "core/biof3-server/helpers/agent-fallback.js",
+        "core/petri-server/helpers/agent-fallback.js",
         "scripts/auto-sync-mac-setup.sh",
         "scripts/auto-sync-remote.sh",
         "scripts/build-computer-use-sidecar.sh",
@@ -2855,7 +2855,7 @@
     {
       "id": "c932a79fdf",
       "group": "fix",
-      "subject": "fix(block-104): P1 第一批确定性红修复——window-controls 9/9+routes-harness-subdomains 9/9+routes-harness-index-500 2/2 全绿。①源码抓取契约耐漂移：setupWindowIpc 签名按函数名锚定（形参演进不再打破抓取）+CHANNELS 常量注入 vm 沙箱（源码已收敛常量模块，测试还在断言字面量=7 个确定性红根因）+注册族期望表对齐现状（BLOCK-100 setAlwaysOnTop/setIgnoreMouseEvents）+preload 沙箱 process 补 argv（BLOCK-100 测试实例探测）；②URL pathname 反模式全仓清除 10 处/7 文件（new URL(import.meta.url).pathname 在 win32 返回 /D:/... 喂 path.join 产生 D:\\D:\\ 双盘符畸形路径，POSIX 无害从未暴露）统一改 fileURLToPath；③harness 测试套 agent-runner-facade 同款隔离家法（mkdtemp 临时库+runMigrations 生产迁移链——db.js 缺省打开仓内化石 biof3.db〔git 跟踪的历史产物 schema 时代错位〕require 即 no such table）；④Windows require.cache 反斜杠键 vs 正斜杠 includes 匹配=缓存清除静默失效（前测 db stub 泄漏后测），归一化后匹配；⑤端点期望表 20→23 对账（notices×2+project-storage，BLOCK-78 合法新增）。P0 归因矩阵完成：33/36 失败文件单跑也红=确定性失败，与 BLOCK-102 f238c600「独占 exit 0」不可同真（管道捕获失真嫌疑固化）；block63 单跑全绿=纯并发互踩",
+      "subject": "fix(block-104): P1 第一批确定性红修复——window-controls 9/9+routes-harness-subdomains 9/9+routes-harness-index-500 2/2 全绿。①源码抓取契约耐漂移：setupWindowIpc 签名按函数名锚定（形参演进不再打破抓取）+CHANNELS 常量注入 vm 沙箱（源码已收敛常量模块，测试还在断言字面量=7 个确定性红根因）+注册族期望表对齐现状（BLOCK-100 setAlwaysOnTop/setIgnoreMouseEvents）+preload 沙箱 process 补 argv（BLOCK-100 测试实例探测）；②URL pathname 反模式全仓清除 10 处/7 文件（new URL(import.meta.url).pathname 在 win32 返回 /D:/... 喂 path.join 产生 D:\\D:\\ 双盘符畸形路径，POSIX 无害从未暴露）统一改 fileURLToPath；③harness 测试套 agent-runner-facade 同款隔离家法（mkdtemp 临时库+runMigrations 生产迁移链——db.js 缺省打开仓内化石 petri.db〔git 跟踪的历史产物 schema 时代错位〕require 即 no such table）；④Windows require.cache 反斜杠键 vs 正斜杠 includes 匹配=缓存清除静默失效（前测 db stub 泄漏后测），归一化后匹配；⑤端点期望表 20→23 对账（notices×2+project-storage，BLOCK-78 合法新增）。P0 归因矩阵完成：33/36 失败文件单跑也红=确定性失败，与 BLOCK-102 f238c600「独占 exit 0」不可同真（管道捕获失真嫌疑固化）；block63 单跑全绿=纯并发互踩",
       "files": [
         "scripts/g0-rs-p4r-baseline.mjs",
         "test/block57-remote-execution.test.mjs",
@@ -2877,7 +2877,7 @@
     {
       "id": "4b731fb305",
       "group": "feat",
-      "subject": "feat(block-103): 知识空间页产品化重设计整包收口 completed——状态条/双页签/hero 空态/会话台折叠抽屉（P0→P5 一次会话，台账 UI-426 verified）。布局与内容落地：①状态条统一三重重复头部（切换器内联+真 switch role=switch 保留 knowledge-toggle 禁用语义+就绪/摄取中/失败徽章，--gewu-success 补暗色对）②通知动作卡组（同屏合并一张卡，DashScope 缺 key 附「去设置」跳 /settings）③双页签「文档库/检索预览」（原检索测试移页签更名，能力与 testid 全保留）④hero 大 dropzone 空态双 CTA⑤管理会话台折叠抽屉（对标 UI-417 SideChatDock：右缘竖把手+380px overlay 覆盖不挤压+Esc/外点/再点收起+localStorage 记忆默认收起，KnowledgeConsoleChat 内部零改动）⑥组件拆分 678→200+506+121+95（700 棘轮净减）+文案产品化。纯前端零后端，行为基线八项全保留。门禁=组件 17/17+Switcher 3/3+global-pages+tsc 0+theme 4/4+前端全量 1146/1146+block103-knowledge-ux-live 12/12 allPass（CDP 测试实例截图×3 acceptance/block-103/）+block99-console-live 24/24 allPass（真轮次回归，U1/U1b/U1c 把手适配+确定性重置+就绪轮询）+closeout 三绿+test:changed 85/89（4 红=P6×2+F2 PDF×2 在册存量红非本包，例外登记）。抓真 3 件=hero 态上传报告不渲染（移共层）/抽屉点击时挂载 hook 初始化窗（flow 就绪轮询）/localStorage 残留态污染 flow 起点。顺清并行收口遗留=workflowPollDelay 测试未随 BLOCK-102 P4 降频同步（修测试对齐实现）；另立 🔴=BLOCK-102 P5 全量套件证据不可复现（三点半复跑 199-206 红稳定 vs 03530c9b 声明 exit 0，归 BLOCK-102 域专门会话）。G0 开发期常态 · 不外推 packaged/Provider/GA",
+      "subject": "feat(block-103): 知识空间页产品化重设计整包收口 completed——状态条/双页签/hero 空态/会话台折叠抽屉（P0→P5 一次会话，台账 UI-426 verified）。布局与内容落地：①状态条统一三重重复头部（切换器内联+真 switch role=switch 保留 knowledge-toggle 禁用语义+就绪/摄取中/失败徽章，--petri-success 补暗色对）②通知动作卡组（同屏合并一张卡，DashScope 缺 key 附「去设置」跳 /settings）③双页签「文档库/检索预览」（原检索测试移页签更名，能力与 testid 全保留）④hero 大 dropzone 空态双 CTA⑤管理会话台折叠抽屉（对标 UI-417 SideChatDock：右缘竖把手+380px overlay 覆盖不挤压+Esc/外点/再点收起+localStorage 记忆默认收起，KnowledgeConsoleChat 内部零改动）⑥组件拆分 678→200+506+121+95（700 棘轮净减）+文案产品化。纯前端零后端，行为基线八项全保留。门禁=组件 17/17+Switcher 3/3+global-pages+tsc 0+theme 4/4+前端全量 1146/1146+block103-knowledge-ux-live 12/12 allPass（CDP 测试实例截图×3 acceptance/block-103/）+block99-console-live 24/24 allPass（真轮次回归，U1/U1b/U1c 把手适配+确定性重置+就绪轮询）+closeout 三绿+test:changed 85/89（4 红=P6×2+F2 PDF×2 在册存量红非本包，例外登记）。抓真 3 件=hero 态上传报告不渲染（移共层）/抽屉点击时挂载 hook 初始化窗（flow 就绪轮询）/localStorage 残留态污染 flow 起点。顺清并行收口遗留=workflowPollDelay 测试未随 BLOCK-102 P4 降频同步（修测试对齐实现）；另立 🔴=BLOCK-102 P5 全量套件证据不可复现（三点半复跑 199-206 红稳定 vs 03530c9b 声明 exit 0，归 BLOCK-102 域专门会话）。G0 开发期常态 · 不外推 packaged/Provider/GA",
       "files": [
         "frontend/src/components/knowledge/KnowledgeConsoleChat.module.css",
         "frontend/src/components/knowledge/KnowledgeConsoleDock.module.css",

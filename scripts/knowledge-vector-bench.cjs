@@ -48,13 +48,13 @@ function cosineSim(a, b) {
 }
 
 async function main() {
-  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-kbench-'));
-  process.env.BIOF3_DB_PATH = path.join(tempRoot, 'bench.db');
-  process.env.BIOF3_LOCAL_DATA_DIR = tempRoot;
-  process.env.BIOF3_BETTER_SQLITE3_ROOT = path.join(__dirname, '..', 'core', 'biof3-server');
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-kbench-'));
+  process.env.PETRI_DB_PATH = path.join(tempRoot, 'bench.db');
+  process.env.PETRI_LOCAL_DATA_DIR = tempRoot;
+  process.env.PETRI_BETTER_SQLITE3_ROOT = path.join(__dirname, '..', 'core', 'petri-server');
   const { runMigrations } = require('../src/migration-runner.js');
-  await runMigrations(process.env.BIOF3_DB_PATH, path.join(__dirname, '..', 'src', 'migrations'));
-  const sqlite = require('../core/biof3-server/db.js').getDatabase();
+  await runMigrations(process.env.PETRI_DB_PATH, path.join(__dirname, '..', 'src', 'migrations'));
+  const sqlite = require('../core/petri-server/db.js').getDatabase();
 
   console.log(`# 向量扫描基准（dim=${DIM}，BLOB 载入 + JS cosine，模拟 searchKnowledge 向量通道）`);
   const results = [];

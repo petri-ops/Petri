@@ -61,7 +61,7 @@
 | ✅已处理 | 2026-07-24 | LoopRun 契约漂移已修复：`automationMode` 固定为 guided/confirm/trusted，新增独立 `executionIntent=task_draft/task_execute`；生产新建统一走 `buildLoopRun`，旧 task_* 行只读归一化，恢复仍按项目+会话复用同一 run。 | 本文件 §7 | 见 §7 |
 | ✅已处理 | 2026-07-23 | HLE-C1 完成
 | ✅已处理 | 2026-07-23 | HLE-C2 完成
-| ✅已处理 | 2026-07-23 | HLE-C5R：真实 Bulk RNA 聊天路径发现 Plugin Contract 未统一——DESeq2 coldata 绑定丢失、log2FoldChange/log2FC 列名漂移、volcano-plot 硬编码 log2FC、Workflow DAG 缺少 deg-standardizer、failed Job 假成功防护基于文件存在而非 artifactTruth、metadata→coldata 映射未进入 Job 参数。合成测试通过但产品路径失败。修复：biof3.deg.v1 profile、volcano-plot lfc_col 参数、DESeq2 preflight、bulk-rna-core 4-step DAG、Repair Boundary、scientific-task-planner coldataBinding、agent-runner false-success 检测。1032/1032 测试全量通过，插件契约 lint 0 错误。真实产品验收待 Step 7。 |
+| ✅已处理 | 2026-07-23 | HLE-C5R：真实 Bulk RNA 聊天路径发现 Plugin Contract 未统一——DESeq2 coldata 绑定丢失、log2FoldChange/log2FC 列名漂移、volcano-plot 硬编码 log2FC、Workflow DAG 缺少 deg-standardizer、failed Job 假成功防护基于文件存在而非 artifactTruth、metadata→coldata 映射未进入 Job 参数。合成测试通过但产品路径失败。修复：petri.deg.v1 profile、volcano-plot lfc_col 参数、DESeq2 preflight、bulk-rna-core 4-step DAG、Repair Boundary、scientific-task-planner coldataBinding、agent-runner false-success 检测。1032/1032 测试全量通过，插件契约 lint 0 错误。真实产品验收待 Step 7。 |
 | ✅已处理 | 2026-07-23 | DESeq2 存在 built-in、新旧 installed 快照和 `tool-scripts` 三条脚本来源，真实加载被 6 月 installed 副本覆盖。现以 `resources/built-in-plugins/deseq2` 为 builtin-canonical 唯一源码：移除 installed 台账/本机副本和 legacy R 脚本，普通 installed 不得覆盖，显式 development 仍可调试覆盖，并补充来源选择回归。 |
 | ✅已处理 | 2026-07-23 | HLE-C5 离线基础：server.js 启动恢复（HLE-C5）接入 listRunningLoopRuns；running LoopRun → failed(recovery_required) 平滑过渡；Loop Controller 修复 require('./loop-failure-diagnoser') 引用 loop-repair-strategy；22/22 恢复矩阵测试通过；46/46 SPT-1 三轨离线验收测试通过；440/440 Loop 离线测试全量通过。注意：离线测试通过不等于真实产品路径通过，HLE-C5 真实产品验收待 HLE-C5R 完成。 | 本提交 | `core/r-server/server.js`, `core/r-server/db.js`, `core/shared-backend/loop-controller.js`, `test/loop-recovery-integration.test.mjs`, `test/loop-spt1-acceptance.test.mjs` |
 
@@ -153,7 +153,7 @@ git branch -d codex/fix-collapsed-right-titlebar-minimal \
 3. **可注入的 download/hash/install 函数**，测试用 mock 完全覆盖，无真实网络调用
 4. **IPC 只暴露 list（只读）**，provision/remove 由 Harness 编排层内部完成，符合 D8 透明进度
 5. **tools-executor.js 和 mcp/registry.js 两处 R_LIBS_USER 注入逻辑一致**，provisioned bundle 优先级最高
-6. **HarnessEnvironment 组件遵循 Stage 1 UI 规范**（field__label / field__hint / biof3-badge）
+6. **HarnessEnvironment 组件遵循 Stage 1 UI 规范**（field__label / field__hint / petri-badge）
 
 ### 问题 A：代码重复（R_LIBS_USER 组装逻辑）
 
@@ -203,8 +203,8 @@ git branch -d codex/fix-collapsed-right-titlebar-minimal \
 - **对验收影响**：不阻塞 M1
 - **✅ 处理（2026-07-18，主 agent）**：在 `capability-provisioning.js` 实现 host 白名单，作为独立 gate 加在 `provisionCapability` 的 readiness 检查之后、任何下载之前：
   - `checkUrlAllowed(url, options)`：强制 `https:`（对齐 `macos-oss-updater.js` 的 https-only），host 走白名单；返回结构化 `{ok:false, reason}`（`invalid_url` / `insecure_protocol` / `host_not_allowed`），不抛异常。
-  - 默认白名单 `DEFAULT_ALLOWED_HOSTS` = 真实分发源 `biof3-uploads.oss-cn-hangzhou.aliyuncs.com` + 后缀 `.aliyuncs.com`（对齐 D7 OSS CDN）。`.` 开头条目为后缀匹配且防 `aliyuncs.com.evil.net` 型 lookalike，其余精确匹配。
-  - 可覆盖：`options.allowedHosts`（测试/编排）与 `BIOF3_CAPABILITY_ALLOWED_HOSTS` 环境变量（D4 分发源可换、只改配置不改逻辑）。
+  - 默认白名单 `DEFAULT_ALLOWED_HOSTS` = 真实分发源 `petri-uploads.oss-cn-hangzhou.aliyuncs.com` + 后缀 `.aliyuncs.com`（对齐 D7 OSS CDN）。`.` 开头条目为后缀匹配且防 `aliyuncs.com.evil.net` 型 lookalike，其余精确匹配。
+  - 可覆盖：`options.allowedHosts`（测试/编排）与 `PETRI_CAPABILITY_ALLOWED_HOSTS` 环境变量（D4 分发源可换、只改配置不改逻辑）。
   - gate 位置刻意在 readiness 之后：已就位的 capability 短路返回、不重新校验，收紧白名单不会 strand 已装 bundle。
   - 新增 5 个测试（off-allowlist 拒绝且不下载 / http 拒绝 / allowedHosts 覆盖 / checkUrlAllowed 匹配规则 / env 覆盖），本文件测试 13→18，全通过。
   - **顺带纠正设计文档失实描述**：设计文档 §3.3/§5.5 与本审计原文均称"复用 plugin-manager 的 host 白名单逻辑"——经核实 `src/plugin-manager.js#downloadFile`（及 `content-sync.js#downloadFile`）**从来没有 host 白名单**，都是裸 `https.get(url)`；全仓唯一做 host 校验的是 `macos-oss-updater.js#resolveArtifactUrl`（https + 同源）。因此本次是**新实现**而非复用，并已修正 `stage3-standard-workflows-design.md` §3.3/§5.2 的错误表述，避免后续 agent 继续被"现成白名单"误导。
@@ -240,11 +240,11 @@ git branch -d codex/fix-collapsed-right-titlebar-minimal \
   3. 或在 package.json 中扩展 test glob 为 `node --test test/*.test.mjs core/test/*.mjs`
 - **优先级**：中（门禁覆盖范围直接影响 CI 可信度）
 - **对验收影响**：不阻塞 Stage 3，但影响长期代码质量
-- **✅ 处理（2026-07-17，主 agent）**：未采用方案 3（`core/test/*.mjs` glob 会拖入 4 个打 `biof3.com` 已下线云平台的 live smoke，CI 必挂）。改为按测试性质分流：
+- **✅ 处理（2026-07-17，主 agent）**：未采用方案 3（`core/test/*.mjs` glob 会拖入 4 个打 `petri.com` 已下线云平台的 live smoke，CI 必挂）。改为按测试性质分流：
   - 3 个纯单测迁进门禁：`agent-workflow.mjs` / `execution-context.mjs` / `final-report.mjs` → `test/*.test.mjs`（`git mv` 保留历史，修正相对 require 路径）。同步更新引用它们的 `package.json`（harness:phase6 / harness:agent-evaluate）与 `.github/workflows/ci.yml`。
   - `report-theme.mjs`：`test/report-theme.test.mjs` 已是其超集（含 isHtmlFile + XSS 用例），删除 `core/test/` 陈旧副本。
   - `sanitizer.test.mjs`：随死模块删除（见问题 E）。
-  - 4 个 live-network smoke（`agent-tools.smoke` / `copilot-scenarios` / `smoke-phase-c3` / `smoke-tools`）**有意保留在 `core/test/`**：它们打已下线的 `biof3.com` 云平台、需凭证、CI 里会挂，不应进门禁。已在本记录标注其性质，避免后续误纳入。
+  - 4 个 live-network smoke（`agent-tools.smoke` / `copilot-scenarios` / `smoke-phase-c3` / `smoke-tools`）**有意保留在 `core/test/`**：它们打已下线的 `petri.com` 云平台、需凭证、CI 里会挂，不应进门禁。已在本记录标注其性质，避免后续误纳入。
   - **顺带抓到的真 bug**：迁移后 `npm test` 覆盖到 `agent-workflow.test.mjs`，暴露 `listAgentWorkflowTemplates` 断言仍期望 2 个模板 —— 但 WGCNA 提交 `e30bc90` 已新增第 3 个 `coexpression-network` 模板。该测试在 CI 门禁内、却不在本地 `npm test` glob 内，正是本问题所述"假绿"：`e30bc90` 一旦 push 就会让 CI 变红。已把断言更新为 3 模板（含 coexpression-network）。本地 `npm test` 从 324→367（+43 迁移用例），唯一 fail 仍是环境性 sqlite ABI。
 
 ### 问题 G：project-run-layout.js isAdmin 硬编码
@@ -385,7 +385,7 @@ git branch -d codex/fix-collapsed-right-titlebar-minimal \
 | 2026-07-17 | 清理 §2.3 5 个已合并 codex 残留分支（worktree prune + branch -d），保留 §2.2 待评估分支 | 主 agent |
 | 2026-07-18 | 处理问题 D：为 capability-provisioning 实现 host 白名单（`checkUrlAllowed`：https-only + 默认 OSS CDN 白名单 + `options.allowedHosts`/env 覆盖），gate 加在 readiness 之后不 strand 已装 bundle，补 5 个测试（13→18）；顺带纠正设计文档 §3.3/§5.5「复用 plugin-manager host 白名单」的失实描述（该白名单从不存在，本次为新实现） | 主 agent |
 | 2026-07-18 | Stage 3 M3：实现多 Provider harness 评测脚本 `scripts/harness-provider-eval.mjs`（6 环节探针，前 4 必需；Markdown+JSON 双报告到 gitignored `eval-reports/`；凭据只读环境变量、不落盘/不打印/不进 CI）+ 31 个 mock 单测纳入门禁（`test/harness-provider-eval.test.mjs`，零网络）+ package.json `harness:provider-eval` 接线。真机跑分待用户 key/endpoint。全量测试 367→406（+39），唯一 fail 仍为环境 sqlite ABI。 | 主 agent |
-| 2026-07-18 | Stage 3 M3 首次真机跑分（用户执行 `source .biof3-secrets && npm run harness:provider-eval`）：DeepSeek + Anthropic 双目标各 6/6 全绿，exit 0，达成"≥2 Provider 通过必需项 + 可比较报告 + 失败分类"出口判据；结论记入 stage3 §9（不含 key） | 主 agent |
+| 2026-07-18 | Stage 3 M3 首次真机跑分（用户执行 `source .petri-secrets && npm run harness:provider-eval`）：DeepSeek + Anthropic 双目标各 6/6 全绿，exit 0，达成"≥2 Provider 通过必需项 + 可比较报告 + 失败分类"出口判据；结论记入 stage3 §9（不含 key） | 主 agent |
 | 2026-07-18 | Stage 3 M5 三方插件接入指南落地：新建 `docs/third-party-plugin-guide.md`（基于真实 go-kegg/deseq2/volcano-plot 插件），stage3 §15 占位改为指向该指南 | 主 agent |
 | 2026-07-18 | Stage 3 B1/B2：新增 R bundle 构建脚本 build-r-bundle.mjs + capability-bundles 注册表 + 运行路径接线（ensureBundlesForPlugin 接进 tools-executor/registry），闭合问题 H；4 wiring 测试，全量 423 零回归 | 主 agent |
 | 2026-07-19 | Stage 4 第一批：修复 migration 系统 Node / Electron ABI 边界（问题 I），全量根测试首次 0 fail；开发态与 arm64 打包态空目录启动通过 | 主 agent |

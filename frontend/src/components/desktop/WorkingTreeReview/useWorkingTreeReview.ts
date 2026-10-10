@@ -4,13 +4,13 @@
 // 持有 working tree review 的全局状态：元数据、文件列表、当前选中文件、
 // hunk 决策（pending/accept/reject）、任务上下文。
 // 订阅 agent:task-done 事件实现自动弹出。
-// 严格通过 desktopBridge / biof3Desktop.workingTreeReview 通道访问 IPC。
+// 严格通过 desktopBridge / petriDesktop.workingTreeReview 通道访问 IPC。
 // ============================================================
 
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { getBridge } from '@/lib/desktopBridge';
-import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
+import { petriEvents, subscribePetriEvent } from '@/lib/events';
 import { hunkDecisionKey, hunkDecisionList } from './reviewModeHelpers';
 
 // BLOCK-92 Wave B-3 — 类型定义外迁 ./useWorkingTreeReview/types.ts（原 15-207 行，纯搬运零行为变化）。
@@ -298,12 +298,12 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
     void refresh();
   }, [projectId, refresh]);
 
-  // 订阅 agent:task-done（renderer 侧主路径）—— SSE done 派发的 biof3:agent-task-done
+  // 订阅 agent:task-done（renderer 侧主路径）—— SSE done 派发的 petri:agent-task-done
   // 会自动弹出浮层。preload 的 bridge.onTaskDone（main→renderer webContents.send）
   // 保留作为备用通道，给未来 main 真触发时使用。
   useEffect(() => {
-    const unsubscribe = subscribeGewuEvent(
-      gewuEvents.agentTaskDone,
+    const unsubscribe = subscribePetriEvent(
+      petriEvents.agentTaskDone,
       (detail) => {
         const incoming = detail?.taskId || '';
         setTaskId(incoming);
@@ -331,7 +331,7 @@ export function useWorkingTreeReview(options: UseWorkingTreeReviewOptions = {}):
   // BLOCK-28.7 — 聊天区改动卡片点击文件行：刷新并选中该文件。
   // 路径必须在当前工作区 status 里（防御外部乱传）；diff 未覆盖时先 refresh。
   useEffect(() => {
-    return subscribeGewuEvent(gewuEvents.reviewOpenFile, (detail) => {
+    return subscribePetriEvent(petriEvents.reviewOpenFile, (detail) => {
       const target = detail?.filePath || '';
       if (!target) return;
       setSelectedFilePath((current) => (current === target ? current : target));

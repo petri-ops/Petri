@@ -11,7 +11,7 @@
         "baseUrl": "https://47.110.228.168:8443",
         "platform": "darwin",
         "arch": "arm64",
-        "gewuVersion": "1.0.0",
+        "petriVersion": "1.0.0",
         "executors": {
           "r": true,
           "python": true
@@ -39,7 +39,7 @@
       "baseUrl": "https://47.110.228.168:8443",
       "platform": "darwin",
       "arch": "arm64",
-      "gewuVersion": "1.0.0",
+      "petriVersion": "1.0.0",
       "executors": {
         "r": true,
         "python": true

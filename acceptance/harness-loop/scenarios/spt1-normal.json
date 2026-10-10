@@ -28,7 +28,7 @@
         "sequence": 2,
         "observedStateDigest": "node_sample_metadata_validator_ready",
         "goalGapIds": [],
-        "proposedAction": {"type": "run_tool", "toolId": "sample-metadata-validator", "inputs": {"counts": "../gewu-pack-bio/plugins/deseq2/demo-data/counts.csv", "metadata": "../gewu-pack-bio/plugins/deseq2/demo-data/metadata.csv"}},
+        "proposedAction": {"type": "run_tool", "toolId": "sample-metadata-validator", "inputs": {"counts": "../petri-pack-bio/plugins/deseq2/demo-data/counts.csv", "metadata": "../petri-pack-bio/plugins/deseq2/demo-data/metadata.csv"}},
         "decision": "continue",
         "decisionReasonCode": "VALID_INPUTS_CONFIRMED",
         "publicConclusion": "输入校验通过：4 个样本，两组（WT/KO），contrast 可估计。"

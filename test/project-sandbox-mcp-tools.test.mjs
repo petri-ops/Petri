@@ -3,7 +3,7 @@
  *
  * Phase 3: MCP/Agent 工具入口收敛测试
  *
- * 验证 biof3-server/mcp/registry.js 的物理目录解析：
+ * 验证 petri-server/mcp/registry.js 的物理目录解析：
  * - 物理目录主键统一使用正式 tool_job.id（不再用 mcp_* 身份）
  * - 带 projectId → 结果落在 <workspace>/results/jobs/<toolJobId>（项目沙盒）
  * - 无 projectId → 落共享全局 tool-jobs/<toolJobId>（不再是独立 mcp-tool-jobs）
@@ -25,26 +25,26 @@ const __dirname = path.dirname(__filename);
 const require = createRequire(import.meta.url);
 
 // BLOCK-49 加映清债 —— 统一临时 DB 自举（存量：单跑/全量缺 projects 表）
-//（BIOF3_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）
+//（PETRI_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）
 {
   const fsx = require('node:fs');
   const osx = require('node:os');
   const pth = require('node:path');
   const urlx = require('node:url');
   const hereDir = pth.dirname(urlx.fileURLToPath(import.meta.url));
-  const Database = require(pth.resolve(hereDir, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const tempDbDir = fsx.mkdtempSync(pth.join(osx.tmpdir(), 'biof3-sweep-db-'));
-  const boot = new Database(pth.join(tempDbDir, 'biof3.db'));
+  const Database = require(pth.resolve(hereDir, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const tempDbDir = fsx.mkdtempSync(pth.join(osx.tmpdir(), 'petri-sweep-db-'));
+  const boot = new Database(pth.join(tempDbDir, 'petri.db'));
   const migrationsDir = pth.resolve(hereDir, '..', 'src', 'migrations');
   for (const f of fsx.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fsx.readFileSync(pth.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = pth.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = pth.join(tempDbDir, 'petri.db');
   process.on('exit', () => { try { fsx.rmSync(tempDbDir, { recursive: true, force: true }); } catch {} });
 }
 
-const R_SERVER = path.join(__dirname, '..', 'core', 'biof3-server');
+const R_SERVER = path.join(__dirname, '..', 'core', 'petri-server');
 const db = require(path.join(R_SERVER, 'db.js'));
 const registry = require(path.join(R_SERVER, 'mcp', 'registry.js'));
 const { resolveMcpJobLayout, GLOBAL_JOBS_DIR } = registry._test;
@@ -56,7 +56,7 @@ let savedGetProject;
 const createdDirs = [];
 
 before(() => {
-  tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-mcp-sandbox-'));
+  tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-mcp-sandbox-'));
   workspaceRoot = path.join(tmpRoot, 'mcp-workspace');
   fs.mkdirSync(workspaceRoot, { recursive: true });
 

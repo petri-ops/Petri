@@ -23,19 +23,19 @@ import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs';
 
-const TMP_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-loop-route-'));
+const TMP_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-loop-route-'));
 const DB_PATH = path.join(TMP_DIR, 'test.db');
-process.env.BIOF3_DB_PATH = DB_PATH;
+process.env.PETRI_DB_PATH = DB_PATH;
 
 // ---------------------------------------------------------------------------
 // Import modules
 // ---------------------------------------------------------------------------
 const lc = (await import('../core/shared-backend/loop-contract.js')).default;
 
-// Load DB — must happen after BIOF3_DB_PATH is set
+// Load DB — must happen after PETRI_DB_PATH is set
 let db;
 try {
-  const dbMod = await import('../core/biof3-server/db.js');
+  const dbMod = await import('../core/petri-server/db.js');
   db = dbMod.default || dbMod;
 } catch {
   db = null;

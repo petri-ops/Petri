@@ -26,7 +26,7 @@
 | 3 | App.tsx 移除 `<SkillsSidebar>` + import + marginLeft | `frontend/src/App.tsx` | grep 确认无 SkillsSidebar import / JSX |
 | 4 | 删除 SkillsSidebar.tsx + .module.css | `frontend/src/components/desktop/SkillsSidebar*` | `ls` 确认文件不存在 |
 | 5 | pages/skills/index.tsx error 状态「返回首页」按钮 | `frontend/src/pages/skills/index.tsx` L101-118 | grep `handleReturnHome\|返回首页\|arrow-left` |
-| 6 | styles/custom.css 4 token 补全 | `frontend/src/styles/custom.css` 行 74 83 85 86 + 暗色主题行 192 194 | grep `--biof3-accent-soft\|--biof3-border-color\|--biof3-font-mono\|--biof3-font-sans` |
+| 6 | styles/custom.css 4 token 补全 | `frontend/src/styles/custom.css` 行 74 83 85 86 + 暗色主题行 192 194 | grep `--petri-accent-soft\|--petri-border-color\|--petri-font-mono\|--petri-font-sans` |
 
 PHASE 1 通过 grep 综合验证 6 项，确认 commit `01c5e0b` 以来**未被任何后续 commit 回退**（`git log 01c5e0b..HEAD -- <6 UI-161 文件>` 应为空）。
 

@@ -141,8 +141,8 @@ function inspectDirectoryComponent(anchor, parent, component, { create = false }
 
 function resolvePrivateDirectory(workspaceRoot, components, { create = false, allowMissing = false } = {}) {
   const anchor = resolveWorkspaceAnchor(workspaceRoot);
-  if (!Array.isArray(components) || components.length === 0 || components[0] !== '.biof3') {
-    privatePathError('private_path_component_invalid', 'Result Studio private paths must start at .biof3.');
+  if (!Array.isArray(components) || components.length === 0 || components[0] !== '.petri') {
+    privatePathError('private_path_component_invalid', 'Result Studio private paths must start at .petri.');
   }
   let current = anchor;
   for (const component of components) {
@@ -173,7 +173,7 @@ function inspectPrivateEntry(
   components,
   { allowMissing = false, kind = 'any' } = {},
 ) {
-  if (!Array.isArray(components) || components.length < 2 || components[0] !== '.biof3') {
+  if (!Array.isArray(components) || components.length < 2 || components[0] !== '.petri') {
     privatePathError('private_path_component_invalid', 'Result Studio private entry is invalid.');
   }
   const anchor = resolveWorkspaceAnchor(workspaceRoot);

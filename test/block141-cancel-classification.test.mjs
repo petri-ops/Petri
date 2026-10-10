@@ -57,19 +57,19 @@ async function waitUntil(fn, label, timeoutMs = 20000, debugFn = null) {
 }
 
 // ── 共享 harness（单进程单 db.js 单例；两测试共用同一 tmp/db） ──────────
-// 形态与 test/block130-queue.test.mjs 同构：BIOF3_DB_PATH → 生产 migration 链
+// 形态与 test/block130-queue.test.mjs 同构：PETRI_DB_PATH → 生产 migration 链
 // → db.js 异步 facade。执行器 binPath 钉 process.execPath（零外部运行时依赖，
 // 插件脚本以 JS 内容落地、扩展名不影响执行）。
-process.env.BIOF3_DB_PATH = path.join(
-  fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block141-')),
-  'biof3.db',
+process.env.PETRI_DB_PATH = path.join(
+  fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block141-')),
+  'petri.db',
 );
 const { runMigrations } = require('../src/migration-runner');
-await runMigrations(process.env.BIOF3_DB_PATH, path.join(ROOT, 'src', 'migrations'));
-const dbMod = require('../core/biof3-server/db.js');
+await runMigrations(process.env.PETRI_DB_PATH, path.join(ROOT, 'src', 'migrations'));
+const dbMod = require('../core/petri-server/db.js');
 const db = dbMod.getAsyncDatabase();
 
-const tempDir = path.dirname(process.env.BIOF3_DB_PATH);
+const tempDir = path.dirname(process.env.PETRI_DB_PATH);
 const pluginDir = path.join(tempDir, 'plugins', PLUGIN_ID);
 fs.mkdirSync(path.join(pluginDir, 'scripts'), { recursive: true });
 fs.writeFileSync(
@@ -105,9 +105,9 @@ fs.writeFileSync(
   ].join('\n'),
 );
 // 测试进程独占替换全局插件注册表（本文件即该注册表的唯一消费者，无需保存恢复——
-// 原 `const realPlugins = globalThis._biof3Plugins` 从未回读，no-unused-vars 真修删除）。
-globalThis._biof3Plugins = new Map();
-globalThis._biof3Plugins.set(PLUGIN_ID, {
+// 原 `const realPlugins = globalThis._petriPlugins` 从未回读，no-unused-vars 真修删除）。
+globalThis._petriPlugins = new Map();
+globalThis._petriPlugins.set(PLUGIN_ID, {
   id: PLUGIN_ID,
   language: 'python',
   pluginDir,
@@ -125,11 +125,11 @@ executorsMod.getExecutor = (lang) => ({
   getRuntimeVersion: () => 'block141-test-node',
 });
 
-const { activeToolJobs } = require('../core/biof3-server/helpers/tool-job-lifecycle-registry.js');
-const { requestActiveToolJobCancellation } = require('../core/biof3-server/helpers/tools-executor/active-job.js');
+const { activeToolJobs } = require('../core/petri-server/helpers/tool-job-lifecycle-registry.js');
+const { requestActiveToolJobCancellation } = require('../core/petri-server/helpers/tools-executor/active-job.js');
 
 test('BLOCK-128-① 竞窗契约：取消击杀在途时 finalize 必须落 cancelled（分类先于 artifact/失败分支；HK-01 红转绿）', async () => {
-  const { _runPluginScript } = require('../core/biof3-server/mcp/registry/run-plugin-script.js');
+  const { _runPluginScript } = require('../core/petri-server/mcp/registry/run-plugin-script.js');
   const toolJobId = 'tj_block141_race';
   const jobDir = path.join(tempDir, 'tool-jobs', toolJobId);
   fs.mkdirSync(path.join(jobDir, 'output'), { recursive: true });
@@ -191,7 +191,7 @@ test('BLOCK-128-① 竞窗契约：取消击杀在途时 finalize 必须落 canc
 });
 
 test('BLOCK-128-① 对照组：HTTP finalizeJobRun 链 in-process 取消收敛 cancelled + ③ ownership pid 落库', async () => {
-  const { createToolsExecutor } = require('../core/biof3-server/helpers/tools-executor.js');
+  const { createToolsExecutor } = require('../core/petri-server/helpers/tools-executor.js');
   const jobsDir = path.join(tempDir, 'tool-jobs-http');
   const executor = createToolsExecutor({
     db,
@@ -248,7 +248,7 @@ test('BLOCK-128-① 对照组：HTTP finalizeJobRun 链 in-process 取消收敛 
 });
 
 test('BLOCK-128-① 源码契约：createJobRunFinalizer 取消分类先于 artifact 真值校验（回归守护）', () => {
-  const src = fs.readFileSync(path.join(ROOT, 'core/biof3-server/helpers/tools-executor.js'), 'utf8');
+  const src = fs.readFileSync(path.join(ROOT, 'core/petri-server/helpers/tools-executor.js'), 'utf8');
   const start = src.indexOf('function createJobRunFinalizer');
   const end = src.indexOf('async function executeJob');
   assert.ok(start > 0 && end > start, 'createJobRunFinalizer 工厂在 executeJob 之前');

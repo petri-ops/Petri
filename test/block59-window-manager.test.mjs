@@ -506,7 +506,7 @@ describe('适配器与 preload 静态契约', () => {
 
   test('preload 暴露 windowManager 桥段', () => {
     const src = fs.readFileSync(PRELOAD, 'utf8');
-    assert.match(src, /windowManager:\s*\{/, 'biof3Desktop.windowManager 缺失');
+    assert.match(src, /windowManager:\s*\{/, 'petriDesktop.windowManager 缺失');
     for (const method of ['popOut', 'returnToDock', 'minimizeToRail', 'restore', 'remove', 'snapshot', 'self', 'onStateChanged']) {
       assert.match(src, new RegExp(`${method}:\\s*\\(`), `windowManager.${method} 缺失`);
     }

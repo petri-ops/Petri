@@ -32,7 +32,7 @@ const {
 } = layoutModule;
 
 // 临时测试目录
-const TEST_ROOT = path.join(os.tmpdir(), 'biof3-test-layout-' + Date.now());
+const TEST_ROOT = path.join(os.tmpdir(), 'petri-test-layout-' + Date.now());
 
 describe('Phase 1: Project Run Layout Resolver', () => {
   let testWorkspace;

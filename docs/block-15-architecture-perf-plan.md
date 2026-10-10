@@ -154,7 +154,7 @@ main.js 中 16 个 BLOCK-9.1 相关 import（14 个 plan 登记 + 2 个 plan 未
 
 | # | channel 名 | handler 函数 | 行号 | Type |
 |---|-----------|-------------|------|------|
-| 1 | `biof3:agent-workbench-flags` | `setupAgentWorkbenchFlagsIpc` 内联 | 604 | `handle` |
+| 1 | `petri:agent-workbench-flags` | `setupAgentWorkbenchFlagsIpc` 内联 | 604 | `handle` |
 | 2 | `window:minimize` | `setupWindowIpc` 内联 | 619 | `on` |
 | 3 | `window:maximize` | `setupWindowIpc` 内联 | 622 | `on` |
 | 4 | `window:close` | `setupWindowIpc` 内联 | 631 | `on` |
@@ -325,7 +325,7 @@ main.js 中 16 个 BLOCK-9.1 相关 import（14 个 plan 登记 + 2 个 plan 未
 
 | # | Channel | Type | Handler 行 |
 |---|---------|------|-----------|
-| 1 | `AGENT_WORKBENCH_FLAG_CHANNEL` ("biof3:agent-workbench-flags") | handle | 604 |
+| 1 | `AGENT_WORKBENCH_FLAG_CHANNEL` ("petri:agent-workbench-flags") | handle | 604 |
 | 2 | `window:minimize` | on | 619 |
 | 3 | `window:maximize` | on | 622 |
 | 4 | `window:close` | on | 631 |

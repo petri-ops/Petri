@@ -6,11 +6,11 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const pluginLoader = require('../core/biof3-server/plugin-loader.js');
-const { renderPluginDemoPathsForPrompt } = require('../core/biof3-server/helpers/plugin-demo-prompt.js');
+const pluginLoader = require('../core/petri-server/plugin-loader.js');
+const { renderPluginDemoPathsForPrompt } = require('../core/petri-server/helpers/plugin-demo-prompt.js');
 
 test('loadPluginsFromDisk refreshes changed installed plugin metadata and removes deleted plugins', () => {
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-plugin-refresh-'));
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-plugin-refresh-'));
   const pluginDir = path.join(tmpDir, 'demo-tool');
   const scriptsDir = path.join(pluginDir, 'scripts');
   fs.mkdirSync(scriptsDir, { recursive: true });
@@ -52,12 +52,12 @@ test('loadPluginsFromDisk refreshes changed installed plugin metadata and remove
   );
   fs.writeFileSync(path.join(scriptsDir, 'demo-tool.R'), 'cat("first\\n")\n');
 
-  const previousMap = globalThis._biof3Plugins;
+  const previousMap = globalThis._petriPlugins;
   try {
-    globalThis._biof3Plugins = new Map();
+    globalThis._petriPlugins = new Map();
 
     pluginLoader.loadPluginsFromDisk(tmpDir);
-    pluginLoader.loadBuiltInPlugins(process.env.BIOF3_BUILT_IN_PLUGINS_DIR);
+    pluginLoader.loadBuiltInPlugins(process.env.PETRI_BUILT_IN_PLUGINS_DIR);
     let defs = pluginLoader.getAllToolDefinitions();
     assert.equal(defs.length, 1);
     assert.equal(defs[0].description, 'first version');
@@ -102,13 +102,13 @@ test('loadPluginsFromDisk refreshes changed installed plugin metadata and remove
     defs = pluginLoader.getAllToolDefinitions();
     assert.equal(defs.length, 0);
   } finally {
-    globalThis._biof3Plugins = previousMap;
+    globalThis._petriPlugins = previousMap;
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 });
 
 test('legacy disk refresh cannot shadow builtin-canonical sample-metrics', () => {
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-plugin-canonical-refresh-'));
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-plugin-canonical-refresh-'));
   const pluginDir = path.join(tmpDir, 'sample-metrics');
   const scriptsDir = path.join(pluginDir, 'scripts');
   fs.mkdirSync(scriptsDir, { recursive: true });
@@ -132,11 +132,11 @@ test('legacy disk refresh cannot shadow builtin-canonical sample-metrics', () =>
   );
   fs.writeFileSync(path.join(scriptsDir, 'sample-metrics.R'), 'stop("stale copy must not run")\n');
 
-  const previousMap = globalThis._biof3Plugins;
-  const previousBuiltInDir = process.env.BIOF3_BUILT_IN_PLUGINS_DIR;
+  const previousMap = globalThis._petriPlugins;
+  const previousBuiltInDir = process.env.PETRI_BUILT_IN_PLUGINS_DIR;
   try {
-    globalThis._biof3Plugins = new Map();
-    process.env.BIOF3_BUILT_IN_PLUGINS_DIR = path.resolve(
+    globalThis._petriPlugins = new Map();
+    process.env.PETRI_BUILT_IN_PLUGINS_DIR = path.resolve(
       'test',
       'fixtures',
       'neutral-plugins',
@@ -155,11 +155,11 @@ test('legacy disk refresh cannot shadow builtin-canonical sample-metrics', () =>
       demoPrompt,
       /neutral-plugins[/\\]sample-metrics[/\\]demo-data[/\\]demo-samples\.csv/,
     );
-    assert.doesNotMatch(demoPrompt, /Documents[/\\]BioF3-Local[/\\]plugins[/\\]sample-metrics/);
+    assert.doesNotMatch(demoPrompt, /Documents[/\\]Petri-Local[/\\]plugins[/\\]sample-metrics/);
   } finally {
-    globalThis._biof3Plugins = previousMap;
-    if (previousBuiltInDir === undefined) delete process.env.BIOF3_BUILT_IN_PLUGINS_DIR;
-    else process.env.BIOF3_BUILT_IN_PLUGINS_DIR = previousBuiltInDir;
+    globalThis._petriPlugins = previousMap;
+    if (previousBuiltInDir === undefined) delete process.env.PETRI_BUILT_IN_PLUGINS_DIR;
+    else process.env.PETRI_BUILT_IN_PLUGINS_DIR = previousBuiltInDir;
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 });

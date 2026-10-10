@@ -1,5 +1,5 @@
 {
-  "name": "@biof3/shared",
+  "name": "@petri/shared",
   "version": "0.1.0",
   "private": true,
   "description": "Copilot 纯逻辑层共享包（web 版 Docusaurus + 桌面版 Vite SPA）",

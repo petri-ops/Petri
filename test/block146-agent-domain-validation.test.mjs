@@ -36,12 +36,12 @@ const PLUGIN_DEGLIKE = 'block146deg'; // 对照：deg_table 输入（非域语�
 
 // ── 共享 harness（形态与 test/block146-bundle-failfast-required-input.test.mjs
 // 同构——A 轨同批建立的 _runPluginScript agent 路径测试装置）──
-const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block146b-'));
-process.env.BIOF3_DB_PATH = path.join(tempDir, 'biof3.db');
-process.env.BIOF3_LOCAL_DATA_DIR = path.join(tempDir, 'local-data');
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block146b-'));
+process.env.PETRI_DB_PATH = path.join(tempDir, 'petri.db');
+process.env.PETRI_LOCAL_DATA_DIR = path.join(tempDir, 'local-data');
 const { runMigrations } = require('../src/migration-runner');
-await runMigrations(process.env.BIOF3_DB_PATH, path.join(ROOT, 'src', 'migrations'));
-const dbMod = require('../core/biof3-server/db.js');
+await runMigrations(process.env.PETRI_DB_PATH, path.join(ROOT, 'src', 'migrations'));
+const dbMod = require('../core/petri-server/db.js');
 const db = dbMod.getAsyncDatabase();
 
 function makePlugin(id, toolDefinition, scriptExt, scriptLines) {
@@ -98,12 +98,12 @@ const degLikePlugin = makePlugin(
   RUN_SCRIPT,
 );
 
-globalThis._biof3Plugins = new Map();
+globalThis._petriPlugins = new Map();
 for (const [id, meta] of [
   [PLUGIN_DESEQ2LIKE, deseq2LikePlugin],
   [PLUGIN_DEGLIKE, degLikePlugin],
 ]) {
-  globalThis._biof3Plugins.set(id, {
+  globalThis._petriPlugins.set(id, {
     id,
     pluginDir: meta.pluginDir,
     language: 'python',
@@ -142,8 +142,8 @@ function writeInput(name, content) {
 }
 
 async function runAgent(pluginId, args, userId) {
-  const { _runPluginScript } = require('../core/biof3-server/mcp/registry/run-plugin-script.js');
-  const meta = globalThis._biof3Plugins.get(pluginId);
+  const { _runPluginScript } = require('../core/petri-server/mcp/registry/run-plugin-script.js');
+  const meta = globalThis._petriPlugins.get(pluginId);
   const result = await _runPluginScript(
     dbMod, null, meta, meta.scriptFile, args, userId,
     null, null, null, null, agentSeams(),
@@ -250,7 +250,7 @@ test('#7 对照：非域语义文件输入（deg_table，含小数）不做域�
 // ── HTTP multipart 既有路径行为不变（B 轨只加不改）──────────────────────────
 
 test('#7 HTTP 对照：坏 counts multipart 直跑仍 400 domain_validation_failed（既有行为不变）', async () => {
-  const { createToolsExecutor } = require('../core/biof3-server/helpers/tools-executor.js');
+  const { createToolsExecutor } = require('../core/petri-server/helpers/tools-executor.js');
   const jobsDir = path.join(tempDir, 'tool-jobs-http');
   fs.mkdirSync(jobsDir, { recursive: true });
   const scriptsDir = path.join(tempDir, 'tool-scripts');

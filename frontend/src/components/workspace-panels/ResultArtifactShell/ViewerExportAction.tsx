@@ -25,7 +25,7 @@ export function ViewerExportAction({ adapter, url }: {
   return (
     <div className={styles.actionsRow}>
       <a
-        className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+        className="petri-btn petri-btn--ghost petri-btn--sm"
         href={url}
         target="_blank"
         rel="noreferrer"

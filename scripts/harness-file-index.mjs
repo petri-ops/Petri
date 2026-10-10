@@ -18,7 +18,7 @@ const { createExecutionContext: createCanonicalExecutionContext } = moduleRequir
 
 const DEFAULT_MAX_SAMPLE_BYTES = 256 * 1024;
 const DEFAULT_MAX_FILES = 500;
-const DEFAULT_CACHE_NAME = '.biof3-harness-index.json';
+const DEFAULT_CACHE_NAME = '.petri-harness-index.json';
 const SKIP_DIRS = new Set([
   '.git',
   '.cursor',
@@ -102,15 +102,15 @@ function pathExists(inputPath) {
 
 function defaultDataDir() {
   return (
-    process.env.BIOF3_LOCAL_DATA_DIR ||
-    path.join(process.env.HOME || process.cwd(), 'Documents', 'BioF3-Local')
+    process.env.PETRI_LOCAL_DATA_DIR ||
+    path.join(process.env.HOME || process.cwd(), 'Documents', 'Petri-Local')
   );
 }
 
 function defaultJobsDir(dataDir = defaultDataDir()) {
   return (
-    process.env.BIOF3_TOOL_JOBS_DIR ||
-    path.join(process.env.BIOF3_LOCAL_RESULTS_DIR || path.join(dataDir, 'results'), 'tool-jobs')
+    process.env.PETRI_TOOL_JOBS_DIR ||
+    path.join(process.env.PETRI_LOCAL_RESULTS_DIR || path.join(dataDir, 'results'), 'tool-jobs')
   );
 }
 
@@ -1554,7 +1554,7 @@ function datasetPathFromValue(value, dataDir = defaultDataDir()) {
 export function createLocalHarnessPlatform(platformOptions = {}) {
   const dataDir = normalizePath(platformOptions.dataDir || defaultDataDir());
   const jobsDir = normalizePath(platformOptions.jobsDir || defaultJobsDir(dataDir));
-  const dbPath = platformOptions.dbPath || process.env.BIOF3_DB_PATH || path.join(dataDir, 'biof3.db');
+  const dbPath = platformOptions.dbPath || process.env.PETRI_DB_PATH || path.join(dataDir, 'petri.db');
   const runtimeChecks = platformOptions.runtimeChecks || {};
   const pathMappings = normalizePathMappings(
     platformOptions.pathMappings ||
@@ -1594,7 +1594,7 @@ export function createLocalHarnessPlatform(platformOptions = {}) {
         return { runtime: name, ready: true, command: process.env.SHELL || 'sh', reason: null };
       }
       if (name === 'r') {
-        const rHome = process.env.BIOF3_R_HOME || process.env.R_HOME;
+        const rHome = process.env.PETRI_R_HOME || process.env.R_HOME;
         const command = platformOptions.rscriptPath || process.env.RSCRIPT_PATH || (rHome ? path.join(rHome, 'bin', 'Rscript') : null);
         return {
           runtime: name,
@@ -1604,7 +1604,7 @@ export function createLocalHarnessPlatform(platformOptions = {}) {
         };
       }
       if (name === 'python') {
-        const pyHome = process.env.BIOF3_PY_HOME;
+        const pyHome = process.env.PETRI_PY_HOME;
         const pyCandidates = pyHome
           ? [path.join(pyHome, 'bin', 'python3'), path.join(pyHome, 'bin', 'python'), path.join(pyHome, 'python.exe')]
           : [];

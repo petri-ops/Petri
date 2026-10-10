@@ -154,7 +154,7 @@ export function RevisionCodeView({
         <strong>代码不可用</strong>
         <p>{error?.message || '当前 Revision 没有可验证的代码投影。'}</p>
         <small>{error?.code || 'revision_source_unavailable'}</small>
-        {revisionId && <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => void load()}>重试</button>}
+        {revisionId && <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={() => void load()}>重试</button>}
       </section>
     );
   }
@@ -173,14 +173,14 @@ export function RevisionCodeView({
           <p>{projection.language} · {scopeLabel(projection.scope)} · {projection.reproduction.status}</p>
         </div>
         <div className={styles.actions} aria-label="代码操作">
-          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => void copy()}>复制</button>
-          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={download}>下载</button>
+          <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={() => void copy()}>复制</button>
+          <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={download}>下载</button>
           <details>
             <summary>交给 Agent</summary>
             <div className={styles.menu}>
-              <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => onAgentRequest?.('explain')}>解释这份代码</button>
-              <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => onAgentRequest?.('modify')}>提出代码修改</button>
-              <button className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={() => onAgentRequest?.('explain')}>解释这份代码</button>
+              <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={() => onAgentRequest?.('modify')}>提出代码修改</button>
+              <button className="petri-btn petri-btn--ghost petri-btn--sm"
                 type="button"
                 disabled={!projection.reproduction.replayable || !replayContext?.contextToken || replayBusy}
                 onClick={() => void prepareReplay()}
@@ -192,7 +192,7 @@ export function RevisionCodeView({
       <div className={styles.status} role="status">
         {actionMessage || replayStatus}
         {projection.openableRelativePath && onOpenWorkspaceFile && (
-          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => onOpenWorkspaceFile(projection.openableRelativePath!)}>在项目文件中打开</button>
+          <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={() => onOpenWorkspaceFile(projection.openableRelativePath!)}>在项目文件中打开</button>
         )}
       </div>
       {replayPreflight && (
@@ -205,8 +205,8 @@ export function RevisionCodeView({
             <li>副作用：创建新 Job 与候选 Revision；不采用候选、不修改当前或历史版本</li>
           </ul>
           <div className={styles.actions}>
-            <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={replayBusy} onClick={() => setReplayPreflight(null)}>取消</button>
-            <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={replayBusy} onClick={() => void confirmReplay()}>确认受控重放</button>
+            <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" disabled={replayBusy} onClick={() => setReplayPreflight(null)}>取消</button>
+            <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" disabled={replayBusy} onClick={() => void confirmReplay()}>确认受控重放</button>
           </div>
         </section>
       )}

@@ -87,7 +87,7 @@ function revisionInput({ changeSetId, revisionId, familyId, artifactId, sourceCo
 }
 
 function makeFixture(context, { families = ['family_a'] } = {}) {
-  const root = mkdtempSync(join(tmpdir(), 'biof3-p6-ref-tx-'));
+  const root = mkdtempSync(join(tmpdir(), 'petri-p6-ref-tx-'));
   const dbPath = join(root, 'result-studio.db');
   context.after(() => {
     try {
@@ -108,7 +108,7 @@ function makeFixture(context, { families = ['family_a'] } = {}) {
     changeSetId: 'cs_base',
     projectId: 'project_p6_ref',
     baseCommit: COMMIT_A,
-    workingBranchRef: 'refs/heads/biof3/baseline/cs_base',
+    workingBranchRef: 'refs/heads/petri/baseline/cs_base',
     createdBy: 'agent',
   });
   repository.transitionChangeSet({ changeSetId: 'cs_base', to: 'running' });
@@ -132,7 +132,7 @@ function makeFixture(context, { families = ['family_a'] } = {}) {
     sourceCommit: COMMIT_B,
     baseRevisions,
   });
-  const refs = families.map((familyId) => [`refs/heads/biof3/current/${familyId}`, COMMIT_A]);
+  const refs = families.map((familyId) => [`refs/heads/petri/current/${familyId}`, COMMIT_A]);
   return {
     dbPath,
     db,
@@ -174,7 +174,7 @@ function createCandidate(repository, { changeSetId, sourceCommit, baseRevisions 
     changeSetId,
     projectId: 'project_p6_ref',
     baseCommit: COMMIT_A,
-    workingBranchRef: `refs/heads/biof3/changeset/${changeSetId}`,
+    workingBranchRef: `refs/heads/petri/changeset/${changeSetId}`,
     createdBy: 'agent',
   });
   repository.transitionChangeSet({ changeSetId, to: 'running' });
@@ -212,7 +212,7 @@ function transitionInput({
     targetStatus: 'adopted',
     ownerLease,
     refUpdates: candidates.map((revision) => ({
-      ref: `refs/heads/biof3/current/${revision.artifactFamilyId}`,
+      ref: `refs/heads/petri/current/${revision.artifactFamilyId}`,
       expectedOld: COMMIT_A,
       newOid: revision.sourceCommit,
     })),
@@ -249,7 +249,7 @@ test('P6 durable ref transaction atomically finalizes a multi-family cohort', (c
     candidates.map((revision) => revision.revisionId).sort(),
   );
   for (const candidate of candidates) {
-    assert.equal(adapter.revParse(`refs/heads/biof3/current/${candidate.artifactFamilyId}`), COMMIT_B);
+    assert.equal(adapter.revParse(`refs/heads/petri/current/${candidate.artifactFamilyId}`), COMMIT_B);
   }
 });
 
@@ -267,7 +267,7 @@ test('P6 ordinary post-ref failure rolls Git back and aborts the journal', (cont
     }),
     /injected failure/,
   );
-  assert.equal(adapter.revParse('refs/heads/biof3/current/family_a'), COMMIT_A);
+  assert.equal(adapter.revParse('refs/heads/petri/current/family_a'), COMMIT_A);
   assert.equal(repository.getRefTransaction('rft_adopt').state, 'aborted');
   assert.equal(repository.getChangeSet('cs_candidate').status, 'preview_ready');
   assert.equal(repository.getCurrentRevision('family_a').revisionId, baseRevisions[0].revisionId);
@@ -285,7 +285,7 @@ test('P6 execute refuses SQLite acknowledgement when a ref drifts after atomic G
       repository,
       adapter,
       afterRefsApplied() {
-        adapter.refs.set('refs/heads/biof3/current/family_b', COMMIT_C);
+        adapter.refs.set('refs/heads/petri/current/family_b', COMMIT_C);
       },
     }),
     (error) => error?.code === 'ref_transaction_git_postcondition_failed',
@@ -297,8 +297,8 @@ test('P6 execute refuses SQLite acknowledgement when a ref drifts after atomic G
     repository.listCurrentRevisions('project_p6_ref').map((revision) => revision.revisionId).sort(),
     baseRevisions.map((revision) => revision.revisionId).sort(),
   );
-  assert.equal(adapter.revParse('refs/heads/biof3/current/family_a'), COMMIT_B);
-  assert.equal(adapter.revParse('refs/heads/biof3/current/family_b'), COMMIT_C);
+  assert.equal(adapter.revParse('refs/heads/petri/current/family_a'), COMMIT_B);
+  assert.equal(adapter.revParse('refs/heads/petri/current/family_b'), COMMIT_C);
 
   const recovered = recoverActiveRefTransactions(
     { projectId: 'project_p6_ref', runtimeLease: CURRENT_RUNTIME_LEASE },
@@ -323,7 +323,7 @@ test('P6 recovery resumes an all-old prepared transaction', (context) => {
     'ref_transaction_sqlite_finalized',
   ]);
   assert.equal(repository.getRefTransaction('rft_adopt').state, 'completed');
-  assert.equal(adapter.revParse('refs/heads/biof3/current/family_a'), COMMIT_B);
+  assert.equal(adapter.revParse('refs/heads/petri/current/family_a'), COMMIT_B);
 });
 
 test('P6 restart recovers a prepared journal after its different owner process exits', (context) => {
@@ -356,7 +356,7 @@ test('P6 restart recovers a prepared journal after its different owner process e
     assert.equal(restartedRepository.getRefTransaction('rft_restart').state, 'completed');
     assert.equal(restartedRepository.getChangeSet('cs_candidate').status, 'adopted');
     assert.equal(restartedRepository.getCurrentRevision('family_a').revisionId, candidates[0].revisionId);
-    assert.equal(adapter.revParse('refs/heads/biof3/current/family_a'), COMMIT_B);
+    assert.equal(adapter.revParse('refs/heads/petri/current/family_a'), COMMIT_B);
   } finally {
     restartedDb.close();
   }
@@ -382,7 +382,7 @@ test('P6 recovery finalizes an all-new transaction left before SQLite acknowledg
 test('P6 recovery blocks a third-value Git ref without changing SQLite truth', (context) => {
   const { repository, adapter, candidates, baseRevisions } = makeFixture(context);
   repository.prepareRefTransaction(transitionInput({ candidates }));
-  adapter.refs.set('refs/heads/biof3/current/family_a', COMMIT_C);
+  adapter.refs.set('refs/heads/petri/current/family_a', COMMIT_C);
 
   const recovered = recoverActiveRefTransactions(
     { projectId: 'project_p6_ref' },
@@ -396,7 +396,7 @@ test('P6 recovery blocks a third-value Git ref without changing SQLite truth', (
 
 test('P6 failed atomic Git CAS preserves its journal when a third-value ref makes ownership ambiguous', (context) => {
   const { repository, adapter, candidates } = makeFixture(context);
-  adapter.refs.set('refs/heads/biof3/current/family_a', COMMIT_C);
+  adapter.refs.set('refs/heads/petri/current/family_a', COMMIT_C);
   assert.throws(
     () => executeDurableRefTransaction(transitionInput({ candidates }), { repository, adapter }),
     (error) => error?.code === 'git_ref_transaction_conflict',
@@ -418,7 +418,7 @@ test('P6 an ambiguous Git acknowledgement finalizes only after exact all-new obs
   assert.equal(result.acknowledgementRecovered, true);
   assert.equal(repository.getRefTransaction('rft_adopt').state, 'completed');
   assert.equal(repository.getChangeSet('cs_candidate').status, 'adopted');
-  assert.equal(adapter.revParse('refs/heads/biof3/current/family_a'), COMMIT_B);
+  assert.equal(adapter.revParse('refs/heads/petri/current/family_a'), COMMIT_B);
 });
 
 test('P6 prepared journals cannot finalize before Git acknowledgement', (context) => {
@@ -476,7 +476,7 @@ test('P6 recovery refuses a journal still owned by another live runtime', (conte
     { repository, adapter, isOwnerAlive: () => true },
   );
   assert.equal(recovered.blocked[0].kind, 'ref_transaction_owner_active');
-  assert.equal(adapter.revParse('refs/heads/biof3/current/family_a'), COMMIT_A);
+  assert.equal(adapter.revParse('refs/heads/petri/current/family_a'), COMMIT_A);
   assert.equal(repository.getChangeSet('cs_candidate').status, 'preview_ready');
 });
 
@@ -505,7 +505,7 @@ test('P6 recovery blocks a mutated SQLite journal before touching Git', (context
     { repository, adapter },
   );
   assert.equal(recovered.blocked[0].kind, 'ref_transaction_integrity_failed');
-  assert.equal(adapter.revParse('refs/heads/biof3/current/family_a'), COMMIT_A);
+  assert.equal(adapter.revParse('refs/heads/petri/current/family_a'), COMMIT_A);
   assert.equal(repository.getChangeSet('cs_candidate').status, 'preview_ready');
 });
 
@@ -526,7 +526,7 @@ test('P6 recovery blocks a target Revision commit mutated after journal preparat
   assert.equal(repository.getRefTransaction('rft_adopt').state, 'refs_applied');
   assert.equal(repository.getChangeSet('cs_candidate').status, 'preview_ready');
   assert.equal(repository.getCurrentRevision('family_a').revisionId, baseRevisions[0].revisionId);
-  assert.equal(adapter.revParse('refs/heads/biof3/current/family_a'), COMMIT_B);
+  assert.equal(adapter.revParse('refs/heads/petri/current/family_a'), COMMIT_B);
 });
 
 test('P6 recovery blocks target Revision families swapped after journal preparation', (context) => {
@@ -559,6 +559,6 @@ test('P6 recovery blocks target Revision families swapped after journal preparat
     repository.listCurrentRevisions('project_p6_ref').map((revision) => revision.revisionId).sort(),
     baseRevisions.map((revision) => revision.revisionId).sort(),
   );
-  assert.equal(adapter.revParse('refs/heads/biof3/current/family_a'), COMMIT_B);
-  assert.equal(adapter.revParse('refs/heads/biof3/current/family_b'), COMMIT_B);
+  assert.equal(adapter.revParse('refs/heads/petri/current/family_a'), COMMIT_B);
+  assert.equal(adapter.revParse('refs/heads/petri/current/family_b'), COMMIT_B);
 });

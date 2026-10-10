@@ -7,7 +7,7 @@
  *
  * 环境纪律（P2 实机抓真，务必遵守）：
  *  1) origin 必须用 http://localhost:3000。后端 CORS 白名单口径是
- *     BIOF3_TRUSTED_DESKTOP_ORIGINS（env-coordinator 注入，含 localhost:3000）；
+ *     PETRI_TRUSTED_DESKTOP_ORIGINS（env-coordinator 注入，含 localhost:3000）；
  *     页面若跑在 http://127.0.0.1:3000 会被 CORS 拒（无 ACAO 头）→ 渲染进程
  *     fetch failed（网络层其实 200）→ getProject 返回 null → 全屏
  *     「项目不存在或无权访问」，商店页无从渲染。
@@ -144,7 +144,7 @@ async function main() {
   const cards = await cdpEval(`Array.from(document.querySelectorAll('[data-testid^="domain-pack-"]')).map(function(e){return e.getAttribute('data-testid')})`);
 
   // U5 桥
-  const bridgeRaw = await cdpEval(`window.biof3Desktop.packs.listInstalled().then(function(r){return JSON.stringify(r)}).catch(function(e){return 'ERR:'+e.message})`);
+  const bridgeRaw = await cdpEval(`window.petriDesktop.packs.listInstalled().then(function(r){return JSON.stringify(r)}).catch(function(e){return 'ERR:'+e.message})`);
   let bridgeInstalled = 0;
   try {
     const parsed = JSON.parse(bridgeRaw);

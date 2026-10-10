@@ -16,8 +16,8 @@ const {
   createVerifiedSnapshotReadStream,
   pipeVerifiedSnapshotToResponse,
   readVerifiedFileSnapshot,
-} = require('../core/biof3-server/helpers/verified-file-snapshot');
-const { _test } = require('../core/biof3-server/helpers/tools-executor');
+} = require('../core/petri-server/helpers/verified-file-snapshot');
+const { _test } = require('../core/petri-server/helpers/tools-executor');
 
 test('tool executor hydrates persisted params and project context before provenance', () => {
   const job = _test.hydrateExecutionJob({
@@ -151,7 +151,7 @@ test('P6 failed tool results retain measured resources when provenance is unavai
 });
 
 test('HTTP tool execution resolves only server-owned manifest or declared artifact result roots', (context) => {
-  const jobDir = mkdtempSync(join(tmpdir(), 'biof3-tools-result-root-'));
+  const jobDir = mkdtempSync(join(tmpdir(), 'petri-tools-result-root-'));
   const outputDir = join(jobDir, 'output');
   mkdirSync(outputDir);
   context.after(() => rmSync(jobDir, { recursive: true, force: true }));
@@ -187,7 +187,7 @@ test('HTTP tool execution resolves only server-owned manifest or declared artifa
 });
 
 test('private tool artifact reads bind declared flat files to the current Job root', (context) => {
-  const root = mkdtempSync(join(tmpdir(), 'biof3-tools-private-read-'));
+  const root = mkdtempSync(join(tmpdir(), 'petri-tools-private-read-'));
   const projectJobRoot = join(root, 'project-a', 'results', 'jobs', 'job-current');
   const projectOutputDir = join(projectJobRoot, 'output');
   const otherJobRoot = join(root, 'project-b', 'results', 'jobs', 'job-other');
@@ -312,7 +312,7 @@ test('private tool artifact reads bind declared flat files to the current Job ro
 });
 
 test('private tool artifact reads stream the verified descriptor and reject a path swap', async (context) => {
-  const root = mkdtempSync(join(tmpdir(), 'biof3-tools-private-fd-'));
+  const root = mkdtempSync(join(tmpdir(), 'petri-tools-private-fd-'));
   const jobsDir = join(root, 'tool-jobs');
   const outputDir = join(jobsDir, 'job-current', 'output');
   const artifactPath = join(outputDir, 'approved.csv');
@@ -366,7 +366,7 @@ test('private tool artifact reads stream the verified descriptor and reject a pa
 });
 
 test('private tool artifact reads enforce current bytes when a Job has Artifact Truth', async (context) => {
-  const root = mkdtempSync(join(tmpdir(), 'biof3-tools-private-truth-'));
+  const root = mkdtempSync(join(tmpdir(), 'petri-tools-private-truth-'));
   const jobsDir = join(root, 'tool-jobs');
   const outputDir = join(jobsDir, 'job-current', 'output');
   const artifactPath = join(outputDir, 'verified.csv');
@@ -414,7 +414,7 @@ test('private tool artifact reads enforce current bytes when a Job has Artifact 
 });
 
 test('verified snapshot delivery rejects a retained writable fd before sending a corrupt block', async (context) => {
-  const root = mkdtempSync(join(tmpdir(), 'biof3-tools-snapshot-namespace-'));
+  const root = mkdtempSync(join(tmpdir(), 'petri-tools-snapshot-namespace-'));
   const sourcePath = join(root, 'source.csv');
   const original = Buffer.alloc(SNAPSHOT_BUFFER_BYTES * 2 + 37);
   original.fill(0x41, 0, SNAPSHOT_BUFFER_BYTES);
@@ -431,7 +431,7 @@ test('verified snapshot delivery rejects a retained writable fd before sending a
   // Windows 下 realpathSync 返回反斜杠路径，而 target 由被测代码用正斜杠拼接；
   // 直接 startsWith 永不命中 → 钩子静默失效（断言 0 !== 1）。统一归一化为 '/' 再比较。
   const toPosix = (value) => String(value).replaceAll('\\', '/');
-  const snapshotRootPrefix = `${toPosix(realpathSync(root))}/biof3-artifact-stream-`;
+  const snapshotRootPrefix = `${toPosix(realpathSync(root))}/petri-artifact-stream-`;
   nodeFs.promises.unlink = async (target) => {
     const normalizedTarget = toPosix(target);
     if (normalizedTarget.startsWith(snapshotRootPrefix)
@@ -504,7 +504,7 @@ test('verified snapshot delivery rejects a retained writable fd before sending a
 });
 
 test('aborted HTTP snapshot delivery destroys its source stream and closes the anonymous fd', { timeout: 5000 }, async () => {
-  const root = mkdtempSync(join(tmpdir(), 'biof3-tools-snapshot-abort-'));
+  const root = mkdtempSync(join(tmpdir(), 'petri-tools-snapshot-abort-'));
   const sourcePath = join(root, 'large-artifact.bin');
   const original = Buffer.alloc(SNAPSHOT_BUFFER_BYTES * 16, 0x5a);
   writeFileSync(sourcePath, original);

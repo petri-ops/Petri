@@ -22,8 +22,8 @@ const {
   createFreshnessTracker,
   applyFreshnessMark,
   fingerprintOf,
-} = require('../core/biof3-server/helpers/context-freshness.js');
-const { createWorkspaceTools } = require('../core/biof3-server/agent-tools/workspace-tools.js');
+} = require('../core/petri-server/helpers/context-freshness.js');
+const { createWorkspaceTools } = require('../core/petri-server/agent-tools/workspace-tools.js');
 
 // ---------- 纯函数：fingerprintOf ----------
 
@@ -104,7 +104,7 @@ test('applyFreshnessMark: ok 结果增强且不改变原对象', () => {
 // ---------- 集成：真实 workspace_read 三态 ----------
 
 test('BLOCK-56 P3 集成：workspace_read 真实读取的三态标记', async () => {
-  const sandboxRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'biof3-block56-p3-'));
+  const sandboxRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'petri-block56-p3-'));
   const workspaceRoot = path.join(sandboxRoot, 'workspace');
   await fs.mkdir(workspaceRoot, { recursive: true });
   const filePath = path.join(workspaceRoot, 'notes.csv');

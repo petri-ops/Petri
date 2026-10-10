@@ -2,7 +2,7 @@ const AGENT_WORKFLOW_TEMPLATE_VERSION = 1;
 const { isRegisteredProfile } = require('./artifact-profiles');
 
 // A-003 configure inject: harness-workflow-state is injected at bootstrap time,
-// not required at load time. This breaks the shared-backend → biof3-server reverse require.
+// not required at load time. This breaks the shared-backend → petri-server reverse require.
 let _projectHarnessWorkflowJob = null;
 function configure(opts) {
   if (opts && opts.projectHarnessWorkflowJob) {
@@ -338,7 +338,7 @@ const AGENT_WORKFLOW_TEMPLATES = [
             inputId: 'deg_results',
             fromStepId: 'differential',
             artifactType: 'table',
-            artifactProfile: 'biof3.deg.v1',
+            artifactProfile: 'petri.deg.v1',
             description: 'DESeq2 deg_table.csv → canonical DEG artifact',
           },
         ],
@@ -352,7 +352,7 @@ const AGENT_WORKFLOW_TEMPLATES = [
             inputId: 'deg_table',
             fromStepId: 'deg-standardization',
             artifactType: 'table',
-            artifactProfile: 'biof3.deg.v1',
+            artifactProfile: 'petri.deg.v1',
             description: 'deg-standardizer deg_standardized.csv (canonical)',
           },
         ],
@@ -366,7 +366,7 @@ const AGENT_WORKFLOW_TEMPLATES = [
             inputId: 'deg_table',
             fromStepId: 'deg-standardization',
             artifactType: 'table',
-            artifactProfile: 'biof3.deg.v1',
+            artifactProfile: 'petri.deg.v1',
             description: 'deg-standardizer ranked_genes.csv (full ranked list for GSEA)',
           },
         ],

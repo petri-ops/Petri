@@ -4,7 +4,7 @@
   "title": "会话区工具执行记录独立小窗口（ToolActivityDock 统一执行记录浮窗）",
   "date": "2026-09-02",
   "environment": {
-    "app": "dev Electron (BIOF3_ELECTRON_USER_DATA_DIR=.biof3-dev-user-data)",
+    "app": "dev Electron (PETRI_ELECTRON_USER_DATA_DIR=.petri-dev-user-data)",
     "cdp": "http://127.0.0.1:9222",
     "provider": "deepseek / deepseek-v4-flash-vision-exp",
     "accessMode": "完全访问"

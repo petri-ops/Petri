@@ -6,7 +6,7 @@ import { connectSshHost, createProject, listProjects, listSshRemoteDirs, listSsh
 import type { Project } from '@/lib/project-types';
 import { branchApi } from '@/lib/branchBridge';
 import { FolderPicker } from '@/components/desktop/FolderPicker';
-import { dispatchGewuEvent, gewuEvents } from '@/lib/events';
+import { dispatchPetriEvent, petriEvents } from '@/lib/events';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
 import {
   clearConversationDraft,
@@ -204,7 +204,7 @@ export default function Welcome(): React.ReactElement {
   // （files.openDirectoryDialog，可新建目录）；无桥环境（纯浏览器态）回落
   // 应用内 FolderPicker。取消选择则停留当前面板。
   async function openFolderDialogOrFallback() {
-    const dialog = window.biof3Desktop?.files?.openDirectoryDialog;
+    const dialog = window.petriDesktop?.files?.openDirectoryDialog;
     if (typeof dialog === 'function') {
       setPanelSection('folder');
       try {
@@ -371,7 +371,7 @@ export default function Welcome(): React.ReactElement {
 
   // UI-341 — 快捷 chips 一键直发（copilotAsk 由内嵌 SimpleChat 消费）
   function launchChip(prompt: string) {
-    dispatchGewuEvent(gewuEvents.copilotAsk, { prompt });
+    dispatchPetriEvent(petriEvents.copilotAsk, { prompt });
   }
 
   return (

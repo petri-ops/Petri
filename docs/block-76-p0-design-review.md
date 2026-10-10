@@ -9,8 +9,8 @@
 SSH 项目插件作业当前数据流（触发 → 展示）：
 
 1. **D7 钉 host**：`handleToolRun`（tools-executor.js:2264-2294）查 `projects.workspace_kind/ssh_host`，经 `targetRegistry.getByAlias` 就地注册默认目标，**显式传别的 target 也强制钉回项目 host**，写 `tool_jobs.execution_target_id`。
-2. **本地 staging**：`resolveProjectRunLayout`（project-run-layout.js:116-124）——SSH 项目 `workspace_path=NULL`，jobDir 回落 `~/Documents/BioF3-Local/remote-projects/<projectId>/results/jobs/<jobId>`（run-script.R/py、params.json、上传输入、output/、report-template、_biof3-theme.R）。
-3. **上传执行**：`resolveRemoteTargetForJob`（tools-executor.js:1344-1369）探测 + 运行时解析 → `runRemoteToolJob`（:1376-1499）→ `remoteRunner.submit` = `uploadBundle`（tar-over-ssh，排除 output/）→ node-agent start，远端目录 `$HOME/.biof3-agent/jobs/<jobId>`。
+2. **本地 staging**：`resolveProjectRunLayout`（project-run-layout.js:116-124）——SSH 项目 `workspace_path=NULL`，jobDir 回落 `~/Documents/Petri-Local/remote-projects/<projectId>/results/jobs/<jobId>`（run-script.R/py、params.json、上传输入、output/、report-template、_petri-theme.R）。
+3. **上传执行**：`resolveRemoteTargetForJob`（tools-executor.js:1344-1369）探测 + 运行时解析 → `runRemoteToolJob`（:1376-1499）→ `remoteRunner.submit` = `uploadBundle`（tar-over-ssh，排除 output/）→ node-agent start，远端目录 `$HOME/.petri-agent/jobs/<jobId>`。
 4. **运行期**：`streamLog` 偏移续传镜像到本地 `output/remote-runner.log`；30s `pollStatus` 心跳；cancel 走 agent cancel。
 5. **拉回**：终态后 `pullOutputs` 拉 output/ + transfer-manifest sha256 逐文件对账（fail-closed）。
 6. **登记**：`createJobRunFinalizer` → `transitionToolJobToCompleted` 把 **含本地绝对路径的 result_json**（jobDir/outputDir/resultDir/outputs[]/files[]/provenance）写 `tool_jobs` 表——**没有独立 results 表，结果库=tool_jobs.result_json + 磁盘文件**。
@@ -29,8 +29,8 @@ Gateway 现状（BLOCK-67）：ssh 后端支持 list/stat/read/write/mkdir/mv/rm
 ### R1 产物布局：沿用 `results/jobs` 语义✅（2026-09-10 用户确认）
 
 - **推荐 B**：远程产物写 `<remote_path>/results/jobs/<toolJobId>/output/`——与本地项目**同构**。决定性理由：result-studio Revision 的 `outputPath` 本就是相对 workspace 根的相对路径，读面只需把「workspace 根的 fs」换成 Gateway 后端，本地/SSH 一套语义零分叉；且用户在服务器项目树里能看到与本地一致的结果目录。
-- 备选 A `<remote_path>/.gewu-results/<jobId>/`：独立命名空间更「干净」，但 result-studio 相对路径语义要对 SSH 项目特判，读面分叉，且 D5 拆除后旧 `.biof3-agent/jobs` 与新树并存两种远程布局。
-- jobDir 中间物（run-script/params/上传输入）写 `<remote_path>/results/jobs/<jobId>/` 同目录（不建隐藏树）；不再使用 `$HOME/.biof3-agent/jobs/<jobId>`。
+- 备选 A `<remote_path>/.petri-results/<jobId>/`：独立命名空间更「干净」，但 result-studio 相对路径语义要对 SSH 项目特判，读面分叉，且 D5 拆除后旧 `.petri-agent/jobs` 与新树并存两种远程布局。
+- jobDir 中间物（run-script/params/上传输入）写 `<remote_path>/results/jobs/<jobId>/` 同目录（不建隐藏树）；不再使用 `$HOME/.petri-agent/jobs/<jobId>`。
 
 ### R2 执行链：gateway 写脚本 + `exec_bg` 后台直跑（D1 细化）✅ 技术面无分歧
 
@@ -52,7 +52,7 @@ Gateway 现状（BLOCK-67）：ssh 后端支持 list/stat/read/write/mkdir/mv/rm
 
 ### R5 拆除边界（D5 清单化，P5 执行）✅ 边界已核清
 
-- **拆**：`runRemoteToolJob`/`adoptRemoteRunningJob`/启动重附扫描/`killLocalToolJob` 远程分支、`uploadBundle`/`pullBundle`/`remoteJobDirPath`、agent job-supervisor 子命令（start/status/log/manifest/exitinfo）及其远端 `$HOME/.biof3-agent/jobs` 布局、`pullOutputs`+transfer-manifest 对账链。
+- **拆**：`runRemoteToolJob`/`adoptRemoteRunningJob`/启动重附扫描/`killLocalToolJob` 远程分支、`uploadBundle`/`pullBundle`/`remoteJobDirPath`、agent job-supervisor 子命令（start/status/log/manifest/exitinfo）及其远端 `$HOME/.petri-agent/jobs` 布局、`pullOutputs`+transfer-manifest 对账链。
 - **留**：target-registry + execution_targets 表、`routes/ssh-projects.js` targets/connect/list/validate（UI-326/327 向导在用）、mux 通道、node-agent fs/exec verbs、`ensureAgent`、error-classifier、`process-lifecycle.excludeRemoteTargets`（本地孤儿扫描仍需跳过远程作业）。
 
 ### R6 聊天/MCP 旁路收编 ✅（2026-09-10 用户确认）

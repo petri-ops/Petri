@@ -3,7 +3,7 @@ capability: reject-loop-fix
 goal: 审阅面板拒绝改动后，agent 在下一轮对话能真实看到拒绝清单并据此调整——reject→agent 回路在全部运行拓扑（主实例/测试实例/独立后端）下闭环
 acceptance:
   - 红绿先行：目录解析优先级契约（LOCAL_DATA_DIR 优先 / USER_DATA_DIR 回退 / 双缺失 null）先落失败测试再实现
-  - 读写两侧收敛同一共享目录（BIOF3_LOCAL_DATA_DIR），存量 11 条 system-prompt-rejects 契约零回归
+  - 读写两侧收敛同一共享目录（PETRI_LOCAL_DATA_DIR），存量 11 条 system-prompt-rejects 契约零回归
   - 实机走查：测试实例 CDP 拒绝 → :3001 下一轮 agent 回答引用被拒文件，证据落 acceptance/block-125/
 reopen: 用户裁决拓扑策略回摆（如测试实例改独立后端）时重审
 status: completed
@@ -18,17 +18,17 @@ status: completed
 
 | 拓扑 | 写侧（Electron main IPC） | 读侧（后端 agent-runner） | 通？ |
 | --- | --- | --- | --- |
-| 打包生产（单实例） | `<userData>/working-tree-review/rejects` | `BIOF3_USER_DATA_DIR=<userData>`（backend-proc-manager.js:186 注入） | ✅ |
-| 主 dev 实例 | `.biof3-dev-user-data` | dev-electron spawn 时由 main 注入同目录 | ✅ |
-| 测试实例（复用 :3001） | **`.biof3-test-user-data`**（实例自己的 userData；实证=已有一条匿名 .gitignore 拒绝记录躺在那） | :3001 后端由主实例 spawn→读 dev-user-data；**手起裸后端无 `BIOF3_USER_DATA_DIR`→整个跳过** | ❌ |
+| 打包生产（单实例） | `<userData>/working-tree-review/rejects` | `PETRI_USER_DATA_DIR=<userData>`（backend-proc-manager.js:186 注入） | ✅ |
+| 主 dev 实例 | `.petri-dev-user-data` | dev-electron spawn 时由 main 注入同目录 | ✅ |
+| 测试实例（复用 :3001） | **`.petri-test-user-data`**（实例自己的 userData；实证=已有一条匿名 .gitignore 拒绝记录躺在那） | :3001 后端由主实例 spawn→读 dev-user-data；**手起裸后端无 `PETRI_USER_DATA_DIR`→整个跳过** | ❌ |
 
-读侧入口：`agent-runner.js:293` 只认 `process.env.BIOF3_USER_DATA_DIR`；写侧：`src/ipc/working-tree-review.js:153/265` 硬编码 `app.getPath('userData')`。
+读侧入口：`agent-runner.js:293` 只认 `process.env.PETRI_USER_DATA_DIR`；写侧：`src/ipc/working-tree-review.js:153/265` 硬编码 `app.getPath('userData')`。
 
 ## 2. 修法（结构性，非补丁）
 
-读写两侧收敛到**全拓扑已共享的 `BIOF3_LOCAL_DATA_DIR`**（主实例/测试实例/独立后端三端均已设置——测试实例脚本 :73-85 显式指向 dev data 目录）：
+读写两侧收敛到**全拓扑已共享的 `PETRI_LOCAL_DATA_DIR`**（主实例/测试实例/独立后端三端均已设置——测试实例脚本 :73-85 显式指向 dev data 目录）：
 
-- 新 helper `resolveWorkingTreeRejectRoot(env)`（system-prompt.js 导出）：`BIOF3_LOCAL_DATA_DIR` 优先 → `BIOF3_USER_DATA_DIR` 回退 → null。
+- 新 helper `resolveWorkingTreeRejectRoot(env)`（system-prompt.js 导出）：`PETRI_LOCAL_DATA_DIR` 优先 → `PETRI_USER_DATA_DIR` 回退 → null。
 - 写侧：`working-tree-review.js` 两处 `app.getPath('userData')` 改经 helper 解析（IPC main 进程 env 由 env-coordinator 同根设置）。
 - 读侧：`agent-runner.js` 注入段改经 helper 解析。
 - 30 天 TTL 临时信号，存量条目（1 条匿名测试记录）不做迁移，如实留痕自然过期。

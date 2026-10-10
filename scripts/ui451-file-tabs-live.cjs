@@ -17,7 +17,7 @@
  */
 const path = require('node:path');
 const http = require('node:http');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const PROJECT_ID = process.argv[2] || 'p_mu5ftn3a_wxnq';
@@ -220,7 +220,7 @@ const tabOrder = () => EVAL(
       var to=document.querySelector('[data-file-tab-path="${FILE_A}"]');
       if(!from||!to) return 'no_tab';
       var dt=new DataTransfer();
-      dt.setData('application/x-gewu-file-tab', '${FILE_C}');
+      dt.setData('application/x-petri-file-tab', '${FILE_C}');
       window.__ui451dt = dt;
       from.dispatchEvent(new DragEvent('dragstart',{bubbles:true,cancelable:true,dataTransfer:dt}));
       var r=to.getBoundingClientRect();

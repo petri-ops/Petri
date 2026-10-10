@@ -40,7 +40,7 @@
 ## 4. 阶段
 
 - **P0 立项**：本计划 + DOC-REGISTRY + README + roadmap + AUDIT-LOG。
-- **P1 组 A 实机**：dev Electron（BIOF3_ELECTRON_USER_DATA_DIR 指向 dev userData）+ CDP（:9222）逐项驱动 + 截图，证据 `acceptance/block-46/`。
+- **P1 组 A 实机**：dev Electron（PETRI_ELECTRON_USER_DATA_DIR 指向 dev userData）+ CDP（:9222）逐项驱动 + 截图，证据 `acceptance/block-46/`。
 - **P2 组 B 实机**：同上；创建链路用临时项目，验收后清理。
 - **P3 台账升级**：逐项按证据改 `verified`（含日期与证据链接）或维持 `in_progress` 并注明实测发现；UI-255 标题修正。
 - **P4 收口**：AUDIT-LOG 收口 + registry completed + roadmap active 清空 + 提交。
@@ -55,6 +55,6 @@
 
 - 2026-09-03 P0 完成：摸底 13 项台账现状（12 项 in_progress + UI-255 标题残留）；确认 BLOCK-41/43 已大改 ReviewMode，复核以当前实现为准并允许「如实记录漂移」。本计划落盘并注册 DOC-REGISTRY。
 - 2026-09-03 P1 完成：组 A 审阅 UI 7 项 CDP 实机验证，截图落盘 `acceptance/block-46/`（ui-247/249/250/252/255/260-254）。
-- 2026-09-03 P2 完成：组 B 项目创建 6 项 CDP 实机验证（临时项目 biof3-tmp / b46-ws 验收后清理），截图落盘（ui-251×2/253/258）。
+- 2026-09-03 P2 完成：组 B 项目创建 6 项 CDP 实机验证（临时项目 petri-tmp / b46-ws 验收后清理），截图落盘（ui-251×2/253/258）。
 - 2026-09-03 P3 完成：12 项台账逐项升 verified（标题+状态行+复核记录，证据一一对应）；UI-255 标题修正 + 复测发现浮窗纵向越界（内容异步膨胀后 top 不重算）如实登记，已在 roadmap 登记增量候选，不就地大修。
 - 2026-09-03 P4 收口：AUDIT-LOG 收口登记、registry completed、roadmap active 清空、提交。G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -4,13 +4,13 @@ V-A 冷启动验证（BLOCK-145 · BK-08 修复后整栈重启）
 ============================================================
 1. 重启过程（既定配方，如实记录一处配方偏差）
 ============================================================
-配方：lsof -ti :3000 :3001 :3005 :9222 定点杀 → BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222"
-     nohup npm run dev > /tmp/gewu-dev-stack.log 2>&1 & → 端口健康轮询上限 180s
+配方：lsof -ti :3000 :3001 :3005 :9222 定点杀 → PETRI_DEV_ELECTRON_ARGS="--remote-debugging-port=9222"
+     nohup npm run dev > /tmp/petri-dev-stack.log 2>&1 & → 端口健康轮询上限 180s
 
 偏差（如实记录）：配方的字面形式 `lsof -ti :3000 :3001 :3005 :9222` 静默漏检——lsof 只把第一个
 `:port` 当 -i 过滤器，其余当文件名参数。首轮执行因此误判「端口全空」：
   - 实际当时在跑的是 2026-10-06T15:45:40Z 启动的旧栈（wrapper pid 1249），新启动被
-    dev-electron 自护挡下（/tmp/gewu-dev-stack.log: "failed: BioF3 dev stack is already
+    dev-electron 自护挡下（/tmp/petri-dev-stack.log: "failed: Petri dev stack is already
     running (wrapper pid 1249...)"），随后单端口轮询看到四端口 UP 全是旧栈。
   - 改用逐端口形式 `lsof -ti :<p>`（p ∈ 3000/3001/3005/9222）重扫后确认真持有者：
     :3000→1453(Vite) :3001→1507 :3005→1507 :9222→1755(Electron)。
@@ -18,10 +18,10 @@ V-A 冷启动验证（BLOCK-145 · BK-08 修复后整栈重启）
 
 真定点杀（2026-10-07T16:05-16:07Z）：kill -9 {1453,1755,1757,1507,1249,1416,1216} +
 孤儿后端 1889（ppid=1，2026-10-06T23:45:41 起的 Electron boot 自spawn 后端）。
-复核：四端口 lsof 全空、无 dev-electron wrapper、无 biof3-server 进程残留。
+复核：四端口 lsof 全空、无 dev-electron wrapper、无 petri-server 进程残留。
 
 真冷启动：2026-10-07T16:07:36Z 执行
-  BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" nohup npm run dev > /tmp/gewu-dev-stack.log 2>&1 &
+  PETRI_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" nohup npm run dev > /tmp/petri-dev-stack.log 2>&1 &
 端口轮询（逐端口 lsof，间隔 3s，上限 180s）：
   :3000 UP 16:07:45Z（持有者 pid 7544，启动时刻 Thu Oct 8 00:07:37 本地）
   :3001 UP 16:07:45Z（pid 7600，00:07:38 本地）
@@ -34,12 +34,12 @@ V-A 冷启动验证（BLOCK-145 · BK-08 修复后整栈重启）
   GET http://127.0.0.1:9222/json/version → CDP "Chrome/146.0.7680.216"
 结论：新栈为真冷启动（全部端口持有者进程启动时刻 = 本次重启时刻），栈加载了工作区
 core 改动（tunnel.js BLOCK-145 D1 异步化 remotePortSweep 等，工作区 M 状态含
-core/biof3-server/mobile-gateway/tunnel.js、core/biof3-server/server.js）。
+core/petri-server/mobile-gateway/tunnel.js、core/petri-server/server.js）。
 
 ============================================================
 2. V-A 断言：冷启动窗口 [event-loop] 无 ≥5s 长阻塞
 ============================================================
-判据来源：core/biof3-server/server.js:328-346 —— 事件循环监视器为模块加载即执行的
+判据来源：core/petri-server/server.js:328-346 —— 事件循环监视器为模块加载即执行的
 IIFE（无条件启动），1s tick，lag>2000ms 即 console.warn
 `[event-loop] ⚠ blocked ~${lag}ms`；故「无该行」⇒ 无 ≥2s 阻塞 ⇒ 必然无 ≥5s 阻塞。
 
@@ -55,11 +55,11 @@ IIFE（无条件启动），1s tick，lag>2000ms 即 console.warn
 startIfEnabled() 同步 ssh 处）。
 
 提取命令与结果：
-  $ grep "event-loop" /tmp/gewu-dev-stack.log        → 0 行（全新 nohup 日志，54 行）
-  $ sed -n '15615,$p' .biof3-dev-user-data/data/logs/biof3-server.log | grep "event-loop"
+  $ grep "event-loop" /tmp/petri-dev-stack.log        → 0 行（全新 nohup 日志，54 行）
+  $ sed -n '15615,$p' .petri-dev-user-data/data/logs/petri-server.log | grep "event-loop"
                                                       → 0 行（新窗口共 34 行）
 新会话锚：server log 15615 行起 `=== 2026-10-07T16:07:39.482Z — session start ===`；
-  :3001 后端 boot 于 /tmp/gewu-dev-stack.log 16:07:38.279Z，两进程各有
+  :3001 后端 boot 于 /tmp/petri-dev-stack.log 16:07:38.279Z，两进程各有
   `[mobile-tunnel] connecting → aliyun:2234`（BK-08 原阻塞位所在链，已异步化，未产生任何 blocked 行）。
 
 结论：PASS —— 冷启动窗口零 `[event-loop]` 行：无 ≥5s 长阻塞（BK-08 修复生效），
@@ -70,9 +70,9 @@ startIfEnabled() 同步 ssh 处）。
 ============================================================
 - 双后端形态（既定）：Electron boot 自spawn 后端落随机口 52861，抢 :3005 网关失败
   （EADDRINUSE，:3005 归 dev-electron `npm start` 的 :3001 后端）——与
-  .agents/skills/gewu-dev-infra/SKILL.md 已知双后端形态一致，非本次改动引入。
+  .agents/skills/petri-dev-infra/SKILL.md 已知双后端形态一致，非本次改动引入。
 - 随机口 52861 后端 session start 与 :3001 后端 boot 相距 ~1.2s，两条 mobile-tunnel
   connecting 线均未伴随任何 event-loop 行。
 - 追加复扫（2026-10-07T16:18:37Z，launch+11min，含 V-C deseq2 作业实跑负载后）：
-  两日志 [event-loop] 行仍为 0（grep -c：/tmp/gewu-dev-stack.log=0，
+  两日志 [event-loop] 行仍为 0（grep -c：/tmp/petri-dev-stack.log=0，
   server log 新窗口=0），零阻塞态在作业负载下保持；后端 /api/health 仍 ok（db_ok=true）。

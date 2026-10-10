@@ -3,10 +3,10 @@ import { createRequire } from 'node:module';
 import test, { afterEach } from 'node:test';
 
 const require = createRequire(import.meta.url);
-const express = require('../core/biof3-server/node_modules/express');
-const perfProbe = require('../core/biof3-server/helpers/perf-probe');
-const { requestTimingMiddleware } = require('../core/biof3-server/bootstrap');
-const registerPerfProbeRoutes = require('../core/biof3-server/routes/perf-probe');
+const express = require('../core/petri-server/node_modules/express');
+const perfProbe = require('../core/petri-server/helpers/perf-probe');
+const { requestTimingMiddleware } = require('../core/petri-server/bootstrap');
+const registerPerfProbeRoutes = require('../core/petri-server/routes/perf-probe');
 
 async function withServer(configure, run) {
   const app = express();
@@ -21,10 +21,10 @@ async function withServer(configure, run) {
   }
 }
 
-afterEach(() => { perfProbe.disableProbe(); delete process.env.BIOF3_PERF_PROBE; });
+afterEach(() => { perfProbe.disableProbe(); delete process.env.PETRI_PERF_PROBE; });
 
-test('probe stays off and costs nothing unless BIOF3_PERF_PROBE=1', () => {
-  delete process.env.BIOF3_PERF_PROBE;
+test('probe stays off and costs nothing unless PETRI_PERF_PROBE=1', () => {
+  delete process.env.PETRI_PERF_PROBE;
   assert.equal(perfProbe.envEnabled(), false);
   assert.equal(perfProbe.enableProbe(), false);
   assert.equal(perfProbe.isProbeActive(), false);
@@ -33,7 +33,7 @@ test('probe stays off and costs nothing unless BIOF3_PERF_PROBE=1', () => {
   perfProbe.observeBlock(4200);
   assert.deepEqual(perfProbe.snapshotProbe(), { enabled: false, eventLoop: null, requests: [], blocks: [] });
 
-  process.env.BIOF3_PERF_PROBE = '1';
+  process.env.PETRI_PERF_PROBE = '1';
   assert.equal(perfProbe.enableProbe(), true);
   assert.equal(perfProbe.isProbeActive(), true);
 });
@@ -92,13 +92,13 @@ test('snapshot reports event-loop percentiles, per-route timings and discrete bl
 });
 
 test('probe endpoints are absent by default and live once the flag is set', async () => {
-  delete process.env.BIOF3_PERF_PROBE;
+  delete process.env.PETRI_PERF_PROBE;
   await withServer((app) => registerPerfProbeRoutes(app), async (baseUrl) => {
     const response = await fetch(`${baseUrl}/api/__perf/event-loop`);
     assert.equal(response.status, 404, 'probe surface must not exist in a normal run');
   });
 
-  process.env.BIOF3_PERF_PROBE = '1';
+  process.env.PETRI_PERF_PROBE = '1';
   await withServer((app) => registerPerfProbeRoutes(app), async (baseUrl) => {
     const snapshot = await (await fetch(`${baseUrl}/api/__perf/event-loop`)).json();
     assert.equal(snapshot.enabled, true);

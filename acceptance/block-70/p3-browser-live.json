@@ -19,12 +19,12 @@
     {
       "name": "B3 跨项目会话列表",
       "pass": true,
-      "detail": "15 个会话全部可见，带 📁 项目名徽章（1.WorkDir/gewu-desktop/biof3-desktop/devah）与消息数"
+      "detail": "15 个会话全部可见，带 📁 项目名徽章（1.WorkDir/petri-desktop/petri-desktop/devah）与消息数"
     },
     {
       "name": "B4 会话消息阅读",
       "pass": true,
-      "detail": "「R脚本绘制2×2面板图」（10 条）完整渲染用户消息与 Gewu 长回复（含 biof3:// 产物链接文本）"
+      "detail": "「R脚本绘制2×2面板图」（10 条）完整渲染用户消息与 Petri 长回复（含 petri:// 产物链接文本）"
     },
     {
       "name": "B5 composer 轻控制在场",

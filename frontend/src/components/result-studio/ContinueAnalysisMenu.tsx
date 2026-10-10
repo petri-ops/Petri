@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { Icon } from '@/components/icons/Icon';
-import { dispatchGewuEvent, gewuEvents } from '@/lib/events';
+import { dispatchPetriEvent, petriEvents } from '@/lib/events';
 import { useToolCatalog } from '@/lib/tool-catalog';
 import { MAX_AGENT_SAMPLE_IDS, MAX_PERSISTED_ENTITY_IDS, type ArtifactSelection } from '@/lib/artifact-selection';
 import { useSelectionBus } from '@/lib/selectionBus';
@@ -53,7 +53,7 @@ function appendSelectionToPrompt(
 
 /**
  * 「继续分析」显式入口：上游结果喂下游分析必须经 Agent 对话（bind_artifact 血统绑定），
- * 本菜单把该路径显式化——点击菜单项即组装 prompt 经 `gewu:copilot-ask` 投递给 Agent，
+ * 本菜单把该路径显式化——点击菜单项即组装 prompt 经 `petri:copilot-ask` 投递给 Agent，
  * 不在前端直接发起任何分析请求。
  *
  * BLOCK-83 D7：菜单项来自插件目录（useToolCatalog 已装分析），核心前端不写死
@@ -79,7 +79,7 @@ export function ContinueAnalysisMenu({
 
   const runDownstream = (toolTitle: string): void => {
     const basePrompt = buildContinuePrompt(jobId, artifactName, toolTitle);
-    dispatchGewuEvent(gewuEvents.copilotAsk, {
+    dispatchPetriEvent(petriEvents.copilotAsk, {
       prompt: busSelection
         ? appendSelectionToPrompt(basePrompt, busSelection, selectionBus.idField)
         : basePrompt,

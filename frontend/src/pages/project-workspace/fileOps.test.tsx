@@ -7,7 +7,7 @@ import React from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Project } from '@/lib/project-types';
-import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
+import { petriEvents, subscribePetriEvent } from '@/lib/events';
 import { joinPath, splitPath, uniqueTargetName, validateRename } from './fileOps';
 import { RightFileTree } from './RightFileTree';
 
@@ -55,8 +55,8 @@ function dropEventData(item: { path: string; name: string; type: 'file' | 'dir' 
   return {
     ctrlKey,
     dataTransfer: {
-      types: ['application/x-gewu-tree-item'],
-      getData: (mime: string) => (mime === 'application/x-gewu-tree-item' ? JSON.stringify(item) : ''),
+      types: ['application/x-petri-tree-item'],
+      getData: (mime: string) => (mime === 'application/x-petri-tree-item' ? JSON.stringify(item) : ''),
       setData: vi.fn(),
       effectAllowed: 'copyMove',
       dropEffect: 'move',
@@ -97,7 +97,7 @@ describe('RightFileTree 文件操作', () => {
 
   beforeEach(() => {
     changeEvents = [];
-    subscribeGewuEvent(gewuEvents.projectWorkspaceChanged, (detail) => {
+    subscribePetriEvent(petriEvents.projectWorkspaceChanged, (detail) => {
       changeEvents.push({ projectId: detail.projectId });
     });
   });

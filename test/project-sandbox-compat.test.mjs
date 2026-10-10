@@ -31,7 +31,7 @@ let tmpRoot;
 const projectId = 'p_compat';
 
 before(() => {
-  tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-compat-sandbox-'));
+  tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-compat-sandbox-'));
 });
 
 after(() => {
@@ -133,8 +133,8 @@ describe('Phase 5: 更换 workspace 不移动历史结果', () => {
 
 describe('Phase 5: 系统任务显式 system scope', () => {
   it('resolveSystemRunLayout 落 system-tasks/<scope>，不落项目/全局 tool-jobs', () => {
-    const prevDataDir = process.env.BIOF3_LOCAL_DATA_DIR;
-    process.env.BIOF3_LOCAL_DATA_DIR = path.join(tmpRoot, 'appdata');
+    const prevDataDir = process.env.PETRI_LOCAL_DATA_DIR;
+    process.env.PETRI_LOCAL_DATA_DIR = path.join(tmpRoot, 'appdata');
     try {
       const layout = resolveSystemRunLayout({ toolJobId: 'tj_sys_1', systemScope: 'updates' });
       const expectedRoot = path.join(tmpRoot, 'appdata', 'system-tasks', 'updates');
@@ -144,8 +144,8 @@ describe('Phase 5: 系统任务显式 system scope', () => {
       // 不得落在项目 results 或全局 tool-jobs
       assert.ok(!layout.jobRoot.includes(`${path.sep}tool-jobs${path.sep}`));
     } finally {
-      if (prevDataDir === undefined) delete process.env.BIOF3_LOCAL_DATA_DIR;
-      else process.env.BIOF3_LOCAL_DATA_DIR = prevDataDir;
+      if (prevDataDir === undefined) delete process.env.PETRI_LOCAL_DATA_DIR;
+      else process.env.PETRI_LOCAL_DATA_DIR = prevDataDir;
     }
   });
 

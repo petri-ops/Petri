@@ -3,7 +3,7 @@
 
 /**
  * BLOCK-59 加映（用户反馈）—— 弹出窗外观主题与主窗一致性实机断言。
- *   根因：窗口 CSS 模块引用了不存在的 --biof3-bg-primary 等编造令牌，
+ *   根因：窗口 CSS 模块引用了不存在的 --petri-bg-primary 等编造令牌，
  *   全部吃硬编码暗色兜底 → 弹窗永远是暗色，与主窗主题脱钩。
  *   修复：全部改用 custom.css 语义令牌（bg-canvas/surface/subtle、
  *   status-success、text/accent 族，明暗双主题自动适配）。
@@ -19,9 +19,9 @@ const path = require('node:path');
 const http = require('node:http');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
 const DB_PATH = process.env.BIOF59_DB
-  || path.join(__dirname, '..', '.biof3-dev-user-data', 'data', 'biof3.db');
+  || path.join(__dirname, '..', '.petri-dev-user-data', 'data', 'petri.db');
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-59');
 
 function fetchJson(url) {
@@ -112,17 +112,17 @@ async function main() {
 
   const targets = await listTargets();
   const page = targets.find((t) => t.type === 'page' && /localhost:3000/.test(t.url || '') && !/(\/window\/)/.test(t.url || ''));
-  if (!page) throw new Error('biof3_page_not_found');
+  if (!page) throw new Error('petri_page_not_found');
   const client = await new CdpClient(page.webSocketDebuggerUrl).connect();
   results.mainPage = page.url;
 
-  const origPref = await evalJSRetry(client, `localStorage.getItem('biof3-theme') || localStorage.getItem('theme') || 'system'`);
+  const origPref = await evalJSRetry(client, `localStorage.getItem('petri-theme') || localStorage.getItem('theme') || 'system'`);
   const setTheme = (pref) => evalJSRetry(client, `(() => {
-    window.dispatchEvent(new CustomEvent('gewu:theme-change', { detail: { preference: '${pref}' } }));
+    window.dispatchEvent(new CustomEvent('petri:theme-change', { detail: { preference: '${pref}' } }));
     return document.documentElement.getAttribute('data-theme');
   })()`);
   const restoreTheme = () => evalJSRetry(client, `(() => {
-    window.dispatchEvent(new CustomEvent('gewu:theme-change', { detail: { preference: ${JSON.stringify(origPref)} } }));
+    window.dispatchEvent(new CustomEvent('petri:theme-change', { detail: { preference: ${JSON.stringify(origPref)} } }));
     return true;
   })()`);
 
@@ -145,7 +145,7 @@ async function main() {
   const contentKey = `${picked.jobId}:${picked.artifactName}`;
   const contentId = `result:${contentKey}`;
   const pre = await evalJSRetry(client, `(async () => {
-    const wm = window.biof3Desktop?.windowManager;
+    const wm = window.petriDesktop?.windowManager;
     if (!wm) return { bridge: false };
     const snap = await wm.snapshot();
     const entry = (snap?.snapshot?.entries || []).find((e) => e.id === ${JSON.stringify(contentId)});
@@ -160,7 +160,7 @@ async function main() {
   // 1) light 主题 → 弹出结果窗
   await setTheme('light');
   await delay(600);
-  const pop = await evalJSRetry(client, `window.biof3Desktop.windowManager.popOut('result', ${JSON.stringify(contentKey)})`);
+  const pop = await evalJSRetry(client, `window.petriDesktop.windowManager.popOut('result', ${JSON.stringify(contentKey)})`);
   assert('结果窗弹出（light 主题下）', pop?.ok === true, JSON.stringify(pop));
   const hits = await pollTarget('/window/result/');
   const popClient = await new CdpClient(hits[0].webSocketDebuggerUrl).connect();
@@ -193,7 +193,7 @@ async function main() {
   await screenshot(popClient, path.join(EVIDENCE_DIR, 'p59-theme-dark.png'));
 
   // 3) 指挥中心瓦片同一令牌面（dark 下暗色表面）
-  await evalJSRetry(client, `window.biof3Desktop.windowManager.popOut('command-center')`);
+  await evalJSRetry(client, `window.petriDesktop.windowManager.popOut('command-center')`);
   const ccHits = await pollTarget('/window/command-center');
   const ccClient = await new CdpClient(ccHits[0].webSocketDebuggerUrl).connect();
   await delay(2000);
@@ -208,8 +208,8 @@ async function main() {
   await evalJSRetry(ccClient, `(() => { window.close(); return true; })()`);
 
   // 4) 清理 + 恢复原主题
-  await evalJSRetry(client, `window.biof3Desktop.windowManager.minimizeToRail(${JSON.stringify(contentId)})`);
-  await evalJSRetry(client, `window.biof3Desktop.windowManager.remove(${JSON.stringify(contentId)})`);
+  await evalJSRetry(client, `window.petriDesktop.windowManager.minimizeToRail(${JSON.stringify(contentId)})`);
+  await evalJSRetry(client, `window.petriDesktop.windowManager.remove(${JSON.stringify(contentId)})`);
   await restoreTheme();
   log(`主题偏好已恢复: ${origPref}`);
 

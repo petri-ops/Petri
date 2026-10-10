@@ -98,8 +98,8 @@ export function MemoryPanel(): React.ReactElement {
   }
 
   return (
-    <div className="gewu-usage-resource">
-      <div className="gewu-resource-heading">
+    <div className="petri-usage-resource">
+      <div className="petri-resource-heading">
         <div>
           <strong>Agent 记忆治理</strong>
           <p>
@@ -109,35 +109,35 @@ export function MemoryPanel(): React.ReactElement {
         </div>
       </div>
 
-      {error && <p className="gewu-field__result gewu-field__result--err">{error}</p>}
-      {notice && <p className="gewu-field__result gewu-field__result--ok">{notice}</p>}
+      {error && <p className="petri-field__result petri-field__result--err">{error}</p>}
+      {notice && <p className="petri-field__result petri-field__result--ok">{notice}</p>}
       {stats && (
-        <p className="gewu-field__hint">
+        <p className="petri-field__hint">
           当前规模：{stats.facts ?? '—'} 条事实 · {stats.memories ?? '—'} 条向量记忆
         </p>
       )}
 
-      <div className="gewu-resource-heading">
+      <div className="petri-resource-heading">
         <div><strong>已知事实（自动抽取）</strong></div>
       </div>
       {facts === null ? (
-        <p className="gewu-field__hint">加载中…</p>
+        <p className="petri-field__hint">加载中…</p>
       ) : facts.length === 0 ? (
-        <p className="gewu-field__hint">暂无事实——随着对话积累自动抽取。</p>
+        <p className="petri-field__hint">暂无事实——随着对话积累自动抽取。</p>
       ) : (
         <div style={{ display: 'grid', gap: 6 }}>
           {facts.map((fact) => (
             <div
               key={String(fact.id)}
               data-testid={`memory-fact-${fact.id}`}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', border: '1px solid var(--gewu-border, rgba(128,128,128,0.25))', borderRadius: 6 }}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', border: '1px solid var(--petri-border, rgba(128,128,128,0.25))', borderRadius: 6 }}
             >
-              <code style={{ flex: 1, fontSize: 'var(--gewu-font-size-caption, 12px)' }}>
+              <code style={{ flex: 1, fontSize: 'var(--petri-font-size-caption, 12px)' }}>
                 {fact.category ? `[${fact.category}] ` : ''}{fact.content}
               </code>
               <button
                 type="button"
-                className="gewu-btn gewu-btn--danger-ghost gewu-btn--sm"
+                className="petri-btn petri-btn--danger-ghost petri-btn--sm"
                 title="单条遗忘：后续注入不再包含此事实"
                 onClick={() => void deleteFact(fact.id)}
               >
@@ -148,20 +148,20 @@ export function MemoryPanel(): React.ReactElement {
         </div>
       )}
 
-      <div className="gewu-resource-heading" style={{ marginTop: 12 }}>
+      <div className="petri-resource-heading" style={{ marginTop: 12 }}>
         <div><strong>跨会话对话摘要（归档）</strong></div>
         {summary ? (
-          <button type="button" className="gewu-btn gewu-btn--danger-ghost gewu-btn--sm" onClick={() => void clearSummary()}>
+          <button type="button" className="petri-btn petri-btn--danger-ghost petri-btn--sm" onClick={() => void clearSummary()}>
             清除摘要
           </button>
         ) : null}
       </div>
       {summary ? (
-        <p style={{ fontSize: 'var(--gewu-font-size-caption, 12px)', color: 'var(--gewu-text-secondary)', whiteSpace: 'pre-wrap', maxHeight: 120, overflow: 'auto' }}>
+        <p style={{ fontSize: 'var(--petri-font-size-caption, 12px)', color: 'var(--petri-text-secondary)', whiteSpace: 'pre-wrap', maxHeight: 120, overflow: 'auto' }}>
           {summary}
         </p>
       ) : (
-        <p className="gewu-field__hint">暂无归档摘要。</p>
+        <p className="petri-field__hint">暂无归档摘要。</p>
       )}
     </div>
   );

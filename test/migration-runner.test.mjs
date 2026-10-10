@@ -9,14 +9,14 @@ import os from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
-const coreServerRoot = join(root, 'core', 'biof3-server');
+const coreServerRoot = join(root, 'core', 'petri-server');
 const coreRequire = createRequire(join(coreServerRoot, 'package.json'));
 
 test('migration CLI uses the Core native dependency boundary and records schema version', (t) => {
-  const dir = fs.mkdtempSync(join(os.tmpdir(), 'biof3-migration-'));
+  const dir = fs.mkdtempSync(join(os.tmpdir(), 'petri-migration-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const migrationsDir = join(dir, 'migrations');
-  const dbPath = join(dir, 'biof3.db');
+  const dbPath = join(dir, 'petri.db');
   fs.mkdirSync(migrationsDir, { recursive: true });
   fs.writeFileSync(
     join(migrationsDir, '001_create_test.sql'),
@@ -30,7 +30,7 @@ test('migration CLI uses the Core native dependency boundary and records schema 
       encoding: 'utf8',
       env: {
         ...process.env,
-        BIOF3_BETTER_SQLITE3_ROOT: coreServerRoot,
+        PETRI_BETTER_SQLITE3_ROOT: coreServerRoot,
       },
     },
   );

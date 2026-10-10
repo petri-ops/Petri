@@ -27,7 +27,7 @@
  */
 
 const path = require('node:path');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function attach() {

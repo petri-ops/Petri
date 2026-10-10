@@ -104,7 +104,7 @@
 
 | 维度 | BLOCK-10（已收口） | BLOCK-11-BIOSKILLS-INTEGRATION（active） |
 |------|------------------|----------------------------------------|
-| 范围 | 后端架构重构 + 安全/资源/契约审计修复（25 项） | bioSkills 生态 → BioF3 plugin/skill 映射（60 categories + 41 workflows = 101 顶层目录 / 562 SKILL.md） |
+| 范围 | 后端架构重构 + 安全/资源/契约审计修复（25 项） | bioSkills 生态 → Petri plugin/skill 映射（60 categories + 41 workflows = 101 顶层目录 / 562 SKILL.md） |
 | 工作包类型 | 内部架构 + 审计收口 | 业务能力扩张（plugin + skill） |
 | 当前阶段 | completed（2 包 19+23 = 42 commits 全部落地） | active PHASE 0（commit `02ea7bd`，PHASE 1 启动待用户裁决） |
 | PHASE 1 启动条件 | 不适用（已 completed） | 用户显式裁决（user 提示词："BLOCK-11 vs BLOCK-10 顺序已裁决为 PHASE 1 实施各自互斥（BLOCK-11 已完成 SUB-1.1）"） |

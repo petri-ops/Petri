@@ -151,7 +151,7 @@ function SelectionBar({ selection, onClear }: { selection: ArtifactSelection | n
       {selection?.compatibility && selection.compatibility !== 'compatible' && (
         <em data-status={selection.compatibility}>{selection.compatibility === 'stale' ? '选择已过期' : '选择不可用'}</em>
       )}
-      {selection && <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={onClear}>清除</button>}
+      {selection && <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={onClear}>清除</button>}
     </div>
   );
 }
@@ -291,12 +291,12 @@ function VirtualScientificTable({
             </select>
             <input value={clause.value} onChange={(event) => { updateClause(index, { value: event.target.value }); resetViewport(); }} placeholder="筛选值" aria-label={`筛选条件 ${index + 1}`} />
             {filterClauses.length > 1 && (
-              <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" aria-label={`移除筛选条件 ${index + 1}`} onClick={() => setFilterClauses((current) => current.filter((_, i) => i !== index))}>×</button>
+              <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" aria-label={`移除筛选条件 ${index + 1}`} onClick={() => setFilterClauses((current) => current.filter((_, i) => i !== index))}>×</button>
             )}
           </div>
         ))}
-        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => setFilterClauses((current) => [...current, { field: '', op: 'contains', value: '' }])}>添加筛选条件</button>
-        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={!query?.selectionEvidence.entityIdsHash} onClick={selectAllFiltered}>选择全部筛选结果</button>
+        <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={() => setFilterClauses((current) => [...current, { field: '', op: 'contains', value: '' }])}>添加筛选条件</button>
+        <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" disabled={!query?.selectionEvidence.entityIdsHash} onClick={selectAllFiltered}>选择全部筛选结果</button>
         <span>{query ? `${query.matchedCount.toLocaleString()} / ${query.totalRows.toLocaleString()} 行` : '读取中'}</span>
       </div>
       <SelectionBar selection={selection} onClear={() => { selectedRows.current.clear(); onSelectionChange(null); }} />
@@ -320,7 +320,7 @@ function VirtualScientificTable({
       <div className={styles.tableHeader} style={{ gridTemplateColumns: `34px repeat(${columns.length}, minmax(112px, 1fr))` }}>
         <span />
         {columns.map((column) => (
-          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" key={column.field} type="button" onClick={() => toggleSort(column.field)}>
+          <button className="petri-btn petri-btn--ghost petri-btn--sm" key={column.field} type="button" onClick={() => toggleSort(column.field)}>
             {column.field}{sort[0]?.field === column.field ? (sort[0].direction === 'asc' ? ' ↑' : ' ↓') : ''}
           </button>
         ))}
@@ -434,7 +434,7 @@ function ScientificScatter({ manifest, query, selection, onSelectionChange }: {
         )}
       </div>
       {legends.length > 0 && <div className={styles.legend}>{legends.map((legend) => (
-        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" key={legend} type="button" onClick={() => onSelectionChange(buildLegendSelection(manifest, query.rows.filter((row) => row[mapping.legendField!] === legend)))}>{legend}</button>
+        <button className="petri-btn petri-btn--ghost petri-btn--sm" key={legend} type="button" onClick={() => onSelectionChange(buildLegendSelection(manifest, query.rows.filter((row) => row[mapping.legendField!] === legend)))}>{legend}</button>
       ))}</div>}
       <svg
         className={styles.scatter}
@@ -556,11 +556,11 @@ function ScientificMatrix({ manifest, query, selection, onSelectionChange }: {
       <SelectionBar selection={selection} onClear={() => onSelectionChange(null)} />
       <div className={styles.matrix} style={{ gridTemplateColumns: `minmax(110px, auto) repeat(${columns.length}, 28px)` }}>
         <span />
-        {columns.map((field) => <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" key={field} type="button" title={`选择 ${field}`} onClick={() => onSelectionChange(buildColumnSelection(columnManifest, [field]))}>{field}</button>)}
+        {columns.map((field) => <button className="petri-btn petri-btn--ghost petri-btn--sm" key={field} type="button" title={`选择 ${field}`} onClick={() => onSelectionChange(buildColumnSelection(columnManifest, [field]))}>{field}</button>)}
         {rows.map((row) => (
           <React.Fragment key={row[displayRowField]}>
             <button
-              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              className="petri-btn petri-btn--ghost petri-btn--sm"
               type="button"
               disabled={!declaredRowIdField}
               title={declaredRowIdField ? undefined : '该矩阵没有稳定行 ID 列，无法按行选择科学实体'}

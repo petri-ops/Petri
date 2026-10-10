@@ -18,7 +18,7 @@
 const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'ui-452');
@@ -137,7 +137,7 @@ async function navigateToResult(projectId, jobId) {
     if (!img) return { error: 'plot img not found' };
     img.click();
     await new Promise(r => setTimeout(r, 400));
-    const lb = document.querySelector('.gewu-lightbox img');
+    const lb = document.querySelector('.petri-lightbox img');
     if (!lb) return { error: 'lightbox not opened' };
     const z0 = lb.getAttribute('data-zoom');
     lb.dispatchEvent(new WheelEvent('wheel', { deltaY: -240, bubbles: true, cancelable: true }));
@@ -149,7 +149,7 @@ async function navigateToResult(projectId, jobId) {
     const p2 = lb.getAttribute('data-pan');
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     await new Promise(r => setTimeout(r, 250));
-    return { z0, z1, z2, p2, closed: !document.querySelector('.gewu-lightbox') };
+    return { z0, z1, z2, p2, closed: !document.querySelector('.petri-lightbox') };
   })()`);
   run.assert('T3_lightbox_zoom_ui452', lightboxFlow && !lightboxFlow.error && Number(lightboxFlow.z1) > 1 && lightboxFlow.z2 === '1' && lightboxFlow.p2 === '0,0' && lightboxFlow.closed,
     JSON.stringify(lightboxFlow));

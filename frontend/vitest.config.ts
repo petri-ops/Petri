@@ -16,7 +16,7 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: false,
     include: ['src/**/*.test.{ts,tsx}'],
-    // The full app pulls in @biof3/shared/* (vendor submodule) which
+    // The full app pulls in @petri/shared/* (vendor submodule) which
     // currently fails to type-check; tests must not transitively import it.
     setupFiles: [],
   },

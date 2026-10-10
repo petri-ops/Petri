@@ -3,7 +3,7 @@
 > 状态：`completed`（2026-09-04 用户裁决「启动55 一次性搞定」；BLOCK-49 已落地，P2 前置满足；P1→P2→P3→实机→收口一次会话推进，同日收口）
 > 立项日期：2026-09-03（用户裁决「渐进式 + 参考 codex 取精华」）
 > truthDomain: `block-55-engineering-plan-mode`
-> 来源：BioF3 计划能力现状盘点 + codex plan mode 渐进设计调研（本会话）
+> 来源：Petri 计划能力现状盘点 + codex plan mode 渐进设计调研（本会话）
 
 ## 1. 背景
 
@@ -28,7 +28,7 @@
 | Plan 模式下收工具（update\_plan 被拒）——纯讨论不执行       | `core/src/tools/handlers/plan.rs` L87 `turn.mode()==ModeKind::Plan` 拒绝 | 门的技术实现                           |
 | 计划完成三选一弹窗：批准执行 / 清上下文执行 / 继续留在 plan 模式     | `tui/src/chatwidget/plan_implementation.rs` L22-113                    | 用户裁决权 + 上下文管理                    |
 | 指令外置 preset（可调可本地化，不硬编码）                   | `collaboration_mode_presets`（catalog\_messages.plan）                   | P1 提示词组织                         |
-| 计划 = 轻量 step/status（同一时间最多一个 in\_progress） | `plan_spec.rs`                                                         | BioF3 tool\_plan 已有且更强（持久化+生命周期） |
+| 计划 = 轻量 step/status（同一时间最多一个 in\_progress） | `plan_spec.rs`                                                         | Petri tool\_plan 已有且更强（持久化+生命周期） |
 
 **关键洞察**：codex 的渐进 = 模式级开关（讨论↔执行）+ 执行入口三选一裁决——**轻门而非重流程**。spec 不做成重文档系统。
 

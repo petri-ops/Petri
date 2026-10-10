@@ -11,7 +11,7 @@
 
 | ID | 阶段 | 严重度 | 类别 | 描述 | 缓解 |
 |----|------|--------|------|------|------|
-| **A-007** | PHASE 1.1 | 🟠 中 | DB 体系化 | 抽 `_db-singleton.js` 后 desktop main + r-server 进程同时打开 biof3.db | 进程边界不破坏；既有 chf0-critical IPC contract 33 项覆盖 |
+| **A-007** | PHASE 1.1 | 🟠 中 | DB 体系化 | 抽 `_db-singleton.js` 后 desktop main + r-server 进程同时打开 petri.db | 进程边界不破坏；既有 chf0-critical IPC contract 33 项覆盖 |
 | **PR-012** | PHASE 1.1 | 🟢 低 | DB 体系化 | branch-db + result-db 与 r-server 共享文件 → WAL 锁竞争 | 与 A-007 同 commit 解决 |
 | **E-019 full** | PHASE 1.1 | 🟠 中 | DB 体系化 | SQLite busy_timeout 不一致（r-server 10000ms / agent-task-store / branch-db / result-db 各自保留） | 扩 `core/shared-backend/config-helper.js` 暴露 `getConfig().busyTimeout` |
 | **A-009** | PHASE 1.2 | 🟢 低 | 配置 | dev 模式手动启动 r-server 不带 env，端口 fallback 在 3003 / 3001 之间漂移 | 统一到 env-coordinator.js `backendPorts.r` 默认；其他文件 fallback 全部删掉 |
@@ -74,7 +74,7 @@
 |------|------|------|------|
 | 抽 `_db-singleton.js` 后 SQLite handle 共享 | 🟢 低 | 既有 chf0-critical IPC contract 33 项 0 退化 | `_db-singleton.js` 仅代码层共享，进程边界不破坏；既有 better-sqlite3 WAL 模式可容忍多读 |
 | busy_timeout 10000ms 全量统一 | 🟢 低 | 既有 busy_timeout 各自保留不破坏 | 扩 `config-helper.js` 暴露 `getConfig().busyTimeout` |
-| 写入者竞争 | 🟢 低 | desktop main + r-server 同时打开 biof3.db | 既有 chf0-critical IPC contract 33 项覆盖；WAL 模式容忍多读 |
+| 写入者竞争 | 🟢 低 | desktop main + r-server 同时打开 petri.db | 既有 chf0-critical IPC contract 33 项覆盖；WAL 模式容忍多读 |
 
 ### §3.2 A-002 + A-005 r-server 大文件拆分性能风险
 
@@ -114,7 +114,7 @@
 | 风险 | 等级 | 描述 | 缓解 |
 |------|------|------|------|
 | 既有 18 namespace key 名修改 | 🟢 低 | 本工作包不动 preload.js | 0 diff |
-| `biof3` world 既有 `agentWorkbenchFlags` | 🟢 低 | 不动第一份 `biof3` world | 0 diff |
+| `petri` world 既有 `agentWorkbenchFlags` | 🟢 低 | 不动第一份 `petri` world | 0 diff |
 
 ### §4.2 electron.d.ts 兼容性
 

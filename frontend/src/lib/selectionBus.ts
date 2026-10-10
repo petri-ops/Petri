@@ -4,7 +4,7 @@ import {
   type AgentSelectionSummary,
   type ArtifactSelection,
 } from '@/lib/artifact-selection';
-import { dispatchGewuEvent, gewuEvents } from '@/lib/events';
+import { dispatchPetriEvent, petriEvents } from '@/lib/events';
 
 /**
  * selectionBus.ts — BLOCK-139 P0-1 选择总线（plan=docs/block-139-selection-loop-plan.md §5 D1）
@@ -19,7 +19,7 @@ import { dispatchGewuEvent, gewuEvents } from '@/lib/events';
  * Agent 样本 12）由 artifact-selection.ts 的构建/摘要函数保证，总线只透传，
  * 前端不得放宽（D3）。
  *
- * 广播：沿用既有 gewuEvents 事件模式（events.ts 注册表键 `gewu:selection-bus`），
+ * 广播：沿用既有 petriEvents 事件模式（events.ts 注册表键 `petri:selection-bus`），
  * 每次状态写入后经 window 事件广播最新快照；React 消费面走
  * `useSelectionBus()`（useSyncExternalStore 订阅内部监听器，不依赖 window 事件时序）。
  */
@@ -52,7 +52,7 @@ const listeners = new Set<SelectionBusListener>();
 
 function notify(): void {
   // 先落真相再广播：订阅者读到的 detail 与 getSelectionBusState() 一致。
-  dispatchGewuEvent(gewuEvents.selectionBus, busState);
+  dispatchPetriEvent(petriEvents.selectionBus, busState);
   for (const listener of listeners) listener(busState);
 }
 

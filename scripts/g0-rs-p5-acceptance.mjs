@@ -53,12 +53,12 @@ const JOB_TIMEOUT_MS = 12 * 60 * 1000;
 // The bio toolchain (deseq2/volcano/go-kegg fixtures and descriptors) moved to
 // the independent domain pack (BLOCK-83 P4). The P5 live scientific journey
 // runs only when that pack is available next to this repository (or via
-// BIOF3_BIO_PACK_ROOT); without it the gate is an explicit skip, never a
+// PETRI_BIO_PACK_ROOT); without it the gate is an explicit skip, never a
 // silent pass.
 export function findBioPackRoot() {
-  const override = process.env.BIOF3_BIO_PACK_ROOT;
+  const override = process.env.PETRI_BIO_PACK_ROOT;
   if (override) return existsSync(path.join(override, 'pack.json')) ? override : null;
-  const sibling = path.join(ROOT, '..', 'gewu-pack-bio');
+  const sibling = path.join(ROOT, '..', 'petri-pack-bio');
   return existsSync(path.join(sibling, 'pack.json')) ? sibling : null;
 }
 
@@ -102,27 +102,27 @@ export const P5_SOURCE_FILES = Object.freeze({
   packageScripts: 'package.json',
   frontendPackage: 'frontend/package.json',
   impactMap: 'test/impact-map.json',
-  server: 'core/biof3-server/server.js',
-  routeRegistry: 'core/biof3-server/routes/index.js',
-  dataApi: 'core/biof3-server/api-data.js',
-  routes: 'core/biof3-server/routes/result-studio.js',
-  toolsRoute: 'core/biof3-server/routes/tools.js',
-  toolsPlatformRoute: 'core/biof3-server/routes/tools-platform.js',
-  agentLearning: 'core/biof3-server/agent-tools/learning.js',
-  agentRegistry: 'core/biof3-server/agent-tools/registry.js',
-  contextBinding: 'core/biof3-server/agent-tools/result-context-binding.js',
-  contextTools: 'core/biof3-server/agent-tools/result-context-tools.js',
-  contextEditTools: 'core/biof3-server/agent-tools/result-context-edit-tools.js',
-  editTools: 'core/biof3-server/agent-tools/result-edit-tools.js',
-  selectionTools: 'core/biof3-server/agent-tools/result-selection-tools.js',
-  toolDefinitions: 'core/biof3-server/agent-tools/tool-defs.js',
-  database: 'core/biof3-server/db.js',
-  artifactTruth: 'core/biof3-server/helpers/artifact-truth.js',
-  toolExecutor: 'core/biof3-server/helpers/tools-executor.js',
-  mcpRegistry: 'core/biof3-server/mcp/registry.js',
-  toolsMetadata: 'core/biof3-server/routes/tools-metadata.js',
-  pluginLoader: 'core/biof3-server/plugin-loader.js',
-  toolRegistry: 'core/biof3-server/tool-registry.js',
+  server: 'core/petri-server/server.js',
+  routeRegistry: 'core/petri-server/routes/index.js',
+  dataApi: 'core/petri-server/api-data.js',
+  routes: 'core/petri-server/routes/result-studio.js',
+  toolsRoute: 'core/petri-server/routes/tools.js',
+  toolsPlatformRoute: 'core/petri-server/routes/tools-platform.js',
+  agentLearning: 'core/petri-server/agent-tools/learning.js',
+  agentRegistry: 'core/petri-server/agent-tools/registry.js',
+  contextBinding: 'core/petri-server/agent-tools/result-context-binding.js',
+  contextTools: 'core/petri-server/agent-tools/result-context-tools.js',
+  contextEditTools: 'core/petri-server/agent-tools/result-context-edit-tools.js',
+  editTools: 'core/petri-server/agent-tools/result-edit-tools.js',
+  selectionTools: 'core/petri-server/agent-tools/result-selection-tools.js',
+  toolDefinitions: 'core/petri-server/agent-tools/tool-defs.js',
+  database: 'core/petri-server/db.js',
+  artifactTruth: 'core/petri-server/helpers/artifact-truth.js',
+  toolExecutor: 'core/petri-server/helpers/tools-executor.js',
+  mcpRegistry: 'core/petri-server/mcp/registry.js',
+  toolsMetadata: 'core/petri-server/routes/tools-metadata.js',
+  pluginLoader: 'core/petri-server/plugin-loader.js',
+  toolRegistry: 'core/petri-server/tool-registry.js',
   artifactManifest: 'core/shared-backend/artifact-manifest.js',
   executionProvenance: 'core/shared-backend/execution-provenance.js',
   gitAdapter: 'core/shared-backend/git-adapter.js',
@@ -246,7 +246,7 @@ function openP5Database(dbPath, { readonly = true } = {}) {
   const resolved = path.resolve(String(dbPath || ''));
   assert(Boolean(dbPath) && existsSync(resolved), 'p5_no_seed_database_missing');
   const Database = require(require.resolve('better-sqlite3', {
-    paths: [path.join(ROOT, 'core', 'biof3-server'), ROOT],
+    paths: [path.join(ROOT, 'core', 'petri-server'), ROOT],
   }));
   return new Database(resolved, readonly ? { readonly: true } : undefined);
 }
@@ -635,7 +635,7 @@ function readSquareMatrix(filePath, expectedSize) {
 function buildScientificInput() {
   const packRoot = findBioPackRoot();
   if (!packRoot) throw Object.assign(new Error('p5_bio_pack_root_missing'), {
-    detail: { hint: 'set BIOF3_BIO_PACK_ROOT or check out gewu-pack-bio as a sibling directory' },
+    detail: { hint: 'set PETRI_BIO_PACK_ROOT or check out petri-pack-bio as a sibling directory' },
   });
   const symbols = readFileSync(
     path.join(locatePackPluginDir(packRoot, 'go-kegg'), 'demo-data', 'genes.csv'),
@@ -901,13 +901,13 @@ function pngText(filePath, keyword) {
 }
 
 function renderContractFromPng(filePath) {
-  const raw = pngText(filePath, 'BioF3RenderContract');
+  const raw = pngText(filePath, 'PetriRenderContract');
   if (!raw) return null;
   try { return JSON.parse(raw); } catch { return null; }
 }
 
 function renderContractFromSvg(raw) {
-  const match = String(raw || '').match(/<metadata\s+id="biof3-render-contract"\s+data-json-hex="([a-f0-9]+)"\s*\/>/i);
+  const match = String(raw || '').match(/<metadata\s+id="petri-render-contract"\s+data-json-hex="([a-f0-9]+)"\s*\/>/i);
   if (!match || match[1].length % 2 !== 0) return null;
   try { return JSON.parse(Buffer.from(match[1], 'hex').toString('utf8')); } catch { return null; }
 }
@@ -1364,7 +1364,7 @@ function runWorker(env, spec) {
 async function runWorkerMain() {
   const payload = process.argv[process.argv.indexOf('--worker') + 1];
   const spec = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
-  const db = require(path.join(ROOT, 'core/biof3-server/db.js'));
+  const db = require(path.join(ROOT, 'core/petri-server/db.js'));
   const project = db.getProject(spec.projectId);
   if (!project) throw new Error('worker_project_not_found');
   const ownerId = String(project.user_id || 'local-user');
@@ -1372,11 +1372,11 @@ async function runWorkerMain() {
   // registered execution boundary here initializes the same validated
   // built-in/installed/development plugin sources before any Agent tool reads
   // a trusted Result Studio descriptor.
-  const mcpRegistry = require(path.join(ROOT, 'core/biof3-server/mcp/registry.js'));
+  const mcpRegistry = require(path.join(ROOT, 'core/petri-server/mcp/registry.js'));
 
   if (spec.op === 'selection_enrichment') {
     const { tool_result_selection_run: runSelection } = require(
-      path.join(ROOT, 'core/biof3-server/agent-tools/result-selection-tools.js')
+      path.join(ROOT, 'core/petri-server/agent-tools/result-selection-tools.js')
     );
     const result = await runSelection({
       selectionId: spec.selectionId,
@@ -1391,7 +1391,7 @@ async function runWorkerMain() {
 
   if (spec.op === 'artifact_tool_run') {
     const { tool_run_tool: runTool } = require(
-      path.join(ROOT, 'core/biof3-server/agent-tools/learning.js')
+      path.join(ROOT, 'core/petri-server/agent-tools/learning.js')
     );
     const { createResultStudioRepository } = require(
       path.join(ROOT, 'core/shared-backend/result-studio-repository.js')
@@ -1438,10 +1438,10 @@ async function runWorkerMain() {
   }
 
   const { createResultContextEditTools, resolveResultStudioContext } = require(
-    path.join(ROOT, 'core/biof3-server/agent-tools/result-context-edit-tools.js')
+    path.join(ROOT, 'core/petri-server/agent-tools/result-context-edit-tools.js')
   );
   const { createResultChangeSetTools } = require(
-    path.join(ROOT, 'core/biof3-server/agent-tools/result-edit-tools.js')
+    path.join(ROOT, 'core/petri-server/agent-tools/result-edit-tools.js')
   );
   const ctx = {
     projectId: spec.projectId,
@@ -1570,7 +1570,7 @@ function assertLiveP5Runtime(runtime) {
   assert(runtime.closed !== true, 'p5_live_runtime_closed');
   assert(typeof runtime.baseUrl === 'string' && runtime.baseUrl.startsWith('http://127.0.0.1:'),
     'p5_live_runtime_url_invalid');
-  assert(runtime.env?.BIOF3_DB_PATH && runtime.project?.id && runtime.conversation?.id,
+  assert(runtime.env?.PETRI_DB_PATH && runtime.project?.id && runtime.conversation?.id,
     'p5_live_runtime_coordinates_missing');
   return runtime;
 }
@@ -1609,7 +1609,7 @@ export async function createP5LiveScientificRuntime({
   const { root, env } = createCaptureEnv({ port: requestedPort });
   env.R_POOL_ENABLED = 'false';
   // BLOCK-83/84：核心 resources/built-in-plugins 已删除，领域插件唯一来源=
-  // 已安装领域包——server 启动读 <BIOF3_LOCAL_DATA_DIR>/packs/installed.json
+  // 已安装领域包——server 启动读 <PETRI_LOCAL_DATA_DIR>/packs/installed.json
   // 追加包插件源并注册领域工具表。运行时在此做默认接线（一次性 dataDir +
   // 安装记录）；beforeStart 钩子（如 drift 原型的隔离副本）仍可覆盖。
   if (!existsSync(path.join(ROOT, 'resources', 'built-in-plugins'))) {
@@ -1617,10 +1617,10 @@ export async function createP5LiveScientificRuntime({
     if (!packRoot) {
       throw Object.assign(new Error('p5_live_bio_pack_root_missing'), {
         code: 'p5_live_bio_pack_root_missing',
-        detail: { hint: 'set BIOF3_BIO_PACK_ROOT or check out gewu-pack-bio as a sibling directory' },
+        detail: { hint: 'set PETRI_BIO_PACK_ROOT or check out petri-pack-bio as a sibling directory' },
       });
     }
-    env.BIOF3_LOCAL_DATA_DIR = root;
+    env.PETRI_LOCAL_DATA_DIR = root;
     const { installPack } = require('../core/shared-backend/pack-registry.js');
     const installed = installPack(root, packRoot);
     if (!installed.ok) {
@@ -1635,24 +1635,24 @@ export async function createP5LiveScientificRuntime({
     // 隔离根内装配一份「运行副本」并以只读开发源注入（与 P4R corpus 同一配方：
     // 复制而非符号链接——候选发现用 readdirSync().isDirectory()，符号链接会被
     // 静默跳过）。包仓零改动，产品装载语义零改动。
-    env.BIOF3_DEVELOPMENT_PLUGIN_DIRS = stagePackPlugins({
+    env.PETRI_DEVELOPMENT_PLUGIN_DIRS = stagePackPlugins({
       captureRoot: root,
       toolIds: P5_LIVE_DOMAIN_TOOL_IDS,
       packRoot,
     });
-    env.BIOF3_DOMAIN_TOOL_REGISTRY = path.join(packRoot, 'registry', 'tool-registry.json');
+    env.PETRI_DOMAIN_TOOL_REGISTRY = path.join(packRoot, 'registry', 'tool-registry.json');
   }
   // R 运行时：隔离 dataDir 没有已装运行时；按主栈 env-coordinator 同语义
-  // （BIOF3_R_HOME=<数据根>/runtimes/R）从开发机候选根解析，命中即注入，
+  // （PETRI_R_HOME=<数据根>/runtimes/R）从开发机候选根解析，命中即注入，
   // 让 r-executor 的 binPath 直接命中内嵌运行时而非 PATH 兜底。
   const rBinName = process.platform === 'win32' ? 'Rscript.exe' : 'Rscript';
   const rHomeCandidates = [
-    process.env.BIOF3_LOCAL_DATA_DIR ? path.join(process.env.BIOF3_LOCAL_DATA_DIR, 'runtimes', 'R') : null,
-    path.join(ROOT, '.biof3-dev-user-data', 'data', 'runtimes', 'R'),
-    path.join(os.homedir(), 'Documents', 'BioF3-Local', 'runtimes', 'R'),
+    process.env.PETRI_LOCAL_DATA_DIR ? path.join(process.env.PETRI_LOCAL_DATA_DIR, 'runtimes', 'R') : null,
+    path.join(ROOT, '.petri-dev-user-data', 'data', 'runtimes', 'R'),
+    path.join(os.homedir(), 'Documents', 'Petri-Local', 'runtimes', 'R'),
   ].filter(Boolean);
   const rHomeResolved = rHomeCandidates.find((dir) => existsSync(path.join(dir, 'bin', rBinName)));
-  if (rHomeResolved) env.BIOF3_R_HOME = rHomeResolved;
+  if (rHomeResolved) env.PETRI_R_HOME = rHomeResolved;
   let server = null;
   let closed = false;
   let closePromise = null;
@@ -1667,8 +1667,8 @@ export async function createP5LiveScientificRuntime({
   };
 
   try {
-    await applyMigrations(env.BIOF3_DB_PATH, { quiet: true });
-    const tables = inspectTables(env.BIOF3_DB_PATH);
+    await applyMigrations(env.PETRI_DB_PATH, { quiet: true });
+    const tables = inspectTables(env.PETRI_DB_PATH);
     assert(tables.missing.length === 0, `migration_tables_missing:${tables.missing.join(',')}`);
     if (typeof beforeStart === 'function') {
       await beforeStart(Object.freeze({ root, env, port: requestedPort }));
@@ -1681,7 +1681,7 @@ export async function createP5LiveScientificRuntime({
     // The check happens after every schema/bootstrap side effect but before
     // either HTTP write.  A live UI trace therefore starts from exactly the
     // same unseeded product ledger contract as the canonical P5 capture.
-    const noSeedPrecondition = assertP5NoSeedPrecondition(env.BIOF3_DB_PATH, { root });
+    const noSeedPrecondition = assertP5NoSeedPrecondition(env.PETRI_DB_PATH, { root });
     const createdProject = await postJson(baseUrl, '/api/data/projects', {
       name: 'P5 disposable scientific editing',
       description: 'G0-RS-P5 live no-seed scientific runtime',
@@ -1709,7 +1709,7 @@ export async function createP5LiveScientificRuntime({
     const coordinates = Object.freeze({
       root,
       baseUrl,
-      dbPath: env.BIOF3_DB_PATH,
+      dbPath: env.PETRI_DB_PATH,
       projectId: project.id,
       projectWorkspace: project.workspace_path,
       conversationId: conversation.id,
@@ -2130,7 +2130,7 @@ function exactInputHashes(before, after) {
 
 function readDatabaseTruth(dbPath, projectId) {
   const Database = require(require.resolve('better-sqlite3', {
-    paths: [path.join(ROOT, 'core/biof3-server'), ROOT],
+    paths: [path.join(ROOT, 'core/petri-server'), ROOT],
   }));
   const sqlite = new Database(dbPath, { readonly: true });
   try {
@@ -2242,8 +2242,8 @@ export async function captureP5Acceptance({ writeEvidence = false, keep = false,
   env.R_POOL_ENABLED = 'false';
   let server = null;
   try {
-    await applyMigrations(env.BIOF3_DB_PATH, { quiet: true });
-    const tables = inspectTables(env.BIOF3_DB_PATH);
+    await applyMigrations(env.PETRI_DB_PATH, { quiet: true });
+    const tables = inspectTables(env.PETRI_DB_PATH);
     assert(tables.missing.length === 0, `migration_tables_missing:${tables.missing.join(',')}`);
     server = await startServer(env, verbose
       ? { onLog: (channel, line) => console.error(`[p5-server:${channel}] ${line}`) }
@@ -2254,7 +2254,7 @@ export async function captureP5Acceptance({ writeEvidence = false, keep = false,
     // disposable database immediately before the first HTTP product write so
     // a preloaded project, Job or Result Studio record cannot masquerade as a
     // real P5 journey.
-    const noSeedPrecondition = assertP5NoSeedPrecondition(env.BIOF3_DB_PATH, { root });
+    const noSeedPrecondition = assertP5NoSeedPrecondition(env.PETRI_DB_PATH, { root });
 
     const createdProject = await postJson(baseUrl, '/api/data/projects', {
       name: 'P5 disposable scientific editing',
@@ -2377,7 +2377,7 @@ export async function captureP5Acceptance({ writeEvidence = false, keep = false,
     });
     const scientificReplay = await exactReplayRevision(baseUrl, {
       projectId,
-      dbPath: env.BIOF3_DB_PATH,
+      dbPath: env.PETRI_DB_PATH,
       workspaceRoot: project.workspace_path,
       job: scientificRootJob,
       artifactId: 'deg_table',
@@ -2457,7 +2457,7 @@ export async function captureP5Acceptance({ writeEvidence = false, keep = false,
       artifactId: 'volcano',
     });
     const volcanoBaselineSnapshot = readChangeSetCohort(
-      env.BIOF3_DB_PATH,
+      env.PETRI_DB_PATH,
       volcanoInteraction.revision.changeSetId,
     );
     assert(volcanoBaselineSnapshot.changeSet?.status === 'adopted'
@@ -2553,7 +2553,7 @@ export async function captureP5Acceptance({ writeEvidence = false, keep = false,
     const adoptedVolcanoRevision = volcanoEdit.cohortRevisions.find((revision) => revision.artifactId === 'volcano');
     const volcanoReplay = await exactReplayRevision(baseUrl, {
       projectId,
-      dbPath: env.BIOF3_DB_PATH,
+      dbPath: env.PETRI_DB_PATH,
       workspaceRoot: project.workspace_path,
       job: volcanoCandidateJob,
       artifactId: 'volcano',
@@ -2634,7 +2634,7 @@ export async function captureP5Acceptance({ writeEvidence = false, keep = false,
     assert(adoptedHistorical.changeSet?.status === 'adopted', 'historical_alternative_adoption_failed');
     const historicalReplay = await exactReplayRevision(baseUrl, {
       projectId,
-      dbPath: env.BIOF3_DB_PATH,
+      dbPath: env.PETRI_DB_PATH,
       workspaceRoot: project.workspace_path,
       job: historicalCandidateJob,
       artifactId: 'volcano',
@@ -2646,7 +2646,7 @@ export async function captureP5Acceptance({ writeEvidence = false, keep = false,
       { reason: 'p5_historical_lifecycle' })).data;
     assert(revertedHistorical.changeSet?.status === 'reverted', 'historical_alternative_revert_failed');
     const preRestoreCurrentCohort = readCurrentCohort(
-      env.BIOF3_DB_PATH,
+      env.PETRI_DB_PATH,
       projectId,
       historicalAlternative.cohortRevisions,
     );
@@ -2665,7 +2665,7 @@ export async function captureP5Acceptance({ writeEvidence = false, keep = false,
     'volcano_historical_restore_failed', restoredVolcano);
     const restoredReplay = await exactReplayRevision(baseUrl, {
       projectId,
-      dbPath: env.BIOF3_DB_PATH,
+      dbPath: env.PETRI_DB_PATH,
       workspaceRoot: project.workspace_path,
       job: historicalCandidateJob,
       artifactId: 'volcano',
@@ -2673,7 +2673,7 @@ export async function captureP5Acceptance({ writeEvidence = false, keep = false,
       expectedAffectedJobCount: 1,
     });
     const restoredAfterReplaySnapshot = readChangeSetCohort(
-      env.BIOF3_DB_PATH,
+      env.PETRI_DB_PATH,
       restoredVolcano.changeSet.changeSetId,
     );
     assert(restoredAfterReplaySnapshot.revisions.length === restoredVolcano.cohortRevisions.length
@@ -2868,7 +2868,7 @@ export async function captureP5Acceptance({ writeEvidence = false, keep = false,
         && new Set(values).size === values.length;
     });
 
-    const truth = readDatabaseTruth(env.BIOF3_DB_PATH, projectId);
+    const truth = readDatabaseTruth(env.PETRI_DB_PATH, projectId);
     const sourceWorkflowGraphExact = directEnrichment.workflowGraph?.graphId
       === scientificEdit.changeSet.validationSummary.sourceWorkflowGraph?.graphId
       && directEnrichment.workflowGraph?.sourceDigest
@@ -3148,7 +3148,7 @@ async function main() {
     // Explicit skip with reason (BLOCK-83 §P4 C-class semantics): the live
     // scientific journey needs the independent bio pack; without it this gate
     // is a skip, never a silent pass and never a fake green.
-    console.log('[G0-RS-P5] SKIP — bio pack not present (expected sibling ../gewu-pack-bio or BIOF3_BIO_PACK_ROOT); live scientific journey not exercised');
+    console.log('[G0-RS-P5] SKIP — bio pack not present (expected sibling ../petri-pack-bio or PETRI_BIO_PACK_ROOT); live scientific journey not exercised');
     return;
   }
   const result = await captureP5Acceptance(parseCli(process.argv.slice(2)));

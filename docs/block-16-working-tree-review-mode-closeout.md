@@ -51,11 +51,11 @@ BLOCK-16 落地"工作树 PR-style diff 审阅"端到端：用户启动 agent �
 ### PHASE 3 — agent-done 事件接入 + 拒绝清单 + system-prompt 注入（commit `da48006`）
 
 - `frontend/src/lib/events.ts` 加 `agentTaskDone` 事件常量 + `AgentTaskDoneDetail` 类型 + 映射
-- `frontend/src/components/copilot/copilotClient.ts` SSE 4 处 done 分支派发 biof3 event（primary kind only）
+- `frontend/src/components/copilot/copilotClient.ts` SSE 4 处 done 分支派发 petri event（primary kind only）
 - `frontend/src/components/desktop/WorkingTreeReview/useWorkingTreeReview.ts` 订阅 typed event bus（主路径）+ 保留 preload 备用通道
 - `core/r-server/helpers/system-prompt.js` 加 `renderWorkingTreeRejectsForPrompt` + `loadWorkingTreeRejectEntries` 2 helper + `<working-tree-rejects>` 注入段（标签 `WORKING_TREE_REJECTS_v1` / limit 10 / 单行 80 / char budget 4096）
-- `core/r-server/agent-runner.js` 读 `BIOF3_USER_DATA_DIR` env 注入 ctxForPrompt
-- `src/main/backend-proc-manager.js` spawn r-server 时设 `BIOF3_USER_DATA_DIR = app.getPath('userData')`
+- `core/r-server/agent-runner.js` 读 `PETRI_USER_DATA_DIR` env 注入 ctxForPrompt
+- `src/main/backend-proc-manager.js` spawn r-server 时设 `PETRI_USER_DATA_DIR = app.getPath('userData')`
 - `test/system-prompt-rejects.test.mjs` 11 个 vitest 单元（11/11 PASS）
 
 ### PHASE 4 — 专项门禁 + 收口笔录（本 commit）

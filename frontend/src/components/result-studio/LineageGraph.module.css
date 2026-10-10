@@ -1,36 +1,36 @@
 /* BLOCK-138 P1 — 血缘 DAG 画布（LineageGraph）。
-   色源全部走 --gewu-* token（gewu-css-theme 海军蓝阶梯）：画布作为卡内 inset
+   色源全部走 --petri-* token（petri-css-theme 海军蓝阶梯）：画布作为卡内 inset
    用 bg-canvas，节点卡片=bg-subtle，当前节点=accent 提边+低透明 tint（与
    LineageStrip 节点现行激活形态一致）。 */
 
 .lineageGraph {
   height: 240px;
   min-width: 0;
-  border-bottom: 1px solid var(--gewu-border);
-  background: var(--gewu-bg-canvas);
-  font-size: var(--gewu-font-size-xs);
+  border-bottom: 1px solid var(--petri-border);
+  background: var(--petri-bg-canvas);
+  font-size: var(--petri-font-size-xs);
 }
 
 .node :global(.react-flow__node-default) {
   width: auto;
   min-width: 72px;
   padding: 4px 12px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
-  background: var(--gewu-bg-subtle);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-xs);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xs);
   text-align: center;
 }
 
 .nodeCurrent :global(.react-flow__node-default) {
-  border-color: var(--gewu-accent);
-  background: color-mix(in srgb, var(--gewu-accent) 12%, transparent);
-  color: var(--gewu-text);
+  border-color: var(--petri-accent);
+  background: color-mix(in srgb, var(--petri-accent) 12%, transparent);
+  color: var(--petri-text);
   font-weight: 650;
 }
 
 .node:focus-visible {
-  outline: 2px solid var(--gewu-accent);
+  outline: 2px solid var(--petri-accent);
   outline-offset: 2px;
 }

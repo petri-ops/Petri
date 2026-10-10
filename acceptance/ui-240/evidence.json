@@ -3,7 +3,7 @@
   "workPackage": "TYPOGRAPHY-HIERARCHY P2",
   "capturedAt": "2026-08-31T06:10:00Z",
   "implementCommit": "9c796c1",
-  "environment": "dev Electron 30.5.1 (CDP 9222), fixture 项目 workspace=/tmp/biof3-typo-fixture (验收后清理)",
+  "environment": "dev Electron 30.5.1 (CDP 9222), fixture 项目 workspace=/tmp/petri-typo-fixture (验收后清理)",
   "assertions": {
     "markdownPreview.body": "13px (修复前 13px, 不变)",
     "markdownPreview.inlineCode": "12px (修复前 13×0.88≈11.44px 漂移)",

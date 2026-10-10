@@ -1,19 +1,19 @@
 .empty {
   text-align: center;
   padding: 60px 20px;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
 }
 
 .title {
   font-size: var(--ifm-font-size-base);
   font-weight: 700;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   margin-bottom: 6px;
 }
 
 .desc {
-  font-size: var(--gewu-font-size-caption);
-  margin-bottom: var(--gewu-space-5);
+  font-size: var(--petri-font-size-caption);
+  margin-bottom: var(--petri-space-5);
   line-height: 1.6;
 }
 
@@ -21,18 +21,18 @@
   display: flex;
   gap: 10px;
   justify-content: center;
-  margin-top: var(--gewu-space-4);
+  margin-top: var(--petri-space-4);
 }
 
 .hint {
   margin-top: 14px;
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-muted);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-muted);
   line-height: 1.5;
 }
 
 .hint a {
-  color: var(--gewu-teal);
+  color: var(--petri-teal);
   text-decoration: none;
 }
 

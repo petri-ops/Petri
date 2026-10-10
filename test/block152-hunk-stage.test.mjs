@@ -102,8 +102,8 @@ function makeReviewRepo(t, prefix) {
   fs.mkdirSync(userDataDir, { recursive: true });
   const git = (args) => execFileSync('git', ['-C', repoDir, ...args], { encoding: 'utf-8' });
   git(['init', '-q']);
-  git(['config', 'user.email', 'test@biof3.local']);
-  git(['config', 'user.name', 'biof3-test']);
+  git(['config', 'user.email', 'test@petri.local']);
+  git(['config', 'user.name', 'petri-test']);
   fs.writeFileSync(path.join(repoDir, TARGET), HEAD_BODY);
   git(['add', '-A']);
   git(['commit', '-qm', 'init']);
@@ -141,7 +141,7 @@ async function getHunks(repo, filePath = TARGET) {
 // 场景 1（核心红）：混合 accept/未决 → index 只含 accept hunk，工作树不动
 // ---------------------------------------------------------------------------
 test('BLOCK-152 H: 混合 accept/未决 → git show :path 只含 accept hunk，工作树不动', async (t) => {
-  const repo = makeReviewRepo(t, 'biof3-b152-hunk-mixed-');
+  const repo = makeReviewRepo(t, 'petri-b152-hunk-mixed-');
   fs.writeFileSync(path.join(repo.repoDir, TARGET), WORK_MODIFIED);
 
   const hunks = await getHunks(repo);
@@ -162,7 +162,7 @@ test('BLOCK-152 H: 混合 accept/未决 → git show :path 只含 accept hunk，
 // 场景 2（保绿）：全 hunk accept → 整文件 stage，提交后文件干净
 // ---------------------------------------------------------------------------
 test('BLOCK-152 H: 全 hunk accept → 整文件 stage（现状保绿），提交后干净', async (t) => {
-  const repo = makeReviewRepo(t, 'biof3-b152-hunk-whole-');
+  const repo = makeReviewRepo(t, 'petri-b152-hunk-whole-');
   fs.writeFileSync(path.join(repo.repoDir, TARGET), WORK_MODIFIED);
 
   const hunks = await getHunks(repo);
@@ -182,7 +182,7 @@ test('BLOCK-152 H: 全 hunk accept → 整文件 stage（现状保绿），提�
 // 场景 3（回归）：reject 已回退工作树后提交 → 提交含且仅含幸存 hunk（BLOCK-16 reject 链回归）
 // ---------------------------------------------------------------------------
 test('BLOCK-152 H: reject 回退后 commitReview → 提交含且仅含幸存 hunk', async (t) => {
-  const repo = makeReviewRepo(t, 'biof3-b152-hunk-reject-');
+  const repo = makeReviewRepo(t, 'petri-b152-hunk-reject-');
   fs.writeFileSync(path.join(repo.repoDir, TARGET), WORK_MODIFIED);
 
   const hunks = await getHunks(repo);
@@ -205,7 +205,7 @@ test('BLOCK-152 H: reject 回退后 commitReview → 提交含且仅含幸存 hu
 // 场景 4：git apply 失败 → fail-closed 结构化错误，HEAD 不动，临时 index 清理
 // ---------------------------------------------------------------------------
 test('BLOCK-152 H: patch 不可应用 → review_patch_apply_failed 结构化错误且不产生提交', async (t) => {
-  const repo = makeReviewRepo(t, 'biof3-b152-hunk-applyfail-');
+  const repo = makeReviewRepo(t, 'petri-b152-hunk-applyfail-');
   const { createGitAdapter } = require('../core/shared-backend/git-adapter');
   const adapter = createGitAdapter({
     gitDir: path.join(repo.repoDir, '.git'),
@@ -242,7 +242,7 @@ test('BLOCK-152 H: patch 不可应用 → review_patch_apply_failed 结构化错
 
   assert.equal(headSha(repo), before, 'apply 失败不得移动 HEAD（不产生提交）');
   const leftovers = fs.readdirSync(path.join(repo.repoDir, '.git'))
-    .filter((n) => n.startsWith('biof3-review-index'));
+    .filter((n) => n.startsWith('petri-review-index'));
   assert.equal(leftovers.length, 0, '临时 index 必须清理');
 });
 
@@ -250,7 +250,7 @@ test('BLOCK-152 H: patch 不可应用 → review_patch_apply_failed 结构化错
 // 场景 5（治本语义）：失效/未决-only 的 accept 键 → no_files_to_commit，不整文件降级
 // ---------------------------------------------------------------------------
 test('BLOCK-152 H: 仅失效 accept 键 → no_files_to_commit，不把整文件带进提交', async (t) => {
-  const repo = makeReviewRepo(t, 'biof3-b152-hunk-stale-');
+  const repo = makeReviewRepo(t, 'petri-b152-hunk-stale-');
   fs.writeFileSync(path.join(repo.repoDir, TARGET), WORK_MODIFIED);
 
   const before = headSha(repo);
@@ -270,7 +270,7 @@ test('BLOCK-152 H: 仅失效 accept 键 → no_files_to_commit，不把整文件
 // 场景 6：多文件混合（A 全 accept + B 部分 accept）→ 单提交精确含两面
 // ---------------------------------------------------------------------------
 test('BLOCK-152 H: 多文件 A 整文件 + B 部分 hunk → 单提交各取其面', async (t) => {
-  const repo = makeReviewRepo(t, 'biof3-b152-hunk-multifile-');
+  const repo = makeReviewRepo(t, 'petri-b152-hunk-multifile-');
   const FILE_A = 'whole-accept.txt';
   const FILE_B = 'mixed-file.txt';
   const HEAD_A = Array.from({ length: 10 }, (_, i) => `alpha ${i + 1}`).join('\n') + '\n';
@@ -309,7 +309,7 @@ test('BLOCK-152 H: 多文件 A 整文件 + B 部分 hunk → 单提交各取其�
 // （plan §6：hunk 上下文行取舍错一行 = index 与工作树静默分叉 → 以 index 内容断言兜住）
 // ---------------------------------------------------------------------------
 test('BLOCK-152 H: 丢弃前序纯新增 hunk → 后继 hunk post-image 起始行重算，index 内容仍精确', async (t) => {
-  const repo = makeReviewRepo(t, 'biof3-b152-hunk-offset-');
+  const repo = makeReviewRepo(t, 'petri-b152-hunk-offset-');
   const FILE_C = 'insert-then-change.txt';
   const headC = Array.from({ length: 22 }, (_, i) => `c ${i + 1}`).join('\n') + '\n';
   // hunkA：l3 后插入两行（纯新增 Δ=+2）；hunkB：改 l15（与插入点相距 > 2×ctx → 独立 hunk）
@@ -352,7 +352,7 @@ test('BLOCK-152 H: 丢弃前序纯新增 hunk → 后继 hunk post-image 起始�
 // 永远进不了提交树（rename 半套提交）。
 // ---------------------------------------------------------------------------
 test('BLOCK-152 H/P1: staged rename 全 accept → 提交树只含 new 侧，old 不复活，真实 index 干净', async (t) => {
-  const repo = makeReviewRepo(t, 'biof3-b152-hunk-rename-');
+  const repo = makeReviewRepo(t, 'petri-b152-hunk-rename-');
   const OLD_F = 'old-name.txt';
   const NEW_F = 'new-name.txt';
   fs.writeFileSync(path.join(repo.repoDir, OLD_F), HEAD_BODY);
@@ -390,7 +390,7 @@ test('BLOCK-152 H/P1: staged rename 全 accept → 提交树只含 new 侧，old
 // → 单提交各取其面，且 rename 删除侧照样离开提交树、不殃及他文件内容。
 // ---------------------------------------------------------------------------
 test('BLOCK-152 H/P1: staged rename 整文件 + 他文件部分 hunk → 单提交各取其面且 old 不复活', async (t) => {
-  const repo = makeReviewRepo(t, 'biof3-b152-hunk-rename-mix-');
+  const repo = makeReviewRepo(t, 'petri-b152-hunk-rename-mix-');
   const OLD_F = 'old-name.txt';
   const NEW_F = 'new-name.txt';
   const FILE_B = 'mixed-file.txt';

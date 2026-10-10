@@ -10,7 +10,7 @@ import os from 'node:os';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { createSshDirectRunner } = require('../core/biof3-server/helpers/remote-execution/ssh-direct-runner.js');
+const { createSshDirectRunner } = require('../core/petri-server/helpers/remote-execution/ssh-direct-runner.js');
 
 const PROJECT = { id: 'p_test', workspace_kind: 'ssh', ssh_host: 'test-node', remote_path: '/srv/proj' };
 

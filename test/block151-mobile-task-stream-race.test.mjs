@@ -27,7 +27,7 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const PAGE_REL = 'core/biof3-server/mobile-gateway/public/index.html';
+const PAGE_REL = 'core/petri-server/mobile-gateway/public/index.html';
 
 const encoder = new TextEncoder();
 
@@ -110,7 +110,7 @@ function loadMobilePage() {
       }
     },
   });
-  const store = new Map([['gewu-mobile-session', 'tok']]);
+  const store = new Map([['petri-mobile-session', 'tok']]);
 
   const sandbox = {
     console: { error() {}, warn() {}, log() {} },

@@ -4,7 +4,7 @@
 > 来源：BLOCK-109 plan §2 候选池登记 + block-106 plan §7 mmap 遗留。实验证据：OS temp bench 脚本两轮（数据见 §2，脚本不复制入仓——一次性装置）。
 > archivePolicy: retain_stable_path（评估报告长期留档，实施项 mmap 已落 connection.js）
 > canonical 入口：docs/README.md §评估与专项
-> 结论先行：**mmap_size=64MB 已实施**（`core/biof3-server/db/connection.js`，per-connection pragma）；**node:sqlite 迁移不采纳**；**三契约单源化不采纳**（既有机械守护已覆盖其收益）。
+> 结论先行：**mmap_size=64MB 已实施**（`core/petri-server/db/connection.js`，per-connection pragma）；**node:sqlite 迁移不采纳**；**三契约单源化不采纳**（既有机械守护已覆盖其收益）。
 
 ## 1. 勘察现状
 

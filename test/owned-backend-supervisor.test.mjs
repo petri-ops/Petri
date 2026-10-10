@@ -45,7 +45,7 @@ test("unexpected exit restarts an owned backend with bounded backoff", () => {
   const timers = fakeTimers();
   const children = [];
   const supervisor = createOwnedBackendSupervisor({
-    name: "biof3-server",
+    name: "petri-server",
     spawnProcess: () => {
       const child = fakeChild(100 + children.length);
       children.push(child);
@@ -74,7 +74,7 @@ test("a stable backend resets restart backoff", () => {
   const timers = fakeTimers();
   const children = [];
   const supervisor = createOwnedBackendSupervisor({
-    name: "biof3-server",
+    name: "petri-server",
     spawnProcess: () => {
       const child = fakeChild(200 + children.length);
       children.push(child);
@@ -99,7 +99,7 @@ test("shutdown cancels restarts and never respawns the backend", () => {
   const child = fakeChild(300);
   let spawnCount = 0;
   const supervisor = createOwnedBackendSupervisor({
-    name: "biof3-server",
+    name: "petri-server",
     spawnProcess: () => {
       spawnCount += 1;
       return child;

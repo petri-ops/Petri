@@ -14,7 +14,7 @@
   "crash": {
     "uncaughtExceptionCount": 0,
     "isDestroyedErrorCount": 0,
-    "source": "biof3-electron-main.log + .error grep after full terminal open/pty data flow"
+    "source": "petri-electron-main.log + .error grep after full terminal open/pty data flow"
   },
   "verdict": {
     "mainProcessAlive": true,

@@ -375,7 +375,7 @@ function SessionFrameView({
   const wide = ctx.summaryVisibility === 'expanded';
   // UI-448 加映 v25 — 摘要浮卡拖宽偏好优先；未拖过回落 summaryOpenWidth
   const [persistedSummaryWidth, setPersistedSummaryWidth] = React.useState<number | null>(
-    () => readPersistedFloatWidth('gewu:summary-float-width')
+    () => readPersistedFloatWidth('petri:summary-float-width')
   );
   const summaryFloatWidth = persistedSummaryWidth ?? ctx.summaryOpenWidth;
   // UI-448 加映 v26 — 悬浮/钉住列两形态共用同一拖宽偏好与回调
@@ -384,7 +384,7 @@ function SessionFrameView({
     onWidthChange: setPersistedSummaryWidth,
     onCommit: (w: number) => {
       setPersistedSummaryWidth(w);
-      persistFloatWidth('gewu:summary-float-width', w);
+      persistFloatWidth('petri:summary-float-width', w);
     },
   };
 
@@ -404,7 +404,7 @@ function SessionFrameView({
                 handled by CSS on the projection layer above (aria-hidden plus
                 display:none/flex), so this React gate only destroyed the subtree.
 
-                It made copilotAsk undeliverable: dispatchGewuEvent is a bare
+                It made copilotAsk undeliverable: dispatchPetriEvent is a bare
                 window.dispatchEvent with no buffering (lib/events.ts:113) and
                 SimpleChat.tsx:568 is its only subscriber, so a manual edit
                 submitted from ResultEditPanel — reachable from every result-opening

@@ -29,8 +29,8 @@ const { execSync } = require('child_process');
 
 const CDP_PORT = '9222';
 const PROJECT_ID = 'p_mtlnsv0f_xpjb';
-const DB_FILE = path.join(__dirname, '..', '.biof3-dev-user-data', 'data', 'biof3.db');
-const SETTINGS_FILE = path.join(__dirname, '..', '.biof3-dev-user-data', 'data', 'ai-settings.json');
+const DB_FILE = path.join(__dirname, '..', '.petri-dev-user-data', 'data', 'petri.db');
+const SETTINGS_FILE = path.join(__dirname, '..', '.petri-dev-user-data', 'data', 'ai-settings.json');
 const PRIMARY_ID = 'b56-mock-primary';
 const BACKUP_ID = 'b56-mock-backup';
 const BACKUP_MARKER = 'B56-BACKUP-OK — 本条回复由备用模型 B56-Mock-Backup 生成（BLOCK-56 降级链路实机验证固定回执，长度超过任务完成门限）。';

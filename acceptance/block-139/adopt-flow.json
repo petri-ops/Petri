@@ -32,7 +32,7 @@
     {
       "id": "rest_adopt_http_200",
       "pass": true,
-      "detail": "POST http://127.0.0.1:3001/api/result-studio/changesets/cs_60b48df4ccaea953ec9472af1b463ea2/adopt（Authorization: Bearer desktop-local, body {}）→ HTTP 200，一次通过，无 409 adoption_base_stale（无需重试）：{ok:true, changeSet.status:\"adopted\", adoptedAt:\"2026-10-07T11:24:12.307Z\", adoptedRevisionIds 23 条, idempotent:false}。端点契约：core/biof3-server/routes/result-studio/changesets.js:86-104；F1 首版放行判定（parent 空+family 无 current 不判 stale，4513078f 修复）：core/shared-backend/result-compare-service.js:540-546"
+      "detail": "POST http://127.0.0.1:3001/api/result-studio/changesets/cs_60b48df4ccaea953ec9472af1b463ea2/adopt（Authorization: Bearer desktop-local, body {}）→ HTTP 200，一次通过，无 409 adoption_base_stale（无需重试）：{ok:true, changeSet.status:\"adopted\", adoptedAt:\"2026-10-07T11:24:12.307Z\", adoptedRevisionIds 23 条, idempotent:false}。端点契约：core/petri-server/routes/result-studio/changesets.js:86-104；F1 首版放行判定（parent 空+family 无 current 不判 stale，4513078f 修复）：core/shared-backend/result-compare-service.js:540-546"
     },
     {
       "id": "response_shape_assertions",
@@ -42,7 +42,7 @@
     {
       "id": "db_changeset_adopted",
       "pass": true,
-      "detail": "better-sqlite3 readonly 打开 .biof3-dev-user-data/data/biof3.db：scientific_change_sets WHERE change_set_id='cs_60b48df4ccaea953ec9472af1b463ea2' → status='adopted'，adopted_at='2026-10-07T11:24:12.307Z'，status_reason=null；result_ref_transactions 记录 2026-10-07T11:24:11.980Z adopt preview_ready->adopted"
+      "detail": "better-sqlite3 readonly 打开 .petri-dev-user-data/data/petri.db：scientific_change_sets WHERE change_set_id='cs_60b48df4ccaea953ec9472af1b463ea2' → status='adopted'，adopted_at='2026-10-07T11:24:12.307Z'，status_reason=null；result_ref_transactions 记录 2026-10-07T11:24:11.980Z adopt preview_ready->adopted"
     },
     {
       "id": "db_revisions_current_gt0",
@@ -57,7 +57,7 @@
     {
       "id": "cdp_review_panel_adopted",
       "pass": true,
-      "detail": "CDP(9222, .agents/skills/gewu-dev-infra/dev-verify/lib.cjs pollTargets/connectTarget/evalJs/screenshotPng) 主窗深链 http://localhost:3000/project/p_muy0kgp1_13ca/history?job=tj_muy0kkv1_geii → 审阅面板 section[aria-label=\"Result Studio 版本与变更\"] data-mode=\"history\" 渲染：「结果版本 当前 v2」+2 条版本行（v2·正在查看｜原始版本·当前正式版本·valid·volcano.png；v1｜历史版本·valid·volcano.png）→ review-adopted.png。UI 正路（compact navigator「审查」tab，CompactResultNavigator.tsx:81）进 compare → 徽章 data-state=\"adopted\" 文案「已采用」+「撤销本次采用」按钮（ResultStudioChangeSetPanel.tsx:289,413-416）+ 审查记录「已采用 · 2026/10/7 19:24:12」+ 结果修改候选摘要（Agent 修改·验证通过·46 个文件·+10649 −0）与 volcano/pca 前后对比渲染 → review-adopted-compare.png。注：compare 深链会被 useWorkspaceOpenEffects.ts:106-108 → project-workspace.tsx:811 updateWorkspaceMode('result') 弹回 result（与 2026-10-06 负路径走查记录一致），compare 证据经真实 UI 点击采集"
+      "detail": "CDP(9222, .agents/skills/petri-dev-infra/dev-verify/lib.cjs pollTargets/connectTarget/evalJs/screenshotPng) 主窗深链 http://localhost:3000/project/p_muy0kgp1_13ca/history?job=tj_muy0kkv1_geii → 审阅面板 section[aria-label=\"Result Studio 版本与变更\"] data-mode=\"history\" 渲染：「结果版本 当前 v2」+2 条版本行（v2·正在查看｜原始版本·当前正式版本·valid·volcano.png；v1｜历史版本·valid·volcano.png）→ review-adopted.png。UI 正路（compact navigator「审查」tab，CompactResultNavigator.tsx:81）进 compare → 徽章 data-state=\"adopted\" 文案「已采用」+「撤销本次采用」按钮（ResultStudioChangeSetPanel.tsx:289,413-416）+ 审查记录「已采用 · 2026/10/7 19:24:12」+ 结果修改候选摘要（Agent 修改·验证通过·46 个文件·+10649 −0）与 volcano/pca 前后对比渲染 → review-adopted-compare.png。注：compare 深链会被 useWorkspaceOpenEffects.ts:106-108 → project-workspace.tsx:811 updateWorkspaceMode('result') 弹回 result（与 2026-10-06 负路径走查记录一致），compare 证据经真实 UI 点击采集"
     },
     {
       "id": "baseline_coevolution_observed",

@@ -82,7 +82,7 @@ describe('AppRailContext initial projects load retry (BLOCK-87)', () => {
   });
 
   it('stops retrying after a successful load', async () => {
-    listProjectsMock.mockResolvedValue([{ id: 'p_ok', name: 'biof3' }]);
+    listProjectsMock.mockResolvedValue([{ id: 'p_ok', name: 'petri' }]);
 
     render(
       <MemoryRouter initialEntries={['/']}>
@@ -93,14 +93,14 @@ describe('AppRailContext initial projects load retry (BLOCK-87)', () => {
     );
 
     await act(async () => { await vi.advanceTimersByTimeAsync(100); });
-    expect(screen.getByText('biof3')).toBeTruthy();
+    expect(screen.getByText('petri')).toBeTruthy();
     const calls = listProjectsMock.mock.calls.length;
     await act(async () => { await vi.advanceTimersByTimeAsync(30_000); });
     expect(listProjectsMock.mock.calls.length).toBe(calls);
   });
 });
 
-// ── BLOCK-101 P1 — 首屏 SWR（D2 键 gewu-startup-snapshot-v1）──────────
+// ── BLOCK-101 P1 — 首屏 SWR（D2 键 petri-startup-snapshot-v1）──────────
 
 describe('AppRailContext startup SWR snapshot (BLOCK-101 P1)', () => {
   beforeEach(() => {
@@ -116,7 +116,7 @@ describe('AppRailContext startup SWR snapshot (BLOCK-101 P1)', () => {
 
   it('renders snapshot synchronously before the network reconciles, then overwrites with fresh data', async () => {
     window.localStorage.setItem(
-      'gewu-startup-snapshot-v1',
+      'petri-startup-snapshot-v1',
       JSON.stringify({
         version: 1,
         savedAt: Date.now() - 60_000,
@@ -143,12 +143,12 @@ describe('AppRailContext startup SWR snapshot (BLOCK-101 P1)', () => {
     await act(async () => { await vi.advanceTimersByTimeAsync(5_000); });
     expect(screen.getByText('新数据项目')).toBeTruthy();
     // 对账后快照写回为新鲜数据（下次启动即用）
-    const stored = JSON.parse(window.localStorage.getItem('gewu-startup-snapshot-v1') || '{}') as { projects?: Array<{ id: string }> };
+    const stored = JSON.parse(window.localStorage.getItem('petri-startup-snapshot-v1') || '{}') as { projects?: Array<{ id: string }> };
     expect((stored.projects ?? []).map((p: { id: string }) => p.id)).toEqual(['p_fresh']);
   });
 
   it('discards snapshots with a wrong version or malformed shape (fail-closed to normal load)', async () => {
-    window.localStorage.setItem('gewu-startup-snapshot-v1', JSON.stringify({ version: 2, projects: [{ id: 'x', name: '未来版本' }] }));
+    window.localStorage.setItem('petri-startup-snapshot-v1', JSON.stringify({ version: 2, projects: [{ id: 'x', name: '未来版本' }] }));
     listProjectsMock.mockResolvedValue([{ id: 'p_ok', name: '正常加载' }]);
 
     render(
@@ -164,8 +164,8 @@ describe('AppRailContext startup SWR snapshot (BLOCK-101 P1)', () => {
     expect(screen.getByText('正常加载')).toBeTruthy();
 
     // 坏形状（projects 非数组）：同样丢弃
-    window.localStorage.setItem('gewu-startup-snapshot-v1', JSON.stringify({ version: 1, projects: 'garbage' }));
-    window.localStorage.setItem('gewu-startup-snapshot-v1-bad', 'not json');
+    window.localStorage.setItem('petri-startup-snapshot-v1', JSON.stringify({ version: 1, projects: 'garbage' }));
+    window.localStorage.setItem('petri-startup-snapshot-v1-bad', 'not json');
     expect(screen.queryByText('未来版本')).toBeNull();
   });
 });

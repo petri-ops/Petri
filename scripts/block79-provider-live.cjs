@@ -21,14 +21,14 @@ const REPO = path.join(__dirname, '..');
 const EVIDENCE_DIR = path.join(REPO, 'acceptance', 'block-79');
 const API = 'http://127.0.0.1:3001/api';
 const AUTH = { Authorization: 'Bearer desktop-local', 'content-type': 'application/json' };
-// 与 dev 启动器同一数据根与同一 DB（db.js: BIOF3_DB_PATH 优先——不设会回落
-// core/biof3-server/biof3.db 第二库，归因行将落错库）
-process.env.BIOF3_LOCAL_DATA_DIR = path.join(REPO, '.biof3-dev-user-data', 'data');
-process.env.BIOF3_DB_PATH = path.join(process.env.BIOF3_LOCAL_DATA_DIR, 'biof3.db');
+// 与 dev 启动器同一数据根与同一 DB（db.js: PETRI_DB_PATH 优先——不设会回落
+// core/petri-server/petri.db 第二库，归因行将落错库）
+process.env.PETRI_LOCAL_DATA_DIR = path.join(REPO, '.petri-dev-user-data', 'data');
+process.env.PETRI_DB_PATH = path.join(process.env.PETRI_LOCAL_DATA_DIR, 'petri.db');
 
-const Database = require(path.join(REPO, 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-const { modelGateway } = require(path.join(REPO, 'core', 'biof3-server', 'helpers', 'model-gateway.js'));
-const { LOCAL_USER } = require(path.join(REPO, 'core', 'biof3-server', 'auth.js'));
+const Database = require(path.join(REPO, 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+const { modelGateway } = require(path.join(REPO, 'core', 'petri-server', 'helpers', 'model-gateway.js'));
+const { LOCAL_USER } = require(path.join(REPO, 'core', 'petri-server', 'auth.js'));
 
 function fetchJson(url, opts = {}) {
   return new Promise((resolve, reject) => {
@@ -93,7 +93,7 @@ async function main() {
     JSON.stringify(measurable).slice(0, 260));
 
   // A4 端点 = 库内重算（独立 readonly 连接，30d 窗口 + 同 user 过滤，逐组一致）
-  const ro = new Database(path.join(REPO, '.biof3-dev-user-data', 'data', 'biof3.db'), { readonly: true });
+  const ro = new Database(path.join(REPO, '.petri-dev-user-data', 'data', 'petri.db'), { readonly: true });
   const cutoff = new Date(Date.now() - 30 * 86400000).toISOString();
   const recompute = ro.prepare(`SELECT COALESCE(provider,'(未归因)') AS provider,
       COUNT(*) AS calls, COALESCE(SUM(prompt_tokens),0) AS inputTokens,

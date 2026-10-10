@@ -54,8 +54,8 @@ function apiGet(pathname, { userId } = {}) {
 }
 
 before(async () => {
-  dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block37-p2-'));
-  process.env.BIOF3_LOCAL_DATA_DIR = dataDir;
+  dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block37-p2-'));
+  process.env.PETRI_LOCAL_DATA_DIR = dataDir;
 
   // 通过 P1 sink 写入真实形状的记录（与线上落盘同源）
   sink = createIoTranscriptSink({ dataDir });
@@ -122,7 +122,7 @@ before(async () => {
   })}\n`, 'utf8');
 
   const express = require('express');
-  const route = require(resolve('core/biof3-server/routes/ai-agent/llm-transcripts.js'));
+  const route = require(resolve('core/petri-server/routes/ai-agent/llm-transcripts.js'));
   const app = express();
   app.use((req, _res, next) => {
     const uid = req.headers['x-mock-user'];
@@ -142,7 +142,7 @@ before(async () => {
 after(async () => {
   try { if (server) await new Promise((r) => server.close(r)); } catch {}
   try { fs.rmSync(dataDir, { recursive: true, force: true }); } catch {}
-  delete process.env.BIOF3_LOCAL_DATA_DIR;
+  delete process.env.PETRI_LOCAL_DATA_DIR;
 });
 
 test('未登录请求被拒绝 401', async () => {

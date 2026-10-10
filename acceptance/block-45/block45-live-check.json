@@ -5,7 +5,7 @@
   "platform": "darwin (macOS)",
   "scope": "dev Electron boot 清理误杀并存实例修复 —— 实机四场景验证",
   "environment": {
-    "env": "BIOF3_ELECTRON_USER_DATA_DIR=$PWD/.biof3-dev-user-data BIOF3_LOCAL_DATA_DIR=$PWD/.biof3-dev-user-data/data",
+    "env": "PETRI_ELECTRON_USER_DATA_DIR=$PWD/.petri-dev-user-data PETRI_LOCAL_DATA_DIR=$PWD/.petri-dev-user-data/data",
     "initialState": ":3000 残留 vite (pid 1669)；无 token Electron；无启动记录（pre-BLOCK-45）；另发现昨晚 npx 变体无 token Electron 残留 (pid 941) 持 Chromium singleton lock",
     "logs": ["/tmp/b45-stackA.log", "/tmp/b45-stackA2.log", "/tmp/b45-stackC.log", "/tmp/b45-stackD.log"]
   },
@@ -28,7 +28,7 @@
       "given": "栈 A2 完整运行（Electron 72391 + vite :3000 + backend :3001）",
       "when": "另起 wrapper B（npm run dev）",
       "then": [
-        "B 报错退出：'BioF3 dev stack is already running (wrapper pid 72119...) Stop it first (Ctrl+C ... or: kill 72119) ... --force-clean-electron'",
+        "B 报错退出：'Petri dev stack is already running (wrapper pid 72119...) Stop it first (Ctrl+C ... or: kill 72119) ... --force-clean-electron'",
         "A2 的 Electron 72391 仍存活（旧实现此处被全杀 —— 本工作包核心回归点）",
         "A2 后端 health OK；启动记录未被 B 覆盖"
       ],
@@ -61,7 +61,7 @@
   ],
   "teardown": "SIGTERM D wrapper → Electron 停止 + 记录清除；:3000/:3001 0 listeners",
   "liveFindings": [
-    "无 token 老实例持 .biof3-dev-user-data Chromium singleton lock 会使新 boot 的 Electron 静默退出（stderr 仅 devtools bind Address already in use，主日志空）——force-clean 逃生口即为此场景设计",
+    "无 token 老实例持 .petri-dev-user-data Chromium singleton lock 会使新 boot 的 Electron 静默退出（stderr 仅 devtools bind Address already in use，主日志空）——force-clean 逃生口即为此场景设计",
     "kill -9 wrapper 的 vite/backend 子进程成为孤儿继续监听端口，由既有端口 sweep 接管（Electron 段修复不改变该语义）",
     "验证中的瞬态读数（Electron 存活/记录更新）须在 boot 完全 settle 后读，早读会得到陈旧值"
   ],

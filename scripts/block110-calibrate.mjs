@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const decisionApi = require('../core/biof3-server/helpers/decision-api.js');
+const decisionApi = require('../core/petri-server/helpers/decision-api.js');
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
@@ -209,7 +209,7 @@ async function main() {
     capturedAt: new Date().toISOString(),
     sourceCommit: require('node:child_process').execSync('git rev-parse HEAD', { cwd: root }).toString().trim(),
     model: decisionApi.DECISION_MODEL_PIN,
-    wrapper: 'core/biof3-server/helpers/decision-api.js',
+    wrapper: 'core/petri-server/helpers/decision-api.js',
     domains: results,
     gate,
   };

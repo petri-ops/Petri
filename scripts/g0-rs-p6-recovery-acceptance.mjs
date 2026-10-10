@@ -89,7 +89,7 @@ export const P6_SERVICE_FIXTURE_SOURCE_FILES = Object.freeze({
   gitAdapter: 'core/shared-backend/git-adapter.js',
   gitBinding: 'core/shared-backend/git-repository-binding.js',
   resourceSnapshot: 'core/shared-backend/runtime-resource-snapshot.js',
-  routes: 'core/biof3-server/routes/result-studio.js',
+  routes: 'core/petri-server/routes/result-studio.js',
   routeBaselineTest: 'test/result-studio-route-baseline.test.mjs',
   resultClient: 'frontend/src/components/result-studio/resultStudioClient.ts',
   changeSetPanel: 'frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx',
@@ -339,7 +339,7 @@ function revisionInput({
 }
 
 function registerSingleRevision({ repository, adapter, projectId, sourceCommit, input, adopt = true }) {
-  const workingBranchRef = `refs/heads/biof3/changeset/${input.changeSetId}`;
+  const workingBranchRef = `refs/heads/petri/changeset/${input.changeSetId}`;
   repository.createChangeSet({
     changeSetId: input.changeSetId,
     projectId,
@@ -373,9 +373,9 @@ function registerSingleRevision({ repository, adapter, projectId, sourceCommit, 
 }
 
 function createPressureFixture() {
-  const root = mkdtempSync(path.join(tmpdir(), 'biof3-p6-recovery-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-p6-recovery-'));
   const workspaceRoot = path.join(root, 'workspace');
-  const databasePath = path.join(root, 'biof3.db');
+  const databasePath = path.join(root, 'petri.db');
   mkdirSync(workspaceRoot, { recursive: true });
   const projectId = 'p_p6_recovery_runtime';
   let sqlite = createDatabase(databasePath, workspaceRoot, projectId);
@@ -401,7 +401,7 @@ function createPressureFixture() {
   writeFileSync(scriptFile, script);
   writeFileSync(parametersFile, parametersContent);
   const sourceCommit = adapter.commitVirtualFiles({
-    ref: 'refs/heads/biof3/main',
+    ref: 'refs/heads/petri/main',
     expectedOld: ZERO_OID,
     message: 'P6 recovery pressure source',
     files: [
@@ -440,7 +440,7 @@ function createPressureFixture() {
         sourceCommit, scriptHash, parametersHash, toolJobId, relativePath, digest, changeSetId,
       }),
     });
-    adapter.updateRefCas({ ref: `refs/heads/biof3/current/${artifact.familyId}`, newCommit: sourceCommit, expectedOld: ZERO_OID });
+    adapter.updateRefCas({ ref: `refs/heads/petri/current/${artifact.familyId}`, newCommit: sourceCommit, expectedOld: ZERO_OID });
     artifactTruth[artifact.key] = { relativePath, file, digest, bytes: artifact.bytes };
   }
 
@@ -477,7 +477,7 @@ function createPressureFixture() {
     registerSingleRevision({ repository, adapter, projectId, sourceCommit, input });
     parentRevisionId = revisionId;
   }
-  adapter.updateRefCas({ ref: 'refs/heads/biof3/current/family_pressure', newCommit: sourceCommit, expectedOld: ZERO_OID });
+  adapter.updateRefCas({ ref: 'refs/heads/petri/current/family_pressure', newCommit: sourceCommit, expectedOld: ZERO_OID });
 
   const previewRelative = 'results/pressure/revisions/table-preview.csv';
   const previewFile = path.join(workspaceRoot, previewRelative);
@@ -506,7 +506,7 @@ function createPressureFixture() {
     jobRefs: ['tj_p6_preview'],
   });
 
-  repository.createChangeSet({ changeSetId: 'cs_p6_interrupted', projectId, conversationId: 'conv_p6', baseCommit: sourceCommit, workingBranchRef: 'refs/heads/biof3/changeset/cs_p6_interrupted', createdBy: 'agent' });
+  repository.createChangeSet({ changeSetId: 'cs_p6_interrupted', projectId, conversationId: 'conv_p6', baseCommit: sourceCommit, workingBranchRef: 'refs/heads/petri/changeset/cs_p6_interrupted', createdBy: 'agent' });
   repository.transitionChangeSet({ changeSetId: 'cs_p6_interrupted', to: 'running' });
   repository.saveCheckpoint({
     checkpointId: 'cp_p6_interrupted', projectId, conversationId: 'conv_p6', baseCommit: sourceCommit,
@@ -515,7 +515,7 @@ function createPressureFixture() {
     pendingPreview: { stage: 'materialized', revisionIds: [], runtimeLease: staleRuntimeLease },
   });
 
-  repository.createChangeSet({ changeSetId: 'cs_p6_draft', projectId, conversationId: 'conv_p6', baseCommit: sourceCommit, workingBranchRef: 'refs/heads/biof3/changeset/cs_p6_draft', createdBy: 'agent' });
+  repository.createChangeSet({ changeSetId: 'cs_p6_draft', projectId, conversationId: 'conv_p6', baseCommit: sourceCommit, workingBranchRef: 'refs/heads/petri/changeset/cs_p6_draft', createdBy: 'agent' });
   repository.saveCheckpoint({
     checkpointId: 'cp_p6_draft', projectId, conversationId: 'conv_p6', baseCommit: sourceCommit,
     changeSetId: 'cs_p6_draft', changeSetStatus: 'draft',
@@ -531,7 +531,7 @@ function createPressureFixture() {
     startedAt: new Date(lastCheckpointTime + 1).toISOString(),
   };
 
-  adapter.deleteRefCas({ ref: 'refs/heads/biof3/current/family_pressure', expectedOld: sourceCommit });
+  adapter.deleteRefCas({ ref: 'refs/heads/petri/current/family_pressure', expectedOld: sourceCommit });
   sqlite.close();
   sqlite = null;
 
@@ -601,7 +601,7 @@ async function runServiceIntegrationFixture() {
     const recoveryMs = performance.now() - recoveryStarted;
     const opened = fixture.reopen();
     const statusCounts = countStatuses(opened.repository, fixture.projectId);
-    const currentRefRestored = opened.adapter.revParse('refs/heads/biof3/current/family_pressure') === fixture.sourceCommit;
+    const currentRefRestored = opened.adapter.revParse('refs/heads/petri/current/family_pressure') === fixture.sourceCommit;
     const checkpointsPreserved = opened.repository.listProjectCheckpoints(fixture.projectId).length === 3;
     const repairs = recovery.repaired.map((item) => item.repair).sort();
 
@@ -629,7 +629,7 @@ async function runServiceIntegrationFixture() {
       .map((revision) => path.join(fixture.workspaceRoot, revision.outputPath));
     const contentObject = path.join(
       fixture.workspaceRoot,
-      '.biof3/result-objects/sha256',
+      '.petri/result-objects/sha256',
       fixture.pressureDigest.slice(0, 2),
       fixture.pressureDigest,
     );
@@ -647,10 +647,10 @@ async function runServiceIntegrationFixture() {
       && readFileSync(contentObject).equals(objectOriginal);
     writeFileSync(mutationTarget, mutationOriginal);
 
-    opened.repository.createChangeSet({ changeSetId: 'cs_p6_gc', projectId: fixture.projectId, baseCommit: fixture.sourceCommit, workingBranchRef: 'refs/heads/biof3/changeset/cs_p6_gc', createdBy: 'agent' });
+    opened.repository.createChangeSet({ changeSetId: 'cs_p6_gc', projectId: fixture.projectId, baseCommit: fixture.sourceCommit, workingBranchRef: 'refs/heads/petri/changeset/cs_p6_gc', createdBy: 'agent' });
     opened.repository.transitionChangeSet({ changeSetId: 'cs_p6_gc', to: 'abandoned' });
-    opened.adapter.updateRefCas({ ref: 'refs/heads/biof3/changeset/cs_p6_gc', newCommit: fixture.sourceCommit, expectedOld: ZERO_OID });
-    const staging = path.join(fixture.workspaceRoot, '.biof3/revision/cs_p6_gc');
+    opened.adapter.updateRefCas({ ref: 'refs/heads/petri/changeset/cs_p6_gc', newCommit: fixture.sourceCommit, expectedOld: ZERO_OID });
+    const staging = path.join(fixture.workspaceRoot, '.petri/revision/cs_p6_gc');
     mkdirSync(staging, { recursive: true });
     writeFileSync(path.join(staging, 'candidate.R'), 'print(1)\n');
     const old = new Date(Date.now() - 48 * 60 * 60 * 1000);
@@ -715,17 +715,17 @@ async function runServiceIntegrationFixture() {
 
     const conflict = opened.adapter.commitVirtualFiles({
       parentCommit: fixture.sourceCommit,
-      ref: 'refs/heads/biof3/p6-conflict',
+      ref: 'refs/heads/petri/p6-conflict',
       expectedOld: ZERO_OID,
       message: 'P6 conflicting current ref',
       files: [{ path: 'analysis/scripts/conflict.R', content: 'print(99)\n' }],
     }).commit;
-    opened.adapter.updateRefCas({ ref: 'refs/heads/biof3/current/family_complex_svg', newCommit: conflict, expectedOld: fixture.sourceCommit });
+    opened.adapter.updateRefCas({ ref: 'refs/heads/petri/current/family_complex_svg', newCommit: conflict, expectedOld: fixture.sourceCommit });
     const refDrift = await runResultStudioBackground('inspect-workspace', {
       databasePath: fixture.databasePath, workspaceRoot: fixture.workspaceRoot, projectId: fixture.projectId,
       conversationId: 'conv_p6', runtimeLease: fixture.runtimeLease,
     });
-    opened.adapter.updateRefCas({ ref: 'refs/heads/biof3/current/family_complex_svg', newCommit: fixture.sourceCommit, expectedOld: conflict });
+    opened.adapter.updateRefCas({ ref: 'refs/heads/petri/current/family_complex_svg', newCommit: fixture.sourceCommit, expectedOld: conflict });
 
     opened.repository.saveCheckpoint({
       checkpointId: 'cp_p6_corrupt', projectId: fixture.projectId, conversationId: 'conv_p6_corrupt', baseCommit: fixture.sourceCommit,

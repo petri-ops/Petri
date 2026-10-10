@@ -10,7 +10,7 @@
 import React from 'react';
 import { fetchResultLineage, type ResultLineage } from './resultStudioClient';
 import { findCatalogTool, useToolCatalog } from '@/lib/tool-catalog';
-import { dispatchGewuEvent, gewuEvents } from '@/lib/events';
+import { dispatchPetriEvent, petriEvents } from '@/lib/events';
 import styles from './LineageStrip.module.css';
 
 export function LineageStrip({ projectId, jobId, onPinArtifact }: {
@@ -50,7 +50,7 @@ export function LineageStrip({ projectId, jobId, onPinArtifact }: {
                 className={styles.node}
                 aria-current={node.isCurrent ? 'true' : undefined}
                 title={node.isCurrent ? `当前结果（直接下游 ${lineage.downstreamCount} 个）` : `打开上游 ${node.toolId || node.toolJobId}`}
-                onClick={() => dispatchGewuEvent(gewuEvents.projectOpenResult, { toolJobId: node.toolJobId, projectId })}
+                onClick={() => dispatchPetriEvent(petriEvents.projectOpenResult, { toolJobId: node.toolJobId, projectId })}
               >
                 {label}
               </button>

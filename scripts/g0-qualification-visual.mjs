@@ -13,7 +13,7 @@ const evidencePath = join(root, 'acceptance/g0-qualification/visual-state-conver
 const inspectionPath = join(evidenceDir, 'inspection.json');
 const appPath = resolve(
   process.env.G0_QUALIFICATION_APP_PATH
-    || join(root, 'dist/mac-arm64/BioF3.app'),
+    || join(root, 'dist/mac-arm64/Petri.app'),
 );
 const appBuildSubjectPath = join(appPath, 'Contents/Resources/g0-build-subject.json');
 const require = createRequire(import.meta.url);

@@ -25,7 +25,7 @@ const { deriveHostPlatform } = require('./host-platform');
  *
  * Layering:
  *   - This module is PURE DATA + THIN ORCHESTRATION. It has no `electron`
- *     dependency and can run in core/ (biof3-server, tests) and the main process.
+ *     dependency and can run in core/ (petri-server, tests) and the main process.
  *   - `capability-provisioning.js` is the generic download/verify/install
  *     engine. This module supplies it descriptors and decides *whether* a
  *     bundle should be fetched.
@@ -40,7 +40,7 @@ const { deriveHostPlatform } = require('./host-platform');
  *   their OSS objects have been uploaded and checked.
  */
 
-const BUNDLE_HOST = 'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com';
+const BUNDLE_HOST = 'https://petri-uploads.oss-cn-hangzhou.aliyuncs.com';
 // 平台键约定单一来源：src/plugin-schema.js PLATFORM_IDS（'macos-arm64' |
 // 'macos-x64' | 'windows-x64' | 'linux-x64'）。DEFAULT_PLATFORM 只描述
 // 「当前已发布 archive 的构建平台」（registry 数据面，见下方描述符），不再

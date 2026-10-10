@@ -21,7 +21,7 @@
       "errorText": "gate.passed=false — 未找到达门槛的阈值；known_existing argmax 39.3%（四类认识论不可判）"
     },
     {
-      "testFile": ".agents/skills/gewu-dev-infra/dev-verify/flows/block112-intent-live.cjs",
+      "testFile": ".agents/skills/petri-dev-infra/dev-verify/flows/block112-intent-live.cjs",
       "testName": "N4_temp_conversations_cleaned",
       "errorText": "cleanups=[\"conv_8c2=ok\",\"conv_8c2=fail\"] — 两次提交复用活跃会话，重复删除 404"
     },

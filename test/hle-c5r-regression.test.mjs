@@ -26,17 +26,17 @@ import path from 'node:path';
 import { existsSync } from 'node:fs';
 
 // BLOCK-104 P3 — 环境门：外部插件仓不在本机时对应用例 skip（可见计数）。
-const SKIP_EXTERNAL_PACK = !existsSync(path.join(process.cwd(), '..', 'gewu-pack-bio', 'plugins', 'deg-standardizer')) && '外部插件仓 gewu-pack-bio 缺 plugins/deg-standardizer（本机环境缺失，BLOCK-104 P3 环境门）';
+const SKIP_EXTERNAL_PACK = !existsSync(path.join(process.cwd(), '..', 'petri-pack-bio', 'plugins', 'deg-standardizer')) && '外部插件仓 petri-pack-bio 缺 plugins/deg-standardizer（本机环境缺失，BLOCK-104 P3 环境门）';
 // GSEA 环境门（BLOCK-140 轮主线裁决授权，镜像上方探针写法）：gsea 已被 BLOCK-86 用户裁决封存进
 // plugins.dormant/（Mac 侧 clusterProfiler/GO.db/org.Hs.eg.db 等 R 重依赖未装，激活会假可用），故以
 // tool-definition.json 可达为准——不可达=环境感知 skip，不是删覆盖：gsea 已装环境（如 Windows dev 栈）
 // 照常执行断言；Mac 侧激活随 BIO-4 Mac 交付对账（含 R 环境补装）另行处理。
-const SKIP_EXTERNAL_GSEA = !existsSync(path.join(process.cwd(), '..', 'gewu-pack-bio', 'plugins', 'gsea', 'tool-definition.json')) && '外部插件仓 gewu-pack-bio 缺 plugins/gsea/tool-definition.json（BLOCK-86 用户裁决封存于 plugins.dormant/，本机 R 重依赖未装；gsea 已装环境照常执行，Mac 激活随 BIO-4 对账另行处理）';
+const SKIP_EXTERNAL_GSEA = !existsSync(path.join(process.cwd(), '..', 'petri-pack-bio', 'plugins', 'gsea', 'tool-definition.json')) && '外部插件仓 petri-pack-bio 缺 plugins/gsea/tool-definition.json（BLOCK-86 用户裁决封存于 plugins.dormant/，本机 R 重依赖未装；gsea 已装环境照常执行，Mac 激活随 BIO-4 对账另行处理）';
 import os from 'node:os';
 import fs from 'node:fs';
 
-const TMP_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-hle-c5r-'));
-process.env.BIOF3_DB_PATH = path.join(TMP_DIR, 'test.db');
+const TMP_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-hle-c5r-'));
+process.env.PETRI_DB_PATH = path.join(TMP_DIR, 'test.db');
 
 // ---------------------------------------------------------------------------
 // Import modules under test
@@ -136,13 +136,13 @@ function makePartialArtifact(job, overrides = {}) {
 }
 
 // ===========================================================================
-// HLE-C5R-1: DEG Artifact Profile — biof3.deg.v1
+// HLE-C5R-1: DEG Artifact Profile — petri.deg.v1
 // ===========================================================================
 
-describe('HLE-C5R-1: Canonical DEG Profile (biof3.deg.v1)', () => {
-  it('biof3.deg.v1 profile exists and has required columns', () => {
-    const profile = getProfile('biof3.deg.v1');
-    assert.ok(profile, 'biof3.deg.v1 profile must exist');
+describe('HLE-C5R-1: Canonical DEG Profile (petri.deg.v1)', () => {
+  it('petri.deg.v1 profile exists and has required columns', () => {
+    const profile = getProfile('petri.deg.v1');
+    assert.ok(profile, 'petri.deg.v1 profile must exist');
     assert.ok(profile.requiredColumns.length >= 5, 'Must have at least 5 required columns');
     const colNames = profile.requiredColumns.map(c => c.name);
     assert.ok(colNames.includes('gene'), 'Required: gene');
@@ -152,36 +152,36 @@ describe('HLE-C5R-1: Canonical DEG Profile (biof3.deg.v1)', () => {
     assert.ok(colNames.includes('source_method'), 'Required: source_method');
   });
 
-  it('biof3.deg.v1 has known column aliases for log2FC', () => {
-    const profile = getProfile('biof3.deg.v1');
+  it('petri.deg.v1 has known column aliases for log2FC', () => {
+    const profile = getProfile('petri.deg.v1');
     assert.ok(profile.knownColumnAliases.log2FC, 'log2FC must be aliased to log2FoldChange');
     assert.strictEqual(profile.knownColumnAliases.log2FC, 'log2FoldChange');
   });
 
   it('resolveCanonicalColumn maps log2FC → log2FoldChange', () => {
-    assert.strictEqual(resolveCanonicalColumn('biof3.deg.v1', 'log2FC'), 'log2FoldChange');
-    assert.strictEqual(resolveCanonicalColumn('biof3.deg.v1', 'logFC'), 'log2FoldChange');
-    assert.strictEqual(resolveCanonicalColumn('biof3.deg.v1', 'log2FoldChange'), 'log2FoldChange');
-    assert.strictEqual(resolveCanonicalColumn('biof3.deg.v1', 'gene_name'), 'gene');
-    assert.strictEqual(resolveCanonicalColumn('biof3.deg.v1', 'P.Value'), 'pvalue');
+    assert.strictEqual(resolveCanonicalColumn('petri.deg.v1', 'log2FC'), 'log2FoldChange');
+    assert.strictEqual(resolveCanonicalColumn('petri.deg.v1', 'logFC'), 'log2FoldChange');
+    assert.strictEqual(resolveCanonicalColumn('petri.deg.v1', 'log2FoldChange'), 'log2FoldChange');
+    assert.strictEqual(resolveCanonicalColumn('petri.deg.v1', 'gene_name'), 'gene');
+    assert.strictEqual(resolveCanonicalColumn('petri.deg.v1', 'P.Value'), 'pvalue');
   });
 
-  it('isProducer: deg-standardizer and deseq2 produce biof3.deg.v1', () => {
-    assert.ok(isProducer('biof3.deg.v1', 'deg-standardizer'), 'deg-standardizer must produce biof3.deg.v1');
-    assert.ok(isProducer('biof3.deg.v1', 'deseq2'), 'deseq2 must produce biof3.deg.v1');
-    assert.ok(!isProducer('biof3.deg.v1', 'volcano-plot'), 'volcano-plot must NOT produce biof3.deg.v1');
+  it('isProducer: deg-standardizer and deseq2 produce petri.deg.v1', () => {
+    assert.ok(isProducer('petri.deg.v1', 'deg-standardizer'), 'deg-standardizer must produce petri.deg.v1');
+    assert.ok(isProducer('petri.deg.v1', 'deseq2'), 'deseq2 must produce petri.deg.v1');
+    assert.ok(!isProducer('petri.deg.v1', 'volcano-plot'), 'volcano-plot must NOT produce petri.deg.v1');
   });
 
-  it('isConsumer: volcano-plot, go-kegg, gsea consume biof3.deg.v1', () => {
-    assert.ok(isConsumer('biof3.deg.v1', 'volcano-plot'), 'volcano-plot must consume biof3.deg.v1');
-    assert.ok(isConsumer('biof3.deg.v1', 'go-kegg'), 'go-kegg must consume biof3.deg.v1');
-    assert.ok(isConsumer('biof3.deg.v1', 'gsea'), 'gsea must consume biof3.deg.v1');
-    assert.ok(!isConsumer('biof3.deg.v1', 'deseq2'), 'deseq2 must NOT consume its own output');
+  it('isConsumer: volcano-plot, go-kegg, gsea consume petri.deg.v1', () => {
+    assert.ok(isConsumer('petri.deg.v1', 'volcano-plot'), 'volcano-plot must consume petri.deg.v1');
+    assert.ok(isConsumer('petri.deg.v1', 'go-kegg'), 'go-kegg must consume petri.deg.v1');
+    assert.ok(isConsumer('petri.deg.v1', 'gsea'), 'gsea must consume petri.deg.v1');
+    assert.ok(!isConsumer('petri.deg.v1', 'deseq2'), 'deseq2 must NOT consume its own output');
   });
 
   it('validateColumnSchema detects log2FC → log2FoldChange alias mapping', () => {
     // Table with legacy log2FC column (missing source_method - that's OK for this test)
-    const result = validateColumnSchema('biof3.deg.v1', ['gene', 'log2FC', 'pvalue', 'padj']);
+    const result = validateColumnSchema('petri.deg.v1', ['gene', 'log2FC', 'pvalue', 'padj']);
     // validateColumnSchema should warn about log2FC alias mapping
     assert.ok(
       result.warnings?.some(w => w.includes('log2FC') && w.includes('log2FoldChange')),
@@ -265,7 +265,7 @@ describe('HLE-C5R-3: Failed Job + partial artifacts → BLOCK downstream', () =>
     const partialArtifact = {
       id: 'partial_deg',
       artifactTruth: { status: 'degraded', reason: 'partial_output' },
-      profile: 'biof3.deg.v1',
+      profile: 'petri.deg.v1',
     };
     // bindVerifiedArtifact must reject partial artifact
     // (Implementation: validate lineage entry in buildAgentWorkflowPlan)
@@ -486,11 +486,11 @@ describe('HLE-C5R-7: Plugin Contract Lint detects contract mismatches', () => {
 
   it('deg-standardizer has outputs defined', { skip: SKIP_EXTERNAL_PACK }, async () => {
     const def = JSON.parse(fs.readFileSync(
-      path.join(process.cwd(), '..', 'gewu-pack-bio', 'plugins', 'deg-standardizer', 'tool-definition.json'),
+      path.join(process.cwd(), '..', 'petri-pack-bio', 'plugins', 'deg-standardizer', 'tool-definition.json'),
       'utf8',
     ));
     // The tool has outputs; the canonical column contract is enforced via the
-    // artifact-profiles biof3.deg.v1 profile, not necessarily in the description
+    // artifact-profiles petri.deg.v1 profile, not necessarily in the description
     assert.ok(def.outputs?.length > 0, 'deg-standardizer must have outputs defined');
     // Output deg_standardized is the canonical DEG table
     const hasStandardized = def.outputs?.some(o => o.id === 'deg_standardized');
@@ -499,7 +499,7 @@ describe('HLE-C5R-7: Plugin Contract Lint detects contract mismatches', () => {
 
   it('GSEA tool-definition declares gene_id_type parameter', { skip: SKIP_EXTERNAL_GSEA }, async () => {
     const def = JSON.parse(fs.readFileSync(
-      path.join(process.cwd(), '..', 'gewu-pack-bio', 'plugins', 'gsea', 'tool-definition.json'),
+      path.join(process.cwd(), '..', 'petri-pack-bio', 'plugins', 'gsea', 'tool-definition.json'),
       'utf8',
     ));
     // Inputs use 'id' not 'name'

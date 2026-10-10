@@ -16,7 +16,7 @@ const STAGES = [
   'dataReady',
 ];
 
-const BUDGET_SCHEMA = 'gewu/startup-perf-budget.v2';
+const BUDGET_SCHEMA = 'petri/startup-perf-budget.v2';
 
 /**
  * v2 形态：`platforms: { win32: { medians, basis }, darwin: {...} }`。

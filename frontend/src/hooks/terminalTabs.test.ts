@@ -59,7 +59,7 @@ describe('terminalTabs', () => {
 
   it('标签文案：seq 稳定不漂移；副标题取 cwd 基名', () => {
     expect(terminalTabLabel(tab('tab-3', 3))).toBe('终端 3');
-    expect(terminalTabSubtitle(tab('tab-1', 1, '/Users/x/Gewu-workspace/desktop'))).toBe('desktop');
+    expect(terminalTabSubtitle(tab('tab-1', 1, '/Users/x/Petri-workspace/desktop'))).toBe('desktop');
     expect(terminalTabSubtitle(tab('tab-1', 1, 'C:\\data\\proj'))).toBe('proj');
     expect(terminalTabSubtitle(tab('tab-1', 1))).toBe('');
   });

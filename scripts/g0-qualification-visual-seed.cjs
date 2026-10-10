@@ -8,10 +8,10 @@ const path = require('path');
 const resources = process.env.G0_PACKAGED_RESOURCES;
 if (!resources) throw new Error('G0_PACKAGED_RESOURCES is required');
 
-const dbMod = require(path.join(resources, 'core/biof3-server/db.js'));
+const dbMod = require(path.join(resources, 'core/petri-server/db.js'));
 // Ensure the production conversation tables exist before inserting the
 // sanitized fixture. This is the same module used by the real route layer.
-require(path.join(resources, 'core/biof3-server/helpers/conversations.js'));
+require(path.join(resources, 'core/petri-server/helpers/conversations.js'));
 const {
   buildLoopRun,
   buildIteration,

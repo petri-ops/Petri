@@ -16,8 +16,8 @@ import crypto from 'node:crypto';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const decisionApi = require('../../core/biof3-server/helpers/decision-api.js');
-const { thresholdForPoint } = require('../../core/biof3-server/helpers/decision-thresholds.js');
+const decisionApi = require('../../core/petri-server/helpers/decision-api.js');
+const { thresholdForPoint } = require('../../core/petri-server/helpers/decision-thresholds.js');
 
 /** D-3（P0 校准证据 acceptance/block-114/calibration.json：θ=0.70 precision 95%/coverage 96.2%/
  *  nrMisroute=0——取偏离边缘的余量档；调整阈值必须先重校准）。 */

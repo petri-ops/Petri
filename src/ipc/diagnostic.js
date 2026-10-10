@@ -47,7 +47,7 @@ function setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs } = {}) {
         const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
         const { canceled, filePath } = await dialog.showSaveDialog(win, {
           title: "导出诊断日志",
-          defaultPath: `gewu-diagnostic-${ts}.zip`,
+          defaultPath: `petri-diagnostic-${ts}.zip`,
           filters: [{ name: "ZIP", extensions: ["zip"] }],
         });
         if (canceled) return { ok: false, error: "cancelled" };
@@ -70,8 +70,8 @@ function setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs } = {}) {
         appVersion: app.getVersion(),
         isPackaged: app.isPackaged,
         timestamp: new Date().toISOString(),
-        rRuntimeConfigured: !!process.env.BIOF3_R_HOME,
-        pythonRuntimeConfigured: !!process.env.BIOF3_PY_HOME,
+        rRuntimeConfigured: !!process.env.PETRI_R_HOME,
+        pythonRuntimeConfigured: !!process.env.PETRI_PY_HOME,
       };
 
       // 用简单的方式打包：逐文件写入 zip（避免额外依赖）
@@ -86,7 +86,7 @@ function setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs } = {}) {
         archive.pipe(output);
 
         // 添加日志文件
-        for (const name of ["biof3-server"]) { // BLOCK-30 P1: py-server 已摘除 {
+        for (const name of ["petri-server"]) { // BLOCK-30 P1: py-server 已摘除 {
           const logFile = path.join(logDir, `${name}.log`);
           if (fs.existsSync(logFile)) {
             archive.append(
@@ -121,10 +121,10 @@ function setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs } = {}) {
       if (!usedArchiver) {
         // fallback: 写一个简单的 .txt 包（日志拼接 + 系统信息）
         const lines = [];
-        lines.push("=== Gewu Diagnostic Package ===");
+        lines.push("=== Petri Diagnostic Package ===");
         lines.push(JSON.stringify(sysInfo, null, 2));
         lines.push("");
-        for (const name of ["biof3-server"]) { // BLOCK-30 P1: py-server 已摘除 {
+        for (const name of ["petri-server"]) { // BLOCK-30 P1: py-server 已摘除 {
           const logFile = path.join(logDir, `${name}.log`);
           lines.push(`\n=== ${name}.log ===`);
           try {

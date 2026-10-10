@@ -4,9 +4,9 @@
 const { execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const FILE = path.join(__dirname, '..', 'core', 'biof3-server', 'helpers', 'tools-executor.js');
+const FILE = path.join(__dirname, '..', 'core', 'petri-server', 'helpers', 'tools-executor.js');
 
-const head = execFileSync('git', ['show', 'HEAD:core/biof3-server/helpers/tools-executor.js'], { encoding: 'utf8', maxBuffer: 20 * 1024 * 1024 });
+const head = execFileSync('git', ['show', 'HEAD:core/petri-server/helpers/tools-executor.js'], { encoding: 'utf8', maxBuffer: 20 * 1024 * 1024 });
 const START = '  async function runSshDirectToolJob({';
 const END = '\n  /**\n   * 重启恢复（D5.2 启动扫描）';
 const hs = head.indexOf(START);

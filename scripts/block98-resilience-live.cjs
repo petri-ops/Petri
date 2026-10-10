@@ -5,13 +5,13 @@
  *   W1 长任务运行中插队：composer 真发多步任务 → 运行中 POST /steer 注入标记消息
  *      → SSE input_queued 事件可见 → 最终回复包含标记内容（端到端零丢失）；
  *   W2 遥测列：ai_usage 表 additive 四列在位（attempt/retryable/context_exceeded/cancelled_by_user）；
- *   W3 microcompact 接线在场：BIOF3_AGENT_RESILIENCE=1 下发送成功（开关分支加载）。
- * 前置：dev 栈带 BIOF3_AGENT_RESILIENCE=1 启动；CDP 9222。
+ *   W3 microcompact 接线在场：PETRI_AGENT_RESILIENCE=1 下发送成功（开关分支加载）。
+ * 前置：dev 栈带 PETRI_AGENT_RESILIENCE=1 启动；CDP 9222。
  * 证据：acceptance/block-98/block98-resilience-live.json + 截图。
  */
 const path = require('node:path');
 const http = require('node:http');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const PROJECT_ID = process.argv[2] || 'p_mu5emekx_g13p';
@@ -80,7 +80,7 @@ async function attach() {
   for (let i = 0; i < 25 && !taskId; i++) {
     await sleep(1000);
     const ids = await EVAL(
-      "JSON.stringify(Object.keys(localStorage).filter(function(k){return k.indexOf('gewu_agent_task_')===0||k.indexOf('biof3_agent_task_')===0;}).map(function(k){return k.split('agent_task_')[1];}))");
+      "JSON.stringify(Object.keys(localStorage).filter(function(k){return k.indexOf('petri_agent_task_')===0||k.indexOf('petri_agent_task_')===0;}).map(function(k){return k.split('agent_task_')[1];}))");
     try { const arr = JSON.parse(ids); if (Array.isArray(arr) && arr.length) taskId = arr[arr.length - 1]; } catch {}
   }
   run.assert('V1_task_created', Boolean(taskId), 'taskId=' + (taskId || 'none'));
@@ -116,8 +116,8 @@ async function attach() {
   // ── W2 遥测列 ──
   // 直接走 sqlite（脚本侧 better-sqlite3 只读 dev 库）
   try {
-    const Database = require(path.join(__dirname, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-    const dbPath = process.env.BIOF3_DB_PATH || path.join(__dirname, '..', '.biof3-dev-user-data', 'data', 'biof3.db');
+    const Database = require(path.join(__dirname, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+    const dbPath = process.env.PETRI_DB_PATH || path.join(__dirname, '..', '.petri-dev-user-data', 'data', 'petri.db');
     const db = new Database(dbPath, { readonly: true });
     const cols = db.prepare("PRAGMA table_info('ai_usage')").all().map((c) => c.name);
     db.close();

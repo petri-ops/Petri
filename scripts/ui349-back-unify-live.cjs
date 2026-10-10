@@ -10,7 +10,7 @@
  */
 
 const path = require('node:path');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function attach() {
@@ -70,7 +70,7 @@ const MEASURE = `(function(){
   let shape = null;
   for (let i = 0; i < 25; i += 1) {
     shape = JSON.parse(await lib.evalJs(client, `(function(){
-      var panel = document.querySelector('.gewu-plugin-store-panel');
+      var panel = document.querySelector('.petri-plugin-store-panel');
       if (!panel) return 'null';
       function read(btn) {
         if (!btn) return null;

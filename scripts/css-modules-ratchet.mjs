@@ -25,7 +25,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BASELINE = path.join(ROOT, 'acceptance', 'block-92', 'css-plain-baseline.json');
 const SRC_DIR = path.join(ROOT, 'frontend', 'src');
-const SCHEMA_V1 = 'biof3/block154-css-plain-ratchet.v1';
+const SCHEMA_V1 = 'petri/block154-css-plain-ratchet.v1';
 
 function walkCss(dir, acc = []) {
   if (!fs.existsSync(dir)) return acc;

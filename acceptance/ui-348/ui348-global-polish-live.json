@@ -31,7 +31,7 @@
     {
       "name": "V4_welcome_chip_untouched",
       "pass": true,
-      "detail": "欢迎页顶栏品牌 chip 保留（chip=true，text=Gewu）"
+      "detail": "欢迎页顶栏品牌 chip 保留（chip=true，text=Petri）"
     }
   ],
   "allPass": true

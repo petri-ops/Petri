@@ -278,7 +278,7 @@ PHASE 2 r-server 大文件拆分（A-002 26+ 端点 + A-005 7 子域）是工作
 | **A-007 DB singleton 重复** | 候选工作包假设可统一到 `core/r-server/db.js` | 实际 desktop 进程与 r-server 进程是不同进程，从架构上需分开；代码层共享 `getDatabase` 函数 | PHASE 1.1 抽 `src/database/_db-singleton.js` 仅代码层共享，进程边界由 ELECTRON main 进程事实承担 |
 | **A-001 agent-runner 拆分** | 候选工作包假设抽 LoopOrchestrator + ConversationAdapter 即可 | 实际 agent-runner 还有 20 顶层 require 覆盖 system-prompt / llm-client / plans / conversations / memory-vectors / runtime 等；拆完后 `loop-controller` 应独立 require 0 个 agent-runner 内部函数 | PHASE 3.1 拆完后额外验证 `loop-controller.js` 仍可独立运行 |
 | **A-006 56+ singleton 整体收敛** | 候选工作包假设全部收敛 | 实际 56+ 处里 ~12 处可迁 SQLite；其余 ephemeral 内存 cache 现状 OK | PHASE 3.3 仅 ≥5 处迁 SQLite，剩余保留 |
-| **A-010 隐式 env 集中** | 候选工作包假设 214 处全部集中 | 实际进程启动时一次性读 env + helper 内读 env，集中在 `shared-backend/config-helper.js` 后行为不变 | PHASE 1.2 仅 6 处 `process.env.*` 集中（核心 DB 路径 / R_SERVER_URL / PY_SERVER_URL / GATEWAY_URL / BIOF3_CONTENT_ROOT / BIOF3_CONTENT_PLUGINS_DIR），其余保留 |
+| **A-010 隐式 env 集中** | 候选工作包假设 214 处全部集中 | 实际进程启动时一次性读 env + helper 内读 env，集中在 `shared-backend/config-helper.js` 后行为不变 | PHASE 1.2 仅 6 处 `process.env.*` 集中（核心 DB 路径 / R_SERVER_URL / PY_SERVER_URL / GATEWAY_URL / PETRI_CONTENT_ROOT / PETRI_CONTENT_PLUGINS_DIR），其余保留 |
 
 ### §6.2 commit 粒度偏差
 

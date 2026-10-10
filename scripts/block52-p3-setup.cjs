@@ -6,7 +6,7 @@
  *
  * 复用 G0-RS-P4R corpus 的确定性路径（run_tool → tool_job → artifact truth），
  * 但不落 disposable root：项目与 Job 直接进入 dev 运行库
- * （BIOF3_DB_PATH / BIOF3_LOCAL_DATA_DIR 由 dev Electron 注入，继承自当前环境），
+ * （PETRI_DB_PATH / PETRI_LOCAL_DATA_DIR 由 dev Electron 注入，继承自当前环境），
  * 供实机 CDP 测试在 ResultView 中引用其结果图。
  *
  * 用法：
@@ -19,12 +19,12 @@ const path = require('path');
 const REPO_ROOT = path.resolve(__dirname, '..');
 
 async function main() {
-  const db = require(path.join(REPO_ROOT, 'core/biof3-server/db.js'));
+  const db = require(path.join(REPO_ROOT, 'core/petri-server/db.js'));
   const { getOrCreateActiveConversation } = require(
-    path.join(REPO_ROOT, 'core/biof3-server/helpers/conversations.js'),
+    path.join(REPO_ROOT, 'core/petri-server/helpers/conversations.js'),
   );
   const { tool_run_tool: runTool } = require(
-    path.join(REPO_ROOT, 'core/biof3-server/agent-tools/learning.js'),
+    path.join(REPO_ROOT, 'core/petri-server/agent-tools/learning.js'),
   );
 
   const CORPUS_USER = 'local-user';

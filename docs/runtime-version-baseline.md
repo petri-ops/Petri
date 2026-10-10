@@ -5,7 +5,7 @@
 > 避免因某端用了不同的小版本导致下游插件 ABI 错位、prebuilt 二进制不兼容。
 
 - 状态：**生效**（2026-08-08 确立）
-- 范围：`biof3-r-runtime`、`biof3-py-runtime`（manifest `kind: runtime`）及其下游插件
+- 范围：`petri-r-runtime`、`petri-py-runtime`（manifest `kind: runtime`）及其下游插件
 - 维护：任何改动 `builtAgainst` / 运行时版本下限 / 构建脚本版本常量，必须先改本文件再动代码与 manifest
 
 ---
@@ -40,7 +40,7 @@
 ### 3.1 macOS（真实，已发布）
 - **R 4.5.2**：`scripts/build-r-bundle.mjs` → `rVersion: '4.5.2'`（r-enrichment / r-wgcna 两 bundle 均一致），打包硬校验。
 - **Bioconductor 3.22**：同上。
-- **Python**：仓库内无 macOS py build 脚本；制品已在 OSS（`manifest.json` `biof3-py-runtime.artifacts.macos-arm64`
+- **Python**：仓库内无 macOS py build 脚本；制品已在 OSS（`manifest.json` `petri-py-runtime.artifacts.macos-arm64`
   已填 sha256/sizeBytes），精确 sub-version 待从 macOS 机取证回填。
 
 ### 3.2 Windows（在建，目标对齐 macOS）
@@ -48,7 +48,7 @@
 |------|----------|----------|------|
 | `scripts/provision-win-r-runtime.mjs` | `R_VERSION` 默认 | **R 4.5.2** | ✅ 已改为 4.5.2；URL 自动切 `bin/windows/base/old/4.5.2/` |
 | `scripts/build-win-r-runtime-artifact.mjs` | 源 R prefix 探测 | **build 机需装 4.5.2**（脚本继承 build 机 R 版本） | ✅ 注释已明确；2026-08-08 首次产出 `r-runtime-1.0.0-windows-x64.zip`（657MB） |
-| `scripts/upload-win-r-runtime.mjs` | OSS multipartUpload | **R 4.5.2** | ✅ 2026-08-08 上传到 OSS（凭证自动读 `.biof3-secrets` 的 `OSS_AK`/`OSS_SK`） |
+| `scripts/upload-win-r-runtime.mjs` | OSS multipartUpload | **R 4.5.2** | ✅ 2026-08-08 上传到 OSS（凭证自动读 `.petri-secrets` 的 `OSS_AK`/`OSS_SK`） |
 | `scripts/build-win-runtime-artifact.mjs`（py） | 源 Python 探测 | **Python 3.11.9**（Windows 实测） | ✅ 2026-08-08 产出 `py-runtime-1.0.0-windows-x64.zip`（≈480MB，含 Python 3.11.9 + numpy/pandas/scipy/scikit-learn/matplotlib/scanpy/anndata 等科学栈） |
 
 **CRAN 来源**（已实测 HTTP 200）：
@@ -74,7 +74,7 @@ https://cloud.r-project.org/bin/windows/base/old/4.5.2/R-4.5.2-win.exe
 
 ## 5. 待办/未决
 
-- [ ] macOS Python 精确 sub-version 取证（从 macOS 构建机 `BIOF3_BUILD_PYTHON` 实查），锁死双端 Python 基线。
+- [ ] macOS Python 精确 sub-version 取证（从 macOS 构建机 `PETRI_BUILD_PYTHON` 实查），锁死双端 Python 基线。
 - [ ] **Windows R** windows-x64 制品：**已落地** ✅（2026-08-08，详见 §6）。
 - [x] **Windows Python** windows-x64 制品产出（`build-win-runtime-artifact.mjs`）+ 上传 OSS，完成双端 OSS 分发闭环（2026-08-08，`py-runtime-1.0.0-windows-x64.zip` 502MB，Python 3.11.9）。
 - [ ] 平台选择自动化：`selectArtifact` 确认按 platformId 过滤（防装错平台导致的"非 Windows R 树"残留再次出现）。
@@ -85,12 +85,12 @@ https://cloud.r-project.org/bin/windows/base/old/4.5.2/R-4.5.2-win.exe
 
 | 字段 | 值 |
 |------|----|
-| **runtime 插件** | `biof3-r-runtime` |
+| **runtime 插件** | `petri-r-runtime` |
 | **平台** | `windows-x64` |
 | **R 版本** | 4.5.2（与 macOS 基线一致） |
 | **本地制品路径** | `dist-runtime/r-runtime-1.0.0-windows-x64.zip`（已被 `.gitignore` 忽略） |
-| **OSS 路径** | `oss://biof3-uploads/plugins/r-runtime/1.0.0/windows-x64.zip` |
-| **公开 URL** | `https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/windows-x64.zip` |
+| **OSS 路径** | `oss://petri-uploads/plugins/r-runtime/1.0.0/windows-x64.zip` |
+| **公开 URL** | `https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/windows-x64.zip` |
 | **sizeBytes** | `657224393`（≈629MB） |
 | **sha256** | `26b05ba6f3439f2e7ccef9c979d5e157cdc67640fc45fdc759039f2a03dde462` |
 | **ACL** | `public-read`（multipartUpload + HEAD 校验通过） |
@@ -101,12 +101,12 @@ https://cloud.r-project.org/bin/windows/base/old/4.5.2/R-4.5.2-win.exe
 
 | 字段 | 值 |
 |------|----|
-| **runtime 插件** | `biof3-py-runtime` |
+| **runtime 插件** | `petri-py-runtime` |
 | **平台** | `windows-x64` |
 | **Python 版本** | 3.11.9（与 macOS 基线一致；`sys.version` 实测 `3.11.9 (tags/v3.11.9:de54cf5, Apr 2 2024)`） |
 | **本地制品路径** | `dist-runtime/py-runtime-1.0.0-windows-x64.zip`（已被 `.gitignore` 忽略） |
-| **OSS 路径** | `oss://biof3-uploads/plugins/py-runtime/1.0.0/windows-x64.zip` |
-| **公开 URL** | `https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/windows-x64.zip` |
+| **OSS 路径** | `oss://petri-uploads/plugins/py-runtime/1.0.0/windows-x64.zip` |
+| **公开 URL** | `https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/windows-x64.zip` |
 | **sizeBytes** | `502819592`（≈480MB，未压缩 1.6GB，deflate 压缩） |
 | **sha256** | `5a2e07c6504a49f617d81921e073d157e8fd14e37586e92f78211c2975ab6d11` |
 | **ACL** | `public-read`（multipartUpload + HEAD 校验通过） |
@@ -117,7 +117,7 @@ https://cloud.r-project.org/bin/windows/base/old/4.5.2/R-4.5.2-win.exe
 
 ### 6.1 manifest 收尾边界（重要）
 
-- ✅ **`biof3-r-runtime` 与 `biof3-py-runtime` 已从 `manifest.placeholders.json` 移除**
+- ✅ **`petri-r-runtime` 与 `petri-py-runtime` 已从 `manifest.placeholders.json` 移除**
   （2026-08-08）。`plugin-manifest-schema.test.mjs` 第 152-161 行判定只看 pluginId，不看 field；
   只要占位数组里还含这两个 pluginId，schema 测试就红。两条占位移除后 schema 测试变绿。
 - ❌ **不要把 `windows-x64` 写进 `manifest.json` 的 `artifacts`**
@@ -127,7 +127,7 @@ https://cloud.r-project.org/bin/windows/base/old/4.5.2/R-4.5.2-win.exe
   原因是 Windows 发布仍受签名/公证约束（Python 制品 2026-08-08 已产出，见 §6.2；Week 3/4 真实发布时才翻 `supported`）。
 - ✅ **Windows 制品真实状态由 OSS 落地 + 本文件 §6 记录承载**，无需回写 `manifest.json`。
 - ℹ️ **重新生成/重新上传**：`node scripts/upload-win-r-runtime.mjs`
-  （自动读取 `.biof3-secrets` 的 `OSS_AK`/`OSS_SK`，支持 `--dry-run` 预览）。
+  （自动读取 `.petri-secrets` 的 `OSS_AK`/`OSS_SK`，支持 `--dry-run` 预览）。
 
 ---
 

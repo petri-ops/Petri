@@ -2,7 +2,7 @@
 # date: 2026-10-07T14:06:02Z | node v24.16.0 | darwin 25.6.0 arm64
 
 == 1) 脚本实跑（按任务书）==
-$ PATH="$PWD/node_modules/.bin:$PATH" BIOF3_ELECTRON_USER_DATA_DIR=/tmp/bk08-profile-user-data node scripts/dev-electron-profile.mjs --cdp --port 9223 --output json --timeout 45000
+$ PATH="$PWD/node_modules/.bin:$PATH" PETRI_ELECTRON_USER_DATA_DIR=/tmp/bk08-profile-user-data node scripts/dev-electron-profile.mjs --cdp --port 9223 --output json --timeout 45000
 output:
   [CDP] Spawning electron with --remote-debugging-port=9223...
   ERROR: ws_unavailable: Node.js built-in WebSocket not found. Ensure Node.js >= 21, or install the "ws" package: npm install --save-dev ws
@@ -22,4 +22,4 @@ lifecycle 事件（firstPaint/DOMContentLoaded/load）在 WS attach 前已发完
 
 == 结论 ==
 Electron 主进程 + 渲染进程冷启动相位全部亚秒级（T1≈0.37s，T0→T4 全程 <1s 量级），无秒级阻塞；
-~10s 冷启动阻塞不在 Electron/renderer，而在后端 biof3-server 进程（mobile-tunnel spawnSync，见 finding）。
+~10s 冷启动阻塞不在 Electron/renderer，而在后端 petri-server 进程（mobile-tunnel spawnSync，见 finding）。

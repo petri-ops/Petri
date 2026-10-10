@@ -13,10 +13,10 @@ const __dirname = path.dirname(__filename);
 // BLOCK-51 测试基建修复（与 agent-concurrency.test.mjs 同一修复）：loop-orchestrator
 // 依赖链模块顶层即 prepare projects——先跑生产 migration 链再加载。
 const require = createRequire(import.meta.url);
-const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-runner-loop-'));
-process.env.BIOF3_DB_PATH = path.join(tempDir, 'runner-loop.db');
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-runner-loop-'));
+process.env.PETRI_DB_PATH = path.join(tempDir, 'runner-loop.db');
 const { runMigrations } = require('../src/migration-runner');
-await runMigrations(process.env.BIOF3_DB_PATH, path.join(__dirname, '../src/migrations'));
+await runMigrations(process.env.PETRI_DB_PATH, path.join(__dirname, '../src/migrations'));
 
 function resolve(...segments) {
   return path.resolve(__dirname, '..', ...segments);
@@ -24,13 +24,13 @@ function resolve(...segments) {
 
 describe('agent-runner-loop-orchestrator.test.mjs (BLOCK-14 PHASE 3.1 state machine)', () => {
   it('exports runLoop as the sole public API and preserves PHASE 3.1 contract', async () => {
-    const mod = await import(pathToFileURL(resolve('core/biof3-server/loop-orchestrator.js')).href);
+    const mod = await import(pathToFileURL(resolve('core/petri-server/loop-orchestrator.js')).href);
     assert.strictEqual(typeof mod.runLoop, 'function', 'runLoop must be exported');
     assert.strictEqual(mod.runLoop.constructor.name, 'AsyncFunction', 'runLoop must be async');
 
     // loop-orchestrator is the pure state machine; PHASE 3.1 forbids harness-workflow-state
-    // imports because shared-backend must not reverse-require into biof3-server.
-    const src = readFileSync(resolve('core/biof3-server/loop-orchestrator.js'), 'utf8');
+    // imports because shared-backend must not reverse-require into petri-server.
+    const src = readFileSync(resolve('core/petri-server/loop-orchestrator.js'), 'utf8');
     assert.equal(
       /require.*harness-workflow-state/.test(src),
       false,
@@ -48,7 +48,7 @@ describe('agent-runner-loop-orchestrator.test.mjs (BLOCK-14 PHASE 3.1 state mach
   });
 
   it('runLoop input contract requires the 9 callbacks + config + conversationState', async () => {
-    const src = readFileSync(resolve('core/biof3-server/loop-orchestrator.js'), 'utf8');
+    const src = readFileSync(resolve('core/petri-server/loop-orchestrator.js'), 'utf8');
 
     // Function signature destructures 9 named top-level opts
     const requiredOpts = [
@@ -81,7 +81,7 @@ describe('agent-runner-loop-orchestrator.test.mjs (BLOCK-14 PHASE 3.1 state mach
   });
 
   it('agent-runner facade correctly wires runLoop with 4 emit callbacks and config', async () => {
-    const facadeSrc = readFileSync(resolve('core/biof3-server/agent-runner.js'), 'utf8');
+    const facadeSrc = readFileSync(resolve('core/petri-server/agent-runner.js'), 'utf8');
 
     // facade must require loop-orchestrator's runLoop
     assert.ok(

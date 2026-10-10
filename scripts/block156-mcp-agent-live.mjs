@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const API = 'http://127.0.0.1:3001/api';
 const AUTH = { Authorization: 'Bearer desktop-local', 'content-type': 'application/json' };
-const LOCAL_DATA_DIR = path.join(ROOT, '.biof3-dev-user-data', 'data');
+const LOCAL_DATA_DIR = path.join(ROOT, '.petri-dev-user-data', 'data');
 const EVDIR = path.join(ROOT, 'acceptance', 'block-156');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 

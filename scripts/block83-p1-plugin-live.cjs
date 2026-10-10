@@ -6,8 +6,8 @@
  *
  * 运行（对标 BLOCK-79/82 in-process 驱动先例，需 fnm Node 24 + dev 数据面 env）：
  *   export PATH="/c/Users/Admin/AppData/Roaming/fnm/node-versions/v24.20.0/installation:$PATH"
- *   export BIOF3_DB_PATH='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\data\biof3.db'
- *   export BIOF3_LOCAL_DATA_DIR='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\data'
+ *   export PETRI_DB_PATH='D:\1.WorkDir\petri-desktop\.petri-dev-user-data\data\petri.db'
+ *   export PETRI_LOCAL_DATA_DIR='D:\1.WorkDir\petri-desktop\.petri-dev-user-data\data'
  *   node scripts/block83-p1-plugin-live.cjs
  *
  * 断言：
@@ -28,10 +28,10 @@ function assert(name, ok, detail) {
 }
 
 (async () => {
-  const registry = require(path.join(root, 'core/biof3-server/mcp/registry.js'));
+  const registry = require(path.join(root, 'core/petri-server/mcp/registry.js'));
   const hooks = require(path.join(root, 'core/shared-backend/task-confirmation-hooks.js'));
   const sdk = require(path.join(root, 'core/shared-backend/result-studio-plugin-sdk.js'));
-  require(path.join(root, 'core/biof3-server/plugin-loader.js'));
+  require(path.join(root, 'core/petri-server/plugin-loader.js'));
 
   const bioIds = fs.readdirSync(path.join(root, 'resources/built-in-plugins'))
     .filter((d) => fs.existsSync(path.join(root, 'resources/built-in-plugins', d, 'plugin.json')));

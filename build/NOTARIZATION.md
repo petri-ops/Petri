@@ -12,7 +12,7 @@
 
 | Secret | 说明 |
 |--------|------|
-| `APPLE_ID` | Apple ID 邮箱（如 dev@biof3.com） |
+| `APPLE_ID` | Apple ID 邮箱（如 dev@petri.com） |
 | `APP_PASSWORD` | app-specific password（appleid.apple.com 生成） |
 | `NOTARIZE_TEAM_ID` | Apple Team ID（如 ABCD123XYZ） |
 | `CSC_LINK` | 证书 base64（keychain 导出 .p12 → base64） |
@@ -48,6 +48,6 @@ jobs:
 
 签名 + notarized 的 dmg 在干净 Mac 上双击不弹"无法打开"：
 ```bash
-xcrun stapler validate desktop-app/dist/BioF3.app
-spctl -a -vvv desktop-app/dist/BioF3.app  # 应显示 "accepted"
+xcrun stapler validate desktop-app/dist/Petri.app
+spctl -a -vvv desktop-app/dist/Petri.app  # 应显示 "accepted"
 ```

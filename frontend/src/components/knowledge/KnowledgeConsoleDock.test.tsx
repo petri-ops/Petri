@@ -44,10 +44,10 @@ describe('BLOCK-103 KnowledgeConsoleDock', () => {
     expect(screen.getByTestId('knowledge-console-surface')).toBeTruthy();
     expect(screen.getByTestId('knowledge-console')).toBeTruthy();
     expect(handle.getAttribute('aria-expanded')).toBe('true');
-    expect(window.localStorage.getItem('gewu.knowledgeConsoleOpen')).toBe('1');
+    expect(window.localStorage.getItem('petri.knowledgeConsoleOpen')).toBe('1');
     fireEvent.click(handle);
     expect(screen.queryByTestId('knowledge-console')).toBeNull();
-    expect(window.localStorage.getItem('gewu.knowledgeConsoleOpen')).toBe('0');
+    expect(window.localStorage.getItem('petri.knowledgeConsoleOpen')).toBe('0');
   });
 
   it('Esc 收起展开态', () => {
@@ -59,7 +59,7 @@ describe('BLOCK-103 KnowledgeConsoleDock', () => {
   });
 
   it('localStorage=1 时初始展开（记忆恢复）', () => {
-    window.localStorage.setItem('gewu.knowledgeConsoleOpen', '1');
+    window.localStorage.setItem('petri.knowledgeConsoleOpen', '1');
     renderDock();
     expect(screen.getByTestId('knowledge-console')).toBeTruthy();
   });

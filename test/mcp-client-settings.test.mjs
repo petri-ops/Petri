@@ -1,7 +1,7 @@
 /**
  * BLOCK-156 P2 — mcp-settings 持久化测试。
  * 钉住：往返读写/单条 upsert·remove/非法条目拒绝（fail-closed 写入·fail-open 读取）/
- * 损坏文件降级空清单。BIOF3_LOCAL_DATA_DIR 指向临时目录隔离本机真实清单。
+ * 损坏文件降级空清单。PETRI_LOCAL_DATA_DIR 指向临时目录隔离本机真实清单。
  */
 
 import assert from 'node:assert/strict';
@@ -14,9 +14,9 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'b156-mcp-settings-'));
-process.env.BIOF3_LOCAL_DATA_DIR = tmpDir;
+process.env.PETRI_LOCAL_DATA_DIR = tmpDir;
 
-const settings = require('../core/biof3-server/helpers/mcp-settings');
+const settings = require('../core/petri-server/helpers/mcp-settings');
 
 test('BLOCK-156 settings roundtrip: save → list 恒等（规范化字段齐备）', () => {
   const saved = settings.saveMcpServers([

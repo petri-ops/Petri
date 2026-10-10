@@ -16,8 +16,8 @@ const repoRoot = fileURLToPath(new URL('..', import.meta.url));
 const fixture = JSON.parse(
   readFileSync(new URL('../test/fixtures/tool-activity-labels.json', import.meta.url), 'utf8')
 );
-const { TOOL_DEFS } = require(`${repoRoot}/core/biof3-server/agent-tools/tool-defs.js`);
-const { TOOL_ACTIVITY_VERBS, summarizeToolCallForActivity } = require(`${repoRoot}/core/biof3-server/agent-tools/tool-events.js`);
+const { TOOL_DEFS } = require(`${repoRoot}/core/petri-server/agent-tools/tool-defs.js`);
+const { TOOL_ACTIVITY_VERBS, summarizeToolCallForActivity } = require(`${repoRoot}/core/petri-server/agent-tools/tool-events.js`);
 
 test('fixture 覆盖全量静态工具宇宙（TOOL_DEFS 78 个）', () => {
   const universe = TOOL_DEFS.map((t) => t.function.name).sort();

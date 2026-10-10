@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const decisionApi = require('../core/biof3-server/helpers/decision-api.js');
+const decisionApi = require('../core/petri-server/helpers/decision-api.js');
 // 单源：请求组装引用建议器内核（形状漂移即校准失效）。
 const { buildSuggestDecisionRequest, docsOrEvidenceOnly } = require('../scripts/block115-test-suggest.mjs');
 // BLOCK-116 校准工具化：机械共性迁移到共享库（touch-and-migrate 纪律）
@@ -155,7 +155,7 @@ async function main() {
     capturedAt: new Date().toISOString(),
     sourceCommit: require('node:child_process').execSync('git rev-parse HEAD', { cwd: root }).toString().trim(),
     model: decisionApi.DECISION_MODEL_PIN,
-    wrapper: 'core/biof3-server/helpers/decision-api.js',
+    wrapper: 'core/petri-server/helpers/decision-api.js',
     decisionPoint: 'scripts/block115-test-suggest.mjs 增量测试建议（W1-5）',
     result,
     gate,

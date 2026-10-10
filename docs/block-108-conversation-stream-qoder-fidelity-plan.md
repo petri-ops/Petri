@@ -40,13 +40,13 @@ Qoder 的会话信息流形态（用户截图实测）：
 
 ## 3. 依赖与环境纪律
 
-- dev 栈：**2026-09-21 依赖换代后未重启**（react-router v7 / vite 8 / vitest 5 已 `npm install`）——实机验收前必须重启 dev Electron（`BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222"`，fnm Node 24）；后端零改动，但 node_modules 已换代的 vite/dev 栈必须重新拉起。
+- dev 栈：**2026-09-21 依赖换代后未重启**（react-router v7 / vite 8 / vitest 5 已 `npm install`）——实机验收前必须重启 dev Electron（`PETRI_DEV_ELECTRON_ARGS="--remote-debugging-port=9222"`，fnm Node 24）；后端零改动，但 node_modules 已换代的 vite/dev 栈必须重新拉起。
 - flow 只连自管测试实例（:9223），零触碰用户主窗（:9222）。
 
 ## 4. 证据位置
 
 - `acceptance/block-108/`（flow 证据 JSON + PNG）
-- flow：`.agents/skills/gewu-dev-infra/dev-verify/flows/block108-qoder-stream.cjs`
+- flow：`.agents/skills/petri-dev-infra/dev-verify/flows/block108-qoder-stream.cjs`
 
 ## 5. 验收门禁清单（收口时逐项对账）
 
@@ -70,7 +70,7 @@ Qoder 的会话信息流形态（用户截图实测）：
 
 ### 7.1 harness 封装命令审计（用户问：「内置的工具 类似于 bg_exec 等等命令属于后期封装的命令是否有必要？希望用系统自带命令来解决问题 减少个性化的封装」）
 
-**审计对象**（`core/biof3-server/agent-tools/tool-defs.js`，共 74 个工具）中执行类封装族：
+**审计对象**（`core/petri-server/agent-tools/tool-defs.js`，共 74 个工具）中执行类封装族：
 
 | 工具 | 形态 | 系统原生替代 |
 | --- | --- | --- |

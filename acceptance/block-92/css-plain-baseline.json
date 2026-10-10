@@ -1,5 +1,5 @@
 {
-  "schema": "biof3/block154-css-plain-ratchet.v1",
+  "schema": "petri/block154-css-plain-ratchet.v1",
   "plainCssPaths": [
     "frontend/src/components/auth/LoginModal.css",
     "frontend/src/components/copilot/LlmTranscriptViewer.css",

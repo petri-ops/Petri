@@ -15,13 +15,13 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 const tempRoot = mkdtempSync(join(tmpdir(), 'block67-p2b-'));
-process.env.BIOF3_DB_PATH = join(tempRoot, 'p2b.db');
-process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
+process.env.PETRI_DB_PATH = join(tempRoot, 'p2b.db');
+process.env.PETRI_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
 
 const require = createRequire(import.meta.url);
 {
-  const Database = require(resolve(__dirname, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const boot = new Database(process.env.BIOF3_DB_PATH);
+  const Database = require(resolve(__dirname, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const boot = new Database(process.env.PETRI_DB_PATH);
   const migDir = resolve(__dirname, '..', 'src', 'migrations');
   for (const f of require('node:fs').readdirSync(migDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(require('node:fs').readFileSync(require('node:path').resolve(migDir, f), 'utf8'));
@@ -29,9 +29,9 @@ const require = createRequire(import.meta.url);
   boot.close();
 }
 
-const db = require('../core/biof3-server/db');
-const gateway = require('../core/biof3-server/helpers/workspace-gateway');
-const { createWorkspaceTools } = require('../core/biof3-server/agent-tools/workspace-tools');
+const db = require('../core/petri-server/db');
+const gateway = require('../core/petri-server/helpers/workspace-gateway');
+const { createWorkspaceTools } = require('../core/petri-server/agent-tools/workspace-tools');
 
 // ── fake ssh 后端 ──
 const files = new Map([
@@ -147,7 +147,7 @@ test('后台进程三件套 ssh 分支：exec_bg → status → stop', async () 
   const bg = await tools.execBackground({ command: 'sleep 30' }, { ...sshCtx, conversationId: 'conv-p2b' });
   assert.strictEqual(bg.ok, true);
   assert.strictEqual(bg.pid, 4242);
-  assert.ok(execCalls[0].log.includes('.biof3-agent-tmp'));
+  assert.ok(execCalls[0].log.includes('.petri-agent-tmp'));
 
   aliveFlag = true;
   const st = await tools.processStatus({ id: bg.id, tail: 'none' }, sshCtx);
@@ -177,7 +177,7 @@ test('BLOCK-78 P2-④ processList：会话过滤 + 注册表懒探针语义 + lo
   assert.strictEqual(row.pid, 4242);
   assert.strictEqual(typeof row.host, 'string');
   assert.ok(row.startedAtIso);
-  assert.ok(row.logPath.includes('.biof3-agent-tmp'));
+  assert.ok(row.logPath.includes('.petri-agent-tmp'));
 
   // 会话隔离（bgKey 语义与本地表同构）：其他会话不可见
   const other = await tools.processList({}, { ...sshCtx, conversationId: 'conv-other' });

@@ -75,13 +75,13 @@ describe('UI-141 startup gate', () => {
   it('keeps home usable with a non-blocking banner when R runtime is missing', async () => {
     backendStatus = status({ rRuntime: false, pyRuntime: true, isReady: true, rServerUp: true });
     vi.mocked(listProjects).mockResolvedValue([]);
-    Object.defineProperty(window, 'biof3Desktop', {
+    Object.defineProperty(window, 'petriDesktop', {
       configurable: true,
       value: {
         packs: {
           listInstalled: vi.fn(async () => ({
             ok: true,
-            packs: [{ packId: 'gewu-pack-bio', name: '格物 · 生信分析包', packRoot: '/p', version: '0.1.0', installedAt: 'x', requiresRuntimes: [{ pluginId: 'biof3-r-runtime' }] }],
+            packs: [{ packId: 'petri-pack-bio', name: '格物 · 生信分析包', packRoot: '/p', version: '0.1.0', installedAt: 'x', requiresRuntimes: [{ pluginId: 'petri-r-runtime' }] }],
           })),
         },
       },
@@ -109,7 +109,7 @@ describe('UI-141 startup gate', () => {
     expect(screen.queryByText(/R 运行时已就绪，重启应用即可开始分析/)).toBeNull();
 
     // 还原 window 桥 stub（防泄漏到后续 describe）
-    Object.defineProperty(window, 'biof3Desktop', { configurable: true, value: undefined });
+    Object.defineProperty(window, 'petriDesktop', { configurable: true, value: undefined });
   });
 });
 
@@ -119,10 +119,10 @@ describe('UI-141 startup gate', () => {
 // + defineProperty 挂 dataTransfer 模拟 Finder 拖入。
 // ============================================================================
 describe('BLOCK-53 P1 drag-to-create', () => {
-  const originalDesktop = (window as { biof3Desktop?: unknown }).biof3Desktop;
+  const originalDesktop = (window as { petriDesktop?: unknown }).petriDesktop;
 
   function mockDesktop(validate: (path: string) => unknown) {
-    Object.defineProperty(window, 'biof3Desktop', {
+    Object.defineProperty(window, 'petriDesktop', {
       configurable: true,
       value: {
         files: {
@@ -143,7 +143,7 @@ describe('BLOCK-53 P1 drag-to-create', () => {
   }
 
   afterEach(() => {
-    Object.defineProperty(window, 'biof3Desktop', {
+    Object.defineProperty(window, 'petriDesktop', {
       configurable: true,
       value: originalDesktop,
     });
@@ -164,7 +164,7 @@ describe('BLOCK-53 P1 drag-to-create', () => {
     expect(screen.getByText('/tmp/drop-proj')).toBeTruthy();
     expect(screen.getByRole('button', { name: '在此处创建' })).toBeTruthy();
     // 校验链被真实调用（拖入路径走同一校验，不绕过）
-    expect((window as unknown as { biof3Desktop: { files: { validateDirectory: ReturnType<typeof vi.fn> } } }).biof3Desktop.files.validateDirectory)
+    expect((window as unknown as { petriDesktop: { files: { validateDirectory: ReturnType<typeof vi.fn> } } }).petriDesktop.files.validateDirectory)
       .toHaveBeenCalledWith('/tmp/drop-proj');
   });
 

@@ -10,11 +10,11 @@
  *
  * S1 选中→composer 结构化注入：勾选表格行 → getCopilotContext().activeArtifact.selection
  *    （D2 注入通道组装面）= SelectionContext v1 投影（entityType+样本≤12+hash，有界）。
- * S2 继续分析携实体列表：点击菜单项 → window 捕获 gewu:copilot-ask 载荷（组装层实据，
+ * S2 继续分析携实体列表：点击菜单项 → window 捕获 petri:copilot-ask 载荷（组装层实据，
  *    prompt 含 jobId+artifact+「用户已选中 N 个 gene（标记列 gene）：样本」+selectionId 三态）；
  *    同时 CDP Fetch 拦截 api/ai/agent 发送（任意本地端口——实测 rApiBase 是动态端口，非 3001）
  *    并 BlockedByClient——真实网络发送被阻断，不消耗 LLM；被拦请求体作为第二实据。
- * S3 mark-to-entity：window 捕获 gewu:selection-bus 事件流（实例无关真相通道；模块
+ * S3 mark-to-entity：window 捕获 petri:selection-bus 事件流（实例无关真相通道；模块
  *    动态 import 按 performance 资源条目解析真实 URL——Vite HMR t-戳会让裸 URL 造出
  *    第二实例，2026-10-04 首轮走查实抓）——落总线 selection.entityType + 顶层 idField。
  *
@@ -23,7 +23,7 @@
  */
 const fs = require('node:fs');
 const path = require('node:path');
-const lib = require(path.join(__dirname, '..', '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 
 const EVIDENCE_DIR = __dirname;
 const PROJECT_ID = process.env.B139_PROJECT || 'p_mus4u230_wvib';
@@ -79,15 +79,15 @@ async function armSendInterceptor() {
   return { armed: true };
 }
 
-// ── 页面内仪器：gewu 事件捕获 + 按真实加载 URL 动态 import 模块单例 ──
+// ── 页面内仪器：petri 事件捕获 + 按真实加载 URL 动态 import 模块单例 ──
 async function busInstrument() {
   return EVAL(`(async () => {
     if (!window.__b139) {
       window.__b139 = { busEvents: [], askEvents: [] };
-      window.addEventListener('gewu:selection-bus', (e) => {
+      window.addEventListener('petri:selection-bus', (e) => {
         window.__b139.busEvents.push({ at: Date.now(), state: e.detail });
       });
-      window.addEventListener('gewu:copilot-ask', (e) => {
+      window.addEventListener('petri:copilot-ask', (e) => {
         window.__b139.askEvents.push({ at: Date.now(), detail: e.detail });
       });
     }
@@ -140,7 +140,7 @@ async function busInstrument() {
   assert('P1_route_deeplink', routeOk, `route=${route} deepLink=${DEEP_LINK}`);
 
   await busInstrument();
-  const apiBase = await EVAL(`(window.biof3Desktop && window.biof3Desktop.backendConfig && window.biof3Desktop.backendConfig.rApiBase) || 'default'`);
+  const apiBase = await EVAL(`(window.petriDesktop && window.petriDesktop.backendConfig && window.petriDesktop.backendConfig.rApiBase) || 'default'`);
   lib.log(`rApiBase=${apiBase}`);
 
   // ── Step 2: 选 deg_table.csv → 交互表格挂载 ──
@@ -172,7 +172,7 @@ async function busInstrument() {
     return bindEvent ? { artifactId: bindEvent.state.artifactId, selectionAtBind: !!bindEvent.state.selection, tailArtifactId: tail ? tail.artifactId : null, eventCount: evs.length } : null;
   })()`, { label: 'bus D1 binding event for deg_table', timeoutMs: 25000 }).catch(() => null);
   assert('P4_bus_artifact_bound', !!binding && binding.artifactId === MANIFEST.artifactId,
-    `busBindingEvent={artifactId:${binding && binding.artifactId}, selectionAtBind:${binding && binding.selectionAtBind}, tailArtifactId:${binding && binding.tailArtifactId}, eventCount:${binding && binding.eventCount}}（gewu:selection-bus 事件流实证 setSelectionBusArtifact 生产绑定=useArtifactInteractionSelection.ts:227-231；事件通道为实例无关真相——模块动态 import 裸 URL 会因 Vite HMR t-戳得到第二实例，首轮走查实抓后改为按 performance 资源 URL 解析）`);
+    `busBindingEvent={artifactId:${binding && binding.artifactId}, selectionAtBind:${binding && binding.selectionAtBind}, tailArtifactId:${binding && binding.tailArtifactId}, eventCount:${binding && binding.eventCount}}（petri:selection-bus 事件流实证 setSelectionBusArtifact 生产绑定=useArtifactInteractionSelection.ts:227-231；事件通道为实例无关真相——模块动态 import 裸 URL 会因 Vite HMR t-戳得到第二实例，首轮走查实抓后改为按 performance 资源 URL 解析）`);
 
   // ── Step 4: 先清残留持久选择（selectionDurable=true 会恢复旧选），再勾 3 行 → S3 ──
   const cleared = await EVAL(`(() => {
@@ -329,7 +329,7 @@ async function busInstrument() {
       toolId: 'deseq2',
       status: 'completed',
       projectId: PROJECT_ID,
-      source: 'sqlite readonly: .biof3-dev-user-data/data/biof3.db tool_jobs WHERE tool_id=\'deseq2\' AND status=\'completed\' ORDER BY completed_at DESC LIMIT 1（最近 completed deseq2，2026-10-03 16:31:42）',
+      source: 'sqlite readonly: .petri-dev-user-data/data/petri.db tool_jobs WHERE tool_id=\'deseq2\' AND status=\'completed\' ORDER BY completed_at DESC LIMIT 1（最近 completed deseq2，2026-10-03 16:31:42）',
       artifact: `deg_table.csv（差异基因表；manifest HTTP 实证 artifactId=${MANIFEST.artifactId}/entityType=${MANIFEST.entityType}/idField=${MANIFEST.idField}/interactionMode=table/selectionDurable=true）`,
     },
     checks,

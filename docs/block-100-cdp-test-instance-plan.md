@@ -17,16 +17,16 @@ CDP 实机验收（dev-verify flow / 探针）与用户日常使用共用同一�
 
 ## 3. 摸底结论（P0）
 
-- 单实例锁：`src/main.js:165` `app.requestSingleInstanceLock()` 无参版本，按 userData 路径锁——测试实例设独立 `BIOF3_ELECTRON_USER_DATA_DIR`（main.js:83 在锁之前生效）即天然共存。
-- 后端：`--dev` 模式主实例 fork biof3-server（:3001，`R_SERVER_PORT` 贯通 preload `backendConfig.rApiBase`）。**测试实例禁止再 fork**（端口冲突）→ 跳过 migration + 跳过 `startRServer`，`R_SERVER_PORT` 指向既有后端，启动时轮询 health 就绪、缺席 fail-fast 诚实报错。
-- 启动器：`restart-dev-stack.sh` 用 `Start-Process` 分离存活家法；`BIOF3_DEV_ELECTRON_ARGS` 机制已在 `dev-electron.js:440` 消费。
+- 单实例锁：`src/main.js:165` `app.requestSingleInstanceLock()` 无参版本，按 userData 路径锁——测试实例设独立 `PETRI_ELECTRON_USER_DATA_DIR`（main.js:83 在锁之前生效）即天然共存。
+- 后端：`--dev` 模式主实例 fork petri-server（:3001，`R_SERVER_PORT` 贯通 preload `backendConfig.rApiBase`）。**测试实例禁止再 fork**（端口冲突）→ 跳过 migration + 跳过 `startRServer`，`R_SERVER_PORT` 指向既有后端，启动时轮询 health 就绪、缺席 fail-fast 诚实报错。
+- 启动器：`restart-dev-stack.sh` 用 `Start-Process` 分离存活家法；`PETRI_DEV_ELECTRON_ARGS` 机制已在 `dev-electron.js:440` 消费。
 - flow 清单：11 个 dev-verify flow（`app-health` / `ui341-welcome-chat` / `workspace-file-ops` / `block94-knowledge` 等），渐进迁移不强制一次全迁。
 - dev-verify lib：`pollTargets({port})` 已支持自定义端口——测试实例 CDP 9223 直接可用。
 
 ## 4. 工作面
 
-- **P1 主进程测试实例分支**：`BIOF3_TEST_INSTANCE=1` → 跳过 db migration 与 `startRServer`（轮询 `/api/health` 就绪，缺席 fail-fast）+ 离屏可见窗口 + `[TEST]` 标题前缀。userData 由启动器经 `BIOF3_ELECTRON_USER_DATA_DIR=.biof3-test-user-data` 提供。
-- **P2 启动器** `scripts/start-test-instance.sh`：独立脚本（不动 restart-dev-stack.sh）；spawn Electron `--dev` + `BIOF3_DEV_ELECTRON_ARGS=--remote-debugging-port=9223`；Windows `Start-Process` 分离存活家法；就绪断言（9223 targets + backend health）。
+- **P1 主进程测试实例分支**：`PETRI_TEST_INSTANCE=1` → 跳过 db migration 与 `startRServer`（轮询 `/api/health` 就绪，缺席 fail-fast）+ 离屏可见窗口 + `[TEST]` 标题前缀。userData 由启动器经 `PETRI_ELECTRON_USER_DATA_DIR=.petri-test-user-data` 提供。
+- **P2 启动器** `scripts/start-test-instance.sh`：独立脚本（不动 restart-dev-stack.sh）；spawn Electron `--dev` + `PETRI_DEV_ELECTRON_ARGS=--remote-debugging-port=9223`；Windows `Start-Process` 分离存活家法；就绪断言（9223 targets + backend health）。
 - **P3 dev-verify lib 扩面**：`connectTestTarget()`（默认 poll 9223、`?test=1`/`[TEST]` 双标记过滤兜底）+ `withInputShield()`（`Input.setIgnoreInputEvents` 包裹 + finally 恢复——仅只读断言 flow 适用，会连合成输入一起屏蔽）+ 流程纪律 helper（记录/还原原页面，向后兼容仍连主窗口的旧 flow）。
 - **P4 flow 试点迁移**：`app-health` + `ui341-welcome-chat` 迁测试实例（代表性覆盖基础健康 + UI 交互两型）；其余 flow 渐进迁移。
 - **P5 实机验收**：①双实例并存——测试运行中用户窗口正常可用零扰动；②人因干扰负例——测试运行中点击测试窗口不致断言失败；③迁移 flow 断言全过；④探针崩溃兜底（input shield finally 恢复）。
@@ -36,7 +36,7 @@ CDP 实机验收（dev-verify flow / 探针）与用户日常使用共用同一�
 
 | # | 裁决点 | 推荐 |
 | --- | --- | --- |
-| D1 | 测试 userData 位置 | 仓库根 `.biof3-test-user-data`（与 dev 数据根并列，gitignore） |
+| D1 | 测试 userData 位置 | 仓库根 `.petri-test-user-data`（与 dev 数据根并列，gitignore） |
 | D2 | 测试实例 CDP 端口 | 9223（9222 留主实例） |
 | D3 | 离屏坐标 | 主屏左缘外（x=-(宽+100)，y=40），visibilityState=visible |
 | D4 | 首批迁移 flow | `app-health` + `ui341-welcome-chat` |
@@ -46,7 +46,7 @@ CDP 实机验收（dev-verify flow / 探针）与用户日常使用共用同一�
 ## 6. 红线与非范围
 
 **红线**：测试实例零 fork 后端、零 migration（主实例拥有 DB 生命周期）；数据同源 :3001（验收语义不变，临时项目+清理还原家法保持）；测试实例崩溃不影响用户实例；**探针永久禁导航用户窗口**（今日教训成文）。
-**非范围**：Playwright/新测试框架；单实例锁语义变更；全量 flow 一次迁移；打包态（`BIOF3_TEST_INSTANCE` 仅 dev 消费）；手机投影不受影响。
+**非范围**：Playwright/新测试框架；单实例锁语义变更；全量 flow 一次迁移；打包态（`PETRI_TEST_INSTANCE` 仅 dev 消费）；手机投影不受影响。
 
 ## 7. 验收门禁
 
@@ -60,7 +60,7 @@ G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## 8. 收口笔（2026-09-18，P0–P6 一次会话整包 completed）
 
-**交付**：P1 主进程 `BIOF3_TEST_INSTANCE=1` 分支（attach 后端〔markBackendAttached 桩→backend:status 走真实 health 探测，防误报「服务未运行」〕+ 跳过 migration/contentSync + 端口直读 R_SERVER_PORT 防 reserveAvailablePort 误选 3002 + 离屏可见窗口 x=主屏左缘外 1700px + `[TEST]` 标题 + `?test=1` URL 标记）；P2 `scripts/start-test-instance.sh`（后端缺席 fail-fast/幂等杀 9223 监听者绝不碰主实例/Start-Process 分离存活/就绪断言）；P3 lib 扩面 `connectTestTarget`（9223+?test=1 双重防误连用户窗口）+ `withInputShield`（`Input.setIgnoreInputEvents {ignore}` + finally 恢复，D6：仅只读 flow）；P4 flow 试点迁移 app-health + ui341-welcome-chat（poll 端口切 9223）；P5 flow `block100-test-instance` 注册。
+**交付**：P1 主进程 `PETRI_TEST_INSTANCE=1` 分支（attach 后端〔markBackendAttached 桩→backend:status 走真实 health 探测，防误报「服务未运行」〕+ 跳过 migration/contentSync + 端口直读 R_SERVER_PORT 防 reserveAvailablePort 误选 3002 + 离屏可见窗口 x=主屏左缘外 1700px + `[TEST]` 标题 + `?test=1` URL 标记）；P2 `scripts/start-test-instance.sh`（后端缺席 fail-fast/幂等杀 9223 监听者绝不碰主实例/Start-Process 分离存活/就绪断言）；P3 lib 扩面 `connectTestTarget`（9223+?test=1 双重防误连用户窗口）+ `withInputShield`（`Input.setIgnoreInputEvents {ignore}` + finally 恢复，D6：仅只读 flow）；P4 flow 试点迁移 app-health + ui341-welcome-chat（poll 端口切 9223）；P5 flow `block100-test-instance` 注册。
 
 **实机总账**：start-test-instance.sh 3s READY；双实例并存（9222 用户页原样 + 9223 ?test=1）；app-health **4/4**、ui341-welcome-chat **11/11**（真轮次 SSE 对话+自清理）、block100-test-instance **5/5**（离屏 visible/屏蔽吞输入/恢复放行/崩溃兜底/用户零扰动）；证据 `acceptance/block-100/` + `acceptance/ui-341/`。
 

@@ -65,13 +65,13 @@ export interface UseCodeMirrorEditorOptions {
   diffOptions?: DiffViewOptions;
 }
 
-const biof3HighlightStyle = HighlightStyle.define([
-  { tag: t.keyword, color: 'var(--gewu-status-warning, #c586c0)' },
-  { tag: [t.string, t.special(t.string)], color: 'var(--gewu-status-success, #ce9178)' },
-  { tag: t.number, color: 'var(--gewu-accent, #b5cea8)' },
-  { tag: t.comment, color: 'var(--gewu-text-muted, #6a9955)', fontStyle: 'italic' },
-  { tag: t.variableName, color: 'var(--gewu-text, #9cdcfe)' },
-  { tag: t.typeName, color: 'var(--gewu-accent, #4ec9b0)' },
+const petriHighlightStyle = HighlightStyle.define([
+  { tag: t.keyword, color: 'var(--petri-status-warning, #c586c0)' },
+  { tag: [t.string, t.special(t.string)], color: 'var(--petri-status-success, #ce9178)' },
+  { tag: t.number, color: 'var(--petri-accent, #b5cea8)' },
+  { tag: t.comment, color: 'var(--petri-text-muted, #6a9955)', fontStyle: 'italic' },
+  { tag: t.variableName, color: 'var(--petri-text, #9cdcfe)' },
+  { tag: t.typeName, color: 'var(--petri-accent, #4ec9b0)' },
 ]);
 
 /**
@@ -239,7 +239,7 @@ export function useCodeMirrorEditor(
       indentOnInput(),
       bracketMatching(),
       keymap.of([...defaultKeymap, ...historyKeymap]),
-      syntaxHighlighting(biof3HighlightStyle),
+      syntaxHighlighting(petriHighlightStyle),
       syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
       EditorView.theme({
         '&': { height: '100%' },

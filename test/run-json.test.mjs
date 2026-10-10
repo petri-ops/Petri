@@ -4,7 +4,7 @@
  *
  * Asserts the shape of the run.json record the golden-path script
  * writes alongside its HTML report. We re-run the same logic in
- * isolation here (no biof3-server, no DESeq2, just record construction)
+ * isolation here (no petri-server, no DESeq2, just record construction)
  * and verify the resulting JSON:
  *
  *   1. parses
@@ -43,7 +43,7 @@ await new Promise((res) => setTimeout(res, 25));
 const RUN_FINISHED_AT = new Date().toISOString();
 
 const sample = {
-  schema: 'biof3/golden-path-run.v1',
+  schema: 'petri/golden-path-run.v1',
   tool: 'deseq2',
   jobId: 'demo-job-001',
   projectId: 'demo-project-001',
@@ -69,7 +69,7 @@ const sample = {
 const roundTrip = JSON.parse(JSON.stringify(sample));
 
 check(typeof roundTrip === 'object' && roundTrip !== null, 'serializes + parses as object');
-check(roundTrip.schema === 'biof3/golden-path-run.v1', `schema is biof3/golden-path-run.v1 (got ${roundTrip.schema})`);
+check(roundTrip.schema === 'petri/golden-path-run.v1', `schema is petri/golden-path-run.v1 (got ${roundTrip.schema})`);
 check(roundTrip.tool === 'deseq2', `tool is deseq2 (got ${roundTrip.tool})`);
 check(typeof roundTrip.jobId === 'string' && roundTrip.jobId.length > 0, 'jobId is a non-empty string');
 check(typeof roundTrip.projectId === 'string' && roundTrip.projectId.length > 0, 'projectId is a non-empty string');
@@ -101,7 +101,7 @@ const FIXTURE = resolve(REPO_ROOT, 'test/fixtures/golden-path/deseq2-run.json');
   const real = JSON.parse(readFileSync(FIXTURE, 'utf8'));
   let rf = 0;
   const rcheck = (cond, msg) => { if (cond) console.log(`  ✓ ${msg}`); else { console.error(`  ✗ ${msg}`); rf++; } };
-  rcheck(real.schema === 'biof3/golden-path-run.v1', 'real fixture has correct schema');
+  rcheck(real.schema === 'petri/golden-path-run.v1', 'real fixture has correct schema');
   rcheck(real.tool === 'deseq2', 'real fixture tool === deseq2');
   rcheck(real.outputs && real.outputs.summary && real.outputs.summary.sig_genes === 82, 'real fixture reports 82 sig genes');
   rcheck(real.outputs && real.outputs.summary && real.outputs.summary.up === 46, 'real fixture reports 46 up');
@@ -117,7 +117,7 @@ const FIXTURE = resolve(REPO_ROOT, 'test/fixtures/golden-path/deseq2-run.json');
 }
 
 // Rescue-path schema (Week 3B): golden-path.mjs writes a
-// `analysis_succeeded_zip_packaging_pending` record when biof3-server's
+// `analysis_succeeded_zip_packaging_pending` record when petri-server's
 // HTML-report endpoint returns report_source_not_found (a known packaging
 // gap: the zip post-processor that bundles
 // output/ → all_results.zip isn't wired yet, so report endpoint 502s
@@ -125,7 +125,7 @@ const FIXTURE = resolve(REPO_ROOT, 'test/fixtures/golden-path/deseq2-run.json');
 // shape of that rescue record so the contract doesn't silently drift.
 console.log('\n• rescue-path run.json (Week 3B)');
 const rescue = {
-  schema: 'biof3/golden-path-run.v1',
+  schema: 'petri/golden-path-run.v1',
   tool: 'deseq2',
   jobId: 'job_rescue_demo',
   projectId: 'p_rescue_demo',
@@ -149,11 +149,11 @@ const rescue = {
     artifactList: ['deg_table.csv', 'volcano.png', 'report.html'],
   },
   exit: 'analysis_succeeded_zip_packaging_pending',
-  notes: 'R analysis completed; biof3-server zip post-processor did not run.',
+  notes: 'R analysis completed; petri-server zip post-processor did not run.',
 };
 let rb = 0;
 const r2check = (cond, msg) => { if (cond) console.log(`  ✓ ${msg}`); else { console.error(`  ✗ ${msg}`); rb++; } };
-r2check(rescue.schema === 'biof3/golden-path-run.v1', 'rescue schema === biof3/golden-path-run.v1');
+r2check(rescue.schema === 'petri/golden-path-run.v1', 'rescue schema === petri/golden-path-run.v1');
 r2check(rescue.exit === 'analysis_succeeded_zip_packaging_pending', 'rescue exit === analysis_succeeded_zip_packaging_pending');
 r2check(rescue.outputs.html === null, 'rescue outputs.html === null (HTML not synthesized yet)');
 r2check(rescue.outputs.htmlBytes === 0, 'rescue outputs.htmlBytes === 0');

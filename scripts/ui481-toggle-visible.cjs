@@ -4,7 +4,7 @@
  */
 const path = require('path');
 const fs = require('fs');
-const { connectTarget } = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const { connectTarget } = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 
 (async () => {
   const list = await fetch('http://127.0.0.1:9222/json/list').then((r) => r.json());

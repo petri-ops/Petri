@@ -22,8 +22,8 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block88-p2-'));
-process.env.BIOF3_DB_PATH = path.join(tempDir, 'block88-p2.db');
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block88-p2-'));
+process.env.PETRI_DB_PATH = path.join(tempDir, 'block88-p2.db');
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(__dirname, '..');
@@ -32,8 +32,8 @@ const ROOT = path.resolve(__dirname, '..');
 const { runMigrations } = require(path.join(ROOT, 'src/migration-runner.js'));
 await runMigrations(path.join(tempDir, 'block88-p2.db'), path.join(ROOT, 'src', 'migrations'));
 
-const conversations = require(path.join(ROOT, 'core/biof3-server/helpers/conversations.js'));
-const agentTaskStore = require(path.join(ROOT, 'core/biof3-server/agent-task-store.js'));
+const conversations = require(path.join(ROOT, 'core/petri-server/helpers/conversations.js'));
+const agentTaskStore = require(path.join(ROOT, 'core/petri-server/agent-task-store.js'));
 
 function listen(app) {
   return new Promise((resolve) => {
@@ -87,7 +87,7 @@ test('BLOCK-88 P2: conversation list default view excludes delegation; includeFe
   const express = require('express');
   const app = express();
   app.use((req, _res, next) => { req.user = { id: 'local-user' }; next(); });
-  require(path.join(ROOT, 'core/biof3-server/routes/ai-conversations.js'))(app);
+  require(path.join(ROOT, 'core/petri-server/routes/ai-conversations.js'))(app);
   const server = await listen(app);
   const base = `http://127.0.0.1:${server.address().port}`;
   try {
@@ -136,7 +136,7 @@ test('BLOCK-88 P2: agent tasks list maps federatedFrom for delegation tasks', as
   const express = require('express');
   const app = express();
   app.use((req, _res, next) => { req.user = { id: userId }; next(); });
-  require(path.join(ROOT, 'core/biof3-server/routes/ai-agent/task-actions.js')).register(app);
+  require(path.join(ROOT, 'core/petri-server/routes/ai-agent/task-actions.js')).register(app);
   const server = await listen(app);
   try {
     const data = await getJson(`http://127.0.0.1:${server.address().port}/api/ai/agent/tasks?limit=50`);

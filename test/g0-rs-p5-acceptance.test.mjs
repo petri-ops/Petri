@@ -25,7 +25,7 @@ import {
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const Database = require(require.resolve('better-sqlite3', {
-  paths: [path.join(ROOT, 'core/biof3-server'), ROOT],
+  paths: [path.join(ROOT, 'core/petri-server'), ROOT],
 }));
 
 test('P5 SVG evidence recognizes equivalent rendered color encodings', () => {
@@ -126,7 +126,7 @@ test('P5 candidate evidence treats multiple formal outputs from one Job as one p
 });
 
 function createEmptyP5Ledger(root) {
-  const dbPath = path.join(root, 'biof3.db');
+  const dbPath = path.join(root, 'petri.db');
   const db = new Database(dbPath);
   try {
     for (const table of P5_NO_SEED_TABLES) {
@@ -154,7 +154,7 @@ function sourceBoundEvidence(overrides = {}) {
 }
 
 test('P5 refuses an occupied disposable product ledger before any journey write', () => {
-  const root = mkdtempSync(path.join(tmpdir(), 'biof3-p5-no-seed-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-p5-no-seed-'));
   try {
     const dbPath = createEmptyP5Ledger(root);
     const clean = assertP5NoSeedPrecondition(dbPath, { root });
@@ -178,8 +178,8 @@ test('P5 refuses an occupied disposable product ledger before any journey write'
 });
 
 test('P5 no-seed check fails closed for missing tables and a database outside the disposable root', () => {
-  const root = mkdtempSync(path.join(tmpdir(), 'biof3-p5-no-seed-'));
-  const otherRoot = mkdtempSync(path.join(tmpdir(), 'biof3-p5-other-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-p5-no-seed-'));
+  const otherRoot = mkdtempSync(path.join(tmpdir(), 'petri-p5-other-'));
   try {
     const dbPath = createEmptyP5Ledger(root);
     const db = new Database(dbPath);
@@ -221,8 +221,8 @@ test('P5 source binding contains every declared focused test and direct executio
     'test/impact-map.json',
     'core/shared-backend/git-adapter.js',
     'core/shared-backend/git-repository-binding.js',
-    'core/biof3-server/routes/tools-platform.js',
-    'core/biof3-server/plugin-loader.js',
+    'core/petri-server/routes/tools-platform.js',
+    'core/petri-server/plugin-loader.js',
   ]) {
     assert.ok(paths.includes(file), `${file} must be bound to P5 evidence`);
   }
@@ -310,7 +310,7 @@ test('P5 live runtime creates one isolated HTTP project conversation and removes
       assert.equal(runtime.closed, false);
       assert.match(runtime.baseUrl, /^http:\/\/127\.0\.0\.1:\d+$/);
       assert.equal(runtime.coordinates.root, root);
-      assert.equal(runtime.coordinates.dbPath, runtime.env.BIOF3_DB_PATH);
+      assert.equal(runtime.coordinates.dbPath, runtime.env.PETRI_DB_PATH);
       assert.equal(runtime.coordinates.projectId, runtime.project.id);
       assert.equal(runtime.coordinates.conversationId, runtime.conversation.id);
       assert.equal(runtime.conversation.project_id, runtime.project.id);

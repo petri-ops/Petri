@@ -9,11 +9,11 @@
     "url": "http://localhost:3000/project/p_mtrawlau_7rly/result",
     "onResultPath": true,
     "canvas": true,
-    "title": "结果 · biof3-desktop"
+    "title": "结果 · petri-desktop"
   },
   "chatBaseline": {
     "url": "http://localhost:3000/project/p_mtrawlau_7rly",
-    "title": "biof3-desktop"
+    "title": "petri-desktop"
   },
   "ok": true
 }

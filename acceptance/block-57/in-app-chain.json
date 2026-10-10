@@ -27,7 +27,7 @@
     {
       "name": "P4 Artifact Truth 与 manifest 与本地作业同构",
       "pass": true,
-      "detail": "truth=valid artifacts=3 manifestAt=/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/biof3-block57-live-IEusz2/results/tool-jobs/job_1ce919f72d5143b7/output/artifact-manifest.json resultDir=/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/biof3-block57-live-IEusz2/results/tool-jobs/job_1ce919f72d5143b7/output"
+      "detail": "truth=valid artifacts=3 manifestAt=/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/petri-block57-live-IEusz2/results/tool-jobs/job_1ce919f72d5143b7/output/artifact-manifest.json resultDir=/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/petri-block57-live-IEusz2/results/tool-jobs/job_1ce919f72d5143b7/output"
     },
     {
       "name": "P5 R 工具提交到无 R 节点 → stage=runtime 诚实拒绝",

@@ -114,12 +114,12 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
 
   return (
     <div
-      className="gewu-desktop-panel gewu-plugin-store-panel"
+      className="petri-desktop-panel petri-plugin-store-panel"
       role={embedded ? 'region' : 'dialog'}
       aria-label="插件商店"
     >
       {/* Header — BLOCK-156 embedded 模式收起返回钮/图标/标题（宿主页头承载返回），搜索行保留 */}
-      <div className="gewu-plugin-store__header">
+      <div className="petri-plugin-store__header">
         {!embedded && (
           <>
             {/* UI-347 — 返回风格与其它页面对齐（定时分析面同款左上角文字按钮，
@@ -134,13 +134,13 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
               <Icon name="arrow-left" size={14} />
               <span>{backLabel}</span>
             </button>
-            <span className="gewu-plugin-store__icon">
+            <span className="petri-plugin-store__icon">
               <Icon name="puzzle" size={18} />
             </span>
-            <h2 className="gewu-plugin-store__title">插件商店</h2>
+            <h2 className="petri-plugin-store__title">插件商店</h2>
           </>
         )}
-        <div className="gewu-plugin-store__search">
+        <div className="petri-plugin-store__search">
           <input
             type="text"
             placeholder="搜索插件…"
@@ -151,12 +151,12 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
       </div>
 
       {/* Body */}
-      <div className="gewu-plugin-store__body">
+      <div className="petri-plugin-store__body">
         {/* Content */}
-        <div className="gewu-plugin-store__content">
+        <div className="petri-plugin-store__content">
           {/* UI-374 — 有包缺运行时才提示，且文案挂包名；无包不提运行时 */}
           {needRuntimeHint && (
-            <div className="gewu-plugin-store__hint">
+            <div className="petri-plugin-store__hint">
               ⚠️ 已安装领域包 {packsRequiringRuntimes.map((n) => `「${n}」`).join('、')} 需要
               {' '}{missingRuntimeNames.join(' 与 ')} 运行时——请在本页领域包卡片内补装，否则对应分析工具无法使用。
             </div>
@@ -165,22 +165,22 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
           {/* BLOCK-84：领域包分区——整包一键装/卸（记录制，重启生效）
               UI-374：pack 卡片 = 唯一领域入口（运行时子项收编进卡片） */}
           {(availablePacks.length > 0 || installedPacks.length > 0) && (
-            <div className="gewu-plugin-store__packs" data-testid="domain-packs-section">
-              <div className="gewu-plugin-store__packs-header">
+            <div className="petri-plugin-store__packs" data-testid="domain-packs-section">
+              <div className="petri-plugin-store__packs-header">
                 <strong>领域包</strong>
-                <span style={{ fontSize: 'var(--gewu-font-size-caption, 12px)', color: 'var(--gewu-text-tertiary)' }}>
+                <span style={{ fontSize: 'var(--petri-font-size-caption, 12px)', color: 'var(--petri-text-tertiary)' }}>
                   整包安装/卸载一组领域能力（分析插件 + 脚本 + 运行时）；装/卸后需重启应用生效
                 </span>
               </div>
               {packNotice && (
-                <div role="status" style={{ padding: '6px 0', color: 'var(--gewu-text-secondary)' }}>{packNotice}</div>
+                <div role="status" style={{ padding: '6px 0', color: 'var(--petri-text-secondary)' }}>{packNotice}</div>
               )}
               {(() => {
                 const packBridge = getBridge('packs');
                 return packBridge ? (
                   <button
                     type="button"
-                    className="gewu-btn gewu-btn--primary"
+                    className="petri-btn petri-btn--primary"
                     style={{ marginBottom: 8 }}
                     disabled={packBusy !== null}
                     onClick={async () => {
@@ -223,9 +223,9 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                   return (
                     <div
                       key={pack.packId}
-                      className="gewu-plugin-store__pack-card"
+                      className="petri-plugin-store__pack-card"
                       data-testid={`domain-pack-${pack.packId}`}
-                      style={{ border: '1px solid var(--gewu-border, rgba(128,128,128,0.25))', borderRadius: 8, marginBottom: 8 }}
+                      style={{ border: '1px solid var(--petri-border, rgba(128,128,128,0.25))', borderRadius: 8, marginBottom: 8 }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px' }}>
                         <button
@@ -233,15 +233,15 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                           aria-expanded={expanded}
                           aria-label={expanded ? `收起 ${pack.name} 详情` : `展开 ${pack.name} 详情`}
                           onClick={() => setExpandedPackId(expanded ? null : pack.packId)}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--gewu-text-tertiary)', display: 'flex' }}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--petri-text-tertiary)', display: 'flex' }}
                         >
                           <Icon name={expanded ? 'chevron-up' : 'chevron-down'} size={14} />
                         </button>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontWeight: 600 }}>
-                            {pack.name} <span style={{ color: 'var(--gewu-text-tertiary)', fontWeight: 400 }}>v{pack.version}</span>
+                            {pack.name} <span style={{ color: 'var(--petri-text-tertiary)', fontWeight: 400 }}>v{pack.version}</span>
                             {pack.installed && (
-                              <span style={{ marginLeft: 8, fontSize: 'var(--gewu-font-size-caption, 12px)', color: 'var(--gewu-accent, #3b82f6)' }}>已安装</span>
+                              <span style={{ marginLeft: 8, fontSize: 'var(--petri-font-size-caption, 12px)', color: 'var(--petri-accent, #3b82f6)' }}>已安装</span>
                             )}
                             {pack.installed && (() => {
                               // BLOCK-163 W3 P7（DIST-5）— 更新徽标：包根版本 > 已装版本
@@ -249,7 +249,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                               return update ? (
                                 <span
                                   data-testid={`pack-update-${pack.packId}`}
-                                  style={{ marginLeft: 6, fontSize: 'var(--gewu-font-size-caption, 12px)', color: 'var(--gewu-warning, #d97706)' }}
+                                  style={{ marginLeft: 6, fontSize: 'var(--petri-font-size-caption, 12px)', color: 'var(--petri-warning, #d97706)' }}
                                   title={`有新版本 v${update.latestVersion}（当前 v${update.installedVersion}）`}
                                 >
                                   ↑ v{update.latestVersion}
@@ -257,7 +257,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                               ) : null;
                             })()}
                           </div>
-                          <div style={{ color: 'var(--gewu-text-tertiary)', fontSize: 'var(--gewu-font-size-caption, 12px)' }}>
+                          <div style={{ color: 'var(--petri-text-tertiary)', fontSize: 'var(--petri-font-size-caption, 12px)' }}>
                             {contents
                               ? `${contents.pluginCount} 个分析插件 · ${contents.scriptCount} 个脚本模块 · ${contents.demoDataCount} 个演示数据集`
                               : (pack.description || pack.packId)}
@@ -271,7 +271,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                               return (
                                 <button
                                   type="button"
-                                  className="gewu-btn gewu-btn--ghost"
+                                  className="petri-btn petri-btn--ghost"
                                   data-testid={`pack-toggle-${pack.packId}`}
                                   title={isEnabled ? '停用后重启生效：该包全部分析插件不再注册到 run_tool/MCP/目录（可随时启用，免重装）' : '启用后重启生效（免重装）'}
                                   disabled={packBusy !== null}
@@ -287,7 +287,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                               return (
                                 <button
                                   type="button"
-                                  className="gewu-btn gewu-btn--primary"
+                                  className="petri-btn petri-btn--primary"
                                   data-testid={`pack-update-btn-${pack.packId}`}
                                   title={`更新到 v${update.latestVersion}（覆盖装，同一安装链）`}
                                   disabled={packBusy !== null}
@@ -299,7 +299,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                             })()}
                             <button
                               type="button"
-                              className="gewu-btn"
+                              className="petri-btn"
                               disabled={packBusy !== null}
                               onClick={() => void beginPackUninstall(pack)}
                             >
@@ -309,7 +309,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                         ) : (
                           <button
                             type="button"
-                            className="gewu-btn gewu-btn--primary"
+                            className="petri-btn petri-btn--primary"
                             disabled={packBusy !== null}
                             onClick={() => void handlePackInstall(pack)}
                           >
@@ -319,8 +319,8 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                       </div>
                       {/* UI-374 — 展开区：运行时子项（状态/体积/进度）随契约渲染 */}
                       {expanded && requiredRuntimes.length > 0 && (
-                        <div style={{ borderTop: '1px dashed var(--gewu-border, rgba(128,128,128,0.25))', padding: '8px 12px 10px 36px' }} data-testid={`pack-runtimes-${pack.packId}`}>
-                          <div style={{ fontSize: 'var(--gewu-font-size-caption, 12px)', color: 'var(--gewu-text-tertiary)', marginBottom: 6 }}>
+                        <div style={{ borderTop: '1px dashed var(--petri-border, rgba(128,128,128,0.25))', padding: '8px 12px 10px 36px' }} data-testid={`pack-runtimes-${pack.packId}`}>
+                          <div style={{ fontSize: 'var(--petri-font-size-caption, 12px)', color: 'var(--petri-text-tertiary)', marginBottom: 6 }}>
                             运行时基础环境（随包安装）
                           </div>
                           {requiredRuntimes.map((req) => {
@@ -335,15 +335,15 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                                 <Icon name="cpu" size={14} />
                                 <span style={{ flex: 1, minWidth: 0 }}>
                                   {runtimeTitleOf(req.pluginId)}
-                                  <span style={{ color: 'var(--gewu-text-tertiary)', marginLeft: 8, fontSize: 'var(--gewu-font-size-caption, 12px)' }}>
+                                  <span style={{ color: 'var(--petri-text-tertiary)', marginLeft: 8, fontSize: 'var(--petri-font-size-caption, 12px)' }}>
                                     {sizeLabel}
                                     {req.version ? ` · ${req.version}` : ''}
                                   </span>
                                   {rtInstalled && (
-                                    <span style={{ color: 'var(--gewu-text-tertiary)', marginLeft: 8, fontSize: 'var(--gewu-font-size-caption, 12px)' }}>✓ 已安装</span>
+                                    <span style={{ color: 'var(--petri-text-tertiary)', marginLeft: 8, fontSize: 'var(--petri-font-size-caption, 12px)' }}>✓ 已安装</span>
                                   )}
                                   {missingButRequired && (
-                                    <span style={{ color: 'var(--gewu-warning, #d97706)', marginLeft: 8, fontSize: 'var(--gewu-font-size-caption, 12px)' }}>
+                                    <span style={{ color: 'var(--petri-warning, #d97706)', marginLeft: 8, fontSize: 'var(--petri-font-size-caption, 12px)' }}>
                                       必需 · 缺失
                                     </span>
                                   )}
@@ -351,7 +351,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                                 {pack.installed && !rtInstalled && (
                                   <button
                                     type="button"
-                                    className="gewu-btn gewu-btn--primary gewu-btn--sm"
+                                    className="petri-btn petri-btn--primary petri-btn--sm"
                                     disabled={packBusy !== null}
                                     onClick={() => void handleRuntimeTopUp(req.pluginId)}
                                   >
@@ -359,11 +359,11 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                                   </button>
                                 )}
                                 {pack.installed && !rtInstalled && prog && prog.total > 0 && (
-                                  <div className="gewu-plugin-store__progress" style={{ width: 120 }}>
-                                    <div className="gewu-plugin-store__progress-text">
+                                  <div className="petri-plugin-store__progress" style={{ width: 120 }}>
+                                    <div className="petri-plugin-store__progress-text">
                                       {(prog.ratio * 100).toFixed(0)}%
                                     </div>
-                                    <div className="gewu-plugin-store__progress-bar">
+                                    <div className="petri-plugin-store__progress-bar">
                                       <div style={{ width: `${prog.ratio * 100}%` }} />
                                     </div>
                                   </div>
@@ -392,12 +392,12 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
               }}
             >
               <div style={{
-                background: 'var(--gewu-bg, #fff)', borderRadius: 10, padding: 18,
-                width: 'min(520px, 92%)', border: '1px solid var(--gewu-border, rgba(128,128,128,0.25))',
+                background: 'var(--petri-bg, #fff)', borderRadius: 10, padding: 18,
+                width: 'min(520px, 92%)', border: '1px solid var(--petri-border, rgba(128,128,128,0.25))',
                 boxShadow: '0 12px 32px rgba(15,23,42,0.18)',
               }}>
                 <div style={{ fontWeight: 600, marginBottom: 8 }}>卸载「{confirmPack.name}」</div>
-                <div style={{ fontSize: 'var(--gewu-font-size-caption, 12px)', color: 'var(--gewu-text-secondary)', marginBottom: 10 }}>
+                <div style={{ fontSize: 'var(--petri-font-size-caption, 12px)', color: 'var(--petri-text-secondary)', marginBottom: 10 }}>
                   卸载后需重启应用生效。请确认以下处置（可逐项勾选）：
                 </div>
                 <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '6px 0', cursor: 'pointer' }}>
@@ -409,7 +409,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                   <span>
                     删除运行时基础环境
                     {(confirmPlan.runtimes?.removable ?? []).filter((r) => r.installed).length > 0 && (
-                      <span style={{ color: 'var(--gewu-text-tertiary)' }}>
+                      <span style={{ color: 'var(--petri-text-tertiary)' }}>
                         （{confirmPlan.runtimes!.removable.filter((r) => r.installed).map((r) => runtimeTitleOf(r.pluginId)).join('、')}
                         {(() => {
                           const total = confirmPlan.runtimes!.removable.reduce((acc, r) => acc + (r.sizeBytes || 0), 0);
@@ -420,10 +420,10 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                       </span>
                     )}
                     {(confirmPlan.runtimes?.removable ?? []).length === 0 && (
-                      <span style={{ color: 'var(--gewu-text-tertiary)' }}>（本包契约未声明运行时）</span>
+                      <span style={{ color: 'var(--petri-text-tertiary)' }}>（本包契约未声明运行时）</span>
                     )}
                     {(confirmPlan.runtimes?.retained ?? []).length > 0 && (
-                      <span style={{ color: 'var(--gewu-text-tertiary)' }}>
+                      <span style={{ color: 'var(--petri-text-tertiary)' }}>
                         ；{confirmPlan.runtimes!.retained.map((r) => `${runtimeTitleOf(r.pluginId)} 被其他包共享，将保留`).join('；')}
                       </span>
                     )}
@@ -438,28 +438,28 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                   <span>
                     同时删除包源目录
                     {confirmPlan.packSource?.dir && (
-                      <span style={{ color: 'var(--gewu-text-tertiary)', wordBreak: 'break-all' }}>
+                      <span style={{ color: 'var(--petri-text-tertiary)', wordBreak: 'break-all' }}>
                         （{confirmPlan.packSource.dir}
                         {confirmPlan.packSource.sizeBytes ? `，约 ${formatSize(confirmPlan.packSource.sizeBytes)}` : ''}）
                       </span>
                     )}
-                    <div style={{ color: 'var(--gewu-text-tertiary)' }}>内含分析插件、脚本与演示数据；默认保留</div>
+                    <div style={{ color: 'var(--petri-text-tertiary)' }}>内含分析插件、脚本与演示数据；默认保留</div>
                   </span>
                 </label>
-                <div style={{ padding: '8px 0', color: 'var(--gewu-text-secondary)', fontSize: 'var(--gewu-font-size-caption, 12px)' }}>
+                <div style={{ padding: '8px 0', color: 'var(--petri-text-secondary)', fontSize: 'var(--petri-font-size-caption, 12px)' }}>
                   {confirmPlan.userDataPolicy || 'results、项目文件与数据库不受影响'}——用户数据永不删除。
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
                   <button
                     type="button"
-                    className="gewu-btn"
+                    className="petri-btn"
                     onClick={() => { setConfirmPack(null); setConfirmPlan(null); }}
                   >
                     取消
                   </button>
                   <button
                     type="button"
-                    className="gewu-btn gewu-btn--danger-ghost"
+                    className="petri-btn petri-btn--danger-ghost"
                     disabled={packBusy !== null}
                     data-testid="pack-uninstall-confirm-execute"
                     onClick={async () => {
@@ -478,7 +478,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
           )}
 
           {packDeliveredPlugins.length === 0 && (
-            <div className="gewu-empty">
+            <div className="petri-empty">
               {searchQuery ? `没有匹配「${searchQuery}」的插件` : '暂无插件（领域插件随领域包交付）'}
             </div>
           )}
@@ -486,23 +486,23 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
           {/* UI-374 — 包交付的插件：标注来源包，随包装卸（无独立安装按钮） */}
           {packDeliveredPlugins.length > 0 && (
             <div style={{ marginTop: 14 }} data-testid="pack-delivered-plugins">
-              <div style={{ fontSize: 'var(--gewu-font-size-caption, 12px)', color: 'var(--gewu-text-tertiary)', marginBottom: 6 }}>
+              <div style={{ fontSize: 'var(--petri-font-size-caption, 12px)', color: 'var(--petri-text-tertiary)', marginBottom: 6 }}>
                 来自已安装领域包（随包装卸，重启生效）
               </div>
-              <div className="gewu-plugin-store__grid">
+              <div className="petri-plugin-store__grid">
                 {packDeliveredPlugins.map((plugin) => (
-                  <div key={`${plugin.fromPack}:${plugin.id}`} className="gewu-plugin-card installed">
-                    <div className="gewu-plugin-card__top">
-                      <span className="gewu-plugin-card__icon">
+                  <div key={`${plugin.fromPack}:${plugin.id}`} className="petri-plugin-card installed">
+                    <div className="petri-plugin-card__top">
+                      <span className="petri-plugin-card__icon">
                         <Icon name="bar-chart" size={20} />
                       </span>
-                      <div className="gewu-plugin-card__name" title={plugin.id}>
+                      <div className="petri-plugin-card__name" title={plugin.id}>
                         {plugin.id}
                       </div>
-                      <span className="gewu-plugin-card__badge">✓</span>
+                      <span className="petri-plugin-card__badge">✓</span>
                     </div>
-                    <div className="gewu-plugin-card__desc">来源包：{plugin.fromPack}</div>
-                    <div className="gewu-plugin-card__meta">
+                    <div className="petri-plugin-card__desc">来源包：{plugin.fromPack}</div>
+                    <div className="petri-plugin-card__meta">
                       {plugin.version && <span>v{plugin.version}</span>}
                       {plugin.language && (
                         <span className={`lang-${plugin.language}`}>{plugin.language}</span>
@@ -517,8 +517,8 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
       </div>
 
       {/* Footer */}
-      <div className="gewu-plugin-store__footer">
-        <span className="gewu-plugin-store__footer-info">已安装 {installedCount} 个</span>
+      <div className="petri-plugin-store__footer">
+        <span className="petri-plugin-store__footer-info">已安装 {installedCount} 个</span>
       </div>
     </div>
   );

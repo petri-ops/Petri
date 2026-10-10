@@ -1,4 +1,4 @@
-# BioF3 Desktop Database Migrations
+# Petri Desktop Database Migrations
 
 ## 唯一 source of truth
 
@@ -70,13 +70,13 @@ CREATE INDEX IF NOT EXISTS idx_your_table_name ON your_table(name);
 
 ```bash
 # 删除测试数据库，重新跑 migration
-rm -f .biof3-dev-user-data/data/biof3.db*
+rm -f .petri-dev-user-data/data/petri.db*
 
 # 启动 Electron，会自动执行 migration
 npm run dev
 
 # 检查 schema 是否正确
-sqlite3 .biof3-dev-user-data/data/biof3.db ".schema your_table"
+sqlite3 .petri-dev-user-data/data/petri.db ".schema your_table"
 ```
 
 ### 4. 验证一致性
@@ -177,27 +177,27 @@ SQLite 不支持原生 `ALTER TABLE DROP COLUMN`（3.35.0+ 才支持，且有限
 
 ```bash
 # 1. 查看已应用的 migration
-sqlite3 .biof3-dev-user-data/data/biof3.db \
+sqlite3 .petri-dev-user-data/data/petri.db \
   "SELECT version, applied_at FROM schema_migrations ORDER BY version;"
 
 # 2. 查看具体表结构
-sqlite3 .biof3-dev-user-data/data/biof3.db ".schema projects"
+sqlite3 .petri-dev-user-data/data/petri.db ".schema projects"
 
 # 3. 如果需要重置（⚠️ 会丢失所有数据）
-rm -f .biof3-dev-user-data/data/biof3.db*
+rm -f .petri-dev-user-data/data/petri.db*
 npm run dev  # 重新跑所有 migration
 ```
 
 ### 两个数据库 schema 不一致
 
 项目中可能存在两个数据库文件：
-- `.biof3-dev-user-data/data/biof3.db`（主库，通过 migration 构建）
-- `core/r-server/biof3.db`（历史遗留，通过 `db.js` 内联 schema 构建）
+- `.petri-dev-user-data/data/petri.db`（主库，通过 migration 构建）
+- `core/r-server/petri.db`（历史遗留，通过 `db.js` 内联 schema 构建）
 
-**2026-08-20 后应该只使用主库**。如果发现 `core/r-server/biof3.db`，可以安全删除：
+**2026-08-20 后应该只使用主库**。如果发现 `core/r-server/petri.db`，可以安全删除：
 
 ```bash
-rm -f core/r-server/biof3.db*
+rm -f core/r-server/petri.db*
 ```
 
 启动时 `src/main.js` 会确保主库 schema 最新。

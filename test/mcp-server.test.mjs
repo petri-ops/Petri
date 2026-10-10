@@ -15,7 +15,7 @@ test('MCP server tools/list 不再返回单细胞步骤（已移除）', async (
     command: 'node',
     args: [SERVER_PATH],
   });
-  const client = new Client({ name: 'biof3-mcp-test', version: '1.0.0' });
+  const client = new Client({ name: 'petri-mcp-test', version: '1.0.0' });
   await client.connect(transport);
   try {
     const { tools } = await client.listTools();
@@ -34,7 +34,7 @@ test('MCP server tools/call 对未注册工具返回 isError', async () => {
     command: 'node',
     args: [SERVER_PATH],
   });
-  const client = new Client({ name: 'biof3-mcp-test', version: '1.0.0' });
+  const client = new Client({ name: 'petri-mcp-test', version: '1.0.0' });
   await client.connect(transport);
   try {
     // 用绝对不存在的工具名，走 unknown_tool 分支

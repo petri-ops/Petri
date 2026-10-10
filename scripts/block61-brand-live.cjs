@@ -2,13 +2,13 @@
 'use strict';
 
 /**
- * BLOCK-61 实机冒烟：品牌改名 Gewu（dev Electron CDP）。
- *   1) 窗口 document.title = Gewu（index.html）+ preload 桥 window.gewu 可用
- *   2) 兼容别名 window.biof3Desktop 仍指向同一 surface（旧调用不断）
- *   3) TitleBar wordmark 显示 Gewu
- *   4) 主题亮/暗切换正常（gewu:theme-change 事件 + gewu-theme key）
- *   5) 历史主题偏好迁移：预置 biof3-theme=dark → 重载后 resolvedTheme=dark 且新 key gewu-theme=dark（读到即迁移）
- *   6) 窗口管理器经别名可用：popOut result → 弹出窗标题 Gewu — 结果
+ * BLOCK-61 实机冒烟：品牌改名 Petri（dev Electron CDP）。
+ *   1) 窗口 document.title = Petri（index.html）+ preload 桥 window.petri 可用
+ *   2) 兼容别名 window.petriDesktop 仍指向同一 surface（旧调用不断）
+ *   3) TitleBar wordmark 显示 Petri
+ *   4) 主题亮/暗切换正常（petri:theme-change 事件 + petri-theme key）
+ *   5) 历史主题偏好迁移：预置 petri-theme=dark → 重载后 resolvedTheme=dark 且新 key petri-theme=dark（读到即迁移）
+ *   6) 窗口管理器经别名可用：popOut result → 弹出窗标题 Petri — 结果
  *   7) 清理
  * 证据：acceptance/block-61/brand-live.json + p61-*.png
  */
@@ -18,8 +18,8 @@ const { execFileSync } = require('node:child_process');
 const http = require('node:http');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
-const DB_PATH = path.join(__dirname, '..', '.biof3-dev-user-data', 'data', 'biof3.db');
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
+const DB_PATH = path.join(__dirname, '..', '.petri-dev-user-data', 'data', 'petri.db');
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-61');
 
 function fetchJson(url) {
@@ -96,33 +96,33 @@ async function main() {
 
   const targets = await listTargets();
   const page = targets.find((t) => t.type === 'page' && /localhost:3000/.test(t.url || '') && !/(\/window\/)/.test(t.url || ''));
-  if (!page) throw new Error('biof3_page_not_found');
+  if (!page) throw new Error('petri_page_not_found');
   const client = await new CdpClient(page.webSocketDebuggerUrl).connect();
   results.mainPage = page.url;
 
   // 1) document.title + 桥
   const head = await evalJSRetry(client, `(() => ({
     title: document.title,
-    hasGewuBridge: !!window.gewu?.windowManager?.popOut,
-    hasLegacyAlias: !!window.biof3Desktop?.windowManager?.popOut,
-    sameSurface: window.gewu && window.biof3Desktop && window.gewu.windowManager === window.biof3Desktop.windowManager,
+    hasPetriBridge: !!window.petri?.windowManager?.popOut,
+    hasLegacyAlias: !!window.petriDesktop?.windowManager?.popOut,
+    sameSurface: window.petri && window.petriDesktop && window.petri.windowManager === window.petriDesktop.windowManager,
   }))()`);
-  assert('document.title = Gewu', head?.title === 'Gewu', JSON.stringify(head));
-  assert('window.gewu 桥可用（主名）', head?.hasGewuBridge === true, JSON.stringify(head));
-  assert('window.biof3Desktop 兼容别名可用（contextBridge 双暴露为独立代理，功能等价即通过）',
+  assert('document.title = Petri', head?.title === 'Petri', JSON.stringify(head));
+  assert('window.petri 桥可用（主名）', head?.hasPetriBridge === true, JSON.stringify(head));
+  assert('window.petriDesktop 兼容别名可用（contextBridge 双暴露为独立代理，功能等价即通过）',
     head?.hasLegacyAlias === true, JSON.stringify(head));
 
   // 2) TitleBar wordmark fallback 走品牌模块（静态契约见 brand-identity 测试；
   //    运行态标题由 routes 决定——项目页显示项目名是既有行为）
 
   // 3) 历史主题偏好迁移（预置旧 key → 重载 → 读到即迁移）
-  const origTheme = await evalJSRetry(client, `localStorage.getItem('gewu-theme') || localStorage.getItem('biof3-theme') || 'light'`);
-  // 用户级契约：仅存历史 key（biof3-theme=dark）时，升级后主题偏好不丢。
-  // 注意跨窗竞态：隐藏轨道窗的 storage 监听会抢先迁移（写 gewu-theme），
-  // 故删 gewu 后需等竞态窗口再补写 legacy，保证 reload 时「只有 legacy 有值」。
-  await evalJSRetry(client, `(() => { localStorage.removeItem('gewu-theme'); localStorage.setItem('biof3-theme', 'dark'); localStorage.removeItem('theme'); return true; })()`);
+  const origTheme = await evalJSRetry(client, `localStorage.getItem('petri-theme') || localStorage.getItem('petri-theme') || 'light'`);
+  // 用户级契约：仅存历史 key（petri-theme=dark）时，升级后主题偏好不丢。
+  // 注意跨窗竞态：隐藏轨道窗的 storage 监听会抢先迁移（写 petri-theme），
+  // 故删 petri 后需等竞态窗口再补写 legacy，保证 reload 时「只有 legacy 有值」。
+  await evalJSRetry(client, `(() => { localStorage.removeItem('petri-theme'); localStorage.setItem('petri-theme', 'dark'); localStorage.removeItem('theme'); return true; })()`);
   await delay(600);
-  await evalJSRetry(client, `(() => { localStorage.setItem('biof3-theme', 'dark'); return true; })()`);
+  await evalJSRetry(client, `(() => { localStorage.setItem('petri-theme', 'dark'); return true; })()`);
   await evalJSRetry(client, `location.reload(); 'reloading'`);
   await delay(4500);
   const client2 = await reconnectMain();
@@ -131,29 +131,29 @@ async function main() {
     await delay(800);
     migration = await evalJS(client2, `(() => ({
       resolved: document.documentElement.getAttribute('data-theme'),
-      gewuKey: localStorage.getItem('gewu-theme'),
-      legacyGone: localStorage.getItem('biof3-theme') === null,
+      petriKey: localStorage.getItem('petri-theme'),
+      legacyGone: localStorage.getItem('petri-theme') === null,
     }))()`).catch(() => null);
     if (migration?.resolved === 'dark') break;
   }
-  assert('历史主题偏好不丢：仅存 biof3-theme=dark 时升级后仍为 dark',
+  assert('历史主题偏好不丢：仅存 petri-theme=dark 时升级后仍为 dark',
     migration?.resolved === 'dark', JSON.stringify(migration));
-  results.themeMigrationDetail = migration; // gewuKey/legacyGone 为实现细节（跨窗竞态下不做强断言）
+  results.themeMigrationDetail = migration; // petriKey/legacyGone 为实现细节（跨窗竞态下不做强断言）
   await screenshot(client2, path.join(EVIDENCE_DIR, 'p61-01-dark.png'));
 
-  // 4) 主题切换（gewu:theme-change 事件链）
+  // 4) 主题切换（petri:theme-change 事件链）
   await evalJSRetry(client, `(() => {
-    window.dispatchEvent(new CustomEvent('gewu:theme-change', { detail: { preference: 'light' } }));
+    window.dispatchEvent(new CustomEvent('petri:theme-change', { detail: { preference: 'light' } }));
     return true;
   })()`);
   await delay(600);
   const themeNow = await evalJSRetry(client2, `document.documentElement.getAttribute('data-theme')`);
-  assert('gewu:theme-change 事件链生效（切 light）', themeNow === 'light', themeNow);
+  assert('petri:theme-change 事件链生效（切 light）', themeNow === 'light', themeNow);
   await screenshot(client2, path.join(EVIDENCE_DIR, 'p61-02-light.png'));
 
   // 预清理：历史运行残留的弹出条目
   await evalJSRetry(client2, `(async () => {
-    const wm = window.gewu?.windowManager ?? window.biof3Desktop?.windowManager;
+    const wm = window.petri?.windowManager ?? window.petriDesktop?.windowManager;
     if (!wm) return false;
     const snap = await wm.snapshot();
     for (const entry of (snap?.snapshot?.entries || [])) {
@@ -182,25 +182,25 @@ async function main() {
     const contentKey = `${picked.jobId}:${picked.artifactName}`;
     const contentId = `result:${contentKey}`;
     // 经兼容别名调用（证明旧调用面零破坏）
-    const pop = await evalJSRetry(client2, `window.biof3Desktop.windowManager.popOut('result', ${JSON.stringify(contentKey)})`);
+    const pop = await evalJSRetry(client2, `window.petriDesktop.windowManager.popOut('result', ${JSON.stringify(contentKey)})`);
     assert('窗口管理器经兼容别名可用（popOut created）', pop?.ok && pop?.action === 'created', JSON.stringify(pop));
     await pollTarget('/window/result/');
     const hits = await pollTarget('/window/result/');
     const popClient = await new CdpClient(hits[0].webSocketDebuggerUrl).connect();
     await delay(1500);
     const popTitle = await evalJSRetry(popClient, `(() => ({ title: document.title, shellText: (document.querySelector('[class*=title]') || {}).textContent || null }))()`);
-    assert('弹出窗 document.title = Gewu', popTitle?.title === 'Gewu', JSON.stringify(popTitle));
+    assert('弹出窗 document.title = Petri', popTitle?.title === 'Petri', JSON.stringify(popTitle));
     assert('弹出窗内容正常（WindowShell 标题非空）', !!popTitle?.shellText, JSON.stringify(popTitle));
     await screenshot(popClient, path.join(EVIDENCE_DIR, 'p61-03-popout.png'));
-    await evalJSRetry(client2, `window.gewu.windowManager.minimizeToRail(${JSON.stringify(contentId)})`);
-    await evalJSRetry(client2, `window.gewu.windowManager.remove(${JSON.stringify(contentId)})`);
+    await evalJSRetry(client2, `window.petri.windowManager.minimizeToRail(${JSON.stringify(contentId)})`);
+    await evalJSRetry(client2, `window.petri.windowManager.remove(${JSON.stringify(contentId)})`);
   } else {
     assert('弹出窗场景（无可用作业，跳过）', false, 'no job');
   }
 
   // 恢复原主题
   await evalJSRetry(client2, `(() => {
-    window.dispatchEvent(new CustomEvent('gewu:theme-change', { detail: { preference: ${JSON.stringify(origTheme)} } }));
+    window.dispatchEvent(new CustomEvent('petri:theme-change', { detail: { preference: ${JSON.stringify(origTheme)} } }));
     return true;
   })()`);
 

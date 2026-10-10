@@ -110,7 +110,7 @@ export function useEndpointProfilesEditor(): {
   }, [modelProfiles]);
 
   async function loadSettings() {
-    // BLOCK-87 L4-2 收尾：走 getBridge 而非直引 window.biof3Desktop——投影
+    // BLOCK-87 L4-2 收尾：走 getBridge 而非直引 window.petriDesktop——投影
     // 环境下切 HTTP 桥（直引经 shim Proxy 拿到 undefined 会 TypeError）。
     const settingsBridge = getBridge('aiSettings');
     if (!settingsBridge) return;
@@ -388,7 +388,7 @@ export function useEndpointProfilesEditor(): {
       ? exportEndpointProfilesJson(userModelProfiles, apiKeys)
       : exportEndpointProfilesCsv(userModelProfiles, apiKeys);
     downloadEndpointFile(
-      `gewu-api-endpoints.${format}`,
+      `petri-api-endpoints.${format}`,
       content,
       format === 'json' ? 'application/json;charset=utf-8' : 'text/csv;charset=utf-8'
     );

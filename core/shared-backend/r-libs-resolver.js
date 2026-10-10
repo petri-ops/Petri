@@ -5,8 +5,8 @@ const path = require('path');
 
 // Shared R_LIBS_USER resolver for plugin R scripts.
 //
-// Both the HTTP executor (core/biof3-server/helpers/tools-executor.js) and the MCP
-// registry (core/biof3-server/mcp/registry.js) need to assemble the same three-tier
+// Both the HTTP executor (core/petri-server/helpers/tools-executor.js) and the MCP
+// registry (core/petri-server/mcp/registry.js) need to assemble the same three-tier
 // R library search path before spawning Rscript for a plugin. This module is
 // the single source of truth for that logic so the two call sites cannot drift
 // (audit AUDIT-LOG §3 problem A: ~25 lines duplicated across both files).
@@ -81,14 +81,14 @@ function resolveRLibsForPlugin(pluginCfg) {
   }
 
   // 3. R home library.
-  const rHomeLib = path.join(process.env.BIOF3_R_HOME || '', 'library');
+  const rHomeLib = path.join(process.env.PETRI_R_HOME || '', 'library');
   if (fs.existsSync(rHomeLib)) rLibsParts.push(rHomeLib);
 
   if (rLibsParts.length === 0) return null;
 
   return {
     ...process.env,
-    R_HOME: process.env.BIOF3_R_HOME || process.env.R_HOME,
+    R_HOME: process.env.PETRI_R_HOME || process.env.R_HOME,
     // R uses ';' as the library path separator on Windows and ':' on POSIX.
     R_LIBS_USER: rLibsParts.join(path.delimiter),
   };

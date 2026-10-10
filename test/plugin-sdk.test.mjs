@@ -6,7 +6,7 @@ import test from 'node:test';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const pluginLoader = require('../core/biof3-server/plugin-loader.js');
+const pluginLoader = require('../core/petri-server/plugin-loader.js');
 const { inspectPluginSources } = require('../core/shared-backend/plugin-sdk.js');
 
 function writePlugin(root, id, options = {}) {
@@ -39,7 +39,7 @@ function inspect(sources) {
 }
 
 test('Plugin SDK discovers built-in, installed, and development sources with explicit precedence', () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-plugin-sdk-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-plugin-sdk-'));
   try {
     const builtin = path.join(tmp, 'builtin');
     const installed = path.join(tmp, 'installed');
@@ -66,7 +66,7 @@ test('Plugin SDK discovers built-in, installed, and development sources with exp
 });
 
 test('builtin-canonical blocks installed shadowing but allows explicit development override', () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-plugin-sdk-canonical-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-plugin-sdk-canonical-'));
   try {
     const builtin = path.join(tmp, 'builtin');
     const installed = path.join(tmp, 'installed');
@@ -103,7 +103,7 @@ test('builtin-canonical blocks installed shadowing but allows explicit developme
 });
 
 test('Plugin SDK returns structured diagnostics for incomplete plugins', () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-plugin-sdk-invalid-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-plugin-sdk-invalid-'));
   try {
     writePlugin(tmp, 'broken-tool', { script: false });
     const result = inspect([{ type: 'development', root: tmp }]);
@@ -120,7 +120,7 @@ test('Plugin SDK returns structured diagnostics for incomplete plugins', () => {
 });
 
 test('Plugin SDK rejects duplicate failure modes before normalization hides them', () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-plugin-sdk-duplicate-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-plugin-sdk-duplicate-'));
   try {
     writePlugin(tmp, 'duplicate-tool', {
       toolDefinition: {

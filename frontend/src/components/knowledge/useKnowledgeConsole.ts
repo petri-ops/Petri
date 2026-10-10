@@ -16,9 +16,9 @@ import {
   getConversationMessages,
   type ConversationMessage,
 } from '@/components/copilot/copilotConversationsClient';
-import { dispatchGewuEvent, gewuEvents } from '@/lib/events';
+import { dispatchPetriEvent, petriEvents } from '@/lib/events';
 
-const CONVERSATION_KEY = 'gewu_knowledge_console_conv';
+const CONVERSATION_KEY = 'petri_knowledge_console_conv';
 const CONVERSATION_TITLE = '知识空间管理台';
 
 export type ConsoleEntryStatus = 'running' | 'success' | 'error';
@@ -142,7 +142,7 @@ export function useKnowledgeConsole() {
             localStorage.setItem(CONVERSATION_KEY, convId);
           } catch {}
           // UI-396 机制复用：新建会话广播，左栏会话列表即时刷新
-          dispatchGewuEvent(gewuEvents.conversationCreated, {
+          dispatchPetriEvent(petriEvents.conversationCreated, {
             conversationId: convId,
             title: CONVERSATION_TITLE,
             projectId: null,
@@ -227,7 +227,7 @@ export function useKnowledgeConsole() {
             MUTATING_TOOLS.has(e.name) &&
             !(data && typeof data === 'object' && (data as Record<string, unknown>).confirmationRequired === true)
           ) {
-            dispatchGewuEvent(gewuEvents.knowledgeConsoleSync);
+            dispatchPetriEvent(petriEvents.knowledgeConsoleSync);
           }
         },
         onDelta: (delta: string) => {

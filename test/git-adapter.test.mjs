@@ -8,7 +8,7 @@
  * 4. 已有 dirty Git 项目只修改显式目标
  * 5. Git 不可用时诚实阻断
  *
- * 全部使用临时目录中的真实 git 仓库；不访问网络、不读用户数据、不触碰 BioF3 仓库自身。
+ * 全部使用临时目录中的真实 git 仓库；不访问网络、不读用户数据、不触碰 Petri 仓库自身。
  */
 
 import assert from 'node:assert/strict';
@@ -30,17 +30,17 @@ const {
   redactGitDiagnostic,
 } = require('../core/shared-backend/git-adapter');
 const {
-  BIOF3_DIR,
+  PETRI_DIR,
   MANAGED_RELATIVE_PATHS,
   bindProjectRepository,
   inspectWorkspaceGit,
-  resolveBiof3MetadataLayout,
+  resolvePetriMetadataLayout,
 } = require('../core/shared-backend/git-repository-binding');
 
 const runtime = detectGitRuntime();
 const gitReady = runtime.available && runtime.meetsMinimum;
 
-function makeWorkspace(context, prefix = 'biof3-rs1-') {
+function makeWorkspace(context, prefix = 'petri-rs1-') {
   const root = mkdtempSync(join(tmpdir(), prefix));
   context.after(() => rmSync(root, { recursive: true, force: true }));
   return root;
@@ -146,14 +146,14 @@ test('RS1 blocks honestly when git is unavailable', (context) => {
   assert.equal(binding.mode, 'managed');
   assert.equal(binding.adapter, null);
   // 诚实阻断：绝不因 git 缺失而假装可以编辑。
-  assert.equal(existsSync(join(root, BIOF3_DIR, 'git', 'HEAD')), false);
+  assert.equal(existsSync(join(root, PETRI_DIR, 'git', 'HEAD')), false);
 });
 
 test('RS1 preserves process-level diagnostics for a failed Git invocation', (context) => {
   const root = makeWorkspace(context);
   const missingGit = join(root, 'definitely-not-git');
   const adapter = createGitAdapter({
-    gitDir: join(root, '.biof3/git'),
+    gitDir: join(root, '.petri/git'),
     workTree: root,
     gitBin: missingGit,
   });
@@ -195,9 +195,9 @@ test('RS1 blocks when the workspace does not exist', (context) => {
 
 test('RS1 metadata layout stays anchored under the workspace', (context) => {
   const root = makeWorkspace(context);
-  const layout = resolveBiof3MetadataLayout(root);
-  assert.equal(layout.biof3Dir, join(root, '.biof3'));
-  assert.equal(layout.managedGitDir, join(root, '.biof3', 'git'));
+  const layout = resolvePetriMetadataLayout(root);
+  assert.equal(layout.petriDir, join(root, '.petri'));
+  assert.equal(layout.managedGitDir, join(root, '.petri', 'git'));
   for (const dir of [layout.revisionDir, layout.checkpointDir, layout.objectsDir]) {
     assert.equal(dir.startsWith(root), true);
   }
@@ -209,7 +209,7 @@ test('RS1 inspects a non-git workspace without writing anything', (context) => {
   assert.equal(inspection.workspaceExists, true);
   assert.equal(inspection.managed.exists, false);
   assert.equal(existsSync(join(root, '.git')), false);
-  assert.equal(existsSync(join(root, BIOF3_DIR)), false);
+  assert.equal(existsSync(join(root, PETRI_DIR)), false);
 });
 
 test('RS1 creates a managed repository and never git-inits the user directory', { skip: !gitReady }, (context) => {
@@ -219,8 +219,8 @@ test('RS1 creates a managed repository and never git-inits the user directory', 
   assert.equal(binding.status, 'ready');
   assert.equal(binding.mode, 'managed');
   assert.equal(binding.gitAdapterVersion, GIT_ADAPTER_VERSION);
-  // 托管：git 元数据在 .biof3/git，用户目录不出现 .git
-  assert.equal(existsSync(join(root, BIOF3_DIR, 'git', 'HEAD')), true);
+  // 托管：git 元数据在 .petri/git，用户目录不出现 .git
+  assert.equal(existsSync(join(root, PETRI_DIR, 'git', 'HEAD')), true);
   assert.equal(existsSync(join(root, '.git')), false);
   assert.equal(binding.repositoryState.unborn, true);
   assert.deepEqual(binding.managedPaths, [...MANAGED_RELATIVE_PATHS]);
@@ -286,8 +286,8 @@ test('RS1 creates isolation branches for change sets', { skip: !gitReady }, (con
   writeManagedScript(root, 'analysis/scripts/base.R', 'base\n');
   const base = adapter.commit({ message: 'RS1 test: base', paths: ['analysis/scripts/base.R'] });
 
-  adapter.createBranch({ name: 'biof3/changeset/cs_1', startPoint: base.commit });
-  assert.equal(adapter.revParse('refs/heads/biof3/changeset/cs_1'), base.commit);
+  adapter.createBranch({ name: 'petri/changeset/cs_1', startPoint: base.commit });
+  assert.equal(adapter.revParse('refs/heads/petri/changeset/cs_1'), base.commit);
   throwsWithCode(() => adapter.createBranch({ name: '--dangerous' }), 'branch_name_invalid');
 });
 
@@ -297,7 +297,7 @@ test('RS5 creates an isolated virtual commit without touching the work tree', { 
   const adapter = binding.adapter;
   writeManagedScript(root, 'analysis/scripts/base.R', 'base\n');
   const base = adapter.commit({ message: 'RS5 base', paths: ['analysis/scripts/base.R'] });
-  const ref = 'refs/heads/biof3/changeset/cs_virtual';
+  const ref = 'refs/heads/petri/changeset/cs_virtual';
   const candidate = adapter.commitVirtualFiles({
     parentCommit: base.commit,
     ref,
@@ -322,7 +322,7 @@ test('RS5 virtual ref update fails closed on a concurrent ref change', { skip: !
   const root = makeWorkspace(context);
   const binding = bindProjectRepository({ workspaceRoot: root, projectId: 'project_rs5_race' });
   const adapter = binding.adapter;
-  const ref = 'refs/heads/biof3/changeset/cs_race';
+  const ref = 'refs/heads/petri/changeset/cs_race';
   const first = adapter.commitVirtualFiles({
     ref,
     expectedOld: '0'.repeat(40),
@@ -344,20 +344,20 @@ test('P6 atomic ref cohorts never expose a partially updated family set', { skip
   const root = makeWorkspace(context);
   const adapter = bindProjectRepository({ workspaceRoot: root, projectId: 'project_p6_ref_cohort' }).adapter;
   const first = adapter.commitVirtualFiles({
-    ref: 'refs/heads/biof3/main',
+    ref: 'refs/heads/petri/main',
     expectedOld: '0'.repeat(40),
     message: 'P6 ref cohort base',
     files: [{ path: 'analysis/scripts/ref-cohort/base.R', content: 'version <- 1\n' }],
   });
   const second = adapter.commitVirtualFiles({
     parentCommit: first.commit,
-    ref: 'refs/heads/biof3/changeset/ref-cohort',
+    ref: 'refs/heads/petri/changeset/ref-cohort',
     expectedOld: '0'.repeat(40),
     message: 'P6 ref cohort candidate',
     files: [{ path: 'analysis/scripts/ref-cohort/candidate.R', content: 'version <- 2\n' }],
   });
-  const familyA = 'refs/heads/biof3/current/family-a';
-  const familyB = 'refs/heads/biof3/current/family-b';
+  const familyA = 'refs/heads/petri/current/family-a';
+  const familyB = 'refs/heads/petri/current/family-b';
   adapter.updateRefsCas({ updates: [
     { ref: familyA, expectedOld: '0'.repeat(40), newOid: first.commit },
     { ref: familyB, expectedOld: '0'.repeat(40), newOid: first.commit },
@@ -394,13 +394,13 @@ test('RS1 binds a workspace inside a user repository as managed and never touche
 
   const binding = bindProjectRepository({ workspaceRoot: root, projectId: 'project_managed' });
 
-  // 绑定恒为 managed：托管仓库建在 .biof3/git，用户仓库不被二次 git-init、
-  // 不产生 biof3 分支、HEAD 与 WIP 原样保留
+  // 绑定恒为 managed：托管仓库建在 .petri/git，用户仓库不被二次 git-init、
+  // 不产生 petri 分支、HEAD 与 WIP 原样保留
   assert.equal(binding.status, 'ready');
   assert.equal(binding.mode, 'managed');
-  assert.equal(existsSync(join(root, BIOF3_DIR, 'git', 'HEAD')), true);
+  assert.equal(existsSync(join(root, PETRI_DIR, 'git', 'HEAD')), true);
   assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(), headBefore);
-  assert.equal(execFileSync('git', ['for-each-ref', '--format=%(refname)', 'refs/heads/biof3'], {
+  assert.equal(execFileSync('git', ['for-each-ref', '--format=%(refname)', 'refs/heads/petri'], {
     cwd: root,
     encoding: 'utf8',
   }).trim(), '');
@@ -420,7 +420,7 @@ test('RS1 blocks when the managed repository is mid-operation or index-locked', 
   const root = makeWorkspace(context);
   const first = bindProjectRepository({ workspaceRoot: root, projectId: 'project_managed' });
   assert.equal(first.status, 'ready');
-  const managedGitDir = join(root, BIOF3_DIR, 'git');
+  const managedGitDir = join(root, PETRI_DIR, 'git');
 
   writeFileSync(join(managedGitDir, 'index.lock'), '');
   const locked = bindProjectRepository({ workspaceRoot: root, projectId: 'project_managed' });
@@ -443,7 +443,7 @@ test('RS1 refuses to create a managed repository when creation is disabled', { s
   });
   assert.equal(binding.status, 'blocked_repository_state');
   assert.equal(binding.reason, 'managed_repository_absent');
-  assert.equal(existsSync(join(root, BIOF3_DIR, 'git', 'HEAD')), false);
+  assert.equal(existsSync(join(root, PETRI_DIR, 'git', 'HEAD')), false);
 });
 
 // ---------------------------------------------------------------------------
@@ -470,8 +470,8 @@ test('RS1 managed repository disables hooks', { skip: !gitReady }, (context) => 
   const hooksPath = binding.adapter.run(['config', '--get', 'core.hooksPath'], { allowFailure: true, readOnly: true });
   // -c 覆写不落配置文件，但必须指向一个不存在的目录
   const configured = hooksPath.ok ? hooksPath.stdout.trim() : '';
-  assert.equal(configured === '' || configured.includes('biof3-disabled-hooks'), true);
-  assert.equal(existsSync(join(root, BIOF3_DIR, 'git', 'biof3-disabled-hooks')), false);
+  assert.equal(configured === '' || configured.includes('petri-disabled-hooks'), true);
+  assert.equal(existsSync(join(root, PETRI_DIR, 'git', 'petri-disabled-hooks')), false);
 });
 
 // ---------------------------------------------------------------------------
@@ -481,7 +481,7 @@ test('RS1 managed repository disables hooks', { skip: !gitReady }, (context) => 
 // ---------------------------------------------------------------------------
 
 test('BLOCK-20 listModified returns tracked and untracked entries', { skip: !gitReady }, (context) => {
-  const root = makeWorkspace(context, 'biof3-b20-');
+  const root = makeWorkspace(context, 'petri-b20-');
   initUserRepository(root);
   writeFileSync(join(root, 'new-file.txt'), 'untracked\n');
   writeFileSync(join(root, 'README.md'), '# user project v2\n');
@@ -500,7 +500,7 @@ test('BLOCK-20 listModified returns tracked and untracked entries', { skip: !git
 });
 
 test('BLOCK-20 fileHeadContent returns HEAD content for tracked files', { skip: !gitReady }, (context) => {
-  const root = makeWorkspace(context, 'biof3-b20-');
+  const root = makeWorkspace(context, 'petri-b20-');
   initUserRepository(root);
   const adapter = createGitAdapter({ gitDir: join(root, '.git'), workTree: root });
   const result = adapter.fileHeadContent({ path: 'README.md' });
@@ -509,7 +509,7 @@ test('BLOCK-20 fileHeadContent returns HEAD content for tracked files', { skip: 
 });
 
 test('BLOCK-20 fileHeadContent returns null for untracked files', { skip: !gitReady }, (context) => {
-  const root = makeWorkspace(context, 'biof3-b20-');
+  const root = makeWorkspace(context, 'petri-b20-');
   initUserRepository(root);
   writeFileSync(join(root, 'fresh.txt'), 'fresh\n');
   const adapter = createGitAdapter({ gitDir: join(root, '.git'), workTree: root });
@@ -519,7 +519,7 @@ test('BLOCK-20 fileHeadContent returns null for untracked files', { skip: !gitRe
 });
 
 test('BLOCK-20 splitSideDiff returns unified diff + both contents', { skip: !gitReady }, (context) => {
-  const root = makeWorkspace(context, 'biof3-b20-');
+  const root = makeWorkspace(context, 'petri-b20-');
   initUserRepository(root);
   writeFileSync(join(root, 'README.md'), '# user project v2\n- new line\n');
   const adapter = createGitAdapter({ gitDir: join(root, '.git'), workTree: root });
@@ -533,7 +533,7 @@ test('BLOCK-20 splitSideDiff returns unified diff + both contents', { skip: !git
 });
 
 test('BLOCK-20 revertFile rolls back working tree to HEAD', { skip: !gitReady }, (context) => {
-  const root = makeWorkspace(context, 'biof3-b20-');
+  const root = makeWorkspace(context, 'petri-b20-');
   initUserRepository(root);
   writeFileSync(join(root, 'README.md'), '# MUTATED\n');
   const adapter = createGitAdapter({ gitDir: join(root, '.git'), workTree: root });
@@ -553,7 +553,7 @@ test('BLOCK-20 applyInverseHunk validates input', () => {
 });
 
 test('BLOCK-20 applyInverseHunk rejects a real working-tree change', { skip: !gitReady }, (context) => {
-  const root = makeWorkspace(context, 'biof3-b20-');
+  const root = makeWorkspace(context, 'petri-b20-');
   initUserRepository(root);
   // 修改 README 的 line 1（让 git diff 输出 -old / +new hunk）
   writeFileSync(join(root, 'README.md'), '# user project MUTATED\n');
@@ -570,7 +570,7 @@ test('BLOCK-20 applyInverseHunk rejects a real working-tree change', { skip: !gi
 });
 
 test('BLOCK-20 listModified validates paths are safe', { skip: !gitReady }, (context) => {
-  const root = makeWorkspace(context, 'biof3-b20-');
+  const root = makeWorkspace(context, 'petri-b20-');
   initUserRepository(root);
   const adapter = createGitAdapter({ gitDir: join(root, '.git'), workTree: root });
   throwsWithCode(
@@ -588,7 +588,7 @@ test('BLOCK-20 listModified validates paths are safe', { skip: !gitReady }, (con
 // assertSafePathspecs 拒绝（pathspec_required），真实 IPC 链路所有提交差异恒为空，
 // 前端误显示「该提交没有可显示的文件差异」。
 test('UI-232 two-ref range diff works without pathspecs; working-tree diff stays strict', { skip: !gitReady }, (context) => {
-  const root = makeWorkspace(context, 'biof3-ui232-');
+  const root = makeWorkspace(context, 'petri-ui232-');
   const gitDir = join(root, '.git');
   const git = (args) => execFileSync('git', ['-C', root, ...args], { encoding: 'utf8' });
   git(['init', '--quiet']);

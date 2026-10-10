@@ -4,7 +4,7 @@
   "phase": "P4 实机收口",
   "capturedAt": "2026-09-01T01:40:00Z",
   "sourceCommitBase": "96996a3（原 c3baf6b，P4 收口时 amend 补 UI-263 编号，内容不变）",
-  "environment": "dev Electron (CDP 9222) + biof3-server (spawn 后端，验证中因 P4 缺陷修复重启一次)",
+  "environment": "dev Electron (CDP 9222) + petri-server (spawn 后端，验证中因 P4 缺陷修复重启一次)",
   "project": "desktop (p_mt15b0aw_f0xa, workspace = 应用仓库本体，审阅 adapter 绑定仓库)",
   "model": "DeepSeek deepseek-v4-flash-vision-exp（openai-compatible preset，真实 agent task）",
   "scenarios": [
@@ -44,7 +44,7 @@
   },
   "observations": [
     "会话归属索引（conversationChangesStore）为内存态：页面 reload 后历史会话的「本会话改动」索引丢失，回退全量视图；仅当 localStorage 存有该会话未完成任务 key 时经任务事件重放重建（B 会话即如此恢复，A 会话回退全量）。权威清单已持久化于 tasks.files_changed_json，候选改进：挂载时按会话从后端水合归属索引（需后端提供 task→conversation 查询；loop_runs 对 task 模式任务未落行，不能直接复用）。登记 roadmap 候选待用户裁决，不在本包扩权。",
-    "localStorage 残留 biof3_agent_task_* 孤儿 key（[DONE] 未到达/流中断时不清理），resubscribe 以 conversationId+projectId 过滤避免误恢复，无功能性影响；属存量卫生项。"
+    "localStorage 残留 petri_agent_task_* 孤儿 key（[DONE] 未到达/流中断时不清理），resubscribe 以 conversationId+projectId 过滤避免误恢复，无功能性影响；属存量卫生项。"
   ],
   "screenshots": [
     "b-conversation-scope.png（S2：B 会话本会话改动只含 b.txt）",

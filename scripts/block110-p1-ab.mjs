@@ -8,7 +8,7 @@
  * 指标：一致率（双方均 decided）、各自 vs 标签 accuracy、延迟 P50/P95、成本（token/估算）。
  * 证据：acceptance/block-110/p1-ab.json。
  *
- * 前置：BIOF3_DB_PATH 指向 dev 库（大模型路径读 ai-settings）+ jev.env 已 source（Jev key）。
+ * 前置：PETRI_DB_PATH 指向 dev 库（大模型路径读 ai-settings）+ jev.env 已 source（Jev key）。
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -19,11 +19,11 @@ const require = createRequire(import.meta.url);
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
 
-process.env.BIOF3_DB_PATH = process.env.BIOF3_DB_PATH
-  || path.join(root, '.biof3-dev-user-data', 'data', 'biof3.db');
+process.env.PETRI_DB_PATH = process.env.PETRI_DB_PATH
+  || path.join(root, '.petri-dev-user-data', 'data', 'petri.db');
 
-const decisionApi = require(path.join(root, 'core', 'biof3-server', 'helpers', 'decision-api.js'));
-const modelTasks = require(path.join(root, 'core', 'biof3-server', 'helpers', 'model-tasks.js'));
+const decisionApi = require(path.join(root, 'core', 'petri-server', 'helpers', 'decision-api.js'));
+const modelTasks = require(path.join(root, 'core', 'petri-server', 'helpers', 'model-tasks.js'));
 
 const SAMPLES_N = Number(process.env.BLOCK110_AB_N || 100);
 const CONCURRENCY = Number(process.env.BLOCK110_AB_CONCURRENCY || 4);
@@ -147,7 +147,7 @@ const legacyDecided = rows.filter((r) => r.legacy.decided);
 const legacyCorrect = legacyDecided.filter((r) => r.legacy.shifted === r.label).length;
 
 const summary = {
-  schema: 'biof3/block110-p1-ab.v1',
+  schema: 'petri/block110-p1-ab.v1',
   generatedAt: new Date().toISOString(),
   model: decisionApi.DEFAULT_MODEL || 'jev-1.13.0',
   samples: rows.length,

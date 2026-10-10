@@ -10,7 +10,7 @@
  * or complete Provider responses.
  *
  * Usage (live, manual):
- *   source .biof3-secrets
+ *   source .petri-secrets
  *   npm run harness:workspace-provider-eval
  *
  * Required live configuration:
@@ -44,11 +44,11 @@ const MAX_TOOL_CALLS = 12;
 const providerModule = require(path.join(REPO_ROOT, 'core/shared-backend/llm-providers/index.js'));
 const { ModelGateway, getProvider } = providerModule;
 const aiUsageHelper = require(path.join(REPO_ROOT, 'core/shared-backend/ai-usage-helper.js'));
-const { WORKSPACE_TOOL_DEFS } = require(path.join(REPO_ROOT, 'core/biof3-server/agent-tools/tool-defs.js'));
-const { createWorkspaceTools } = require(path.join(REPO_ROOT, 'core/biof3-server/agent-tools/workspace-tools.js'));
-const { dispatchTool } = require(path.join(REPO_ROOT, 'core/biof3-server/agent-tools/index.js'));
-const { inferExecutionPolicy } = require(path.join(REPO_ROOT, 'core/biof3-server/helpers/agent-execution-policy.js'));
-const { appendDesktopAgentInstructions } = require(path.join(REPO_ROOT, 'core/biof3-server/helpers/desktop-agent-prompt.js'));
+const { WORKSPACE_TOOL_DEFS } = require(path.join(REPO_ROOT, 'core/petri-server/agent-tools/tool-defs.js'));
+const { createWorkspaceTools } = require(path.join(REPO_ROOT, 'core/petri-server/agent-tools/workspace-tools.js'));
+const { dispatchTool } = require(path.join(REPO_ROOT, 'core/petri-server/agent-tools/index.js'));
+const { inferExecutionPolicy } = require(path.join(REPO_ROOT, 'core/petri-server/helpers/agent-execution-policy.js'));
+const { appendDesktopAgentInstructions } = require(path.join(REPO_ROOT, 'core/petri-server/helpers/desktop-agent-prompt.js'));
 
 // Live acceptance must not write usage records to the user's database.
 aiUsageHelper.configure({ recordAiUsage: () => {} });
@@ -160,7 +160,7 @@ async function loadFixture() {
 }
 
 async function createSandbox(fixture, targetName) {
-  const sandboxRoot = await fs.mkdtemp(path.join(os.tmpdir(), `biof3-p7-${targetName.replace(/[^a-z0-9-]/gi, '-')}-`));
+  const sandboxRoot = await fs.mkdtemp(path.join(os.tmpdir(), `petri-p7-${targetName.replace(/[^a-z0-9-]/gi, '-')}-`));
   const workspaceRoot = path.join(sandboxRoot, 'workspace');
   await fs.mkdir(workspaceRoot, { recursive: true });
   for (const file of fixture.workspace.files) {
@@ -269,7 +269,7 @@ async function executeToolCall(name, args, ctx, handlers) {
 async function runAgentCase(target, item, handlers) {
   const gateway = makeGateway(target);
   const systemPrompt = appendDesktopAgentInstructions(
-    'You are the BioF3 Desktop project agent. Use the available project tools when the user asks you to inspect or operate on project files. Only claim outcomes supported by tool results.'
+    'You are the Petri Desktop project agent. Use the available project tools when the user asks you to inspect or operate on project files. Only claim outcomes supported by tool results.'
   );
   const messages = [
     { role: 'system', content: systemPrompt },

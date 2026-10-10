@@ -34,7 +34,7 @@ function setupAiSettingsIpc(options = {}) {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const { getAiSettings } = require(
-        resolveCore("biof3-server", "helpers", "ai-settings.js"),
+        resolveCore("petri-server", "helpers", "ai-settings.js"),
       );
       return getAiSettings();
     } catch {
@@ -46,7 +46,7 @@ function setupAiSettingsIpc(options = {}) {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const { saveAiSettings } = require(
-        resolveCore("biof3-server", "helpers", "ai-settings.js"),
+        resolveCore("petri-server", "helpers", "ai-settings.js"),
       );
       saveAiSettings(settings);
       return { ok: true };
@@ -59,7 +59,7 @@ function setupAiSettingsIpc(options = {}) {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const { getApiKey } = require(
-        resolveCore("biof3-server", "helpers", "ai-settings.js"),
+        resolveCore("petri-server", "helpers", "ai-settings.js"),
       );
       const apiKey = getApiKey(String(credentialId || ""));
       return { ok: true, apiKey };
@@ -72,7 +72,7 @@ function setupAiSettingsIpc(options = {}) {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const { testApiKey } = require(
-        resolveCore("biof3-server", "helpers", "ai-settings.js"),
+        resolveCore("petri-server", "helpers", "ai-settings.js"),
       );
       return await testApiKey(providerOrProfile, apiKey);
     } catch (e) {
@@ -84,7 +84,7 @@ function setupAiSettingsIpc(options = {}) {
     const deny = assertSender(event); if (deny) return deny;
     try {
       const { listAvailableModels } = require(
-        resolveCore("biof3-server", "helpers", "ai-settings.js"),
+        resolveCore("petri-server", "helpers", "ai-settings.js"),
       );
       return await listAvailableModels(providerOrProfile, apiKey);
     } catch (e) {

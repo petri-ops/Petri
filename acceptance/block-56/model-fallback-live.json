@@ -103,7 +103,7 @@
         "baseUrl": "http://127.0.0.1:59156"
       }
     ],
-    "dbPath": "tmp(biof3-block56-live-*)/live.db"
+    "dbPath": "tmp(petri-block56-live-*)/live.db"
   },
   "finishedAt": "2026-09-04T01:39:29.211Z",
   "allPass": true

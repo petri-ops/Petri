@@ -10,9 +10,9 @@
  */
 const fs = require('node:fs');
 const path = require('node:path');
-const Database = require(path.join(__dirname, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
+const Database = require(path.join(__dirname, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
 
-const DB_FILE = process.env.BIOF3_DB_PATH || path.join(__dirname, '..', '.biof3-dev-user-data', 'data', 'biof3.db');
+const DB_FILE = process.env.PETRI_DB_PATH || path.join(__dirname, '..', '.petri-dev-user-data', 'data', 'petri.db');
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-95');
 const CACHE_CAPABLE = /deepseek|anthropic|claude|openai|glm|kimi|qwen/i;
 

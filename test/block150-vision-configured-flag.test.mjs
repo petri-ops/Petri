@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-const { computeVisionConfigured } = await import('../core/biof3-server/routes/ai-settings-api.js');
+const { computeVisionConfigured } = await import('../core/petri-server/routes/ai-settings-api.js');
 
 test('BLOCK-150 加映 — vision_configured 能力位三态（注入 getCredential 判据）', () => {
   const settings = {

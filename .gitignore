@@ -1,9 +1,13 @@
 # Dependencies
 node_modules/
+.petri-dev-user-data/
+.petri-test-user-data/
+.petri-test-instance.log
+.petri-test-instance.err.log
+# BLOCK-165 改名前旧名运行时数据：留在本机回溯（D3），不入库
 .biof3-dev-user-data/
 .biof3-test-user-data/
-.biof3-test-instance.log
-.biof3-test-instance.err.log
+core/petri-server/biof3.db*
 
 # Build output
 dist/
@@ -30,7 +34,7 @@ tsconfig.tsbuildinfo
 *.log
 .env
 .env.local
-.biof3-secrets
+.petri-secrets
 
 # IDE
 .vscode/
@@ -52,13 +56,13 @@ eval-reports/
 # Kiro local agent hooks/settings (machine-local, not shared)
 .kiro/
 
-# Absorbed core (formerly vendor/biof3-core submodule) — runtime/generated files.
+# Absorbed core (formerly vendor/petri-core submodule) — runtime/generated files.
 # node_modules/ and *.log are already ignored globally above; these are the
 # core-specific dev databases, caches, backups, and large demo datasets.
-core/r-server/biof3.db*
+core/r-server/petri.db*
 # BLOCK-109 P0 卫生清偿（2026-09-21）：运行时数据库整体退库（含 -shm/-wal），
 # 此前仅 shm/wal 被忽略、主库文件曾被误跟踪入库
-core/biof3-server/biof3.db*
+core/petri-server/petri.db*
 core/r-server/.tmp/
 core/r-server/backups/
 core/py-server/pyserver.db*
@@ -80,8 +84,8 @@ resources/built-in-plugins/**/*.pyc
 # Trae IDE 本地文档/会话产物（机器本地，非项目源码）
 .trae/
 
-# 根级 dev SQLite（桌面主库在 core/biof3-server/biof3.db，见上方 core 条目）
-/core/biof3.db*
+# 根级 dev SQLite（桌面主库在 core/petri-server/petri.db，见上方 core 条目）
+/core/petri.db*
 
 # 实机验收探针截图等本地图形草稿（正式证据在 acceptance/ 下）
 /figures/
@@ -96,8 +100,8 @@ sidecars/computer-use-windows/bin/
 sidecars/computer-use-windows/obj/
 sidecars/computer-use-windows/axfixture/bin/
 sidecars/computer-use-windows/axfixture/obj/
-.biof3-isolated*/
-.biof3-tmp-*
+.petri-isolated*/
+.petri-tmp-*
 
 # CodeBuddy 项目级配置：只有 skills 发现桥入库，会话/缓存等运行时数据不入库
 .codebuddy/*

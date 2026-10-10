@@ -34,7 +34,7 @@ const ALLOWED_OPEN_EXTENSIONS = Object.freeze([
   // Documents & archives
   ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
   ".zip", ".tar", ".gz", ".bz2", ".xz", ".rar",
-  // Genomics / Gewu domain
+  // Genomics / Petri domain
   ".h5ad", ".loom", ".mtx", ".h5", ".rds", ".rdata",
   ".maf", ".vcf", ".bed", ".gtf", ".gff", ".fasta", ".fa", ".fastq", ".fq",
 ]);
@@ -317,7 +317,7 @@ function setupFileDialogIpc({ mainWindow } = {}) {
           return { ok: false, error: "url origin not allowed" };
         }
         // ssh/远程：先拉到临时文件（用户仍按住鼠标；下载完成即接管拖拽）
-        const tempDir = path.join(app.getPath("temp"), "gewu-dragout");
+        const tempDir = path.join(app.getPath("temp"), "petri-dragout");
         fs.mkdirSync(tempDir, { recursive: true });
         filePath = path.join(tempDir, `${Date.now()}-${name}`);
         await new Promise((resolve, reject) => {

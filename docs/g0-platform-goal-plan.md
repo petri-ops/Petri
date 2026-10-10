@@ -111,7 +111,7 @@ Artifact Truth 读取时自愈、provenance 全链留痕、取消升级链、无
 | # | 事项 | 裁决点 |
 | --- | --- | --- |
 | PL-D1 | 独立结果页 `/project/:id/results` 处置 | 退役（深链跳工作区）vs 升级为工作区组件宿主 |
-| PL-D2 | retention 默认策略数值 | tool_jobs/桌面 results 保留多久、超限动作（归档 vs 删除）。2026-10-08 已裁决 30 天删除（主代理按推荐代裁，用户批量推进授权；先例=task_events 30 天）——BLOCK-149 落地：BIOF3_TOOL_JOBS_RETENTION_DAYS 缺省 30（显式 env 覆盖语义不变，0/负数=显式关闭，非法值 fail-closed 关闭）；桌面 results 域与归档 vs 删除细分仍留后续裁决 |
+| PL-D2 | retention 默认策略数值 | tool_jobs/桌面 results 保留多久、超限动作（归档 vs 删除）。2026-10-08 已裁决 30 天删除（主代理按推荐代裁，用户批量推进授权；先例=task_events 30 天）——BLOCK-149 落地：PETRI_TOOL_JOBS_RETENTION_DAYS 缺省 30（显式 env 覆盖语义不变，0/负数=显式关闭，非法值 fail-closed 关闭）；桌面 results 域与归档 vs 删除细分仍留后续裁决 |
 | PL-D3 | token 替代方案 | 请求头（需改下载链路）vs 短期签名 URL |
 | PL-D4 | 队列深度上限与排队超时行为 | 超限拒绝 or 降级提示 |
 

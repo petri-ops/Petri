@@ -41,7 +41,7 @@ describe('terminal-themes', () => {
     expect(TERMINAL_THEMES.dark.foreground).not.toBe(TERMINAL_THEMES.light.foreground);
   });
 
-  it('keeps the dark terminal on the Gewu surface and accent palette', () => {
+  it('keeps the dark terminal on the Petri surface and accent palette', () => {
     expect(TERMINAL_THEMES.dark.background).toBe('#111a2e');
     expect(TERMINAL_THEMES.dark.foreground).toBe('#e6edf3');
     expect(TERMINAL_THEMES.dark.cursor).toBe('#2dd4bf');

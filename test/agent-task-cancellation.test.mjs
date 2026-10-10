@@ -5,11 +5,11 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import test from 'node:test';
 
-const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-agent-cancel-'));
-process.env.BIOF3_DB_PATH = path.join(tempDir, 'agent-tasks.db');
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-agent-cancel-'));
+process.env.PETRI_DB_PATH = path.join(tempDir, 'agent-tasks.db');
 
 const require = createRequire(import.meta.url);
-const store = require('../core/biof3-server/agent-task-store');
+const store = require('../core/petri-server/agent-task-store');
 
 test.after(() => {
   // Windows: better-sqlite3 仍持有 DB 文件句柄，rmdir 会 EPERM —— best-effort 清理，不阻断套件

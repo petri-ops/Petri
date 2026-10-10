@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
-const coreServerRoot = path.join(root, 'core', 'biof3-server');
+const coreServerRoot = path.join(root, 'core', 'petri-server');
 const req = createRequire(path.join(coreServerRoot, 'package.json'));
 const Database = req('better-sqlite3');
 
@@ -25,20 +25,20 @@ import configHelper from '../core/shared-backend/config-helper.js';
 const { getBusyTimeout, setDbConfig, getDbConfig } = configHelper;
 
 function mkTmp() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-agent-task-'));
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'petri-agent-task-'));
 }
 
 test('E-019.1 agent-task-store reads busy_timeout from getBusyTimeout()', (t) => {
   const tmp = mkTmp();
-  process.env.BIOF3_BETTER_SQLITE3_ROOT = coreServerRoot;
+  process.env.PETRI_BETTER_SQLITE3_ROOT = coreServerRoot;
   // agent-task-store reads config.dbPath for its target file path. We
-  // intercept it via BIOF3_DB_PATH env so we can keep the rest of the
-  // biof3-server config untouched.
-  process.env.BIOF3_DB_PATH = path.join(tmp, 'agent-task-store.db');
+  // intercept it via PETRI_DB_PATH env so we can keep the rest of the
+  // petri-server config untouched.
+  process.env.PETRI_DB_PATH = path.join(tmp, 'agent-task-store.db');
 
   t.after(() => {
-    delete process.env.BIOF3_BETTER_SQLITE3_ROOT;
-    delete process.env.BIOF3_DB_PATH;
+    delete process.env.PETRI_BETTER_SQLITE3_ROOT;
+    delete process.env.PETRI_DB_PATH;
     setDbConfig({ busyTimeoutMs: 10000 });
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {}
   });
@@ -53,17 +53,17 @@ test('E-019.1 agent-task-store reads busy_timeout from getBusyTimeout()', (t) =>
   // not exported; verify the override flowed through by reading the source
   // (E-019.2 already asserts no hardcode) and by applying the same pragma
   // to a fresh open against the same file with the same override in scope.
-  const agentTaskStorePath = path.resolve(root, 'core/biof3-server/agent-task-store.js');
+  const agentTaskStorePath = path.resolve(root, 'core/petri-server/agent-task-store.js');
   delete req.cache[req.resolve(agentTaskStorePath)];
   const mod = req(agentTaskStorePath);
   assert.ok(mod && typeof mod === 'object', 'agent-task-store must load without error');
 
   // Open a probe connection against the SAME file the module opened
-  // (BIOF3_DB_PATH) and apply the same pragma chain the module applies.
+  // (PETRI_DB_PATH) and apply the same pragma chain the module applies.
   // This proves that a fresh open with the current override produces the
   // expected busy_timeout — i.e. that the override path used by the
   // module is the canonical one.
-  const probe = new Database(process.env.BIOF3_DB_PATH);
+  const probe = new Database(process.env.PETRI_DB_PATH);
   probe.pragma('journal_mode = WAL');
   probe.pragma(`busy_timeout = ${getBusyTimeout()}`);
   assert.strictEqual(
@@ -76,7 +76,7 @@ test('E-019.1 agent-task-store reads busy_timeout from getBusyTimeout()', (t) =>
   // The module's connection itself should now have the same value —
   // verify by re-opening against the same file (the file is shared; the
   // pragma is durable across connections until checkpoint).
-  const verify = new Database(process.env.BIOF3_DB_PATH, { readonly: true });
+  const verify = new Database(process.env.PETRI_DB_PATH, { readonly: true });
   // busy_timeout is a per-connection pragma, not a file-level one, so we
   // can't read the module's value directly. The probe above proves the
   // override chain works; the source-assert test in E-019.2 proves the
@@ -85,7 +85,7 @@ test('E-019.1 agent-task-store reads busy_timeout from getBusyTimeout()', (t) =>
 });
 
 test('E-019.2 agent-task-store.js no longer hardcodes busy_timeout = 5000', () => {
-  const agentTaskStorePath = path.resolve(root, 'core/biof3-server/agent-task-store.js');
+  const agentTaskStorePath = path.resolve(root, 'core/petri-server/agent-task-store.js');
   const source = fs.readFileSync(agentTaskStorePath, 'utf8');
   // The legacy literal was `db.pragma('busy_timeout = 5000')` and is gone.
   assert.ok(

@@ -13,7 +13,7 @@
     {
       "name": "L1_pair_with_identity_ok",
       "pass": true,
-      "detail": "{\"ok\":true,\"peer\":{\"peerId\":\"gpeer_70e6c941fc81302f\",\"name\":\"DESKTOP-N94BLO7\",\"baseUrl\":\"http://192.168.0.102:3005\",\"platform\":\"win32\",\"arch\":\"x64\",\"gewuVersion\":\"0.0.1-rc.7\",\"executors\":{\"r\":false,\"p"
+      "detail": "{\"ok\":true,\"peer\":{\"peerId\":\"gpeer_70e6c941fc81302f\",\"name\":\"DESKTOP-N94BLO7\",\"baseUrl\":\"http://192.168.0.102:3005\",\"platform\":\"win32\",\"arch\":\"x64\",\"petriVersion\":\"0.0.1-rc.7\",\"executors\":{\"r\":false,\"p"
     },
     {
       "name": "L1a_health_echoes_identity",

@@ -24,7 +24,7 @@
     {
       "name": "C1 提交（bundle 上传 + agent start 确认 active）",
       "pass": true,
-      "detail": "{\"ok\":true,\"remoteDir\":\"$HOME/.biof3-agent/jobs/job_blk57c_mtmygwed\"}"
+      "detail": "{\"ok\":true,\"remoteDir\":\"$HOME/.petri-agent/jobs/job_blk57c_mtmygwed\"}"
     },
     {
       "name": "C2 日志流断流重连后作业继续、终态对齐 exit=0",
@@ -49,7 +49,7 @@
     {
       "name": "D1 取消场景提交成功",
       "pass": true,
-      "detail": "{\"ok\":true,\"remoteDir\":\"$HOME/.biof3-agent/jobs/job_blk57d_mtmyh3fk\"}"
+      "detail": "{\"ok\":true,\"remoteDir\":\"$HOME/.petri-agent/jobs/job_blk57d_mtmyh3fk\"}"
     },
     {
       "name": "D2 取消经 TERM 收敛（exit.json 信号=SIGTERM，节点真相）",

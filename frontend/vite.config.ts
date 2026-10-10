@@ -8,7 +8,7 @@ import rehypeSanitize from 'rehype-sanitize';
 import path from 'path';
 import fs from 'fs';
 
-// BioF3 桌面版原生前端 — Vite SPA
+// Petri 桌面版原生前端 — Vite SPA
 // 脱离 Docusaurus，纯客户端渲染，无 SSG/hydration
 // 阶段 2：MDX 原生渲染 docs（替代 iframe）；blog 已从桌面端移除
 
@@ -40,10 +40,10 @@ function extractSidebarPosition(source: string): number {
 // - 跳过 _ 前缀文件（_contributing / _meta-spec 等 Docusaurus 约定的隐藏页）
 // - 根目录散落的文章（如 intro.md）归到 position 最小的"入门"分类
 function docsSidebarPlugin() {
-  const virtualId = 'virtual:biof3-docs-sidebar';
+  const virtualId = 'virtual:petri-docs-sidebar';
   const resolvedId = '\0' + virtualId;
   return {
-    name: 'biof3-docs-sidebar',
+    name: 'petri-docs-sidebar',
     resolveId(id: string) {
       if (id === virtualId) return resolvedId;
     },
@@ -153,14 +153,14 @@ export default defineConfig({
     // 此处 dev-only 给运行时补上缺失导出：getRefreshReg(file) 返回逐组件注册函数，
     // 语义对齐 react-refresh 官方 runtime 的同名 API。上游对齐后本插件可删。
     {
-      name: 'gewu:react-refresh-runtime-polyfill',
+      name: 'petri:react-refresh-runtime-polyfill',
       apply: 'serve',
       transform(code, id) {
         if ((id.includes('/@react-refresh') || id.includes('refresh-runtime.js'))
           && !code.includes('export function getRefreshReg')) {
           return {
             code: code
-              + '\n// gewu:react-refresh-runtime-polyfill — 供 vite 8.3 oxc refresh 包装器调用\n'
+              + '\n// petri:react-refresh-runtime-polyfill — 供 vite 8.3 oxc refresh 包装器调用\n'
               + 'export function getRefreshReg(filename) { return (type, id) => register(type, id ?? filename); }\n',
             map: null,
           };
@@ -205,8 +205,8 @@ export default defineConfig({
       // CopilotChat 用 useBaseUrl（Docusaurus），桌面版 SPA 无 baseUrl，mock 成恒等
       '@docusaurus/useBaseUrl': path.resolve(__dirname, 'src/lib/useBaseUrl-mock.ts'),
       // 双前端收敛（agent-led 阶段2 Task1）：Copilot 纯逻辑层共享包
-      // 去 submodule 后：@biof3/shared 内嵌在 desktop 仓根 core/packages/shared-copilot
-      '@biof3/shared': path.resolve(__dirname, '..', 'core', 'packages', 'shared-copilot'),
+      // 去 submodule 后：@petri/shared 内嵌在 desktop 仓根 core/packages/shared-copilot
+      '@petri/shared': path.resolve(__dirname, '..', 'core', 'packages', 'shared-copilot'),
     },
   },
   build: {

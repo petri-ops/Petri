@@ -12,7 +12,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
 const PROJECT_ID = process.env.BIOF52_PROJECT || 'p_mt15b0aw_f0xa'; // desktop 项目（workspace=仓库）
 const FILE_PATH = 'figures/quote-live.png';
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-52');
@@ -51,7 +51,7 @@ async function main() {
   fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
   const targets = await fetchJson(`http://127.0.0.1:${DEBUG_PORT}/json/list`);
   const page = targets.find((t) => t.type === 'page' && /localhost:3000/.test(t.url || ''));
-  if (!page) throw new Error('biof3_page_not_found');
+  if (!page) throw new Error('petri_page_not_found');
   const client = await new CdpClient(page.webSocketDebuggerUrl).connect();
 
   const results = { startedAt: new Date().toISOString(), page: page.url, assertions: [] };
@@ -65,7 +65,7 @@ async function main() {
   await delay(2500);
 
   // 2. 通过 projectOpenWorkspaceFile 事件打开目标图片（右栏 Files 预览）
-  await evalJS(client, `(window.dispatchEvent(new CustomEvent('biof3:project-open-workspace-file', {
+  await evalJS(client, `(window.dispatchEvent(new CustomEvent('petri:project-open-workspace-file', {
     detail: { projectId: '${PROJECT_ID}', relativePath: '${FILE_PATH}', name: 'quote-live.png' }
   })), true)`);
   await delay(2000);

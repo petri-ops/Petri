@@ -401,7 +401,7 @@ function adoptBaselineChangeSet({
         'Baseline Revision source commit does not match its candidate commit.',
       );
     }
-    const ref = `refs/heads/biof3/current/${revision.artifactFamilyId}`;
+    const ref = `refs/heads/petri/current/${revision.artifactFamilyId}`;
     const existing = adapter.revParse(ref);
     const expected = expectedCommits.get(revision.revisionId) || null;
     if ((existing && existing !== expected) || (!expected && existing)) {
@@ -610,7 +610,7 @@ function ensureBaselineArtifactCohort(input = {}, dependencies = {}) {
       'Unable to allocate a coherent baseline cohort after prior incomplete registrations.'
     );
   }
-  const workingBranchRef = `refs/heads/biof3/baseline/${changeSetId}`;
+  const workingBranchRef = `refs/heads/petri/baseline/${changeSetId}`;
   const baseCommit = resolveBaseCommit(adapter, projectId);
   let candidateCommit = adapter.revParse(workingBranchRef);
   const language = String(input.language || '').toLowerCase() === 'python' ? 'python' : 'r';
@@ -725,7 +725,7 @@ function ensureBaselineArtifactCohort(input = {}, dependencies = {}) {
         parentCommit: baseCommit,
         ref: workingBranchRef,
         expectedOld: '0'.repeat(40),
-        message: `BioF3 baseline cohort ${sourceJob.id}`,
+        message: `Petri baseline cohort ${sourceJob.id}`,
         files: gitFiles,
       }).commit;
     }
@@ -907,7 +907,7 @@ function ensureBaselineArtifactRevision(input = {}, dependencies = {}) {
   const artifactFamilyId = deterministicId('af', projectId, sourceJob.id, artifactId);
   const revisionId = deterministicId('rev', projectId, sourceJob.id, artifactId, outputHash);
   const changeSetId = deterministicId('cs', 'baseline', projectId, sourceJob.id, artifactId, outputHash);
-  const workingBranchRef = `refs/heads/biof3/baseline/${changeSetId}`;
+  const workingBranchRef = `refs/heads/petri/baseline/${changeSetId}`;
   const managedBase = path.posix.join('analysis/scripts', artifactFamilyId, revisionId);
   const scriptRelativePath = path.posix.join(managedBase, `${safeSegment(artifactId, 'artifact_id')}.${extension}`);
   const parametersRelativePath = path.posix.join(managedBase, 'parameters.json');
@@ -972,7 +972,7 @@ function ensureBaselineArtifactRevision(input = {}, dependencies = {}) {
         parentCommit: baseCommit,
         ref: workingBranchRef,
         expectedOld: '0'.repeat(40),
-        message: `BioF3 baseline ${sourceJob.id}: ${artifactId}`,
+        message: `Petri baseline ${sourceJob.id}: ${artifactId}`,
         files,
       }).commit;
     }

@@ -4,7 +4,7 @@
 /**
  * BLOCK-67 P3 实机 CDP 验收：远程终端（ssh pty）+ 远程审阅（git 只读链）。
  *   A1 底部终端展开 → ssh pty 挂通（远端 shell 回显：root@ 或远程路径）
- *   A2 终端内 pwd → /root/gewu-block67-demo（远程工作目录语义）
+ *   A2 终端内 pwd → /root/petri-block67-demo（远程工作目录语义）
  *   A3 右栏审阅 tab → 远程 git status/diff 渲染（README.md 改动 + remote-dirty-line）
  * 前置：dev Electron（9222）+ aliyun 可达 + 远程 demo 目录为 git 仓库且带未提交改动。
  * 证据：acceptance/block-67/p3-live.json + p3-*.png
@@ -15,9 +15,9 @@ const http = require('node:http');
 const { execFileSync } = require('node:child_process');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-67');
-const REMOTE_ROOT = '/root/gewu-block67-demo';
+const REMOTE_ROOT = '/root/petri-block67-demo';
 
 function fetchJson(url, opts = {}) {
   return new Promise((resolve, reject) => {
@@ -77,7 +77,7 @@ async function main() {
   const auth = { Authorization: 'Bearer desktop-local', 'content-type': 'application/json' };
 
   // 远程仓库就绪（幂等）：init + commit + dirty
-  sshAliyun(`cd ${REMOTE_ROOT} && git init -q 2>/dev/null; git add -A && git -c user.name=gewu -c user.email=gewu@local commit -qm initial 2>/dev/null; git checkout -q -- README.md 2>/dev/null; printf '# BLOCK-67 实机验收\\n这是远程项目里的 markdown 文件。\\nremote-dirty-line\\n' > README.md; git status --porcelain`);
+  sshAliyun(`cd ${REMOTE_ROOT} && git init -q 2>/dev/null; git add -A && git -c user.name=petri -c user.email=petri@local commit -qm initial 2>/dev/null; git checkout -q -- README.md 2>/dev/null; printf '# BLOCK-67 实机验收\\n这是远程项目里的 markdown 文件。\\nremote-dirty-line\\n' > README.md; git status --porcelain`);
 
   const created = await fetchJson('http://127.0.0.1:3001/api/data/projects', {
     method: 'POST', headers: auth,
@@ -134,7 +134,7 @@ async function main() {
   const termReady = await evalJS(client, `(async () => {
     for (let i = 0; i < 55; i++) {
       const rows = [...document.querySelectorAll('.xterm-rows')].map((r) => r.textContent).join('');
-      if (/root@|iZbp|gewu-block67-demo/.test(rows)) return rows.slice(-300);
+      if (/root@|iZbp|petri-block67-demo/.test(rows)) return rows.slice(-300);
       await new Promise((r) => setTimeout(r, 2000));
     }
     return 'TIMEOUT|' + [...document.querySelectorAll('.xterm-rows')].map((r) => r.textContent).join('').slice(-300);
@@ -147,13 +147,13 @@ async function main() {
   const pwdOut = await evalJS(client, `(async () => {
     const body = document.querySelector('[data-tab-body]');
     const tabId = body ? body.getAttribute('data-tab-body') : null;
-    const bridge = (window.gewu || window.biof3Desktop)?.terminal;
+    const bridge = (window.petri || window.petriDesktop)?.terminal;
     if (!tabId || !bridge || !bridge.writeSession) return JSON.stringify({ err: 'NO_BRIDGE' });
     bridge.writeSession('pwd\\n', tabId);
     for (let i = 0; i < 20; i++) {
       await new Promise((r) => setTimeout(r, 800));
       const now = [...document.querySelectorAll('.xterm-rows')].map((r) => r.textContent).join('');
-      if (now.includes('/root/gewu-block67-demo')) return '/root/gewu-block67-demo';
+      if (now.includes('/root/petri-block67-demo')) return '/root/petri-block67-demo';
     }
     return '';
   })()`, 40_000);
@@ -171,7 +171,7 @@ async function main() {
     return 'opened';
   })()`, 30_000).catch((e) => log('A3 open step: ' + e.message));
   const reviewState = await evalJS(client, `(async () => {
-    const b = (window.gewu || window.biof3Desktop)?.workingTreeReview;
+    const b = (window.petri || window.petriDesktop)?.workingTreeReview;
     if (!b) return JSON.stringify({ diff: false, err: 'NO_BRIDGE' });
     const st = await b.status({ projectId: ${JSON.stringify(projectId)} });
     const files = (st && st.data && st.data.files) || [];

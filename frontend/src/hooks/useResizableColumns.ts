@@ -25,7 +25,7 @@ export interface ResizableColumnsState {
   ) => void;
 }
 
-const LS_KEY = 'gewu-pw-cols';
+const LS_KEY = 'petri-pw-cols';
 const LEGACY_DEFAULT_BOTTOM_TERMINAL_HEIGHT = 240;
 const DEFAULT_BOTTOM_TERMINAL_HEIGHT = 176;
 const MIN_BOTTOM_TERMINAL_HEIGHT = 120;
@@ -104,7 +104,7 @@ const MIN_LEFT_WIDTH = 96;
 const MIN_RIGHT_WIDTH = 96;
 const MIN_INPUT_HEIGHT = 48;
 const MIN_RESULT_RIGHT_WIDTH = 360;
-const RESIZING_CLASS = 'gewu-resizing-columns';
+const RESIZING_CLASS = 'petri-resizing-columns';
 
 function setResizingClass(active: boolean): void {
   if (typeof document === 'undefined') return;
@@ -211,13 +211,13 @@ export function useResizableColumns(
           // -width 让左栏 aside 零延迟跟随指针（列内 ColumnHeader 在 aside 内、
           // 随 aside 同宽，仍刚性）；-span 让 BottomTerminal 两竖边跟随。
           // 二者都是「同树指针跟随」，非跨树同步补丁；松手 cleanup 交回 state。
-          document.documentElement.style.setProperty('--gewu-live-left-width', `${w}px`);
-          document.documentElement.style.setProperty('--gewu-live-left-span', `${w + 1}px`);
+          document.documentElement.style.setProperty('--petri-live-left-width', `${w}px`);
+          document.documentElement.style.setProperty('--petri-live-left-span', `${w + 1}px`);
         } else if (which === 'right') {
           const w = Math.max(MIN_RIGHT_WIDTH, sr - (ev.clientX - startX));
           setRightWidth(w);
-          document.documentElement.style.setProperty('--gewu-live-right-width', `${w}px`);
-          document.documentElement.style.setProperty('--gewu-live-right-span', `${w + 1}px`);
+          document.documentElement.style.setProperty('--petri-live-right-width', `${w}px`);
+          document.documentElement.style.setProperty('--petri-live-right-span', `${w + 1}px`);
         } else if (which === 'resultRight') {
           pendingResultRightWidth = Math.min(
             clamp.max ?? Number.POSITIVE_INFINITY,
@@ -230,7 +230,7 @@ export function useResizableColumns(
             resultResizeFrame = window.requestAnimationFrame(() => {
               resultResizeFrame = null;
               document.documentElement.style.setProperty(
-                '--gewu-live-result-right-width',
+                '--petri-live-result-right-width',
                 `${pendingResultRightWidth}px`,
               );
             });
@@ -251,8 +251,8 @@ export function useResizableColumns(
         pendingMove = null;
         if (which === 'left' || which === 'right') {
           const rootStyle = document.documentElement.style;
-          rootStyle.removeProperty(which === 'left' ? '--gewu-live-left-width' : '--gewu-live-right-width');
-          rootStyle.removeProperty(which === 'left' ? '--gewu-live-left-span' : '--gewu-live-right-span');
+          rootStyle.removeProperty(which === 'left' ? '--petri-live-left-width' : '--petri-live-right-width');
+          rootStyle.removeProperty(which === 'left' ? '--petri-live-left-span' : '--petri-live-right-span');
         }
         if (which === 'resultRight') {
           if (resultResizeFrame !== null) {
@@ -261,7 +261,7 @@ export function useResizableColumns(
           }
           setResultRightWidth(pendingResultRightWidth);
           window.requestAnimationFrame(() => {
-            document.documentElement.style.removeProperty('--gewu-live-result-right-width');
+            document.documentElement.style.removeProperty('--petri-live-result-right-width');
           });
         }
         document.removeEventListener('mousemove', onMove);

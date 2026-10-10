@@ -1,5 +1,5 @@
 /**
- * shared-backend/workflow-engine.js — BioF3 Desktop Workflow Engine
+ * shared-backend/workflow-engine.js — Petri Desktop Workflow Engine
  *
  * 工作流执行引擎：在 Skills 之上提供流程编排能力。
  *

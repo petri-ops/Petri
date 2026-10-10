@@ -23,23 +23,23 @@ const require = createRequire(import.meta.url);
 // 内存 DB 自举（migration 全量应用；decision_log 由 011 迁移创建）
 {
   const Database = require('better-sqlite3');
-  const tempDbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-b116-'));
-  const db = new Database(path.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-b116-'));
+  const db = new Database(path.join(tempDbDir, 'petri.db'));
   const migrationsDir = path.join(root, 'src', 'migrations');
   for (const file of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     db.exec(fs.readFileSync(path.join(migrationsDir, file), 'utf8'));
   }
   db.close();
-  process.env.BIOF3_DB_PATH = path.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try { fs.rmSync(tempDbDir, { recursive: true, force: true }); } catch { /* 句柄延迟释放 */ }
   });
 }
 
-const decisionLog = require(path.join(root, 'core', 'biof3-server', 'helpers', 'decision-log.js'));
-const decisionApi = require(path.join(root, 'core', 'biof3-server', 'helpers', 'decision-api.js'));
-const decisionConfigModule = require(path.join(root, 'core', 'biof3-server', 'helpers', 'decision-config.js'));
-const thresholds = require(path.join(root, 'core', 'biof3-server', 'helpers', 'decision-thresholds.js'));
+const decisionLog = require(path.join(root, 'core', 'petri-server', 'helpers', 'decision-log.js'));
+const decisionApi = require(path.join(root, 'core', 'petri-server', 'helpers', 'decision-api.js'));
+const decisionConfigModule = require(path.join(root, 'core', 'petri-server', 'helpers', 'decision-config.js'));
+const thresholds = require(path.join(root, 'core', 'petri-server', 'helpers', 'decision-thresholds.js'));
 const { DECISION_MODEL_PIN } = decisionApi;
 
 const NO_SLEEP = async () => {};
@@ -55,7 +55,7 @@ function okFetch(answer) {
 
 async function readRows() {
   const Database = require('better-sqlite3');
-  const db = new Database(process.env.BIOF3_DB_PATH, { readonly: true });
+  const db = new Database(process.env.PETRI_DB_PATH, { readonly: true });
   const rows = db.prepare('SELECT * FROM decision_log ORDER BY id ASC').all();
   db.close();
   return rows;
@@ -68,9 +68,9 @@ test('阈值注册表：八接点在册 + evidence 文件在位 + 模块常量�
     assert.equal(thresholds[point].model, DECISION_MODEL_PIN, `${point} 模型 pin 一致`);
   }
   // 模块常量=注册表值（re-export 兼容）
-  const interpret = require(path.join(root, 'core', 'biof3-server', 'helpers', 'interpret.js'));
-  const intentRouter = require(path.join(root, 'core', 'biof3-server', 'helpers', 'intent-router.js'));
-  const toolRouter = require(path.join(root, 'core', 'biof3-server', 'helpers', 'tool-router.js'));
+  const interpret = require(path.join(root, 'core', 'petri-server', 'helpers', 'interpret.js'));
+  const intentRouter = require(path.join(root, 'core', 'petri-server', 'helpers', 'intent-router.js'));
+  const toolRouter = require(path.join(root, 'core', 'petri-server', 'helpers', 'tool-router.js'));
   const triage = require(path.join(root, 'scripts', 'lib', 'block114-triage-core.mjs'));
   const suggest = require(path.join(root, 'scripts', 'block115-test-suggest.mjs'));
   assert.equal(interpret.MARKER_DECISION_THRESHOLD, thresholds['marker-celltype'].threshold);
@@ -185,13 +185,13 @@ test('recentDecisions：DB 不可用返回 null（诚实不可用）', async (t)
 
 
 test('P5 provider：文件供给优先于 env（file > env > 默认）', async (t) => {
-  const cfgDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-b116-p5-'));
+  const cfgDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-b116-p5-'));
   const cfgPath = path.join(cfgDir, 'decision-config.json');
   fs.writeFileSync(cfgPath, JSON.stringify({ version: 1, points: {}, provider: { baseUrl: 'https://file.example', apiKey: 'file-key', model: 'jev-1.13.0' } }));
-  process.env.BIOF3_DECISION_CONFIG_PATH = cfgPath;
+  process.env.PETRI_DECISION_CONFIG_PATH = cfgPath;
   process.env.TYPESAFE_API_KEY = 'env-key';
   t.after(() => {
-    delete process.env.BIOF3_DECISION_CONFIG_PATH;
+    delete process.env.PETRI_DECISION_CONFIG_PATH;
     delete process.env.TYPESAFE_API_KEY;
     decisionLog._setDecisionLogDb(null);
   });
@@ -201,13 +201,13 @@ test('P5 provider：文件供给优先于 env（file > env > 默认）', async (
 });
 
 test('P5 provider：env 回退（文件无供给时用 env key）', async (t) => {
-  const cfgDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-b116-p5b-'));
+  const cfgDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-b116-p5b-'));
   const cfgPath = path.join(cfgDir, 'decision-config.json');
   fs.writeFileSync(cfgPath, JSON.stringify({ version: 1, points: {} }));
-  process.env.BIOF3_DECISION_CONFIG_PATH = cfgPath;
+  process.env.PETRI_DECISION_CONFIG_PATH = cfgPath;
   process.env.TYPESAFE_API_KEY = 'env-key';
   t.after(() => {
-    delete process.env.BIOF3_DECISION_CONFIG_PATH;
+    delete process.env.PETRI_DECISION_CONFIG_PATH;
     delete process.env.TYPESAFE_API_KEY;
   });
   const cfg = decisionApi.resolveDecisionConfig();
@@ -215,18 +215,18 @@ test('P5 provider：env 回退（文件无供给时用 env key）', async (t) =>
 });
 
 test('P5 provider：GET 打码（apiKey 永不回传原文）', async (t) => {
-  const cfgDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-b116-p5c-'));
+  const cfgDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-b116-p5c-'));
   const cfgPath = path.join(cfgDir, 'decision-config.json');
   fs.writeFileSync(cfgPath, JSON.stringify({ version: 1, points: {}, provider: { baseUrl: 'https://file.example', apiKey: 'file-key', model: 'jev-1.13.0' } }));
-  process.env.BIOF3_DECISION_CONFIG_PATH = cfgPath;
-  t.after(() => { delete process.env.BIOF3_DECISION_CONFIG_PATH; });
+  process.env.PETRI_DECISION_CONFIG_PATH = cfgPath;
+  t.after(() => { delete process.env.PETRI_DECISION_CONFIG_PATH; });
   const masked = decisionConfigModule.getProviderMasked();
   assert.equal(masked.hasKey, true);
   assert.ok(!JSON.stringify(masked).includes('file-key'), '打码视图不得包含 key 原文');
 });
 
 test('70 工具恒等红线延续（W1-3 契约复验）', () => {
-  const { TOOL_DEFS, DOMAIN_TOOL_DEFS } = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'tool-defs.js'));
+  const { TOOL_DEFS, DOMAIN_TOOL_DEFS } = require(path.join(root, 'core', 'petri-server', 'agent-tools', 'tool-defs.js'));
   const union = Object.values(DOMAIN_TOOL_DEFS).flat();
   assert.equal(union.length, TOOL_DEFS.length);
 });
@@ -234,7 +234,7 @@ test('70 工具恒等红线延续（W1-3 契约复验）', () => {
 // ---------- BLOCK-116 W2（BK-04）：agent 可见决策工具（decision_summary/decision_recent） ----------
 
 test('BK-04：decision_summary 聚合统计 + days 边界钳制 + available:false 诚实面', async () => {
-  const { tool_decision_summary } = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'decision-tools.js'));
+  const { tool_decision_summary } = require(path.join(root, 'core', 'petri-server', 'agent-tools', 'decision-tools.js'));
   // 种子：两条可统计判定（走记账单源 logDecision）
   await decisionLog.logDecision({ point: 'intent-route', threshold: 0.7, state: 's', choice: 'task', confidence: 0.9, degraded: 0, model: 'jev-1.13.0', latencyMs: 100 });
   await decisionLog.logDecision({ point: 'report-guard', threshold: 3, state: 's2', choice: 3.2, confidence: 0.6, degraded: 1, reason: 'auth_failed', model: 'jev-1.13.0', latencyMs: 50 });
@@ -255,7 +255,7 @@ test('BK-04：decision_summary 聚合统计 + days 边界钳制 + available:fals
 });
 
 test('BK-04：decision_recent 逐条回放 + point 过滤 + limit 钳制', async () => {
-  const { tool_decision_recent } = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'decision-tools.js'));
+  const { tool_decision_recent } = require(path.join(root, 'core', 'petri-server', 'agent-tools', 'decision-tools.js'));
   const all = await tool_decision_recent({ limit: 20 });
   assert.equal(all.ok, true);
   assert.equal(all.available, true);
@@ -275,7 +275,7 @@ test('BK-04：decision_recent 逐条回放 + point 过滤 + limit 钳制', async
 });
 
 test('BK-04：工具注册四件套在位（defs/registry handler/metadata/计数 73）', () => {
-  const { TOOL_DEFS, DOMAIN_TOOL_DEFS } = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'tool-defs.js'));
+  const { TOOL_DEFS, DOMAIN_TOOL_DEFS } = require(path.join(root, 'core', 'petri-server', 'agent-tools', 'tool-defs.js'));
   const names = TOOL_DEFS.map((t) => t.function.name);
   assert.ok(names.includes('decision_summary') && names.includes('decision_recent'), 'defs 在位');
   // BLOCK-121 result_summary +1 = 74；BLOCK-124（C-13）codegraph +2 = 76（73 系 BLOCK-121 漏改的存量红，本批清偿）
@@ -283,7 +283,7 @@ test('BK-04：工具注册四件套在位（defs/registry handler/metadata/计�
   // 恒等：新工具经 session 域模块进入（⋃ 域 = 全集）
   const union = Object.values(DOMAIN_TOOL_DEFS).flat().map((t) => t.function.name);
   assert.ok(union.includes('decision_summary') && union.includes('decision_recent'));
-  const { TOOL_METADATA: meta } = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'tool-metadata.js'));
+  const { TOOL_METADATA: meta } = require(path.join(root, 'core', 'petri-server', 'agent-tools', 'tool-metadata.js'));
   assert.equal(meta.decision_summary.readOnly, true, '纯读元数据');
   assert.equal(meta.decision_recent.concurrentSafe, true, '纯读可并发');
 });
@@ -291,10 +291,10 @@ test('BK-04：工具注册四件套在位（defs/registry handler/metadata/计�
 // ---------- BLOCK-116 W2（BK-05）：阈值热调——gates 覆盖解析/校验/不变量 + 消费方迁移 ----------
 
 test('BK-05：gates patch 经 setPointConfig 落盘 → getPointRuntime 合并解析（defaultGates 恒暴露校准原值）', async (t) => {
-  const cfgDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-bk05-'));
-  process.env.BIOF3_DECISION_CONFIG_PATH = path.join(cfgDir, 'decision-config.json');
+  const cfgDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-bk05-'));
+  process.env.PETRI_DECISION_CONFIG_PATH = path.join(cfgDir, 'decision-config.json');
   t.after(() => {
-    delete process.env.BIOF3_DECISION_CONFIG_PATH;
+    delete process.env.PETRI_DECISION_CONFIG_PATH;
     try { fs.rmSync(cfgDir, { recursive: true, force: true }); } catch { /* 句柄延迟释放 */ }
   });
 
@@ -313,10 +313,10 @@ test('BK-05：gates patch 经 setPointConfig 落盘 → getPointRuntime 合并�
 });
 
 test('BK-05：gates patch 校验——未知键/非有限值/[0,1] 量表越界/不变量违反 全部拒绝', async (t) => {
-  const cfgDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-bk05b-'));
-  process.env.BIOF3_DECISION_CONFIG_PATH = path.join(cfgDir, 'decision-config.json');
+  const cfgDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-bk05b-'));
+  process.env.PETRI_DECISION_CONFIG_PATH = path.join(cfgDir, 'decision-config.json');
   t.after(() => {
-    delete process.env.BIOF3_DECISION_CONFIG_PATH;
+    delete process.env.PETRI_DECISION_CONFIG_PATH;
     try { fs.rmSync(cfgDir, { recursive: true, force: true }); } catch { /* 句柄延迟释放 */ }
   });
 
@@ -341,10 +341,10 @@ test('BK-05：gates patch 校验——未知键/非有限值/[0,1] 量表越界/
 });
 
 test('BK-05：消费方迁移源码契约——本地常量第二真相退役，闸门经 getPointRuntime 解析', () => {
-  const convSrc = fs.readFileSync(path.join(root, 'core', 'biof3-server', 'helpers', 'conversations.js'), 'utf8');
+  const convSrc = fs.readFileSync(path.join(root, 'core', 'petri-server', 'helpers', 'conversations.js'), 'utf8');
   assert.ok(!convSrc.includes('_JEV_YES') && !convSrc.includes('_JEV_NO'), 'topic-shift 本地常量退役');
   assert.match(convSrc, /getPointRuntime\('topic-shift'\)\.gates/, 'topic-shift 闸门经配置解析');
-  const ksSrc = fs.readFileSync(path.join(root, 'core', 'biof3-server', 'helpers', 'knowledge-space.js'), 'utf8');
+  const ksSrc = fs.readFileSync(path.join(root, 'core', 'petri-server', 'helpers', 'knowledge-space.js'), 'utf8');
   assert.ok(!ksSrc.includes('_JEV_RELEVANT_NOUL') && !ksSrc.includes('_JEV_INJECTION_NOUL'), 'knowledge-guard 本地常量退役');
   assert.match(ksSrc, /getPointRuntime\('knowledge-guard'\)\.gates/, 'knowledge-guard 闸门经配置解析');
 });

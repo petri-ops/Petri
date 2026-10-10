@@ -4,7 +4,7 @@
 /**
  * BLOCK-126 实机验收 — 感知实时性（终态失效事件 + 运行期日志 live 尾部）。
  *
- * 前置：dev 栈在跑（biof3-server 含 BLOCK-126 代码）。
+ * 前置：dev 栈在跑（petri-server 含 BLOCK-126 代码）。
  * 断言：
  *   A1 复跑一个真实 deseq2 job，终态时 SSE /api/events 收到
  *      { type:'invalidate', domain:'jobs', payload.toolJobId=<新 job>, state=<终态> }；
@@ -166,12 +166,12 @@ async function main() {
   // 端点 resolveProjectRunLayout 对部分项目形态（自建/已删）解析失败回退全局
   // 目录后误报“无日志”——既有缺陷（found 计算非本包触碰面），登记 AUDIT-LOG，
   // 不作为本包验收判据。
-  const runLogPath = path.join(ROOT, '.biof3-dev-user-data', 'data', 'projects');
+  const runLogPath = path.join(ROOT, '.petri-dev-user-data', 'data', 'projects');
   const candidates = fs.existsSync(runLogPath)
     ? fs.readdirSync(runLogPath).map((entry) => path.join(runLogPath, entry, 'results', 'jobs', jobId, 'output', 'run.log'))
     : [];
-  candidates.push(path.join(ROOT, '.biof3-dev-user-data', 'data', 'results', 'tool-jobs', jobId, 'output', 'run.log'));
-  candidates.push(path.join(os.homedir(), 'Documents', 'BioF3-Local', 'results', 'tool-jobs', jobId, 'output', 'run.log'));
+  candidates.push(path.join(ROOT, '.petri-dev-user-data', 'data', 'results', 'tool-jobs', jobId, 'output', 'run.log'));
+  candidates.push(path.join(os.homedir(), 'Documents', 'Petri-Local', 'results', 'tool-jobs', jobId, 'output', 'run.log'));
   const runLogFile = candidates.find((p) => fs.existsSync(p)) || null;
   const runLogContent = runLogFile ? fs.readFileSync(runLogFile, 'utf8') : '';
   record('final_runlog_on_disk',

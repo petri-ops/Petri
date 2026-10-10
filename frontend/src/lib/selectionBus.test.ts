@@ -6,7 +6,7 @@ import {
   summarizeSelectionForAgent,
   type ArtifactInteractionManifest,
 } from '@/lib/artifact-selection';
-import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
+import { petriEvents, subscribePetriEvent } from '@/lib/events';
 import {
   getSelectionBusState,
   setSelectionBusArtifact,
@@ -20,7 +20,7 @@ import {
 // 红侧契约测试 — BLOCK-139 P0-1 选择总线（plan=docs/block-139-selection-loop-plan.md）
 //
 // 被钉裁决（此刻尚无实现，测试必须真实失败于「模块不存在」）：
-// - D1 总线形态：lib 层自定义 store hook（useState + gewuEvents 广播）；
+// - D1 总线形态：lib 层自定义 store hook（useState + petriEvents 广播）；
 //   单选择真相=「当前活跃 artifact 的当前选择」；切换 artifact 即换选择上下文。
 // - D3 有界不变量：MAX_PERSISTED_ENTITY_IDS=2000 / Agent 样本 12，前端不得放宽。
 // - plan §2 P0-1：产出结构化 SelectionContext v1 投影——词汇表镜像
@@ -32,7 +32,7 @@ import {
 //   setSelectionBusSelection(selection: ArtifactSelection | null): void
 //   subscribeSelectionBus(listener): () => void
 //   useSelectionBus(): SelectionBusState          // React hook
-//   gewuEvents.selectionBus                        // events.ts 注册表键（GewuEventMap 同步登记）
+//   petriEvents.selectionBus                        // events.ts 注册表键（PetriEventMap 同步登记）
 //   interface SelectionBusState {
 //     artifactId: string;                          // '' = 未绑定活跃 artifact
 //     revisionId: string | null;
@@ -174,12 +174,12 @@ describe('BLOCK-139 P0-1 D3 有界不变量（前端不得放宽）', () => {
   });
 });
 
-describe('BLOCK-139 P0-1 gewuEvents 事件模式延伸（D1）', () => {
+describe('BLOCK-139 P0-1 petriEvents 事件模式延伸（D1）', () => {
   it('events.ts 注册表登记 selectionBus 键；写入选择经 window 事件广播', () => {
-    expect(typeof gewuEvents.selectionBus).toBe('string');
+    expect(typeof petriEvents.selectionBus).toBe('string');
     bindArtifact('deg_table');
     const received: SelectionBusState[] = [];
-    const unsubscribe = subscribeGewuEvent(gewuEvents.selectionBus, (detail) => {
+    const unsubscribe = subscribePetriEvent(petriEvents.selectionBus, (detail) => {
       received.push(detail);
     });
     const selection = buildRowSelection(manifestFor('deg_table', 4), rows(2)).selection;

@@ -256,7 +256,7 @@ Agent 可以根据用户意图把会话从 `conversation` 提升到 `context_ass
 - 删除 conversation 时级联删除该会话消息、conversation checkpoint、向量/派生事实和只服务于回放的 task events。
 - 已产生的科学 `tool_job`、artifact 和任务交付包不随聊天删除，除非用户在结果/项目层另行明确删除；删除聊天不能破坏执行真相。
 - 归档 conversation 只停止默认注入，不删除原文；恢复后可重新构建上下文。
-- 密钥、Authorization、`.biof3-secrets`、完整 Provider 请求/响应、模型私有推理和未经必要性证明的大块用户数据禁止入库。
+- 密钥、Authorization、`.petri-secrets`、完整 Provider 请求/响应、模型私有推理和未经必要性证明的大块用户数据禁止入库。
 - 数据库写入失败、消息被大小限制截断、事件只在临时层或来源不可回读时必须有可见状态，不能声称“完整保存”。
 
 ### 3.11 历史重开、长期记忆与耐久恢复
@@ -284,7 +284,7 @@ Harness Core 的基础工具不是每个生信算法，而是围绕“找到证�
 | 工作流控制 | `plan`、`run_tool(list/plan/status/next/bind_artifact/run)` | 真实 tool manifest、步骤依赖、确认门、Job/Artifact lineage |
 | 命令执行 | `workspace_exec`：`full` 通用 shell、`read` 禁止 | 项目 cwd、超时、输出上限、ToolResult/Trace；正式结果不绕过科学分析执行器 |
 
-快速定位的默认顺序是：显式路径或文件引用 → active file/artifact → 增量索引 → 文件名/glob → 文本/列名搜索 → 候选排序 → 读取最小充分范围。大文件优先采样和哈希，未变化文件复用 `.biof3-harness-index.json`，不把全量正文塞进模型。当前实现主要是确定性启发式和有界扫描，不是完整语义代码搜索；如果 HRT-0 证据表明列名/任务语义需要语义召回，再增加带来源引用的 embedding/rerank，不能用不可解释的相似度替代路径、哈希和行号证据。
+快速定位的默认顺序是：显式路径或文件引用 → active file/artifact → 增量索引 → 文件名/glob → 文本/列名搜索 → 候选排序 → 读取最小充分范围。大文件优先采样和哈希，未变化文件复用 `.petri-harness-index.json`，不把全量正文塞进模型。当前实现主要是确定性启发式和有界扫描，不是完整语义代码搜索；如果 HRT-0 证据表明列名/任务语义需要语义召回，再增加带来源引用的 embedding/rerank，不能用不可解释的相似度替代路径、哈希和行号证据。
 
 ### 3.13 Token 成本与缓存策略
 
@@ -293,7 +293,7 @@ Harness Core 的基础工具不是每个生信算法，而是围绕“找到证�
 | 缓存层 | 缓存内容 | 命中条件 | 质量边界 |
 |---|---|---|---|
 | Provider prompt cache | 稳定 system 前缀、工具 schema、未变化的上下文前缀 | 供应商、模型、profile、前缀哈希和 TTL 均一致 | 只是复用相同输入 token 的处理，不改变模型输入；厂商不支持时透明回退 |
-| BioF3 本地证据缓存 | 文件索引、结构探针、query/read_page 只读结果、embedding、ContextEnvelope 片段 | project scope、输入/文件 SHA、参数、权限、插件/规则版本一致 | 文件或设计变化立即失效；返回必须带 source/hash/createdAt，不缓存成无来源结论 |
+| Petri 本地证据缓存 | 文件索引、结构探针、query/read_page 只读结果、embedding、ContextEnvelope 片段 | project scope、输入/文件 SHA、参数、权限、插件/规则版本一致 | 文件或设计变化立即失效；返回必须带 source/hash/createdAt，不缓存成无来源结论 |
 | 任务/结果缓存 | 已完成 replay 或确定性工具的 artifact 引用 | tool/plugin/runtime 版本、TaskSpec、输入哈希、参数、seed 和执行策略完全一致 | 只能复用已验证 Artifact；有副作用、随机性或环境漂移时重新确认/运行 |
 
 缓存 key 至少包括：`projectId`、`conversationId`（仅会话级内容）、`modelProfileId`、模型能力快照、system/tool schema hash、TaskSpec/Checkpoint hash、输入文件 hash、规范化参数、权限模式、插件/runtime 版本和 policy 版本。不能把一个项目、一个用户或一个模型的缓存跨作用域混用。
@@ -1012,7 +1012,7 @@ npm run build:mac-arm64
 - 先完成当前 HRT 子包的出口标准，再进入下一个子包。
 - 不批量新增生物信息流程，不复制参考 Harness 工程目录。
 - 不直接修改用户真实输入，不根据预期显著性调参。
-- 不读取、打印或提交 `.biof3-secrets`、Keychain 或 API Key。
+- 不读取、打印或提交 `.petri-secrets`、Keychain 或 API Key。
 - 不使用 `git add .` 或 `git add -A`；显式 stage 文件。
 - 任何 UI 状态、Provider、发布和无关清理不得混入 P-03 子包提交。
 

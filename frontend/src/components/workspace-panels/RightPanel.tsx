@@ -154,10 +154,10 @@ export function RightPanel({
       {visible && onResize && <div className={styles.resizeHandleV} onMouseDown={onResize} />}
       <aside
         className={`${styles.rightCol}${visible ? '' : ` ${styles.rightColCollapsed}`}`}
-        style={{ width: visible ? `var(--gewu-live-right-width, ${ctx.width}px)` : 0 }}
+        style={{ width: visible ? `var(--petri-live-right-width, ${ctx.width}px)` : 0 }}
         data-workspace-mode={workspaceMode}
         aria-hidden={!visible}
-        data-gewu-motion="functional"
+        data-petri-motion="functional"
       >
         {ctx.columnHeader}
         <div className={styles.resultPanel}>

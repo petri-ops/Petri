@@ -21,7 +21,7 @@ const cp = require('../core/shared-backend/capability-provisioning.js');
 // ── helpers ─────────────────────────────────────────────────────────────────
 
 function tmpDir() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-cap-test-'));
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'petri-cap-test-'));
 }
 
 function sha256Of(content) {
@@ -44,7 +44,7 @@ function baseCap(overrides = {}) {
   return {
     capabilityId: 'r-enrichment',
     version: '1.0.0',
-    url: 'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/bundles/r-enrichment-1.0.0.tar',
+    url: 'https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/bundles/r-enrichment-1.0.0.tar',
     sha256: GOOD_SHA,
     ...overrides,
   };
@@ -290,7 +290,7 @@ test('provisionCapability: rejects a host not on the allowlist without downloadi
 
 test('provisionCapability: rejects insecure (http) protocol', async () => {
   const runtimesDir = tmpDir();
-  const cap = baseCap({ url: 'http://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/bundle.tar' });
+  const cap = baseCap({ url: 'http://petri-uploads.oss-cn-hangzhou.aliyuncs.com/bundle.tar' });
   const result = await cp.provisionCapability(cap, { runtimesDir, download: makeDownload(CONTENT) });
   assert.equal(result.ok, false);
   assert.equal(result.error, 'insecure_protocol');
@@ -315,7 +315,7 @@ test('provisionCapability: options.allowedHosts permits a custom host', async ()
 test('checkUrlAllowed: exact, suffix, protocol and invalid-url rules', () => {
   // default allowlist: exact host
   assert.equal(
-    cp.checkUrlAllowed('https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/x.tar').ok,
+    cp.checkUrlAllowed('https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/x.tar').ok,
     true,
   );
   // default allowlist: suffix match on .aliyuncs.com
@@ -327,28 +327,28 @@ test('checkUrlAllowed: exact, suffix, protocol and invalid-url rules', () => {
   assert.equal(off.ok, false);
   assert.equal(off.reason, 'host_not_allowed');
   // http rejected
-  assert.equal(cp.checkUrlAllowed('http://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/x.tar').reason, 'insecure_protocol');
+  assert.equal(cp.checkUrlAllowed('http://petri-uploads.oss-cn-hangzhou.aliyuncs.com/x.tar').reason, 'insecure_protocol');
   // garbage URL
   assert.equal(cp.checkUrlAllowed('not a url').reason, 'invalid_url');
   // explicit allowedHosts override
   assert.equal(cp.checkUrlAllowed('https://h.test/x', { allowedHosts: ['h.test'] }).ok, true);
 });
 
-// ── 18. host allowlist: BIOF3_CAPABILITY_ALLOWED_HOSTS env override ────────────
+// ── 18. host allowlist: PETRI_CAPABILITY_ALLOWED_HOSTS env override ────────────
 
-test('checkUrlAllowed: BIOF3_CAPABILITY_ALLOWED_HOSTS env var overrides default', () => {
-  const prev = process.env.BIOF3_CAPABILITY_ALLOWED_HOSTS;
+test('checkUrlAllowed: PETRI_CAPABILITY_ALLOWED_HOSTS env var overrides default', () => {
+  const prev = process.env.PETRI_CAPABILITY_ALLOWED_HOSTS;
   try {
-    process.env.BIOF3_CAPABILITY_ALLOWED_HOSTS = 'cdn.example.org, .mirror.test';
+    process.env.PETRI_CAPABILITY_ALLOWED_HOSTS = 'cdn.example.org, .mirror.test';
     assert.equal(cp.checkUrlAllowed('https://cdn.example.org/x.tar').ok, true);
     assert.equal(cp.checkUrlAllowed('https://a.mirror.test/x.tar').ok, true);
     // default OSS host no longer allowed once env override is set
     assert.equal(
-      cp.checkUrlAllowed('https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/x.tar').ok,
+      cp.checkUrlAllowed('https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/x.tar').ok,
       false,
     );
   } finally {
-    if (prev === undefined) delete process.env.BIOF3_CAPABILITY_ALLOWED_HOSTS;
-    else process.env.BIOF3_CAPABILITY_ALLOWED_HOSTS = prev;
+    if (prev === undefined) delete process.env.PETRI_CAPABILITY_ALLOWED_HOSTS;
+    else process.env.PETRI_CAPABILITY_ALLOWED_HOSTS = prev;
   }
 });

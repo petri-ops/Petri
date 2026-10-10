@@ -23,7 +23,7 @@
     {
       "name": "A2 gateway 健康",
       "ok": true,
-      "detail": "{\"ok\":true,\"service\":\"gewu-mobile-gateway\"}"
+      "detail": "{\"ok\":true,\"service\":\"petri-mobile-gateway\"}"
     },
     {
       "name": "A3 移动页可达",
@@ -147,7 +147,7 @@
     }
   ],
   "notes": {
-    "method": "isolated probe: real biof3-server child processes (off-state + on-state), fresh tmp dataDir, migrations applied",
+    "method": "isolated probe: real petri-server child processes (off-state + on-state), fresh tmp dataDir, migrations applied",
     "redaction": "pairing/session tokens never stored in evidence",
     "honestBoundary": "real-phone scan acceptance pending user; settings-panel CDP assertion pending dev-stack window"
   }

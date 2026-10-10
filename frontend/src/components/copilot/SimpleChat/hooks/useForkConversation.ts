@@ -3,7 +3,7 @@
 // conversationForked 供 LeftPanel 刷新会话列表）。
 import { useCallback, useState } from 'react';
 import { forkConversation } from '@/components/copilot/copilotConversationsClient';
-import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
+import { petriEvents, dispatchPetriEvent } from '@/lib/events';
 
 interface UseForkConversationOptions {
   conversationId: string | null;
@@ -48,7 +48,7 @@ export function useForkConversation(options: UseForkConversationOptions): {
         await refreshConversations();
         onConversationChange(forked.id);
         // Broadcast so LeftPanel (via project-workspace) refreshes the conversation list
-        dispatchGewuEvent(gewuEvents.conversationForked, {
+        dispatchPetriEvent(petriEvents.conversationForked, {
           newConversationId: forked.id,
           projectId: projectId || '',
         });

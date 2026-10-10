@@ -11,13 +11,13 @@
 按用户裁决"BLOCK-8 UI-132 dev CSP 静态化"启动 BLOCK-8，目标收口 UI-132 (行 239 in_progress) `in_progress` 状态。
 
 **PHASE 0 摸底发现 — entry 描述与实际代码不一致**：
-- entry 描述：`src/main.js setupCsp` dev-CSP `connect-src` / `frame-src` 改为本地网络分支变量，dev 模式放开 `127.0.0.1:*` 和 `ws://127.0.0.1:*`（生产仍只允许 `localhost:*`）；同时 `frontend/src/styles/custom.css` 在日间/夜间两套主题里补齐 `--biof3-warning: var(--biof3-status-warning)`
+- entry 描述：`src/main.js setupCsp` dev-CSP `connect-src` / `frame-src` 改为本地网络分支变量，dev 模式放开 `127.0.0.1:*` 和 `ws://127.0.0.1:*`（生产仍只允许 `localhost:*`）；同时 `frontend/src/styles/custom.css` 在日间/夜间两套主题里补齐 `--petri-warning: var(--petri-status-warning)`
 - 实际代码：
   - `src/main.js` L507-509 用 `127.0.0.1` 注入 3 个 URL（r/py/gateway）— commit `3240a09 fix(desktop): Inject R_SERVER_URL/PY_SERVER_URL/GATEWAY_URL for gateway (P1-CFG-1)`
   - `src/main.js` L1418-1422 CSP dev mode 已放开 `http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*` — 配套 commit `3240a09`
   - `src/main.js` L1443 CSP dev mode 日志 "127.0.0.1:* whitelisted"
-  - `frontend/src/styles/custom.css` L71 明色主题 `--biof3-warning: var(--biof3-status-warning)` — commit `f3b5c42 refactor(css): migrate all CSS token references from --ifm-* to --biof3-*` + commit `3000a06 feat(frontend): Workspace UI plumbing — icons, panels, layout, styles`
-  - `frontend/src/styles/custom.css` L181 暗色主题 `--biof3-warning: var(--biof3-status-warning)` — 同 commit
+  - `frontend/src/styles/custom.css` L71 明色主题 `--petri-warning: var(--petri-status-warning)` — commit `f3b5c42 refactor(css): migrate all CSS token references from --ifm-* to --petri-*` + commit `3000a06 feat(frontend): Workspace UI plumbing — icons, panels, layout, styles`
+  - `frontend/src/styles/custom.css` L181 暗色主题 `--petri-warning: var(--petri-status-warning)` — 同 commit
 
 **结论**：UI-132 (行 239 in_progress) entry 描述的两个改动的**目标都已 100% 落地**，但 **entry 没同步状态**——audit ledger 与实际代码漂移。**PHASE 0 摸底盲点 = BLOCK-7 PHASE 0 UI-161 同类盲点（UI-161 实际已 5/5 PASS 但 entry 仍 in_progress）**。
 
@@ -36,8 +36,8 @@
 |---|---|---|---|
 | 1 | main.js setupCsp dev mode 放开 `http://127.0.0.1:*` + `ws://127.0.0.1:*` | `src/main.js` L1418-1422 + L1443 | grep `isDevMode` + `127.0.0.1:\*` + `ws://127.0.0.1:\*` + `CSP dev mode ... 127.0.0.1:\* whitelisted` |
 | 2 | main.js R_SERVER_URL/PY_SERVER_URL/GATEWAY_URL 用 `127.0.0.1` 注入 | `src/main.js` L507-509 | grep `process.env.R_SERVER_URL.*127.0.0.1` + `process.env.PY_SERVER_URL.*127.0.0.1` + `process.env.GATEWAY_URL.*127.0.0.1` |
-| 3 | styles/custom.css `--biof3-warning` token 明色主题 | `frontend/src/styles/custom.css` L71 | grep `--biof3-warning: var(--biof3-status-warning)` |
-| 4 | styles/custom.css `--biof3-warning` token 暗色主题 | `frontend/src/styles/custom.css` L181 | grep `--biof3-warning: var(--biof3-status-warning)` (在 `:root[data-theme="dark"]` / `[data-theme="dark"]` 块内) |
+| 3 | styles/custom.css `--petri-warning` token 明色主题 | `frontend/src/styles/custom.css` L71 | grep `--petri-warning: var(--petri-status-warning)` |
+| 4 | styles/custom.css `--petri-warning` token 暗色主题 | `frontend/src/styles/custom.css` L181 | grep `--petri-warning: var(--petri-status-warning)` (在 `:root[data-theme="dark"]` / `[data-theme="dark"]` 块内) |
 
 PHASE 1 通过 grep 综合验证 4 项，确认 commit `3240a09`（CSP dev 放开）/ `3000a06`（Workspace UI plumbing）+ `f3b5c42`（CSS token 迁移）以来**未被任何后续 commit 回退**。
 
@@ -50,17 +50,17 @@ PHASE 1 通过 grep 综合验证 4 项，确认 commit `3240a09`（CSP dev 放�
 - 1.1 grep main.js L1418-1422 dev mode 放开 `127.0.0.1:*` + `ws://127.0.0.1:*`
 - 1.2 grep main.js L1443 CSP dev mode 日志 "127.0.0.1:* whitelisted"
 - 1.3 grep main.js L507-509 R_SERVER_URL/PY_SERVER_URL/GATEWAY_URL 注入 `127.0.0.1`
-- 1.4 grep styles/custom.css L71 明色主题 `--biof3-warning`
-- 1.5 grep styles/custom.css L181 暗色主题 `--biof3-warning`
-- 1.6 git log 退化检查（`3240a09..HEAD -- src/main.js` 检查不引入 `127.0.0.1` 删除；`f3b5c42..HEAD -- frontend/src/styles/custom.css` 检查不删除 `--biof3-warning`）
+- 1.4 grep styles/custom.css L71 明色主题 `--petri-warning`
+- 1.5 grep styles/custom.css L181 暗色主题 `--petri-warning`
+- 1.6 git log 退化检查（`3240a09..HEAD -- src/main.js` 检查不引入 `127.0.0.1` 删除；`f3b5c42..HEAD -- frontend/src/styles/custom.css` 检查不删除 `--petri-warning`）
 - 1.7 tsc --noEmit + vitest run 全量核验（保留绿色）
 
 ### PHASE 2：Vite build + 产物 grep
 
 - 2.1 vite build 产出 frontend/dist/（如未产出则跑 `cd frontend && npm run build`）
-- 2.2 grep 产物 CSS 中 `--biof3-warning` 已定义
+- 2.2 grep 产物 CSS 中 `--petri-warning` 已定义
 - 2.3 grep 产物 JS 不含 main.js CSP 内容（CSP 在 main 进程，渲染产物不直接含）
-- 2.4 grep 产物 CSS 含 `--biof3-status-warning` 引用链完整
+- 2.4 grep 产物 CSS 含 `--petri-status-warning` 引用链完整
 
 ### PHASE 3：theme-token-contract test + 治理门
 

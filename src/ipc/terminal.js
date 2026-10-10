@@ -94,19 +94,19 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
       const { rServerProc } = getProcs();
       const processes = [
         {
-          id: "biof3-server",
+          id: "petri-server",
           label: "R 后端",
-          command: `node ${resolveCore("biof3-server", "server.js")}`,
+          command: `node ${resolveCore("petri-server", "server.js")}`,
           status: rServerProc && !rServerProc.killed ? "running" : "stopped",
           pid: rServerProc?.pid || null,
-          logPath: path.join(logDir, "biof3-server.log"),
-          output: readLogTail(path.join(logDir, "biof3-server.log")),
+          logPath: path.join(logDir, "petri-server.log"),
+          output: readLogTail(path.join(logDir, "petri-server.log")),
         },
       ];
       return {
         ok: true,
         logDir,
-        dataDir: process.env.BIOF3_LOCAL_DATA_DIR || null,
+        dataDir: process.env.PETRI_LOCAL_DATA_DIR || null,
         processes,
       };
     } catch (e) {
@@ -130,7 +130,7 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
       const cwd =
         typeof targetPath === "string" && targetPath.trim()
           ? targetPath.trim()
-          : process.env.BIOF3_LOCAL_DATA_DIR || process.env.BIOF3_PROJECT_ROOT;
+          : process.env.PETRI_LOCAL_DATA_DIR || process.env.PETRI_PROJECT_ROOT;
       const plan = getOpenShellPlan(cwd, process.platform);
       // BLOCK-102 P1 — spawn 的 ENOENT 是异步 error 事件，同步 try/catch 拦不住、
       // 也不能立刻报 ok。等一小窗让 error 事件到达后再如实回执（错误不再静默、
@@ -234,14 +234,14 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
           name: "xterm-256color",
           cols: 100,
           rows: 28,
-          cwd: process.env.BIOF3_LOCAL_DATA_DIR || process.env.BIOF3_PROJECT_ROOT || ".",
+          cwd: process.env.PETRI_LOCAL_DATA_DIR || process.env.PETRI_PROJECT_ROOT || ".",
           env: { ...process.env, TERM: "xterm-256color", COLORTERM: "truecolor" },
         })
           : pty.spawn("ssh", sshArgv, {
           name: "xterm-256color",
           cols: 100,
           rows: 28,
-          cwd: process.env.BIOF3_LOCAL_DATA_DIR || process.env.BIOF3_PROJECT_ROOT || ".",
+          cwd: process.env.PETRI_LOCAL_DATA_DIR || process.env.PETRI_PROJECT_ROOT || ".",
           env: { ...process.env, TERM: "xterm-256color", COLORTERM: "truecolor" },
         });
         const disposeData = proc.onData((data) =>
@@ -264,7 +264,7 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
       const cwd =
         requestedCwd && fs.existsSync(requestedCwd)
           ? requestedCwd
-          : process.env.BIOF3_LOCAL_DATA_DIR || process.env.BIOF3_PROJECT_ROOT;
+          : process.env.PETRI_LOCAL_DATA_DIR || process.env.PETRI_PROJECT_ROOT;
       const { shellPath, args: shellArgs } = getSessionShellSpec(process.env, process.platform);
       const pty = require("node-pty");
       const proc = pty.spawn(shellPath, shellArgs, {

@@ -1,5 +1,5 @@
 /* BLOCK-97 / UI-398 — 摘要卡「任务清单」节。
-   颜色全部走 --gewu-* token（亮暗双主题天然成立）；禁 slate 字面量与裸色值
+   颜色全部走 --petri-* token（亮暗双主题天然成立）；禁 slate 字面量与裸色值
    （theme-token-contract 门禁）；section 底座复用 project-workspace.module.css
    的 workspacePinnedSummarySection 族，不在此重复。 */
 
@@ -18,7 +18,7 @@
   gap: 6px;
   font-size: 12px;
   line-height: 1.45;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
 }
 
 .check {
@@ -26,12 +26,12 @@
   width: 12px;
   text-align: center;
   font-size: 11px;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .index {
   flex: none;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   font-variant-numeric: tabular-nums;
 }
 
@@ -42,29 +42,29 @@
 
 /* 进行中：accent 提亮（激活语义），正文用主文字色 */
 .item[data-status='in_progress'] {
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .item[data-status='in_progress'] .check {
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
 }
 
 /* 已完成：勾选 + 三级字 + 删除线（做完一条勾一条） */
 .item[data-status='completed'] .check {
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
 }
 
 .item[data-status='completed'] .content {
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   text-decoration: line-through;
 }
 
 .progress {
   font-size: 11px;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   font-variant-numeric: tabular-nums;
 }
 
 .progress[data-done='true'] {
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
 }

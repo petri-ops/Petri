@@ -26,7 +26,7 @@ const { WsTestClient } = await import('./block162-ws-client.mjs');
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const { attachAgentWs, FALLBACK_POLL_MS } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/agent-ws.js'));
+const { attachAgentWs, FALLBACK_POLL_MS } = require(path.join(ROOT, 'core/petri-server/mobile-gateway/agent-ws.js'));
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));

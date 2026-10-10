@@ -23,7 +23,7 @@ const { execFileSync } = require('child_process');
 const root = path.resolve(__dirname, '..');
 const packRegistry = require(path.join(root, 'core/shared-backend/pack-registry.js'));
 
-const REAL_PACK = 'D:/1.WorkDir/gewu-pack-bio';
+const REAL_PACK = 'D:/1.WorkDir/petri-pack-bio';
 const FIXTURE_PLUGINS = path.join(root, 'test/fixtures/neutral-plugins');
 const results = [];
 
@@ -34,7 +34,7 @@ function makeSecondTenantPack() {
   fs.mkdirSync(path.join(packRoot, 'plugins'), { recursive: true });
   fs.cpSync(FIXTURE_PLUGINS, path.join(packRoot, 'plugins'), { recursive: true });
   fs.writeFileSync(path.join(packRoot, 'pack.json'), JSON.stringify({
-    packId: 'gewu-pack-neutral-fixture',
+    packId: 'petri-pack-neutral-fixture',
     name: '中性夹具包（第二租户验收）',
     version: '0.0.1',
     kind: 'domain-pack',
@@ -90,9 +90,9 @@ function runProbe(dataDir) {
     'pluginDirMissing=' + (loaded && loaded.pluginDirMissing));
 
   // ── P3 卸载语义 ──
-  const un = packRegistry.uninstallPack(dataDir, 'gewu-pack-bio');
+  const un = packRegistry.uninstallPack(dataDir, 'petri-pack-bio');
   const afterRecs = packRegistry.readInstalledPacks(dataDir);
-  assert('P3a_uninstall_ok', un && un.ok === true && un.removed === 'gewu-pack-bio', JSON.stringify(un));
+  assert('P3a_uninstall_ok', un && un.ok === true && un.removed === 'petri-pack-bio', JSON.stringify(un));
   assert('P3b_record_removed', afterRecs.length === 0, 'records=' + afterRecs.length);
   assert('P3c_pack_files_kept', fs.existsSync(path.join(REAL_PACK, 'pack.json')), '包文件为用户资产，卸载不删');
 
@@ -108,7 +108,7 @@ function runProbe(dataDir) {
   const fixtureState = runProbe(dataDir);
   assert('P6b_fixture_catalog', fixtureState && fixtureState.catalog >= 1 && fixtureState.hasBio === false,
     'catalog=' + (fixtureState && fixtureState.catalog) + ' hasBio=' + (fixtureState && fixtureState.hasBio));
-  const un3 = packRegistry.uninstallPack(dataDir, 'gewu-pack-neutral-fixture');
+  const un3 = packRegistry.uninstallPack(dataDir, 'petri-pack-neutral-fixture');
   const finalState = runProbe(dataDir);
   assert('P6c_fixture_uninstallable', un3 && un3.ok === true && finalState && finalState.catalog === 0,
     'un=' + JSON.stringify(un3) + ' catalog=' + (finalState && finalState.catalog));

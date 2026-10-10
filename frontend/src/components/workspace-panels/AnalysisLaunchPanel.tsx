@@ -139,7 +139,7 @@ function ToolLaunchForm({ tool, workspaceFiles, projectId, onLaunchWithPrompt, o
         <div>
           <button
             type="button"
-            className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+            className="petri-btn petri-btn--ghost petri-btn--sm"
             disabled={demoBusy}
             onClick={() => { void handleLoadDemo(); }}
           >
@@ -242,7 +242,7 @@ export function AnalysisLaunchPanel({ tools, onLaunch, loading = false, workspac
                         <span className={styles.analysisLaunchCardTitle}>
                           <span
                             className={styles.analysisLaunchDot}
-                            style={{ background: tool.color || 'var(--gewu-accent, #3b82f6)' }}
+                            style={{ background: tool.color || 'var(--petri-accent, #3b82f6)' }}
                             aria-hidden
                           />
                           {tool.title}
@@ -261,7 +261,7 @@ export function AnalysisLaunchPanel({ tools, onLaunch, loading = false, workspac
                         {!tool.comingSoon && tool.inputs.length > 0 && (
                           <button
                             type="button"
-                            className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                            className="petri-btn petri-btn--ghost petri-btn--sm"
                             aria-expanded={expandedTool === tool.id}
                             onClick={() => setExpandedTool((current) => (current === tool.id ? null : tool.id))}
                           >

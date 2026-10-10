@@ -237,7 +237,7 @@ const TOOL_ACTIVITY_VERBS: Readonly<Record<string, string>> = {
   "computer_snapshot": "已取快照",
   "computer_type": "已输入",
   "computer_wait": "已等待",
-  "delegate_to_gewu_node": "已委派",
+  "delegate_to_petri_node": "已委派",
 
   "federation_list_peers": "已查询协作节点",
   "skill_discover": "已列技能",
@@ -322,7 +322,7 @@ export const TOOL_ACTIVITY_ICONS: Readonly<Record<string, IconName>> = {
   "computer_snapshot": "eye",
   "computer_type": "eye",
   "computer_wait": "eye",
-  "delegate_to_gewu_node": "globe",
+  "delegate_to_petri_node": "globe",
   "federation_list_peers": "globe",
   "followup_task": "bot",
   "generate_methods": "table",
@@ -427,8 +427,8 @@ function summarizeToolCallSwitch(
       return { actionLabel: TOOL_ACTIVITY_VERBS.read_page, actionDetail: compactDetail(args.url) || '网页' };
     case 'read_image':
       return { actionLabel: TOOL_ACTIVITY_VERBS.read_image, actionDetail: compactDetail(args.filePath || args.toolJobId) || '图像' };
-    case 'delegate_to_gewu_node':
-      return { actionLabel: TOOL_ACTIVITY_VERBS.delegate_to_gewu_node, actionDetail: compactDetail(args.task) || '协作节点' };
+    case 'delegate_to_petri_node':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.delegate_to_petri_node, actionDetail: compactDetail(args.task) || '协作节点' };
       case 'federation_list_peers':
         return { actionLabel: TOOL_ACTIVITY_VERBS.federation_list_peers, actionDetail: '联邦节点' };
       case 'skill_discover':

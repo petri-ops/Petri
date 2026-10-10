@@ -1,5 +1,5 @@
 /**
- * shared-backend/skills-sdk.js — BioF3 Desktop Skills SDK
+ * shared-backend/skills-sdk.js — Petri Desktop Skills SDK
  *
  * 统一 Skills 层访问入口，对接 Agent、MCP、Workflow Engine。
  *
@@ -280,7 +280,7 @@ class SkillsSDK {
 
     const skillListTool = {
       name: 'list_skills',
-      description: '列出所有可用的 BioF3 Skills，支持按类别/标签/来源筛选',
+      description: '列出所有可用的 Petri Skills，支持按类别/标签/来源筛选',
       inputSchema: {
         type: 'object',
         properties: {
@@ -309,7 +309,7 @@ class SkillsSDK {
 
     const executeSkillTool = {
       name: 'execute_skill',
-      description: '执行一个 BioF3 Skill',
+      description: '执行一个 Petri Skill',
       inputSchema: {
         type: 'object',
         properties: {

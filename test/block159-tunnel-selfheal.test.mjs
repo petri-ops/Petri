@@ -28,7 +28,7 @@ import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const TUNNEL_PATH = path.join(ROOT, 'core/biof3-server/mobile-gateway/tunnel.js');
+const TUNNEL_PATH = path.join(ROOT, 'core/petri-server/mobile-gateway/tunnel.js');
 
 const {
   createTunnelManager,
@@ -92,7 +92,7 @@ function probeResponse(status) {
 
 test('BLOCK-159 ① 探活连续 2 次 fail → 自愈重连（新 spawn）；单次 fail 不触发；ok 清零', async () => {
   assert.equal(PROBE_FAIL_RECONNECT_THRESHOLD, 2, '阈值钉住：2（单次抖动给复测机会）');
-  const root = mkdtempSync(path.join(tmpdir(), 'gewu-tunnel-selfheal-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-tunnel-selfheal-'));
   let manager = null;
   try {
     // a. 连续 fail ×2 → 自愈：spawn 计数涨到 2
@@ -147,7 +147,7 @@ test('BLOCK-159 ② buildSshArgs ServerAlive 15→10；jitteredDelay ±30% 有�
 // ── ③ 清场并行（顺序串行下本用例死锁=红）─────────────────────────────────
 
 test('BLOCK-159 ③ 清场链并行：killStale 与 remotePortSweep 并发启动，都完成才 spawn', async () => {
-  const root = mkdtempSync(path.join(tmpdir(), 'gewu-tunnel-parallel-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-tunnel-parallel-'));
   let manager = null;
   try {
     writeTunnelConfig(root, { enabled: true, host: 'aliyun', remotePort: 2299, localPort: 3005 });
@@ -185,7 +185,7 @@ test('BLOCK-159 ③ 清场链并行：killStale 与 remotePortSweep 并发启动
 // ── ④ exit 不覆盖已排程重连 ──────────────────────────────────────────────
 
 test('BLOCK-159 ④ 自愈重连排程后 exit 事件不双排程（spawn 恰好 +1）', async () => {
-  const root = mkdtempSync(path.join(tmpdir(), 'gewu-tunnel-exitguard-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-tunnel-exitguard-'));
   let manager = null;
   try {
     const { manager: m, spawned } = buildSelfhealManager(root, { probeFetch: probeResponse(502) });

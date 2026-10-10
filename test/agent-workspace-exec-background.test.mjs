@@ -13,14 +13,14 @@ import path from 'node:path';
 const require = createRequire(import.meta.url);
 {
   const Database = require('better-sqlite3');
-  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'biof3-exec-bg-db-'));
-  const db = new Database(path.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'petri-exec-bg-db-'));
+  const db = new Database(path.join(tempDbDir, 'petri.db'));
   const migrationsDir = path.resolve('src/migrations');
   for (const file of fssync.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     db.exec(fssync.readFileSync(path.join(migrationsDir, file), 'utf8'));
   }
   db.close();
-  process.env.BIOF3_DB_PATH = path.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try {
       fssync.rmSync(tempDbDir, { recursive: true, force: true });
@@ -29,8 +29,8 @@ const require = createRequire(import.meta.url);
     }
   });
 }
-const { createWorkspaceTools } = require('../core/biof3-server/agent-tools/workspace-tools.js');
-const { getToolDefs } = require('../core/biof3-server/agent-tools/tool-defs.js');
+const { createWorkspaceTools } = require('../core/petri-server/agent-tools/workspace-tools.js');
+const { getToolDefs } = require('../core/petri-server/agent-tools/tool-defs.js');
 
 const isWindows = process.platform === 'win32';
 const maybeSkipShell = isWindows ? test.skip : test;
@@ -57,7 +57,7 @@ async function waitFor(predicate, timeoutMs = 8000, intervalMs = 100) {
 }
 
 before(async () => {
-  sandboxRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'biof3-exec-bg-'));
+  sandboxRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'petri-exec-bg-'));
   workspaceRoot = path.join(sandboxRoot, 'workspace');
   await fs.mkdir(workspaceRoot, { recursive: true });
 
@@ -114,7 +114,7 @@ maybeSkipShell('后台启动长任务：立即返回 processId + 日志路径，
   assert.ok(start.processId.startsWith('bg-'));
   assert.equal(typeof start.pid, 'number');
   assert.equal(start.status, 'running');
-  assert.ok(start.logPath.startsWith('.biof3-agent-tmp/'));
+  assert.ok(start.logPath.startsWith('.petri-agent-tmp/'));
   spawnedProcessIds.push(start.processId);
 
   const status = await tools.processStatus({ processId: start.processId }, ctx);

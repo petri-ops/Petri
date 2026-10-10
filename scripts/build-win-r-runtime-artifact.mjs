@@ -7,8 +7,8 @@ if (process.platform !== 'win32') {
 /**
  * build-win-r-runtime-artifact.mjs
  * ---------------------------------------------------------------
- * 在「装有 R 4.5.2 的 Windows 构建机」上，组装 BioF3 的 windows-x64
- * R 运行时制品（对应 manifest.json 的 biof3-r-runtime）。
+ * 在「装有 R 4.5.2 的 Windows 构建机」上，组装 Petri 的 windows-x64
+ * R 运行时制品（对应 manifest.json 的 petri-r-runtime）。
  *
  * 产物：一个 zip，内部根目录为 `R/`，解压到
  *   userData/runtimes/R 后，resolveRuntime('r') 即可命中
@@ -22,12 +22,12 @@ if (process.platform !== 'win32') {
  * 用法（在 Windows 构建机）：
  *   node scripts/build-win-r-runtime-artifact.mjs
  *   # 可选环境变量：
- *   #   BIOF3_BUILD_R     —— 源 R 安装前缀（默认自动探测 Rscript -e 'cat(R.home())'）
- *   #   BIOF3_R_VERSION  —— 仅用于制品命名（默认取源 R 版本）
+ *   #   PETRI_BUILD_R     —— 源 R 安装前缀（默认自动探测 Rscript -e 'cat(R.home())'）
+ *   #   PETRI_R_VERSION  —— 仅用于制品命名（默认取源 R 版本）
  *   #   OUT_DIR          —— 产物输出目录（默认 <repo>/dist-runtime）
  *
  * 完成后脚本打印一段 JSON，填进：
- *   manifest.json 的 biof3-r-runtime.artifacts.windows-x64
+ *   manifest.json 的 petri-r-runtime.artifacts.windows-x64
  *   manifest.placeholders.json 对应条目的 current（由 null 改为真实值）
  * release-contract.json 的 windows-x64.supported 仍保持 false，直到 Week 3/4。
  */
@@ -61,7 +61,7 @@ function parsePackages(file) {
 
 function resolveSourceRPrefix() {
   const candidates = [];
-  if (process.env.BIOF3_BUILD_R) candidates.push(process.env.BIOF3_BUILD_R);
+  if (process.env.PETRI_BUILD_R) candidates.push(process.env.PETRI_BUILD_R);
   candidates.push('Rscript', 'Rscript.exe');
   for (const c of candidates) {
     try {
@@ -74,7 +74,7 @@ function resolveSourceRPrefix() {
       }
     } catch {}
   }
-  fail('找不到可用的 R 4.5 源安装。请先安装 R 4.5 或设置 BIOF3_BUILD_R。');
+  fail('找不到可用的 R 4.5 源安装。请先安装 R 4.5 或设置 PETRI_BUILD_R。');
 }
 
 function stagePrefix(srcPrefix, stageR) {
@@ -98,7 +98,7 @@ function installPackages(stageR, packages) {
     '}',
     'cat("DONE\\n")',
   ].join('\n');
-  const tmpR = path.join(os.tmpdir(), `biof3-r-install-${Date.now()}.R`);
+  const tmpR = path.join(os.tmpdir(), `petri-r-install-${Date.now()}.R`);
   fs.writeFileSync(tmpR, installR);
   try {
     const r = spawnSync(rscript, [tmpR], { stdio: 'inherit', windowsHide: true, timeout: 1000 * 60 * 60 * 3 });
@@ -151,7 +151,7 @@ function main() {
   if (repackOnly) {
     // 复用最近一个已有 stage（不重新下载/安装包，只重打 zip 修正结构）
     const dirs = fs.existsSync(OUT_DIR)
-      ? fs.readdirSync(OUT_DIR).filter((d) => d.startsWith('biof3-r-runtime-staging-'))
+      ? fs.readdirSync(OUT_DIR).filter((d) => d.startsWith('petri-r-runtime-staging-'))
       : [];
     if (dirs.length === 0) fail('--repack-only 但找不到已有 stage 目录，请直接完整构建。');
     const newest = dirs
@@ -166,7 +166,7 @@ function main() {
     const { prefix } = resolveSourceRPrefix();
     // 用 PID 后缀的唯一 stage 目录，避免多次运行共享目录时触发批量删除门禁
     // （Node fs.rmSync 对 >50 文件目录会被 WorkBuddy 安全删除 shim 拦截）。
-    const stageRoot = path.join(OUT_DIR, `biof3-r-runtime-staging-${process.pid}`);
+    const stageRoot = path.join(OUT_DIR, `petri-r-runtime-staging-${process.pid}`);
     stageR = path.join(stageRoot, 'R');
     stagePrefix(prefix, stageR);
     installPackages(stageR, parsePackages(PACKAGES));
@@ -185,10 +185,10 @@ function main() {
   console.log('  - 此制品只「上传 OSS + 打印真实摘要」，由 scripts/upload-win-r-runtime.mjs 完成。');
   console.log('  - 不要把它写进 manifest.json 的 artifacts.windows-x64 ——');
   console.log('    plugin-manifest-schema.test.mjs 第 70-74 行要求 windows-x64 必须为 0（0.0.1 禁止假 Windows 支持）。');
-  console.log('  - zip 落地 OSS 后，才允许把 biof3-r-runtime 从 manifest.placeholders.json 移除。\n');
+  console.log('  - zip 落地 OSS 后，才允许把 petri-r-runtime 从 manifest.placeholders.json 移除。\n');
   console.log(JSON.stringify({
     "windows-x64": {
-      "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/windows-x64.zip",
+      "url": "https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/windows-x64.zip",
       "sha256": sha256,
       "sizeBytes": sizeBytes,
     },

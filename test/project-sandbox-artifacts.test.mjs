@@ -23,7 +23,7 @@ const __dirname = path.dirname(__filename);
 const require = createRequire(import.meta.url);
 
 const SHARED_BACKEND = path.join(__dirname, '..', 'core', 'shared-backend');
-const R_HELPERS = path.join(__dirname, '..', 'core', 'biof3-server', 'helpers');
+const R_HELPERS = path.join(__dirname, '..', 'core', 'petri-server', 'helpers');
 
 const { resolveProjectRunLayout, isPathContained, safeJoinUnder } = require(
   path.join(SHARED_BACKEND, 'project-run-layout.js')
@@ -45,7 +45,7 @@ function stubDb(workspacePath, status = 'active') {
 }
 
 before(() => {
-  tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-arti-sandbox-'));
+  tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-arti-sandbox-'));
   workspaceRoot = path.join(tmpRoot, 'arti-workspace');
   fs.mkdirSync(workspaceRoot, { recursive: true });
 });

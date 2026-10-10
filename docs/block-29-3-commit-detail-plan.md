@@ -14,7 +14,7 @@
 
 - **adapter**（`core/shared-backend/git-adapter.js` log()）：pretty format 改为 `\x01` 记录分隔 + `%b` body 字段（`%x01%H%x00%h%x00%an%x00%aI%x00%s%x00%b`），解析按 `\x01` 分记录（body 可含换行，不能按行切），body 去尾部换行；字段数校验 5 → 6。
 - **IPC 载荷 additive**：`git:commit-log` 返回 `commits[]` 增加 `message` 字段（0 新增通道，preload 直传不改）；`electron.d.ts` commitLog commits 类型 + `useWorkingTreeReview` `CommitInfo` 增加 `message`。
-- **前端**（ReviewMode 提交详情视图）：新增 `.rvw-commit-info` 详情头——subject（粗体）+ author · 时间 + 汇总统计（`N 文件 +A −D`，由既有 commitDiff `summary`/`files.length` 聚合，0 新查询）；body 非空时以原生 `<details>` 折叠展示完整说明（展开/收起，零新增 state）；字号只用 `--biof3-font-size-*` token。
+- **前端**（ReviewMode 提交详情视图）：新增 `.rvw-commit-info` 详情头——subject（粗体）+ author · 时间 + 汇总统计（`N 文件 +A −D`，由既有 commitDiff `summary`/`files.length` 聚合，0 新查询）；body 非空时以原生 `<details>` 折叠展示完整说明（展开/收起，零新增 state）；字号只用 `--petri-font-size-*` token。
 - **范围修正（诚实记录）**：文件条每文件 ±统计 BLOCK-29 已交付（`computeFileDiffStats`），本包不重做。
 
 **非范围**：历史列表行内嵌 body（保持列表密度）/ 按 body 搜索 / commit amend / 暂存区·分支切换·push-pull（维持排除）/ 0 新增 IPC 通道 / 0 新依赖 / AI 审阅 0 重新引入。

@@ -73,7 +73,7 @@ export function BottomTerminal({
       className={`${styles.embeddedTerminal} ${open ? styles.embeddedTerminalOpen : ''}`}
       style={{ height: open ? height : 0, left: leftOffset, right: rightOffset }}
       aria-hidden={!open}
-      data-gewu-motion="functional"
+      data-petri-motion="functional"
     >
       <div className={styles.embeddedTerminalResize} onMouseDown={onResize} />
       <div className={styles.embeddedTerminalTabs} role="tablist" aria-label="终端标签">
@@ -141,8 +141,8 @@ export function BottomTerminal({
               {limitNotice}
             </span>
           ) : null}
-          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={clear}>清空</button>
-          <button className="gewu-btn gewu-btn--icon" type="button" onClick={onClose} aria-label="关闭终端面板" title="关闭终端面板">
+          <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={clear}>清空</button>
+          <button className="petri-btn petri-btn--icon" type="button" onClick={onClose} aria-label="关闭终端面板" title="关闭终端面板">
             <Icon name="x" size={13} />
           </button>
         </div>

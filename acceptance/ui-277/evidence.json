@@ -3,9 +3,9 @@
   "block": "BLOCK-40-CONV-CHANGES-HYDRATION",
   "date": "2026-09-02",
   "environment": {
-    "stack": "dev Electron (wrapper nohup, BIOF3_ELECTRON_USER_DATA_DIR/.biof3-dev-user-data)",
-    "realBackend": "http://localhost:63008/api（Electron supervisor 托管，BIOF3_DB_PATH=.biof3-dev-user-data/data/biof3.db）",
-    "note": ":3001 为 wrapper 侧后端（bioF3.db 空库），端点冒烟以页面 window.biof3Desktop.backendConfig.rApiBase 注入基址为准",
+    "stack": "dev Electron (wrapper nohup, PETRI_ELECTRON_USER_DATA_DIR/.petri-dev-user-data)",
+    "realBackend": "http://localhost:63008/api（Electron supervisor 托管，PETRI_DB_PATH=.petri-dev-user-data/data/petri.db）",
+    "note": ":3001 为 wrapper 侧后端（petri.db 空库），端点冒烟以页面 window.petriDesktop.backendConfig.rApiBase 注入基址为准",
     "project": "tinkspace (p_mthvakv3_fffw)",
     "sessionA": "conv_e8db19c1-de3",
     "sessionB": "会话 B（S3 新建，任务 2026-09-02T13:0xZ 完成）"

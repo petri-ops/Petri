@@ -9,13 +9,13 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const nodeRequire = createRequire(import.meta.url);
-const Database = nodeRequire('../core/biof3-server/node_modules/better-sqlite3');
-const registry = nodeRequire('../core/biof3-server/helpers/tool-job-lifecycle-registry');
+const Database = nodeRequire('../core/petri-server/node_modules/better-sqlite3');
+const registry = nodeRequire('../core/petri-server/helpers/tool-job-lifecycle-registry');
 const {
   reconcileStaleRunningToolJobs,
   DEFAULT_STALE_AFTER_MS,
   DEFAULT_STARTUP_GRACE_MS,
-} = nodeRequire('../core/biof3-server/helpers/stale-running-reconciler.js');
+} = nodeRequire('../core/petri-server/helpers/stale-running-reconciler.js');
 
 function makeDb() {
   const dir = mkdtempSync(join(tmpdir(), 'stale-reconciler-'));

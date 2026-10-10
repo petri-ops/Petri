@@ -13,10 +13,10 @@ const __dirname = path.dirname(__filename);
 // require ./db 即 prepare projects——全新环境必须先跑生产 migration 链再加载，
 // 否则 SQLITE_ERROR（block-30 后既有损坏，本轮顺带修复）。
 const require = createRequire(import.meta.url);
-const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-loop-subdomains-'));
-process.env.BIOF3_DB_PATH = path.join(tempDir, 'loop-subdomains.db');
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-loop-subdomains-'));
+process.env.PETRI_DB_PATH = path.join(tempDir, 'loop-subdomains.db');
 const { runMigrations } = require('../src/migration-runner');
-await runMigrations(process.env.BIOF3_DB_PATH, path.join(__dirname, '../src/migrations'));
+await runMigrations(process.env.PETRI_DB_PATH, path.join(__dirname, '../src/migrations'));
 
 function resolve(...segments) {
   return path.resolve(__dirname, '..', ...segments);
@@ -27,24 +27,24 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
 
   describe('loop-orchestrator.js', () => {
     it('should require without error', async () => {
-      const mod = await import(pathToFileURL(resolve('core/biof3-server/loop-orchestrator.js')).href);
+      const mod = await import(pathToFileURL(resolve('core/petri-server/loop-orchestrator.js')).href);
       assert.ok(mod, 'module should be loaded');
     });
 
     it('should export runLoop function', async () => {
-      const { runLoop } = await import(pathToFileURL(resolve('core/biof3-server/loop-orchestrator.js')).href);
+      const { runLoop } = await import(pathToFileURL(resolve('core/petri-server/loop-orchestrator.js')).href);
       assert.strictEqual(typeof runLoop, 'function', 'runLoop should be a function');
     });
 
     it('runLoop should be async function', async () => {
-      const { runLoop } = await import(pathToFileURL(resolve('core/biof3-server/loop-orchestrator.js')).href);
+      const { runLoop } = await import(pathToFileURL(resolve('core/petri-server/loop-orchestrator.js')).href);
       assert.ok(runLoop.constructor.name === 'AsyncFunction', 'runLoop should be async');
     });
 
     it('should NOT reference harness-workflow-state', async () => {
       const fs = await import('fs');
       const content = fs.readFileSync(
-        resolve('core/biof3-server/loop-orchestrator.js'),
+        resolve('core/petri-server/loop-orchestrator.js'),
         'utf8'
       );
       const matches = content.match(/require.*harness-workflow-state|harnessWorkflowState/g);
@@ -58,12 +58,12 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
 
   describe('conversation-adapter.js', () => {
     it('should require without error', async () => {
-      const mod = await import(pathToFileURL(resolve('core/biof3-server/conversation-adapter.js')).href);
+      const mod = await import(pathToFileURL(resolve('core/petri-server/conversation-adapter.js')).href);
       assert.ok(mod, 'module should be loaded');
     });
 
     it('should export required functions', async () => {
-      const mod = await import(pathToFileURL(resolve('core/biof3-server/conversation-adapter.js')).href);
+      const mod = await import(pathToFileURL(resolve('core/petri-server/conversation-adapter.js')).href);
       assert.strictEqual(typeof mod.appendAssistantMessage, 'function');
       assert.strictEqual(typeof mod.appendUserMessage, 'function');
       assert.strictEqual(typeof mod.saveChatTurnToMemory, 'function');
@@ -75,7 +75,7 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
     });
 
     it('should re-export conversation helpers', async () => {
-      const mod = await import(pathToFileURL(resolve('core/biof3-server/conversation-adapter.js')).href);
+      const mod = await import(pathToFileURL(resolve('core/petri-server/conversation-adapter.js')).href);
       assert.strictEqual(typeof mod.getOrCreateActiveConversation, 'function');
       assert.strictEqual(typeof mod.appendMessageToConversation, 'function');
       assert.strictEqual(typeof mod._maybeAutoTitleConversation, 'function');
@@ -85,22 +85,22 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
 
   describe('agent-runner.js facade', () => {
     it('should require without error', async () => {
-      const mod = await import(pathToFileURL(resolve('core/biof3-server/agent-runner.js')).href);
+      const mod = await import(pathToFileURL(resolve('core/petri-server/agent-runner.js')).href);
       assert.ok(mod, 'module should be loaded');
     });
 
     it('should export runAgentLoop function', async () => {
-      const { runAgentLoop } = await import(pathToFileURL(resolve('core/biof3-server/agent-runner.js')).href);
+      const { runAgentLoop } = await import(pathToFileURL(resolve('core/petri-server/agent-runner.js')).href);
       assert.strictEqual(typeof runAgentLoop, 'function', 'runAgentLoop should be a function');
     });
 
     it('runAgentLoop should be async function', async () => {
-      const { runAgentLoop } = await import(pathToFileURL(resolve('core/biof3-server/agent-runner.js')).href);
+      const { runAgentLoop } = await import(pathToFileURL(resolve('core/petri-server/agent-runner.js')).href);
       assert.ok(runAgentLoop.constructor.name === 'AsyncFunction', 'runAgentLoop should be async');
     });
 
     it('should export 5 named functions (signature unchanged)', async () => {
-      const mod = await import(pathToFileURL(resolve('core/biof3-server/agent-runner.js')).href);
+      const mod = await import(pathToFileURL(resolve('core/petri-server/agent-runner.js')).href);
       const namedExports = Object.keys(mod).filter(
         k => !k.startsWith('default') && !k.startsWith('module')
       );
@@ -116,7 +116,7 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
     });
 
     it('runAgentLoop should be callable with documented parameters', async () => {
-      const { runAgentLoop } = await import(pathToFileURL(resolve('core/biof3-server/agent-runner.js')).href);
+      const { runAgentLoop } = await import(pathToFileURL(resolve('core/petri-server/agent-runner.js')).href);
       // runAgentLoop uses destructuring with defaults, so length reports all params
       // We verify it's a function that can be called
       assert.ok(typeof runAgentLoop === 'function', 'runAgentLoop should be callable');
@@ -130,7 +130,7 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
     it('agent-runner.js should be under 970 lines (BLOCK-104 ratchet: only shrink)', async () => {
       const fs = await import('fs');
       const content = fs.readFileSync(
-        resolve('core/biof3-server/agent-runner.js'),
+        resolve('core/petri-server/agent-runner.js'),
         'utf8'
       );
       const lines = content.split('\n').length;
@@ -149,7 +149,7 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
     it('loop-orchestrator.js should be under 1250 lines', async () => {
       const fs = await import('fs');
       const content = fs.readFileSync(
-        resolve('core/biof3-server/loop-orchestrator.js'),
+        resolve('core/petri-server/loop-orchestrator.js'),
         'utf8'
       );
       const lines = content.split('\n').length;
@@ -162,7 +162,7 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
     it('conversation-adapter.js should be under 450 lines', async () => {
       const fs = await import('fs');
       const content = fs.readFileSync(
-        resolve('core/biof3-server/conversation-adapter.js'),
+        resolve('core/petri-server/conversation-adapter.js'),
         'utf8'
       );
       const lines = content.split('\n').length;

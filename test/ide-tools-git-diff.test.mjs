@@ -12,7 +12,7 @@ import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const IDE_TOOLS = resolve(__dirname, '..', 'core/biof3-server/mcp/ide-tools');
+const IDE_TOOLS = resolve(__dirname, '..', 'core/petri-server/mcp/ide-tools');
 
 const ideTools = await import(
   pathToFileURL(resolve(IDE_TOOLS, 'index.js')).href
@@ -25,7 +25,7 @@ const H = _rawHandlers;
  * 仓库内有 1 次 commit（add file + commit），随后修改这个文件让工作区脏。
  */
 function makeGitRepo() {
-  const repo = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-git-diff-`);
+  const repo = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-git-diff-`);
   // 默认 git 环境，避免 home dir 干扰
   const env = {
     ...process.env,
@@ -97,7 +97,7 @@ test('ide_git_diff rejects path outside allowlist', () => {
 
 test('ide_git_diff rejects non-git repository', () => {
   // 纯目录不是 git 仓库
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-nogit-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-nogit-`);
   try {
     const res = H.ide_git_diff({ path: tmp });
     assert.equal(res.ok, false);
@@ -108,7 +108,7 @@ test('ide_git_diff rejects non-git repository', () => {
 });
 
 test('ide_git_diff respects maxLines hard cap', () => {
-  const repo = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-git-diff-cap-`);
+  const repo = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-git-diff-cap-`);
   try {
     const env = {
       ...process.env,

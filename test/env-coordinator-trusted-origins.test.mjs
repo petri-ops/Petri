@@ -66,7 +66,7 @@ test('BLOCK-84 dev: non-default port is carried through, not hardcoded to 3000',
   assert.ok(!set.has('http://localhost:3000'), 'must not leak the default port');
 });
 
-test('BLOCK-84: existing BIOF3_TRUSTED_DESKTOP_ORIGINS entries are preserved', () => {
+test('BLOCK-84: existing PETRI_TRUSTED_DESKTOP_ORIGINS entries are preserved', () => {
   const set = computeTrustedRendererOrigins({
     existing: 'http://localhost:9999 , http://10.0.0.5:8080',
     isDev: true,
@@ -109,7 +109,7 @@ test('BLOCK-84: consumer boundary honours the computed set (integration, no Elec
     rendererDevUrl: 'http://localhost:3000',
     rendererPort: null,
   });
-  process.env.BIOF3_TRUSTED_DESKTOP_ORIGINS = [...set].join(',');
+  process.env.PETRI_TRUSTED_DESKTOP_ORIGINS = [...set].join(',');
   const boundary = require(path.join(root, 'core/shared-backend/local-request-boundary.js'));
   for (const origin of set) {
     assert.ok(
@@ -121,5 +121,5 @@ test('BLOCK-84: consumer boundary honours the computed set (integration, no Elec
     !boundary.isTrustedDesktopOrigin('http://evil.example.com'),
     'boundary must still reject untrusted origins',
   );
-  delete process.env.BIOF3_TRUSTED_DESKTOP_ORIGINS;
+  delete process.env.PETRI_TRUSTED_DESKTOP_ORIGINS;
 });

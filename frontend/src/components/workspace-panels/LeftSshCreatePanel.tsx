@@ -226,7 +226,7 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
 
   return (
     <div
-      style={{ padding: '8px 12px 10px', borderBottom: '1px solid var(--gewu-border, rgba(128,128,128,0.25))' }}
+      style={{ padding: '8px 12px 10px', borderBottom: '1px solid var(--petri-border, rgba(128,128,128,0.25))' }}
       data-testid="left-ssh-create-panel"
     >
       {step === 'connect' ? (
@@ -236,7 +236,7 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
               type="button"
               role="tab"
               aria-selected={mode === 'alias'}
-              className={`gewu-btn gewu-btn--sm ${mode === 'alias' ? '' : 'gewu-btn--ghost'}`}
+              className={`petri-btn petri-btn--sm ${mode === 'alias' ? '' : 'petri-btn--ghost'}`}
               onClick={() => { setMode('alias'); setError(''); }}
             >
               别名
@@ -245,7 +245,7 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
               type="button"
               role="tab"
               aria-selected={mode === 'password'}
-              className={`gewu-btn gewu-btn--sm ${mode === 'password' ? '' : 'gewu-btn--ghost'}`}
+              className={`petri-btn petri-btn--sm ${mode === 'password' ? '' : 'petri-btn--ghost'}`}
               onClick={() => { setMode('password'); setError(''); }}
               title="密码只用于一次性安装本机公钥到服务器，之后免密连接；密码不会被保存"
             >
@@ -308,10 +308,10 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
             </>
           )}
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            <button type="submit" className="gewu-btn gewu-btn--sm" disabled={busy}>
+            <button type="submit" className="petri-btn petri-btn--sm" disabled={busy}>
               {busy ? '连接中…' : '连接'}
             </button>
-            <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={onClose} disabled={busy}>
+            <button type="button" className="petri-btn petri-btn--ghost petri-btn--sm" onClick={onClose} disabled={busy}>
               取消
             </button>
           </div>
@@ -328,7 +328,7 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
             </span>
             <button
               type="button"
-              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              className="petri-btn petri-btn--ghost petri-btn--sm"
               onClick={() => { const p = parentPath === '/' ? '/' : `${parentPath}/`; setPathInput(p); void fetchCandidates(p); }}
               disabled={candidatesLoading || normalizedCreatePath === '/'}
               title="返回上级目录"
@@ -337,7 +337,7 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
             </button>
             <button
               type="button"
-              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              className="petri-btn petri-btn--ghost petri-btn--sm"
               onClick={() => { void fetchCandidates(pathInput); }}
               disabled={candidatesLoading}
               title="刷新候选"
@@ -362,7 +362,7 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
             />
             <button
               type="button"
-              className="gewu-btn gewu-btn--sm"
+              className="petri-btn petri-btn--sm"
               style={{ marginBottom: 4, whiteSpace: 'nowrap' }}
               onClick={() => void handleCreate()}
               disabled={createDisabled}
@@ -372,7 +372,7 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
             </button>
           </div>
           <div
-            style={{ maxHeight: 180, overflowY: 'auto', border: '1px solid var(--gewu-border, rgba(128,128,128,0.25))', borderRadius: 6, marginBottom: 4 }}
+            style={{ maxHeight: 180, overflowY: 'auto', border: '1px solid var(--petri-border, rgba(128,128,128,0.25))', borderRadius: 6, marginBottom: 4 }}
             data-testid="ssh-path-candidates"
           >
             {candidatesLoading ? (
@@ -389,7 +389,7 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
                   title={cand}
                   style={{
                     display: 'block', width: '100%', textAlign: 'left', padding: '4px 10px', fontSize: 12,
-                    background: idx === highlight ? 'var(--gewu-accent-weak, rgba(128,0,255,0.12))' : 'none',
+                    background: idx === highlight ? 'var(--petri-accent-weak, rgba(128,0,255,0.12))' : 'none',
                     border: 'none', cursor: 'pointer', color: 'inherit', fontFamily: 'monospace',
                   }}
                 >
@@ -399,7 +399,7 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
             )}
           </div>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 4 }}>
-            <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={onClose} disabled={busy}>
+            <button type="button" className="petri-btn petri-btn--ghost petri-btn--sm" onClick={onClose} disabled={busy}>
               取消
             </button>
           </div>

@@ -12,10 +12,10 @@ import { fileURLToPath } from 'node:url';
  * BLOCK-145 D1 — tunnel 异步化契约测试（红绿先行，BK-08 根因修复守卫）。
  *
  * 已定位根因（BLOCK-144 取证）：
- *   - core/biof3-server/mobile-gateway/tunnel.js:20  顶层解构 spawnSync（别名 cpSpawnSync）
+ *   - core/petri-server/mobile-gateway/tunnel.js:20  顶层解构 spawnSync（别名 cpSpawnSync）
  *   - tunnel.js:200-208 remotePortSweep() 用 cpSpawnSync 同步跑 ssh（ConnectTimeout=10、
  *     timeout=25s）——在 spawnTunnel() 冷启动链上同步等待网络往返，阻塞 event loop
- *   - core/biof3-server/server.js:370 启动路径 getTunnelManager(...).startIfEnabled()
+ *   - core/petri-server/server.js:370 启动路径 getTunnelManager(...).startIfEnabled()
  *     在模块求值期同步走到上述同步 ssh → 桌面冷启动被卡（BK-08）
  *
  * 契约（修好后必须全绿）：
@@ -28,8 +28,8 @@ import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const TUNNEL_PATH = path.join(ROOT, 'core/biof3-server/mobile-gateway/tunnel.js');
-const SERVER_PATH = path.join(ROOT, 'core/biof3-server/server.js');
+const TUNNEL_PATH = path.join(ROOT, 'core/petri-server/mobile-gateway/tunnel.js');
+const SERVER_PATH = path.join(ROOT, 'core/petri-server/server.js');
 
 const SYNC_SPAWN_RE = /spawnSync|execSync|execFileSync/gi;
 
@@ -192,7 +192,7 @@ test('BLOCK-145 D1② 现状锚：server.js 在 app.listen 注册后经 setImmed
 
 test('BLOCK-145 D1② 启动非阻塞契约：startIfEnabled() 不得同步等待网络往返', () => {
   const { createTunnelManager, writeTunnelConfig } = require(TUNNEL_PATH);
-  const root = mkdtempSync(path.join(tmpdir(), 'gewu-tunnel-async-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-tunnel-async-'));
   let manager = null;
   try {
     // 先以 disabled 建 manager（避免构造期自动 spawn 干扰归因），再落 enabled 配置
@@ -242,7 +242,7 @@ test('BLOCK-145 D1② 启动非阻塞契约：startIfEnabled() 不得同步等�
 
 test('BLOCK-145 D1② 清场顺序契约：killStale → 远端清场完成 → 才 spawn 正式隧道', async () => {
   const { createTunnelManager, writeTunnelConfig } = require(TUNNEL_PATH);
-  const root = mkdtempSync(path.join(tmpdir(), 'gewu-tunnel-order-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-tunnel-order-'));
   let manager = null;
   try {
     // enabled 配置直接建 manager：走构造期冷启动路径（与 server.js 引导同链）

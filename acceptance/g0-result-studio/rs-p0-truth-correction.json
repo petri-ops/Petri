@@ -8,7 +8,7 @@
     "baselineVersion": "1.1.1",
     "lifecycleStatus": "maintained",
     "qualificationStatus": "qualified",
-    "constitutionId": "biof3-g0-constitution-v1",
+    "constitutionId": "petri-g0-constitution-v1",
     "manifestDigest": "5c8a0246bd263a304f520e853dd9a4576a3be0fbb668523e67b028add1d70df5",
     "bundleDigest": "8799d7678debeab413628832872fdfceee73c0a9fe6ae46b414260797819df86"
   },

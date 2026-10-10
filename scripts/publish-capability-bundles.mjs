@@ -11,10 +11,10 @@ const FILES = [
   join(BUNDLE_DIR, 'r-enrichment-1.0.0-macos-arm64.tar.gz'),
   join(BUNDLE_DIR, 'r-wgcna-1.0.0-macos-arm64.tar.gz'),
 ];
-const bucket = process.env.BIOF3_OSS_BUCKET || 'biof3-uploads';
+const bucket = process.env.PETRI_OSS_BUCKET || 'petri-uploads';
 const region = process.env.OSS_REGION || 'cn-hangzhou';
 const endpoint = process.env.OSS_ENDPOINT || 'oss-cn-hangzhou.aliyuncs.com';
-const prefix = (process.env.BIOF3_OSS_BUNDLE_PREFIX || 'bundles').replace(/^\/+|\/+$/g, '');
+const prefix = (process.env.PETRI_OSS_BUNDLE_PREFIX || 'bundles').replace(/^\/+|\/+$/g, '');
 const uploadEnabled = process.argv.includes('--upload');
 
 function fail(message) {

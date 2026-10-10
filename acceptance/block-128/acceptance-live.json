@@ -1,7 +1,7 @@
 {
   "suite": "block128-acceptance-live",
   "baseUrl": "http://127.0.0.1:3001",
-  "dbFile": "/.biof3-dev-user-data/data/biof3.db",
+  "dbFile": "/.petri-dev-user-data/data/petri.db",
   "toolId": "deseq2",
   "projectId": "p_mupdezdn_gks6",
   "jobId": "tj_mupdf1qc_o81b",

@@ -1,8 +1,8 @@
-/* Gewu 桌面版原生 shell — 全局样式 */
+/* Petri 桌面版原生 shell — 全局样式 */
 /* 复刻 Docusaurus 设计系统：Infima token + custom.css 覆盖，
    但结构走桌面化（无 navbar/footer，dock 浮动侧边栏）。
    - infima default.css：~200 个设计 token（颜色/间距/圆角/阴影/字号/z-index）
-   - 仓库根 custom.css：Gewu brand palette + primary 色阶覆盖 + markdown 排版
+   - 仓库根 custom.css：Petri brand palette + primary 色阶覆盖 + markdown 排版
    - 下方桌面版覆盖：body 字体、滚动条、dock 让位 */
 @import 'infima/dist/css/default/default.css';
 @import './custom.css';
@@ -10,42 +10,42 @@
 :root {
   /* 桌面版基础（覆盖 infima 的 web 站点默认） */
   --ifm-navbar-height: 0px; /* 桌面版无 navbar */
-  --gewu-titlebar-height: 38px;
+  --petri-titlebar-height: 38px;
   /* infima 默认 background-color: transparent（靠 body），桌面版给实色 */
   --ifm-background-color: #ffffff;
   /* 桌面版内容区更紧凑的阅读宽度 */
-  --ifm-font-size-base: calc(15.5px * var(--gewu-font-scale, 1));
+  --ifm-font-size-base: calc(15.5px * var(--petri-font-scale, 1));
   --ifm-line-height-base: 1.65;
 
   /* 桌面版字号 token — Infima 无 heading 字号 token，统一在此定义供 module 引用。
-     BLOCK-49 加映三 — 全部 token 走 calc(var(--gewu-font-scale) × 基准)：
+     BLOCK-49 加映三 — 全部 token 走 calc(var(--petri-font-scale) × 基准)：
      设置面板「界面字号」调节 root 缩放系数（html.style 注入，默认 1），
      图标与布局尺寸不受影响。 */
-  --gewu-font-scale: 1;
-  --gewu-font-size-xs: calc(0.625rem * var(--gewu-font-scale)); /* 10px 徽标/角标 */
-  --gewu-font-size-sm: calc(0.6875rem * var(--gewu-font-scale)); /* 11px 辅助文字 */
-  --gewu-font-size-caption: calc(0.75rem * var(--gewu-font-scale)); /* 12px 说明/caption */
-  --gewu-font-size-body-sm: calc(0.8125rem * var(--gewu-font-scale)); /* 13px 紧凑正文/表格 */
-  --gewu-font-size-body: calc(0.875rem * var(--gewu-font-scale)); /* 14px 正文 */
-  --gewu-font-size-md: calc(1rem * var(--gewu-font-scale)); /* 16px 小标题/MD h2 */
-  --gewu-font-size-lg: calc(1.125rem * var(--gewu-font-scale)); /* 18px 小标题 */
-  --gewu-font-size-xl: calc(1.25rem * var(--gewu-font-scale)); /* 20px 标题 */
-  --gewu-font-size-2xl: calc(1.375rem * var(--gewu-font-scale)); /* 22px 大标题 */
-  --gewu-font-size-3xl: calc(1.75rem * var(--gewu-font-scale)); /* 28px 页标题 */
-  --gewu-font-size-base: var(--gewu-font-size-body); /* 别名：三档基线（BLOCK-76 清债补契约定义） */
+  --petri-font-scale: 1;
+  --petri-font-size-xs: calc(0.625rem * var(--petri-font-scale)); /* 10px 徽标/角标 */
+  --petri-font-size-sm: calc(0.6875rem * var(--petri-font-scale)); /* 11px 辅助文字 */
+  --petri-font-size-caption: calc(0.75rem * var(--petri-font-scale)); /* 12px 说明/caption */
+  --petri-font-size-body-sm: calc(0.8125rem * var(--petri-font-scale)); /* 13px 紧凑正文/表格 */
+  --petri-font-size-body: calc(0.875rem * var(--petri-font-scale)); /* 14px 正文 */
+  --petri-font-size-md: calc(1rem * var(--petri-font-scale)); /* 16px 小标题/MD h2 */
+  --petri-font-size-lg: calc(1.125rem * var(--petri-font-scale)); /* 18px 小标题 */
+  --petri-font-size-xl: calc(1.25rem * var(--petri-font-scale)); /* 20px 标题 */
+  --petri-font-size-2xl: calc(1.375rem * var(--petri-font-scale)); /* 22px 大标题 */
+  --petri-font-size-3xl: calc(1.75rem * var(--petri-font-scale)); /* 28px 页标题 */
+  --petri-font-size-base: var(--petri-font-size-body); /* 别名：三档基线（BLOCK-76 清债补契约定义） */
 
   /* 桌面版间距 token — 常用 px 档位，零碎值（3/5/10/14px）保留 */
-  --gewu-space-1: 4px;
-  --gewu-space-2: 6px;
-  --gewu-space-3: 8px;
-  --gewu-space-4: 12px;
-  --gewu-space-5: 16px;
-  --gewu-space-6: 24px;
-  --gewu-live-result-right-width: 720px;
+  --petri-space-1: 4px;
+  --petri-space-2: 6px;
+  --petri-space-3: 8px;
+  --petri-space-4: 12px;
+  --petri-space-5: 16px;
+  --petri-space-6: 24px;
+  --petri-live-result-right-width: 720px;
 
   /* dock/面板表面色 — UI-238 亮色切中性 zinc（与白底发丝线区分），暗色蓝灰深底
      （保持品牌冷调，非 infima emphasis 的纯灰） */
-  --gewu-surface-dim: #f4f4f5;
+  --petri-surface-dim: #f4f4f5;
 }
 
 /* UI-392 — 特异性对齐 infima：infima 用 html[data-theme='dark']（0,1,1），
@@ -53,11 +53,11 @@
    从未生效（body 恒 infima 灰 #1b1b1d，欢迎页整页露出）。提级到同特异性
    后，@import 顺序保证本仓后置规则获胜。 */
 html[data-theme='dark'] {
-  --ifm-background-color: var(--gewu-bg-surface);
-  --ifm-background-surface-color: var(--gewu-bg-surface);
+  --ifm-background-color: var(--petri-bg-surface);
+  --ifm-background-surface-color: var(--petri-bg-surface);
   /* UI-392 — 暗色 surface-dim 单一真源在 custom.css（#111a2e 海军蓝族）；
      原字面量 #0f172a（slate-900）与之冲突构成双暗底，改引用消除分歧 */
-  --gewu-surface-dim: var(--gewu-bg-surface);
+  --petri-surface-dim: var(--petri-bg-surface);
 }
 
 * {
@@ -70,10 +70,10 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  font-family: var(--gewu-font-sans);
-  font-size: var(--gewu-font-size-md);
+  font-family: var(--petri-font-sans);
+  font-size: var(--petri-font-size-md);
   background: var(--ifm-background-color);
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -84,7 +84,7 @@ body {
 }
 
 /* 桌面版主内容区 — dock 右侧 */
-.gewu-spa-main {
+.petri-spa-main {
   height: 100vh;
   min-height: 0;
   overflow: hidden;
@@ -99,15 +99,15 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--gewu-border) 60%, var(--gewu-bg-subtle) 40%);
+  background: color-mix(in srgb, var(--petri-border) 60%, var(--petri-bg-subtle) 40%);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--gewu-text-secondary) 50%, transparent 50%);
+  background: color-mix(in srgb, var(--petri-text-secondary) 50%, transparent 50%);
 }
 
 /* docs/blog iframe 过渡容器 */
-.gewu-docs-frame-wrap {
+.petri-docs-frame-wrap {
   position: fixed;
   top: 0;
   left: 64px; /* 让出 dock */
@@ -115,16 +115,16 @@ body {
   bottom: 0;
   background: var(--ifm-background-color, #fff);
 }
-.gewu-docs-frame-loading {
+.petri-docs-frame-loading {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--gewu-text-muted);
-  font-size: var(--gewu-font-size-md);
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-md);
 }
-.gewu-docs-frame {
+.petri-docs-frame {
   width: 100%;
   height: 100%;
   border: none;
@@ -133,8 +133,8 @@ body {
 
 /* ────────────────────────────────────────────────────────────
  * 桌面版基线覆盖 — 修正 infima 对裸元素的 Web 站点风格副作用
- * 仅作用于未被 .gewu-docs-content 重新定义的页面（应用页）。
- * docs/blog 页有自己的 .gewu-docs-content 规则，优先级更高，不受影响。
+ * 仅作用于未被 .petri-docs-content 重新定义的页面（应用页）。
+ * docs/blog 页有自己的 .petri-docs-content 规则，优先级更高，不受影响。
  * ──────────────────────────────────────────────────────────── */
 
 /* 表单控件：Chrome UA 默认不继承字体（button 计算栈会落到 Arial），
@@ -151,19 +151,19 @@ textarea {
    让所有 code=容器×0.88 漂移（13→11.4/16→14.1），行内代码统一 caption 12px */
 code {
   border: none;
-  background-color: var(--gewu-bg-subtle);
-  font-family: var(--gewu-font-mono, monospace);
-  font-size: var(--gewu-font-size-caption);
+  background-color: var(--petri-bg-subtle);
+  font-family: var(--petri-font-mono, monospace);
+  font-size: var(--petri-font-size-caption);
 }
 /* pre 代码块：去掉 infima 默认背景，让应用页自己的代码块样式生效；
-   docs/blog 的 .gewu-docs-content pre 会重新给深色背景；
+   docs/blog 的 .petri-docs-content pre 会重新给深色背景；
    UI-240：接管字号——infima pre{font:88% mono} 使代码块随容器漂移，
    统一代码块基准 body-sm 13px（对齐聊天正文/CM diff/文件树） */
 pre {
   background-color: transparent;
   padding: 0;
   margin: 0;
-  font: var(--gewu-font-size-body-sm) / 1.5 var(--gewu-font-mono, monospace);
+  font: var(--petri-font-size-body-sm) / 1.5 var(--petri-font-mono, monospace);
 }
 pre code {
   background-color: transparent;
@@ -187,7 +187,7 @@ ol {
 
 /* 暗色模式：inline code 背景用半透明，避免亮灰块刺眼 */
 [data-theme='dark'] code {
-  background-color: var(--gewu-border);
+  background-color: var(--petri-border);
 }
 
 /* ────────────────────────────────────────────────────────────
@@ -210,9 +210,9 @@ ol {
   /* UI-341 加映二 — 功能性布局过渡豁免：侧栏/终端开合是「空间变化的即时反馈」
      （0.22s 宽/高，无跨屏位移、无缩放、无视差），不属 WCAG 2.3.3 针对的交互动效；
      被上面的兜底压成 1 微秒会让开合退化为瞬跳（用户实测反馈「不平滑」的根因）。
-     宿主以 data-gewu-motion="functional" 显式标记这三处容器；
+     宿主以 data-petri-motion="functional" 显式标记这三处容器；
      属性选择器 (0,1,0) 权重高于上方 `*` (0,0,0)，同为 !important 时稳定胜出。 */
-  [data-gewu-motion='functional'] {
+  [data-petri-motion='functional'] {
     transition-duration: 0.22s !important;
     transition-delay: 0ms !important;
   }

@@ -245,7 +245,7 @@
       "passed": true,
       "evidence": [
         "core/shared-backend/git-adapter.js",
-        "core/biof3-server/routes/result-studio.js"
+        "core/petri-server/routes/result-studio.js"
       ],
       "detail": "changesets steady-state cost fell by at least half against the frozen P4R-0 baseline, measured on the real chain rather than asserted."
     },
@@ -262,7 +262,7 @@
       "id": "RS-P4R1-3",
       "passed": true,
       "evidence": [
-        "core/biof3-server/routes/result-studio.js"
+        "core/petri-server/routes/result-studio.js"
       ],
       "detail": "Every measured route returned 200, so the numbers describe the real path and not argument validation."
     },
@@ -316,7 +316,7 @@
       "evidence": [
         "test/result-studio-agent-binding.test.mjs",
         "test/system-prompt-result-context.test.mjs",
-        "core/biof3-server/agent-tools/result-context-binding.js"
+        "core/petri-server/agent-tools/result-context-binding.js"
       ],
       "detail": "Context projection, pre-schema token binding, stale-token rejection and five-stage recording executed as Node tests; task/legacy imports are additionally protected by a static wiring guard."
     },
@@ -373,7 +373,7 @@
       "passed": true,
       "evidence": [
         "core/shared-backend/result-revision-source.js",
-        "core/biof3-server/routes/result-studio.js",
+        "core/petri-server/routes/result-studio.js",
         "test/result-revision-source.test.mjs",
         "test/p4r-invariants.test.mjs"
       ],

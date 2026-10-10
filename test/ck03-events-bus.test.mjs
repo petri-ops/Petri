@@ -27,22 +27,22 @@ const require = createRequire(import.meta.url);
 let tempDbDir;
 {
   const Database = require('better-sqlite3');
-  tempDbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-ck03-db-'));
-  const db = new Database(path.join(tempDbDir, 'biof3.db'));
+  tempDbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-ck03-db-'));
+  const db = new Database(path.join(tempDbDir, 'petri.db'));
   const migrationsDir = resolve('src/migrations');
   for (const file of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     db.exec(fs.readFileSync(path.join(migrationsDir, file), 'utf8'));
   }
   db.close();
-  process.env.BIOF3_DB_PATH = path.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try { fs.rmSync(tempDbDir, { recursive: true, force: true }); } catch {}
   });
 }
 
-const eventBus = require(resolve('core/biof3-server/helpers/event-bus.js'));
-const eventsRoute = require(resolve('core/biof3-server/routes/events-bus.js'));
-const agentTaskStore = require(resolve('core/biof3-server/agent-task-store.js'));
+const eventBus = require(resolve('core/petri-server/helpers/event-bus.js'));
+const eventsRoute = require(resolve('core/petri-server/routes/events-bus.js'));
+const agentTaskStore = require(resolve('core/petri-server/agent-task-store.js'));
 
 const USER_ID = 'u_ck03';
 let server = null;

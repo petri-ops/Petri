@@ -11,7 +11,7 @@
  * So every capture run gets a throwaway root instead. The backend already reads
  * every path it needs from the environment, so isolation needs no production
  * code change. The authoritative list is ISOLATED_PATH_ENV below; on top of it
- * a run sets R_SERVER_PORT and BIOF3_PERF_PROBE=1, which arms the probe from
+ * a run sets R_SERVER_PORT and PETRI_PERF_PROBE=1, which arms the probe from
  * commit 340c09a.
  *
  * The isolation is asserted, not assumed: assertIsolated() refuses to run when
@@ -37,9 +37,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SERVER_ENTRY = path.join(REPO_ROOT, 'core', 'biof3-server', 'server.js');
+const SERVER_ENTRY = path.join(REPO_ROOT, 'core', 'petri-server', 'server.js');
 const MIGRATIONS_DIR = path.join(REPO_ROOT, 'src', 'migrations');
-const REPO_DB = path.join(REPO_ROOT, 'core', 'biof3-server', 'biof3.db');
+const REPO_DB = path.join(REPO_ROOT, 'core', 'petri-server', 'petri.db');
 
 /**
  * Every environment variable that decides where the backend WRITES.
@@ -47,8 +47,8 @@ const REPO_DB = path.join(REPO_ROOT, 'core', 'biof3-server', 'biof3.db');
  * Declared once and consumed by both createCaptureEnv() and assertIsolated(),
  * so a path can never be redirected without also being guarded — the first
  * version of this file set four of these and guarded the same four, which left
- * BIOF3_LOCAL_DATA_DIR, BIOF3_PLUGINS_DIR and BIOF3_HARNESS_LOCAL_ROOT falling
- * back to ~/Documents/BioF3-Local, the real user data root.
+ * PETRI_LOCAL_DATA_DIR, PETRI_PLUGINS_DIR and PETRI_HARNESS_LOCAL_ROOT falling
+ * back to ~/Documents/Petri-Local, the real user data root.
  *
  * Each entry maps the variable to its subdirectory inside the disposable root.
  * Sources: config.js (db/temp/results/uploads), db.js:550 getLocalDataRoot,
@@ -56,13 +56,13 @@ const REPO_DB = path.join(REPO_ROOT, 'core', 'biof3-server', 'biof3.db');
  * mcp/registry.js:167 + helpers/tools-executor.js:116 (harness root).
  */
 export const ISOLATED_PATH_ENV = Object.freeze({
-  BIOF3_DB_PATH: 'biof3.db',
-  BIOF3_TEMP_DIR: 'tmp',
-  BIOF3_LOCAL_RESULTS_DIR: 'results',
-  BIOF3_LOCAL_UPLOADS_DIR: 'uploads',
-  BIOF3_LOCAL_DATA_DIR: 'data',
-  BIOF3_PLUGINS_DIR: 'plugins',
-  BIOF3_HARNESS_LOCAL_ROOT: 'results',
+  PETRI_DB_PATH: 'petri.db',
+  PETRI_TEMP_DIR: 'tmp',
+  PETRI_LOCAL_RESULTS_DIR: 'results',
+  PETRI_LOCAL_UPLOADS_DIR: 'uploads',
+  PETRI_LOCAL_DATA_DIR: 'data',
+  PETRI_PLUGINS_DIR: 'plugins',
+  PETRI_HARNESS_LOCAL_ROOT: 'results',
 });
 
 /**
@@ -83,7 +83,7 @@ export const ISOLATED_PATH_ENV = Object.freeze({
 export function fingerprintRealDataRoot(realRoot) {
   if (!existsSync(realRoot)) return { present: false };
   const list = (dir) => (existsSync(dir) ? readdirSync(dir).sort().join('\n') : null);
-  const dbPath = path.join(realRoot, 'biof3.db');
+  const dbPath = path.join(realRoot, 'petri.db');
   const db = existsSync(dbPath) ? statSync(dbPath) : null;
   return {
     present: true,
@@ -132,7 +132,7 @@ export function assertIsolated(env, root) {
   // database is the most damaging mistake available here, so it earns the
   // specific message. The generic rule would otherwise swallow it, since the
   // repository database is always outside a throwaway root.
-  if (env.BIOF3_DB_PATH && path.resolve(env.BIOF3_DB_PATH) === path.resolve(REPO_DB)) {
+  if (env.PETRI_DB_PATH && path.resolve(env.PETRI_DB_PATH) === path.resolve(REPO_DB)) {
     throw new Error('capture isolation: refusing to capture against the repository database');
   }
 
@@ -148,21 +148,21 @@ export function assertIsolated(env, root) {
 
 /** Build a disposable root plus the environment that points the server at it. */
 export function createCaptureEnv({ port, root } = {}) {
-  const captureRoot = root || mkdtempSync(path.join(tmpdir(), 'biof3-p4r-capture-'));
+  const captureRoot = root || mkdtempSync(path.join(tmpdir(), 'petri-p4r-capture-'));
 
   const paths = Object.fromEntries(
     Object.entries(ISOLATED_PATH_ENV).map(([key, leaf]) => [key, path.join(captureRoot, leaf)]),
   );
-  // BIOF3_DB_PATH names a file; the rest are directories the backend expects to exist.
+  // PETRI_DB_PATH names a file; the rest are directories the backend expects to exist.
   for (const [key, value] of Object.entries(paths)) {
-    if (key !== 'BIOF3_DB_PATH') mkdirSync(value, { recursive: true });
+    if (key !== 'PETRI_DB_PATH') mkdirSync(value, { recursive: true });
   }
 
   const env = {
     ...process.env,
     ...paths,
-    BIOF3_PERF_PROBE: '1',
-    BIOF3_DESKTOP: '1',
+    PETRI_PERF_PROBE: '1',
+    PETRI_DESKTOP: '1',
     R_SERVER_PORT: String(port ?? 0),
     // Keep a capture run off the network and out of the AI path entirely.
     R_POOL_ENABLED: 'false',
@@ -199,7 +199,7 @@ export async function applyMigrations(dbPath, { quiet = false } = {}) {
 /** Report which RS tables actually exist, so a capture cannot silently run half-migrated. */
 export function inspectTables(dbPath) {
   const Database = require(require.resolve('better-sqlite3', {
-    paths: [path.join(REPO_ROOT, 'core', 'biof3-server'), REPO_ROOT],
+    paths: [path.join(REPO_ROOT, 'core', 'petri-server'), REPO_ROOT],
   }));
   const db = new Database(dbPath, { readonly: true });
   try {
@@ -304,8 +304,8 @@ export async function capture({ scenarios, keep = false, quiet = false, onLog } 
   let server = null;
 
   try {
-    const migration = await applyMigrations(env.BIOF3_DB_PATH, { quiet });
-    const tables = inspectTables(env.BIOF3_DB_PATH);
+    const migration = await applyMigrations(env.PETRI_DB_PATH, { quiet });
+    const tables = inspectTables(env.PETRI_DB_PATH);
     if (tables.missing.length) {
       throw new Error(`migration left RS tables missing: ${tables.missing.join(', ')}`);
     }

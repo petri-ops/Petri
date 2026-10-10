@@ -49,7 +49,7 @@ const DEG_ROWS = [
 const tempDirs = [];
 
 function makeRepo(context) {
-  const root = mkdtempSync(join(tmpdir(), 'biof3-rs3-'));
+  const root = mkdtempSync(join(tmpdir(), 'petri-rs3-'));
   tempDirs.push(root);
   const db = new Database(join(root, 'rs3.db'));
   // 关闭 makeRepo 自己持有的 DB（用例级 after 钩子）。

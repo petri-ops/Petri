@@ -9,15 +9,15 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
-const tempRoot = mkdtempSync(join(tmpdir(), 'biof3-g0-lf0-'));
-process.env.BIOF3_DB_PATH = join(tempRoot, 'g0-lf0.db');
-process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
+const tempRoot = mkdtempSync(join(tmpdir(), 'petri-g0-lf0-'));
+process.env.PETRI_DB_PATH = join(tempRoot, 'g0-lf0.db');
+process.env.PETRI_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
 
 // BLOCK-49 加映清债 —— 应用全量 migrations
 {
   const _cr = createRequire(import.meta.url);
-  const Database = _cr(resolve(__dirname, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const boot = new Database(process.env.BIOF3_DB_PATH);
+  const Database = _cr(resolve(__dirname, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const boot = new Database(process.env.PETRI_DB_PATH);
   const migDir = resolve(__dirname, '..', 'src', 'migrations');
   for (const f of _cr('node:fs').readdirSync(migDir).filter((f) => f.endsWith('.sql')).sort()) {
     const sql = _cr('node:fs').readFileSync(_cr('node:path').resolve(migDir, f), 'utf8');
@@ -31,10 +31,10 @@ process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
 }
 const require = createRequire(import.meta.url);
 
-const db = require('../core/biof3-server/db');
+const db = require('../core/petri-server/db');
 const g0 = require('../core/shared-backend/g0-baseline');
 const { resolveProjectRunLayout } = require('../core/shared-backend/project-run-layout');
-const { createWorkspaceTools } = require('../core/biof3-server/agent-tools/workspace-tools');
+const { createWorkspaceTools } = require('../core/petri-server/agent-tools/workspace-tools');
 
 after(() => {
   try {
@@ -165,7 +165,7 @@ test('deleting a project deletes its G0 identity record', () => {
 
 test('an earlier LF0 project baseline table upgrades idempotently and backfills exact identities', () => {
   const migrationDbPath = join(tempRoot, 'g0-lf0-old-schema.db');
-  const Database = require('../core/biof3-server/node_modules/better-sqlite3');
+  const Database = require('../core/petri-server/node_modules/better-sqlite3');
   const migrationDb = new Database(migrationDbPath);
   // migrationDb 需有 projects 表（spawn 子进程的 agent-task-store schema 检查）
   migrationDb.exec(`CREATE TABLE IF NOT EXISTS projects (
@@ -214,7 +214,7 @@ test('an earlier LF0 project baseline table upgrades idempotently and backfills 
   const probe = spawnSync(
     process.execPath,
     ['-e', `
-      const db = require('./core/biof3-server/db');
+      const db = require('./core/petri-server/db');
       const columns = db.db.prepare('PRAGMA table_info(project_g0_baselines)').all().map((item) => item.name);
       const row = db.db.prepare('SELECT * FROM project_g0_baselines WHERE project_id = ?').get('old_schema_project');
       process.stdout.write(JSON.stringify({ columns, row }));
@@ -224,8 +224,8 @@ test('an earlier LF0 project baseline table upgrades idempotently and backfills 
       cwd: process.cwd(),
       env: {
         ...process.env,
-        BIOF3_DB_PATH: migrationDbPath,
-        BIOF3_LOCAL_DATA_DIR: join(tempRoot, 'old-schema-local-data'),
+        PETRI_DB_PATH: migrationDbPath,
+        PETRI_LOCAL_DATA_DIR: join(tempRoot, 'old-schema-local-data'),
       },
       encoding: 'utf8',
     },

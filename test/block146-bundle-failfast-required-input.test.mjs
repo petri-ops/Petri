@@ -51,14 +51,14 @@ async function waitUntil(fn, label, timeoutMs = 20000, debugFn = null) {
 }
 
 // ── 共享 harness（形态与 test/block141-cancel-classification.test.mjs 同构）──
-// BIOF3_DB_PATH → 生产 migration 链 → db.js 异步 facade；BIOF3_LOCAL_DATA_DIR
-// 钉到临时目录，隔离真实 ~/Documents/BioF3-Local 的 provisioning ledger。
-const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block146-'));
-process.env.BIOF3_DB_PATH = path.join(tempDir, 'biof3.db');
-process.env.BIOF3_LOCAL_DATA_DIR = path.join(tempDir, 'local-data');
+// PETRI_DB_PATH → 生产 migration 链 → db.js 异步 facade；PETRI_LOCAL_DATA_DIR
+// 钉到临时目录，隔离真实 ~/Documents/Petri-Local 的 provisioning ledger。
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block146-'));
+process.env.PETRI_DB_PATH = path.join(tempDir, 'petri.db');
+process.env.PETRI_LOCAL_DATA_DIR = path.join(tempDir, 'local-data');
 const { runMigrations } = require('../src/migration-runner');
-await runMigrations(process.env.BIOF3_DB_PATH, path.join(ROOT, 'src', 'migrations'));
-const dbMod = require('../core/biof3-server/db.js');
+await runMigrations(process.env.PETRI_DB_PATH, path.join(ROOT, 'src', 'migrations'));
+const dbMod = require('../core/petri-server/db.js');
 const db = dbMod.getAsyncDatabase();
 
 function makePlugin(id, pluginJsonExtra, toolDefinition, scriptExt, scriptLines) {
@@ -117,13 +117,13 @@ const reqFilePlugin = makePlugin(
   RUN_SCRIPT,
 );
 
-globalThis._biof3Plugins = new Map();
+globalThis._petriPlugins = new Map();
 for (const [id, meta] of [
   [PLUGIN_BUNDLE, { ...bundlePlugin, language: 'r', requiresBundle: 'r-enrichment', requiresBundleVersion: '1.0.0' }],
   [PLUGIN_PLAIN, { ...plainPlugin, language: 'r' }],
   [PLUGIN_REQFILE, { ...reqFilePlugin, language: 'python' }],
 ]) {
-  globalThis._biof3Plugins.set(id, {
+  globalThis._petriPlugins.set(id, {
     id,
     ...meta,
     // plugin-loader 契约：scriptPath = scripts 目录（getScriptForTool /
@@ -166,7 +166,7 @@ const agentSeams = () => ({
 });
 
 async function runAgent(plugin, args, userId) {
-  const { _runPluginScript } = require('../core/biof3-server/mcp/registry/run-plugin-script.js');
+  const { _runPluginScript } = require('../core/petri-server/mcp/registry/run-plugin-script.js');
   const result = await _runPluginScript(
     dbMod, null, plugin, plugin.scriptFile, args, userId,
     null, null, null, null, agentSeams(),
@@ -252,7 +252,7 @@ test('#9 对照：无 requiresBundle 声明的 R 插件不受影响（合法无 
 // ── #9 HTTP 路径：executeJob 内必需 bundle 未就绪 → markJobFailed('dependencies') ─
 
 test('#9 HTTP 路径：win32 宿主必需 bundle 未就绪 → 作业 failed 且 error 携带结构化归因', async () => {
-  const { createToolsExecutor } = require('../core/biof3-server/helpers/tools-executor.js');
+  const { createToolsExecutor } = require('../core/petri-server/helpers/tools-executor.js');
   const jobsDir = path.join(tempDir, 'tool-jobs-http');
   fs.mkdirSync(jobsDir, { recursive: true });
   const scriptsDir = path.join(tempDir, 'tool-scripts');

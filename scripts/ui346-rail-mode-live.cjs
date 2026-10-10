@@ -17,7 +17,7 @@ const path = require('node:path');
 const http = require('node:http');
 
 const ROOT = path.join(__dirname, '..');
-const lib = require(path.join(ROOT, '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(ROOT, '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 const AUTH = { Authorization: 'Bearer desktop-local' };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -95,7 +95,7 @@ async function waitPanel(client, selector, timeoutMs = 15000) {
   const before1 = await lib.evalJs(client, PATH_NOW);
   await clickRailItem(client, '插件');
   const url1 = await waitUrl(client, `/project/${latestProjectId}/plugins`);
-  const panel1 = url1 ? await waitPanel(client, '.gewu-plugin-store-panel') : false;
+  const panel1 = url1 ? await waitPanel(client, '.petri-plugin-store-panel') : false;
   run.assert('V1_welcome_plugins_opens', url1 !== null && panel1,
     `欢迎页（${before1}）点「插件」→ ${url1 || 'URL 未变'}，插件商店面板${panel1 ? '已渲染' : '未渲染'}`);
 
@@ -118,7 +118,7 @@ async function waitPanel(client, selector, timeoutMs = 15000) {
   const urlBefore3 = await lib.evalJs(client, PATH_NOW);
   await clickRailItem(client, '插件');
   const url3 = await waitUrl(client, `/project/${latestProjectId}/plugins`);
-  const panel3 = url3 ? await waitPanel(client, '.gewu-plugin-store-panel') : false;
+  const panel3 = url3 ? await waitPanel(client, '.petri-plugin-store-panel') : false;
   const projectPreserved = url3 !== null && url3.startsWith(`/project/${latestProjectId}/`);
   run.assert('V3_in_project_switch_preserved', projectPreserved && panel3,
     `项目内（${urlBefore3}）点「插件」→ ${url3 || 'URL 未变'}，项目未变且面板${panel3 ? '已渲染' : '未渲染'}`);

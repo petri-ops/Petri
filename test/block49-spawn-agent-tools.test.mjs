@@ -5,24 +5,24 @@ import { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const R_SERVER = resolve(__dirname, '..', 'core', 'biof3-server');
+const R_SERVER = resolve(__dirname, '..', 'core', 'petri-server');
 const require = createRequire(import.meta.url);
 
 // 与 agent-tool-registry.test.mjs 同一自举手法：临时 DB（src/migrations 全量），
-// BIOF3_DB_PATH 必须在 require db.js 前生效。
+// PETRI_DB_PATH 必须在 require db.js 前生效。
 {
   const fs = require('fs');
   const os = require('os');
   const path = require('path');
   const Database = require(R_SERVER + '/node_modules/better-sqlite3');
-  const tempDbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block49-db-'));
-  const boot = new Database(path.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block49-db-'));
+  const boot = new Database(path.join(tempDbDir, 'petri.db'));
   const migrationsDir = resolve(__dirname, '..', 'src', 'migrations');
   for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fs.readFileSync(path.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = path.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try { fs.rmSync(tempDbDir, { recursive: true, force: true }); } catch {}
   });
@@ -34,12 +34,12 @@ for (const key of Object.keys(process.env)) {
   if (/_API_KEY$/.test(key)) delete process.env[key];
 }
 
-const { decideAgentToolCall } = require('../core/biof3-server/agent-tools/agent-tool-policy.js');
-const { getToolContract } = require('../core/biof3-server/agent-tools/registry.js');
-const { spawn_agent, list_agents, wait_agent, followup_task, __test } = require('../core/biof3-server/agent-tools/spawn-agent-tools.js');
-const agentTaskStore = require('../core/biof3-server/agent-task-store.js');
-const { getOrCreateActiveConversation, appendMessageToConversation } = require('../core/biof3-server/helpers/conversations.js');
-const { aiTaskConcurrencyAcquire, aiTaskConcurrencyRelease } = require('../core/biof3-server/helpers/runtime.js');
+const { decideAgentToolCall } = require('../core/petri-server/agent-tools/agent-tool-policy.js');
+const { getToolContract } = require('../core/petri-server/agent-tools/registry.js');
+const { spawn_agent, list_agents, wait_agent, followup_task, __test } = require('../core/petri-server/agent-tools/spawn-agent-tools.js');
+const agentTaskStore = require('../core/petri-server/agent-task-store.js');
+const { getOrCreateActiveConversation, appendMessageToConversation } = require('../core/petri-server/helpers/conversations.js');
+const { aiTaskConcurrencyAcquire, aiTaskConcurrencyRelease } = require('../core/petri-server/helpers/runtime.js');
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -508,7 +508,7 @@ test('BLOCK-120：followup 续派继承原子 todoRefs + 显式覆盖（D-5）',
 });
 
 test('BLOCK-120：工具 schema 含 todoRefs（spawn_agent/followup_task）', () => {
-  const defs = require('../core/biof3-server/agent-tools/tool-defs/agent-orchestration.js');
+  const defs = require('../core/petri-server/agent-tools/tool-defs/agent-orchestration.js');
   const spawn = defs.find((d) => d.function && d.function.name === 'spawn_agent');
   assert.ok(spawn.function.parameters.properties.todoRefs, 'spawn_agent todoRefs 在位');
   assert.match(spawn.function.parameters.properties.todoRefs.description, /清单条目 id/);

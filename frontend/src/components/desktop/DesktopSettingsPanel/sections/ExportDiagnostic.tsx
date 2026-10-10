@@ -4,7 +4,7 @@
 // Extracted from src/components/desktop/DesktopSettingsPanel.tsx
 // by BLOCK-9.2 PHASE 1. Original location: lines 209-246.
 //
-// Wraps window.biof3Desktop.diagnostic.export() into a button with
+// Wraps window.petriDesktop.diagnostic.export() into a button with
 // success/failure message. Self-contained.
 // ============================================================
 
@@ -15,11 +15,11 @@ export function ExportDiagnostic(): React.ReactElement | null {
   const [msg, setMsg] = useState<string | null>(null);
 
   const handleExport = useCallback(async () => {
-    if (!window.biof3Desktop?.diagnostic) return;
+    if (!window.petriDesktop?.diagnostic) return;
     setExporting(true);
     setMsg(null);
     try {
-      const result = await window.biof3Desktop.diagnostic.export();
+      const result = await window.petriDesktop.diagnostic.export();
       if (result.ok) {
         setMsg('已导出到下载文件夹');
       } else if (result.error !== 'cancelled') {
@@ -31,19 +31,19 @@ export function ExportDiagnostic(): React.ReactElement | null {
     setExporting(false);
   }, []);
 
-  if (!window.biof3Desktop?.diagnostic) return null;
+  if (!window.petriDesktop?.diagnostic) return null;
 
   return (
-    <div className="gewu-update-section">
+    <div className="petri-update-section">
       <button
         type="button"
-        className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+        className="petri-btn petri-btn--ghost petri-btn--sm"
         onClick={() => void handleExport()}
         disabled={exporting}
       >
         {exporting ? '导出中…' : '导出诊断日志'}
       </button>
-      {msg && <span className="gewu-field__hint">{msg}</span>}
+      {msg && <span className="petri-field__hint">{msg}</span>}
     </div>
   );
 }

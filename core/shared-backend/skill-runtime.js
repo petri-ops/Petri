@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * skill-runtime.js — BioF3 Desktop Skills 执行运行时
+ * skill-runtime.js — Petri Desktop Skills 执行运行时
  *
  * Phase 1 产物：Skills 层执行引擎，负责：
  * 1. Skill 执行编排

@@ -20,21 +20,21 @@ browser-use 连 localhost:3000 实测 computed style + 全仓 CSS 审计，同�
 
 ### P1（UI-239）CodeMirror 全场景 13px 基准
 
-`CodeMirrorEditor.module.css` `.cmEditor :global(.cm-scroller)` 增加 `font-size: var(--biof3-font-size-body-sm)`——一处声明覆盖审阅 diff、提交全文、blame、未来编辑区所有 CM 挂载；行号 gutter 同步继承 13px。基准对齐聊天正文/文件树/markdown 预览（13px）。
+`CodeMirrorEditor.module.css` `.cmEditor :global(.cm-scroller)` 增加 `font-size: var(--petri-font-size-body-sm)`——一处声明覆盖审阅 diff、提交全文、blame、未来编辑区所有 CM 挂载；行号 gutter 同步继承 13px。基准对齐聊天正文/文件树/markdown 预览（13px）。
 
 ### P2（UI-240）`code`/`pre` 接管 + 代码块统一 13px
 
 `global.css` 桌面基线覆盖区（裸元素 `code`/`pre` 规则处）扩权：
 
-- bare `code`：接管 `font-size: var(--biof3-font-size-caption)`（行内代码 12px）+ `font-family: var(--biof3-font-mono)`；
-- bare `pre`：接管 `font: var(--biof3-font-size-body-sm)/1.5 var(--biof3-font-mono)`（代码块 13px）；
+- bare `code`：接管 `font-size: var(--petri-font-size-caption)`（行内代码 12px）+ `font-family: var(--petri-font-mono)`；
+- bare `pre`：接管 `font: var(--petri-font-size-body-sm)/1.5 var(--petri-font-mono)`（代码块 13px）；
 - `pre code` 维持 100%/inherit。
 
 废 88% 漂移。同步 `.cp-md .cp-code-pre` caption→body-sm（聊天内两套代码块 12/13 对齐为一档）。显式规则（`.sc-msg-body pre/code` 13、`.workspaceMarkdownPreview code` 行内 12）specificity 更高不受影响；docs 页在 iframe 文档内不受影响。
 
 ### P3（UI-241）低于阶梯硬编码收口
 
-`project-workspace.module.css` `_fileTreeSize` 9px→`var(--biof3-font-size-xs)`；`WorkspaceFileIcon.module.css` 7px/8px→xs（徽标字符可能溢出小图标，实机核对，必要时同步图标盒尺寸）；grep 兜底代码表面 7~9px 清零。
+`project-workspace.module.css` `_fileTreeSize` 9px→`var(--petri-font-size-xs)`；`WorkspaceFileIcon.module.css` 7px/8px→xs（徽标字符可能溢出小图标，实机核对，必要时同步图标盒尺寸）；grep 兜底代码表面 7~9px 清零。
 
 ### P4 实机 fixture 验收 + 收口
 

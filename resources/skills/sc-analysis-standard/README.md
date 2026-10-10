@@ -159,7 +159,7 @@ sc-analysis-standard/
 
 ## 依赖环境
 
-### Python 运行时（biof3-py-runtime）
+### Python 运行时（petri-py-runtime）
 
 - Python >= 3.10
 - scanpy >= 1.9
@@ -170,7 +170,7 @@ sc-analysis-standard/
 - scvi-tools >= 1.0（可选）
 - torch >= 2.0（scvi-tools 可选）
 
-### R 运行时（biof3-r-runtime）
+### R 运行时（petri-r-runtime）
 
 - R >= 4.4.0
 - Seurat >= 5.0.0
@@ -190,7 +190,7 @@ MIT License
 
 ## 作者
 
-BioF3 Team
+Petri Team
 
 ## 版本历史
 

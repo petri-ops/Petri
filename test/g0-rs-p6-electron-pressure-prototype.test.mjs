@@ -24,7 +24,7 @@ import { P6_UI110_SOURCE_FILES } from '../scripts/g0-rs-p6-ui110-observation.mjs
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // Bio fixtures live in the independent domain pack; pack-absent machines skip
 // the pack-dependent producer test with an explicit reason (BLOCK-83 §P4).
-const BIO_PACK_SKIP_REASON = 'bio pack not present (expected sibling ../gewu-pack-bio or BIOF3_BIO_PACK_ROOT); go-kegg pressure fixture unavailable';
+const BIO_PACK_SKIP_REASON = 'bio pack not present (expected sibling ../petri-pack-bio or PETRI_BIO_PACK_ROOT); go-kegg pressure fixture unavailable';
 
 function passingObservation(overrides = {}) {
   const base = {
@@ -187,8 +187,8 @@ test('P6 Electron pressure source binding contains its complete UI/runtime ances
     'scripts/g0-rs-p6-electron-pressure-prototype.mjs',
     'scripts/g0-rs-p6-electron-pressure-driver.cjs',
     'test/g0-rs-p6-electron-pressure-prototype.test.mjs',
-    'core/biof3-server/helpers/tools-executor.js',
-    'core/biof3-server/routes/result-studio.js',
+    'core/petri-server/helpers/tools-executor.js',
+    'core/petri-server/routes/result-studio.js',
     'core/shared-backend/result-studio-lifecycle.js',
     'core/shared-backend/result-studio-repository.js',
     'core/shared-backend/result-studio-runtime-lease.js',

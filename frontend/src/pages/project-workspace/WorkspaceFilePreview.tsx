@@ -412,7 +412,7 @@ export function WorkspaceFilePreview({
                         e.preventDefault();
                         onOpenFile(linkedFile);
                       }}
-                      style={{ color: 'var(--gewu-accent, #4f86ff)', textDecoration: 'underline', cursor: 'pointer' }}
+                      style={{ color: 'var(--petri-accent, #4f86ff)', textDecoration: 'underline', cursor: 'pointer' }}
                     >
                       {children}
                     </a>

@@ -38,7 +38,7 @@ test('SSE stream URLs no longer carry the token constant', () => {
 // 放 URL——日志/引用/历史污染面与主链同款。修法对齐主链 = fetch + Authorization
 // Bearer 头（EventSource 无法携带自定义头，fetch 流可）。
 test('mobile /m page task stream must not put the session token in the URL', () => {
-  const mobilePage = read('core/biof3-server/mobile-gateway/public/index.html');
+  const mobilePage = read('core/petri-server/mobile-gateway/public/index.html');
   assert.ok(!/[?&]session=/.test(mobilePage),
     '/m 页事件流 URL 不得携带 ?session=（token 出 URL，对齐 BLOCK-132 主链方案）');
   // 对齐主链形态：fetch 流 + Bearer 头在位（不是简单删参导致认证失联）
@@ -47,6 +47,6 @@ test('mobile /m page task stream must not put the session token in the URL', () 
 });
 
 test('files.js drag-out Origin fallback (real semantics) stays untouched', () => {
-  const files = read('core/biof3-server/routes/files.js');
+  const files = read('core/petri-server/routes/files.js');
   assert.ok(files.includes('DRAG_OUT_TOKEN'), 'drag-out Origin fallback retained (has real check semantics)');
 });

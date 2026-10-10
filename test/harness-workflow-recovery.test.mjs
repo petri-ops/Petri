@@ -8,7 +8,7 @@ const {
   createRecoveryConfirmationStore,
   publicRecoveryParams,
   validateWorkflowRecoveryAction,
-} = require('../core/biof3-server/helpers/harness-workflow-recovery.js');
+} = require('../core/petri-server/helpers/harness-workflow-recovery.js');
 
 test('reconcile requires an existing result and rejects agent-only actions', () => {
   assert.deepEqual(

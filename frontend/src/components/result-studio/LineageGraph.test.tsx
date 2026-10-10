@@ -110,7 +110,7 @@ describe('LineageGraph（BLOCK-138 P1 血缘 DAG 画布）', () => {
     fireEvent.click(await screen.findByTestId('flow-node-j1'));
     const target = dispatchSpy.mock.calls
       .map((call) => call[0] as Event)
-      .find((evt) => evt.type === 'gewu:project-open-result');
+      .find((evt) => evt.type === 'petri:project-open-result');
     expect(target, 'projectOpenResult event must be dispatched').toBeTruthy();
     expect((target as CustomEvent).detail).toEqual({ toolJobId: 'j1', projectId: 'p1' });
   });
@@ -154,7 +154,7 @@ describe('LineageGraph 节点钉住入口（BLOCK-140 P1 第二刀·右键，HK-
     fireEvent.click(screen.getByTestId('flow-node-j1'));
     const target = dispatchSpy.mock.calls
       .map((call) => call[0] as Event)
-      .find((evt) => evt.type === 'gewu:project-open-result');
+      .find((evt) => evt.type === 'petri:project-open-result');
     expect(target, 'projectOpenResult event must be dispatched').toBeTruthy();
   });
 });

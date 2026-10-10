@@ -4,7 +4,7 @@
   "purpose": "BLOCK-138 实机走查第 2 轮：chat 链补产真实跨 Job 血缘链（≥2 节点），accessMode:'full' 修正上一轮只读轮问题后重试（≤2 次）",
   "conclusion": "method=failed：尝试 1（plan/bind 链）跑通 differential（deseq2 completed+truth valid）但下游 3 步 tool_not_available、0 图落库；尝试 2（Result Studio 富集派生正路）第 1 步即 context_artifact_not_open（desq2 产物未成为 RS 可绑定 Revision）且富集工具未注册。两轮后库内仍 7 张图全 1 节点，无 ≥2 节点链，如实返回 failed。",
   "existingGraphSurvey": {
-    "database": ".biof3-dev-user-data/data/biof3.db (better-sqlite3 readonly)",
+    "database": ".petri-dev-user-data/data/petri.db (better-sqlite3 readonly)",
     "totalGraphs": 7,
     "allSingle": true,
     "maxNodes": 1,
@@ -75,7 +75,7 @@
       "conversationId": "conv_5f230af4-9ea",
       "projectId": "p_muqfdayj_422a",
       "messageIntent": "run_tool op='plan'(templateId=bulk-rna-core, initialInputs=block52 counts/coldata 绝对路径+design/contrast) → 按 readyStepIds 逐个 op='run'(workflowPlan+stepId) → 需要时 op='bind_artifact'；禁止散跑",
-      "outcome": "plan 创建成功（4 步，仅 differential 有 toolId）；deseq2 作业 tj_muqfdsd8_pjl9 completed（artifactTruth=valid，23 产物，staged 输入 2 项 integrity=verified）；bind_artifact 在 plan 层生效（lineage 新增 differential→deg-standardization, artifactId=deg_table, profile=biof3.deg.v1, status=valid）但未解除阻塞；deg-standardization run 报 {\"error\":\"missing_toolId\",\"message\":\"op=run 需要 toolId\"}（deg-standardizer 未注册，plan 内 blockedReason=tool_not_available）；volcano/enrichment 同 blocked。plan 1/4 步、terminal=false、readyStepIds=[]。",
+      "outcome": "plan 创建成功（4 步，仅 differential 有 toolId）；deseq2 作业 tj_muqfdsd8_pjl9 completed（artifactTruth=valid，23 产物，staged 输入 2 项 integrity=verified）；bind_artifact 在 plan 层生效（lineage 新增 differential→deg-standardization, artifactId=deg_table, profile=petri.deg.v1, status=valid）但未解除阻塞；deg-standardization run 报 {\"error\":\"missing_toolId\",\"message\":\"op=run 需要 toolId\"}（deg-standardizer 未注册，plan 内 blockedReason=tool_not_available）；volcano/enrichment 同 blocked。plan 1/4 步、terminal=false、readyStepIds=[]。",
       "toolJobsCreated": 1,
       "graphsCreated": 0
     },
@@ -92,11 +92,11 @@
     }
   ],
   "codeLevelBlockers": [
-    "saveWorkflowGraph 全仓仅两处调用：core/biof3-server/agent-tools/result-selection-tools.js:225（persistVerifiedWorkflowGraph，仅 RS 选择/富集派生动作）与 core/biof3-server/agent-tools/result-edit-tools.js:69（科学编辑 plan 授权时投影持久化）；plan/bind 链（run_tool op='plan'/'bind_artifact'/'run'）不落任何图。",
+    "saveWorkflowGraph 全仓仅两处调用：core/petri-server/agent-tools/result-selection-tools.js:225（persistVerifiedWorkflowGraph，仅 RS 选择/富集派生动作）与 core/petri-server/agent-tools/result-edit-tools.js:69（科学编辑 plan 授权时投影持久化）；plan/bind 链（run_tool op='plan'/'bind_artifact'/'run'）不落任何图。",
     "血缘边只来自子 Job executionProvenance.inputs[].lineage（core/shared-backend/result-workflow-graph.js:562-588 附近 buildAuthoritativeWorkflowGraph）；该服务端 lineage 仅 Result Studio 派生动作注入：result-selection-tools.js:388-396 与 :590-603（下游硬编码 go-kegg）、result-changeset-service.js:390-410（downstream 直子作业）。",
-    "受信 lineage 写入面全部汇聚 go-kegg/volcano 下游工具，而 go-kegg/deg-standardizer/volcano-plot 等 14 个插件在 gewu-pack-bio/plugins.dormant/（用户裁决 2026-09-15：保留 deseq2 为唯一活跃参考实现，激活需用户裁决）→ 本 run 不得激活。",
+    "受信 lineage 写入面全部汇聚 go-kegg/volcano 下游工具，而 go-kegg/deg-standardizer/volcano-plot 等 14 个插件在 petri-pack-bio/plugins.dormant/（用户裁决 2026-09-15：保留 deseq2 为唯一活跃参考实现，激活需用户裁决）→ 本 run 不得激活。",
     "活动栈实证只有 deseq2 一个分析插件（GET /api/tools/catalog count=1；后端日志 [plugin-loader] loaded 1 plugin(s) 自 2026-09-29 起）；bulk-rna-core 模板 4 步仅 differential 可用（listAgentWorkflowTemplates supportedStepCount=1, available=false）。",
-    "deseq2 插件无 resultStudio descriptor（gewu-pack-bio/plugins/deseq2/plugin.json resultStudio=null）→ 作业完成不登记 artifact_revisions（p_muqfdayj_422a revisions=0），RS 派生动作无 current Revision 可绑（context_artifact_not_open）。",
+    "deseq2 插件无 resultStudio descriptor（petri-pack-bio/plugins/deseq2/plugin.json resultStudio=null）→ 作业完成不登记 artifact_revisions（p_muqfdayj_422a revisions=0），RS 派生动作无 current Revision 可绑（context_artifact_not_open）。",
     "agent-workflow.js bindVerifiedArtifact(:238-296) 只写模型携带 plan.lineage + step.inputs，不写服务端 lineage 记录、不触发 persistVerifiedWorkflowGraph。"
   ],
   "lineageEndpointChecks": [

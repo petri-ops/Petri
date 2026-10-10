@@ -204,7 +204,7 @@ function buildMigrationSql() {
 /**
  * 幂等建表。
  *
- * 用途：开发与测试环境中 biof3-server 可能在 Electron migration 之前就需要这些表。
+ * 用途：开发与测试环境中 petri-server 可能在 Electron migration 之前就需要这些表。
  * 生产升级路径仍是 migration 文件；本函数执行的是同一份 DDL，不是第二套 schema。
  *
  * @param {{ exec: Function }} db better-sqlite3 实例

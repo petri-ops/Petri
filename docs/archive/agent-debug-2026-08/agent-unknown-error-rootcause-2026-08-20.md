@@ -44,7 +44,7 @@ curl -X POST localhost:3001/api/ai/agent \
 - 修复前同款 task：`failed / localizeToolResult is not a function`
 - 修复后新 task：`completed / done / error null` ✓
 
-真实错误落库位置：`.biof3-dev-user-data/data/biof3.db` 的 `tasks` 表
+真实错误落库位置：`.petri-dev-user-data/data/petri.db` 的 `tasks` 表
 `error` 字段（注意列名是 `id`，不是 `task_id`）。
 
 ## 提交
@@ -70,7 +70,7 @@ HTTP 非 2xx → `http_error`（line 425）、SSE 帧 JSON.parse 失败 → `par
 `parsed.error` → `api_error`（line 340）、`req/res error`（line 438/435）、
 complete() 无 choice → `parse_error`（line 307）。**全部在位，描述准确。**
 
-## 实际失败数据画像（.biof3-dev-user-data/data/biof3.db）
+## 实际失败数据画像（.petri-dev-user-data/data/petri.db）
 
 ai_usage 表（94 行，2026-08-20 14:34 本地起才有数据）：
 

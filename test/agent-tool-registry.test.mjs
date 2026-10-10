@@ -7,26 +7,26 @@ import { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const R_SERVER = resolve(__dirname, '..', 'core', 'biof3-server');
+const R_SERVER = resolve(__dirname, '..', 'core', 'petri-server');
 const require = createRequire(import.meta.url);
 
 // BLOCK-52 收口顺手修（存量基建，与 agent-vision.test.mjs 同一修法）：自举临时 DB
 //（src/migrations 全量）——registry 链路 require query-tools → db.js 在 default
-// biof3.db 缺最新 schema 时抛 no such table: projects；BIOF3_DB_PATH 隔离须在
+// petri.db 缺最新 schema 时抛 no such table: projects；PETRI_DB_PATH 隔离须在
 // require db.js 前生效（CommonJS require 顺序执行）。
 {
   const fs = require('fs');
   const os = require('os');
   const dbPath = require('path');
   const Database = require(R_SERVER + '/node_modules/better-sqlite3');
-  const tempDbDir = fs.mkdtempSync(dbPath.join(os.tmpdir(), 'biof3-agent-registry-db-'));
-  const boot = new Database(dbPath.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fs.mkdtempSync(dbPath.join(os.tmpdir(), 'petri-agent-registry-db-'));
+  const boot = new Database(dbPath.join(tempDbDir, 'petri.db'));
   const migrationsDir = resolve(__dirname, '..', 'src', 'migrations');
   for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fs.readFileSync(dbPath.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = dbPath.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = dbPath.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try { fs.rmSync(tempDbDir, { recursive: true, force: true }); } catch {}
   });
@@ -38,9 +38,9 @@ const {
   getProviderToolDefs,
   getToolContract,
   getToolRegistry,
-} = require('../core/biof3-server/agent-tools/registry.js');
-const { getToolDefs } = require('../core/biof3-server/agent-tools/tool-defs.js');
-const { dispatchTool } = require('../core/biof3-server/agent-tools/index.js');
+} = require('../core/petri-server/agent-tools/registry.js');
+const { getToolDefs } = require('../core/petri-server/agent-tools/tool-defs.js');
+const { dispatchTool } = require('../core/petri-server/agent-tools/index.js');
 const { DeepSeekProvider } = require('../core/shared-backend/llm-providers/deepseek.js');
 const {
   openAIToAnthropicRequest,
@@ -110,7 +110,7 @@ test('agent registry pairs every model-visible definition with one handler and c
   // 数量同源断言：工具集随工作包增长（BLOCK-69/77/78/85…），硬编码数字已两次漂移。
   // 改为与 defs 总数对齐 + 去重断言；三表失配仍由 buildToolRegistry 的互查 throw 覆盖。
   const defCount = (() => {
-    const { TOOL_DEFS } = require('../core/biof3-server/agent-tools/tool-defs.js');
+    const { TOOL_DEFS } = require('../core/petri-server/agent-tools/tool-defs.js');
     return TOOL_DEFS.length;
   })();
   assert.equal(registry.length, defCount);
@@ -170,9 +170,9 @@ test('risk tier allowlist cannot be extended by registry consumers', () => {
 test('schema-first loading does not capture partial act helper exports', () => {
   const script = `
     (async () => {
-      const { getToolDefs } = require('./core/biof3-server/agent-tools/tool-defs.js');
-      const planTools = require('./core/biof3-server/agent-tools/plan-ui-tools.js');
-      const actTools = require('./core/biof3-server/agent-tools/act-tools.js');
+      const { getToolDefs } = require('./core/petri-server/agent-tools/tool-defs.js');
+      const planTools = require('./core/petri-server/agent-tools/plan-ui-tools.js');
+      const actTools = require('./core/petri-server/agent-tools/act-tools.js');
       // BLOCK-99 G4：空间管理会话台工具族 71 件；BLOCK-116 W2（BK-04）决策观测 +2 = 73；
       // BLOCK-121 P2（B1）result_summary +1 = 74；BLOCK-124（C-13）codegraph +2 = 76；
       // BLOCK-157 W1（KNW-1）skill_discover/skill_get +2 = 78；BLOCK-164 W1 federation_list_peers +1 = 79
@@ -227,7 +227,7 @@ test('retired learning handlers remain outside the Agent registry and dispatcher
 
 test('BLOCK-99 G4 knowledge-console subset filters to the knowledge whitelist and leaves other contexts untouched', () => {
   const all = getToolDefs();
-  const { resolveToolDefsForContext, KNOWLEDGE_CONSOLE_TOOL_NAMES } = require('../core/biof3-server/agent-tools/knowledge-console-tools.js');
+  const { resolveToolDefsForContext, KNOWLEDGE_CONSOLE_TOOL_NAMES } = require('../core/petri-server/agent-tools/knowledge-console-tools.js');
   // 未命中 toolSubset：维持全量（additive，现状行为）
   assert.equal(resolveToolDefsForContext({}, all).length, all.length);
   assert.equal(resolveToolDefsForContext({ toolSubset: 'unknown-value' }, all).length, all.length);

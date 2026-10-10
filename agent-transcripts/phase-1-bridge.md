@@ -16,8 +16,8 @@
 - [PHASE 0 synthesis](phase-0-synthesis-report.md)（主 agent 综合报告）
 
 ### 0.2 主 agent 修正 B 报告的 2 处错误
-1. preload 不是单一 `biof3` world —— 实际**双重 expose**（行 21 `biof3` + 行 61 `biof3Desktop`）
-2. 项目里所有 `biof3Desktop.*` 桥都已接通，**唯独 skills 断**（不是命名不一致）
+1. preload 不是单一 `petri` world —— 实际**双重 expose**（行 21 `petri` + 行 61 `petriDesktop`）
+2. 项目里所有 `petriDesktop.*` 桥都已接通，**唯独 skills 断**（不是命名不一致）
 
 ### 0.3 用户决策（2026-08-16 16:09）
 - **P1-A**：最小改动（仅 4 文件：preload + main + useSkillStore + 新 test）
@@ -39,7 +39,7 @@
 
 ### 1.1 `src/preload.js` (+19)
 
-第二份 `exposeInMainWorld('biof3Desktop', {...})` 对象（行 61）补 skills 子块，对齐 electron.d.ts PHASE 1 增字段声明：
+第二份 `exposeInMainWorld('petriDesktop', {...})` 对象（行 61）补 skills 子块，对齐 electron.d.ts PHASE 1 增字段声明：
 
 ```javascript
 // G0 UI-157：Skills 发现 / 执行 / 进度桥（对齐 frontend/src/lib/electron.d.ts L114-169）
@@ -162,7 +162,7 @@ function _stopAllProgressWakeups(): void { ... }
 
 ### 1.5 `frontend/src/hooks/useSkillStore.test.ts` (+225, 新文件)
 
-**镜像** `frontend/src/hooks/usePluginStore.test.ts`（175 行模板）的 `vi.stubGlobal('biof3Desktop', {...})` 模式。
+**镜像** `frontend/src/hooks/usePluginStore.test.ts`（175 行模板）的 `vi.stubGlobal('petriDesktop', {...})` 模式。
 
 **9 tests**：
 
@@ -299,8 +299,8 @@ $ git log --oneline -3
 
 ## 9. 与 PHASE 0 / 上游对比
 
-### 9.1 PHASE 0 B 报告说"命名不一致（preload 用 biof3 / electron.d.ts 用 biof3Desktop）"
-- ❌ B 错的，实际双重 expose 都接通 biof3Desktop
+### 9.1 PHASE 0 B 报告说"命名不一致（preload 用 petri / electron.d.ts 用 petriDesktop）"
+- ❌ B 错的，实际双重 expose 都接通 petriDesktop
 - 主 agent 在 PHASE 0 synthesis §4 修正
 
 ### 9.2 PHASE 0 synthesis §1.2 "electron.d.ts 已是 source-of-truth"
@@ -325,7 +325,7 @@ $ git log --oneline -3
 | PHASE | 内容 | 是否委派 | 备注 |
 |---|---|---|---|
 | **PHASE 2** | UI-161 5 项清理核对 | 是（worker） | plan §3.1.B 5 项核对 + 已自验证 |
-| **PHASE 3** | 真实 dev Electron 实机 4 截图 | 谨慎 | `BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222"` 启动 + Playwright MCP attach CDP |
+| **PHASE 3** | 真实 dev Electron 实机 4 截图 | 谨慎 | `PETRI_DEV_ELECTRON_ARGS="--remote-debugging-port=9222"` 启动 + Playwright MCP attach CDP |
 | **PHASE 4** | `ui-productization-audit.md` UI-157 `in_progress → verified` | 主 agent | 需 PHASE 3 4 截图证据 |
 | **PHASE 5** | closeout：plan / handoff / AUDIT-LOG 同步 | 主 agent | 需所有 PHASE 落地证据 |
 

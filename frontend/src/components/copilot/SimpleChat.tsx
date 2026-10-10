@@ -115,7 +115,7 @@ export type {
 
 import { useCopilotContext } from '@/lib/copilotContextProvider';
 import { useConversations } from '@/hooks/useConversations';
-import { gewuEvents, dispatchGewuEvent, subscribeGewuEvent } from '@/lib/events';
+import { petriEvents, dispatchPetriEvent, subscribePetriEvent } from '@/lib/events';
 import '@/lib/chat-file-references';
 import type { ExtractContext, FileReferenceClickDetail } from '@/lib/chat-file-references';
 
@@ -239,8 +239,8 @@ export function SimpleChat({
   useEffect(() => {
     // 能力位必须问「将执行识图的聊天后端」——dev 双后端形态下 rApiBase 才是执行方
     // （BLOCK-85 端口纪律①：跨进程状态同源；问错侧=能力位与执行位脑裂）。
-    const rApiBase = (window as unknown as { biof3Desktop?: { backendConfig?: { rApiBase?: string } } })
-      ?.biof3Desktop?.backendConfig?.rApiBase;
+    const rApiBase = (window as unknown as { petriDesktop?: { backendConfig?: { rApiBase?: string } } })
+      ?.petriDesktop?.backendConfig?.rApiBase;
     const apiBase = rApiBase || (import.meta.env.DEV ? 'http://localhost:3001/api' : '/api');
     let cancelled = false;
     fetch(`${apiBase}/ai/settings`)
@@ -305,7 +305,7 @@ export function SimpleChat({
   // （中央会话）消费，避免右栏 chat tab 与中央会话重复入列；跨项目载荷丢弃。
   useEffect(() => {
     if (!ownsCopilotAsk) return undefined;
-    return subscribeGewuEvent(gewuEvents.selectionQuote, (detail) => {
+    return subscribePetriEvent(petriEvents.selectionQuote, (detail) => {
       if (detail.projectId && detail.projectId !== projectId) return;
       setSelectionRefs((prev) => appendSelectionReference(prev, detail));
     });
@@ -323,7 +323,7 @@ export function SimpleChat({
   // 与 P1 同策略：仅 copilotAsk 拥有者消费；跨项目载荷丢弃。
   useEffect(() => {
     if (!ownsCopilotAsk) return undefined;
-    return subscribeGewuEvent(gewuEvents.imageQuote, (detail) => {
+    return subscribePetriEvent(petriEvents.imageQuote, (detail) => {
       if (detail.projectId && detail.projectId !== projectId) return;
       setImageRefs((prev) => appendImageReference(prev, detail));
     });
@@ -402,7 +402,7 @@ export function SimpleChat({
       const id = t.taskId || '';
       if (!id || autoOpenedSubAgents.has(id)) continue;
       autoOpenedSubAgents.add(id);
-      dispatchGewuEvent(gewuEvents.agentOpenInRail, { runId: id });
+      dispatchPetriEvent(petriEvents.agentOpenInRail, { runId: id });
     }
   }, [subTasksForAutoOpen]);
   const durableLoop = useDurableConversationLoop(projectId, conversationId, activeRun?.loop);
@@ -528,7 +528,7 @@ export function SimpleChat({
   // UI-AGENTWB-004 A4 bridge: opt-in switch for routing
   // assistant messages that carry `meta.resultNodes` through the
   // ResultCard pipeline. Defaults to false so existing users see
-  // no change; flip via `localStorage.biof3.simplechat.extraRenderers='true'`.
+  // no change; flip via `localStorage.petri.simplechat.extraRenderers='true'`.
   const extraRenderersFlag = useExtraRenderersFlag();
 
   // Resolve file references only after a message is fully settled —
@@ -550,7 +550,7 @@ export function SimpleChat({
     if (loading) return;
     // A page-level active job can belong to another conversation. Settled
     // history therefore resolves only against this project's workspace;
-    // explicit biof3 artifact URIs still carry and verify their own job ID.
+    // explicit petri artifact URIs still carry and verify their own job ID.
     setSettledContext({ projectId });
   }, [loading, projectId]);
 
@@ -561,14 +561,14 @@ export function SimpleChat({
     const resolved = detail.resolved;
     if (!resolved || resolved.projectId !== projectId) return;
     if (resolved.kind === 'artifact') {
-      dispatchGewuEvent(gewuEvents.projectOpenArtifact, {
+      dispatchPetriEvent(petriEvents.projectOpenArtifact, {
         jobId: resolved.jobId,
         artifactName: resolved.artifactName,
         projectId,
       });
       return;
     }
-    dispatchGewuEvent(gewuEvents.projectOpenWorkspaceFile, {
+    dispatchPetriEvent(petriEvents.projectOpenWorkspaceFile, {
       projectId,
       relativePath: resolved.relativePath,
       name: resolved.name,
@@ -675,7 +675,7 @@ export function SimpleChat({
     setLiveTopicShift(null);
   }, [conversationId]);
   useEffect(() => {
-    return subscribeGewuEvent(gewuEvents.conversationTopicShift, (detail) => {
+    return subscribePetriEvent(petriEvents.conversationTopicShift, (detail) => {
       if (detail.conversationId !== conversationId) return;
       setLiveTopicShift({ at: detail.at, reason: detail.reason });
       void refreshConversations();
@@ -1249,7 +1249,7 @@ export function SimpleChat({
                       {cmd.kind !== 'action' && (
                         <span
                           className="sc-slash-item-label"
-                          style={{ marginRight: 6, fontSize: 'var(--gewu-font-size-caption, 12px)', color: 'var(--gewu-accent, #3b82f6)' }}
+                          style={{ marginRight: 6, fontSize: 'var(--petri-font-size-caption, 12px)', color: 'var(--petri-accent, #3b82f6)' }}
                         >
                           {cmd.kind === 'skill' ? '技能' : '模板'}
                         </span>

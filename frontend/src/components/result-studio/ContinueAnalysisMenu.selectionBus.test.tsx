@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { MockInstance } from 'vitest';
 import { buildRowSelection, MAX_PERSISTED_ENTITY_IDS, type ArtifactInteractionManifest } from '@/lib/artifact-selection';
 import type { CopilotAskDetail } from '@/lib/events';
-import { gewuEvents } from '@/lib/events';
+import { petriEvents } from '@/lib/events';
 import { setSelectionBusArtifact, setSelectionBusSelection } from '@/lib/selectionBus';
 import { ContinueAnalysisMenu } from './ContinueAnalysisMenu';
 
@@ -73,7 +73,7 @@ function copilotAskEventsFrom(spy: MockInstance<typeof window.dispatchEvent>): A
     .map(([event]) => event)
     .filter(
       (event): event is CustomEvent<CopilotAskDetail> =>
-        event instanceof CustomEvent && event.type === gewuEvents.copilotAsk,
+        event instanceof CustomEvent && event.type === petriEvents.copilotAsk,
     );
 }
 

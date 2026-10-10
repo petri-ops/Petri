@@ -9,21 +9,21 @@
 ## 1. 缺陷诊断（2026-08-29 用户反馈 + CDP 截图实锤）
 
 浅色主题（`data-theme="light"`）下主区审阅页呈"半暗半亮"：暗色 summary 条/侧栏/状态栏
-浮在主题浅色画布（`--biof3-surface-dim: #f8fafc`）上，CM 高亮文字用暗色调配色。
+浮在主题浅色画布（`--petri-surface-dim: #f8fafc`）上，CM 高亮文字用暗色调配色。
 
 根因：BLOCK-28 沿用旧抽屉 CSS（WorkingTreeReview.css + 新增 ReviewMode.css），其中
-`--biof3-fg` / `--biof3-fg-muted` / `--biof3-bg-elev` / `--biof3-bg-list` /
-`--biof3-bg-button` / `--biof3-mono` / `--biof3-status-danger` 等变量名**在本仓
+`--petri-fg` / `--petri-fg-muted` / `--petri-bg-elev` / `--petri-bg-list` /
+`--petri-bg-button` / `--petri-mono` / `--petri-status-danger` 等变量名**在本仓
 token 体系中不存在**，回退常量全是暗色硬编码。旧抽屉是全暗浮层未暴露；进主区后与
-Infima + `--biof3-*` 语义 token 体系混用即串色。
+Infima + `--petri-*` 语义 token 体系混用即串色。
 
 本仓真实 token（frontend/src/styles/custom.css，明暗双套齐备）：
-- 表面：`--biof3-bg-canvas` / `--biof3-bg-surface` / `--biof3-bg-subtle` / `--biof3-bg-elevated`
-- 文字：`--biof3-text` / `--biof3-text-secondary` / `--biof3-text-tertiary` / `--biof3-text-muted`
-- 边框：`--biof3-border` / `--biof3-border-strong` / `--biof3-border-subtle`
-- 强调：`--biof3-accent` / `--biof3-accent-soft` / `--biof3-hover`
-- 状态：`--biof3-status-success-fg/-bg` / `--biof3-status-error-fg/-bg` 等
-- 字体：`--biof3-font-mono`
+- 表面：`--petri-bg-canvas` / `--petri-bg-surface` / `--petri-bg-subtle` / `--petri-bg-elevated`
+- 文字：`--petri-text` / `--petri-text-secondary` / `--petri-text-tertiary` / `--petri-text-muted`
+- 边框：`--petri-border` / `--petri-border-strong` / `--petri-border-subtle`
+- 强调：`--petri-accent` / `--petri-accent-soft` / `--petri-hover`
+- 状态：`--petri-status-success-fg/-bg` / `--petri-status-error-fg/-bg` 等
+- 字体：`--petri-font-mono`
 
 ## 2. 范围
 

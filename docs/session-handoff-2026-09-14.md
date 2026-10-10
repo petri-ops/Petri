@@ -20,7 +20,7 @@
 ### 1. `53a8df5a` UI-367（BLOCK-87-L4-2）——手机双缺陷修复
 - 用户反馈：①「总是 rate_limited」②「插件商店手机端与桌面不一致（缺领域包/运行时）」
 - 限流根因：限速器挂网关最前且**静态资源/Vite 热更模块全计数**，240/分/IP 必误伤（隧道全设备共享 127.0.0.1）→ 改为只计 `/api/`、`/m/api/`、`/federation/`，上限 600；静态/投影资产仍过会话门但不耗配额
-- 商店不一致根因：L4 第一批投影桥 `plugins.listInstalled` 误包 `{ok,packs}` 信封（桌面 IPC 契约=裸数组）+缺 `listRemote`+垫片 Proxy 下 `window.biof3Desktop.packs` 恒空
+- 商店不一致根因：L4 第一批投影桥 `plugins.listInstalled` 误包 `{ok,packs}` 信封（桌面 IPC 契约=裸数组）+缺 `listRemote`+垫片 Proxy 下 `window.petriDesktop.packs` 恒空
 - 修复：core 投影端点扩面（`/api/plugins/catalog` 同 manifest 文件、`/api/runtime/status` executors 同探测、`/api/packs/installed|available` pack-registry 同源同 dataDir）；投影桥逐字对齐 IPC 形状（裸数组/listRemote/packs+runtime 桥），写面诚实禁用；PluginStorePanel 直读垫片改 `getBridge('packs')` 单点解析
 - 顺手：impact-map 补 `acceptance/block-85|87/**` 映射（🟡存量预告项销号，test:changed 该红清零）
 
@@ -97,14 +97,14 @@
 ## 八、同日第六轮补记（SEC-HARDEN 主进程安全加固 + 代码复审余项 ③④ 收口）
 
 - **用户裁决**：「清两个低危安全/健壮性余项」（代码复审 ③ main.js webPreferences / ④ 无句柄失活 job 不杀进程）。按承诺先做只读排查，结论如下。
-- **④ = 设计决策，不改（销号附论证）**：`core/biof3-server/helpers/process-lifecycle.js:231-266` 的 `markUnownedStaleJobs` 在**无进程句柄**时只改 DB 状态、刻意不发信号——代码内已有完整论证（job 记录可能是孤儿、PID 可能被复用、进程可能属别的 job → SIGKILL 会误杀无关进程，属安全违规），DB error 文案也如实告知用户「进程归属无法证明，未发送信号」；而**有句柄**的路径 `recoverStaleActiveJobs` 确实会 terminate 子进程。「有句柄才杀」是正确分界。
+- **④ = 设计决策，不改（销号附论证）**：`core/petri-server/helpers/process-lifecycle.js:231-266` 的 `markUnownedStaleJobs` 在**无进程句柄**时只改 DB 状态、刻意不发信号——代码内已有完整论证（job 记录可能是孤儿、PID 可能被复用、进程可能属别的 job → SIGKILL 会误杀无关进程，属安全违规），DB error 文案也如实告知用户「进程归属无法证明，未发送信号」；而**有句柄**的路径 `recoverStaleActiveJobs` 确实会 terminate 子进程。「有句柄才杀」是正确分界。
 - **③ = 字面项已满足，真残留是对齐官方安全清单的三处缺口**：三个 BrowserWindow（`src/main/_window-create.js` / `src/ipc/window-manager.js` ×2）均已显式 `contextIsolation:true / nodeIntegration:false / sandbox:true / webSecurity:true`；但：
   - **#5 未设权限处理器** → 官方文档原文：「By default, Electron will automatically approve all permission requests unless the developer has manually configured a custom handler.」本应用有加载**任意外部 URL** 的 `<webview>`（结果浏览器面板），等于任意站点可无提示拿摄像头/麦克风/定位/屏幕捕获。
   - **#11 `<webview allowpopups="true">`** → 官方清单明令避免（默认立场就是不允许）。
   - **#12 未校验 webview webPreferences/params** → 渲染层（含被注入页面）可创建带任意 `preload`/`partition` 的 webview。
-- **交付**：新 `src/main/security-hardening.js` + `src/main.js` 装配（**模块加载期**注册 `web-contents-created`；`whenReady` + `setupDesktopEnv` 后装配权限策略）+ `frontend/src/pages/project-workspace/BrowserPanel.tsx` 撤 `allowpopups`。策略：webview 附着前删 `preload(URL)`、强制 `sandbox/contextIsolation/webSecurity=true`、`nodeIntegration=false`；partition 白名单 `persist:gewu-browser`；src 限 http(s)；每个 webContents 的 `setWindowOpenHandler` 一律 deny（http(s) 交系统浏览器，非 http(s) 丢弃）；权限**默认拒绝**，仅受信渲染 origin（`BIOF3_TRUSTED_DESKTOP_ORIGINS`）放行 `clipboard-sanitized-write` / `openExternal`。
+- **交付**：新 `src/main/security-hardening.js` + `src/main.js` 装配（**模块加载期**注册 `web-contents-created`；`whenReady` + `setupDesktopEnv` 后装配权限策略）+ `frontend/src/pages/project-workspace/BrowserPanel.tsx` 撤 `allowpopups`。策略：webview 附着前删 `preload(URL)`、强制 `sandbox/contextIsolation/webSecurity=true`、`nodeIntegration=false`；partition 白名单 `persist:petri-browser`；src 限 http(s)；每个 webContents 的 `setWindowOpenHandler` 一律 deny（http(s) 交系统浏览器，非 http(s) 丢弃）；权限**默认拒绝**，仅受信渲染 origin（`PETRI_TRUSTED_DESKTOP_ORIGINS`）放行 `clipboard-sanitized-write` / `openExternal`。
 - **实机门抓出我自己两个真缺陷（下个 Agent 勿回退）**：
-  1. **只装 `defaultSession` 会漏掉 webview 的分区 session** —— `persist:gewu-browser` 不共享默认 session，实测 guest 内 `geolocation` 仍 `granted`。修=另挂 `app.on('session-created')` 给此后每个 session 都装（幂等）。
+  1. **只装 `defaultSession` 会漏掉 webview 的分区 session** —— `persist:petri-browser` 不共享默认 session，实测 guest 内 `geolocation` 仍 `granted`。修=另挂 `app.on('session-created')` 给此后每个 session 都装（幂等）。
   2. **check handler 的 `requestingOrigin` 可能为空**（Chromium 对剪贴板写等检查不一定带来源）—— 只按它判会把自家 UI 的复制按钮误杀。修=回退 `webContents.getURL()`，两者都取不到才拒（安全侧失败）。
   - 另记一条**探针坑**：CDP `Runtime.evaluate` 无用户手势且页面可能失焦，Chromium 对这种 `navigator.clipboard.writeText` 本身就报 `Write permission denied`（与权限策略无关）→ **不能用「无手势写入成败」当判据**；正确取证=①`navigator.permissions.query({name:'clipboard-write'})` 的状态 ②`Input.dispatchMouseEvent` 真实点击驱动的端到端复制。
 - **门禁**：`test/security-hardening.test.mjs` **17/17**；实机 `scripts/sec-harden-live.cjs` **8/8**（S1 自家 geolocation=denied／S2 剪贴板权限 granted／S2b 真实点击复制 ok／S3 白名单 webview 正常加载／S4 野 partition 被拦／S5 file: 被拦／S6 guest 权限也 denied／S7 allowpopups 已撤）；根 `test:changed` 99/105（2 红=P6 存量基线）；前端 `test:changed` 1/1。证据 `acceptance/sec-harden/`。
@@ -138,7 +138,7 @@
 
 **Mac 侧（一次性粘贴）**
 ```bash
-cd <Mac 上的 biof3-desktop>
+cd <Mac 上的 petri-desktop>
 git pull --ff-only                 # 拉到 663547c2 或更新
 node -v                            # 必须是 v24.x；若否：fnm use 24（或 fnm install 24）
 # 首次/依赖有变动时再执行：npm ci
@@ -172,7 +172,7 @@ npm run dev
 ### 9.3 Mac G0-RS P6 证据重采（当前 `test:changed` 那 2 红的唯一来历）
 
 ```bash
-cd <Mac 上的 biof3-desktop>
+cd <Mac 上的 petri-desktop>
 git pull --ff-only
 node -v                                        # v24.x
 npm run g0:result-studio:p6:update             # syntax + P6 全量套件 + 前端 + 重采写证据

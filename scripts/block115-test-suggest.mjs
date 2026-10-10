@@ -16,8 +16,8 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const decisionApi = require('../core/biof3-server/helpers/decision-api.js');
-const { thresholdForPoint } = require('../core/biof3-server/helpers/decision-thresholds.js');
+const decisionApi = require('../core/petri-server/helpers/decision-api.js');
+const { thresholdForPoint } = require('../core/petri-server/helpers/decision-thresholds.js');
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
@@ -37,7 +37,7 @@ export const TEST_AREAS = {
 export const SUGGEST_THRESHOLD = thresholdForPoint('test-suggest');
 
 export function isSuggestEnabled() {
-  return process.env.BIOF3_JEV_TEST_SUGGEST !== '0'; // 注意：本工具默认开（纯建议无副作用，显式 0 关闭）
+  return process.env.PETRI_JEV_TEST_SUGGEST !== '0'; // 注意：本工具默认开（纯建议无副作用，显式 0 关闭）
 }
 
 /**

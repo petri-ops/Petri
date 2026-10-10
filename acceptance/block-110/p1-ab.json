@@ -1,5 +1,5 @@
 {
-  "schema": "biof3/block110-p1-ab.v1",
+  "schema": "petri/block110-p1-ab.v1",
   "generatedAt": "2026-09-22T01:59:47.484Z",
   "model": "jev-1.13.0",
   "samples": 100,

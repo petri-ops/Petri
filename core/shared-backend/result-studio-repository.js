@@ -44,7 +44,7 @@ const {
 } = require('./result-studio-runtime-lease');
 
 const {
-  BIOF3_REF_PATTERN,
+  PETRI_REF_PATTERN,
   SHA256_PATTERN,
   GIT_OID_PATTERN,
   ResultStudioRepositoryError,
@@ -1000,7 +1000,7 @@ function createResultStudioRepository(db, options = {}) {
           || !sourceStatus || !targetStatus || !canTransitionChangeSet(sourceStatus, targetStatus).allowed
           || refUpdates.length === 0
           || new Set(refUpdates.map((entry) => entry.ref)).size !== refUpdates.length
-          || refUpdates.some((entry) => !BIOF3_REF_PATTERN.test(entry.ref)
+          || refUpdates.some((entry) => !PETRI_REF_PATTERN.test(entry.ref)
             || !GIT_OID_PATTERN.test(entry.expectedOld)
             || !GIT_OID_PATTERN.test(entry.newOid)
             || entry.expectedOld === entry.newOid)

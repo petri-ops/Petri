@@ -11,7 +11,7 @@
     {
       "name": "P4-1 agent created resident task (model used tool)",
       "pass": true,
-      "detail": "reply=已创建并核实完成。\n\n**taskId：`res_mtwjcu7n_aio9`**\n\n意图卡落盘情况（`.gewu/resident/res_mtwjcu7n_aio9.json`）：\n\n| 字段 | 值 |\n|---|---|\n| intent | P4 全链验收：挂机 15 分钟探针 |\n| successCrit | attempts=disabled@05:47:08,disabled@05:47:12,disabled@05:47:16,disabled@05:47:20,disabled@05:47:24,disabled@05:47:28,disabled@05:47:32,disabled@05:47:36,disabled@05:47:40,disabled@05:47:44,disabled@05:47:49,disabled@05:47:53,disabl"
+      "detail": "reply=已创建并核实完成。\n\n**taskId：`res_mtwjcu7n_aio9`**\n\n意图卡落盘情况（`.petri/resident/res_mtwjcu7n_aio9.json`）：\n\n| 字段 | 值 |\n|---|---|\n| intent | P4 全链验收：挂机 15 分钟探针 |\n| successCrit | attempts=disabled@05:47:08,disabled@05:47:12,disabled@05:47:16,disabled@05:47:20,disabled@05:47:24,disabled@05:47:28,disabled@05:47:32,disabled@05:47:36,disabled@05:47:40,disabled@05:47:44,disabled@05:47:49,disabled@05:47:53,disabl"
     },
     {
       "name": "P4-2 intent card on server (running)",

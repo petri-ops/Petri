@@ -896,7 +896,7 @@ module.exports = {
     const replayService = createControlledReplayService();
     const baselineWork = createDeduplicatedBackgroundRunner(runResultStudioBackground);
     const workspaceInspectionWork = createDeduplicatedBackgroundRunner(runResultStudioBackground);
-    const configuredDatabasePath = sqlite.name || process.env.BIOF3_DB_PATH || null;
+    const configuredDatabasePath = sqlite.name || process.env.PETRI_DB_PATH || null;
     const databasePath = configuredDatabasePath && configuredDatabasePath !== ':memory:'
       ? require('path').resolve(configuredDatabasePath)
       : null;

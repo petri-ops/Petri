@@ -17,7 +17,7 @@ const require = createRequire(import.meta.url);
 const ROOT = path.resolve('.');
 
 const tmpData = fs.mkdtempSync(path.join(os.tmpdir(), 'b163-permissions-'));
-process.env.BIOF3_LOCAL_DATA_DIR = tmpData;
+process.env.PETRI_LOCAL_DATA_DIR = tmpData;
 
 const packRegistry = require(path.join(ROOT, 'core/shared-backend/pack-registry.js'));
 

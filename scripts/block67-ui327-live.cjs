@@ -65,7 +65,7 @@ const ev = async (c, expr, to = 60000) => { const r = await Promise.race([c.send
     let hasCandidate=false;
     for(let i=0;i<20;i++){
       await new Promise(r=>setTimeout(r,500));
-      if(panel.textContent.includes('/root/gewu-block67-demo/')){ hasCandidate=true; break; }
+      if(panel.textContent.includes('/root/petri-block67-demo/')){ hasCandidate=true; break; }
     }
     // 终端式补全：打 /root/ge → Tab → 完整路径（含原生事件探针）
     const setter=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;
@@ -77,7 +77,7 @@ const ev = async (c, expr, to = 60000) => { const r = await Promise.race([c.send
     pathInput.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',bubbles:true,cancelable:true}));
     for(let j=0;j<16;j++){
       await new Promise(r=>setTimeout(r,500));
-      if(pathInput.value==='/root/gewu-block67-demo/') break;
+      if(pathInput.value==='/root/petri-block67-demo/') break;
     }
     return JSON.stringify({step:'pick',chip:chip0(),selected:pathInput.value,hasCandidate,tabSeen:window.__tabSeen});
     function chip0(){const c=panel.querySelector('[data-testid="ssh-connected-chip"]');return c?c.textContent.trim():'';}
@@ -85,7 +85,7 @@ const ev = async (c, expr, to = 60000) => { const r = await Promise.race([c.send
   const s = JSON.parse(out);
   const step1ok = s.step === 'pick' && s.chip === 'aliyun' && s.hasCandidate === true;
   assert('向导① 连接主机（chip=aliyun）+ 路径输入预填 /root/ + 候选展示', step1ok && s.hasCandidate, out);
-  assert('向导② Tab 补全 /root/ge → /root/gewu-block67-demo/（onKeyDown 链）', s.tabSeen === true && s.selected === '/root/gewu-block67-demo/', out);
+  assert('向导② Tab 补全 /root/ge → /root/petri-block67-demo/（onKeyDown 链）', s.tabSeen === true && s.selected === '/root/petri-block67-demo/', out);
 
   // —— 向导③：在此路径创建项目 → API 对账新项目 → 导航对账 ——
   await ev(c, `(async () => {

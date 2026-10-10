@@ -9,7 +9,7 @@
  * 用法：node scripts/block96-ssh-channel-live.cjs [--alias wsl]
  * 前置：目标节点 ssh 免密可达（key auth）。
  */
-process.env.BIOF3_SSH_MUX = process.env.BIOF3_SSH_MUX || '1';
+process.env.PETRI_SSH_MUX = process.env.PETRI_SSH_MUX || '1';
 
 const fs = require('fs');
 const path = require('path');
@@ -19,8 +19,8 @@ const aliasIdx = process.argv.indexOf('--alias');
 const ALIAS = aliasIdx >= 0 ? process.argv[aliasIdx + 1] : (process.env.BLOCK96_SSH_ALIAS || 'wsl');
 const OUT = path.join(__dirname, '..', 'acceptance', 'block-96', 'block96-p1-live.json');
 
-const sshTransport = require('../core/biof3-server/helpers/remote-execution/ssh-transport');
-const gateway = require('../core/biof3-server/helpers/workspace-gateway');
+const sshTransport = require('../core/petri-server/helpers/remote-execution/ssh-transport');
+const gateway = require('../core/petri-server/helpers/workspace-gateway');
 
 const checks = [];
 function record(name, passed, detail) {
@@ -143,10 +143,10 @@ function sshRun(remoteCommand, input) {
   fs.writeFileSync(OUT, JSON.stringify(evidence, null, 2));
   console.log(`\n${allPass ? 'ALL PASS' : 'FAILED'} → ${OUT}`);
   // mux 会话的子进程/stdio 句柄会吊住事件循环——显式关闭后硬退出，保证可被 flow/CI 消费
-  require('../core/biof3-server/helpers/remote-execution/ssh-multiplexer').closeAll();
+  require('../core/petri-server/helpers/remote-execution/ssh-multiplexer').closeAll();
   process.exit(allPass ? 0 : 1);
 })().catch((e) => {
   console.error('LIVE PROBE ERROR:', e.message);
-  try { require('../core/biof3-server/helpers/remote-execution/ssh-multiplexer').closeAll(); } catch {}
+  try { require('../core/petri-server/helpers/remote-execution/ssh-multiplexer').closeAll(); } catch {}
   process.exit(1);
 });

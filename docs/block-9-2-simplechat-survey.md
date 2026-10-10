@@ -196,13 +196,13 @@ interface SimpleChatProps {
 
 ### 1.6 IPC 订阅 / Context Provider 情况
 
-**IPC 订阅位置**（`subscribeBioF3Event` 调用）：
+**IPC 订阅位置**（`subscribePetriEvent` 调用）：
 
 | 行号 | 调用 | 生命周期 |
 |---|---|---|
-| L307-318 | `dispatchBioF3Event(biof3Events.projectOpenArtifact, ...)` + `projectOpenWorkspaceFile` | inline 在 `handleFileReferenceClick` useCallback 内（fire-and-forget） |
-| L826 | `subscribeBioF3Event(biof3Events.copilotAsk, ...)` | `useEffect` 内订阅（L819-833），依赖 `ownsCopilotAsk` |
-| L894 | `dispatchBioF3Event(biof3Events.conversationForked, ...)` | inline 在 `handleForkAt` useCallback 内 |
+| L307-318 | `dispatchPetriEvent(petriEvents.projectOpenArtifact, ...)` + `projectOpenWorkspaceFile` | inline 在 `handleFileReferenceClick` useCallback 内（fire-and-forget） |
+| L826 | `subscribePetriEvent(petriEvents.copilotAsk, ...)` | `useEffect` 内订阅（L819-833），依赖 `ownsCopilotAsk` |
+| L894 | `dispatchPetriEvent(petriEvents.conversationForked, ...)` | inline 在 `handleForkAt` useCallback 内 |
 
 **结论**：**所有 IPC 订阅都在 `SimpleChat` 主组件生命周期内**，且都在 `useEffect` 或 `useCallback` 中 —— 没有独立的 IPC subscription hook 可抽；提取到子模块时必须保留订阅的 cleanup 逻辑。
 
@@ -230,7 +230,7 @@ frontend/src/components/copilot/SimpleChat.tsx (2277 行)
 ├── L62-148 其他内部 imports (React/内部模块/@/lib/@/hooks)
 │           代表性 export/line 例子：
 │           - L62-69  `import { ... } from '@/lib/copilotContextProvider'`   (copilotCtx context)
-│           - L75-79  `import { biof3Events, subscribeBioF3Event, ... } from '@/lib/events'`
+│           - L75-79  `import { petriEvents, subscribePetriEvent, ... } from '@/lib/events'`
 │           - L85-114 `import { ... } from './copilotClient'` / `./copilotConversationsClient`
 │           - L127    `import { useDurableConversationLoop } from '@/hooks/useDurableConversationLoop'`
 │
@@ -410,7 +410,7 @@ frontend/src/components/copilot/SimpleChat.tsx (2277 行)
 | 76 | 751 | `useCallback(send, [...])` | [accessMode, activeModel, ..., send, streaming] | 主 send pipeline |
 | 77 | 811 | `useRef(send)` | initial | sendRef |
 | 78 | 812 | `useEffect(() => { sendRef.current = send }, [send])` | [send] | sendRef sync effect |
-| 79 | 819 | `useEffect(() => { subscribeBioF3Event(copilotAsk) }, [...])` | [...] | copilotAsk 事件订阅 |
+| 79 | 819 | `useEffect(() => { subscribePetriEvent(copilotAsk) }, [...])` | [...] | copilotAsk 事件订阅 |
 | 80 | 837 | `useCallback(stop, [])` | [] | stop generation |
 | 81 | 843 | `useCallback(regenerate, [...])` | [conversationId, streaming, displayMessages, sendRef] | regenerate |
 | 82 | 861 | `useCallback(handleRefresh, [])` | [] | refresh conversation |
@@ -705,9 +705,9 @@ export function ImagePreviewModal({
 
 | 行号 | 引用 | 当前位置 | 抽取后位置 |
 |---|---|---|---|
-| L307-318 | `dispatchBioF3Event(projectOpenArtifact/...)` | inline in handleFileReferenceClick useCallback | 保留主组件（属于 file reference resolver） |
-| L826 | `subscribeBioF3Event(copilotAsk)` | useEffect 内 | 保留主组件（依赖 ownsCopilotAsk gating） |
-| L894 | `dispatchBioF3Event(conversationForked)` | inline in handleForkAt useCallback | 保留主组件（属于 handleForkAt） |
+| L307-318 | `dispatchPetriEvent(projectOpenArtifact/...)` | inline in handleFileReferenceClick useCallback | 保留主组件（属于 file reference resolver） |
+| L826 | `subscribePetriEvent(copilotAsk)` | useEffect 内 | 保留主组件（依赖 ownsCopilotAsk gating） |
+| L894 | `dispatchPetriEvent(conversationForked)` | inline in handleForkAt useCallback | 保留主组件（属于 handleForkAt） |
 
 **结论**：所有 IPC 引用都耦合主组件 state（ownsCopilotAsk / pendingApproval / projectId），**不能抽取到独立文件**。所有 IPC subscribe/unsubscribe 必须在主组件生命周期内。
 
@@ -924,7 +924,7 @@ export type {
 
 ```bash
 # 1. TypeScript 0 错误
-cd /Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/frontend && npx tsc --noEmit
+cd /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/frontend && npx tsc --noEmit
 
 # 2. 直接 SimpleChat 测试 23/23 PASS（不能退化）
 npx vitest run src/components/copilot/SimpleChat.test.tsx \
@@ -933,7 +933,7 @@ npx vitest run src/components/copilot/SimpleChat.test.tsx \
               src/components/copilot/simple-chat-file-open.test.ts
 
 # 3. 影响范围测试（按 test/impact-map.json 选）
-cd /Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop && npm run test:changed:list
+cd /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop && npm run test:changed:list
 
 # 4. 治理门（4 项必跑）
 npm run docs:check          # 文档数 PASS
@@ -945,13 +945,13 @@ npm run docs:reconcile      # 0 issues
 
 ```bash
 # 5. Vite build（产物大小应保持 ~2308 kB）
-cd /Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop && npm run build --prefix frontend
+cd /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop && npm run build --prefix frontend
 
 # 6. chf0-critical 不退化（plugin IPC contract）
 node --test test/chf0-critical/*
 
 # 7. vitest 75 文件 630 tests 0 失败（影响范围内）
-cd /Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop && npm run test:changed
+cd /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop && npm run test:changed
 
 # 8. 4 个 import 客户端 0 改动（git diff 应为空）
 git diff --stat HEAD -- frontend/src/components/workspace-panels/CenterPanel.tsx \

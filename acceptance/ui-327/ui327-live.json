@@ -4,17 +4,17 @@
     {
       "name": "向导① 连接主机（chip=aliyun）+ 路径输入预填 /root/ + 候选展示",
       "pass": true,
-      "detail": "{\"step\":\"pick\",\"chip\":\"aliyun\",\"selected\":\"/root/gewu-block67-demo/\",\"hasCandidate\":true,\"tabSeen\":true}"
+      "detail": "{\"step\":\"pick\",\"chip\":\"aliyun\",\"selected\":\"/root/petri-block67-demo/\",\"hasCandidate\":true,\"tabSeen\":true}"
     },
     {
-      "name": "向导② Tab 补全 /root/ge → /root/gewu-block67-demo/（onKeyDown 链）",
+      "name": "向导② Tab 补全 /root/ge → /root/petri-block67-demo/（onKeyDown 链）",
       "pass": true,
-      "detail": "{\"step\":\"pick\",\"chip\":\"aliyun\",\"selected\":\"/root/gewu-block67-demo/\",\"hasCandidate\":true,\"tabSeen\":true}"
+      "detail": "{\"step\":\"pick\",\"chip\":\"aliyun\",\"selected\":\"/root/petri-block67-demo/\",\"hasCandidate\":true,\"tabSeen\":true}"
     },
     {
       "name": "向导③ 创建项目（API 对账：新 ssh 项目出现）",
       "pass": true,
-      "detail": "{\"id\":\"p_mtuukew7_qms0\",\"name\":\"gewu-block67-demo\"}"
+      "detail": "{\"id\":\"p_mtuukew7_qms0\",\"name\":\"petri-block67-demo\"}"
     },
     {
       "name": "导航进入新建项目页",

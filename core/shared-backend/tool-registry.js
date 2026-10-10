@@ -388,12 +388,12 @@ function getBuiltinTools() {
 
 /**
  * 从 R Server MCP Registry 迁移工具
- * 读取 biof3-server/mcp/registry.js 导出的工具定义并注册
+ * 读取 petri-server/mcp/registry.js 导出的工具定义并注册
  * @returns {Promise<{ ok: boolean, count: number, error?: string }>}
  */
 async function migrateFromRServerRegistry() {
   try {
-    const rRegistryPath = path.join(__dirname, '..', 'biof3-server', 'mcp', 'registry.js');
+    const rRegistryPath = path.join(__dirname, '..', 'petri-server', 'mcp', 'registry.js');
     const fs = require('fs');
 
     if (!fs.existsSync(rRegistryPath)) {

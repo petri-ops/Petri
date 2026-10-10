@@ -17,20 +17,20 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const R_SERVER = path.resolve(__dirname, '..', 'core', 'biof3-server');
+const R_SERVER = path.resolve(__dirname, '..', 'core', 'petri-server');
 const require = createRequire(import.meta.url);
 
 // 临时 DB 自举（须在 require db.js 前生效）
 {
   const Database = require(path.join(R_SERVER, 'node_modules', 'better-sqlite3'));
-  const tempDbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block49p2-db-'));
-  const boot = new Database(path.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block49p2-db-'));
+  const boot = new Database(path.join(tempDbDir, 'petri.db'));
   const migrationsDir = path.resolve(__dirname, '..', 'src', 'migrations');
   for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fs.readFileSync(path.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = path.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try { fs.rmSync(tempDbDir, { recursive: true, force: true }); } catch {}
   });

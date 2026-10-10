@@ -11,7 +11,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const CORE = resolve(__dirname, '..', 'core', 'biof3-server');
+const CORE = resolve(__dirname, '..', 'core', 'petri-server');
 
 const ideTools = await import(
   pathToFileURL(resolve(CORE, 'mcp/ide-tools/index.js')).href
@@ -20,7 +20,7 @@ const { _rawHandlers } = ideTools;
 const H = _rawHandlers;
 
 function makeTempDir() {
-  return fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-diff-`);
+  return fs.mkdtempSync(`${os.tmpdir()}/petri-ide-diff-`);
 }
 
 function cleanup(tmp) {
@@ -70,7 +70,7 @@ test('ide_file_diff returns empty hunks for identical files', () => {
 });
 
 test('ide_file_diff rejects out-of-allowlist path', () => {
-  // /etc/passwd 不在白名单内（既不是 cwd、也不是 os.tmpdir()，更不是 ~/.biof3/logs）。
+  // /etc/passwd 不在白名单内（既不是 cwd、也不是 os.tmpdir()，更不是 ~/.petri/logs）。
   const res = H.ide_file_diff({ pathA: '/etc/passwd', pathB: '/etc/hosts' });
   assert.equal(res.ok, false);
   assert.match(res.error, /allowlist|safe|resolve under/);

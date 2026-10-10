@@ -8,7 +8,7 @@
     "toolId": "deseq2",
     "status": "completed",
     "projectId": "p_mus4u230_wvib",
-    "source": "sqlite readonly: .biof3-dev-user-data/data/biof3.db tool_jobs WHERE tool_id='deseq2' AND status='completed' ORDER BY completed_at DESC LIMIT 1（最近 completed deseq2，2026-10-03 16:31:42）",
+    "source": "sqlite readonly: .petri-dev-user-data/data/petri.db tool_jobs WHERE tool_id='deseq2' AND status='completed' ORDER BY completed_at DESC LIMIT 1（最近 completed deseq2，2026-10-03 16:31:42）",
     "artifact": "deg_table.csv（差异基因表；manifest HTTP 实证 artifactId=deg_table/entityType=gene/idField=gene/interactionMode=table/selectionDurable=true）"
   },
   "checks": [
@@ -30,7 +30,7 @@
     {
       "id": "P4_bus_artifact_bound",
       "pass": true,
-      "detail": "busBindingEvent={artifactId:deg_table, selectionAtBind:true, tailArtifactId:deg_table, eventCount:9}（gewu:selection-bus 事件流实证 setSelectionBusArtifact 生产绑定=useArtifactInteractionSelection.ts:227-231；事件通道为实例无关真相——模块动态 import 裸 URL 会因 Vite HMR t-戳得到第二实例，首轮走查实抓后改为按 performance 资源 URL 解析）"
+      "detail": "busBindingEvent={artifactId:deg_table, selectionAtBind:true, tailArtifactId:deg_table, eventCount:9}（petri:selection-bus 事件流实证 setSelectionBusArtifact 生产绑定=useArtifactInteractionSelection.ts:227-231；事件通道为实例无关真相——模块动态 import 裸 URL 会因 Vite HMR t-戳得到第二实例，首轮走查实抓后改为按 performance 资源 URL 解析）"
     },
     {
       "id": "S3_mark_to_entity_bus",

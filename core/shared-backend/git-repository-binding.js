@@ -3,13 +3,13 @@
 /**
  * shared-backend/git-repository-binding.js
  *
- * G0-RS1 — 把一个 BioF3 项目安全地绑定到一个 Git 版本后端。
+ * G0-RS1 — 把一个 Petri 项目安全地绑定到一个 Git 版本后端。
  *
  * 决策来源：docs/g0-rs0-result-studio-audit.md §4 风险矩阵。
  * 2026-10-03 用户裁决（UI-462）：Result Studio 历史只进受管理私有仓库，
  * 「接入用户自有仓库」能力整体退役——因此只剩 managed 一种绑定模式。
  *
- * managed：git 元数据放 `<workspace>/.biof3/git`，工作区仍是项目目录本身，
+ * managed：git 元数据放 `<workspace>/.petri/git`，工作区仍是项目目录本身，
  * 因此用户浏览项目时看不到 `.git`。用户项目目录自身的 Git 仓库（若有）
  * 与本绑定完全无关：不读、不写、不在任何 UI 提示。
  *
@@ -40,8 +40,8 @@ const BINDING_STATUSES = Object.freeze([
   'blocked_workspace_invalid',
 ]);
 
-/** BioF3 私有目录名；托管 git 与 revision 元数据都在它下面。 */
-const BIOF3_DIR = '.biof3';
+/** Petri 私有目录名；托管 git 与 revision 元数据都在它下面。 */
+const PETRI_DIR = '.petri';
 
 /**
  * RS 受管理的相对路径。只有这些路径会进入版本控制。
@@ -68,7 +68,7 @@ function inspectWorkspaceGit(options = {}) {
   }
   const resolvedWorkspace = path.resolve(workspaceRoot);
   const runtime = detectGitRuntime({ gitBin: options.gitBin });
-  const managedGitDir = path.join(resolvedWorkspace, BIOF3_DIR, 'git');
+  const managedGitDir = path.join(resolvedWorkspace, PETRI_DIR, 'git');
   const managedExists = fs.existsSync(path.join(managedGitDir, 'HEAD'));
 
   return {
@@ -187,25 +187,25 @@ function bindProjectRepository(options = {}) {
 /**
  * 托管元数据落点。全部锚定 workspaceRoot，与 project-run-layout 同源。
  */
-function resolveBiof3MetadataLayout(workspaceRoot) {
+function resolvePetriMetadataLayout(workspaceRoot) {
   const root = path.resolve(workspaceRoot);
-  const biof3Dir = path.join(root, BIOF3_DIR);
+  const petriDir = path.join(root, PETRI_DIR);
   return {
     workspaceRoot: root,
-    biof3Dir,
-    managedGitDir: path.join(biof3Dir, 'git'),
-    revisionDir: path.join(biof3Dir, 'revision'),
-    checkpointDir: path.join(biof3Dir, 'checkpoints'),
-    objectsDir: path.join(biof3Dir, 'objects'),
+    petriDir,
+    managedGitDir: path.join(petriDir, 'git'),
+    revisionDir: path.join(petriDir, 'revision'),
+    checkpointDir: path.join(petriDir, 'checkpoints'),
+    objectsDir: path.join(petriDir, 'objects'),
   };
 }
 
 module.exports = {
   REPOSITORY_BINDING_VERSION,
   BINDING_STATUSES,
-  BIOF3_DIR,
+  PETRI_DIR,
   MANAGED_RELATIVE_PATHS,
   inspectWorkspaceGit,
   bindProjectRepository,
-  resolveBiof3MetadataLayout,
+  resolvePetriMetadataLayout,
 };

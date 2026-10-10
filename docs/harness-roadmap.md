@@ -1,4 +1,4 @@
-# BioF3 Harness Roadmap v1
+# Petri Harness Roadmap v1
 
 > 状态：Phase 1–6 + Phase 7 已分别收口；后续由 HRT-v1（`harness-loop-engineering-plan.md`）/ HLE-C0~C5（`harness-loop-production-closure-plan.md`）/ Phase 7 收口（`harness-phase7-completion-plan.md`）分别落地。本文保持 2026-07-21 之前快照；不再用于当前推进决策。
 

@@ -12,7 +12,7 @@
 //     and returns an updates[] list. Read-only.
 //   loadAllPlugins(): startup-time restore — rehydrates runtime env
 //     vars, registers content-plugin docs in globalThis, and pushes
-//     tool plugin metadata to biof3-server via registerPluginInServer.
+//     tool plugin metadata to petri-server via registerPluginInServer.
 // ============================================================
 
 const fs = require('fs');
@@ -32,7 +32,7 @@ const {
   RUNTIMES_DIR,
   PROJECT_ROOT,
 } = require('./paths');
-const pluginLoader = require(path.join(PROJECT_ROOT, 'biof3-server', 'plugin-loader.js'));
+const pluginLoader = require(path.join(PROJECT_ROOT, 'petri-server', 'plugin-loader.js'));
 const {
   getInstalledPlugins,
   removeInstalledPlugin,
@@ -54,9 +54,9 @@ async function uninstallRuntime(pluginId, plug) {
 
   // 清环境变量（回退到打包内嵌或 null）
   if (lang === 'r') {
-    delete process.env.BIOF3_R_HOME;
+    delete process.env.PETRI_R_HOME;
   } else {
-    delete process.env.BIOF3_PY_HOME;
+    delete process.env.PETRI_PY_HOME;
   }
 
   removeInstalledPlugin(pluginId);
@@ -101,8 +101,8 @@ async function loadAllPlugins() {
             )
           : getPythonRuntimeExecutable(runtimeDir, process.platform) !== null;
       if (fs.existsSync(runtimeDir) && platformMatch && binExists) {
-        if (plug.language === 'r') process.env.BIOF3_R_HOME = runtimeDir;
-        else process.env.BIOF3_PY_HOME = runtimeDir;
+        if (plug.language === 'r') process.env.PETRI_R_HOME = runtimeDir;
+        else process.env.PETRI_PY_HOME = runtimeDir;
         console.log(`[plugin] runtime loaded: ${plug.id} → ${runtimeDir}`);
       } else {
         console.warn(
@@ -112,7 +112,7 @@ async function loadAllPlugins() {
       continue;
     }
 
-    // Content 插件：恢复 docsDir 注册到 globalThis._biof3ContentPlugins
+    // Content 插件：恢复 docsDir 注册到 globalThis._petriContentPlugins
     if (plug.type === 'content-plugin') {
       const pluginDir = path.join(PLUGINS_DIR, plug.id);
       if (!fs.existsSync(pluginDir)) {

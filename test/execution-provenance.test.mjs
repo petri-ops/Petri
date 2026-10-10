@@ -12,7 +12,7 @@ const {
   resolveExecutionInputPath,
 } = require('../core/shared-backend/execution-provenance');
 const { collectExecutionInputs, writeArtifactManifest } = require('../core/shared-backend/artifact-manifest');
-const root = mkdtempSync(join(tmpdir(), 'biof3-hrt4-'));
+const root = mkdtempSync(join(tmpdir(), 'petri-hrt4-'));
 after(() => rmSync(root, { recursive: true, force: true }));
 
 test('HRT-4 binds TaskSpec, plugin, runtime, script, params, inputs and artifacts', () => {

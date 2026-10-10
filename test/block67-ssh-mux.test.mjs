@@ -3,7 +3,7 @@
  *
  * 用本地 bash 执行 agent 的 __mux 循环（不经 ssh），验证客户端会话：
  * 命令投递 / R 行解析 / 多请求串行 / fs_write 大载荷 / 会话死亡后拒绝。
- * agent 脚本以临时 HOME 部署（$HOME/.biof3-agent/bin/biof3-agent.sh），
+ * agent 脚本以临时 HOME 部署（$HOME/.petri-agent/bin/petri-agent.sh），
  * 使 remoteAgentCommand 的 "$HOME/..." 在本地成立。
  */
 import assert from 'node:assert/strict';
@@ -15,17 +15,17 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const require = createRequire(import.meta.url);
-const { BIOF3_AGENT_SH, remoteAgentCommand } = require('../core/biof3-server/helpers/remote-execution/node-agent');
-const mux = require('../core/biof3-server/helpers/remote-execution/ssh-multiplexer');
+const { PETRI_AGENT_SH, remoteAgentCommand } = require('../core/petri-server/helpers/remote-execution/node-agent');
+const mux = require('../core/petri-server/helpers/remote-execution/ssh-multiplexer');
 // BLOCK-96 F2 — fs_list 契约断言经 gateway 解码（stdout = 单行 base64(NUL 记录流)）
-const { parseListEntries } = require('../core/biof3-server/helpers/workspace-gateway');
+const { parseListEntries } = require('../core/petri-server/helpers/workspace-gateway');
 
 // 临时 HOME 部署 agent（与远端布局一致）
 const fakeHome = mkdtempSync(join(tmpdir(), 'b67-mux-'));
-const agentDir = join(fakeHome, '.biof3-agent', 'bin');
+const agentDir = join(fakeHome, '.petri-agent', 'bin');
 mkdirSync(agentDir, { recursive: true });
-const agentPath = join(agentDir, 'biof3-agent.sh');
-writeFileSync(agentPath, BIOF3_AGENT_SH);
+const agentPath = join(agentDir, 'petri-agent.sh');
+writeFileSync(agentPath, PETRI_AGENT_SH);
 process.env.HOME = fakeHome;
 process.env.USERPROFILE = fakeHome;
 
@@ -94,10 +94,10 @@ test('runOnMux: 非零 exit 仍返回 stdout（语义交调用方）+ muxEnabled
   assert.strictEqual(r.code, 0); // agent fs_stat not_found 走 stdout JSON、exit 0
   assert.ok(r.stdout.includes('not_found'));
 
-  const orig = process.env.BIOF3_SSH_MUX;
-  process.env.BIOF3_SSH_MUX = '0';
+  const orig = process.env.PETRI_SSH_MUX;
+  process.env.PETRI_SSH_MUX = '0';
   assert.strictEqual(mux.muxEnabled(), false);
-  if (orig === undefined) delete process.env.BIOF3_SSH_MUX; else process.env.BIOF3_SSH_MUX = orig;
+  if (orig === undefined) delete process.env.PETRI_SSH_MUX; else process.env.PETRI_SSH_MUX = orig;
 });
 
 test('mux 会话死亡: pending 与后续请求诚实拒绝（可重试）', async () => {

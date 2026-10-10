@@ -18,7 +18,7 @@
 2. ✅ `G0-START` 审计通过（10/10，2026-07-24）。
 3. ✅ `G0-LF0` 已建立 Constitution、Baseline Registry、版本身份和 Support Matrix（2026-07-24）。
 
-启动边界：本计划已于 2026-07-25 完成 `SDC-0` Profile Registry 与版本治理。`SDC1-A Data-to-first-result slice` 已于 2026-08-04 以实现检查点 `bd15777` 和 source-bound 开发态 Electron 证据收口。`SDC-1` 与 `SDC-2` 已于 2026-08-06 以 fixture 覆盖 + `frontend/src/lib/data-profile.test.ts` + `scripts/check-sdc-complete.mjs` 收口，canonical evidence 为 `acceptance/g0-scientific-data-contract/sdc1-complete.json` 与 `sdc2-semantic-binder.json`。单工作包串行不变；SDC-3～SDC-7 与 P7 不自动启动。**2026-09-15 用户裁决：SDC 不在本阶段推进**——BLOCK-83 后架构前提已变（生信能力迁领域包 gewu-pack-bio、核心领域中性化），SDC-3～SDC-7 的归属（核心 vs 领域包）与范围（与 Result Studio/Agent 工作台重叠面）需先做 P0 归属对账才可重启；本阶段不排期、不列为队列候选。
+启动边界：本计划已于 2026-07-25 完成 `SDC-0` Profile Registry 与版本治理。`SDC1-A Data-to-first-result slice` 已于 2026-08-04 以实现检查点 `bd15777` 和 source-bound 开发态 Electron 证据收口。`SDC-1` 与 `SDC-2` 已于 2026-08-06 以 fixture 覆盖 + `frontend/src/lib/data-profile.test.ts` + `scripts/check-sdc-complete.mjs` 收口，canonical evidence 为 `acceptance/g0-scientific-data-contract/sdc1-complete.json` 与 `sdc2-semantic-binder.json`。单工作包串行不变；SDC-3～SDC-7 与 P7 不自动启动。**2026-09-15 用户裁决：SDC 不在本阶段推进**——BLOCK-83 后架构前提已变（生信能力迁领域包 petri-pack-bio、核心领域中性化），SDC-3～SDC-7 的归属（核心 vs 领域包）与范围（与 Result Studio/Agent 工作台重叠面）需先做 P0 归属对账才可重启；本阶段不排期、不列为队列候选。
 
 ## 1. 决策结论
 
@@ -34,7 +34,7 @@
 - p-value、adjusted p-value、方向和基因 ID 类型缺失或含义不明确。
 - 上游插件输出了文件，但其内容不满足下游插件的科学或结构契约。
 
-因此，BioF3 不能采用以下两种不可靠方式：
+因此，Petri 不能采用以下两种不可靠方式：
 
 1. 把原始数据直接传给插件，等待 R/Python 报错后再临时修改。
 2. 为了让流程继续而静默猜测科学含义、覆盖原文件或修改插件源码。
@@ -58,7 +58,7 @@ Profiler、Binder、Adapter、Standardizer 和 Validator 必须复用这条真�
 当前已经存在：
 
 - `core/shared-backend/artifact-profiles.js`
-- `biof3.deg.v1`
+- `petri.deg.v1`
 - `deg-standardizer`
 - DESeq2 输入 Preflight
 - `metadata → coldata` 显式绑定
@@ -194,7 +194,7 @@ cannot_reliably_answer
 - 生产者和消费者能力
 - compatible / migration / breaking 规则
 
-`biof3.deg.v1` 是现有种子，后续必须按同一治理方式扩展。
+`petri.deg.v1` 是现有种子，后续必须按同一治理方式扩展。
 
 ### 5.5 AdapterPlan
 
@@ -253,12 +253,12 @@ cannot_reliably_answer
 
 首批 Profile：
 
-1. `biof3.counts-matrix.v1`
-2. `biof3.sample-metadata.v1`
-3. `biof3.expression-matrix.v1`
-4. `biof3.deg.v1`
-5. `biof3.gene-list.v1`
-6. `biof3.enrichment-table.v1`
+1. `petri.counts-matrix.v1`
+2. `petri.sample-metadata.v1`
+3. `petri.expression-matrix.v1`
+4. `petri.deg.v1`
+5. `petri.gene-list.v1`
+6. `petri.enrichment-table.v1`
 
 出口：
 
@@ -547,10 +547,10 @@ acceptance/g0-scientific-data-contract/
 ## 13. 可复用 Agent 提示词
 
 ```text
-你正在开发 BioF3 Desktop。
+你正在开发 Petri Desktop。
 
 仓库：
-/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop
+/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop
 
 目标：
 按 docs/g0-scientific-data-contract-plan.md 实施当前允许启动的第一个未完成 SDC 工作包。核心目标是让不规则用户数据经过 Profiler、Semantic Binding、可复现 Adapter、Plugin I/O Contract 和 typed DAG 后再进入科学插件；不能等待 R/Python 报错后临时修文件，也不能用自动格式转换猜测关键科学设计。

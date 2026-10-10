@@ -45,7 +45,7 @@ async function main() {
   const pairingUrl = process.argv[2];
   if (!pairingUrl) { console.error('usage: node scripts/block88-p4-dual-machine.cjs <pairingUrl>'); process.exit(2); }
 
-  const cmdRoot = mkdtempSync(path.join(tmpdir(), 'gewu-block88-p4-cmd-'));
+  const cmdRoot = mkdtempSync(path.join(tmpdir(), 'petri-block88-p4-cmd-'));
   try {
     // ── L1 Mac 指挥席署名配对 Windows（真实 addPeerFromPairingUrl 全链）──
     const federation = require(path.join(ROOT, 'core/shared-backend/federation-peers.js'));
@@ -75,9 +75,9 @@ async function main() {
       `status=${projects.status} count=${(projects.data.projects || []).length}`);
 
     // ── L3 默认零授权：带 projectId 委托 → Windows 诚实 403 ──
-    process.env.BIOF3_LOCAL_DATA_DIR = cmdRoot;
-    const { tool_delegate_to_gewu_node } = require(path.join(ROOT, 'core/biof3-server/agent-tools/federation-tools.js'));
-    const denied = await tool_delegate_to_gewu_node({ peerId, task: DELEGATE_TASK, projectId: target.id, timeoutMinutes: 3 });
+    process.env.PETRI_LOCAL_DATA_DIR = cmdRoot;
+    const { tool_delegate_to_petri_node } = require(path.join(ROOT, 'core/petri-server/agent-tools/federation-tools.js'));
+    const denied = await tool_delegate_to_petri_node({ peerId, task: DELEGATE_TASK, projectId: target.id, timeoutMinutes: 3 });
     assert_('L3_ungarnted_denied_cross_machine', denied.ok !== true && denied.error === 'federation_project_not_granted',
       JSON.stringify({ error: denied.error, message: denied.message }).slice(0, 180));
 
@@ -90,7 +90,7 @@ async function main() {
     assert_('L4_windows_grant_ok', grant.status === 200 && grant.data.ok === true);
 
     // ── L5 授权放行：真实委托在 Windows 跑完（真实模型轮次）──
-    const receipt = await tool_delegate_to_gewu_node({ peerId, task: DELEGATE_TASK, projectId: target.id, timeoutMinutes: 8 });
+    const receipt = await tool_delegate_to_petri_node({ peerId, task: DELEGATE_TASK, projectId: target.id, timeoutMinutes: 8 });
     assert_('L5_granted_delegate_done_cross_machine', receipt.ok === true,
       `agentStatus=${receipt.agentStatus} err=${receipt.error || 'none'} reply=${String(receipt.reply || '').slice(0, 90)}`);
 
@@ -110,7 +110,7 @@ async function main() {
       JSON.stringify(fed && { project_id: fed.project_id, origin: fed.origin }));
 
     // ── L7 发现面：不带 projectId 委托回执附 grantedProjects ──
-    const receipt2 = await tool_delegate_to_gewu_node({ peerId, task: DELEGATE_TASK, timeoutMinutes: 8 });
+    const receipt2 = await tool_delegate_to_petri_node({ peerId, task: DELEGATE_TASK, timeoutMinutes: 8 });
     assert_('L7_discovery_granted_projects', receipt2.ok === true && Array.isArray(receipt2.grantedProjects)
       && receipt2.grantedProjects.some((p) => p.projectId === target.id),
       JSON.stringify(receipt2.grantedProjects || receipt2.error));
@@ -121,7 +121,7 @@ async function main() {
       headers: { Authorization: `Bearer ${token}` },
     });
     assert_('L8a_windows_revoke_ok', revoke.status === 200);
-    const deniedAgain = await tool_delegate_to_gewu_node({ peerId, task: DELEGATE_TASK, projectId: target.id, timeoutMinutes: 3 });
+    const deniedAgain = await tool_delegate_to_petri_node({ peerId, task: DELEGATE_TASK, projectId: target.id, timeoutMinutes: 3 });
     assert_('L8b_revoked_denied_again_cross_machine', deniedAgain.ok !== true && deniedAgain.error === 'federation_project_not_granted',
       JSON.stringify({ error: deniedAgain.error }).slice(0, 120));
   } finally {

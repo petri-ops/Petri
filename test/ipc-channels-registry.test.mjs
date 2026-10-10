@@ -63,7 +63,7 @@ const MAIN_ONLY = new Set([
 ]);
 
 /** 非 IPC 通道的协议类型 tag（canonical=frontend/src/lib/events.ts），reflux 白名单。 */
-const PROTOCOL_TAGS = new Set(['gewu:project-open-artifact']);
+const PROTOCOL_TAGS = new Set(['petri:project-open-artifact']);
 
 function flattenRegistry() {
   const flat = [];

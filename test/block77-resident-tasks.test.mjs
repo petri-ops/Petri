@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-const { TOOL_DEFS } = await import('../core/biof3-server/agent-tools/tool-defs.js');
+const { TOOL_DEFS } = await import('../core/petri-server/agent-tools/tool-defs.js');
 
 function def(name) {
   return TOOL_DEFS.find((d) => d.function && d.function.name === name);

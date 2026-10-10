@@ -32,7 +32,7 @@
 
 - **实锤**：`replot.R` 从未存在于 git 历史（`git log --all` 零命中）；`backend-proc-manager.js` L275-280 脚本缺失即 `"replot disabled"` 跳过 spawn——**plumber 进程从未启动**，`r-compute.js` 代理路由指向永无人监听的 :8787。
 
-- **R 事实上已单轨**：唯一活路径 = tools-executor 每任务独立 Rscript 子进程（超时/僵尸恢复/provenance 全在此链）。BLOCK-30 拓扑声明的「biof3-server + plumber」与现实不符。
+- **R 事实上已单轨**：唯一活路径 = tools-executor 每任务独立 Rscript 子进程（超时/僵尸恢复/provenance 全在此链）。BLOCK-30 拓扑声明的「petri-server + plumber」与现实不符。
 
 - **语义替代已存在**：Replot 用途已被 Result Studio 版本化编辑取代（改参数→新 Revision→重跑，走 Artifact Truth 而非内存缓存）。清理无功能损失。
 
@@ -69,10 +69,10 @@
 | 位置                                      | 内容                                                                         |
 | --------------------------------------- | -------------------------------------------------------------------------- |
 | `src/main/backend-proc-manager.js`      | `startPlumber` 整段 + `plumberProc` 状态 + plumber idle timer（\~60 行）          |
-| `core/biof3-server/routes/r-compute.js` | 代理路由整文件（\~100 行，代理到永无人监听的 :8787）                                           |
-| `core/biof3-server/routes/index.js`     | L46 挂载行移除                                                                  |
+| `core/petri-server/routes/r-compute.js` | 代理路由整文件（\~100 行，代理到永无人监听的 :8787）                                           |
+| `core/petri-server/routes/index.js`     | L46 挂载行移除                                                                  |
 | `src/backend-health.js`                 | `plumberUp` 探测字段移除（恒 false 的死指标）                                           |
-| `core/biof3-server/ARCHITECTURE.md`     | 拓扑描述 "biof3-server + plumber" → "biof3-server 单轨"（与现实对齐）                   |
+| `core/petri-server/ARCHITECTURE.md`     | 拓扑描述 "petri-server + plumber" → "petri-server 单轨"（与现实对齐）                   |
 | 前端 `scOpenReplotForAnalysis`            | `copilotClient.ts` L183/L301（URL context 参数）——实施时确认其消费终点；若指向 replot 端点则一并清 |
 
 **语义替代已存在**：Replot 的设计用途（驻留 R 进程交互式重绘）已被 Result Studio 版本化编辑取代（改参数 → 新 Revision → 重跑，走 Artifact Truth 链而非内存缓存），清理无功能损失。
@@ -160,7 +160,7 @@
 
 - 2026-09-03 P2 实施完成：loop-orchestrator.js 每轮请求前 `estimateRequestTokens` 预算检查，total > ctxWindow×0.85 触发 `trimMessagesToBudget`（防抖单次，就地替换 messages）+ `token_budget(trimmed)` 事件；新增 `test/context-breaker.test.mjs` 3/3（超窗触发一次性修剪 / 正常不触发 / finish_reason=length 多轮续写）。
 
-- 2026-09-03 P3 实施完成：`startPlumber`/`stopPlumber` 及 plumber 状态整段（backend-proc-manager.js）、`routes/r-compute.js` 整文件、routes/index.js 挂载行、backend-health.js `plumberUp` 死指标、preload/env-coordinator/_backend-ports plumber 端口残留、前端 replot 消费链（electron.d.ts/BackendStatusProvider/project-workspace）、相关测试断言全部移除；ARCHITECTURE.md 拓扑改「biof3-server 单轨」；全仓 grep `plumber|replot` 仅剩历史文档与 plan 引用。
+- 2026-09-03 P3 实施完成：`startPlumber`/`stopPlumber` 及 plumber 状态整段（backend-proc-manager.js）、`routes/r-compute.js` 整文件、routes/index.js 挂载行、backend-health.js `plumberUp` 死指标、preload/env-coordinator/_backend-ports plumber 端口残留、前端 replot 消费链（electron.d.ts/BackendStatusProvider/project-workspace）、相关测试断言全部移除；ARCHITECTURE.md 拓扑改「petri-server 单轨」；全仓 grep `plumber|replot` 仅剩历史文档与 plan 引用。
 
 - 2026-09-03 P5 定向门禁全绿：定向测试 22/22（concurrency 10 + context-breaker 3 + main-window-compat 5 + 相关 4）+ 回归 57/57（agent-runner-facade/facade-compat/loop-orchestrator-subdomains/conversation-adapter/backend-health/env-coordinator-port/preload-branch 等）+ 前端 tsc 0 + `docs:check` PASS + `ui:audit:check` PASS（UI-279 补登 + ce430483 豁免登记）。
 

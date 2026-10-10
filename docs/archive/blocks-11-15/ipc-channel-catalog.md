@@ -1,8 +1,8 @@
-# IPC Channel Catalog (BioF3 Desktop · G0)
+# IPC Channel Catalog (Petri Desktop · G0)
 
 最后更新：2026-08-19（BLOCK-14-IPC-CHANNEL-CATALOG 工作包收口：5 表 + 1 孤儿候选清单）
 
-本文件是 **`biof3:desktop` Electron app 静态 IPC 通道目录**，由 `BLOCK-14-IPC-CHANNEL-CATALOG` 工作包通过 ripgrep 静态扫描生成。
+本文件是 **`petri:desktop` Electron app 静态 IPC 通道目录**，由 `BLOCK-14-IPC-CHANNEL-CATALOG` 工作包通过 ripgrep 静态扫描生成。
 
 - **不修改任何源文件**，只读扫描产物。
 - 覆盖范围：`src/main.js` + `src/main/*.js` + `src/ipc/*.js` + `src/mcp-server.js` + `src/preload.js` + `frontend/src/lib/desktopBridge.ts` + `frontend/src/lib/electron.d.ts`。
@@ -24,14 +24,14 @@
 
 | # | Channel 名 | 注册位置 | Register 形式 | Notes |
 |---:|:----------|:---------|:--------------|:------|
-| 1 | `biof3:agent-workbench-flags` | `src/main.js:604` | `ipcMain.handle` | 由常量 `AGENT_WORKBENCH_FLAG_CHANNEL = "biof3:agent-workbench-flags"` 定义 |
+| 1 | `petri:agent-workbench-flags` | `src/main.js:604` | `ipcMain.handle` | 由常量 `AGENT_WORKBENCH_FLAG_CHANNEL = "petri:agent-workbench-flags"` 定义 |
 | 2 | `window:minimize` | `src/main.js:619` | `ipcMain.on` | 自定义 traffic-light |
 | 3 | `window:maximize` | `src/main.js:622` | `ipcMain.on` | 自定义 traffic-light |
 | 4 | `window:close` | `src/main.js:631` | `ipcMain.on` | 自定义 traffic-light |
 | 5 | `window:isMaximized` | `src/main.js:634` | `ipcMain.handle` | 自定义 traffic-light |
 | 6 | `window:isFullScreen` | `src/main.js:640` | `ipcMain.handle` | macOS fullscreen |
 | 7 | `window:toggleFullScreen` | `src/main.js:644` | `ipcMain.on` | macOS fullscreen |
-| 8 | `app:relaunch` | `src/main.js:660` | `ipcMain.handle` | BIOF3_R_HOME 重启 |
+| 8 | `app:relaunch` | `src/main.js:660` | `ipcMain.handle` | PETRI_R_HOME 重启 |
 | 9 | `skills:discover` | `src/main.js:829` | `ipcMain.handle` | UI-157 |
 | 10 | `skills:execute` | `src/main.js:841` | `ipcMain.handle` | UI-157 |
 | 11 | `skills:getExecution` | `src/main.js:906` | `ipcMain.handle` | UI-157 |
@@ -120,76 +120,76 @@
 
 | # | Channel 名 | preload 行号 | 暴露 namespace | Notes |
 |---:|:----------|:-------------|:---------------|:------|
-| 1 | `ai-settings:get` | `src/preload.js:143` | `biof3Desktop.aiSettings.get` | |
-| 2 | `ai-settings:save` | `src/preload.js:144` | `biof3Desktop.aiSettings.save` | |
-| 3 | `ai-settings:get-credential` | `src/preload.js:145` | `biof3Desktop.aiSettings.getCredential` | |
-| 4 | `ai-settings:test` | `src/preload.js:146` | `biof3Desktop.aiSettings.test` | |
-| 5 | `ai-settings:list-models` | `src/preload.js:147` | `biof3Desktop.aiSettings.listModels` | |
-| 6 | `compute-settings:get` | `src/preload.js:152` | `biof3Desktop.computeSettings.get` | |
-| 7 | `compute-settings:save` | `src/preload.js:153` | `biof3Desktop.computeSettings.save` | |
-| 8 | `harness-capabilities:list` | `src/preload.js:158` | `biof3Desktop.harnessCapabilities.list` | |
-| 9 | `plugin:list-installed` | `src/preload.js:163` | `biof3Desktop.plugins.listInstalled` | |
-| 10 | `plugin:list-remote` | `src/preload.js:164` | `biof3Desktop.plugins.listRemote` | |
-| 11 | `plugin:install` | `src/preload.js:169` | `biof3Desktop.plugins.install` | `install-progress` 主进程推送 |
-| 12 | `plugin:uninstall` | `src/preload.js:176` | `biof3Desktop.plugins.uninstall` | |
-| 13 | `plugin:check-updates` | `src/preload.js:177` | `biof3Desktop.plugins.checkUpdates` | |
-| 14 | `content-plugin:list` | `src/preload.js:182` | `biof3Desktop.contentPlugins.list` | |
-| 15 | `content-plugin:list-docs` | `src/preload.js:183` | `biof3Desktop.contentPlugins.listDocs` | |
-| 16 | `content-plugin:read` | `src/preload.js:185` | `biof3Desktop.contentPlugins.read` | |
-| 17 | `runtime:status` | `src/preload.js:190` | `biof3Desktop.runtime.status` | |
-| 18 | `backend:status` | `src/preload.js:195` | `biof3Desktop.backend.status` | M1-1 |
-| 19 | `py:start` | `src/preload.js:200` | `biof3Desktop.py.start` | |
-| 20 | `py:stop` | `src/preload.js:201` | `biof3Desktop.py.stop` | |
-| 21 | `plumber:start` | `src/preload.js:204` | `biof3Desktop.plumber.start` | |
-| 22 | `plumber:stop` | `src/preload.js:205` | `biof3Desktop.plumber.stop` | |
-| 23 | `file:save-dialog` | `src/preload.js:210` | `biof3Desktop.files.saveDialog` | |
-| 24 | `file:open-dialog` | `src/preload.js:211` | `biof3Desktop.files.openDialog` | 同时支持单文件与目录选择（`openDirectoryDialog` 转 `{ openDirectory: true }`） |
-| 25 | `file:open-path` | `src/preload.js:213` | `biof3Desktop.files.openPath` | |
-| 26 | `file:open-workspace-file` | `src/preload.js:215` | `biof3Desktop.files.openWorkspaceFile` | |
-| 27 | `diagnostic:export` | `src/preload.js:220` | `biof3Desktop.diagnostic.export` | |
-| 28 | `telemetry:report` | `src/preload.js:225` | `biof3Desktop.telemetry.report` | |
-| 29 | `data:info` | `src/preload.js:230` | `biof3Desktop.data.info` | |
-| 30 | `data:open-dir` | `src/preload.js:231` | `biof3Desktop.data.openDir` | |
-| 31 | `terminal:snapshot` | `src/preload.js:236` | `biof3Desktop.terminal.snapshot` | |
-| 32 | `terminal:open-log-dir` | `src/preload.js:237` | `biof3Desktop.terminal.openLogDir` | |
-| 33 | `terminal:open-shell` | `src/preload.js:238` | `biof3Desktop.terminal.openShell` | |
-| 34 | `terminal:session-start` | `src/preload.js:239` | `biof3Desktop.terminal.startSession` | |
-| 35 | `terminal:session-write` | `src/preload.js:240` | `biof3Desktop.terminal.writeSession` | |
-| 36 | `terminal:session-resize` | `src/preload.js:242` | `biof3Desktop.terminal.resizeSession` | |
-| 37 | `terminal:session-stop` | `src/preload.js:243` | `biof3Desktop.terminal.stopSession` | |
-| 38 | `skills:discover` | `src/preload.js:261` | `biof3Desktop.skills.discover` | |
-| 39 | `skills:execute` | `src/preload.js:263` | `biof3Desktop.skills.execute` | `String(skillId ?? '')` 防御 |
-| 40 | `skills:getExecution` | `src/preload.js:265` | `biof3Desktop.skills.getExecution` | |
-| 41 | `skills:cancel` | `src/preload.js:267` | `biof3Desktop.skills.cancel` | |
-| 42 | `branch:create` | `src/preload.js:288` | `biof3Desktop.branch.create` | |
-| 43 | `branch:list` | `src/preload.js:289` | `biof3Desktop.branch.list` | |
-| 44 | `branch:switch` | `src/preload.js:290` | `biof3Desktop.branch.switch` | |
-| 45 | `branch:delete` | `src/preload.js:291` | `biof3Desktop.branch.delete` | |
-| 46 | `branch:rename` | `src/preload.js:292` | `biof3Desktop.branch.rename` | |
-| 47 | `branch:active` | `src/preload.js:293` | `biof3Desktop.branch.getActive` | |
-| 48 | `result:create` | `src/preload.js:299` | `biof3Desktop.result.create` | |
-| 49 | `result:get` | `src/preload.js:300` | `biof3Desktop.result.get` | |
-| 50 | `result:list` | `src/preload.js:301` | `biof3Desktop.result.list` | |
-| 51 | `result:update` | `src/preload.js:302` | `biof3Desktop.result.update` | |
-| 52 | `result:delete` | `src/preload.js:303` | `biof3Desktop.result.delete` | |
-| 53 | `result:byProject` | `src/preload.js:304` | `biof3Desktop.result.byProject` | |
-| 54 | `result:createFromConversation` | `src/preload.js:306` | `biof3Desktop.result.createFromConversation` | |
-| 55 | `result:version:create` | `src/preload.js:308` | `biof3Desktop.result.version.create` | |
-| 56 | `result:version:get` | `src/preload.js:309` | `biof3Desktop.result.version.get` | |
-| 57 | `result:version:getByNumber` | `src/preload.js:310` | `biof3Desktop.result.version.getByNumber` | |
-| 58 | `result:version:list` | `src/preload.js:311` | `biof3Desktop.result.version.list` | |
-| 59 | `updater:check` | `src/preload.js:317` | `biof3Desktop.updater.check` | |
-| 60 | `updater:download` | `src/preload.js:318` | `biof3Desktop.updater.download` | |
-| 61 | `updater:install` | `src/preload.js:319` | `biof3Desktop.updater.install` | |
-| 62 | `app:relaunch` | `src/preload.js:138` | `biof3Desktop.app.relaunch` | |
-| 63 | `window:isMaximized` | `src/preload.js:103` | `biof3Desktop.window.isMaximized` | |
-| 64 | `window:isFullScreen` | `src/preload.js:119` | `biof3Desktop.window.isFullScreen` | |
+| 1 | `ai-settings:get` | `src/preload.js:143` | `petriDesktop.aiSettings.get` | |
+| 2 | `ai-settings:save` | `src/preload.js:144` | `petriDesktop.aiSettings.save` | |
+| 3 | `ai-settings:get-credential` | `src/preload.js:145` | `petriDesktop.aiSettings.getCredential` | |
+| 4 | `ai-settings:test` | `src/preload.js:146` | `petriDesktop.aiSettings.test` | |
+| 5 | `ai-settings:list-models` | `src/preload.js:147` | `petriDesktop.aiSettings.listModels` | |
+| 6 | `compute-settings:get` | `src/preload.js:152` | `petriDesktop.computeSettings.get` | |
+| 7 | `compute-settings:save` | `src/preload.js:153` | `petriDesktop.computeSettings.save` | |
+| 8 | `harness-capabilities:list` | `src/preload.js:158` | `petriDesktop.harnessCapabilities.list` | |
+| 9 | `plugin:list-installed` | `src/preload.js:163` | `petriDesktop.plugins.listInstalled` | |
+| 10 | `plugin:list-remote` | `src/preload.js:164` | `petriDesktop.plugins.listRemote` | |
+| 11 | `plugin:install` | `src/preload.js:169` | `petriDesktop.plugins.install` | `install-progress` 主进程推送 |
+| 12 | `plugin:uninstall` | `src/preload.js:176` | `petriDesktop.plugins.uninstall` | |
+| 13 | `plugin:check-updates` | `src/preload.js:177` | `petriDesktop.plugins.checkUpdates` | |
+| 14 | `content-plugin:list` | `src/preload.js:182` | `petriDesktop.contentPlugins.list` | |
+| 15 | `content-plugin:list-docs` | `src/preload.js:183` | `petriDesktop.contentPlugins.listDocs` | |
+| 16 | `content-plugin:read` | `src/preload.js:185` | `petriDesktop.contentPlugins.read` | |
+| 17 | `runtime:status` | `src/preload.js:190` | `petriDesktop.runtime.status` | |
+| 18 | `backend:status` | `src/preload.js:195` | `petriDesktop.backend.status` | M1-1 |
+| 19 | `py:start` | `src/preload.js:200` | `petriDesktop.py.start` | |
+| 20 | `py:stop` | `src/preload.js:201` | `petriDesktop.py.stop` | |
+| 21 | `plumber:start` | `src/preload.js:204` | `petriDesktop.plumber.start` | |
+| 22 | `plumber:stop` | `src/preload.js:205` | `petriDesktop.plumber.stop` | |
+| 23 | `file:save-dialog` | `src/preload.js:210` | `petriDesktop.files.saveDialog` | |
+| 24 | `file:open-dialog` | `src/preload.js:211` | `petriDesktop.files.openDialog` | 同时支持单文件与目录选择（`openDirectoryDialog` 转 `{ openDirectory: true }`） |
+| 25 | `file:open-path` | `src/preload.js:213` | `petriDesktop.files.openPath` | |
+| 26 | `file:open-workspace-file` | `src/preload.js:215` | `petriDesktop.files.openWorkspaceFile` | |
+| 27 | `diagnostic:export` | `src/preload.js:220` | `petriDesktop.diagnostic.export` | |
+| 28 | `telemetry:report` | `src/preload.js:225` | `petriDesktop.telemetry.report` | |
+| 29 | `data:info` | `src/preload.js:230` | `petriDesktop.data.info` | |
+| 30 | `data:open-dir` | `src/preload.js:231` | `petriDesktop.data.openDir` | |
+| 31 | `terminal:snapshot` | `src/preload.js:236` | `petriDesktop.terminal.snapshot` | |
+| 32 | `terminal:open-log-dir` | `src/preload.js:237` | `petriDesktop.terminal.openLogDir` | |
+| 33 | `terminal:open-shell` | `src/preload.js:238` | `petriDesktop.terminal.openShell` | |
+| 34 | `terminal:session-start` | `src/preload.js:239` | `petriDesktop.terminal.startSession` | |
+| 35 | `terminal:session-write` | `src/preload.js:240` | `petriDesktop.terminal.writeSession` | |
+| 36 | `terminal:session-resize` | `src/preload.js:242` | `petriDesktop.terminal.resizeSession` | |
+| 37 | `terminal:session-stop` | `src/preload.js:243` | `petriDesktop.terminal.stopSession` | |
+| 38 | `skills:discover` | `src/preload.js:261` | `petriDesktop.skills.discover` | |
+| 39 | `skills:execute` | `src/preload.js:263` | `petriDesktop.skills.execute` | `String(skillId ?? '')` 防御 |
+| 40 | `skills:getExecution` | `src/preload.js:265` | `petriDesktop.skills.getExecution` | |
+| 41 | `skills:cancel` | `src/preload.js:267` | `petriDesktop.skills.cancel` | |
+| 42 | `branch:create` | `src/preload.js:288` | `petriDesktop.branch.create` | |
+| 43 | `branch:list` | `src/preload.js:289` | `petriDesktop.branch.list` | |
+| 44 | `branch:switch` | `src/preload.js:290` | `petriDesktop.branch.switch` | |
+| 45 | `branch:delete` | `src/preload.js:291` | `petriDesktop.branch.delete` | |
+| 46 | `branch:rename` | `src/preload.js:292` | `petriDesktop.branch.rename` | |
+| 47 | `branch:active` | `src/preload.js:293` | `petriDesktop.branch.getActive` | |
+| 48 | `result:create` | `src/preload.js:299` | `petriDesktop.result.create` | |
+| 49 | `result:get` | `src/preload.js:300` | `petriDesktop.result.get` | |
+| 50 | `result:list` | `src/preload.js:301` | `petriDesktop.result.list` | |
+| 51 | `result:update` | `src/preload.js:302` | `petriDesktop.result.update` | |
+| 52 | `result:delete` | `src/preload.js:303` | `petriDesktop.result.delete` | |
+| 53 | `result:byProject` | `src/preload.js:304` | `petriDesktop.result.byProject` | |
+| 54 | `result:createFromConversation` | `src/preload.js:306` | `petriDesktop.result.createFromConversation` | |
+| 55 | `result:version:create` | `src/preload.js:308` | `petriDesktop.result.version.create` | |
+| 56 | `result:version:get` | `src/preload.js:309` | `petriDesktop.result.version.get` | |
+| 57 | `result:version:getByNumber` | `src/preload.js:310` | `petriDesktop.result.version.getByNumber` | |
+| 58 | `result:version:list` | `src/preload.js:311` | `petriDesktop.result.version.list` | |
+| 59 | `updater:check` | `src/preload.js:317` | `petriDesktop.updater.check` | |
+| 60 | `updater:download` | `src/preload.js:318` | `petriDesktop.updater.download` | |
+| 61 | `updater:install` | `src/preload.js:319` | `petriDesktop.updater.install` | |
+| 62 | `app:relaunch` | `src/preload.js:138` | `petriDesktop.app.relaunch` | |
+| 63 | `window:isMaximized` | `src/preload.js:103` | `petriDesktop.window.isMaximized` | |
+| 64 | `window:isFullScreen` | `src/preload.js:119` | `petriDesktop.window.isFullScreen` | |
 
 ### 2b — `ipcRenderer.on`（main→preload push，13 项）
 
 | # | Channel 名 | preload 行号 | main 推送位置 | Notes |
 |---:|:----------|:-------------|:--------------|:------|
-| 1 | `biof3:agent-workbench-flags` | `:41`, `:61`, `:62` | `src/main.js:321` (`webContents.send`) + `:604` (`ipcMain.handle` 双向) | 常量共享 |
+| 1 | `petri:agent-workbench-flags` | `:41`, `:61`, `:62` | `src/main.js:321` (`webContents.send`) + `:604` (`ipcMain.handle` 双向) | 常量共享 |
 | 2 | `app:soft-refresh` | `:67` | `src/main.js:497` (`webContents.send`) | Cmd+R |
 | 3 | `window:maximize-changed` | `:113`, `:114` | main.js L561 区域（`window:maximize` 触发的状态广播） | |
 | 4 | `window:fullscreen-changed` | `:130`, `:131` | `src/main.js:581/586/592/597` (`webContents.send`) | |
@@ -214,9 +214,9 @@
 
 | # | Namespace | preload 行号 | 暴露的 surface | Notes |
 |---:|:----------|:-------------|:---------------|:------|
-| 1 | `biof3` | `src/preload.js:46` | `{ agentWorkbenchFlags: { getExtraRenderers, set, onChange } }` | UI 与 agent harness feature flag；`set` 走 invoke + 其余订阅/读取 |
-| 2 | `biof3Desktop` | `src/preload.js:86` | 顶层字段 `isDesktop: true` + `platform` / `arch` / `backendConfig` + 21 个子 namespace（`window` / `app` / `aiSettings` / `computeSettings` / `harnessCapabilities` / `plugins` / `skills` / `contentPlugins` / `runtime` / `backend` / `py` / `plumber` / `files` / `diagnostic` / `telemetry` / `data` / `terminal` / `updater` / `branch` / `result`） | 主桥，详见表 5 |
-| 3 | `process` | `src/preload.js:79` | `{ env: { BIOF3_DESKTOP?, NODE_ENV? } }` | 仅暴露 2 个环境变量；防 SSR/CSP 误用 |
+| 1 | `petri` | `src/preload.js:46` | `{ agentWorkbenchFlags: { getExtraRenderers, set, onChange } }` | UI 与 agent harness feature flag；`set` 走 invoke + 其余订阅/读取 |
+| 2 | `petriDesktop` | `src/preload.js:86` | 顶层字段 `isDesktop: true` + `platform` / `arch` / `backendConfig` + 21 个子 namespace（`window` / `app` / `aiSettings` / `computeSettings` / `harnessCapabilities` / `plugins` / `skills` / `contentPlugins` / `runtime` / `backend` / `py` / `plumber` / `files` / `diagnostic` / `telemetry` / `data` / `terminal` / `updater` / `branch` / `result`） | 主桥，详见表 5 |
+| 3 | `process` | `src/preload.js:79` | `{ env: { PETRI_DESKTOP?, NODE_ENV? } }` | 仅暴露 2 个环境变量；防 SSR/CSP 误用 |
 
 > 表 3 总结：**3 个 namespace** 顶层暴露。
 
@@ -224,28 +224,28 @@
 
 ## 表 4 — frontend typed bridge (`desktopBridge.ts`)
 
-> 来源：`frontend/src/lib/desktopBridge.ts` 是 typed accessor 层 — 它**不直接调用 IPC**，而是通过 `keyof DesktopBridge` 派生 `DesktopBridgeName` 类型，再让 `getBridge` / `requireBridge` 在 `electron.d.ts` 的 `Window.biof3Desktop` 上取值。共 **3 个 public API** + **1 个 error class**。
+> 来源：`frontend/src/lib/desktopBridge.ts` 是 typed accessor 层 — 它**不直接调用 IPC**，而是通过 `keyof DesktopBridge` 派生 `DesktopBridgeName` 类型，再让 `getBridge` / `requireBridge` 在 `electron.d.ts` 的 `Window.petriDesktop` 上取值。共 **3 个 public API** + **1 个 error class**。
 
 | # | API/Type | 行为 | Notes |
 |---:|:---------|:-----|:------|
-| 1 | `isDesktop(): boolean` | 判断 `typeof window !== 'undefined' && !!window.biof3Desktop` | 无 IPC 调用，纯 SSR 守卫 |
-| 2 | `getBridge<K>(name: K): DesktopBridgeHandle<K> \| null` | 从 `window.biof3Desktop` 取子 bridge handle，缺失返 null | K 限定 `keyof DesktopBridge`（自动由 electron.d.ts 派生，新增子 namespace 自动可用） |
+| 1 | `isDesktop(): boolean` | 判断 `typeof window !== 'undefined' && !!window.petriDesktop` | 无 IPC 调用，纯 SSR 守卫 |
+| 2 | `getBridge<K>(name: K): DesktopBridgeHandle<K> \| null` | 从 `window.petriDesktop` 取子 bridge handle，缺失返 null | K 限定 `keyof DesktopBridge`（自动由 electron.d.ts 派生，新增子 namespace 自动可用） |
 | 3 | `requireBridge<K>(name: K): DesktopBridgeHandle<K>` | 同上但缺失时抛 `BridgeUnavailableError` | 适用于 hot-path |
 | 4 | `class BridgeUnavailableError extends Error` | 错误类型，含 `bridgeName: string \| number \| symbol` | 抛错时 console 便于排查 |
 
-> 表 4 总结：3 个 accessor + 1 个错误类；其类型由 electron.d.ts 的 `Window.biof3Desktop` 全自动派生，故本文件只列 typed accessor 层，IPC channel 名见 **表 5**。
+> 表 4 总结：3 个 accessor + 1 个错误类；其类型由 electron.d.ts 的 `Window.petriDesktop` 全自动派生，故本文件只列 typed accessor 层，IPC channel 名见 **表 5**。
 
 ---
 
 ## 表 5 — `electron.d.ts` IPC type 声明（按 namespace 分组）
 
-> 来源：`frontend/src/lib/electron.d.ts` 的 `Window.biof3Desktop` 命名空间声明 + `Window.biof3.agentWorkbenchFlags` + `Window.process.env`。按 21 个 namespace 分组列出 typed method surface + 4 个接口类型。
+> 来源：`frontend/src/lib/electron.d.ts` 的 `Window.petriDesktop` 命名空间声明 + `Window.petri.agentWorkbenchFlags` + `Window.process.env`。按 21 个 namespace 分组列出 typed method surface + 4 个接口类型。
 
-### 5.1 — `biof3Desktop.isDesktop` 元标记
+### 5.1 — `petriDesktop.isDesktop` 元标记
 
 - `isDesktop: true`
 
-### 5.2 — `biof3Desktop.platform / arch / backendConfig`
+### 5.2 — `petriDesktop.platform / arch / backendConfig`
 
 | # | Field | 类型 | Notes |
 |---:|:------|:-----|:------|
@@ -254,7 +254,7 @@
 | 3 | `backendConfig.rApiBase: string` | 字符串 | R server base URL |
 | 4 | `backendConfig.pythonApiBase: string` | 字符串 | Python server base URL |
 
-### 5.3 — `biof3Desktop.window`
+### 5.3 — `petriDesktop.window`
 
 | # | Method | 签名 | 底层 IPC |
 |---:|:-------|:-----|:---------|
@@ -267,13 +267,13 @@
 | 7 | `toggleFullScreen()` | `() => void` | `window:toggleFullScreen` |
 | 8 | `onFullScreenChanged(cb)` | `(cb: (v: boolean) => void) => () => void` | `window:fullscreen-changed` (on) |
 
-### 5.4 — `biof3Desktop.app`
+### 5.4 — `petriDesktop.app`
 
 | # | Method | 签名 | 底层 IPC |
 |---:|:-------|:-----|:---------|
 | 1 | `relaunch()` | `() => Promise<{ok, error?}>` | `app:relaunch` |
 
-### 5.5 — `biof3Desktop.aiSettings`
+### 5.5 — `petriDesktop.aiSettings`
 
 | # | Method | 签名 | 底层 IPC |
 |---:|:-------|:-----|:---------|
@@ -283,20 +283,20 @@
 | 4 | `test(provider, apiKey)` | `(p, k) => Promise<{ok, message}>` | `ai-settings:test` |
 | 5 | `listModels(provider, apiKey)` | `(p, k) => Promise<{ok, models: string[], message}>` | `ai-settings:list-models` |
 
-### 5.6 — `biof3Desktop.computeSettings`
+### 5.6 — `petriDesktop.computeSettings`
 
 | # | Method | 签名 | 底层 IPC |
 |---:|:-------|:-----|:---------|
 | 1 | `get()` | `() => Promise<ComputeSettings>` | `compute-settings:get` |
 | 2 | `save(settings)` | `(s) => Promise<{ok, error?, restartRequired?}>` | `compute-settings:save` |
 
-### 5.7 — `biof3Desktop.harnessCapabilities`
+### 5.7 — `petriDesktop.harnessCapabilities`
 
 | # | Method | 签名 | 底层 IPC |
 |---:|:-------|:-----|:---------|
 | 1 | `list()` | `() => Promise<{ok, capabilities: HarnessCapabilityEntry[], error?}>` | `harness-capabilities:list` |
 
-### 5.8 — `biof3Desktop.plugins`
+### 5.8 — `petriDesktop.plugins`
 
 | # | Method | 签名 | 底层 IPC |
 |---:|:-------|:-----|:---------|
@@ -307,7 +307,7 @@
 | 5 | `checkUpdates()` | `() => Promise<Array<{id, currentVersion, latestVersion}>>` | `plugin:check-updates` |
 
 
-### 5.9 — `biof3Desktop.skills`（G0-RS / UI-157 / BLOCK-2）
+### 5.9 — `petriDesktop.skills`（G0-RS / UI-157 / BLOCK-2）
 
 | # | Method | 签名 | 底层 IPC |
 |---:|:-------|:-----|:---------|
@@ -317,7 +317,7 @@
 | 4 | `cancel(executionId)` | `(id) => Promise<{ok, cancelled?, error?}>` | `skills:cancel`（PHASE 1 A） |
 | 5 | `onProgress(cb)` | `(cb) => () => void` | `skills:progress`（`webContents.send`） |
 
-### 5.10 — `biof3Desktop.contentPlugins`
+### 5.10 — `petriDesktop.contentPlugins`
 
 | # | Method | 签名 | 底层 IPC |
 |---:|:-------|:-----|:---------|
@@ -325,33 +325,33 @@
 | 2 | `listDocs(pluginId)` | `(id) => Promise<Array<{id, title, position, relativePath, pluginId}>>` | `content-plugin:list-docs` |
 | 3 | `read(pluginId, relativePath)` | `(id, path) => Promise<{ok, content?, error?}>` | `content-plugin:read` |
 
-### 5.11 — `biof3Desktop.runtime`
+### 5.11 — `petriDesktop.runtime`
 
 | # | Method | 签名 | 底层 IPC |
 |---:|:-------|:-----|:---------|
 | 1 | `status()` | `() => Promise<{r, python}>` | `runtime:status` |
 
-### 5.12 — `biof3Desktop.backend`
+### 5.12 — `petriDesktop.backend`
 
 | # | Method | 签名 | 底层 IPC |
 |---:|:-------|:-----|:---------|
 | 1 | `status()` | `() => Promise<BackendStatus>` | `backend:status` |
 
-### 5.13 — `biof3Desktop.py`
+### 5.13 — `petriDesktop.py`
 
 | # | Method | 签名 | 底层 IPC |
 |---:|:-------|:-----|:---------|
 | 1 | `start()` | `() => Promise<{ok, alreadyRunning?, pid?, error?}>` | `py:start` |
 | 2 | `stop()` | `() => Promise<{ok, wasRunning?}>` | `py:stop` |
 
-### 5.14 — `biof3Desktop.plumber`
+### 5.14 — `petriDesktop.plumber`
 
 | # | Method | 签名 | 底层 IPC |
 |---:|:-------|:-----|:---------|
 | 1 | `start()` | `() => Promise<{ok, alreadyRunning?, pid?, error?}>` | `plumber:start` |
 | 2 | `stop()` | `() => Promise<{ok, wasRunning?}>` | `plumber:stop` |
 
-### 5.15 — `biof3Desktop.files`
+### 5.15 — `petriDesktop.files`
 
 | # | Method | 签名 | 底层 IPC |
 |---:|:-------|:-----|:---------|
@@ -361,26 +361,26 @@
 | 4 | `openPath(targetPath)` | `(p) => Promise<{ok, error?}>` | `file:open-path` |
 | 5 | `openWorkspaceFile(workspacePath, relativePath)` | `(ws, rel) => Promise<{ok, error?}>` | `file:open-workspace-file` |
 
-### 5.16 — `biof3Desktop.diagnostic`
+### 5.16 — `petriDesktop.diagnostic`
 
 | # | Method | 签名 | 底层 IPC |
 |---:|:-------|:-----|:---------|
 | 1 | `export(targetPath?)` | `(p?) => Promise<{ok, path?, error?}>` | `diagnostic:export` |
 
-### 5.17 — `biof3Desktop.telemetry`
+### 5.17 — `petriDesktop.telemetry`
 
 | # | Method | 签名 | 底层 IPC |
 |---:|:-------|:-----|:---------|
 | 1 | `report(payload)` | `(p: TelemetryPayload) => Promise<{ok, reason?}>` | `telemetry:report` |
 
-### 5.18 — `biof3Desktop.data`
+### 5.18 — `petriDesktop.data`
 
 | # | Method | 签名 | 底层 IPC |
 |---:|:-------|:-----|:---------|
 | 1 | `info()` | `() => Promise<{ok, dataDir?, total?, breakdown?}>` | `data:info` |
 | 2 | `openDir()` | `() => Promise<{ok, error?}>` | `data:open-dir` |
 
-### 5.19 — `biof3Desktop.terminal`
+### 5.19 — `petriDesktop.terminal`
 
 | # | Method | 签名 | 底层 IPC |
 |---:|:-------|:-----|:---------|
@@ -394,7 +394,7 @@
 | 8 | `onData(cb)` | `(cb: (s: string) => void) => () => void` | `terminal:data` |
 | 9 | `onExit(cb)` | `(cb: (d: {code?, signal?}) => void) => () => void` | `terminal:exit` |
 
-### 5.20 — `biof3Desktop.updater`
+### 5.20 — `petriDesktop.updater`
 
 | # | Method | 签名 | 底层 IPC |
 |---:|:-------|:-----|:---------|
@@ -407,7 +407,7 @@
 | 7 | `onUpdateDownloaded(cb)` | `(cb: () => void) => () => void` | `updater:update-downloaded` |
 | 8 | `onError(cb)` | `(cb: (msg: string) => void) => () => void` | `updater:error` |
 
-### 5.21 — `biof3Desktop.branch`
+### 5.21 — `petriDesktop.branch`
 
 | # | Method | 签名 | 底层 IPC |
 |---:|:-------|:-----|:---------|
@@ -418,9 +418,9 @@
 | 5 | `rename(params)` | `({branchId, newName}) => Promise<void>` | `branch:rename` |
 | 6 | `getActive(params)` | `({projectId}) => Promise<{...} \| null>` | `branch:active` |
 
-> ⚠️ 注意：electron.d.ts 公开的 `biof3Desktop.branch` 仅 6 个方法；**它没有透出** `branch:project:create/get/update/list` / `branch:get/children` / `message:append/list/get/count/delete/clear` 共 13 项。这些 channel 在 main 有 handler 但**未在 electron.d.ts 暴露 typed method**（preload 也没 invoke 它们）。详见 **附录 A**。
+> ⚠️ 注意：electron.d.ts 公开的 `petriDesktop.branch` 仅 6 个方法；**它没有透出** `branch:project:create/get/update/list` / `branch:get/children` / `message:append/list/get/count/delete/clear` 共 13 项。这些 channel 在 main 有 handler 但**未在 electron.d.ts 暴露 typed method**（preload 也没 invoke 它们）。详见 **附录 A**。
 
-### 5.22 — `biof3Desktop.result`
+### 5.22 — `petriDesktop.result`
 
 | # | Method | 签名 | 底层 IPC |
 |---:|:-------|:-----|:---------|
@@ -436,7 +436,7 @@
 | 10 | `version.getByNumber(params)` | `({resultId, version}) => Promise<{...} \| null>` | `result:version:getByNumber` |
 | 11 | `version.list(params)` | `({resultId, limit?, offset?}) => Promise<Array<...>>` | `result:version:list` |
 
-> 表 5 总结：`biof3Desktop` 共 21 个 namespace（含元标记 + 4 配置字段），其中 17 个是方法 namespace（`window` / `app` / `aiSettings` / `computeSettings` / `harnessCapabilities` / `plugins` / `skills` / `contentPlugins` / `runtime` / `backend` / `py` / `plumber` / `files` / `diagnostic` / `telemetry` / `data` / `terminal` / `updater` / `branch` / `result`）；加 `biof3.agentWorkbenchFlags` + `process.env` 两个顶层 namespace + 4 个 interface（`BackendStatus` / `TelemetryPayload` / `ComputeSettings` / `HarnessCapabilityEntry`）。
+> 表 5 总结：`petriDesktop` 共 21 个 namespace（含元标记 + 4 配置字段），其中 17 个是方法 namespace（`window` / `app` / `aiSettings` / `computeSettings` / `harnessCapabilities` / `plugins` / `skills` / `contentPlugins` / `runtime` / `backend` / `py` / `plumber` / `files` / `diagnostic` / `telemetry` / `data` / `terminal` / `updater` / `branch` / `result`）；加 `petri.agentWorkbenchFlags` + `process.env` 两个顶层 namespace + 4 个 interface（`BackendStatus` / `TelemetryPayload` / `ComputeSettings` / `HarnessCapabilityEntry`）。
 
 
 ---
@@ -472,22 +472,22 @@
 
 ## 附录 B — 渲染层内部事件总线（renderer-only CustomEvent，非 IPC）
 
-> 本附录**仅作背景**，**不属于 IPC catalog**。`frontend/src/lib/events.ts` 定义 10 个 `biof3:*` 字符串事件名（同 namespace 但走 `window.dispatchEvent(CustomEvent)`，不经过 Electron IPC）。它们的发送与订阅都在渲染进程内：
+> 本附录**仅作背景**，**不属于 IPC catalog**。`frontend/src/lib/events.ts` 定义 10 个 `petri:*` 字符串事件名（同 namespace 但走 `window.dispatchEvent(CustomEvent)`，不经过 Electron IPC）。它们的发送与订阅都在渲染进程内：
 
 | # | 事件名 | 来源 | 订阅 |
 |---:|:-------|:-----|:----|
-| 1 | `biof3:onboarding-done` | DesktopOnboarding 完成 | App 的 DesktopOnboardingMount |
-| 2 | `biof3:soft-refresh` | main.js preload on `Cmd+R` | project-workspace refetch |
-| 3 | `biof3:project-open-result` | project-workspace right-panel | project-workspace 自身 |
-| 4 | `biof3:project-open-artifact` | SimpleChat 内部 artifact 链接 | project-workspace |
-| 5 | `biof3:project-open-workspace-file` | SimpleChat 内部 file 链接 | project-workspace |
-| 6 | `biof3:project-workspace-changed` | Agent workspace 写盘 | Files panel |
-| 7 | `biof3:copilot-ask` | App/Copilot 主流程 | SimpleChat |
-| 8 | `biof3:browser-back` | App router | BrowserPane |
-| 9 | `biof3:browser-forward` | App router | BrowserPane |
-| 10 | `biof3:conversation-forked` | copilotContext / ConversationRunStore | project-workspace / SimpleChat |
+| 1 | `petri:onboarding-done` | DesktopOnboarding 完成 | App 的 DesktopOnboardingMount |
+| 2 | `petri:soft-refresh` | main.js preload on `Cmd+R` | project-workspace refetch |
+| 3 | `petri:project-open-result` | project-workspace right-panel | project-workspace 自身 |
+| 4 | `petri:project-open-artifact` | SimpleChat 内部 artifact 链接 | project-workspace |
+| 5 | `petri:project-open-workspace-file` | SimpleChat 内部 file 链接 | project-workspace |
+| 6 | `petri:project-workspace-changed` | Agent workspace 写盘 | Files panel |
+| 7 | `petri:copilot-ask` | App/Copilot 主流程 | SimpleChat |
+| 8 | `petri:browser-back` | App router | BrowserPane |
+| 9 | `petri:browser-forward` | App router | BrowserPane |
+| 10 | `petri:conversation-forked` | copilotContext / ConversationRunStore | project-workspace / SimpleChat |
 
-> 注意区别：`biof3:agent-workbench-flags` 是 **真正的 IPC channel**（`ipcMain.handle` + `ipcRenderer.invoke/on` 双向），不要与上面这些 renderer-only `biof3:` 事件名混淆。
+> 注意区别：`petri:agent-workbench-flags` 是 **真正的 IPC channel**（`ipcMain.handle` + `ipcRenderer.invoke/on` 双向），不要与上面这些 renderer-only `petri:` 事件名混淆。
 
 ---
 

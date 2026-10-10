@@ -9,7 +9,7 @@
  *  - **数据**：项目列表、项目树展开态、当前项目会话、跨项目会话、当前会话 id、
  *    创建态/错误态。
  *  - **布局**：左右栏宽 + 底栏高度（useResizableColumns 单实例，写
- *    document.documentElement 的 --gewu-live-* 变量，供壳层与工作区共读）。
+ *    document.documentElement 的 --petri-live-* 变量，供壳层与工作区共读）。
  *  - **动作**：项目/会话的建、改名、归档、分支、切换，SSH 五连。
  *  - **副作用适配槽（adapter）**：少数动作需要「工作区在场时才成立」的效果
  *    （切会话时清 job/artifact、建会话时切到 chat 模式、项目改名时刷新工作区
@@ -43,7 +43,7 @@ import type { Project } from '@/lib/project-types';
 import { useConversations, useOtherConversations } from '@/hooks/useConversations';
 import { useProjectTreeState } from '@/pages/project-workspace/useProjectTreeState';
 import { useResizableColumns } from '@/hooks/useResizableColumns';
-import { gewuEvents, subscribeGewuEvent , dispatchGewuEvent } from '@/lib/events';
+import { petriEvents, subscribePetriEvent , dispatchPetriEvent } from '@/lib/events';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 
 /** 工作区在场时才成立的副作用（工作区挂载时注册，卸载即摘除）。 */
@@ -148,13 +148,13 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
   const currentProjectId = projectIdFromPath(location.pathname);
 
   // ── 数据 ──
-  // BLOCK-101 P1 — 首屏 SWR（D2 键 gewu-startup-snapshot-v1）：localStorage 快照
+  // BLOCK-101 P1 — 首屏 SWR（D2 键 petri-startup-snapshot-v1）：localStorage 快照
   // 同步先渲染上次内容（打开瞬间即见，零首帧等待），后台 listProjects 对账后
   // 即弃快照（DB 唯一事实源；快照仅渲染缓存，不参与业务判断）。版本号失效 +
   // 形状校验 fail-closed（非数组/结构异常一律丢弃走正常加载）。
   const [allProjects, setAllProjects] = useState<Project[]>(() => {
     try {
-      const raw = window.localStorage.getItem('gewu-startup-snapshot-v1');
+      const raw = window.localStorage.getItem('petri-startup-snapshot-v1');
       if (!raw) return [];
       const parsed = JSON.parse(raw) as { version?: unknown; projects?: unknown };
       if (parsed?.version !== 1 || !Array.isArray(parsed.projects)) return [];
@@ -168,7 +168,7 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
   const persistSnapshot = useCallback((list: Project[]) => {
     try {
       window.localStorage.setItem(
-        'gewu-startup-snapshot-v1',
+        'petri-startup-snapshot-v1',
         JSON.stringify({ version: 1, savedAt: Date.now(), projects: list })
       );
     } catch { /* 隐私模式/超限：快照失效即走正常加载，非致命 */ }
@@ -210,7 +210,7 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
   }, [persistSnapshot]);
 
   // 软刷新（其它面改了项目/会话后）
-  useEffect(() => subscribeGewuEvent(gewuEvents.softRefresh, () => { void refreshProjects(); }), [refreshProjects]);
+  useEffect(() => subscribePetriEvent(petriEvents.softRefresh, () => { void refreshProjects(); }), [refreshProjects]);
 
 
   const treeState = useProjectTreeState(currentProjectId, allProjects);
@@ -245,7 +245,7 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
   // 其它已展开项目的会话列表（force 绕过共享缓存），左栏秒级出现新会话。
   useEffect(
     () =>
-      subscribeGewuEvent(gewuEvents.conversationCreated, (detail) => {
+      subscribePetriEvent(petriEvents.conversationCreated, (detail) => {
         void refreshConversations();
         void refreshOtherConversations();
         void detail;
@@ -328,7 +328,7 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
 
   const createProjectFromPath = useCallback(async (selected: string) => {
     setCreateError('');
-    const validate = window.biof3Desktop?.files?.validateDirectory;
+    const validate = window.petriDesktop?.files?.validateDirectory;
     if (typeof validate !== 'function') {
       setCreateError('当前环境不支持路径校验');
       return;
@@ -346,7 +346,7 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
       setAllProjects((prev) => [created, ...prev.filter((item) => item.id !== created.id)]);
       // 项目创建广播（softRefresh → AppRail 刷新左栏项目列表，用户反馈「创建项目左栏不更新」）
       try {
-        dispatchGewuEvent(gewuEvents.softRefresh, undefined);
+        dispatchPetriEvent(petriEvents.softRefresh, undefined);
       } catch {
         // 事件总线失败不阻塞导航
       }
@@ -361,9 +361,9 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
 
   const openCreatePanel = useCallback(async () => {
     setCreateError('');
-    const dialog = window.biof3Desktop?.files?.openDirectoryDialog;
+    const dialog = window.petriDesktop?.files?.openDirectoryDialog;
     if (typeof dialog !== 'function') {
-      setCreateError('当前环境不支持原生文件夹选择（请在 Gewu 桌面应用中使用）');
+      setCreateError('当前环境不支持原生文件夹选择（请在 Petri 桌面应用中使用）');
       return;
     }
     const selected = await dialog();
@@ -422,10 +422,10 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
   const sshListDirs = useCallback(async (alias: string, path: string) => listSshRemoteDirs(alias, path), []);
 
   const sshRegisterHost = useCallback(async (p: { ip: string; port: string; username: string; password: string }) => {
-    const desktop = (window as unknown as { biof3Desktop?: { ssh?: { registerHost: (p: { ip: string; port: number; username: string; password: string }) => Promise<{ ok: boolean; alias?: string; error?: string }> } } });
-    const bridge = desktop.biof3Desktop?.ssh ?? (window as unknown as { gewu?: { ssh?: { registerHost: (p: { ip: string; port: number; username: string; password: string }) => Promise<{ ok: boolean; alias?: string; error?: string }> } } }).gewu?.ssh;
+    const desktop = (window as unknown as { petriDesktop?: { ssh?: { registerHost: (p: { ip: string; port: number; username: string; password: string }) => Promise<{ ok: boolean; alias?: string; error?: string }> } } });
+    const bridge = desktop.petriDesktop?.ssh ?? (window as unknown as { petri?: { ssh?: { registerHost: (p: { ip: string; port: number; username: string; password: string }) => Promise<{ ok: boolean; alias?: string; error?: string }> } } }).petri?.ssh;
     if (!bridge?.registerHost) {
-      return { ok: false, error: '当前运行环境不支持密码引导连接（请升级 Gewu 桌面端）' };
+      return { ok: false, error: '当前运行环境不支持密码引导连接（请升级 Petri 桌面端）' };
     }
     if (!p.ip || !p.port || !/^[1-9][0-9]*$/.test(p.port) || Number(p.port) > 65535 || !p.username || !p.password) {
       return { ok: false, error: '请完整填写 IP、端口（1-65535）、用户名与密码' };
@@ -442,7 +442,7 @@ export function AppRailProvider({ children }: { children: React.ReactNode }): Re
     const created = await createProject({ name, modality: 'general', workspaceKind: 'ssh', sshHost: p.alias, remotePath: p.remotePath });
       // 项目创建广播（softRefresh → AppRail 刷新左栏项目列表，用户反馈「创建项目左栏不更新」）
       try {
-        dispatchGewuEvent(gewuEvents.softRefresh, undefined);
+        dispatchPetriEvent(petriEvents.softRefresh, undefined);
       } catch {
         // 事件总线失败不阻塞导航
       }

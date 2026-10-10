@@ -32,14 +32,14 @@ const require = createRequire(import.meta.url);
 // 内存 DB 自举（同 block34-tool-activities-persist.test.mjs）
 {
   const Database = require('better-sqlite3');
-  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'biof3-ui272-reasoning-db-'));
-  const db = new Database(path.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'petri-ui272-reasoning-db-'));
+  const db = new Database(path.join(tempDbDir, 'petri.db'));
   const migrationsDir = resolve('src/migrations');
   for (const file of fssync.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     db.exec(fssync.readFileSync(path.join(migrationsDir, file), 'utf8'));
   }
   db.close();
-  process.env.BIOF3_DB_PATH = path.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try {
       fssync.rmSync(tempDbDir, { recursive: true, force: true });
@@ -51,7 +51,7 @@ const require = createRequire(import.meta.url);
 
 describe('UI-272 static contract: reasoning reaches runLoop return and message persistence', () => {
   it('loop-orchestrator aggregates reasoning_delta in the streaming callback and returns reasoningByIteration', () => {
-    const src = fssync.readFileSync(resolve('core/biof3-server/loop-orchestrator.js'), 'utf8');
+    const src = fssync.readFileSync(resolve('core/petri-server/loop-orchestrator.js'), 'utf8');
     assert.ok(
       src.includes("event.type === 'reasoning_delta'"),
       'streaming callback must handle reasoning_delta events',
@@ -73,7 +73,7 @@ describe('UI-272 static contract: reasoning reaches runLoop return and message p
   });
 
   it('agent-runner destructures reasoningByIteration and forwards it to appendAssistantMessage', () => {
-    const src = fssync.readFileSync(resolve('core/biof3-server/agent-runner.js'), 'utf8');
+    const src = fssync.readFileSync(resolve('core/petri-server/agent-runner.js'), 'utf8');
     const destructureIdx = src.indexOf('await runLoop({');
     const head = src.slice(0, destructureIdx);
     assert.ok(
@@ -90,8 +90,8 @@ describe('UI-272 static contract: reasoning reaches runLoop return and message p
 
 describe('UI-272 behavior: reasoningByIteration lands in copilot_messages.meta_json', () => {
   function persistAndReadMeta(reasoningByIteration) {
-    const ca = require(resolve('core/biof3-server/conversation-adapter.js'));
-    const conversations = require(resolve('core/biof3-server/helpers/conversations.js'));
+    const ca = require(resolve('core/petri-server/conversation-adapter.js'));
+    const conversations = require(resolve('core/petri-server/helpers/conversations.js'));
     const conv = conversations.getOrCreateActiveConversation('u_ui272', { title: 'ui272-reasoning', page: 'desktop-project', projectId: 'p_ui272' });
     const conversationId = conv.id || conv.conversationId;
     assert.ok(conversationId, 'conversation must be created');
@@ -121,7 +121,7 @@ describe('UI-272 behavior: reasoningByIteration lands in copilot_messages.meta_j
     assert.strictEqual(result.persisted, true, 'message must persist');
 
     const Database = require('better-sqlite3');
-    const db = new Database(process.env.BIOF3_DB_PATH, { readonly: true });
+    const db = new Database(process.env.PETRI_DB_PATH, { readonly: true });
     try {
       const row = db.prepare(
         "SELECT meta_json FROM copilot_messages WHERE task_id = ? AND role = 'assistant' LIMIT 1",

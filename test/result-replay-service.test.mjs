@@ -113,7 +113,7 @@ function writeValidChildReplayPackage(childDir, {
 }
 
 function fixture(context, runChangeSet) {
-  const workspaceRoot = mkdtempSync(join(tmpdir(), 'biof3-controlled-replay-'));
+  const workspaceRoot = mkdtempSync(join(tmpdir(), 'petri-controlled-replay-'));
   // Windows 下 better-sqlite3 连接句柄由模块级单例持有、进程退出前不释放，
   // after 钩子里 rmSync 临时目录会抛 EPERM（POSIX 无此约束）。清理是尽力而为，
   // tmpdir 残留无害。
@@ -143,7 +143,7 @@ function fixture(context, runChangeSet) {
   const sourcePath = 'analysis/scripts/family_1/rev_1/table.R';
   const parametersPath = 'analysis/scripts/family_1/rev_1/parameters.json';
   const committed = binding.adapter.commitVirtualFiles({
-    ref: 'refs/heads/biof3/replay-source', expectedOld: '0'.repeat(40), message: 'replay source',
+    ref: 'refs/heads/petri/replay-source', expectedOld: '0'.repeat(40), message: 'replay source',
     files: [{ path: sourcePath, content: source }, { path: parametersPath, content: parameters }],
   });
   const provenancePayload = {
@@ -177,7 +177,7 @@ function fixture(context, runChangeSet) {
   assert.equal(graphResult.ok, true);
   repository.createChangeSet({
     changeSetId: 'cs_1', projectId: 'p_1', baseCommit: committed.commit,
-    workingBranchRef: 'refs/heads/biof3/replay-source', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/replay-source', createdBy: 'agent',
   });
   repository.transitionChangeSet({ changeSetId: 'cs_1', to: 'running' });
   repository.appendRevisionBatch({
@@ -252,7 +252,7 @@ function fixture(context, runChangeSet) {
 }
 
 test('P5 rehydrates an HTTP-uploaded input from result_json when public params omit its path', (context) => {
-  const workspaceRoot = mkdtempSync(join(tmpdir(), 'biof3-replay-uploaded-input-'));
+  const workspaceRoot = mkdtempSync(join(tmpdir(), 'petri-replay-uploaded-input-'));
   context.after(() => rmSync(workspaceRoot, { recursive: true, force: true }));
   const jobRoot = join(workspaceRoot, 'results', 'jobs', 'job_uploaded');
   const scriptPath = join(jobRoot, 'run-script.R');
@@ -358,7 +358,7 @@ test('P5 single-Job historical restore preserves a replayable authoritative work
   const replacementParametersPath = 'analysis/scripts/family_1/rev_current/parameters.json';
   const replacementCommit = fx.dependencies.adapter.commitVirtualFiles({
     parentCommit: sourceRevision.sourceCommit,
-    ref: 'refs/heads/biof3/replay-current',
+    ref: 'refs/heads/petri/replay-current',
     expectedOld: '0'.repeat(40),
     message: 'replacement current',
     files: [
@@ -370,7 +370,7 @@ test('P5 single-Job historical restore preserves a replayable authoritative work
     changeSetId: 'cs_current',
     projectId: 'p_1',
     baseCommit: sourceRevision.sourceCommit,
-    workingBranchRef: 'refs/heads/biof3/replay-current',
+    workingBranchRef: 'refs/heads/petri/replay-current',
     createdBy: 'agent',
     parentArtifactRefs: ['rev_1'],
   });
@@ -498,7 +498,7 @@ test('confirmation rejects stale context and cross-project scope', async (contex
 });
 
 test('exact replay proof covers the complete formal output cohort and rejects one-byte drift', (context) => {
-  const workspaceRoot = mkdtempSync(join(tmpdir(), 'biof3-controlled-replay-cohort-'));
+  const workspaceRoot = mkdtempSync(join(tmpdir(), 'petri-controlled-replay-cohort-'));
   context.after(() => rmSync(workspaceRoot, { recursive: true, force: true }));
   const pngPath = join(workspaceRoot, 'results', 'job_2', 'volcano.png');
   const svgPath = join(workspaceRoot, 'results', 'job_2', 'volcano.svg');
@@ -673,9 +673,9 @@ test('P5 verifies every replay Job in authoritative order before producing one c
 });
 
 test('P5 cohort ReplayPackage binds and independently validates every per-Job package', async (context) => {
-  const projectRoot = mkdtempSync(join(tmpdir(), 'biof3-replay-cohort-package-'));
+  const projectRoot = mkdtempSync(join(tmpdir(), 'petri-replay-cohort-package-'));
   context.after(() => rmSync(projectRoot, { recursive: true, force: true }));
-  const packageDir = join(projectRoot, '.biof3', 'replay-packages', 'cohort');
+  const packageDir = join(projectRoot, '.petri', 'replay-packages', 'cohort');
   const revisions = [
     { revisionId: 'rev_deg', toolJobId: 'job_deg', artifactFamilyId: 'family_deg', artifactId: 'deg_table', outputHash: 'a'.repeat(64) },
     { revisionId: 'rev_go', toolJobId: 'job_go', artifactFamilyId: 'family_go', artifactId: 'go_bp_results', outputHash: 'b'.repeat(64) },
@@ -756,7 +756,7 @@ test('P5 HTTP replay preserves generated downstream Artifact lineage through the
   // result-studio 路由已按域拆分为 routes/result-studio/*.js；replay 在 revisions.js，
   // compare 在 changesets.js。此处直接读各自文件，不依赖旧的单文件布局。
   const revisionsSource = readFileSync(
-    join(import.meta.dirname, '..', 'core/biof3-server/routes/result-studio/revisions.js'),
+    join(import.meta.dirname, '..', 'core/petri-server/routes/result-studio/revisions.js'),
     'utf8',
   );
   const replayRouteStart = revisionsSource.indexOf("app.post('/api/result-studio/revisions/:revisionId/replay'");

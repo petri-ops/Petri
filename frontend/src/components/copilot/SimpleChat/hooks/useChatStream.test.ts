@@ -31,8 +31,8 @@ vi.mock('@/components/copilot/conversationDraft', () => ({
 }));
 
 vi.mock('@/lib/events', () => ({
-  gewuEvents: { copilotAsk: 'copilotAsk' },
-  subscribeGewuEvent: vi.fn(() => () => {}),
+  petriEvents: { copilotAsk: 'copilotAsk' },
+  subscribePetriEvent: vi.fn(() => () => {}),
 }));
 
 vi.mock('@/lib/brand', () => ({ readBrandStorage: vi.fn(() => null) }));

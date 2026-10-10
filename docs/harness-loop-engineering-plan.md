@@ -304,7 +304,7 @@ Loop 采用“目标驱动 + 异常保护”，不得恢复历史的固定 5 轮
 - 自动修复允许的风险等级和最大额外成本。
 - 预算接近/超过时的 `continue | pause | require_user` 策略。
 
-资源峰值不可用时必须显示 `unavailable_without_process_sampler`，不能用主机开始/结束快照冒充进程峰值。Provider cache、BioF3 证据缓存和 Replay cache 的命中必须记录 scope/key/version；缓存命中不能跳过当前输入 hash 和 validator 检查。
+资源峰值不可用时必须显示 `unavailable_without_process_sampler`，不能用主机开始/结束快照冒充进程峰值。Provider cache、Petri 证据缓存和 Replay cache 的命中必须记录 scope/key/version；缓存命中不能跳过当前输入 hash 和 validator 检查。
 
 ## 9. 持久化、压缩与模型切换
 

@@ -5,7 +5,7 @@
   "commit": "339506a",
   "passed": false,
   "qualificationEligible": false,
-  "purpose": "BLOCK-24 P2 dev Electron observation of the UI-194 pending-scroll chain via the mounted dev bridge window.__biof3DispatchOpenFile('frontend/src/lib/desktopBridge.ts', 40).",
+  "purpose": "BLOCK-24 P2 dev Electron observation of the UI-194 pending-scroll chain via the mounted dev bridge window.__petriDispatchOpenFile('frontend/src/lib/desktopBridge.ts', 40).",
   "checks": {
     "devBridgeFunctionPresent": true,
     "dispatchCallAccepted": true,
@@ -14,6 +14,6 @@
     "fileNameSurfacesInPreview": false,
     "unitTests": "BLOCK-22 focused vitest 53/53 (ChatCardLinkBridge 7 + pendingScrollContext 6 + WorkspaceFilePreviewBridge 8)"
   },
-  "rootCause": "The producer side is wired (BioF3OpenFileDevBridge mounted in App.tsx; project-workspace.tsx P4.5 dispatches pending requests), but the consumer is not mounted: WorkspaceFilePreviewBridge and ChatCardLinkBridge are barrel-exported only, with no JSX mount in any page. The dispatched pending request has no consumer to open the preview or scroll.",
+  "rootCause": "The producer side is wired (PetriOpenFileDevBridge mounted in App.tsx; project-workspace.tsx P4.5 dispatches pending requests), but the consumer is not mounted: WorkspaceFilePreviewBridge and ChatCardLinkBridge are barrel-exported only, with no JSX mount in any page. The dispatched pending request has no consumer to open the preview or scroll.",
   "disposition": "UI-194 remains in_progress: pending-scroll chain components implemented and unit-verified; consumer mounting (WorkspaceFilePreviewBridge in the preview surface, ChatCardLinkBridge in the chat UI) is a business-side decision outside BLOCK-24's registered scope."
 }

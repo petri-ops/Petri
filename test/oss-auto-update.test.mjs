@@ -8,8 +8,8 @@ const builder = readFileSync(join(root, 'electron-builder.yml'), 'utf8');
 const publisher = readFileSync(join(root, 'scripts/publish-macos-oss.mjs'), 'utf8');
 const packageJson = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 
-test('macOS updater uses the BioF3 OSS generic latest feed', () => {
-  assert.match(builder, /publish:\s*\n\s*provider: generic\s*\n\s*url: https:\/\/biof3-uploads\.oss-cn-hangzhou\.aliyuncs\.com\/desktop\/updates\/macos\s*\n\s*channel: latest/);
+test('macOS updater uses the Petri OSS generic latest feed', () => {
+  assert.match(builder, /publish:\s*\n\s*provider: generic\s*\n\s*url: https:\/\/petri-uploads\.oss-cn-hangzhou\.aliyuncs\.com\/desktop\/updates\/macos\s*\n\s*channel: latest/);
 });
 
 test('macOS build scripts choose architecture without locking it in the DMG target', () => {

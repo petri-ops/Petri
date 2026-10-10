@@ -96,6 +96,6 @@ Result Studio 的渲染面从「写死的 switch + 单血缘条带」收敛为�
 - **已知语义后果（用户知情）**：agent 链会在审阅队列产生 pending ChangeSet 条目（待人工 adopt）——把 RS 审阅语义自然延伸到 agent 链。
 - 台账：本节即加映登记（AUDIT-LOG 同步）；实机与集成提交后 UI-460 补记。
 
-- **§9 收口（2026-10-03）**：F1 修复两批集成提交——ea765eea（chain-preview.js pending 注册+三链形成点接线+契约 6/6〔含补刃两案：inputLineage 物化+图自动落库〕）+ d3ae13a3（走查抓真的挂载点缺陷修复：LineageViewSwitch 完成态 shellBody 同位补挂载）。链产 /lineage chain=3 实证；实机三断言 R2 复走全过+换眼复核 confirmed；P6 绑定门两次集成提交均刷新 13/13。Mac 侧域插件激活（gewu-pack-bio 本地 2f3d474，不推送——Windows 线合并对账留 BIO-4 域）。已知语义后果已兑现：agent 链 pending ChangeSet 进审阅队列（walk-attempt5-review-queue.png 实证）。
+- **§9 收口（2026-10-03）**：F1 修复两批集成提交——ea765eea（chain-preview.js pending 注册+三链形成点接线+契约 6/6〔含补刃两案：inputLineage 物化+图自动落库〕）+ d3ae13a3（走查抓真的挂载点缺陷修复：LineageViewSwitch 完成态 shellBody 同位补挂载）。链产 /lineage chain=3 实证；实机三断言 R2 复走全过+换眼复核 confirmed；P6 绑定门两次集成提交均刷新 13/13。Mac 侧域插件激活（petri-pack-bio 本地 2f3d474，不推送——Windows 线合并对账留 BIO-4 域）。已知语义后果已兑现：agent 链 pending ChangeSet 进审阅队列（walk-attempt5-review-queue.png 实证）。
 
 - **R-1 迁移注记（2026-10-05）**：R-1 空态切换器随用户裁决「整下一个工作包」迁入 BLOCK-140（切片 C 同文件面顺带），BLOCK-138 台账保留指针。

@@ -21,7 +21,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 
-const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-wtr-b50-'));
+const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-wtr-b50-'));
 const repoDir = path.join(tmpRoot, 'repo');
 const userDataDir = path.join(tmpRoot, 'user-data');
 fs.mkdirSync(repoDir, { recursive: true });
@@ -33,8 +33,8 @@ const git = (args, opts = {}) =>
 // 初始化 tmp 仓库：a.txt 已提交后从工作区删除（D）；b-only.txt 提交后彻底改名消失不适用，
 // 用 c-gone.txt：提交后从磁盘删除且从索引移除（模拟历史残留：HEAD 与工作区均无）
 git(['init', '-q']);
-git(['config', 'user.email', 'test@biof3.local']);
-git(['config', 'user.name', 'biof3-test']);
+git(['config', 'user.email', 'test@petri.local']);
+git(['config', 'user.name', 'petri-test']);
 fs.writeFileSync(path.join(repoDir, 'a.txt'), 'head a line\n');
 fs.writeFileSync(path.join(repoDir, 'c-gone.txt'), 'gone content\n');
 fs.writeFileSync(path.join(repoDir, 'live.txt'), 'live content\n');

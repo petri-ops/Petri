@@ -296,7 +296,7 @@ export function MobileSyncPanel(): React.ReactElement {
         {status && (
           <button
             type="button"
-            className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+            className="petri-btn petri-btn--ghost petri-btn--sm"
             disabled={busy}
             onClick={() => void toggleEnabled()}
           >
@@ -304,11 +304,11 @@ export function MobileSyncPanel(): React.ReactElement {
           </button>
         )}
       </div>
-      {!status && <p className="gewu-field__hint">正在读取状态…</p>}
+      {!status && <p className="petri-field__hint">正在读取状态…</p>}
       {status && !status.enabled && (
-        <p className="gewu-field__hint">开启后需重启桌面端生效。内容只在你的局域网内传输，端口 {status.port}。</p>
+        <p className="petri-field__hint">开启后需重启桌面端生效。内容只在你的局域网内传输，端口 {status.port}。</p>
       )}
-      {error && <p className="gewu-field__hint" role="alert">{error}</p>}
+      {error && <p className="petri-field__hint" role="alert">{error}</p>}
 
       {status?.enabled && (
         <>
@@ -338,7 +338,7 @@ export function MobileSyncPanel(): React.ReactElement {
                 <button
                   type="button"
                   data-testid="mobile-copy-link"
-                  className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                  className="petri-btn petri-btn--ghost petri-btn--sm"
                   onClick={() => { void copyLink(); }}
                 >
                   {copied ? '已复制' : '复制链接'}
@@ -353,7 +353,7 @@ export function MobileSyncPanel(): React.ReactElement {
               <button
                 type="button"
                 data-testid="mobile-revoke-all"
-                className="gewu-btn gewu-btn--danger-ghost gewu-btn--sm"
+                className="petri-btn petri-btn--danger-ghost petri-btn--sm"
                 disabled={busy}
                 onClick={() => { void revokeAllDevices(); }}
               >
@@ -375,7 +375,7 @@ export function MobileSyncPanel(): React.ReactElement {
                     <span className={styles.deviceMeta}>{formatRelativeTime(device.lastSeenAt)}</span>
                     <button
                       type="button"
-                      className="gewu-btn gewu-btn--danger-ghost gewu-btn--sm"
+                      className="petri-btn petri-btn--danger-ghost petri-btn--sm"
                       disabled={busy}
                       onClick={() => { void revokeDevice(device.id); }}
                     >
@@ -457,7 +457,7 @@ export function MobileSyncPanel(): React.ReactElement {
           <div className={styles.tunnelActions}>
             <button
               type="button"
-              className="gewu-btn gewu-btn--primary gewu-btn--sm"
+              className="petri-btn petri-btn--primary petri-btn--sm"
               disabled={busy}
               onClick={() => { void saveTunnel({}); }}
             >
@@ -465,7 +465,7 @@ export function MobileSyncPanel(): React.ReactElement {
             </button>
             <button
               type="button"
-              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              className="petri-btn petri-btn--ghost petri-btn--sm"
               disabled={busy || !tunnelHost.trim()}
               onClick={() => { void saveTunnel({ profileSave: tunnelHost.trim() }); }}
               data-testid="tunnel-profile-save"
@@ -474,7 +474,7 @@ export function MobileSyncPanel(): React.ReactElement {
             </button>
             <button
               type="button"
-              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              className="petri-btn petri-btn--ghost petri-btn--sm"
               disabled={busy}
               onClick={() => { void saveTunnel({ enabled: !tunnel.enabled }); }}
             >

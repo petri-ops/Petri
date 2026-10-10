@@ -11,8 +11,8 @@ import test from 'node:test';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const resilience = require('../core/biof3-server/helpers/agent-resilience');
-const compactionMod = require('../core/biof3-server/helpers/conversation-compaction');
+const resilience = require('../core/petri-server/helpers/agent-resilience');
+const compactionMod = require('../core/petri-server/helpers/conversation-compaction');
 
 test('planThreshold 阈值公式表驱动（D3）', () => {
   // 200K 窗口（ZCode 标定域）：eff=200000-8192=191808, buffer=min(13000,15344)=13000

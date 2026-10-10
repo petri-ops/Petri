@@ -33,8 +33,8 @@ status: completed
 
 - ORC-2 维度选择=系统级破坏命令（**不含 rm/del 等常规命令**——rm 构建产物属日常操作，静态黑名单已兜底最坏面；用户需更严由 ORC-1 规则自配）+ 敏感路径（系统目录与凭证目录子串模式）。MCP 半边 v1 诚实边界：MCP 工具参数无标准路径字段，动态维度仅覆盖显式 path 字段的内建工具，MCP 全量参数扫描留 v2。
 - ORC-2 命中语义=deny（取最严），guardKey 回显 + 指引文案；`ctx.dynamicGuardAcks`（Set）为统一「用户已确认」通道，require-ack 类规则命中时若 ack 集含规则键则放行（reason=user_rule_acked）。确认 UI（前端弹卡）为 rider，v1 不做。
-- ORC-1 规则判定置於静态闸之后、动态维度之前（first-match 先到先判，与领域 hook 同语义）；规则文件 `$BIOF3_LOCAL_DATA_DIR/agent-rules.json`，读缓存 fail-soft（缺文件=零规则零行为）。
-- CAP-2 机制偏离登记：预裁决写「Electron safeStorage」，实际 mcp-settings IO 在 core 进程（无 Electron API）→ 改用 core 侧 aes-256-gcm + `$BIOF3_LOCAL_DATA_DIR/keys/mcp-env.key` 本地密钥（效果等价：落盘零明文；机制差异波报复认）。
+- ORC-1 规则判定置於静态闸之后、动态维度之前（first-match 先到先判，与领域 hook 同语义）；规则文件 `$PETRI_LOCAL_DATA_DIR/agent-rules.json`，读缓存 fail-soft（缺文件=零规则零行为）。
+- CAP-2 机制偏离登记：预裁决写「Electron safeStorage」，实际 mcp-settings IO 在 core 进程（无 Electron API）→ 改用 core 侧 aes-256-gcm + `$PETRI_LOCAL_DATA_DIR/keys/mcp-env.key` 本地密钥（效果等价：落盘零明文；机制差异波报复认）。
 - KNW-3 v1=文本模板注入（选中后向 composer 输入框填充结构化提示模板），BLOCK-139 式结构化 chip 注入留 v2（范围从紧）；run_tool 模板数据源走既有 run_tool 目录面。
 - KNW-4 SKILL.md 兼容=受限 front-matter 解析（name/description，零 YAML 依赖，HK-04 解析器同思路）；插件导入不随批（商店通道 BLOCK-158 已退役、pack 对话框已在），DIST-2 剩余面收敛=SKILL.md 兼容 + MCP 配置导入。
 

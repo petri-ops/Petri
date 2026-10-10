@@ -38,7 +38,7 @@ rl.on('line', (line) => {
       result(id, {
         protocolVersion: params && params.protocolVersion ? params.protocolVersion : '2024-11-05',
         capabilities: { tools: {} },
-        serverInfo: { name: 'gewu-fixture-mcp', version: '1.0.0' },
+        serverInfo: { name: 'petri-fixture-mcp', version: '1.0.0' },
       });
       break;
     case 'tools/list':

@@ -28,7 +28,7 @@ BLOCK-16 的目标是补齐这一体验缺口，但**不**触碰 Provider / pack
   - 已有 `stage / commit / showFile / createBranch / updateRefCas / deleteRefCas / resolveManyRefs / listRefs`，可覆盖 BLOCK-16 需要的"回滚到 HEAD / 选择性撤销 hunk" 等操作。
 - `core/r-server/mcp/ide-tools/git-diff.js`（Phase 3 IDE MCP tool）
   - 子进程 `git diff --no-color --no-ext-diff`，已实现 `parseUnifiedHunks` + `truncateHunksByLines`，输出 `{ ok, hunks, summary: { added, removed }, truncated }`。
-  - 已做路径白名单 + 白名单二次校验（`path-allowlist.js` 仅允许 cwd / os.tmpdir / ~/.biof3/logs，禁止 `.git`、`.ssh`、`node_modules`、`.venv`）。
+  - 已做路径白名单 + 白名单二次校验（`path-allowlist.js` 仅允许 cwd / os.tmpdir / ~/.petri/logs，禁止 `.git`、`.ssh`、`node_modules`、`.venv`）。
 - `core/r-server/mcp/ide-tools/diff.js`（Apple/FreeBSD `/usr/bin/diff` 封装 + `parseUnifiedHunks` / `parseNormalHunks`）和 `diff-helpers.js`（共享解析器）。
 
 **当前缺口**：
@@ -52,20 +52,20 @@ git -C <absRepo> diff --no-color --no-ext-diff --src-prefix=a/ --dst-prefix=b/ [
 
 **现有 channel 命名空间**（preload.js 暴露）：
 
-- `window.biof3Desktop.{window, app, aiSettings, computeSettings, harnessCapabilities, plugins, contentPlugins, runtime, backend, py, plumber, files, diagnostic, telemetry, data, terminal, skills, branch, result, updater}` — 共 19 个命名空间。
-- `window.biof3.{agentWorkbenchFlags}` — 与 `biof3Desktop` 并列的特殊通道。
-- 类型定义在 `frontend/src/lib/electron.d.ts`，映射到 `Window.biof3Desktop?` 强类型。
+- `window.petriDesktop.{window, app, aiSettings, computeSettings, harnessCapabilities, plugins, contentPlugins, runtime, backend, py, plumber, files, diagnostic, telemetry, data, terminal, skills, branch, result, updater}` — 共 19 个命名空间。
+- `window.petri.{agentWorkbenchFlags}` — 与 `petriDesktop` 并列的特殊通道。
+- 类型定义在 `frontend/src/lib/electron.d.ts`，映射到 `Window.petriDesktop?` 强类型。
 - 桥接封装：`frontend/src/lib/desktopBridge.ts` 提供 `getBridge / requireBridge / isDesktop` + `BridgeUnavailableError`。
 
 **现有 IPC 风格**：
 
 - 异步：`ipcRenderer.invoke(name, ...args)` ↔ `ipcMain.handle(name, async (event, ...args) => {...})`（绝大多数通道）。
 - 单向事件：`ipcRenderer.send(name, ...)` ↔ 主进程 `webContents.send(name, ...)` ↔ preload 包装 `onXxx(callback)` 返回 unsubscribe（参考 `terminal.onData/onExit`、`skills.onProgress`、`updater.onUpdateAvailable`）。
-- 自定义应用事件：`window.dispatchEvent(new CustomEvent('biof3:xxx', { detail }))`，由 `frontend/src/lib/events.ts` 的 typed event bus 统一（`biof3Events` 常量 + `subscribeBioF3Event`）。
+- 自定义应用事件：`window.dispatchEvent(new CustomEvent('petri:xxx', { detail }))`，由 `frontend/src/lib/events.ts` 的 typed event bus 统一（`petriEvents` 常量 + `subscribePetriEvent`）。
 - 主进程侧：handler 文件分布在 `src/ipc/*.js`（17 个模块：`file-dialog, plugin, terminal, telemetry, ai-settings, compute-settings, runtime-status, backend-lifecycle, diagnostic, auto-update, data-management, branch-handlers, result-handlers, harness-capabilities, skills-window, workbench-flags, _sender-guard`），由 `src/main.js` 在 app ready 后 `setupXxxIpc({ mainWindow })` 注入。
 - BLOCK-9.1 SUB-15.1 拆分后，新 IPC handler 必须走"独立模块 + setupXxxIpc"风格，不要再写回 main.js。
 
-**已有 git 相关 IPC**：**没有**。`window.biof3Desktop.*` 19 个命名空间均不涉及 git。git 相关操作目前只走 MCP（`ide_git_diff / ide_git_log / ide_git_show / ide_git_blame / ide_file_diff`）由 Agent 调用，不暴露给前端。
+**已有 git 相关 IPC**：**没有**。`window.petriDesktop.*` 19 个命名空间均不涉及 git。git 相关操作目前只走 MCP（`ide_git_diff / ide_git_log / ide_git_show / ide_git_blame / ide_file_diff`）由 Agent 调用，不暴露给前端。
 
 ### 2.3 AI Agent 事件广播
 
@@ -73,17 +73,17 @@ git -C <absRepo> diff --no-color --no-ext-diff --src-prefix=a/ --dst-prefix=b/ [
 
 - 任务事件链路在 SSE 层（`frontend/src/components/copilot/copilotClient.ts`），`streamChat` 通过 `/ai/agent/task/:taskId` 拿事件流，原生事件包括 `conversation / topic_shift / loop_phase / loop_iteration / iter / agent_status / agent_progress / result_edit_progress / tool_call / tool_result / done / delta`。
 - **没有** "agent done / 我改了 N 个文件" 这种工作区写入完成事件。`result_edit_progress` 走的是 Result Studio 的 ChangeSet 流程，与 working tree 改动没有重合。
-- 现有 typed event bus `biof3Events` 在 `frontend/src/lib/events.ts` 共 9 个事件：
+- 现有 typed event bus `petriEvents` 在 `frontend/src/lib/events.ts` 共 9 个事件：
   - `onboardingDone / softRefresh / projectOpenResult / projectOpenArtifact / projectOpenWorkspaceFile / projectWorkspaceChanged / copilotAsk / browserBack / browserForward / conversationForked`
   - **没有** "agent task done + working tree 改动清单" 事件。
 - `projectWorkspaceChanged` 由 Files panel 在轮询 / 写入时触发，**不是** Agent → main 的可靠通道；Agent 没有"我改了 X"的明示。
-- 同一 typed-event 总线在 `cmd:palette` 已用作应用内 cross-component 通知（参考 `CommandPalette.tsx` 用 `dispatchBioF3Event`）。
+- 同一 typed-event 总线在 `cmd:palette` 已用作应用内 cross-component 通知（参考 `CommandPalette.tsx` 用 `dispatchPetriEvent`）。
 
 **Luna worker / Codex / Claude Code 的"我改了这些文件"信号**：
 
 - 当前**没有任何 in-process 通道**。Agent 是 shell-out 到 `git apply / git diff` 的外部子进程，不与 Electron 主进程通信。
 - Agent 完成一个任务后，能依赖的只有：（a）用户主动看 git status；（b）Agent 自报 "我改了 A, B, C"（纯文本）。
-- 没有 `desktopBridge.invoke('agent:foo', ...)` 之类的 agent IPC；`window.biof3Desktop.agent*` **不存在**。
+- 没有 `desktopBridge.invoke('agent:foo', ...)` 之类的 agent IPC；`window.petriDesktop.agent*` **不存在**。
 
 ### 2.4 前端 UI 基础设施
 
@@ -91,7 +91,7 @@ git -C <absRepo> diff --no-color --no-ext-diff --src-prefix=a/ --dst-prefix=b/ [
 
 - `frontend/src/components/copilot/SimpleChat/ImagePreviewModal.tsx`（BLOCK-9.2 PHASE 4 抽出，~127 行）：overlay + container + Esc + 点背景关闭，CSS 类 `sc-preview-*`。**这是项目最干净的全屏浮层模板**。
 - `frontend/src/components/copilot/CommandPalette.tsx`：Spotlight 风格命令面板（Cmd+K），inline CSS in `simple-chat.css`。
-- `frontend/src/components/auth/LoginModal.css`：site-wide 模态（`biof3-login-modal-*` 类，z-index 10000，fade + pop 动画）。
+- `frontend/src/components/auth/LoginModal.css`：site-wide 模态（`petri-login-modal-*` 类，z-index 10000，fade + pop 动画）。
 - `frontend/src/components/ui/Lightbox.tsx`：最小全屏图灯箱，Esc 关闭 + body overflow hidden。
 - **没有**统一的 `<Modal>` / `<Dialog>` 组件；每个模块自带 CSS。
 
@@ -233,9 +233,9 @@ git -C <absRepo> diff --no-color --no-ext-diff --src-prefix=a/ --dst-prefix=b/ [
 
 ### 4.2 命名 / 风格约定
 
-- 通道名前缀 `git:`（与既有 `window.biof3Desktop.*` 子树一致），不使用 `git-`。
+- 通道名前缀 `git:`（与既有 `window.petriDesktop.*` 子树一致），不使用 `git-`。
 - 同步通道走 `invoke / handle`；事件通知走 `webContents.send` + preload 的 `onXxx(callback)` 返回 unsubscribe。
-- 路径入参必须经 `core/r-server/mcp/ide-tools/path-allowlist.js`（cwd / os.tmpdir / ~/.biof3/logs；拒绝 `.git / .ssh / node_modules / __pycache__ / .venv / venv`）。
+- 路径入参必须经 `core/r-server/mcp/ide-tools/path-allowlist.js`（cwd / os.tmpdir / ~/.petri/logs；拒绝 `.git / .ssh / node_modules / __pycache__ / .venv / venv`）。
 - hunk 拒绝日志写 `<dataDir>/working-tree-review/rejects/<taskId>-<hunkIndex>.json`（路径脱敏后），由 `core/shared-backend/redaction.js` 走与 diagnostics 相同的脱敏流程。
 
 ## 5. AI Agent 拒绝信号传递方案（至少 2 候选对比）
@@ -246,7 +246,7 @@ git -C <absRepo> diff --no-color --no-ext-diff --src-prefix=a/ --dst-prefix=b/ [
 
 - **机制**：
   - 用户拒绝 hunk → 主进程写 `<dataDir>/working-tree-review/rejects/<taskId>.json`，内容 `{ taskId, file, hunkIndex, oldText, newText, rejectedAt, conversationId }`。
-  - Agent（Luna worker / Codex / Claude Code）启动下一个 turn 时，通过**约定的 system-prompt 注入片段**读 `${BIOF3_DATA_DIR}/working-tree-review/rejects/*.json`，把"用户拒绝的 hunk"作为 instruction 注入 prompt。
+  - Agent（Luna worker / Codex / Claude Code）启动下一个 turn 时，通过**约定的 system-prompt 注入片段**读 `${PETRI_DATA_DIR}/working-tree-review/rejects/*.json`，把"用户拒绝的 hunk"作为 instruction 注入 prompt。
   - 注入方式：与 `core/r-server/helpers/system-prompt.js` 的 result-context 注入对齐（`docs/result-studio-plan.md` P3 已固化模式）。
 - **优势**：
   - 不依赖 IPC 反向通道（Agent 不在 Electron 主进程内）。
@@ -331,14 +331,14 @@ git -C <absRepo> diff --no-color --no-ext-diff --src-prefix=a/ --dst-prefix=b/ [
 **关键事实**（5 条 bullet）：
 
 1. **git diff 已有完整后端能力**：`core/shared-backend/git-adapter.js` + `core/r-server/mcp/ide-tools/git-diff.js` + `diff-helpers.js` 三件套覆盖 unified diff 解析 + 路径白名单 + 5000 行截断；BLOCK-16 复用而非新建。
-2. **IPC 桥 gap 是"working tree → renderer"通道**：现有 19 个 `biof3Desktop.*` 命名空间无 git 类；需新增 `git:working-tree-status` / `git:working-tree-diff` / `git:working-tree-file-content` / `git:hunk-apply` / `git:working-tree-revert` 共 5 条 invoke/handle 通道 + 1 条 `agent:task-done` 通知通道。
-3. **AI Agent 完成事件无现成 IPC**：现有 `biof3Events` typed bus 9 个事件无 agent-done；推荐新增 `agent:task-done` 事件（detail 含 `taskId + filesChanged`），由 main 在 SSE `event=done` 时 dispatch。
+2. **IPC 桥 gap 是"working tree → renderer"通道**：现有 19 个 `petriDesktop.*` 命名空间无 git 类；需新增 `git:working-tree-status` / `git:working-tree-diff` / `git:working-tree-file-content` / `git:hunk-apply` / `git:working-tree-revert` 共 5 条 invoke/handle 通道 + 1 条 `agent:task-done` 通知通道。
+3. **AI Agent 完成事件无现成 IPC**：现有 `petriEvents` typed bus 9 个事件无 agent-done；推荐新增 `agent:task-done` 事件（detail 含 `taskId + filesChanged`），由 main 在 SSE `event=done` 时 dispatch。
 4. **方案 C（手写 React 渲染）是 G0 边界内的最优**：与 ADR-RS-3 + 既有 Result Studio diff 风格对齐、零新依赖、hunk 接受/拒绝可自渲染完全控制；方案 A（Monaco）与 ADR 冲突、方案 B（react-diff-viewer）30KB 增量但与既有风格不一致。
 5. **拒绝信号通道推荐"本机清单 + system-prompt 注入"基线 + MCP 主动拉补充**：与既有 `system-prompt.js` result-context 注入模式对齐，fail-safe fallback；MCP 通道作为 Agent 主动 query 的快速补充。
 
 **下一步建议**（不替主 Agent 决策）：
 
-- 主 Agent 在收到本调研后，按 `$biof3-project-governance` skill 启动 BLOCK-16 工作包登记（plan ID / 阶段 / 验收门禁 / 证据位置）。
+- 主 Agent 在收到本调研后，按 `$petri-project-governance` skill 启动 BLOCK-16 工作包登记（plan ID / 阶段 / 验收门禁 / 证据位置）。
 - 登记本报告到 `docs/DOC-REGISTRY.json`（kind=`reference` 或 `audit`）。
 - BLOCK-16 首版范围建议聚焦：（a）5 条 IPC channel + electron.d.ts 类型；（b）`<WorkingTreeReviewMount />` 全屏浮层组件（手写 diff 渲染）；（c）`agent:task-done` typed event；（d）hunk 拒绝清单 + system-prompt 注入（方案 ① 基线）；（e）`block:working-tree-review` 专项门禁 + `docs:check` + `ui:audit:check` 必跑。
 - Result Studio / Provider / packaged Electron / GA 相关任何改动不进 BLOCK-16 范围。

@@ -26,7 +26,7 @@
     {
       "name": "P4-9 agent reports failure honestly (R5 no auto-restart)",
       "pass": true,
-      "detail": "reply=**已确认：该驻留任务已失败终止，未达成成功标准。**\n\n意图卡（`.gewu/resident/res_mtwjcu7n_aio9.json`）现况：\n\n| 字段 | 值 |\n|---|---|\n| taskId | `res_mtwjcu7n_aio9` |\n| status | **failed** |\n| la | attempts=disabled@05:55:34,disabled@05:55:39,disabled@05:55:43,disabled@05:55:47,disabled@05:55:51,disabled@05:55:55,disabled@05:55:59,disabled@05:56:03,disabled@05:56:07,disabled@05:56:11,disabled@05:56:15,disabled@05:56:19,disabl"
+      "detail": "reply=**已确认：该驻留任务已失败终止，未达成成功标准。**\n\n意图卡（`.petri/resident/res_mtwjcu7n_aio9.json`）现况：\n\n| 字段 | 值 |\n|---|---|\n| taskId | `res_mtwjcu7n_aio9` |\n| status | **failed** |\n| la | attempts=disabled@05:55:34,disabled@05:55:39,disabled@05:55:43,disabled@05:55:47,disabled@05:55:51,disabled@05:55:55,disabled@05:55:59,disabled@05:56:03,disabled@05:56:07,disabled@05:56:11,disabled@05:56:15,disabled@05:56:19,disabl"
     }
   ],
   "allPass": true,

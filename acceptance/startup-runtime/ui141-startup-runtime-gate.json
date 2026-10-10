@@ -19,7 +19,7 @@
   },
   "build": {
     "command": "npm run build:mac-arm64",
-    "app": "dist/mac-arm64/BioF3.app",
+    "app": "dist/mac-arm64/Petri.app",
     "architecture": "arm64",
     "signed": false,
     "result": "passed"

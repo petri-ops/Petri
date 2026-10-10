@@ -5,7 +5,7 @@
  * BLOCK-88 P3 实机验收 — 项目授权边界：越界拒绝 / 授权放行 / 吊销即时生效。
  *
  * 拓扑：被访端 B = 本机 dev 栈（:3001 + :3005）；指挥席 A = 驱动进程内真实
- * delegate_to_gewu_node 工具（独立 dataDir + 真实 federation-admin 配对署名）。
+ * delegate_to_petri_node 工具（独立 dataDir + 真实 federation-admin 配对署名）。
  * 链路：署名配对 → 默认零授权（带 projectId 委托 → 宿主 403 诚实拒绝）→
  * 宿主桌面面授权（REST，grants.json 落盘）→ 同一委托放行且委托会话落项目绑定
  * → 回执附 grantedProjects 发现面 → 吊销后再次委托即刻 403 → CDP 测试实例
@@ -22,7 +22,7 @@ const path = require('node:path');
 const { spawn } = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, '..');
-const B_BASE = process.env.BIOF3_B_BASE || 'http://127.0.0.1:3001';
+const B_BASE = process.env.PETRI_B_BASE || 'http://127.0.0.1:3001';
 const ENGINEER = { displayName: '工程师 A', device: 'macOS' };
 const DELEGATE_TASK = '只读侦察：用一句话报告你收到的项目名称，不要使用任何工具。';
 
@@ -50,7 +50,7 @@ function listen(app) {
 }
 
 async function ensureTestInstance() {
-  const lib = require(path.join(ROOT, '.agents/skills/gewu-dev-infra/dev-verify/lib.cjs'));
+  const lib = require(path.join(ROOT, '.agents/skills/petri-dev-infra/dev-verify/lib.cjs'));
   try {
     await lib.pollTargets({ port: lib.TEST_INSTANCE_PORT, timeoutMs: 2000 });
     return;
@@ -84,12 +84,12 @@ async function main() {
   assert_('P1_invite_token_issued', invite.status === 200 && !!invite.data.token);
   const pairingUrl = `http://127.0.0.1:3005/pair?token=${invite.data.token}`;
 
-  const cmdRoot = mkdtempSync(path.join(tmpdir(), 'gewu-block88-p3-cmd-'));
+  const cmdRoot = mkdtempSync(path.join(tmpdir(), 'petri-block88-p3-cmd-'));
   let cmdServer = null;
   try {
     const express = require('express');
     const cmdApp = express();
-    require(path.join(ROOT, 'core/biof3-server/routes/federation-admin.js'))(cmdApp, { dataDir: cmdRoot });
+    require(path.join(ROOT, 'core/petri-server/routes/federation-admin.js'))(cmdApp, { dataDir: cmdRoot });
     cmdServer = await listen(cmdApp);
     const paired = await json(`http://127.0.0.1:${cmdServer.address().port}/api/federation/peers/pair`, {
       method: 'POST', body: { url: pairingUrl, identity: ENGINEER },
@@ -98,9 +98,9 @@ async function main() {
     const peerId = paired.data.peer.peerId;
 
     // ── P2 默认零授权：带 projectId 委托 → 宿主 403 诚实拒绝 ──
-    process.env.BIOF3_LOCAL_DATA_DIR = cmdRoot;
-    const { tool_delegate_to_gewu_node } = require(path.join(ROOT, 'core/biof3-server/agent-tools/federation-tools.js'));
-    const denied = await tool_delegate_to_gewu_node({ peerId, task: DELEGATE_TASK, projectId: target.id, timeoutMinutes: 3 });
+    process.env.PETRI_LOCAL_DATA_DIR = cmdRoot;
+    const { tool_delegate_to_petri_node } = require(path.join(ROOT, 'core/petri-server/agent-tools/federation-tools.js'));
+    const denied = await tool_delegate_to_petri_node({ peerId, task: DELEGATE_TASK, projectId: target.id, timeoutMinutes: 3 });
     assert_('P2_undelegated_project_denied_403', denied.ok !== true && denied.error === 'federation_project_not_granted',
       JSON.stringify({ error: denied.error, message: denied.message }).slice(0, 160));
 
@@ -114,7 +114,7 @@ async function main() {
     assert_('P3a_grant_visible_with_project_name', !!row && row.projectName === target.name, JSON.stringify(row));
 
     // ── P4 授权放行：同一委托真实跑完 + 委托会话落项目绑定 ──
-    const receipt = await tool_delegate_to_gewu_node({ peerId, task: DELEGATE_TASK, projectId: target.id, timeoutMinutes: 6 });
+    const receipt = await tool_delegate_to_petri_node({ peerId, task: DELEGATE_TASK, projectId: target.id, timeoutMinutes: 6 });
     assert_('P4_granted_delegate_runs_to_done', receipt.ok === true, `agentStatus=${receipt.agentStatus} err=${receipt.error || 'none'}`);
     assert_('P4a_meta_federated_from', true, 'covered by P2 suite; here assert binding below');
 
@@ -126,7 +126,7 @@ async function main() {
       JSON.stringify(fed && { project_id: fed.project_id, origin: fed.origin, title: fed.title }));
 
     // ── P5 发现面：不带 projectId 的委托回执附 grantedProjects ──
-    const receipt2 = await tool_delegate_to_gewu_node({ peerId, task: DELEGATE_TASK, timeoutMinutes: 6 });
+    const receipt2 = await tool_delegate_to_petri_node({ peerId, task: DELEGATE_TASK, timeoutMinutes: 6 });
     assert_('P5_discovery_granted_projects_in_receipt', receipt2.ok === true
       && Array.isArray(receipt2.grantedProjects)
       && receipt2.grantedProjects.some((p) => p.projectId === target.id),
@@ -135,7 +135,7 @@ async function main() {
     // ── P6 吊销即时生效 ──
     const revoke = await json(`${B_BASE}/api/federation/grants?engineer=${encodeURIComponent(ENGINEER.displayName)}&projectId=${encodeURIComponent(target.id)}`, { method: 'DELETE', headers: auth });
     assert_('P6a_revoke_ok', revoke.status === 200);
-    const deniedAgain = await tool_delegate_to_gewu_node({ peerId, task: DELEGATE_TASK, projectId: target.id, timeoutMinutes: 3 });
+    const deniedAgain = await tool_delegate_to_petri_node({ peerId, task: DELEGATE_TASK, projectId: target.id, timeoutMinutes: 3 });
     assert_('P6b_revoked_delegate_denied_again', deniedAgain.ok !== true && deniedAgain.error === 'federation_project_not_granted',
       JSON.stringify({ error: deniedAgain.error }).slice(0, 120));
 
@@ -143,7 +143,7 @@ async function main() {
     // 重新授权以便 UI 展示授权态
     await json(`${B_BASE}/api/federation/grants`, { method: 'POST', headers: auth, body: { engineer: ENGINEER.displayName, projectId: target.id } });
     await ensureTestInstance();
-    const lib = require(path.join(ROOT, '.agents/skills/gewu-dev-infra/dev-verify/lib.cjs'));
+    const lib = require(path.join(ROOT, '.agents/skills/petri-dev-infra/dev-verify/lib.cjs'));
     const client = await lib.connectTestTarget({});
     const evalJs = async (expr) => {
       const r = await client.send('Runtime.evaluate', { expression: expr, returnByValue: true, awaitPromise: true });
@@ -182,7 +182,7 @@ async function main() {
   const evidence = {
     package: 'BLOCK-88-ENGINEER-COLLAB',
     stage: 'P3-GRANTS',
-    topology: 'loopback dual-node: B=dev stack :3001/:3005 (real), A=real delegate_to_gewu_node tool (isolated dataDir)',
+    topology: 'loopback dual-node: B=dev stack :3001/:3005 (real), A=real delegate_to_petri_node tool (isolated dataDir)',
     engineer: ENGINEER,
     delegateTask: DELEGATE_TASK,
     startedAt,

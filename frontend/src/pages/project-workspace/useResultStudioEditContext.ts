@@ -8,7 +8,7 @@ import { fetchResultStudioContext } from '@/lib/result-studio-interaction-client
 import { summarizeSelectionForAgent } from '@/lib/artifact-selection';
 import { isResultStudioContextToken } from '@/lib/result-edit-agent-bridge';
 import { buildResultEditCopilotAsk } from '@/lib/result-edit-agent-bridge';
-import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
+import { petriEvents, dispatchPetriEvent } from '@/lib/events';
 import { useSelectionBus, setSelectionBusSelection } from '@/lib/selectionBus';
 import { isConversationRunning } from '@/components/copilot/conversationRunStore';
 
@@ -341,7 +341,7 @@ export function useResultStudioEditContext(options: UseResultStudioEditContextOp
         return false;
       }
       setWorkspaceNotice('');
-      dispatchGewuEvent(gewuEvents.copilotAsk, detail);
+      dispatchPetriEvent(petriEvents.copilotAsk, detail);
       return true;
     } finally {
       setResultEditSubmitting(false);

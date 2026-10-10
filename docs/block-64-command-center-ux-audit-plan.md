@@ -15,7 +15,7 @@
 
 ### 2.1 是否按项目绑定？——跨项目绑定是合理定位，但缺归属标注
 
-- 数据源 `GET /api/tools/history`（[tools-metadata.js:268-277](../core/biof3-server/routes/tools-metadata.js)）按 user 过滤、**无 project 参数**、`created_at DESC LIMIT 50` 再截 12——指挥中心是全应用**唯一**跨项目作业面（其余面全部项目级或会话级）。
+- 数据源 `GET /api/tools/history`（[tools-metadata.js:268-277](../core/petri-server/routes/tools-metadata.js)）按 user 过滤、**无 project 参数**、`created_at DESC LIMIT 50` 再截 12——指挥中心是全应用**唯一**跨项目作业面（其余面全部项目级或会话级）。
 - 「指挥中心」作为全局部落，跨项目合理；缺陷在**瓦片无项目归属标识**（只有 `name/tool_id`/远程徽章），跨项目混排时用户无法分辨作业来自哪个项目（job 对象含 `project_id/conversation_id`，前端有数据没渲染）。
 - 与项目级结果库（ResultsLibrary，项目内列表）分工在数据源层面清晰（history vs `/api/projects/:id/jobs`），**不构成冗余**。
 
@@ -35,7 +35,7 @@
 | --- | --- | --- | --- |
 | 1 | **P0 真 bug** | `mapToolJob` 丢弃 `execution_target_id`——后端 SELECT 显式返回、前端类型声明了、mapper 没映射 → 指挥中心与结果库的「远程」徽章（BLOCK-57 交付）**生产环境永不渲染**；两处测试均手工注入字段才通过，掩盖断链 | [project-store.ts:196-211](../frontend/src/lib/project-store.ts) vs [CommandCenterPage.tsx:120-122](../frontend/src/pages/window/CommandCenterPage.tsx) / [ResultsLibrary.tsx:75-81](../frontend/src/components/workspace-panels/ResultsLibrary.tsx) |
 | 2 | **P1** | running/pending 瓦片点击只提示「无产物可下钻」——**全前端不存在 tool job 日志查看器**：`/api/tools/status/:id` 的日志字段前端未消费、无日志 SSE；最需要「盯」的运行中作业反而零可动作 | [CommandCenterPage.tsx:64-89](../frontend/src/pages/window/CommandCenterPage.tsx)；后端 cancel 同理 |
-| 3 | **P1** | **无取消入口**：后端 `POST /api/tools/cancel/:id` 存在（[tools-platform.js:60](../core/biof3-server/routes/tools-platform.js)），前端零调用；跑错作业只能等它自己结束或重启 | 同上 |
+| 3 | **P1** | **无取消入口**：后端 `POST /api/tools/cancel/:id` 存在（[tools-platform.js:60](../core/petri-server/routes/tools-platform.js)），前端零调用；跑错作业只能等它自己结束或重启 | 同上 |
 | 4 | **P1** | 12 瓦片取「最近 12」**无状态过滤/置顶**：done/failed 历史把 running 作业挤出俯瞰墙（连续小作业场景下长任务不可见）；失败瓦片连 `job.error` 都不显示（ResultView 有） | [CommandCenterPage.tsx:46](../frontend/src/pages/window/CommandCenterPage.tsx) `data.slice(0, MAX_TILES)` |
 | 5 | **P1** | 跨项目瓦片无项目归属标注（§2.1） | job.project_id 有数据未渲染 |
 | 6 | **P2** | agent 维度俯瞰空白（§2.2 真空白①）：spawn_agent 任务不进指挥中心，plan 原意未兑现 | BLOCK-49 SubAgentsBar 为会话内存态 |

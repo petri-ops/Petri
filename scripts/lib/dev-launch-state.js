@@ -75,7 +75,7 @@ function resolveBootElectronAction({ record, wrapperAlive, hasTokenPids, forceCl
     return {
       action: 'fail',
       message:
-        `BioF3 dev stack is already running (wrapper pid ${record.wrapperPid}, launched ${record.startedAt || 'unknown'}). ` +
+        `Petri dev stack is already running (wrapper pid ${record.wrapperPid}, launched ${record.startedAt || 'unknown'}). ` +
         `Stop it first (Ctrl+C in its terminal, or: kill ${record.wrapperPid}), ` +
         `then re-run npm run dev. To override this check and force-clean all workspace Electron processes, pass --force-clean-electron.`,
     };

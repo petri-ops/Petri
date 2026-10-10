@@ -16,10 +16,10 @@ const { execFileSync } = require('node:child_process');
 const http = require('node:http');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
 const PROJECT_ID = process.env.BIOF49_PROJECT || 'p_mtlnsv0f_xpjb';
 const DB_PATH = process.env.BIOF49_DB
-  || path.join(__dirname, '..', '.biof3-dev-user-data', 'data', 'biof3.db');
+  || path.join(__dirname, '..', '.petri-dev-user-data', 'data', 'petri.db');
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-49');
 const WAIT_MS = 8 * 60 * 1000;
 const POLL_MS = 4000;
@@ -27,7 +27,7 @@ const POLL_MS = 4000;
 const PROMPT = [
   '请严格按以下步骤操作（必须使用 spawn_agent 工具，不要自己直接完成）：',
   '1) 用 spawn_agent 派生子 agent A，任务：给出 BRCA1、TP53、EGFR 三个基因各一句话功能说明。',
-  '2) 用 spawn_agent 派生子 agent B，任务：把字符串 biof3 反转，并写出一句话说明。',
+  '2) 用 spawn_agent 派生子 agent B，任务：把字符串 petri 反转，并写出一句话说明。',
   '3) 用 wait_agent 分别等待 A 和 B 结束，取得各自结论。',
   '4) 最后把两份结论合并成一段话汇报给我。',
 ].join('\n');
@@ -108,7 +108,7 @@ async function main() {
   fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
   const targets = await fetchJson(`http://127.0.0.1:${DEBUG_PORT}/json/list`);
   const page = targets.find((t) => t.type === 'page' && /localhost:3000/.test(t.url || ''));
-  if (!page) throw new Error('biof3_page_not_found');
+  if (!page) throw new Error('petri_page_not_found');
   const client = await new CdpClient(page.webSocketDebuggerUrl).connect();
 
   const results = {

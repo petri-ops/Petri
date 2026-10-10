@@ -26,7 +26,7 @@
     {
       "name": "A5 数据真实：DOM 项目名与后端 API 返回一致且非空",
       "pass": true,
-      "detail": "dom=[YST|1.WorkDir|biof3|devah|gewu-desktop] api=5 项"
+      "detail": "dom=[YST|1.WorkDir|petri|devah|petri-desktop] api=5 项"
     },
     {
       "name": "A6 壳层在场：AppRail 项目树容器在 DOM（排除整块未渲染的假绿）",
@@ -53,9 +53,9 @@
   "domNames": [
     "YST",
     "1.WorkDir",
-    "biof3",
+    "petri",
     "devah",
-    "gewu-desktop"
+    "petri-desktop"
   ],
   "apiProjectCount": 5,
   "samples": [
@@ -235,5 +235,5 @@
     }
   ],
   "screenshot": "ui369-selfheal-after.png",
-  "note": "脚本自身零用户手势：无点击、无 reload 调用、无 gewu:soft-refresh 派发"
+  "note": "脚本自身零用户手势：无点击、无 reload 调用、无 petri:soft-refresh 派发"
 }

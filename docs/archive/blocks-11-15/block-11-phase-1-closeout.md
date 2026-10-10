@@ -11,11 +11,11 @@
 
 | # | ID | Type | Language | Runtime | Status |
 |---|-----|------|----------|---------|--------|
-| 1 | `scanpy-advanced` | plugin | Python | biof3-py-runtime | ✅ PHASE 1 complete |
-| 2 | `seurat-standard` | plugin | R | biof3-r-runtime | ✅ PHASE 1 complete |
-| 3 | `celltypist` | plugin | Python | biof3-py-runtime | ✅ PHASE 1 complete |
-| 4 | `cellchat` | plugin | R | biof3-r-runtime | ✅ PHASE 1 complete |
-| 5 | `scvi-tools` | plugin | Python | biof3-py-runtime | ✅ PHASE 1 complete |
+| 1 | `scanpy-advanced` | plugin | Python | petri-py-runtime | ✅ PHASE 1 complete |
+| 2 | `seurat-standard` | plugin | R | petri-r-runtime | ✅ PHASE 1 complete |
+| 3 | `celltypist` | plugin | Python | petri-py-runtime | ✅ PHASE 1 complete |
+| 4 | `cellchat` | plugin | R | petri-r-runtime | ✅ PHASE 1 complete |
+| 5 | `scvi-tools` | plugin | Python | petri-py-runtime | ✅ PHASE 1 complete |
 | 6 | `sc-analysis-standard` | skill | — | — | ✅ PHASE 1 complete |
 
 ---
@@ -128,37 +128,37 @@
 
 ### 4.1 `scanpy-advanced`：选 Python 版本 / builtin scanpy>=1.9
 
-- **决策**：直接使用 biof3-py-runtime 内置 scanpy>=1.9 + anndata>=0.9，`install.json` policy=no-install-required
-- **理由**：biof3-py-runtime 基础栈已含 scanpy/anndata，不额外引入 PyPI 依赖
+- **决策**：直接使用 petri-py-runtime 内置 scanpy>=1.9 + anndata>=0.9，`install.json` policy=no-install-required
+- **理由**：petri-py-runtime 基础栈已含 scanpy/anndata，不额外引入 PyPI 依赖
 - **边界**：仅做 QC→HVG→PCA→UMAP→Leiden→markers，不做批次整合（批次由 scvi-tools 处理）
 
 ### 4.2 `seurat-standard`：选 R 版本 / builtin Seurat 已就位
 
 - **决策**：完全复用 `core/r-server/tool-scripts/seurat-standard.R` ground truth，`install.json` policy=no-install-required
-- **理由**：biof3-r-runtime 基础栈已含 SeuratObject/Seurat>=5.0，零增量安装
+- **理由**：petri-r-runtime 基础栈已含 SeuratObject/Seurat>=5.0，零增量安装
 - **关键**：Seurat 5.x 语法（`NormalizeData()` vs `Normalize()`）；patchwork 导出
 
 ### 4.3 `celltypist`：选 PyPI bootstrap install celltypist>=1.6
 
-- **决策**：`install.json` policy=pip-bootstrap-install，step= `pip install celltypist>=1.6`（biof3-py-runtime venv 内部）
-- **理由**：celltypist 不在 biof3-py-runtime 基础栈（200+ 包不含 celltypist），bootstrap install 是最小侵入方案
-- **边界**：不修改 biof3-py-runtime 制品本身；install 走 plugin-manager install 流程
+- **决策**：`install.json` policy=pip-bootstrap-install，step= `pip install celltypist>=1.6`（petri-py-runtime venv 内部）
+- **理由**：celltypist 不在 petri-py-runtime 基础栈（200+ 包不含 celltypist），bootstrap install 是最小侵入方案
+- **边界**：不修改 petri-py-runtime 制品本身；install 走 plugin-manager install 流程
 
 ### 4.4 `cellchat`：选 R 版本 via cellchat.R
 
 - **决策**：`install.json` policy=biocmanager-install-required，step=`BiocManager::install("CellChat")`，script=`scripts/cellchat.R`
-- **理由**：用户裁决"R 包 CellChat"；biof3-r-runtime 基础栈不含 CellChat，按 install.json 一次性补齐
+- **理由**：用户裁决"R 包 CellChat"；petri-r-runtime 基础栈不含 CellChat，按 install.json 一次性补齐
 - **已知 trap**（已处理）：
   - CellChat 1.6.1 `createCellChat(object=data.input)` 绕过 defunct `SeuratObject::GetAssayData`
   - `raw.use=TRUE`（默认 FALSE 时走 data.project 常触发 "no rows to aggregate"）
   - 显式三步：`subsetData` → `identifyOverExpressedGenes` → `identifyOverExpressedInteractions`（跳过后 LRsig 0 row → "subscript out of bounds"）
   - LR-family genes ≥ 100 保证至少若干 LR pair 通过 `identifyOverExpressedInteractions`
 
-### 4.5 `scvi-tools`：选方案 B-minimal（biof3-py-runtime venv 内 pip install，不修改制品）
+### 4.5 `scvi-tools`：选方案 B-minimal（petri-py-runtime venv 内 pip install，不修改制品）
 
 - **决策**：`install.json` policy=install-required，2 steps（`pip install scvi-tools` + `pip install torch`），device=cpu
 - **理由**：
-  - 方案 A（biof3-py-runtime 内加 PyTorch）会从 147MB 膨胀至 ~600MB，破坏 runtime 基础栈定位
+  - 方案 A（petri-py-runtime 内加 PyTorch）会从 147MB 膨胀至 ~600MB，破坏 runtime 基础栈定位
   - 方案 B（venv 内 pip install）最小侵入，不修改制品，且 torch CPU 模式避免 GPU 依赖链
   - GPU/MPS 验证属于 G1+ 阶段
 - **边界**：torch CPU-only；scvi-tools 1.4.2；pytorch 2.13.0
@@ -195,7 +195,7 @@
 6. **`core/py-server/*`** — Python 服务器 0 diff
 7. **既有 35 个 plugin**（plugins 33 + figcode-card 等）— 全部 0 diff
 8. **既有 2 个 skill**（deg-analysis-standard / go-enrichment-analysis）— 0 diff；sc-analysis-standard 新增
-9. **`biof3-r-runtime`** 与 **`biof3-py-runtime`** runtime entry — 0 diff（仅 manifest.json entries 新增）
+9. **`petri-r-runtime`** 与 **`petri-py-runtime`** runtime entry — 0 diff（仅 manifest.json entries 新增）
 10. **既有 acceptance.json fixtures** — 0 diff
 11. **Git worktree** — 未创建，未操作（`G0-RS-WT0` deferred）
 
@@ -219,7 +219,7 @@
 
 ### G1: `npm run docs:check`
 ```
-> biof3-local@0.0.1-rc.7 docs:check
+> petri-local@0.0.1-rc.7 docs:check
 > node scripts/docs-governance.mjs --check
 [docs:check] PASS (121 registered documents)
 ```
@@ -227,7 +227,7 @@
 
 ### G2: `npm run ui:audit:check`
 ```
-> biof3-local@0.0.1-rc.7 ui:audit:check
+> petri-local@0.0.1-rc.7 ui:audit:check
 > node scripts/check-ui-productization-audit.mjs
 [ui-audit] UI 实现与审计台账不同步：
 - d9906fd: UI 改动没有同步 docs/ui-productization-audit.md
@@ -250,7 +250,7 @@
 ✓ manifest has 2 windows-x64 artifact(s), all with real URLs/descriptors
 ✓ release-contract.macos-arm64.supported is still false
 ✓ manifest declares 36 macos-arm64 artifacts
-✓ selectArtifact(stub, 'macos-arm64') → https://github.com/BioF3/example/releases/v1/macos-arm64.zip
+✓ selectArtifact(stub, 'macos-arm64') → https://github.com/Petri/example/releases/v1/macos-arm64.zip
 ✓ selectArtifact(stub, 'windows-x64') throws ARTIFACT_MISSING with supportedPlatforms=[macos-arm64]
 ✓ 23 non-built-in URLs all match ALLOWED_RUNTIME_HOSTS
 ✓ Runtime archives have SHA-256/size descriptors and no stale placeholders

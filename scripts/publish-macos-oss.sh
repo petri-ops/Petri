@@ -7,10 +7,10 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Local release credentials stay outside Git. Existing environment variables
 # (for example in CI) continue to work when this file is absent.
-if [[ -f "$ROOT/.biof3-secrets" ]]; then
+if [[ -f "$ROOT/.petri-secrets" ]]; then
   set -a
   # shellcheck disable=SC1091
-  source "$ROOT/.biof3-secrets"
+  source "$ROOT/.petri-secrets"
   set +a
 fi
 

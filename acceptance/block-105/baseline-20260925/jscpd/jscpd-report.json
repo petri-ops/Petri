@@ -8,7 +8,7 @@
           "line": 45,
           "position": 1917
         },
-        "name": "biof3-server\\agent-task-store.js",
+        "name": "petri-server\\agent-task-store.js",
         "start": 36,
         "startLoc": {
           "column": 12,
@@ -28,7 +28,7 @@
           "line": 191,
           "position": 6076
         },
-        "name": "biof3-server\\agent-task-store.js",
+        "name": "petri-server\\agent-task-store.js",
         "start": 182,
         "startLoc": {
           "column": 13,
@@ -46,7 +46,7 @@
           "line": 46,
           "position": 1924
         },
-        "name": "biof3-server\\agent-task-store.js",
+        "name": "petri-server\\agent-task-store.js",
         "start": 36,
         "startLoc": {
           "column": 10,
@@ -66,7 +66,7 @@
           "line": 214,
           "position": 6658
         },
-        "name": "biof3-server\\agent-task-store.js",
+        "name": "petri-server\\agent-task-store.js",
         "start": 204,
         "startLoc": {
           "column": 12,
@@ -84,7 +84,7 @@
           "line": 47,
           "position": 1939
         },
-        "name": "biof3-server\\agent-task-store.js",
+        "name": "petri-server\\agent-task-store.js",
         "start": 41,
         "startLoc": {
           "column": 23,
@@ -104,7 +104,7 @@
           "line": 215,
           "position": 6664
         },
-        "name": "biof3-server\\agent-task-store.js",
+        "name": "petri-server\\agent-task-store.js",
         "start": 209,
         "startLoc": {
           "column": 21,
@@ -122,7 +122,7 @@
           "line": 508,
           "position": 19818
         },
-        "name": "biof3-server\\agent-task-store.js",
+        "name": "petri-server\\agent-task-store.js",
         "start": 496,
         "startLoc": {
           "column": 9,
@@ -142,7 +142,7 @@
           "line": 712,
           "position": 27731
         },
-        "name": "biof3-server\\agent-task-store.js",
+        "name": "petri-server\\agent-task-store.js",
         "start": 700,
         "startLoc": {
           "column": 47,
@@ -160,7 +160,7 @@
           "line": 708,
           "position": 27561
         },
-        "name": "biof3-server\\agent-task-store.js",
+        "name": "petri-server\\agent-task-store.js",
         "start": 700,
         "startLoc": {
           "column": 26,
@@ -180,7 +180,7 @@
           "line": 727,
           "position": 28307
         },
-        "name": "biof3-server\\agent-task-store.js",
+        "name": "petri-server\\agent-task-store.js",
         "start": 719,
         "startLoc": {
           "column": 22,
@@ -198,7 +198,7 @@
           "line": 708,
           "position": 27561
         },
-        "name": "biof3-server\\agent-task-store.js",
+        "name": "petri-server\\agent-task-store.js",
         "start": 700,
         "startLoc": {
           "column": 32,
@@ -218,7 +218,7 @@
           "line": 752,
           "position": 29501
         },
-        "name": "biof3-server\\agent-task-store.js",
+        "name": "petri-server\\agent-task-store.js",
         "start": 744,
         "startLoc": {
           "column": 13,
@@ -236,7 +236,7 @@
           "line": 713,
           "position": 27737
         },
-        "name": "biof3-server\\agent-task-store.js",
+        "name": "petri-server\\agent-task-store.js",
         "start": 700,
         "startLoc": {
           "column": 31,
@@ -256,7 +256,7 @@
           "line": 886,
           "position": 34116
         },
-        "name": "biof3-server\\agent-task-store.js",
+        "name": "petri-server\\agent-task-store.js",
         "start": 873,
         "startLoc": {
           "column": 39,
@@ -274,7 +274,7 @@
           "line": 729,
           "position": 28371
         },
-        "name": "biof3-server\\agent-task-store.js",
+        "name": "petri-server\\agent-task-store.js",
         "start": 721,
         "startLoc": {
           "column": 4,
@@ -294,7 +294,7 @@
           "line": 754,
           "position": 29565
         },
-        "name": "biof3-server\\agent-task-store.js",
+        "name": "petri-server\\agent-task-store.js",
         "start": 746,
         "startLoc": {
           "column": 4,
@@ -312,7 +312,7 @@
           "line": 483,
           "position": 21032
         },
-        "name": "biof3-server\\agent-tools\\agent-loop-control.js",
+        "name": "petri-server\\agent-tools\\agent-loop-control.js",
         "start": 477,
         "startLoc": {
           "column": 0,
@@ -350,7 +350,7 @@
           "line": 31,
           "position": 1178
         },
-        "name": "biof3-server\\agent-tools\\federation-tools.js",
+        "name": "petri-server\\agent-tools\\federation-tools.js",
         "start": 23,
         "startLoc": {
           "column": 110,
@@ -370,7 +370,7 @@
           "line": 44,
           "position": 1983
         },
-        "name": "biof3-server\\routes\\federation-admin.js",
+        "name": "petri-server\\routes\\federation-admin.js",
         "start": 36,
         "startLoc": {
           "column": 121,
@@ -388,7 +388,7 @@
           "line": 41,
           "position": 1438
         },
-        "name": "biof3-server\\agent-tools\\federation-tools.js",
+        "name": "petri-server\\agent-tools\\federation-tools.js",
         "start": 31,
         "startLoc": {
           "column": 38,
@@ -408,7 +408,7 @@
           "line": 54,
           "position": 2294
         },
-        "name": "biof3-server\\routes\\federation-admin.js",
+        "name": "petri-server\\routes\\federation-admin.js",
         "start": 44,
         "startLoc": {
           "column": 71,
@@ -426,7 +426,7 @@
           "line": 33,
           "position": 1392
         },
-        "name": "biof3-server\\agent-tools\\knowledge-tools.js",
+        "name": "petri-server\\agent-tools\\knowledge-tools.js",
         "start": 18,
         "startLoc": {
           "column": 88,
@@ -446,7 +446,7 @@
           "line": 124,
           "position": 4624
         },
-        "name": "biof3-server\\agent-tools\\knowledge-tools.js",
+        "name": "petri-server\\agent-tools\\knowledge-tools.js",
         "start": 110,
         "startLoc": {
           "column": 132,
@@ -464,7 +464,7 @@
           "line": 30,
           "position": 1318
         },
-        "name": "biof3-server\\agent-tools\\knowledge-tools.js",
+        "name": "petri-server\\agent-tools\\knowledge-tools.js",
         "start": 22,
         "startLoc": {
           "column": 2,
@@ -484,7 +484,7 @@
           "line": 80,
           "position": 3090
         },
-        "name": "biof3-server\\agent-tools\\knowledge-tools.js",
+        "name": "petri-server\\agent-tools\\knowledge-tools.js",
         "start": 72,
         "startLoc": {
           "column": 2,
@@ -502,7 +502,7 @@
           "line": 34,
           "position": 1403
         },
-        "name": "biof3-server\\agent-tools\\knowledge-tools.js",
+        "name": "petri-server\\agent-tools\\knowledge-tools.js",
         "start": 24,
         "startLoc": {
           "column": 8,
@@ -522,7 +522,7 @@
           "line": 125,
           "position": 4638
         },
-        "name": "biof3-server\\agent-tools\\knowledge-tools.js",
+        "name": "petri-server\\agent-tools\\knowledge-tools.js",
         "start": 115,
         "startLoc": {
           "column": 8,
@@ -540,7 +540,7 @@
           "line": 824,
           "position": 29891
         },
-        "name": "biof3-server\\agent-tools\\learning.js",
+        "name": "petri-server\\agent-tools\\learning.js",
         "start": 819,
         "startLoc": {
           "column": 70,
@@ -560,7 +560,7 @@
           "line": 998,
           "position": 38424
         },
-        "name": "biof3-server\\agent-tools\\learning.js",
+        "name": "petri-server\\agent-tools\\learning.js",
         "start": 993,
         "startLoc": {
           "column": 57,
@@ -578,7 +578,7 @@
           "line": 825,
           "position": 29903
         },
-        "name": "biof3-server\\agent-tools\\learning.js",
+        "name": "petri-server\\agent-tools\\learning.js",
         "start": 820,
         "startLoc": {
           "column": 6,
@@ -598,7 +598,7 @@
           "line": 1034,
           "position": 39895
         },
-        "name": "biof3-server\\agent-tools\\learning.js",
+        "name": "petri-server\\agent-tools\\learning.js",
         "start": 1029,
         "startLoc": {
           "column": 6,
@@ -616,7 +616,7 @@
           "line": 998,
           "position": 38424
         },
-        "name": "biof3-server\\agent-tools\\learning.js",
+        "name": "petri-server\\agent-tools\\learning.js",
         "start": 990,
         "startLoc": {
           "column": 108,
@@ -636,7 +636,7 @@
           "line": 1033,
           "position": 39883
         },
-        "name": "biof3-server\\agent-tools\\learning.js",
+        "name": "petri-server\\agent-tools\\learning.js",
         "start": 1025,
         "startLoc": {
           "column": 106,
@@ -654,7 +654,7 @@
           "line": 169,
           "position": 6884
         },
-        "name": "biof3-server\\agent-tools\\plan-ui-tools.js",
+        "name": "petri-server\\agent-tools\\plan-ui-tools.js",
         "start": 164,
         "startLoc": {
           "column": 26,
@@ -674,7 +674,7 @@
           "line": 27,
           "position": 1565
         },
-        "name": "biof3-server\\agent-tools\\verify-dispatch.js",
+        "name": "petri-server\\agent-tools\\verify-dispatch.js",
         "start": 24,
         "startLoc": {
           "column": 40,
@@ -692,7 +692,7 @@
           "line": 315,
           "position": 17284
         },
-        "name": "biof3-server\\agent-tools\\registry.js",
+        "name": "petri-server\\agent-tools\\registry.js",
         "start": 306,
         "startLoc": {
           "column": 41,
@@ -730,7 +730,7 @@
           "line": 80,
           "position": 3538
         },
-        "name": "biof3-server\\agent-tools\\result-context-tools.js",
+        "name": "petri-server\\agent-tools\\result-context-tools.js",
         "start": 70,
         "startLoc": {
           "column": 0,
@@ -750,7 +750,7 @@
           "line": 310,
           "position": 14187
         },
-        "name": "biof3-server\\agent-tools\\result-edit-tools.js",
+        "name": "petri-server\\agent-tools\\result-edit-tools.js",
         "start": 300,
         "startLoc": {
           "column": 0,
@@ -768,7 +768,7 @@
           "line": 96,
           "position": 4027
         },
-        "name": "biof3-server\\agent-tools\\result-context-tools.js",
+        "name": "petri-server\\agent-tools\\result-context-tools.js",
         "start": 78,
         "startLoc": {
           "column": 0,
@@ -788,7 +788,7 @@
           "line": 160,
           "position": 6627
         },
-        "name": "biof3-server\\agent-tools\\result-selection-tools.js",
+        "name": "petri-server\\agent-tools\\result-selection-tools.js",
         "start": 152,
         "startLoc": {
           "column": 0,
@@ -806,7 +806,7 @@
           "line": 96,
           "position": 4027
         },
-        "name": "biof3-server\\agent-tools\\result-context-tools.js",
+        "name": "petri-server\\agent-tools\\result-context-tools.js",
         "start": 80,
         "startLoc": {
           "column": 23,
@@ -844,7 +844,7 @@
           "line": 96,
           "position": 4027
         },
-        "name": "biof3-server\\agent-tools\\result-context-tools.js",
+        "name": "petri-server\\agent-tools\\result-context-tools.js",
         "start": 80,
         "startLoc": {
           "column": 23,
@@ -882,7 +882,7 @@
           "line": 356,
           "position": 16701
         },
-        "name": "biof3-server\\agent-tools\\result-edit-tools.js",
+        "name": "petri-server\\agent-tools\\result-edit-tools.js",
         "start": 345,
         "startLoc": {
           "column": 25,
@@ -902,7 +902,7 @@
           "line": 95,
           "position": 3759
         },
-        "name": "biof3-server\\routes\\_helpers\\workflow.js",
+        "name": "petri-server\\routes\\_helpers\\workflow.js",
         "start": 84,
         "startLoc": {
           "column": 41,
@@ -920,7 +920,7 @@
           "line": 355,
           "position": 16688
         },
-        "name": "biof3-server\\agent-tools\\result-edit-tools.js",
+        "name": "petri-server\\agent-tools\\result-edit-tools.js",
         "start": 345,
         "startLoc": {
           "column": 15,
@@ -940,7 +940,7 @@
           "line": 111,
           "position": 5028
         },
-        "name": "biof3-server\\routes\\result-studio\\index.js",
+        "name": "petri-server\\routes\\result-studio\\index.js",
         "start": 101,
         "startLoc": {
           "column": 8,
@@ -958,7 +958,7 @@
           "line": 355,
           "position": 16688
         },
-        "name": "biof3-server\\agent-tools\\result-edit-tools.js",
+        "name": "petri-server\\agent-tools\\result-edit-tools.js",
         "start": 346,
         "startLoc": {
           "column": 8,
@@ -996,7 +996,7 @@
           "line": 453,
           "position": 21417
         },
-        "name": "biof3-server\\agent-tools\\result-edit-tools.js",
+        "name": "petri-server\\agent-tools\\result-edit-tools.js",
         "start": 444,
         "startLoc": {
           "column": 29,
@@ -1016,7 +1016,7 @@
           "line": 603,
           "position": 27145
         },
-        "name": "biof3-server\\agent-tools\\result-edit-tools.js",
+        "name": "petri-server\\agent-tools\\result-edit-tools.js",
         "start": 594,
         "startLoc": {
           "column": 52,
@@ -1034,7 +1034,7 @@
           "line": 492,
           "position": 23049
         },
-        "name": "biof3-server\\agent-tools\\result-edit-tools.js",
+        "name": "petri-server\\agent-tools\\result-edit-tools.js",
         "start": 487,
         "startLoc": {
           "column": 23,
@@ -1054,7 +1054,7 @@
           "line": 511,
           "position": 23844
         },
-        "name": "biof3-server\\agent-tools\\result-edit-tools.js",
+        "name": "petri-server\\agent-tools\\result-edit-tools.js",
         "start": 506,
         "startLoc": {
           "column": 24,
@@ -1072,7 +1072,7 @@
           "line": 537,
           "position": 24676
         },
-        "name": "biof3-server\\agent-tools\\result-edit-tools.js",
+        "name": "petri-server\\agent-tools\\result-edit-tools.js",
         "start": 531,
         "startLoc": {
           "column": 22,
@@ -1092,7 +1092,7 @@
           "line": 561,
           "position": 25487
         },
-        "name": "biof3-server\\agent-tools\\result-edit-tools.js",
+        "name": "petri-server\\agent-tools\\result-edit-tools.js",
         "start": 555,
         "startLoc": {
           "column": 23,
@@ -1110,7 +1110,7 @@
           "line": 537,
           "position": 24676
         },
-        "name": "biof3-server\\agent-tools\\result-edit-tools.js",
+        "name": "petri-server\\agent-tools\\result-edit-tools.js",
         "start": 531,
         "startLoc": {
           "column": 22,
@@ -1130,7 +1130,7 @@
           "line": 590,
           "position": 26574
         },
-        "name": "biof3-server\\agent-tools\\result-edit-tools.js",
+        "name": "petri-server\\agent-tools\\result-edit-tools.js",
         "start": 584,
         "startLoc": {
           "column": 24,
@@ -1148,7 +1148,7 @@
           "line": 423,
           "position": 19263
         },
-        "name": "biof3-server\\agent-tools\\result-selection-tools.js",
+        "name": "petri-server\\agent-tools\\result-selection-tools.js",
         "start": 415,
         "startLoc": {
           "column": 77,
@@ -1168,7 +1168,7 @@
           "line": 645,
           "position": 29667
         },
-        "name": "biof3-server\\agent-tools\\result-selection-tools.js",
+        "name": "petri-server\\agent-tools\\result-selection-tools.js",
         "start": 637,
         "startLoc": {
           "column": 6,
@@ -1186,7 +1186,7 @@
           "line": 390,
           "position": 18915
         },
-        "name": "biof3-server\\agent-tools\\spawn-agent-tools.js",
+        "name": "petri-server\\agent-tools\\spawn-agent-tools.js",
         "start": 385,
         "startLoc": {
           "column": 35,
@@ -1206,7 +1206,7 @@
           "line": 333,
           "position": 18370
         },
-        "name": "biof3-server\\routes\\ai-agent\\chat.js",
+        "name": "petri-server\\routes\\ai-agent\\chat.js",
         "start": 328,
         "startLoc": {
           "column": 88,
@@ -1224,7 +1224,7 @@
           "line": 427,
           "position": 20571
         },
-        "name": "biof3-server\\agent-tools\\spawn-agent-tools.js",
+        "name": "petri-server\\agent-tools\\spawn-agent-tools.js",
         "start": 422,
         "startLoc": {
           "column": 115,
@@ -1244,7 +1244,7 @@
           "line": 464,
           "position": 22449
         },
-        "name": "biof3-server\\agent-tools\\spawn-agent-tools.js",
+        "name": "petri-server\\agent-tools\\spawn-agent-tools.js",
         "start": 459,
         "startLoc": {
           "column": 123,
@@ -1262,7 +1262,7 @@
           "line": 519,
           "position": 25394
         },
-        "name": "biof3-server\\agent-tools\\spawn-agent-tools.js",
+        "name": "petri-server\\agent-tools\\spawn-agent-tools.js",
         "start": 508,
         "startLoc": {
           "column": 54,
@@ -1282,7 +1282,7 @@
           "line": 696,
           "position": 33591
         },
-        "name": "biof3-server\\agent-tools\\spawn-agent-tools.js",
+        "name": "petri-server\\agent-tools\\spawn-agent-tools.js",
         "start": 686,
         "startLoc": {
           "column": 50,
@@ -1300,7 +1300,7 @@
           "line": 524,
           "position": 25665
         },
-        "name": "biof3-server\\agent-tools\\spawn-agent-tools.js",
+        "name": "petri-server\\agent-tools\\spawn-agent-tools.js",
         "start": 519,
         "startLoc": {
           "column": 44,
@@ -1320,7 +1320,7 @@
           "line": 701,
           "position": 33859
         },
-        "name": "biof3-server\\agent-tools\\spawn-agent-tools.js",
+        "name": "petri-server\\agent-tools\\spawn-agent-tools.js",
         "start": 696,
         "startLoc": {
           "column": 41,
@@ -1338,7 +1338,7 @@
           "line": 581,
           "position": 27708
         },
-        "name": "biof3-server\\agent-tools\\spawn-agent-tools.js",
+        "name": "petri-server\\agent-tools\\spawn-agent-tools.js",
         "start": 571,
         "startLoc": {
           "column": 37,
@@ -1358,7 +1358,7 @@
           "line": 732,
           "position": 34990
         },
-        "name": "biof3-server\\agent-tools\\spawn-agent-tools.js",
+        "name": "petri-server\\agent-tools\\spawn-agent-tools.js",
         "start": 722,
         "startLoc": {
           "column": 32,
@@ -1376,7 +1376,7 @@
           "line": 301,
           "position": 9895
         },
-        "name": "biof3-server\\agent-tools\\tool-defs\\result-studio.js",
+        "name": "petri-server\\agent-tools\\tool-defs\\result-studio.js",
         "start": 274,
         "startLoc": {
           "column": 10,
@@ -1396,7 +1396,7 @@
           "line": 449,
           "position": 15610
         },
-        "name": "biof3-server\\agent-tools\\tool-defs\\result-studio.js",
+        "name": "petri-server\\agent-tools\\tool-defs\\result-studio.js",
         "start": 422,
         "startLoc": {
           "column": 10,
@@ -1414,7 +1414,7 @@
           "line": 569,
           "position": 24890
         },
-        "name": "biof3-server\\agent-tools\\tool-events.js",
+        "name": "petri-server\\agent-tools\\tool-events.js",
         "start": 561,
         "startLoc": {
           "column": 67,
@@ -1434,7 +1434,7 @@
           "line": 596,
           "position": 25805
         },
-        "name": "biof3-server\\agent-tools\\tool-events.js",
+        "name": "petri-server\\agent-tools\\tool-events.js",
         "start": 587,
         "startLoc": {
           "column": 57,
@@ -1452,7 +1452,7 @@
           "line": 48,
           "position": 1933
         },
-        "name": "biof3-server\\agent-tools\\workspace-ssh-surface.js",
+        "name": "petri-server\\agent-tools\\workspace-ssh-surface.js",
         "start": 37,
         "startLoc": {
           "column": 61,
@@ -1472,7 +1472,7 @@
           "line": 248,
           "position": 8489
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 237,
         "startLoc": {
           "column": 59,
@@ -1490,7 +1490,7 @@
           "line": 48,
           "position": 1933
         },
-        "name": "biof3-server\\agent-tools\\workspace-ssh-surface.js",
+        "name": "petri-server\\agent-tools\\workspace-ssh-surface.js",
         "start": 40,
         "startLoc": {
           "column": 31,
@@ -1510,7 +1510,7 @@
           "line": 1515,
           "position": 61704
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 1507,
         "startLoc": {
           "column": 31,
@@ -1528,7 +1528,7 @@
           "line": 64,
           "position": 2425
         },
-        "name": "biof3-server\\agent-tools\\workspace-ssh-surface.js",
+        "name": "petri-server\\agent-tools\\workspace-ssh-surface.js",
         "start": 58,
         "startLoc": {
           "column": 71,
@@ -1548,7 +1548,7 @@
           "line": 116,
           "position": 3462
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 110,
         "startLoc": {
           "column": 43,
@@ -1566,7 +1566,7 @@
           "line": 101,
           "position": 4438
         },
-        "name": "biof3-server\\agent-tools\\workspace-ssh-surface.js",
+        "name": "petri-server\\agent-tools\\workspace-ssh-surface.js",
         "start": 95,
         "startLoc": {
           "column": 30,
@@ -1586,7 +1586,7 @@
           "line": 264,
           "position": 12580
         },
-        "name": "biof3-server\\agent-tools\\workspace-ssh-surface.js",
+        "name": "petri-server\\agent-tools\\workspace-ssh-surface.js",
         "start": 258,
         "startLoc": {
           "column": 26,
@@ -1604,7 +1604,7 @@
           "line": 122,
           "position": 5529
         },
-        "name": "biof3-server\\agent-tools\\workspace-ssh-surface.js",
+        "name": "petri-server\\agent-tools\\workspace-ssh-surface.js",
         "start": 115,
         "startLoc": {
           "column": 45,
@@ -1624,7 +1624,7 @@
           "line": 195,
           "position": 6814
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 184,
         "startLoc": {
           "column": 36,
@@ -1642,7 +1642,7 @@
           "line": 137,
           "position": 6187
         },
-        "name": "biof3-server\\agent-tools\\workspace-ssh-surface.js",
+        "name": "petri-server\\agent-tools\\workspace-ssh-surface.js",
         "start": 132,
         "startLoc": {
           "column": 43,
@@ -1662,7 +1662,7 @@
           "line": 218,
           "position": 10403
         },
-        "name": "biof3-server\\agent-tools\\workspace-ssh-surface.js",
+        "name": "petri-server\\agent-tools\\workspace-ssh-surface.js",
         "start": 213,
         "startLoc": {
           "column": 72,
@@ -1680,7 +1680,7 @@
           "line": 158,
           "position": 7208
         },
-        "name": "biof3-server\\agent-tools\\workspace-ssh-surface.js",
+        "name": "petri-server\\agent-tools\\workspace-ssh-surface.js",
         "start": 140,
         "startLoc": {
           "column": 55,
@@ -1700,7 +1700,7 @@
           "line": 362,
           "position": 13299
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 344,
         "startLoc": {
           "column": 55,
@@ -1718,7 +1718,7 @@
           "line": 188,
           "position": 8673
         },
-        "name": "biof3-server\\agent-tools\\workspace-ssh-surface.js",
+        "name": "petri-server\\agent-tools\\workspace-ssh-surface.js",
         "start": 178,
         "startLoc": {
           "column": 52,
@@ -1738,7 +1738,7 @@
           "line": 619,
           "position": 22788
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 609,
         "startLoc": {
           "column": 85,
@@ -1756,7 +1756,7 @@
           "line": 193,
           "position": 8860
         },
-        "name": "biof3-server\\agent-tools\\workspace-ssh-surface.js",
+        "name": "petri-server\\agent-tools\\workspace-ssh-surface.js",
         "start": 186,
         "startLoc": {
           "column": 30,
@@ -1776,7 +1776,7 @@
           "line": 252,
           "position": 12037
         },
-        "name": "biof3-server\\agent-tools\\workspace-ssh-surface.js",
+        "name": "petri-server\\agent-tools\\workspace-ssh-surface.js",
         "start": 245,
         "startLoc": {
           "column": 49,
@@ -1794,7 +1794,7 @@
           "line": 231,
           "position": 11062
         },
-        "name": "biof3-server\\agent-tools\\workspace-ssh-surface.js",
+        "name": "petri-server\\agent-tools\\workspace-ssh-surface.js",
         "start": 221,
         "startLoc": {
           "column": 26,
@@ -1814,7 +1814,7 @@
           "line": 652,
           "position": 24371
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 642,
         "startLoc": {
           "column": 25,
@@ -1832,7 +1832,7 @@
           "line": 357,
           "position": 16993
         },
-        "name": "biof3-server\\agent-tools\\workspace-ssh-surface.js",
+        "name": "petri-server\\agent-tools\\workspace-ssh-surface.js",
         "start": 348,
         "startLoc": {
           "column": 31,
@@ -1852,7 +1852,7 @@
           "line": 432,
           "position": 20361
         },
-        "name": "biof3-server\\agent-tools\\workspace-ssh-surface.js",
+        "name": "petri-server\\agent-tools\\workspace-ssh-surface.js",
         "start": 423,
         "startLoc": {
           "column": 31,
@@ -1870,7 +1870,7 @@
           "line": 354,
           "position": 16814
         },
-        "name": "biof3-server\\agent-tools\\workspace-ssh-surface.js",
+        "name": "petri-server\\agent-tools\\workspace-ssh-surface.js",
         "start": 348,
         "startLoc": {
           "column": 47,
@@ -1890,7 +1890,7 @@
           "line": 859,
           "position": 34027
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 852,
         "startLoc": {
           "column": 68,
@@ -1908,7 +1908,7 @@
           "line": 364,
           "position": 17451
         },
-        "name": "biof3-server\\agent-tools\\workspace-ssh-surface.js",
+        "name": "petri-server\\agent-tools\\workspace-ssh-surface.js",
         "start": 359,
         "startLoc": {
           "column": 24,
@@ -1928,7 +1928,7 @@
           "line": 536,
           "position": 25641
         },
-        "name": "biof3-server\\agent-tools\\workspace-ssh-surface.js",
+        "name": "petri-server\\agent-tools\\workspace-ssh-surface.js",
         "start": 531,
         "startLoc": {
           "column": 78,
@@ -1946,7 +1946,7 @@
           "line": 533,
           "position": 25351
         },
-        "name": "biof3-server\\agent-tools\\workspace-ssh-surface.js",
+        "name": "petri-server\\agent-tools\\workspace-ssh-surface.js",
         "start": 518,
         "startLoc": {
           "column": 6,
@@ -1966,7 +1966,7 @@
           "line": 811,
           "position": 32052
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 793,
         "startLoc": {
           "column": 6,
@@ -1984,7 +1984,7 @@
           "line": 631,
           "position": 30575
         },
-        "name": "biof3-server\\agent-tools\\workspace-ssh-surface.js",
+        "name": "petri-server\\agent-tools\\workspace-ssh-surface.js",
         "start": 626,
         "startLoc": {
           "column": 43,
@@ -2004,7 +2004,7 @@
           "line": 1420,
           "position": 57248
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 1416,
         "startLoc": {
           "column": 71,
@@ -2022,7 +2022,7 @@
           "line": 605,
           "position": 22118
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 598,
         "startLoc": {
           "column": 95,
@@ -2042,7 +2042,7 @@
           "line": 638,
           "position": 23566
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 631,
         "startLoc": {
           "column": 94,
@@ -2060,7 +2060,7 @@
           "line": 817,
           "position": 32443
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 810,
         "startLoc": {
           "column": 99,
@@ -2080,7 +2080,7 @@
           "line": 884,
           "position": 35345
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 877,
         "startLoc": {
           "column": 12,
@@ -2098,7 +2098,7 @@
           "line": 896,
           "position": 35813
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 871,
         "startLoc": {
           "column": 4,
@@ -2118,7 +2118,7 @@
           "line": 968,
           "position": 38951
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 943,
         "startLoc": {
           "column": 4,
@@ -2136,7 +2136,7 @@
           "line": 896,
           "position": 35813
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 874,
         "startLoc": {
           "column": 6,
@@ -2156,7 +2156,7 @@
           "line": 1186,
           "position": 47920
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 1163,
         "startLoc": {
           "column": 6,
@@ -2174,7 +2174,7 @@
           "line": 978,
           "position": 39437
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 968,
         "startLoc": {
           "column": 6,
@@ -2194,7 +2194,7 @@
           "line": 1162,
           "position": 46879
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 1152,
         "startLoc": {
           "column": 6,
@@ -2212,7 +2212,7 @@
           "line": 990,
           "position": 39999
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 980,
         "startLoc": {
           "column": 6,
@@ -2232,7 +2232,7 @@
           "line": 1197,
           "position": 48563
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 1186,
         "startLoc": {
           "column": 6,
@@ -2250,7 +2250,7 @@
           "line": 1083,
           "position": 43555
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 1073,
         "startLoc": {
           "column": 6,
@@ -2270,7 +2270,7 @@
           "line": 1216,
           "position": 49159
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 1206,
         "startLoc": {
           "column": 6,
@@ -2288,7 +2288,7 @@
           "line": 1100,
           "position": 44072
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 1088,
         "startLoc": {
           "column": 17,
@@ -2308,7 +2308,7 @@
           "line": 1231,
           "position": 49647
         },
-        "name": "biof3-server\\agent-tools\\workspace-tools.js",
+        "name": "petri-server\\agent-tools\\workspace-tools.js",
         "start": 1219,
         "startLoc": {
           "column": 29,
@@ -2326,7 +2326,7 @@
           "line": 463,
           "position": 13244
         },
-        "name": "biof3-server\\cache-manager.js",
+        "name": "petri-server\\cache-manager.js",
         "start": 452,
         "startLoc": {
           "column": 41,
@@ -2346,7 +2346,7 @@
           "line": 478,
           "position": 13677
         },
-        "name": "biof3-server\\cache-manager.js",
+        "name": "petri-server\\cache-manager.js",
         "start": 467,
         "startLoc": {
           "column": 50,
@@ -2364,7 +2364,7 @@
           "line": 948,
           "position": 35922
         },
-        "name": "biof3-server\\db.js",
+        "name": "petri-server\\db.js",
         "start": 933,
         "startLoc": {
           "column": 9,
@@ -2384,7 +2384,7 @@
           "line": 972,
           "position": 36691
         },
-        "name": "biof3-server\\db.js",
+        "name": "petri-server\\db.js",
         "start": 957,
         "startLoc": {
           "column": 41,
@@ -2402,7 +2402,7 @@
           "line": 1090,
           "position": 40445
         },
-        "name": "biof3-server\\db.js",
+        "name": "petri-server\\db.js",
         "start": 1080,
         "startLoc": {
           "column": 9,
@@ -2422,7 +2422,7 @@
           "line": 1108,
           "position": 40975
         },
-        "name": "biof3-server\\db.js",
+        "name": "petri-server\\db.js",
         "start": 1098,
         "startLoc": {
           "column": 41,
@@ -2440,7 +2440,7 @@
           "line": 38,
           "position": 1108
         },
-        "name": "biof3-server\\helpers\\admin-gov.js",
+        "name": "petri-server\\helpers\\admin-gov.js",
         "start": 32,
         "startLoc": {
           "column": 18,
@@ -2460,7 +2460,7 @@
           "line": 50,
           "position": 1565
         },
-        "name": "biof3-server\\helpers\\admin-gov.js",
+        "name": "petri-server\\helpers\\admin-gov.js",
         "start": 42,
         "startLoc": {
           "column": 28,
@@ -2478,7 +2478,7 @@
           "line": 57,
           "position": 2045
         },
-        "name": "biof3-server\\helpers\\admin-gov.js",
+        "name": "petri-server\\helpers\\admin-gov.js",
         "start": 52,
         "startLoc": {
           "column": 4,
@@ -2498,7 +2498,7 @@
           "line": 67,
           "position": 2606
         },
-        "name": "biof3-server\\helpers\\admin-gov.js",
+        "name": "petri-server\\helpers\\admin-gov.js",
         "start": 62,
         "startLoc": {
           "column": 14,
@@ -2516,7 +2516,7 @@
           "line": 201,
           "position": 8945
         },
-        "name": "biof3-server\\helpers\\agent-fallback.js",
+        "name": "petri-server\\helpers\\agent-fallback.js",
         "start": 196,
         "startLoc": {
           "column": 35,
@@ -2536,7 +2536,7 @@
           "line": 258,
           "position": 11333
         },
-        "name": "biof3-server\\routes\\ai-agent\\resume.js",
+        "name": "petri-server\\routes\\ai-agent\\resume.js",
         "start": 253,
         "startLoc": {
           "column": 31,
@@ -2554,7 +2554,7 @@
           "line": 137,
           "position": 4312
         },
-        "name": "biof3-server\\helpers\\artifact-truth.js",
+        "name": "petri-server\\helpers\\artifact-truth.js",
         "start": 130,
         "startLoc": {
           "column": 42,
@@ -2574,7 +2574,7 @@
           "line": 23,
           "position": 945
         },
-        "name": "biof3-server\\mcp\\registry\\artifact-normalize.js",
+        "name": "petri-server\\mcp\\registry\\artifact-normalize.js",
         "start": 16,
         "startLoc": {
           "column": 38,
@@ -2592,7 +2592,7 @@
           "line": 318,
           "position": 15613
         },
-        "name": "biof3-server\\helpers\\decision-api.js",
+        "name": "petri-server\\helpers\\decision-api.js",
         "start": 313,
         "startLoc": {
           "column": 10,
@@ -2612,7 +2612,7 @@
           "line": 358,
           "position": 17417
         },
-        "name": "biof3-server\\helpers\\decision-api.js",
+        "name": "petri-server\\helpers\\decision-api.js",
         "start": 353,
         "startLoc": {
           "column": 4,
@@ -2630,7 +2630,7 @@
           "line": 94,
           "position": 2893
         },
-        "name": "biof3-server\\helpers\\docs-index.js",
+        "name": "petri-server\\helpers\\docs-index.js",
         "start": 78,
         "startLoc": {
           "column": 12,
@@ -2668,7 +2668,7 @@
           "line": 60,
           "position": 1473
         },
-        "name": "biof3-server\\helpers\\guest-permissions.js",
+        "name": "petri-server\\helpers\\guest-permissions.js",
         "start": 53,
         "startLoc": {
           "column": 2,
@@ -2688,7 +2688,7 @@
           "line": 99,
           "position": 2422
         },
-        "name": "biof3-server\\helpers\\guest-permissions.js",
+        "name": "petri-server\\helpers\\guest-permissions.js",
         "start": 92,
         "startLoc": {
           "column": 2,
@@ -2706,7 +2706,7 @@
           "line": 58,
           "position": 2187
         },
-        "name": "biof3-server\\helpers\\knowledge-ingest.js",
+        "name": "petri-server\\helpers\\knowledge-ingest.js",
         "start": 51,
         "startLoc": {
           "column": 24,
@@ -2726,7 +2726,7 @@
           "line": 136,
           "position": 4628
         },
-        "name": "biof3-server\\routes\\files.js",
+        "name": "petri-server\\routes\\files.js",
         "start": 129,
         "startLoc": {
           "column": 29,
@@ -2744,7 +2744,7 @@
           "line": 147,
           "position": 5690
         },
-        "name": "biof3-server\\helpers\\knowledge-parsers.js",
+        "name": "petri-server\\helpers\\knowledge-parsers.js",
         "start": 140,
         "startLoc": {
           "column": 37,
@@ -2764,7 +2764,7 @@
           "line": 170,
           "position": 6641
         },
-        "name": "biof3-server\\helpers\\knowledge-parsers.js",
+        "name": "petri-server\\helpers\\knowledge-parsers.js",
         "start": 163,
         "startLoc": {
           "column": 24,
@@ -2782,7 +2782,7 @@
           "line": 627,
           "position": 23864
         },
-        "name": "biof3-server\\helpers\\knowledge-space.js",
+        "name": "petri-server\\helpers\\knowledge-space.js",
         "start": 621,
         "startLoc": {
           "column": 2,
@@ -2802,7 +2802,7 @@
           "line": 745,
           "position": 28002
         },
-        "name": "biof3-server\\helpers\\knowledge-space.js",
+        "name": "petri-server\\helpers\\knowledge-space.js",
         "start": 739,
         "startLoc": {
           "column": 2,
@@ -2820,7 +2820,7 @@
           "line": 637,
           "position": 24108
         },
-        "name": "biof3-server\\helpers\\knowledge-space.js",
+        "name": "petri-server\\helpers\\knowledge-space.js",
         "start": 627,
         "startLoc": {
           "column": 71,
@@ -2840,7 +2840,7 @@
           "line": 756,
           "position": 28324
         },
-        "name": "biof3-server\\helpers\\knowledge-space.js",
+        "name": "petri-server\\helpers\\knowledge-space.js",
         "start": 746,
         "startLoc": {
           "column": 62,
@@ -2858,7 +2858,7 @@
           "line": 159,
           "position": 4994
         },
-        "name": "biof3-server\\helpers\\message-trimmer.js",
+        "name": "petri-server\\helpers\\message-trimmer.js",
         "start": 143,
         "startLoc": {
           "column": 29,
@@ -2878,7 +2878,7 @@
           "line": 179,
           "position": 5560
         },
-        "name": "biof3-server\\helpers\\message-trimmer.js",
+        "name": "petri-server\\helpers\\message-trimmer.js",
         "start": 163,
         "startLoc": {
           "column": 33,
@@ -2896,7 +2896,7 @@
           "line": 694,
           "position": 27629
         },
-        "name": "biof3-server\\helpers\\methods-export.js",
+        "name": "petri-server\\helpers\\methods-export.js",
         "start": 683,
         "startLoc": {
           "column": 62,
@@ -2905,7 +2905,7 @@
         }
       },
       "format": "javascript",
-      "fragment": "      '# BioF3 reproducible analysis script (Python / scanpy)',\n      '# ============================================================',\n      '# Analysis : ' + (analysis.name || analysis.type),\n      '# Type     : ' + analysis.type + ' — ' + tools,\n      '# Dataset  : ' + ((dataset && dataset.name) || '?'),\n      '# Cells x Genes : ' +\n        (dataset && dataset.n_cells != null ? dataset.n_cells : '?') +\n        ' x ' +\n        (dataset && dataset.n_genes != null ? dataset.n_genes : '?'),\n      '# Params   : ' + JSON.stringify(analysis.params || {}),\n      '# Generated: ' + generatedAt + ' by ' + (username || 'BioF3'),\n      '#',",
+      "fragment": "      '# Petri reproducible analysis script (Python / scanpy)',\n      '# ============================================================',\n      '# Analysis : ' + (analysis.name || analysis.type),\n      '# Type     : ' + analysis.type + ' — ' + tools,\n      '# Dataset  : ' + ((dataset && dataset.name) || '?'),\n      '# Cells x Genes : ' +\n        (dataset && dataset.n_cells != null ? dataset.n_cells : '?') +\n        ' x ' +\n        (dataset && dataset.n_genes != null ? dataset.n_genes : '?'),\n      '# Params   : ' + JSON.stringify(analysis.params || {}),\n      '# Generated: ' + generatedAt + ' by ' + (username || 'Petri'),\n      '#',",
       "isNew": false,
       "kind": "exact",
       "lines": 12,
@@ -2916,7 +2916,7 @@
           "line": 714,
           "position": 28584
         },
-        "name": "biof3-server\\helpers\\methods-export.js",
+        "name": "petri-server\\helpers\\methods-export.js",
         "start": 703,
         "startLoc": {
           "column": 55,
@@ -2934,7 +2934,7 @@
           "line": 47,
           "position": 1777
         },
-        "name": "biof3-server\\helpers\\plans.js",
+        "name": "petri-server\\helpers\\plans.js",
         "start": 39,
         "startLoc": {
           "column": 39,
@@ -2954,7 +2954,7 @@
           "line": 237,
           "position": 8680
         },
-        "name": "biof3-server\\helpers\\plans.js",
+        "name": "petri-server\\helpers\\plans.js",
         "start": 229,
         "startLoc": {
           "column": 50,
@@ -2972,7 +2972,7 @@
           "line": 59,
           "position": 2197
         },
-        "name": "biof3-server\\helpers\\plans.js",
+        "name": "petri-server\\helpers\\plans.js",
         "start": 50,
         "startLoc": {
           "column": 6,
@@ -2992,7 +2992,7 @@
           "line": 249,
           "position": 9112
         },
-        "name": "biof3-server\\helpers\\plans.js",
+        "name": "petri-server\\helpers\\plans.js",
         "start": 240,
         "startLoc": {
           "column": 6,
@@ -3010,7 +3010,7 @@
           "line": 85,
           "position": 3205
         },
-        "name": "biof3-server\\helpers\\plans.js",
+        "name": "petri-server\\helpers\\plans.js",
         "start": 51,
         "startLoc": {
           "column": 21,
@@ -3030,7 +3030,7 @@
           "line": 137,
           "position": 5274
         },
-        "name": "biof3-server\\helpers\\plans.js",
+        "name": "petri-server\\helpers\\plans.js",
         "start": 103,
         "startLoc": {
           "column": 20,
@@ -3048,7 +3048,7 @@
           "line": 99,
           "position": 3847
         },
-        "name": "biof3-server\\helpers\\plans.js",
+        "name": "petri-server\\helpers\\plans.js",
         "start": 92,
         "startLoc": {
           "column": 38,
@@ -3068,7 +3068,7 @@
           "line": 285,
           "position": 10561
         },
-        "name": "biof3-server\\helpers\\plans.js",
+        "name": "petri-server\\helpers\\plans.js",
         "start": 278,
         "startLoc": {
           "column": 49,
@@ -3086,7 +3086,7 @@
           "line": 111,
           "position": 4266
         },
-        "name": "biof3-server\\helpers\\plans.js",
+        "name": "petri-server\\helpers\\plans.js",
         "start": 102,
         "startLoc": {
           "column": 6,
@@ -3106,7 +3106,7 @@
           "line": 297,
           "position": 10992
         },
-        "name": "biof3-server\\helpers\\plans.js",
+        "name": "petri-server\\helpers\\plans.js",
         "start": 288,
         "startLoc": {
           "column": 6,
@@ -3124,7 +3124,7 @@
           "line": 275,
           "position": 10135
         },
-        "name": "biof3-server\\helpers\\plans.js",
+        "name": "petri-server\\helpers\\plans.js",
         "start": 241,
         "startLoc": {
           "column": 21,
@@ -3144,7 +3144,7 @@
           "line": 323,
           "position": 12015
         },
-        "name": "biof3-server\\helpers\\plans.js",
+        "name": "petri-server\\helpers\\plans.js",
         "start": 289,
         "startLoc": {
           "column": 20,
@@ -3162,7 +3162,7 @@
           "line": 68,
           "position": 2410
         },
-        "name": "biof3-server\\helpers\\project-storage.js",
+        "name": "petri-server\\helpers\\project-storage.js",
         "start": 61,
         "startLoc": {
           "column": 27,
@@ -3182,7 +3182,7 @@
           "line": 83,
           "position": 3339
         },
-        "name": "biof3-server\\helpers\\remote-resource-snapshot.js",
+        "name": "petri-server\\helpers\\remote-resource-snapshot.js",
         "start": 75,
         "startLoc": {
           "column": 34,
@@ -3200,7 +3200,7 @@
           "line": 22,
           "position": 697
         },
-        "name": "biof3-server\\helpers\\site-snapshot.js",
+        "name": "petri-server\\helpers\\site-snapshot.js",
         "start": 14,
         "startLoc": {
           "column": 37,
@@ -3220,7 +3220,7 @@
           "line": 191,
           "position": 6383
         },
-        "name": "biof3-server\\helpers\\site-snapshot.js",
+        "name": "petri-server\\helpers\\site-snapshot.js",
         "start": 183,
         "startLoc": {
           "column": 26,
@@ -3238,7 +3238,7 @@
           "line": 49,
           "position": 1877
         },
-        "name": "biof3-server\\helpers\\site-snapshot.js",
+        "name": "petri-server\\helpers\\site-snapshot.js",
         "start": 34,
         "startLoc": {
           "column": 17,
@@ -3258,7 +3258,7 @@
           "line": 218,
           "position": 7555
         },
-        "name": "biof3-server\\helpers\\site-snapshot.js",
+        "name": "petri-server\\helpers\\site-snapshot.js",
         "start": 203,
         "startLoc": {
           "column": 14,
@@ -3276,7 +3276,7 @@
           "line": 61,
           "position": 2309
         },
-        "name": "biof3-server\\helpers\\site-snapshot.js",
+        "name": "petri-server\\helpers\\site-snapshot.js",
         "start": 49,
         "startLoc": {
           "column": 30,
@@ -3296,7 +3296,7 @@
           "line": 230,
           "position": 7984
         },
-        "name": "biof3-server\\helpers\\site-snapshot.js",
+        "name": "petri-server\\helpers\\site-snapshot.js",
         "start": 218,
         "startLoc": {
           "column": 27,
@@ -3314,7 +3314,7 @@
           "line": 123,
           "position": 4131
         },
-        "name": "biof3-server\\helpers\\site-snapshot.js",
+        "name": "petri-server\\helpers\\site-snapshot.js",
         "start": 61,
         "startLoc": {
           "column": 26,
@@ -3334,7 +3334,7 @@
           "line": 292,
           "position": 9803
         },
-        "name": "biof3-server\\helpers\\site-snapshot.js",
+        "name": "petri-server\\helpers\\site-snapshot.js",
         "start": 230,
         "startLoc": {
           "column": 23,
@@ -3352,7 +3352,7 @@
           "line": 111,
           "position": 4435
         },
-        "name": "biof3-server\\helpers\\tools-assets.js",
+        "name": "petri-server\\helpers\\tools-assets.js",
         "start": 95,
         "startLoc": {
           "column": 89,
@@ -3372,7 +3372,7 @@
           "line": 196,
           "position": 8118
         },
-        "name": "biof3-server\\helpers\\tools-assets.js",
+        "name": "petri-server\\helpers\\tools-assets.js",
         "start": 180,
         "startLoc": {
           "column": 67,
@@ -3390,7 +3390,7 @@
           "line": 153,
           "position": 6281
         },
-        "name": "biof3-server\\helpers\\tools-assets.js",
+        "name": "petri-server\\helpers\\tools-assets.js",
         "start": 138,
         "startLoc": {
           "column": 52,
@@ -3410,7 +3410,7 @@
           "line": 171,
           "position": 7041
         },
-        "name": "biof3-server\\helpers\\tools-assets.js",
+        "name": "petri-server\\helpers\\tools-assets.js",
         "start": 156,
         "startLoc": {
           "column": 55,
@@ -3428,7 +3428,7 @@
           "line": 1148,
           "position": 45863
         },
-        "name": "biof3-server\\helpers\\tools-executor.js",
+        "name": "petri-server\\helpers\\tools-executor.js",
         "start": 1138,
         "startLoc": {
           "column": 41,
@@ -3448,7 +3448,7 @@
           "line": 1160,
           "position": 46357
         },
-        "name": "biof3-server\\helpers\\tools-executor.js",
+        "name": "petri-server\\helpers\\tools-executor.js",
         "start": 1150,
         "startLoc": {
           "column": 37,
@@ -3466,7 +3466,7 @@
           "line": 65,
           "position": 2359
         },
-        "name": "biof3-server\\helpers\\tools-executor\\tool-result-misc.js",
+        "name": "petri-server\\helpers\\tools-executor\\tool-result-misc.js",
         "start": 56,
         "startLoc": {
           "column": 7,
@@ -3486,7 +3486,7 @@
           "line": 90,
           "position": 3045
         },
-        "name": "biof3-server\\helpers\\tools-executor\\tool-result-misc.js",
+        "name": "petri-server\\helpers\\tools-executor\\tool-result-misc.js",
         "start": 81,
         "startLoc": {
           "column": 17,
@@ -3504,7 +3504,7 @@
           "line": 154,
           "position": 5385
         },
-        "name": "biof3-server\\helpers\\user-facts.js",
+        "name": "petri-server\\helpers\\user-facts.js",
         "start": 144,
         "startLoc": {
           "column": 23,
@@ -3524,7 +3524,7 @@
           "line": 210,
           "position": 7115
         },
-        "name": "biof3-server\\helpers\\user-facts.js",
+        "name": "petri-server\\helpers\\user-facts.js",
         "start": 200,
         "startLoc": {
           "column": 22,
@@ -3542,7 +3542,7 @@
           "line": 181,
           "position": 6116
         },
-        "name": "biof3-server\\helpers\\user-facts.js",
+        "name": "petri-server\\helpers\\user-facts.js",
         "start": 155,
         "startLoc": {
           "column": 12,
@@ -3562,7 +3562,7 @@
           "line": 236,
           "position": 7824
         },
-        "name": "biof3-server\\helpers\\user-facts.js",
+        "name": "petri-server\\helpers\\user-facts.js",
         "start": 210,
         "startLoc": {
           "column": 35,
@@ -3580,7 +3580,7 @@
           "line": 845,
           "position": 34746
         },
-        "name": "biof3-server\\loop-orchestrator.js",
+        "name": "petri-server\\loop-orchestrator.js",
         "start": 840,
         "startLoc": {
           "column": 45,
@@ -3600,7 +3600,7 @@
           "line": 923,
           "position": 38864
         },
-        "name": "biof3-server\\loop-orchestrator.js",
+        "name": "petri-server\\loop-orchestrator.js",
         "start": 918,
         "startLoc": {
           "column": 60,
@@ -3618,7 +3618,7 @@
           "line": 1115,
           "position": 46719
         },
-        "name": "biof3-server\\loop-orchestrator.js",
+        "name": "petri-server\\loop-orchestrator.js",
         "start": 1107,
         "startLoc": {
           "column": 8,
@@ -3638,7 +3638,7 @@
           "line": 1179,
           "position": 50026
         },
-        "name": "biof3-server\\loop-orchestrator.js",
+        "name": "petri-server\\loop-orchestrator.js",
         "start": 1171,
         "startLoc": {
           "column": 8,
@@ -3656,7 +3656,7 @@
           "line": 33,
           "position": 1025
         },
-        "name": "biof3-server\\mcp\\ide-tools\\diff-helpers.js",
+        "name": "petri-server\\mcp\\ide-tools\\diff-helpers.js",
         "start": 23,
         "startLoc": {
           "column": 0,
@@ -3676,7 +3676,7 @@
           "line": 223,
           "position": 7071
         },
-        "name": "biof3-server\\mcp\\ide-tools\\diff.js",
+        "name": "petri-server\\mcp\\ide-tools\\diff.js",
         "start": 213,
         "startLoc": {
           "column": 0,
@@ -3694,7 +3694,7 @@
           "line": 291,
           "position": 9487
         },
-        "name": "biof3-server\\mcp\\ide-tools\\diff.js",
+        "name": "petri-server\\mcp\\ide-tools\\diff.js",
         "start": 276,
         "startLoc": {
           "column": 2,
@@ -3714,7 +3714,7 @@
           "line": 191,
           "position": 6677
         },
-        "name": "biof3-server\\mcp\\ide-tools\\git-diff.js",
+        "name": "petri-server\\mcp\\ide-tools\\git-diff.js",
         "start": 177,
         "startLoc": {
           "column": 2,
@@ -3732,7 +3732,7 @@
           "line": 127,
           "position": 4741
         },
-        "name": "biof3-server\\mcp\\ide-tools\\file.js",
+        "name": "petri-server\\mcp\\ide-tools\\file.js",
         "start": 121,
         "startLoc": {
           "column": 2,
@@ -3752,7 +3752,7 @@
           "line": 190,
           "position": 7111
         },
-        "name": "biof3-server\\mcp\\ide-tools\\file.js",
+        "name": "petri-server\\mcp\\ide-tools\\file.js",
         "start": 184,
         "startLoc": {
           "column": 2,
@@ -3770,7 +3770,7 @@
           "line": 85,
           "position": 2821
         },
-        "name": "biof3-server\\mcp\\ide-tools\\git-blame.js",
+        "name": "petri-server\\mcp\\ide-tools\\git-blame.js",
         "start": 78,
         "startLoc": {
           "column": 50,
@@ -3790,7 +3790,7 @@
           "line": 73,
           "position": 2788
         },
-        "name": "biof3-server\\mcp\\ide-tools\\git-diff.js",
+        "name": "petri-server\\mcp\\ide-tools\\git-diff.js",
         "start": 65,
         "startLoc": {
           "column": 50,
@@ -3808,7 +3808,7 @@
           "line": 85,
           "position": 2821
         },
-        "name": "biof3-server\\mcp\\ide-tools\\git-blame.js",
+        "name": "petri-server\\mcp\\ide-tools\\git-blame.js",
         "start": 78,
         "startLoc": {
           "column": 50,
@@ -3828,7 +3828,7 @@
           "line": 67,
           "position": 2509
         },
-        "name": "biof3-server\\mcp\\ide-tools\\git-show.js",
+        "name": "petri-server\\mcp\\ide-tools\\git-show.js",
         "start": 60,
         "startLoc": {
           "column": 52,
@@ -3846,7 +3846,7 @@
           "line": 189,
           "position": 6185
         },
-        "name": "biof3-server\\mcp\\ide-tools\\git-blame.js",
+        "name": "petri-server\\mcp\\ide-tools\\git-blame.js",
         "start": 173,
         "startLoc": {
           "column": 23,
@@ -3866,7 +3866,7 @@
           "line": 138,
           "position": 4778
         },
-        "name": "biof3-server\\mcp\\ide-tools\\git-diff.js",
+        "name": "petri-server\\mcp\\ide-tools\\git-diff.js",
         "start": 118,
         "startLoc": {
           "column": 29,
@@ -3884,7 +3884,7 @@
           "line": 193,
           "position": 6220
         },
-        "name": "biof3-server\\mcp\\ide-tools\\git-blame.js",
+        "name": "petri-server\\mcp\\ide-tools\\git-blame.js",
         "start": 173,
         "startLoc": {
           "column": 16,
@@ -3904,7 +3904,7 @@
           "line": 160,
           "position": 5378
         },
-        "name": "biof3-server\\mcp\\ide-tools\\git-log.js",
+        "name": "petri-server\\mcp\\ide-tools\\git-log.js",
         "start": 134,
         "startLoc": {
           "column": 18,
@@ -3922,7 +3922,7 @@
           "line": 193,
           "position": 6220
         },
-        "name": "biof3-server\\mcp\\ide-tools\\git-blame.js",
+        "name": "petri-server\\mcp\\ide-tools\\git-blame.js",
         "start": 184,
         "startLoc": {
           "column": 48,
@@ -3942,7 +3942,7 @@
           "line": 143,
           "position": 4816
         },
-        "name": "biof3-server\\mcp\\ide-tools\\git-show.js",
+        "name": "petri-server\\mcp\\ide-tools\\git-show.js",
         "start": 130,
         "startLoc": {
           "column": 48,
@@ -3960,7 +3960,7 @@
           "line": 76,
           "position": 2818
         },
-        "name": "biof3-server\\mcp\\ide-tools\\git-diff.js",
+        "name": "petri-server\\mcp\\ide-tools\\git-diff.js",
         "start": 63,
         "startLoc": {
           "column": 61,
@@ -3980,7 +3980,7 @@
           "line": 71,
           "position": 2406
         },
-        "name": "biof3-server\\mcp\\ide-tools\\git-log.js",
+        "name": "petri-server\\mcp\\ide-tools\\git-log.js",
         "start": 59,
         "startLoc": {
           "column": 52,
@@ -3998,7 +3998,7 @@
           "line": 76,
           "position": 2818
         },
-        "name": "biof3-server\\mcp\\ide-tools\\git-diff.js",
+        "name": "petri-server\\mcp\\ide-tools\\git-diff.js",
         "start": 67,
         "startLoc": {
           "column": 37,
@@ -4018,7 +4018,7 @@
           "line": 70,
           "position": 2595
         },
-        "name": "biof3-server\\mcp\\ide-tools\\git-show.js",
+        "name": "petri-server\\mcp\\ide-tools\\git-show.js",
         "start": 62,
         "startLoc": {
           "column": 37,
@@ -4036,7 +4036,7 @@
           "line": 138,
           "position": 4778
         },
-        "name": "biof3-server\\mcp\\ide-tools\\git-diff.js",
+        "name": "petri-server\\mcp\\ide-tools\\git-diff.js",
         "start": 116,
         "startLoc": {
           "column": 12,
@@ -4056,7 +4056,7 @@
           "line": 135,
           "position": 4597
         },
-        "name": "biof3-server\\mcp\\ide-tools\\git-show.js",
+        "name": "petri-server\\mcp\\ide-tools\\git-show.js",
         "start": 117,
         "startLoc": {
           "column": 5,
@@ -4074,7 +4074,7 @@
           "line": 209,
           "position": 7044
         },
-        "name": "biof3-server\\mcp\\ide-tools\\git-diff.js",
+        "name": "petri-server\\mcp\\ide-tools\\git-diff.js",
         "start": 163,
         "startLoc": {
           "column": 3,
@@ -4094,7 +4094,7 @@
           "line": 272,
           "position": 8902
         },
-        "name": "biof3-server\\mcp\\ide-tools\\git-show.js",
+        "name": "petri-server\\mcp\\ide-tools\\git-show.js",
         "start": 230,
         "startLoc": {
           "column": 52,
@@ -4112,7 +4112,7 @@
           "line": 210,
           "position": 7059
         },
-        "name": "biof3-server\\mcp\\ide-tools\\git-diff.js",
+        "name": "petri-server\\mcp\\ide-tools\\git-diff.js",
         "start": 186,
         "startLoc": {
           "column": 15,
@@ -4132,7 +4132,7 @@
           "line": 273,
           "position": 8917
         },
-        "name": "biof3-server\\mcp\\ide-tools\\git-show.js",
+        "name": "petri-server\\mcp\\ide-tools\\git-show.js",
         "start": 249,
         "startLoc": {
           "column": 15,
@@ -4150,7 +4150,7 @@
           "line": 144,
           "position": 5235
         },
-        "name": "biof3-server\\mcp\\registry.js",
+        "name": "petri-server\\mcp\\registry.js",
         "start": 135,
         "startLoc": {
           "column": 29,
@@ -4170,7 +4170,7 @@
           "line": 216,
           "position": 7171
         },
-        "name": "biof3-server\\mcp\\registry.js",
+        "name": "petri-server\\mcp\\registry.js",
         "start": 207,
         "startLoc": {
           "column": 24,
@@ -4188,7 +4188,7 @@
           "line": 223,
           "position": 7384
         },
-        "name": "biof3-server\\mcp\\registry.js",
+        "name": "petri-server\\mcp\\registry.js",
         "start": 211,
         "startLoc": {
           "column": 92,
@@ -4208,7 +4208,7 @@
           "line": 259,
           "position": 8309
         },
-        "name": "biof3-server\\mcp\\registry.js",
+        "name": "petri-server\\mcp\\registry.js",
         "start": 247,
         "startLoc": {
           "column": 92,
@@ -4226,7 +4226,7 @@
           "line": 394,
           "position": 13797
         },
-        "name": "biof3-server\\mcp\\registry.js",
+        "name": "petri-server\\mcp\\registry.js",
         "start": 389,
         "startLoc": {
           "column": 40,
@@ -4235,7 +4235,7 @@
         }
       },
       "format": "javascript",
-      "fragment": "    { type: 'builtin', root: builtInDir },\n    { type: 'installed', root:\n      process.env.BIOF3_PLUGINS_DIR ||\n      path.join(os.homedir(), 'Documents', 'BioF3-Local', 'plugins') },\n    ...developmentDirs.map((root) => ({ type: 'development', root })),\n    ...packSources,",
+      "fragment": "    { type: 'builtin', root: builtInDir },\n    { type: 'installed', root:\n      process.env.PETRI_PLUGINS_DIR ||\n      path.join(os.homedir(), 'Documents', 'Petri-Local', 'plugins') },\n    ...developmentDirs.map((root) => ({ type: 'development', root })),\n    ...packSources,",
       "isNew": false,
       "kind": "exact",
       "lines": 6,
@@ -4246,7 +4246,7 @@
           "line": 98,
           "position": 4695
         },
-        "name": "biof3-server\\server.js",
+        "name": "petri-server\\server.js",
         "start": 93,
         "startLoc": {
           "column": 75,
@@ -4264,7 +4264,7 @@
           "line": 185,
           "position": 8500
         },
-        "name": "biof3-server\\mcp\\registry\\run-plugin-script.js",
+        "name": "petri-server\\mcp\\registry\\run-plugin-script.js",
         "start": 170,
         "startLoc": {
           "column": 87,
@@ -4284,7 +4284,7 @@
           "line": 209,
           "position": 9190
         },
-        "name": "biof3-server\\mcp\\registry\\run-plugin-script.js",
+        "name": "petri-server\\mcp\\registry\\run-plugin-script.js",
         "start": 194,
         "startLoc": {
           "column": 78,
@@ -4302,7 +4302,7 @@
           "line": 76,
           "position": 3547
         },
-        "name": "biof3-server\\mobile-gateway\\control.js",
+        "name": "petri-server\\mobile-gateway\\control.js",
         "start": 67,
         "startLoc": {
           "column": 12,
@@ -4322,7 +4322,7 @@
           "line": 115,
           "position": 4939
         },
-        "name": "biof3-server\\routes\\ai-legacy.js",
+        "name": "petri-server\\routes\\ai-legacy.js",
         "start": 105,
         "startLoc": {
           "column": 86,
@@ -4340,7 +4340,7 @@
           "line": 304,
           "position": 14322
         },
-        "name": "biof3-server\\mobile-gateway\\index.js",
+        "name": "petri-server\\mobile-gateway\\index.js",
         "start": 299,
         "startLoc": {
           "column": 69,
@@ -4360,7 +4360,7 @@
           "line": 318,
           "position": 14798
         },
-        "name": "biof3-server\\mobile-gateway\\index.js",
+        "name": "petri-server\\mobile-gateway\\index.js",
         "start": 313,
         "startLoc": {
           "column": 69,
@@ -4378,7 +4378,7 @@
           "line": 304,
           "position": 14322
         },
-        "name": "biof3-server\\mobile-gateway\\index.js",
+        "name": "petri-server\\mobile-gateway\\index.js",
         "start": 299,
         "startLoc": {
           "column": 71,
@@ -4398,7 +4398,7 @@
           "line": 327,
           "position": 15111
         },
-        "name": "biof3-server\\mobile-gateway\\index.js",
+        "name": "petri-server\\mobile-gateway\\index.js",
         "start": 322,
         "startLoc": {
           "column": 37,
@@ -4416,7 +4416,7 @@
           "line": 304,
           "position": 14322
         },
-        "name": "biof3-server\\mobile-gateway\\index.js",
+        "name": "petri-server\\mobile-gateway\\index.js",
         "start": 299,
         "startLoc": {
           "column": 71,
@@ -4436,7 +4436,7 @@
           "line": 337,
           "position": 15494
         },
-        "name": "biof3-server\\mobile-gateway\\index.js",
+        "name": "petri-server\\mobile-gateway\\index.js",
         "start": 332,
         "startLoc": {
           "column": 38,
@@ -4454,7 +4454,7 @@
           "line": 319,
           "position": 14827
         },
-        "name": "biof3-server\\mobile-gateway\\index.js",
+        "name": "petri-server\\mobile-gateway\\index.js",
         "start": 313,
         "startLoc": {
           "column": 74,
@@ -4474,7 +4474,7 @@
           "line": 328,
           "position": 15140
         },
-        "name": "biof3-server\\mobile-gateway\\index.js",
+        "name": "petri-server\\mobile-gateway\\index.js",
         "start": 322,
         "startLoc": {
           "column": 40,
@@ -4492,7 +4492,7 @@
           "line": 319,
           "position": 14807
         },
-        "name": "biof3-server\\mobile-gateway\\index.js",
+        "name": "petri-server\\mobile-gateway\\index.js",
         "start": 313,
         "startLoc": {
           "column": 74,
@@ -4512,7 +4512,7 @@
           "line": 338,
           "position": 15503
         },
-        "name": "biof3-server\\mobile-gateway\\index.js",
+        "name": "petri-server\\mobile-gateway\\index.js",
         "start": 332,
         "startLoc": {
           "column": 41,
@@ -4530,7 +4530,7 @@
           "line": 157,
           "position": 5414
         },
-        "name": "biof3-server\\plugin-loader.js",
+        "name": "petri-server\\plugin-loader.js",
         "start": 152,
         "startLoc": {
           "column": 21,
@@ -4568,7 +4568,7 @@
           "line": 596,
           "position": 21015
         },
-        "name": "biof3-server\\plugin-loader.js",
+        "name": "petri-server\\plugin-loader.js",
         "start": 590,
         "startLoc": {
           "column": 6,
@@ -4606,7 +4606,7 @@
           "line": 606,
           "position": 21556
         },
-        "name": "biof3-server\\plugin-loader.js",
+        "name": "petri-server\\plugin-loader.js",
         "start": 600,
         "startLoc": {
           "column": 33,
@@ -4644,7 +4644,7 @@
           "line": 730,
           "position": 26226
         },
-        "name": "biof3-server\\plugin-loader.js",
+        "name": "petri-server\\plugin-loader.js",
         "start": 725,
         "startLoc": {
           "column": 73,
@@ -4664,7 +4664,7 @@
           "line": 786,
           "position": 28595
         },
-        "name": "biof3-server\\plugin-loader.js",
+        "name": "petri-server\\plugin-loader.js",
         "start": 781,
         "startLoc": {
           "column": 80,
@@ -4682,7 +4682,7 @@
           "line": 747,
           "position": 26825
         },
-        "name": "biof3-server\\plugin-loader.js",
+        "name": "petri-server\\plugin-loader.js",
         "start": 732,
         "startLoc": {
           "column": 2,
@@ -4702,7 +4702,7 @@
           "line": 802,
           "position": 29177
         },
-        "name": "biof3-server\\plugin-loader.js",
+        "name": "petri-server\\plugin-loader.js",
         "start": 787,
         "startLoc": {
           "column": 2,
@@ -4720,7 +4720,7 @@
           "line": 767,
           "position": 27799
         },
-        "name": "biof3-server\\plugin-loader.js",
+        "name": "petri-server\\plugin-loader.js",
         "start": 749,
         "startLoc": {
           "column": 17,
@@ -4740,7 +4740,7 @@
           "line": 818,
           "position": 29884
         },
-        "name": "biof3-server\\plugin-loader.js",
+        "name": "petri-server\\plugin-loader.js",
         "start": 802,
         "startLoc": {
           "column": 77,
@@ -4758,7 +4758,7 @@
           "line": 42,
           "position": 1671
         },
-        "name": "biof3-server\\routes\\_helpers\\format.js",
+        "name": "petri-server\\routes\\_helpers\\format.js",
         "start": 26,
         "startLoc": {
           "column": 44,
@@ -4778,7 +4778,7 @@
           "line": 58,
           "position": 2317
         },
-        "name": "biof3-server\\routes\\_helpers\\repository.js",
+        "name": "petri-server\\routes\\_helpers\\repository.js",
         "start": 42,
         "startLoc": {
           "column": 25,
@@ -4796,7 +4796,7 @@
           "line": 39,
           "position": 1446
         },
-        "name": "biof3-server\\routes\\_helpers\\harness-shared.js",
+        "name": "petri-server\\routes\\_helpers\\harness-shared.js",
         "start": 27,
         "startLoc": {
           "column": 52,
@@ -4816,7 +4816,7 @@
           "line": 26,
           "position": 836
         },
-        "name": "biof3-server\\routes\\_helpers\\validate.js",
+        "name": "petri-server\\routes\\_helpers\\validate.js",
         "start": 14,
         "startLoc": {
           "column": 54,
@@ -4834,7 +4834,7 @@
           "line": 112,
           "position": 4270
         },
-        "name": "biof3-server\\routes\\_helpers\\storage.js",
+        "name": "petri-server\\routes\\_helpers\\storage.js",
         "start": 100,
         "startLoc": {
           "column": 21,
@@ -4872,7 +4872,7 @@
           "line": 143,
           "position": 5713
         },
-        "name": "biof3-server\\routes\\_helpers\\workspace-file-index.js",
+        "name": "petri-server\\routes\\_helpers\\workspace-file-index.js",
         "start": 135,
         "startLoc": {
           "column": 28,
@@ -4892,7 +4892,7 @@
           "line": 159,
           "position": 6117
         },
-        "name": "biof3-server\\routes\\_helpers\\workspace-file-index.js",
+        "name": "petri-server\\routes\\_helpers\\workspace-file-index.js",
         "start": 151,
         "startLoc": {
           "column": 31,
@@ -4910,7 +4910,7 @@
           "line": 45,
           "position": 1969
         },
-        "name": "biof3-server\\routes\\ai-agent\\background-processes.js",
+        "name": "petri-server\\routes\\ai-agent\\background-processes.js",
         "start": 37,
         "startLoc": {
           "column": 48,
@@ -4930,7 +4930,7 @@
           "line": 65,
           "position": 2818
         },
-        "name": "biof3-server\\routes\\ai-agent\\background-processes.js",
+        "name": "petri-server\\routes\\ai-agent\\background-processes.js",
         "start": 57,
         "startLoc": {
           "column": 63,
@@ -4948,7 +4948,7 @@
           "line": 42,
           "position": 1805
         },
-        "name": "biof3-server\\routes\\ai-agent\\background-processes.js",
+        "name": "petri-server\\routes\\ai-agent\\background-processes.js",
         "start": 37,
         "startLoc": {
           "column": 48,
@@ -4968,7 +4968,7 @@
           "line": 24,
           "position": 751
         },
-        "name": "biof3-server\\routes\\ai-agent\\context.js",
+        "name": "petri-server\\routes\\ai-agent\\context.js",
         "start": 19,
         "startLoc": {
           "column": 48,
@@ -4986,7 +4986,7 @@
           "line": 42,
           "position": 1805
         },
-        "name": "biof3-server\\routes\\ai-agent\\background-processes.js",
+        "name": "petri-server\\routes\\ai-agent\\background-processes.js",
         "start": 37,
         "startLoc": {
           "column": 48,
@@ -5006,7 +5006,7 @@
           "line": 22,
           "position": 790
         },
-        "name": "biof3-server\\routes\\ai-agent\\decisions.js",
+        "name": "petri-server\\routes\\ai-agent\\decisions.js",
         "start": 17,
         "startLoc": {
           "column": 39,
@@ -5024,7 +5024,7 @@
           "line": 42,
           "position": 1805
         },
-        "name": "biof3-server\\routes\\ai-agent\\background-processes.js",
+        "name": "petri-server\\routes\\ai-agent\\background-processes.js",
         "start": 37,
         "startLoc": {
           "column": 48,
@@ -5044,7 +5044,7 @@
           "line": 36,
           "position": 1435
         },
-        "name": "biof3-server\\routes\\ai-agent\\decisions.js",
+        "name": "petri-server\\routes\\ai-agent\\decisions.js",
         "start": 31,
         "startLoc": {
           "column": 38,
@@ -5062,7 +5062,7 @@
           "line": 42,
           "position": 1805
         },
-        "name": "biof3-server\\routes\\ai-agent\\background-processes.js",
+        "name": "petri-server\\routes\\ai-agent\\background-processes.js",
         "start": 37,
         "startLoc": {
           "column": 48,
@@ -5082,7 +5082,7 @@
           "line": 27,
           "position": 1001
         },
-        "name": "biof3-server\\routes\\ai-agent\\events.js",
+        "name": "petri-server\\routes\\ai-agent\\events.js",
         "start": 22,
         "startLoc": {
           "column": 40,
@@ -5100,7 +5100,7 @@
           "line": 24,
           "position": 776
         },
-        "name": "biof3-server\\routes\\ai-agent\\context.js",
+        "name": "petri-server\\routes\\ai-agent\\context.js",
         "start": 19,
         "startLoc": {
           "column": 56,
@@ -5120,7 +5120,7 @@
           "line": 27,
           "position": 1026
         },
-        "name": "biof3-server\\routes\\ai-agent\\events.js",
+        "name": "petri-server\\routes\\ai-agent\\events.js",
         "start": 22,
         "startLoc": {
           "column": 48,
@@ -5138,7 +5138,7 @@
           "line": 50,
           "position": 1909
         },
-        "name": "biof3-server\\routes\\ai-agent\\events.js",
+        "name": "petri-server\\routes\\ai-agent\\events.js",
         "start": 41,
         "startLoc": {
           "column": 85,
@@ -5158,7 +5158,7 @@
           "line": 24,
           "position": 901
         },
-        "name": "biof3-server\\routes\\events-bus.js",
+        "name": "petri-server\\routes\\events-bus.js",
         "start": 16,
         "startLoc": {
           "column": 93,
@@ -5176,7 +5176,7 @@
           "line": 157,
           "position": 5675
         },
-        "name": "biof3-server\\routes\\ai-agent\\llm-transcripts.js",
+        "name": "petri-server\\routes\\ai-agent\\llm-transcripts.js",
         "start": 147,
         "startLoc": {
           "column": 43,
@@ -5196,7 +5196,7 @@
           "line": 177,
           "position": 6578
         },
-        "name": "biof3-server\\routes\\ai-agent\\llm-transcripts.js",
+        "name": "petri-server\\routes\\ai-agent\\llm-transcripts.js",
         "start": 167,
         "startLoc": {
           "column": 50,
@@ -5214,7 +5214,7 @@
           "line": 146,
           "position": 7769
         },
-        "name": "biof3-server\\routes\\ai-agent\\task-actions.js",
+        "name": "petri-server\\routes\\ai-agent\\task-actions.js",
         "start": 140,
         "startLoc": {
           "column": 62,
@@ -5234,7 +5234,7 @@
           "line": 176,
           "position": 9537
         },
-        "name": "biof3-server\\routes\\ai-agent\\task-actions.js",
+        "name": "petri-server\\routes\\ai-agent\\task-actions.js",
         "start": 170,
         "startLoc": {
           "column": 66,
@@ -5252,7 +5252,7 @@
           "line": 146,
           "position": 7769
         },
-        "name": "biof3-server\\routes\\ai-agent\\task-actions.js",
+        "name": "petri-server\\routes\\ai-agent\\task-actions.js",
         "start": 140,
         "startLoc": {
           "column": 62,
@@ -5272,7 +5272,7 @@
           "line": 192,
           "position": 10518
         },
-        "name": "biof3-server\\routes\\ai-agent\\task-actions.js",
+        "name": "petri-server\\routes\\ai-agent\\task-actions.js",
         "start": 186,
         "startLoc": {
           "column": 67,
@@ -5290,7 +5290,7 @@
           "line": 373,
           "position": 14578
         },
-        "name": "biof3-server\\routes\\ai-chat.js",
+        "name": "petri-server\\routes\\ai-chat.js",
         "start": 363,
         "startLoc": {
           "column": 12,
@@ -5310,7 +5310,7 @@
           "line": 385,
           "position": 15081
         },
-        "name": "biof3-server\\routes\\ai-chat.js",
+        "name": "petri-server\\routes\\ai-chat.js",
         "start": 378,
         "startLoc": {
           "column": 12,
@@ -5328,7 +5328,7 @@
           "line": 41,
           "position": 1615
         },
-        "name": "biof3-server\\routes\\ai-conversations.js",
+        "name": "petri-server\\routes\\ai-conversations.js",
         "start": 36,
         "startLoc": {
           "column": 4,
@@ -5348,7 +5348,7 @@
           "line": 114,
           "position": 6413
         },
-        "name": "biof3-server\\routes\\ai-conversations.js",
+        "name": "petri-server\\routes\\ai-conversations.js",
         "start": 109,
         "startLoc": {
           "column": 4,
@@ -5366,7 +5366,7 @@
           "line": 57,
           "position": 2602
         },
-        "name": "biof3-server\\routes\\ai-conversations.js",
+        "name": "petri-server\\routes\\ai-conversations.js",
         "start": 52,
         "startLoc": {
           "column": 33,
@@ -5386,7 +5386,7 @@
           "line": 81,
           "position": 4365
         },
-        "name": "biof3-server\\routes\\ai-conversations.js",
+        "name": "petri-server\\routes\\ai-conversations.js",
         "start": 76,
         "startLoc": {
           "column": 64,
@@ -5404,7 +5404,7 @@
           "line": 207,
           "position": 11986
         },
-        "name": "biof3-server\\routes\\ai-conversations.js",
+        "name": "petri-server\\routes\\ai-conversations.js",
         "start": 199,
         "startLoc": {
           "column": 175,
@@ -5424,7 +5424,7 @@
           "line": 121,
           "position": 6368
         },
-        "name": "biof3-server\\routes\\ai-memory.js",
+        "name": "petri-server\\routes\\ai-memory.js",
         "start": 115,
         "startLoc": {
           "column": 147,
@@ -5442,7 +5442,7 @@
           "line": 207,
           "position": 11986
         },
-        "name": "biof3-server\\routes\\ai-conversations.js",
+        "name": "petri-server\\routes\\ai-conversations.js",
         "start": 199,
         "startLoc": {
           "column": 154,
@@ -5462,7 +5462,7 @@
           "line": 119,
           "position": 6512
         },
-        "name": "biof3-server\\routes\\ai-plans.js",
+        "name": "petri-server\\routes\\ai-plans.js",
         "start": 113,
         "startLoc": {
           "column": 47,
@@ -5480,7 +5480,7 @@
           "line": 120,
           "position": 4973
         },
-        "name": "biof3-server\\routes\\ai-loop.js",
+        "name": "petri-server\\routes\\ai-loop.js",
         "start": 110,
         "startLoc": {
           "column": 21,
@@ -5500,7 +5500,7 @@
           "line": 161,
           "position": 6435
         },
-        "name": "biof3-server\\routes\\ai-loop.js",
+        "name": "petri-server\\routes\\ai-loop.js",
         "start": 151,
         "startLoc": {
           "column": 22,
@@ -5518,7 +5518,7 @@
           "line": 151,
           "position": 6030
         },
-        "name": "biof3-server\\routes\\ai-loop.js",
+        "name": "petri-server\\routes\\ai-loop.js",
         "start": 142,
         "startLoc": {
           "column": 31,
@@ -5538,7 +5538,7 @@
           "line": 352,
           "position": 13557
         },
-        "name": "biof3-server\\routes\\ai-loop.js",
+        "name": "petri-server\\routes\\ai-loop.js",
         "start": 342,
         "startLoc": {
           "column": 35,
@@ -5556,7 +5556,7 @@
           "line": 148,
           "position": 5961
         },
-        "name": "biof3-server\\routes\\ai-loop.js",
+        "name": "petri-server\\routes\\ai-loop.js",
         "start": 142,
         "startLoc": {
           "column": 31,
@@ -5576,7 +5576,7 @@
           "line": 411,
           "position": 15842
         },
-        "name": "biof3-server\\routes\\ai-loop.js",
+        "name": "petri-server\\routes\\ai-loop.js",
         "start": 405,
         "startLoc": {
           "column": 38,
@@ -5594,7 +5594,7 @@
           "line": 247,
           "position": 9810
         },
-        "name": "biof3-server\\routes\\ai-loop.js",
+        "name": "petri-server\\routes\\ai-loop.js",
         "start": 241,
         "startLoc": {
           "column": 37,
@@ -5614,7 +5614,7 @@
           "line": 280,
           "position": 11056
         },
-        "name": "biof3-server\\routes\\ai-loop.js",
+        "name": "petri-server\\routes\\ai-loop.js",
         "start": 274,
         "startLoc": {
           "column": 34,
@@ -5632,7 +5632,7 @@
           "line": 247,
           "position": 9810
         },
-        "name": "biof3-server\\routes\\ai-loop.js",
+        "name": "petri-server\\routes\\ai-loop.js",
         "start": 241,
         "startLoc": {
           "column": 37,
@@ -5652,7 +5652,7 @@
           "line": 312,
           "position": 12148
         },
-        "name": "biof3-server\\routes\\ai-loop.js",
+        "name": "petri-server\\routes\\ai-loop.js",
         "start": 306,
         "startLoc": {
           "column": 35,
@@ -5670,7 +5670,7 @@
           "line": 64,
           "position": 2354
         },
-        "name": "biof3-server\\routes\\ai-memory.js",
+        "name": "petri-server\\routes\\ai-memory.js",
         "start": 58,
         "startLoc": {
           "column": 33,
@@ -5690,7 +5690,7 @@
           "line": 94,
           "position": 4461
         },
-        "name": "biof3-server\\routes\\ai-memory.js",
+        "name": "petri-server\\routes\\ai-memory.js",
         "start": 88,
         "startLoc": {
           "column": 67,
@@ -5708,7 +5708,7 @@
           "line": 63,
           "position": 2315
         },
-        "name": "biof3-server\\routes\\ai-memory.js",
+        "name": "petri-server\\routes\\ai-memory.js",
         "start": 58,
         "startLoc": {
           "column": 33,
@@ -5728,7 +5728,7 @@
           "line": 137,
           "position": 7123
         },
-        "name": "biof3-server\\routes\\ai-memory.js",
+        "name": "petri-server\\routes\\ai-memory.js",
         "start": 132,
         "startLoc": {
           "column": 35,
@@ -5746,7 +5746,7 @@
           "line": 64,
           "position": 2354
         },
-        "name": "biof3-server\\routes\\ai-memory.js",
+        "name": "petri-server\\routes\\ai-memory.js",
         "start": 58,
         "startLoc": {
           "column": 33,
@@ -5766,7 +5766,7 @@
           "line": 217,
           "position": 11866
         },
-        "name": "biof3-server\\routes\\ai-memory.js",
+        "name": "petri-server\\routes\\ai-memory.js",
         "start": 211,
         "startLoc": {
           "column": 40,
@@ -5784,7 +5784,7 @@
           "line": 88,
           "position": 4149
         },
-        "name": "biof3-server\\routes\\ai-memory.js",
+        "name": "petri-server\\routes\\ai-memory.js",
         "start": 83,
         "startLoc": {
           "column": 152,
@@ -5804,7 +5804,7 @@
           "line": 110,
           "position": 5764
         },
-        "name": "biof3-server\\routes\\ai-memory.js",
+        "name": "petri-server\\routes\\ai-memory.js",
         "start": 105,
         "startLoc": {
           "column": 163,
@@ -5822,7 +5822,7 @@
           "line": 115,
           "position": 6014
         },
-        "name": "biof3-server\\routes\\ai-memory.js",
+        "name": "petri-server\\routes\\ai-memory.js",
         "start": 110,
         "startLoc": {
           "column": 40,
@@ -5842,7 +5842,7 @@
           "line": 158,
           "position": 8306
         },
-        "name": "biof3-server\\routes\\ai-memory.js",
+        "name": "petri-server\\routes\\ai-memory.js",
         "start": 153,
         "startLoc": {
           "column": 36,
@@ -5860,7 +5860,7 @@
           "line": 115,
           "position": 6037
         },
-        "name": "biof3-server\\routes\\ai-memory.js",
+        "name": "petri-server\\routes\\ai-memory.js",
         "start": 110,
         "startLoc": {
           "column": 40,
@@ -5880,7 +5880,7 @@
           "line": 194,
           "position": 10720
         },
-        "name": "biof3-server\\routes\\ai-memory.js",
+        "name": "petri-server\\routes\\ai-memory.js",
         "start": 189,
         "startLoc": {
           "column": 43,
@@ -5898,7 +5898,7 @@
           "line": 121,
           "position": 6375
         },
-        "name": "biof3-server\\routes\\ai-memory.js",
+        "name": "petri-server\\routes\\ai-memory.js",
         "start": 115,
         "startLoc": {
           "column": 89,
@@ -5918,7 +5918,7 @@
           "line": 200,
           "position": 11062
         },
-        "name": "biof3-server\\routes\\ai-memory.js",
+        "name": "petri-server\\routes\\ai-memory.js",
         "start": 194,
         "startLoc": {
           "column": 93,
@@ -5936,7 +5936,7 @@
           "line": 121,
           "position": 6375
         },
-        "name": "biof3-server\\routes\\ai-memory.js",
+        "name": "petri-server\\routes\\ai-memory.js",
         "start": 116,
         "startLoc": {
           "column": 78,
@@ -5956,7 +5956,7 @@
           "line": 119,
           "position": 6519
         },
-        "name": "biof3-server\\routes\\ai-plans.js",
+        "name": "petri-server\\routes\\ai-plans.js",
         "start": 114,
         "startLoc": {
           "column": 78,
@@ -5974,7 +5974,7 @@
           "line": 132,
           "position": 6886
         },
-        "name": "biof3-server\\routes\\ai-memory.js",
+        "name": "petri-server\\routes\\ai-memory.js",
         "start": 126,
         "startLoc": {
           "column": 70,
@@ -5994,7 +5994,7 @@
           "line": 211,
           "position": 11585
         },
-        "name": "biof3-server\\routes\\ai-memory.js",
+        "name": "petri-server\\routes\\ai-memory.js",
         "start": 205,
         "startLoc": {
           "column": 74,
@@ -6012,7 +6012,7 @@
           "line": 151,
           "position": 6416
         },
-        "name": "biof3-server\\routes\\federation-admin.js",
+        "name": "petri-server\\routes\\federation-admin.js",
         "start": 146,
         "startLoc": {
           "column": 53,
@@ -6032,7 +6032,7 @@
           "line": 178,
           "position": 7613
         },
-        "name": "biof3-server\\routes\\federation-admin.js",
+        "name": "petri-server\\routes\\federation-admin.js",
         "start": 173,
         "startLoc": {
           "column": 77,
@@ -6050,7 +6050,7 @@
           "line": 153,
           "position": 6474
         },
-        "name": "biof3-server\\routes\\federation-admin.js",
+        "name": "petri-server\\routes\\federation-admin.js",
         "start": 146,
         "startLoc": {
           "column": 53,
@@ -6070,7 +6070,7 @@
           "line": 217,
           "position": 8946
         },
-        "name": "biof3-server\\routes\\federation-admin.js",
+        "name": "petri-server\\routes\\federation-admin.js",
         "start": 210,
         "startLoc": {
           "column": 49,
@@ -6088,7 +6088,7 @@
           "line": 151,
           "position": 6416
         },
-        "name": "biof3-server\\routes\\federation-admin.js",
+        "name": "petri-server\\routes\\federation-admin.js",
         "start": 146,
         "startLoc": {
           "column": 53,
@@ -6108,7 +6108,7 @@
           "line": 233,
           "position": 9682
         },
-        "name": "biof3-server\\routes\\federation-admin.js",
+        "name": "petri-server\\routes\\federation-admin.js",
         "start": 228,
         "startLoc": {
           "column": 64,
@@ -6126,7 +6126,7 @@
           "line": 179,
           "position": 7623
         },
-        "name": "biof3-server\\routes\\federation-admin.js",
+        "name": "petri-server\\routes\\federation-admin.js",
         "start": 173,
         "startLoc": {
           "column": 86,
@@ -6146,7 +6146,7 @@
           "line": 234,
           "position": 9692
         },
-        "name": "biof3-server\\routes\\federation-admin.js",
+        "name": "petri-server\\routes\\federation-admin.js",
         "start": 228,
         "startLoc": {
           "column": 73,
@@ -6164,7 +6164,7 @@
           "line": 174,
           "position": 6330
         },
-        "name": "biof3-server\\routes\\files.js",
+        "name": "petri-server\\routes\\files.js",
         "start": 168,
         "startLoc": {
           "column": 43,
@@ -6184,7 +6184,7 @@
           "line": 246,
           "position": 10369
         },
-        "name": "biof3-server\\routes\\files.js",
+        "name": "petri-server\\routes\\files.js",
         "start": 240,
         "startLoc": {
           "column": 45,
@@ -6202,7 +6202,7 @@
           "line": 406,
           "position": 18749
         },
-        "name": "biof3-server\\routes\\files.js",
+        "name": "petri-server\\routes\\files.js",
         "start": 399,
         "startLoc": {
           "column": 52,
@@ -6222,7 +6222,7 @@
           "line": 466,
           "position": 21176
         },
-        "name": "biof3-server\\routes\\files.js",
+        "name": "petri-server\\routes\\files.js",
         "start": 459,
         "startLoc": {
           "column": 52,
@@ -6240,7 +6240,7 @@
           "line": 406,
           "position": 18749
         },
-        "name": "biof3-server\\routes\\files.js",
+        "name": "petri-server\\routes\\files.js",
         "start": 400,
         "startLoc": {
           "column": 42,
@@ -6260,7 +6260,7 @@
           "line": 444,
           "position": 20273
         },
-        "name": "biof3-server\\routes\\files.js",
+        "name": "petri-server\\routes\\files.js",
         "start": 438,
         "startLoc": {
           "column": 60,
@@ -6278,7 +6278,7 @@
           "line": 446,
           "position": 20290
         },
-        "name": "biof3-server\\routes\\files.js",
+        "name": "petri-server\\routes\\files.js",
         "start": 440,
         "startLoc": {
           "column": 33,
@@ -6298,7 +6298,7 @@
           "line": 472,
           "position": 21602
         },
-        "name": "biof3-server\\routes\\files.js",
+        "name": "petri-server\\routes\\files.js",
         "start": 462,
         "startLoc": {
           "column": 33,
@@ -6316,7 +6316,7 @@
           "line": 446,
           "position": 20290
         },
-        "name": "biof3-server\\routes\\files.js",
+        "name": "petri-server\\routes\\files.js",
         "start": 440,
         "startLoc": {
           "column": 33,
@@ -6336,7 +6336,7 @@
           "line": 509,
           "position": 23545
         },
-        "name": "biof3-server\\routes\\files.js",
+        "name": "petri-server\\routes\\files.js",
         "start": 500,
         "startLoc": {
           "column": 33,
@@ -6354,7 +6354,7 @@
           "line": 255,
           "position": 10012
         },
-        "name": "biof3-server\\routes\\harness\\file-references.js",
+        "name": "petri-server\\routes\\harness\\file-references.js",
         "start": 231,
         "startLoc": {
           "column": 48,
@@ -6374,7 +6374,7 @@
           "line": 285,
           "position": 11176
         },
-        "name": "biof3-server\\routes\\harness\\file-references.js",
+        "name": "petri-server\\routes\\harness\\file-references.js",
         "start": 260,
         "startLoc": {
           "column": 67,
@@ -6392,7 +6392,7 @@
           "line": 304,
           "position": 12049
         },
-        "name": "biof3-server\\routes\\harness\\file-references.js",
+        "name": "petri-server\\routes\\harness\\file-references.js",
         "start": 292,
         "startLoc": {
           "column": 51,
@@ -6412,7 +6412,7 @@
           "line": 336,
           "position": 13490
         },
-        "name": "biof3-server\\routes\\harness\\file-references.js",
+        "name": "petri-server\\routes\\harness\\file-references.js",
         "start": 324,
         "startLoc": {
           "column": 38,
@@ -6430,7 +6430,7 @@
           "line": 145,
           "position": 6022
         },
-        "name": "biof3-server\\routes\\harness\\loop.js",
+        "name": "petri-server\\routes\\harness\\loop.js",
         "start": 139,
         "startLoc": {
           "column": 48,
@@ -6450,7 +6450,7 @@
           "line": 169,
           "position": 7043
         },
-        "name": "biof3-server\\routes\\harness\\loop.js",
+        "name": "petri-server\\routes\\harness\\loop.js",
         "start": 163,
         "startLoc": {
           "column": 42,
@@ -6468,7 +6468,7 @@
           "line": 25,
           "position": 866
         },
-        "name": "biof3-server\\routes\\harness\\notices.js",
+        "name": "petri-server\\routes\\harness\\notices.js",
         "start": 19,
         "startLoc": {
           "column": 36,
@@ -6488,7 +6488,7 @@
           "line": 35,
           "position": 1545
         },
-        "name": "biof3-server\\routes\\harness\\project-storage.js",
+        "name": "petri-server\\routes\\harness\\project-storage.js",
         "start": 29,
         "startLoc": {
           "column": 50,
@@ -6506,7 +6506,7 @@
           "line": 87,
           "position": 3829
         },
-        "name": "biof3-server\\routes\\harness\\scientific-task.js",
+        "name": "petri-server\\routes\\harness\\scientific-task.js",
         "start": 81,
         "startLoc": {
           "column": 64,
@@ -6526,7 +6526,7 @@
           "line": 105,
           "position": 4743
         },
-        "name": "biof3-server\\routes\\harness\\scientific-task.js",
+        "name": "petri-server\\routes\\harness\\scientific-task.js",
         "start": 99,
         "startLoc": {
           "column": 51,
@@ -6544,7 +6544,7 @@
           "line": 132,
           "position": 6080
         },
-        "name": "biof3-server\\routes\\harness\\scientific-task.js",
+        "name": "petri-server\\routes\\harness\\scientific-task.js",
         "start": 122,
         "startLoc": {
           "column": 117,
@@ -6564,7 +6564,7 @@
           "line": 144,
           "position": 6654
         },
-        "name": "biof3-server\\routes\\harness\\scientific-task.js",
+        "name": "petri-server\\routes\\harness\\scientific-task.js",
         "start": 134,
         "startLoc": {
           "column": 71,
@@ -6582,7 +6582,7 @@
           "line": 151,
           "position": 7215
         },
-        "name": "biof3-server\\routes\\harness\\scientific-task.js",
+        "name": "petri-server\\routes\\harness\\scientific-task.js",
         "start": 144,
         "startLoc": {
           "column": 67,
@@ -6602,7 +6602,7 @@
           "line": 212,
           "position": 11634
         },
-        "name": "biof3-server\\routes\\harness\\scientific-task.js",
+        "name": "petri-server\\routes\\harness\\scientific-task.js",
         "start": 205,
         "startLoc": {
           "column": 110,
@@ -6620,7 +6620,7 @@
           "line": 55,
           "position": 1929
         },
-        "name": "biof3-server\\routes\\harness\\workflow.js",
+        "name": "petri-server\\routes\\harness\\workflow.js",
         "start": 48,
         "startLoc": {
           "column": 83,
@@ -6640,7 +6640,7 @@
           "line": 154,
           "position": 5450
         },
-        "name": "biof3-server\\routes\\harness\\workflow.js",
+        "name": "petri-server\\routes\\harness\\workflow.js",
         "start": 147,
         "startLoc": {
           "column": 49,
@@ -6658,7 +6658,7 @@
           "line": 332,
           "position": 12762
         },
-        "name": "biof3-server\\routes\\knowledge.js",
+        "name": "petri-server\\routes\\knowledge.js",
         "start": 324,
         "startLoc": {
           "column": 35,
@@ -6678,7 +6678,7 @@
           "line": 342,
           "position": 13193
         },
-        "name": "biof3-server\\routes\\knowledge.js",
+        "name": "petri-server\\routes\\knowledge.js",
         "start": 334,
         "startLoc": {
           "column": 50,
@@ -6696,7 +6696,7 @@
           "line": 332,
           "position": 12757
         },
-        "name": "biof3-server\\routes\\knowledge.js",
+        "name": "petri-server\\routes\\knowledge.js",
         "start": 324,
         "startLoc": {
           "column": 60,
@@ -6716,7 +6716,7 @@
           "line": 359,
           "position": 13916
         },
-        "name": "biof3-server\\routes\\knowledge.js",
+        "name": "petri-server\\routes\\knowledge.js",
         "start": 351,
         "startLoc": {
           "column": 61,
@@ -6734,7 +6734,7 @@
           "line": 359,
           "position": 13920
         },
-        "name": "biof3-server\\routes\\knowledge.js",
+        "name": "petri-server\\routes\\knowledge.js",
         "start": 352,
         "startLoc": {
           "column": 37,
@@ -6754,7 +6754,7 @@
           "line": 380,
           "position": 14795
         },
-        "name": "biof3-server\\routes\\knowledge.js",
+        "name": "petri-server\\routes\\knowledge.js",
         "start": 371,
         "startLoc": {
           "column": 71,
@@ -6772,7 +6772,7 @@
           "line": 369,
           "position": 14324
         },
-        "name": "biof3-server\\routes\\knowledge.js",
+        "name": "petri-server\\routes\\knowledge.js",
         "start": 362,
         "startLoc": {
           "column": 53,
@@ -6792,7 +6792,7 @@
           "line": 380,
           "position": 14791
         },
-        "name": "biof3-server\\routes\\knowledge.js",
+        "name": "petri-server\\routes\\knowledge.js",
         "start": 371,
         "startLoc": {
           "column": 55,
@@ -6810,7 +6810,7 @@
           "line": 97,
           "position": 4601
         },
-        "name": "biof3-server\\routes\\mobile-admin.js",
+        "name": "petri-server\\routes\\mobile-admin.js",
         "start": 89,
         "startLoc": {
           "column": 14,
@@ -6830,7 +6830,7 @@
           "line": 115,
           "position": 5497
         },
-        "name": "biof3-server\\routes\\mobile-admin.js",
+        "name": "petri-server\\routes\\mobile-admin.js",
         "start": 107,
         "startLoc": {
           "column": 112,
@@ -6848,7 +6848,7 @@
           "line": 43,
           "position": 1950
         },
-        "name": "biof3-server\\routes\\result-studio\\changesets.js",
+        "name": "petri-server\\routes\\result-studio\\changesets.js",
         "start": 38,
         "startLoc": {
           "column": 45,
@@ -6868,7 +6868,7 @@
           "line": 38,
           "position": 1877
         },
-        "name": "biof3-server\\routes\\result-studio\\workspace.js",
+        "name": "petri-server\\routes\\result-studio\\workspace.js",
         "start": 31,
         "startLoc": {
           "column": 57,
@@ -6886,7 +6886,7 @@
           "line": 80,
           "position": 3833
         },
-        "name": "biof3-server\\routes\\result-studio\\changesets.js",
+        "name": "petri-server\\routes\\result-studio\\changesets.js",
         "start": 71,
         "startLoc": {
           "column": 46,
@@ -6906,7 +6906,7 @@
           "line": 99,
           "position": 4757
         },
-        "name": "biof3-server\\routes\\result-studio\\changesets.js",
+        "name": "petri-server\\routes\\result-studio\\changesets.js",
         "start": 90,
         "startLoc": {
           "column": 43,
@@ -6924,7 +6924,7 @@
           "line": 72,
           "position": 2881
         },
-        "name": "biof3-server\\routes\\result-studio\\interaction.js",
+        "name": "petri-server\\routes\\result-studio\\interaction.js",
         "start": 66,
         "startLoc": {
           "column": 72,
@@ -6944,7 +6944,7 @@
           "line": 277,
           "position": 13657
         },
-        "name": "biof3-server\\routes\\result-studio\\interaction.js",
+        "name": "petri-server\\routes\\result-studio\\interaction.js",
         "start": 273,
         "startLoc": {
           "column": 100,
@@ -6962,7 +6962,7 @@
           "line": 253,
           "position": 12583
         },
-        "name": "biof3-server\\routes\\result-studio\\revisions.js",
+        "name": "petri-server\\routes\\result-studio\\revisions.js",
         "start": 247,
         "startLoc": {
           "column": 31,
@@ -6982,7 +6982,7 @@
           "line": 267,
           "position": 13161
         },
-        "name": "biof3-server\\routes\\result-studio\\revisions.js",
+        "name": "petri-server\\routes\\result-studio\\revisions.js",
         "start": 261,
         "startLoc": {
           "column": 45,
@@ -7000,7 +7000,7 @@
           "line": 62,
           "position": 2700
         },
-        "name": "biof3-server\\routes\\result-studio\\storage.js",
+        "name": "petri-server\\routes\\result-studio\\storage.js",
         "start": 57,
         "startLoc": {
           "column": 53,
@@ -7020,7 +7020,7 @@
           "line": 77,
           "position": 3410
         },
-        "name": "biof3-server\\routes\\result-studio\\storage.js",
+        "name": "petri-server\\routes\\result-studio\\storage.js",
         "start": 72,
         "startLoc": {
           "column": 44,
@@ -7038,7 +7038,7 @@
           "line": 180,
           "position": 7847
         },
-        "name": "biof3-server\\routes\\tools-metadata.js",
+        "name": "petri-server\\routes\\tools-metadata.js",
         "start": 175,
         "startLoc": {
           "column": 35,
@@ -7058,7 +7058,7 @@
           "line": 221,
           "position": 9852
         },
-        "name": "biof3-server\\routes\\tools-metadata.js",
+        "name": "petri-server\\routes\\tools-metadata.js",
         "start": 216,
         "startLoc": {
           "column": 32,
@@ -7076,7 +7076,7 @@
           "line": 180,
           "position": 7847
         },
-        "name": "biof3-server\\routes\\tools-metadata.js",
+        "name": "petri-server\\routes\\tools-metadata.js",
         "start": 175,
         "startLoc": {
           "column": 35,
@@ -7096,7 +7096,7 @@
           "line": 272,
           "position": 12840
         },
-        "name": "biof3-server\\routes\\tools-metadata.js",
+        "name": "petri-server\\routes\\tools-metadata.js",
         "start": 267,
         "startLoc": {
           "column": 35,
@@ -7114,7 +7114,7 @@
           "line": 181,
           "position": 7861
         },
-        "name": "biof3-server\\routes\\tools-metadata.js",
+        "name": "petri-server\\routes\\tools-metadata.js",
         "start": 175,
         "startLoc": {
           "column": 35,
@@ -7134,7 +7134,7 @@
           "line": 356,
           "position": 16576
         },
-        "name": "biof3-server\\routes\\tools-metadata.js",
+        "name": "petri-server\\routes\\tools-metadata.js",
         "start": 350,
         "startLoc": {
           "column": 53,
@@ -7152,7 +7152,7 @@
           "line": 42,
           "position": 1289
         },
-        "name": "biof3-server\\routes\\tools-platform.js",
+        "name": "petri-server\\routes\\tools-platform.js",
         "start": 36,
         "startLoc": {
           "column": 46,
@@ -7172,7 +7172,7 @@
           "line": 54,
           "position": 1826
         },
-        "name": "biof3-server\\routes\\tools-platform.js",
+        "name": "petri-server\\routes\\tools-platform.js",
         "start": 48,
         "startLoc": {
           "column": 72,
@@ -7190,7 +7190,7 @@
           "line": 65,
           "position": 2330
         },
-        "name": "biof3-server\\routes\\tools-platform.js",
+        "name": "petri-server\\routes\\tools-platform.js",
         "start": 60,
         "startLoc": {
           "column": 52,
@@ -7210,7 +7210,7 @@
           "line": 144,
           "position": 5470
         },
-        "name": "biof3-server\\routes\\tools-platform.js",
+        "name": "petri-server\\routes\\tools-platform.js",
         "start": 138,
         "startLoc": {
           "column": 35,
@@ -7237,7 +7237,7 @@
         }
       },
       "format": "typescript",
-      "fragment": "export interface CopilotContext {\n  page: CopilotPage;\n  pageTitle?: string;\n  /** Current full URL (for citation) */\n  pageUrl?: string;\n  /** Excerpted main content from the page (~2K chars), for docs/blog/figcode etc. */\n  pageContent?: string;\n  /** Headings outline of current page, for \"where am I in the document\" awareness */\n  pageOutline?: string[];\n  /** Heading currently in viewport (closest one above the fold) */\n  visibleHeading?: string;\n  // W3-C: 当前云平台模块（决定 biof3-server system-prompt 走 spatial / single-cell 分支）\n  currentModule?: 'single-cell' | 'spatial';\n  // single-cell + spatial 共享字段（同结构）\n  projectId?: string;\n  datasetId?: string;\n  datasetName?: string;\n  analysisId?: string;\n  analysisType?: string;\n  analysisName?: string;\n  summary?: unknown;\n  /** Available cluster ids on the current result, for action suggestions */\n  clusterIds?: (string | number)[];\n  // figcode\n  plotName?: string;\n  codeContent?: string;\n  // tools page\n  toolId?: string;\n  toolName?: string;\n  toolResult?: unknown;\n  availableTools?: string[];",
+      "fragment": "export interface CopilotContext {\n  page: CopilotPage;\n  pageTitle?: string;\n  /** Current full URL (for citation) */\n  pageUrl?: string;\n  /** Excerpted main content from the page (~2K chars), for docs/blog/figcode etc. */\n  pageContent?: string;\n  /** Headings outline of current page, for \"where am I in the document\" awareness */\n  pageOutline?: string[];\n  /** Heading currently in viewport (closest one above the fold) */\n  visibleHeading?: string;\n  // W3-C: 当前云平台模块（决定 petri-server system-prompt 走 spatial / single-cell 分支）\n  currentModule?: 'single-cell' | 'spatial';\n  // single-cell + spatial 共享字段（同结构）\n  projectId?: string;\n  datasetId?: string;\n  datasetName?: string;\n  analysisId?: string;\n  analysisType?: string;\n  analysisName?: string;\n  summary?: unknown;\n  /** Available cluster ids on the current result, for action suggestions */\n  clusterIds?: (string | number)[];\n  // figcode\n  plotName?: string;\n  codeContent?: string;\n  // tools page\n  toolId?: string;\n  toolName?: string;\n  toolResult?: unknown;\n  availableTools?: string[];",
       "isNew": false,
       "kind": "exact",
       "lines": 31,
@@ -7845,7 +7845,7 @@
         }
       },
       "format": "javascript",
-      "fragment": "  function run(args, runOptions = {}) {\n    const prefix = ['--git-dir', resolvedGitDir, '--work-tree', resolvedWorkTree];\n    if (!allowHooks) {\n      // 指向一个我们从不创建的目录 → git 找不到任何 hook，等价于禁用。\n      prefix.unshift('-c', `core.hooksPath=${path.join(resolvedGitDir, 'biof3-disabled-hooks')}`);\n    }\n    const env = baseEnv();\n    if (runOptions.readOnly) env.GIT_OPTIONAL_LOCKS = '0';",
+      "fragment": "  function run(args, runOptions = {}) {\n    const prefix = ['--git-dir', resolvedGitDir, '--work-tree', resolvedWorkTree];\n    if (!allowHooks) {\n      // 指向一个我们从不创建的目录 → git 找不到任何 hook，等价于禁用。\n      prefix.unshift('-c', `core.hooksPath=${path.join(resolvedGitDir, 'petri-disabled-hooks')}`);\n    }\n    const env = baseEnv();\n    if (runOptions.readOnly) env.GIT_OPTIONAL_LOCKS = '0';",
       "isNew": false,
       "kind": "exact",
       "lines": 8,
@@ -11265,7 +11265,7 @@
         }
       },
       "format": "typescript",
-      "fragment": "    expect(result.current.resultRightWidth).toBe(720);\n    await act(async () => {\n      await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));\n    });\n    expect(\n      document.documentElement.style.getPropertyValue('--gewu-live-result-right-width'),\n    ).toBe('420px');",
+      "fragment": "    expect(result.current.resultRightWidth).toBe(720);\n    await act(async () => {\n      await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));\n    });\n    expect(\n      document.documentElement.style.getPropertyValue('--petri-live-result-right-width'),\n    ).toBe('420px');",
       "isNew": false,
       "kind": "exact",
       "lines": 7,
@@ -11683,7 +11683,7 @@
         }
       },
       "format": "typescript",
-      "fragment": "    const handles = installBridge();\n    // PHASE 1 IPC bridge wiring: bridge.skills.cancel(executionId) must be wired to SkillsSDK via main.js\n    const bridge = (window as unknown as {\n      biof3Desktop: { skills: { cancel: Mock } };\n    }).biof3Desktop;\n    let cancelResult: { ok: boolean; cancelled?: boolean; error?: string } = { ok: false };",
+      "fragment": "    const handles = installBridge();\n    // PHASE 1 IPC bridge wiring: bridge.skills.cancel(executionId) must be wired to SkillsSDK via main.js\n    const bridge = (window as unknown as {\n      petriDesktop: { skills: { cancel: Mock } };\n    }).petriDesktop;\n    let cancelResult: { ok: boolean; cancelled?: boolean; error?: string } = { ok: false };",
       "isNew": false,
       "kind": "exact",
       "lines": 6,
@@ -11987,7 +11987,7 @@
         }
       },
       "format": "typescript",
-      "fragment": "const DEFAULT_TITLE_BAR: TitleBarState = {\n  title: 'Gewu',\n  tabs: [],\n  activeTabId: null,\n  onSelectTab: null,\n  onCloseTab: null,\n  onMoreAction: null,\n  toolMenuOpen: false,\n  toolMenuItems: [],\n  onSelectToolItem: null,\n  resultItems: [],\n  activeResultId: null,\n  onSelectResult: null,\n  canGoBack: false,\n  canGoForward: false,\n  onGoBack: null,\n  onGoForward: null,\n};",
+      "fragment": "const DEFAULT_TITLE_BAR: TitleBarState = {\n  title: 'Petri',\n  tabs: [],\n  activeTabId: null,\n  onSelectTab: null,\n  onCloseTab: null,\n  onMoreAction: null,\n  toolMenuOpen: false,\n  toolMenuItems: [],\n  onSelectToolItem: null,\n  resultItems: [],\n  activeResultId: null,\n  onSelectResult: null,\n  canGoBack: false,\n  canGoForward: false,\n  onGoBack: null,\n  onGoForward: null,\n};",
       "isNew": false,
       "kind": "exact",
       "lines": 18,
@@ -12063,7 +12063,7 @@
         }
       },
       "format": "typescript",
-      "fragment": "  isActive: true,\n};\n\ntype Envelope = { ok: boolean; data?: unknown; error?: string };\n\nfunction stubBridge(methods: Record<string, unknown>): void {\n  (window as unknown as Record<string, unknown>).gewu = { branch: methods };",
+      "fragment": "  isActive: true,\n};\n\ntype Envelope = { ok: boolean; data?: unknown; error?: string };\n\nfunction stubBridge(methods: Record<string, unknown>): void {\n  (window as unknown as Record<string, unknown>).petri = { branch: methods };",
       "isNew": false,
       "kind": "exact",
       "lines": 7,
@@ -12101,7 +12101,7 @@
         }
       },
       "format": "typescript",
-      "fragment": "  return mod.branchApi;\n}\n\nbeforeEach(() => {\n  delete (window as unknown as Record<string, unknown>).gewu;\n  delete (window as unknown as Record<string, unknown>).biof3Desktop;\n});\n\nafterEach(() => {\n  delete (window as unknown as Record<string, unknown>).gewu;\n  delete (window as unknown as Record<string, unknown>).biof3Desktop;\n  vi.restoreAllMocks();\n});\n\ndescribe('branchBridge envelope unwrap + row mapping (UI-P2-001)', () => {",
+      "fragment": "  return mod.branchApi;\n}\n\nbeforeEach(() => {\n  delete (window as unknown as Record<string, unknown>).petri;\n  delete (window as unknown as Record<string, unknown>).petriDesktop;\n});\n\nafterEach(() => {\n  delete (window as unknown as Record<string, unknown>).petri;\n  delete (window as unknown as Record<string, unknown>).petriDesktop;\n  vi.restoreAllMocks();\n});\n\ndescribe('branchBridge envelope unwrap + row mapping (UI-P2-001)', () => {",
       "isNew": false,
       "kind": "exact",
       "lines": 15,
@@ -12519,7 +12519,7 @@
         }
       },
       "format": "javascript",
-      "fragment": "  return openDb('branch');\n}\n\n/**\n * Backward-compatible DB path accessor (read-only utility for tests +\n * consumers that previously called branch-db.getDatabasePath()).\n * @returns {string}\n */\nfunction getDatabasePath() {\n  const path = require('path');\n  const dataDir = process.env.BIOF3_LOCAL_DATA_DIR;\n  if (!dataDir) {\n    throw new Error('BIOF3_LOCAL_DATA_DIR environment variable is not set');\n  }\n  return path.join(dataDir, 'biof3.db');\n}\n\n/**\n * Backward-compatible close. Closes the singleton connection for the\n * branch role.\n */\nfunction closeDatabase() {\n  closeDb('branch');",
+      "fragment": "  return openDb('branch');\n}\n\n/**\n * Backward-compatible DB path accessor (read-only utility for tests +\n * consumers that previously called branch-db.getDatabasePath()).\n * @returns {string}\n */\nfunction getDatabasePath() {\n  const path = require('path');\n  const dataDir = process.env.PETRI_LOCAL_DATA_DIR;\n  if (!dataDir) {\n    throw new Error('PETRI_LOCAL_DATA_DIR environment variable is not set');\n  }\n  return path.join(dataDir, 'petri.db');\n}\n\n/**\n * Backward-compatible close. Closes the singleton connection for the\n * branch role.\n */\nfunction closeDatabase() {\n  closeDb('branch');",
       "isNew": false,
       "kind": "exact",
       "lines": 23,
@@ -12937,7 +12937,7 @@
         }
       },
       "format": "javascript",
-      "fragment": "          cwd: process.env.BIOF3_LOCAL_DATA_DIR || process.env.BIOF3_PROJECT_ROOT || \".\",\n          env: { ...process.env, TERM: \"xterm-256color\", COLORTERM: \"truecolor\" },\n        });\n        const disposeData = proc.onData((data) =>\n          sendTerminalEvent(CHANNELS.terminal.data, { sessionId, data }),\n        );\n        const disposeExit = proc.onExit(({ exitCode, signal }) => {\n          sendTerminalEvent(CHANNELS.terminal.exit, { sessionId, code: exitCode, signal });\n          disposeData?.dispose();\n          disposeExit?.dispose();\n          sessions.delete(sessionId);\n        });\n        sessions.set(sessionId, {\n          proc, disposeData, disposeExit,\n          cwd: `${alias}:${remotePath}`,",
+      "fragment": "          cwd: process.env.PETRI_LOCAL_DATA_DIR || process.env.PETRI_PROJECT_ROOT || \".\",\n          env: { ...process.env, TERM: \"xterm-256color\", COLORTERM: \"truecolor\" },\n        });\n        const disposeData = proc.onData((data) =>\n          sendTerminalEvent(CHANNELS.terminal.data, { sessionId, data }),\n        );\n        const disposeExit = proc.onExit(({ exitCode, signal }) => {\n          sendTerminalEvent(CHANNELS.terminal.exit, { sessionId, code: exitCode, signal });\n          disposeData?.dispose();\n          disposeExit?.dispose();\n          sessions.delete(sessionId);\n        });\n        sessions.set(sessionId, {\n          proc, disposeData, disposeExit,\n          cwd: `${alias}:${remotePath}`,",
       "isNew": false,
       "kind": "exact",
       "lines": 15,

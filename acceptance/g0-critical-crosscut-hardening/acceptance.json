@@ -13,13 +13,13 @@
     {
       "id": "CHF0-SEC-1",
       "status": "passed",
-      "assertion": "R/Python raw execution and replot code routes fail closed for non-BioF3 origins",
+      "assertion": "R/Python raw execution and replot code routes fail closed for non-Petri origins",
       "command": "node --test --test-name-pattern=CHF0 SEC-1 test/g0-chf0-http.test.mjs",
       "testFile": "test/g0-chf0-http.test.mjs",
       "testNamePattern": "CHF0 SEC-1",
       "testCount": 2,
       "exitCode": 0,
-      "outputTail": "✔ CHF0 SEC-1 trusts only declared BioF3 renderer origins (0.6353ms)\n✔ CHF0 SEC-1 R raw execution routes fail closed (0.0963ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 605.8306"
+      "outputTail": "✔ CHF0 SEC-1 trusts only declared Petri renderer origins (0.6353ms)\n✔ CHF0 SEC-1 R raw execution routes fail closed (0.0963ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 605.8306"
     },
     {
       "id": "CHF0-SEC-2",
@@ -47,13 +47,13 @@
   "sourceHashes": {
     "package.json": "44a14c489dcefc4b0e5181a0e6b604ff5736372a85164c6adbab1ba3b3e25b7a",
     "src/main.js": "27eefabe489b60adef55e42030ca001c6695c4c8d4655db15950fd12494c1b48",
-    "core/biof3-server/bootstrap.js": "618ce06f1b90a7fb4e6de9ca6f983c9c1805b4d59dd13846f98ecb008728b69c",
-    "core/biof3-server/db.js": "387c50f9567428969a2c0fd89a59e485c52ca831eb2cc254f81de8ff80736408",
-    "core/biof3-server/helpers/local-request-boundary.js": "20ae30a4b8805a474700fd82b30f61342878531bc239098714e27698e174b7d1",
-    "core/biof3-server/helpers/process-lifecycle.js": "5009ee15bebeff54c9002df89301cd42abb5f0fdac636ae29c6a5cfeb54d13ab",
-    "core/biof3-server/helpers/tools-executor.js": "18e8d1f76aa06a90f31ec4d6ea436ea3177ae275c1840f1d727319d3546509a0",
-    "core/biof3-server/routes/files.js": "93071dd4be0f612994275d8bb27f10c5245760ee45bc3e58a4a35f2ba10c0c78",
-    "core/biof3-server/routes/tools-platform.js": "cdce4456d71b47348f0174d7c06e37b693b3c9f29291907143028c159a7a6792",
+    "core/petri-server/bootstrap.js": "618ce06f1b90a7fb4e6de9ca6f983c9c1805b4d59dd13846f98ecb008728b69c",
+    "core/petri-server/db.js": "387c50f9567428969a2c0fd89a59e485c52ca831eb2cc254f81de8ff80736408",
+    "core/petri-server/helpers/local-request-boundary.js": "20ae30a4b8805a474700fd82b30f61342878531bc239098714e27698e174b7d1",
+    "core/petri-server/helpers/process-lifecycle.js": "5009ee15bebeff54c9002df89301cd42abb5f0fdac636ae29c6a5cfeb54d13ab",
+    "core/petri-server/helpers/tools-executor.js": "18e8d1f76aa06a90f31ec4d6ea436ea3177ae275c1840f1d727319d3546509a0",
+    "core/petri-server/routes/files.js": "93071dd4be0f612994275d8bb27f10c5245760ee45bc3e58a4a35f2ba10c0c78",
+    "core/petri-server/routes/tools-platform.js": "cdce4456d71b47348f0174d7c06e37b693b3c9f29291907143028c159a7a6792",
     "core/shared-backend/local-request-boundary.js": "f72b27719576f65b63f347dbb5149da9456dec0e5ed2f6201d75d86cfd998bc1",
     "core/shared-backend/storage/local-storage.js": "7c61bf4a7cc656ba89fa35ee1653fa03c7572f3a763c3ea8181319c737132c8f",
     "test/g0-chf0-http.test.mjs": "ba769fb7a0ae842c98d066a0348cb2c45969a9a20f478e5a40ff9b62452dd17d",

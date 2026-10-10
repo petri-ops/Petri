@@ -11,7 +11,7 @@
 已核实的现状（2026-09-02 摸底）：
 
 - **订阅是 fetch-stream 而非 EventSource**：[copilotClient.ts:640-708](../frontend/src/components/copilot/copilotClient.ts#L640-L708) `subscribeAgentTask` 用 `fetch` + `ReadableStream` 读 SSE。后端重启时连接断开。
-- **后端 SSE 语义已完备支持重连**：[events.js](../core/biof3-server/routes/ai-agent/events.js) 订阅时先回放 `afterSeq+1` 起的历史事件（seq 续传）；task 已终态时发送终态事件后**必发 `[DONE]`** 再 `res.end()`；`failed` 终态事件携带 BLOCK-38 的 `resumable`/`interruptedAt` 标记。因此「流结束而未收到 `[DONE]`」⇔ 异常断线，可作为重连信号。
+- **后端 SSE 语义已完备支持重连**：[events.js](../core/petri-server/routes/ai-agent/events.js) 订阅时先回放 `afterSeq+1` 起的历史事件（seq 续传）；task 已终态时发送终态事件后**必发 `[DONE]`** 再 `res.end()`；`failed` 终态事件携带 BLOCK-38 的 `resumable`/`interruptedAt` 标记。因此「流结束而未收到 `[DONE]`」⇔ 异常断线，可作为重连信号。
 - **断线后前端现有行为有两处缺陷**（[copilotClient.ts:584-592](../frontend/src/components/copilot/copilotClient.ts#L584-L592)）：① `streamChatViaTask` 的 catch 对订阅阶段错误**回退 legacy**（`streamChatLegacy` 重发整段对话重新提交，非续传——中断场景下会重复执行已完成的步骤）；② `subscribeAgentTask` 读循环干净截断（`done=true` 未遇 `[DONE]`）时落入 `onDone?.()` 假装完成——任务实际被清扫为 failed+interrupted，用户却看到"完成"。
 - **run 状态侧无需改动**：[conversationRunStore.ts:286-314](../frontend/src/components/copilot/conversationRunStore.ts#L286-L314) `finish('error')` 已在 `errorInfo.resumable` 时写入 `resumable`/`interruptedAt`，且 `finish` 有 `status !== 'running'` 守卫（error 后到达的 `[DONE]` 不会覆盖失败态）；SimpleChat 的 ResumePrompt 渲染条件（`m.error && m.resumable && m.taskId`）与确认弹层/续跑链路 BLOCK-38 已交付。
 - **statusMessage 有现成渲染位**：SimpleChat 待处理的 assistant 消息展示 `m.statusMessage`（SimpleChat.tsx L1254），可用于「正在重连」提示。

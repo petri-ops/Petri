@@ -2,7 +2,7 @@
 /**
  * BLOCK-125 实机走查 — reject→agent 回路全拓扑闭环验证：
  * 播种项目+未提交变更 → CDP 测试实例(:9223) 打开审阅 tab 点「拒绝」→
- * 验证拒绝清单落盘到共享目录(BIOF3_LOCAL_DATA_DIR) → :3001 REST 下一轮提问 →
+ * 验证拒绝清单落盘到共享目录(PETRI_LOCAL_DATA_DIR) → :3001 REST 下一轮提问 →
  * agent 回答引用被拒文件=回路闭环。
  * 产出：acceptance/block-125/reject-loop-live.json
  */
@@ -14,12 +14,12 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const lib = require(path.join(ROOT, '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(ROOT, '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 
 const API = 'http://127.0.0.1:3001/api';
 const AUTH = { Authorization: 'Bearer desktop-local' };
 const APP_ORIGIN = 'http://localhost:3000';
-const SHARED_REJECTS = path.join(ROOT, '.biof3-dev-user-data', 'data', 'working-tree-review', 'rejects');
+const SHARED_REJECTS = path.join(ROOT, '.petri-dev-user-data', 'data', 'working-tree-review', 'rejects');
 const EVDIR = path.join(ROOT, 'acceptance', 'block-125');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 

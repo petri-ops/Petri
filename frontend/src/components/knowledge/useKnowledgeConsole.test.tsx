@@ -7,7 +7,7 @@ import { cleanup, renderHook, act, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { useKnowledgeConsole } from './useKnowledgeConsole';
-import { gewuEvents } from '@/lib/events';
+import { petriEvents } from '@/lib/events';
 
 const streamChatMock = vi.fn();
 
@@ -73,14 +73,14 @@ describe('BLOCK-99 G4 useKnowledgeConsole', () => {
 
   it('记忆会话存在 → 复用并加载历史；不存在 → 重建', async () => {
     captureStream();
-    window.localStorage.setItem('gewu_knowledge_console_conv', 'conv_console_existing');
+    window.localStorage.setItem('petri_knowledge_console_conv', 'conv_console_existing');
     const first = renderHook(() => useKnowledgeConsole());
     await waitFor(() => expect(first.result.current.ready).toBe(true));
     expect(first.result.current.conversationId).toBe('conv_console_existing');
     expect(first.result.current.entries).toHaveLength(2);
     expect(first.result.current.entries[0]).toMatchObject({ role: 'user', content: '上一条' });
 
-    window.localStorage.setItem('gewu_knowledge_console_conv', 'conv_console_gone');
+    window.localStorage.setItem('petri_knowledge_console_conv', 'conv_console_gone');
     const second = renderHook(() => useKnowledgeConsole());
     await waitFor(() => expect(second.result.current.ready).toBe(true));
     expect(second.result.current.conversationId).toBe('conv_console_new');
@@ -117,7 +117,7 @@ describe('BLOCK-99 G4 useKnowledgeConsole', () => {
     await waitFor(() => expect(result.current.ready).toBe(true));
 
     const dispatched: string[] = [];
-    window.addEventListener(gewuEvents.knowledgeConsoleSync, () => dispatched.push('sync'));
+    window.addEventListener(petriEvents.knowledgeConsoleSync, () => dispatched.push('sync'));
 
     streamChatMock.mockImplementation(async (opts: Record<string, unknown>) => {
       Object.assign(getCaptured(), opts);
@@ -187,7 +187,7 @@ describe('BLOCK-99 G4 useKnowledgeConsole', () => {
     await waitFor(() => expect(result.current.ready).toBe(true));
 
     const dispatched: string[] = [];
-    window.addEventListener(gewuEvents.knowledgeConsoleSync, () => dispatched.push('sync'));
+    window.addEventListener(petriEvents.knowledgeConsoleSync, () => dispatched.push('sync'));
 
     streamChatMock.mockImplementation(async (opts: Record<string, unknown>) => {
       Object.assign(getCaptured(), opts);
@@ -246,7 +246,7 @@ describe('BLOCK-99 G4 useKnowledgeConsole', () => {
     await waitFor(() => expect(result.current.ready).toBe(true));
 
     const dispatched: string[] = [];
-    window.addEventListener(gewuEvents.knowledgeConsoleSync, () => dispatched.push('sync'));
+    window.addEventListener(petriEvents.knowledgeConsoleSync, () => dispatched.push('sync'));
 
     streamChatMock.mockImplementation(async (opts: Record<string, unknown>) => {
       Object.assign(getCaptured(), opts);

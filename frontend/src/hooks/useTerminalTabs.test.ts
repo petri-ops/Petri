@@ -105,12 +105,12 @@ function installBridge() {
       };
     }),
   };
-  (window as unknown as { biof3Desktop: unknown }).biof3Desktop = { terminal: bridge };
+  (window as unknown as { petriDesktop: unknown }).petriDesktop = { terminal: bridge };
   return { bridge, onDataListeners, onExitListeners };
 }
 
 function uninstallBridge() {
-  delete (window as unknown as { biof3Desktop?: unknown }).biof3Desktop;
+  delete (window as unknown as { petriDesktop?: unknown }).petriDesktop;
 }
 
 // ---------------------------------------------------------------------------

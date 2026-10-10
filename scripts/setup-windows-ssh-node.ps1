@@ -1,6 +1,6 @@
 # ============================================================
 # setup-windows-ssh-node.ps1  (BLOCK-85 direction B)
-# One-time setup so the Mac's Gewu can SSH into this Windows
+# One-time setup so the Mac's Petri can SSH into this Windows
 # machine as an execution node. Run from an ELEVATED PowerShell.
 #
 #   powershell -ExecutionPolicy Bypass -File scripts\setup-windows-ssh-node.ps1
@@ -9,7 +9,7 @@
 #   1. Install OpenSSH Server (Windows optional capability) if missing
 #   2. Start sshd + set it to auto-start
 #   3. Open firewall rule for inbound port 22
-#   4. Set sshd DefaultShell to Git Bash (bash.exe) - the Gewu
+#   4. Set sshd DefaultShell to Git Bash (bash.exe) - the Petri
 #      node-side runner speaks POSIX shell
 #   5. Prepare C:\ProgramData\ssh\administrators_authorized_keys
 #      (mandatory pubkey path for admin-group users on Windows OpenSSH)
@@ -71,7 +71,7 @@ if ($gitBash) {
         -Value $gitBash -PropertyType String -Force | Out-Null
     Step "DefaultShell set to $gitBash"
 } else {
-    Write-Warning 'Git Bash not found - DefaultShell left as-is. Install Git for Windows first; the Gewu runner needs POSIX bash.'
+    Write-Warning 'Git Bash not found - DefaultShell left as-is. Install Git for Windows first; the Petri runner needs POSIX bash.'
 }
 
 # --- 5. administrators_authorized_keys ready to receive the Mac pubkey ---
@@ -94,7 +94,7 @@ Write-Host "Windows LAN IP : $ip"
 Write-Host "Windows user   : $env:USERNAME"
 Write-Host "sshd port      : 22 (DefaultShell = bash)"
 Write-Host 'Mac ~/.ssh/config entry:'
-Write-Host "  Host gewu-windows"
+Write-Host "  Host petri-windows"
 Write-Host "    HostName $ip"
 Write-Host "    Port 22"
 Write-Host "    User $env:USERNAME"

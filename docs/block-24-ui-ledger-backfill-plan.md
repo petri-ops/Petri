@@ -14,7 +14,7 @@ Close the BLOCK-22 ledger debt (UI-191~194 were never registered in
 - dev Electron observation for UI-193 (accept/reject widget on the Working
   Tree Review inline diff, including a real hunk reject through the BLOCK-20
   IPC with repository restore) and UI-194 (pending-scroll linkage driven
-  through the mounted dev bridge `window.__biof3DispatchOpenFile`).
+  through the mounted dev bridge `window.__petriDispatchOpenFile`).
 - Fix `test/impact-map.json` classification-rule overlaps so
   `npm run test:changed:list` reproduces and passes.
 - Canonical ledger updates (roadmap / handoff / AUDIT-LOG / DOC-REGISTRY /
@@ -47,7 +47,7 @@ Close the BLOCK-22 ledger debt (UI-191~194 were never registered in
    open Working Tree Review → observe the accept/reject widgets → reject one
    hunk through the widget → verify the file is restored and the repository
    is clean → evidence `acceptance/ui-193/`.
-3. **P2 — UI-194 dev Electron**: dispatch `window.__biof3DispatchOpenFile`
+3. **P2 — UI-194 dev Electron**: dispatch `window.__petriDispatchOpenFile`
    → observe the preview open the file in CodeMirror and scroll to the
    target line → evidence `acceptance/ui-194/`.
 4. **P3 — Impact-map repair**: remove or merge the overlapping
@@ -83,7 +83,7 @@ updated.
   `CodeMirrorDiffView` passes a `DiffRevision` without `hunks`, so
   `getHunks()` is empty and the WTR accept/reject UX remains the BLOCK-20
   drawer action bar (`acceptance/ui-193/`, passed:false with root cause).
-  The UI-194 dispatch through the mounted `window.__biof3DispatchOpenFile`
+  The UI-194 dispatch through the mounted `window.__petriDispatchOpenFile`
   was accepted but produced no preview — `WorkspaceFilePreviewBridge` /
   `ChatCardLinkBridge` have no JSX mount anywhere, so the pending request
   has no consumer (`acceptance/ui-194/`, passed:false with root cause).

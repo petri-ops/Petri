@@ -9,7 +9,7 @@ changes are authored by the agent itself, so a second AI pass over the same
 the human reviewer is already served by the deterministic Working Tree
 Review panel (diff, per-hunk accept/reject, commit). Codex keeps /review as
 a flagship feature because its scope includes reviewing human-authored code
-(PR review); BioF3's primary flow does not.
+(PR review); Petri's primary flow does not.
 
 The removal is reversible: git history retains the full implementation
 (commits 0ca7e59..7fc08c5, UI-202/UI-203 evidence and ledgers stay as

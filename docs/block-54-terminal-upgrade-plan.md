@@ -17,7 +17,7 @@
 | 输出预算                  | `max_output_tokens` 默认 10000 + policy 封顶（token 级而非字节级）                                                        | `shell_spec.rs` L59-63                                                     |
 | 审批                    | ExecCommand/WriteStdin 独立审批语义（命令/cwd/sandbox/pid）                                                             | `tools/approvals.rs` L65-89                                                |
 
-### 1.2 BioF3 现状差距
+### 1.2 Petri 现状差距
 
 **模型侧**（`workspace_exec`，BLOCK-33 建）：一次性命令 + 后台变体（exec\_background + 进程表 + process\_status/stop）——后台化领先 codex，但缺「yield 中间档」：同步等到完 vs 转后台的二元选择中间没有「等 10 秒没完就交还控制权」；输出为字节级截断（8KB cap）而非 token 预算。
 
@@ -96,7 +96,7 @@
 
 ## 6. 进度记录
 
-- 2026-09-03 P0（planned 登记）：用户裁决立项；方案源自 codex unified exec 调研（yield\_time\_ms 中间档 / 64 会话上限哲学 / token 预算输出）对比 BioF3 差距（模型侧缺 yield、用户侧终端单例）；本计划落盘并注册 DOC-REGISTRY；排队 BLOCK-51 之后。
+- 2026-09-03 P0（planned 登记）：用户裁决立项；方案源自 codex unified exec 调研（yield\_time\_ms 中间档 / 64 会话上限哲学 / token 预算输出）对比 Petri 差距（模型侧缺 yield、用户侧终端单例）；本计划落盘并注册 DOC-REGISTRY；排队 BLOCK-51 之后。
 
 - 2026-09-04 **P1 完成**：workspace\_exec 新增 `yield_ms`（默认 10000，范围 250-30000，钳制不报错）+ `max_output_tokens`（token 预算截断 + 诚实标记）；超时路径按 exec\_background 同款 record 挂入既有后台进程表（`process_status` 轮询收尾 / `process_stop` 停止），与 exec\_background 正交 0 重复设施；tool-defs schema 同步。定向 `agent-workspace-exec-yield.test.mjs` 全绿。
 

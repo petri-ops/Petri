@@ -3,7 +3,7 @@
  * BLOCK-117 P1 — 本地 Laya 供给接点级校准裁决 harness（plan docs/block-117-laya-supply-validation-plan.md §1.1 P1）。
  *
  * 机制：不改三个原 harness 的语料/组装器/门限判据，仅通过两个通道重定向——
- *  1. BIOF3_DECISION_CONFIG_PATH → 沙箱配置（供给指向本地 laya_decide serve，零 API 费用零外发）；
+ *  1. PETRI_DECISION_CONFIG_PATH → 沙箱配置（供给指向本地 laya_decide serve，零 API 费用零外发）；
  *  2. CALIBRATION_EVIDENCE_OUT/FILE/MODEL → 证据落 acceptance/block-117/（原 Jev 证据文件零风险）。
  * 裁决语义：沿用各接点原 P0 门限（gate.passed）——达标=可采纳（附建议 θ），
  * 不达标=不可采纳（附最优 θ 曲线摘要）；不放松任何门限、不硬凑 θ。
@@ -71,7 +71,7 @@ async function main() {
       timeout: 10 * 60 * 1000,
       env: {
         ...process.env,
-        BIOF3_DECISION_CONFIG_PATH: SANDBOX_CONFIG,
+        PETRI_DECISION_CONFIG_PATH: SANDBOX_CONFIG,
         CALIBRATION_EVIDENCE_OUT: EVIDENCE_DIR,
         CALIBRATION_EVIDENCE_FILE: outFile,
         CALIBRATION_EVIDENCE_MODEL: 'laya-typed-decisions (local supply)',
@@ -106,8 +106,8 @@ async function main() {
     capturedAt: new Date().toISOString(),
     sourceCommit: require('node:child_process').execSync('git rev-parse HEAD', { cwd: root }).toString().trim(),
     model: 'laya-typed-decisions (local supply, convaiinnovations/laya via laya_decide serve /v1/systemone)',
-    wrapper: 'core/biof3-server/helpers/decision-api.js（客户端零改动，D-B provider 可替换性）',
-    supplySandbox: 'fixtures/decision-config-laya-sandbox.json（BIOF3_DECISION_CONFIG_PATH 通道；零 API 费用零外发）',
+    wrapper: 'core/petri-server/helpers/decision-api.js（客户端零改动，D-B provider 可替换性）',
+    supplySandbox: 'fixtures/decision-config-laya-sandbox.json（PETRI_DECISION_CONFIG_PATH 通道；零 API 费用零外发）',
     verdictRule: '沿用各接点原 P0 门限判据，不因换模型放松；不可采纳即如实落证据',
     perPoint,
     summaryLine: `三接点裁决：可采纳 ${adoptable.length}/${POINTS.length}${adoptable.length ? '（' + adoptable.map((p) => p.point + (p.recommendedThreshold != null ? '@θ=' + p.recommendedThreshold : '')).join('、') + '）' : ''}`,

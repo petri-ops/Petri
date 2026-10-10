@@ -17,7 +17,7 @@
           "version": "4.5.3",
           "command": "/usr/bin/Rscript"
         },
-        "remoteJobDir": "$HOME/.biof3-agent/jobs/rjob_tj_mtnywtsc_dszf_661061",
+        "remoteJobDir": "$HOME/.petri-agent/jobs/rjob_tj_mtnywtsc_dszf_661061",
         "argmode": "jobdir",
         "agentVersion": "ec012a2941b550bf",
         "transport": "tar-over-ssh",
@@ -44,7 +44,7 @@
     },
     "local": {
       "rVersion": null,
-      "note": "本机（macOS，BioF3 内嵌 R）"
+      "note": "本机（macOS，Petri 内嵌 R）"
     }
   },
   "perFile": [

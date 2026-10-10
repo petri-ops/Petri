@@ -20,12 +20,12 @@ const SKIP_REASON = '中性夹具插件缺失（test/fixtures/neutral-plugins/sa
 
 test('built-in 工具插件被自动发现（sample-metrics）', { skip: hasBuiltIn ? false : SKIP_REASON }, async () => {
   // 清空已装插件，确保 volcano-plot 来自 built-in 发现（不是 installed.json）
-  // 用空 BIOF3_PLUGINS_DIR 让 loadPluginsFromDisk 找不到已装插件
+  // 用空 PETRI_PLUGINS_DIR 让 loadPluginsFromDisk 找不到已装插件
   const emptyDir = resolve(__dirname, '..', 'test-tmp-empty');
   const transport = new StdioClientTransport({
     command: 'node',
     args: [SERVER_PATH],
-    env: { ...process.env, BIOF3_PLUGINS_DIR: emptyDir, BIOF3_BUILT_IN_PLUGINS_DIR: BUILT_IN_DIR },
+    env: { ...process.env, PETRI_PLUGINS_DIR: emptyDir, PETRI_BUILT_IN_PLUGINS_DIR: BUILT_IN_DIR },
   });
   const client = new Client({ name: 'builtin-test', version: '1.0.0' });
   await client.connect(transport);
@@ -45,7 +45,7 @@ test('built-in 与已装插件去重（已装优先）', { skip: !hasBuiltIn }, 
   // 构造 installed.json 含 volcano-plot（模拟已装）
   const os = await import('node:os');
   const fs = await import('node:fs');
-  const tmpDir = fs.mkdtempSync(join(os.tmpdir(), 'biof3-dedup-'));
+  const tmpDir = fs.mkdtempSync(join(os.tmpdir(), 'petri-dedup-'));
   const pluginDir = join(tmpDir, 'volcano-plot');
   fs.mkdirSync(join(pluginDir, 'scripts'), { recursive: true });
   fs.writeFileSync(join(pluginDir, 'plugin.json'), JSON.stringify({
@@ -59,7 +59,7 @@ test('built-in 与已装插件去重（已装优先）', { skip: !hasBuiltIn }, 
   const transport = new StdioClientTransport({
     command: 'node',
     args: [SERVER_PATH],
-    env: { ...process.env, BIOF3_PLUGINS_DIR: tmpDir },
+    env: { ...process.env, PETRI_PLUGINS_DIR: tmpDir },
   });
   const client = new Client({ name: 'dedup-test', version: '1.0.0' });
   await client.connect(transport);

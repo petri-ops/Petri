@@ -4,7 +4,7 @@
 /**
  * UI-379 delegated user retest (用户裁决「你来」委托 Agent 代跑).
  *
- * Prerequisite: dev stack running with CDP (`BIOF3_DEV_ELECTRON_ARGS=--remote-debugging-port=9222 npm run dev`).
+ * Prerequisite: dev stack running with CDP (`PETRI_DEV_ELECTRON_ARGS=--remote-debugging-port=9222 npm run dev`).
  *
  * User-view acceptance of the two React hooks-order fixes:
  *   ① 首启/欢迎页整页空白（DesktopOnboarding 早退排在 hooks 前）
@@ -15,7 +15,7 @@
  */
 
 const path = require('node:path');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 
 const REPO = lib.findRepoRoot(__dirname);
 const EVIDENCE_DIR = path.join(REPO, 'acceptance', 'ui-379');

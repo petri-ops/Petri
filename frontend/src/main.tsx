@@ -1,4 +1,4 @@
-// Gewu 桌面版原生 shell — 应用入口
+// Petri 桌面版原生 shell — 应用入口
 // 替代 Docusaurus 的 Root + Layout，纯 React Router
 
 import React from 'react';

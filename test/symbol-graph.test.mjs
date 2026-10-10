@@ -1,6 +1,6 @@
 // HK-03 P1 契约测试 — symbol-graph 两查询（红绿先行：本文件先于实现落盘）
 // 契约锚点：docs/hk03-symbol-graph-selection.md §1 需求规格 / §4 P1 落地要点
-// BLOCK-124（C-13）迁家：单源迁 core/biof3-server/helpers/code-graph.js（scripts 变薄壳），
+// BLOCK-124（C-13）迁家：单源迁 core/petri-server/helpers/code-graph.js（scripts 变薄壳），
 // 追加产品化判据：tsconfig paths 别名解析 / 畸形文件容错 / maxFiles 上限。
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -78,7 +78,7 @@ test.after(() => {
 
 async function loadModule() {
   // BLOCK-124 单源迁家：内核在 core（CJS）；scripts/symbol-graph.mjs 仅剩 CLI 薄壳
-  const imported = await import('../core/biof3-server/helpers/code-graph.js');
+  const imported = await import('../core/petri-server/helpers/code-graph.js');
   return imported.default ?? imported;
 }
 

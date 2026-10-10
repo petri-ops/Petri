@@ -3,17 +3,17 @@ import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 
 export type ThemePreference = 'system' | 'light' | 'dark';
 export type ResolvedTheme = 'light' | 'dark';
-// BLOCK-61：新 key 命名空间 gewu-*；历史 key 读兼容（偏好零丢失），写入只落新 key。
-const THEME_STORAGE_KEY = 'gewu-theme';
-const LEGACY_THEME_KEYS = ['biof3-theme', 'theme'] as const;
-const THEME_CHANGE_EVENT = 'gewu:theme-change';
+// BLOCK-61：新 key 命名空间 petri-*；历史 key 读兼容（偏好零丢失），写入只落新 key。
+const THEME_STORAGE_KEY = 'petri-theme';
+const LEGACY_THEME_KEYS = ['petri-theme', 'theme'] as const;
+const THEME_CHANGE_EVENT = 'petri:theme-change';
 
 // BLOCK-49 加映三 — 界面字号：root 字号缩放系数（默认 1 = 14px 正文基准）。
-// 注入 --gewu-font-scale 到 html.style，全部字号 token 走 calc() 跟随缩放。
-const FONT_SCALE_STORAGE_KEY = 'gewu-font-scale';
+// 注入 --petri-font-scale 到 html.style，全部字号 token 走 calc() 跟随缩放。
+const FONT_SCALE_STORAGE_KEY = 'petri-font-scale';
 export const FONT_SCALE_MIN = 0.8;
 export const FONT_SCALE_MAX = 1.4;
-const FONT_CHANGE_EVENT = 'gewu:font-scale-change';
+const FONT_CHANGE_EVENT = 'petri:font-scale-change';
 import { applyAccent, readAccent, ACCENT_STORAGE_KEY, type AccentId } from './accents';
 export { type AccentId } from './accents';
 
@@ -28,7 +28,7 @@ function readFontScale(): number {
 }
 
 function applyFontScale(scale: number): void {
-  document.documentElement.style.setProperty('--gewu-font-scale', String(scale));
+  document.documentElement.style.setProperty('--petri-font-scale', String(scale));
 }
 
 interface ThemeContextValue {

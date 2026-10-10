@@ -19,10 +19,10 @@ const require = createRequire(import.meta.url);
 const ROOT = path.resolve('.');
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'b163-mcp-http-'));
-process.env.BIOF3_LOCAL_DATA_DIR = tmpDir;
+process.env.PETRI_LOCAL_DATA_DIR = tmpDir;
 
-const settings = require(path.join(ROOT, 'core/biof3-server/helpers/mcp-settings'));
-const manager = require(path.join(ROOT, 'core/biof3-server/mcp/client-manager'));
+const settings = require(path.join(ROOT, 'core/petri-server/helpers/mcp-settings'));
+const manager = require(path.join(ROOT, 'core/petri-server/mcp/client-manager'));
 
 // ── 最小 MCP-over-HTTP 夹具：initialize + tools/list ──
 const httpServer = http.createServer((req, res) => {
@@ -39,7 +39,7 @@ const httpServer = http.createServer((req, res) => {
         result: {
           protocolVersion: (msg.params && msg.params.protocolVersion) || '2024-11-05',
           capabilities: { tools: {} },
-          serverInfo: { name: 'gewu-http-fixture', version: '1.0.0' },
+          serverInfo: { name: 'petri-http-fixture', version: '1.0.0' },
         },
       }));
       return;

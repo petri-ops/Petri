@@ -106,7 +106,7 @@
 | **E-018** | error §三 L496-506 | rServerSupervisor 自动重启无 IPC 通知 | `src/main/backend-proc-manager.js` + `src/owned-backend-supervisor.js` | P1 | 🟠 中 | 不外推 | ⚠️ **引用不启动**（observability 候选） |
 | **E-019 full** | error §三 L508-529 | r-server 内 SQLite 双 connection busy_timeout **全量** 不一致 | `core/r-server/agent-task-store.js:177-179` + `core/r-server/db.js:18-32` + `src/database/{branch,result}-db.js` | P1 | 🟠 中 | BLOCK-10 PHASE 2 partial 落地 r-server 单进程 config-helper | ✅ **PHASE 1**（主范围；扩到 agent-task-store + branch-db + result-db） |
 | **PR-006** | perf §四 L269-291 | 4 个 backend 子进程 exit handler 仅 console.log | `src/main/backend-proc-manager.js` | P1 | 🟠 中 | 不外推 | ⚠️ **引用不启动**（observability 候选） |
-| **PR-012** | perf §四 L488-521 | branch-db + result-db 同时打开 biof3.db（与 E-019 / A-007 同根） | `src/database/{branch,result}-db.js` | P1 | 🟢 低 | 不外推 | ✅ **PHASE 1**（与 A-007 同 commit） |
+| **PR-012** | perf §四 L488-521 | branch-db + result-db 同时打开 petri.db（与 E-019 / A-007 同根） | `src/database/{branch,result}-db.js` | P1 | 🟢 低 | 不外推 | ✅ **PHASE 1**（与 A-007 同 commit） |
 | **C-001-rserver** | rserver-http §五 L456-462 | `/api/run` 与 `/api/replot/run` 双重拦截 | `core/r-server/routes/r-compute.js:48,65` + `core/r-server/bootstrap.js:62` | P1 | 🟢 低 | 不外推 | ⚠️ **引用不启动**（rserver-http-debt-pack 候选） |
 | **C-002-rserver** | rserver-http §五 L464-472 | /api/result-studio/interaction 在 Revision 不匹配返回 HTTP 200 + {error} | `core/r-server/routes/result-studio.js` | P1 | 🟢 低 | 不外推 | ⚠️ **引用不启动**（rserver-http-debt-pack 候选；与 A-002 同文件，PHASE 2 落地 A-002 时不联动修） |
 | **M-001** | rserver-http §六 L474-480 | /api/ai/admin/* 9 端点鉴权后置 | `core/r-server/routes/ai-admin.js:25` | P1 | 🟠 中 | 不外推 | ⚠️ **引用不启动**（rserver-http-debt-pack 候选） |
@@ -165,7 +165,7 @@
 | ID | 用户可见症状 | 当前阶段边界 | commit |
 |----|--------------|--------------|--------|
 | **A-007** | 测试时 branch-db close → result-db 还活着，状态机难以预测；branch/result IPC handler 多开 SQLite handle | dev Electron + packaged 边界内 verified | PHASE 1.1 |
-| **PR-012** | branch-db + result-db 与 r-server 共享 biof3.db；WAL 锁竞争 | dev Electron + packaged 边界内 verified | PHASE 1.1（与 A-007 同 commit） |
+| **PR-012** | branch-db + result-db 与 r-server 共享 petri.db；WAL 锁竞争 | dev Electron + packaged 边界内 verified | PHASE 1.1（与 A-007 同 commit） |
 | **E-019 full** | SQLite busy_timeout 不一致（r-server 10000ms / agent-task-store / branch-db / result-db 各自保留） | dev Electron + packaged 边界内 verified | PHASE 1.1（与 A-007 同 commit） |
 | **A-009** | dev 模式手动启动 r-server 不带 env，端口 fallback 在 3003 / 3001 之间漂移 | dev Electron 边界内 verified | PHASE 1.2 |
 | **A-010（仅 jspdf）** | frontend/package.json 装 jspdf 但 0 import；214 处 process.env.* 散落 | dev Electron + packaged 边界内 verified | PHASE 1.2（仅移除 jspdf + 6 处 process.env.* 集中） |
@@ -426,7 +426,7 @@ PHASE 4（audit + closeout）
 | **A-007 DB singleton 重复** | 候选工作包假设可统一到 `core/r-server/db.js` | 实际 desktop 进程与 r-server 进程是不同进程，从架构上需分开；代码层共享 `getDatabase` 函数 | PHASE 1.1 抽 `src/database/_db-singleton.js` 仅代码层共享，进程边界由 ELECTRON main 进程事实承担 |
 | **A-001 agent-runner 拆分** | 候选工作包假设抽 LoopOrchestrator + ConversationAdapter 即可 | 实际 agent-runner 还有 20 顶层 require 覆盖 system-prompt / llm-client / plans / conversations / memory-vectors / runtime 等；拆完后 `loop-controller` 应独立 require 0 个 agent-runner 内部函数 | PHASE 3.1 拆完后额外验证 `loop-controller.js` 仍可独立运行 |
 | **A-006 56+ singleton 整体收敛** | 候选工作包假设全部收敛 | 实际 56+ 处里 ~12 处可迁 SQLite；其余 ephemeral 内存 cache 现状 OK | PHASE 3.3 仅 ≥5 处迁 SQLite，剩余保留 |
-| **A-010 隐式 env 集中** | 候选工作包假设 214 处全部集中 | 实际进程启动时一次性读 env + helper 内读 env，集中在 `shared-backend/config-helper.js` 后行为不变 | PHASE 1.2 仅 6 处 `process.env.*` 集中（核心 DB 路径 / R_SERVER_URL / PY_SERVER_URL / GATEWAY_URL / BIOF3_CONTENT_ROOT / BIOF3_CONTENT_PLUGINS_DIR），其余保留 |
+| **A-010 隐式 env 集中** | 候选工作包假设 214 处全部集中 | 实际进程启动时一次性读 env + helper 内读 env，集中在 `shared-backend/config-helper.js` 后行为不变 | PHASE 1.2 仅 6 处 `process.env.*` 集中（核心 DB 路径 / R_SERVER_URL / PY_SERVER_URL / GATEWAY_URL / PETRI_CONTENT_ROOT / PETRI_CONTENT_PLUGINS_DIR），其余保留 |
 
 ---
 

@@ -14,8 +14,8 @@ const { mkdirSync, readFileSync, writeFileSync } = require('node:fs');
 const path = require('node:path');
 const { probeUrl } = require('../src/backend-health.js');
 
-const CONFIG_ENV = 'BIOF3_P6_RECOVERY_ELECTRON_CONFIG';
-const ATTEMPT_ENV = 'BIOF3_P6_RECOVERY_ELECTRON_ATTEMPT';
+const CONFIG_ENV = 'PETRI_P6_RECOVERY_ELECTRON_CONFIG';
+const ATTEMPT_ENV = 'PETRI_P6_RECOVERY_ELECTRON_ATTEMPT';
 const PRELOAD_PATH = path.resolve(__dirname, '..', 'src', 'preload.js');
 const WAIT_MS = 120_000;
 const POLL_MS = 100;
@@ -321,7 +321,7 @@ async function run() {
     width: 1280,
     height: 840,
     show: config.show === true,
-    title: 'BioF3 P6 isolated recovery observation',
+    title: 'Petri P6 isolated recovery observation',
     backgroundColor: '#ffffff',
     webPreferences: {
       contextIsolation: true,

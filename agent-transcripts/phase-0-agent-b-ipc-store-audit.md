@@ -18,36 +18,36 @@ The preload exposes **three** globals on `window`:
 
 | Global | Method | Channel | Return type |
 |---|---|---|---|
-| `window.biof3` | `agentWorkbenchFlags.getExtraRenderers()` | none (closure read of `AGENT_WORKBENCH_FLAGS`) | `boolean` |
-| `window.biof3` | `agentWorkbenchFlags.set(value)` | `biof3:agent-workbench-flags` (invoke) | `Promise<{ok, extraRenderers, error?}>` |
-| `window.biof3` | `agentWorkbenchFlags.onChange(cb)` | `biof3:agent-workbench-flags` (on) | unsubscribe `() => void` |
-| `window.process` | `process.env.{BIOF3_DESKTOP, NODE_ENV}` | none (constant) | `'1' \| 'production'` |
-| `window.biof3Desktop` | `isDesktop` (constant) | — | `true` |
-| `window.biof3Desktop` | `platform` (constant) | — | `string` |
-| `window.biof3Desktop` | `arch` (constant) | — | `string` |
-| `window.biof3Desktop` | `backendConfig` (frozen) | — | `{rApiBase, pythonApiBase}` |
-| `window.biof3Desktop.window.minimize/maximize/close` | `ipcRenderer.send` | `window:minimize\|maximize\|close` | `void` |
-| `window.biof3Desktop.window.isMaximized` | `invoke` | `window:isMaximized` | `Promise<boolean>` |
-| `window.biof3Desktop.window.onMaximizeChanged(cb)` | `on` | `window:maximize-changed` | unsubscribe `() => void` |
-| `window.biof3Desktop.app.relaunch` | `invoke` | `app:relaunch` | `Promise<{ok, error?}>` |
-| `window.biof3Desktop.aiSettings.get/save/getCredential/test/listModels` | `invoke` | `ai-settings:*` (5 channels) | per type — see electron.d.ts |
-| `window.biof3Desktop.computeSettings.get/save` | `invoke` | `compute-settings:*` | `Promise<ComputeSettings>` / `Promise<{ok, error?, restartRequired?}>` |
-| `window.biof3Desktop.harnessCapabilities.list` | `invoke` | `harness-capabilities:list` | `Promise<{ok, capabilities: HarnessCapabilityEntry[], error?}>` |
-| `window.biof3Desktop.plugins.listInstalled/listRemote/uninstall/checkUpdates` | `invoke` | `plugin:list-installed\|list-remote\|uninstall\|check-updates` | per type |
-| `window.biof3Desktop.plugins.install(pluginId, onProgress?)` | `invoke` + `on('plugin:install-progress')` | `plugin:install` | `Promise<{ok, error?}>`; progress listener cleaned up via `promise.finally` |
-| `window.biof3Desktop.contentPlugins.list/listDocs/read` | `invoke` | `content-plugin:list\|list-docs\|read` | per type |
-| `window.biof3Desktop.runtime.status` | `invoke` | `runtime:status` | `Promise<{r, python}>` |
-| `window.biof3Desktop.backend.status` | `invoke` | `backend:status` | `Promise<BackendStatus>` |
-| `window.biof3Desktop.py.start/stop` | `invoke` | `py:start\|stop` | `Promise<{ok, ...}>` |
-| `window.biof3Desktop.plumber.start/stop` | `invoke` | `plumber:start\|stop` | `Promise<{ok, ...}>` |
-| `window.biof3Desktop.files.saveDialog/openDialog/openDirectoryDialog/openPath/openWorkspaceFile` | `invoke` | `file:save-dialog\|open-dialog\|open-path\|open-workspace-file` | per type |
-| `window.biof3Desktop.diagnostic.export` | `invoke` | `diagnostic:export` | `Promise<{ok, path?, error?}>` |
-| `window.biof3Desktop.telemetry.report` | `invoke` | `telemetry:report` | `Promise<{ok, reason?}>` |
-| `window.biof3Desktop.data.info/openDir` | `invoke` | `data:info\|open-dir` | per type |
-| `window.biof3Desktop.terminal.snapshot/openLogDir/openShell/startSession/writeSession/resizeSession/stopSession` | `invoke` | `terminal:*` (7 channels) | per type |
-| `window.biof3Desktop.terminal.onData/onExit` | `on` | `terminal:data\|exit` | unsubscribe `() => void` |
-| `window.biof3Desktop.updater.check/download/install` | `invoke` | `updater:check\|download\|install` | per type |
-| `window.biof3Desktop.updater.onUpdateAvailable/onUpdateNotAvailable/onDownloadProgress/onUpdateDownloaded/onError` | `on` | `updater:*-event` | unsubscribe `() => void` |
+| `window.petri` | `agentWorkbenchFlags.getExtraRenderers()` | none (closure read of `AGENT_WORKBENCH_FLAGS`) | `boolean` |
+| `window.petri` | `agentWorkbenchFlags.set(value)` | `petri:agent-workbench-flags` (invoke) | `Promise<{ok, extraRenderers, error?}>` |
+| `window.petri` | `agentWorkbenchFlags.onChange(cb)` | `petri:agent-workbench-flags` (on) | unsubscribe `() => void` |
+| `window.process` | `process.env.{PETRI_DESKTOP, NODE_ENV}` | none (constant) | `'1' \| 'production'` |
+| `window.petriDesktop` | `isDesktop` (constant) | — | `true` |
+| `window.petriDesktop` | `platform` (constant) | — | `string` |
+| `window.petriDesktop` | `arch` (constant) | — | `string` |
+| `window.petriDesktop` | `backendConfig` (frozen) | — | `{rApiBase, pythonApiBase}` |
+| `window.petriDesktop.window.minimize/maximize/close` | `ipcRenderer.send` | `window:minimize\|maximize\|close` | `void` |
+| `window.petriDesktop.window.isMaximized` | `invoke` | `window:isMaximized` | `Promise<boolean>` |
+| `window.petriDesktop.window.onMaximizeChanged(cb)` | `on` | `window:maximize-changed` | unsubscribe `() => void` |
+| `window.petriDesktop.app.relaunch` | `invoke` | `app:relaunch` | `Promise<{ok, error?}>` |
+| `window.petriDesktop.aiSettings.get/save/getCredential/test/listModels` | `invoke` | `ai-settings:*` (5 channels) | per type — see electron.d.ts |
+| `window.petriDesktop.computeSettings.get/save` | `invoke` | `compute-settings:*` | `Promise<ComputeSettings>` / `Promise<{ok, error?, restartRequired?}>` |
+| `window.petriDesktop.harnessCapabilities.list` | `invoke` | `harness-capabilities:list` | `Promise<{ok, capabilities: HarnessCapabilityEntry[], error?}>` |
+| `window.petriDesktop.plugins.listInstalled/listRemote/uninstall/checkUpdates` | `invoke` | `plugin:list-installed\|list-remote\|uninstall\|check-updates` | per type |
+| `window.petriDesktop.plugins.install(pluginId, onProgress?)` | `invoke` + `on('plugin:install-progress')` | `plugin:install` | `Promise<{ok, error?}>`; progress listener cleaned up via `promise.finally` |
+| `window.petriDesktop.contentPlugins.list/listDocs/read` | `invoke` | `content-plugin:list\|list-docs\|read` | per type |
+| `window.petriDesktop.runtime.status` | `invoke` | `runtime:status` | `Promise<{r, python}>` |
+| `window.petriDesktop.backend.status` | `invoke` | `backend:status` | `Promise<BackendStatus>` |
+| `window.petriDesktop.py.start/stop` | `invoke` | `py:start\|stop` | `Promise<{ok, ...}>` |
+| `window.petriDesktop.plumber.start/stop` | `invoke` | `plumber:start\|stop` | `Promise<{ok, ...}>` |
+| `window.petriDesktop.files.saveDialog/openDialog/openDirectoryDialog/openPath/openWorkspaceFile` | `invoke` | `file:save-dialog\|open-dialog\|open-path\|open-workspace-file` | per type |
+| `window.petriDesktop.diagnostic.export` | `invoke` | `diagnostic:export` | `Promise<{ok, path?, error?}>` |
+| `window.petriDesktop.telemetry.report` | `invoke` | `telemetry:report` | `Promise<{ok, reason?}>` |
+| `window.petriDesktop.data.info/openDir` | `invoke` | `data:info\|open-dir` | per type |
+| `window.petriDesktop.terminal.snapshot/openLogDir/openShell/startSession/writeSession/resizeSession/stopSession` | `invoke` | `terminal:*` (7 channels) | per type |
+| `window.petriDesktop.terminal.onData/onExit` | `on` | `terminal:data\|exit` | unsubscribe `() => void` |
+| `window.petriDesktop.updater.check/download/install` | `invoke` | `updater:check\|download\|install` | per type |
+| `window.petriDesktop.updater.onUpdateAvailable/onUpdateNotAvailable/onDownloadProgress/onUpdateDownloaded/onError` | `on` | `updater:*-event` | unsubscribe `() => void` |
 
 **🚨 Critical finding — `skills` is NOT exposed in preload.js**
 
@@ -55,7 +55,7 @@ The preload exposes **three** globals on `window`:
 $ grep -n 'skill' src/preload.js   →   No matches found
 ```
 
-Despite `frontend/src/lib/electron.d.ts` lines 114–169 declaring a `window.biof3Desktop.skills.{discover, execute, getExecution}` interface and `useSkillStore.ts` calling `getBridge('skills')`, **preload.js never adds `skills:` to its `contextBridge.exposeInMainWorld('biof3Desktop', { ... })` block**. At runtime `getBridge('skills')` always returns `null`, so the Skills page always renders its error state. See §3 and §6.
+Despite `frontend/src/lib/electron.d.ts` lines 114–169 declaring a `window.petriDesktop.skills.{discover, execute, getExecution}` interface and `useSkillStore.ts` calling `getBridge('skills')`, **preload.js never adds `skills:` to its `contextBridge.exposeInMainWorld('petriDesktop', { ... })` block**. At runtime `getBridge('skills')` always returns `null`, so the Skills page always renders its error state. See §3 and §6.
 
 ### 1.2 `src/main.js` — `ipcMain.handle` / `ipcMain.on` registry
 
@@ -111,7 +111,7 @@ Despite `frontend/src/lib/electron.d.ts` lines 114–169 declaring a `window.bio
 
 | Event channel | Line | Producer |
 |---|---|---|
-| `biof3:agent-workbench-flags` | 911 | `setupAgentWorkbenchFlags` initial push |
+| `petri:agent-workbench-flags` | 911 | `setupAgentWorkbenchFlags` initial push |
 | `app:soft-refresh` | 1081 | Dev-triggered full reload fallback |
 | `updater:download-progress` | 1555 | Updater progress |
 | `updater:update-downloaded` | 1582 | Updater terminal state |
@@ -129,16 +129,16 @@ Despite `frontend/src/lib/electron.d.ts` lines 114–169 declaring a `window.bio
 
 ### 2.1 `frontend/src/lib/desktopBridge.ts`
 
-> File: 117 lines, full read. Pure TS facade, no React. Imports `Window['biof3Desktop']` from `@/lib/electron`.
+> File: 117 lines, full read. Pure TS facade, no React. Imports `Window['petriDesktop']` from `@/lib/electron`.
 
 **Exported API** (5 named exports + 2 type aliases + 1 class):
 
 | Export | Kind | Signature | JSDoc summary |
 |---|---|---|---|
-| `DesktopBridgeName` | type | `keyof Window['biof3Desktop']` | Bridge-name key — adding a new bridge in `electron.d.ts` automatically makes it addressable. |
-| `DesktopBridgeHandle<K>` | type | `Window['biof3Desktop'][K]` | Sub-handle type for a given bridge name. |
+| `DesktopBridgeName` | type | `keyof Window['petriDesktop']` | Bridge-name key — adding a new bridge in `electron.d.ts` automatically makes it addressable. |
+| `DesktopBridgeHandle<K>` | type | `Window['petriDesktop'][K]` | Sub-handle type for a given bridge name. |
 | `BridgeUnavailableError` | class | `extends Error`, name `'BridgeUnavailableError'` | Thrown by `requireBridge` when the bridge is missing; message identifies which bridge. |
-| `isDesktop()` | function | `() => boolean` | True if running inside the BioF3 desktop app (`window.biof3Desktop` is set). SSR-safe (short-circuits when `typeof window === 'undefined'`). |
+| `isDesktop()` | function | `() => boolean` | True if running inside the Petri desktop app (`window.petriDesktop` is set). SSR-safe (short-circuits when `typeof window === 'undefined'`). |
 | `getBridge<K>(name: K)` | function | `<K extends DesktopBridgeName>(name: K) => DesktopBridgeHandle<K> \| null` | Returns the sub-bridge typed against the canonical shape, or `null` if the desktop context (or that specific bridge) is unavailable. Non-critical paths short-circuit on `null`. |
 | `requireBridge<K>(name: K)` | function | `<K extends DesktopBridgeName>(name: K) => DesktopBridgeHandle<K>` | Throws `BridgeUnavailableError` if missing. For hot-path IPC where there is no graceful fallback. |
 
@@ -197,7 +197,7 @@ The `K extends DesktopBridgeName` constraint means a `getBridge('skills')` call 
 
 | Action | Current data source | Lines | Notes |
 |---|---|---|---|
-| `discover` (initial + forceRefresh) | **IPC via `getBridge('skills').discover()`** — calls back into `window.biof3Desktop.skills.discover()` | `_discoverSkills()` at 170–212; `discover` callback at 437–450 | Module-level cache (`_cache`) + 5-min TTL + in-flight de-dup. **🚨 Returns `{ ok: false, error: 'skills bridge unavailable' }` because no preload expose exists.** |
+| `discover` (initial + forceRefresh) | **IPC via `getBridge('skills').discover()`** — calls back into `window.petriDesktop.skills.discover()` | `_discoverSkills()` at 170–212; `discover` callback at 437–450 | Module-level cache (`_cache`) + 5-min TTL + in-flight de-dup. **🚨 Returns `{ ok: false, error: 'skills bridge unavailable' }` because no preload expose exists.** |
 | `search` | local-only (`useMemo` filter on `snapshot.skills`) | 452–456 | Reserved for future server-side search; today only sets the local `searchQuery`. |
 | `execute` | **IPC via `getBridge('skills').execute(skillId, params)`** | `execute` callback at 458–540 | Generates optimistic `SkillExecution` record with id `exec-${Date.now()}-${rand}`, awaits bridge promise, swaps optimistic id for real `executionId`, then starts `_startPolling`. **🚨 Returns `{ ok: false, error: 'skills bridge unavailable' }`.** |
 | `getExecution` | local `Map<string, SkillExecution>` lookup | 542–547 | No IPC. |
@@ -287,9 +287,9 @@ The store-consumer contract is **fully stable and side-effect free** from the pa
 | 2 | Dead `SkillsSidebar.module.css` | must NOT exist | `frontend/src/components/desktop/SkillsSidebar.module.css` → **not found** (Glob `**/SkillsSidebar.*` → 0 files) | ✅ OK |
 | 3 | `LeftPanel` `QuickActions` array — Skills entry exists | yes, with `sparkles` icon | `LeftPanel.tsx` lines 125–133 — entry `{ key: 'skills', mode: null, label: 'Skills', icon: 'sparkles', onClick: ctx.handleNavigateToSkills, title: 'Skills' }` | ✅ OK |
 | 4 | `pages/skills/index.tsx` error state — "返回首页" button | present | `pages/skills/index.tsx` lines 107–115 — `<button className={styles.retryBtn} onClick={handleReturnHome} title="返回首页">返回首页</button>` (note: `handleReturnHome` calls `navigate('/')`, line 55) | ✅ OK |
-| 5 | `styles/custom.css` — 4 tokens present | all 4 | light-mode: `--biof3-accent-soft` line 83, `--biof3-border-color` line 74, `--biof3-font-mono` line 86, `--biof3-font-sans` line 85 — all present in `:root`. dark-mode overrides: lines 192 (accent-soft), 194 (border-color) — font tokens correctly inherited via the `[data-theme='dark']` block's empty font section (theme switch uses the same font tokens) | ✅ OK |
+| 5 | `styles/custom.css` — 4 tokens present | all 4 | light-mode: `--petri-accent-soft` line 83, `--petri-border-color` line 74, `--petri-font-mono` line 86, `--petri-font-sans` line 85 — all present in `:root`. dark-mode overrides: lines 192 (accent-soft), 194 (border-color) — font tokens correctly inherited via the `[data-theme='dark']` block's empty font section (theme switch uses the same font tokens) | ✅ OK |
 
-**Note on UI-161 sidebar residue**: `frontend/src/components/desktop/desktop.css` lines 1889–1897 still carry a comment block titled `SkillsSidebar — 桌面端 Skills 快速访问侧边栏布局` plus a `.biof3-spa-main { transition: margin-left 0.25s ease; }` rule. These are dead comments (and one dead style rule) but not file-level references; they don't break UI but should be cleaned in a follow-up to fully retire UI-161 traces. The `.biof3-spa-main` `transition` is harmless because no element currently sets `margin-left` from this rule's expectation.
+**Note on UI-161 sidebar residue**: `frontend/src/components/desktop/desktop.css` lines 1889–1897 still carry a comment block titled `SkillsSidebar — 桌面端 Skills 快速访问侧边栏布局` plus a `.petri-spa-main { transition: margin-left 0.25s ease; }` rule. These are dead comments (and one dead style rule) but not file-level references; they don't break UI but should be cleaned in a follow-up to fully retire UI-161 traces. The `.petri-spa-main` `transition` is harmless because no element currently sets `margin-left` from this rule's expectation.
 
 ---
 
@@ -300,9 +300,9 @@ The store-consumer contract is **fully stable and side-effect free** from the pa
 | Layer | Action | Target location |
 |---|---|---|
 | main.js | **NEW** `ipcMain.handle('skills:list', async (event) => { ... })` inside a new `setupSkillsIpc()` function — call `core/shared-backend/skill-registry.js` (`require('./skill-registry')` next to existing plugin-manager requires on line 874) and normalize to the Skill shape. Place near the other `setupXxxIpc` blocks (after `setupDataIpc` at line 1900 is a natural slot). |
-| preload.js | Add `skills: { list: () => ipcRenderer.invoke('skills:list'), ... }` inside the `biof3Desktop` `contextBridge.exposeInMainWorld` block (around line 145, before `runtime`). |
+| preload.js | Add `skills: { list: () => ipcRenderer.invoke('skills:list'), ... }` inside the `petriDesktop` `contextBridge.exposeInMainWorld` block (around line 145, before `runtime`). |
 | electron.d.ts | **Already declared** (lines 116–151) under `skills.discover()`. Either keep the existing method name or extend the interface to add `list` alongside `discover` — prefer `discover` to keep current `useSkillStore` source untouched, OR add a new `list` and switch `useSkillStore` to it. |
-| desktopBridge.ts | No change needed (centralized access pattern already generic over `keyof biof3Desktop`). |
+| desktopBridge.ts | No change needed (centralized access pattern already generic over `keyof petriDesktop`). |
 | useSkillStore.ts | No change needed — `getBridge('skills').discover()` resolves at runtime once preload exposes it. |
 
 **Risk**: Any caller that depends on `bridge === null` would break; current behavior is `bridge === null` so callers already cope. The signature (`Promise<{ ok, skills?, error? }>`) is what `useSkillStore` already expects.
@@ -361,7 +361,7 @@ The current label + behavior is internally consistent (label says "go home", but
 
 ### 7.2 Are there Skills-related tests that lock in current behavior?
 
-**No.** A `glob` for `test/**/*skill*` returns 0 files, and `grep` across `**/*.test.{ts,tsx,js,jsx}` for `useSkillStore|skills:discover|skills:execute|skills:list|window.biof3Desktop.skills` returns no matches. The only adjacent test is `frontend/src/hooks/usePluginStore.test.ts` (175 lines) — it follows the same `vi.fn`-based bridge mock pattern and could serve as the template for a future `useSkillStore.test.ts`. Because there are no tests, PHASE 1 is free to add IPC handler tests without breaking existing snapshots.
+**No.** A `glob` for `test/**/*skill*` returns 0 files, and `grep` across `**/*.test.{ts,tsx,js,jsx}` for `useSkillStore|skills:discover|skills:execute|skills:list|window.petriDesktop.skills` returns no matches. The only adjacent test is `frontend/src/hooks/usePluginStore.test.ts` (175 lines) — it follows the same `vi.fn`-based bridge mock pattern and could serve as the template for a future `useSkillStore.test.ts`. Because there are no tests, PHASE 1 is free to add IPC handler tests without breaking existing snapshots.
 
 ### 7.3 Does main.js need any new import / require for the engine?
 
@@ -374,7 +374,7 @@ PHASE 1 will need a **new** `require('./skill-bridge')` (or inlined module) wrap
 
 - `electron.d.ts` lines 114–169 already declare `skills.{discover, execute, getExecution}`. PHASE 1 must **either** add new methods (`list`, `invoke`, `status`, `onProgress`) or repurpose the existing ones — either way a TS diff is required.
 - If PHASE 1 chooses **Option B** in §6.2 (rename `execute → invoke`), the rename must propagate to `useSkillStore.ts` line 484 and the file-local `ExecuteResult` type alias at lines 129–133.
-- The `getBridge('skills')` return type is `DesktopBridgeHandle<'skills'>` which collapses to `window.biof3Desktop.skills`. **No `any` will be needed** if the interface is kept clean.
+- The `getBridge('skills')` return type is `DesktopBridgeHandle<'skills'>` which collapses to `window.petriDesktop.skills`. **No `any` will be needed** if the interface is kept clean.
 - `useSkillStore.ts` line 234 casts `result.execution` fields into a local `SkillExecution`. If PHASE 1 normalizes the IPC payload strictly to `SkillExecution`'s public shape, the cast at lines 235–247 can stay but should be revisited.
 
 ### 7.5 Other open questions
@@ -389,7 +389,7 @@ PHASE 1 will need a **new** `require('./skill-bridge')` (or inlined module) wrap
 
 ```bash
 # Plan + required reading
-read /Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/docs/block-2-ui-157-review-plan.md
+read /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/docs/block-2-ui-157-review-plan.md
 read src/preload.js
 read frontend/src/lib/desktopBridge.ts
 read frontend/src/pages/skills/index.tsx
@@ -427,10 +427,10 @@ grep --files-with-matches SkillsSidebar                    # → desktop.css com
 # Tests
 glob 'test/**/*skill*'                                     # → 0 files
 glob 'frontend/src/**/useSkillStore.test.*'                # → 0 files
-grep -l 'useSkillStore|skills:discover|skills:execute|skills:list|window.biof3Desktop.skills' '**/*.test.{ts,tsx,js,jsx}'   # → 0 files
+grep -l 'useSkillStore|skills:discover|skills:execute|skills:list|window.petriDesktop.skills' '**/*.test.{ts,tsx,js,jsx}'   # → 0 files
 
 # Tokens
-grep -n -- '--biof3-accent-soft|--biof3-border-color|--biof3-font-mono|--biof3-font-sans' frontend/src/styles/custom.css
+grep -n -- '--petri-accent-soft|--petri-border-color|--petri-font-mono|--petri-font-sans' frontend/src/styles/custom.css
 
 # Icons sanity
 grep -n 'sparkles\|arrow-left\|alert-circle\|command\|layers' frontend/src/components/icons/Icon.tsx
@@ -440,11 +440,11 @@ grep -n 'sparkles\|arrow-left\|alert-circle\|command\|layers' frontend/src/compo
 
 ## Key findings (TL;DR for PHASE 1)
 
-1. **The Skills bridge is declared but never wired.** `electron.d.ts` declares `window.biof3Desktop.skills.{discover, execute, getExecution}`, `useSkillStore` calls `getBridge('skills')`, **but `src/preload.js` has zero `skills` references and `src/main.js` has zero `skill`/`skills` references**. Every `getBridge('skills')` call returns `null` at runtime — the Skills page always renders the error state with the `返回首页` button.
+1. **The Skills bridge is declared but never wired.** `electron.d.ts` declares `window.petriDesktop.skills.{discover, execute, getExecution}`, `useSkillStore` calls `getBridge('skills')`, **but `src/preload.js` has zero `skills` references and `src/main.js` has zero `skill`/`skills` references**. Every `getBridge('skills')` call returns `null` at runtime — the Skills page always renders the error state with the `返回首页` button.
 2. **The renderer-side contract is fully stable.** `pages/skills/index.tsx`, `SkillCard.tsx`, `SkillDetail.tsx`, `SkillSearch.tsx` only consume `useSkillStore` data + actions; they never touch IPC. PHASE 1 can rewire underneath the store without changing a single line in `pages/skills/*`.
 3. **No tests lock in the current (broken) behavior.** There are zero `skill` test files anywhere in the repo, so PHASE 1 has full freedom to add `useSkillStore.test.ts` modeled on `usePluginStore.test.ts` (175-line template ready), and to add IPC handler tests without breaking existing snapshots.
 4. **The 4 new IPC channels split cleanly**: `skills:list` ↔ current `discover`, `skills:invoke` ↔ current `execute`, `skills:status` ↔ current `getExecution`, and `skills:progress` as a new push channel that should replace `_startPolling` (2 s interval) to avoid duplicate update paths.
-5. **UI-161 cleanup is verified clean.** `SkillsSidebar.tsx` and `SkillsSidebar.module.css` are gone; `LeftPanel.QuickActions` carries the Skills entry (`icon: 'sparkles'`, lines 125–133); the `返回首页` button at `pages/skills/index.tsx` lines 107–115 is intact; all 4 CSS tokens are present in `custom.css` (lines 74, 83, 85, 86 in light mode; 192, 194 in dark mode). Two dead comment blocks remain in `frontend/src/components/desktop/desktop.css` lines 1889–1897 (`SkillsSidebar` comments + a vestigial `.biof3-spa-main { transition: margin-left ... }` rule) — harmless but should be swept in a follow-up.
+5. **UI-161 cleanup is verified clean.** `SkillsSidebar.tsx` and `SkillsSidebar.module.css` are gone; `LeftPanel.QuickActions` carries the Skills entry (`icon: 'sparkles'`, lines 125–133); the `返回首页` button at `pages/skills/index.tsx` lines 107–115 is intact; all 4 CSS tokens are present in `custom.css` (lines 74, 83, 85, 86 in light mode; 192, 194 in dark mode). Two dead comment blocks remain in `frontend/src/components/desktop/desktop.css` lines 1889–1897 (`SkillsSidebar` comments + a vestigial `.petri-spa-main { transition: margin-left ... }` rule) — harmless but should be swept in a follow-up.
 
 ---
 *End of audit. Report written, READ-ONLY phase complete.*

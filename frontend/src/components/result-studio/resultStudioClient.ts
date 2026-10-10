@@ -379,7 +379,7 @@ export function revisionArtifactUrl(revisionId: string): string {
 }
 
 // UI-462（2026-10-03 用户裁决）：「接入用户自有 Git 仓库」能力整体退役——
-// Result Studio 版本历史只进受管理私有存储（.biof3/git），与用户项目仓库无关，
+// Result Studio 版本历史只进受管理私有存储（.petri/git），与用户项目仓库无关，
 // 无 consent 端点、无绑定状态查询、无 UI 提示。
 
 

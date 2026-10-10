@@ -7,7 +7,7 @@ import { getApiPrefix } from './copilotClient';
 function getAuthHeader(): Record<string, string> {
   if (typeof window === 'undefined') return {};
   try {
-    const token = localStorage.getItem('biof3_token');
+    const token = localStorage.getItem('petri_token');
     return token ? { Authorization: `Bearer ${token}` } : {};
   } catch {
     return {};

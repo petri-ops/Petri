@@ -7,8 +7,8 @@ if (process.platform !== 'win32') {
 /**
  * build-win-runtime-artifact.mjs
  * ---------------------------------------------------------------
- * 在「装有 Python 3.11 的 Windows 构建机」上，组装 BioF3 的 windows-x64
- * Python 运行时制品（对应 manifest.json 的 biof3-py-runtime）。
+ * 在「装有 Python 3.11 的 Windows 构建机」上，组装 Petri 的 windows-x64
+ * Python 运行时制品（对应 manifest.json 的 petri-py-runtime）。
  *
  * 产物：一个 zip，内部根目录为 `Python/`，解压到
  *   userData/runtimes/Python 后，resolveRuntime('python') 即可命中
@@ -17,18 +17,18 @@ if (process.platform !== 'win32') {
  * 用法（在 Windows 构建机）：
  *   node scripts/build-win-runtime-artifact.mjs
  *   # 可选环境变量：
- *   #   BIOF3_BUILD_PYTHON  —— 源 Python 解释器（默认 `py -3.11` 或 `python`）
- *   #   BIOF3_PY_VERSION    —— 仅用于制品命名（默认取源解释器版本）
+ *   #   PETRI_BUILD_PYTHON  —— 源 Python 解释器（默认 `py -3.11` 或 `python`）
+ *   #   PETRI_PY_VERSION    —— 仅用于制品命名（默认取源解释器版本）
  *   #   OUT_DIR             —— 产物输出目录（默认 <repo>/dist-runtime）
  *
  * 产物只负责「本地产出 zip」；完成后脚本打印 sha256/sizeBytes。
  * ⚠️ 收尾边界（2026-08-08 确立，与 R 制品一致）：
  *   1) 用 scripts/upload-win-python-runtime.mjs 把 zip 传到 OSS
- *      （oss://biof3-uploads/plugins/py-runtime/1.0.0/windows-x64.zip，public-read + HEAD 校验）。
+ *      （oss://petri-uploads/plugins/py-runtime/1.0.0/windows-x64.zip，public-read + HEAD 校验）。
  *   2) 不要把 windows-x64 写进 manifest.json 的 artifacts ——
  *      plugin-manifest-schema.test.mjs 第 70-74 行要求 windows-x64 必须为 0
  *      （0.0.1 阶段禁止假 Windows 支持）。release-contract.windows-x64.supported 维持 false。
- *   3) biof3-py-runtime 的占位此前已从 manifest.placeholders.json 移除，无需回写。
+ *   3) petri-py-runtime 的占位此前已从 manifest.placeholders.json 移除，无需回写。
  *   真实制品状态由 OSS 落地 + docs/runtime-version-baseline.md §6.2 记录承载。
  */
 
@@ -56,7 +56,7 @@ function fail(msg, err) {
 // 1) 解析源 Python 前缀
 function resolveSourcePrefix() {
   const candidates = [];
-  if (process.env.BIOF3_BUILD_PYTHON) candidates.push(process.env.BIOF3_BUILD_PYTHON);
+  if (process.env.PETRI_BUILD_PYTHON) candidates.push(process.env.PETRI_BUILD_PYTHON);
   candidates.push('py', 'python', 'python3');
   for (const c of candidates) {
     try {
@@ -72,7 +72,7 @@ function resolveSourcePrefix() {
       }
     } catch {}
   }
-  fail('找不到可用的 Python 3.11+ 源解释器。请先安装 Python 3.11 或设置 BIOF3_BUILD_PYTHON。');
+  fail('找不到可用的 Python 3.11+ 源解释器。请先安装 Python 3.11 或设置 PETRI_BUILD_PYTHON。');
 }
 
 // 2) 复制前缀到 staging/Python
@@ -117,8 +117,8 @@ function prune(stagePython) {
 
 // 5) 压缩 —— 纯 Node 流式 ZIP 写入（zlib raw-deflate，逐文件、常驻内存低）
 // ⚠️ 关键：必须压缩 stagePython（即 Python/ 目录本身），而非 stageRoot。
-//    否则 zip 顶层会变成 biof3-py-runtime-staging/Python/...（两层壳），
-//    plugin-manager 的 flatten 只剥一层 → 解压到 runtimes/Python/biof3-py-runtime-staging/Python/python.exe，
+//    否则 zip 顶层会变成 petri-py-runtime-staging/Python/...（两层壳），
+//    plugin-manager 的 flatten 只剥一层 → 解压到 runtimes/Python/petri-py-runtime-staging/Python/python.exe，
 //    resolveRuntime('python') 期望 runtimes/Python/python.exe → 不命中。
 //    压缩 Python/ 本身 → zip 顶层直接是 Python/python.exe ✅（与 R 制品同样的修复）。
 // ⚠️ 不用 PowerShell Compress-Archive：它对 1.6GB 的 Python 树（完整科学栈）会因
@@ -248,7 +248,7 @@ function main() {
   if (!fs.existsSync(REQUIREMENTS)) fail(`缺少 requirements 文件: ${REQUIREMENTS}`);
 
   const { prefix } = resolveSourcePrefix();
-  const stageRoot = path.join(OUT_DIR, 'biof3-py-runtime-staging-' + process.pid);
+  const stageRoot = path.join(OUT_DIR, 'petri-py-runtime-staging-' + process.pid);
   const stagePython = path.join(stageRoot, 'Python');
   // 注意：stage 目录带 PID 后缀唯一化，每次都是全新空目录，不要在这里 rmSync 旧目录——
   // 旧 staging 树含数千文件，fs.rmSync 会触发 WorkBuddy safe-delete shim 的批量删除拦截（fail-closed）。
@@ -268,15 +268,15 @@ function main() {
   console.log(`sha256   : ${sha256}`);
   console.log('\n⚠️ 收尾边界（与 R 制品一致，2026-08-08 确立）：');
   console.log('  1) 用 scripts/upload-win-python-runtime.mjs 把 zip 传到 OSS');
-  console.log('     oss://biof3-uploads/plugins/py-runtime/1.0.0/windows-x64.zip（public-read + HEAD 校验）。');
+  console.log('     oss://petri-uploads/plugins/py-runtime/1.0.0/windows-x64.zip（public-read + HEAD 校验）。');
   console.log('  2) 不要把 windows-x64 写进 manifest.json 的 artifacts ——');
   console.log('     plugin-manifest-schema.test.mjs 第 70-74 行要求 windows-x64 必须为 0');
   console.log('     （0.0.1 阶段禁止假 Windows 支持）。release-contract.windows-x64.supported 维持 false。');
-  console.log('  3) biof3-py-runtime 的占位已从 manifest.placeholders.json 移除（制品落地即不再占位）。');
+  console.log('  3) petri-py-runtime 的占位已从 manifest.placeholders.json 移除（制品落地即不再占位）。');
   console.log('\n下面这段是制品真实摘要，记录到 docs/runtime-version-baseline.md §6：\n');
   console.log(JSON.stringify({
     platform: 'windows-x64',
-    url: 'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/windows-x64.zip',
+    url: 'https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/windows-x64.zip',
     sha256,
     sizeBytes,
   }, null, 2));

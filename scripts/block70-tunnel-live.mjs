@@ -26,7 +26,7 @@ import { fileURLToPath } from 'node:url';
 import { applyMigrations, createCaptureEnv, stopServer } from './g0-rs-p4r-capture.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SERVER_ENTRY = path.join(ROOT, 'core', 'biof3-server', 'server.js');
+const SERVER_ENTRY = path.join(ROOT, 'core', 'petri-server', 'server.js');
 const EVIDENCE_PATH = path.join(ROOT, 'acceptance', 'block-70', 'block70-tunnel-live.json');
 const TUNNEL_HOST = process.env.B70_TUNNEL_HOST || 'aliyun';
 
@@ -63,8 +63,8 @@ async function freePort() {
 async function main() {
   const envRoot = createCaptureEnv({ port: await freePort() });
   const root = envRoot.root;
-  const dataDir = envRoot.env.BIOF3_LOCAL_DATA_DIR;
-  await applyMigrations(envRoot.env.BIOF3_DB_PATH, { quiet: true });
+  const dataDir = envRoot.env.PETRI_LOCAL_DATA_DIR;
+  await applyMigrations(envRoot.env.PETRI_DB_PATH, { quiet: true });
 
   const gatewayPort = await freePort();
   const remotePort = await freePort();
@@ -73,8 +73,8 @@ async function main() {
   const child = spawn(process.execPath, [SERVER_ENTRY], {
     env: {
       ...envRoot.env,
-      BIOF3_MOBILE_ENABLED: '1',
-      BIOF3_MOBILE_PORT: String(gatewayPort),
+      PETRI_MOBILE_ENABLED: '1',
+      PETRI_MOBILE_PORT: String(gatewayPort),
     },
     cwd: ROOT,
     stdio: ['ignore', 'ignore', 'ignore'],
@@ -115,7 +115,7 @@ async function main() {
     // T3 端到端：从 aliyun 回环穿隧道打 gateway（无需反代即证明转发成立）
     const loopbackHealth = execSync(`ssh -o BatchMode=yes -o ConnectTimeout=10 ${TUNNEL_HOST} "curl -s -m 5 http://127.0.0.1:${remotePort}/m/api/health"`, { encoding: 'utf8', timeout: 20000, stdio: ['ignore', 'pipe', 'pipe'] });
     const health = JSON.parse(loopbackHealth);
-    assert('T3_end_to_end_through_tunnel', health.ok === true && health.service === 'gewu-mobile-gateway', loopbackHealth.slice(0, 160));
+    assert('T3_end_to_end_through_tunnel', health.ok === true && health.service === 'petri-mobile-gateway', loopbackHealth.slice(0, 160));
 
     // T4 隧道不放大攻击面：无会话访问受保护面 → 401
     const unauthorized = execSync(`ssh -o BatchMode=yes -o ConnectTimeout=10 ${TUNNEL_HOST} "curl -s -o /dev/null -w '%{http_code}' -m 5 http://127.0.0.1:${remotePort}/api/ai/conversations"`, { encoding: 'utf8', timeout: 20000, stdio: ['ignore', 'pipe', 'pipe'] });

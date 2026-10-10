@@ -127,7 +127,7 @@ export function ResultStudioContextBar({
               ['compare', '审查修改'],
               ['history', '版本历史'],
             ] as const).map(([mode, label]) => (
-              <button className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              <button className="petri-btn petri-btn--ghost petri-btn--sm"
                 key={mode}
                 type="button"
                 aria-current={activeMode === mode ? 'page' : undefined}
@@ -245,7 +245,7 @@ export function ResultStudioInspector({
       </dl>
       <ResultStudioContextReadiness context={context} />
       <div className={styles.inspectorActions}>
-        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+        <button className="petri-btn petri-btn--ghost petri-btn--sm"
           type="button"
           // BIO-6（BIO-D4 裁决 b）— 解读统一走 Agent + result_summary 链，
           // prompt 经 resultSurface 单一构造器出词，锚定任务与产物坐标。
@@ -255,7 +255,7 @@ export function ResultStudioInspector({
           解释当前结果
         </button>
         {artifact.availabilityStatus === 'unavailable' && (
-          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+          <button className="petri-btn petri-btn--ghost petri-btn--sm"
             type="button"
             onClick={() => onAskAgent(`请检查并恢复当前结果文件“${title}”。先说明缺失原因和可恢复边界，不要覆盖原始数据。`)}
           >

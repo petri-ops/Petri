@@ -79,21 +79,21 @@ export function DecisionUsagePanel(): React.ReactElement {
     ms != null && Number.isFinite(Number(ms)) ? `${Number(ms)} ms` : '—';
 
   return (
-    <div className="gewu-usage-resource">
-      <div className="gewu-resource-heading">
+    <div className="petri-usage-resource">
+      <div className="petri-resource-heading">
         <div>
           <strong>决策原语调用（近 7 天）</strong>
           <p>接点级调用量、平均延迟与降级率。降级=决策 API 不可用回退既有行为；记录为 best-effort。</p>
         </div>
       </div>
       {error ? (
-        <p className="gewu-field__hint">{error}</p>
+        <p className="petri-field__hint">{error}</p>
       ) : !available ? (
-        <p className="gewu-field__hint">决策台账暂不可用（数据库未就绪）。</p>
+        <p className="petri-field__hint">决策台账暂不可用（数据库未就绪）。</p>
       ) : !points || points.length === 0 ? (
-        <p className="gewu-field__hint">暂无决策调用记录（各接点默认关闭时只有显式开启后才产生记录）。</p>
+        <p className="petri-field__hint">暂无决策调用记录（各接点默认关闭时只有显式开启后才产生记录）。</p>
       ) : (
-        <div className="gewu-metric-grid">
+        <div className="petri-metric-grid">
           {points.map((row) => (
             <div key={row.point}>
               <small>{row.point} · {row.calls} 次调用</small>
@@ -103,17 +103,17 @@ export function DecisionUsagePanel(): React.ReactElement {
           ))}
         </div>
       )}
-      <p className="gewu-field__hint">阈值与校准证据的绑定关系见 helpers/decision-thresholds.js；调整阈值必须先重校准。</p>
+      <p className="petri-field__hint">阈值与校准证据的绑定关系见 helpers/decision-thresholds.js；调整阈值必须先重校准。</p>
       {/* BLOCK-116 P3 — 最近决策逐条回放（可折叠；默认收起） */}
-      <div className="gewu-resource-heading">
+      <div className="petri-resource-heading">
         <div><strong>最近决策（20 条）</strong><p>逐条回放：接点 · 判定 · 置信度 · 降级标记</p></div>
-        <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={() => setShowRecent((v) => !v)}>
+        <button type="button" className="petri-btn petri-btn--ghost petri-btn--sm" onClick={() => setShowRecent((v) => !v)}>
           {showRecent ? '收起' : '展开'}
         </button>
       </div>
       {showRecent && (
         recent && recent.length > 0 ? (
-          <div className="gewu-metric-grid">
+          <div className="petri-metric-grid">
             {recent.map((row, idx) => (
               <div key={`${row.at}-${idx}`}>
                 <small>{row.point}{row.degraded ? ' · 降级' : ''}</small>
@@ -123,7 +123,7 @@ export function DecisionUsagePanel(): React.ReactElement {
             ))}
           </div>
         ) : (
-          <p className="gewu-field__hint">暂无最近决策记录。</p>
+          <p className="petri-field__hint">暂无最近决策记录。</p>
         )
       )}
     </div>

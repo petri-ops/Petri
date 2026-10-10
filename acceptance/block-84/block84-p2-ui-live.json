@@ -7,7 +7,7 @@
   "storeUrl": "http://localhost:3000/project/p_mtkamsfu_3mxo/plugins",
   "href": "http://localhost:3000/project/p_mtkamsfu_3mxo/plugins",
   "cards": [
-    "domain-pack-gewu-pack-bio"
+    "domain-pack-petri-pack-bio"
   ],
   "bridgeInstalled": 1,
   "results": [
@@ -29,7 +29,7 @@
     {
       "name": "U4_pack_card_present",
       "ok": true,
-      "detail": "cards=[\"domain-pack-gewu-pack-bio\"]"
+      "detail": "cards=[\"domain-pack-petri-pack-bio\"]"
     },
     {
       "name": "U5_bridge_matches_section",

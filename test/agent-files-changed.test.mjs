@@ -5,12 +5,12 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import test from 'node:test';
 
-const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-agent-files-changed-'));
-process.env.BIOF3_DB_PATH = path.join(tempDir, 'agent-tasks.db');
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-agent-files-changed-'));
+process.env.PETRI_DB_PATH = path.join(tempDir, 'agent-tasks.db');
 
 const require = createRequire(import.meta.url);
-const store = require('../core/biof3-server/agent-task-store');
-const { aggregateFilesChanged, collectFilesChangedForTask } = require('../core/biof3-server/agent-files-changed');
+const store = require('../core/petri-server/agent-task-store');
+const { aggregateFilesChanged, collectFilesChangedForTask } = require('../core/petri-server/agent-files-changed');
 
 test.after(() => {
   try {

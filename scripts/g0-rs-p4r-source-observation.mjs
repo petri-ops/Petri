@@ -23,7 +23,7 @@ const evidencePath = path.join(rootDir, 'acceptance/g0-result-studio/rs-p4r-sour
 const sourceFiles = Object.freeze({
   observation: 'scripts/g0-rs-p4r-source-observation.mjs',
   corpus: 'scripts/g0-rs-p4r-corpus.mjs',
-  routes: 'core/biof3-server/routes/result-studio.js',
+  routes: 'core/petri-server/routes/result-studio.js',
   sourceProjection: 'core/shared-backend/result-revision-source.js',
   replayService: 'core/shared-backend/result-replay-service.js',
 });
@@ -160,7 +160,7 @@ async function observe() {
       });
     }
     const packRoot = resolveBioPackRoot();
-    if (!packRoot) throw new Error('bio pack not found (BIOF3_BIO_PACK_ROOT or sibling gewu-pack-bio)');
+    if (!packRoot) throw new Error('bio pack not found (PETRI_BIO_PACK_ROOT or sibling petri-pack-bio)');
     const binding = sourceBinding(packRoot);
     const result = {
       schemaVersion: 1,

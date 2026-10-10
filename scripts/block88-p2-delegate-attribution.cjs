@@ -5,7 +5,7 @@
  * BLOCK-88 P2 实机验收 — 委托任务归属隔离（loopback 双节点，真实 delegate 工具）。
  *
  * 拓扑：被访端 B = 本机 dev 栈（:3001 + :3005，真实进程）；指挥席 A = 驱动进程
- * 内的**真实 delegate_to_gewu_node 工具**（独立 dataDir + 真实 federation-admin 配对）。
+ * 内的**真实 delegate_to_petri_node 工具**（独立 dataDir + 真实 federation-admin 配对）。
  * 链路：A 署名配对 → A 的 agent 工具把任务委托给 B → B 经 gateway 会话门识别
  * 访客身份（req.mobileSession.identity）→ 开**独立委托会话**（origin 标记，不复用
  * 宿主活跃会话）→ 任务落 params.federated → 默认视图隔离 + includeFederated 可见
@@ -22,7 +22,7 @@ const path = require('node:path');
 const { spawn } = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, '..');
-const B_BASE = process.env.BIOF3_B_BASE || 'http://127.0.0.1:3001';
+const B_BASE = process.env.PETRI_B_BASE || 'http://127.0.0.1:3001';
 const ENGINEER = { displayName: '工程师 A', device: 'macOS' };
 const DELEGATE_TASK = '只读侦察：用一句话报告你运行所在机器的操作系统类型和当前时间，不要使用任何工具。';
 
@@ -50,7 +50,7 @@ function listen(app) {
 }
 
 async function ensureTestInstance() {
-  const lib = require(path.join(ROOT, '.agents/skills/gewu-dev-infra/dev-verify/lib.cjs'));
+  const lib = require(path.join(ROOT, '.agents/skills/petri-dev-infra/dev-verify/lib.cjs'));
   try {
     await lib.pollTargets({ port: lib.TEST_INSTANCE_PORT, timeoutMs: 2000 });
     return;
@@ -75,12 +75,12 @@ async function main() {
   assert_('P1_invite_token_issued', invite.status === 200 && !!invite.data.token);
   const pairingUrl = `http://127.0.0.1:3005/pair?token=${invite.data.token}`;
 
-  const cmdRoot = mkdtempSync(path.join(tmpdir(), 'gewu-block88-p2-cmd-'));
+  const cmdRoot = mkdtempSync(path.join(tmpdir(), 'petri-block88-p2-cmd-'));
   let cmdServer = null;
   try {
     const express = require('express');
     const cmdApp = express();
-    require(path.join(ROOT, 'core/biof3-server/routes/federation-admin.js'))(cmdApp, { dataDir: cmdRoot });
+    require(path.join(ROOT, 'core/petri-server/routes/federation-admin.js'))(cmdApp, { dataDir: cmdRoot });
     cmdServer = await listen(cmdApp);
     const cmdBase = `http://127.0.0.1:${cmdServer.address().port}`;
     const paired = await json(`${cmdBase}/api/federation/peers/pair`, {
@@ -89,10 +89,10 @@ async function main() {
     assert_('P1a_pair_with_identity_ok', paired.status === 200 && paired.data.ok === true);
     const peerId = paired.data.peer && paired.data.peer.peerId;
 
-    // ── P2 真实委托：A 侧 delegate_to_gewu_node 工具（env 指向 A 的 dataDir）──
-    process.env.BIOF3_LOCAL_DATA_DIR = cmdRoot;
-    const { tool_delegate_to_gewu_node } = require(path.join(ROOT, 'core/biof3-server/agent-tools/federation-tools.js'));
-    const receipt = await tool_delegate_to_gewu_node({ peerId, task: DELEGATE_TASK, timeoutMinutes: 6 });
+    // ── P2 真实委托：A 侧 delegate_to_petri_node 工具（env 指向 A 的 dataDir）──
+    process.env.PETRI_LOCAL_DATA_DIR = cmdRoot;
+    const { tool_delegate_to_petri_node } = require(path.join(ROOT, 'core/petri-server/agent-tools/federation-tools.js'));
+    const receipt = await tool_delegate_to_petri_node({ peerId, task: DELEGATE_TASK, timeoutMinutes: 6 });
     assert_('P2_delegate_tool_ok', receipt.ok === true, `agentStatus=${receipt.agentStatus} err=${receipt.error || 'none'} reply=${String(receipt.reply || '').slice(0, 80)}`);
     const peerTaskId = receipt.peerTaskId;
     assert_('P2a_peer_task_id_returned', !!peerTaskId);
@@ -123,7 +123,7 @@ async function main() {
 
     // ── P5 CDP 走查：测试实例左栏「联邦委托」查看面（9223，禁碰 9222）──
     await ensureTestInstance();
-    const lib = require(path.join(ROOT, '.agents/skills/gewu-dev-infra/dev-verify/lib.cjs'));
+    const lib = require(path.join(ROOT, '.agents/skills/petri-dev-infra/dev-verify/lib.cjs'));
     const client = await lib.connectTestTarget({});
     const evalJs = async (expr) => {
       const r = await client.send('Runtime.evaluate', { expression: expr, returnByValue: true, awaitPromise: true });
@@ -166,7 +166,7 @@ async function main() {
   const evidence = {
     package: 'BLOCK-88-ENGINEER-COLLAB',
     stage: 'P2-ATTRIBUTION',
-    topology: 'loopback dual-node: B=dev stack :3001/:3005 (real), A=real delegate_to_gewu_node tool (isolated dataDir)',
+    topology: 'loopback dual-node: B=dev stack :3001/:3005 (real), A=real delegate_to_petri_node tool (isolated dataDir)',
     engineer: ENGINEER,
     delegateTask: DELEGATE_TASK,
     startedAt,

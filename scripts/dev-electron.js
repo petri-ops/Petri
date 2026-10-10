@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Start BioF3 desktop in renderer-HMR mode.
+ * Start Petri desktop in renderer-HMR mode.
  *
  * One command starts:
  * 1. Vite dev server for frontend hot updates.
@@ -24,20 +24,20 @@ const {
 const isWin = process.platform === 'win32';
 const npmCmd = isWin ? 'npm.cmd' : 'npm';
 const npxCmd = isWin ? 'npx.cmd' : 'npx';
-const rendererUrl = process.env.BIOF3_RENDERER_DEV_URL || 'http://localhost:3000';
+const rendererUrl = process.env.PETRI_RENDERER_DEV_URL || 'http://localhost:3000';
 const projectRoot = process.cwd();
 const electronApp = path.join(projectRoot, 'node_modules/electron/dist/Electron.app');
 const electronBinary = path.join(electronApp, 'Contents/MacOS/Electron');
 const electronUserDataDir =
-  process.env.BIOF3_ELECTRON_USER_DATA_DIR || path.join(projectRoot, '.biof3-dev-user-data');
+  process.env.PETRI_ELECTRON_USER_DATA_DIR || path.join(projectRoot, '.petri-dev-user-data');
 const electronLocalDataDir =
-  process.env.BIOF3_LOCAL_DATA_DIR || path.join(electronUserDataDir, 'data');
-// biof3-server 与迁移子进程同样按 BIOF3_LOCAL_DATA_DIR 解析 ai-settings.json /
+  process.env.PETRI_LOCAL_DATA_DIR || path.join(electronUserDataDir, 'data');
+// petri-server 与迁移子进程同样按 PETRI_LOCAL_DATA_DIR 解析 ai-settings.json /
 // credential-store / 数据根。只把它放进 electronEnv 会让后端各自回落到
-// ~/Documents/BioF3-Local（无配置 → 模型列表重置为 deepseek 默认、凭据读空），
+// ~/Documents/Petri-Local（无配置 → 模型列表重置为 deepseek 默认、凭据读空），
 // 必须在 fork 任何子进程前导出，与 Electron 主进程（env-coordinator）同根。
-process.env.BIOF3_LOCAL_DATA_DIR = electronLocalDataDir;
-const electronLogPath = process.env.BIOF3_ELECTRON_LOG_PATH || path.join(os.tmpdir(), 'biof3-electron-main.log');
+process.env.PETRI_LOCAL_DATA_DIR = electronLocalDataDir;
+const electronLogPath = process.env.PETRI_ELECTRON_LOG_PATH || path.join(os.tmpdir(), 'petri-electron-main.log');
 const electronErrorLogPath = `${electronLogPath}.error`;
 
 const children = new Set();
@@ -47,11 +47,11 @@ let launchedElectronViaOpen = false;
 // （token 随 --args 注入主进程 argv；Helper 子进程 argv 不含 token，天然只中主进程），
 // 不再按二进制路径全杀工作区 Electron —— 否则会误杀人工 `electron . --dev`
 // 或另一 wrapper 启动的并存实例（BLOCK-34 P4 实机两次静默退出的根因）。
-const launchToken = `biof3dev-${process.pid}-${Date.now().toString(36)}`;
+const launchToken = `petridev-${process.pid}-${Date.now().toString(36)}`;
 // BLOCK-45：boot 清理逃生口 —— 仅显式传入时恢复旧「全杀工作区 Electron」语义，
 // 覆盖 pre-BLOCK-45 无启动记录残留实例的极端场景。
 const forceCleanElectron =
-  process.argv.includes('--force-clean-electron') || process.env.BIOF3_FORCE_CLEAN_ELECTRON === '1';
+  process.argv.includes('--force-clean-electron') || process.env.PETRI_FORCE_CLEAN_ELECTRON === '1';
 
 function spawnChild(command, args, options = {}) {
   const { shutdownOnExit = 'error', ...spawnOptions } = options;
@@ -110,12 +110,12 @@ function getWorkspaceElectronPids() {
     .filter((pid) => Number.isInteger(pid) && pid > 0);
 }
 
-// token 定向 pgrep（BLOCK-45 泛化）：匹配 argv 含 `biof3-dev-launch-token=<token>`
+// token 定向 pgrep（BLOCK-45 泛化）：匹配 argv 含 `petri-dev-launch-token=<token>`
 // 的进程。pattern 不带前导 `--`（避免被 pgrep 当选项解析）；pgrep 会把仍存活的
 // `open` 自身也命中（其 argv 含 token），排除掉。
 function getElectronPidsByToken(token) {
   if (process.platform !== 'darwin' || !token) return [];
-  const result = spawnSync('pgrep', ['-f', `biof3-dev-launch-token=${token}`], { encoding: 'utf8' });
+  const result = spawnSync('pgrep', ['-f', `petri-dev-launch-token=${token}`], { encoding: 'utf8' });
   if (result.status !== 0) return [];
   const childPids = new Set([...children].map((child) => child.pid));
   return result.stdout
@@ -125,7 +125,7 @@ function getElectronPidsByToken(token) {
     .filter((pid) => Number.isInteger(pid) && pid > 0 && !childPids.has(pid));
 }
 
-// 本 wrapper 经 `open --args ... --biof3-dev-launch-token=<token>` 启动的实例。
+// 本 wrapper 经 `open --args ... --petri-dev-launch-token=<token>` 启动的实例。
 function getLaunchedElectronPids() {
   return getElectronPidsByToken(launchToken);
 }
@@ -352,7 +352,7 @@ async function stopWorkspaceDevProcesses() {
   // immediately re-bind them via its child process manager.
   //
   // BLOCK-45：Electron 段不再按二进制路径全杀（并存实例误杀根因）——
-  //   - 显式 `--force-clean-electron` / BIOF3_FORCE_CLEAN_ELECTRON=1 →
+  //   - 显式 `--force-clean-electron` / PETRI_FORCE_CLEAN_ELECTRON=1 →
   //     恢复旧全杀语义（逃生口，覆盖 pre-BLOCK-45 无记录残留）；
   //   - 默认走 token 定向：上一 wrapper 仍存活且其 token 命中 → fail-closed
   //     抛错中止 boot（提示先停旧栈）；wrapper 已死 → token 定向清理残留；
@@ -373,26 +373,26 @@ async function stopWorkspaceDevProcesses() {
       }
     }
   }
-  // Always sweep vite / biof3-server regardless of OS — these are the
+  // Always sweep vite / petri-server regardless of OS — these are the
     // ports the dev loop actually waits on. The order matches the boot
     // sequence so an older stack drops in reverse.
     // (BLOCK-30 P1: 独立 Python 后端 :3004 已摘除。)
   const rendererPort = Number(new URL(rendererUrl).port) || 3000;
   await stopPidsByPort(rendererPort, 'vite renderer');
-  await stopPidsByPort(3001, 'biof3-server');
+  await stopPidsByPort(3001, 'petri-server');
 }
 
 async function main() {
-  // Auto-clear any BioF3 dev process from a previous session that still owns
+  // Auto-clear any Petri dev process from a previous session that still owns
   // the dev ports, then verify the renderer port is actually free. Doing both
   // means a hot-reload dev loop can re-run `npm run dev` without first having
   // to manually `lsof -ti :3000 | xargs kill`.
   await stopWorkspaceDevProcesses();
   if (await urlIsAvailable(rendererUrl)) {
-    // A foreign server (not BioF3) is holding the port — refuse rather than
+    // A foreign server (not Petri) is holding the port — refuse rather than
     // kill something we don't own.
     throw new Error(
-      `${rendererUrl} is already serving a page by a non-BioF3 process. ` +
+      `${rendererUrl} is already serving a page by a non-Petri process. ` +
         `Stop it manually before running npm run dev again.`
     );
   }
@@ -400,29 +400,29 @@ async function main() {
   spawnChild(npmCmd, ['--prefix', 'frontend', 'run', 'dev']);
   await waitForUrl(rendererUrl);
 
-  // biof3-server (and later Electron) both need the same DB. env-coordinator
-  // pins the main-process DB to <BIOF3_LOCAL_DATA_DIR>/biof3.db（上面已导出为
-  // electronLocalDataDir）。镜像同一路径，biof3-server 与迁移子进程打开同一个
-  // 已迁移库，而不是各自回落（core/biof3-server/biof3.db 或 macOS 时代的
-  // ~/Library/Application Support/biof3-local/bioF3.db —— 后者在本机会把
+  // petri-server (and later Electron) both need the same DB. env-coordinator
+  // pins the main-process DB to <PETRI_LOCAL_DATA_DIR>/petri.db（上面已导出为
+  // electronLocalDataDir）。镜像同一路径，petri-server 与迁移子进程打开同一个
+  // 已迁移库，而不是各自回落（core/petri-server/petri.db 或 macOS 时代的
+  // ~/Library/Application Support/petri-local/petri.db —— 后者在本机会把
   // 后端指到另一个空库，与主进程分裂）。
-  process.env.BIOF3_DB_PATH = path.join(electronLocalDataDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(electronLocalDataDir, 'petri.db');
 
-  // 全新克隆首个 dev boot 的目录自举：迁移与 biof3-server 在此之前打开
-  // BIOF3_DB_PATH，但此前 mkdir 只存在于 darwin 启动分支（449 行）——旧工作区
+  // 全新克隆首个 dev boot 的目录自举：迁移与 petri-server 在此之前打开
+  // PETRI_DB_PATH，但此前 mkdir 只存在于 darwin 启动分支（449 行）——旧工作区
   // 目录早已存在掩盖了这一点（2026-09-25 全新克隆冷启动测试抓真：
   // migration failed: Cannot open database because the directory does not exist）。
-  // recursive 建两层，用户自定义 BIOF3_ELECTRON_USER_DATA_DIR 同样受益。
+  // recursive 建两层，用户自定义 PETRI_ELECTRON_USER_DATA_DIR 同样受益。
   fs.mkdirSync(electronUserDataDir, { recursive: true });
   fs.mkdirSync(electronLocalDataDir, { recursive: true });
 
-  // Run pending DB migrations against the shared DB before biof3-server starts.
-  // Uses the same BIOF3_BETTER_SQLITE3_ROOT root as main.js:367 so the
+  // Run pending DB migrations against the shared DB before petri-server starts.
+  // Uses the same PETRI_BETTER_SQLITE3_ROOT root as main.js:367 so the
   // better-sqlite3 native addon ABI matches.
-  const migrationEnv = { ...process.env, ELECTRON_RUN_AS_NODE: '1', BIOF3_BETTER_SQLITE3_ROOT: path.join(projectRoot, 'core/biof3-server') };
+  const migrationEnv = { ...process.env, ELECTRON_RUN_AS_NODE: '1', PETRI_BETTER_SQLITE3_ROOT: path.join(projectRoot, 'core/petri-server') };
   const migrationResult = spawnSync(
     process.execPath,
-    [path.join(projectRoot, 'src', 'migration-runner.js'), process.env.BIOF3_DB_PATH, path.join(projectRoot, 'src', 'migrations')],
+    [path.join(projectRoot, 'src', 'migration-runner.js'), process.env.PETRI_DB_PATH, path.join(projectRoot, 'src', 'migrations')],
     { cwd: projectRoot, encoding: 'utf8', env: migrationEnv },
   );
   if (migrationResult.error) throw migrationResult.error;
@@ -432,16 +432,16 @@ async function main() {
   const migrationOutput = String(migrationResult.stdout || '').trim();
   if (migrationOutput) console.log('[dev-electron] ' + migrationOutput.replace(/\n/g, '\n[dev-electron] '));
 
-  // Start biof3-server on :3001 so /api/ai/chat (and other /api/* routes used by
+  // Start petri-server on :3001 so /api/ai/chat (and other /api/* routes used by
   // the renderer) are reachable from the dev shell. Without this the copilot
   // context-budget ring (UI-190) and other live SSE features stay empty.
-  spawnChild(npmCmd, ['--prefix', 'core/biof3-server', 'start'], { env: { ...process.env } });
+  spawnChild(npmCmd, ['--prefix', 'core/petri-server', 'start'], { env: { ...process.env } });
   await waitForUrl('http://127.0.0.1:3001/api/health');
 
   // Optional extra Electron CLI args for local debugging, e.g.
-  //   BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev
+  //   PETRI_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev
   // Empty by default so normal dev runs are unchanged.
-  const extraElectronArgs = (process.env.BIOF3_DEV_ELECTRON_ARGS || '')
+  const extraElectronArgs = (process.env.PETRI_DEV_ELECTRON_ARGS || '')
     .split(' ')
     .map((arg) => arg.trim())
     .filter(Boolean);
@@ -481,16 +481,16 @@ async function main() {
       '--env',
       'NODE_ENV=development',
       '--env',
-      `BIOF3_RENDERER_DEV_URL=${rendererUrl}`,
+      `PETRI_RENDERER_DEV_URL=${rendererUrl}`,
       '--env',
-      `BIOF3_ELECTRON_USER_DATA_DIR=${electronUserDataDir}`,
+      `PETRI_ELECTRON_USER_DATA_DIR=${electronUserDataDir}`,
       '--env',
-      `BIOF3_LOCAL_DATA_DIR=${electronLocalDataDir}`,
+      `PETRI_LOCAL_DATA_DIR=${electronLocalDataDir}`,
     ];
     if (process.env.ELECTRON_DISABLE_SANDBOX) {
       openArgs.push('--env', `ELECTRON_DISABLE_SANDBOX=${process.env.ELECTRON_DISABLE_SANDBOX}`);
     }
-    openArgs.push('--args', projectRoot, '--dev', `--biof3-dev-launch-token=${launchToken}`, ...extraElectronArgs);
+    openArgs.push('--args', projectRoot, '--dev', `--petri-dev-launch-token=${launchToken}`, ...extraElectronArgs);
     spawnChild('/usr/bin/open', openArgs);
     await waitForWorkspaceElectron();
     console.log(`[dev] Electron started via LaunchServices; main log: ${electronLogPath}`);
@@ -508,9 +508,9 @@ async function main() {
         ...process.env,
         ELECTRON_IS_DEV: '1',
         NODE_ENV: 'development',
-        BIOF3_RENDERER_DEV_URL: rendererUrl,
-        BIOF3_ELECTRON_USER_DATA_DIR: electronUserDataDir,
-        BIOF3_LOCAL_DATA_DIR: electronLocalDataDir,
+        PETRI_RENDERER_DEV_URL: rendererUrl,
+        PETRI_ELECTRON_USER_DATA_DIR: electronUserDataDir,
+        PETRI_LOCAL_DATA_DIR: electronLocalDataDir,
       };
       delete electronEnv.ELECTRON_RUN_AS_NODE;
       spawnChild(npxCmd, ['electron', '.', '--dev', ...extraElectronArgs], {

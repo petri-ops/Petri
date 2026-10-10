@@ -13,7 +13,7 @@ const {
 } = require('../core/shared-backend/result-studio-table-query');
 
 function tableFile(context, rows = 100) {
-  const root = join(tmpdir(), `biof3-rs-p2-${process.pid}-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+  const root = join(tmpdir(), `petri-rs-p2-${process.pid}-${Date.now()}-${Math.random().toString(16).slice(2)}`);
   mkdirSync(root, { recursive: true });
   context.after(() => import('node:fs').then(({ rmSync }) => rmSync(root, { recursive: true, force: true })));
   const file = join(root, 'deg.csv');
@@ -57,7 +57,7 @@ test('RS-P2 100k-row query keeps the renderer payload bounded and authoritative'
 });
 
 test('RS-P2 normalizes R row-name columns without pretending row numbers are identities', (context) => {
-  const root = join(tmpdir(), `biof3-rs-p2-row-${process.pid}-${Date.now()}`);
+  const root = join(tmpdir(), `petri-rs-p2-row-${process.pid}-${Date.now()}`);
   mkdirSync(root, { recursive: true });
   context.after(() => import('node:fs').then(({ rmSync }) => rmSync(root, { recursive: true, force: true })));
   const filePath = join(root, 'matrix.csv');

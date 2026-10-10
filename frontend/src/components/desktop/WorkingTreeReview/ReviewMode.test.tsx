@@ -915,7 +915,7 @@ describe('BLOCK-53 P2 — not-git one-time git init prompt', () => {
     expect(await screen.findByTestId('git-init-prompt')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: '不再提示' }));
     expect(screen.queryByTestId('git-init-prompt')).toBeNull();
-    expect(window.localStorage.getItem('gewu.gitinit.dismissed.p1')).toBe('1');
+    expect(window.localStorage.getItem('petri.gitinit.dismissed.p1')).toBe('1');
 
     unmount();
     getBridgeMock.mockReturnValue(makeNotGitBridge());

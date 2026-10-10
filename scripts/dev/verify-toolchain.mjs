@@ -1,7 +1,7 @@
 // scripts/dev/verify-toolchain.mjs
-// BioF3 Desktop local development toolchain smoke test.
+// Petri Desktop local development toolchain smoke test.
 // Confirms: Node ABI, fnm, MSVC, better-sqlite3 (root + core), node-pty,
-// and that core/biof3-server native modules load under the current Node.
+// and that core/petri-server native modules load under the current Node.
 import { existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
 
@@ -43,7 +43,7 @@ check('node-pty',
     return `v${v}, pty.node at ${path}`;
   });
 
-console.log('┌─ BioF3 Desktop Toolchain Smoke Check');
+console.log('┌─ Petri Desktop Toolchain Smoke Check');
 for (const { name, ok, info, error } of checks) {
   console.log(`│ ${ok ? '✓' : '✗'} ${name.padEnd(28)} ${ok ? info : '(FAILED) ' + error}`);
 }

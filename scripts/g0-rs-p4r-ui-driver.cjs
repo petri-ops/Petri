@@ -16,7 +16,7 @@ const { createHash } = require('node:crypto');
 const { mkdirSync, readFileSync, writeFileSync } = require('node:fs');
 const path = require('node:path');
 
-const CONFIG_ENV = 'BIOF3_P4R_UI_DRIVER_CONFIG';
+const CONFIG_ENV = 'PETRI_P4R_UI_DRIVER_CONFIG';
 const WAIT_TIMEOUT_MS = 45_000;
 const POLL_MS = 100;
 const controlLines = [];
@@ -97,8 +97,8 @@ async function waitFor(webContents, expression, label, timeoutMs = WAIT_TIMEOUT_
 async function setTheme(webContents, theme) {
   await webContents.executeJavaScript(`
     (() => {
-      localStorage.setItem('biof3-theme', ${JSON.stringify(theme)});
-      window.dispatchEvent(new CustomEvent('gewu:theme-change', {
+      localStorage.setItem('petri-theme', ${JSON.stringify(theme)});
+      window.dispatchEvent(new CustomEvent('petri:theme-change', {
         detail: { preference: ${JSON.stringify(theme)} }
       }));
       return true;
@@ -439,15 +439,15 @@ async function reopenResultTrace(window, requestedOutcome) {
   const startedAt = performance.now();
   const dispatched = await wc.executeJavaScript(`
     (() => {
-      // BLOCK-61 品牌改名：应用事件前缀已 biof3: → gewu:（frontend/src/lib/events.ts），
+      // BLOCK-61 品牌改名：应用事件前缀已 petri: → petri:（frontend/src/lib/events.ts），
       // 旧名派发无人监听，重开结果等待会超时。
-      window.dispatchEvent(new CustomEvent('gewu:project-open-artifact', {
+      window.dispatchEvent(new CustomEvent('petri:project-open-artifact', {
         detail: {
           jobId: ${JSON.stringify(jobId)},
           artifactName: ${JSON.stringify(artifactName)}
         }
       }));
-      window.dispatchEvent(new CustomEvent('gewu:project-open-result', {
+      window.dispatchEvent(new CustomEvent('petri:project-open-result', {
         detail: { toolJobId: ${JSON.stringify(jobId)} }
       }));
       return true;

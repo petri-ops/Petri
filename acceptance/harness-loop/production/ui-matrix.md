@@ -2,7 +2,7 @@
 
 Overall: PASS
 
-- Source state: real BioF3 Vite renderer connected to the same local R/Python
+- Source state: real Petri Vite renderer connected to the same local R/Python
   services and SQLite used by the Electron development shell.
 - Evidence boundary: screenshots verify the application renderer, not macOS
   window chrome. Electron startup and backend restart are verified separately

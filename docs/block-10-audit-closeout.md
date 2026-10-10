@@ -44,7 +44,7 @@
 
 commit `1c0ebf0`：
 
-- **C-001** Critical：`src/preload.js` 顶层新增 2 个 namespace（biof3Desktop.branch 6 方法 + biof3Desktop.result 7 方法 + result.version 4 子 namespace），1:1 映射 `electron.d.ts:319-505` 已声明
+- **C-001** Critical：`src/preload.js` 顶层新增 2 个 namespace（petriDesktop.branch 6 方法 + petriDesktop.result 7 方法 + result.version 4 子 namespace），1:1 映射 `electron.d.ts:319-505` 已声明
 - **C-002** Critical：`src/ipc/result-handlers.js` validTypes 扩展 'conversation_export' + createFromConversation 改 'conversation_export'（与 d.ts union + result.types.ts 对齐）
 - DB migration collateral：007_result_conversation_export_type.sql 12-step SQLite table-rebuild 扩展 CHECK 集合
 - 3 新测试：preload-branch-result-namespaces / result-handlers-valid-types / migration-007-conversation-export（9 项 PASS）

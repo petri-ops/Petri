@@ -7,13 +7,13 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import test from 'node:test';
 
-const root = mkdtempSync(path.join(tmpdir(), 'biof3-result-route-baseline-'));
-process.env.BIOF3_DB_PATH = path.join(root, 'route.db');
+const root = mkdtempSync(path.join(tmpdir(), 'petri-result-route-baseline-'));
+process.env.PETRI_DB_PATH = path.join(root, 'route.db');
 const require = createRequire(import.meta.url);
 const { runMigrations } = require('../src/migration-runner');
-await runMigrations(process.env.BIOF3_DB_PATH, path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src', 'migrations'));
-const route = require('../core/biof3-server/routes/result-studio');
-const { readVerifiedFileSnapshot } = require('../core/biof3-server/helpers/verified-file-snapshot');
+await runMigrations(process.env.PETRI_DB_PATH, path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src', 'migrations'));
+const route = require('../core/petri-server/routes/result-studio');
+const { readVerifiedFileSnapshot } = require('../core/petri-server/helpers/verified-file-snapshot');
 const { queryResultTable } = require('../core/shared-backend/result-studio-table-query');
 const {
   baselineFailureDiagnostic,
@@ -27,21 +27,21 @@ const {
 } = route._test;
 
 test('UI-462 production Git callers never reference existing-repository consent (capability retired)', () => {
-  // UI-462（2026-10-03 用户裁决）：Result Studio 历史只进受管理私有仓库（.biof3/git）。
+  // UI-462（2026-10-03 用户裁决）：Result Studio 历史只进受管理私有仓库（.petri/git）。
   // 生产 Git 调用方（projectContext 闭包 + background child + agent-tools）
   // 不得再出现 consent 存取或 existing 附加路径的任何引用。
   for (const relative of [
-    '../core/biof3-server/routes/result-studio/index.js',
+    '../core/petri-server/routes/result-studio/index.js',
     '../core/shared-backend/result-studio-background-child.js',
-    '../core/biof3-server/agent-tools/result-edit-tools.js',
-    '../core/biof3-server/agent-tools/result-selection-tools.js',
+    '../core/petri-server/agent-tools/result-edit-tools.js',
+    '../core/petri-server/agent-tools/result-selection-tools.js',
   ]) {
     const source = readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), relative), 'utf8');
     assert.doesNotMatch(source, /allowExistingRepository|hasExistingRepositoryConsent|saveExistingRepositoryConsent/);
     assert.doesNotMatch(source, /mode === 'existing'/);
   }
 });
-const routeDb = require('../core/biof3-server/db').db;
+const routeDb = require('../core/petri-server/db').db;
 
 test.after(() => {
   try { routeDb.close(); } catch { /* already closed */ }
@@ -52,7 +52,7 @@ test('P6 Revision table-page route passes the persisted output hash to the bound
   // PHASE 2.1b: the readTablePage call moved to the revisions subdomain module.
   const source = readFileSync(path.join(
     path.dirname(fileURLToPath(import.meta.url)),
-    '../core/biof3-server/routes/result-studio/revisions.js',
+    '../core/petri-server/routes/result-studio/revisions.js',
   ), 'utf8');
   assert.match(
     source,

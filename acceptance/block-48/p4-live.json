@@ -4,7 +4,7 @@
     {
       "name": "P4-0 computer_authorize：agent 链路权限探测",
       "pass": true,
-      "detail": "{\"ok\":true,\"screenTrusted\":false,\"screenGuidance\":\"需要屏幕录制权限：系统设置 → 隐私与安全性 → 屏幕录制，把 Gewu（或运行它的终端/宿主应用）加入允许列表后重试。\",\"trusted\":true}"
+      "detail": "{\"ok\":true,\"screenTrusted\":false,\"screenGuidance\":\"需要屏幕录制权限：系统设置 → 隐私与安全性 → 屏幕录制，把 Petri（或运行它的终端/宿主应用）加入允许列表后重试。\",\"trusted\":true}"
     },
     {
       "name": "P4-1 TextEdit 目标应用就绪",
@@ -64,7 +64,7 @@
     {
       "name": "P4-8 screenshot：屏幕录制未授权 → 诚实引导（双态兼容）",
       "pass": true,
-      "detail": "{\"ok\":false,\"error\":\"not_trusted_screen\",\"message\":\"需要屏幕录制权限：系统设置 → 隐私与安全性 → 屏幕录制，把 Gewu（或运行它的终端/宿主应用）加入允许列表后重试。\"}"
+      "detail": "{\"ok\":false,\"error\":\"not_trusted_screen\",\"message\":\"需要屏幕录制权限：系统设置 → 隐私与安全性 → 屏幕录制，把 Petri（或运行它的终端/宿主应用）加入允许列表后重试。\"}"
     }
   ],
   "marker": "BLOCK48-P4-1788665012680",

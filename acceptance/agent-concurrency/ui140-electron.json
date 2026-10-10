@@ -28,7 +28,7 @@
   "launch": {
     "entrypoint": "npm run dev",
     "electronViaLaunchServices": true,
-    "isolatedUserData": ".biof3-dev-user-data",
+    "isolatedUserData": ".petri-dev-user-data",
     "portsObserved": [3000, 3001, 3004, 9222]
   },
   "provider": {

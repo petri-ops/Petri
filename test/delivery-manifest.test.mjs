@@ -7,7 +7,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const { createDeliveryManifest, writeDeliveryManifest } = require('../core/shared-backend/delivery-manifest');
-const root = mkdtempSync(join(tmpdir(), 'biof3-hrt5-'));
+const root = mkdtempSync(join(tmpdir(), 'petri-hrt5-'));
 after(() => rmSync(root, { recursive: true, force: true }));
 
 const taskRecord = {

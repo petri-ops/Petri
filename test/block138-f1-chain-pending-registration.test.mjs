@@ -12,12 +12,12 @@
 //     解析到已持久化 Revision 行（core/shared-backend/result-workflow-graph.js:286-362）——
 //     行存在即可 = pending 未 adopt 即可解锁血缘
 //   - plan/bind 链形成点 = tool_run_tool op=bind_artifact
-//     （core/biof3-server/agent-tools/learning.js:769-813）
+//     （core/petri-server/agent-tools/learning.js:769-813）
 //   - selection 链形成点 = 裸 job artifact 的 context 解析
-//     （core/biof3-server/agent-tools/result-context-tools.js:150-179，无 Revision 即
+//     （core/petri-server/agent-tools/result-context-tools.js:150-179，无 Revision 即
 //     context_artifact_not_open——AUDIT-LOG 🟡 2026-10-02 blocker B1 / attempt-3 实据）
 //   - selection→enrichment 下游 lineage 形状 = tool_result_selection_run 所发
-//     resultStudioInputLineage（core/biof3-server/agent-tools/result-selection-tools.js:590-602，
+//     resultStudioInputLineage（core/petri-server/agent-tools/result-selection-tools.js:590-602，
 //     kind:'selection'）
 //
 // 覆盖：
@@ -54,24 +54,24 @@ const require = createRequire(import.meta.url);
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 // ---------------------------------------------------------------------------
-// 统一临时 DB 自举（BLOCK-49 惯例：BIOF3_DB_PATH 须在 require db.js 前生效；
+// 统一临时 DB 自举（BLOCK-49 惯例：PETRI_DB_PATH 须在 require db.js 前生效；
 // 与 test/agent-workflow-phase6.test.mjs / test/result-selection-tools.test.mjs 同一修法）
 // ---------------------------------------------------------------------------
-const tempDbRoot = mkdtempSync(join(tmpdir(), 'biof3-f1-chain-db-'));
-const tempDbPath = join(tempDbRoot, 'biof3.db');
+const tempDbRoot = mkdtempSync(join(tmpdir(), 'petri-f1-chain-db-'));
+const tempDbPath = join(tempDbRoot, 'petri.db');
 const { runMigrations } = require(join(REPO_ROOT, 'src', 'migration-runner'));
 await runMigrations(tempDbPath, join(REPO_ROOT, 'src', 'migrations'));
-process.env.BIOF3_DB_PATH = tempDbPath;
+process.env.PETRI_DB_PATH = tempDbPath;
 process.on('exit', () => {
   try { rmSync(tempDbRoot, { recursive: true, force: true }); } catch { /* 尽力清理 */ }
 });
 
-const db = require(join(REPO_ROOT, 'core', 'biof3-server', 'db.js'));
-const learning = require(join(REPO_ROOT, 'core', 'biof3-server', 'agent-tools', 'learning.js'));
+const db = require(join(REPO_ROOT, 'core', 'petri-server', 'db.js'));
+const learning = require(join(REPO_ROOT, 'core', 'petri-server', 'agent-tools', 'learning.js'));
 const {
   resolveResultStudioContext,
-} = require(join(REPO_ROOT, 'core', 'biof3-server', 'agent-tools', 'result-context-tools.js'));
-const pluginLoader = require(join(REPO_ROOT, 'core', 'biof3-server', 'plugin-loader.js'));
+} = require(join(REPO_ROOT, 'core', 'petri-server', 'agent-tools', 'result-context-tools.js'));
+const pluginLoader = require(join(REPO_ROOT, 'core', 'petri-server', 'plugin-loader.js'));
 const { createResultStudioRepository } = require(join(REPO_ROOT, 'core', 'shared-backend', 'result-studio-repository'));
 const { buildAuthoritativeWorkflowGraph } = require(join(REPO_ROOT, 'core', 'shared-backend', 'result-workflow-graph'));
 const { bindProjectRepository } = require(join(REPO_ROOT, 'core', 'shared-backend', 'git-repository-binding'));
@@ -166,11 +166,11 @@ function writeChainPlugin(pluginsDir, spec) {
   };
 }
 
-const F1_PLUGINS_DIR = mkdtempSync(join(tmpdir(), 'biof3-f1-chain-plugins-'));
+const F1_PLUGINS_DIR = mkdtempSync(join(tmpdir(), 'petri-f1-chain-plugins-'));
 process.on('exit', () => {
   try { rmSync(F1_PLUGINS_DIR, { recursive: true, force: true }); } catch { /* 尽力清理 */ }
 });
-globalThis._biof3Plugins = new Map();
+globalThis._petriPlugins = new Map();
 for (const plugin of [
   writeChainPlugin(F1_PLUGINS_DIR, {
     id: 'chain-metrics',
@@ -208,7 +208,7 @@ for (const plugin of [
     interactionMappings: [{ artifactId: 'deg_standardized', mode: 'table', entityType: 'gene', idField: 'gene' }],
   }),
 ]) {
-  globalThis._biof3Plugins.set(plugin.id, plugin);
+  globalThis._petriPlugins.set(plugin.id, plugin);
 }
 
 // 夹具自检：三个中性插件的 resultStudio descriptor 必须真实可解析
@@ -316,7 +316,7 @@ function fabricateChainJob(fx, { toolId, name, outputs, inputs = [], params = {}
 const F1_USER = 'f1-chain-user';
 
 function f1Fixture(context) {
-  const workspaceRoot = mkdtempSync(join(tmpdir(), 'biof3-f1-chain-ws-'));
+  const workspaceRoot = mkdtempSync(join(tmpdir(), 'petri-f1-chain-ws-'));
   context.after(() => {
     try { rmSync(workspaceRoot, { recursive: true, force: true }); } catch { /* 尽力清理 */ }
   });
@@ -676,7 +676,7 @@ test('F1 契约④ selection→enrichment：selection 链形成点注册 pending
 // run-plugin-script.js:291-317 provenanceFor 同构，job 落库 completed。
 // ---------------------------------------------------------------------------
 function installChainRunFakeExecutor(fx, context, captured) {
-  const registryModule = require(join(REPO_ROOT, 'core', 'biof3-server', 'mcp', 'registry'));
+  const registryModule = require(join(REPO_ROOT, 'core', 'petri-server', 'mcp', 'registry'));
   const { collectExecutionInputs } = require(join(REPO_ROOT, 'core', 'shared-backend', 'artifact-manifest'));
   const { createExecutionProvenance } = require(join(REPO_ROOT, 'core', 'shared-backend', 'execution-provenance'));
   const originalCallTool = registryModule.callTool;

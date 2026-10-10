@@ -1,21 +1,21 @@
 .titleBar {
   --titlebar-left-span: 310px;
   --titlebar-right-span: 540px;
-  --titlebar-height: var(--gewu-titlebar-height);
-  --titlebar-bg: color-mix(in srgb, var(--gewu-bg-surface) 98%, var(--gewu-bg-canvas) 2%);
+  --titlebar-height: var(--petri-titlebar-height);
+  --titlebar-bg: color-mix(in srgb, var(--petri-bg-surface) 98%, var(--petri-bg-canvas) 2%);
   --titlebar-left-bg: var(--titlebar-bg);
-  --titlebar-border: color-mix(in srgb, var(--gewu-border) 72%, transparent 28%);
-  --titlebar-divider: color-mix(in srgb, var(--gewu-border) 64%, transparent 36%);
-  --titlebar-ink: var(--gewu-text);
-  --titlebar-ink-muted: var(--gewu-text-secondary);
-  --titlebar-pill-bg: color-mix(in srgb, var(--gewu-bg-surface) 72%, transparent 28%);
-  --titlebar-pill-border: color-mix(in srgb, var(--gewu-border-strong) 62%, transparent 38%);
-  --titlebar-hover: color-mix(in srgb, var(--gewu-hover) 92%, transparent 8%);
+  --titlebar-border: color-mix(in srgb, var(--petri-border) 72%, transparent 28%);
+  --titlebar-divider: color-mix(in srgb, var(--petri-border) 64%, transparent 36%);
+  --titlebar-ink: var(--petri-text);
+  --titlebar-ink-muted: var(--petri-text-secondary);
+  --titlebar-pill-bg: color-mix(in srgb, var(--petri-bg-surface) 72%, transparent 28%);
+  --titlebar-pill-border: color-mix(in srgb, var(--petri-border-strong) 62%, transparent 38%);
+  --titlebar-hover: color-mix(in srgb, var(--petri-hover) 92%, transparent 8%);
   --win-btn-size: 22px;
-  --win-btn-bg: color-mix(in srgb, var(--gewu-text) 12%, transparent 88%);
-  --win-btn-bg-hover: color-mix(in srgb, var(--gewu-text) 22%, transparent 78%);
-  --win-btn-fg: color-mix(in srgb, var(--gewu-text) 78%, transparent 22%);
-  --win-btn-bg-close: color-mix(in srgb, var(--gewu-text) 12%, transparent 88%);
+  --win-btn-bg: color-mix(in srgb, var(--petri-text) 12%, transparent 88%);
+  --win-btn-bg-hover: color-mix(in srgb, var(--petri-text) 22%, transparent 78%);
+  --win-btn-fg: color-mix(in srgb, var(--petri-text) 78%, transparent 22%);
+  --win-btn-bg-close: color-mix(in srgb, var(--petri-text) 12%, transparent 88%);
   --win-btn-bg-close-hover: #e0464e;
   --win-btn-fg-close-hover: #ffffff;
   position: fixed;
@@ -121,7 +121,7 @@
 }
 
 .macTrafficBtn:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--gewu-accent) 78%, white 22%);
+  outline: 2px solid color-mix(in srgb, var(--petri-accent) 78%, white 22%);
   outline-offset: 1px;
 }
 
@@ -167,7 +167,7 @@
 }
 
 .winBtn:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--gewu-accent) 78%, white 22%);
+  outline: 2px solid color-mix(in srgb, var(--petri-accent) 78%, white 22%);
   outline-offset: 1px;
 }
 
@@ -244,7 +244,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   font-weight: 630;
   line-height: 16px;
 }
@@ -292,7 +292,7 @@
   min-width: 0;
   max-width: 100%;
   padding: 0 7px;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   font-weight: 620;
   line-height: 16px;
   white-space: nowrap;
@@ -322,7 +322,7 @@
 
 .resultPrimary:focus-visible,
 .resultMenuTrigger:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--gewu-accent) 78%, white 22%);
+  outline: 2px solid color-mix(in srgb, var(--petri-accent) 78%, white 22%);
   outline-offset: 1px;
 }
 
@@ -343,10 +343,10 @@
   width: min(260px, calc(100vw - 20px));
   max-width: calc(100vw - 20px);
   padding: 5px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 9px;
-  background: var(--gewu-bg-elevated);
-  box-shadow: 0 14px 32px color-mix(in srgb, var(--gewu-text) 18%, transparent);
+  background: var(--petri-bg-elevated);
+  box-shadow: 0 14px 32px color-mix(in srgb, var(--petri-text) 18%, transparent);
   transform: translateX(-50%);
 }
 
@@ -361,8 +361,8 @@
   border: none;
   border-radius: 7px;
   background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-sm);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-sm);
   text-align: left;
   cursor: pointer;
 }
@@ -375,7 +375,7 @@
 }
 
 .resultMenuItem:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--gewu-accent) 78%, white 22%);
+  outline: 2px solid color-mix(in srgb, var(--petri-accent) 78%, white 22%);
   outline-offset: -1px;
 }
 
@@ -394,7 +394,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--titlebar-ink-muted);
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
 }
 
 .resultMenuItemActive .resultMenuItemStatus {
@@ -471,10 +471,10 @@
   display: grid;
   width: 176px;
   padding: 5px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 10px;
-  background: var(--gewu-bg-elevated);
-  box-shadow: 0 14px 32px color-mix(in srgb, var(--gewu-text) 18%, transparent);
+  background: var(--petri-bg-elevated);
+  box-shadow: 0 14px 32px color-mix(in srgb, var(--petri-text) 18%, transparent);
   -webkit-app-region: no-drag;
 }
 
@@ -488,16 +488,16 @@
   border: none;
   border-radius: 7px;
   background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-sm);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-sm);
   text-align: left;
   cursor: pointer;
 }
 
 .toolMenu > button:hover,
 .toolMenuItemActive {
-  background: var(--gewu-hover) !important;
-  color: var(--gewu-text) !important;
+  background: var(--petri-hover) !important;
+  color: var(--petri-text) !important;
 }
 
 .toolMenu > button span {
@@ -530,13 +530,13 @@
   padding: 0;
   flex-shrink: 0;
   /* UI-215 补充：纯图标按钮收敛 UA 默认字号（13.3333px）到 token */
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
 }
 
 .iconBtn:focus-visible,
 .tabPillMain:focus-visible,
 .tabClose:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--gewu-accent) 78%, white 22%);
+  outline: 2px solid color-mix(in srgb, var(--petri-accent) 78%, white 22%);
   outline-offset: 1px;
 }
 
@@ -576,8 +576,8 @@
 }
 
 .tabPillActive {
-  background: color-mix(in srgb, var(--gewu-accent-bg) 72%, var(--gewu-bg-surface) 28%);
-  border-color: color-mix(in srgb, var(--gewu-accent) 28%, var(--gewu-border) 72%);
+  background: color-mix(in srgb, var(--petri-accent-bg) 72%, var(--petri-bg-surface) 28%);
+  border-color: color-mix(in srgb, var(--petri-accent) 28%, var(--petri-border) 72%);
 }
 
 .tabPillMain {
@@ -602,8 +602,8 @@
   padding: 0 5px;
   margin-left: 4px;
   border-radius: 8px;
-  background: color-mix(in srgb, var(--gewu-accent) 16%, transparent);
-  color: var(--gewu-accent);
+  background: color-mix(in srgb, var(--petri-accent) 16%, transparent);
+  color: var(--petri-accent);
   font-size: 10px;
   font-weight: 600;
   line-height: 16px;
@@ -616,7 +616,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   font-weight: 580;
   line-height: 16px;
 }
@@ -632,8 +632,8 @@
   width: 18px;
   height: 18px;
   border-radius: 6px;
-  background: color-mix(in srgb, var(--gewu-accent) 18%, transparent 82%);
-  color: var(--gewu-accent);
+  background: color-mix(in srgb, var(--petri-accent) 18%, transparent 82%);
+  color: var(--petri-accent);
   flex-shrink: 0;
 }
 
@@ -647,7 +647,7 @@
   border-radius: 999px;
   background: transparent;
   color: color-mix(in srgb, var(--titlebar-ink-muted) 72%, transparent 28%);
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   line-height: 1;
   padding: 0;
   cursor: pointer;
@@ -703,9 +703,9 @@
 }
 
 [data-theme='dark'] .titleBar {
-  --titlebar-bg: color-mix(in srgb, var(--gewu-bg-surface) 96%, var(--gewu-bg-canvas) 4%);
+  --titlebar-bg: color-mix(in srgb, var(--petri-bg-surface) 96%, var(--petri-bg-canvas) 4%);
   --titlebar-left-bg: var(--titlebar-bg);
-  --titlebar-pill-bg: color-mix(in srgb, var(--gewu-bg-elevated) 70%, transparent 30%);
+  --titlebar-pill-bg: color-mix(in srgb, var(--petri-bg-elevated) 70%, transparent 30%);
 }
 
 @media (max-width: 1380px) {

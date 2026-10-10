@@ -39,10 +39,10 @@ function getProvider(name) {
 
 /**
  * 获取 chat provider。
- * 优先级：BIOF3_LLM_PROVIDER 环境变量 > 默认 'deepseek'
+ * 优先级：PETRI_LLM_PROVIDER 环境变量 > 默认 'deepseek'
  */
 function getChatProvider() {
-  const name = process.env.BIOF3_LLM_PROVIDER || 'deepseek';
+  const name = process.env.PETRI_LLM_PROVIDER || 'deepseek';
   const provider = _providers.get(name);
   if (!provider) {
     throw new Error(`LLM chat provider 未注册: ${name}`);
@@ -52,10 +52,10 @@ function getChatProvider() {
 
 /**
  * 获取 embedding provider。
- * 优先级：BIOF3_EMBED_PROVIDER 环境变量 > 默认 'dashscope'
+ * 优先级：PETRI_EMBED_PROVIDER 环境变量 > 默认 'dashscope'
  */
 function getEmbedProvider() {
-  const name = process.env.BIOF3_EMBED_PROVIDER || 'dashscope';
+  const name = process.env.PETRI_EMBED_PROVIDER || 'dashscope';
   const provider = _providers.get(name);
   if (!provider) {
     throw new Error(`LLM embed provider 未注册: ${name}`);

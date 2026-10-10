@@ -15,7 +15,7 @@ const { createHash } = require('node:crypto');
 const { mkdirSync, readFileSync, writeFileSync } = require('node:fs');
 const path = require('node:path');
 
-const CONFIG_ENV = 'BIOF3_P6_UI110_DRIVER_CONFIG';
+const CONFIG_ENV = 'PETRI_P6_UI110_DRIVER_CONFIG';
 const PRELOAD_PATH = path.resolve(__dirname, '..', 'src', 'preload.js');
 const SHORT_WAIT_MS = 45_000;
 const AGENT_WAIT_MS = 12 * 60 * 1000;
@@ -256,7 +256,7 @@ async function captureScreenshot(window, outputDir, label) {
 async function dismissOnboarding(webContents) {
   const outcome = await waitFor(webContents, `
     (() => {
-      const completed = localStorage.getItem('biof3-onboarding-completed') === '1';
+      const completed = localStorage.getItem('petri-onboarding-completed') === '1';
       const dialog = document.querySelector('[role="dialog"][aria-label="首次启动引导"]');
       if (completed && !dialog) return { state: 'already_completed' };
       const button = dialog && [...dialog.querySelectorAll('button')]
@@ -268,7 +268,7 @@ async function dismissOnboarding(webContents) {
   `, 'first-run onboarding');
   if (outcome.state === 'dismissed') {
     await waitFor(webContents, `
-      localStorage.getItem('biof3-onboarding-completed') === '1'
+      localStorage.getItem('petri-onboarding-completed') === '1'
         && !document.querySelector('[role="dialog"][aria-label="首次启动引导"]')
     `, 'first-run onboarding dismissal');
   }
@@ -1174,7 +1174,7 @@ async function run({ providedWindow = null, providedConfig = null, manageWindow 
       width: 1440,
       height: 900,
       show: config.show === true,
-      title: 'BioF3 P6 UI-110 isolated trace',
+      title: 'Petri P6 UI-110 isolated trace',
       backgroundColor: '#ffffff',
       webPreferences: {
         contextIsolation: true,

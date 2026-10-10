@@ -48,8 +48,8 @@ test('real Chinese and ASCII pass through untouched; malformed escapes kept as-i
 function decodeRDepareseSafe(x) { return decodeRDeparseString(x); }
 
 test('both manifest read points are wired to the decoder', () => {
-  const executor = fs.readFileSync(path.join(ROOT, 'core/biof3-server/helpers/tools-executor.js'), 'utf8');
-  const mcp = fs.readFileSync(path.join(ROOT, 'core/biof3-server/mcp/registry/run-plugin-script.js'), 'utf8');
+  const executor = fs.readFileSync(path.join(ROOT, 'core/petri-server/helpers/tools-executor.js'), 'utf8');
+  const mcp = fs.readFileSync(path.join(ROOT, 'core/petri-server/mcp/registry/run-plugin-script.js'), 'utf8');
   assert.ok(executor.includes('decodeRDeparseManifest(JSON.parse'), 'tools-executor manifest read decodes');
   assert.ok(mcp.includes('decodeRDeparseManifest(JSON.parse'), 'run-plugin-script manifest read decodes');
 });

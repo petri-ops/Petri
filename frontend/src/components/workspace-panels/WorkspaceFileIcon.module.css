@@ -9,12 +9,12 @@
 }
 
 .glyph {
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .badge {
   border-radius: 5px;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   font-weight: 700;
   letter-spacing: -0.03em;
 }
@@ -51,32 +51,32 @@
 .fileIcon[data-kind='data'] {
   color: #168269;
   background: rgb(22 130 105 / 11%);
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
 }
 
 .fileIcon[data-kind='config'] {
   color: #d56a24;
   background: transparent;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   font-weight: 500;
 }
 
 .fileIcon[data-kind='markdown'] {
   color: #24914d;
   background: transparent;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
 }
 
 .fileIcon[data-kind='document'] {
   color: #6d7786;
   background: rgb(109 119 134 / 10%);
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
 }
 
 .fileIcon[data-kind='pdf'] {
   color: #cf4545;
   background: rgb(207 69 69 / 10%);
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
 }
 
 .fileIcon[data-kind='image'] {
@@ -86,13 +86,13 @@
 .fileIcon[data-kind='web'] {
   color: #d8752c;
   background: rgb(216 117 44 / 10%);
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
 }
 
 .fileIcon[data-kind='style'] {
   color: #6659c6;
   background: rgb(102 89 198 / 10%);
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
 }
 
 .fileIcon[data-kind='shell'] {
@@ -102,9 +102,9 @@
 .fileIcon[data-kind='archive'] {
   color: #8b6a35;
   background: rgb(139 106 53 / 10%);
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
 }
 
 .fileIcon[data-kind='generic'] {
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }

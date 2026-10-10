@@ -2,7 +2,7 @@
 'use strict';
 const path = require('path');
 const REPO = path.join(process.cwd());
-const lib = require(path.join(REPO, '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(REPO, '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 const delay = (ms) => new Promise(r => setTimeout(r, ms));
 async function main() {
   const targets = await lib.pollTargets({ timeoutMs: 10000 });

@@ -1,6 +1,6 @@
 # 指引：aliyun 反向隧道一次性配置（BLOCK-70 P3 · 无域名/IP 版）
 
-> 目标：让手机在**任何网络**（4G/5G/公司 WiFi）通过 `https://<你的aliyun IP>` 打开 Gewu 移动页。
+> 目标：让手机在**任何网络**（4G/5G/公司 WiFi）通过 `https://<你的aliyun IP>` 打开 Petri 移动页。
 > 安全模型：家里电脑**不开任何入站端口**；桌面端只发起出站 `ssh -R`（钉 aliyun 回环）；
 > 公网只有 aliyun 的 443（TLS 在 aliyun 终结）。以下均为**你自己的服务器**上的一次性操作。
 >
@@ -12,7 +12,7 @@
 ssh aliyun
 mkdir -p /etc/nginx/ssl
 openssl req -x509 -nodes -newkey rsa:2048 -days 825 \
-  -keyout /etc/nginx/ssl/gewu.key -out /etc/nginx/ssl/gewu.crt \
+  -keyout /etc/nginx/ssl/petri.key -out /etc/nginx/ssl/petri.crt \
   -subj "/CN=47.110.228.168" \
   -addext "subjectAltName=IP:47.110.228.168"
 ```
@@ -27,15 +27,15 @@ openssl req -x509 -nodes -newkey rsa:2048 -days 825 \
 apt update && apt install -y nginx
 ```
 
-写入 `/etc/nginx/sites-available/gewu-mobile`：
+写入 `/etc/nginx/sites-available/petri-mobile`：
 
 ```nginx
 server {
     listen 443 ssl;
     server_name 47.110.228.168;
 
-    ssl_certificate     /etc/nginx/ssl/gewu.crt;
-    ssl_certificate_key /etc/nginx/ssl/gewu.key;
+    ssl_certificate     /etc/nginx/ssl/petri.crt;
+    ssl_certificate_key /etc/nginx/ssl/petri.key;
 
     # 移动页走 SSE 实时流，必须关缓冲
     proxy_buffering off;
@@ -58,7 +58,7 @@ server {
 启用并重载：
 
 ```bash
-ln -sf /etc/nginx/sites-available/gewu-mobile /etc/nginx/sites-enabled/gewu-mobile
+ln -sf /etc/nginx/sites-available/petri-mobile /etc/nginx/sites-enabled/petri-mobile
 rm -f /etc/nginx/sites-enabled/default
 nginx -t && systemctl reload nginx
 ```
@@ -70,7 +70,7 @@ nginx -t && systemctl reload nginx
 
 ## ④ 桌面端配置
 
-打开 Gewu 设置 →「计算与数据」→「手机连接」面板（或左栏底部「手机连接」）：
+打开 Petri 设置 →「计算与数据」→「手机连接」面板（或左栏底部「手机连接」）：
 
 - SSH 主机别名：`aliyun`
 - 公网地址：`https://47.110.228.168`
@@ -82,7 +82,7 @@ nginx -t && systemctl reload nginx
 ```bash
 # 本机验证公网入口（-k 跳过自签校验）
 curl -k https://47.110.228.168/m/api/health
-# 期望：{"ok":true,"service":"gewu-mobile-gateway"}
+# 期望：{"ok":true,"service":"petri-mobile-gateway"}
 ```
 
 手机（任意网络）浏览器打开 `https://47.110.228.168/m` → 警告页点继续 →
@@ -103,8 +103,8 @@ curl -k https://47.110.228.168/m/api/health
 GW_GATE_PORT=443 GW_REMOTE_PORT=2233 GW_PROBE_SECS=120 bash block159-relay-watchdog.sh
 ```
 
-- 安装内容：nginx systemd drop-in（Restart=always）+ `gewu-relay-probe.timer`
-  （探活→异常 `systemctl restart nginx` + `logger -t gewu-relay-probe` 留痕）。
+- 安装内容：nginx systemd drop-in（Restart=always）+ `petri-relay-probe.timer`
+  （探活→异常 `systemctl restart nginx` + `logger -t petri-relay-probe` 留痕）。
 - 幂等可重跑；`--uninstall` 干净撤销（drop-in 一并移除，nginx 回归发行版默认）。
 - 换中转机/换 IP 三步：新机按 ①②⑥ 装一遍 → 桌面端「我的设备」面板隧道配置
   改 host/publicUrl（或从中转档案切换）→ 手机扫新码重配对一次。
@@ -119,7 +119,7 @@ GW_GATE_PORT=443 GW_REMOTE_PORT=2233 GW_PROBE_SECS=120 bash block159-relay-watch
 | curl -k 超时 | 安全组 443 未放行，或 nginx 未启动（`systemctl status nginx`） |
 | curl -k 返回 502 | 桌面端隧道未连接（remotePort 未监听），先看面板隧道状态 |
 | 二维码还是局域网地址 | 隧道状态不是 connected，或公网地址没填/没保存 |
-| 装了看门狗仍间歇 502/超时 | `journalctl -t gewu-relay-probe` 看探活留痕；桌面端隧道是否 connected（服务器看门狗不代拨隧道，桌面断由桌面自愈） |
+| 装了看门狗仍间歇 502/超时 | `journalctl -t petri-relay-probe` 看探活留痕；桌面端隧道是否 connected（服务器看门狗不代拨隧道，桌面断由桌面自愈） |
 
 ## 安全边界（务必知晓）
 

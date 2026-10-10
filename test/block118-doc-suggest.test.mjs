@@ -19,7 +19,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
 const require = createRequire(import.meta.url);
 
-const thresholds = require(path.join(root, 'core', 'biof3-server', 'helpers', 'decision-thresholds.js'));
+const thresholds = require(path.join(root, 'core', 'petri-server', 'helpers', 'decision-thresholds.js'));
 const {
   DOC_TARGETS,
   buildDocSuggestDecisionRequest,
@@ -60,7 +60,7 @@ test('DOC_TARGETS 钉住：五 canonical 文档 + 每文档专属 question（D-�
 test('deterministicHits：frontend/src UI 面文件 → uiAudit 硬命中；其余为零', () => {
   assert.deepEqual([...deterministicHits(['frontend/src/pages/home.tsx'])], ['uiAudit']);
   assert.deepEqual([...deterministicHits(['frontend/src/components/copilot/simple-chat.css'])], ['uiAudit']);
-  assert.equal(deterministicHits(['core/biof3-server/agent-runner.js']).size, 0);
+  assert.equal(deterministicHits(['core/petri-server/agent-runner.js']).size, 0);
   assert.equal(deterministicHits(['scripts/dev-suggest-run.mjs']).size, 0);
   assert.equal(deterministicHits([]).size, 0);
 });
@@ -84,7 +84,7 @@ test('空输入：零建议零出站', async () => {
 test('uiAudit 硬规则独立于模型：模型低分仍建议；其余文档按门控', async () => {
   const spy = okFetch(noulAnswers({ roadmap: 0.1, handoff: 0.1, uiAudit: 0.01, auditLog: 0.1, planDoc: 0.6 }));
   const r = await resolveDocSuggestions(
-    ['frontend/src/pages/home.tsx', 'core/biof3-server/db.js'],
+    ['frontend/src/pages/home.tsx', 'core/petri-server/db.js'],
     { ...API_KEY_OVERRIDE, fetchImpl: spy.impl, sleep: NO_SLEEP }
   );
   assert.equal(r.suggest, true);
@@ -99,7 +99,7 @@ test('uiAudit 硬规则独立于模型：模型低分仍建议；其余文档按
 
 test('降级：决策失败 → 零建议（安全默认，永不 throw）', async () => {
   const impl = async () => { const e = new Error('TimeoutError'); e.name = 'TimeoutError'; throw e; };
-  const r = await resolveDocSuggestions(['core/biof3-server/agent-runner.js'], { ...API_KEY_OVERRIDE, fetchImpl: impl, sleep: NO_SLEEP });
+  const r = await resolveDocSuggestions(['core/petri-server/agent-runner.js'], { ...API_KEY_OVERRIDE, fetchImpl: impl, sleep: NO_SLEEP });
   assert.equal(r.suggest, false);
   assert.equal(r.reason, 'timeout');
   assert.deepEqual(r.suggestions, []);

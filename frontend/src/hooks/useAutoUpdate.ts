@@ -1,7 +1,7 @@
 /**
- * useAutoUpdate — unified update state for the Gewu desktop shell.
+ * useAutoUpdate — unified update state for the Petri desktop shell.
  *
- * Subscribes to window.biof3Desktop.updater IPC events and exposes a
+ * Subscribes to window.petriDesktop.updater IPC events and exposes a
  * single source of truth for desktop update surfaces such as DesktopSettingsPanel.
  *
  * State is session-only (lives in React state, resets on page refresh —
@@ -49,7 +49,7 @@ export function useAutoUpdate(): AutoUpdateState & AutoUpdateActions {
 
   // Mount: do one auto-check for a pending update
   useEffect(() => {
-    const updater = window.biof3Desktop?.updater;
+    const updater = window.petriDesktop?.updater;
     if (!updater) return;
 
     let cancelled = false;
@@ -73,7 +73,7 @@ export function useAutoUpdate(): AutoUpdateState & AutoUpdateActions {
 
   // Subscribe to live events
   useEffect(() => {
-    const updater = window.biof3Desktop?.updater;
+    const updater = window.petriDesktop?.updater;
     if (!updater) return;
 
     const offProgress = updater.onDownloadProgress?.((p) => {
@@ -98,7 +98,7 @@ export function useAutoUpdate(): AutoUpdateState & AutoUpdateActions {
   }, []);
 
   const check = useCallback(async () => {
-    const updater = window.biof3Desktop?.updater;
+    const updater = window.petriDesktop?.updater;
     if (!updater || checking) return;
     setChecking(true);
     setError('');
@@ -124,7 +124,7 @@ export function useAutoUpdate(): AutoUpdateState & AutoUpdateActions {
   }, [checking]);
 
   const download = useCallback(async () => {
-    const updater = window.biof3Desktop?.updater;
+    const updater = window.petriDesktop?.updater;
     if (!updater || downloading) return;
     setError('');
     setDownloading(true);
@@ -143,7 +143,7 @@ export function useAutoUpdate(): AutoUpdateState & AutoUpdateActions {
   }, [downloading]);
 
   const install = useCallback(async () => {
-    const updater = window.biof3Desktop?.updater;
+    const updater = window.petriDesktop?.updater;
     if (!updater || installing) return;
     setError('');
     setInstalling(true);

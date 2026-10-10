@@ -3,7 +3,7 @@
 // BLOCK-77 P1 — surface 驻留创建链加传输重试（一次性手术脚本，用后即删）。
 const fs = require('fs');
 const path = require('path');
-const FILE = path.join(__dirname, '..', 'core', 'biof3-server', 'agent-tools', 'workspace-ssh-surface.js');
+const FILE = path.join(__dirname, '..', 'core', 'petri-server', 'agent-tools', 'workspace-ssh-surface.js');
 let t = fs.readFileSync(FILE, 'utf8');
 
 // 0) 头部导入 withTransportRetry
@@ -15,8 +15,8 @@ t = t.replace(
 );
 
 // 1) exec_bg 起进程包重试
-const oldS = '    const bg = await execBackground({ command: wrapped, cwd: args.cwd, logFile: `.gewu/resident/${taskId}.log` }, ctx);';
-const newS = '    const bg = await withTransportRetry(() => execBackground({ command: wrapped, cwd: args.cwd, logFile: `.gewu/resident/${taskId}.log` }, ctx));';
+const oldS = '    const bg = await execBackground({ command: wrapped, cwd: args.cwd, logFile: `.petri/resident/${taskId}.log` }, ctx);';
+const newS = '    const bg = await withTransportRetry(() => execBackground({ command: wrapped, cwd: args.cwd, logFile: `.petri/resident/${taskId}.log` }, ctx));';
 if (!t.includes(oldS)) { console.error('S pattern missing'); process.exit(1); }
 t = t.replace(oldS, newS);
 

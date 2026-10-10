@@ -10,7 +10,7 @@
 
 用户裁决原话：「如果没有的话 我觉得 可以新开一个block 这个性能上是需要优化的」（2026-09-16；前置对话=SSH 远端连接的延迟/韧性核对，用户据此裁决立项）。
 
-主模块：`core/biof3-server/helpers/remote-execution/`（ssh-transport / remote-job-runner / node-agent / error-classifier）+ `core/biof3-server/helpers/workspace-gateway.js`（部署校验缓存）+ 远端连接状态呈现面（落点 P0 评审定）
+主模块：`core/petri-server/helpers/remote-execution/`（ssh-transport / remote-job-runner / node-agent / error-classifier）+ `core/petri-server/helpers/workspace-gateway.js`（部署校验缓存）+ 远端连接状态呈现面（落点 P0 评审定）
 
 关联：BLOCK-57-REMOTE-EXECUTION（通道层权威，本包只做增量不重开其 D1–D9 裁决）；BLOCK-67-SSH-REMOTE-PROJECT（远程项目形态 + D2 体感预算 P50≤1.5s / D5 断线诚实）；BLOCK-76-SSH-NATIVE-EXECUTION；BLOCK-89/90/91（远程文件面能力，本包不动其语义）；BLOCK-39-AGENT-STREAM-RECONNECT（**设计模式先例**：游标续传 + 断线重建，本包把同款思路用于 SSH 长流）；BLOCK-78（sys_resource 远程监测面）。
 
@@ -74,7 +74,7 @@
 - **P2**：W3 恢复编排 + W4 重试增强（含幂等回归）；
 - **P3**：W5 熔断 + W6 可见性与高级参数 + 实机收口（真远端前后对账）。
 
-**环境纪律（launch checklist §1）**：dev 栈 = `npm run dev`（wrapper 起 vite `:3000` + biof3-server `:3001` + Electron，macOS 经 LaunchServices 启动）；**本包主模块在 `core/biof3-server/helpers/remote-execution/`，属后端代码——任何改动必须重启 dev 栈才生效**（Vite HMR 只覆盖前端）；实机验证需真远端（aliyun / dell）；CDP 实机走查用 `BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222"`；并行包文件面零触碰声明见 §2 与 §6。
+**环境纪律（launch checklist §1）**：dev 栈 = `npm run dev`（wrapper 起 vite `:3000` + petri-server `:3001` + Electron，macOS 经 LaunchServices 启动）；**本包主模块在 `core/petri-server/helpers/remote-execution/`，属后端代码——任何改动必须重启 dev 栈才生效**（Vite HMR 只覆盖前端）；实机验证需真远端（aliyun / dell）；CDP 实机走查用 `PETRI_DEV_ELECTRON_ARGS="--remote-debugging-port=9222"`；并行包文件面零触碰声明见 §2 与 §6。
 
 ## 5. 验收门禁（收口时逐项对账）
 

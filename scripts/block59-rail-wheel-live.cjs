@@ -18,9 +18,9 @@ const { execFileSync } = require('node:child_process');
 const http = require('node:http');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
 const DB_PATH = process.env.BIOF59_DB
-  || path.join(__dirname, '..', '.biof3-dev-user-data', 'data', 'biof3.db');
+  || path.join(__dirname, '..', '.petri-dev-user-data', 'data', 'petri.db');
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-59');
 
 function fetchJson(url) {
@@ -125,12 +125,12 @@ async function main() {
 
   const targets = await listTargets();
   const page = targets.find((t) => t.type === 'page' && /localhost:3000/.test(t.url || '') && !/(\/window\/)/.test(t.url || ''));
-  if (!page) throw new Error('biof3_page_not_found');
+  if (!page) throw new Error('petri_page_not_found');
   const client = await new CdpClient(page.webSocketDebuggerUrl).connect();
 
   // 幂等预清理
   await evalJSRetry(client, `(async () => {
-    const wm = window.biof3Desktop?.windowManager;
+    const wm = window.petriDesktop?.windowManager;
     if (!wm) return false;
     const snap = await wm.snapshot();
     for (const id of ${JSON.stringify(ids)}) {
@@ -145,10 +145,10 @@ async function main() {
 
   // 两个作业各弹出一次（禁双开：各 created）→ 逐个降格
   for (const p of picked) {
-    await evalJSRetry(client, `window.biof3Desktop.windowManager.popOut('result', ${JSON.stringify(`${p.jobId}:${p.artifactName}`)})`);
+    await evalJSRetry(client, `window.petriDesktop.windowManager.popOut('result', ${JSON.stringify(`${p.jobId}:${p.artifactName}`)})`);
     await pollTarget(`/window/result/${encodeURIComponent(`${p.jobId}:${p.artifactName}`)}`);
     await delay(1000); // 首帧渲染后再降格（快照有内容）
-    await evalJSRetry(client, `window.biof3Desktop.windowManager.minimizeToRail(${JSON.stringify(`result:${p.jobId}:${p.artifactName}`)})`);
+    await evalJSRetry(client, `window.petriDesktop.windowManager.minimizeToRail(${JSON.stringify(`result:${p.jobId}:${p.artifactName}`)})`);
   }
   const railHits = await pollTarget('/window/rail');
   assert('轨道窗出现', Array.isArray(railHits) && railHits.length >= 1, `targets=${railHits?.length}`);
@@ -237,8 +237,8 @@ async function main() {
 
   // 清理
   for (const id of ids) {
-    await evalJSRetry(client, `window.biof3Desktop.windowManager.minimizeToRail(${JSON.stringify(id)})`).catch(() => {});
-    await evalJSRetry(client, `window.biof3Desktop.windowManager.remove(${JSON.stringify(id)})`);
+    await evalJSRetry(client, `window.petriDesktop.windowManager.minimizeToRail(${JSON.stringify(id)})`).catch(() => {});
+    await evalJSRetry(client, `window.petriDesktop.windowManager.remove(${JSON.stringify(id)})`);
   }
 
   const allPass = results.assertions.every((a) => a.pass);

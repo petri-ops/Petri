@@ -7,18 +7,18 @@ import test from 'node:test';
 
 // BLOCK-33 P1 — registry 导入链会拉起 db.js（要求已迁移的库），与 agent-files-changed
 // 测试同款环境自举：临时库 + 按序应用 src/migrations/*.sql（提供 projects 等基线表）。
-const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-agent-system-info-'));
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-agent-system-info-'));
 const require = createRequire(import.meta.url);
 {
   const Database = require('better-sqlite3');
-  const db = new Database(path.join(tempDir, 'biof3.db'));
+  const db = new Database(path.join(tempDir, 'petri.db'));
   const migrationsDir = path.resolve('src/migrations');
   for (const file of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     db.exec(fs.readFileSync(path.join(migrationsDir, file), 'utf8'));
   }
   db.close();
 }
-process.env.BIOF3_DB_PATH = path.join(tempDir, 'biof3.db');
+process.env.PETRI_DB_PATH = path.join(tempDir, 'petri.db');
 
 test.after(() => {
   try {
@@ -29,7 +29,7 @@ test.after(() => {
 });
 
 test('BLOCK-33 P1 system_info 工具形状', async (_t) => {
-  const { tool_system_info } = await import('../core/biof3-server/agent-tools/system-info-tools.js');
+  const { tool_system_info } = await import('../core/petri-server/agent-tools/system-info-tools.js');
   const result = await tool_system_info({}, { projectId: 'p_test' });
   assert.equal(result.ok, true);
   assert.equal(result.os.platform, process.platform);
@@ -45,7 +45,7 @@ test('BLOCK-33 P1 system_info 工具形状', async (_t) => {
 });
 
 test('BLOCK-33 P1 registry 三方对齐（def/handler/contract）+ 提供者投影', async (_t) => {
-  const registry = await import('../core/biof3-server/agent-tools/registry.js');
+  const registry = await import('../core/petri-server/agent-tools/registry.js');
   // buildToolRegistry 在模块加载时强校验：def/handler/contract 不齐会 throw
   const entry = registry.getToolEntry('system_info');
   assert.ok(entry, 'system_info 已注册');
@@ -58,7 +58,7 @@ test('BLOCK-33 P1 registry 三方对齐（def/handler/contract）+ 提供者投�
 });
 
 test('BLOCK-33 P1 只读模式同样可用（非 mutating 不受 accessMode 限制）', async (_t) => {
-  const { executeToolCall } = await import('../core/biof3-server/agent-tools/tool-execution.js');
+  const { executeToolCall } = await import('../core/petri-server/agent-tools/tool-execution.js');
   const envelope = await executeToolCall('system_info', {}, {
     accessMode: 'read',
     allowExecution: false,

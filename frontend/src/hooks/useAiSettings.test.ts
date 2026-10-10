@@ -16,14 +16,14 @@ function installBridge(opts: {
   const get = vi.fn().mockResolvedValue(opts.initial || null);
   const save = opts.save || vi.fn().mockResolvedValue(undefined);
   const listModels = opts.listModels;
-  (window as unknown as { biof3Desktop: unknown }).biof3Desktop = {
+  (window as unknown as { petriDesktop: unknown }).petriDesktop = {
     aiSettings: { get, save, ...(listModels ? { listModels } : {}) },
   };
   return { get, save, listModels };
 }
 
 function uninstallBridge() {
-  delete (window as unknown as { biof3Desktop?: unknown }).biof3Desktop;
+  delete (window as unknown as { petriDesktop?: unknown }).petriDesktop;
 }
 
 beforeEach(() => {

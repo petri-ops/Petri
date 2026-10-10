@@ -136,7 +136,7 @@
 | **OB-004** | observ §六 L401-422 | error-log.js 默认路径不可写 | `core/r-server/routes/index.js` + `src/mcp-server.js` | **P1** | 2 改 | 0 新测试（沿用既有） | 🟢 低 | ✅ 已落地 |
 | **OB-005** | observ §六 L424-443 | Health 端点 shape 不一致，liveness/readiness 未分离 | `src/mcp-server.js` (6 行小改) | **P1** | 1 改 | 0 新测试（沿用既有） | 🟢 低 (partial 已落地) / 🟠 中 (full 推迟) | 🚫 不外推（partial 已落地；full 推迟） |
 | **PR-006** | perf §四 L269-291 | 4 个 backend 子进程 exit handler 仅 console.log + null | `src/main/backend-proc-manager.js` (4 proc.on('exit')) | **P1** | 0 改（保留） | 0 | 🟠 中 | 🚫 不外推 |
-| **PR-012** | perf §四 L488-521 | branch-db + result-db 同时打开 biof3.db | `src/database/branch-db.js:18-49` + `src/database/result-db.js:23-54` | **P1** | 0 改 | 0 | 🟢 低 | 🚫 不外推 |
+| **PR-012** | perf §四 L488-521 | branch-db + result-db 同时打开 petri.db | `src/database/branch-db.js:18-49` + `src/database/result-db.js:23-54` | **P1** | 0 改 | 0 | 🟢 低 | 🚫 不外推 |
 
 ### §2.3 同根关联显式识别（修复时必须合并）
 

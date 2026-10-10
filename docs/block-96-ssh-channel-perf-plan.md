@@ -1,6 +1,6 @@
 # BLOCK-96-SSH-CHANNEL-PERF — SSH 远程通道效率与稳定性优化（连接面 / 列表面 / 错误契约 / 进程面 / 可观测）
 
-最后更新：2026-09-16（**整包收口 completed（P0–P4 当日完成，active 槽位清空）**。交付六工作面：F1 连接面（addressFamily 传输层参数化 + probe 握手计时 + mux 幂等只读透明重试）/ F2 列表面（fs_list 单 fork NUL 记录协议 + 服务端分页 + 前端树游标加载「加载更多」）/ F3 错误契约（die 原因经 mux envelope 第 4 字段回传 + pipefail + LC_ALL=C + 错误码表 + 死代码清理）/ F4 进程面（exec_bg pidfile 身份替代 pgrep 猜测 + ps_pid starttime 校验防 PID 复用 + kill_pid 进程组击杀 + exec 看门狗组杀）/ F5 可观测（verb 日志门控 BIOF3_SSH_VERB_LOG + fs_grep 排除集）/ F6 probe 领域探测退役。**对照数字（WSL 真节点）**：首连 330ms←基线 21200ms；fs_list@500 warm 15ms←基线 2600ms（cold 21ms）；六类特殊文件名（引号/反斜杠/换行/制表符/空格/中文）逐字回填；分页契约与 truncated 标记正确；exec 超时孤儿 orphansAfter=0。**门禁**：契约 12 套件 104 项 0 fail（7 环境跳过）；tsc 0 + vitest 36 过；`npm run closeout` 四门全绿；dev-verify flow `block96-ssh-channel` 3/3 allPass；UI-388/389 台账同提交登记；e48b631/5170e53 台账缺口按 BLOCK-91 先例补登豁免清单。**实现期抓真 3 处**：①__mux 循环 bash $() 剥 NUL——fs_list 改 agent 侧 base64 单行先行；②非 Linux 节点无 setsid——exec/exec_bg 降级路径；③live 脚本 mux 句柄吊住事件循环——closeAll+显式 exit。**评估项五条结论回写（无悬置）**：sftp 大文件/probe TTL 缓存/__mux 并发/IDLE_CLOSE=不做（依据见 F5）；addressFamily setter UI=deferred 遗留候选。G0 开发期常态 · 不外推 packaged/Provider/GA）
+最后更新：2026-09-16（**整包收口 completed（P0–P4 当日完成，active 槽位清空）**。交付六工作面：F1 连接面（addressFamily 传输层参数化 + probe 握手计时 + mux 幂等只读透明重试）/ F2 列表面（fs_list 单 fork NUL 记录协议 + 服务端分页 + 前端树游标加载「加载更多」）/ F3 错误契约（die 原因经 mux envelope 第 4 字段回传 + pipefail + LC_ALL=C + 错误码表 + 死代码清理）/ F4 进程面（exec_bg pidfile 身份替代 pgrep 猜测 + ps_pid starttime 校验防 PID 复用 + kill_pid 进程组击杀 + exec 看门狗组杀）/ F5 可观测（verb 日志门控 PETRI_SSH_VERB_LOG + fs_grep 排除集）/ F6 probe 领域探测退役。**对照数字（WSL 真节点）**：首连 330ms←基线 21200ms；fs_list@500 warm 15ms←基线 2600ms（cold 21ms）；六类特殊文件名（引号/反斜杠/换行/制表符/空格/中文）逐字回填；分页契约与 truncated 标记正确；exec 超时孤儿 orphansAfter=0。**门禁**：契约 12 套件 104 项 0 fail（7 环境跳过）；tsc 0 + vitest 36 过；`npm run closeout` 四门全绿；dev-verify flow `block96-ssh-channel` 3/3 allPass；UI-388/389 台账同提交登记；e48b631/5170e53 台账缺口按 BLOCK-91 先例补登豁免清单。**实现期抓真 3 处**：①__mux 循环 bash $() 剥 NUL——fs_list 改 agent 侧 base64 单行先行；②非 Linux 节点无 setsid——exec/exec_bg 降级路径；③live 脚本 mux 句柄吊住事件循环——closeAll+显式 exit。**评估项五条结论回写（无悬置）**：sftp 大文件/probe TTL 缓存/__mux 并发/IDLE_CLOSE=不做（依据见 F5）；addressFamily setter UI=deferred 遗留候选。G0 开发期常态 · 不外推 packaged/Provider/GA）
 
 状态：`completed（2026-09-16 P0–P4 一次会话完成，六工作面 F1–F6 全收口；提交链 2a487b14→12e91068→3fdf5df2→78a58b71→7122bdc5→b5635947→收口提交）`
 
@@ -8,7 +8,7 @@
 
 用户裁决原话：「就目前的这个脚本或者机制来说。 效率和稳定性如何有哪些方面可以大幅度的优化呢 我还是能感受到不稳定 还有首次连接有些慢  需要新建一个block用来优化」（2026-09-16），并附外部 AI（DeepSeek）对 agent 脚本的静态分析作参考输入。本会话独立通读脚本全文 + 传输层 + gateway，并在本机 WSL 真节点实测取证后立项（DeepSeek 判断：印证 4 / 修正 3 / 新增 5，见 §0.2）。
 
-主模块：`core/biof3-server/helpers/remote-execution/`（`node-agent.js` 内嵌 biof3-agent.sh、`ssh-multiplexer.js`、`ssh-transport.js`、`remote-job-runner.js` ensureAgent）+ `helpers/workspace-gateway.js`（ssh 后端）
+主模块：`core/petri-server/helpers/remote-execution/`（`node-agent.js` 内嵌 petri-agent.sh、`ssh-multiplexer.js`、`ssh-transport.js`、`remote-job-runner.js` ensureAgent）+ `helpers/workspace-gateway.js`（ssh 后端）
 
 关联：BLOCK-67（SSH 远程项目面 + __mux 单连接复用）、BLOCK-77（resident 任务 / exec_bg P5 修复）、BLOCK-78（sys_resource 轮询面）、BLOCK-89/90/91（fs verbs 增量消费方）；BLOCK-92/93/94/95 文件面零触碰
 
@@ -77,7 +77,7 @@
 
 ### F5 可观测 + 评估项收口
 
-- **verb 级结构化日志（已实现）**：`BIOF3_SSH_VERB_LOG=1` 门控（默认关），每 verb 一行 JSON（channel/verb/ms/exit/bytes/ts）——「感觉不稳定」从此可归因；门控测试锁定缺省静默。
+- **verb 级结构化日志（已实现）**：`PETRI_SSH_VERB_LOG=1` 门控（默认关），每 verb 一行 JSON（channel/verb/ms/exit/bytes/ts）——「感觉不稳定」从此可归因；门控测试锁定缺省静默。
 - **fs_grep 默认排除集（已实现）**：`--exclude-dir` 默认 `.git/node_modules/target`。
 - **评估项结论（2026-09-16 P4 逐条裁决，不允许悬置）**：
   - 大文件 fs_read 改 sftp/scp 通道 → **不做**：fs_read 已有 offset/length 窗口 + BLOCK-90/91 64KB 分片上传/下载通道覆盖大文件路径；16MB 预览上限内单口直读 RTT 实测 15ms 级；引入 sftp 子通道=第二传输码路径，收益不抵复杂度。
@@ -101,7 +101,7 @@
 2. **每个性能宣称必须有前后对照数字**：以本会话基线（21.2s / 226ms / 2.6s@500 / 6.3ms 批量）为准绳，收口时同机复测对账；
 3. **agent 脚本变更自动重部署**（sha256 版本钉扎，ensureAgent 哈希变即重传）：mux 会话生命周期 ≤ app 会话，无跨版本长连接兼容负担；但同一会话内 fs verbs 行为一致性须契约测试保证；
 4. **协议演进最小化**：`__mux` 一期保持「无请求 id 串行」语义（block67 契约依赖），envelope 加 stderr 字段属向后兼容追加；
-5. dev 纪律：core/biof3-server 变更须重启 dev 栈并预告用户窗口闪动；fnm Node 24。
+5. dev 纪律：core/petri-server 变更须重启 dev 栈并预告用户窗口闪动；fnm Node 24。
 
 ## 4. 阶段草案（P0 评审裁剪优先级后串行执行）
 
@@ -111,7 +111,7 @@
 | P1 | **已收口（2026-09-16）**：F6 probe 退役（12e91068/UI-388）→ F1 连接面（同提交）→ F2 列表面（3fdf5df2/UI-389，含前端树游标加载）；实现期抓真 1 处=__mux 循环 bash $() 剥 NUL，fs_list 改 agent 侧 base64 单行先行 | 契约 9 套件 73/73 绿（特殊文件名夹具+分页夹具）+ 前端 tsc 0/vitest 36 过 + 实机 WSL 计时对照（首连 330ms←21200ms、fs_list@500 warm 15ms←2600ms）落 `acceptance/block-96/` |
 | P2 | **已收口（2026-09-16）**：F3 错误契约（78a58b71）——die 原因经 mux envelope 第 4 字段回传 + pipefail（截断型管道显式 \|\| true）+ LC_ALL=C + 错误码表 + 死代码清理（now_ms/openTimeoutMs） | 错误注入契约测试（die→remoteError 显式码/thin 不误标 transport）+ block67 契约族全绿 77/77 |
 | P3 | **已收口（2026-09-16）**：F4 进程面（7122bdc5）——exec_bg pidfile 身份（pid+starttime）+ ps_pid starttime 校验（PID 复用防误判）+ kill_pid 进程组击杀 + exec 看门狗组杀 | block77 resident 契约 47/47 绿 + WSL 实机孤儿清零断言（exec 超时孙进程组杀 orphansAfter=0） |
-| P4 | **已收口（2026-09-16）**：F5 可观测（verb 日志门控 BIOF3_SSH_VERB_LOG + fs_grep 排除集）+ dev-verify flow `block96-ssh-channel` 注册 + 评估项五条逐条结论（见 F5，无悬置）+ 整包收口 | verb 日志门控测试 + dev-verify flow 3/3 allPass + `npm run closeout` 四门 |
+| P4 | **已收口（2026-09-16）**：F5 可观测（verb 日志门控 PETRI_SSH_VERB_LOG + fs_grep 排除集）+ dev-verify flow `block96-ssh-channel` 注册 + 评估项五条逐条结论（见 F5，无悬置）+ 整包收口 | verb 日志门控测试 + dev-verify flow 3/3 allPass + `npm run closeout` 四门 |
 
 **完成语义**：整包 `completed` = 已启动工作面全部收口 + 实机对照数字落 `acceptance/block-96/`（新目录必配 impact-map）；评估项须有「做/不做 + 依据」结论；未启动工作面必须经用户显式裁决 `deferred` 并回写本状态头。
 

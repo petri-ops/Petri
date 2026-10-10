@@ -13,13 +13,13 @@ function installBridge<K extends DesktopBridgeName>(
   // a stub that satisfies whatever the chosen bridge declares.
   handle: unknown
 ) {
-  (window as unknown as Record<string, unknown>).biof3Desktop = {
+  (window as unknown as Record<string, unknown>).petriDesktop = {
     [name]: handle,
   };
 }
 
 function uninstallBridge() {
-  delete (window as unknown as { biof3Desktop?: unknown }).biof3Desktop;
+  delete (window as unknown as { petriDesktop?: unknown }).petriDesktop;
 }
 
 beforeEach(() => {
@@ -27,11 +27,11 @@ beforeEach(() => {
 });
 
 describe('isDesktop', () => {
-  it('returns false when window.biof3Desktop is absent', () => {
+  it('returns false when window.petriDesktop is absent', () => {
     expect(isDesktop()).toBe(false);
   });
 
-  it('returns true when window.biof3Desktop is populated', () => {
+  it('returns true when window.petriDesktop is populated', () => {
     installBridge('aiSettings', { get: () => Promise.resolve({}) });
     expect(isDesktop()).toBe(true);
   });
@@ -51,7 +51,7 @@ describe('getBridge', () => {
   });
 
   it('returns null when the bridge exists but the sub-handle is missing', () => {
-    (window as unknown as Record<string, unknown>).biof3Desktop = {
+    (window as unknown as Record<string, unknown>).petriDesktop = {
       isDesktop: true,
       platform: 'darwin',
       arch: 'arm64',

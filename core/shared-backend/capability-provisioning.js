@@ -12,7 +12,7 @@
  *   - No second download/verify/install system: this module re-implements
  *     the same download + streaming SHA-256 + atomic-move steps already used
  *     by `src/plugin-manager.js`, but stays free of an `electron` dependency
- *     so it can run in `core/` (biof3-server, tests) as well as the main process.
+ *     so it can run in `core/` (petri-server, tests) as well as the main process.
  *   - Offline-first: callers should prefer an already-provisioned capability
  *     and only reach the network when the local copy is missing or invalid
  *     (D5). This module doesn't decide *when* to fetch — callers (Harness
@@ -47,14 +47,14 @@ const CAPABILITIES_DIR_NAME = 'capabilities';
  * project OSS CDN (see src/macos-oss-updater.js DEFAULT_FEED_URL), so the
  * default allowlist covers Aliyun OSS. Distribution source can move (D4/D7)
  * without touching provisioning logic by overriding the allowlist via
- * `options.allowedHosts` or the BIOF3_CAPABILITY_ALLOWED_HOSTS env var.
+ * `options.allowedHosts` or the PETRI_CAPABILITY_ALLOWED_HOSTS env var.
  *
  * Entries are matched case-insensitively. An entry beginning with '.' is a
  * suffix match (e.g. '.aliyuncs.com' matches 'x.oss-cn-hangzhou.aliyuncs.com');
  * any other entry must match the host exactly.
  */
 const DEFAULT_ALLOWED_HOSTS = Object.freeze([
-  'biof3-uploads.oss-cn-hangzhou.aliyuncs.com',
+  'petri-uploads.oss-cn-hangzhou.aliyuncs.com',
   '.aliyuncs.com',
 ]);
 
@@ -62,7 +62,7 @@ function resolveAllowedHosts(options = {}) {
   if (Array.isArray(options.allowedHosts) && options.allowedHosts.length > 0) {
     return options.allowedHosts;
   }
-  const fromEnv = process.env.BIOF3_CAPABILITY_ALLOWED_HOSTS;
+  const fromEnv = process.env.PETRI_CAPABILITY_ALLOWED_HOSTS;
   if (fromEnv && fromEnv.trim()) {
     return fromEnv.split(',').map((h) => h.trim()).filter(Boolean);
   }
@@ -103,7 +103,7 @@ function checkUrlAllowed(url, options = {}) {
 }
 
 function defaultRuntimesDir() {
-  const localDataDir = process.env.BIOF3_LOCAL_DATA_DIR || path.join(os.homedir(), 'Documents', 'BioF3-Local');
+  const localDataDir = process.env.PETRI_LOCAL_DATA_DIR || path.join(os.homedir(), 'Documents', 'Petri-Local');
   return path.join(localDataDir, 'runtimes');
 }
 

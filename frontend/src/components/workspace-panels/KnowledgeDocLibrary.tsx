@@ -234,7 +234,7 @@ export function KnowledgeDocLibrary({
 
   const handleOpenDir = useCallback(() => {
     if (knowledgeDir) {
-      void window.biof3Desktop?.files?.openPath(knowledgeDir);
+      void window.petriDesktop?.files?.openPath(knowledgeDir);
     }
   }, [knowledgeDir]);
 
@@ -413,7 +413,7 @@ export function KnowledgeDocLibrary({
                             <button
                               type="button"
                               className={styles.previewOpenRaw}
-                              onClick={() => void window.biof3Desktop?.files?.openPath(preview.rawPath)}
+                              onClick={() => void window.petriDesktop?.files?.openPath(preview.rawPath)}
                               data-testid="knowledge-doc-open-raw"
                             >
                               打开原文件

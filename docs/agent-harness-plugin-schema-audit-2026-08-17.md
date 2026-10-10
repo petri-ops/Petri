@@ -1,4 +1,4 @@
-# BioF3 Desktop — Agent Harness Plugin Schema 与风险审计报告
+# Petri Desktop — Agent Harness Plugin Schema 与风险审计报告
 
 | 项目 | 值 |
 | --- | --- |
@@ -20,7 +20,7 @@
 | 维度 | 评分 | 说明 |
 | --- | --- | --- |
 | Schema 自描述完整性 | 8/10 | 10 个内置插件 + 1 个原型，全部产出 `tool-definition.json`；含 inputs/outputs/failureModes/resultStudio/parameterImpacts；output artifact 字段基本齐全 |
-| Schema 形式化校验 | 2/10 | 入口 `_inputsToInputSchema` 把 BioF3 自研 inputs[] 简单映射成 JSON Schema 后**只用于 MCP listTools 暴露**，callTool 入口**完全跳过 schema 校验**直接传 args 给脚本 |
+| Schema 形式化校验 | 2/10 | 入口 `_inputsToInputSchema` 把 Petri 自研 inputs[] 简单映射成 JSON Schema 后**只用于 MCP listTools 暴露**，callTool 入口**完全跳过 schema 校验**直接传 args 给脚本 |
 | 入参执行前校验 | 4/10 | file input 在 `_resolveStagedInputPath` 有白名单；plugin input `id` 用 regex 限制；文本/数值参数**完全无边界校验**，依赖各脚本里 `as.numeric`、`%||%`、手写 `clamp` |
 | 错误码体系一致性 | 7/10 | failureModes[] 形式化声明，与脚本 `stop()` / `failureMode = "xxx"` 对齐；但 exit code 单一（1），无结构化 error class |
 | 风险函数隔离 | 7/10 | 插件脚本不调 shell/network，只用 R/Python 科学包；`execFile` 仅在 r-server 调度层出现，固定 300s timeout + 10MB maxBuffer + 沙箱 jobDir |
@@ -59,10 +59,10 @@
 
 ### 2.1 注册机制与发现方式
 
-插件发现有三条来源，按优先级合并到 `globalThis._biof3Plugins: Map<id, plugin>`：
+插件发现有三条来源，按优先级合并到 `globalThis._petriPlugins: Map<id, plugin>`：
 
 1. **builtin**：`resources/built-in-plugins/manifest.json` 列出 + `<id>/{plugin.json, tool-definition.json, scripts/}` 在磁盘上 → `_getCanonicalBuiltInPlugin()` + `loadBuiltInPlugins()`。
-2. **installed**：`~/Documents/BioF3-Local/plugins/installed.json` → `loadPluginsFromDisk()`。
+2. **installed**：`~/Documents/Petri-Local/plugins/installed.json` → `loadPluginsFromDisk()`。
 3. **development**：`inspectPluginSources({ developmentDirs })` 经 `shared-backend/plugin-sdk.js` 走。
 
 合并规则（`loadPluginsFromSources`，`core/r-server/plugin-loader.js:629-674`）：
@@ -76,8 +76,8 @@
 
 | # | Plugin ID | Kind/Type | Language | Scripts | tool-definition.json | plugin.json | 主要功能 | manifest status |
 | - | --------- | --------- | -------- | ------- | -------------------- | ----------- | -------- | --------------- |
-| 1 | biof3-r-runtime | runtime | r | — | ❌ | ❌ | R 4.5.2 + Bioconductor 3.22 + 70+ 包 | n/a |
-| 2 | biof3-py-runtime | runtime | python | — | ❌ | ❌ | Python 3.11.9 + 200+ 包 | n/a |
+| 1 | petri-r-runtime | runtime | r | — | ❌ | ❌ | R 4.5.2 + Bioconductor 3.22 + 70+ 包 | n/a |
+| 2 | petri-py-runtime | runtime | python | — | ❌ | ❌ | Python 3.11.9 + 200+ 包 | n/a |
 | 3 | deseq2 | plugin | r | deseq2.R | ✅ | ✅ | Bulk RNA-seq DESeq2 + lfcShrink(apeglm) | canonical |
 | 4 | volcano-plot | plugin | r | volcano-plot.R | ✅ | ✅ | 火山图绘制（log2FC + pvalue） | canonical |
 | 5 | gene-correlation | plugin | r | gene-correlation.R | ✅ | ✅ | Top N 基因 Pearson/Spearman 相关性热图 | incubating |
@@ -90,7 +90,7 @@
 | 12 | deg-standardizer | plugin | r | deg-standardizer.R | ✅ | ✅ | DEG 表标准化 Artifact | incubating |
 | 13 | ranked-go-enrichment | plugin | r | (无 built-in 副本) | ⚠️ acceptance/ | ❌ | GSEA-like 富集原型（仅 acceptance 验收） | n/a |
 
-**未在清单中的特殊插件**（manifest 列出但属 non-tool 类型，不进入 `_biof3Plugins`，仅供 `installPlugin` 解析/下载）：
+**未在清单中的特殊插件**（manifest 列出但属 non-tool 类型，不进入 `_petriPlugins`，仅供 `installPlugin` 解析/下载）：
 
 - **19 个 figcode-card 包**：figcode-volcano-animated / figcode-trajectory-branch / figcode-sc-doublet / figcode-cytotrace / figcode-qq-plot / figcode-manhattan / figcode-power-curve / figcode-meta-forest / figcode-mut-signature / figcode-lego-plot / figcode-spatial-cluster / figcode-spatial-deconv-c2l / figcode-feature-spatial / figcode-spatial-svg-moran / figcode-squidpy-neighbors / figcode-spatial-lr-liana / figcode-scvelo-stream / figcode-shap-summary（均为科学依赖包，不注册为 MCP 工具）
 - **1 个 figcode-data 包**：figcode-data-bsgenome-hg19（hg19 参考基因组数据）
@@ -98,7 +98,7 @@
 
 > **统计说明**：用户委派描述"19 个 built-in plugin"实际包含：
 > - **13 个工具插件**（10 个有 scripts/ + 2 个 runtime + 1 个 acceptance 原型）——这些是本审计的核心对象
-> - **20 个 figcode-card/data 纯依赖包** —— 这些由 `installPlugin` 处理，**不进入 `_biof3Plugins`，不暴露为 MCP 工具**
+> - **20 个 figcode-card/data 纯依赖包** —— 这些由 `installPlugin` 处理，**不进入 `_petriPlugins`，不暴露为 MCP 工具**
 > - 因此本报告聚焦 **10 个工具插件（10 个 tool-definition.json） + 1 个 prototype** = 11 个 schema 单元，与"19"的差异在 manifest 包含 figcode 依赖包
 
 ### 2.3 Schema 完整度总览表（核心 10 个工具插件）
@@ -137,7 +137,7 @@
 - **代码片段**：
 
 ```12:15:core/r-server/plugin-loader.js
-// _inputsToInputSchema 把 BioF3 inputs[] 简单映射成 JSON Schema，
+// _inputsToInputSchema 把 Petri inputs[] 简单映射成 JSON Schema，
 // 仅用于 MCP listTools 暴露给客户端。
 function _inputsToInputSchema(inputs) {
   const properties = {};
@@ -656,8 +656,8 @@ stdout: String(stdout || '').slice(-2000),
 | `core/r-server/mcp/registry.js:1677` | `callTool(name, args, opts)` | 入口，路由 skill/branch/ide/plugin |
 | `core/r-server/mcp/registry.js:1052` | `_runPluginScript` | 调 R/Python 脚本的私有函数 |
 | `core/r-server/mcp/registry.js:1359` | `execFile` | 唯一执行点（300s + 10MB） |
-| `core/r-server/plugin-loader.js:395` | `listToolsForMCP()` | 把 `_biof3Plugins` 转 MCP 格式 |
-| `core/r-server/plugin-loader.js:376` | `_inputsToInputSchema()` | BioF3 inputs[] → JSON Schema（仅展示，不验证） |
+| `core/r-server/plugin-loader.js:395` | `listToolsForMCP()` | 把 `_petriPlugins` 转 MCP 格式 |
+| `core/r-server/plugin-loader.js:376` | `_inputsToInputSchema()` | Petri inputs[] → JSON Schema（仅展示，不验证） |
 
 ### 4.2 Schema 声明字段（grep 汇总）
 
@@ -677,7 +677,7 @@ $ grep -rE 'system|shell|exec|popen' resources/built-in-plugins/*/scripts/
 
 $ grep -rE 'download\.file|requests\.|http|GET|POST|urlretrieve|urllib|fetch' resources/built-in-plugins/*/scripts/
 # → 仅 gsea.R / go-kegg.R 通过 R KEGGREST 包（依赖 RCurl/libcurl）做 HTTP GET
-#   有 offline snapshot fallback（find_biof3_kegg_snapshot）
+#   有 offline snapshot fallback（find_petri_kegg_snapshot）
 
 $ grep -rE 'sqlite|dbExecute|dbGetQuery|dbWriteTable' resources/built-in-plugins/*/scripts/
 # → 0 个（插件脚本不直连 SQLite，DB 由 r-server 调度层管理）
@@ -725,7 +725,7 @@ $ grep -rE 'sqlite|dbExecute|dbGetQuery|dbWriteTable' resources/built-in-plugins
 | **agent-harness-contract-audit-2026-08-17.md** | Branch/Result IPC 三层漂移 | 不重复 |
 | **agent-harness-error-handling-audit-2026-08-17.md** | failureMode 漂移（推测覆盖 PL-002） | PL-002/PL-005/PL-006：明确给出 7 个插件的 `failureModes.detect` regex 漂移点 + 4 处 manifest.files 漂移 |
 | **agent-harness-architecture-audit-2026-08-17.md** | sourceType 优先级（推测覆盖 PL-008） | PL-008：给出 plugin-loader.js:629-674 的具体合并规则漏洞 |
-| **agent-harness-architecture-audit-2026-08-17.md** | plugin-loader 与 registry 双源（推测） | 本审计完整给出 `_biof3Plugins: Map` 三源合并规则 |
+| **agent-harness-architecture-audit-2026-08-17.md** | plugin-loader 与 registry 双源（推测） | 本审计完整给出 `_petriPlugins: Map` 三源合并规则 |
 
 ---
 

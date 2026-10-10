@@ -17,27 +17,27 @@ const require = createRequire(import.meta.url);
 const ROOT = path.resolve('.');
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'b156-mcp-proj-'));
-process.env.BIOF3_LOCAL_DATA_DIR = tmpDir;
+process.env.PETRI_LOCAL_DATA_DIR = tmpDir;
 
 // registry 全图自举临时 DB（与 agent-tool-registry.test.mjs 同一修法）：
 // require 链 query-tools → db.js 在缺 schema 时抛 no such table: projects；
-// BIOF3_DB_PATH 必须在 require registry 前生效。
+// PETRI_DB_PATH 必须在 require registry 前生效。
 {
-  const Database = require(path.join(ROOT, 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const boot = new Database(path.join(tmpDir, 'biof3.db'));
+  const Database = require(path.join(ROOT, 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const boot = new Database(path.join(tmpDir, 'petri.db'));
   const migrationsDir = path.join(ROOT, 'src', 'migrations');
   for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fs.readFileSync(path.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = path.join(tmpDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tmpDir, 'petri.db');
 }
 
-const settings = require(path.join(ROOT, 'core/biof3-server/helpers/mcp-settings'));
-const manager = require(path.join(ROOT, 'core/biof3-server/mcp/client-manager'));
-const projection = require(path.join(ROOT, 'core/biof3-server/agent-tools/mcp-projection'));
-const registry = require(path.join(ROOT, 'core/biof3-server/agent-tools/registry'));
-const policy = require(path.join(ROOT, 'core/biof3-server/agent-tools/agent-tool-policy'));
+const settings = require(path.join(ROOT, 'core/petri-server/helpers/mcp-settings'));
+const manager = require(path.join(ROOT, 'core/petri-server/mcp/client-manager'));
+const projection = require(path.join(ROOT, 'core/petri-server/agent-tools/mcp-projection'));
+const registry = require(path.join(ROOT, 'core/petri-server/agent-tools/registry'));
+const policy = require(path.join(ROOT, 'core/petri-server/agent-tools/agent-tool-policy'));
 
 const FIXTURE = path.join(ROOT, 'test', 'fixtures', 'mcp-fixture-server.cjs');
 const NODE = process.execPath;
@@ -129,7 +129,7 @@ test('BLOCK-157 CAP-1：readOnly 夹具经真实 stdio 回流', async () => {
 });
 
 test('BLOCK-156 knowledge-console 白名单子集自动排除 mcp_* 工具', async () => {
-  const { resolveToolDefsForContext } = require(path.join(ROOT, 'core/biof3-server/agent-tools/knowledge-console-tools'));
+  const { resolveToolDefsForContext } = require(path.join(ROOT, 'core/petri-server/agent-tools/knowledge-console-tools'));
   const all = registry.getProviderToolDefs();
   const scoped = resolveToolDefsForContext({ toolSubset: 'knowledge-console' }, all);
   assert.ok(scoped.every((d) => !d.function.name.startsWith('mcp_')));

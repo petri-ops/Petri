@@ -1,6 +1,6 @@
-# BioF3 第三方分析插件接入指南
+# Petri 第三方分析插件接入指南
 
-> Stage 3 出口交付物（M5）。本文档说明如何为 BioF3 Harness 编写一个自包含的分析插件，
+> Stage 3 出口交付物（M5）。本文档说明如何为 Petri Harness 编写一个自包含的分析插件，
 > 让它被自动发现、注册、参数修复、执行、产物校验、二跳编排与失败恢复，全程**不修改**
 > Agent 核心、执行器、job 库或结果系统。
 >
@@ -167,7 +167,7 @@ Harness 用 `detect` 把原始报错归类成结构化可恢复项，驱动 `dec
 约定：
 
 - 入参：R/Python 插件统一接收第一个位置参数 `job_dir`，并读取 `job_dir/params.json`；不要自行发明 `--args` / `--params` 协议。
-- executor 会把脚本复制成 `jobDir/run-script.R` / `run-script.py`，R 脚本附带 `_biof3-theme.R`，并注入 `R_LIBS_USER`（见 §5）。
+- executor 会把脚本复制成 `jobDir/run-script.R` / `run-script.py`，R 脚本附带 `_petri-theme.R`，并注入 `R_LIBS_USER`（见 §5）。
 - 科研产物只写到 `job_dir/output/`。`artifact-manifest.json` 与 `provenance.json` 是 Harness 依据实际执行脚本、参数、输入和输出统一生成的内部证据，不得声明为用户科研产物。
 - **结果为空 / ID 映射失败等务必输出可被 `detect` 正则命中的结构化诊断文本**；若插件主动阻断，还应保存 `status=blocked` 与 `failureMode`，执行层会原样保留。
 - 不要在脚本里自己下载重包或联网；依赖由 `requiresBundle` + provisioning 负责。
@@ -185,7 +185,7 @@ Harness 用 `detect` 把原始报错归类成结构化可恢复项，驱动 `dec
    `R_LIBS_USER`（优先级最高），R 脚本 `library(clusterProfiler)` 即可命中。
 3. 一个 bundle 可被多插件共享（GO/KEGG 与 GSEA 同用 `r-enrichment`）。
 4. bundle 的 `url` 由分发 manifest 描述，host 必须在白名单内（默认 Aliyun OSS，可经
-   `BIOF3_CAPABILITY_ALLOWED_HOSTS` 覆盖）。**换分发源只改 manifest，不改插件代码。**
+   `PETRI_CAPABILITY_ALLOWED_HOSTS` 覆盖）。**换分发源只改 manifest，不改插件代码。**
 
 ---
 

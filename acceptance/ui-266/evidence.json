@@ -3,14 +3,14 @@
   "workPackage": "BLOCK-34-AGENT-TOOL-TRAIL-DOCK",
   "phase": "P4 实机收口",
   "capturedAt": "2026-09-01T12:28:00Z",
-  "environment": "dev Electron (CDP 9222) + biof3-server :3001/:64514（含 P3 新路由 routes/ai-agent/background-processes.js；BIOF3_ELECTRON_USER_DATA_DIR/BIOF3_LOCAL_DATA_DIR 指向 .biof3-dev-user-data）",
+  "environment": "dev Electron (CDP 9222) + petri-server :3001/:64514（含 P3 新路由 routes/ai-agent/background-processes.js；PETRI_ELECTRON_USER_DATA_DIR/PETRI_LOCAL_DATA_DIR 指向 .petri-dev-user-data）",
   "model": "DeepSeek（真实 task，非 mock）",
   "project": "desktop p_msh9wyfo_ns9y（新对话经左栏「创建新对话」创建，绑定正确项目）",
   "scenarios": [
     {
       "id": "S1-浮窗自动弹出与实时状态",
       "steps": "用户任务：请使用 workspace_exec_background 工具，在项目工作区后台启动 python3 -m http.server 8765，启动成功后只回复一句话",
-      "observed": "agent 调用 workspace_exec_background 成功后，右下角 BackgroundProcessDock 自动弹出：状态标签「运行中 · 2s」随轮询递增（2s→6s→8s），命令行区显示 python3 -m http.server 8765，等宽日志区自动滚动吸附底部（autoScrollPinned=true）。事件链路：tool_result(data.processId) → biof3:agent-background-process → Dock 挂载 + 1s 轮询列表/日志端点。",
+      "observed": "agent 调用 workspace_exec_background 成功后，右下角 BackgroundProcessDock 自动弹出：状态标签「运行中 · 2s」随轮询递增（2s→6s→8s），命令行区显示 python3 -m http.server 8765，等宽日志区自动滚动吸附底部（autoScrollPinned=true）。事件链路：tool_result(data.processId) → petri:agent-background-process → Dock 挂载 + 1s 轮询列表/日志端点。",
       "screenshot": "p4-shot-1-dock-expanded.png",
       "result": "PASS"
     },

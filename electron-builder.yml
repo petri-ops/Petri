@@ -1,8 +1,8 @@
-# BioF3 Local — Electron Builder 配置
+# Petri Local — Electron Builder 配置
 
-appId: com.biof3.local
-productName: BioF3
-copyright: Copyright © 2026 BioF3
+appId: com.petri.local
+productName: Petri
+copyright: Copyright © 2026 Petri
 
 directories:
   output: dist
@@ -51,7 +51,7 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
-  shortcutName: BioF3
+  shortcutName: Petri
 
 # 压缩
 compression: maximum
@@ -62,24 +62,24 @@ compression: maximum
 # GitHub Release 继续作为手动下载镜像，不再作为应用内更新源。
 publish:
   provider: generic
-  url: https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/desktop/updates/macos
+  url: https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/desktop/updates/macos
   channel: latest
 
-# 额外资源：biof3-server / shared-backend / 前端 build 产物 / 内置插件
-# biof3-server 作为子进程 spawn，需要带上各自的 node_modules
-# （BLOCK-30 P1：独立 Python 后端已摘除，Python 工具由 biof3-server 经执行器本地执行）
+# 额外资源：petri-server / shared-backend / 前端 build 产物 / 内置插件
+# petri-server 作为子进程 spawn，需要带上各自的 node_modules
+# （BLOCK-30 P1：独立 Python 后端已摘除，Python 工具由 petri-server 经执行器本地执行）
 #
 # 阶段 3（desktop-spa）：前端 build 产物改为 Vite SPA（frontend/dist）
 # Docusaurus build 仍保留（docs/blog iframe 过渡，阶段 2 后移除）
 #
 # R/Python Runtime 已移除 — 改为插件商店按需下载（~200MB 初始包）
 # 打包脚本: scripts/build-runtime-plugins.sh → 上传 OSS → manifest.json 注册
-# 用户首次启动后在插件商店下载 R/Python Runtime 到 ~/Documents/BioF3-Local/runtimes/
+# 用户首次启动后在插件商店下载 R/Python Runtime 到 ~/Documents/Petri-Local/runtimes/
 extraResources:
   # 去 submodule 后：core 内嵌在 desktop 仓根 core/ 下
-  # 打包时把 core 的 biof3-server/shared-backend 复制到 resources/core/
-  - from: ./core/biof3-server
-    to: core/biof3-server
+  # 打包时把 core 的 petri-server/shared-backend 复制到 resources/core/
+  - from: ./core/petri-server
+    to: core/petri-server
     filter:
       - "**/*"
       - "!**/.DS_Store"

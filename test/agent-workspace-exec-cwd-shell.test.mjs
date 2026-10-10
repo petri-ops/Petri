@@ -12,14 +12,14 @@ import path from 'node:path';
 const require = createRequire(import.meta.url);
 {
   const Database = require('better-sqlite3');
-  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'biof3-exec-cwd-shell-db-'));
-  const db = new Database(path.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'petri-exec-cwd-shell-db-'));
+  const db = new Database(path.join(tempDbDir, 'petri.db'));
   const migrationsDir = path.resolve('src/migrations');
   for (const file of fssync.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     db.exec(fssync.readFileSync(path.join(migrationsDir, file), 'utf8'));
   }
   db.close();
-  process.env.BIOF3_DB_PATH = path.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try {
       fssync.rmSync(tempDbDir, { recursive: true, force: true });
@@ -28,15 +28,15 @@ const require = createRequire(import.meta.url);
     }
   });
 }
-const { createWorkspaceTools } = require('../core/biof3-server/agent-tools/workspace-tools.js');
-const { getToolDefs } = require('../core/biof3-server/agent-tools/tool-defs.js');
+const { createWorkspaceTools } = require('../core/petri-server/agent-tools/workspace-tools.js');
+const { getToolDefs } = require('../core/petri-server/agent-tools/tool-defs.js');
 
 const isWindows = process.platform === 'win32';
 const maybeSkipShell = isWindows ? test.skip : test;
 
 function symlinksSupported() {
   try {
-    const probe = fssync.mkdtempSync(path.join(os.tmpdir(), 'biof3-symlink-probe-'));
+    const probe = fssync.mkdtempSync(path.join(os.tmpdir(), 'petri-symlink-probe-'));
     try {
       fssync.symlinkSync(path.join(probe, 'target'), path.join(probe, 'link'));
       return true;
@@ -58,7 +58,7 @@ let tools;
 const ctx = { projectId: 'p_exec_cwd', userId: 'u_owner', accessMode: 'full' };
 
 before(async () => {
-  sandboxRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'biof3-exec-cwd-shell-'));
+  sandboxRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'petri-exec-cwd-shell-'));
   workspaceRoot = path.join(sandboxRoot, 'workspace');
   outsideRoot = path.join(sandboxRoot, 'outside');
   await fs.mkdir(path.join(workspaceRoot, 'data'), { recursive: true });

@@ -25,7 +25,7 @@ const path = require('node:path');
 const http = require('node:http');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'ui-310');
 
 function fetchJson(url) {
@@ -66,7 +66,7 @@ async function main() {
     const h = document.querySelectorAll('[class*="resizeHandleV"]')[0];
     if (!h) return null;
     const r = h.getBoundingClientRect();
-    const headerVar = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gewu-titlebar-height')) || 38;
+    const headerVar = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--petri-titlebar-height')) || 38;
     return { x: r.left, y: r.top, w: r.width, h: r.height, lineX: r.left + 4, headerH: Math.round(headerVar), dpr: window.devicePixelRatio };
   })()`);
   if (!geo) throw new Error('resize_handle_not_found');

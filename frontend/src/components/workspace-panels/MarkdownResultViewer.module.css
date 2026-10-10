@@ -1,11 +1,11 @@
 /* BLOCK-142 切片 E — Markdown 产物 viewer。
-   主题纪律（gewu-css-theme）：颜色一律 var(--gewu-*)，无裸色值/无 slate/无遗留 token；
+   主题纪律（petri-css-theme）：颜色一律 var(--petri-*)，无裸色值/无 slate/无遗留 token；
    global.css 的 code/pre/a/table 元素级规则会溅射进本组件（skill 铁律 5），
    以下对 markdown 语义元素全部显式 scoped 定样式完成中性化。 */
 
 .markdownBody {
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-body);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body);
   line-height: 1.65;
   overflow-wrap: anywhere;
 }
@@ -25,7 +25,7 @@
 .markdownBody h4,
 .markdownBody h5,
 .markdownBody h6 {
-  color: var(--gewu-text);
+  color: var(--petri-text);
   line-height: 1.35;
   margin: 1.2em 0 0.5em;
   font-weight: 600;
@@ -49,12 +49,12 @@
 
 /* 链接：accent 随主题（不写死蓝/teal） */
 .markdownBody a {
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
   text-decoration: underline;
 }
 
 .markdownBody a:hover {
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
   opacity: 0.85;
 }
 
@@ -65,36 +65,36 @@
   max-width: 100%;
   display: block;
   overflow-x: auto;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
 }
 
 .markdownBody th,
 .markdownBody td {
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   padding: 5px 10px;
   text-align: left;
-  font-size: var(--gewu-font-size-body-sm);
-  color: var(--gewu-text);
+  font-size: var(--petri-font-size-body-sm);
+  color: var(--petri-text);
 }
 
 .markdownBody th {
-  background: var(--gewu-bg-subtle);
+  background: var(--petri-bg-subtle);
   font-weight: 600;
 }
 
 /* 代码：行内=容器内 inset（subtle）；代码块=canvas inset + 边框 */
 .markdownBody code {
-  font-family: var(--gewu-font-mono);
+  font-family: var(--petri-font-mono);
   font-size: 0.9em;
-  background: var(--gewu-bg-subtle);
+  background: var(--petri-bg-subtle);
   border: none;
   border-radius: 4px;
   padding: 1px 5px;
 }
 
 .markdownBody pre {
-  background: var(--gewu-bg-canvas);
-  border: 1px solid var(--gewu-border);
+  background: var(--petri-bg-canvas);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
   padding: 10px 12px;
   margin: 0 0 0.9em;
@@ -104,21 +104,21 @@
 .markdownBody pre code {
   background: transparent;
   padding: 0;
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
 }
 
 /* 引用块 */
 .markdownBody blockquote {
   margin: 0 0 0.9em;
   padding: 2px 0 2px 12px;
-  border-left: 3px solid var(--gewu-border-strong);
-  color: var(--gewu-text-secondary);
+  border-left: 3px solid var(--petri-border-strong);
+  color: var(--petri-text-secondary);
 }
 
 /* 分隔线 / 列表 / 任务列表 */
 .markdownBody hr {
   border: none;
-  border-top: 1px solid var(--gewu-border);
+  border-top: 1px solid var(--petri-border);
   margin: 1.1em 0;
 }
 
@@ -143,13 +143,13 @@
 }
 
 .markdownBody ::-webkit-scrollbar-thumb {
-  background: var(--gewu-border-strong);
+  background: var(--petri-border-strong);
   border-radius: 4px;
 }
 
 .markdownLoading {
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-body-sm);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-body-sm);
 }
 
 /* 错误态：如实显示（status-error 族 token 亮暗双套有定义） */
@@ -158,9 +158,9 @@
   flex-direction: column;
   gap: 4px;
   padding: 10px 12px;
-  border: 1px solid var(--gewu-status-error-border);
+  border: 1px solid var(--petri-status-error-border);
   border-radius: 8px;
-  background: var(--gewu-status-error-bg);
-  color: var(--gewu-status-error-fg);
-  font-size: var(--gewu-font-size-body-sm);
+  background: var(--petri-status-error-bg);
+  color: var(--petri-status-error-fg);
+  font-size: var(--petri-font-size-body-sm);
 }

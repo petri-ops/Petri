@@ -13,15 +13,15 @@
 
 ## 2. 评审裁决（R1–R5，⏳ 待用户确认）
 
-- **R1 意图卡 = 项目内文件** ✅ 技术面无分歧：`.gewu/resident/<taskId>.json`（task/成功标准/backing pid/日志路径/创建时间/状态机）。执行真相仍在 process/job 状态机，意图卡只描述「意图与归属」（单一真值红线不破）。文件随项目走：ssh 项目落服务器（远程真值），本地项目落本地。
-- **R2 回访循环** ✅：后端 setInterval 60s（可配 `BIOF3_RESIDENT_INTERVAL_MS`），仅软件运行期；每轮对 running 驻留任务做 ps_pid 存活 + 日志 mtime 增长两项检查；异常判据 = 进程死且 .exit 非零 / 日志 N 轮无增长。
+- **R1 意图卡 = 项目内文件** ✅ 技术面无分歧：`.petri/resident/<taskId>.json`（task/成功标准/backing pid/日志路径/创建时间/状态机）。执行真相仍在 process/job 状态机，意图卡只描述「意图与归属」（单一真值红线不破）。文件随项目走：ssh 项目落服务器（远程真值），本地项目落本地。
+- **R2 回访循环** ✅：后端 setInterval 60s（可配 `PETRI_RESIDENT_INTERVAL_MS`），仅软件运行期；每轮对 running 驻留任务做 ps_pid 存活 + 日志 mtime 增长两项检查；异常判据 = 进程死且 .exit 非零 / 日志 N 轮无增长。
 - **R3 通知分层** ✅：异常与完成 → `notify.custom` 应用内通知（dedupeKey 防重复）；进行中不推。移动推送接口预留（函数签名占位，BLOCK-70 联动）。
 - **R4 生命周期** ✅：created → running → completed | failed | abandoned；abandoned（连续 3 轮无进展且进程死）需用户确认后清理，不自动删除。
 - **R5 安全边界** ✅：回访只读状态 + 通知，不自动重启失败任务；kill/重跑必须用户确认。
 
 ## 3. 风险与实测项
 
-- 回访轮询经 mux 复用连接（~1 RTT/任务），60s 节奏下开销可忽略；BIOF3_SSH_MUX=0 时退化为 thin per-call（每任务每轮一次握手，登记实测项）。
+- 回访轮询经 mux 复用连接（~1 RTT/任务），60s 节奏下开销可忽略；PETRI_SSH_MUX=0 时退化为 thin per-call（每任务每轮一次握手，登记实测项）。
 - 交接班挂载点（P2 定）：候选 = 会话打开时 system 注入 vs proactive 任务条；评审倾向后者（复用 BLOCK-49 投影，零 prompt 污染）。
 
 ## 4. 确认记录

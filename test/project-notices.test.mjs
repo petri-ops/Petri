@@ -10,21 +10,21 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const tempRoot = mkdtempSync(join(tmpdir(), 'b78-notices-'));
-process.env.BIOF3_DB_PATH = join(tempRoot, 'notices.db');
-process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
+process.env.PETRI_DB_PATH = join(tempRoot, 'notices.db');
+process.env.PETRI_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
 
 const require = createRequire(import.meta.url);
 {
-  const Database = require(resolve(__dirname, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const boot = new Database(process.env.BIOF3_DB_PATH);
+  const Database = require(resolve(__dirname, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const boot = new Database(process.env.PETRI_DB_PATH);
   const migDir = resolve(__dirname, '..', 'src', 'migrations');
   for (const f of require('node:fs').readdirSync(migDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(require('node:fs').readFileSync(require('node:path').resolve(migDir, f), 'utf8'));
   }
   boot.close();
 }
-const { createProjectNoticeStore } = require('../core/biof3-server/helpers/project-notices.js');
-const db = require('../core/biof3-server/db');
+const { createProjectNoticeStore } = require('../core/petri-server/helpers/project-notices.js');
+const db = require('../core/petri-server/db');
 
 test('project-notices：插入/未读计数/项目隔离/全部已读', () => {
   const store = createProjectNoticeStore(db.getDatabase());

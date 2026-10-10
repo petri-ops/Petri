@@ -4,8 +4,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 
-// plugin-manager 顶层用 app.getPath，纯 Node 下必须用 BIOF3_LOCAL_DATA_DIR 旁路
-process.env.BIOF3_LOCAL_DATA_DIR = process.env.BIOF3_LOCAL_DATA_DIR || '/tmp/biof3-test-data';
+// plugin-manager 顶层用 app.getPath，纯 Node 下必须用 PETRI_LOCAL_DATA_DIR 旁路
+process.env.PETRI_LOCAL_DATA_DIR = process.env.PETRI_LOCAL_DATA_DIR || '/tmp/petri-test-data';
 
 const require = createRequire(import.meta.url);
 const pm = require('../src/plugin-manager.js');
@@ -39,7 +39,7 @@ test('installPlugin: 远程 artifact 缺 sha256 在下载前 fail-fast', async (
           id: 'unsigned-plugin',
           version: '1.0.0',
           artifacts: {
-            'macos-arm64': { url: 'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/never/downloaded.zip', sha256: null },
+            'macos-arm64': { url: 'https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/never/downloaded.zip', sha256: null },
           },
         },
       }),

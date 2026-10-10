@@ -2,7 +2,7 @@
  * Electron Preload — 桌面版前端 ↔ 主进程 IPC 桥
  *
  * 通过 contextBridge 暴露安全的 API 给 webview 前端调用。
- * 前端通过 window.biof3Desktop 访问这些 API。
+ * 前端通过 window.petriDesktop 访问这些 API。
  *
  * 阶段 3（desktop-spa）：主窗口加载 Vite SPA，不再需要隐藏 Docusaurus
  * navbar（SPA 没有 navbar）。body padding 由 DesktopToolbar 组件自己管理。
@@ -10,7 +10,7 @@
 
 const { contextBridge, ipcRenderer, webUtils } = require('electron');
 
-// A-009: pull the biof3-server port fallback from env-coordinator
+// A-009: pull the petri-server port fallback from env-coordinator
 // instead of duplicating the per-port fallback defaults here. The
 // Electron main process sets R_SERVER_PORT on
 // process.env before preload.js runs, so the helper default
@@ -24,7 +24,7 @@ const { contextBridge, ipcRenderer, webUtils } = require('electron');
 // and avoids the cross-file require which is forbidden when
 // BrowserWindow is launched with sandbox: true (the require here
 // otherwise throws "module not found" and aborts the entire preload,
-// which silently strips window.biof3Desktop and disables the custom
+// which silently strips window.petriDesktop and disables the custom
 // traffic-light buttons in the title bar).
 function _readPort(envName, defaultPort) {
   const raw = process.env[envName];
@@ -34,7 +34,7 @@ function _readPort(envName, defaultPort) {
 }
 const _rPort = _readPort('R_SERVER_PORT', 3001);
 
-const AGENT_WORKBENCH_FLAG_CHANNEL = 'gewu:agent-workbench-flags';
+const AGENT_WORKBENCH_FLAG_CHANNEL = 'petri:agent-workbench-flags';
 const AGENT_WORKBENCH_FLAGS = { extraRenderers: false };
 
 ipcRenderer.on(AGENT_WORKBENCH_FLAG_CHANNEL, (_event, payload) => {
@@ -42,11 +42,11 @@ ipcRenderer.on(AGENT_WORKBENCH_FLAG_CHANNEL, (_event, payload) => {
   AGENT_WORKBENCH_FLAGS.extraRenderers = payload.extraRenderers;
 });
 
-contextBridge.exposeInMainWorld('biof3', {
+contextBridge.exposeInMainWorld('petri', {
   agentWorkbenchFlags: {
     // contextBridge freezes getters on the renderer side and rebinds them
     // to a frozen snapshot of the snapshot taken at first access — using a
-    // plain getter causes `window.biof3.agentWorkbenchFlags.extraRenderers`
+    // plain getter causes `window.petri.agentWorkbenchFlags.extraRenderers`
     // to permanently read `false` even after the user flips the toggle in
     // packaged Electron. Expose a synchronous method instead so each call
     // returns the live value from the closure.
@@ -65,24 +65,24 @@ contextBridge.exposeInMainWorld('biof3', {
 
 ipcRenderer.on('app:soft-refresh', () => {
   try {
-    window.dispatchEvent(new CustomEvent('gewu:soft-refresh'));
+    window.dispatchEvent(new CustomEvent('petri:soft-refresh'));
   } catch {}
 });
 
 // ============================================================
-// 注入 process.env.BIOF3_DESKTOP = '1' 到渲染进程
+// 注入 process.env.PETRI_DESKTOP = '1' 到渲染进程
 // ============================================================
-// 前端代码通过 typeof process && process.env && process.env.BIOF3_DESKTOP
+// 前端代码通过 typeof process && process.env && process.env.PETRI_DESKTOP
 // 检测桌面版，但 contextIsolation:true + nodeIntegration:false 下
 // 渲染进程没有 process 对象。通过 contextBridge 暴露让其检测通过。
 contextBridge.exposeInMainWorld('process', {
   env: {
-    BIOF3_DESKTOP: '1',
+    PETRI_DESKTOP: '1',
     NODE_ENV: 'production',
   },
 });
 
-// BLOCK-61 品牌桥：主全局名 gewu；biof3Desktop 为兼容别名（同一 surface
+// BLOCK-61 品牌桥：主全局名 petri；petriDesktop 为兼容别名（同一 surface
 // 双暴露，desktopBridge 双读），过渡期后评估移除。
 const desktopBridgeSurface = {
   // 平台标识
@@ -99,13 +99,13 @@ const desktopBridgeSurface = {
     marks: () => ipcRenderer.invoke('startup:marks'),
   },
   // BLOCK-100 — 测试实例标记（主进程经 webPreferences.additionalArguments 注入
-  // --gewu-test-instance=1）。严格 === true 判定：投影 shim 的 Proxy 属性访问
+  // --petri-test-instance=1）。严格 === true 判定：投影 shim 的 Proxy 属性访问
   // 返回 callable proxy（truthy 但非 true），不会误亮测试徽标。
-  __testInstance: process.argv.includes('--gewu-test-instance=1'),
+  __testInstance: process.argv.includes('--petri-test-instance=1'),
   // UI-421 — 测试实例管理模式快捷键透传（主进程 _window-create.js 注入实际生效
-  // 的组合键；默认 Ctrl+Alt+Shift+M，BIOF3_TEST_MANAGE_SHORTCUT 可覆盖）。
+  // 的组合键；默认 Ctrl+Alt+Shift+M，PETRI_TEST_MANAGE_SHORTCUT 可覆盖）。
   __testManageShortcut:
-    (process.argv.find((a) => a.startsWith('--gewu-test-manage-shortcut=')) || '').split('=')[1] || null,
+    (process.argv.find((a) => a.startsWith('--petri-test-manage-shortcut=')) || '').split('=')[1] || null,
   backendConfig: Object.freeze({
     rApiBase: `http://localhost:${_rPort}/api`,
   }),
@@ -203,8 +203,8 @@ const desktopBridgeSurface = {
     },
   },
 
-  // 应用级控制 — 装完运行时后需整体重启（BIOF3_R_HOME 在 main 启动时固化，
-  // 只重启 biof3-server 不够，必须重新解析 runtime 路径）
+  // 应用级控制 — 装完运行时后需整体重启（PETRI_R_HOME 在 main 启动时固化，
+  // 只重启 petri-server 不够，必须重新解析 runtime 路径）
   app: {
     relaunch: () => ipcRenderer.invoke('app:relaunch'),
   },
@@ -505,9 +505,9 @@ const desktopBridgeSurface = {
   },
 };
 
-contextBridge.exposeInMainWorld('gewu', desktopBridgeSurface);
+contextBridge.exposeInMainWorld('petri', desktopBridgeSurface);
 // 兼容别名：历史全局名（desktopBridge 读新优先、旧名兜底）
-contextBridge.exposeInMainWorld('biof3Desktop', desktopBridgeSurface);
+contextBridge.exposeInMainWorld('petriDesktop', desktopBridgeSurface);
 
 // ── Ctrl/Cmd + 滚轮 → 页面缩放 ────────────────────────────────
 // 无边框窗口没有菜单栏，Electron 的 zoomIn/zoomOut 菜单角色快捷键不可达，

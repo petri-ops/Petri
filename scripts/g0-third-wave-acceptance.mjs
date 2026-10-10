@@ -21,7 +21,7 @@ const ancestor = (commit) => { try { execFileSync('git', ['merge-base', '--is-an
 
 function inspect(verification = null, bootstrap = false) {
   const plan = read('docs/g0-living-foundation-plan.md');
-  const executor = read('core/biof3-server/helpers/tools-executor.js');
+  const executor = read('core/petri-server/helpers/tools-executor.js');
   const gateway = read('core/shared-backend/llm-providers/model-gateway.js');
   const checkpoint = read('core/shared-backend/loop-checkpoint.js');
   const summary = read('frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx');
@@ -29,7 +29,7 @@ function inspect(verification = null, bootstrap = false) {
   const checks = [
     check('G0-W3-01', g0.validateG0BaselineBundle().ok && g0.manifest.lifecycleStatus === 'maintained' && g0.manifest.qualificationStatus === 'qualified', ['core/shared-backend/g0/baseline-manifest.json'], 'Maintained qualified baseline retains third-wave contracts.'),
     check('G0-W3-02', runtime.contract.resourceDimensions.length === 6 && runtime.contract.actions.length >= 7, ['core/shared-backend/g0/adaptive-runtime.json'], 'LF5 resource and control decisions are bounded.'),
-    check('G0-W3-03', /createRuntimeResourceSnapshot/.test(executor) && runtime.contract.readinessRequired.length === 5, ['core/biof3-server/helpers/tools-executor.js'], 'LF5 reuses production resource and readiness truth.'),
+    check('G0-W3-03', /createRuntimeResourceSnapshot/.test(executor) && runtime.contract.readinessRequired.length === 5, ['core/petri-server/helpers/tools-executor.js'], 'LF5 reuses production resource and readiness truth.'),
     check('G0-W3-04', runtime.contract.scientificBoundary.includes('scientific design change'), ['core/shared-backend/g0/adaptive-runtime.json'], 'Runtime repair cannot silently alter science.'),
     check('G0-W3-05', memory.contract.cacheLayers.length === 5 && memory.contract.cacheFingerprintFields.length === 8, ['core/shared-backend/g0/model-memory-cost.json'], 'LF6 cache layers and invalidation identity are complete.'),
     check('G0-W3-06', memory.contract.durableFactKinds.length >= 7 && /buildLoopContextEnvelope/.test(checkpoint), ['core/shared-backend/loop-checkpoint.js'], 'LF6 compression is anchored to durable facts and checkpoints.'),

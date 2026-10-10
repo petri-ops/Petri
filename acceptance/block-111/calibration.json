@@ -4,7 +4,7 @@
   "capturedAt": "2026-09-22T05:16:02.280Z",
   "sourceCommit": "81c59a5741d56471d8565534fa7f81c92d3912ab",
   "model": "jev-1.13.0",
-  "wrapper": "core/biof3-server/helpers/decision-api.js",
+  "wrapper": "core/petri-server/helpers/decision-api.js",
   "decisionPoint": "interpret.js lookupCellType 二跳（W1-1 marker→细胞类型判别）",
   "result": {
     "corpus": {

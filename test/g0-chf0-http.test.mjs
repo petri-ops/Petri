@@ -8,27 +8,27 @@ import test from 'node:test';
 const require = createRequire(import.meta.url);
 
 // BLOCK-49 加映清债 —— 统一临时 DB 自举（存量：单跑/全量缺 projects 表）
-//（BIOF3_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）
+//（PETRI_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）
 {
   const fsx = require('node:fs');
   const osx = require('node:os');
   const pth = require('node:path');
   const urlx = require('node:url');
   const hereDir = pth.dirname(urlx.fileURLToPath(import.meta.url));
-  const Database = require(pth.resolve(hereDir, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const tempDbDir = fsx.mkdtempSync(pth.join(osx.tmpdir(), 'biof3-sweep-db-'));
-  const boot = new Database(pth.join(tempDbDir, 'biof3.db'));
+  const Database = require(pth.resolve(hereDir, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const tempDbDir = fsx.mkdtempSync(pth.join(osx.tmpdir(), 'petri-sweep-db-'));
+  const boot = new Database(pth.join(tempDbDir, 'petri.db'));
   const migrationsDir = pth.resolve(hereDir, '..', 'src', 'migrations');
   for (const f of fsx.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fsx.readFileSync(pth.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = pth.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = pth.join(tempDbDir, 'petri.db');
   process.on('exit', () => { try { fsx.rmSync(tempDbDir, { recursive: true, force: true }); } catch {} });
 }
 const express = require('express');
 const boundary = require('../core/shared-backend/local-request-boundary.js');
-const registerFileRoutes = require('../core/biof3-server/routes/files.js');
+const registerFileRoutes = require('../core/petri-server/routes/files.js');
 const { LocalFileStorage } = require('../core/shared-backend/storage/local-storage.js');
 const { registerStorage } = require('../core/shared-backend/storage/index.js');
 
@@ -53,19 +53,19 @@ function invokeHandlers(handlers, req, res, index = 0) {
   return handlers[index](req, res, () => invokeHandlers(handlers, req, res, index + 1));
 }
 
-test('CHF0 SEC-1 trusts only declared BioF3 renderer origins', () => {
+test('CHF0 SEC-1 trusts only declared Petri renderer origins', () => {
   const previous = {
-    trusted: process.env.BIOF3_TRUSTED_DESKTOP_ORIGINS,
-    dev: process.env.BIOF3_RENDERER_DEV_URL,
-    renderer: process.env.BIOF3_RENDERER_ORIGIN,
+    trusted: process.env.PETRI_TRUSTED_DESKTOP_ORIGINS,
+    dev: process.env.PETRI_RENDERER_DEV_URL,
+    renderer: process.env.PETRI_RENDERER_ORIGIN,
   };
   try {
-    delete process.env.BIOF3_TRUSTED_DESKTOP_ORIGINS;
-    delete process.env.BIOF3_RENDERER_DEV_URL;
-    delete process.env.BIOF3_RENDERER_ORIGIN;
+    delete process.env.PETRI_TRUSTED_DESKTOP_ORIGINS;
+    delete process.env.PETRI_RENDERER_DEV_URL;
+    delete process.env.PETRI_RENDERER_ORIGIN;
     assert.equal(boundary.isTrustedDesktopOrigin('http://localhost:3000'), true);
     assert.equal(boundary.isTrustedDesktopOrigin('http://127.0.0.1:3002'), true);
-    process.env.BIOF3_TRUSTED_DESKTOP_ORIGINS = 'http://localhost:4100';
+    process.env.PETRI_TRUSTED_DESKTOP_ORIGINS = 'http://localhost:4100';
     assert.equal(boundary.isTrustedDesktopOrigin('http://localhost:4100'), true);
     assert.equal(boundary.isTrustedDesktopOrigin('http://localhost:3000'), false);
     assert.equal(boundary.isTrustedDesktopOrigin('http://localhost:6666'), false);
@@ -75,9 +75,9 @@ test('CHF0 SEC-1 trusts only declared BioF3 renderer origins', () => {
     assert.equal(boundary.isTrustedDesktopOrigin(undefined), true);
   } finally {
     for (const [key, value] of [
-      ['BIOF3_TRUSTED_DESKTOP_ORIGINS', previous.trusted],
-      ['BIOF3_RENDERER_DEV_URL', previous.dev],
-      ['BIOF3_RENDERER_ORIGIN', previous.renderer],
+      ['PETRI_TRUSTED_DESKTOP_ORIGINS', previous.trusted],
+      ['PETRI_RENDERER_DEV_URL', previous.dev],
+      ['PETRI_RENDERER_ORIGIN', previous.renderer],
     ]) {
       if (value === undefined) delete process.env[key];
       else process.env[key] = value;
@@ -108,10 +108,10 @@ test('CHF0 SEC-1 R raw execution routes fail closed', () => {
 });
 
 test('CHF0 SEC-2 real /api/files route rejects origins and traversal while serving valid nested keys', async () => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-chf0-http-storage-'));
-  const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-chf0-http-outside-'));
-  const previous = process.env.BIOF3_LOCAL_RESULTS_DIR;
-  process.env.BIOF3_LOCAL_RESULTS_DIR = root;
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-chf0-http-storage-'));
+  const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-chf0-http-outside-'));
+  const previous = process.env.PETRI_LOCAL_RESULTS_DIR;
+  process.env.PETRI_LOCAL_RESULTS_DIR = root;
   let server;
   try {
     const source = path.join(root, 'source.txt');
@@ -147,8 +147,8 @@ test('CHF0 SEC-2 real /api/files route rejects origins and traversal while servi
     }
   } finally {
     if (server) await new Promise((resolve) => server.close(resolve));
-    if (previous === undefined) delete process.env.BIOF3_LOCAL_RESULTS_DIR;
-    else process.env.BIOF3_LOCAL_RESULTS_DIR = previous;
+    if (previous === undefined) delete process.env.PETRI_LOCAL_RESULTS_DIR;
+    else process.env.PETRI_LOCAL_RESULTS_DIR = previous;
     fs.rmSync(root, { recursive: true, force: true });
     fs.rmSync(outside, { recursive: true, force: true });
   }

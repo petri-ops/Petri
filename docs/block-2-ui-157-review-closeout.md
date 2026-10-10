@@ -26,7 +26,7 @@
 | PHASE 0 | 摸底 + 综合 + 用户裁决 | ✅ | `agent-transcripts/phase-0-{synthesis,agent-a,b,c,d,inbox}.md`（4 子代理 + 主 agent 综合 + 修正 B 报告 2 处错误断言） |
 | PHASE 1 | IPC 桥接通 | ✅ | commit `2d81377` feat(skills-bridge) + `0be5483` docs(ui-157) + `7e010a4` docs(audit)；9 vitest PASS；4 治理门 GREEN |
 | PHASE 2 | UI-161 5 项清理核对 | ✅ | commit `5c98ca8` docs(ui-157)；5/5 PASS |
-| PHASE 3 | 实机 dev Electron 4 截图 | ⏸️ **搁置** | 按用户裁决 P1-T-A 跳过（Vite-only mock 测试，不启用 `BIOF3_DEV_ELECTRON_ARGS`） |
+| PHASE 3 | 实机 dev Electron 4 截图 | ⏸️ **搁置** | 按用户裁决 P1-T-A 跳过（Vite-only mock 测试，不启用 `PETRI_DEV_ELECTRON_ARGS`） |
 | PHASE 4 | audit ledger 推进 | ✅ | `docs/ui-productization-audit.md` 末尾「最近变更日志」追加 BLOCK-2-UI-157-REVIEW 工作包收口笔录；UI-157 + UI-161 **保持 `in_progress` 字样不变**（PHASE 3 跳过不构成 verified 升级条件）|
 | PHASE 5 | closeout | ✅ | 本文档 + 4 canonical 文档同步 + DOC-REGISTRY 同步 |
 
@@ -81,7 +81,7 @@
 
 如未来需升级 `verified`，应走：
 
-- 选项 A：用户显式 widen 范围启用 `BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222"` 跑真实 dev Electron + CDP attach + 4 截图存 `acceptance/SKILLS-IPC/`
+- 选项 A：用户显式 widen 范围启用 `PETRI_DEV_ELECTRON_ARGS="--remote-debugging-port=9222"` 跑真实 dev Electron + CDP attach + 4 截图存 `acceptance/SKILLS-IPC/`
 - 选项 B：用户显式声明按 P-07 模型接口类 `key-unavailable 例外` 模式扩展到 IPC 类（需要在 audit 文档中新增类似"dev-electron-unavailable 例外"）
 
 ---
@@ -108,8 +108,8 @@ PHASE 0 摸底时主 agent 说 "`electron.d.ts` 已是 source-of-truth"——**�
 
 ### 8.2 Agent B 报告 2 处错误断言
 
-1. preload 不是单一 `biof3` world —— 实际**双重 expose**（行 21 `biof3` + 行 61 `biof3Desktop`）
-2. 项目里所有 `biof3Desktop.*` 桥都已接通，**唯独 skills 断**（不是命名不一致）
+1. preload 不是单一 `petri` world —— 实际**双重 expose**（行 21 `petri` + 行 61 `petriDesktop`）
+2. 项目里所有 `petriDesktop.*` 桥都已接通，**唯独 skills 断**（不是命名不一致）
 
 主 agent PHASE 0 综合时已修正并写进 `phase-0-synthesis-report.md` §4。
 

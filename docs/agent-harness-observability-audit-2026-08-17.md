@@ -1,8 +1,8 @@
-# BioF3 Desktop Agent Harness 可观测性独立审查
+# Petri Desktop Agent Harness 可观测性独立审查
 
 **日期**: 2026-08-17
 **审查视角**: 可观测性（日志 / 追踪 / 指标 / 健康检查 / 错误聚合）
-**项目**: BioF3 Desktop — Electron + React/Vite + 内嵌 R/Python runtime
+**项目**: Petri Desktop — Electron + React/Vite + 内嵌 R/Python runtime
 **当前阶段**: G0 长期开发期
 **审查范围**: Agent Harness 后端（`core/r-server/` + `core/shared-backend/` + `core/py-server/` + `core/gateway/` + `src/main/` + `src/ipc/`）
 **不审查范围**: 前端 UI 渲染、商业逻辑正确性、Agent 业务语义、G1+ 阶段事项（Provider 矩阵/GA/公证/dist staleness 等）
@@ -17,10 +17,10 @@
 |------|-------------|------|
 | **日志结构化** | **4/10** | 已存在 `core/shared-backend/logger.js` JSON+dev 双格式，但 **319:62** 调用比，console 仍占 84%；r-server top 5 全部 console=0 logger；src/ 整层零 logger 引用 |
 | **追踪 / 关联 ID** | **5/10** | HTTP 有 `requestIdMiddleware` + `X-Request-Id` 头 + `child(rid)` 接入点；但 **IPC 层零贯穿**（preload → main → backend-proc 三段断链）；SSE 流式事件带 `traceId`（仅 r-server agent），未跨进程 |
-| **指标** | **2/10** | 唯一指标源是 `BIOF3_PERF_PROBE=1` env-gated `perf-probe`（routes/event-loop 计时）；无 IPC 计数器、无 SQLite 写入延迟、无后端重启次数；无 `/metrics` 端点；`error-log.js` 是文件 append，无聚合 |
+| **指标** | **2/10** | 唯一指标源是 `PETRI_PERF_PROBE=1` env-gated `perf-probe`（routes/event-loop 计时）；无 IPC 计数器、无 SQLite 写入延迟、无后端重启次数；无 `/metrics` 端点；`error-log.js` 是文件 append，无聚合 |
 | **健康检查** | **6/10** | 4 端点齐备（r-server `/api/health` / py-server `/api/health` / gateway `/health` / ai-misc `/api/ai/health`），但 **readiness ≠ liveness 区分缺失**；启动 ready 信号非显式事件（依赖 `isReady` 字段轮询）；4 端点返回 shape 各自定义 |
-| **错误聚合 / 升级** | **3/10** | `error-log.js` 单一 file append（`/var/log/biof3-errors.log`，默认路径在 macOS 不可写）；unhandledRejection/uncaughtException 仅在 r-server 注册，py-server 仅 SIGTERM 路径；无 dedupe / 计数 / 升级阈值；`logError` 整个 codebase 仅 **2 处调用**（r-server/server.js:75/78）|
-| **跨进程关联** | **2/10** | `BIOF3_ERROR_LOG_FILE` 跨进程共享一个文件但无 lock；`backend-proc-manager` 把 stdout/stderr 各写独立文件；无时间轴 / rid / pid 索引；诊断导出包按文件打包，不做 join |
+| **错误聚合 / 升级** | **3/10** | `error-log.js` 单一 file append（`/var/log/petri-errors.log`，默认路径在 macOS 不可写）；unhandledRejection/uncaughtException 仅在 r-server 注册，py-server 仅 SIGTERM 路径；无 dedupe / 计数 / 升级阈值；`logError` 整个 codebase 仅 **2 处调用**（r-server/server.js:75/78）|
+| **跨进程关联** | **2/10** | `PETRI_ERROR_LOG_FILE` 跨进程共享一个文件但无 lock；`backend-proc-manager` 把 stdout/stderr 各写独立文件；无时间轴 / rid / pid 索引；诊断导出包按文件打包，不做 join |
 | **总体可观测性评分** | **3.7/10** | **「进程内能看、跨进程失明」的 G0 早期形态** |
 
 > 阶段判断：G0 阶段合理性边界 = dev Electron 边界内 + packaged Electron 实机核对。**本审计所有发现均按 G0 当前阶段证据等级评估**，不外推 Provider 矩阵 / GA / dist staleness 等 G1+ 事项。
@@ -179,7 +179,7 @@
 
 | 设施 | 位置 | 状态 | 暴露路径 |
 |------|------|------|----------|
-| `perf-probe` | `core/r-server/helpers/perf-probe.js` | **默认关闭**（`BIOF3_PERF_PROBE=1` 才启用） | `GET /api/__perf/event-loop` / `POST /api/__perf/reset` |
+| `perf-probe` | `core/r-server/helpers/perf-probe.js` | **默认关闭**（`PETRI_PERF_PROBE=1` 才启用） | `GET /api/__perf/event-loop` / `POST /api/__perf/reset` |
 | `monitorEventLoopDelay` | `core/r-server/server.js:177-195` | 每 1s 探测；>2000ms 阻塞打 console.warn | 通过 perf-probe 暴露 |
 | `_aiActiveStreams` | `core/r-server/helpers/runtime.js:24` | 模块级计数器 | `getActiveStreamCount()` 内部 API，**未挂到任何 health 端点** |
 | `_providerStats` | `core/r-server/helpers/circuit-breaker.js:38` | 内部 Map：每 provider success/failure/recovery | `getHealth(providerName)` 内部 API，**未挂 health 端点** |
@@ -203,7 +203,7 @@
 
 | 信号 | 现状 |
 |------|------|
-| r-server listen 后 console.log | ✅ `🧬 BioF3 R Server running on port ${PORT}` + 列出 `/api/health` |
+| r-server listen 后 console.log | ✅ `🧬 Petri R Server running on port ${PORT}` + 列出 `/api/health` |
 | 显式 ready 事件 | ❌ 无 `app.emit('ready')` 或 IPC 推送 `isReady: true` |
 | 渲染进程轮询 | ✅ 5s 一次 IPC `backend:status` → `getBackendStatus` → 聚合 4 后端 |
 | ready ≠ healthy 区分 | ❌ `/api/health` 返回 `{status: 'ok'}` 即视为 ready，**不检查 DB/Plugin Loader 是否完成** |
@@ -263,7 +263,7 @@ renderer ── IPC: backend:status ──→ main.js
 
 | 来源 | 实现 | 频率 |
 |------|------|------|
-| `core/shared-backend/error-log.js` | `fs.appendFile(BIOF3_ERROR_LOG_FILE, JSON+'\n')` | 调用点极少 |
+| `core/shared-backend/error-log.js` | `fs.appendFile(PETRI_ERROR_LOG_FILE, JSON+'\n')` | 调用点极少 |
 | `core/r-server/server.js:74-80` | `process.on('unhandledRejection'/'uncaughtException', logError)` | ✅ 注册 |
 | `core/py-server/server.js:230-235` | `process.on('SIGTERM/SIGINT/uncaughtException/unhandledRejection', ...)` | ✅ 注册；但 `uncaughtException` 仅 `console.error`，不写 `error-log` |
 | `core/r-server/mcp/server.js:83` | `process.on('uncaughtException', ...)` | 仅 console.error |
@@ -285,7 +285,7 @@ core/r-server/server.js:78:  logError('uncaughtException', err);
 ### 6.3 `error-log.js` 实现细节
 
 ```js
-const errorLogFile = process.env.BIOF3_ERROR_LOG_FILE || '/var/log/biof3-errors.log';
+const errorLogFile = process.env.PETRI_ERROR_LOG_FILE || '/var/log/petri-errors.log';
 // ↑ macOS 默认路径不可写（无 root 权限），文件 fallback 仅 swallow
 function logError(source, err, meta = {}) {
   const entry = { time, source, message, stack, ...meta };
@@ -295,8 +295,8 @@ function logError(source, err, meta = {}) {
 ```
 
 **问题**：
-- 默认路径 `/var/log/biof3-errors.log` 在 macOS sandbox / 普通用户下不可写（无 sudo 权限），`.catch(() => {})` 静默吞掉；
-- `readRecentErrors(limit=200)` 读全文**逐行 JSON.parse**——`/var/log/biof3-errors.log` 实际可能不存在，文件不存在时返回空数组，**调用方无法判断**；
+- 默认路径 `/var/log/petri-errors.log` 在 macOS sandbox / 普通用户下不可写（无 sudo 权限），`.catch(() => {})` 静默吞掉；
+- `readRecentErrors(limit=200)` 读全文**逐行 JSON.parse**——`/var/log/petri-errors.log` 实际可能不存在，文件不存在时返回空数组，**调用方无法判断**；
 - 无 dedupe / 计数 / 频率限制——同一 `unhandledRejection` 反复出现会无限 append；
 - 无轮转 / 大小限制——长跑进程可能写到 GB 级。
 
@@ -310,7 +310,7 @@ function logError(source, err, meta = {}) {
 
 **问题**：
 - **不打 time index**——文件名固定 `r-server.log`，导出后无办法判定"哪条是 boot 时哪条是 5min 前"（虽然内容有时间戳，但**没有时间索引表**）；
-- **不导出 `error-log.js` 文件**——如果实际写到 `/var/log/biof3-errors.log`，导出 zip 缺这份；
+- **不导出 `error-log.js` 文件**——如果实际写到 `/var/log/petri-errors.log`，导出 zip 缺这份；
 - **不包含 main process 自己的 console**——`src/main.js` console.log 只在 stdout，没单独文件。
 - **不包含 gateway 日志**——`core/gateway/server.js:14 console.log` 只走 stdout，stdout 由谁收？main spawn gateway proc 时只 pipe 到 console（见 `backend-proc-manager.js:206-219`），**不写 gateway.log**。
 - `redactSensitiveText` 是必要的（剥离 token / 路径），但**没有 rid 字段**重建跨进程链路。
@@ -322,7 +322,7 @@ function logError(source, err, meta = {}) {
 | unhandledRejection | → `logError` → JSONL 文件 | ❌ 无告警阈值；无 UI 通知 |
 | uncaughtException | → `logError` + console.error | ❌ 不重启 r-server（注释"let pm2 decide"） |
 | IPC handler `try/catch` | → `{ok:false, error: e.message}` | ❌ 不进 error-log；不进 telemetry |
-| Renderer 上报 | → `telemetry.js:reportError()` | ⚠️ 默认关；`https://biof3.com/api/telemetry` 占位端点；隐私白名单 `category/appVersion/errorSummary/timestamp` |
+| Renderer 上报 | → `telemetry.js:reportError()` | ⚠️ 默认关；`https://petri.com/api/telemetry` 占位端点；隐私白名单 `category/appVersion/errorSummary/timestamp` |
 | backend 进程退出 | `backend-proc-manager.js` console.log | ⚠️ rServerSupervisor 内部维护，但不暴露重启次数 |
 
 ---
@@ -341,7 +341,7 @@ function logError(source, err, meta = {}) {
 **修复方向**:
 1. **不要**全量替换（1200 行 main.js + 1800 行 r-server/mcp/registry.js 改 logger 风险高）；
 2. 优先级替换：MCP 工具 dispatch 路径（`act-tools.js` / `plan-ui-tools.js` / `tool-execution.js`）→ 已部分用 traceId 但零 logger；
-3. 给 `console.*` 加 `process.env.BIOF3_LOG_FORCE_CONSOLE` 兼容开关：默认全 dev 用 console，生产模式 `NODE_ENV=production` 自动 redirect 到 logger；
+3. 给 `console.*` 加 `process.env.PETRI_LOG_FORCE_CONSOLE` 兼容开关：默认全 dev 用 console，生产模式 `NODE_ENV=production` 自动 redirect 到 logger；
 4. 顶层约定：所有「业务失败」必须 `logger.error`，「上下文加载失败可降级」用 `logger.warn`；
 5. 验证脚本 `grep -rn "console\.(log|warn|error)" core/r-server/agent-tools/ core/r-server/routes/ src/ipc/ | wc -l` 应作为 CI 软信号。
 
@@ -355,15 +355,15 @@ function logError(source, err, meta = {}) {
 
 **问题**:
 - r-server HTTP 有 `requestIdMiddleware`（`bootstrap.js:15-20`），但 **Electron IPC → main process → spawn child 链路**完全不传 rid；
-- `src/preload.js` 暴露的 IPC API（如 `window.biof3Desktop.backend.status()`）把 `{ok, error}` 透传，**不附加 rid** 给 renderer；
+- `src/preload.js` 暴露的 IPC API（如 `window.petriDesktop.backend.status()`）把 `{ok, error}` 透传，**不附加 rid** 给 renderer；
 - 渲染进程发起一次「提交分析」IPC → main process → spawn / write IPC → r-server 收到 HTTP 时**不知道这条请求来自哪条 renderer 触发**；
 - 一旦后端日志需要关联到 UI session，**只能靠时间戳窗口估算**。
 
 **修复方向**:
-1. 在 `src/preload.js` 暴露 `window.biof3Desktop.__rid = uuidv4()` 或一次性 sessionId；
+1. 在 `src/preload.js` 暴露 `window.petriDesktop.__rid = uuidv4()` 或一次性 sessionId；
 2. `src/main.js` 的 `ipcMain.handle('xxx', async (event, payload) => { const rid = payload?.rid || uuidv4().slice(0,12); ... })`；
-3. `src/main/backend-proc-manager.js` spawn child 时 `env: {...process.env, BIOF3_RID: rid}` 或通过临时 file 传；
-4. r-server 入口 `bootstrap.js` 增加 `BIOF3_RID` env 读取，**优先级** `x-request-id > BIOF3_RID > uuidv4`；
+3. `src/main/backend-proc-manager.js` spawn child 时 `env: {...process.env, PETRI_RID: rid}` 或通过临时 file 传；
+4. r-server 入口 `bootstrap.js` 增加 `PETRI_RID` env 读取，**优先级** `x-request-id > PETRI_RID > uuidv4`；
 5. 收益：未来诊断包可按 rid 重建完整调用链。
 
 **G0 阶段证据等级**: dev Electron 边界内「trace 断点已识别」verified。**不外推分布式 trace**（如 OpenTelemetry）—— 当前单进程桌面 + 4 个 child proc 是 G0 现实。
@@ -380,7 +380,7 @@ function logError(source, err, meta = {}) {
 - **无 SQLite query 延迟**：`core/r-server/db.js` 2133 行单文件 SQL 入口**无 timer 包裹**；
 - **无 LLM Provider 失败率暴露**：`circuit-breaker.getHealth()` 是内部 API，**没挂到任何 HTTP 端点**；
 - **无 `/metrics` 端点**：Prometheus / StatsD / OpenTelemetry collector **零接入**；
-- `perf-probe` 仅在 `BIOF3_PERF_PROBE=1` 时挂 `/api/__perf/event-loop`，是 dev/QA 工具，**不是生产 metrics**。
+- `perf-probe` 仅在 `PETRI_PERF_PROBE=1` 时挂 `/api/__perf/event-loop`，是 dev/QA 工具，**不是生产 metrics**。
 
 **修复方向**:
 1. 不引入 prom-client / otel（重型，违反 G0 阶段纪律）；
@@ -403,15 +403,15 @@ function logError(source, err, meta = {}) {
 **位置**: `core/shared-backend/error-log.js:10` / 调用点 `core/r-server/server.js:75,78`。
 
 **问题**:
-- 默认路径 `/var/log/biof3-errors.log` 在 macOS sandbox / 普通用户下**无写权限**（`/var/log` 是 root-only），`.catch(() => {})` 静默吞掉错误；
-- `BIOF3_ERROR_LOG_FILE` env 变量可改路径，但**没有任何代码设置过这个 env**（`src/main.js` 与 `src/main/env-coordinator.js` 均未设）；
+- 默认路径 `/var/log/petri-errors.log` 在 macOS sandbox / 普通用户下**无写权限**（`/var/log` 是 root-only），`.catch(() => {})` 静默吞掉错误；
+- `PETRI_ERROR_LOG_FILE` env 变量可改路径，但**没有任何代码设置过这个 env**（`src/main.js` 与 `src/main/env-coordinator.js` 均未设）；
 - 整个 codebase **`logError()` 仅 2 处调用**（r-server 启动时的 unhandledRejection + uncaughtException），其他所有错误（IPC handler `try/catch`、tools-executor 失败、plugin load 失败等）**不进 error-log**；
 - 无 dedupe：同一 unhandledRejection 高频触发（如死循环抛错）会无限 append，**长跑进程磁盘爆炸**；
 - 无轮转：appendFile flags `'a'` 模式，无 size/time 触发 rotate；
 - `readRecentErrors()` 返回空数组时**不区分 "文件不存在" vs "文件存在但为空"**——上层无法判断健康度。
 
 **修复方向**:
-1. 改默认路径为 `path.join(BIOF3_LOCAL_DATA_DIR, 'logs', 'errors.log')`（参考 `src/main/backend-proc-manager.js:105-113` 的 `getLogDir()` 模式）；
+1. 改默认路径为 `path.join(PETRI_LOCAL_DATA_DIR, 'logs', 'errors.log')`（参考 `src/main/backend-proc-manager.js:105-113` 的 `getLogDir()` 模式）；
 2. 把 `console.error` 调用全部加 `logError(source, err)` 桥接（**渐进式**：先 r-server/routes + r-server/agent-tools）；
 3. 加 dedupe：`Map<key, {count, lastAt}>`，key = `${source}:${err.message}`，TTL 60s 内相同不重复写文件；
 4. 加 size cap：>50MB 时 rotate（`errors.log.1`）+ 仅保留最近 3 份；
@@ -522,7 +522,7 @@ function logError(source, err, meta = {}) {
 **位置**: `core/r-server/helpers/perf-probe.js:23-25`（envEnabled）/ `core/r-server/server.js:177-195`（event-loop 监测）/ `core/r-server/bootstrap.js:31-49`（middleware）/ `core/r-server/routes/perf-probe.js`（端点）。
 
 **问题**:
-- `BIOF3_PERF_PROBE=1` 才启用，**生产默认关**；
+- `PETRI_PERF_PROBE=1` 才启用，**生产默认关**；
 - event-loop monitor（`server.js:177-195`）虽然**始终运行**（不依赖 env），但**只 console.warn**（`server.js:188-191`），>2000ms 阻塞出现时无人察觉；
 - `routes/perf-probe.js` 的 `/api/__perf/*` 端点仅在 env 开启时挂载，无人主动 enable；
 - 性能 baseline 缺失：G0 阶段 RS-P4R baseline 抓不到生产模式数据。
@@ -579,12 +579,12 @@ function logError(source, err, meta = {}) {
 - ✅ 隐私白名单严格（`category / appVersion / errorSummary / timestamp`），max 200 字符，sanitize 换行/截断；
 - ✅ 默认关，读 `ai-settings.json` 的 `telemetry_enabled` 字段；
 - ✅ 失败静默 + 5s 超时，不影响业务流程；
-- ⚠️ `TELEMETRY_ENDPOINT = 'https://biof3.com/api/telemetry'` 是**占位**——上线前需替换；
+- ⚠️ `TELEMETRY_ENDPOINT = 'https://petri.com/api/telemetry'` 是**占位**——上线前需替换；
 - ⚠️ 与 `error-log.js` 协同：telemetry 只在 renderer 上报；`error-log.js` 是后端 errors，**两条管线完全独立**——后端 `logError` 永远不到 telemetry。
 
 **修复方向**:
 1. 在 `core/shared-backend/error-log.js` 增加 `telemetryEnabled && !inFallbackMode` 时同步上报到 `telemetry.js`（需要 main process 提供 IPC 桥）；
-2. 端点 env 化：`process.env.BIOF3_TELEMETRY_ENDPOINT || TELEMETRY_ENDPOINT`；
+2. 端点 env 化：`process.env.PETRI_TELEMETRY_ENDPOINT || TELEMETRY_ENDPOINT`；
 3. G0 阶段不外推「自动开启 telemetry」——决策权属用户。
 
 **G0 阶段证据等级**: 现有实现已是 G0 阶段纪律下的最佳形态；端点上线是 G1+ 阶段事项，**当前不视为缺口**。
@@ -628,13 +628,13 @@ function logError(source, err, meta = {}) {
 
 ### #3（高 ROI） OB-004 error-log 路径修复 + 全面接入 console.error
 
-- **目标范围**：`core/shared-backend/error-log.js`（默认路径改 `BIOF3_LOCAL_DATA_DIR/logs/errors.log`）+ 渐进把 `console.error` 调用点接 `logError`。
+- **目标范围**：`core/shared-backend/error-log.js`（默认路径改 `PETRI_LOCAL_DATA_DIR/logs/errors.log`）+ 渐进把 `console.error` 调用点接 `logError`。
 - **预期收益**：
-  1. 解决 macOS sandbox 下 `/var/log/biof3-errors.log` 不可写静默失败；
+  1. 解决 macOS sandbox 下 `/var/log/petri-errors.log` 不可写静默失败；
   2. 把 54 处 `console.error` 全部桥接到 error-log.jsonl（OB-001 + OB-004 联合修复）；
   3. dedupe 防止高频错误刷盘。
 - **风险**：低。
-- **验证**：`ls -la $BIOF3_LOCAL_DATA_DIR/logs/errors.log` 在 macOS 上能创建；`tail -f` 能看到 IPC handler 失败。
+- **验证**：`ls -la $PETRI_LOCAL_DATA_DIR/logs/errors.log` 在 macOS 上能创建；`tail -f` 能看到 IPC handler 失败。
 
 ### 次优（按 ROI 排序）
 

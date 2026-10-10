@@ -5,7 +5,7 @@
 
 ## 用法
 
-- 装载型测试：把 `BIOF3_BUILT_IN_PLUGINS_DIR` 指向本目录（或在进程内 `loadPluginsFromSources({ builtInDir: <本目录> })`）。
+- 装载型测试：把 `PETRI_BUILT_IN_PLUGINS_DIR` 指向本目录（或在进程内 `loadPluginsFromSources({ builtInDir: <本目录> })`）。
 - 描述符读取型测试：直接读 `sample-metrics/tool-definition.json` 的 `resultStudio` 块。
 
 ## 契约

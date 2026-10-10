@@ -5,7 +5,7 @@
 // SimpleChat (read-only) and DesktopSettingsPanel (full CRUD).
 // State-decomposition §4.5 [HIGH]: both components used
 // `useState<ChatModelPreset[]>` + `useState<activeId>` and
-// independently called `window.biof3Desktop.aiSettings.get()`,
+// independently called `window.petriDesktop.aiSettings.get()`,
 // which meant each one held its own view of "which model is the
 // one I'd send a request with".
 //

@@ -4,7 +4,7 @@
 // 'plan' | 'read'; UI-303 把计划模式并入档位菜单成为第四档，plan 档
 // 行为对齐 read + 仅额外放行 plan 工具，权威裁决仍在后端 Spec 门)。
 // Mirrors the authoritative backend decision surface
-// (core/biof3-server/agent-tools/agent-tool-policy.js
+// (core/petri-server/agent-tools/agent-tool-policy.js
 // decideAgentToolCall + workspace-tools preflight) so the frontend can
 // surface a synchronous UI hint before network IO.
 //

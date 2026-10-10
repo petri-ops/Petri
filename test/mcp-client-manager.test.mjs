@@ -14,10 +14,10 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'b156-mcp-mgr-'));
-process.env.BIOF3_LOCAL_DATA_DIR = tmpDir;
+process.env.PETRI_LOCAL_DATA_DIR = tmpDir;
 
-const settings = require('../core/biof3-server/helpers/mcp-settings');
-const manager = require('../core/biof3-server/mcp/client-manager');
+const settings = require('../core/petri-server/helpers/mcp-settings');
+const manager = require('../core/petri-server/mcp/client-manager');
 
 const FIXTURE = path.resolve('test', 'fixtures', 'mcp-fixture-server.cjs');
 const NODE = process.execPath;
@@ -60,7 +60,7 @@ test('BLOCK-156 重复连接幂等（alreadyConnected）；断开后调用拒绝
 test('BLOCK-156 坏命令降级 error 状态（R1：不抛、不阻塞）', async () => {
   settings.saveMcpServers([
     { id: 'fixture', command: NODE, args: [FIXTURE] },
-    { id: 'broken', command: 'gewu-definitely-not-a-command-156', args: [], autoConnect: false },
+    { id: 'broken', command: 'petri-definitely-not-a-command-156', args: [], autoConnect: false },
   ]);
   const broken = await manager.connectServer('broken');
   assert.equal(broken.ok, false);

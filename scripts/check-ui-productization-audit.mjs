@@ -250,13 +250,13 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   'c177374ba4ee10faf7b7dcab0628198272f8cf70',
   // 2026-09-06 4844e88「全量核对收口」不可变提交：frontend 仅触碰
   // ReviewMode.test.tsx + chat-file-references.test.ts 两个 *test* 文件
-  // （biof3:// → gewu:// 改名回归的测试对齐），无产品 UI surface 变化；
+  // （petri:// → petri:// 改名回归的测试对齐），无产品 UI surface 变化；
   // subject `fix:` 未带 UI-###。sync+message 双豁免，不占 UI 条目。
   // 不重写共享历史。
   '4844e8855ae5b25ce95e949e784b4cd0d312c1d3',
   // 2026-08-30 BLOCK-30-BACKEND-CONVERGENCE 不可变实现提交 (P1/P2/P4)：
   // 后端收敛与更名（py-server 摘除 / gateway 摘除 / core/r-server →
-  // core/biof3-server），前端仅路径级 import 变化。UI 影响补登为 UI-222
+  // core/petri-server），前端仅路径级 import 变化。UI 影响补登为 UI-222
   // （合并条目）。豁免同提交台账与 UI-### 编号要求。
   'edd1116b2b524bfdc96fc16bc16fa2ad8318b216',
   'd4f459d734b5b7d71076cfb34f661d27e9b8117a',
@@ -836,7 +836,7 @@ const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   '8f3d55a5d9b7a4638b0a6bd7a391706e04710e15',
   // 2026-09-06 4844e88「全量核对收口」不可变提交：frontend 仅触碰
   // ReviewMode.test.tsx + chat-file-references.test.ts 两个 *test* 文件
-  // （biof3:// → gewu:// 改名回归的测试对齐），无产品 UI surface 变化；
+  // （petri:// → petri:// 改名回归的测试对齐），无产品 UI surface 变化；
   // 不占 UI 条目。同时豁免同提交台账要求（subject `fix:` 未带 UI-###）。
   '4844e8855ae5b25ce95e949e784b4cd0d312c1d3',
   // 2026-09-07 39f0104「composer 窄态图标化」不可变实现提交：subject 带

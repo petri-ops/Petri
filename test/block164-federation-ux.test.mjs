@@ -3,7 +3,7 @@
 /**
  * BLOCK-164 W1 — federation_list_peers 委托入口可自足契约。
  *
- * 盘点断点【高】：delegate_to_gewu_node 需要 gpeer_* ID，但 agent 没有任何列节点
+ * 盘点断点【高】：delegate_to_petri_node 需要 gpeer_* ID，但 agent 没有任何列节点
  * 工具——首次使用者卡死在「模型不知道 peerId」。契约：
  *  ①空节点诚实态：nodes=[] + 引导文案（去联邦面板配对）。
  *  ②节点清单：peerId/name/identity/在线态（lastProbe 陈旧度 <2min）；
@@ -22,15 +22,15 @@ import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-// BLOCK-164 W2 — db 引导（BIOF3_DB_PATH 必须先于任何 db/store require）
-process.env.BIOF3_DB_PATH = path.join(tmpdir(), `gewu-b164-${Date.now()}.db`);
+// BLOCK-164 W2 — db 引导（PETRI_DB_PATH 必须先于任何 db/store require）
+process.env.PETRI_DB_PATH = path.join(tmpdir(), `petri-b164-${Date.now()}.db`);
 // 全量 schema 先行（db.getDatabase 需要 projects 等表；agent-concurrency.test.mjs 同款先例）
 const { runMigrations } = require('../src/migration-runner');
-await runMigrations(process.env.BIOF3_DB_PATH, path.join(ROOT, 'src', 'migrations'));
-const TOOLS_PATH = path.join(ROOT, 'core/biof3-server/agent-tools/federation-tools.js');
-const ADMIN_PATH = path.join(ROOT, 'core/biof3-server/routes/federation-admin.js');
+await runMigrations(process.env.PETRI_DB_PATH, path.join(ROOT, 'src', 'migrations'));
+const TOOLS_PATH = path.join(ROOT, 'core/petri-server/agent-tools/federation-tools.js');
+const ADMIN_PATH = path.join(ROOT, 'core/petri-server/routes/federation-admin.js');
 
-const { tool_federation_list_peers, tool_delegate_to_gewu_node } = require(TOOLS_PATH);
+const { tool_federation_list_peers, tool_delegate_to_petri_node } = require(TOOLS_PATH);
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -54,24 +54,24 @@ function writeGrants(dataDir, grants) {
 }
 
 test('BLOCK-164 ① 空节点诚实态：nodes=[] + 配对引导文案', async () => {
-  const dir = mkdtempSync(path.join(tmpdir(), 'gewu-b164-empty-'));
-  const prev = process.env.BIOF3_LOCAL_DATA_DIR;
-  process.env.BIOF3_LOCAL_DATA_DIR = dir;
+  const dir = mkdtempSync(path.join(tmpdir(), 'petri-b164-empty-'));
+  const prev = process.env.PETRI_LOCAL_DATA_DIR;
+  process.env.PETRI_LOCAL_DATA_DIR = dir;
   try {
     const result = await tool_federation_list_peers();
     assert.equal(result.ok, true);
     assert.deepEqual(result.nodes, []);
     assert.ok(result.message.includes('尚未配对'), '空态必须给配对引导');
   } finally {
-    process.env.BIOF3_LOCAL_DATA_DIR = prev;
+    process.env.PETRI_LOCAL_DATA_DIR = prev;
     rmSync(dir, { recursive: true, force: true });
   }
 });
 
 test('BLOCK-164 ② 节点清单：在线态按 lastProbe 陈旧度；对端不可达 grantedToMe=null+诚实 note', async () => {
-  const dir = mkdtempSync(path.join(tmpdir(), 'gewu-b164-peers-'));
-  const prev = process.env.BIOF3_LOCAL_DATA_DIR;
-  process.env.BIOF3_LOCAL_DATA_DIR = dir;
+  const dir = mkdtempSync(path.join(tmpdir(), 'petri-b164-peers-'));
+  const prev = process.env.PETRI_LOCAL_DATA_DIR;
+  process.env.PETRI_LOCAL_DATA_DIR = dir;
   try {
     const now = new Date().toISOString();
     writePeers(dir, [
@@ -89,41 +89,41 @@ test('BLOCK-164 ② 节点清单：在线态按 lastProbe 陈旧度；对端不�
     const stale = result.nodes.find((n) => n.peerId === 'gpeer_ddddccccbbbbaaaa');
     assert.equal(stale.online, false, '从未探活=离线');
   } finally {
-    process.env.BIOF3_LOCAL_DATA_DIR = prev;
+    process.env.PETRI_LOCAL_DATA_DIR = prev;
     rmSync(dir, { recursive: true, force: true });
   }
 });
 
 test('BLOCK-164 ③ 本机授权概览：grants.json 真值进回执 myGrants', async () => {
-  const dir = mkdtempSync(path.join(tmpdir(), 'gewu-b164-grants-'));
-  const prev = process.env.BIOF3_LOCAL_DATA_DIR;
-  process.env.BIOF3_LOCAL_DATA_DIR = dir;
+  const dir = mkdtempSync(path.join(tmpdir(), 'petri-b164-grants-'));
+  const prev = process.env.PETRI_LOCAL_DATA_DIR;
+  process.env.PETRI_LOCAL_DATA_DIR = dir;
   try {
     writePeers(dir, []);
     writeGrants(dir, [{ engineer: '工程师A', projectId: 'proj-1', grantedAt: '2026-10-10T00:00:00Z' }]);
     const result = await tool_federation_list_peers();
     assert.deepEqual(result.myGrants, [{ engineer: '工程师A', projectId: 'proj-1', grantedAt: '2026-10-10T00:00:00Z' }]);
   } finally {
-    process.env.BIOF3_LOCAL_DATA_DIR = prev;
+    process.env.PETRI_LOCAL_DATA_DIR = prev;
     rmSync(dir, { recursive: true, force: true });
   }
 });
 
 test('BLOCK-164 ④ delegate 文案指向 federation_list_peers（缺参/未知 peer 两处）', async () => {
-  const missing = await tool_delegate_to_gewu_node({});
+  const missing = await tool_delegate_to_petri_node({});
   assert.equal(missing.error, 'missing_peer_id');
   assert.ok(missing.message.includes('federation_list_peers'), '缺参文案必须指向列节点工具');
 
-  const dir = mkdtempSync(path.join(tmpdir(), 'gewu-b164-copy-'));
-  const prev = process.env.BIOF3_LOCAL_DATA_DIR;
-  process.env.BIOF3_LOCAL_DATA_DIR = dir;
+  const dir = mkdtempSync(path.join(tmpdir(), 'petri-b164-copy-'));
+  const prev = process.env.PETRI_LOCAL_DATA_DIR;
+  process.env.PETRI_LOCAL_DATA_DIR = dir;
   try {
     writePeers(dir, []);
-    const unknown = await tool_delegate_to_gewu_node({ peerId: 'gpeer_nope', task: 'x' });
+    const unknown = await tool_delegate_to_petri_node({ peerId: 'gpeer_nope', task: 'x' });
     assert.equal(unknown.error, 'unknown_peer');
     assert.ok(unknown.message.includes('federation_list_peers'), '未知 peer 文案必须指向列节点工具');
   } finally {
-    process.env.BIOF3_LOCAL_DATA_DIR = prev;
+    process.env.PETRI_LOCAL_DATA_DIR = prev;
     rmSync(dir, { recursive: true, force: true });
   }
 });
@@ -131,17 +131,17 @@ test('BLOCK-164 ④ delegate 文案指向 federation_list_peers（缺参/未知 
 // ── BLOCK-164 W2 — 委托历史聚合契约 ─────────────────────────────────────
 
 test('BLOCK-164 ⑤ 委托历史聚合：call/result 对 → 状态/对方/回复/归属；无结果=running', async () => {
-  const store = require('../core/biof3-server/agent-task-store');
+  const store = require('../core/petri-server/agent-task-store');
   const { collectDelegations } = require(ADMIN_PATH);
-  const { getDatabase } = require('../core/biof3-server/db');
+  const { getDatabase } = require('../core/petri-server/db');
   const db = getDatabase();
 
   store.insertAgentTask({ taskId: 'task-del-a', userId: 'local-user', params: { conversationId: 'conv-a', projectId: 'proj-a' } });
-  store.appendAgentTaskEvent('task-del-a', 1, 'tool_call', { event: 'tool_call', name: 'delegate_to_gewu_node', args: { peerId: 'gpeer_x', task: '跑一个差异分析' } });
-  store.appendAgentTaskEvent('task-del-a', 2, 'tool_result', { event: 'tool_result', name: 'delegate_to_gewu_node', toolResult: { callId: 'c1', status: 'completed', data: { ok: true, peerName: 'Mac 实验室', reply: '差异分析已完成，产物已生成' } } });
+  store.appendAgentTaskEvent('task-del-a', 1, 'tool_call', { event: 'tool_call', name: 'delegate_to_petri_node', args: { peerId: 'gpeer_x', task: '跑一个差异分析' } });
+  store.appendAgentTaskEvent('task-del-a', 2, 'tool_result', { event: 'tool_result', name: 'delegate_to_petri_node', toolResult: { callId: 'c1', status: 'completed', data: { ok: true, peerName: 'Mac 实验室', reply: '差异分析已完成，产物已生成' } } });
 
   store.insertAgentTask({ taskId: 'task-del-b', userId: 'local-user', params: {} });
-  store.appendAgentTaskEvent('task-del-b', 1, 'tool_call', { event: 'tool_call', name: 'delegate_to_gewu_node', args: { peerId: 'gpeer_y', task: '另一个委托' } });
+  store.appendAgentTaskEvent('task-del-b', 1, 'tool_call', { event: 'tool_call', name: 'delegate_to_petri_node', args: { peerId: 'gpeer_y', task: '另一个委托' } });
 
   const rows = collectDelegations(db, 'local-user');
   assert.equal(rows.length, 2);

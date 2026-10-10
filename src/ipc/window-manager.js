@@ -494,13 +494,13 @@ function setupWindowManagerIpc({
 
   // ── UI-385 — 子智能体/结果独立窗退役后的下钻通道 ──────────────
   // 指挥中心等独立窗不再弹 result 窗：调用本 handler 把载荷转发到主窗，
-  // 由主窗渲染层（preload relay → gewu:project-open-artifact）在右栏打开。
+  // 由主窗渲染层（preload relay → petri:project-open-artifact）在右栏打开。
   // 只放行单一白名单事件类型（SEC-HARDEN：不做成通用事件注入通道）。
   ipcMain.handle(CHANNELS.window.openResultInMain, (_event, payload) => {
     const scope = resolveSenderScope(_event);
     if (!scope) return { ok: false, code: "sender_not_allowed" };
     const type = payload && payload.type;
-    if (type !== "gewu:project-open-artifact") {  // 协议类型 tag，真源=frontend/src/lib/events.ts（SEC-HARDEN 白名单）
+    if (type !== "petri:project-open-artifact") {  // 协议类型 tag，真源=frontend/src/lib/events.ts（SEC-HARDEN 白名单）
       return { ok: false, code: "type_not_allowed" };
     }
     const main = getMainWindow();

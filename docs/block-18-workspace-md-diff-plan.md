@@ -29,7 +29,7 @@ BLOCK-18 复用 BLOCK-17 已实现的 IPC 通道（`agentDocReview:list / loadPa
 | IPC handlers（`src/ipc/agent-doc-review.js`） | 已写 | ✅ 复用，**不删** |
 | `computeSimpleDiff`（`AgentDocReview.tsx:27-52`） | 已写 | ✅ 提取到 `lib/markdownDiff.ts` |
 | `.wt-*` 样式（`WorkingTreeReview.css`） | 已重命名为 `.wt-*` 在该文件 | ✅ 复用 |
-| `preload.js` `biof3Desktop.agentDocReview` namespace | 已挂 | ✅ 复用 |
+| `preload.js` `petriDesktop.agentDocReview` namespace | 已挂 | ✅ 复用 |
 | `desktopBridge.ts` `getBridge('agentDocReview')` | 已挂 | ✅ 复用 |
 | `electron.d.ts` `AgentDocFileEntry` 类型 | 已加 | ✅ 复用 |
 | **独立 `AgentDocReview` 面板** | 已写 | ❌ 删除（4 文件） |
@@ -53,7 +53,7 @@ BLOCK-17 的 plan 文件 `docs/block-17-agent-doc-review-panel-plan.md` 保留�
 **复用（不动）**
 
 - `src/ipc/agent-doc-review.js` —— IPC handlers
-- `src/preload.js` —— `biof3Desktop.agentDocReview` namespace
+- `src/preload.js` —— `petriDesktop.agentDocReview` namespace
 - `frontend/src/lib/desktopBridge.ts` —— `getBridge('agentDocReview')`
 - `frontend/src/lib/electron.d.ts` —— `AgentDocFileEntry` / bridge 声明
 - `frontend/src/components/desktop/WorkingTreeReview/WorkingTreeReview.css`（.wt-*）

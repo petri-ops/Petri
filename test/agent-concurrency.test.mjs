@@ -6,23 +6,23 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
-const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-agent-concurrency-'));
-process.env.BIOF3_DB_PATH = path.join(tempDir, 'agent-concurrency.db');
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-agent-concurrency-'));
+process.env.PETRI_DB_PATH = path.join(tempDir, 'agent-concurrency.db');
 
 const require = createRequire(import.meta.url);
 const TEST_DIR = path.dirname(fileURLToPath(import.meta.url));
 
 // BLOCK-51 测试基建修复：projects / copilot_messages 等表 DDL 由 src/migrations/*.sql
-// 管理（生产由 Electron migration-runner 应用），core/biof3-server/db.js 模块顶层即
+// 管理（生产由 Electron migration-runner 应用），core/petri-server/db.js 模块顶层即
 // prepare projects——全新临时库必须先跑同一 migration 链再加载 db.js，否则模块加载即
 // 抛 no such table: projects（block-30 后既有损坏，本轮顺带修复）。
 const { runMigrations } = require('../src/migration-runner');
-await runMigrations(process.env.BIOF3_DB_PATH, path.join(TEST_DIR, '../src/migrations'));
+await runMigrations(process.env.PETRI_DB_PATH, path.join(TEST_DIR, '../src/migrations'));
 
-const db = require('../core/biof3-server/db');
-const conv = require('../core/biof3-server/helpers/conversations');
-const runtime = require('../core/biof3-server/helpers/runtime');
-const agentTaskStore = require('../core/biof3-server/agent-task-store');
+const db = require('../core/petri-server/db');
+const conv = require('../core/petri-server/helpers/conversations');
+const runtime = require('../core/petri-server/helpers/runtime');
+const agentTaskStore = require('../core/petri-server/agent-task-store');
 const { buildLoopRun } = require('../core/shared-backend/loop-contract');
 const sqlite = db.getDatabase();
 
@@ -280,8 +280,8 @@ test('取消 sub-agent 不级联到父/兄弟（A-4 反向）', () => {
 // ============================================================
 
 test('BLOCK-51 M1 — 路由层 acquire 调用形状契约（isPrimary 必传）', () => {
-  const chatSrc = fs.readFileSync(path.join(TEST_DIR, '../core/biof3-server/routes/ai-agent/chat.js'), 'utf8');
-  const resumeSrc = fs.readFileSync(path.join(TEST_DIR, '../core/biof3-server/routes/ai-agent/resume.js'), 'utf8');
+  const chatSrc = fs.readFileSync(path.join(TEST_DIR, '../core/petri-server/routes/ai-agent/chat.js'), 'utf8');
+  const resumeSrc = fs.readFileSync(path.join(TEST_DIR, '../core/petri-server/routes/ai-agent/resume.js'), 'utf8');
 
   // chat.js：primary/subagent 按 wantKind 区分（M1 修复形状）
   assert.match(

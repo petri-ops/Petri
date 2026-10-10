@@ -30,7 +30,7 @@ import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const BINARY = path.join(__dirname, '..', 'sidecars', 'computer-use-windows', 'bin', 'publish', 'gewu-computer-use-windows.exe');
+const BINARY = path.join(__dirname, '..', 'sidecars', 'computer-use-windows', 'bin', 'publish', 'petri-computer-use-windows.exe');
 const EVIDENCE = path.join(__dirname, '..', 'acceptance', 'block-63', 'p1-live.json');
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -107,7 +107,7 @@ async function main() {
   // A5 dev Electron UIA 观测（Chromium UIA 懒启用现状取证）
   let electronCount = null;
   try {
-    setForegroundByTitle('Gewu');
+    setForegroundByTitle('Petri');
     await delay(800);
     const snapElectron = await request('snapshot', { target: 'frontmost' });
     electronCount = snapElectron.ok ? snapElectron.data.elementCount : null;

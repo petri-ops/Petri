@@ -30,7 +30,7 @@
 ## 4. 依赖
 
 - BLOCK-31（`completed`）——`AgentChangesCard` projectId 传参在其 conversationId 之上叠加
-- BLOCK-30 单后端更名（`completed`）——DB 路径 `core/biof3-server`
+- BLOCK-30 单后端更名（`completed`）——DB 路径 `core/petri-server`
 
 ## 5. 门禁与证据
 
@@ -47,6 +47,6 @@
 
 **P3 实机收口（verified）**：S1 IPC 层 tinkspace→ThinkSpace / desktop→应用仓库互不串；S2 tinkspace 审阅 115 文件 +770 −9877 全为 ThinkSpace 路径、历史 = ThinkSpace master 提交；S3 desktop 审阅 = 应用仓库 working tree；S4 非 git 探针项目渲染诚实空态（验收后已删）。证据 `acceptance/ui-264/`（4 截图 + evidence.json）。门禁：tsc 0 / 定向 vitest 67/67 / node --check / docs:check 172 / ui:audit:check / docs:reconcile 0。
 
-**dev 启动注意**：需 `BIOF3_ELECTRON_USER_DATA_DIR=$PWD/.biof3-dev-user-data BIOF3_LOCAL_DATA_DIR=$PWD/.biof3-dev-user-data/data`，否则 userData 落到 `~/Documents/BioF3-Local` 旧库（env-coordinator `setupDesktopEnv` 语义）。
+**dev 启动注意**：需 `PETRI_ELECTRON_USER_DATA_DIR=$PWD/.petri-dev-user-data PETRI_LOCAL_DATA_DIR=$PWD/.petri-dev-user-data/data`，否则 userData 落到 `~/Documents/Petri-Local` 旧库（env-coordinator `setupDesktopEnv` 语义）。
 
 G0 开发期常态 · 不外推 packaged / Provider / GA.

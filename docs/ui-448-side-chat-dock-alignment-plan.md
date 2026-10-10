@@ -5,7 +5,7 @@ acceptance:
   - 红绿先行（HK-01）：单输入面/内容让位/compact 占位符三面契约测试先落红，实现后转绿，红→绿证据随收口笔录留痕
   - 中栏单一输入面：悬浮面展开时中栏 composer 让位（让位提示条替代），收起后还原；悬挂面自身 composer 不受影响
   - 内容让位：悬浮面展开时中栏会话内容列收窄避让（不再被 380px 面板拦腰切割），收起还原
-  - 视觉对齐：surface 圆角 16px/阴影走新 token --gewu-shadow-float（亮暗双套，摘要浮层同值硬编码收编单源）/入场 280ms + prefers-reduced-motion 降级
+  - 视觉对齐：surface 圆角 16px/阴影走新 token --petri-shadow-float（亮暗双套，摘要浮层同值硬编码收编单源）/入场 280ms + prefers-reduced-motion 降级
   - 窄面适配：悬挂面 SimpleChat compact 占位符（短提示不折行）；表格/长 token 三态实机核对（框内滚动+滚动条可见）
   - 台账同步：docs/ui-productization-audit.md UI-448 条目与实现同一提交；实机走查截图证据落 acceptance/ui-448/
 reopen: 用户实机过目后对新形态不满意，或悬浮面与摘要浮层同屏叠置的已知边界升级为真问题时
@@ -42,8 +42,8 @@ SideChatDock（UI-417）展开后是「同一主视图的第二份拷贝」：38
 1. 新增 `frontend/src/hooks/sideChatDockStore.ts`（模块级单例 store + `useSyncExternalStore` hook）——SideChatDock 开态从组件 useState 升为共享真相；中性归属 hooks/ 避免 copilot ↔ workspace-panels 反向依赖。
 2. SimpleChat：`ownsCopilotAsk` 实例在开态下 composer 让位——渲染轻量提示条（含「返回中栏输入」动作，点击收起悬浮面还原）；新增 `compact?: boolean` prop（悬挂面实例用短占位符「输入消息…」不折行）。
 3. CenterPanel：中栏 `.agentMain` 在开态挂让位类（`padding-right: min(432px, calc(100% - 320px))`），会话内容列收窄避让，320px 下限兜底极窄窗口。
-4. SideChatDock.module.css 视觉对齐：圆角 16px、`--gewu-shadow-float`、入场 280ms、`prefers-reduced-motion` 降级。
-5. custom.css 新增 `--gewu-shadow-float` 亮暗双套；`.workspaceSummaryFloat` 同值硬编码收编为该 token（单源化，零视觉变化）。
+4. SideChatDock.module.css 视觉对齐：圆角 16px、`--petri-shadow-float`、入场 280ms、`prefers-reduced-motion` 降级。
+5. custom.css 新增 `--petri-shadow-float` 亮暗双套；`.workspaceSummaryFloat` 同值硬编码收编为该 token（单源化，零视觉变化）。
 6. SideChatDock 把手与 44px 间隙结构**保留**（把手是常驻入口 + 运行呼吸灯载体，「再点收起」D1 契约不破坏；「贴缘」对齐在此处有意部分达成，理由：贴 right:0 则把手无处安放，收益不抵契约破坏）。
 
 **非范围（exclusions）**：
@@ -129,7 +129,7 @@ SideChatDock（UI-417）展开后是「同一主视图的第二份拷贝」：38
 
 用户原话：「主题风格应该和摘要面板保持一致」「侧边聊天只是单纯的聊天不加入主会话agent」「聊天输入框下面不需要那么多的内容了…适当的删减一下 你看看怎么调整 应该是个比较大的任务」。
 
-1. **主题对齐摘要面板**：悬浮面底色 `--gewu-bg-surface` 与摘要卡 `--gewu-bg-elevated` 存在色差（用户截图可见两卡深浅不一）——surface 底色换 `--gewu-bg-elevated`，头部对齐摘要卡顶栏规格（min-height 52px / padding 10px 13px 9px / 分隔线 color-mix(text 6%)）。
+1. **主题对齐摘要面板**：悬浮面底色 `--petri-bg-surface` 与摘要卡 `--petri-bg-elevated` 存在色差（用户截图可见两卡深浅不一）——surface 底色换 `--petri-bg-elevated`，头部对齐摘要卡顶栏规格（min-height 52px / padding 10px 13px 9px / 分隔线 color-mix(text 6%)）。
 2. **独立会话（不加入主会话 agent）**：悬挂面不再镜像中栏 activeConvId——改为**每项目独立的侧聊会话**（localStorage 按 projectId 持久化，空则首发自动建话，复用 useChatStream 既有建话路径），组件签名收缩为只收 projectId；中栏会话与悬挂面互不干扰（各自的 run/消息流）。解释口径：仍带项目背景（read 档只读工具可用），但不是主会话的一部分；主会话的编码 agent 内容不再镜像到悬挂面。reopen：若用户本意是「完全无工具纯 LLM 聊天」，撤 read 锁改直连对话端点（另裁）。
 3. **composer 删减**：SimpleChat 增 `slimComposer` prop——隐藏导出/知识空间开关/上下文用量环/模型与供应商/思考档位五组控件，只留「只读模式」锁定徽标 + 发送键。
 
@@ -153,7 +153,7 @@ HK-01 红绿先行：开态隐把手 + slim 传参契约重构先红后绿。宽
 
 ### §10.1 加映 v4 实施记录（2026-09-27 当日收口）
 
-红绿先行：契约重构 3 红（开态隐把手×2/呼吸灯与 open 解耦）→ 20/20 绿。波折两条如实登记：①max-width 百分比参照系误用——`.dockRoot` 是零宽定位容器，`calc(100%-24px)` 把面板夹塌成边框 2px，改回视口单位并注释留痕（.dockRoot 定位契约的隐蔽陷阱入册）；②字档纠正——摘要卡正文实测是 `--gewu-font-size-sm`（12.13px@scale1.1025）而非 caption（13.23px），首设 caption 经量测推翻后改正，教训=字级对齐以 computed style 实测为准（skill §3 配方）。端到端：模型菜单在 300px 面板内可弹出可选（withinSurface 实证）；两条探针会话回收清场。验证=20/20+前端全量 155 文件/1238 用例 0 红+tsc 0+eslint 0 error。证据=acceptance/ui-448/walkthrough-v4.json。
+红绿先行：契约重构 3 红（开态隐把手×2/呼吸灯与 open 解耦）→ 20/20 绿。波折两条如实登记：①max-width 百分比参照系误用——`.dockRoot` 是零宽定位容器，`calc(100%-24px)` 把面板夹塌成边框 2px，改回视口单位并注释留痕（.dockRoot 定位契约的隐蔽陷阱入册）；②字档纠正——摘要卡正文实测是 `--petri-font-size-sm`（12.13px@scale1.1025）而非 caption（13.23px），首设 caption 经量测推翻后改正，教训=字级对齐以 computed style 实测为准（skill §3 配方）。端到端：模型菜单在 300px 面板内可弹出可选（withinSurface 实证）；两条探针会话回收清场。验证=20/20+前端全量 155 文件/1238 用例 0 红+tsc 0+eslint 0 error。证据=acceptance/ui-448/walkthrough-v4.json。
 ### §10.2 加映 v4 收口（2026-09-27）
 
 实现提交 a176ec77（UI 台账加映段同提交）；closeout 十一门绿。v4 in_progress 待用户过目翻 verified。G0 开发期常态 · 不外推 packaged/Provider/GA。

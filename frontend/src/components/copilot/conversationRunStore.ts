@@ -1,6 +1,6 @@
 import { useCallback, useSyncExternalStore } from 'react';
 import type { CopilotContext } from '@/lib/copilotContext';
-import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
+import { petriEvents, dispatchPetriEvent } from '@/lib/events';
 import {
   cancelAgentTask,
   fetchInFlightPrimaryTasks,
@@ -542,7 +542,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
             }
           );
         }
-        dispatchGewuEvent(gewuEvents.projectWorkspaceChanged, {
+        dispatchPetriEvent(petriEvents.projectWorkspaceChanged, {
           projectId: options.projectId,
           source: 'agent',
         });
@@ -553,7 +553,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
         !event.needApproval &&
         event.toolJobId
       ) {
-        dispatchGewuEvent(gewuEvents.projectOpenResult, {
+        dispatchPetriEvent(petriEvents.projectOpenResult, {
           toolJobId: event.toolJobId,
           projectId: options.projectId,
         });
@@ -568,7 +568,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
           bgData && typeof bgData.processId === 'string' ? bgData.processId : null;
         if (processId) {
           try {
-            dispatchGewuEvent(gewuEvents.agentBackgroundProcess, {
+            dispatchPetriEvent(petriEvents.agentBackgroundProcess, {
               processId,
               conversationId,
             });
@@ -582,7 +582,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     // refreshConversations 固化到 DB 真值）。store 不持有该状态（低频一次性信号）。
     onTopicShift: (info) => {
       try {
-        dispatchGewuEvent(gewuEvents.conversationTopicShift, {
+        dispatchPetriEvent(petriEvents.conversationTopicShift, {
           conversationId,
           reason: info.reason,
           at: new Date().toISOString(),
@@ -604,7 +604,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     // 左栏项目树即时刷新（子 agent / copilotAsk / 联邦委托等后端建会话路径）。
     onConversation: (info) => {
       try {
-        dispatchGewuEvent(gewuEvents.conversationCreated, {
+        dispatchPetriEvent(petriEvents.conversationCreated, {
           conversationId: info.conversationId,
           title: info.title,
           projectId: options.projectId ?? null,

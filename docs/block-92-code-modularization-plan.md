@@ -41,11 +41,11 @@
 | 文件 | 行数 | 备注 |
 | --- | --- | --- |
 | shared-backend/result-changeset-service.js | 2783 | 全仓最大 |
-| biof3-server/helpers/tools-executor.js | 2711 | loop/agent 族测试面 |
-| biof3-server/db.js | 2194 | |
+| petri-server/helpers/tools-executor.js | 2711 | loop/agent 族测试面 |
+| petri-server/db.js | 2194 | |
 | shared-backend/result-studio-repository.js | 2009 | |
-| biof3-server/agent-tools/workspace-tools.js | 1800 | |
-| biof3-server/mcp/registry.js | 1699 | |
+| petri-server/agent-tools/workspace-tools.js | 1800 | |
+| petri-server/mcp/registry.js | 1699 | |
 | shared-backend/result-studio-lifecycle.js | 1692 | |
 | shared-backend/result-replay-service.js | 1630 | |
 | shared-backend/git-adapter.js | 1549 | |
@@ -67,7 +67,7 @@
 
 **非范围（exclusions，写死）**：
 
-- `core/biof3-server/loop-orchestrator.js`——已有行数门 <1250（现状 1241），本包零触碰，防门缝纠缠；
+- `core/petri-server/loop-orchestrator.js`——已有行数门 <1250（现状 1241），本包零触碰，防门缝纠缠；
 - <700 行文件一律不拆（IPC 常量集中机制项除外，其按"跨文件机制"入册而非按行数）；
 - 一切行为 / 性能 / 架构语义变更；一切重构工具与新依赖（沿用一期"不引入 jscodeshift/ts-morph"裁决）;
 - P6 源绑定证据重采（D8 例外族归 G0-RS）；Result Studio P7（deferred）；

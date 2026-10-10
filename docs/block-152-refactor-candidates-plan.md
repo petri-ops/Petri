@@ -25,7 +25,7 @@ status: completed
 | --- | --- | --- |
 | P 平台映射 | 三副本收敛：新 core/shared-backend/host-platform.js 单源（deriveHostPlatform+平台键集合）；capability-bundles 复用；scripts/build-r-bundle.mjs currentPlatform 改 require 单源；src/plugin/runtime.js detectPlatform 按 arch 判定（可 require 则收敛，否则薄实现+锚守护登记） | core/shared-backend/capability-bundles.js、scripts/build-r-bundle.mjs、src/plugin/runtime.js、src/plugin-schema.js（只读） |
 | H hunk 级 stage | commitReview：按 decisions 把可 stage 面精确化——整文件 accept=git add；混合=构造 per-hunk patch git apply --cached；reject=不入 index（现状已对）；未决=不 stage（治本，前端拦截保留） | src/ipc/working-tree-review.js（commitReview :326-343 段）+ 临时仓行为测 |
-| T 隧道自探活 | tunnel.js 周期 probe（如 60s 间隔，5s 超时，AbortController；401=活判定）→ status() 增 probeState/probedAt；MobileSync 徽标消费（probe ok+≥15min 才宣称；probe 失败降级「连接建立中」语义） | core/biof3-server/mobile-gateway/tunnel.js、frontend/.../MobileSync.tsx |
+| T 隧道自探活 | tunnel.js 周期 probe（如 60s 间隔，5s 超时，AbortController；401=活判定）→ status() 增 probeState/probedAt；MobileSync 徽标消费（probe ok+≥15min 才宣称；probe 失败降级「连接建立中」语义） | core/petri-server/mobile-gateway/tunnel.js、frontend/.../MobileSync.tsx |
 
 ## 3. 非范围
 

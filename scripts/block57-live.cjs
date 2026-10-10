@@ -4,7 +4,7 @@
 /**
  * BLOCK-57 P1 实机驱动（真 SSH + 真 agent + 真传输 + 真 executeJob 分派）
  *
- * Part 1 模块级全链 —— host = process.env.BIOF3_BLOCK57_HOST || 'aliyun'（用户指定真实节点）：
+ * Part 1 模块级全链 —— host = process.env.PETRI_BLOCK57_HOST || 'aliyun'（用户指定真实节点）：
  *   A agent 部署 + sha256 版本钉扎（二次部署幂等 no-op）
  *   B 节点能力探测（os / R / Python / 调度器，诚实上报）
  *   C 提交→日志流（含断流重连）→ 终态对齐 → 产物拉回 + sha256 对账
@@ -30,19 +30,19 @@ const ROOT = path.join(__dirname, '..');
 const EVIDENCE_DIR = path.join(ROOT, 'acceptance', 'block-57');
 fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
 
-const HOST = process.env.BIOF3_BLOCK57_HOST || 'aliyun';
+const HOST = process.env.PETRI_BLOCK57_HOST || 'aliyun';
 
 // env 必须在 require db 之前设置（单例解析）；Part 2 使用临时 DB
-const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block57-live-'));
-process.env.BIOF3_DB_PATH = path.join(tmpRoot, 'live.db');
-process.env.BIOF3_LOCAL_DATA_DIR = path.join(tmpRoot, 'local-data');
+const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block57-live-'));
+process.env.PETRI_DB_PATH = path.join(tmpRoot, 'live.db');
+process.env.PETRI_LOCAL_DATA_DIR = path.join(tmpRoot, 'local-data');
 
 const {
   createRemoteJobRunner,
-} = require(ROOT + '/core/biof3-server/helpers/remote-execution/remote-job-runner');
-const { runSshOp, remoteJobDirPath } = require(ROOT + '/core/biof3-server/helpers/remote-execution/ssh-transport');
-const { remoteAgentCommand } = require(ROOT + '/core/biof3-server/helpers/remote-execution/node-agent');
-const { createTargetRegistry } = require(ROOT + '/core/biof3-server/helpers/remote-execution/target-registry');
+} = require(ROOT + '/core/petri-server/helpers/remote-execution/remote-job-runner');
+const { runSshOp, remoteJobDirPath } = require(ROOT + '/core/petri-server/helpers/remote-execution/ssh-transport');
+const { remoteAgentCommand } = require(ROOT + '/core/petri-server/helpers/remote-execution/node-agent');
+const { createTargetRegistry } = require(ROOT + '/core/petri-server/helpers/remote-execution/target-registry');
 
 const runner = createRemoteJobRunner();
 const results = [];
@@ -252,7 +252,7 @@ async function runInAppChain() {
   console.log(`\n===== Part 2：应用级全链（host=${HOST}，真 executeJob 分派） =====`);
 
   // 临时测试插件（stdlib python）：为应用级成功链提供科学作业载体。
-  // 经 BIOF3_PLUGINS_DIR 隔离加载，不触碰 built-in 插件面。
+  // 经 PETRI_PLUGINS_DIR 隔离加载，不触碰 built-in 插件面。
   const pluginsDir = path.join(tmpRoot, 'plugins');
   const pluginDir = path.join(pluginsDir, 'blk57-remote-echo');
   fs.mkdirSync(path.join(pluginDir, 'scripts'), { recursive: true });
@@ -278,21 +278,21 @@ async function runInAppChain() {
   ].join('\n'));
 
   // 生产同款：先跑 src/migrations（db.js 模块级 prepare 依赖 projects 等表存在）
-  process.env.BIOF3_BETTER_SQLITE3_ROOT = process.env.BIOF3_BETTER_SQLITE3_ROOT
-    || path.join(ROOT, 'core', 'biof3-server', 'node_modules');
+  process.env.PETRI_BETTER_SQLITE3_ROOT = process.env.PETRI_BETTER_SQLITE3_ROOT
+    || path.join(ROOT, 'core', 'petri-server', 'node_modules');
   const { runMigrations } = require(ROOT + '/src/migration-runner.js');
   await runMigrations(path.join(tmpRoot, 'live.db'), path.join(ROOT, 'src', 'migrations'));
-  const dbMod = require(ROOT + '/core/biof3-server/db');
+  const dbMod = require(ROOT + '/core/petri-server/db');
   const db = dbMod.getAsyncDatabase();
   const config = {
     localResultsDir: path.join(tmpRoot, 'results'),
     mkdirSandbox: (p) => fs.mkdirSync(p, { recursive: true }),
   };
-  const pluginLoader = require(ROOT + '/core/biof3-server/plugin-loader');
+  const pluginLoader = require(ROOT + '/core/petri-server/plugin-loader');
   pluginLoader.loadPluginsFromDisk(pluginsDir);
-  const { createToolsExecutor } = require(ROOT + '/core/biof3-server/helpers/tools-executor');
-  const { createToolsAssetHandlers } = require(ROOT + '/core/biof3-server/helpers/tools-assets');
-  const notify = require(ROOT + '/core/biof3-server/notify-feishu');
+  const { createToolsExecutor } = require(ROOT + '/core/petri-server/helpers/tools-executor');
+  const { createToolsAssetHandlers } = require(ROOT + '/core/petri-server/helpers/tools-assets');
+  const notify = require(ROOT + '/core/petri-server/notify-feishu');
 
   const jobsDir = path.join(tmpRoot, 'results', 'tool-jobs');
   const { publicDemoJobIds, safeJoinUnder } = createToolsAssetHandlers({
@@ -308,7 +308,7 @@ async function runInAppChain() {
     config,
     notify,
     jobsDir,
-    scriptsDir: path.join(ROOT, 'core', 'biof3-server', 'tool-scripts'),
+    scriptsDir: path.join(ROOT, 'core', 'petri-server', 'tool-scripts'),
     publicDemoJobIds,
     safeJoinUnder,
     getUserId: (req) => (req.user && (req.user.id || req.user.userId)) || null,

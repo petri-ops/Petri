@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 // BLOCK-85 §9.2 Mac 侧出码：打开左栏「联邦」弹层（默认「我的设备」tab），读取自动出码的配对链接。
-// 前置：dev 栈在跑且 CDP 9222（BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev）。
+// 前置：dev 栈在跑且 CDP 9222（PETRI_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev）。
 // 用法: node scripts/block85-mac-pairing-code.cjs
 const path = require('path');
 const {
   pollTargets, filterPageTargets, selectPageTarget, connectTarget, evalJs,
   screenshotPng, createRun,
-} = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+} = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-85');
 

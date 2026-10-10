@@ -45,7 +45,7 @@ const WORKER_HOLD_CONFIRMATION_GRACE_MS = 1_000;
 const JOB_TIMEOUT_MS = 180_000;
 
 const Database = require(require.resolve('better-sqlite3', {
-  paths: [path.join(ROOT, 'core', 'biof3-server'), ROOT],
+  paths: [path.join(ROOT, 'core', 'petri-server'), ROOT],
 }));
 const { createResultStudioRepository } = require(
   path.join(ROOT, 'core/shared-backend/result-studio-repository.js')
@@ -345,7 +345,7 @@ export async function createRealVolcanoBaseline(runtime, rowCount = 240) {
   // (「这个旧结果没有可信的会话归属」) refuses the deep link and the fallback
   // binds the running candidate job instead, which hides the version panel.
   {
-    const bind = openLedger(runtime.env.BIOF3_DB_PATH, { readonly: false });
+    const bind = openLedger(runtime.env.PETRI_DB_PATH, { readonly: false });
     try {
       const bound = bind.prepare(
         'UPDATE tool_jobs SET conversation_id=? WHERE id=? AND conversation_id IS NULL'
@@ -868,7 +868,7 @@ export async function waitForDurableCandidateCheckpoint(runtime, worker, timeout
   let holdConfirmationStartedAt = null;
   while (Date.now() < deadline) {
     const checkpoint = readDurableCandidateCheckpoint(
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       runtime.project.id,
       runtime.conversation.id,
       worker.baselineJobId,
@@ -951,7 +951,7 @@ export async function waitForDurableCandidateCheckpoint(runtime, worker, timeout
       }
       holdConfirmationStartedAt = null;
       const heldCheckpoint = readDurableCandidateCheckpoint(
-        runtime.env.BIOF3_DB_PATH,
+        runtime.env.PETRI_DB_PATH,
         runtime.project.id,
         runtime.conversation.id,
         worker.baselineJobId,
@@ -961,9 +961,9 @@ export async function waitForDurableCandidateCheckpoint(runtime, worker, timeout
         && heldCheckpoint.checkpoint_id === checkpoint.checkpoint_id
         && heldCheckpoint.candidateJob.id === checkpoint.candidateJob.id,
       'p6_restart_checkpoint_changed_after_hold');
-      const integrity = verifyCheckpoint(runtime.env.BIOF3_DB_PATH, checkpoint.checkpoint_id);
+      const integrity = verifyCheckpoint(runtime.env.PETRI_DB_PATH, checkpoint.checkpoint_id);
       const git = candidateRefCommit(
-        runtime.env.BIOF3_DB_PATH,
+        runtime.env.PETRI_DB_PATH,
         runtime.project.id,
         checkpoint.working_branch_ref,
       );
@@ -1007,7 +1007,7 @@ export async function waitForDurableCandidateCheckpoint(runtime, worker, timeout
           stdout: output.stdout.slice(-1600),
           stderr: output.stderr.slice(-1200),
           state: readWorkerDebugState(
-            runtime.env.BIOF3_DB_PATH,
+            runtime.env.PETRI_DB_PATH,
             runtime.project.id,
             runtime.conversation.id,
             worker.baselineJobId,
@@ -1025,7 +1025,7 @@ export async function waitForDurableCandidateCheckpoint(runtime, worker, timeout
       stdout: output.stdout.slice(-1600),
       stderr: output.stderr.slice(-1200),
       state: readWorkerDebugState(
-        runtime.env.BIOF3_DB_PATH,
+        runtime.env.PETRI_DB_PATH,
         runtime.project.id,
         runtime.conversation.id,
         worker.baselineJobId,
@@ -1400,7 +1400,7 @@ export async function captureP6RealStopPrototype({ keep = false, verbose = false
     runtime = await createP5LiveScientificRuntime({ verbose });
     root = runtime.root;
     const baseline = await createRealVolcanoBaseline(runtime);
-    const sqlite = openLedger(runtime.env.BIOF3_DB_PATH);
+    const sqlite = openLedger(runtime.env.PETRI_DB_PATH);
     let baselineRevisionIds;
     try {
       baselineRevisionIds = sqlite.prepare(`
@@ -1412,23 +1412,23 @@ export async function captureP6RealStopPrototype({ keep = false, verbose = false
       sqlite.close();
     }
     const baselineBefore = readBaselineTruth(
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       runtime.project.id,
       baselineRevisionIds,
     );
-    const countsBefore = readResultStudioCounts(runtime.env.BIOF3_DB_PATH, runtime.project.id);
+    const countsBefore = readResultStudioCounts(runtime.env.PETRI_DB_PATH, runtime.project.id);
     const stopJobId = await submitP6StopJob(runtime);
-    const running = await waitForRunningJobProcess(runtime.env.BIOF3_DB_PATH, stopJobId);
+    const running = await waitForRunningJobProcess(runtime.env.PETRI_DB_PATH, stopJobId);
     const cancelled = await postJson(
       runtime.baseUrl,
       `/api/tools/cancel/${encodeURIComponent(stopJobId)}`,
       {},
       30_000,
     );
-    const job = await waitForCancelledJobResourceSummary(runtime.env.BIOF3_DB_PATH, stopJobId, 10_000);
-    const countsAfter = readResultStudioCounts(runtime.env.BIOF3_DB_PATH, runtime.project.id);
+    const job = await waitForCancelledJobResourceSummary(runtime.env.PETRI_DB_PATH, stopJobId, 10_000);
+    const countsAfter = readResultStudioCounts(runtime.env.PETRI_DB_PATH, runtime.project.id);
     const baselineAfter = readBaselineTruth(
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       runtime.project.id,
       baselineRevisionIds,
     );
@@ -1482,7 +1482,7 @@ export async function captureP6RealFailurePrototype({ keep = false, verbose = fa
     runtime = await createP5LiveScientificRuntime({ verbose });
     root = runtime.root;
     const baseline = await createRealVolcanoBaseline(runtime);
-    const sqlite = openLedger(runtime.env.BIOF3_DB_PATH);
+    const sqlite = openLedger(runtime.env.PETRI_DB_PATH);
     let baselineRevisionIds;
     try {
       baselineRevisionIds = sqlite.prepare(`
@@ -1494,21 +1494,21 @@ export async function captureP6RealFailurePrototype({ keep = false, verbose = fa
       sqlite.close();
     }
     const baselineBefore = readBaselineTruth(
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       runtime.project.id,
       baselineRevisionIds,
     );
 
-    const countsBeforeFailure = readResultStudioCounts(runtime.env.BIOF3_DB_PATH, runtime.project.id);
+    const countsBeforeFailure = readResultStudioCounts(runtime.env.PETRI_DB_PATH, runtime.project.id);
     const failedJobId = await submitP6VolcanoJob(runtime, buildP6FailingVolcanoInput());
     const failedJob = await waitForTerminalJob(runtime.baseUrl, failedJobId);
-    const failedLedger = readJobTruth(runtime.env.BIOF3_DB_PATH, failedJobId);
-    const countsAfterFailure = readResultStudioCounts(runtime.env.BIOF3_DB_PATH, runtime.project.id);
+    const failedLedger = readJobTruth(runtime.env.PETRI_DB_PATH, failedJobId);
+    const countsAfterFailure = readResultStudioCounts(runtime.env.PETRI_DB_PATH, runtime.project.id);
 
     const recoveryJobId = await submitP6VolcanoJob(runtime, buildP6RestartVolcanoInput(80));
     const recoveryJob = await waitForCompletedJob(runtime.baseUrl, recoveryJobId);
 
-    const countsBeforeValidator = readResultStudioCounts(runtime.env.BIOF3_DB_PATH, runtime.project.id);
+    const countsBeforeValidator = readResultStudioCounts(runtime.env.PETRI_DB_PATH, runtime.project.id);
     const validatorJobId = await submitP6ValidatorBlockedJob(runtime);
     const validatorJob = await waitForCompletedJob(runtime.baseUrl, validatorJobId);
     const validatorArtifact = (validatorJob.result?.artifacts || [])
@@ -1534,9 +1534,9 @@ export async function captureP6RealFailurePrototype({ keep = false, verbose = fa
       validatorHttpStatus = error.status || null;
       validatorDiagnosticCode = error.code || null;
     }
-    const countsAfterValidator = readResultStudioCounts(runtime.env.BIOF3_DB_PATH, runtime.project.id);
+    const countsAfterValidator = readResultStudioCounts(runtime.env.PETRI_DB_PATH, runtime.project.id);
     const baselineAfter = readBaselineTruth(
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       runtime.project.id,
       baselineRevisionIds,
     );
@@ -1598,7 +1598,7 @@ export async function captureP6RealDriftPrototype({ keep = false, verbose = fals
         //
         // BLOCK-86 封存态：包 plugins/ 只剩 deseq2（manifest.json 仍索引 15 个），
         // 被封存的 volcano-plot 只在 harness 的封存插件运行副本里
-        // （BIOF3_DEVELOPMENT_PLUGIN_DIRS，由 createP5LiveScientificRuntime 装配）。
+        // （PETRI_DEVELOPMENT_PLUGIN_DIRS，由 createP5LiveScientificRuntime 装配）。
         // 副本因此 = 包 plugins/ 的 manifest + 包 plugins/ 的活跃插件 + 运行副本里的
         // 封存插件，冷启窗口的「隔离副本即全部插件世界」语义保持不变。
         const coreBuiltIns = path.join(ROOT, 'resources', 'built-in-plugins');
@@ -1610,11 +1610,11 @@ export async function captureP6RealDriftPrototype({ keep = false, verbose = fals
           if (!packRoot) {
             throw Object.assign(new Error('p6_restart_bio_pack_root_missing'), {
               code: 'p6_restart_bio_pack_root_missing',
-              detail: { hint: 'set BIOF3_BIO_PACK_ROOT or check out gewu-pack-bio as a sibling directory' },
+              detail: { hint: 'set PETRI_BIO_PACK_ROOT or check out petri-pack-bio as a sibling directory' },
             });
           }
           cpSync(path.join(packRoot, 'plugins'), isolatedBuiltIns, { recursive: true });
-          const stagedDirs = String(env.BIOF3_DEVELOPMENT_PLUGIN_DIRS || '')
+          const stagedDirs = String(env.PETRI_DEVELOPMENT_PLUGIN_DIRS || '')
             .split(path.delimiter)
             .map((entry) => entry.trim())
             .filter(Boolean);
@@ -1630,10 +1630,10 @@ export async function captureP6RealDriftPrototype({ keep = false, verbose = fals
             }
           }
         }
-        env.BIOF3_BUILT_IN_PLUGINS_DIR = isolatedBuiltIns;
+        env.PETRI_BUILT_IN_PLUGINS_DIR = isolatedBuiltIns;
         // 副本即全部插件世界：冷启重放必须只看到副本本身，否则运行副本里的
         // 封存插件（1.0.0）会以后置开发源遮蔽副本里被升级的 2.0.0。
-        env.BIOF3_DEVELOPMENT_PLUGIN_DIRS = isolatedBuiltIns;
+        env.PETRI_DEVELOPMENT_PLUGIN_DIRS = isolatedBuiltIns;
       },
     });
     root = runtime.root;
@@ -1645,14 +1645,14 @@ export async function captureP6RealDriftPrototype({ keep = false, verbose = fals
     const baseline = await createRealVolcanoBaseline(runtime);
     const baselineRevisionId = baseline.interaction.revision.revisionId;
     const baselineTruth = readBaselineTruth(
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       runtime.project.id,
       [baselineRevisionId],
     );
     const binding = candidateRefCommit(
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       runtime.project.id,
-      `refs/heads/biof3/current/${baseline.interaction.revision.artifactFamilyId}`,
+      `refs/heads/petri/current/${baseline.interaction.revision.artifactFamilyId}`,
     );
     const dirtyGitDetected = runManagedGit(binding, ['status', '--porcelain'])
       .split('\n').some((line) => line.endsWith('user-notes.txt'));
@@ -1691,8 +1691,8 @@ export async function captureP6RealDriftPrototype({ keep = false, verbose = fals
       { timeoutMs: 120_000 },
     )).data);
 
-    const currentRef = `refs/heads/biof3/current/${artifactRow.artifact_family_id}`;
-    const alternateCommit = runManagedGit(binding, ['rev-parse', '--verify', 'refs/heads/biof3/main']);
+    const currentRef = `refs/heads/petri/current/${artifactRow.artifact_family_id}`;
+    const alternateCommit = runManagedGit(binding, ['rev-parse', '--verify', 'refs/heads/petri/main']);
     invariant(alternateCommit !== artifactRow.source_commit, 'p6_drift_alternate_commit_not_distinct');
     runManagedGit(binding, ['update-ref', currentRef, alternateCommit, artifactRow.source_commit]);
     const refDriftStatus = publicStatusShape((await requestJson(
@@ -1731,7 +1731,7 @@ export async function captureP6RealDriftPrototype({ keep = false, verbose = fals
     invariant(scriptSnapshotPath && existsSync(scriptSnapshotPath), 'p6_drift_script_snapshot_missing_before_test');
     const scriptSnapshotBytes = readFileSync(scriptSnapshotPath);
     const scriptArtifact = (scriptJob.result?.artifacts || []).find((artifact) => artifact?.id === 'volcano');
-    const scriptCountsBefore = readResultStudioCounts(runtime.env.BIOF3_DB_PATH, runtime.project.id);
+    const scriptCountsBefore = readResultStudioCounts(runtime.env.PETRI_DB_PATH, runtime.project.id);
     writeFileSync(scriptSnapshotPath, Buffer.concat([scriptSnapshotBytes, Buffer.from('\n# external drift\n')]));
     const scriptQuery = new URLSearchParams({
       projectId: runtime.project.id,
@@ -1750,7 +1750,7 @@ export async function captureP6RealDriftPrototype({ keep = false, verbose = fals
       `/api/result-studio/interaction?${scriptQuery.toString()}`,
       { timeoutMs: 120_000 },
     );
-    const scriptCountsAfter = readResultStudioCounts(runtime.env.BIOF3_DB_PATH, runtime.project.id);
+    const scriptCountsAfter = readResultStudioCounts(runtime.env.PETRI_DB_PATH, runtime.project.id);
 
     const selectionId = `sel_${randomUUID().replace(/-/g, '')}`;
     await postJson(runtime.baseUrl, '/api/result-studio/selection', {
@@ -1797,7 +1797,7 @@ export async function captureP6RealDriftPrototype({ keep = false, verbose = fals
         revisionId: secondRevision.revisionId,
       }).toString()}`,
     )).data;
-    const oldContextCountsBefore = readResultStudioCounts(runtime.env.BIOF3_DB_PATH, runtime.project.id);
+    const oldContextCountsBefore = readResultStudioCounts(runtime.env.PETRI_DB_PATH, runtime.project.id);
     const oldContextReplay = await requestJsonResponse(
       runtime.baseUrl,
       `/api/result-studio/revisions/${encodeURIComponent(secondRevision.revisionId)}/replay`,
@@ -1812,17 +1812,17 @@ export async function captureP6RealDriftPrototype({ keep = false, verbose = fals
         timeoutMs: 120_000,
       },
     );
-    const oldContextCountsAfter = readResultStudioCounts(runtime.env.BIOF3_DB_PATH, runtime.project.id);
+    const oldContextCountsAfter = readResultStudioCounts(runtime.env.PETRI_DB_PATH, runtime.project.id);
 
     await runtime.close({ removeRoot: false });
     const pluginManifestPath = path.join(
-      runtime.env.BIOF3_BUILT_IN_PLUGINS_DIR,
+      runtime.env.PETRI_BUILT_IN_PLUGINS_DIR,
       'volcano-plot/plugin.json',
     );
     const upgradedPlugin = JSON.parse(readFileSync(pluginManifestPath, 'utf8'));
     upgradedPlugin.version = '2.0.0';
     writeFileSync(pluginManifestPath, `${JSON.stringify(upgradedPlugin, null, 2)}\n`);
-    const builtInManifestPath = path.join(runtime.env.BIOF3_BUILT_IN_PLUGINS_DIR, 'manifest.json');
+    const builtInManifestPath = path.join(runtime.env.PETRI_BUILT_IN_PLUGINS_DIR, 'manifest.json');
     const builtInManifest = JSON.parse(readFileSync(builtInManifestPath, 'utf8'));
     const indexedPlugin = builtInManifest.plugins?.['volcano-plot'];
     invariant(indexedPlugin, 'p6_drift_plugin_index_missing');
@@ -1834,7 +1834,7 @@ export async function captureP6RealDriftPrototype({ keep = false, verbose = fals
     // drift 冷启窗口＝隔离副本即全部插件世界：暂时隐藏包装载记录，冷启段结束恢复。
     // 根目录随弃置 runtime 清理，异常路径无跨 run 残留。
     const packInstalledJsonPath = path.join(
-      runtime.env.BIOF3_LOCAL_DATA_DIR, 'packs', 'installed.json');
+      runtime.env.PETRI_LOCAL_DATA_DIR, 'packs', 'installed.json');
     const packInstalledJsonHidden = `${packInstalledJsonPath}.drift-cold-window`;
     let packSourceHidden = false;
     if (existsSync(packInstalledJsonPath)) {
@@ -1869,7 +1869,7 @@ export async function captureP6RealDriftPrototype({ keep = false, verbose = fals
         revisionId: secondRevision.revisionId,
       }).toString()}`,
     )).data;
-    const pluginCountsBefore = readResultStudioCounts(runtime.env.BIOF3_DB_PATH, runtime.project.id);
+    const pluginCountsBefore = readResultStudioCounts(runtime.env.PETRI_DB_PATH, runtime.project.id);
     const pluginReplay = await requestJsonResponse(
       coldServer.baseUrl,
       `/api/result-studio/revisions/${encodeURIComponent(secondRevision.revisionId)}/replay`,
@@ -1884,8 +1884,8 @@ export async function captureP6RealDriftPrototype({ keep = false, verbose = fals
         timeoutMs: 120_000,
       },
     );
-    const pluginCountsAfter = readResultStudioCounts(runtime.env.BIOF3_DB_PATH, runtime.project.id);
-    const allCurrent = openLedger(runtime.env.BIOF3_DB_PATH);
+    const pluginCountsAfter = readResultStudioCounts(runtime.env.PETRI_DB_PATH, runtime.project.id);
+    const allCurrent = openLedger(runtime.env.PETRI_DB_PATH);
     let currentRevisionIds;
     try {
       currentRevisionIds = allCurrent.prepare(`
@@ -1895,7 +1895,7 @@ export async function captureP6RealDriftPrototype({ keep = false, verbose = fals
       allCurrent.close();
     }
     const currentTruth = readBaselineTruth(
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       runtime.project.id,
       currentRevisionIds,
     );
@@ -1980,14 +1980,14 @@ export async function captureP6RealRestartPrototype({ keep = false, verbose = fa
       beforeStart({ env }) {
         // The production default is ten minutes. This isolated harness keeps
         // the same stale-owner algorithm but shortens its observation window.
-        env.BIOF3_TOOL_ZOMBIE_TIMEOUT_MS = '250';
-        env.BIOF3_TOOL_HEARTBEAT_INTERVAL_MS = '100';
+        env.PETRI_TOOL_ZOMBIE_TIMEOUT_MS = '250';
+        env.PETRI_TOOL_HEARTBEAT_INTERVAL_MS = '100';
       },
     });
     root = runtime.root;
-    const dbIdentityBefore = fileIdentity(runtime.env.BIOF3_DB_PATH);
+    const dbIdentityBefore = fileIdentity(runtime.env.PETRI_DB_PATH);
     const baseline = await createRealVolcanoBaseline(runtime, 50_000);
-    const sqlite = openLedger(runtime.env.BIOF3_DB_PATH);
+    const sqlite = openLedger(runtime.env.PETRI_DB_PATH);
     let baselineRevisionIds;
     try {
       baselineRevisionIds = sqlite.prepare(`
@@ -2000,7 +2000,7 @@ export async function captureP6RealRestartPrototype({ keep = false, verbose = fa
     }
     invariant(baselineRevisionIds.length >= 3, 'p6_restart_baseline_cohort_incomplete');
     const baselineBefore = readBaselineTruth(
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       runtime.project.id,
       baselineRevisionIds,
     );
@@ -2043,21 +2043,21 @@ export async function captureP6RealRestartPrototype({ keep = false, verbose = fa
       120_000,
     );
     const afterRecoveryTruth = readInterruptedTruth(
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       durable.checkpoint.change_set_id,
     );
     const interruptedJob = await waitForInterruptedJobTerminal(
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       durable.checkpoint.candidateJob.id,
     );
     const afterRecoveryIntegrity = verifyCheckpoint(
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       afterRecoveryTruth.checkpoint.checkpoint_id,
     );
     invariant(afterRecoveryIntegrity.matches === true,
       'p6_restart_recovered_checkpoint_corrupt', afterRecoveryIntegrity);
     const baselineAfterRecovery = readBaselineTruth(
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       runtime.project.id,
       baselineRevisionIds,
     );
@@ -2082,11 +2082,11 @@ export async function captureP6RealRestartPrototype({ keep = false, verbose = fa
       120_000,
     )).data;
     const bindingAfter = candidateRefCommit(
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       runtime.project.id,
       durable.checkpoint.working_branch_ref,
     );
-    const dbIdentityAfter = fileIdentity(runtime.env.BIOF3_DB_PATH);
+    const dbIdentityAfter = fileIdentity(runtime.env.PETRI_DB_PATH);
     const observation = {
       prototype: 'real_process_restart_noncanonical',
       noSeedSeededTableCount: runtime.noSeedPrecondition.seededTables.length,

@@ -1,8 +1,8 @@
-# BioF3 Desktop Agent Harness 后端架构调研报告
+# Petri Desktop Agent Harness 后端架构调研报告
 
 **日期**: 2026-08-17
 **范围**: Agent Harness 后端架构（非前端 UI）
-**项目**: BioF3 Desktop — Electron + React/Vite + 内嵌 R/Python runtime
+**项目**: Petri Desktop — Electron + React/Vite + 内嵌 R/Python runtime
 **当前阶段**: G0 长期开发期
 
 ---
@@ -483,14 +483,14 @@ async function handleMessage(line) {
 
 ```79:101:frontend/src/lib/desktopBridge.ts
 export function isDesktop(): boolean {
-  return typeof window !== 'undefined' && !!window.biof3Desktop;
+  return typeof window !== 'undefined' && !!window.petriDesktop;
 }
 
 export function getBridge<K extends DesktopBridgeName>(
   name: K
 ): DesktopBridgeHandle<K> | null {
   if (typeof window === 'undefined') return null;
-  const desktop = window.biof3Desktop;
+  const desktop = window.petriDesktop;
   if (!desktop) return null;
   const handle = (desktop as Partial<DesktopBridge>)[name];
   return (handle ?? null) as DesktopBridgeHandle<K> | null;
@@ -537,7 +537,7 @@ function buildEnvelope(name, args, data, ctx, options, durationMs) {
 
 ### 精简摘要（300 字内）
 
-基于对 BioF3 Desktop agent harness 后端架构的全面调研，识别出以下 **5 个最高 ROI 优化方向**（按优先级排序）：
+基于对 Petri Desktop agent harness 后端架构的全面调研，识别出以下 **5 个最高 ROI 优化方向**（按优先级排序）：
 
 ---
 

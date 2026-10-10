@@ -10,11 +10,11 @@
  * 供给（BLOCK-118 用户裁决「两者都支持」）：
  *   - file（默认）：跟随 data/decision-config.json（与设置页「决策模型接口」同源，
  *     当前可为本机 Laya 或 Jev 云）。
- *   - cloud：从 .biof3-dev-user-data/jev.env.bak-by-user-request 读 TYPESAFE_API_KEY
+ *   - cloud：从 .petri-dev-user-data/jev.env.bak-by-user-request 读 TYPESAFE_API_KEY
  *     直连 Jev 云（gitignored 只读，不回显不入仓——quality:secret 红线）。
  *
  * 裸 shell 下 decision-config 默认推导（cwd/data）不存在，须显式锚定 dev 数据面
- * （.biof3-dev-user-data/data/decision-config.json），否则静默降级 no_key。
+ * （.petri-dev-user-data/data/decision-config.json），否则静默降级 no_key。
  * 建议语义与各内核一致：增量附加、只加不减、低置信/降级=零建议。
  */
 import fs from 'node:fs';
@@ -58,33 +58,33 @@ function collectChangedFiles() {
 
 /** 锚定决策配置路径（首个存在者；都不存在不设 env 走内建推导=诚实降级 no_key）。 */
 function anchorDecisionConfigPath() {
-  if (process.env.BIOF3_DECISION_CONFIG_PATH) return;
+  if (process.env.PETRI_DECISION_CONFIG_PATH) return;
   const candidates = [
-    path.join(root, '.biof3-dev-user-data', 'data', 'decision-config.json'),
+    path.join(root, '.petri-dev-user-data', 'data', 'decision-config.json'),
     path.join(root, 'data', 'decision-config.json'),
   ];
   for (const p of candidates) {
     if (fs.existsSync(p)) {
-      process.env.BIOF3_DECISION_CONFIG_PATH = p;
+      process.env.PETRI_DECISION_CONFIG_PATH = p;
       return;
     }
   }
 }
 
-/** 锚定决策台账 DB（BLOCK-118 加映 1）：裸 shell 缺 BIOF3_DB_PATH 时 logDecision 会打开
+/** 锚定决策台账 DB（BLOCK-118 加映 1）：裸 shell 缺 PETRI_DB_PATH 时 logDecision 会打开
  * 默认路径库（无 decision_log 表）→ INSERT 失败被 best-effort 静默跳过=调用不留痕。
  * dev 数据面存在时锚定之，与后端同账本；无 dev 数据面保持默认（诚实零记账）。 */
 function anchorDecisionDbPath() {
-  if (process.env.BIOF3_DB_PATH) return;
-  const candidate = path.join(root, '.biof3-dev-user-data', 'data', 'biof3.db');
+  if (process.env.PETRI_DB_PATH) return;
+  const candidate = path.join(root, '.petri-dev-user-data', 'data', 'petri.db');
   if (fs.existsSync(candidate)) {
-    process.env.BIOF3_DB_PATH = candidate;
+    process.env.PETRI_DB_PATH = candidate;
   }
 }
 
 /** 解析 cloud 供给（备份 env 文件只读，值不回显不落日志）。 */
 function cloudOverrides() {
-  const envFile = path.join(root, '.biof3-dev-user-data', 'jev.env.bak-by-user-request');
+  const envFile = path.join(root, '.petri-dev-user-data', 'jev.env.bak-by-user-request');
   let raw = '';
   try {
     raw = fs.readFileSync(envFile, 'utf8');

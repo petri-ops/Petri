@@ -12,7 +12,7 @@ import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const IDE_TOOLS = resolve(__dirname, '..', 'core/biof3-server/mcp/ide-tools');
+const IDE_TOOLS = resolve(__dirname, '..', 'core/petri-server/mcp/ide-tools');
 
 const ideTools = await import(
   pathToFileURL(resolve(IDE_TOOLS, 'index.js')).href
@@ -34,7 +34,7 @@ function gitEnv() {
 const SPAWN_OPTS = { encoding: 'utf8' };
 
 function makeRepo() {
-  const repo = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-git-show-`);
+  const repo = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-git-show-`);
   const env = gitEnv();
   const spawn = (args) => spawnSync('git', args, { env, ...SPAWN_OPTS });
   spawn(['init', '-q', '-b', 'main', repo]);
@@ -103,7 +103,7 @@ test('ide_git_show rejects path outside allowlist', () => {
 });
 
 test('ide_git_show rejects non-git repository', () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-nogit-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-nogit-`);
   try {
     const res = H.ide_git_show({ path: tmp, commit: 'HEAD' });
     assert.equal(res.ok, false);
@@ -125,7 +125,7 @@ test('ide_git_show rejects invalid commit reference', () => {
 });
 
 test('ide_git_show respects maxLines hard cap', () => {
-  const repo = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-git-show-cap-`);
+  const repo = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-git-show-cap-`);
   try {
     const env = gitEnv();
     spawnSync('git', ['init', '-q', '-b', 'main', repo], { env });

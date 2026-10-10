@@ -26,13 +26,13 @@ import {
 } from './ExperimentalFeaturesSection';
 import { EXTRA_RENDERERS_STORAGE_KEY } from '@/components/copilot/extraRenderers';
 
-type AgentWorkbenchFlagBridge = NonNullable<Window['biof3']>['agentWorkbenchFlags'];
+type AgentWorkbenchFlagBridge = NonNullable<Window['petri']>['agentWorkbenchFlags'];
 
 afterEach(() => {
   cleanup();
   window.localStorage.removeItem(EXTRA_RENDERERS_STORAGE_KEY);
-  // The Section writes window.biof3 directly. Restore a clean state.
-  delete (window as { biof3?: unknown }).biof3;
+  // The Section writes window.petri directly. Restore a clean state.
+  delete (window as { petri?: unknown }).petri;
 });
 
 function readCssSource(): string {
@@ -97,7 +97,7 @@ describe('ExperimentalFeaturesSection', () => {
   it('initialises from the bridge value when both bridge and localStorage are present', () => {
     window.localStorage.setItem(EXTRA_RENDERERS_STORAGE_KEY, 'true');
     const { bridge } = makeBridge(false, { ok: true, extraRenderers: false });
-    (window as { biof3?: unknown }).biof3 = { agentWorkbenchFlags: bridge };
+    (window as { petri?: unknown }).petri = { agentWorkbenchFlags: bridge };
     render(<ExperimentalFeaturesSection bridge={bridge} />);
     const toggle = screen.getByRole<HTMLInputElement>('switch', { name: EXTRA_RENDERERS_LABEL });
     expect(toggle.checked).toBe(false);
@@ -161,7 +161,7 @@ describe('ExperimentalFeaturesSection', () => {
     render(<ExperimentalFeaturesSection />);
     const toggle = screen.getByRole<HTMLInputElement>('switch', { name: EXTRA_RENDERERS_LABEL });
     expect(toggle.getAttribute('aria-label')).toBe(EXTRA_RENDERERS_LABEL);
-    expect(toggle.getAttribute('aria-describedby')).toBe('gewu-extra-renderers-description');
+    expect(toggle.getAttribute('aria-describedby')).toBe('petri-extra-renderers-description');
     // The description span carries the live "已开启/已关闭" copy.
     expect(screen.getByText('已关闭')).toBeTruthy();
   });

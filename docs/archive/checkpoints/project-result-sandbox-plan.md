@@ -3,7 +3,7 @@
 最后更新：2026-07-16 04:05 UTC
 
 > **⚠️ 历史记录横幅（2026-07-16 补充）**：本文是已完成的历史专项记录，其后仓库经历了「去 vendor 化 + web 冗余清理」（见 [`dependency-decoupling-checkpoint.md`](../../dependency-decoupling-checkpoint.md)），阅读时请注意：
-> - 文中所有 `vendor/biof3-core/X` 路径现在是 `core/X`（submodule 已内联）。
+> - 文中所有 `vendor/petri-core/X` 路径现在是 `core/X`（submodule 已内联）。
 > - 文中提到的 PostgreSQL 文件（`db-core-pg.js`、`r-server-db-pg.js` 等）与 `Core vendor 同步` 均已移除；数据库现为纯 SQLite。
 > - Phase 5b 收敛的「单细胞 step 引擎」已在 Phase B 整体移除（单细胞工具将重写）。
 > - resolver / 沙盒 / containment 的**结论仍然有效**，只是承载文件路径与后端形态已变。本文不再逐行维护。
@@ -35,7 +35,7 @@
 
 目标：
 
-> 用户为项目选择的 `workspace_path` 是该项目所有正式分析结果的物理沙盒根。R、Python、MCP、Agent Workflow 和报告生成不得继续把项目结果默认写入全局 `BioF3-Local/results`。
+> 用户为项目选择的 `workspace_path` 是该项目所有正式分析结果的物理沙盒根。R、Python、MCP、Agent Workflow 和报告生成不得继续把项目结果默认写入全局 `Petri-Local/results`。
 
 本任务是运行目录收敛，不是新增分析流程，不得改变唯一事实链：
 
@@ -52,25 +52,25 @@
 
 尚未成立：
 
-1. Electron 仍把 `BIOF3_LOCAL_RESULTS_DIR` 固定为 `~/Documents/BioF3-Local/results`。
+1. Electron 仍把 `PETRI_LOCAL_RESULTS_DIR` 固定为 `~/Documents/Petri-Local/results`。
 2. R 普通工具固定写入 `<global-results>/tool-jobs/<jobId>`。
 3. Python 工具固定写入同一个全局 `tool-jobs`。
 4. MCP/Agent 插件固定写入 `<global-results>/mcp-tool-jobs/<mcpJobId>`。
 5. 普通 `/api/tools/run` 执行入口没有以 `projectId` 解析 `jobDir`，写 `tool_jobs` 时也未统一持久化 `project_id`。
 6. MCP 的物理目录使用 `mcp_*`，数据库事实使用 `tool_job.id`，目录身份尚未收敛。
 7. artifact 路由和清理逻辑主要信任全局 jobs root，尚未把“该 job 所属项目的结果根”作为授权边界。
-8. Python task cache、上传缓存、runtime、插件、数据库等系统数据与正式结果混合在全局 BioF3 数据目录语义中，必须明确哪些迁、哪些不迁。
+8. Python task cache、上传缓存、runtime、插件、数据库等系统数据与正式结果混合在全局 Petri 数据目录语义中，必须明确哪些迁、哪些不迁。
 
 关键代码证据：
 
-- `src/main.js`：`BIOF3_LOCAL_RESULTS_DIR` 初始化。
-- `vendor/biof3-core/r-server/routes/tools.js`：R `JOBS_DIR`。
-- `vendor/biof3-core/r-server/helpers/tools-executor.js`：普通工具创建 `jobDir`、写 params/files、执行和 artifact 路由。
-- `vendor/biof3-core/py-server/tools-router.js`：Python `JOBS_DIR/jobDir/outputDir`。
-- `vendor/biof3-core/r-server/mcp/registry.js`：`MCP_JOBS_DIR` 和 MCP 物理目录。
-- `vendor/biof3-core/r-server/routes/harness.js`：project scope 与 artifact 解析。
-- `vendor/biof3-core/r-server/routes/files.js`：workspace containment 参考实现。
-- `vendor/biof3-core/shared-backend/execution-context.js`：canonical path 与 adapter 边界。
+- `src/main.js`：`PETRI_LOCAL_RESULTS_DIR` 初始化。
+- `vendor/petri-core/r-server/routes/tools.js`：R `JOBS_DIR`。
+- `vendor/petri-core/r-server/helpers/tools-executor.js`：普通工具创建 `jobDir`、写 params/files、执行和 artifact 路由。
+- `vendor/petri-core/py-server/tools-router.js`：Python `JOBS_DIR/jobDir/outputDir`。
+- `vendor/petri-core/r-server/mcp/registry.js`：`MCP_JOBS_DIR` 和 MCP 物理目录。
+- `vendor/petri-core/r-server/routes/harness.js`：project scope 与 artifact 解析。
+- `vendor/petri-core/r-server/routes/files.js`：workspace containment 参考实现。
+- `vendor/petri-core/shared-backend/execution-context.js`：canonical path 与 adapter 边界。
 
 ## 3. 目标目录契约
 
@@ -89,7 +89,7 @@
 │   │       └── logs/
 │   │           └── run.log
 │   └── exports/                  # 用户主动导出的报告/汇总
-└── .biof3/
+└── .petri/
     └── workspace.json            # 可选的非敏感 workspace 版本/身份元数据
 ```
 
@@ -104,7 +104,7 @@
 
 ## 4. 明确不进入项目结果沙盒的内容
 
-以下继续留在 `BioF3-Local` 应用数据目录：
+以下继续留在 `Petri-Local` 应用数据目录：
 
 - SQLite/PostgreSQL 连接配置和数据库文件。
 - API Key、credential reference、AI 设置和隐私设置。
@@ -126,7 +126,7 @@
 1. ✅ 保留当前 dirty worktree，Core 回收站改动未被覆盖
 2. ✅ 创建基线审计测试 `test/project-result-sandbox.test.mjs`
 3. ✅ 记录当前缺口清单：
-   - Electron 固定设置 `BIOF3_LOCAL_RESULTS_DIR`
+   - Electron 固定设置 `PETRI_LOCAL_RESULTS_DIR`
    - R/Python executor 固定使用全局 `JOBS_DIR`
    - MCP 使用独立的 `mcp-tool-jobs` 目录
    - `/api/tools/run` 未强制要求 `projectId`
@@ -145,7 +145,7 @@
 
 完成内容：
 
-1. ✅ 创建 `vendor/biof3-core/shared-backend/project-run-layout.js`
+1. ✅ 创建 `vendor/petri-core/shared-backend/project-run-layout.js`
 2. ✅ 实现 `resolveProjectRunLayout({ projectId, toolJobId, db, userId, skipPermissionCheck, ensureDirs })`
    - 从数据库读取 project.workspace_path
    - 校验项目存在、active、有权限、workspace 可写
@@ -192,10 +192,10 @@
 - ✅ 本地（desktop）模式容器路径 = 宿主路径；docker（web）模式保留全局挂载映射（与 R 侧对齐）
 
 关键文件：
-- ✅ `vendor/biof3-core/r-server/helpers/tools-executor.js`
-- ✅ `vendor/biof3-core/py-server/tools-router.js`
-- ✅ `vendor/biof3-core/py-server/r-server-db.js`
-- ✅ `vendor/biof3-core/py-server/r-server-db-pg.js`
+- ✅ `vendor/petri-core/r-server/helpers/tools-executor.js`
+- ✅ `vendor/petri-core/py-server/tools-router.js`
+- ✅ `vendor/petri-core/py-server/r-server-db.js`
+- ✅ `vendor/petri-core/py-server/r-server-db-pg.js`
 
 验证证据：
 - `test/project-sandbox-py-tools.test.mjs`：7 项 Python 入口真实临时目录测试全部通过
@@ -246,8 +246,8 @@
 - ✅ 未新建 workflow DB / 结果索引 / artifact 表
 
 关键文件：
-- ✅ `vendor/biof3-core/shared-backend/project-run-layout.js`（新增 exportsDir）
-- ✅ `vendor/biof3-core/r-server/helpers/tools-executor.js`（containment + 项目感知写 + 导出副本）
+- ✅ `vendor/petri-core/shared-backend/project-run-layout.js`（新增 exportsDir）
+- ✅ `vendor/petri-core/r-server/helpers/tools-executor.js`（containment + 项目感知写 + 导出副本）
 
 验证证据：
 - `test/project-sandbox-artifacts.test.mjs`：4 项通过
@@ -363,15 +363,15 @@ npm run harness:agent-evaluate
 
 Core 主体：
 
-- `vendor/biof3-core/r-server/db.js`
-- `vendor/biof3-core/r-server/db-core-pg.js`
-- `vendor/biof3-core/r-server/routes/tools.js`
-- `vendor/biof3-core/r-server/helpers/tools-executor.js`
-- `vendor/biof3-core/py-server/tools-router.js`
-- `vendor/biof3-core/r-server/mcp/registry.js`
-- `vendor/biof3-core/r-server/routes/harness.js`
-- `vendor/biof3-core/r-server/routes/files.js`
-- `vendor/biof3-core/shared-backend/execution-context.js`
+- `vendor/petri-core/r-server/db.js`
+- `vendor/petri-core/r-server/db-core-pg.js`
+- `vendor/petri-core/r-server/routes/tools.js`
+- `vendor/petri-core/r-server/helpers/tools-executor.js`
+- `vendor/petri-core/py-server/tools-router.js`
+- `vendor/petri-core/r-server/mcp/registry.js`
+- `vendor/petri-core/r-server/routes/harness.js`
+- `vendor/petri-core/r-server/routes/files.js`
+- `vendor/petri-core/shared-backend/execution-context.js`
 
 Desktop/前端契约：
 

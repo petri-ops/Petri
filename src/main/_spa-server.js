@@ -28,7 +28,7 @@ async function startSpaServer({ resolveResource, isDevMode, rendererDevUrl, proc
     try {
       const { startStaticServer } = require("../static-server");
       const spaServer = await startStaticServer(spaBuildDir, {
-        port: Number(process.env.BIOF3_RENDERER_PORT || 3002),
+        port: Number(process.env.PETRI_RENDERER_PORT || 3002),
         baseUrl: "/",
         label: "spa-server",
         spaFallback: true,

@@ -1,6 +1,6 @@
 /* Lightbox — fullscreen image viewer */
 
-.gewu-lightbox {
+.petri-lightbox {
   position: fixed;
   inset: 0;
   z-index: 100000;
@@ -9,10 +9,10 @@
   align-items: center;
   justify-content: center;
   cursor: zoom-out;
-  animation: gewu-lightbox-fade 0.15s ease-out;
+  animation: petri-lightbox-fade 0.15s ease-out;
 }
 
-.gewu-lightbox__img {
+.petri-lightbox__img {
   max-width: 92vw;
   max-height: 90vh;
   object-fit: contain;
@@ -22,25 +22,25 @@
   -webkit-user-drag: none;
 }
 
-.gewu-lightbox__hint {
+.petri-lightbox__hint {
   position: absolute;
   bottom: 18px;
   left: 50%;
   transform: translateX(-50%);
   color: rgba(255, 255, 255, 0.72);
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   pointer-events: none;
 }
 
 
-.gewu-lightbox__close {
+.petri-lightbox__close {
   position: absolute;
   top: 16px;
   right: 24px;
   background: rgba(255, 255, 255, 0.1);
   border: none;
   color: #fff;
-  font-size: var(--gewu-font-size-3xl);
+  font-size: var(--petri-font-size-3xl);
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -50,11 +50,11 @@
   justify-content: center;
   transition: background 0.15s;
 }
-.gewu-lightbox__close:hover {
+.petri-lightbox__close:hover {
   background: rgba(255, 255, 255, 0.25);
 }
 
-@keyframes gewu-lightbox-fade {
+@keyframes petri-lightbox-fade {
   from {
     opacity: 0;
   }

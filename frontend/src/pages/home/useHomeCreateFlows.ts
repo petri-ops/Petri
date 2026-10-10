@@ -7,7 +7,7 @@ import {
   validateSshProject,
   type SshTargetCandidate,
 } from '@/lib/project-store';
-import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
+import { petriEvents, dispatchPetriEvent } from '@/lib/events';
 
 // BLOCK-92 Wave B-6 — 首页创建流状态簇外迁（原 home.tsx 内联，纯搬运零行为变化）：
 // BLOCK-67/UI-321 SSH 远程项目创建流、UI-257 手动路径兜底 + UI-259 应用内选目录、
@@ -103,10 +103,10 @@ export function useHomeSshProject(options: {
           return;
         }
         setSshRegistering(true);
-        const desktop = (window as unknown as { biof3Desktop?: { ssh?: { registerHost: (p: { ip: string; port: number; username: string; password: string }) => Promise<{ ok: boolean; alias?: string; error?: string }> } } });
-        const bridge = desktop.biof3Desktop?.ssh ?? (window as unknown as { gewu?: { ssh?: { registerHost: (p: { ip: string; port: number; username: string; password: string }) => Promise<{ ok: boolean; alias?: string; error?: string }> } } }).gewu?.ssh;
+        const desktop = (window as unknown as { petriDesktop?: { ssh?: { registerHost: (p: { ip: string; port: number; username: string; password: string }) => Promise<{ ok: boolean; alias?: string; error?: string }> } } });
+        const bridge = desktop.petriDesktop?.ssh ?? (window as unknown as { petri?: { ssh?: { registerHost: (p: { ip: string; port: number; username: string; password: string }) => Promise<{ ok: boolean; alias?: string; error?: string }> } } }).petri?.ssh;
         if (!bridge?.registerHost) {
-          setCreateError('当前运行环境不支持密码引导连接（请升级 Gewu 桌面端）');
+          setCreateError('当前运行环境不支持密码引导连接（请升级 Petri 桌面端）');
           return;
         }
         const reg = await bridge.registerHost({ ip, port: Number(sshPort), username: sshUsername.trim(), password: sshPassword });
@@ -137,7 +137,7 @@ export function useHomeSshProject(options: {
       setSshOpen(false);
       // 项目创建广播（softRefresh → AppRail 刷新左栏项目列表，用户反馈「创建项目左栏不更新」）
       try {
-        dispatchGewuEvent(gewuEvents.softRefresh, undefined);
+        dispatchPetriEvent(petriEvents.softRefresh, undefined);
       } catch {
         // 事件总线失败不阻塞导航
       }
@@ -213,9 +213,9 @@ export function useManualPathFlow(options: {
 
   const confirmManualPath = useCallback(async () => {
     if (manualValidating) return;
-    const validate = window.biof3Desktop?.files?.validateDirectory;
+    const validate = window.petriDesktop?.files?.validateDirectory;
     if (typeof validate !== 'function') {
-      setCreateError('当前运行环境不支持路径校验（请在 Gewu 桌面应用中使用）。');
+      setCreateError('当前运行环境不支持路径校验（请在 Petri 桌面应用中使用）。');
       return;
     }
     setManualValidating(true);
@@ -268,9 +268,9 @@ export function useHomeDropToCreate(options: {
       setCreateError('无法读取拖入项的路径（请拖入文件夹）。');
       return;
     }
-    const validate = window.biof3Desktop?.files?.validateDirectory;
+    const validate = window.petriDesktop?.files?.validateDirectory;
     if (typeof validate !== 'function') {
-      setCreateError('当前运行环境不支持路径校验（请在 Gewu 桌面应用中使用）。');
+      setCreateError('当前运行环境不支持路径校验（请在 Petri 桌面应用中使用）。');
       return;
     }
     try {
@@ -301,7 +301,7 @@ export function useHomeDropToCreate(options: {
         void acceptDroppedPath(null);
         return;
       }
-      const pathFor = window.biof3Desktop?.files?.pathForFile;
+      const pathFor = window.petriDesktop?.files?.pathForFile;
       const raw = typeof pathFor === 'function'
         ? pathFor(file)
         : (file as File & { path?: string }).path || null;

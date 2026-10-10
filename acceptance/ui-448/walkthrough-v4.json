@@ -6,7 +6,7 @@
   "fixes": {
     "widthMatch": "surface 380→300px（与摘要卡同声明宽），实测 300 vs 摘要 288（摘要 shrink-to-fit 自身夹紧）",
     "flushRight": "right:44→14px 与摘要卡同一右缘，实测 rightEdgeDelta=0（14px=workspaceSessionLayout 内缩量，注释留痕）",
-    "fontMatch": ".sc-msg-body 及其 p 层定点覆写 --gewu-font-size-sm，实测消息 12.1275px = 摘要正文 12.1275px（fontMatch=true；波折登记：首设 caption 档实为 13.23px@scale1.1025 不符，量测后改 sm）",
+    "fontMatch": ".sc-msg-body 及其 p 层定点覆写 --petri-font-size-sm，实测消息 12.1275px = 摘要正文 12.1275px（fontMatch=true；波折登记：首设 caption 档实为 13.23px@scale1.1025 不符，量测后改 sm）",
     "handleHidden": "开态把手隐藏（关闭=✕/Esc/外点），收起态把手回归且呼吸灯与 open 解耦常驻提示",
     "modelPicker": "slim 隐藏名单收缩：模型/供应商选择对恢复（窄面板图标化），菜单在面板内实测可弹出可选（withinSurface=true, items=1），知识开关仍隐藏"
   },

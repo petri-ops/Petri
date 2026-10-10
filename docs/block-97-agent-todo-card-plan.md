@@ -25,8 +25,8 @@
 | --- | --- | --- |
 | 摘要卡 | `frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx`（约 1002 行，行数台账棘轮管辖） | 「任务循环」节（L349-380）与「任务进度」节（L382-405）之间新增「任务清单」节 |
 | 摘要卡数据 | props `loop`/`loopSummary`（`useDurableConversationLoop`，CenterPanel.tsx:311 调用）+ 组件内 hook 轮询 | todo 状态与 loop 同层接入（conversationRunStore 事件投影） |
-| agent 循环 | `core/biof3-server/loop-orchestrator.js`（runLoop L108）+ `agent-runner.js`（_emit L364-366 双通道=onEvent 回调 + `appendAgentTaskEvent` 持久化） | todo_write 为普通工具调用，回路零改动 |
-| 工具注册 | `core/biof3-server/agent-tools/`：`tool-defs.js`（TOOL_DEFS）+ `registry.js`（HANDLERS L100-160 / TOOL_REGISTRY L361 / validateContract L273）+ `index.js` dispatchTool | 新建 `agent-tools/todo-tools.js` + tool-defs/registry 各加一支（范本=BLOCK-55 plan 工具：tool-defs.js:613 + plan-ui-tools.js:14） |
+| agent 循环 | `core/petri-server/loop-orchestrator.js`（runLoop L108）+ `agent-runner.js`（_emit L364-366 双通道=onEvent 回调 + `appendAgentTaskEvent` 持久化） | todo_write 为普通工具调用，回路零改动 |
+| 工具注册 | `core/petri-server/agent-tools/`：`tool-defs.js`（TOOL_DEFS）+ `registry.js`（HANDLERS L100-160 / TOOL_REGISTRY L361 / validateContract L273）+ `index.js` dispatchTool | 新建 `agent-tools/todo-tools.js` + tool-defs/registry 各加一支（范本=BLOCK-55 plan 工具：tool-defs.js:613 + plan-ui-tools.js:14） |
 | 事件流 | `agent-tools/tool-events.js`（tool_call L42 / tool_result L53）→ `agent-task-store.js` task_events 表（L271-276，seq append-only）→ SSE `routes/ai-agent/events.js` L29（`?afterSeq=N` 断线续传）→ 前端 `copilot/copilotClient/agentTaskStream.ts`（subscribeAgentTask L73，事件分派 L332-345）→ `conversationRunStore.ts` | 事件管道零新增；若立专用事件类型，在 agent-runner `_emit` 与 agentTaskStream 分派各加一支 |
 | 持久化 | 首选 task_events 事件重放（零迁移、重启可重放）；终态快照可落 `copilot_messages.meta_json`（helpers/conversations.js:34）；备选新表 `copilot_todos`（仿 copilot_plan_steps，`src/migrations/`） | P0 评审定案 |
 | 相邻展示 | 既有「任务进度」节 = `HarnessWorkflowJobState` 固定分析流水线 rail（CenterPanel activeWorkflow） | 语义不同（固定流水线 vs agent 动态清单）：并存不合并 |

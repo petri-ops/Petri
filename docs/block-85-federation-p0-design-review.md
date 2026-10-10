@@ -1,8 +1,8 @@
-# BLOCK-85 格物联邦（Gewu Federation）P0 设计评审
+# BLOCK-85 格物联邦（Petri Federation）P0 设计评审
 
 > 状态：`P1-P3 已交付 + P4 closeout 完成（2026-09-18；四门绿〔hygiene/docs/ui-audit/test:changed 树净〕+ 联邦集成探针 3/3〔federation 1/1 + jobs 2/2，双实例自举〕。**唯余双真机端到端验收待执行**：Windows ↔ Mac 真实互派任务需 Mac 在网+用户操作配对——验收包已备（acceptance/block-85/ 配对码实机证据 6/6 已落）；完成后整包 completed 并解锁 BLOCK-88 P1（D7 门槛）`
 > 日期：2026-09-13
-> 用户裁决史：①「执行级 双向」（初始）→ ②纠正「我的目的是 gewu 在两个软件之间的通信 不是要系统级别控制桌面」→ ③「都要」（分析作业级 + Agent 会话级）。
+> 用户裁决史：①「执行级 双向」（初始）→ ②纠正「我的目的是 petri 在两个软件之间的通信 不是要系统级别控制桌面」→ ③「都要」（分析作业级 + Agent 会话级）。
 > **SSH 节点方案作废**：`scripts/setup-windows-ssh-node.ps1` 与系统级 sshd 配置不再是本包内容（脚本保留仓库但标记非本包交付）。
 
 ## 1. 目标一句话
@@ -16,7 +16,7 @@
 | mobile-gateway（BLOCK-70） | 独立 Express 实例 + 配对码/QR/会话/吊销/审计/IP 限速全套，默认关闭 additive | **直接复用**：配对发起方从手机浏览器换成对端格物 |
 | 全量路由挂载 | P3.5 已验证会话门内挂载 /api/* 全量 | 对端格物拿到与本地同源同门的 API 面 |
 | `/api/ai/agent` | 现成（手机 composer 已在用） | Agent 委托的对端执行入口 |
-| 工具执行链 tools-executor | `execution_target_id` 是 tool_jobs 一等字段；NULL=本地，非 NULL=SSH 分派（tools-executor.js:2080） | **扩展点**：新增 target 类型 `gewu-node` |
+| 工具执行链 tools-executor | `execution_target_id` 是 tool_jobs 一等字段；NULL=本地，非 NULL=SSH 分派（tools-executor.js:2080） | **扩展点**：新增 target 类型 `petri-node` |
 | SSE 流 | /m 移动页任务详情 afterSeq 已验证 | 联邦任务状态回传 |
 | 执行位置选择器（BLOCK-57 面板） | 现成 UI 模式 | 「格物节点」并列选项 |
 | 双端本地执行器 | Windows R 4.5.2 本会话刚装好并验证；Mac 自备 | 各端用自己的执行器跑 |
@@ -33,7 +33,7 @@
 指挥席把作业 POST 到对端 `/api/tools/run`（对端以本地身份跑自己的 tools-executor）→ 作业状态经 SSE 回传指挥席 → 完成后产物（PNG/表格）由指挥席按需拉取（对端已有文件读取面）。指挥席本地落一条镜像 job（状态投影，真值在对端）。**建议：此形态**——对端跑的作业在对端也有完整记录（Artifact Truth 留在对端），指挥席是视图。
 
 ### D4 Agent 会话级协议（任务粒度 2）
-指挥席 agent 新工具 `delegate_to_gewu_node`（参数：节点+任务描述）→ 对端 `POST /api/ai/agent` 开新会话执行 → 流式回传摘要与进度 → 终态（含关键产物引用）回指挥席会话。**建议：此形态**——对端 agent 是完整独立会话（对端可查），指挥席看到的是委托单+回执。
+指挥席 agent 新工具 `delegate_to_petri_node`（参数：节点+任务描述）→ 对端 `POST /api/ai/agent` 开新会话执行 → 流式回传摘要与进度 → 终态（含关键产物引用）回指挥席会话。**建议：此形态**——对端 agent 是完整独立会话（对端可查），指挥席看到的是委托单+回执。
 
 ### D5 执行位置 UI
 工具提交卡执行位置现两态（本地/远程目标）→ 加第三态「格物节点」，列出已配对在线的对端格物（名称+机型+在线状态）。**建议：并列第三态，不混入 SSH 目标列表**。
@@ -60,7 +60,7 @@
 | --- | --- | --- |
 | P0 | 本评审稿，D1–D8 裁决 | 用户逐项确认 |
 | P1 | 联邦通道：协作端点路由 + 配对/会话复用 + 双端协作面板 + 节点列表 | 集成探针 + 实机配对双端通 |
-| P2 | 作业级联邦：gewu-node 执行位置 + 作业下发/SSE 回传/产物拉取 + 镜像 job | 隔离探针 + **真实分析作业跨机跑通** |
+| P2 | 作业级联邦：petri-node 执行位置 + 作业下发/SSE 回传/产物拉取 + 镜像 job | 隔离探针 + **真实分析作业跨机跑通** |
 | P3 | Agent 委托：delegate 工具 + 对端会话 + 流式回执 | 真实模型委托跑通 |
 | P4 | closeout | `npm run closeout` 全绿 + canonical 五件套 |
 

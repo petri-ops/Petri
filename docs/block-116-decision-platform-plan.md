@@ -33,7 +33,7 @@
 
 ### P4 实现完成记录（2026-09-22 深夜，closeout 十门全绿）
 
-- `helpers/decision-config.js`：五运行时接点（topic-shift/knowledge-guard/marker-celltype/intent-route/tool-route）注册 + decision-config.json 持久化（读不落盘，仅 PUT 落盘——测试/只读零副作用）+ `BIOF3_DECISION_CONFIG_PATH` 测试隔离通道。
+- `helpers/decision-config.js`：五运行时接点（topic-shift/knowledge-guard/marker-celltype/intent-route/tool-route）注册 + decision-config.json 持久化（读不落盘，仅 PUT 落盘——测试/只读零副作用）+ `PETRI_DECISION_CONFIG_PATH` 测试隔离通道。
 - 优先级（契约钉住）：env='0' 强制关（杀开关最高）> 配置文件 enabled > 默认；env='1' 仅首载种子不强制运行时（避免 UI 关不掉）。
 - `routes/ai-agent/decisions.js`：GET /config（五接点全量+envOverride 如实暴露）/ PUT /config/:point（enabled/threshold 校验 [0,1]，非法 400、未知接点 404）。
 - 前端 `sections/DecisionConfigPanel.tsx` + types.ts 'decisions' 节 + 设置页挂载（紧邻「用量与资源」观测节）：五卡片（说明/env 覆盖提示/双门限只读/启用开关/阈值输入预填校准值+偏离提醒+还原默认）。

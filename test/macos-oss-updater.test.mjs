@@ -15,14 +15,14 @@ const {
   selectDmg,
 } = require('../src/macos-oss-updater');
 
-const payload = Buffer.from('biof3-dmg-fixture');
+const payload = Buffer.from('petri-dmg-fixture');
 const sha512 = createHash('sha512').update(payload).digest('base64');
 const manifest = `version: 0.0.1-rc.3
 files:
-  - url: BioF3-0.0.1-rc.3-arm64.dmg
+  - url: Petri-0.0.1-rc.3-arm64.dmg
     sha512: ${sha512}
     size: ${payload.length}
-  - url: BioF3-0.0.1-rc.3.dmg
+  - url: Petri-0.0.1-rc.3.dmg
     sha512: ${sha512}
     size: ${payload.length}
 releaseDate: '2026-07-15T12:00:00.000Z'
@@ -43,12 +43,12 @@ test('compares release-candidate versions correctly', () => {
 
 test('rejects update artifacts outside the configured HTTPS feed', () => {
   const feed = 'https://example.com/updates/macos/';
-  assert.throws(() => resolveArtifactUrl(feed, 'https://evil.example/BioF3.dmg'));
-  assert.throws(() => resolveArtifactUrl(feed, '../../../BioF3.dmg'));
+  assert.throws(() => resolveArtifactUrl(feed, 'https://evil.example/Petri.dmg'));
+  assert.throws(() => resolveArtifactUrl(feed, '../../../Petri.dmg'));
 });
 
 test('downloads, verifies and opens a DMG without electron-updater', async () => {
-  const dir = mkdtempSync(join(tmpdir(), 'biof3-updater-'));
+  const dir = mkdtempSync(join(tmpdir(), 'petri-updater-'));
   const opened = [];
   const progress = [];
   const fetchImpl = async (url) => {
@@ -77,7 +77,7 @@ test('downloads, verifies and opens a DMG without electron-updater', async () =>
 });
 
 test('rejects a DMG whose SHA-512 does not match the manifest', async () => {
-  const dir = mkdtempSync(join(tmpdir(), 'biof3-updater-corrupt-'));
+  const dir = mkdtempSync(join(tmpdir(), 'petri-updater-corrupt-'));
   const fetchImpl = async (url) => {
     if (String(url).endsWith('latest-mac.yml')) return new Response(manifest);
     return new Response(Buffer.alloc(payload.length, 0));

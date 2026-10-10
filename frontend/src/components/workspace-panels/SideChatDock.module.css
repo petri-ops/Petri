@@ -1,4 +1,4 @@
-/* SideChatDock.module.css — UI-417 侧边聊天悬挂化（--gewu-* token，海军蓝家族） */
+/* SideChatDock.module.css — UI-417 侧边聊天悬挂化（--petri-* token，海军蓝家族） */
 
 .dockRoot {
   position: absolute;
@@ -11,7 +11,7 @@
 }
 
 /* 悬浮面：覆盖在中栏右缘上方，不挤压布局（UI-351 float 先例）
-   UI-448 — 视觉对齐项目摘要浮层语言：16px 圆角、--gewu-shadow-float 大柔和影、
+   UI-448 — 视觉对齐项目摘要浮层语言：16px 圆角、--petri-shadow-float 大柔和影、
    280ms 入场 + prefers-reduced-motion 降级（与 .workspaceSummaryFloat 同族）
    UI-448 加映 v2 — 不再全高：贴底右下角占一半高度，与右上角摘要浮层同屏共存
    UI-448 加映 v4 — 与摘要卡完全一致：同宽 300px（同款 max-width 夹紧）、贴右侧边
@@ -38,11 +38,11 @@
   max-width: calc(100vw - 120px);
   display: flex;
   flex-direction: column;
-  /* UI-448 加映 v3 — 底色对齐摘要卡（--gewu-bg-elevated，原 surface 档偏深） */
-  background: var(--gewu-bg-elevated);
-  border: 1px solid var(--gewu-border);
+  /* UI-448 加映 v3 — 底色对齐摘要卡（--petri-bg-elevated，原 surface 档偏深） */
+  background: var(--petri-bg-elevated);
+  border: 1px solid var(--petri-border);
   border-radius: 16px;
-  box-shadow: var(--gewu-shadow-float);
+  box-shadow: var(--petri-shadow-float);
   overflow: hidden;
   pointer-events: auto;
   animation: sideChatSlideIn 280ms ease-out;
@@ -58,15 +58,15 @@
   transform: translateY(-1px);
 }
 
-/* UI-448 加映 v4 — 聊天文字对齐摘要正文档：摘要卡正文实为 --gewu-font-size-sm
+/* UI-448 加映 v4 — 聊天文字对齐摘要正文档：摘要卡正文实为 --petri-font-size-sm
    档（实测 12.13px@scale1.1025；caption 档实为 13.23px，勿混）。.sc-msg-body 与
    其 p 层均有显式字号，继承覆盖不到，需定点覆写 */
 .surfaceBody :global(.sc-msg-body) {
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
 }
 
 .surfaceBody :global(.sc-msg-body p) {
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
 }
 
 /* UI-448 加映 v5 — 内容贴左、去早换行：面板 300px 被三层内缩吃掉 ~60px
@@ -135,14 +135,14 @@
   gap: 6px;
   min-height: 52px;
   padding: 10px 13px 9px;
-  border-bottom: 1px solid color-mix(in srgb, var(--gewu-text) 6%, transparent);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-caption);
+  border-bottom: 1px solid color-mix(in srgb, var(--petri-text) 6%, transparent);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-caption);
   flex-shrink: 0;
 }
 
 .surfaceTitle {
-  color: var(--gewu-text);
+  color: var(--petri-text);
   font-weight: 600;
 }
 
@@ -156,13 +156,13 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   cursor: pointer;
 }
 
 .closeBtn:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .surfaceBody {
@@ -195,10 +195,10 @@
   max-height: calc(50% - 8px);
   display: flex;
   flex-direction: column;
-  background: var(--gewu-bg-elevated);
-  border: 1px solid var(--gewu-border);
+  background: var(--petri-bg-elevated);
+  border: 1px solid var(--petri-border);
   border-radius: 16px;
-  box-shadow: var(--gewu-shadow-float);
+  box-shadow: var(--petri-shadow-float);
   overflow: hidden;
   pointer-events: auto;
 }
@@ -212,7 +212,7 @@
 
 .dockedColumn :global(.sc-msg-body),
 .dockedColumn :global(.sc-msg-body p) {
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
 }
 
 .dockedColumn :global(.sc-body) {

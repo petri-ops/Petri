@@ -2,7 +2,7 @@ import React from 'react';
 import { cleanup, render, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
+import { petriEvents, dispatchPetriEvent } from '@/lib/events';
 import type { Project } from '@/lib/project-types';
 import type { ActiveWorkspaceFile } from './types';
 
@@ -122,7 +122,7 @@ describe('RightFileTree 刷新触发面 (UI-399)', () => {
     expect(treeCalls.length).toBe(2);
 
     // agent 写档广播：树刷新恢复（根分页 + 活动文件签名目录 = 2 次）
-    dispatchGewuEvent(gewuEvents.projectWorkspaceChanged, { projectId: 'p_ssh1', source: 'agent' });
+    dispatchPetriEvent(petriEvents.projectWorkspaceChanged, { projectId: 'p_ssh1', source: 'agent' });
     await waitFor(() => expect(treeCalls.length).toBe(4), { timeout: 2000 });
     expect(treeCalls[2]).toContain('prefix=');
     expect(treeCalls[3]).toContain('prefix=src');

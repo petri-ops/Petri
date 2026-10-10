@@ -54,7 +54,7 @@ const R_BLOCKER = rRuntimeBlocker();
 
 function openDisposableDb(dbPath) {
   const Database = require(require.resolve('better-sqlite3', {
-    paths: [path.join(REPO_ROOT, 'core', 'biof3-server'), REPO_ROOT],
+    paths: [path.join(REPO_ROOT, 'core', 'petri-server'), REPO_ROOT],
   }));
   return new Database(dbPath, { readonly: true });
 }
@@ -148,7 +148,7 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
     // revision to address rather than a fabricated id.
     await fetch(`${ctx.baseUrl}/api/result-studio/interaction?jobId=${ctx.jobId}&artifact=${ctx.artifact}`);
     await fetch(`${ctx.baseUrl}/api/result-studio/interaction?jobId=${ctx.replayJobId}&artifact=${ctx.replayArtifact}`);
-    const revisions = query(env.BIOF3_DB_PATH, 'select revision_id, tool_job_id, is_current from artifact_revisions');
+    const revisions = query(env.PETRI_DB_PATH, 'select revision_id, tool_job_id, is_current from artifact_revisions');
     ctx.replayRevisionId = revisions?.find((row) => row.tool_job_id === ctx.replayJobId)?.revision_id || null;
     // The historical DESeq2 corpus predates complete formal-output cohort
     // qualification. Keep this invariant addressed to a real qualified
@@ -177,7 +177,7 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
 
     // Prove the independence rather than implying it: the byte route must not
     // be reachable only after the result-studio surface has been touched.
-    const routes = readFileSync(path.join(REPO_ROOT, 'core/biof3-server/routes/tools-platform.js'), 'utf8');
+    const routes = readFileSync(path.join(REPO_ROOT, 'core/petri-server/routes/tools-platform.js'), 'utf8');
     assert.ok(
       !/result-studio/.test(routes),
       'the artifact byte route file must not reference the result-studio surface',
@@ -186,7 +186,7 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
 
   // ── 2 ─────────────────────────────────────────────────────────────────────
   test('2a: reading a historical revision does not move the current pointer', async () => {
-    const before = currentPointers(ctx.env.BIOF3_DB_PATH);
+    const before = currentPointers(ctx.env.PETRI_DB_PATH);
     assert.ok(before && before.length > 0, 'a current revision must exist to make this meaningful');
 
     // Address a specific revision — the original version only ever requested
@@ -203,7 +203,7 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
     }
 
     assert.deepEqual(
-      currentPointers(ctx.env.BIOF3_DB_PATH),
+      currentPointers(ctx.env.PETRI_DB_PATH),
       before,
       'no read may re-point is_current (a row count cannot see this — the pointer is a column)',
     );
@@ -211,7 +211,7 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
 
   test('2b: a pure read performs no database write', async () => {
     await fetch(`${ctx.baseUrl}/api/result-studio/workspace/status?projectId=${ctx.projectId}`);
-    const before = bindingWriteFingerprint(ctx.env.BIOF3_DB_PATH, ctx.projectId);
+    const before = bindingWriteFingerprint(ctx.env.PETRI_DB_PATH, ctx.projectId);
     await new Promise((resolve) => { setTimeout(resolve, 1100); });
 
     for (let i = 0; i < 3; i += 1) {
@@ -223,7 +223,7 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
     // repo().saveRepositoryBinding() unconditionally at :320-330 — so a GET
     // writes a row and re-runs an uncached bindProjectRepository (4 git forks).
     assert.deepEqual(
-      bindingWriteFingerprint(ctx.env.BIOF3_DB_PATH, ctx.projectId),
+      bindingWriteFingerprint(ctx.env.PETRI_DB_PATH, ctx.projectId),
       before,
       'a read-only route must not rewrite the repository binding row',
     );
@@ -234,9 +234,9 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
     const workspace = path.join(ctx.root, 'readonly-version-project');
     mkdirSync(workspace, { recursive: true });
     const Database = require(require.resolve('better-sqlite3', {
-      paths: [path.join(REPO_ROOT, 'core', 'biof3-server'), REPO_ROOT],
+      paths: [path.join(REPO_ROOT, 'core', 'petri-server'), REPO_ROOT],
     }));
-    const writable = new Database(ctx.env.BIOF3_DB_PATH);
+    const writable = new Database(ctx.env.PETRI_DB_PATH);
     try {
       const now = new Date().toISOString();
       writable.prepare(`insert into projects
@@ -246,11 +246,11 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
     } finally {
       writable.close();
     }
-    const before = resultStudioWriteFingerprint(ctx.env.BIOF3_DB_PATH, projectId);
+    const before = resultStudioWriteFingerprint(ctx.env.PETRI_DB_PATH, projectId);
     const response = await fetch(`${ctx.baseUrl}/api/result-studio/changesets?projectId=${projectId}&artifactFamilyId=missing-family`);
     assert.equal(response.status, 200);
-    assert.deepEqual(resultStudioWriteFingerprint(ctx.env.BIOF3_DB_PATH, projectId), before);
-    assert.equal(existsSync(path.join(workspace, '.biof3', 'git')), false, 'a GET must not initialize .biof3/git');
+    assert.deepEqual(resultStudioWriteFingerprint(ctx.env.PETRI_DB_PATH, projectId), before);
+    assert.equal(existsSync(path.join(workspace, '.petri', 'git')), false, 'a GET must not initialize .petri/git');
   });
 
   // ── 3 ─────────────────────────────────────────────────────────────────────
@@ -294,9 +294,9 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
   test('3b: controlled replay requires context-bound preflight and creates one non-current candidate', async () => {
     assert.ok(ctx.replayRevisionId, 'a replayable standalone-volcano Revision is required');
     const Database = require(require.resolve('better-sqlite3', {
-      paths: [path.join(REPO_ROOT, 'core', 'biof3-server'), REPO_ROOT],
+      paths: [path.join(REPO_ROOT, 'core', 'petri-server'), REPO_ROOT],
     }));
-    const writable = new Database(ctx.env.BIOF3_DB_PATH);
+    const writable = new Database(ctx.env.PETRI_DB_PATH);
     try {
       // The disposable corpus is owned by its synthetic execution identity,
       // while the HTTP server uses the loopback local identity. Rebind only
@@ -334,7 +334,7 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
     assert.equal(forbidden.status, 400, 'caller-authored execution material must be rejected');
     assert.equal((await forbidden.json()).error, 'replay_request_field_not_allowed');
 
-    const currentBefore = currentPointers(ctx.env.BIOF3_DB_PATH);
+    const currentBefore = currentPointers(ctx.env.PETRI_DB_PATH);
     const preflight = await fetch(`${ctx.baseUrl}/api/result-studio/revisions/${ctx.replayRevisionId}/replay`, {
       method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
@@ -349,7 +349,7 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
     assert.equal(prepared.execution.acceptsWorkflowPlan, false);
     assert.equal(prepared.execution.acceptsShell, false);
     assert.equal(prepared.execution.adoptsCandidate, false);
-    assert.deepEqual(currentPointers(ctx.env.BIOF3_DB_PATH), currentBefore, 'preflight must be read-only');
+    assert.deepEqual(currentPointers(ctx.env.PETRI_DB_PATH), currentBefore, 'preflight must be read-only');
 
     const confirmBody = {
       phase: 'confirm', projectId: ctx.projectId, conversationId, contextToken,
@@ -363,7 +363,7 @@ describe('G0-RS-P4R-0 invariants', { skip: R_BLOCKER ?? false, timeout: 900000 }
     assert.equal(candidate.status, 'preview_ready');
     assert.equal(candidate.parentRevisionId, ctx.replayRevisionId);
     assert.equal(candidate.adopted, false);
-    assert.deepEqual(currentPointers(ctx.env.BIOF3_DB_PATH), currentBefore, 'replay candidate must not replace current');
+    assert.deepEqual(currentPointers(ctx.env.PETRI_DB_PATH), currentBefore, 'replay candidate must not replace current');
     const duplicated = await fetch(`${ctx.baseUrl}/api/result-studio/revisions/${ctx.replayRevisionId}/replay`, {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(confirmBody),
     });

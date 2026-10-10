@@ -25,7 +25,7 @@ status: completed
 
 ## 2. 范围
 
-- **P0** `core/biof3-server/mobile-gateway/ws.js`：零依赖最小 WS 服务端。握手指纹（SHA1+GUID）、text 帧编解码（2/8 字节长度）、客户端掩码解码、ping→pong、pong 判活、close 握手、发送缓冲上限（默认 1MiB 越限断开=慢消费者保护）。**边界如实**：分片帧（continuation）按协议错误显式 close——浏览器对小程序帧不分片，beyond-contract 显式拒绝优于静默错解。
+- **P0** `core/petri-server/mobile-gateway/ws.js`：零依赖最小 WS 服务端。握手指纹（SHA1+GUID）、text 帧编解码（2/8 字节长度）、客户端掩码解码、ping→pong、pong 判活、close 握手、发送缓冲上限（默认 1MiB 越限断开=慢消费者保护）。**边界如实**：分片帧（continuation）按协议错误显式 close——浏览器对小程序帧不分片，beyond-contract 显式拒绝优于静默错解。
 - **P1** `agent-task-store.js`：`appendAgentTaskEvent` 落库成功后 `taskEventBus.emit`（additive；:628 的压实快照重写路径不挂——兜底轮询 2s 内回填，前端单调 seq 守卫去重）。
 - **P2** 网关端点 `/m/api/ws`：upgrade 时按既有 sessionAuth 三源鉴权（cookie/Bearer/?session），未授权写 401 后销毁；`sub{taskId,afterSeq}` 越权校验同 SSE 端点（task.user_id 匹配）；事件帧形状与 SSE `{seq,eventType,payload}` 对齐、终态帧 `{t:"done",taskId,status,payload}` 对齐 done/error/cancelled+[DONE]；进程内即时推送 + 2s 兜底轮询双轨（单调 seq，重叠由前端守卫去重）；15s ping / 30s 无 pong 判死。
 - **P3** 前端 `agentTaskStream.ts`：`isProjectionEnv()` 且 WebSocket 可用 → WS 单连接订阅；WS 传输级失败连续 3 次 → 5 分钟内直走既有 SSE（防升级被代理拦死的死循环）；**水位无限重连/30s 封顶抖动/非水位错误不重试/abort 上抛全部复用**（外层循环不变，仅单次订阅尝试内部换传输）。

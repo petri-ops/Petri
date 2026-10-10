@@ -15,7 +15,7 @@
 const path = require('node:path');
 const fs = require('node:fs');
 const os = require('node:os');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 
 const REPO = lib.findRepoRoot(__dirname);
 const EVIDENCE_DIR = path.join(REPO, 'acceptance', 'block-90');
@@ -71,7 +71,7 @@ async function main() {
 
   // 等工作区离开加载态（BLOCK-90 接管挂在 RightFileTree，须等其挂载）
   await waitUntil(async () => {
-    return lib.evalJs(client, 'Boolean(window.biof3Desktop?.files?.pathForFile)');
+    return lib.evalJs(client, 'Boolean(window.petriDesktop?.files?.pathForFile)');
   }, 'workspace ready');
 
   // 打开右栏「文件」标签（drop 接管挂在 RightFileTree，标签未激活时监听未挂载）
@@ -92,7 +92,7 @@ async function main() {
       const file = new File(['synthetic'], name, { type: 'text/csv' });
       const dt = new DataTransfer();
       dt.items.add(file);
-      dt.setData('application/x-gewu-source-path', sourcePath);
+      dt.setData('application/x-petri-source-path', sourcePath);
       const event = new DragEvent('drop', { bubbles: true, cancelable: true, clientX: 700, clientY: 400 });
       Object.defineProperty(event, 'dataTransfer', { value: dt });
       window.dispatchEvent(event);
@@ -124,7 +124,7 @@ async function main() {
       const event = new DragEvent('dragstart', { bubbles: true, cancelable: true });
       Object.defineProperty(event, 'dataTransfer', { value: dt });
       fileRow.dispatchEvent(event);
-      return { found: true, downloadUrl: dt.getData('DownloadURL'), internal: dt.getData('application/x-gewu-tree-item') };
+      return { found: true, downloadUrl: dt.getData('DownloadURL'), internal: dt.getData('application/x-petri-tree-item') };
     })()
   `);
   run.assert('drag-out: file row exposes DownloadURL', dragOut.found === true
@@ -137,7 +137,7 @@ async function main() {
   const payload = await run.finish({
     sourcePath,
     importedName,
-    provenance: 'synthetic drop via documented test seam (application/x-gewu-source-path); real webUtils path needs user drag',
+    provenance: 'synthetic drop via documented test seam (application/x-petri-source-path); real webUtils path needs user drag',
   });
   try { fs.unlinkSync(sourcePath); } catch {}
   process.exitCode = payload.allPass ? 0 : 1;

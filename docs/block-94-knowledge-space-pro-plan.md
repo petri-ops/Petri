@@ -18,10 +18,10 @@
 | agent-tool-registry | 9/9（工具总数 58→59 计数断言同步，knowledge_read 注册） |
 | agent-runner 邻接（facade/adapter/block34） | 44/44（挂点收敛动前动后一致）；loop-orchestrator「emitToolResult must forward via _emit」1 红=BLOCK-97 单通道契约变更后测试未同步（动前基线已红，存量归属）；**当夜已机械同步测试至已发布契约（双挂 maybeEmitTaskTodo），复跑 3/3 绿** |
 | 前端受影响批 | 面板 8/8 + conversationRunStore 48/48 + CenterPanel 8/8 + WorkspaceSummaryCard + hook/主题/全局页全绿（88/88 批次） |
-| tsc / theme | 0 / 4/4（theme 门禁抓真 1 件：自造 --gewu-brand 未定义 token，改回 --gewu-accent） |
+| tsc / theme | 0 / 4/4（theme 门禁抓真 1 件：自造 --petri-brand 未定义 token，改回 --petri-accent） |
 | 实机 | block94-knowledge-live **18/18 allPass**（真实 DashScope 嵌入 + DeepSeek 真实轮次；acceptance/block-94/）+ 跨重启启动恢复 block94-boot-recovery-live 4/4 + dev-verify flow `block94-knowledge` 注册 |
 | closeout 聚合 | hygiene PASS + docs:check PASS(251) + ui:audit:check PASS（361 编号；实现提交四笔按先例登记 LEGACY 双豁免，UI-402 收口补登）+ test:changed 1 红 = `g0-rs-p6-product-acceptance` p6_current_source_tree_not_exact（`test/impact-map.json` 属 P6 绑定面，本包补注册 block94 规则所触发；按 231501e2 先例 **D8 例外归属 G0-RS 重采**，非本包产品缺陷） |
-| 依赖 | 1 新依赖落地 = pdfjs-dist@4.10.38（exact，core/biof3-server；复用 UI-400 用户裁决，D2 四问留痕 §7.2）；sqlite-vec 不引入（§8） |
+| 依赖 | 1 新依赖落地 = pdfjs-dist@4.10.38（exact，core/petri-server；复用 UI-400 用户裁决，D2 四问留痕 §7.2）；sqlite-vec 不引入（§8） |
 
 ### 9.3 实机抓真（如实登记）
 
@@ -36,7 +36,7 @@
 
 用户裁决原话：「需要新建一个block用来优化知识空间 主要目的是让知识空间内变得专业 易用 能力全面」（2026-09-16）
 
-主模块：知识空间（`/knowledge` 全局页 + `core/biof3-server` knowledge 域）
+主模块：知识空间（`/knowledge` 全局页 + `core/petri-server` knowledge 域）
 
 前身：`docs/block-69-knowledge-space-plan.md`（v1，completed；UI-318/320/348/366 verified）——文本族单空间 RAG 原型。v1 P1/P2 交付质量高（诚实空态 / fail-closed / 单一真相纪律贯彻、21 项后端契约测试 + 实机 15 断言、产品代码近零 TODO），但能力边界清晰：格式仅文本族、DashScope 单点、无引用溯源、无批量管理、无预览、重启摄取卡死。本包是 v2 专业化升级载体：兑现 BLOCK-69 plan 已登记未启动的 P3 断层，并扩展管理面 UX 与工程底盘。
 
@@ -46,7 +46,7 @@
 
 ### F1 可靠底盘（专业）
 
-- **摄取队列启动恢复**：队列为进程内 promise 链，无持久化、无启动恢复（`core/biof3-server/helpers/knowledge-ingest.js:31-45`）——重启后 uploaded/parsing 中间态文档永久显示「摄取中」，只能逐个手动 reindex。→ 启动时中间态文档自动重排入队或标 failed 并支持批量重试。
+- **摄取队列启动恢复**：队列为进程内 promise 链，无持久化、无启动恢复（`core/petri-server/helpers/knowledge-ingest.js:31-45`）——重启后 uploaded/parsing 中间态文档永久显示「摄取中」，只能逐个手动 reindex。→ 启动时中间态文档自动重排入队或标 failed 并支持批量重试。
 - **嵌入模型一致性防护**：chunks 已存 dim/model 列但检索只查 `embedding IS NOT NULL`（`knowledge-space.js:343-347`），换嵌入模型后旧向量静默产出错误相似度。→ model 不匹配 chunk 隔离 + 换模型时提示重建。
 - **自动召回挂点收敛**：同段注入逻辑在 `agent-runner.js:420-436` 与 `routes/ai-agent/chat.js:405-417` 双处重复实现。→ 收敛为单一实现（纯去重零行为变更）。
 - **文档列表分页**：`listDocuments` 全量返回（`knowledge-space.js:78-82`）。
@@ -86,11 +86,11 @@
 | `frontend/src/components/workspace-panels/KnowledgeSpacePanel.tsx` | 344 | 管理面（开关/上传/列表/删除/重建/清空/检索测试） |
 | `frontend/src/components/copilot/SimpleChat/hooks/useKnowledgeSpace.ts` | 71 | composer 大脑开关（DB 单一真相） |
 | `frontend/src/lib/knowledgeClient.ts` | 103 | 前端 API 封装（7 函数） |
-| `core/biof3-server/routes/knowledge.js` | 175 | REST 8 端点 |
-| `core/biof3-server/helpers/knowledge-space.js` | 493 | 检索内核（分块/嵌入/双通道 RRF/注入/删除） |
-| `core/biof3-server/helpers/knowledge-ingest.js` | 194 | 摄取管道（状态机 + 进程内串行队列） |
-| `core/biof3-server/helpers/knowledge-parsers.js` | 126 | 解析器注册表（P1 文本族 ~50 扩展名） |
-| `core/biof3-server/agent-tools/knowledge-tools.js` | 80 | agent 工具（search + status） |
+| `core/petri-server/routes/knowledge.js` | 175 | REST 8 端点 |
+| `core/petri-server/helpers/knowledge-space.js` | 493 | 检索内核（分块/嵌入/双通道 RRF/注入/删除） |
+| `core/petri-server/helpers/knowledge-ingest.js` | 194 | 摄取管道（状态机 + 进程内串行队列） |
+| `core/petri-server/helpers/knowledge-parsers.js` | 126 | 解析器注册表（P1 文本族 ~50 扩展名） |
+| `core/petri-server/agent-tools/knowledge-tools.js` | 80 | agent 工具（search + status） |
 | `src/migrations/009_knowledge_space.sql` | 73 | 四表（spaces/documents/chunks/chunks_fts trigram） |
 
 - 检索链路：向量（text-embedding-v3 1024 维 cosine 阈值 0.55）+ FTS5 trigram bm25 双通道 RRF k=60 融合；分块=结构感知（Markdown 标题边界）+1600 字符上限+120 重叠；注入 ≤3 块 ≤1800 字符。**是真实语义检索，但向量为暴力扫描。**
@@ -115,7 +115,7 @@
 4. UI 增量同提交登记 `docs/ui-productization-audit.md`（UI-### 顺延）；
 5. 每工作面独立提交、可中断可续作；面内动前存受影响测试基线、动后对账归属（红禁静默）；
 6. SimpleChat.tsx 是 P6 绑定源 + UI-38x 高频迭代面：F5 citation 卡等落点涉及它时避免与在制 UI 包/BLOCK-92 Wave A 撞期，撞期即停手上报裁决；
-7. dev 纪律：后端（core/biof3-server）变更须重启 dev 栈并预告用户窗口闪动；fnm Node 24。
+7. dev 纪律：后端（core/petri-server）变更须重启 dev 栈并预告用户窗口闪动；fnm Node 24。
 
 ## 4. 阶段草案（P0 评审裁剪优先级后串行执行）
 
@@ -166,8 +166,8 @@
 
 ### 7.3 环境事实与风险对账
 
-- Mac 环境：Node v24.16.0 ✓（better-sqlite3 ABI 匹配）；dev DB 已存在（`.biof3-dev-user-data/`，2026-09-15 Mac 会话所建），`dashscope_configured: true` + `embed_provider: "dashscope"` → **真实嵌入通道实机可用**。
-- dev 栈：`BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev`；core/** 变更须重启 dev 栈。
+- Mac 环境：Node v24.16.0 ✓（better-sqlite3 ABI 匹配）；dev DB 已存在（`.petri-dev-user-data/`，2026-09-15 Mac 会话所建），`dashscope_configured: true` + `embed_provider: "dashscope"` → **真实嵌入通道实机可用**。
+- dev 栈：`PETRI_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev`；core/** 变更须重启 dev 栈。
 - 存量基线对账：loop/agent 族 continuation guard 2 红（🟡 2026-09-16 登记）——F1 动 agent-runner/chat.js **动前存定向基线、动后逐项归属**，禁把存量红记成本包引入。
 
 ## 8. F6 规模化评估报告（2026-09-18，实测基线 + 结论登记）

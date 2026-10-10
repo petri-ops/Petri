@@ -20,11 +20,11 @@ import { fileURLToPath } from 'node:url';
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-const { buildMobileGateway } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/index.js'));
-const { getStores, resetStoresForTest } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/pairing.js'));
+const { buildMobileGateway } = require(path.join(ROOT, 'core/petri-server/mobile-gateway/index.js'));
+const { getStores, resetStoresForTest } = require(path.join(ROOT, 'core/petri-server/mobile-gateway/pairing.js'));
 
 function tmpRoot() {
-  return mkdtempSync(path.join(tmpdir(), 'gewu-fed-test-'));
+  return mkdtempSync(path.join(tmpdir(), 'petri-fed-test-'));
 }
 
 function listen(app) {
@@ -53,7 +53,7 @@ test('BLOCK-85 P1: pair -> handshake -> probe -> revoke -> remove full chain', a
     const express = require('express');
     const adminApp = express();
     adminApp.use(express.json({ limit: '4kb' }));
-    require(path.join(ROOT, 'core/biof3-server/routes/mobile-admin.js'))(adminApp, { dataDir: execRoot });
+    require(path.join(ROOT, 'core/petri-server/routes/mobile-admin.js'))(adminApp, { dataDir: execRoot });
     const adminServer = await listen(adminApp);
     const adminBase = `http://127.0.0.1:${adminServer.address().port}`;
 
@@ -67,7 +67,7 @@ test('BLOCK-85 P1: pair -> handshake -> probe -> revoke -> remove full chain', a
     // 注意：不挂 app 级 express.json——与生产 routes/index.js 挂法一致
     // （admin 路由自带路由级 json；双重解析会消费已耗尽的 stream → 500）。
     const cmdApp = express();
-    require(path.join(ROOT, 'core/biof3-server/routes/federation-admin.js'))(cmdApp, { dataDir: cmdRoot });
+    require(path.join(ROOT, 'core/petri-server/routes/federation-admin.js'))(cmdApp, { dataDir: cmdRoot });
     const cmdServer = await listen(cmdApp);
     const cmdBase = `http://127.0.0.1:${cmdServer.address().port}`;
 

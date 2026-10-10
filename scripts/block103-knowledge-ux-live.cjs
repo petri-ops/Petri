@@ -55,7 +55,7 @@ async function main() {
   }
   assert('C0b_empty_space_available', !!spaceBId, `create=${created.status} id=${spaceBId}`);
 
-  const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+  const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
   const client = await lib.connectTestTarget({});
   const evalJs = async (expr) => {
     const r = await client.send('Runtime.evaluate', { expression: expr, returnByValue: true, awaitPromise: true });
@@ -70,7 +70,7 @@ async function main() {
   await evalJs("location.href='/knowledge'");
   await new Promise((r) => setTimeout(r, 2000));
   // 确定性起点：清掉上轮抽屉开合记忆（D2 默认收起断言的前提）
-  await evalJs(`localStorage.setItem('gewu.knowledgeConsoleOpen', '0'); location.reload()`);
+  await evalJs(`localStorage.setItem('petri.knowledgeConsoleOpen', '0'); location.reload()`);
   await new Promise((r) => setTimeout(r, 3000));
 
   // U1 页壳挂载 + D2 默认收起

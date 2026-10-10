@@ -49,7 +49,7 @@ test('python runtime lookup prefers bin launcher over framework root dylib', () 
   const fs = req('node:fs');
   const os = req('node:os');
   const path = req('node:path');
-  const runtimeHome = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-python-home-'));
+  const runtimeHome = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-python-home-'));
   try {
     fs.mkdirSync(path.join(runtimeHome, 'bin'));
     fs.writeFileSync(path.join(runtimeHome, 'python'), 'framework dylib placeholder');

@@ -4,11 +4,11 @@
 /**
  * BLOCK-73 UI-322 实机 CDP 验收：文件树「显示隐藏文件」开关（方案 A）。
  *   1) 工具条 toggle 存在且默认关（aria-pressed=false）
- *   2) 默认态：树中无点开头条目（以 biof3-desktop 工作区 .gitignore 为标记）
+ *   2) 默认态：树中无点开头条目（以 petri-desktop 工作区 .gitignore 为标记）
  *   3) toggle 开：.gitignore 等点文件出现（HMR/reload 后服务端参数生效）
- *   4) 偏好持久化：localStorage gewu.fileTree.showHidden=1，reload 后仍开
+ *   4) 偏好持久化：localStorage petri.fileTree.showHidden=1，reload 后仍开
  *   5) toggle 关：点文件消失
- * 前置：dev Electron（9222）+ 后端（3001，载入 BLOCK-73 files.js）+ 打开的本地项目（biof3-desktop）。
+ * 前置：dev Electron（9222）+ 后端（3001，载入 BLOCK-73 files.js）+ 打开的本地项目（petri-desktop）。
  * 证据：acceptance/ui-322/ui322-live.json + ui322-*.png
  */
 const fs = require('node:fs');
@@ -16,7 +16,7 @@ const path = require('node:path');
 const http = require('node:http');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'ui-322');
 
 function fetchJson(url) {
@@ -69,7 +69,7 @@ async function main() {
   main = main || pages[0];
   const client = await new CdpClient(main.webSocketDebuggerUrl).connect();
 
-  // 记录原页面（并行会话可能在用）；本验收在 biof3-desktop 本地项目上跑，结束后恢复
+  // 记录原页面（并行会话可能在用）；本验收在 petri-desktop 本地项目上跑，结束后恢复
   const originalUrl = main.url;
   const TARGET = 'http://localhost:3000/project/p_mtrawlau_7rly';
   const restoreOriginal = async () => {
@@ -107,7 +107,7 @@ async function main() {
   })()`);
 
   // 清偏好 → 初始态为关
-  await evalJS(client, `(() => { localStorage.removeItem('gewu.fileTree.showHidden'); return 'cleared'; })()`);
+  await evalJS(client, `(() => { localStorage.removeItem('petri.fileTree.showHidden'); return 'cleared'; })()`);
   await client.send('Page.reload');
   await new Promise((r) => setTimeout(r, 5000));
   // reload 后重新确保 files tab
@@ -140,7 +140,7 @@ async function main() {
   })()`);
   const shown = JSON.parse(await evalJS(client, `JSON.stringify({
     pressed: document.querySelector('[data-testid="file-tree-show-hidden"]')?.getAttribute('aria-pressed'),
-    persisted: localStorage.getItem('gewu.fileTree.showHidden'),
+    persisted: localStorage.getItem('petri.fileTree.showHidden'),
     hasGitignore: (document.querySelector('[role="tree"]')?.textContent || '').includes('.gitignore'),
   })`));
   assert('B3 toggle 开：.gitignore 等点文件出现在树中', shown.pressed === 'true' && shown.hasGitignore === true, JSON.stringify(shown));

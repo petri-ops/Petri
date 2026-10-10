@@ -1,4 +1,4 @@
-# BioF3 Harness Phase7 完成计划
+# Petri Harness Phase7 完成计划
 
 > 状态：`completed`（2026-07-21）
 > 最后核对：2026-07-21
@@ -104,7 +104,7 @@ Phase 7 已完成：
 
 ### 3.1 应吸收
 
-| 参考概念 | BioF3 落地方式 |
+| 参考概念 | Petri 落地方式 |
 | --- | --- |
 | 工具类别与副作用等级 | 扩展现有 JS 工具定义，增加 `category`、`sideEffect`、`riskTier`、`resources`、`cancellable` |
 | 统一 ToolResult | 保留现有业务字段，同时包入版本化结果 envelope |
@@ -120,7 +120,7 @@ Phase 7 已完成：
 - 不增加 SSH、远端 Shell、Web 抓取、任意 Git 写操作。
 - 不允许删除、批量替换、绝对路径脚本和远程脚本管道进入当前基线。
 - 不把普通文件操作登记成科学分析 job/artifact。
-- 不复制参考工程的目录结构；能力应落入 BioF3 现有 Agent、项目和 Electron 边界。
+- 不复制参考工程的目录结构；能力应落入 Petri 现有 Agent、项目和 Electron 边界。
 
 ## 4. 目标架构
 
@@ -501,7 +501,7 @@ git rev-parse origin/main
 - 提交使用 Conventional Commits。
 - 只 stage 明确相关文件，禁止 `git add .` 和 `git add -A`。
 - 永远排除未跟踪参考工程 `DeepSeek_harness/` 和 `api-failover-proxy/`。
-- 不读取、打印或提交 `.biof3-secrets`、Keychain 内容、API Key。
+- 不读取、打印或提交 `.petri-secrets`、Keychain 内容、API Key。
 - 长驻开发壳由用户或已有开发会话保持；自动化测试不得遗留进程。
 - 遇到产品决策缺口时停止在工作包边界，不擅自扩大权限。
 

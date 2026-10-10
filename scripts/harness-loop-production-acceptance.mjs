@@ -12,7 +12,7 @@ const require = createRequire(import.meta.url);
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // The R server owns the production SQLite ABI. Reuse that dependency instead
 // of the Electron-rebuilt root copy so this gate runs under the project Node.
-const Database = require(path.join(repoRoot, 'core/biof3-server/node_modules/better-sqlite3'));
+const Database = require(path.join(repoRoot, 'core/petri-server/node_modules/better-sqlite3'));
 const evidenceDir = path.join(repoRoot, 'acceptance/harness-loop/production');
 const requiredJson = [
   'baseline.json',

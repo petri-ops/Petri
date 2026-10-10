@@ -13,7 +13,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import test from 'node:test';
 
-const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-adr-test-'));
+const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-adr-test-'));
 const snapshotsDir = path.join(tmpDir, 'agent-doc-snapshots');
 const snapshotsSubDir = path.join(snapshotsDir, '.snapshots');
 fs.mkdirSync(snapshotsDir, { recursive: true });

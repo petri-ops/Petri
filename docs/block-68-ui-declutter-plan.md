@@ -32,7 +32,7 @@
 - **模型 I/O 查看器**：[LlmTranscriptViewer.tsx](../frontend/src/components/copilot/LlmTranscriptViewer.tsx)（BLOCK-37 P3 / UI-274）overlay 形态（`role="dialog"` + 遮罩），数据面 [llmTranscripts.ts](../frontend/src/components/copilot/llmTranscripts.ts) 按 `conversationId` 拉取，只读
 - **右侧边栏 tab 体系**：`RightPanelMode` 八值 union（[project-workspace.tsx:84](../frontend/src/pages/project-workspace.tsx) `'home'|'results'|'files'|'terminal'|'browser'|'chat'|'analyze'|'review'`）+ [useRightPanelTabs.ts](../frontend/src/hooks/useRightPanelTabs.ts)（`openRightPanel`/`rightToolMenuOpen` 工具飞出菜单）+ [RightPanel.tsx](../frontend/src/components/workspace-panels/RightPanel.tsx) tab 内容分发；`ctx.activeConvId` 已在 `RightPanelContext`（会话绑定天然可得）
 - **空态件**：[EmptyResult.tsx](../frontend/src/pages/project-workspace/EmptyResult.tsx)（UI-305 P1 从 project-workspace.tsx 平移）= 头部四件套（`emptyResultIcon`/`Title`/`Desc`/`Project`）+ 六卡片（结果/后端/浏览器/文件/侧边聊天/审阅，均带 `<small>` 副标题）
-- **自动刷新挂钩点（既有信号）**：`gewuEvents.projectWorkspaceChanged`（[conversationRunStore.ts:683](../frontend/src/components/copilot/conversationRunStore.ts) agent 写档后 dispatch；[DataIntakeControl.tsx:74](../frontend/src/components/workspace-panels/DataIntakeControl.tsx) 数据导入后 dispatch；[RightFileTree.tsx:107](../frontend/src/pages/project-workspace/RightFileTree.tsx) 已是该信号的消费者）——文件链接自动重解析直接订阅同源信号，**不新建第二套文件变更真相**
+- **自动刷新挂钩点（既有信号）**：`petriEvents.projectWorkspaceChanged`（[conversationRunStore.ts:683](../frontend/src/components/copilot/conversationRunStore.ts) agent 写档后 dispatch；[DataIntakeControl.tsx:74](../frontend/src/components/workspace-panels/DataIntakeControl.tsx) 数据导入后 dispatch；[RightFileTree.tsx:107](../frontend/src/pages/project-workspace/RightFileTree.tsx) 已是该信号的消费者）——文件链接自动重解析直接订阅同源信号，**不新建第二套文件变更真相**
 
 ## 3. 设计裁决
 

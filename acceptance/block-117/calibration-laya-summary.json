@@ -4,8 +4,8 @@
   "capturedAt": "2026-09-22T15:13:31.719Z",
   "sourceCommit": "68cd541e0f9ea5bb2b7809b71810028abfe51141",
   "model": "laya-typed-decisions (local supply, convaiinnovations/laya via laya_decide serve /v1/systemone)",
-  "wrapper": "core/biof3-server/helpers/decision-api.js（客户端零改动，D-B provider 可替换性）",
-  "supplySandbox": "fixtures/decision-config-laya-sandbox.json（BIOF3_DECISION_CONFIG_PATH 通道；零 API 费用零外发）",
+  "wrapper": "core/petri-server/helpers/decision-api.js（客户端零改动，D-B provider 可替换性）",
+  "supplySandbox": "fixtures/decision-config-laya-sandbox.json（PETRI_DECISION_CONFIG_PATH 通道；零 API 费用零外发）",
   "verdictRule": "沿用各接点原 P0 门限判据，不因换模型放松；不可采纳即如实落证据",
   "perPoint": [
     {

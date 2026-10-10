@@ -4,8 +4,8 @@
   "environment": "dev Electron (fnm Node 24.20, CDP 9222) + aliyun 真实节点",
   "method": "CDP Runtime.evaluate 实机探针（REST 创建 ssh 项目 → 主窗树行定位 → 点击 远程连接 → 轮询 toast viewport）",
   "assertions": [
-    { "name": "ssh 项目树行含「远程连接」按钮（title=远程连接 · aliyun:/root/gewu-block67-demo）", "pass": true },
-    { "name": "点击后连通性检测成功，toast 显示「远程连接正常：aliyun:/root/gewu-block67-demo」", "pass": true },
+    { "name": "ssh 项目树行含「远程连接」按钮（title=远程连接 · aliyun:/root/petri-block67-demo）", "pass": true },
+    { "name": "点击后连通性检测成功，toast 显示「远程连接正常：aliyun:/root/petri-block67-demo」", "pass": true },
     { "name": "全程 0 个 renderer console error", "pass": true }
   ],
   "related": {

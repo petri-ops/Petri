@@ -7,7 +7,7 @@
   justify-content: flex-end;
   align-items: stretch;
   pointer-events: none; /* 穿透由主进程 ignoreMouseEvents 控制；双保险 */
-  font-family: var(--gewu-font-sans);
+  font-family: var(--petri-font-sans);
 }
 
 /* ── 条带（右缘）：26px 常驻 → hover 34px，透明度 0.45 → 0.72 ── */
@@ -19,8 +19,8 @@
   align-items: center;
   gap: 6px;
   padding: 10px 0;
-  background: var(--gewu-bg-surface);
-  border-left: 1px solid var(--gewu-border);
+  background: var(--petri-bg-surface);
+  border-left: 1px solid var(--petri-border);
   opacity: 0.45;
   transition: width 0.16s ease, opacity 0.16s ease;
   overflow: hidden;
@@ -45,13 +45,13 @@
   align-items: center;
   justify-content: center;
   background: transparent;
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
   transition: opacity 0.4s ease, background 0.12s ease;
 }
 
 .tick[data-kind='terminal'],
 .tick[data-kind='agent'] {
-  color: var(--gewu-status-success);
+  color: var(--petri-status-success);
 }
 
 .tick[data-faded='true'] {
@@ -59,13 +59,13 @@
 }
 
 .tick:hover {
-  background: var(--gewu-bg-subtle);
+  background: var(--petri-bg-subtle);
   opacity: 1;
 }
 
 .overflowChip {
   font-size: 9px;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
   writing-mode: vertical-rl;
   letter-spacing: 1px;
 }
@@ -73,7 +73,7 @@
 .emptyHint {
   writing-mode: vertical-rl;
   font-size: 10px;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
   opacity: 0.6;
 }
 
@@ -87,17 +87,17 @@
   overflow: auto;
   padding: 12px;
   border-radius: 10px;
-  border: 1px solid var(--gewu-border);
-  background: var(--gewu-bg-elevated);
-  box-shadow: var(--gewu-shadow-menu);
+  border: 1px solid var(--petri-border);
+  background: var(--petri-bg-elevated);
+  box-shadow: var(--petri-shadow-menu);
 }
 
 .thumbWrap {
   margin-bottom: 10px;
   padding: 6px;
   border-radius: 8px;
-  border: 1px solid var(--gewu-border);
-  background: var(--gewu-bg-subtle);
+  border: 1px solid var(--petri-border);
+  background: var(--petri-bg-subtle);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -115,18 +115,18 @@
   margin-bottom: 10px;
   padding: 18px 12px;
   border-radius: 8px;
-  border: 1px dashed var(--gewu-border);
-  background: var(--gewu-bg-subtle);
+  border: 1px dashed var(--petri-border);
+  background: var(--petri-bg-subtle);
   text-align: center;
   font-size: 11px;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
 }
 
 .cardTitle {
   display: block;
   font-size: 13px;
   font-weight: 600;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   margin-bottom: 4px;
   word-break: break-all;
 }
@@ -134,7 +134,7 @@
 .cardMeta {
   display: block;
   font-size: 11px;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   margin-bottom: 10px;
 }
 
@@ -148,35 +148,35 @@
   height: 28px;
   font-size: 12px;
   border-radius: 6px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   background: transparent;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   cursor: pointer;
 }
 
 .cardBtn:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .cardBtnPrimary {
-  background: var(--gewu-accent);
-  border-color: var(--gewu-accent);
-  color: var(--gewu-on-accent);
+  background: var(--petri-accent);
+  border-color: var(--petri-accent);
+  color: var(--petri-on-accent);
 }
 
 .cardBtnPrimary:hover {
-  background: var(--gewu-accent-hover);
+  background: var(--petri-accent-hover);
 }
 
 .cardBtnDanger:hover {
-  background: var(--gewu-status-error-bg);
-  border-color: var(--gewu-danger);
-  color: var(--gewu-danger);
+  background: var(--petri-status-error-bg);
+  border-color: var(--petri-danger);
+  color: var(--petri-danger);
 }
 
 .fadedNote {
   display: block;
   font-size: 11px;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
   margin-bottom: 8px;
 }

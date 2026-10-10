@@ -37,7 +37,7 @@ const isDevMode =
 
 // Safe for --check: plain env access.
 const rendererDevUrl =
-  process.env.BIOF3_RENDERER_DEV_URL || "http://localhost:3000";
+  process.env.PETRI_RENDERER_DEV_URL || "http://localhost:3000";
 
 // ── IS_DEV / PROJECT_ROOT ─────────────────────────────────────────────────
 //

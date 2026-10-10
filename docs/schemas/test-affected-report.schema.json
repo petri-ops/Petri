@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://biof3.local/schemas/test-affected-report.schema.json",
+  "$id": "https://petri.local/schemas/test-affected-report.schema.json",
   "title": "test-affected report",
   "description": "Machine-readable JSON report emitted by `scripts/test-affected.mjs --report <path>`. Schema version 1. Wraps the existing `--json` plan output plus metadata so the report is self-describing.",
   "type": "object",

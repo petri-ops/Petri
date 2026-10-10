@@ -19,7 +19,7 @@
 - **P0 归因矩阵**：BLOCK-102 仲裁跑（/tmp/block102-tiebreak.log，199 红）全部失败文件逐一单跑（隔离、加固旗标），四分类：A 确定性红（P1 修）/ B 并发绿互踩（P2 治）/ C 环境依赖（P3 显式 skip 带原因）/ D 在册存量（P3 skip 带台账指针），矩阵落 §2。
 - **P1 确定性红修复**：按杠杆序——源码抓取契约对齐（window-controls 族）/ 路径构造修复（facade 族 D:\D:\）/ EPERM 清理加固（rmSync maxRetries）/ 其余断言群逐个归因修复。**修测试对齐实现 or 修实现，逐个判定留痕。**
 - **P2 并发互踩治理**：block88-project-grants mock 模型/超时护栏（收编并行会话处置候选）+ 共享固定资源盘点（固定路径/固定端口/共享 fixture）mkdtemp 化或错开。
-- **P3 平台与环境门纪律**：真平台专属测试显式 `process.platform` 门（skip 输出原因）；环境依赖（gewu-pack-bio 仓缺失类）探测后 skip 带指引；在册存量红（P6 源绑定/F2 PDF）skip 带 AUDIT-LOG 指针——**skip 必须可见可计数，不得静默**。
+- **P3 平台与环境门纪律**：真平台专属测试显式 `process.platform` 门（skip 输出原因）；环境依赖（petri-pack-bio 仓缺失类）探测后 skip 带指引；在册存量红（P6 源绑定/F2 PDF）skip 带 AUDIT-LOG 指针——**skip 必须可见可计数，不得静默**。
 - **P4 scripts 双端同形门**：全部 scripts/*.sh 补 uname 分支或 `# platform:` 标注；调用 powershell/wscript/taskkill 的 Windows 专属脚本补入口平台护栏（非 win32 fail-fast 带清晰报错）；机械门禁 `test/scripts-platform-contract.test.mjs`（无守卫且无标注=红，豁免集内嵌门禁本体）；process.platform 散落分支冻结登记门禁（登记 74 文件基线，新增 fail-closed）。
 - **P5 全量基线重采 + 收口**：`npm run test:all` 真 exit 0（退出码直采不经管道消费方）+ 前端 1146/1146 + closeout 聚合 + canonical 回写。
 
@@ -29,7 +29,7 @@
 
 | 簇 | 文件 | 单跑签名 | 根因 | 处置 | 现状 |
 | --- | --- | --- | --- | --- | --- |
-| A 化石库 | act-tool-core / routes-ai-agent-subdomains / routes-result-studio-subdomains / routes-harness-subdomains / routes-harness-index-500 | SQLITE_ERROR no such table: projects | db.js 模块级 prepare projects 需先跑迁移；缺省打开仓内化石 biof3.db（git 跟踪的历史产物，schema 时代错位） | agent-runner-facade 同款家法：mkdtemp 临时库+runMigrations（CJS 文件用 before 钩子） | 全绿 |
+| A 化石库 | act-tool-core / routes-ai-agent-subdomains / routes-result-studio-subdomains / routes-harness-subdomains / routes-harness-index-500 | SQLITE_ERROR no such table: projects | db.js 模块级 prepare projects 需先跑迁移；缺省打开仓内化石 petri.db（git 跟踪的历史产物，schema 时代错位） | agent-runner-facade 同款家法：mkdtemp 临时库+runMigrations（CJS 文件用 before 钩子） | 全绿 |
 | B 路径反模式 | block60 / block57×2 / harness×2 / rs-subdomains / g0-rs-p4r 脚本 | D:\D:\ 双盘符 / \D:\ 前导反斜杠 | new URL(import.meta.url).pathname 在 win32 返回 /D:/... 喂 path.join | 全仓 10 处/7 文件统一改 fileURLToPath | 全绿 |
 | C 源码抓取契约漂移 | window-controls | CHANNELS is not defined / 签名不匹配 | 源码收敛 CHANNELS 常量模块+setupWindowIpc 加参；沙箱未注入/签名串过期 | 名字锚定抓取+常量注入+期望表对齐（BLOCK-100 注册族） | 9/9 |
 | D preload 沙箱缺口 | preload-branch-result / preload-agentdocreview | undefined.includes / namespace 缺失 | process.argv 缺失（BLOCK-100 探测）/ webUtils+window 缺口；agentDocReview 产品面已移除=僵尸测试 | argv/webUtils/window 注入；僵尸测试删除 | 3/3；已删 |
@@ -80,7 +80,7 @@
 - 僵尸测试删除 1：demo-data（守卫资源已随 BLOCK-83 P4 迁包生态）。
 - 漂移对账 4：result-handlers（CHANNELS 常量）/ release-contract（SPI 化后 goldenPath 断言迁技能清单）/ plugin-schema（catalog 绝对路径跨平台）/ g0-rs-p7（facade 拆分跟随；agent-runner durable 路径 completion guard 仅剩引入=真实漂移，如实标注归 RS 域跟进）。
 - 环境/装包门 skip 可见 5 文件：agent-tool-result + agent-workflow-phase6（需装领域包，装包自动恢复）/ ide-tools-terminal（node-pty conpty 需控制台宿主，NODE_PTY_TEST_ALLOWED=1 opt-in）/ g0-rs-p6×2（重打仅限 macOS，AUDIT-LOG 🟡 指针）。
-- qa-smoke themes 检查化石 biof3- 前缀对账 `--gewu-*`（7/7 exit 0）。
+- qa-smoke themes 检查化石 petri- 前缀对账 `--petri-*`（7/7 exit 0）。
 - closeout 五门绿。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## 8. P4 缩水门禁补齐增量（2026-09-20，用户裁决「继续」；第二增量）

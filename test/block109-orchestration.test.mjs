@@ -15,18 +15,18 @@ const root = resolve(here, '..');
 
 test('callProviderWithNetworkRetry：瞬断重试后成功、耗尽上抛、非瞬断不重试、abort 即停', async () => {
   // loop-orchestrator 依赖桌面 DB 环境——用 dev 库副本隔离加载；无库环境跳过（诚实分级）
-  const devDb = resolve(root, '.biof3-dev-user-data', 'data', 'biof3.db');
+  const devDb = resolve(root, '.petri-dev-user-data', 'data', 'petri.db');
   if (!existsSync(devDb)) {
     assert.ok(true, 'dev DB 不存在，跳过行为验证（CI/干净环境）');
     return;
   }
   const tmp = resolve(os.tmpdir(), `b109-retry-test-${Date.now()}.db`);
   copyFileSync(devDb, tmp);
-  process.env.BIOF3_DB_PATH = tmp;
-  process.env.BIOF3_LOCAL_DATA_DIR = dirname(tmp);
+  process.env.PETRI_DB_PATH = tmp;
+  process.env.PETRI_LOCAL_DATA_DIR = dirname(tmp);
   let mod;
   try {
-    mod = await import(pathToFileURL(resolve(root, 'core', 'biof3-server', 'loop-orchestrator.js')).href);
+    mod = await import(pathToFileURL(resolve(root, 'core', 'petri-server', 'loop-orchestrator.js')).href);
   } finally {
     try { unlinkSync(tmp); } catch { /* Windows 句柄延迟释放：留给 OS 清理（known class ③） */ }
   }
@@ -78,7 +78,7 @@ test('callProviderWithNetworkRetry：瞬断重试后成功、耗尽上抛、非�
 });
 
 test('spawn 派发并行度软上限源码契约（BLOCK-109 P2）', () => {
-  const src = readFileSync(resolve(root, 'core', 'biof3-server', 'agent-tools', 'spawn-agent-tools.js'), 'utf8');
+  const src = readFileSync(resolve(root, 'core', 'petri-server', 'agent-tools', 'spawn-agent-tools.js'), 'utf8');
   // 软上限守卫三要素：守卫调用 + 常量 + 软指引返回（wait_agent 引导）
   assert.ok(src.includes('getRunningChildAgentTasks(parentTaskId)'), '必须按父任务核对活跃子任务');
   assert.ok(src.includes('SPAWN_CONCURRENCY_LIMIT'), '必须存在并行上限常量');

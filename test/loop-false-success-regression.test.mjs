@@ -29,8 +29,8 @@ import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs';
 
-const TMP_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-loop-false-success-'));
-process.env.BIOF3_DB_PATH = path.join(TMP_DIR, 'test.db');
+const TMP_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-loop-false-success-'));
+process.env.PETRI_DB_PATH = path.join(TMP_DIR, 'test.db');
 
 // ---------------------------------------------------------------------------
 // Import modules under test

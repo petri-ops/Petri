@@ -18,12 +18,12 @@ const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
 const PROJECT_ID = process.env.BIOF52_P3_PROJECT || 'p_mtlmxzv8_bbmw';
 const TOOL_JOB_ID = process.env.BIOF52_P3_JOB || 'tj_mtlmxzyv_xbj9';
 const ARTIFACT_NAME = 'volcano.png';
 const DB_PATH = process.env.BIOF52_P3_DB
-  || path.join(__dirname, '..', '.biof3-dev-user-data', 'data', 'biof3.db');
+  || path.join(__dirname, '..', '.petri-dev-user-data', 'data', 'petri.db');
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-52');
 const REVISION_WAIT_MS = 6 * 60 * 1000;
 const REVISION_POLL_MS = 5000;
@@ -74,7 +74,7 @@ async function main() {
   fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
   const targets = await fetchJson(`http://127.0.0.1:${DEBUG_PORT}/json/list`);
   const page = targets.find((t) => t.type === 'page' && /localhost:3000/.test(t.url || ''));
-  if (!page) throw new Error('biof3_page_not_found');
+  if (!page) throw new Error('petri_page_not_found');
   const client = await new CdpClient(page.webSocketDebuggerUrl).connect();
 
   const results = {
@@ -98,7 +98,7 @@ async function main() {
   await delay(2500);
 
   // 2. 通过 projectOpenResult 事件打开 volcano-plot 结果（ResultView + interaction 物化基线）
-  await evalJS(client, `(window.dispatchEvent(new CustomEvent('biof3:project-open-result', {
+  await evalJS(client, `(window.dispatchEvent(new CustomEvent('petri:project-open-result', {
     detail: { toolJobId: '${TOOL_JOB_ID}', projectId: '${PROJECT_ID}' }
   })), true)`);
   await delay(1500);

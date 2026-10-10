@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const catalog = require('../core/biof3-server/routes/tools-catalog');
-const pluginLoader = require('../core/biof3-server/plugin-loader');
+const catalog = require('../core/petri-server/routes/tools-catalog');
+const pluginLoader = require('../core/petri-server/plugin-loader');
 // BLOCK-83 P4：核心仓零内置插件——测试装载中性夹具源
 pluginLoader.loadPluginsFromSources({ builtInDir: path.resolve(root, 'test/fixtures/neutral-plugins') });
 

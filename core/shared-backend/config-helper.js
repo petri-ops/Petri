@@ -1,20 +1,20 @@
 /**
  * shared-backend/config-helper.js — 统一读取 config 的入口（自洽版）
  *
- * 断点1（分仓前置）：斩断对 biof3-server 的反向 require。
- * 调用方（biof3-server/desktop）启动时调 configure({getConfig}) 注入自己的 config；
+ * 断点1（分仓前置）：斩断对 petri-server 的反向 require。
+ * 调用方（petri-server/desktop）启动时调 configure({getConfig}) 注入自己的 config；
  * 未注入时从环境变量构造 fallback（保持原行为，shared-backend 仍能独立跑）。
  *
- * 历史上本模块按优先级 require biof3-server/config → py-server/config（py-server 已于 BLOCK-30 P1 摘除），那是"假独立"——
- * 分仓后 ../biof3-server/config 路径会断，initSharedBackend / 执行器 / 存储 / llm-providers 全炸。
+ * 历史上本模块按优先级 require petri-server/config → py-server/config（py-server 已于 BLOCK-30 P1 摘除），那是"假独立"——
+ * 分仓后 ../petri-server/config 路径会断，initSharedBackend / 执行器 / 存储 / llm-providers 全炸。
  * 依赖反转后，shared-backend 真自洽，分仓安全。
  *
  * E-019 db-config closeout (BLOCK-10 PHASE 2)：
- *   同一进程打开多个 SQLite connection（biof3-server/db.js + agent-task-store.js +
+ *   同一进程打开多个 SQLite connection（petri-server/db.js + agent-task-store.js +
  *   src/database/{branch,result}-db.js）共享文件，但 busy_timeout /
  *   journal_mode 等参数历史上各自硬编码。本模块在 config-helper 内追加
  *   db-config 命名空间：getConfig / setConfig / validateVersion(version)。
- *   setConfig 用于 biof3-server 与 desktop 进程启动时把 biof3-server 端的
+ *   setConfig 用于 petri-server 与 desktop 进程启动时把 petri-server 端的
  *   `BUSY_TIMEOUT_MS=10000`、`JOURNAL_MODE='WAL'`、expected
  *   `DB_SCHEMA_VERSION='1'` 注入；validateVersion(version) 在 Schema
  *   不一致时抛 `Error('db-version-mismatch')`。该 API 不 ALTER 任何 schema，
@@ -36,13 +36,13 @@ function configure(provider) {
 function getConfig() {
   // 优先用注入的
   if (_getConfig) return _getConfig();
-  // fallback：从环境变量构造（真自洽，不依赖 biof3-server）
+  // fallback：从环境变量构造（真自洽，不依赖 petri-server）
   return {
-    rHome: process.env.BIOF3_R_HOME || '',
-    pyHome: process.env.BIOF3_PY_HOME || '',
-    tempDir: process.env.BIOF3_TEMP_DIR || '/tmp/biof3-tmp',
-    localResultsDir: process.env.BIOF3_LOCAL_RESULTS_DIR || '',
-    localUploadsDir: process.env.BIOF3_LOCAL_UPLOADS_DIR || '',
+    rHome: process.env.PETRI_R_HOME || '',
+    pyHome: process.env.PETRI_PY_HOME || '',
+    tempDir: process.env.PETRI_TEMP_DIR || '/tmp/petri-tmp',
+    localResultsDir: process.env.PETRI_LOCAL_RESULTS_DIR || '',
+    localUploadsDir: process.env.PETRI_LOCAL_UPLOADS_DIR || '',
   };
 }
 
@@ -73,7 +73,7 @@ function getDbConfig() {
 /**
  * Replace the db config. Pass a partial object; unspecified keys keep their
  * current values. Validation is intentionally minimal — we want callers
- * (biof3-server boot, desktop main) to be able to set valid overrides without
+ * (petri-server boot, desktop main) to be able to set valid overrides without
  * being blocked by structural checks.
  * @param {Partial<{busyTimeoutMs: number, journalMode: string, schemaVersion: string}>} patch
  */
@@ -119,7 +119,7 @@ function validateDbVersion(clientVersion) {
 // BLOCK-10 PHASE 1.1 (E-019 full) 增补：
 //   - getBusyTimeout() 返回 getDbConfig().busyTimeoutMs，作为 SQLite 打开期
 //     `PRAGMA busy_timeout` 的唯一入口。agent-task-store / branch-db /
-//     result-db 全部走这里，避免再次出现"biof3-server 单进程 5000 vs 10000"漂移。
+//     result-db 全部走这里，避免再次出现"petri-server 单进程 5000 vs 10000"漂移。
 //   - Proxy 把 `busyTimeout` 字段转发到 getDbConfig()，所以
 //     `configHelper.busyTimeout` / `getConfig().busyTimeout` 也能读（与
 //     getBusyTimeout() 同值），方便老代码无需改 import 即可拿到统一值。
@@ -143,13 +143,13 @@ function getBusyTimeout() {
 //   getEnv(key, fallback)
 //     — equivalent to `process.env[key] || fallback` with one twist:
 //       empty string is treated as unset so a stub env injection
-//       (`process.env.BIOF3_DB_PATH = ''`) does not silently win
+//       (`process.env.PETRI_DB_PATH = ''`) does not silently win
 //       against the documented fallback.
 //
 //   getCoreEnv()
 //     — returns the 6 core desktop env keys (busyTimeout + 5 path /
 //       port fields) as a frozen snapshot. The keys match
-//       `core/biof3-server/config.js` consumers (config.rHome,
+//       `core/petri-server/config.js` consumers (config.rHome,
 //       config.localResultsDir, config.localUploadsDir,
 //       config.tempDir, config.dbPath, config.port).
 //
@@ -179,11 +179,11 @@ function getEnv(key, fallback) {
  * Keys:
  *   busyTimeoutMs  — PRAGMA busy_timeout; default 10000 (matches
  *                    E-019 full which routes through getBusyTimeout()).
- *   rHome          — process.env.BIOF3_R_HOME || ''
- *   localResultsDir — process.env.BIOF3_LOCAL_RESULTS_DIR || ''
- *   localUploadsDir — process.env.BIOF3_LOCAL_UPLOADS_DIR || ''
- *   tempDir        — process.env.BIOF3_TEMP_DIR || '/tmp/biof3-tmp'
- *   dbPath         — process.env.BIOF3_DB_PATH || ''
+ *   rHome          — process.env.PETRI_R_HOME || ''
+ *   localResultsDir — process.env.PETRI_LOCAL_RESULTS_DIR || ''
+ *   localUploadsDir — process.env.PETRI_LOCAL_UPLOADS_DIR || ''
+ *   tempDir        — process.env.PETRI_TEMP_DIR || '/tmp/petri-tmp'
+ *   dbPath         — process.env.PETRI_DB_PATH || ''
  *
  * (port is *not* included here — ports live in env-coordinator
  *  because Electron owns port allocation. See getBackendPort().)
@@ -200,11 +200,11 @@ function getEnv(key, fallback) {
 function getCoreEnv() {
   return Object.freeze({
     busyTimeoutMs: getBusyTimeout(),
-    rHome: getEnv('BIOF3_R_HOME', ''),
-    localResultsDir: getEnv('BIOF3_LOCAL_RESULTS_DIR', ''),
-    localUploadsDir: getEnv('BIOF3_LOCAL_UPLOADS_DIR', ''),
-    tempDir: getEnv('BIOF3_TEMP_DIR', '/tmp/biof3-tmp'),
-    dbPath: getEnv('BIOF3_DB_PATH', ''),
+    rHome: getEnv('PETRI_R_HOME', ''),
+    localResultsDir: getEnv('PETRI_LOCAL_RESULTS_DIR', ''),
+    localUploadsDir: getEnv('PETRI_LOCAL_UPLOADS_DIR', ''),
+    tempDir: getEnv('PETRI_TEMP_DIR', '/tmp/petri-tmp'),
+    dbPath: getEnv('PETRI_DB_PATH', ''),
   });
 }
 

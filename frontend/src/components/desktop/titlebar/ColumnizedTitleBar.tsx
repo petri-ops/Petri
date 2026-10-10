@@ -11,7 +11,7 @@ import styles from './ColumnizedTitleBar.module.css';
  * BLOCK-62 P1b — 列级 header（ProjectWorkspace regular 分支专用）。
  *
  * 作为对应栏 aside（flex-column）的第一个子元素：交叉轴默认 stretch → header 宽
- * = aside 宽 = 栏宽（aside 消费 `--gewu-live-*`），header 与栏体同属一个 aside、
+ * = aside 宽 = 栏宽（aside 消费 `--petri-live-*`），header 与栏体同属一个 aside、
  * 同一次 React commit 渲染 → 顶栏分隔线与栏体边缘物理一体，刚性由构造保证
  * （跨树同步契约 --titlebar-*-span grid 模拟 / collapsedRail 魔数在本路由退役）。
  *

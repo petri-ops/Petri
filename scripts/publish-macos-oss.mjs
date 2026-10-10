@@ -10,14 +10,14 @@ const ROOT = resolve(import.meta.dirname, '..');
 const DIST = join(ROOT, 'dist');
 const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
 const version = pkg.version;
-const bucket = process.env.BIOF3_OSS_BUCKET || 'biof3-uploads';
+const bucket = process.env.PETRI_OSS_BUCKET || 'petri-uploads';
 const region = process.env.OSS_REGION || 'cn-hangzhou';
 const endpoint = process.env.OSS_ENDPOINT || 'oss-cn-hangzhou.aliyuncs.com';
-const prefix = (process.env.BIOF3_OSS_UPDATE_PREFIX || 'desktop/updates/macos').replace(/^\/+|\/+$/g, '');
-const publicBaseUrl = process.env.BIOF3_OSS_UPDATE_URL ||
+const prefix = (process.env.PETRI_OSS_UPDATE_PREFIX || 'desktop/updates/macos').replace(/^\/+|\/+$/g, '');
+const publicBaseUrl = process.env.PETRI_OSS_UPDATE_URL ||
   `https://${bucket}.${endpoint}/${prefix}`;
-const uploadTimeout = Number(process.env.BIOF3_OSS_UPLOAD_TIMEOUT_MS || 600000);
-const uploadPartSize = Number(process.env.BIOF3_OSS_UPLOAD_PART_SIZE || 10 * 1024 * 1024);
+const uploadTimeout = Number(process.env.PETRI_OSS_UPLOAD_TIMEOUT_MS || 600000);
+const uploadPartSize = Number(process.env.PETRI_OSS_UPLOAD_PART_SIZE || 10 * 1024 * 1024);
 const dryRun = process.argv.includes('--dry-run');
 const prepareOnly = process.argv.includes('--prepare-only');
 

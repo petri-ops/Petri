@@ -7,7 +7,7 @@
 //     frontend/tsconfig.json 的 projectService）+ react-hooks + security；
 //     strictTypeChecked 留 P2 棘轮逐步收紧（先拿 recommended 层噪音基线）。
 //   - src/ core/ scripts/ 的 JS：js recommended + security（无类型信息，纯语法/反模式层）。
-//   - 排除：node_modules / dist / acceptance / .biof3-* / vendor（codex/sdk 不属本项目代码面）。
+//   - 排除：node_modules / dist / acceptance / .petri-* / vendor（codex/sdk 不属本项目代码面）。
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
@@ -20,8 +20,8 @@ export default tseslint.config(
       '**/node_modules/**',
       '**/dist/**',
       'acceptance/**',
-      '.biof3-*/**',
-      '**/.biof3-*/**',
+      '.petri-*/**',
+      '**/.petri-*/**',
       'codex/**',
       '_external-ref/**',
       // openclaw/ = OpenClaw 外部参考镜像（研究对标用，~6.7GB，经 .git/info/exclude 本地排除不入仓，

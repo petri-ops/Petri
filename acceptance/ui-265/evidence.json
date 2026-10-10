@@ -3,7 +3,7 @@
   "workPackage": "BLOCK-33-GENERAL-CODING-AGENT",
   "phase": "P6 实机收口",
   "capturedAt": "2026-09-01T09:43:00Z",
-  "environment": "dev Electron (CDP 9222) + biof3-server :52397（supervisor 重启加载 P1–P5 最新代码；BIOF3_ELECTRON_USER_DATA_DIR/BIOF3_LOCAL_DATA_DIR 指向 .biof3-dev-user-data）",
+  "environment": "dev Electron (CDP 9222) + petri-server :52397（supervisor 重启加载 P1–P5 最新代码；PETRI_ELECTRON_USER_DATA_DIR/PETRI_LOCAL_DATA_DIR 指向 .petri-dev-user-data）",
   "model": "DeepSeek deepseek-v4-flash-vision-exp（真实 task，非 mock）",
   "project": "desktop p_mt15b0aw_f0xa → 应用仓库本体（新对话经左栏「创建新对话」创建，绑定正确项目）",
   "scenarios": [

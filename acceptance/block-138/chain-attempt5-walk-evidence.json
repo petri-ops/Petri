@@ -4,9 +4,9 @@
   "purpose": "BLOCK-138 第 5 轮（attempt-5）：F1 修复已生效 + Mac 域三插件已激活（catalog=3）的栈上，经 chat plan/bind 链与备选 selection 路获取 ≥2 节点真实血缘链",
   "conclusion": "method=failed：plan/bind 链首次实机跑出 3 个串联 completed job（deseq2→deg-standardizer→volcano-plot，执行顺序与输入绑定真实成立），F1 信任层在全部 3 个链形成点各注册 1 个 pending ChangeSet（attempt-4 仅 1 个）——但权威血缘端点对三个 job 全部返回 lineage=null（项目内 result_workflow_graphs=0 张），≥2 节点血缘链仍不可达。断链根因从 attempt-4 的『下游无工具』前移为：plan 链执行路径不持久化工作流图、job provenance inputs 无 lineage record（建边前提）、三插件 resultStudio=None（selection/enrichment 动作未声明）、无 current revision（adopt 是人的审阅动作，本 run 零 adopt）。",
   "stackState": {
-    "health": "core :3001 /api/health=200；Vite :3000=200；CDP :9222 gewu-desktop/0.0.1-rc.7 Electron/41.10.7",
+    "health": "core :3001 /api/health=200；Vite :3000=200；CDP :9222 petri-desktop/0.0.1-rc.7 Electron/41.10.7",
     "pluginCatalog": "GET /api/tools/catalog → ok=true,count=3（deg-standardizer/deg-standardizer,deseq2,volcano-plot，source=installed-plugins）——attempt-4 时为 count=1，本轮前置条件满足",
-    "pluginDescriptors": "python3 实读 /Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/gewu-pack-bio/plugins/{deseq2,deg-standardizer,volcano-plot}/plugin.json → 三者 resultStudio 均为 None（attempt-4 blocker #2 未变化）"
+    "pluginDescriptors": "python3 实读 /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/petri-pack-bio/plugins/{deseq2,deg-standardizer,volcano-plot}/plugin.json → 三者 resultStudio 均为 None（attempt-4 blocker #2 未变化）"
   },
   "mainPathPlanBindChain": {
     "channel": "POST /api/ai/agent（task 模式，context={projectId,page:'workspace',pageTitle:'项目工作区',accessMode:'full'}）",
@@ -14,7 +14,7 @@
     "taskId": "97e3098a-530d-450d-92fe-ec1bfd682790",
     "conversationId": "conv_a463a6a3-f5c",
     "poll": "GET /api/ai/agent/task/97e3098a-530d-450d-92fe-ec1bfd682790/meta 间隔 5s，06:03:38 running → 06:04:38 completed（~65s）",
-    "agentReport": "plan → bind → run 链完成；enrichment blocked tool_not_available（go-kegg/gsea 未注册）；plan 终态 status=blocked、terminal=false、completedCount=3/4、readyStepIds=[]；bind 两条（differential→deg-standardization inputId=deg_results profile=biof3.deg.v1；deg-standardization→volcano inputId=deg_table，agent 发现默认绑到 deg_down.csv 子集后显式 artifactId=deg_standardized 重绑为全量表）",
+    "agentReport": "plan → bind → run 链完成；enrichment blocked tool_not_available（go-kegg/gsea 未注册）；plan 终态 status=blocked、terminal=false、completedCount=3/4、readyStepIds=[]；bind 两条（differential→deg-standardization inputId=deg_results profile=petri.deg.v1；deg-standardization→volcano inputId=deg_table，agent 发现默认绑到 deg_down.csv 子集后显式 artifactId=deg_standardized 重绑为全量表）",
     "jobs": [
       { "stepId": "differential", "toolId": "deseq2", "toolJobId": "tj_murzkt27_ofoq", "status": "completed", "artifactTruth": "valid", "artifacts": 23 },
       { "stepId": "deg-standardization", "toolId": "deg-standardizer", "toolJobId": "tj_murzl9cq_hzsj", "status": "completed", "artifacts": 6 },
@@ -26,7 +26,7 @@
     "taskId": "bc08c579-a6ce-4c2a-9f4b-838d3f55e276",
     "channel": "同上，对 completed deseq2 job tj_murzkt27_ofoq『选 padj 前 50 → go-kegg』",
     "outcome": "result_studio_context 两次（含自带恢复路径重试）均 ok=false context_artifact_not_open（无正式版本结果打开）；agent 拒绝伪造 selectionId/contextToken，step2 未执行；0 新 job、0 新血缘边、0 adopt、0 插件激活（会话转储 /tmp/block138-walk-attempt5-fallback-conversation.json）",
-    "codeGates": "core/biof3-server/agent-tools/result-selection-tools.js:359-361（deg_enrichment_action_not_declared）与 :472-474（selection_action_not_declared）——三插件 resultStudio=None 即便过 context 门也会被拦；current revision 门（adopt 属人的审阅动作）"
+    "codeGates": "core/petri-server/agent-tools/result-selection-tools.js:359-361（deg_enrichment_action_not_declared）与 :472-474（selection_action_not_declared）——三插件 resultStudio=None 即便过 context 门也会被拦；current revision 门（adopt 属人的审阅动作）"
   },
   "finalChecks": {
     "lineageEndpoints": {
@@ -38,7 +38,7 @@
       },
       "verdict": "chain 长度=0，不满足 ≥2 且上游在前"
     },
-    "graphTotals": "better-sqlite3 readonly .biof3-dev-user-data/data/biof3.db：SELECT COUNT(*) FROM result_workflow_graphs WHERE project_id='p_murzjsx2_pu0z' → 0（库内仍 7 张全在 p_mtlnsv0f_xpjb、单节点，本轮新增 0）",
+    "graphTotals": "better-sqlite3 readonly .petri-dev-user-data/data/petri.db：SELECT COUNT(*) FROM result_workflow_graphs WHERE project_id='p_murzjsx2_pu0z' → 0（库内仍 7 张全在 p_mtlnsv0f_xpjb、单节点，本轮新增 0）",
     "reviewQueueVisibility": {
       "api": "GET /api/result-studio/changesets?projectId=p_murzjsx2_pu0z&status=preview_ready → 3 行全部 preview_ready：cs_534e7f1958736b596a2a5f5d00fb72ac（chain-preview:tj_murzkt27_ofoq，46 changedPaths）/ cs_e283379f66691819122cefdce84dcad9（chain-preview:tj_murzl9cq_hzsj，12）/ cs_044cce3c836b48dfc4bd22b0597bdbac（chain-preview:tj_murzlooj_hoah，10）；DB 复核 scientific_change_sets 三行 adopted_at 均为 NULL；artifact_revisions 项目内 34 行全部 is_current=0（信任层红线：零 adopt）",
       "ui": "工作区右栏『审阅』面板可打开但显示『当前项目工作区不是 git 仓库』（该面板是工作区 git 版本历史审阅面，非 Result Studio ChangeSet 队列；未点击『初始化 git 仓库』以免超范围变更）；Result Studio ChangeSet 面板需主画布打开结果后可达（ResultStudioChangeSetPanel.tsx）"
@@ -46,16 +46,16 @@
     "toolsStatusTerminal": "GET /api/tools/status/tj_murzlooj_hoah → status=completed, toolId=volcano-plot, artifacts=5（report.html/volcano.png/volcano.svg/classified_table.csv/volcano.pdf）"
   },
   "codeLevelRootCause": [
-    "血缘端点只读 result_workflow_graphs（core/biof3-server/routes/result-studio/lineage.js:35-41），无图即 lineage=null",
-    "图持久化仅两条路：result_edit_plan 科学编辑类（core/biof3-server/agent-tools/result-edit-tools.js:280-293 → persistAuthoritativeWorkflowGraph:47）与 selection/enrichment 已准入下游执行（core/biof3-server/agent-tools/result-selection-tools.js:205-241 persistVerifiedWorkflowGraph）；plan 链 op='run' 路径无图持久化（F1 接线 learning.js:864-899 只注册 chainPreview ChangeSet）",
+    "血缘端点只读 result_workflow_graphs（core/petri-server/routes/result-studio/lineage.js:35-41），无图即 lineage=null",
+    "图持久化仅两条路：result_edit_plan 科学编辑类（core/petri-server/agent-tools/result-edit-tools.js:280-293 → persistAuthoritativeWorkflowGraph:47）与 selection/enrichment 已准入下游执行（core/petri-server/agent-tools/result-selection-tools.js:205-241 persistVerifiedWorkflowGraph）；plan 链 op='run' 路径无图持久化（F1 接线 learning.js:864-899 只注册 chainPreview ChangeSet）",
     "图边要求下游 job provenance inputs 携带服务端签发的 lineage record 且 source revision 可解析（core/shared-backend/result-workflow-graph.js:286-362 validateLineage / :554-582 建边；:310-313 workflow_source_revision_drift）；本轮 3 个 job provenance lineage 全 null，即使强建图也会 workflow_lineage_missing 失败",
-    "context 投影只读、图仅在『已准入下游执行显式快照』时落库（core/biof3-server/agent-tools/result-context-tools.js:233-238 注释明示）",
+    "context 投影只读、图仅在『已准入下游执行显式快照』时落库（core/petri-server/agent-tools/result-context-tools.js:233-238 注释明示）",
     "三插件 resultStudio=None（plugin.json 实读）→ selection/enrichment 动作未声明门在位（result-selection-tools.js:359-361/472-474）",
     "34 个 preview revision 全部 is_current=0，adopt 是人的审阅动作（方向 1 红线），本 run 零 adopt"
   ],
   "f1TrustLayerVerified": "F1 修复实机生效范围=链形成点 pending 信任层注册：本轮 3 个链形成点（bind+每次 plan 链 run）各注册 1 个 pending ChangeSet（attempt-4 仅 bind 1 个），幂等、零 adopt、is_current 集合零触碰、审阅队列 API 可见——修复本身按设计工作；它不写图、不写 provenance lineage，故血缘链仍不形成",
   "windowWalkthrough": {
-    "tool": ".agents/skills/gewu-dev-infra/dev-verify/lib.cjs（pollTargets/connectTarget/evalJs/screenshotPng）",
+    "tool": ".agents/skills/petri-dev-infra/dev-verify/lib.cjs（pollTargets/connectTarget/evalJs/screenshotPng）",
     "navigation": "主窗 location http://localhost:3000/ → http://localhost:3000/project/p_murzjsx2_pu0z（CDP 驱动，走查目的本身）",
     "domAssertions": "body 含项目名 block138-walk-140257；三个 toolJobId（tj_murzkt27_ofoq/tj_murzl9cq_hzsj/tj_murzlooj_hoah）在项目会话可见；section[aria-label='结果血缘图'] 不存在——与 LineageGraph.tsx:49『lineage.chain.length<=1 → return null』诚实纪律一致（lineage=null 不渲染）",
     "screenshots": ["acceptance/block-138/walk-attempt5-project-window.png", "acceptance/block-138/walk-attempt5-review-queue.png"]

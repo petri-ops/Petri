@@ -1,0 +1,4 @@
+interface:
+  display_name: "Petri 开发基础设施"
+  short_description: "会话状态恢复、工作区卫生、收口门禁聚合、实机校验 flow、产品 Skill 脚手架与委派契约"
+  default_prompt: "Use $petri-dev-infra to run state/hygiene/closeout/verify and follow the closeout discipline."

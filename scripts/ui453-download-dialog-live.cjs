@@ -18,7 +18,7 @@
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 const fs = require('node:fs');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const PROJECT_ID = process.argv[2] || 'p_mu5ftn3a_wxnq';
@@ -69,7 +69,7 @@ $b.Save("${target.replace(/\\/g, '\\\\')}",[System.Drawing.Imaging.ImageFormat]:
   try { await client.send('Page.bringToFront'); } catch { /* ignore */ }
 
   // T0 桥在场
-  const bridge = await EVAL(`(function(){var b=window.biof3Desktop&&window.biof3Desktop.files;return !!(b&&typeof b.downloadFromUrl==='function');})()`);
+  const bridge = await EVAL(`(function(){var b=window.petriDesktop&&window.petriDesktop.files;return !!(b&&typeof b.downloadFromUrl==='function');})()`);
   run.assert('T0_download_bridge_present', bridge === true || bridge === 'true', String(bridge));
 
   // 清场：先关掉可能残留的对话框（避免断言串扰）
@@ -78,7 +78,7 @@ $b.Save("${target.replace(/\\/g, '\\\\')}",[System.Drawing.Imaging.ImageFormat]:
 
   // T1 触发 → 读真实对话框标题
   const before = runProbe(false).titles;
-  await EVAL(`window.biof3Desktop.files.downloadFromUrl('http://localhost:3001/api/workspaces/${PROJECT_ID}/file?path=${encodeURIComponent(SAMPLE_PATH)}', 'DIALOG-GATE.R').then(function(r){console.log('DL_RESULT:'+JSON.stringify(r));})`).catch(() => {});
+  await EVAL(`window.petriDesktop.files.downloadFromUrl('http://localhost:3001/api/workspaces/${PROJECT_ID}/file?path=${encodeURIComponent(SAMPLE_PATH)}', 'DIALOG-GATE.R').then(function(r){console.log('DL_RESULT:'+JSON.stringify(r));})`).catch(() => {});
   await sleep(3500);
   const after = runProbe(false).titles;
   const newTitles = after.filter((t) => !before.includes(t));

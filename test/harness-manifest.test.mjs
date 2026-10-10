@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 // BLOCK-83 P4：核心仓零内置插件——manifest 校验指向中性夹具
 // （env 必须在模块 import 前生效——check 脚本在模块加载期解析 BUILT_IN_DIR）
-process.env.BIOF3_HARNESS_MANIFEST_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'fixtures', 'neutral-plugins');
+process.env.PETRI_HARNESS_MANIFEST_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'fixtures', 'neutral-plugins');
 const { validateHarnessManifests } = await import('../scripts/check-harness-manifests.mjs');
 
 test('built-in runnable plugins expose normalized Harness manifest v1', () => {
@@ -25,7 +25,7 @@ test('built-in runnable plugins expose normalized Harness manifest v1', () => {
 });
 
 test('validateHarnessManifests rejects duplicate failure mode codes', () => {
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-harness-manifest-'));
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-harness-manifest-'));
   try {
     const pluginDir = path.join(tmpDir, 'dup-plugin');
     fs.mkdirSync(pluginDir, { recursive: true });

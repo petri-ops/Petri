@@ -28,7 +28,7 @@
 **我方现状（HEAD 面代码事实）**：
 
 - **展示侧已就绪**：UI-272 已渲染 `reasoning_content` 思考段——`copilotClient.ts:1106-1109` 解析流式 `delta.reasoning_content` → `conversationRunStore.ts:599-606` 按迭代聚合 `reasoningByIteration` → 随消息展示并经 meta 持久化。上游自己开了思考时我方已能显示。
-- **请求侧全缺**：全仓无 `reasoning_effort` / `enable_thinking` / `thinking` 请求参数（grep 实证）；agent 请求体固定 `temperature: 0.4 + max_tokens: 16384`（`core/biof3-server/routes/ai-agent/chat.js:655-666`）。这就是「没有这种选项」的直接原因。
+- **请求侧全缺**：全仓无 `reasoning_effort` / `enable_thinking` / `thinking` 请求参数（grep 实证）；agent 请求体固定 `temperature: 0.4 + max_tokens: 16384`（`core/petri-server/routes/ai-agent/chat.js:655-666`）。这就是「没有这种选项」的直接原因。
 - **管道已通（关键利好）**：请求体一路透传——`ai-agent/chat.js` 构造 `reqBody` → 网关合并 `...(profile.parameters) ...(body)`（`core/shared-backend/llm-providers/model-gateway.js:181-185`）→ deepseek 适配层 `...(body)` 展开（`deepseek.js:267-277`）→ 上游。**只要 body 带上思考参数就会直达上游，后端无需新建链路**。anthropic / dashscope 适配层同构需逐一核对。
 - **能力位已有**：`MODEL_CAPABILITIES` 含 `'reasoning'`（`model-profile.js:18`），渠道可声明；用户截图 4 渠道全走 OpenAI 兼容协议（DeepSeek 系 / gemini 系中转 / GLM 系 scnet / sensenova），上游思考参数各异。
 - **可行性结论：可以补充，量级中小**（对标 BLOCK-79 当日包体量）；风险集中在「各上游参数名不一 + 严格网关对未知参数 400」。

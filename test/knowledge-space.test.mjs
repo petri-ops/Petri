@@ -1,6 +1,6 @@
 // BLOCK-69 P0 — 知识空间检索内核单测
-// 跑法：node --test test/knowledge-space.test.mjs（必须 Node 24：core/biof3-server better-sqlite3 ABI 137）
-// BIOF3_DB_PATH / BIOF3_LOCAL_DATA_DIR 必须在 require db.js 前生效。
+// 跑法：node --test test/knowledge-space.test.mjs（必须 Node 24：core/petri-server better-sqlite3 ABI 137）
+// PETRI_DB_PATH / PETRI_LOCAL_DATA_DIR 必须在 require db.js 前生效。
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -12,32 +12,32 @@ import { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const R_SERVER = resolve(__dirname, '..', 'core', 'biof3-server');
+const R_SERVER = resolve(__dirname, '..', 'core', 'petri-server');
 const require = createRequire(import.meta.url);
 
-const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block69-'));
-process.env.BIOF3_DB_PATH = path.join(tempRoot, 'biof3.db');
-process.env.BIOF3_LOCAL_DATA_DIR = tempRoot;
+const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block69-'));
+process.env.PETRI_DB_PATH = path.join(tempRoot, 'petri.db');
+process.env.PETRI_LOCAL_DATA_DIR = tempRoot;
 process.on('exit', () => {
   try { fs.rmSync(tempRoot, { recursive: true, force: true }); } catch {}
 });
 
-// migration-runner 无 BIOF3_BETTER_SQLITE3_ROOT 时在 require 期即 plain require 根
+// migration-runner 无 PETRI_BETTER_SQLITE3_ROOT 时在 require 期即 plain require 根
 // node_modules 的 better-sqlite3（Electron ABI 145）；必须在 require 前指到 core 的 Node ABI 构建。
-process.env.BIOF3_BETTER_SQLITE3_ROOT = R_SERVER;
+process.env.PETRI_BETTER_SQLITE3_ROOT = R_SERVER;
 const { runMigrations } = require('../src/migration-runner.js');
 const migrationsDir = resolve(__dirname, '..', 'src', 'migrations');
 
 // 自举即按生产路径跑全量迁移（migration-runner + schema_migrations 追踪），
 // 之后 db.js 在 require 期才能安全 prepare projects 等表。
-const bootVersion = await runMigrations(process.env.BIOF3_DB_PATH, migrationsDir);
+const bootVersion = await runMigrations(process.env.PETRI_DB_PATH, migrationsDir);
 
 test('migration 009 已应用且重放为 no-op：三表 + FTS 虚表 + 默认空间种子行', async () => {
   assert.ok(bootVersion >= 9, `bootstrap applied migrations, latest >= 9, got ${bootVersion}`);
   // 重放：schema_migrations 已记录 → 幂等 no-op（不重复 ALTER/INSERT）
-  const replay = await runMigrations(process.env.BIOF3_DB_PATH, migrationsDir);
+  const replay = await runMigrations(process.env.PETRI_DB_PATH, migrationsDir);
   assert.equal(replay, bootVersion);
-  const ksFresh = require('../core/biof3-server/helpers/knowledge-space.js');
+  const ksFresh = require('../core/petri-server/helpers/knowledge-space.js');
   const space = ksFresh.getSpace();
   assert.ok(space, 'default space row seeded');
   assert.equal(space.id, 'ks_default');
@@ -45,8 +45,8 @@ test('migration 009 已应用且重放为 no-op：三表 + FTS 虚表 + 默认�
   assert.equal(ksFresh.listDocuments().length, 0);
 });
 
-const ks = require('../core/biof3-server/helpers/knowledge-space.js');
-const sqlite = require('../core/biof3-server/db.js').getDatabase();
+const ks = require('../core/petri-server/helpers/knowledge-space.js');
+const sqlite = require('../core/petri-server/db.js').getDatabase();
 
 // ---------- D3 chunker ----------
 
@@ -267,9 +267,9 @@ test('clearSpace: 全清文档+分块+FTS，空间行保留', async () => {
 
 // ---------- P1：agent 工具面 ----------
 
-const { getToolContract } = require('../core/biof3-server/agent-tools/registry.js');
-const { decideAgentToolCall } = require('../core/biof3-server/agent-tools/agent-tool-policy.js');
-const { tool_knowledge_search, tool_knowledge_status } = require('../core/biof3-server/agent-tools/knowledge-tools.js');
+const { getToolContract } = require('../core/petri-server/agent-tools/registry.js');
+const { decideAgentToolCall } = require('../core/petri-server/agent-tools/agent-tool-policy.js');
+const { tool_knowledge_search, tool_knowledge_status } = require('../core/petri-server/agent-tools/knowledge-tools.js');
 
 test('knowledge 工具契约：retrieval/none/R0，只读面全档位可用', () => {
   const search = getToolContract('knowledge_search');
@@ -320,7 +320,7 @@ test('knowledge_status 工具：状态投影', () => {
 
 // ---------- P1：摄取管道 ----------
 
-const ingest = require('../core/biof3-server/helpers/knowledge-ingest.js');
+const ingest = require('../core/petri-server/helpers/knowledge-ingest.js');
 
 test('摄取管道: uploaded→parsing→chunking→embedding→ready，分块+FTS+向量落库', async () => {
   const content = [
@@ -609,7 +609,7 @@ function buildMinimalPdf(lines) {
 }
 
 test('F2 PDF: 文本层 PDF 摄取 ready（kind=pdf，文本可检索），.pdf 移出 fail-closed 清单', async () => {
-  const { checkSupported } = require('../core/biof3-server/helpers/knowledge-parsers.js');
+  const { checkSupported } = require('../core/petri-server/helpers/knowledge-parsers.js');
   checkSupported('paper.pdf');
 
   const pdf = buildMinimalPdf(['TP53 regulates cell cycle arrest.', 'BRCA1 mediates homologous recombination repair.']);
@@ -697,7 +697,7 @@ test('F5 citations: buildTurnInjection 返回注入块清单（溯源数据源�
 });
 
 test('F5 knowledge_read: 按 docId 深读分块原文（未就绪/未知 fail-closed）', async () => {
-  const { tool_knowledge_read } = require('../core/biof3-server/agent-tools/knowledge-tools.js');
+  const { tool_knowledge_read } = require('../core/petri-server/agent-tools/knowledge-tools.js');
   const doc = await ingest.createDocument({
     name: 'read-me.txt',
     buffer: Buffer.from('整篇深读目标：TP53 通路要点，含多个分块。', 'utf8'),
@@ -908,8 +908,8 @@ test('G3 注入: 绑定空间后按绑定范围召回（他空间文档不可达
 
 // ---------- BLOCK-99 G4：空间管理会话台（工具族 + 归类移动 + D4 确认门）----------
 
-const { dispatchTool } = require('../core/biof3-server/agent-tools/index.js');
-const confirmStore = require('../core/biof3-server/helpers/knowledge-confirm.js');
+const { dispatchTool } = require('../core/petri-server/agent-tools/index.js');
+const confirmStore = require('../core/petri-server/helpers/knowledge-confirm.js');
 
 test('G4 moveDocumentsToSpace: 归属迁移非破坏（块/检索跟随，原空间即刻不可达）', async () => {
   const spaceB = ks.createSpace('G4 归类空间 B');

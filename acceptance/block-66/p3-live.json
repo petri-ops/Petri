@@ -2,7 +2,7 @@
   "startedAt": "2026-09-08T06:26:43.632Z",
   "assertions": [
     {
-      "name": "P3-A1 无 R 环境 biof3-server 照常启动（health 200）",
+      "name": "P3-A1 无 R 环境 petri-server 照常启动（health 200）",
       "pass": true,
       "detail": "port=3901"
     },
@@ -30,10 +30,10 @@
   "guiPhase": {
     "status": "blocked",
     "reason": "agent 非交互会话无法启动 GUI Electron（静默退出 0 / CDP 不可达，最小 Electron 应用同样；非产品代码问题）",
-    "manual": "在交互会话运行：BIOF3_ELECTRON_USER_DATA_DIR=<空 runtimes 临时目录> npm run dev → 确认无全屏「先安装分析运行时」门、首页出现非阻塞 R 引导条（role=status）、设置页运行时入口在位"
+    "manual": "在交互会话运行：PETRI_ELECTRON_USER_DATA_DIR=<空 runtimes 临时目录> npm run dev → 确认无全屏「先安装分析运行时」门、首页出现非阻塞 R 引导条（role=status）、设置页运行时入口在位"
   },
   "finishedAt": "2026-09-08T06:27:22.287Z",
   "allPass": true,
   "guiBlocked": true,
-  "note": "agent 非交互会话无法启动 GUI Electron（静默退出 0 / CDP 不可达，最小 Electron 应用同样；非产品代码问题）；隔离 userData（空 runtimes）天然无 R；A 部分为真实 biof3-server 进程，B 部分为隔离环境真实 executor 解析。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+  "note": "agent 非交互会话无法启动 GUI Electron（静默退出 0 / CDP 不可达，最小 Electron 应用同样；非产品代码问题）；隔离 userData（空 runtimes）天然无 R；A 部分为真实 petri-server 进程，B 部分为隔离环境真实 executor 解析。G0 开发期常态 · 不外推 packaged/Provider/GA。"
 }

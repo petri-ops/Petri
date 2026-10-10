@@ -19,7 +19,7 @@ T-AW-014 是 T-AW-013 packaged Electron 第三轴验证（commit `1d1d1b2`）的
 触发条件：
 1. UI-AGENTWB-005/006/007 在 `docs/ui-productization-audit.md` 行 242/243 仍标 `in_progress`，A4（UI-AGENTWB-004）已 `verified（A5）` 但缺 dev 实机覆盖；
 2. T-AW-013 packaged 三轴中，dev Electron 路径未单独验证（dev 与 packaged 是两份独立 Electron 主进程 + 两份 preload，桥接不能等同）；
-3. UI-AGENTWB-007 的 Settings 切换 + 启动参数路径在 packaged 下走的是同一份 main.js，但 dev Electron 走的是 `scripts/dev-electron.js` 启动脚本 + `BIOF3_DEV_ELECTRON_ARGS` env 通路，需要单独端到端验证。
+3. UI-AGENTWB-007 的 Settings 切换 + 启动参数路径在 packaged 下走的是同一份 main.js，但 dev Electron 走的是 `scripts/dev-electron.js` 启动脚本 + `PETRI_DEV_ELECTRON_ARGS` env 通路，需要单独端到端验证。
 
 不做的：P7 / Provider / GA 矩阵外推、release-pipeline 重设计、`src/main.js` / `src/preload.js` 修改。
 
@@ -27,14 +27,14 @@ T-AW-014 是 T-AW-013 packaged Electron 第三轴验证（commit `1d1d1b2`）的
 
 | 项目 | 取值 |
 | --- | --- |
-| 启动命令 | `npm run dev`（关键：不用 `npm run dev:electron`，后者绕过 `BIOF3_DEV_ELECTRON_ARGS`） |
-| 环境变量 | `BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222"` |
-| 启动脚本 | `scripts/dev-electron.js`（解析 `BIOF3_DEV_ELECTRON_ARGS` 传给 Electron CLI） |
+| 启动命令 | `npm run dev`（关键：不用 `npm run dev:electron`，后者绕过 `PETRI_DEV_ELECTRON_ARGS`） |
+| 环境变量 | `PETRI_DEV_ELECTRON_ARGS="--remote-debugging-port=9222"` |
+| 启动脚本 | `scripts/dev-electron.js`（解析 `PETRI_DEV_ELECTRON_ARGS` 传给 Electron CLI） |
 | Electron 版本 | 30.5.1（来自 `dev-electron.log` 启动首行） |
-| user-data-dir | `.biof3-dev-user-data/`（dev 隔离，与 packaged `~/Documents/BioF3-Local/` 分开） |
+| user-data-dir | `.petri-dev-user-data/`（dev 隔离，与 packaged `~/Documents/Petri-Local/` 分开） |
 | CDP 入口 | `http://localhost:9222/json/version` → Browser=Chrome/130.0.0.0, Protocol=1.3 |
 | Page target | `ws://localhost:9222/devtools/page/...`（CONSOLE 视图） |
-| 数据库 | `~/Documents/BioF3-Local/biof3.db`（dev electron 复用同一份桌面板 userData） |
+| 数据库 | `~/Documents/Petri-Local/petri.db`（dev electron 复用同一份桌面板 userData） |
 | conv_id | `conv_57a378c6-e52`（与 T-AW-013 同会话） |
 
 启动日志 tail（最后 30 行节选，详见 `/tmp/dev-electron.log`）：
@@ -43,7 +43,7 @@ T-AW-014 是 T-AW-013 packaged Electron 第三轴验证（commit `1d1d1b2`）的
 [dev-electron] spawning electron with args: --remote-debugging-port=9222
 [main] ready: app version 0.0.1-rc.7, electron 30.5.1, node 20.14.0
 [main] agentWorkbenchFlags extraRenderers (default false)
-[main] created main window: bioF3MainWindow id=1
+[main] created main window: petriMainWindow id=1
 [preload] agentWorkbenchFlags bridge ready: getter + setter + onChange
 [simplechat] resultNodes injected for conversation conv_57a378c6-e52
 [focus] isKeyWindow after load: n/a isFocused: false
@@ -74,7 +74,7 @@ Settings → 实验特性 → 「Agent Workbench Extra Renderers」toggle ON：
 
 // localStorage 同步验证
 {
-  "key": "biof3.agentWorkbench.flags",
+  "key": "petri.agentWorkbench.flags",
   "value": "{\"extraRenderers\":true}"
 }
 
@@ -127,7 +127,7 @@ sleep 8
 }
 
 // localStorage 已含
-{"key":"biof3.agentWorkbench.flags","value":"{\"extraRenderers\":true}"}
+{"key":"petri.agentWorkbench.flags","value":"{\"extraRenderers\":true}"}
 
 // 4 renderer 端到端挂载（同 conv fixture）
 {

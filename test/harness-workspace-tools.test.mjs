@@ -9,34 +9,34 @@ import path from 'node:path';
 const require = createRequire(import.meta.url);
 
 // BLOCK-49 加映清债 —— 统一临时 DB 自举（存量：单跑/全量缺 projects 表）
-//（BIOF3_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）
+//（PETRI_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）
 {
   const fsx = require('node:fs');
   const osx = require('node:os');
   const pth = require('node:path');
   const urlx = require('node:url');
   const hereDir = pth.dirname(urlx.fileURLToPath(import.meta.url));
-  const Database = require(pth.resolve(hereDir, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const tempDbDir = fsx.mkdtempSync(pth.join(osx.tmpdir(), 'biof3-sweep-db-'));
-  const boot = new Database(pth.join(tempDbDir, 'biof3.db'));
+  const Database = require(pth.resolve(hereDir, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const tempDbDir = fsx.mkdtempSync(pth.join(osx.tmpdir(), 'petri-sweep-db-'));
+  const boot = new Database(pth.join(tempDbDir, 'petri.db'));
   const migrationsDir = pth.resolve(hereDir, '..', 'src', 'migrations');
   for (const f of fsx.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fsx.readFileSync(pth.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = pth.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = pth.join(tempDbDir, 'petri.db');
   process.on('exit', () => { try { fsx.rmSync(tempDbDir, { recursive: true, force: true }); } catch {} });
 }
-const { createWorkspaceTools } = require('../core/biof3-server/agent-tools/workspace-tools.js');
-const { getToolDefs } = require('../core/biof3-server/agent-tools/tool-defs.js');
-const { dispatchTool } = require('../core/biof3-server/agent-tools/index.js');
+const { createWorkspaceTools } = require('../core/petri-server/agent-tools/workspace-tools.js');
+const { getToolDefs } = require('../core/petri-server/agent-tools/tool-defs.js');
+const { dispatchTool } = require('../core/petri-server/agent-tools/index.js');
 
 // Windows (without Developer Mode) and some CI images cannot create symlinks,
 // which breaks the escape-prevention fixture. Probe once and skip the symlink
 // portion on unsupported platforms — the same guard used by the RS5 suite.
 function symlinksSupported() {
   try {
-    const probe = fssync.mkdtempSync(path.join(os.tmpdir(), 'biof3-symlink-probe-'));
+    const probe = fssync.mkdtempSync(path.join(os.tmpdir(), 'petri-symlink-probe-'));
     try {
       fssync.symlinkSync(path.join(probe, 'target'), path.join(probe, 'link'));
       return true;
@@ -65,7 +65,7 @@ let tools;
 const ctx = { projectId: 'p_workspace', userId: 'u_owner', accessMode: 'full' };
 
 before(async () => {
-  sandboxRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'biof3-workspace-tools-'));
+  sandboxRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'petri-workspace-tools-'));
   workspaceRoot = path.join(sandboxRoot, 'workspace');
   outsideRoot = path.join(sandboxRoot, 'outside');
   await fs.mkdir(path.join(workspaceRoot, 'data'), { recursive: true });

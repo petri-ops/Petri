@@ -12,7 +12,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const CORE = resolve(__dirname, '..', 'core', 'biof3-server');
+const CORE = resolve(__dirname, '..', 'core', 'petri-server');
 
 const ideTools = await import(
   pathToFileURL(resolve(CORE, 'mcp/ide-tools/index.js')).href
@@ -21,7 +21,7 @@ const { _rawHandlers } = ideTools;
 const H = _rawHandlers;
 
 test('ide_file_create + ide_file_read normal path', () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-test-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-test-`);
   const filePath = `${tmp}/new.txt`;
   const createRes = H.ide_file_create({ path: filePath, content: 'hello\n' });
   assert.equal(createRes.ok, true);
@@ -36,7 +36,7 @@ test('ide_file_create + ide_file_read normal path', () => {
 });
 
 test('ide_file_create rejects existing file', () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-test-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-test-`);
   const filePath = `${tmp}/dup.txt`;
   H.ide_file_create({ path: filePath, content: 'a' });
   const res = H.ide_file_create({ path: filePath, content: 'b' });
@@ -46,7 +46,7 @@ test('ide_file_create rejects existing file', () => {
 });
 
 test('ide_file_write overwrite requires confirm=true', () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-test-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-test-`);
   const filePath = `${tmp}/w.txt`;
   H.ide_file_create({ path: filePath, content: 'old' });
   const noConfirm = H.ide_file_write({ path: filePath, content: 'new' });
@@ -59,7 +59,7 @@ test('ide_file_write overwrite requires confirm=true', () => {
 });
 
 test('ide_file_write append mode', () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-test-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-test-`);
   const filePath = `${tmp}/a.txt`;
   H.ide_file_create({ path: filePath, content: 'a' });
   const res = H.ide_file_write({ path: filePath, content: 'b', mode: 'append' });
@@ -69,7 +69,7 @@ test('ide_file_write append mode', () => {
 });
 
 test('ide_file_delete requires confirm=true', () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-test-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-test-`);
   const filePath = `${tmp}/d.txt`;
   H.ide_file_create({ path: filePath, content: 'x' });
   const noConfirm = H.ide_file_delete({ path: filePath });
@@ -82,7 +82,7 @@ test('ide_file_delete requires confirm=true', () => {
 });
 
 test('ide_file_delete non-empty dir requires recursive=true', () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-test-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-test-`);
   const dir = `${tmp}/dir`;
   fs.mkdirSync(dir);
   fs.writeFileSync(`${dir}/inside.txt`, 'x');
@@ -95,7 +95,7 @@ test('ide_file_delete non-empty dir requires recursive=true', () => {
 });
 
 test('ide_file_rename moves file', () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-test-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-test-`);
   const oldPath = `${tmp}/old.txt`;
   const newPath = `${tmp}/new.txt`;
   H.ide_file_create({ path: oldPath, content: 'r' });
@@ -107,7 +107,7 @@ test('ide_file_rename moves file', () => {
 });
 
 test('ide_file_rename overwrite requires confirm=true', () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-test-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-test-`);
   const oldPath = `${tmp}/o.txt`;
   const newPath = `${tmp}/n.txt`;
   H.ide_file_create({ path: oldPath, content: 'o' });
@@ -126,7 +126,7 @@ test('ide_file_rename overwrite requires confirm=true', () => {
 });
 
 test('ide_file_exists returns correct state', () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-test-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-test-`);
   const filePath = `${tmp}/e.txt`;
   let res = H.ide_file_exists({ path: filePath });
   assert.equal(res.ok, true);
@@ -140,7 +140,7 @@ test('ide_file_exists returns correct state', () => {
 });
 
 test('ide_file_list with and without filter', () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-test-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-test-`);
   H.ide_file_create({ path: `${tmp}/a.txt`, content: 'a' });
   H.ide_file_create({ path: `${tmp}/b.md`, content: 'b' });
   fs.mkdirSync(`${tmp}/sub`);
@@ -159,7 +159,7 @@ test('ide_file_read rejects out-of-allowlist path', () => {
 });
 
 test('ide_file_read rejects oversized file via maxSize', () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-test-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-test-`);
   const filePath = `${tmp}/big.txt`;
   const big = 'x'.repeat(1024);
   H.ide_file_create({ path: filePath, content: big });

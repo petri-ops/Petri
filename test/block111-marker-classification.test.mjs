@@ -4,7 +4,7 @@
  * 契约红线（plan docs/block-111-jev-w1-marker-classification-plan.md §2.2/§6）：
  *   - CELL_MARKERS 规则表唯一候选生成，模型只挑不造（choice∉criteria 由 decision-api 校验拒收）；
  *   - 候选集为空 → 零出站直返 null（A 型边界：无候选不问模型）；
- *   - 默认关（BIOF3_JEV_MARKER_GUARD=1 显式开）= 零出站零行为变化；
+ *   - 默认关（PETRI_JEV_MARKER_GUARD=1 显式开）= 零出站零行为变化；
  *   - 任何失败形态（缺 key/超时/校验失败/网络失败/HTTP 错误）回退 lookupCellType 现行结果，永不 throw；
  *   - 单阈值门控（D-5：MARKER_DECISION_THRESHOLD=0.55，P0 校准证据 acceptance/block-111/calibration.json）。
  *
@@ -27,7 +27,7 @@ const {
   buildMarkerDecisionRequest,
   isMarkerGuardEnabled,
   lookupCellTypeWithConfidence,
-} = require(path.join(root, 'core', 'biof3-server', 'helpers', 'interpret.js'));
+} = require(path.join(root, 'core', 'petri-server', 'helpers', 'interpret.js'));
 
 const NO_SLEEP = async () => {};
 
@@ -82,7 +82,7 @@ function errorFetch(name) {
   return { impl, count: () => calls };
 }
 
-const GUARD_ON = { BIOF3_JEV_MARKER_GUARD: '1' };
+const GUARD_ON = { PETRI_JEV_MARKER_GUARD: '1' };
 const API_KEY_OVERRIDE = { apiKey: 'test-key-do-not-call-real-api' };
 
 test('lookupCellType 现行契约零变化（legacy 回退目标）', () => {
@@ -135,7 +135,7 @@ test('buildMarkerDecisionRequest：请求形状钉（P0 校准同形）', () => 
 });
 
 test('默认关：零出站 + 零行为变化（D-4）', async (t) => {
-  useEnv(t, { BIOF3_JEV_MARKER_GUARD: undefined });
+  useEnv(t, { PETRI_JEV_MARKER_GUARD: undefined });
   const fetchSpy = errorFetch('TimeoutError'); // 若被误调立即暴露
   const r = await lookupCellTypeWithConfidence(['CD3E', 'CD3D'], { ...API_KEY_OVERRIDE, fetchImpl: fetchSpy.impl, sleep: NO_SLEEP });
   assert.equal(isMarkerGuardEnabled(), false);

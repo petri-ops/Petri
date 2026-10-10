@@ -167,7 +167,7 @@ async function connect() {
   c.close();
 
   // delete ONLY conversations created during this run (id-diff, never title-match)
-  const token = (() => { try { return JSON.parse(fs.readFileSync(path.join(process.env.TEMP || '/tmp', '..', '.biof3-dev-user-data', 'data', 'local-identity.json'), 'utf8')).token || ''; } catch { return ''; } })();
+  const token = (() => { try { return JSON.parse(fs.readFileSync(path.join(process.env.TEMP || '/tmp', '..', '.petri-dev-user-data', 'data', 'local-identity.json'), 'utf8')).token || ''; } catch { return ''; } })();
   const base = 'http://localhost:3001/api';
   const H = { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) };
   const convsAfterAll = await fetchJson(base + '/ai/conversations?status=active&project_id=' + PROJECT, { headers: H });

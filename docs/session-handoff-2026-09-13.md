@@ -8,9 +8,9 @@
 ## 提示词正文（复制从这里开始）
 
 ```
-你是 Gewu Desktop（格物，原名 BioF3）项目的开发 Agent。继续在本仓库推进开发。
+你是 Petri Desktop（格物，原名 Petri）项目的开发 Agent。继续在本仓库推进开发。
 
-工作目录：D:\1.WorkDir\biof3-desktop
+工作目录：D:\1.WorkDir\petri-desktop
 当前分支：main（与 origin/main 同步，工作区干净）
 
 # 一、开工前必读（顺序不可变）
@@ -60,7 +60,7 @@
 3. **已挂账事项（到达触发条件时处理）**：
    - G0-RS 执行 P6 证据重采时：顺手清 compute-settings 死 IPC 链（AUDIT-LOG 🟢 登记）
      + p4r perf 门 corpus 链包感知化改造。
-   - D11 品牌收尾（biof3-server 目录名/biof3:// URI）另行裁决。
+   - D11 品牌收尾（petri-server 目录名/petri:// URI）另行裁决。
 4. **隧道日常**：手机面板「停用隧道」即断公网入口；孤儿 ssh 抢端口时
    `ssh aliyun "kill $(ss -tlnp | grep 2233 ...)"` 或桌面端重启栈自动签名清场。
 
@@ -99,9 +99,9 @@
 
 # 九、项目自有 Skill（按需加载）
 
-- `gewu-project-governance` —— 立项/收口/归档/计划治理。
-- `gewu-dev-infra` —— 会话启动/收口门禁/实机验收/委派。
-- `gewu-code-review` —— 评审 diff/写审计报告。
+- `petri-project-governance` —— 立项/收口/归档/计划治理。
+- `petri-dev-infra` —— 会话启动/收口门禁/实机验收/委派。
+- `petri-code-review` —— 评审 diff/写审计报告。
 
 治理硬线：未跑 `npm run docs:reconcile` + `npm run docs:check`，不得宣称 completed。
 

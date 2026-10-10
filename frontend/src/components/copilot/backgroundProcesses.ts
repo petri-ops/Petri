@@ -1,7 +1,7 @@
 /**
  * BLOCK-34 P3 — 后台进程浮窗客户端
  *
- * 只读查询 biof3-server 的 background-processes 路由（数据源为
+ * 只读查询 petri-server 的 background-processes 路由（数据源为
  * workspace-tools 内存进程表，per conversation 隔离）：
  *   - listBackgroundProcesses: 列出本会话后台进程（含日志尾部摘要）
  *   - fetchProcessLogTail: 读单个进程日志尾部（浮窗 1s 轮询用）

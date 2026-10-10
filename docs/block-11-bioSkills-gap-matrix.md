@@ -6,7 +6,7 @@
 > Last Updated: 2026-08-18
 > Source data:
 > - bioSkills clone: `/tmp/bioSkills` (depth=1)
-> - BioF3 manifests: `resources/built-in-plugins/manifest.json`, `resources/skills/manifest.json`
+> - Petri manifests: `resources/built-in-plugins/manifest.json`, `resources/skills/manifest.json`
 
 ---
 
@@ -14,12 +14,12 @@
 
 - bioSkills 仓库**真实规模**: **60 个生信 domain categories + 41 个跨领域 workflow pipelines = 101 个一级目录**，**562 个 SKILL.md**。BLOCK-11 plan v0.1 写的 "32 categories / ~170 SKILL.md" 是过期估计，需要按 101 categories 重新规划范围。
 - bioSkills 仓库本身**已被 archive**（README 头行明文），后续不会有官方更新与 bug 修复，集成时只能 fork + 内部维护。
-- BioF3 现状真实数字: **2 个 Skill** + **10 个真分析插件**（非 runtime、非 figcode-card、非 data）+ **19 个 figcode-card** + **2 个 runtime** + **1 个 figcode-data** = 32 个 manifest plugin entries，但仅覆盖 bioSkills **~13 个 categories**（含 partial / covered）。
+- Petri 现状真实数字: **2 个 Skill** + **10 个真分析插件**（非 runtime、非 figcode-card、非 data）+ **19 个 figcode-card** + **2 个 runtime** + **1 个 figcode-data** = 32 个 manifest plugin entries，但仅覆盖 bioSkills **~13 个 categories**（含 partial / covered）。
 - **完全 gap 的 categories: 47 个**（占 60 domain categories 的 ~78%）。
 - **新 Top 5（已重新评分）**:
-  1. **single-cell** (P0, 95) — 17 个 SKILL.md，BioF3 只有 4 个 FigCode 卡片，缺 integrated pipeline
-  2. **variant-calling** (P0, 92) — 13 个 SKILL.md，BioF3 只有 2 个 FigCode 卡片，缺 base calling
-  3. **methylation-analysis** (P1, 84) — 10 个 SKILL.md，BioF3 **完全空白**（gap）
+  1. **single-cell** (P0, 95) — 17 个 SKILL.md，Petri 只有 4 个 FigCode 卡片，缺 integrated pipeline
+  2. **variant-calling** (P0, 92) — 13 个 SKILL.md，Petri 只有 2 个 FigCode 卡片，缺 base calling
+  3. **methylation-analysis** (P1, 84) — 10 个 SKILL.md，Petri **完全空白**（gap）
   4. **rna-quantification** (P2, 78) — 4 个 SKILL.md，缺 salmon/kallisto/featurecounts
   5. **alignment-files** (P2, 76) — 10 个 SKILL.md，缺 samtools/pysam base plugin
 - 重大调整: 原 plan Top 5 中的 **pathway-analysis** 已**实质覆盖**（go-kegg + gsea + deg-analysis-standard + go-enrichment-analysis），从 P1 降到 **P3 候选**（次轮可补 reactomepa / msigdbr 升级）；**read-qc** 保留 P2 但评分下调。
@@ -180,18 +180,18 @@ workflows/metabolic-modeling-pipeline
 workflows/metabolomics-pipeline
 ```
 
-> **集成建议**：workflows/ 不直接映射到 BioF3 plugin（BioF3 plugin 是单工具或紧耦合组合），但其 `depends_on` 列表可作为 plugin 选型矩阵参考。例：`metagenomics-pipeline.depends_on = [read-qc/fastp-workflow, metagenomics/contamination-controls, metagenomics/kraken-classification, ...]` → BioF3 想覆盖 metagenomics 需要至少 5 个 plugin。
+> **集成建议**：workflows/ 不直接映射到 Petri plugin（Petri plugin 是单工具或紧耦合组合），但其 `depends_on` 列表可作为 plugin 选型矩阵参考。例：`metagenomics-pipeline.depends_on = [read-qc/fastp-workflow, metagenomics/contamination-controls, metagenomics/kraken-classification, ...]` → Petri 想覆盖 metagenomics 需要至少 5 个 plugin。
 
 ---
 
-## §5 BioF3 现有 Plugin/Skill 盘点
+## §5 Petri 现有 Plugin/Skill 盘点
 
 ### 5.1 Plugins（`resources/built-in-plugins/manifest.json`）
 
 | 类型 | Plugin ID | Title | Language | Status |
 |------|-----------|-------|----------|--------|
-| runtime | `biof3-r-runtime` | R 运行时 | R | — |
-| runtime | `biof3-py-runtime` | Python 运行时 | Python | — |
+| runtime | `petri-r-runtime` | R 运行时 | R | — |
+| runtime | `petri-py-runtime` | Python 运行时 | Python | — |
 | plugin | `volcano-plot` | 火山图 | R | canonical |
 | plugin | `deseq2` | DESeq2 差异分析 | R | canonical |
 | plugin | `gene-correlation` | 基因相关性热图 | R | incubating |
@@ -238,20 +238,20 @@ workflows/metabolomics-pipeline
 
 ### 5.3 间接依赖（runtime 内置）
 
-`biof3-py-runtime` description 声明包含：`pandas, numpy, scipy, sklearn, matplotlib, scanpy, anndata, biopython, pysam, pybedtools, pyBigWig, scikit-allel, mygene`。`biof3-r-runtime` 声明：`DESeq2, Bioconductor 3.22, ggplot2, dplyr, data.table, BiocGenerics, clusterProfiler, ...`（70+ R 包）。
+`petri-py-runtime` description 声明包含：`pandas, numpy, scipy, sklearn, matplotlib, scanpy, anndata, biopython, pysam, pybedtools, pyBigWig, scikit-allel, mygene`。`petri-r-runtime` 声明：`DESeq2, Bioconductor 3.22, ggplot2, dplyr, data.table, BiocGenerics, clusterProfiler, ...`（70+ R 包）。
 
-> **意义**：BioF3 已"零成本"具备 scanpy + squidpy + biopython + pysam 的 Python 基础，但**未把它们包装为 manifest plugin/skill**，导致用户/Agent 看不到可用入口。
+> **意义**：Petri 已"零成本"具备 scanpy + squidpy + biopython + pysam 的 Python 基础，但**未把它们包装为 manifest plugin/skill**，导致用户/Agent 看不到可用入口。
 
 ---
 
-## §6 Gap Matrix（bioSkills × BioF3）
+## §6 Gap Matrix（bioSkills × Petri）
 
 按 bioSkills domain categories（60 个）逐项判定，状态定义：
 - **covered** = 有对应 plugin + skill 已落地
 - **partial** = 有相关 plugin（figcode-card 或下游可视化）或 runtime 内置包但缺 skill/integrated pipeline
 - **gap** = 完全空白
 
-| # | Category | BioF3 Plugin | BioF3 Skill | Gap 状态 |
+| # | Category | Petri Plugin | Petri Skill | Gap 状态 |
 |---|----------|--------------|-------------|----------|
 | 1 | alignment | — | — | **gap**（runtime 有 biopython） |
 | 2 | alignment-files | — | — | **gap**（runtime 有 pysam） |
@@ -314,7 +314,7 @@ workflows/metabolomics-pipeline
 | 59 | tcr-bcr-analysis | — | — | **gap** |
 | 60 | temporal-genomics | — | — | **gap** |
 | 61 | variant-calling | `figcode-mut-signature`, `figcode-lego-plot`（BSgenome hg19） | — | **partial**（缺 GATK / DeepVariant / bcftools base caller） |
-| 62 | workflow-management | — | — | **gap**（当前 BioF3 自有 workflow-engine，不需要 nf-core/Nextflow） |
+| 62 | workflow-management | — | — | **gap**（当前 Petri 自有 workflow-engine，不需要 nf-core/Nextflow） |
 
 ### 6.1 汇总统计
 
@@ -336,15 +336,15 @@ workflows/metabolomics-pipeline
 
 ```
 Score = (SKILL.md 数 / 20) × 30     # 内容丰度（满分 30）
-      + (BioF3 覆盖缺口) × 25       # 空白度（满分 25，0=全覆盖，1=完全空）
+      + (Petri 覆盖缺口) × 25       # 空白度（满分 25，0=全覆盖，1=完全空）
       + (实现难度逆向) × 20         # 难度（满分 20，0=极难如 GATK，1=简单如 fastqc）
       + (用户使用频率) × 15         # 用户期望（满分 15，按生物医学主流任务估计）
-      + (BioF3 runtime 可复用度) × 10 # runtime 已有多少包（满分 10）
+      + (Petri runtime 可复用度) × 10 # runtime 已有多少包（满分 10）
 ```
 
 ### 7.2 Top 5
 
-| # | Priority | Category | SKILL.md | BioF3 现状 | Score | 实现难度 | 评分理由 |
+| # | Priority | Category | SKILL.md | Petri 现状 | Score | 实现难度 | 评分理由 |
 |---|----------|----------|----------|------------|-------|----------|----------|
 | 1 | **P0** | **single-cell** | 17 | 4 FigCode cards（trajectory/doublet/CytoTRACE/scvelo）；scanpy/anndata runtime 内置 | **95** | 中-High（sc内存大） | 内容丰度 25.5 + 空白 22（partial） + 难度 12 + 用户频度 14 + runtime 8 → 91.5 → 95（计为 RNA-seq 标杆 workflow） |
 | 2 | **P0** | **variant-calling** | 13 | 2 FigCode cards（mut-signature/lego-plot，BSgenome hg19）；完全无 base caller | **92** | High（GATK license / DeepVariant 大依赖） | 19.5 + 25 + 10 + 13 + 8 → 75.5 → 上调因 +10 公共数据库刚需（GEO/SRA/PRJNA/ClinVar） |
@@ -359,22 +359,22 @@ Score = (SKILL.md 数 / 20) × 30     # 内容丰度（满分 30）
 | 1 | single-cell (P0, 95) | **single-cell (P0, 95)** | 不变，理性最高 |
 | 2 | variant-calling (P0, 92) | **variant-calling (P0, 92)** | 不变 |
 | 3 | pathway-analysis (P1, 85) | **methylation-analysis (P1, 84)** | pathway-analysis 已被 go-kegg+gsea+2 skills 实质 covered，从 Top 5 降到 P3 |
-| 4 | methylation-analysis (P1, 82) | **rna-quantification (P2, 78)** | 上调 rna-quantification：DEG 上游必经、BioF3 完全空白 |
+| 4 | methylation-analysis (P1, 82) | **rna-quantification (P2, 78)** | 上调 rna-quantification：DEG 上游必经、Petri 完全空白 |
 | 5 | read-qc (P2, 78) | **alignment-files (P2, 76)** | read-qc 保留 partial（expression-qc 是 count-level）但下调；alignment-files 是 read-qc 上游必经，runtime 已含 pysam |
 
 ### 7.4 关键决策点
 
-1. **pathway-analysis 退出 Top 5**：原 plan 误把"已覆盖"当"待做"，重新核对 BioF3 已具备 clusterProfiler + 2 skills。下一轮（PHASE 6+）可以补 reactomepa / WikiPathways / msigdbr 高级用法，但不是 P0-P1 紧急事项。
-2. **rna-quantification 进入 Top 5**：salmon/kallisto/featureCounts 是 RNA-seq 必做步骤，但 BioF3 完全空白；这是 workflow 完整性硬缺口。
+1. **pathway-analysis 退出 Top 5**：原 plan 误把"已覆盖"当"待做"，重新核对 Petri 已具备 clusterProfiler + 2 skills。下一轮（PHASE 6+）可以补 reactomepa / WikiPathways / msigdbr 高级用法，但不是 P0-P1 紧急事项。
+2. **rna-quantification 进入 Top 5**：salmon/kallisto/featureCounts 是 RNA-seq 必做步骤，但 Petri 完全空白；这是 workflow 完整性硬缺口。
 3. **alignment-files 进入 Top 5**：samtools/pysam base plugin 是 read-qc、variant-calling、rna-quantification 的共同上游；不放 Top 5 后续 plugin 都得各自解决 BAM 处理。
 
 ---
 
 ## §8 Phase 2/3 候选（剩余 categories 排序）
 
-按"BioF3 空白度 × 用户频度 × 实现难度"排序，给后续工作包（PHASE 6+）参考。本表不在 BLOCK-11 范围（plan §2.2 明确 32→all 是 G1+ 工作）。
+按"Petri 空白度 × 用户频度 × 实现难度"排序，给后续工作包（PHASE 6+）参考。本表不在 BLOCK-11 范围（plan §2.2 明确 32→all 是 G1+ 工作）。
 
-| Rank | Category | SKILL.md | BioF3 现状 | 备注 |
+| Rank | Category | SKILL.md | Petri 现状 | 备注 |
 |------|----------|----------|------------|------|
 | 6 | read-qc | 7 | partial（expression-qc only） | FASTQ-level QC（FastQC/fastp/MultiQC） |
 | 7 | atac-seq | 12 | gap | MACS3 + chromVAR |
@@ -413,12 +413,12 @@ Score = (SKILL.md 数 / 20) × 30     # 内容丰度（满分 30）
 
 | Risk | Severity | Affected Categories | Mitigation |
 |------|----------|---------------------|------------|
-| **bioSkills 仓库已 archive** | High | 所有 | 仅作为内容参考 fork 至 BioF3 内部维护；不依赖上游更新 |
+| **bioSkills 仓库已 archive** | High | 所有 | 仅作为内容参考 fork 至 Petri 内部维护；不依赖上游更新 |
 | **GATK 商用 license** | High | variant-calling | 用 DeepVariant（开源） + bcftools（开源） + Clair3（开源）组合替代 GATK4 full pipeline |
-| **DeepVariant / Clair3 模型 1-2GB** | Medium | variant-calling | 复用 biof3-py-runtime；模型随 plugin artifact 打包（biof3 模式已支持） |
+| **DeepVariant / Clair3 模型 1-2GB** | Medium | variant-calling | 复用 petri-py-runtime；模型随 plugin artifact 打包（petri 模式已支持） |
 | **Seurat 启动慢（GB 内存）** | Medium | single-cell | acceptance.json 设 memory threshold；提供 python scanpy 默认路径 |
 | **Cassiopeia / Pertpy 安装复杂** | Medium | single-cell | 接受范围：scRBA pipeline 优先用 scanpy + scvi-tools + scvelo（已可用） |
-| **methylKit / bsseq R 包体积** | Medium | methylation-analysis | 接受范围：均已包含在 Bioconductor 3.22 中（biof3-r-runtime 已声明 70+ 包） |
+| **methylKit / bsseq R 包体积** | Medium | methylation-analysis | 接受范围：均已包含在 Bioconductor 3.22 中（petri-r-runtime 已声明 70+ 包） |
 | **Salmon/kallisto 二进制 + decoy index** | Medium | rna-quantification | decoy-aware index artifact 制作一次，预置 ref 包 |
 | **samtools/pysam 包装** | Low | alignment-files | 已有 runtime pysam；只需 plugin manifest + run.sh |
 | **BSgenome.Hsapiens.UCSC.hg19 (~2.5GB)** | Low | variant-calling（已有） | `figcode-data-bsgenome-hg19` 已声明 |
@@ -428,10 +428,10 @@ Score = (SKILL.md 数 / 20) × 30     # 内容丰度（满分 30）
 
 | Risk | Severity | Mitigation |
 |------|----------|------------|
-| SKILL.md 长度 100-500 行、含 code 块 | Medium | bioSkills 仅作内容参考；BioF3 plugin.json 仅 30-50 行 manifest + run script |
-| bioSkills SKILL.md 用 markdown + YAML frontmatter，BioF3 用 JSON schema | Low | plan §4.3 已设计映射表（`Use when...` → `description`、`depends_on` → `plugins.required`） |
-| bioSkills 使用 "decision tree / failure modes" 段落 | Low | BioF3 skill.json `recovery_strategies` 字段已对位 |
-| bioSkills 评估（Bio-Task Bench）与 BioF3 Result Studio 评估体系不同 | Low | 仅借鉴 SKILL.md 内容，**不**复制评估基线 |
+| SKILL.md 长度 100-500 行、含 code 块 | Medium | bioSkills 仅作内容参考；Petri plugin.json 仅 30-50 行 manifest + run script |
+| bioSkills SKILL.md 用 markdown + YAML frontmatter，Petri 用 JSON schema | Low | plan §4.3 已设计映射表（`Use when...` → `description`、`depends_on` → `plugins.required`） |
+| bioSkills 使用 "decision tree / failure modes" 段落 | Low | Petri skill.json `recovery_strategies` 字段已对位 |
+| bioSkills 评估（Bio-Task Bench）与 Petri Result Studio 评估体系不同 | Low | 仅借鉴 SKILL.md 内容，**不**复制评估基线 |
 
 ### 9.3 治理 / 流程风险
 
@@ -440,7 +440,7 @@ Score = (SKILL.md 数 / 20) × 30     # 内容丰度（满分 30）
 | BLOCK-10 active 并行冲突 | High | 单工作包串行纪律（plan §0 已要求用户裁决） |
 | plan v0.1 数字（32/170）与现实（101/562）不符 | Medium | 本 gap matrix 已重算，PHASE 1 启动前更新 plan v0.2 |
 | 10 个真 plugin + 2 skills 的覆盖与已发布 acceptance 不被新工作破坏 | Medium | PHASE 1 启动前跑 `npm run ui:audit:check` + `npm run docs:check` 基线 |
-| `biof3-r-runtime` 包声明 vs `biof3-py-runtime` 包声明未列全名 | Low | 拉取 runtime artifact 内的 `requirements.txt` / `DESCRIPTION` 后再决定 plugin 需补包 |
+| `petri-r-runtime` 包声明 vs `petri-py-runtime` 包声明未列全名 | Low | 拉取 runtime artifact 内的 `requirements.txt` / `DESCRIPTION` 后再决定 plugin 需补包 |
 
 ---
 
@@ -474,7 +474,7 @@ Score = (SKILL.md 数 / 20) × 30     # 内容丰度（满分 30）
 
 1. 更新 BLOCK-11 plan v0.1 → v0.2（按 §10.1 修订建议）
 2. 用户明确裁决 BLOCK-10 vs BLOCK-11 顺序（plan §0 选项 A/B/C）
-3. 核对 `biof3-r-runtime` 包列表（runtime artifact 内 `DESCRIPTION`）vs Top 5 所需 R 包；缺的包列入 `requirements.json`（不影响 Phase 1，但 PHASE 2 启动前必须解决）
+3. 核对 `petri-r-runtime` 包列表（runtime artifact 内 `DESCRIPTION`）vs Top 5 所需 R 包；缺的包列入 `requirements.json`（不影响 Phase 1，但 PHASE 2 启动前必须解决）
 4. 跑 `npm run docs:check` + `npm run ui:audit:check` 基线，确认现有 32 manifest plugin entries / 2 skills 不被破坏
 5. 制定「skill.json → plugin 选型矩阵」文档（基于 plan §4.3 + 本 gap matrix §6）
 
@@ -487,8 +487,8 @@ Score = (SKILL.md 数 / 20) × 30     # 内容丰度（满分 30）
 - bioSkills README 头行: *"This repo is archived... no longer updates or code fixes"*
 - bioSkills skill writing reference: `/tmp/bioSkills/skill_writing_reference.md`
 - bioSkills 评估: `/tmp/bioSkills/resources/bioskills_eval_20260328.pdf`
-- BioF3 plugin manifest: `resources/built-in-plugins/manifest.json`
-- BioF3 skill manifest: `resources/skills/manifest.json`
-- BioF3 sample plugin: `resources/built-in-plugins/deseq2/plugin.json`
-- BioF3 sample skill: `resources/skills/deg-analysis-standard/skill.json`
+- Petri plugin manifest: `resources/built-in-plugins/manifest.json`
+- Petri skill manifest: `resources/skills/manifest.json`
+- Petri sample plugin: `resources/built-in-plugins/deseq2/plugin.json`
+- Petri sample skill: `resources/skills/deg-analysis-standard/skill.json`
 - BLOCK-11 plan v0.1: `agent-tools/block-11-bioSkills-integration-plan-v0.1.md`（将升级为 v0.2）

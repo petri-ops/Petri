@@ -15,7 +15,7 @@ governingDocs:
 
 ## 1. 目标
 
-为 BioF3 Desktop 补齐"AI Agent 完成一次任务后，弹出 PR-style diff 审阅浮层"的体验：用户可对 working tree 改动按 **hunk 级别**批准/拒绝/回滚，拒绝信号写入本机清单并通过 `system-prompt` 注入让 AI 在下一轮对话里**重新生成**。
+为 Petri Desktop 补齐"AI Agent 完成一次任务后，弹出 PR-style diff 审阅浮层"的体验：用户可对 working tree 改动按 **hunk 级别**批准/拒绝/回滚，拒绝信号写入本机清单并通过 `system-prompt` 注入让 AI 在下一轮对话里**重新生成**。
 
 **v1 thin-slice 范围**（不含 G1+ 阶段事项）：
 - 5 条 IPC invoke/handle 通道 + 1 条 main→renderer 通知事件
@@ -52,7 +52,7 @@ governingDocs:
 ## 4. 不变量守住
 
 不修改 / 不破坏：
-- `src/preload.js` 的 `biof3Desktop.*` 既有 19 个命名空间（**只新增** 不覆盖）
+- `src/preload.js` 的 `petriDesktop.*` 既有 19 个命名空间（**只新增** 不覆盖）
 - `frontend/src/lib/electron.d.ts` 既有 IPC 类型（**只 extend** `WorkingTreeReview*` 子树）
 - `frontend/src/lib/desktopBridge.ts` 既有 `getBridge / requireBridge / isDesktop`
 - `core/shared-backend/git-adapter.js`（**只读取 + 调用**已有 `diff / stage / status`；BLOCK-16 范围内**新增** `applyPatch / revertPaths` 两个方法）
@@ -92,16 +92,16 @@ governingDocs:
      - `git:hunk-apply` → `git-adapter.applyPatch({ patch: reversePatch })` + reject 清单写入
      - `git:working-tree-revert` → `git-adapter.revertPaths()`
    - 1 条通知：`webContents.send('agent:task-done', { taskId, filesChanged })`
-   - 路径白名单走 `core/r-server/mcp/ide-tools/path-allowlist.js`（cwd / os.tmpdir / ~/.biof3/logs）
-   - **Sender guard**：参考 BLOCK-3 `_sender-guard.js`（同包已有），每个 handler 调用 `_assertBioF3Sender(event)`
+   - 路径白名单走 `core/r-server/mcp/ide-tools/path-allowlist.js`（cwd / os.tmpdir / ~/.petri/logs）
+   - **Sender guard**：参考 BLOCK-3 `_sender-guard.js`（同包已有），每个 handler 调用 `_assertPetriSender(event)`
 
 3. **`src/main.js` 装配**：在 `app.whenReady().then(...)` 内增加一行 `setupWorkingTreeReviewIpc({ mainWindow })`，与既有 `setupXxxIpc` 风格一致
 
-4. **`src/preload.js`**：在 `window.biof3Desktop` 的子树下增加 `workingTreeReview.*` 5 个 invoke + 1 个 `onTaskDone(callback)` 通知
+4. **`src/preload.js`**：在 `window.petriDesktop` 的子树下增加 `workingTreeReview.*` 5 个 invoke + 1 个 `onTaskDone(callback)` 通知
    - 命名空间：`workingTreeReview.{status, diff, fileContent, applyHunk, revert, onTaskDone}`
    - **不动** 既有 19 个命名空间的方法签名
 
-5. **`frontend/src/lib/electron.d.ts`**：在 `Window.biof3Desktop` 类型下 extend `workingTreeReview: { ... }`（5 个方法 + 1 个事件订阅）
+5. **`frontend/src/lib/electron.d.ts`**：在 `Window.petriDesktop` 类型下 extend `workingTreeReview: { ... }`（5 个方法 + 1 个事件订阅）
 
 **PHASE 1 验证**（不跑全量）：
 - `node --check src/ipc/working-tree-review.js` 必须 PASS
@@ -161,10 +161,10 @@ governingDocs:
 **主 Agent 直做 + worker 委派混合**：
 
 1. **agent-done 事件广播**：
-   - **主 Agent** 改 `frontend/src/components/copilot/copilotClient.ts`：在 SSE `event='done'` 的分支里调 `window.dispatchEvent(new CustomEvent('biof3:agent-task-done', { detail: { taskId, filesChanged } }))`
+   - **主 Agent** 改 `frontend/src/components/copilot/copilotClient.ts`：在 SSE `event='done'` 的分支里调 `window.dispatchEvent(new CustomEvent('petri:agent-task-done', { detail: { taskId, filesChanged } }))`
    - **主 Agent** 在 `frontend/src/lib/events.ts` 的 typed event bus 增加 `'agent-task-done'` 事件常量 + type
    - **worker** 在 `src/main.js`（或 `src/ipc/working-tree-review.js`）增加 SSE → main IPC 桥（如果 SSE 不在主进程）：MCP SSE listener → `webContents.send('agent:task-done', ...)`
-   - **不引入** 新依赖；沿用既有 `biof3Events` typed bus 模式
+   - **不引入** 新依赖；沿用既有 `petriEvents` typed bus 模式
 
 2. **hunk 拒绝清单**：
    - **主 Agent** 在 `frontend/src/components/desktop/WorkingTreeReview/DiffFileView.tsx` 的 reject 路径里调 `bridge.workingTreeReview.applyHunk({ ..., action: 'reject' })`

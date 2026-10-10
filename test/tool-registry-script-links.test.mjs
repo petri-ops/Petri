@@ -8,16 +8,16 @@ import { fileURLToPath } from 'node:url';
 const require = createRequire(import.meta.url);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const packRegistry = require('../core/shared-backend/pack-registry.js');
-const toolRegistry = require('../core/biof3-server/tool-registry.js');
+const toolRegistry = require('../core/petri-server/tool-registry.js');
 
 // D2 注册表死链守卫（G0-BIO §2.0 / BLOCK-145 D2①）
 //
 // 契约（退役契约）：领域注册表 registry/tool-registry.json 里声明了脚本的每个
 // TOOLS.* 条目（cfg.script 非空字符串），其脚本必须真实存在于：
-//   a) pack 仓 gewu-pack-bio/plugins*/（含 plugins.dormant——glob `plugins*` 字面义）
+//   a) pack 仓 petri-pack-bio/plugins*/（含 plugins.dormant——glob `plugins*` 字面义）
 //      任一插件的 scripts/ 目录；或
-//   b) desktop 侧 core/biof3-server/tool-scripts/（tools-executor 的 scriptsDir
-//      解析目标，core/biof3-server/routes/tools.js:28）。
+//   b) desktop 侧 core/petri-server/tool-scripts/（tools-executor 的 scriptsDir
+//      解析目标，core/petri-server/routes/tools.js:28）。
 // 死链逐条列出 = 红。退役（删除条目/script 置空走插件通道/改指 pack 插件脚本）后转绿。
 //
 // 背景：BLOCK-83 P4 领域中立化后 desktop 侧 tool-scripts/ 已删（G0-BIO §2.0）。
@@ -27,15 +27,15 @@ const toolRegistry = require('../core/biof3-server/tool-registry.js');
 // 必然 "Script not found"（tools-executor.js:1398）。本测试把「声明了脚本就必须
 // 找得到脚本」变成机械守卫，防止注册表再积累纸面条目。
 
-const DESKTOP_SCRIPTS_DIR = path.join(root, 'core', 'biof3-server', 'tool-scripts');
+const DESKTOP_SCRIPTS_DIR = path.join(root, 'core', 'petri-server', 'tool-scripts');
 
 function findPackRoot() {
   const available = packRegistry.discoverAvailablePacks({ projectRoot: root });
-  const pack = available.find((p) => p.packId === 'gewu-pack-bio');
+  const pack = available.find((p) => p.packId === 'petri-pack-bio');
   if (!pack) {
     throw new Error(
-      'pack 仓未找到：discoverAvailablePacks 未发现 gewu-pack-bio' +
-        '（期望兄弟仓 ../gewu-pack-bio，实际候选见 core/shared-backend/pack-registry.js:100-115）'
+      'pack 仓未找到：discoverAvailablePacks 未发现 petri-pack-bio' +
+        '（期望兄弟仓 ../petri-pack-bio，实际候选见 core/shared-backend/pack-registry.js:100-115）'
     );
   }
   return pack.packRoot;
@@ -76,7 +76,7 @@ test('D2 注册表死链守卫：registry 声明的每个脚本必须存在于 p
   const registryFile = path.join(packRoot, 'registry', 'tool-registry.json');
   assert.ok(fs.existsSync(registryFile), 'pack 注册表缺失: ' + registryFile);
 
-  // 走生产注册单入口（core/biof3-server/tool-registry.js registerDomainToolsFile），
+  // 走生产注册单入口（core/petri-server/tool-registry.js registerDomainToolsFile），
   // 与 server.js:82 boot 接线同一路径，不直接裸读 JSON。
   const wired = toolRegistry.registerDomainToolsFile(registryFile);
   assert.equal(wired.ok, true, '注册表装载失败: ' + JSON.stringify(wired));

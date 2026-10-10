@@ -20,7 +20,7 @@ const path = require('node:path');
 const http = require('node:http');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-59');
 const SESSION_ID = process.env.BIOF59_SESSION || 'default';
 
@@ -99,13 +99,13 @@ async function main() {
 
   const targets = await listTargets();
   const page = targets.find((t) => t.type === 'page' && /localhost:3000/.test(t.url || '') && !/(\/window\/)/.test(t.url || ''));
-  if (!page) throw new Error('biof3_page_not_found');
+  if (!page) throw new Error('petri_page_not_found');
   const client = await new CdpClient(page.webSocketDebuggerUrl).connect();
   results.mainPage = page.url;
 
   // 幂等预清理：上轮残留（terminal 条目 / default 会话）
   const pre = await evalJSRetry(client, `(async () => {
-    const wm = window.biof3Desktop?.windowManager;
+    const wm = window.petriDesktop?.windowManager;
     if (!wm) return { bridge: false };
     const snap = await wm.snapshot();
     const entry = (snap?.snapshot?.entries || []).find((e) => e.id === 'terminal:${SESSION_ID}');
@@ -113,17 +113,17 @@ async function main() {
       if (entry.state === 'popped') await wm.minimizeToRail(entry.id);
       await wm.remove(entry.id);
     }
-    await window.biof3Desktop.terminal.stopSession('${SESSION_ID}');
+    await window.petriDesktop.terminal.stopSession('${SESSION_ID}');
     return { bridge: true, cleaned: !!entry };
   })()`);
   assert('主窗 windowManager/terminal 桥可用 + 预清理', pre?.bridge === true, JSON.stringify(pre));
 
   // 1) 起会话
-  const started = await evalJSRetry(client, `window.biof3Desktop.terminal.startSession(undefined, '${SESSION_ID}')`);
+  const started = await evalJSRetry(client, `window.petriDesktop.terminal.startSession(undefined, '${SESSION_ID}')`);
   assert('终端会话启动（主窗 tab 语义，pty 运行中）', started?.ok === true && started?.sessionId === '${SESSION_ID}'.replace('${SESSION_ID}', SESSION_ID), JSON.stringify(started));
 
   // 2) 升格为窗
-  const pop = await evalJSRetry(client, `window.biof3Desktop.windowManager.popOut('terminal', '${SESSION_ID}')`);
+  const pop = await evalJSRetry(client, `window.petriDesktop.windowManager.popOut('terminal', '${SESSION_ID}')`);
   assert('终端 Tab 升格 → created（terminal:<sessionId>）', pop?.ok && pop?.action === 'created' && pop?.id === `terminal:${SESSION_ID}`, JSON.stringify(pop));
   const popHits = await pollTarget('/window/terminal/');
   assert('终端独立窗 target 出现', Array.isArray(popHits) && popHits.length === 1, `targets=${popHits?.length}`);
@@ -139,9 +139,9 @@ async function main() {
   await screenshot(popClient, path.join(EVIDENCE_DIR, 'p59-p2-01-terminal-window.png'));
 
   // 3) 数据面：主窗写入 → pty echo → 受管窗转发 → 弹出窗收到
-  await evalJSRetry(popClient, `(() => { window.__p59probe = ''; window.biof3Desktop.terminal.onData((p) => { if (p.sessionId === '${SESSION_ID}') window.__p59probe += String(p.data || ''); }); return true; })()`);
+  await evalJSRetry(popClient, `(() => { window.__p59probe = ''; window.petriDesktop.terminal.onData((p) => { if (p.sessionId === '${SESSION_ID}') window.__p59probe += String(p.data || ''); }); return true; })()`);
   const marker = `B59P2-${Date.now()}`;
-  await evalJSRetry(client, `window.biof3Desktop.terminal.writeSession('echo ${marker}\\r', '${SESSION_ID}')`);
+  await evalJSRetry(client, `window.petriDesktop.terminal.writeSession('echo ${marker}\\r', '${SESSION_ID}')`);
   let probeHit = false;
   for (let i = 0; i < 15; i++) {
     await delay(600);
@@ -153,7 +153,7 @@ async function main() {
   assert('弹出窗终端有真实渲染内容（xterm rows 非空）', termLines > 0, `chars=${termLines}`);
 
   // 4) × 降格 → 轨道出现
-  const mini = await evalJSRetry(client, `window.biof3Desktop.windowManager.minimizeToRail('terminal:${SESSION_ID}')`);
+  const mini = await evalJSRetry(client, `window.petriDesktop.windowManager.minimizeToRail('terminal:${SESSION_ID}')`);
   assert('× → 降格 railed（终端常驻不淡出）', mini?.ok && mini?.state === 'railed', JSON.stringify(mini));
   const railHits = await pollTarget('/window/rail');
   assert('轨道容器窗 target 出现（懒创建）', Array.isArray(railHits) && railHits.length >= 1, `targets=${railHits?.length}`);
@@ -171,7 +171,7 @@ async function main() {
   // 5) 点击刻度 = 恢复
   await evalJSRetry(railClient, `(() => { const t = document.querySelector('[data-kind="terminal"]'); t.click(); return true; })()`);
   await delay(1500);
-  const snapRestored = await evalJSRetry(client, `window.biof3Desktop.windowManager.snapshot()`);
+  const snapRestored = await evalJSRetry(client, `window.petriDesktop.windowManager.snapshot()`);
   const restoredEntry = (snapRestored?.snapshot?.entries || []).find((e) => e.id === `terminal:${SESSION_ID}`);
   assert('轨道刻度点击 → popped（hover 恢复路径的点击等价）', restoredEntry?.state === 'popped', JSON.stringify(restoredEntry));
 
@@ -185,10 +185,10 @@ async function main() {
   assert('无降格窗口时轨道自动隐藏（visibilityState hidden）', railHidden);
 
   // 7) 再降格 → 轨道显式移除 → 轨道隐藏 + 条目终结
-  await evalJSRetry(client, `window.biof3Desktop.windowManager.minimizeToRail('terminal:${SESSION_ID}')`);
+  await evalJSRetry(client, `window.petriDesktop.windowManager.minimizeToRail('terminal:${SESSION_ID}')`);
   await pollTarget('/window/rail');
-  await evalJSRetry(client, `window.biof3Desktop.windowManager.remove('terminal:${SESSION_ID}')`);
-  const snapFinal = await evalJSRetry(client, `window.biof3Desktop.windowManager.snapshot()`);
+  await evalJSRetry(client, `window.petriDesktop.windowManager.remove('terminal:${SESSION_ID}')`);
+  const snapFinal = await evalJSRetry(client, `window.petriDesktop.windowManager.snapshot()`);
   assert('轨道显式移除 → 条目终结', !((snapFinal?.snapshot?.entries || []).some((e) => e.id === `terminal:${SESSION_ID}`)));
   let railHidden2 = false;
   for (let i = 0; i < 10; i++) {
@@ -199,7 +199,7 @@ async function main() {
   assert('移除后轨道隐藏（常驻窗保活不销毁）', railHidden2);
 
   // 清理：停 pty 会话
-  await evalJSRetry(client, `window.biof3Desktop.terminal.stopSession('${SESSION_ID}')`);
+  await evalJSRetry(client, `window.petriDesktop.terminal.stopSession('${SESSION_ID}')`);
 
   const allPass = results.assertions.every((a) => a.pass);
   results.finishedAt = new Date().toISOString();

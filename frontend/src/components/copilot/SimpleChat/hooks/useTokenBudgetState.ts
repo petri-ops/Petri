@@ -1,7 +1,7 @@
 // BLOCK-92 Wave A-3 — token 预算事件状态（自主组件平移，零行为变化）：
-// 订阅 gewu token_budget 事件（BLOCK-20），驱动 ContextBudgetButton。
+// 订阅 petri token_budget 事件（BLOCK-20），驱动 ContextBudgetButton。
 import { useEffect, useState } from 'react';
-import { gewuEvents } from '@/lib/events';
+import { petriEvents } from '@/lib/events';
 import type { TokenBudget } from '../../ContextBudgetBar';
 
 export function useTokenBudgetState(): TokenBudget | null {
@@ -21,8 +21,8 @@ export function useTokenBudgetState(): TokenBudget | null {
         knowledgeTokens: detail.knowledgeTokens,
       });
     };
-    window.addEventListener(gewuEvents.tokenBudget, handler);
-    return () => window.removeEventListener(gewuEvents.tokenBudget, handler);
+    window.addEventListener(petriEvents.tokenBudget, handler);
+    return () => window.removeEventListener(petriEvents.tokenBudget, handler);
   }, []);
 
   return tokenBudget;

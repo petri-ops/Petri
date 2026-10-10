@@ -231,13 +231,13 @@ function preloadHarness({ invokeValue } = {}) {
       assert.equal(moduleName, 'electron');
       return { contextBridge, ipcRenderer, webUtils: {} };
     },
-    // BLOCK-100 起 preload 读 process.argv 探测测试实例标记（--gewu-test-instance=1）
+    // BLOCK-100 起 preload 读 process.argv 探测测试实例标记（--petri-test-instance=1）
     process: { platform: 'darwin', arch: 'arm64', env: {}, argv: [] },
     window: { dispatchEvent() {} },
     CustomEvent: class CustomEvent {},
   });
 
-  return { desktop: exposed.get('biof3Desktop'), sent, invoked, added, removed, listeners };
+  return { desktop: exposed.get('petriDesktop'), sent, invoked, added, removed, listeners };
 }
 
 test('main window is explicitly frameless for renderer-owned controls', () => {
@@ -404,7 +404,7 @@ test('macOS window shortcuts close/minimize while preserving Cmd/Ctrl+R refresh 
 
 test('preload window controls use exact IPC channels and cleanup the same listener', async () => {
   const { desktop, sent, invoked, added, removed, listeners } = preloadHarness();
-  assert.ok(desktop?.window, 'preload must expose biof3Desktop.window');
+  assert.ok(desktop?.window, 'preload must expose petriDesktop.window');
 
   desktop.window.minimize();
   desktop.window.maximize();

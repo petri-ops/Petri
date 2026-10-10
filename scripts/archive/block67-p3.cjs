@@ -12,11 +12,11 @@ if (!pid) { console.error('usage: node block67-p3-a3.cjs <projectId>'); process.
   const targets = await fetchJson('http://127.0.0.1:9222/json');
   const c = await new CdpClient(targets[0].webSocketDebuggerUrl).connect();
   const out = await Promise.race([
-    c.send('Runtime.evaluate',{expression:`(async()=>{const br=(window.gewu||window.biof3Desktop)?.workingTreeReview;if(!br)return 'NO_BRIDGE';const st=await br.status({projectId:'${pid}'});const n=st.data?st.data.files.length:-1;let diffHas=false;if(n>0){const df=await br.diff({projectId:'${pid}',paths:['README.md']});diffHas=JSON.stringify(df).includes('remote-dirty-line');}return JSON.stringify({n,diffHas});})()`,awaitPromise:true,returnByValue:true}),
+    c.send('Runtime.evaluate',{expression:`(async()=>{const br=(window.petri||window.petriDesktop)?.workingTreeReview;if(!br)return 'NO_BRIDGE';const st=await br.status({projectId:'${pid}'});const n=st.data?st.data.files.length:-1;let diffHas=false;if(n>0){const df=await br.diff({projectId:'${pid}',paths:['README.md']});diffHas=JSON.stringify(df).includes('remote-dirty-line');}return JSON.stringify({n,diffHas});})()`,awaitPromise:true,returnByValue:true}),
     new Promise((_,rej)=>setTimeout(()=>rej(new Error('eval_timeout')),45000)),
   ]);
   console.log(out.exceptionDetails?'EXC '+String(out.exceptionDetails.exception?.description||'').slice(0,150):out.result.value);
-  const remote = execFileSync('ssh',['-o','BatchMode=yes','--','aliyun','cd /root/gewu-block67-demo && git status --porcelain | head -1; git log --format=%ad -1 --date=format:%H:%M:%S'],{encoding:'utf8'});
+  const remote = execFileSync('ssh',['-o','BatchMode=yes','--','aliyun','cd /root/petri-block67-demo && git status --porcelain | head -1; git log --format=%ad -1 --date=format:%H:%M:%S'],{encoding:'utf8'});
   console.log('remote:', JSON.stringify(remote));
   c.socket.close();
   process.exit(0);

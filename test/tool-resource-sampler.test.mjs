@@ -93,7 +93,7 @@ test('P6 tool sampler never turns explicit null observations into measured zeroe
 });
 
 test('P6 directory sampler measures physical job bytes without following paths outside the tree', async (context) => {
-  const root = mkdtempSync(path.join(tmpdir(), 'biof3-resource-sampler-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-resource-sampler-'));
   context.after(() => rmSync(root, { recursive: true, force: true }));
   mkdirSync(path.join(root, 'output'));
   writeFileSync(path.join(root, 'input.csv'), '12345');

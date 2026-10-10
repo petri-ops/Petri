@@ -1,12 +1,12 @@
 /**
  * shared-backend/ai-usage-helper.js — AI 用量记录的注入式入口（自洽版）
  *
- * 断点1（分仓前置）：斩断 llm-providers 对 biof3-server/helpers/ai-usage 的反向 require。
- * 调用方（biof3-server）启动时调 configure({recordAiUsage}) 注入自己的实现；
+ * 断点1（分仓前置）：斩断 llm-providers 对 petri-server/helpers/ai-usage 的反向 require。
+ * 调用方（petri-server）启动时调 configure({recordAiUsage}) 注入自己的实现；
  * 未注入时 no-op（不阻塞 LLM 调用，计费降级但不报错）。
  *
- * 历史上 deepseek/dashscope/dashscope-vision 各自懒 require biof3-server/helpers/ai-usage，
- * 分仓后 ../../biof3-server/helpers/ai-usage 路径会断。依赖反转后，shared-backend 真自洽。
+ * 历史上 deepseek/dashscope/dashscope-vision 各自懒 require petri-server/helpers/ai-usage，
+ * 分仓后 ../../petri-server/helpers/ai-usage 路径会断。依赖反转后，shared-backend 真自洽。
  */
 
 let _recordAiUsage = null;

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { composeConversationMarkdown, MAX_EXPORT_MESSAGES, formatTs } from '../core/biof3-server/helpers/conversation-export.js';
+import { composeConversationMarkdown, MAX_EXPORT_MESSAGES, formatTs } from '../core/petri-server/helpers/conversation-export.js';
 
 /**
  * UI-444 — 会话导出 Markdown 组合器契约。

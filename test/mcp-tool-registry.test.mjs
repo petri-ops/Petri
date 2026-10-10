@@ -7,11 +7,11 @@ import { dirname, resolve, join } from 'node:path';
 
 const path = { join };
 const __dirname = dirname(fileURLToPath(import.meta.url));
-// desktop-app/test → 仓库根/biof3-server
-const R_SERVER = resolve(__dirname, '..', 'core', 'biof3-server');
+// desktop-app/test → 仓库根/petri-server
+const R_SERVER = resolve(__dirname, '..', 'core', 'petri-server');
 
 const pluginLoader = await import(pathToFileURL(R_SERVER + '/plugin-loader.js').href);
-const registryModule = await import(pathToFileURL(resolve(__dirname, '..', 'core', 'biof3-server', 'mcp', 'registry.js')).href);
+const registryModule = await import(pathToFileURL(resolve(__dirname, '..', 'core', 'petri-server', 'mcp', 'registry.js')).href);
 const { listTools, callTool } = registryModule;
 const registryTest = registryModule.default?._test || registryModule._test;
 
@@ -28,20 +28,20 @@ test('_inputsToInputSchema 把 inputs[] 转 JSON Schema', () => {
 });
 
 test('MCP registry honors the same explicit built-in source root as the HTTP server', () => {
-  const previous = process.env.BIOF3_BUILT_IN_PLUGINS_DIR;
+  const previous = process.env.PETRI_BUILT_IN_PLUGINS_DIR;
   const configured = resolve(__dirname, 'fixtures', 'isolated-built-ins');
   try {
-    process.env.BIOF3_BUILT_IN_PLUGINS_DIR = configured;
+    process.env.PETRI_BUILT_IN_PLUGINS_DIR = configured;
     assert.equal(registryTest.resolveBuiltInPluginsDir(), configured);
   } finally {
-    if (previous === undefined) delete process.env.BIOF3_BUILT_IN_PLUGINS_DIR;
-    else process.env.BIOF3_BUILT_IN_PLUGINS_DIR = previous;
+    if (previous === undefined) delete process.env.PETRI_BUILT_IN_PLUGINS_DIR;
+    else process.env.PETRI_BUILT_IN_PLUGINS_DIR = previous;
   }
 });
 
 test('已退役工具：callTool 视为未知工具', async () => {
   // Scientific analysis is exposed only through installed plugin tools.
-  globalThis._biof3Plugins = new Map();
+  globalThis._petriPlugins = new Map();
   const result = await callTool('doublet', {});
   assert.equal(result.isError, true);
   assert.match(result.content[0].text, /unknown_tool/i);
@@ -51,7 +51,7 @@ test('listTools 只返回插件工具', async () => {
   // 清空 + 注册一个 mock 插件（pluginDir 指向临时目录，放真实 tool-definition.json）
   const os = await import('node:os');
   const fs = await import('node:fs');
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-mcp-test-'));
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-mcp-test-'));
   const pluginDir = path.join(tmpDir, 'volcano-plot');
   fs.mkdirSync(path.join(pluginDir, 'scripts'), { recursive: true });
   fs.writeFileSync(path.join(tmpDir, 'installed.json'), JSON.stringify([{ id: 'volcano-plot' }]));
@@ -78,7 +78,7 @@ test('listTools 只返回插件工具', async () => {
       ],
     }),
   );
-  globalThis._biof3Plugins = new Map();
+  globalThis._petriPlugins = new Map();
   pluginLoader.loadPluginsFromDisk(tmpDir);
   try {
     const tools = await listTools();
@@ -99,13 +99,13 @@ test('listTools 只返回插件工具', async () => {
     const stepCount = tools.filter((t) => t._isStep).length;
     assert.equal(stepCount, 0, '不应含单细胞步骤');
   } finally {
-    globalThis._biof3Plugins = new Map();
+    globalThis._petriPlugins = new Map();
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 });
 
 test('callTool 对未知工具返回 isError', async () => {
-  globalThis._biof3Plugins = new Map(); // 清空，确保 volcano-plot 未注册
+  globalThis._petriPlugins = new Map(); // 清空，确保 volcano-plot 未注册
   const result = await callTool('nonexistent_tool_xyz', {});
   assert.equal(result.isError, true);
   assert.match(result.content[0].text, /unknown_tool/i);
@@ -118,8 +118,8 @@ test('callTool 跑通 sample-metrics 出 PNG（live）', { skip: !RUN_LIVE }, as
   // 注册 built-in volcano-plot 插件（指向 resources/built-in-plugins/volcano-plot）
   const builtInDir = resolve(__dirname, 'fixtures', 'neutral-plugins', 'sample-metrics');
   const demoCsv = path.join(builtInDir, 'demo-data', 'demo_deg.csv');
-  globalThis._biof3Plugins = new Map();
-  globalThis._biof3Plugins.set('sample-metrics', {
+  globalThis._petriPlugins = new Map();
+  globalThis._petriPlugins.set('sample-metrics', {
     id: 'volcano-plot',
     version: '1.0.0',
     language: 'r',
@@ -144,7 +144,7 @@ test('callTool 跑通 sample-metrics 出 PNG（live）', { skip: !RUN_LIVE }, as
     // manifest summary 应有 up/down 计数
     assert.ok(summary.manifest?.summary?.up >= 0, 'manifest.summary.up 应存在');
   } finally {
-    globalThis._biof3Plugins = new Map();
+    globalThis._petriPlugins = new Map();
   }
 });
 
@@ -157,7 +157,7 @@ test('callTool 跑通 sample-metrics 全流程出图（live）', { skip: !RUN_LI
   // BLOCK-83 P4：显式带理由 skip（静默 return 会伪装成覆盖通过）
   if (!hasDemo) { console.log('SKIP：中性夹具 demo 数据缺失（仓库完整性问题）'); return; }
   // 显式从三源加载器注册；builtin-canonical 不得被历史安装副本覆盖。
-  globalThis._biof3Plugins = new Map();
+  globalThis._petriPlugins = new Map();
   const pluginLoaderFresh = await import(pathToFileURL(R_SERVER + '/plugin-loader.js').href);
   pluginLoaderFresh.loadPluginsFromSources({
     builtInDir: path.resolve(__dirname, '..', 'resources', 'built-in-plugins'),
@@ -180,6 +180,6 @@ test('callTool 跑通 sample-metrics 全流程出图（live）', { skip: !RUN_LI
     // manifest.summary 应有差异基因计数
     assert.ok(summary.manifest?.summary?.sig_genes >= 0, 'manifest.summary.sig_genes 应存在');
   } finally {
-    globalThis._biof3Plugins = new Map();
+    globalThis._petriPlugins = new Map();
   }
 });

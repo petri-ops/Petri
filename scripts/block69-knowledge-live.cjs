@@ -24,8 +24,8 @@ const path = require('node:path');
 const http = require('node:http');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
-const API = process.env.BIOF3_API_BASE || 'http://localhost:3001/api';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
+const API = process.env.PETRI_API_BASE || 'http://localhost:3001/api';
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-69');
 
 function fetchJson(url, opts) {

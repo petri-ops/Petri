@@ -24,15 +24,15 @@ import { dirname, resolve } from 'node:path';
   const _createRequire = (await import('node:module')).default.createRequire;
   const _req = _createRequire(import.meta.url);
   const _here = dirname(fileURLToPath(import.meta.url));
-  const _Database = _req(resolve(_here, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const _dir = _fs.mkdtempSync(_path.resolve(_os.tmpdir(), 'biof3-sweep-db-'));
-  const _boot = new _Database(_path.resolve(_dir, 'biof3.db'));
+  const _Database = _req(resolve(_here, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const _dir = _fs.mkdtempSync(_path.resolve(_os.tmpdir(), 'petri-sweep-db-'));
+  const _boot = new _Database(_path.resolve(_dir, 'petri.db'));
   const _mig = _path.resolve(_here, '..', 'src', 'migrations');
   for (const f of _fs.readdirSync(_mig).filter((f) => f.endsWith('.sql')).sort()) {
     _boot.exec(_fs.readFileSync(_path.resolve(_mig, f), 'utf8'));
   }
   _boot.close();
-  process.env.BIOF3_DB_PATH = _path.resolve(_dir, 'biof3.db');
+  process.env.PETRI_DB_PATH = _path.resolve(_dir, 'petri.db');
   process.on('exit', () => { try { _fs.rmSync(_dir, { recursive: true, force: true }); } catch {} });
 }
 

@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const require = createRequire(import.meta.url);
-const { walkSize, parseDuOutput, createStorageCache } = require('../core/biof3-server/helpers/project-storage.js');
+const { walkSize, parseDuOutput, createStorageCache } = require('../core/petri-server/helpers/project-storage.js');
 
 test('walkSize：递归求和 + 限文件数截断诚实降级', async () => {
   const root = mkdtempSync(join(tmpdir(), 'b78-walk-'));

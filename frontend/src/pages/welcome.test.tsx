@@ -12,7 +12,7 @@ import {
   listSshTargetCandidates,
   validateSshProject,
 } from '@/lib/project-store';
-import { dispatchGewuEvent, gewuEvents } from '@/lib/events';
+import { dispatchPetriEvent, petriEvents } from '@/lib/events';
 import type { Project } from '@/lib/project-types';
 
 vi.mock('@/components/backend/BackendStatusProvider', () => ({
@@ -56,10 +56,10 @@ vi.mock('@/lib/project-store', () => ({
   listSshRemoteDirs: vi.fn(),
 }));
 
-// dispatchGewuEvent 必须是 spy；gewuEvents 常量保持真实实现（断言引用同一常量）
+// dispatchPetriEvent 必须是 spy；petriEvents 常量保持真实实现（断言引用同一常量）
 vi.mock('@/lib/events', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/events')>();
-  return { ...actual, dispatchGewuEvent: vi.fn() };
+  return { ...actual, dispatchPetriEvent: vi.fn() };
 });
 
 // FolderPicker stub 保留 onCancel 契约，覆盖面板的取消路径
@@ -79,7 +79,7 @@ const mockValidateSsh = vi.mocked(validateSshProject);
 const mockConnectSshHost = vi.mocked(connectSshHost);
 const mockListSshRemoteDirs = vi.mocked(listSshRemoteDirs);
 const mockBranchList = vi.mocked(branchApi.list);
-const mockDispatchGewuEvent = vi.mocked(dispatchGewuEvent);
+const mockDispatchPetriEvent = vi.mocked(dispatchPetriEvent);
 
 const projectA: Project = {
   id: 'p_a', name: '阿尔法项目', createdAt: '2026-09-01T00:00:00Z', updatedAt: '2026-09-09T00:00:00Z',
@@ -196,14 +196,14 @@ describe('Welcome（BLOCK-80 欢迎页 + UI-341 内嵌聊天模块 + UI-373 不�
   });
 
   it('未选项目态键入的草稿随选中迁移（key 换挂载不丢字）', async () => {
-    window.localStorage.setItem('gewu:composer-draft::new', '未发送的草稿文本');
+    window.localStorage.setItem('petri:composer-draft::new', '未发送的草稿文本');
     renderWelcome();
     await openPicker();
     fireEvent.click(screen.getByText('贝塔项目'));
     await waitFor(() => expect(screen.queryByPlaceholderText('搜索工作区')).toBeNull());
     // 迁移目标键 (p_b, new) 有文本、来源空项目键已清
-    expect(window.localStorage.getItem('gewu:composer-draft:p_b:new')).toBe('未发送的草稿文本');
-    expect(window.localStorage.getItem('gewu:composer-draft::new')).toBeNull();
+    expect(window.localStorage.getItem('petri:composer-draft:p_b:new')).toBe('未发送的草稿文本');
+    expect(window.localStorage.getItem('petri:composer-draft::new')).toBeNull();
     window.localStorage.clear();
   });
 
@@ -274,8 +274,8 @@ describe('Welcome（BLOCK-80 欢迎页 + UI-341 内嵌聊天模块 + UI-373 不�
   it('快捷 chip 一键直发 starter prompt（copilotAsk 事件）', () => {
     renderWelcome();
     fireEvent.click(screen.getByText('差异分析'));
-    expect(mockDispatchGewuEvent).toHaveBeenCalledWith(
-      gewuEvents.copilotAsk,
+    expect(mockDispatchPetriEvent).toHaveBeenCalledWith(
+      petriEvents.copilotAsk,
       expect.objectContaining({ prompt: expect.stringContaining('DESeq2') })
     );
   });

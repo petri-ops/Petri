@@ -23,7 +23,7 @@ const REPO = path.join(__dirname, '..');
 const EVIDENCE = path.join(REPO, 'acceptance', 'block-77');
 const API = 'http://127.0.0.1:3001/api';
 const AUTH = { Authorization: 'Bearer desktop-local', 'content-type': 'application/json' };
-const REMOTE_ROOT = '/root/gewu-block77-demo';
+const REMOTE_ROOT = '/root/petri-block77-demo';
 const STATE = path.join(EVIDENCE, 'p4-state.json');
 const PHASE = process.argv[2] || 'phase1';
 
@@ -165,7 +165,7 @@ async function createProject(name) {
 
 async function main() {
   fs.mkdirSync(EVIDENCE, { recursive: true });
-  const libPath = path.join(REPO, '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs');
+  const libPath = path.join(REPO, '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs');
   lib = require(libPath);
   let projectId = null;
 
@@ -178,7 +178,7 @@ async function main() {
     // ── ② 真实模型对话：挂机 sleep 900 ──
     const prompt = [
       '请用 resident_task_create 工具创建一个驻留任务，参数：',
-      'command 填：sleep 900 && echo done > .gewu/resident/p4-done.txt',
+      'command 填：sleep 900 && echo done > .petri/resident/p4-done.txt',
       'intent 填：P4 全链验收：挂机 15 分钟探针',
       'success_criteria 填：900 秒后 p4-done.txt 出现',
       'failure_handling 填：notify-only',
@@ -197,7 +197,7 @@ async function main() {
     const taskId = taskIdMatch[0];
 
     // ── ③ 服务器真值：意图卡 + 进程存活 ──
-    const cardRaw = sshDell(`cat ${REMOTE_ROOT}/.gewu/resident/${taskId}.json`);
+    const cardRaw = sshDell(`cat ${REMOTE_ROOT}/.petri/resident/${taskId}.json`);
     const card = JSON.parse(cardRaw);
     assert('P4-2 intent card on server (running)', card.status === 'running', `status=${card.status}`);
     let alive = true;
@@ -247,7 +247,7 @@ async function main() {
     for (let i = 0; i < 10 && !flipped; i++) {
       await delay(15000);
       try {
-        const raw = sshDell(`grep -o '"status": "[a-z]*"' ${REMOTE_ROOT}/.gewu/resident/${taskId}.json | head -1`);
+        const raw = sshDell(`grep -o '"status": "[a-z]*"' ${REMOTE_ROOT}/.petri/resident/${taskId}.json | head -1`);
         flipped = /failed/.test(raw);
       } catch { /* keep waiting */ }
     }

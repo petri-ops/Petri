@@ -61,13 +61,13 @@
 }
 
 .leftQuickAction:focus-visible {
-  outline: 2px solid var(--biof3-border-color);
+  outline: 2px solid var(--petri-border-color);
   outline-offset: 2px;
-  box-shadow: 0 0 0 3px var(--biof3-accent-bg);
+  box-shadow: 0 0 0 3px var(--petri-accent-bg);
 }
 ```
 
-- `--biof3-border-color` 是 `frontend/src/styles/custom.css` L74 / L194 已定义的 token（alias for `--biof3-border`），非新 token。
+- `--petri-border-color` 是 `frontend/src/styles/custom.css` L74 / L194 已定义的 token（alias for `--petri-border`），非新 token。
 - `:hover` 原有，本工作仅追加 `transition` 让颜色切换平滑过渡。
 - 键盘 Tab 顺序：DOM 自然顺序保持，无 `tabindex`，测试断言 3 个 QuickAction 按钮均无 `tabindex` 属性。
 

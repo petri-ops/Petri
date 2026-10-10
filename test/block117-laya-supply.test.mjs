@@ -3,7 +3,7 @@
  *
  * 契约红线：
  *  - 真实 Laya 响应 fixtures（laya_decide serve /v1/systemone 捕获）必须通过 decision-api.js
- *    现行 validateAnswers 全题型校验——Gewu 客户端零改动消费本地供给的机械承载；
+ *    现行 validateAnswers 全题型校验——Petri 客户端零改动消费本地供给的机械承载；
  *  - 七接点 Jev 注册表零漂移：本包不改变任何 Jev 供给阈值/gates/model/证据绑定
  *    （「无证据不改阈值」红线；Laya 裁决走 P1 证据与 P2 写回，不在此偷换）。
  */
@@ -18,8 +18,8 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
 const require = createRequire(import.meta.url);
 
-const decisionApi = require(path.join(root, 'core', 'biof3-server', 'helpers', 'decision-api.js'));
-const thresholds = require(path.join(root, 'core', 'biof3-server', 'helpers', 'decision-thresholds.js'));
+const decisionApi = require(path.join(root, 'core', 'petri-server', 'helpers', 'decision-api.js'));
+const thresholds = require(path.join(root, 'core', 'petri-server', 'helpers', 'decision-thresholds.js'));
 
 const FIXTURES_DIR = path.join(root, 'acceptance', 'block-117', 'fixtures');
 const FIXTURES = ['laya-answers-stuck-loop.json', 'laya-answers-test-weakening.json'];

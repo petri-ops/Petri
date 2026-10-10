@@ -27,7 +27,7 @@ const {
 } = require('../core/shared-backend/result-compare-service');
 
 function makeFixture(context) {
-  const workspaceRoot = mkdtempSync(join(tmpdir(), 'biof3-rs6-'));
+  const workspaceRoot = mkdtempSync(join(tmpdir(), 'petri-rs6-'));
   const db = new Database(join(workspaceRoot, 'rs6.db'));
   // 先关库再删目录：Windows 上打开的 SQLite 文件无法删除（EPERM）。
   context.after(() => {
@@ -47,7 +47,7 @@ function makeFixture(context) {
   const sourceScriptPath = 'analysis/scripts/family/rev_source/artifact.R';
   const sourceParamsPath = 'analysis/scripts/family/rev_source/parameters.json';
   const base = adapter.commitVirtualFiles({
-    ref: 'refs/heads/biof3/main', expectedOld: '0'.repeat(40), message: 'RS6 base',
+    ref: 'refs/heads/petri/main', expectedOld: '0'.repeat(40), message: 'RS6 base',
     files: [
       { path: sourceScriptPath, content: sourceScript },
       { path: sourceParamsPath, content: sourceParams },
@@ -86,7 +86,7 @@ function makeFixture(context) {
   };
   repository.createChangeSet({
     changeSetId: 'cs_source', projectId: 'p_rs6', baseCommit: base.commit,
-    workingBranchRef: 'refs/heads/biof3/source', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/source', createdBy: 'agent',
   });
   repository.transitionChangeSet({ changeSetId: 'cs_source', to: 'running' });
   repository.appendRevisionBatch({
@@ -135,7 +135,7 @@ function makeFixture(context) {
   const candidateScriptPath = 'analysis/scripts/family/rev_candidate/artifact.R';
   const candidateParamsPath = 'analysis/scripts/family/rev_candidate/parameters.json';
   const candidate = adapter.commitVirtualFiles({
-    parentCommit: base.commit, ref: 'refs/heads/biof3/changeset/cs_candidate', expectedOld: '0'.repeat(40),
+    parentCommit: base.commit, ref: 'refs/heads/petri/changeset/cs_candidate', expectedOld: '0'.repeat(40),
     message: 'RS6 candidate',
     files: [
       { path: candidateScriptPath, content: candidateScript },
@@ -148,7 +148,7 @@ function makeFixture(context) {
   const candidateHash = sha256(readFileSync(candidateOutput));
   repository.createChangeSet({
     changeSetId: 'cs_candidate', projectId: 'p_rs6', baseCommit: base.commit,
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_candidate', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_candidate', createdBy: 'agent',
     parentArtifactRefs: ['rev_source'],
   });
   repository.transitionChangeSet({ changeSetId: 'cs_candidate', to: 'running' });
@@ -193,7 +193,7 @@ function installSourceAncestorGraph(fx) {
   const sourceRevision = fx.repository.getRevision('rev_source');
   fx.repository.createChangeSet({
     changeSetId: 'cs_parent', projectId: 'p_rs6', baseCommit: fx.base.commit,
-    workingBranchRef: 'refs/heads/biof3/parent', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/parent', createdBy: 'agent',
   });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_parent', to: 'running' });
   fx.repository.appendRevision({
@@ -287,7 +287,7 @@ test('RS6 JSON and table comparisons report bounded truncation honestly', (conte
   assert.equal(json.truncated, true);
   assert.equal(json.changes.length <= 500, true);
 
-  const root = mkdtempSync(join(tmpdir(), 'biof3-rs6-large-'));
+  const root = mkdtempSync(join(tmpdir(), 'petri-rs6-large-'));
   context.after(() => rmSync(root, { recursive: true, force: true }));
   const before = join(root, 'before.csv');
   const after = join(root, 'after.csv');
@@ -302,7 +302,7 @@ test('RS6 JSON and table comparisons report bounded truncation honestly', (conte
 });
 
 test('RS6 table comparison reports schema, row and bounded sample changes', (context) => {
-  const root = mkdtempSync(join(tmpdir(), 'biof3-rs6-table-'));
+  const root = mkdtempSync(join(tmpdir(), 'petri-rs6-table-'));
   context.after(() => rmSync(root, { recursive: true, force: true }));
   const before = join(root, 'before.csv');
   const after = join(root, 'after.csv');
@@ -341,7 +341,7 @@ test('RS6 compare, adopt and revert preserve one atomic current Revision', (cont
   }, { repository: fx.repository, adapter: fx.adapter, getToolJob: fx.getToolJob });
   assert.equal(adopted.changeSet.status, 'adopted');
   assert.equal(fx.repository.getCurrentRevision('family').revisionId, 'rev_candidate');
-  assert.equal(fx.adapter.revParse('refs/heads/biof3/current/family'), fx.candidate.commit);
+  assert.equal(fx.adapter.revParse('refs/heads/petri/current/family'), fx.candidate.commit);
   assert.equal(adoptResultChangeSet({
     projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, changeSetId: 'cs_candidate',
   }, { repository: fx.repository, adapter: fx.adapter, getToolJob: fx.getToolJob }).idempotent, true);
@@ -351,7 +351,7 @@ test('RS6 compare, adopt and revert preserve one atomic current Revision', (cont
   });
   assert.equal(reverted.changeSet.status, 'reverted');
   assert.equal(fx.repository.getCurrentRevision('family').revisionId, 'rev_source');
-  assert.equal(fx.adapter.revParse('refs/heads/biof3/current/family'), fx.base.commit);
+  assert.equal(fx.adapter.revParse('refs/heads/petri/current/family'), fx.base.commit);
 });
 
 test('P5 adopted ChangeSet refuses stale idempotency after its cohort is no longer current', (context) => {
@@ -395,7 +395,7 @@ test('RS6 adoption keeps the family-first preview (no parent, no current) adopta
   const firstParamsPath = 'analysis/scripts/family_first/rev_first/parameters.json';
   const first = fx.adapter.commitVirtualFiles({
     parentCommit: fx.base.commit,
-    ref: 'refs/heads/biof3/changeset/cs_first', expectedOld: '0'.repeat(40),
+    ref: 'refs/heads/petri/changeset/cs_first', expectedOld: '0'.repeat(40),
     message: 'RS6 family-first preview',
     files: [
       { path: firstScriptPath, content: firstScript },
@@ -408,7 +408,7 @@ test('RS6 adoption keeps the family-first preview (no parent, no current) adopta
   const firstHash = sha256(readFileSync(firstOutput));
   fx.repository.createChangeSet({
     changeSetId: 'cs_first', projectId: 'p_rs6', baseCommit: fx.base.commit,
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_first', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_first', createdBy: 'agent',
   });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_first', to: 'running' });
   fx.repository.appendRevision({
@@ -444,7 +444,7 @@ test('RS6 adoption keeps the family-first preview (no parent, no current) adopta
 test('RS6 adoption keeps SQLite unchanged when the current Git ref fails CAS', (context) => {
   const fx = makeFixture(context);
   fx.adapter.updateRefCas({
-    ref: 'refs/heads/biof3/current/family',
+    ref: 'refs/heads/petri/current/family',
     newCommit: fx.candidate.commit,
     expectedOld: '0'.repeat(40),
   });
@@ -456,7 +456,7 @@ test('RS6 adoption keeps SQLite unchanged when the current Git ref fails CAS', (
   );
   assert.equal(fx.repository.getChangeSet('cs_candidate').status, 'preview_ready');
   assert.equal(fx.repository.getCurrentRevision('family').revisionId, 'rev_source');
-  assert.equal(fx.adapter.revParse('refs/heads/biof3/current/family'), fx.candidate.commit);
+  assert.equal(fx.adapter.revParse('refs/heads/petri/current/family'), fx.candidate.commit);
 });
 
 test('P4R-4 checkpoint failure rolls back adopt and revert across SQLite and Git', (context) => {
@@ -471,7 +471,7 @@ test('P4R-4 checkpoint failure rolls back adopt and revert across SQLite and Git
   );
   assert.equal(fx.repository.getChangeSet('cs_candidate').status, 'preview_ready');
   assert.equal(fx.repository.getCurrentRevision('family').revisionId, 'rev_source');
-  assert.equal(fx.adapter.revParse('refs/heads/biof3/current/family'), null);
+  assert.equal(fx.adapter.revParse('refs/heads/petri/current/family'), null);
 
   fx.repository.saveCheckpoint = saveCheckpoint;
   adoptResultChangeSet({ projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, changeSetId: 'cs_candidate' }, {
@@ -487,7 +487,7 @@ test('P4R-4 checkpoint failure rolls back adopt and revert across SQLite and Git
   );
   assert.equal(fx.repository.getChangeSet('cs_candidate').status, 'adopted');
   assert.equal(fx.repository.getCurrentRevision('family').revisionId, 'rev_candidate');
-  assert.equal(fx.adapter.revParse('refs/heads/biof3/current/family'), fx.candidate.commit);
+  assert.equal(fx.adapter.revParse('refs/heads/petri/current/family'), fx.candidate.commit);
   assert.equal(fx.repository.getLatestCheckpoint({ projectId: 'p_rs6' }).checkpointHash, checkpointBefore.checkpointHash);
 });
 
@@ -540,16 +540,16 @@ test('RS6 discarding an unadopted preview removes only its temporary ref', (cont
     projectId: 'p_rs6', workspaceRoot: fx.workspaceRoot, changeSetId: 'cs_candidate',
   }, { repository: fx.repository, adapter: fx.adapter });
   assert.equal(result.changeSet.status, 'reverted');
-  assert.equal(fx.adapter.revParse('refs/heads/biof3/changeset/cs_candidate'), null);
+  assert.equal(fx.adapter.revParse('refs/heads/petri/changeset/cs_candidate'), null);
   assert.equal(fx.repository.getCurrentRevision('family').revisionId, 'rev_source');
-  assert.equal(fx.adapter.revParse('refs/heads/biof3/main'), fx.base.commit);
+  assert.equal(fx.adapter.revParse('refs/heads/petri/main'), fx.base.commit);
 });
 
 test('P6 preview discard never follows a symlinked private revision root during cleanup', (context) => {
   const fx = makeFixture(context);
-  const revisionRoot = join(fx.workspaceRoot, '.biof3', 'revision');
+  const revisionRoot = join(fx.workspaceRoot, '.petri', 'revision');
   rmSync(revisionRoot, { recursive: true, force: true });
-  const outside = mkdtempSync(join(tmpdir(), 'biof3-compare-cleanup-outside-'));
+  const outside = mkdtempSync(join(tmpdir(), 'petri-compare-cleanup-outside-'));
   context.after(() => rmSync(outside, { recursive: true, force: true }));
   const outsideStaging = join(outside, 'cs_candidate');
   mkdirSync(outsideStaging);

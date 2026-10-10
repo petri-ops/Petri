@@ -4,7 +4,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const { ModelGateway, isRetryableProviderError } = require('../core/shared-backend/llm-providers/model-gateway.js');
-const { parseJsonText, responseText } = require('../core/biof3-server/helpers/model-tasks.js');
+const { parseJsonText, responseText } = require('../core/petri-server/helpers/model-tasks.js');
 
 function createGateway(overrides = {}) {
   const calls = [];

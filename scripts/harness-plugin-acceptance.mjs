@@ -76,15 +76,15 @@ function validateReproducibility(parsed, expectedOutputNames) {
 }
 
 async function runAcceptance() {
-  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-plugin-acceptance-'));
-  process.env.BIOF3_LOCAL_RESULTS_DIR = path.join(tempRoot, 'results');
-  process.env.BIOF3_LOCAL_DATA_DIR = path.join(tempRoot, 'data');
-  process.env.BIOF3_DB_PATH = path.join(tempRoot, 'biof3.db');
-  process.env.BIOF3_HARNESS_LOCAL_ROOT = path.join(tempRoot, 'results');
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-plugin-acceptance-'));
+  process.env.PETRI_LOCAL_RESULTS_DIR = path.join(tempRoot, 'results');
+  process.env.PETRI_LOCAL_DATA_DIR = path.join(tempRoot, 'data');
+  process.env.PETRI_DB_PATH = path.join(tempRoot, 'petri.db');
+  process.env.PETRI_HARNESS_LOCAL_ROOT = path.join(tempRoot, 'results');
   // 验收内置源码本身，不能让用户目录中的已安装旧版本覆盖 built-in。
-  process.env.BIOF3_PLUGINS_DIR = path.join(tempRoot, 'plugins');
-  fs.mkdirSync(process.env.BIOF3_PLUGINS_DIR, { recursive: true });
-  const { tool_run_tool } = require('../core/biof3-server/agent-tools/learning');
+  process.env.PETRI_PLUGINS_DIR = path.join(tempRoot, 'plugins');
+  fs.mkdirSync(process.env.PETRI_PLUGINS_DIR, { recursive: true });
+  const { tool_run_tool } = require('../core/petri-server/agent-tools/learning');
   const results = [];
   try {
     for (const id of pluginIds()) {
@@ -165,7 +165,7 @@ async function runAcceptance() {
     console.log(`[plugins] ${passed} passed / ${failed} failed / ${skipped} skipped`);
     if (failed > 0) process.exitCode = 1;
   } finally {
-    if (process.env.BIOF3_KEEP_PLUGIN_ACCEPTANCE_TEMP === '1') {
+    if (process.env.PETRI_KEEP_PLUGIN_ACCEPTANCE_TEMP === '1') {
       console.log(`[plugins] preserved temp root: ${tempRoot}`);
     } else {
       fs.rmSync(tempRoot, { recursive: true, force: true });

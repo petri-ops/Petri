@@ -6,13 +6,13 @@
   "environment": "dev Electron 30.5.1 (CDP 9222), Vite HMR 推送后复测",
   "assertions": {
     "fullInventory.sans": "单栈 -apple-system/system-ui/Segoe UI/PingFang SC/Hiragino Sans GB/Microsoft YaHei/Roboto（原 Arial 的 _convSelectorText 已入栈）",
-    "fullInventory.mono": "单栈 ui-monospace/SFMono-Regular/Menlo/Consolas = --biof3-font-mono token（聊天 cp-inline-code/cp-file-ref 等）",
+    "fullInventory.mono": "单栈 ui-monospace/SFMono-Regular/Menlo/Consolas = --petri-font-mono token（聊天 cp-inline-code/cp-file-ref 等）",
     "fullInventory.except": "仅 xterm-char-measure-element（xterm 终端内部测量元素，deliberate 不动）",
     "macTrafficBtn": "canonical sans（修复前 UA 默认 Arial）",
     "convSelector": "canonical sans（修复前 UA 默认 Arial）",
     "arialRemaining": "0（全应用 button/span/small 零 Arial 元素）",
-    "bodySans": "var(--biof3-font-sans) 消费",
-    "cmScroller": "var(--biof3-font-mono)（静态断言，幽灵变量已废）"
+    "bodySans": "var(--petri-font-sans) 消费",
+    "cmScroller": "var(--petri-font-mono)（静态断言，幽灵变量已废）"
   },
   "screenshots": [
     "workspace-light-after.png"

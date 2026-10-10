@@ -3,7 +3,7 @@
   "purpose": "BLOCK-119 加映 4（BK-01）— fit 阈值邻域波动盘点与 fitReviewBand 证据",
   "privacy": "只存分数/延迟/结论指针，零汇报原文（语料隐私红线同 corpus 纪律）",
   "sources": [
-    "decision_log（.biof3-dev-user-data/data/biof3.db，point IN (report-guard, output-judge)，截至 2026-09-24 全量 15 行）",
+    "decision_log（.petri-dev-user-data/data/petri.db，point IN (report-guard, output-judge)，截至 2026-09-24 全量 15 行）",
     "P2 试点实录同一真实汇报 5 判实验（acceptance/block-119/p2-pilot/，AUDIT-LOG 2026-09-23 深夜二）"
   ],
   "fiveFoldExperiment": {

@@ -25,13 +25,13 @@ status: completed
 
 ### 2.0 结构性事实：可用分析面接近单点
 
-BLOCK-83 P4（2026-09-12）领域中立化后，生信分析全部迁至兄弟仓 `gewu-pack-bio`（domain-pack）。当前装载状态：
+BLOCK-83 P4（2026-09-12）领域中立化后，生信分析全部迁至兄弟仓 `petri-pack-bio`（domain-pack）。当前装载状态：
 
-- pack 15 个插件中**仅 deseq2 活跃**（`gewu-pack-bio/plugins/installed.json` 单条）；其余 14 个在 `plugins.dormant/` 冻结（2026-09-15 用户裁决）。
-- pack 另有 **17 个 R 脚本未接线**（desktop 侧 `core/biof3-server/tool-scripts/` 已删，registry legacy 条目走 `getToolConfig` 拼空路径 → "Script not found"，`helpers/tools-executor.js:642-656,1262-1267`）；5 个 Python 工具（scVI/空间组四件套）**只有纸面声明无脚本**。
+- pack 15 个插件中**仅 deseq2 活跃**（`petri-pack-bio/plugins/installed.json` 单条）；其余 14 个在 `plugins.dormant/` 冻结（2026-09-15 用户裁决）。
+- pack 另有 **17 个 R 脚本未接线**（desktop 侧 `core/petri-server/tool-scripts/` 已删，registry legacy 条目走 `getToolConfig` 拼空路径 → "Script not found"，`helpers/tools-executor.js:642-656,1262-1267`）；5 个 Python 工具（scVI/空间组四件套）**只有纸面声明无脚本**。
 - HEAVY_TOOLS 白名单 14 个重操作工具中 13 个生信工具，**只有 deseq2 当前有活跃插件通道**。
 - 领域覆盖：Bulk RNA-seq 主链设计完整（validator→QC→deseq2→standardizer→volcano→go-kegg/gsea，模板 `bulk-rna-core` 在 `core/shared-backend/agent-workflow.js:325-375`）但**只有 deseq2 通电**；scRNA 全冻结；蛋白组/代谢组/甲基化/ATAC 零覆盖；空间组纸面。
-- design formula 被收窄为单列名（`gewu-pack-bio/plugins/deseq2/scripts/deseq2.R:168` 拼 `~ <col>`），**多因子设计 `~ batch + condition` 不支持**。
+- design formula 被收窄为单列名（`petri-pack-bio/plugins/deseq2/scripts/deseq2.R:168` 拼 `~ <col>`），**多因子设计 `~ batch + condition` 不支持**。
 - 平台面：域插件原型仅声明 macos-arm64 platformSupport；Windows 侧真实分析链依赖域包交付（当前开发机即 Windows）。
 
 ### 2.1 结果解读面：可信度 95 分，专业信息密度不及格
@@ -45,7 +45,7 @@ BLOCK-83 P4（2026-09-12）领域中立化后，生信分析全部迁至兄弟�
 | 点火山图看基因名+log2FC+padj | selection 只带实体 ID 不带数值（`frontend/src/lib/artifact-selection.ts:94-119`）；hover title 只有基因 ID（`ScientificInteractionViewer.tsx:383`） |
 | 火山图定位指定基因（TP53） | 无搜索无高亮，只能去表格 contains（`:329-398`） |
 | 显著性阈值线（padj=0.05，lfc=±1） | 无参考线（`:358-359` 只有坐标轴） |
-| 全量点交互（2 万基因） | **限 250 点且是文件前 250 行非 top 显著基因**（`core/biof3-server/routes/result-studio/interaction.js:243-248`） |
+| 全量点交互（2 万基因） | **限 250 点且是文件前 250 行非 top 显著基因**（`core/petri-server/routes/result-studio/interaction.js:243-248`） |
 | 组合筛选 `padj<0.05 AND lfc>1` | UI 只有单字段 contains（`:147-152`）；**filter 协议已支持 eq/lt/gt 未做控件**（`artifact-selection.ts:78-87`） |
 | 数值专业格式（科学计数/有效位/右对齐） | 原样字符串渲染（`:298`） |
 | 热图聚类树 + z-score 色标 | 无 dendrogram、无图例刻度、min-max 红蓝固定（css `:42-45`） |
@@ -57,20 +57,20 @@ BLOCK-83 P4（2026-09-12）领域中立化后，生信分析全部迁至兄弟�
 
 ### 2.2 解读层断链
 
-- `/api/ai/interpret` 有 **10+ 分析类型的解读模板**（deg/enrichment/trajectory/空间组学，`core/biof3-server/helpers/interpret.js:181-339`）但**前端零调用**（遗留 web 路由）。
-- 现行链路：按钮拼 prompt 走 Agent 对话（`CenterPanel.tsx:179-182`），但 Agent 的 `result_summary` 只读工具**只能看到主表前 6 行×8 列**（`core/biof3-server/agent-tools/result-summary-tools.js:145-153`）——「Copilot 引用真实基因/数字」（BLOCK-121 已验证的路径）受制于极窄真值窗口。
+- `/api/ai/interpret` 有 **10+ 分析类型的解读模板**（deg/enrichment/trajectory/空间组学，`core/petri-server/helpers/interpret.js:181-339`）但**前端零调用**（遗留 web 路由）。
+- 现行链路：按钮拼 prompt 走 Agent 对话（`CenterPanel.tsx:179-182`），但 Agent 的 `result_summary` 只读工具**只能看到主表前 6 行×8 列**（`core/petri-server/agent-tools/result-summary-tools.js:145-153`）——「Copilot 引用真实基因/数字」（BLOCK-121 已验证的路径）受制于极窄真值窗口。
 
 ### 2.3 工作流面：链在库里，用户看不见
 
 - **QC→DEG→富集血缘图已完整入库**（`result_workflow_graphs` 含 nodes/edges/dependsOn/hash，`core/shared-backend/result-workflow-graph.js:519` 从 Job/Revision/Selection 真值投影）但**前端零消费、无暴露端点**——数据侧零缺口，纯投影工作。
-- 上游喂下游三条路径全经 Agent 中介（plan/bind_artifact 对话链 / selection→`result_enrichment_from_context` / BLOCK-52 引用改参）；**selection 下游硬编码仅 go_kegg**（`core/biof3-server/agent-tools/result-selection-tools.js:432`）。
+- 上游喂下游三条路径全经 Agent 中介（plan/bind_artifact 对话链 / selection→`result_enrichment_from_context` / BLOCK-52 引用改参）；**selection 下游硬编码仅 go_kegg**（`core/petri-server/agent-tools/result-selection-tools.js:432`）。
 - DEG 阈值改动下游级联重跑**只支持 2 个直接子节点**（`core/shared-backend/result-scientific-rerun.js:6-9`：go-kegg/volcano-plot）。
 - compare 限 ChangeSet 边界（编辑前后），不能任选两次 run 对比。
 
 ### 2.4 输入侧：显式性缺失 + 领域校验真空
 
 - **无表单式执行面**：分析面板「运行」只向 agent 发消息「请运行「X」分析」（`frontend/src/components/workspace-panels/RightPanel.tsx:246-255`）；用户不能显式指定「用哪个矩阵+哪个 metadata」；审批卡只能批准不能编辑参数（`ApprovalCard.tsx`）。
-- 领域校验**声明而不执行**：`core/shared-backend/artifact-profiles.js:96-157` 声明了 `biof3.counts-matrix.v1`（feature_ids_unique/counts_non_negative_integer）与 `biof3.sample-metadata.v1`（sample_overlap_required/condition_not_missing）规则，但核心消费只到「id 已注册+type 匹配」（`agent-workflow.js:251-256`）；执行者 sample-metadata-validator 插件休眠——**当前上传路径只有通用 CSV 嗅探**（`tools-executor/result-files.js:291-348`）。
+- 领域校验**声明而不执行**：`core/shared-backend/artifact-profiles.js:96-157` 声明了 `petri.counts-matrix.v1`（feature_ids_unique/counts_non_negative_integer）与 `petri.sample-metadata.v1`（sample_overlap_required/condition_not_missing）规则，但核心消费只到「id 已注册+type 匹配」（`agent-workflow.js:251-256`）；执行者 sample-metadata-validator 插件休眠——**当前上传路径只有通用 CSV 嗅探**（`tools-executor/result-files.js:291-348`）。
 - 显式参数面仅剩两个：Skills 页 optional 表单（required 仅文字列出，`SkillDetail.tsx:221-223`）+ Result Studio 上下文编辑（改参而非发起）。
 
 ### 2.5 参数领域语义（亮点 + 一处收窄）
@@ -134,7 +134,7 @@ BLOCK-83 P4（2026-09-12）领域中立化后，生信分析全部迁至兄弟�
 - 全局推进序：`pending-work-backlog.md`（C-15/C-12 本日改编入指向本计划；阶段种子入队时逐行登记）。
 - 当前立即任务：`next-steps-roadmap.md`。
 - UI 面阶段（BIO-1/BIO-2 前端部分）同提交更新 `ui-productization-audit.md`。
-- 域包仓库：`D:\1.WorkDir\gewu-pack-bio`（本 Goal 的 BIO-4 阶段主要施工面之一，跨仓改动时按其仓内治理执行）。
+- 域包仓库：`D:\1.WorkDir\petri-pack-bio`（本 Goal 的 BIO-4 阶段主要施工面之一，跨仓改动时按其仓内治理执行）。
 - 收口语义：同 G0-PLATFORM §7。
 
 ## 8. 实施记录

@@ -15,8 +15,8 @@ GW=$(curl -s --max-time 3 http://127.0.0.1:3005/api/mobile/status 2>/dev/null ||
 if echo "$GW" | grep -q session_invalid; then
   say "网关已在线（:3005 → 401 session_invalid），跳过起栈"
 else
-  say "网关不在，BIOF3_MOBILE_ENABLED=1 起栈（后台 nohup，日志 /tmp/gewu-dev-85.log）..."
-  BIOF3_MOBILE_ENABLED=1 nohup npm run dev > /tmp/gewu-dev-85.log 2>&1 &
+  say "网关不在，PETRI_MOBILE_ENABLED=1 起栈（后台 nohup，日志 /tmp/petri-dev-85.log）..."
+  PETRI_MOBILE_ENABLED=1 nohup npm run dev > /tmp/petri-dev-85.log 2>&1 &
   say "等待网关上线（最长 90s，Electron 窗口会弹出）..."
   for i in $(seq 1 45); do
     sleep 2
@@ -24,7 +24,7 @@ else
     echo "$GW" | grep -q session_invalid && break
   done
   if ! echo "$GW" | grep -q session_invalid; then
-    say "ERROR: 网关 90s 未上线，查日志：tail -40 /tmp/gewu-dev-85.log"; exit 1
+    say "ERROR: 网关 90s 未上线，查日志：tail -40 /tmp/petri-dev-85.log"; exit 1
   fi
   say "网关已上线"
 fi

@@ -28,14 +28,14 @@ status: completed
 ## 3. 范围
 
 **P1 终态失效事件**（单点接线，覆盖全部终态路径）：
-- 新 `core/biof3-server/helpers/job-events.js`：`publishJobTerminalState(jobId, state, extra)` → `eventBus.publishInvalidation('jobs', { toolJobId, state, ... })`，永不 throw。
+- 新 `core/petri-server/helpers/job-events.js`：`publishJobTerminalState(jobId, state, extra)` → `eventBus.publishInvalidation('jobs', { toolJobId, state, ... })`，永不 throw。
 - **executor 侧收敛在状态机 CAS 原语层**（`tools-executor/active-job.js`）：`transitionToolJobToFailed` / `transitionToolJobToCompleted` / `settleConfirmedToolCancellation` 三原语 CAS 成功（changes≥1）才发——覆盖本地执行、超时、取消收敛、失败、成功、僵尸恢复全部路径，且天然不重发。
 - durable-cancel 抑制启动的直写收敛（`tools-executor.js` canLaunchOwnedToolJob 分支）补发 cancelled。
 - **MCP 路径**（`run-plugin-script.js`）各 `db.updateToolJob` 终态直写后补发（该路径不走 CAS 原语）。
 - 前端零改动：`useInvalidationStream('jobs')` 消费方（CK-03 已接两处）自动受益；轮询兜底保留（断线自愈语义不变）。
 
 **P2 运行期日志流**（HTTP 异步主路径 executeJob）：
-- 新 `core/biof3-server/helpers/job-live-log.js`：按 jobId 的有界行缓冲（StringDecoder 多字节安全、尾部 600 行/96KB、丢弃计数诚实标注、终态 clear）。
+- 新 `core/petri-server/helpers/job-live-log.js`：按 jobId 的有界行缓冲（StringDecoder 多字节安全、尾部 600 行/96KB、丢弃计数诚实标注、终态 clear）。
 - `executeJob` 的 `execFile` 改 `spawn`：stdout/stderr 双收集（全量字符串供 finalize 原 API + 逐块喂 live-log）；**行为等价钉住**：maxBuffer 10MB 超限同语义失败、err.killed/err.code 契约保持、owner.process/child.pid/生命周期链零适配（ChildProcess 同接口）；`windowsHide: true`（子进程无窗口闪现，改善项登记）。
 - 日志端点：本地作业运行中且 run.log 未落 → 返回 live 尾部（`source: 'live', live: true`，note 诚实标注滚动丢弃/结束写全量）；结束后走既有 run.log 文件链零变化；SSH 分支（remote-runner.log）不动。
 - 前端 Jobs Wall 零改动受益（轮询日志端点自动拿到运行中增量）。

@@ -2,7 +2,7 @@
   "startedAt": "2026-09-04T10:30:00.456Z",
   "page": "http://localhost:3000/project/p_mtlnsv0f_xpjb",
   "projectId": "p_mtlnsv0f_xpjb",
-  "dbPath": "/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data/biof3.db",
+  "dbPath": "/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/.petri-dev-user-data/data/petri.db",
   "assertions": [
     {
       "name": "UI「计划模式」开关可点击且进入激活态（aria-pressed=true）",
@@ -32,7 +32,7 @@
     {
       "name": "run 结束后前端拉取 draft → 批准卡渲染（spec 正文 + 步骤表 + 三按钮）",
       "pass": true,
-      "detail": "{\"title\":\"BRCA1/TP53 功能说明 + biof3 反转（第四轮）\",\"hasSpec\":true,\"stepCount\":3,\"buttons\":[\"批准并执行\",\"批准并清上下文执行\",\"继续讨论（含 1 个子智能体步骤）\"]}"
+      "detail": "{\"title\":\"BRCA1/TP53 功能说明 + petri 反转（第四轮）\",\"hasSpec\":true,\"stepCount\":3,\"buttons\":[\"批准并执行\",\"批准并清上下文执行\",\"继续讨论（含 1 个子智能体步骤）\"]}"
     },
     {
       "name": "点击「批准并清上下文执行」",
@@ -52,7 +52,7 @@
     {
       "name": "清上下文执行：执行 run 消息数组仅含 spec 自包含首条（不带讨论历史）",
       "pass": true,
-      "detail": "messages=1, head=计划「BRCA1/TP53 功能说明 + biof3 反转（第四轮）」已批准（planId: plan_102f4a98"
+      "detail": "messages=1, head=计划「BRCA1/TP53 功能说明 + petri 反转（第四轮）」已批准（planId: plan_102f4a98"
     },
     {
       "name": "执行期步骤推进：assignee 分派与主 agent 步骤经 update_step 写回终态",
@@ -95,7 +95,7 @@
     "userId": "local-user"
   },
   "approvalCard": {
-    "title": "BRCA1/TP53 功能说明 + biof3 反转（第四轮）",
+    "title": "BRCA1/TP53 功能说明 + petri 反转（第四轮）",
     "hasSpec": true,
     "stepCount": 3,
     "buttons": [

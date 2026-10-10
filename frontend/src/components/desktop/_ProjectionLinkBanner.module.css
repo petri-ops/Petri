@@ -9,14 +9,14 @@
   justify-content: center;
   gap: 8px;
   padding: 6px 12px;
-  border-bottom: 1px solid var(--gewu-border);
+  border-bottom: 1px solid var(--petri-border);
   border-left: none;
   border-right: none;
   border-top: none;
-  background: var(--gewu-bg-elevated);
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-body-sm);
-  box-shadow: var(--gewu-shadow-sm);
+  background: var(--petri-bg-elevated);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body-sm);
+  box-shadow: var(--petri-shadow-sm);
   pointer-events: none;
 }
 
@@ -24,6 +24,6 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--gewu-warning-text);
+  background: var(--petri-warning-text);
   flex: 0 0 auto;
 }

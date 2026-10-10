@@ -1,6 +1,6 @@
 {
   "generatedAt": "2026-09-17T05:56:46.537Z",
-  "db": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\biof3.db",
+  "db": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\petri.db",
   "note": "BLOCK-95 B3 度量先行：prompt cache 基线。B1 后端拼装 + B2 compaction 落地后，前缀稳定性（工具定义→系统提示→对话）是 cache 命中的前提；本报告为翻默认裁决的对账底稿。",
   "overall": {
     "calls": 813,

@@ -637,21 +637,21 @@ ipcRenderer.on('skills:progress', handler);
 
 ---
 
-### F2（🟡 Minor）`preload.js` `biof3Desktop` 暴露 partial 防御
+### F2（🟡 Minor）`preload.js` `petriDesktop` 暴露 partial 防御
 
 **文件**：`src/preload.js` 行 61-260
 **代码片段**：
 ```javascript
-contextBridge.exposeInMainWorld('biof3Desktop', {
+contextBridge.exposeInMainWorld('petriDesktop', {
   isDesktop: true,
   // ... 100+ methods
 });
 ```
 
 **问题描述**：
-- 整个 `biof3Desktop` 通过 `contextBridge.exposeInMainWorld` 暴露（**OK**，contextBridge 是隔离沙箱）
+- 整个 `petriDesktop` 通过 `contextBridge.exposeInMainWorld` 暴露（**OK**，contextBridge 是隔离沙箱）
 - 但 `onProgress` 等回调引用 closure 中的 `AGENT_WORKBENCH_FLAGS` 等全局可变状态——**testability OK, security OK**
-- **真正风险**：若 renderer 端有恶意脚本尝试 `delete window.biof3Desktop.skills = null`，**contextBridge.frozen object** handle 抛错——OK
+- **真正风险**：若 renderer 端有恶意脚本尝试 `delete window.petriDesktop.skills = null`，**contextBridge.frozen object** handle 抛错——OK
 - **但**：`onProgress` 返回的 unsubscribe 没绑定 `try/finally`——调用方忘了调用 unsubscribe 就泄漏（已在 A1 描述）
 
 **建议修复方向**：保持现状

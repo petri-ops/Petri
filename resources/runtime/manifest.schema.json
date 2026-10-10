@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://biof3.local/schemas/built-in-plugins/manifest.schema.json",
-  "title": "BioF3 Built-in Plugin Manifest",
-  "description": "Per-platform artifact schema for BioF3 Runtime and plugin distribution. Each plugin declares per-platform artifacts (url/sha256/sizeBytes). sha256 and sizeBytes may be null and filled by CI in Week 4 — but url MUST match the platformId it sits under.",
+  "$id": "https://petri.local/schemas/built-in-plugins/manifest.schema.json",
+  "title": "Petri Built-in Plugin Manifest",
+  "description": "Per-platform artifact schema for Petri Runtime and plugin distribution. Each plugin declares per-platform artifacts (url/sha256/sizeBytes). sha256 and sizeBytes may be null and filled by CI in Week 4 — but url MUST match the platformId it sits under.",
   "type": "object",
   "required": ["version", "plugins"],
   "additionalProperties": false,

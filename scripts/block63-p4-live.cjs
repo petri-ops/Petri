@@ -32,13 +32,13 @@ const fs = require('node:fs');
 const { spawn, execFileSync } = require('node:child_process');
 
 const ROOT = path.join(__dirname, '..');
-const DEV_DB = path.join(ROOT, '.biof3-dev-user-data', 'data', 'biof3.db');
-process.env.BIOF3_DB_PATH = DEV_DB;
-process.env.BIOF3_LOCAL_DATA_DIR = path.join(ROOT, '.biof3-dev-user-data', 'data');
-process.env.BIOF3_BETTER_SQLITE3_ROOT = path.join(ROOT, 'core', 'biof3-server', 'node_modules');
+const DEV_DB = path.join(ROOT, '.petri-dev-user-data', 'data', 'petri.db');
+process.env.PETRI_DB_PATH = DEV_DB;
+process.env.PETRI_LOCAL_DATA_DIR = path.join(ROOT, '.petri-dev-user-data', 'data');
+process.env.PETRI_BETTER_SQLITE3_ROOT = path.join(ROOT, 'core', 'petri-server', 'node_modules');
 
-const { executeToolCall } = require(ROOT + '/core/biof3-server/agent-tools');
-const db = require(ROOT + '/core/biof3-server/db');
+const { executeToolCall } = require(ROOT + '/core/petri-server/agent-tools');
+const db = require(ROOT + '/core/petri-server/db');
 
 const PROJECT_ID = 'p_mtrawlau_7rly';
 const USER_ID = 'local-user';
@@ -188,7 +188,7 @@ async function main() {
   let closed = false;
   let leftToUser = false;
   try {
-    const host = require(ROOT + '/core/biof3-server/helpers/computer-use-host').getComputerUseHost();
+    const host = require(ROOT + '/core/petri-server/helpers/computer-use-host').getComputerUseHost();
     await host.requestWithRecovery('close', { target: { hwnd: ourHwnd } });
     await delay(1500);
     // 判定：保存提示弹窗（frontmost 是记事本系且出现「不保存」按钮）or 已关闭

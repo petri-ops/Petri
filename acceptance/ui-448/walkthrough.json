@@ -27,7 +27,7 @@
         "dockPlaceholder": "输入消息…（compact 短占位符，单行）",
         "surface": { "x": 915, "y": 8, "w": 380, "h": 934 },
         "radius": "16px",
-        "shadowDark": "rgba(0, 0, 0, 0.5) 0px 12px 32px 0px（--gewu-shadow-float 暗档）",
+        "shadowDark": "rgba(0, 0, 0, 0.5) 0px 12px 32px 0px（--petri-shadow-float 暗档）",
         "yieldClassApplied": true,
         "yieldPaddingRight": "432px",
         "noMidTokenSlicing": true
@@ -56,7 +56,7 @@
     "doubleComposer": "2 → 1（同屏只剩悬浮面自身的 composer；中栏以提示条让位）",
     "slicing": "中栏内容列收窄 432px 让位，sha256/表格完整可读，无 token 中断切割",
     "narrowFit": "compact 短占位符单行；表格框内滚动且滚动条可见；长 token 框内换行",
-    "visual": "圆角 16px、--gewu-shadow-float（亮暗双套，摘要浮层同值硬编码收编单源）、280ms 入场、prefers-reduced-motion 降级"
+    "visual": "圆角 16px、--petri-shadow-float（亮暗双套，摘要浮层同值硬编码收编单源）、280ms 入场、prefers-reduced-motion 降级"
   },
   "honestBoundaries": [
     "悬浮面 + 摘要浮层同屏叠置为已知边界（非范围，reopen 条件在 plan）",

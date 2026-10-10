@@ -32,7 +32,7 @@ Provider / GA / 发布流水 / 签名（G1+）；Vite dev 冷启动优化（开�
 | # | 裁决点 | 推荐 |
 | --- | --- | --- |
 | D1 | 启动分段口径 | main ready / window shown / first paint / data ready 四段（flow 自动采样） |
-| D2 | SWR 快照键与失效 | `gewu-startup-snapshot-v1`（projects 列表），版本号失效；仅渲染缓存不参与业务判断 |
+| D2 | SWR 快照键与失效 | `petri-startup-snapshot-v1`（projects 列表），版本号失效；仅渲染缓存不参与业务判断 |
 | D3 | 虚拟化阈值 | 树节点 > 300 才实施（按 P0 度量定） |
 | D4 | 打包态 profile 入范围 | 推荐入（unsigned packaged，UI-141 先例，仅采样不发布） |
 | D5 | 首屏 SWR 与 BLOCK-99 文件面 | KnowledgeSpacePanel 零触碰；AppRailContext/useConversations 若重叠撞期即停手上报 |

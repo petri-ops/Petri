@@ -144,7 +144,7 @@ export function TerminalWindowPage(): React.ReactElement {
             <span className={styles.statusChip}>{attachNote}</span>
             {actionError && <div className={styles.errorBlock}>{actionError}</div>}
             <div>
-              <button type="button" className="gewu-btn gewu-btn--sm" onClick={() => void handleStart()}>
+              <button type="button" className="petri-btn petri-btn--sm" onClick={() => void handleStart()}>
                 启动会话
               </button>
             </div>

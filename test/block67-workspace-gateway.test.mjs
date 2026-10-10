@@ -5,7 +5,7 @@
  * 以注入 fake runSshOp 断言 verb+base64 载荷）/ createProject ssh 字段 fail-closed /
  * local 项目零回归（workspace_path 补缺省 + 目录创建不变）。
  * DB 自举：临时库 + 全量 migrations（g0-api-route 同款）；better-sqlite3 用
- * core/biof3-server 的 ABI（根 node_modules 为 Electron ABI）。
+ * core/petri-server 的 ABI（根 node_modules 为 Electron ABI）。
  */
 import assert from 'node:assert/strict';
 import test, { after } from 'node:test';
@@ -18,15 +18,15 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 const tempRoot = mkdtempSync(join(tmpdir(), 'block67-gw-'));
-process.env.BIOF3_DB_PATH = join(tempRoot, 'gw.db');
-process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
+process.env.PETRI_DB_PATH = join(tempRoot, 'gw.db');
+process.env.PETRI_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
 // 本文件验证 thin per-call 语义（fake runSshOp）——禁用 D1.1 多路复用（mux 协议另有专项测试）
-process.env.BIOF3_SSH_MUX = '0';
+process.env.PETRI_SSH_MUX = '0';
 
 const require = createRequire(import.meta.url);
 {
-  const Database = require(resolve(__dirname, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const boot = new Database(process.env.BIOF3_DB_PATH);
+  const Database = require(resolve(__dirname, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const boot = new Database(process.env.PETRI_DB_PATH);
   const migDir = resolve(__dirname, '..', 'src', 'migrations');
   for (const f of require('node:fs').readdirSync(migDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(require('node:fs').readFileSync(require('node:path').resolve(migDir, f), 'utf8'));
@@ -34,8 +34,8 @@ const require = createRequire(import.meta.url);
   boot.close();
 }
 
-const db = require('../core/biof3-server/db');
-const gateway = require('../core/biof3-server/helpers/workspace-gateway');
+const db = require('../core/petri-server/db');
+const gateway = require('../core/petri-server/helpers/workspace-gateway');
 
 test('safeRemoteJoin: 边界（.. / 绝对 / 空段 / 合法拼接）', () => {
   assert.strictEqual(gateway.safeRemoteJoin('/remote/proj', 'a/b.txt'), '/remote/proj/a/b.txt');
@@ -85,7 +85,7 @@ test('local 后端: write mtime 冲突检测（D3 不静默覆盖）', async (t)
 
 test('ssh 后端: 命令构造走 base64 fs verbs（fake runSshOp，零网络）', async (t) => {
   const calls = [];
-  const actual = require('../core/biof3-server/helpers/remote-execution/ssh-transport');
+  const actual = require('../core/petri-server/helpers/remote-execution/ssh-transport');
   const original = actual.runSshOp;
   // BLOCK-96 F2 契约：fs_list 载荷 = 单行 base64(NUL 记录流 <type>\t<size>\t<mtime>\t<name>\0)。
   // 夹具含特殊文件名（引号/反斜杠/换行/制表符）——NUL 记录协议下必须原样存活，
@@ -112,7 +112,7 @@ test('ssh 后端: 命令构造走 base64 fs verbs（fake runSshOp，零网络）
 
   const backend = gateway.createSshBackend({ alias: 'aliyun' });
   // 绕过真实 ensureAgent：直接预置 ensured 集不可行（闭包内），改由 fake deploy。
-  const runner = require('../core/biof3-server/helpers/remote-execution/remote-job-runner');
+  const runner = require('../core/petri-server/helpers/remote-execution/remote-job-runner');
   const origCreate = runner.createRemoteJobRunner;
   runner.createRemoteJobRunner = () => ({ ensureAgent: async () => ({ ok: true }) });
   t.after(() => { runner.createRemoteJobRunner = origCreate; });
@@ -144,11 +144,11 @@ test('ssh 后端: 命令构造走 base64 fs verbs（fake runSshOp，零网络）
 });
 
 test('ssh 后端: transport 失败诚实抛出（分类信息保留）', async (t) => {
-  const actual = require('../core/biof3-server/helpers/remote-execution/ssh-transport');
+  const actual = require('../core/petri-server/helpers/remote-execution/ssh-transport');
   const original = actual.runSshOp;
   actual.runSshOp = async () => ({ code: 255, stdout: '', stderr: 'refused', classified: { kind: 'transport.network', retryable: true } });
   t.after(() => { actual.runSshOp = original; });
-  const runner = require('../core/biof3-server/helpers/remote-execution/remote-job-runner');
+  const runner = require('../core/petri-server/helpers/remote-execution/remote-job-runner');
   const origCreate = runner.createRemoteJobRunner;
   runner.createRemoteJobRunner = () => ({ ensureAgent: async () => ({ ok: true }) });
   t.after(() => { runner.createRemoteJobRunner = origCreate; });
@@ -158,16 +158,16 @@ test('ssh 后端: transport 失败诚实抛出（分类信息保留）', async (
 });
 
 test('ssh 后端: mux 会话死亡对幂等只读 verb 透明重试一次；写类不重试（BLOCK-96 F1）', async (t) => {
-  const muxModule = require('../core/biof3-server/helpers/remote-execution/ssh-multiplexer');
+  const muxModule = require('../core/petri-server/helpers/remote-execution/ssh-multiplexer');
   const origRunOnMux = muxModule.runOnMux;
-  const origMuxEnv = process.env.BIOF3_SSH_MUX;
-  process.env.BIOF3_SSH_MUX = '1';
-  const runner = require('../core/biof3-server/helpers/remote-execution/remote-job-runner');
+  const origMuxEnv = process.env.PETRI_SSH_MUX;
+  process.env.PETRI_SSH_MUX = '1';
+  const runner = require('../core/petri-server/helpers/remote-execution/remote-job-runner');
   const origCreate = runner.createRemoteJobRunner;
   runner.createRemoteJobRunner = () => ({ ensureAgent: async () => ({ ok: true }) });
   t.after(() => {
     muxModule.runOnMux = origRunOnMux;
-    if (origMuxEnv === undefined) delete process.env.BIOF3_SSH_MUX; else process.env.BIOF3_SSH_MUX = origMuxEnv;
+    if (origMuxEnv === undefined) delete process.env.PETRI_SSH_MUX; else process.env.PETRI_SSH_MUX = origMuxEnv;
     runner.createRemoteJobRunner = origCreate;
   });
 
@@ -196,21 +196,21 @@ test('ssh 后端: mux 会话死亡对幂等只读 verb 透明重试一次；写�
   assert.strictEqual(writeCalls, 1, 'write verbs never auto-retry');
 });
 
-test('ssh 后端: F5 verb 日志门控——BIOF3_SSH_VERB_LOG=1 输出结构化行，缺省静默', async (t) => {
-  const muxModule = require('../core/biof3-server/helpers/remote-execution/ssh-multiplexer');
+test('ssh 后端: F5 verb 日志门控——PETRI_SSH_VERB_LOG=1 输出结构化行，缺省静默', async (t) => {
+  const muxModule = require('../core/petri-server/helpers/remote-execution/ssh-multiplexer');
   const origRunOnMux = muxModule.runOnMux;
-  const origMuxEnv = process.env.BIOF3_SSH_MUX;
-  const origVerbLog = process.env.BIOF3_SSH_VERB_LOG;
-  process.env.BIOF3_SSH_MUX = '1';
-  delete process.env.BIOF3_SSH_VERB_LOG;
-  const runner = require('../core/biof3-server/helpers/remote-execution/remote-job-runner');
+  const origMuxEnv = process.env.PETRI_SSH_MUX;
+  const origVerbLog = process.env.PETRI_SSH_VERB_LOG;
+  process.env.PETRI_SSH_MUX = '1';
+  delete process.env.PETRI_SSH_VERB_LOG;
+  const runner = require('../core/petri-server/helpers/remote-execution/remote-job-runner');
   const origCreate = runner.createRemoteJobRunner;
   runner.createRemoteJobRunner = () => ({ ensureAgent: async () => ({ ok: true }) });
   muxModule.runOnMux = async () => ({ ok: true, code: 0, stdout: 'f\t1\t1\tok.txt\0', stderr: '' });
   t.after(() => {
     muxModule.runOnMux = origRunOnMux;
-    if (origMuxEnv === undefined) delete process.env.BIOF3_SSH_MUX; else process.env.BIOF3_SSH_MUX = origMuxEnv;
-    if (origVerbLog === undefined) delete process.env.BIOF3_SSH_VERB_LOG; else process.env.BIOF3_SSH_VERB_LOG = origVerbLog;
+    if (origMuxEnv === undefined) delete process.env.PETRI_SSH_MUX; else process.env.PETRI_SSH_MUX = origMuxEnv;
+    if (origVerbLog === undefined) delete process.env.PETRI_SSH_VERB_LOG; else process.env.PETRI_SSH_VERB_LOG = origVerbLog;
     runner.createRemoteJobRunner = origCreate;
     process.stderr.write = origWrite;
   });
@@ -226,7 +226,7 @@ test('ssh 后端: F5 verb 日志门控——BIOF3_SSH_VERB_LOG=1 输出结构化
   assert.strictEqual(captured, '', 'silent by default');
 
   // 开启后：每 verb 一行 JSON（channel/verb/ms/exit/bytes）
-  process.env.BIOF3_SSH_VERB_LOG = '1';
+  process.env.PETRI_SSH_VERB_LOG = '1';
   await backend.list('/x');
   process.stderr.write = origWrite;
   const line = captured.trim().split('\n').filter(Boolean).pop();
@@ -239,23 +239,23 @@ test('ssh 后端: F5 verb 日志门控——BIOF3_SSH_VERB_LOG=1 输出结构化
 });
 
 test('ssh 后端: agent die 经 stderr 回传显式错误码，thin 不误标 transport（BLOCK-96 F3）', async (t) => {
-  const muxModule = require('../core/biof3-server/helpers/remote-execution/ssh-multiplexer');
-  const actual = require('../core/biof3-server/helpers/remote-execution/ssh-transport');
+  const muxModule = require('../core/petri-server/helpers/remote-execution/ssh-multiplexer');
+  const actual = require('../core/petri-server/helpers/remote-execution/ssh-transport');
   const origRunOnMux = muxModule.runOnMux;
   const origRunSshOp = actual.runSshOp;
-  const origMuxEnv = process.env.BIOF3_SSH_MUX;
-  const runner = require('../core/biof3-server/helpers/remote-execution/remote-job-runner');
+  const origMuxEnv = process.env.PETRI_SSH_MUX;
+  const runner = require('../core/petri-server/helpers/remote-execution/remote-job-runner');
   const origCreate = runner.createRemoteJobRunner;
   runner.createRemoteJobRunner = () => ({ ensureAgent: async () => ({ ok: true }) });
   t.after(() => {
     muxModule.runOnMux = origRunOnMux;
     actual.runSshOp = origRunSshOp;
-    if (origMuxEnv === undefined) delete process.env.BIOF3_SSH_MUX; else process.env.BIOF3_SSH_MUX = origMuxEnv;
+    if (origMuxEnv === undefined) delete process.env.PETRI_SSH_MUX; else process.env.PETRI_SSH_MUX = origMuxEnv;
     runner.createRemoteJobRunner = origCreate;
   });
 
   // mux 路径：envelope code=64 + stderr "agent_error: <code>" → remoteError
-  process.env.BIOF3_SSH_MUX = '1';
+  process.env.PETRI_SSH_MUX = '1';
   muxModule.runOnMux = async () => ({ ok: true, code: 64, stdout: '', stderr: 'agent_error: already_exists\n' });
   const backend = gateway.createSshBackend({ alias: 'die-host' });
   await assert.rejects(
@@ -264,7 +264,7 @@ test('ssh 后端: agent die 经 stderr 回传显式错误码，thin 不误标 tr
   );
 
   // thin 路径：exit 64 被分类器标为 remote.command_failed → 转 remoteError，不再误标 transport
-  process.env.BIOF3_SSH_MUX = '0';
+  process.env.PETRI_SSH_MUX = '0';
   actual.runSshOp = async () => ({
     code: 64, stdout: '', stderr: 'agent_error: fs_write_failed', timedOut: false,
     classified: { kind: 'remote.command_failed', retryable: false, detail: 'agent_error: fs_write_failed' },

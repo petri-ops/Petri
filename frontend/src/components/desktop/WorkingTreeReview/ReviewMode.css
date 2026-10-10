@@ -8,11 +8,11 @@
  * ============================================================ */
 
 .rvw-container {
-  height: calc(100vh - var(--gewu-titlebar-height, 38px));
+  height: calc(100vh - var(--petri-titlebar-height, 38px));
   display: flex;
   flex-direction: column;
-  background: var(--gewu-bg-canvas);
-  color: var(--gewu-text);
+  background: var(--petri-bg-canvas);
+  color: var(--petri-text);
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -31,8 +31,8 @@
   flex-wrap: nowrap;
   gap: 12px;
   padding: 6px 12px;
-  border-bottom: 1px solid var(--gewu-border);
-  background: var(--gewu-bg-surface);
+  border-bottom: 1px solid var(--petri-border);
+  background: var(--petri-bg-surface);
   flex-shrink: 0;
 }
 
@@ -69,7 +69,7 @@
 /* UI-248 — 批量展开/收起按钮（dock 摘要行） */
 .rvw-expand-all-btn {
   flex-shrink: 0;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   padding: 2px 8px;
 }
 
@@ -88,8 +88,8 @@
 }
 
 .rvw-tree-toggle-btn[aria-pressed='true'] {
-  color: var(--gewu-accent);
-  border-color: var(--gewu-accent);
+  color: var(--petri-accent);
+  border-color: var(--petri-accent);
 }
 
 /* UI-250 — 文件行悬停浮动预览：只读 diff/内容 + 状态统计头（fixed 定位，不拦截点击） */
@@ -101,8 +101,8 @@
   max-height: 60vh;
   display: flex;
   flex-direction: column;
-  background: var(--gewu-bg-elevated, var(--gewu-bg-surface));
-  border: 1px solid var(--gewu-border);
+  background: var(--petri-bg-elevated, var(--petri-bg-surface));
+  border: 1px solid var(--petri-border);
   border-radius: 10px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
   overflow: hidden;
@@ -113,7 +113,7 @@
   align-items: center;
   gap: 8px;
   padding: 6px 10px;
-  border-bottom: 1px solid var(--gewu-border);
+  border-bottom: 1px solid var(--petri-border);
   min-width: 0;
   flex-shrink: 0;
 }
@@ -124,9 +124,9 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-family: var(--gewu-font-mono);
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-secondary);
+  font-family: var(--petri-font-mono);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-secondary);
 }
 
 .rvw-hover-preview-body {
@@ -149,7 +149,7 @@
   width: 22px;
   height: 22px;
   border-radius: 6px;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   cursor: help;
 }
 
@@ -157,8 +157,8 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-text-secondary);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
   min-width: 0;
@@ -187,9 +187,9 @@
 .rvw-review-progress {
   padding: 1px 8px;
   border-radius: 8px;
-  background: var(--gewu-accent-soft);
-  color: var(--gewu-accent);
-  font-size: var(--gewu-font-size-xs);
+  background: var(--petri-accent-soft);
+  color: var(--petri-accent);
+  font-size: var(--petri-font-size-xs);
   font-weight: 600;
 }
 
@@ -197,7 +197,7 @@
 .rvw-progress-track {
   position: relative;
   height: 2px;
-  background: var(--gewu-bg-subtle);
+  background: var(--petri-bg-subtle);
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -205,7 +205,7 @@
 .rvw-progress-fill {
   position: absolute;
   inset: 0 auto 0 0;
-  background: var(--gewu-accent);
+  background: var(--petri-accent);
   transition: width 200ms ease;
 }
 
@@ -225,9 +225,9 @@
 .rvw-sidebar {
   width: 300px;
   flex-shrink: 0;
-  border-right: 1px solid var(--gewu-border);
+  border-right: 1px solid var(--petri-border);
   overflow-y: auto;
-  background: var(--gewu-bg-canvas);
+  background: var(--petri-bg-canvas);
 }
 
 .rvw-diff-area {
@@ -236,7 +236,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
 }
 
 /* BLOCK-28.2 — dock：diff 为纵向主体，占满剩余高度 */
@@ -262,7 +262,7 @@
 
 /* ===== P2 — 文件树：目录分组 ===== */
 .rvw-group {
-  border-bottom: 1px solid var(--gewu-border-subtle);
+  border-bottom: 1px solid var(--petri-border-subtle);
 }
 
 .rvw-group-header {
@@ -273,22 +273,22 @@
   padding: 6px 12px;
   border: 0;
   background: transparent;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   cursor: pointer;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   font-weight: 600;
   text-align: left;
 }
 
 .rvw-group-header:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text-secondary);
+  background: var(--petri-hover);
+  color: var(--petri-text-secondary);
 }
 
 .rvw-caret {
   display: inline-flex;
   align-items: center;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
   transition: transform 120ms ease;
 }
 
@@ -302,7 +302,7 @@
 }
 
 .rvw-group-name {
-  font-family: var(--gewu-font-mono, monospace);
+  font-family: var(--petri-font-mono, monospace);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -310,8 +310,8 @@
 
 .rvw-group-count {
   margin-left: auto;
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-muted);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-muted);
 }
 
 /* ===== P2 — 文件行：图标 + 文件名 + 统计 + 已审标记 ===== */
@@ -332,13 +332,13 @@
   top: 0;
   bottom: 0;
   width: 1px;
-  background: var(--gewu-border-subtle);
+  background: var(--petri-border-subtle);
 }
 
 .rvw-file-icon {
   display: inline-flex;
   align-items: center;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
   flex-shrink: 0;
   position: relative;
   z-index: 1;
@@ -349,16 +349,16 @@
   height: 22px;
   padding: 0 8px;
   border-radius: 5px;
-  font-size: var(--gewu-font-size-xs);
-  background: var(--gewu-accent-soft);
-  border-color: color-mix(in srgb, var(--gewu-accent) 45%, transparent);
-  color: var(--gewu-accent);
+  font-size: var(--petri-font-size-xs);
+  background: var(--petri-accent-soft);
+  border-color: color-mix(in srgb, var(--petri-accent) 45%, transparent);
+  color: var(--petri-accent);
   box-shadow: none;
 }
 
 .rvw-inline-edit-btn:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--gewu-accent) 24%, transparent);
-  border-color: color-mix(in srgb, var(--gewu-accent) 60%, transparent);
+  background: color-mix(in srgb, var(--petri-accent) 24%, transparent);
+  border-color: color-mix(in srgb, var(--petri-accent) 60%, transparent);
 }
 
 .rvw-file-stats {
@@ -366,19 +366,19 @@
   align-items: center;
   gap: 4px;
   flex-shrink: 0;
-  font-family: var(--gewu-font-mono, monospace);
-  font-size: var(--gewu-font-size-xs);
+  font-family: var(--petri-font-mono, monospace);
+  font-size: var(--petri-font-size-xs);
 }
 
 .rvw-stat-add {
-  font-family: var(--gewu-font-mono, monospace);
-  color: var(--gewu-status-success-fg);
+  font-family: var(--petri-font-mono, monospace);
+  color: var(--petri-status-success-fg);
   font-weight: 600;
 }
 
 .rvw-stat-del {
-  font-family: var(--gewu-font-mono, monospace);
-  color: var(--gewu-status-error-fg);
+  font-family: var(--petri-font-mono, monospace);
+  color: var(--petri-status-error-fg);
   font-weight: 600;
 }
 
@@ -387,8 +387,8 @@
 }
 
 .rvw-reviewed-mark {
-  color: var(--gewu-status-success-fg);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-status-success-fg);
+  font-size: var(--petri-font-size-xs);
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -422,7 +422,7 @@
   padding: 0;
   border: 0;
   border-radius: 2px;
-  background: var(--gewu-accent);
+  background: var(--petri-accent);
   opacity: 0.75;
   cursor: pointer;
   pointer-events: auto;
@@ -434,11 +434,11 @@
 }
 
 .wt-diff-marker.is-accepted {
-  background: var(--gewu-status-success-fg);
+  background: var(--petri-status-success-fg);
 }
 
 .wt-diff-marker.is-rejected {
-  background: var(--gewu-status-error-fg);
+  background: var(--petri-status-error-fg);
 }
 
 /* ===== P3 — hunk 悬浮 accept/reject 控件（行尾卡片） ===== */
@@ -449,15 +449,15 @@
   margin-left: 10px;
   vertical-align: baseline;
   padding: 3px 6px;
-  background: var(--gewu-bg-elevated);
-  border: 1px solid var(--gewu-border);
+  background: var(--petri-bg-elevated);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
-  box-shadow: var(--gewu-shadow-menu);
+  box-shadow: var(--petri-shadow-menu);
 }
 
 .wt-hunk-btn {
   padding: 2px 10px;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   line-height: 1.5;
   border-radius: 5px;
   border: 1px solid transparent;
@@ -465,42 +465,42 @@
 }
 
 .wt-hunk-btn-accept {
-  background: var(--gewu-status-success-bg);
-  border-color: color-mix(in srgb, var(--gewu-status-success-fg) 45%, transparent);
-  color: var(--gewu-status-success-fg);
+  background: var(--petri-status-success-bg);
+  border-color: color-mix(in srgb, var(--petri-status-success-fg) 45%, transparent);
+  color: var(--petri-status-success-fg);
 }
 
 .wt-hunk-btn-accept:hover {
-  background: color-mix(in srgb, var(--gewu-status-success-fg) 18%, transparent);
+  background: color-mix(in srgb, var(--petri-status-success-fg) 18%, transparent);
 }
 
 .wt-hunk-btn-reject {
-  background: var(--gewu-status-error-bg);
-  border-color: color-mix(in srgb, var(--gewu-status-error-fg) 45%, transparent);
-  color: var(--gewu-status-error-fg);
+  background: var(--petri-status-error-bg);
+  border-color: color-mix(in srgb, var(--petri-status-error-fg) 45%, transparent);
+  color: var(--petri-status-error-fg);
 }
 
 .wt-hunk-btn-reject:hover {
-  background: color-mix(in srgb, var(--gewu-status-error-fg) 18%, transparent);
+  background: color-mix(in srgb, var(--petri-status-error-fg) 18%, transparent);
 }
 
 .wt-hunk-control-state {
-  font-size: var(--gewu-font-size-xs);
-  font-family: var(--gewu-font-mono, monospace);
-  color: var(--gewu-text-muted);
+  font-size: var(--petri-font-size-xs);
+  font-family: var(--petri-font-mono, monospace);
+  color: var(--petri-text-muted);
 }
 
 /* ===== BLOCK-147 #3 — 键盘焦点 hunk 视觉反馈（↑↓/j/k 流） ===== */
 /* 焦点 hunk 控件卡片：accent 描边 + 柔光圈（组件级 class 限定，避免 infima 特异性冲突） */
 .wt-hunk-controls.is-focused {
-  border-color: var(--gewu-accent);
-  box-shadow: var(--gewu-shadow-menu), 0 0 0 2px var(--gewu-accent-soft);
+  border-color: var(--petri-accent);
+  box-shadow: var(--petri-shadow-menu), 0 0 0 2px var(--petri-accent-soft);
 }
 
 /* 标记条当前焦点位：accent 光圈 + 不透明 */
 .wt-diff-marker.is-focused {
   opacity: 1;
-  box-shadow: 0 0 0 2px var(--gewu-accent-soft);
+  box-shadow: 0 0 0 2px var(--petri-accent-soft);
 }
 
 /* ===== P4 — 底部内嵌提交框（VS Code SCM 风格） ===== */
@@ -508,8 +508,8 @@
    meta 统计行 + 输入行 + 提交按钮 */
 .rvw-commitbox {
   flex-shrink: 0;
-  border-top: 1px solid var(--gewu-border);
-  background: var(--gewu-bg-surface);
+  border-top: 1px solid var(--petri-border);
+  background: var(--petri-bg-surface);
   padding: 7px 12px;
   display: flex;
   flex-direction: column;
@@ -519,48 +519,48 @@
 .rvw-commitbox-input {
   width: 100%;
   box-sizing: border-box;
-  background: var(--gewu-input-bg);
-  color: var(--gewu-text);
-  border: 1px solid var(--gewu-border);
+  background: var(--petri-input-bg);
+  color: var(--petri-text);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
   padding: 6px 10px;
   font-family: inherit;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
 }
 
 .rvw-commitbox-input::placeholder {
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
 }
 
 .rvw-commitbox-input:focus {
   outline: none;
-  border-color: var(--gewu-accent);
-  box-shadow: 0 0 0 2px var(--gewu-accent-soft);
+  border-color: var(--petri-accent);
+  box-shadow: 0 0 0 2px var(--petri-accent-soft);
 }
 
 .rvw-commitbox-meta {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-tertiary);
 }
 
 .rvw-commitbox-stat {
-  color: var(--gewu-status-success-fg);
+  color: var(--petri-status-success-fg);
 }
 
 .rvw-commitbox-stat-reject {
-  color: var(--gewu-status-error-fg);
+  color: var(--petri-status-error-fg);
 }
 
 /* BLOCK-147 #2 — 未决 hunk 计数：警示色（既有 token，带降级） */
 .rvw-commitbox-stat-pending {
-  color: var(--gewu-status-warning-fg, var(--gewu-text-muted));
+  color: var(--petri-status-warning-fg, var(--petri-text-muted));
 }
 
 .rvw-commitbox-error {
-  color: var(--gewu-status-error-fg);
+  color: var(--petri-status-error-fg);
 }
 
 /* ===== P2 — 空态（图形化居中） ===== */
@@ -571,7 +571,7 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
   padding: 40px;
 }
 
@@ -582,19 +582,19 @@
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: var(--gewu-bg-subtle);
-  color: var(--gewu-text-muted);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-muted);
 }
 
 .rvw-empty-state .rvw-empty-title {
-  font-size: var(--gewu-font-size-lg);
+  font-size: var(--petri-font-size-lg);
   font-weight: 600;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
 }
 
 .rvw-empty-state .rvw-empty-hint {
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text-muted);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-text-muted);
   max-width: 420px;
   text-align: center;
   line-height: 1.6;
@@ -603,7 +603,7 @@
 /* ===== BLOCK-29 — 改动/历史分区切换 + 提交历史列表 ===== */
 .rvw-view-switch {
   display: inline-flex;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 7px;
   overflow: hidden;
   flex-shrink: 0;
@@ -612,16 +612,16 @@
 .rvw-view-switch-btn {
   border: none;
   background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-caption);
   font-family: inherit;
   padding: 3px 10px;
   cursor: pointer;
 }
 
 .rvw-view-switch-btn.active {
-  background: var(--gewu-accent-soft);
-  color: var(--gewu-accent);
+  background: var(--petri-accent-soft);
+  color: var(--petri-accent);
   font-weight: 600;
 }
 
@@ -640,22 +640,22 @@
   padding: 6px 12px;
   border: none;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   cursor: pointer;
   text-align: left;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
 }
 
 /* UI-237 — hover 只留极轻反馈 */
 .rvw-history-row:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .rvw-history-sha {
-  font-family: var(--gewu-font-mono, monospace);
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-accent);
+  font-family: var(--petri-font-mono, monospace);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-accent);
   flex-shrink: 0;
 }
 
@@ -665,13 +665,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .rvw-history-meta {
   flex-shrink: 0;
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-muted);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-muted);
   white-space: nowrap;
 }
 
@@ -679,8 +679,8 @@
   flex-shrink: 0;
   border: none;
   background: transparent;
-  color: var(--gewu-accent);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-accent);
+  font-size: var(--petri-font-size-caption);
   font-family: inherit;
   padding: 4px 8px;
   border-radius: 6px;
@@ -689,7 +689,7 @@
 }
 
 .rvw-history-back:hover {
-  background: var(--gewu-bg-subtle);
+  background: var(--petri-bg-subtle);
 }
 
 /* ===== BLOCK-29.1 — dock 手风琴：文件行一级，点击展开行内 diff ===== */
@@ -712,17 +712,17 @@
   width: 230px;
   max-width: 46%;
   flex-shrink: 0;
-  border-left: 1px solid var(--gewu-border);
+  border-left: 1px solid var(--petri-border);
   overflow-y: auto;
-  background: var(--gewu-bg-canvas);
+  background: var(--petri-bg-canvas);
   padding: 6px 0 10px;
 }
 
 .rvw-dock-tree-title {
   padding: 0 12px 6px;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   font-weight: 600;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
 }
 
 .rvw-dock-tree-dir {
@@ -733,15 +733,15 @@
   padding: 4px 10px 4px 8px;
   border: none;
   background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xs);
   font-family: inherit;
   text-align: left;
   cursor: pointer;
 }
 
 .rvw-dock-tree-dir:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .rvw-dock-tree-dir .rvw-group-name {
@@ -760,19 +760,19 @@
   padding: 4px 10px 4px 24px;
   border: none;
   background: transparent;
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-xs);
   font-family: inherit;
   text-align: left;
   cursor: pointer;
 }
 
 .rvw-dock-tree-file:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .rvw-dock-tree-file.active {
-  background: var(--gewu-accent-soft);
+  background: var(--petri-accent-soft);
 }
 
 .rvw-dock-tree-file-name {
@@ -784,11 +784,11 @@
 }
 
 .rvw-acc-item {
-  border-bottom: 1px solid var(--gewu-border-subtle);
+  border-bottom: 1px solid var(--petri-border-subtle);
 }
 
 .rvw-acc-item.active {
-  background: var(--gewu-accent-soft);
+  background: var(--petri-accent-soft);
 }
 
 .rvw-acc-row {
@@ -799,14 +799,14 @@
   padding: 6px 10px;
   border: none;
   background: transparent;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   cursor: pointer;
   text-align: left;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
 }
 
 .rvw-acc-row:hover {
-  background: var(--gewu-bg-subtle);
+  background: var(--petri-bg-subtle);
 }
 
 .rvw-acc-name {
@@ -820,7 +820,7 @@
 .rvw-acc-group-files {
   margin-left: 13px;
   padding-left: 4px;
-  border-left: 1px solid var(--gewu-border-tertiary, var(--gewu-border));
+  border-left: 1px solid var(--petri-border-tertiary, var(--petri-border));
 }
 
 .rvw-acc-item--nested .rvw-acc-row {
@@ -828,8 +828,8 @@
 }
 
 .rvw-acc-diff {
-  border-top: 1px solid var(--gewu-border-subtle);
-  background: var(--gewu-bg-canvas);
+  border-top: 1px solid var(--petri-border-subtle);
+  background: var(--petri-bg-canvas);
   max-height: 60vh;
   overflow-y: auto;
 }
@@ -842,7 +842,7 @@
   width: 20px;
   height: 20px;
   border-radius: 5px;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
   opacity: 0;
   transition: opacity 0.12s ease, background 0.12s ease;
   flex-shrink: 0;
@@ -853,19 +853,19 @@
 }
 
 .rvw-acc-action:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 /* BLOCK-29.6 UI-243 — 行内编辑操作 hover 用 accent（区别于 danger 放弃） */
 .rvw-acc-action-edit:hover {
-  color: var(--gewu-accent);
-  background: var(--gewu-accent-soft);
+  color: var(--petri-accent);
+  background: var(--petri-accent-soft);
 }
 
 .rvw-acc-action-danger:hover {
-  background: var(--gewu-status-error-bg);
-  color: var(--gewu-status-error-fg);
+  background: var(--petri-status-error-bg);
+  color: var(--petri-status-error-fg);
 }
 
 /* UI-247 — 历史第二行（.rvw-history-head/.rvw-history-tools）已取消：
@@ -892,8 +892,8 @@
   z-index: 91;
   min-width: 168px;
   padding: 4px;
-  background: var(--gewu-bg-elevated, var(--gewu-bg-surface));
-  border: 1px solid var(--gewu-border);
+  background: var(--petri-bg-elevated, var(--petri-bg-surface));
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
 }
@@ -905,19 +905,19 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-caption);
   font-family: inherit;
   text-align: left;
   cursor: pointer;
 }
 
 .rvw-overflow-menu-item:hover:not(:disabled) {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .rvw-overflow-menu-item--danger {
-  color: var(--gewu-status-error-fg);
+  color: var(--petri-status-error-fg);
 }
 
 .rvw-overflow-menu-item:disabled {
@@ -931,9 +931,9 @@
   gap: 5px;
   padding: 2px 8px;
   border-radius: 999px;
-  background: var(--gewu-accent-soft);
-  color: var(--gewu-accent);
-  font-size: var(--gewu-font-size-xs);
+  background: var(--petri-accent-soft);
+  color: var(--petri-accent);
+  font-size: var(--petri-font-size-xs);
   max-width: 60%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -947,7 +947,7 @@
 }
 
 .rvw-history-filter-clear:hover {
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .rvw-history-filter-spacer {
@@ -959,29 +959,29 @@
   width: calc(100% - 20px);
   margin: 4px 10px 8px;
   padding: 5px 0;
-  border: 1px dashed var(--gewu-border);
+  border: 1px dashed var(--petri-border);
   border-radius: 7px;
   background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-caption);
   font-family: inherit;
   cursor: pointer;
 }
 
 .rvw-history-more:hover {
-  background: var(--gewu-bg-subtle);
-  color: var(--gewu-text);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text);
 }
 
 /* UI-231 — 历史行内展开详情（列表不跳转，可同开多条） */
 /* UI-237 — 展开行不再铺灰底：左侧 accent 竖线 + 标题变色标记选中 */
 .rvw-history-row[aria-expanded='true'] {
   background: transparent;
-  box-shadow: inset 2px 0 0 var(--gewu-accent);
+  box-shadow: inset 2px 0 0 var(--petri-accent);
 }
 
 .rvw-history-row[aria-expanded='true'] .rvw-history-subject {
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
   font-weight: 600;
 }
 
@@ -990,7 +990,7 @@
 .rvw-history-detail {
   margin: 2px 0 8px;
   padding: 2px 8px 6px 10px;
-  border-left: 2px solid var(--gewu-border-strong);
+  border-left: 2px solid var(--petri-border-strong);
   background: transparent;
   border-radius: 0 7px 7px 0;
 }
@@ -1001,10 +1001,10 @@
   align-items: stretch;
   gap: 0;
   margin-top: 6px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 7px;
   overflow: hidden;
-  background: var(--gewu-bg-canvas);
+  background: var(--petri-bg-canvas);
 }
 
 .rvw-commit-tree {
@@ -1013,8 +1013,8 @@
   overflow-y: auto;
   max-height: 60vh;
   padding: 4px 0;
-  border-right: 1px solid var(--gewu-border);
-  background: var(--gewu-bg-surface);
+  border-right: 1px solid var(--petri-border);
+  background: var(--petri-bg-surface);
 }
 
 .rvw-commit-tree-dir {
@@ -1025,8 +1025,8 @@
   padding: 4px 8px 2px;
   border: none;
   background: transparent;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs);
   font-weight: 600;
   font-family: inherit;
   text-align: left;
@@ -1054,19 +1054,19 @@
   padding: 4px 8px 4px 22px;
   border: none;
   background: transparent;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   cursor: pointer;
   text-align: left;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
 }
 
 .rvw-commit-tree-row:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .rvw-commit-tree-row.active {
-  background: var(--gewu-accent-soft);
-  color: var(--gewu-accent);
+  background: var(--petri-accent-soft);
+  color: var(--petri-accent);
   font-weight: 600;
 }
 
@@ -1091,8 +1091,8 @@
   display: inline-flex;
   align-items: baseline;
   gap: 5px;
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-secondary);
   white-space: nowrap;
 }
 
@@ -1108,13 +1108,13 @@
   overflow: auto;
   white-space: pre-wrap;
   word-break: break-word;
-  font-family: var(--gewu-font-mono);
-  font-size: var(--gewu-font-size-body-sm);
+  font-family: var(--petri-font-mono);
+  font-size: var(--petri-font-size-body-sm);
   line-height: 1.6;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   background: transparent;
   border: none;
-  border-left: 2px solid var(--gewu-border);
+  border-left: 2px solid var(--petri-border);
   border-radius: 0;
 }
 
@@ -1128,24 +1128,24 @@
 
 .rvw-viewmode-btn {
   padding: 2px 8px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
   background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xs);
   font-family: inherit;
   cursor: pointer;
 }
 
 .rvw-viewmode-btn:hover:not(:disabled) {
-  background: var(--gewu-bg-subtle);
-  color: var(--gewu-text);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text);
 }
 
 .rvw-viewmode-btn.active {
-  background: var(--gewu-bg-elevated);
-  border-color: var(--gewu-border-strong);
-  color: var(--gewu-text);
+  background: var(--petri-bg-elevated);
+  border-color: var(--petri-border-strong);
+  color: var(--petri-text);
   font-weight: 600;
 }
 
@@ -1157,9 +1157,9 @@
 .rvw-fulltext-wrap {
   max-height: 60vh;
   overflow: auto;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 7px;
-  background: var(--gewu-bg-canvas);
+  background: var(--petri-bg-canvas);
 }
 
 /* BLOCK-29.5 — 历史分区分支选择器（只读） */
@@ -1167,11 +1167,11 @@
   max-width: 180px;
   height: 28px;
   padding: 0 6px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  background: var(--gewu-bg-canvas);
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-caption);
+  background: var(--petri-bg-canvas);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-caption);
   font-family: inherit;
   cursor: pointer;
   /* UI-245 — 分支选择器不参与 flex 挤压 */
@@ -1180,8 +1180,8 @@
 
 /* BLOCK-29.5 — blame 逐行归属视图 */
 .rvw-blame-grid {
-  font-family: var(--gewu-font-mono);
-  font-size: var(--gewu-font-size-xs);
+  font-family: var(--petri-font-mono);
+  font-size: var(--petri-font-size-xs);
 }
 
 .rvw-blame-row {
@@ -1193,12 +1193,12 @@
 }
 
 .rvw-blame-row:hover {
-  background: var(--gewu-bg-subtle);
+  background: var(--petri-bg-subtle);
 }
 
 .rvw-blame-line {
   text-align: right;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
   user-select: none;
 }
 
@@ -1206,7 +1206,7 @@
   display: inline-flex;
   gap: 6px;
   min-width: 0;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1214,14 +1214,14 @@
 
 .rvw-blame-sha {
   font-weight: 600;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .rvw-blame-content {
   white-space: pre;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 /* UI-249 — `.rvw-compare-hint`（两提交对比提示）随对比模式移除 */
@@ -1231,7 +1231,7 @@
   margin: 0 12px 6px;
   padding: 2px 8px;
   border: none;
-  border-left: 2px solid var(--gewu-border);
+  border-left: 2px solid var(--petri-border);
   border-radius: 0;
   background: transparent;
 }
@@ -1242,7 +1242,7 @@
   gap: 8px;
   min-width: 0;
   padding: 2px 0;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
 }
 
 /* ===== BLOCK-41 — git 写操作三期：暂存两栏 / stage-unstage / 分支切换错误 / push-pull ===== */
@@ -1263,9 +1263,9 @@
   align-items: center;
   gap: 6px;
   padding: 6px 8px 4px;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   font-weight: 600;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   user-select: none;
@@ -1277,8 +1277,8 @@
 
 /* 行内 stage/unstage：hover 用 accent（staged 行 minus / unstaged 行 plus） */
 .rvw-acc-action-stage:hover {
-  color: var(--gewu-accent);
-  background: var(--gewu-accent-soft);
+  color: var(--petri-accent);
+  background: var(--petri-accent-soft);
 }
 
 /* 分支切换失败：错误信息 + 冲突文件清单 */
@@ -1296,8 +1296,8 @@
 }
 
 .rvw-checkout-conflict-path {
-  font-family: var(--gewu-font-mono, monospace);
-  font-size: var(--gewu-font-size-xs);
+  font-family: var(--petri-font-mono, monospace);
+  font-size: var(--petri-font-size-xs);
 }
 
 /* ahead/behind 徽标 + push/pull 按钮组（summary 行内） */
@@ -1305,20 +1305,20 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-muted);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-muted);
   white-space: nowrap;
 }
 
 .rvw-sync-ahead {
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
 }
 
 .rvw-sync-behind {
-  color: var(--gewu-status-warning-fg, var(--gewu-text-muted));
+  color: var(--petri-status-warning-fg, var(--petri-text-muted));
 }
 
 /* staged 栏提交框：与 AI 审阅提交条同构，顶部细线区分 */
 .rvw-commitbox--staged {
-  border-top: 1px solid var(--gewu-border);
+  border-top: 1px solid var(--petri-border);
 }

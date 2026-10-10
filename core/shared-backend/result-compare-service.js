@@ -419,7 +419,7 @@ function verifyRevisionForAdoption({ revision, parent, familyFirst = false, work
 
 function planCurrentRefUpdates({ adapter, revisions, expectedCommit, nextCommit }) {
   return revisions.map((revision) => {
-    const ref = `refs/heads/biof3/current/${revision.artifactFamilyId}`;
+    const ref = `refs/heads/petri/current/${revision.artifactFamilyId}`;
     const existing = adapter.revParse(ref);
     const expected = expectedCommit(revision);
     if (existing && expected && existing !== expected) {
@@ -709,7 +709,7 @@ function revertResultChangeSet(input = {}, dependencies = {}) {
     try {
       removePrivatePathSync(
         input.workspaceRoot,
-        ['.biof3', 'revision', changeSet.changeSetId],
+        ['.petri', 'revision', changeSet.changeSetId],
         { recursive: true, force: true, kind: 'directory' },
       );
     } catch { /* unsafe or changed staging is preserved for RS8 lifecycle inspection */ }
@@ -926,7 +926,7 @@ function restoreArtifactRevision(input = {}, dependencies = {}) {
       parametersHash,
     };
   });
-  const workingBranchRef = `refs/heads/biof3/changeset/${changeSetId}`;
+  const workingBranchRef = `refs/heads/petri/changeset/${changeSetId}`;
   repository.createChangeSet({
     changeSetId,
     projectId: input.projectId,
@@ -948,7 +948,7 @@ function restoreArtifactRevision(input = {}, dependencies = {}) {
       parentCommit: selectedCurrent.sourceCommit,
       ref: workingBranchRef,
       expectedOld: ZERO_OID,
-      message: `BioF3 restore cohort ${resolved.changeSet.changeSetId} (${rows.length} outputs)`,
+      message: `Petri restore cohort ${resolved.changeSet.changeSetId} (${rows.length} outputs)`,
       files,
     });
     const revisionInputs = rows.map((row) => ({

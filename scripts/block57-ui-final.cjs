@@ -15,9 +15,9 @@ const { execFileSync } = require('node:child_process');
 const http = require('node:http');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
 const PROJECT_ID = process.env.BIOF57_PROJECT || 'p_mtlnsv0f_xpjb';
-const DB_PATH = path.join(__dirname, '..', '.biof3-dev-user-data', 'data', 'biof3.db');
+const DB_PATH = path.join(__dirname, '..', '.petri-dev-user-data', 'data', 'petri.db');
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-57');
 const WAIT_MS = 8 * 60 * 1000;
 
@@ -74,7 +74,7 @@ async function main() {
   fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
   const targets = await fetchJson(`http://127.0.0.1:${DEBUG_PORT}/json/list`);
   const page = targets.find((t) => t.type === 'page' && /localhost:3000/.test(t.url || ''));
-  if (!page) throw new Error('biof3_page_not_found');
+  if (!page) throw new Error('petri_page_not_found');
   const client = await new CdpClient(page.webSocketDebuggerUrl).connect();
 
   const results = { startedAt: new Date().toISOString(), projectId: PROJECT_ID, assertions: [] };

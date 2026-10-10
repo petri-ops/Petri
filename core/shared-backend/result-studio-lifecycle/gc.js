@@ -22,7 +22,7 @@ const {
 
 function listGcEntries({ repository, adapter, workspaceRoot, projectId, minAgeMs = DEFAULT_GC_MIN_AGE_MS, now = Date.now() }) {
   const workspaceAnchor = guardPrivatePath(() => resolveWorkspaceAnchor(workspaceRoot));
-  const privateComponents = ['.biof3', 'revision'];
+  const privateComponents = ['.petri', 'revision'];
   const privateRoot = guardPrivatePath(() => inspectPrivateDirectory(
     workspaceAnchor,
     privateComponents,
@@ -318,7 +318,7 @@ function gcPrivateEntryComponents(entry) {
   const relativePath = String(entry?.relativePath || '');
   const components = relativePath.split('/');
   if (components.length !== 3
-      || components[0] !== '.biof3'
+      || components[0] !== '.petri'
       || components[1] !== 'revision'
       || !components[2]
       || components.join('/') !== relativePath) {

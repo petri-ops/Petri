@@ -1,11 +1,11 @@
-# BioF3 Agent 工作台增强计划
+# Petri Agent 工作台增强计划
 
 > 文档版本：v1.4（增量增强版 · 修订 3 Phase 2/3 逐项对账收束）
 > 创建日期：2026-08-14
 > 修订日期：2026-09-12
 > 状态：**completed（2026-09-12 对账收口，用户裁决「确认」路线）**
-> 负责人：BioF3 Team
-> 目标：在现有 BioF3 Desktop 工作台基础上**渐进式增添** Codex 式 AI 生信协作能力
+> 负责人：Petri Team
+> 目标：在现有 Petri Desktop 工作台基础上**渐进式增添** Codex 式 AI 生信协作能力
 
 ---
 
@@ -60,7 +60,7 @@
 
 ### 环境纪律
 
-当前实机为 **Windows**（v1.1 写于 macOS）：fnm Node 24 + `BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev` 起 dev 栈；`core/**`、`src/main.js` 改动后必须重启 dev 栈再实机验证；实机证据按 G0 纪律为 **dev Electron 边界内**。
+当前实机为 **Windows**（v1.1 写于 macOS）：fnm Node 24 + `PETRI_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev` 起 dev 栈；`core/**`、`src/main.js` 改动后必须重启 dev 栈再实机验证；实机证据按 G0 纪律为 **dev Electron 边界内**。
 
 ---
 
@@ -126,11 +126,11 @@
 
 ### 1.1 背景
 
-BioF3 Desktop 已经具备稳定的 AI 协作骨架：`ProjectWorkspace` 三栏、`SimpleChat` 流、`ResultStudioSurface` artifact 查看、`SkillsSidebar`、`BackendStatusProvider`、`useSkillStore` 等都已落地。本计划基于这些事实，**在现有 UI 之上渐进式增添** Codex 式体验，而不是替换或重构已有结构。
+Petri Desktop 已经具备稳定的 AI 协作骨架：`ProjectWorkspace` 三栏、`SimpleChat` 流、`ResultStudioSurface` artifact 查看、`SkillsSidebar`、`BackendStatusProvider`、`useSkillStore` 等都已落地。本计划基于这些事实，**在现有 UI 之上渐进式增添** Codex 式体验，而不是替换或重构已有结构。
 
 **核心定位**（来自 `docs/codex-style-workbench-direction.md`）：
 
-> BioF3 工作台是面向生信分析家的 **AI 协作开发环境**
+> Petri 工作台是面向生信分析家的 **AI 协作开发环境**
 > - AI 是主角（不是辅助工具）
 > - 结果卡片是核心交付物
 > - 右侧查看器与聊天强联动
@@ -164,7 +164,7 @@ BioF3 Desktop 已经具备稳定的 AI 协作骨架：`ProjectWorkspace` 三栏�
 
 ### 1.3 核心原则
 
-BioF3 **不能**变成"AI 随意写脚本、随意生成结果"的产品。必须坚持：
+Petri **不能**变成"AI 随意写脚本、随意生成结果"的产品。必须坚持：
 
 1. **所有正式分析必须落到已注册插件、标准 workflow 或受控执行器**
 2. **每次分析必须记录 projectId、toolId、插件版本、参数、输入、输出、日志、状态**
@@ -174,11 +174,11 @@ BioF3 **不能**变成"AI 随意写脚本、随意生成结果"的产品。必�
 
 **推荐原则**：
 
-> AI 负责理解意图、选择工具、填参数、串流程、解释结果；BioF3 插件系统负责真实计算和产物生成。
+> AI 负责理解意图、选择工具、填参数、串流程、解释结果；Petri 插件系统负责真实计算和产物生成。
 
 ### 1.4 与 IDE 改造计划的区别
 
-本计划**不是**将 BioF3 改造成传统 IDE（如 `docs/archive/ide-transformation-retired/ide-transformation-plan.md` 所述的 Monaco Editor 集成、文件树导航等；该计划于 2026-08-16 superseded 并归档），也**不是**通过新建"Codex 工作台"页面替换现有 `ProjectWorkspace`，而是专注于在现有 UI 之上**扩展**：
+本计划**不是**将 Petri 改造成传统 IDE（如 `docs/archive/ide-transformation-retired/ide-transformation-plan.md` 所述的 Monaco Editor 集成、文件树导航等；该计划于 2026-08-16 superseded 并归档），也**不是**通过新建"Codex 工作台"页面替换现有 `ProjectWorkspace`，而是专注于在现有 UI 之上**扩展**：
 
 | 维度 | IDE 改造方向（归档） | Agent 工作台增强（本计划） |
 |------|---------------------|---------------------------|
@@ -397,7 +397,7 @@ ProjectWorkspace (主组件)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                      BioF3 Desktop Shell (现有 — 全部保留)                  │
+│                      Petri Desktop Shell (现有 — 全部保留)                  │
 │  ┌───────────────────┐  ┌─────────────────────┐  ┌─────────────────┐ │
 │  │    Left Panel     │  │   Center Panel       │  │   Right Panel   │ │
 │  │   (保留)          │  │   (保留)             │  │   (保留)        │ │
@@ -998,7 +998,7 @@ const previewHandlers: ArtifactPreviewHandler[] = [
    - 状态同步（**新增** `subAgentStatus` 字段，**不修改**现有 `runStatus` 枚举）
 
 2. **Agent 通信（保留现有 IPC + 新增 sub-agent 通道）**
-   - 子 Agent → 主 Agent 结果传递（**新增** 独立 IPC channel `biof3:subagent-result`，**不修改**现有 channel）
+   - 子 Agent → 主 Agent 结果传递（**新增** 独立 IPC channel `petri:subagent-result`，**不修改**现有 channel）
    - 并行执行状态合并（**复用** 现有 `runStatus`，**不引入**新状态机）
    - 冲突处理（**新增** 独立冲突处理函数，flag 关闭时不调用）
 
@@ -1100,7 +1100,7 @@ const previewHandlers: ArtifactPreviewHandler[] = [
    - 权限控制（**新增** Capability 字段，**不修改**现有权限断言）
 
 2. **协作编辑（增量 IPC channel）**
-   - 多人同时查看（**新增** `biof3:presence-update` channel，**不修改**现有 channel）
+   - 多人同时查看（**新增** `petri:presence-update` channel，**不修改**现有 channel）
    - 变更通知（**新增** 独立通知服务，**不替换**现有通知）
 
 3. **评论系统（独立数据模型）**
@@ -1701,7 +1701,7 @@ const SERVER_AGENT_WORKBENCH_FLAGS = {
 
 - **开发态**：通过 `localStorage.agentWorkbench.flags` JSON 控制；提供 `scripts/dev-toggle-flags.mjs` 命令行辅助。
 - **生产态打包**：通过 Electron 启动参数 `--agent-workbench-flags=resultCard=true,executionProgress=true` 一次性注入。
-- **管理员 UI**（**规划中**，近期非 blocking）：在 Settings 页面**新增** "Experimental Features" 子区，**仅在** `window.biof3Desktop.experimentalSettings` 暴露时显示；该子区是**新增** UI，不影响现有 Settings 任何部分。
+- **管理员 UI**（**规划中**，近期非 blocking）：在 Settings 页面**新增** "Experimental Features" 子区，**仅在** `window.petriDesktop.experimentalSettings` 暴露时显示；该子区是**新增** UI，不影响现有 Settings 任何部分。
 
 ### X.1.8 Flag 启用的强制纪律
 
@@ -1799,7 +1799,7 @@ async function runMatrix() {
 ```bash
 # 1. 关闭所有 flag
 unset AGENT_WORKBENCH_FLAGS
-rm -f ~/.biof3/agentWorkbench.flags.json
+rm -f ~/.petri/agentWorkbench.flags.json
 
 # 2. 运行 v1.0 等价冒烟集
 npm run test:smoke:v1-equivalent  # 自包含脚本

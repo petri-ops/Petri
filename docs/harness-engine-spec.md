@@ -1,10 +1,10 @@
-# BioF3 Harness Engine Spec v1
+# Petri Harness Engine Spec v1
 
 > 状态：Harness Phase 1–6 / Phase 7 / HRT-0~7 / HLE-C0~C5 已分别收口（见 [`harness-loop-engineering-plan.md`](./harness-loop-engineering-plan.md)、[`harness-loop-production-closure-plan.md`](./harness-loop-production-closure-plan.md)、[`harness-phase7-completion-plan.md`](./harness-phase7-completion-plan.md)）。本规范保持 v1 草图为锚点不再更新；后续治理以收口计划为准。
 
 最后更新：2026-08-16（GATES-4 batch 2：顶部状态句跟进 Phase 7 / HRT / HLE 收口）
 
-这份文档定义 BioF3 的“Prompt 工程 / Harness 工程”底座。
+这份文档定义 Petri 的“Prompt 工程 / Harness 工程”底座。
 
 目标不是把模型写得更长，而是把模型的工作方式变成可编排、可验证、可扩展、可移植的执行系统。
 
@@ -193,10 +193,10 @@ npm run harness:index -- <path>
 - DEG 表、表达矩阵、样本分组表、manifest、summary 等常见角色推断。
 - 表达矩阵方向粗判：`rows_are_features` / `rows_are_samples`。
 - 大文件采样读取，避免把整份文件塞进上下文。
-- 文件 hash 与 `.biof3-harness-index.json` 缓存读写。
+- 文件 hash 与 `.petri-harness-index.json` 缓存读写。
 - 支持基于缓存的增量重建：对未变化文件复用旧索引，对新增/变更/删除文件局部更新。
 - 基于插件 manifest 输入定义的候选文件推荐：
-- BioF3 范围解析：
+- Petri 范围解析：
   - `path`：任意本地目录或文件。
   - `project`：项目工作目录。
   - `job`：工具任务目录。
@@ -436,7 +436,7 @@ Harness 必须支持最基本的修复回路：
 
 当前落地状态（2026-07-11）：
 
-- `plugin-loader.normalizePluginManifest()` 已将 `plugin.json + tool-definition.json` 归一为 `BioF3PluginManifest v1`。
+- `plugin-loader.normalizePluginManifest()` 已将 `plugin.json + tool-definition.json` 归一为 `PetriPluginManifest v1`。
 - MCP `tools/list` 已透传 `_manifest`、`outputSchema.artifacts` 和 `failureModes`。
 - 内置可运行插件 `volcano-plot`、`gene-correlation`、`pca-explorer` 已补 `pluginManifestVersion`、`supportedPlatforms` 和 `failureModes`。
 - 已新增 `npm run harness:check` 和 `test/harness-manifest.test.mjs` 做回归校验。

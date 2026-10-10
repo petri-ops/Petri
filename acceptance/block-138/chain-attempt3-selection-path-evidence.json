@@ -42,7 +42,7 @@
       "blocker": "B1 · deseq2 job 没有正式 ArtifactRevision，且无任何从裸 job 首次登记 revision 的产品路径",
       "evidence": [
         "SELECT * FROM artifact_revisions WHERE tool_job_id='tj_muqfdsd8_pjl9' → 0 行（全库 27 行全属 p_mtlnsv0f_xpjb，artifact_id 均非 deg_table）",
-        "GET /api/result-studio/context-envelope?projectId=p_muqfdayj_422a&jobId=tj_muqfdsd8_pjl9&artifact=deg_table.csv → 409 {error:'context_artifact_not_open'}（core/biof3-server/agent-tools/result-context-tools.js:168-179 fail-closed）",
+        "GET /api/result-studio/context-envelope?projectId=p_muqfdayj_422a&jobId=tj_muqfdsd8_pjl9&artifact=deg_table.csv → 409 {error:'context_artifact_not_open'}（core/petri-server/agent-tools/result-context-tools.js:168-179 fail-closed）",
         "revision 唯一创建入口是 repository.appendRevisionBatch（core/shared-backend/result-studio-repository.js:543），仅被 result-changeset-service.js:627 调用，且要求已存在的 sourceRevision——先有鸡还是先有蛋"
       ]
     },
@@ -51,7 +51,7 @@
       "evidence": [
         "GET /api/tools/catalog → 目录仅 1 个分析工具 deseq2",
         "agent run_tool go-kegg → unknown_tool（两次尝试均实测）",
-        "selection 路径实现 core/biof3-server/agent-tools/result-selection-tools.js:603-612 固定 runTool toolId='go-kegg'——即使 B1 解决也会在此失败"
+        "selection 路径实现 core/petri-server/agent-tools/result-selection-tools.js:603-612 固定 runTool toolId='go-kegg'——即使 B1 解决也会在此失败"
       ]
     },
     {
@@ -67,7 +67,7 @@
     "agentTask": "b257756d-8422-4e49-8f38-46f641c4ad00（type=agent_loop，completed，2026-10-02T03:50:31Z→03:51:16Z）",
     "bindTrace": [
       "seq 1025 tool_call run_tool {op:'bind_artifact', fromStepId:'differential', fromToolJobId:'tj_muqfdsd8_pjl9', inputId:'deg_results', toStepId:'deg-standardization'}",
-      "seq 1025 工作流计划中 deg-standardization 步骤原始快照：{status:'blocked', blockedReason:'tool_not_available', toolId:null, toolJobId:null, toolCandidates:['deg-standardizer'], dependsOn:['differential'], inputBindings:[{inputId:'deg_results', fromStepId:'differential', artifactProfile:'biof3.deg.v1'}], inputs:{}}",
+      "seq 1025 工作流计划中 deg-standardization 步骤原始快照：{status:'blocked', blockedReason:'tool_not_available', toolId:null, toolJobId:null, toolCandidates:['deg-standardizer'], dependsOn:['differential'], inputBindings:[{inputId:'deg_results', fromStepId:'differential', artifactProfile:'petri.deg.v1'}], inputs:{}}",
       "seq 1433 agent_progress：绑定成功，differential → deg-standardization 真实血缘边产生（artifact deg_table，truth=valid），步骤 blocked→ready，但 toolId=null、blockedReason 仍为 tool_not_available",
       "seq 1638-1639：op='run' stepId='deg-standardization' → missing_toolId（op=run 需要 toolId）；显式 toolId='deg-standardizer' → 工具未注册",
       "根因（产品 finding）：bind 生效但下游未解锁 = 模板声明的下游步骤没有已注册工具承载（目录仅 deseq2，bulk-rna-core supportedStepCount=1 available=false）；计划内血缘边不落 result_workflow_graphs（该表仅由 selection/enrichment/changeset 三条受信路径经 persistVerifiedWorkflowGraph 写入）"

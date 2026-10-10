@@ -10,7 +10,7 @@ vi.mock('@/hooks/useAutoUpdate', () => ({
   useAutoUpdate: () => useAutoUpdateMock(),
 }));
 
-type DesktopGlobal = { biof3Desktop?: { updater?: unknown } };
+type DesktopGlobal = { petriDesktop?: { updater?: unknown } };
 
 function autoUpdateState() {
   return {
@@ -33,12 +33,12 @@ describe('UpdateChecker hooks order', () => {
   beforeEach(() => {
     useAutoUpdateMock.mockReset();
     useAutoUpdateMock.mockReturnValue(autoUpdateState());
-    delete (window as unknown as DesktopGlobal).biof3Desktop;
+    delete (window as unknown as DesktopGlobal).petriDesktop;
   });
 
   afterEach(() => {
     cleanup();
-    delete (window as unknown as DesktopGlobal).biof3Desktop;
+    delete (window as unknown as DesktopGlobal).petriDesktop;
   });
 
   // 回归门：useAutoUpdate() 必须无条件调用。修复前它排在 `if (!updater) return null`
@@ -50,10 +50,10 @@ describe('UpdateChecker hooks order', () => {
   });
 
   it('桥在位时渲染更新区块', () => {
-    (window as unknown as DesktopGlobal).biof3Desktop = { updater: { check: vi.fn() } };
+    (window as unknown as DesktopGlobal).petriDesktop = { updater: { check: vi.fn() } };
     const { container } = render(<UpdateChecker />);
     expect(useAutoUpdateMock).toHaveBeenCalledTimes(1);
-    expect(container.querySelector('.gewu-update-section')).toBeTruthy();
+    expect(container.querySelector('.petri-update-section')).toBeTruthy();
     expect(screen.getAllByRole('button').length).toBeGreaterThan(0);
   });
 });

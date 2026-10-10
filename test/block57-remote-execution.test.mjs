@@ -17,32 +17,32 @@ const require = createRequire(import.meta.url);
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const { parseSshConfig, isValidHostAlias } = require(
-  path.join(repoRoot, 'core/biof3-server/helpers/remote-execution/ssh-config-parser.js')
+  path.join(repoRoot, 'core/petri-server/helpers/remote-execution/ssh-config-parser.js')
 );
 const { classifySshFailure } = require(
-  path.join(repoRoot, 'core/biof3-server/helpers/remote-execution/error-classifier.js')
+  path.join(repoRoot, 'core/petri-server/helpers/remote-execution/error-classifier.js')
 );
 const {
-  BIOF3_AGENT_SH,
+  PETRI_AGENT_SH,
   agentVersionHash,
   remoteAgentCommand,
 } = require(
-  path.join(repoRoot, 'core/biof3-server/helpers/remote-execution/node-agent.js')
+  path.join(repoRoot, 'core/petri-server/helpers/remote-execution/node-agent.js')
 );
 const {
   buildSshArgv,
 } = require(
-  path.join(repoRoot, 'core/biof3-server/helpers/remote-execution/ssh-transport.js')
+  path.join(repoRoot, 'core/petri-server/helpers/remote-execution/ssh-transport.js')
 );
 const { createTargetRegistry, newTargetId } = require(
-  path.join(repoRoot, 'core/biof3-server/helpers/remote-execution/target-registry.js')
+  path.join(repoRoot, 'core/petri-server/helpers/remote-execution/target-registry.js')
 );
 const { markUnownedStaleJobs } = require(
-  path.join(repoRoot, 'core/biof3-server/helpers/process-lifecycle.js')
+  path.join(repoRoot, 'core/petri-server/helpers/process-lifecycle.js')
 );
 
 function tempDb() {
-  const Database = require(path.join(repoRoot, 'core/biof3-server/node_modules/better-sqlite3'));
+  const Database = require(path.join(repoRoot, 'core/petri-server/node_modules/better-sqlite3'));
   const db = new Database(':memory:');
   db.exec(`CREATE TABLE execution_targets (
     id TEXT PRIMARY KEY, alias TEXT NOT NULL, label TEXT DEFAULT '',
@@ -131,12 +131,12 @@ test('classifier treats unknown 255 stderr as conservatively retryable', () => {
 test('agent script version hash is stable and non-empty', () => {
   const hash = agentVersionHash();
   assert.match(hash, /^[0-9a-f]{16}$/);
-  assert.equal(hash, agentVersionHash(BIOF3_AGENT_SH));
+  assert.equal(hash, agentVersionHash(PETRI_AGENT_SH));
 });
 
 test('remote agent command quotes fixed verbs and rejects unsafe args', () => {
   const cmd = remoteAgentCommand(['status', 'job_abc123']);
-  assert.ok(cmd.startsWith('bash "$HOME/.biof3-agent/bin/biof3-agent.sh"'));
+  assert.ok(cmd.startsWith('bash "$HOME/.petri-agent/bin/petri-agent.sh"'));
   assert.ok(cmd.includes('"status"'));
   assert.ok(cmd.includes('"job_abc123"'));
   assert.throws(() => remoteAgentCommand(['status', 'job; rm -rf /']));
@@ -195,7 +195,7 @@ test('target registry registers, dedupes, fetches, and removes targets', async (
 // ── local stale-fail must exempt remote jobs (D5.3) ─────────
 
 test('markUnownedStaleJobs excludes remote-target jobs when asked', async () => {
-  const Database = require(path.join(repoRoot, 'core/biof3-server/node_modules/better-sqlite3'));
+  const Database = require(path.join(repoRoot, 'core/petri-server/node_modules/better-sqlite3'));
   const db = new Database(':memory:');
   db.exec(`CREATE TABLE tool_jobs (
     id TEXT PRIMARY KEY, status TEXT, error TEXT, completed_at BIGINT, heartbeat_at BIGINT,
@@ -218,7 +218,7 @@ test('markUnownedStaleJobs excludes remote-target jobs when asked', async () => 
 
 test('tools-executor keeps local path untouched and remote branch additive', () => {
   const src = fs.readFileSync(
-    path.join(repoRoot, 'core/biof3-server/helpers/tools-executor.js'), 'utf8'
+    path.join(repoRoot, 'core/petri-server/helpers/tools-executor.js'), 'utf8'
   );
   // 本地运行时块仅在无远程目标时进入
   assert.match(src, /if \(!remoteDispatch\) \{\s*\n\s*const \{ getExecutor \}/);
@@ -236,7 +236,7 @@ test('tools-executor keeps local path untouched and remote branch additive', () 
 
 test('handleToolRun unknown execution target fails closed before job creation', () => {
   const src = fs.readFileSync(
-    path.join(repoRoot, 'core/biof3-server/helpers/tools-executor.js'), 'utf8'
+    path.join(repoRoot, 'core/petri-server/helpers/tools-executor.js'), 'utf8'
   );
   const gate = src.indexOf("error: 'unknown_execution_target'");
   const insert = src.indexOf('INSERT INTO tool_jobs');

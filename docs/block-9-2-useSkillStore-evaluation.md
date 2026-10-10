@@ -96,7 +96,7 @@ PHASE 4 第二轮 commit `1a58f2c` 抽出 5 个 stream-related callback 到 `fro
 | 内部状态点数 | 5 module-level（singleton） | 0 module-level（state 全部 `useState`） |
 | Set 数 | 1 (`_subscribers`) | 0 |
 | Map 数 | 2 (`_pollIntervals` / `_progressUnsubs`) | 1 (`sendRef` —— 仅为稳定回调句柄) |
-| IPC 订阅数 | 通过 window.biof3Desktop.skills.*（全局） | `subscribeBioF3Event(biof3Events.copilotAsk)` 1 个 |
+| IPC 订阅数 | 通过 window.petriDesktop.skills.*（全局） | `subscribePetriEvent(petriEvents.copilotAsk)` 1 个 |
 | Callback 数 | 多 useCallback | 5 useCallback |
 | 单实例还是多实例 | **singleton**（全进程 1 个 module-level cache） | **多实例**（每次组件 useChatStream 调用 → 1 个 hook instance） |
 
@@ -108,7 +108,7 @@ PHASE 4 第二轮 commit `1a58f2c` 抽出 5 个 stream-related callback 到 `fro
 
 3. **测试 mock 的颗粒度**：useChatStream hook 测试可以 mock props + setState，跨文件调用无副作用。useSkillStore 必须 mock module-level state（`_cache` / `_inflight` / `_subscribers`），这些 mock 在 vitest 4 个 fixture 中通过 `vi.resetModules()` + `__resetSkillStoreCacheForTests` 完成 —— 跨文件后 mock 复杂度会指数级上升。
 
-4. **React 行为契约**：useChatStream 是 React 内部的 hook，单次 render 调用 12 个固定顺序 hook 完全 ok（hooks-of-rules 满足）。useSkillStore 模块顶层副作用（如 `subscribeBioF3Event` 全局订阅）跨文件后**导入顺序敏感**，多 entrypoint 重复实例化会破坏预期。
+4. **React 行为契约**：useChatStream 是 React 内部的 hook，单次 render 调用 12 个固定顺序 hook 完全 ok（hooks-of-rules 满足）。useSkillStore 模块顶层副作用（如 `subscribePetriEvent` 全局订阅）跨文件后**导入顺序敏感**，多 entrypoint 重复实例化会破坏预期。
 
 ### 4.3 结论
 

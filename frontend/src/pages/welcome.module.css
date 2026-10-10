@@ -21,14 +21,14 @@
   margin: 0;
   font-size: 30px;
   font-weight: 700;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   text-align: center;
 }
 
 .welcomeSub {
   margin: -10px 0 6px;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-body);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-body);
   text-align: center;
 }
 
@@ -58,22 +58,22 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
 }
 
 .projectSelect {
   max-width: 260px;
   padding: 4px 6px;
-  border: 1px solid var(--gewu-border-color, transparent);
+  border: 1px solid var(--petri-border-color, transparent);
   border-radius: 6px;
   background: transparent;
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-body-sm);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body-sm);
 }
 
 .pickerEmpty {
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-text-secondary);
 }
 
 .branchChip {
@@ -82,29 +82,29 @@
   gap: 4px;
   padding: 3px 8px;
   border-radius: 999px;
-  background: var(--gewu-hover);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-caption);
+  background: var(--petri-hover);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-caption);
 }
 
 .manageLink {
   margin-left: auto;
   border: none;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   cursor: pointer;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .manageLink:hover {
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
 }
 
 .errorText {
-  color: var(--gewu-danger, #c0392b);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-danger, #c0392b);
+  font-size: var(--petri-font-size-caption);
 }
 
 .chips {
@@ -116,18 +116,18 @@
 
 .chip {
   padding: 6px 14px;
-  border: 1px solid var(--gewu-border-color, transparent);
+  border: 1px solid var(--petri-border-color, transparent);
   border-radius: 999px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-caption);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-caption);
   cursor: pointer;
   transition: color 0.12s, border-color 0.12s;
 }
 
 .chip:hover {
-  color: var(--gewu-accent);
-  border-color: var(--gewu-accent);
+  color: var(--petri-accent);
+  border-color: var(--petri-accent);
 }
 
 /* UI-337 — ZCode 式项目下拉面板（搜索 + 清单✓ + 打开文件夹 + 远程连接） */
@@ -144,15 +144,15 @@
   padding: 5px 10px;
   border: 1px solid transparent;
   border-radius: 8px;
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-body-sm);
+  background: var(--petri-hover);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body-sm);
   font-weight: 600;
   cursor: pointer;
 }
 
 .pickerTrigger:hover {
-  border-color: var(--gewu-border-color, var(--gewu-text-secondary));
+  border-color: var(--petri-border-color, var(--petri-text-secondary));
 }
 
 .pickerOverlay {
@@ -171,8 +171,8 @@
   width: 340px;
   max-width: 80vw;
   border-radius: 12px;
-  background: var(--gewu-bg-surface);
-  border: 1px solid var(--gewu-border-color, transparent);
+  background: var(--petri-bg-surface);
+  border: 1px solid var(--petri-border-color, transparent);
   box-shadow: 0 10px 32px rgba(0, 0, 0, 0.18);
   z-index: 31;
   overflow: hidden;
@@ -183,11 +183,11 @@
   box-sizing: border-box;
   padding: 10px 12px;
   border: none;
-  border-bottom: 1px solid var(--gewu-border-color, transparent);
+  border-bottom: 1px solid var(--petri-border-color, transparent);
   background: transparent;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   font: inherit;
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   outline: none;
 }
 
@@ -206,18 +206,18 @@
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-body-sm);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body-sm);
   text-align: left;
   cursor: pointer;
 }
 
 .projectRow:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .projectRowActive {
-  background: var(--gewu-accent-bg, var(--gewu-hover));
+  background: var(--petri-accent-bg, var(--petri-hover));
 }
 
 .projectRowName {
@@ -232,20 +232,20 @@
   font-size: 10px;
   padding: 1px 5px;
   border-radius: 4px;
-  background: var(--gewu-hover);
-  color: var(--gewu-text-secondary);
+  background: var(--petri-hover);
+  color: var(--petri-text-secondary);
 }
 
 .projectRowEmpty {
   padding: 10px 12px;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-caption);
 }
 
 .panelActions {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid var(--gewu-border-color, transparent);
+  border-top: 1px solid var(--petri-border-color, transparent);
   padding: 4px;
 }
 
@@ -257,14 +257,14 @@
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-body-sm);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body-sm);
   text-align: left;
   cursor: pointer;
 }
 
 .panelAction:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .actionForm {
@@ -276,18 +276,18 @@
 
 .actionInput {
   padding: 7px 9px;
-  border: 1px solid var(--gewu-border-color, transparent);
+  border: 1px solid var(--petri-border-color, transparent);
   border-radius: 8px;
-  background: var(--gewu-bg);
-  color: var(--gewu-text);
+  background: var(--petri-bg);
+  color: var(--petri-text);
   font: inherit;
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   outline: none;
 }
 
 .actionPath {
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -302,19 +302,19 @@
 .actionBack {
   border: none;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   cursor: pointer;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
 }
 
 .actionPrimary {
   padding: 6px 14px;
   border: none;
   border-radius: 8px;
-  background: var(--gewu-accent);
+  background: var(--petri-accent);
   color: #fff;
   font-weight: 600;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   cursor: pointer;
 }
 
@@ -324,8 +324,8 @@
 }
 
 .actionHint {
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-text-secondary);
 }
 
 /* UI-424 — 顶部「← 返回」按钮退役（用户裁决），exitRow/exitBtn 样式随组件删除
@@ -354,8 +354,8 @@
 .dirSuggestion {
   border: none;
   background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-caption);
   text-align: left;
   padding: 5px 8px;
   border-radius: 6px;
@@ -366,8 +366,8 @@
 }
 
 .dirSuggestion:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-accent);
+  background: var(--petri-hover);
+  color: var(--petri-accent);
 }
 
 /* UI-341 加映 — 内嵌聊天（composer-only 变体）：壳由 composerCard 对话框

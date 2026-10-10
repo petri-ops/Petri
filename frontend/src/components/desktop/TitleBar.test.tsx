@@ -8,8 +8,8 @@ import type { TitleBarResultItem } from '@/hooks/useWorkspacePanels';
 import { WorkspacePanelsProvider, useWorkspacePanelsContext } from './WorkspacePanelsContext';
 import { TitleBar } from './TitleBar';
 
-type DesktopWindow = NonNullable<Window['biof3Desktop']>['window'];
-type DesktopBridge = NonNullable<Window['biof3Desktop']>;
+type DesktopWindow = NonNullable<Window['petriDesktop']>['window'];
+type DesktopBridge = NonNullable<Window['petriDesktop']>;
 
 function makeBridge(overrides: Partial<DesktopWindow> = {}): DesktopBridge {
   const windowApi: DesktopWindow = {
@@ -102,7 +102,7 @@ afterEach(() => {
 describe('TitleBar desktop window controls', () => {
   it('renders the three mac traffic controls with labels and the expected icons', () => {
     const bridge = makeBridge();
-    vi.stubGlobal('biof3Desktop', bridge);
+    vi.stubGlobal('petriDesktop', bridge);
     renderTitleBar();
 
     const close = screen.getByRole('button', { name: '关闭窗口' });
@@ -119,7 +119,7 @@ describe('TitleBar desktop window controls', () => {
 
   it('routes close, minimize, and fullscreen clicks to the desktop bridge', () => {
     const bridge = makeBridge();
-    vi.stubGlobal('biof3Desktop', bridge);
+    vi.stubGlobal('petriDesktop', bridge);
     renderTitleBar();
 
     fireEvent.click(screen.getByRole('button', { name: '关闭窗口' }));
@@ -160,7 +160,7 @@ describe('TitleBar desktop window controls', () => {
         return unsubscribe;
       }),
     });
-    vi.stubGlobal('biof3Desktop', bridge);
+    vi.stubGlobal('petriDesktop', bridge);
     const view = renderTitleBar();
 
     await waitFor(() => {
@@ -189,7 +189,7 @@ describe('TitleBar desktop window controls', () => {
         return Promise.resolve(false);
       }),
     });
-    vi.stubGlobal('biof3Desktop', bridge);
+    vi.stubGlobal('petriDesktop', bridge);
     renderTitleBar();
 
     await waitFor(() => expect(bridge.window.isMaximized).toHaveBeenCalledTimes(1));
@@ -204,7 +204,7 @@ describe('TitleBar desktop window controls', () => {
     document.documentElement.setAttribute('data-projection', '1');
     try {
       const bridge = { ...makeBridge(), platform: 'win32' } as DesktopBridge;
-      vi.stubGlobal('biof3Desktop', bridge);
+      vi.stubGlobal('petriDesktop', bridge);
       renderTitleBar();
       expect(screen.queryByRole('button', { name: '最小化' })).toBeNull();
       expect(screen.queryByRole('button', { name: '关闭' })).toBeNull();
@@ -215,7 +215,7 @@ describe('TitleBar desktop window controls', () => {
 
   it('keeps window controls on a real Windows desktop (no projection flag)', () => {
     const bridge = { ...makeBridge(), platform: 'win32' } as DesktopBridge;
-    vi.stubGlobal('biof3Desktop', bridge);
+    vi.stubGlobal('petriDesktop', bridge);
     renderTitleBar();
     expect(screen.getByRole('button', { name: '最小化' })).toBeTruthy();
     expect(screen.getByRole('button', { name: '关闭' })).toBeTruthy();
@@ -252,7 +252,7 @@ describe('TitleBar desktop window controls', () => {
         return vi.fn();
       }),
     });
-    vi.stubGlobal('biof3Desktop', bridge);
+    vi.stubGlobal('petriDesktop', bridge);
     renderTitleBar();
 
     await waitFor(() => {
@@ -273,7 +273,7 @@ describe('TitleBar desktop window controls', () => {
   it('keeps the safe unmaximized default when the initial query rejects', async () => {
     const initialQuery = deferred<boolean>();
     const bridge = { ...makeBridge({ isMaximized: vi.fn(() => initialQuery.promise) }), platform: 'win32' } as DesktopBridge;
-    vi.stubGlobal('biof3Desktop', bridge);
+    vi.stubGlobal('petriDesktop', bridge);
     renderTitleBar();
 
     await waitFor(() => {
@@ -297,7 +297,7 @@ describe('TitleBar desktop window controls', () => {
         throw new Error('window state unavailable');
       }),
     });
-    vi.stubGlobal('biof3Desktop', bridge);
+    vi.stubGlobal('petriDesktop', bridge);
     renderTitleBar();
 
     await act(async () => {
@@ -310,7 +310,7 @@ describe('TitleBar desktop window controls', () => {
   // 组件显式设置 onDoubleClick={!isMac ? ... : undefined}。
   it('toggles fullscreen on a blank header double-click but ignores buttons and role=button children', () => {
     const bridge = { ...makeBridge(), platform: 'win32' } as DesktopBridge;
-    vi.stubGlobal('biof3Desktop', bridge);
+    vi.stubGlobal('petriDesktop', bridge);
     renderTitleBar();
     const header = screen.getByRole('banner');
 
@@ -329,7 +329,7 @@ describe('TitleBar desktop window controls', () => {
   });
 
   it('uses the fixed collapsed left rail width after toggling the left panel', () => {
-    vi.stubGlobal('biof3Desktop', undefined);
+    vi.stubGlobal('petriDesktop', undefined);
     renderTitleBar();
     const header = screen.getByRole('banner');
     expect(header.getAttribute('style')).toContain('--titlebar-left-span: 241px');
@@ -353,7 +353,7 @@ describe('TitleBar workspace-context windowTools (UI-359)', () => {
   }
 
   it('hides bottom-terminal and right-panel toggles on non-workspace routes', () => {
-    vi.stubGlobal('biof3Desktop', undefined);
+    vi.stubGlobal('petriDesktop', undefined);
     renderAt('/');
 
     // 非工作区路由没有右栏/底部终端，渲染死开关只会产生「点了没反应」。
@@ -364,7 +364,7 @@ describe('TitleBar workspace-context windowTools (UI-359)', () => {
   });
 
   it('keeps the toggles on workspace routes with shortcut hints in titles', () => {
-    vi.stubGlobal('biof3Desktop', undefined);
+    vi.stubGlobal('petriDesktop', undefined);
     renderAt('/project/p1/chat');
 
     // 桌面默认 rightOpen=true → 右侧栏按钮呈「收起」态；终端默认收起 → 「展开」态。
@@ -375,7 +375,7 @@ describe('TitleBar workspace-context windowTools (UI-359)', () => {
   });
 
   it('hides the toggles on the standalone Result Studio route', () => {
-    vi.stubGlobal('biof3Desktop', undefined);
+    vi.stubGlobal('petriDesktop', undefined);
     renderAt('/project/p1/results');
 
     expect(screen.queryByRole('button', { name: '收起右侧栏' })).toBeNull();
@@ -384,7 +384,7 @@ describe('TitleBar workspace-context windowTools (UI-359)', () => {
 
   // UI-360 — 摘要卡只在 chat / scheduled 模式存在，欢迎页/独立工作面不开关。
   it('hides the summary toggle on the welcome page', () => {
-    vi.stubGlobal('biof3Desktop', undefined);
+    vi.stubGlobal('petriDesktop', undefined);
     renderAt('/');
 
     expect(screen.queryByRole('button', { name: '展开摘要概览' })).toBeNull();
@@ -392,7 +392,7 @@ describe('TitleBar workspace-context windowTools (UI-359)', () => {
   });
 
   it('keeps the summary toggle on chat-mode workspace routes', () => {
-    vi.stubGlobal('biof3Desktop', undefined);
+    vi.stubGlobal('petriDesktop', undefined);
     renderAt('/project/p1/chat');
 
     expect(screen.getByRole('button', { name: '展开摘要概览' })).toBeTruthy();
@@ -402,7 +402,7 @@ describe('TitleBar workspace-context windowTools (UI-359)', () => {
   // 历史深链 /project/:id/{plugins,settings} fail-closed 回 chat（UI-347 search 先例），
   // 工作区 chrome 全量在场（模式裁剪随模式退役一并消失）。
   it('treats legacy plugins and settings deep links as chat', () => {
-    vi.stubGlobal('biof3Desktop', undefined);
+    vi.stubGlobal('petriDesktop', undefined);
     const { unmount } = renderAt('/project/p1/plugins');
 
     expect(screen.getByRole('button', { name: '收起右侧栏' })).toBeTruthy();
@@ -418,7 +418,7 @@ describe('TitleBar workspace-context windowTools (UI-359)', () => {
 
   it('keeps window controls on non-workspace routes while windowTools is trimmed', () => {
     const bridge = { ...makeBridge(), platform: 'win32' } as DesktopBridge;
-    vi.stubGlobal('biof3Desktop', bridge);
+    vi.stubGlobal('petriDesktop', bridge);
     renderAt('/');
 
     // 裁剪只针对面板开关；非 mac 自绘窗口控件必须恒在。
@@ -429,8 +429,8 @@ describe('TitleBar workspace-context windowTools (UI-359)', () => {
 });
 
 describe('TitleBar web fallback', () => {
-  it('renders a placeholder and never calls IPC when biof3Desktop is unavailable', () => {
-    vi.stubGlobal('biof3Desktop', undefined);
+  it('renders a placeholder and never calls IPC when petriDesktop is unavailable', () => {
+    vi.stubGlobal('petriDesktop', undefined);
     renderTitleBar();
     const header = screen.getByRole('banner');
 
@@ -444,7 +444,7 @@ describe('TitleBar web fallback', () => {
 
   it('treats a bridge that is not marked desktop as web content', () => {
     const bridge = makeBridge();
-    vi.stubGlobal('biof3Desktop', { ...bridge, isDesktop: false });
+    vi.stubGlobal('petriDesktop', { ...bridge, isDesktop: false });
     renderTitleBar();
 
     expect(screen.queryByRole('button', { name: '关闭窗口' })).toBeNull();
@@ -529,14 +529,14 @@ describe('TitleBar route-aware dividers (UI-377)', () => {
   }
 
   it('welcome route goes fully bare: no brand title, no zone dividers (UI-376)', () => {
-    vi.stubGlobal('biof3Desktop', undefined);
+    vi.stubGlobal('petriDesktop', undefined);
     renderAt('/');
-    // UI-376 — 欢迎页并入独立页 bare 形态：品牌回退标题（「Gewu」）与左区
+    // UI-376 — 欢迎页并入独立页 bare 形态：品牌回退标题（「Petri」）与左区
     // 分隔线都不渲染（页面自带「返回 + 问候」页头）
     const center = document.querySelector('[class*="centerTitle"]') as HTMLElement;
     expect(center).toBeTruthy();
     expect(center.className).toContain('centerTitleBare');
-    expect(center.textContent).not.toContain('Gewu');
+    expect(center.textContent).not.toContain('Petri');
     const left = document.querySelector('[class*="leftZone"]') as HTMLElement;
     expect(left.className).toContain('leftZoneBare');
     // 左栏开合按钮保留（bare 只撤边框与标题）
@@ -544,7 +544,7 @@ describe('TitleBar route-aware dividers (UI-377)', () => {
   });
 
   it('keeps the center-title right divider on workspace routes with the right rail open', () => {
-    vi.stubGlobal('biof3Desktop', undefined);
+    vi.stubGlobal('petriDesktop', undefined);
     renderAt('/project/p1/chat');
     const center = document.querySelector('[class*="centerTitle"]') as HTMLElement;
     expect(center).toBeTruthy();
@@ -554,7 +554,7 @@ describe('TitleBar route-aware dividers (UI-377)', () => {
 
   it('drops the window-controls left divider when windowTools is empty (non-workspace route)', () => {
     const bridge = { ...makeBridge(), platform: 'win32' } as DesktopBridge;
-    vi.stubGlobal('biof3Desktop', bridge);
+    vi.stubGlobal('petriDesktop', bridge);
     renderAt('/');
     const wc = document.querySelector('[class*="windowControls"]') as HTMLElement;
     expect(wc).toBeTruthy();
@@ -563,7 +563,7 @@ describe('TitleBar route-aware dividers (UI-377)', () => {
 
   it('keeps the window-controls left divider on workspace routes (toggles present)', () => {
     const bridge = { ...makeBridge(), platform: 'win32' } as DesktopBridge;
-    vi.stubGlobal('biof3Desktop', bridge);
+    vi.stubGlobal('petriDesktop', bridge);
     renderAt('/project/p1/chat');
     const wc = document.querySelector('[class*="windowControls"]') as HTMLElement;
     expect(wc).toBeTruthy();

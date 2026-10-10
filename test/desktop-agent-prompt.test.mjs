@@ -10,14 +10,14 @@ const require = createRequire(import.meta.url);
   const fssync = require('node:fs');
   const os = require('node:os');
   const nodePath = require('node:path');
-  const tempDbDir = fssync.mkdtempSync(nodePath.join(os.tmpdir(), 'biof3-agent-prompt-db-'));
-  const db = new Database(nodePath.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fssync.mkdtempSync(nodePath.join(os.tmpdir(), 'petri-agent-prompt-db-'));
+  const db = new Database(nodePath.join(tempDbDir, 'petri.db'));
   const migrationsDir = nodePath.resolve('src/migrations');
   for (const file of fssync.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     db.exec(fssync.readFileSync(nodePath.join(migrationsDir, file), 'utf8'));
   }
   db.close();
-  process.env.BIOF3_DB_PATH = nodePath.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = nodePath.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try {
       fssync.rmSync(tempDbDir, { recursive: true, force: true });
@@ -26,11 +26,11 @@ const require = createRequire(import.meta.url);
     }
   });
 }
-const { buildSystemPrompt } = require('../core/biof3-server/helpers/system-prompt.js');
+const { buildSystemPrompt } = require('../core/petri-server/helpers/system-prompt.js');
 const {
   appendDesktopAgentInstructions,
-} = require('../core/biof3-server/helpers/desktop-agent-prompt.js');
-const { getToolDefs } = require('../core/biof3-server/agent-tools/tool-defs.js');
+} = require('../core/petri-server/helpers/desktop-agent-prompt.js');
+const { getToolDefs } = require('../core/petri-server/agent-tools/tool-defs.js');
 
 test('desktop prompt rejects legacy identity and automatic recommendation patterns', () => {
   const prompt = appendDesktopAgentInstructions(
@@ -39,10 +39,10 @@ test('desktop prompt rejects legacy identity and automatic recommendation patter
       { provider: 'deepseek', providerLabel: 'DeepSeek', model: 'deepseek-v4-flash' }
     ) +
       '\n\n=== Tool Calling 指南 ===' +
-      '\n旧内容：DESeq2 完成后推荐 enrichment 或 gsea，并自称 BioF3 Copilot。'
+      '\n旧内容：DESeq2 完成后推荐 enrichment 或 gsea，并自称 Petri Copilot。'
   );
 
-  assert.doesNotMatch(prompt, /BioF3 Copilot/);
+  assert.doesNotMatch(prompt, /Petri Copilot/);
   assert.doesNotMatch(prompt, /完成后推荐 enrichment 或 gsea/);
   assert.doesNotMatch(prompt, /FigCode|推荐学习路径/);
   assert.match(prompt, /不要自动生成“推荐下一步”清单/);

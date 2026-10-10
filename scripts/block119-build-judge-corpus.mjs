@@ -14,7 +14,7 @@
  *    · mismatch：跨会话请求 × 回复（硬负例，难度下界，gold=0）
  *
  * 隐私红线（plan §1）：语料文件只存指针（conv 文件名 + 记录序号）+ gold + 类型，
- * transcript 原文不离开 gitignored .biof3-dev-user-data/（校准 harness 运行时按指针回读）。
+ * transcript 原文不离开 gitignored .petri-dev-user-data/（校准 harness 运行时按指针回读）。
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -22,7 +22,7 @@ import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
-const SRC_DIR = path.join(root, '.biof3-dev-user-data', 'data', 'llm-transcripts');
+const SRC_DIR = path.join(root, '.petri-dev-user-data', 'data', 'llm-transcripts');
 const OUT = path.join(root, 'acceptance', 'block-119', 'corpus-judge-fit.json');
 
 /** 按会话分组的 (request指针, response指针)。 */
@@ -81,7 +81,7 @@ function main() {
     kind: 'block119-judge-fit-corpus',
     version: '1.1.0',
     capturedAt: new Date().toISOString(),
-    sourceDir: '.biof3-dev-user-data/data/llm-transcripts（gitignored；语料只存指针，原文不入仓）',
+    sourceDir: '.petri-dev-user-data/data/llm-transcripts（gitignored；语料只存指针，原文不入仓）',
     labeling: '配对设计（BLOCK-110 先例）：outcome_positive=真实请求-回复配对；turn_mismatch=同会话下一轮请求×本轮回复（同域话题定义性不契合）；mismatch=跨会话错配（硬负例）。迭代留痕：纠错词结果信号在 327 配对命中 0（语料以验收探针为主）、finishReason=length 全库 1 条，均弃用——本语料难度为 fit 任务下界，采纳门控按保守解读。',
     distribution: {
       convUnits: units.length, turnsTotal: flat.length, count: samples.length,

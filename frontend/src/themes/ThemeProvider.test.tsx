@@ -48,7 +48,7 @@ describe('ThemeProvider', () => {
   });
 
   it('migrates existing light or dark storage and ignores system changes', () => {
-    localStorage.setItem('gewu-theme', 'dark');
+    localStorage.setItem('petri-theme', 'dark');
     const setSystemDark = mockSystemTheme(false);
     const { result } = renderHook(() => useTheme(), { wrapper });
     expect(result.current.preference).toBe('dark');
@@ -72,11 +72,11 @@ describe('ThemeProvider', () => {
     const { result } = renderHook(() => useTheme(), { wrapper });
 
     act(() => result.current.setPreference('dark'));
-    expect(localStorage.getItem('gewu-theme')).toBe('dark');
+    expect(localStorage.getItem('petri-theme')).toBe('dark');
     expect(document.documentElement.style.colorScheme).toBe('dark');
 
     act(() => result.current.setPreference('system'));
-    expect(localStorage.getItem('gewu-theme')).toBe('system');
+    expect(localStorage.getItem('petri-theme')).toBe('system');
     expect(document.documentElement.dataset.themePreference).toBe('system');
   });
 
@@ -86,14 +86,14 @@ describe('ThemeProvider', () => {
 
     act(() => {
       window.dispatchEvent(
-        new CustomEvent('gewu:theme-change', {
+        new CustomEvent('petri:theme-change', {
           detail: { preference: 'dark' },
         })
       );
     });
 
     expect(result.current.preference).toBe('dark');
-    expect(localStorage.getItem('gewu-theme')).toBe('dark');
+    expect(localStorage.getItem('petri-theme')).toBe('dark');
     expect(document.documentElement.dataset.theme).toBe('dark');
   });
 });

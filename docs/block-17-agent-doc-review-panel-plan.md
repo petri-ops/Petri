@@ -9,7 +9,7 @@
 
 ## 概述（原始动机）
 
-为 BioF3 Desktop 添加「Agent 文档审阅」侧边栏面板，复用 WorkingTreeReview 的 `.wt-*` CSS 样式骨架。新增独立 IPC 通道 `agentDocReview` 与 `WorkspacePanels` 状态槽。面板通过 TitleBar `+` 工具菜单触发。
+为 Petri Desktop 添加「Agent 文档审阅」侧边栏面板，复用 WorkingTreeReview 的 `.wt-*` CSS 样式骨架。新增独立 IPC 通道 `agentDocReview` 与 `WorkspacePanels` 状态槽。面板通过 TitleBar `+` 工具菜单触发。
 
 ## 收口（2026-08-22）
 
@@ -18,7 +18,7 @@
 BLOCK-17 已实现的以下资产**保留并复用**：
 
 - `src/ipc/agent-doc-review.js`（3 条 IPC handlers）
-- `src/preload.js` 中 `biof3Desktop.agentDocReview` namespace
+- `src/preload.js` 中 `petriDesktop.agentDocReview` namespace
 - `frontend/src/lib/electron.d.ts` 中 `AgentDocFileEntry` 类型
 - `frontend/src/lib/desktopBridge.ts` 中 `getBridge('agentDocReview')` 支持
 - `frontend/src/components/desktop/WorkingTreeReview/WorkingTreeReview.css`（.wt-* 样式）
@@ -50,7 +50,7 @@ BLOCK-17 已实现但**不再使用**的资产（BLOCK-18 删除）：
 ## 原始范围（已实现）
 
 - `src/ipc/agent-doc-review.js` — IPC handlers ✅
-- `src/preload.js` — `biof3Desktop.agentDocReview` namespace ✅
+- `src/preload.js` — `petriDesktop.agentDocReview` namespace ✅
 - `frontend/src/lib/electron.d.ts` — `AgentDocFileEntry` 类型 + bridge 声明 ✅
 - `frontend/src/lib/desktopBridge.ts` — `getBridge('agentDocReview')` 支持 ✅
 - `src/main.js` — 装配 `setupAgentDocReviewIpc` ✅

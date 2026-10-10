@@ -87,14 +87,14 @@ describe('projectionDataBridges', () => {
         ok: true,
         manifest: {
           plugins: {
-            'biof3-r-runtime': { title: 'R 运行时（基础环境）', type: 'runtime' },
-            'biof3-py-runtime': { title: 'Python 运行时（基础环境）', type: 'runtime' },
+            'petri-r-runtime': { title: 'R 运行时（基础环境）', type: 'runtime' },
+            'petri-py-runtime': { title: 'Python 运行时（基础环境）', type: 'runtime' },
           },
         },
       },
     });
     const remote = await getProjectionPluginsBridge().listRemote();
-    expect(Object.keys(remote.plugins).sort()).toEqual(['biof3-py-runtime', 'biof3-r-runtime']);
+    expect(Object.keys(remote.plugins).sort()).toEqual(['petri-py-runtime', 'petri-r-runtime']);
   });
 
   it('BLOCK-158 商店面退役：投影 plugins 桥不再有 install/uninstall 写面', () => {
@@ -109,12 +109,12 @@ describe('projectionDataBridges', () => {
     mockFetchByPath({
       '/api/packs/installed': {
         ok: true,
-        packs: [{ packId: 'gewu-pack-bio', packRoot: '/x', version: '0.1.0', installedAt: '2026-09-14T00:00:00Z' }],
+        packs: [{ packId: 'petri-pack-bio', packRoot: '/x', version: '0.1.0', installedAt: '2026-09-14T00:00:00Z' }],
       },
       '/api/packs/available': {
         ok: true,
         packs: [
-          { packId: 'gewu-pack-bio', name: '格物 · 生信分析包', version: '0.1.0', description: '', packRoot: '/x', installed: true },
+          { packId: 'petri-pack-bio', name: '格物 · 生信分析包', version: '0.1.0', description: '', packRoot: '/x', installed: true },
         ],
       },
     });
@@ -122,7 +122,7 @@ describe('projectionDataBridges', () => {
     const installed = await bridge.listInstalled();
     const available = await bridge.listAvailable();
     expect(installed.ok).toBe(true);
-    expect(installed.packs[0]).toMatchObject({ packId: 'gewu-pack-bio' });
+    expect(installed.packs[0]).toMatchObject({ packId: 'petri-pack-bio' });
     expect(available.ok).toBe(true);
     expect(available.packs[0]).toMatchObject({ installed: true });
   });
@@ -131,7 +131,7 @@ describe('projectionDataBridges', () => {
     const bridge = getProjectionPacksBridge();
     expect((await bridge.installFromDialog()).ok).toBe(false);
     expect((await bridge.installPath('/x')).ok).toBe(false);
-    expect((await bridge.uninstall('gewu-pack-bio')).ok).toBe(false);
+    expect((await bridge.uninstall('petri-pack-bio')).ok).toBe(false);
   });
 
   it('runtime.status maps the { r, python } contract and degrades to all-false', async () => {

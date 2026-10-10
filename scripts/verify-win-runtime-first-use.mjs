@@ -48,7 +48,7 @@ if (process.platform !== 'win32') {
   fail(`本脚本仅用于 win32，当前平台 ${process.platform}`);
 }
 
-// ── 隔离目录：刻意不用 Documents/BioF3-Local（用户默认数据目录），避免污染 ──
+// ── 隔离目录：刻意不用 Documents/Petri-Local（用户默认数据目录），避免污染 ──
 const DATA_DIR = path.join(REPO_ROOT, 'tmp', 'win-first-use');
 const RUNTIMES_DIR = path.join(DATA_DIR, 'runtimes');
 
@@ -216,7 +216,7 @@ async function verifyPython(runtimePaths) {
 async function main() {
   console.log('Windows Runtime 首用隔离验证');
   console.log(`  隔离数据目录: ${DATA_DIR}`);
-  console.log(`  (刻意避开 Documents/BioF3-Local，不污染用户默认数据目录)`);
+  console.log(`  (刻意避开 Documents/Petri-Local，不污染用户默认数据目录)`);
 
   const compat = await loadPlatformCompat();
   const runtimePaths = await loadRuntimePaths();

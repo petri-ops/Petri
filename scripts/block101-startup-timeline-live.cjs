@@ -53,7 +53,7 @@ async function killTestInstance() {
     const parsed = JSON.parse(out || '[]');
     const procs = Array.isArray(parsed) ? parsed : [parsed];
     for (const p of procs) {
-      if (!/biof3-test-user-data|gewu-test-instance/.test(p.CommandLine || '')) continue;
+      if (!/petri-test-user-data|petri-test-instance/.test(p.CommandLine || '')) continue;
       try { process.kill(Number(p.ProcessId)); log(`killed test instance pid=${p.ProcessId}`); } catch {}
     }
   } catch (e) { log('kill probe skipped: ' + e.message.slice(0, 120)); }
@@ -81,13 +81,13 @@ async function sampleOnce(label, lib) {
   const evalInPage = (expr) => lib.evalJs(client, expr);
   // 等 SPA 挂载 + 首批 API 到货（marks 上报需要 dataReady 链走完）
   for (let i = 0; i < 40; i++) {
-    const desktop = await evalInPage('!!(window.gewu || window.biof3Desktop)').catch(() => false);
+    const desktop = await evalInPage('!!(window.petri || window.petriDesktop)').catch(() => false);
     if (desktop) break;
     await sleep(500);
   }
   await sleep(1500);
   const marks = await evalInPage(`(async () => {
-    const desktop = window.gewu || window.biof3Desktop;
+    const desktop = window.petri || window.petriDesktop;
     if (!desktop || !desktop.startup) return { error: 'startup_bridge_missing' };
     const main = await desktop.startup.marks();
     const paints = performance.getEntriesByType('paint').map((e) => ({ name: e.name, startTime: Math.round(e.startTime) }));
@@ -155,7 +155,7 @@ function collectContext() {
 }
 
 async function main() {
-  const libPath = path.join(ROOT, '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs');
+  const libPath = path.join(ROOT, '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs');
   const lib = require(libPath);
   fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
   const samples = [];

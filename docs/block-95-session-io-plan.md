@@ -2,13 +2,13 @@
 
 最后更新：2026-09-16
 
-状态：`completed（2026-09-17 整包收口：六工作面 A1-A5+B1-B5 全收口无半拆。提交链 8d98194e→f4b49e0e→dfe038f6→fc0142dc→de525eaa→59567047→a1e19848→28a620dc。门禁总账：契约 4/4+6/6+6/6+3/3 + copilot 293 + tsc 0 + theme 4/4 + 棘轮 PASS；实机 dev Electron 四脚本 8/8+6/6+8/8+3/3 allPass；closeout 三绿+test:changed 3 红全 D8 源绑定例外族〔本包 impact-map 合法登记触发，BLOCK-92 同款先例，归 G0-RS〕+棘轮单独 PASS。核心数字：长会话最新窗口+补页修复；增量拼装逐字对账；compaction 省 47.6%/轮；cache 96.8% 命中修复实证。两开关默认关翻默认待用户裁决；UI-394 in_progress 待用户复看。G0 开发期常态 · 不外推 packaged/Provider/GA）`active（2026-09-17 P0/P1/P2 完成：P1=A1+A3+A4 实机 8/8〔UI-394 in_progress〕；P2=B1 后端拼装开关 BIOF3_SERVER_HISTORY_ASSEMBLY 默认关，契约 6/6 + 实机 diff 对账 6/6 allPass〔增量形态请求下 LLM 收到 DB 全量拼装逐字一致〕；P3=B2 会话级 compaction〔契约 6/6 + 实机 8/8：token 对账 46297→24258 每轮省 22039（-47.6%），covers=29-31 条，原文红线契约+实机双证〕+ A5 压缩标记卡实机渲染确认（截图 acceptance/block-95/block95-a5-compaction-notice.png；BIOF3_SESSION_COMPACTION 默认关，翻默认待 P6 裁决；resume 续接卡已由 BLOCK-38/UI-275 ResumePrompt 覆盖，A5 增量=压缩标记卡如实登记）；P4=B3 cache 断链修复〔deepseek/anthropic 落库补 cache 字段；修复前基线 957 万 tokens 恒 0 → 修复后同渠道 96.8% 命中（15744/16260）实锤；前缀稳定评估=既有顺序+静态缓存达标零改动；ContextBudgetBar 审计视图=数据面已具备、UI 增量列后续候选；契约 3/3 + 基线脚本可复跑 scripts/block95-b3-cache-baseline.cjs〕；P5=A2 渲染性能〔displayMessages 派生链 useMemo 化（消除 keystroke/菜单 state 的全量重拼）；实机帧率观测 scripts/block95-a2-frame-live.cjs 3/3：25s 流式窗口 recalc+layout≈0ms、script 303.8ms（1.2%）、DOM 1985 节点——虚拟化评估结论=当前规模无必要，阈值（>5000 条或 recalc 占比>40%）触发时再议〕+ B4 评估结论〔system prompt/tool guide ~1K tokens/请求，B3 修复后 cache 96.8% 命中吸收其成本，裁剪必要性显著降低——只评估不动码（用户裁决③）〕+ B5 评估结论〔30K 硬截断已与 Anthropic BASH_MAX_OUTPUT_LENGTH 同语义；quiet/tail 指南注入=行为敏感（prompt 变更须逐项对账）列后续候选〕。P6 整包收口进行中）`
+状态：`completed（2026-09-17 整包收口：六工作面 A1-A5+B1-B5 全收口无半拆。提交链 8d98194e→f4b49e0e→dfe038f6→fc0142dc→de525eaa→59567047→a1e19848→28a620dc。门禁总账：契约 4/4+6/6+6/6+3/3 + copilot 293 + tsc 0 + theme 4/4 + 棘轮 PASS；实机 dev Electron 四脚本 8/8+6/6+8/8+3/3 allPass；closeout 三绿+test:changed 3 红全 D8 源绑定例外族〔本包 impact-map 合法登记触发，BLOCK-92 同款先例，归 G0-RS〕+棘轮单独 PASS。核心数字：长会话最新窗口+补页修复；增量拼装逐字对账；compaction 省 47.6%/轮；cache 96.8% 命中修复实证。两开关默认关翻默认待用户裁决；UI-394 in_progress 待用户复看。G0 开发期常态 · 不外推 packaged/Provider/GA）`active（2026-09-17 P0/P1/P2 完成：P1=A1+A3+A4 实机 8/8〔UI-394 in_progress〕；P2=B1 后端拼装开关 PETRI_SERVER_HISTORY_ASSEMBLY 默认关，契约 6/6 + 实机 diff 对账 6/6 allPass〔增量形态请求下 LLM 收到 DB 全量拼装逐字一致〕；P3=B2 会话级 compaction〔契约 6/6 + 实机 8/8：token 对账 46297→24258 每轮省 22039（-47.6%），covers=29-31 条，原文红线契约+实机双证〕+ A5 压缩标记卡实机渲染确认（截图 acceptance/block-95/block95-a5-compaction-notice.png；PETRI_SESSION_COMPACTION 默认关，翻默认待 P6 裁决；resume 续接卡已由 BLOCK-38/UI-275 ResumePrompt 覆盖，A5 增量=压缩标记卡如实登记）；P4=B3 cache 断链修复〔deepseek/anthropic 落库补 cache 字段；修复前基线 957 万 tokens 恒 0 → 修复后同渠道 96.8% 命中（15744/16260）实锤；前缀稳定评估=既有顺序+静态缓存达标零改动；ContextBudgetBar 审计视图=数据面已具备、UI 增量列后续候选；契约 3/3 + 基线脚本可复跑 scripts/block95-b3-cache-baseline.cjs〕；P5=A2 渲染性能〔displayMessages 派生链 useMemo 化（消除 keystroke/菜单 state 的全量重拼）；实机帧率观测 scripts/block95-a2-frame-live.cjs 3/3：25s 流式窗口 recalc+layout≈0ms、script 303.8ms（1.2%）、DOM 1985 节点——虚拟化评估结论=当前规模无必要，阈值（>5000 条或 recalc 占比>40%）触发时再议〕+ B4 评估结论〔system prompt/tool guide ~1K tokens/请求，B3 修复后 cache 96.8% 命中吸收其成本，裁剪必要性显著降低——只评估不动码（用户裁决③）〕+ B5 评估结论〔30K 硬截断已与 Anthropic BASH_MAX_OUTPUT_LENGTH 同语义；quiet/tail 指南注入=行为敏感（prompt 变更须逐项对账）列后续候选〕。P6 整包收口进行中）`
 
 计划编号：`BLOCK-95-SESSION-IO`
 
 用户裁决原话：「需要新建一个block用来优化 信息流 I/O  主要目的是让每个session的连贯性好看易读 还有一个方面是性能 省token」（2026-09-16），并指定参考文章：Anthropic《Maximizing the value of your Claude Code sessions》（Lydia Hallie，2026-08-14，claude.com/blog）。
 
-主模块：`core/biof3-server`（会话/事件流数据面 + LLM 请求拼装）+ `frontend/src/components/copilot/`（信息流呈现面）
+主模块：`core/petri-server`（会话/事件流数据面 + LLM 请求拼装）+ `frontend/src/components/copilot/`（信息流呈现面）
 
 关联：UI-382~387（信息流呈现面既有增量，in_progress 待用户复看，本包不重做）；BLOCK-79（ai_usage 用量/缓存字段）；BLOCK-91（composer 附件引用注入）；BLOCK-65（子智能体上下文隔离基线）；BLOCK-37（io-transcript 全量落盘）
 
@@ -16,7 +16,7 @@
 
 文章的成本模型：**一次 session 的成本 ≈ 上下文里的 token 数 × 它们驻留的轮数 × 并发上下文数**。token 单价 = 模型 × 输入/输出（输出约 5× 输入）× 是否缓存（cache 读 0.1×、写至多 2×、TTL 5 分钟 API / 1 小时订阅，每轮续期）。四个最值得盯的抓手（按成本影响粗排）：**① 上下文驻留轮数**（长会话第 40 轮还在重读前 39 轮——/clear 分任务、/compact 收尾段）；**② cache buster**（会话中途切模型/effort/fast-mode、过期后才 /compact——切换要挑「便宜时机」：会话开头或 /clear 之后）；**③ 工具输出噪声**（中等体量噪声输出比超限大输出更贵——quiet flags、@-mention 直接附文件、大输出落盘只留预览、噪声活派 subagent）；**④ 启动载荷**（工具定义 + 系统提示 + CLAUDE.md 在打第一个字之前就已驻留——/context 审计、工作流文档移入 skills 按需加载）。
 
-Claude Code 把这些做成**给用户的手动杠杆**（/clear //compact //rewind //context）；我们的产品里对应机制必须是**运行时自动 + 用户可见可控**的产品能力——这是本包把文章观念翻译成 Gewu 实现的总原则。
+Claude Code 把这些做成**给用户的手动杠杆**（/clear //compact //rewind //context）；我们的产品里对应机制必须是**运行时自动 + 用户可见可控**的产品能力——这是本包把文章观念翻译成 Petri 实现的总原则。
 
 ## 1. 两目标 → 六工作面（2026-09-16 代码摸底证据）
 
@@ -43,7 +43,7 @@ Claude Code 把这些做成**给用户的手动杠杆**（/clear //compact //rew
 
 ### A 面：信息流连贯易读（呈现面）
 
-- **A1 长会话加载游标化（真缺陷先行）**：历史消息 `ORDER BY ts ASC LIMIT ?`（`core/biof3-server/routes/ai-conversations.js:121-122`，前端拉 200 条 `useConversationResume.ts:45`）——超过 200 条的会话前端拿到的是**最旧** 200 条，且无向上分页游标。长会话恰恰是「看不到最近、连贯性断裂」的重灾区。→ 改「最新优先加载 + 向上滚动补页 + 游标协议」，前端对账逻辑（5s 轮询镜像）同步适配。
+- **A1 长会话加载游标化（真缺陷先行）**：历史消息 `ORDER BY ts ASC LIMIT ?`（`core/petri-server/routes/ai-conversations.js:121-122`，前端拉 200 条 `useConversationResume.ts:45`）——超过 200 条的会话前端拿到的是**最旧** 200 条，且无向上分页游标。长会话恰恰是「看不到最近、连贯性断裂」的重灾区。→ 改「最新优先加载 + 向上滚动补页 + 游标协议」，前端对账逻辑（5s 轮询镜像）同步适配。
 - **A2 流式渲染性能**：`SimpleChat.tsx` 的 displayMessages 每个流式事件全量重拼（L693-792 两次 slice 拷贝）+ 全量重渲染（L1401-1576），无虚拟化；`ChatScrollbar.tsx` MutationObserver 全量测高。流式 delta 期间整列表重算是卡顿直接来源。→ 尾部流式块局部更新（memo/分区渲染），虚拟化列为评估项。
 - **A3 自动滚动守卫**：`scrollTop = scrollHeight` 直写（`SimpleChat.tsx:809-813`），无「用户上翻则不打扰」守卫。→ 上翻暂停跟随 + 新内容浮标 + 一键回底部。
 - **A4 语义分段**：`topic_shift` 事件已在流里（`conversations.js:163-205` 检测、`conversation-adapter.js:192` 投递）、`loop_phase`/`loop_iteration`/`agent_status` 生命周期事件齐备——但渲染为平铺行。→ 渲染成小节分隔/呼吸感，让长信息流有「章节」；与 UI-383 只读折叠、UI-387 图标带风格合流，同真值只留一张皮。
@@ -90,7 +90,7 @@ Claude Code 把这些做成**给用户的手动杠杆**（/clear //compact //rew
 3. UI 增量同提交登记 `docs/ui-productization-audit.md`（UI-### 顺延）；信息流样式与 UI-382~387 既有风格合流（停靠承载、同真值一张皮）；
 4. 每工作面独立提交、可中断可续作；面内动前存受影响测试基线、动后对账归属（红禁静默）——B 面触碰 `agent-runner.js` / `loop-orchestrator.js` 高危区，loop/agent 族存量基线红（continuation guard 2 项 🟡）归属对账照 BLOCK-94 §5 同款纪律；
 5. 历史行为兼容：B1 改拼装权须保持 resume/fork/多端镜像（BLOCK-87 5s 轮询）三链路契约测试全绿后才切换；
-6. dev 纪律：core/biof3-server 变更须重启 dev 栈并预告用户窗口闪动；fnm Node 24。
+6. dev 纪律：core/petri-server 变更须重启 dev 栈并预告用户窗口闪动；fnm Node 24。
 
 ## 5. 阶段草案（P0 评审裁剪优先级后串行执行）
 

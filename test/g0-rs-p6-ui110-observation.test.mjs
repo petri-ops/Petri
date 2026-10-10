@@ -49,8 +49,8 @@ test('P6 UI-110 source binding contains the complete P5 base and independent P6 
     'scripts/g0-rs-p6-ui110-local-gateway.mjs',
     'test/result-studio-route-baseline.test.mjs',
     'src/preload.js',
-    'core/biof3-server/routes/ai-agent.js',
-    'core/biof3-server/agent-runner.js',
+    'core/petri-server/routes/ai-agent.js',
+    'core/petri-server/agent-runner.js',
     'core/shared-backend/redaction.js',
     'test/diagnostic-redaction.test.mjs',
     'frontend/src/pages/project-workspace.tsx',
@@ -227,7 +227,7 @@ test('P6 UI-110 stages only a verified preprovisioned local enrichment capabilit
     });
 
     const targetData = path.join(root, 'target-data');
-    const staged = stageP6Ui110LocalCapability({ BIOF3_LOCAL_DATA_DIR: targetData }, sourceRuntimes);
+    const staged = stageP6Ui110LocalCapability({ PETRI_LOCAL_DATA_DIR: targetData }, sourceRuntimes);
     assert.equal(staged.ready, true);
     assert.equal(staged.source, 'verified_preprovisioned_local_dependency');
     assert.equal(staged.networkAccessDuringTrace, 'none');

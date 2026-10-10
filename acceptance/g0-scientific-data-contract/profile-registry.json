@@ -8,8 +8,8 @@
   "profileCount": 6,
   "profileIdentities": [
     {
-      "profileId": "biof3.counts-matrix.v1",
-      "familyId": "biof3.counts-matrix",
+      "profileId": "petri.counts-matrix.v1",
+      "familyId": "petri.counts-matrix",
       "version": "v1",
       "majorVersion": 1,
       "lifecycleStatus": "active",
@@ -17,8 +17,8 @@
       "contractDigest": "075956b3bd84ab5cff70d9fdc43f9a2f3dbbae65bf3f59b0a94c0d252cb25772"
     },
     {
-      "profileId": "biof3.deg.v1",
-      "familyId": "biof3.deg",
+      "profileId": "petri.deg.v1",
+      "familyId": "petri.deg",
       "version": "v1",
       "majorVersion": 1,
       "lifecycleStatus": "active",
@@ -26,8 +26,8 @@
       "contractDigest": "e1944a85bc67eb4c0f58fff9d72281b8b8182cc52473d0c0c4905ea3416ae981"
     },
     {
-      "profileId": "biof3.enrichment-table.v1",
-      "familyId": "biof3.enrichment-table",
+      "profileId": "petri.enrichment-table.v1",
+      "familyId": "petri.enrichment-table",
       "version": "v1",
       "majorVersion": 1,
       "lifecycleStatus": "active",
@@ -35,8 +35,8 @@
       "contractDigest": "26c36bc11d38e48abc6abf4dee340c735f60f42a43ccb65308e78c144dd20294"
     },
     {
-      "profileId": "biof3.expression-matrix.v1",
-      "familyId": "biof3.expression-matrix",
+      "profileId": "petri.expression-matrix.v1",
+      "familyId": "petri.expression-matrix",
       "version": "v1",
       "majorVersion": 1,
       "lifecycleStatus": "active",
@@ -44,8 +44,8 @@
       "contractDigest": "c6a8de1be1c900165699f648e938cf1ced869d24bdcec51609c82ba193cefdbf"
     },
     {
-      "profileId": "biof3.gene-list.v1",
-      "familyId": "biof3.gene-list",
+      "profileId": "petri.gene-list.v1",
+      "familyId": "petri.gene-list",
       "version": "v1",
       "majorVersion": 1,
       "lifecycleStatus": "active",
@@ -53,8 +53,8 @@
       "contractDigest": "10444aa3042b8ecbc8e00b087cae750b0c77bb609530e1ddb096c4dbd778b9cc"
     },
     {
-      "profileId": "biof3.sample-metadata.v1",
-      "familyId": "biof3.sample-metadata",
+      "profileId": "petri.sample-metadata.v1",
+      "familyId": "petri.sample-metadata",
       "version": "v1",
       "majorVersion": 1,
       "lifecycleStatus": "active",

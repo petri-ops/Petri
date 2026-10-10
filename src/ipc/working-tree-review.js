@@ -33,12 +33,12 @@ const { _writeRejectEntry } = require('./working-tree-review/reject-store');
 // BLOCK-152 H 轨 — commitReview hunk 级 stage 面分类（纯函数：签名复算/diff 切片/patch 构造）。
 const { classifyReviewStageSurface } = require('./working-tree-review/review-stage');
 
-// BLOCK-125：拒绝清单根目录解析——与 core/biof3-server/helpers/system-prompt.js
+// BLOCK-125：拒绝清单根目录解析——与 core/petri-server/helpers/system-prompt.js
 // resolveWorkingTreeRejectRoot 同优先级（LOCAL_DATA_DIR 优先 / USER_DATA_DIR 回退），
 // 两侧口径由 test/reject-loop-root.test.mjs 源码扫描守卫钉住（本文件受 quality:arch
 // R5 限制不能 require core helper，故内联同逻辑；改解析规则必须两侧同批改）。
 function resolveRejectRootDir() {
-  if (process.env.BIOF3_LOCAL_DATA_DIR) return process.env.BIOF3_LOCAL_DATA_DIR;
+  if (process.env.PETRI_LOCAL_DATA_DIR) return process.env.PETRI_LOCAL_DATA_DIR;
   return app.getPath('userData');
 }
 

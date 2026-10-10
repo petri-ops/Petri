@@ -12,9 +12,9 @@ test('P7 producer is packaged-only, source-bound, and never imports historical R
   assert.match(source, /activateAllWindows/);
   assert.match(source, /kCGWindowLayer/);
   for (const completionSource of [
-    'core/biof3-server/agent-runner.js',
-    'core/biof3-server/agent-tools/agent-loop-control.js',
-    'core/biof3-server/agent-tools/result-context-binding.js',
+    'core/petri-server/agent-runner.js',
+    'core/petri-server/agent-tools/agent-loop-control.js',
+    'core/petri-server/agent-tools/result-context-binding.js',
     'frontend/src/lib/result-edit-agent-bridge.ts',
   ]) assert.match(source, new RegExp(completionSource.replaceAll('/', '\\/').replaceAll('.', '\\.')));
   assert.doesNotMatch(source, /rs9-(?:product|provider|visual)-acceptance\.json/);
@@ -53,7 +53,7 @@ test('P7 bound drawer completion guard covers the durable task Agent path (singl
   // 退役，completion guard 的真实且唯一归属地 = loop-orchestrator.js（durable task
   // 路径）。原 K 簇 🟡「expectation 传递已不在」的漂移随双轨退役收敛完成：
   // loop-orchestrator 现承载完整 guard 契约（expectation 传递在位，534-535 行）。
-  const orchestratorSource = readFileSync(new URL('../core/biof3-server/loop-orchestrator.js', import.meta.url), 'utf8');
+  const orchestratorSource = readFileSync(new URL('../core/petri-server/loop-orchestrator.js', import.meta.url), 'utf8');
   assert.match(orchestratorSource, /createResultEditCompletionGuard/);
   assert.match(orchestratorSource, /expectation:\s*toolCtx\.resultStudioCompletionExpectation/);
   assert.match(orchestratorSource, /resultEditCompletionGuard\.recordToolResult\(name, result\)/);
@@ -61,6 +61,6 @@ test('P7 bound drawer completion guard covers the durable task Agent path (singl
   assert.match(orchestratorSource, /resultEditCompletionGuard\.required/);
   assert.match(orchestratorSource, /resultEditCompletionGuard\.requiresToolExecution\(\)/);
   assert.match(orchestratorSource, /resultEditCompletionGuard\.requiredToolChoice\(\)/);
-  const runnerSource = readFileSync(new URL('../core/biof3-server/agent-runner.js', import.meta.url), 'utf8');
+  const runnerSource = readFileSync(new URL('../core/petri-server/agent-runner.js', import.meta.url), 'utf8');
   assert.match(runnerSource, /createResultEditCompletionGuard/);
 });

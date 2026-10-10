@@ -446,7 +446,7 @@ describe('WorkspaceSummaryCard (BLOCK-78 P1 项目运行时投影)', () => {
     }) as unknown as typeof getBridge);
     const dispatched: CustomEvent[] = [];
     const dispatchSpy = vi.spyOn(window, 'dispatchEvent').mockImplementation((ev: Event) => {
-      if (ev instanceof CustomEvent && ev.type === 'gewu:agent-open-in-rail') dispatched.push(ev);
+      if (ev instanceof CustomEvent && ev.type === 'petri:agent-open-in-rail') dispatched.push(ev);
       return true;
     });
     listAgentTasksMock.mockResolvedValue([

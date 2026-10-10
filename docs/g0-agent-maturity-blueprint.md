@@ -139,7 +139,7 @@ status: reference
 | 裁决点 | v1 缺省（即生效，波报复认） | 明确不做（v2 另裁） |
 | --- | --- | --- |
 | KNW-3 命令集 | 命令源两类：产品 Skills（`/<skill-id>`）+ run_tool 工作流模板（`/tpl:<templateId>`）；`/` 触发前缀过滤面板，选中即向 composer 注入结构化执行意图（复用 BLOCK-139 注入通道），不自动跳页 | UI 动作命令（CommandPalette 保持纯 UI）、自定义命令注册、参数内联补全 |
-| ORC-1 规则形态 | 规则三字段：匹配器（路径 glob 或命令首 token）+ 动作（require-ack / deny）+ 作用域（全局/单项目）；存 rules.json（BIOF3-Local，installed.json 同款形态）；设置页列表式增删改 | 表达式语言、正则、规则优先级编排（v1 先到先判，与领域 hook 同走 first-veto） |
+| ORC-1 规则形态 | 规则三字段：匹配器（路径 glob 或命令首 token）+ 动作（require-ack / deny）+ 作用域（全局/单项目）；存 rules.json（PETRI-Local，installed.json 同款形态）；设置页列表式增删改 | 表达式语言、正则、规则优先级编排（v1 先到先判，与领域 hook 同走 first-veto） |
 | ORC-2 动态维度 | v1 收两维：workspace 路径 glob + 命令首 token；判定序 = 静态契约档 → 用户规则 → 动态维度，取最严；科学源数据不可变硬约束不动 | 参数值语义分析、跨工具调用链推断、按数据类型自动分级 |
 | DIST-3⇄CAP-5 权限词表 | manifest 可选 `permissions[]` 六词：filesystem:read / filesystem:write / network / process:spawn / runtime-install / data:demo；不声明 = 现状全权（存量 8 插件零破坏）；声明 = 安装确认逐条展示 + 执行器越权即拒；未知词拒装（plugin-schema 校验） | 权限细粒到参数、与签名绑定 |
 

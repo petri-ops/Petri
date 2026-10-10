@@ -5,7 +5,7 @@
   min-height: 0;
   flex-direction: column;
   overflow: hidden;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
 }
 
 .canvasBody {
@@ -27,18 +27,18 @@
   align-items: start;
   gap: 10px;
   padding: 10px 14px;
-  border-bottom: 1px solid var(--gewu-border);
-  background: var(--gewu-bg-surface);
+  border-bottom: 1px solid var(--petri-border);
+  background: var(--petri-bg-surface);
 }
 
 .backButton,
 .askButton,
 .inspectorActions button,
 .inspectorActions a {
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 7px;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   cursor: pointer;
   font: inherit;
 }
@@ -67,8 +67,8 @@
   min-width: 0;
   margin: 0;
   overflow: hidden;
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-body);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body);
   font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -77,8 +77,8 @@
 .contextIdentity p {
   margin: 3px 0 0;
   overflow: hidden;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-sm);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-sm);
   line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -89,8 +89,8 @@
   flex-wrap: wrap;
   gap: 4px 10px;
   margin-top: 4px;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs);
 }
 
 .modeSwitcher {
@@ -104,22 +104,22 @@
   border: 0;
   border-radius: 5px;
   background: transparent;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   cursor: pointer;
   font: inherit;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   line-height: 22px;
   padding: 0 7px;
 }
 
 .modeSwitcher button:hover {
-  background: var(--gewu-bg-hover);
-  color: var(--gewu-text);
+  background: var(--petri-bg-hover);
+  color: var(--petri-text);
 }
 
 .modeSwitcher button[aria-current='page'] {
-  background: color-mix(in srgb, var(--gewu-accent) 12%, transparent);
-  color: var(--gewu-accent);
+  background: color-mix(in srgb, var(--petri-accent) 12%, transparent);
+  color: var(--petri-accent);
 }
 
 .truthBadge {
@@ -128,17 +128,17 @@
   align-items: center;
   min-height: 19px;
   padding: 0 7px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 999px;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xs);
   font-weight: 600;
 }
 
-.truthBadge[data-tone='valid'] { color: var(--gewu-status-online); }
+.truthBadge[data-tone='valid'] { color: var(--petri-status-online); }
 .truthBadge[data-tone='degraded'],
-.truthBadge[data-tone='running'] { color: var(--gewu-status-loading); }
-.truthBadge[data-tone='blocked'] { color: var(--gewu-danger); }
+.truthBadge[data-tone='running'] { color: var(--petri-status-loading); }
+.truthBadge[data-tone='blocked'] { color: var(--petri-danger); }
 
 .availabilityBadge {
   display: inline-flex;
@@ -146,10 +146,10 @@
   align-items: center;
   min-height: 19px;
   padding: 0 7px;
-  border: 1px solid color-mix(in srgb, var(--gewu-danger) 42%, var(--gewu-border));
+  border: 1px solid color-mix(in srgb, var(--petri-danger) 42%, var(--petri-border));
   border-radius: 999px;
-  color: var(--gewu-danger);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-danger);
+  font-size: var(--petri-font-size-xs);
   font-weight: 650;
 }
 
@@ -159,15 +159,15 @@
   align-items: center;
   gap: 5px;
   padding: 0 10px;
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
 }
 
 .backButton:hover,
 .askButton:hover,
 .inspectorActions button:hover,
 .inspectorActions a:hover {
-  border-color: var(--gewu-border-strong);
-  color: var(--gewu-text);
+  border-color: var(--petri-border-strong);
+  color: var(--petri-text);
 }
 
 .inspector,
@@ -179,18 +179,18 @@
   gap: 12px;
   padding: 14px 12px;
   overflow: auto;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .inspectorEmpty {
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
-.inspectorEmpty strong { color: var(--gewu-text); font-size: var(--gewu-font-size-caption); }
-.inspectorEmpty span { max-width: 220px; font-size: var(--gewu-font-size-sm); line-height: 1.5; }
+.inspectorEmpty strong { color: var(--petri-text); font-size: var(--petri-font-size-caption); }
+.inspectorEmpty span { max-width: 220px; font-size: var(--petri-font-size-sm); line-height: 1.5; }
 
 .inspectorHeader {
   display: grid;
@@ -199,8 +199,8 @@
 }
 
 .inspectorHeader > span:first-child {
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs);
   font-weight: 650;
   letter-spacing: .06em;
 }
@@ -208,7 +208,7 @@
 .inspectorHeader strong {
   max-width: 100%;
   overflow: hidden;
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -217,7 +217,7 @@
   display: grid;
   gap: 0;
   margin: 0;
-  border-top: 1px solid var(--gewu-border);
+  border-top: 1px solid var(--petri-border);
 }
 
 .inspectorFacts > div {
@@ -225,11 +225,11 @@
   grid-template-columns: 58px minmax(0, 1fr);
   gap: 8px;
   padding: 7px 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--gewu-border) 70%, transparent);
-  font-size: var(--gewu-font-size-sm);
+  border-bottom: 1px solid color-mix(in srgb, var(--petri-border) 70%, transparent);
+  font-size: var(--petri-font-size-sm);
 }
 
-.inspectorFacts dt { color: var(--gewu-text-tertiary); }
+.inspectorFacts dt { color: var(--petri-text-tertiary); }
 .inspectorFacts dd { margin: 0; overflow-wrap: anywhere; }
 
 .inspectorActions {
@@ -245,20 +245,20 @@
   align-items: center;
   gap: 5px;
   padding: 0 8px;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   text-decoration: none;
 }
 
 .technicalDetails {
   margin-top: auto;
   padding-top: 8px;
-  border-top: 1px solid var(--gewu-border);
+  border-top: 1px solid var(--petri-border);
 }
 
 .technicalDetails summary {
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   cursor: pointer;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
 }
 
 .technicalDetails dl {
@@ -266,10 +266,10 @@
   grid-template-columns: 54px minmax(0, 1fr);
   gap: 5px 8px;
   margin: 9px 0 0;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
 }
 
-.technicalDetails dt { color: var(--gewu-text-tertiary); }
+.technicalDetails dt { color: var(--petri-text-tertiary); }
 .technicalDetails dd { margin: 0; overflow-wrap: anywhere; }
 
 @media (max-width: 820px) {
@@ -297,29 +297,29 @@
 .contextReadiness {
   margin: 0;
   padding: 7px 8px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-sm);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-sm);
   line-height: 1.5;
 }
 
 .contextReadiness[data-state='ready'] {
-  border-color: color-mix(in srgb, var(--gewu-status-online) 40%, var(--gewu-border));
+  border-color: color-mix(in srgb, var(--petri-status-online) 40%, var(--petri-border));
 }
 
 .contextReadiness[data-state='blocked'] {
-  border-color: color-mix(in srgb, var(--gewu-status-loading) 45%, var(--gewu-border));
-  color: var(--gewu-text-primary);
+  border-color: color-mix(in srgb, var(--petri-status-loading) 45%, var(--petri-border));
+  color: var(--petri-text-primary);
 }
 
 .contextReadiness[data-state='loading'] {
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .root button:focus-visible,
 .root a:focus-visible,
 .root summary:focus-visible {
-  outline: 2px solid var(--gewu-accent);
+  outline: 2px solid var(--petri-accent);
   outline-offset: 2px;
 }

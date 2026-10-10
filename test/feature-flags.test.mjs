@@ -11,13 +11,13 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 
-const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-flags-'));
-process.env.BIOF3_LOCAL_DATA_DIR = tempRoot;
+const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-flags-'));
+process.env.PETRI_LOCAL_DATA_DIR = tempRoot;
 process.on('exit', () => {
   try { fs.rmSync(tempRoot, { recursive: true, force: true }); } catch {}
 });
 
-const ff = require('../core/biof3-server/helpers/feature-flags.js');
+const ff = require('../core/petri-server/helpers/feature-flags.js');
 
 test('默认值：三开关全部默认开（2026-09-18 用户裁决翻默认）', () => {
   const env = {};
@@ -27,24 +27,24 @@ test('默认值：三开关全部默认开（2026-09-18 用户裁决翻默认）
 });
 
 test('env 强制覆盖：1/true 强开、0/false 强关（kill-switch 语义不变）', () => {
-  assert.equal(ff.resolveFlag('agent_resilience', { BIOF3_AGENT_RESILIENCE: '1' }), true);
-  assert.equal(ff.resolveFlag('agent_resilience', { BIOF3_AGENT_RESILIENCE: 'true' }), true);
-  assert.equal(ff.resolveFlag('agent_resilience', { BIOF3_AGENT_RESILIENCE: '0' }), false);
-  assert.equal(ff.resolveFlag('agent_resilience', { BIOF3_AGENT_RESILIENCE: 'false' }), false);
+  assert.equal(ff.resolveFlag('agent_resilience', { PETRI_AGENT_RESILIENCE: '1' }), true);
+  assert.equal(ff.resolveFlag('agent_resilience', { PETRI_AGENT_RESILIENCE: 'true' }), true);
+  assert.equal(ff.resolveFlag('agent_resilience', { PETRI_AGENT_RESILIENCE: '0' }), false);
+  assert.equal(ff.resolveFlag('agent_resilience', { PETRI_AGENT_RESILIENCE: 'false' }), false);
   // 非强制值（如 'yes'）不覆盖 → 走持久化/默认
-  assert.equal(ff.resolveFlag('agent_resilience', { BIOF3_AGENT_RESILIENCE: 'yes' }), true);
+  assert.equal(ff.resolveFlag('agent_resilience', { PETRI_AGENT_RESILIENCE: 'yes' }), true);
 });
 
 test('设置页持久化：显式选择生效，env 强制优先于持久化', () => {
   ff.setFlag('session_compaction', false);
   assert.equal(ff.resolveFlag('session_compaction', {}), false, 'persisted off wins over default');
   assert.equal(
-    ff.resolveFlag('session_compaction', { BIOF3_SESSION_COMPACTION: '1' }),
+    ff.resolveFlag('session_compaction', { PETRI_SESSION_COMPACTION: '1' }),
     true,
     'env force-on beats persisted off',
   );
   assert.equal(
-    ff.resolveFlag('session_compaction', { BIOF3_SESSION_COMPACTION: '0' }),
+    ff.resolveFlag('session_compaction', { PETRI_SESSION_COMPACTION: '0' }),
     false,
     'env force-off beats persisted on',
   );
@@ -53,7 +53,7 @@ test('设置页持久化：显式选择生效，env 强制优先于持久化', (
 });
 
 test('快照投影：enabled/envOverride/stored/default 齐全，设置页可诚实标注 env 锁定', () => {
-  const snapshot = ff.getFlagsSnapshot({ BIOF3_AGENT_RESILIENCE: '0' });
+  const snapshot = ff.getFlagsSnapshot({ PETRI_AGENT_RESILIENCE: '0' });
   assert.equal(snapshot.agent_resilience.enabled, false);
   assert.equal(snapshot.agent_resilience.envOverride, false, 'env lock surfaced');
   assert.equal(snapshot.session_compaction.envOverride, null);

@@ -7,7 +7,7 @@ import path from 'node:path';
 const require = createRequire(import.meta.url);
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const { withSessionExecutionTarget, withSessionExecutionTargetSync } = require(
-  path.join(repoRoot, 'core/biof3-server/helpers/remote-execution/session-target.js'),
+  path.join(repoRoot, 'core/petri-server/helpers/remote-execution/session-target.js'),
 );
 
 test('session target injects into params when known and absent', async () => {

@@ -9,9 +9,9 @@
 
 ## §1 TL;DR
 
-BioF3 现成 plugin/skill 资产已收敛到 **10 个 built-in plugin** + **2 个 built-in skill**，分布严格分层：
+Petri 现成 plugin/skill 资产已收敛到 **10 个 built-in plugin** + **2 个 built-in skill**，分布严格分层：
 
-- **Plugin**（执行体）按子领域归位（`bulk-rnaseq` / `spatial` / `figcode-*`），每个 plugin 自带 `plugin.json` + `environment.json` + `tool-definition.json` + `scripts/<id>.R` + `acceptance.json` + `golden-revisions/` + `demo-data/` + `<id>-report-template.html` + `README.md` 八件套。R 脚本统一以 **JSON 媒介** + `commandArgs` + `_biof3-theme.R` source 的方式接入 BioF3 调度器（`tools.js` 负责把 job 目录、params.json、inputs 和主题文件塞给脚本）。
+- **Plugin**（执行体）按子领域归位（`bulk-rnaseq` / `spatial` / `figcode-*`），每个 plugin 自带 `plugin.json` + `environment.json` + `tool-definition.json` + `scripts/<id>.R` + `acceptance.json` + `golden-revisions/` + `demo-data/` + `<id>-report-template.html` + `README.md` 八件套。R 脚本统一以 **JSON 媒介** + `commandArgs` + `_petri-theme.R` source 的方式接入 Petri 调度器（`tools.js` 负责把 job 目录、params.json、inputs 和主题文件塞给脚本）。
 - **Skill**（AI 编排）只承担 prompt / 参数 / plugin 组合 / 错误恢复策略，**不重写分析逻辑**，通过 `plugins.required / plugins.optional` 复用现成 plugin。`prompts.system / user_templates` 既可内联字符串，也可走相对路径 `prompts/system.md` + `prompts/user/*.md`，由 skill-schema 校验。注意 `go-enrichment-analysis` 的 `plugins.required` 中写的是 `clusterProfiler`（R 包名），与 `deg-analysis-standard` 写 plugin id 不同 — 这是 schema 容忍但尚未统一的现状。
 - **Skill ↔ Plugin 连接**：以 `skill.json.plugins.required` 数组声明 plugin id 串（与 `manifest.json` 中 built-in plugin 名一一对应），调度时按 `outputs.primary[].type` + `parameters.optional[].options/default` 引导用户输入；运行期由 skill executor 解析 `workflows.default` 调用对应 plugin 的 `scripts/<id>.R`，结果再按 `outputs` schema 回填。
 
@@ -23,8 +23,8 @@ BioF3 现成 plugin/skill 资产已收敛到 **10 个 built-in plugin** + **2 �
 
 | Plugin ID | 类型 | 复杂度 | 备注 |
 | --- | --- | --- | --- |
-| `biof3-r-runtime` | runtime | N/A | R 4.5.2 + Bioconductor 3.22 + 70+ 包；走 OSS zip 真实 artifact |
-| `biof3-py-runtime` | runtime | N/A | Python 3.11.9 + scanpy/sklearn 等 200+ 包；走 OSS zip |
+| `petri-r-runtime` | runtime | N/A | R 4.5.2 + Bioconductor 3.22 + 70+ 包；走 OSS zip 真实 artifact |
+| `petri-py-runtime` | runtime | N/A | Python 3.11.9 + scanpy/sklearn 等 200+ 包；走 OSS zip |
 | `deseq2` | bulk RNA-seq | **高** | 最复杂 R 流程：counts + coldata → DESeq2 → lfcShrink(apeglm) → volcano/PCA/heatmap/report |
 | `volcano-plot` | bulk RNA-seq | 中 | **参数最多（19 个 input）**，presentation-heavy；自动探测 log2FC 别名 |
 | `expression-qc` | bulk RNA-seq | 中 | 表达量质控，deseq2 上游 |
@@ -147,8 +147,8 @@ job_dir <- args[1]                       # ← 入口：Job 工作目录
 output_dir <- file.path(job_dir, "output")
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
-# 1) 加载 BioF3 SCI 视觉主题 (tools.js 自动塞到 jobDir)
-source(file.path(job_dir, "_biof3-theme.R"))
+# 1) 加载 Petri SCI 视觉主题 (tools.js 自动塞到 jobDir)
+source(file.path(job_dir, "_petri-theme.R"))
 
 # 2) 读取参数（统一 JSON 媒介）
 params <- fromJSON(file.path(job_dir, "params.json"))
@@ -396,7 +396,7 @@ resources/skills/<id>/
   },
 
   "metadata": {
-    "author": "BioF3 Team",
+    "author": "Petri Team",
     "license": "MIT",
     "source": "built-in",
     "created": "2026-08-14",
@@ -457,7 +457,7 @@ User → Skill Executor
         ├─ 按 plugins.required 顺序校验 runtime / bundle
         ├─ 对每个 plugin 调 tools.js runHook()
         │     ├─ 准备 jobDir
-        │     ├─ 拷贝 inputs.csv + params.json + _biof3-theme.R
+        │     ├─ 拷贝 inputs.csv + params.json + _petri-theme.R
         │     ├─ Rscript scripts/<id>.R <jobDir>  (或 plugin-manager 等价调用)
         │     ├─ 读 output_dir + provenance.json 校验 resultStudio / artifact manifest
         │     └─ 失败 → 触发 recovery_strategies 或 failureModes
@@ -536,7 +536,7 @@ resources/built-in-plugins/<id>/
 
 1. **八件套不能缺**：plugin 目录必须同时存在 `plugin.json + environment.json + tool-definition.json + scripts/<id>.R + acceptance.json + README.md + demo-data/ + <id>-report-template.html`；Result Studio class 加 `golden-revisions/result-studio-v1.json`。缺哪一件，Harness/UI/Acceptance 三处都会卡。
 2. **`plugin.json` ↔ `environment.json` R 包字符串必须严格一致**（同样版本约束表达式），否则 runtime 校验和 tool-definition 渲染会出现版本漂移。
-3. **R 脚本三件套要清真**：`commandArgs[1] <- jobDir`，`source(jobDir/_biof3-theme.R)`，`fromJSON(file.path(jobDir,"params.json"))`，缺一会让 SCI 主题、param 输入、确定性 PNG 三件事全部塌方。生成的 PNG 末尾用 `png::writePNG(png::readPNG(f), f)` 重写以稳定 Result Studio hash。
+3. **R 脚本三件套要清真**：`commandArgs[1] <- jobDir`，`source(jobDir/_petri-theme.R)`，`fromJSON(file.path(jobDir,"params.json"))`，缺一会让 SCI 主题、param 输入、确定性 PNG 三件事全部塌方。生成的 PNG 末尾用 `png::writePNG(png::readPNG(f), f)` 重写以稳定 Result Studio hash。
 4. **`tool-definition.json` 是 UI 二跳绑定的真相源**：`inputs[].required` + `outputs[].filename + type + interaction` + `resultStudio` + `failureModes[].detect` 全部要在 tool-definition，不要只写在 plugin.json 中。
 5. **`acceptance.json` 至少 3 个 fixture**：`valid` + `missing-inputs` (expectedStatus:blocked, expectedFailureMode:missing_required_file_inputs) + `runtime-not-ready` (skipOnSupportedPlatform:true)。Enrichment 类再加 `empty-result`（`expectedStatus: valid, expectedNote: "科学空结果"`）。
 6. **Skill 的 `prompts.system` 优先用相对路径**（`prompts/system.md`），内容是分析师角色定位 + 能力 + 错误处理 + 参考文献四段式，可与同一 skill 的 user prompt 模板共享 `{{var}}`。

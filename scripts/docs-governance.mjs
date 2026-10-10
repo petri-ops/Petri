@@ -764,7 +764,7 @@ async function runCli() {
 
   if (mode === '--status') {
     const managed = await collectManagedMarkdown(DEFAULT_ROOT, registry.coverage);
-    console.log('BioF3 document governance status');
+    console.log('Petri document governance status');
     console.log(`  Registered: ${registry.documents.length}`);
     console.log(`  Managed Markdown: ${managed.length}`);
     console.log(`  Validation: ${issues.length === 0 ? 'PASS' : `FAIL (${issues.length})`}`);

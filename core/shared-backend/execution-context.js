@@ -10,7 +10,7 @@ function normalizeSlashPath(value) {
   );
 }
 
-function createPathMapper({ localRoot, canonicalRoot = '/work/biof3' } = {}) {
+function createPathMapper({ localRoot, canonicalRoot = '/work/petri' } = {}) {
   const resolvedLocalRoot = localRoot ? path.resolve(String(localRoot)) : null;
   const normalizedLocalRoot = resolvedLocalRoot ? normalizeSlashPath(resolvedLocalRoot) : null;
   const normalizedCanonicalRoot = normalizeSlashPath(canonicalRoot);

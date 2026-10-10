@@ -34,7 +34,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
 import type { CopilotContext } from '@/lib/copilotContext';
-import { gewuEvents, subscribeGewuEvent , dispatchGewuEvent } from '@/lib/events';
+import { petriEvents, subscribePetriEvent , dispatchPetriEvent } from '@/lib/events';
 import { readBrandStorage } from '@/lib/brand';
 import { copilotContextOverrideForAsk } from '@/lib/result-edit-agent-bridge';
 import { INITIAL_NAV_STATE, type HistoryNavState } from '@/components/copilot/chatHistoryNav';
@@ -214,7 +214,7 @@ export function useChatStream({
         onConversationChange(created.id);
         // 广播新会话（AppRailContext 订阅后即时刷新左栏项目树——用户反馈「左侧列表不实时更新」）
         try {
-          dispatchGewuEvent(gewuEvents.conversationCreated, {
+          dispatchPetriEvent(petriEvents.conversationCreated, {
             conversationId: created.id,
             title: (created as { title?: string }).title,
             projectId: projectId || null,
@@ -344,7 +344,7 @@ export function useChatStream({
   // happens before the override is applied).
   useEffect(() => {
     if (!ownsCopilotAsk) return undefined;
-    const unsub = subscribeGewuEvent(gewuEvents.copilotAsk, (detail) => {
+    const unsub = subscribePetriEvent(petriEvents.copilotAsk, (detail) => {
       const { prompt, analysisMode } = detail;
       const p = typeof prompt === 'string' ? prompt.trim() : '';
       if (!p) return;
@@ -388,7 +388,7 @@ export function useChatStream({
   // 8. `runInBackground` — spawn a sub-agent task while the
   // primary conversation loop is busy. Requires an active parent
   // task (activeRun?.taskId); the parent Claude/Codex/Codex
-  // subagent system (biof3-server) provides the routing.
+  // subagent system (petri-server) provides the routing.
   const runInBackground = useCallback((text: string) => {
     const trimmed = text.trim();
     if (!trimmed || !conversationId) return;

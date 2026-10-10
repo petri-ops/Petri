@@ -39,7 +39,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BASELINE = path.join(ROOT, 'acceptance', 'block-92', 'size-baseline.json');
 const EXCEPTIONS = path.join(ROOT, 'acceptance', 'block-92', 'size-exceptions.json');
 export const BUDGET_LINES = 700;
-const SCHEMA_V2 = 'biof3/block109-size-ledger.v2';
+const SCHEMA_V2 = 'petri/block109-size-ledger.v2';
 
 // plan §1 清单（BLOCK-92 P1 立项时 ≥700 行产品文件；拆分完成后原文件可能只剩薄层）
 const MANIFEST = [
@@ -58,11 +58,11 @@ const MANIFEST = [
   { path: 'frontend/src/hooks/useSkillStore.ts', wave: 'B', module: 'W-02' },
   { path: 'frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx', wave: 'B', module: 'W-04' },
   { path: 'core/shared-backend/result-changeset-service.js', wave: 'C', module: 'W-04' },
-  { path: 'core/biof3-server/helpers/tools-executor.js', wave: 'C', module: 'P-03' },
-  { path: 'core/biof3-server/db.js', wave: 'C', module: 'P-01' },
+  { path: 'core/petri-server/helpers/tools-executor.js', wave: 'C', module: 'P-03' },
+  { path: 'core/petri-server/db.js', wave: 'C', module: 'P-01' },
   { path: 'core/shared-backend/result-studio-repository.js', wave: 'C', module: 'W-04' },
-  { path: 'core/biof3-server/agent-tools/workspace-tools.js', wave: 'C', module: 'P-03' },
-  { path: 'core/biof3-server/mcp/registry.js', wave: 'C', module: 'P-02' },
+  { path: 'core/petri-server/agent-tools/workspace-tools.js', wave: 'C', module: 'P-03' },
+  { path: 'core/petri-server/mcp/registry.js', wave: 'C', module: 'P-02' },
   { path: 'core/shared-backend/result-studio-lifecycle.js', wave: 'C', module: 'W-04' },
   { path: 'core/shared-backend/result-replay-service.js', wave: 'C', module: 'W-04' },
   { path: 'core/shared-backend/git-adapter.js', wave: 'C', module: 'P-01' },
@@ -108,7 +108,7 @@ export function evaluateGate({ current, baseline, exceptions, today }) {
   // 缺失即红（fail-closed），例外条目路径必须在白名单内（不得新增例外）。
   const allowed = exceptions.allowedExceptionPaths;
   const allowedSet = Array.isArray(allowed) ? new Set(allowed) : null;
-  if (exceptions.schema === 'biof3/block109-size-exceptions.v2' && !allowedSet) {
+  if (exceptions.schema === 'petri/block109-size-exceptions.v2' && !allowedSet) {
     violations.push('size-exceptions.json: v2 schema 必须提供 allowedExceptionPaths（只出不进白名单）');
   }
   for (const [p] of exceptionMap) {

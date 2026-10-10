@@ -3,7 +3,7 @@
   "workPackage": "TYPOGRAPHY-HIERARCHY P3",
   "capturedAt": "2026-08-31T06:10:00Z",
   "implementCommit": "1314135",
-  "environment": "dev Electron 30.5.1 (CDP 9222), fixture 项目 workspace=/tmp/biof3-typo-fixture (验收后清理)",
+  "environment": "dev Electron 30.5.1 (CDP 9222), fixture 项目 workspace=/tmp/petri-typo-fixture (验收后清理)",
   "assertions": {
     "fileTree.fileTreeSize": "10px (修复前 9px)",
     "fileTree.fileIcon": "10px (修复前 7/8px 混用; 18px 图标盒内 10px 徽标实机无溢出)",

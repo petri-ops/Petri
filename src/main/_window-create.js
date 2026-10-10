@@ -62,12 +62,12 @@ async function createWindow({
   }
 
   // ── Window Creation ──────────────────────────────────────────
-  // BLOCK-100 P1/D3 — 测试实例（BIOF3_TEST_INSTANCE=1，start-test-instance.sh
+  // BLOCK-100 P1/D3 — 测试实例（PETRI_TEST_INSTANCE=1，start-test-instance.sh
   // 注入）：默认窗口离屏可见（主屏左缘外）——visibilityState 保持 visible，rAF
   // 正常；hidden/minimized 有实测渲染冻结反例（restart-dev-stack.sh 注释留档），
-  // 禁用。BIOF3_TEST_ONSCREEN=1（启动器 --onscreen）时摆屏幕内供人观察测试
+  // 禁用。PETRI_TEST_ONSCREEN=1（启动器 --onscreen）时摆屏幕内供人观察测试
   // 过程（2026-09-18 用户需求「能够看到测试的情况」）；两种摆放渲染语义等价。
-  const IS_TEST_INSTANCE = process.env.BIOF3_TEST_INSTANCE === "1";
+  const IS_TEST_INSTANCE = process.env.PETRI_TEST_INSTANCE === "1";
   const testWindowBounds = {};
   const testWindowSize = {};
   if (IS_TEST_INSTANCE) {
@@ -81,7 +81,7 @@ async function createWindow({
     // 不破坏布局类断言）。
     testWindowSize.width = 1280;
     testWindowSize.height = 800;
-    if (process.env.BIOF3_TEST_ONSCREEN === "1") {
+    if (process.env.PETRI_TEST_ONSCREEN === "1") {
       const { screen } = require("electron");
       const primary = screen.getPrimaryDisplay().bounds;
       testWindowBounds.x = primary.x + primary.width - 1280 - 24;
@@ -135,8 +135,8 @@ async function createWindow({
       // 与 _window-ipc.js 的注册处共用同一解析式。
       additionalArguments: IS_TEST_INSTANCE
         ? [
-            "--gewu-test-instance=1",
-            `--gewu-test-manage-shortcut=${process.env.BIOF3_TEST_MANAGE_SHORTCUT || "Control+Alt+Shift+M"}`,
+            "--petri-test-instance=1",
+            `--petri-test-manage-shortcut=${process.env.PETRI_TEST_MANAGE_SHORTCUT || "Control+Alt+Shift+M"}`,
           ]
         : [],
     },
@@ -315,7 +315,7 @@ async function createWindow({
   });
 
   // ── DevTools ──────────────────────────────────────────────────
-  if (process.env.BIOF3_OPEN_DEVTOOLS === "1") {
+  if (process.env.PETRI_OPEN_DEVTOOLS === "1") {
     mainWindow.webContents.openDevTools();
   }
 

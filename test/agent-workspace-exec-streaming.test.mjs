@@ -11,14 +11,14 @@ import path from 'node:path';
 const require = createRequire(import.meta.url);
 {
   const Database = require('better-sqlite3');
-  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'biof3-exec-stream-db-'));
-  const db = new Database(path.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'petri-exec-stream-db-'));
+  const db = new Database(path.join(tempDbDir, 'petri.db'));
   const migrationsDir = path.resolve('src/migrations');
   for (const file of fssync.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     db.exec(fssync.readFileSync(path.join(migrationsDir, file), 'utf8'));
   }
   db.close();
-  process.env.BIOF3_DB_PATH = path.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try {
       fssync.rmSync(tempDbDir, { recursive: true, force: true });
@@ -27,13 +27,13 @@ const require = createRequire(import.meta.url);
     }
   });
 }
-const { createWorkspaceTools } = require('../core/biof3-server/agent-tools/workspace-tools.js');
+const { createWorkspaceTools } = require('../core/petri-server/agent-tools/workspace-tools.js');
 const {
   buildToolOutputEvent,
   createToolOutputStream,
-} = require('../core/biof3-server/agent-tools/tool-events.js');
-const { createAgentToolInterceptor } = require('../core/biof3-server/agent-tools/agent-tool-interceptor.js');
-const { executeToolCall } = require('../core/biof3-server/agent-tools/tool-execution.js');
+} = require('../core/petri-server/agent-tools/tool-events.js');
+const { createAgentToolInterceptor } = require('../core/petri-server/agent-tools/agent-tool-interceptor.js');
+const { executeToolCall } = require('../core/petri-server/agent-tools/tool-execution.js');
 
 const isWindows = process.platform === 'win32';
 const maybeSkipShell = isWindows ? test.skip : test;
@@ -45,7 +45,7 @@ let tools;
 const ctx = { projectId: 'p_exec_stream', userId: 'u_owner', accessMode: 'full' };
 
 before(async () => {
-  sandboxRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'biof3-exec-stream-'));
+  sandboxRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'petri-exec-stream-'));
   workspaceRoot = path.join(sandboxRoot, 'workspace');
   await fs.mkdir(workspaceRoot, { recursive: true });
 

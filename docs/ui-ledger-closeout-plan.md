@@ -27,7 +27,7 @@ grep -E '^\|\s*\*{0,2}UI-[A-Z0-9-]+' docs/ui-productization-audit.md \
 
 后果链条：
 - 无会话 → 无可 fork 对象 → UI-156 的「创建分支」按设计不出现
-- 未打开产物 → 进不了 `result/code/compare/history` 模式 → UI-181 的项目名后缀按设计不追加（chat 模式下标题 `biof3-desktop | 新对话` 是**正确**的，判不了）
+- 未打开产物 → 进不了 `result/code/compare/history` 模式 → UI-181 的项目名后缀按设计不追加（chat 模式下标题 `petri-desktop | 新对话` 是**正确**的，判不了）
 
 **结论：这 9 项不是"探一下就能定案"，而是先要有一套能把应用可靠驱动到目标界面的 harness。这是 PHASE 0 的全部意义。**
 
@@ -87,6 +87,6 @@ grep -E '^\|\s*\*{0,2}UI-[A-Z0-9-]+' docs/ui-productization-audit.md \
 | UI-195 inline-diff widget | **cancelled** | acceptRejectWidget.ts 已随 f57089cb（BLOCK-43 / UI-193 superseded）整文件退休、生产零引用；活路径 = BLOCK-28 hunkControls（UI-182/UI-196 同型先例） |
 | UI-184 SSE 吞流（隐藏拼行） | verified | fatal fixture 实跑即其真链实证：_dispatchSseEvent 同步抛错被入口守卫接住转 onError、ErrorBanner 呈现完整 stack |
 
-随包修复（均为验收过程抓出的真缺陷）：`a9df9f95`（UI-180 ×2 + UI-P2-001 branchBridge）、`1dc133c3`（agent-workbench-flags IPC 裸调 publish —— extraRenderers 开关此前被 bridge.set rejection 永久回滚）、`835332dc`（dev-electron.js 数据根三分裂：BIOF3_LOCAL_DATA_DIR 未导出致后端回落 ~/Documents/BioF3-Local → 模型列表重置 deepseek 默认、用户配置读不到；BIOF3_DB_PATH 钉死 macOS 时代 ~/Library 路径）。
+随包修复（均为验收过程抓出的真缺陷）：`a9df9f95`（UI-180 ×2 + UI-P2-001 branchBridge）、`1dc133c3`（agent-workbench-flags IPC 裸调 publish —— extraRenderers 开关此前被 bridge.set rejection 永久回滚）、`835332dc`（dev-electron.js 数据根三分裂：PETRI_LOCAL_DATA_DIR 未导出致后端回落 ~/Documents/Petri-Local → 模型列表重置 deepseek 默认、用户配置读不到；PETRI_DB_PATH 钉死 macOS 时代 ~/Library 路径）。
 
 事故记录（如实登记）：PHASE 4 清理脚本曾按标题匹配误删用户会话 conv_240062f9-e01（新对话 (分支)，昨日 UI-156 验证遗留的 fork 拷贝）——已从 WAL 快照恢复全部真实字段（parent_id/timestamps），按 fork 语义以同 id 重建（消息拷贝 4 条 = fork 时点父会话状态）；清理逻辑已改为 id-diff 只删本次新建。

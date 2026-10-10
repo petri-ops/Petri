@@ -4,7 +4,7 @@
 /**
  * BLOCK-67 P1e 实机 CDP 验收：SSH 远程项目 —— 创建 → 文件树 → 预览 → 编辑保存。
  *   A1 home 创建区含「SSH 远程项目…」入口，面板可开（目标候选来自 /api/ssh-projects/targets）
- *   A2 填 aliyun + /root/gewu-block67-demo → 校验并创建 → 项目工作台加载，项目卡/URL 进入新项目
+ *   A2 填 aliyun + /root/petri-block67-demo → 校验并创建 → 项目工作台加载，项目卡/URL 进入新项目
  *   A3 文件树渲染远程目录（README.md + data/ 目录），展开 data/ 出 demo.csv（懒展开）
  *   A4 点开 README.md 预览显示远程内容（含中文 marker）
  *   A5 编辑追加唯一标记并保存 → 远程文件真实变更（节点侧 cat 对账）；再改由节点侧直改后保存 → 409 冲突诚实呈现
@@ -17,9 +17,9 @@ const http = require('node:http');
 const { execFileSync } = require('node:child_process');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-67');
-const REMOTE_ROOT = '/root/gewu-block67-demo';
+const REMOTE_ROOT = '/root/petri-block67-demo';
 const MARKER = `block67-marker-${Date.now()}`;
 
 function fetchJson(url) {

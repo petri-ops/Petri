@@ -80,12 +80,12 @@ export function ThemeControl({
 
   return (
     <div
-      className={`gewu-theme-control ${compact ? 'gewu-theme-control--compact' : ''} ${menuPlacement === 'bottom' ? 'gewu-theme-control--menu-bottom' : ''}`}
+      className={`petri-theme-control ${compact ? 'petri-theme-control--compact' : ''} ${menuPlacement === 'bottom' ? 'petri-theme-control--menu-bottom' : ''}`}
       ref={rootRef}
     >
       {open && (
         <div
-          className="gewu-theme-control__menu"
+          className="petri-theme-control__menu"
           role="menu"
           aria-label="选择外观主题"
           onKeyDown={onMenuKeyDown}
@@ -100,7 +100,7 @@ export function ThemeControl({
               role="menuitemradio"
               aria-checked={preference === option.value}
               tabIndex={preference === option.value ? 0 : -1}
-              className="gewu-theme-control__option"
+              className="petri-theme-control__option"
               onClick={() => {
                 setPreference(option.value);
                 close();
@@ -116,7 +116,7 @@ export function ThemeControl({
       <button
         type="button"
         ref={triggerRef}
-        className="gewu-theme-control__trigger"
+        className="petri-theme-control__trigger"
         onClick={() => setOpen((value) => !value)}
         onKeyDown={(event) => {
           if (event.key === 'ArrowDown' && !open) {

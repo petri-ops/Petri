@@ -17,7 +17,7 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const R_SERVER = path.resolve(__dirname, '..', 'core', 'biof3-server');
+const R_SERVER = path.resolve(__dirname, '..', 'core', 'petri-server');
 
 // 全量套件防挂 watchdog：sidecar stdio 在受限环境下可能挂起，
 // 3 分钟强制退出（诚实 fail 而非拖死整个套件）
@@ -27,17 +27,17 @@ setTimeout(() => {
 }, 180000).unref();
 const require = createRequire(import.meta.url);
 
-// 临时 DB 自举（存量基建同款：BIOF3_DB_PATH 须在 require db.js 前生效）
+// 临时 DB 自举（存量基建同款：PETRI_DB_PATH 须在 require db.js 前生效）
 {
   const Database = require(path.join(R_SERVER, 'node_modules', 'better-sqlite3'));
-  const tempDbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-computer-tools-db-'));
-  const boot = new Database(path.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-computer-tools-db-'));
+  const boot = new Database(path.join(tempDbDir, 'petri.db'));
   const migrationsDir = path.resolve(__dirname, '..', 'src', 'migrations');
   for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fs.readFileSync(path.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = path.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try { fs.rmSync(tempDbDir, { recursive: true, force: true }); } catch {}
   });

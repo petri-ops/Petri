@@ -50,7 +50,7 @@ describe('LineageStrip（BLOCK-127 BIO-3 P1 结果血缘条）', () => {
     expect(dispatchSpy).toHaveBeenCalled();
     const target = dispatchSpy.mock.calls
       .map((call) => call[0] as Event)
-      .find((evt) => evt.type === 'gewu:project-open-result');
+      .find((evt) => evt.type === 'petri:project-open-result');
     expect(target, 'projectOpenResult event must be dispatched').toBeTruthy();
     expect((target as CustomEvent).detail).toEqual({ toolJobId: 'j1', projectId: 'p1' });
   });
@@ -104,7 +104,7 @@ describe('LineageStrip 节点钉住入口（BLOCK-140 P1 第二刀，HK-01 先�
     fireEvent.click(screen.getByRole('button', { name: 'DESeq2 差异表达' }));
     const target = dispatchSpy.mock.calls
       .map((call) => call[0] as Event)
-      .find((evt) => evt.type === 'gewu:project-open-result');
+      .find((evt) => evt.type === 'petri:project-open-result');
     expect(target, 'projectOpenResult event must be dispatched').toBeTruthy();
     expect((target as CustomEvent).detail).toEqual({ toolJobId: 'j1', projectId: 'p1' });
   });

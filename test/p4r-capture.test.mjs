@@ -24,26 +24,26 @@ import {
 } from '../scripts/g0-rs-p4r-capture.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const REPO_DB = path.join(REPO_ROOT, 'core', 'biof3-server', 'biof3.db');
+const REPO_DB = path.join(REPO_ROOT, 'core', 'petri-server', 'petri.db');
 
 /**
- * Paths that fall back to ~/Documents/BioF3-Local — the real user data root,
+ * Paths that fall back to ~/Documents/Petri-Local — the real user data root,
  * holding the live database and 150 project directories — when their variable
  * is unset. The first version of this harness redirected four paths and
  * guarded the same four, silently leaving these three pointing at real data.
  */
 const MUST_BE_ISOLATED = [
-  'BIOF3_DB_PATH',
-  'BIOF3_TEMP_DIR',
-  'BIOF3_LOCAL_RESULTS_DIR',
-  'BIOF3_LOCAL_UPLOADS_DIR',
-  'BIOF3_LOCAL_DATA_DIR',
-  'BIOF3_PLUGINS_DIR',
-  'BIOF3_HARNESS_LOCAL_ROOT',
+  'PETRI_DB_PATH',
+  'PETRI_TEMP_DIR',
+  'PETRI_LOCAL_RESULTS_DIR',
+  'PETRI_LOCAL_UPLOADS_DIR',
+  'PETRI_LOCAL_DATA_DIR',
+  'PETRI_PLUGINS_DIR',
+  'PETRI_HARNESS_LOCAL_ROOT',
 ];
 
 test('every path that can reach the real user data root is redirected and guarded', () => {
-  // Regression: these three defaulted to ~/Documents/BioF3-Local, which holds
+  // Regression: these three defaulted to ~/Documents/Petri-Local, which holds
   // the live database and 150 project directories.
   for (const key of MUST_BE_ISOLATED) {
     assert.ok(key in ISOLATED_PATH_ENV, `${key} must be redirected into the disposable root`);
@@ -58,7 +58,7 @@ test('every path that can reach the real user data root is redirected and guarde
     // exactly what let the three escape.
     for (const key of MUST_BE_ISOLATED) {
       assert.throws(
-        () => assertIsolated({ ...env, [key]: path.join(homedir(), 'Documents', 'BioF3-Local') }, root),
+        () => assertIsolated({ ...env, [key]: path.join(homedir(), 'Documents', 'Petri-Local') }, root),
         /capture isolation/,
         `${key} pointing at the real data root must abort the run`,
       );
@@ -69,7 +69,7 @@ test('every path that can reach the real user data root is redirected and guarde
 });
 
 test('isolation fails closed when a path escapes the disposable root', () => {
-  const root = '/tmp/biof3-capture-root';
+  const root = '/tmp/petri-capture-root';
   const good = Object.fromEntries(
     Object.entries(ISOLATED_PATH_ENV).map(([key, leaf]) => [key, path.join(root, leaf)]),
   );
@@ -90,20 +90,20 @@ test('isolation fails closed when a path escapes the disposable root', () => {
 
   // A traversal that lands outside the root is still outside it.
   assert.throws(
-    () => assertIsolated({ ...good, BIOF3_TEMP_DIR: path.join(root, '..', 'elsewhere') }, root),
+    () => assertIsolated({ ...good, PETRI_TEMP_DIR: path.join(root, '..', 'elsewhere') }, root),
     /resolves outside the disposable root/,
   );
 });
 
 test('isolation refuses to capture against the repository database', () => {
-  const root = mkdtempSync(path.join(tmpdir(), 'biof3-capture-guard-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-capture-guard-'));
   try {
     assert.throws(
       () => assertIsolated({
-        BIOF3_DB_PATH: REPO_DB,
-        BIOF3_TEMP_DIR: path.join(root, 'tmp'),
-        BIOF3_LOCAL_RESULTS_DIR: path.join(root, 'results'),
-        BIOF3_LOCAL_UPLOADS_DIR: path.join(root, 'uploads'),
+        PETRI_DB_PATH: REPO_DB,
+        PETRI_TEMP_DIR: path.join(root, 'tmp'),
+        PETRI_LOCAL_RESULTS_DIR: path.join(root, 'results'),
+        PETRI_LOCAL_UPLOADS_DIR: path.join(root, 'uploads'),
       }, root),
       /refusing to capture against the repository database/,
     );
@@ -115,15 +115,15 @@ test('isolation refuses to capture against the repository database', () => {
 test('a built environment points every writable path into its own root', () => {
   const { root, env, paths } = createCaptureEnv({ port: 12345 });
   try {
-    for (const key of ['BIOF3_DB_PATH', 'BIOF3_TEMP_DIR', 'BIOF3_LOCAL_RESULTS_DIR', 'BIOF3_LOCAL_UPLOADS_DIR']) {
+    for (const key of ['PETRI_DB_PATH', 'PETRI_TEMP_DIR', 'PETRI_LOCAL_RESULTS_DIR', 'PETRI_LOCAL_UPLOADS_DIR']) {
       assert.ok(env[key].startsWith(root + path.sep), `${key} must live under the disposable root`);
     }
-    assert.equal(env.BIOF3_PERF_PROBE, '1', 'the probe must be armed for a capture run');
+    assert.equal(env.PETRI_PERF_PROBE, '1', 'the probe must be armed for a capture run');
     assert.equal(env.R_SERVER_PORT, '12345');
     for (const [key, value] of Object.entries(paths)) {
-      if (key !== 'BIOF3_DB_PATH') assert.ok(statSync(value).isDirectory(), `${key} must be created`);
+      if (key !== 'PETRI_DB_PATH') assert.ok(statSync(value).isDirectory(), `${key} must be created`);
     }
-    assert.notEqual(path.resolve(env.BIOF3_DB_PATH), path.resolve(REPO_DB));
+    assert.notEqual(path.resolve(env.PETRI_DB_PATH), path.resolve(REPO_DB));
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -149,7 +149,7 @@ test('--keep leaves an inspectable root with a fully migrated database', { timeo
   const result = await capture({ keep: true });
   try {
     assert.equal(existsSync(result.root), true);
-    assert.deepEqual(inspectTables(path.join(result.root, 'biof3.db')).missing, []);
+    assert.deepEqual(inspectTables(path.join(result.root, 'petri.db')).missing, []);
   } finally {
     rmSync(result.root, { recursive: true, force: true });
   }

@@ -1,6 +1,6 @@
 {
   "projectId": "p_mui3fx4f_ywdx",
-  "workspacePath": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\projects\\block123---1790409252970-mui3fx4f",
+  "workspacePath": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\projects\\block123---1790409252970-mui3fx4f",
   "taskId": "ba5c8b2d-b303-41c4-82fc-01ef05c96cc6",
   "conversationId": "conv_e1ecbaba-910",
   "at": "2026-09-26T07:54:29.491Z",
@@ -8,7 +8,7 @@
     {
       "stage": "S1 播种",
       "verdict": "通",
-      "detail": "projectId=p_mui3fx4f_ywdx workspace=D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\projects\\block123---1790409252970-mui3fx4f 基线红=true"
+      "detail": "projectId=p_mui3fx4f_ywdx workspace=D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\projects\\block123---1790409252970-mui3fx4f 基线红=true"
     },
     {
       "stage": "S2 指令",

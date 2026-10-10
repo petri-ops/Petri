@@ -3,7 +3,7 @@
   "workPackage": "BLOCK-32-PROJECT-SCOPED-REVIEW",
   "phase": "P3 实机收口",
   "capturedAt": "2026-09-01T05:20:00Z",
-  "environment": "dev Electron (CDP 9222) + biof3-server :52397（BIOF3_ELECTRON_USER_DATA_DIR/BIOF3_LOCAL_DATA_DIR 指向 .biof3-dev-user-data）",
+  "environment": "dev Electron (CDP 9222) + petri-server :52397（PETRI_ELECTRON_USER_DATA_DIR/PETRI_LOCAL_DATA_DIR 指向 .petri-dev-user-data）",
   "projects": {
     "tinkspace": "p_mthvakv3_fffw → /Users/zhangdiandian/Documents/2.OpenWork/ThinkSpace（独立 git 仓库）",
     "desktop": "p_mt15b0aw_f0xa → 应用仓库本体"
@@ -24,7 +24,7 @@
     {
       "id": "S3-desktop审阅UI",
       "steps": "desktop 项目打开审阅 dock 改动分区",
-      "observed": "10 个文件 +209 −76 = 应用仓库 working tree（BLOCK-32 改动 + biof3.db-shm/wal），项目隔离双向成立",
+      "observed": "10 个文件 +209 −76 = 应用仓库 working tree（BLOCK-32 改动 + petri.db-shm/wal），项目隔离双向成立",
       "result": "PASS"
     },
     {
@@ -37,7 +37,7 @@
   "implementationNotes": [
     "主进程不能直连 better-sqlite3（Electron ABI 123 vs npm 编译目标 137，首次实现即崩溃）——项目 workspace 经后端 HTTP（getBackendPort('r') + /api/data/projects）解析，30s TTL 缓存",
     "前端 projectId 统一经 react-router useParams（/project/:projectId 路由）解析，无 props 层层透传；/review 独立路由无项目上下文 → null → 后端维持应用仓库旧行为（诚实边界，登记于 plan）",
-    "dev Electron 启动需 BIOF3_ELECTRON_USER_DATA_DIR + BIOF3_LOCAL_DATA_DIR 指向 .biof3-dev-user-data，否则落到 ~/Documents/BioF3-Local 旧库（本次实机踩坑，env-coordinator.js setupDesktopEnv 语义）"
+    "dev Electron 启动需 PETRI_ELECTRON_USER_DATA_DIR + PETRI_LOCAL_DATA_DIR 指向 .petri-dev-user-data，否则落到 ~/Documents/Petri-Local 旧库（本次实机踩坑，env-coordinator.js setupDesktopEnv 语义）"
   ],
   "screenshots": [
     "tinkspace-review-thinkspace-repo.png（S2 改动：ThinkSpace 仓库）",

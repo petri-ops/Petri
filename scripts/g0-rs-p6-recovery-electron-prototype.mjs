@@ -39,7 +39,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DRIVER_PATH = path.join(ROOT, 'scripts/g0-rs-p6-recovery-electron-driver.cjs');
 const VITE_PATH = path.join(ROOT, 'frontend/node_modules/vite/bin/vite.js');
 const ELECTRON_PATH = require('electron');
-const RECOVERY_ELECTRON_ATTEMPT_ENV = 'BIOF3_P6_RECOVERY_ELECTRON_ATTEMPT';
+const RECOVERY_ELECTRON_ATTEMPT_ENV = 'PETRI_P6_RECOVERY_ELECTRON_ATTEMPT';
 const MAX_ACTIVE_ELECTRON_LAUNCH_ATTEMPTS = 2;
 const DRIVER_RESULT_PARSE_STABILITY_MS = 250;
 const ACTIVE_ELECTRON_TERM_GRACE_MS = 2_000;
@@ -49,7 +49,7 @@ const COMMIT = /^[a-f0-9]{40}$/;
 const TERMINAL_JOBS = new Set(['completed', 'failed', 'cancelled', 'recovery_required']);
 
 const Database = require(require.resolve('better-sqlite3', {
-  paths: [path.join(ROOT, 'core', 'biof3-server'), ROOT],
+  paths: [path.join(ROOT, 'core', 'petri-server'), ROOT],
 }));
 
 export const P6_RECOVERY_ELECTRON_CLASSIFICATION =
@@ -65,9 +65,9 @@ const SOURCE_PATHS = Object.freeze([
   'scripts/g0-rs-p6-real-restart-prototype.mjs',
   'scripts/g0-rs-p5-acceptance.mjs',
   'scripts/g0-rs-p4r-capture.mjs',
-  'core/biof3-server/helpers/artifact-truth.js',
-  'core/biof3-server/helpers/tools-executor.js',
-  'core/biof3-server/routes/result-studio.js',
+  'core/petri-server/helpers/artifact-truth.js',
+  'core/petri-server/helpers/tools-executor.js',
+  'core/petri-server/routes/result-studio.js',
   'core/shared-backend/result-changeset-service.js',
   'core/shared-backend/result-studio-background-child.js',
   'core/shared-backend/result-studio-background.js',
@@ -861,9 +861,9 @@ async function runElectron(configPath, resultPath, backendPort) {
     cwd: ROOT,
     env: {
       ...process.env,
-      BIOF3_DESKTOP: '1',
+      PETRI_DESKTOP: '1',
       R_SERVER_PORT: String(backendPort),
-      BIOF3_P6_RECOVERY_ELECTRON_CONFIG: configPath,
+      PETRI_P6_RECOVERY_ELECTRON_CONFIG: configPath,
       [RECOVERY_ELECTRON_ATTEMPT_ENV]: '1',
     },
     stdio: ['ignore', 'ignore', 'pipe'],
@@ -901,9 +901,9 @@ async function launchActiveElectronAttempt(configPath, resultPath, backendPort, 
     detached: process.platform !== 'win32',
     env: {
       ...process.env,
-      BIOF3_DESKTOP: '1',
+      PETRI_DESKTOP: '1',
       R_SERVER_PORT: String(backendPort),
-      BIOF3_P6_RECOVERY_ELECTRON_CONFIG: configPath,
+      PETRI_P6_RECOVERY_ELECTRON_CONFIG: configPath,
       [RECOVERY_ELECTRON_ATTEMPT_ENV]: String(attempt),
     },
     stdio: ['ignore', 'ignore', 'pipe'],
@@ -1121,10 +1121,10 @@ export async function observeP6RecoveryElectron({ keep = false, show = false, ve
         verbose,
         beforeStart({ env }) {
           const rendererOrigin = `http://127.0.0.1:${uiPort}`;
-          env.BIOF3_RENDERER_DEV_URL = rendererOrigin;
-          env.BIOF3_TRUSTED_DESKTOP_ORIGINS = rendererOrigin;
-          env.BIOF3_TOOL_ZOMBIE_TIMEOUT_MS = '250';
-          env.BIOF3_TOOL_HEARTBEAT_INTERVAL_MS = '100';
+          env.PETRI_RENDERER_DEV_URL = rendererOrigin;
+          env.PETRI_TRUSTED_DESKTOP_ORIGINS = rendererOrigin;
+          env.PETRI_TOOL_ZOMBIE_TIMEOUT_MS = '250';
+          env.PETRI_TOOL_HEARTBEAT_INTERVAL_MS = '100';
         },
       }),
       (createdRuntime) => {
@@ -1133,10 +1133,10 @@ export async function observeP6RecoveryElectron({ keep = false, show = false, ve
       },
     );
     resourceGate.assertNotInterrupted();
-    const dbIdentityBefore = fileIdentity(runtime.env.BIOF3_DB_PATH);
+    const dbIdentityBefore = fileIdentity(runtime.env.PETRI_DB_PATH);
     const baseline = await createRealVolcanoBaseline(runtime, 50_000);
     resourceGate.assertNotInterrupted();
-    const db = openLedger(runtime.env.BIOF3_DB_PATH);
+    const db = openLedger(runtime.env.PETRI_DB_PATH);
     let baselineRevisionIds;
     try {
       baselineRevisionIds = db.prepare(`
@@ -1149,7 +1149,7 @@ export async function observeP6RecoveryElectron({ keep = false, show = false, ve
     }
     invariant(baselineRevisionIds.length >= 3, 'p6_recovery_electron_baseline_cohort_incomplete');
     const baselineBefore = readBaselineSnapshot(
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       runtime.project.workspace_path,
       runtime.project.id,
       baselineRevisionIds,
@@ -1241,12 +1241,12 @@ export async function observeP6RecoveryElectron({ keep = false, show = false, ve
     const restartRestoreMs = performance.now() - restartRestoreStartedAt;
 
     const recoveredState = readRecoveredTruth(
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       durable.checkpoint.change_set_id,
       durable.checkpoint.candidateJob.id,
     );
     const baselineAfterRecovery = readBaselineSnapshot(
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       runtime.project.workspace_path,
       runtime.project.id,
       baselineRevisionIds,
@@ -1273,7 +1273,7 @@ export async function observeP6RecoveryElectron({ keep = false, show = false, ve
     const reopenElectron = await runElectron(configPath, reopenResultPath, backendPort);
     resourceGate.assertNotInterrupted();
     const finalStatus = await readWorkspaceStatus(coldServer.baseUrl, runtime.project.id);
-    const dbIdentityAfter = fileIdentity(runtime.env.BIOF3_DB_PATH);
+    const dbIdentityAfter = fileIdentity(runtime.env.PETRI_DB_PATH);
     const sourceAtEnd = getP6RecoveryElectronSourceBinding();
 
     const observation = {

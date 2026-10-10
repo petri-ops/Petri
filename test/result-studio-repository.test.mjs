@@ -32,7 +32,7 @@ const HASH_1 = '1'.repeat(64);
 const HASH_2 = '2'.repeat(64);
 
 function makeRepo(context) {
-  const root = mkdtempSync(join(tmpdir(), 'biof3-rs2-'));
+  const root = mkdtempSync(join(tmpdir(), 'petri-rs2-'));
   const db = new Database(join(root, 'test.db'));
   // Close the DB before removing its directory: on Windows an open file
   // cannot be deleted, so the cleanup must run after db.close().
@@ -48,7 +48,7 @@ function newChangeSet(repo, overrides = {}) {
     projectId: 'project_1',
     conversationId: 'conv_1',
     baseCommit: COMMIT_A,
-    workingBranchRef: 'refs/heads/biof3/changeset/cs',
+    workingBranchRef: 'refs/heads/petri/changeset/cs',
     createdBy: 'agent',
     ...overrides,
   });
@@ -121,7 +121,7 @@ test('P5 ordinary Revision append cannot bypass exact replay verification', (con
 });
 
 test('RS2 repository refuses to run against a database without the schema', (context) => {
-  const root = mkdtempSync(join(tmpdir(), 'biof3-rs2-bare-'));
+  const root = mkdtempSync(join(tmpdir(), 'petri-rs2-bare-'));
   const db = new Database(join(root, 'bare.db'));
   context.after(() => {
     try { db.close(); } catch { /* noop */ }
@@ -386,7 +386,7 @@ test('P4R-4 family-scoped queries paginate every Revision without unrelated Chan
   }
   for (let index = 1; index <= 105; index += 1) {
     const changeSetId = `cs_other_${index}`;
-    newChangeSet(repo, { changeSetId, workingBranchRef: `refs/heads/biof3/changeset/${changeSetId}` });
+    newChangeSet(repo, { changeSetId, workingBranchRef: `refs/heads/petri/changeset/${changeSetId}` });
     repo.appendRevision(revisionInput(changeSetId, {
       revisionId: `rev_other_${index}`,
       artifactFamilyId: `other-family-${index}`,
@@ -438,7 +438,7 @@ test('P6 preview slot count and running ChangeSet creation are one SQLite transa
       projectId: 'project_1',
       conversationId: 'conv_1',
       baseCommit: COMMIT_A,
-      workingBranchRef: `refs/heads/biof3/changeset/${changeSetId}`,
+      workingBranchRef: `refs/heads/petri/changeset/${changeSetId}`,
       createdBy: 'agent',
     },
     checkpoint: {
@@ -467,7 +467,7 @@ test('P6 preview slot count and running ChangeSet creation are one SQLite transa
 });
 
 test('RS2 recovers state across a real database reopen', (context) => {
-  const root = mkdtempSync(join(tmpdir(), 'biof3-rs2-reopen-'));
+  const root = mkdtempSync(join(tmpdir(), 'petri-rs2-reopen-'));
   const dbPath = join(root, 'reopen.db');
 
   const first = new Database(dbPath);
@@ -623,7 +623,7 @@ test('RS2 persists a git repository binding per project', (context) => {
     projectId: 'project_1',
     mode: 'managed',
     workspaceRoot: '/tmp/ws',
-    gitDir: '/tmp/ws/.biof3/git',
+    gitDir: '/tmp/ws/.petri/git',
     workTree: '/tmp/ws',
     managedPaths: ['analysis/scripts', 'analysis/workflows'],
     status: 'ready',
@@ -638,7 +638,7 @@ test('RS2 persists a git repository binding per project', (context) => {
     projectId: 'project_1',
     mode: 'managed',
     workspaceRoot: '/tmp/ws',
-    gitDir: '/tmp/ws/.biof3/git',
+    gitDir: '/tmp/ws/.petri/git',
     workTree: '/tmp/ws',
     managedPaths: ['analysis/scripts', 'analysis/workflows'],
     status: 'blocked_git_unavailable',

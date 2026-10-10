@@ -4,8 +4,8 @@
   "env": "dev 栈（localhost:3000，Vite HMR），viewport 1680x950，dark",
   "feedback": "用户三点：①主题风格与摘要面板一致②侧边聊天只是单纯聊天、不加入主会话 agent③composer 工具栏删减（图2）",
   "fixes": {
-    "themeAlign": "surface 底色 --gewu-bg-surface→--gewu-bg-elevated（实测 rgb(29,41,69)=elevated）；头部对齐摘要顶栏规格（52px/10-13-9/text6% 分隔线）",
-    "independentConversation": "悬挂面不再镜像中栏 activeConvId：每项目 localStorage 持久化独立侧聊会话（gewu:side-chat-conv:<projectId>），空则首发由 useChatStream 既有路径建话；组件签名收缩为只收 projectId（CenterPanel 以 key=projectId 重挂载）",
+    "themeAlign": "surface 底色 --petri-bg-surface→--petri-bg-elevated（实测 rgb(29,41,69)=elevated）；头部对齐摘要顶栏规格（52px/10-13-9/text6% 分隔线）",
+    "independentConversation": "悬挂面不再镜像中栏 activeConvId：每项目 localStorage 持久化独立侧聊会话（petri:side-chat-conv:<projectId>），空则首发由 useChatStream 既有路径建话；组件签名收缩为只收 projectId（CenterPanel 以 key=projectId 重挂载）",
     "slimComposer": "SimpleChat 增 slimComposer：导出按钮+ContextBudgetButton JSX 条件移除，知识开关+模型/供应商/思考档位对 CSS display:none（实测 computed display none）；只留只读徽标+发送键"
   },
   "e2e": {

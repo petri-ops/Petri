@@ -20,12 +20,12 @@ const {
 const { validateWorkflowPlanBindings } = workflow;
 
 const EXPECTED_PROFILE_IDS = [
-  'biof3.counts-matrix.v1',
-  'biof3.sample-metadata.v1',
-  'biof3.expression-matrix.v1',
-  'biof3.deg.v1',
-  'biof3.gene-list.v1',
-  'biof3.enrichment-table.v1',
+  'petri.counts-matrix.v1',
+  'petri.sample-metadata.v1',
+  'petri.expression-matrix.v1',
+  'petri.deg.v1',
+  'petri.gene-list.v1',
+  'petri.enrichment-table.v1',
 ];
 
 function clone(value) {
@@ -49,7 +49,7 @@ test('SDC-0 profiles carry machine-readable science, schema, lifecycle and prove
     const profile = getProfile(profileId);
     assert.ok(profile, profileId);
     assert.equal(validateProfileDefinition(profile).valid, true, profileId);
-    assert.match(profile.familyId, /^biof3\.[a-z0-9-]+$/);
+    assert.match(profile.familyId, /^petri\.[a-z0-9-]+$/);
     assert.ok(PROFILE_KINDS.includes(profile.profileKind));
     assert.ok(profile.scientificMeaning.length > 10);
     assert.ok(profile.granularity.length > 0);
@@ -73,7 +73,7 @@ test('SDC-0 profiles carry machine-readable science, schema, lifecycle and prove
 });
 
 test('SDC-0 preserves the canonical DEG profile and legacy aliases', () => {
-  const profile = getProfile('biof3.deg.v1');
+  const profile = getProfile('petri.deg.v1');
   assert.equal(profile.knownColumnAliases.log2FC, 'log2FoldChange');
   assert.ok(profile.producers.includes('deg-standardizer'));
   assert.ok(profile.directProducers.includes('deseq2'));
@@ -81,22 +81,22 @@ test('SDC-0 preserves the canonical DEG profile and legacy aliases', () => {
 });
 
 test('SDC-0 rejects malformed profile identity and reused version drift', () => {
-  const malformed = clone(getProfile('biof3.gene-list.v1'));
-  malformed.profileId = 'biof3.gene-list.latest';
+  const malformed = clone(getProfile('petri.gene-list.v1'));
+  malformed.profileId = 'petri.gene-list.latest';
   assert.equal(validateProfileDefinition(malformed).valid, false);
 
-  const drifted = clone(getProfile('biof3.gene-list.v1'));
+  const drifted = clone(getProfile('petri.gene-list.v1'));
   drifted.optionalColumns.push({ name: 'weight', type: 'number', nullable: true });
-  const change = classifyProfileChange(getProfile('biof3.gene-list.v1'), drifted);
+  const change = classifyProfileChange(getProfile('petri.gene-list.v1'), drifted);
   assert.equal(change.changeClass, 'breaking');
   assert.equal(change.reason, 'profile_identity_reused_with_contract_drift');
 });
 
 test('SDC-0 classifies compatible, migration and breaking profile changes conservatively', () => {
-  const base = clone(getProfile('biof3.gene-list.v1'));
+  const base = clone(getProfile('petri.gene-list.v1'));
 
   const compatible = clone(base);
-  compatible.profileId = 'biof3.gene-list.v2';
+  compatible.profileId = 'petri.gene-list.v2';
   compatible.version = 'v2';
   compatible.schemaVersion = 2;
   compatible.optionalColumns.push({ name: 'weight', type: 'number', nullable: true });
@@ -112,23 +112,23 @@ test('SDC-0 classifies compatible, migration and breaking profile changes conser
 });
 
 test('SDC-0 compatibility resolution is explicit and fail-closed', () => {
-  assert.deepEqual(resolveProfileCompatibility('biof3.deg.v1', 'biof3.deg.v1'), {
+  assert.deepEqual(resolveProfileCompatibility('petri.deg.v1', 'petri.deg.v1'), {
     status: 'compatible',
     reason: 'exact_profile_match',
-    sourceProfileId: 'biof3.deg.v1',
-    targetProfileId: 'biof3.deg.v1',
+    sourceProfileId: 'petri.deg.v1',
+    targetProfileId: 'petri.deg.v1',
     migrationId: null,
   });
 
   assert.equal(
-    resolveProfileCompatibility('biof3.deg.v1', 'biof3.unknown.v1').status,
+    resolveProfileCompatibility('petri.deg.v1', 'petri.unknown.v1').status,
     'blocked',
   );
   assert.equal(
-    resolveProfileCompatibility('biof3.deg.v1', 'biof3.gene-list.v1').reason,
+    resolveProfileCompatibility('petri.deg.v1', 'petri.gene-list.v1').reason,
     'profile_family_mismatch',
   );
-  assert.equal(isRegisteredProfile('biof3.not-real.v1'), false);
+  assert.equal(isRegisteredProfile('petri.not-real.v1'), false);
 });
 
 test('SDC-0 prevents an unregistered profile from becoming a typed DAG edge', () => {
@@ -142,7 +142,7 @@ test('SDC-0 prevents an unregistered profile from becoming a typed DAG edge', ()
         inputBindings: [{
           inputId: 'data',
           fromStepId: 'source',
-          artifactProfile: 'biof3.not-real.v1',
+          artifactProfile: 'petri.not-real.v1',
         }],
       },
     ],

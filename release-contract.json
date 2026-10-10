@@ -1,7 +1,7 @@
 {
   "channel": "beta",
   "version": "v0.1.0-beta",
-  "tagline": "BioF3 是一个本地优先的生物信息学项目工作台，AI 在项目上下文中帮助用户运行分析、检查产物并生成报告。",
+  "tagline": "Petri 是一个本地优先的生物信息学项目工作台，AI 在项目上下文中帮助用户运行分析、检查产物并生成报告。",
   "goldenPath": {
     "name": "demo-deseq2-report",
     "dataset": "内置小型 DESeq2 demo (resources/demo-data/deseq2-sample)",

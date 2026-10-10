@@ -3,7 +3,7 @@
   "ui": "UI-274",
   "date": "2026-09-02",
   "environment": {
-    "devElectron": "BIOF3_ELECTRON_USER_DATA_DIR=$PWD/.biof3-dev-user-data BIOF3_LOCAL_DATA_DIR=$PWD/.biof3-dev-user-data/data",
+    "devElectron": "PETRI_ELECTRON_USER_DATA_DIR=$PWD/.petri-dev-user-data PETRI_LOCAL_DATA_DIR=$PWD/.petri-dev-user-data/data",
     "backend": ":3001（PID 42162，12:47 重启加载最新代码，含 P1 埋点 + P2 端点）",
     "vite": ":3000",
     "cdp": "9222"

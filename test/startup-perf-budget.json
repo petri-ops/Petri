@@ -1,5 +1,5 @@
 {
-  "schema": "gewu/startup-perf-budget.v2",
+  "schema": "petri/startup-perf-budget.v2",
   "note": "BLOCK-106 启动性能中位数预算（棘轮语义：只许收缩，不许放宽；放宽需用户裁决）。断言对象=各段 5 样本中位数，缺失某段判不通过（不得用「没采到」绕过门禁）。**按平台分档**：启动绝对值强依赖机器/系统，跨平台套用数字必然假红或假绿；无本平台档时 flow 直接判红并给出建基线方法（不许静默跳过）。",
   "platforms": {
     "darwin": {

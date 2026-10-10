@@ -1,7 +1,7 @@
 # BLOCK-109-CORE-ARCH-CONVERGENCE — 会话核心链路架构收敛（单一事实源）
 
-**状态**：`completed（2026-09-21 当日四阶段整包收口：P0 基线+清偿（e110f561）→ P1 事件单一事实源+组装唯一化+legacy 退役（50e1e030/3f25ffc3/c029b616/8857c574，flow 7/7）→ P2 工具元数据化+调度分组+九域拆分（2d258278，契约 4/4）→ P3 架构门禁基线化（code-size v2 sha256+例外 expires、arch-cycles 14 环入册新环即红、双门入 closeout 链、自测红/绿样本 5/5）；验收 §4 逐项对账绿 + closeout 十门全绿；立项=2026-09-21 用户裁决「基于这些点 开一个或多个block系统性优化gewu」，基于 ZCode 对比审计；D1–D6 按 §7 留痕）`
-**立项**：2026-09-21（对比审计报告存在于立项会话；证据 file:line 全部落在本仓与参考仓可复现——Mac `/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/reference/ZCode`；Windows `D:\1.WorkDir\reference\ZCode`（2026-09-21 全量 clone：上游公开史仅 2 commits——`77432b6` Initial commit → `872ad96` feat: open source，包版本 v3.14.0，无 tag））
+**状态**：`completed（2026-09-21 当日四阶段整包收口：P0 基线+清偿（e110f561）→ P1 事件单一事实源+组装唯一化+legacy 退役（50e1e030/3f25ffc3/c029b616/8857c574，flow 7/7）→ P2 工具元数据化+调度分组+九域拆分（2d258278，契约 4/4）→ P3 架构门禁基线化（code-size v2 sha256+例外 expires、arch-cycles 14 环入册新环即红、双门入 closeout 链、自测红/绿样本 5/5）；验收 §4 逐项对账绿 + closeout 十门全绿；立项=2026-09-21 用户裁决「基于这些点 开一个或多个block系统性优化petri」，基于 ZCode 对比审计；D1–D6 按 §7 留痕）`
+**立项**：2026-09-21（对比审计报告存在于立项会话；证据 file:line 全部落在本仓与参考仓可复现——Mac `/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/reference/ZCode`；Windows `D:\1.WorkDir\reference\ZCode`（2026-09-21 全量 clone：上游公开史仅 2 commits——`77432b6` Initial commit → `872ad96` feat: open source，包版本 v3.14.0，无 tag））
 **修订**：2026-09-21（用户核查裁决「立项时未考虑已收口的 BLOCK-109-AGENT-ORCHESTRATION-UX」成立——立项提交 `5427a489` 14:52 早于其四件套落地 `dddd135c` 15:09；本次吸收四件套为基线输入与零退化红线，D1–D6 与四阶段划分不变）
 **修订 2**：2026-09-21（用户实测三裁决之二「按你的建议来」：P0 拆前基线并入实机故障场景——run `80669989` 7 子智能体 3 败的证据链，见 §1 P0-2）
 **责任轨道**：BLOCK（多工作面：后端事件模型 + 前端消费链 + 工具定义层 + 门禁基建，跨会话串行分阶段，含数据契约裁决）
@@ -15,11 +15,11 @@
 
 ### 0.2 现状根因（代码证据）
 
-1. **对话链路多轨真相**：上下文组装在 `core/biof3-server/agent-runner.js:22-70` 与 legacy `core/biof3-server/routes/ai-agent/chat.js:34-70`（自留 786 行 SSE handler，`chat.js:15` 自述）**各拼一遍**；会话恢复 4 个入口（`conversationRunStore.ts` 的 resumeConversationRun / resumeInterruptedConversation / resumeOrphanAgentTasks / resumeSubAgentTasks）；主 agent 恢复态存前端 localStorage、子 agent 存后端 `loop_runs` 表族，仅靠注释约定「后者权威」（`frontend/src/components/copilot/conversationRunStore/subAgentTasks.ts:399-400`、`SimpleChat.tsx:325`）。
+1. **对话链路多轨真相**：上下文组装在 `core/petri-server/agent-runner.js:22-70` 与 legacy `core/petri-server/routes/ai-agent/chat.js:34-70`（自留 786 行 SSE handler，`chat.js:15` 自述）**各拼一遍**；会话恢复 4 个入口（`conversationRunStore.ts` 的 resumeConversationRun / resumeInterruptedConversation / resumeOrphanAgentTasks / resumeSubAgentTasks）；主 agent 恢复态存前端 localStorage、子 agent 存后端 `loop_runs` 表族，仅靠注释约定「后者权威」（`frontend/src/components/copilot/conversationRunStore/subAgentTasks.ts:399-400`、`SimpleChat.tsx:325`）。
 2. **上下文组装双轨 + 预算无治理**（压缩机制**已存在**，立项核实撤回对比审计的「无压缩」误判）：BLOCK-95 B2 rolling auto-compact（`helpers/conversation-compaction.js` 220 行，阈值自动+手动，默认开）与 BLOCK-98 M1/M3 microcompact+reactive+熔断+输入插队（`helpers/agent-resilience.js` 380 行，`agent-runner.js:672-704` 接线，flag `agent_resilience: true` 默认开）均已交付——**本包对压缩零重复**。剩余真实缺口：①上下文组装在 `agent-runner.js:22-70` 与 legacy `routes/ai-agent/chat.js:34-70`（自留 786 行 SSE handler，`chat.js:15` 自述）各拼一遍；②system-prompt 十余个注入源（`helpers/system-prompt.js` 494 行：chat-summary / user-facts / knowledge 召回 / plans / content-plugins…）无分段 token 预算治理。
 3. **工具定义集中且无执行元数据**：71 个工具集中在 `agent-tools/tool-defs.js`（约 1500 行，`result_changeset_*` 与 `_in_context` 变体 8 对近乎复制）；无 readOnly/destructive/concurrentSafe/timeoutMs/needsApproval/riskLevel 元数据，调度无法按风险分组并行，权限拦截只能 policy 事后分类（`spawn-agent-tools.js:10`）。
 4. **架构门禁无棘轮牙齿**：`gate:code-size` 台账为登记制（超标可登记放行，例外不过期）；dependency-cruiser 未启用 forbidCycles 硬门禁。
-5. **卫生残留**：仓库提交了运行时数据库 `core/biof3-server/biof3.db`（含 -shm/-wal）；`src/main.js:578-580` 引用未定义标识符 `setupFigcodeIpc` 的死守卫。
+5. **卫生残留**：仓库提交了运行时数据库 `core/petri-server/petri.db`（含 -shm/-wal）；`src/main.js:578-580` 引用未定义标识符 `setupFigcodeIpc` 的死守卫。
 
 **ZCode 参照做法**（借鉴设计、自研实现，Apache-2.0 合规见 §2 非范围）：约 70 种 SessionEvent 先落存储再扇出、前端只消费 EventReducer 投影（`reference/ZCode/packages/contracts/src/events/session.events.ts:83`）；工具 entry 元数据化 + 拓扑并行调度（`reference/ZCode/apps/zcode-cli/packages/core/src/tool/types.ts:63-80`）；architecture-policy 机器门禁 + sha256 基线 + 例外 expires 自动过期（`reference/ZCode/architecture-policy.yaml:59-65`）。压缩三层（compact/policy.ts）不移植——BLOCK-95/98 已有等价交付（§0.2-2）。
 
@@ -35,7 +35,7 @@
 2. **拆前行为基线**（BLOCK-92 先例：拆前基线拆后对账）：固化「一轮带工具调用的会话」端到端契约测试（输入→SSE 事件序列→落库→恢复），作为 P1 重构的行为等价判据；**基线必须覆盖 UI-432 四件套行为**（瞬断重试退避语义 / spawn 软上限指引 / 终态结果组卡 / 概览孤儿过滤）——既有契约 `test/block109-orchestration.test.mjs` + `SubAgentResultGroup.test.tsx` 并入 P1 等价判据回归集。
    - **2026-09-21 实机故障场景并入**（用户裁决「按你的建议来」；run `80669989` 7 子智能体 3 败实证）：①**流中断形态**——3 败全为流式输出中途 `read ECONNRESET`（delta 流过半被掐），与后端 event-loop 冻结（10-12s × 5）恢复时刻**逐毫秒同刻**；BLOCK-109 P1 瞬断重试对该形态**零触发**（全 run 零 `network_retry` 事件、零 `[network-retry]` 日志）——其契约测试注入的是调用期 reject，实机流中途死亡走体面终态路径未达重试包装。基线必须固化「模型流中途死亡」场景；P1 重写循环时**重试须覆盖全流轮**。②event-loop 冻结源未锚定（候选=同步 SQLite 批写 / 大目录扫描），列为 P0 基线采集附带观察项。③「清单终态对账」「子智能体汇报收敛」已按用户裁决另册登记（roadmap），不在本包范围。
 3. **UI-431 尾巴清偿**（D3）：AgentRunPanel 子智能体面板实机补验，UI 台账翻 verified——P1 动 conversationRunStore/SimpleChat 文件面前必须落定。
-4. **卫生清偿**：`biof3.db`/`-shm`/`-wal` 从 git 索引移除并入 `.gitignore`（先核对路径解析确认非测试夹具依赖）；删 `main.js:578-580` 死守卫；`hygiene:check` + 定向测试绿。
+4. **卫生清偿**：`petri.db`/`-shm`/`-wal` 从 git 索引移除并入 `.gitignore`（先核对路径解析确认非测试夹具依赖）；删 `main.js:578-580` 死守卫；`hygiene:check` + 定向测试绿。
 5. **事件模型评审**（P1 前置设计裁决）：事件类型枚举、存储落点（`task_events` 扩列 vs 新表）、保留策略（BLOCK-106 实测 18k 行/天的规模约束）、与 `meta_json` 聚合快照的迁移共存策略——写成 plan 附录 A 后过用户裁决再动代码。
 
 ### P1：事件溯源单一事实源 + 组装唯一化（本包核心，风险最高）
@@ -65,7 +65,7 @@
 
 ## 2. 范围与非范围
 
-**范围**：§1 四阶段全部工作面；`core/biof3-server` 会话链路 / `frontend/src/components/copilot` 消费链 / `agent-tools` 定义层 / 门禁脚本。
+**范围**：§1 四阶段全部工作面；`core/petri-server` 会话链路 / `frontend/src/components/copilot` 消费链 / `agent-tools` 定义层 / 门禁脚本。
 
 **非范围（exclusions）**：
 

@@ -42,7 +42,7 @@ function baseChangeSet(overrides = {}) {
     projectId: 'project_1',
     conversationId: 'conv_1',
     baseCommit: COMMIT_A,
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_1',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_1',
     status: 'draft',
     createdBy: 'agent',
     ...overrides,

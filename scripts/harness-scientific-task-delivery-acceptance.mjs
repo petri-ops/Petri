@@ -9,19 +9,19 @@ import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, '..');
-const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-hrt5-acceptance-'));
-const keepWorkspace = process.env.BIOF3_HRT5_KEEP_WORKSPACE === '1';
-const visualFixture = process.env.BIOF3_HRT5_VISUAL_FIXTURE === '1';
-process.env.BIOF3_DB_PATH = path.join(tempRoot, 'hrt5.db');
-process.env.BIOF3_LOCAL_DATA_DIR = path.join(tempRoot, 'local-data');
-process.env.BIOF3_LOCAL_RESULTS_DIR = path.join(tempRoot, 'local-results');
-const localRHome = path.join(os.homedir(), 'Documents', 'BioF3-Local', 'runtimes', 'R');
-if (fs.existsSync(path.join(localRHome, 'bin', 'Rscript'))) process.env.BIOF3_R_HOME = localRHome;
+const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-hrt5-acceptance-'));
+const keepWorkspace = process.env.PETRI_HRT5_KEEP_WORKSPACE === '1';
+const visualFixture = process.env.PETRI_HRT5_VISUAL_FIXTURE === '1';
+process.env.PETRI_DB_PATH = path.join(tempRoot, 'hrt5.db');
+process.env.PETRI_LOCAL_DATA_DIR = path.join(tempRoot, 'local-data');
+process.env.PETRI_LOCAL_RESULTS_DIR = path.join(tempRoot, 'local-results');
+const localRHome = path.join(os.homedir(), 'Documents', 'Petri-Local', 'runtimes', 'R');
+if (fs.existsSync(path.join(localRHome, 'bin', 'Rscript'))) process.env.PETRI_R_HOME = localRHome;
 
 const require = createRequire(import.meta.url);
-const db = require('../core/biof3-server/db');
-const pluginLoader = require('../core/biof3-server/plugin-loader');
-const { tool_run_tool } = require('../core/biof3-server/agent-tools/learning');
+const db = require('../core/petri-server/db');
+const pluginLoader = require('../core/petri-server/plugin-loader');
+const { tool_run_tool } = require('../core/petri-server/agent-tools/learning');
 const { confirmScientificTask } = require('../core/shared-backend/scientific-task-confirmation');
 const { createDeliveryManifest, writeDeliveryManifest } = require('../core/shared-backend/delivery-manifest');
 const { resolveProjectRunLayout } = require('../core/shared-backend/project-run-layout');
@@ -136,7 +136,7 @@ async function main() {
     console.log(JSON.stringify({
       visualFixture: true,
       tempRoot,
-      dbPath: process.env.BIOF3_DB_PATH,
+      dbPath: process.env.PETRI_DB_PATH,
       projectId: project.id,
       jobs: results.map((item, index) => ({
         id: item.toolJobId,

@@ -11,10 +11,10 @@
   border: 0;
   border-radius: 5px;
   background: transparent;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   cursor: pointer;
   font: inherit;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   list-style: none;
   white-space: nowrap;
 }
@@ -25,8 +25,8 @@
 
 .menu > summary:hover,
 .menu[open] > summary {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .popup {
@@ -36,17 +36,17 @@
   z-index: 20;
   width: min(280px, calc(100vw - 32px));
   padding: 8px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
   box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
 }
 
 .popupLabel {
   padding: 2px 6px 6px;
-  border-bottom: 1px solid var(--gewu-border-subtle);
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs);
+  border-bottom: 1px solid var(--petri-border-subtle);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs);
   font-weight: 650;
 }
 
@@ -67,15 +67,15 @@
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   text-align: left;
   cursor: pointer;
   font: inherit;
 }
 
 .items button:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .items button span {
@@ -87,7 +87,7 @@
 
 .items button small {
   flex: 0 0 auto;
-  color: var(--gewu-text-tertiary);
-  font-family: var(--gewu-font-mono);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-tertiary);
+  font-family: var(--petri-font-mono);
+  font-size: var(--petri-font-size-xs);
 }

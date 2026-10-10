@@ -28,7 +28,7 @@
 | **PR-001** | PHASE 2.3 | 🟠 中 | 数据丢失 | retention sweeper 误删用户早期 chat / agent run | 仅删 `>30 day` + 非 active 的；保留 `tasks.status='running'` 不删；task_events 显式不动 |
 | **E-017 partial** | PHASE 2.3 | 🟢 低 | lifecycle 死锁 | SIGINT/SIGTERM handler 防递归失败 → 二次信号递归 | installBackendExitLifecycle 单次装 + removeListener 防递归；既有 owned-backend-supervisor.test.mjs 覆盖 |
 | **E-019 partial** | PHASE 2.3 | 🟢 低 | db config 缺测试 | config-helper.js 无外部契约 → 单进程 r-server 单点 | 无外部消费者；如未来 branch-db/result-db 接入，需额外测试 |
-| **OB-004** | PHASE 2.4 | 🟢 低 | 路径兼容 | error_log 默认路径改 local-data → 既有 `/var/log/biof3-errors.log` 用户设置失效 | 沿用既有 BIOF3_ERROR_LOG_FILE env 优先级；mcp-server.test.mjs 覆盖 |
+| **OB-004** | PHASE 2.4 | 🟢 低 | 路径兼容 | error_log 默认路径改 local-data → 既有 `/var/log/petri-errors.log` 用户设置失效 | 沿用既有 PETRI_ERROR_LOG_FILE env 优先级；mcp-server.test.mjs 覆盖 |
 | **OB-005 partial** | PHASE 2.4 | 🟢 低 | health shape 漂移 | mcp-server.js health 6 行小改与 r-server / py-server / gateway 4 个 health 端点 shape 不一致 | backend-health.test.mjs 既有；observability-work-package 后续统一 |
 | **PL-001** | **PHASE 3** | 🟠 中 | plugin 工具面广 | 10 工具插件 × 5 schema 字段覆盖不全 → 漏校验字段仍可注入 | 10 tests 覆盖；按 schema 字段 required/type/minimum/maximum/enum 逐字段验证 |
 | **C-001-rserver** | 不外推 | 🟢 低 | 双重拦截 | `/api/run` 与 `/api/replot/run` 双重拦截 → frontend 误调 500 | rserver-http-debt-pack 候选；frontend 0 调用方 |
@@ -167,7 +167,7 @@
 | 风险 | 等级 | 描述 | 缓解 |
 |------|------|------|------|
 | 既有 16 namespace key 名修改 | 🟠 中 | C-001 PHASE 1 仅**新增** branch + result 2 namespace，不修改既有 | preload-branch-result-namespaces.test.mjs 3 tests 守住 18 namespace（16 既有 + 2 新增） |
-| `biof3` world 既有 `agentWorkbenchFlags` | 🟢 低 | `biof3Desktop` 是第二份 expose；`biof3` 是第一份 | 不动第一份 |
+| `petri` world 既有 `agentWorkbenchFlags` | 🟢 低 | `petriDesktop` 是第二份 expose；`petri` 是第一份 | 不动第一份 |
 
 ### §5.2 electron.d.ts 兼容性
 

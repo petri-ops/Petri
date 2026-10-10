@@ -7,18 +7,18 @@ import test from 'node:test';
 import { bootstrapTestDb } from './helpers/bootstrap-db.mjs';
 
 const require = createRequire(import.meta.url);
-const tempRoot = mkdtempSync(join(tmpdir(), 'biof3-project-memory-'));
-process.env.BIOF3_DB_PATH = join(tempRoot, 'memory.db');
+const tempRoot = mkdtempSync(join(tmpdir(), 'petri-project-memory-'));
+process.env.PETRI_DB_PATH = join(tempRoot, 'memory.db');
 
 
 bootstrapTestDb();
-const dbMod = require('../core/biof3-server/db.js');
+const dbMod = require('../core/petri-server/db.js');
 const sqlite = dbMod.getDatabase();
-const memories = require('../core/biof3-server/helpers/memory-vectors.js');
-const facts = require('../core/biof3-server/helpers/user-facts.js');
-const summaries = require('../core/biof3-server/helpers/chat-summary.js');
-const { buildSiteSnapshotAsync } = require('../core/biof3-server/helpers/site-snapshot.js');
-const { tool_query, tool_search } = require('../core/biof3-server/agent-tools/query-tools.js');
+const memories = require('../core/petri-server/helpers/memory-vectors.js');
+const facts = require('../core/petri-server/helpers/user-facts.js');
+const summaries = require('../core/petri-server/helpers/chat-summary.js');
+const { buildSiteSnapshotAsync } = require('../core/petri-server/helpers/site-snapshot.js');
+const { tool_query, tool_search } = require('../core/petri-server/agent-tools/query-tools.js');
 
 const userId = 'user-memory-test';
 const projectA = 'project-memory-a';

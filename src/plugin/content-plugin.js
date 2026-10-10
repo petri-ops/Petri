@@ -9,7 +9,7 @@
 //
 // Content plugins are docs/tutorials distributed as zips — they expose a
 // docsDir of .md/.mdx files. The registry lives on globalThis
-// (`globalThis._biof3ContentPlugins`) so install/load-time code can
+// (`globalThis._petriContentPlugins`) so install/load-time code can
 // populate it and runtime read paths can consume it from any module.
 // ============================================================
 
@@ -18,9 +18,9 @@ const path = require('path');
 
 function registerContentPlugin(pluginDir, meta) {
   try {
-    if (!globalThis._biof3ContentPlugins) globalThis._biof3ContentPlugins = new Map();
+    if (!globalThis._petriContentPlugins) globalThis._petriContentPlugins = new Map();
     const docsDir = path.join(pluginDir, meta.docsDir || 'docs');
-    globalThis._biof3ContentPlugins.set(meta.id, {
+    globalThis._petriContentPlugins.set(meta.id, {
       id: meta.id,
       contentType: meta.contentType || 'tutorial',
       omics: meta.omics || 'general',
@@ -36,15 +36,15 @@ function registerContentPlugin(pluginDir, meta) {
 }
 
 function unregisterContentPlugin(pluginId) {
-  if (globalThis._biof3ContentPlugins) {
-    globalThis._biof3ContentPlugins.delete(pluginId);
+  if (globalThis._petriContentPlugins) {
+    globalThis._petriContentPlugins.delete(pluginId);
   }
 }
 
 // 列出某 content-plugin 的文档树（递归扫 docsDir 下的 .md/.mdx）
 // 返回 [{ id, title, position, relativePath }]
 function listContentPluginDocs(pluginId) {
-  const entry = globalThis._biof3ContentPlugins && globalThis._biof3ContentPlugins.get(pluginId);
+  const entry = globalThis._petriContentPlugins && globalThis._petriContentPlugins.get(pluginId);
   if (!entry) return [];
   const items = [];
   try {
@@ -82,7 +82,7 @@ function listContentPluginDocs(pluginId) {
 
 // 读取 content-plugin 内某文档的 md 文本（按 relativePath）
 function readContentPluginDoc(pluginId, relativePath) {
-  const entry = globalThis._biof3ContentPlugins && globalThis._biof3ContentPlugins.get(pluginId);
+  const entry = globalThis._petriContentPlugins && globalThis._petriContentPlugins.get(pluginId);
   if (!entry) throw new Error(`content-plugin ${pluginId} 未注册`);
   // 防止路径穿越：解析后必须在 docsDir 内
   const resolved = path.resolve(entry.docsDir, relativePath);
@@ -96,9 +96,9 @@ function readContentPluginDoc(pluginId, relativePath) {
 
 // 列出所有已注册 content-plugin 元数据（供前端 sidebar 顶层分类用）
 function listAllContentPlugins() {
-  if (!globalThis._biof3ContentPlugins) return [];
+  if (!globalThis._petriContentPlugins) return [];
   const out = [];
-  for (const [, e] of globalThis._biof3ContentPlugins) {
+  for (const [, e] of globalThis._petriContentPlugins) {
     out.push({
       id: e.id,
       contentType: e.contentType,

@@ -22,22 +22,22 @@ const repoRoot = resolve(here, '..');
 const require = createRequire(import.meta.url);
 
 // BLOCK-49 加映清债 —— 统一临时 DB 自举（存量：单跑/全量缺 projects 表）
-//（BIOF3_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）
+//（PETRI_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）
 {
   const fsx = require('node:fs');
   const osx = require('node:os');
   const pth = require('node:path');
   const urlx = require('node:url');
   const hereDir = pth.dirname(urlx.fileURLToPath(import.meta.url));
-  const Database = require(pth.resolve(hereDir, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const tempDbDir = fsx.mkdtempSync(pth.join(osx.tmpdir(), 'biof3-sweep-db-'));
-  const boot = new Database(pth.join(tempDbDir, 'biof3.db'));
+  const Database = require(pth.resolve(hereDir, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const tempDbDir = fsx.mkdtempSync(pth.join(osx.tmpdir(), 'petri-sweep-db-'));
+  const boot = new Database(pth.join(tempDbDir, 'petri.db'));
   const migrationsDir = pth.resolve(hereDir, '..', 'src', 'migrations');
   for (const f of fsx.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fsx.readFileSync(pth.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = pth.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = pth.join(tempDbDir, 'petri.db');
   process.on('exit', () => { try { fsx.rmSync(tempDbDir, { recursive: true, force: true }); } catch {} });
 }
 
@@ -143,7 +143,7 @@ const stubManifest = {
   kind: 'plugin',
   artifacts: {
     'macos-arm64': {
-      url: 'https://github.com/BioF3/example/releases/v1/macos-arm64.zip',
+      url: 'https://github.com/Petri/example/releases/v1/macos-arm64.zip',
       sha256: null,
       sizeBytes: null,
     },
@@ -187,7 +187,7 @@ assert.strictEqual(offenders.length, 0, `offending URLs:\n${offenders.join('\n')
 console.log(`✓ ${checked} non-built-in URLs all match ALLOWED_RUNTIME_HOSTS=${JSON.stringify(ALLOWED_RUNTIME_HOSTS)}`);
 
 // ── 5. Runtime archives have immutable descriptors and no stale placeholders ──
-for (const pid of ['biof3-r-runtime', 'biof3-py-runtime']) {
+for (const pid of ['petri-r-runtime', 'petri-py-runtime']) {
   const artifact = manifest.plugins[pid].artifacts['macos-arm64'];
   assert.match(artifact.sha256, /^[a-f0-9]{64}$/, `${pid} must have a real SHA-256`);
   assert.ok(Number.isInteger(artifact.sizeBytes) && artifact.sizeBytes > 0, `${pid} must have archive size`);

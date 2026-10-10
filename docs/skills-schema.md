@@ -1,4 +1,4 @@
-# BioF3 Desktop Skill 定义 Schema
+# Petri Desktop Skill 定义 Schema
 
 > 状态：**设计稿**（待实现）
 >
@@ -145,7 +145,7 @@
   },
   
   "metadata": {
-    "author": "BioF3 Team",
+    "author": "Petri Team",
     "license": "MIT",
     "source": "built-in",
     "created": "2026-08-14",
@@ -382,7 +382,7 @@
   },
   
   "metadata": {
-    "author": "BioF3 Team",
+    "author": "Petri Team",
     "license": "MIT",
     "source": "built-in",
     "created": "2026-08-14"
@@ -531,7 +531,7 @@
   },
   
   "metadata": {
-    "author": "BioF3 Team",
+    "author": "Petri Team",
     "license": "MIT",
     "source": "built-in",
     "created": "2026-08-14"

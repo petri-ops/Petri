@@ -12,7 +12,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const CORE = resolve(__dirname, '..', 'core', 'biof3-server');
+const CORE = resolve(__dirname, '..', 'core', 'petri-server');
 
 const ideTools = await import(
   pathToFileURL(resolve(CORE, 'mcp/ide-tools/index.js')).href
@@ -28,21 +28,21 @@ function seedCorpus(tmp, name, lines) {
 }
 
 test('ide_file_search_text finds matches across files', () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-search-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-search-`);
   seedCorpus(tmp, 'a.txt', [
     'alpha line',
-    'this contains BIOF3_TOKEN in the middle',
+    'this contains PETRI_TOKEN in the middle',
     'beta line',
   ]);
   seedCorpus(tmp, 'b.md', [
     'preface',
-    'another BIOF3_TOKEN here',
+    'another PETRI_TOKEN here',
     'trailing',
   ]);
 
   const res = H.ide_file_search_text({
     path: tmp,
-    pattern: 'BIOF3_TOKEN',
+    pattern: 'PETRI_TOKEN',
   });
   assert.equal(res.ok, true, `search failed: ${res.error}`);
   assert.equal(res.count, 2, `expected 2 matches, got ${res.count}`);
@@ -52,14 +52,14 @@ test('ide_file_search_text finds matches across files', () => {
     assert.ok(typeof m.file === 'string' && m.file.length > 0);
     assert.ok(typeof m.line === 'number' && m.line >= 1);
     assert.ok(typeof m.column === 'number' && m.column >= 1);
-    assert.ok(m.text.includes('BIOF3_TOKEN'));
+    assert.ok(m.text.includes('PETRI_TOKEN'));
     assert.ok(Array.isArray(m.context));
   }
   fs.rmSync(tmp, { recursive: true });
 });
 
 test('ide_file_search_text rejects empty pattern', () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-search-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-search-`);
   const noPattern = H.ide_file_search_text({ path: tmp, pattern: '' });
   assert.equal(noPattern.ok, false);
   assert.match(noPattern.error, /pattern must be a non-empty string/);
@@ -92,7 +92,7 @@ test('ide_file_search_text rejects out-of-allowlist path', () => {
 });
 
 test('ide_file_search_text respects maxResults cap (truncates)', () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-search-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-search-`);
   // 在一个文件中放 5 行匹配
   const lines = [];
   for (let i = 0; i < 5; i += 1) lines.push(`match line ${i}`);
@@ -124,7 +124,7 @@ test('ide_file_search_text respects maxResults cap (truncates)', () => {
 });
 
 test('ide_file_search_text with context returns surrounding lines', () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-search-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-search-`);
   seedCorpus(tmp, 'ctx.txt', [
     'before-1',
     'before-2',
@@ -161,7 +161,7 @@ test('ide_file_search_text with context returns surrounding lines', () => {
 });
 
 test('ide_file_search_text filePattern restricts to glob', () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-search-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-search-`);
   seedCorpus(tmp, 'note.txt', ['TOKEN in txt']);
   seedCorpus(tmp, 'note.md', ['TOKEN in md']);
 
@@ -187,7 +187,7 @@ test('ide_file_search_text filePattern restricts to glob', () => {
 });
 
 test('ide_file_search_text fixed-strings mode (regex=false)', () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-search-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-search-`);
   seedCorpus(tmp, 'fixed.txt', [
     'plain text',
     'a.b.c pattern', // 正则下 . 是元字符；fixed-strings 下应字面命中

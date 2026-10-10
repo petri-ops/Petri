@@ -46,7 +46,7 @@ const SHARED_BACKEND_DIR = resolveSharedBackendDir();
 const PROJECT_ROOT = resolveProjectRoot();
 
 const USER_DATA_DIR =
-  process.env.BIOF3_LOCAL_DATA_DIR || path.join(app.getPath('documents'), 'Gewu-Local');
+  process.env.PETRI_LOCAL_DATA_DIR || path.join(app.getPath('documents'), 'Petri-Local');
 const PLUGINS_DIR = path.join(USER_DATA_DIR, 'plugins');
 const RUNTIMES_DIR = path.join(USER_DATA_DIR, 'runtimes');
 const INSTALLED_FILE = path.join(PLUGINS_DIR, 'installed.json');
@@ -71,7 +71,7 @@ function getFixRPathsScript() {
 const BUILT_IN_PLUGINS_DIR = path.join(RESOURCES_PATH, 'built-in-plugins');
 
 // BLOCK-158 商店面退役 — 远程插件清单 URL 随商店通道退役（OSS bucket 基建不动，
-// G1 恢复在线商店时在此挂点恢复 BIOF3_PLUGIN_MANIFEST_URL 语义）。
+// G1 恢复在线商店时在此挂点恢复 PETRI_PLUGIN_MANIFEST_URL 语义）。
 
 // Init shared backend (was in plugin-manager.js L63-67). Idempotent; safe to
 // require at module load.
@@ -85,7 +85,7 @@ try {
 // 调执行器做 runtime 校验/装包，需要正确 rHome）。
 try {
   require(SHARED_BACKEND_DIR).configure({
-    getConfig: () => require(path.join(PROJECT_ROOT, 'biof3-server', 'config')),
+    getConfig: () => require(path.join(PROJECT_ROOT, 'petri-server', 'config')),
   });
 } catch (e) {
   console.warn('[plugin] shared-backend configure failed:', e.message);

@@ -29,16 +29,16 @@ const TEST_DIR = path.dirname(fileURLToPath(import.meta.url));
 
 // ---- DB 自举（⑧ runLoop 直测需要；loop-orchestrator 顶层 require ./db）----
 // 与 context-breaker.test.mjs 同一基建：先跑生产 migration 链再加载被测模块。
-const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block155-vision-inline-'));
-process.env.BIOF3_DB_PATH = path.join(tempDir, 'block155-vision-inline.db');
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block155-vision-inline-'));
+process.env.PETRI_DB_PATH = path.join(tempDir, 'block155-vision-inline.db');
 const { runMigrations } = require('../src/migration-runner');
-await runMigrations(process.env.BIOF3_DB_PATH, path.join(TEST_DIR, '../src/migrations'));
+await runMigrations(process.env.PETRI_DB_PATH, path.join(TEST_DIR, '../src/migrations'));
 
 // ---- 被测模块（HK-01：实现前 require 失败 → 每条用例独立报红）----
 let visionInlineMod = null;
 let visionInlineLoadError = null;
 try {
-  visionInlineMod = require('../core/biof3-server/agent-tools/vision-inline.js');
+  visionInlineMod = require('../core/petri-server/agent-tools/vision-inline.js');
 } catch (e) {
   visionInlineLoadError = e;
 }
@@ -193,8 +193,8 @@ test('BLOCK-155 ⑦ chatVisionInlineCapable 真值表（openai-family+vision=tru
 });
 
 // ---------- ⑧ loop-orchestrator 非侵入（runLoop 直测）----------
-const { runLoop } = require('../core/biof3-server/loop-orchestrator');
-const db = require('../core/biof3-server/db.js');
+const { runLoop } = require('../core/petri-server/loop-orchestrator');
+const db = require('../core/petri-server/db.js');
 
 // 1x1 最小合法 PNG（与 agent-vision.test.mjs 同源字节）
 const PNG_BYTES = Buffer.from(
@@ -203,7 +203,7 @@ const PNG_BYTES = Buffer.from(
 );
 
 function setupWorkspaceWithAttachment() {
-  const wsDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block155-ws-'));
+  const wsDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block155-ws-'));
   fs.mkdirSync(path.join(wsDir, '.chat-attachments'), { recursive: true });
   fs.writeFileSync(path.join(wsDir, '.chat-attachments', 'umap.png'), PNG_BYTES);
   const project = db.createProject({ name: 'BLOCK-155-vision-inline', workspacePath: wsDir });
@@ -310,8 +310,8 @@ test('BLOCK-155 ⑧ 反例：visionInline 未开启 → reqBody 原样字符串 
 });
 
 // ---------- ⑨ read_image 工具门：当前轮已内联图片确定性短路 ----------
-const { tool_read_image } = require('../core/biof3-server/agent-tools/vision-tools.js');
-const { lastUserAttachmentImagePaths } = require('../core/biof3-server/agent-tools/vision-inline.js');
+const { tool_read_image } = require('../core/petri-server/agent-tools/vision-tools.js');
+const { lastUserAttachmentImagePaths } = require('../core/petri-server/agent-tools/vision-inline.js');
 
 test('BLOCK-155 ⑨ 工具门：filePath 命中内联集合→短路重定向（不触解析链/不花视觉调用）；未命中→照常走解析', async () => {
   const inlined = new Set(['.chat-attachments/umap.png']);

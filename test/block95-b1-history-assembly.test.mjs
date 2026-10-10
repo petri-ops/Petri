@@ -1,7 +1,7 @@
 /**
  * BLOCK-95 B1 — 历史拼装权收归后端契约（helpers/history-assembly.js）。
  *
- * 真实 SQLite（BIOF3_DB_PATH 临时库），覆盖：
+ * 真实 SQLite（PETRI_DB_PATH 临时库），覆盖：
  *   - 开关判定（默认关 / 1|true 开 / 其他值关）
  *   - 拼装 = DB 历史 + 本轮 user 原文回填
  *   - diff 对账核心：模拟前端 tagged（= DB 同源 restore + 原文尾）与拼装输出逐字一致
@@ -34,14 +34,14 @@ function seedMsg(role, content, ts) {
 }
 
 before(async () => {
-  tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block95-b1-'));
+  tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block95-b1-'));
   const dbPath = path.join(tempDir, 'b1.db');
-  process.env.BIOF3_DB_PATH = dbPath;
+  process.env.PETRI_DB_PATH = dbPath;
   const { runMigrations } = require(resolve('src/migration-runner.js'));
   runMigrations(dbPath, resolve('src/migrations'));
-  require(resolve('core/biof3-server/helpers/conversations'));
-  adb = require(resolve('core/biof3-server/db')).getAsyncDatabase();
-  assembly = require(resolve('core/biof3-server/helpers/history-assembly'));
+  require(resolve('core/petri-server/helpers/conversations'));
+  adb = require(resolve('core/petri-server/db')).getAsyncDatabase();
+  assembly = require(resolve('core/petri-server/helpers/history-assembly'));
 
   await adb.prepare('INSERT INTO copilot_conversations(id, user_id, title, status, created_at, updated_at) VALUES (?,?,?,?,?,?)')
     .run(CONV, USER_ID, 't', 'active', new Date().toISOString(), new Date().toISOString());
@@ -55,24 +55,24 @@ before(async () => {
 
 after(async () => {
   try { fs.rmSync(tempDir, { recursive: true, force: true }); } catch {}
-  delete process.env.BIOF3_DB_PATH;
+  delete process.env.PETRI_DB_PATH;
 });
 
 test('开关判定：默认开（2026-09-18 裁决），0/false 强关，非强制值不覆盖', () => {
   const { isServerHistoryAssemblyEnabled } = assembly;
   // 隔离持久化杂质：指向空临时目录，确保走到「默认值」分支
-  const prevDir = process.env.BIOF3_LOCAL_DATA_DIR;
-  process.env.BIOF3_LOCAL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-b1-flag-'));
+  const prevDir = process.env.PETRI_LOCAL_DATA_DIR;
+  process.env.PETRI_LOCAL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-b1-flag-'));
   try {
     assert.equal(isServerHistoryAssemblyEnabled({}), true);
-    assert.equal(isServerHistoryAssemblyEnabled({ BIOF3_SERVER_HISTORY_ASSEMBLY: '1' }), true);
-    assert.equal(isServerHistoryAssemblyEnabled({ BIOF3_SERVER_HISTORY_ASSEMBLY: 'true' }), true);
-    assert.equal(isServerHistoryAssemblyEnabled({ BIOF3_SERVER_HISTORY_ASSEMBLY: 'yes' }), true, '非强制值不覆盖 → 默认开');
-    assert.equal(isServerHistoryAssemblyEnabled({ BIOF3_SERVER_HISTORY_ASSEMBLY: '0' }), false, 'kill-switch 强关');
+    assert.equal(isServerHistoryAssemblyEnabled({ PETRI_SERVER_HISTORY_ASSEMBLY: '1' }), true);
+    assert.equal(isServerHistoryAssemblyEnabled({ PETRI_SERVER_HISTORY_ASSEMBLY: 'true' }), true);
+    assert.equal(isServerHistoryAssemblyEnabled({ PETRI_SERVER_HISTORY_ASSEMBLY: 'yes' }), true, '非强制值不覆盖 → 默认开');
+    assert.equal(isServerHistoryAssemblyEnabled({ PETRI_SERVER_HISTORY_ASSEMBLY: '0' }), false, 'kill-switch 强关');
     assert.equal(isServerHistoryAssemblyEnabled(undefined), true);
   } finally {
-    if (prevDir === undefined) delete process.env.BIOF3_LOCAL_DATA_DIR;
-    else process.env.BIOF3_LOCAL_DATA_DIR = prevDir;
+    if (prevDir === undefined) delete process.env.PETRI_LOCAL_DATA_DIR;
+    else process.env.PETRI_LOCAL_DATA_DIR = prevDir;
   }
 });
 

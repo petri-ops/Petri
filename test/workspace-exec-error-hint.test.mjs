@@ -13,28 +13,28 @@ import { fileURLToPath } from 'node:url';
 
 const require_ = createRequire(import.meta.url);
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const R_SERVER = resolve(__dirname, '..', 'core', 'biof3-server');
+const R_SERVER = resolve(__dirname, '..', 'core', 'petri-server');
 
-// 自举临时 DB（registry 链路 require 面同款，BIOF3_DB_PATH 须在 require 前生效）
+// 自举临时 DB（registry 链路 require 面同款，PETRI_DB_PATH 须在 require 前生效）
 {
   const fs = require_('fs');
   const os = require_('os');
   const nodePath = require_('path');
   const Database = require_(R_SERVER + '/node_modules/better-sqlite3');
   const tempDbDir = fs.mkdtempSync(nodePath.join(os.tmpdir(), 'g04-exec-hint-db-'));
-  const boot = new Database(nodePath.join(tempDbDir, 'biof3.db'));
+  const boot = new Database(nodePath.join(tempDbDir, 'petri.db'));
   const migrationsDir = resolve(__dirname, '..', 'src', 'migrations');
   for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fs.readFileSync(nodePath.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = nodePath.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = nodePath.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try { fs.rmSync(tempDbDir, { recursive: true, force: true }); } catch {}
   });
 }
 
-const { createWorkspaceTools } = require_('../core/biof3-server/agent-tools/workspace-tools.js');
+const { createWorkspaceTools } = require_('../core/petri-server/agent-tools/workspace-tools.js');
 
 function seedProject({ scripts = { test: 'node run-tests.js', lint: 'eslint .' }, extraTestFiles = 0 } = {}) {
   const root = mkdtempSync(join(tmpdir(), 'g04-exec-hint-fx-'));

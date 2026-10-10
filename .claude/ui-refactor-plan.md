@@ -1,4 +1,4 @@
-# BioF3 Desktop UI Current Plan
+# Petri Desktop UI Current Plan
 
 最后更新：2026-07-15
 

@@ -9,7 +9,7 @@
  *     recordAiUsage: require('./helpers/ai-usage').recordAiUsage,
  *   });
  *
- * 斩断 shared-backend 对 biof3-server 的反向 require（分仓前置；BLOCK-30 P1 起 py-server 已摘除）。
+ * 斩断 shared-backend 对 petri-server 的反向 require（分仓前置；BLOCK-30 P1 起 py-server 已摘除）。
  */
 
 const configHelper = require('./config-helper');
@@ -21,7 +21,7 @@ function configure(provider) {
   if (!provider) return;
   if (provider.getConfig) configHelper.configure({ getConfig: provider.getConfig });
   if (provider.recordAiUsage) aiUsageHelper.configure({ recordAiUsage: provider.recordAiUsage });
-  // A-003: inject projectHarnessWorkflowJob into agent-workflow (breaks shared-backend → biof3-server reverse require)
+  // A-003: inject projectHarnessWorkflowJob into agent-workflow (breaks shared-backend → petri-server reverse require)
   if (provider.projectHarnessWorkflowJob) {
     const { agentWorkflow } = module.exports;
     if (agentWorkflow && typeof agentWorkflow.configure === 'function') {

@@ -165,7 +165,7 @@
   "supportClaims": [
     {
       "id": "macos-arm64-packaged-local-execution",
-      "description": "BioF3 Desktop packaged app runs local scientific execution on macOS arm64 with converged UI.",
+      "description": "Petri Desktop packaged app runs local scientific execution on macOS arm64 with converged UI.",
       "requiredEvidenceClasses": [
         "constitution_baseline",
         "truth_lattice",

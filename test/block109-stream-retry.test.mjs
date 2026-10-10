@@ -32,21 +32,21 @@ const require = createRequire(import.meta.url);
 // 内存 DB 自举（loop-orchestrator 依赖链顶层 prepare projects，同 block109-p0-baseline 先例）
 {
   const Database = require('better-sqlite3');
-  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'biof3-b109-stream-retry-'));
-  const db = new Database(path.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'petri-b109-stream-retry-'));
+  const db = new Database(path.join(tempDbDir, 'petri.db'));
   const migrationsDir = path.join(root, 'src', 'migrations');
   for (const file of fssync.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     db.exec(fssync.readFileSync(path.join(migrationsDir, file), 'utf8'));
   }
   db.close();
-  process.env.BIOF3_DB_PATH = path.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try { fssync.rmSync(tempDbDir, { recursive: true, force: true }); } catch { /* Windows 句柄延迟释放 */ }
   });
 }
 
 const { DeepSeekProvider } = require(path.join(root, 'core', 'shared-backend', 'llm-providers', 'deepseek.js'));
-const { callProviderWithNetworkRetry } = require(path.join(root, 'core', 'biof3-server', 'loop-orchestrator.js'));
+const { callProviderWithNetworkRetry } = require(path.join(root, 'core', 'petri-server', 'loop-orchestrator.js'));
 
 const sseFrame = (obj) => `data: ${JSON.stringify(obj)}\n\n`;
 

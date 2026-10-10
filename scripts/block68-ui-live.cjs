@@ -19,7 +19,7 @@ const path = require('node:path');
 const http = require('node:http');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-68');
 
 function fetchJson(url) {
@@ -102,7 +102,7 @@ async function main() {
   // ── 断言 2：projectWorkspaceChanged 派发无异常（接线已由单测覆盖）──
   const evtState = JSON.parse(await evalJS(client, `(async () => {
     try {
-      window.dispatchEvent(new CustomEvent('gewu:project-workspace-changed', { detail: { projectId: 'p_live', source: 'agent' } }));
+      window.dispatchEvent(new CustomEvent('petri:project-workspace-changed', { detail: { projectId: 'p_live', source: 'agent' } }));
       await new Promise((r) => setTimeout(r, 900));
       return JSON.stringify({ ok: true, composerStill: !!document.querySelector('textarea.sc-input') });
     } catch (e) { return JSON.stringify({ ok: false, err: String(e) }); }

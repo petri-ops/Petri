@@ -46,9 +46,9 @@ function locateStaging() {
     return p;
   }
   const matches = fs.readdirSync(OUT_DIR)
-    .filter((d) => d.startsWith('biof3-py-runtime-staging-'))
+    .filter((d) => d.startsWith('petri-py-runtime-staging-'))
     .map((d) => path.join(OUT_DIR, d));
-  if (matches.length === 0) fail(`在 ${OUT_DIR} 找不到 biof3-py-runtime-staging-* 目录，请先运行 build-win-runtime-artifact.mjs`);
+  if (matches.length === 0) fail(`在 ${OUT_DIR} 找不到 petri-py-runtime-staging-* 目录，请先运行 build-win-runtime-artifact.mjs`);
   if (matches.length > 1) console.warn(`[resume-py] 发现多个 staging，使用第一个: ${matches[0]}`);
   return matches[0];
 }
@@ -216,14 +216,14 @@ function main() {
   console.log(`sha256   : ${sha256}`);
   console.log('\n⚠️ 收尾边界（与 R 制品一致，2026-08-08 确立）：');
   console.log('  1) 用 scripts/upload-win-python-runtime.mjs 把 zip 传到 OSS');
-  console.log('     oss://biof3-uploads/plugins/py-runtime/1.0.0/windows-x64.zip（public-read + HEAD 校验）。');
+  console.log('     oss://petri-uploads/plugins/py-runtime/1.0.0/windows-x64.zip（public-read + HEAD 校验）。');
   console.log('  2) 不要把 windows-x64 写进 manifest.json 的 artifacts ——');
   console.log('     plugin-manifest-schema.test.mjs 第 70-74 行要求 windows-x64 必须为 0。');
   console.log('     release-contract.windows-x64.supported 维持 false。');
-  console.log('  3) biof3-py-runtime 的占位已从 manifest.placeholders.json 移除。\n');
+  console.log('  3) petri-py-runtime 的占位已从 manifest.placeholders.json 移除。\n');
   console.log(JSON.stringify({
     platform: 'windows-x64',
-    url: 'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/windows-x64.zip',
+    url: 'https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/windows-x64.zip',
     sha256,
     sizeBytes,
   }, null, 2));

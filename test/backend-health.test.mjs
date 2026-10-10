@@ -1,7 +1,7 @@
 // M1-1 后端就绪感知层测试
 // 运行：cd desktop-app && node --test test/backend-health.test.mjs
 // BLOCK-30 P1: py-server HTTP 服务已摘除——probePy/pyServerUp 场景删除，
-// pyRuntime 仅反映运行时安装态（Python 工具由 biof3-server 本地执行）。
+// pyRuntime 仅反映运行时安装态（Python 工具由 petri-server 本地执行）。
 // BLOCK-51 P3: plumber 空壳已摘除——probePlumber/plumberUp 场景删除，
 // isReady 仅由 rServerUp 决定。
 import assert from 'node:assert/strict';
@@ -14,7 +14,7 @@ import {
 {
   const status = mergeRuntimeStatusWithConfiguredHomes(
     { r: { installed: false }, python: { installed: false } },
-    { BIOF3_R_HOME: '/system/R', BIOF3_PY_HOME: '/system/Python' },
+    { PETRI_R_HOME: '/system/R', PETRI_PY_HOME: '/system/Python' },
   );
   assert.strictEqual(status.r.installed, true, '已解析的系统 R 应视为可用 Runtime');
   assert.strictEqual(status.python.installed, true, '已解析的系统 Python 应视为可用 Runtime');
@@ -52,7 +52,7 @@ import {
   console.log('✓ 场景2 R 未装通过：', status.downReason);
 }
 
-// === 场景 3：R 装了但 biof3-server 未起（health 探测失败）===
+// === 场景 3：R 装了但 petri-server 未起（health 探测失败）===
 {
   const status = await getBackendStatus({
     runtimeStatus: { r: { installed: true }, python: { installed: true } },
@@ -63,10 +63,10 @@ import {
   assert.strictEqual(status.rServerUp, false, 'rServerUp 应为 false（health 探测失败）');
   assert.strictEqual(status.isReady, false, 'isReady 应为 false');
   assert.ok(status.downReason, 'downReason 应非空');
-  console.log('✓ 场景3 biof3-server 未起通过：', status.downReason);
+  console.log('✓ 场景3 petri-server 未起通过：', status.downReason);
 }
 
-// === 场景 4：biof3-server 进程已退出（killed=true）===
+// === 场景 4：petri-server 进程已退出（killed=true）===
 {
   const status = await getBackendStatus({
     runtimeStatus: { r: { installed: true }, python: { installed: true } },
@@ -75,10 +75,10 @@ import {
   });
   assert.strictEqual(status.rServerUp, false, 'rServerUp 应为 false（进程 killed）');
   assert.strictEqual(status.isReady, false, 'isReady 应为 false');
-  console.log('✓ 场景4 biof3-server killed 通过');
+  console.log('✓ 场景4 petri-server killed 通过');
 }
 
-// === 场景 5：biof3-server 进程对象为 null（未 spawn）===
+// === 场景 5：petri-server 进程对象为 null（未 spawn）===
 {
   const status = await getBackendStatus({
     runtimeStatus: { r: { installed: true }, python: { installed: false } },
@@ -90,7 +90,7 @@ import {
   console.log('✓ 场景5 进程 null 通过');
 }
 
-// === 场景 6：isReady 仅由 biof3-server 决定 ===
+// === 场景 6：isReady 仅由 petri-server 决定 ===
 {
   const status = await getBackendStatus({
     runtimeStatus: { r: { installed: true }, python: { installed: false } },
@@ -98,12 +98,12 @@ import {
     procs: { rServer: { killed: false } },
   });
   assert.strictEqual(status.rServerUp, true, 'rServerUp 应为 true');
-  assert.strictEqual(status.isReady, true, 'isReady 应为 true（仅 biof3-server 是硬要求）');
+  assert.strictEqual(status.isReady, true, 'isReady 应为 true（仅 petri-server 是硬要求）');
   assert.strictEqual(status.downReason, null, 'downReason 应为 null');
   console.log('✓ 场景6 isReady 单轨判定通过');
 }
 
-// === 场景 7（BLOCK-66 P1）：R 缺失但 biof3-server 就绪 → isReady=true（语义解绑）===
+// === 场景 7（BLOCK-66 P1）：R 缺失但 petri-server 就绪 → isReady=true（语义解绑）===
 {
   const status = await getBackendStatus({
     runtimeStatus: { r: { installed: false }, python: { installed: false } },

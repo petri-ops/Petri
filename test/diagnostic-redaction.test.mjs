@@ -11,7 +11,7 @@ const {
 } = require("../src/diagnostic-redaction.js");
 
 test("diagnostic redaction resolves the packaged core resource path", () => {
-  const resourcesPath = "/Applications/BioF3.app/Contents/Resources";
+  const resourcesPath = "/Applications/Petri.app/Contents/Resources";
   assert.equal(
     resolveDiagnosticRedactionModule({ isPackaged: true, resourcesPath }),
     path.join(resourcesPath, "core", "shared-backend", "redaction.js"),
@@ -20,7 +20,7 @@ test("diagnostic redaction resolves the packaged core resource path", () => {
   // dev 路径断言只锚 resolver 的真实承诺（src/diagnostic-redaction.js:12 =
   // <repo>/core/shared-backend/redaction.js，由本测试文件位置等价推导），
   // 不锚检出目录名——历史字面量 `desktop/` 把仓库改名/换位（本仓 checkout=
-  // biof3-desktop-fresh）变成与环境耦合的确定性红，与本测试语义无关。
+  // petri-desktop-fresh）变成与环境耦合的确定性红，与本测试语义无关。
   const devPath = resolveDiagnosticRedactionModule({ isPackaged: false });
   assert.equal(
     devPath,

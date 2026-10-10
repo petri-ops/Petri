@@ -16,11 +16,11 @@ import { fileURLToPath } from 'node:url';
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-const { buildMobileGateway } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/index.js'));
-const { resetStoresForTest } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/pairing.js'));
+const { buildMobileGateway } = require(path.join(ROOT, 'core/petri-server/mobile-gateway/index.js'));
+const { resetStoresForTest } = require(path.join(ROOT, 'core/petri-server/mobile-gateway/pairing.js'));
 
 function tmpRoot() {
-  return mkdtempSync(path.join(tmpdir(), 'gewu-fedterm-test-'));
+  return mkdtempSync(path.join(tmpdir(), 'petri-fedterm-test-'));
 }
 
 function listen(app) {
@@ -89,7 +89,7 @@ test('BLOCK-85 P4: projection terminal start -> echo roundtrip -> exit -> limit'
     const express = require('express');
     const adminApp = express();
     adminApp.use(express.json({ limit: '4kb' }));
-    require(path.join(ROOT, 'core/biof3-server/routes/mobile-admin.js'))(adminApp, { dataDir: execRoot });
+    require(path.join(ROOT, 'core/petri-server/routes/mobile-admin.js'))(adminApp, { dataDir: execRoot });
     const adminServer = await listen(adminApp);
     const adminBase = `http://127.0.0.1:${adminServer.address().port}`;
 

@@ -5,38 +5,38 @@ import { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const R_SERVER = resolve(__dirname, '..', 'core', 'biof3-server');
+const R_SERVER = resolve(__dirname, '..', 'core', 'petri-server');
 const require = createRequire(import.meta.url);
 
 // 与 block49-spawn-agent-tools.test.mjs 同一自举手法：临时 DB（src/migrations 全量），
-// BIOF3_DB_PATH 必须在 require db.js 前生效。
+// PETRI_DB_PATH 必须在 require db.js 前生效。
 {
   const fs = require('fs');
   const os = require('os');
   const path = require('path');
   const Database = require(R_SERVER + '/node_modules/better-sqlite3');
-  const tempDbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block55-db-'));
-  const boot = new Database(path.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block55-db-'));
+  const boot = new Database(path.join(tempDbDir, 'petri.db'));
   const migrationsDir = resolve(__dirname, '..', 'src', 'migrations');
   for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fs.readFileSync(path.join(migrationsDir, f), 'utf8'));
   }
   // 计划基础表 + BLOCK-55 additive DDL（与 ai-bridge 运行时迁移同一事实源）
-  const planLifecycle = require('../core/biof3-server/helpers/plan-lifecycle.js');
+  const planLifecycle = require('../core/petri-server/helpers/plan-lifecycle.js');
   planLifecycle.ensurePlanBaseSchema(boot);
   planLifecycle.ensureBlock55PlanSchema(boot);
   boot.close();
-  process.env.BIOF3_DB_PATH = path.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try { fs.rmSync(tempDbDir, { recursive: true, force: true }); } catch {}
   });
 }
 
-const { decideAgentToolCall } = require('../core/biof3-server/agent-tools/agent-tool-policy.js');
-const { getToolContract } = require('../core/biof3-server/agent-tools/registry.js');
-const { tool_plan } = require('../core/biof3-server/agent-tools/plan-ui-tools.js');
-const { approvePlanDraft, applyPlanRevision } = require('../core/biof3-server/helpers/plan-lifecycle.js');
-const dbMod = require('../core/biof3-server/db.js');
+const { decideAgentToolCall } = require('../core/petri-server/agent-tools/agent-tool-policy.js');
+const { getToolContract } = require('../core/petri-server/agent-tools/registry.js');
+const { tool_plan } = require('../core/petri-server/agent-tools/plan-ui-tools.js');
+const { approvePlanDraft, applyPlanRevision } = require('../core/petri-server/helpers/plan-lifecycle.js');
+const dbMod = require('../core/petri-server/db.js');
 const adb = dbMod.getAsyncDatabase();
 
 const USER = 'u_block55';
@@ -91,7 +91,7 @@ test("accessMode='plan' 档位等效 planMode：mutating 拒绝 + plan/只读放
 });
 
 test('UI-303 — PLAN_MODE_PROMPT_SECTION 共享常量导出且两条 agent 路径同源', () => {
-  const { PLAN_MODE_PROMPT_SECTION } = require('../core/biof3-server/helpers/plans.js');
+  const { PLAN_MODE_PROMPT_SECTION } = require('../core/petri-server/helpers/plans.js');
   assert.match(PLAN_MODE_PROMPT_SECTION, /=== 计划模式（Spec 门）===/);
   assert.match(PLAN_MODE_PROMPT_SECTION, /plan\(op="create"/);
 });

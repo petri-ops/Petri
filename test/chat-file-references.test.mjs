@@ -9,7 +9,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const R_SERVER = resolve(__dirname, '..', 'core', 'biof3-server');
+const R_SERVER = resolve(__dirname, '..', 'core', 'petri-server');
 const req = createRequire(import.meta.url);
 
 const helpers = req(R_SERVER + '/helpers/chat-file-references.js');
@@ -45,19 +45,19 @@ function makeWorkspaceTree(root, files) {
 }
 
 test('classifyReference accepts internal artifact URIs', () => {
-  const a = helpers.classifyReference('biof3://artifact/tj_123/data/差异基因.csv');
+  const a = helpers.classifyReference('petri://artifact/tj_123/data/差异基因.csv');
   assert.ok(a);
   assert.equal(a.kind, 'artifact');
   assert.equal(a.normalized, 'tj_123/data/差异基因.csv');
   const encoded = helpers.classifyReference(
-    'biof3://artifact/tj_123/' + encodeURIComponent('差异 基因.csv'),
+    'petri://artifact/tj_123/' + encodeURIComponent('差异 基因.csv'),
   );
   assert.ok(encoded);
   assert.equal(encoded.normalized, 'tj_123/差异 基因.csv');
 });
 
 test('classifyReference accepts workspace URIs', () => {
-  const ok = helpers.classifyReference('biof3://workspace/p_001/data/sample.csv');
+  const ok = helpers.classifyReference('petri://workspace/p_001/data/sample.csv');
   assert.ok(ok);
   assert.equal(ok.kind, 'workspace');
   assert.equal(ok.normalized, 'p_001/data/sample.csv');
@@ -121,7 +121,7 @@ test('classifyReference rejects empty / control characters', () => {
 });
 
 test('normalizeReference forwards classification results', () => {
-  const a = helpers.normalizeReference('biof3://artifact/tj_123/deg.csv');
+  const a = helpers.normalizeReference('petri://artifact/tj_123/deg.csv');
   assert.ok(a);
   assert.equal(a.kind, 'artifact');
   const toolsUrl = helpers.normalizeReference('/api/tools/file/tj_abc/deg.csv');
@@ -137,16 +137,16 @@ test('toInternalUri encodes Chinese + spaces', () => {
     jobId: 'tj_123',
     artifactName: '差异 基因.csv',
   });
-  assert.equal(artifact, 'biof3://artifact/tj_123/' + encodeURIComponent('差异 基因.csv'));
+  assert.equal(artifact, 'petri://artifact/tj_123/' + encodeURIComponent('差异 基因.csv'));
   const ws = helpers.toInternalUri({
     kind: 'workspace',
     projectId: 'p_001',
     relativePath: 'data/sample.csv',
   });
-  assert.equal(ws, 'biof3://workspace/p_001/data/sample.csv');
+  assert.equal(ws, 'petri://workspace/p_001/data/sample.csv');
 });
 test('route: internal URI resolves to an artifact', async () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-fr-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-fr-'));
   const workspaceRoot = path.join(tmp, 'project');
   const jobId = 'tj_alpha';
   fs.mkdirSync(workspaceRoot, { recursive: true });
@@ -177,12 +177,12 @@ test('route: internal URI resolves to an artifact', async () => {
   const response = await invoke({
     projectId: 'p_001',
     activeJobId: null,
-    references: ['biof3://artifact/' + jobId + '/deg.csv'],
+    references: ['petri://artifact/' + jobId + '/deg.csv'],
   });
   assert.equal(response.status, 200);
   assert.equal(response.body.ok, true);
   const entry = response.body.results[0];
-  assert.equal(entry.reference, 'biof3://artifact/' + jobId + '/deg.csv');
+  assert.equal(entry.reference, 'petri://artifact/' + jobId + '/deg.csv');
   assert.equal(entry.resolved.kind, 'artifact');
   assert.equal(entry.resolved.jobId, jobId);
   assert.equal(entry.resolved.name, 'deg.csv');
@@ -190,7 +190,7 @@ test('route: internal URI resolves to an artifact', async () => {
 });
 
 test('route: tools file URL resolves to artifact', async () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-fr-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-fr-'));
   const workspaceRoot = path.join(tmp, 'project');
   const jobId = 'tj_beta';
   fs.mkdirSync(workspaceRoot, { recursive: true });
@@ -226,7 +226,7 @@ test('route: tools file URL resolves to artifact', async () => {
 });
 
 test('route: bare filename prefers active artifacts and otherwise requires a unique workspace match', async () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-fr-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-fr-'));
   const workspaceRoot = path.join(tmp, 'project');
   makeWorkspaceTree(workspaceRoot, [
     'frontend/src/model-registry.ts',
@@ -296,7 +296,7 @@ test('route: bare filename prefers active artifacts and otherwise requires a uni
 });
 
 test('route: project relative-absolute path must be inside the workspace root', async () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-fr-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-fr-'));
   const workspaceRoot = path.join(tmp, 'project');
   makeWorkspaceTree(workspaceRoot, ['data/sample.csv', 'data/sub/nested.csv']);
   const sibling = path.join(tmp, 'sibling');
@@ -343,7 +343,7 @@ test('route: project relative-absolute path must be inside the workspace root', 
 });
 
 test('route: rejects dangerous protocols and unknown schemes', async () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-fr-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-fr-'));
   const dbStub = buildDbStub({ workspacePath: path.join(tmp, 'project') });
   const invoke = loadResolveRoute(dbStub);
 
@@ -366,7 +366,7 @@ test('route: rejects dangerous protocols and unknown schemes', async () => {
 });
 
 test('route: missing truth (job not found, artifact missing, project mismatch, forbidden)', async () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-fr-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-fr-'));
   const workspaceRoot = path.join(tmp, 'project');
   fs.mkdirSync(workspaceRoot, { recursive: true });
   const dbStub = buildDbStub({
@@ -377,10 +377,10 @@ test('route: missing truth (job not found, artifact missing, project mismatch, f
   });
   const invoke = loadResolveRoute(dbStub);
 
-  const r1 = await invoke({ projectId: 'p_001', references: ['biof3://artifact/tj_unknown/deg.csv'] });
+  const r1 = await invoke({ projectId: 'p_001', references: ['petri://artifact/tj_unknown/deg.csv'] });
   assert.equal(r1.body.results[0].reason, 'job_not_found');
 
-  const r2 = await invoke({ projectId: 'p_001', references: ['biof3://artifact/tj_known/never.csv'] });
+  const r2 = await invoke({ projectId: 'p_001', references: ['petri://artifact/tj_known/never.csv'] });
   assert.equal(r2.body.results[0].reason, 'artifact_missing');
 
   const crossProjectStub = buildDbStub({
@@ -388,7 +388,7 @@ test('route: missing truth (job not found, artifact missing, project mismatch, f
     jobs: [['tj_x', { id: 'tj_x', user_id: 'u_local', project_id: 'p_other', tool_id: 'volcano-plot', result_json: JSON.stringify({ artifactTruth: { status: 'valid', blocking: false }, artifacts: [{ name: 'x.csv' }] }) }]],
   });
   const invoke2 = loadResolveRoute(crossProjectStub);
-  const r3 = await invoke2({ projectId: 'p_001', references: ['biof3://artifact/tj_x/x.csv'] });
+  const r3 = await invoke2({ projectId: 'p_001', references: ['petri://artifact/tj_x/x.csv'] });
   assert.equal(r3.body.results[0].reason, 'project_mismatch');
 
   const legacyJobStub = buildDbStub({
@@ -407,7 +407,7 @@ test('route: missing truth (job not found, artifact missing, project mismatch, f
   const invokeLegacy = loadResolveRoute(legacyJobStub);
   const legacy = await invokeLegacy({
     projectId: 'p_001',
-    references: ['biof3://artifact/tj_legacy/legacy.csv'],
+    references: ['petri://artifact/tj_legacy/legacy.csv'],
   });
   assert.equal(legacy.body.results[0].resolved, null);
   assert.equal(legacy.body.results[0].reason, 'project_mismatch');
@@ -422,27 +422,27 @@ test('route: missing truth (job not found, artifact missing, project mismatch, f
 });
 
 test('route: workspace URI only resolves when projectId matches', async () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-fr-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-fr-'));
   const workspaceRoot = path.join(tmp, 'project');
   makeWorkspaceTree(workspaceRoot, ['data/sample.csv']);
   const dbStub = buildDbStub({ workspacePath: workspaceRoot });
   const invoke = loadResolveRoute(dbStub);
 
-  const ok = await invoke({ projectId: 'p_001', references: ['biof3://workspace/p_001/data/sample.csv'] });
+  const ok = await invoke({ projectId: 'p_001', references: ['petri://workspace/p_001/data/sample.csv'] });
   assert.equal(ok.body.results[0].resolved.kind, 'workspace');
 
-  const mismatch = await invoke({ projectId: 'p_001', references: ['biof3://workspace/p_999/data/sample.csv'] });
+  const mismatch = await invoke({ projectId: 'p_001', references: ['petri://workspace/p_999/data/sample.csv'] });
   assert.equal(mismatch.body.results[0].reason, 'project_mismatch');
 });
 
 test('route: workspace URI must stay inside the project root', async () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-fr-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-fr-'));
   const workspaceRoot = path.join(tmp, 'project');
   fs.mkdirSync(workspaceRoot, { recursive: true });
   const dbStub = buildDbStub({ workspacePath: workspaceRoot });
   const invoke = loadResolveRoute(dbStub);
 
-  const escape = await invoke({ projectId: 'p_001', references: ['biof3://workspace/p_001/../../etc/passwd'] });
+  const escape = await invoke({ projectId: 'p_001', references: ['petri://workspace/p_001/../../etc/passwd'] });
   assert.equal(escape.body.results[0].resolved, null);
   assert.equal(escape.body.results[0].reason, 'workspace_out_of_root');
 });

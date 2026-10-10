@@ -11,12 +11,12 @@
     {
       "name": "A0b_r_runtime_present",
       "pass": true,
-      "detail": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\runtimes\\R"
+      "detail": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\runtimes\\R"
     },
     {
       "name": "A0c_pack_demo_data_present",
       "pass": true,
-      "detail": "D:\\1.WorkDir\\gewu-pack-bio"
+      "detail": "D:\\1.WorkDir\\petri-pack-bio"
     },
     {
       "name": "A1_catalog_deseq2_loaded",
@@ -31,12 +31,12 @@
     {
       "name": "A2b_workspace_resolved",
       "pass": true,
-      "detail": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\projects\\block121---1790384588466-muhor9vd"
+      "detail": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\projects\\block121---1790384588466-muhor9vd"
     },
     {
       "name": "A2c_demo_files_staged",
       "pass": true,
-      "detail": "D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\projects\\block121---1790384588466-muhor9vd"
+      "detail": "D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\projects\\block121---1790384588466-muhor9vd"
     },
     {
       "name": "A2d_chat_task_completed",
@@ -66,7 +66,7 @@
     {
       "name": "A3a_artifact_truth_valid",
       "pass": true,
-      "detail": "{\"artifactTruthVersion\":1,\"status\":\"valid\",\"blocking\":false,\"resultDir\":\"D:\\\\1.WorkDir\\\\biof3-desktop\\\\.biof3-dev-user-data\\\\data\\\\projects\\\\block121---17903845"
+      "detail": "{\"artifactTruthVersion\":1,\"status\":\"valid\",\"blocking\":false,\"resultDir\":\"D:\\\\1.WorkDir\\\\petri-desktop\\\\.petri-dev-user-data\\\\data\\\\projects\\\\block121---17903845"
     },
     {
       "name": "A3b_job_has_conversation_owner",
@@ -76,7 +76,7 @@
     {
       "name": "A3c_primary_artifact_on_disk",
       "pass": true,
-      "detail": "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/data/projects/block121---1790384588466-muhor9vd/results/jobs/tj_muhoreeu_kdxl/output/deg_table.csv"
+      "detail": "D:/1.WorkDir/petri-desktop/.petri-dev-user-data/data/projects/block121---1790384588466-muhor9vd/results/jobs/tj_muhoreeu_kdxl/output/deg_table.csv"
     },
     {
       "name": "A4a_studio_trusted_badge",

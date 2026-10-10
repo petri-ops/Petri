@@ -9,30 +9,30 @@ import { createHash } from 'node:crypto';
 const require = createRequire(import.meta.url);
 
 // BLOCK-49 加映清债 —— 统一临时 DB 自举（存量：单跑/全量缺 projects 表）
-//（BIOF3_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）
+//（PETRI_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）
 {
   const fsx = require('node:fs');
   const osx = require('node:os');
   const pth = require('node:path');
   const urlx = require('node:url');
   const hereDir = pth.dirname(urlx.fileURLToPath(import.meta.url));
-  const Database = require(pth.resolve(hereDir, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const tempDbDir = fsx.mkdtempSync(pth.join(osx.tmpdir(), 'biof3-sweep-db-'));
-  const boot = new Database(pth.join(tempDbDir, 'biof3.db'));
+  const Database = require(pth.resolve(hereDir, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const tempDbDir = fsx.mkdtempSync(pth.join(osx.tmpdir(), 'petri-sweep-db-'));
+  const boot = new Database(pth.join(tempDbDir, 'petri.db'));
   const migrationsDir = pth.resolve(hereDir, '..', 'src', 'migrations');
   for (const f of fsx.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fsx.readFileSync(pth.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = pth.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = pth.join(tempDbDir, 'petri.db');
   process.on('exit', () => { try { fsx.rmSync(tempDbDir, { recursive: true, force: true }); } catch {} });
 }
 const {
   createResultEditPlanTool,
   createResultChangeSetTools,
   projectDirectEnrichmentSubgraph,
-} = require('../core/biof3-server/agent-tools/result-edit-tools');
-const { normalizePluginManifest } = require('../core/biof3-server/plugin-loader');
+} = require('../core/petri-server/agent-tools/result-edit-tools');
+const { normalizePluginManifest } = require('../core/petri-server/plugin-loader');
 const { computeExecutionProvenanceHash } = require('../core/shared-backend/execution-provenance');
 
 function makeJob(projectId = 'p_1') {
@@ -350,7 +350,7 @@ test('RS4 plugin normalization rejects incomplete Result Studio metadata', () =>
 });
 
 test('RS5 Agent ChangeSet tool scopes the source and emits durable progress', async (context) => {
-  const root = mkdtempSync(join(tmpdir(), 'biof3-rs5-agent-'));
+  const root = mkdtempSync(join(tmpdir(), 'petri-rs5-agent-'));
   context.after(() => rmSync(root, { recursive: true, force: true }));
   const script = join(root, 'results/jobs/tj_plot/run-script.R');
   mkdirSync(join(script, '..'), { recursive: true });
@@ -386,7 +386,7 @@ test('RS5 Agent ChangeSet tool scopes the source and emits durable progress', as
       status: 'ready', mode: 'managed', workspaceRoot: root, managedPaths: ['analysis/scripts'], reason: null,
       inspection: { runtime: { versionRaw: 'git version test' } },
       adapter: {
-        gitDir: join(root, '.biof3/git'), workTree: root,
+        gitDir: join(root, '.petri/git'), workTree: root,
         revParse: (ref) => ref === `${sourceCommit}^{commit}` ? sourceCommit : null,
         showFile: ({ filePath }) => filePath.endsWith('plot.R') ? 'print(1)\n' : paramsText,
       },
@@ -485,7 +485,7 @@ test('RS6 Agent can read history while the managed repository is blocked but can
     bindProjectRepository: () => ({
       status: 'blocked', mode: 'managed', workspaceRoot: '/tmp/p_1', managedPaths: [],
       reason: 'index_lock_present', inspection: { runtime: {} },
-      adapter: { gitDir: '/tmp/p_1/.biof3/git', workTree: '/tmp/p_1' },
+      adapter: { gitDir: '/tmp/p_1/.petri/git', workTree: '/tmp/p_1' },
     }),
     compareResultChangeSet: () => ({ summary: { status: 'preview_ready' } }),
   });

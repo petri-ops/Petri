@@ -4,21 +4,21 @@
  * 历史：BLOCK-20 抽屉形态遗留样式，抽屉退役（BLOCK-28）后仅保留
  * 主区审阅模式（ReviewMode.tsx / CodeMirrorDiffView.tsx）在用的类。
  * BLOCK-28.1：全部迁移到应用语义 token（custom.css 明暗双套），
- * 修复浅色主题串色——不再使用任何不存在的 --gewu-* 变量名与暗色硬编码。
+ * 修复浅色主题串色——不再使用任何不存在的 --petri-* 变量名与暗色硬编码。
  * ============================================================ */
 
 /* ---- 标题 / 徽标文本 ---- */
 .wt-title {
   font-weight: 600;
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   letter-spacing: 0.02em;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .wt-task-id {
-  font-family: var(--gewu-font-mono, monospace);
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-tertiary);
+  font-family: var(--petri-font-mono, monospace);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-tertiary);
 }
 
 /* ---- 按钮（BLOCK-28.3 卡片风格；BLOCK-29.6 UI-243 紧凑化：28px 控件栅格） ---- */
@@ -28,11 +28,11 @@
   justify-content: center;
   height: 28px;
   padding: 0 10px;
-  font-size: var(--gewu-font-size-caption);
-  border: 1px solid var(--gewu-border);
+  font-size: var(--petri-font-size-caption);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
   cursor: pointer;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
   transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
@@ -42,8 +42,8 @@
 }
 
 .wt-btn:hover:not(:disabled) {
-  background: var(--gewu-hover);
-  border-color: var(--gewu-border-strong);
+  background: var(--petri-hover);
+  border-color: var(--petri-border-strong);
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
 }
 
@@ -64,63 +64,63 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   cursor: pointer;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   line-height: 1;
   transition: background 120ms ease, color 120ms ease;
 }
 
 .wt-icon-btn:hover:not(:disabled) {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 /* 危险操作（Revert all）— UI-243 降为 danger-ghost，唯一 primary 留给提交审阅 */
 .wt-btn-danger {
   background: transparent;
   border-color: transparent;
-  color: var(--gewu-status-error-fg);
+  color: var(--petri-status-error-fg);
   box-shadow: none;
 }
 
 .wt-btn-danger:hover:not(:disabled) {
-  background: var(--gewu-status-error-bg);
-  border-color: color-mix(in srgb, var(--gewu-status-error) 45%, transparent);
+  background: var(--petri-status-error-bg);
+  border-color: color-mix(in srgb, var(--petri-status-error) 45%, transparent);
 }
 
 /* 主操作（Commit） */
 .wt-btn-commit {
-  background: var(--gewu-accent);
-  border-color: var(--gewu-accent);
-  color: var(--gewu-on-accent);
+  background: var(--petri-accent);
+  border-color: var(--petri-accent);
+  color: var(--petri-on-accent);
   font-weight: 600;
 }
 
 .wt-btn-commit:hover:not(:disabled) {
-  background: var(--gewu-accent-hover);
-  border-color: var(--gewu-accent-hover);
+  background: var(--petri-accent-hover);
+  border-color: var(--petri-accent-hover);
 }
 
 /* ---- 错误横幅 ---- */
 .wt-error {
   padding: 8px 16px;
-  background: var(--gewu-status-error-bg);
-  border-bottom: 1px solid color-mix(in srgb, var(--gewu-status-error) 40%, transparent);
-  color: var(--gewu-status-error-fg);
-  font-size: var(--gewu-font-size-caption);
+  background: var(--petri-status-error-bg);
+  border-bottom: 1px solid color-mix(in srgb, var(--petri-status-error) 40%, transparent);
+  color: var(--petri-status-error-fg);
+  font-size: var(--petri-font-size-caption);
   flex-shrink: 0;
 }
 
 /* ---- 文件列表 ---- */
 .wt-file-list-title {
   padding: 8px 12px;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--gewu-text-tertiary);
-  border-bottom: 1px solid var(--gewu-border-subtle);
+  color: var(--petri-text-tertiary);
+  border-bottom: 1px solid var(--petri-border-subtle);
 }
 
 .wt-file-list-item {
@@ -131,23 +131,23 @@
   padding: 7px 12px;
   border: 0;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   cursor: pointer;
   text-align: left;
-  font-size: var(--gewu-font-size-caption);
-  border-bottom: 1px solid var(--gewu-border-subtle);
+  font-size: var(--petri-font-size-caption);
+  border-bottom: 1px solid var(--petri-border-subtle);
 }
 
 .wt-file-list-item:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .wt-file-list-item.active {
-  background: var(--gewu-accent-soft);
-  border-left: 3px solid var(--gewu-accent);
+  background: var(--petri-accent-soft);
+  border-left: 3px solid var(--petri-accent);
   padding-left: 9px;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .wt-file-list-badge {
@@ -164,42 +164,42 @@
   min-width: 16px;
   height: 16px;
   border-radius: 8px;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   font-weight: 700;
   padding: 0 3px;
   line-height: 1;
 }
 
 .wt-badge-accept-mini {
-  background: var(--gewu-status-success-bg);
-  color: var(--gewu-status-success-fg);
-  border: 1px solid color-mix(in srgb, var(--gewu-status-success-fg) 40%, transparent);
+  background: var(--petri-status-success-bg);
+  color: var(--petri-status-success-fg);
+  border: 1px solid color-mix(in srgb, var(--petri-status-success-fg) 40%, transparent);
 }
 
 .wt-badge-reject-mini {
-  background: var(--gewu-status-error-bg);
-  color: var(--gewu-status-error-fg);
-  border: 1px solid color-mix(in srgb, var(--gewu-status-error-fg) 40%, transparent);
+  background: var(--petri-status-error-bg);
+  color: var(--petri-status-error-fg);
+  border: 1px solid color-mix(in srgb, var(--petri-status-error-fg) 40%, transparent);
 }
 
 .wt-file-status {
-  font-family: var(--gewu-font-mono, monospace);
-  font-size: var(--gewu-font-size-xs);
+  font-family: var(--petri-font-mono, monospace);
+  font-size: var(--petri-font-size-xs);
   width: 16px;
   text-align: center;
   flex-shrink: 0;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
 }
 
-.wt-file-status-M { color: var(--gewu-status-warning); }
-.wt-file-status-A { color: var(--gewu-status-success-fg); }
-.wt-file-status-D { color: var(--gewu-status-error-fg); }
-.wt-file-status-R { color: var(--gewu-status-info); }
-.wt-file-status-C { color: var(--gewu-accent); }
-.wt-file-status-\? { color: var(--gewu-text-muted); }
+.wt-file-status-M { color: var(--petri-status-warning); }
+.wt-file-status-A { color: var(--petri-status-success-fg); }
+.wt-file-status-D { color: var(--petri-status-error-fg); }
+.wt-file-status-R { color: var(--petri-status-info); }
+.wt-file-status-C { color: var(--petri-accent); }
+.wt-file-status-\? { color: var(--petri-text-muted); }
 
 .wt-file-list-path {
-  font-family: var(--gewu-font-mono, monospace);
+  font-family: var(--petri-font-mono, monospace);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -209,8 +209,8 @@
 .wt-empty {
   padding: 24px;
   text-align: center;
-  color: var(--gewu-text-muted);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-caption);
 }
 
 /* ---- BLOCK-53 P2 / UI-283 — 非 git 工作区一次性 git init 引导 ---- */
@@ -232,43 +232,43 @@
 .wt-gitinit-confirm-lead {
   margin: 0;
   max-width: 380px;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .wt-gitinit-message {
   margin: 0;
   max-width: 420px;
-  color: var(--gewu-text-muted);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-caption);
 }
 
 /* ---- diff 文件头 ---- */
 .wt-file-header {
   padding: 8px 12px;
-  background: var(--gewu-bg-surface);
-  border-bottom: 1px solid var(--gewu-border);
+  background: var(--petri-bg-surface);
+  border-bottom: 1px solid var(--petri-border);
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
 }
 
 .wt-file-path {
-  font-family: var(--gewu-font-mono, monospace);
+  font-family: var(--petri-font-mono, monospace);
   font-weight: 600;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .wt-file-old-path {
-  font-family: var(--gewu-font-mono, monospace);
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs);
+  font-family: var(--petri-font-mono, monospace);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs);
 }
 
 .wt-file-hunk-count {
   margin-left: auto;
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-tertiary);
 }
 
 /* ---- 提交成功 toast（面板内轻提示） ---- */
@@ -277,17 +277,17 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px;
-  background: var(--gewu-status-success-bg);
-  border-bottom: 1px solid color-mix(in srgb, var(--gewu-status-success-fg) 40%, transparent);
-  color: var(--gewu-status-success-fg);
-  font-size: var(--gewu-font-size-caption);
+  background: var(--petri-status-success-bg);
+  border-bottom: 1px solid color-mix(in srgb, var(--petri-status-success-fg) 40%, transparent);
+  color: var(--petri-status-success-fg);
+  font-size: var(--petri-font-size-caption);
   flex-shrink: 0;
   gap: 12px;
 }
 
 .wt-commit-hash {
-  font-family: var(--gewu-font-mono, monospace);
-  color: var(--gewu-status-success-fg);
+  font-family: var(--petri-font-mono, monospace);
+  color: var(--petri-status-success-fg);
 }
 
 .wt-commit-success-close {
@@ -295,7 +295,7 @@
   border: none;
   color: inherit;
   cursor: pointer;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   padding: 0;
   opacity: 0.7;
   flex-shrink: 0;
@@ -307,13 +307,13 @@
 
 /* ---- 警示 / 二进制 ---- */
 .wt-warning {
-  color: var(--gewu-status-warning-fg);
+  color: var(--petri-status-warning-fg);
 }
 
 .wt-file-binary {
   padding: 16px;
   text-align: center;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
 }
 
 /* ---- BLOCK-23 — CodeMirror diff 容器 ---- */
@@ -328,14 +328,14 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  color: var(--gewu-text-muted);
-  font-size: var(--gewu-font-size-body-sm);
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-body-sm);
 }
 
 .wt-diff-error {
   padding: 12px 16px;
-  color: var(--gewu-status-error-fg);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-status-error-fg);
+  font-size: var(--petri-font-size-caption);
 }
 
 /* BLOCK-50 — 工作区文件缺失的结构化兜底占位 */
@@ -344,13 +344,13 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  color: var(--gewu-text-muted);
-  font-size: var(--gewu-font-size-body-sm);
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-body-sm);
 }
 
 .wt-diff-deleted-note {
   padding: 6px 16px;
-  color: var(--gewu-text-muted);
-  font-size: var(--gewu-font-size-caption);
-  border-bottom: 1px solid var(--gewu-border-subtle);
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-caption);
+  border-bottom: 1px solid var(--petri-border-subtle);
 }

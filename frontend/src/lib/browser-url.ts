@@ -1,6 +1,6 @@
 export function normalizeBrowserUrl(value: string): string {
   const trimmed = value.trim();
-  if (!trimmed) return 'https://biof3.com/';
+  if (!trimmed) return 'https://petri.com/';
   if (/^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(trimmed)) return trimmed;
   if (trimmed.startsWith('localhost') || trimmed.startsWith('127.0.0.1')) {
     return `http://${trimmed}`;
@@ -8,7 +8,7 @@ export function normalizeBrowserUrl(value: string): string {
   return `https://${trimmed}`;
 }
 
-export function isGewuLocalBrowserUrl(value: string): boolean {
+export function isPetriLocalBrowserUrl(value: string): boolean {
   try {
     const url = new URL(value);
     return url.protocol === 'http:' && (url.hostname === 'localhost' || url.hostname === '127.0.0.1');

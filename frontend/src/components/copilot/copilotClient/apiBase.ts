@@ -5,7 +5,7 @@
 // ============================================================
 
 import { getPlatformApiPrefix } from '@/lib/authClient';
-import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
+import { petriEvents, dispatchPetriEvent } from '@/lib/events';
 import type { AgentTaskDoneDetail } from '@/lib/events';
 
 export function getApiPrefix(): string {
@@ -15,8 +15,8 @@ export function getApiPrefix(): string {
 export function getAuthHeader(): Record<string, string> {
   if (typeof window === 'undefined') return {};
   try {
-    // BLOCK-61 读旧兼容：历史 key biof3_token
-    const token = localStorage.getItem('gewu_token') ?? localStorage.getItem('biof3_token');
+    // BLOCK-61 读旧兼容：历史 key petri_token
+    const token = localStorage.getItem('petri_token') ?? localStorage.getItem('petri_token');
     return token ? { Authorization: `Bearer ${token}` } : {};
   } catch {
     return {};
@@ -24,7 +24,7 @@ export function getAuthHeader(): Record<string, string> {
 }
 
 /**
- * BLOCK-16 PHASE 3：在 primary agent task 收尾时派发 biof3:agent-task-done，
+ * BLOCK-16 PHASE 3：在 primary agent task 收尾时派发 petri:agent-task-done，
  * 触发 useWorkingTreeReview 自动弹出浮层。仅 kind === 'primary' 触发；
  * subagent 收尾不广播（避免淹没）。
  * BLOCK-31 P2：payload 尽量携带 SSE done 事件中的权威 filesChanged（后端
@@ -44,7 +44,7 @@ export function emitAgentTaskDone(
       filesChanged: payload?.filesChanged ?? [],
       conversationId: payload?.conversationId,
     };
-    dispatchGewuEvent(gewuEvents.agentTaskDone, detail);
+    dispatchPetriEvent(petriEvents.agentTaskDone, detail);
   } catch {
     // 事件总线失败不应阻塞 SSE 收口路径
   }

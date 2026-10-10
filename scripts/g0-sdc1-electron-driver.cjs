@@ -5,9 +5,9 @@ const { createHash } = require('node:crypto');
 const { mkdirSync, readFileSync, writeFileSync } = require('node:fs');
 const path = require('node:path');
 
-const CONFIG_ENV = 'BIOF3_SDC1_DRIVER_CONFIG';
+const CONFIG_ENV = 'PETRI_SDC1_DRIVER_CONFIG';
 const PRELOAD_PATH = path.resolve(__dirname, '..', 'src', 'preload.js');
-const AI_SETTINGS_HELPER_PATH = path.resolve(__dirname, '..', 'core', 'biof3-server', 'helpers', 'ai-settings.js');
+const AI_SETTINGS_HELPER_PATH = path.resolve(__dirname, '..', 'core', 'petri-server', 'helpers', 'ai-settings.js');
 const CHAT_INPUT_SELECTOR = 'textarea.sc-input[placeholder^="输入消息…"]';
 const SEND_BUTTON_SELECTOR = 'button.sc-send-cta-send[title="发送消息"]';
 const POLL_MS = 125;
@@ -73,7 +73,7 @@ async function dismissOnboarding(webContents) {
   await waitFor(webContents, `document.readyState === 'complete' || document.readyState === 'interactive'`, 'renderer');
   const outcome = await waitFor(webContents, `
     (() => {
-      const completed = localStorage.getItem('biof3-onboarding-completed') === '1';
+      const completed = localStorage.getItem('petri-onboarding-completed') === '1';
       const dialog = document.querySelector('[role="dialog"][aria-label="首次启动引导"]');
       if (completed && !dialog) return { state: 'already_completed' };
       const button = dialog && [...dialog.querySelectorAll('button')]
@@ -85,7 +85,7 @@ async function dismissOnboarding(webContents) {
   `, 'first-run onboarding');
   if (outcome.state === 'dismissed') {
     await waitFor(webContents, `
-      localStorage.getItem('biof3-onboarding-completed') === '1'
+      localStorage.getItem('petri-onboarding-completed') === '1'
         && !document.querySelector('[role="dialog"][aria-label="首次启动引导"]')
     `, 'first-run onboarding dismissal');
   }
@@ -223,7 +223,7 @@ async function run(config) {
     width: 1440,
     height: 900,
     show: config.show === true,
-    title: 'BioF3 SDC1 isolated trace',
+    title: 'Petri SDC1 isolated trace',
     backgroundColor: '#ffffff',
     webPreferences: {
       contextIsolation: true,

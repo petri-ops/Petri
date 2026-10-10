@@ -21,15 +21,15 @@ const {
 } = require('../core/shared-backend/scientific-replay-package');
 
 test('adopted Result Studio Revision exports a database-free package with exact input and output cohort hashes', (context) => {
-  const projectRoot = mkdtempSync(path.join(tmpdir(), 'biof3-result-revision-package-'));
-  const handoffRoot = mkdtempSync(path.join(tmpdir(), 'biof3-result-revision-handoff-'));
+  const projectRoot = mkdtempSync(path.join(tmpdir(), 'petri-result-revision-package-'));
+  const handoffRoot = mkdtempSync(path.join(tmpdir(), 'petri-result-revision-handoff-'));
   context.after(() => rmSync(projectRoot, { recursive: true, force: true }));
   context.after(() => rmSync(handoffRoot, { recursive: true, force: true }));
 
   const inputPath = path.join(projectRoot, 'inputs', 'counts.csv');
   const outputPath = path.join(projectRoot, 'results', 'jobs', 'job_candidate', 'output', 'deg_table.csv');
   const reportPath = path.join(projectRoot, 'results', 'jobs', 'job_candidate', 'output', 'run-report.html');
-  const scriptPath = path.join(projectRoot, '.biof3', 'revision', 'cs_candidate', 'run-script.R');
+  const scriptPath = path.join(projectRoot, '.petri', 'revision', 'cs_candidate', 'run-script.R');
   mkdirSync(path.dirname(inputPath), { recursive: true });
   mkdirSync(path.dirname(outputPath), { recursive: true });
   mkdirSync(path.dirname(scriptPath), { recursive: true });
@@ -146,7 +146,7 @@ test('adopted Result Studio Revision exports a database-free package with exact 
 });
 
 test('Result Studio ReplayPackage refuses candidate or failed Job truth', (context) => {
-  const projectRoot = mkdtempSync(path.join(tmpdir(), 'biof3-result-revision-package-reject-'));
+  const projectRoot = mkdtempSync(path.join(tmpdir(), 'petri-result-revision-package-reject-'));
   context.after(() => rmSync(projectRoot, { recursive: true, force: true }));
   assert.throws(() => buildResultRevisionReplayPackage({
     revision: { revisionId: 'rev_1', projectId: 'p_1', changeSetId: 'cs_1', toolJobId: 'job_1' },

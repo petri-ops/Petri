@@ -16,7 +16,7 @@
 
 const path = require('node:path');
 const http = require('node:http');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function attach() {
@@ -36,7 +36,7 @@ const MEASURE = `(function(){
   var rail = q('aside[class*="rightCol"]');
   return JSON.stringify({
     path: location.pathname,
-    store: !!q('.gewu-plugin-store-panel'),
+    store: !!q('.petri-plugin-store-panel'),
     backBtn: !!q('button[aria-label="返回"]'),
     workspaceAside: !!q('aside[data-workspace-mode]'),
     railWidth: rail ? Math.round(rail.getBoundingClientRect().width) : null,

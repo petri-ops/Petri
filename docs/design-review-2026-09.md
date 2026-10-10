@@ -1,4 +1,4 @@
-# 设计评审报告 — BioF3 Desktop（2026-09-03）
+# 设计评审报告 — Petri Desktop（2026-09-03）
 
 > 性质：只读设计层评审留痕（无代码改动），与 AUDIT-51 四域代码审计（2026-09-03）互补——彼为缺陷狩猎，此为架构评估。
 > 状态：`reference`（评审结论 + 候选建议，待用户裁决转化为工作包）
@@ -99,7 +99,7 @@
 
 - `src/ipc/working-tree-review.js` L357-371（BLOCK-50 后端兜底）
 
-- `core/biof3-server/helpers/runtime.js` L57-77（isPrimary 设计意图）
+- `core/petri-server/helpers/runtime.js` L57-77（isPrimary 设计意图）
 
 - `routes/ai-agent/chat.js` L229 / `routes/ai-agent/resume.js` L218（缺参调用点）
 

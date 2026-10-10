@@ -55,7 +55,7 @@
 
 ### 3.2 执行接线（已核实的真实机制）
 - 脚本定位：`pluginLoader.getScriptForTool(id)` → `resources/built-in-plugins/<id>/scripts/<id>.R`。
-- 执行：registry `_runPluginScript` 把脚本复制成 `jobDir/run-script.R`，复制 `_biof3-theme.R`，注入 `R_LIBS_USER`（**`pluginDir/packages/r` 最高优先级**），经 R executor 跑 `Rscript run-script.R --args params.json`（Python 为 `--params`）。
+- 执行：registry `_runPluginScript` 把脚本复制成 `jobDir/run-script.R`，复制 `_petri-theme.R`，注入 `R_LIBS_USER`（**`pluginDir/packages/r` 最高优先级**），经 R executor 跑 `Rscript run-script.R --args params.json`（Python 为 `--params`）。
 - 产物：脚本写 output dir + manifest；artifact-truth 归一为 `artifacts[]` 并校验（缺失/空/类型不符）。
 - built-in 插件放进 `resources/built-in-plugins/` 且 manifest 合规即被发现/注册/可运行，**无需额外任务白名单接线**。
 
@@ -178,7 +178,7 @@ test/fixtures/harness/go-kegg-*.json        # valid lineage / degraded / blocked
 - 读 `--args params.json` + DEG 表；按显著阈值筛基因；`bitr()` 做 ID 映射。
 - `enrichGO()`（org.<Sp>.eg.db）+ KEGG 富集**走离线数据集**（D5：bundle 内预装 KEGG 数据，不默认打在线 API；缺失才联网补齐）；生成表、dotplot/barplot；写 report + zip + manifest。
 - 结果为空/映射失败时输出结构化诊断文本（供 failureModes.detect 捕捉）。
-- 复用 `_biof3-theme.R` 主题。
+- 复用 `_petri-theme.R` 主题。
 
 ### 7.6 二跳验证
 - 真实链路：DESeq2/历史 DEG valid artifact → `bind_artifact` → go-kegg run → artifact truth valid。
@@ -216,7 +216,7 @@ test/fixtures/harness/go-kegg-*.json        # valid lineage / degraded / blocked
 ### B3 真机检查点（2026-07-19）
 
 - ✅ `scripts/build-r-bundle.mjs` 已改为从当前已验证 R library 计算 `Depends / Imports / LinkingTo` 递归闭包并复制到 staging，避开“系统库已安装导致新 libDir 为空”和 `options(warn=2)` 把安装警告升级成致命错误的问题。`--dry-run` 已核对：`r-enrichment` 127 个外部包、`r-wgcna` 69 个外部包，R 4.5.2 / Bioconductor 3.22 与根包版本匹配。
-- ✅ `r-enrichment` 构建路径会生成 human / mouse 两份 KEGG snapshot；GO/KEGG 与 GSEA 脚本先读 bundle 内 `.biof3-data/kegg-{hsa,mmu}.rds`，缺失或读取失败才回退 KEGG REST。
+- ✅ `r-enrichment` 构建路径会生成 human / mouse 两份 KEGG snapshot；GO/KEGG 与 GSEA 脚本先读 bundle 内 `.petri-data/kegg-{hsa,mmu}.rds`，缺失或读取失败才回退 KEGG REST。
 - ✅ 已补齐真实 `.tar.gz` 安装器：SHA-256 校验后解压到 capability installDir，校验 `bundle-manifest.json` 的 bundleId/version，成功后才写 provisioning ledger。此前仅下载文件、未解压时即使发布也不能被 `R_LIBS_USER` 使用。
 - ✅ HTTP r-server 启动时已与 MCP 对齐 built-in / installed / development 三源发现；此前 HTTP 回退旧 tool registry 会丢失 `requiresBundle`，导致 B2 ensure 接线在 App 工具入口不触发。
 - ✅ GO/KEGG 上传校验已允许契约声明的一列 `gene` 列表；此前通用 CSV“至少两列”门禁会在创建 tool_job 前拒绝官方 demo。
@@ -279,7 +279,7 @@ test/fixtures/harness/go-kegg-*.json        # valid lineage / degraded / blocked
 
 **M3 Provider 评测**
 - harness 评测脚本，DeepSeek + Anthropic 各跑 GO/KEGG 全链；可比较报告 + 失败分类。
-- ✅ 脚本已实现（2026-07-18）：`scripts/harness-provider-eval.mjs`（`npm run harness:provider-eval`）。6 环节探针（intent / 工具选型 / 参数填充 / tool calling / 失败恢复 / 结果解释），前 4 项为必需门槛；产出 Markdown + JSON 双报告到 `eval-reports/`（已 gitignore）。凭据只读环境变量（`source .biof3-secrets`），不落盘、不打印、不进 CI。纯评分/渲染函数由 `test/harness-provider-eval.test.mjs`（31 用例、mock gateway、零网络）纳入门禁。
+- ✅ 脚本已实现（2026-07-18）：`scripts/harness-provider-eval.mjs`（`npm run harness:provider-eval`）。6 环节探针（intent / 工具选型 / 参数填充 / tool calling / 失败恢复 / 结果解释），前 4 项为必需门槛；产出 Markdown + JSON 双报告到 `eval-reports/`（已 gitignore）。凭据只读环境变量（`source .petri-secrets`），不落盘、不打印、不进 CI。纯评分/渲染函数由 `test/harness-provider-eval.test.mjs`（31 用例、mock gateway、零网络）纳入门禁。
 - ✅ 真机跑分已完成（2026-07-18）：DeepSeek + Anthropic 各 6/6，`requiredFailures` 与 `failures` 均为空；该脚本只测 LLM 决策链，不执行 R。
 
 **M4 样板复制**

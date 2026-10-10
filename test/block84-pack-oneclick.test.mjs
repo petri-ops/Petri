@@ -9,12 +9,12 @@ import { fileURLToPath } from 'node:url';
 const require = createRequire(import.meta.url);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const packRegistry = require('../core/shared-backend/pack-registry.js');
-const toolRegistry = require('../core/biof3-server/tool-registry.js');
+const toolRegistry = require('../core/petri-server/tool-registry.js');
 
-// 真包定位：pack 仓与 desktop 仓同级（AGENTS.md/ask 事实「pack 仓在 ../gewu-pack-bio」）。
-// 勿硬编码机器绝对路径——block-84 原版写死 D:/1.WorkDir/gewu-pack-bio（作者 Windows 机），
+// 真包定位：pack 仓与 desktop 仓同级（AGENTS.md/ask 事实「pack 仓在 ../petri-pack-bio」）。
+// 勿硬编码机器绝对路径——block-84 原版写死 D:/1.WorkDir/petri-pack-bio（作者 Windows 机），
 // 换机即 pack_json_missing 三连红；同级解析在原机上落点不变，跨机可移植。
-const REAL_PACK = path.resolve(root, '..', 'gewu-pack-bio');
+const REAL_PACK = path.resolve(root, '..', 'petri-pack-bio');
 
 function tempDataDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'block84-packs-'));
@@ -33,14 +33,14 @@ test('BLOCK-84 pack validation: pack.json contract and loadability hard evidence
   // 真包通过
   const real = packRegistry.validatePackDir(REAL_PACK);
   assert.equal(real.ok, true, JSON.stringify(real));
-  assert.equal(real.pack.packId, 'gewu-pack-bio');
+  assert.equal(real.pack.packId, 'petri-pack-bio');
 });
 
 test('BLOCK-84 install is an idempotent upsert; uninstall removes the record only', () => {
   const dataDir = tempDataDir();
   const first = packRegistry.installPack(dataDir, REAL_PACK);
   assert.equal(first.ok, true);
-  assert.equal(first.pack.packId, 'gewu-pack-bio');
+  assert.equal(first.pack.packId, 'petri-pack-bio');
   // 幂等：重复安装 = 更新（不产生第二条）
   const second = packRegistry.installPack(dataDir, REAL_PACK);
   assert.equal(second.ok, true);
@@ -49,17 +49,17 @@ test('BLOCK-84 install is an idempotent upsert; uninstall removes the record onl
   // 记录文件确实落在 dataDir/packs/installed.json
   assert.ok(fs.existsSync(packRegistry.packsRecordFile(dataDir)));
   // 卸载 = 只移记录（包文件不动）
-  const removed = packRegistry.uninstallPack(dataDir, 'gewu-pack-bio');
+  const removed = packRegistry.uninstallPack(dataDir, 'petri-pack-bio');
   assert.equal(removed.ok, true);
   assert.equal(packRegistry.readInstalledPacks(dataDir).length, 0);
   assert.ok(fs.existsSync(path.join(REAL_PACK, 'pack.json')), '包文件是用户资产，不得删除');
   // 卸载未安装的包 → 明确错误
-  assert.equal(packRegistry.uninstallPack(dataDir, 'gewu-pack-bio').error, 'pack_not_installed');
+  assert.equal(packRegistry.uninstallPack(dataDir, 'petri-pack-bio').error, 'pack_not_installed');
 });
 
 test('BLOCK-84 discovery finds the sibling pack automatically', () => {
   const available = packRegistry.discoverAvailablePacks({ projectRoot: root });
-  assert.ok(available.some((p) => p.packId === 'gewu-pack-bio'), JSON.stringify(available.map((p) => p.packId)));
+  assert.ok(available.some((p) => p.packId === 'petri-pack-bio'), JSON.stringify(available.map((p) => p.packId)));
 });
 
 test('BLOCK-84 tool-registry supports additive domain registration (dev env + pack boot share one mechanism)', () => {

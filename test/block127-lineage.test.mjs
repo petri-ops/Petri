@@ -113,7 +113,7 @@ test('buildLineageChain returns null for a job not present in the graph', () => 
 
 test('repository lists project workflow graphs newest-first and the projection finds the containing graph', () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'block127-'));
-  const sqlite = new Database(path.join(root, 'biof3.db'));
+  const sqlite = new Database(path.join(root, 'petri.db'));
   sqlite.exec(`CREATE TABLE projects (id TEXT PRIMARY KEY, workspace_path TEXT NOT NULL);`);
   ensureResultStudioSchema(sqlite);
   ensureResultWorkflowGraphSchema(sqlite);

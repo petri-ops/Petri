@@ -21,7 +21,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
 import { forkConversation } from '@/components/copilot/copilotConversationsClient';
-import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
+import { petriEvents, subscribePetriEvent } from '@/lib/events';
 // UI-448 — 开态升共享 store：中栏 composer 让位与内容让位类同源联动（单一输入面）
 import styles from './SideChatDock.module.css';
 // UI-448 加映 v25 — 浮卡左缘拖宽把手 + 偏好持久化
@@ -31,9 +31,9 @@ import {
   readPersistedFloatWidth,
 } from './FloatCardResizer';
 
-const sideChatConvKey = (projectId: string) => `gewu:side-chat-conv:${projectId}`;
+const sideChatConvKey = (projectId: string) => `petri:side-chat-conv:${projectId}`;
 /** v25 — 浮面拖宽偏好（全局 UI 偏好，跨项目/跨会话记忆）。 */
-const SIDE_CHAT_FLOAT_WIDTH_KEY = 'gewu:side-chat-float-width';
+const SIDE_CHAT_FLOAT_WIDTH_KEY = 'petri:side-chat-float-width';
 
 function readStoredSideConversation(projectId: string): string | null {
   try {
@@ -132,7 +132,7 @@ export function SideChatDock({
   // UI-417 入口收编：原右栏 chat tab 的入口（home 空态卡/分析完成跳转）派发
   // sideChatOpen，这里展开悬挂面（无会话时也展开——诚实空态引导首条消息）。
   useEffect(
-    () => subscribeGewuEvent(gewuEvents.sideChatOpen, () => onOpenChange(true)),
+    () => subscribePetriEvent(petriEvents.sideChatOpen, () => onOpenChange(true)),
     [onOpenChange]
   );
   // UI-448 加映 v5 — 常驻化（摘要卡同款特性）：移除外点收起与 Esc 收起

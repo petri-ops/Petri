@@ -2,14 +2,14 @@
 // HK-03 P1 — symbol-graph CLI（dev 轨薄壳；BLOCK-124 起内核单源在 core）：
 //   node scripts/symbol-graph.mjs who-imports <symbol>
 //   node scripts/symbol-graph.mjs classify-edges <file>
-// 内核：core/biof3-server/helpers/code-graph.js（选型 docs/hk03-symbol-graph-selection.md；
+// 内核：core/petri-server/helpers/code-graph.js（选型 docs/hk03-symbol-graph-selection.md；
 // 诚实盲区=变量形式动态 require/按路径动态调用/字符串引用 → UNRESOLVED，不猜测）。
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
 
 const require_ = createRequire(import.meta.url);
-const { buildGraph, whoImports, classifyEdges } = require_('../core/biof3-server/helpers/code-graph.js');
+const { buildGraph, whoImports, classifyEdges } = require_('../core/petri-server/helpers/code-graph.js');
 
 // CLI 同步语义（yieldEvery=0）：命令行单进程无需让位事件循环
 async function main() {

@@ -24,24 +24,24 @@ const require = createRequire(import.meta.url);
 // 内存 DB 自举（agent-tools 顶层初始化注册表，同 block34 先例）
 {
   const Database = require('better-sqlite3');
-  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'biof3-b109-p2-meta-'));
-  const db = new Database(path.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'petri-b109-p2-meta-'));
+  const db = new Database(path.join(tempDbDir, 'petri.db'));
   const migrationsDir = path.join(root, 'src', 'migrations');
   for (const file of fssync.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     db.exec(fssync.readFileSync(path.join(migrationsDir, file), 'utf8'));
   }
   db.close();
-  process.env.BIOF3_DB_PATH = path.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try { fssync.rmSync(tempDbDir, { recursive: true, force: true }); } catch { /* Windows 句柄延迟释放 */ }
   });
 }
 
-const toolMetadataMod = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'tool-metadata.js'));
+const toolMetadataMod = require(path.join(root, 'core', 'petri-server', 'agent-tools', 'tool-metadata.js'));
 const { TOOL_METADATA, METADATA_KEYS, RISK_LEVELS, getToolMetadata } = toolMetadataMod;
-const toolDefsMod = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'tool-defs.js'));
-const { getToolRegistry } = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'registry.js'));
-const { runAgentToolCallBatch } = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'agent-loop-control.js'));
+const toolDefsMod = require(path.join(root, 'core', 'petri-server', 'agent-tools', 'tool-defs.js'));
+const { getToolRegistry } = require(path.join(root, 'core', 'petri-server', 'agent-tools', 'registry.js'));
+const { runAgentToolCallBatch } = require(path.join(root, 'core', 'petri-server', 'agent-tools', 'agent-loop-control.js'));
 
 // skill 元工具（skill_discover/get/execute）注册在 mcp/registry（getSkillToolDefinitions），
 // 不在 tool-defs.js 内——计数时一并纳入完备性门禁。

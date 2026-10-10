@@ -53,7 +53,7 @@ import {
   resumeOrphanAgentTasks,
 } from './conversationRunStore';
 import type { KnowledgeCitation, StreamChatOptions } from './copilotClient/types';
-import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
+import { petriEvents, subscribePetriEvent } from '@/lib/events';
 import { deriveLoopDisplay } from '@/lib/loop-client';
 
 /** 取第 N 次 streamChat 调用的 StreamChatOptions（vi.mock 的 mock.calls 无类型，统一收口 cast）。 */
@@ -388,7 +388,7 @@ describe('conversation run store', () => {
 
   it('broadcasts a project file refresh after successful workspace mutations and commands', () => {
     const received: Array<{ projectId: string; source: string }> = [];
-    const unsubscribe = subscribeGewuEvent(gewuEvents.projectWorkspaceChanged, (detail) => {
+    const unsubscribe = subscribePetriEvent(petriEvents.projectWorkspaceChanged, (detail) => {
       received.push(detail);
     });
     start('conversation-a', 'edit a file');
@@ -431,7 +431,7 @@ describe('conversation run store', () => {
 
   it('opens a completed analysis result directly from the run_tool event', () => {
     const received: Array<{ toolJobId: string; projectId?: string | null }> = [];
-    const unsubscribe = subscribeGewuEvent(gewuEvents.projectOpenResult, (detail) => {
+    const unsubscribe = subscribePetriEvent(petriEvents.projectOpenResult, (detail) => {
       received.push(detail);
     });
     start('conversation-a', 'run analysis');

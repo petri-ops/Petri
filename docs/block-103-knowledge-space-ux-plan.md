@@ -33,7 +33,7 @@
 
 ## 2. 非范围（exclusions）
 
-- 零后端/REST/事件契约改动（`gewu:knowledge-console-sync`、spaces/documents 端点原样消费）。
+- 零后端/REST/事件契约改动（`petri:knowledge-console-sync`、spaces/documents 端点原样消费）。
 - KnowledgeConsoleChat / useKnowledgeConsole 内部能力零改动（只动容器与显隐）；SimpleChat.tsx 零触碰（BLOCK-99 红线延续）。
 - 不做多空间数据模型/绑定语义变更（BLOCK-99 已收口）；不做嵌入多 provider / sqlite-vec（BLOCK-94 §8 延续）；不做上传格式族扩展（P4 线）；不做 i18n 抽离（🟡 在册待裁决）；不做手机投影专属布局；G1+ 全部不外推。
 
@@ -77,6 +77,6 @@ KnowledgeSpacePanel.test.tsx 八项行为断言全保留：诚实空态+开关�
 ## 8. 运行记录
 
 - 2026-09-19 立项即启动（P0-LAUNCH）：产品分析 §0 定稿（七条问题截图+代码双证据）；D1-D7 预置推荐先行留痕（§3）；行为基线八项锁定（§4）。P1 页壳重构起串行。
-- **P1-P4 实施 completed**：页壳重构（状态条/通知动作卡组/双页签）+ KnowledgeDocLibrary（hero 空态/工具行/列表/预览/批量/粘贴，交互局部状态内聚，切空间自动清选择集）+ KnowledgeSearchProbe（检索状态自持，「检索预览」命名）+ KnowledgeConsoleDock（把手/overlay/Esc/外点/localStorage 记忆）+ 页壳接 dock + block99 flow 把手适配 + impact-map block103 规则；--gewu-success 补暗色对（custom.css）。
+- **P1-P4 实施 completed**：页壳重构（状态条/通知动作卡组/双页签）+ KnowledgeDocLibrary（hero 空态/工具行/列表/预览/批量/粘贴，交互局部状态内聚，切空间自动清选择集）+ KnowledgeSearchProbe（检索状态自持，「检索预览」命名）+ KnowledgeConsoleDock（把手/overlay/Esc/外点/localStorage 记忆）+ 页壳接 dock + block99 flow 把手适配 + impact-map block103 规则；--petri-success 补暗色对（custom.css）。
 - **抓真 3 件**：①hero 空态下上传报告不渲染（报告/错误块移 hero 与列表共层——空态首传立即可见，组件测试抓出）；②抽屉点击时才挂载 → useKnowledgeConsole 初始化窗内 textarea disabled（block99 flow 加就绪轮询 U1c）；③抽屉开合 localStorage 残留态污染 flow 确定性起点（flow 先清零再 reload）。
 - **P5 收口 completed**：组件 17/17（行为基线八项全保留）+Switcher 3/3+global-pages 冒烟+tsc 0+theme 4/4+前端全量 1146/1146（含顺清并行收口遗留=workflowPollDelay 测试未随 BLOCK-102 P4 降频同步，修测试对齐实现）；实机=block103-knowledge-ux-live **12/12 allPass**（截图×3 acceptance/block-103/）+block99-console-live **24/24 allPass**（真轮次回归）；closeout 聚合=hygiene/docs/ui-audit 三门绿 + test:changed 85/89（4 红全为在册存量红非本包：P6 源绑定×2〔AUDIT-LOG 🔴 在册〕+F2 PDF×2〔BLOCK-99 Windows 动前基线〕，例外如实登记不表述为通过）。台账 UI-426 verified。同会话另立 🔴=BLOCK-102 P5 全量套件证据不可复现（三点半复跑 199-206 红稳定 vs 声明 exit 0；归 BLOCK-102 域专门会话，不阻塞本包）。

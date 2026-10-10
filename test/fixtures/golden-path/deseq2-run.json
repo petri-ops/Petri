@@ -1,5 +1,5 @@
 {
-  "schema": "biof3/golden-path-run.v1",
+  "schema": "petri/golden-path-run.v1",
   "tool": "deseq2",
   "jobId": "job_6b3808816e0041b4",
   "projectId": "p_mrkp2m0j_6c4z",
@@ -33,5 +33,5 @@
     "runtimes": { "r_server": "0.9.0", "r_version": "4.5.2", "r_packages": ["DESeq2", "ggplot2", "ggrepel", "pheatmap"] }
   },
   "exit": "analysis_succeeded_zip_packaging_pending",
-  "notes": "Real run captured 2026-07-14 against locally-bootstrapped biof3-server; JSON-only fixture keeps tests independent of binary archives and developer-specific tmp paths."
+  "notes": "Real run captured 2026-07-14 against locally-bootstrapped petri-server; JSON-only fixture keeps tests independent of binary archives and developer-specific tmp paths."
 }

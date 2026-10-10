@@ -12,7 +12,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const CORE = resolve(__dirname, '..', 'core', 'biof3-server');
+const CORE = resolve(__dirname, '..', 'core', 'petri-server');
 
 const allowlist = await import(
   pathToFileURL(resolve(CORE, 'mcp/ide-tools/path-allowlist.js')).href

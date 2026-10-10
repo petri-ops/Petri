@@ -2,7 +2,7 @@
  * BLOCK-40 P1 — 会话改动权威清单只读水合端点
  *（routes/ai-agent/conversation-changes.js + agent-task-store.listConversationChanges）。
  *
- * 真实 SQLite（BIOF3_DB_PATH 临时库）+ 真实 Express app，覆盖：
+ * 真实 SQLite（PETRI_DB_PATH 临时库）+ 真实 Express app，覆盖：
  *   - 多任务跨 path 聚合；新任务覆盖旧任务同路径（COALESCE(finished_at, created_at) 定序）
  *   - iteration/tool 归属保留（UI-273）
  *   - 非 agent_loop 任务 / running / retry_pending 排除
@@ -58,9 +58,9 @@ function seedTask({ taskId, conversationId, files, status = 'done' }) {
 }
 
 before(async () => {
-  tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block40-p1-'));
-  process.env.BIOF3_DB_PATH = path.join(tempDir, 'agent-tasks.db');
-  store = require(resolve('core/biof3-server/agent-task-store'));
+  tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block40-p1-'));
+  process.env.PETRI_DB_PATH = path.join(tempDir, 'agent-tasks.db');
+  store = require(resolve('core/petri-server/agent-task-store'));
 
   // 旧任务（会话 A）：写 a.md（created）+ b.md（modified，带 UI-273 归属）
   seedTask({
@@ -87,7 +87,7 @@ before(async () => {
   seedTask({ taskId: 't-b-4', conversationId: CONV_B, files: [{ path: 'other.md', status: 'created' }] });
 
   const express = require('express');
-  const route = require(resolve('core/biof3-server/routes/ai-agent/conversation-changes.js'));
+  const route = require(resolve('core/petri-server/routes/ai-agent/conversation-changes.js'));
   const app = express();
   route.register(app);
 
@@ -102,7 +102,7 @@ before(async () => {
 after(async () => {
   try { if (server) await new Promise((r) => server.close(r)); } catch {}
   try { fs.rmSync(tempDir, { recursive: true, force: true }); } catch {}
-  delete process.env.BIOF3_DB_PATH;
+  delete process.env.PETRI_DB_PATH;
 });
 
 test('store：多任务跨 path 聚合，新任务覆盖旧任务同路径（后写为准）', () => {

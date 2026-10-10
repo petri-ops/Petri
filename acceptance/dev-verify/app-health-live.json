@@ -1,28 +1,13 @@
 {
   "name": "app-health",
-  "startedAt": "2026-09-20T14:01:46.376Z",
-  "finishedAt": "2026-09-20T14:01:46.414Z",
+  "startedAt": "2026-10-09T08:13:22.500Z",
+  "finishedAt": "2026-10-09T08:13:32.716Z",
   "assertions": [
     {
-      "name": "cdp_targets_listed",
-      "pass": true,
-      "detail": "1 targets"
-    },
-    {
-      "name": "spa_page_target_present",
-      "pass": true,
-      "detail": "http://localhost:3000/?test=1"
-    },
-    {
-      "name": "document_title_non_empty",
-      "pass": true,
-      "detail": "Gewu"
-    },
-    {
-      "name": "spa_root_mounted",
-      "pass": true,
-      "detail": "root childElementCount>0=true"
+      "name": "flow_completed_without_exception",
+      "pass": false,
+      "detail": "cdp_not_ready_on_port_9223: connect ECONNREFUSED 127.0.0.1:9223 — 先启动 dev 栈：PETRI_DEV_ELECTRON_ARGS=\"--remote-debugging-port=9223\" npm run dev"
     }
   ],
-  "allPass": true
+  "allPass": false
 }

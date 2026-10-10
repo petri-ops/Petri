@@ -6,7 +6,7 @@
  * 语义：tool_job 执行失败后，仅「外部 SIGKILL 且非取消请求」（系统 OOM /
  * 资源挤占，同义退出码 137=128+9）判瞬态可重试；其余（nonzero_exit /
  * hard_timeout / 取消 / executor setup 失败）一律确定性不重试。策略默认
- * 关闭（BIOF3_TOOL_RETRY_MAX 未设或 0），加法式接入不改既有失败语义。
+ * 关闭（PETRI_TOOL_RETRY_MAX 未设或 0），加法式接入不改既有失败语义。
  */
 
 import { test } from 'node:test';
@@ -23,7 +23,7 @@ const {
   classifyToolJobFailure,
   isRetryEnabled,
   getRetryMax,
-} = require('../core/biof3-server/helpers/tool-retry-policy.js');
+} = require('../core/petri-server/helpers/tool-retry-policy.js');
 
 test('failure classification table: only external SIGKILL (non-cancel) is transient', () => {
   // 瞬态：外部 SIGKILL（系统 OOM / 资源挤占）
@@ -73,37 +73,37 @@ test('failure classification table: only external SIGKILL (non-cancel) is transi
   assert.equal(classifyToolJobFailure({ signal: 'SIGTERM' }).transient, false);
 });
 
-test('retry gate reads env per call: default off, BIOF3_TOOL_RETRY_MAX=2 turns it on', () => {
+test('retry gate reads env per call: default off, PETRI_TOOL_RETRY_MAX=2 turns it on', () => {
   // env 名是契约本身，直写字面量（直引 process.env 属性，不取计算成员）。
-  const hadOwn = Object.prototype.hasOwnProperty.call(process.env, 'BIOF3_TOOL_RETRY_MAX');
-  const saved = process.env.BIOF3_TOOL_RETRY_MAX;
+  const hadOwn = Object.prototype.hasOwnProperty.call(process.env, 'PETRI_TOOL_RETRY_MAX');
+  const saved = process.env.PETRI_TOOL_RETRY_MAX;
   try {
-    delete process.env.BIOF3_TOOL_RETRY_MAX;
+    delete process.env.PETRI_TOOL_RETRY_MAX;
     assert.equal(isRetryEnabled(), false, 'default must be off (no env)');
     assert.equal(getRetryMax(), 0);
     assert.equal(isRetryEnabled(), false, 'import-time caching would break this; gate must read env per call');
-    process.env.BIOF3_TOOL_RETRY_MAX = '2';
+    process.env.PETRI_TOOL_RETRY_MAX = '2';
     assert.equal(isRetryEnabled(), true);
     assert.equal(getRetryMax(), 2);
     // 显式 0 / 非法值 / 负数一律回退关闭
-    process.env.BIOF3_TOOL_RETRY_MAX = '0';
+    process.env.PETRI_TOOL_RETRY_MAX = '0';
     assert.equal(isRetryEnabled(), false);
     assert.equal(getRetryMax(), 0);
-    process.env.BIOF3_TOOL_RETRY_MAX = 'not-a-number';
+    process.env.PETRI_TOOL_RETRY_MAX = 'not-a-number';
     assert.equal(isRetryEnabled(), false);
     assert.equal(getRetryMax(), 0);
-    process.env.BIOF3_TOOL_RETRY_MAX = '-3';
+    process.env.PETRI_TOOL_RETRY_MAX = '-3';
     assert.equal(isRetryEnabled(), false);
     assert.equal(getRetryMax(), 0);
   } finally {
-    if (hadOwn) process.env.BIOF3_TOOL_RETRY_MAX = saved;
-    else delete process.env.BIOF3_TOOL_RETRY_MAX;
+    if (hadOwn) process.env.PETRI_TOOL_RETRY_MAX = saved;
+    else delete process.env.PETRI_TOOL_RETRY_MAX;
   }
 });
 
 test('tools-executor failure path consults the retry policy before markJobFailed', () => {
   const src = fs.readFileSync(
-    path.join(ROOT, 'core/biof3-server/helpers/tools-executor.js'),
+    path.join(ROOT, 'core/petri-server/helpers/tools-executor.js'),
     'utf8',
   );
   assert.ok(src.includes("require('./tool-retry-policy')"), 'executor must wire the policy module');
@@ -124,7 +124,7 @@ test('retry bookkeeping honors the async db facade (regression: un-awaited reads
   // 返回 Promise。漏 await 时 Promise?.retry_count 恒 undefined → retryCount 恒 0 →
   // 预算判定 retryCount < retryMax 永不耗尽（无界 requeue churn）。
   const src = fs.readFileSync(
-    path.join(ROOT, 'core/biof3-server/helpers/tools-executor.js'),
+    path.join(ROOT, 'core/petri-server/helpers/tools-executor.js'),
     'utf8',
   );
   assert.ok(

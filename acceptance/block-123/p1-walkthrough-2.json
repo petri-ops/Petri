@@ -4,7 +4,7 @@
     {
       "id": "A1 播种",
       "verdict": "通",
-      "detail": "基线红=true（0 前缀用例必失败）workspace=D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\projects\\block123-a---1790413695825-mui63592"
+      "detail": "基线红=true（0 前缀用例必失败）workspace=D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\projects\\block123-a---1790413695825-mui63592"
     },
     {
       "id": "A2 任务",

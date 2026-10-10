@@ -7,14 +7,14 @@
   min-width: 264px;
   max-width: 340px;
   font-size: var(--font-size-body, 13px);
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .fedHint {
   margin: 0;
   font-size: 12px;
   line-height: 1.55;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .addCard {
@@ -22,9 +22,9 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  border: 1px solid var(--gewu-border, #e4e4e7);
+  border: 1px solid var(--petri-border, #e4e4e7);
   border-radius: 12px;
-  background: var(--gewu-bg-subtle);
+  background: var(--petri-bg-subtle);
 }
 
 .addTitle {
@@ -37,15 +37,15 @@
   width: 100%;
   font-size: 12px;
   padding: 8px 9px;
-  border: 1px solid var(--gewu-border, #e4e4e7);
+  border: 1px solid var(--petri-border, #e4e4e7);
   border-radius: 8px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
   font-family: var(--font-mono, ui-monospace, monospace);
 }
 
 .addInput::placeholder {
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
 }
 
 .addRow {
@@ -68,16 +68,16 @@
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border: 1px solid var(--gewu-border, #e4e4e7);
+  border: 1px solid var(--petri-border, #e4e4e7);
   border-radius: 10px;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
 }
 
 .peerDot {
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: var(--gewu-text-muted);
+  background: var(--petri-text-muted);
   flex: none;
 }
 
@@ -108,7 +108,7 @@
 
 .peerMeta {
   font-size: 11px;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -116,10 +116,10 @@
 
 .emptyState {
   font-size: 12px;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
   text-align: center;
   padding: 14px 8px;
-  border: 1px dashed var(--gewu-border, #e4e4e7);
+  border: 1px dashed var(--petri-border, #e4e4e7);
   border-radius: 10px;
 }
 
@@ -141,7 +141,7 @@
   height: 148px;
   border-radius: 10px;
   background: #fff;
-  border: 1px solid var(--gewu-border, #e4e4e7);
+  border: 1px solid var(--petri-border, #e4e4e7);
 }
 
 .inviteLinkRow {
@@ -154,7 +154,7 @@
   flex: 1;
   min-width: 0;
   font-size: 11px;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -166,13 +166,13 @@
   flex-direction: column;
   gap: 6px;
   padding: 8px 0;
-  border-top: 1px solid var(--gewu-border, #e4e4e7);
+  border-top: 1px solid var(--petri-border, #e4e4e7);
 }
 
 .grantEngineer {
   font-size: 12px;
   font-weight: 600;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .grantChips {
@@ -188,9 +188,9 @@
   padding: 2px 8px;
   border-radius: 999px;
   font-size: 11px;
-  border: 1px solid var(--gewu-border, #e4e4e7);
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text-secondary);
+  border: 1px solid var(--petri-border, #e4e4e7);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -205,7 +205,7 @@
   font-size: 12px;
   line-height: 1;
   cursor: pointer;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
 }
 
 .grantRevoke:hover {
@@ -223,8 +223,8 @@
   min-width: 0;
   font-size: 12px;
   padding: 6px 8px;
-  border: 1px solid var(--gewu-border, #e4e4e7);
+  border: 1px solid var(--petri-border, #e4e4e7);
   border-radius: 8px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
 }

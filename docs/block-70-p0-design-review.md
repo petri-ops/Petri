@@ -14,18 +14,18 @@
 
 | plan 声称 | 当前代码事实 | 结论 |
 | --- | --- | --- |
-| Express 绑 `127.0.0.1:3001` | `core/biof3-server/server.js:330` `app.listen(PORT, '127.0.0.1', ...)` | ✅ 一致 |
+| Express 绑 `127.0.0.1:3001` | `core/petri-server/server.js:330` `app.listen(PORT, '127.0.0.1', ...)` | ✅ 一致 |
 | conversations REST | `routes/ai-conversations.js:52/86/115`（list / detail / messages） | ✅ 一致 |
 | agent 任务列表 | `routes/ai-agent/task-actions.js:37` `GET /api/ai/agent/tasks` | ✅ 一致 |
 | SSE 断线续传 | `routes/ai-agent/events.js` `GET /api/ai/agent/task/:taskId`，`?afterSeq=N` | ✅ 一致 |
-| LOCAL_USER 注入 | `core/biof3-server/auth.js:15` `req.user = LOCAL_USER` | ✅ 一致 |
-| 凭据存储先例 | `core/biof3-server/helpers/credential-store.js` 存在 | ✅ 一致 |
+| LOCAL_USER 注入 | `core/petri-server/auth.js:15` `req.user = LOCAL_USER` | ✅ 一致 |
+| 凭据存储先例 | `core/petri-server/helpers/credential-store.js` 存在 | ✅ 一致 |
 | 设置面板挂点 | `DesktopSettingsPanel.tsx:57/858` `sections/RemoteTargets` 先例 | ✅ 一致 |
 | 模块化路由注册 | `routes/index.js` `registerRoutes(app)`，模块形态 `(app)=>{}` | ✅ 一致（本包沿用该形态） |
 
 ## 2. D1–D10 逐项评审
 
-- **D1 独立 app 实例 / 独立端口** — **确认**。实现为同进程第二 Express 实例（`mobile-gateway`），主后端 `127.0.0.1:3001` 绑定与 origin 白名单零改动。端口 env `BIOF3_MOBILE_PORT`，默认 **3005**。A1 绑 `0.0.0.0`，A2 隧道段回绑 `127.0.0.1`（P3 再裁决，本期只做 A1 + 回环）。
+- **D1 独立 app 实例 / 独立端口** — **确认**。实现为同进程第二 Express 实例（`mobile-gateway`），主后端 `127.0.0.1:3001` 绑定与 origin 白名单零改动。端口 env `PETRI_MOBILE_PORT`，默认 **3005**。A1 绑 `0.0.0.0`，A2 隧道段回绑 `127.0.0.1`（P3 再裁决，本期只做 A1 + 回环）。
 - **D2 配对与二维码** — **确认，附依赖裁决**。一次性配对 token（32B hex，TTL 5 分钟，单次使用）→ 换持久会话 token（仅存 sha256，文件制 `<dataDir>/mobile/sessions.json`，对标 packs/installed.json 文件制先例）；设置区可吊销。QR 内容 = `http://<LAN-IP>:<port>/m#<pairToken>`。**依赖裁决**：`qrcode-generator`（MIT、零传递依赖、单文件）为 plan §5-D2/§7 明文预名的全包唯一新 npm 依赖——按 plan 落地，**⏳ 待用户醒后追认**（若否决，替换面隔离在单一渲染函数，成本约 10 行）。**依赖前置核查（DEPENDENCY-CHANGE-CHECKLIST）**：无既有 QR 能力（root/frontend package.json 零 QR 依赖）；无可复用内部实现。
 - **D3 单一真相红线** — **确认**。移动面数据端点直接复用既有路由模块（conversations / agent tasks / SSE / tools 历史），同进程共享同一 db 单例；DB 零新业务表；不建第二套会话存储。
 - **D4 安全边界** — **确认**。默认关闭（config 文件 `mobile/gateway.json` `enabled:false` + 显式开启）；全部 `/m/api/*` 过会话 token 鉴权中间件（无 token 401）；配对 token 单次+短时效；会话可吊销（吊销即时生效）；按 IP 内存限速（超限 429）；JSONL 审计日志 `<dataDir>/mobile/audit.log`；权限批准链本期不触达（P2 面才涉及，届时按 BLOCK-48 两段式原样）；v1 无文件上传/产物下载（移动 app 实例**只挂载** conversations/agent/tasks/tools 读面模块，files/workspace/terminal/computer 等模块不挂载）。

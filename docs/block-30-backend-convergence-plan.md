@@ -1,4 +1,4 @@
-# BLOCK-30-BACKEND-CONVERGENCE — 单后端收敛与更名（biof3-server）Plan
+# BLOCK-30-BACKEND-CONVERGENCE — 单后端收敛与更名（petri-server）Plan
 
 - **Plan ID**: `BLOCK-30-BACKEND-CONVERGENCE`（用户裁决启动，2026-08-30）
 - **状态**: `completed`（2026-08-30 收口：P0 `214185f` / P1 `edd1116` / P2 `d4f459d` / P3 改判 `2f563a1` / P4 `4e51ae1`；P6 证据重采待安静环境，见 §P5 收口记）
@@ -9,12 +9,12 @@
 
 - r-server / py-server **均为 Node.js**（Express + better-sqlite3）业务后端；R/Python 只是 spawn 的解释器子进程。真实执行链：前端/agent/MCP → r-server `tools-executor` → `getExecutor(plugin.language)` → spawn 内嵌 Rscript/python。r-server 自身已能执行 Python 工具，不经 py-server。
 - 前端从不调用 py-server（`getApiPrefix('python')` 全前端 0 调用方；唯一接触是 `BackendStatusProvider` 健康探活 3004）。py-server 裸执行入口 `/api/run` 恒 410；`py-pool` 常驻 worker 池因无流量闲置。
-- py-server 经 `r-server-db.js` 受限读写同一 `biof3.db`（users 只读 + tool_jobs 读写）→ **`tool_jobs` 存在双写入方**。gateway（3005）唯一消费者是前端健康探活。
+- py-server 经 `r-server-db.js` 受限读写同一 `petri.db`（users 只读 + tool_jobs 读写）→ **`tool_jobs` 存在双写入方**。gateway（3005）唯一消费者是前端健康探活。
 - 按语言拆 HTTP 服务是 web/ECS 双模式时代遗留；收敛为单后端符合 `dependency-decoupling-checkpoint.md` 不变量（"不引入第二套后端"）。`shared-backend/executors` 注册表已预留语言无关接缝（含 `buildPoolWorker()` 池钩子，当前 0 调用方）。
 
 ## 2. 目标与非范围
 
-**目标**：① 摘除 py-server（py-pool 抢救至 shared-backend）；② 摘除 gateway；③ py-pool 接线 tools-executor（Python 工具常驻池）；④ 更名 `core/r-server` → `core/biof3-server`。
+**目标**：① 摘除 py-server（py-pool 抢救至 shared-backend）；② 摘除 gateway；③ py-pool 接线 tools-executor（Python 工具常驻池）；④ 更名 `core/r-server` → `core/petri-server`。
 
 **非范围**：不改工具契约内容 / 数据库 schema / MCP 协议 / 插件格式；不用其他语言重写控制面；不改前端页面（仅状态探活适配）；plumber 原样保留；`rApiBase` 前端契约名不改（`getApiPrefix` 保留 language 参数恒走 r-base）；G1+ 不外推。
 
@@ -35,7 +35,7 @@
 | `R_SERVER_URL` | 17 | P2 |
 | `pythonApiBase` | 8 | P1 |
 | `py-pool` | 8 | P1 抢救（git mv 保留） |
-| `BIOF3_R_DB_PATH` | 1 | P1 |
+| `PETRI_R_DB_PATH` | 1 | P1 |
 | `r-server` 字样 | ~400 | P4 |
 
 打包层：`electron-builder.yml` L80-95 extraResources 打包 r-server/py-server/shared-backend 三目录；`src/mcp-server.js` L27 硬解析 `core/r-server/mcp/registry`；`core/py-server/pyserver.db*` 为 2026-07-16 dev 遗留，随 P1 删除。
@@ -68,10 +68,10 @@ P1 抢救的 `py-pool.js` 保留为 `shared-backend/executors/` 资产，但**�
 
 **验证门**：无需运行时验证（无行为变化）；本节改判经 plan 修订记录，随 P4 提交。
 
-### P4 · 更名 `core/biof3-server`（1 commit，原子）
-1. `git mv core/r-server core/biof3-server`（保历史）。
-2. 词边界替换四类：目录路径引用（`main.js` / `mcp-server.js` / `plugin-manager.js` / vite / tsconfig / CI / scripts）、`electron-builder.yml` from/to、`package.json` name（`biof3-r-server` → `biof3-server`）+ description 正名、md 文档 + `DOC-REGISTRY.json`。
-3. **替换纪律**：带词边界工具、按目录分批 review diff（`r-server` 是 `biof3-r-server` / `R_SERVER_URL` 的子串，禁盲替换；P1/P2 已清零 py/gateway 引用）。
+### P4 · 更名 `core/petri-server`（1 commit，原子）
+1. `git mv core/r-server core/petri-server`（保历史）。
+2. 词边界替换四类：目录路径引用（`main.js` / `mcp-server.js` / `plugin-manager.js` / vite / tsconfig / CI / scripts）、`electron-builder.yml` from/to、`package.json` name（`petri-r-server` → `petri-server`）+ description 正名、md 文档 + `DOC-REGISTRY.json`。
+3. **替换纪律**：带词边界工具、按目录分批 review diff（`r-server` 是 `petri-r-server` / `R_SERVER_URL` 的子串，禁盲替换；P1/P2 已清零 py/gateway 引用）。
 
 **验证门**：定向测试 + dev Electron 启动 + `docs:check`。**回滚**：整 stage 单提交 revert。**残余风险（诚实记录）**：packaged 资源路径已同提交更新，packaged 实机构建按 G0 纪律不外推，G1 前需重建验证。
 

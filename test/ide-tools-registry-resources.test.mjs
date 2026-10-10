@@ -9,7 +9,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const REGISTRY_PATH = resolve(__dirname, '..', 'core', 'biof3-server', 'mcp', 'registry.js');
+const REGISTRY_PATH = resolve(__dirname, '..', 'core', 'petri-server', 'mcp', 'registry.js');
 
 const registry = await import(pathToFileURL(REGISTRY_PATH).href);
 

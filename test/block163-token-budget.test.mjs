@@ -20,13 +20,13 @@ const ROOT = path.resolve('.');
 // tiktoken 从 core 的 node_modules 解析（根 package 无此依赖；estimator 顶部
 // require('tiktoken') 走 core 解析域）
 const { createRequire: createCoreRequire } = require('node:module');
-const coreRequire = createCoreRequire(path.join(ROOT, 'core/biof3-server/package.json'));
+const coreRequire = createCoreRequire(path.join(ROOT, 'core/petri-server/package.json'));
 // 预置 tiktoken 解析域：注册为根 require 可见的 fallback 不行——直接预热 estimator
 // 的模块解析：用 coreRequire 先加载一次 estimator 内部依赖链。
 void coreRequire;
 
-const estimator = coreRequire(path.join(ROOT, 'core/biof3-server/helpers/token-estimator.js'));
-const ratios = require(path.join(ROOT, 'core/biof3-server/helpers/model-token-ratios'));
+const estimator = coreRequire(path.join(ROOT, 'core/petri-server/helpers/token-estimator.js'));
+const ratios = require(path.join(ROOT, 'core/petri-server/helpers/model-token-ratios'));
 
 test('BLOCK-163 MDL-1 预算窗口：preset 优先；已知模型 resolved:true', async () => {
   const preset = await estimator.getContextWindowForBudget('any-model', 'openai', null, null, 200000);
@@ -46,7 +46,7 @@ test('BLOCK-163 MDL-1 盲区收口：未知模型→保守 32k+resolved:false（
 });
 
 test('BLOCK-163 MDL-1 源码钉：agent-runner 未知→32k+warn+token_budget resolved 字段', () => {
-  const src = fs.readFileSync(path.join(ROOT, 'core/biof3-server/agent-runner.js'), 'utf8');
+  const src = fs.readFileSync(path.join(ROOT, 'core/petri-server/agent-runner.js'), 'utf8');
   assert.match(src, /getContextWindowForBudget/);
   assert.match(src, /32768/);
   assert.match(src, /resolved: ctxResolved/);

@@ -26,7 +26,7 @@
  *    nodeIntegration=false/webSecurity=true）、限定 partition 白名单、校验 src 协议。
  *  - 每个 webContents（含 webview guest）装 `setWindowOpenHandler`：一律 deny，
  *    http/https 交给系统浏览器（绝不由 guest 自建窗口）。
- *  - 权限策略：**默认拒绝**；仅自家受信渲染 origin（`BIOF3_TRUSTED_DESKTOP_ORIGINS`，
+ *  - 权限策略：**默认拒绝**；仅自家受信渲染 origin（`PETRI_TRUSTED_DESKTOP_ORIGINS`，
  *    由 `env-coordinator.setupDesktopEnv` 写入）放行本应用确实在用的两项
  *    （`clipboard-sanitized-write` = 复制按钮、`openExternal` = 外链走系统浏览器）。
  *
@@ -37,7 +37,7 @@
 const { URL } = require('node:url');
 
 /** 允许承载 `<webview>` 的 session 分区白名单（唯一使用点：结果浏览器面板）。 */
-const WEBVIEW_PARTITION_ALLOWLIST = Object.freeze(['persist:gewu-browser']);
+const WEBVIEW_PARTITION_ALLOWLIST = Object.freeze(['persist:petri-browser']);
 
 /** 受信渲染 origin 允许申请的权限（本应用真实使用面）。 */
 const TRUSTED_RENDERER_PERMISSIONS = Object.freeze(['clipboard-sanitized-write', 'openExternal']);
@@ -61,7 +61,7 @@ function isHttpOrHttps(value) {
 
 /** 受信渲染 origin 集合（运行时载体：env-coordinator 写入的环境变量）。 */
 function trustedOriginsFromEnv(env = process.env) {
-  return String(env.BIOF3_TRUSTED_DESKTOP_ORIGINS || '')
+  return String(env.PETRI_TRUSTED_DESKTOP_ORIGINS || '')
     .split(',')
     .map((value) => value.trim())
     .filter(Boolean);
@@ -171,7 +171,7 @@ function applyWebContentsHardening({ app, shell, log = console } = {}) {
  *
  * 两个易踩的坑（实机验收抓出，勿回退）：
  *  1) **必须覆盖「所有加载远程内容的 session」**，不能只装 `defaultSession`：
- *     `<webview partition="persist:gewu-browser">` 用的是**分区 session**，只装默认 session
+ *     `<webview partition="persist:petri-browser">` 用的是**分区 session**，只装默认 session
  *     时 guest 仍走 Electron 的「自动批准一切」——实测 guest 内 geolocation = granted。
  *     故除默认 session 外，另挂 `app.on('session-created')` 给此后创建的每个 session 装。
  *  2) **检查 handler 的 requestingOrigin 可能为空**（Chromium 对剪贴板写等检查不一定带来源），
@@ -184,7 +184,7 @@ function applyPermissionPolicy({ session, app, env = process.env, log = console 
   }
   const trustedOrigins = trustedOriginsFromEnv(env);
   if (trustedOrigins.length === 0) {
-    log.warn?.('[security] BIOF3_TRUSTED_DESKTOP_ORIGINS 为空 → 权限策略将拒绝全部申请');
+    log.warn?.('[security] PETRI_TRUSTED_DESKTOP_ORIGINS 为空 → 权限策略将拒绝全部申请');
   }
 
   // 拒绝时按「权限@来源」去重打点，避免 webview 内页面探测时刷屏。

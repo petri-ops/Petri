@@ -18,11 +18,11 @@ const require = createRequire(import.meta.url);
 const ROOT = path.resolve('.');
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'b160-mcp-env-'));
-process.env.BIOF3_LOCAL_DATA_DIR = tmpDir;
+process.env.PETRI_LOCAL_DATA_DIR = tmpDir;
 
-const crypto = require(path.join(ROOT, 'core/biof3-server/helpers/mcp-env-crypto.js'));
+const crypto = require(path.join(ROOT, 'core/petri-server/helpers/mcp-env-crypto.js'));
 // settings 模块顶层固化 SETTINGS_DIR → 动态 require 前先设 env（每用例独立 tmp 用模块重置不可行，单 tmp 即可）
-const settings = require(path.join(ROOT, 'core/biof3-server/helpers/mcp-settings.js'));
+const settings = require(path.join(ROOT, 'core/petri-server/helpers/mcp-settings.js'));
 
 const SECRET = 'sk-super-secret-token-9f2c';
 

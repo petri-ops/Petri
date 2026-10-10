@@ -2,7 +2,7 @@
 
 ## 1 Scope
 
-Bring the OpenAI Codex `/review` experience to BioF3 Desktop, reusing the
+Bring the OpenAI Codex `/review` experience to Petri Desktop, reusing the
 local checkout at `desktop/codex/` (openai/codex) as the reference
 implementation, on top of the existing BLOCK-20 diff IPC + BLOCK-22/23
 CodeMirror diff view + UI-140 sub-agent runtime.

@@ -16,7 +16,7 @@
 ### G1 多空间数据模型与 CRUD（专业）
 
 - `knowledge_spaces` 表 v1 即支持多行（建表注释「space 字段留多空间扩展位」，`src/migrations/009_knowledge_space.sql:18`）；documents/chunks 均带 `space_id` 列 + FK ON DELETE CASCADE——数据模型扩展位现成，migration 010 additive。
-- REST 面参数化：现有 12 端点全为单空间隐式 `ks_default`（`core/biof3-server/routes/knowledge.js`，space GET/POST + documents 8 端点 + clear + search）——新增 spaces CRUD（create/rename/delete/enable），存量文档端点加 spaceId 参数。
+- REST 面参数化：现有 12 端点全为单空间隐式 `ks_default`（`core/petri-server/routes/knowledge.js`，space GET/POST + documents 8 端点 + clear + search）——新增 spaces CRUD（create/rename/delete/enable），存量文档端点加 spaceId 参数。
 - 删除空间=级联删除其文档与分块（FK 已有）；须确认门 + 诚实列出影响面（文档数/块数）。
 - 存量 `ks_default` 无缝保留为默认空间，单空间用户零迁移成本、零行为变更。
 
@@ -51,11 +51,11 @@
 
 | 文件 | 行数 | 角色 |
 | --- | --- | --- |
-| `core/biof3-server/helpers/knowledge-space.js` | 594 | 检索内核（双通道 RRF/docId 过滤/scaleStats/注入收敛后单源） |
-| `core/biof3-server/helpers/knowledge-ingest.js` | 239 | 摄取管道（状态机+串行队列+启动恢复） |
-| `core/biof3-server/helpers/knowledge-parsers.js` | 182 | 解析器注册表（文本族+PDF） |
-| `core/biof3-server/routes/knowledge.js` | 287 | REST 12 端点（全单空间隐式 ks_default） |
-| `core/biof3-server/agent-tools/knowledge-tools.js` | 116 | agent 工具 search/status/read 三件（工具总数 59） |
+| `core/petri-server/helpers/knowledge-space.js` | 594 | 检索内核（双通道 RRF/docId 过滤/scaleStats/注入收敛后单源） |
+| `core/petri-server/helpers/knowledge-ingest.js` | 239 | 摄取管道（状态机+串行队列+启动恢复） |
+| `core/petri-server/helpers/knowledge-parsers.js` | 182 | 解析器注册表（文本族+PDF） |
+| `core/petri-server/routes/knowledge.js` | 287 | REST 12 端点（全单空间隐式 ks_default） |
+| `core/petri-server/agent-tools/knowledge-tools.js` | 116 | agent 工具 search/status/read 三件（工具总数 59） |
 | `frontend/src/components/workspace-panels/KnowledgeSpacePanel.tsx` | 701 | 管理面（**已达 BLOCK-92 棘轮 ≥700 行台账线**） |
 | `frontend/src/pages/knowledge/index.tsx` | 48 | `/knowledge` 页壳（G4 会话台挂载点） |
 | `frontend/src/lib/knowledgeClient.ts` | 168 | 前端 API 封装 |
@@ -84,7 +84,7 @@
 4. UI 增量同提交登记 `docs/ui-productization-audit.md`（UI-### 顺延，当前 361 号段后）；
 5. 每工作面独立提交、可中断可续作；面内动前存受影响测试基线、动后对账归属（红禁静默）；
 6. KnowledgeSpacePanel 已 701 行触台账线：G2 改造须同步拆分或在行数台账中如实说明，禁只增不减恶化台账；
-7. dev 纪律：core/biof3-server 变更须重启 dev 栈并预告用户窗口闪动；fnm Node 24。
+7. dev 纪律：core/petri-server 变更须重启 dev 栈并预告用户窗口闪动；fnm Node 24。
 
 ## 3.5 P0 评审结论（2026-09-18，HEAD d5e3a93f 复核）
 
@@ -133,6 +133,6 @@
 ## 8. P6 收口实录（2026-09-18）
 
 - 门禁实况：docs:check PASS（255）+ ui:audit:check PASS（373 编号）+ hygiene PASS；契约 48/50（2 红=F2 PDF 动前存量基线，Windows 本机，归属 BLOCK-94 时代）+ registry 10/10 + hook 6/6 + 面板回归 11/11 + tsc 0 + theme 4/4 + 实机 flow 22/22 allPass。
-- **D8 例外（G0-RS P6 源绑定族，按 BLOCK-92/95 先例登记归属）**：本包合法变更触碰 `core/biof3-server/agent-runner.js`、`routes/ai-agent/chat.js`、`test/impact-map.json` 等 P6 绑定文件 → 存量 `acceptance/g0-result-studio/` 证据 `p6_stored_current_source_hash_mismatch`。重采实际尝试两轮：①修复真断链一块（BLOCK-92 Wave C 迁移遗留：`tools-executor/job-provenance.js` 函数内 `'../db'/'../plugin-loader'` 未跟目录深度，`node --check` 不抓、主服务常规路径不踩，P6 真实作业终结路径踩中——已修）；②重采仍失败于 `p6_restart_baseline_job_failed`，经主栈复现取证=**`Unknown tool: volcano-plot`**——BLOCK-86 封存领域包后本 checkout 无 volcano 插件注册，G0-RS P6 重采需装包或将基线工具迁移 deseq2，属 G0-RS 范围（09-13 后该证据即不可在本机重采，与多笔 roadmap「D8 例外族归 G0-RS」登记连续一致）。
+- **D8 例外（G0-RS P6 源绑定族，按 BLOCK-92/95 先例登记归属）**：本包合法变更触碰 `core/petri-server/agent-runner.js`、`routes/ai-agent/chat.js`、`test/impact-map.json` 等 P6 绑定文件 → 存量 `acceptance/g0-result-studio/` 证据 `p6_stored_current_source_hash_mismatch`。重采实际尝试两轮：①修复真断链一块（BLOCK-92 Wave C 迁移遗留：`tools-executor/job-provenance.js` 函数内 `'../db'/'../plugin-loader'` 未跟目录深度，`node --check` 不抓、主服务常规路径不踩，P6 真实作业终结路径踩中——已修）；②重采仍失败于 `p6_restart_baseline_job_failed`，经主栈复现取证=**`Unknown tool: volcano-plot`**——BLOCK-86 封存领域包后本 checkout 无 volcano 插件注册，G0-RS P6 重采需装包或将基线工具迁移 deseq2，属 G0-RS 范围（09-13 后该证据即不可在本机重采，与多笔 roadmap「D8 例外族归 G0-RS」登记连续一致）。
 - test:changed 聚合器另修一处存量分类冲突（`scripts/ui404-agent-panel-collapse-live.cjs` 与并行会话 ui-404-408 专项规则双重命中，e01edc4c 引入——精确条目自 script-block-live-drivers 移除由专项规则接管）。
 - 定向直跑对账（BLOCK-89/91 先例）：knowledge 契约 + agent-tool-registry + 前端 hook/面板/切换器 + tsc + theme + block99-knowledge-multispace flow 全绿如上；本包产品面零未验证范围。

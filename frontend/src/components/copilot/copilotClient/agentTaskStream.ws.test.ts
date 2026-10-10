@@ -18,8 +18,8 @@ vi.mock('./apiBase', () => ({
 }));
 
 vi.mock('@/lib/events', () => ({
-  gewuEvents: { tokenBudget: 'tokenBudget' },
-  dispatchGewuEvent: vi.fn(),
+  petriEvents: { tokenBudget: 'tokenBudget' },
+  dispatchPetriEvent: vi.fn(),
 }));
 
 const encoder = new TextEncoder();

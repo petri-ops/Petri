@@ -2,7 +2,7 @@
  * BLOCK-119 P2 — 子智能体汇报门契约（默认关零行为/fail-open/RETRY×1 带判词重写/复判标注）。
  *
  * 契约红线（plan §P2 + helpers/report-guard.js 头注）：
- *  - 默认关：BIOF3_JEV_REPORT_GUARD≠1 → 结果对象原样返回（零出站零改动）；
+ *  - 默认关：PETRI_JEV_REPORT_GUARD≠1 → 结果对象原样返回（零出站零改动）；
  *  - 非 subagent（enabled=false）→ 同上；
  *  - 降级（决策失败）=放行 + degraded 标注；
  *  - RETRY → 恰好一次 callProvider 重写（带判词 prompt）+ 一次复判（verdictAfter）；
@@ -19,7 +19,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
 const require = createRequire(import.meta.url);
 
-const reportGuard = require(path.join(root, 'core', 'biof3-server', 'helpers', 'report-guard.js'));
+const reportGuard = require(path.join(root, 'core', 'petri-server', 'helpers', 'report-guard.js'));
 
 const NO_SLEEP = async () => {};
 const API_KEY_OVERRIDE = { apiKey: 'test-key-do-not-call-real-api' };
@@ -71,7 +71,7 @@ function useEnv(t, env) {
 }
 
 test('默认关：env≠1 → 原样返回零出站', async (t) => {
-  useEnv(t, { BIOF3_JEV_REPORT_GUARD: undefined });
+  useEnv(t, { PETRI_JEV_REPORT_GUARD: undefined });
   let calls = 0;
   const result = { assistantText: '汇报' };
   const r = await reportGuard.applyToLoopResult(result, {
@@ -85,7 +85,7 @@ test('默认关：env≠1 → 原样返回零出站', async (t) => {
 });
 
 test('enabled=false（非 subagent）→ 原样返回', async (t) => {
-  useEnv(t, { BIOF3_JEV_REPORT_GUARD: '1' });
+  useEnv(t, { PETRI_JEV_REPORT_GUARD: '1' });
   const result = { assistantText: '汇报' };
   const r = await reportGuard.applyToLoopResult(result, {
     enabled: false, request: '任务',
@@ -95,7 +95,7 @@ test('enabled=false（非 subagent）→ 原样返回', async (t) => {
 });
 
 test('PASS：透传 + meta（不重写）', async (t) => {
-  useEnv(t, { BIOF3_JEV_REPORT_GUARD: '1' });
+  useEnv(t, { PETRI_JEV_REPORT_GUARD: '1' });
   let providerCalls = 0;
   const result = { assistantText: '已核对：文件 12 个，其中脚本 3 个。' };
   const r = await reportGuard.applyToLoopResult(result, {
@@ -110,7 +110,7 @@ test('PASS：透传 + meta（不重写）', async (t) => {
 });
 
 test('RETRY：恰一次带判词重写 + 复判标注', async (t) => {
-  useEnv(t, { BIOF3_JEV_REPORT_GUARD: '1' });
+  useEnv(t, { PETRI_JEV_REPORT_GUARD: '1' });
   let providerCalls = 0;
   let judgeCalls = 0;
   // 首判 retry 区（2.75），复判 pass 区（3.5）。加映 4 起邻域判定带 fit-only 重放，
@@ -141,7 +141,7 @@ test('RETRY：恰一次带判词重写 + 复判标注', async (t) => {
 });
 
 test('ESCALATE：不重写原样透传 + meta', async (t) => {
-  useEnv(t, { BIOF3_JEV_REPORT_GUARD: '1' });
+  useEnv(t, { PETRI_JEV_REPORT_GUARD: '1' });
   let providerCalls = 0;
   const result = { assistantText: '完全无关内容。' };
   const r = await reportGuard.applyToLoopResult(result, {
@@ -155,7 +155,7 @@ test('ESCALATE：不重写原样透传 + meta', async (t) => {
 });
 
 test('降级：决策失败=fail-open 放行 + degraded 标注', async (t) => {
-  useEnv(t, { BIOF3_JEV_REPORT_GUARD: '1' });
+  useEnv(t, { PETRI_JEV_REPORT_GUARD: '1' });
   const impl = async () => { const e = new Error('TimeoutError'); e.name = 'TimeoutError'; throw e; };
   const result = { assistantText: '汇报' };
   const r = await reportGuard.applyToLoopResult(result, {
@@ -170,7 +170,7 @@ test('降级：决策失败=fail-open 放行 + degraded 标注', async (t) => {
 // ── BLOCK-119 加映 3 — goals 门控 + steering 指令行保留 ──
 
 test('加映 3：goals 门控——fit 过但目标未达成 → ESCALATE + goalFails（不重写）', async (t) => {
-  useEnv(t, { BIOF3_JEV_REPORT_GUARD: '1' });
+  useEnv(t, { PETRI_JEV_REPORT_GUARD: '1' });
   let providerCalls = 0;
   const fetchImpl = async () => ({
     ok: true, status: 200,
@@ -195,7 +195,7 @@ test('加映 3：goals 门控——fit 过但目标未达成 → ESCALATE + goal
 });
 
 test('加映 3：RETRY 重写 prompt 必须逐字保留运行中 steering 指令行', async (t) => {
-  useEnv(t, { BIOF3_JEV_REPORT_GUARD: '1' });
+  useEnv(t, { PETRI_JEV_REPORT_GUARD: '1' });
   let phase = 'first';
   let seenPrompt = '';
   const fetchImpl = async () => fitFetch(phase === 'first' ? 2.7 : 3.8)();
@@ -216,7 +216,7 @@ test('加映 3：RETRY 重写 prompt 必须逐字保留运行中 steering 指令
 });
 
 test('加映 3：无 steeringLines → 重写 prompt 不含保留段', async (t) => {
-  useEnv(t, { BIOF3_JEV_REPORT_GUARD: '1' });
+  useEnv(t, { PETRI_JEV_REPORT_GUARD: '1' });
   let phase = 'first';
   let seenPrompt = '';
   const fetchImpl = async () => fitFetch(phase === 'first' ? 2.7 : 3.8)();
@@ -236,7 +236,7 @@ test('加映 3：无 steeringLines → 重写 prompt 不含保留段', async (t)
 // ── BLOCK-119 加映 4 — fit 阈值邻域复核（median-of-3 防误重写）──
 
 test('加映 4：邻域复核防误重写——首判 RETRY 区、中位数 PASS → 不重写 + meta.fitReplay', async (t) => {
-  useEnv(t, { BIOF3_JEV_REPORT_GUARD: '1' });
+  useEnv(t, { PETRI_JEV_REPORT_GUARD: '1' });
   let providerCalls = 0;
   // 首判 2.7（RETRY 区）→ 重放 3.1×2 → median 3.1 ≥ 3=PASS（好汇报不再被波动误重写）
   const { fetchImpl } = fitFetchExact((n) => (n === 0 ? 2.7 : 3.1));
@@ -256,7 +256,7 @@ test('加映 4：邻域复核防误重写——首判 RETRY 区、中位数 PASS
 });
 
 test('加映 4：带外高分零重放——meta.fitReplay=null（形状稳定）', async (t) => {
-  useEnv(t, { BIOF3_JEV_REPORT_GUARD: '1' });
+  useEnv(t, { PETRI_JEV_REPORT_GUARD: '1' });
   const { fetchImpl, calls } = fitFetchExact(() => 3.8);
   const r = await reportGuard.applyToLoopResult({ assistantText: '已核对完成。' }, {
     enabled: true, request: '任务',

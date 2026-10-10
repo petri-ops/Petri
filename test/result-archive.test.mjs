@@ -7,10 +7,10 @@ import extractZip from "extract-zip";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-const { createResultArchive } = require("../core/biof3-server/helpers/result-archive.js");
+const { createResultArchive } = require("../core/petri-server/helpers/result-archive.js");
 
 test("createResultArchive packages completed outputs without including itself", async () => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "biof3-result-archive-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "petri-result-archive-"));
   const outputDir = path.join(root, "output");
   const extracted = path.join(root, "extracted");
   fs.mkdirSync(outputDir);
@@ -32,7 +32,7 @@ test("createResultArchive packages completed outputs without including itself", 
 
 test("result archive loads ESM-only archiver without a CommonJS require", () => {
   const source = fs.readFileSync(
-    path.join(process.cwd(), "core/biof3-server/helpers/result-archive.js"),
+    path.join(process.cwd(), "core/petri-server/helpers/result-archive.js"),
     "utf8",
   );
   assert.match(source, /await import\(["']archiver["']\)/);

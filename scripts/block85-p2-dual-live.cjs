@@ -123,8 +123,8 @@ async function main() {
   // 4) Artifact Truth 在执行端：fed 模式断言 Windows staging 无拉回（local 模式产物本就在本地，跳过）
   if (MODE === 'fed') {
     const candidates = [
-      path.join(REPO, '.biof3-dev-user-data', 'data', 'results', 'jobs', jobId),
-      path.join(REPO, '.biof3-dev-user-data', 'data', 'tools-results', jobId),
+      path.join(REPO, '.petri-dev-user-data', 'data', 'results', 'jobs', jobId),
+      path.join(REPO, '.petri-dev-user-data', 'data', 'tools-results', jobId),
     ];
     let pulled = [];
     for (const dir of candidates) {

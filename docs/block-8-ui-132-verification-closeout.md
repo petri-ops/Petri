@@ -15,8 +15,8 @@
 - 实际代码：
   - `src/main.js` L1418-1422 CSP dev mode 已放开 `http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*` + L1443 CSP dev mode 日志 "127.0.0.1:* whitelisted" — commit `3240a09 fix(desktop): Inject R_SERVER_URL/PY_SERVER_URL/GATEWAY_URL for gateway (P1-CFG-1)`
   - `src/main.js` L507-509 用 `127.0.0.1` 注入 3 个 URL（r/py/gateway）— 同期落地
-  - `frontend/src/styles/custom.css` L71 明色主题 `--biof3-warning: var(--biof3-status-warning)` — commit `f3b5c42 refactor(css): migrate all CSS token references from --ifm-* to --biof3-*` + commit `3000a06 feat(frontend): Workspace UI plumbing`
-  - `frontend/src/styles/custom.css` L181 暗色主题 `--biof3-warning: var(--biof3-status-warning)` — 同 commit
+  - `frontend/src/styles/custom.css` L71 明色主题 `--petri-warning: var(--petri-status-warning)` — commit `f3b5c42 refactor(css): migrate all CSS token references from --ifm-* to --petri-*` + commit `3000a06 feat(frontend): Workspace UI plumbing`
+  - `frontend/src/styles/custom.css` L181 暗色主题 `--petri-warning: var(--petri-status-warning)` — 同 commit
 
 **路径选择**——沿用 BLOCK-7 Vite-only + 静态 grep 综合验证路径（UI-132 不依赖 IPC 桥 + UI-132 改动是纯代码静态层）。
 
@@ -32,7 +32,7 @@
 | PHASE | 名称 | 状态 | 关键证据 |
 |---|---|---|---|
 | PHASE 1 | 静态 grep 4 项 | ✅ | 4/4 PASS（详见 §3）|
-| PHASE 2 | Vite build + 产物 grep | ✅ | build 3.62s 839 modules + `--biof3-warning` / `--biof3-status-warning` 在产物 CSS 多次出现 |
+| PHASE 2 | Vite build + 产物 grep | ✅ | build 3.62s 839 modules + `--petri-warning` / `--petri-status-warning` 在产物 CSS 多次出现 |
 | PHASE 3 | 测试 + 主题契约 | ✅ | theme-token-contract test 1/1 PASS + tsc 0 错误 |
 | PHASE 4 | audit + closeout | ✅ | UI-132 (行 239 in_progress → verified) + 4 canonical 同步 + closeout 报告 + AUDIT-LOG 登记（本次）|
 
@@ -44,8 +44,8 @@
 |---|---|---|---|---|
 | ① | main.js setupCsp dev mode 放开 127.0.0.1 | `src/main.js` L1418-1422 + L1443 | `localNet = isDevMode ? "http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* " : ...` + CSP dev mode 日志 "127.0.0.1:* whitelisted" | ✅ PASS |
 | ② | main.js R_SERVER_URL 等 3 URL 注入 127.0.0.1 | `src/main.js` L507-509 | `process.env.R_SERVER_URL = http://127.0.0.1:${backendPorts.r}` 等 3 处 | ✅ PASS |
-| ③ | styles/custom.css `--biof3-warning` 明色主题 | `frontend/src/styles/custom.css` L71 | `--biof3-warning: var(--biof3-status-warning)` 在日间主题 | ✅ PASS |
-| ④ | styles/custom.css `--biof3-warning` 暗色主题 | `frontend/src/styles/custom.css` L181 | `--biof3-warning: var(--biof3-status-warning)` 在 `:root[data-theme="dark"]` / `[data-theme="dark"]` 块内 | ✅ PASS |
+| ③ | styles/custom.css `--petri-warning` 明色主题 | `frontend/src/styles/custom.css` L71 | `--petri-warning: var(--petri-status-warning)` 在日间主题 | ✅ PASS |
+| ④ | styles/custom.css `--petri-warning` 暗色主题 | `frontend/src/styles/custom.css` L181 | `--petri-warning: var(--petri-status-warning)` 在 `:root[data-theme="dark"]` / `[data-theme="dark"]` 块内 | ✅ PASS |
 | **git log 退化检查** | `git log 3240a09..HEAD -- src/main.js` 无 `revert\|remove 127\|delete 127`；`git log f3b5c42..HEAD -- frontend/src/styles/custom.css` 无 `revert\|remove warning\|delete warning` | 空输出（自 3240a09 / f3b5c42 以来 32 commit 全部未回退）| ✅ PASS（空）|
 | **tsc --noEmit** | `cd frontend && npx tsc --noEmit` | 0 错误 | ✅ PASS |
 
@@ -64,8 +64,8 @@ dist/assets/index-BsCD42BE.js   2,308.73 kB │ gzip: 720.79 kB
 
 | 项 | 期望 | 结果 |
 |---|---|---|
-| `--biof3-warning` 在产物 CSS 已定义 | 多次出现 | ✅ PASS（CSS 10+ 处）|
-| `--biof3-status-warning` 在产物 CSS 已定义 | 多次出现 | ✅ PASS（CSS 10+ 处）|
+| `--petri-warning` 在产物 CSS 已定义 | 多次出现 | ✅ PASS（CSS 10+ 处）|
+| `--petri-status-warning` 在产物 CSS 已定义 | 多次出现 | ✅ PASS（CSS 10+ 处）|
 
 ---
 
@@ -85,8 +85,8 @@ dist/assets/index-BsCD42BE.js   2,308.73 kB │ gzip: 720.79 kB
 
 按 audit 行 402 治理纪律，UI-132 升级 `verified` 需实机证据。BLOCK-8 通过以下 4 项静态证据 + 2 项产物证据联合证明 UI-132 完整性：
 
-1. **PHASE 1 grep 4 项**：源码层证据（main.js setupCsp dev mode 放开 + R_SERVER_URL 等 3 URL 注入 + styles/custom.css `--biof3-warning` 明色 + 暗色）
-2. **PHASE 2 产物 grep 2 项**：构建层证据（Vite build 后产物 CSS 中 `--biof3-warning` / `--biof3-status-warning` 正确包含）
+1. **PHASE 1 grep 4 项**：源码层证据（main.js setupCsp dev mode 放开 + R_SERVER_URL 等 3 URL 注入 + styles/custom.css `--petri-warning` 明色 + 暗色）
+2. **PHASE 2 产物 grep 2 项**：构建层证据（Vite build 后产物 CSS 中 `--petri-warning` / `--petri-status-warning` 正确包含）
 3. **PHASE 3 theme-token-contract test 1/1**：契约层证据（4 token 主题契约测试通过）
 4. **git log 退化检查空**：进化层证据（32 commit 后 main.js / custom.css 4 文件未被任何 commit 修改）
 

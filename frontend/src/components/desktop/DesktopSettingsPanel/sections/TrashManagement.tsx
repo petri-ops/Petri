@@ -115,15 +115,15 @@ export function TrashManagement(): React.ReactElement {
   const count = projects.length + conversations.length;
 
   return (
-    <div className="gewu-trash-section">
-      <div className="gewu-trash-section__header">
+    <div className="petri-trash-section">
+      <div className="petri-trash-section__header">
         <div>
           <strong>回收站</strong>
           <p>移除的项目和会话会保留在这里，清理后才会永久删除。</p>
         </div>
         <button
           type="button"
-          className="gewu-btn gewu-btn--danger-ghost gewu-btn--sm"
+          className="petri-btn petri-btn--danger-ghost petri-btn--sm"
           onClick={() => void emptyTrash()}
           disabled={loading || count === 0 || busyId !== null}
         >
@@ -131,33 +131,33 @@ export function TrashManagement(): React.ReactElement {
         </button>
       </div>
       {loading ? (
-        <div className="gewu-trash-empty">正在读取回收站…</div>
+        <div className="petri-trash-empty">正在读取回收站…</div>
       ) : count === 0 ? (
-        <div className="gewu-trash-empty">回收站为空</div>
+        <div className="petri-trash-empty">回收站为空</div>
       ) : (
-        <div className="gewu-trash-list">
+        <div className="petri-trash-list">
           {projects.map((project) => (
-            <div key={project.id} className="gewu-trash-item">
+            <div key={project.id} className="petri-trash-item">
               <Icon name="folder" size={14} />
               <div><strong>{project.name}</strong><small>项目</small></div>
-              <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => void restoreProject(project.id)} disabled={busyId !== null}>恢复</button>
+              <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={() => void restoreProject(project.id)} disabled={busyId !== null}>恢复</button>
               <button type="button" className="danger" onClick={() => void permanentlyDeleteProject(project.id)} disabled={busyId !== null}>永久删除</button>
             </div>
           ))}
           {conversations.map((conversation) => (
-            <div key={conversation.id} className="gewu-trash-item">
+            <div key={conversation.id} className="petri-trash-item">
               <Icon name="message-circle" size={14} />
               <div>
                 <strong>{conversation.title}</strong>
                 <small>会话{conversation.project_id ? ` · ${projectNameById.get(conversation.project_id) || '现有项目'}` : ''}</small>
               </div>
-              <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => void restoreConversation(conversation.id)} disabled={busyId !== null}>恢复</button>
+              <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={() => void restoreConversation(conversation.id)} disabled={busyId !== null}>恢复</button>
               <button type="button" className="danger" onClick={() => void permanentlyDeleteConversation(conversation.id)} disabled={busyId !== null}>永久删除</button>
             </div>
           ))}
         </div>
       )}
-      <p className="gewu-field__hint">永久清理只删除 Gewu 内的项目记录、会话和关联消息，不会删除你选择的外部工作目录。</p>
+      <p className="petri-field__hint">永久清理只删除 Petri 内的项目记录、会话和关联消息，不会删除你选择的外部工作目录。</p>
     </div>
   );
 }

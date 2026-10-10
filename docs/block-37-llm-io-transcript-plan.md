@@ -24,14 +24,14 @@
 - [model-gateway.js](../core/shared-backend/llm-providers/model-gateway.js) 两个分支埋点：包装 `onEvent` tee 原始帧；结果/错误终态后异步落盘。traceId 从 telemetry 取，conversationId 从 options 透传（调用方已有）。
 
 **P2 只读端点（后端）**
-- `core/biof3-server/routes/ai-agent/llm-transcripts.js`：
+- `core/petri-server/routes/ai-agent/llm-transcripts.js`：
   - `GET /api/ai-agent/llm-transcripts?conversationId=` → 索引（ts/model/iteration/usage/sizeBytes/error 摘要，不含正文）。
   - `GET /api/ai-agent/llm-transcripts/record?conversationId=&ts=`（或 traceId）→ 单条完整记录。
   - 路径安全：conversationId 白名单校验（拒 `..`、`/`、空），文件不存在返回诚实空态。
 
 **P3 前端信息流查看器（UI-274）**
 - 会话级「模型 I/O」查看器：按时间倒序列出本会话全部模型调用（时间 / 模型 / 轮次 / tokens / 体积 / 错误标记），点击展开单条——请求 messages 按角色折叠树 + 响应聚合正文（含 reasoning / tool_calls / usage），SSE 帧数与截断标记诚实呈现。
-- 入口：会话区现有工具区 icon 按钮（按需打开，不常驻，符合「界面干净」裁决）；样式全 token 化（`--biof3-*`，白底细边框风格）。
+- 入口：会话区现有工具区 icon 按钮（按需打开，不常驻，符合「界面干净」裁决）；样式全 token 化（`--petri-*`，白底细边框风格）。
 - 只读：不提供任何重放/编辑/删除。
 
 **P4 实机收口**

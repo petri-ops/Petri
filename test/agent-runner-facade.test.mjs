@@ -12,10 +12,10 @@ const __dirname = path.dirname(__filename);
 // BLOCK-51 测试基建修复（与 agent-concurrency.test.mjs 同一修复）：agent-runner
 // 依赖链模块顶层即 prepare projects——先跑生产 migration 链再加载。
 const require = createRequire(import.meta.url);
-const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-runner-facade-'));
-process.env.BIOF3_DB_PATH = path.join(tempDir, 'runner-facade.db');
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-runner-facade-'));
+process.env.PETRI_DB_PATH = path.join(tempDir, 'runner-facade.db');
 const { runMigrations } = require('../src/migration-runner');
-await runMigrations(process.env.BIOF3_DB_PATH, path.join(__dirname, '../src/migrations'));
+await runMigrations(process.env.PETRI_DB_PATH, path.join(__dirname, '../src/migrations'));
 
 function resolve(...segments) {
   return path.resolve(__dirname, '..', ...segments);
@@ -23,7 +23,7 @@ function resolve(...segments) {
 
 describe('agent-runner-facade.test.mjs (BLOCK-14 PHASE 3.1 facade)', () => {
   it('exports exactly the 5 PHASE 3.1 documented APIs (no extras)', async () => {
-    const mod = await import(pathToFileURL(resolve('core/biof3-server/agent-runner.js')).href);
+    const mod = await import(pathToFileURL(resolve('core/petri-server/agent-runner.js')).href);
     const expected = [
       'runAgentLoop',
       'resolveAgentTaskTerminal',
@@ -42,7 +42,7 @@ describe('agent-runner-facade.test.mjs (BLOCK-14 PHASE 3.1 facade)', () => {
   });
 
   it('resolveAgentTaskTerminal error envelope covers all 5 branches', async () => {
-    const { resolveAgentTaskTerminal } = await import(pathToFileURL(resolve('core/biof3-server/agent-runner.js')).href);
+    const { resolveAgentTaskTerminal } = await import(pathToFileURL(resolve('core/petri-server/agent-runner.js')).href);
 
     // branch 1: cancelled takes precedence
     const cancelled = resolveAgentTaskTerminal({
@@ -83,7 +83,7 @@ describe('agent-runner-facade.test.mjs (BLOCK-14 PHASE 3.1 facade)', () => {
   });
 
   it('resolveFailedJobReplacements fail-closed path distinguishes repaired vs unresolved', async () => {
-    const { resolveFailedJobReplacements } = await import(pathToFileURL(resolve('core/biof3-server/agent-runner.js')).href);
+    const { resolveFailedJobReplacements } = await import(pathToFileURL(resolve('core/petri-server/agent-runner.js')).href);
 
     // repaired: same-tool, higher iteration
     const repairedJobs = [

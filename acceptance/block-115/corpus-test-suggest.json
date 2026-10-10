@@ -7,97 +7,97 @@
   "samples": [
     [
       "sg-001",
-      "core/biof3-server/agent-runner.js",
+      "core/petri-server/agent-runner.js",
       "agent-backend",
       "typical"
     ],
     [
       "sg-002",
-      "core/biof3-server/loop-orchestrator.js",
+      "core/petri-server/loop-orchestrator.js",
       "agent-backend",
       "typical"
     ],
     [
       "sg-003",
-      "core/biof3-server/agent-task-store.js",
+      "core/petri-server/agent-task-store.js",
       "agent-backend",
       "typical"
     ],
     [
       "sg-004",
-      "core/biof3-server/agent-tools/spawn-agent-tools.js",
+      "core/petri-server/agent-tools/spawn-agent-tools.js",
       "agent-backend",
       "typical"
     ],
     [
       "sg-005",
-      "core/biof3-server/helpers/agent-execution-policy.js",
+      "core/petri-server/helpers/agent-execution-policy.js",
       "agent-backend",
       "typical"
     ],
     [
       "sg-006",
-      "core/biof3-server/routes/ai-agent/resume.js",
+      "core/petri-server/routes/ai-agent/resume.js",
       "agent-backend",
       "typical"
     ],
     [
       "sg-007",
-      "core/biof3-server/helpers/agent-resilience.js",
+      "core/petri-server/helpers/agent-resilience.js",
       "agent-backend",
       "typical"
     ],
     [
       "sg-008",
-      "core/biof3-server/helpers/agent-reconciliation.js",
+      "core/petri-server/helpers/agent-reconciliation.js",
       "agent-backend",
       "typical"
     ],
     [
       "sg-009",
-      "core/biof3-server/helpers/plan-intent.js",
+      "core/petri-server/helpers/plan-intent.js",
       "agent-backend",
       "typical"
     ],
     [
       "sg-010",
-      "core/biof3-server/agent-tools/tool-execution.js",
+      "core/petri-server/agent-tools/tool-execution.js",
       "agent-backend",
       "typical"
     ],
     [
       "sg-011",
-      "core/biof3-server/routes/ai-agent/chat.js",
+      "core/petri-server/routes/ai-agent/chat.js",
       "agent-backend",
       "typical"
     ],
     [
       "sg-012",
-      "core/biof3-server/helpers/history-assembly.js",
+      "core/petri-server/helpers/history-assembly.js",
       "conversation-copilot",
       "typical"
     ],
     [
       "sg-013",
-      "core/biof3-server/helpers/conversation-compaction.js",
+      "core/petri-server/helpers/conversation-compaction.js",
       "conversation-copilot",
       "typical"
     ],
     [
       "sg-014",
-      "core/biof3-server/conversation-adapter.js",
+      "core/petri-server/conversation-adapter.js",
       "conversation-copilot",
       "typical"
     ],
     [
       "sg-015",
-      "core/biof3-server/helpers/conversations.js",
+      "core/petri-server/helpers/conversations.js",
       "conversation-copilot",
       "typical"
     ],
     [
       "sg-016",
-      "core/biof3-server/routes/ai-agent/events.js",
+      "core/petri-server/routes/ai-agent/events.js",
       "conversation-copilot",
       "typical"
     ],
@@ -115,25 +115,25 @@
     ],
     [
       "sg-019",
-      "core/biof3-server/helpers/knowledge-space.js",
+      "core/petri-server/helpers/knowledge-space.js",
       "knowledge-result",
       "typical"
     ],
     [
       "sg-020",
-      "core/biof3-server/routes/knowledge.js",
+      "core/petri-server/routes/knowledge.js",
       "knowledge-result",
       "typical"
     ],
     [
       "sg-021",
-      "core/biof3-server/helpers/memory-vectors.js",
+      "core/petri-server/helpers/memory-vectors.js",
       "knowledge-result",
       "typical"
     ],
     [
       "sg-022",
-      "core/biof3-server/agent-tools/knowledge-console-tools.js",
+      "core/petri-server/agent-tools/knowledge-console-tools.js",
       "knowledge-result",
       "typical"
     ],
@@ -145,7 +145,7 @@
     ],
     [
       "sg-024",
-      "core/biof3-server/helpers/result-edit-controls.js",
+      "core/petri-server/helpers/result-edit-controls.js",
       "knowledge-result",
       "typical"
     ],
@@ -157,7 +157,7 @@
     ],
     [
       "sg-026",
-      "core/biof3-server/agent-tools/result-selection-tools.js",
+      "core/petri-server/agent-tools/result-selection-tools.js",
       "knowledge-result",
       "typical"
     ],
@@ -169,43 +169,43 @@
     ],
     [
       "sg-028",
-      "core/biof3-server/database/result-db.js",
+      "core/petri-server/database/result-db.js",
       "knowledge-result",
       "typical"
     ],
     [
       "sg-029",
-      "core/biof3-server/helpers/interpret.js",
+      "core/petri-server/helpers/interpret.js",
       "knowledge-result",
       "typical"
     ],
     [
       "sg-030",
-      "core/biof3-server/agent-tools/tool-defs.js",
+      "core/petri-server/agent-tools/tool-defs.js",
       "agent-backend",
       "typical"
     ],
     [
       "sg-031",
-      "core/biof3-server/agent-tools/tool-metadata.js",
+      "core/petri-server/agent-tools/tool-metadata.js",
       "agent-backend",
       "typical"
     ],
     [
       "sg-032",
-      "core/biof3-server/agent-tools/registry.js",
+      "core/petri-server/agent-tools/registry.js",
       "agent-backend",
       "typical"
     ],
     [
       "sg-033",
-      "core/biof3-server/agent-tools/agent-tool-policy.js",
+      "core/petri-server/agent-tools/agent-tool-policy.js",
       "agent-backend",
       "typical"
     ],
     [
       "sg-034",
-      "core/biof3-server/agent-tools/act-tools.js",
+      "core/petri-server/agent-tools/act-tools.js",
       "agent-backend",
       "typical"
     ],
@@ -301,7 +301,7 @@
     ],
     [
       "sg-050",
-      ".agents/skills/gewu-dev-infra/dev-verify/run.cjs",
+      ".agents/skills/petri-dev-infra/dev-verify/run.cjs",
       "infra-platform",
       "typical"
     ],
@@ -319,7 +319,7 @@
     ],
     [
       "sg-053",
-      ".agents/skills/gewu-dev-infra/dev-verify/flows/block110-knowledge-guard-live.cjs",
+      ".agents/skills/petri-dev-infra/dev-verify/flows/block110-knowledge-guard-live.cjs",
       "infra-platform",
       "typical"
     ],
@@ -355,19 +355,19 @@
     ],
     [
       "sg-059",
-      "core/biof3-server/helpers/decision-api.js",
+      "core/petri-server/helpers/decision-api.js",
       "agent-backend",
       "typical"
     ],
     [
       "sg-060",
-      "core/biof3-server/helpers/intent-router.js",
+      "core/petri-server/helpers/intent-router.js",
       "agent-backend",
       "typical"
     ],
     [
       "sg-061",
-      "core/biof3-server/helpers/tool-router.js",
+      "core/petri-server/helpers/tool-router.js",
       "agent-backend",
       "typical"
     ],
@@ -379,13 +379,13 @@
     ],
     [
       "sg-063",
-      "core/biof3-server/helpers/interpret.js, core/biof3-server/helpers/decision-api.js",
+      "core/petri-server/helpers/interpret.js, core/petri-server/helpers/decision-api.js",
       "agent-backend",
       "typical"
     ],
     [
       "sg-064",
-      ".agents/skills/gewu-dev-infra/scripts/closeout-gates.mjs",
+      ".agents/skills/petri-dev-infra/scripts/closeout-gates.mjs",
       "infra-platform",
       "typical"
     ],
@@ -475,13 +475,13 @@
     ],
     [
       "sg-079",
-      "core/biof3-server/agent-runner.js, core/biof3-server/loop-orchestrator.js",
+      "core/petri-server/agent-runner.js, core/petri-server/loop-orchestrator.js",
       "agent-backend",
       "boundary"
     ],
     [
       "sg-080",
-      "core/biof3-server/helpers/conversations.js, core/biof3-server/helpers/history-assembly.js",
+      "core/petri-server/helpers/conversations.js, core/petri-server/helpers/history-assembly.js",
       "conversation-copilot",
       "boundary"
     ],
@@ -493,7 +493,7 @@
     ],
     [
       "sg-082",
-      "core/biof3-server/helpers/decision-api.js, core/biof3-server/helpers/conversations.js",
+      "core/petri-server/helpers/decision-api.js, core/petri-server/helpers/conversations.js",
       "agent-backend",
       "boundary"
     ],
@@ -505,7 +505,7 @@
     ],
     [
       "sg-084",
-      "core/biof3-server/helpers/knowledge-space.js, core/biof3-server/helpers/interpret.js",
+      "core/petri-server/helpers/knowledge-space.js, core/petri-server/helpers/interpret.js",
       "knowledge-result",
       "boundary"
     ],
@@ -523,7 +523,7 @@
     ],
     [
       "sg-087",
-      "core/biof3-server/routes/ai-agent/task-actions.js",
+      "core/petri-server/routes/ai-agent/task-actions.js",
       "agent-backend",
       "boundary"
     ],
@@ -535,7 +535,7 @@
     ],
     [
       "sg-089",
-      "core/biof3-server/helpers/site-snapshot.js",
+      "core/petri-server/helpers/site-snapshot.js",
       "agent-backend",
       "boundary"
     ],
@@ -547,13 +547,13 @@
     ],
     [
       "sg-091",
-      "core/biof3-server/helpers/model-tasks.js",
+      "core/petri-server/helpers/model-tasks.js",
       "agent-backend",
       "boundary"
     ],
     [
       "sg-092",
-      "core/biof3-server/helpers/model-gateway.js",
+      "core/petri-server/helpers/model-gateway.js",
       "agent-backend",
       "boundary"
     ],
@@ -571,31 +571,31 @@
     ],
     [
       "sg-095",
-      "core/biof3-server/helpers/user-facts.js",
+      "core/petri-server/helpers/user-facts.js",
       "conversation-copilot",
       "boundary"
     ],
     [
       "sg-096",
-      "core/biof3-server/helpers/chat-summary.js",
+      "core/petri-server/helpers/chat-summary.js",
       "conversation-copilot",
       "boundary"
     ],
     [
       "sg-097",
-      "core/biof3-server/helpers/methods-export.js",
+      "core/petri-server/helpers/methods-export.js",
       "knowledge-result",
       "boundary"
     ],
     [
       "sg-098",
-      "core/biof3-server/agent-tools/content-plugins.js",
+      "core/petri-server/agent-tools/content-plugins.js",
       "agent-backend",
       "boundary"
     ],
     [
       "sg-099",
-      "core/biof3-server/helpers/ai-settings.js",
+      "core/petri-server/helpers/ai-settings.js",
       "agent-backend",
       "boundary"
     ],
@@ -607,7 +607,7 @@
     ],
     [
       "sg-101",
-      "core/biof3-server/db.js",
+      "core/petri-server/db.js",
       "agent-backend",
       "boundary"
     ],
@@ -619,7 +619,7 @@
     ],
     [
       "sg-103",
-      "core/biof3-server/mcp/registry.js",
+      "core/petri-server/mcp/registry.js",
       "agent-backend",
       "boundary"
     ],

@@ -1,4 +1,4 @@
-# BioF3 Desktop IDE MCP 工具设计文档
+# Petri Desktop IDE MCP 工具设计文档
 
 > **文档状态**: 草稿 v0.1  
 > **创建日期**: 2026-08-14  
@@ -23,7 +23,7 @@
 
 ### 1.1 需求背景
 
-BioF3 Desktop 作为全组学学习与实战平台，其 AI Copilot 需要具备操作 IDE 的能力。
+Petri Desktop 作为全组学学习与实战平台，其 AI Copilot 需要具备操作 IDE 的能力。
 
 ### 1.2 设计目标
 
@@ -56,7 +56,7 @@ BioF3 Desktop 作为全组学学习与实战平台，其 AI Copilot 需要具备
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                    preload.js (contextBridge)                    │
-│  window.biof3Desktop = {                                        │
+│  window.petriDesktop = {                                        │
 │    files, terminal, plugins, runtime, backend, window, ...       │
 │  }                                                              │
 └─────────────────────────────────────────────────────────────────┘
@@ -163,7 +163,7 @@ ide:terminal:list
 ### 4.2 preload.js 扩展
 
 ```javascript
-contextBridge.exposeInMainWorld('biof3Desktop', {
+contextBridge.exposeInMainWorld('petriDesktop', {
   // ... 现有接口 ...
 
   // IDE 工具
@@ -441,4 +441,4 @@ interface TerminalSession {
 
 ---
 
-*文档生成：BioF3 Desktop IDE MCP Tools Design*
+*文档生成：Petri Desktop IDE MCP Tools Design*

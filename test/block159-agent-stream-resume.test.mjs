@@ -24,8 +24,8 @@ import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const EVENTS_PATH = path.join(ROOT, 'core/biof3-server/routes/ai-agent/events.js');
-const GATEWAY_PATH = path.join(ROOT, 'core/biof3-server/mobile-gateway/index.js');
+const EVENTS_PATH = path.join(ROOT, 'core/petri-server/routes/ai-agent/events.js');
+const GATEWAY_PATH = path.join(ROOT, 'core/petri-server/mobile-gateway/index.js');
 
 // ── ① agent SSE 心跳（源码扫描钉）────────────────────────────────────────
 
@@ -43,7 +43,7 @@ test('BLOCK-159 ① agent SSE 心跳：15s 注释帧 + close/终态双路径清�
 });
 
 test('BLOCK-159 ① 终端 SSE 心跳基线保持（回归锚：15s ping 不因本包漂移）', () => {
-  const source = readFileSync(path.join(ROOT, 'core/biof3-server/mobile-gateway/index.js'), 'utf8');
+  const source = readFileSync(path.join(ROOT, 'core/petri-server/mobile-gateway/index.js'), 'utf8');
   assert.ok(/setInterval\(\(\) => \{\s*try \{ res\.write\(': ping\\n\\n'\); \} catch \{ \/\* closed \*\/ \}\s*\}, 15_000\)/.test(source),
     '终端流 15s ping 基线（index.js）保持');
 });
@@ -57,7 +57,7 @@ test('BLOCK-159 ② 审计写异步化：appendFile fire-and-forget，appendFile
 
   // 行为级：createAuditWriter 异步落盘且内容合法 JSONL
   const { buildMobileGateway } = require(GATEWAY_PATH);
-  const dir = mkdtempSync(path.join(tmpdir(), 'gewu-block159-audit-'));
+  const dir = mkdtempSync(path.join(tmpdir(), 'petri-block159-audit-'));
   const auditPath = path.join(dir, 'audit.log');
   try {
     const { app } = buildMobileGateway({ dataDir: dir, auditPath, mountRoutes: () => {} });

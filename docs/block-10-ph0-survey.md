@@ -111,7 +111,7 @@
 
 - **报告 / 行**：observ §三 L352-371
 - **标题**：IPC 跨进程 trace 不贯穿，preload 不传 rid
-- **核心代码位置**：`src/preload.js:1-1000`（IPC 透传无 rid）/ `src/main.js`（IPC handler 无 rid 注入）/ `src/main/backend-proc-manager.js`（spawn child 不传 BIOF3_RID）
+- **核心代码位置**：`src/preload.js:1-1000`（IPC 透传无 rid）/ `src/main.js`（IPC handler 无 rid 注入）/ `src/main/backend-proc-manager.js`（spawn child 不传 PETRI_RID）
 - **关联 ID**：—
 - **修复方案**：preload 注入 rid + main handler 透传 + spawn child env 注入
 - **当前状态**：🚫 **不外推**（observability-work-package 候选）
@@ -271,10 +271,10 @@
 - **修复方案**（v0.1 规划）：抽 `safeProcExit(name, code)` helper 调 `webContents.send('backend:status', down)`
 - **当前状态**：🚫 **不外推**（commit `a09f706` r-server 进程级 `installBackendExitLifecycle` 已落地；Electron 主进程的 `backend-proc-manager.js` IPC 推送 / `metrics.inc` 推迟）。**与 v0.1 规划偏差**：v0.1 把 backend exit 视为 Electron 主进程侧问题（`backend-proc-manager.js`），实际执行落到 r-server 子进程侧（`core/r-server/server.js`）。这是合理的范围调整，但必须在 closeout 报告中明确记录。
 
-#### PR-012 — branch-db + result-db 同时打开 biof3.db 🚫 不外推
+#### PR-012 — branch-db + result-db 同时打开 petri.db 🚫 不外推
 
 - **报告 / 行**：perf §四 L488-521
-- **标题**：desktop main 进程 branch-db + result-db 同时打开 biof3.db（与 r-server 进程共享文件）
+- **标题**：desktop main 进程 branch-db + result-db 同时打开 petri.db（与 r-server 进程共享文件）
 - **核心代码位置**：`src/database/branch-db.js:18-49` / `src/database/result-db.js:23-54`
 - **关联 ID**：A-007 + PR-011
 - **修复方案**：v0.1 规划统一 busy_timeout；**实际不动**
@@ -322,7 +322,7 @@ v0.1 §2.3 识别 7 组同根关联。**PHASE 0 调研发现：实际 commit `a0
 ### §4.3 BLOCK-5（IPC bridge finalize）边界
 
 - ✅ 不动 IPC channel 字面量（PHASE 1 C-001 新增 `branch` + `result` 是 namespace-level，channel 名 `branch:create` 等是新增不动既有）
-- ✅ PHASE 1 `biof3Desktop.branch` / `biof3Desktop.result` / `biof3Desktop.result.version` 3 namespace 全部**新增**，不动既有 16 namespace
+- ✅ PHASE 1 `petriDesktop.branch` / `petriDesktop.result` / `petriDesktop.result.version` 3 namespace 全部**新增**，不动既有 16 namespace
 
 ### §4.4 BLOCK-9（mega file refactor 前端）边界
 

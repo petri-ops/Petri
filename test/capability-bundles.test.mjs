@@ -23,7 +23,7 @@ const bundles = require('../core/shared-backend/capability-bundles.js');
 // ── helpers ─────────────────────────────────────────────────────────────────
 
 function tmpDir() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-bundles-test-'));
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'petri-bundles-test-'));
 }
 
 /**
@@ -82,7 +82,7 @@ test('BUNDLE_REGISTRY contains the two real bundle entries', () => {
     assert.equal(d.version, '1.0.0');
     assert.equal(d.sha256, expected[id].sha256);
     assert.equal(d.sizeBytes, expected[id].sizeBytes);
-    assert.ok(d.url.startsWith('https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/bundles/'));
+    assert.ok(d.url.startsWith('https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/bundles/'));
     assert.ok(d.url.includes(id) && d.url.includes('1.0.0') && d.url.includes('macos-arm64'));
     assert.deepEqual(d.platforms, ['macos-arm64']);
   }
@@ -204,7 +204,7 @@ test('ensureBundlesForPlugin: published bundle with sha256 downloads and install
   const publishedDescriptor = {
     bundleId: 'r-enrichment',
     version: '1.0.0',
-    url: 'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/bundles/r-enrichment-1.0.0-macos-arm64.tar.gz',
+    url: 'https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/bundles/r-enrichment-1.0.0-macos-arm64.tar.gz',
     sha256: GOOD_SHA,
     sizeBytes: CONTENT.length,
     platforms: ['macos-arm64'],
@@ -233,7 +233,7 @@ test('ensureBundlesForPlugin: already-provisioned bundle returns alreadyReady wi
   const publishedDescriptor = {
     bundleId: 'r-enrichment',
     version: '1.0.0',
-    url: 'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/bundles/r-enrichment-1.0.0-macos-arm64.tar.gz',
+    url: 'https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/bundles/r-enrichment-1.0.0-macos-arm64.tar.gz',
     sha256: GOOD_SHA,
     sizeBytes: CONTENT.length,
     platforms: ['macos-arm64'],
@@ -444,7 +444,7 @@ test('#8 ensureBundlesForPlugin：resolved platform 穿入安装期望——平�
     bundleId: 'r-enrichment',
     version: '1.0.0',
     platform: 'windows-x64',
-    url: 'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/bundles/r-enrichment-1.0.0-windows-x64.tar.gz',
+    url: 'https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/bundles/r-enrichment-1.0.0-windows-x64.tar.gz',
     sha256: crypto.createHash('sha256').update(fs.readFileSync(archive)).digest('hex'),
     sizeBytes: fs.statSync(archive).size,
     platforms: ['windows-x64'],
@@ -482,7 +482,7 @@ test('ensureBundlesForPlugin uses the real tar.gz installer by default', async (
   bundles.getBundleDescriptor = () => ({
     bundleId: 'r-enrichment',
     version: '1.0.0',
-    url: 'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/bundles/r-enrichment-1.0.0-macos-arm64.tar.gz',
+    url: 'https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/bundles/r-enrichment-1.0.0-macos-arm64.tar.gz',
     sha256: crypto.createHash('sha256').update(fs.readFileSync(archive)).digest('hex'),
     sizeBytes: fs.statSync(archive).size,
     platforms: ['macos-arm64'],

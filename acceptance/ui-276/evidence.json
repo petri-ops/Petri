@@ -5,7 +5,7 @@
   "date": "2026-09-02",
   "environment": {
     "mode": "dev Electron (npm run dev, renderer-HMR)",
-    "backend": "biof3-server，Electron 主进程 supervisor 托管（本次实机端口 :65281，kill 后自动重启）",
+    "backend": "petri-server，Electron 主进程 supervisor 托管（本次实机端口 :65281，kill 后自动重启）",
     "cdp": "9222 驱动，全程页面未 reload（CDP 连接与截图连续可证）",
     "model": "gemini-3.7-flash-tiered（ninijoker）",
     "accessMode": "完全访问"
@@ -43,7 +43,7 @@
       "id": "A5",
       "claim": "后端清扫与续跑任务落库正确",
       "evidence": "tasks 表：7d5b6e81 status=failed interrupted_at=2026-09-02T11:25:05.848Z（服务重启，Agent 任务中断）；ed4f4132 status=completed finished_at=11:25:41；后端日志「Marked 1 interrupted Agent task(s) as failed on startup」",
-      "source": ".biof3-dev-user-data/data/biof3.db tasks 表；biof3-electron-main.log"
+      "source": ".petri-dev-user-data/data/petri.db tasks 表；petri-electron-main.log"
     },
     {
       "id": "A6",

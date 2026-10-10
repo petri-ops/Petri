@@ -3,7 +3,7 @@
 /**
  * HLE-C3R: Durable resume + context checkpoint integration tests.
  *
- * Uses an isolated SQLite database via BIOF3_DB_PATH. Verifies the durable
+ * Uses an isolated SQLite database via PETRI_DB_PATH. Verifies the durable
  * recovery primitives that the production agent-runner now relies on:
  *
  *  - getActiveLoopRunForConversation resolves the latest NON-TERMINAL run for a
@@ -37,16 +37,16 @@ import * as loopCheckpoint from '../core/shared-backend/loop-checkpoint.js';
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const TMP_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-c3r-'));
-process.env.BIOF3_DB_PATH = path.join(TMP_DIR, 'test.db');
+const TMP_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-c3r-'));
+process.env.PETRI_DB_PATH = path.join(TMP_DIR, 'test.db');
 
 // 新鲜 DB 必须先应用 src/migrations 全量（projects 等用户数据表由迁移管理，
 // db.js 模块加载即预编译 projects 语句）；否则 import db.js 即抛
 // no such table: projects，整组用例连带失败。与 loop-api-route.test.mjs 同一自举手法。
 {
-  const Database = require('../core/biof3-server/node_modules/better-sqlite3');
+  const Database = require('../core/petri-server/node_modules/better-sqlite3');
   const migrationsDir = path.resolve(__dirname, '..', 'src', 'migrations');
-  const boot = new Database(process.env.BIOF3_DB_PATH);
+  const boot = new Database(process.env.PETRI_DB_PATH);
   for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fs.readFileSync(path.join(migrationsDir, f), 'utf8'));
   }
@@ -58,7 +58,7 @@ let lc;
 const cp = loopCheckpoint.default || loopCheckpoint;
 
 before(async () => {
-  db = (await import('../core/biof3-server/db.js')).default || (await import('../core/biof3-server/db.js'));
+  db = (await import('../core/petri-server/db.js')).default || (await import('../core/petri-server/db.js'));
   lc = loopContract;
 });
 

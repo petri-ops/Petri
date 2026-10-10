@@ -7,8 +7,8 @@ if (process.platform !== 'win32') {
 /**
  * provision-win-python-runtime.mjs
  * ---------------------------------------------------------------
- * 开发机一键引导：在本机 Windows 上把 BioF3 的 Python 运行时装进
- *   %USERPROFILE%/Documents/BioF3-Local/runtimes/Python
+ * 开发机一键引导：在本机 Windows 上把 Petri 的 Python 运行时装进
+ *   %USERPROFILE%/Documents/Petri-Local/runtimes/Python
  * （与 main.js resolveRuntime 的第一优先路径一致），从而 Python 执行器
  * 在下次 `npm run dev` 时自动启动——无需手动安装 Python，也无需等
  * OSS 上的官方 windows-x64 制品（Week 3/4）。
@@ -19,8 +19,8 @@ if (process.platform !== 'win32') {
  * 用法（在 Windows 开发机，需网络）：
  *   node scripts/provision-win-python-runtime.mjs
  * 环境变量：
- *   BIOF3_PY_VERSION      嵌入版版本（默认 3.11.9）
- *   BIOF3_LOCAL_DATA_DIR  覆盖数据根目录（默认 Documents/BioF3-Local）
+ *   PETRI_PY_VERSION      嵌入版版本（默认 3.11.9）
+ *   PETRI_LOCAL_DATA_DIR  覆盖数据根目录（默认 Documents/Petri-Local）
  */
 
 import fs from 'node:fs';
@@ -33,10 +33,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
 const REQUIREMENTS = path.join(REPO_ROOT, 'resources', 'built-in-plugins', 'py-runtime-requirements.txt');
 
-const PY_VERSION = process.env.BIOF3_PY_VERSION || '3.11.9';
-const DATA_ROOT = process.env.BIOF3_LOCAL_DATA_DIR
-  ? path.resolve(process.env.BIOF3_LOCAL_DATA_DIR)
-  : path.join(os.homedir(), 'Documents', 'BioF3-Local');
+const PY_VERSION = process.env.PETRI_PY_VERSION || '3.11.9';
+const DATA_ROOT = process.env.PETRI_LOCAL_DATA_DIR
+  ? path.resolve(process.env.PETRI_LOCAL_DATA_DIR)
+  : path.join(os.homedir(), 'Documents', 'Petri-Local');
 const TARGET = path.join(DATA_ROOT, 'runtimes', 'Python');
 
 function fail(msg, err) {
@@ -76,7 +76,7 @@ async function main() {
   }
 
   fs.mkdirSync(TARGET, { recursive: true });
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-py-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-py-'));
   const embedZip = path.join(tmp, 'embed.zip');
   const embedUrl = `https://www.python.org/ftp/python/${PY_VERSION}/python-${PY_VERSION}-embed-amd64.zip`;
 

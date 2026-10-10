@@ -6,22 +6,22 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 
 // BLOCK-49 加映清债 —— 统一临时 DB 自举（存量：单跑/全量缺 projects 表）
-//（BIOF3_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）
+//（PETRI_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）
 {
   const fsx = require('node:fs');
   const osx = require('node:os');
   const pth = require('node:path');
   const urlx = require('node:url');
   const hereDir = pth.dirname(urlx.fileURLToPath(import.meta.url));
-  const Database = require(pth.resolve(hereDir, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const tempDbDir = fsx.mkdtempSync(pth.join(osx.tmpdir(), 'biof3-sweep-db-'));
-  const boot = new Database(pth.join(tempDbDir, 'biof3.db'));
+  const Database = require(pth.resolve(hereDir, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const tempDbDir = fsx.mkdtempSync(pth.join(osx.tmpdir(), 'petri-sweep-db-'));
+  const boot = new Database(pth.join(tempDbDir, 'petri.db'));
   const migrationsDir = pth.resolve(hereDir, '..', 'src', 'migrations');
   for (const f of fsx.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fsx.readFileSync(pth.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = pth.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = pth.join(tempDbDir, 'petri.db');
   process.on('exit', () => { try { fsx.rmSync(tempDbDir, { recursive: true, force: true }); } catch {} });
 }
 const {
@@ -29,8 +29,8 @@ const {
   createResultEditProgressRecorder,
   finalizeResultEditProgress,
   projectResultStudioToolContext,
-} = require('../core/biof3-server/agent-tools/result-context-binding');
-const { createAgentToolInterceptor } = require('../core/biof3-server/agent-tools/agent-tool-interceptor');
+} = require('../core/petri-server/agent-tools/result-context-binding');
+const { createAgentToolInterceptor } = require('../core/petri-server/agent-tools/agent-tool-interceptor');
 
 const TOKEN = 'f'.repeat(64);
 
@@ -236,11 +236,11 @@ test('P4R-3 wires the context/progress helpers into the durable task production 
   // loop-orchestrator 承载进度记录/完成守卫/终态收尾。
   // BLOCK-109-CORE-ARCH P1 — legacy SSE 路径（chat.js 内的 guard 接线）已物理退役，
   // 原 chat.js 断言段随之删除；durable 路径即唯一生产路径。
-  const runnerText = source('core/biof3-server/agent-runner.js');
+  const runnerText = source('core/petri-server/agent-runner.js');
   assert.match(runnerText, /\.\.\.projectResultStudioToolContext\(context\)/);
   assert.match(runnerText, /providerFailureReason/);
 
-  const orchestratorText = source('core/biof3-server/loop-orchestrator.js');
+  const orchestratorText = source('core/petri-server/loop-orchestrator.js');
   for (const pattern of [
     /createResultEditProgressRecorder\(\)/,
     /providerFailureReason/,
@@ -253,5 +253,5 @@ test('P4R-3 wires the context/progress helpers into the durable task production 
   ]) {
     assert.match(orchestratorText, pattern);
   }
-  assert.match(source('core/biof3-server/agent-tools/result-context-binding.js'), /已完成的阶段结论已保留/);
+  assert.match(source('core/petri-server/agent-tools/result-context-binding.js'), /已完成的阶段结论已保留/);
 });

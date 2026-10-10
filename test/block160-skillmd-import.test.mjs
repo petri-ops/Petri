@@ -19,11 +19,11 @@ const require = createRequire(import.meta.url);
 const ROOT = path.resolve('.');
 
 const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'b160-skillmd-'));
-process.env.BIOF3_USER_DATA_DIR = path.join(tmpRoot, 'user-data');
-process.env.BIOF3_LOCAL_DATA_DIR = path.join(tmpRoot, 'data');
+process.env.PETRI_USER_DATA_DIR = path.join(tmpRoot, 'user-data');
+process.env.PETRI_LOCAL_DATA_DIR = path.join(tmpRoot, 'data');
 
 const registry = require(path.join(ROOT, 'core', 'shared-backend', 'skill-registry.js'));
-const mcpImport = require(path.join(ROOT, 'core', 'biof3-server', 'helpers', 'mcp-config-import.js'));
+const mcpImport = require(path.join(ROOT, 'core', 'petri-server', 'helpers', 'mcp-config-import.js'));
 
 const SKILL_MD = `---
 name: My Imported Skill

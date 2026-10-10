@@ -131,7 +131,7 @@ export function LeftPanel({ ctx, open = true }: LeftPanelProps): React.ReactElem
       setDropHint('拖入的不是有效的文件/文件夹');
       return;
     }
-    const pathFor = window.biof3Desktop?.files?.pathForFile;
+    const pathFor = window.petriDesktop?.files?.pathForFile;
     const raw = typeof pathFor === 'function'
       ? pathFor(file)
       : (file as File & { path?: string }).path || null;
@@ -139,9 +139,9 @@ export function LeftPanel({ ctx, open = true }: LeftPanelProps): React.ReactElem
       setDropHint('无法读取拖入项的路径');
       return;
     }
-    const validate = window.biof3Desktop?.files?.validateDirectory;
+    const validate = window.petriDesktop?.files?.validateDirectory;
     if (typeof validate !== 'function') {
-      setDropHint('当前运行环境不支持路径校验（请在 Gewu 桌面应用中使用）。');
+      setDropHint('当前运行环境不支持路径校验（请在 Petri 桌面应用中使用）。');
       return;
     }
     try {
@@ -161,14 +161,14 @@ export function LeftPanel({ ctx, open = true }: LeftPanelProps): React.ReactElem
   return (
     <aside
       className={`${styles.leftCol}${open ? '' : ` ${styles.leftColCollapsed}`}`}
-      style={{ width: open ? `var(--gewu-live-left-width, ${ctx.width}px)` : 0 }}
+      style={{ width: open ? `var(--petri-live-left-width, ${ctx.width}px)` : 0 }}
       aria-hidden={!open}
-      data-gewu-motion="functional"
+      data-petri-motion="functional"
     >
       {ctx.columnHeader}
       <div
         className={styles.leftPanelWrap}
-        style={dropActive ? { outline: '1px dashed var(--gewu-accent)', outlineOffset: '-4px' } : undefined}
+        style={dropActive ? { outline: '1px dashed var(--petri-accent)', outlineOffset: '-4px' } : undefined}
         onDragOver={(e) => {
           e.preventDefault();
           if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';

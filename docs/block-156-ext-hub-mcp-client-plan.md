@@ -4,7 +4,7 @@ goal: 把现有生信垂直的插件+技能归位到「领域扩展」货架，�
 acceptance:
   - P0 勘察结论落盘本 plan §3（八组勘察事实 + 决策点 D1-D7），实现动手前经用户确认
   - P1 扩展中心货架重组：前端四货架（领域插件/领域技能/通用技能/MCP 服务）+ 旧路由重定向 + LeftPanel/AppRail 入口收敛 + skill category 归类规则 + marketplace 残迹清理；组件/路由定向测试 + theme 门禁 + 实机 CDP 断言（货架在场/切换/深链重定向）证据落 acceptance/block-156/
-  - P2 MCP 客户端基座：channels.js 登记 mcp:* 通道族 + preload 包装 + 连接管理器（stdio）+ 配置持久化 + 扩展页/设置面 UI；连接生命周期测试 + ipc-channels-registry 双向守护 + 实机断言（以自家 biof3-mcp stdio server 为回环被连对象，connect→listTools→disconnect）
+  - P2 MCP 客户端基座：channels.js 登记 mcp:* 通道族 + preload 包装 + 连接管理器（stdio）+ 配置持久化 + 扩展页/设置面 UI；连接生命周期测试 + ipc-channels-registry 双向守护 + 实机断言（以自家 petri-mcp stdio server 为回环被连对象，connect→listTools→disconnect）
   - P3 工具投影与审批策略：第三方工具按 mcp_<server>_<tool> 命名空间投影进 agent-tools 注册表（每工具声明 contract sideEffect/riskTier）+ 复用 agent-tool-policy 档位闸（不开第二套权限系统）；投影契约测试 + policy 档位测试 + block109-p2 恒等对账 + 实机 agent 会话调用 MCP 工具断言
 reopen: 用户裁决货架分类学回摆（领域/通用边界变化）或 MCP 客户端方向变化时
 status: completed
@@ -20,7 +20,7 @@ status: completed
 
 现有插件（PluginStorePanel）与技能（SkillsPage）都属生信垂直能力，归并为**领域扩展**货架；新增**通用技能**货架（不绑领域的方法论，coding-playbook 已是既成实例）与 **MCP 服务**货架（第三方 MCP server 接入，应用作为 MCP client），让格物作为通用 agent 补齐第三方扩展面。
 
-**用户裁决（2026-10-10 原话）**：方向裁决「MCP客户端需要的 毕竟 gewu是个通用 agent 怎么能不支持第三方的 mcp和skills呢」「目前的 插件和skills都属于生信垂直领域 应该合并归到领域中 新增 skills和mcp服务 对应通用agent」+ 节奏授权「行！ 按照你的节奏整」（=按主 Agent 提议的节奏：先归类重组、再上 MCP 引擎、P0 勘察报告先行、确认后进实现）。
+**用户裁决（2026-10-10 原话）**：方向裁决「MCP客户端需要的 毕竟 petri是个通用 agent 怎么能不支持第三方的 mcp和skills呢」「目前的 插件和skills都属于生信垂直领域 应该合并归到领域中 新增 skills和mcp服务 对应通用agent」+ 节奏授权「行！ 按照你的节奏整」（=按主 Agent 提议的节奏：先归类重组、再上 MCP 引擎、P0 勘察报告先行、确认后进实现）。
 
 **红线**：
 1. 货架合并是**入口层/分类学合并**，不做插件与技能的代码层合并——RS descriptor 契约、plugin-loader、skill-registry 两条运行时保持原样。
@@ -40,9 +40,9 @@ status: completed
 
 1. **路由与入口**：`/skills`（App.tsx:149）、`/plugins`（:151）、`/settings`（:153）三个独立路由；入口按钮在 `LeftPanel.tsx` QuickActions（插件 puzzle :348-354、Skills sparkles :356-362、分组「工作台」），`AppRail.tsx:109-111` 与 `project-workspace.tsx:461` 各有一份 navigate 转发；home 页仅后端未就绪时的逃生通道入口（home.tsx:130-136、:355-359）。
 2. **插件商店**：数据全走 `usePluginStore`（模块缓存+订阅）→ IPC `plugin:list-installed/list-remote/install/uninstall`；另有**领域包(pack)体系**（BLOCK-84，`useDomainPacks` → `pack:*` 通道族，三档卸载确认）——「领域」概念已有基建雏形；分类体系现仅 all/tool 两档（UI-374 把 runtime 收编进包卡片）；content-plugin 不进商店（独立文档通道）。
-3. **远程清单**：`plugin/manifest-source.js` 拉取 `BIOF3_PLUGIN_MANIFEST_URL`（缺省 OSS 常量，paths.js:75-77），15s 超时、失败静默降级为仅内置清单——远程清单模式已有成熟先例可参照。
-4. **技能数据流**：桌面走 IPC `skills:discover/execute/progress/cancel`（`src/main.js:238-316` → skills-sdk → SkillRegistry），不走 HTTP；HTTP 投影仅移动端（projection-data.js:45）；installed 目录 = 用户数据目录 `$BIOF3_USER_DATA_DIR/skills`（skill-registry.js:282-291）；**marketplace 只剩残迹**（SOURCE_PRIORITY:30、缓存字段 :48-50、MCP schema enum 遗留，无任何加载代码）。
-5. **设置面惯例**：`DesktopSettingsPanel` 八分区（types.ts:15-43），新分区三步注册；持久化惯例 = JSON 文件（ai-settings.json 模式，core/biof3-server/helpers/ai-settings.js）；IPC 链路样例 ai-settings（channels.js:15-21 → ipc/ai-settings.js → preload.js:213-219 → electron.d.ts → hook）。
+3. **远程清单**：`plugin/manifest-source.js` 拉取 `PETRI_PLUGIN_MANIFEST_URL`（缺省 OSS 常量，paths.js:75-77），15s 超时、失败静默降级为仅内置清单——远程清单模式已有成熟先例可参照。
+4. **技能数据流**：桌面走 IPC `skills:discover/execute/progress/cancel`（`src/main.js:238-316` → skills-sdk → SkillRegistry），不走 HTTP；HTTP 投影仅移动端（projection-data.js:45）；installed 目录 = 用户数据目录 `$PETRI_USER_DATA_DIR/skills`（skill-registry.js:282-291）；**marketplace 只剩残迹**（SOURCE_PRIORITY:30、缓存字段 :48-50、MCP schema enum 遗留，无任何加载代码）。
+5. **设置面惯例**：`DesktopSettingsPanel` 八分区（types.ts:15-43），新分区三步注册；持久化惯例 = JSON 文件（ai-settings.json 模式，core/petri-server/helpers/ai-settings.js）；IPC 链路样例 ai-settings（channels.js:15-21 → ipc/ai-settings.js → preload.js:213-219 → electron.d.ts → hook）。
 6. **Agent 工具链**：`getToolDefs()`（tool-defs.js:47-51）→ registry `getProviderToolDefs()`（启动时 buildToolRegistry 三方一致性 fail-fast 校验，registry.js:431）→ agent-runner.js:655 `resolveToolDefsForContext` → 可选 BLOCK-113 两跳预路由收窄（:656-677，默认关）→ loopConfig.tools。**`⋃DOMAIN_TOOL_DEFS === TOOL_DEFS` 深度恒等契约被 block109-p2 测试钉住**（tool-defs.js:41-42），新增域必须保持。
 7. **审批档位**：两层——会话 accessMode 四档（read/workspace-write/plan/full）；工具级 contract（sideEffect 五值 × riskTier R0-R3，R3 一律 deny）；**默认档由 sideEffect+riskTier 推导，无独立档位字段**——MCP 投影工具必须逐工具声明这两项；HEAVY_TOOLS 确认门是 run_tool 专属先例。
 8. **IPC 新增纪律**：channels.js 值唯一且 `ns:event` 形、preload 字面量必配（或 MAIN_ONLY 白名单）、**新 IPC 文件必须加入 ipc-channels-registry.test.mjs 的 CONSUMERS 数组**（字面量回流闸），五道闸缺一即红。
@@ -72,7 +72,7 @@ status: completed
 | 阶段 | 内容 | 验收门禁（收口逐项对账） |
 |---|---|---|
 | P1 扩展中心货架重组 | /extensions 四货签（领域插件=现商店基底/领域技能/通用技能/MCP 服务占位）+ 旧路由重定向 + LeftPanel/AppRail/project-workspace/home 入口收敛 + D2 归类规则 + D7 残迹清理 | 货架组件+路由重定向+入口收敛定向测试绿；theme-token-contract 4/4；tsc 0；ui:audit 台账同提交；实机 CDP 断言（四货签在场/切换/旧深链重定向三断言）证据落 acceptance/block-156/ |
-| P2 MCP 客户端基座 | channels `mcp:*` 通道族 + src/ipc/mcp.js + preload 包装 + 连接管理器（stdio，动态 import SDK）+ mcp-servers.json 持久化 + MCP 货架签配置 UI（增删 server/连接状态/工具列表预览） | ipc-channels-registry 五闸绿；连接生命周期测试（connect/listTools/disconnect/异常降级）绿；持久化读写测试绿；实机断言（以 `node src/mcp-server.js` 即自家 biof3-mcp 为回环被连对象，connect→listTools 非空→disconnect）证据落 acceptance/block-156/ |
+| P2 MCP 客户端基座 | channels `mcp:*` 通道族 + src/ipc/mcp.js + preload 包装 + 连接管理器（stdio，动态 import SDK）+ mcp-servers.json 持久化 + MCP 货架签配置 UI（增删 server/连接状态/工具列表预览） | ipc-channels-registry 五闸绿；连接生命周期测试（connect/listTools/disconnect/异常降级）绿；持久化读写测试绿；实机断言（以 `node src/mcp-server.js` 即自家 petri-mcp 为回环被连对象，connect→listTools 非空→disconnect）证据落 acceptance/block-156/ |
 | P3 工具投影与审批策略 | tool-defs/mcp.js 域 + registry 汇编 + HANDLERS/CONTRACTS + policy 接线（D4 档）+ tool-metadata 同轨 + 会话内工具调用链路 | agent-tool-registry 启动一致性绿；投影契约测试（命名空间/schema 转换/降级空集合）绿；agent-tool-policy 档位测试（R2 external-request 在四档下行为）绿；block109-p2 恒等绿；实机 agent 会话调用 MCP 工具全链断言证据落 acceptance/block-156/ |
 
 完成语义：三阶段各自独立收口（定向门禁+实机证据+台账回写），整包 completed 需三阶段齐 + closeout 十一门绿；任一阶段发现跨包面即停下上报。
@@ -98,7 +98,7 @@ status: completed
 | 阶段 | 提交 | 定向测试 | 实机断言 | 证据 |
 |---|---|---|---|---|
 | P1 货架重组 | 1842c2ee | extensionShelves 5/5 + 扩展中心页 5/5 + LeftPanel 断言更新 + 邻域 62/18 + theme 4/4 + tsc 0 | CDP 八断言 ALL PASS（四货签在场/默认领域插件/嵌入无双重页头/D2 双向隔离/MCP 占位/旧深链 /plugins /skills 双重定向） | acceptance/block-156/block156-extensions-hub-live.json + p1-hub-domain-plugins.png |
-| P2 客户端基座 | 7d4f9f97 | settings 5/5 + manager 4/4 + McpShelfPane 4/4 + tsc 0 | 回环九断言 ALL PASS（夹具确定性 1 工具 + 自家 biof3-mcp 被连真实发现 28 工具 + UI 在场卡片 + 断开回落 + 清场复原） | acceptance/block-156/block156-mcp-client-live.json + p2-mcp-shelf-connected.png |
+| P2 客户端基座 | 7d4f9f97 | settings 5/5 + manager 4/4 + McpShelfPane 4/4 + tsc 0 | 回环九断言 ALL PASS（夹具确定性 1 工具 + 自家 petri-mcp 被连真实发现 28 工具 + UI 在场卡片 + 断开回落 + 清场复原） | acceptance/block-156/block156-mcp-client-live.json + p2-mcp-shelf-connected.png |
 | P3 投影与策略 | 7599abc5 | 投影契约 6/6 + 回归 75 项 0 红（agent-tool-registry/block116/tool-activity-labels/block109-p2/policy/mcp-tool-registry/block113） | agent 全链十二断言 ALL PASS（真实 deepseek-flash 自主调 mcp_fixture_fixture_echo·echo 回流 assistant·transcript toolCalls 按名·流式帧在场·断开清面 409·清场） | acceptance/block-156/mcp-agent-loop-live.json |
 
 UI 台账：UI-480（扩展中心四货架）verified + 加映 P2/P3（MCP 配置面与投影）。工具总数钉：静态 76 不动（投影为动态追加层，76 钉全数保持绿）。

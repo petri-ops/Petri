@@ -273,7 +273,7 @@ function ensureChainRevisions(input = {}, dependencies = {}) {
     .map((entry) => ({ artifactId: entry.artifactId, sha256: entry.outputHash }))
     .sort((left, right) => left.artifactId.localeCompare(right.artifactId))));
   const changeSetId = deterministicId('cs', 'chain-preview-v1', projectId, toolJobId, cohortDigest);
-  const workingBranchRef = `refs/heads/biof3/chain-preview/${safeSegment(changeSetId, 'change_set_id')}`;
+  const workingBranchRef = `refs/heads/petri/chain-preview/${safeSegment(changeSetId, 'change_set_id')}`;
 
   try {
     const existingChangeSet = repository.getChangeSet(changeSetId);
@@ -352,7 +352,7 @@ function ensureChainRevisions(input = {}, dependencies = {}) {
         parentCommit: baseCommit,
         ref: workingBranchRef,
         expectedOld: '0'.repeat(40),
-        message: `BioF3 chain preview ${toolJobId} (${provable.length} artifacts)`,
+        message: `Petri chain preview ${toolJobId} (${provable.length} artifacts)`,
         files: managedFiles,
       }).commit;
     }

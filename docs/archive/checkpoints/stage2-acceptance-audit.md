@@ -171,7 +171,7 @@ const apiKey = (selectedPreset && selectedPreset.apiKey) || getApiKey(providerNa
 **前置条件**：已执行 `npm run build:mac` 生成 .app/.dmg
 
 **执行步骤**：
-1. 打开打包后的 BioF3.app
+1. 打开打包后的 Petri.app
 2. 进入设置 > AI 模型
 3. 验证：
    - [ ] Provider 卡片显示正确（deepseek/openai/anthropic/...）
@@ -182,7 +182,7 @@ const apiKey = (selectedPreset && selectedPreset.apiKey) || getApiKey(providerNa
    - [ ] Keychain 存储正常（保存重开后凭据仍在）
    - [ ] 会话选择器同步（切换模型后新会话立即使用新模型）
    - [ ] 窄窗口布局正常
-4. 截图存档至 `/tmp/biof3-model-management-ui.png`
+4. 截图存档至 `/tmp/petri-model-management-ui.png`
 
 ---
 

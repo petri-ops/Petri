@@ -66,7 +66,7 @@ function createGitAdapter(options = {}) {
     const prefix = ['--git-dir', resolvedGitDir, '--work-tree', resolvedWorkTree];
     if (!allowHooks) {
       // 指向一个我们从不创建的目录 → git 找不到任何 hook，等价于禁用。
-      prefix.unshift('-c', `core.hooksPath=${path.join(resolvedGitDir, 'biof3-disabled-hooks')}`);
+      prefix.unshift('-c', `core.hooksPath=${path.join(resolvedGitDir, 'petri-disabled-hooks')}`);
     }
     const env = baseEnv();
     if (runOptions.readOnly) env.GIT_OPTIONAL_LOCKS = '0';
@@ -116,7 +116,7 @@ function createGitAdapter(options = {}) {
   function runAsync(args, runOptions = {}) {
     const prefix = ['--git-dir', resolvedGitDir, '--work-tree', resolvedWorkTree];
     if (!allowHooks) {
-      prefix.unshift('-c', `core.hooksPath=${path.join(resolvedGitDir, 'biof3-disabled-hooks')}`);
+      prefix.unshift('-c', `core.hooksPath=${path.join(resolvedGitDir, 'petri-disabled-hooks')}`);
     }
     const env = baseEnv();
     if (runOptions.readOnly) env.GIT_OPTIONAL_LOCKS = '0';
@@ -181,8 +181,8 @@ function createGitAdapter(options = {}) {
         if (!init.ok) throw new GitAdapterError('git_init_failed', 'Managed repository init failed.', init);
       }
       // 托管仓库自带提交身份，避免机器没有 global identity 时提交失败。
-      run(['config', 'user.name', identity?.name || 'BioF3'], { allowFailure: true });
-      run(['config', 'user.email', identity?.email || 'biof3@localhost'], { allowFailure: true });
+      run(['config', 'user.name', identity?.name || 'Petri'], { allowFailure: true });
+      run(['config', 'user.email', identity?.email || 'petri@localhost'], { allowFailure: true });
       // 托管历史不对外推送，显式关闭 gc 自动打包外的远程行为面。
       run(['config', 'core.logAllRefUpdates', 'true'], { allowFailure: true });
       return this.repositoryState();
@@ -809,7 +809,7 @@ function createGitAdapter(options = {}) {
       return refs;
     },
 
-    /** Atomically apply one exact BioF3 ref compare-and-swap cohort. */
+    /** Atomically apply one exact Petri ref compare-and-swap cohort. */
     updateRefsCas({ updates } = {}) {
       if (!Array.isArray(updates) || updates.length === 0) {
         throw new GitAdapterError('ref_transaction_invalid', 'At least one ref update is required.');
@@ -821,13 +821,13 @@ function createGitAdapter(options = {}) {
       }));
       if (new Set(normalized.map((entry) => entry.ref)).size !== normalized.length
           || normalized.some((entry) =>
-            !/^refs\/heads\/biof3\/[A-Za-z0-9][A-Za-z0-9._\-/]*$/.test(entry.ref)
+            !/^refs\/heads\/petri\/[A-Za-z0-9][A-Za-z0-9._\-/]*$/.test(entry.ref)
             || !/^[a-f0-9]{40}$/.test(entry.expectedOld)
             || !/^[a-f0-9]{40}$/.test(entry.newOid)
             || entry.expectedOld === entry.newOid)) {
         throw new GitAdapterError(
           'ref_transaction_invalid',
-          'Every ref transaction entry must be one unique exact BioF3 compare-and-swap.'
+          'Every ref transaction entry must be one unique exact Petri compare-and-swap.'
         );
       }
       const zero = '0'.repeat(40);
@@ -853,12 +853,12 @@ function createGitAdapter(options = {}) {
     },
 
     /**
-     * 以 compare-and-swap 更新一个 BioF3 refs/heads 引用。
+     * 以 compare-and-swap 更新一个 Petri refs/heads 引用。
      * 调用方必须给出预期旧值；不存在的 ref 使用 40 个 0。
      */
     updateRefCas({ ref, newCommit, expectedOld } = {}) {
-      if (typeof ref !== 'string' || !/^refs\/heads\/biof3\/[A-Za-z0-9][A-Za-z0-9._\-/]*$/.test(ref)) {
-        throw new GitAdapterError('ref_invalid', 'A refs/heads/biof3/* destination is required.');
+      if (typeof ref !== 'string' || !/^refs\/heads\/petri\/[A-Za-z0-9][A-Za-z0-9._\-/]*$/.test(ref)) {
+        throw new GitAdapterError('ref_invalid', 'A refs/heads/petri/* destination is required.');
       }
       if (!/^[a-f0-9]{40}$/.test(String(newCommit || ''))) {
         throw new GitAdapterError('new_commit_invalid', 'newCommit must be a full git object id.');
@@ -872,8 +872,8 @@ function createGitAdapter(options = {}) {
     },
 
     deleteRefCas({ ref, expectedOld } = {}) {
-      if (typeof ref !== 'string' || !/^refs\/heads\/biof3\/[A-Za-z0-9][A-Za-z0-9._\-/]*$/.test(ref)) {
-        throw new GitAdapterError('ref_invalid', 'A refs/heads/biof3/* destination is required.');
+      if (typeof ref !== 'string' || !/^refs\/heads\/petri\/[A-Za-z0-9][A-Za-z0-9._\-/]*$/.test(ref)) {
+        throw new GitAdapterError('ref_invalid', 'A refs/heads/petri/* destination is required.');
       }
       if (!/^[a-f0-9]{40}$/.test(String(expectedOld || ''))) {
         throw new GitAdapterError('expected_old_invalid', 'expectedOld must be a full git object id.');
@@ -925,7 +925,7 @@ function createGitAdapter(options = {}) {
       if (new Set(safePaths).size !== files.length) {
         throw new GitAdapterError('virtual_file_duplicate', 'Virtual file paths must be unique.');
       }
-      const indexPath = path.join(resolvedGitDir, `biof3-index-${randomUUID()}`);
+      const indexPath = path.join(resolvedGitDir, `petri-index-${randomUUID()}`);
       const isolatedEnv = { GIT_INDEX_FILE: indexPath };
       try {
         const readTree = parentCommit
@@ -1039,7 +1039,7 @@ function createGitAdapter(options = {}) {
       const ref = `refs/heads/${branch}`;
       const safeStage = stagePaths.length > 0 ? assertSafePathspecs(stagePaths, scope) : [];
       const safeRemove = removePaths.length > 0 ? assertSafePathspecs(removePaths, scope) : [];
-      const indexPath = path.join(resolvedGitDir, `biof3-review-index-${randomUUID()}`);
+      const indexPath = path.join(resolvedGitDir, `petri-review-index-${randomUUID()}`);
       const isolatedEnv = { GIT_INDEX_FILE: indexPath };
       try {
         const readTree = run(['read-tree', 'HEAD'], { allowFailure: true, env: isolatedEnv });

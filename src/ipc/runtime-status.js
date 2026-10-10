@@ -27,7 +27,7 @@ function setupRuntimeIpc({ rServerProc } = {}) {
   });
 
   // M1-1：后端就绪感知层——聚合 runtime:status + health 探测 + 子进程存活
-  // 渲染进程通过 window.biof3Desktop.backend.status() 调用，5s 轮询
+  // 渲染进程通过 window.petriDesktop.backend.status() 调用，5s 轮询
   ipcMain.handle(CHANNELS.backend.status, async () => {
     try {
       const { getRuntimeStatus } = require("../plugin-manager");

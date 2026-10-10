@@ -80,7 +80,7 @@ job_dir 执行协议（事实定义在 `tools-executor.js`）：脚本以 `argv[
 
 ### 2.6 migration 机制
 
-`src/migration-runner.js`：`schema_migrations(version, applied_at)`，扫 `migrationsDir/*.sql`，命名 `NNN_description.sql`，每个文件包在 `db.transaction` 内。注册点在 `src/main.js`，通过 `spawnSync` 以外部 Node（`ELECTRON_RUN_AS_NODE=1`，受 `BIOF3_BETTER_SQLITE3_ROOT` 控制）执行，用于规避 Electron/Node ABI 冲突。
+`src/migration-runner.js`：`schema_migrations(version, applied_at)`，扫 `migrationsDir/*.sql`，命名 `NNN_description.sql`，每个文件包在 `db.transaction` 内。注册点在 `src/main.js`，通过 `spawnSync` 以外部 Node（`ELECTRON_RUN_AS_NODE=1`，受 `PETRI_BETTER_SQLITE3_ROOT` 控制）执行，用于规避 Electron/Node ABI 冲突。
 
 **现状**：现有全部 schema 都写在 `core/r-server/db.js` 的命令式 `CREATE TABLE IF NOT EXISTS` + `try { ALTER TABLE } catch {}` 里。
 
@@ -106,16 +106,16 @@ job_dir 执行协议（事实定义在 `tools-executor.js`）：脚本以 `argv[
 
 | 层 | 负责 | 物理位置 | 不负责 |
 | --- | --- | --- | --- |
-| Git | 脚本、参数、流程定义、结果清单的文本版本与 diff、commit、ref、恢复 | `<workspace>/.biof3/git`（BioF3 托管）或用户既有仓库的显式路径子集 | 科学有效性、大型数据 |
+| Git | 脚本、参数、流程定义、结果清单的文本版本与 diff、commit、ref、恢复 | `<workspace>/.petri/git`（Petri 托管）或用户既有仓库的显式路径子集 | 科学有效性、大型数据 |
 | Artifact Store | 科学产物本体、hash、三态、lineage、验证 | `<workspace>/results/`，沿用 `resolveProjectRunLayout` | 文本编辑体验 |
-| SQLite | 索引、查询、UI 投影、选择状态、映射 | `biof3.db` 新表 | 替代 Git 或文件本体 |
+| SQLite | 索引、查询、UI 投影、选择状态、映射 | `petri.db` 新表 | 替代 Git 或文件本体 |
 | Harness | 意图、分类、规划、执行、恢复 | 现有 Loop/Task 链 | 自造执行真相 |
 
 ### 3.2 复用 vs 新增
 
 **复用，禁止替代**：
 
-- `resolveProjectRunLayout()` — 所有 RS 路径必须由它派生，`.biof3/` 与 revision 目录都锚定 `workspaceRoot`，并继续走 `isPathContained` 校验。
+- `resolveProjectRunLayout()` — 所有 RS 路径必须由它派生，`.petri/` 与 revision 目录都锚定 `workspaceRoot`，并继续走 `isPathContained` 校验。
 - `reconcileArtifactTruth()` — 每个新 Revision 的 `validationStatus` 必须由它产出，RS 不得自行判定 valid/degraded/blocked。
 - `run_tool → tool_job → artifact truth` — 任何 `presentation_rerender` 及以上分类都必须创建真实 `tool_job`。
 - `execution-provenance.js` / `artifact-manifest.js` / `delivery-manifest.js` / `scientific-replay-package.js` — Revision 的 provenance 直接复用，不新建并行 provenance。
@@ -131,7 +131,7 @@ job_dir 执行协议（事实定义在 `tools-executor.js`）：脚本以 `argv[
 
 理由：RS 表承载版本与恢复语义，需要可审计的版本号、事务边界和失败回滚；`try { ALTER TABLE } catch {}` 无法表达"这次升级是否成功"。
 
-**风险与缓解**：migration runner 已接线但**从未被真实使用过**（目录为空）。因此 RS2 必须包含 runner 首次使用验证：空库首装、已有库升级、事务回滚、以及 `BIOF3_BETTER_SQLITE3_ROOT` 下的 ABI 路径。不能假设它开箱可用。
+**风险与缓解**：migration runner 已接线但**从未被真实使用过**（目录为空）。因此 RS2 必须包含 runner 首次使用验证：空库首装、已有库升级、事务回滚、以及 `PETRI_BETTER_SQLITE3_ROOT` 下的 ABI 路径。不能假设它开箱可用。
 
 ### 3.4 ADR-RS-3：Git 通过 CLI Adapter，不引入 git 库
 
@@ -151,12 +151,12 @@ job_dir 执行协议（事实定义在 `tools-executor.js`）：脚本以 `argv[
 
 | 场景 | 检测 | 行为 | 禁止 |
 | --- | --- | --- | --- |
-| 非 Git 项目 | `<workspace>` 无 `.git` 且无托管绑定 | 创建 `<workspace>/.biof3/git` 托管仓库，只追踪受管理路径 | 对用户目录执行 `git init` |
+| 非 Git 项目 | `<workspace>` 无 `.git` 且无托管绑定 | 创建 `<workspace>/.petri/git` 托管仓库，只追踪受管理路径 | 对用户目录执行 `git init` |
 | 已有 clean Git | 有 `.git`，`status` 干净 | 绑定既有仓库，只操作显式声明路径，AI 修改走专用 branch/隔离区 | `git add .` / `git add -A` |
 | 已有 dirty Git | `status` 有未提交或 untracked 改动 | 目标路径与用户 WIP 无交集 → 继续；有交集 → ChangeSet 置 `blocked` 并解释 | 自动 stage、stash、覆盖用户改动 |
 | 存在 submodule / worktree / index.lock | Adapter 预检 | 明确阻断并说明 | 强行操作或删锁 |
 | git 不可用 | readiness 检测失败 | 阻断正式采用，给出诊断 | 静默降级为不可恢复编辑 |
-| 用户拒绝接入既有仓库 | 用户显式选择 | 改用 `.biof3/git` 托管历史 | 强制绑定 |
+| 用户拒绝接入既有仓库 | 用户显式选择 | 改用 `.petri/git` 托管历史 | 强制绑定 |
 
 全场景禁止：自动 `push`、`force push`、`rebase`、删除用户分支；托管仓库默认不执行外部 hooks。
 
@@ -213,6 +213,6 @@ RS0 未展开、留给 RS1 的项：
 
 - `src/plugin-manager.js`（55KB）与 `src/plugin-schema.js` 中内置插件 `plugin.json` 的真实清单位置与输出声明格式（`core/` 下无 `plugin.json`）。
 - `core/shared-backend/g0-truth-projection.js` 的 `buildTruthProjection` 字段细节。
-- `.biof3/` 目录是否需要加入 `.gitignore` 与打包排除规则。
+- `.petri/` 目录是否需要加入 `.gitignore` 与打包排除规则。
 
 下一阶段：`G0-RS1` Git Adapter 与 Repository Binding。按单线串行纪律，RS1 收口后才启动 RS2。

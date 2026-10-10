@@ -19,9 +19,9 @@ const { execFileSync } = require('node:child_process');
 const http = require('node:http');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
 const DB_PATH = process.env.BIOF59_DB
-  || path.join(__dirname, '..', '.biof3-dev-user-data', 'data', 'biof3.db');
+  || path.join(__dirname, '..', '.petri-dev-user-data', 'data', 'petri.db');
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-59');
 
 function fetchJson(url) {
@@ -116,14 +116,14 @@ async function main() {
 
   const targets = await listTargets();
   const page = targets.find((t) => t.type === 'page' && /localhost:3000/.test(t.url || '') && !/(\/window\/)/.test(t.url || ''));
-  if (!page) throw new Error('biof3_page_not_found');
+  if (!page) throw new Error('petri_page_not_found');
   const client = await new CdpClient(page.webSocketDebuggerUrl).connect();
   results.mainPage = page.url;
 
   // 幂等预清理
   const contentId = `agent:${picked.id}`;
   const pre = await evalJSRetry(client, `(async () => {
-    const wm = window.biof3Desktop?.windowManager;
+    const wm = window.petriDesktop?.windowManager;
     if (!wm) return { bridge: false };
     const snap = await wm.snapshot();
     const entry = (snap?.snapshot?.entries || []).find((e) => e.id === ${JSON.stringify(contentId)});
@@ -136,7 +136,7 @@ async function main() {
   assert('主窗桥可用 + 预清理', pre?.bridge === true, JSON.stringify(pre));
 
   // 2) 弹出 agent 详情窗
-  const pop = await evalJSRetry(client, `window.biof3Desktop.windowManager.popOut('agent', ${JSON.stringify(picked.id)})`);
+  const pop = await evalJSRetry(client, `window.petriDesktop.windowManager.popOut('agent', ${JSON.stringify(picked.id)})`);
   assert('popOut(agent) → created（BLOCK-49 链路键）', pop?.ok && pop?.action === 'created' && pop?.id === contentId, JSON.stringify(pop));
   const hits = await pollTarget('/window/agent/');
   assert('agent 详情窗 target 出现', Array.isArray(hits) && hits.length === 1, `targets=${hits?.length}`);
@@ -162,8 +162,8 @@ async function main() {
   await screenshot(agentClient, path.join(EVIDENCE_DIR, 'p59-p4-01-agent-window.png'));
 
   // 4) 清理
-  await evalJSRetry(client, `window.biof3Desktop.windowManager.minimizeToRail(${JSON.stringify(contentId)})`);
-  const removed = await evalJSRetry(client, `window.biof3Desktop.windowManager.remove(${JSON.stringify(contentId)})`);
+  await evalJSRetry(client, `window.petriDesktop.windowManager.minimizeToRail(${JSON.stringify(contentId)})`);
+  const removed = await evalJSRetry(client, `window.petriDesktop.windowManager.remove(${JSON.stringify(contentId)})`);
   assert('清理：轨道降格 + 显式移除', removed?.ok === true, JSON.stringify(removed));
 
   const allPass = results.assertions.every((a) => a.pass);

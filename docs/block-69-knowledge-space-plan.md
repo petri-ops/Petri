@@ -22,10 +22,10 @@
 
 **可行，且地基好于预期**——项目已有真实的 RAG 半套基建，本包补上另一半（摄取管道 + agent 主链路读面 + UI）：
 
-- **嵌入通道已有生产使用**：`core/biof3-server/helpers/memory-vectors.js`（SEMANTIC_SEARCH_v1：`memory_vectors` 表 BLOB 存 Float32Array、`EMBEDDING_DIM=1024`、`text-embedding-v3`、cosine 检索、TOPK=3、THRESHOLD=0.55）；调用链 `memory-vectors.js dashscopeEmbed` → `core/biof3-server/helpers/model-gateway.js embed()` → `core/shared-backend/llm-providers/model-gateway.js:295-319` → `dashscope.js:38-103`
+- **嵌入通道已有生产使用**：`core/petri-server/helpers/memory-vectors.js`（SEMANTIC_SEARCH_v1：`memory_vectors` 表 BLOB 存 Float32Array、`EMBEDDING_DIM=1024`、`text-embedding-v3`、cosine 检索、TOPK=3、THRESHOLD=0.55）；调用链 `memory-vectors.js dashscopeEmbed` → `core/petri-server/helpers/model-gateway.js embed()` → `core/shared-backend/llm-providers/model-gateway.js:295-319` → `dashscope.js:38-103`
 - **agent 主链路只写不读（本包正好补读面）**：`routes/ai-agent/chat.js:1121-1143` 跑完 turn 写记忆向量，但 `ai-agent/chat.js` / `agent-runner.js` 全程无任何检索注入（grep 证实 0 命中）——知识空间注入是新增能力，不与既有注入冲突
-- **工具注册双模式成熟**：agent 工具面 `core/biof3-server/agent-tools/tool-defs.js`（名字→实现 `registry.js:104-124`，权限分级 `contract()` `:176-201`），注入点 `agent-runner.js:596` 与 `routes/ai-agent/chat.js:592`——`knowledge_search` 工具有干净挂点
-- **存储约定现成**：单一 `biof3.db`（`core/biof3-server/db.js`）+ `<LOCAL_DATA_DIR>` 子目录约定（`src/main/env-coordinator.js:222-244`），新增 `knowledge/` 子目录顺理成章
+- **工具注册双模式成熟**：agent 工具面 `core/petri-server/agent-tools/tool-defs.js`（名字→实现 `registry.js:104-124`，权限分级 `contract()` `:176-201`），注入点 `agent-runner.js:596` 与 `routes/ai-agent/chat.js:592`——`knowledge_search` 工具有干净挂点
+- **存储约定现成**：单一 `petri.db`（`core/petri-server/db.js`）+ `<LOCAL_DATA_DIR>` 子目录约定（`src/main/env-coordinator.js:222-244`），新增 `knowledge/` 子目录顺理成章
 - **UI 扩展有先例**：`RightPanelMode` 八值 union（`frontend/src/pages/project-workspace.tsx:84`）+ `RightPanel.tsx:137-239` 分支分发，review tab 是最近先例；`ContextBudgetBar` TokenBudget categories（`frontend/src/components/copilot/ContextBudgetBar.tsx:3-22`）可扩展类目
 - **全文索引能力内建（修订 1 核实）**：better-sqlite3 12.11.1 自带 SQLite 且默认启用 FTS5 全文检索 + trigram 分词器（中文子串匹配可用）——**关键词索引通道 0 新依赖**；注意当前仓库 better-sqlite3 按 Electron ABI 编译，系统 node 直接 require 会 NODE_MODULE_VERSION 报错，FTS5/trigram 可用性在 P0 以重建环境单测实证
 
@@ -34,15 +34,15 @@
 ## 3. 代码事实基线
 
 - **对话记忆（相邻域，不动）**：`memory_vectors`（按 user/project/kind 索引）+ `user_facts`（`routes/ai-memory.js:12-126`）；旧 chat 路由注入检索块（`routes/ai-chat.js:205,340`），agent 路由只写——三者与知识空间语义不同（记忆=对话沉淀、事实=用户画像、知识=用户上传背景），**不合并不互写**
-- **项目数据导入（相邻域，不混）**：`POST /api/workspaces/:projectId/import`（`core/biof3-server/routes/files.js:236-301`，multer 限 `.csv/.tsv/.txt` 500MB）+ `core/shared-backend/data-profiler.js` profiling——这是**项目工作区数据面**真相；知识空间是独立域，不落 `<workspace>/data/`，不复用该端点
+- **项目数据导入（相邻域，不混）**：`POST /api/workspaces/:projectId/import`（`core/petri-server/routes/files.js:236-301`，multer 限 `.csv/.tsv/.txt` 500MB）+ `core/shared-backend/data-profiler.js` profiling——这是**项目工作区数据面**真相；知识空间是独立域，不落 `<workspace>/data/`，不复用该端点
 - **前端 Office 预览（参考件）**：`frontend/src/lib/office-file-preview.ts` 用 unzipit 提取 docx/xlsx/pptx 结构化摘要——是前端渲染层简化摘要，非后端摄取管道，思路可参考不直接复用
-- **视觉通道**：`core/biof3-server/agent-tools/vision-tools.js` `read_image`（dashscope-vision provider，注册于 `agent-tools/registry.js:124`）——图像知识摄取可复用同通道做"描述化索引"
+- **视觉通道**：`core/petri-server/agent-tools/vision-tools.js` `read_image`（dashscope-vision provider，注册于 `agent-tools/registry.js:124`）——图像知识摄取可复用同通道做"描述化索引"
 - **上下文组装链**：前端 `useChatStream.send`（`frontend/src/components/copilot/SimpleChat/hooks/useChatStream.ts:163-210`）→ `conversationRunStore.startConversationRun`（`:363` 起）→ `copilotClient.streamChat`（`copilotClient.ts:1113-1121`）→ `POST /api/ai/agent` SSE → 后端 `buildSystemPrompt`（`agent-runner.js:340-370`；`helpers/system-prompt.js:423`）——注入块加在 `buildSystemPrompt` 一层
 - **composer 挂点**：accessMode 档位菜单（`SimpleChat.tsx:1687-1751`）、模型选择器（`:1798-1850`）、⋯ 菜单（`:1756-1795`，**BLOCK-68 已裁决整体移除，本包不得依赖该挂点**）；预算环挂载 `:1797`
 
 ## 4. 设计裁决（D1–D8，标 ⏳ 者待 P0 评审用户确认）
 
-- **D1 独立知识域（第三数据域）**：`biof3.db` 新增 `knowledge_spaces`（v1 单行 default 空间：name/enabled/embedding 模型——"大脑"的实体化）、`knowledge_documents`（name/kind/size/status/error/chunk_count/时间戳）、`knowledge_chunks`（doc_id/seq/text/vector BLOB/dim/model）。向量编码沿用 memory-vectors 的 Float32Array BLOB 方案但**独立建表**，不改 `memory_vectors` 任何语义。表带 space 字段留多空间扩展位，v1 只呈现"一个大脑"
+- **D1 独立知识域（第三数据域）**：`petri.db` 新增 `knowledge_spaces`（v1 单行 default 空间：name/enabled/embedding 模型——"大脑"的实体化）、`knowledge_documents`（name/kind/size/status/error/chunk_count/时间戳）、`knowledge_chunks`（doc_id/seq/text/vector BLOB/dim/model）。向量编码沿用 memory-vectors 的 Float32Array BLOB 方案但**独立建表**，不改 `memory_vectors` 任何语义。表带 space 字段留多空间扩展位，v1 只呈现"一个大脑"
 - **D2 摄取管道**：解析器注册表（parser registry，按扩展名/MIME 路由）；文档状态机 `uploaded → parsing → chunking → embedding → ready | failed(+error)`；原始文件落 `<LOCAL_DATA_DIR>/knowledge/<docId>/`；进程内串行摄取队列 + 前端轮询状态
 - **D3 分块**：结构感知（标题/段落边界）+ 尺寸上限（约 800 token/块、少量重叠），参数收敛到单一常量模块，不提前调优
 - **D4 检索与注入（本包核心裁决 ⏳，修订 1 扩展）**：
@@ -53,7 +53,7 @@
 - **D6 UI（对应需求 4/5）**：大脑图标 = 知识空间实体入口——composer 工具条独立 icon 开关按钮（启用态高亮，**不挂 ⋯ 菜单**——BLOCK-68 已裁决其移除）+ 右栏 `RightPanelMode` 增 `'knowledge'` tab（与文件/审阅/模型 I/O 并列）。tab 内容：空间开关 + 文档列表（名称/类型/状态/块数/时间）+ 多选上传 + 删除/重建索引 + **检索测试框**（输入 query 看.top-k 命中，摄取质量可自证）。启用状态单一真相 = DB，前端经端点读写，不造第二真相
 - **D7 嵌入依赖事实（诚实呈现）**：当前唯一 embedding 实现 = DashScope text-embedding-v3；**启用前提 = DashScope key 已配置**（aiSettings 既有通道），无 key 渲染诚实空态（"配置嵌入模型后可启用"），不静默降级。本地 embedding（transformers.js）登记远期候选
 - **D8 检索规模边界**：better-sqlite3 暴力扫描 + 余弦在万级 chunk 内可用（单机桌面场景合理）；sqlite-vec 等向量索引登记为规模触顶后的候选，本期不做
-- **D9 存储位置与可见性（修订 1 新增）**：知识库全部落在用户数据根目录 `BIOF3_LOCAL_DATA_DIR`（默认 `<文档>/Gewu-Local`，`src/main/env-coordinator.js:222-231`）——**原始文件** `<root>/knowledge/<docId>/`，**索引与清单** 同一根目录 `biof3.db` 内的知识域表 + FTS5 虚表；设置面板/知识 tab 提供「打开知识目录」入口（复用既有 files 桥的 reveal 通道），用户始终找得到、备份得了
+- **D9 存储位置与可见性（修订 1 新增）**：知识库全部落在用户数据根目录 `PETRI_LOCAL_DATA_DIR`（默认 `<文档>/Petri-Local`，`src/main/env-coordinator.js:222-231`）——**原始文件** `<root>/knowledge/<docId>/`，**索引与清单** 同一根目录 `petri.db` 内的知识域表 + FTS5 虚表；设置面板/知识 tab 提供「打开知识目录」入口（复用既有 files 桥的 reveal 通道），用户始终找得到、备份得了
 - **D10 删除语义（修订 1 新增，对应"用户可以清除部分内容吗"）**：**可以，粒度 = 整篇文档**——知识 tab 文档列表每行带删除入口，删除在单事务内清除原始文件 + chunks + 向量 + FTS 行，同时生效于两条检索通道（删后立即可证不命中）；另设「清空空间」危险区入口（两步确认，BLOCK-64 取消两步确认先例）；解析质量不佳用「重建索引」对单文档重跑管道。**文档内部段落级编辑不在首包**（远期候选，chunk 粒度删除涉及引用一致性，先不做）
 
 ## 5. 阶段划分（建议 P0–P2 为首包一次会话收口；P3+ 另行裁决）

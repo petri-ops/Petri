@@ -1,5 +1,5 @@
-# BioF3 R 运行时基础包 (biof3-r-runtime)
-# 与 resources/built-in-plugins/manifest.json 中 biof3-r-runtime 的声明一致
+# Petri R 运行时基础包 (petri-r-runtime)
+# 与 resources/built-in-plugins/manifest.json 中 petri-r-runtime 的声明一致
 # （R 4.5 + ggplot2/dplyr/data.table/BiocGenerics 等 70+ 包）。
 #
 # 这里列出「基础集 + 各 R 插件直接依赖」；其余为传递依赖，由安装器自动带入。

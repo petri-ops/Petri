@@ -25,8 +25,8 @@ import { fingerprintRealDataRoot } from '../scripts/g0-rs-p4r-capture.mjs';
 import { captureBaseline } from '../scripts/g0-rs-p4r-baseline.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const REPO_DB = path.join(REPO_ROOT, 'core', 'biof3-server', 'biof3.db');
-const REAL_DATA_ROOT = path.join(homedir(), 'Documents', 'BioF3-Local');
+const REPO_DB = path.join(REPO_ROOT, 'core', 'petri-server', 'petri.db');
+const REAL_DATA_ROOT = path.join(homedir(), 'Documents', 'Petri-Local');
 
 /** Routes whose cost is the whole point of the baseline. */
 const MUST_BE_MEASURED = ['job-status', 'artifact-bytes', 'interaction', 'changesets', 'workspace-status'];

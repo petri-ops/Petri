@@ -32,14 +32,14 @@ const require = createRequire(import.meta.url);
 // 内存 DB 自举（同 agent-workspace-exec-background.test.mjs）
 {
   const Database = require('better-sqlite3');
-  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'biof3-block34-p1-db-'));
-  const db = new Database(path.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'petri-block34-p1-db-'));
+  const db = new Database(path.join(tempDbDir, 'petri.db'));
   const migrationsDir = resolve('src/migrations');
   for (const file of fssync.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     db.exec(fssync.readFileSync(path.join(migrationsDir, file), 'utf8'));
   }
   db.close();
-  process.env.BIOF3_DB_PATH = path.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try {
       fssync.rmSync(tempDbDir, { recursive: true, force: true });
@@ -51,7 +51,7 @@ const require = createRequire(import.meta.url);
 
 describe('BLOCK-34 P1 static contract: tool activities recorder reaches message persistence', () => {
   it('runLoop return includes assistantToolActivities', async () => {
-    const src = fs.readFileSync(resolve('core/biof3-server/loop-orchestrator.js'), 'utf8');
+    const src = fs.readFileSync(resolve('core/petri-server/loop-orchestrator.js'), 'utf8');
     const returnIdx = src.lastIndexOf('return {');
     const returnBlock = src.slice(returnIdx);
     assert.ok(
@@ -61,7 +61,7 @@ describe('BLOCK-34 P1 static contract: tool activities recorder reaches message 
   });
 
   it('agent-runner destructures the recorder and no longer passes null to appendAssistantMessage', () => {
-    const src = fs.readFileSync(resolve('core/biof3-server/agent-runner.js'), 'utf8');
+    const src = fs.readFileSync(resolve('core/petri-server/agent-runner.js'), 'utf8');
     const destructureIdx = src.indexOf('await runLoop({');
     const head = src.slice(0, destructureIdx);
     assert.ok(
@@ -82,11 +82,11 @@ describe('BLOCK-34 P1 static contract: tool activities recorder reaches message 
 
 describe('BLOCK-34 P1 behavior: recorder snapshot lands in copilot_messages.meta_json', () => {
   it('appendAssistantMessage persists toolActivities snapshot into message meta', () => {
-    const { createToolActivityRecorder } = require(resolve('core/biof3-server/agent-tools'));
-    const ca = require(resolve('core/biof3-server/conversation-adapter.js'));
+    const { createToolActivityRecorder } = require(resolve('core/petri-server/agent-tools'));
+    const ca = require(resolve('core/petri-server/conversation-adapter.js'));
 
     // 建会话（appendAssistantMessage 需要 conversationId 存在）
-    const conversations = require(resolve('core/biof3-server/helpers/conversations.js'));
+    const conversations = require(resolve('core/petri-server/helpers/conversations.js'));
     const conv = conversations.getOrCreateActiveConversation('u_block34', { title: 'block34-p1', page: 'desktop-project', projectId: 'p_block34' });
     const conversationId = conv.id || conv.conversationId;
     assert.ok(conversationId, 'conversation must be created');
@@ -121,7 +121,7 @@ describe('BLOCK-34 P1 behavior: recorder snapshot lands in copilot_messages.meta
     assert.strictEqual(result.persisted, true, 'message must persist');
 
     const Database = require('better-sqlite3');
-    const db = new Database(process.env.BIOF3_DB_PATH, { readonly: true });
+    const db = new Database(process.env.PETRI_DB_PATH, { readonly: true });
     try {
       const row = db.prepare(
         "SELECT meta_json FROM copilot_messages WHERE conversation_id = ? AND role = 'assistant' ORDER BY id DESC LIMIT 1",
@@ -139,8 +139,8 @@ describe('BLOCK-34 P1 behavior: recorder snapshot lands in copilot_messages.meta
   });
 
   it('UI-437 v5.6: recorder 快照携带参数摘要与 resultData（时间线行内详情的数据源）', () => {
-    const { createToolActivityRecorder } = require(resolve('core/biof3-server/agent-tools'));
-    const { buildToolResultEvent } = require(resolve('core/biof3-server/agent-tools/tool-events'));
+    const { createToolActivityRecorder } = require(resolve('core/petri-server/agent-tools'));
+    const { buildToolResultEvent } = require(resolve('core/petri-server/agent-tools/tool-events'));
     const recorder = createToolActivityRecorder();
 
     recorder.recordCall({ name: 'query', callId: 'c-1', args: { datasets: '项目文档' } });
@@ -163,7 +163,7 @@ describe('BLOCK-34 P1 behavior: recorder snapshot lands in copilot_messages.meta
   });
 
   it('UI-437 v5.5: 对象结果 summary 用 digest 取代 ok（top-3 键，ok/error 样板剔除）', () => {
-    const { buildToolResultEvent } = require(resolve('core/biof3-server/agent-tools/tool-events'));
+    const { buildToolResultEvent } = require(resolve('core/petri-server/agent-tools/tool-events'));
 
     const evt = buildToolResultEvent(
       { tool: 'query', status: 'success', durationMs: 7, data: { ok: true, datasets: [], analyses: [], query: '项目文档' } },
@@ -180,8 +180,8 @@ describe('BLOCK-34 P1 behavior: recorder snapshot lands in copilot_messages.meta
   });
 
   it('UI-273: buildToolResultEvent and recorder snapshot carry changeDiff for write ops', () => {
-    const { createToolActivityRecorder } = require(resolve('core/biof3-server/agent-tools'));
-    const { buildToolResultEvent } = require(resolve('core/biof3-server/agent-tools/tool-events'));
+    const { createToolActivityRecorder } = require(resolve('core/petri-server/agent-tools'));
+    const { buildToolResultEvent } = require(resolve('core/petri-server/agent-tools/tool-events'));
 
     const changeDiff = {
       added: 2,
@@ -236,7 +236,7 @@ describe('BLOCK-34 P1 behavior: recorder snapshot lands in copilot_messages.meta
 });
 
 describe('UI-384 — 只读工具结果内容镜像（行详情输出块数据源）', () => {
-  const { buildResultOutputText, RESULT_OUTPUT_TOOLS } = require(resolve('core/biof3-server/agent-tools/tool-events'));
+  const { buildResultOutputText, RESULT_OUTPUT_TOOLS } = require(resolve('core/petri-server/agent-tools/tool-events'));
 
   it('workspace_read：头行（路径/行区间/总行数）+ 内容；空内容诚实标注', () => {
     const out = buildResultOutputText('workspace_read', {
@@ -315,8 +315,8 @@ describe('UI-384 — 只读工具结果内容镜像（行详情输出块数据�
 
 describe('UI-382 — agentRunId 随活动快照落库（历史重建后内联实况卡可恢复）', () => {
   it('recordResult 从 spawn/wait/list agent 结果提取 agentId 存入快照', () => {
-    const { createToolActivityRecorder } = require(resolve('core/biof3-server/agent-tools'));
-    const { buildToolResultEvent } = require(resolve('core/biof3-server/agent-tools/tool-events'));
+    const { createToolActivityRecorder } = require(resolve('core/petri-server/agent-tools'));
+    const { buildToolResultEvent } = require(resolve('core/petri-server/agent-tools/tool-events'));
 
     const recorder = createToolActivityRecorder();
     recorder.recordCall({ name: 'spawn_agent', args: { task: '统计文件数' }, traceId: 'tr', callId: 'call_s1', iteration: 1 });
@@ -344,8 +344,8 @@ describe('UI-382 — agentRunId 随活动快照落库（历史重建后内联实
   });
 
   it('非 agent 工具的 data.agentId 不误提取；recordOutput 内容镜像随快照存活', () => {
-    const { createToolActivityRecorder } = require(resolve('core/biof3-server/agent-tools'));
-    const { buildToolOutputEvent, buildToolResultEvent } = require(resolve('core/biof3-server/agent-tools/tool-events'));
+    const { createToolActivityRecorder } = require(resolve('core/petri-server/agent-tools'));
+    const { buildToolOutputEvent, buildToolResultEvent } = require(resolve('core/petri-server/agent-tools/tool-events'));
 
     const recorder = createToolActivityRecorder();
     recorder.recordCall({ name: 'run_tool', args: { toolId: 'deseq2' }, traceId: 'tr', callId: 'call_r', iteration: 1 });

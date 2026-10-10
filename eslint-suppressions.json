@@ -1,25 +1,25 @@
 {
-  "core/biof3-server/agent-runner.js": {
+  "core/petri-server/agent-runner.js": {
     "no-unused-vars": {
       "count": 2
     }
   },
-  "core/biof3-server/agent-tools/workspace-ssh-surface.js": {
+  "core/petri-server/agent-tools/workspace-ssh-surface.js": {
     "no-control-regex": {
       "count": 1
     }
   },
-  "core/biof3-server/agent-tools/workspace-tools.js": {
+  "core/petri-server/agent-tools/workspace-tools.js": {
     "no-control-regex": {
       "count": 2
     }
   },
-  "core/biof3-server/helpers/chat-file-references.js": {
+  "core/petri-server/helpers/chat-file-references.js": {
     "no-control-regex": {
       "count": 1
     }
   },
-  "core/biof3-server/loop-orchestrator.js": {
+  "core/petri-server/loop-orchestrator.js": {
     "no-unused-vars": {
       "count": 2
     }

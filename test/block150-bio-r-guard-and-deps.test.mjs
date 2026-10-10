@@ -24,7 +24,7 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SIBLING_PACK = path.resolve(root, '..', 'gewu-pack-bio');
+const SIBLING_PACK = path.resolve(root, '..', 'petri-pack-bio');
 const hasPack = fs.existsSync(SIBLING_PACK);
 
 const GUARD_MARKER = '# ---- 缺包守卫';

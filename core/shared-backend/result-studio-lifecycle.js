@@ -80,7 +80,7 @@ function inspectRevisionIntegrity({ repository, adapter, workspaceRoot, projectI
   const sourceCommits = adapter.resolveManyRefs(
     revisions.map((revision) => revision.sourceCommit).filter(Boolean),
   );
-  const currentRefs = adapter.listRefs('refs/heads/biof3/current/');
+  const currentRefs = adapter.listRefs('refs/heads/petri/current/');
 
   for (const revision of revisions) {
     let actualHash = null;
@@ -95,7 +95,7 @@ function inspectRevisionIntegrity({ repository, adapter, workspaceRoot, projectI
       issues.push({ revisionId: revision.revisionId, kind: 'source_commit_missing', blocking: true });
     }
     if (revision.isCurrent) {
-      const ref = `refs/heads/biof3/current/${revision.artifactFamilyId}`;
+      const ref = `refs/heads/petri/current/${revision.artifactFamilyId}`;
       // listRefs 只返回存在的 ref；缺失即为 null，与 revParse 语义一致。
       const actual = currentRefs.get(ref) || null;
       if (actual !== revision.sourceCommit) {
@@ -612,7 +612,7 @@ function recoverResultStudioWorkspace(input = {}, dependencies = {}) {
   }
 
   for (const revision of repository.listCurrentRevisions(input.projectId)) {
-    const ref = `refs/heads/biof3/current/${revision.artifactFamilyId}`;
+    const ref = `refs/heads/petri/current/${revision.artifactFamilyId}`;
     if (!adapter.revParse(ref) && revision.sourceCommit && adapter.revParse(revision.sourceCommit)) {
       adapter.updateRefCas({ ref, newCommit: revision.sourceCommit, expectedOld: ZERO_OID });
       repaired.push({ repair: 'restored_missing_current_ref' });
@@ -666,7 +666,7 @@ function inspectResultStudioStorage({ repository, workspaceRoot, projectId } = {
   const uniqueArtifactBytes = [...groups.values()].reduce((sum, group) => sum + group.bytes, 0);
   const privateRoot = guardPrivatePath(() => inspectPrivateDirectory(
     workspaceRoot,
-    ['.biof3', 'revision'],
+    ['.petri', 'revision'],
     { allowMissing: true },
   ));
   const privateStorage = privateRoot
@@ -789,7 +789,7 @@ function executeArtifactDeduplication(input = {}, dependencies = {}) {
   const plan = planArtifactDeduplication(input, dependencies);
   if (!input.planToken || input.planToken !== plan.planToken) throw new ResultStudioLifecycleError('dedup_plan_stale', 'Deduplication plan token is missing or stale.');
   const workspaceRoot = guardPrivatePath(() => resolveWorkspaceAnchor(input.workspaceRoot));
-  const objectRootComponents = ['.biof3', 'result-objects', 'sha256'];
+  const objectRootComponents = ['.petri', 'result-objects', 'sha256'];
   guardPrivatePath(() => ensurePrivateDirectory(workspaceRoot, objectRootComponents));
   const cloned = [];
   const clonePrimitives = new Set();
@@ -805,7 +805,7 @@ function executeArtifactDeduplication(input = {}, dependencies = {}) {
       { allowMissing: true, kind: 'file' },
     ));
     if (!objectEntry || files.some((file) => sameFileIdentity(file, objectEntry.path))) {
-      const temporaryName = `.biof3-object-${crypto.randomUUID()}`;
+      const temporaryName = `.petri-object-${crypto.randomUUID()}`;
       const temporaryComponents = [...objectDirComponents, temporaryName];
       const temporaryObject = path.join(objectDir, temporaryName);
       try {
@@ -842,7 +842,7 @@ function executeArtifactDeduplication(input = {}, dependencies = {}) {
     try {
       for (let index = 0; index < files.length; index += 1) {
         const file = files[index];
-        const temporary = path.join(path.dirname(file), `.biof3-dedupe-${crypto.randomUUID()}`);
+        const temporary = path.join(path.dirname(file), `.petri-dedupe-${crypto.randomUUID()}`);
         clonePrimitives.add(copyFileCopyOnWrite(objectEntry.path, temporary));
         if (hashFile(temporary) !== group.digest) throw new ResultStudioLifecycleError('dedup_postcondition_failed', 'Deduplicated Artifact failed its hash postcondition.');
         if (sameFileIdentity(objectEntry.path, temporary)) throw new ResultStudioLifecycleError('dedup_inode_alias', 'Copy-on-write clone unexpectedly reused the content object inode.');

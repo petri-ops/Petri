@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the BioF3 desktop app are documented in this
+All notable changes to the Petri desktop app are documented in this
 file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## Week 4 (2026-07-14) -- RC Gate 1 close-out + Gate 4 macOS DMG + release CI
@@ -18,7 +18,7 @@ file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
   contract coverage
 - `AGENTS.md` + `frontend/AGENTS.md` + `.cursorignore` -- AI agent
   entry points and context scope
-- `icons/biof3-logo-concept-v1.{svg,png}` -- brand concept for
+- `icons/petri-logo-concept-v1.{svg,png}` -- brand concept for
   rc.1 packaging
 - `.github/workflows/release.yml` -- tag-driven dual-platform build
   (`macos-14` arm64+x64 dmg, `windows-latest` x64 NSIS) +
@@ -102,7 +102,7 @@ file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 - `resources/demo-data/<tool>/` demo fixtures for 9 of 11 built-in
   tools. Each fixture matches the file shape expected by the
-  corresponding biof3-server `tool-scripts/<tool>.R`:
+  corresponding petri-server `tool-scripts/<tool>.R`:
   - `deseq2/` -- 10-gene counts (5 up + 3 down + 2 housekeeping) +
     WT/KO coldata (2 reps each)
   - `volcano-plot/` -- 25-row DEG table (10 up + 8 down + 7 NS)
@@ -122,7 +122,7 @@ file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
   each fixture, including deferred tools (seurat-standard /
   wgcna / maftools-mutation) that need real external datasets.
 - `scripts/golden-path.mjs` -- emits `<base>.run.json`
-  (schema `biof3/golden-path-run.v1`) alongside the HTML
+  (schema `petri/golden-path-run.v1`) alongside the HTML
   report, capturing tool / job / project / params / inputs /
   outputs / contract / duration.
 - `test/demo-data.test.mjs` -- 60 assertions across the 9 demo
@@ -134,7 +134,7 @@ file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - `docs/first-success-path.md` -- end-to-end walkthrough of the
   user journey + reproduction steps for the captured real run.
 - `test/fixtures/golden-path/deseq2-run.json` -- JSON-only record
-  of the real captured run from 2026-07-14: DESeq2 on the biof3-server's bundled demo
+  of the real captured run from 2026-07-14: DESeq2 on the petri-server's bundled demo
   data, 6 samples, 1978 genes tested, 82 sig genes (46 up / 36
   down), 23 artifacts.
 
@@ -150,9 +150,9 @@ file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - **seurat-standard / wgcna / maftools-mutation demo data** --
   require real external datasets (PBMC 3k, TCGA-BRCA, TCGA-LAML
   MAF). Worker task required.
-- **biof3-server local-mode zip post-processor** -- the biof3-server
+- **petri-server local-mode zip post-processor** -- the petri-server
   marks a job `failed: Required artifact zip was not produced`
-  in `BIOF3_EXEC_MODE=local`, even when all 23 R-output
+  in `PETRI_EXEC_MODE=local`, even when all 23 R-output
   artifacts exist on disk. This blocks the report endpoint
   (`/api/tools/report/:id` returns 502) and therefore blocks
   Step 6 of the golden path. Real DESeq2 analysis is verified
@@ -178,7 +178,7 @@ file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 - `scripts/golden-path.mjs` — two-stage rescue path for the local-mode
   zip post-processor gap:
-  - Step 5: if biof3-server marks a job `failed: Required artifact zip was
+  - Step 5: if petri-server marks a job `failed: Required artifact zip was
     not produced` but `/api/tools/status/:id` shows ≥3 artifacts on
     disk, harvest the artifact list and continue to step 6 instead of
     bailing.
@@ -191,7 +191,7 @@ file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
   `summary.sig_genes` as number, etc.).
 - `tmp/golden-path/report/deseq2-job_51d05ccdece3450c.run.json` —
   real captured run from the modified script on 2026-07-14 against
-  the same biof3-server local-mode config; 22 artifacts, sig_genes=82,
+  the same petri-server local-mode config; 22 artifacts, sig_genes=82,
   up=46, down=36.
 - `docs/first-success-path.md` — append `Update 2026-07-14: rescue
   path landed` section documenting the two-stage rescue and the

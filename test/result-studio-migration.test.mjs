@@ -14,7 +14,7 @@
  * 4. 重复执行幂等
  * 5. 失败 migration 整体回滚，不留半套表、不记版本
  * 6. 目录缺失时的静默 no-op（记录既有行为，避免误判为已升级）
- * 7. BIOF3_BETTER_SQLITE3_ROOT ABI 路径
+ * 7. PETRI_BETTER_SQLITE3_ROOT ABI 路径
  */
 
 import assert from 'node:assert/strict';
@@ -155,7 +155,7 @@ test('P6 ref transaction migration is generated from its schema module and is ad
 // ---------------------------------------------------------------------------
 
 test('RS2 runner installs the schema into an empty database', async (context) => {
-  const root = tempDir(context, 'biof3-rs2-mig-empty-');
+  const root = tempDir(context, 'petri-rs2-mig-empty-');
   const dbPath = join(root, 'fresh.db');
 
   assert.equal(getAppliedVersion(dbPath), 0);
@@ -192,7 +192,7 @@ test('RS2 runner installs the schema into an empty database', async (context) =>
 });
 
 test('RS2 runner upgrades an existing database without touching its tables', async (context) => {
-  const root = tempDir(context, 'biof3-rs2-mig-upgrade-');
+  const root = tempDir(context, 'petri-rs2-mig-upgrade-');
   const dbPath = join(root, 'existing.db');
 
   // 模拟已有用户库：一张业务表 + 一行数据
@@ -214,7 +214,7 @@ test('RS2 runner upgrades an existing database without touching its tables', asy
 });
 
 test('RS2 runner is idempotent across repeated startups', async (context) => {
-  const root = tempDir(context, 'biof3-rs2-mig-idem-');
+  const root = tempDir(context, 'petri-rs2-mig-idem-');
   const dbPath = join(root, 'repeat.db');
 
   const first = await runMigrations(dbPath, REAL_MIGRATIONS_DIR);
@@ -236,7 +236,7 @@ test('RS2 runner is idempotent across repeated startups', async (context) => {
 // ---------------------------------------------------------------------------
 
 test('RS2 a failing migration rolls back completely and records no version', async (context) => {
-  const root = tempDir(context, 'biof3-rs2-mig-fail-');
+  const root = tempDir(context, 'petri-rs2-mig-fail-');
   const dbPath = join(root, 'broken.db');
   const migrationsDir = join(root, 'migrations');
   mkdirSync(migrationsDir, { recursive: true });
@@ -256,7 +256,7 @@ test('RS2 a failing migration rolls back completely and records no version', asy
 });
 
 test('RS2 a later failing migration preserves the earlier applied one', async (context) => {
-  const root = tempDir(context, 'biof3-rs2-mig-seq-');
+  const root = tempDir(context, 'petri-rs2-mig-seq-');
   const dbPath = join(root, 'seq.db');
   const migrationsDir = join(root, 'migrations');
   mkdirSync(migrationsDir, { recursive: true });
@@ -274,7 +274,7 @@ test('RS2 a later failing migration preserves the earlier applied one', async (c
 // ---------------------------------------------------------------------------
 
 test('RS2 documents the silent no-op when the migrations directory is absent', async (context) => {
-  const root = tempDir(context, 'biof3-rs2-mig-absent-');
+  const root = tempDir(context, 'petri-rs2-mig-absent-');
   const dbPath = join(root, 'noop.db');
 
   // 这正是 RS2 之前的真实状态：目录不存在 → runner 返回当前版本且不报错。
@@ -289,24 +289,24 @@ test('RS2 documents the silent no-op when the migrations directory is absent', a
 // 7. ABI 路径
 // ---------------------------------------------------------------------------
 
-test('RS2 loadDatabaseConstructor honours BIOF3_BETTER_SQLITE3_ROOT', (context) => {
-  const original = process.env.BIOF3_BETTER_SQLITE3_ROOT;
+test('RS2 loadDatabaseConstructor honours PETRI_BETTER_SQLITE3_ROOT', (context) => {
+  const original = process.env.PETRI_BETTER_SQLITE3_ROOT;
   context.after(() => {
-    if (original === undefined) delete process.env.BIOF3_BETTER_SQLITE3_ROOT;
-    else process.env.BIOF3_BETTER_SQLITE3_ROOT = original;
+    if (original === undefined) delete process.env.PETRI_BETTER_SQLITE3_ROOT;
+    else process.env.PETRI_BETTER_SQLITE3_ROOT = original;
   });
 
   // 未设置 → 用根依赖
-  delete process.env.BIOF3_BETTER_SQLITE3_ROOT;
+  delete process.env.PETRI_BETTER_SQLITE3_ROOT;
   assert.equal(typeof loadDatabaseConstructor(), 'function');
 
   // 指向 core → 用 core 自己的依赖树（打包后 Electron ABI 与终端 Node 不同）
-  process.env.BIOF3_BETTER_SQLITE3_ROOT = join(REPO_ROOT, 'core', 'shared-backend');
+  process.env.PETRI_BETTER_SQLITE3_ROOT = join(REPO_ROOT, 'core', 'shared-backend');
   const scoped = loadDatabaseConstructor();
   assert.equal(typeof scoped, 'function');
 
   // 解析出来的构造器必须真的能开库
-  const root = tempDir(context, 'biof3-rs2-abi-');
+  const root = tempDir(context, 'petri-rs2-abi-');
   const db = new scoped(join(root, 'abi.db'));
   try {
     db.exec('CREATE TABLE probe (id TEXT PRIMARY KEY)');

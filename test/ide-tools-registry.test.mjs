@@ -11,7 +11,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const REGISTRY_PATH = resolve(__dirname, '..', 'core', 'biof3-server', 'mcp', 'registry.js');
+const REGISTRY_PATH = resolve(__dirname, '..', 'core', 'petri-server', 'mcp', 'registry.js');
 
 const registry = await import(pathToFileURL(REGISTRY_PATH).href);
 
@@ -39,7 +39,7 @@ test('listTools includes 12 ide_* tools', async () => {
 });
 
 test('callTool("ide_file_exists") returns ok=true for valid path', async () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-reg-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-reg-`);
   const res = await registry.callTool('ide_file_exists', { path: tmp });
   assert.equal(res.isError, false, `isError expected false, got: ${JSON.stringify(res)}`);
   const payload = JSON.parse(res.content[0].text);

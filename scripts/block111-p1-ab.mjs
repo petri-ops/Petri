@@ -18,12 +18,12 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const decisionApi = require('../core/biof3-server/helpers/decision-api.js');
+const decisionApi = require('../core/petri-server/helpers/decision-api.js');
 
 // 本 harness 的被测对象是「显式开启形态」（生产默认关由契约测试钉住）。
-process.env.BIOF3_JEV_MARKER_GUARD = '1';
+process.env.PETRI_JEV_MARKER_GUARD = '1';
 
-const interpret = require('../core/biof3-server/helpers/interpret.js');
+const interpret = require('../core/petri-server/helpers/interpret.js');
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
@@ -122,7 +122,7 @@ async function main() {
     capturedAt: new Date().toISOString(),
     sourceCommit: require('node:child_process').execSync('git rev-parse HEAD', { cwd: root }).toString().trim(),
     model: decisionApi.DECISION_MODEL_PIN,
-    productionPath: 'core/biof3-server/helpers/interpret.js lookupCellTypeWithConfidence（guard=1 显式开启）',
+    productionPath: 'core/petri-server/helpers/interpret.js lookupCellTypeWithConfidence（guard=1 显式开启）',
     corpus: { file: 'corpus-marker-celltype.json', choiceEvaluable: evaluable.length, emptyBoundary: empties.length },
     apiFailures: failures,
     validCount: valid.length,

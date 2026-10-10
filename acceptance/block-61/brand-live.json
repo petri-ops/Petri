@@ -2,27 +2,27 @@
   "startedAt": "2026-09-05T23:38:15.079Z",
   "assertions": [
     {
-      "name": "document.title = Gewu",
+      "name": "document.title = Petri",
       "pass": true,
-      "detail": "{\"title\":\"Gewu\",\"hasGewuBridge\":true,\"hasLegacyAlias\":true,\"sameSurface\":false}"
+      "detail": "{\"title\":\"Petri\",\"hasPetriBridge\":true,\"hasLegacyAlias\":true,\"sameSurface\":false}"
     },
     {
-      "name": "window.gewu 桥可用（主名）",
+      "name": "window.petri 桥可用（主名）",
       "pass": true,
-      "detail": "{\"title\":\"Gewu\",\"hasGewuBridge\":true,\"hasLegacyAlias\":true,\"sameSurface\":false}"
+      "detail": "{\"title\":\"Petri\",\"hasPetriBridge\":true,\"hasLegacyAlias\":true,\"sameSurface\":false}"
     },
     {
-      "name": "window.biof3Desktop 兼容别名可用（contextBridge 双暴露为独立代理，功能等价即通过）",
+      "name": "window.petriDesktop 兼容别名可用（contextBridge 双暴露为独立代理，功能等价即通过）",
       "pass": true,
-      "detail": "{\"title\":\"Gewu\",\"hasGewuBridge\":true,\"hasLegacyAlias\":true,\"sameSurface\":false}"
+      "detail": "{\"title\":\"Petri\",\"hasPetriBridge\":true,\"hasLegacyAlias\":true,\"sameSurface\":false}"
     },
     {
-      "name": "历史主题偏好不丢：仅存 biof3-theme=dark 时升级后仍为 dark",
+      "name": "历史主题偏好不丢：仅存 petri-theme=dark 时升级后仍为 dark",
       "pass": true,
-      "detail": "{\"resolved\":\"dark\",\"gewuKey\":\"dark\",\"legacyGone\":true}"
+      "detail": "{\"resolved\":\"dark\",\"petriKey\":\"dark\",\"legacyGone\":true}"
     },
     {
-      "name": "gewu:theme-change 事件链生效（切 light）",
+      "name": "petri:theme-change 事件链生效（切 light）",
       "pass": true,
       "detail": "light"
     },
@@ -32,20 +32,20 @@
       "detail": "{\"ok\":true,\"id\":\"result:tj_mtnyx2kb_97hz:design_summary.json\",\"action\":\"created\",\"autoDemoted\":null}"
     },
     {
-      "name": "弹出窗 document.title = Gewu",
+      "name": "弹出窗 document.title = Petri",
       "pass": true,
-      "detail": "{\"title\":\"Gewu\",\"shellText\":\"独立窗 · 只读sample-metadata-validator via agentdesign_summary.json\"}"
+      "detail": "{\"title\":\"Petri\",\"shellText\":\"独立窗 · 只读sample-metadata-validator via agentdesign_summary.json\"}"
     },
     {
       "name": "弹出窗内容正常（WindowShell 标题非空）",
       "pass": true,
-      "detail": "{\"title\":\"Gewu\",\"shellText\":\"独立窗 · 只读sample-metadata-validator via agentdesign_summary.json\"}"
+      "detail": "{\"title\":\"Petri\",\"shellText\":\"独立窗 · 只读sample-metadata-validator via agentdesign_summary.json\"}"
     }
   ],
   "mainPage": "http://localhost:3000/project/p_mtlnsv0f_xpjb?job=tj_mtnyx2kb_97hz",
   "themeMigrationDetail": {
     "resolved": "dark",
-    "gewuKey": "dark",
+    "petriKey": "dark",
     "legacyGone": true
   },
   "finishedAt": "2026-09-05T23:38:23.934Z",

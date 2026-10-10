@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { MockInstance } from 'vitest';
 import type { CopilotAskDetail } from '@/lib/events';
-import { gewuEvents } from '@/lib/events';
+import { petriEvents } from '@/lib/events';
 import type { ResultArtifactNavSection } from '@/lib/result-manifest';
 import { buildResultArtifactPickerGroups } from '@/lib/result-artifact-display';
 import { CompactResultNavigator } from './CompactResultNavigator';
@@ -35,7 +35,7 @@ function copilotAskEventsFrom(
     .map(([event]) => event)
     .filter(
       (event): event is CustomEvent<CopilotAskDetail> =>
-        event instanceof CustomEvent && event.type === gewuEvents.copilotAsk,
+        event instanceof CustomEvent && event.type === petriEvents.copilotAsk,
     );
 }
 

@@ -23,7 +23,7 @@ export const THINKING_LEVEL_LABELS: Record<ThinkingLevel, string> = {
   high: '高',
 };
 
-const PREFIX = 'gewu:thinking-level:';
+const PREFIX = 'petri:thinking-level:';
 
 function storageKey(projectId: string | null | undefined, conversationId: string | null | undefined): string {
   return `${PREFIX}${projectId || 'none'}:${conversationId || 'new'}`;

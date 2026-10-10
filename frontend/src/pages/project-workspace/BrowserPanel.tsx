@@ -4,8 +4,8 @@
 // ============================================================
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Icon } from '@/components/icons/Icon';
-import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
-import { getBrowserViewportSize, isGewuLocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
+import { petriEvents, subscribePetriEvent } from '@/lib/events';
+import { getBrowserViewportSize, isPetriLocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
 import styles from '../project-workspace.module.css';
 
 // ============================================================
@@ -52,7 +52,7 @@ export function BrowserPanel({
   const webviewRef = useRef<WebviewLike | null>(null);
   const [inputUrl, setInputUrl] = useState(() => normalizeBrowserUrl(initialUrl));
   const [frameUrl, setFrameUrl] = useState(() =>
-    isGewuLocalBrowserUrl(startUrlRef.current) ? startUrlRef.current : ''
+    isPetriLocalBrowserUrl(startUrlRef.current) ? startUrlRef.current : ''
   );
   const [frameKey, setFrameKey] = useState(0);
   const [title, setTitle] = useState('浏览器');
@@ -85,7 +85,7 @@ export function BrowserPanel({
       startUrlRef.current = nextUrl;
       setInputUrl(nextUrl);
       onUrlChange(nextUrl);
-      if (isGewuLocalBrowserUrl(nextUrl)) {
+      if (isPetriLocalBrowserUrl(nextUrl)) {
         setFrameUrl(nextUrl);
         setBrowserError('');
         setLoading(true);
@@ -118,7 +118,7 @@ export function BrowserPanel({
     const webview = document.createElement('webview') as WebviewLike;
     webview.style.border = '0';
     webview.style.display = 'flex';
-    webview.setAttribute('partition', 'persist:gewu-browser');
+    webview.setAttribute('partition', 'persist:petri-browser');
     // SEC-HARDEN — 撤掉 allowpopups（Electron 官方安全清单 #11：`<webview>` 不应允许
     // 自建窗口；默认立场就是不允许）。guest 的 window.open 因此不再生效；主进程
     // src/main/security-hardening.js 另在「每个 webContents」上装了 setWindowOpenHandler
@@ -233,8 +233,8 @@ export function BrowserPanel({
   }, [frameUrl]);
 
   useEffect(() => {
-    const offBack = subscribeGewuEvent(gewuEvents.browserBack, () => goBack());
-    const offForward = subscribeGewuEvent(gewuEvents.browserForward, () => goForward());
+    const offBack = subscribePetriEvent(petriEvents.browserBack, () => goBack());
+    const offForward = subscribePetriEvent(petriEvents.browserForward, () => goForward());
     return () => {
       offBack();
       offForward();
@@ -284,7 +284,7 @@ export function BrowserPanel({
           key={frameKey}
           className={styles.browserFrame}
           src={frameUrl}
-          title="Gewu HTML 报告"
+          title="Petri HTML 报告"
           onLoad={() => {
             setLoading(false);
             setBrowserError('');
@@ -298,7 +298,7 @@ export function BrowserPanel({
           <Icon name="globe" size={22} />
           <strong>无法打开网页</strong>
           <span>{browserError}</span>
-          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={reload}>重新加载</button>
+          <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={reload}>重新加载</button>
         </div>
       )}
     </div>

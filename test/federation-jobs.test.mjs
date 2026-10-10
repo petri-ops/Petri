@@ -29,11 +29,11 @@ import { fileURLToPath } from 'node:url';
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-const { buildMobileGateway } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/index.js'));
-const { getStores, resetStoresForTest } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/pairing.js'));
+const { buildMobileGateway } = require(path.join(ROOT, 'core/petri-server/mobile-gateway/index.js'));
+const { getStores, resetStoresForTest } = require(path.join(ROOT, 'core/petri-server/mobile-gateway/pairing.js'));
 
 function tmpRoot() {
-  return mkdtempSync(path.join(tmpdir(), 'gewu-fedjob-test-'));
+  return mkdtempSync(path.join(tmpdir(), 'petri-fedjob-test-'));
 }
 
 function listen(app) {
@@ -87,13 +87,13 @@ test('BLOCK-85 P2: job forward -> status -> file -> revoke propagation -> offlin
     // ── 对端 admin：生成配对 token ──
     const adminApp = express();
     adminApp.use(express.json({ limit: '4kb' }));
-    require(path.join(ROOT, 'core/biof3-server/routes/mobile-admin.js'))(adminApp, { dataDir: execRoot });
+    require(path.join(ROOT, 'core/petri-server/routes/mobile-admin.js'))(adminApp, { dataDir: execRoot });
     const adminServer = await listen(adminApp);
     const adminBase = `http://127.0.0.1:${adminServer.address().port}`;
 
     // ── 指挥席：federation-admin REST ──
     const cmdApp = express();
-    require(path.join(ROOT, 'core/biof3-server/routes/federation-admin.js'))(cmdApp, { dataDir: cmdRoot });
+    require(path.join(ROOT, 'core/petri-server/routes/federation-admin.js'))(cmdApp, { dataDir: cmdRoot });
     const cmdServer = await listen(cmdApp);
     const cmdBase = `http://127.0.0.1:${cmdServer.address().port}`;
 

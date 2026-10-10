@@ -3,10 +3,10 @@
 
 /**
  * BLOCK-66 P3 实机收口（两态实机）：
- *   A) 无 R 环境：biof3-server 照常启动（隔离 userData / 空 runtimes，自定义端口）
+ *   A) 无 R 环境：petri-server 照常启动（隔离 userData / 空 runtimes，自定义端口）
  *   B) 隔离环境 R 执行诚实失败：r-executor 解析路径不存在 → preflight not ready + 商店指引
  *   C) dev Electron 无 R 实机（隔离 userData + CDP）：无全屏「先安装分析运行时」门、
- *      非阻塞引导条在位、Electron 托管的 biof3-server health 200
+ *      非阻塞引导条在位、Electron 托管的 petri-server health 200
  *
  * 证据：acceptance/block-66/p3-live.json
  * 前置：Node 24（ABI 137）；frontend/node_modules 已安装；本机无 R（隔离 userData 天然无 R）。
@@ -45,20 +45,20 @@ function fetchBody(url, timeoutMs = 2000) {
 function migrate(dbPath) {
   const r = spawnSync(process.execPath,
     [path.join(ROOT, 'src', 'migration-runner.js'), dbPath, path.join(ROOT, 'src', 'migrations')],
-    { cwd: ROOT, encoding: 'utf8', env: { ...process.env, ELECTRON_RUN_AS_NODE: '1', BIOF3_BETTER_SQLITE3_ROOT: path.join(ROOT, 'core', 'biof3-server') } });
+    { cwd: ROOT, encoding: 'utf8', env: { ...process.env, ELECTRON_RUN_AS_NODE: '1', PETRI_BETTER_SQLITE3_ROOT: path.join(ROOT, 'core', 'petri-server') } });
   if (r.status !== 0) throw new Error('migration failed: ' + (r.stderr || r.stdout || '').slice(0, 300));
 }
 
 // 无 R 的干净 env（隔离 userData、清掉宿主可能存在的 R_HOME）
 function cleanEnvNoR(userDataDir, port) {
   const env = { ...process.env };
-  delete env.BIOF3_R_HOME;
-  env.BIOF3_USER_DATA_DIR = userDataDir;
-  env.BIOF3_LOCAL_DATA_DIR = userDataDir;
-  env.BIOF3_LOCAL_RESULTS_DIR = path.join(userDataDir, 'results');
-  env.BIOF3_LOCAL_UPLOADS_DIR = path.join(userDataDir, 'uploads');
-  env.BIOF3_TEMP_DIR = path.join(userDataDir, 'tmp');
-  env.BIOF3_DB_PATH = path.join(userDataDir, 'bioF3.db');
+  delete env.PETRI_R_HOME;
+  env.PETRI_USER_DATA_DIR = userDataDir;
+  env.PETRI_LOCAL_DATA_DIR = userDataDir;
+  env.PETRI_LOCAL_RESULTS_DIR = path.join(userDataDir, 'results');
+  env.PETRI_LOCAL_UPLOADS_DIR = path.join(userDataDir, 'uploads');
+  env.PETRI_TEMP_DIR = path.join(userDataDir, 'tmp');
+  env.PETRI_DB_PATH = path.join(userDataDir, 'petri.db');
   env.R_SERVER_PORT = String(port);
   return env;
 }
@@ -66,15 +66,15 @@ function cleanEnvNoR(userDataDir, port) {
 async function main() {
   const evidenceDir = path.join(ROOT, 'acceptance', 'block-66');
   fs.mkdirSync(evidenceDir, { recursive: true });
-  const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block66-'));
+  const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block66-'));
   log('temp root: ' + tmpRoot);
 
-  // ── Part A：无 R 环境 biof3-server 照常启动 ──
+  // ── Part A：无 R 环境 petri-server 照常启动 ──
   const dirA = path.join(tmpRoot, 'a');
   fs.mkdirSync(path.join(dirA, 'runtimes'), { recursive: true });
-  migrate(path.join(dirA, 'bioF3.db'));
+  migrate(path.join(dirA, 'petri.db'));
   const portA = 3901;
-  const serverA = spawn(process.execPath, [path.join(ROOT, 'core', 'biof3-server', 'server.js')], {
+  const serverA = spawn(process.execPath, [path.join(ROOT, 'core', 'petri-server', 'server.js')], {
     env: cleanEnvNoR(dirA, portA), cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'],
   });
   serverA.stderr.on('data', () => {});
@@ -83,14 +83,14 @@ async function main() {
     if (await fetchOk(`http://127.0.0.1:${portA}/api/health`)) { a1 = true; break; }
     await delay(1000);
   }
-  assert('P3-A1 无 R 环境 biof3-server 照常启动（health 200）', a1, `port=${portA}`);
+  assert('P3-A1 无 R 环境 petri-server 照常启动（health 200）', a1, `port=${portA}`);
   try { serverA.kill(); } catch {}
 
   // ── Part B：隔离环境 R 执行诚实失败（preflight）──
   try {
-    delete process.env.BIOF3_R_HOME;
-    process.env.BIOF3_USER_DATA_DIR = path.join(tmpRoot, 'b');
-    fs.mkdirSync(path.join(process.env.BIOF3_USER_DATA_DIR, 'runtimes'), { recursive: true });
+    delete process.env.PETRI_R_HOME;
+    process.env.PETRI_USER_DATA_DIR = path.join(tmpRoot, 'b');
+    fs.mkdirSync(path.join(process.env.PETRI_USER_DATA_DIR, 'runtimes'), { recursive: true });
     const { RExecutor } = (() => {
       // shared-backend executors 无独立导出桶，直接 require 类文件
       const mod = require(path.join(ROOT, 'core', 'shared-backend', 'executors', 'r-executor.js'));
@@ -99,7 +99,7 @@ async function main() {
     const executor = new RExecutor();
     const binPath = executor.binPath;
     const exists = binPath && fs.existsSync(binPath);
-    const { evaluateRuntimePreflight } = require(path.join(ROOT, 'core', 'biof3-server', 'helpers', 'tools-executor.js'))._test;
+    const { evaluateRuntimePreflight } = require(path.join(ROOT, 'core', 'petri-server', 'helpers', 'tools-executor.js'))._test;
     const preflight = evaluateRuntimePreflight(executor, 'r');
     assert('P3-B1 隔离无 R 环境：r-executor 解析路径不存在或 preflight 诚实拒绝',
       !exists || preflight.ready === true ? true : (!preflight.ready && /插件商店/.test(preflight.reason)),
@@ -117,7 +117,7 @@ async function main() {
   // ── Part C：dev Electron 无 R 实机（隔离 userData + CDP）──
   const dirC = path.join(tmpRoot, 'c');
   fs.mkdirSync(path.join(dirC, 'runtimes'), { recursive: true });
-  migrate(path.join(dirC, 'bioF3.db'));
+  migrate(path.join(dirC, 'petri.db'));
   const portC = 3902;
   const vitePort = 3900;
   const cdpPort = 9223;
@@ -138,8 +138,8 @@ async function main() {
     const envC = cleanEnvNoR(dirC, portC);
     envC.ELECTRON_IS_DEV = '1';
     envC.NODE_ENV = 'development';
-    envC.BIOF3_RENDERER_DEV_URL = `http://localhost:${vitePort}`;
-    envC.BIOF3_ELECTRON_USER_DATA_DIR = dirC;
+    envC.PETRI_RENDERER_DEV_URL = `http://localhost:${vitePort}`;
+    envC.PETRI_ELECTRON_USER_DATA_DIR = dirC;
     delete envC.ELECTRON_RUN_AS_NODE;
     const electron = spawn(path.join(ROOT, 'node_modules', 'electron', 'dist', 'electron.exe'),
       ['.', '--dev', `--remote-debugging-port=${cdpPort}`],
@@ -206,13 +206,13 @@ async function main() {
         const banner = await evalInPage('!!document.querySelector("[role=status]")');
         assert('P3-C5 非阻塞 R 引导条在位（role=status）', banner === true, `banner=${banner}`);
         const health = await fetchOk(`http://127.0.0.1:${portC}/api/health`);
-        assert('P3-C6 Electron 托管的 biof3-server 无 R health 200', health, `port=${portC}`);
+        assert('P3-C6 Electron 托管的 petri-server 无 R health 200', health, `port=${portC}`);
       }
     } else {
       results.guiPhase = {
         status: 'blocked',
         reason: 'agent 非交互会话无法启动 GUI Electron（静默退出 0，最小 Electron 应用同样；非产品代码问题）',
-        manual: '在交互会话运行：BIOF3_ELECTRON_USER_DATA_DIR=<空 runtimes 临时目录> npm run dev → 确认无全屏「先安装分析运行时」门、首页出现非阻塞 R 引导条（role=status）、设置页运行时入口在位',
+        manual: '在交互会话运行：PETRI_ELECTRON_USER_DATA_DIR=<空 runtimes 临时目录> npm run dev → 确认无全屏「先安装分析运行时」门、首页出现非阻塞 R 引导条（role=status）、设置页运行时入口在位',
         electronLog: electronErr.join('').slice(0, 500),
       };
       log('GUI 阶段被环境阻塞（guiBlocked）——已登记手动验收命令，A/B 部分证据不受影响');
@@ -225,7 +225,7 @@ async function main() {
     results.guiPhase = {
       status: 'blocked',
       reason: 'agent 非交互会话无法启动 GUI Electron（静默退出 0 / CDP 不可达，最小 Electron 应用同样；非产品代码问题）',
-      manual: '在交互会话运行：BIOF3_ELECTRON_USER_DATA_DIR=<空 runtimes 临时目录> npm run dev → 确认无全屏「先安装分析运行时」门、首页出现非阻塞 R 引导条（role=status）、设置页运行时入口在位',
+      manual: '在交互会话运行：PETRI_ELECTRON_USER_DATA_DIR=<空 runtimes 临时目录> npm run dev → 确认无全屏「先安装分析运行时」门、首页出现非阻塞 R 引导条（role=status）、设置页运行时入口在位',
     };
     log('GUI 阶段被环境阻塞（guiBlocked）——已登记手动验收命令，A/B 部分证据不受影响');
   }
@@ -238,7 +238,7 @@ async function main() {
   results.allPass = allPass;
   results.guiBlocked = results.guiPhase ? true : false;
   results.note = (results.guiPhase ? results.guiPhase.reason + '；' : '')
-    + '隔离 userData（空 runtimes）天然无 R；A 部分为真实 biof3-server 进程，B 部分为隔离环境真实 executor 解析。'
+    + '隔离 userData（空 runtimes）天然无 R；A 部分为真实 petri-server 进程，B 部分为隔离环境真实 executor 解析。'
     + 'G0 开发期常态 · 不外推 packaged/Provider/GA。';
   fs.writeFileSync(path.join(evidenceDir, 'p3-live.json'), JSON.stringify(results, null, 2) + '\n');
   log(`证据已写入 acceptance/block-66/p3-live.json (allPass=${allPass})`);

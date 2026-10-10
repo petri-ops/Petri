@@ -2,7 +2,7 @@
  * BLOCK-112 W1-2 — copilot 发送前意图路由契约（分类接点 + chitchat 快路径）。
  *
  * 契约红线（plan docs/block-112-copilot-intent-routing-plan.md §2/§6）：
- *  - guard 关（BIOF3_JEV_INTENT_ROUTE=1 显式开）＝零出站零行为变化；
+ *  - guard 关（PETRI_JEV_INTENT_ROUTE=1 显式开）＝零出站零行为变化；
  *  - 任何决策失败形态（缺 key/超时/校验失败）＝fastPath=false 回退现行 runAgentLoop，永不 throw；
  *  - 分流仅当 argmax=chitchat 且 confidence ≥ INTENT_ROUTE_THRESHOLD（D-3 θ=0.70）；
  *  - 快路径事件契约逐字镜像 agent-runner：run_started → delta(choices[0].delta.content) →
@@ -24,11 +24,11 @@ const {
   buildIntentDecisionRequest,
   isIntentRouteEnabled,
   shouldUseChitchatFastPath,
-} = require(path.join(root, 'core', 'biof3-server', 'helpers', 'intent-router.js'));
-const { runChitchatFastPath, CHITCHAT_SYSTEM_PROMPT } = require(path.join(root, 'core', 'biof3-server', 'helpers', 'chitchat-fast-path.js'));
+} = require(path.join(root, 'core', 'petri-server', 'helpers', 'intent-router.js'));
+const { runChitchatFastPath, CHITCHAT_SYSTEM_PROMPT } = require(path.join(root, 'core', 'petri-server', 'helpers', 'chitchat-fast-path.js'));
 
 const NO_SLEEP = async () => {};
-const GUARD_ON = { BIOF3_JEV_INTENT_ROUTE: '1' };
+const GUARD_ON = { PETRI_JEV_INTENT_ROUTE: '1' };
 const API_KEY_OVERRIDE = { apiKey: 'test-key-do-not-call-real-api' };
 
 function useEnv(t, env) {
@@ -85,7 +85,7 @@ test('buildIntentDecisionRequest：state 截 600 字 + criteria 与类目集一�
 });
 
 test('guard 默认关：零出站零行为变化（D-4）', async (t) => {
-  useEnv(t, { BIOF3_JEV_INTENT_ROUTE: undefined });
+  useEnv(t, { PETRI_JEV_INTENT_ROUTE: undefined });
   const spy = errorFetch('TimeoutError');
   const r = await shouldUseChitchatFastPath('你好呀', { ...API_KEY_OVERRIDE, fetchImpl: spy.impl, sleep: NO_SLEEP });
   assert.equal(isIntentRouteEnabled(), false);

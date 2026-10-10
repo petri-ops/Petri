@@ -1,9 +1,9 @@
 // ============================================================
-// desktopBridge — typed accessor for the window.biof3Desktop
+// desktopBridge — typed accessor for the window.petriDesktop
 // IPC surface declared in `@/lib/electron.d.ts`.
 //
 // State-decomposition §4.7 [HIGH] flagged that every
-// component went through `window.biof3Desktop?.x?.y?.()`
+// component went through `window.petriDesktop?.x?.y?.()`
 // with hand-rolled defensive checks, and three hooks
 // (`useAiSettings`, `usePluginStore`, `useTerminalSession`)
 // each re-declared a local sub-bridge type that mirrored the
@@ -22,7 +22,7 @@
 //     ToolboxPanel.
 //
 //   - `useTerminalSession.ts` used loose
-//     `window.biof3Desktop?.terminal?.writeSession?.(...)`
+//     `window.petriDesktop?.terminal?.writeSession?.(...)`
 //     chains with `({ code, signal }: { code?: number | null; ... })`
 //     inline parameter types that lost the source-of-truth
 //     shape from electron.d.ts.
@@ -39,8 +39,8 @@
 //     inline interfaces).
 //   - A single point that decides what "no desktop context"
 //     means (returns null vs throws) — components no longer
-//     spell out `if (!window.biof3Desktop?.x) return;` and
-//     `window.biof3Desktop.x.y()` separately.
+//     spell out `if (!window.petriDesktop?.x) return;` and
+//     `window.petriDesktop.x.y()` separately.
 //   - SSR safety: all accessors short-circuit when
 //     `typeof window === 'undefined'`. The legacy
 //     older plot pages had hand-rolled bridge checks that are now redundant.
@@ -51,12 +51,12 @@ import { getProjectionTerminalBridge } from '@/lib/projectionTerminalBridge';
 import { getProjectionDataBridge } from '@/lib/projectionDataBridges';
 
 /** Strongly-typed handle to the desktop IPC bridge, narrowing
- *  the optional `window.biof3Desktop` declared in electron.d.ts. */
-// BLOCK-61：主全局名 window.gewu；biof3Desktop 为兼容别名（preload 双暴露）。
-type DesktopBridge = NonNullable<Window['gewu']>;
+ *  the optional `window.petriDesktop` declared in electron.d.ts. */
+// BLOCK-61：主全局名 window.petri；petriDesktop 为兼容别名（preload 双暴露）。
+type DesktopBridge = NonNullable<Window['petri']>;
 
 /** Map of bridge name → its sub-handle type. Keyof the
- *  biof3Desktop declaration, so adding a new bridge in
+ *  petriDesktop declaration, so adding a new bridge in
  *  electron.d.ts automatically makes it available here. */
 export type DesktopBridgeName = keyof DesktopBridge;
 
@@ -71,16 +71,16 @@ export class BridgeUnavailableError extends Error {
   constructor(public readonly bridgeName: string | number | symbol) {
     super(
       `Desktop IPC bridge "${String(bridgeName)}" is not available. ` +
-        `This code path runs only inside the Gewu desktop app.`
+        `This code path runs only inside the Petri desktop app.`
     );
     this.name = 'BridgeUnavailableError';
   }
 }
 
-/** True if the page is running inside the Gewu desktop
- *  app (preload has populated window.biof3Desktop). */
+/** True if the page is running inside the Petri desktop
+ *  app (preload has populated window.petriDesktop). */
 export function isDesktop(): boolean {
-  return typeof window !== 'undefined' && !!(window.gewu ?? window.biof3Desktop);
+  return typeof window !== 'undefined' && !!(window.petri ?? window.petriDesktop);
 }
 
 /** Returns the requested sub-bridge handle typed against the
@@ -93,7 +93,7 @@ export function getBridge<K extends DesktopBridgeName>(
   name: K
 ): DesktopBridgeHandle<K> | null {
   if (typeof window === 'undefined') return null;
-  const desktop = window.gewu ?? window.biof3Desktop;
+  const desktop = window.petri ?? window.petriDesktop;
   if (!desktop) return null;
   // BLOCK-85 P4 — 投影环境终端：浏览器没有 Electron 终端桥，切换到
   // gateway HTTP 通道（同形接口，node-pty 会话驻留 core 进程）。

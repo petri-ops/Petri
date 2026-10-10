@@ -4,7 +4,7 @@
   "baselineVersion": "1.1.1",
   "lifecycleStatus": "maintained",
   "qualificationStatus": "qualified",
-  "constitutionId": "biof3-g0-constitution-v1",
+  "constitutionId": "petri-g0-constitution-v1",
   "executionTruthChain": [
     "run_tool",
     "tool_job",
@@ -39,7 +39,7 @@
   },
   "database": {
     "engine": "sqlite",
-    "schemaIdentity": "biof3-local-inline-v1",
+    "schemaIdentity": "petri-local-inline-v1",
     "migrationLedgerSchemaVersion": 1,
     "projectBaselineRecordVersion": 1
   },

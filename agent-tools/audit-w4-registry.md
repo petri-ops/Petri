@@ -164,7 +164,7 @@
 | 真实 `Provider` 矩阵 / packaged Electron 公证 / OSS 远程接手 / GA 公证流水 | G1+ 阶段事项，按 `AGENTS.md` §「当前阶段纪律」不外推 | 用户未明确启动 G1+ 之前**不**主动推进 |
 | `qualificationEligible` 状态 | G0 长期开发期常态（`AGENTS.md` 阶段纪律） | 不校正、不提醒 |
 | `Result Studio` `RS-P7` deferred | 已通过 `g0-result-studio-plan.md` §14 记录并治理 | 不重排 |
-| 创建/修改 work-package / 替换 canonical 入口 | 涉及 `$biof3-project-governance` skill 流程 | 由主 agent 启动 skill 后处理 |
+| 创建/修改 work-package / 替换 canonical 入口 | 涉及 `$petri-project-governance` skill 流程 | 由主 agent 启动 skill 后处理 |
 | `AGENT-INTERACTION-EVAL-20260814` 的 `entrypoint='docs/DOC-REGISTRY.json'` 语义 | 当前 schema 允许非 canonical 文档 entrypoint 任意写；script 不校验 | 视为后续治理演进而非 fail |
 | `truthDomain` 字面未被 AGENTS.md 引用 | schema 设计是 entrypoint 路径连通，不要求命名空间字面出现 | 无 |
 | `AGENT-WORKBENCH` 携带 `phases: [...]` 字段 | JSON 合法，script 不强制 schema；不在本审计任务范围 | 后续如要锁 schema 扩展字段再处理 |

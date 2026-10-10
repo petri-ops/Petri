@@ -78,7 +78,7 @@ export interface WorkspacePanels {
 }
 
 const DEFAULT_TITLE_BAR: TitleBarState = {
-  title: 'Gewu',
+  title: 'Petri',
   tabs: [],
   activeTabId: null,
   reviewCount: 0,

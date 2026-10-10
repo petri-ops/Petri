@@ -15,13 +15,13 @@ import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 
 const tempRoot = mkdtempSync(join(tmpdir(), 'block148-tree-'));
-process.env.BIOF3_DB_PATH = join(tempRoot, 'routes.db');
-process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
+process.env.PETRI_DB_PATH = join(tempRoot, 'routes.db');
+process.env.PETRI_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
 
 const require = createRequire(import.meta.url);
 {
-  const Database = require(resolve(__dirname, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const boot = new Database(process.env.BIOF3_DB_PATH);
+  const Database = require(resolve(__dirname, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const boot = new Database(process.env.PETRI_DB_PATH);
   const migDir = resolve(__dirname, '..', 'src', 'migrations');
   for (const f of require('node:fs').readdirSync(migDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(require('node:fs').readFileSync(require('node:path').resolve(migDir, f), 'utf8'));
@@ -29,9 +29,9 @@ const require = createRequire(import.meta.url);
   boot.close();
 }
 
-const db = require('../core/biof3-server/db');
-const gateway = require('../core/biof3-server/helpers/workspace-gateway');
-const filesRoute = require('../core/biof3-server/routes/files');
+const db = require('../core/petri-server/db');
+const gateway = require('../core/petri-server/helpers/workspace-gateway');
+const filesRoute = require('../core/petri-server/routes/files');
 const express = require('express');
 
 let server;
@@ -199,7 +199,7 @@ test('flat 模式逐字节兼容：条目无 path 字段（增量字段只有 in
 
 test('ssh 分支 recursive：经 backend.list 逐层展开，条目带 path；flat 响应同样携带白名单投影', async (t) => {
   const p = db.createProject({ name: 'b148-ssh' });
-  require('../core/biof3-server/db').getDatabase()
+  require('../core/petri-server/db').getDatabase()
     .prepare("UPDATE projects SET workspace_kind='ssh', ssh_host='fake', remote_path='/srv/proj' WHERE id=?")
     .run(p.id);
   t.after(() => { try { rmSync(p.workspace_path, { recursive: true, force: true }); } catch {} });

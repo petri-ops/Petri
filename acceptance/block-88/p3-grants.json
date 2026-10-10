@@ -1,7 +1,7 @@
 {
   "package": "BLOCK-88-ENGINEER-COLLAB",
   "stage": "P3-GRANTS",
-  "topology": "loopback dual-node: B=dev stack :3001/:3005 (real), A=real delegate_to_gewu_node tool (isolated dataDir)",
+  "topology": "loopback dual-node: B=dev stack :3001/:3005 (real), A=real delegate_to_petri_node tool (isolated dataDir)",
   "engineer": {
     "displayName": "工程师 A",
     "device": "macOS"

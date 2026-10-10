@@ -7,13 +7,13 @@
  *
  * Why this file exists:
  *   src/database/branch-db.js and (the now-retired UI-457) result-db.js both opened the
- *   same `biof3.db` file with their own _dbCache + new Database() + close
+ *   same `petri.db` file with their own _dbCache + new Database() + close
  *   pair — 30 lines of infrastructure duplicated verbatim (A-007). Worse,
  *   each call to `new Database(filePath)` opens another sqlite3 handle; in
  *   better-sqlite3's WAL mode that's tolerable for readers but compounds
  *   writer-lock contention when both modules are live in IPC handlers and
  *   MCP-server code paths (PR-012). And neither module set `journal_mode =
- *   WAL` nor `busy_timeout`, so writes from `core/biof3-server/db.js` (which
+ *   WAL` nor `busy_timeout`, so writes from `core/petri-server/db.js` (which
  *   does set them) raced the desktop handlers (E-019).
  *
  * What this module provides:
@@ -23,8 +23,8 @@
  *   - closeAll()           → closes every cached connection.
  *   - _reset()             → closeAll() (test-only escape hatch).
  *
- * `branch` and `result` both resolve to the same `biof3.db` under
- * BIOF3_LOCAL_DATA_DIR (legacy single-file layout, preserved 100%); the
+ * `branch` and `result` both resolve to the same `petri.db` under
+ * PETRI_LOCAL_DATA_DIR (legacy single-file layout, preserved 100%); the
  * role key only exists so callers don't reach across module boundaries.
  * PR-012 dedup happens because openDb caches by resolved file path, not by
  * role string — the second call returns the same Database instance.
@@ -32,13 +32,13 @@
  * E-019 full: the connection is opened with journal_mode=WAL and
  * busy_timeout = getBusyTimeout() (canonical source: shared-backend
  * config-helper.js → getDbConfig().busyTimeoutMs, default 10000ms). Every
- * SQLite handle in the desktop + biof3-server process family now uses the
+ * SQLite handle in the desktop + petri-server process family now uses the
  * same value via the same config helper.
  *
  * 100% backward compatible:
  *   branch-db.js / result-db.js keep their public exports (getDatabase,
  *   closeDatabase, getDatabasePath) and re-export them as thin shims over
- *   this singleton, so existing IPC handlers and biof3-server MCP code that
+ *   this singleton, so existing IPC handlers and petri-server MCP code that
  *   imported them keep working without changes.
  */
 
@@ -53,14 +53,14 @@ function _getDbPath(role) {
   if (!VALID_ROLES.has(role)) {
     throw new Error(`Unknown db role: ${role}; expected one of ${[...VALID_ROLES].join(', ')}`);
   }
-  const dataDir = process.env.BIOF3_LOCAL_DATA_DIR;
+  const dataDir = process.env.PETRI_LOCAL_DATA_DIR;
   if (!dataDir) {
-    throw new Error('BIOF3_LOCAL_DATA_DIR environment variable is not set');
+    throw new Error('PETRI_LOCAL_DATA_DIR environment variable is not set');
   }
   // Legacy single-file layout: branch-db.js + result-db.js both opened
-  // `biof3.db`. Keep that exact filename so the singleton never silently
+  // `petri.db`. Keep that exact filename so the singleton never silently
   // moves an existing user's data (PR-012 dedup is per-process, not per-file).
-  return path.join(dataDir, 'biof3.db');
+  return path.join(dataDir, 'petri.db');
 }
 
 /**
@@ -78,8 +78,8 @@ function openDb(role) {
   const db = new Database(dbPath);
   // Apply the canonical WAL + busy_timeout from config-helper (E-019 full).
   // Setting busy_timeout on every open guarantees that even when called
-  // before any biof3-server child process is spawned, the desktop handle is
-  // already consistent with biof3-server's policy.
+  // before any petri-server child process is spawned, the desktop handle is
+  // already consistent with petri-server's policy.
   db.pragma(`journal_mode = WAL`);
   db.pragma(`busy_timeout = ${getBusyTimeout()}`);
   // foreign_keys=ON matches shared-backend/db.js behavior and prevents

@@ -20,8 +20,8 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const decisionApi = require('../core/biof3-server/helpers/decision-api.js');
-const { configForPoint } = require('../core/biof3-server/helpers/decision-thresholds.js');
+const decisionApi = require('../core/petri-server/helpers/decision-api.js');
+const { configForPoint } = require('../core/petri-server/helpers/decision-thresholds.js');
 const { docsOrEvidenceOnly } = require('../scripts/block115-test-suggest.mjs');
 
 const here = path.dirname(fileURLToPath(import.meta.url));

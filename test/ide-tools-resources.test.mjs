@@ -12,7 +12,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const CORE = resolve(__dirname, '..', 'core', 'biof3-server');
+const CORE = resolve(__dirname, '..', 'core', 'petri-server');
 
 const resources = await import(
   pathToFileURL(resolve(CORE, 'mcp/ide-tools/resources.js')).href
@@ -46,7 +46,7 @@ test('readIdeResource("ide://projects") returns valid JSON', () => {
 });
 
 test('readIdeResource("ide://git-status?path=<tmp>") for non-git dir returns isRepo=false', () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-res-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-res-`);
   const uri = `ide://git-status?path=${encodeURIComponent(tmp)}`;
   const res = resources.readIdeResource(uri);
   assert.equal(res.ok, true);

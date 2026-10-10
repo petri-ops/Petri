@@ -1,8 +1,8 @@
-# BioF3 Desktop Agent Harness 错误处理与可靠性独立审查
+# Petri Desktop Agent Harness 错误处理与可靠性独立审查
 
 **日期**: 2026-08-17
 **审查视角**: 错误处理与可靠性（独立视角）
-**项目**: BioF3 Desktop — Electron + React/Vite + 内嵌 R/Python runtime
+**项目**: Petri Desktop — Electron + React/Vite + 内嵌 R/Python runtime
 **当前阶段**: G0 长期开发期
 **审查范围**: Agent Harness 后端（`core/r-server/` + `core/shared-backend/` + `src/main/` + `src/ipc/`）
 **不审查范围**: 前端 UI 渲染逻辑、商业逻辑正确性、G1+ 阶段事项（Provider 矩阵/GA/公证/dist staleness 等）
@@ -26,7 +26,7 @@
 
 **自评 7/10（10 = 工业级，1 = 完全不可靠）**
 
-**核心判断**：BioF3 Desktop 的 Agent Harness 后端在错误传播的**结构化**和**可观测性**上做了显著投入（标准 envelope、retryable 错误码、tool_job 终态持久化、Artifact Truth、owned-backend-supervisor 自愈重启），整体骨架是稳健的。**但有两类显著薄弱**：
+**核心判断**：Petri Desktop 的 Agent Harness 后端在错误传播的**结构化**和**可观测性**上做了显著投入（标准 envelope、retryable 错误码、tool_job 终态持久化、Artifact Truth、owned-backend-supervisor 自愈重启），整体骨架是稳健的。**但有两类显著薄弱**：
 
 1. **Provider 错误 context 大量丢失**：上游原始 message（`parsed.error.message`）在多次 fallback + model routing wrapper 后被简化或截断为 `http_xxx` 等短码；用户看到的错误往往只是 "上游异常：http_429"，缺少 Provider 真实 message。
 2. **Retry 策略分散且语义不一致**：`model-gateway.js` 用 `isRetryableProviderError` 做可重试判断（带 status code 与 error code），但 `agent-runner.js` 又叠一层 `provider_retry` 循环（maxAttempts=3），`agent-task-store.js` 又实现了一套 `RETRY_POLICY`（基于字符串匹配 `timeout/rate_limit/...`）。三套机制并存，**职责边界模糊**——一个失败可能同时触发两套重试，或三套都失败才终止。
@@ -136,7 +136,7 @@
 
 #### 场景 C：R/Python 子进程被 SIGKILL（OOM、用户取消、超时）
 
-- **触发条件**：R 脚本内存爆掉（macOS 杀进程）、用户点击 stop、`BIOF3_TOOL_HARD_TIMEOUT_MS` (默认 30 min) 触发。
+- **触发条件**：R 脚本内存爆掉（macOS 杀进程）、用户点击 stop、`PETRI_TOOL_HARD_TIMEOUT_MS` (默认 30 min) 触发。
 - **各层表现**：
   - `core/r-server/helpers/process-lifecycle.js` `terminateChildProcess()` 发 SIGTERM，5s 后发 SIGKILL。
   - `core/r-server/helpers/tools-executor.js` 回调：
@@ -454,11 +454,11 @@ for (const statement of [
 
 **文件位置**: `core/r-server/ai-bridge.js`
 
-**问题描述**：`try { globalThis._biof3.recordAiUsage = recordAiUsage; } catch {}` 模式**几乎不可能抛错**——除非 `_biof3` 本身被 freeze。`catch {}` 是过度防御。
+**问题描述**：`try { globalThis._petri.recordAiUsage = recordAiUsage; } catch {}` 模式**几乎不可能抛错**——除非 `_petri` 本身被 freeze。`catch {}` 是过度防御。
 
 **影响**：无直接影响；但模式传染——其他模块可能误以为 `try { assignment } catch {}` 是必要的，造成代码噪音。
 
-**建议修复**：删除 try/catch，若需要可加 `Object.defineProperty(globalThis._biof3, key, { value, writable: true })`。
+**建议修复**：删除 try/catch，若需要可加 `Object.defineProperty(globalThis._petri, key, { value, writable: true })`。
 
 ---
 
@@ -591,7 +591,7 @@ async function settleConfirmedToolCancellation({ db, jobId, result, ... }) {
 
 **影响**：用户配置某工具需要 retry 时（Provider/网络瞬态错误），agent 会在 3 次后被强制停。
 
-**建议修复**：暴露环境变量 `BIOF3_AGENT_MAX_IDENTICAL_TOOL_CALLS`，并在 SETTINGS 中提供 UI。
+**建议修复**：暴露环境变量 `PETRI_AGENT_MAX_IDENTICAL_TOOL_CALLS`，并在 SETTINGS 中提供 UI。
 
 ---
 

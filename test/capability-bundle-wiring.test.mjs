@@ -3,8 +3,8 @@
  *
  * Stage 3 B2 part2 — run-path wiring contract.
  *
- * The two R run paths (core/biof3-server/helpers/tools-executor.js and
- * core/biof3-server/mcp/registry.js) now call `ensureBundlesForPlugin(cfg)` BEFORE
+ * The two R run paths (core/petri-server/helpers/tools-executor.js and
+ * core/petri-server/mcp/registry.js) now call `ensureBundlesForPlugin(cfg)` BEFORE
  * `resolveRLibsForPlugin(cfg)` for R plugins that declare `requiresBundle`.
  * These tests exercise that exact ordered contract WITHOUT spawning a real
  * executor or Rscript: they assert the observable behavior the wiring depends
@@ -30,7 +30,7 @@ const bundles = require('../core/shared-backend/capability-bundles.js');
 const rLibs = require('../core/shared-backend/r-libs-resolver.js');
 
 function tmpDir() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-wiring-test-'));
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'petri-wiring-test-'));
 }
 
 function sha256Of(content) {
@@ -55,7 +55,7 @@ async function makeMockInstall(tmpFile, installDir) {
 const PUBLISHED = {
   bundleId: 'r-enrichment',
   version: '1.0.0',
-  url: 'https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/bundles/r-enrichment-1.0.0-macos-arm64.tar.gz',
+  url: 'https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/bundles/r-enrichment-1.0.0-macos-arm64.tar.gz',
   sha256: GOOD_SHA,
   sizeBytes: CONTENT.length,
   platforms: ['macos-arm64'],
@@ -85,13 +85,13 @@ async function runWiring(cfg, ensureOptions) {
 
 test('wiring: published bundle downloads once and is then mounted via R_LIBS_USER', async () => {
   // Point BOTH the ensure options and resolveRLibsForPlugin's default readiness
-  // check at the same runtimesDir by controlling BIOF3_LOCAL_DATA_DIR (which
+  // check at the same runtimesDir by controlling PETRI_LOCAL_DATA_DIR (which
   // defaultRuntimesDir derives runtimes/ from). resolveRLibsForPlugin takes no
   // runtimesDir arg, so this env is the only way to align the two.
   const localData = tmpDir();
   const runtimesDir = path.join(localData, 'runtimes');
-  const prevLocalData = process.env.BIOF3_LOCAL_DATA_DIR;
-  process.env.BIOF3_LOCAL_DATA_DIR = localData;
+  const prevLocalData = process.env.PETRI_LOCAL_DATA_DIR;
+  process.env.PETRI_LOCAL_DATA_DIR = localData;
 
   const counter = { calls: 0 };
   const original = bundles.getBundleDescriptor;
@@ -120,8 +120,8 @@ test('wiring: published bundle downloads once and is then mounted via R_LIBS_USE
     assert.ok(parts.includes(installDir), `R_LIBS_USER must include ${installDir}, got ${env.R_LIBS_USER}`);
   } finally {
     bundles.getBundleDescriptor = original;
-    if (prevLocalData === undefined) delete process.env.BIOF3_LOCAL_DATA_DIR;
-    else process.env.BIOF3_LOCAL_DATA_DIR = prevLocalData;
+    if (prevLocalData === undefined) delete process.env.PETRI_LOCAL_DATA_DIR;
+    else process.env.PETRI_LOCAL_DATA_DIR = prevLocalData;
   }
 });
 
@@ -131,8 +131,8 @@ test('wiring: published bundle downloads once and is then mounted via R_LIBS_USE
 test('wiring: unpublished bundle does not download, does not throw, run continues', async () => {
   const localData = tmpDir();
   const runtimesDir = path.join(localData, 'runtimes');
-  const prevLocalData = process.env.BIOF3_LOCAL_DATA_DIR;
-  process.env.BIOF3_LOCAL_DATA_DIR = localData;
+  const prevLocalData = process.env.PETRI_LOCAL_DATA_DIR;
+  process.env.PETRI_LOCAL_DATA_DIR = localData;
 
   const counter = { calls: 0 };
   const original = bundles.getBundleDescriptor;
@@ -161,8 +161,8 @@ test('wiring: unpublished bundle does not download, does not throw, run continue
     assert.equal(env, null, 'no ready bundle ⇒ no R_LIBS_USER env, run on base runtime');
   } finally {
     bundles.getBundleDescriptor = original;
-    if (prevLocalData === undefined) delete process.env.BIOF3_LOCAL_DATA_DIR;
-    else process.env.BIOF3_LOCAL_DATA_DIR = prevLocalData;
+    if (prevLocalData === undefined) delete process.env.PETRI_LOCAL_DATA_DIR;
+    else process.env.PETRI_LOCAL_DATA_DIR = prevLocalData;
   }
 });
 

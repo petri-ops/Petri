@@ -3,7 +3,7 @@
 最后更新：2026-08-15
 状态：**A5 收口**（UI-AGENTWB-003 / UI-AGENTWB-004 转 `verified`）
 源绑定：`db2e04b feat(agent-workbench): P1.3 chart/image 渲染器注册 + A4 SimpleChat 注入桥`
-工作目录：`/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop`
+工作目录：`/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop`
 
 ## 1. 范围与边界
 
@@ -77,14 +77,14 @@ npm run test:files --prefix frontend -- \
 
 下列结论以**源码 + 47/47 单元测试 + tsc strict** 静态阅读得出（dev Electron 实机手测不在 A5 子 Agent 编排范围；后续主 Agent 收口可选择亲自跑或者不跑，按 §X.2 "双向 flag 强制测试用例"等价于"feature-flag-conditional test"，本子 Agent 已跑通）。
 
-**flag = off（缺省或 `localStorage.biof3.simplechat.extraRenderers !== 'true'`）**
+**flag = off（缺省或 `localStorage.petri.simplechat.extraRenderers !== 'true'`）**
 1. `readExtraRenderersFlag()` 返回 `false`：缺省时 `getItem` 为 `null`，显式 `'TRUE'`/`'1'`/`''` 同样不通过 `=== 'true'` 严格匹配 —— 4 态用例在 `extraRenderers.test.tsx:84-101` 覆盖。
 2. `<AssistantResultNodes>` **绝不挂载**：条件 `extraRenderersFlag && m.resultNodes && m.resultNodes.length > 0` 中第一项短路，DOM 中无 `sc-extra-result-nodes` 容器 —— `SimpleChat.extraRenderers.test.tsx:1-3`（两轴断言）覆盖。
 3. 现有 markdown 路径不动：`<CopilotMarkdown text={...}>` 渲染与 v1.0 等价（无 prop 变化、无 `<style>` 注入、无 console.warn）。
 4. 无新增 IPC / SQLite 写入：A4 不动 `desktopBridge.ts` / `copilotConversationsClient.ts` / `useConversations`；`m.resultNodes` 只在内存中解析，写回 SQLite 的字段保持 `meta` 原样。
 5. `registerDefaultRenderers()` 仅在 `<AssistantResultNodes>` 自身渲染时触发（`frontend/src/components/copilot/extraRenderers.tsx:128-149`），flag=off 路径上**完全不调用**。因此 flag=off 时**不**会让 chart/image renderer 注册到 `ResultCardRenderer` 模块级 `Map`。这一行为与 P1.3 "RendererRegistry 注册器层落地、不挂入 SimpleChat"语义一致，且不破坏既有 `ResultNode.type='unknown-type'` 回落 TextRenderer 的 fallback（已在 `ResultCardRenderer.test.tsx:36-48` 通过）。
 
-**flag = on（`localStorage.biof3.simplechat.extraRenderers = 'true'`）**
+**flag = on（`localStorage.petri.simplechat.extraRenderers = 'true'`）**
 1. `useExtraRenderersFlag()` 立即报告 `true`（`extraRenderers.test.tsx:103-110`）。
 2. 在 `assistant` message 上、若 `m.resultNodes` 非空数组，`<AssistantResultNodes>` 挂载；首行 `registerDefaultRenderers()` 注册 text/table/chart/image 四件套到 `ResultCardRenderer`（`renderers/index.ts:19-27`）—— 这是 idempotent 设计（模块级 `Map.set` 重复赋同值无影响）。
 3. 渲染管线：`AssistantResultNodes` → `ResultCardRenderer` → 按 `node.type` 查 `Map` → 落入 `TextRenderer` / `TableRenderer` / `ChartRenderer` / `ImageRenderer`；未知 type 回落 `TextRenderer`（`ResultCardRenderer.tsx:42`）。
@@ -148,13 +148,13 @@ npm run test:files --prefix frontend -- \
 
 **正式评估（供参考）**：
 
-1. **当前实现**：flag 完全依赖 `localStorage.getItem('biof3.simplechat.extraRenderers') === 'true'`，无 IPC 通道、无 Electron 启动参数、无 Settings 页面入口、无 Server-side `AGENT_WORKBENCH_RESULT_CARD` 旁路。
+1. **当前实现**：flag 完全依赖 `localStorage.getItem('petri.simplechat.extraRenderers') === 'true'`，无 IPC 通道、无 Electron 启动参数、无 Settings 页面入口、无 Server-side `AGENT_WORKBENCH_RESULT_CARD` 旁路。
 2. **生产态切换入口方案**（不在 A5 启动）：
    - Electron 启动参数：`app.commandLine` 注入 → `preload.js` 暴露 → SimpleChat 同步读取 —— 需要新增 IPC channel，污染 `desktopBridge.ts`。
    - Settings 页面"Experimental Features"折叠区 —— 需要新增 `ExperimentalSettingsPanel`、注册表单值持久化路径、`AboutPanel` 隐藏逻辑；且要遵守 §X.1.7"管理员 UI 规划中"声明（在 `agent-workbench-enhancement-plan.md` 中）。
    - Server-side prompt gating —— 修改 `src/mcp-server.js` 在 `AGENT_WORKBENCH_RESULT_CARD=true` 时给 agent prompt 追加 resultNodes 生成指令；与"前端 flag"独立控制。
 3. **A5 推荐**：
-   - 当前 `localStorage.biof3.simplechat.extraRenderers` 已经覆盖开发者调试需求，A4 注释明示"生产态打包需通过设置页或启动参数显式设置（不在本次范围）"（`SimpleChat.tsx:418` + `extraRenderers.tsx:6-19` + UI-AGENTWB-004 §遗留风险②）。
+   - 当前 `localStorage.petri.simplechat.extraRenderers` 已经覆盖开发者调试需求，A4 注释明示"生产态打包需通过设置页或启动参数显式设置（不在本次范围）"（`SimpleChat.tsx:418` + `extraRenderers.tsx:6-19` + UI-AGENTWB-004 §遗留风险②）。
    - 生产态入口的发起条件是：①P2 体验层成熟、②计划 §X.1.7 "Experimental Features" 子区获得产品决议、③Settings 模块接受新表单域。
    - 在 A5 不启动的前提下：当前 dev-only flag 不会因"用户无法在 packaged 环境切换"而违反 §X.1.7（该节标注"规划中、近期待评估"）；它属于计划允许的"开发态先落地、生产态后到位"双轨。
 
@@ -212,7 +212,7 @@ npm run test:files --prefix frontend -- \
 ## 9. 检查清单（自审）
 
 - [x] 先读 `docs/AUDIT-LOG.md` 并处理现有活跃广播（无 🔴 阻塞、无 🟢 待合并，无需处置）
-- [x] 触及 `docs/ui-productization-audit.md` / `docs/AUDIT-LOG.md` / 新验收报告 / 创建 worktree 时遵守 `$biof3-project-governance`
+- [x] 触及 `docs/ui-productization-audit.md` / `docs/AUDIT-LOG.md` / 新验收报告 / 创建 worktree 时遵守 `$petri-project-governance`
 - [x] 单工作包串行纪律未破，未启 P2 / P1.5 / flag UI / 新 npm 依赖
 - [x] 治理门禁必跑：`npm run docs:check` + `npm run ui:audit:check` + `tsc --noEmit` 三项全绿
 - [x] 测试范围纪律：定向 `npm run test:files` 跑 4 文件 47/47，与 `db2e04b` 一致；未跑全量

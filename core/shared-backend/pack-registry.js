@@ -133,11 +133,11 @@ function validatePackDir(packRoot) {
   };
 }
 
-/** 发现可用包：兄弟仓 gewu-pack-bio（dev 便利）+ 调用方给定的候选目录。 */
+/** 发现可用包：兄弟仓 petri-pack-bio（dev 便利）+ 调用方给定的候选目录。 */
 function discoverAvailablePacks({ projectRoot, extraDirs = [] } = {}) {
   const candidates = [];
   if (projectRoot) {
-    candidates.push(path.resolve(projectRoot, '..', 'gewu-pack-bio'));
+    candidates.push(path.resolve(projectRoot, '..', 'petri-pack-bio'));
   }
   for (const dir of extraDirs) candidates.push(path.resolve(dir));
   const seen = new Set();

@@ -12,14 +12,14 @@ const CHANNELS = require('./channels');
 
 const { ipcMain } = require("electron");
 
-const AGENT_WORKBENCH_FLAG_CHANNEL = CHANNELS.gewu.agentWorkbenchFlags;
+const AGENT_WORKBENCH_FLAG_CHANNEL = CHANNELS.petri.agentWorkbenchFlags;
 const AGENT_WORKBENCH_FLAG_NAME = "extraRenderers";
 
 function parseAgentWorkbenchFlags(argv = process.argv, env = process.env) {
   const cliValue = argv.find((arg) => arg.startsWith("--agent-workbench-flags="));
   const raw = cliValue
     ? cliValue.slice("--agent-workbench-flags=".length)
-    : String(env.BIOF3_AGENT_WORKBENCH_FLAGS || "");
+    : String(env.PETRI_AGENT_WORKBENCH_FLAGS || "");
   const enabled = raw
     .split(",")
     .map((value) => value.trim())

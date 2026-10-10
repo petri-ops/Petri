@@ -14,12 +14,12 @@
     {
       "name": "PRE_pack_installed_json",
       "ok": true,
-      "detail": "D:/1.WorkDir/gewu-pack-bio/plugins"
+      "detail": "D:/1.WorkDir/petri-pack-bio/plugins"
     },
     {
       "name": "PRE_fixture_installed_json",
       "ok": true,
-      "detail": "D:\\1.WorkDir\\biof3-desktop\\test\\fixtures\\neutral-plugins"
+      "detail": "D:\\1.WorkDir\\petri-desktop\\test\\fixtures\\neutral-plugins"
     },
     {
       "name": "Z1_catalog_empty_honest",
@@ -29,7 +29,7 @@
     {
       "name": "Z3_runtime_manifest_survives",
       "ok": true,
-      "detail": "runtime=biof3-r-runtime,biof3-py-runtime"
+      "detail": "runtime=petri-r-runtime,petri-py-runtime"
     },
     {
       "name": "Z4_zero_bio_files_in_core",

@@ -4,9 +4,9 @@
   "purpose": "BLOCK-138 第 6 轮（attempt-6）：补刃第二件（chain-preview persistChainWorkflowGraph 图落库 + learning.js resolvePlanStepInputLineage provenance lineage）后的栈上，经 chat plan/bind 链获得 ≥2 节点真实血缘链",
   "conclusion": "method=produced：plan/bind 链首次尝试即产出 3 节点真实血缘链（deseq2 → deg-standardizer → volcano-plot，2 条真实边、validation=valid），权威血缘端点 /api/result-studio/lineage 对终端 job 返回 chain 长度=3、上游在前、终端 isCurrent=true；同时 3 个 pending ChangeSet（各带 preview revisions）进入审阅队列，零 adopt、is_current 集合零触碰。selection 备选路未动用（ask 的条件是 plan/bind 卡住才走）。enrichment 第 4 步如实 blocked（go-kegg/gsea 未激活，用户裁决休眠面未触碰）。",
   "stackState": {
-    "backend": "core/biof3-server/server.js pid 25662（2026-10-03 16:23 启动），晚于补刃文件 mtime 16:13-16:14：core/shared-backend/result-changeset-service/chain-preview.js（persistChainWorkflowGraph/withChainGraphPersist）、core/biof3-server/agent-tools/learning.js（resolvePlanStepInputLineage + listProjectToolJobs 注入 + 四执行点 resultStudioInputLineage 接线）、result-context-tools.js / result-selection-tools.js（各 +1 行 listProjectToolJobs 注入）——修复代码确认在跑进程内",
+    "backend": "core/petri-server/server.js pid 25662（2026-10-03 16:23 启动），晚于补刃文件 mtime 16:13-16:14：core/shared-backend/result-changeset-service/chain-preview.js（persistChainWorkflowGraph/withChainGraphPersist）、core/petri-server/agent-tools/learning.js（resolvePlanStepInputLineage + listProjectToolJobs 注入 + 四执行点 resultStudioInputLineage 接线）、result-context-tools.js / result-selection-tools.js（各 +1 行 listProjectToolJobs 注入）——修复代码确认在跑进程内",
     "pluginCatalog": "GET /api/tools/catalog → ok=true,count=3（deseq2/deg-standardizer/volcano-plot，source=installed-plugins）",
-    "inputFiles": "block52 9/29 跑通输入实存：.biof3-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f/inputs/{counts.csv 61419B,coldata.csv 147B}",
+    "inputFiles": "block52 9/29 跑通输入实存：.petri-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f/inputs/{counts.csv 61419B,coldata.csv 147B}",
     "lineageWiring": "learning.js plan 链 run 把 plan.lineage 解析为 {kind:'artifact',sourceRevisionId,sourceToolJobId,sourceArtifactId,sourceOutputHash,materializationHash} 经 registry.js:928 → run-plugin-script.js:305 写入下游 job provenance"
   },
   "projectAndChatChain": {
@@ -39,7 +39,7 @@
     "terminalJobStatus": "GET /api/tools/status/tj_mus4vpzy_ztwn → ok=true,status=completed,toolId=volcano-plot,artifactCount=5（report.html/volcano.png/volcano.svg/classified_table.csv/volcano.pdf）",
     "reviewQueueVisibility": {
       "api": "GET /api/result-studio/changesets?projectId=p_mus4u230_wvib&status=preview_ready → 3 行全部 preview_ready：cs_b19c2b95c4f36c3cb069b6a19c52d94f（chain-preview:tj_mus4uxjq_s69m，46 changedPaths）/ cs_5296811ae8cd2b2f049ab1b0a3ffa7ff（chain-preview:tj_mus4vg1b_tf2r，12）/ cs_a364d87fb5b7126a67b35e0216176b64（chain-preview:tj_mus4vpzy_ztwn，10），adopted_at 均 None",
-      "dbCorroboration": "better-sqlite3 readonly .biof3-dev-user-data/data/biof3.db：scientific_change_sets 项目内 3 行 status='preview_ready'、adopted_at=NULL；artifact_revisions 项目内 34 行 SUM(is_current)=0、validation_status 全 'valid'（信任层红线：零 adopt、is_current 集合零触碰）"
+      "dbCorroboration": "better-sqlite3 readonly .petri-dev-user-data/data/petri.db：scientific_change_sets 项目内 3 行 status='preview_ready'、adopted_at=NULL；artifact_revisions 项目内 34 行 SUM(is_current)=0、validation_status 全 'valid'（信任层红线：零 adopt、is_current 集合零触碰）"
     },
     "graphCorroboration": {
       "db": "result_workflow_graphs 项目内 3 行（08:31:43/08:31:59/08:32:13，随链增长 1→2→3 节点），库内总数 7→10（本轮新增 3）；终端图 wfg_d05e23f47638c43cbf2f70bf validation='valid'",

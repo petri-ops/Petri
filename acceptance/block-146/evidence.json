@@ -8,8 +8,8 @@
       "scope": "#8 平台解析根修 + #9 bundle 结构化失败归因 + #4 required file fail-fast",
       "files": [
         "core/shared-backend/capability-bundles.js",
-        "core/biof3-server/mcp/registry/run-plugin-script.js",
-        "core/biof3-server/helpers/tools-executor.js"
+        "core/petri-server/mcp/registry/run-plugin-script.js",
+        "core/petri-server/helpers/tools-executor.js"
       ],
       "tests": [
         "test/capability-bundles.test.mjs（24/24，含 #8 红绿轮 17/7→24/0）",

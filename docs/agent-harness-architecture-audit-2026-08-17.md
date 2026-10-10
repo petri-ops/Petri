@@ -1,8 +1,8 @@
-# BioF3 Desktop Agent Harness 后端架构与可维护性审查
+# Petri Desktop Agent Harness 后端架构与可维护性审查
 
 **日期**: 2026-08-17
 **范围**: Agent harness 后端架构 + 可维护性视角（非前端 UI、非新增功能）
-**项目**: BioF3 Desktop — Electron + React/Vite + 内嵌 R/Python runtime
+**项目**: Petri Desktop — Electron + React/Vite + 内嵌 R/Python runtime
 **当前阶段**: G0 长期开发期
 **审查方法**: 静态分析（无运行时插桩）+ 模块级调用图 + 反模式 grep
 
@@ -107,7 +107,7 @@ src/database/branch-db.js   ──┐
 src/database/result-db.js   ──┘
                               │
                               ▼
-              对同一个 biof3.db 文件，各自 new Database(path)
+              对同一个 petri.db 文件，各自 new Database(path)
 ```
 
 - `branch-db.js` L31-49 和 `result-db.js` L36-54 是**逐字重复**的 singleton 包装；
@@ -306,7 +306,7 @@ const _embedCallLog = new Map();
 **片段**: 见 §2.4 引用。
 
 **问题**:
-- 两个文件同时打开 `biof3.db`，每次 `getDatabase()` 走各自的 `_dbCache` 单例（不是共享），造成：
+- 两个文件同时打开 `petri.db`，每次 `getDatabase()` 走各自的 `_dbCache` 单例（不是共享），造成：
   - 多于 1 个 SQLite handle 持有同一文件；
   - WAL checkpoint / busy_timeout 各自配置，可能漂移；
   - 测试时一个 close 另一个还活着，状态机难以预测；
@@ -318,8 +318,8 @@ const _embedCallLog = new Map();
    ```js
    const { loadDatabaseConstructor } = require('../migration-runner');
    const _cache = new Map();
-   function getDatabase(dbName='biof3.db') { ... } // 统一
-   function closeDatabase(dbName='biof3.db') { ... }
+   function getDatabase(dbName='petri.db') { ... } // 统一
+   function closeDatabase(dbName='petri.db') { ... }
    function _resetAllForTests() { ... }
    ```
 2. `branch-db.js` / `result-db.js` 改为 `const { getDatabase, closeDatabase } = require('./_db-singleton')`；
@@ -362,8 +362,8 @@ const _embedCallLog = new Map();
 
 **隐式依赖（隐式契约清单）**:
 - 214 处 `process.env.*` 读取，未通过单一 `config` 模块集中管理；
-- 9 处 `BIOF3_*` / `R_SERVER_PORT` / `PY_SERVER_PORT` 等；
-- 多个文件直接读 `process.env.BIOF3_LOCAL_DATA_DIR`（见 `core/r-server/db.js:599`）；
+- 9 处 `PETRI_*` / `R_SERVER_PORT` / `PY_SERVER_PORT` 等；
+- 多个文件直接读 `process.env.PETRI_LOCAL_DATA_DIR`（见 `core/r-server/db.js:599`）；
 - `src/main/env-coordinator.js` 通过 `process.env.X = String(value)` 反向注入，与「env 由 main 设置」的设计不一致。
 
 **修复方向**:
@@ -467,13 +467,13 @@ const _embedCallLog = new Map();
 
 ### 6.2 隐式依赖
 
-- `process.env.BIOF3_LOCAL_DATA_DIR` —— 主进程注入，两个 db 模块读取，A-007/A-010 已涉及；
-- `process.env.BIOF3_CONTENT_ROOT` —— R/Python tool 执行读 root；
-- `process.env.BIOF3_CONTENT_PLUGINS_DIR` —— content plugins 目录；
+- `process.env.PETRI_LOCAL_DATA_DIR` —— 主进程注入，两个 db 模块读取，A-007/A-010 已涉及；
+- `process.env.PETRI_CONTENT_ROOT` —— R/Python tool 执行读 root；
+- `process.env.PETRI_CONTENT_PLUGINS_DIR` —— content plugins 目录；
 - `process.env.R_SERVER_URL / PY_SERVER_URL / GATEWAY_URL` —— gateway 进程与 r-server 互相 URL 注入；
-- `BIOF3_RENDERER_DEV_URL` —— Vite dev server URL，dev mode only；
+- `PETRI_RENDERER_DEV_URL` —— Vite dev server URL，dev mode only；
 - **隐式端口**: `R_SERVER_PORT=3003` 默认（见 A-009）；
-- **隐式文件路径**: `~/Library/Application Support/BioF3/` (macOS) / 平台对应路径，由 `env-coordinator.js` 通过 `app.getPath()` 注入；
+- **隐式文件路径**: `~/Library/Application Support/Petri/` (macOS) / 平台对应路径，由 `env-coordinator.js` 通过 `app.getPath()` 注入；
 
 **总计**: 214 处 `process.env.*` 读取 = 隐式契约较重。
 
@@ -707,7 +707,7 @@ core/shared-backend/agent-workflow.js
 |------|------|------|
 | `core/r-server/cache-manager.js` | 8 处 env 读 | 启动时一次性，后续无变更；可以集中 |
 | `core/r-server/server.js` | 6 处 | 启动 + reload |
-| `core/r-server/db.js` | 2 处（`BIOF3_DB_PATH` / `BIOF3_LOCAL_DATA_DIR`） | DB 路径最关键的隐式契约 |
+| `core/r-server/db.js` | 2 处（`PETRI_DB_PATH` / `PETRI_LOCAL_DATA_DIR`） | DB 路径最关键的隐式契约 |
 | `core/r-server/helpers/system-prompt.js` | 1 处 | 模板内容 |
 | `src/main/env-coordinator.js` | 14+ 处 env 写 | 主进程唯一注入点 |
 

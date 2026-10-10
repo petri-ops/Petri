@@ -87,7 +87,7 @@
   （WorkingTreeReview/、CodeMirror 相关、触及页面）；node --check 触及 ipc/preload（如有）。
 - 每提交：`npm run docs:check` + `npm run ui:audit:check`。
 - 不跑全量 `npm run check` / `npm run test:all:workspace`。
-- P5：`BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev`，
+- P5：`PETRI_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev`，
   intent-to-add fixture（`git add -N`，验收后删除）制造真实 diff，CDP 驱动验证
   布局/统计/悬浮按钮/标记条/进度/内嵌提交全链 + 截图与 DOM 证据落 `acceptance/ui-204/`。
 - WTR 组件实机验证前干净 reload 页面（HMR 状态劣化前科）。

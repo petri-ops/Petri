@@ -29,16 +29,16 @@ GATE_PORT="${GW_GATE_PORT:-443}"
 REMOTE_PORT="${GW_REMOTE_PORT:-2233}"
 PROBE_SECS="${GW_PROBE_SECS:-120}"
 SSH_WATCHDOG="${GW_SSH_WATCHDOG:-0}"
-PROBE_BIN=/usr/local/sbin/gewu-relay-probe.sh
-PROBE_SERVICE=/etc/systemd/system/gewu-relay-probe.service
-PROBE_TIMER=/etc/systemd/system/gewu-relay-probe.timer
+PROBE_BIN=/usr/local/sbin/petri-relay-probe.sh
+PROBE_SERVICE=/etc/systemd/system/petri-relay-probe.service
+PROBE_TIMER=/etc/systemd/system/petri-relay-probe.timer
 NGINX_DROPIN_DIR=/etc/systemd/system/nginx.service.d
 
 say() { echo "[relay-watchdog] $*"; }
 
 if [ "${1:-}" = "--uninstall" ]; then
   say "撤销：停用并移除探活单元"
-  systemctl disable --now gewu-relay-probe.timer 2>/dev/null || true
+  systemctl disable --now petri-relay-probe.timer 2>/dev/null || true
   rm -f "$PROBE_TIMER" "$PROBE_SERVICE" "$PROBE_BIN"
   rm -rf "$NGINX_DROPIN_DIR"
   systemctl daemon-reload
@@ -52,7 +52,7 @@ command -v curl >/dev/null || { say "未找到 curl——apt install -y curl"; e
 
 # 1) nginx systemd 自愈（drop-in 不改发行版单元文件，卸载即净）
 mkdir -p "$NGINX_DROPIN_DIR"
-cat > "$NGINX_DROPIN_DIR/gewu-watchdog.conf" <<'UNIT'
+cat > "$NGINX_DROPIN_DIR/petri-watchdog.conf" <<'UNIT'
 [Service]
 Restart=always
 RestartSec=5
@@ -63,7 +63,7 @@ if [ "$SSH_WATCHDOG" = "1" ]; then
   SSH_UNIT=$(systemctl list-unit-files 'ssh*.service' --no-legend 2>/dev/null | awk '{print $1}' | grep -E '^ssh(d)?\.service$' | head -1 || true)
   if [ -n "${SSH_UNIT:-}" ]; then
     mkdir -p "/etc/systemd/system/${SSH_UNIT}.d"
-    printf '[Service]\nRestart=on-failure\nRestartSec=5\n' > "/etc/systemd/system/${SSH_UNIT}.d/gewu-watchdog.conf"
+    printf '[Service]\nRestart=on-failure\nRestartSec=5\n' > "/etc/systemd/system/${SSH_UNIT}.d/petri-watchdog.conf"
     say "ssh 看门狗已挂到 ${SSH_UNIT}（Restart=on-failure）"
   fi
 fi
@@ -73,13 +73,13 @@ fi
 #    桌面断→桌面自愈重拨；服务器 nginx 死→此处拉起。
 cat > "$PROBE_BIN" <<UNIT
 #!/usr/bin/env bash
-# gewu-relay-probe — 端到端探活（block159-relay-watchdog 安装；参数见文件头注释）
+# petri-relay-probe — 端到端探活（block159-relay-watchdog 安装；参数见文件头注释）
 code=\$(curl -ksS -o /dev/null -w '%{http_code}' --max-time 8 \\
   "https://127.0.0.1:${GATE_PORT}/api/mobile/status" || echo 000)
 if [ "\$code" = "401" ]; then
   exit 0
 fi
-logger -t gewu-relay-probe "public gate unhealthy (http_code=\$code, expect 401) -> restarting nginx"
+logger -t petri-relay-probe "public gate unhealthy (http_code=\$code, expect 401) -> restarting nginx"
 systemctl restart nginx
 UNIT
 chmod 700 "$PROBE_BIN"
@@ -87,34 +87,34 @@ chmod 700 "$PROBE_BIN"
 # 4) systemd 单元 + 计时器（串行、不叠加；unref 等价=无 RemainAfterExit）
 cat > "$PROBE_SERVICE" <<'UNIT'
 [Unit]
-Description=Gewu mobile relay end-to-end probe (BLOCK-159 family)
+Description=Petri mobile relay end-to-end probe (BLOCK-159 family)
 After=network-online.target nginx.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/sbin/gewu-relay-probe.sh
+ExecStart=/usr/local/sbin/petri-relay-probe.sh
 UNIT
 
 cat > "$PROBE_TIMER" <<UNIT
 [Unit]
-Description=Gewu mobile relay probe timer (every ${PROBE_SECS}s)
+Description=Petri mobile relay probe timer (every ${PROBE_SECS}s)
 
 [Timer]
 OnBootSec=60
 OnUnitActiveSec=${PROBE_SECS}
-Unit=gewu-relay-probe.service
+Unit=petri-relay-probe.service
 
 [Install]
 WantedBy=timers.target
 UNIT
 
 systemctl daemon-reload
-systemctl enable --now gewu-relay-probe.timer
+systemctl enable --now petri-relay-probe.timer
 
 # 5) 当场取证一轮（不等首个计时）：结果如实打印，异常不吞
 if "$PROBE_BIN"; then
   say "安装完成，当场探活：401 = 整链通（nginx 看门狗 + 每 ${PROBE_SECS}s 探活已就位）"
 else
-  say "安装完成，但当场探活未过（可能桌面端隧道未连）——nginx 看门狗与计时器已就位，journalctl -t gewu-relay-probe 可查"
+  say "安装完成，但当场探活未过（可能桌面端隧道未连）——nginx 看门狗与计时器已就位，journalctl -t petri-relay-probe 可查"
 fi
-systemctl --no-pager --lines=3 status gewu-relay-probe.timer || true
+systemctl --no-pager --lines=3 status petri-relay-probe.timer || true

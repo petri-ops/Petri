@@ -12,30 +12,30 @@ const require = createRequire(import.meta.url);
 const path = await import('node:path');
 const url = await import('node:url');
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const R_SERVER = path.resolve(__dirname, '..', 'core', 'biof3-server');
+const R_SERVER = path.resolve(__dirname, '..', 'core', 'petri-server');
 
 // 自举临时 DB（src/migrations 全量）——ai-usage 模块级 getDatabase() 需要库在位；
-// BIOF3_DB_PATH 隔离须在 require db.js 前生效（BLOCK-52 家法）。
+// PETRI_DB_PATH 隔离须在 require db.js 前生效（BLOCK-52 家法）。
 {
   const fs = require('fs');
   const ospkg = require('os');
   const dbPathMod = require('path');
   const Database = require(R_SERVER + '/node_modules/better-sqlite3');
-  const tempDbDir = fs.mkdtempSync(dbPathMod.join(ospkg.tmpdir(), 'biof3-block98-res-db-'));
-  const boot = new Database(dbPathMod.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fs.mkdtempSync(dbPathMod.join(ospkg.tmpdir(), 'petri-block98-res-db-'));
+  const boot = new Database(dbPathMod.join(tempDbDir, 'petri.db'));
   const migrationsDir = path.resolve(__dirname, '..', 'src', 'migrations');
   for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fs.readFileSync(dbPathMod.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = dbPathMod.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = dbPathMod.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try { fs.rmSync(tempDbDir, { recursive: true, force: true }); } catch {}
   });
 }
 
-const resilience = require('../core/biof3-server/helpers/agent-resilience');
-const aiUsage = require('../core/biof3-server/helpers/ai-usage');
+const resilience = require('../core/petri-server/helpers/agent-resilience');
+const aiUsage = require('../core/petri-server/helpers/ai-usage');
 
 // ── M3 防呆状态机 ──
 
@@ -152,7 +152,7 @@ test('recordAiUsage 接受韧性遥测字段并持久化', () => {
     attempt: 2, retryable: true, contextExceeded: true, errorCode: 'context_exceeded',
   });
   // 模块未导出查询助手时直接打 sqlite 查询
-  const sqlite = require('../core/biof3-server/db').getDatabase();
+  const sqlite = require('../core/petri-server/db').getDatabase();
   const got = sqlite.prepare("SELECT attempt, retryable, context_exceeded FROM ai_usage WHERE user_id='u-block98' ORDER BY id DESC LIMIT 1").get();
   assert.deepEqual({ attempt: got.attempt, retryable: got.retryable, context_exceeded: got.context_exceeded }, { attempt: 2, retryable: 1, context_exceeded: 1 });
 });

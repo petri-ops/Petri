@@ -6,7 +6,7 @@
  *
  * 用法（需 fnm Node 24）：
  *   node scripts/block83-pack-source-check.cjs <packRoot>
- *   # 例：node scripts/block83-pack-source-check.cjs D:/1.WorkDir/gewu-pack-bio
+ *   # 例：node scripts/block83-pack-source-check.cjs D:/1.WorkDir/petri-pack-bio
  *
  * 断言：
  *   P1 内置源指向空目录时，插件仍可全部从包的 plugins/ 加载（核心不依赖内置生信内容）
@@ -35,9 +35,9 @@ if (!fs.existsSync(pluginsDir)) {
 }
 
 // 空的内置源：证明「核心不内置生信内容」也能工作
-const emptyBuiltIn = fs.mkdtempSync(path.join(os.tmpdir(), 'gewu-empty-builtin-'));
-process.env.BIOF3_BUILT_IN_PLUGINS_DIR = emptyBuiltIn;
-process.env.BIOF3_PLUGINS_DIR = pluginsDir;
+const emptyBuiltIn = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-empty-builtin-'));
+process.env.PETRI_BUILT_IN_PLUGINS_DIR = emptyBuiltIn;
+process.env.PETRI_PLUGINS_DIR = pluginsDir;
 
 const results = [];
 function assert(name, ok, detail) {
@@ -45,8 +45,8 @@ function assert(name, ok, detail) {
   console.log((ok ? 'PASS' : 'FAIL') + ' — ' + name + (ok ? '' : ' :: ' + String(detail).slice(0, 300)));
 }
 
-const pluginLoader = require(path.join(ROOT, 'core/biof3-server/plugin-loader.js'));
-const catalogRoutes = require(path.join(ROOT, 'core/biof3-server/routes/tools-catalog.js'));
+const pluginLoader = require(path.join(ROOT, 'core/petri-server/plugin-loader.js'));
+const catalogRoutes = require(path.join(ROOT, 'core/petri-server/routes/tools-catalog.js'));
 
 const packJsonPath = path.join(packRoot, 'pack.json');
 const pack = fs.existsSync(packJsonPath) ? JSON.parse(fs.readFileSync(packJsonPath, 'utf8')) : null;

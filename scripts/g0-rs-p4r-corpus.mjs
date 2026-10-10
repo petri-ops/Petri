@@ -10,10 +10,10 @@
  *
  * Isolation comes from scripts/g0-rs-p4r-capture.mjs: ISOLATED_PATH_ENV
  * redirects every writable path into a throwaway root, and assertIsolated()
- * fails closed. The developer database and ~/Documents/BioF3-Local are never
+ * fails closed. The developer database and ~/Documents/Petri-Local are never
  * touched.
  *
- * WHY A CHILD PROCESS: core/biof3-server/config.js and core/biof3-server/db.js snapshot
+ * WHY A CHILD PROCESS: core/petri-server/config.js and core/petri-server/db.js snapshot
  * the environment at module load, and mcp/registry.js computes its jobs dir at
  * load too. A caller that already required any of them would bind the run to
  * real paths no matter what we assign afterwards. Running the tools in a fresh
@@ -125,11 +125,11 @@ async function runStepsInChild() {
   const require = createRequire(import.meta.url);
   const spec = JSON.parse(process.argv[process.argv.indexOf('--child') + 1]);
 
-  const { tool_run_tool: runTool } = require(path.join(REPO_ROOT, 'core', 'biof3-server', 'agent-tools', 'learning.js'));
-  const db = require(path.join(REPO_ROOT, 'core', 'biof3-server', 'db.js'));
+  const { tool_run_tool: runTool } = require(path.join(REPO_ROOT, 'core', 'petri-server', 'agent-tools', 'learning.js'));
+  const db = require(path.join(REPO_ROOT, 'core', 'petri-server', 'db.js'));
 
   // Package-aware inputs: the demo CSVs live in the bio domain pack since
-  // BLOCK-83. resolveBioPackRoot() honors BIOF3_BIO_PACK_ROOT, which the parent
+  // BLOCK-83. resolveBioPackRoot() honors PETRI_BIO_PACK_ROOT, which the parent
   // may have set — the spawned env inherits it, so parent and child resolve the
   // same pack.
   const inputs = resolvePackCorpusInputs(resolveBioPackRoot());
@@ -138,7 +138,7 @@ async function runStepsInChild() {
   // (interaction, context-envelope, changesets, workspace/status) validates a
   // projectId and rejects with 400/404 without one, so a project-less corpus
   // would let a baseline capture "measure" argument validation instead of the
-  // real path. The workspace path lands inside BIOF3_LOCAL_DATA_DIR, which
+  // real path. The workspace path lands inside PETRI_LOCAL_DATA_DIR, which
   // ISOLATED_PATH_ENV has already redirected into the disposable root.
   const CORPUS_USER = 'p4r-corpus';
   const project = db.createProject({
@@ -254,8 +254,8 @@ export async function generateCorpus({ root: reuseRoot, keep = false, withEnrich
   const pack = buildPackEnv({ captureRoot: root, toolIds });
   Object.assign(env, pack.env);
   try {
-    await applyMigrations(env.BIOF3_DB_PATH, { quiet });
-    const tables = inspectTables(env.BIOF3_DB_PATH);
+    await applyMigrations(env.PETRI_DB_PATH, { quiet });
+    const tables = inspectTables(env.PETRI_DB_PATH);
     if (tables.missing.length) throw new Error(`migration left RS tables missing: ${tables.missing.join(', ')}`);
 
     const { records, outputs, projectId } = await runCorpusSteps(env, { withEnrichment, onLog });

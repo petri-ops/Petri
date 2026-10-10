@@ -19,17 +19,17 @@ const ROOT = path.resolve('.');
 // 临时 DB 自举（knowledge-tools → knowledge-space → db.js）
 const dbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'b163-knw6-'));
 {
-  const Database = require(path.join(ROOT, 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const boot = new Database(path.join(dbDir, 'biof3.db'));
+  const Database = require(path.join(ROOT, 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const boot = new Database(path.join(dbDir, 'petri.db'));
   const migrationsDir = path.join(ROOT, 'src', 'migrations');
   for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fs.readFileSync(path.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = path.join(dbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(dbDir, 'petri.db');
 }
 
-const { suggestSkillsForQuery } = require(path.join(ROOT, 'core/biof3-server/agent-tools/knowledge-tools.js'));
+const { suggestSkillsForQuery } = require(path.join(ROOT, 'core/petri-server/agent-tools/knowledge-tools.js'));
 
 const SKILLS = [
   { id: 'deg-analysis-standard', name: '标准差异分析', description: '从计数矩阵到火山图的 DEG 流程', category: 'bioinformatics/ngs', tags: ['deg', 'deseq2'] },
@@ -56,7 +56,7 @@ test('BLOCK-163 KNW-6 TOP 3 截断与零命中', () => {
 });
 
 test('BLOCK-160 KNW-6 接线钉：knowledge_search 成功路径带 suggestedSkills（源码扫描）', () => {
-  const src = fs.readFileSync(path.join(ROOT, 'core/biof3-server/agent-tools/knowledge-tools.js'), 'utf8');
+  const src = fs.readFileSync(path.join(ROOT, 'core/petri-server/agent-tools/knowledge-tools.js'), 'utf8');
   assert.match(src, /suggestedSkills/, '命中结果应可携带 suggestedSkills');
   assert.match(src, /suggestSkillsForQuery\(query\)/, '成功路径应调用映射器');
 });

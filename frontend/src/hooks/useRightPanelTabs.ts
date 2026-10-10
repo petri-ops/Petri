@@ -27,7 +27,7 @@ export function useRightPanelTabs(): UseRightPanelTabsResult {
   const [rightTab, setRightTab] = useState<RightPanelMode>('home');
   const [openRightTabs, setOpenRightTabs] = useState<RightPanelMode[]>(['home']);
   const [rightToolMenuOpen, setRightToolMenuOpen] = useState(false);
-  const [browserUrl, setBrowserUrl] = useState('https://biof3.com/');
+  const [browserUrl, setBrowserUrl] = useState('https://petri.com/');
 
   const openRightPanel = useCallback(
     (tab: RightPanelMode, _compactLayout?: boolean) => {

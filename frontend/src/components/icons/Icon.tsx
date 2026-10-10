@@ -11,7 +11,7 @@
 // Usage:
 //   <Icon name="book" />
 //   <Icon name="graduation-cap" size={18} />
-//   <Icon name="dna" className="gewu-icon--accent" />
+//   <Icon name="dna" className="petri-icon--accent" />
 // ============================================================
 
 import React from 'react';

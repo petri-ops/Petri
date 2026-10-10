@@ -5,7 +5,7 @@
  * UI-437 v5.11/v5.12 实机验证（dev Electron 测试实例，只连 :9223，禁触用户主窗 :9222）：
  * 真跑一轮「system_info + knowledge_search」只读任务（复刻用户截图场景），终态后
  * 展开运行摘要与全部工具行，机械量测展开体（v5.12 量测参照系=可视列 .sc-msg-body
- * + 祖先链零逃逸断言，见 gewu-css-theme skill 视觉验收红线）：
+ * + 祖先链零逃逸断言，见 petri-css-theme skill 视觉验收红线）：
  *   V1 无工具名行（.sc-tool-activity-tool 不存在）
  *   V2 无「返回」标题（.sc-tool-resultdata-title 不存在）
  *   V3 JSON 框在场且复制钮悬浮框内右上角且不越可视列（copyEscapePx<=0）
@@ -16,7 +16,7 @@
  */
 const fs = require('node:fs');
 const path = require('node:path');
-const lib = require(path.join(process.cwd(), '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(process.cwd(), '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 
 const API = 'http://127.0.0.1:3001/api';
 const AUTH = { Authorization: 'Bearer desktop-local' };

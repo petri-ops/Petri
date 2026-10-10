@@ -21,13 +21,13 @@ const __dirname = path.dirname(__filename);
 const resolve = (...segments) => path.resolve(__dirname, '..', ...segments);
 const require = createRequire(import.meta.url);
 
-// db / store 必须在 env 设置后加载（BIOF3_DB_PATH 单例解析）
-const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block38-'));
-process.env.BIOF3_DB_PATH = path.join(tmpRoot, 'agent-tasks.db');
+// db / store 必须在 env 设置后加载（PETRI_DB_PATH 单例解析）
+const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block38-'));
+process.env.PETRI_DB_PATH = path.join(tmpRoot, 'agent-tasks.db');
 const DATA_DIR = path.join(tmpRoot, 'local-data');
-process.env.BIOF3_LOCAL_DATA_DIR = DATA_DIR;
+process.env.PETRI_LOCAL_DATA_DIR = DATA_DIR;
 
-const store = require(resolve('core/biof3-server/agent-task-store'));
+const store = require(resolve('core/petri-server/agent-task-store'));
 const { createIoTranscriptSink, readLastRecord } = require(
   resolve('core/shared-backend/llm-providers/io-transcript.js')
 );
@@ -78,7 +78,7 @@ function apiGet(pathname, { userId } = {}) {
 
 before(async () => {
   const express = require('express');
-  const route = require(resolve('core/biof3-server/routes/ai-agent/resume.js'));
+  const route = require(resolve('core/petri-server/routes/ai-agent/resume.js'));
   const app = express();
   app.use(express.json({ limit: '256kb' }));
   app.use((req, _res, next) => {
@@ -90,7 +90,7 @@ before(async () => {
     // 测试注入：不触达真实 provider；记录调用参数并模拟正常完成
     runAgentLoop(opts) {
       stubLoopCalls.push(opts);
-      const runtime = require(resolve('core/biof3-server/helpers/runtime.js'));
+      const runtime = require(resolve('core/petri-server/helpers/runtime.js'));
       try { runtime.aiTaskConcurrencyRelease(opts.userId, opts.taskId); } catch {}
       return Promise.resolve({ assistantText: 'resumed-done' });
     },
@@ -107,8 +107,8 @@ before(async () => {
 after(async () => {
   try { if (server) await new Promise((r) => server.close(r)); } catch {}
   try { fs.rmSync(tmpRoot, { recursive: true, force: true }); } catch {}
-  delete process.env.BIOF3_DB_PATH;
-  delete process.env.BIOF3_LOCAL_DATA_DIR;
+  delete process.env.PETRI_DB_PATH;
+  delete process.env.PETRI_LOCAL_DATA_DIR;
 });
 
 // ---------- store：启动清扫 + 可续跑判定 ----------
@@ -143,7 +143,7 @@ test('sweepInterruptedRunningTasks：running agent_loop → failed + 显式 inte
 // ---------- io-transcript：readLastRecord 取证读取 ----------
 
 test('readLastRecord：末条命中 / 轮转留存回退 / 诚实空态', () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-b38-transcript-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-b38-transcript-'));
   const sink = createIoTranscriptSink({ dataDir: dir });
 
   // 空态：文件不存在

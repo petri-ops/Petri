@@ -43,7 +43,7 @@ establishing / not_yet_qualified
 | 维度 | 首轮候选范围 | 边界 |
 |---|---|---|
 | 平台 | macOS arm64 | Windows、Linux、macOS x64 分别按证据晋级 |
-| 应用 | BioF3 Desktop packaged app | 开发壳通过不能替代 packaged 证据 |
+| 应用 | Petri Desktop packaged app | 开发壳通过不能替代 packaged 证据 |
 | 存储 | 本地文件 + SQLite | 不声明云端、PostgreSQL 或共享数据库资格 |
 | Runtime | 当前已发布 R/Python/Node 能力 | 未发布 bundle 和未验收架构不进入支持声明 |
 | Provider | deterministic mock + 至少两种真实 Provider | Provider 文本不能改变确定性科学验收 |

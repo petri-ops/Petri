@@ -15,14 +15,14 @@ BLOCK-34 代码无关的时刻（agent 任务收尾后 / 人工 kill 8765 孤儿
    SIGTERM→SIGKILL —— 包括**不是本 wrapper 启动**的并存实例（人工
    `electron . --dev` / 另一 wrapper 实例）。
 3. Electron main 收到 SIGTERM → app 退出链 → 后端子进程被杀
-   （`[biof3-server] [lifecycle] db closed on SIGTERM`）。
+   （`[petri-server] [lifecycle] db closed on SIGTERM`）。
 
 即：wrapper 收尾时「按二进制路径全杀」扩大了打击面，杀掉了自己没启动的实例。
 
 ## 2. 修复方案（launch-token 定向）
 
 - wrapper 启动 Electron 时生成一次性随机 token
-  `--biof3-dev-launch-token=<pid>-<random>`，经 `open -a ... --args` 传入。
+  `--petri-dev-launch-token=<pid>-<random>`，经 `open -a ... --args` 传入。
   main.js argv 解析为 `process.argv.includes('--dev')`（加法式），未知参数安全；
   单例锁按 userData 隔离，token 不受影响。
 - 新增 `getLaunchedElectronPids()`：`pgrep -f <token>` 精确匹配**本 wrapper 启动的
@@ -52,7 +52,7 @@ BLOCK-34 代码无关的时刻（agent 任务收尾后 / 人工 kill 8765 孤儿
 
 - P1：`node --check scripts/dev-electron.js`；启动链冒烟（wrapper 正常拉起 Electron + CDP）。
 - P2（实机核心判据）：wrapper A 启动实例 A（CDP 9222）→ 人工以独立
-  `BIOF3_ELECTRON_USER_DATA_DIR` 启动并存实例 B（单例锁按 userData 隔离，可共存），
+  `PETRI_ELECTRON_USER_DATA_DIR` 启动并存实例 B（单例锁按 userData 隔离，可共存），
   B 采用 `./node_modules/.bin/electron`（cli.js 变体）启动以覆盖 boot 清理盲区
   回归 → SIGTERM wrapper A → **A 实例退出、B 实例存活**（修复前 B 会被全杀）；
   再验证 boot 清理：重启 wrapper 时 B 被按设计清杀。判定采用事件轮询

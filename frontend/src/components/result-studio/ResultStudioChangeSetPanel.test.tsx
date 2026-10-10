@@ -37,7 +37,7 @@ const candidate: ArtifactRevision = {
 
 const changeSet: ResultStudioChangeSet = {
   changeSetId: 'cs_2', projectId: 'p_1', status: 'preview_ready', candidateCommit: 'c'.repeat(40),
-  workingBranchRef: 'refs/heads/biof3/changeset/cs_2', createdBy: 'agent',
+  workingBranchRef: 'refs/heads/petri/changeset/cs_2', createdBy: 'agent',
   changedPaths: [{ relativePath: 'analysis/scripts/plot.R', changeType: 'added' }],
   validationSummary: { artifactTruthStatus: 'valid', intentSummary: '把火山图配色调整为蓝色', impactLevel: 'presentation_rerender' },
   createdAt: '2026-07-25T00:00:00Z', updatedAt: '2026-07-25T00:01:00Z',

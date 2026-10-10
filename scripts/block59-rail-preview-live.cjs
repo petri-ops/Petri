@@ -22,9 +22,9 @@ const { execFileSync } = require('node:child_process');
 const http = require('node:http');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
 const DB_PATH = process.env.BIOF59_DB
-  || path.join(__dirname, '..', '.biof3-dev-user-data', 'data', 'biof3.db');
+  || path.join(__dirname, '..', '.petri-dev-user-data', 'data', 'petri.db');
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-59');
 
 function fetchJson(url) {
@@ -126,12 +126,12 @@ async function main() {
 
   const targets = await listTargets();
   const page = targets.find((t) => t.type === 'page' && /localhost:3000/.test(t.url || '') && !/(\/window\/)/.test(t.url || ''));
-  if (!page) throw new Error('biof3_page_not_found');
+  if (!page) throw new Error('petri_page_not_found');
   const client = await new CdpClient(page.webSocketDebuggerUrl).connect();
 
   // 幂等预清理
   const pre = await evalJSRetry(client, `(async () => {
-    const wm = window.biof3Desktop?.windowManager;
+    const wm = window.petriDesktop?.windowManager;
     if (!wm) return { bridge: false };
     const snap = await wm.snapshot();
     const entry = (snap?.snapshot?.entries || []).find((e) => e.id === ${JSON.stringify(contentId)});
@@ -144,11 +144,11 @@ async function main() {
   assert('主窗桥可用 + 预清理', pre?.bridge === true, JSON.stringify(pre));
 
   // 弹出 → × 降格（走 window:minimize，含快照采集）
-  const pop = await evalJSRetry(client, `window.biof3Desktop.windowManager.popOut('result', ${JSON.stringify(contentKey)})`);
+  const pop = await evalJSRetry(client, `window.petriDesktop.windowManager.popOut('result', ${JSON.stringify(contentKey)})`);
   assert('结果窗弹出', pop?.ok && pop?.action === 'created', JSON.stringify(pop));
   await pollTarget('/window/result/');
   await delay(1200); // 首帧渲染完成再降格，快照才有内容
-  const mini = await evalJSRetry(client, `window.biof3Desktop.windowManager.minimizeToRail(${JSON.stringify(contentId)})`);
+  const mini = await evalJSRetry(client, `window.petriDesktop.windowManager.minimizeToRail(${JSON.stringify(contentId)})`);
   assert('× 降格（minimize 含快照采集）', mini?.ok && mini?.state === 'railed', JSON.stringify(mini));
 
   // 轨道窗出现：宽 364
@@ -202,11 +202,11 @@ async function main() {
   // 点击恢复 + 清理
   await evalJSRetry(railClient, `(() => { document.querySelector('button[class*=tick]').click(); return true; })()`);
   await delay(1200);
-  const snap = await evalJSRetry(client, `window.biof3Desktop.windowManager.snapshot()`);
+  const snap = await evalJSRetry(client, `window.petriDesktop.windowManager.snapshot()`);
   const entry = (snap?.snapshot?.entries || []).find((e) => e.id === contentId);
   assert('点击刻度 → popped（恢复路径完好）', entry?.state === 'popped', JSON.stringify(entry));
-  await evalJSRetry(client, `window.biof3Desktop.windowManager.minimizeToRail(${JSON.stringify(contentId)})`);
-  const removed = await evalJSRetry(client, `window.biof3Desktop.windowManager.remove(${JSON.stringify(contentId)})`);
+  await evalJSRetry(client, `window.petriDesktop.windowManager.minimizeToRail(${JSON.stringify(contentId)})`);
+  const removed = await evalJSRetry(client, `window.petriDesktop.windowManager.remove(${JSON.stringify(contentId)})`);
   assert('清理：降格 + 显式移除', removed?.ok === true, JSON.stringify(removed));
 
   const allPass = results.assertions.every((a) => a.pass);

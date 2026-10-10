@@ -118,8 +118,8 @@ function resolveProjectRunLayout(options) {
   // 依规留本地），不建第二套工作区真相。本地项目语义不变。
   let workspaceRoot = project.workspace_path;
   if (!workspaceRoot && project.workspace_kind === 'ssh') {
-    const localDataRoot = process.env.BIOF3_LOCAL_DATA_DIR
-      || path.join(require('os').homedir(), 'Documents', 'BioF3-Local');
+    const localDataRoot = process.env.PETRI_LOCAL_DATA_DIR
+      || path.join(require('os').homedir(), 'Documents', 'Petri-Local');
     workspaceRoot = path.join(localDataRoot, 'remote-projects', String(projectId));
   }
   if (!workspaceRoot) {
@@ -139,7 +139,7 @@ function resolveProjectRunLayout(options) {
     try {
       fs.mkdirSync(normalizedWorkspace, { recursive: true });
       // 测试写入权限
-      const testFile = path.join(normalizedWorkspace, '.biof3-write-test');
+      const testFile = path.join(normalizedWorkspace, '.petri-write-test');
       fs.writeFileSync(testFile, '');
       fs.unlinkSync(testFile);
     } catch (error) {
@@ -207,7 +207,7 @@ function resolveSystemRunLayout(options) {
 
   // 系统任务使用应用数据目录
   const appDataDir =
-    process.env.BIOF3_LOCAL_DATA_DIR || path.join(os.homedir(), 'Documents', 'BioF3-Local');
+    process.env.PETRI_LOCAL_DATA_DIR || path.join(os.homedir(), 'Documents', 'Petri-Local');
 
   const workspaceRoot = path.join(appDataDir, 'system-tasks', systemScope);
   const resultsRoot = path.join(workspaceRoot, 'results');

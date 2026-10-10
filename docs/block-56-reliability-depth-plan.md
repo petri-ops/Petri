@@ -3,13 +3,13 @@
 > 状态：`completed`（2026-09-04 P1→P2→P3→实机 全部收口；F4 记忆系统按计划仅登记不实施）
 > 立项日期：2026-09-03（用户裁决「四个新发现单独开一个 block」）
 > truthDomain: `block-56-reliability-depth`
-> 来源：codex 第四轮调研（compact\_model\_fallback / sandbox\_tags / context\_manager / memories）+ BioF3 上下文审计遗留观察项
+> 来源：codex 第四轮调研（compact\_model\_fallback / sandbox\_tags / context\_manager / memories）+ Petri 上下文审计遗留观察项
 
 ## 1. 背景
 
 codex 第四轮调研新发现四项机制，共同主题是**可靠性纵深**——坏情况发生时任务不报废：
 
-| # | 发现                  | codex 实现                                                                                                                                                                                                                           | BioF3 现状                                                                              | 价值        |
+| # | 发现                  | codex 实现                                                                                                                                                                                                                           | Petri 现状                                                                              | 价值        |
 | - | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | --------- |
 | ① | **模型降级链路**          | 双层：模型级（InvalidRequest/ContextWindowExceeded/ServerOverloaded/UsageLimitReached 等错误触发当前→备用模型切换，`compact_model_fallback.rs` L8-64，遥测 `codex.compaction.model_fallback` 打 tag）+ 传输级（WebSocket 耗尽重试预算→强制切 HTTP，`client.rs` L2071-2085） | DeepSeek 单 provider，模型挂任务挂（BLOCK-38 只能中断续跑，不能换模型续命）；retry\_pending 已有链路，缺 fallback 维度 | ⭐⭐⭐       |
 | ② | **沙箱中间档**           | 显式策略等级 `read-only / workspace-write / danger-full-access`（`sandbox_tags.rs` L58-105，按 PermissionProfile/filesystem/network policy 输出标签）                                                                                            | read/full 二档 + commandVerdict 黑名单——full 是全开，缺 `workspace-write`（允许写项目目录、禁系统其余）        | ⭐⭐        |
@@ -30,7 +30,7 @@ codex 第四轮调研新发现四项机制，共同主题是**可靠性纵深**�
 
 - **边界**：不做自动多级连环降级（A→B→C 链）——单级即可，连环降级掩盖真实故障
 
-- **provider 层不动**：传输级 fallback（WS→HTTP）不适用（BioF3 走 HTTP SSE，无 WS 主传输）
+- **provider 层不动**：传输级 fallback（WS→HTTP）不适用（Petri 走 HTTP SSE，无 WS 主传输）
 
 ### 2.2 P2 — 沙箱中间档 workspace-write（F2）
 
@@ -48,7 +48,7 @@ codex 第四轮调研新发现四项机制，共同主题是**可靠性纵深**�
 
 - agent loop 内存 map：`path → {hash, readAt, iteration}`；再次读同文件时：hash 相同 → 结果附 `unchanged: true` 提示模型免重述；hash 变 → 结果附 `changedSinceLastRead: true`（模型自判是否重读）
 
-- **不做**：自动重读/自动失效旧内容（模型裁决权保留，对齐「不硬冲」纪律）；rollback reinjection（BioF3 无 rollback 语义，不引入）
+- **不做**：自动重读/自动失效旧内容（模型裁决权保留，对齐「不硬冲」纪律）；rollback reinjection（Petri 无 rollback 语义，不引入）
 
 ### 2.4 F4 — 记忆系统（仅登记，不实施）
 
@@ -115,7 +115,7 @@ codex 第四轮调研新发现四项机制，共同主题是**可靠性纵深**�
 
 - 2026-09-04 P3（实施收口）：`helpers/context-freshness.js`（纯函数：fingerprintOf 前 8 位切片 + createFreshnessTracker 内存 map 三态 + applyFreshnessMark 零副作用增强）+ `loop-orchestrator.js` execute 接缝（workspace_read 结果增强，事件与模型消息共用）。成本边界：readFile 只对 ≤MAX_TEXT_FILE_BYTES 文本文件返回 sha256，指纹为切片零额外哈希成本（二进制/超大文件走既有错误路径天然无需指纹）。不做自动重读（模型裁决权保留）。定向测试：`test/block56-context-freshness.test.mjs` 三态 + 边界 + 真实 workspace_read 集成（7/7）；loop-orchestrator 回归 46/46。
 
-- 2026-09-04 实机（P1 降级链路真链路验证）：`scripts/block56-live.cjs`——本地双 mock OpenAI-compatible 端点（deepseek 真协议，primary 可注入 500/400/401 故障，backup 正常 SSE），真设置落盘（临时 BIOF3_LOCAL_DATA_DIR）+ 真 DB（BIOF3_DB_PATH）+ 真分类 + 真配置解析。14/14 断言全 PASS，证据 `acceptance/block-56/model-fallback-live.json`：A 请求级（500 → gateway 内切备用 + model_fallback 事件 + fallbackFrom 溯源）；B 任务级（400 context 超限 → 请求级不动（isRetryable=false 分工正确）→ 任务失败 → 真分类 context_window → 真建续跑任务（fallbackOfTaskId 溯源）→ 备用端点真完成 + disableProviderFallback=true + 恢复指令注入（系统注入/原消息/进度摘要/降级注明）→ 单级不连环闸 already_resumed）；C 不可降级（401 → not_degradable 诚实失败零回归）；D 未启用配置 → no_fallback_profile 诚实失败。UI 台账同步：UI-287（降级任务条显示）/ UI-288（档位三选菜单）in_progress 待 dev Electron 实机。
+- 2026-09-04 实机（P1 降级链路真链路验证）：`scripts/block56-live.cjs`——本地双 mock OpenAI-compatible 端点（deepseek 真协议，primary 可注入 500/400/401 故障，backup 正常 SSE），真设置落盘（临时 PETRI_LOCAL_DATA_DIR）+ 真 DB（PETRI_DB_PATH）+ 真分类 + 真配置解析。14/14 断言全 PASS，证据 `acceptance/block-56/model-fallback-live.json`：A 请求级（500 → gateway 内切备用 + model_fallback 事件 + fallbackFrom 溯源）；B 任务级（400 context 超限 → 请求级不动（isRetryable=false 分工正确）→ 任务失败 → 真分类 context_window → 真建续跑任务（fallbackOfTaskId 溯源）→ 备用端点真完成 + disableProviderFallback=true + 恢复指令注入（系统注入/原消息/进度摘要/降级注明）→ 单级不连环闸 already_resumed）；C 不可降级（401 → not_degradable 诚实失败零回归）；D 未启用配置 → no_fallback_profile 诚实失败。UI 台账同步：UI-287（降级任务条显示）/ UI-288（档位三选菜单）in_progress 待 dev Electron 实机。
 
 - 2026-09-04 UI 实机收口（UI-287 / UI-288 全部 verified，主智能体接管收尾）：**UI-287**——`scripts/block56-ui-fallback-live.cjs` 11/11 allPass（场景 R 请求级：同任务 completed + task_events 记 model_fallback + mock 500 注入生效 + 备用 marker 上屏 + 降级 notice chip 上屏；场景 T 任务级：failed→续跑 completed fallbackOfTaskId 溯源 + 备用 profile 单级不连环 + 无缝切订阅无错误横幅 + 无新增错误横幅；ai-settings 字节级恢复），证据 `acceptance/block-56/ui-fallback-live.json` + 截图 ×2。**实机发现并修复真缺陷**：请求级降级与任务终态同批到达（备用模型秒回）时，notice 挂在 run 快照上，而 run 终态对账（`shouldClearReconciledConversationRun` → `clearConversationRun`）紧随销毁 run 且持久化消息不携带该字段——chip 存活 <300ms 用户不可见。修复 = conversationRunStore 模块级会话级 `fallbackNotices` map（请求级/任务级双写、`getConversationFallbackNotice` 导出、新 run 开始清除）+ SimpleChat displayMessages 包装层附着到最后一条助手消息（覆盖 run 清理后的早返回构建路径）。根因取证：`scripts/block56-ui287-diagnose.cjs` 三层探针（SSE 帧捕获 / store 落盘读回 / displayMessages 构建）同 target 钉扎取证，证据 `acceptance/block-56/ui287-diagnose.json`。门禁：conversationRunStore.test 35/35 + SimpleChat 相关 vitest 28/28 + tsc 0。**UI-288**——`scripts/block56-ui288-workspace-live.cjs` 10/10 全 PASS（「项目写」档 workspace_write 真实落盘且 context.accessMode=workspace-write / workspace_exec_background 被拒记 `access_mode_workspace_write` 且无后台进程实际启动 / 探针清理），证据 `acceptance/block-56/ui288-workspace-live.json` + 截图 ×2。台账 UI-287/288 → verified。
 

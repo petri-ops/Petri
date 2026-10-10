@@ -19,13 +19,13 @@ const { zoomBy, zoomReset } = require("./_zoom.js");
 // 穿透。仅测试实例注册（globalShortcut 不抢用户快捷键）。
 // UI-421 — 默认键改 Ctrl+Alt+Shift+M：Ctrl+Alt+M 常被第三方程序 RegisterHotKey
 // 抢占且 register() 静默返回 false（2026-09-19 实机实锤，用户按键无响应）；
-// 注册结果必须显式落日志，env BIOF3_TEST_MANAGE_SHORTCUT 可覆盖。与
+// 注册结果必须显式落日志，env PETRI_TEST_MANAGE_SHORTCUT 可覆盖。与
 // _window-create.js 的 additionalArguments 注入处共用同一解析式。
 const MANAGE_SHORTCUT =
-  process.env.BIOF3_TEST_MANAGE_SHORTCUT || "Control+Alt+Shift+M";
+  process.env.PETRI_TEST_MANAGE_SHORTCUT || "Control+Alt+Shift+M";
 
 function registerTestManageModeToggle({ globalShortcut, getMainWindow }) {
-  if (process.env.BIOF3_TEST_INSTANCE !== "1") return;
+  if (process.env.PETRI_TEST_INSTANCE !== "1") return;
   let manageMode = false;
   const apply = () => {
     const win = getMainWindow();
@@ -44,7 +44,7 @@ function registerTestManageModeToggle({ globalShortcut, getMainWindow }) {
     console.log(`[test-manage] 管理模式快捷键已注册: ${MANAGE_SHORTCUT}`);
   } else {
     console.warn(
-      `[test-manage] globalShortcut.register ${MANAGE_SHORTCUT} 失败——组合键被其他程序占用，管理模式不可用；可用环境变量 BIOF3_TEST_MANAGE_SHORTCUT 换键后重启测试实例`
+      `[test-manage] globalShortcut.register ${MANAGE_SHORTCUT} 失败——组合键被其他程序占用，管理模式不可用；可用环境变量 PETRI_TEST_MANAGE_SHORTCUT 换键后重启测试实例`
     );
   }
   const win = getMainWindow();
@@ -81,9 +81,9 @@ function setupWindowIpc({ ipcMain, process, app, getMainWindow, globalShortcut }
   });
 
   // ── BLOCK-100/UI-411 — 测试实例窗口管理 ────────────────────
-  // 守卫：仅 BIOF3_TEST_INSTANCE=1 的实例放行（用户实例误调会导致鼠标失效）。
+  // 守卫：仅 PETRI_TEST_INSTANCE=1 的实例放行（用户实例误调会导致鼠标失效）。
   ipcMain.handle(CHANNELS.window.setAlwaysOnTop, (event, flag) => {
-    if (process.env.BIOF3_TEST_INSTANCE !== "1") return { ok: false, code: "test_instance_only" };
+    if (process.env.PETRI_TEST_INSTANCE !== "1") return { ok: false, code: "test_instance_only" };
     const win = resolveSenderWindow(event);
     if (!win) return { ok: false };
     win.setAlwaysOnTop(Boolean(flag));
@@ -91,7 +91,7 @@ function setupWindowIpc({ ipcMain, process, app, getMainWindow, globalShortcut }
   });
 
   ipcMain.handle(CHANNELS.window.setIgnoreMouseEvents, (event, flag) => {
-    if (process.env.BIOF3_TEST_INSTANCE !== "1") return { ok: false, code: "test_instance_only" };
+    if (process.env.PETRI_TEST_INSTANCE !== "1") return { ok: false, code: "test_instance_only" };
     const win = resolveSenderWindow(event);
     if (!win) return { ok: false };
     // forward:true（Windows）：穿透时仍向渲染层转发 mousemove——管理条悬停
@@ -157,7 +157,7 @@ function setupWindowIpc({ ipcMain, process, app, getMainWindow, globalShortcut }
   });
 
   // ── App relaunch (for runtime install / env refresh) ────────
-  // BIOF3_R_HOME env is fixed at startup; a partial biof3-server restart
+  // PETRI_R_HOME env is fixed at startup; a partial petri-server restart
   // would still read stale values — require full app relaunch.
   ipcMain.handle(CHANNELS.app.relaunch, async () => {
     try {

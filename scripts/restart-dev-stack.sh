@@ -11,7 +11,7 @@
 # **显式** location.href='http://localhost:3000/'（chrome 错误页上 location.reload 无效）。
 # 2026-09-11 沉淀（当次踩坑三连）：
 #   1) detached backend 会逃逸 electron 树杀 → 必须 kill 3001 监听者（僵尸）；
-#   2) dev 栈数据面在 BIOF3_DB_PATH / BIOF3_LOCAL_DATA_DIR（.biof3-dev-user-data/data），
+#   2) dev 栈数据面在 PETRI_DB_PATH / PETRI_LOCAL_DATA_DIR（.petri-dev-user-data/data），
 #      不带 env 重启会连到默认空库（BLOCK-79 环境事实的环境变量版）；
 #   3) cmd.exe .cmd 必须 CRLF（LF 会炸），改用 PowerShell Start-Process 直启 node。
 set -u
@@ -26,7 +26,7 @@ taskkill_ms() { MSYS_NO_PATHCONV=1 taskkill "$@" >/dev/null 2>&1 || true; }
 taskkill_ms /IM electron.exe /F
 occ=$(netstat -ano | grep ':3001' | grep LISTENING | awk '{print $5}' | head -1)
 if [ -n "${occ:-}" ]; then echo "kill stale backend on 3001 (pid $occ)"; taskkill_ms /PID "$occ" /F; fi
-CDP_PORT="${BIOF3_DEV_CDP_PORT:-9222}"
+CDP_PORT="${PETRI_DEV_CDP_PORT:-9222}"
 occ9=$(netstat -ano | grep ":${CDP_PORT}" | grep LISTENING | awk '{print $5}' | head -1)
 if [ -n "${occ9:-}" ]; then echo "kill stale cdp on ${CDP_PORT} (pid $occ9)"; taskkill_ms /PID "$occ9" /F; fi
 sleep 2
@@ -46,7 +46,7 @@ for p in 3001 "${CDP_PORT}"; do
       # 下一个空闲端口继续启动，不 ABORT——3001 才是硬性清场对象。
       CDP_PORT=$((p + 1))
       echo "WARN: CDP port $p 清不掉（继承句柄幽灵），改用 $CDP_PORT"
-      export BIOF3_DEV_CDP_PORT="$CDP_PORT"
+      export PETRI_DEV_CDP_PORT="$CDP_PORT"
     else
       left=$(netstat -ano | grep ":$p" | grep LISTENING | head -1 || true)
       echo "ABORT: port $p still held after kill — 清场失败，拒绝继续（$left）"; exit 3
@@ -55,42 +55,42 @@ for p in 3001 "${CDP_PORT}"; do
 done
 
 export PATH="/c/Users/Admin/AppData/Roaming/fnm/node-versions/v24.20.0/installation:$PATH"
-export BIOF3_DB_PATH='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\data\biof3.db'
-export BIOF3_LOCAL_DATA_DIR='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\data'
+export PETRI_DB_PATH='D:\1.WorkDir\petri-desktop\.petri-dev-user-data\data\petri.db'
+export PETRI_LOCAL_DATA_DIR='D:\1.WorkDir\petri-desktop\.petri-dev-user-data\data'
 # BLOCK-85 双真机 — 跨端公网门自签证书 CA 信任（后端 fetch 8442/8443 必须；
-# 证书=ECS /etc/nginx/ssl/gewu.crt 的本机拷贝。忘设=重启后跨端互访突然全断
+# 证书=ECS /etc/nginx/ssl/petri.crt 的本机拷贝。忘设=重启后跨端互访突然全断
 # DEPTH_ZERO_SELF_SIGNED_CERT，见 dev-infra SKILL「端口与后端实例纪律」第 6 条）
 # BLOCK-110-JEV — 决策 API 凭据注入（key 不入仓；文件在 gitignored 区，用户裁决
 # 「key 暂保留后续轮换」，替换时只改 jev.env 并重启后端）。缺文件静默跳过。
-# 部署密钥（.biof3-secrets，env 格式，gitignored——「不要 commit 到 git」）。
+# 部署密钥（.petri-secrets，env 格式，gitignored——「不要 commit 到 git」）。
 # BLOCK-150 加映：AI key 已不进后端凭据链（用户裁决「杜绝走 env 显式设置」——
 # 设置页 credential store 是唯一来源，见 helpers/ai-settings.js getApiKey）；本文件
 # 仅保留非 AI 用途（NODE_EXTRA_CA_CERTS 等）与 OPENAI_COMPATIBLE_* 渠道端点。
-if [ -f "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/.biof3-secrets" ]; then
+if [ -f "D:/1.WorkDir/petri-desktop/.petri-dev-user-data/.petri-secrets" ]; then
   set -a
-  . "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/.biof3-secrets"
+  . "D:/1.WorkDir/petri-desktop/.petri-dev-user-data/.petri-secrets"
   set +a
-  echo "deploy secrets: .biof3-secrets sourced"
+  echo "deploy secrets: .petri-secrets sourced"
 fi
 # BLOCK-116 P5 — 决策模型供给（端点/Key/模型）已迁移至 data/decision-config.json
 # （设置页「决策原语→模型接口」可视管理；用户裁决取消 env 依赖）。
-# 如需应急回退：恢复 .biof3-dev-user-data/jev.env.bak-by-user-request 并取消下方注释。
-# if [ -f "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/jev.env" ]; then
+# 如需应急回退：恢复 .petri-dev-user-data/jev.env.bak-by-user-request 并取消下方注释。
+# if [ -f "D:/1.WorkDir/petri-desktop/.petri-dev-user-data/jev.env" ]; then
 #   set -a
-#   . "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/jev.env"
+#   . "D:/1.WorkDir/petri-desktop/.petri-dev-user-data/jev.env"
 #   set +a
 #   echo "block110: jev.env loaded (TYPESAFE_API_KEY present)"
 # fi
-if [ -f "D:/1.WorkDir/biof3-desktop/.biof3-dev-user-data/ecs-gewu.crt" ]; then
-  export NODE_EXTRA_CA_CERTS='D:\1.WorkDir\biof3-desktop\.biof3-dev-user-data\ecs-gewu.crt'
-  echo "block85: NODE_EXTRA_CA_CERTS set (ecs-gewu.crt)"
+if [ -f "D:/1.WorkDir/petri-desktop/.petri-dev-user-data/ecs-petri.crt" ]; then
+  export NODE_EXTRA_CA_CERTS='D:\1.WorkDir\petri-desktop\.petri-dev-user-data\ecs-petri.crt'
+  echo "block85: NODE_EXTRA_CA_CERTS set (ecs-petri.crt)"
 fi
 # BLOCK-95 三开关 2026-09-18 已翻默认开（feature-flags.js 单一真相 + 设置页 UI-403）。
 # 此处只透传调用方覆盖：=1/=0 强制开/关（kill-switch）；留空=走默认（现在默认开）。
-export BIOF3_SERVER_HISTORY_ASSEMBLY="${BIOF3_SERVER_HISTORY_ASSEMBLY:-}"
-export BIOF3_SESSION_COMPACTION="${BIOF3_SESSION_COMPACTION:-}"
-if [ -n "${BIOF3_SERVER_HISTORY_ASSEMBLY}" ]; then echo "block95: env override BIOF3_SERVER_HISTORY_ASSEMBLY=${BIOF3_SERVER_HISTORY_ASSEMBLY}"; fi
-if [ -n "${BIOF3_SESSION_COMPACTION}" ]; then echo "block95: env override BIOF3_SESSION_COMPACTION=${BIOF3_SESSION_COMPACTION}"; fi
+export PETRI_SERVER_HISTORY_ASSEMBLY="${PETRI_SERVER_HISTORY_ASSEMBLY:-}"
+export PETRI_SESSION_COMPACTION="${PETRI_SESSION_COMPACTION:-}"
+if [ -n "${PETRI_SERVER_HISTORY_ASSEMBLY}" ]; then echo "block95: env override PETRI_SERVER_HISTORY_ASSEMBLY=${PETRI_SERVER_HISTORY_ASSEMBLY}"; fi
+if [ -n "${PETRI_SESSION_COMPACTION}" ]; then echo "block95: env override PETRI_SESSION_COMPACTION=${PETRI_SESSION_COMPACTION}"; fi
 
 
 # -WindowStyle Minimized（最小化的是 node 控制台；Electron GUI 正常显示）。
@@ -107,7 +107,7 @@ if [ -n "${ELECTRON_RUN_AS_NODE:-}" ]; then unset ELECTRON_RUN_AS_NODE; echo "st
 vite_code=$(curl -s -m 5 http://127.0.0.1:3000/ -w '\n%{http_code}' 2>/dev/null | tail -n1)
 if [ "${vite_code}" != "200" ]; then
   echo "vite(:3000) not responding (code=${vite_code:-000}) - starting frontend dev server"
-  powershell -NoProfile -Command "Start-Process -FilePath 'C:\Users\Admin\AppData\Roaming\fnm\node-versions\v24.20.0\installation\npm.cmd' -ArgumentList 'run','dev' -WorkingDirectory 'D:\1.WorkDir\biof3-desktop\frontend' -WindowStyle Minimized"
+  powershell -NoProfile -Command "Start-Process -FilePath 'C:\Users\Admin\AppData\Roaming\fnm\node-versions\v24.20.0\installation\npm.cmd' -ArgumentList 'run','dev' -WorkingDirectory 'D:\1.WorkDir\petri-desktop\frontend' -WindowStyle Minimized"
   vite_ok=""
   for vi in $(seq 1 30); do
     sleep 2
@@ -118,7 +118,7 @@ if [ "${vite_code}" != "200" ]; then
     echo "ABORT: vite(:3000) 未能就绪: 继续启动只会得到黑屏窗口(见文件头黑屏纪律), 先修前端栈"; exit 4
   fi
 fi
-powershell -NoProfile -Command "Remove-Item Env:ELECTRON_RUN_AS_NODE -ErrorAction SilentlyContinue; Start-Process -FilePath 'C:\Users\Admin\AppData\Roaming\fnm\node-versions\v24.20.0\installation\node.exe' -ArgumentList 'node_modules\electron\cli.js','.','--dev','--remote-debugging-port=${CDP_PORT}' -WorkingDirectory 'D:\1.WorkDir\biof3-desktop' -WindowStyle Minimized -RedirectStandardOutput 'D:\1.WorkDir\biof3-desktop\.dev-stack-live.log' -RedirectStandardError 'D:\1.WorkDir\biof3-desktop\.dev-stack-err.log'"
+powershell -NoProfile -Command "Remove-Item Env:ELECTRON_RUN_AS_NODE -ErrorAction SilentlyContinue; Start-Process -FilePath 'C:\Users\Admin\AppData\Roaming\fnm\node-versions\v24.20.0\installation\node.exe' -ArgumentList 'node_modules\electron\cli.js','.','--dev','--remote-debugging-port=${CDP_PORT}' -WorkingDirectory 'D:\1.WorkDir\petri-desktop' -WindowStyle Minimized -RedirectStandardOutput 'D:\1.WorkDir\petri-desktop\.dev-stack-live.log' -RedirectStandardError 'D:\1.WorkDir\petri-desktop\.dev-stack-err.log'"
 echo "start dispatched"
 
 for i in $(seq 1 36); do

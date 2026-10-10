@@ -5,7 +5,7 @@
   "implementation": "dynamic workflow dwfrun-e6674578 双轨并行（A 徽标诚实化 / P 平台三件）+ 独立评审 P1=0 + 统一门禁全绿；主代理终审集成批处置评审 P2 四条",
   "delivered": {
     "A 轨 #5 隧道徽标诚实化": "前端消费 TunnelStatus.stateSinceTs（后端零改动）；三态宣称——未连接/连接建立中（<15min「尚未确认公网可用」琥珀）/持续连接（≥15min+60s 时钟裕量才「公网可用」绿，宁晚勿假）；缺失/非法/未来时刻从紧永不宣称",
-    "P1 PL-D2": "BIOF3_TOOL_JOBS_RETENTION_DAYS 缺省 0（无限）→30 天（主代理按推荐代裁，对齐 task_events 30 天先例，roadmap/立项行留痕）；resolveToolJobsRetentionDays 纯函数（env 覆盖透传/非法 fail-closed=关闭）；g0-platform §8 裁决点对账注记",
+    "P1 PL-D2": "PETRI_TOOL_JOBS_RETENTION_DAYS 缺省 0（无限）→30 天（主代理按推荐代裁，对齐 task_events 30 天先例，roadmap/立项行留痕）；resolveToolJobsRetentionDays 纯函数（env 覆盖透传/非法 fail-closed=关闭）；g0-platform §8 裁决点对账注记",
     "P2 nul 根修": "全仓定位=无 committed 源头（真 cmd.exe 调用属设备语义）；真源=git-bash 把 nul 当文件名的 Windows 风格重定向（仓库外复现实证）；hygiene:check 兜底实证有效（造 nul→FAIL→清→PASS）；留痕=dev-infra SKILL Windows 纪律第 10 条（禁 >nul 重定向+勿 gitignore 红线）",
     "P3 平台映射锚": "test/platform-id-single-source-anchor.test.mjs：deriveHostPlatform 四组合 ⊆ PLATFORM_IDS 逐键锚+fail-closed 键形态（跨源 require 实测不触 arch 红线，无需降级）；impact-map 接线进 plugin-runtime 规则"
   },

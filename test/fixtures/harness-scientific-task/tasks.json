@@ -9,8 +9,8 @@
       "persona": "no_bioinformatics_background",
       "originalRequest": "我有处理组和对照组的数据，帮我看看发生了什么，最好告诉我哪些功能可能受影响。",
       "inputs": [
-        { "role": "counts", "path": "../gewu-pack-bio/plugins/deseq2/demo-data/counts.csv" },
-        { "role": "metadata", "path": "../gewu-pack-bio/plugins/deseq2/demo-data/metadata.csv" }
+        { "role": "counts", "path": "../petri-pack-bio/plugins/deseq2/demo-data/counts.csv" },
+        { "role": "metadata", "path": "../petri-pack-bio/plugins/deseq2/demo-data/metadata.csv" }
       ],
       "plainLanguagePreview": {
         "found": "发现一份基因计数矩阵和一份样本分组表。",
@@ -38,8 +38,8 @@
       "persona": "bioinformatics_engineer",
       "originalRequest": "比较 KO 和 WT，并用 GO/KEGG 与 GSEA 判断功能方向，所有下游结果必须能追溯到同一份差异结果。",
       "inputs": [
-        { "role": "counts", "path": "../gewu-pack-bio/plugins/deseq2/demo-data/demo-counts.csv" },
-        { "role": "metadata", "path": "../gewu-pack-bio/plugins/deseq2/demo-data/demo-coldata.csv" }
+        { "role": "counts", "path": "../petri-pack-bio/plugins/deseq2/demo-data/demo-counts.csv" },
+        { "role": "metadata", "path": "../petri-pack-bio/plugins/deseq2/demo-data/demo-coldata.csv" }
       ],
       "moduleDag": ["sample-metadata-validator", "expression-qc", "deseq2", "deg-standardizer", "volcano-plot", "go-kegg", "gsea", "evidence-delivery-pack"],
       "lineageRules": ["downstream_requires_verified_artifact", "artifact_type_must_match", "no_chat_text_binding", "each_final_artifact_has_script_or_explicit_dependency"],
@@ -60,7 +60,7 @@
       "originalRequest": "文件都在这里，直接帮我比较两组。",
       "inputs": [
         { "role": "unknown_table", "path": "test/fixtures/harness-scientific-task/data/metadata-disguised.csv" },
-        { "role": "counts", "path": "../gewu-pack-bio/plugins/deseq2/demo-data/counts.csv" }
+        { "role": "counts", "path": "../petri-pack-bio/plugins/deseq2/demo-data/counts.csv" }
       ],
       "probeSequence": ["detect_content_not_extension", "read_headers_only", "compare_sample_ids", "report_ambiguity"],
       "expectedDecision": "cannot_reliably_answer",

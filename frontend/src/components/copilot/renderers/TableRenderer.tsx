@@ -10,7 +10,7 @@
 // Behaviour:
 //   - When payload matches the contract, render a compact
 //     <table> with <thead>/<tbody>, scoped CSS module, and
-//     align with the existing --gewu-* tokens used by
+//     align with the existing --petri-* tokens used by
 //     ResultCard.module.css.
 //   - When payload is malformed, fail-soft to a labelled JSON
 //     dump so a bad upstream payload never crashes the card

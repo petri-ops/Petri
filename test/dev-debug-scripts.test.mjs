@@ -4,7 +4,7 @@
  * 这些脚本不是产品代码，但它们的**坑是重复踩过的**（2026-09-11 BLOCK-77 P4 与
  * UI-341 实机期间各踩一次），按仓库「同类缺陷第二次出现即转机械门禁」规则，
  * 把判据固化在测试里：
- *   1. 重启 dev 栈必须注入 BIOF3_DB_PATH + BIOF3_LOCAL_DATA_DIR
+ *   1. 重启 dev 栈必须注入 PETRI_DB_PATH + PETRI_LOCAL_DATA_DIR
  *      —— 不带则落默认空库（数据面失联，见 BLOCK-79 环境事实登记）。
  *   2. 禁止 `-WindowStyle Hidden` 启动 —— hidden 会让页面 visibilityState=hidden，
  *      Chromium 冻结视口（实测 949px）并跳过懒渲染，验收断言整体失真。
@@ -23,11 +23,11 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
 
 test('restart-dev-stack.sh 守住 DB 环境变量（否则落默认空库）', () => {
   const sh = read('scripts/restart-dev-stack.sh');
-  assert.ok(sh.includes('BIOF3_DB_PATH'), '必须注入 BIOF3_DB_PATH');
-  assert.ok(sh.includes('BIOF3_LOCAL_DATA_DIR'), '必须注入 BIOF3_LOCAL_DATA_DIR');
+  assert.ok(sh.includes('PETRI_DB_PATH'), '必须注入 PETRI_DB_PATH');
+  assert.ok(sh.includes('PETRI_LOCAL_DATA_DIR'), '必须注入 PETRI_LOCAL_DATA_DIR');
   assert.ok(
-    sh.includes('.biof3-dev-user-data'),
-    '数据面须指向 .biof3-dev-user-data（与 dev-electron 的 userData 一致）'
+    sh.includes('.petri-dev-user-data'),
+    '数据面须指向 .petri-dev-user-data（与 dev-electron 的 userData 一致）'
   );
 });
 

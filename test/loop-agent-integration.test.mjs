@@ -22,19 +22,19 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const require = createRequire(import.meta.url);
 
 // BLOCK-49 加映 顺手修（存量：单跑缺 DB 自举 no such table: projects，与
-// agent-tool-registry.test.mjs 同一修法）——BIOF3_DB_PATH 须在 require db 前生效
+// agent-tool-registry.test.mjs 同一修法）——PETRI_DB_PATH 须在 require db 前生效
 {
   const fs = require('node:fs');
   const os = require('node:os');
-  const Database = require(resolve(__dirname, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const tempDbDir = fs.mkdtempSync(resolve(os.tmpdir(), 'biof3-loop-integration-db-'));
-  const boot = new Database(resolve(tempDbDir, 'biof3.db'));
+  const Database = require(resolve(__dirname, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const tempDbDir = fs.mkdtempSync(resolve(os.tmpdir(), 'petri-loop-integration-db-'));
+  const boot = new Database(resolve(tempDbDir, 'petri.db'));
   const migrationsDir = resolve(__dirname, '..', 'src', 'migrations');
   for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fs.readFileSync(resolve(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = resolve(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = resolve(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try { fs.rmSync(tempDbDir, { recursive: true, force: true }); } catch {}
   });
@@ -53,7 +53,7 @@ const {
   runAgentLoop,
   resolveAgentTaskTerminal,
   buildLoopObservationEvidence,
-} = require(resolve(__dirname, '../core/biof3-server/agent-runner'));
+} = require(resolve(__dirname, '../core/petri-server/agent-runner'));
 
 function mapDecisionToIterationStatus(decision) {
   switch (decision) {
@@ -444,7 +444,7 @@ describe('HLE-C1: Loop Agent Integration', () => {
 
   describe('Repair lineage resolution', () => {
     it('treats a preflight failure as resolved by a later completed same-tool Job', async () => {
-      const { resolveFailedJobReplacements } = await import('../core/biof3-server/agent-runner.js');
+      const { resolveFailedJobReplacements } = await import('../core/petri-server/agent-runner.js');
       const resolved = resolveFailedJobReplacements([
         {
           callId: 'preflight-call',
@@ -479,7 +479,7 @@ describe('HLE-C1: Loop Agent Integration', () => {
     });
 
     it('records an observed replacement even when no deterministic repair strategy matched', async () => {
-      const { buildObservedReplacementAttempt } = await import('../core/biof3-server/agent-runner.js');
+      const { buildObservedReplacementAttempt } = await import('../core/petri-server/agent-runner.js');
       const attempt = buildObservedReplacementAttempt(
         { faultType: 'unknown_failure' },
         {

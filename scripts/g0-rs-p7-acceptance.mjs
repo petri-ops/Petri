@@ -30,11 +30,11 @@ const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const EVIDENCE_PATH = path.join(ROOT, 'acceptance/g0-result-studio/rs-p7-honest-product-requalification.json');
 const SCREENSHOT_DIR = path.join(ROOT, 'acceptance/g0-result-studio/rs-p7-packaged-ui');
-const APP_PATH = path.join(ROOT, 'dist/mac-arm64/BioF3.app');
-const EXECUTABLE = path.join(APP_PATH, 'Contents/MacOS/BioF3');
+const APP_PATH = path.join(ROOT, 'dist/mac-arm64/Petri.app');
+const EXECUTABLE = path.join(APP_PATH, 'Contents/MacOS/Petri');
 const RESOURCES = path.join(APP_PATH, 'Contents/Resources');
 const BUILD_SUBJECT = path.join(RESOURCES, 'g0-build-subject.json');
-const USER_SETTINGS = path.join(homedir(), 'Documents/BioF3-Local/ai-settings.json');
+const USER_SETTINGS = path.join(homedir(), 'Documents/Petri-Local/ai-settings.json');
 const TASK_IDS = Object.freeze([
   'deg_selection_to_enrichment',
   'volcano_ai_presentation_edit',
@@ -51,11 +51,11 @@ const SOURCE_FILES = Object.freeze([
   'core/shared-backend/result-studio-evidence-bundle.js',
   // git-repository-consent-schema.js removed by UI-462 (existing-repository retirement)
   'src/migrations/004_git_repository_consent.sql',
-  'core/biof3-server/helpers/ai-settings.js',
-  'core/biof3-server/agent-runner.js',
-  'core/biof3-server/agent-tools/agent-loop-control.js',
-  'core/biof3-server/agent-tools/result-context-binding.js',
-  'core/biof3-server/routes/ai-agent.js',
+  'core/petri-server/helpers/ai-settings.js',
+  'core/petri-server/agent-runner.js',
+  'core/petri-server/agent-tools/agent-loop-control.js',
+  'core/petri-server/agent-tools/result-context-binding.js',
+  'core/petri-server/routes/ai-agent.js',
   'frontend/src/pages/project-workspace.tsx',
   'frontend/src/components/result-studio/ResultAgentComposer.tsx',
   'frontend/src/components/result-studio/ResultEditPanel.tsx',
@@ -71,9 +71,9 @@ const SOURCE_FILES = Object.freeze([
 const COMMIT = /^[a-f0-9]{40}$/;
 
 const Database = require(require.resolve('better-sqlite3', {
-  paths: [path.join(ROOT, 'core/biof3-server'), ROOT],
+  paths: [path.join(ROOT, 'core/petri-server'), ROOT],
 }));
-const aiSettings = require('../core/biof3-server/helpers/ai-settings');
+const aiSettings = require('../core/petri-server/helpers/ai-settings');
 const { ModelGateway, getProvider } = require('../core/shared-backend/llm-providers');
 const {
   REQUIRED_INVARIANTS,
@@ -140,7 +140,7 @@ function capturePackagedWindowNative(ownerPid) {
   ].join('\n');
   const windowId = execFileSync('swift', ['-e', swift], { encoding: 'utf8', timeout: 30_000 }).trim();
   invariant(/^\d+$/.test(windowId), 'p7_native_capture_window_missing');
-  const capturePath = path.join(tmpdir(), `biof3-p7-native-${process.pid}-${Date.now()}.png`);
+  const capturePath = path.join(tmpdir(), `petri-p7-native-${process.pid}-${Date.now()}.png`);
   try {
     execFileSync('/usr/sbin/screencapture', ['-x', `-l${windowId}`, capturePath], { timeout: 30_000 });
     const png = readFileSync(capturePath);
@@ -406,7 +406,7 @@ function writeSandboxSettings(dataDir, profileId) {
 }
 
 function stageRuntimes(dataDir) {
-  const source = path.join(homedir(), 'Documents/BioF3-Local/runtimes');
+  const source = path.join(homedir(), 'Documents/Petri-Local/runtimes');
   const target = path.join(dataDir, 'runtimes');
   mkdirSync(target, { recursive: true });
   const linked = [];
@@ -422,7 +422,7 @@ function stageRuntimes(dataDir) {
 
 function appendLog(state, chunk) {
   state.log = `${state.log}${String(chunk || '')}`.slice(-262_144);
-  const match = state.log.match(/biof3-server spawned[^\n]*on :(\d+)/);
+  const match = state.log.match(/petri-server spawned[^\n]*on :(\d+)/);
   if (match) state.backendPort = Number(match[1]);
 }
 
@@ -482,8 +482,8 @@ async function stopPackagedApp(instance) {
 
 function initializeExistingGit(workspace, dirty) {
   execFileSync('git', ['init', '-q'], { cwd: workspace });
-  execFileSync('git', ['config', 'user.name', 'BioF3 P7'], { cwd: workspace });
-  execFileSync('git', ['config', 'user.email', 'p7@biof3.local'], { cwd: workspace });
+  execFileSync('git', ['config', 'user.name', 'Petri P7'], { cwd: workspace });
+  execFileSync('git', ['config', 'user.email', 'p7@petri.local'], { cwd: workspace });
   writeFileSync(path.join(workspace, 'user-owned-note.txt'), 'preserve me\n');
   execFileSync('git', ['add', 'user-owned-note.txt'], { cwd: workspace });
   execFileSync('git', ['commit', '-qm', 'user baseline'], { cwd: workspace });
@@ -562,8 +562,8 @@ async function responsiveObservation(client, window, config, target, outputDir) 
   for (const item of ['light', 'dark'].flatMap((theme) => [1440, 1024, 820].map((width) => ({ width, theme })))) {
     await setViewport(client, item.width, 900);
     await window.webContents.executeJavaScript(`
-      localStorage.setItem('biof3-theme', ${JSON.stringify(item.theme)});
-      window.dispatchEvent(new CustomEvent('biof3:theme-change', { detail: { theme: ${JSON.stringify(item.theme)} } }));
+      localStorage.setItem('petri-theme', ${JSON.stringify(item.theme)});
+      window.dispatchEvent(new CustomEvent('petri:theme-change', { detail: { theme: ${JSON.stringify(item.theme)} } }));
       true;
     `);
     const started = performance.now();
@@ -737,24 +737,24 @@ function executableArchitectures() {
 }
 
 async function runJourney(target, index, { existingGit = false, dirtyGit = false } = {}) {
-  const root = mkdtempSync(path.join(tmpdir(), `biof3-p7-${index + 1}-`));
+  const root = mkdtempSync(path.join(tmpdir(), `petri-p7-${index + 1}-`));
   const captureDir = path.join(root, 'captures');
   const resultPath = path.join(root, 'driver-result.json');
   const electronDataDir = path.join(root, 'electron');
   const debugPort = await freePort();
   const rendererPort = await freePort();
   const capture = createCaptureEnv({ root, port: 0 });
-  capture.env.BIOF3_DB_PATH = path.join(capture.env.BIOF3_LOCAL_DATA_DIR, 'biof3.db');
-  capture.env.BIOF3_RENDERER_PORT = String(rendererPort);
+  capture.env.PETRI_DB_PATH = path.join(capture.env.PETRI_LOCAL_DATA_DIR, 'petri.db');
+  capture.env.PETRI_RENDERER_PORT = String(rendererPort);
   // The packaged renderer is served from the disposable Vite origin.  Allow
   // that exact origin through the backend's local request boundary so the
   // CDP driver can exercise the same cross-origin API calls as the product UI.
-  capture.env.BIOF3_TRUSTED_DESKTOP_ORIGINS = `http://127.0.0.1:${rendererPort}`;
-  capture.env.BIOF3_BUILT_IN_PLUGINS_DIR = path.join(RESOURCES, 'built-in-plugins');
+  capture.env.PETRI_TRUSTED_DESKTOP_ORIGINS = `http://127.0.0.1:${rendererPort}`;
+  capture.env.PETRI_BUILT_IN_PLUGINS_DIR = path.join(RESOURCES, 'built-in-plugins');
   mkdirSync(captureDir, { recursive: true });
   mkdirSync(electronDataDir, { recursive: true });
-  const runtimes = stageRuntimes(capture.env.BIOF3_LOCAL_DATA_DIR);
-  writeSandboxSettings(capture.env.BIOF3_LOCAL_DATA_DIR, target.profile.id);
+  const runtimes = stageRuntimes(capture.env.PETRI_LOCAL_DATA_DIR);
+  writeSandboxSettings(capture.env.PETRI_LOCAL_DATA_DIR, target.profile.id);
   let first = null;
   let second = null;
   let stage = 'start_packaged_app';
@@ -765,7 +765,7 @@ async function runJourney(target, index, { existingGit = false, dirtyGit = false
     const baseUrl = `http://127.0.0.1:${first.state.backendPort}`;
     const uiUrl = new URL(first.cdp.target.url);
     const uiBaseUrl = `${uiUrl.protocol}//${uiUrl.host}`;
-    const noSeedPrecondition = inspectP5NoSeedPrecondition(capture.env.BIOF3_DB_PATH, { root });
+    const noSeedPrecondition = inspectP5NoSeedPrecondition(capture.env.PETRI_DB_PATH, { root });
     invariant(noSeedPrecondition.seededTables.length === 0, 'p7_product_ledger_not_empty', noSeedPrecondition);
     const projectPayload = await requestJson(baseUrl, '/api/data/projects', {
       method: 'POST',
@@ -828,10 +828,10 @@ async function runJourney(target, index, { existingGit = false, dirtyGit = false
       ? Date.parse(canvasCheckpoint.observedAt) - Date.parse(startedCheckpoint.observedAt)
       : Number.NaN;
     invariant(ui?.passed === true, 'p7_packaged_ui_trace_failed', ui);
-    const agent = projectAgentEvidence(capture.env.BIOF3_DB_PATH, project.id);
+    const agent = projectAgentEvidence(capture.env.PETRI_DB_PATH, project.id);
     invariant(agent.resultToolNames.length > 0 && agent.toolResultCount >= agent.toolCallCount,
       'p7_real_provider_product_tool_chain_missing', agent);
-    const truthBeforeRestart = projectTruthDigest(capture.env.BIOF3_DB_PATH, project.id);
+    const truthBeforeRestart = projectTruthDigest(capture.env.PETRI_DB_PATH, project.id);
     const shutdownFirst = await stopPackagedApp(first);
     first = null;
     invariant(shutdownFirst.processExited && shutdownFirst.backendStopped, 'p7_first_packaged_shutdown_incomplete');
@@ -849,14 +849,14 @@ async function runJourney(target, index, { existingGit = false, dirtyGit = false
     stage = 'exact_replay';
     const replay = await exactReplayRevision(restartBaseUrl, {
       projectId: project.id,
-      dbPath: capture.env.BIOF3_DB_PATH,
+      dbPath: capture.env.PETRI_DB_PATH,
       workspaceRoot: project.workspace_path,
       job: { id: baselines.volcano.jobId },
       artifactId: baselines.volcano.artifactId,
       revisionId: baselines.volcano.revisionId,
       expectedAffectedJobCount: 1,
     });
-    const truthAfterRestart = projectTruthDigest(capture.env.BIOF3_DB_PATH, project.id);
+    const truthAfterRestart = projectTruthDigest(capture.env.PETRI_DB_PATH, project.id);
     invariant(truthAfterRestart.revisionCount === truthBeforeRestart.revisionCount
       && truthAfterRestart.changeSetCount === truthBeforeRestart.changeSetCount,
     'p7_restart_truth_drift');
@@ -878,7 +878,7 @@ async function runJourney(target, index, { existingGit = false, dirtyGit = false
       outputCohortHash: replay.replay.reproducibility.outputCohortHash,
       packageDigest: replay.replay.replayPackage.packageDigest,
     };
-    const truthFinal = projectTruthDigest(capture.env.BIOF3_DB_PATH, project.id);
+    const truthFinal = projectTruthDigest(capture.env.PETRI_DB_PATH, project.id);
     const result = {
       providerClass: target.profile.provider,
       projectDigest: stableHash(project.id),

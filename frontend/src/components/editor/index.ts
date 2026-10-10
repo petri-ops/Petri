@@ -7,7 +7,7 @@
  * P0 只暴露 CodeMirrorEditor + 必要类型。
  * P1 才会扩 unifiedDiffExtension / DiffRevision / EditorMode 联合类型。
  * P3 新增 integration 层桥接组件（WorkspaceFilePreviewBridge / AppLevelBridge）。
- * P4.2 新增 useEditorApi hook + GewuOpenFileDevBridge 重命名。
+ * P4.2 新增 useEditorApi hook + PetriOpenFileDevBridge 重命名。
  */
 
 export { CodeMirrorEditor } from './CodeMirror/CodeMirrorEditor';
@@ -26,5 +26,5 @@ export type {
   WorkspaceFilePreviewBridgeProps,
 } from './integration/WorkspaceFilePreviewBridge';
 
-// P4.2 重命名：AppLevelBridge → GewuOpenFileDevBridge
-export type { DispatchOpenFileFn } from './integration/GewuOpenFileDevBridge';
+// P4.2 重命名：AppLevelBridge → PetriOpenFileDevBridge
+export type { DispatchOpenFileFn } from './integration/PetriOpenFileDevBridge';

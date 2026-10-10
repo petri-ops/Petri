@@ -40,7 +40,7 @@ test('webview 附着：中和 preload 与全部不安全偏好，合法 src/part
   };
   const verdict = verifyWebviewAttach({
     webPreferences,
-    params: { src: 'https://example.com/doc', partition: 'persist:gewu-browser' },
+    params: { src: 'https://example.com/doc', partition: 'persist:petri-browser' },
   });
 
   assert.equal(verdict.allow, true);
@@ -78,14 +78,14 @@ test('webview 附着：partition 不在白名单一律拒绝（仍先中和偏�
   assert.equal(verdict.allow, false);
   assert.equal(verdict.reason, 'partition_not_allowlisted');
   assert.equal(webPreferences.nodeIntegration, false, '拒绝前也必须中和');
-  assert.deepEqual(WEBVIEW_PARTITION_ALLOWLIST, ['persist:gewu-browser']);
+  assert.deepEqual(WEBVIEW_PARTITION_ALLOWLIST, ['persist:petri-browser']);
 });
 
 test('webview 附着：非 http(s) 的 src 一律拒绝（file/javascript/data/about）', () => {
   for (const src of ['file:///etc/passwd', 'javascript:alert(1)', 'data:text/html,<b>x</b>', 'about:blank', '', 'https://']) {
     const verdict = verifyWebviewAttach({
       webPreferences: {},
-      params: { src, partition: 'persist:gewu-browser' },
+      params: { src, partition: 'persist:petri-browser' },
     });
     assert.equal(verdict.allow, false, `应拒绝 src=${JSON.stringify(src)}`);
     assert.equal(verdict.reason, 'src_not_http_or_https');
@@ -156,11 +156,11 @@ test('权限决策：非同一 origin 一律拒绝（不允许 startsWith 式比
 
 test('trustedOriginsFromEnv：逗号分隔 + 去空白 + 剔除空项', () => {
   assert.deepEqual(
-    trustedOriginsFromEnv({ BIOF3_TRUSTED_DESKTOP_ORIGINS: ' http://localhost:3000 , http://127.0.0.1:3000 ,, ' }),
+    trustedOriginsFromEnv({ PETRI_TRUSTED_DESKTOP_ORIGINS: ' http://localhost:3000 , http://127.0.0.1:3000 ,, ' }),
     ['http://localhost:3000', 'http://127.0.0.1:3000'],
   );
   assert.deepEqual(trustedOriginsFromEnv({}), []);
-  assert.deepEqual(trustedOriginsFromEnv({ BIOF3_TRUSTED_DESKTOP_ORIGINS: '' }), []);
+  assert.deepEqual(trustedOriginsFromEnv({ PETRI_TRUSTED_DESKTOP_ORIGINS: '' }), []);
 });
 
 test('applyPermissionPolicy：默认 session 装齐两个 handler，且决策与纯函数一致', () => {
@@ -174,7 +174,7 @@ test('applyPermissionPolicy：默认 session 装齐两个 handler，且决策与
   const warn = () => {};
   const { trustedOrigins } = applyPermissionPolicy({
     session,
-    env: { BIOF3_TRUSTED_DESKTOP_ORIGINS: TRUSTED },
+    env: { PETRI_TRUSTED_DESKTOP_ORIGINS: TRUSTED },
     log: { warn },
   });
 
@@ -202,7 +202,7 @@ test('applyPermissionPolicy：检查 handler 在 requestingOrigin 为空时回�
       setPermissionCheckHandler: (fn) => { handlers.check = fn; },
     },
   };
-  applyPermissionPolicy({ session, env: { BIOF3_TRUSTED_DESKTOP_ORIGINS: TRUSTED }, log: { warn: () => {} } });
+  applyPermissionPolicy({ session, env: { PETRI_TRUSTED_DESKTOP_ORIGINS: TRUSTED }, log: { warn: () => {} } });
 
   assert.equal(handlers.check({ getURL: () => `${TRUSTED}/project/x` }, 'clipboard-sanitized-write', ''), true);
   assert.equal(handlers.check({ getURL: () => `${TRUSTED}/project/x` }, 'clipboard-sanitized-write', undefined), true);
@@ -212,7 +212,7 @@ test('applyPermissionPolicy：检查 handler 在 requestingOrigin 为空时回�
 });
 
 test('applyPermissionPolicy：session-created 覆盖分区 session —— 实机缺陷回归（webview guest 曾走默认放行）', () => {
-  // 实机现象：`<webview partition="persist:gewu-browser">` 用的是分区 session，
+  // 实机现象：`<webview partition="persist:petri-browser">` 用的是分区 session，
   // 只装 defaultSession 时 guest 内 geolocation 查询仍为 granted。
   const app = new EventEmitter();
   const session = {
@@ -221,7 +221,7 @@ test('applyPermissionPolicy：session-created 覆盖分区 session —— 实机
       setPermissionCheckHandler: () => {},
     },
   };
-  const result = applyPermissionPolicy({ session, app, env: { BIOF3_TRUSTED_DESKTOP_ORIGINS: TRUSTED }, log: { warn: () => {} } });
+  const result = applyPermissionPolicy({ session, app, env: { PETRI_TRUSTED_DESKTOP_ORIGINS: TRUSTED }, log: { warn: () => {} } });
   assert.equal(result.installedSessions.size, 1, '默认 session 已装');
 
   const partitionHandlers = {};
@@ -256,7 +256,7 @@ test('applyPermissionPolicy：受信 origin 为空时全拒（安全侧失败）
   handlers.request({ getURL: () => `${TRUSTED}/` }, 'clipboard-sanitized-write', (ok) => { decision = ok; });
   assert.equal(decision, false);
   assert.equal(handlers.check(null, 'clipboard-sanitized-write', TRUSTED), false);
-  assert.ok(warnings.some((line) => line.includes('BIOF3_TRUSTED_DESKTOP_ORIGINS 为空')), '应告警');
+  assert.ok(warnings.some((line) => line.includes('PETRI_TRUSTED_DESKTOP_ORIGINS 为空')), '应告警');
 });
 
 test('applyPermissionPolicy：缺少 session 模块时 fail-fast', () => {
@@ -286,7 +286,7 @@ test('applyWebContentsHardening：每个 webContents 都装 will-attach-webview 
 
   let prevented = false;
   const evilPrefs = { preload: '/tmp/evil.js', nodeIntegration: true, sandbox: false, contextIsolation: false };
-  contents.emit('will-attach-webview', { preventDefault: () => { prevented = true; } }, evilPrefs, { src: 'https://example.com/', partition: 'persist:gewu-browser' });
+  contents.emit('will-attach-webview', { preventDefault: () => { prevented = true; } }, evilPrefs, { src: 'https://example.com/', partition: 'persist:petri-browser' });
   assert.equal(prevented, false, '合法 partition + https src 应放行');
   assert.equal(evilPrefs.preload, undefined, 'preload 必须被删除');
   assert.equal(evilPrefs.nodeIntegration, false);

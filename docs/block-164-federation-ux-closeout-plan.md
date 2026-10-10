@@ -19,7 +19,7 @@ status: completed
 
 ### W1 委托入口可自足（解盘点断点 1【高】）
 - 新 agent 工具 `federation_list_peers`（federation-tools.js + tool-defs 注册）：输出节点清单（peerId/名称/署名/在线态/lastProbe 陈旧度）+ 我的哪些项目已授权给谁；空节点诚实态「尚未配对任何协作节点」。
-- `delegate_to_gewu_node` 错误文案改指向：peerId 未知时提示「先用 federation_list_peers 查询」。
+- `delegate_to_petri_node` 错误文案改指向：peerId 未知时提示「先用 federation_list_peers 查询」。
 - 不做：composer 表单/选择器（UI 形态另裁）；工具不新增敏感面（只读聚合既有 peers/grants 数据）。
 
 ### W2 委托回流本地可查（解断点 2【中高】）
@@ -39,7 +39,7 @@ status: completed
 
 ## 3. 文件面隔离（并行插队批红线）
 
-本包文件面：`core/biof3-server/agent-tools/federation-tools.js`、`core/biof3-server/agent-tools/tool-defs/remote.js`、`core/biof3-server/routes/federation-admin.js`、`core/shared-backend/federation-peers.js`、联邦相关前端组件（Federation*.tsx / 新委托历史视图组件）、对应 test/block164-*。**不触碰**并行包在途面（agent-tools 其余/mcp/http-transport、ui-audit 脚本、插件域）。
+本包文件面：`core/petri-server/agent-tools/federation-tools.js`、`core/petri-server/agent-tools/tool-defs/remote.js`、`core/petri-server/routes/federation-admin.js`、`core/shared-backend/federation-peers.js`、联邦相关前端组件（Federation*.tsx / 新委托历史视图组件）、对应 test/block164-*。**不触碰**并行包在途面（agent-tools 其余/mcp/http-transport、ui-audit 脚本、插件域）。
 
 ## 4. 非范围（exclusions）
 
@@ -58,7 +58,7 @@ status: completed
 
 - **W1**：`federation_list_peers` 只读工具（节点 peerId/名称/署名/在线态/对端授权项目 3s 尽力探测 + 本机授权概览；空节点配对引导）；delegate 缺参/未知 peer 文案两处指向该工具；静态工具宇宙 78→79 四处计数钉同步 + 动词图标夹具/后端/前端三面登记。
 - **W2**：`GET /api/federation/delegations`（collectDelegations 聚合：task_events 中 delegate 工具 call/result 对 JOIN tasks，输出 task/peer/状态/回复头/conversationId/projectId，limit 50）；联邦面板新增「委托记录」卡（空态引导/状态标签/回复摘要/刷新；v1 边界=仅列表不做跨端深链，如实）。**实机**：端点在真实数据上聚合出 2026-09-18 BLOCK-85 双真机的历史委托记录。
-- **W3**：`startPeerHeartbeat`（默认 60s unref；空清单跳过；单 peer 失败静默；BIOF3_FED_HEARTBEAT_MS=0 关闭；注入式依赖可测）。**实机**：lastProbe 由 2026-09-19（三周陈旧）自动刷新为 2026-10-10T12:41 ok:true——「在线态靠手动点探」断点闭合。
+- **W3**：`startPeerHeartbeat`（默认 60s unref；空清单跳过；单 peer 失败静默；PETRI_FED_HEARTBEAT_MS=0 关闭；注入式依赖可测）。**实机**：lastProbe 由 2026-09-19（三周陈旧）自动刷新为 2026-10-10T12:41 ok:true——「在线态靠手动点探」断点闭合。
 - **搭车项查证**：fed: 原始 ID 暴露面在当前代码仅 RemoteTargets 默认目标逻辑，未发现摘要卡裸 ID 渲染点——UI-422 候选维持候选（无改动需求）。
 - **测试**：block164 7/7（W1×4+W2 聚合+W3 心跳×2；db 引导按 agent-concurrency 先例 runMigrations）+ 邻域 36/36 + 前端 toolActivity 16/16 + tsc 0 + lint 新文件 0 error。
 - **lint 顺手清偿**：Federation.tsx 两处 react-hooks/set-state-in-effect（一处存量一处新增）改顺序 IIFE await 形态（同目录 RemoteTargets 同款过规形态）。

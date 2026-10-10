@@ -17,9 +17,9 @@ const http = require('node:http');
 const { execFileSync } = require('node:child_process');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-67');
-const REMOTE_ROOT = '/root/gewu-block67-demo';
+const REMOTE_ROOT = '/root/petri-block67-demo';
 const MARKER = `p2-live-${Date.now().toString(36)}`;
 
 function fetchJson(url, opts = {}) {

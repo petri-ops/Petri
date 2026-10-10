@@ -1,5 +1,5 @@
 /**
- * BioF3 Desktop Skill Schema Validator
+ * Petri Desktop Skill Schema Validator
  * 
  * Implements JSON Schema validation for Skill Manifests following the contract
  * defined in docs/skills-schema.md. Uses native JSON Schema without external
@@ -138,9 +138,9 @@ let currentLocale = 'en';
  */
 const SKILL_SCHEMA = {
   $schema: 'http://json-schema.org/draft-07/schema#',
-  $id: 'https://biof3.desktop/schemas/skill-manifest-v1.json',
-  title: 'BioF3 Skill Manifest',
-  description: 'Schema for BioF3 Desktop Skill Manifest definitions',
+  $id: 'https://petri.desktop/schemas/skill-manifest-v1.json',
+  title: 'Petri Skill Manifest',
+  description: 'Schema for Petri Desktop Skill Manifest definitions',
   type: 'object',
   required: [
     'skillManifestVersion',

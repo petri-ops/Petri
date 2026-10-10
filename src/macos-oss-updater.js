@@ -5,7 +5,7 @@ const { pipeline } = require("stream/promises");
 const { Readable, Transform } = require("stream");
 
 const DEFAULT_FEED_URL =
-  "https://gewu-uploads.oss-cn-hangzhou.aliyuncs.com/desktop/updates/macos/";
+  "https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/desktop/updates/macos/";
 
 function parseScalar(value) {
   const trimmed = String(value || "").trim();
@@ -98,7 +98,7 @@ function createMacOssUpdater({
   currentVersion,
   arch = process.arch,
   downloadsDir,
-  feedUrl = process.env.BIOF3_UPDATE_FEED_URL || DEFAULT_FEED_URL,
+  feedUrl = process.env.PETRI_UPDATE_FEED_URL || DEFAULT_FEED_URL,
   fetchImpl = globalThis.fetch,
   openPath,
   onProgress = () => {},

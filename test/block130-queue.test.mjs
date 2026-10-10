@@ -21,9 +21,9 @@ const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 test('handleToolRun enqueues instead of rejecting when busy, with a depth ceiling', () => {
-  const src = fs.readFileSync(path.join(ROOT, 'core/biof3-server/helpers/tools-executor.js'), 'utf8');
+  const src = fs.readFileSync(path.join(ROOT, 'core/petri-server/helpers/tools-executor.js'), 'utf8');
   assert.ok(src.includes('shouldQueue = true'), 'busy path must set the enqueue flag instead of returning 429');
-  assert.ok(src.includes('BIOF3_TOOL_QUEUE_DEPTH_LIMIT'), 'depth ceiling must be configurable');
+  assert.ok(src.includes('PETRI_TOOL_QUEUE_DEPTH_LIMIT'), 'depth ceiling must be configurable');
   assert.ok(src.includes("error: 'max_concurrent'"), '429 remains only for the depth ceiling');
   assert.ok(src.includes('queued: true') && src.includes('queuePosition'), 'queued response carries the queue position');
   // 终态泵：注册+一次一泵+重启安全（jobDir 重建 staged）
@@ -33,13 +33,13 @@ test('handleToolRun enqueues instead of rejecting when busy, with a depth ceilin
 });
 
 test('terminal CAS primitives notify the scheduler pump (slot release triggers dequeue)', () => {
-  const src = fs.readFileSync(path.join(ROOT, 'core/biof3-server/helpers/tools-executor/active-job.js'), 'utf8');
+  const src = fs.readFileSync(path.join(ROOT, 'core/petri-server/helpers/tools-executor/active-job.js'), 'utf8');
   const notifications = (src.match(/notifyScheduler\(\)/g) || []).length;
   assert.ok(notifications >= 3, 'all three terminal primitives must notify, got ' + notifications);
 });
 
 test('registry scheduler slot: set → notify invokes; unset/throwing pumps never break the terminal path', () => {
-  const { setSchedulerPump, notifyScheduler } = require('../core/biof3-server/helpers/tool-job-lifecycle-registry.js');
+  const { setSchedulerPump, notifyScheduler } = require('../core/petri-server/helpers/tool-job-lifecycle-registry.js');
   let called = 0;
   setSchedulerPump(() => { called += 1; });
   notifyScheduler();
@@ -75,13 +75,13 @@ test('queue pump drives pending rows through the async db facade (BLOCK-135 复�
   // 生产注入形态复刻：routes/tools.js 的 db = dbMod.getAsyncDatabase()（get/all/run
   // 返回 Promise）。旧缺陷：泵内 all()/get() 未 await → rows 是 Promise → for-of
   // TypeError → 被注册处空 .catch 吞掉 → 泵从未拉起过任何排队作业。
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-pump-facade-'));
-  process.env.BIOF3_DB_PATH = path.join(tempDir, 'pump.db');
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-pump-facade-'));
+  process.env.PETRI_DB_PATH = path.join(tempDir, 'pump.db');
   // db.js 模块顶层即 prepare projects（与 agent-runner-facade.test.mjs 同一前提）：
   // 先跑生产 migration 链再加载 db 模块。
   const { runMigrations } = require('../src/migration-runner');
-  await runMigrations(process.env.BIOF3_DB_PATH, path.join(ROOT, 'src', 'migrations'));
-  const dbMod = require('../core/biof3-server/db.js');
+  await runMigrations(process.env.PETRI_DB_PATH, path.join(ROOT, 'src', 'migrations'));
+  const dbMod = require('../core/petri-server/db.js');
   const db = dbMod.getAsyncDatabase();
 
   // 计数包装保持 async 契约（与真 facade 同构），按 SQL 精确计数观察泵的迭代进度
@@ -104,7 +104,7 @@ test('queue pump drives pending rows through the async db facade (BLOCK-135 复�
     },
   };
 
-  const { createToolsExecutor } = require('../core/biof3-server/helpers/tools-executor.js');
+  const { createToolsExecutor } = require('../core/petri-server/helpers/tools-executor.js');
   const jobsDir = path.join(tempDir, 'tool-jobs'); // 故意不创建：jobRoot 缺失 → 泵迭代后跳过，不真执行作业
   createToolsExecutor({
     db: countingDb,
@@ -128,7 +128,7 @@ test('queue pump drives pending rows through the async db facade (BLOCK-135 复�
   insert.run('pump-j1', 'u1', 0, Date.now());
   insert.run('pump-j2', 'u1', 0, Date.now() + 1);
   insert.run('pump-j3', 'u1', 1, Date.now() + 2);
-  const { notifyScheduler, setSchedulerPump } = require('../core/biof3-server/helpers/tool-job-lifecycle-registry.js');
+  const { notifyScheduler, setSchedulerPump } = require('../core/petri-server/helpers/tool-job-lifecycle-registry.js');
   try {
     notifyScheduler(); // 工厂已注册真泵到共享 registry
     const deadline = Date.now() + 3000;

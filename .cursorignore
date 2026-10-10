@@ -1,5 +1,5 @@
-# Embedded core server dependencies (formerly vendor/biof3-core submodule)
-core/biof3-server/node_modules/
+# Embedded core server dependencies (formerly vendor/petri-core submodule)
+core/petri-server/node_modules/
 core/py-server/node_modules/
 core/**/node_modules/
 

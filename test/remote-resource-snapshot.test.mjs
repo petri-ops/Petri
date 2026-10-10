@@ -11,8 +11,8 @@ import os from 'node:os';
 import path from 'node:path';
 
 const require = createRequire(import.meta.url);
-const { buildRemoteSnapshot, createRemoteSnapshotCache } = require('../core/biof3-server/helpers/remote-resource-snapshot.js');
-const { BIOF3_AGENT_SH } = require('../core/biof3-server/helpers/remote-execution/node-agent.js');
+const { buildRemoteSnapshot, createRemoteSnapshotCache } = require('../core/petri-server/helpers/remote-resource-snapshot.js');
+const { PETRI_AGENT_SH } = require('../core/petri-server/helpers/remote-execution/node-agent.js');
 
 const AGENT_INFO = {
   memTotalBytes: 16 * 1024 ** 3,
@@ -66,10 +66,10 @@ test('createRemoteSnapshotCache：fresh 命中 / 超时转 stale / 无历史 unr
 });
 
 test('node-agent 脚本：bash -n 语法通过且包含 sys_resource verb 分发', () => {
-  assert.match(BIOF3_AGENT_SH, /sys_resource\)/);
-  assert.match(BIOF3_AGENT_SH, /fs_\*\|exec\|exec_bg\|ps_pid\|kill_pid\|sys_resource\|__mux\)/);
-  const tmp = path.join(os.tmpdir(), `biof3-agent-test-${process.pid}.sh`);
-  fs.writeFileSync(tmp, BIOF3_AGENT_SH, 'utf8');
+  assert.match(PETRI_AGENT_SH, /sys_resource\)/);
+  assert.match(PETRI_AGENT_SH, /fs_\*\|exec\|exec_bg\|ps_pid\|kill_pid\|sys_resource\|__mux\)/);
+  const tmp = path.join(os.tmpdir(), `petri-agent-test-${process.pid}.sh`);
+  fs.writeFileSync(tmp, PETRI_AGENT_SH, 'utf8');
   try {
     execFileSync('bash', ['-n', tmp]);
   } finally {
@@ -85,8 +85,8 @@ test('node-agent sys_resource：bash 执行输出单行合法 JSON（本机 Linu
     // Windows 指挥席无 bash 时跳过执行面（dell/aliyun 节点为 Linux，由实机验收覆盖）。
     return;
   }
-  const tmp = path.join(os.tmpdir(), `biof3-agent-run-${process.pid}.sh`);
-  fs.writeFileSync(tmp, BIOF3_AGENT_SH, 'utf8');
+  const tmp = path.join(os.tmpdir(), `petri-agent-run-${process.pid}.sh`);
+  fs.writeFileSync(tmp, PETRI_AGENT_SH, 'utf8');
   fs.chmodSync(tmp, 0o755);
   try {
     const out = execFileSync('bash', [tmp, 'sys_resource'], { encoding: 'utf8', timeout: 15000 });

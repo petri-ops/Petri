@@ -14,7 +14,7 @@ import { fetchKnowledgeSpace, setKnowledgeSpaceEnabled, type KnowledgeSpaceState
 import { KnowledgeSpaceSwitcher } from './KnowledgeSpaceSwitcher';
 import { KnowledgeDocLibrary } from './KnowledgeDocLibrary';
 import { KnowledgeSearchProbe } from './KnowledgeSearchProbe';
-import { subscribeGewuEvent } from '@/lib/events';
+import { subscribePetriEvent } from '@/lib/events';
 import { BUSY_STATUSES } from './knowledge-utils';
 import styles from './KnowledgeSpacePanel.module.css';
 
@@ -50,7 +50,7 @@ export function KnowledgeSpacePanel() {
   // BLOCK-99 G4 — 管理台会话驱动变更后即时刷新（双通道同一真相；轮询兜底不变）
   useEffect(
     () =>
-      subscribeGewuEvent('gewu:knowledge-console-sync', () => {
+      subscribePetriEvent('petri:knowledge-console-sync', () => {
         void refresh();
       }),
     [refresh]

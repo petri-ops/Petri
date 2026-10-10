@@ -15,7 +15,7 @@ const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 function tmpRoot() {
-  return mkdtempSync(path.join(tmpdir(), 'gewu-prefs-test-'));
+  return mkdtempSync(path.join(tmpdir(), 'petri-prefs-test-'));
 }
 
 function listen(app) {
@@ -34,7 +34,7 @@ test('BLOCK-86 L1: prefs PUT/GET merge + sanitize + persist', async () => {
     const express = require('express');
     const app = express();
     // 不挂 app 级 express.json（路由自带；双重解析会消费已耗尽 stream → 500）
-    require(path.join(ROOT, 'core/biof3-server/routes/user-prefs.js'))(app, { dataDir: root });
+    require(path.join(ROOT, 'core/petri-server/routes/user-prefs.js'))(app, { dataDir: root });
     const server = await listen(app);
     const base = `http://127.0.0.1:${server.address().port}`;
 

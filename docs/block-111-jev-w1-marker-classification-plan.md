@@ -22,7 +22,7 @@
 | 阶段 | 内容 | 核心落点 |
 | --- | --- | --- |
 | P0 | 校准基线 + 题型/阈值评审 | marker 判别中文/符号语料 ≥100 样本（构建法见 §3 D-3）+ confidence-accuracy 曲线 + 阈值初值 + D-1~D-5 逐项裁决；证据落 `acceptance/block-111/` |
-| P1 | 接线 + 降级契约 | `core/biof3-server/helpers/interpret.js` `lookupCellType` 旁路二跳（规则表候选生成 → `askDecision` choice → 阈值门控 → additive 输出）；`routes/ai-legacy.js` `cellTypeHints` additive 契约扩展；降级路径测试钉住 |
+| P1 | 接线 + 降级契约 | `core/petri-server/helpers/interpret.js` `lookupCellType` 旁路二跳（规则表候选生成 → `askDecision` choice → 阈值门控 → additive 输出）；`routes/ai-legacy.js` `cellTypeHints` additive 契约扩展；降级路径测试钉住 |
 | P2 | 实机验收 + 收口 | dev Electron 实机 `/api/ai/interpret` 全链断言（真实 Jev 轮次 + 降级态 + 杀开关）+ A/B 对账 + closeout 十门 |
 
 ### 1.2 非范围（exclusions）
@@ -38,9 +38,9 @@
 
 ### 2.1 现状（file:line 已核实）
 
-- `core/biof3-server/helpers/interpret.js:19` `CELL_MARKERS`：22 条基因组合→细胞类型映射（CellMarker 2.0 + PanglaoDB 高频条目精选）。
+- `core/petri-server/helpers/interpret.js:19` `CELL_MARKERS`：22 条基因组合→细胞类型映射（CellMarker 2.0 + PanglaoDB 高频条目精选）。
 - `interpret.js:52-66` `lookupCellType(markers)`：对每条规则数交集（`matches >= 2 && matches > bestScore`），取最高分命中返回**裸字符串**；无并列仲裁（先到先得）、无置信度、无概率；无命中返回 `null`。
-- 唯一生产消费点 `core/biof3-server/routes/ai-legacy.js:27`：`POST /api/ai/interpret` 对每个 cluster 的 topMarkers 查表 → `cellTypeHints`（cluster→类型名字符串）与模型解读文本并列返回；模型失败时 hint 串进 fallback 文本。
+- 唯一生产消费点 `core/petri-server/routes/ai-legacy.js:27`：`POST /api/ai/interpret` 对每个 cluster 的 topMarkers 查表 → `cellTypeHints`（cluster→类型名字符串）与模型解读文本并列返回；模型失败时 hint 串进 fallback 文本。
 - 痛点：跨类型共有基因（如 GZMB 同时命中细胞毒性 T 与 NK 语境）时命中分并列无仲裁；用户看不到「这个推断有多可信」；规则表外的新型细胞类型提示完全丢失（这是 B/C 型边界内的固有损失，本包不追）。
 
 ### 2.2 目标形态（W0 同构二跳）
@@ -62,7 +62,7 @@ markers[] ─→ 规则表候选生成（A 型，零出站）：候选集 = matc
 - **D-1 题型**：choice（候选=规则表命中集，`matches≥2` 边界沿用现行；候选唯一时是否仍出站问 confidence？）——推荐：唯一候选也出站（一次调用补全 confidence 与分布，interpret 低频无成本压力）。
 - **D-2 消费契约形态**：`cellTypeHints` 保留字符串不动 + additive 新增 `cellTypeHintsDetailed`（`{cluster, type, confidence, probabilities, adopted}`[]，仅决策路径样本进入）——推荐此形态（零破坏、可回放、老前端零感知）。
 - **D-3 校准语料构建法**：≥100 样本，全部由公开发表 marker 知识构建（CellMarker/PanglaoDB 同源），**零用户数据出站**（D-A 分级=一般）；构成=①每类型典型全面板/部分面板/加噪面板（正样本）②跨类型歧义面板（并列命中，gold=生物学正确主导型）③陷阱面板（gold ∉ 候选集，正确行为=低置信回退，占比 10~15%）④候选集为空样本（断言零出站，不进 choice 指标）。格式镜像 `acceptance/block-110/corpus-topic-shift.json`（kind/domain/version/note/count/samples）。
-- **D-4 默认开关位**：默认关+显式开（`BIOF3_JEV_MARKER_GUARD=1`，同 W0-P2 知识库二跳先例）vs 默认开+杀开关（同 W0-P1 话题漂移先例）——推荐：**默认关+显式开**（`/api/ai/interpret` 是用户可见科学提示面，可信度敏感；P0 校准 accuracy ≥0.95 且 P2 实机零回归后，翻默认另行裁决）。
+- **D-4 默认开关位**：默认关+显式开（`PETRI_JEV_MARKER_GUARD=1`，同 W0-P2 知识库二跳先例）vs 默认开+杀开关（同 W0-P1 话题漂移先例）——推荐：**默认关+显式开**（`/api/ai/interpret` 是用户可见科学提示面，可信度敏感；P0 校准 accuracy ≥0.95 且 P2 实机零回归后，翻默认另行裁决）。
 - **D-5 阈值初值与门控语义**：P0 曲线产出后定（预期 θ_high≈confidence 且 accuracy ≥0.95 的最低置信带；θ_low 取显著低于 chance 的下界）；中间带维持现行无置信度字符串——推荐双阈值三区间，与 W0-P1 同构。
 
 ## 4. 关闭语义
@@ -88,7 +88,7 @@ markers[] ─→ 规则表候选生成（A 型，零出站）：候选集 = matc
 
 - **模型只挑不造**：criteria 只能来自规则表命中集，模型不得新增候选（响应校验层机械保证：choice ∉ criteria 即 invalid_response 降级）。
 - **决策 API 唯一接入**：必经 `helpers/decision-api.js` `askDecision`（0 npm 新依赖，pin `jev-1.13.0`）；退出路径=删接点回退现行。
-- **key 不入仓**：`TYPESAFE_API_KEY` 只从服务端 env（`.biof3-secrets` source 入栈，quality:secret 红线）。
+- **key 不入仓**：`TYPESAFE_API_KEY` 只从服务端 env（`.petri-secrets` source 入栈，quality:secret 红线）。
 - **降级必有**：任何失败形态回退现行 `lookupCellType` 字符串，`/api/ai/interpret` 永不因决策 API 失败而失败。
 - **A 型规则零模型化**：不把「是否命中」本身交给模型；规则表匹配始终是候选生成前置门。
 - 风险：基因符号人鼠同源歧义（Corpus 覆盖）、Jev CJK 短板（本接点 state 以基因符号为主、候选名为中文——P0 语料含中文候选名样本实测该项）、低频接点观测样本少（P2 以 harness 语料为主要证据面，实机只验链路）。
@@ -111,7 +111,7 @@ markers[] ─→ 规则表候选生成（A 型，零出站）：候选集 = matc
 | **D-1 题型** | choice，唯一候选也出站（补 confidence） | partial 2 基因子集 accuracy 1.0 / conf 1.0，出站成本约 487 token/次、P50 301ms，interpret 低频无压力 |
 | **D-2 消费契约** | `cellTypeHints` 字符串不动 + additive `cellTypeHintsDetailed: {cluster, type, confidence, adopted, probabilities}[]`（仅决策路径样本进入） | 零破坏、可回放；`adopted=false` 即回退样本（type=现行规则表结果） |
 | **D-3 语料构建法** | 按 §3 D-3 交付定版（104 条，构建法与 gold 判据见 corpus note） | 实测通过；语料与校准证据同入库 |
-| **D-4 默认开关位** | **默认关 + 显式开 `BIOF3_JEV_MARKER_GUARD=1`**（同 W0-P2 先例）；P2 实机零回归后翻默认另行裁决 | 用户可见科学提示面，可信度优先；未门控歧义 88.2% 说明回退路径必须常备 |
+| **D-4 默认开关位** | **默认关 + 显式开 `PETRI_JEV_MARKER_GUARD=1`**（同 W0-P2 先例）；P2 实机零回归后翻默认另行裁决 | 用户可见科学提示面，可信度优先；未门控歧义 88.2% 说明回退路径必须常备 |
 | **D-5 阈值** | **单阈值 θ_high=0.55**（conf≥0.55 采纳附置信度，否则回退现行字符串） | θ=0.55 为 coverage≥0.85 约束下 adoptedAccuracy=1.0 + trap 误采纳=0 的最高覆盖档；choice 题型 confidence 天然单门控，W0-P1 noul 的三区间双阈值不适用（题型差异，非偏差），中间带回退语义由「<θ 即回退」承接 |
 
 **P0 结论**：证据门通过（accuracy 1.0@0.55 ≥ 0.95 门、coverage 0.9125 ≥ 0.85 门、trap 0% ≤ 5% 门）。D-1~D-5 用户裁决后进 P1。
@@ -122,13 +122,13 @@ markers[] ─→ 规则表候选生成（A 型，零出站）：候选集 = matc
 
 ### 7.3 P1 落地记录（2026-09-22）
 
-- `core/biof3-server/helpers/interpret.js`：新增 `MARKER_DECISION_THRESHOLD=0.55` / `deriveMarkerCandidates`（lookupCellType 同语义全命中集）/ `buildMarkerDecisionRequest`（P0 校准同形，单源）/ `isMarkerGuardEnabled`（`BIOF3_JEV_MARKER_GUARD=1`）/ `lookupCellTypeWithConfidence`（永不 throw，五态降级）；`lookupCellType` 原函数零改动（回退目标）。
-- `core/biof3-server/routes/ai-legacy.js`：guard 关=原路径逐字节等价（零新键）；guard 开=`cellTypeHints` 照旧 + `cellTypeHintsDetailed`（`{cluster,type,confidence,adopted,probabilities?}`）additive。
+- `core/petri-server/helpers/interpret.js`：新增 `MARKER_DECISION_THRESHOLD=0.55` / `deriveMarkerCandidates`（lookupCellType 同语义全命中集）/ `buildMarkerDecisionRequest`（P0 校准同形，单源）/ `isMarkerGuardEnabled`（`PETRI_JEV_MARKER_GUARD=1`）/ `lookupCellTypeWithConfidence`（永不 throw，五态降级）；`lookupCellType` 原函数零改动（回退目标）。
+- `core/petri-server/routes/ai-legacy.js`：guard 关=原路径逐字节等价（零新键）；guard 开=`cellTypeHints` 照旧 + `cellTypeHintsDetailed`（`{cluster,type,confidence,adopted,probabilities?}`）additive。
 - `scripts/block111-p0-calibrate.mjs`：候选生成与请求组装改引 interpret.js 单源（删本地副本），`--dry` 回归绿。
 - 契约 `test/block111-marker-classification.test.mjs` **14/14 绿**（现行契约钉/候选推导/请求形状/guard 关零出站/零候选零出站/no_key/timeout×3/http_error/network_error/伪造候选拒收/采纳/低于阈值回退/阈值边界 0.55/歧义陷阱端到端）；`npm run test:changed` 路由 **159 项 0 红 3 skip**；impact-map 登记 `block111-jev-w1-marker` 规则。
 
 ### 7.4 P2 落地记录（2026-09-22，当日收口）
 
 - **A/B 生产路径**（`scripts/block111-p1-ab.mjs`，guard=1 + 真实 key，92 choice 可评估 + 12 零候选边界）：legacyBaseline **0.8375** / coverage **0.9125** / gatedAccuracy **1.0** / endToEnd **0.925** ≥ legacy ✓ / 零候选边界 **12/12** 直返 null；gate.passed=true（`acceptance/block-111/p1-ab.json`）。**诚实登记（轮间方差）**：本轮 1/12 双细胞陷阱被采纳（trapFalseAdoption 8.3%，校准轮为 0%）——θ=0.55 位于该陷阱置信度（≈0.5-0.6 漂移带）边缘；采纳态附带 confidence 与 probabilities 呈现、且 D-4 默认关（显式开才生效），风险有界；若用户裁决收紧，θ=0.60（校准 coverage 0.90）为备选档，**改阈值必须先重校准**。
-- **实机腿** flow `block111-marker-live` **7/7 allPass**（dev 栈以 `BIOF3_JEV_MARKER_GUARD=1` + jev.env 重启；证据 `acceptance/block-111/block111-marker-live-live.json`）：M0 端点 200 / M1 detailed 四簇在场 / M2 canonical T adopted=true conf=1 / M3 双细胞簇模型给 conf 0.5 < 0.55 → adopted=false（正确回退，模型行为留痕）/ M4 零候选簇 {type:null} / **M5 老契约 cellTypeHints 深等于规则表预期（零变化）** / M6 canonical B adopted=true conf=1。
+- **实机腿** flow `block111-marker-live` **7/7 allPass**（dev 栈以 `PETRI_JEV_MARKER_GUARD=1` + jev.env 重启；证据 `acceptance/block-111/block111-marker-live-live.json`）：M0 端点 200 / M1 detailed 四簇在场 / M2 canonical T adopted=true conf=1 / M3 双细胞簇模型给 conf 0.5 < 0.55 → adopted=false（正确回退，模型行为留痕）/ M4 零候选簇 {type:null} / **M5 老契约 cellTypeHints 深等于规则表预期（零变化）** / M6 canonical B adopted=true conf=1。
 - 降级五态（缺 key/超时/http 错/网络错/杀开关）由契约测试覆盖（单后端进程无法运行中翻 env，flow 头注已注明）。

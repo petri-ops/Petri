@@ -16,7 +16,7 @@
  *      （宿主 monkeypatch 测试面不变，见 capability-bundles.test.mjs #8）；
  *   ② scripts/build-r-bundle.mjs currentPlatform —— createRequire 引本模块；
  *   ③ src/plugin/runtime.js detectPlatform —— 薄委托（dependency-cruiser R5 只拦
- *      core/biof3-server，src→core/shared-backend 合法，quality:arch 实测留痕）。
+ *      core/petri-server，src→core/shared-backend 合法，quality:arch 实测留痕）。
  *
  * fail-closed 语义（BLOCK-146 #8 沿用）：宿主平台无对应 canonical 键时输出
  * `${platform}-${arch}` 兜底形态（不造键）——调用方按 unknown/null 拒绝下载/安装。

@@ -23,7 +23,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const BINARY = path.join(
-  __dirname, '..', 'sidecars', 'computer-use-windows', 'bin', 'publish', 'gewu-computer-use-windows.exe'
+  __dirname, '..', 'sidecars', 'computer-use-windows', 'bin', 'publish', 'petri-computer-use-windows.exe'
 );
 
 let child = null;

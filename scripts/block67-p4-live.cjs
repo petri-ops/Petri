@@ -50,7 +50,7 @@ async function main() {
   // ── A1 断线诚实失败 ──
   const bad = await req(`${API}/api/data/projects`, {
     method: 'POST', headers: auth,
-    body: JSON.stringify({ name: 'P4断线-不可达', workspaceKind: 'ssh', sshHost: 'aliyun-6022', remotePath: '/root/gewu-block67-demo' }),
+    body: JSON.stringify({ name: 'P4断线-不可达', workspaceKind: 'ssh', sshHost: 'aliyun-6022', remotePath: '/root/petri-block67-demo' }),
   });
   const badId = bad.body.project?.id;
   assert('A1a 不可达项目创建（本地 DB 落库成功，不预判网络）', !!badId);
@@ -68,7 +68,7 @@ async function main() {
   // ── A2 恢复（同 remote_path 换可达 alias） ──
   const good = await req(`${API}/api/data/projects`, {
     method: 'POST', headers: auth,
-    body: JSON.stringify({ name: 'P4恢复-可达', workspaceKind: 'ssh', sshHost: 'aliyun', remotePath: '/root/gewu-block67-demo' }),
+    body: JSON.stringify({ name: 'P4恢复-可达', workspaceKind: 'ssh', sshHost: 'aliyun', remotePath: '/root/petri-block67-demo' }),
   });
   const goodId = good.body.project?.id;
   const treeGood = await req(`${API}/api/workspaces/${goodId}/tree`, { headers: auth });
@@ -88,7 +88,7 @@ async function main() {
     `file status=${escFile.status}`);
 
   // ── A4 安全面②：verb 白名单 + 参数白名单 ──
-  const { remoteAgentCommand } = require('../core/biof3-server/helpers/remote-execution/node-agent');
+  const { remoteAgentCommand } = require('../core/petri-server/helpers/remote-execution/node-agent');
   let whitelistOk = true;
   try { remoteAgentCommand(['fs_stat', 'x'.repeat(300)]); whitelistOk = false; } catch { /* >256 拒绝 */ }
   // verb 位置与参数同走字符白名单（远端 agent 侧 die("unknown_verb") 兜底未知 verb）；
@@ -119,7 +119,7 @@ async function main() {
   for (const id of [badId, goodId, localId]) {
     await req(`${API}/api/data/projects/${id}`, { method: 'DELETE', headers: auth }).catch(() => {});
   }
-  sshAliyun(`cd /root/gewu-block67-demo && git checkout -q -- README.md 2>/dev/null; printf '# BLOCK-67 实机验收\\n这是远程项目里的 markdown 文件。\\n' > README.md; true`);
+  sshAliyun(`cd /root/petri-block67-demo && git checkout -q -- README.md 2>/dev/null; printf '# BLOCK-67 实机验收\\n这是远程项目里的 markdown 文件。\\n' > README.md; true`);
 
   results.allPass = results.assertions.every((a) => a.pass);
   results.finishedAt = new Date().toISOString();

@@ -22,7 +22,7 @@
     {
       "name": "P2_pair_with_identity_ok",
       "pass": true,
-      "detail": "{\"ok\":true,\"peer\":{\"peerId\":\"gpeer_44a699f3356f1c7c\",\"name\":\"MacBook-Pro.local\",\"baseUrl\":\"http://127.0.0.1:3005\",\"platform\":\"darwin\",\"arch\":\"arm64\",\"gewuVersion\":\"1.0.0\",\"executors\":{\"r\":true,\"python"
+      "detail": "{\"ok\":true,\"peer\":{\"peerId\":\"gpeer_44a699f3356f1c7c\",\"name\":\"MacBook-Pro.local\",\"baseUrl\":\"http://127.0.0.1:3005\",\"platform\":\"darwin\",\"arch\":\"arm64\",\"petriVersion\":\"1.0.0\",\"executors\":{\"r\":true,\"python"
     },
     {
       "name": "P2a_peer_registry_identity",

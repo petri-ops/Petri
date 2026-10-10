@@ -292,7 +292,7 @@ plugin 执行路径（DESeq2/GO-KEGG/volcano）
 - `conversationRunStore` 多 run、`isConversationRunning` 仅 primary、`SimpleChat` 输入态（primary 在飞禁用、sub-agent 在飞可用）。
 
 **真实 Electron 验收（Phase D 门，A-1~A-6）**
-- 启动：`env -u ELECTRON_RUN_AS_NODE ELECTRON_DISABLE_SANDBOX=1 npm run dev`。脚本会精确回收本 workspace 的旧 Electron、等待退出，并把 Electron userData 与后端 SQLite/项目数据一并隔离到 `.biof3-dev-user-data/`；不得手工删除已安装版共享 `SingletonLock`。
+- 启动：`env -u ELECTRON_RUN_AS_NODE ELECTRON_DISABLE_SANDBOX=1 npm run dev`。脚本会精确回收本 workspace 的旧 Electron、等待退出，并把 Electron userData 与后端 SQLite/项目数据一并隔离到 `.petri-dev-user-data/`；不得手工删除已安装版共享 `SingletonLock`。
 - 验证：单会话长任务输入框可用、并行起第 2 sub-agent、独立取消、历史无交错、主 loop 槽不被占满。
 
 ## 14. 回滚策略

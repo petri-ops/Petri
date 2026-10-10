@@ -92,7 +92,7 @@ describe('computeGzipBytes（gzip 计量）', () => {
 
 describe('measureDistAssets（dist 资产扫描）', () => {
   it('扫描 assets/**/*.js、剥哈希成稳定键、忽略非 js', () => {
-    const dist = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-r2-dist-'));
+    const dist = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-r2-dist-'));
     try {
       writeAsset(dist, 'assets/index-B1ghXk9p.js', 'console.log("entry")'.repeat(40));
       writeAsset(dist, 'assets/vendor-Cd_9xQ2z.js', 'export const v = 1;'.repeat(30));
@@ -112,7 +112,7 @@ describe('measureDistAssets（dist 资产扫描）', () => {
   });
 
   it('同键哈希碰撞时保留较大者并如实计数（确定性）', () => {
-    const dist = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-r2-coll-'));
+    const dist = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-r2-coll-'));
     try {
       writeAsset(dist, 'assets/chunk-Aaaa1111.js', 'small');
       writeAsset(dist, 'assets/chunk-Bbbb2222.js', 'x'.repeat(4000));
@@ -126,7 +126,7 @@ describe('measureDistAssets（dist 资产扫描）', () => {
   });
 
   it('dist 无 assets 目录 → 抛清晰错误（fail-closed）', () => {
-    const empty = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-r2-empty-'));
+    const empty = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-r2-empty-'));
     try {
       assert.throws(() => measureDistAssets(empty), /assets/);
     } finally {

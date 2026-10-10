@@ -14,7 +14,7 @@ const require = createRequire(import.meta.url);
 
 // 测试策略层逻辑
 test('agent-tool-policy accessMode validation', async (t) => {
-  const { decideAgentToolCall } = require('../core/biof3-server/agent-tools/agent-tool-policy.js');
+  const { decideAgentToolCall } = require('../core/petri-server/agent-tools/agent-tool-policy.js');
 
   await t.test('should allow mutating tools in full access mode', () => {
     const decision = decideAgentToolCall({
@@ -65,7 +65,7 @@ test('agent-tool-policy accessMode validation', async (t) => {
 
 // BLOCK-56 P2 — 三档矩阵：read / workspace-write / full
 test('BLOCK-56 P2 accessMode workspace-write 三档矩阵', async (t) => {
-  const { decideAgentToolCall } = require('../core/biof3-server/agent-tools/agent-tool-policy.js');
+  const { decideAgentToolCall } = require('../core/petri-server/agent-tools/agent-tool-policy.js');
   const { ACCESS_MODES, normalizeScientificTaskSpec } = require('../core/shared-backend/scientific-task-spec.js');
 
   const decide = (name, sideEffect, accessMode, args = {}, extra = {}) => decideAgentToolCall({
@@ -139,7 +139,7 @@ test('BLOCK-56 P2 accessMode workspace-write 三档矩阵', async (t) => {
   });
 
   await t.test('inferExecutionPolicy：workspace-write 允许执行且 reason 可追溯', () => {
-    const { inferExecutionPolicy } = require('../core/biof3-server/helpers/agent-execution-policy.js');
+    const { inferExecutionPolicy } = require('../core/petri-server/helpers/agent-execution-policy.js');
     assert.deepStrictEqual(inferExecutionPolicy([], { accessMode: 'workspace-write' }), {
       allowExecution: true,
       reason: 'explicit_workspace_write_access_mode',
@@ -151,7 +151,7 @@ test('BLOCK-56 P2 accessMode workspace-write 三档矩阵', async (t) => {
 
 // UI-303 — 计划模式并入档位菜单成为第四档（read / plan / workspace-write / full）
 test('UI-303 accessMode plan 第四档矩阵', async (t) => {
-  const { decideAgentToolCall } = require('../core/biof3-server/agent-tools/agent-tool-policy.js');
+  const { decideAgentToolCall } = require('../core/petri-server/agent-tools/agent-tool-policy.js');
   const { ACCESS_MODES, normalizeScientificTaskSpec } = require('../core/shared-backend/scientific-task-spec.js');
 
   const decide = (name, sideEffect, accessMode, args = {}, extra = {}) => decideAgentToolCall({
@@ -183,7 +183,7 @@ test('UI-303 accessMode plan 第四档矩阵', async (t) => {
   });
 
   await t.test('inferExecutionPolicy：plan 档不允许执行', () => {
-    const { inferExecutionPolicy } = require('../core/biof3-server/helpers/agent-execution-policy.js');
+    const { inferExecutionPolicy } = require('../core/petri-server/helpers/agent-execution-policy.js');
     assert.strictEqual(inferExecutionPolicy([], { accessMode: 'plan' }).allowExecution, false);
   });
 

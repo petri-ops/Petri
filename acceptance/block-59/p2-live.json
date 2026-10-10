@@ -9,7 +9,7 @@
     {
       "name": "终端会话启动（主窗 tab 语义，pty 运行中）",
       "pass": true,
-      "detail": "{\"ok\":true,\"pid\":26058,\"cwd\":\"/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data\",\"shell\":\"/bin/zsh\",\"sessionId\":\"default\"}"
+      "detail": "{\"ok\":true,\"pid\":26058,\"cwd\":\"/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/.petri-dev-user-data/data\",\"shell\":\"/bin/zsh\",\"sessionId\":\"default\"}"
     },
     {
       "name": "终端 Tab 升格 → created（terminal:<sessionId>）",

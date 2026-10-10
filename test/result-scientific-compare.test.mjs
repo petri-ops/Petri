@@ -9,7 +9,7 @@ const require = createRequire(import.meta.url);
 const { compareScientificTables } = require('../core/shared-backend/result-scientific-compare');
 
 function files(context, before, after) {
-  const root = mkdtempSync(join(tmpdir(), 'biof3-scientific-compare-'));
+  const root = mkdtempSync(join(tmpdir(), 'petri-scientific-compare-'));
   context.after(() => rmSync(root, { recursive: true, force: true }));
   const beforePath = join(root, 'before.csv');
   const afterPath = join(root, 'after.csv');

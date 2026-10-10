@@ -20,7 +20,7 @@ const { getRuntimeBinCandidates } = require('../platform-compat');
 const { getPythonRuntimeExecutable } = require(path.join(__dirname, '..', '..', 'core', 'shared-backend', 'runtime-paths'));
 // BLOCK-152 P 轨收敛：宿主→平台键推导单源。静态 require（不用上方 path.join
 // 形态）让 quality:arch 真实裁决这条 src→core/shared-backend 边——R5 只拦
-// core/biof3-server，core/shared-backend 合法（2026-10-09 实测绿，见工作包留痕）。
+// core/petri-server，core/shared-backend 合法（2026-10-09 实测绿，见工作包留痕）。
 const { deriveHostPlatform } = require('../../core/shared-backend/host-platform');
 const {
   RUNTIMES_DIR,

@@ -17,26 +17,26 @@
   gap: 10px;
   padding: 12px 14px;
   border-radius: 10px;
-  border: 1px solid var(--gewu-border);
-  border-left: 4px solid var(--gewu-info);
-  background: var(--gewu-bg-elevated);
-  color: var(--gewu-text);
-  box-shadow: var(--gewu-shadow-sm);
-  font-size: var(--gewu-font-size-body-sm);
+  border: 1px solid var(--petri-border);
+  border-left: 4px solid var(--petri-info);
+  background: var(--petri-bg-elevated);
+  color: var(--petri-text);
+  box-shadow: var(--petri-shadow-sm);
+  font-size: var(--petri-font-size-body-sm);
   line-height: 1.4;
 }
 
 .toast[data-variant='success'] {
-  border-left-color: var(--gewu-success);
+  border-left-color: var(--petri-success);
 }
 .toast[data-variant='info'] {
-  border-left-color: var(--gewu-info);
+  border-left-color: var(--petri-info);
 }
 .toast[data-variant='warning'] {
-  border-left-color: var(--gewu-warning-text);
+  border-left-color: var(--petri-warning-text);
 }
 .toast[data-variant='error'] {
-  border-left-color: var(--gewu-danger);
+  border-left-color: var(--petri-danger);
 }
 
 .message {
@@ -49,8 +49,8 @@
   flex: 0 0 auto;
   border: none;
   background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-md);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-md);
   line-height: 1;
   cursor: pointer;
   padding: 0 2px;
@@ -58,5 +58,5 @@
 }
 
 .dismiss:hover {
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }

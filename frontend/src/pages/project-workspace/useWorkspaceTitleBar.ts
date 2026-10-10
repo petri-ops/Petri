@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
-import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
+import { petriEvents, dispatchPetriEvent } from '@/lib/events';
 import { RIGHT_PANEL_ITEMS, type RightPanelMode } from './rightPanelTabs';
 // UI-446 — 审阅 tab 未读圆点数据源（当前会话工作区改动索引）
 import { useConversationUnreviewedCount, useConversationShortstat } from '@/components/copilot/conversationChangesStore';
@@ -153,16 +153,16 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
       canGoForward: rightTab === 'browser' && browserCanGoForward,
       onGoBack:
         rightTab === 'browser' && browserCanGoBack
-          ? () => dispatchGewuEvent(gewuEvents.browserBack)
+          ? () => dispatchPetriEvent(petriEvents.browserBack)
           : null,
       onGoForward:
         rightTab === 'browser' && browserCanGoForward
-          ? () => dispatchGewuEvent(gewuEvents.browserForward)
+          ? () => dispatchPetriEvent(petriEvents.browserForward)
           : null,
     });
     return () => {
     updateTitleBar({
-      title: 'Gewu',
+      title: 'Petri',
       tabs: [],
       activeTabId: null,
       reviewCount: 0,

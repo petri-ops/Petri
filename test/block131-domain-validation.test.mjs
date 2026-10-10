@@ -21,7 +21,7 @@ const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const {
   validateDomainUploads,
-} = require('../core/biof3-server/helpers/upload-domain-validation.js');
+} = require('../core/petri-server/helpers/upload-domain-validation.js');
 
 function withFiles(files, run) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block131-'));
@@ -89,7 +89,7 @@ test('non-domain files are left to the generic sniffer (no fabricated findings)'
 });
 
 test('handleToolRun wiring: domain validation runs after the generic sniffer and fails closed', () => {
-  const src = fs.readFileSync(path.join(ROOT, 'core/biof3-server/helpers/tools-executor.js'), 'utf8');
+  const src = fs.readFileSync(path.join(ROOT, 'core/petri-server/helpers/tools-executor.js'), 'utf8');
   assert.ok(src.includes('validateDomainUploads'), 'executor must call the domain validator');
   const callOrder = src.indexOf('validateUploadedFiles(toolId');
   const domainOrder = src.indexOf('validateDomainUploads(');

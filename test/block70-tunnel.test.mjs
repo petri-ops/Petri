@@ -17,10 +17,10 @@ const {
   writeTunnelConfig,
   getTunnelManager,
   resetTunnelManagersForTest,
-} = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/tunnel.js'));
+} = require(path.join(ROOT, 'core/petri-server/mobile-gateway/tunnel.js'));
 
 function tmpRoot() {
-  return mkdtempSync(path.join(tmpdir(), 'gewu-tunnel-test-'));
+  return mkdtempSync(path.join(tmpdir(), 'petri-tunnel-test-'));
 }
 
 /** 假 ssh 进程：EventEmitter + pid + kill()，供注入。 */
@@ -144,8 +144,8 @@ test('BLOCK-70 P3 admin REST round-trips tunnel config through the shared manage
     const express = require('express');
     const adminApp = express();
     // 不加 app 级 express.json：mobile-admin 的路由级中间件自带解析
-    // （根目录与 core/biof3-server 各有一份 express 依赖时双重解析会报 stream not readable）。
-    require(path.join(ROOT, 'core/biof3-server/routes/mobile-admin.js'))(adminApp, { dataDir: root });
+    // （根目录与 core/petri-server 各有一份 express 依赖时双重解析会报 stream not readable）。
+    require(path.join(ROOT, 'core/petri-server/routes/mobile-admin.js'))(adminApp, { dataDir: root });
     const server = await new Promise((resolve) => {
       const listening = adminApp.listen(0, '127.0.0.1', () => resolve(listening));
     });
@@ -199,7 +199,7 @@ function sleep(ms) {
 
 
 // ── P3 清场纯函数：按签名挑孤儿、豁免在册孩子 ──────────────────────────
-const { selectStaleSshPids } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/tunnel.js'));
+const { selectStaleSshPids } = require(path.join(ROOT, 'core/petri-server/mobile-gateway/tunnel.js'));
 
 test('BLOCK-70 P3 stale ssh selection matches signature exactly and honours exclusions', () => {
   const entries = [

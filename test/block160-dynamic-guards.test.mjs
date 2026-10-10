@@ -16,7 +16,7 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve('.');
 
-const policy = require(path.join(ROOT, 'core/biof3-server/agent-tools/agent-tool-policy'));
+const policy = require(path.join(ROOT, 'core/petri-server/agent-tools/agent-tool-policy'));
 
 const EXEC_CONTRACT = { sideEffect: 'execution', riskTier: 'R2' };
 const FULL = { accessMode: 'full' };

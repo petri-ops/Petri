@@ -1,6 +1,6 @@
-// vendor/biof3-core/test/agent-workflow.mjs — Phase 6 agent workflow runtime tests
+// vendor/petri-core/test/agent-workflow.mjs — Phase 6 agent workflow runtime tests
 // Unit tests for agent-workflow.js pure functions (no DB, no side effects).
-// Run: node --test vendor/biof3-core/test/agent-workflow.mjs
+// Run: node --test vendor/petri-core/test/agent-workflow.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
@@ -384,10 +384,10 @@ test('bindVerifiedArtifact prefers canonicalPath over path', () => {
     fromStepId: 'deg-standardization',
     toStepId: 'volcano',
     inputId: 'deg_table',
-    artifact: { path: '/local/results.csv', canonicalPath: '/work/biof3/results.csv' },
+    artifact: { path: '/local/results.csv', canonicalPath: '/work/petri/results.csv' },
     artifactTruth: { status: 'valid' },
   });
-  assert.equal(result.steps.find((s) => s.id === 'volcano').inputs.deg_table, '/work/biof3/results.csv');
+  assert.equal(result.steps.find((s) => s.id === 'volcano').inputs.deg_table, '/work/petri/results.csv');
 });
 
 // ---------------------------------------------------------------------------

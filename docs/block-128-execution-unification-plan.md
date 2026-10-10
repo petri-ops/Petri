@@ -25,7 +25,7 @@ status: completed
 ## 3. 修法（三件）
 
 1. **进程级共享登记表** `helpers/tool-job-lifecycle-registry.js`：activeToolJobs 单例 + countActiveUserToolJobs（每用户 pending+running，终态不计）。tools-executor 工厂局部 Map 换共享（生产单进程单 executor 语义等价）。
-2. **MCP 路径并入装置**：建行前并发准入（≥max_concurrent 拒绝，429 契约字样同 HTTP）；execFile 前 claimActiveToolJob（重入拒绝）；child 到手后 owner.process=child + armActiveToolJobLifecycle（心跳 30s + 硬超时 BIOF3_TOOL_HARD_TIMEOUT_MS 默认 30min）；回调收尾 clearTimers→release→finalize。**timeout: 300000 → 0**（内建退役，硬预算统一由装置管）。
+2. **MCP 路径并入装置**：建行前并发准入（≥max_concurrent 拒绝，429 契约字样同 HTTP）；execFile 前 claimActiveToolJob（重入拒绝）；child 到手后 owner.process=child + armActiveToolJobLifecycle（心跳 30s + 硬超时 PETRI_TOOL_HARD_TIMEOUT_MS 默认 30min）；回调收尾 clearTimers→release→finalize。**timeout: 300000 → 0**（内建退役，硬预算统一由装置管）。
 3. 装置层 db 用 better-sqlite3 原句柄（lifecycleDb；不可用时退化无心跳但硬超时仍生效）。
 
 ## 4. 非范围

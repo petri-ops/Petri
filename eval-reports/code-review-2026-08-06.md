@@ -1,4 +1,4 @@
-# BioF3 Desktop 代码评审报告（2026-08-06）
+# Petri Desktop 代码评审报告（2026-08-06）
 
 评审人：Senior Developer ｜ 性质：只读复审 + 新增发现 ｜ 不改动任何资格状态与工作包状态
 基线：在 `docs/project-wide-audit-2026-07.md`（六维横切审计）基础上逐项核实当前代码状态，并补充新发现。

@@ -2,7 +2,7 @@
  * BLOCK-95 B2 — 会话级 rolling compaction 契约（helpers/conversation-compaction.js
  * + ai-conversations 信封/端点）。
  *
- * 真实 SQLite（BIOF3_DB_PATH 临时库），覆盖：
+ * 真实 SQLite（PETRI_DB_PATH 临时库），覆盖：
  *   - 开关判定（默认关）
  *   - planCompaction 阈值判定（token/消息数不足不折叠；超限按 KEEP_RECENT 切分）
  *   - applyCompactionView 视图投影（covers 内替换为摘要、其余原样、无记录原样）
@@ -46,16 +46,16 @@ function apiPost(pathname) {
 }
 
 before(async () => {
-  tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block95-b2-'));
+  tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block95-b2-'));
   const dbPath = path.join(tempDir, 'b2.db');
-  process.env.BIOF3_DB_PATH = dbPath;
-  delete process.env.BIOF3_SESSION_COMPACTION;
+  process.env.PETRI_DB_PATH = dbPath;
+  delete process.env.PETRI_SESSION_COMPACTION;
   const { runMigrations } = require(resolve('src/migration-runner.js'));
   runMigrations(dbPath, resolve('src/migrations'));
-  dbMod = require(resolve('core/biof3-server/db'));
-  require(resolve('core/biof3-server/helpers/conversations'));
+  dbMod = require(resolve('core/petri-server/db'));
+  require(resolve('core/petri-server/helpers/conversations'));
   sqlite = dbMod.getDatabase();
-  compaction = require(resolve('core/biof3-server/helpers/conversation-compaction'));
+  compaction = require(resolve('core/petri-server/helpers/conversation-compaction'));
 
   await sqlite.prepare('INSERT INTO copilot_conversations(id, user_id, title, status, created_at, updated_at) VALUES (?,?,?,?,?,?)')
     .run(CONV, USER_ID, 't', 'active', new Date().toISOString(), new Date().toISOString());
@@ -64,7 +64,7 @@ before(async () => {
   }
 
   const express = require('express');
-  const mount = require(resolve('core/biof3-server/routes/ai-conversations.js'));
+  const mount = require(resolve('core/petri-server/routes/ai-conversations.js'));
   const app = express();
   app.use((req, _res, next) => { req.user = { id: USER_ID }; next(); });
   mount(app);
@@ -79,20 +79,20 @@ before(async () => {
 after(async () => {
   try { if (server) await new Promise((r) => server.close(r)); } catch {}
   try { fs.rmSync(tempDir, { recursive: true, force: true }); } catch {}
-  delete process.env.BIOF3_DB_PATH;
-  delete process.env.BIOF3_SESSION_COMPACTION;
+  delete process.env.PETRI_DB_PATH;
+  delete process.env.PETRI_SESSION_COMPACTION;
 });
 
 test('开关判定：默认开（2026-09-18 裁决），0 强关', () => {
-  const prevDir = process.env.BIOF3_LOCAL_DATA_DIR;
-  process.env.BIOF3_LOCAL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-b2-flag-'));
+  const prevDir = process.env.PETRI_LOCAL_DATA_DIR;
+  process.env.PETRI_LOCAL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-b2-flag-'));
   try {
     assert.equal(compaction.isSessionCompactionEnabled({}), true);
-    assert.equal(compaction.isSessionCompactionEnabled({ BIOF3_SESSION_COMPACTION: '1' }), true);
-    assert.equal(compaction.isSessionCompactionEnabled({ BIOF3_SESSION_COMPACTION: '0' }), false);
+    assert.equal(compaction.isSessionCompactionEnabled({ PETRI_SESSION_COMPACTION: '1' }), true);
+    assert.equal(compaction.isSessionCompactionEnabled({ PETRI_SESSION_COMPACTION: '0' }), false);
   } finally {
-    if (prevDir === undefined) delete process.env.BIOF3_LOCAL_DATA_DIR;
-    else process.env.BIOF3_LOCAL_DATA_DIR = prevDir;
+    if (prevDir === undefined) delete process.env.PETRI_LOCAL_DATA_DIR;
+    else process.env.PETRI_LOCAL_DATA_DIR = prevDir;
   }
 });
 
@@ -122,7 +122,7 @@ test('applyCompactionView：covers 内替换为摘要卡、其余原样；无记
 });
 
 test('compactConversationNow：真实落库 + upsert 推进 + 原文红线不变', async () => {
-  const modelTasks = require(resolve('core/biof3-server/helpers/model-tasks'));
+  const modelTasks = require(resolve('core/petri-server/helpers/model-tasks'));
   const originalCall = modelTasks.callModelTask;
   let callCount = 0;
   modelTasks.callModelTask = async () => {
@@ -168,13 +168,13 @@ test('messages 信封带 compaction 字段；compact 端点开关关时 409', as
   assert.ok(msgs.compaction.summary.length > 0);
 
   // 开关 env 强制关 → 409（kill-switch 路径；默认已翻开，2026-09-18 裁决）
-  const prev = process.env.BIOF3_SESSION_COMPACTION;
-  process.env.BIOF3_SESSION_COMPACTION = '0';
+  const prev = process.env.PETRI_SESSION_COMPACTION;
+  process.env.PETRI_SESSION_COMPACTION = '0';
   const compact = await apiPost(`/api/ai/conversations/${CONV}/compact`);
   assert.equal(compact.status, 409);
   // 开关默认开（删 env 走默认）→ 端点可用，不再 409
-  if (prev === undefined) delete process.env.BIOF3_SESSION_COMPACTION;
-  else process.env.BIOF3_SESSION_COMPACTION = prev;
+  if (prev === undefined) delete process.env.PETRI_SESSION_COMPACTION;
+  else process.env.PETRI_SESSION_COMPACTION = prev;
   const compactOn = await apiPost(`/api/ai/conversations/${CONV}/compact`);
   assert.notEqual(compactOn.status, 409);
 });

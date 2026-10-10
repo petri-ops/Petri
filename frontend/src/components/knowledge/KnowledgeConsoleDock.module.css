@@ -1,5 +1,5 @@
 /* KnowledgeConsoleDock.module.css — BLOCK-103 P4 管理会话台折叠抽屉
-   （--gewu-* token，禁 slate/零定义族；交互对标 UI-417 SideChatDock） */
+   （--petri-* token，禁 slate/零定义族；交互对标 UI-417 SideChatDock） */
 
 .dockRoot {
   position: relative;
@@ -17,29 +17,29 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 10px;
-  background: var(--gewu-bg-subtle);
-  color: var(--gewu-text-secondary);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-secondary);
   cursor: pointer;
   padding: 10px 0;
 }
 
 .handle:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .handleActive {
-  border-color: var(--gewu-accent);
-  background: var(--gewu-accent-surface);
-  color: var(--gewu-accent);
+  border-color: var(--petri-accent);
+  background: var(--petri-accent-surface);
+  color: var(--petri-accent);
 }
 
 .handleText {
   writing-mode: vertical-rl;
   letter-spacing: 2px;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
 }
 
 /* overlay：覆盖在文档区上方（不挤压布局），右缘留把手位 */
@@ -52,10 +52,10 @@
   z-index: 30;
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 12px;
-  background: var(--gewu-bg-surface);
-  box-shadow: var(--gewu-shadow-menu);
+  background: var(--petri-bg-surface);
+  box-shadow: var(--petri-shadow-menu);
   overflow: hidden;
   animation: dockSlideIn 0.18s ease-out;
 }
@@ -81,14 +81,14 @@
   justify-content: center;
   width: 24px;
   height: 24px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text-tertiary);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-tertiary);
   cursor: pointer;
 }
 
 .closeBtn:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }

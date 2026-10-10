@@ -39,7 +39,7 @@ const gitReady = (() => {
 // Helpers (copied locally to keep this file independent from git-adapter.test.mjs)
 // ---------------------------------------------------------------------------
 
-function makeWorkspace(context, prefix = 'biof3-b20-per-hunk-') {
+function makeWorkspace(context, prefix = 'petri-b20-per-hunk-') {
   const root = mkdtempSync(join(tmpdir(), prefix));
   context.after(() => {
     try { rmSync(root, { recursive: true, force: true }); } catch { /* best effort cleanup */ }

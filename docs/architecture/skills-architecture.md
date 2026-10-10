@@ -1,6 +1,6 @@
-# BioF3 Desktop Skills 层架构设计
+# Petri Desktop Skills 层架构设计
 
-> 本文档定义 BioF3 Desktop 的 Skills 层架构，作为四层抽象体系的顶层。
+> 本文档定义 Petri Desktop 的 Skills 层架构，作为四层抽象体系的顶层。
 >
 > 状态：Draft → Active
 > 版本：1.0.0
@@ -12,7 +12,7 @@
 
 ### 1.1 四层架构
 
-BioF3 Desktop 采用分层架构，每层有明确的职责边界：
+Petri Desktop 采用分层架构，每层有明确的职责边界：
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
@@ -131,7 +131,7 @@ Agent <-- MCP 协议 --> Skills SDK
   },
 
   "metadata": {
-    "author": "BioF3 Team",
+    "author": "Petri Team",
     "license": "MIT",
     "source": "built-in",
     "created": "2026-08-14",

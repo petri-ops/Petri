@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "constitutionId": "biof3-g0-constitution-v1",
+  "constitutionId": "petri-g0-constitution-v1",
   "appliesToBaselineMajor": 0,
   "executionTruthChain": [
     "run_tool",

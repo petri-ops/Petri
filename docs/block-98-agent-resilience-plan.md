@@ -2,11 +2,11 @@
 
 > 状态：**completed（2026-09-17 P0–P5 一次会话整包收口）**；实机 block98-resilience-live 8/8 allPass；两开关维持默认关、翻默认经用户裁决呈报中（§6 P5）；UI-401 verified
 > 立项日期：2026-09-17 · 行号基线：`8bf67dd1`（工作区另有 BLOCK-97 在制 WIP，见 §0 启动门槛）
-> 用户裁决原话：「整理成一个 BLOCK 立项候选」「要全面深挖 尽可能通过这些机制的嵌入让gewu项目变得更稳重」（2026-09-17，在「ZCode 是如何做到长任务不中断」技术解剖会话上）
+> 用户裁决原话：「整理成一个 BLOCK 立项候选」「要全面深挖 尽可能通过这些机制的嵌入让petri项目变得更稳重」（2026-09-17，在「ZCode 是如何做到长任务不中断」技术解剖会话上）
 
 ## §0 背景与启动门槛
 
-用户在本会话提出「ZCode 如何做到长任务不中断？spec？长任务编排器？」，随后裁决把 ZCode 的机制全面深挖并移植进 Gewu，让「提出需求→等待→拿到预期结果」的稳定体验落地到本产品 copilot。本会话已完成对 ZCode 本体（`zcode.cjs` 11.4MB bundle + 主库 db.sqlite 431MB + rollout 模型 IO 日志）的完整解剖，结论沉淀于 §2/§3，作为本包移植规格。
+用户在本会话提出「ZCode 如何做到长任务不中断？spec？长任务编排器？」，随后裁决把 ZCode 的机制全面深挖并移植进 Petri，让「提出需求→等待→拿到预期结果」的稳定体验落地到本产品 copilot。本会话已完成对 ZCode 本体（`zcode.cjs` 11.4MB bundle + 主库 db.sqlite 431MB + rollout 模型 IO 日志）的完整解剖，结论沉淀于 §2/§3，作为本包移植规格。
 
 **启动门槛（两条，对标 BLOCK-92 先例）**：
 
@@ -66,11 +66,11 @@
 
 | 事实 | 位置 | 与本包关系 |
 | --- | --- | --- |
-| B2 会话级 rolling compaction（**单层**，默认关 `BIOF3_SESSION_COMPACTION`）：12K token/24 条触发、保留最近 12、500 字中文摘要、`conversation_compaction` 表 covers_rowid 投影、诚实标记卡 A5 | `core/biof3-server/helpers/conversation-compaction.js`（全文 179 行已通读） | M2 的升级基座，不推倒重来 |
+| B2 会话级 rolling compaction（**单层**，默认关 `PETRI_SESSION_COMPACTION`）：12K token/24 条触发、保留最近 12、500 字中文摘要、`conversation_compaction` 表 covers_rowid 投影、诚实标记卡 A5 | `core/petri-server/helpers/conversation-compaction.js`（全文 179 行已通读） | M2 的升级基座，不推倒重来 |
 | token 估算：tiktoken cl100k（优于 ZCode 的 chars/4 估算），`countTokens/countMessages` | `helpers/token-estimator.js` | M2 阈值公式直接复用 |
 | B1 后端拼装（compaction 的架构前提） | `helpers/history-assembly.js` | M1 视图层清理挂载点 |
 | B3 cache 断链已修（ai_usage 命中率实测 96.8%） | ai_usage 表 + ai-bridge | M2 provider 真值覆盖 + M5 遥测挂点 |
-| agent 主循环 `runAgentLoop`（895 行文件）+ loop-orchestrator（1241 行门） | `core/biof3-server/agent-runner.js:316` | M3/M4 注入点；行数门零触碰（新增逻辑下沉 helpers，BLOCK-92 家法） |
+| agent 主循环 `runAgentLoop`（895 行文件）+ loop-orchestrator（1241 行门） | `core/petri-server/agent-runner.js:316` | M3/M4 注入点；行数门零触碰（新增逻辑下沉 helpers，BLOCK-92 家法） |
 | llm-transcripts 落盘机制已存在（BLOCK-95 验证数据提及「llm-transcripts 源文件」） | 待 P0 勘察确切路径与格式 | M2 「全文转写路径」指针可复用性判定 |
 | BLOCK-97 task_todo 在制（工作区 WIP）：`agent-tools/todo-tools.js` + conversationRunStore/conversationTodos.ts | 并行会话持有 | M2 摘要模板「待办任务」章节将来可引用 task_todo 状态（P0 对齐） |
 | dev-verify flow 框架 + closeout 五门 + D7/D8 例外家法 | scripts/dev-verify | M6 验收载体 |
@@ -93,7 +93,7 @@
 | D3 | 阈值公式：`ctx − min(maxOut, 21K) − buffer`，buffer 对小窗口模型缩放为 `min(13K, 8%×有效窗口)`（本仓多 provider 64K~128K 窗口，ZCode 常数按 200K 标定不能硬抄） | **公式化 + provider 真值覆盖**（ai_usage 已有真值）；固定 12K 退役 |
 | D4 | 防呆三件套 + reactive 一次做齐 vs 分期 | **一次做齐**（三者共享同一套状态机，拆开反而两次改 agent-runner） |
 | D5 | 插队队列语义：一期「下一轮请求注入」 vs ZCode 级 per-request drain | **一期下一轮注入**（产品语义已达标，drain 细粒度留评估项须有结论） |
-| D6 | 灰度开关：新增 `BIOF3_AGENT_RESILIENCE` 总开关（M1–M3），与 B2 开关关系收口时一并呈报 | **总开关默认关，收口时用户裁决翻默认**（B2「默认关待裁决」悬置一并了结） |
+| D6 | 灰度开关：新增 `PETRI_AGENT_RESILIENCE` 总开关（M1–M3），与 B2 开关关系收口时一并呈报 | **总开关默认关，收口时用户裁决翻默认**（B2「默认关待裁决」悬置一并了结） |
 | D7 | M5 遥测字段 additive 落 ai_usage 现表 vs 新表 | **现表 additive 加列**（对标 BLOCK-96 F3 错误码表先例，不建第二真相） |
 
 ## §6 分阶段计划（裁决后串行）
@@ -120,7 +120,7 @@
 - **摘要质量回归**（9 章节 vs 现 500 字要点，token 成本上升）→ 摘要 maxTokens 上限保护延续（B2 现 800，P2 重定标）；成本对账数字进收口报告。
 - **agent-runner 行数门**（1241/1250）→ M3/M4 逻辑全部下沉 `helpers/agent-resilience.js` 新文件，runner 只留接线。
 - **插队语义歧义**（用户以为立即生效）→ 排队态前端明示（「已排队，将在当前步骤后加入」），诚实可见红线。
-- **总回滚**：总开关 `BIOF3_AGENT_RESILIENCE=0` + B2 开关既有独立回滚路径，全部灰度可逆。
+- **总回滚**：总开关 `PETRI_AGENT_RESILIENCE=0` + B2 开关既有独立回滚路径，全部灰度可逆。
 
 ## §9 完成语义
 
@@ -132,6 +132,6 @@
 - **提交链**：183fd963（启动）→ 77b84029（P0 结论+P1 microcompact）→ edc81406（P2 摘要升级）→ [P3] 防呆+reactive+遥测 → [P4] 插队队列 → [P5] 本收口提交（台账/registry/roadmap/AUDIT-LOG）。
 - **门禁对账（§7）**：①契约=microcompact 7 用例（20+ 断言）+ compaction-upgrade 5（公式表驱动/legacy 兼容）+ resilience-state 8（熔断/reactive 上限/分类/裁剪边界/遥测列）全绿；②实机=block98-resilience-live **8/8 allPass**（acceptance/block-98/）——运行中 steer 端到端零丢失（模型原样复述插入标记）+ 排队可见 + 遥测四列；③红线=原文零触碰（P1 投影副本+P2 视图层，测试锁定）+ A5 兼容（B2 回归全绿）；④邻接=block97/34/93/agent-tool-registry/agent-run-tool 全绿 + tsc 0 + theme 4/4；⑤治理=docs:check/ui-audit/closeout 全绿 + 棘轮（agent-runner 接线净增~35 行，不在台账 22 文件内）。
 - **未验证范围（如实）**：reactive/熔断路径实机未触发（真超限需 98K+ token 轮次，契约测试覆盖全部分支）；microcompact 实机自动触发未达（默认 64K 窗口阈值 ~57K，契约覆盖）；composer 运行中发送自动改走 steer 未接线（登记 UI 候选）。
-- **翻默认呈报（P5）**：`BIOF3_AGENT_RESILIENCE` 现默认关；B2 `BIOF3_SESSION_COMPACTION` 悬置——两开关翻默认待用户显式裁决。
+- **翻默认呈报（P5）**：`PETRI_AGENT_RESILIENCE` 现默认关；B2 `PETRI_SESSION_COMPACTION` 悬置——两开关翻默认待用户显式裁决。
 - 遗留候选（§9 延续）：checkpoint/rewind、workflow 编排引擎、定时自动化、drain 细粒度、composer-steer 自动接线、模型跨边界回查转写。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。

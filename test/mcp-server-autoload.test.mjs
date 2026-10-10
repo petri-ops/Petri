@@ -15,7 +15,7 @@ const SERVER_PATH = resolve(__dirname, '..', 'src', 'mcp-server.js');
 
 test('mcp-server 子进程启动后 tools/list 含自动加载的插件', async () => {
   // 构造临时 pluginsDir
-  const pluginsDir = mkdtempSync(join(tmpdir(), 'biof3-mcp-e2e-'));
+  const pluginsDir = mkdtempSync(join(tmpdir(), 'petri-mcp-e2e-'));
   const pluginDir = join(pluginsDir, 'e2e-tool');
   mkdirSync(join(pluginDir, 'scripts'), { recursive: true });
   writeFileSync(join(pluginDir, 'plugin.json'), JSON.stringify({
@@ -32,9 +32,9 @@ test('mcp-server 子进程启动后 tools/list 含自动加载的插件', async 
   const transport = new StdioClientTransport({
     command: 'node',
     args: [SERVER_PATH],
-    env: { ...process.env, BIOF3_PLUGINS_DIR: pluginsDir },
+    env: { ...process.env, PETRI_PLUGINS_DIR: pluginsDir },
   });
-  const client = new Client({ name: 'biof3-mcp-test', version: '1.0.0' });
+  const client = new Client({ name: 'petri-mcp-test', version: '1.0.0' });
   await client.connect(transport);
   try {
     const { tools } = await client.listTools();

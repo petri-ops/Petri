@@ -75,7 +75,7 @@ test('BLOCK-83 D3 scientific confirmation joins the registry only through its fa
 
 test('BLOCK-83 D3 plugin-loader bridge registers the scientific hook for RS plugins (interim composition)', () => {
   hooks.__resetTaskConfirmationHooksForTest();
-  const { normalizePluginManifest } = require('../core/biof3-server/plugin-loader');
+  const { normalizePluginManifest } = require('../core/petri-server/plugin-loader');
   const pluginDir = path.join(root, 'test/fixtures/neutral-plugins/sample-metrics');
   const plugin = { ...JSON.parse(fs.readFileSync(path.join(pluginDir, 'plugin.json'))), pluginDir };
   const toolDefinition = JSON.parse(fs.readFileSync(path.join(pluginDir, 'tool-definition.json')));
@@ -85,9 +85,9 @@ test('BLOCK-83 D3 plugin-loader bridge registers the scientific hook for RS plug
 });
 
 test('BLOCK-83 D3 source gate: generic layers must not require the domain contract directly', () => {
-  const dbSource = fs.readFileSync(path.join(root, 'core/biof3-server/db.js'), 'utf8');
-  const learningSource = fs.readFileSync(path.join(root, 'core/biof3-server/agent-tools/learning.js'), 'utf8');
-  const loaderSource = fs.readFileSync(path.join(root, 'core/biof3-server/plugin-loader.js'), 'utf8');
+  const dbSource = fs.readFileSync(path.join(root, 'core/petri-server/db.js'), 'utf8');
+  const learningSource = fs.readFileSync(path.join(root, 'core/petri-server/agent-tools/learning.js'), 'utf8');
+  const loaderSource = fs.readFileSync(path.join(root, 'core/petri-server/plugin-loader.js'), 'utf8');
   assert.ok(!dbSource.includes("require('../shared-backend/scientific-task-confirmation')"), 'db.js must go through the hook registry');
   assert.ok(!learningSource.includes("require('../../shared-backend/scientific-task-confirmation')"), 'learning.js must go through the hook registry');
   assert.ok(dbSource.includes('runTaskConfirmationHooks'));

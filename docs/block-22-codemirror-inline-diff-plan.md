@@ -102,7 +102,7 @@
 |------|------|------|
 | `WorkspacePanelsContext`（panels mount/unmount） | `frontend/src/components/workspace-panels/` | ✅ |
 | `CopilotContext`（chat state + composer） | `frontend/src/components/copilot/` | ✅ |
-| 事件总线 `biof3Events.projectOpenWorkspaceFile` | `frontend/src/lib/events.ts:35` | ✅ |
+| 事件总线 `petriEvents.projectOpenWorkspaceFile` | `frontend/src/lib/events.ts:35` | ✅ |
 | **缺"跳转到行"事件** | grep `projectOpenWorkspaceFileAtLine` 0 命中 | ✅ |
 | **缺"打开审阅 diff"事件** | grep `projectReviewWorkspaceDiff` 0 命中 | ✅ |
 
@@ -226,7 +226,7 @@ frontend/src/components/editor/
 - `CodeMirrorEditor.module.css` 定义：
   - `.cm-deletedChunk` / `.cm-insertedChunk`（行级）
   - `.cm-deletedChar` / `.cm-insertedChar`（字符级）
-  - **复用 `.hljs token` 颜色变量**（不引入新 token，沿用 `styles/custom.css` 已有 `--biof3-*` token）
+  - **复用 `.hljs token` 颜色变量**（不引入新 token，沿用 `styles/custom.css` 已有 `--petri-*` token）
 - `extensions/scrollToLine.ts` API 实现（`scrollToLine(line, options)` + `pulseForDuration(3000)`），**不接业务事件**
 - `types.ts`：`DiffRevision` / `EditorApi` / `EditorMode` 类型定义落地
 - `useCodeMirrorEditor.ts` 把 `EditorApi` 通过 `forwardRef` 暴露给父组件
@@ -274,8 +274,8 @@ frontend/src/components/editor/
 
 **范围**：
 - `frontend/src/lib/events.ts` 新增：
-  - `biof3Events.projectOpenWorkspaceFileAtLine: 'biof3:project-open-workspace-file-at-line'`
-  - `biof3Events.projectReviewWorkspaceDiff: 'biof3:project-review-workspace-diff'`
+  - `petriEvents.projectOpenWorkspaceFileAtLine: 'petri:project-open-workspace-file-at-line'`
+  - `petriEvents.projectReviewWorkspaceDiff: 'petri:project-review-workspace-diff'`
 - `frontend/src/components/copilot/SimpleChat.tsx:1817` 改为 dispatch 新事件（保留 toggle 展开/折叠作为副操作）
 - `frontend/src/App.tsx` 全局监听器（跨 react-router 页面切换）：
   - 监听 `projectOpenWorkspaceFileAtLine` → 打开 `WorkspaceFilePreview` + `scrollToLine(line)` + `pulse(3000)`
@@ -408,7 +408,7 @@ frontend/src/components/editor/
 | 7 | P3 跨 react-router 页面切换事件丢失 | 🟢 | `App.tsx` 全局监听器（不在路由组件内）；`pendingScrollContext` 持久化跳转目标直到消费 |
 | 8 | `ide_file_diff` MCP 工具返回格式与 CM6 unifiedMergeView 期望格式不一致 | 🟡 | `useCodeMirrorEditor` 内做 adapter：`DiffHunk[]` → CM6 `Chunk`[]；不修改 `ide_file_diff` |
 | 9 | P2 accept/reject 后磁盘写入失败（workspace.writeTextFile 拒绝） | 🟢 | UI 显示 toast 错误；不破坏 CM6 状态；reject 清单不写入 |
-| 10 | `.cm-deletedChunk` / `.cm-insertedChunk` 与既有 `.hljs-*` token 视觉冲突 | 🟢 | P1 复用 `.hljs token 颜色变量`（`--biof3-status-warning` / `--biof3-status-success` 等已有 token），不引入新 CSS variable |
+| 10 | `.cm-deletedChunk` / `.cm-insertedChunk` 与既有 `.hljs-*` token 视觉冲突 | 🟢 | P1 复用 `.hljs token 颜色变量`（`--petri-status-warning` / `--petri-status-success` 等已有 token），不引入新 CSS variable |
 
 ---
 

@@ -23,11 +23,11 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
-const coreServerRoot = path.join(root, 'core', 'biof3-server');
+const coreServerRoot = path.join(root, 'core', 'petri-server');
 const req = createRequire(path.join(coreServerRoot, 'package.json'));
 
 // Core's better-sqlite3 — the migration-runner paths and singleton both
-// point here when BIOF3_BETTER_SQLITE3_ROOT is set.
+// point here when PETRI_BETTER_SQLITE3_ROOT is set.
 req('better-sqlite3');
 
 import { openDb, closeDb, closeAll, _reset } from '../src/database/_db-singleton.js';
@@ -35,7 +35,7 @@ import configHelper from '../core/shared-backend/config-helper.js';
 const { getBusyTimeout, setDbConfig, getDbConfig } = configHelper;
 
 function mkTmp() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-db-singleton-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-db-singleton-'));
   return dir;
 }
 
@@ -54,15 +54,15 @@ function readForeignKeys(db) {
 
 test('A-007.1 openDb(branch) returns the same instance on repeated calls', (t) => {
   const tmp = mkTmp();
-  process.env.BIOF3_LOCAL_DATA_DIR = tmp;
-  process.env.BIOF3_BETTER_SQLITE3_ROOT = coreServerRoot;
+  process.env.PETRI_LOCAL_DATA_DIR = tmp;
+  process.env.PETRI_BETTER_SQLITE3_ROOT = coreServerRoot;
   _reset();
 
   t.after(() => {
     closeAll();
     _reset();
-    delete process.env.BIOF3_LOCAL_DATA_DIR;
-    delete process.env.BIOF3_BETTER_SQLITE3_ROOT;
+    delete process.env.PETRI_LOCAL_DATA_DIR;
+    delete process.env.PETRI_BETTER_SQLITE3_ROOT;
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {}
   });
 
@@ -73,15 +73,15 @@ test('A-007.1 openDb(branch) returns the same instance on repeated calls', (t) =
 
 test('A-007.2 openDb(result) returns the same instance on repeated calls', (t) => {
   const tmp = mkTmp();
-  process.env.BIOF3_LOCAL_DATA_DIR = tmp;
-  process.env.BIOF3_BETTER_SQLITE3_ROOT = coreServerRoot;
+  process.env.PETRI_LOCAL_DATA_DIR = tmp;
+  process.env.PETRI_BETTER_SQLITE3_ROOT = coreServerRoot;
   _reset();
 
   t.after(() => {
     closeAll();
     _reset();
-    delete process.env.BIOF3_LOCAL_DATA_DIR;
-    delete process.env.BIOF3_BETTER_SQLITE3_ROOT;
+    delete process.env.PETRI_LOCAL_DATA_DIR;
+    delete process.env.PETRI_BETTER_SQLITE3_ROOT;
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {}
   });
 
@@ -92,15 +92,15 @@ test('A-007.2 openDb(result) returns the same instance on repeated calls', (t) =
 
 test('A-007.3 closeDb + reopen yields a brand new connection', (t) => {
   const tmp = mkTmp();
-  process.env.BIOF3_LOCAL_DATA_DIR = tmp;
-  process.env.BIOF3_BETTER_SQLITE3_ROOT = coreServerRoot;
+  process.env.PETRI_LOCAL_DATA_DIR = tmp;
+  process.env.PETRI_BETTER_SQLITE3_ROOT = coreServerRoot;
   _reset();
 
   t.after(() => {
     closeAll();
     _reset();
-    delete process.env.BIOF3_LOCAL_DATA_DIR;
-    delete process.env.BIOF3_BETTER_SQLITE3_ROOT;
+    delete process.env.PETRI_LOCAL_DATA_DIR;
+    delete process.env.PETRI_BETTER_SQLITE3_ROOT;
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {}
   });
 
@@ -118,15 +118,15 @@ test('A-007.3 closeDb + reopen yields a brand new connection', (t) => {
 
 test('A-007.4 closeAll closes every cached connection', (t) => {
   const tmp = mkTmp();
-  process.env.BIOF3_LOCAL_DATA_DIR = tmp;
-  process.env.BIOF3_BETTER_SQLITE3_ROOT = coreServerRoot;
+  process.env.PETRI_LOCAL_DATA_DIR = tmp;
+  process.env.PETRI_BETTER_SQLITE3_ROOT = coreServerRoot;
   _reset();
 
   t.after(() => {
     closeAll();
     _reset();
-    delete process.env.BIOF3_LOCAL_DATA_DIR;
-    delete process.env.BIOF3_BETTER_SQLITE3_ROOT;
+    delete process.env.PETRI_LOCAL_DATA_DIR;
+    delete process.env.PETRI_BETTER_SQLITE3_ROOT;
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {}
   });
 
@@ -146,8 +146,8 @@ test('A-007.4 closeAll closes every cached connection', (t) => {
 
 test('A-007.5 busy_timeout reflects getBusyTimeout() override', (t) => {
   const tmp = mkTmp();
-  process.env.BIOF3_LOCAL_DATA_DIR = tmp;
-  process.env.BIOF3_BETTER_SQLITE3_ROOT = coreServerRoot;
+  process.env.PETRI_LOCAL_DATA_DIR = tmp;
+  process.env.PETRI_BETTER_SQLITE3_ROOT = coreServerRoot;
   _reset();
 
   t.after(() => {
@@ -155,8 +155,8 @@ test('A-007.5 busy_timeout reflects getBusyTimeout() override', (t) => {
     _reset();
     // restore default config so other suites are not affected
     setDbConfig({ busyTimeoutMs: 10000 });
-    delete process.env.BIOF3_LOCAL_DATA_DIR;
-    delete process.env.BIOF3_BETTER_SQLITE3_ROOT;
+    delete process.env.PETRI_LOCAL_DATA_DIR;
+    delete process.env.PETRI_BETTER_SQLITE3_ROOT;
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {}
   });
 
@@ -177,15 +177,15 @@ test('A-007.5 busy_timeout reflects getBusyTimeout() override', (t) => {
 
 test('A-007.6 WAL journal mode is applied at open time', (t) => {
   const tmp = mkTmp();
-  process.env.BIOF3_LOCAL_DATA_DIR = tmp;
-  process.env.BIOF3_BETTER_SQLITE3_ROOT = coreServerRoot;
+  process.env.PETRI_LOCAL_DATA_DIR = tmp;
+  process.env.PETRI_BETTER_SQLITE3_ROOT = coreServerRoot;
   _reset();
 
   t.after(() => {
     closeAll();
     _reset();
-    delete process.env.BIOF3_LOCAL_DATA_DIR;
-    delete process.env.BIOF3_BETTER_SQLITE3_ROOT;
+    delete process.env.PETRI_LOCAL_DATA_DIR;
+    delete process.env.PETRI_BETTER_SQLITE3_ROOT;
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {}
   });
 
@@ -195,15 +195,15 @@ test('A-007.6 WAL journal mode is applied at open time', (t) => {
 
 test('A-007.7 openDb throws on unknown role', (t) => {
   const tmp = mkTmp();
-  process.env.BIOF3_LOCAL_DATA_DIR = tmp;
-  process.env.BIOF3_BETTER_SQLITE3_ROOT = coreServerRoot;
+  process.env.PETRI_LOCAL_DATA_DIR = tmp;
+  process.env.PETRI_BETTER_SQLITE3_ROOT = coreServerRoot;
   _reset();
 
   t.after(() => {
     closeAll();
     _reset();
-    delete process.env.BIOF3_LOCAL_DATA_DIR;
-    delete process.env.BIOF3_BETTER_SQLITE3_ROOT;
+    delete process.env.PETRI_LOCAL_DATA_DIR;
+    delete process.env.PETRI_BETTER_SQLITE3_ROOT;
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {}
   });
 
@@ -215,15 +215,15 @@ test('A-007.7 openDb throws on unknown role', (t) => {
 
 test('A-007.8 foreign_keys is enabled by openDb', (t) => {
   const tmp = mkTmp();
-  process.env.BIOF3_LOCAL_DATA_DIR = tmp;
-  process.env.BIOF3_BETTER_SQLITE3_ROOT = coreServerRoot;
+  process.env.PETRI_LOCAL_DATA_DIR = tmp;
+  process.env.PETRI_BETTER_SQLITE3_ROOT = coreServerRoot;
   _reset();
 
   t.after(() => {
     closeAll();
     _reset();
-    delete process.env.BIOF3_LOCAL_DATA_DIR;
-    delete process.env.BIOF3_BETTER_SQLITE3_ROOT;
+    delete process.env.PETRI_LOCAL_DATA_DIR;
+    delete process.env.PETRI_BETTER_SQLITE3_ROOT;
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {}
   });
 

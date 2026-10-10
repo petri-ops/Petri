@@ -19,7 +19,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const packRegistry = require('../core/shared-backend/pack-registry.js');
 const { createPackLifecycle } = require('../src/pack-lifecycle.js');
 
-const SIBLING_PACK = path.resolve(root, '..', 'gewu-pack-bio');
+const SIBLING_PACK = path.resolve(root, '..', 'petri-pack-bio');
 
 function tempDataDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'block86-packs-'));
@@ -370,6 +370,6 @@ test('BLOCK-86 contract: 兄弟仓真包声明 R/Python 运行时（跨仓协调
   const validated = packRegistry.validatePackDir(SIBLING_PACK);
   assert.equal(validated.ok, true, JSON.stringify(validated));
   const ids = validated.pack.requiresRuntimes.map((r) => r.pluginId);
-  assert.ok(ids.includes('biof3-r-runtime'), JSON.stringify(ids));
-  assert.ok(ids.includes('biof3-py-runtime'), JSON.stringify(ids));
+  assert.ok(ids.includes('petri-r-runtime'), JSON.stringify(ids));
+  assert.ok(ids.includes('petri-py-runtime'), JSON.stringify(ids));
 });

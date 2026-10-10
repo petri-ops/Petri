@@ -9,7 +9,7 @@
  *   3) Ctrl+S：立即落盘（早于 1.2s 防抖窗口，证明走快捷键链）
  *   4) 眼睛回预览：编辑器卸载、切换钮回铅笔
  *   5) 结束清理：删除验收暂存文件
- * 前置：dev Electron（9222）+ 后端（3001）+ biof3-desktop 本地项目（p_mtrawlau_7rly）。
+ * 前置：dev Electron（9222）+ 后端（3001）+ petri-desktop 本地项目（p_mtrawlau_7rly）。
  * 证据：acceptance/ui-323/ui323-live.json + ui323-*.png
  */
 const fs = require('node:fs');
@@ -17,12 +17,12 @@ const path = require('node:path');
 const http = require('node:http');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
 const PROJECT_ID = 'p_mtrawlau_7rly';
 const TARGET = `http://localhost:3000/project/${PROJECT_ID}`;
 const SCRATCH = 'ui323-autosave-check.md';
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'ui-323');
-const WORKSPACE = path.join(__dirname, '..'); // biof3-desktop 工作区根
+const WORKSPACE = path.join(__dirname, '..'); // petri-desktop 工作区根
 
 function fetchJson(url) {
   return new Promise((resolve, reject) => {

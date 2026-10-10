@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "capturedAt": "2026-09-23T12:37:20.785Z",
   "sourceCommit": "d74df78208e9c73f2fd7cc94e69325b4dc0b8725",
-  "wrapper": "core/biof3-server/helpers/decision-api.js",
+  "wrapper": "core/petri-server/helpers/decision-api.js",
   "decisionPoint": "doc-suggest（dev-time，BLOCK-118 P1）",
   "supply": "cloud",
   "result": {

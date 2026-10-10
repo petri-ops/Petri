@@ -16,7 +16,7 @@
     {
       "name": "首个 tab 已拉起独立 pty（listSessions 1 会话）",
       "pass": true,
-      "detail": "[{\"sessionId\":\"tab-1\",\"pid\":82661,\"cwd\":\"/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f\",\"running\":true}]"
+      "detail": "[{\"sessionId\":\"tab-1\",\"pid\":82661,\"cwd\":\"/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/.petri-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f\",\"running\":true}]"
     },
     {
       "name": "「新建终端标签」×2 → 3 tab 并存（tab-1/2/3）",
@@ -31,22 +31,22 @@
     {
       "name": "新 tab 默认 cwd 绑定项目 workspace",
       "pass": true,
-      "detail": "cwd=/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f"
+      "detail": "cwd=/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/.petri-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f"
     },
     {
       "name": "tab-1 输出路由正确：pwd=block52-p3-09031507-mtlnsv0f + marker-1，且不含其他 tab marker",
       "pass": true,
-      "detail": "~/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f main* ⇡ ❯ pwd && echo b54-marker-1                                                        "
+      "detail": "~/Documents/1.WorkDir/Petri-workspace/desktop/.petri-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f main* ⇡ ❯ pwd && echo b54-marker-1                                                        "
     },
     {
       "name": "tab-2 输出路由正确：pwd=block52-p3-09031507-mtlnsv0f + marker-2，且不含其他 tab marker",
       "pass": true,
-      "detail": "~/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f main* ⇡ ❯ pwd && echo b54-marker-2                                                        "
+      "detail": "~/Documents/1.WorkDir/Petri-workspace/desktop/.petri-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f main* ⇡ ❯ pwd && echo b54-marker-2                                                        "
     },
     {
       "name": "tab-3 输出路由正确：pwd=block52-p3-09031507-mtlnsv0f + marker-3，且不含其他 tab marker",
       "pass": true,
-      "detail": "~/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f main* ⇡ ❯ pwd && echo b54-marker-3                                                        "
+      "detail": "~/Documents/1.WorkDir/Petri-workspace/desktop/.petri-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f main* ⇡ ❯ pwd && echo b54-marker-3                                                        "
     },
     {
       "name": "tab-3 × 关闭按钮可点击",

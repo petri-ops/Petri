@@ -15,14 +15,14 @@ import styles from '../TitleBar.module.css';
  */
 
 // 惰性求值（不要提成模块级常量）：模块级常量在 import 时就固化，测试里通过
-// vi.stubGlobal 注入 window.biof3Desktop 发生在 import 之后，会导致这两个判定
+// vi.stubGlobal 注入 window.petriDesktop 发生在 import 之后，会导致这两个判定
 // 永远为 false、窗口控件根本不渲染，整个测试文件集体失败。
 export function getIsMac(): boolean {
-  return typeof window !== 'undefined' && window.biof3Desktop?.platform === 'darwin';
+  return typeof window !== 'undefined' && window.petriDesktop?.platform === 'darwin';
 }
 
 export function getIsDesktop(): boolean {
-  return typeof window !== 'undefined' && window.biof3Desktop?.isDesktop === true;
+  return typeof window !== 'undefined' && window.petriDesktop?.isDesktop === true;
 }
 
 /**
@@ -81,8 +81,8 @@ export function modeUsesSummaryCard(mode: WorkspaceMode): boolean {
  * UI-364 — /plugins 插件商店独立页并入同形态。
  * UI-365 — /settings 设置独立页并入同形态。
  * UI-376 — / 欢迎页并入同形态：页面自带「返回 + 问候」页头，顶栏的品牌回退
- * 标题（「Gewu」）与左区分隔线（与左栏边缘错位 ~13px 的悬空线）均无意义
- * （用户截图指认「Gewu 和旁边的灰色分隔线没有实际意义」）。
+ * 标题（「Petri」）与左区分隔线（与左栏边缘错位 ~13px 的悬空线）均无意义
+ * （用户截图指认「Petri 和旁边的灰色分隔线没有实际意义」）。
  */
 export function isStandalonePagePath(pathname: string): boolean {
   return pathname === '/' || /^\/(skills|knowledge|backend|plugins|settings)\/?$/.test(pathname);
@@ -113,13 +113,13 @@ export function handleTitleBarDoubleClick(event: React.MouseEvent<HTMLElement>):
   if (target?.closest?.('button, a, input, select, textarea, [role="button"]')) {
     return;
   }
-  const bridge = typeof window !== 'undefined' ? window.biof3Desktop : undefined;
+  const bridge = typeof window !== 'undefined' ? window.petriDesktop : undefined;
   const desktopWindow = bridge?.isDesktop === true ? bridge.window : undefined;
   desktopWindow?.toggleFullScreen?.();
 }
 
 export function useDesktopWindowControls(): DesktopWindowControls {
-  const bridge = typeof window !== 'undefined' ? window.biof3Desktop : undefined;
+  const bridge = typeof window !== 'undefined' ? window.petriDesktop : undefined;
   const desktopWindow = bridge?.isDesktop === true ? bridge.window : undefined;
   const [isMaximized, setIsMaximized] = useState<boolean>(false);
 

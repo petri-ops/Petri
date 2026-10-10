@@ -2,7 +2,7 @@
 
 > 类型：**评估报告**（非工作包、非计划、不改生产代码）
 > 评估日期：2026-09-13
-> 评估对象：`D:\1.WorkDir\biof3-desktop`（Gewu Desktop，原名 BioF3）
+> 评估对象：`D:\1.WorkDir\petri-desktop`（Petri Desktop，原名 Petri）
 > 评估时点基线：`main` @ `81069a3b`，与 `origin/main` 同步，工作区干净
 > 方法：只读侦察（Git 元数据 / 治理文档 / 门禁脚本 / 文件系统实态）
 > 阶段声明：G0 长期开发期。本报告不外推 packaged / Provider / GA。
@@ -61,7 +61,7 @@
 
 | 检查项 | 实测结果 | 判定 |
 | --- | --- | --- |
-| 远程配置 | `origin` → `https://github.com/ShengXinF3/biof3-desktop.git` | ✅ 单一远程，无冗余 |
+| 远程配置 | `origin` → `https://github.com/petri-ops/Petri.git` | ✅ 单一远程，无冗余 |
 | 上游跟踪 | `main` → `origin/main` | ✅ 正常 |
 | 领先/落后 | `0 0`（`git rev-list --left-right --count origin/main...HEAD`） | ✅ 完全同步 |
 | 工作区 | `git status --porcelain` 空 | ✅ 干净，无 untracked |
@@ -149,12 +149,12 @@ v0.0.1-rc.7   ab519fac 2026-07-21   1552 commits behind main   ← package.json 
 
 ```
 $ git ls-files --stage .claude/skills/
-120000 .claude/skills/gewu-code-review
-120000 .claude/skills/gewu-dev-infra
-120000 .claude/skills/gewu-project-governance
+120000 .claude/skills/petri-code-review
+120000 .claude/skills/petri-dev-infra
+120000 .claude/skills/petri-project-governance
 
 $ 磁盘实态
-.claude/skills/gewu-dev-infra = REGULAR FILE (内容为路径字符串)
+.claude/skills/petri-dev-infra = REGULAR FILE (内容为路径字符串)
 ```
 
 **根因**：`core.symlinks = false`（Windows 无 symlink 权限时的 Git 默认行为）—— Git 将 symlink 检出为文本文件。
@@ -162,7 +162,7 @@ $ 磁盘实态
 **验证结论：这不是缺陷**。逐项验证：
 
 1. `git status .claude/` 为空 → Git 认为工作树与索引一致（正确地按降级形态对待）
-2. 目标路径解析有效 → `../../.agents/skills/gewu-dev-infra` 存在
+2. 目标路径解析有效 → `../../.agents/skills/petri-dev-infra` 存在
 3. `SKILL.md` 可通过该路径发现 → 3/3 可发现
 4. `hygiene-check.mjs` **已经显式处理此情形**（脚本注释第 9-10 行：「Windows 无 symlink 支持时 git 会把链接检出为『内容即目标路径』的纯文本」），并正确解析目标；目标存在，故不报死链
 
@@ -314,4 +314,4 @@ python -c "..."   # 见报告正文的解析脚本
 1. **本报告不改变任何状态**。DOC-REGISTRY 未改、AUDIT-LOG 未改、未提交、未立项。
 2. **评估发现的漂移均不影响产品功能**，属治理元数据卫生问题。
 3. **G0 开发期常态** · 不外推 packaged / Provider / GA。
-4. 若用户裁决执行 A-1/A-2/A-3，需走 `$gewu-project-governance` 并在同一提交回写台账。
+4. 若用户裁决执行 A-1/A-2/A-3，需走 `$petri-project-governance` 并在同一提交回写台账。

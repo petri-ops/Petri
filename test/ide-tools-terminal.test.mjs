@@ -12,7 +12,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const CORE = resolve(__dirname, '..', 'core', 'biof3-server');
+const CORE = resolve(__dirname, '..', 'core', 'petri-server');
 
 // BLOCK-104 增量 — 环境门：node-pty 的 conpty agent 在 node --test 无控制台
 // 上下文下 AttachConsole failed（require 期即抛，Windows 测试环境限制，
@@ -39,14 +39,14 @@ const terminal = await import(
 );
 
 test('ide_terminal_create + write + read + list + close', { skip: PTY_UNAVAILABLE }, async () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-term-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-term-`);
   const create = H.ide_terminal_create({ cwd: tmp, name: 't1' });
   assert.equal(create.ok, true, `create failed: ${create.error}`);
   const sessionId = create.sessionId;
 
-  const write = H.ide_terminal_write({ sessionId, command: 'echo biof3-ide-test\r\n' });
+  const write = H.ide_terminal_write({ sessionId, command: 'echo petri-ide-test\r\n' });
   assert.equal(write.ok, true);
-  assert.equal(write.written, 'echo biof3-ide-test\r\n'.length);
+  assert.equal(write.written, 'echo petri-ide-test\r\n'.length);
 
   // wait for PTY output to flow back into buffer
   await new Promise((r) => setTimeout(r, 350));
@@ -54,7 +54,7 @@ test('ide_terminal_create + write + read + list + close', { skip: PTY_UNAVAILABL
   const read = H.ide_terminal_read({ sessionId });
   assert.equal(read.ok, true);
   assert.ok(typeof read.text === 'string');
-  assert.ok(read.text.includes('biof3-ide-test'), `expected output to contain token, got: ${read.text}`);
+  assert.ok(read.text.includes('petri-ide-test'), `expected output to contain token, got: ${read.text}`);
 
   const list = H.ide_terminal_list();
   assert.equal(list.ok, true);
@@ -68,7 +68,7 @@ test('ide_terminal_create + write + read + list + close', { skip: PTY_UNAVAILABL
 });
 
 test('ide_terminal_close requires confirm=true', { skip: PTY_UNAVAILABLE }, () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-term-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-term-`);
   const create = H.ide_terminal_create({ cwd: tmp });
   assert.equal(create.ok, true);
   const noConfirm = H.ide_terminal_close({ sessionId: create.sessionId });
@@ -79,7 +79,7 @@ test('ide_terminal_close requires confirm=true', { skip: PTY_UNAVAILABLE }, () =
 });
 
 test('ide_terminal_write rejects oversized command', { skip: PTY_UNAVAILABLE }, () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-term-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-term-`);
   const create = H.ide_terminal_create({ cwd: tmp });
   assert.equal(create.ok, true);
   const longCmd = 'x'.repeat(10000);

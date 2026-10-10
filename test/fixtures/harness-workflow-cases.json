@@ -14,7 +14,7 @@
           "result": {
             "artifactTruth": { "status": "valid", "validCount": 1 },
             "artifacts": [
-              { "id": "deg_table", "type": "table", "canonicalPath": "/work/biof3/results/deg.csv" }
+              { "id": "deg_table", "type": "table", "canonicalPath": "/work/petri/results/deg.csv" }
             ]
           }
         }
@@ -24,7 +24,7 @@
           "fromStepId": "differential",
           "toStepId": "deg-standardization",
           "inputId": "deg_results",
-          "artifact": { "id": "deg_table", "type": "table", "canonicalPath": "/work/biof3/results/deg.csv" },
+          "artifact": { "id": "deg_table", "type": "table", "canonicalPath": "/work/petri/results/deg.csv" },
           "artifactTruth": { "status": "valid" }
         }
       ],
@@ -48,7 +48,7 @@
           "result": {
             "artifactTruth": { "status": "valid", "validCount": 1 },
             "artifacts": [
-              { "id": "deg_table", "type": "table", "canonicalPath": "/work/biof3/results/deg.csv" }
+              { "id": "deg_table", "type": "table", "canonicalPath": "/work/petri/results/deg.csv" }
             ]
           }
         },
@@ -60,7 +60,7 @@
           "result": {
             "artifactTruth": { "status": "valid", "validCount": 1 },
             "artifacts": [
-              { "id": "deg_standardized", "type": "table", "canonicalPath": "/work/biof3/results/deg_standardized.csv" }
+              { "id": "deg_standardized", "type": "table", "canonicalPath": "/work/petri/results/deg_standardized.csv" }
             ]
           }
         }
@@ -70,21 +70,21 @@
           "fromStepId": "differential",
           "toStepId": "deg-standardization",
           "inputId": "deg_results",
-          "artifact": { "id": "deg_table", "type": "table", "canonicalPath": "/work/biof3/results/deg.csv" },
+          "artifact": { "id": "deg_table", "type": "table", "canonicalPath": "/work/petri/results/deg.csv" },
           "artifactTruth": { "status": "valid" }
         },
         {
           "fromStepId": "deg-standardization",
           "toStepId": "volcano",
           "inputId": "deg_table",
-          "artifact": { "id": "deg_standardized", "type": "table", "canonicalPath": "/work/biof3/results/deg_standardized.csv" },
+          "artifact": { "id": "deg_standardized", "type": "table", "canonicalPath": "/work/petri/results/deg_standardized.csv" },
           "artifactTruth": { "status": "valid" }
         },
         {
           "fromStepId": "deg-standardization",
           "toStepId": "enrichment",
           "inputId": "deg_table",
-          "artifact": { "id": "deg_standardized", "type": "table", "canonicalPath": "/work/biof3/results/deg_standardized.csv" },
+          "artifact": { "id": "deg_standardized", "type": "table", "canonicalPath": "/work/petri/results/deg_standardized.csv" },
           "artifactTruth": { "status": "valid" }
         }
       ],
@@ -180,7 +180,7 @@
           "result": {
             "artifactTruth": { "status": "valid", "validCount": 1 },
             "artifacts": [
-              { "id": "deg_table", "type": "table", "canonicalPath": "/work/biof3/results/deg.csv" }
+              { "id": "deg_table", "type": "table", "canonicalPath": "/work/petri/results/deg.csv" }
             ]
           }
         },
@@ -192,7 +192,7 @@
           "result": {
             "artifactTruth": { "status": "valid", "validCount": 1 },
             "artifacts": [
-              { "id": "deg_standardized", "type": "table", "canonicalPath": "/work/biof3/results/deg_std.csv" }
+              { "id": "deg_standardized", "type": "table", "canonicalPath": "/work/petri/results/deg_std.csv" }
             ]
           }
         }
@@ -202,21 +202,21 @@
           "fromStepId": "differential",
           "toStepId": "deg-standardization",
           "inputId": "deg_results",
-          "artifact": { "id": "deg_table", "type": "table", "canonicalPath": "/work/biof3/results/deg.csv" },
+          "artifact": { "id": "deg_table", "type": "table", "canonicalPath": "/work/petri/results/deg.csv" },
           "artifactTruth": { "status": "valid" }
         },
         {
           "fromStepId": "deg-standardization",
           "toStepId": "volcano",
           "inputId": "deg_table",
-          "artifact": { "id": "deg_standardized", "type": "table", "canonicalPath": "/work/biof3/results/deg_std.csv" },
+          "artifact": { "id": "deg_standardized", "type": "table", "canonicalPath": "/work/petri/results/deg_std.csv" },
           "artifactTruth": { "status": "valid" }
         },
         {
           "fromStepId": "deg-standardization",
           "toStepId": "enrichment",
           "inputId": "deg_table",
-          "artifact": { "id": "deg_standardized", "type": "table", "canonicalPath": "/work/biof3/results/deg_std.csv" },
+          "artifact": { "id": "deg_standardized", "type": "table", "canonicalPath": "/work/petri/results/deg_std.csv" },
           "artifactTruth": { "status": "valid" }
         }
       ],
@@ -240,7 +240,7 @@
           "result": {
             "artifactTruth": { "status": "valid", "validCount": 1 },
             "artifacts": [
-              { "id": "module_assignment", "type": "table", "canonicalPath": "/work/biof3/results/module_assignment.csv" }
+              { "id": "module_assignment", "type": "table", "canonicalPath": "/work/petri/results/module_assignment.csv" }
             ]
           }
         }
@@ -250,7 +250,7 @@
           "fromStepId": "coexpression",
           "toStepId": "enrichment",
           "inputId": "deg_table",
-          "artifact": { "id": "module_assignment", "type": "table", "canonicalPath": "/work/biof3/results/module_assignment.csv" },
+          "artifact": { "id": "module_assignment", "type": "table", "canonicalPath": "/work/petri/results/module_assignment.csv" },
           "artifactTruth": { "status": "valid" }
         }
       ],

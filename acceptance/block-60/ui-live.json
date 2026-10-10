@@ -31,7 +31,7 @@
     {
       "name": "执行目标选择持久化",
       "pass": true,
-      "detail": "chip 显示 dell（localStorage biof3.executionTargetId=tgt_d0e2ece166bd）"
+      "detail": "chip 显示 dell（localStorage petri.executionTargetId=tgt_d0e2ece166bd）"
     }
   ],
   "allPass": true,

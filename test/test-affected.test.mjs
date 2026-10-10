@@ -10,7 +10,7 @@ test('impact map validates and classifies the current script inventory', () => {
 });
 
 test('result studio backend changes select one deduplicated domain bundle', () => {
-  const plan = resolveImpact(['core/shared-backend/result-edit-intent.js', 'core/shared-backend/result-edit-controls.js', 'core/biof3-server/routes/result-studio.js']);
+  const plan = resolveImpact(['core/shared-backend/result-edit-intent.js', 'core/shared-backend/result-edit-controls.js', 'core/petri-server/routes/result-studio.js']);
   assert.deepEqual(plan.unknown, []);
   assert.equal(new Set(plan.tests).size, plan.tests.length);
   assert.ok(plan.tests.includes('test/result-edit-intent.test.mjs'));
@@ -56,9 +56,9 @@ test('SDC1 scripts have one maintained classification and select the focused gat
 
 test('Result Studio Agent production wiring selects binding and prompt regressions', () => {
   for (const file of [
-    'core/biof3-server/agent-runner.js',
-    'core/biof3-server/routes/ai-agent.js',
-    'core/biof3-server/helpers/system-prompt.js',
+    'core/petri-server/agent-runner.js',
+    'core/petri-server/routes/ai-agent.js',
+    'core/petri-server/helpers/system-prompt.js',
   ]) {
     const plan = resolveImpact([file]);
     assert.deepEqual(plan.unknown, []);
@@ -74,7 +74,7 @@ test('low-level Git and interceptor changes keep their domain-specific test scop
     assert.ok(plan.tests.includes('test/git-adapter.test.mjs'));
     assert.ok(!plan.tests.includes('test/p4r-invariants.test.mjs'));
   }
-  const interceptor = resolveImpact(['core/biof3-server/agent-tools/agent-tool-interceptor.js']);
+  const interceptor = resolveImpact(['core/petri-server/agent-tools/agent-tool-interceptor.js']);
   assert.deepEqual(interceptor.unknown, []);
   assert.ok(interceptor.tests.includes('test/agent-tool-policy.test.mjs'));
   assert.ok(interceptor.tests.includes('test/result-studio-agent-binding.test.mjs'));

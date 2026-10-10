@@ -22,9 +22,9 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block88-p3-'));
-process.env.BIOF3_DB_PATH = path.join(tempDir, 'block88-p3.db');
-process.env.BIOF3_LOCAL_DATA_DIR = path.join(tempDir, 'data');
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block88-p3-'));
+process.env.PETRI_DB_PATH = path.join(tempDir, 'block88-p3.db');
+process.env.PETRI_LOCAL_DATA_DIR = path.join(tempDir, 'data');
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(__dirname, '..');
@@ -33,8 +33,8 @@ const { runMigrations } = require(path.join(ROOT, 'src/migration-runner.js'));
 await runMigrations(path.join(tempDir, 'block88-p3.db'), path.join(ROOT, 'src', 'migrations'));
 
 const grants = require(path.join(ROOT, 'core/shared-backend/federation-grants.js'));
-const { buildMobileGateway } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/index.js'));
-const { getStores, resetStoresForTest } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/pairing.js'));
+const { buildMobileGateway } = require(path.join(ROOT, 'core/petri-server/mobile-gateway/index.js'));
+const { getStores, resetStoresForTest } = require(path.join(ROOT, 'core/petri-server/mobile-gateway/pairing.js'));
 
 function listen(app) {
   return new Promise((resolve) => {
@@ -74,7 +74,7 @@ test('BLOCK-88 P3: grants store — idempotent grant, check, revoke, honest nega
 });
 
 test('BLOCK-88 P3: host admin REST — list with project names, grant, revoke (404 on double)', async () => {
-  const db = require(path.join(ROOT, 'core/biof3-server/db.js')).getDatabase();
+  const db = require(path.join(ROOT, 'core/petri-server/db.js')).getDatabase();
   db.prepare("INSERT INTO projects (id, name, status, created_at, updated_at) VALUES ('p_grant_me', '授权演示项目', 'active', ?, ?)")
     .run(new Date().toISOString(), new Date().toISOString());
 
@@ -82,7 +82,7 @@ test('BLOCK-88 P3: host admin REST — list with project names, grant, revoke (4
   const app = express();
   // 注意：不挂 app 级 express.json——admin 路由自带路由级 json（双重解析会
   // 消费已耗尽的 stream → 500，federation.test.mjs 同款先例警告）。
-  require(path.join(ROOT, 'core/biof3-server/routes/federation-admin.js'))(app, { dataDir: path.join(tempDir, 'grants-admin') });
+  require(path.join(ROOT, 'core/petri-server/routes/federation-admin.js'))(app, { dataDir: path.join(tempDir, 'grants-admin') });
   const server = await listen(app);
   const base = `http://127.0.0.1:${server.address().port}`;
   try {

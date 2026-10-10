@@ -24,7 +24,7 @@
 
 const path = require('node:path');
 const fs = require('node:fs');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'ui-373');
@@ -92,7 +92,7 @@ async function waitFor(client, predicate, timeoutMs = 12000) {
   const draftSnapshot = JSON.parse(await lib.evalJs(client, `(function(){
     var out={};
     for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);
-      if(k.indexOf('gewu:composer-draft:')===0) out[k]=localStorage.getItem(k);}
+      if(k.indexOf('petri:composer-draft:')===0) out[k]=localStorage.getItem(k);}
     return JSON.stringify(out);})()`));
   await lib.evalJs(client, `(function(){
     Object.keys(${JSON.stringify(draftSnapshot)}).forEach(function(k){localStorage.removeItem(k);});

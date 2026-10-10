@@ -15,9 +15,9 @@
 
 | 事实 | 位置 | 状态 |
 | --- | --- | --- |
-| gateway 文件面接口 `list/read/write/stat/mkdir/mv/rm`，local+ssh 双后端已实现 | `core/biof3-server/helpers/workspace-gateway.js:96-158（ssh）/242-278（local）` | ✅ 就绪 |
-| node-agent fs verbs（POSIX shell，版本哈希 ensureAgent 自动部署） | `core/biof3-server/helpers/remote-execution/node-agent.js` | ✅ 就绪，缺 `fs_cp` |
-| REST 仅有 tree/file 读 + SSH PUT 写 + import/upload | `core/biof3-server/routes/files.js` | ❌ 无 move/copy/delete/mkdir 暴露 |
+| gateway 文件面接口 `list/read/write/stat/mkdir/mv/rm`，local+ssh 双后端已实现 | `core/petri-server/helpers/workspace-gateway.js:96-158（ssh）/242-278（local）` | ✅ 就绪 |
+| node-agent fs verbs（POSIX shell，版本哈希 ensureAgent 自动部署） | `core/petri-server/helpers/remote-execution/node-agent.js` | ✅ 就绪，缺 `fs_cp` |
+| REST 仅有 tree/file 读 + SSH PUT 写 + import/upload | `core/petri-server/routes/files.js` | ❌ 无 move/copy/delete/mkdir 暴露 |
 | 前端文件树纯只读（每行 button，点击=预览/展开），无右键菜单/拖拽/删除入口 | `frontend/src/pages/project-workspace/FileTreeItem.tsx` / `RightFileTree.tsx` | ❌ 待建 |
 | 路径安全 `safeJoinUnder`+realpath（local）/ `safeRemoteJoin`（ssh） | `routes/files.js:85-96` / `workspace-gateway.js:23-33` | ✅ 就绪 |
 | 刷新机制：local 2s 轮询 + `projectWorkspaceChanged` 事件 + 手动刷新 | `RightFileTree.tsx:106-128` | ✅ 就绪 |
@@ -30,7 +30,7 @@
 - **D3 删除语义统一**：确认后直接删除（用户裁决「不要有区分」→ 不引入本地回收站 `shell.trashItem` 特例通道；远程本无回收站）。EPERM/EBUSY（文件被占用）等错误如实上报。
 - **D4 冲突语义单一**：服务端目标已存在 → `409` 拒绝；拖拽等批量场景由前端预检目录清单自动 `-2` 后缀（对齐 `copyImportWithoutOverwrite` 房风），服务端不隐藏冲突。
 - **D5 交互形态**：行级右键上下文菜单（重命名/移动/复制/删除/新建文件夹）+ HTML5 拖拽（拖到目录=移动，Ctrl+拖=复制）；删除需确认弹层。
-- **D6 刷新走既有事件**：操作成功后 `dispatchGewuEvent(projectWorkspaceChanged)`，不建第二套文件变更真相（BLOCK-68 红线延续）。
+- **D6 刷新走既有事件**：操作成功后 `dispatchPetriEvent(projectWorkspaceChanged)`，不建第二套文件变更真相（BLOCK-68 红线延续）。
 - **D7 投影手机端桌面-only 先行**：REST 端点天然可后续接 mobile gateway，本期不做投影文件树（uninstall-plan 桌面-only 先例）。
 
 ## 3. 范围
@@ -50,7 +50,7 @@
 5. 组件测试（`*.test.tsx`，mock gotcha 遵循 endsWith 匹配纪律）+ `docs/ui-productization-audit.md` UI-378 登记。
 
 ### P3 实机验收 + 收口
-1. dev-verify flow `workspace-file-ops` 登记（`.agents/skills/gewu-dev-infra/dev-verify/`）。
+1. dev-verify flow `workspace-file-ops` 登记（`.agents/skills/petri-dev-infra/dev-verify/`）。
 2. 实机断言链：本地项目 mkdir→（写文件）→move→copy→delete 全链 + 树刷新事件生效 + 409 冲突；证据 `acceptance/block-89/`。
 3. 远程（ssh）证据等级：契约测试覆盖双后端同构语义；真节点（aliyun/dell，BLOCK-67 资产）可达则加实机远程链，不可达则如实登记「ssh 面以契约为证」。
 4. 收口门禁：hygiene + docs:check + ui:audit:check + test:changed（fail-fast 聚合）。

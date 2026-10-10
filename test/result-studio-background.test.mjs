@@ -9,7 +9,7 @@ import { after, test } from 'node:test';
 
 const require = createRequire(import.meta.url);
 const Database = require(require.resolve('better-sqlite3', {
-  paths: [path.resolve('core/biof3-server'), path.resolve('.')],
+  paths: [path.resolve('core/petri-server'), path.resolve('.')],
 }));
 const {
   backgroundChildForkOptions,
@@ -68,11 +68,11 @@ async function waitForReplacementGeneration(ctx, timeoutMs = 70_000) {
 }
 
 function fixture() {
-  const root = mkdtempSync(path.join(tmpdir(), 'biof3-rs-background-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-rs-background-'));
   roots.push(root);
   const workspaceRoot = path.join(root, 'workspace');
   mkdirSync(path.join(workspaceRoot, 'results'), { recursive: true });
-  const databasePath = path.join(root, 'biof3.db');
+  const databasePath = path.join(root, 'petri.db');
   const sqlite = new Database(databasePath);
   sqlite.pragma('journal_mode = WAL');
   sqlite.pragma('busy_timeout = 10000');
@@ -292,7 +292,7 @@ test('P6 recovery runs in the canonical background child and closes incomplete r
     changeSetId: 'cs_background_interrupted',
     projectId: ctx.projectId,
     baseCommit: '0'.repeat(40),
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_background_interrupted',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_background_interrupted',
     createdBy: 'agent',
   });
   ctx.repository.transitionChangeSet({ changeSetId: 'cs_background_interrupted', to: 'running' });
@@ -333,7 +333,7 @@ test('P6 background recovery leaves a current-runtime operation untouched', asyn
     changeSetId: 'cs_background_active',
     projectId: ctx.projectId,
     baseCommit: '0'.repeat(40),
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_background_active',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_background_active',
     createdBy: 'agent',
   });
   ctx.repository.transitionChangeSet({ changeSetId: 'cs_background_active', to: 'running' });

@@ -4,7 +4,7 @@
     {
       "id": "fixture-discovery-mechanism",
       "pass": true,
-      "detail": "产物列表机制确认为「manifest 声明 + 磁盘扫描合并」：status 端点每次请求重跑 reconcileToolJobArtifacts（core/biof3-server/routes/tools-metadata.js:175-181）→ listActualFiles readdirSync 扫描结果目录，未声明磁盘文件以 _source:'disk' 追加（core/biof3-server/helpers/artifact-truth.js:320-322,167-175）→ 签名变化即回写 DB（tools-metadata.js:152-160）→ 文件端点 declaredResultFilenames 放行（core/biof3-server/helpers/tools-executor/result-files.js:9,122-129）→ 前端 collectArtifacts 把 result.artifacts 合并进 manifest 列表（frontend/src/lib/result-manifest.ts:140-152）。实测：向 job 输出目录写入三 fixture 后 curl status，artifact 数 5→8（report-notes.md[text]/sample-matrix.xlsx[table]/spec-sheet.pdf[plot] 全部被发现），artifactTruth.status=valid 未阻断；未改 manifest.json、未走『替换既有产物』手法。"
+      "detail": "产物列表机制确认为「manifest 声明 + 磁盘扫描合并」：status 端点每次请求重跑 reconcileToolJobArtifacts（core/petri-server/routes/tools-metadata.js:175-181）→ listActualFiles readdirSync 扫描结果目录，未声明磁盘文件以 _source:'disk' 追加（core/petri-server/helpers/artifact-truth.js:320-322,167-175）→ 签名变化即回写 DB（tools-metadata.js:152-160）→ 文件端点 declaredResultFilenames 放行（core/petri-server/helpers/tools-executor/result-files.js:9,122-129）→ 前端 collectArtifacts 把 result.artifacts 合并进 manifest 列表（frontend/src/lib/result-manifest.ts:140-152）。实测：向 job 输出目录写入三 fixture 后 curl status，artifact 数 5→8（report-notes.md[text]/sample-matrix.xlsx[table]/spec-sheet.pdf[plot] 全部被发现），artifactTruth.status=valid 未阻断；未改 manifest.json、未走『替换既有产物』手法。"
     },
     {
       "id": "fixture-file-serving",
@@ -44,7 +44,7 @@
     {
       "id": "pdf-render-environment-incident",
       "pass": true,
-      "detail": "走查过程如实记录：本机长跑 dev Electron 会话（10/3 启动）pdfjs page.render 永久悬挂（组件状态『渲染中 0/1 页』，无任何 console/Log 报错；已知好产物 volcano.pdf 同样悬挂，与 fixture 无关）。对照实验定位根因：同二进制裸实例（无 CSP）57ms 渲染成功；裸实例注入同款 app CSP 头仍 222ms 成功（排除 CSP/eval/FontFace：isEvalSupported:false、disableFontFace:true 均仍悬挂）；真实 app 代码+全新 Chromium profile 渲染成功（组件 canvas=1）；同 profile --disable-gpu 渲染成功。最终定位：老化 .biof3-dev-user-data profile 的 Local State 中 GPU 偏好/规避状态使 pdfjs GPU 光栅化路径楔死；移除 Local State 后 GPU 正常渲染（canvas=1『共 1 页』），备份存 /tmp/walk142-localstate.bak。属环境级退化，非 BLOCK-142 三 viewer 实现缺陷；最终走查证据全部取自修复后的真实 app 实例。"
+      "detail": "走查过程如实记录：本机长跑 dev Electron 会话（10/3 启动）pdfjs page.render 永久悬挂（组件状态『渲染中 0/1 页』，无任何 console/Log 报错；已知好产物 volcano.pdf 同样悬挂，与 fixture 无关）。对照实验定位根因：同二进制裸实例（无 CSP）57ms 渲染成功；裸实例注入同款 app CSP 头仍 222ms 成功（排除 CSP/eval/FontFace：isEvalSupported:false、disableFontFace:true 均仍悬挂）；真实 app 代码+全新 Chromium profile 渲染成功（组件 canvas=1）；同 profile --disable-gpu 渲染成功。最终定位：老化 .petri-dev-user-data profile 的 Local State 中 GPU 偏好/规避状态使 pdfjs GPU 光栅化路径楔死；移除 Local State 后 GPU 正常渲染（canvas=1『共 1 页』），备份存 /tmp/walk142-localstate.bak。属环境级退化，非 BLOCK-142 三 viewer 实现缺陷；最终走查证据全部取自修复后的真实 app 实例。"
     }
   ],
   "screenshots": [
@@ -53,6 +53,6 @@
     "acceptance/block-142/pdf-viewer.png"
   ],
   "allPass": true,
-  "sideEffects": "① fixture 三件写入 job 输出目录 .biof3-dev-user-data/data/projects/block138-f1-verify-163053-mus4u230/results/jobs/tj_mus4vpzy_ztwn/（report-notes.md=含 GFM 表格+双 XSS 探针、sample-matrix.xlsx=exceljs 双工作表『概览』6×3+『全量』215×55、spec-sheet.pdf=手craft 单页 PDF）；生成脚本在 /tmp/block142-fixture-gen.mjs，未入仓库；产物一旦随该 job 清理会一并消失。② 重启了 dev Electron：原 10/3 启动的实例 pdfjs 渲染楔死已 kill；诊断中先后以裸实例（/tmp/electron-repro，独立 userData，已退）与真实代码+全新 profile 实例（已退）做对照；期间清除了 .biof3-dev-user-data 的可再生缓存（Cache/Code Cache/GPUCache/DawnGraphiteCache/DawnWebGPUCache/Shared Dictionary）并移除 Local State（备份 /tmp/walk142-localstate.bak），Cookies/Local Storage/data/biof3.db 未动。③ 当前 9222 上留有一个直启的真实 app 实例（同 profile、GPU 正常、pdf 渲染正常，token=walk142-heal），dev-launch-token.json 已同步登记；下次 npm run dev:electron 按 wrapper 既有语义接管。④ 新增文件仅 acceptance/block-142/（本 JSON+三截图）；git 工作树其余与任务开始时一致，未改 docs/**、src/**、core/**、无关 test/**，未 commit。",
+  "sideEffects": "① fixture 三件写入 job 输出目录 .petri-dev-user-data/data/projects/block138-f1-verify-163053-mus4u230/results/jobs/tj_mus4vpzy_ztwn/（report-notes.md=含 GFM 表格+双 XSS 探针、sample-matrix.xlsx=exceljs 双工作表『概览』6×3+『全量』215×55、spec-sheet.pdf=手craft 单页 PDF）；生成脚本在 /tmp/block142-fixture-gen.mjs，未入仓库；产物一旦随该 job 清理会一并消失。② 重启了 dev Electron：原 10/3 启动的实例 pdfjs 渲染楔死已 kill；诊断中先后以裸实例（/tmp/electron-repro，独立 userData，已退）与真实代码+全新 profile 实例（已退）做对照；期间清除了 .petri-dev-user-data 的可再生缓存（Cache/Code Cache/GPUCache/DawnGraphiteCache/DawnWebGPUCache/Shared Dictionary）并移除 Local State（备份 /tmp/walk142-localstate.bak），Cookies/Local Storage/data/petri.db 未动。③ 当前 9222 上留有一个直启的真实 app 实例（同 profile、GPU 正常、pdf 渲染正常，token=walk142-heal），dev-launch-token.json 已同步登记；下次 npm run dev:electron 按 wrapper 既有语义接管。④ 新增文件仅 acceptance/block-142/（本 JSON+三截图）；git 工作树其余与任务开始时一致，未改 docs/**、src/**、core/**、无关 test/**，未 commit。",
   "generatedAt": "2026-10-05T16:20:00+08:00"
 }

@@ -1,4 +1,4 @@
-# Gewu Desktop UI / 使用体验评估报告
+# Petri Desktop UI / 使用体验评估报告
 
 - **评估日期**：2026-10-10
 - **评估范围**：`frontend/src/`（253 个 `.tsx` / 约 36.7k 行，70 个 `.css` / 约 29.6k 行）
@@ -15,7 +15,7 @@
 但存在**三个结构性问题**，它们不是"细节没做好"，而是地基与入口出了故障：
 
 1. **键盘用户几乎无法使用主区**——Tab 键连按 50 次全部困在左栏项目树内，主区聊天输入框完全不可达（P0，实机复现）
-2. **间距 token 形同虚设**——定义了 6 档 `--gewu-space-*`，全仓仅 **2 处**引用，裸px 间距 **1718 处**（P1）
+2. **间距 token 形同虚设**——定义了 6 档 `--petri-space-*`，全仓仅 **2 处**引用，裸px 间距 **1718 处**（P1）
 3. **Cmd+K 是一个死功能**——快捷键全局劫持了，但命令列表传的是空数组，用户按下必得空面板（P0）
 
 外加一条**零风险高收益**优化：`CommandPalette.tsx:10` 误引入 4312 行聊天 CSS 污染首屏，删一行可让首屏 CSS 从 391KB 降到约 150KB。
@@ -28,7 +28,7 @@
 
 | 文件:行号 | 问题 | 影响 | 改进建议 |
 |---|---|---|---|
-| `styles/global.css:38-43` | 定义 6 档 `--gewu-space-1..6`（4/6/8/12/16/24px），全仓 `var(--gewu-space-*)` 仅 **2 处**引用；裸 px 间距（padding/margin/gap）**1718 处** | 高 | 这是间距不一致的**根因**。档外高频值：10px×150、5px×102、3px×75、7px×55、14px×52、9px×24。建议先做一轮机械替换：把能对齐到档位的值（10→12、14→16、9→8、7→8）批量归一，剩余零碎值保留但登记清单 |
+| `styles/global.css:38-43` | 定义 6 档 `--petri-space-1..6`（4/6/8/12/16/24px），全仓 `var(--petri-space-*)` 仅 **2 处**引用；裸 px 间距（padding/margin/gap）**1718 处** | 高 | 这是间距不一致的**根因**。档外高频值：10px×150、5px×102、3px×75、7px×55、14px×52、9px×24。建议先做一轮机械替换：把能对齐到档位的值（10→12、14→16、9→8、7→8）批量归一，剩余零碎值保留但登记清单 |
 | `pages/project-workspace.module.css`（7642 行） | 单文件承载全部工作区样式，含 `@media` 断点 20+ 处 | 中 | 拆分建议：按面板（left/center/right）拆为3 个 module，避免任何局部改动都要加载全文 |
 
 ### 1.2 层级：z-index 军备竞赛（影响：高）
@@ -41,20 +41,20 @@
 
 | 文件:行号 | 问题 | 影响 | 改进建议 |
 |---|---|---|---|
-| `styles/custom.css:88-89` | `--gewu-text-muted: #a1a1aa`（亮）on 白 = **2.56:1**；暗色 `#6b7689` on `#111a2e` = **3.78:1**，均低于 4.5:1 | 高 | 见第二节，这是被用作正文色 92 处的系统性问题 |
-| `styles/custom.css:220-221` | 暗色 `--gewu-surface-dim` 与 `--gewu-bg-surface` 同为 `#111a2e`，消除双暗底分叉——UI-392 历史问题**已修复** | 已达标 | 无需处理，登记为正面案例 |
-| 全仓 CSS | 457 处 hex 颜色，TSX 内 21 处硬编码色；多数走 `var(--gewu-*, fallback)` 模式 | 低 | 模式健康，硬编码量可控 |
+| `styles/custom.css:88-89` | `--petri-text-muted: #a1a1aa`（亮）on 白 = **2.56:1**；暗色 `#6b7689` on `#111a2e` = **3.78:1**，均低于 4.5:1 | 高 | 见第二节，这是被用作正文色 92 处的系统性问题 |
+| `styles/custom.css:220-221` | 暗色 `--petri-surface-dim` 与 `--petri-bg-surface` 同为 `#111a2e`，消除双暗底分叉——UI-392 历史问题**已修复** | 已达标 | 无需处理，登记为正面案例 |
+| 全仓 CSS | 457 处 hex 颜色，TSX 内 21 处硬编码色；多数走 `var(--petri-*, fallback)` 模式 | 低 | 模式健康，硬编码量可控 |
 | `styles/custom.css` | **色板化执行良好**：主色阶 50–900 + `*-lightest/light/dark` 派生阶共 40+ 变体；状态色（success/warning/error/info/online/loading/offline）、图表系列色、终端 ANSI 色均已成体系 | 已达标 | 建议补一条 token 契约测试，冻结"调色板只增不改" |
-| `styles/custom.css` 各强调色（blue/violet/rose/amber） | **色阶塌缩**：每个强调色只有 `--gewu-accent` + `-soft` + `-bg` + `-hover` 4 个派生，而 teal 主色有 40+ 档。同一套组件在非 teal 主题下色阶层次明显不足 | 中 | 为其余 4 个强调色补 `-surface`/`-border`/`-emphasis` 等常用派生，否则暗色模式下 rose/amber 档会因亮度不足而失真 |
+| `styles/custom.css` 各强调色（blue/violet/rose/amber） | **色阶塌缩**：每个强调色只有 `--petri-accent` + `-soft` + `-bg` + `-hover` 4 个派生，而 teal 主色有 40+ 档。同一套组件在非 teal 主题下色阶层次明显不足 | 中 | 为其余 4 个强调色补 `-surface`/`-border`/`-emphasis` 等常用派生，否则暗色模式下 rose/amber 档会因亮度不足而失真 |
 
 ### 1.4 排版（影响：低，总体达标）
 
 | 指标 | 数值 | 判定 |
 |---|---|---|
-| `var(--gewu-font-size-*)` 引用 | **923 处** | 达标 |
+| `var(--petri-font-size-*)` 引用 | **923 处** | 达标 |
 | 裸 `font-size: Npx` | **112 处**（12px×46、11px×29、10px×11） | 低优先级收尾 |
 
-字号 token 化率 89%，排版一致性是本项目做得最好的维度之一，不建议夸大成问题。零碎裸值集中在小字号场景（徽标/角标），逐一替换为 `--gewu-font-size-xs/sm` 即可。
+字号 token 化率 89%，排版一致性是本项目做得最好的维度之一，不建议夸大成问题。零碎裸值集中在小字号场景（徽标/角标），逐一替换为 `--petri-font-size-xs/sm` 即可。
 
 ### 1.5 设计规范落地（影响：高）
 
@@ -62,7 +62,7 @@
 |---|---|---|---|
 | `components/ui/PageHeader.tsx`<br>`components/ui/WorkbenchEmpty.module.css` | **零引用死组件**——`PageHeader` / `WorkbenchEmpty` 被 0 个文件引用。每个页面各写各的页头与空状态 | 高 | 这是"同类组件各写一套"的直接证据。要么强制推广（改造现有页面接入），要么删除并在 `docs/` 留一条"页头规范"说明，避免后人重复造轮子 |
 | `styles/custom.css:1208-1233`（`.run-modal`）、`827-875`（`.navbar`）、`components/auth/LoginModal.css`（341 行）、`components/ui/PageHeader.css` | **约 375 行死 CSS**：这4 处均**零 tsx 消费者**（已逐个核实） | 中 | 死代码会持续误导后人参考错误范式。建议删除，并在 `hygiene:check` 增加"孤立 CSS 文件"检测 |
-| **圆角档位无 token** | `--gewu-radius` 引用 **0 处**，实测 **26 种**裸圆角值（3/4/5/6/7/8/9/10/11/12/13/14/16/20/24px…） | 中 | 圆角是"视觉形状语言"的核心，26 种值等于没有形状语言。建议收敛为 5 档：4/6/8/12/999px(胶囊) |
+| **圆角档位无 token** | `--petri-radius` 引用 **0 处**，实测 **26 种**裸圆角值（3/4/5/6/7/8/9/10/11/12/13/14/16/20/24px…） | 中 | 圆角是"视觉形状语言"的核心，26 种值等于没有形状语言。建议收敛为 5 档：4/6/8/12/999px(胶囊) |
 | `styles/global.css:37` | 注释自承"零碎值（3/5/10/14px）保留" | 中 | 这条决策直接导致了 1.1 的 1718 处裸 px。间距与圆角应同批治理 |
 | `styles/theme-token-contract.test.ts` | 已有 token 契约测试，但**仅覆盖颜色 token**，未覆盖间距/字号/圆角/z-index | 中 | 把 spacing / radius / z-index 档位一并纳入契约，治理才有防回退护栏 |
 | `components/desktop/desktop.css`（2150 行）<br>`components/copilot/simple-chat.css`（4312 行） | 全局 CSS（非 Modules）与 CSS Modules 混用，边界不清 | 中 | 明确规则：全局 CSS 只允许放 token 与 reset，组件样式一律 Modules |
@@ -98,20 +98,20 @@
 
 | 前景 / 背景 | 对比度 | 要求 | 判定 |
 |---|---|---|---|
-| `--gewu-text-muted #a1a1aa` on `#ffffff` | **2.56:1** | 4.5 | **不达标** |
-| `--gewu-text-muted #6b7689` on `#111a2e`（暗） | **3.78:1** | 4.5 | **不达标** |
-| `--gewu-accent`亮色作文字 | **3.74:1** | 4.5 | **不达标** |
-| `--gewu-border` | **1.27:1** | 3（非文本） | **不达标** |
-| `--gewu-text-tertiary #71717a` on 白 | 4.83:1 | 4.5 | 达标 |
+| `--petri-text-muted #a1a1aa` on `#ffffff` | **2.56:1** | 4.5 | **不达标** |
+| `--petri-text-muted #6b7689` on `#111a2e`（暗） | **3.78:1** | 4.5 | **不达标** |
+| `--petri-accent`亮色作文字 | **3.74:1** | 4.5 | **不达标** |
+| `--petri-border` | **1.27:1** | 3（非文本） | **不达标** |
+| `--petri-text-tertiary #71717a` on 白 | 4.83:1 | 4.5 | 达标 |
 | 暗色 tertiary `#8b98ad` on `#111a2e` | 5.94:1 | 4.5 | 达标 |
 
 | 文件:行号 | 问题 | 影响 | 改进建议 |
 |---|---|---|---|
-| `styles/custom.css:89`<br>`styles/custom.css:221` | `--gewu-text-muted` 双主题均不达标，却被用作正文色 **92 处**，多为 11px 小字（最坏组合：最低对比 + 最小字号） | 高 | 亮色改`#71717a`（4.83:1），暗色改 `#8b98ad`（5.94:1），一次性解决 92 处 |
-| `styles/custom.css` | `--gewu-accent` 作正文文字仅 3.74:1 | 中 | 区分 accent-as-decoration 与 accent-as-text，后者用 `--gewu-accent-strong` |
-| `--gewu-border #243149` | 1.27:1，作为输入框/卡片边界远低于 3:1 | 中 | 边框提亮到 3:1，或改用双线（边框 + 背景色差）表达边界 |
-| `components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css:103-107` | **全仓最严重的对比度缺陷**：`.drawerError` 文字色 `#ffc8c8`（浅粉）配`rgba(220,80,80,0.18)` 半透明红底，该文件 `data-theme` 出现 **0 次** → 亮色模式下对比度约 **1.45:1**（要求 4.5） | **高** | 错误文字在亮色下几乎不可读，而这是"出错了"的唯一提示。改用 `var(--gewu-status-error-fg)` / `var(--gewu-danger)` 主题变量，背景走 token 化的 `--gewu-danger-bg` |
-| `pages/extensions/extensions.module.css:14,340` | 分类 pill hover 态 `color: var(--gewu-text-muted)` 在灰底(`#f4f4f5`)上约 2.46:1 | 中 | 改用 `var(--gewu-text-secondary)`（4.5:1） |
+| `styles/custom.css:89`<br>`styles/custom.css:221` | `--petri-text-muted` 双主题均不达标，却被用作正文色 **92 处**，多为 11px 小字（最坏组合：最低对比 + 最小字号） | 高 | 亮色改`#71717a`（4.83:1），暗色改 `#8b98ad`（5.94:1），一次性解决 92 处 |
+| `styles/custom.css` | `--petri-accent` 作正文文字仅 3.74:1 | 中 | 区分 accent-as-decoration 与 accent-as-text，后者用 `--petri-accent-strong` |
+| `--petri-border #243149` | 1.27:1，作为输入框/卡片边界远低于 3:1 | 中 | 边框提亮到 3:1，或改用双线（边框 + 背景色差）表达边界 |
+| `components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css:103-107` | **全仓最严重的对比度缺陷**：`.drawerError` 文字色 `#ffc8c8`（浅粉）配`rgba(220,80,80,0.18)` 半透明红底，该文件 `data-theme` 出现 **0 次** → 亮色模式下对比度约 **1.45:1**（要求 4.5） | **高** | 错误文字在亮色下几乎不可读，而这是"出错了"的唯一提示。改用 `var(--petri-status-error-fg)` / `var(--petri-danger)` 主题变量，背景走 token 化的 `--petri-danger-bg` |
+| `pages/extensions/extensions.module.css:14,340` | 分类 pill hover 态 `color: var(--petri-text-muted)` 在灰底(`#f4f4f5`)上约 2.46:1 | 中 | 改用 `var(--petri-text-secondary)`（4.5:1） |
 
 ### 2.3 语义化（影响：低，已达标）
 
@@ -171,7 +171,7 @@
 
 | 文件:行号 | 问题 | 影响 | 改进建议 |
 |---|---|---|---|
-| `components/desktop/desktop.css:297-304` | `.gewu-settings-nav` 固定 `width: 176px` 且 `flex-shrink: 0`，700px 窄窗下主内容区被挤至负宽，实测右侧导航项 `right=673` 溢出视口 | 中 | 加 `@media (max-width: 820px)` 收窄为 56px 图标栏，或改为顶部横向 tab |
+| `components/desktop/desktop.css:297-304` | `.petri-settings-nav` 固定 `width: 176px` 且 `flex-shrink: 0`，700px 窄窗下主内容区被挤至负宽，实测右侧导航项 `right=673` 溢出视口 | 中 | 加 `@media (max-width: 820px)` 收窄为 56px 图标栏，或改为顶部横向 tab |
 
 UI-479「侧栏自适应收起」已处理侧栏随列宽/视口折叠（阈值 140/560/640，带迟滞与手动优先），机制设计扎实。
 
@@ -195,7 +195,7 @@ UI-479「侧栏自适应收起」已处理侧栏随列宽/视口折叠（阈值 
 |---|---|---|
 | `@keyframes` 含布局属性（触发重排） | 47 个中 **0 个** | 达标 |
 | `will-change` 使用 | 仅 2 处，用途正当（scroll-position、进度条宽度） | 达标，无滥用 |
-| reduced-motion 兜底 | `global.css:199-218`，并用 `[data-gewu-motion='functional']`（权重 0,1,0 > `*` 0,0,0）豁免功能性过渡 | 达标 |
+| reduced-motion 兜底 | `global.css:199-218`，并用 `[data-petri-motion='functional']`（权重 0,1,0 > `*` 0,0,0）豁免功能性过渡 | 达标 |
 
 ---
 
@@ -206,7 +206,7 @@ UI-479「侧栏自适应收起」已处理侧栏随列宽/视口折叠（阈值 
 | 1 | **P0** | 删 `import './simple-chat.css'` | `CommandPalette.tsx:10` | 首屏 CSS 391KB→150KB，零风险 |
 | 2 | **P0** | `.drawerError` 亮色下对比度 1.45:1，错误提示几乎不可读且无暗色适配 | `CodeReviewDrawer.module.css:103-107` | 错误信息可读性，改用状态色 token |
 | 3 | **P0** | hover-only 显形导致键盘焦点不可见 + Tab 困陷左栏 | `project-workspace.module.css:1039-1045` | 一行 CSS 修复键盘可达性 |
-| 4 | **P0** | `--gewu-text-muted` 对比度 2.56/3.78 不达标，用作正文 92 处 | `custom.css:89,221` | 一次改色解决 92 处可读性 |
+| 4 | **P0** | `--petri-text-muted` 对比度 2.56/3.78 不达标，用作正文 92 处 | `custom.css:89,221` | 一次改色解决 92 处可读性 |
 | 5 | **P1** | Cmd+K 死功能（传空数组） | `App.tsx:176-181` | 消除无效入口 |
 | 6 | **P1** | z-index 军备竞赛，语义与数值倒挂（20+ 处，0 档位token） | 全仓 | 定义 6 档层级 token |
 | 7 | **P1** | 间距 token 零引用（2/1718）+ 圆角 26 种裸值无 token | `global.css:38-43` | 间距/形状语言一致性根因 |

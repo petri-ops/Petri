@@ -1,5 +1,5 @@
 {
-  "schema": "biof3/test-impact-map.v1",
+  "schema": "petri/test-impact-map.v1",
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
@@ -69,27 +69,27 @@
       "id": "block78-runtime-projection",
       "note": "BLOCK-78 摘要卡片项目化：远程资源实时快照——node-agent sys_resource verb（ensureAgent 哈希自动部署）/ gateway sysResource 方法 / harness 资源路由 projectId 路由（additive，无参/local 既有调用零改动）/ 归一化与 TTL 缓存 helper / 前端 hook projectId 参数与卡片 source 驱动。零网络测试锁归一化三态阈值 + TTL fresh/stale/unreachable + agent 脚本 bash 语法与本机执行；实机 dell 读数对账与断连三态归 BLOCK-78 P3 验收。",
       "patterns": [
-        "core/biof3-server/helpers/remote-resource-snapshot.js",
-        "core/biof3-server/routes/harness/resources.js",
-        "core/biof3-server/helpers/remote-execution/node-agent.js",
-        "core/biof3-server/helpers/workspace-gateway.js",
+        "core/petri-server/helpers/remote-resource-snapshot.js",
+        "core/petri-server/routes/harness/resources.js",
+        "core/petri-server/helpers/remote-execution/node-agent.js",
+        "core/petri-server/helpers/workspace-gateway.js",
         "frontend/src/hooks/useRuntimeResourceSnapshot.ts",
         "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
         "frontend/src/components/workspace-panels/CenterPanel.tsx",
         "scripts/block78-*",
         "acceptance/block-78/**",
-        "core/biof3-server/helpers/ai-usage.js",
-        "core/biof3-server/routes/ai-misc.js",
-        "core/biof3-server/routes/harness/harness.js",
-        "core/biof3-server/agent-tools/workspace-ssh-surface.js",
-        "core/biof3-server/agent-tools/workspace-tools.js",
-        "core/biof3-server/routes/ai-agent/background-processes.js",
-        "core/biof3-server/helpers/project-storage.js",
-        "core/biof3-server/routes/harness/project-storage.js",
-        "core/biof3-server/routes/harness/index.js",
-        "core/biof3-server/helpers/project-notices.js",
-        "core/biof3-server/helpers/project-notice-store.js",
-        "core/biof3-server/routes/harness/notices.js",
+        "core/petri-server/helpers/ai-usage.js",
+        "core/petri-server/routes/ai-misc.js",
+        "core/petri-server/routes/harness/harness.js",
+        "core/petri-server/agent-tools/workspace-ssh-surface.js",
+        "core/petri-server/agent-tools/workspace-tools.js",
+        "core/petri-server/routes/ai-agent/background-processes.js",
+        "core/petri-server/helpers/project-storage.js",
+        "core/petri-server/routes/harness/project-storage.js",
+        "core/petri-server/routes/harness/index.js",
+        "core/petri-server/helpers/project-notices.js",
+        "core/petri-server/helpers/project-notice-store.js",
+        "core/petri-server/routes/harness/notices.js",
         "scripts/ui330-*"
       ],
       "tests": [
@@ -161,8 +161,8 @@
       "note": "P4R source projection, controlled replay, background materialization and Code tests are owned by P4R; the explicit invariant gates remain listed so a route regression cannot be hidden by the default bundle.",
       "patterns": [
         "core/shared-backend/result-*.js",
-        "core/biof3-server/routes/result-studio.js",
-        "core/biof3-server/agent-tools/result-*.js",
+        "core/petri-server/routes/result-studio.js",
+        "core/petri-server/agent-tools/result-*.js",
         "frontend/src/components/result-studio/**",
         "frontend/src/lib/result-studio-*.ts",
         "frontend/src/lib/result-edit-agent-bridge.ts",
@@ -197,7 +197,7 @@
     {
       "id": "agent-tool-interceptor",
       "patterns": [
-        "core/biof3-server/agent-tools/agent-tool-interceptor.js"
+        "core/petri-server/agent-tools/agent-tool-interceptor.js"
       ],
       "tests": [
         "test/agent-tool-policy.test.mjs",
@@ -208,10 +208,10 @@
     {
       "id": "result-studio-agent-runtime",
       "patterns": [
-        "core/biof3-server/agent-runner.js",
-        "core/biof3-server/routes/ai-agent.js",
-        "core/biof3-server/helpers/ai-settings.js",
-        "core/biof3-server/helpers/system-prompt.js"
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/routes/ai-agent.js",
+        "core/petri-server/helpers/ai-settings.js",
+        "core/petri-server/helpers/system-prompt.js"
       ],
       "tests": [
         "test/ai-settings-credential.test.mjs",
@@ -224,9 +224,9 @@
       "id": "loop",
       "patterns": [
         "core/shared-backend/loop-*.js",
-        "core/biof3-server/agent-runner.js",
-        "core/biof3-server/routes/ai-loop.js",
-        "core/biof3-server/routes/loop.js"
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/routes/ai-loop.js",
+        "core/petri-server/routes/loop.js"
       ],
       "tests": [
         "test/loop-contract.test.mjs",
@@ -276,7 +276,7 @@
       "id": "sdc1-data-to-first-result",
       "note": "SDC1-A keeps project-local import, bounded structural profiling, fail-closed readiness, the existing Agent handoff, and its development Electron observer under one focused regression bundle; it does not qualify SDC-2+ or P7. Frontend tests are selected through frontendRelated and run by Vitest.",
       "patterns": [
-        "core/biof3-server/routes/files.js",
+        "core/petri-server/routes/files.js",
         "scripts/g0-sdc1-*"
       ],
       "tests": [
@@ -288,15 +288,15 @@
       "id": "ux1g1-tool-job-conversation",
       "note": "Conversation-bound ToolJob identity covers migration, creation, approval continuation, plugin execution/retry, ScientificTask/workflow binding, Result Studio derived execution, all job-history projections, and frontend compatibility mapping. Frontend tests are selected through frontendRelated and run by Vitest.",
       "patterns": [
-        "core/biof3-server/db.js",
-        "core/biof3-server/api-data.js",
-        "core/biof3-server/agent-tools/learning.js",
-        "core/biof3-server/agent-tools/result-edit-tools.js",
-        "core/biof3-server/mcp/registry.js",
-        "core/biof3-server/routes/ai-legacy.js",
-        "core/biof3-server/routes/harness.js",
-        "core/biof3-server/routes/result-studio.js",
-        "core/biof3-server/routes/tools-metadata.js",
+        "core/petri-server/db.js",
+        "core/petri-server/api-data.js",
+        "core/petri-server/agent-tools/learning.js",
+        "core/petri-server/agent-tools/result-edit-tools.js",
+        "core/petri-server/mcp/registry.js",
+        "core/petri-server/routes/ai-legacy.js",
+        "core/petri-server/routes/harness.js",
+        "core/petri-server/routes/result-studio.js",
+        "core/petri-server/routes/tools-metadata.js",
         "frontend/src/lib/project-types.ts",
         "frontend/src/lib/project-store.ts",
         "frontend/src/components/copilot/copilotClient.ts",
@@ -336,7 +336,7 @@
         "frontend/src/pages/settings/index.tsx",
         "frontend/src/pages/settings/settings.module.css",
         "frontend/src/lib/project-store.ts",
-        "core/biof3-server/routes/tools-metadata.js"
+        "core/petri-server/routes/tools-metadata.js"
       ],
       "tests": [
         "test/tool-job-conversation.test.mjs",
@@ -391,7 +391,7 @@
         "core/shared-backend/llm-*.js",
         "core/shared-backend/model-*.js",
         "core/shared-backend/llm-providers/**",
-        "core/biof3-server/agent-tools/vision-tools.js"
+        "core/petri-server/agent-tools/vision-tools.js"
       ],
       "tests": [
         "test/model-gateway.test.mjs",
@@ -408,12 +408,12 @@
       "id": "block155-chat-vision-inline",
       "note": "BLOCK-155 真·单通道 vision：聊天渠道声明视觉能力时当前轮用户图片在 loop-orchestrator 请求体组装点内联为 image_url 部件（messages 本体不动）；vision-image-io 与 read_image 同源读图；前端输入门放宽 vision_configured||渠道视觉。",
       "patterns": [
-        "core/biof3-server/agent-tools/vision-inline.js",
-        "core/biof3-server/agent-tools/vision-image-io.js",
-        "core/biof3-server/agent-tools/vision-tools.js",
-        "core/biof3-server/loop-orchestrator.js",
-        "core/biof3-server/agent-runner.js",
-        "core/biof3-server/routes/ai-agent/**",
+        "core/petri-server/agent-tools/vision-inline.js",
+        "core/petri-server/agent-tools/vision-image-io.js",
+        "core/petri-server/agent-tools/vision-tools.js",
+        "core/petri-server/loop-orchestrator.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/routes/ai-agent/**",
         "frontend/src/components/copilot/SimpleChat.tsx",
         "frontend/src/components/copilot/SimpleChat/attachments.ts",
         "scripts/block155-*.mjs",
@@ -444,11 +444,11 @@
       "id": "chf0-critical",
       "patterns": [
         "src/main.js",
-        "core/biof3-server/helpers/process-lifecycle.js",
-        "core/biof3-server/helpers/tools-executor.js",
-        "core/biof3-server/routes/files.js",
-        "core/biof3-server/routes/r-compute.js",
-        "core/biof3-server/routes/tools-platform.js",
+        "core/petri-server/helpers/process-lifecycle.js",
+        "core/petri-server/helpers/tools-executor.js",
+        "core/petri-server/routes/files.js",
+        "core/petri-server/routes/r-compute.js",
+        "core/petri-server/routes/tools-platform.js",
         "core/shared-backend/local-request-boundary.js",
         "plugins/pca-explorer/**",
         "plugins/volcano-plot/**"
@@ -489,10 +489,10 @@
       "id": "plugin-runtime",
       "patterns": [
         "plugins/**",
-        "core/biof3-server/plugin-loader.js",
-        "core/biof3-server/mcp/**",
-        "core/biof3-server/tool-registry.js",
-        "core/biof3-server/tool-scripts/**",
+        "core/petri-server/plugin-loader.js",
+        "core/petri-server/mcp/**",
+        "core/petri-server/tool-registry.js",
+        "core/petri-server/tool-scripts/**",
         "src/plugin-manager.js",
         "src/plugin-schema.js",
         "core/shared-backend/capability-bundles.js",
@@ -521,7 +521,7 @@
       "patterns": [
         "src/**",
         "build/**",
-        "core/biof3-server/db.js",
+        "core/petri-server/db.js",
         "src/migrations/**",
         "electron-builder.yml"
       ],
@@ -541,7 +541,7 @@
     {
       "id": "backend-fallback",
       "patterns": [
-        "core/biof3-server/**",
+        "core/petri-server/**",
         "core/packages/**",
         "core/shared-backend/storage/**",
         "core/shared-backend/path-safe.js",
@@ -758,10 +758,10 @@
     {
       "id": "perf-probe",
       "patterns": [
-        "core/biof3-server/helpers/perf-probe.js",
-        "core/biof3-server/routes/perf-probe.js",
-        "core/biof3-server/bootstrap.js",
-        "core/biof3-server/server.js"
+        "core/petri-server/helpers/perf-probe.js",
+        "core/petri-server/routes/perf-probe.js",
+        "core/petri-server/bootstrap.js",
+        "core/petri-server/server.js"
       ],
       "tests": [
         "test/perf-probe.test.mjs",
@@ -942,7 +942,7 @@
       "id": "p6-canonical-source-binding",
       "note": "Every source byte eligible for the canonical P6 binding selects the fast recomputing verifier. The bounded broad prefixes are intentional: a future source-map addition inside the same runtime surfaces must fail closed until evidence is refreshed, while the expensive live matrix remains opt-in.",
       "patterns": [
-        "core/biof3-server/**",
+        "core/petri-server/**",
         "core/shared-backend/**",
         "frontend/src/**",
         "frontend/vite.config.ts",
@@ -1172,11 +1172,11 @@
       "id": "ide-git-tools",
       "note": "Phase 3 IDE MCP git tools (git-diff / git-log / git-show / git-blame) are exercised by the dedicated test files. The new test files are also auto-selected by test-infrastructure through test/**.",
       "patterns": [
-        "core/biof3-server/mcp/ide-tools/git-diff.js",
-        "core/biof3-server/mcp/ide-tools/git-log.js",
-        "core/biof3-server/mcp/ide-tools/git-show.js",
-        "core/biof3-server/mcp/ide-tools/git-blame.js",
-        "core/biof3-server/mcp/ide-tools/diff-helpers.js",
+        "core/petri-server/mcp/ide-tools/git-diff.js",
+        "core/petri-server/mcp/ide-tools/git-log.js",
+        "core/petri-server/mcp/ide-tools/git-show.js",
+        "core/petri-server/mcp/ide-tools/git-blame.js",
+        "core/petri-server/mcp/ide-tools/diff-helpers.js",
         "test/ide-tools-git-diff.test.mjs",
         "test/ide-tools-git-log.test.mjs",
         "test/ide-tools-git-show.test.mjs",
@@ -1350,8 +1350,8 @@
       "id": "block63-windows-computer-use-host",
       "note": "BLOCK-63 P3 编排注册：Windows sidecar 托管（computer-use-host 平台门/双平台定位）+ computer_* 工具 handler 确认门真链。改动即跑 host 契约测试（前置：sidecar 已构建）。",
       "patterns": [
-        "core/biof3-server/helpers/computer-use-host.js",
-        "core/biof3-server/agent-tools/computer-use-tools.js",
+        "core/petri-server/helpers/computer-use-host.js",
+        "core/petri-server/agent-tools/computer-use-tools.js",
         "test/block63-computer-host.test.mjs"
       ],
       "tests": [
@@ -1361,7 +1361,7 @@
     },
     {
       "id": "block66-runtime-decouple",
-      "note": "BLOCK-66 运行时解耦：R 硬门摘除（biof3-server 无 R 可用）。改动即跑 backend-health 语义拆分测试。",
+      "note": "BLOCK-66 运行时解耦：R 硬门摘除（petri-server 无 R 可用）。改动即跑 backend-health 语义拆分测试。",
       "patterns": [
         "src/main/backend-proc-manager.js",
         "src/backend-health.js",
@@ -1390,9 +1390,9 @@
     },
     {
       "id": "script-dev-infra",
-      "note": "BLOCK-71 开发基础设施沉淀：会话状态/卫生检查/收口聚合/dev-verify 底座（canonical 家在 gewu-dev-infra skill 内）。工具自身改动跑 test/dev-verify.test.mjs + 冒烟（npm run state / hygiene:check / skills:check）。",
+      "note": "BLOCK-71 开发基础设施沉淀：会话状态/卫生检查/收口聚合/dev-verify 底座（canonical 家在 petri-dev-infra skill 内）。工具自身改动跑 test/dev-verify.test.mjs + 冒烟（npm run state / hygiene:check / skills:check）。",
       "patterns": [
-        ".agents/skills/gewu-dev-infra/**",
+        ".agents/skills/petri-dev-infra/**",
         "scripts/skill-scaffold.mjs",
         "test/dev-verify.test.mjs"
       ],
@@ -1410,9 +1410,9 @@
         "scripts/block75-*.cjs",
         "scripts/block75-*.ps1",
         "scripts/lib-block75-os.cjs",
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/os-save-dialog.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/os-save-dialog.cjs",
         "acceptance/block-75/**",
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block100-test-instance.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block100-test-instance.cjs",
         "acceptance/block-100/**"
       ],
       "tests": [
@@ -1427,7 +1427,7 @@
       "id": "block76-ssh-native-execution",
       "note": "BLOCK-76 P1 SSH 直跑执行链：ssh-direct-runner（gateway 写编排面/exec_bg/.exit 终态/进程组取消）+ tools-executor ssh 分支 + mcp registry 收编。改动即跑 runner 零网络契约测试。",
       "patterns": [
-        "core/biof3-server/helpers/remote-execution/ssh-direct-runner.js",
+        "core/petri-server/helpers/remote-execution/ssh-direct-runner.js",
         "test/ssh-direct-runner.test.mjs",
         "scripts/block76-*.cjs",
         "acceptance/block-76/**"
@@ -1455,10 +1455,10 @@
       "id": "block79-token-speed",
       "note": "BLOCK-79 按供应商的 token 输出速率：ai_usage provider 归因列（additive）+ model-gateway attempt 级注入 + summarizeProviderUsage 成对聚合（端到端平均输出速率口径·embedding 排除·zero-usage 不可算）+ usage-mine providers 分组段 + 设置页供应商速率表。",
       "patterns": [
-        "core/biof3-server/helpers/ai-usage.js",
-        "core/biof3-server/routes/ai-misc.js",
-        "core/biof3-server/helpers/project-storage.js",
-        "core/biof3-server/shared-backend/llm-providers/model-gateway.js",
+        "core/petri-server/helpers/ai-usage.js",
+        "core/petri-server/routes/ai-misc.js",
+        "core/petri-server/helpers/project-storage.js",
+        "core/petri-server/shared-backend/llm-providers/model-gateway.js",
         "core/shared-backend/llm-providers/model-gateway.js",
         "core/shared-backend/llm-providers/deepseek.js",
         "core/shared-backend/llm-providers/anthropic.js",
@@ -1578,15 +1578,15 @@
         "core/shared-backend/result-studio-repository.js",
         "core/shared-backend/result-studio-schema.js",
         "core/shared-backend/result-edit-controls.js",
-        "core/biof3-server/plugin-loader.js",
+        "core/petri-server/plugin-loader.js",
         "test/block83-task-confirmation-hooks.test.mjs",
         "test/block83-*.test.mjs",
         "scripts/block83-*",
         "acceptance/block-83/**",
-        "core/biof3-server/routes/tools-catalog.js",
+        "core/petri-server/routes/tools-catalog.js",
         "frontend/src/lib/tool-catalog.ts",
-        "core/biof3-server/routes/tools.js",
-        "core/biof3-server/server.js",
+        "core/petri-server/routes/tools.js",
+        "core/petri-server/server.js",
         "frontend/src/components/workspace-panels/AnalysisLaunchPanel.tsx",
         "frontend/src/components/workspace-panels/RightPanel.tsx",
         "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
@@ -1597,7 +1597,7 @@
         "core/shared-backend/loop-contract.js",
         "core/shared-backend/loop-failure-diagnoser.js",
         "core/shared-backend/loop-repair-strategy.js",
-        "core/biof3-server/loop-orchestrator.js",
+        "core/petri-server/loop-orchestrator.js",
         "test/domain-neutrality.test.mjs",
         "test/helpers/domain-scan.mjs",
         "test/domain-neutrality-baseline.json",
@@ -1625,9 +1625,9 @@
       "note": "BLOCK-84 领域包产品级一键装/卸：记录制 pack-registry（installed.json）+ boot 接线（插件源追加 / 领域工具注册）+ Electron IPC（pack:* 5 handlers）+ 商店「领域包」分区 + 一键装/卸实机验收（隔离探针 + CDP UI 双态）。同时覆盖 dev 渲染器 origin 白名单（trusted origins 双变体）与本地请求边界契约。",
       "patterns": [
         "core/shared-backend/pack-registry.js",
-        "core/biof3-server/server.js",
-        "core/biof3-server/plugin-loader.js",
-        "core/biof3-server/tool-registry.js",
+        "core/petri-server/server.js",
+        "core/petri-server/plugin-loader.js",
+        "core/petri-server/tool-registry.js",
         "core/shared-backend/local-request-boundary.js",
         "src/ipc/pack.js",
         "src/main/env-coordinator.js",
@@ -1661,8 +1661,8 @@
       "id": "block70-mobile-sync",
       "note": "BLOCK-70 手机远程同步：mobile-gateway 独立 app 实例（配对 token/会话吊销/鉴权限速审计）+ mobile-admin 管理 REST + 设置区「手机远程」（UI-319）+ 移动只读页。改 gateway/admin/设置面板任一文件即跑本套件。",
       "patterns": [
-        "core/biof3-server/mobile-gateway/**",
-        "core/biof3-server/routes/mobile-admin.js",
+        "core/petri-server/mobile-gateway/**",
+        "core/petri-server/routes/mobile-admin.js",
         "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/MobileSync.tsx",
         "test/block70-*.test.mjs",
@@ -1700,9 +1700,9 @@
       "id": "block89-workspace-file-ops",
       "note": "BLOCK-89 工作区文件操作：REST fs/move|copy|delete|mkdir 双后端同构（workspace-gateway local fsp.cp / node-agent fs_cp=cp -R 哈希自动部署）+ 路径边界/409 冲突/classified 502 诚实映射 + 前端 UI-378 右键菜单与拖拽（FileTreeItem/RightFileTree/弹层）。契约测试锁 local 真 fs 全链 + ssh fake backend 透传与错误映射 + agent verb bash 行为；P3 实机走 dev-verify flow workspace-file-ops。",
       "patterns": [
-        "core/biof3-server/routes/files.js",
-        "core/biof3-server/helpers/workspace-gateway.js",
-        "core/biof3-server/helpers/remote-execution/node-agent.js",
+        "core/petri-server/routes/files.js",
+        "core/petri-server/helpers/workspace-gateway.js",
+        "core/petri-server/helpers/remote-execution/node-agent.js",
         "frontend/src/pages/project-workspace/FileTreeItem.tsx",
         "frontend/src/pages/project-workspace/FileTreeList.tsx",
         "frontend/src/pages/project-workspace/RightFileTree.tsx",
@@ -1730,11 +1730,11 @@
       "id": "block93-agent-roles",
       "note": "BLOCK-93 子智能体专职化：角色注册表 + spawn_agent role 参数 + prompt 软约束注入 + 续派继承 + 前端三处显式角色展示。",
       "patterns": [
-        "core/biof3-server/agent-tools/agent-roles.js",
-        "core/biof3-server/agent-tools/spawn-agent-tools.js",
-        "core/biof3-server/agent-tools/tool-defs.js",
-        "core/biof3-server/agent-runner.js",
-        "core/biof3-server/routes/ai-agent/task-actions.js",
+        "core/petri-server/agent-tools/agent-roles.js",
+        "core/petri-server/agent-tools/spawn-agent-tools.js",
+        "core/petri-server/agent-tools/tool-defs.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/routes/ai-agent/task-actions.js",
         "frontend/src/lib/agentCategories.ts",
         "frontend/src/components/copilot/conversationRunStore.ts",
         "frontend/src/components/copilot/ToolActivityList.tsx",
@@ -1780,12 +1780,12 @@
       "id": "block98-agent-resilience",
       "note": "BLOCK-98 Agent 长任务韧性：microcompact 视图层折叠 + 阈值公式化 9 章节摘要 + 防呆状态机 + reactive 原地重试 + ai_usage 韧性遥测列 + 输入插队队列（steer 路由/loop 边界注入/前端排队可见）。",
       "patterns": [
-        "core/biof3-server/helpers/agent-resilience.js",
-        "core/biof3-server/helpers/conversation-compaction.js",
-        "core/biof3-server/helpers/ai-usage.js",
-        "core/biof3-server/agent-runner.js",
-        "core/biof3-server/routes/ai-agent/chat.js",
-        "core/biof3-server/routes/ai-agent/task-actions.js",
+        "core/petri-server/helpers/agent-resilience.js",
+        "core/petri-server/helpers/conversation-compaction.js",
+        "core/petri-server/helpers/ai-usage.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/routes/ai-agent/chat.js",
+        "core/petri-server/routes/ai-agent/task-actions.js",
         "frontend/src/components/copilot/copilotClient/types.ts",
         "frontend/src/components/copilot/copilotClient/agentTaskStream.ts",
         "frontend/src/components/copilot/conversationRunStore/**",
@@ -1810,11 +1810,11 @@
       "id": "block97-agent-todo-card",
       "note": "BLOCK-97 智能体待办卡：todo_write 内部工具 + task_todo 专用事件（agent-runner emitAssistant 通道发射）+ 提示词纪律注入 + 摘要卡「任务清单」节（conversationTodos 会话级存储实时勾选）。",
       "patterns": [
-        "core/biof3-server/agent-tools/todo-tools.js",
-        "core/biof3-server/agent-tools/tool-defs.js",
-        "core/biof3-server/agent-tools/registry.js",
-        "core/biof3-server/agent-runner.js",
-        "core/biof3-server/routes/ai-agent/chat.js",
+        "core/petri-server/agent-tools/todo-tools.js",
+        "core/petri-server/agent-tools/tool-defs.js",
+        "core/petri-server/agent-tools/registry.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/routes/ai-agent/chat.js",
         "frontend/src/components/copilot/copilotClient/types.ts",
         "frontend/src/components/copilot/copilotClient/agentTaskStream.ts",
         "frontend/src/components/copilot/conversationRunStore/**",
@@ -1839,13 +1839,13 @@
       "id": "block94-knowledge-space-pro",
       "note": "BLOCK-94 知识空间专业化：F1 启动恢复/嵌入模型一致性/召回挂点收敛 buildTurnInjection/列表分页 + F2 PDF 解析（pdfjs-dist 复用）+ F3 拖拽/逐文件聚合/粘贴入库 + F4 预览/批量 + F5 知识溯源 knowledge_citations 事件/docId 过滤/降级诚实化/knowledge_read + F6 规模观测。",
       "patterns": [
-        "core/biof3-server/helpers/knowledge-space.js",
-        "core/biof3-server/helpers/knowledge-ingest.js",
-        "core/biof3-server/helpers/knowledge-parsers.js",
-        "core/biof3-server/routes/knowledge.js",
-        "core/biof3-server/agent-tools/knowledge-tools.js",
-        "core/biof3-server/agent-runner.js",
-        "core/biof3-server/routes/ai-agent/chat.js",
+        "core/petri-server/helpers/knowledge-space.js",
+        "core/petri-server/helpers/knowledge-ingest.js",
+        "core/petri-server/helpers/knowledge-parsers.js",
+        "core/petri-server/routes/knowledge.js",
+        "core/petri-server/agent-tools/knowledge-tools.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/routes/ai-agent/chat.js",
         "frontend/src/lib/knowledgeClient.ts",
         "frontend/src/components/workspace-panels/KnowledgeSpacePanel.tsx",
         "frontend/src/components/workspace-panels/KnowledgeSpacePanel.module.css",
@@ -1869,11 +1869,11 @@
       "id": "block96-ssh-channel-perf",
       "note": "BLOCK-96 SSH 通道效率稳定性：fs_list 单 fork NUL 记录协议 + 服务端分页 + 前端游标加载 + mux 幂等只读透明重试 + addressFamily 传输层参数化 + probe 握手计时/F6 领域探测退役。",
       "patterns": [
-        "core/biof3-server/helpers/remote-execution/node-agent.js",
-        "core/biof3-server/helpers/remote-execution/ssh-multiplexer.js",
-        "core/biof3-server/helpers/remote-execution/ssh-transport.js",
-        "core/biof3-server/helpers/remote-execution/target-registry.js",
-        "core/biof3-server/helpers/workspace-gateway.js",
+        "core/petri-server/helpers/remote-execution/node-agent.js",
+        "core/petri-server/helpers/remote-execution/ssh-multiplexer.js",
+        "core/petri-server/helpers/remote-execution/ssh-transport.js",
+        "core/petri-server/helpers/remote-execution/target-registry.js",
+        "core/petri-server/helpers/workspace-gateway.js",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/RemoteTargets.tsx",
         "frontend/src/pages/project-workspace/RightFileTree.tsx",
         "frontend/src/pages/project-workspace/FileTreeList.tsx",
@@ -1916,9 +1916,9 @@
     },
     {
       "id": "block95-session-io",
-      "note": "BLOCK-95 会话信息流 I/O 优化：A1 游标加载（ai-conversations 路由 messages 端点游标协议 + copilotConversationsClient 分页信封 + useConversationResume 分页簇）+ A3 滚动守卫（SimpleChat 回底浮标）+ A4 话题小节分隔（conversationRunStore onTopicShift→gewu 事件→SimpleChat 分隔卡）。P2=B1 历史拼装收归后端（helpers/history-assembly.js 开关灰度）+ 实机 diff 对账脚本已登记。P3=B2 compaction + A5 标记卡、P4=B3 cache 断链修复+基线脚本已登记。P5 面落地时续登记。",
+      "note": "BLOCK-95 会话信息流 I/O 优化：A1 游标加载（ai-conversations 路由 messages 端点游标协议 + copilotConversationsClient 分页信封 + useConversationResume 分页簇）+ A3 滚动守卫（SimpleChat 回底浮标）+ A4 话题小节分隔（conversationRunStore onTopicShift→petri 事件→SimpleChat 分隔卡）。P2=B1 历史拼装收归后端（helpers/history-assembly.js 开关灰度）+ 实机 diff 对账脚本已登记。P3=B2 compaction + A5 标记卡、P4=B3 cache 断链修复+基线脚本已登记。P5 面落地时续登记。",
       "patterns": [
-        "core/biof3-server/routes/ai-conversations.js",
+        "core/petri-server/routes/ai-conversations.js",
         "frontend/src/components/copilot/copilotConversationsClient.ts",
         "frontend/src/components/copilot/SimpleChat/hooks/useConversationResume.ts",
         "frontend/src/components/copilot/SimpleChat/hooks/useConversationResume.test.tsx",
@@ -1927,15 +1927,15 @@
         "frontend/src/components/copilot/conversationRunStore.ts",
         "test/block95-messages-cursor.test.mjs",
         "acceptance/block-95/**",
-        "core/biof3-server/routes/ai-agent/chat.js",
-        "core/biof3-server/helpers/history-assembly.js",
+        "core/petri-server/routes/ai-agent/chat.js",
+        "core/petri-server/helpers/history-assembly.js",
         "test/block95-b1-history-assembly.test.mjs",
         "scripts/block95-p1-live.cjs",
         "scripts/block95-b1-diff-live.cjs",
         "core/shared-backend/llm-providers/protocol-usage.js",
         "core/shared-backend/llm-providers/deepseek.js",
         "core/shared-backend/llm-providers/anthropic.js",
-        "core/biof3-server/helpers/conversation-compaction.js",
+        "core/petri-server/helpers/conversation-compaction.js",
         "test/block95-b2-compaction.test.mjs",
         "test/block95-b3-cache-fields.test.mjs",
         "scripts/block95-b3-cache-baseline.cjs",
@@ -1956,9 +1956,9 @@
       "id": "ui397-ssh-link-status",
       "note": "UI-397 远程连接不再闲置主动断连（mux 移除 IDLE_CLOSE）+ SSH 呼吸灯（ssh-ping 端点 + useSshHeartbeat 30s 探活 + SshStatusDot 红绿灯）。",
       "patterns": [
-        "core/biof3-server/helpers/remote-execution/ssh-multiplexer.js",
-        "core/biof3-server/routes/files.js",
-        "core/biof3-server/helpers/workspace-gateway.js",
+        "core/petri-server/helpers/remote-execution/ssh-multiplexer.js",
+        "core/petri-server/routes/files.js",
+        "core/petri-server/helpers/workspace-gateway.js",
         "frontend/src/hooks/useSshHeartbeat.ts",
         "frontend/src/components/workspace-panels/SshStatusDot.tsx",
         "frontend/src/components/workspace-panels/SshStatusDot.module.css"
@@ -1991,16 +1991,16 @@
       "id": "block99-knowledge-multispace",
       "note": "BLOCK-99 知识空间多空间版：G1 空间 CRUD/参数化/G4 会话台工具族+确认门+子集/注入管道 conversationId/G5 失配统计按空间/G6 启动恢复跨空间 + 前端会话台/切换器/事件总线 + dev-verify flow 与实机证据脚本。",
       "patterns": [
-        "core/biof3-server/helpers/knowledge-space.js",
-        "core/biof3-server/helpers/knowledge-ingest.js",
-        "core/biof3-server/helpers/knowledge-confirm.js",
-        "core/biof3-server/agent-tools/knowledge-tools.js",
-        "core/biof3-server/agent-tools/knowledge-console-tools.js",
-        "core/biof3-server/agent-tools/tool-defs.js",
-        "core/biof3-server/agent-tools/registry.js",
-        "core/biof3-server/agent-runner.js",
-        "core/biof3-server/routes/ai-agent/chat.js",
-        "core/biof3-server/routes/knowledge.js",
+        "core/petri-server/helpers/knowledge-space.js",
+        "core/petri-server/helpers/knowledge-ingest.js",
+        "core/petri-server/helpers/knowledge-confirm.js",
+        "core/petri-server/agent-tools/knowledge-tools.js",
+        "core/petri-server/agent-tools/knowledge-console-tools.js",
+        "core/petri-server/agent-tools/tool-defs.js",
+        "core/petri-server/agent-tools/registry.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/routes/ai-agent/chat.js",
+        "core/petri-server/routes/knowledge.js",
         "frontend/src/components/knowledge/**",
         "frontend/src/components/workspace-panels/KnowledgeSpacePanel.tsx",
         "frontend/src/components/workspace-panels/KnowledgeSpaceSwitcher.tsx",
@@ -2067,7 +2067,7 @@
       "id": "block106-task-events-retention",
       "note": "BLOCK-106 P2 数据层规模债与可评审性：task_events 保留清扫（ISO cutoff + created_at 索引，索引由 agent-task-store 模块级 DDL 自持）+ 控制字节吞字面量修复面（file-dialog 文件名安全校验、build.ps1 输出目录）。防复发门禁=hygiene:check 检查项 5。",
       "patterns": [
-        "core/biof3-server/agent-task-store.js",
+        "core/petri-server/agent-task-store.js",
         "src/ipc/file-dialog.js",
         "sidecars/computer-use-windows/build.ps1",
         "test/block106-task-events-retention.test.mjs"
@@ -2102,7 +2102,7 @@
     },
     {
       "id": "auto-sync-remote",
-      "note": "远程库自动同步（安全档，2026-09-18；2026-09-19 无窗口化：任务 Action=wscript+auto-sync-hidden.vbs 隐藏包装→auto-sync-remote.cmd）：Windows 计划任务 Gewu-AutoSync 每 2 分钟 fetch+判据链+ff-only 快进。独立 dev-infra 脚本不被任何应用代码 require，bash 语法检查（bash -n）+ schtasks LastTaskResult + FETCH_HEAD mtime 前进即验证面，无定向 Node 测试。.vbs 必须 ASCII-only（WSH 按 ANSI/GBK 读，UTF-8 中文注释会吞换行变纯注释 exit 0 空转）。",
+      "note": "远程库自动同步（安全档，2026-09-18；2026-09-19 无窗口化：任务 Action=wscript+auto-sync-hidden.vbs 隐藏包装→auto-sync-remote.cmd）：Windows 计划任务 Petri-AutoSync 每 2 分钟 fetch+判据链+ff-only 快进。独立 dev-infra 脚本不被任何应用代码 require，bash 语法检查（bash -n）+ schtasks LastTaskResult + FETCH_HEAD mtime 前进即验证面，无定向 Node 测试。.vbs 必须 ASCII-only（WSH 按 ANSI/GBK 读，UTF-8 中文注释会吞换行变纯注释 exit 0 空转）。",
       "patterns": [
         "scripts/auto-sync-remote.sh",
         "scripts/auto-sync-remote.cmd",
@@ -2117,7 +2117,7 @@
     },
     {
       "id": "stack-watchdog",
-      "note": "dev 栈法证看门狗（2026-09-19：当日三次全栈进程团灭后部署；计划任务 Gewu-StackWatchdog 每 5 分钟 backend+CDP 双健康探针→死亡抓指纹〔last-seen 进程/幸存者/netstat 画像/事件日志〕→自动拉起 vite+主栈+测试实例）。任务 Action=wscript+stack-watchdog-hidden.vbs 隐藏包装→.biof3-dev-user-data/stack-watchdog.ps1（未跟踪机器基建，同 mac-tunnel-monitor 先例）。无定向 Node 测试，验证面=死亡现场全链自愈（已实测：检测→法证→五口全绿）+ schtasks LastTaskResult。.vbs 必须 ASCII-only（同 auto-sync 教训）。",
+      "note": "dev 栈法证看门狗（2026-09-19：当日三次全栈进程团灭后部署；计划任务 Petri-StackWatchdog 每 5 分钟 backend+CDP 双健康探针→死亡抓指纹〔last-seen 进程/幸存者/netstat 画像/事件日志〕→自动拉起 vite+主栈+测试实例）。任务 Action=wscript+stack-watchdog-hidden.vbs 隐藏包装→.petri-dev-user-data/stack-watchdog.ps1（未跟踪机器基建，同 mac-tunnel-monitor 先例）。无定向 Node 测试，验证面=死亡现场全链自愈（已实测：检测→法证→五口全绿）+ schtasks LastTaskResult。.vbs 必须 ASCII-only（同 auto-sync 教训）。",
       "patterns": [
         "scripts/stack-watchdog-hidden.vbs"
       ],
@@ -2133,16 +2133,16 @@
         "core/shared-backend/engineer-identity.js",
         "core/shared-backend/federation-peers.js",
         "core/shared-backend/federation-grants.js",
-        "core/biof3-server/agent-tools/federation-tools.js",
-        "core/biof3-server/agent-tools/tool-defs.js",
-        "core/biof3-server/mobile-gateway/pairing.js",
-        "core/biof3-server/mobile-gateway/index.js",
-        "core/biof3-server/routes/federation-admin.js",
-        "core/biof3-server/helpers/conversations.js",
-        "core/biof3-server/routes/ai-conversations.js",
-        "core/biof3-server/routes/ai-agent/task-actions.js",
-        "core/biof3-server/routes/ai-agent/chat.js",
-        "core/biof3-server/agent-tools/spawn-agent-tools.js",
+        "core/petri-server/agent-tools/federation-tools.js",
+        "core/petri-server/agent-tools/tool-defs.js",
+        "core/petri-server/mobile-gateway/pairing.js",
+        "core/petri-server/mobile-gateway/index.js",
+        "core/petri-server/routes/federation-admin.js",
+        "core/petri-server/helpers/conversations.js",
+        "core/petri-server/routes/ai-conversations.js",
+        "core/petri-server/routes/ai-agent/task-actions.js",
+        "core/petri-server/routes/ai-agent/chat.js",
+        "core/petri-server/agent-tools/spawn-agent-tools.js",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/Federation.tsx",
         "frontend/src/components/copilot/copilotConversationsClient.ts",
         "frontend/src/components/copilot/copilotClient/agentTaskApi.ts",
@@ -2191,11 +2191,11 @@
       "id": "block109-agent-orchestration-ux",
       "note": "BLOCK-109 子智能体编排呈现与韧性：主循环瞬断重试（loop-orchestrator callProviderWithNetworkRetry）+ spawn 并行度软上限 + 子智能体终态结果组卡（SubAgentResultGroup）+ 概览孤儿过滤（WorkspaceSummaryCard）。契约=test/block109-orchestration.test.mjs（重试四态/软上限源码契约/孤儿过滤源码契约）+ SubAgentResultGroup.test.tsx。证据 acceptance/block-109/。 UI-438 加映：终态组卡（SubAgentResultGroup/useTerminalSubAgentResults）已由「时间线行内 bot 行 + 详情」取代，文件移除。",
       "patterns": [
-        "core/biof3-server/loop-orchestrator.js",
-        "core/biof3-server/agent-tools/spawn-agent-tools.js",
+        "core/petri-server/loop-orchestrator.js",
+        "core/petri-server/agent-tools/spawn-agent-tools.js",
         "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
         "acceptance/block-109/**",
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block109-agent-panel.cjs"
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block109-agent-panel.cjs"
       ],
       "tests": [
         "test/block109-orchestration.test.mjs"
@@ -2205,15 +2205,15 @@
     },
     {
       "id": "block110-jev-decision-integration",
-      "note": "BLOCK-110-JEV-DECISION-INTEGRATION：Jev/System One 决策模型融合。P0 地基=core/biof3-server/helpers/decision-api.js（裸 HTTP wrapper：超时/429/529 退避重试/响应校验仿 validate_choice/类型化降级，D-B base URL 可配置）+ 中文校准 harness（scripts/block110-calibrate.mjs，语料 acceptance/block-110/corpus-*.json）→ P1 conversations.js _maybeDetectTopicShift noul 直替 → P2 knowledge-space.js 二跳 → P3 选做 agent-runner 预路由。契约=test/block110-decision-api.test.mjs（放行/拒收/重试/降级/D-B/语料完整性 15 项）。证据 acceptance/block-110/（calibration.json 为 P0 收口物）。P1/P2 落地后把对应 core 文件加进 patterns。",
+      "note": "BLOCK-110-JEV-DECISION-INTEGRATION：Jev/System One 决策模型融合。P0 地基=core/petri-server/helpers/decision-api.js（裸 HTTP wrapper：超时/429/529 退避重试/响应校验仿 validate_choice/类型化降级，D-B base URL 可配置）+ 中文校准 harness（scripts/block110-calibrate.mjs，语料 acceptance/block-110/corpus-*.json）→ P1 conversations.js _maybeDetectTopicShift noul 直替 → P2 knowledge-space.js 二跳 → P3 选做 agent-runner 预路由。契约=test/block110-decision-api.test.mjs（放行/拒收/重试/降级/D-B/语料完整性 15 项）。证据 acceptance/block-110/（calibration.json 为 P0 收口物）。P1/P2 落地后把对应 core 文件加进 patterns。",
       "patterns": [
-        "core/biof3-server/helpers/decision-api.js",
+        "core/petri-server/helpers/decision-api.js",
         "scripts/block110-calibrate.mjs",
         "scripts/block110-merge-corpus.cjs",
         "acceptance/block-110/**",
         "test/block110-*.test.mjs",
         "scripts/block110-p1-ab.mjs",
-        "core/biof3-server/helpers/knowledge-space.js"
+        "core/petri-server/helpers/knowledge-space.js"
       ],
       "tests": [
         "test/block110-decision-api.test.mjs",
@@ -2226,14 +2226,14 @@
     },
     {
       "id": "block125-reject-loop",
-      "note": "BLOCK-125（C-17a）reject→agent 回路拓扑修复：拒绝清单根目录解析统一 BIOF3_LOCAL_DATA_DIR 优先（USER_DATA_DIR 回退）——修复测试实例/独立后端拓扑下读写两侧 userData 脑裂（BLOCK-85 家族）；契约=reject-loop-root（解析优先级+写读收敛+IPC 写侧源码扫描守卫）+存量 system-prompt-rejects 11 契约回归；实机走查=测试实例 CDP 拒绝→共享目录落盘→:3001 下一轮 agent 引用被拒文件（acceptance/block-125/）。",
+      "note": "BLOCK-125（C-17a）reject→agent 回路拓扑修复：拒绝清单根目录解析统一 PETRI_LOCAL_DATA_DIR 优先（USER_DATA_DIR 回退）——修复测试实例/独立后端拓扑下读写两侧 userData 脑裂（BLOCK-85 家族）；契约=reject-loop-root（解析优先级+写读收敛+IPC 写侧源码扫描守卫）+存量 system-prompt-rejects 11 契约回归；实机走查=测试实例 CDP 拒绝→共享目录落盘→:3001 下一轮 agent 引用被拒文件（acceptance/block-125/）。",
       "patterns": [
         "test/reject-loop-root.test.mjs",
         "scripts/block125-reject-loop-live.mjs",
         "acceptance/block-125/**",
         "src/ipc/working-tree-review.js",
-        "core/biof3-server/agent-runner.js",
-        "core/biof3-server/helpers/system-prompt.js"
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/helpers/system-prompt.js"
       ],
       "tests": [
         "test/reject-loop-root.test.mjs",
@@ -2263,10 +2263,10 @@
     },
     {
       "id": "hk03-symbol-graph",
-      "note": "HK-03 符号图/导入边精确分类查询（typescript Compiler API 零新增依赖；选型/回放/DEAD 语义边界=docs/hk03-symbol-graph-selection.md）。BLOCK-124（C-13）内核单源迁 core/biof3-server/helpers/code-graph.js（scripts/symbol-graph.mjs 只剩 CLI 薄壳），契约测试随迁。补登原因=UI-445 提交 c3387d24 登记 test:changed fail-closed 拦截本脚本未登记，红旗归属 HK-03 收口清偿。",
+      "note": "HK-03 符号图/导入边精确分类查询（typescript Compiler API 零新增依赖；选型/回放/DEAD 语义边界=docs/hk03-symbol-graph-selection.md）。BLOCK-124（C-13）内核单源迁 core/petri-server/helpers/code-graph.js（scripts/symbol-graph.mjs 只剩 CLI 薄壳），契约测试随迁。补登原因=UI-445 提交 c3387d24 登记 test:changed fail-closed 拦截本脚本未登记，红旗归属 HK-03 收口清偿。",
       "patterns": [
         "scripts/symbol-graph.mjs",
-        "core/biof3-server/helpers/code-graph.js",
+        "core/petri-server/helpers/code-graph.js",
         "test/symbol-graph.test.mjs"
       ],
       "tests": [
@@ -2280,12 +2280,12 @@
       "id": "block124-codegraph-tools",
       "note": "BLOCK-124（C-13）codegraph 双工具注册面：session 域 defs + registry HANDLERS/CONTRACTS + tool-metadata + 动词三面（tool-events / 前端 toolActivity / fixture）；根解析复用 workspace-tools withWorkspace 双闸。工具总数钉 74→76 同步四处（agent-tool-registry×2 / tool-activity-labels / block116 存量红顺手清偿）。G-04 根治（BLOCK-123 遗留观察项）：workspace_exec 命令不存在反馈增形（commandNotFoundHint 候选+note 指路，locale 无关确定性判定）+契约测试+实机探针随本规则。内核契约另由 hk03-symbol-graph 规则覆盖。",
       "patterns": [
-        "core/biof3-server/agent-tools/codegraph-tools.js",
-        "core/biof3-server/agent-tools/tool-defs/session.js",
-        "core/biof3-server/agent-tools/registry.js",
-        "core/biof3-server/agent-tools/tool-metadata.js",
-        "core/biof3-server/agent-tools/tool-events.js",
-        "core/biof3-server/agent-tools/workspace-tools.js",
+        "core/petri-server/agent-tools/codegraph-tools.js",
+        "core/petri-server/agent-tools/tool-defs/session.js",
+        "core/petri-server/agent-tools/registry.js",
+        "core/petri-server/agent-tools/tool-metadata.js",
+        "core/petri-server/agent-tools/tool-events.js",
+        "core/petri-server/agent-tools/workspace-tools.js",
         "frontend/src/components/copilot/toolActivity.ts",
         "test/fixtures/tool-activity-labels.json",
         "test/codegraph-tools.test.mjs",
@@ -2348,15 +2348,15 @@
     },
     {
       "id": "block111-jev-w1-marker",
-      "note": "BLOCK-111-JEV-W1-MARKER-CLASSIFICATION：决策内化弧 W1-1 marker→细胞类型判别二跳。interpret.js CELL_MARKERS 规则表候选生成 + decision-api choice 二跳（D-5 单阈值 θ=0.55 门控，D-4 默认关 BIOF3_JEV_MARKER_GUARD=1 显式开）+ ai-legacy.js /api/ai/interpret cellTypeHintsDetailed additive（cellTypeHints 老契约零变化）。契约=test/block111-marker-classification.test.mjs（现行契约钉/候选推导/请求形状/降级五态/伪造候选拒收/门控边界 14 项）。P0 证据 acceptance/block-111/（calibration.json gate.passed + corpus 104 条）。P2 实机 flow 落地后把脚本加进 patterns。",
+      "note": "BLOCK-111-JEV-W1-MARKER-CLASSIFICATION：决策内化弧 W1-1 marker→细胞类型判别二跳。interpret.js CELL_MARKERS 规则表候选生成 + decision-api choice 二跳（D-5 单阈值 θ=0.55 门控，D-4 默认关 PETRI_JEV_MARKER_GUARD=1 显式开）+ ai-legacy.js /api/ai/interpret cellTypeHintsDetailed additive（cellTypeHints 老契约零变化）。契约=test/block111-marker-classification.test.mjs（现行契约钉/候选推导/请求形状/降级五态/伪造候选拒收/门控边界 14 项）。P0 证据 acceptance/block-111/（calibration.json gate.passed + corpus 104 条）。P2 实机 flow 落地后把脚本加进 patterns。",
       "patterns": [
-        "core/biof3-server/helpers/interpret.js",
-        "core/biof3-server/routes/ai-legacy.js",
+        "core/petri-server/helpers/interpret.js",
+        "core/petri-server/routes/ai-legacy.js",
         "scripts/block111-p0-calibrate.mjs",
         "scripts/block111-p1-ab.mjs",
         "acceptance/block-111/**",
         "test/block111-*.test.mjs",
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block111-marker-live.cjs"
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block111-marker-live.cjs"
       ],
       "tests": [
         "test/block111-marker-classification.test.mjs"
@@ -2367,15 +2367,15 @@
     },
     {
       "id": "block112-copilot-intent",
-      "note": "BLOCK-112-COPILOT-INTENT-ROUTING：W1-2 copilot 发送前意图路由。intent-router.js 决策接点（choice 四类，θ=0.70 门控，默认关 BIOF3_JEV_INTENT_ROUTE=1）+ chitchat-fast-path.js 快路径（callModelTask 直答→run_started/delta 事件回放→markAgentTaskDone）+ chat.js 提交链分支（guard 关逐字节等价）。契约=test/block112-intent-routing.test.mjs（guard 零出站/降级五态/伪造类目拒收/采纳与门控/快路径事件契约/失败回退窗口 13 项）。P0 证据 acceptance/block-112/。P2 实机 flow 落地后把脚本加进 patterns。",
+      "note": "BLOCK-112-COPILOT-INTENT-ROUTING：W1-2 copilot 发送前意图路由。intent-router.js 决策接点（choice 四类，θ=0.70 门控，默认关 PETRI_JEV_INTENT_ROUTE=1）+ chitchat-fast-path.js 快路径（callModelTask 直答→run_started/delta 事件回放→markAgentTaskDone）+ chat.js 提交链分支（guard 关逐字节等价）。契约=test/block112-intent-routing.test.mjs（guard 零出站/降级五态/伪造类目拒收/采纳与门控/快路径事件契约/失败回退窗口 13 项）。P0 证据 acceptance/block-112/。P2 实机 flow 落地后把脚本加进 patterns。",
       "patterns": [
-        "core/biof3-server/helpers/intent-router.js",
-        "core/biof3-server/helpers/chitchat-fast-path.js",
-        "core/biof3-server/routes/ai-agent/chat.js",
+        "core/petri-server/helpers/intent-router.js",
+        "core/petri-server/helpers/chitchat-fast-path.js",
+        "core/petri-server/routes/ai-agent/chat.js",
         "scripts/block112-p0-calibrate.mjs",
         "acceptance/block-112/**",
         "test/block112-*.test.mjs",
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block112-intent-live.cjs"
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block112-intent-live.cjs"
       ],
       "frontendRelated": false,
       "classifiesScripts": true,
@@ -2412,15 +2412,15 @@
       "id": "block116-decision-platform",
       "note": "BLOCK-116-DECISION-PLATFORM：W2 决策平台化。decision-log.js 台账（migration 011 additive，best-effort 永不 throw，meta {point,threshold} 咽喉）+ decision-thresholds.js 阈值注册表（七接点阈值/门↔校准证据绑定，一致性契约机械承载重校准红线）+ decision-api meta 记账 + decisions.js 观测端点 + DecisionUsagePanel 设置面板 + calibration-common.mjs 校准共享库。契约=test/block116-decision-platform.test.mjs（记账行/降级行/never-throw/无 meta 零行/注册表一致性/聚合 7 项）。",
       "patterns": [
-        "core/biof3-server/helpers/decision-log.js",
-        "core/biof3-server/helpers/decision-thresholds.js",
-        "core/biof3-server/helpers/decision-api.js",
-        "core/biof3-server/routes/ai-agent/decisions.js",
+        "core/petri-server/helpers/decision-log.js",
+        "core/petri-server/helpers/decision-thresholds.js",
+        "core/petri-server/helpers/decision-api.js",
+        "core/petri-server/routes/ai-agent/decisions.js",
         "src/migrations/011_decision_log.sql",
         "scripts/lib/calibration-common.mjs",
         "acceptance/block-116/**",
         "test/block116-*.test.mjs",
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block116-decision-platform-live.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block116-decision-platform-live.cjs",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/DecisionUsagePanel.tsx"
       ],
       "tests": [
@@ -2448,15 +2448,15 @@
     },
     {
       "id": "block113-tool-prerouting",
-      "note": "BLOCK-113-TOOL-PREROUTING：W1-3 工具两跳预路由。tool-router.js 决策接点（choice 九域+all，θ=0.80，默认关 BIOF3_JEV_TOOL_ROUTE=1）+ narrowToolDefsByFamily 收窄器（路由域∪session 底座）+ agent-runner 下发链挂钩 + tool-defs.js DOMAIN_TOOL_DEFS additive 导出（71 工具恒等红线）。契约=test/block113-tool-prerouting.test.mjs（恒等/guard 零出站/降级五态/伪造域拒收/all 弃权/低置信/收窄器保序与保守回退 12 项）。P0 证据 acceptance/block-113/。",
+      "note": "BLOCK-113-TOOL-PREROUTING：W1-3 工具两跳预路由。tool-router.js 决策接点（choice 九域+all，θ=0.80，默认关 PETRI_JEV_TOOL_ROUTE=1）+ narrowToolDefsByFamily 收窄器（路由域∪session 底座）+ agent-runner 下发链挂钩 + tool-defs.js DOMAIN_TOOL_DEFS additive 导出（71 工具恒等红线）。契约=test/block113-tool-prerouting.test.mjs（恒等/guard 零出站/降级五态/伪造域拒收/all 弃权/低置信/收窄器保序与保守回退 12 项）。P0 证据 acceptance/block-113/。",
       "patterns": [
-        "core/biof3-server/helpers/tool-router.js",
-        "core/biof3-server/agent-tools/tool-defs.js",
-        "core/biof3-server/agent-runner.js",
+        "core/petri-server/helpers/tool-router.js",
+        "core/petri-server/agent-tools/tool-defs.js",
+        "core/petri-server/agent-runner.js",
         "scripts/block113-p0-calibrate.mjs",
         "acceptance/block-113/**",
         "test/block113-*.test.mjs",
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block113-toolroute-live.cjs"
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block113-toolroute-live.cjs"
       ],
       "tests": [
         "test/block112-intent-routing.test.mjs"
@@ -2470,15 +2470,15 @@
       "note": "BLOCK-109-CORE-ARCH-CONVERGENCE 会话核心链路架构收敛：P0 拆前行为基线（BLOCK-92 先例）=block109-p0-baseline.test.mjs（一轮带工具调用会话的 SSE 事件序列/runLoop 返回契约/task_events 回放恒等/流中断形态@runLoop 边界）。P1 事件溯源单一事实源+组装唯一化动主链文件必跑。证据 acceptance/block-109/。 三包增量（2026-09-21 用户裁决「这四个搞起」）：汇报收敛纪律/终态对账/自动计划意图恢复接线与纯函数契约=test/block109-reporting-reconcile.test.mjs。",
       "patterns": [
         "test/block109-p0-baseline.test.mjs",
-        "core/biof3-server/loop-orchestrator.js",
-        "core/biof3-server/agent-runner.js",
-        "core/biof3-server/conversation-adapter.js",
-        "core/biof3-server/helpers/history-assembly.js",
-        "core/biof3-server/routes/ai-agent/**",
+        "core/petri-server/loop-orchestrator.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/conversation-adapter.js",
+        "core/petri-server/helpers/history-assembly.js",
+        "core/petri-server/routes/ai-agent/**",
         "scripts/arch-cycles-gate.mjs",
         "acceptance/block-109/**",
-        "core/biof3-server/helpers/plan-intent.js",
-        "core/biof3-server/helpers/agent-reconciliation.js",
+        "core/petri-server/helpers/plan-intent.js",
+        "core/petri-server/helpers/agent-reconciliation.js",
         "core/shared-backend/llm-providers/deepseek.js"
       ],
       "tests": [
@@ -2497,12 +2497,12 @@
     },
     {
       "id": "block117-laya-supply-validation",
-      "note": "BLOCK-117-LAYA-SUPPLY-VALIDATION：本地 Laya 决策供给接入验证（校准+阈值重定）。线兼容层在仓库外 laya_decide serve（POST /v1/systemone 别名，decision-api 客户端零改动）；仓内=真实 Laya 响应 fixtures 过 decision-api validateAnswers 契约 + 七接点 Jev 注册表零漂移红线 + 三接点校准 harness（CALIBRATION_EVIDENCE_OUT/FILE/MODEL 输出重定向 env，默认行为不变）+ block117-p0-calibrate 编排（BIOF3_DECISION_CONFIG_PATH 沙箱供给）+ block117-layasupply-live 实机 flow（PUT provider 切换→真跑→台账→文件级还原）。裁决证据=acceptance/block-117/。 三个存量校准 harness 的输出重定向 env 触改归各自 block 规则（单规则分类契约）。",
+      "note": "BLOCK-117-LAYA-SUPPLY-VALIDATION：本地 Laya 决策供给接入验证（校准+阈值重定）。线兼容层在仓库外 laya_decide serve（POST /v1/systemone 别名，decision-api 客户端零改动）；仓内=真实 Laya 响应 fixtures 过 decision-api validateAnswers 契约 + 七接点 Jev 注册表零漂移红线 + 三接点校准 harness（CALIBRATION_EVIDENCE_OUT/FILE/MODEL 输出重定向 env，默认行为不变）+ block117-p0-calibrate 编排（PETRI_DECISION_CONFIG_PATH 沙箱供给）+ block117-layasupply-live 实机 flow（PUT provider 切换→真跑→台账→文件级还原）。裁决证据=acceptance/block-117/。 三个存量校准 harness 的输出重定向 env 触改归各自 block 规则（单规则分类契约）。",
       "patterns": [
         "scripts/block117-p0-calibrate.mjs",
         "acceptance/block-117/**",
         "test/block117-*.test.mjs",
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block117-layasupply-live.cjs"
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block117-layasupply-live.cjs"
       ],
       "tests": [
         "test/block117-laya-supply.test.mjs"
@@ -2524,7 +2524,7 @@
         "frontend/src/components/copilot/SimpleChat/LoopStatusPanel.tsx",
         "frontend/src/components/copilot/SimpleChat/LoopStatusPanel.test.tsx",
         "frontend/src/components/copilot/simple-chat.css",
-        "core/biof3-server/agent-tools/tool-events.js",
+        "core/petri-server/agent-tools/tool-events.js",
         "test/tool-activity-labels.test.mjs",
         "test/fixtures/tool-activity-labels.json",
         "scripts/ui437-*",
@@ -2550,13 +2550,13 @@
     },
     {
       "id": "block119-output-judge-harness",
-      "note": "BLOCK-119-OUTPUT-JUDGE-HARNESS：输出评判 Harness 工程。judge-core（canonical 单源 core/biof3-server/helpers/judge-core.js，scripts/lib/harness/judge-core.mjs ESM 薄壳）三态推进门（PASS/RETRY×1/ESCALATE，fit score 0-4 + faithful 需 reference + goal_N）+ stability-core 探针（k 重放一致率）+ 语料挖掘（llm-transcripts 指针，隐私红线原文不入仓）+ fit 校准（θ=3 精度 0.8254/覆盖 0.7875）+ 注册表 output-judge 接点（faithful/goal=observe-only）+ output:judge CLI + P2 子智能体汇报门（helpers/report-guard.js，agent-runner 挂点，默认关 BIOF3_JEV_REPORT_GUARD=1，fail-open+RETRY×1）。契约=test/block119-output-judge.test.mjs + test/block119-report-guard.test.mjs。证据 acceptance/block-119/。",
+      "note": "BLOCK-119-OUTPUT-JUDGE-HARNESS：输出评判 Harness 工程。judge-core（canonical 单源 core/petri-server/helpers/judge-core.js，scripts/lib/harness/judge-core.mjs ESM 薄壳）三态推进门（PASS/RETRY×1/ESCALATE，fit score 0-4 + faithful 需 reference + goal_N）+ stability-core 探针（k 重放一致率）+ 语料挖掘（llm-transcripts 指针，隐私红线原文不入仓）+ fit 校准（θ=3 精度 0.8254/覆盖 0.7875）+ 注册表 output-judge 接点（faithful/goal=observe-only）+ output:judge CLI + P2 子智能体汇报门（helpers/report-guard.js，agent-runner 挂点，默认关 PETRI_JEV_REPORT_GUARD=1，fail-open+RETRY×1）。契约=test/block119-output-judge.test.mjs + test/block119-report-guard.test.mjs。证据 acceptance/block-119/。",
       "patterns": [
         "scripts/block119-*.mjs",
         "scripts/lib/harness/**",
-        "core/biof3-server/helpers/judge-core.js",
-        "core/biof3-server/helpers/report-guard.js",
-        "core/biof3-server/agent-runner.js",
+        "core/petri-server/helpers/judge-core.js",
+        "core/petri-server/helpers/report-guard.js",
+        "core/petri-server/agent-runner.js",
         "acceptance/block-119/**",
         "test/block119-*.test.mjs"
       ],
@@ -2572,10 +2572,10 @@
       "id": "agent-steering",
       "note": "子智能体实时 steering（2026-09-23 增量）：send_message/queueUserMessage 复用 BLOCK-98 M4 输入插队队列实时送达（队列条目扩展 {text, meta}，parentMessageSeq 供回执）+ M4 注入跨迭代持久（drain 后同步 fullMessages）+ parent_message_delivered 回执 + followup_task/launchUserFollowup 经 collectUndeliveredParentMessages 去重已实时送达的父消息。",
       "patterns": [
-        "core/biof3-server/agent-tools/spawn-agent-tools.js",
-        "core/biof3-server/agent-tools/tool-defs/agent-orchestration.js",
-        "core/biof3-server/helpers/agent-resilience.js",
-        "core/biof3-server/agent-runner.js"
+        "core/petri-server/agent-tools/spawn-agent-tools.js",
+        "core/petri-server/agent-tools/tool-defs/agent-orchestration.js",
+        "core/petri-server/helpers/agent-resilience.js",
+        "core/petri-server/agent-runner.js"
       ],
       "tests": [
         "test/agent-steering.test.mjs",
@@ -2589,8 +2589,8 @@
       "id": "block120-reconciliation-linkage",
       "note": "BLOCK-120-RECONCILIATION-LINKAGE（BK-03）：终态对账 v2 条目级归属。spawn_agent/followup_task 增可选 todoRefs（normalizeTodoRefs fail-closed + latestTodoIds 快照对照，未登记 id 丢弃回传）落 params.todoRefs；对账 v2=helpers/agent-reconciliation.js 按 refs 反查清单出 item_level_mismatch 条目级失真（无 linkage 回退 v1 kind）。契约=test/block49-spawn-agent-tools.test.mjs + test/block109-reporting-reconcile.test.mjs。证据 acceptance/block-120/。",
       "patterns": [
-        "core/biof3-server/agent-tools/spawn-agent-tools.js",
-        "core/biof3-server/helpers/agent-reconciliation.js",
+        "core/petri-server/agent-tools/spawn-agent-tools.js",
+        "core/petri-server/helpers/agent-reconciliation.js",
         "acceptance/block-120/**"
       ],
       "tests": [
@@ -2602,9 +2602,9 @@
       "id": "ck03-events-bus",
       "note": "CK-03（C-02 轮询→SSE 第一批：jobs 域失效通知）：helpers/event-bus.js（SSE 客户端注册表+publishInvalidation+心跳）+ routes/events-bus.js（GET /api/events 通道）+ agent-task-store 4 发布点（create/markDone/markFailed/markCancelled）+ 前端 hooks/useInvalidationStream（fetch-SSE 解析+指数退避重连）+ 消费方接入（useConversationJobs/project-workspace/WorkspaceSummaryCard 706 jobs 轮询降频）。契约=test/ck03-events-bus.test.mjs。 UI-442 自然取证目录（acceptance/ui-442/）随本规则登记。",
       "patterns": [
-        "core/biof3-server/helpers/event-bus.js",
-        "core/biof3-server/routes/events-bus.js",
-        "core/biof3-server/agent-task-store.js",
+        "core/petri-server/helpers/event-bus.js",
+        "core/petri-server/routes/events-bus.js",
+        "core/petri-server/agent-task-store.js",
         "frontend/src/hooks/useInvalidationStream.ts",
         "frontend/src/hooks/useConversationJobs.ts",
         "test/ck03-*.test.mjs",
@@ -2620,7 +2620,7 @@
       "id": "ck04-section-budgets",
       "note": "CK-04（C-04 分段 token 预算治理第一刀）：system-prompt.js 组装重构为 buildSystemPromptSections（段计量 sections 报告）+ 段级字符预算表 SECTION_CHAR_BUDGETS（pageContent 8000/harness 2×2500/workingTreeRejects 4000）+ 超限截断诚实标注；buildSystemPrompt 旧签名零破坏（内部委托）。契约=test/ck04-section-budgets.test.mjs（零破坏全等/计量对账/截断标注）。",
       "patterns": [
-        "core/biof3-server/helpers/system-prompt.js",
+        "core/petri-server/helpers/system-prompt.js",
         "test/ck04-*.test.mjs"
       ],
       "tests": [
@@ -2636,11 +2636,11 @@
       "id": "block121-result-loop-vertical",
       "note": "BLOCK-121 开发态结果闭环垂直切片：flow block121-result-loop（真实 chat→run_tool(deseq2)→artifactTruth→Studio 可信徽标→（P2）Copilot 跨轮引用）+ run_tool 迁 session 域（tool-route 收窄不再剔除执行入口，回归钉在 block113 契约）+（P2）result_summary 有界只读工具。",
       "patterns": [
-        ".agents/skills/gewu-dev-infra/dev-verify/flows/block121-result-loop.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block121-result-loop.cjs",
         "acceptance/block-121/**",
         "docs/block-121-result-loop-vertical-plan.md",
-        "core/biof3-server/agent-tools/tool-defs/remote.js",
-        "core/biof3-server/agent-tools/tool-defs/session.js",
+        "core/petri-server/agent-tools/tool-defs/remote.js",
+        "core/petri-server/agent-tools/tool-defs/session.js",
         "test/block113-tool-prerouting.test.mjs"
       ],
       "tests": [
@@ -2654,8 +2654,8 @@
       "id": "ui444-conversation-export",
       "note": "UI-444 会话导出 Markdown：后端 helpers/conversation-export.js 纯组合器 + GET /ai/conversations/:id/export.md 路由（ai-conversations.js）+ SimpleChat composer 导出按钮（files.downloadFromUrl 静默落 Downloads）。",
       "patterns": [
-        "core/biof3-server/helpers/conversation-export.js",
-        "core/biof3-server/routes/ai-conversations.js",
+        "core/petri-server/helpers/conversation-export.js",
+        "core/petri-server/routes/ai-conversations.js",
         "test/conversation-export.test.mjs",
         "acceptance/ui-444/**",
         "frontend/src/components/copilot/SimpleChat.tsx"
@@ -2669,7 +2669,7 @@
     },
     {
       "id": "ui448-side-chat-dock-alignment",
-      "note": "UI-448 侧边聊天悬浮面体验对齐项目摘要：hooks/sideChatDockStore.ts 共享开态 + SimpleChat/ComposerYield.tsx 让位提示条 + SimpleChat compact 占位符 + CenterPanel agentMainSideChatYield 让位类 + SideChatDock 视觉对齐（--gewu-shadow-float）+ custom.css token + 摘要浮层阴影收编单源；证据目录 acceptance/ui-448/ 归 exactly-one 规则防 fail-closed 拦截。",
+      "note": "UI-448 侧边聊天悬浮面体验对齐项目摘要：hooks/sideChatDockStore.ts 共享开态 + SimpleChat/ComposerYield.tsx 让位提示条 + SimpleChat compact 占位符 + CenterPanel agentMainSideChatYield 让位类 + SideChatDock 视觉对齐（--petri-shadow-float）+ custom.css token + 摘要浮层阴影收编单源；证据目录 acceptance/ui-448/ 归 exactly-one 规则防 fail-closed 拦截。",
       "patterns": [
         "frontend/src/hooks/sideChatDockStore.ts",
         "frontend/src/components/copilot/SimpleChat/ComposerYield.tsx",
@@ -2751,9 +2751,9 @@
       "patterns": [
         "core/shared-backend/result-changeset-service.js",
         "core/shared-backend/result-changeset-service/chain-preview.js",
-        "core/biof3-server/agent-tools/learning.js",
-        "core/biof3-server/agent-tools/result-context-tools.js",
-        "core/biof3-server/agent-tools/result-selection-tools.js",
+        "core/petri-server/agent-tools/learning.js",
+        "core/petri-server/agent-tools/result-context-tools.js",
+        "core/petri-server/agent-tools/result-selection-tools.js",
         "test/block138-f1-chain-pending-registration.test.mjs",
         "acceptance/block-138/**"
       ],
@@ -2839,7 +2839,7 @@
       "patterns": [
         "scripts/bundle-size-baseline.mjs",
         "acceptance/bundle-size-baseline.json",
-        "core/biof3-server/mcp/registry/run-plugin-script.js",
+        "core/petri-server/mcp/registry/run-plugin-script.js",
         "frontend/src/components/result-studio/ScientificInteractionViewer.tsx",
         "frontend/src/components/result-studio/ScientificInteractionViewer.matrixRowIdField.test.tsx",
         "frontend/src/components/result-studio/activeArtifactProjection.ts",
@@ -2860,7 +2860,7 @@
     },
     {
       "id": "block142-renderers",
-      "note": "BLOCK-142 成果面切片 E·renderer 补课（md/xlsx/pdf）：viewerRegistry 三条扩展名规则（.pdf→pdf 包装 WorkspacePdfPreview、.xlsx/.xlsm→exceljs 动态 import 有界网格、.md→react-markdown+remark-gfm 无 rehype-raw 防 XSS）+ 三个新 viewer（MarkdownResultViewer/PdfResultViewer/SpreadsheetResultViewer，样式只走 --gewu-* token）+ Shell 挂载面接线。改任一登记文件即跑四条新契约测试（注册表 block142 + 三 viewer 组件）；前端面经 frontendRelated + frontend/src 自动路由进 vitest（改动源文件走 test:related 反查，ArtifactPinPane 并行受 block140 规则覆盖）。",
+      "note": "BLOCK-142 成果面切片 E·renderer 补课（md/xlsx/pdf）：viewerRegistry 三条扩展名规则（.pdf→pdf 包装 WorkspacePdfPreview、.xlsx/.xlsm→exceljs 动态 import 有界网格、.md→react-markdown+remark-gfm 无 rehype-raw 防 XSS）+ 三个新 viewer（MarkdownResultViewer/PdfResultViewer/SpreadsheetResultViewer，样式只走 --petri-* token）+ Shell 挂载面接线。改任一登记文件即跑四条新契约测试（注册表 block142 + 三 viewer 组件）；前端面经 frontendRelated + frontend/src 自动路由进 vitest（改动源文件走 test:related 反查，ArtifactPinPane 并行受 block140 规则覆盖）。",
       "patterns": [
         "frontend/src/components/result-studio/viewerRegistry.block142.test.ts",
         "frontend/src/components/result-studio/viewerRegistry.test.ts",
@@ -2890,8 +2890,8 @@
       "id": "block144-tech-debt",
       "note": "BLOCK-144 技术债清尾批（C-22/C-23 清偿）：C-22 tool-jobs 布局拼接第三处收敛（tools-metadata.js /api/tools/log/:id 兜底分支接 resolveToolJobExportDirs 候选链，契约测试 block144-c22-log-layout-convergence 钉 tools-metadata.js 源码+HTTP 行为双面）+ C-23 finalizeJobRun/pumpQueuedToolJobs 行为级补测五路径（block144-tool-jobs-behavior，真 SQLite+真工厂+真子进程）。改任一登记源文件即跑两条新契约测试。",
       "patterns": [
-        "core/biof3-server/helpers/tools-executor.js",
-        "core/biof3-server/routes/tools-metadata.js",
+        "core/petri-server/helpers/tools-executor.js",
+        "core/petri-server/routes/tools-metadata.js",
         "test/block144-c22-log-layout-convergence.test.mjs",
         "test/block144-tool-jobs-behavior.test.mjs"
       ],
@@ -2906,8 +2906,8 @@
       "id": "block145-adjudication",
       "note": "BLOCK-145 裁决批（D1/D2/D3=DO）：D1 tunnel 异步化（BK-08 根因修复，remotePortSweep 同步 ssh 下线，block145-tunnel-async 钉 tunnel.js+server.js 冷启动链源码守卫+启动非阻塞行为）；D2 注册表死链退役（tool-registry-script-links 钉「声明脚本必须存在」机械守卫，17 条 legacy 条目指向已删 desktop 侧 tool-scripts）；D3 多因子 design（deseq2-multifactor-design 钉 desktop 校验链 scientific-task-planner.js designFormula/designTerms + pack 侧 deseq2.R 因子项解析，Rscript 不在位显式 skip）；另含 D5 skills 面改动登记（coding-playbook/deg-analysis-standard skill.json、prompts/system.md、skill-scaffold.mjs）。改任一登记源文件即跑三条新契约测试。",
       "patterns": [
-        "core/biof3-server/mobile-gateway/tunnel.js",
-        "core/biof3-server/server.js",
+        "core/petri-server/mobile-gateway/tunnel.js",
+        "core/petri-server/server.js",
         "core/shared-backend/scientific-task-planner.js",
         "core/shared-backend/skill-registry.js",
         "resources/skills/coding-playbook/skill.json",
@@ -2969,8 +2969,8 @@
       "id": "block149-retention",
       "note": "BLOCK-149 PL-D2 落地面：retention-sweeper（resolveToolJobsRetentionDays 纯函数+接线）与 tool-jobs-retention helper 的行为契约由 block136（终态窗口删/保护清单）与 pl4a（纯函数六分支）双测试锚定；改任一文件即跑两条。",
       "patterns": [
-        "core/biof3-server/jobs/retention-sweeper.js",
-        "core/biof3-server/helpers/tool-jobs-retention.js"
+        "core/petri-server/jobs/retention-sweeper.js",
+        "core/petri-server/helpers/tool-jobs-retention.js"
       ],
       "tests": [
         "test/block136-retention.test.mjs",
@@ -3031,7 +3031,7 @@
     },
     {
       "id": "block150-bio-track",
-      "note": "BLOCK-150 审视吸收批第一波 B 轨：data-management 明细中文名（labels 字段+消费端渲染）+ R 缺包守卫契约测试（兄弟仓 gewu-pack-bio/plugins 三插件 R 脚本的守卫存在性指纹锚+三源依赖声明一致性；pack 仓文件不在本仓 pattern 面，测试触发以本仓文件与证据目录为准）。ScientificInteractionViewer caveat 因果句复用 block141 规则面，不重复登记。",
+      "note": "BLOCK-150 审视吸收批第一波 B 轨：data-management 明细中文名（labels 字段+消费端渲染）+ R 缺包守卫契约测试（兄弟仓 petri-pack-bio/plugins 三插件 R 脚本的守卫存在性指纹锚+三源依赖声明一致性；pack 仓文件不在本仓 pattern 面，测试触发以本仓文件与证据目录为准）。ScientificInteractionViewer caveat 因果句复用 block141 规则面，不重复登记。",
       "patterns": [
         "src/ipc/data-management.js",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/DataManagement.tsx",
@@ -3050,10 +3050,10 @@
         "frontend/src/lib/extensionShelves.ts",
         "frontend/src/pages/extensions/**",
         "frontend/src/hooks/useMcpServers.ts",
-        "core/biof3-server/helpers/mcp-settings.js",
-        "core/biof3-server/mcp/client-manager.js",
-        "core/biof3-server/routes/mcp-client.js",
-        "core/biof3-server/agent-tools/mcp-projection.js",
+        "core/petri-server/helpers/mcp-settings.js",
+        "core/petri-server/mcp/client-manager.js",
+        "core/petri-server/routes/mcp-client.js",
+        "core/petri-server/agent-tools/mcp-projection.js",
         "test/fixtures/mcp-fixture-server.cjs",
         "scripts/block156-*.mjs",
         "acceptance/block-156/**",
@@ -3094,15 +3094,15 @@
       "id": "block157-maturity-wave1",
       "note": "BLOCK-157 成熟度蓝图 W1 波：KNW-1/KNW-2 Skills 可见性与渐进披露（skill-tools/tool-defs skill 域/agent-runner 索引注入，静态工具 76→78）+CAP-1 MCP annotations 粒度审批（readOnlyHint→retrieval/none，默认 D4 不变）+DIST-1 插件启停粒度（installed enabled 标志+加载器尊重+plugin:set-enabled IPC+货架开关）+插件目录拓扑收敛（resolveInstalledPluginsDir 单源，BLOCK-125 家族修复）。 探针脚本经本规则 classifiesScripts 分类（platform-branch-freeze 的 scripts/** 为 classifiesScripts:false 不参与 exactly-one）。",
       "patterns": [
-        "core/biof3-server/agent-tools/skill-tools.js",
-        "core/biof3-server/agent-tools/tool-defs/skill.js",
-        "core/biof3-server/agent-tools/tool-defs.js",
-        "core/biof3-server/agent-tools/registry.js",
-        "core/biof3-server/agent-tools/tool-events.js",
-        "core/biof3-server/agent-tools/mcp-projection.js",
-        "core/biof3-server/agent-runner.js",
-        "core/biof3-server/plugin-loader.js",
-        "core/biof3-server/server.js",
+        "core/petri-server/agent-tools/skill-tools.js",
+        "core/petri-server/agent-tools/tool-defs/skill.js",
+        "core/petri-server/agent-tools/tool-defs.js",
+        "core/petri-server/agent-tools/registry.js",
+        "core/petri-server/agent-tools/tool-events.js",
+        "core/petri-server/agent-tools/mcp-projection.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/plugin-loader.js",
+        "core/petri-server/server.js",
         "src/plugin/installed.js",
         "src/ipc/channels.js",
         "src/ipc/plugin.js",
@@ -3144,7 +3144,7 @@
         "src/plugin/uninstall.js",
         "src/plugin/paths.js",
         "src/plugin-schema.js",
-        "core/biof3-server/plugin-loader.js",
+        "core/petri-server/plugin-loader.js",
         "frontend/src/hooks/usePluginStore.ts",
         "frontend/src/components/desktop/PluginStorePanel.tsx",
         "frontend/src/components/desktop/PluginStorePanel/**",
@@ -3165,8 +3165,8 @@
       "id": "block159-mobile-remote-transport",
       "note": "BLOCK-159 手机远程传输层优化：生产投影 gzip（compress.js，零依赖）/隧道探活连败自愈+ServerAlive 15→10/agent SSE 15s 心跳/审计异步写/限流按会话 token 分桶/agent 流水位续传（删 90s 硬预算）/投影 link 状态+回前台 resync/断连横幅 UI-482。读者含 mobile-gateway 邻域契约（block70/145/152）。 家族轻量批增补：scripts/block159-relay-watchdog.sh（中转服务器看门狗，软件独立性=零 IP/厂商写死）。（BLOCK-160 收口代登记：两个在制脚本补 exactly-one 分类，归属 BLOCK-159）（BLOCK-160 收口代登记注记修正：ui-audit-probe.cjs 从 patterns 移除——scripts/** 通配已按 exactly-one 计入，双计即红）（BLOCK-160 收口代登记注记修正：ui-audit-probe.cjs 归还本规则 classifiesScripts 分类——platform-branch-freeze 的 scripts/** 为 pattern-only 不参与 exactly-one）（BLOCK-160 收口代登记：ui-ux-audit 报告目录归属 BLOCK-161 面随规则通配）",
       "patterns": [
-        "core/biof3-server/mobile-gateway/**",
-        "core/biof3-server/routes/ai-agent/events.js",
+        "core/petri-server/mobile-gateway/**",
+        "core/petri-server/routes/ai-agent/events.js",
         "frontend/src/lib/projectionLink.ts",
         "frontend/src/lib/projectionTerminalBridge.ts",
         "frontend/src/lib/projectionDataBridges.ts",
@@ -3197,14 +3197,14 @@
       "id": "block160-maturity-wave2",
       "note": "BLOCK-160 成熟度蓝图 W2 波：ORC-2 动态审批两维（policy evaluateDynamicGuards）/ORC-1 用户规则层（agent-user-rules+REST+设置面）/KNW-3 斜杠菜单双来源（slashSources+workflow-templates 路由）/CAP-2 mcp env 加密（mcp-env-crypto+mcp-settings 接线）/KNW-4⇄DIST-2（SKILL.md 合成导入+mcp-config-import+import IPC）。",
       "patterns": [
-        "core/biof3-server/agent-tools/agent-tool-policy.js",
-        "core/biof3-server/agent-tools/agent-tool-interceptor.js",
-        "core/biof3-server/helpers/agent-user-rules.js",
-        "core/biof3-server/helpers/mcp-env-crypto.js",
-        "core/biof3-server/helpers/mcp-settings.js",
-        "core/biof3-server/helpers/mcp-config-import.js",
-        "core/biof3-server/routes/ai-settings-api.js",
-        "core/biof3-server/routes/tools-catalog.js",
+        "core/petri-server/agent-tools/agent-tool-policy.js",
+        "core/petri-server/agent-tools/agent-tool-interceptor.js",
+        "core/petri-server/helpers/agent-user-rules.js",
+        "core/petri-server/helpers/mcp-env-crypto.js",
+        "core/petri-server/helpers/mcp-settings.js",
+        "core/petri-server/helpers/mcp-config-import.js",
+        "core/petri-server/routes/ai-settings-api.js",
+        "core/petri-server/routes/tools-catalog.js",
         "core/shared-backend/skill-registry.js",
         "src/ipc/pack.js",
         "frontend/src/hooks/usePluginStore.ts",
@@ -3234,13 +3234,13 @@
       "id": "block164-federation-ux",
       "note": "BLOCK-164 联邦协作体验收口：W1 federation_list_peers 工具（delegate 文案指向）/W2 委托历史聚合端点+联邦面板委托记录卡/W3 节点 60s 定时探活心跳。读者含联邦邻域（federation.test+registry 计数+labels 夹具）。",
       "patterns": [
-        "core/biof3-server/routes/federation-admin.js",
-        "core/biof3-server/agent-tools/federation-tools.js",
-        "core/biof3-server/agent-tools/tool-defs/remote.js",
-        "core/biof3-server/agent-tools/tool-events.js",
-        "core/biof3-server/agent-tools/tool-metadata.js",
-        "core/biof3-server/agent-tools/registry.js",
-        "core/biof3-server/agent-task-store.js",
+        "core/petri-server/routes/federation-admin.js",
+        "core/petri-server/agent-tools/federation-tools.js",
+        "core/petri-server/agent-tools/tool-defs/remote.js",
+        "core/petri-server/agent-tools/tool-events.js",
+        "core/petri-server/agent-tools/tool-metadata.js",
+        "core/petri-server/agent-tools/registry.js",
+        "core/petri-server/agent-task-store.js",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/Federation.tsx",
         "frontend/src/components/copilot/toolActivity.ts",
         "frontend/src/components/copilot/copilotClient/agentTaskStream.ts",

@@ -92,8 +92,8 @@ const EXTRA_SOURCE_PATHS = Object.freeze([
   'scripts/g0-rs-p6-electron-pressure-prototype.mjs',
   'scripts/g0-rs-p6-electron-pressure-driver.cjs',
   'test/g0-rs-p6-electron-pressure-prototype.test.mjs',
-  'core/biof3-server/helpers/tools-executor.js',
-  'core/biof3-server/routes/result-studio.js',
+  'core/petri-server/helpers/tools-executor.js',
+  'core/petri-server/routes/result-studio.js',
   'core/shared-backend/result-changeset-service.js',
   'core/shared-backend/result-compare-service.js',
   'core/shared-backend/result-studio-lifecycle.js',
@@ -237,7 +237,7 @@ export function loadGoKeggPressureInput() {
   if (!packRoot) {
     throw Object.assign(new Error('p6_pressure_bio_pack_root_missing'), {
       code: 'p6_pressure_bio_pack_root_missing',
-      detail: { hint: 'set BIOF3_BIO_PACK_ROOT or check out gewu-pack-bio as a sibling directory' },
+      detail: { hint: 'set PETRI_BIO_PACK_ROOT or check out petri-pack-bio as a sibling directory' },
     });
   }
   const inputPath = path.join(
@@ -320,7 +320,7 @@ async function runHttpTool(runtime, { toolId, params, files }) {
   // refuses deep links for conversation-less jobs, so the pressure fixture
   // binds every target job to the live trace conversation after completion.
   {
-    const bind = new Database(runtime.env.BIOF3_DB_PATH);
+    const bind = new Database(runtime.env.PETRI_DB_PATH);
     try {
       bind.prepare('UPDATE tool_jobs SET conversation_id=? WHERE id=? AND conversation_id IS NULL')
         .run(runtime.conversation.id, boundJob.id);
@@ -547,7 +547,7 @@ function probeRevisionImmutability(repository, revisionId) {
 }
 
 function stagePressureHistory(runtime, real) {
-  const db = new Database(runtime.env.BIOF3_DB_PATH);
+  const db = new Database(runtime.env.PETRI_DB_PATH);
   const repository = createResultStudioRepository(db);
   try {
     const volcanoCohort = repository.listRevisionsByChangeSet(
@@ -588,7 +588,7 @@ function stagePressureHistory(runtime, real) {
           changeSetId,
           intentRef: `p6-pressure-synthetic-alias:${artifactId}:${String(index + 1).padStart(3, '0')}`,
           baseCommit: source.sourceCommit,
-          workingBranchRef: `refs/heads/biof3/p6-pressure/alias/${changeSetId}`,
+          workingBranchRef: `refs/heads/petri/p6-pressure/alias/${changeSetId}`,
           parentArtifactRefs: [parent.revisionId],
           createdAt,
         });
@@ -617,7 +617,7 @@ function stagePressureHistory(runtime, real) {
       }
       updateGitRef(
         binding,
-        `refs/heads/biof3/current/${source.artifactFamilyId}`,
+        `refs/heads/petri/current/${source.artifactFamilyId}`,
         source.sourceCommit,
       );
     }
@@ -627,7 +627,7 @@ function stagePressureHistory(runtime, real) {
     const currentBeforePreview = repository.listCurrentRevisions(runtime.project.id);
     const previewChangeSetId = deterministicId('cs', runtime.project.id, 'pressure-preview-cohort');
     const previewCreatedAt = new Date(Date.UTC(2026, 6, 31, 0, 0, 1)).toISOString();
-    const previewRef = `refs/heads/biof3/p6-pressure/preview/${previewChangeSetId}`;
+    const previewRef = `refs/heads/petri/p6-pressure/preview/${previewChangeSetId}`;
     const previewSources = ['classified_table', 'volcano', 'volcano_svg'].map((artifactId) => {
       const source = byArtifact.get(artifactId);
       const parent = repository.getCurrentRevision(source.artifactFamilyId, source.projectId);
@@ -770,7 +770,7 @@ function inspectPng(filePath) {
 
 function inspectPhysicalTruth(runtime, real, pressure) {
   const root = path.resolve(runtime.project.workspace_path);
-  const db = new Database(runtime.env.BIOF3_DB_PATH, { readonly: true });
+  const db = new Database(runtime.env.PETRI_DB_PATH, { readonly: true });
   const exactArtifact = (job, artifactId, { revisionRequired = true } = {}) => {
     const artifact = artifactRecord(job, artifactId);
     const target = path.resolve(artifact.path);
@@ -1138,7 +1138,7 @@ export async function observeP6ElectronPressure({
   const sourceAtStart = getP6ElectronPressureSourceBinding();
   const backendPort = await freePort();
   const uiPort = await freePort(new Set([backendPort]));
-  const root = mkdtempSync(path.join(tmpdir(), 'biof3-p6-electron-pressure-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-p6-electron-pressure-'));
   const configPath = path.join(root, 'driver-config.json');
   const resultPath = path.join(root, 'driver-result.json');
   let runtime = null;
@@ -1161,8 +1161,8 @@ export async function observeP6ElectronPressure({
       port: backendPort,
       beforeStart: ({ env }) => {
         const rendererOrigin = `http://127.0.0.1:${uiPort}`;
-        env.BIOF3_RENDERER_DEV_URL = rendererOrigin;
-        env.BIOF3_TRUSTED_DESKTOP_ORIGINS = rendererOrigin;
+        env.PETRI_RENDERER_DEV_URL = rendererOrigin;
+        env.PETRI_TRUSTED_DESKTOP_ORIGINS = rendererOrigin;
       },
     });
     vite = spawn(process.execPath, [
@@ -1180,7 +1180,7 @@ export async function observeP6ElectronPressure({
     const pressure = stagePressureHistory(runtime, real);
     const truth = inspectPhysicalTruth(runtime, real, pressure);
     const revisionDigestBeforeElectron = readProjectRevisionDigest(
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       runtime.project.id,
     );
 
@@ -1203,9 +1203,9 @@ export async function observeP6ElectronPressure({
       cwd: ROOT,
       env: {
         ...process.env,
-        BIOF3_DESKTOP: '1',
+        PETRI_DESKTOP: '1',
         R_SERVER_PORT: String(backendPort),
-        BIOF3_P6_PRESSURE_DRIVER_CONFIG: configPath,
+        PETRI_P6_PRESSURE_DRIVER_CONFIG: configPath,
       },
       stdio: ['ignore', 'ignore', 'pipe'],
     });
@@ -1226,7 +1226,7 @@ export async function observeP6ElectronPressure({
     }
     const renderer = JSON.parse(readFileSync(resultPath, 'utf8'));
     const revisionDigestAfterElectron = readProjectRevisionDigest(
-      runtime.env.BIOF3_DB_PATH,
+      runtime.env.PETRI_DB_PATH,
       runtime.project.id,
     );
     const sourceAtEnd = getP6ElectronPressureSourceBinding();

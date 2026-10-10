@@ -566,7 +566,7 @@ function createControlledReplayService(options = {}) {
             }, dependencies);
         const packageDir = path.join(
           dependencies.workspaceRoot,
-          '.biof3',
+          '.petri',
           'replay-packages',
           revisionId,
           confirmationToken,

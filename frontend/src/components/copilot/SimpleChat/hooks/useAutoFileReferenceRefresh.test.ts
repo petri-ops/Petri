@@ -6,7 +6,7 @@
 import { cleanup, renderHook, act, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
+import { petriEvents, dispatchPetriEvent } from '@/lib/events';
 import { useAutoFileReferenceRefresh } from './useAutoFileReferenceRefresh';
 
 const { resetCacheMock } = vi.hoisted(() => ({ resetCacheMock: vi.fn() }));
@@ -23,7 +23,7 @@ const CHANGED = { projectId: 'p_test', source: 'agent' } as const;
 
 function fireChanged() {
   act(() => {
-    dispatchGewuEvent(gewuEvents.projectWorkspaceChanged, CHANGED);
+    dispatchPetriEvent(petriEvents.projectWorkspaceChanged, CHANGED);
   });
 }
 

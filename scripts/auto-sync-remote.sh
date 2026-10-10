@@ -3,13 +3,13 @@
 # auto-sync-remote.sh — 远程库自动同步（安全档：仅 fetch + ff-only 快进）
 # 用户裁决 2026-09-18「计划任务 + 安全档」：分叉/失败只登记 events 待裁决，
 # 绝不自动 rebase / push / stash / 解冲突。
-# 双端同形：Windows=计划任务 Gewu-AutoSync（scripts/auto-sync-remote.cmd 包装，每 2 分钟）；
-# Mac=launchd com.gewu.auto-sync（scripts/auto-sync-mac-setup.sh 一键部署，每 120 秒）。
+# 双端同形：Windows=计划任务 Petri-AutoSync（scripts/auto-sync-remote.cmd 包装，每 2 分钟）；
+# Mac=launchd com.petri.auto-sync（scripts/auto-sync-mac-setup.sh 一键部署，每 120 秒）。
 # 兼容性注记：date 用 %Y-%m-%d %H:%M:%S 而非 %F %T（BSD/GNU 双兼容），无 bash4+ 特性（macOS 自带 bash 3.2 可跑）。
 set -u
 cd "$(dirname "$0")/.." || exit 1
 
-DATA_DIR=".biof3-dev-user-data"
+DATA_DIR=".petri-dev-user-data"
 LOG="$DATA_DIR/auto-sync.log"            # 全量流水：只在有动作的轮次写
 EVENTS="$DATA_DIR/auto-sync-events.log"  # 待裁决事件：agent 会话启动对账入口（SKILL 第 8 条）
 LOCK="$DATA_DIR/.auto-sync.lock"

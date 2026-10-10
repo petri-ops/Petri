@@ -21,7 +21,7 @@ const cyclesGate = await importScript('scripts/arch-cycles-gate.mjs');
 const TODAY = '2026-09-21';
 const fileOf = (name, lines, sha) => ({ path: name, lines, sha256: sha || `sha-${name}-${lines}` });
 const baseOf = (f) => ({ path: f.path, lines: f.lines, sha256: f.sha256 });
-const baselineFrom = (files) => ({ schema: 'biof3/block109-size-ledger.v2', files: files.map(baseOf), total: files.reduce((s, f) => s + f.lines, 0) });
+const baselineFrom = (files) => ({ schema: 'petri/block109-size-ledger.v2', files: files.map(baseOf), total: files.reduce((s, f) => s + f.lines, 0) });
 
 test('P3 自测 — 绿样本：预算内+指纹一致+无过期例外', () => {
   const files = [fileOf('a.js', 500), fileOf('b.js', 900)];
@@ -97,7 +97,7 @@ test('P3 自测 — 只出不进棘轮（BLOCK-154 P2-3）：v2 缺白名单红 
   const baseline = baselineFrom(base);
   const mk = (files) => ({ schema: 'v2', files, total: 0 });
   const v2exceptions = (list, allowed) => ({
-    schema: 'biof3/block109-size-exceptions.v2',
+    schema: 'petri/block109-size-exceptions.v2',
     allowedExceptionPaths: allowed,
     exceptions: list,
   });

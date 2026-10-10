@@ -31,7 +31,7 @@
 
 const path = require('node:path');
 const fs = require('node:fs');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'sec-harden');
@@ -66,7 +66,7 @@ const RENDERER_PROBE = `(async function(){
   btn.addEventListener('click', async () => {
     window.__secHardenProbe.clickedAt = Date.now();
     try {
-      await navigator.clipboard.writeText('gewu-sec-harden-click');
+      await navigator.clipboard.writeText('petri-sec-harden-click');
       window.__secHardenProbe.result = 'ok';
     } catch (error) {
       window.__secHardenProbe.result = 'failed:' + (error && error.message);
@@ -104,9 +104,9 @@ const RENDERER_PROBE = `(async function(){
     return { label, settled, url, guestId, err, guestGeolocation };
   }
 
-  out.allowed = await tryAttach('allowlisted', 'persist:gewu-browser', 'http://127.0.0.1:3001/api/health');
+  out.allowed = await tryAttach('allowlisted', 'persist:petri-browser', 'http://127.0.0.1:3001/api/health');
   out.badPartition = await tryAttach('bad_partition', 'persist:attacker', 'http://127.0.0.1:3001/api/health');
-  out.badScheme = await tryAttach('file_scheme', 'persist:gewu-browser', 'file:///etc/passwd');
+  out.badScheme = await tryAttach('file_scheme', 'persist:petri-browser', 'file:///etc/passwd');
 
   host.remove();
   return JSON.stringify(out);

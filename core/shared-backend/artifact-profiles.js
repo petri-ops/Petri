@@ -20,7 +20,7 @@ const PROFILE_COMPATIBILITY_STATUSES = Object.freeze([
   'blocked',
 ]);
 const PROFILE_CHANGE_CLASSES = Object.freeze(['compatible', 'migration', 'breaking']);
-const PROFILE_ID_RE = /^(biof3\.[a-z0-9]+(?:-[a-z0-9]+)*)\.v([1-9]\d*)$/;
+const PROFILE_ID_RE = /^(petri\.[a-z0-9]+(?:-[a-z0-9]+)*)\.v([1-9]\d*)$/;
 
 const DEFAULT_PROVENANCE = Object.freeze({
   requiresParentJob: true,
@@ -93,9 +93,9 @@ function defineProfile(definition) {
 }
 
 const ARTIFACT_PROFILES = {
-  'biof3.counts-matrix.v1': defineProfile({
-    profileId: 'biof3.counts-matrix.v1',
-    familyId: 'biof3.counts-matrix',
+  'petri.counts-matrix.v1': defineProfile({
+    profileId: 'petri.counts-matrix.v1',
+    familyId: 'petri.counts-matrix',
     profileKind: 'data',
     description: 'Canonical raw integer count matrix',
     scientificMeaning: 'Untransformed non-negative integer feature counts measured for biological samples',
@@ -120,9 +120,9 @@ const ARTIFACT_PROFILES = {
     consumers: ['sample-metadata-validator', 'deseq2', 'expression-qc'],
   }),
 
-  'biof3.sample-metadata.v1': defineProfile({
-    profileId: 'biof3.sample-metadata.v1',
-    familyId: 'biof3.sample-metadata',
+  'petri.sample-metadata.v1': defineProfile({
+    profileId: 'petri.sample-metadata.v1',
+    familyId: 'petri.sample-metadata',
     profileKind: 'data',
     description: 'Canonical sample metadata and scientific design table',
     scientificMeaning: 'One row per biological sample with explicit sample identity and experimental condition',
@@ -156,9 +156,9 @@ const ARTIFACT_PROFILES = {
     consumers: ['deseq2', 'pca-explorer', 'wgcna'],
   }),
 
-  'biof3.expression-matrix.v1': defineProfile({
-    profileId: 'biof3.expression-matrix.v1',
-    familyId: 'biof3.expression-matrix',
+  'petri.expression-matrix.v1': defineProfile({
+    profileId: 'petri.expression-matrix.v1',
+    familyId: 'petri.expression-matrix',
     profileKind: 'data',
     description: 'Canonical normalized expression matrix',
     scientificMeaning: 'Finite continuous abundance values with an explicitly declared normalization and scale',
@@ -185,9 +185,9 @@ const ARTIFACT_PROFILES = {
     consumers: ['pca-explorer', 'gene-correlation', 'wgcna'],
   }),
 
-  'biof3.deg.v1': defineProfile({
-    profileId: 'biof3.deg.v1',
-    familyId: 'biof3.deg',
+  'petri.deg.v1': defineProfile({
+    profileId: 'petri.deg.v1',
+    familyId: 'petri.deg',
     profileKind: 'artifact',
     description: 'Canonical differential expression gene table',
     scientificMeaning: 'Per-gene effect size and multiplicity-controlled statistical evidence for one explicit contrast',
@@ -234,9 +234,9 @@ const ARTIFACT_PROFILES = {
     ],
   }),
 
-  'biof3.gene-list.v1': defineProfile({
-    profileId: 'biof3.gene-list.v1',
-    familyId: 'biof3.gene-list',
+  'petri.gene-list.v1': defineProfile({
+    profileId: 'petri.gene-list.v1',
+    familyId: 'petri.gene-list',
     profileKind: 'artifact',
     description: 'Canonical gene set or ranked gene list',
     scientificMeaning: 'A declared set or deterministic ranking of gene identifiers derived from a scientific artifact',
@@ -269,9 +269,9 @@ const ARTIFACT_PROFILES = {
     ],
   }),
 
-  'biof3.enrichment-table.v1': defineProfile({
-    profileId: 'biof3.enrichment-table.v1',
-    familyId: 'biof3.enrichment-table',
+  'petri.enrichment-table.v1': defineProfile({
+    profileId: 'petri.enrichment-table.v1',
+    familyId: 'petri.enrichment-table',
     profileKind: 'artifact',
     description: 'Canonical functional enrichment result table',
     scientificMeaning: 'Per-term enrichment statistics tied to a declared gene universe, database and analysis method',

@@ -7,7 +7,7 @@
 //   BIO-D5(:122) 多因子 design 裁决点 = R 公式语法暴露程度与防呆深度
 //
 // 被测链（单列假设的精确位置）：
-//   pack 侧  gewu-pack-bio/plugins/deseq2/scripts/deseq2.R
+//   pack 侧  petri-pack-bio/plugins/deseq2/scripts/deseq2.R
 //            :57-61 normalize_design_col 仅剥首个 `~`，:63 收窄为标量 design_col，
 //            :108 Preflight 2 按单列名 `%in% colnames` 校验，:168 as.formula(paste0("~ ", design_col))
 //   desktop  core/shared-backend/scientific-task-planner.js
@@ -47,16 +47,16 @@ const { RExecutor } = require('../core/shared-backend/executors/r-executor.js');
 
 const TEST_DIR = path.dirname(fileURLToPath(import.meta.url));
 const DESKTOP_ROOT = path.resolve(TEST_DIR, '..');
-const DESEQ2_DIR = path.resolve(DESKTOP_ROOT, '..', 'gewu-pack-bio', 'plugins', 'deseq2');
+const DESEQ2_DIR = path.resolve(DESKTOP_ROOT, '..', 'petri-pack-bio', 'plugins', 'deseq2');
 const DESEQ2_R = path.join(DESEQ2_DIR, 'scripts', 'deseq2.R');
-const THEME_R = path.join(DESEQ2_DIR, 'scripts', '_biof3-theme.R');
+const THEME_R = path.join(DESEQ2_DIR, 'scripts', '_petri-theme.R');
 
 // ---------------------------------------------------------------------------
 // 环境探测：R 依赖测试不在位时显式 skip（skip ≠ pass）
 // ---------------------------------------------------------------------------
 
 // app 同源 Rscript 解析（RExecutor.binPath）：返回可执行文件绝对路径或 null。
-// 内嵌 R（BIOF3_R_HOME / core/biof3-server/R）优先，PATH（Rscript.exe/Rscript）兜底。
+// 内嵌 R（PETRI_R_HOME / core/petri-server/R）优先，PATH（Rscript.exe/Rscript）兜底。
 let rscriptBin;
 function resolveRscriptBin() {
   if (rscriptBin === undefined) {
@@ -82,7 +82,7 @@ function rscriptAvailable() {
 
 function requireREnvironment(t) {
   if (!fs.existsSync(DESEQ2_R)) {
-    t.skip('gewu-pack-bio/plugins/deseq2 不在位（兄弟仓未检出）');
+    t.skip('petri-pack-bio/plugins/deseq2 不在位（兄弟仓未检出）');
     return false;
   }
   if (!rscriptAvailable()) {
@@ -100,7 +100,7 @@ test('C#10 pack 指纹锚：deseq2.R 必须定义 parse_design_terms(x)（多因
   if (!fs.existsSync(DESEQ2_R)) {
     // 兄弟仓整体未检出属环境缺失（与既有 7 个 R 测试同口径 skip）；仓在位而符号
     // 缺失才是本锚要抓的漂移——那是红，不许 skip 掩盖。
-    t.skip('gewu-pack-bio/plugins/deseq2 不在位（兄弟仓未检出）');
+    t.skip('petri-pack-bio/plugins/deseq2 不在位（兄弟仓未检出）');
     return;
   }
   const rSource = fs.readFileSync(DESEQ2_R, 'utf8');
@@ -259,7 +259,7 @@ function runDeseq2Fixture(t, { params, coldata }) {
     fs.writeFileSync(path.join(jobDir, 'counts.csv'), COUNTS_CSV);
     fs.writeFileSync(path.join(jobDir, 'coldata.csv'), coldata);
     fs.writeFileSync(path.join(jobDir, 'params.json'), JSON.stringify(params));
-    fs.copyFileSync(THEME_R, path.join(jobDir, '_biof3-theme.R'));
+    fs.copyFileSync(THEME_R, path.join(jobDir, '_petri-theme.R'));
     const run = spawnSync(resolveRscriptBin(), [DESEQ2_R, jobDir], {
       encoding: 'utf8',
       timeout: 180000,

@@ -18,7 +18,7 @@ related:
 
 ## 1. 目标
 
-为 BioF3 Desktop 提供**系统级的代码审阅体验**——不再只是"文件页内嵌 diff toggle"，而是仿 VSCode Source Control / Cursor Pending Changes / Antigravity Review 的**常驻右侧面板**：
+为 Petri Desktop 提供**系统级的代码审阅体验**——不再只是"文件页内嵌 diff toggle"，而是仿 VSCode Source Control / Cursor Pending Changes / Antigravity Review 的**常驻右侧面板**：
 
 - 列出当前项目 `git status --porcelain` 中所有 `?? / M / A / D` 的文本文件（不限于 markdown）
 - 每个文件 → 红绿 unified diff + 可选左右双栏 split view

@@ -23,12 +23,12 @@ const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const { sanitizeEngineerIdentity, FIELD_MAX } = require(path.join(ROOT, 'core/shared-backend/engineer-identity.js'));
-const { buildMobileGateway } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/index.js'));
-const { getStores, resetStoresForTest } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/pairing.js'));
+const { buildMobileGateway } = require(path.join(ROOT, 'core/petri-server/mobile-gateway/index.js'));
+const { getStores, resetStoresForTest } = require(path.join(ROOT, 'core/petri-server/mobile-gateway/pairing.js'));
 const { addPeerFromPairingUrl, sanitizePeers } = require(path.join(ROOT, 'core/shared-backend/federation-peers.js'));
 
 function tmpRoot() {
-  return mkdtempSync(path.join(tmpdir(), 'gewu-block88-test-'));
+  return mkdtempSync(path.join(tmpdir(), 'petri-block88-test-'));
 }
 
 function listen(app) {
@@ -169,7 +169,7 @@ test('BLOCK-88 P1: command-seat pairing with signature lands identity on both en
     const express = require('express');
     const adminApp = express();
     adminApp.use(express.json({ limit: '4kb' }));
-    require(path.join(ROOT, 'core/biof3-server/routes/mobile-admin.js'))(adminApp, { dataDir: execRoot });
+    require(path.join(ROOT, 'core/petri-server/routes/mobile-admin.js'))(adminApp, { dataDir: execRoot });
     const adminServer = await listen(adminApp);
     const adminBase = `http://127.0.0.1:${adminServer.address().port}`;
 
@@ -222,7 +222,7 @@ test('BLOCK-88 P1: /api/federation/members lists only active engineer sessions',
 
     const express = require('express');
     const app = express();
-    require(path.join(ROOT, 'core/biof3-server/routes/federation-admin.js'))(app, { dataDir: root });
+    require(path.join(ROOT, 'core/petri-server/routes/federation-admin.js'))(app, { dataDir: root });
     const server = await listen(app);
     try {
       const data = await body(await fetch(`http://127.0.0.1:${server.address().port}/api/federation/members`));

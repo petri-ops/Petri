@@ -18,7 +18,7 @@
 
 const path = require('node:path');
 const http = require('node:http');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function attach() {
@@ -39,10 +39,10 @@ const MEASURE = `(function(){
   var rail = q('aside[class*="rightCol"]');
   return JSON.stringify({
     path: location.pathname,
-    settingsPanel: !!q('.gewu-desktop-panel'),
+    settingsPanel: !!q('.petri-desktop-panel'),
     workspaceAside: !!q('aside[data-workspace-mode]'),
     railWidth: rail ? Math.round(rail.getBoundingClientRect().width) : null,
-    diagNav: qa('[class*="gewu-settings-nav__item"]').some(function(b) { return b.textContent.indexOf('运行时与诊断') !== -1; }),
+    diagNav: qa('[class*="petri-settings-nav__item"]').some(function(b) { return b.textContent.indexOf('运行时与诊断') !== -1; }),
     diagTitle: document.body.textContent.indexOf('运行时与诊断') !== -1,
     localSvc: document.body.textContent.indexOf('本地服务') !== -1,
     backendQuickAction: qa('[class*="leftQuickActions"] button').some(function(b) { return b.textContent.indexOf('后端') !== -1; })
@@ -75,7 +75,7 @@ const MEASURE = `(function(){
 
   // V2 — 「运行时与诊断」分区切换 + 本地服务诊断面板在场
   const navHit = await lib.evalJs(client, `(function(){
-    var items = Array.from(document.querySelectorAll('[class*="gewu-settings-nav__item"]'));
+    var items = Array.from(document.querySelectorAll('[class*="petri-settings-nav__item"]'));
     var target = items.find(function(i) { return i.textContent.indexOf('运行时与诊断') !== -1; });
     if (!target) return 'missing';
     target.click(); return 'clicked';

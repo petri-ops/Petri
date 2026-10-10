@@ -131,7 +131,7 @@ async function addPeerFromPairingUrl(dataDir, rawUrl, { expectedProtocol = 1, id
     existing.name = node.name || existing.name;
     existing.platform = node.platform || existing.platform;
     existing.arch = node.arch || existing.arch;
-    existing.gewuVersion = health.data.gewuVersion || existing.gewuVersion;
+    existing.petriVersion = health.data.petriVersion || existing.petriVersion;
     existing.executors = health.data.executors || existing.executors;
     existing.sessionToken = sessionToken;
     if (cleanIdentity) existing.identity = cleanIdentity;
@@ -144,7 +144,7 @@ async function addPeerFromPairingUrl(dataDir, rawUrl, { expectedProtocol = 1, id
       baseUrl,
       platform: node.platform || null,
       arch: node.arch || null,
-      gewuVersion: health.data.gewuVersion || null,
+      petriVersion: health.data.petriVersion || null,
       executors: health.data.executors || null,
       protocol: health.data.protocol || 1,
       sessionToken,
@@ -204,7 +204,7 @@ function sanitizePeers(dataDir) {
         baseUrl: entry.baseUrl,
         platform: entry.platform,
         arch: entry.arch,
-        gewuVersion: entry.gewuVersion,
+        petriVersion: entry.petriVersion,
         executors: entry.executors,
         protocol: entry.protocol,
         addedAt: entry.addedAt,

@@ -529,7 +529,7 @@ test('driver creates a hardened BrowserWindow and clicks only the public recover
   assert.match(source, /contextIsolation:\s*true/);
   assert.match(source, /nodeIntegration:\s*false/);
   assert.match(source, /sandbox:\s*true/);
-  assert.match(source, /BIOF3_P6_RECOVERY_ELECTRON_ATTEMPT/);
+  assert.match(source, /PETRI_P6_RECOVERY_ELECTRON_ATTEMPT/);
   assert.match(source, /electron-user-data-attempt-/);
   assert.match(source, /setWindowOpenHandler\(\(\) => \(\{ action: 'deny' \}\)\)/);
   assert.match(source, /ipcMain\.handle\('backend:status', async \(\) => \{/);
@@ -597,7 +597,7 @@ test('resource gate blocks later cold-server creation and exposes in-flight reso
 });
 
 test('real no-seed worker and active Electron SIGKILL recovery trace is opt-in', {
-  skip: process.env.BIOF3_RUN_P6_RECOVERY_ELECTRON !== '1',
+  skip: process.env.PETRI_RUN_P6_RECOVERY_ELECTRON !== '1',
   timeout: 20 * 60 * 1000,
 }, async () => {
   const result = await observeP6RecoveryElectron();

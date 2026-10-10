@@ -5,15 +5,15 @@
  * 把 macOS arm64 R/Python 运行时制品上传到阿里云 OSS，并校验与
  * resources/built-in-plugins/manifest.json 声明的 macos-arm64
  * sha256/sizeBytes 一致。目标路径与 manifest 同结构：
- *   oss://biof3-uploads/plugins/r-runtime/1.0.0/macos-arm64.zip
- *   oss://biof3-uploads/plugins/py-runtime/1.0.0/macos-arm64.zip
+ *   oss://petri-uploads/plugins/r-runtime/1.0.0/macos-arm64.zip
+ *   oss://petri-uploads/plugins/py-runtime/1.0.0/macos-arm64.zip
  *
  * 背景（2026-08-09 🔴）：manifest 已声明真实 sha256/sizeBytes，但 OSS 上
  * macos-arm64.zip 实际 HTTP 404 → macOS 新装用户 installRuntime 下载失败。
  * 本脚本只负责「上传 + 校验」，制品本体与 OSS 凭据需由构建/运维侧提供。
  *
  * 用法（在 macOS 构建机，有 OSS 凭据）：
- *   export OSS_AK=... OSS_SK=...   # 或放到仓库根 .biof3-secrets
+ *   export OSS_AK=... OSS_SK=...   # 或放到仓库根 .petri-secrets
  *   node scripts/upload-macos-runtime.mjs --runtime r  --zip /path/r-runtime-1.0.0-macos-arm64.zip
  *   node scripts/upload-macos-runtime.mjs --runtime py --zip /path/py-runtime-1.0.0-macos-arm64.zip
  *   # --dry-run 仅预览 + hash 校验，不上传（无需 OSS 凭据）
@@ -39,10 +39,10 @@ function fail(msg) {
   process.exit(1);
 }
 
-// 自动加载 .biof3-secrets（export KEY="val" 格式），供 OSS_AK/OSS_SK 使用。
+// 自动加载 .petri-secrets（export KEY="val" 格式），供 OSS_AK/OSS_SK 使用。
 // 该文件在 .gitignore 中，不会进仓库。若已手动 export 同名变量则优先保留。
 function loadSecretsFile() {
-  const p = resolve(REPO_ROOT, '.biof3-secrets');
+  const p = resolve(REPO_ROOT, '.petri-secrets');
   if (!existsSync(p)) return;
   const content = readFileSync(p, 'utf8');
   const re = /^\s*export\s+([A-Z0-9_]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s#]+))/gm;
@@ -56,11 +56,11 @@ function loadSecretsFile() {
 }
 loadSecretsFile();
 
-const bucket = process.env.BIOF3_OSS_BUCKET || 'biof3-uploads';
+const bucket = process.env.PETRI_OSS_BUCKET || 'petri-uploads';
 const endpoint = process.env.OSS_ENDPOINT || 'oss-cn-hangzhou.aliyuncs.com';
 const region = process.env.OSS_REGION || 'cn-hangzhou';
-const accessKeyId = process.env.OSS_AK || process.env.BIOF3_OSS_ACCESS_KEY_ID || process.env.OSS_ACCESS_KEY_ID;
-const accessKeySecret = process.env.OSS_SK || process.env.BIOF3_OSS_ACCESS_KEY_SECRET || process.env.OSS_ACCESS_KEY_SECRET;
+const accessKeyId = process.env.OSS_AK || process.env.PETRI_OSS_ACCESS_KEY_ID || process.env.OSS_ACCESS_KEY_ID;
+const accessKeySecret = process.env.OSS_SK || process.env.PETRI_OSS_ACCESS_KEY_SECRET || process.env.OSS_ACCESS_KEY_SECRET;
 
 const dryRun = process.argv.includes('--dry-run');
 const rtIdx = process.argv.indexOf('--runtime');
@@ -68,10 +68,10 @@ const runtime = (rtIdx >= 0 ? process.argv[rtIdx + 1] : 'r').toLowerCase();
 const zipIdx = process.argv.indexOf('--zip');
 const zipPath = zipIdx >= 0 ? resolve(process.argv[zipIdx + 1]) : null;
 
-// manifest 插件键是 biof3-r-runtime / biof3-py-runtime；OSS 路径段是 r-runtime / py-runtime
+// manifest 插件键是 petri-r-runtime / petri-py-runtime；OSS 路径段是 r-runtime / py-runtime
 const RUNTIME = {
-  r:  { manifestKey: 'biof3-r-runtime', ossSegment: 'r-runtime' },
-  py: { manifestKey: 'biof3-py-runtime', ossSegment: 'py-runtime' },
+  r:  { manifestKey: 'petri-r-runtime', ossSegment: 'r-runtime' },
+  py: { manifestKey: 'petri-py-runtime', ossSegment: 'py-runtime' },
 };
 const rt = RUNTIME[runtime];
 if (!rt) fail(`--runtime 必须是 r 或 py，收到: ${runtime}`);
@@ -118,7 +118,7 @@ if (dryRun) {
 }
 
 if (!accessKeyId || !accessKeySecret) {
-  fail('缺少 OSS 凭据。请设置 OSS_AK / OSS_SK（脚本会自动读取 .biof3-secrets）。');
+  fail('缺少 OSS 凭据。请设置 OSS_AK / OSS_SK（脚本会自动读取 .petri-secrets）。');
 }
 
 const OSS = (await import('ali-oss')).default;
@@ -128,14 +128,14 @@ const client = new OSS({
   bucket,
   accessKeyId,
   accessKeySecret,
-  timeout: Number(process.env.BIOF3_OSS_UPLOAD_TIMEOUT_MS || 600000),
+  timeout: Number(process.env.PETRI_OSS_UPLOAD_TIMEOUT_MS || 600000),
 });
 
 async function main() {
   try {
     console.log('[oss-macos-runtime] uploading (multipart)...');
     await client.multipartUpload(objectName, zipPath, {
-      partSize: Number(process.env.BIOF3_OSS_UPLOAD_PART_SIZE || 10 * 1024 * 1024),
+      partSize: Number(process.env.PETRI_OSS_UPLOAD_PART_SIZE || 10 * 1024 * 1024),
       parallel: 3,
       headers: { 'Content-Type': 'application/zip', 'Cache-Control': 'public, immutable, max-age=31536000' },
     });

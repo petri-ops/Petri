@@ -19,7 +19,7 @@ const { execSync } = require('child_process');
 
 const CDP_PORT = '9222';
 const PROJECT_ID = 'p_mtlnsv0f_xpjb';
-const DB_FILE = path.join(__dirname, '..', '.biof3-dev-user-data', 'data', 'biof3.db');
+const DB_FILE = path.join(__dirname, '..', '.petri-dev-user-data', 'data', 'petri.db');
 const PROBE_REL = 'b56-ui288-probe.txt';
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-56');
 if (!fs.existsSync(EVIDENCE_DIR)) fs.mkdirSync(EVIDENCE_DIR, { recursive: true });

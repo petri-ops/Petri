@@ -11,7 +11,7 @@
  * 证据：acceptance/block-95/block95-p1-live.json + 截图。
  */
 const path = require('node:path');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const PROJECT_ID = process.argv[2] || 'p_mu3qk7vs_2xwc';

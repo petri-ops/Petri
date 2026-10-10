@@ -213,7 +213,7 @@ export function McpShelfPane(): React.ReactElement {
           title="从 JSON 文件导入 MCP server 配置（{servers:[…]} 或数组；坏条目跳过并提示）"
           onClick={() => {
             void (async () => {
-            const bridge = (window as unknown as { biof3Desktop?: { mcpConfigImportDialog?: () => Promise<{ ok: boolean; canceled?: boolean; imported?: number; skipped?: Array<{ id: string; error: string }>; error?: string }> } }).biof3Desktop;
+            const bridge = (window as unknown as { petriDesktop?: { mcpConfigImportDialog?: () => Promise<{ ok: boolean; canceled?: boolean; imported?: number; skipped?: Array<{ id: string; error: string }>; error?: string }> } }).petriDesktop;
             if (!bridge?.mcpConfigImportDialog) return;
             const result = await bridge.mcpConfigImportDialog();
             if (result?.canceled) return;

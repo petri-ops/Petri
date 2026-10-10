@@ -51,8 +51,8 @@ UI-161 entry §最后段明确写道："不接 IPC / 不动 preload / main / wor
 【PHASE 0 摸底后修订 / PHASE 1 实际落地（commit `2d81377` P1-1.3）】**`frontend/src/lib/electron.d.ts` L114-218（含 L207-218 onProgress 完整字段）已通过 ADDITIVE +2 字段扩展为 source-of-truth**（PHASE 1 落地新增 `cancel(executionId)` + `onProgress(callback)` 字段声明 +12 行 + JSDoc 注释），无需后续重写；`desktopBridge.ts` 已通过 `getBridge('skills')` 自动派生类型，无需修改。真实缺口仅在 main 进程 + preload 暴露：
 
 - `src/main.js`：新增 `ipcMain.handle('skills:discover')` / `'skills:execute'` / `'skills:getExecution'` 三个 handler；内部委托 `core/shared-backend/skills-sdk.js` 单例（行 77 `class SkillsSDK` + 行 232 `executeSkill` + 行 311 `executeSkillTool`）+ 装配 `core/shared-backend/workflow-engine.js`（行 566 `cancel` + `getExecution`）；**进度推送**用 `webContents.send('skills:progress', ...)`（订阅 SDK 内部或包装 SkillRuntime diff `execCtx.checkpoints[]`）
-- `src/preload.js`：在第二份 `contextBridge.exposeInMainWorld('biof3Desktop', {...})` 对象（行 61 起）补 `skills` 子块，对齐 `electron.d.ts` 声明：`discover()` / `execute(skillId, params)` / `getExecution(executionId)` / `onProgress(callback)` / `cancel(executionId)`；**注意**：world 名是 `biof3Desktop`（与 electron.d.ts 一致），不是 `desktopBridge`（plan 初稿命名错误）
-- `frontend/src/hooks/useSkillStore.ts`：改 1 行：`_startPolling` (2s polling) → 订阅 `window.biof3Desktop.skills.onProgress(...)` 替代；其余 store 实现保持不变（已自动通过 `getBridge('skills')` 走真实 IPC）
+- `src/preload.js`：在第二份 `contextBridge.exposeInMainWorld('petriDesktop', {...})` 对象（行 61 起）补 `skills` 子块，对齐 `electron.d.ts` 声明：`discover()` / `execute(skillId, params)` / `getExecution(executionId)` / `onProgress(callback)` / `cancel(executionId)`；**注意**：world 名是 `petriDesktop`（与 electron.d.ts 一致），不是 `desktopBridge`（plan 初稿命名错误）
+- `frontend/src/hooks/useSkillStore.ts`：改 1 行：`_startPolling` (2s polling) → 订阅 `window.petriDesktop.skills.onProgress(...)` 替代；其余 store 实现保持不变（已自动通过 `getBridge('skills')` 走真实 IPC）
 - **不动**：`electron.d.ts`、`desktopBridge.ts`、4 个 page（SkillDetail/SkillCard/SkillSearch/skills/index）、UI-161 任何 token
 
 **B. UI-161 清理核对（不重复实现）**
@@ -60,7 +60,7 @@ UI-161 entry §最后段明确写道："不接 IPC / 不动 preload / main / wor
 - 验证 `frontend/src/components/desktop/SkillsSidebar.tsx` 与 `SkillsSidebar.module.css` 已不存在（确认 commit `01c5e0b` 落地）
 - 验证 `frontend/src/components/workspace-panels/LeftPanel.tsx` `QuickActions` 数组包含 Skills 项（sparkles icon）
 - 验证 `frontend/src/pages/skills/index.tsx` error 状态有「返回首页」按钮
-- 验证 `styles/custom.css` 含 `--biof3-accent-soft` / `--biof3-border-color` / `--biof3-font-mono` / `--biof3-font-sans` 4 token
+- 验证 `styles/custom.css` 含 `--petri-accent-soft` / `--petri-border-color` / `--petri-font-mono` / `--petri-font-sans` 4 token
 - 若任一项回退，恢复之（不重新设计，仅恢复 commit `01c5e0b` 的清理结果）
 
 **C. 实机验证**
@@ -120,14 +120,14 @@ UI-161 entry §最后段明确写道："不接 IPC / 不动 preload / main / wor
 **目标**：把 `useSkillStore` 真实接到 `workflow-engine.js`。
 
 执行项（顺序；**经 PHASE 0 摸底对齐**）：
-1. **`src/preload.js`**（最小改动 ~15 行）：在第二份 `contextBridge.exposeInMainWorld('biof3Desktop', {...})` 对象（行 61 起）补 `skills` 子块，对齐 `frontend/src/lib/electron.d.ts` L114-218（含 L207-218 onProgress 完整字段）已声明契约：`discover()` / `execute(skillId, params)` / `getExecution(executionId)` / `onProgress(callback)` / `cancel(executionId)`。底层对应 `ipcRenderer.invoke('skills:discover')` 等
+1. **`src/preload.js`**（最小改动 ~15 行）：在第二份 `contextBridge.exposeInMainWorld('petriDesktop', {...})` 对象（行 61 起）补 `skills` 子块，对齐 `frontend/src/lib/electron.d.ts` L114-218（含 L207-218 onProgress 完整字段）已声明契约：`discover()` / `execute(skillId, params)` / `getExecution(executionId)` / `onProgress(callback)` / `cancel(executionId)`。底层对应 `ipcRenderer.invoke('skills:discover')` 等
 2. **`src/main.js`**（~80 行）：顶部 `require('skills-sdk')` 单例装配 + `WorkflowEngine` 注入；注册 3 个 `ipcMain.handle('skills:discover'/'execute'/'getExecution')` + 1 个 `ipcMain.handle('skills:cancel')`；进度推送用 `webContents.send('skills:progress', { executionId, progress, checkpoints })` —— 通过包装 `SkillRuntime`（`core/shared-backend/skill-runtime.js` 行 188 已具备 `cancel(executionId)`）后 `setInterval(1000)` diff `execCtx.checkpoints[]` 合成（`workflow-engine.js` 零 EventEmitter）
-3. **`frontend/src/hooks/useSkillStore.ts`**（改 1 处 ~10 行）：把 `_startPolling`（行 581 附近，2 秒 polling）替换为订阅 `window.biof3Desktop.skills.onProgress(callback)`；回调内调 `_notify()` + 写 store。store 其余实现不变（已自动通过 `getBridge('skills')` 走真实 IPC）
-4. **`frontend/src/hooks/useSkillStore.test.ts`**（**新文件** ~200 行）：镜像 `frontend/src/hooks/usePluginStore.test.ts`（195 行模板，9 tests）；用 `vi.stubGlobal('biof3Desktop', { skills: { discover: vi.fn(), execute: vi.fn(), getExecution: vi.fn(), onProgress: vi.fn(), cancel: vi.fn() } })`；每测试调用 `__resetSkillStoreCacheForTests()`（`useSkillStore.ts` L580 已导出）重置缓存
+3. **`frontend/src/hooks/useSkillStore.ts`**（改 1 处 ~10 行）：把 `_startPolling`（行 581 附近，2 秒 polling）替换为订阅 `window.petriDesktop.skills.onProgress(callback)`；回调内调 `_notify()` + 写 store。store 其余实现不变（已自动通过 `getBridge('skills')` 走真实 IPC）
+4. **`frontend/src/hooks/useSkillStore.test.ts`**（**新文件** ~200 行）：镜像 `frontend/src/hooks/usePluginStore.test.ts`（195 行模板，9 tests）；用 `vi.stubGlobal('petriDesktop', { skills: { discover: vi.fn(), execute: vi.fn(), getExecution: vi.fn(), onProgress: vi.fn(), cancel: vi.fn() } })`；每测试调用 `__resetSkillStoreCacheForTests()`（`useSkillStore.ts` L580 已导出）重置缓存
 5. **完全不动**：`electron.d.ts`（已 source-of-truth）/ `desktopBridge.ts`（已通过 `getBridge('skills')` 自动派生）/ 4 个 page（仅 consume store）/ UI-161 任何 token / `core/shared-backend/*`（仅消费其既有 exports，不改）
 
 **PHASE 0 已验证约束**：
-- preload.js 行 21-50 第一份 expose `'biof3'` 仅 `agentWorkbenchFlags`；行 61-246 第二份 expose `'biof3Desktop'` 含 9 个桌面桥（isDesktop / window / app / aiSettings / computeSettings / harnessCapabilities / plugins / contentPlugins / terminal / updater），**唯独缺 skills**
+- preload.js 行 21-50 第一份 expose `'petri'` 仅 `agentWorkbenchFlags`；行 61-246 第二份 expose `'petriDesktop'` 含 9 个桌面桥（isDesktop / window / app / aiSettings / computeSettings / harnessCapabilities / plugins / contentPlugins / terminal / updater），**唯独缺 skills**
 - main.js 行 1161-1842 含 ~40 个 `ipcMain.handle`，但 0 个 `skills:*`；`require(...workflow-engine.js/skills-sdk.js)` 也是 0 命中
 - `useSkillStore.ts` 行 173 已 `const bridge = getBridge('skills')`，行 175 返回 `'skills bridge unavailable'`（这就是 UI-161 retry 按钮"skills bridge unavailable" 文案来源）
 
@@ -151,7 +151,7 @@ UI-161 entry §最后段明确写道："不接 IPC / 不动 preload / main / wor
 2. `grep -r "SkillsSidebar" frontend/src/` → 必须 0 命中
 3. `grep -n "Skills" frontend/src/components/workspace-panels/LeftPanel.tsx` → 必须见 QuickActions 中存在 Skills 项
 4. `grep -n "返回首页\|retryBtn\|handleRetry" frontend/src/pages/skills/index.tsx` → 必须命中
-5. `grep -n "biof3-accent-soft\|biof3-border-color\|biof3-font-mono\|biof3-font-sans" frontend/src/styles/custom.css` → 必须 4/4 命中
+5. `grep -n "petri-accent-soft\|petri-border-color\|petri-font-mono\|petri-font-sans" frontend/src/styles/custom.css` → 必须 4/4 命中
 
 回退处理：
 - 任一项不命中 → 立刻报告主 agent；不擅自修补（除非是简单 typo 或 import 错位）
@@ -300,4 +300,4 @@ UI-161 entry §最后段明确写道："不接 IPC / 不动 preload / main / wor
 - 全部 5 项核对 OK → 直接进入 PHASE 1
 - 发现 UI-161 回退 → 在 PHASE 2 内补 commit 修复后再 PHASE 3
 - 发现 engine exports 严重不足 → 决定是否扩大 PHASE 1 范围或开 PHASE 1a 分支
-- 用户中途裁决新增范围或中止 → 走 `$biof3-project-governance` skill 的 "Continue active work" 路径更新本 plan
+- 用户中途裁决新增范围或中止 → 走 `$petri-project-governance` skill 的 "Continue active work" 路径更新本 plan

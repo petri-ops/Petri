@@ -14,7 +14,7 @@
 
 **必须用户显式裁决后启动。**
 
-用户已表达意图：将 [GPTomics/bioSkills.git](https://github.com/GPTomics/bioSkills) 生态接入 BioF3 Desktop Skills 系统。
+用户已表达意图：将 [GPTomics/bioSkills.git](https://github.com/GPTomics/bioSkills) 生态接入 Petri Desktop Skills 系统。
 
 当前存在 active 工作包 `BLOCK-10-ARCHITECTURE`（PHASE 0 已收口，待 PHASE 1 启动）。
 
@@ -36,18 +36,18 @@ GPTomics/bioSkills (1.2k Stars, 已 archive) 是一套 AI Coding Agent 的**生�
 - 每个 SKILL.md = 生信最佳实践 Prompt 模板（供 AI Agent 读取后生成代码）
 - **不是**：可执行代码 / Plugin / Workflow Engine
 
-### 1.2 BioF3 Desktop Skills 是什么
+### 1.2 Petri Desktop Skills 是什么
 
-BioF3 Skills 是**可执行工作流引擎**：
+Petri Skills 是**可执行工作流引擎**：
 - JSON manifest (`skill.json`) + DAG Workflow + Plugin 执行器 + Recovery 策略
 - 当前只有 2 个 built-in 生信 Skill（deg-analysis-standard, go-enrichment-analysis）
 - 生态覆盖率 ~3%
 
 ### 1.3 目标
 
-将 bioSkills 的**内容领域**映射为 BioF3 Skills 的**可执行生态**：
+将 bioSkills 的**内容领域**映射为 Petri Skills 的**可执行生态**：
 - 目标：覆盖率从 ~3% → ~80%+（32 categories 中 26 个有 plugin + skill）
-- 不做：把 SKILL.md 的 Prompt 文本直接搬进 BioF3（那是 Prompt Library，不是 Execution Engine）
+- 不做：把 SKILL.md 的 Prompt 文本直接搬进 Petri（那是 Prompt Library，不是 Execution Engine）
 
 ---
 
@@ -55,7 +55,7 @@ BioF3 Skills 是**可执行工作流引擎**：
 
 ### 2.1 In Scope
 
-- [ ] 制定 bioSkills → BioF3 plugin/skill 的优先级路线图
+- [ ] 制定 bioSkills → Petri plugin/skill 的优先级路线图
 - [ ] 实现 Top 5 priority categories 的 plugin + skill.json（见 §3）
 - [ ] 验证 workflow-engine 能正确调度新 plugin
 - [ ] 更新 `resources/built-in-plugins/manifest.json`
@@ -69,7 +69,7 @@ BioF3 Skills 是**可执行工作流引擎**：
 - ❌ Provider 矩阵 / OSS 远程分发
 - ❌ GA 公证流水线
 - ❌ MCP Server 暴露新 plugin 为工具（skill-runtime 层够了，MCP 暴露是 G1+）
-- ❌ 把 bioSkills SKILL.md 的 Prompt 文本逐字翻译进 BioF3 skill.json（那是 Prompt Library 工作流，不适合可执行引擎）
+- ❌ 把 bioSkills SKILL.md 的 Prompt 文本逐字翻译进 Petri skill.json（那是 Prompt Library 工作流，不适合可执行引擎）
 - ❌ 32 个 category 全部实现（那是超大型生态工作，需多工作包，后续再规划）
 
 ### 2.3 验收证据
@@ -84,11 +84,11 @@ BioF3 Skills 是**可执行工作流引擎**：
 
 ## §3 优先级路线图（Top 5）
 
-基于 bioSkills category 技能数 × BioF3 当前空白 × R/Python 实现难度综合评分：
+基于 bioSkills category 技能数 × Petri 当前空白 × R/Python 实现难度综合评分：
 
 ### 🟢 Phase 1 — Top 5（本次工作包范围）
 
-| Priority | Category | Skills | BioF3 现状 | 评分 | Plugin ID | Skill ID |
+| Priority | Category | Skills | Petri 现状 | 评分 | Plugin ID | Skill ID |
 |----------|---------|--------|-----------|------|-----------|----------|
 | **P0** | `single-cell` | 17 | scanpy ✅ + squidpy ✅，缺 Seurat/Pertpy/Cassiopeia | **95** | `seurat`, `scanpy-advanced` | `sc-analysis-standard` |
 | **P0** | `variant-calling` | 13 | **完全空白** | **92** | `variant-calling-gatk` | `variant-analysis-standard` |
@@ -142,25 +142,25 @@ resources/skills/{skill-id}/
 └── metadata.json
 ```
 
-### 4.3 bioSkills SKILL.md → BioF3 skill.json 转换规则
+### 4.3 bioSkills SKILL.md → Petri skill.json 转换规则
 
-bioSkills SKILL.md（Markdown）→ BioF3 skill.json（JSON）的映射：
+bioSkills SKILL.md（Markdown）→ Petri skill.json（JSON）的映射：
 
-| bioSkills 字段 | BioF3 skill.json 字段 | 说明 |
+| bioSkills 字段 | Petri skill.json 字段 | 说明 |
 |---------------|----------------------|------|
 | `Use when...` | `description` | 直接复用 |
 | `Quick Start` | `prompts.system` | 提炼为系统 prompt |
 | `Example Prompts` | `prompts.user_templates` | 转为模板字符串 |
 | `Version Compatibility` | `metadata.compatibility` | 转换版本范围 |
 | `Category` | `category` | 格式：`bioinformatics/{subdomain}` |
-| 工具列表 | `plugins.required` | 映射到 BioF3 plugin id |
+| 工具列表 | `plugins.required` | 映射到 Petri plugin id |
 | 核心流程 | `workflows.default` | 转为 DAG step 名 |
 
 ### 4.4 关键原则
 
 1. **Plugin first, Skill second**：先实现 plugin 可执行，再包装 skill
 2. **Minimize new plugin id**：尽量复用现有 plugin（如 scanpy 已有时，补 scanpy-advanced 而非新建）
-3. **Version compatibility 保守**：bioSkills 的版本要求普遍宽松，BioF3 应取交集
+3. **Version compatibility 保守**：bioSkills 的版本要求普遍宽松，Petri 应取交集
 4. **No MCP exposure in this package**：只做到 skill-runtime 层，MCP 是 G1+ 工作
 5. **Offline-verified only**：不做 packaged/dist/Provider/G1+ 验证
 
@@ -171,10 +171,10 @@ bioSkills SKILL.md（Markdown）→ BioF3 skill.json（JSON）的映射：
 ### PHASE 0：调研与准备（无代码改动）
 
 - [ ] 读取 bioSkills.git 仓库，提取 32 categories 的完整 skill 列表
-- [ ] 逐一对照 BioF3 现有 plugin（deg / go-kegg / gsea / scanpy / squidpy / deseq2 / volcano-plot / expression-qc 等）
-- [ ] 生成 gap 矩阵（bioSkills category × BioF3 plugin coverage）
+- [ ] 逐一对照 Petri 现有 plugin（deg / go-kegg / gsea / scanpy / squidpy / deseq2 / volcano-plot / expression-qc 等）
+- [ ] 生成 gap 矩阵（bioSkills category × Petri plugin coverage）
 - [ ] 确认 Top 5 plugin 的技术可行性（Python/R 环境依赖、现有包是否已装）
-- [ ] 确认 Top 5 的 `environment.json` 依赖与 `biof3-py-runtime` / `biof3-r-runtime` 的交集
+- [ ] 确认 Top 5 的 `environment.json` 依赖与 `petri-py-runtime` / `petri-r-runtime` 的交集
 - [ ] 输出：`docs/block-11-bioSkills-gap-matrix.md`
 
 ### PHASE 1：single-cell plugin + skill（P0）
@@ -225,8 +225,8 @@ bioSkills SKILL.md（Markdown）→ BioF3 skill.json（JSON）的映射：
 - ✅ `core/shared-backend/workflow-engine.js`（workflow 执行）
 - ✅ `core/shared-backend/skill-runtime.js`（skill → plugin 调度）
 - ✅ `resources/built-in-plugins/manifest.schema.json`（plugin manifest schema）
-- ✅ 现有 `biof3-r-runtime` / `biof3-py-runtime`（依赖基础）
-- ⚠️ `biof3-py-runtime` 可能需要补充：`seurat`（R）、`GATK`（需要额外安装）、`methylKit`（R）
+- ✅ 现有 `petri-r-runtime` / `petri-py-runtime`（依赖基础）
+- ⚠️ `petri-py-runtime` 可能需要补充：`seurat`（R）、`GATK`（需要额外安装）、`methylKit`（R）
 
 ---
 
@@ -235,7 +235,7 @@ bioSkills SKILL.md（Markdown）→ BioF3 skill.json（JSON）的映射：
 | Risk | Severity | Mitigation |
 |------|----------|------------|
 | GATK license 限制 | High | 用 bcftools/GATK4 开源子集代替；或 defer variant-calling plugin |
-| 环境包依赖超出现有 runtime | Medium | 先确认 `biof3-r-runtime` 包列表，不够则 defer 该 plugin |
+| 环境包依赖超出现有 runtime | Medium | 先确认 `petri-r-runtime` 包列表，不够则 defer 该 plugin |
 | seurat 启动慢（~GB 内存） | Medium | acceptance.json 加 memory threshold |
 | bioSkills SKILL.md 内容质量参差 | Low | 只映射技术领域，不复制 Prompt 文本 |
 | BLOCK-10 并行冲突 | High | 等用户裁决 |

@@ -27,7 +27,7 @@ status: completed
 1. **选一条组学分析路径做垂直闭环**（P0 勘察定夺，候选=scrna_standard 标准分析：插件
    执行 → 结果产物入库/打开 → Result Studio 展示与复核 → Copilot 引用该结果继续问答/
    建议下一步）。选择判据=现有能力最完整、断点最少、对用户最有代表性。
-2. **该路径的实机验收 flow**（`.agents/skills/gewu-dev-infra/dev-verify/flows/`），断言
+2. **该路径的实机验收 flow**（`.agents/skills/petri-dev-infra/dev-verify/flows/`），断言
    覆盖：分析产出落库、Studio 展示与真实数据一致（非占位/非实验态文案）、Copilot 能取
    到并引用该结果内容作答。
 3. **该路径上咬人的洞就地修**：定向测试图漏掉的契约、实机暴露的断链。flaky 零容忍
@@ -88,9 +88,9 @@ status: completed
 
 | 事实 | deg/deseq2 | scrna_standard（seurat-standard） |
 | --- | --- | --- |
-| 插件态 | **激活**：运行栈 catalog 实证 deseq2 已载（`/api/tools/catalog` 唯一工具） | **休眠**：`../gewu-pack-bio/plugins.dormant/seurat-standard`，需先激活 |
+| 插件态 | **激活**：运行栈 catalog 实证 deseq2 已载（`/api/tools/catalog` 唯一工具） | **休眠**：`../petri-pack-bio/plugins.dormant/seurat-standard`，需先激活 |
 | 演示数据 | 包内自带（`demo-data/deseq2/demo-counts.csv + demo-coldata.csv`） | **包内无 scrna 演示数据**，需外部获取数据集 |
-| 运行时 | 本机 R 运行时在位（`.biof3-dev-user-data/data/runtimes/R/bin/Rscript.exe`） | 同一 R 运行时，但 Seurat 库在位未实证 |
+| 运行时 | 本机 R 运行时在位（`.petri-dev-user-data/data/runtimes/R/bin/Rscript.exe`） | 同一 R 运行时，但 Seurat 库在位未实证 |
 | 历史证据 | pack-lifecycle A8 曾在本机真实跑通（deseq2→completed） | 无 |
 | 语义层 | interpret.js 原生支持 `deg` 解读分支 | 支持 `scrna_standard`，但链路断头同 deg |
 
@@ -142,7 +142,7 @@ scrna 登记为后续候选（重开条件=包内激活 seurat-standard + scrna 
 
 ### 8.5 P1 环境前置（全部实证在位）
 
-- 主 dev 栈在跑（:3001 health ok；`BIOF3_LOCAL_DATA_DIR=.biof3-dev-user-data/data`）；
+- 主 dev 栈在跑（:3001 health ok；`PETRI_LOCAL_DATA_DIR=.petri-dev-user-data/data`）；
 - 测试实例 CDP 9223（`bash scripts/start-test-instance.sh`，零 fork 直连主栈后端）；
-- R 运行时 + deseq2 插件 + 演示数据（`../gewu-pack-bio`）；
+- R 运行时 + deseq2 插件 + 演示数据（`../petri-pack-bio`）；
 - 真实模型供给（dev 栈既有配置，block111/116 系列 flow 同款）。

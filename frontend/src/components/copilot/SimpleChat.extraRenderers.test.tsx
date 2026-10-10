@@ -38,7 +38,7 @@ import { registerDefaultRenderers } from './renderers';
 afterEach(() => {
   cleanup();
   window.localStorage.removeItem(EXTRA_RENDERERS_STORAGE_KEY);
-  delete (window as { biof3?: unknown }).biof3;
+  delete (window as { petri?: unknown }).petri;
 });
 
 function makeAssistantMessage(meta: Record<string, unknown> | null | undefined): ConversationMessage {
@@ -203,7 +203,7 @@ describe('SimpleChat A4 bridge — restoreSimpleMessage + render branch', () => 
   it('bridge getExtraRenderers()=true wins over a contradictory localStorage key', () => {
     window.localStorage.setItem(EXTRA_RENDERERS_STORAGE_KEY, '');
     const listeners: Array<(value: boolean) => void> = [];
-    (window as { biof3?: unknown }).biof3 = {
+    (window as { petri?: unknown }).petri = {
       agentWorkbenchFlags: {
         getExtraRenderers: () => true,
         set: async () => ({ ok: true, extraRenderers: true }),

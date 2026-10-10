@@ -16,9 +16,9 @@ LIVE-VERIFY2-1790003812064
 LIVE-VERIFY2-1790003779807
 LIVE-VERIFY-1790003584201
 B109-spawn-1789972542860
-biof3-desktop
+petri-desktop
 B108-final-1789958290129
-biof3-desktop
+petri-desktop
 SingleCell
 B97-todo-live
 Desktop
@@ -26,7 +26,7 @@ Desktop
 SingleCell
 YST
 1.WorkDir
-biof3
+petri
 devah
 联邦
 设置

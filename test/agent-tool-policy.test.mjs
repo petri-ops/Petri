@@ -10,46 +10,46 @@ import path from 'node:path';
 const require = createRequire(import.meta.url);
 
 // BLOCK-49 加映清债 —— 统一临时 DB 自举（存量：单跑/全量缺 projects 表）
-//（BIOF3_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）
+//（PETRI_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）
 {
   const fsx = require('node:fs');
   const osx = require('node:os');
   const pth = require('node:path');
   const urlx = require('node:url');
   const hereDir = pth.dirname(urlx.fileURLToPath(import.meta.url));
-  const Database = require(pth.resolve(hereDir, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const tempDbDir = fsx.mkdtempSync(pth.join(osx.tmpdir(), 'biof3-sweep-db-'));
-  const boot = new Database(pth.join(tempDbDir, 'biof3.db'));
+  const Database = require(pth.resolve(hereDir, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const tempDbDir = fsx.mkdtempSync(pth.join(osx.tmpdir(), 'petri-sweep-db-'));
+  const boot = new Database(pth.join(tempDbDir, 'petri.db'));
   const migrationsDir = pth.resolve(hereDir, '..', 'src', 'migrations');
   for (const f of fsx.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fsx.readFileSync(pth.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = pth.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = pth.join(tempDbDir, 'petri.db');
   // BLOCK-83 P4：registry 插件源指向中性夹具（sample-metrics 入 HEAVY_TOOLS 后，
   // dispatch 的 registeredTool 校验需要它可被发现；须在 require 链前生效）。
-  process.env.BIOF3_BUILT_IN_PLUGINS_DIR = pth.resolve(hereDir, 'fixtures', 'neutral-plugins');
+  process.env.PETRI_BUILT_IN_PLUGINS_DIR = pth.resolve(hereDir, 'fixtures', 'neutral-plugins');
   process.on('exit', () => { try { fsx.rmSync(tempDbDir, { recursive: true, force: true }); } catch {} });
 }
 const {
   decideAgentToolCall,
   isProtectedScientificSource,
-} = require('../core/biof3-server/agent-tools/agent-tool-policy.js');
+} = require('../core/petri-server/agent-tools/agent-tool-policy.js');
 const {
   createAgentToolInterceptor,
   validateToolArguments,
-} = require('../core/biof3-server/agent-tools/agent-tool-interceptor.js');
-const { getToolEntry } = require('../core/biof3-server/agent-tools/registry.js');
-const { createWorkspaceTools } = require('../core/biof3-server/agent-tools/workspace-tools.js');
-const { dispatchTool } = require('../core/biof3-server/agent-tools/index.js');
-require('../core/biof3-server/db.js');
+} = require('../core/petri-server/agent-tools/agent-tool-interceptor.js');
+const { getToolEntry } = require('../core/petri-server/agent-tools/registry.js');
+const { createWorkspaceTools } = require('../core/petri-server/agent-tools/workspace-tools.js');
+const { dispatchTool } = require('../core/petri-server/agent-tools/index.js');
+require('../core/petri-server/db.js');
 
 // Windows (without Developer Mode) and some CI images cannot create symlinks,
 // which breaks the escape-prevention fixture. Probe once and skip the symlink
 // portion on unsupported platforms — the same guard used by the RS5 suite.
 function symlinksSupported() {
   try {
-    const probe = fssync.mkdtempSync(path.join(os.tmpdir(), 'biof3-symlink-probe-'));
+    const probe = fssync.mkdtempSync(path.join(os.tmpdir(), 'petri-symlink-probe-'));
     try {
       fssync.symlinkSync(path.join(probe, 'target'), path.join(probe, 'link'));
       return true;
@@ -304,7 +304,7 @@ const workspaceCtx = {
 };
 
 before(async () => {
-  sandboxRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'biof3-agent-policy-'));
+  sandboxRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'petri-agent-policy-'));
   workspaceRoot = path.join(sandboxRoot, 'workspace');
   outsideRoot = path.join(sandboxRoot, 'outside');
   await fs.mkdir(workspaceRoot, { recursive: true });
@@ -370,7 +370,7 @@ test('workspace preflight hard-denies missing scope, ownership, sensitive paths,
   });
   assert.equal(ownership.error, 'permission_denied');
 
-  const sensitive = await interceptWorkspace('workspace_read', { path: '.biof3-secrets' }, workspaceCtx);
+  const sensitive = await interceptWorkspace('workspace_read', { path: '.petri-secrets' }, workspaceCtx);
   assert.equal(sensitive.error, 'sensitive_path');
   assert.equal(sensitive.reason, 'policy_denied');
 
@@ -492,7 +492,7 @@ test('atomic create-only publish converts a final link race into content_conflic
     assert.equal(raced.error, 'content_conflict');
     assert.equal(await fs.readFile(racePath, 'utf8'), 'concurrent-link\n');
     const residue = (await fs.readdir(workspaceRoot)).filter((name) =>
-      name.startsWith('.biof3-write-')
+      name.startsWith('.petri-write-')
     );
     assert.deepEqual(residue, []);
   } finally {

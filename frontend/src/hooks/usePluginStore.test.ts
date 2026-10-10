@@ -23,7 +23,7 @@ function installBridge(overrides: BridgeOverrides = {}): BridgeHandles {
   const runtime = overrides.runtime
     ? { status: vi.fn(overrides.runtime.status) as MockFn }
     : { status: vi.fn().mockResolvedValue({ r: { installed: false, path: null }, python: { installed: false, path: null } }) };
-  (window as unknown as { biof3Desktop: unknown }).biof3Desktop = {
+  (window as unknown as { petriDesktop: unknown }).petriDesktop = {
     plugins: {
       listInstalled: vi.fn().mockResolvedValue(installed),
       listRemote: vi.fn().mockResolvedValue(remote),
@@ -40,7 +40,7 @@ interface BridgeHandles {
 }
 
 function uninstallBridge() {
-  delete (window as unknown as { biof3Desktop?: unknown }).biof3Desktop;
+  delete (window as unknown as { petriDesktop?: unknown }).petriDesktop;
 }
 
 beforeEach(() => {
@@ -73,7 +73,7 @@ describe('usePluginStore', () => {
   it('does not refetch on a second mount of the same hook', async () => {
     const listInstalled = vi.fn().mockResolvedValue([]);
     const listRemote = vi.fn().mockResolvedValue({ plugins: {} });
-    (window as unknown as { biof3Desktop: unknown }).biof3Desktop = {
+    (window as unknown as { petriDesktop: unknown }).petriDesktop = {
       plugins: { listInstalled, listRemote },
       runtime: { status: vi.fn().mockResolvedValue({ r: { installed: false, path: null }, python: { installed: false, path: null } }) },
     };
@@ -87,7 +87,7 @@ describe('usePluginStore', () => {
 
   it('autoLoad=false skips the bridge on mount but refresh() populates later', async () => {
     installBridge({ installed: [{ id: 'p1', version: '1.0.0' }] });
-    const bridge = (window as unknown as { biof3Desktop: { plugins: { listInstalled: ReturnType<typeof vi.fn> } } }).biof3Desktop;
+    const bridge = (window as unknown as { petriDesktop: { plugins: { listInstalled: ReturnType<typeof vi.fn> } } }).petriDesktop;
     const listInstalled = bridge.plugins.listInstalled;
     listInstalled.mockClear();
 

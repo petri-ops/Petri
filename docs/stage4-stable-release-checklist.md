@@ -39,7 +39,7 @@ electron-builder 会把根 `better-sqlite3` 重建为 Electron ABI，并在 `aft
 
 ### 修复
 
-- 开发态 migration 子进程通过 `BIOF3_BETTER_SQLITE3_ROOT` 明确加载 `core/r-server` 的系统 Node ABI 依赖。
+- 开发态 migration 子进程通过 `PETRI_BETTER_SQLITE3_ROOT` 明确加载 `core/r-server` 的系统 Node ABI 依赖。
 - 打包态不设置该覆盖，继续使用 Electron Helper 与 electron-builder 重建的根 ABI。
 - migration 单测使用同一 Core 依赖边界，不再取决于最后一次执行的是 build 还是 test。
 

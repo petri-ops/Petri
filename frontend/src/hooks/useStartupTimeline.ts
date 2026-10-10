@@ -39,7 +39,7 @@ export function markDataReady(context?: { projectCount?: number }): void {
 function sendReport(isMountFallback: boolean): void {
   if (typeof window === 'undefined') return;
   if (isMountFallback && mountReported) return;
-  const desktop = (window as { gewu?: unknown }).gewu ?? (window as { biof3Desktop?: unknown }).biof3Desktop;
+  const desktop = (window as { petri?: unknown }).petri ?? (window as { petriDesktop?: unknown }).petriDesktop;
   const bridge = (desktop as { startup?: { report?: (p: StartupReport) => void } } | null)?.startup;
   if (!bridge?.report) return;
   if (isMountFallback) mountReported = true;

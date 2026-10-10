@@ -16,7 +16,7 @@
  *    iteration completes; results feed into loop's evidence/decision
  *
  * NOT in scope:
- *  - Actually executing validators (tool_executor lives in biof3-server)
+ *  - Actually executing validators (tool_executor lives in petri-server)
  *  - Writing validator results to DB (done by integration layer)
  *  - Replacing existing artifact-truth.js (different concern: tool execution vs loop evidence)
  *

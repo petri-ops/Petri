@@ -26,7 +26,7 @@
     {
       "name": "A3 save_writes_file_to_disk",
       "pass": true,
-      "detail": "D:\\1.WorkDir\\biof3-desktop\\.biof3-tmp-block75\\block75-save-2026-09-19T04-42-20.zip (69893 bytes)"
+      "detail": "D:\\1.WorkDir\\petri-desktop\\.petri-tmp-block75\\block75-save-2026-09-19T04-42-20.zip (69893 bytes)"
     },
     {
       "name": "A4 saved_content_is_diagnostic_package",
@@ -36,7 +36,7 @@
     {
       "name": "A5 ipc_returns_ok_with_path",
       "pass": true,
-      "detail": "{\"ok\":true,\"path\":\"D:\\\\1.WorkDir\\\\biof3-desktop\\\\.biof3-tmp-block75\\\\block75-save-2026-09-19T04-42-20.zip\"}"
+      "detail": "{\"ok\":true,\"path\":\"D:\\\\1.WorkDir\\\\petri-desktop\\\\.petri-tmp-block75\\\\block75-save-2026-09-19T04-42-20.zip\"}"
     },
     {
       "name": "B1 dialog_reappeared_for_cancel",
@@ -51,7 +51,7 @@
     {
       "name": "B3 cancel_writes_nothing_to_disk",
       "pass": true,
-      "detail": "D:\\1.WorkDir\\biof3-desktop\\.biof3-tmp-block75\\block75-cancel-2026-09-19T04-42-20.zip"
+      "detail": "D:\\1.WorkDir\\petri-desktop\\.petri-tmp-block75\\block75-cancel-2026-09-19T04-42-20.zip"
     },
     {
       "name": "C1 dialog_reappeared_for_overwrite",
@@ -76,7 +76,7 @@
     {
       "name": "C5 yes_ipc_returns_ok",
       "pass": true,
-      "detail": "{\"ok\":true,\"path\":\"D:\\\\1.WorkDir\\\\biof3-desktop\\\\.biof3-tmp-block75\\\\block75-overwrite-2026-09-19T04-42-20.zip\"}"
+      "detail": "{\"ok\":true,\"path\":\"D:\\\\1.WorkDir\\\\petri-desktop\\\\.petri-tmp-block75\\\\block75-overwrite-2026-09-19T04-42-20.zip\"}"
     },
     {
       "name": "C6 overwrite_prompt_again_on_second_save",

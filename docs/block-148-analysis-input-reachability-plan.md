@@ -23,7 +23,7 @@ status: completed
 
 | 项 | 审视发现 | 内容 | 主文件 |
 | --- | --- | --- | --- |
-| 表单下拉可达性 | #11 | 白名单与上传面一致（单源）；子目录可选（后端 tree 递归/带参）；value 用 path 消歧 | AnalysisLaunchPanel.tsx:38/65/123、core/biof3-server/routes/files.js:106/162、前端 tool-catalog.ts |
+| 表单下拉可达性 | #11 | 白名单与上传面一致（单源）；子目录可选（后端 tree 递归/带参）；value 用 path 消歧 | AnalysisLaunchPanel.tsx:38/65/123、core/petri-server/routes/files.js:106/162、前端 tool-catalog.ts |
 | demo 一键载入 | #12 | 前端消费 demoDataUrl 契约字段 + /api/tools/demo-data 端点，「用示例数据试跑」把 demo 文件落工作区 | AnalysisLaunchPanel.tsx（或分析入口邻近组件）、tool-catalog.ts:55 既有类型、tools-platform.js:308 既有端点（只读复用） |
 
 ## 3. 非范围

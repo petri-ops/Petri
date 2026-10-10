@@ -15,25 +15,25 @@ import { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const R_SERVER = resolve(__dirname, '..', 'core', 'biof3-server');
+const R_SERVER = resolve(__dirname, '..', 'core', 'petri-server');
 const require = createRequire(import.meta.url);
 
 // 自举临时 DB（src/migrations 全量）——registry 链路 require query-tools →
-// db.js 在 default biof3.db 缺最新 schema 时抛 no such table；BIOF3_DB_PATH
+// db.js 在 default petri.db 缺最新 schema 时抛 no such table；PETRI_DB_PATH
 // 隔离须在 require db.js 前生效（BLOCK-52 收口修法，同 agent-tool-registry.test.mjs）。
 {
   const fs = require('fs');
   const os = require('os');
   const dbPath = require('path');
   const Database = require(R_SERVER + '/node_modules/better-sqlite3');
-  const tempDbDir = fs.mkdtempSync(dbPath.join(os.tmpdir(), 'biof3-block97-todo-db-'));
-  const boot = new Database(dbPath.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fs.mkdtempSync(dbPath.join(os.tmpdir(), 'petri-block97-todo-db-'));
+  const boot = new Database(dbPath.join(tempDbDir, 'petri.db'));
   const migrationsDir = resolve(__dirname, '..', 'src', 'migrations');
   for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fs.readFileSync(dbPath.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = dbPath.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = dbPath.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try { fs.rmSync(tempDbDir, { recursive: true, force: true }); } catch {}
   });
@@ -44,8 +44,8 @@ const {
   maybeEmitTaskTodo,
   TODO_STATUSES,
   MAX_ITEMS,
-} = require('../core/biof3-server/agent-tools/todo-tools');
-const { getToolEntry, getProviderToolDefs } = require('../core/biof3-server/agent-tools/registry');
+} = require('../core/petri-server/agent-tools/todo-tools');
+const { getToolEntry, getProviderToolDefs } = require('../core/petri-server/agent-tools/registry');
 
 function validItems() {
   return [

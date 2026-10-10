@@ -1,6 +1,6 @@
 // M1-1 后端就绪感知层 — 全局 Context + 5s 轮询
 // 挂在 App 根，下游用 useBackendStatus() 消费。
-// biof3-server 不通时由摘要概览显示降级提示。
+// petri-server 不通时由摘要概览显示降级提示。
 //
 // （BLOCK-30 P2：曾有的 Gateway 健康聚合随 gateway 摘除）
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -82,7 +82,7 @@ async function fetchRuntimeStatus(base: string): Promise<RuntimeStatusPayload | 
 }
 
 async function readBackendStatus(): Promise<EnhancedBackendStatus | null> {
-  const desktopStatus = await window.biof3Desktop?.backend?.status();
+  const desktopStatus = await window.petriDesktop?.backend?.status();
   if (desktopStatus) {
     return { ...desktopStatus };
   }

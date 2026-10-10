@@ -1,7 +1,7 @@
 /**
  * BLOCK-95 A1 — 会话消息游标分页契约（routes/ai-conversations.js GET /:id/messages）。
  *
- * 真实 SQLite（BIOF3_DB_PATH 临时库）+ 真实 Express app，覆盖：
+ * 真实 SQLite（PETRI_DB_PATH 临时库）+ 真实 Express app，覆盖：
  *   - 默认窗口语义翻转：默认返回**最新** limit 条（修复旧「最旧 limit 条」缺陷）
  *   - hasMore / nextBefore / windowOffset / total 信封字段正确
  *   - before 游标向上翻页：两批拼接 = 全量，不重不漏
@@ -61,22 +61,22 @@ async function seedMessages(conversationId, count, sameTs = false) {
 }
 
 before(async () => {
-  tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block95-a1-'));
+  tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block95-a1-'));
   const dbPath = path.join(tempDir, 'block95.db');
-  process.env.BIOF3_DB_PATH = dbPath;
+  process.env.PETRI_DB_PATH = dbPath;
   // projects 等用户数据表由 src/migrations 管理（正常由 Electron 主进程执行），
   // 纯 Node 测试环境先跑同一 runner（g0-rs-p4r-capture.mjs 先例）
   const { runMigrations } = require(resolve('src/migration-runner.js'));
   runMigrations(dbPath, resolve('src/migrations'));
   // helpers/conversations.js require 即建 copilot_* 表（同步侧）
-  require(resolve('core/biof3-server/helpers/conversations'));
-  adb = require(resolve('core/biof3-server/db')).getAsyncDatabase();
+  require(resolve('core/petri-server/helpers/conversations'));
+  adb = require(resolve('core/petri-server/db')).getAsyncDatabase();
 
   await seedMessages(CONV_BIG, TOTAL, false);
   await seedMessages(CONV_FORK, TOTAL, true);
 
   const express = require('express');
-  const mount = require(resolve('core/biof3-server/routes/ai-conversations.js'));
+  const mount = require(resolve('core/petri-server/routes/ai-conversations.js'));
   const app = express();
   app.use((req, _res, next) => { req.user = { id: USER_ID }; next(); });
   mount(app);
@@ -92,7 +92,7 @@ before(async () => {
 after(async () => {
   try { if (server) await new Promise((r) => server.close(r)); } catch {}
   try { fs.rmSync(tempDir, { recursive: true, force: true }); } catch {}
-  delete process.env.BIOF3_DB_PATH;
+  delete process.env.PETRI_DB_PATH;
 });
 
 test('默认窗口返回最新 limit 条（修复最旧 200 条缺陷）', async () => {

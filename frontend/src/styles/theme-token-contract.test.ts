@@ -28,16 +28,16 @@ function stripComments(text: string): string {
 }
 
 describe('theme token contract', () => {
-  it('defines every Gewu token referenced in frontend source', () => {
+  it('defines every Petri token referenced in frontend source', () => {
     const definitions = new Set<string>();
     const references = new Set<string>();
 
     for (const file of walk(srcRoot)) {
       const text = stripComments(fs.readFileSync(file, 'utf8'));
-      for (const match of text.matchAll(/--gewu-[A-Za-z0-9-]+(?=\s*:)/g)) {
+      for (const match of text.matchAll(/--petri-[A-Za-z0-9-]+(?=\s*:)/g)) {
         definitions.add(match[0]);
       }
-      for (const match of text.matchAll(/var\(--(gewu-[A-Za-z0-9-]+)/g)) {
+      for (const match of text.matchAll(/var\(--(petri-[A-Za-z0-9-]+)/g)) {
         references.add(`--${match[1]}`);
       }
     }
@@ -45,11 +45,11 @@ describe('theme token contract', () => {
     // JS 运行时 setProperty 注入的拖拽期 live token（useResizableColumns），
     // 无静态定义属预期——白名单见 BLOCK-76 会话 🟢 清债登记（AUDIT-LOG 2026-09-08）。
     const JS_INJECTED_TOKENS = new Set([
-      '--gewu-live-left-width',
-      '--gewu-live-left-span',
-      '--gewu-live-right-width',
-      '--gewu-live-right-span',
-      '--gewu-live-result-right-width',
+      '--petri-live-left-width',
+      '--petri-live-left-span',
+      '--petri-live-right-width',
+      '--petri-live-right-span',
+      '--petri-live-result-right-width',
     ]);
     const missing = [...references]
       .filter((token) => !definitions.has(token) && !JS_INJECTED_TOKENS.has(token))
@@ -57,7 +57,7 @@ describe('theme token contract', () => {
     expect(missing).toEqual([]);
   });
 
-  // UI-392 — 海军蓝家族统一后的防回潮门禁（规范见 .agents/skills/gewu-css-theme）。
+  // UI-392 — 海军蓝家族统一后的防回潮门禁（规范见 .agents/skills/petri-css-theme）。
 
   it('holds no legacy undefined --color-* token references (零定义家族禁回潮)', () => {
     const offenders: string[] = [];

@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-BioF3 Desktop 是一个 Electron 桌面应用，结合了 AI 陪伴的全组学学习与实战平台。技术栈包括：
+Petri Desktop 是一个 Electron 桌面应用，结合了 AI 陪伴的全组学学习与实战平台。技术栈包括：
 - **桌面壳**: Electron 30.5.1
 - **前端**: React 18 + Vite + TypeScript (严格模式)
 - **后端**: Node.js + better-sqlite3（纯本地：本地文件存储 + SQLite + 内嵌 R/Python 本地执行）
 - **核心库**: `core/`（仓库内，已内联；不再是 git submodule）
 
-> **架构去耦（2026-07）**：核心后端已从 `vendor/biof3-core` submodule 内联为 `core/`；OSS 存储、PostgreSQL、docker 执行三条 web/ECS 双模式分支已全部移除。详见 `docs/dependency-decoupling-checkpoint.md`。凡本文与该检查点冲突，以检查点为准。
+> **架构去耦（2026-07）**：核心后端已从 `vendor/petri-core` submodule 内联为 `core/`；OSS 存储、PostgreSQL、docker 执行三条 web/ECS 双模式分支已全部移除。详见 `docs/dependency-decoupling-checkpoint.md`。凡本文与该检查点冲突，以检查点为准。
 
 ## 当前开发阶段
 
@@ -272,8 +272,8 @@ npm run harness:agent-evaluate
 
 - Electron 主进程日志: Console (npm run dev 输出)
 - 渲染进程日志: DevTools Console (Cmd+Option+I)
-- R 服务日志: `~/Library/Application Support/BioF3/logs/`
-- Python 服务日志: `~/Library/Application Support/BioF3/logs/`
+- R 服务日志: `~/Library/Application Support/Petri/logs/`
+- Python 服务日志: `~/Library/Application Support/Petri/logs/`
 
 ### 常见问题
 
@@ -287,7 +287,7 @@ npm run harness:agent-evaluate
 
 ### 发布准备
 
-1. 确保 `.biof3-secrets` 存在且权限为 `600`（包含 OSS 凭据）
+1. 确保 `.petri-secrets` 存在且权限为 `600`（包含 OSS 凭据）
 2. 更新 `package.json` 版本号
 3. 提交并打标签: `git tag v0.0.1-rc.X`
 

@@ -22,20 +22,20 @@ const root = path.resolve(here, '..');
 const require = createRequire(import.meta.url);
 const { judgeOutput, buildJudgeRequest } = require('./lib/harness/judge-core.mjs');
 const { probeStability } = require('./lib/harness/stability-core.mjs');
-const decisionApi = require('../core/biof3-server/helpers/decision-api.js');
+const decisionApi = require('../core/petri-server/helpers/decision-api.js');
 
 const SEPARATOR = String.fromCharCode(10);
-const TRANSCRIPT_DIR = path.join(root, '.biof3-dev-user-data', 'data', 'llm-transcripts');
+const TRANSCRIPT_DIR = path.join(root, '.petri-dev-user-data', 'data', 'llm-transcripts');
 
 /** 锚定决策台账 DB（BLOCK-118 加映 1 同款：裸 shell 下防 best-effort 记账静默丢失）。 */
 function anchorDecisionDbPath() {
-  if (process.env.BIOF3_DB_PATH) return;
-  const candidate = path.join(root, '.biof3-dev-user-data', 'data', 'biof3.db');
-  if (fs.existsSync(candidate)) process.env.BIOF3_DB_PATH = candidate;
+  if (process.env.PETRI_DB_PATH) return;
+  const candidate = path.join(root, '.petri-dev-user-data', 'data', 'petri.db');
+  if (fs.existsSync(candidate)) process.env.PETRI_DB_PATH = candidate;
 }
 
 function cloudOverrides() {
-  const envFile = path.join(root, '.biof3-dev-user-data', 'jev.env.bak-by-user-request');
+  const envFile = path.join(root, '.petri-dev-user-data', 'jev.env.bak-by-user-request');
   let apiKey = null;
   for (const line of fs.readFileSync(envFile, 'utf8').split(/\r?\n/)) {
     const m = line.match(/^\s*TYPESAFE_API_KEY\s*=\s*(.+)\s*$/);

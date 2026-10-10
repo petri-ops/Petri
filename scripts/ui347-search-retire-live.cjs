@@ -17,7 +17,7 @@ const path = require('node:path');
 const http = require('node:http');
 
 const ROOT = path.join(__dirname, '..');
-const lib = require(path.join(ROOT, '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(ROOT, '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 const AUTH = { Authorization: 'Bearer desktop-local' };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -87,7 +87,7 @@ async function waitComposer(client, timeoutMs = 20000) {
   let header = null;
   for (let i = 0; i < 30; i += 1) {
     header = await lib.evalJs(client, `(function(){
-      var panel = document.querySelector('.gewu-plugin-store-panel');
+      var panel = document.querySelector('.petri-plugin-store-panel');
       if (!panel) return null;
       var back = panel.querySelector('button[aria-label="返回对话"]');
       var closeX = panel.querySelector('button[aria-label="关闭"]');
@@ -101,7 +101,7 @@ async function waitComposer(client, timeoutMs = 20000) {
     `插件页渲染（panel=${h.panel}），左上角「${h.backText || '无'}」返回按钮存在=${h.back}，右上角 × 关闭已移除=${!h.closeX}`);
 
   /* V3 — 返回对话走通 */
-  await lib.evalJs(client, `(function(){ var b = document.querySelector('.gewu-plugin-store-panel button[aria-label="返回对话"]'); if (b) b.click(); return 'clicked'; })()`);
+  await lib.evalJs(client, `(function(){ var b = document.querySelector('.petri-plugin-store-panel button[aria-label="返回对话"]'); if (b) b.click(); return 'clicked'; })()`);
   await sleep(2000);
   const backToChat = await waitComposer(client, 10000);
   const urlBack = await lib.evalJs(client, `location.pathname`).catch(() => null);

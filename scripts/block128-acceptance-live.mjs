@@ -5,7 +5,7 @@
  * block128-acceptance-live.mjs — BLOCK-128 执行语义统一实机三件验收
  * （plan acceptance：对话跑分析→job 行心跳推进 + Jobs Wall 可见 + 取消可达）。
  *
- * 前置：主 dev 栈在跑（:3001 后端 + Vite :3000 + Electron CDP :9222，BIOF3_LOCAL_DATA_DIR 同源）。
+ * 前置：主 dev 栈在跑（:3001 后端 + Vite :3000 + Electron CDP :9222，PETRI_LOCAL_DATA_DIR 同源）。
  * 断言：
  *   A1 chat-mcp-run       agent 对话链（POST /api/ai/agent → run_tool op=run）发起真实 deseq2 job
  *   A2 heartbeat-advance  运行窗口内 tool_jobs.heartbeat_at 采样出现 ≥2 个递增值（30s 心跳×2；
@@ -22,7 +22,7 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
-const lib = require('../.agents/skills/gewu-dev-infra/dev-verify/lib.cjs');
+const lib = require('../.agents/skills/petri-dev-infra/dev-verify/lib.cjs');
 const Database = require('better-sqlite3');
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -60,7 +60,7 @@ async function main() {
     throw new Error('project create failed: ' + JSON.stringify(created.data).slice(0, 200));
   }
   const projectId = (created.data.project || created.data).id;
-  const inputsDir = path.join(ROOT, '.biof3-dev-user-data', 'data', 'projects', projectId, 'inputs');
+  const inputsDir = path.join(ROOT, '.petri-dev-user-data', 'data', 'projects', projectId, 'inputs');
   fs.mkdirSync(inputsDir, { recursive: true });
   const GENES = 120000, SAMPLES = 24;
   const conditions = [...Array(12).fill('Control'), ...Array(12).fill('Treatment')];
@@ -93,7 +93,7 @@ async function main() {
   const startedAt = Date.now();
 
   // 1) DB 句柄
-  const dbFile = path.join(ROOT, '.biof3-dev-user-data', 'data', 'biof3.db');
+  const dbFile = path.join(ROOT, '.petri-dev-user-data', 'data', 'petri.db');
   const db = new Database(dbFile);
   const getJobRow = db.prepare('SELECT id, status, process_pid, heartbeat_at FROM tool_jobs WHERE tool_id = ? AND created_at >= ? ORDER BY created_at DESC LIMIT 1');
 
@@ -145,8 +145,8 @@ async function main() {
   const mainPage = mainTargets.find((t) => t.type === 'page' && !t.url.includes('/window/'));
   if (!mainPage) throw new Error('main window target not found: ' + JSON.stringify(mainTargets.map((t) => t.url)));
   const mainClient = await lib.connectTarget(mainPage);
-  const rApiBase = await lib.evalJs(mainClient, `(() => { const b = window.gewu || window.biof3Desktop; return (b && b.backendConfig && b.backendConfig.rApiBase) || null; })()`).catch(() => null);
-  await lib.evalJs(mainClient, `(() => { const b = window.gewu || window.biof3Desktop; return b && b.windowManager && b.windowManager.popOut ? (b.windowManager.popOut('command-center'), 'popped') : 'no_bridge'; })()`);
+  const rApiBase = await lib.evalJs(mainClient, `(() => { const b = window.petri || window.petriDesktop; return (b && b.backendConfig && b.backendConfig.rApiBase) || null; })()`).catch(() => null);
+  await lib.evalJs(mainClient, `(() => { const b = window.petri || window.petriDesktop; return b && b.windowManager && b.windowManager.popOut ? (b.windowManager.popOut('command-center'), 'popped') : 'no_bridge'; })()`);
   let wallClient = null;
   for (let i = 0; i < 20 && !wallClient; i++) {
     await sleep(1000);

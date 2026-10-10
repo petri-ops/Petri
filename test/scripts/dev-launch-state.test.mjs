@@ -24,7 +24,7 @@ function makeTempDir() {
   return mkdtempSync(join(tmpdir(), 'b45-launch-state-'));
 }
 
-const RECORD = { token: 'biof3dev-123-abc', wrapperPid: 4242, startedAt: '2026-09-03T00:00:00.000Z' };
+const RECORD = { token: 'petridev-123-abc', wrapperPid: 4242, startedAt: '2026-09-03T00:00:00.000Z' };
 
 // ---------------------------------------------------------------------------
 // readLaunchRecord

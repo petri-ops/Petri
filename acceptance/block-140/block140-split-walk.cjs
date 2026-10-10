@@ -27,7 +27,7 @@
  */
 const fs = require('node:fs');
 const path = require('node:path');
-const lib = require(path.join(__dirname, '..', '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 
 const EVIDENCE_DIR = __dirname;
 const PROJECT_W1W3 = 'p_mus4u230_wvib';
@@ -94,7 +94,7 @@ const absentAfterSettle = async (expr, { settleMs = 9000, label = '' } = {}) => 
   assert('P0_route_deeplink', String(routeW1W3) === `/project/${PROJECT_W1W3}/result?job=${JOB_W1W3}`,
     `route=${routeW1W3} deepLink=${LINK_W1W3}（深链 /result?job= 打开 result 视图；前端为本 run 新实现，Vite HMR 即时生效）`);
 
-  const apiBase = await EVAL(`(window.biof3Desktop && window.biof3Desktop.backendConfig && window.biof3Desktop.backendConfig.rApiBase) || 'http://localhost:57312'`);
+  const apiBase = await EVAL(`(window.petriDesktop && window.petriDesktop.backendConfig && window.petriDesktop.backendConfig.rApiBase) || 'http://localhost:57312'`);
   lib.log(`rApiBase=${apiBase}`);
 
   // HTTP 真相同源取数（R-1 判空与切换器同一 /lineage 端点）——两 job 一次取证

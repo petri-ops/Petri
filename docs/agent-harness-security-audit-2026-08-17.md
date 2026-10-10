@@ -1,4 +1,4 @@
-# BioF3 Desktop — Agent Harness 安全审查报告
+# Petri Desktop — Agent Harness 安全审查报告
 
 | 项目 | 值 |
 | --- | --- |
@@ -639,12 +639,12 @@ async function runMigrations(dbPath, migrationsDir) {
 - **攻击场景**:
   1. `migrationsDir` 来自 `process.argv[2]` 或调用方传入。如果 attacker 能控制 `migrationsDir` 路径（通过环境变量注入），可以引入任意 `.sql` 文件。
   2. `fs.readFileSync(path.join(migrationsDir, f), 'utf8')` 后 `db.exec(sql)` 是完整的多语句执行通道 —— 这是 SQLite 的设计，但若 migration 文件被攻击者替换（含恶意 `ATTACH DATABASE` / `PRAGMA journal_mode=OFF`），可能破坏数据完整性。
-  3. `loadDatabaseConstructor` 允许通过 `BIOF3_BETTER_SQLITE3_ROOT` 环境变量切换 ABI — 可被滥用注入恶意 native module。
+  3. `loadDatabaseConstructor` 允许通过 `PETRI_BETTER_SQLITE3_ROOT` 环境变量切换 ABI — 可被滥用注入恶意 native module。
 
 - **建议修复方向**:
   - `migrationsDir` 路径固定为 `${__dirname}/migrations`，不接收外部参数。
   - 增加 migration 文件完整性校验（每个 .sql 在仓库中带 sha256，启动时验证）。
-  - `loadDatabaseConstructor` 校验 `BIOF3_BETTER_SQLITE3_ROOT` 必须落在受信任目录树下。
+  - `loadDatabaseConstructor` 校验 `PETRI_BETTER_SQLITE3_ROOT` 必须落在受信任目录树下。
 
 - **与 G0 阶段纪律的兼容性**: 完全兼容。
 
@@ -664,12 +664,12 @@ canonicalRoot: canonicalRoot || _canonicalRootFromEnv(),
 ```
 
 - **攻击场景**:
-  1. 若 `_localRootFromEnv()` 读取 `BIOF3_PROJECT_ROOT` / `BIOF3_LOCAL_DATA_DIR` 等环境变量，而启动脚本允许从外部配置文件导入（当前 `resolveNodeBin` 也会调用 `execFileSync(locator, ['node'])`），攻击者通过修改 `.env` 或 macOS 启动 plist 可把 project root 改成 `/tmp/evil`。
+  1. 若 `_localRootFromEnv()` 读取 `PETRI_PROJECT_ROOT` / `PETRI_LOCAL_DATA_DIR` 等环境变量，而启动脚本允许从外部配置文件导入（当前 `resolveNodeBin` 也会调用 `execFileSync(locator, ['node'])`），攻击者通过修改 `.env` 或 macOS 启动 plist 可把 project root 改成 `/tmp/evil`。
   2. `_resolveMcpJobLayout` 用 `_localRootFromEnv()` 决定 sandbox root，污染后 sandbox 失效。
-  3. `GLOBAL_JOBS_DIR` 默认是 `~/.biof3/tool-jobs`，但若环境变量覆盖，可能写到任意目录。
+  3. `GLOBAL_JOBS_DIR` 默认是 `~/.petri/tool-jobs`，但若环境变量覆盖，可能写到任意目录。
 
 - **建议修复方向**:
-  - 强制 `localRoot` 与 `canonicalRoot` 只接受 `${HOME}/.biof3/...` 下的值，使用 `path.relative` 后判定前缀。
+  - 强制 `localRoot` 与 `canonicalRoot` 只接受 `${HOME}/.petri/...` 下的值，使用 `path.relative` 后判定前缀。
   - 把所有 env-based 路径放入 `resolveTrustedPath(envName, defaultRelative)` helper 中统一校验。
 
 - **与 G0 阶段纪律的兼容性**: 完全兼容。
@@ -813,7 +813,7 @@ function redactSensitiveValue(value, ancestors = new WeakSet()) {
 
 **IPC 边界（主进程）**：
 - `src/main.js`（含 BrowserWindow webPreferences、setupCsp、setupWindowIpc、setupAgentWorkbenchFlagsIpc、setupSkillsIpc、setupAutoUpdateIpc）
-- `src/preload.js`（含 `contextBridge.exposeInMainWorld('biof3', ...)`、`exposeInMainWorld('process', ...)`）
+- `src/preload.js`（含 `contextBridge.exposeInMainWorld('petri', ...)`、`exposeInMainWorld('process', ...)`）
 - `frontend/src/lib/desktopBridge.ts`（renderer 侧 typed accessor）
 - `src/ipc/branch-handlers.js`、`src/ipc/result-handlers.js`、`src/ipc/terminal.js`、`src/ipc/diagnostic.js`、`src/ipc/ai-settings.js`、`src/ipc/plugin.js`、`src/ipc/file-dialog.js`、`src/ipc/compute-settings.js`、`src/ipc/data-management.js`、`src/ipc/auto-update.js`、`src/ipc/runtime-status.js`、`src/ipc/backend-lifecycle.js`、`src/ipc/telemetry.js`、`src/ipc/harness-capabilities.js`
 - `src/diagnostic-redaction.js`
@@ -867,7 +867,7 @@ function redactSensitiveValue(value, ancestors = new WeakSet()) {
 | --- | --- | --- |
 | SQLite 全部使用 better-sqlite3 prepared statement（参数化） | `core/r-server/db.js` 全表、迁移 005/006、`src/database/branch-db.js`、`src/database/result-db.js` | 未发现字符串拼接的 SQL，符合 best practice |
 | `credential-store.js` macOS Keychain + 0o600 文件 | `core/r-server/helpers/credential-store.js:22-93` | 凭据分层存储，进程外不暴露 |
-| `path-allowlist.js` 严格 cwd + tmpdir + ~/.biof3/logs 白名单 | `core/r-server/mcp/ide-tools/path-allowlist.js:30-79` | 显式 deny-list + safeJoinUnder |
+| `path-allowlist.js` 严格 cwd + tmpdir + ~/.petri/logs 白名单 | `core/r-server/mcp/ide-tools/path-allowlist.js:30-79` | 显式 deny-list + safeJoinUnder |
 | `workspace-tools.js` `resolveWorkspaceTarget` 多重防御（path escape + symlink escape + sensitive segment + 真实路径比对） | `core/r-server/agent-tools/workspace-tools.js:107-151` | 纵深防御体现 |
 | `agent-tool-policy.js` 显式 deny + riskTier + accessMode 多维度 | `core/r-server/agent-tools/agent-tool-policy.js` | 与 fail-closed 一致 |
 | `redactSensitiveText` 调用范围广（diagnostic export、agent-tool-result、toolActivity） | 多处 | redact 覆盖面尚可（但 S-009 中仍有覆盖缺口） |

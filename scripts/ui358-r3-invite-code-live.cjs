@@ -5,7 +5,7 @@ const path = require('path');
 const {
   pollTargets, filterPageTargets, selectPageTarget, connectTarget, evalJs,
   screenshotPng, createRun,
-} = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+} = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-85');
 

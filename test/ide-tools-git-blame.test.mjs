@@ -12,7 +12,7 @@ import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const IDE_TOOLS = resolve(__dirname, '..', 'core/biof3-server/mcp/ide-tools');
+const IDE_TOOLS = resolve(__dirname, '..', 'core/petri-server/mcp/ide-tools');
 
 const ideTools = await import(
   pathToFileURL(resolve(IDE_TOOLS, 'index.js')).href
@@ -34,7 +34,7 @@ function gitEnv() {
 const SPAWN_OPTS = { encoding: 'utf8' };
 
 function makeRepo() {
-  const repo = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-git-blame-`);
+  const repo = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-git-blame-`);
   const env = gitEnv();
   const spawn = (args) => spawnSync('git', args, { env, ...SPAWN_OPTS });
   spawn(['init', '-q', '-b', 'main', repo]);
@@ -112,7 +112,7 @@ test('ide_git_blame respects startLine / endLine range', () => {
 });
 
 test('ide_git_blame rejects untracked file', () => {
-  const repo = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-git-blame-unt-`);
+  const repo = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-git-blame-unt-`);
   try {
     const env = gitEnv();
     spawnSync('git', ['init', '-q', '-b', 'main', repo], { env });
@@ -133,7 +133,7 @@ test('ide_git_blame rejects path outside allowlist', () => {
 });
 
 test('ide_git_blame rejects non-git repository', () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-nogit-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-nogit-`);
   try {
     const res = H.ide_git_blame({ path: tmp, file: 'something' });
     assert.equal(res.ok, false);

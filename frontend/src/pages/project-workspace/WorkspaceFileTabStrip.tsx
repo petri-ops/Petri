@@ -12,7 +12,7 @@ import type { ActiveWorkspaceFile } from './types';
 import { fileTabPanelId } from './workspaceFileTabOps';
 
 /** 独立 MIME：与文件树拖拽（TREE_DRAG_MIME）隔离，tab 条不接受树行拖入。 */
-export const FILE_TAB_DRAG_MIME = 'application/x-gewu-file-tab';
+export const FILE_TAB_DRAG_MIME = 'application/x-petri-file-tab';
 
 // UI-451 加映 v2 — reveal = 在文件树中定位该 tab（展开祖先目录 + 行滚入视野）
 // UI-451 加映 v3 — reopen = 重开最近关闭的 tab（历史存在时才出现在菜单）

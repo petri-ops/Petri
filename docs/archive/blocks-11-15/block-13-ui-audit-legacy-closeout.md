@@ -4,7 +4,7 @@
 > Truth Domain: `block-13-ui-audit-legacy-closure`
 > Status: ✅ **COMPLETE** — pre-existing UI drift 已通过 LEGACY 豁免机制收敛（不重写共享历史，不外推 G1+ 阶段）
 > Completed: 2026-08-18
-> Governance basis: `$biof3-project-governance` skill + AGENTS.md "UI 进度自动对账" + BLOCK-9.2 / BLOCK-10 / BLOCK-12 同款 LEGACY 豁免范式
+> Governance basis: `$petri-project-governance` skill + AGENTS.md "UI 进度自动对账" + BLOCK-9.2 / BLOCK-10 / BLOCK-12 同款 LEGACY 豁免范式
 
 ---
 

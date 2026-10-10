@@ -1,6 +1,6 @@
 /**
  * BLOCK-10 PHASE 1.1 (PR-012) — branch-db + result-db share one connection
- * when targeting the same file (desktop main + biof3-server MCP child process).
+ * when targeting the same file (desktop main + petri-server MCP child process).
  *
  * Coverage:
  *   PR-012.1 branch + result use the same resolved file path (legacy
@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
-const coreServerRoot = path.join(root, 'core', 'biof3-server');
+const coreServerRoot = path.join(root, 'core', 'petri-server');
 createRequire(path.join(coreServerRoot, 'package.json'));
 const rootReq = createRequire(path.join(root, 'package.json'));
 
@@ -34,39 +34,39 @@ import { getDatabase, closeDatabase, getDatabasePath } from '../src/database/bra
 // 验证 branch 角色自身的单例去重契约（PR-012 的机制不变，实例面只剩 branch）。
 
 function mkTmp() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-db-shared-'));
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'petri-db-shared-'));
 }
 
-test('PR-012.1 branch-db resolves the legacy single-file biof3.db path (result 侧已退役)', (t) => {
+test('PR-012.1 branch-db resolves the legacy single-file petri.db path (result 侧已退役)', (t) => {
   const tmp = mkTmp();
-  process.env.BIOF3_LOCAL_DATA_DIR = tmp;
-  process.env.BIOF3_BETTER_SQLITE3_ROOT = coreServerRoot;
+  process.env.PETRI_LOCAL_DATA_DIR = tmp;
+  process.env.PETRI_BETTER_SQLITE3_ROOT = coreServerRoot;
   _reset();
 
   t.after(() => {
     closeAll();
     _reset();
-    delete process.env.BIOF3_LOCAL_DATA_DIR;
-    delete process.env.BIOF3_BETTER_SQLITE3_ROOT;
+    delete process.env.PETRI_LOCAL_DATA_DIR;
+    delete process.env.PETRI_BETTER_SQLITE3_ROOT;
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {}
   });
 
   const branchPath = getDatabasePath();
-  assert.ok(branchPath.endsWith('biof3.db'), 'path must keep the legacy biof3.db filename');
+  assert.ok(branchPath.endsWith('petri.db'), 'path must keep the legacy petri.db filename');
   assert.strictEqual(rootReq('./src/database/branch-db.js').getDatabasePath(), branchPath, '重复 require 同一单例路径');
 });
 
 test('PR-012.2 openDb 双次调用与 legacy shim 返回同一 Database 实例（去重机制）', (t) => {
   const tmp = mkTmp();
-  process.env.BIOF3_LOCAL_DATA_DIR = tmp;
-  process.env.BIOF3_BETTER_SQLITE3_ROOT = coreServerRoot;
+  process.env.PETRI_LOCAL_DATA_DIR = tmp;
+  process.env.PETRI_BETTER_SQLITE3_ROOT = coreServerRoot;
   _reset();
 
   t.after(() => {
     closeAll();
     _reset();
-    delete process.env.BIOF3_LOCAL_DATA_DIR;
-    delete process.env.BIOF3_BETTER_SQLITE3_ROOT;
+    delete process.env.PETRI_LOCAL_DATA_DIR;
+    delete process.env.PETRI_BETTER_SQLITE3_ROOT;
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {}
   });
 
@@ -79,15 +79,15 @@ test('PR-012.2 openDb 双次调用与 legacy shim 返回同一 Database 实例�
 
 test('PR-012.3 同一单例句柄上的写读一致（单共享句柄机制）', (t) => {
   const tmp = mkTmp();
-  process.env.BIOF3_LOCAL_DATA_DIR = tmp;
-  process.env.BIOF3_BETTER_SQLITE3_ROOT = coreServerRoot;
+  process.env.PETRI_LOCAL_DATA_DIR = tmp;
+  process.env.PETRI_BETTER_SQLITE3_ROOT = coreServerRoot;
   _reset();
 
   t.after(() => {
     closeAll();
     _reset();
-    delete process.env.BIOF3_LOCAL_DATA_DIR;
-    delete process.env.BIOF3_BETTER_SQLITE3_ROOT;
+    delete process.env.PETRI_LOCAL_DATA_DIR;
+    delete process.env.PETRI_BETTER_SQLITE3_ROOT;
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {}
   });
 
@@ -112,15 +112,15 @@ test('PR-012.3 同一单例句柄上的写读一致（单共享句柄机制）',
 
 test('PR-012 backward-compat shims: branch-db.closeDatabase closes the singleton for both roles', (t) => {
   const tmp = mkTmp();
-  process.env.BIOF3_LOCAL_DATA_DIR = tmp;
-  process.env.BIOF3_BETTER_SQLITE3_ROOT = coreServerRoot;
+  process.env.PETRI_LOCAL_DATA_DIR = tmp;
+  process.env.PETRI_BETTER_SQLITE3_ROOT = coreServerRoot;
   _reset();
 
   t.after(() => {
     closeAll();
     _reset();
-    delete process.env.BIOF3_LOCAL_DATA_DIR;
-    delete process.env.BIOF3_BETTER_SQLITE3_ROOT;
+    delete process.env.PETRI_LOCAL_DATA_DIR;
+    delete process.env.PETRI_BETTER_SQLITE3_ROOT;
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch {}
   });
 

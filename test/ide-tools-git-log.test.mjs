@@ -12,7 +12,7 @@ import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const IDE_TOOLS = resolve(__dirname, '..', 'core/biof3-server/mcp/ide-tools');
+const IDE_TOOLS = resolve(__dirname, '..', 'core/petri-server/mcp/ide-tools');
 
 const ideTools = await import(
   pathToFileURL(resolve(IDE_TOOLS, 'index.js')).href
@@ -38,7 +38,7 @@ const SPAWN_OPTS = { encoding: 'utf8' };
  * 返回 { repo, commits: [sha1, sha2, sha3] }，commits[0] == HEAD。
  */
 function makeRepoWithCommits() {
-  const repo = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-git-log-`);
+  const repo = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-git-log-`);
   const env = gitEnv();
   spawnSync('git', ['init', '-q', '-b', 'main', repo], { env });
   // commit 1
@@ -119,7 +119,7 @@ test('ide_git_log rejects path outside allowlist', () => {
 });
 
 test('ide_git_log rejects non-git repository', () => {
-  const tmp = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-nogit-`);
+  const tmp = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-nogit-`);
   try {
     const res = H.ide_git_log({ path: tmp });
     assert.equal(res.ok, false);
@@ -130,7 +130,7 @@ test('ide_git_log rejects non-git repository', () => {
 });
 
 test('ide_git_log limit hard cap clamps to 200 and reports truncated', () => {
-  const repo = fs.mkdtempSync(`${os.tmpdir()}/biof3-ide-git-log-cap-`);
+  const repo = fs.mkdtempSync(`${os.tmpdir()}/petri-ide-git-log-cap-`);
   try {
     const env = gitEnv();
     const spawn = (args) => spawnSync('git', args, { env, ...SPAWN_OPTS });

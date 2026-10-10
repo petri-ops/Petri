@@ -15,7 +15,7 @@ import '@xyflow/react/dist/style.css';
 import { fetchResultLineage, type ResultLineage } from './resultStudioClient';
 import { projectLineageToFlow, type LineageGraphNodeData } from './lineageProjection';
 import { findCatalogTool, useToolCatalog } from '@/lib/tool-catalog';
-import { dispatchGewuEvent, gewuEvents } from '@/lib/events';
+import { dispatchPetriEvent, petriEvents } from '@/lib/events';
 import styles from './LineageGraph.module.css';
 
 export function LineageGraph({ projectId, jobId, onPinArtifact }: {
@@ -59,7 +59,7 @@ export function LineageGraph({ projectId, jobId, onPinArtifact }: {
   }));
 
   const handleNodeClick = (_event: React.MouseEvent, node: Node<LineageGraphNodeData>): void => {
-    dispatchGewuEvent(gewuEvents.projectOpenResult, { toolJobId: node.id, projectId });
+    dispatchPetriEvent(petriEvents.projectOpenResult, { toolJobId: node.id, projectId });
   };
 
   // BLOCK-140 P1 — 右键=钉住次级动作（主点击打开链不变）
@@ -80,8 +80,8 @@ export function LineageGraph({ projectId, jobId, onPinArtifact }: {
         onNodeClick={handleNodeClick}
         onNodeContextMenu={onPinArtifact ? handleNodeContextMenu : undefined}
         defaultEdgeOptions={{
-          style: { stroke: 'var(--gewu-border-strong)' },
-          markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--gewu-border-strong)' },
+          style: { stroke: 'var(--petri-border-strong)' },
+          markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--petri-border-strong)' },
         }}
       >
         <Background />

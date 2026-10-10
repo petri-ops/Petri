@@ -1,10 +1,10 @@
 /**
- * Electron 主进程入口 — Gewu 本地桌面版
+ * Electron 主进程入口 — Petri 本地桌面版
  *
  * 职责：
  * 1. 设置桌面版本地存储、运行时和用户数据环境变量
- * 2. 启动 biof3-server（子进程 spawn，避免原生模块 V8 版本冲突；BLOCK-30 P1 起
- *    无独立 py-server，Python 工具由 biof3-server 经执行器注册表本地执行；
+ * 2. 启动 petri-server（子进程 spawn，避免原生模块 V8 版本冲突；BLOCK-30 P1 起
+ *    无独立 py-server，Python 工具由 petri-server 经执行器注册表本地执行；
  *    BLOCK-51 P3 起 plumber 空壳也已摘除，R 为 tools-executor 单轨）
  * 3. 加载已安装插件
  * 4. 内容增量同步（后台）
@@ -76,9 +76,9 @@ try {
 
 // ── Path resolution helpers (re-exported from core-utils.js for local use) ──
 
-if (process.env.BIOF3_ELECTRON_USER_DATA_DIR) {
+if (process.env.PETRI_ELECTRON_USER_DATA_DIR) {
   try {
-    app.setPath("userData", process.env.BIOF3_ELECTRON_USER_DATA_DIR);
+    app.setPath("userData", process.env.PETRI_ELECTRON_USER_DATA_DIR);
   } catch (e) {
     console.warn("[desktop] failed to override userData path:", e.message);
   }
@@ -87,7 +87,7 @@ if (process.env.BIOF3_ELECTRON_USER_DATA_DIR) {
 // BLOCK-100 P1 — 测试实例标记（由 scripts/start-test-instance.sh 注入）：
 // 独立 userData 绕单实例锁与用户窗口共存；零 fork 后端、零 migration
 // （数据同源 :3001，主实例拥有 DB 生命周期）；窗口离屏可见 + `?test=1` 标记。
-const IS_TEST_INSTANCE = process.env.BIOF3_TEST_INSTANCE === "1";
+const IS_TEST_INSTANCE = process.env.PETRI_TEST_INSTANCE === "1";
 
 // ── EPIPE / stdout 兜底 ─────────────────────────────────────
 // console.log 写 stdout 时若管道已关（子进程退出/重定向）会抛 EPIPE，
@@ -111,7 +111,7 @@ process.stderr?.on?.("error", (err) => {
 // ── 路径解析（开发模式 vs 打包模式）────────────────────────────
 // 去 submodule 后（core 内嵌）：
 //   - desktop 自己的资源（frontend/dist, build, resources/）在 desktop 仓根
-//   - core 资源（biof3-server, shared-backend）内嵌在 desktop 仓根 core/ 下
+//   - core 资源（petri-server, shared-backend）内嵌在 desktop 仓根 core/ 下
 //     （BLOCK-30 P1：py-server / gateway 已摘除）
 // 开发模式：PROJECT_ROOT = desktop 仓根（src/..），CORE_ROOT = PROJECT_ROOT/core
 // 打包模式：desktop 资源在 process.resourcesPath，core 资源在 process.resourcesPath/core
@@ -134,7 +134,7 @@ process.stderr?.on?.("error", (err) => {
 // ── 环境变量（桌面版模式）──────────────────────────────────────
 
 // Runtime 解析两级优先：
-//   1. 用户安装的独立 Runtime（~/Documents/Gewu-Local/runtimes/{R|Python}）— 最高优先
+//   1. 用户安装的独立 Runtime（~/Documents/Petri-Local/runtimes/{R|Python}）— 最高优先
 //   2. 开发模式：检测系统 R/Python（仅 dev，打包模式不检测，保持独立）
 //   3. 都没有 → 返回 null，R/Python 功能不可用，提示从插件商店安装
 // reserveAvailablePort 已提取到 src/main/core-utils.js
@@ -160,7 +160,7 @@ const setMainWindow = (w) => { _mainWindow = w; };
 // 回调中无 catch，直接导致主进程 Uncaught Exception）。
 const mainWindow = { isDestroyed() { return _mainWindow == null || _mainWindow.isDestroyed(); }, get webContents() { return _mainWindow?.webContents; }, isMinimized() { return _mainWindow?.isMinimized(); }, isFocused() { return _mainWindow?.isFocused(); }, restore() { _mainWindow?.restore(); }, show() { _mainWindow?.show(); }, focus() { _mainWindow?.focus(); } };
 
-// Gewu owns local backend ports and must run as a single application
+// Petri owns local backend ports and must run as a single application
 // instance. A repeated launch focuses the existing window instead of starting
 // another R/Python service stack.
 const hasSingleInstanceLock = app.requestSingleInstanceLock();
@@ -199,7 +199,7 @@ if (!hasSingleInstanceLock) {
 // ── IPC：诊断日志导出 / 数据备份（M2-8）─────────────────────────
 
 // ── IPC：数据目录管理（卸载数据保留）──────────────────────────
-// 用户可能在操作系统卸载应用后仍想保留 ~/Documents/Gewu-Local/ 数据，
+// 用户可能在操作系统卸载应用后仍想保留 ~/Documents/Petri-Local/ 数据，
 // 或主动清理。这里提供查看数据目录大小 + 在文件管理器中打开的能力。
 // ── IPC：终端/日志面板 ───────────────────────────────────────
 
@@ -281,14 +281,14 @@ function setupSkillsIpc() {
     if (result.canceled || !result.filePaths.length) {
       return { ok: false, canceled: true };
     }
-    const { importMcpConfigFile } = require(resolveCore("biof3-server", "helpers", "mcp-config-import.js"));
+    const { importMcpConfigFile } = require(resolveCore("petri-server", "helpers", "mcp-config-import.js"));
     return importMcpConfigFile(result.filePaths[0]);
   });
 
   ipcMain.handle(CHANNELS.mcpConfig.importPath, async (event, filePath) => {
     if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };
     if (!filePath || typeof filePath !== "string") return { ok: false, error: "file_path_required" };
-    const { importMcpConfigFile } = require(resolveCore("biof3-server", "helpers", "mcp-config-import.js"));
+    const { importMcpConfigFile } = require(resolveCore("petri-server", "helpers", "mcp-config-import.js"));
     return importMcpConfigFile(filePath);
   });
 
@@ -453,8 +453,8 @@ async function main() {
   setupDesktopEnv(backendPorts);
 
   // SEC-HARDEN 清单 #5：权限默认拒绝（Electron 未装 handler 时是「自动批准一切」）。
-  // 必须晚于 setupDesktopEnv——受信渲染 origin 由它写入 BIOF3_TRUSTED_DESKTOP_ORIGINS。
-  // 传 app 是为了用 'session-created' 覆盖分区 session（webview 的 persist:gewu-browser
+  // 必须晚于 setupDesktopEnv——受信渲染 origin 由它写入 PETRI_TRUSTED_DESKTOP_ORIGINS。
+  // 传 app 是为了用 'session-created' 覆盖分区 session（webview 的 persist:petri-browser
   // 不共享 defaultSession，只装默认 session 会漏掉 guest）。
   try {
     applyPermissionPolicy({ session, app, log: console });
@@ -464,8 +464,8 @@ async function main() {
     console.error("[security] 权限策略装配失败（继续启动，权限请求将被自动批准——安全策略未生效）:", error?.message || error);
   }
 
-  // M1-4 (H3)：启动 biof3-server 前跑 db migration，防升级 schema 错乱。
-  // Migration must use the same selected Node boundary as biof3-server. Loading
+  // M1-4 (H3)：启动 petri-server 前跑 db migration，防升级 schema 错乱。
+  // Migration must use the same selected Node boundary as petri-server. Loading
   // better-sqlite3 inside Electron would require a different native ABI and
   // would break the system-Node copy used by Harness/backend processes.
   // BLOCK-100 P1 — 测试实例跳过：主实例拥有 DB 生命周期，migration 已由其执行。
@@ -475,7 +475,7 @@ async function main() {
   // 时序不变：startRServer 前仍 await 完成态；失败仍不阻断启动（initSchema 兜底）。
   const migrationPromise = (async () => {
     const migDir = path.join(__dirname, "migrations");
-    const dbPath = process.env.BIOF3_DB_PATH;
+    const dbPath = process.env.PETRI_DB_PATH;
     if (!dbPath || IS_TEST_INSTANCE) return;
     fs.mkdirSync(path.dirname(dbPath), { recursive: true });
     const migrationEnv = { ...process.env, ELECTRON_RUN_AS_NODE: "1" };
@@ -489,9 +489,9 @@ async function main() {
     // during module evaluation, which silently degrades IS_DEV to false and skips this branch.
 
     if (!app.isPackaged) {
-      migrationEnv.BIOF3_BETTER_SQLITE3_ROOT = resolveCore("biof3-server");
+      migrationEnv.PETRI_BETTER_SQLITE3_ROOT = resolveCore("petri-server");
     } else {
-      delete migrationEnv.BIOF3_BETTER_SQLITE3_ROOT;
+      delete migrationEnv.PETRI_BETTER_SQLITE3_ROOT;
     }
     await new Promise((resolve, reject) => {
       const migration = spawn(
@@ -517,7 +517,7 @@ async function main() {
   })();
 
   // 1. 启动后端服务
-  // biof3-server 常驻（BLOCK-30 P1/P2：唯一业务后端，Python 工具经执行器注册表
+  // petri-server 常驻（BLOCK-30 P1/P2：唯一业务后端，Python 工具经执行器注册表
   // 本地执行；gateway 协调层已摘除）。
   // BLOCK-9.1 PHASE 4: startRServer moved to src/main/backend-proc-manager.js.
   // main.js orchestrates via named imports.
@@ -545,7 +545,7 @@ async function main() {
     }
   } else {
     // BLOCK-154 波次 2 — migration 完成态在此收口（时序不变：schema 先于后端打开 DB）；
-    // 失败不阻断启动——biof3-server 的 initSchema() 仍会兜底建表。
+    // 失败不阻断启动——petri-server 的 initSchema() 仍会兜底建表。
     try {
       await migrationPromise;
     } catch (e) {
@@ -564,10 +564,10 @@ async function main() {
 
   // 5. 设置 IPC
   // TLS/Proxy fix: 渲染进程(Chromium)默认继承系统代理，会把 localhost 的
-  // biof3-server 请求也塞进系统代理，导致
+  // petri-server 请求也塞进系统代理，导致
   // "Client network socket disconnected before secure TLS connection was
   // established"。只绕开本地回环，外网仍走原代理（避免 blanket direct://
-  // 误伤需要代理才能访问的外网 LLM）。注意：biof3-server 出站 LLM 走 Node
+  // 误伤需要代理才能访问的外网 LLM）。注意：petri-server 出站 LLM 走 Node
   // fetch/https，本就不吃系统代理，此设置不影响它。
   try {
     session.defaultSession.setProxy({
@@ -682,7 +682,7 @@ app.whenReady().then(main);
 applyWebContentsHardening({ app, shell, log: console });
 
 app.on("window-all-closed", () => {
-  // Product contract: closing Gewu stops the local application and every
+  // Product contract: closing Petri stops the local application and every
   // backend it owns. Do not keep R/Python services resident on macOS.
   app.quit();
 });

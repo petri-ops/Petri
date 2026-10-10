@@ -153,7 +153,7 @@ function parseSkillManifest(manifest, source, baseDir) {
       secondary: Array.isArray(outputs.secondary) ? outputs.secondary : [],
     },
     metadata: {
-      author: metadata.author || 'BioF3 Team',
+      author: metadata.author || 'Petri Team',
       license: metadata.license || 'MIT',
       source: metadata.source || source,
       created: metadata.created || new Date().toISOString().split('T')[0],
@@ -279,13 +279,13 @@ function loadBuiltInSkills() {
  */
 function getInstalledSkillsDir() {
   // 优先使用环境变量指定的路径
-  const envPath = process.env.BIOF3_USER_DATA_DIR;
+  const envPath = process.env.PETRI_USER_DATA_DIR;
   if (envPath) {
     return path.join(envPath, 'skills');
   }
   // 回退到 common 用户数据路径
   const os = require('os');
-  return path.join(os.homedir(), '.biof3', 'skills');
+  return path.join(os.homedir(), '.petri', 'skills');
 }
 
 /**

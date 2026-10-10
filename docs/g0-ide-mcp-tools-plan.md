@@ -4,13 +4,13 @@
 **创建日期**: 2026-08-14
 **Plan ID**: G0-IDE-MCP-TOOLS
 **truthDomain**: agent-ide-mcp-tools
-**Owner**: BioF3 Desktop Agent Team
+**Owner**: Petri Desktop Agent Team
 **依赖前置**:
 - `docs/archive/ide-transformation-retired/ide-research/mcp-ide-tools-design.md` — 设计文档（已存在，2026-08-14；2026-08-16 已 superseded 归档）
 - `docs/skills-architecture.md` — Skills 四层架构（已存在）
 - `core/r-server/mcp/registry.js` — MCP 注册中心（已存在，已注册 skill_* 三件套）
 - `src/main.js` IPC 处理器（已存在 file:open-dialog / file:save-dialog 等面向 UI 的通道）
-- `src/preload.js` — contextBridge（已存在 biof3Desktop 桥）
+- `src/preload.js` — contextBridge（已存在 petriDesktop 桥）
 
 ---
 
@@ -39,7 +39,7 @@
 ### Phase 1 — 文件 + 终端（P0）
 - `ide_file_read` / `ide_file_write` / `ide_file_create` / `ide_file_delete` / `ide_file_rename` / `ide_file_exists` / `ide_file_list`（7 个）
 - `ide_terminal_create` / `ide_terminal_write` / `ide_terminal_read` / `ide_terminal_close` / `ide_terminal_list`（5 个）
-- 安全约束：路径白名单（项目根 + 系统临时目录）、操作审计写入 `~/.biof3/logs/ide-tools.log`、危险操作（`file_delete`、`file_write` 覆盖）需 `confirm=true`
+- 安全约束：路径白名单（项目根 + 系统临时目录）、操作审计写入 `~/.petri/logs/ide-tools.log`、危险操作（`file_delete`、`file_write` 覆盖）需 `confirm=true`
 
 ### Phase 2 — 编辑器 + 搜索（P0/P1）
 - `ide_editor_open` / `ide_editor_close` / `ide_editor_get_open_files` / `ide_editor_set_active_file` / `ide_editor_get_selection` / `ide_editor_set_selection`（6 个）
@@ -54,8 +54,8 @@
 
 ### 4.1 代码落点（Phase 1 实际落点，已交付）
 - **`core/r-server/mcp/ide-tools/`** — 新建目录（MCP server 跑在 r-server 进程里）：
-  - `path-allowlist.js` — 路径白名单（cwd + tmpdir + ~/.biof3/logs）+ deny 名单（.git/.ssh/node_modules）
-  - `audit-log.js` — 操作审计写入 ~/.biof3/logs/ide-tools.log
+  - `path-allowlist.js` — 路径白名单（cwd + tmpdir + ~/.petri/logs）+ deny 名单（.git/.ssh/node_modules）
+  - `audit-log.js` — 操作审计写入 ~/.petri/logs/ide-tools.log
   - `file.js` — 7 个文件操作 MCP 工具
   - `terminal.js` — 5 个终端 MCP 工具（node-pty）
   - `index.js` — 入口 + 自动审计包装
@@ -67,7 +67,7 @@
 
 ### 4.2 复用的现有约束
 - 不新建 executor / Job / Workflow，只复用 MCP `callTool()` 入口
-- 操作审计复用 `~/.biof3/logs/` 目录（与既有 `backend-health.js` 一致）
+- 操作审计复用 `~/.petri/logs/` 目录（与既有 `backend-health.js` 一致）
 - 路径白名单基于 `core/shared-backend/path-safe.js` 的 `safeJoinUnder` 扩展，不重复实现
 - Plugin loader / capability bundles 不改动；IDE 工具是**第一方**能力，不是第三方插件
 
@@ -85,7 +85,7 @@
 - [ ] `test/ide-tools-file.test.mjs` 7/7 通过：read/write/create/delete/rename/exists/list 含正常与失败路径
 - [ ] `test/ide-tools-terminal.test.mjs` 5/5 通过：create/write/read/close/list
 - [ ] `test/ide-tools-safe-path.test.mjs` 通过：白名单内允许、白名单外拒绝、相对路径拒绝、符号链接逃逸拒绝
-- [ ] 操作审计写入 `~/.biof3/logs/ide-tools.log` 至少 1 条 Phase 1 调用记录
+- [ ] 操作审计写入 `~/.petri/logs/ide-tools.log` 至少 1 条 Phase 1 调用记录
 - [ ] `npm run docs:check` PASS
 - [ ] `npm run ui:audit:check` PASS（如有 UI 改动则同步台账）
 
@@ -151,7 +151,7 @@
 - [x] MCP `listTools()` 返回至少 12 个 `ide_*` 工具
 - [x] 33 个 IDE 工具定向测试全部通过
 - [x] 路径白名单测试覆盖：白名单内允许、白名单外拒绝、相对路径拒绝、deny 段拒绝
-- [x] 操作审计写入 `~/.biof3/logs/ide-tools.log`（测试期间验证过）
+- [x] 操作审计写入 `~/.petri/logs/ide-tools.log`（测试期间验证过）
 - [x] `npm run docs:check` PASS
 
 ### Phase 1.5 收口（2026-08-14）
@@ -219,7 +219,7 @@
 
 **复用与依赖**：
 - 复用 `core/r-server/mcp/ide-tools/diff.js` 的 `parseUnifiedHunks`（未修改 Phase 1.5 文件）；新文件 `diff-helpers.js` 复用 + 复制 5 行 `summarize`（避免动 frozen 代码）
-- 全部走 `core/r-server/mcp/ide-tools/path-allowlist.js` 白名单（cwd / os.tmpdir() / ~/.biof3/logs）
+- 全部走 `core/r-server/mcp/ide-tools/path-allowlist.js` 白名单（cwd / os.tmpdir() / ~/.petri/logs）
 - 全部经 `git rev-parse --git-dir` 验证仓库存在
 
 **测试证据**（4 新文件 / 22 个测试 + Phase 1.5 期望数从 14 → 18）：

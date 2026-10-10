@@ -9,7 +9,7 @@ import styles from './MarkdownResultViewer.module.css';
  * 契约（plan §1.1）：fetch 产物 URL 文本 → react-markdown ^9 渲染；
  * remarkPlugins 仅 [remark-gfm]（GFM 表格/删除线/任务列表），**不加 rehype-raw**
  * —— raw HTML 一律不渲染为元素（无 innerHTML 注入面，XSS 安全默认）；
- * 文本获取失败如实显示错误，不假渲染空壳。样式只走 --gewu-* token。
+ * 文本获取失败如实显示错误，不假渲染空壳。样式只走 --petri-* token。
  */
 export function MarkdownResultViewer({ url, name }: { url: string; name: string }): React.ReactElement {
   // state 携带其取数来源的 url：切换产物时由渲染期派生「陈旧 → 加载中」，

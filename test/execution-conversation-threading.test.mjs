@@ -9,28 +9,28 @@ import { tmpdir } from 'node:os';
 const require = createRequire(import.meta.url);
 
 // BLOCK-49 加映清债 —— 统一临时 DB 自举（存量：单跑/全量缺 projects 表）
-//（BIOF3_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）
+//（PETRI_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）
 {
   const fsx = require('node:fs');
   const osx = require('node:os');
   const pth = require('node:path');
   const urlx = require('node:url');
   const hereDir = pth.dirname(urlx.fileURLToPath(import.meta.url));
-  const Database = require(pth.resolve(hereDir, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const tempDbDir = fsx.mkdtempSync(pth.join(osx.tmpdir(), 'biof3-sweep-db-'));
-  const boot = new Database(pth.join(tempDbDir, 'biof3.db'));
+  const Database = require(pth.resolve(hereDir, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const tempDbDir = fsx.mkdtempSync(pth.join(osx.tmpdir(), 'petri-sweep-db-'));
+  const boot = new Database(pth.join(tempDbDir, 'petri.db'));
   const migrationsDir = pth.resolve(hereDir, '..', 'src', 'migrations');
   for (const f of fsx.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fsx.readFileSync(pth.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = pth.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = pth.join(tempDbDir, 'petri.db');
   process.on('exit', () => { try { fsx.rmSync(tempDbDir, { recursive: true, force: true }); } catch {} });
 }
-const { createResultChangeSetTools } = require('../core/biof3-server/agent-tools/result-edit-tools');
+const { createResultChangeSetTools } = require('../core/petri-server/agent-tools/result-edit-tools');
 
 test('Result Edit executeJob forwards the trusted tool context conversation', async (context) => {
-  const root = mkdtempSync(join(tmpdir(), 'biof3-execution-conversation-'));
+  const root = mkdtempSync(join(tmpdir(), 'petri-execution-conversation-'));
   context.after(() => rmSync(root, { recursive: true, force: true }));
   const scriptContent = 'print(1)\n';
   const scriptPath = join(root, 'run-script.R');
@@ -91,7 +91,7 @@ test('Result Edit executeJob forwards the trusted tool context conversation', as
     reason: null,
     inspection: { runtime: { versionRaw: 'git version test' } },
     adapter: {
-      gitDir: join(root, '.biof3/git'),
+      gitDir: join(root, '.petri/git'),
       workTree: root,
       revParse: (ref) => ref === `${sourceCommit}^{commit}` ? sourceCommit : null,
       showFile: ({ filePath }) => filePath.endsWith('plot.R') ? scriptContent : '{}',

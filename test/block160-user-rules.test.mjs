@@ -18,10 +18,10 @@ const require = createRequire(import.meta.url);
 const ROOT = path.resolve('.');
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'b160-user-rules-'));
-process.env.BIOF3_LOCAL_DATA_DIR = tmpDir;
+process.env.PETRI_LOCAL_DATA_DIR = tmpDir;
 
-const rulesHelper = require(path.join(ROOT, 'core/biof3-server/helpers/agent-user-rules'));
-const policy = require(path.join(ROOT, 'core/biof3-server/agent-tools/agent-tool-policy'));
+const rulesHelper = require(path.join(ROOT, 'core/petri-server/helpers/agent-user-rules'));
+const policy = require(path.join(ROOT, 'core/petri-server/agent-tools/agent-tool-policy'));
 
 const EXEC_CONTRACT = { sideEffect: 'execution', riskTier: 'R2' };
 const WRITE_CONTRACT = { sideEffect: 'workspace-write', riskTier: 'R2' };
@@ -102,7 +102,7 @@ test('BLOCK-160 ORC-1 零规则/无 ctx：决策零扰动（fail-soft）', () =>
 });
 
 test('BLOCK-160 ORC-1 接线钉：拦截器必须注入 ctx.userRules（源码扫描守卫）', () => {
-  const src = fs.readFileSync(path.join(ROOT, 'core/biof3-server/agent-tools/agent-tool-interceptor.js'), 'utf8');
+  const src = fs.readFileSync(path.join(ROOT, 'core/petri-server/agent-tools/agent-tool-interceptor.js'), 'utf8');
   assert.match(src, /userRules/, '拦截器应注入 ctx.userRules');
   assert.match(src, /loadUserRules/, '拦截器应调用 loadUserRules');
 });

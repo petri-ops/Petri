@@ -267,10 +267,10 @@ test('P6 observation sanitizer refuses local coordinates while preserving bounde
 });
 
 test('P6 no-seed product scenarios pass against the disposable real runtime', {
-  skip: process.env.BIOF3_P6_RUN_PRODUCT_SCENARIOS !== '1',
+  skip: process.env.PETRI_P6_RUN_PRODUCT_SCENARIOS !== '1',
   timeout: 10 * 60 * 1000,
 }, async () => {
-  const observation = await captureP6ProductScenarios({ verbose: process.env.BIOF3_P6_VERBOSE === '1' });
+  const observation = await captureP6ProductScenarios({ verbose: process.env.PETRI_P6_VERBOSE === '1' });
   const evaluation = evaluateP6ProductScenarios(observation);
   assert.equal(evaluation.passed, true, JSON.stringify(evaluation));
   assert.equal(assertSanitizedP6ProductScenarioObservation(observation), true);

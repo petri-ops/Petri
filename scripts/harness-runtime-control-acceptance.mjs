@@ -12,7 +12,7 @@ const commands = [
   ['frontend-typecheck', 'npm run check --prefix frontend'],
 ];
 const results = commands.map(([label, command]) => {
-  const run = spawnSync(command, { cwd: root, shell: true, stdio: 'inherit', env: { ...process.env, CI: '1', BIOF3_HARNESS_OFFLINE: '1' } });
+  const run = spawnSync(command, { cwd: root, shell: true, stdio: 'inherit', env: { ...process.env, CI: '1', PETRI_HARNESS_OFFLINE: '1' } });
   return { label, command, exitCode: run.status ?? 1, signal: run.signal || null };
 });
 const report = {

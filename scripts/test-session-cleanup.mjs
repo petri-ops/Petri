@@ -13,7 +13,7 @@
  * 安全：只删标题匹配 isTestSessionTitle 模式的会话（探针/取证/验收命名），
  * 用户真实会话零触碰；非 2xx 逐条如实报错不中断。
  */
-const API = process.env.BIOF3_API || 'http://127.0.0.1:3001/api';
+const API = process.env.PETRI_API || 'http://127.0.0.1:3001/api';
 const AUTH = { Authorization: 'Bearer desktop-local' };
 
 // 测试生成会话/项目的命名模式（审计留痕：新增模式须先补 test/test-session-cleanup.test.mjs）

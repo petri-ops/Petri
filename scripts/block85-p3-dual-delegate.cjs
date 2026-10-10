@@ -5,10 +5,10 @@
  * BLOCK-85 双真机验收 P3（Runbook §3）：真实模型委托跨机跑通。
  *
  * 链路：POST /api/ai/agent（task 模式，返回 taskId）→ GET /api/ai/agent/task/:taskId
- * 消费 SSE → agent 调 delegate_to_gewu_node(peerId, task) → Mac 开独立 agent 会话执行
+ * 消费 SSE → agent 调 delegate_to_petri_node(peerId, task) → Mac 开独立 agent 会话执行
  * → 回执（状态 + 对方 agent 摘要）回流 Windows 会话。
  * 断言：
- *   A1 事件流出现 delegate_to_gewu_node 调用（peerId 正确）
+ *   A1 事件流出现 delegate_to_petri_node 调用（peerId 正确）
  *   A2 委托回执成功（Mac 侧 agent 执行并返回摘要）
  *   A3 任务终态完成
  * 证据：acceptance/block-85/dual-p3-delegate.json（Runbook 指定路径，含原始事件流）
@@ -79,7 +79,7 @@ async function main() {
       //    （delegate 无项目绑定的结构缺口，登记 BLOCK-88 域）；且委托未开独立会话，历史只读纪律延续。
       // ③ 故 P3 载体改为不依赖项目绑定的真实只读委托：跨机系统信息侦察+如实汇报，
       //    委托链断言（调用/回执/终态摘要）不变；分析作业跨机已由 P2 单独足额证明。
-      content: `使用 delegate_to_gewu_node 工具把一项工作交给协作成员（peerId 填 "${PEER_ID}"）执行。delegate 的 task 参数只写这句话：「汇报你本机的运行环境：操作系统名称与版本、CPU 架构、主机名，以及 Node/npm 的版本号（可用 system_info 等工具查询），以清单形式回复」。委托等待 2 分钟。你自己不要在本机查询这些信息，全部由协作成员完成。`,
+      content: `使用 delegate_to_petri_node 工具把一项工作交给协作成员（peerId 填 "${PEER_ID}"）执行。delegate 的 task 参数只写这句话：「汇报你本机的运行环境：操作系统名称与版本、CPU 架构、主机名，以及 Node/npm 的版本号（可用 system_info 等工具查询），以清单形式回复」。委托等待 2 分钟。你自己不要在本机查询这些信息，全部由协作成员完成。`,
     }],
     context: {},
   });
@@ -99,7 +99,7 @@ async function main() {
     const isTool = ev.eventType === 'tool_call' || ev.eventType === 'tool_result' || text.includes('toolResult');
     results.events.push(isTool ? text : text.slice(0, 1500));
     if (results.events.length > 4000) return; // 保险丝
-    if (text.includes('delegate_to_gewu_node')) {
+    if (text.includes('delegate_to_petri_node')) {
       if (!sawDelegateCall && (ev.eventType === 'tool_call' || ev.eventType === 'tool_start' || text.includes('arguments') || text.includes('arguments_json') || text.includes(PEER_ID))) {
         sawDelegateCall = true;
         delegateCallDetail = text.slice(0, 600);
@@ -128,7 +128,7 @@ async function main() {
   let delegateOk = null;
   let replyText = '';
   for (const e of results.events) {
-    if (!e.includes('delegate_to_gewu_node') || !e.includes('toolResult')) continue;
+    if (!e.includes('delegate_to_petri_node') || !e.includes('toolResult')) continue;
     try {
       const j = JSON.parse(e);
       const tr = j.payload && j.payload.toolResult;

@@ -150,7 +150,7 @@ function applyTruncation(record, maxBytes) {
 /**
  * 创建落盘 sink。
  * @param {object} options
- * @param {string} options.dataDir 本地数据根目录（BIOF3_LOCAL_DATA_DIR 同源解析）
+ * @param {string} options.dataDir 本地数据根目录（PETRI_LOCAL_DATA_DIR 同源解析）
  * @param {number} [options.maxRecordBytes] 单条记录上限（默认 8MB）
  * @param {number} [options.maxFrames] 单条记录保留的 delta 帧上限（默认 2000）
  * @param {number} [options.maxFileBytes] 单文件轮转阈值（默认 64MB）

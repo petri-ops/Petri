@@ -8,7 +8,7 @@ acceptance:
   - A 轨#4：required file 型输入路径不存在时 fail-fast（「输入 X 路径不存在: <path>（需本地绝对路径）」形态），run-plugin-script.js:191 静默 continue 消除
   - B 轨#7：域校验（小数 counts/重复基因名等既有规则）在 agent run_tool / UI 表单的主执行路径触发——复用 upload-domain-validation 单源不复制第二份真相；HTTP multipart 既有路径行为不变
   - C 轨#10：test/deseq2-multifactor-design.test.mjs 锚 pack 仓 deseq2.R 内容指纹——契约漂移红而非 skip；Rscript 检测与 app 运行时解析口径对齐（先探后改，改动留痕）
-  - C 轨#6：本机 pack 仓（D:\1.WorkDir\gewu-pack-bio）补齐 D3 R 侧 parse_design_terms 多因子（直收 ~ batch + condition、单列向后兼容、preflight 逐项 fail-closed），对照 desktop 契约 scientific-task-planner.js designFormula/designTerms；pack 仓本地提交（BIO-4 惯例不推送，hash 留痕）；R 侧真实跑通验证，Rscript 不可用则如实登记边界不编造
+  - C 轨#6：本机 pack 仓（D:\1.WorkDir\petri-pack-bio）补齐 D3 R 侧 parse_design_terms 多因子（直收 ~ batch + condition、单列向后兼容、preflight 逐项 fail-closed），对照 desktop 契约 scientific-task-planner.js designFormula/designTerms；pack 仓本地提交（BIO-4 惯例不推送，hash 留痕）；R 侧真实跑通验证，Rscript 不可用则如实登记边界不编造
   - 统一门禁：test:changed + quality:secret/arch/lint/types 全绿；收口 closeout 十一门（主代理集成提交后）
 reopen: bundle「必需性」静态判据若后续出现第二插件形态需求再泛化；#11/#12（B9 表单下拉/demo 数据）与 A2 工作台三条属审视批后续批次，按序列另立项
 status: completed
@@ -27,9 +27,9 @@ status: completed
 
 | 轨 | 审视发现 | 内容 | 主文件面 |
 | --- | --- | --- | --- |
-| A 平台与归因 | #8/#9/#4 | bundle 平台解析根修 + manifest 平台校验；bundle 结构化失败并入 job 文案；required file 输入 fail-fast | core/shared-backend/capability-bundles.js、core/biof3-server/mcp/registry/run-plugin-script.js、core/biof3-server/helpers/tools-executor.js |
+| A 平台与归因 | #8/#9/#4 | bundle 平台解析根修 + manifest 平台校验；bundle 结构化失败并入 job 文案；required file 输入 fail-fast | core/shared-backend/capability-bundles.js、core/petri-server/mcp/registry/run-plugin-script.js、core/petri-server/helpers/tools-executor.js |
 | B 域校验主路径 | #7 | validateDomainUploads 规则接入 agent run_tool/UI 主执行路径（单源复用） | tools-executor.js / run-plugin-script.js 暂存段 + upload-domain-validation.js（只读复用） |
-| C pack 对账闭环 | #6/#10 | 契约测试锚 pack 内容指纹（漂移红非 skip）+ Rscript 检测修正；本机 pack 仓补齐 parse_design_terms 多因子 | test/deseq2-multifactor-design.test.mjs + ../gewu-pack-bio/plugins/deseq2/scripts/deseq2.R |
+| C pack 对账闭环 | #6/#10 | 契约测试锚 pack 内容指纹（漂移红非 skip）+ Rscript 检测修正；本机 pack 仓补齐 parse_design_terms 多因子 | test/deseq2-multifactor-design.test.mjs + ../petri-pack-bio/plugins/deseq2/scripts/deseq2.R |
 
 执行序：A → B 串行（A/B 共享 tools-executor.js 与 run-plugin-script.js 文件面，避免并行互踩）；C 与 A/B 并行（文件面互斥：pack 仓 + 独立测试文件）。
 
@@ -59,7 +59,7 @@ status: completed
 
 ## 6. 风险与边界
 
-- 跨仓编辑：C 轨在 ../gewu-pack-bio（本工作区外）改 deseq2.R——限定该文件与必要 manifest，改动不推送。
+- 跨仓编辑：C 轨在 ../petri-pack-bio（本工作区外）改 deseq2.R——限定该文件与必要 manifest，改动不推送。
 - bundle 平台键集合以 index 实测为准：若 index 无 windows-x64 键，正确行为=unknown 拒下载（fail-closed），不是造键。
 - 「bundle 必需性」判据：实现员读 ensureBundlesForPlugin 语义后定（插件声明依赖+平台匹配），取舍在 notes 留痕；拿不准从紧（fail 优于静默回退）。
 - Rscript PATH 与 app 运行时 R 解析口径差异：先探明 app 如何解析 R 路径（运行时配置/环境变量），测试检测向其对齐；探不明则只加指纹锚不动检测，边界留痕。

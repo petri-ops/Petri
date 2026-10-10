@@ -10,7 +10,7 @@ import { findCatalogTool, useToolCatalog } from '@/lib/tool-catalog';
 import { buildPreviewTable } from '@/lib/file-preview/buildPreviewTable';
 import { csvPreviewPageCount, csvPreviewPageRows } from '@/lib/csv-preview-pagination';
 import { Lightbox } from '@/components/ui/Lightbox';
-import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
+import { petriEvents, dispatchPetriEvent } from '@/lib/events';
 import { useTheme } from '@/themes/ThemeProvider';
 import { type HarnessWorkflowJobState } from '@/lib/harness-client';
 import {
@@ -728,7 +728,7 @@ export function ResultArtifactShell({
   // BLOCK-52 P2（图片/结果图引用）：把当前结果图 + artifact 血统派发给 SimpleChat composer。
   const handleQuoteArtifactImage = () => {
     if (!selectedArtifactUrl) return;
-    dispatchGewuEvent(gewuEvents.imageQuote, {
+    dispatchPetriEvent(petriEvents.imageQuote, {
       projectId: project.id,
       kind: 'result-artifact',
       name: selectedArtifactName,
@@ -753,8 +753,8 @@ export function ResultArtifactShell({
       <strong>当前产物文件不可用</strong>
       <span>{effectivePreviewAvailability.reason || '结果记录仍在，但无法读取对应文件。'}</span>
       <div>
-        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={retryCurrentPreview}>重试预览</button>
-        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+        <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={retryCurrentPreview}>重试预览</button>
+        <button className="petri-btn petri-btn--ghost petri-btn--sm"
           type="button"
           onClick={() => onAskAgent(`请检查并恢复当前结果文件“${selectedArtifactLabel || selectedArtifactName}”。先说明缺失原因和可恢复边界，不要覆盖原始数据。`)}
         >
@@ -799,7 +799,7 @@ export function ResultArtifactShell({
             {/* BLOCK-52 P2（图片/结果图引用）：把当前结果图引用到对话 composer */}
             <button
               type="button"
-              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              className="petri-btn petri-btn--ghost petri-btn--sm"
               onClick={handleQuoteArtifactImage}
               title="把这张结果图引用到对话"
             >
@@ -894,8 +894,8 @@ export function ResultArtifactShell({
           </table>
           <div className={styles.csvPreviewPager}>
             <span>共 {rows.length.toLocaleString()} 行（预览文本预算内） · 第 {Math.min(csvPreviewPage, pageCount - 1) + 1}/{pageCount} 页</span>
-            <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={csvPreviewPage <= 0} onClick={() => setCsvPreviewPage((p) => Math.max(0, p - 1))}>上一页</button>
-            <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={csvPreviewPage >= pageCount - 1} onClick={() => setCsvPreviewPage((p) => Math.min(pageCount - 1, p + 1))}>下一页</button>
+            <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" disabled={csvPreviewPage <= 0} onClick={() => setCsvPreviewPage((p) => Math.max(0, p - 1))}>上一页</button>
+            <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" disabled={csvPreviewPage >= pageCount - 1} onClick={() => setCsvPreviewPage((p) => Math.min(pageCount - 1, p + 1))}>下一页</button>
           </div>
         </div>
       );
@@ -963,7 +963,7 @@ export function ResultArtifactShell({
         */}
       </div>
       {recoveryAction && (
-        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+        <button className="petri-btn petri-btn--ghost petri-btn--sm"
           type="button"
           disabled={recoveryBusy}
           onClick={() => void requestRecovery()}
@@ -977,10 +977,10 @@ export function ResultArtifactShell({
     <div className={styles.resultWorkflowConfirmation}>
       <span>确认执行“{pendingRecovery.label}”？该操作会写入任务审计记录。</span>
       <div>
-        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={recoveryBusy} onClick={() => void resolveRecovery(false)}>
+        <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" disabled={recoveryBusy} onClick={() => void resolveRecovery(false)}>
           取消
         </button>
-        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={recoveryBusy} onClick={() => void resolveRecovery(true)}>
+        <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" disabled={recoveryBusy} onClick={() => void resolveRecovery(true)}>
           确认执行
         </button>
       </div>
@@ -993,7 +993,7 @@ export function ResultArtifactShell({
     <>
       {/* BLOCK-140 P0 — 「钉住」：把当前查看产物钉入副栏（视图级快照） */}
       {selectedArtifact && (
-        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={previewLoading} onClick={handlePinArtifact}>钉住</button>
+        <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" disabled={previewLoading} onClick={handlePinArtifact}>钉住</button>
       )}
       {selectedArtifactName && (
         <span className={styles.resultReportTechnicalName}>{selectedArtifactName}</span>
@@ -1016,7 +1016,7 @@ export function ResultArtifactShell({
         </div>
       )}
       {reportArtifact && (
-        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+        <button className="petri-btn petri-btn--ghost petri-btn--sm"
           type="button"
           disabled={reportGenerating}
           onClick={() => void generateFinalReport()}
@@ -1025,7 +1025,7 @@ export function ResultArtifactShell({
         </button>
       )}
       {finalReportUrl && onOpenBrowser && (
-        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => onOpenBrowser(finalReportUrl)}>查看 HTML 报告</button>
+        <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={() => onOpenBrowser(finalReportUrl)}>查看 HTML 报告</button>
       )}
       {finalReportUrl && (
         <a href={finalReportUrl} download="final-report.html">导出 HTML 报告</a>
@@ -1033,7 +1033,7 @@ export function ResultArtifactShell({
       {result.deliveryManifest && (
         <>
           <a href={buildUrl('delivery-manifest.json')} target="_blank" rel="noreferrer">查看交付清单</a>
-          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={replayPackageBusy} onClick={() => void exportReplayPackage()}>
+          <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" disabled={replayPackageBusy} onClick={() => void exportReplayPackage()}>
             {replayPackageBusy ? '导出中…' : '导出复现包'}
           </button>
         </>
@@ -1042,7 +1042,7 @@ export function ResultArtifactShell({
         <a href={scientificScriptUrl} target="_blank" rel="noreferrer">查看脚本</a>
       )}
       {result.deliveryManifest && (
-        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+        <button className="petri-btn petri-btn--ghost petri-btn--sm"
           type="button"
           onClick={() => onAskAgent(`请为任务 ${job.id} 的产物 ${selectedArtifactName} 发起重放验证；先展示输入、资源和副作用确认摘要，不要直接执行。`)}
         >
@@ -1165,7 +1165,7 @@ export function ResultArtifactShell({
         job.name || job.tool_id,
         <div className={styles.resultPlaceholder}>
           <p>结果加载失败：{resultError}</p>
-          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => setResultRetryVersion((value) => value + 1)}>重试</button>
+          <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={() => setResultRetryVersion((value) => value + 1)}>重试</button>
         </div>,
         'done'
       );
@@ -1202,7 +1202,7 @@ export function ResultArtifactShell({
             setViewedRevision(revision);
             resetInteractionSelection();
             onModeChange?.('result', revision.toolJobId);
-            dispatchGewuEvent(gewuEvents.projectOpenArtifact, {
+            dispatchPetriEvent(petriEvents.projectOpenArtifact, {
               projectId: project.id,
               jobId: revision.toolJobId,
               artifactName: revision.outputPath.split('/').pop() || revision.artifactId,
@@ -1236,7 +1236,7 @@ export function ResultArtifactShell({
         {manifestError && (
           <div className={styles.resultWorkflowError} role="alert">
             <span>结果清单暂不可用；已保留可直接读取的结果文件。</span>
-            <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" disabled={manifestLoading} onClick={() => setManifestRetryVersion((value) => value + 1)}>
+            <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" disabled={manifestLoading} onClick={() => setManifestRetryVersion((value) => value + 1)}>
               {manifestLoading ? '重试中…' : '重试结果清单'}
             </button>
           </div>
@@ -1244,7 +1244,7 @@ export function ResultArtifactShell({
         {interactionError && (
           <div className={styles.resultWorkflowError} role="alert">
             <span>{interactionError}</span>
-            <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => setInteractionRetryVersion((value) => value + 1)}>重试交互能力</button>
+            <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={() => setInteractionRetryVersion((value) => value + 1)}>重试交互能力</button>
           </div>
         )}
         <div className={styles.resultSidebarPreviewBody}>

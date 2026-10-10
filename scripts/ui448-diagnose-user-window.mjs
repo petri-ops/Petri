@@ -4,7 +4,7 @@
 // 用法：node scripts/ui448-diagnose-user-window.mjs
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
-const lib = require('../.agents/skills/gewu-dev-infra/dev-verify/lib.cjs');
+const lib = require('../.agents/skills/petri-dev-infra/dev-verify/lib.cjs');
 
 const targets = await lib.pollTargets({ port: 9222, timeoutMs: 10000 });
 const page = targets.find((t) => t.type === 'page');

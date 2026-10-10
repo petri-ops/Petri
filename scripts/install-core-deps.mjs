@@ -3,7 +3,7 @@
  * scripts/install-core-deps.mjs
  *
  * postinstall hook: install node_modules for the embedded core servers
- * (core/biof3-server), which are spawned as child processes at
+ * (core/petri-server), which are spawned as child processes at
  * runtime and packaged verbatim via electron-builder extraResources.
  *
  * These directories have their own package.json but their node_modules are
@@ -20,13 +20,13 @@
  *
  * We therefore rebuild the native modules here for the *current* system Node
  * and skip the rebuild only when they already load cleanly under it. This
- * prevents the biof3-server "ERR_DLOPEN_FAILED / NODE_MODULE_VERSION mismatch"
+ * prevents the petri-server "ERR_DLOPEN_FAILED / NODE_MODULE_VERSION mismatch"
  * crash that otherwise appears after a fresh clone or a Node upgrade
  * (e.g. Node 23 → 24 ABI 131 → 137).
  *
  * Escape hatches:
- *   BIOF3_SKIP_CORE_INSTALL=1   skip entirely (e.g. offline CI that pre-installs)
- *   BIOF3_FORCE_CORE_INSTALL=1  reinstall even if node_modules exists
+ *   PETRI_SKIP_CORE_INSTALL=1   skip entirely (e.g. offline CI that pre-installs)
+ *   PETRI_FORCE_CORE_INSTALL=1  reinstall even if node_modules exists
  */
 import { existsSync, readdirSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
@@ -34,17 +34,17 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const CORE_SERVERS = ['core/biof3-server']; // BLOCK-30 P1: 独立 Python 后端已摘除
+const CORE_SERVERS = ['core/petri-server']; // BLOCK-30 P1: 独立 Python 后端已摘除
 // Native modules in the core servers that must match the system Node ABI.
 // `binary` is the compiled addon file name (convention: name with - → _).
 const NATIVE_MODULES = [{ name: 'better-sqlite3', binary: 'better_sqlite3.node' }];
 
-if (process.env.BIOF3_SKIP_CORE_INSTALL === '1') {
-  console.log('[install-core-deps] skipped (BIOF3_SKIP_CORE_INSTALL=1)');
+if (process.env.PETRI_SKIP_CORE_INSTALL === '1') {
+  console.log('[install-core-deps] skipped (PETRI_SKIP_CORE_INSTALL=1)');
   process.exit(0);
 }
 
-const force = process.env.BIOF3_FORCE_CORE_INSTALL === '1';
+const force = process.env.PETRI_FORCE_CORE_INSTALL === '1';
 const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const nodeBin = process.execPath; // the Node running this postinstall
 const abi = process.versions.modules;
@@ -129,7 +129,7 @@ for (const rel of CORE_SERVERS) {
       continue; // nothing to rebuild yet
     }
   } else if (force) {
-    console.log(`[install-core-deps] ${rel}: force reinstall (BIOF3_FORCE_CORE_INSTALL=1)`);
+    console.log(`[install-core-deps] ${rel}: force reinstall (PETRI_FORCE_CORE_INSTALL=1)`);
     const res = spawnSync(npmCmd, ['install', '--ignore-scripts'], { cwd: dir, stdio: 'inherit' });
     if (res.status !== 0) {
       console.warn(`[install-core-deps] ${rel}: npm install exited ${res.status}.`);

@@ -7,7 +7,7 @@
 
 ## 0. 立项来源与用户裁决留痕
 
-- 技术调研（2026-09-21，本会话）：TypeSafe Jev 官方 109 页文档全量调研 + 17 篇 cookbook 提炼 + Gewu 7 区域接入点排查，沉淀为 `docs/planning/typesafe-jev-system-one-research.md`（kind: reference）。
+- 技术调研（2026-09-21，本会话）：TypeSafe Jev 官方 109 页文档全量调研 + 17 篇 cookbook 提炼 + Petri 7 区域接入点排查，沉淀为 `docs/planning/typesafe-jev-system-one-research.md`（kind: reference）。
 - 用户裁决原话（2026-09-21）：「现在集中到jev和项目的融合中来 是否要做个或多个block来优化项目」。
 - 结构裁决（2026-09-21，AskUserQuestion）：包结构=「一个 BLOCK 分阶段（推荐）」；P3 工具预路由=「列入包内选做阶段（推荐）」（P2 收口后另行裁决是否执行）。
 - key 裁决（2026-09-21，用户原话）：「key暂时保留等我们的项目走到一定的阶段我再替换」——测试 key 暂用，轮换时点用户定；**任何阶段 key 不入仓**（`quality:secret` fail-closed 红线），P0 起走服务端 env 注入。
@@ -16,14 +16,14 @@
 
 ### 1.1 范围（in-scope）
 
-把 TypeSafe Jev（System One 决策 API）接入 Gewu 后端，按「地基 → 最小 PoC → 检索增强 → 选做预路由」四阶段推进：
+把 TypeSafe Jev（System One 决策 API）接入 Petri 后端，按「地基 → 最小 PoC → 检索增强 → 选做预路由」四阶段推进：
 
 | 阶段 | 内容 | 核心落点 |
 | --- | --- | --- |
-| P0 | 接入地基 + 中文校准基线 | 新增 `core/biof3-server/helpers/decision-api.js`（裸 HTTPS wrapper）+ 中文语料 confidence-accuracy 校准 harness |
-| P1 | 话题漂移判断 noul 直替（PoC） | `core/biof3-server/helpers/conversations.js` `_maybeDetectTopicShift` |
-| P2 | 知识库检索二跳过滤/重排 + 注入检测 | `core/biof3-server/helpers/knowledge-space.js`（`VECTOR_THRESHOLD` 之上加语义层） |
-| P3（选做） | MCP 工具下发前两跳预路由 | `core/biof3-server/agent-runner.js` 工具下发链（`:614` resolveToolDefsForContext 处挂钩） |
+| P0 | 接入地基 + 中文校准基线 | 新增 `core/petri-server/helpers/decision-api.js`（裸 HTTPS wrapper）+ 中文语料 confidence-accuracy 校准 harness |
+| P1 | 话题漂移判断 noul 直替（PoC） | `core/petri-server/helpers/conversations.js` `_maybeDetectTopicShift` |
+| P2 | 知识库检索二跳过滤/重排 + 注入检测 | `core/petri-server/helpers/knowledge-space.js`（`VECTOR_THRESHOLD` 之上加语义层） |
+| P3（选做） | MCP 工具下发前两跳预路由 | `core/petri-server/agent-runner.js` 工具下发链（`:614` resolveToolDefsForContext 处挂钩） |
 
 P0 交付三件事：① wrapper（超时/指数退避重试 429,529 遵循 retry-after/响应校验仿 jev-ultrafast `validate_choice`：choice∈ids、概率归一 ±0.02、argmax 一致）；② 降级契约（缺 key、网络失败、校验失败一律回退现行为，降级路径必须有测试钉住）；③ 校准 harness（topic-shift ≥100 条中文标注样本 + 检索相关性样本，产出 confidence-accuracy 曲线与阈值初值，证据落 `acceptance/block-110/calibration.json`）。P0 收口含一次评审裁决（阈值初值、题型定版、降级策略细节）。
 
@@ -38,7 +38,7 @@ P0 交付三件事：① wrapper（超时/指数退避重试 429,529 遵循 retr
 - **0 npm 新依赖**：不引入 `typesafe-sdk` / `@typesafe-ai/sdk`，Node 侧裸 HTTPS 自实现（依赖裁决见 §2）。
 - 不做浏览器 agent 类功能（jev-ultrafast 形态）。
 - 不动已判「不适合」的确定性决策点：loop 决策（`loop-orchestrator.js`）、执行策略（`agent-execution-policy.js`）、verify_state（`verify-dispatch.js`）、auto-title（生成类）。
-- 前端零改动零持 key：P1/P2 全部落在 core/biof3-server 服务端。
+- 前端零改动零持 key：P1/P2 全部落在 core/petri-server 服务端。
 - marker→细胞类型判别（`interpret.js`，研究文档候选点 4）**不在本包**——留候选池，需要时另行立项。
 - G0 阶段纪律：不外推 packaged/Provider/GA。
 
@@ -125,7 +125,7 @@ P0 交付三件事：① wrapper（超时/指数退避重试 429,529 遵循 retr
 
 ## P1 收口记录（2026-09-22 凌晨）
 
-**交付**：①`_maybeDetectTopicShift` Jev noul 直替层（conversations.js）——双阈值三区间（noul≥0.85 切换 / ≤0.50 未切换直替 / 中间带回退大模型路径）、D-A state=最近 6 条、降级（缺 key/网络/校验失败）与杀开关（BIOF3_JEV_TOPIC_SHIFT=0）全路回退大模型路径；契约 `{shifted, reason}|null` 不变。②A/B harness `scripts/block110-p1-ab.mjs`（双路径同批对跑）。
+**交付**：①`_maybeDetectTopicShift` Jev noul 直替层（conversations.js）——双阈值三区间（noul≥0.85 切换 / ≤0.50 未切换直替 / 中间带回退大模型路径）、D-A state=最近 6 条、降级（缺 key/网络/校验失败）与杀开关（PETRI_JEV_TOPIC_SHIFT=0）全路回退大模型路径；契约 `{shifted, reason}|null` 不变。②A/B harness `scripts/block110-p1-ab.mjs`（双路径同批对跑）。
 
 **A/B 实测**（`acceptance/block-110/p1-ab.json`，100 条平衡样本，真模型双路径）：
 
@@ -143,10 +143,10 @@ P0 交付三件事：① wrapper（超时/指数退避重试 429,529 遵循 retr
 
 ## P2 收口记录（2026-09-22 凌晨）
 
-**交付**：①`knowledge-space.js` Jev 二跳 `jevSecondStageGuard`——融合命中 top5 逐条双问 noul 复核（is_relevant <0.5 丢弃 / has_injection ≥0.70 丢弃并标注 injectionSuspects）；fail-open（Jev 失败保留命中）；默认关闭（BIOF3_JEV_KNOWLEDGE_GUARD=1 显式开启，D-A 裁决），VECTOR_THRESHOLD 硬阈值不动。②检索端点 `jevGuard` 元数据透传（additive 可观测）。③实机腿 flow `block110-knowledge-guard-live` **7/7**：真实 DashScope 嵌入摄取 3 文档 ready、显式开启下 jevGuard 在位（checked≥1）、注入文档被 Jev 标注并拦截（injectionSuspects=1）、空间状态恢复、清理。
+**交付**：①`knowledge-space.js` Jev 二跳 `jevSecondStageGuard`——融合命中 top5 逐条双问 noul 复核（is_relevant <0.5 丢弃 / has_injection ≥0.70 丢弃并标注 injectionSuspects）；fail-open（Jev 失败保留命中）；默认关闭（PETRI_JEV_KNOWLEDGE_GUARD=1 显式开启，D-A 裁决），VECTOR_THRESHOLD 硬阈值不动。②检索端点 `jevGuard` 元数据透传（additive 可观测）。③实机腿 flow `block110-knowledge-guard-live` **7/7**：真实 DashScope 嵌入摄取 3 文档 ready、显式开启下 jevGuard 在位（checked≥1）、注入文档被 Jev 标注并拦截（injectionSuspects=1）、空间状态恢复、清理。
 
 **注入拦截阈值实测**：0.70 初值在真实注入样本（伪造系统指令+正常内容混排）上实机触发正确——P0 遗留的「注入阈值实测后定」闭环。
 
 **P3 选做裁决留痕**：不执行（2026-09-22，P2 收口后按 §0 结构裁决另行复议；本收口即留痕）。工具预路由候选保留在 plan §1.1 表格。
 
-**部署密钥接线**：restart-dev-stack.sh 新增 `.biof3-dev-user-data/.biof3-secrets` source（部署密钥 env 文件，gitignored，含 DASHSCOPE_API_KEY）——嵌入凭据链修复（此前 Windows 侧 dashscope_configured=false 的根因=密钥只在 secrets 文件、从未进后端 env）。
+**部署密钥接线**：restart-dev-stack.sh 新增 `.petri-dev-user-data/.petri-secrets` source（部署密钥 env 文件，gitignored，含 DASHSCOPE_API_KEY）——嵌入凭据链修复（此前 Windows 侧 dashscope_configured=false 的根因=密钥只在 secrets 文件、从未进后端 env）。

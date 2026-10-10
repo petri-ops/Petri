@@ -21,12 +21,12 @@ const https = require('node:https');
 const http = require('node:http');
 
 const ROOT = path.join(__dirname, '..');
-const lib = require(path.join(ROOT, '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
-const DATA_DIR = process.env.BIOF3_LOCAL_DATA_DIR || path.join(ROOT, '.biof3-dev-user-data', 'data');
+const lib = require(path.join(ROOT, '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
+const DATA_DIR = process.env.PETRI_LOCAL_DATA_DIR || path.join(ROOT, '.petri-dev-user-data', 'data');
 const EVIDENCE_DIR = path.join(ROOT, 'acceptance', 'block-81');
 const PROMPT = '只回复「收到」';
 
-/** 凭据解析：与 core/biof3-server/helpers/model-gateway.js getCredential 同口径。 */
+/** 凭据解析：与 core/petri-server/helpers/model-gateway.js getCredential 同口径。 */
 function credentialKeyFor(profile) {
   const ref = String(profile.credentialRef || '');
   const sep = ref.indexOf(':');

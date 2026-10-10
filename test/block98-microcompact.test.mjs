@@ -23,7 +23,7 @@ const {
   toolGroups,
   microcompactMessages,
   maybeMicrocompactBody,
-} = require('../core/biof3-server/helpers/agent-resilience');
+} = require('../core/petri-server/helpers/agent-resilience');
 
 /** 构造一轮工具调用块：assistant 载体 + n 条 tool 结果 */
 function toolBlock(n, fill = 'x'.repeat(2000), name = 'read_page') {
@@ -56,45 +56,45 @@ function longConversation(blockCount) {
 }
 
 function withEnv(fn) {
-  const prev = process.env.BIOF3_AGENT_RESILIENCE;
-  process.env.BIOF3_AGENT_RESILIENCE = '1';
+  const prev = process.env.PETRI_AGENT_RESILIENCE;
+  process.env.PETRI_AGENT_RESILIENCE = '1';
   try {
     return fn();
   } finally {
-    if (prev === undefined) delete process.env.BIOF3_AGENT_RESILIENCE;
-    else process.env.BIOF3_AGENT_RESILIENCE = prev;
+    if (prev === undefined) delete process.env.PETRI_AGENT_RESILIENCE;
+    else process.env.PETRI_AGENT_RESILIENCE = prev;
   }
 }
 
 test('开关默认开（2026-09-18 裁决）：超阈值折叠；0/false 强关时原样返回', () => {
-  const prev = process.env.BIOF3_AGENT_RESILIENCE;
-  const prevDir = process.env.BIOF3_LOCAL_DATA_DIR;
-  process.env.BIOF3_LOCAL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-b98-flag-'));
+  const prev = process.env.PETRI_AGENT_RESILIENCE;
+  const prevDir = process.env.PETRI_LOCAL_DATA_DIR;
+  process.env.PETRI_LOCAL_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-b98-flag-'));
   try {
     // 默认开：超阈值（contextWindow=100）触发 microcompact
-    delete process.env.BIOF3_AGENT_RESILIENCE;
+    delete process.env.PETRI_AGENT_RESILIENCE;
     const messages = longConversation(10);
     const body = { messages, model: 'm' };
     const out = maybeMicrocompactBody(body, { contextWindow: 100 });
     assert.notEqual(out, body, 'default-on folds beyond threshold');
     assert.equal(isResilienceEnabled({}), true);
     // kill-switch 强关：原样返回（同一 body 引用）
-    process.env.BIOF3_AGENT_RESILIENCE = '0';
-    assert.equal(isResilienceEnabled({ BIOF3_AGENT_RESILIENCE: '0' }), false);
+    process.env.PETRI_AGENT_RESILIENCE = '0';
+    assert.equal(isResilienceEnabled({ PETRI_AGENT_RESILIENCE: '0' }), false);
     const messages2 = longConversation(10);
     const body2 = { messages: messages2, model: 'm' };
     const out2 = maybeMicrocompactBody(body2, { contextWindow: 100 });
     assert.equal(out2, body2, 'must return the same body reference when disabled via kill-switch');
   } finally {
-    if (prev === undefined) delete process.env.BIOF3_AGENT_RESILIENCE;
-    else process.env.BIOF3_AGENT_RESILIENCE = prev;
-    if (prevDir === undefined) delete process.env.BIOF3_LOCAL_DATA_DIR;
-    else process.env.BIOF3_LOCAL_DATA_DIR = prevDir;
+    if (prev === undefined) delete process.env.PETRI_AGENT_RESILIENCE;
+    else process.env.PETRI_AGENT_RESILIENCE = prev;
+    if (prevDir === undefined) delete process.env.PETRI_LOCAL_DATA_DIR;
+    else process.env.PETRI_LOCAL_DATA_DIR = prevDir;
   }
 });
 
 test('阈值公式：min(窗口×0.9, 窗口−2000) 表驱动', () => {
-  delete process.env.BIOF3_AGENT_RESILIENCE;
+  delete process.env.PETRI_AGENT_RESILIENCE;
   const messages = longConversation(3);
   const big = { messages, model: 'm' };
   // 窗口巨大 → 阈值巨大 → 不触发

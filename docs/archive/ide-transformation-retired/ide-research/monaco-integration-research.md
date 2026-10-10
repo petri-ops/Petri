@@ -1,6 +1,6 @@
 # Monaco Editor 集成研究文档
 
-**项目**: BioF3 Desktop  
+**项目**: Petri Desktop  
 **日期**: 2026-08-14  
 **状态**: 研究阶段
 
@@ -645,7 +645,7 @@ ipcMain.handle('file:write', async (event, filePath, content) => {
 });
 
 // src/preload.js 暴露
-contextBridge.exposeInMainWorld('biof3Desktop', {
+contextBridge.exposeInMainWorld('petriDesktop', {
   file: {
     read: (path) => ipcRenderer.invoke('file:read', path),
     write: (path, content) => ipcRenderer.invoke('file:write', path, content),
@@ -736,4 +736,4 @@ describe('MonacoCodeViewer', () => {
 
 - [@monaco-editor/react 官方文档](https://www.npmjs.com/package/@monaco-editor/react)
 - [Monaco Editor 配置选项](https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.IStandaloneEditorConstructionOptions.html)
-- [BioF3 Desktop 现有代码高亮实现](./CodeHighlight.tsx)
+- [Petri Desktop 现有代码高亮实现](./CodeHighlight.tsx)

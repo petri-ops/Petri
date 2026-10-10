@@ -19,15 +19,15 @@ const dataDir = process.argv[2];
 
 try {
   const packRegistry = require(path.join(ROOT, 'core/shared-backend', 'pack-registry.js'));
-  const pluginLoader = require(path.join(ROOT, 'core/biof3-server', 'plugin-loader.js'));
-  const catalogRoutes = require(path.join(ROOT, 'core/biof3-server', 'routes', 'tools-catalog.js'));
+  const pluginLoader = require(path.join(ROOT, 'core/petri-server', 'plugin-loader.js'));
+  const catalogRoutes = require(path.join(ROOT, 'core/petri-server', 'routes', 'tools-catalog.js'));
 
   const installed = packRegistry.readInstalledPacks(dataDir);
   let wiring = 0;
   // 与 server.js boot 等价：builtin + installed(兜底) + 已装包源
   const sources = [
     { type: 'builtin', root: path.join(ROOT, 'resources', 'built-in-plugins') },
-    { type: 'installed', root: path.join(os.homedir(), 'Documents', 'BioF3-Local', 'plugins') },
+    { type: 'installed', root: path.join(os.homedir(), 'Documents', 'Petri-Local', 'plugins') },
   ];
   for (const pack of installed) {
     const packPluginsDir = path.join(pack.packRoot, 'plugins');

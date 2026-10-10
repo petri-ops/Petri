@@ -3,7 +3,7 @@
 // 一次性手术脚本：tools-executor 的 adoptRemoteRunningJob → adoptSshDirectJob（BLOCK-76 P5）。
 const fs = require('fs');
 const path = require('path');
-const FILE = path.join(__dirname, '..', 'core', 'biof3-server', 'helpers', 'tools-executor.js');
+const FILE = path.join(__dirname, '..', 'core', 'petri-server', 'helpers', 'tools-executor.js');
 let t = fs.readFileSync(FILE, 'utf8');
 const startMarker = '  async function adoptRemoteRunningJob(jobId) {';
 const endMarker = '\n  function createJobRunFinalizer(';

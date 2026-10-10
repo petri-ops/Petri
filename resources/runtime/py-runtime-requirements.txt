@@ -1,5 +1,5 @@
-# BioF3 Python 运行时基础科学栈 (biof3-py-runtime)
-# 与 resources/built-in-plugins/manifest.json 中 biof3-py-runtime 的声明一致。
+# Petri Python 运行时基础科学栈 (petri-py-runtime)
+# 与 resources/built-in-plugins/manifest.json 中 petri-py-runtime 的声明一致。
 #
 # 仅含「基础运行时」包。FigCode 卡片所需的 squidpy / liana / xgboost / shap /
 # scvelo 等由各自的 figcode-* 插件制品单独提供，不在此列，避免膨胀基础包。

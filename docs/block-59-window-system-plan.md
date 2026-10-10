@@ -22,9 +22,9 @@
 |---|---|---|---|
 | **L1 停靠 ↔ 弹出**（日常路径） | VS Code auxiliary windows | ~70% | 主窗 Tab/面板为默认态；任何面板可拖出/弹出成独立窗，可收回。**用户日常只碰这一层** |
 | **L2 指挥中心墙**（多任务俯瞰） | codex agent command center | ~20% | 独立单例总览窗，网格瓦片聚合所有 agent/作业实时状态；点击瓦片下钻到 L1 弹出窗。多任务时才打开 |
-| **L3 边缘活动轨道**（BioF3 特色配件） | 原创 | ~10% | 只做一件事：**降格窗口的存放处**——弹出窗点 × 不销毁，缩进屏幕右缘，hover 可恢复 |
+| **L3 边缘活动轨道**（Petri 特色配件） | 原创 | ~10% | 只做一件事：**降格窗口的存放处**——弹出窗点 × 不销毁，缩进屏幕右缘，hover 可恢复 |
 
-**用户动线一句话**：单任务主窗 Tab，想盯就**弹出**（VS Code）；多任务开**指挥中心**俯瞰下钻（codex）；暂时不看想留着：× **降格进轨道**，hover 恢复（BioF3）。
+**用户动线一句话**：单任务主窗 Tab，想盯就**弹出**（VS Code）；多任务开**指挥中心**俯瞰下钻（codex）；暂时不看想留着：× **降格进轨道**，hover 恢复（Petri）。
 
 **架构检验标准**：任一层砍掉系统都成立——原创不绑架架构。
 
@@ -135,7 +135,7 @@ docked ──弹出──► popped ──×/超上限──► railed ──显
   - **P2 轨道 + 终端窗**（ccbe8e2f，UI-293 verified）：28px 透明 alwaysOnTop 轨道条带窗（懒创建/穿透 ignoreMouseEvents/rail-mouse hover 切换/无条目自动 hide）+ RailPage 只读注册表投影（刻度点击恢复/hover 320px 卡显式移除/static 5min 淡出视觉降权/7 刻度收拢 +N）+ terminal.js `forwardToContentWindow`（terminal:data/exit 送达受管窗）+ TerminalWindowPage（同一 pty 第二活视图，主窗 tab 保活零丢失）+ BottomTerminal 升格按钮；**实机抓真修**：rail sender 被自身作用域规则拦截——轨道授予全量变异权（hover 恢复/显式移除是轨道职责，plan §5）；实机 14 断言（pty 升格/xterm 挂载/数据面转发实锤/降格→轨道懒创建/刻度点击恢复/自动隐藏/显式移除终结）。
   - **P3 指挥中心**（b2397ed2，UI-294 verified）：CommandCenterPage 单例无状态窗（**零第二真相**：瓦片只读 /api/tools/history 既有 REST，5s 轮询最近 12 作业；诚实耗时进度不虚构百分比；点击瓦片下钻 L1 结果窗）+ WindowShell `closeBehavior` prop（'rail' 契约默认 / 'close' 无状态单例真关闭）+ TitleBar 入口；实机 10 断言（单例创建/不双开/瓦片与 tool_jobs 真相交叉核对/下钻弹出/× 随开随关不进轨道）。
   - **P4 agent 详情窗**（acd863c1，UI-295 verified）：AgentWindowPage 复用 `subscribeAgentTask` 既有 SSE（/api/ai/agent/task 零新后端面，断线退避续传同款）——全量回放即实时路径，时间线 tool_call/result 200 条环形截断 + 终态摘要 delta 回放累积（与父会话/wait_agent 同源）+ 终态徽章如实；toolActivity additive `agentRunId`（仅 spawn/wait/list 提取）+ ToolActivityList「详情窗」按钮；**实机抓真修**：statusChip 类名跨 CSS module 引用错位（tsc 不可见）；实机 10 断言（真实历史子 agent 8 tool_call + 92 delta 回放渲染/摘要 1258 字符/徽章「已完成」/流健康）。
-  - **加映（2026-09-05 用户反馈「弹窗主题与主界面不一致」，UI-296 verified）**：窗口 CSS 模块引用了 8 个编造令牌（--biof3-bg-primary 系），硬编码暗色兜底使弹窗永远暗色与主题脱钩；全部改用 custom.css 语义令牌（bg-canvas/surface/subtle、status-success 族）明暗自适配；顺手修 5 处先于本包存在的存量令牌违规（RemoteTargets/simple-chat/LeftPanel/project-workspace），theme-token-contract 契约测试回绿并纳入回归面（本次定向测试选择曾漏跑该契约——教训记录）；实机 9 断言（light 白画布 / 主窗切暗弹窗经 storage 事件实时跟随 / 指挥中心瓦片随主题 / 原偏好恢复），证据 `acceptance/block-59/theme-live.json`。
+  - **加映（2026-09-05 用户反馈「弹窗主题与主界面不一致」，UI-296 verified）**：窗口 CSS 模块引用了 8 个编造令牌（--petri-bg-primary 系），硬编码暗色兜底使弹窗永远暗色与主题脱钩；全部改用 custom.css 语义令牌（bg-canvas/surface/subtle、status-success 族）明暗自适配；顺手修 5 处先于本包存在的存量令牌违规（RemoteTargets/simple-chat/LeftPanel/project-workspace），theme-token-contract 契约测试回绿并纳入回归面（本次定向测试选择曾漏跑该契约——教训记录）；实机 9 断言（light 白画布 / 主窗切暗弹窗经 storage 事件实时跟随 / 指挥中心瓦片随主题 / 原偏好恢复），证据 `acceptance/block-59/theme-live.json`。
   - **加映二（2026-09-06 用户反馈「hover 应可预览 / 轨道展示不全看不出是啥」，UI-297 verified）**：根因一=轨道窗 28px 宽，320px hover 卡整体被窗体裁剪（预览物理不可见）→ 轨道窗加宽 28→364（预览区 336 透明穿透 + 条带 28）；根因二=刻度是纯色块 → 刻度带类型图标（bar-chart/terminal/brain）。新增降格瞬间内容快照（capturePage 可见态采集，×/minimize 全部先快照后 hide）+ window:thumbnail IPC；hover 卡 = 快照图 + 标题 + 恢复/移除 + 180ms 防误关延迟。单测 37/37（加映二契约锁）；实机 9 断言（卡右缘 328<364 物理在窗内/快照 naturalWidth=480/图标刻度/恢复路径完好）+ P2 原 14 断言回归 PASS；证据 `acceptance/block-59/rail-preview-live.json`。
   - **加映三（2026-09-06 用户裁决「开干」补全 plan §5 遗留两细节，UI-298 verified）**：滚轮换卡（条带 onWheel，deltaY 方向切换 + 统一 hoverTick）+ 卡片垂直钳位（锚点=悬停刻度 top，钳制 [12, innerHeight-卡高-12]，ResizeObserver 随快照加载重钳，CSS max-height 兜底）。单测 38/38；实机 8 断言（双向滚轮切换/钳位卡 rect 完整在窗内）+ 加映二 9 断言回归 PASS；证据 `acceptance/block-59/rail-wheel-live.json`。至此 plan §5 规格全部落地。
   - **收口门**：四套实机脚本（block59-ui-live/p2/p3/p4-live）收口前顺序回归全 PASS（60 断言）；单测 36/36；前端受影响 vitest 23/23；tsc 0；docs:check + ui:audit:check PASS；UI-292/293/294/295 verified。诚实范围：重启后弹出窗不恢复（P1 plan 明示，geometry 持久化佐证）；static 5min 淡出由 railEntries 单测覆盖（实机不做 5min 等待）；「详情窗」入口按钮以数据面单测 + 同一 popOut IPC 实机驱动覆盖。0 新 npm 依赖；复用 `_window-create.js`/同一 SPA 路由/task_events 与 SSE 链（plan §10 治理红线全程守住：轨道/指挥中心/agent 窗全部只读投影，窗口永不持有 canonical state）。G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -11,7 +11,7 @@
     {
       "name": "A2_panel_mounted_with_spawned_child",
       "pass": true,
-      "detail": "hasPanel=true taskTextMatched=true taskText=「在当前 BioF3 项目工作区（项目根目录）执行两件事：\n1) 列出项目根目录（即工作区根路径 \".\"）下的所有文件名（只列根目录，不递归子目录）；\n2) 统计」 title=实时工作流（工具调用时间线）· 3 次调用 timelines=[\"T:1\"]"
+      "detail": "hasPanel=true taskTextMatched=true taskText=「在当前 Petri 项目工作区（项目根目录）执行两件事：\n1) 列出项目根目录（即工作区根路径 \".\"）下的所有文件名（只列根目录，不递归子目录）；\n2) 统计」 title=实时工作流（工具调用时间线）· 3 次调用 timelines=[\"T:1\"]"
     },
     {
       "name": "A3_panel_timeline_segments_valid",

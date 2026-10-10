@@ -34,21 +34,21 @@ const require = createRequire(import.meta.url);
 // 内存 DB 自举（同 block34 先例：loop-orchestrator/agent-task-store 顶层即 prepare）
 {
   const Database = require('better-sqlite3');
-  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'biof3-b109-p0-baseline-'));
-  const db = new Database(path.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'petri-b109-p0-baseline-'));
+  const db = new Database(path.join(tempDbDir, 'petri.db'));
   const migrationsDir = path.join(root, 'src', 'migrations');
   for (const file of fssync.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     db.exec(fssync.readFileSync(path.join(migrationsDir, file), 'utf8'));
   }
   db.close();
-  process.env.BIOF3_DB_PATH = path.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try { fssync.rmSync(tempDbDir, { recursive: true, force: true }); } catch { /* Windows 句柄延迟释放 */ }
   });
 }
 
-const { runLoop } = require(path.join(root, 'core', 'biof3-server', 'loop-orchestrator.js'));
-const agentTaskStore = require(path.join(root, 'core', 'biof3-server', 'agent-task-store.js'));
+const { runLoop } = require(path.join(root, 'core', 'petri-server', 'loop-orchestrator.js'));
+const agentTaskStore = require(path.join(root, 'core', 'petri-server', 'agent-task-store.js'));
 
 // 事件分类器：把 emit 流折成稳定类型标签（拆前序列钉死用）
 function classify(e) {

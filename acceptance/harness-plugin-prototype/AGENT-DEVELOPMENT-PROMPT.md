@@ -3,10 +3,10 @@
 将下面内容完整复制给新的智能体。智能体完成插件开发后，必须回到 Harness 主线，不得把本任务扩展为 Harness Core 重构。
 
 ```text
-你现在负责在 BioF3 Desktop 中开发第一批基础生信分析插件模块。
+你现在负责在 Petri Desktop 中开发第一批基础生信分析插件模块。
 
 工作目录：
-/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop
+/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop
 
 目标：
 按照 Harness 插件规范开发可复用、可验证、可复现的基础分析插件。插件开发完成后回到 Harness 主线，不修改 Harness Core 的任务状态机、执行器、Job 表、Artifact Truth 或会话系统。

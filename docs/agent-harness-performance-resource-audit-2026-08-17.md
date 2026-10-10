@@ -1,8 +1,8 @@
-# BioF3 Desktop Agent Harness 性能与资源独立审查
+# Petri Desktop Agent Harness 性能与资源独立审查
 
 **日期**: 2026-08-17
 **审查视角**: 性能与资源（独立视角，与既有 4 份审计并列）
-**项目**: BioF3 Desktop — Electron + React/Vite + 内嵌 R/Python runtime
+**项目**: Petri Desktop — Electron + React/Vite + 内嵌 R/Python runtime
 **当前阶段**: G0 长期开发期
 **审查范围**: Agent Harness 后端（`core/r-server/` + `core/shared-backend/` + `core/py-server/` + `src/main/` + `src/ipc/`）+ 前端 SSE consumer（`frontend/src/components/copilot/`）
 **审查方法**: 静态分析（无运行时压测，无内存采样）+ 反模式 grep + 闭包 / 单例生命周期分析
@@ -27,13 +27,13 @@
 
 **自评 6.5/10（10 = 工业级资源纪律，1 = 完全失控）**
 
-**核心判断**：BioF3 Desktop 的后端在 **功能正确性** 和 **可恢复性** 上有显著投入（supervisor 自愈、zombie recovery、task_events 持久化、SSE close 释放 aiConcurrency），整体骨架与既有错误处理审查（E-017/E-018）的判断一致。但 **资源纪律** 维度相对薄弱：
+**核心判断**：Petri Desktop 的后端在 **功能正确性** 和 **可恢复性** 上有显著投入（supervisor 自愈、zombie recovery、task_events 持久化、SSE close 释放 aiConcurrency），整体骨架与既有错误处理审查（E-017/E-018）的判断一致。但 **资源纪律** 维度相对薄弱：
 
 1. **没有主动资源预算**：没有定时内存快照、没有 heap 用量上限告警、没有 WAL 监控；唯一接近「监控」的是 `core/r-server/server.js:183` 的 1 秒 `setInterval` 测 event-loop 阻塞（**event-loop lag > 2s 才 warn**）。
 2. **模块级可变单例无 TTL 兜底**：`_pendingActAcks`（act-tools.js）依赖 800ms `setTimeout` 自我清理；`_aiUserStreams` / `_aiTaskStreams` / `_embedCallLog`（runtime.js）依赖外部 release 路径正确调用；`_impliedPageByRequest`（act-tools.js:146）依赖 30s `setTimeout`。**任一 release 路径断裂 → 永久内存增长**。
 3. **SQLite `copilot_messages` / `task_events` 无 cleanup 任务**：append-only 表没有滚动归档或归档过期策略。长期运行的 dev Electron / packaged Electron 不重启时（OS 更新周期 ~数天），表将持续膨胀。
 4. **SSE 长连接无 keepalive 心跳**：浏览器默认 ~60s SSE idle timeout，**r-server 端没有周期性 `: keepalive\n\n` 帧**，依赖实际事件流量保持连接。一旦 Provider 慢 / 思考时间长，连接被 silent close，前端 `subscribeAgentTask` 不知道断开（**只看到 `reader.read() → done`**），仍显示「thinking」。
-5. **三个进程（r-server / py-server / gateway）独立持有 `biof3.db` 或 `r-server.db` 的 SQLite 连接**；desktop main 进程（`branch-db.js` + `result-db.js`）再各开 2 个 handle。**同一时刻最多 5 个 SQLite handle 持有相关 db 文件**，WAL 模式下多 reader 可接受，但写者竞争 + busy_timeout 不一致（5000ms / 10000ms / 默认 0ms）会放大 lock wait 抖动。
+5. **三个进程（r-server / py-server / gateway）独立持有 `petri.db` 或 `r-server.db` 的 SQLite 连接**；desktop main 进程（`branch-db.js` + `result-db.js`）再各开 2 个 handle。**同一时刻最多 5 个 SQLite handle 持有相关 db 文件**，WAL 模式下多 reader 可接受，但写者竞争 + busy_timeout 不一致（5000ms / 10000ms / 默认 0ms）会放大 lock wait 抖动。
 
 ### 1.3 一句话总结
 
@@ -437,7 +437,7 @@ const poll = setInterval(() => {
 
 ---
 
-### PR-011 [Major] `core/r-server/db.js:2133` 和 `core/r-server/agent-task-store.js:177` 持有同一个 `biof3.db` 文件两个独立 SQLite handle，busy_timeout 不一致
+### PR-011 [Major] `core/r-server/db.js:2133` 和 `core/r-server/agent-task-store.js:177` 持有同一个 `petri.db` 文件两个独立 SQLite handle，busy_timeout 不一致
 
 **文件位置**:
 - `core/r-server/db.js:18-32`：`busy_timeout = 10000`
@@ -460,7 +460,7 @@ const poll = setInterval(() => {
 
 ---
 
-### PR-012 [Major] 桌面端 `branch-db.js` + `result-db.js` 同时打开 `biof3.db`，**与 r-server 进程共享文件**
+### PR-012 [Major] 桌面端 `branch-db.js` + `result-db.js` 同时打开 `petri.db`，**与 r-server 进程共享文件**
 
 **文件位置**:
 - `src/database/branch-db.js:18-49`
@@ -470,7 +470,7 @@ const poll = setInterval(() => {
 - desktop main 进程持有 2 个 SQLite handle（branch-db + result-db）。
 - r-server 子进程持有 1 个 handle（db.js）。
 - py-server 子进程持有 1 个 handle（`core/py-server/r-server-db.js:27`）。
-- **总共可能 4 个 SQLite handle 持有 biof3.db 系列文件**（branch-db / result-db / r-server 主 db / py-server 只读 db）。
+- **总共可能 4 个 SQLite handle 持有 petri.db 系列文件**（branch-db / result-db / r-server 主 db / py-server 只读 db）。
 - WAL 模式 OK；但 busy_timeout 各自配置：`branch-db.js` 默认 0ms（无 pragma）→ 任何 db 写争用时 branch-db 直接抛 SQLITE_BUSY。
 - 与架构审查 A-007 同方向。
 
@@ -587,7 +587,7 @@ setInterval(
 
 **修复方向**：
 1. `setInterval(...).unref()`（main 进程 keep-alive 不依赖此 timer）。
-2. 加 `BIOF3_CONTENT_SYNC_DEV_MODE=0` 环境变量在 dev mode disable。
+2. 加 `PETRI_CONTENT_SYNC_DEV_MODE=0` 环境变量在 dev mode disable。
 3. 把 syncContent 改 `setTimeout` chain，自然 GC。
 
 ---
@@ -867,7 +867,7 @@ ptyProcess.onExit(({ exitCode }) => {
 
 **修复方向**：
 1. `module.exports.startPerfMonitor = () => {...}` + `stopPerfMonitor = () => {...}`；测试 setup/teardown 显式调。
-2. env var `BIOF3_PERF_MONITOR=0` 关闭。
+2. env var `PETRI_PERF_MONITOR=0` 关闭。
 
 ---
 
@@ -1031,7 +1031,7 @@ export async function streamChat(opts: StreamChatOptions): Promise<void> {
 
 ---
 
-### PR-033 [Minor] `src/preload.js:147, 222, 256, 269-289` IPC listener 全部走 `ipcRenderer.removeListener`，**但 `window.biof3` 对象上的方法引用旧 closure**
+### PR-033 [Minor] `src/preload.js:147, 222, 256, 269-289` IPC listener 全部走 `ipcRenderer.removeListener`，**但 `window.petri` 对象上的方法引用旧 closure**
 
 **文件位置**: `src/preload.js` 多处
 
@@ -1041,7 +1041,7 @@ return () => ipcRenderer.removeListener('plugin:install-progress', handler);
 ```
 
 **问题描述**：
-- contextBridge 暴露的 `biof3.plugin.onInstallProgress(callback)` 返回 unsubscribe 函数。
+- contextBridge 暴露的 `petri.plugin.onInstallProgress(callback)` 返回 unsubscribe 函数。
 - callback 闭包持有 renderer 上下文；unsubscribe 后 listener 移除但 closure 仍被 callback 持。
 - **正常路径**：用户主动 unsubscribe → callback 不再被调 → GC 释放 closure。
 - **异常路径**：用户不 unsubscribe（如 component unmount 但 hook 没 cleanup）→ listener 永久注册 → IPC send 永远通知该 callback → callback 持 component state → component unmount 后 state 不可达 → leak。
@@ -1052,7 +1052,7 @@ return () => ipcRenderer.removeListener('plugin:install-progress', handler);
 
 **修复方向**：
 1. 加 ESLint rule `react-hooks/exhaustive-deps` 强制 hook cleanup。
-2. 文档化每个 `biof3.*.onXxx` 必须 unsubscribe。
+2. 文档化每个 `petri.*.onXxx` 必须 unsubscribe。
 
 ---
 
@@ -1160,11 +1160,11 @@ return () => ipcRenderer.removeListener('plugin:install-progress', handler);
 
 | 文件 | 句柄来源 | busy_timeout | 共享 db 文件 |
 |------|---------|--------------|------------|
-| `core/r-server/db.js` | `new Database(DB_PATH)` | 10000ms | biof3.db |
-| `core/r-server/agent-task-store.js` | `new Database(config.dbPath)` | **5000ms** | biof3.db（PR-011） |
+| `core/r-server/db.js` | `new Database(DB_PATH)` | 10000ms | petri.db |
+| `core/r-server/agent-task-store.js` | `new Database(config.dbPath)` | **5000ms** | petri.db（PR-011） |
 | `core/py-server/r-server-db.js` | `new Database(R_DB_PATH, ...)` | 默认 0ms | r-server.db |
-| `src/database/branch-db.js` | `_dbCache[dbName]` | **默认 0ms**（PR-012） | biof3.db |
-| `src/database/result-db.js` | `_dbCache[dbName]` | **默认 0ms**（PR-012） | biof3.db |
+| `src/database/branch-db.js` | `_dbCache[dbName]` | **默认 0ms**（PR-012） | petri.db |
+| `src/database/result-db.js` | `_dbCache[dbName]` | **默认 0ms**（PR-012） | petri.db |
 
 ### 6.6 Backend 子进程清单
 

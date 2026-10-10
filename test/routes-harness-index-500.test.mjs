@@ -12,10 +12,10 @@ const require = createRequire(import.meta.url);
 // prepare projects，先隔离临时库并跑生产 migration 链再加载（缺省化石库必炸）。
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-harness-index500-'));
-process.env.BIOF3_DB_PATH = path.join(tempDir, 'harness-index-500.db');
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-harness-index500-'));
+process.env.PETRI_DB_PATH = path.join(tempDir, 'harness-index-500.db');
 const { runMigrations } = require('../src/migration-runner');
-await runMigrations(process.env.BIOF3_DB_PATH, path.join(__dirname, '../src/migrations'));
+await runMigrations(process.env.PETRI_DB_PATH, path.join(__dirname, '../src/migrations'));
 
 /**
  * test/routes-harness-index-500.test.mjs — BLOCK-21 regression coverage.
@@ -47,7 +47,7 @@ path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '..',
   'core',
-  'biof3-server',
+  'petri-server',
   'routes',
   '_helpers',
   'harness-shared.js',
@@ -67,11 +67,11 @@ path.resolve(
  * Build a minimal Express-like app that mounts only the /api/harness/index
  * route from routes/harness/resources.js, backed by a stubbed db and a
  * scratch directory so we can exercise the real handler without booting the
- * whole biof3-server.
+ * whole petri-server.
  *
  * Must be called with a stubDbAlreadyInjected=true after the test has set up
  * the require.cache override for the db module. Otherwise the helper will
- * load the real db (which fails because there is no biof3-server/db in the test
+ * load the real db (which fails because there is no petri-server/db in the test
  * cwd) before the stub lands.
  */
 function buildTestApp(opts = {}) {
@@ -98,12 +98,12 @@ function buildTestApp(opts = {}) {
     // 统一归一为正斜杠后再匹配。
     const norm = key.split(path.sep).join('/');
     if (
-      norm.includes('/core/biof3-server/routes/_helpers/harness-shared.js') ||
-      norm.includes('/core/biof3-server/routes/harness/') ||
-      norm.endsWith('/core/biof3-server/routes/harness/resources.js') ||
-      norm.endsWith('/core/biof3-server/routes/harness/workflow.js') ||
-      norm.endsWith('/core/biof3-server/routes/harness/repair.js') ||
-      norm.endsWith('/core/biof3-server/routes/harness/scientific-task.js')
+      norm.includes('/core/petri-server/routes/_helpers/harness-shared.js') ||
+      norm.includes('/core/petri-server/routes/harness/') ||
+      norm.endsWith('/core/petri-server/routes/harness/resources.js') ||
+      norm.endsWith('/core/petri-server/routes/harness/workflow.js') ||
+      norm.endsWith('/core/petri-server/routes/harness/repair.js') ||
+      norm.endsWith('/core/petri-server/routes/harness/scientific-task.js')
     ) {
       delete require.cache[key];
     }
@@ -117,25 +117,25 @@ function buildTestApp(opts = {}) {
     next();
   });
 
-  const resourcesRoute = require('../core/biof3-server/routes/harness/resources.js');
+  const resourcesRoute = require('../core/petri-server/routes/harness/resources.js');
   resourcesRoute.register(app);
   return app;
 }
 
 /**
- * Inject a stub for core/biof3-server/db into the require cache BEFORE the helper
+ * Inject a stub for core/petri-server/db into the require cache BEFORE the helper
  * module loads. The stub must mirror the parts of db that harness-shared uses.
  */
 function installDbStub(fakeProject) {
   // Resolve the db module path RELATIVE TO THE DESKTOP REPO ROOT, not the test
-  // file. require.resolve('../../core/biof3-server/db.js') would resolve to
-  // <workspace>/core/biof3-server/db.js (one level too high), which is the bug
+  // file. require.resolve('../../core/petri-server/db.js') would resolve to
+  // <workspace>/core/petri-server/db.js (one level too high), which is the bug
   // pattern that originally caused this BLOCK-21 regression.
   const dbModulePath = require.resolve(path.join(
     path.dirname(fileURLToPath(import.meta.url)),
     '..',
     'core',
-    'biof3-server',
+    'petri-server',
     'db.js',
   ));
   require.cache[dbModulePath] = {

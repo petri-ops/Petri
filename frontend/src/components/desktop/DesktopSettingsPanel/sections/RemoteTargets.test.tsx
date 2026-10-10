@@ -13,7 +13,7 @@ const PEER = {
   baseUrl: 'https://example.test:8443',
   platform: 'darwin',
   arch: 'arm64',
-  gewuVersion: '1.0.0',
+  petriVersion: '1.0.0',
   executors: { r: true, python: true },
   protocol: 1,
   addedAt: '2026-09-18T13:30:06.027Z',
@@ -56,7 +56,7 @@ describe('RemoteTargets 联邦执行位置选择（UI-422 / BLOCK-85 fed: 产品
     expect(screen.getByTestId('federation-peer-status-gpeer_test123').textContent).toContain('已连通 64ms');
 
     fireEvent.click(screen.getByTestId('federation-peer-default-gpeer_test123'));
-    expect(window.localStorage.getItem('gewu.executionTargetId')).toBe('fed:gpeer_test123');
+    expect(window.localStorage.getItem('petri.executionTargetId')).toBe('fed:gpeer_test123');
     await waitFor(() =>
       expect(screen.getByTestId('remote-target-default-summary').textContent).toContain('联邦节点 MacBook-Pro.local'),
     );
@@ -75,13 +75,13 @@ describe('RemoteTargets 联邦执行位置选择（UI-422 / BLOCK-85 fed: 产品
   });
 
   it('恢复本机执行：清除存储键并回退摘要', async () => {
-    window.localStorage.setItem('gewu.executionTargetId', 'fed:gpeer_test123');
+    window.localStorage.setItem('petri.executionTargetId', 'fed:gpeer_test123');
     stubFetch();
     render(<RemoteTargets />);
     await waitFor(() => expect(screen.getByTestId('federation-peer-row')).toBeTruthy());
     const clear = screen.getByTestId('remote-target-default-clear');
     fireEvent.click(clear);
-    expect(window.localStorage.getItem('gewu.executionTargetId')).toBeNull();
+    expect(window.localStorage.getItem('petri.executionTargetId')).toBeNull();
     await waitFor(() =>
       expect(screen.getByTestId('remote-target-default-summary').textContent).toContain('本机（分析在本机执行）'),
     );

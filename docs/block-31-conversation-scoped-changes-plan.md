@@ -12,8 +12,8 @@
 
 缺口（要做的「权威清单」）：
 
-1. 后端 SSE `done` 事件无 payload（`core/biof3-server/routes/ai-agent/chat.js` 4 处 + `events.js:76/98`）；renderer `emitAgentTaskDone` 硬编码 `filesChanged: []`（`copilotClient.ts:21-30`，协议字段 `AgentTaskDoneDetail.filesChanged` 在 `lib/events.ts:96-99` 已预留但从未填充）。
-2. 任务收尾无文件清单聚合：全 `core/biof3-server` 无 `filesChanged` 产出；但**重建材料已持久化**——`agent-runner.js:357` 把全部 `tool_result`（含 `workspace_write`/`workspace_replace` 的 `path` + `changeSummary`）写入 `task_events`。
+1. 后端 SSE `done` 事件无 payload（`core/petri-server/routes/ai-agent/chat.js` 4 处 + `events.js:76/98`）；renderer `emitAgentTaskDone` 硬编码 `filesChanged: []`（`copilotClient.ts:21-30`，协议字段 `AgentTaskDoneDetail.filesChanged` 在 `lib/events.ts:96-99` 已预留但从未填充）。
+2. 任务收尾无文件清单聚合：全 `core/petri-server` 无 `filesChanged` 产出；但**重建材料已持久化**——`agent-runner.js:357` 把全部 `tool_result`（含 `workspace_write`/`workspace_replace` 的 `path` + `changeSummary`）写入 `task_events`。
 3. 任务↔会话关联：`loop_runs.conversation_id`（真列，`getLoopRunByTaskId` db.js:1189-1194）为准，`tasks.params.conversationId`（JSON）兜底；会话内 primary + subagent 可并发（并发锁按用户不按会话），归属必须先按 task 再聚合到 conversation。
 
 ## 2. 方案
@@ -32,7 +32,7 @@
 
 ## 4. 依赖
 
-- BLOCK-30 单后端收敛（`completed`）——本包改 `core/biof3-server` 即唯一业务后端
+- BLOCK-30 单后端收敛（`completed`）——本包改 `core/petri-server` 即唯一业务后端
 - UI-252（改动卡片）/ UI-216（卡片→审阅跳转）既有行为为基线
 
 ## 5. 门禁与证据
@@ -46,7 +46,7 @@
 
 **P1 后端权威清单（已落地）**：
 
-- 新模块 `core/biof3-server/agent-files-changed.js`：`aggregateFilesChanged(events)` 纯聚合——回放 task_events，提取 `workspace_write`/`workspace_replace` 成功结果（`toolResult.data.ok===true`）的 `path`；`created`→`created`、否则 `modified`；`dryRun` 与失败写入跳过；`publicData` 预览截断时按 `callId` 回退到 `tool_call` 的 `args.path` 并置 `attributionComplete=false`；`approval_required` 跳过。
+- 新模块 `core/petri-server/agent-files-changed.js`：`aggregateFilesChanged(events)` 纯聚合——回放 task_events，提取 `workspace_write`/`workspace_replace` 成功结果（`toolResult.data.ok===true`）的 `path`；`created`→`created`、否则 `modified`；`dryRun` 与失败写入跳过；`publicData` 预览截断时按 `callId` 回退到 `tool_call` 的 `args.path` 并置 `attributionComplete=false`；`approval_required` 跳过。
 - `agent-task-store.js`：additive 列 `tasks.files_changed_json`（ALTER 容错）；`markAgentTaskDone/Failed/Cancelled` 接受可选 `filesChanged`（`COALESCE` 保留原值）；`getAgentTask` 返回解析后的 `filesChanged`；`resetTaskForRetry` 重试前清空清单。
 - `agent-runner.js`：终态判定前 `collectFilesChangedForTask` 聚合并随三个终态标记持久化（聚合失败不阻塞终态）。
 - `routes/ai-agent/events.js`：两处 SSE `done` 注入 `filesChanged`（task 模式权威通道；legacy 直连路径无 task_events，维持空清单由前端兜底——诚实边界）。

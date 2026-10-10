@@ -12,13 +12,13 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 const tempRoot = mkdtempSync(join(tmpdir(), 'block79-provider-'));
-process.env.BIOF3_DB_PATH = join(tempRoot, 'provider.db');
-process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
+process.env.PETRI_DB_PATH = join(tempRoot, 'provider.db');
+process.env.PETRI_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
 
 const require = createRequire(import.meta.url);
 {
-  const Database = require(resolve(__dirname, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const boot = new Database(process.env.BIOF3_DB_PATH);
+  const Database = require(resolve(__dirname, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const boot = new Database(process.env.PETRI_DB_PATH);
   const migDir = resolve(__dirname, '..', 'src', 'migrations');
   for (const f of require('node:fs').readdirSync(migDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(require('node:fs').readFileSync(require('node:path').resolve(migDir, f), 'utf8'));
@@ -26,8 +26,8 @@ const require = createRequire(import.meta.url);
   boot.close();
 }
 
-const { recordAiUsage, summarizeProviderUsage } = require('../core/biof3-server/helpers/ai-usage.js');
-const db = require('../core/biof3-server/db');
+const { recordAiUsage, summarizeProviderUsage } = require('../core/petri-server/helpers/ai-usage.js');
+const db = require('../core/petri-server/db');
 const sqlite = db.getDatabase();
 
 test('recordAiUsage 落 provider 列；旧行 NULL 语义', () => {

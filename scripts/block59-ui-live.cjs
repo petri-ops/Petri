@@ -24,11 +24,11 @@ const { execFileSync } = require('node:child_process');
 const http = require('node:http');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
 const DB_PATH = process.env.BIOF59_DB
-  || path.join(__dirname, '..', '.biof3-dev-user-data', 'data', 'biof3.db');
-const USER_DATA_DIR = process.env.BIOF3_ELECTRON_USER_DATA_DIR
-  || path.join(__dirname, '..', '.biof3-dev-user-data');
+  || path.join(__dirname, '..', '.petri-dev-user-data', 'data', 'petri.db');
+const USER_DATA_DIR = process.env.PETRI_ELECTRON_USER_DATA_DIR
+  || path.join(__dirname, '..', '.petri-dev-user-data');
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-59');
 
 function fetchJson(url) {
@@ -147,29 +147,29 @@ async function main() {
   // 2) 主窗桥
   const targets = await listTargets();
   const page = targets.find((t) => t.type === 'page' && /localhost:3000/.test(t.url || '') && !/(\/window\/)/.test(t.url || ''));
-  if (!page) throw new Error('biof3_page_not_found');
+  if (!page) throw new Error('petri_page_not_found');
   const client = await new CdpClient(page.webSocketDebuggerUrl).connect();
   results.mainPage = page.url;
 
-  const bridgeReady = await evalJSRetry(client, `!!window.biof3Desktop?.windowManager?.popOut`);
+  const bridgeReady = await evalJSRetry(client, `!!window.petriDesktop?.windowManager?.popOut`);
   assert('主窗 preload 暴露 windowManager 桥', bridgeReady === true, String(bridgeReady));
 
-  const snap0 = await evalJSRetry(client, `window.biof3Desktop.windowManager.snapshot()`);
+  const snap0 = await evalJSRetry(client, `window.petriDesktop.windowManager.snapshot()`);
   assert('初始快照：maxPopped=4（≤4 并发契约）', snap0?.ok && snap0?.snapshot?.maxPopped === 4, JSON.stringify(snap0).slice(0, 120));
 
   // 幂等预清理：上一次运行残留的同键条目（popped → 降格；随后轨道移除销毁残留窗）
   const preEntry = (snap0?.snapshot?.entries || []).find((e) => e.id === contentId);
   if (preEntry) {
     if (preEntry.state === 'popped') {
-      await evalJSRetry(client, `window.biof3Desktop.windowManager.minimizeToRail(${JSON.stringify(contentId)})`);
+      await evalJSRetry(client, `window.petriDesktop.windowManager.minimizeToRail(${JSON.stringify(contentId)})`);
     }
-    await evalJSRetry(client, `window.biof3Desktop.windowManager.remove(${JSON.stringify(contentId)})`);
+    await evalJSRetry(client, `window.petriDesktop.windowManager.remove(${JSON.stringify(contentId)})`);
     await pollWindowTarget(contentKey, { appear: false });
     log(`预清理：移除残留条目 ${contentId}（state=${preEntry.state}）`);
   }
 
   // 3) 弹出
-  const pop1 = await evalJSRetry(client, `window.biof3Desktop.windowManager.popOut('result', ${JSON.stringify(contentKey)})`);
+  const pop1 = await evalJSRetry(client, `window.petriDesktop.windowManager.popOut('result', ${JSON.stringify(contentKey)})`);
   assert('popOut → created（白名单键通过，注册表入 popped）', pop1?.ok && pop1?.action === 'created' && pop1?.id === contentId, JSON.stringify(pop1));
 
   const hits1 = await pollWindowTarget(contentKey, { appear: true });
@@ -178,7 +178,7 @@ async function main() {
   // 4) 独立窗内断言
   const popClient = await new CdpClient(hits1[0].webSocketDebuggerUrl).connect();
   await delay(1800); // 首帧 + 状态自举
-  const selfInfo = await evalJSRetry(popClient, `window.biof3Desktop.windowManager.self()`);
+  const selfInfo = await evalJSRetry(popClient, `window.petriDesktop.windowManager.self()`);
   assert('独立窗 self() 身份正确', selfInfo?.ok && selfInfo?.contentId === contentId, JSON.stringify(selfInfo));
   const shellInfo = await evalJSRetry(popClient, `(() => {
     const header = document.querySelector('[data-drag-region]');
@@ -201,31 +201,31 @@ async function main() {
   await screenshot(popClient, path.join(EVIDENCE_DIR, 'p59-01-popout.png'));
 
   // 5) 同内容禁双开
-  const pop2 = await evalJSRetry(client, `window.biof3Desktop.windowManager.popOut('result', ${JSON.stringify(contentKey)})`);
+  const pop2 = await evalJSRetry(client, `window.petriDesktop.windowManager.popOut('result', ${JSON.stringify(contentKey)})`);
   const targetsAfterDup = (await listTargets()).filter((t) => t.type === 'page' && (t.url || '').includes('/window/result/'));
   assert('同内容再弹出 = focused（不建第二窗）', pop2?.ok && pop2?.action === 'focused', JSON.stringify(pop2));
   assert('同内容双开后独立窗 target 数不变（=1）', targetsAfterDup.length === 1, `targets=${targetsAfterDup.length}`);
 
   // 6) 收回
-  const ret = await evalJSRetry(client, `window.biof3Desktop.windowManager.returnToDock(${JSON.stringify(contentId)})`);
+  const ret = await evalJSRetry(client, `window.petriDesktop.windowManager.returnToDock(${JSON.stringify(contentId)})`);
   assert('returnToDock → docked（状态零丢失路径）', ret?.ok && ret?.state === 'docked', JSON.stringify(ret));
   const goneTargets = await pollWindowTarget(contentKey, { appear: false });
   assert('收回后独立窗 target 消失（BrowserWindow 销毁）', Array.isArray(goneTargets) && goneTargets.length === 0, `targets=${goneTargets?.length}`);
 
   // 7) 再弹出 → × 降格（hide 保活，不可变契约）
-  const pop3 = await evalJSRetry(client, `window.biof3Desktop.windowManager.popOut('result', ${JSON.stringify(contentKey)})`);
+  const pop3 = await evalJSRetry(client, `window.petriDesktop.windowManager.popOut('result', ${JSON.stringify(contentKey)})`);
   assert('再次弹出 → created', pop3?.ok && pop3?.action === 'created', JSON.stringify(pop3));
   await pollWindowTarget(contentKey, { appear: true });
-  const mini = await evalJSRetry(client, `window.biof3Desktop.windowManager.minimizeToRail(${JSON.stringify(contentId)})`);
+  const mini = await evalJSRetry(client, `window.petriDesktop.windowManager.minimizeToRail(${JSON.stringify(contentId)})`);
   assert('× → minimizeToRail（降格不是销毁）', mini?.ok && mini?.state === 'railed', JSON.stringify(mini));
   const targetsAfterMini = (await listTargets()).filter((t) => t.type === 'page' && (t.url || '').includes('/window/result/'));
   assert('降格后 target 仍在（隐藏保活，注册表保活可恢复）', targetsAfterMini.length === 1, `targets=${targetsAfterMini.length}`);
-  const snapRailed = await evalJSRetry(client, `window.biof3Desktop.windowManager.snapshot()`);
+  const snapRailed = await evalJSRetry(client, `window.petriDesktop.windowManager.snapshot()`);
   const railedEntry = (snapRailed?.snapshot?.entries || []).find((e) => e.id === contentId);
   assert('注册表条目 railed + static 淡出时间戳', !!railedEntry && railedEntry.state === 'railed' && typeof railedEntry.fadeAfter === 'number', JSON.stringify(railedEntry));
 
   // 8) 轨道恢复
-  const restored = await evalJSRetry(client, `window.biof3Desktop.windowManager.restore(${JSON.stringify(contentId)})`);
+  const restored = await evalJSRetry(client, `window.petriDesktop.windowManager.restore(${JSON.stringify(contentId)})`);
   assert('restore → popped（回记忆位置）', restored?.ok && restored?.state === 'popped', JSON.stringify(restored));
   const targetsAfterRestore = (await listTargets()).filter((t) => t.type === 'page' && (t.url || '').includes('/window/result/'));
   assert('恢复后独立窗 target 存在', targetsAfterRestore.length === 1, `targets=${targetsAfterRestore.length}`);
@@ -238,13 +238,13 @@ async function main() {
   }
 
   // 9) 唯一销毁路径：先降格入轨道，再从轨道显式移除（popped 态直接移除必须被拒——契约实证）
-  const removeWhilePopped = await evalJSRetry(client, `window.biof3Desktop.windowManager.remove(${JSON.stringify(contentId)})`);
+  const removeWhilePopped = await evalJSRetry(client, `window.petriDesktop.windowManager.remove(${JSON.stringify(contentId)})`);
   assert('契约：popped 态 remove 被拒（销毁只有轨道显式移除一条路）',
     removeWhilePopped?.ok === false && removeWhilePopped?.code === 'invalid_transition', JSON.stringify(removeWhilePopped));
-  await evalJSRetry(client, `window.biof3Desktop.windowManager.minimizeToRail(${JSON.stringify(contentId)})`);
-  const removed = await evalJSRetry(client, `window.biof3Desktop.windowManager.remove(${JSON.stringify(contentId)})`);
+  await evalJSRetry(client, `window.petriDesktop.windowManager.minimizeToRail(${JSON.stringify(contentId)})`);
+  const removed = await evalJSRetry(client, `window.petriDesktop.windowManager.remove(${JSON.stringify(contentId)})`);
   assert('remove → closed（轨道内显式移除）', removed?.ok && removed?.state === 'closed', JSON.stringify(removed));
-  const snapAfterRemove = await evalJSRetry(client, `window.biof3Desktop.windowManager.snapshot()`);
+  const snapAfterRemove = await evalJSRetry(client, `window.petriDesktop.windowManager.snapshot()`);
   assert('注册表条目终结（终态后不在注册表）', !((snapAfterRemove?.snapshot?.entries || []).some((e) => e.id === contentId)), JSON.stringify(snapAfterRemove?.entries?.length));
 
   // 10) geometry 持久化（位置记忆归主进程）
@@ -279,15 +279,15 @@ async function main() {
       return true;
     })()`);
     const uiHits = await pollWindowTarget('', { appear: true });
-    const uiSnap = await evalJSRetry(client, `window.biof3Desktop.windowManager.snapshot()`);
+    const uiSnap = await evalJSRetry(client, `window.petriDesktop.windowManager.snapshot()`);
     const uiEntry = (uiSnap?.snapshot?.entries || []).find((e) => e.state === 'popped');
     assert('P1b 真实点击「弹出」→ 独立窗出现且注册表 popped',
       Array.isArray(uiHits) && uiHits.length >= 1 && !!uiEntry, JSON.stringify({ targets: uiHits?.length, entry: uiEntry }));
     await screenshot(client, path.join(EVIDENCE_DIR, 'p59-03-mainwindow-button.png'));
     // 清理（场景 B 残留）：降格 + 移除
     if (uiEntry) {
-      await evalJSRetry(client, `window.biof3Desktop.windowManager.minimizeToRail(${JSON.stringify(uiEntry.id)})`);
-      await evalJSRetry(client, `window.biof3Desktop.windowManager.remove(${JSON.stringify(uiEntry.id)})`);
+      await evalJSRetry(client, `window.petriDesktop.windowManager.minimizeToRail(${JSON.stringify(uiEntry.id)})`);
+      await evalJSRetry(client, `window.petriDesktop.windowManager.remove(${JSON.stringify(uiEntry.id)})`);
     }
   } else {
     assert('P1b 主窗「弹出」按钮场景（job 无 project_id，跳过）', false, 'no project_id');

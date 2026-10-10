@@ -185,7 +185,7 @@ function _resolveSkillsIpcWindow(event) {
 ```markdown
 51:【PHASE 0 摸底后修订 / PHASE 1 实际落地（commit `2d81377` P1-1.3）】**`frontend/src/lib/electron.d.ts` L114-218（含 L207-218 onProgress 完整字段）已通过 ADDITIVE +2 字段扩展为 source-of-truth**（PHASE 1 落地新增 `cancel(executionId)` + `onProgress(callback)` 字段声明 +12 行 + JSDoc 注释）...
 
-123:1. **`src/preload.js`**（最小改动 ~15 行）：在第二份 `contextBridge.exposeInMainWorld('biof3Desktop', {...})` 对象（行 61 起）补 `skills` 子块，对齐 `frontend/src/lib/electron.d.ts` L114-218（含 L207-218 onProgress 完整字段）已声明契约：`discover()` / `execute(skillId, params)` / `getExecution(executionId)` / `onProgress(callback)` / `cancel(executionId)`。
+123:1. **`src/preload.js`**（最小改动 ~15 行）：在第二份 `contextBridge.exposeInMainWorld('petriDesktop', {...})` 对象（行 61 起）补 `skills` 子块，对齐 `frontend/src/lib/electron.d.ts` L114-218（含 L207-218 onProgress 完整字段）已声明契约：`discover()` / `execute(skillId, params)` / `getExecution(executionId)` / `onProgress(callback)` / `cancel(executionId)`。
 
 274:按 PHASE 6 只读代码质量审核报告 §10.3 H1 项，本节 §3.1.A 内 `electron.d.ts L114-150` 措辞**已在 BLOCK-5 PHASE 1 修订**：
 276:- L51 / L123 两处 `L114-150` → `L114-218`（含 L207-218 onProgress 完整字段）

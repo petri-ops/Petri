@@ -11,7 +11,7 @@ status: completed
 
 最后更新：2026-09-15
 
-状态：`completed（整包 closeout——2026-09-15 当日完成最后一段 p4r ui observation 重采。重启增量：P0→P1+P6 重采→P2→closeout。ui 重采实锤=旧证据锚点 35a0760c 早于 UI-122/UI-305 渲染层契约，驱动连随 7 关漂移全修复（全程非产品缺陷、零产品语义改动）：①模式切换双 nav 短/长标签（CompactResultNavigator「审查/历史」vs ContextBar「审查修改/版本历史」，result 模式仅前者在场）②采纳后 onRevisionActivated 跳回 result（UI-305，compare 面板卸载）③恢复 v2 同族跳转④图像交互静默降级（UI-122 shouldSurfaceInteractionFailure 只对 table 报错）⑤keyboardTrace window.hide() 后合成器停帧→capturePage viz UnknownVizError（临时显示窗口韧性回退）⑥故障矩阵 prepare 跟随面板装载契约（重试按钮挂 compare/history 才装载的版本面板）⑦Tab trace 前焦点播种 + 显式「进入交互选择」+ 重启版本经审查面板验「当前 v3」+ stage 落盘诊断。证据：rs-p4r-ui-observation.json passed=true 锚定 6b3c68bf（14 判据全过：6 态矩阵/截图全异/无溢出/主体全程在/composer 全程 ready/无泄漏/主动作预算/连续生命周期 adopted→undo→恢复 v3→受控重放/服务重启含版本恢复/次级故障 4 条+图像静默降级/键盘全可达；反馈预算 模式 15.2ms·重开 7.5ms·首内容 3.9ms）；rs-p4r-product-acceptance 随 HEAD 重生成；UI-379 两处 React hooks 顺序真缺陷修复（本轮 P6/ui 链实机抓真；草编 UI-378 与 BLOCK-89 撞号重编号）当日用户委托代跑复测升 verified。Result Studio 维持 implemented_unverified / experimental；P7 维持 deferred。G0 开发期常态 · 不外推 packaged/Provider/GA）。此前 active（P2-COMPLETED——2026-09-15 p4r corpus 链包感知化当日收口：交付 scripts/g0-rs-p4r-pack.mjs 包感知层（包根解析+plugins.dormant/ 兼容+复制 staging——symlink 会被候选发现 readdirSync isDirectory 静默跳过 plugin-sdk.js:49——+BIOF3_DEVELOPMENT_PLUGIN_DIRS/BIOF3_DOMAIN_TOOL_REGISTRY 注入），corpus 子进程+六处服务端 env 同源接线，显式输入先落项目工作区（admitted 校验 exactProjectFile 拒工作区外路径）；顺手清两笔存量债（baseline.mjs 缺 pathToFileURL import 恒红、agent-tool-registry 硬编码 53 未跟 BLOCK-77/85 更新→57）。证据：p4r:test 全套件 231 项 0 红 0 跳 + p4r:perf 14/14（事件循环 20.6ms vs 冻结 250ms）+ source-observation allFourVerified（desktop@1357c4c4（收口链 HEAD）+包@21d610c 双绑定）+ live 19 检查全绿（含真实后端重启恢复）+ closeout 四门绿；ui observation SKIPPED（端口 3001 被运行中 dev 栈占用，脚本要求独占，非产品缺陷）。包仓零改动（快进 0.1.1=21d610c）。整包余下一环=closeout（P6 重采 D8 族归此）。此前 active（P2-P4R-CORPUS——2026-09-15 用户裁决启动「启动 G0-RS P2 P4R-CORPUS」：p4r corpus 生成链包感知化。实锤红态=corpus 子进程空领域注册表（`未知工具: deseq2`，tool-registry.js:18 仅认 `BIOF3_DOMAIN_TOOL_REGISTRY`）+ CORPUS_INPUTS 两条核心树死路径（`core/biof3-server/tool-demo-data/`、`resources/built-in-plugins/` 已随 BLOCK-83 迁包删除）。改造面：包根解析（`BIOF3_BIO_PACK_ROOT` → 兄弟仓 `../gewu-pack-bio`，findBioPackRoot 先例）+ 子进程注入领域注册表 + 输入改包源（`demo-data/deseq2/`、`plugins/go-kegg/demo-data/genes.csv`）+ 插件定位兼容封存态（`plugins/` 与 `plugins.dormant/` 双侧查找，包仓 0.1.1=21d610c）。验收门禁：corpus 真跑 ≥3 步全产物（真实 R 作业）+ `g0:result-studio:p4r:test` 全绿 + `p4r:perf` 13 项证据刷新（基线 RS-P4R0-13 冻结不覆盖，只写 currentObservation）+ docs/ui 门禁。非范围：P6 重采（D8 例外族另行）、P7（deferred）。此前 planned（P2-P4R-QUEUED——P6 重采 completed @ macOS 指挥席 2026-09-15：`p6:update` 全套件 365 测试 0 红 + live capture 10/10 canonical checks，证据锚定 `e2ec798c`（`f62ab036`）；剩 p4r corpus 包感知化待用户裁决启动——R 运行时侧已就绪，改造本身未动。2026-09-15 active 槽位让位给 BLOCK-86（用户裁决「1」），本包转 planned 排队）`——实机抓真三件：①核心树 `resources/built-in-plugins/` 残留仅含 `__pycache__/*.pyc` 的目录（BLOCK-83 清核幸存、git 不可见）骗过 runtime 接线 `existsSync` 开关跳过包装载 → Unknown tool volcano-plot，已移出；②迁包后 `_biof3-theme.R` 两头落空（核心 `tool-scripts/` 已删、包 build 约定未兑现）→ 六 R 插件作业目录缺主题文件，包仓 `b2d0e91` 兑现复制并推送；③BLOCK-84 多源装载 installed 后置覆盖 builtin——drift 原型「升级隔离副本」被真包遮蔽（replay 恒 200）→ 冷启窗口隐藏包装载记录（`e2ec798c`），`pluginUpgradeBlocksReplayOnly` 转绿。环境事实：本机 `~/Documents/BioF3-Local/runtimes/R` 为半成品拷贝（Rscript 委派框架 R，checkpoint-hold 身份契约不过）→ 换符号链接指 `/Library/Frameworks/R.framework/Resources`（R 4.5.2）。P1（Windows 侧收尾：死链删除 + 套件回绿 + 7 缺陷修复 + 包装载接线 + R 首次引导）已交付。历史状态：`UX1G-2 completed`（多分析结果入口短闭环）；P7 维持 `deferred`，Result Studio 维持 `implemented_unverified / experimental`
+状态：`completed（整包 closeout——2026-09-15 当日完成最后一段 p4r ui observation 重采。重启增量：P0→P1+P6 重采→P2→closeout。ui 重采实锤=旧证据锚点 35a0760c 早于 UI-122/UI-305 渲染层契约，驱动连随 7 关漂移全修复（全程非产品缺陷、零产品语义改动）：①模式切换双 nav 短/长标签（CompactResultNavigator「审查/历史」vs ContextBar「审查修改/版本历史」，result 模式仅前者在场）②采纳后 onRevisionActivated 跳回 result（UI-305，compare 面板卸载）③恢复 v2 同族跳转④图像交互静默降级（UI-122 shouldSurfaceInteractionFailure 只对 table 报错）⑤keyboardTrace window.hide() 后合成器停帧→capturePage viz UnknownVizError（临时显示窗口韧性回退）⑥故障矩阵 prepare 跟随面板装载契约（重试按钮挂 compare/history 才装载的版本面板）⑦Tab trace 前焦点播种 + 显式「进入交互选择」+ 重启版本经审查面板验「当前 v3」+ stage 落盘诊断。证据：rs-p4r-ui-observation.json passed=true 锚定 6b3c68bf（14 判据全过：6 态矩阵/截图全异/无溢出/主体全程在/composer 全程 ready/无泄漏/主动作预算/连续生命周期 adopted→undo→恢复 v3→受控重放/服务重启含版本恢复/次级故障 4 条+图像静默降级/键盘全可达；反馈预算 模式 15.2ms·重开 7.5ms·首内容 3.9ms）；rs-p4r-product-acceptance 随 HEAD 重生成；UI-379 两处 React hooks 顺序真缺陷修复（本轮 P6/ui 链实机抓真；草编 UI-378 与 BLOCK-89 撞号重编号）当日用户委托代跑复测升 verified。Result Studio 维持 implemented_unverified / experimental；P7 维持 deferred。G0 开发期常态 · 不外推 packaged/Provider/GA）。此前 active（P2-COMPLETED——2026-09-15 p4r corpus 链包感知化当日收口：交付 scripts/g0-rs-p4r-pack.mjs 包感知层（包根解析+plugins.dormant/ 兼容+复制 staging——symlink 会被候选发现 readdirSync isDirectory 静默跳过 plugin-sdk.js:49——+PETRI_DEVELOPMENT_PLUGIN_DIRS/PETRI_DOMAIN_TOOL_REGISTRY 注入），corpus 子进程+六处服务端 env 同源接线，显式输入先落项目工作区（admitted 校验 exactProjectFile 拒工作区外路径）；顺手清两笔存量债（baseline.mjs 缺 pathToFileURL import 恒红、agent-tool-registry 硬编码 53 未跟 BLOCK-77/85 更新→57）。证据：p4r:test 全套件 231 项 0 红 0 跳 + p4r:perf 14/14（事件循环 20.6ms vs 冻结 250ms）+ source-observation allFourVerified（desktop@1357c4c4（收口链 HEAD）+包@21d610c 双绑定）+ live 19 检查全绿（含真实后端重启恢复）+ closeout 四门绿；ui observation SKIPPED（端口 3001 被运行中 dev 栈占用，脚本要求独占，非产品缺陷）。包仓零改动（快进 0.1.1=21d610c）。整包余下一环=closeout（P6 重采 D8 族归此）。此前 active（P2-P4R-CORPUS——2026-09-15 用户裁决启动「启动 G0-RS P2 P4R-CORPUS」：p4r corpus 生成链包感知化。实锤红态=corpus 子进程空领域注册表（`未知工具: deseq2`，tool-registry.js:18 仅认 `PETRI_DOMAIN_TOOL_REGISTRY`）+ CORPUS_INPUTS 两条核心树死路径（`core/petri-server/tool-demo-data/`、`resources/built-in-plugins/` 已随 BLOCK-83 迁包删除）。改造面：包根解析（`PETRI_BIO_PACK_ROOT` → 兄弟仓 `../petri-pack-bio`，findBioPackRoot 先例）+ 子进程注入领域注册表 + 输入改包源（`demo-data/deseq2/`、`plugins/go-kegg/demo-data/genes.csv`）+ 插件定位兼容封存态（`plugins/` 与 `plugins.dormant/` 双侧查找，包仓 0.1.1=21d610c）。验收门禁：corpus 真跑 ≥3 步全产物（真实 R 作业）+ `g0:result-studio:p4r:test` 全绿 + `p4r:perf` 13 项证据刷新（基线 RS-P4R0-13 冻结不覆盖，只写 currentObservation）+ docs/ui 门禁。非范围：P6 重采（D8 例外族另行）、P7（deferred）。此前 planned（P2-P4R-QUEUED——P6 重采 completed @ macOS 指挥席 2026-09-15：`p6:update` 全套件 365 测试 0 红 + live capture 10/10 canonical checks，证据锚定 `e2ec798c`（`f62ab036`）；剩 p4r corpus 包感知化待用户裁决启动——R 运行时侧已就绪，改造本身未动。2026-09-15 active 槽位让位给 BLOCK-86（用户裁决「1」），本包转 planned 排队）`——实机抓真三件：①核心树 `resources/built-in-plugins/` 残留仅含 `__pycache__/*.pyc` 的目录（BLOCK-83 清核幸存、git 不可见）骗过 runtime 接线 `existsSync` 开关跳过包装载 → Unknown tool volcano-plot，已移出；②迁包后 `_petri-theme.R` 两头落空（核心 `tool-scripts/` 已删、包 build 约定未兑现）→ 六 R 插件作业目录缺主题文件，包仓 `b2d0e91` 兑现复制并推送；③BLOCK-84 多源装载 installed 后置覆盖 builtin——drift 原型「升级隔离副本」被真包遮蔽（replay 恒 200）→ 冷启窗口隐藏包装载记录（`e2ec798c`），`pluginUpgradeBlocksReplayOnly` 转绿。环境事实：本机 `~/Documents/Petri-Local/runtimes/R` 为半成品拷贝（Rscript 委派框架 R，checkpoint-hold 身份契约不过）→ 换符号链接指 `/Library/Frameworks/R.framework/Resources`（R 4.5.2）。P1（Windows 侧收尾：死链删除 + 套件回绿 + 7 缺陷修复 + 包装载接线 + R 首次引导）已交付。历史状态：`UX1G-2 completed`（多分析结果入口短闭环）；P7 维持 `deferred`，Result Studio 维持 `implemented_unverified / experimental`
 
 开发形态：`单工作包串行 / 主工作区分支`（不使用 Git Worktree，判据见 §14 `G0-RS-WT0`）
 
@@ -73,7 +73,7 @@ Result Studio 进入 `result/code/compare/history` 时，Electron 顶层标题�
 
 自动证据为聚焦前端 46/46、受影响 Node 125 pass / 1 live skip、strict TypeScript、syntax、impact-map 与 diff 门；回归覆盖旧 Job 结果响应和深链状态查询的迟到提交失效。开发态真实数据 `conv_aac7a5c7-67e` 的 GSEA 与 GO/KEGG 两个 Job 完成浏览器菜单、键盘/鼠标、720/840/1050px、会话切换和 legacy 降级核对；同一开发态 Electron 窗口从顶部“结果 2”打开 GSEA，并切换到 GO/KEGG，URL、标题、主画布与 Inspector 归属一致。macOS ScreenCaptureKit 在后续菜单采集时报既有 `-3811/-3812`，因此 Electron 像素截图矩阵没有扩展；UI-123 仅在该开发态 macOS/renderer 边界为 `verified`，不外推 packaged、Provider、P6 freshness 或 P7 资格。
 
-BioF3 当前已经具备可信运行、Artifact 导航、静态预览、交付摘要、脚本入口和 ReplayPackage，但结果仍主要是“可查看的交付终点”，尚未成为用户可以持续探索、选择、编辑、比较和继续分析的科研工作对象。
+Petri 当前已经具备可信运行、Artifact 导航、静态预览、交付摘要、脚本入口和 ReplayPackage，但结果仍主要是“可查看的交付终点”，尚未成为用户可以持续探索、选择、编辑、比较和继续分析的科研工作对象。
 
 本工作包把结果区域升级为：
 
@@ -81,7 +81,7 @@ BioF3 当前已经具备可信运行、Artifact 导航、静态预览、交付�
 
 采用以下核心架构：
 
-> **真实 Git 负责脚本、参数、流程定义、结果清单与文本差异；Artifact Truth 负责科学产物、验证与 lineage；SQLite 负责索引、查询和 UI 投影；BioF3 提供不要求用户理解 Git 的 Codex-like 交互。**
+> **真实 Git 负责脚本、参数、流程定义、结果清单与文本差异；Artifact Truth 负责科学产物、验证与 lineage；SQLite 负责索引、查询和 UI 投影；Petri 提供不要求用户理解 Git 的 Codex-like 交互。**
 
 不自研一个弱化版 Git，也不把大型科研数据强行提交 Git。
 
@@ -451,10 +451,10 @@ Checkpoint 绑定：
 
 ### 7.1 无现有 Git 的项目
 
-BioF3 创建托管 Git backend：
+Petri 创建托管 Git backend：
 
 ```text
-.biof3/
+.petri/
 ├── git/
 ├── revision/
 ├── checkpoints/
@@ -476,7 +476,7 @@ BioF3 创建托管 Git backend：
 - 仓库根目录。
 - 当前 branch/HEAD。
 - dirty/untracked 状态。
-- BioF3 将修改的明确路径。
+- Petri 将修改的明确路径。
 - 是否存在 submodule、worktree 或锁。
 
 安全规则：
@@ -486,7 +486,7 @@ BioF3 创建托管 Git backend：
 - AI 修改使用专用 branch/worktree 或等价隔离区。
 - 不自动 push、force push、rebase 或删除用户分支。
 - 与用户现有未提交修改冲突时，ChangeSet 进入 blocked，不覆盖。
-- 用户可以选择“仅使用 BioF3 托管历史”，避免接入现有仓库。
+- 用户可以选择“仅使用 Petri 托管历史”，避免接入现有仓库。
 
 ### 7.3 Git Runtime
 
@@ -703,8 +703,8 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 - 隔离对象已消失：LF0～LF12 全部关闭，G0 转为常驻 `maintained` 门禁，不存在与 RS 并行的 LF 开发线。
 - 无并行所有者：`git worktree list` 仅主工作区；当前只有一个活跃开发线程。
 - 成本可量化：每个 Worktree 需独立 `node_modules`（527M + frontend 209M）与独立 electron-rebuild（`better-sqlite3` × `electron 30.5.1` ABI）；项目已有一次 native 架构错配事故记录，复制环境会放大该类问题。
-- 参照实例已存在：`/Applications/BioF3.app`（rc.7）与 `dist/mac-arm64/BioF3.app` 已提供 `userData` 独立的稳定对照，无需第二份 checkout。
-- 非技术前置：`G0-RS1` 的 Git Adapter 面向**用户项目目录**，其 非Git / clean / dirty 矩阵由临时 fixture 仓库覆盖，与 BioF3 仓库自身的 Worktree 无关。WT0 不是 RS1～RS9 的技术前置。
+- 参照实例已存在：`/Applications/Petri.app`（rc.7）与 `dist/mac-arm64/Petri.app` 已提供 `userData` 独立的稳定对照，无需第二份 checkout。
+- 非技术前置：`G0-RS1` 的 Git Adapter 面向**用户项目目录**，其 非Git / clean / dirty 矩阵由临时 fixture 仓库覆盖，与 Petri 仓库自身的 Worktree 无关。WT0 不是 RS1～RS9 的技术前置。
 
 替代做法：
 
@@ -754,7 +754,7 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 交付：
 
 - ✅ Git readiness/版本/路径检测：`detectGitRuntime()`，最低版本 `2.20.0`（低于该版本不保证 `--porcelain=v1 -z` 与 worktree 子命令行为一致）。
-- ✅ 托管 Git repository binding：`mode='managed'`，git 元数据落 `<workspace>/.biof3/git`，工作区仍是项目目录，用户浏览项目时看不到 `.git`。
+- ✅ 托管 Git repository binding：`mode='managed'`，git 元数据落 `<workspace>/.petri/git`，工作区仍是项目目录，用户浏览项目时看不到 `.git`。
 - ✅ 现有 Git repository 安全绑定：`mode='existing'`，只操作 `MANAGED_RELATIVE_PATHS`（当前为 `analysis/scripts`、`analysis/workflows`）；项目为仓库子目录时自动加相对前缀。
 - ✅ 精确路径 status/diff/commit/ref/branch/ls-files Adapter；`commit()` 使用 `--only` + 显式 pathspec。
 - ✅ dirty/untracked/conflict/lock/mid-operation/submodule/linked-worktree 检测；5 类 `blocked_*` 状态。
@@ -808,7 +808,7 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 - ✅ 进程中断后可恢复：真实关闭并重开数据库后状态、Revision、checkpoint 全部保留；`findInterruptedChangeSets()` 把 `running` 分类为 `recovery_required_after_restart`、`preview_ready` 为 `awaiting_user_decision`，只报告不自动改写。
 - ✅ 重复 adopt/revert 幂等：返回 `idempotent: true`，不重复切换 current 指针。
 - ✅ 一个 family 永不出现两个 current：由 partial unique index `WHERE is_current = 1` 在 DB 层保证，绕过仓库直接写库也会失败。
-- ✅ migration runner 首次使用验证（RS0 要求）：空库首装、已有库升级不动现存表、坏 SQL 事务回滚且不记版本、重复执行幂等、缺目录时的静默 no-op 行为、`BIOF3_BETTER_SQLITE3_ROOT` 下的 ABI 路径。
+- ✅ migration runner 首次使用验证（RS0 要求）：空库首装、已有库升级不动现存表、坏 SQL 事务回滚且不记版本、重复执行幂等、缺目录时的静默 no-op 行为、`PETRI_BETTER_SQLITE3_ROOT` 下的 ABI 路径。
 - ✅ migration 文件与 schema 模块逐字节一致，且不含 `BEGIN/COMMIT`（runner 已包事务，自带会导致嵌套失败）、`PRAGMA`、`AUTOINCREMENT`、`INSERT OR REPLACE`、`DROP/ALTER TABLE`。
 
 实现期修正的真实缺陷（均由验收测试捕获）：
@@ -916,7 +916,7 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 实现与边界：
 
 - 不启用 Git Worktree。`GitAdapter.commitVirtualFiles()` 使用临时 `GIT_INDEX_FILE` 和 Git plumbing 构造 candidate commit，并以 `update-ref <new> <expected-old>` 做 CAS；不 checkout、不改工作树、不携带用户 WIP，现有仓库子目录保留 `gitPathPrefix`。
-- `.biof3/revision/<changeSetId>/` 是私有执行 staging；脚本、参数和 materialization manifest 通过临时目录原子发布。正式可追溯脚本同时写入 candidate commit 的 `analysis/scripts/<artifactFamily>/<revision>/`，源脚本、源数据、旧 Artifact 与旧 Revision 保持不可变。
+- `.petri/revision/<changeSetId>/` 是私有执行 staging；脚本、参数和 materialization manifest 通过临时目录原子发布。正式可追溯脚本同时写入 candidate commit 的 `analysis/scripts/<artifactFamily>/<revision>/`，源脚本、源数据、旧 Artifact 与旧 Revision 保持不可变。
 - 首次打开一个真实 `completed + Artifact Truth valid` 的交互式 Artifact 时，若尚无 Revision，基于 Job/Artifact/输出 hash 建立确定性的 baseline ChangeSet、独立脚本和 current v1。每个普通 root Job/Artifact 建立独立 family，无法证明同源时不擅自合并；RS5 candidate Job 已绑定 Revision 时直接复用，不自动覆盖 current。
 - `result_changeset_create` 复用 RS4 的完整 `ResultEditIntent`，科学变化必须通过确认门；执行仍唯一进入现有 MCP 插件执行器，产生真实 `tool_job → artifact truth → provenance`，再登记 v2 Revision。候选只到 `preview_ready`，固定返回 `adopted:false`；RS6 才能采用或撤销。
 - materialized override 只接受真实位于该 ChangeSet 私有目录、语言扩展匹配且 SHA-256 精确匹配的脚本；任意工作区路径、symlink escape、hash 漂移均拒绝。
@@ -956,7 +956,7 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 实现与边界：
 
 - `result-compare-service.js` 在同一 ChangeSet/ArtifactRevision 真相上提供有界文本 Git diff、JSON 字段 diff、CSV/TSV 语义 diff、图像/SVG Revision 对照和 history；200k 字符、500 JSON 字段、4 MiB 表格前缀与 20 行样本上限均显式返回截断状态。
-- adopt 仅接受 `preview_ready`、candidate ref/commit 一致、父 Revision 仍为 current、脚本哈希与真实 completed Job/Artifact Truth 均有效的候选。Git `refs/heads/biof3/current/*` 以 CAS 更新并在 SQLite transaction 回调内切 current；并发漂移或任一失败均回滚，不留下部分采用。
+- adopt 仅接受 `preview_ready`、candidate ref/commit 一致、父 Revision 仍为 current、脚本哈希与真实 completed Job/Artifact Truth 均有效的候选。Git `refs/heads/petri/current/*` 以 CAS 更新并在 SQLite transaction 回调内切 current；并发漂移或任一失败均回滚，不留下部分采用。
 - revert 只允许撤销仍为 current 的非 baseline ChangeSet；未采用候选只删除自己的临时 ref，baseline 永远不能撤销。restore 不改写历史，而是产生新的 commit、ChangeSet 和 Revision；重复恢复同一目标幂等返回同一新版本。
 - 5 个 Agent 工具和 6 个 HTTP 端点复用相同服务与项目权限边界；Revision Artifact 下载再次校验工作区包含性与 SHA-256。普通用户默认只看当前版本、状态、来源、文件数和操作，高级 Git 信息折叠披露。
 - `ResultStudioChangeSetPanel` 已接入真实结果侧栏；默认紧凑，展开后显示前后图、表格/JSON/文本差异和历史。采用/恢复后打开返回的真实 Job/Artifact，不建立第二套结果预览或版本状态。
@@ -1032,7 +1032,7 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 - `createResultChangeSet()` 在 change_set、materialized、candidate_committed、preview_ready 和失败/取消阶段持续更新同一 `WorkspaceCheckpoint`；关闭会话或进程中断后不依赖 renderer 内存恢复修改现场。
 - `result-studio-lifecycle.js` 联合校验 checkpoint hash、ChangeSet 状态、candidate/current Git refs、Revision current 指针、source commit 与 Artifact SHA-256。只有已存在 candidate ref、valid Revision、completed Job 和 valid Artifact Truth 的 running ChangeSet 才可自动恢复到 `preview_ready`；缺失 current ref 可从 SQLite+commit 自愈，冲突 ref、Artifact 漂移、checkpoint 损坏或半采用状态一律阻断。
 - 存储摘要按 Artifact SHA-256 区分 logical/unique/deduplicable bytes；精确重复结果可通过 plan token + 哈希前后条件物化为项目内 content-addressed hardlink，不触碰源数据或改变 Artifact 内容。Git 继续承担文本对象自身的 content-addressed 去重。
-- 安全 GC 先生成稳定 plan token，执行时重新核对。可删除范围仅限超过年龄门的关闭态/临时 `.biof3/revision` staging 和仍匹配 candidate commit 的内部 ref；`artifactDeletionCount` 永远为 0，不删除 Artifact 文件、Revision 记录、current/adopted/selection/checkpoint 引用对象。
+- 安全 GC 先生成稳定 plan token，执行时重新核对。可删除范围仅限超过年龄门的关闭态/临时 `.petri/revision` staging 和仍匹配 candidate commit 的内部 ref；`artifactDeletionCount` 永远为 0，不删除 Artifact 文件、Revision 记录、current/adopted/selection/checkpoint 引用对象。
 - 大表新增最多 1 MiB / 200 行的 byte cursor API，结果侧栏按 50 行渐进加载候选表并在局部滚动容器渲染，不读取完整文件、不阻塞首屏。RFC4180 multiline cell 边界明确披露，不冒充完整 CSV 引擎。
 - preview Job 在创建 ChangeSet 前读取真实内存/磁盘快照和 active preview 数；资源不足 fail-closed，并发饱和返回 queued，绝不通过修改科学参数换取运行。项目级 status/recover/storage/deduplicate/gc/preview-budget API 与紧凑 UI 状态均复用同一 SQLite/Git/Artifact 真相。
 
@@ -1059,7 +1059,7 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 
 环境矩阵：
 
-- 非 Git 项目 + BioF3 托管 Git。
+- 非 Git 项目 + Petri 托管 Git。
 - 已有 clean Git 项目。
 - 已有 dirty Git 项目。
 - 应用重启和任务中断。
@@ -1081,7 +1081,7 @@ API 必须按 project/user 权限校验，不允许通过 revisionId 越权读�
 - 新增确定性 `result-studio-qualification.js`：只有 5/5 科学任务、9/9 环境、7/7 证据类型、至少 2 类真实 Provider、全部独立脚本及零假成功/半采用/静默丢失同时成立才允许晋升；任一缺项都 fail-closed。
 - DEG 表精确选择 27 个稳定 `gene_id`，以 filter/hash 和 12 个有界样本进入 Agent 上下文；科学阈值修改确定性覆盖 DEG、火山图与富集下游节点，并保持科学确认门。
 - DeepSeek 与 OpenAI-compatible 两类真实 Provider 通过 Result Studio 展示修改、科学阈值、27 基因继续富集和未知参数保守分级矩阵；不保存模型、URL、响应或凭据。
-- 真实 renderer 使用隔离 SQLite、项目目录和 BioF3 托管 Git：明亮/夜间、1440×900、820×900、五万行 DEG 大表、服务中断/重启共 5 态通过。820px 下 `innerWidth = clientWidth = scrollWidth = 820`；五万行表仅渲染当前可见 24 行，显示 4 个版本、逻辑占用与可去重空间，重启后仍恢复同一候选现场。
+- 真实 renderer 使用隔离 SQLite、项目目录和 Petri 托管 Git：明亮/夜间、1440×900、820×900、五万行 DEG 大表、服务中断/重启共 5 态通过。820px 下 `innerWidth = clientWidth = scrollWidth = 820`；五万行表仅渲染当前可见 24 行，显示 4 个版本、逻辑占用与可去重空间，重启后仍恢复同一候选现场。
 - Git Adapter 专项继续覆盖非 Git、已有 clean Git 和已有 dirty Git；ChangeSet/Review/Lifecycle 专项覆盖 AI/手动同一契约、失败/取消、compare/adopt/revert/restore、checkpoint、Artifact hash、ref 自愈/阻断与安全 GC。
 - 脱敏证据：`rs9-product-acceptance.json`、`rs9-provider-acceptance.json`、`rs9-visual-acceptance.json` 及 `rs9-ui/` 五张截图。聚合结果为 5/5 tasks、9/9 environments、7/7 evidence classes。
 - 历史实现曾把 `result-studio-editing` 晋升为 qualified support claim；产品复核发现五条任务由独立测试、fixture 与截图组合推导，Provider 探针未执行真实工具闭环，视觉检查依赖人工布尔值，大表由数据库 seed 构造。因此该资格声明暂停，待 `G0-RS-P0` 修正机器声明、`G0-RS-P7` 重新资格。
@@ -1118,7 +1118,7 @@ npm run g0:result-studio:acceptance
 
 - Diff、commit message 和诊断不得泄露 API Key、环境变量或项目外路径。
 - Git remote 操作默认禁用；本工作包不自动 push。
-- 外部 Git hooks 默认不在 BioF3 托管仓库执行。
+- 外部 Git hooks 默认不在 Petri 托管仓库执行。
 - 现有仓库 hooks、filters、attributes 的行为必须审计后受控调用。
 - 脚本执行继续受 Harness 权限、项目作用域和副作用策略约束。
 - 源数据不可变规则覆盖 AI、手动 UI、Git restore 和 shell 绕过路径。
@@ -1538,9 +1538,9 @@ P4R 完成后的默认产品形态固定为：
 
 ##### P4R-0：Truth Baseline、失败测试与预算冻结
 
-进度（2026-07-28）：P4R-0 已收口。一次性隔离捕获环境、canonical corpus、失败测试先行和性能预算均已完成；`acceptance/g0-result-studio/rs-p4r-performance.json` 为 13/13，基线由 `RS-P4R0-13` 冻结，重跑只写 `currentObservation` 与对比，不覆盖基线。P4R-0 收口时不变量为 6/7，唯一红项 Revision source projection 已由 P4R-5 关闭；当前套件含 7 条核心不变量与 1 条显式 runtime skip guard，本机为 8/8。原始观测工具由 `340c09a` 引入并保持 `BIOF3_PERF_PROBE=1` 默认关闭。
+进度（2026-07-28）：P4R-0 已收口。一次性隔离捕获环境、canonical corpus、失败测试先行和性能预算均已完成；`acceptance/g0-result-studio/rs-p4r-performance.json` 为 13/13，基线由 `RS-P4R0-13` 冻结，重跑只写 `currentObservation` 与对比，不覆盖基线。P4R-0 收口时不变量为 6/7，唯一红项 Revision source projection 已由 P4R-5 关闭；当前套件含 7 条核心不变量与 1 条显式 runtime skip guard，本机为 8/8。原始观测工具由 `340c09a` 引入并保持 `PETRI_PERF_PROBE=1` 默认关闭。
 
-运行时勘察（2026-07-26，只读检查开发库 `core/r-server/biof3.db`，只取计数与结构，不读结果内容）：
+运行时勘察（2026-07-26，只读检查开发库 `core/r-server/petri.db`，只取计数与结构，不读结果内容）：
 
 | 事实 | 实测 | 对 P4R-0 的影响 |
 |---|---|---|
@@ -1616,7 +1616,7 @@ P4R-2 的可交付范围以**该子阶段启动时**的代码实况为界，本�
 
 **证据边界**
 
-P4R-2 的证据边界沿用 P4R-0 已确立的纪律：**没有生产者的指标一律记 `unmeasured` 并写明原因，绝不估算、绝不默认为 0、绝不用形状校验冒充测量**（先例见 `acceptance/g0-result-studio/rs-p4r-performance.json` 的 `unmeasured` 数组与 `budgets.visibleFeedbackMs` 的 `machineVerifiable:false` / `status:"frozen_target_not_yet_measurable"`）。可以机器证明的部分：模式容器一次只渲染一态、`resultFirstScreen.ts` 中每个首屏谓词的真值表、header 不再重复呈现 `artifactTruth.status`、版本位在拿不到 `revisionOrdinal` 时走降级文案而非截断 ID、焦点顺序与 `role`/`aria-*` 完整、核心路径键盘处理器可触发、状态不只依赖颜色、样式只引用已定义的 `--biof3-*` token——这些全部是 DOM 结构与纯函数断言，happy-dom 足以覆盖，写成 vitest 并经 `npm run test:files`（**不得用会退化成 `vitest run --changed` 的裸 `npm test`**，见 §P4R-0 证据门约束）。必须记为未测量的部分：`1440/1024/820px` 下的实际布局与横向溢出、明暗主题的真实渲染差异、以及「主体首屏可见」的像素判定。原因是实测的而非假设的——`frontend/vite.config.ts` 的 `test.environment` 为 `happy-dom`，本次核对临时跑的探针（用例已删除）得 `getBoundingClientRect() = 0×0`、`offsetWidth = 0`、`document.documentElement.scrollWidth = 0`、`clientWidth = 0`，`getComputedStyle` 只回显声明值，`window.innerWidth` 可设但不带布局；仓库内无 playwright/puppeteer；`scripts/g0-qualification-visual.mjs` 只校验既有 PNG 与人工 `inspection.json`（其 `accessibilityInspection` 断言 `method === 'computer-use-accessibility-and-screenshot-review'`），并不捕获。统一用 `not_captured_no_browser_automation_in_repo` 作为原因串，与 P4R-0 保持同一词表。另有两条不得重复的前例：其一，`acceptance/g0-result-studio/rs-p2-ui-observation.json` 在仓库内**没有任何生产者**（`scripts/g0-rs-p2-acceptance.mjs:131-144` 只校验其形状：六格矩阵、`pageHorizontalOverflow === false`、64 位 sha256），因此它不可重跑、不可复核，P4R-2 **不得**再产出同类「形状被校验、内容无来源」的 UI 证据；其二，`npm run g0:result-studio:p4r:frontend` 已建立并执行真实 frontend specs；不存在单独的 `:ui` 像素门，因为仓库仍无浏览器自动化。`acceptance/g0-result-studio/rs-p4r-product-reframe.json` 同时绑定 `sourceHashes` 与 source commit，生产源码或实际执行 spec 漂移都会令证据失效。所有 P4R-2 证据保持 `qualificationEligible:false`，不升级 `result-studio-editing` 支持声明，产品资格仍由 P7 唯一裁决。
+P4R-2 的证据边界沿用 P4R-0 已确立的纪律：**没有生产者的指标一律记 `unmeasured` 并写明原因，绝不估算、绝不默认为 0、绝不用形状校验冒充测量**（先例见 `acceptance/g0-result-studio/rs-p4r-performance.json` 的 `unmeasured` 数组与 `budgets.visibleFeedbackMs` 的 `machineVerifiable:false` / `status:"frozen_target_not_yet_measurable"`）。可以机器证明的部分：模式容器一次只渲染一态、`resultFirstScreen.ts` 中每个首屏谓词的真值表、header 不再重复呈现 `artifactTruth.status`、版本位在拿不到 `revisionOrdinal` 时走降级文案而非截断 ID、焦点顺序与 `role`/`aria-*` 完整、核心路径键盘处理器可触发、状态不只依赖颜色、样式只引用已定义的 `--petri-*` token——这些全部是 DOM 结构与纯函数断言，happy-dom 足以覆盖，写成 vitest 并经 `npm run test:files`（**不得用会退化成 `vitest run --changed` 的裸 `npm test`**，见 §P4R-0 证据门约束）。必须记为未测量的部分：`1440/1024/820px` 下的实际布局与横向溢出、明暗主题的真实渲染差异、以及「主体首屏可见」的像素判定。原因是实测的而非假设的——`frontend/vite.config.ts` 的 `test.environment` 为 `happy-dom`，本次核对临时跑的探针（用例已删除）得 `getBoundingClientRect() = 0×0`、`offsetWidth = 0`、`document.documentElement.scrollWidth = 0`、`clientWidth = 0`，`getComputedStyle` 只回显声明值，`window.innerWidth` 可设但不带布局；仓库内无 playwright/puppeteer；`scripts/g0-qualification-visual.mjs` 只校验既有 PNG 与人工 `inspection.json`（其 `accessibilityInspection` 断言 `method === 'computer-use-accessibility-and-screenshot-review'`），并不捕获。统一用 `not_captured_no_browser_automation_in_repo` 作为原因串，与 P4R-0 保持同一词表。另有两条不得重复的前例：其一，`acceptance/g0-result-studio/rs-p2-ui-observation.json` 在仓库内**没有任何生产者**（`scripts/g0-rs-p2-acceptance.mjs:131-144` 只校验其形状：六格矩阵、`pageHorizontalOverflow === false`、64 位 sha256），因此它不可重跑、不可复核，P4R-2 **不得**再产出同类「形状被校验、内容无来源」的 UI 证据；其二，`npm run g0:result-studio:p4r:frontend` 已建立并执行真实 frontend specs；不存在单独的 `:ui` 像素门，因为仓库仍无浏览器自动化。`acceptance/g0-result-studio/rs-p4r-product-reframe.json` 同时绑定 `sourceHashes` 与 source commit，生产源码或实际执行 spec 漂移都会令证据失效。所有 P4R-2 证据保持 `qualificationEligible:false`，不升级 `result-studio-editing` 支持声明，产品资格仍由 P7 唯一裁决。
 
 
 - 主体首屏化。**删除对象按代码实况重新指定**：原文点名的三个对象经核对均不成立——Honeycomb 结果导航是网格列（`project-workspace.module.css:4086-4088`）且已可收起（`project-workspace.tsx:4257-4258`、`:3947`），删之得横向宽度而非首屏高度，其去留改为横向宽度问题单独裁决、不计入首屏化交付；存储卡已自抑制（`ResultStudioChangeSetPanel.tsx:56`、`:182`、`:184`）；二级 Artifact rail 已条件渲染（`project-workspace.tsx:3946`）。真正无条件占据首屏的是计划未点名的 `resultDeliveryCard`，已由 `ba6b124` 按 `resultFirstScreen.ts::shouldShowDeliveryCard` 条件化。
@@ -1625,9 +1625,9 @@ P4R-2 的证据边界沿用 P4R-0 已确立的纪律：**没有生产者的指�
 - **收敛已有 header，不新建（P4R-2 启动判据）**：`ResultStudioContextBar`（`ResultStudioSurface.tsx:64-103`，挂载于 `CenterPanel.tsx:181-191`）已经是结果头。本阶段做三件事：去掉它与 `workflowBar`（`project-workspace.tsx:4049`、`:4059`）对同一 `artifactTruth.status` 的重复呈现；把版本位从截断 Revision ID（`resultSurface.ts:125-129`）改为 §P4R.3 要求的 `vN`——启动时 `ActiveArtifact`（`project-workspace.tsx:132-150`）不含 `revisionOrdinal`，P4R-2 最终选择补一条不阻塞主体的最小投影，并在载荷缺失时如实显示「当前版本」，**不得用截断 ID 冒充 `vN`**；保留返回入口，内部 ID 不进普通视图。
 - **返回目标按现状写为「返回会话」**：仓库内不存在结果列表界面，返回按钮的 `aria-label` 就是「返回对话」（`ResultStudioSurface.tsx:83`）并走 `updateWorkspaceMode('chat')`（`CenterPanel.tsx:188`），右栏 `results` tab 是单 Artifact Inspector（`RightPanel.tsx:146-174`）。§P4R.3 布局图中的「返回结果列表」同步改为「返回会话」；若要建结果列表，那是新增产品面，不属 P4R-2 且需单独立项。
 - **模式机制本阶段只能立骨架，不能立四态**：`WorkspaceMode`（`useWorkspaceRouting.ts:4`）中不存在 `code` 与 `history`；`compare` 零写入者且与 `result` 渲染完全相同（`ResultStudioSurface.tsx:53` 只落 `data-mode`，两份 module CSS 均不选择它）。因此 P4R-2 只交付「一次只显示一态」的容器与状态载体，并在其上接入唯一有实现的 `result`。`code` 入口在 P4R-5 的 Revision 源投影路由存在前不得渲染；`history`/版本选择器随 P4R-4 接入；`compare` 在 P4R-4 给出比较入口前保持不可达，**不得由本阶段把它伪装成可用的第四态**。
-- **[x] Agent 会话常驻（已交付 `8e58f98`）**。该条在原 charter 中被写成布局偏好，实测是**主路径上的静默数据丢失**：`ResultEditPanel`（`RightPanel.tsx:161-174`）提交后派发的 `copilotAsk` 经零缓冲的 `dispatchBioF3Event`（`lib/events.ts:109-113`）发出，唯一订阅者 `SimpleChat.tsx:579-585` 在 result 模式下未挂载，事件消失且 `finally` 同步把按钮重置为空闲，用户得不到任何失败提示。修复去掉了 `CenterPanel` 中冗余且具破坏性的 `{ctx.showPinnedSummary && children}` 门（可见性本由投影层 `aria-hidden` + CSS 承担，去掉后比原来**少**做工作），并新增 `ownsCopilotAsk`（默认 `false`，仅中央实例传 `true`，`CenterPanel.tsx:167`）避免右栏 chat tab 重复订阅。守门测试此前双重假绿（给所有模式硬编码 `showPinnedSummary: true` 并 mock 掉 `SimpleChat`），已改为按 mode 派生并新增 `copilotAskDelivery.test.tsx` 用真实订阅验证送达。记为**交付缺陷修复**，不记为布局改造。
+- **[x] Agent 会话常驻（已交付 `8e58f98`）**。该条在原 charter 中被写成布局偏好，实测是**主路径上的静默数据丢失**：`ResultEditPanel`（`RightPanel.tsx:161-174`）提交后派发的 `copilotAsk` 经零缓冲的 `dispatchPetriEvent`（`lib/events.ts:109-113`）发出，唯一订阅者 `SimpleChat.tsx:579-585` 在 result 模式下未挂载，事件消失且 `finally` 同步把按钮重置为空闲，用户得不到任何失败提示。修复去掉了 `CenterPanel` 中冗余且具破坏性的 `{ctx.showPinnedSummary && children}` 门（可见性本由投影层 `aria-hidden` + CSS 承担，去掉后比原来**少**做工作），并新增 `ownsCopilotAsk`（默认 `false`，仅中央实例传 `true`，`CenterPanel.tsx:167`）避免右栏 chat tab 重复订阅。守门测试此前双重假绿（给所有模式硬编码 `showPinnedSummary: true` 并 mock 掉 `SimpleChat`），已改为按 mode 派生并新增 `copilotAskDelivery.test.tsx` 用真实订阅验证送达。记为**交付缺陷修复**，不记为布局改造。
 - **[x] 选择与滚动保持（已交付）**：进出结果、切换 Artifact/Revision 后草稿、选择、滚动可恢复。其中「布局」一项已由 `project-workspace.tsx:309-320`、`:377-386` 的 `resultPanelRestoreRef` 实现；草稿的存活已由 `8e58f98` 从结构上保证（会话不再卸载）；**选择**状态因 `activeArtifact`（含 selection）是宿主 state、`updateWorkspaceMode` 不重置它、仅 `activeJobId` 变化才清空而天然保持；**滚动**位置由新增的 `frontend/src/components/result-studio/resultScrollMemory.ts`（按 jobId 缓存 `.resultView` scrollTop 的纯模块，7/7 单测）+ `ResultArtifactShell` 成功态 div 的 ref/onScroll 接线实现，result 层重新挂载时按 job.id 恢复。chat 侧 `sc-messages` 因 SimpleChat 常驻天然保持，无需额外机制。仅对 `result↔chat` 验证；Code/History/Compare 的对应验证分别随 P4R-5/P4R-4 补齐。滚动恢复的实机像素验证本仓库无浏览器自动化，按 P4R-0 先例记 `not_captured_no_browser_automation_in_repo`。
-- 1440/1024/820px、明暗主题和键盘焦点：**按可证明性拆成两半，不整条作为出口条件**。可在 happy-dom 单测中机器证明的部分必须成立并写进证据：模式容器在每个断点下渲染同一棵可达 DOM、焦点顺序与 `role`/`aria-*` 完整、核心路径的键盘处理器存在且可触发、状态不只靠颜色（以文本或 `data-*` 兜底）、样式只使用已定义的 `--biof3-*` token 因而明暗共用一套声明。不可证明的部分**必须按 P4R-0 先例记为未测量并给出原因**：`frontend/vite.config.ts` 用 happy-dom，实测 `getBoundingClientRect()`/`offsetWidth`/`scrollWidth`/`clientWidth` 全为 0，不做布局计算；仓库无 playwright/puppeteer；`scripts/g0-qualification-visual.mjs` 只校验既有 PNG 不捕获。因此 `pageHorizontalOverflow`、各断点实际可见高度与「主体首屏可见」的像素判定一律记 `unmeasured` + `not_captured_no_browser_automation_in_repo`，**不得估算、不得以 `innerWidth` 冒充布局、不得以人工提供而仓库内无生产者的 JSON 充作机器证据**。
+- 1440/1024/820px、明暗主题和键盘焦点：**按可证明性拆成两半，不整条作为出口条件**。可在 happy-dom 单测中机器证明的部分必须成立并写进证据：模式容器在每个断点下渲染同一棵可达 DOM、焦点顺序与 `role`/`aria-*` 完整、核心路径的键盘处理器存在且可触发、状态不只靠颜色（以文本或 `data-*` 兜底）、样式只使用已定义的 `--petri-*` token 因而明暗共用一套声明。不可证明的部分**必须按 P4R-0 先例记为未测量并给出原因**：`frontend/vite.config.ts` 用 happy-dom，实测 `getBoundingClientRect()`/`offsetWidth`/`scrollWidth`/`clientWidth` 全为 0，不做布局计算；仓库无 playwright/puppeteer；`scripts/g0-qualification-visual.mjs` 只校验既有 PNG 不捕获。因此 `pageHorizontalOverflow`、各断点实际可见高度与「主体首屏可见」的像素判定一律记 `unmeasured` + `not_captured_no_browser_automation_in_repo`，**不得估算、不得以 `innerWidth` 冒充布局、不得以人工提供而仓库内无生产者的 JSON 充作机器证据**。
 
 ##### P4R-3：Agent-first Editing
 

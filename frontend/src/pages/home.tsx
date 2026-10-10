@@ -5,7 +5,7 @@
  * 没有项目时才保留创建项目的启动页。
  *
  * ⚠️ 首次运行死锁修复（见 .workbuddy/memory）：
- * 项目列表走 biof3-server(:3001)，而 biof3-server 需要 R 运行时；R 运行时又只能从
+ * 项目列表走 petri-server(:3001)，而 petri-server 需要 R 运行时；R 运行时又只能从
  * 插件商店安装，而商店此前唯一入口在「项目工作台」内部 —— 于是形成死锁：
  *   没装 R → 进不了工作台 → 进不了工作台就装不了 R。
  * 修复：检测到 R 运行时缺失时，本页直接渲染「首次配置」引导页，并内嵌
@@ -30,7 +30,7 @@ import {
   useHomeSshProject,
   useManualPathFlow,
 } from './home/useHomeCreateFlows';
-import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
+import { petriEvents, dispatchPetriEvent } from '@/lib/events';
 
 export default function Home(): React.ReactElement {
   const backendStatus = useBackendStatus();
@@ -145,9 +145,9 @@ export default function Home(): React.ReactElement {
     setCreateError('');
     try {
       // UI-251 — 创建失败不再静默：桥缺失/对话框失败/接口报错都要有可见反馈
-      const dialog = window.biof3Desktop?.files?.openDirectoryDialog;
+      const dialog = window.petriDesktop?.files?.openDirectoryDialog;
       if (typeof dialog !== 'function') {
-        setCreateError('当前运行环境不支持选择工作目录（请在 Gewu 桌面应用中使用）。');
+        setCreateError('当前运行环境不支持选择工作目录（请在 Petri 桌面应用中使用）。');
         return;
       }
       const selectedPath = await dialog();
@@ -188,7 +188,7 @@ export default function Home(): React.ReactElement {
       setBlankName('');
       // 项目创建广播（softRefresh → AppRail 刷新左栏项目列表，用户反馈「创建项目左栏不更新」）
       try {
-        dispatchGewuEvent(gewuEvents.softRefresh, undefined);
+        dispatchPetriEvent(petriEvents.softRefresh, undefined);
       } catch {
         // 事件总线失败不阻塞导航
       }
@@ -213,7 +213,7 @@ export default function Home(): React.ReactElement {
       setPendingWorkspace(null);
       // 项目创建广播（softRefresh → AppRail 刷新左栏项目列表，用户反馈「创建项目左栏不更新」）
       try {
-        dispatchGewuEvent(gewuEvents.softRefresh, undefined);
+        dispatchPetriEvent(petriEvents.softRefresh, undefined);
       } catch {
         // 事件总线失败不阻塞导航
       }
@@ -246,7 +246,7 @@ export default function Home(): React.ReactElement {
     if (relaunching) return;
     setRelaunching(true);
     try {
-      await window.biof3Desktop?.app?.relaunch?.();
+      await window.petriDesktop?.app?.relaunch?.();
     } finally {
       // relaunch 成功时进程已退出，这里只兜底 relaunch 不可用的情况
       setRelaunching(false);
@@ -256,7 +256,7 @@ export default function Home(): React.ReactElement {
   // ── 启动/配置引导页：两类截然不同的状态，必须分开处理 ──
   // ① runtimeMissing：R 运行时**确认缺失**（backend:status 显式返回 false）。
   //    此时才需要去插件商店装运行时 —— 真正的"首次配置"场景。
-  // ② backendNotReady：状态已检测（loaded=true）但后端 30s 仍未就绪（biof3-server
+  // ② backendNotReady：状态已检测（loaded=true）但后端 30s 仍未就绪（petri-server
   //    没起来）。这是"后端启动慢/启动失败"，**不是**缺运行时 —— 误导用户去装
   //    运行时毫无意义，应给"重试/重启"出路，文案明确说"本地分析服务未启动"。
   // 注：runtimeMissing 用 `=== false` 而非 `!rRuntime`，因为 rRuntime 为 null
@@ -342,7 +342,7 @@ export default function Home(): React.ReactElement {
         对话、文件等通用功能不受影响；运行 R 类分析工具需安装 R 运行时（约 657MB）。
       </span>
       <button
-        className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+        className="petri-btn petri-btn--ghost petri-btn--sm"
         type="button"
         onClick={() => setStoreOpen(true)}
       >
@@ -362,7 +362,7 @@ export default function Home(): React.ReactElement {
           <span>
             <Icon name="check" size={14} /> R 运行时已就绪，重启应用即可开始分析
           </span>
-          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => void handleRelaunch()} disabled={relaunching}>
+          <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={() => void handleRelaunch()} disabled={relaunching}>
             {relaunching ? '正在重启…' : '立即重启应用'}
           </button>
         </div>
@@ -372,7 +372,7 @@ export default function Home(): React.ReactElement {
 
   if (status === 'loading') {
     return (
-      <div className={styles.homeState} aria-label="正在启动 Gewu">
+      <div className={styles.homeState} aria-label="正在启动 Petri">
         <span className={styles.homeStateDot} />
         <span>{backendStatus.downReason || '正在准备项目工作台…'}</span>
       </div>
@@ -393,7 +393,7 @@ export default function Home(): React.ReactElement {
           </p>
           <div className={styles.emptyHomePendingActions}>
             <button
-              className="gewu-btn gewu-btn--sm"
+              className="petri-btn petri-btn--sm"
               type="button"
               onClick={() => void confirmCreatePending()}
               disabled={creating}
@@ -401,7 +401,7 @@ export default function Home(): React.ReactElement {
               {creating ? '创建中…' : '在此处创建'}
             </button>
             <button
-              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              className="petri-btn petri-btn--ghost petri-btn--sm"
               type="button"
               onClick={() => setPendingWorkspace(null)}
               disabled={creating}
@@ -412,13 +412,13 @@ export default function Home(): React.ReactElement {
         </>
       ) : (
         <>
-          <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => void handleCreateProject()} disabled={creating}>
+          <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={() => void handleCreateProject()} disabled={creating}>
             {creating ? '创建中…' : '选择工作目录并创建'}
           </button>
           {/* UI-257 — 手动输入路径兜底：目录面板「打开」被系统禁用时可粘贴完整路径 */}
           {!manualPathOpen ? (
             <button
-              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              className="petri-btn petri-btn--ghost petri-btn--sm"
               type="button"
               onClick={() => setManualPathOpen(true)}
               disabled={creating}
@@ -443,7 +443,7 @@ export default function Home(): React.ReactElement {
                 />
                 {/* UI-259 — 应用内选择文件夹：点选目录直接得到路径，不依赖系统面板 */}
                 <button
-                  className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                  className="petri-btn petri-btn--ghost petri-btn--sm"
                   type="button"
                   onClick={() => {
                     if (!browseOpen) setBrowseFrom(manualPath);
@@ -455,7 +455,7 @@ export default function Home(): React.ReactElement {
                   选择文件夹…
                 </button>
                 <button
-                  className="gewu-btn gewu-btn--sm"
+                  className="petri-btn petri-btn--sm"
                   type="button"
                   onClick={() => void confirmManualPath()}
                   disabled={manualValidating || !manualPath.trim()}
@@ -481,7 +481,7 @@ export default function Home(): React.ReactElement {
           {/* BLOCK-67 UI-321 — SSH 远程项目：项目本体在远程服务器（对标 ZCode SSH 远程连接形态） */}
           {!sshOpen ? (
             <button
-              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              className="petri-btn petri-btn--ghost petri-btn--sm"
               type="button"
               onClick={() => void openSshPanel()}
               disabled={creating}
@@ -496,7 +496,7 @@ export default function Home(): React.ReactElement {
                   type="button"
                   role="tab"
                   aria-selected={sshMode === 'alias'}
-                  className={`gewu-btn gewu-btn--sm ${sshMode === 'alias' ? '' : 'gewu-btn--ghost'}`}
+                  className={`petri-btn petri-btn--sm ${sshMode === 'alias' ? '' : 'petri-btn--ghost'}`}
                   onClick={() => { setSshMode('alias'); setSshValidated(false); setCreateError(''); }}
                 >
                   别名连接
@@ -505,7 +505,7 @@ export default function Home(): React.ReactElement {
                   type="button"
                   role="tab"
                   aria-selected={sshMode === 'password'}
-                  className={`gewu-btn gewu-btn--sm ${sshMode === 'password' ? '' : 'gewu-btn--ghost'}`}
+                  className={`petri-btn petri-btn--sm ${sshMode === 'password' ? '' : 'petri-btn--ghost'}`}
                   onClick={() => { setSshMode('password'); setSshValidated(false); setCreateError(''); }}
                   title="密码只用于一次性安装本机公钥到服务器，之后免密连接；密码不会被保存"
                 >
@@ -586,7 +586,7 @@ export default function Home(): React.ReactElement {
                 aria-label="远程项目绝对路径"
               />
               <button
-                className="gewu-btn gewu-btn--sm"
+                className="petri-btn petri-btn--sm"
                 type="button"
                 onClick={() => void confirmCreateSsh()}
                 disabled={sshValidating || sshRegistering || creating || !sshRemotePath.trim() || (sshMode === 'alias' ? !sshAlias.trim() : (!sshIp.trim() || !sshPassword))}
@@ -595,14 +595,14 @@ export default function Home(): React.ReactElement {
                 {sshRegistering ? '连接主机中…' : sshValidating ? '校验中…' : sshMode === 'password' ? '连接并创建' : '校验并创建'}
               </button>
               <button
-                className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                className="petri-btn petri-btn--ghost petri-btn--sm"
                 type="button"
                 onClick={() => setSshOpen(false)}
                 disabled={sshValidating || sshRegistering || creating}
               >
                 取消
               </button>
-              {sshValidated && <span aria-live="polite" style={{ fontSize: 12, color: 'var(--gewu-status-success)' }}>路径有效</span>}
+              {sshValidated && <span aria-live="polite" style={{ fontSize: 12, color: 'var(--petri-status-success)' }}>路径有效</span>}
             </div>
           )}
           {/* UI-258 — 空白项目：只填名字创建，工作目录稍后在项目内设置/更换 */}
@@ -619,7 +619,7 @@ export default function Home(): React.ReactElement {
               aria-label="空白项目名称"
             />
             <button
-              className="gewu-btn gewu-btn--sm"
+              className="petri-btn petri-btn--sm"
               type="button"
               onClick={() => void createBlankProject()}
               disabled={creating}
@@ -730,7 +730,7 @@ export default function Home(): React.ReactElement {
       <div className={styles.homeState}>
         <Icon name="flag" size={18} />
         <span>项目列表加载失败</span>
-        <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={() => {
+        <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={() => {
           setStatus('loading');
           setLoadAttempt((value) => value + 1);
         }}>

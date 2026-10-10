@@ -1,12 +1,12 @@
 {
   "generatedAt": "2026-09-12T05:00:15.228Z",
   "block": "BLOCK-83-P4-PACK-SOURCE",
-  "packRoot": "D:\\1.WorkDir\\gewu-pack-bio",
-  "packId": "gewu-pack-bio",
+  "packRoot": "D:\\1.WorkDir\\petri-pack-bio",
+  "packId": "petri-pack-bio",
   "env": {
     "node": "v24.20.0",
-    "builtInSource": "C:\\Users\\Admin\\AppData\\Local\\Temp\\gewu-empty-builtin-s0i5Gd",
-    "installedSource": "D:\\1.WorkDir\\gewu-pack-bio\\plugins"
+    "builtInSource": "C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-empty-builtin-s0i5Gd",
+    "installedSource": "D:\\1.WorkDir\\petri-pack-bio\\plugins"
   },
   "totals": {
     "pass": 5,
@@ -34,12 +34,12 @@
     {
       "name": "P0_pack_manifest_present",
       "ok": true,
-      "detail": "gewu-pack-bio"
+      "detail": "petri-pack-bio"
     },
     {
       "name": "P1_plugins_load_from_pack",
       "ok": true,
-      "detail": "从包加载插件数=15（内置源=C:\\Users\\Admin\\AppData\\Local\\Temp\\gewu-empty-builtin-s0i5Gd 为空）"
+      "detail": "从包加载插件数=15（内置源=C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-empty-builtin-s0i5Gd 为空）"
     },
     {
       "name": "P1b_all_loaded_plugins_come_from_pack",

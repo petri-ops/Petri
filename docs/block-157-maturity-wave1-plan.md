@@ -55,7 +55,7 @@ status: completed
 
 **交付**：P1 KNW-1（`a3969190`）skill_discover/skill_get 投影静态面 76→78 + P2 KNW-2（`23ad1154`）agent-runner 技能索引常驻注入（有界/空清单零注入/源码扫描接线钉）+ P3 CAP-1（`5cd195d7`）mcp-projection 读 annotations.readOnlyHint 分级（只读→retrieval/none/R1，默认 D4 零漂移）+ P4 DIST-1（`4ef6d666`）installed enabled 标志+加载器尊重+plugin:set-enabled IPC+货架开关（UI-481）。
 
-**实机抓真修复**：插件目录跨进程拓扑脑裂（BLOCK-125 家族）——主进程装插件写 `$BIOF3_LOCAL_DATA_DIR/plugins` 而 core 后端只认 `BIOF3_PLUGINS_DIR || ~/Documents/BioF3-Local/plugins`，装了读不到（探针插件 catalog 缺席实证）；收敛=resolveInstalledPluginsDir 单源三点接线（`cd7c58ac`，未设 env 行为零变化）。
+**实机抓真修复**：插件目录跨进程拓扑脑裂（BLOCK-125 家族）——主进程装插件写 `$PETRI_LOCAL_DATA_DIR/plugins` 而 core 后端只认 `PETRI_PLUGINS_DIR || ~/Documents/Petri-Local/plugins`，装了读不到（探针插件 catalog 缺席实证）；收敛=resolveInstalledPluginsDir 单源三点接线（`cd7c58ac`，未设 env 行为零变化）。
 
 **波末三出口断言 ALL PASS**（acceptance/block-157/wave1-live.json，真实模型 deepseek 渠道，主代理代跑实机）：①read 档 agent 自主 skill_discover+skill_get 并引用 coding-playbook（transcript toolCalls 按名实锤）；②workspace-write 档调 readOnlyHint MCP 工具原样回流 `lookup: p53… (readonly)`；③探针插件 启用在场→停用+重启消失→启用+重启复现（停用即不注册/启用免重装，catalog 8→7→8）。临时项目/探针插件已清场复原（catalog 回 7 件 pack 域）。
 
@@ -65,6 +65,6 @@ status: completed
 
 **riders**：UI-481 插件启停开关 in_progress 待用户实机过目翻 verified；KNW-2 注入段的用户体感核验（技能索引在会话中的可见性）随日常使用观察。
 
-**加映（UI-481 过目抓真，同日）**：用户反馈「开关没看到」——CDP 探查实证用户货架插件面=**包交付插件行**（pack 体系；OSS 商店清单不可达→商店卡片为零），P4 主件的商店安装卡片开关在用户可见面缺席。加映交付**领域包整包启停**：packs/installed.json 记录级 enabled（缺省启用）+pack:set-enabled IPC+server.js 装配循环跳过停用包（插件源与 tool-registry 注册整体不生效）+包卡片「停用/启用」按钮（与卸载并列）。红 4→4/4 绿+面板 9/9+tsc 0+CDP 实机在场断言（pack-toggle-gewu-pack-bio 在场，acceptance/ui-481/pack-toggle-visible.png）；双通道语义=商店卡片开关治理 installed.json 安装源、包卡片开关治理 pack 安装源。测试钉=block157-pack-enabled（含 server 接线源码扫描守卫+IPC 双侧登记钉）。
+**加映（UI-481 过目抓真，同日）**：用户反馈「开关没看到」——CDP 探查实证用户货架插件面=**包交付插件行**（pack 体系；OSS 商店清单不可达→商店卡片为零），P4 主件的商店安装卡片开关在用户可见面缺席。加映交付**领域包整包启停**：packs/installed.json 记录级 enabled（缺省启用）+pack:set-enabled IPC+server.js 装配循环跳过停用包（插件源与 tool-registry 注册整体不生效）+包卡片「停用/启用」按钮（与卸载并列）。红 4→4/4 绿+面板 9/9+tsc 0+CDP 实机在场断言（pack-toggle-petri-pack-bio 在场，acceptance/ui-481/pack-toggle-visible.png）；双通道语义=商店卡片开关治理 installed.json 安装源、包卡片开关治理 pack 安装源。测试钉=block157-pack-enabled（含 server 接线源码扫描守卫+IPC 双侧登记钉）。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。

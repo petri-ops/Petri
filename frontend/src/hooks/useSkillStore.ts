@@ -3,7 +3,7 @@
  * filtering, and execution.
  *
  * Replaces scattered local-state caches across components that called
- * `window.biof3Desktop.skills.*` directly. Implements:
+ * `window.petriDesktop.skills.*` directly. Implements:
  * - Module-level cache with 5-minute TTL
  * - Subscriber fan-out for cross-component sync
  * - Optimistic execution updates

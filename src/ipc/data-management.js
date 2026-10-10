@@ -23,7 +23,7 @@ const BREAKDOWN_LABELS = {
   uploads: "上传文件",
   logs: "日志",
   tmp: "临时文件",
-  "biof3.db": "本地数据库",
+  "petri.db": "本地数据库",
   "ai-settings.json": "AI 配置",
 };
 
@@ -53,7 +53,7 @@ function setupDataManagementIpc() {
   // 返回数据目录路径 + 各子目录大小（runtimes / plugins / results / uploads / logs / db）
   ipcMain.handle(CHANNELS.data.info, async () => {
     try {
-      const dataDir = process.env.BIOF3_LOCAL_DATA_DIR;
+      const dataDir = process.env.PETRI_LOCAL_DATA_DIR;
       if (!dataDir) return { ok: false, error: "数据目录未配置" };
       const breakdown = {};
       const subdirs = [
@@ -68,11 +68,11 @@ function setupDataManagementIpc() {
         const subPath = path.join(dataDir, sub);
         if (fs.existsSync(subPath)) breakdown[sub] = getDirSize(subPath);
       }
-      // biof3.db 单独算
-      const dbPath = path.join(dataDir, "biof3.db");
+      // petri.db 单独算
+      const dbPath = path.join(dataDir, "petri.db");
       if (fs.existsSync(dbPath)) {
         try {
-          breakdown["biof3.db"] = fs.statSync(dbPath).size;
+          breakdown["petri.db"] = fs.statSync(dbPath).size;
         } catch {}
       }
       // ai-settings.json 等
@@ -96,7 +96,7 @@ function setupDataManagementIpc() {
   // 在系统文件管理器中打开数据目录
   ipcMain.handle(CHANNELS.data.openDir, async () => {
     try {
-      const dataDir = process.env.BIOF3_LOCAL_DATA_DIR;
+      const dataDir = process.env.PETRI_LOCAL_DATA_DIR;
       if (!dataDir) return { ok: false, error: "数据目录未配置" };
       if (!fs.existsSync(dataDir)) {
         fs.mkdirSync(dataDir, { recursive: true });

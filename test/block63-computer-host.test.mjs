@@ -18,7 +18,7 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const R_SERVER = path.resolve(__dirname, '..', 'core', 'biof3-server');
+const R_SERVER = path.resolve(__dirname, '..', 'core', 'petri-server');
 
 // 全量套件防挂 watchdog（对标 block48：sidecar stdio 受限环境可能挂起）
 setTimeout(() => {
@@ -27,17 +27,17 @@ setTimeout(() => {
 }, 180000).unref();
 const require = createRequire(import.meta.url);
 
-// 临时 DB 自举（存量基建同款：BIOF3_DB_PATH 须在 require db.js 前生效）
+// 临时 DB 自举（存量基建同款：PETRI_DB_PATH 须在 require db.js 前生效）
 {
   const Database = require(path.join(R_SERVER, 'node_modules', 'better-sqlite3'));
-  const tempDbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block63-host-db-'));
-  const boot = new Database(path.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block63-host-db-'));
+  const boot = new Database(path.join(tempDbDir, 'petri.db'));
   const migrationsDir = path.resolve(__dirname, '..', 'src', 'migrations');
   for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fs.readFileSync(path.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = path.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try { fs.rmSync(tempDbDir, { recursive: true, force: true }); } catch {}
   });
@@ -58,18 +58,18 @@ describe('托管：平台门与二进制定位（BLOCK-63）', () => {
   test('win32 默认定位指向 computer-use-windows 单文件发布且存在', () => {
     const p = defaultSidecarPath();
     if (process.platform === 'win32') {
-      assert.ok(p.endsWith('gewu-computer-use-windows.exe'), 'win32 应指向 .exe：' + p);
+      assert.ok(p.endsWith('petri-computer-use-windows.exe'), 'win32 应指向 .exe：' + p);
       assert.ok(fs.existsSync(p), 'sidecar 未构建：powershell sidecars/computer-use-windows/build.ps1');
     }
   });
 
-  test('env BIOF3_COMPUTER_USE_SIDECAR 覆盖优先', () => {
+  test('env PETRI_COMPUTER_USE_SIDECAR 覆盖优先', () => {
     const fake = path.join(os.tmpdir(), 'fake-sidecar.exe');
-    process.env.BIOF3_COMPUTER_USE_SIDECAR = fake;
+    process.env.PETRI_COMPUTER_USE_SIDECAR = fake;
     try {
       assert.equal(defaultSidecarPath(), fake);
     } finally {
-      delete process.env.BIOF3_COMPUTER_USE_SIDECAR;
+      delete process.env.PETRI_COMPUTER_USE_SIDECAR;
     }
   });
 

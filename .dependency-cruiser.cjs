@@ -8,7 +8,7 @@
  *   R3 后端（core/）禁止 import Electron 主进程（src/）——core 由独立 node 进程
  *      运行，反向依赖即架构破坏；
  *   R4 前端禁止 import 后端源码（core/）——前后端边界是 REST/API，不是源码共享；
- *   R5 Electron 主进程（src/）禁止 import 后端实现（core/biof3-server/**）——
+ *   R5 Electron 主进程（src/）禁止 import 后端实现（core/petri-server/**）——
  *      后端生命周期由 backend-proc-manager 独立管理（单后端收敛 BLOCK-30 承诺）。
  * D4 裁决：先 report-only 一轮清误报，然后 blocked 转门禁（npm run quality:arch）。
  */
@@ -37,7 +37,7 @@ module.exports = {
     },
     {
       name: 'R4-frontend-no-backend-source',
-      comment: '前后端边界是 REST/API，前端禁止 import 后端实现（core/biof3-server）；core/packages/** 是前后端共享层，合法。',
+      comment: '前后端边界是 REST/API，前端禁止 import 后端实现（core/petri-server）；core/packages/** 是前后端共享层，合法。',
       severity: 'error',
       from: { path: '^frontend/src' },
       to: { path: '^core', pathNot: ['core/packages/'] },
@@ -47,7 +47,7 @@ module.exports = {
       comment: '后端生命周期归 backend-proc-manager，主进程禁止 import 后端实现',
       severity: 'error',
       from: { path: '^src' },
-      to: { path: '^core/biof3-server' },
+      to: { path: '^core/petri-server' },
     },
   ],
   options: {

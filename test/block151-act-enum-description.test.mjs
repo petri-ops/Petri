@@ -24,22 +24,22 @@ const require = createRequire(import.meta.url);
 // 内存 DB 自举（act-tools/plan-ui-tools 顶层 require ../db，同 block109 先例）
 {
   const Database = require('better-sqlite3');
-  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'biof3-b151-act-desc-'));
-  const db = new Database(path.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'petri-b151-act-desc-'));
+  const db = new Database(path.join(tempDbDir, 'petri.db'));
   const migrationsDir = path.join(root, 'src', 'migrations');
   for (const file of fssync.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     db.exec(fssync.readFileSync(path.join(migrationsDir, file), 'utf8'));
   }
   db.close();
-  process.env.BIOF3_DB_PATH = path.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try { fssync.rmSync(tempDbDir, { recursive: true, force: true }); } catch { /* Windows 句柄延迟释放 */ }
   });
 }
 
-const browserDefs = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'tool-defs', 'browser.js'));
-const actTools = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'act-tools.js'));
-const planUiTools = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'plan-ui-tools.js'));
+const browserDefs = require(path.join(root, 'core', 'petri-server', 'agent-tools', 'tool-defs', 'browser.js'));
+const actTools = require(path.join(root, 'core', 'petri-server', 'agent-tools', 'act-tools.js'));
+const planUiTools = require(path.join(root, 'core', 'petri-server', 'agent-tools', 'plan-ui-tools.js'));
 
 const actDef = browserDefs.find((d) => d.function && d.function.name === 'act');
 const actEnum = actDef.function.parameters.properties.type.enum;

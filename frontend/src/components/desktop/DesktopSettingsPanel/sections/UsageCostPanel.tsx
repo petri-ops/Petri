@@ -67,8 +67,8 @@ export function UsageCostPanel(): React.ReactElement {
     : '';
 
   return (
-    <div className="gewu-usage-resource">
-      <div className="gewu-resource-heading">
+    <div className="petri-usage-resource">
+      <div className="petri-resource-heading">
         <div>
           <strong>模型用量与成本（近 30 天）</strong>
           <p>
@@ -78,12 +78,12 @@ export function UsageCostPanel(): React.ReactElement {
         </div>
       </div>
       {error ? (
-        <p className="gewu-field__hint">{error}</p>
+        <p className="petri-field__hint">{error}</p>
       ) : !data ? (
-        <p className="gewu-field__hint">加载中…</p>
+        <p className="petri-field__hint">加载中…</p>
       ) : (
         <>
-          <div className="gewu-metric-grid">
+          <div className="petri-metric-grid">
             <div>
               <small>调用次数</small>
               <strong>{data.calls ?? 0}</strong>
@@ -106,8 +106,8 @@ export function UsageCostPanel(): React.ReactElement {
           </div>
           {Array.isArray(data.models) && data.models.length > 0 && (
             <div style={{ marginTop: 10 }}>
-              <small style={{ color: 'var(--gewu-text-tertiary)' }}>按模型（TOP 20）</small>
-              <div className="gewu-metric-grid" style={{ marginTop: 4 }}>
+              <small style={{ color: 'var(--petri-text-tertiary)' }}>按模型（TOP 20）</small>
+              <div className="petri-metric-grid" style={{ marginTop: 4 }}>
                 {data.models.map((row) => (
                   <div key={row.model}>
                     <small>{row.model} · {row.calls} 次</small>

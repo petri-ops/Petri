@@ -29,7 +29,7 @@
 
 **已完成**：
 - P0 评审 confirmed（R6 交接班=双通道：proactive 任务条 + agent 会话注入）
-- P1 驻留创建链：`resident_task_create/list/read` 三工具三层注册 + 意图卡 `.gewu/resident/<taskId>.json`（契约测试 3/3）
+- P1 驻留创建链：`resident_task_create/list/read` 三工具三层注册 + 意图卡 `.petri/resident/<taskId>.json`（契约测试 3/3）
 - P2 回访循环 `resident-revisit.js`：60s 可配，进程存活/.exit/日志增长三检查，completed/failed 翻转 + notify 异常与完成通知；实机探针验证（dell 死 pid 卡正确翻转 failed）
 - P3 provenance 平移（captureREnv 服务器 R 包清单）+ 聊天终态远程化 + 交接班双通道 B（agent-runner systemPrompt 注入）
 
@@ -43,13 +43,13 @@
 
 - **BLOCK-78/79**：并行会话完成（本会话未触碰），均 completed + verified
 - **🟢 清债**：前端全量 vitest 974/974 首次全绿（4 项修复，AUDIT-LOG 三条 🟢 闭环）
-- **SKILL 沉淀**：`gewu-dev-infra/SKILL.md` 新增「Windows/中文实机脚本纪律」6 条规则
+- **SKILL 沉淀**：`petri-dev-infra/SKILL.md` 新增「Windows/中文实机脚本纪律」6 条规则
 
 ## 二、关键技术决策与教训
 
 | 决策/教训 | 详情 |
 |---|---|
-| 意图卡文件形态 | `.gewu/resident/<taskId>.json`，与本地项目 results/jobs 同构（R1 用户裁决） |
+| 意图卡文件形态 | `.petri/resident/<taskId>.json`，与本地项目 results/jobs 同构（R1 用户裁决） |
 | 交接班双通道 | A: proactive 任务条；B: agent 会话 systemPrompt 注入 digest（R6 用户裁决） |
 | MAX_ARG_STRLEN | Linux 单参数 128KB，gateway 名义 1MB 载荷 >98KB 即 E2BIG，全链 64KB 分块 |
 | Windows argv 32KB | thin per-call 大参数 ENAMETOOLONG，mux stdin 是唯一通道 |
@@ -79,10 +79,10 @@
 
 | 文件 | 用途 |
 |---|---|
-| `core/biof3-server/helpers/remote-execution/ssh-direct-runner.js` | 直跑执行器 |
-| `core/biof3-server/helpers/remote-execution/job-output-reader.js` | 产物统一读取器 |
-| `core/biof3-server/helpers/remote-execution/resident-revisit.js` | 回访循环 + 交接班摘要 |
-| `core/biof3-server/agent-tools/workspace-ssh-surface.js` | ssh surface（驻留创建 + 传输重试） |
+| `core/petri-server/helpers/remote-execution/ssh-direct-runner.js` | 直跑执行器 |
+| `core/petri-server/helpers/remote-execution/job-output-reader.js` | 产物统一读取器 |
+| `core/petri-server/helpers/remote-execution/resident-revisit.js` | 回访循环 + 交接班摘要 |
+| `core/petri-server/agent-tools/workspace-ssh-surface.js` | ssh surface（驻留创建 + 传输重试） |
 | `scripts/block77-p4-live.cjs` | P4 全链验收脚本（aliyun 版，两阶段） |
 | `scripts/lib-block75-os.cjs` | EnumWindows 窗口定位（BLOCK-75 遗产） |
 | `test/block77-resident-tasks.test.mjs` | 驻留工具定义契约测试 |

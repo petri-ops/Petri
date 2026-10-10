@@ -30,9 +30,9 @@ function validateRegisterInput({ ip, port, username, password }) {
   return null;
 }
 
-/** 别名生成：gewu-<ip 点换划线>[-端口非 22 时追加]。 */
+/** 别名生成：petri-<ip 点换划线>[-端口非 22 时追加]。 */
 function generateAlias(ip, port) {
-  const base = `gewu-${String(ip).replace(/[^\w]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "")}`;
+  const base = `petri-${String(ip).replace(/[^\w]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "")}`;
   return Number(port) === 22 ? base : `${base}-${port}`;
 }
 

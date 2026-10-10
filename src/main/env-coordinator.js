@@ -7,8 +7,8 @@
 // Original location: src/main.js ~line 368 (setupDesktopEnv).
 //
 // Phases of setupDesktopEnv (716 lines originally):
-//   1. ENV injection (BIOF3_DESKTOP / SITE_DIR / user data dirs)
-//   2. Directory creation (8 subdirectories under BIOF3_LOCAL_DATA_DIR)
+//   1. ENV injection (PETRI_DESKTOP / SITE_DIR / user data dirs)
+//   2. Directory creation (8 subdirectories under PETRI_LOCAL_DATA_DIR)
 //   3. R/Python runtime resolution (3-tier priority)
 //   4. Backend ports env injection (process.env.R_SERVER_PORT etc.)
 //   5. Trusted renderer origins (CSP allowlist)
@@ -53,7 +53,7 @@ function resolveResource(...parts) {
 
 // rendererDevUrl — main.js:71-72
 const rendererDevUrl =
-  process.env.BIOF3_RENDERER_DEV_URL || "http://localhost:3000";
+  process.env.PETRI_RENDERER_DEV_URL || "http://localhost:3000";
 
 // Re-define runtime resolution helpers here for self-containment:
 // resolveRuntime + _detectSystemR + _detectSystemPython are
@@ -160,8 +160,8 @@ function resolveRuntimeLocal(lang, userDataDir) {
 // A-009 single source of truth for backend ports.
 //
 // All port fallback values used to be scattered across:
-//   core/biof3-server/server.js:130            (R_SERVER_PORT || 3003)
-//   core/biof3-server/config.js:23             (R_SERVER_PORT || '3003')
+//   core/petri-server/server.js:130            (R_SERVER_PORT || 3003)
+//   core/petri-server/config.js:23             (R_SERVER_PORT || '3003')
 //   src/preload.js:67-68                   (R_SERVER_PORT || 3001；PY_SERVER_PORT 随 BLOCK-30 摘除)
 //   src/backend-health.js:13-16            (4 separate defaults)
 //
@@ -170,7 +170,7 @@ function resolveRuntimeLocal(lang, userDataDir) {
 // 3003 vs 3005). When the Electron main process is running,
 // setupDesktopEnv() sets R_SERVER_PORT（BLOCK-30 起 py-server/gateway 已摘除，
 // BLOCK-51 P3 起 plumber 已摘除）on process.env before any of these modules reads
-// it, so the fallback is unreachable. When the biof3-server / py-server
+// it, so the fallback is unreachable. When the petri-server / py-server
 // is launched as a standalone child process (without Electron's main),
 // env-coordinator is *not* running and the fallback kicks in.
 //
@@ -181,7 +181,7 @@ function resolveRuntimeLocal(lang, userDataDir) {
 //   r       → 3001  (matches preload.js / backend-health.js historical default)
 //   python  → 3004  (matches preload.js / backend-health.js historical default)
 //
-// 3003 was the legacy biof3-server default (server.js / config.js); the
+// 3003 was the legacy petri-server default (server.js / config.js); the
 // Electron main process always overwrites R_SERVER_PORT before these
 // readers execute, so the historical 3003 was never reachable in dev
 // Electron. The new canonical default is 3001, which matches what
@@ -209,7 +209,7 @@ function getBackendPorts() {
 }
 
 /**
- * 计算注入给子进程（biof3-server）的 BIOF3_TRUSTED_DESKTOP_ORIGINS 白名单。
+ * 计算注入给子进程（petri-server）的 PETRI_TRUSTED_DESKTOP_ORIGINS 白名单。
  *
  * 这个集合是后端的 CORS / untrusted-origin 判据（消费方：
  * core/shared-backend/local-request-boundary.js）。CORS 按精确 origin 匹配，
@@ -254,27 +254,27 @@ function computeTrustedRendererOrigins({ existing, isDev, rendererDevUrl, render
 }
 
 function setupDesktopEnv(backendPorts) {
-  process.env.BIOF3_DESKTOP = "1";
-  process.env.BIOF3_SITE_DIR = resolveResource("build");
+  process.env.PETRI_DESKTOP = "1";
+  process.env.PETRI_SITE_DIR = resolveResource("build");
 
   // 用户数据目录（先确定，resolveRuntime 要用）
   const userDataDir =
-    process.env.BIOF3_LOCAL_DATA_DIR ||
+    process.env.PETRI_LOCAL_DATA_DIR ||
     path.join(app.getPath("documents"), resolveLocalDirName(app));
-  process.env.BIOF3_LOCAL_DATA_DIR = userDataDir;
-  process.env.BIOF3_LOCAL_RESULTS_DIR = path.join(userDataDir, "results");
-  process.env.BIOF3_LOCAL_UPLOADS_DIR = path.join(userDataDir, "uploads");
-  process.env.BIOF3_TEMP_DIR = path.join(userDataDir, "tmp");
-  process.env.BIOF3_PY_TEMP_DIR = path.join(userDataDir, "tmp", "py");
-  process.env.BIOF3_DB_PATH = path.join(userDataDir, "biof3.db");
+  process.env.PETRI_LOCAL_DATA_DIR = userDataDir;
+  process.env.PETRI_LOCAL_RESULTS_DIR = path.join(userDataDir, "results");
+  process.env.PETRI_LOCAL_UPLOADS_DIR = path.join(userDataDir, "uploads");
+  process.env.PETRI_TEMP_DIR = path.join(userDataDir, "tmp");
+  process.env.PETRI_PY_TEMP_DIR = path.join(userDataDir, "tmp", "py");
+  process.env.PETRI_DB_PATH = path.join(userDataDir, "petri.db");
 
   // 确保目录存在
   for (const dir of [
     userDataDir,
-    process.env.BIOF3_LOCAL_RESULTS_DIR,
-    process.env.BIOF3_LOCAL_UPLOADS_DIR,
-    process.env.BIOF3_TEMP_DIR,
-    process.env.BIOF3_PY_TEMP_DIR,
+    process.env.PETRI_LOCAL_RESULTS_DIR,
+    process.env.PETRI_LOCAL_UPLOADS_DIR,
+    process.env.PETRI_TEMP_DIR,
+    process.env.PETRI_PY_TEMP_DIR,
     path.join(userDataDir, "plugins"),
     path.join(userDataDir, "runtimes"),
     path.join(userDataDir, "logs"),
@@ -300,7 +300,7 @@ function setupDesktopEnv(backendPorts) {
   })();
   const rHome = resolveRuntimeLocal("r", userDataDir);
   if (rHome) {
-    process.env.BIOF3_R_HOME = rHome;
+    process.env.PETRI_R_HOME = rHome;
     console.log("[desktop] R runtime:", rHome);
   } else if (packRequiresRuntimes) {
     console.warn(
@@ -312,7 +312,7 @@ function setupDesktopEnv(backendPorts) {
 
   const pyHome = resolveRuntimeLocal("python", userDataDir);
   if (pyHome) {
-    process.env.BIOF3_PY_HOME = pyHome;
+    process.env.PETRI_PY_HOME = pyHome;
     console.log("[desktop] Python runtime:", pyHome);
   } else if (packRequiresRuntimes) {
     console.warn(
@@ -325,19 +325,19 @@ function setupDesktopEnv(backendPorts) {
   process.env.R_SERVER_PORT = String(backendPorts.r);
   process.env.R_SERVER_URL = `http://127.0.0.1:${backendPorts.r}`;
   if (backendPorts.renderer) {
-    process.env.BIOF3_RENDERER_PORT = String(backendPorts.renderer);
-    process.env.BIOF3_RENDERER_ORIGIN = `http://localhost:${backendPorts.renderer}`;
+    process.env.PETRI_RENDERER_PORT = String(backendPorts.renderer);
+    process.env.PETRI_RENDERER_ORIGIN = `http://localhost:${backendPorts.renderer}`;
   }
   const trustedRendererOrigins = computeTrustedRendererOrigins({
-    existing: process.env.BIOF3_TRUSTED_DESKTOP_ORIGINS,
+    existing: process.env.PETRI_TRUSTED_DESKTOP_ORIGINS,
     isDev: isDevModeLocal(),
     rendererDevUrl,
     rendererPort: backendPorts.renderer,
   });
-  process.env.BIOF3_TRUSTED_DESKTOP_ORIGINS = [...trustedRendererOrigins].join(",");
+  process.env.PETRI_TRUSTED_DESKTOP_ORIGINS = [...trustedRendererOrigins].join(",");
   // Child servers run in separate Node processes and cannot see Electron's
   // in-memory plugin registry. Give them the exact packaged/dev built-in root
-  process.env.BIOF3_BUILT_IN_PLUGINS_DIR = getBuiltInPluginsDir({
+  process.env.PETRI_BUILT_IN_PLUGINS_DIR = getBuiltInPluginsDir({
     isPackaged: !isDevModeLocal(),
     projectRoot: getProjectRootLocal(),
     resourcesPath: process.resourcesPath,

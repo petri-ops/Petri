@@ -50,7 +50,7 @@ test('BLOCK-157 加映 setPackEnabled：翻转持久化 + 未知包诚实失败 
 });
 
 test('BLOCK-157 加映 接线钉：server.js 装配循环必须尊重停用包（源码扫描守卫）', () => {
-  const src = fs.readFileSync(path.join(ROOT, 'core/biof3-server/server.js'), 'utf8');
+  const src = fs.readFileSync(path.join(ROOT, 'core/petri-server/server.js'), 'utf8');
   assert.match(src, /readInstalledPacks/, 'server.js 应读已装包记录');
   assert.match(src, /enabled === false/, '装配循环应跳过 enabled === false 的包（停用即不注册该包插件源）');
 });

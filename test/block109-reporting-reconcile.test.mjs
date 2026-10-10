@@ -19,19 +19,19 @@ const root = path.resolve(here, '..');
 const require = createRequire(import.meta.url);
 
 const runnerSrc = require('node:fs').readFileSync(
-  path.join(root, 'core', 'biof3-server', 'agent-runner.js'), 'utf8'
+  path.join(root, 'core', 'petri-server', 'agent-runner.js'), 'utf8'
 );
 const { detectAutoPlanIntent, latestUserText } = require(
-  path.join(root, 'core', 'biof3-server', 'helpers', 'plan-intent.js')
+  path.join(root, 'core', 'petri-server', 'helpers', 'plan-intent.js')
 );
 const { computeReconciliationNotice } = require(
-  path.join(root, 'core', 'biof3-server', 'helpers', 'agent-reconciliation.js')
+  path.join(root, 'core', 'petri-server', 'helpers', 'agent-reconciliation.js')
 );
 
 // ---------- 包一：汇报收敛 ----------
 
 test('包一 汇报收敛 — spawn_agent 工具描述携带父侧汇报契约', () => {
-  const defs = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'tool-defs', 'agent-orchestration.js'));
+  const defs = require(path.join(root, 'core', 'petri-server', 'agent-tools', 'tool-defs', 'agent-orchestration.js'));
   const spawn = defs.find((d) => d.function && d.function.name === 'spawn_agent');
   assert.ok(spawn, 'spawn_agent 定义在位');
   assert.match(spawn.function.description, /汇报契约/);

@@ -432,7 +432,7 @@ test('P6 real-drift verdict requires every independent fail-closed boundary', ()
 test('P6 restart prototype executes the real SIGKILL and two cold boots when explicitly requested', {
   concurrency: false,
   timeout: 6 * 60 * 1000,
-  skip: process.env.BIOF3_RUN_P6_REAL_RESTART !== '1',
+  skip: process.env.PETRI_RUN_P6_REAL_RESTART !== '1',
 }, async () => {
   const result = await captureP6RealRestartPrototype();
   assert.equal(result.passed, true, JSON.stringify(result.checks));
@@ -444,7 +444,7 @@ test('P6 restart prototype executes the real SIGKILL and two cold boots when exp
 test('P6 user-stop prototype exercises the real cancel route when explicitly requested', {
   concurrency: false,
   timeout: 6 * 60 * 1000,
-  skip: process.env.BIOF3_RUN_P6_REAL_STOP !== '1',
+  skip: process.env.PETRI_RUN_P6_REAL_STOP !== '1',
 }, async () => {
   const result = await captureP6RealStopPrototype();
   assert.equal(result.passed, true, JSON.stringify(result));
@@ -456,7 +456,7 @@ test('P6 user-stop prototype exercises the real cancel route when explicitly req
 test('P6 failure prototype exercises a real R failure and a real validator block when explicitly requested', {
   concurrency: false,
   timeout: 6 * 60 * 1000,
-  skip: process.env.BIOF3_RUN_P6_REAL_FAILURE !== '1',
+  skip: process.env.PETRI_RUN_P6_REAL_FAILURE !== '1',
 }, async () => {
   const result = await captureP6RealFailurePrototype();
   assert.equal(result.passed, true, JSON.stringify(result));
@@ -468,7 +468,7 @@ test('P6 failure prototype exercises a real R failure and a real validator block
 test('P6 drift prototype exercises real Artifact/ref/script/plugin/selection boundaries when explicitly requested', {
   concurrency: false,
   timeout: 8 * 60 * 1000,
-  skip: process.env.BIOF3_RUN_P6_REAL_DRIFT !== '1',
+  skip: process.env.PETRI_RUN_P6_REAL_DRIFT !== '1',
 }, async () => {
   const result = await captureP6RealDriftPrototype();
   assert.equal(result.passed, true, JSON.stringify(result));

@@ -13,17 +13,17 @@ const fs = require('node:fs');
 const crypto = require('node:crypto');
 
 const ROOT = path.join(__dirname, '..');
-const DEV_DB = path.join(ROOT, '.biof3-dev-user-data', 'data', 'biof3.db');
-process.env.BIOF3_DB_PATH = DEV_DB;
-process.env.BIOF3_LOCAL_DATA_DIR = path.join(ROOT, '.biof3-dev-user-data', 'data');
-process.env.BIOF3_BETTER_SQLITE3_ROOT = path.join(ROOT, 'core', 'biof3-server', 'node_modules');
+const DEV_DB = path.join(ROOT, '.petri-dev-user-data', 'data', 'petri.db');
+process.env.PETRI_DB_PATH = DEV_DB;
+process.env.PETRI_LOCAL_DATA_DIR = path.join(ROOT, '.petri-dev-user-data', 'data');
+process.env.PETRI_BETTER_SQLITE3_ROOT = path.join(ROOT, 'core', 'petri-server', 'node_modules');
 
-const learning = require(ROOT + '/core/biof3-server/agent-tools/learning');
-const Database = require(ROOT + '/core/biof3-server/node_modules/better-sqlite3');
+const learning = require(ROOT + '/core/petri-server/agent-tools/learning');
+const Database = require(ROOT + '/core/petri-server/node_modules/better-sqlite3');
 
 const PROJECT_ID = 'p_mtlnsv0f_xpjb';
 const CONV_ID = 'conv_05dc94bc-561';
-const PROJECT_DIR = path.join(ROOT, '.biof3-dev-user-data', 'data', 'projects', 'block52-p3-09031507-mtlnsv0f');
+const PROJECT_DIR = path.join(ROOT, '.petri-dev-user-data', 'data', 'projects', 'block52-p3-09031507-mtlnsv0f');
 const INPUTS = {
   counts: path.join(PROJECT_DIR, 'inputs', 'counts.csv'),
   metadata: path.join(PROJECT_DIR, 'inputs', 'coldata.csv'),
@@ -41,7 +41,7 @@ function sha256(file) {
 }
 
 const BUNDLE_FILES = new Set([
-  'run-script.R', 'run-script.py', 'params.json', '_biof3-theme.R',
+  'run-script.R', 'run-script.py', 'params.json', '_petri-theme.R',
   'report-template.html', 'state.json', 'exit.json', 'transfer-manifest.json',
   'provenance.json', 'remote-runner.log',
 ]);
@@ -154,7 +154,7 @@ async function runOnce(label, executionTargetId, db) {
       },
       local: {
         rVersion: B.executionTarget && B.executionTarget.runtime && B.executionTarget.runtime.version,
-        note: '本机（macOS，BioF3 内嵌 R）',
+        note: '本机（macOS，Petri 内嵌 R）',
       },
     },
     perFile: compare,

@@ -21,7 +21,7 @@ const { spawn, execFileSync } = require('node:child_process');
 const { createInterface } = require('node:readline');
 
 const ROOT = path.join(__dirname, '..');
-const BINARY = path.join(ROOT, 'sidecars', 'computer-use', 'bin', 'gewu-computer-use');
+const BINARY = path.join(ROOT, 'sidecars', 'computer-use', 'bin', 'petri-computer-use');
 const EVIDENCE_DIR = path.join(ROOT, 'acceptance', 'block-48');
 
 let child = null;

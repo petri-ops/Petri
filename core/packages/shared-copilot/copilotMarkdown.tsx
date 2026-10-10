@@ -9,7 +9,7 @@
 //   - http/https links keep target=_blank; mailto keeps target=_blank;
 //   - same-origin / relative links are kept (react-router picks them up);
 //   - javascript:, data:, file:, vbscript: and unknown protocols are dropped;
-//   - biof3://artifact|workspace URIs dispatch the typed onFileReferenceClick
+//   - petri://artifact|workspace URIs dispatch the typed onFileReferenceClick
 //     callback (or onLinkClick for legacy callers).
 // ============================================================
 
@@ -489,8 +489,8 @@ function buildInternalReference(
 }
 
 /**
- * Auto-link raw biof3:// URIs that aren't already wrapped in a markdown link.
- * Without this, references like  "see biof3://artifact/JOB/deg.csv" wouldn't
+ * Auto-link raw petri:// URIs that aren't already wrapped in a markdown link.
+ * Without this, references like  "see petri://artifact/JOB/deg.csv" wouldn't
  * be clickable. Everything else (http/https) is left for the user to wrap
  * explicitly to avoid accidentally promoting raw URLs in prose.
  */
@@ -525,7 +525,7 @@ function renderAutolinks(
       <FileReferenceLink
         key={`${keyPrefix}-auto-${counter++}`}
         raw={next.raw}
-        label={next.raw.startsWith('biof3://') ? displayLabelForUri(next.raw) : next.raw}
+        label={next.raw.startsWith('petri://') ? displayLabelForUri(next.raw) : next.raw}
         kind={next.resolved.kind}
         resolved={{ raw: next.raw, kind: next.resolved.kind, resolved: next.resolved }}
         onFileReferenceClick={options.onFileReferenceClick}
@@ -541,14 +541,14 @@ function renderAutolinks(
 }
 
 function displayLabelForUri(uri: string): string {
-  // biof3://artifact/<jobId>/<filename> -> <filename>
-  // biof3://workspace/<projectId>/<relpath...> -> relpath basename
-  const artifactMatch = uri.match(/^biof3:\/\/artifact\/[^/]+\/(.+)$/i);
+  // petri://artifact/<jobId>/<filename> -> <filename>
+  // petri://workspace/<projectId>/<relpath...> -> relpath basename
+  const artifactMatch = uri.match(/^petri:\/\/artifact\/[^/]+\/(.+)$/i);
   if (artifactMatch) {
     const tail = decodeURIComponent(artifactMatch[1]);
     return tail.split('/').pop() || tail;
   }
-  const workspaceMatch = uri.match(/^biof3:\/\/workspace\/[^/]+\/(.+)$/i);
+  const workspaceMatch = uri.match(/^petri:\/\/workspace\/[^/]+\/(.+)$/i);
   if (workspaceMatch) {
     const tail = decodeURIComponent(workspaceMatch[1]);
     return tail.split('/').pop() || tail;
@@ -878,7 +878,7 @@ function syntheticInternalUri(
   if (resolved.kind === 'artifact') {
     const artifactName = resolved.artifactName || resolved.name;
     if (!resolved.jobId || !artifactName) return null;
-    return `biof3://artifact/${encodeURIComponent(resolved.jobId)}/${artifactName
+    return `petri://artifact/${encodeURIComponent(resolved.jobId)}/${artifactName
       .split('/')
       .map((part) => encodeURIComponent(part))
       .join('/')}`;
@@ -889,7 +889,7 @@ function syntheticInternalUri(
       .split('/')
       .map((part) => encodeURIComponent(part))
       .join('/');
-    return `biof3://workspace/${encodeURIComponent(resolved.projectId)}/${tail}`;
+    return `petri://workspace/${encodeURIComponent(resolved.projectId)}/${tail}`;
   }
   return null;
 }

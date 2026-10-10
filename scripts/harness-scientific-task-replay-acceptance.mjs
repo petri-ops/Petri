@@ -18,7 +18,7 @@ const {
 const { sourceMessageDigest, stableStringify } = require('../core/shared-backend/scientific-task-spec');
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-hrt6-acceptance-'));
+const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-hrt6-acceptance-'));
 
 function sha256(value) {
   return crypto.createHash('sha256').update(value).digest('hex');
@@ -26,8 +26,8 @@ function sha256(value) {
 
 function findRscript() {
   const candidates = [
-    process.env.BIOF3_R_HOME ? path.join(process.env.BIOF3_R_HOME, 'bin', 'Rscript') : null,
-    path.join(os.homedir(), 'Documents', 'BioF3-Local', 'runtimes', 'R', 'bin', 'Rscript'),
+    process.env.PETRI_R_HOME ? path.join(process.env.PETRI_R_HOME, 'bin', 'Rscript') : null,
+    path.join(os.homedir(), 'Documents', 'Petri-Local', 'runtimes', 'R', 'bin', 'Rscript'),
     '/usr/local/bin/Rscript',
     '/opt/homebrew/bin/Rscript',
     '/usr/bin/Rscript',

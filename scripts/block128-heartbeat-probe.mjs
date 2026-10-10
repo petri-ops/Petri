@@ -34,7 +34,7 @@ async function main() {
   // 项目 + 大输入
   const created = await rest('POST', '/api/data/projects', { name: `block128-hb-${Date.now().toString(36)}`, modality: 'bulk' });
   const projectId = (created.project || created).id;
-  const inputsDir = path.join(ROOT, '.biof3-dev-user-data', 'data', 'projects', projectId, 'inputs');
+  const inputsDir = path.join(ROOT, '.petri-dev-user-data', 'data', 'projects', projectId, 'inputs');
   fs.mkdirSync(inputsDir, { recursive: true });
   fs.copyFileSync('/tmp/big-counts.csv', path.join(inputsDir, 'counts.csv'));
   fs.copyFileSync('/tmp/big-coldata.csv', path.join(inputsDir, 'coldata.csv'));
@@ -48,7 +48,7 @@ async function main() {
 
   const { db } = (() => {
     const Database2 = Database;
-    return { db: new Database2(path.join(ROOT, '.biof3-dev-user-data', 'data', 'biof3.db'), { readonly: true }) };
+    return { db: new Database2(path.join(ROOT, '.petri-dev-user-data', 'data', 'petri.db'), { readonly: true }) };
   })();
 
   // chat MCP 链发起

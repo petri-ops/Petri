@@ -1,4 +1,4 @@
-# BioF3 项目与文档生命周期规范
+# Petri 项目与文档生命周期规范
 
 最后更新：2026-08-16
 
@@ -14,7 +14,7 @@
 
 1. `AGENTS.md`：规定强制触发点和不可绕过边界。
 2. `docs/`：保存人可读的 canonical 事实与完整规则。
-3. `$gewu-project-governance`：规定 Agent 的执行顺序。
+3. `$petri-project-governance`：规定 Agent 的执行顺序。
 4. `scripts/docs-governance.mjs`：提供确定性的注册、覆盖和冲突门禁。
 
 文档只能解释和索引事实，不能把未通过的代码、科学结果、UI 或资格状态写成通过。
@@ -168,7 +168,7 @@ JSON 输出模式，与既有 `--status` / `--check` / `--reconcile` / `--json` 
 
 - canonical schema 索引：[`docs/schemas/README.md`](./schemas/README.md)
 - 计划：[`docs/doc-governance-gates-plan.md` §2 GATES-2](./doc-governance-gates-plan.md)
-- skill：`$gewu-project-governance` 的"Run the deterministic controls"
+- skill：`$petri-project-governance` 的"Run the deterministic controls"
 - 退出码定义：本文件 §4.5
 
 ## 4. 生命周期

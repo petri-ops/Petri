@@ -11,7 +11,7 @@
    - The image is constrained to the card body width with
      `max-width: 100%` so it can never horizontally overflow
      the ResultCard chrome.
-   - Uses --gewu-* design tokens (same family as ResultCard +
+   - Uses --petri-* design tokens (same family as ResultCard +
      TableRenderer + ChartRenderer) for caption color, fallback
      bg/border, and error boundary.
    - caption is muted and small so the chrome title still
@@ -37,15 +37,15 @@
      remains intact for both landscape and portrait payloads. */
   max-width: 100%;
   border-radius: 6px;
-  background: var(--gewu-bg-subtle);
-  border: 1px solid var(--gewu-border);
+  background: var(--petri-bg-subtle);
+  border: 1px solid var(--petri-border);
 }
 
 .caption {
   margin: 0;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   line-height: 1.4;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   /* Allow long captions to wrap naturally inside the card body. */
   word-break: break-word;
 }
@@ -53,12 +53,12 @@
 .fallback {
   margin: 0;
   padding: 8px 10px;
-  border: 1px dashed var(--gewu-border);
+  border: 1px dashed var(--petri-border);
   border-radius: 6px;
-  background: var(--gewu-bg-subtle);
-  color: var(--gewu-text-secondary);
-  font-family: var(--gewu-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
-  font-size: var(--gewu-font-size-sm);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-secondary);
+  font-family: var(--petri-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: var(--petri-font-size-sm);
   line-height: 1.45;
   overflow-x: auto;
   white-space: pre;
@@ -66,8 +66,8 @@
 
 .fallbackNote {
   margin: 0 0 6px;
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-tertiary);
-  font-family: var(--gewu-font-sans, inherit);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-tertiary);
+  font-family: var(--petri-font-sans, inherit);
   font-style: normal;
 }

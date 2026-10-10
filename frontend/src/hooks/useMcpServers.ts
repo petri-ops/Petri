@@ -1,7 +1,7 @@
 /**
  * useMcpServers — MCP 服务货架状态 hook（BLOCK-156 P2）。
  *
- * 数据面走后端 HTTP（/api/mcp/servers*）：MCP 连接住在 biof3-server 进程
+ * 数据面走后端 HTTP（/api/mcp/servers*）：MCP 连接住在 petri-server 进程
  * （与 agent 工具执行同进程，P3 投影前提），不走 desktopBridge IPC。
  * 后端缺位（老栈/未起）=空清单 + 一次性 error，不阻塞货架渲染。
  */

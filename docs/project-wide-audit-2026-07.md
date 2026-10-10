@@ -1,4 +1,4 @@
-# BioF3 Desktop 全项目横切审计（2026-07-27）
+# Petri Desktop 全项目横切审计（2026-07-27）
 
 规范编号：`AUDIT-PROJECT-WIDE-2026-07`
 

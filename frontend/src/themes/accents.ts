@@ -24,7 +24,7 @@ export const ACCENT_OPTIONS: ReadonlyArray<AccentOption & { id: AccentId }> = [
   { id: 'amber', label: '琥珀', swatch: '#d97706' },
 ];
 
-export const ACCENT_STORAGE_KEY = 'gewu-accent';
+export const ACCENT_STORAGE_KEY = 'petri-accent';
 const VALID_IDS = new Set(ACCENT_OPTIONS.map((o) => o.id as string));
 
 export function readAccent(): AccentId {

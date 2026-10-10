@@ -2,7 +2,7 @@
   "generatedAt": "2026-09-07T15:30:00.447Z",
   "target": {
     "url": "http://localhost:3000/project/p_mtrawlau_7rly",
-    "title": "Gewu"
+    "title": "Petri"
   },
   "fix": "resizeHandleV z-index 5->10000（列内 ColumnHeader 9999 曾遮挡 header 带内悬停高亮第二像素）",
   "handleRect": {

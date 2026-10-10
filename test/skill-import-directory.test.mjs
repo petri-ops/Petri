@@ -2,7 +2,7 @@
  * BLOCK-156 D7 — 第三方技能本地目录导入测试。
  * 钉住：合法目录安装后 discoverSkills 可见（source=installed）/缺 skill.json
  * fail-closed/坏 manifest 拒绝/built-in id 冲突拒绝/重复导入覆盖/卸载清净。
- * BIOF3_USER_DATA_DIR 指向临时目录隔离本机真实 installed 清单。
+ * PETRI_USER_DATA_DIR 指向临时目录隔离本机真实 installed 清单。
  */
 
 import assert from 'node:assert/strict';
@@ -16,7 +16,7 @@ const require = createRequire(import.meta.url);
 const ROOT = path.resolve('.');
 
 const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'b156-skill-import-'));
-process.env.BIOF3_USER_DATA_DIR = path.join(tmpRoot, 'user-data');
+process.env.PETRI_USER_DATA_DIR = path.join(tmpRoot, 'user-data');
 
 const registry = require(path.join(ROOT, 'core', 'shared-backend', 'skill-registry.js'));
 
@@ -57,7 +57,7 @@ test('D7 合法目录导入 → discoverSkills 可见（source=installed，附�
   assert.equal(found.version, '1.0.0');
 
   // 附件随目录复制（导入的是副本，不是源目录引用）
-  const dest = path.join(process.env.BIOF3_USER_DATA_DIR, 'skills', 'my-general-skill');
+  const dest = path.join(process.env.PETRI_USER_DATA_DIR, 'skills', 'my-general-skill');
   assert.ok(fs.existsSync(path.join(dest, 'workflow.md')));
 });
 
@@ -74,7 +74,7 @@ test('D7 缺 skill.json / 坏 manifest → fail-closed 拒绝且零写入', () =
   assert.equal(bad.error, 'skill_manifest_invalid');
 
   // 零写入：installed 目录无 bad-skill
-  assert.ok(!fs.existsSync(path.join(process.env.BIOF3_USER_DATA_DIR, 'skills', 'bad-skill')));
+  assert.ok(!fs.existsSync(path.join(process.env.PETRI_USER_DATA_DIR, 'skills', 'bad-skill')));
 });
 
 test('D7 built-in id 冲突拒绝（导入不得静默不可见）', () => {
@@ -97,5 +97,5 @@ test('D7 重复导入覆盖更新（以最新导入为准）+ 卸载清净', () 
   const removed = registry.uninstallImportedSkill('my-general-skill');
   assert.equal(removed.ok, true);
   assert.ok(!registry.discoverSkills().some((s) => s.id === 'my-general-skill'));
-  assert.ok(!fs.existsSync(path.join(process.env.BIOF3_USER_DATA_DIR, 'skills', 'my-general-skill')));
+  assert.ok(!fs.existsSync(path.join(process.env.PETRI_USER_DATA_DIR, 'skills', 'my-general-skill')));
 });

@@ -6,7 +6,7 @@ import styles from './TestInstanceBadge.module.css';
  * BLOCK-100 / UI-409+UI-413 — 测试实例窗口管理条。
  *
  * 身份判定：preload 经 webPreferences.additionalArguments 注入
- * `--gewu-test-instance=1`，biof3Desktop.__testInstance === true 才渲染。
+ * `--petri-test-instance=1`，petriDesktop.__testInstance === true 才渲染。
  * 严格 === true：投影 shim（Proxy 属性访问返回 callable proxy）与普通主实例
  * （undefined）都不会误亮。
  *
@@ -19,13 +19,13 @@ import styles from './TestInstanceBadge.module.css';
  */
 const isTestInstance =
   typeof window !== 'undefined' &&
-  (window as { biof3Desktop?: { __testInstance?: unknown } }).biof3Desktop
+  (window as { petriDesktop?: { __testInstance?: unknown } }).petriDesktop
     ?.__testInstance === true;
 
 // UI-421 — 快捷键由主进程经启动参数透传（默认 Ctrl+Alt+Shift+M：
 // Ctrl+Alt+M 在部分机器被第三方程序 RegisterHotKey 占用导致静默失败）。
 const manageShortcut =
-  (window as { biof3Desktop?: { __testManageShortcut?: string } }).biof3Desktop
+  (window as { petriDesktop?: { __testManageShortcut?: string } }).petriDesktop
     ?.__testManageShortcut || 'Ctrl+Alt+M';
 
 export function TestInstanceBadge(): React.ReactElement | null {

@@ -8,15 +8,15 @@ import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const tempRoot = mkdtempSync(join(tmpdir(), 'biof3-hrt3-'));
-process.env.BIOF3_DB_PATH = join(tempRoot, 'hrt3.db');
+const tempRoot = mkdtempSync(join(tmpdir(), 'petri-hrt3-'));
+process.env.PETRI_DB_PATH = join(tempRoot, 'hrt3.db');
 
-process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
+process.env.PETRI_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
 const require = createRequire(import.meta.url);
 // BLOCK-49 加映清债 —— 应用全量 migrations（原仅设 DB 路径未建表）
 {
   const Database = require('better-sqlite3');
-  const boot = new Database(process.env.BIOF3_DB_PATH);
+  const boot = new Database(process.env.PETRI_DB_PATH);
   const migDir = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'migrations');
   for (const f of require('node:fs').readdirSync(migDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(require('node:fs').readFileSync(require('node:path').join(migDir, f), 'utf8'));
@@ -24,7 +24,7 @@ const require = createRequire(import.meta.url);
   boot.close();
 }
 
-const db = require('../core/biof3-server/db');
+const db = require('../core/petri-server/db');
 const { confirmScientificTask } = require('../core/shared-backend/scientific-task-confirmation');
 const { sourceMessageDigest, validateContextCheckpoint } = require('../core/shared-backend/scientific-task-spec');
 after(() => { try { db.closeDatabase(); } catch {} rmSync(tempRoot, { recursive: true, force: true }); });

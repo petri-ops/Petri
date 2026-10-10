@@ -16,11 +16,11 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-agent-subagent-recent-'));
-process.env.BIOF3_DB_PATH = path.join(tempDir, 'agent-tasks.db');
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-agent-subagent-recent-'));
+process.env.PETRI_DB_PATH = path.join(tempDir, 'agent-tasks.db');
 
 const require = createRequire(import.meta.url);
-const store = require('../core/biof3-server/agent-task-store');
+const store = require('../core/petri-server/agent-task-store');
 
 test.after(() => {
   try {
@@ -60,8 +60,8 @@ test('畸形 params 行不抛错且不污染结果（json_valid 防御）', () =
   const userId = 'user-ui405-bad';
   store.insertAgentTask({ taskId: 'sub-ok', userId, params: { kind: 'subagent' } });
   // 直写一条非法 JSON params（模拟历史脏数据）
-  const Database = require(path.join(__dirname, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const raw = new Database(process.env.BIOF3_DB_PATH);
+  const Database = require(path.join(__dirname, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const raw = new Database(process.env.PETRI_DB_PATH);
   raw.prepare("INSERT INTO tasks (id, type, user_id, params, status, agent_status, created_at) VALUES ('bad-row', 'agent', ?, '{not-json', 'failed', 'failed', datetime('now'))").run(userId);
   raw.close();
 

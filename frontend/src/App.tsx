@@ -1,11 +1,11 @@
-// Gewu 桌面版原生 shell — App 根组件
+// Petri 桌面版原生 shell — App 根组件
 // 路由出口 + 首次启动引导
 
 import React, { useEffect, lazy, Suspense } from 'react';
-// BLOCK-22 P4.6: DEV ONLY — manual file-open testing entry via window.__biof3DispatchOpenFile
+// BLOCK-22 P4.6: DEV ONLY — manual file-open testing entry via window.__petriDispatchOpenFile
 // Production build: React.lazy + NODE_ENV=production → tree-shakeable, zero runtime cost
-const GewuOpenFileDevBridge = lazy(() =>
-  import('./components/editor/integration/GewuOpenFileDevBridge')
+const PetriOpenFileDevBridge = lazy(() =>
+  import('./components/editor/integration/PetriOpenFileDevBridge')
 );
 import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import { TitleBar } from '@/components/desktop/TitleBar';
@@ -52,7 +52,7 @@ const RailPage = lazy(() => import('@/components/window/RailPage').then((m) => (
 const CommandCenterPage = lazy(() => import('@/pages/window/CommandCenterPage').then((m) => ({ default: m.CommandCenterPage })));
 // BLOCK-59 P4 — agent 详情窗（BLOCK-49 spawn 链路只读投影）
 import '@/components/desktop/desktop.css';
-// 断点6：注入平台 API 给 @biof3/shared 渲染层组件（如 ActResultCard）
+// 断点6：注入平台 API 给 @petri/shared 渲染层组件（如 ActResultCard）
 import { configureApi } from '../../core/packages/shared-copilot/api-inject';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 configureApi({ getApiPrefix: () => getApiPrefix(), getToken });
@@ -117,7 +117,7 @@ function AppShell(): React.ReactElement {
               style={{
                 position: 'fixed', top: 0, bottom: 0, left: 0, zIndex: 79,
                 width: 'min(300px, 86vw)', overflowY: 'auto', height: '100%',
-                background: 'var(--gewu-bg-surface)', boxShadow: 'var(--gewu-shadow-menu)',
+                background: 'var(--petri-bg-surface)', boxShadow: 'var(--petri-shadow-menu)',
               }}
               data-testid="projection-rail-overlay"
             >
@@ -127,12 +127,12 @@ function AppShell(): React.ReactElement {
         )}
         {(!projectionMobile) && <AppRail />}
         <main
-          className="gewu-spa-main"
+          className="petri-spa-main"
           style={{
             flex: 1,
             minWidth: 0,
             marginTop: 0,
-            paddingTop: isColumnizedWorkspace ? 0 : 'var(--gewu-titlebar-height)',
+            paddingTop: isColumnizedWorkspace ? 0 : 'var(--petri-titlebar-height)',
             transition: 'margin-left 0.25s ease',
           }}
         >
@@ -181,7 +181,7 @@ function AppShell(): React.ReactElement {
         />
         {/* BLOCK-22 P4.6: DEV ONLY — do NOT use in production */}
         <Suspense fallback={null}>
-          <GewuOpenFileDevBridge />
+          <PetriOpenFileDevBridge />
         </Suspense>
         </PendingScrollProvider>
       </CopilotContextProvider>
@@ -195,8 +195,8 @@ export default function App(): React.ReactElement {
 
   useEffect(() => {
     const html = document.documentElement;
-    html.classList.add('gewu-desktop');
-    html.classList.remove('gewu-desktop-dock-collapsed');
+    html.classList.add('petri-desktop');
+    html.classList.remove('petri-desktop-dock-collapsed');
     document.body.style.paddingLeft = '0';
     document.body.style.boxSizing = 'border-box';
   }, []);

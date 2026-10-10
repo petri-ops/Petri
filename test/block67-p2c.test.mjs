@@ -14,13 +14,13 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 const tempRoot = mkdtempSync(join(tmpdir(), 'block67-p2c-'));
-process.env.BIOF3_DB_PATH = join(tempRoot, 'p2c.db');
-process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
+process.env.PETRI_DB_PATH = join(tempRoot, 'p2c.db');
+process.env.PETRI_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
 
 const require = createRequire(import.meta.url);
 {
-  const Database = require(resolve(__dirname, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const boot = new Database(process.env.BIOF3_DB_PATH);
+  const Database = require(resolve(__dirname, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const boot = new Database(process.env.PETRI_DB_PATH);
   const migDir = resolve(__dirname, '..', 'src', 'migrations');
   for (const f of require('node:fs').readdirSync(migDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(require('node:fs').readFileSync(require('node:path').resolve(migDir, f), 'utf8'));
@@ -28,10 +28,10 @@ const require = createRequire(import.meta.url);
   boot.close();
 }
 
-const db = require('../core/biof3-server/db');
+const db = require('../core/petri-server/db');
 const { resolveProjectRunLayout } = require('../core/shared-backend/project-run-layout');
-const { tool_system_info } = require('../core/biof3-server/agent-tools/system-info-tools');
-const gateway = require('../core/biof3-server/helpers/workspace-gateway');
+const { tool_system_info } = require('../core/petri-server/agent-tools/system-info-tools');
+const gateway = require('../core/petri-server/helpers/workspace-gateway');
 
 test('D7/D8: ssh 项目 jobDir 落本地 staging（remote-projects/<id>），workspace_path 仍为 NULL', () => {
   const p = db.createProject({ name: 'p2c-ssh', workspaceKind: 'ssh', sshHost: 'aliyun', remotePath: '/srv/x' });

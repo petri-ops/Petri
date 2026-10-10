@@ -121,7 +121,7 @@ export function ArtifactPinPane({
           <span className={styles.artifactPinName}>{snapshot.artifactName}</span>
           <button
             type="button"
-            className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+            className="petri-btn petri-btn--ghost petri-btn--sm"
             onClick={() => onUnpin?.()}
           >
             解除钉住

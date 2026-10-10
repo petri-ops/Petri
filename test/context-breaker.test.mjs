@@ -11,8 +11,8 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
-const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-context-breaker-'));
-process.env.BIOF3_DB_PATH = path.join(tempDir, 'context-breaker.db');
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-context-breaker-'));
+process.env.PETRI_DB_PATH = path.join(tempDir, 'context-breaker.db');
 
 const require = createRequire(import.meta.url);
 const TEST_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -20,9 +20,9 @@ const TEST_DIR = path.dirname(fileURLToPath(import.meta.url));
 // loop-orchestrator 顶层 require ./db（模块顶层 prepare projects）——
 // 与 agent-concurrency.test.mjs 同一基建修复：先跑生产 migration 链。
 const { runMigrations } = require('../src/migration-runner');
-await runMigrations(process.env.BIOF3_DB_PATH, path.join(TEST_DIR, '../src/migrations'));
+await runMigrations(process.env.PETRI_DB_PATH, path.join(TEST_DIR, '../src/migrations'));
 
-const { runLoop } = require('../core/biof3-server/loop-orchestrator');
+const { runLoop } = require('../core/petri-server/loop-orchestrator');
 
 // ~180 tokens/条（tiktoken cl100k_base 对自然语言文本），100 条 ≈ 18K tokens
 function buildMessages(count) {

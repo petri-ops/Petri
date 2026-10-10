@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
+import { petriEvents, subscribePetriEvent } from '@/lib/events';
 import { __resetFileReferenceCache } from '@/lib/chat-file-references';
 
 /**
@@ -19,7 +19,7 @@ export function useAutoFileReferenceRefresh(onRefresh: () => void, debounceMs = 
   });
 
   useEffect(() => {
-    const unsubscribe = subscribeGewuEvent(gewuEvents.projectWorkspaceChanged, () => {
+    const unsubscribe = subscribePetriEvent(petriEvents.projectWorkspaceChanged, () => {
       if (timerRef.current) window.clearTimeout(timerRef.current);
       timerRef.current = window.setTimeout(() => {
         timerRef.current = null;

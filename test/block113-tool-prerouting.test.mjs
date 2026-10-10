@@ -2,7 +2,7 @@
  * BLOCK-113 W1-3 — 工具两跳预路由契约（分类接点 + 域收窄器 + 恒等红线）。
  *
  * 契约红线（plan docs/block-113-tool-prerouting-plan.md §1.1/§5）：
- *  - guard 关（BIOF3_JEV_TOOL_ROUTE=1 显式开）＝零出站零行为变化；
+ *  - guard 关（PETRI_JEV_TOOL_ROUTE=1 显式开）＝零出站零行为变化；
  *  - 任何决策失败形态（缺 key/超时/校验失败）＝route=false 回退全量，永不 throw；
  *  - 采纳（argmax≠all 且 conf ≥ θ=0.80）→ 收窄=路由域 ∪ session 基础件；
  *  - 71 工具集合恒等：⋃ DOMAIN_TOOL_DEFS 与 TOOL_DEFS 逐引用一致（BLOCK-109 P2 红线）。
@@ -24,11 +24,11 @@ const {
   buildToolRouteDecisionRequest,
   narrowToolDefsByFamily,
   resolveToolRoute,
-} = require(path.join(root, 'core', 'biof3-server', 'helpers', 'tool-router.js'));
-const { TOOL_DEFS, DOMAIN_TOOL_DEFS } = require(path.join(root, 'core', 'biof3-server', 'agent-tools', 'tool-defs.js'));
+} = require(path.join(root, 'core', 'petri-server', 'helpers', 'tool-router.js'));
+const { TOOL_DEFS, DOMAIN_TOOL_DEFS } = require(path.join(root, 'core', 'petri-server', 'agent-tools', 'tool-defs.js'));
 
 const NO_SLEEP = async () => {};
-const GUARD_ON = { BIOF3_JEV_TOOL_ROUTE: '1' };
+const GUARD_ON = { PETRI_JEV_TOOL_ROUTE: '1' };
 const API_KEY_OVERRIDE = { apiKey: 'test-key-do-not-call-real-api' };
 
 function useEnv(t, env) {
@@ -91,7 +91,7 @@ test('buildToolRouteDecisionRequest：state 截 600 字 + criteria 与类目集�
 });
 
 test('guard 默认关：零出站零行为变化（D-4）', async (t) => {
-  useEnv(t, { BIOF3_JEV_TOOL_ROUTE: undefined });
+  useEnv(t, { PETRI_JEV_TOOL_ROUTE: undefined });
   const spy = errorFetch('TimeoutError');
   const r = await resolveToolRoute('画一个火山图', { ...API_KEY_OVERRIDE, fetchImpl: spy.impl, sleep: NO_SLEEP });
   assert.equal(r.route, false);

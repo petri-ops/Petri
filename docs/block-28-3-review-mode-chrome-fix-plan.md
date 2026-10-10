@@ -16,7 +16,7 @@
 ## 2. 方案（单 PHASE，UI-212）
 
 - 文案：summary 标题 / 空态标题 / TitleBar tooltip / aria-label 统一「审阅」。
-- 字号对齐：按钮 / 文件行 / chips / 统计 / diff 头 / commitbox 全部回落 `--biof3-font-size-caption`（12px）；
+- 字号对齐：按钮 / 文件行 / chips / 统计 / diff 头 / commitbox 全部回落 `--petri-font-size-caption`（12px）；
   summary 标题 13px（body-sm）semibold；空态维持 lg 层级（对齐首页「开始工作」尺度）。
 - 按钮卡片化：`.wt-btn` 基础样式改为白底（bg-surface）+ 描边 + 8px 圆角 + 微阴影，
   hover 抬边框加深；Commit 保持 accent 实色主按钮（与首页主操作一致性）。

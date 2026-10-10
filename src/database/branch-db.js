@@ -10,7 +10,7 @@
 //   centralized in src/database/_db-singleton.js. This module is a thin
 //   wrapper that delegates every connection to openDb('branch'), and
 //   keeps its public exports (getDatabase, getDatabasePath, closeDatabase)
-//   as shims for backward compatibility with IPC handlers and biof3-server
+//   as shims for backward compatibility with IPC handlers and petri-server
 //   MCP code paths that import them.
 // ============================================================
 
@@ -33,11 +33,11 @@ function getDatabase() {
  */
 function getDatabasePath() {
   const path = require('path');
-  const dataDir = process.env.BIOF3_LOCAL_DATA_DIR;
+  const dataDir = process.env.PETRI_LOCAL_DATA_DIR;
   if (!dataDir) {
-    throw new Error('BIOF3_LOCAL_DATA_DIR environment variable is not set');
+    throw new Error('PETRI_LOCAL_DATA_DIR environment variable is not set');
   }
-  return path.join(dataDir, 'biof3.db');
+  return path.join(dataDir, 'petri.db');
 }
 
 /**

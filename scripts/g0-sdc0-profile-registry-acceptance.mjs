@@ -30,9 +30,9 @@ function inspect() {
   const registry = profiles.validateProfileRegistry();
   const profileIds = profiles.listProfiles();
   const identities = profileIds.map((profileId) => profiles.getProfileIdentity(profileId));
-  const base = clone(profiles.getProfile('biof3.gene-list.v1'));
+  const base = clone(profiles.getProfile('petri.gene-list.v1'));
   const additive = clone(base);
-  additive.profileId = 'biof3.gene-list.v2';
+  additive.profileId = 'petri.gene-list.v2';
   additive.version = 'v2';
   additive.schemaVersion = 2;
   additive.optionalColumns.push({ name: 'weight', type: 'number', nullable: true });
@@ -51,7 +51,7 @@ function inspect() {
         inputBindings: [{
           inputId: 'data',
           fromStepId: 'source',
-          artifactProfile: 'biof3.unregistered.v1',
+          artifactProfile: 'petri.unregistered.v1',
         }],
       },
     ],
@@ -62,15 +62,15 @@ function inspect() {
     profiles.classifyProfileChange(base, migratory).changeClass,
     profiles.classifyProfileChange(base, semanticBreak).changeClass,
   ];
-  const exactCompatibility = profiles.resolveProfileCompatibility('biof3.deg.v1', 'biof3.deg.v1');
-  const unknownCompatibility = profiles.resolveProfileCompatibility('biof3.deg.v1', 'biof3.unregistered.v1');
+  const exactCompatibility = profiles.resolveProfileCompatibility('petri.deg.v1', 'petri.deg.v1');
+  const unknownCompatibility = profiles.resolveProfileCompatibility('petri.deg.v1', 'petri.unregistered.v1');
 
   const checks = [
     item('SDC0-01', registry.valid && registry.profileCount === 6, ['core/shared-backend/artifact-profiles.js'], 'Registry validates with exactly six initial canonical profiles.'),
     item('SDC0-02', profiles.PROFILE_KINDS.join(',') === 'data,artifact,display', ['core/shared-backend/artifact-profiles.js'], 'Data, scientific Artifact and Display Artifact kinds are distinct.'),
     item('SDC0-03', profileIds.every((id) => profiles.validateProfileDefinition(profiles.getProfile(id)).valid), ['test/g0-sdc0-profile-registry.test.mjs'], 'Every profile has a valid versioned machine contract.'),
     item('SDC0-04', identities.length === 6 && new Set(identities.map((entry) => entry.contractDigest)).size === 6, ['acceptance/g0-scientific-data-contract/profile-registry.json'], 'Each profile has a stable, distinct contract digest.'),
-    item('SDC0-05', profiles.getProfile('biof3.deg.v1')?.knownColumnAliases?.log2FC === 'log2FoldChange', ['test/hle-c5r-regression.test.mjs'], 'The admitted DEG profile remains backward compatible.'),
+    item('SDC0-05', profiles.getProfile('petri.deg.v1')?.knownColumnAliases?.log2FC === 'log2FoldChange', ['test/hle-c5r-regression.test.mjs'], 'The admitted DEG profile remains backward compatible.'),
     item('SDC0-06', changeClasses.join(',') === 'compatible,migration,breaking', ['test/g0-sdc0-profile-registry.test.mjs'], 'Change classification covers compatible, migration and breaking outcomes.'),
     item('SDC0-07', !unknownPlanValidation.valid && unknownPlanValidation.errors.some((error) => error.includes('unregistered_artifact_profile')), ['core/shared-backend/agent-workflow.js'], 'An unregistered profile cannot become a typed workflow edge.'),
     item('SDC0-08', exactCompatibility.status === 'compatible' && unknownCompatibility.status === 'blocked', ['core/shared-backend/artifact-profiles.js'], 'Compatibility is exact and unknown versions fail closed.'),

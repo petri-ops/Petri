@@ -9,14 +9,14 @@ import test from 'node:test';
 const require = createRequire(import.meta.url);
 
 // BLOCK-104 P2 — agent-runner-facade 同款家法：先隔离临时库并跑生产迁移链再加载
-// （db.js 缺省打开仓内化石 biof3.db，schema 时代错位，require 即 no such table）。
+// （db.js 缺省打开仓内化石 petri.db，schema 时代错位，require 即 no such table）。
 const __filename_rs = fileURLToPath(import.meta.url);
-process.env.BIOF3_DB_PATH = path.join(
-  fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-rs-subdomains-')),
+process.env.PETRI_DB_PATH = path.join(
+  fs.mkdtempSync(path.join(os.tmpdir(), 'petri-rs-subdomains-')),
   'rs-subdomains.db',
 );
 const { runMigrations } = require('../src/migration-runner');
-await runMigrations(process.env.BIOF3_DB_PATH, path.join(path.dirname(__filename_rs), '../src/migrations'));
+await runMigrations(process.env.PETRI_DB_PATH, path.join(path.dirname(__filename_rs), '../src/migrations'));
 
 /**
  * test/routes-result-studio-subdomains.test.mjs — PHASE 2.1b contract tests
@@ -92,13 +92,13 @@ function makeFakeApp() {
 
 test('8 subdomain files are all require()-able and export register()', () => {
   for (const name of SUBDOMAINS) {
-    const sub = require(`../core/biof3-server/routes/result-studio/${name}`);
+    const sub = require(`../core/petri-server/routes/result-studio/${name}`);
     assert.equal(typeof sub.register, 'function', `${name}.register must be a function`);
   }
 });
 
 test('routes/result-studio/index.js register() accepts an Express app and runs without error', () => {
-  const index = require('../core/biof3-server/routes/result-studio/index');
+  const index = require('../core/petri-server/routes/result-studio/index');
   const app = makeFakeApp();
   // register() 内部会调 9 个子域 register，每个子域会调 app.get/post 挂载端点
   assert.doesNotThrow(() => index.register(app), 'index.register(app) should not throw');
@@ -108,7 +108,7 @@ test('routes/result-studio/index.js register() accepts an Express app and runs w
 });
 
 test('routes/result-studio/index.js register() mounts 8 subdomains in declared order', () => {
-  const index = require('../core/biof3-server/routes/result-studio/index');
+  const index = require('../core/petri-server/routes/result-studio/index');
   const app = makeFakeApp();
   index.register(app);
   // 验证每条 EXPECTED_ENDPOINTS 都被挂载
@@ -119,12 +119,12 @@ test('routes/result-studio/index.js register() mounts 8 subdomains in declared o
 });
 
 test('main file routes/result-studio.js still exports a callable register function', () => {
-  const main = require('../core/biof3-server/routes/result-studio');
+  const main = require('../core/petri-server/routes/result-studio');
   assert.equal(typeof main, 'function', 'main export must be a callable register function');
 });
 
 test('main file facade _test field exposes 9 helpers for backward compat', () => {
-  const main = require('../core/biof3-server/routes/result-studio');
+  const main = require('../core/petri-server/routes/result-studio');
   const expected = [
     'baselineFailureDiagnostic',
     'bindAuthoritativeQuerySelection',
@@ -146,7 +146,7 @@ test('main file is a thin facade (line count significantly reduced)', () => {
   // 加载 fs + path 后 readFileSync 计数。
   const fs = require('node:fs');
   const path = require('node:path');
-  const mainPath = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'core', 'biof3-server', 'routes', 'result-studio.js');
+  const mainPath = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'core', 'petri-server', 'routes', 'result-studio.js');
   const content = fs.readFileSync(mainPath, 'utf8');
   const lineCount = content.split('\n').length;
   assert.ok(lineCount <= 80, `main file should be ≤ 80 lines (thin facade), got ${lineCount}`);
@@ -157,7 +157,7 @@ test('main file is a thin facade (line count significantly reduced)', () => {
 test('each subdomain file has reasonable line count (≥ 30, ≤ 320)', () => {
   const fs = require('node:fs');
   const path = require('node:path');
-  const subDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'core', 'biof3-server', 'routes', 'result-studio');
+  const subDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'core', 'petri-server', 'routes', 'result-studio');
   for (const name of SUBDOMAINS) {
     const subPath = path.join(subDir, `${name}.js`);
     const content = fs.readFileSync(subPath, 'utf8');
@@ -171,7 +171,7 @@ test('each subdomain file has reasonable line count (≥ 30, ≤ 320)', () => {
 });
 
 test('routes/result-studio/index.js exposes _submodules and _helpers surfaces', () => {
-  const index = require('../core/biof3-server/routes/result-studio/index');
+  const index = require('../core/petri-server/routes/result-studio/index');
   assert.ok(index._submodules, '_submodules must exist');
   assert.ok(index._helpers, '_helpers must exist');
   for (const name of SUBDOMAINS) {
@@ -184,7 +184,7 @@ test('routes/result-studio/index.js exposes _submodules and _helpers surfaces', 
 
 test('endpoints match between subdomain register() and main file register() (no path drift)', () => {
   // 分别用 fake app 通过 index.js 和每个子域独立注册，比较挂载的 endpoints
-  const index = require('../core/biof3-server/routes/result-studio/index');
+  const index = require('../core/petri-server/routes/result-studio/index');
   const indexApp = makeFakeApp();
   index.register(indexApp);
 

@@ -7,8 +7,8 @@
  */
 const path = require('node:path');
 const http = require('node:http');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
-const Database = require(path.join(__dirname, '..', 'core/biof3-server/node_modules/better-sqlite3'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
+const Database = require(path.join(__dirname, '..', 'core/petri-server/node_modules/better-sqlite3'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-95');
 const AUTH = { Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' };
@@ -27,7 +27,7 @@ function apiPost(pathname, body) {
 
 (async () => {
   const run = lib.createRun({ name: 'block95-a2-frame-live', evidenceDir: EVIDENCE_DIR });
-  const db = new Database(path.join(__dirname, '..', '.biof3-dev-user-data/data/biof3.db'), { readonly: true });
+  const db = new Database(path.join(__dirname, '..', '.petri-dev-user-data/data/petri.db'), { readonly: true });
   const conv = db.prepare("SELECT id FROM copilot_conversations WHERE title='B2 压缩验证重会话' LIMIT 1").get();
   const proj = db.prepare("SELECT id FROM projects WHERE status='active' ORDER BY updated_at DESC LIMIT 1").get();
   db.close();

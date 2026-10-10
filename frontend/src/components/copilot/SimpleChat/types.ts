@@ -197,7 +197,7 @@ export interface ExamplePrompt {
 }
 
 // 2026-09-18 历史残留清理（用户裁决「要有通用性 领域提示……可以直接修复」）：
-// 默认示例卡领域中立——「分析单细胞数据」是 biof3 生信时代遗留，生信能力已
+// 默认示例卡领域中立——「分析单细胞数据」是 petri 生信时代遗留，生信能力已
 // 领域包化（BLOCK-86），领域示例卡改由「已装领域包」动态追加（见
 // DOMAIN_EXAMPLE_PROMPTS + helpers.useDomainExamplePrompts），无包不提领域。
 export const DEFAULT_EXAMPLE_PROMPTS: ExamplePrompt[] = [
@@ -211,7 +211,7 @@ export const DEFAULT_EXAMPLE_PROMPTS: ExamplePrompt[] = [
     icon: 'zap',
     title: '快速开始',
     description: '查看 AI 能帮你做什么',
-    prompt: 'Gewu Desktop 能帮我完成哪些任务？',
+    prompt: 'Petri Desktop 能帮我完成哪些任务？',
   },
   {
     icon: 'list-details',
@@ -224,7 +224,7 @@ export const DEFAULT_EXAMPLE_PROMPTS: ExamplePrompt[] = [
 // 领域示例卡注册表（v1 静态映射：包 id → 示例卡；包 manifest 支持示例声明后
 // 迁移到包侧数据）。仅当对应领域包「已安装」时由 useDomainExamplePrompts 追加。
 export const DOMAIN_EXAMPLE_PROMPTS: Record<string, ExamplePrompt[]> = {
-  'gewu-pack-bio': [
+  'petri-pack-bio': [
     {
       icon: 'bar-chart',
       title: '分析单细胞数据',

@@ -83,7 +83,7 @@ export function Lightbox({
 
   return (
     <div
-      className="gewu-lightbox"
+      className="petri-lightbox"
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
@@ -93,14 +93,14 @@ export function Lightbox({
         ref={imgRef}
         src={src}
         alt={alt || ''}
-        className="gewu-lightbox__img"
+        className="petri-lightbox__img"
         style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, cursor: zoom > 1 ? 'grab' : 'zoom-in' }}
         data-zoom={String(Number(zoom.toFixed(3)))}
         data-pan={`${Math.round(pan.x)},${Math.round(pan.y)}`}
         draggable={false}
       />
       <button
-        className="gewu-lightbox__close"
+        className="petri-lightbox__close"
         type="button"
         onClick={onClose}
         onPointerDown={(event) => event.stopPropagation()}
@@ -108,7 +108,7 @@ export function Lightbox({
       >
         ×
       </button>
-      <span className="gewu-lightbox__hint">滚轮缩放 · 拖拽平移 · 双击复位</span>
+      <span className="petri-lightbox__hint">滚轮缩放 · 拖拽平移 · 双击复位</span>
     </div>
   );
 }

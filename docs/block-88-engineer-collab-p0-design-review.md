@@ -12,8 +12,8 @@
 
 | 资产 | 现状 | 对 88 的意义 |
 | --- | --- | --- |
-| `core/biof3-server/db/users.js` | users 表 + DAO（getUserByUsername/getUserById/createUser）齐备 | 身份存储基建已有；但 `auth.js` 当前把**所有请求映射为单一 LOCAL_USER 'local-user'**（桌面单管理员设计） |
-| `core/biof3-server/agent-task-store.js:260-340` | **tasks 表已有 user_id 列**（BLOCK-10 S-006，nullable，写入侧填充） | 任务归属列现成——访客工程师归属可落此列 |
+| `core/petri-server/db/users.js` | users 表 + DAO（getUserByUsername/getUserById/createUser）齐备 | 身份存储基建已有；但 `auth.js` 当前把**所有请求映射为单一 LOCAL_USER 'local-user'**（桌面单管理员设计） |
+| `core/petri-server/agent-task-store.js:260-340` | **tasks 表已有 user_id 列**（BLOCK-10 S-006，nullable，写入侧填充） | 任务归属列现成——访客工程师归属可落此列 |
 | `core/shared-backend/federation-peers.js` | peers 注册表（peerId/name/baseUrl/lastProbe） | **无工程师身份字段**——需 additive 扩展 identity |
 | mobile-gateway（BLOCK-70/85） | 配对/会话（token 只存 hash）/吊销/审计/IP 限速全套 | 配对握手是身份注入点；会话存储需 additive 加 identity |
 | `routes/federation-admin.js` + `fed:` 分派 | 作业转发/状态/产物三端点；scope 设计为 jobs/full 两档（85 D6） | 授权边界扩展点 |
@@ -98,7 +98,7 @@ A 能看到/操作 B 的哪些项目。**建议：配对后默认零授权，B �
 - **交付**：访客身份检测（req.mobileSession.identity，网关会话门携带 P1 落档署名）→ 委托独立会话（origin 列，消化 85 登记「委托未开独立会话」缺口）+ getOrCreateActiveConversation 复用恒排除（反向污染防护）+ 自动标题守卫（实机抓真：auto-title 会洗掉归属标题）+ params.federated 归属 + spawn 继承 + meta/tasks federatedFrom 透出 + 会话列表默认视图隔离（includeFederated 开关）+ UI-419 左栏「联邦委托会话」查看节/俯瞰联邦角标（同提交台账）。
 - **实现注记**：tasks.user_id 维持宿主权限面语义 'local-user'（subagent 派生所有权检查/并发桶/历史拼装依赖它），归属走 params.federated + conversations.origin 双面——D3 意图（归属可见+隔离+可清理）完整达成，列机制与 plan §3-D3 字面有出入如实留痕。
 - **门禁对账**：契约 test/block88-task-attribution.test.mjs 4/4 + block88-engineer-identity 5/5 + subagent-recent 回归绿；tsc 0；theme-token-contract 4/4；docs:check PASS(255)；ui:audit 同步通过；定向全集 332 项 324 过 7 红——**全部存量（基线对照证实非本包引入）**：block67 fs verbs 4 红（macOS bash verb 面）+ sys_resource 1 红（用例自注 Linux/WSL 语义面）+ P6 源绑定 2 红（🟡 在册）。
-- **实机断言**：scripts/block88-p2-delegate-attribution.cjs **13/13 allPass**——A 侧真实 delegate_to_gewu_node 工具跨节点委托、B 端真实跑完模型回执 done → meta federatedFrom=工程师 A + 会话标题「来自工程师 A的委托：…」（守卫生效）+ 默认视图零泄漏 + includeFederated 可见 + 宿主活跃会话零污染 + CDP 测试实例左栏联邦面可见；证据 acceptance/block-88/p2-attribution.json+png。
+- **实机断言**：scripts/block88-p2-delegate-attribution.cjs **13/13 allPass**——A 侧真实 delegate_to_petri_node 工具跨节点委托、B 端真实跑完模型回执 done → meta federatedFrom=工程师 A + 会话标题「来自工程师 A的委托：…」（守卫生效）+ 默认视图零泄漏 + includeFederated 可见 + 宿主活跃会话零污染 + CDP 测试实例左栏联邦面可见；证据 acceptance/block-88/p2-attribution.json+png。
 - **P3 预备**：项目授权边界（grants 清单+越界 403+授权/吊销 UI）+ 85 登记缺口「delegation 无项目绑定」（本轮实机再次印证：委托会话 project_id 为 NULL）——启动待用户裁决。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 

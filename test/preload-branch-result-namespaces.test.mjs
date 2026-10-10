@@ -9,9 +9,9 @@
  *
  * 测试策略（与 test/window-controls.test.mjs 同样的 vm harness）：
  *   1) 在 vm sandbox 内执行 src/preload.js（mock electron contextBridge + ipcRenderer）
- *   2) 校验 window.biof3Desktop.branch.* 的 6 个方法
+ *   2) 校验 window.petriDesktop.branch.* 的 6 个方法
  *      ↔ ipcRenderer.invoke 调用 channel 一一对应
- *   3) 校验 window.biof3Desktop.result.* 的 7 个方法
+ *   3) 校验 window.petriDesktop.result.* 的 7 个方法
  *      + result.version.* 的 4 个子方法 ↔ channel 一一对应
  *   4) 校验 result:create 接受 conversation_export 类型
  *      （C-002 修复的 contract 一致性；运行时 validTypes 由 result-handlers.js
@@ -63,13 +63,13 @@ function runPreload() {
     CustomEvent: class CustomEvent {},
   });
 
-  return { desktop: exposed.get('biof3Desktop'), invoked };
+  return { desktop: exposed.get('petriDesktop'), invoked };
 }
 
-test('preload exposes biof3Desktop.branch with 6 methods mapping to branch:* channels', async () => {
+test('preload exposes petriDesktop.branch with 6 methods mapping to branch:* channels', async () => {
   const { desktop, invoked } = runPreload();
-  assert.ok(desktop, 'biof3Desktop must be exposed');
-  assert.ok(desktop.branch, 'C-001: biof3Desktop.branch namespace must exist');
+  assert.ok(desktop, 'petriDesktop must be exposed');
+  assert.ok(desktop.branch, 'C-001: petriDesktop.branch namespace must exist');
 
   const expected = [
     ['create', 'branch:create'],
@@ -108,9 +108,9 @@ test('preload exposes biof3Desktop.branch with 6 methods mapping to branch:* cha
   );
 });
 
-test('preload exposes biof3Desktop.result with 7 methods + version sub-namespace (4 methods)', async () => {
+test('preload exposes petriDesktop.result with 7 methods + version sub-namespace (4 methods)', async () => {
   const { desktop, invoked } = runPreload();
-  assert.ok(desktop.result, 'C-001: biof3Desktop.result namespace must exist');
+  assert.ok(desktop.result, 'C-001: petriDesktop.result namespace must exist');
 
   const expected = [
     ['create', 'result:create'],

@@ -2,21 +2,21 @@
    同源（zone 片段复用同一组 --titlebar-* 变量），暗色覆盖同步。header 作为栏
    aside（flex-column）第一个子元素，交叉轴 stretch → 宽 = aside 宽 = 栏宽。 */
 .columnHeader {
-  --titlebar-height: var(--gewu-titlebar-height);
-  --titlebar-bg: color-mix(in srgb, var(--gewu-bg-surface) 98%, var(--gewu-bg-canvas) 2%);
+  --titlebar-height: var(--petri-titlebar-height);
+  --titlebar-bg: color-mix(in srgb, var(--petri-bg-surface) 98%, var(--petri-bg-canvas) 2%);
   --titlebar-left-bg: var(--titlebar-bg);
-  --titlebar-border: color-mix(in srgb, var(--gewu-border) 72%, transparent 28%);
-  --titlebar-divider: color-mix(in srgb, var(--gewu-border) 64%, transparent 36%);
-  --titlebar-ink: var(--gewu-text);
-  --titlebar-ink-muted: var(--gewu-text-secondary);
-  --titlebar-pill-bg: color-mix(in srgb, var(--gewu-bg-surface) 72%, transparent 28%);
-  --titlebar-pill-border: color-mix(in srgb, var(--gewu-border-strong) 62%, transparent 38%);
-  --titlebar-hover: color-mix(in srgb, var(--gewu-hover) 92%, transparent 8%);
+  --titlebar-border: color-mix(in srgb, var(--petri-border) 72%, transparent 28%);
+  --titlebar-divider: color-mix(in srgb, var(--petri-border) 64%, transparent 36%);
+  --titlebar-ink: var(--petri-text);
+  --titlebar-ink-muted: var(--petri-text-secondary);
+  --titlebar-pill-bg: color-mix(in srgb, var(--petri-bg-surface) 72%, transparent 28%);
+  --titlebar-pill-border: color-mix(in srgb, var(--petri-border-strong) 62%, transparent 38%);
+  --titlebar-hover: color-mix(in srgb, var(--petri-hover) 92%, transparent 8%);
   --win-btn-size: 22px;
-  --win-btn-bg: color-mix(in srgb, var(--gewu-text) 12%, transparent 88%);
-  --win-btn-bg-hover: color-mix(in srgb, var(--gewu-text) 22%, transparent 78%);
-  --win-btn-fg: color-mix(in srgb, var(--gewu-text) 78%, transparent 22%);
-  --win-btn-bg-close: color-mix(in srgb, var(--gewu-text) 12%, transparent 88%);
+  --win-btn-bg: color-mix(in srgb, var(--petri-text) 12%, transparent 88%);
+  --win-btn-bg-hover: color-mix(in srgb, var(--petri-text) 22%, transparent 78%);
+  --win-btn-fg: color-mix(in srgb, var(--petri-text) 78%, transparent 22%);
+  --win-btn-bg-close: color-mix(in srgb, var(--petri-text) 12%, transparent 88%);
   --win-btn-bg-close-hover: #e0464e;
   --win-btn-fg-close-hover: #ffffff;
 
@@ -72,14 +72,14 @@
 }
 
 [data-theme='dark'] .columnHeader {
-  --titlebar-bg: color-mix(in srgb, var(--gewu-bg-surface) 96%, var(--gewu-bg-canvas) 4%);
+  --titlebar-bg: color-mix(in srgb, var(--petri-bg-surface) 96%, var(--petri-bg-canvas) 4%);
   --titlebar-left-bg: var(--titlebar-bg);
-  --titlebar-pill-bg: color-mix(in srgb, var(--gewu-bg-elevated) 70%, transparent 30%);
+  --titlebar-pill-bg: color-mix(in srgb, var(--petri-bg-elevated) 70%, transparent 30%);
 }
 
 /* UI-448 加映 v13 — 侧聊开关运行呼吸：侧聊 agent 运行中图标取在线色（v7 语言迁入顶栏） */
 .sideChatRunning {
-  color: var(--gewu-status-online);
+  color: var(--petri-status-online);
   animation: sideChatToggleBreath 1.6s ease-in-out infinite;
 }
 

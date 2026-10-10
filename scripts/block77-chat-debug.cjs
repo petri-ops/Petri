@@ -3,7 +3,7 @@
 // 调试探针：导航到项目页 → 发送 resident_task_create 请求 → 每 5s 抓取聊天区文本 → 打印
 const path = require('path');
 const REPO = path.join(__dirname, '..');
-const lib = require(path.join(REPO, '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(REPO, '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function main() {
@@ -25,7 +25,7 @@ async function main() {
 
   const prompt = [
     '请用 resident_task_create 工具创建一个驻留任务，参数如下：',
-    'command 填：sleep 1200 && echo done > .gewu/resident/sleep-done.txt',
+    'command 填：sleep 1200 && echo done > .petri/resident/sleep-done.txt',
     'intent 填：P4 全链验证探针：挂机 20 分钟',
     'success_criteria 填：1200 秒后 sleep-done.txt 出现',
     'failure_handling 填：notify-only',

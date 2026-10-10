@@ -164,7 +164,7 @@
 | `docs/agent-workbench-enhancement-plan.md`（11.1 节） | 仍位于 `docs/`（非 archive），`status: planned`，被 `docs/README.md` / `docs/ui-productization-audit.md` / `docs/agent-workbench-p1-a5-verification-2026-08-15.md` 多处引用 | 不在 archive；本审计范围限于 archive |
 | `docs/ide-transformation-plan.md` 与 `docs/ide-research/*`（建议归档） | 由 `agent-workbench-enhancement-plan.md` §11 提议归档；当前未执行 | 工作包 `G0-IDE-MCP-TOOLS` Phase 1+1.5+3 已收口、Phase 2 `deferred`；归档动作属独立 governance 工作包 |
 | archive 子目录 `ide-transformation-retired/` 的实际创建 | 未发生；文件未移动 | 同上 |
-| `docs/DOC-REGISTRY.json` 内 `coverage.excludedPrefixes` 是否扩到 `docs/agent-workbench-*` 等 | 当前策略未变 | 治理门禁调整属 `$biof3-project-governance` skill 范畴 |
+| `docs/DOC-REGISTRY.json` 内 `coverage.excludedPrefixes` 是否扩到 `docs/agent-workbench-*` 等 | 当前策略未变 | 治理门禁调整属 `$petri-project-governance` skill 范畴 |
 | archive 文档首段是否补"已被 X 吸收"声明（B 类降级） | 当前未发生 | 文件内容修改属归档编辑，非只读审计 |
 | `claude-instructions-through-stage2.md` 第 1 行加强自警示横幅 | 当前仅有第 48/321 行的纪律提示 | 文件本体修改属归档编辑，非只读审计 |
 | `docs:check` 实际运行验证（PASS / issue 数量） | 未执行；`scripts/docs-governance.mjs` 自查表明 0 issue | 本审计范围不含门禁执行；如需确认，主 agent 可运行 `npm run docs:check`（秒级） |

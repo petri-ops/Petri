@@ -24,11 +24,11 @@ export interface VisionRoleBindingProps {
 export function VisionRoleBinding({ profiles, value, onChange }: VisionRoleBindingProps) {
   const visionProfiles = profiles.filter(hasVisionCapability);
   return (
-    <div className="gewu-model-role-binding">
-      <label className="gewu-model-role-binding__label">
+    <div className="petri-model-role-binding">
+      <label className="petri-model-role-binding__label">
         识图模型（视觉理解）
         <select
-          className="gewu-select"
+          className="petri-select"
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           aria-label="识图模型（视觉理解角色）"
@@ -44,11 +44,11 @@ export function VisionRoleBinding({ profiles, value, onChange }: VisionRoleBindi
         </select>
       </label>
       {visionProfiles.length === 0 ? (
-        <p className="gewu-field__hint" role="note">
+        <p className="petri-field__hint" role="note">
           暂无可选渠道：先在下方渠道行勾选「视觉」能力（渠道网关需支持图片输入）。
         </p>
       ) : (
-        <p className="gewu-field__hint">换绑后贴图即走所选渠道；其网关须真正支持图片输入，否则调用会诚实报错。</p>
+        <p className="petri-field__hint">换绑后贴图即走所选渠道；其网关须真正支持图片输入，否则调用会诚实报错。</p>
       )}
     </div>
   );

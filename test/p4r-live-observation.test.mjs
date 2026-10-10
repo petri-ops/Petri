@@ -77,7 +77,7 @@ test('P4R-6 injected failures still execute cleanup exactly once', async () => {
 });
 
 test('P4R-6 owned lifecycle removes its disposable root and is idempotent', async () => {
-  const root = mkdtempSync(path.join(tmpdir(), 'biof3-p4r6-lifecycle-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-p4r6-lifecycle-'));
   const lifecycle = createOwnedLifecycle();
   lifecycle.setRoot(root);
   await lifecycle.cleanup();
@@ -106,7 +106,7 @@ test('P4R-6 signal handler requests one cleanup and records the signal exit code
 });
 
 test('P4R-6 real SIGTERM cleans the root and terminates the parent process', { skip: process.platform === 'win32' && 'Windows 无真实 SIGTERM 语义（模拟信号不递归进程树）——仅 POSIX 运行（BLOCK-104 P3 平台门）' }, async () => {
-  const root = mkdtempSync(path.join(tmpdir(), 'biof3-p4r6-signal-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-p4r6-signal-'));
   const script = path.join(ROOT, 'scripts/g0-rs-p4r-live-observation.mjs');
   const child = spawn(process.execPath, [script, '--signal-fixture-child', root], {
     cwd: ROOT,

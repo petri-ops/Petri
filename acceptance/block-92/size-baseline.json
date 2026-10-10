@@ -1,5 +1,5 @@
 {
-  "schema": "biof3/block109-size-ledger.v2",
+  "schema": "petri/block109-size-ledger.v2",
   "files": [
     {
       "path": "frontend/src/components/copilot/conversationRunStore.ts",
@@ -107,14 +107,14 @@
       "sha256": "3d43f4a3070c03250e7765b38cdfb70595b0502ee27cc53a909e36e1f6e711f9"
     },
     {
-      "path": "core/biof3-server/helpers/tools-executor.js",
+      "path": "core/petri-server/helpers/tools-executor.js",
       "wave": "C",
       "module": "P-03",
       "lines": 2101,
       "sha256": "2e43c1aa4a6531df5879a36f5a732e5f2f584cced4ca6271970c211f3e80ff9c"
     },
     {
-      "path": "core/biof3-server/db.js",
+      "path": "core/petri-server/db.js",
       "wave": "C",
       "module": "P-01",
       "lines": 1476,
@@ -128,14 +128,14 @@
       "sha256": "2f2a6349a19f49d43012434c05e07e12f506b41ef67c148aab1dc514b2726db9"
     },
     {
-      "path": "core/biof3-server/agent-tools/workspace-tools.js",
+      "path": "core/petri-server/agent-tools/workspace-tools.js",
       "wave": "C",
       "module": "P-03",
       "lines": 1610,
       "sha256": "b30db6bef5e95fe13a572e0fa49108591965c7827cb6d94ef114cdcd2cfafd80"
     },
     {
-      "path": "core/biof3-server/mcp/registry.js",
+      "path": "core/petri-server/mcp/registry.js",
       "wave": "C",
       "module": "P-02",
       "lines": 965,

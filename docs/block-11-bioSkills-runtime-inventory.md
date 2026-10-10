@@ -1,4 +1,4 @@
-# BLOCK-11: biof3-py-runtime / biof3-r-runtime 包清单
+# BLOCK-11: petri-py-runtime / petri-r-runtime 包清单
 
 > Plan ID: `BLOCK-11-BIOSKILLS-INTEGRATION`
 > Phase: **PHASE 0 伴随调研**
@@ -9,8 +9,8 @@
 
 ## §1 TL;DR
 
-BioF3 的 "runtime" 不是目录，而是**两件**注册在 `resources/built-in-plugins/manifest.json`
-中的 `kind: "runtime"` 插件（`biof3-py-runtime` v1.0.0 / `biof3-r-runtime` v1.0.0），
+Petri 的 "runtime" 不是目录，而是**两件**注册在 `resources/built-in-plugins/manifest.json`
+中的 `kind: "runtime"` 插件（`petri-py-runtime` v1.0.0 / `petri-r-runtime` v1.0.0），
 附两份显式清单文件 `py-runtime-requirements.txt`（10 个 Python 包）与
 `r-runtime-packages.txt`（26 个 R 包）。除此之外，`figcode-*` 卡片各自携带独立
 artifact（squidpy / monocle3 / scvelo / scDblFinder / CytoTRACE / xgboost / shap 等）。
@@ -31,23 +31,23 @@ G0 阶段纪律**不外推**；本报告只描述 runtime 已就位包清单与 
 
 ---
 
-## §2 biof3-py-runtime 路径与结构
+## §2 petri-py-runtime 路径与结构
 
-`biof3-py-runtime` **不是 `core/` 下的目录**，而是一个注册在插件仓库里的
+`petri-py-runtime` **不是 `core/` 下的目录**，而是一个注册在插件仓库里的
 "runtime kind" 插件：
 
 ```
 resources/built-in-plugins/
-├── manifest.json                       # 含 biof3-py-runtime / biof3-r-runtime 注册项
+├── manifest.json                       # 含 petri-py-runtime / petri-r-runtime 注册项
 ├── py-runtime-requirements.txt         # 显式 Python 包清单（10 个）
 ├── r-runtime-packages.txt              # 显式 R 包清单（26 个）
-├── biof3-py-runtime 不存在独立目录     # runtime 实际从 OSS artifact zip 加载
+├── petri-py-runtime 不存在独立目录     # runtime 实际从 OSS artifact zip 加载
 └── <其他 plugin-id>/                   # 业务插件（含 figcode-*）
 
 core/py-server/                         # Python 工具执行服务（Node 调度 + 子进程）
-├── server.js / py-pool.js              # 调用 biof3-py-runtime 加载的 Python 环境
+├── server.js / py-pool.js              # 调用 petri-py-runtime 加载的 Python 环境
 ├── python-tool-script-generator.js     # 生成临时 Python 脚本
-├── package.json / .env.example         # biof3-py-tmp 路径 + 容器名
+├── package.json / .env.example         # petri-py-tmp 路径 + 容器名
 └── pyserver.db                         # 任务数据库
 ```
 
@@ -55,17 +55,17 @@ core/py-server/                         # Python 工具执行服务（Node 调�
 
 | Platform | URL | sha256 | sizeBytes |
 |---|---|---|---|
-| macos-arm64 | `https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/macos-arm64.zip` | `f88502026027aec32eaa03ea5d2faefe77dbd59d0524f99d365208385b2abec8` | 154,126,592 (~147MB) |
-| windows-x64 | `https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/windows-x64.zip` | null | null |
+| macos-arm64 | `https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/macos-arm64.zip` | `f88502026027aec32eaa03ea5d2faefe77dbd59d0524f99d365208385b2abec8` | 154,126,592 (~147MB) |
+| windows-x64 | `https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/windows-x64.zip` | null | null |
 
 **Built against**: Python 3.11.9 · Requires: `python >=3.10.0`
 
-**manifest description 原文**：_"Python 3.11.9 + pandas/numpy/scipy/sklearn/matplotlib/scanpy 等 200+ 包，BioF3 所有 Python 工具的运行基础。"_
+**manifest description 原文**：_"Python 3.11.9 + pandas/numpy/scipy/sklearn/matplotlib/scanpy 等 200+ 包，Petri 所有 Python 工具的运行基础。"_
 （"200+ 包"包括 pip 间接依赖；显式清单仅 10 个核心包。）
 
 ---
 
-## §3 biof3-py-runtime 已装 Python 包
+## §3 petri-py-runtime 已装 Python 包
 
 数据源：`resources/built-in-plugins/py-runtime-requirements.txt`（10 个显式包）
 
@@ -82,7 +82,7 @@ core/py-server/                         # Python 工具执行服务（Node 调�
 | requests | >=2.28 | HTTP 客户端 |
 | tqdm | >=4.65 | 进度条 |
 
-**通过 figcode-* 卡片附带 artifact 提供的 Python 包**（不属于 biof3-py-runtime，独立 artifact zip）：
+**通过 figcode-* 卡片附带 artifact 提供的 Python 包**（不属于 petri-py-runtime，独立 artifact zip）：
 
 | Package | 引入插件（figcodeCardId） | 备注 |
 |---|---|---|
@@ -100,24 +100,24 @@ core/py-server/                         # Python 工具执行服务（Node 调�
 
 ---
 
-## §4 biof3-r-runtime 路径与结构
+## §4 petri-r-runtime 路径与结构
 
-`biof3-r-runtime` 同样是注册在 manifest.json 中的 runtime kind 插件：
+`petri-r-runtime` 同样是注册在 manifest.json 中的 runtime kind 插件：
 
 ```
 resources/built-in-plugins/
-├── manifest.json                       # biof3-r-runtime v1.0.0 注册项
+├── manifest.json                       # petri-r-runtime v1.0.0 注册项
 ├── r-runtime-packages.txt              # 显式 R 包清单（26 个）
-└── biof3-r-runtime 不存在独立目录      # runtime 实际从 OSS artifact zip 加载
+└── petri-r-runtime 不存在独立目录      # runtime 实际从 OSS artifact zip 加载
 
 core/r-server/                          # R 工具执行服务
-├── server.js / agent-runner.js         # 调用 biof3-r-runtime 加载的 R 环境
+├── server.js / agent-runner.js         # 调用 petri-r-runtime 加载的 R 环境
 ├── tool-scripts/                       # 24 个 .R 工具脚本 + _scope.md 步骤 0 文档
 │   ├── seurat-standard.R               # 已存在（seurat 工具）
 │   ├── deseq2.R / gsea.R / go-kegg.R / wgcna.R / ...
 │   └── _seurat-standard-scope.md       # 步骤 0 ground truth
 ├── package.json / .env.example
-├── biof3.db                            # 任务数据库
+├── petri.db                            # 任务数据库
 └── node_modules / routes / ...
 ```
 
@@ -125,17 +125,17 @@ core/r-server/                          # R 工具执行服务
 
 | Platform | URL | sha256 | sizeBytes |
 |---|---|---|---|
-| macos-arm64 | `https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/macos-arm64.zip` | `60e1c9bc1eae529585ff8184b2f507331539a8302beb34249b2597fe7231e68c` | 556,916,997 (~557MB) |
-| windows-x64 | `https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/windows-x64.zip` | null | null |
+| macos-arm64 | `https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/macos-arm64.zip` | `60e1c9bc1eae529585ff8184b2f507331539a8302beb34249b2597fe7231e68c` | 556,916,997 (~557MB) |
+| windows-x64 | `https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/windows-x64.zip` | null | null |
 
 **Built against**: R 4.5.2 + Bioconductor 3.22 · Requires: `r >=4.4.0`
 
-**manifest description 原文**：_"R 4.5.2 + Bioconductor 3.22 + ggplot2/dplyr/data.table/BiocGenerics 等 70+ 包，BioF3 所有 R 工具的运行基础。"_
+**manifest description 原文**：_"R 4.5.2 + Bioconductor 3.22 + ggplot2/dplyr/data.table/BiocGenerics 等 70+ 包，Petri 所有 R 工具的运行基础。"_
 （"70+ 包"包括 Bioconductor 间接依赖；显式清单 26 个核心包。）
 
 ---
 
-## §5 biof3-r-runtime 已装 R 包
+## §5 petri-r-runtime 已装 R 包
 
 数据源：`resources/built-in-plugins/r-runtime-packages.txt`（26 个显式包）
 
@@ -177,7 +177,7 @@ core/r-server/                          # R 工具执行服务
 | **gifski** | `figcode-volcano-animated` | GIF 导出 |
 | **BSgenome.Hsapiens.UCSC.hg19** | `figcode-data-bsgenome-hg19` | hg19 参考（2.5GB 数据包） |
 
-**业务插件 environment.json 直接声明的 R 包**（非 figcode，主要依赖 biof3-r-runtime）：
+**业务插件 environment.json 直接声明的 R 包**（非 figcode，主要依赖 petri-r-runtime）：
 
 | Plugin | R 依赖 |
 |---|---|
@@ -192,7 +192,7 @@ core/r-server/                          # R 工具执行服务
 | `sample-metadata-validator` | jsonlite >=1.8.0, digest >=0.6.0 |
 
 > 注：上表中 "go-kegg" / "gsea" / "wgcna" 等均通过 `requiresBundle: "r-enrichment"` /
-> `"r-wgcna"` 机制共享 biof3-r-runtime 的 R 解释器。
+> `"r-wgcna"` 机制共享 petri-r-runtime 的 R 解释器。
 
 ---
 
@@ -202,9 +202,9 @@ core/r-server/                          # R 工具执行服务
 
 | Target Package | Language | 当前状态 | 来源 / 待加位置 | 备注 |
 |---|---|---|---|---|
-| **scanpy** | Python | 已就位 | biof3-py-runtime（>=1.9） | 核心已就位 |
+| **scanpy** | Python | 已就位 | petri-py-runtime（>=1.9） | 核心已就位 |
 | **squidpy** | Python | 已就位 | 6 个 figcode-* 卡片 artifact | 空间转录组卡片 |
-| **seurat** | R | 已就位 | biof3-r-runtime（基础集） | 已就位 |
+| **seurat** | R | 已就位 | petri-r-runtime（基础集） | 已就位 |
 | **scvelo** | Python | 已就位 | `figcode-scvelo-stream` artifact | RNA velocity 卡片 |
 | **scDblFinder** | R | 已就位 | `figcode-sc-doublet` artifact | 双胞检测卡片 |
 | **CytoTRACE** | R | 已就位 | `figcode-cytotrace` artifact | 分化潜能卡片 |
@@ -225,7 +225,7 @@ core/r-server/                          # R 工具执行服务
 | **vcftools** | C++（CLI） | 未安装 | 同上 |
 | **freebayes** | C++（CLI） | 未安装 | 同上 |
 
-**风险等级**：高。整个 variant-calling 生态在 BioF3 中**完全空白**，需新建独立
+**风险等级**：高。整个 variant-calling 生态在 Petri 中**完全空白**，需新建独立
 "variant-calling tools" 子集（conda env / 系统级二进制）；GATK 商业 license 是核心
 风险，建议改用 GATK4 开源子集 + bcftools/freebayes。
 
@@ -233,11 +233,11 @@ core/r-server/                          # R 工具执行服务
 
 | Target Package | Language | 当前状态 | 来源 | 备注 |
 |---|---|---|---|---|
-| **clusterProfiler** | R | 已就位 | biof3-r-runtime + go-kegg/gsea 插件 | 核心已就位 |
-| **enrichplot** | R | 已就位 | biof3-r-runtime | 核心已就位 |
-| **DOSE** | R | 已就位 | biof3-r-runtime | 核心已就位 |
-| **org.Hs.eg.db / org.Mm.eg.db** | R | 已就位 | biof3-r-runtime | 核心已就位 |
-| **msigdbr** | R | 已就位 | biof3-r-runtime + gsea 插件 | 核心已就位 |
+| **clusterProfiler** | R | 已就位 | petri-r-runtime + go-kegg/gsea 插件 | 核心已就位 |
+| **enrichplot** | R | 已就位 | petri-r-runtime | 核心已就位 |
+| **DOSE** | R | 已就位 | petri-r-runtime | 核心已就位 |
+| **org.Hs.eg.db / org.Mm.eg.db** | R | 已就位 | petri-r-runtime | 核心已就位 |
+| **msigdbr** | R | 已就位 | petri-r-runtime + gsea 插件 | 核心已就位 |
 | **ReactomePA** | R | 未安装 | 需 Bioconductor 新增 | 与 clusterProfiler 互补 |
 | **fgsea** | R | 未安装 | 需 Bioconductor 新增 | 快速 GSEA |
 
@@ -253,8 +253,8 @@ core/r-server/                          # R 工具执行服务
 | **minfi** | R | 未安装 | 需 Bioconductor 新增（450K 阵列分析） |
 | **ChAMP** | R | 未安装 | 需 Bioconductor 新增（450K/850K pipeline） |
 
-**风险等级**：中。methylation 生态在 BioF3 **完全空白**；4 个工具都是
-Bioconductor R 包，理论可统一扩展到 biof3-r-runtime（需评估 zip 大小膨胀）。
+**风险等级**：中。methylation 生态在 Petri **完全空白**；4 个工具都是
+Bioconductor R 包，理论可统一扩展到 petri-r-runtime（需评估 zip 大小膨胀）。
 
 ### §6.5 P2 — read-qc
 
@@ -266,7 +266,7 @@ Bioconductor R 包，理论可统一扩展到 biof3-r-runtime（需评估 zip �
 | **trim_galore** | Python（wrapper） | 未安装 | 依赖 cutadapt + FastQC |
 
 **风险等级**：低。FastQC/MultiQC/cutadapt 均为常见工具，可通过新建
-"biof3-read-qc-tools" 子集添加；trim_galore 是 cutadapt 的便捷 wrapper。
+"petri-read-qc-tools" 子集添加；trim_galore 是 cutadapt 的便捷 wrapper。
 
 > 备注：现有 `expression-qc` 插件是 **counts 矩阵 QC**（不是 raw reads QC），
 > 用 R 实现，不涉及 FastQC 等原始测序数据 QC 工具。
@@ -279,36 +279,36 @@ Bioconductor R 包，理论可统一扩展到 biof3-r-runtime（需评估 zip �
 
 ### PHASE 1 — single-cell（启动门槛：低）
 
-- **核心已就位**，无需扩展 biof3-py-runtime 或 biof3-r-runtime。
+- **核心已就位**，无需扩展 petri-py-runtime 或 petri-r-runtime。
 - 若纳入 **pertpy** 与 **cassiopeia**：
-  - `pertpy`：Python 包，pip 装入 biof3-py-runtime 增量 artifact（评估 ~30MB）
-  - `cassiopeia`：Bioconductor R 包，加入 biof3-r-runtime 增量（评估 ~20MB）
+  - `pertpy`：Python 包，pip 装入 petri-py-runtime 增量 artifact（评估 ~30MB）
+  - `cassiopeia`：Bioconductor R 包，加入 petri-r-runtime 增量（评估 ~20MB）
 - **决策点**：pertpy / cassiopeia 是否纳入 v1？若纳入，需扩展 manifest runtime artifact。
 
 ### PHASE 2 — variant-calling（启动门槛：高）
 
 - **核心决策**：是否使用 GATK？
   - 推荐改用 **GATK4 开源子集（gatk4-cli）** + bcftools + freebayes + vcftools
-  - 全部以 CLI 形式封装，需新建独立 runtime 子集（不能放进 biof3-py-runtime）
-- **建议方案**：新建 `biof3-variant-tools` runtime 类插件（kind: "runtime"），artifacts
+  - 全部以 CLI 形式封装，需新建独立 runtime 子集（不能放进 petri-py-runtime）
+- **建议方案**：新建 `petri-variant-tools` runtime 类插件（kind: "runtime"），artifacts
   含 macos-arm64 conda-pack 或纯二进制 zip（包含 bcftools / freebayes / vcftools /
   samtools + GATK4-cli jar）。
-- **不推荐**：把 variant-calling CLI 工具塞进 biof3-py-runtime（污染纯 Python runtime）。
+- **不推荐**：把 variant-calling CLI 工具塞进 petri-py-runtime（污染纯 Python runtime）。
 
 ### PHASE 3 — pathway + methylation（启动门槛：低 + 中）
 
-- **pathway 扩展**：在 biof3-r-runtime 增量 artifact 添加 **ReactomePA** + **fgsea**
+- **pathway 扩展**：在 petri-r-runtime 增量 artifact 添加 **ReactomePA** + **fgsea**
   - 都是 Bioconductor R 包；可与现有 clusterProfiler/enrichplot 共存
   - 评估总增量：约 15-20MB
 - **methylation 扩展**：4 个工具（methylKit / bsseq / minfi / ChAMP）全部需新增
   - 评估总增量：约 50-80MB（minfi/ChAMP 含较多依赖）
-  - 决策点：4 个工具是否全装？若全装，建议**单独** `biof3-methylation-runtime`
-    子集，避免 biof3-r-runtime 体积膨胀（557MB → 700MB+）。
+  - 决策点：4 个工具是否全装？若全装，建议**单独** `petri-methylation-runtime`
+    子集，避免 petri-r-runtime 体积膨胀（557MB → 700MB+）。
 
 ### PHASE 4 — read-qc（启动门槛：低）
 
-- **建议方案**：新建 `biof3-read-qc-tools` 子集
-  - FastQC（Java jar）+ MultiQC（Python 包，可与 biof3-py-runtime 共享）
+- **建议方案**：新建 `petri-read-qc-tools` 子集
+  - FastQC（Java jar）+ MultiQC（Python 包，可与 petri-py-runtime 共享）
   - cutadapt（Python，但需 C 编译）+ trim_galore（Python wrapper）
 - **替代方案**：若保持 read-qc 卡片化，可分两个 figcode 插件：
   - `figcode-read-qc-fastqc`：FastQC jar + wrapper R/Python
@@ -316,10 +316,10 @@ Bioconductor R 包，理论可统一扩展到 biof3-r-runtime（需评估 zip �
 
 ### 通用建议
 
-1. **优先复用 runtime**：PHASE 1/3 的扩展尽量增量加到 biof3-py-runtime /
-   biof3-r-runtime，避免插件膨胀。
+1. **优先复用 runtime**：PHASE 1/3 的扩展尽量增量加到 petri-py-runtime /
+   petri-r-runtime，避免插件膨胀。
 2. **CLI 工具拆子集**：variant-calling / read-qc 的 CLI 类工具（带 JVM、二进制）
-   建议独立 runtime 子集（biof3-variant-tools / biof3-read-qc-tools），不污染
+   建议独立 runtime 子集（petri-variant-tools / petri-read-qc-tools），不污染
    纯 Python 基础栈。
 3. **G1+ 阶段事项不动**：按当前 G0 阶段纪律，本报告不外推 packaged 公证 / Provider
    矩阵 / GA，仅描述 runtime 包清单与 PHASE 1-4 启动前扩展需求。
@@ -330,26 +330,26 @@ Bioconductor R 包，理论可统一扩展到 biof3-r-runtime（需评估 zip �
 
 ### runtime 注册路径
 
-- `resources/built-in-plugins/manifest.json` — `biof3-py-runtime`（line 37） /
-  `biof3-r-runtime`（line 8）注册项，含 artifacts / sha256 / builtAgainst / description
-- `resources/built-in-plugins/py-runtime-requirements.txt` — biof3-py-runtime 显式
+- `resources/built-in-plugins/manifest.json` — `petri-py-runtime`（line 37） /
+  `petri-r-runtime`（line 8）注册项，含 artifacts / sha256 / builtAgainst / description
+- `resources/built-in-plugins/py-runtime-requirements.txt` — petri-py-runtime 显式
   Python 包清单（10 个核心包）
-- `resources/built-in-plugins/r-runtime-packages.txt` — biof3-r-runtime 显式 R 包
+- `resources/built-in-plugins/r-runtime-packages.txt` — petri-r-runtime 显式 R 包
   清单（26 个核心包 + Bioconductor 间接依赖至 70+）
 
 ### runtime artifact URL
 
-- biof3-py-runtime macos-arm64: `https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/macos-arm64.zip`
+- petri-py-runtime macos-arm64: `https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/macos-arm64.zip`
   - sha256: `f88502026027aec32eaa03ea5d2faefe77dbd59d0524f99d365208385b2abec8`
   - size: 154,126,592 bytes (~147MB)
-- biof3-r-runtime macos-arm64: `https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/macos-arm64.zip`
+- petri-r-runtime macos-arm64: `https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/macos-arm64.zip`
   - sha256: `60e1c9bc1eae529585ff8184b2f507331539a8302beb34249b2597fe7231e68c`
   - size: 556,916,997 bytes (~557MB)
 
 ### 相关代码位置
 
-- `core/py-server/server.js` / `py-pool.js` — Python 工具调度（消费 biof3-py-runtime）
-- `core/r-server/server.js` / `agent-runner.js` — R 工具调度（消费 biof3-r-runtime）
+- `core/py-server/server.js` / `py-pool.js` — Python 工具调度（消费 petri-py-runtime）
+- `core/r-server/server.js` / `agent-runner.js` — R 工具调度（消费 petri-r-runtime）
 - `core/r-server/tool-scripts/seurat-standard.R` + `_seurat-standard-scope.md` —
   已存在的 Seurat 工具脚本与步骤 0 ground truth（PHASE 1 实施可直接复用）
 - `core/r-server/tool-scripts/_gsea-scope.md` — GSEA 范围卡（pathway PHASE 3 实施参考）

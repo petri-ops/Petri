@@ -4,18 +4,18 @@
  * ui348-global-polish-live.cjs — UI-348 实机验收：右栏后端卡删除 + 全局页主题色 + 顶栏冲突。
  *
  * 用户裁决（2026-09-11）：①右栏「后端」卡删除（管理面已在左栏入口的全局页）；
- * ②后端/知识空间页主题色随设置适配；③Skills/知识空间/后端顶栏「Gewu」区
+ * ②后端/知识空间页主题色随设置适配；③Skills/知识空间/后端顶栏「Petri」区
  * 分隔线错位/布局冲突优化。
  *
  * 断言：
  *   V1 右栏 home 空态不再有「后端」卡（其余快捷卡保留）；
  *   V2 /knowledge /backend 页头图标色 = 主题 accent token（非硬编码紫 #8b5cf6）；
- *   V3 全局页顶栏无品牌 chip「Gewu」、左右分区线退场（border 0）；
+ *   V3 全局页顶栏无品牌 chip「Petri」、左右分区线退场（border 0）；
  *   V4 回归：欢迎页顶栏品牌 chip 不受影响（仍在）。
  */
 
 const path = require('node:path');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function attach() {
@@ -72,7 +72,7 @@ async function goto(client, url) {
         hardViolet: (iconBg || '').indexOf('139, 92, 246') >= 0 || (iconFg || '') === 'rgb(139, 92, 246)',
         zoneBorders: zoneBorders,
         chipGone: !chip,
-        accent: getComputedStyle(document.documentElement).getPropertyValue('--gewu-accent').trim()
+        accent: getComputedStyle(document.documentElement).getPropertyValue('--petri-accent').trim()
       });
     })()`).catch(() => '{}');
     const s = JSON.parse(probe || '{}');

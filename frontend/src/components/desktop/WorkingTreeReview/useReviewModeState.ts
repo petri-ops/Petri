@@ -31,8 +31,8 @@ export function useGitInitPrompt(options: {
   useEffect(() => {
     try {
       setGitInitDismissed(
-        window.localStorage.getItem(`gewu.gitinit.dismissed.${projectId || 'default'}`) === '1'
-        || window.localStorage.getItem(`biof3.gitinit.dismissed.${projectId || 'default'}`) === '1',
+        window.localStorage.getItem(`petri.gitinit.dismissed.${projectId || 'default'}`) === '1'
+        || window.localStorage.getItem(`petri.gitinit.dismissed.${projectId || 'default'}`) === '1',
       );
     } catch {
       // localStorage 不可用（私有模式等）时按「未 dismiss」处理，引导仍可用
@@ -44,7 +44,7 @@ export function useGitInitPrompt(options: {
     setGitInitDismissed(true);
     try {
       // projectId 缺席（异常路由）时也按一次性记忆处理，用兜底 key
-      window.localStorage.setItem(`gewu.gitinit.dismissed.${projectId || 'default'}`, '1');
+      window.localStorage.setItem(`petri.gitinit.dismissed.${projectId || 'default'}`, '1');
     } catch {
       // ignore：记忆失败仅影响「不再弹」，本次 dismiss 仍然生效
     }

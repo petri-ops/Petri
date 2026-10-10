@@ -32,12 +32,12 @@
 
 ### 1.2 IPC 桥缺口比想象的**小** — 仅缺 `skills` 子块 + `main.js` IPC handlers
 
-- **`electron.d.ts` 已完整声明** `window.biof3Desktop.skills.{discover, execute, getExecution}`（行 114-150）
-- **`useSkillStore` 已调用** `getBridge('skills')`（行 173）；缺的是底层 `window.biof3Desktop.skills` 实际对象
-- **`preload.js` 有双重 expose**：行 21 `'biof3'`（仅 agentWorkbenchFlags）+ 行 61 `'biof3Desktop'`（全部 9 个桌面桥：isDesktop / window / app / aiSettings / computeSettings / harnessCapabilities / plugins / contentPlugins / terminal / updater）
-- **`biof3Desktop.skills` 在 preload.js 里**确实**缺失**（grep "skill" 0 命中）；main.js 也无 `skills` 相关 require / handler
-- **其他桥全部健康**（aiSettings / plugins / computeSettings / harnessCapabilities / contentPlugins / terminal / updater / window / app 都在 preload.js 第二份 `biof3Desktop` 对象里 + main.js 有对应 `ipcMain.handle`）
-- ✅ **无命名不一致问题**（Agent B 报告的"preload 用 `'biof3'` 而 electron.d.ts 用 `'biof3Desktop'`"是误读；preload 已经双重 expose 到 `biof3Desktop`）
+- **`electron.d.ts` 已完整声明** `window.petriDesktop.skills.{discover, execute, getExecution}`（行 114-150）
+- **`useSkillStore` 已调用** `getBridge('skills')`（行 173）；缺的是底层 `window.petriDesktop.skills` 实际对象
+- **`preload.js` 有双重 expose**：行 21 `'petri'`（仅 agentWorkbenchFlags）+ 行 61 `'petriDesktop'`（全部 9 个桌面桥：isDesktop / window / app / aiSettings / computeSettings / harnessCapabilities / plugins / contentPlugins / terminal / updater）
+- **`petriDesktop.skills` 在 preload.js 里**确实**缺失**（grep "skill" 0 命中）；main.js 也无 `skills` 相关 require / handler
+- **其他桥全部健康**（aiSettings / plugins / computeSettings / harnessCapabilities / contentPlugins / terminal / updater / window / app 都在 preload.js 第二份 `petriDesktop` 对象里 + main.js 有对应 `ipcMain.handle`）
+- ✅ **无命名不一致问题**（Agent B 报告的"preload 用 `'petri'` 而 electron.d.ts 用 `'petriDesktop'`"是误读；preload 已经双重 expose 到 `petriDesktop`）
 
 ### 1.3 backend DAG 引擎已就绪，只缺 SkillsSDK 单例装配
 
@@ -54,9 +54,9 @@
 
 | # | 文件 | 改动 | 行数估算 |
 |---|---|---|---|
-| 1 | `src/preload.js` | 在 `biof3Desktop` 第二份 expose 对象里加 `skills` 子块（discover/execute/getExecution/onProgress） | +15 |
+| 1 | `src/preload.js` | 在 `petriDesktop` 第二份 expose 对象里加 `skills` 子块（discover/execute/getExecution/onProgress） | +15 |
 | 2 | `src/main.js` | 顶部 `require` `skills-sdk` + 单例装配 + 3 个 `ipcMain.handle` + 1 个 progress 推送包装 | +80 |
-| 3 | `frontend/src/hooks/useSkillStore.ts` | 改 1 行：`_startPolling` (2s) → 订阅 `window.biof3Desktop.skills.onProgress` | ±10 |
+| 3 | `frontend/src/hooks/useSkillStore.ts` | 改 1 行：`_startPolling` (2s) → 订阅 `window.petriDesktop.skills.onProgress` | ±10 |
 | 4 | `frontend/src/hooks/useSkillStore.test.ts` | **新文件**，镜像 `usePluginStore.test.ts`（195 行模板） | +200 |
 
 **总计**：~305 行新增 + 改 1 处 polling。
@@ -77,7 +77,7 @@
 ```bash
 cd frontend && npm run dev  # 启动 Vite :3000
 # 用 Playwright MCP 访问 http://localhost:3000/skills
-# 在 page console 用 vi.stubGlobal('biof3Desktop', { skills: {...mock...} })
+# 在 page console 用 vi.stubGlobal('petriDesktop', { skills: {...mock...} })
 ```
 
 适合：PHASE 1 早期接通 UI 数据层（用 fixture 数据验证 4 个 page 渲染）
@@ -92,7 +92,7 @@ npm run test:files -- test/skills-sdk.test.mjs   # backend SDK
 ### 真实 Electron IPC（BLOCK-2 显式 widen 时启用）
 
 ```bash
-BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev
+PETRI_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev
 ```
 
 ### 4 个治理门禁（每次 commit 前必跑）
@@ -110,20 +110,20 @@ npm run docs:reconcile         # sub-5s
 
 ## 4. 对 Agent B 报告的修正
 
-### 修正 1：preload.js 不是单一 `biof3` world，而是**双重 expose**
+### 修正 1：preload.js 不是单一 `petri` world，而是**双重 expose**
 
 | 行号 | world 名 | 暴露内容 |
 |---|---|---|
-| 21 | `'biof3'` | 仅 `agentWorkbenchFlags` |
-| 61 | `'biof3Desktop'` | 9 个桌面桥（isDesktop / window / app / aiSettings / computeSettings / harnessCapabilities / plugins / contentPlugins / terminal / updater） |
+| 21 | `'petri'` | 仅 `agentWorkbenchFlags` |
+| 61 | `'petriDesktop'` | 9 个桌面桥（isDesktop / window / app / aiSettings / computeSettings / harnessCapabilities / plugins / contentPlugins / terminal / updater） |
 
-Agent B 仅看了行 21，没看行 61，错误地推断出"preload 用 `'biof3'`，与 electron.d.ts 的 `'biof3Desktop'` 不匹配"。
+Agent B 仅看了行 21，没看行 61，错误地推断出"preload 用 `'petri'`，与 electron.d.ts 的 `'petriDesktop'` 不匹配"。
 
-### 修正 2：项目里所有 `biof3Desktop.*` 桥**都已接通**，**只有 skills 断**
+### 修正 2：项目里所有 `petriDesktop.*` 桥**都已接通**，**只有 skills 断**
 
 | 桥 | electron.d.ts | preload.js | main.js | renderer |
 |---|---|---|---|---|
-| aiSettings / plugins / computeSettings / harnessCapabilities / contentPlugins / terminal / updater / window / app | ✅ | ✅（在 `biof3Desktop` 第二份对象里） | ✅ | ✅ |
+| aiSettings / plugins / computeSettings / harnessCapabilities / contentPlugins / terminal / updater / window / app | ✅ | ✅（在 `petriDesktop` 第二份对象里） | ✅ | ✅ |
 | **skills** | ✅ **L114-150** | ❌ **缺失** | ❌ **缺失** | ⚠️ 调 `getBridge('skills')` 拿 null |
 
 → PHASE 1 改动面比 B 报告"PHASE 1 rewire"暗示的小**一个数量级**：不需要新 IPC 命名（`skills:list` / `skills:invoke` 等），直接对齐 electron.d.ts 声明的 `discover` / `execute` / `getExecution` 3 个 hook + 1 个新 onProgress 推送。
@@ -168,7 +168,7 @@ Agent B 仅看了行 21，没看行 61，错误地推断出"preload 用 `'biof3'
 
 ## 7. 结论
 
-**PHASE 0 摸底已完成，4 治理门禁 GREEN，UI-161 intact，IPC 桥缺口精确（仅 `biof3Desktop.skills`），backend SkillsSDK 已就绪仅缺 main.js 单例装配。**
+**PHASE 0 摸底已完成，4 治理门禁 GREEN，UI-161 intact，IPC 桥缺口精确（仅 `petriDesktop.skills`），backend SkillsSDK 已就绪仅缺 main.js 单例装配。**
 
 **PHASE 1 改动面 ~305 行（preload +15 / main +80 / useSkillStore ±10 / 新 test +200），无需新 IPC channel 命名，对齐 electron.d.ts 现有 3 个 hook + 1 个新 push 事件。**
 

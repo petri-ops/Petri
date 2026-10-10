@@ -8,7 +8,7 @@
  * 断言全部是真行为：输入后语义树 value 变化、按钮 AXPress 后状态回写、
  * 截图产物为真实 PNG、wait 正/负超时两路。
  *
- * 前置：bash scripts/build-computer-use-sidecar.sh（bin/gewu-computer-use + bin/axfixture）
+ * 前置：bash scripts/build-computer-use-sidecar.sh（bin/petri-computer-use + bin/axfixture）
  */
 
 import assert from 'node:assert/strict';
@@ -21,7 +21,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const BINARY = path.join(__dirname, '..', 'sidecars', 'computer-use', 'bin', 'gewu-computer-use');
+const BINARY = path.join(__dirname, '..', 'sidecars', 'computer-use', 'bin', 'petri-computer-use');
 // BLOCK-104 P3 — 环境门：sidecar 未构建时整组 skip（可见计数，带构建指引）。
 const HAS_SIDECAR = fs.existsSync(BINARY);
 const SIDECAR_SKIP = HAS_SIDECAR ? false : 'sidecar 未构建：先运行 bash scripts/build-computer-use-sidecar.sh（macOS Swift 产物）';

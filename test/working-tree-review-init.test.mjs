@@ -22,7 +22,7 @@ function makeTempDir(prefix) {
 }
 
 test('initRepositoryAt: fresh directory → git init + full initial commit', async () => {
-  const dir = makeTempDir('biof3-b53-init-');
+  const dir = makeTempDir('petri-b53-init-');
   try {
     fs.writeFileSync(path.join(dir, 'hello.txt'), 'hi\n');
     fs.mkdirSync(path.join(dir, 'nested'));
@@ -38,8 +38,8 @@ test('initRepositoryAt: fresh directory → git init + full initial commit', asy
     // 真实仓库状态：初始提交包含全部文件
     const { execFileSync } = await import('node:child_process');
     const log = execFileSync('git', ['-C', dir, 'log', '--oneline'], { encoding: 'utf-8' });
-    // BLOCK-61 品牌改名后初始提交信息为 Gewu（源码 repository-init.js 为唯一真值）
-    assert.match(log, /Initial commit \(Gewu\)/);
+    // BLOCK-61 品牌改名后初始提交信息为 Petri（源码 repository-init.js 为唯一真值）
+    assert.match(log, /Initial commit \(Petri\)/);
     const files = execFileSync('git', ['-C', dir, 'ls-files'], { encoding: 'utf-8' });
     assert.match(files, /hello\.txt/);
     assert.match(files, /nested\/data\.csv/);
@@ -52,7 +52,7 @@ test('initRepositoryAt: fresh directory → git init + full initial commit', asy
 });
 
 test('initRepositoryAt: already a git repo → idempotent alreadyGit', async () => {
-  const dir = makeTempDir('biof3-b53-already-');
+  const dir = makeTempDir('petri-b53-already-');
   try {
     const { execFileSync } = await import('node:child_process');
     execFileSync('git', ['-C', dir, 'init', '-q']);
@@ -72,7 +72,7 @@ test('initRepositoryAt: commit fails (empty tree) → init kept, committed:false
   // 走与「git 身份未配置」同一容错分支的确定性场景：空目录无文件可提交，
   // git commit 以 "nothing to commit" 失败；init 与 .git 必须保留且返回可行动 warning。
   // （不直接测「无身份」：部分平台的 git 会用 GECOS+hostname 自动推断身份，机器相关不可断言。）
-  const dir = makeTempDir('biof3-b53-empty-');
+  const dir = makeTempDir('petri-b53-empty-');
   try {
     const res = await initRepositoryAt(dir);
 

@@ -1,4 +1,4 @@
-/* KnowledgeConsoleChat.module.css — BLOCK-99 G4 管理会话台（--gewu-* token，禁 slate/零定义族） */
+/* KnowledgeConsoleChat.module.css — BLOCK-99 G4 管理会话台（--petri-* token，禁 slate/零定义族） */
 
 /* /knowledge 页布局（BLOCK-103 起文档区为主体，会话台折叠抽屉见
    KnowledgeConsoleDock.module.css）。注意 flex-direction: row 必须显式——
@@ -24,9 +24,9 @@
   flex-direction: column;
   height: 100%;
   min-width: 0;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 10px;
-  background: var(--gewu-surface);
+  background: var(--petri-surface);
   overflow: hidden;
 }
 
@@ -35,21 +35,21 @@
   align-items: center;
   gap: 7px;
   padding: 9px 12px;
-  border-bottom: 1px solid var(--gewu-border);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-caption);
+  border-bottom: 1px solid var(--petri-border);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-caption);
   flex-shrink: 0;
 }
 
 .headerTitle {
-  color: var(--gewu-text);
+  color: var(--petri-text);
   font-weight: 600;
 }
 
 .headerHint {
   margin-left: auto;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs);
 }
 
 .list {
@@ -63,11 +63,11 @@
 }
 
 .empty {
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-caption);
   line-height: 1.7;
-  background: var(--gewu-bg-subtle);
-  border: 1px solid var(--gewu-border);
+  background: var(--petri-bg-subtle);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
   padding: 10px 12px;
 }
@@ -78,7 +78,7 @@
 }
 
 .emptyNote {
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   margin-top: 6px;
 }
 
@@ -86,7 +86,7 @@
   max-width: 92%;
   padding: 7px 10px;
   border-radius: 10px;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   line-height: 1.6;
   white-space: pre-wrap;
   word-break: break-word;
@@ -94,14 +94,14 @@
 
 .msgUser {
   align-self: flex-end;
-  background: var(--gewu-accent-surface);
-  color: var(--gewu-text);
+  background: var(--petri-accent-surface);
+  color: var(--petri-text);
 }
 
 .msgAssistant {
   align-self: flex-start;
-  background: var(--gewu-bg-subtle);
-  color: var(--gewu-text);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text);
 }
 
 .toolRow {
@@ -111,15 +111,15 @@
   align-items: center;
   gap: 6px;
   padding: 5px 9px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
-  background: var(--gewu-bg-subtle);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-xs);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xs);
 }
 
 .toolRowError {
-  border-color: var(--gewu-danger);
+  border-color: var(--petri-danger);
 }
 
 .toolSpin {
@@ -133,12 +133,12 @@
 }
 
 .toolLabel {
-  color: var(--gewu-text);
+  color: var(--petri-text);
   font-weight: 600;
 }
 
 .toolSummary {
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -149,21 +149,21 @@
   width: 100%;
   margin-top: 4px;
   padding: 8px 10px;
-  border: 1px solid var(--gewu-danger);
+  border: 1px solid var(--petri-danger);
   border-radius: 8px;
-  background: var(--gewu-danger-bg);
+  background: var(--petri-danger-bg);
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
 .confirmTitle {
-  color: var(--gewu-danger);
+  color: var(--petri-danger);
   font-weight: 600;
 }
 
 .confirmImpact {
-  color: var(--gewu-text);
+  color: var(--petri-text);
   line-height: 1.6;
 }
 
@@ -173,42 +173,42 @@
 }
 
 .confirmBtnDanger {
-  border: 1px solid var(--gewu-danger);
+  border: 1px solid var(--petri-danger);
   border-radius: 6px;
-  background: var(--gewu-danger);
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-xs);
+  background: var(--petri-danger);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-xs);
   padding: 4px 10px;
   cursor: pointer;
 }
 
 .confirmBtnGhost {
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
   background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xs);
   padding: 4px 10px;
   cursor: pointer;
 }
 
 .confirmBtnGhost:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .confirmResolved {
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .error {
   flex-shrink: 0;
   margin: 0 12px 8px;
   padding: 6px 10px;
-  border: 1px solid var(--gewu-danger);
+  border: 1px solid var(--petri-danger);
   border-radius: 8px;
-  background: var(--gewu-danger-bg);
-  color: var(--gewu-danger);
-  font-size: var(--gewu-font-size-xs);
+  background: var(--petri-danger-bg);
+  color: var(--petri-danger);
+  font-size: var(--petri-font-size-xs);
 }
 
 .composer {
@@ -217,25 +217,25 @@
   align-items: flex-end;
   gap: 8px;
   padding: 10px 12px;
-  border-top: 1px solid var(--gewu-border);
+  border-top: 1px solid var(--petri-border);
 }
 
 .input {
   flex: 1;
   min-width: 0;
   resize: none;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
-  background: var(--gewu-bg-subtle);
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-caption);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-caption);
   line-height: 1.5;
   padding: 7px 9px;
 }
 
 .input:focus {
   outline: none;
-  border-color: var(--gewu-accent);
+  border-color: var(--petri-accent);
 }
 
 .input:disabled {
@@ -249,10 +249,10 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  border: 1px solid var(--gewu-accent);
+  border: 1px solid var(--petri-accent);
   border-radius: 8px;
-  background: var(--gewu-accent-surface);
-  color: var(--gewu-text);
+  background: var(--petri-accent-surface);
+  color: var(--petri-text);
   cursor: pointer;
 }
 
@@ -262,5 +262,5 @@
 }
 
 .sendBtn:not(:disabled):hover {
-  background: var(--gewu-accent);
+  background: var(--petri-accent);
 }

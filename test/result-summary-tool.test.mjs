@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { buildResultSummary, pickPrimaryArtifact, readTablePreview, tool_result_summary } from '../core/biof3-server/agent-tools/result-summary-tools.js';
+import { buildResultSummary, pickPrimaryArtifact, readTablePreview, tool_result_summary } from '../core/petri-server/agent-tools/result-summary-tools.js';
 
 /**
  * BLOCK-121 P2（B1）— result_summary 有界只读读取工具契约。

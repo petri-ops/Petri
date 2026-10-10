@@ -23,7 +23,7 @@
     {
       "name": "T3_end_to_end_through_tunnel",
       "ok": true,
-      "detail": "{\"ok\":true,\"service\":\"gewu-mobile-gateway\"}"
+      "detail": "{\"ok\":true,\"service\":\"petri-mobile-gateway\"}"
     },
     {
       "name": "T4_protected_route_401_via_tunnel",

@@ -19,27 +19,27 @@ export function UpdateChecker(): React.ReactElement | null {
   const { checking, available, availableVersion, downloading, progress, downloaded, error, upToDate, installing, check, download, install } =
     useAutoUpdate();
 
-  if (!window.biof3Desktop?.updater) return null;
+  if (!window.petriDesktop?.updater) return null;
 
   const pct = progress !== null ? Math.round(progress * 100) : 0;
 
   return (
-    <div className="gewu-update-section">
+    <div className="petri-update-section">
       {downloaded ? (
         <button
           type="button"
-          className="gewu-btn gewu-btn--primary gewu-btn--sm"
+          className="petri-btn petri-btn--primary petri-btn--sm"
           onClick={() => void install()}
           disabled={installing}
         >
           {installing ? '正在打开…' : '打开安装包'}
         </button>
       ) : downloading ? (
-        <span className="gewu-update-progress">下载中 {pct}%</span>
+        <span className="petri-update-progress">下载中 {pct}%</span>
       ) : available ? (
         <button
           type="button"
-          className="gewu-btn gewu-btn--primary gewu-btn--sm"
+          className="petri-btn petri-btn--primary petri-btn--sm"
           onClick={() => void download()}
         >
           下载 v{availableVersion}
@@ -47,7 +47,7 @@ export function UpdateChecker(): React.ReactElement | null {
       ) : (
         <button
           type="button"
-          className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+          className="petri-btn petri-btn--ghost petri-btn--sm"
           onClick={() => void check()}
           disabled={checking}
         >
@@ -55,9 +55,9 @@ export function UpdateChecker(): React.ReactElement | null {
         </button>
       )}
       {upToDate && !error && (
-        <span className="gewu-field__hint">当前已是最新版本</span>
+        <span className="petri-field__hint">当前已是最新版本</span>
       )}
-      {error && <span className="gewu-field__hint">{error}</span>}
+      {error && <span className="petri-field__hint">{error}</span>}
     </div>
   );
 }

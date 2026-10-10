@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<title>Petri · 移动工作区</title>
+<style>
+  :root {
+    --bg: #101216; --card: #191d24; --line: #2a303b; --text: #e8ebf0;
+    --dim: #97a0ae; --accent: #4f8cff; --ok: #3fb96b; --warn: #e0a13c; --err: #e05c5c;
+  }
+  @media (prefers-color-scheme: light) {
+    :root { --bg: #f4f6f9; --card: #ffffff; --line: #dfe4ec; --text: #1c2230; --dim: #66707f; }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font: 15px/1.5 -apple-system, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; padding-bottom: 64px; }
+  header { position: sticky; top: 0; background: var(--card); border-bottom: 1px solid var(--line); padding: 12px 16px; display: flex; align-items: center; gap: 8px; z-index: 10; }
+  header h1 { font-size: 16px; font-weight: 600; flex: 1; }
+  header .state { font-size: 12px; color: var(--dim); }
+  nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; background: var(--card); border-top: 1px solid var(--line); z-index: 10; }
+  nav button { flex: 1; padding: 12px 0; background: none; border: none; color: var(--dim); font-size: 13px; }
+  nav button.active { color: var(--accent); font-weight: 600; }
+  main { padding: 12px 12px 24px; max-width: 640px; margin: 0 auto; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; }
+  .card h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; word-break: break-all; }
+  .card p, .card li { font-size: 13px; color: var(--dim); word-break: break-all; }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .badge { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); }
+  .s-running { color: var(--ok); border-color: var(--ok); }
+  .s-failed, .s-cancelled { color: var(--err); border-color: var(--err); }
+  .s-completed { color: var(--accent); border-color: var(--accent); }
+  .back { background: none; border: none; color: var(--accent); font-size: 14px; padding: 4px 0 12px; }
+  .empty { text-align: center; color: var(--dim); padding: 48px 16px; font-size: 14px; }
+  pre { white-space: pre-wrap; word-break: break-all; font-size: 13px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; margin: 6px 0; }
+  .screen { max-width: 420px; margin: 80px auto; text-align: center; padding: 0 24px; }
+  .screen h2 { font-size: 18px; margin-bottom: 10px; }
+  .screen p { color: var(--dim); font-size: 14px; margin-bottom: 8px; }
+  .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 76px; background: var(--card); border: 1px solid var(--line); padding: 8px 16px; border-radius: 999px; font-size: 13px; display: none; z-index: 20; }
+  .approval { border-color: var(--warn); }
+  .approval h3 { color: var(--warn); }
+  .approval .actions { display: flex; gap: 10px; margin-top: 10px; }
+  .approval .actions button { flex: 1; padding: 10px 0; border-radius: 8px; border: 1px solid var(--line); background: none; color: var(--text); font-size: 14px; }
+  .approval .actions .approve.armed { background: var(--ok); color: #fff; border-color: var(--ok); }
+  .approval .actions .reject.armed { background: var(--err); color: #fff; border-color: var(--err); }
+  .approval .done { margin-top: 10px; font-size: 13px; color: var(--dim); }
+  .composer { position: fixed; left: 0; right: 0; bottom: 52px; background: var(--card); border-top: 1px solid var(--line); padding: 8px 10px; display: flex; gap: 8px; z-index: 10; }
+  .composer input { flex: 1; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; color: var(--text); padding: 10px 12px; font-size: 14px; }
+  .composer button { border: none; border-radius: 8px; background: var(--accent); color: #fff; padding: 0 16px; font-size: 14px; }
+  .composer button:disabled { opacity: 0.5; }
+  .cancelbtn { background: none; border: 1px solid var(--err); color: var(--err); border-radius: 8px; padding: 6px 12px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+<script>
+(function () {
+  'use strict';
+  var SESSION_KEY = 'petri-mobile-session';
+  var app = document.getElementById('app');
+  var state = { tab: 'tasks', tasks: [], conversations: [], detail: null };
+
+  function toast(msg) {
+    var el = document.getElementById('toast');
+    el.textContent = msg; el.style.display = 'block';
+    setTimeout(function () { el.style.display = 'none'; }, 2600);
+  }
+
+  function sessionToken() { return localStorage.getItem(SESSION_KEY) || ''; }
+
+  function api(path, options) {
+    options = options || {};
+    options.headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers, { Authorization: 'Bearer ' + sessionToken() });
+    if (options.body && typeof options.body !== 'string') options.body = JSON.stringify(options.body);
+    return fetch(path, options).then(function (res) {
+      if (res.status === 401) { localStorage.removeItem(SESSION_KEY); renderUnpaired('会话已失效，请回桌面端重新扫码配对'); throw new Error('unauthorized'); }
+      return res.json().catch(function () { return {}; });
+    });
+  }
+
+  // ── 配对：URL hash 携带一次性 token → 换持久会话 ─────────────────────
+  function tryPairFromHash() {
+    var hash = location.hash || '';
+    var token = hash.charAt(0) === '#' ? hash.slice(1) : '';
+    if (!token) return Promise.resolve(false);
+    return fetch('/m/api/pair', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: token }),
+    }).then(function (res) { return res.json(); }).then(function (data) {
+      history.replaceState(null, '', location.pathname);
+      if (data && data.ok && data.sessionToken) {
+        localStorage.setItem(SESSION_KEY, data.sessionToken);
+        toast('配对成功');
+        return true;
+      }
+      renderUnpaired((data && data.message) || '配对码无效或已过期，请在桌面端重新生成');
+      return true;
+    }).catch(function () { return false; });
+  }
+
+  function statusBadge(status) {
+    var s = String(status || '').toLowerCase();
+    var cls = s === 'running' || s === 'pending' ? 's-running'
+      : s === 'failed' || s === 'cancelled' || s === 'recovery_required' ? 's-failed'
+        : s === 'completed' ? 's-completed' : '';
+    return '<span class="badge ' + cls + '">' + (status || '-') + '</span>';
+  }
+
+  function esc(text) {
+    var div = document.createElement('div');
+    div.textContent = String(text == null ? '' : text);
+    return div.innerHTML;
+  }
+
+  // ── 总览（/m/api/overview 一次拉全：会话+分析作业+智能体任务）────────
+  function loadOverview() {
+    return api('/m/api/overview').then(function (data) {
+      state.overview = {
+        conversations: data.conversations || [],
+        toolJobs: data.toolJobs || [],
+        agentTasks: data.agentTasks || [],
+      };
+    }).catch(function (e) { if (e.message !== 'unauthorized') toast('总览加载失败'); });
+  }
+
+  // ── 任务墙（智能体任务 + 分析作业）─────────────────────────────────
+  function loadTasks() {
+    return loadOverview().then(function () {
+      if (state.detail) renderDetail(); else renderTasks();
+    });
+  }
+
+  function renderTasks() {
+    var o = state.overview || { agentTasks: [], toolJobs: [] };
+    var agentHtml = o.agentTasks.length ? o.agentTasks.map(function (t) {
+      return '<div class="card" data-task="' + esc(t.taskId) + '">'
+        + '<div class="row"><h3>' + esc(t.taskText || t.taskId) + '</h3>' + statusBadge(t.status) + '</div>'
+        + '<p>' + esc(t.createdAt || '') + (t.agentStatus ? ' · agent: ' + esc(t.agentStatus) : '') + '</p>'
+        + '</div>';
+    }).join('') : '<div class="empty">暂无智能体任务</div>';
+    var jobHtml = o.toolJobs.length ? o.toolJobs.map(function (j) {
+      return '<div class="card">'
+        + '<div class="row"><h3>' + esc(j.name || j.tool_id || j.id) + '</h3>' + statusBadge(j.status) + '</div>'
+        + '<p>' + esc(j.project_name || '') + (j.completed_at ? ' · ' + esc(j.completed_at) : '') + '</p>'
+        + (j.error ? '<p>' + esc(String(j.error).slice(0, 160)) + '</p>' : '')
+        + '</div>';
+    }).join('') : '<div class="empty">暂无分析作业</div>';
+    app.innerHTML = '<main>'
+      + '<h3 style="margin:4px 0 8px">智能体任务</h3>' + agentHtml
+      + '<h3 style="margin:14px 0 8px">分析作业</h3>' + jobHtml
+      + '</main>' + navHtml();
+    Array.prototype.forEach.call(app.querySelectorAll('[data-task]'), function (el) {
+      el.addEventListener('click', function () { openTask(el.getAttribute('data-task')); });
+    });
+    bindNav();
+  }
+
+  // ── 任务详情（SSE afterSeq 实时流 + 批准卡 + 取消）──────────────────
+  // BLOCK-150 ⑥ — token 出 URL（对齐 BLOCK-132 主链方案）：EventSource 无法
+  // 携带自定义头，曾把会话 token 拼进 URL query（日志/引用/历史污染，与主链
+  // agentTaskStream 同款问题）。改 fetch + ReadableStream + Authorization Bearer
+  // 头（认证通道与页面 api() 助手一致），断线 2s 退避重连、afterSeq 续传
+  // （重连不再从 0 重放，顺带修掉旧 EventSource 固定 afterSeq=0 的重复回放）。
+  function openTaskStream(taskId) {
+    var stopped = false;
+    // BLOCK-151（BLOCK-150 P2-1 携带）— close() 不能只翻 stopped 标志：
+    // 在途 pump 会继续读流，旧任务的迟到帧经 handleStreamLine 落进新详情。
+    // AbortController 让 close() 真正取消在途 fetch（旧 WebView 无此全局时优雅降级）。
+    var aborter = typeof AbortController === 'function' ? new AbortController() : null;
+    // 分发归属守卫：帧只允许写进「本任务」的详情——切换详情/返回任务墙后，
+    // 旧任务迟到帧（含 needApproval/大 seq）不得污染新视图或抬高其 lastSeq。
+    function detailLive() { return !!(state.detail && state.detail.taskId === taskId); }
+    function connect() {
+      if (stopped) return;
+      // afterSeq 取 detail 上记录的 lastSeq（首连 0；重连续传不重放）
+      var afterSeq = (state.detail && state.detail.taskId === taskId && state.detail.lastSeq) || 0;
+      fetch('/api/ai/agent/task/' + encodeURIComponent(taskId) + '?afterSeq=' + afterSeq, {
+        headers: { Authorization: 'Bearer ' + sessionToken(), Accept: 'text/event-stream' },
+        signal: aborter ? aborter.signal : undefined,
+      }).then(function (resp) {
+        if (!resp.ok || !resp.body) throw new Error('HTTP ' + resp.status);
+        var reader = resp.body.getReader();
+        var decoder = new TextDecoder();
+        var buf = '';
+        function pump() {
+          return reader.read().then(function (r) {
+            if (r.done) throw new Error('stream_end');
+            buf += decoder.decode(r.value, { stream: true });
+            var idx;
+            while ((idx = buf.indexOf('\n\n')) !== -1) {
+              var frame = buf.slice(0, idx);
+              buf = buf.slice(idx + 2);
+              var lines = frame.split('\n');
+              for (var i = 0; i < lines.length; i++) {
+                var m = lines[i].match(/^data:\s?(.*)$/);
+                // [DONE] 是协议哨兵非事件（主链同款教训：不跳过会当正文渲染）
+                if (m && m[1] && m[1] !== '[DONE]' && detailLive()) handleStreamLine(m[1]);
+              }
+            }
+            return pump();
+          });
+        }
+        return pump();
+      }).catch(function () {
+        // 断线退避重连（任务详情仍开着才续；afterSeq 由 lastSeq 续传）
+        if (!stopped && detailLive()) {
+          setTimeout(connect, 2000);
+        }
+      });
+    }
+    connect();
+    return {
+      close: function () {
+        stopped = true;
+        if (aborter) { try { aborter.abort(); } catch (e) { /* 已关闭即幂等 */ } }
+      },
+    };
+  }
+
+  function openTask(taskId) {
+    state.detail = { taskId: taskId, meta: null, lines: [], approval: null, decided: null };
+    renderDetail();
+    if (state.es) { state.es.close(); state.es = null; }
+    // 任务元信息：批准决定需要 projectId/conversationId scope（D4 权限不放大）。
+    api('/api/ai/agent/task/' + encodeURIComponent(taskId) + '/meta')
+      .then(function (data) {
+        var meta = data && (data.task || data.meta || data);
+        if (state.detail && state.detail.taskId === taskId && meta) {
+          state.detail.meta = meta;
+        }
+      }).catch(function () { /* 元信息缺失时批准卡会以 404 诚实失败 */ });
+    try {
+      state.es = openTaskStream(taskId);
+    } catch (e) { toast('实时流不可用'); }
+  }
+
+  function handleStreamLine(raw) {
+    var d = state.detail;
+    if (!d) return;
+    var parsed = null;
+    try { parsed = JSON.parse(raw); } catch (e) { /* 纯文本行 */ }
+    // BLOCK-150 ⑥ — 事件序号落 detail，断线重连按 lastSeq 续传（不重放）
+    if (parsed && typeof parsed.seq === 'number' && parsed.seq > (d.lastSeq || 0)) {
+      d.lastSeq = parsed.seq;
+    }
+    if (parsed && parsed.needApproval && parsed.ackToken) {
+      d.approval = {
+        ackToken: parsed.ackToken,
+        toolId: parsed.toolId || 'run_tool',
+        message: parsed.message || '',
+        params: parsed.params ? JSON.stringify(parsed.params).slice(0, 240) : '',
+      };
+      d.decided = null;
+      renderDetail();
+      return;
+    }
+    var line = parsed
+      ? (parsed.type ? parsed.type + ': ' + (parsed.content || parsed.message || parsed.preview || '') : raw)
+      : raw;
+    d.lines.push(line);
+    var stream = document.getElementById('stream');
+    if (stream) { stream.textContent = d.lines.slice(-200).join('\n'); stream.scrollTop = stream.scrollHeight; }
+  }
+
+  function twoStepConfirm(button, onConfirm) {
+    if (button.classList.contains('armed')) { onConfirm(); return; }
+    var label = button.textContent;
+    button.classList.add('armed');
+    button.textContent = '再点一次确认';
+    setTimeout(function () {
+      if (button.isConnected) { button.classList.remove('armed'); button.textContent = label; }
+    }, 3000);
+  }
+
+  function decideApproval(approve) {
+    var d = state.detail;
+    if (!d || !d.approval || d.decided) return;
+    var scope = {
+      projectId: (d.meta && (d.meta.projectId || d.meta.project_id)) || null,
+      conversationId: (d.meta && (d.meta.conversationId || d.meta.conversation_id)) || null,
+    };
+    api('/m/api/approvals/' + encodeURIComponent(d.approval.ackToken) + '/decide', {
+      method: 'POST',
+      body: { approve: approve, projectId: scope.projectId, conversationId: scope.conversationId },
+    }).then(function (data) {
+      if (data && data.ok) {
+        d.decided = approve ? 'approved' : 'rejected';
+        toast(approve ? '已批准，桌面端继续执行' : '已拒绝该操作');
+        renderDetail();
+      } else {
+        toast((data && data.message) || '批准失败（令牌无效或范围不匹配）');
+      }
+    }).catch(function (e) { if (e.message !== 'unauthorized') toast('批准请求失败'); });
+  }
+
+  function cancelTask() {
+    var d = state.detail;
+    if (!d) return;
+    api('/api/ai/agent/task/' + encodeURIComponent(d.taskId) + '/cancel', { method: 'POST', body: {} })
+      .then(function (data) {
+        toast(data && (data.ok || data.status === 'ok') ? '已请求取消，两端状态将一致收敛' : (data && (data.message || data.error)) || '取消请求已发送');
+      }).catch(function (e) { if (e.message !== 'unauthorized') toast('取消请求失败'); });
+  }
+
+  function renderDetail() {
+    var d = state.detail;
+    var approvalHtml = '';
+    if (d.approval) {
+      var a = d.approval;
+      var doneNote = d.decided === 'approved' ? '<p class="done">✓ 已批准——桌面端继续执行，结果看下方实时流</p>'
+        : d.decided === 'rejected' ? '<p class="done">✓ 已拒绝</p>' : '';
+      approvalHtml = '<div class="card approval"><h3>待批准 · ' + esc(a.toolId) + '</h3>'
+        + (a.message ? '<p>' + esc(a.message) + '</p>' : '')
+        + (a.params ? '<pre>' + esc(a.params) + '</pre>' : '')
+        + (doneNote || '<div class="actions">'
+          + '<button class="approve" id="approve">批准</button>'
+          + '<button class="reject" id="reject">拒绝</button>'
+          + '</div>')
+        + '</div>';
+    }
+    app.innerHTML = '<main><button class="back" id="back">‹ 返回任务墙</button>'
+      + '<div class="card"><div class="row"><h3>任务 ' + esc(d.taskId) + '</h3>'
+      + '<button class="cancelbtn" id="cancel">取消任务</button></div>'
+      + '<pre id="stream">' + esc(d.lines.slice(-200).join('\n')) + '</pre></div>'
+      + approvalHtml
+      + '</main>' + navHtml();
+    document.getElementById('back').addEventListener('click', function () {
+      if (state.es) { state.es.close(); state.es = null; }
+      state.detail = null;
+      renderTasks();
+    });
+    document.getElementById('cancel').addEventListener('click', cancelTask);
+    var approveBtn = document.getElementById('approve');
+    var rejectBtn = document.getElementById('reject');
+    if (approveBtn) approveBtn.addEventListener('click', function () { twoStepConfirm(approveBtn, function () { decideApproval(true); }); });
+    if (rejectBtn) rejectBtn.addEventListener('click', function () { twoStepConfirm(rejectBtn, function () { decideApproval(false); }); });
+    bindNav();
+  }
+
+  // ── 会话列表 / 阅读 / composer 轻控制 ───────────────────────────────
+  function loadConversations() {
+    return loadOverview().then(function () {
+      state.conversations = state.overview.conversations;
+      renderConversations();
+    });
+  }
+
+  function renderConversations() {
+    var html = state.conversations.length ? state.conversations.map(function (c) {
+      return '<div class="card" data-conv="' + esc(c.id) + '">'
+        + '<div class="row"><h3>' + esc(c.title || c.id) + '</h3><span class="badge">' + esc(c.message_count || 0) + ' 条</span></div>'
+        + '<p>' + esc(c.project_name ? '📁 ' + c.project_name + ' · ' : '') + esc(c.updated_at || '') + '</p></div>';
+    }).join('') : '<div class="empty">暂无会话</div>';
+    app.innerHTML = '<main>' + html + '</main>' + composerHtml() + navHtml();
+    Array.prototype.forEach.call(app.querySelectorAll('[data-conv]'), function (el) {
+      el.addEventListener('click', function () { openConversation(el.getAttribute('data-conv')); });
+    });
+    bindComposer();
+    bindNav();
+  }
+
+  function openConversation(id) {
+    api('/api/ai/conversations/' + encodeURIComponent(id) + '/messages').then(function (data) {
+      var messages = data.messages || [];
+      var html = messages.map(function (m) {
+        var role = m.role === 'user' ? '你' : 'Petri';
+        return '<div class="card"><h3>' + esc(role) + '</h3><p>' + esc(typeof m.content === 'string' ? m.content : JSON.stringify(m.content)).slice(0, 2000) + '</p></div>';
+      }).join('');
+      app.innerHTML = '<main><button class="back" id="back">‹ 返回会话列表</button>' + (html || '<div class="empty">暂无消息</div>') + '</main>'
+        + composerHtml(id) + navHtml();
+      document.getElementById('back').addEventListener('click', renderConversations);
+      bindComposer(id);
+      bindNav();
+    }).catch(function (e) { if (e.message !== 'unauthorized') toast('会话读取失败'); });
+  }
+
+  function composerHtml(conversationId) {
+    return '<div class="composer" data-conv="' + esc(conversationId || '') + '">'
+      + '<input type="text" id="composer-input" placeholder="' + (conversationId ? '发消息…' : '给 Petri 发消息（新建会话）…') + '">'
+      + '<button id="composer-send">发送</button></div>';
+  }
+
+  function bindComposer(conversationId) {
+    var input = document.getElementById('composer-input');
+    var send = document.getElementById('composer-send');
+    if (!input || !send) return;
+    function submit() {
+      var text = input.value.trim();
+      if (!text || send.disabled) return;
+      send.disabled = true;
+      var body = { messages: [{ role: 'user', content: text }] };
+      if (conversationId) body.conversationId = conversationId;
+      api('/api/ai/agent', { method: 'POST', body: body }).then(function (data) {
+        send.disabled = false;
+        if (data && (data.taskId || (data.ok !== false && data.status === 'ok'))) {
+          input.value = '';
+          toast('任务已启动' + (data.taskId ? '：' + data.taskId : '') + '，桌面端执行中');
+          state.tab = 'tasks';
+          state.detail = null;
+          renderTasks();
+          loadTasks();
+        } else {
+          toast((data && (data.message || data.error)) || '发送失败（请确认桌面端已配置模型）');
+        }
+      }).catch(function (e) { send.disabled = false; if (e.message !== 'unauthorized') toast('发送失败'); });
+    }
+    send.addEventListener('click', submit);
+    input.addEventListener('keydown', function (evt) { if (evt.key === 'Enter') submit(); });
+  }
+
+  function navHtml() {
+    return '<nav>'
+      + '<button data-tab="tasks" class="' + (state.tab === 'tasks' ? 'active' : '') + '">任务</button>'
+      + '<button data-tab="conversations" class="' + (state.tab === 'conversations' ? 'active' : '') + '">会话</button>'
+      + '</nav>';
+  }
+
+  function bindNav() {
+    Array.prototype.forEach.call(app.querySelectorAll('[data-tab]'), function (el) {
+      el.addEventListener('click', function () {
+        state.tab = el.getAttribute('data-tab');
+        if (state.tab === 'tasks') { if (state.detail) renderDetail(); else { renderTasks(); loadTasks(); } }
+        else loadConversations();
+      });
+    });
+  }
+
+  function renderUnpaired(message) {
+    app.innerHTML = '<div class="screen"><h2>尚未配对</h2>'
+      + '<p>' + esc(message || '请在桌面端 Petri 设置 →「手机远程」生成配对二维码后扫码打开本页。') + '</p>'
+      + '<p>配对码为一次性且 5 分钟内有效。</p></div>';
+  }
+
+  function boot() {
+    tryPairFromHash().then(function (pairedOrRendered) {
+      if (pairedOrRendered) return;
+      if (!sessionToken()) { renderUnpaired(); return; }
+      api('/m/api/health').then(function () {
+        renderTasks();
+        loadTasks();
+      }).catch(function (e) {
+        if (e.message !== 'unauthorized') renderUnpaired('移动网关不可达，请检查网络或桌面端开关');
+      });
+    });
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>

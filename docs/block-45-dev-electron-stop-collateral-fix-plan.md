@@ -4,7 +4,7 @@
 
 实测踩中（BLOCK-43 P3 验收，2026-09-03 登记 memory lesson）：`scripts/dev-electron.js` 的 `stopWorkspaceElectron()`（L146）用 pgrep 匹配 `projectRoot/node_modules/electron/dist/(Electron.app/...|electron)` **全杀**本仓库 Electron 二进制启动的所有主进程；而 `main()`（L308）**每次新 boot** 都执行它作为「上一会话残留清理」。结果：并存 dev 栈（如实机验收用的长时 nohup 栈）的 Electron 被新 boot 无差别击杀。
 
-对照组：wrapper **退出**路径 `shutdown()` 已在 BLOCK-35 改为一次性启动 token 定向（`stopLaunchedElectron()`，只杀本 wrapper 经 `open --args ... --biof3-dev-launch-token=<token>` 启动的实例，并存实例存活）；boot 清理路径漏改，行为不对称。
+对照组：wrapper **退出**路径 `shutdown()` 已在 BLOCK-35 改为一次性启动 token 定向（`stopLaunchedElectron()`，只杀本 wrapper 经 `open --args ... --petri-dev-launch-token=<token>` 启动的实例，并存实例存活）；boot 清理路径漏改，行为不对称。
 
 **用户裁决（2026-09-03）**：启动本工作包修复。
 
@@ -16,7 +16,7 @@ boot 清理语义为「接管 dev 端口」，但 Electron 主进程不占 :3000
 
 ### 设计（对齐 BLOCK-35 token 哲学）
 
-1. **持久化启动 token**：boot 时把本次 launch token + wrapper pid 写入 `projectRoot/.biof3-dev-user-data/dev-launch-token.json`（gitignore 目录内，不入库）。
+1. **持久化启动 token**：boot 时把本次 launch token + wrapper pid 写入 `projectRoot/.petri-dev-user-data/dev-launch-token.json`（gitignore 目录内，不入库）。
 2. **boot 清理 Electron 段改为 token 定向**：读上一 token → `getLaunchedElectronPids()` 同款 pgrep（token 值定向）→ SIGTERM→SIGKILL。不再全杀。
 3. **并存 wrapper fail-closed 守卫**：若上一 token 记录的 wrapper pid 仍存活且 token 定向 pgrep 命中其 Electron → 判定「dev 栈已在运行」，报错退出并提示先停止旧栈（Ctrl+C / kill wrapper）。把原「静默误杀」升级为显式冲突，消除误杀场景。
 4. **陈旧残留正常清理**：wrapper pid 已死（崩溃残留）→ token 定向清理照常执行，保持「免手动 lsof 重启」便利。

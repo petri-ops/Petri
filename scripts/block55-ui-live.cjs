@@ -21,21 +21,21 @@ const { execFileSync } = require('node:child_process');
 const http = require('node:http');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
-// 前端 rApiBase 指向 Electron 主进程 spawn 的 biof3-server（随机端口），
-// 其 BIOF3_DB_PATH 由 env-coordinator 指向 BIOF3_LOCAL_DATA_DIR（dev = .biof3-dev-user-data/data）。
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
+// 前端 rApiBase 指向 Electron 主进程 spawn 的 petri-server（随机端口），
+// 其 PETRI_DB_PATH 由 env-coordinator 指向 PETRI_LOCAL_DATA_DIR（dev = .petri-dev-user-data/data）。
 const PROJECT_ID = process.env.BIOF55_PROJECT || 'p_mtlnsv0f_xpjb';
 const DB_PATH = process.env.BIOF55_DB
-  || path.join(__dirname, '..', '.biof3-dev-user-data', 'data', 'biof3.db');
+  || path.join(__dirname, '..', '.petri-dev-user-data', 'data', 'petri.db');
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-55');
 const WAIT_MS = 8 * 60 * 1000;
 const POLL_MS = 4000;
 
 const PROMPT = [
   '请为以下任务起草一份完整计划（只起草，不要执行）：',
-  '「给出 BRCA1、TP53 两个基因各一句话功能说明，并把字符串 biof3 反转」。要求 3 个步骤：',
+  '「给出 BRCA1、TP53 两个基因各一句话功能说明，并把字符串 petri 反转」。要求 3 个步骤：',
   '步骤 1：给出 BRCA1、TP53 各一句话功能说明（该步骤标记 assignee 为 subagent，适合派子智能体独立完成）；',
-  '步骤 2：把字符串 biof3 反转；',
+  '步骤 2：把字符串 petri 反转；',
   '步骤 3：把步骤 1 和步骤 2 的结果合并成一段汇报。',
   '计划正文 specMd 必须自包含（含目标、边界、每步验收标准）。起草完成后提交计划等待批准，不要执行任何步骤。',
 ].join('\n');
@@ -164,7 +164,7 @@ async function main() {
   fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
   const targets = await fetchJson(`http://127.0.0.1:${DEBUG_PORT}/json/list`);
   const page = targets.find((t) => t.type === 'page' && /localhost:3000/.test(t.url || ''));
-  if (!page) throw new Error('biof3_page_not_found');
+  if (!page) throw new Error('petri_page_not_found');
   const client = await new CdpClient(page.webSocketDebuggerUrl).connect();
 
   const results = {

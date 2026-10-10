@@ -1,6 +1,6 @@
 // ============================================================
 // CopilotContextProvider — React Context wrapper around the
-// vendor `@biof3/shared/context` singleton.
+// vendor `@petri/shared/context` singleton.
 //
 // Why: state-decomposition §4.2 [HIGH] — the module-scope
 // `let current` in `vendor/.../context.ts` has no contract. Pages

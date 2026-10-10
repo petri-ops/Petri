@@ -17,6 +17,6 @@
   {
     "assert": "S5-3 磁盘核对：.git 创建 + 初始提交存在",
     "pass": true,
-    "detail": "5835ff7 Initial commit (BioF3)"
+    "detail": "5835ff7 Initial commit (Petri)"
   }
 ]

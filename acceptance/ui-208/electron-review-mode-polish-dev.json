@@ -10,17 +10,17 @@
       "containerText": "rgb(15, 23, 42)",
       "summaryBg": "rgb(255, 255, 255)",
       "summaryText": "rgb(15, 23, 42)",
-      "note": "修复前 containerText 为 rgb(224,224,224)（暗色回退）浮在浅背景上；修复后为 --biof3-text 深色"
+      "note": "修复前 containerText 为 rgb(224,224,224)（暗色回退）浮在浅背景上；修复后为 --petri-text 深色"
     },
     "dark": {
       "containerBg": "rgb(11, 18, 32)",
       "containerText": "rgb(230, 237, 243)",
-      "note": "暗色主题同样正确（--biof3-bg-canvas / --biof3-text）"
+      "note": "暗色主题同样正确（--petri-bg-canvas / --petri-text）"
     }
   },
   "checks": {
     "noUnusedTokenVars": true,
-    "note": "WorkingTreeReview.css + ReviewMode.css 中不再存在 --biof3-fg/--biof3-bg-elev/--biof3-bg-list/--biof3-bg-button/--biof3-mono/--biof3-status-danger 等不存在的变量名（grep 0 命中）",
+    "note": "WorkingTreeReview.css + ReviewMode.css 中不再存在 --petri-fg/--petri-bg-elev/--petri-bg-list/--petri-bg-button/--petri-mono/--petri-status-danger 等不存在的变量名（grep 0 命中）",
     "fileTreeIcons": true,
     "treeIndentGuide": true,
     "progressTrack": true,

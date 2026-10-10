@@ -1,4 +1,4 @@
-# BioF3 Git Worktree 开发治理规范
+# Petri Git Worktree 开发治理规范
 
 最后更新：2026-07-24
 
@@ -10,7 +10,7 @@
 
 Git Worktree 不是复制项目，也不是把当前目录转移到多个目录。它让同一 Git 仓库的不同分支在不同工作目录中同时检出，共享对象数据库和提交历史，但各自拥有独立的工作区与索引。
 
-BioF3 使用 Worktree 的目标是隔离有边界的并行开发和运行环境，不是无限增加并发 Agent。最终交付仍通过 Git commit、review、merge 或明确的 patch 完成，禁止靠 `cp` 合并目录。
+Petri 使用 Worktree 的目标是隔离有边界的并行开发和运行环境，不是无限增加并发 Agent。最终交付仍通过 Git commit、review、merge 或明确的 patch 完成，禁止靠 `cp` 合并目录。
 
 ## 2. 正式启动门
 

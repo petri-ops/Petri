@@ -99,21 +99,21 @@
 **文件**：`frontend/src/styles/custom.css`
 
 ```74:86:frontend/src/styles/custom.css
-  --biof3-border-color: var(--biof3-border);
+  --petri-border-color: var(--petri-border);
   ...
-  --biof3-accent-soft: rgba(13, 148, 136, 0.16);
+  --petri-accent-soft: rgba(13, 148, 136, 0.16);
   ...
-  --biof3-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --biof3-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --petri-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --petri-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 ```
 
 ```192:194:frontend/src/styles/custom.css
-  --biof3-accent-soft: rgba(45, 212, 191, 0.20);
+  --petri-accent-soft: rgba(45, 212, 191, 0.20);
   ...
-  --biof3-border-color: var(--biof3-border);
+  --petri-border-color: var(--petri-border);
 ```
 
-**判断**：PASS — 4 个 token 全部存在（亮色主题行 74 83 85 86 + 暗色主题行 192 194）。`--biof3-accent-soft` / `--biof3-border-color` / `--biof3-font-mono` / `--biof3-font-sans` 4/4 全部定义。5/5 清单第 4 项 intact。
+**判断**：PASS — 4 个 token 全部存在（亮色主题行 74 83 85 86 + 暗色主题行 192 194）。`--petri-accent-soft` / `--petri-border-color` / `--petri-font-mono` / `--petri-font-sans` 4/4 全部定义。5/5 清单第 4 项 intact。
 
 ### Item 5：git diff 01c5e0b..HEAD 对 4 文件零 commit ✅ PASS
 
@@ -232,7 +232,7 @@ $ npm run docs:reconcile
 
 | PHASE | 内容 | 状态 | 备注 |
 |---|---|---|---|
-| PHASE 3 | 实机 dev Electron 4 截图 | ⏸️ **搁置** | 按 P1-T-A 决策 Vite-only 不启真 Electron → 需用户显式 widen 范围启用 `BIOF3_DEV_ELECTRON_ARGS="--remote-debugging-port=9222"` 才执行 |
+| PHASE 3 | 实机 dev Electron 4 截图 | ⏸️ **搁置** | 按 P1-T-A 决策 Vite-only 不启真 Electron → 需用户显式 widen 范围启用 `PETRI_DEV_ELECTRON_ARGS="--remote-debugging-port=9222"` 才执行 |
 | PHASE 4 | `ui-productization-audit.md` UI-157 `in_progress → verified` | ⏸️ 待 PHASE 3 决策 | 需 PHASE 3 4 截图证据才能 verified |
 | PHASE 5 | closeout（plan / handoff / AUDIT-LOG 同步）| ⏸️ 待 PHASE 4 | 需所有 PHASE 落地证据 |
 
@@ -240,7 +240,7 @@ $ npm run docs:reconcile
 - P1-A 最小改动
 - **P1-T-A Vite-only mock 测试**（不启动真实 Electron）
 
-→ PHASE 3 实机启动**不可能**在 P1-T-A 决策下完成。需用户显式 widen 范围（启用 `BIOF3_DEV_ELECTRON_ARGS` 才能执行 PHASE 3 实机）。
+→ PHASE 3 实机启动**不可能**在 P1-T-A 决策下完成。需用户显式 widen 范围（启用 `PETRI_DEV_ELECTRON_ARGS` 才能执行 PHASE 3 实机）。
 
 **PHASE 2 worker 立场**：PHASE 2 5 项核对已 100% 完成，PHASE 3-5 取决于用户决策。**不自作主张**延伸 PHASE 3 范围。
 

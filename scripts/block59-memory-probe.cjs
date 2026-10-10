@@ -22,11 +22,11 @@ const { execFileSync } = require('node:child_process');
 const http = require('node:http');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
 const DB_PATH = process.env.BIOF59_DB
-  || path.join(__dirname, '..', '.biof3-dev-user-data', 'data', 'biof3.db');
+  || path.join(__dirname, '..', '.petri-dev-user-data', 'data', 'petri.db');
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-59');
-const ELECTRON_MATCH = 'BioF3-workspace/desktop/node_modules/electron/dist/Electron.app';
+const ELECTRON_MATCH = 'Petri-workspace/desktop/node_modules/electron/dist/Electron.app';
 
 function fetchJson(url) {
   return new Promise((resolve, reject) => {
@@ -128,7 +128,7 @@ async function main() {
 
   // 幂等预清理
   await evalJSRetry(client, `(async () => {
-    const wm = window.biof3Desktop?.windowManager;
+    const wm = window.petriDesktop?.windowManager;
     if (!wm) return false;
     const snap = await wm.snapshot();
     for (const id of ${JSON.stringify(keys.map((k) => `result:${k}`))}) {
@@ -150,7 +150,7 @@ async function main() {
 
   // 2) 弹出两个结果窗
   for (const key of keys) {
-    const r = await evalJSRetry(client, `window.biof3Desktop.windowManager.popOut('result', ${JSON.stringify(key)})`);
+    const r = await evalJSRetry(client, `window.petriDesktop.windowManager.popOut('result', ${JSON.stringify(key)})`);
     assert(`弹出 ${key.slice(-24)}`, r?.ok === true, JSON.stringify(r));
   }
   await delay(4000); // 渲染稳定
@@ -185,8 +185,8 @@ async function main() {
 
   // 4) 回收：remove 两窗 → 总量回落
   for (const key of keys) {
-    await evalJSRetry(client, `window.biof3Desktop.windowManager.minimizeToRail('result:${key}')`);
-    await evalJSRetry(client, `window.biof3Desktop.windowManager.remove('result:${key}')`);
+    await evalJSRetry(client, `window.petriDesktop.windowManager.minimizeToRail('result:${key}')`);
+    await evalJSRetry(client, `window.petriDesktop.windowManager.remove('result:${key}')`);
   }
   await delay(2500);
   const afterClose = electronTreeRssMB();

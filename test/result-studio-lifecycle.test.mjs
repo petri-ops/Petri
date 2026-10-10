@@ -71,7 +71,7 @@ function validJob(projectId, toolJobId, artifactId, digest, sourceSha256) {
 }
 
 function fixture(context) {
-  const workspaceRoot = mkdtempSync(join(tmpdir(), 'biof3-rs8-'));
+  const workspaceRoot = mkdtempSync(join(tmpdir(), 'petri-rs8-'));
   const db = new Database(join(workspaceRoot, 'rs8.db'));
   // 先关库再删目录：Windows 上打开的 SQLite 文件无法删除（EPERM）。
   context.after(() => {
@@ -83,14 +83,14 @@ function fixture(context) {
   const repository = createResultStudioRepository(db, { ensureSchema: false });
   const adapter = bindProjectRepository({ workspaceRoot, projectId: 'p_rs8' }).adapter;
   const base = adapter.commitVirtualFiles({
-    ref: 'refs/heads/biof3/main', expectedOld: '0'.repeat(40), message: 'RS8 base',
+    ref: 'refs/heads/petri/main', expectedOld: '0'.repeat(40), message: 'RS8 base',
     files: [{ path: 'analysis/scripts/base.R', content: 'print(1)\n' }],
   }).commit;
   const output = join(workspaceRoot, 'results/jobs/tj_base/output/table.csv');
   mkdirSync(join(output, '..'), { recursive: true });
   writeFileSync(output, 'gene,value\nA,1\nB,2\nC,3\nD,4\n');
   const outputHash = sha256(readFileSync(output));
-  repository.createChangeSet({ changeSetId: 'cs_base', projectId: 'p_rs8', baseCommit: base, workingBranchRef: 'refs/heads/biof3/base', createdBy: 'agent' });
+  repository.createChangeSet({ changeSetId: 'cs_base', projectId: 'p_rs8', baseCommit: base, workingBranchRef: 'refs/heads/petri/base', createdBy: 'agent' });
   repository.transitionChangeSet({ changeSetId: 'cs_base', to: 'running' });
   repository.transitionChangeSet({ changeSetId: 'cs_base', to: 'preview_ready', candidateCommit: base });
   repository.appendRevision({
@@ -100,7 +100,7 @@ function fixture(context) {
     outputPath: 'results/jobs/tj_base/output/table.csv', outputHash, validationStatus: 'valid', reproducibilityStatus: 'available', changeSetId: 'cs_base',
   });
   repository.adoptChangeSet({ changeSetId: 'cs_base', candidateCommit: base });
-  adapter.updateRefCas({ ref: 'refs/heads/biof3/current/family', newCommit: base, expectedOld: '0'.repeat(40) });
+  adapter.updateRefCas({ ref: 'refs/heads/petri/current/family', newCommit: base, expectedOld: '0'.repeat(40) });
   return { workspaceRoot, db, repository, adapter, base, output, outputHash };
 }
 
@@ -123,13 +123,13 @@ function assertAllRevisionSourcesAvailable(repository, adapter, projectId) {
 test('RS8 restores a durable running ChangeSet to preview only with valid Job and Artifact truth', (context) => {
   const fx = fixture(context);
   const candidate = fx.adapter.commitVirtualFiles({
-    parentCommit: fx.base, ref: 'refs/heads/biof3/changeset/cs_pending', expectedOld: '0'.repeat(40), message: 'candidate',
+    parentCommit: fx.base, ref: 'refs/heads/petri/changeset/cs_pending', expectedOld: '0'.repeat(40), message: 'candidate',
     files: [
       { path: 'analysis/scripts/candidate.R', content: 'print(2)\n' },
       { path: 'analysis/scripts/candidate-parameters.json', content: '{}\n' },
     ],
   }).commit;
-  fx.repository.createChangeSet({ changeSetId: 'cs_pending', projectId: 'p_rs8', conversationId: 'conv_1', baseCommit: fx.base, workingBranchRef: 'refs/heads/biof3/changeset/cs_pending', createdBy: 'agent' });
+  fx.repository.createChangeSet({ changeSetId: 'cs_pending', projectId: 'p_rs8', conversationId: 'conv_1', baseCommit: fx.base, workingBranchRef: 'refs/heads/petri/changeset/cs_pending', createdBy: 'agent' });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_pending', to: 'running' });
   fx.repository.appendRevision({
     revisionId: 'rev_pending', projectId: 'p_rs8', artifactFamilyId: 'family', artifactId: 'table', parentRevisionIds: ['rev_base'],
@@ -166,12 +166,12 @@ test('P6 treats an intact preview as a pending decision instead of a restart int
     changeSetId: 'cs_preview',
     projectId: 'p_rs8',
     baseCommit: fx.base,
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_preview',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_preview',
     createdBy: 'agent',
   });
   const candidate = fx.adapter.commitVirtualFiles({
     parentCommit: fx.base,
-    ref: 'refs/heads/biof3/changeset/cs_preview',
+    ref: 'refs/heads/petri/changeset/cs_preview',
     expectedOld: '0'.repeat(40),
     message: 'complete preview',
     files: [
@@ -228,7 +228,7 @@ test('P6 closes an incomplete running attempt after restart instead of leaving p
     projectId: 'p_rs8',
     conversationId: 'conv_incomplete',
     baseCommit: fx.base,
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_incomplete',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_incomplete',
     createdBy: 'agent',
   });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_incomplete', to: 'running' });
@@ -265,7 +265,7 @@ test('P6 takes over a newer checkpoint after its isolated child owner has died',
     projectId: 'p_rs8',
     conversationId: 'conv_dead_child',
     baseCommit: fx.base,
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_dead_child',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_dead_child',
     createdBy: 'agent',
   });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_dead_child', to: 'running' });
@@ -305,7 +305,7 @@ test('P6 abandons an unstarted draft after restart while preserving its checkpoi
     projectId: 'p_rs8',
     conversationId: 'conv_draft',
     baseCommit: fx.base,
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_draft',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_draft',
     createdBy: 'agent',
   });
   fx.repository.saveCheckpoint({
@@ -338,7 +338,7 @@ test('P6 never recovers a ChangeSet owned by the current runtime lease', (contex
   const fx = fixture(context);
   fx.repository.createChangeSet({
     changeSetId: 'cs_active', projectId: 'p_rs8', baseCommit: fx.base,
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_active', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_active', createdBy: 'agent',
   });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_active', to: 'running' });
   fx.repository.saveCheckpoint({
@@ -364,7 +364,7 @@ test('P6 never takes over an older checkpoint while its foreign runtime owner is
   const fx = fixture(context);
   fx.repository.createChangeSet({
     changeSetId: 'cs_live_foreign', projectId: 'p_rs8', baseCommit: fx.base,
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_live_foreign', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_live_foreign', createdBy: 'agent',
   });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_live_foreign', to: 'running' });
   fx.repository.saveCheckpoint({
@@ -396,7 +396,7 @@ test('P6 never takes over an older checkpoint while its foreign runtime owner is
 test('P6 reconciles an atomic preview whose old-runtime checkpoint missed the final save', (context) => {
   const fx = fixture(context);
   const candidate = fx.adapter.commitVirtualFiles({
-    parentCommit: fx.base, ref: 'refs/heads/biof3/changeset/cs_atomic_preview', expectedOld: '0'.repeat(40),
+    parentCommit: fx.base, ref: 'refs/heads/petri/changeset/cs_atomic_preview', expectedOld: '0'.repeat(40),
     message: 'atomic preview', files: [
       { path: 'analysis/scripts/atomic.R', content: 'print(4)\n' },
       { path: 'analysis/scripts/atomic-parameters.json', content: '{}\n' },
@@ -404,7 +404,7 @@ test('P6 reconciles an atomic preview whose old-runtime checkpoint missed the fi
   }).commit;
   fx.repository.createChangeSet({
     changeSetId: 'cs_atomic_preview', projectId: 'p_rs8', baseCommit: fx.base,
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_atomic_preview', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_atomic_preview', createdBy: 'agent',
   });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_atomic_preview', to: 'running' });
   fx.repository.appendRevision({
@@ -450,12 +450,12 @@ test('P6 reconciles an atomic preview whose old-runtime checkpoint missed the fi
 test('P6 blocks an incoherent preview and never presents it as a pending decision', (context) => {
   const fx = fixture(context);
   const candidate = fx.adapter.commitVirtualFiles({
-    parentCommit: fx.base, ref: 'refs/heads/biof3/changeset/cs_bad_preview', expectedOld: '0'.repeat(40),
+    parentCommit: fx.base, ref: 'refs/heads/petri/changeset/cs_bad_preview', expectedOld: '0'.repeat(40),
     message: 'bad preview', files: [{ path: 'analysis/scripts/bad.R', content: 'print(5)\n' }],
   }).commit;
   fx.repository.createChangeSet({
     changeSetId: 'cs_bad_preview', projectId: 'p_rs8', baseCommit: fx.base,
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_bad_preview', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_bad_preview', createdBy: 'agent',
   });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_bad_preview', to: 'running' });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_bad_preview', to: 'preview_ready', candidateCommit: candidate });
@@ -472,7 +472,7 @@ test('P6 blocks an incoherent preview and never presents it as a pending decisio
 test('P6 blocks stale running evidence when exact Job provenance does not prove the Revision', (context) => {
   const fx = fixture(context);
   const candidate = fx.adapter.commitVirtualFiles({
-    parentCommit: fx.base, ref: 'refs/heads/biof3/changeset/cs_job_drift', expectedOld: '0'.repeat(40),
+    parentCommit: fx.base, ref: 'refs/heads/petri/changeset/cs_job_drift', expectedOld: '0'.repeat(40),
     message: 'job drift', files: [
       { path: 'analysis/scripts/job-drift.R', content: 'print(6)\n' },
       { path: 'analysis/scripts/job-drift-parameters.json', content: '{}\n' },
@@ -480,7 +480,7 @@ test('P6 blocks stale running evidence when exact Job provenance does not prove 
   }).commit;
   fx.repository.createChangeSet({
     changeSetId: 'cs_job_drift', projectId: 'p_rs8', baseCommit: fx.base,
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_job_drift', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_job_drift', createdBy: 'agent',
   });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_job_drift', to: 'running' });
   fx.repository.appendRevision({
@@ -511,7 +511,7 @@ test('P6 recovery transition and checkpoint rollback together on an injected fai
   const fx = fixture(context);
   fx.repository.createChangeSet({
     changeSetId: 'cs_atomic_recovery', projectId: 'p_rs8', baseCommit: fx.base,
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_atomic_recovery', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_atomic_recovery', createdBy: 'agent',
   });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_atomic_recovery', to: 'running' });
   const checkpoint = fx.repository.saveCheckpoint({
@@ -540,7 +540,7 @@ test('P6 new ChangeSet start leaves neither draft nor checkpoint on an injected 
   assert.throws(() => fx.repository.startChangeSetWithCheckpoint({
     changeSet: {
       changeSetId: 'cs_atomic_start', projectId: 'p_rs8', baseCommit: fx.base,
-      workingBranchRef: 'refs/heads/biof3/changeset/cs_atomic_start', createdBy: 'agent',
+      workingBranchRef: 'refs/heads/petri/changeset/cs_atomic_start', createdBy: 'agent',
     },
     checkpoint: {
       checkpointId: 'cp_atomic_start', projectId: 'p_rs8', baseCommit: fx.base,
@@ -586,21 +586,21 @@ test('P6 blocks integrity when the persisted Revision inventory exceeds a capped
 
 test('RS8 restores a missing current Git ref but blocks a conflicting ref', (context) => {
   const fx = fixture(context);
-  fx.adapter.deleteRefCas({ ref: 'refs/heads/biof3/current/family', expectedOld: fx.base });
+  fx.adapter.deleteRefCas({ ref: 'refs/heads/petri/current/family', expectedOld: fx.base });
   assert.equal(inspectResultStudioWorkspace({ repository: fx.repository, adapter: fx.adapter, workspaceRoot: fx.workspaceRoot, projectId: 'p_rs8' }).status, 'recovery_available');
   const repaired = recoverResultStudioWorkspace({ workspaceRoot: fx.workspaceRoot, projectId: 'p_rs8' }, { repository: fx.repository, adapter: fx.adapter });
   assert.equal(repaired.after.status, 'ready');
-  assert.equal(fx.adapter.revParse('refs/heads/biof3/current/family'), fx.base);
+  assert.equal(fx.adapter.revParse('refs/heads/petri/current/family'), fx.base);
 
   const conflicting = fx.adapter.commitVirtualFiles({
     parentCommit: fx.base,
-    ref: 'refs/heads/biof3/conflict',
+    ref: 'refs/heads/petri/conflict',
     expectedOld: '0'.repeat(40),
     message: 'conflicting current ref',
     files: [{ path: 'analysis/scripts/conflict.R', content: 'print(99)\n' }],
   }).commit;
   fx.adapter.updateRefCas({
-    ref: 'refs/heads/biof3/current/family',
+    ref: 'refs/heads/petri/current/family',
     newCommit: conflicting,
     expectedOld: fx.base,
   });
@@ -617,7 +617,7 @@ test('RS8 restores a missing current Git ref but blocks a conflicting ref', (con
     adapter: fx.adapter,
   });
   assert.equal(refused.recovered, false);
-  assert.equal(fx.adapter.revParse('refs/heads/biof3/current/family'), conflicting);
+  assert.equal(fx.adapter.revParse('refs/heads/petri/current/family'), conflicting);
 });
 
 test('P6 blocks a corrupted durable checkpoint without rewriting its evidence', (context) => {
@@ -654,7 +654,7 @@ test('P6 blocks a corrupted durable checkpoint without rewriting its evidence', 
 
 test('RS8 storage summary is content-addressed and GC never targets Artifact history', (context) => {
   const fx = fixture(context);
-  fx.repository.createChangeSet({ changeSetId: 'cs_orphan', projectId: 'p_rs8', baseCommit: fx.base, workingBranchRef: 'refs/heads/biof3/changeset/cs_orphan', createdBy: 'agent' });
+  fx.repository.createChangeSet({ changeSetId: 'cs_orphan', projectId: 'p_rs8', baseCommit: fx.base, workingBranchRef: 'refs/heads/petri/changeset/cs_orphan', createdBy: 'agent' });
   fx.repository.appendRevision({
     revisionId: 'rev_orphan', projectId: 'p_rs8', artifactFamilyId: 'orphan', artifactId: 'table', sourceCommit: fx.base,
     sourceScriptRef: { relativePath: 'analysis/scripts/base.R', sha256: sha256('print(1)\n'), entryPoint: 'base.R', artifactId: 'table', rendererId: 'test:table', language: 'r', origin: 'project_materialized' },
@@ -662,7 +662,7 @@ test('RS8 storage summary is content-addressed and GC never targets Artifact his
     validationStatus: 'valid', reproducibilityStatus: 'available', changeSetId: 'cs_orphan',
   });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_orphan', to: 'abandoned' });
-  const staging = join(fx.workspaceRoot, '.biof3/revision/cs_orphan');
+  const staging = join(fx.workspaceRoot, '.petri/revision/cs_orphan');
   mkdirSync(staging, { recursive: true });
   writeFileSync(join(staging, 'run-script.R'), 'print(1)');
   const old = new Date(Date.now() - 48 * 60 * 60 * 1000);
@@ -674,7 +674,7 @@ test('RS8 storage summary is content-addressed and GC never targets Artifact his
   mkdirSync(join(duplicatePath, '..'), { recursive: true });
   writeFileSync(duplicatePath, readFileSync(fx.output));
   fx.db.prepare("UPDATE artifact_revisions SET output_path = ? WHERE revision_id = 'rev_orphan'").run('results/jobs/tj_duplicate/output/table.csv');
-  const contentObject = join(fx.workspaceRoot, '.biof3/result-objects/sha256', fx.outputHash.slice(0, 2), fx.outputHash);
+  const contentObject = join(fx.workspaceRoot, '.petri/result-objects/sha256', fx.outputHash.slice(0, 2), fx.outputHash);
   mkdirSync(join(contentObject, '..'), { recursive: true });
   linkSync(fx.output, contentObject);
   rmSync(duplicatePath);
@@ -731,7 +731,7 @@ test('P6 deduplication revalidates result-objects and never writes through a pri
     changeSetId: 'cs_private_link',
     projectId: 'p_rs8',
     baseCommit: fx.base,
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_private_link',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_private_link',
     createdBy: 'agent',
   });
   fx.repository.appendRevision({
@@ -744,9 +744,9 @@ test('P6 deduplication revalidates result-objects and never writes through a pri
     { workspaceRoot: fx.workspaceRoot, projectId: 'p_rs8' },
     { repository: fx.repository },
   );
-  const outside = mkdtempSync(join(tmpdir(), 'biof3-result-objects-outside-'));
+  const outside = mkdtempSync(join(tmpdir(), 'petri-result-objects-outside-'));
   context.after(() => rmSync(outside, { recursive: true, force: true }));
-  symlinkSync(outside, join(fx.workspaceRoot, '.biof3', 'result-objects'), 'dir');
+  symlinkSync(outside, join(fx.workspaceRoot, '.petri', 'result-objects'), 'dir');
 
   assert.throws(
     () => executeArtifactDeduplication(
@@ -765,11 +765,11 @@ test('P6 GC revalidates revision staging before ref mutation or external deletio
     changeSetId: 'cs_private_gc',
     projectId: 'p_rs8',
     baseCommit: fx.base,
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_private_gc',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_private_gc',
     createdBy: 'agent',
   });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_private_gc', to: 'abandoned' });
-  const revisionRoot = join(fx.workspaceRoot, '.biof3', 'revision');
+  const revisionRoot = join(fx.workspaceRoot, '.petri', 'revision');
   const staging = join(revisionRoot, 'cs_private_gc');
   mkdirSync(staging, { recursive: true });
   writeFileSync(join(staging, 'candidate.R'), 'print(1)\n');
@@ -779,10 +779,10 @@ test('P6 GC revalidates revision staging before ref mutation or external deletio
     { workspaceRoot: fx.workspaceRoot, projectId: 'p_rs8' },
     { repository: fx.repository, adapter: fx.adapter },
   );
-  assert.ok(plan.entries.some((entry) => entry.relativePath === '.biof3/revision/cs_private_gc'));
+  assert.ok(plan.entries.some((entry) => entry.relativePath === '.petri/revision/cs_private_gc'));
 
   rmSync(revisionRoot, { recursive: true });
-  const outside = mkdtempSync(join(tmpdir(), 'biof3-revision-outside-'));
+  const outside = mkdtempSync(join(tmpdir(), 'petri-revision-outside-'));
   context.after(() => rmSync(outside, { recursive: true, force: true }));
   const outsideStaging = join(outside, 'cs_private_gc');
   mkdirSync(outsideStaging);
@@ -798,13 +798,13 @@ test('P6 GC revalidates revision staging before ref mutation or external deletio
     (error) => error?.code === 'private_path_symlink',
   );
   assert.equal(readFileSync(marker, 'utf8'), 'must survive');
-  assert.equal(fx.adapter.revParse('refs/heads/biof3/result-sources/' + fx.base), null);
+  assert.equal(fx.adapter.revParse('refs/heads/petri/result-sources/' + fx.base), null);
 });
 
 test('P6 GC atomically protects every persisted Revision source before deleting a closed candidate ref', (context) => {
   const fx = fixture(context);
   const sourceText = 'message("historical source remains replayable")\n';
-  const candidateRef = 'refs/heads/biof3/changeset/cs_historical_source';
+  const candidateRef = 'refs/heads/petri/changeset/cs_historical_source';
   const candidate = fx.adapter.commitVirtualFiles({
     parentCommit: fx.base,
     ref: candidateRef,
@@ -884,7 +884,7 @@ test('P6 GC atomically protects every persisted Revision source before deleting 
 
 test('P6 GC deletes a closed non-source candidate ref only after independent reachability is proven', (context) => {
   const fx = fixture(context);
-  const candidateRef = 'refs/heads/biof3/changeset/cs_unreferenced_candidate';
+  const candidateRef = 'refs/heads/petri/changeset/cs_unreferenced_candidate';
   const candidate = fx.adapter.commitVirtualFiles({
     parentCommit: fx.base,
     ref: candidateRef,
@@ -911,7 +911,7 @@ test('P6 GC deletes a closed non-source candidate ref only after independent rea
   assert.equal(protectedPlan.protectedCandidateRefs[0].independentlyReachableAfterPlan, false);
   assert.equal(fx.adapter.revParse(candidateRef), candidate);
 
-  const independentRef = 'refs/heads/biof3/archive/unreferenced_candidate';
+  const independentRef = 'refs/heads/petri/archive/unreferenced_candidate';
   fx.adapter.updateRefCas({ ref: independentRef, newCommit: candidate, expectedOld: '0'.repeat(40) });
   const deletablePlan = planResultStudioGc({
     workspaceRoot: fx.workspaceRoot,
@@ -933,7 +933,7 @@ test('P6 GC deletes a closed non-source candidate ref only after independent rea
 test('P6 GC fails closed when a deterministic source protection ref conflicts', (context) => {
   const fx = fixture(context);
   const sourceText = 'message("protected conflict")\n';
-  const candidateRef = 'refs/heads/biof3/changeset/cs_source_conflict';
+  const candidateRef = 'refs/heads/petri/changeset/cs_source_conflict';
   const candidate = fx.adapter.commitVirtualFiles({
     parentCommit: fx.base,
     ref: candidateRef,
@@ -959,7 +959,7 @@ test('P6 GC fails closed when a deterministic source protection ref conflicts', 
   fx.repository.transitionChangeSet({
     changeSetId: 'cs_source_conflict', to: 'validation_failed', candidateCommit: candidate,
   });
-  const protectedRef = `refs/heads/biof3/result-sources/${candidate}`;
+  const protectedRef = `refs/heads/petri/result-sources/${candidate}`;
   fx.adapter.updateRefCas({ ref: protectedRef, newCommit: fx.base, expectedOld: '0'.repeat(40) });
 
   assert.throws(
@@ -978,13 +978,13 @@ test('P6 GC fails closed when a deterministic source protection ref conflicts', 
 test('P6 GC only deletes the exact server-derived ChangeSet candidate ref', (context) => {
   const fx = fixture(context);
   const protectedRefs = [
-    ['cs_current_ref', 'refs/heads/biof3/current/family'],
-    ['cs_main_ref', 'refs/heads/biof3/main'],
-    ['cs_baseline_ref', 'refs/heads/biof3/baseline/cs_baseline_ref'],
-    ['cs_source_ref', 'refs/heads/biof3/result-sources/manual'],
-    ['cs_internal_ref', 'refs/heads/biof3/archive/keep'],
+    ['cs_current_ref', 'refs/heads/petri/current/family'],
+    ['cs_main_ref', 'refs/heads/petri/main'],
+    ['cs_baseline_ref', 'refs/heads/petri/baseline/cs_baseline_ref'],
+    ['cs_source_ref', 'refs/heads/petri/result-sources/manual'],
+    ['cs_internal_ref', 'refs/heads/petri/archive/keep'],
     ['cs_external_ref', 'refs/heads/user-owned/result-candidate'],
-    ['cs_mismatched_candidate', 'refs/heads/biof3/changeset/not_cs_mismatched_candidate'],
+    ['cs_mismatched_candidate', 'refs/heads/petri/changeset/not_cs_mismatched_candidate'],
   ];
   for (const [changeSetId, ref] of protectedRefs) {
     if (!fx.adapter.revParse(ref)) {
@@ -1014,16 +1014,16 @@ test('P6 GC only deletes the exact server-derived ChangeSet candidate ref', (con
 
 test('P6 rejects stale GC plans and deduplication after Artifact drift', (context) => {
   const fx = fixture(context);
-  fx.repository.createChangeSet({ changeSetId: 'cs_cleanup', projectId: 'p_rs8', baseCommit: fx.base, workingBranchRef: 'refs/heads/biof3/changeset/cs_cleanup', createdBy: 'agent' });
+  fx.repository.createChangeSet({ changeSetId: 'cs_cleanup', projectId: 'p_rs8', baseCommit: fx.base, workingBranchRef: 'refs/heads/petri/changeset/cs_cleanup', createdBy: 'agent' });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_cleanup', to: 'abandoned' });
-  const staging = join(fx.workspaceRoot, '.biof3/revision/cs_cleanup');
+  const staging = join(fx.workspaceRoot, '.petri/revision/cs_cleanup');
   mkdirSync(staging, { recursive: true });
   writeFileSync(join(staging, 'candidate.R'), 'print(2)');
   const old = new Date(Date.now() - 48 * 60 * 60 * 1000);
   utimesSync(staging, old, old);
   const gcPlan = planResultStudioGc({ workspaceRoot: fx.workspaceRoot, projectId: 'p_rs8' }, { repository: fx.repository, adapter: fx.adapter });
-  mkdirSync(join(fx.workspaceRoot, '.biof3/revision/.tmp-new'), { recursive: true });
-  utimesSync(join(fx.workspaceRoot, '.biof3/revision/.tmp-new'), old, old);
+  mkdirSync(join(fx.workspaceRoot, '.petri/revision/.tmp-new'), { recursive: true });
+  utimesSync(join(fx.workspaceRoot, '.petri/revision/.tmp-new'), old, old);
   assert.throws(
     () => executeResultStudioGc({ workspaceRoot: fx.workspaceRoot, projectId: 'p_rs8', planToken: gcPlan.planToken }, { repository: fx.repository, adapter: fx.adapter }),
     (error) => error?.code === 'gc_plan_stale',
@@ -1034,7 +1034,7 @@ test('P6 rejects stale GC plans and deduplication after Artifact drift', (contex
   const duplicatePath = join(fx.workspaceRoot, 'results/jobs/tj_duplicate/output/table.csv');
   mkdirSync(join(duplicatePath, '..'), { recursive: true });
   writeFileSync(duplicatePath, readFileSync(fx.output));
-  fx.repository.createChangeSet({ changeSetId: 'cs_duplicate', projectId: 'p_rs8', baseCommit: fx.base, workingBranchRef: 'refs/heads/biof3/changeset/cs_duplicate', createdBy: 'agent' });
+  fx.repository.createChangeSet({ changeSetId: 'cs_duplicate', projectId: 'p_rs8', baseCommit: fx.base, workingBranchRef: 'refs/heads/petri/changeset/cs_duplicate', createdBy: 'agent' });
   fx.repository.appendRevision({
     revisionId: 'rev_duplicate', projectId: 'p_rs8', artifactFamilyId: 'duplicate', artifactId: 'table', sourceCommit: fx.base,
     sourceScriptRef: { relativePath: 'analysis/scripts/base.R', sha256: sha256('print(1)\n'), entryPoint: 'base.R', artifactId: 'table', rendererId: 'test:table', language: 'r', origin: 'project_materialized' },
@@ -1063,7 +1063,7 @@ test('RS8 progressive table pages stay bounded and use a continuation cursor', (
 });
 
 test('P6 Revision table pages bind every parsed byte to one Artifact Truth descriptor', (context) => {
-  const root = mkdtempSync(join(tmpdir(), 'biof3-p6-table-truth-'));
+  const root = mkdtempSync(join(tmpdir(), 'petri-p6-table-truth-'));
   context.after(() => rmSync(root, { recursive: true, force: true }));
   const filePath = join(root, 'truth.csv');
   const original = 'id,value\nA,1\nB,2\n';
@@ -1115,7 +1115,7 @@ test('P6 Revision table pages bind every parsed byte to one Artifact Truth descr
 });
 
 test('P6 progressive table pages round-trip RFC4180 records at exact byte boundaries', (context) => {
-  const root = mkdtempSync(join(tmpdir(), 'biof3-p6-rfc4180-'));
+  const root = mkdtempSync(join(tmpdir(), 'petri-p6-rfc4180-'));
   context.after(() => rmSync(root, { recursive: true, force: true }));
   const filePath = join(root, 'unicode.csv');
   writeFileSync(filePath, [
@@ -1152,7 +1152,7 @@ test('P6 progressive table pages round-trip RFC4180 records at exact byte bounda
 });
 
 test('P6 progressive table reader supports quoted TSV delimiters and a header beyond 64 KiB', (context) => {
-  const root = mkdtempSync(join(tmpdir(), 'biof3-p6-long-header-'));
+  const root = mkdtempSync(join(tmpdir(), 'petri-p6-long-header-'));
   context.after(() => rmSync(root, { recursive: true, force: true }));
   const tsvPath = join(root, 'quoted.tsv');
   writeFileSync(tsvPath, 'id\tnote\r\n1\t"alpha\tbeta"\r\n2\t"line one\nline two"\r\n');
@@ -1179,7 +1179,7 @@ test('P6 progressive table reader supports quoted TSV delimiters and a header be
 });
 
 test('P6 progressive table reader fails closed for incomplete and oversized records', (context) => {
-  const root = mkdtempSync(join(tmpdir(), 'biof3-p6-invalid-table-'));
+  const root = mkdtempSync(join(tmpdir(), 'petri-p6-invalid-table-'));
   context.after(() => rmSync(root, { recursive: true, force: true }));
   const write = (name, content) => {
     const filePath = join(root, name);

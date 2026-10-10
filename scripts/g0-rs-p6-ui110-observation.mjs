@@ -57,7 +57,7 @@ const SCREENSHOT_DIR = path.join(ROOT, 'acceptance/g0-result-studio/rs-p6-ui110-
 const DRIVER_PATH = path.join(ROOT, 'scripts/g0-rs-p6-ui110-driver.cjs');
 const VITE_PATH = path.join(ROOT, 'frontend/node_modules/vite/bin/vite.js');
 const ELECTRON_PATH = path.join(ROOT, 'node_modules/.bin/electron');
-const LOCAL_RUNTIMES_ENV = 'BIOF3_P6_LOCAL_RUNTIMES_DIR';
+const LOCAL_RUNTIMES_ENV = 'PETRI_P6_LOCAL_RUNTIMES_DIR';
 const SHA256_PATTERN = /^[a-f0-9]{64}$/;
 // Descriptors live inside the domain pack. The old `resources/built-in-plugins/`
 // paths died with BLOCK-83 (pack migration), and BLOCK-86 sealed 14 of the 15
@@ -96,12 +96,12 @@ export const P6_UI110_SOURCE_SENTINELS = Object.freeze({
   p6GatewayTest: 'test/g0-rs-p6-ui110-local-gateway.test.mjs',
   baselineRouteTest: 'test/result-studio-route-baseline.test.mjs',
   electronPreload: 'src/preload.js',
-  aiSettings: 'core/biof3-server/helpers/ai-settings.js',
+  aiSettings: 'core/petri-server/helpers/ai-settings.js',
   modelProfile: 'core/shared-backend/llm-providers/model-profile.js',
   providerTransport: 'core/shared-backend/llm-providers/deepseek.js',
-  modelGateway: 'core/biof3-server/helpers/model-gateway.js',
-  agentRoute: 'core/biof3-server/routes/ai-agent.js',
-  agentRunner: 'core/biof3-server/agent-runner.js',
+  modelGateway: 'core/petri-server/helpers/model-gateway.js',
+  agentRoute: 'core/petri-server/routes/ai-agent.js',
+  agentRunner: 'core/petri-server/agent-runner.js',
   redaction: 'core/shared-backend/redaction.js',
   diagnosticRedactionTest: 'test/diagnostic-redaction.test.mjs',
   capabilityProvisioning: 'core/shared-backend/capability-provisioning.js',
@@ -347,7 +347,7 @@ async function runElectron(configPath, resultPath, { onSpawn, environment = {} }
     env: {
       ...process.env,
       ...environment,
-      BIOF3_P6_UI110_DRIVER_CONFIG: configPath,
+      PETRI_P6_UI110_DRIVER_CONFIG: configPath,
     },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
@@ -404,7 +404,7 @@ function writeDisposableAiSettings(env, gatewayBaseUrl) {
     },
     model_fallback_enabled: false,
   };
-  const settingsPath = path.join(env.BIOF3_LOCAL_DATA_DIR, 'ai-settings.json');
+  const settingsPath = path.join(env.PETRI_LOCAL_DATA_DIR, 'ai-settings.json');
   mkdirSync(path.dirname(settingsPath), { recursive: true });
   writeFileSync(settingsPath, `${JSON.stringify(settings, null, 2)}\n`, { mode: 0o600 });
 }
@@ -459,7 +459,7 @@ export function inspectP6Ui110LocalCapability(runtimesDir) {
 
 export function stageP6Ui110LocalCapability(env, sourceRuntimesDir = process.env[LOCAL_RUNTIMES_ENV]) {
   const source = inspectP6Ui110LocalCapability(sourceRuntimesDir);
-  const targetRuntimesDir = path.join(env.BIOF3_LOCAL_DATA_DIR, 'runtimes');
+  const targetRuntimesDir = path.join(env.PETRI_LOCAL_DATA_DIR, 'runtimes');
   const targetInstallDir = path.join(
     targetRuntimesDir,
     'capabilities',
@@ -726,7 +726,7 @@ function pngText(bytes, keyword) {
 
 function renderContractFromPng(filePath) {
   const bytes = readFileSync(filePath);
-  const raw = pngText(bytes, 'BioF3RenderContract');
+  const raw = pngText(bytes, 'PetriRenderContract');
   if (!raw) return { contract: null, dimensions: pngDimensions(bytes) };
   try { return { contract: JSON.parse(raw), dimensions: pngDimensions(bytes) }; }
   catch { return { contract: null, dimensions: pngDimensions(bytes) }; }
@@ -734,14 +734,14 @@ function renderContractFromPng(filePath) {
 
 function renderContractFromSvg(filePath) {
   const raw = readFileSync(filePath, 'utf8');
-  const match = raw.match(/<metadata\s+id="biof3-render-contract"\s+data-json-hex="([a-f0-9]+)"\s*\/>/i);
+  const match = raw.match(/<metadata\s+id="petri-render-contract"\s+data-json-hex="([a-f0-9]+)"\s*\/>/i);
   if (!match || match[1].length % 2 !== 0) return null;
   try { return JSON.parse(Buffer.from(match[1], 'hex').toString('utf8')); } catch { return null; }
 }
 
 function openReadonlyDatabase(dbPath) {
   const Database = require(require.resolve('better-sqlite3', {
-    paths: [path.join(ROOT, 'core/biof3-server'), ROOT],
+    paths: [path.join(ROOT, 'core/petri-server'), ROOT],
   }));
   return new Database(dbPath, { readonly: true });
 }
@@ -1234,7 +1234,7 @@ export async function observeP6Ui110({ writeEvidence = false, keep = false, show
   const uiPort = await findFreeLoopbackPort(new Set([backendPort]));
   await assertPortFree(uiPort);
   await assertPortFree(backendPort);
-  const root = mkdtempSync(path.join(tmpdir(), 'biof3-p6-ui110-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-p6-ui110-'));
   const captureDir = path.join(root, 'ui-captures');
   const configPath = path.join(root, 'ui-driver-config.json');
   const resultPath = path.join(root, 'ui-driver-result.json');
@@ -1266,14 +1266,14 @@ export async function observeP6Ui110({ writeEvidence = false, keep = false, show
       port: backendPort,
       beforeStart: ({ env }) => {
         const rendererOrigin = `http://127.0.0.1:${uiPort}`;
-        env.BIOF3_RENDERER_DEV_URL = rendererOrigin;
-        env.BIOF3_TRUSTED_DESKTOP_ORIGINS = rendererOrigin;
+        env.PETRI_RENDERER_DEV_URL = rendererOrigin;
+        env.PETRI_TRUSTED_DESKTOP_ORIGINS = rendererOrigin;
         localCapability = stageP6Ui110LocalCapability(env);
         writeDisposableAiSettings(env, gateway.baseUrl);
       },
     });
     const baselines = await prepareP5LiveScientificBaselines(runtime);
-    const truthBefore = projectTruthSnapshot(runtime.env.BIOF3_DB_PATH, runtime.project.id);
+    const truthBefore = projectTruthSnapshot(runtime.env.PETRI_DB_PATH, runtime.project.id);
 
     vite = spawn(process.execPath, [VITE_PATH, '--host', '127.0.0.1', '--port', String(uiPort), '--strictPort'], {
       cwd: path.join(ROOT, 'frontend'),
@@ -1316,7 +1316,7 @@ export async function observeP6Ui110({ writeEvidence = false, keep = false, show
       renderer = await runElectron(configPath, resultPath, {
         onSpawn: (child) => { electron = child; },
         environment: {
-          BIOF3_DESKTOP: '1',
+          PETRI_DESKTOP: '1',
           R_SERVER_PORT: String(backendPort),
         },
       });
@@ -1324,7 +1324,7 @@ export async function observeP6Ui110({ writeEvidence = false, keep = false, show
       const summary = summarizeGatewayTrace(gateway.trace);
       throw new Error(`${error instanceof Error ? error.message : String(error)}; gatewayPhases=${JSON.stringify(summary.requestPhaseCounts)}; gatewayErrors=${JSON.stringify(summary.errorCodeCounts)}`);
     }
-    const truth = inspectP6Ui110Truth(runtime.env.BIOF3_DB_PATH, runtime.project.id, truthBefore, {
+    const truth = inspectP6Ui110Truth(runtime.env.PETRI_DB_PATH, runtime.project.id, truthBefore, {
       workspaceRoot: runtime.project.workspace_path,
       renderer,
       changedLfc: baselines.changedLfc,

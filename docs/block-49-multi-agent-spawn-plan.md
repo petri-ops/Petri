@@ -6,11 +6,11 @@
 
 ## 1. 背景与动机
 
-用户对比考察 openai/codex（MultiAgentV2）后裁决立项：BioF3 当前 agent 是「单 agent 串行 loop」，模型无法内生派生子 agent；按 codex 范式补齐「agent 自己长出来的」多 agent 能力。
+用户对比考察 openai/codex（MultiAgentV2）后裁决立项：Petri 当前 agent 是「单 agent 串行 loop」，模型无法内生派生子 agent；按 codex 范式补齐「agent 自己长出来的」多 agent 能力。
 
 ### 1.1 现状诊断（双向调研结论）
 
-**BioF3 已有地基（AGENT-CONCURRENCY 遗产，复用率高）**：
+**Petri 已有地基（AGENT-CONCURRENCY 遗产，复用率高）**：
 
 | 能力      | 位置                                                                                                       |
 | ------- | -------------------------------------------------------------------------------------------------------- |
@@ -129,7 +129,7 @@
 
 ## 7. 进度记录
 
-- 2026-09-03 P0（planned 登记）：完成 codex MultiAgentV2 双向调研（六工具协议 / 继承覆盖 / 回传机制）与 BioF3 地基盘点（四项复用资产 + 五个断点）；本计划落盘并注册 DOC-REGISTRY；待 BLOCK-47 收口后由用户裁决启动。
+- 2026-09-03 P0（planned 登记）：完成 codex MultiAgentV2 双向调研（六工具协议 / 继承覆盖 / 回传机制）与 Petri 地基盘点（四项复用资产 + 五个断点）；本计划落盘并注册 DOC-REGISTRY；待 BLOCK-47 收口后由用户裁决启动。
 - 2026-09-04 P1→P5 一次会话收口（节奏对齐 BLOCK-54/56）：
   - **P0 启动登记**：用户裁决启动，plan active + DOC-REGISTRY + roadmap/AUDIT-LOG 登记；顺带修正 BLOCK-56 收口提交 `9f7e44f5` 的两处同文件并行编辑竞态丢失（plan-56 状态头 + roadmap 头部）。
   - **P1 工具面 MVP**：`agent-tools/spawn-agent-tools.js` 三工具（spawn_agent 异步返回 agentId / list_agents 含终态 / wait_agent 阻塞轮询+超时让出）；tool-defs OpenAI schema + registry 契约注册（spawn=state-write/R2、list=none/R0、wait=none/R1，新 category=agent-management）；执行层进程内直调既有 subagent 链（agent-task-store + runAgentLoop 懒加载断 require 环 + aiTaskConcurrency 槽），不走 HTTP 自调用；父 loop toolCtx 注入 taskId 锚点（agent-runner.js）。
@@ -143,7 +143,7 @@
   - **收口门禁**：docs:reconcile + docs:check（200 PASS）+ ui:audit:check PASS；定向 `test:changed` 589 项 579 过，10 败全部位于 4 个 **HEAD 预存失败文件**（agent-run-tool / g0-api-route / scientific-task-persistence / tool-job-conversation——测试自举未先跑迁移即 require db.js，顶层 prepare `projects` 语句触发 `no such table`，stash 后 HEAD 同败已复核），**BLOCK-49 零回归**；block49 专项与 loop 回归全过。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 
-- 2026-09-06 二期启动（active）：主智能体受权决定启动顺序，从候选（BLOCK-49 二期 / BLOCK-56 F4 记忆 / biof3-r-toolchain）中裁决本包二期先行——多智能体协作是核心骨架、与 BLOCK-48 P3 注册+政策+授权门模式同构风险最低、单会话可收口。范围：interrupt_agent（requestAgentTaskCancel+级联，真实机制复用）/ send_message（持久化消息队列语义——运行中即时注入需改 agent-runner 核心（messages 按值闭包），v1 诚实登记为事件队列 + followup 注入）/ followup_task（终态子 agent 续派：launchSubAgent 从 spawn_agent 抽取共用 + 终态摘要 + 队列消息注入）+ proactive（子 agent 终态 child_finished 事件投递父任务流，SSE 协议面 additive，前端消费登记候选）。
+- 2026-09-06 二期启动（active）：主智能体受权决定启动顺序，从候选（BLOCK-49 二期 / BLOCK-56 F4 记忆 / petri-r-toolchain）中裁决本包二期先行——多智能体协作是核心骨架、与 BLOCK-48 P3 注册+政策+授权门模式同构风险最低、单会话可收口。范围：interrupt_agent（requestAgentTaskCancel+级联，真实机制复用）/ send_message（持久化消息队列语义——运行中即时注入需改 agent-runner 核心（messages 按值闭包），v1 诚实登记为事件队列 + followup 注入）/ followup_task（终态子 agent 续派：launchSubAgent 从 spawn_agent 抽取共用 + 终态摘要 + 队列消息注入）+ proactive（子 agent 终态 child_finished 事件投递父任务流，SSE 协议面 additive，前端消费登记候选）。
 
 - 2026-09-06 二期收口（completed）：**协作三工具 + proactive 全链落地**。① **interrupt_agent**：requestAgentTaskCancel + cancelAgentTaskCascade 级联 + interrupt_requested 事件审计 + 终态幂等。② **send_message**：持久化消息队列语义（parent_message 事件 → 子 agent 事件流可审计，followup 续派时注入上下文）；**运行中即时注入需改 agent-runner 核心（messages 按值闭包），v1 诚实登记候选**。③ **followup_task**：launchSubAgent 从 spawn_agent 抽取共用（模型/权限/会话继承链一致）+ 终态摘要前情 + 队列消息注入。④ **proactive**：runner 终态钩子 child_finished 事件投递父任务流（SSE 协议面 additive；前端 notice 消费登记候选）。⑤ **单测 13/13**（契约/政策矩阵同 spawn 门/interrupt 幂等与级联/send 入队与终态引导/followup 组合提示断言[摘要+队列注入]/executeToolCall 双态链）+ **实机 14 断言**（真实模型：spawn→wait→followup 续派真跑→运行中入队→中断→cancelled→proactive ≥3 条）。**登记发现**：resolveAgentTaskTerminal 完成判定要求回答 >20 字符——短回答子任务（如纯算式）被判 failed（产品启发式，登记候选待裁决）；实机首两轮模型抖动（已答对判 failed）由该启发式放大。门禁：docs/ui 契约 PASS。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

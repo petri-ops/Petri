@@ -4,7 +4,7 @@ const CHANNELS = require('./channels');
 /**
  * IPC handlers: pack:* — 领域包一键装/卸（BLOCK-84）+ 契约推导生命周期编排（BLOCK-86 P1）。
  * 纯 Electron main 侧：dialog 选择目录 + pack-lifecycle 编排（记录 + 运行时联动）。
- * boot 接线（插件源/工具注册）由 biof3-server 启动消费记录完成；装/卸后需重启生效。
+ * boot 接线（插件源/工具注册）由 petri-server 启动消费记录完成；装/卸后需重启生效。
  * 编排逻辑全部在 src/pack-lifecycle.js（可测），此处只做 IPC 装配与进度转发。
  */
 
@@ -13,9 +13,9 @@ const path = require('path');
 const { createPackLifecycle } = require('../pack-lifecycle');
 
 function getDataDir() {
-  // 与 BLOCK-79 环境事实同源：BIOF3_LOCAL_DATA_DIR 由 dev-electron/主进程注入
-  return process.env.BIOF3_LOCAL_DATA_DIR
-    || path.join(require('os').homedir(), 'Documents', 'Gewu-Local');
+  // 与 BLOCK-79 环境事实同源：PETRI_LOCAL_DATA_DIR 由 dev-electron/主进程注入
+  return process.env.PETRI_LOCAL_DATA_DIR
+    || path.join(require('os').homedir(), 'Documents', 'Petri-Local');
 }
 
 const lifecycle = createPackLifecycle();
@@ -51,7 +51,7 @@ function registerPackIpc() {
 
   ipcMain.handle(CHANNELS.pack.listAvailable, async () => {
     const packRegistry = require('../../core/shared-backend/pack-registry');
-    const available = packRegistry.discoverAvailablePacks({ projectRoot: process.env.BIOF3_PROJECT_ROOT || path.resolve(__dirname, '..', '..') });
+    const available = packRegistry.discoverAvailablePacks({ projectRoot: process.env.PETRI_PROJECT_ROOT || path.resolve(__dirname, '..', '..') });
     const installed = packRegistry.readInstalledPacks(getDataDir());
     const installedIds = new Set(installed.map((p) => p.packId));
     return {

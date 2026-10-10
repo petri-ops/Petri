@@ -8,7 +8,7 @@ interface FederationPeer {
   baseUrl: string;
   platform: string | null;
   arch: string | null;
-  gewuVersion: string | null;
+  petriVersion: string | null;
   executors: { r?: boolean; python?: boolean } | null;
   protocol: number;
   addedAt: string;
@@ -63,7 +63,7 @@ interface FederationEnvelope {
 }
 
 // 署名持久化键：本机工程师署名是展示性声明（D1-A），存 localStorage 即可。
-const ENGINEER_NAME_KEY = 'gewu-engineer-name';
+const ENGINEER_NAME_KEY = 'petri-engineer-name';
 const MEMBERS_REFRESH_MS = 30 * 1000;
 // 访客活跃判定：lastSeenAt 在窗口内视为在线（gateway 每请求刷新该字段）。
 const MEMBER_ONLINE_WINDOW_MS = 2 * 60 * 1000;
@@ -363,7 +363,7 @@ export function FederationPanel(): React.ReactElement {
       </p>
 
       {error && <p className={styles.errorText} role="alert">{error}</p>}
-      {notice && <p className="gewu-field__hint" role="status">{notice}</p>}
+      {notice && <p className="petri-field__hint" role="status">{notice}</p>}
 
       <div className={styles.addCard} data-testid="federation-invite">
         <h4 className={styles.addTitle}>本机配对码</h4>
@@ -387,7 +387,7 @@ export function FederationPanel(): React.ReactElement {
               </span>
               <button
                 type="button"
-                className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                className="petri-btn petri-btn--ghost petri-btn--sm"
                 onClick={() => { void copyInvite(); }}
                 data-testid="federation-invite-copy"
               >
@@ -395,7 +395,7 @@ export function FederationPanel(): React.ReactElement {
               </button>
               <button
                 type="button"
-                className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                className="petri-btn petri-btn--ghost petri-btn--sm"
                 disabled={inviteBusy}
                 onClick={() => { void generateInvite(); }}
                 data-testid="federation-invite-regen"
@@ -437,7 +437,7 @@ export function FederationPanel(): React.ReactElement {
         <div className={styles.addRow}>
           <button
             type="button"
-            className="gewu-btn gewu-btn--primary gewu-btn--sm"
+            className="petri-btn petri-btn--primary petri-btn--sm"
             disabled={busy || !pairUrl.trim()}
             onClick={() => { void addPeer(); }}
             data-testid="federation-pair-submit"
@@ -531,7 +531,7 @@ export function FederationPanel(): React.ReactElement {
                     </select>
                     <button
                       type="button"
-                      className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                      className="petri-btn petri-btn--ghost petri-btn--sm"
                       disabled={grantBusy || !grantSelections[name]}
                       data-testid="federation-grant-submit"
                       onClick={() => {
@@ -568,14 +568,14 @@ export function FederationPanel(): React.ReactElement {
                   <span className={styles.peerMeta}>
                     {platformLabel(peer)}
                     {peer.identity?.displayName ? ` · 署名 ${peer.identity.displayName}` : ''}
-                    {peer.gewuVersion ? ` · v${peer.gewuVersion}` : ''}
+                    {peer.petriVersion ? ` · v${peer.petriVersion}` : ''}
                     {probeOk && peer.lastProbe?.latencyMs != null ? ` · ${peer.lastProbe.latencyMs}ms` : ''}
                     {probeBad ? ` · ${peer.lastProbe?.error || '离线'}` : ''}
                   </span>
                 </div>
                 <button
                   type="button"
-                  className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                  className="petri-btn petri-btn--ghost petri-btn--sm"
                   disabled={busy}
                   onClick={() => { void openProjection(peer.peerId); }}
                   data-testid="federation-open-ui"
@@ -584,7 +584,7 @@ export function FederationPanel(): React.ReactElement {
                 </button>
                 <button
                   type="button"
-                  className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                  className="petri-btn petri-btn--ghost petri-btn--sm"
                   disabled={busy}
                   onClick={() => { void probePeer(peer.peerId); }}
                 >
@@ -592,7 +592,7 @@ export function FederationPanel(): React.ReactElement {
                 </button>
                 <button
                   type="button"
-                  className="gewu-btn gewu-btn--danger-ghost gewu-btn--sm"
+                  className="petri-btn petri-btn--danger-ghost petri-btn--sm"
                   disabled={busy}
                   onClick={() => { void removePeer(peer.peerId); }}
                 >
@@ -639,7 +639,7 @@ function FederationDelegations(): React.ReactElement {
         委托记录
         <button
           type="button"
-          className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+          className="petri-btn petri-btn--ghost petri-btn--sm"
           onClick={() => { void load(); }}
           data-testid="federation-delegation-refresh"
         >

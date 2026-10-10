@@ -29,7 +29,7 @@ status: completed
 
 ## 2. 范围（P0×5 + P1×4）
 
-### P0-1 生产投影 gzip（新模块 `core/biof3-server/mobile-gateway/compress.js`，零新依赖）
+### P0-1 生产投影 gzip（新模块 `core/petri-server/mobile-gateway/compress.js`，零新依赖）
 
 - buffered 中间件：`res.json`/`res.send` 的 JSON/文本响应按 `accept-encoding` gzip（阈值 >1KB；`content-type: text/event-stream` 跳过；已带 `Content-Encoding` 跳过；HEAD 跳过）。
 - 静态资产：`/assets/**` 请求时 gzip + 有界字节缓存（默认 32MB 上限，mtime 失效），immutable 缓存头保持既有语义；非 gzip 客户端 fallthrough 既有 `express.static`。
@@ -82,7 +82,7 @@ status: completed
 2. **手机投影首屏瘦身不做**：用户裁决砍掉；与 UI-357「桌面原封投影」一致。压缩（P0-1）已覆盖首屏体积大头。
 3. 不做 WebSocket 改造 / 不引入 bot 通道 / 不动中转服务器侧配置与交付指引（`docs/guides/mobile-tunnel-aliyun-setup.md` 仅可加注心跳相关性）。
 4. 轮询密度治理（WorkspaceSummaryCard 5s×3 等）不在本包——等 P0-1/P1 系落地后按实测再评估。
-5. **BLOCK-158（并行包，商店面退役）文件面零触碰**：`src/plugin/**`、`src/ipc/plugin.js`、`src/ipc/channels.js`、`src/preload.js`、`core/biof3-server/plugin-loader.js`、`frontend/src/hooks/usePluginStore.ts`、`frontend/src/lib/electron.d.ts`、`test/block157-plugin-enabled.test.mjs`、`acceptance/dev-verify/app-health-live.json`。唯一同文件交叉 `frontend/src/lib/projectionDataBridges.ts`：其改动在 `pluginsBridge` 段（install/uninstall 删除），本包改动在 `getJson` 头部与导出段，行区不相交；提交时按 hunk 精确暂存本包改动，绝不整文件打包对方在途改动。
+5. **BLOCK-158（并行包，商店面退役）文件面零触碰**：`src/plugin/**`、`src/ipc/plugin.js`、`src/ipc/channels.js`、`src/preload.js`、`core/petri-server/plugin-loader.js`、`frontend/src/hooks/usePluginStore.ts`、`frontend/src/lib/electron.d.ts`、`test/block157-plugin-enabled.test.mjs`、`acceptance/dev-verify/app-health-live.json`。唯一同文件交叉 `frontend/src/lib/projectionDataBridges.ts`：其改动在 `pluginsBridge` 段（install/uninstall 删除），本包改动在 `getJson` 头部与导出段，行区不相交；提交时按 hunk 精确暂存本包改动，绝不整文件打包对方在途改动。
 
 ## 4. 依赖与环境纪律
 

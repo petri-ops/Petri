@@ -137,7 +137,7 @@ MIT License
 
 ## 作者
 
-BioF3 Team
+Petri Team
 
 ## 版本历史
 

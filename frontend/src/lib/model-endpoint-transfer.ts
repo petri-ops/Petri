@@ -78,7 +78,7 @@ function endpointProfilesForTransfer(
 
 export function exportEndpointProfilesJson(profiles: ChatModelPreset[], apiKeys: Record<string, string> = {}): string {
   return JSON.stringify({
-    format: 'gewu-api-endpoints',
+    format: 'petri-api-endpoints',
     version: 1,
     exportedAt: new Date().toISOString(),
     note: Object.keys(apiKeys).length

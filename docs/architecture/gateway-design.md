@@ -2,7 +2,7 @@
 
 ## 概述
 
-Backend Gateway 是 BioF3 Desktop 后端架构的统一入口层，协调 R Server (3003)、Python Server (3004) 和其他后端服务，提供单一入口点进行工具发现、健康检查和执行路由。
+Backend Gateway 是 Petri Desktop 后端架构的统一入口层，协调 R Server (3003)、Python Server (3004) 和其他后端服务，提供单一入口点进行工具发现、健康检查和执行路由。
 
 ## 架构图
 

@@ -37,5 +37,5 @@
   "allPass": true,
   "conversationId": "conv_b95_b1_mu54a10b",
   "taskId": "62f95c9f-ed27-402f-b9fa-e74e011dff62",
-  "note": "B1 开态实机：LLM 实际收到的 messages 与 DB 拼装逐字对账（开关=BIOF3_SERVER_HISTORY_ASSEMBLY=1）"
+  "note": "B1 开态实机：LLM 实际收到的 messages 与 DB 拼装逐字对账（开关=PETRI_SERVER_HISTORY_ASSEMBLY=1）"
 }

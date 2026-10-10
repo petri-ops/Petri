@@ -2,13 +2,13 @@
 
 > Status: maintained as the demo/golden-path regression contract because tests and fixtures reference it. It is not the current product roadmap.
 
-The exact steps a brand-new BioF3 desktop user needs to take to go
+The exact steps a brand-new Petri desktop user needs to take to go
 from "I just installed the app" to "I have a real analysis report".
 Designed to be smooth, deterministic, and zero-config.
 
 ## 1. App launch
 
-- User opens BioF3 desktop
+- User opens Petri desktop
 - Land on dashboard
 - See "Run your first analysis" card in the center panel
 
@@ -46,7 +46,7 @@ implements this for DESeq2 (`tools.tsx:500-535`):
 ## 6. Click "View report"
 
 - GET `/api/tools/report/:jobId` returns the HTML report
-- Renders inline with the BioF3 dark theme applied
+- Renders inline with the Petri dark theme applied
 - "Download results" link -> `all_results.zip` with all 23
   artifacts
 
@@ -75,7 +75,7 @@ These need real external datasets:
 - maftools-mutation -- TCGA-LAML MAF (`tcga_laml.maf.gz`, 64 KB,
   gzipped)
 
-Worker task: fetch these via `scripts/biof3-spatial-demo-data.sh`
+Worker task: fetch these via `scripts/petri-spatial-demo-data.sh`
 (adapted pattern from spatial) -> `resources/demo-data/<tool>/`.
 
 ### B. Frontend onboarding wiring
@@ -107,8 +107,8 @@ build artifacts; Windows follows in Week 3.5.
 ```bash
 # 1. Start r-server in local mode (local storage, uses system R)
 cd core/r-server
-BIOF3_R_HOME=/Library/Frameworks/R.framework/Resources \
-  R_SERVER_PORT=3003 BIOF3_TEMP_DIR=/tmp/biof3-tmp BIOF3_CACHE_DIR=/tmp/biof3-cache \
+PETRI_R_HOME=/Library/Frameworks/R.framework/Resources \
+  R_SERVER_PORT=3003 PETRI_TEMP_DIR=/tmp/petri-tmp PETRI_CACHE_DIR=/tmp/petri-cache \
   node server.js &
 
 # 2. Run the golden path
@@ -152,7 +152,7 @@ HEAD == origin/main confirms this is upstream, not a local lag).
   analysis_succeeded_zip_packaging_pending`.
 
 Verified by re-running on 2026-07-14 against the same local r-server config
-(`BIOF3_R_HOME=/Library/Frameworks/R.framework/Resources`). The new run
+(`PETRI_R_HOME=/Library/Frameworks/R.framework/Resources`). The new run
 produced a fully-populated run.json under the local `tmp/golden-path/report/`
 with 22 artifacts harvested from `/status.result.files`.
 

@@ -20,14 +20,14 @@ import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
-const coreServerRoot = path.join(root, 'core', 'biof3-server');
+const coreServerRoot = path.join(root, 'core', 'petri-server');
 const storePath = path.join(coreServerRoot, 'agent-task-store.js');
 const req = createRequire(path.join(coreServerRoot, 'package.json'));
 const Database = req('better-sqlite3');
 
 // 测试期不触碰任何真实库：先把 dbPath 指向临时目录再加载模块（对标既有测试姿势）
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'block106-retention-'));
-process.env.BIOF3_DB_PATH = path.join(tempDir, 'agent-tasks.db');
+process.env.PETRI_DB_PATH = path.join(tempDir, 'agent-tasks.db');
 const store = req(storePath);
 
 const DAY_MS = 24 * 60 * 60 * 1000;

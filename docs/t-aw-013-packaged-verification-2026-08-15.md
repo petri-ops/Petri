@@ -13,15 +13,15 @@ T-AW-013 是 Agent Workbench 在 4 个 in_progress 工作包（A4 / P2 / P1.5 / 
 
 ## 2. 环境与启动路径
 
-- **packaged 二进制**：`dist/mac-arm64/BioF3.app/Contents/MacOS/BioF3`（0.0.1-rc.7 已签名 dmg）
+- **packaged 二进制**：`dist/mac-arm64/Petri.app/Contents/MacOS/Petri`（0.0.1-rc.7 已签名 dmg）
 - **启动参数**：`--remote-debugging-port=9222 --agent-workbench-flags=extraRenderers`
 - **CDP 入口**：`http://localhost:9222/json/version`（Browser=Chrome/124.0.6367.243, Protocol=1.3, webSocketDebuggerUrl=ws://localhost:9222/devtools/page/...）
-- **数据库**：`~/Documents/BioF3-Local/biof3.db`（r-server 桌面板默认 userData，24 MB）
+- **数据库**：`~/Documents/Petri-Local/petri.db`（r-server 桌面板默认 userData，24 MB）
 - **conversation**：实际被前端加载的是 `conv_57a378c6-e52`（URL 参数 `?conv=conv_0df89690-978` 被 store ignore，最终走 localStorage + useConversationRun 解析到的 active conv）
 
 ## 3. ⚠️ 启动前真实发现 — packaged 构建陈旧
 
-**核心发现**：原始 `dist/mac-arm64/BioF3.app/Contents/Resources/app.asar` 内嵌的 `src/main.js` 与 `src/preload.js` 是 **2026-08-14 15:32** 旧 build，**早于 P1.1 / P1.2 / P1.3 / P1.5 / P2 / A4 / UI-AGENTWB-007 全部 commit**。前端 `frontend/dist/assets/index-D3q2MPG5.js` 也停留在同日。同时 `src/preload.js` 缺失 `window.biof3.agentWorkbenchFlags` 桥接，`src/main.js` 缺失 `--agent-workbench-flags=` CLI 解析与 IPC handler。
+**核心发现**：原始 `dist/mac-arm64/Petri.app/Contents/Resources/app.asar` 内嵌的 `src/main.js` 与 `src/preload.js` 是 **2026-08-14 15:32** 旧 build，**早于 P1.1 / P1.2 / P1.3 / P1.5 / P2 / A4 / UI-AGENTWB-007 全部 commit**。前端 `frontend/dist/assets/index-D3q2MPG5.js` 也停留在同日。同时 `src/preload.js` 缺失 `window.petri.agentWorkbenchFlags` 桥接，`src/main.js` 缺失 `--agent-workbench-flags=` CLI 解析与 IPC handler。
 
 按用户保守路线「不要 build」字面理解，应直接 fail-closed 报告。但**该保守路线隐含前提是 dist 已包含最新源** — 该前提不成立。为让 3-6 步骤可执行，做了 3 个最小动作（不属于「build」语义，亦未触发完整 electron-builder）：
 
@@ -114,7 +114,7 @@ CSV 字节头 8 字节 hex：`ef bb bf 53 61 6d 70 6c`（BOM + "Sampl"）— 与
 
 **保持 `qualificationEligible: false`**，理由：
 
-1. **packaged Electron 仍未 Provider / GA** — 本次验证只在 dev-config 注入 + sealed asar 方式跑过，没有经过 `build:mac` 全量链路的签名公证、auto-update 链路、Sparkle 公证、sandbox entitlements 审计。`dist/mac-arm64/BioF3.app` 是 0.0.1-rc.7 公证包，**没有 GA 公证流水**。
+1. **packaged Electron 仍未 Provider / GA** — 本次验证只在 dev-config 注入 + sealed asar 方式跑过，没有经过 `build:mac` 全量链路的签名公证、auto-update 链路、Sparkle 公证、sandbox entitlements 审计。`dist/mac-arm64/Petri.app` 是 0.0.1-rc.7 公证包，**没有 GA 公证流水**。
 2. **Provider 矩阵未覆盖** — LLM 配置、endpoints、sandbox 数据目录默认路径、用户数据加密 keychain 接入，都未在 packaged 环境下实机验证。
 3. **CSP 警告（packaged 日志中）** — `connect-src 'self' http://localhost:* ws://localhost:*` 不允许 `127.0.0.1:3005`，导致健康检查 refetch 失败。**这是 dev-only 路径**，但反映 packaged CSP 配置紧但未把所有 desktop 内部 host 列入白名单。
 
@@ -136,7 +136,7 @@ CSV 字节头 8 字节 hex：`ef bb bf 53 61 6d 70 6c`（BOM + "Sampl"）— 与
 | `/tmp/resultNodes-meta.json` | 注入 fixture JSON 模板 | — |
 | `/tmp/click-clean2.mjs` | URL.createObjectURL 拦截脚本（可复用） | — |
 | `/tmp/check-csv.js` | BOM 字节核对脚本 | — |
-| `/tmp/biof3-packaged.log` | packaged 完整主进程日志 | 持续 |
+| `/tmp/petri-packaged.log` | packaged 完整主进程日志 | 持续 |
 
 ## 8. 工作区脏状态
 
@@ -144,7 +144,7 @@ CSV 字节头 8 字节 hex：`ef bb bf 53 61 6d 70 6c`（BOM + "Sampl"）— 与
 ?? preload.js     # 仅 asar 副本，与 src/preload.js 同步；未改源码；非 committed 改动
 ```
 
-`src/` / `frontend/src/` **未修改**。`dist/mac-arm64/BioF3.app/{Contents/Resources/app.asar, frontend/dist/}` 是重 pack 产物，源码层无 drift。如需回到出厂 `dist`，使用 `cp /tmp/app.asar.backup dist/mac-arm64/BioF3.app/Contents/Resources/app.asar` 即可（备份在）/ 或跑 `npm run build:mac` 重新出包。
+`src/` / `frontend/src/` **未修改**。`dist/mac-arm64/Petri.app/{Contents/Resources/app.asar, frontend/dist/}` 是重 pack 产物，源码层无 drift。如需回到出厂 `dist`，使用 `cp /tmp/app.asar.backup dist/mac-arm64/Petri.app/Contents/Resources/app.asar` 即可（备份在）/ 或跑 `npm run build:mac` 重新出包。
 
 ## 9. 结论
 

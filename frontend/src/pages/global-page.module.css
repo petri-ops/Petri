@@ -5,8 +5,8 @@
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
 }
 
 .header {
@@ -14,7 +14,7 @@
   align-items: center;
   gap: 10px;
   padding: 12px 18px;
-  border-bottom: 1px solid var(--gewu-border);
+  border-bottom: 1px solid var(--petri-border);
   flex-shrink: 0;
 }
 
@@ -25,11 +25,11 @@
   gap: 8px;
   height: 30px;
   padding: 0 10px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
-  background: var(--gewu-surface);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-caption);
+  background: var(--petri-surface);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-caption);
   font-weight: 500;
   cursor: pointer;
   flex-shrink: 0;
@@ -37,8 +37,8 @@
 }
 
 .backBtn:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .pageIcon {
@@ -48,8 +48,8 @@
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: var(--gewu-accent-surface);
-  color: var(--gewu-accent);
+  background: var(--petri-accent-surface);
+  color: var(--petri-accent);
   flex-shrink: 0;
 }
 
@@ -61,14 +61,14 @@
 }
 
 .title {
-  font-size: var(--gewu-font-size-base, 14px);
+  font-size: var(--petri-font-size-base, 14px);
   font-weight: 600;
   line-height: 1.2;
 }
 
 .subtitle {
-  font-size: var(--gewu-font-size-xs, 12px);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-xs, 12px);
+  color: var(--petri-text-tertiary);
 }
 
 .body {

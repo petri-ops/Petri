@@ -35,17 +35,17 @@ import { fileURLToPath } from 'node:url';
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const TMP_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-loop-route-int-'));
-process.env.BIOF3_DB_PATH = path.join(TMP_DIR, 'test.db');
+const TMP_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-loop-route-int-'));
+process.env.PETRI_DB_PATH = path.join(TMP_DIR, 'test.db');
 
 // 新鲜 DB 必须先应用 src/migrations 全量（projects 等用户数据表由迁移管理，
 // db.js 模块加载即预编译 projects 语句）。与 block49-spawn-agent-tools.test.mjs
 // 同一自举手法；否则 before() 内 import db.js 即抛 no such table: projects，
 // 全部 RT 用例连带失败。
 {
-  const Database = require('../core/biof3-server/node_modules/better-sqlite3');
+  const Database = require('../core/petri-server/node_modules/better-sqlite3');
   const migrationsDir = path.resolve(__dirname, '..', 'src', 'migrations');
-  const boot = new Database(process.env.BIOF3_DB_PATH);
+  const boot = new Database(process.env.PETRI_DB_PATH);
   for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fs.readFileSync(path.join(migrationsDir, f), 'utf8'));
   }
@@ -116,7 +116,7 @@ function apiRequest(method, pathname, { userId, role, userObjectOnly = false } =
 }
 
 before(async () => {
-  db = (await import('../core/biof3-server/db.js')).default || (await import('../core/biof3-server/db.js'));
+  db = (await import('../core/petri-server/db.js')).default || (await import('../core/petri-server/db.js'));
   lc = (await import('../core/shared-backend/loop-contract.js')).default;
 
   // Fixtures: an owned project and a public project.
@@ -131,7 +131,7 @@ before(async () => {
 
   // Mount the REAL router on a real Express app with a mock-auth middleware.
   const express = require('express');
-  const { registerAiLoopRoutes } = require('../core/biof3-server/routes/ai-loop.js');
+  const { registerAiLoopRoutes } = require('../core/petri-server/routes/ai-loop.js');
   const app = express();
   app.use(express.json());
   // Mock auth: translate test headers into req.userId / req.user
@@ -370,7 +370,7 @@ test('RT-17 session summary replays public iterations, activity and conversation
     publicConclusion: '表达矩阵质控完成',
   });
   db.persistLoopIteration(iteration);
-  const { recordAiUsage } = require('../core/biof3-server/helpers/ai-usage.js');
+  const { recordAiUsage } = require('../core/petri-server/helpers/ai-usage.js');
   recordAiUsage({
     userId: OWNER_ID,
     conversationId,
@@ -405,7 +405,7 @@ test('RT-18 session summary enforces project ownership', async () => {
 
 test('RT-19 production route registry mounts bounded Loop API before the legacy catch-all', () => {
   const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-  const source = fs.readFileSync(path.join(repoRoot, 'core/biof3-server/routes/index.js'), 'utf8');
+  const source = fs.readFileSync(path.join(repoRoot, 'core/petri-server/routes/index.js'), 'utf8');
   const loopApi = source.indexOf("['AI Loop API'");
   const harness = source.indexOf("['Harness'");
   assert.ok(loopApi >= 0 && harness >= 0);

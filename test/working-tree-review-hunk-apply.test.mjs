@@ -23,7 +23,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 
-const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-wtr-hunkapply-'));
+const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-wtr-hunkapply-'));
 const repoDir = path.join(tmpRoot, 'repo');
 const userDataDir = path.join(tmpRoot, 'user-data');
 fs.mkdirSync(repoDir, { recursive: true });
@@ -37,8 +37,8 @@ const TARGET = 'append-at-eof.txt';
 
 // ---- tmp 仓库：提交 10 行文件，然后工作区末尾追加 3 行（hunk 位于 EOF）----
 git(['init', '-q']);
-git(['config', 'user.email', 'test@biof3.local']);
-git(['config', 'user.name', 'biof3-test']);
+git(['config', 'user.email', 'test@petri.local']);
+git(['config', 'user.name', 'petri-test']);
 fs.writeFileSync(path.join(repoDir, TARGET), HEAD_BODY);
 git(['add', '-A']);
 git(['commit', '-qm', 'init']);

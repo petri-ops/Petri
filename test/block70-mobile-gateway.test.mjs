@@ -9,12 +9,12 @@ import { fileURLToPath } from 'node:url';
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-const { resetStoresForTest, createPairingStore, createSessionStore, PAIR_TOKEN_TTL_MS } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/pairing.js'));
-const { readConfig, writeConfig, lanAddresses, resolveEnabled, resolvePort } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/config.js'));
-const { buildMobileGateway, startMobileGateway } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/index.js'));
+const { resetStoresForTest, createPairingStore, createSessionStore, PAIR_TOKEN_TTL_MS } = require(path.join(ROOT, 'core/petri-server/mobile-gateway/pairing.js'));
+const { readConfig, writeConfig, lanAddresses, resolveEnabled, resolvePort } = require(path.join(ROOT, 'core/petri-server/mobile-gateway/config.js'));
+const { buildMobileGateway, startMobileGateway } = require(path.join(ROOT, 'core/petri-server/mobile-gateway/index.js'));
 
 function tmpRoot() {
-  return mkdtempSync(path.join(tmpdir(), 'gewu-mobile-test-'));
+  return mkdtempSync(path.join(tmpdir(), 'petri-mobile-test-'));
 }
 
 function listen(app) {
@@ -85,12 +85,12 @@ test('BLOCK-70 gateway config defaults to off and round-trips writes', () => {
   try {
     assert.deepEqual(readConfig(root), { enabled: false, port: 3005, bind: '0.0.0.0' });
     assert.equal(resolveEnabled({ dataDir: root, env: {} }), false, 'must default to disabled');
-    assert.equal(resolveEnabled({ dataDir: root, env: { BIOF3_MOBILE_ENABLED: '1' } }), true, 'env override enables');
+    assert.equal(resolveEnabled({ dataDir: root, env: { PETRI_MOBILE_ENABLED: '1' } }), true, 'env override enables');
     const next = writeConfig(root, { enabled: true, port: 3007 });
     assert.deepEqual(next, { enabled: true, port: 3007, bind: '0.0.0.0' });
     assert.deepEqual(readConfig(root), next);
     assert.equal(resolvePort({ dataDir: root, env: {} }), 3007);
-    assert.equal(resolvePort({ dataDir: root, env: { BIOF3_MOBILE_PORT: '3010' } }), 3010);
+    assert.equal(resolvePort({ dataDir: root, env: { PETRI_MOBILE_PORT: '3010' } }), 3010);
     writeConfig(root, { port: 99999 });
     assert.equal(readConfig(root).port, 3007, 'out-of-range port must be ignored');
   } finally {
@@ -125,7 +125,7 @@ test('BLOCK-70 gateway: static page, pairing, session auth, revocation, audit', 
     // 静态移动页可达
     const page = await fetch(`${base}/m/`);
     assert.equal(page.status, 200);
-    assert.match(await page.text(), /Gewu · 移动工作区/);
+    assert.match(await page.text(), /Petri · 移动工作区/);
 
     // 未配对：/m/api/* 一律 401
     assert.equal((await fetch(`${base}/m/api/probe`)).status, 401);
@@ -206,7 +206,7 @@ test('BLOCK-70 startMobileGateway stays off unless enabled (additive red line)',
     assert.deepEqual(off, { started: false, reason: 'disabled' });
     const enabled = startMobileGateway({
       dataDir: root,
-      env: { BIOF3_MOBILE_ENABLED: '1', BIOF3_MOBILE_PORT: String(39100 + Math.floor(Math.random() * 400)) },
+      env: { PETRI_MOBILE_ENABLED: '1', PETRI_MOBILE_PORT: String(39100 + Math.floor(Math.random() * 400)) },
       mountRoutes: (mobileApp) => {
         mobileApp.get('/m/api/probe', (_req, res) => res.json({ ok: true }));
       },
@@ -225,7 +225,7 @@ test('BLOCK-70 admin REST and gateway share one session truth (revoke is instant
     const express = require('express');
     const adminApp = express();
     adminApp.use(express.json({ limit: '4kb' }));
-    require(path.join(ROOT, 'core/biof3-server/routes/mobile-admin.js'))(adminApp, { dataDir: root });
+    require(path.join(ROOT, 'core/petri-server/routes/mobile-admin.js'))(adminApp, { dataDir: root });
     const adminServer = await listen(adminApp);
     const adminBase = `http://127.0.0.1:${adminServer.address().port}`;
 
@@ -326,7 +326,7 @@ test('BLOCK-70 加映4: pair reuses a valid session instead of minting a new one
     const express = require('express');
     const adminApp = express();
     adminApp.use(express.json({ limit: '4kb' }));
-    require(path.join(ROOT, 'core/biof3-server/routes/mobile-admin.js'))(adminApp, { dataDir: root });
+    require(path.join(ROOT, 'core/petri-server/routes/mobile-admin.js'))(adminApp, { dataDir: root });
     const adminServer = await listen(adminApp);
     const adminBase = `http://127.0.0.1:${adminServer.address().port}`;
 

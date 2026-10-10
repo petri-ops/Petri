@@ -21,19 +21,19 @@ const path = require('node:path');
 const http = require('node:http');
 
 // env 必须在 require db/ai-settings 之前设置（单例解析）
-const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block56-live-'));
-process.env.BIOF3_DB_PATH = path.join(tmpRoot, 'live.db');
-process.env.BIOF3_LOCAL_DATA_DIR = path.join(tmpRoot, 'local-data');
+const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block56-live-'));
+process.env.PETRI_DB_PATH = path.join(tmpRoot, 'live.db');
+process.env.PETRI_LOCAL_DATA_DIR = path.join(tmpRoot, 'local-data');
 
 const ROOT = path.join(__dirname, '..');
 const EVIDENCE_DIR = path.join(ROOT, 'acceptance', 'block-56');
 
-const { saveAiSettings } = require(ROOT + '/core/biof3-server/helpers/ai-settings');
-const { modelGateway } = require(ROOT + '/core/biof3-server/helpers/model-gateway');
-const agentTaskStore = require(ROOT + '/core/biof3-server/agent-task-store');
-const { classifyDegradableError } = require(ROOT + '/core/biof3-server/helpers/model-fallback-policy');
-const { maybeLaunchTaskLevelFallback } = require(ROOT + '/core/biof3-server/helpers/agent-fallback');
-const { aiTaskConcurrencyRelease } = require(ROOT + '/core/biof3-server/helpers/runtime');
+const { saveAiSettings } = require(ROOT + '/core/petri-server/helpers/ai-settings');
+const { modelGateway } = require(ROOT + '/core/petri-server/helpers/model-gateway');
+const agentTaskStore = require(ROOT + '/core/petri-server/agent-task-store');
+const { classifyDegradableError } = require(ROOT + '/core/petri-server/helpers/model-fallback-policy');
+const { maybeLaunchTaskLevelFallback } = require(ROOT + '/core/petri-server/helpers/agent-fallback');
+const { aiTaskConcurrencyRelease } = require(ROOT + '/core/petri-server/helpers/runtime');
 
 const USER_ID = 'u_block56_live';
 
@@ -118,7 +118,7 @@ async function main() {
   const primaryPort = primary.port;
   const backupPort = backup.port;
 
-  // 真设置落盘（临时 BIOF3_LOCAL_DATA_DIR，不碰用户真实配置）
+  // 真设置落盘（临时 PETRI_LOCAL_DATA_DIR，不碰用户真实配置）
   saveAiSettings({
     model_profiles: [
       {
@@ -139,7 +139,7 @@ async function main() {
     fallbackEnabled: config.fallbackEnabled,
     fallbackBindings: config.fallbackBindings,
     profiles: config.profiles.map((p) => ({ id: p.id, provider: p.provider, model: p.model, baseUrl: p.baseUrl })),
-    dbPath: 'tmp(biof3-block56-live-*)/live.db',
+    dbPath: 'tmp(petri-block56-live-*)/live.db',
   };
 
   try {

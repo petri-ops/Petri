@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
-import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
+import { petriEvents, dispatchPetriEvent } from '@/lib/events';
 import type { ToolJob, Project, Dataset } from '@/lib/project-types';
 import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 import type { BackendStatus } from '@/lib/electron';
@@ -472,7 +472,7 @@ export function WorkspaceSummaryCard({
           <section className={styles.workspacePinnedSummarySection}>
             <div className={styles.workspacePinnedSummarySectionHeading}>
               <div className={styles.workspacePinnedSummarySectionTitle}>最近分析</div>
-              <button className="gewu-btn gewu-btn--ghost gewu-btn--sm" type="button" onClick={onOpenScheduled}>查看全部</button>
+              <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={onOpenScheduled}>查看全部</button>
             </div>
             <div className={styles.workspacePinnedSummaryHistory}>
               {historyJobs.map((job) => {
@@ -676,7 +676,7 @@ export function WorkspaceSummaryCard({
 function openAgentWindow(task: AgentTaskOverviewItem): void {
   // UI-385 — 子智能体详情改由右栏「智能体」tab 承载（独立窗退役）
   try {
-    dispatchGewuEvent(gewuEvents.agentOpenInRail, { runId: task.taskId });
+    dispatchPetriEvent(petriEvents.agentOpenInRail, { runId: task.taskId });
   } catch {
     /* 事件通道不可用时静默——卡片是只读投影，不承担交互失败语义 */
   }
@@ -964,7 +964,7 @@ function RuntimeStatusChip({
 }: {
   label: string;
   runtimeReady: boolean;
-  /** 独立 HTTP 后端进程是否在线；Python 执行已并入 biof3-server（BLOCK-30），
+  /** 独立 HTTP 后端进程是否在线；Python 执行已并入 petri-server（BLOCK-30），
    *  Py chip 不传该 prop，仅展示运行时安装状态。 */
   serverUp?: boolean;
   downReason?: string | null;

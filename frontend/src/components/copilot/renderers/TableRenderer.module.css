@@ -7,7 +7,7 @@
    card chrome (no double-frame).
 
    Visual rules:
-   - Aligns with `--gewu-*` design tokens from styles/custom.css.
+   - Aligns with `--petri-*` design tokens from styles/custom.css.
    - Sticky-ish header via `position: sticky` only when there is
      enough vertical room (`.body` already scrolls when its
      parent overflows; here we keep a static header to stay
@@ -24,9 +24,9 @@
   overflow-x: auto;
   /* Defer vertical scroll to ResultCard body; the table itself
      grows as tall as its content. */
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   line-height: 1.45;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .table {
@@ -56,17 +56,17 @@
      identical with the existing ResultCard body layout. The
      background stops zebra stripes from showing through the
      header row. */
-  background: var(--gewu-bg-subtle);
+  background: var(--petri-bg-subtle);
 }
 
 .headerCell {
   text-align: left;
   font-weight: 600;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   letter-spacing: 0.02em;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   padding: 6px 10px;
-  border-bottom: 1px solid var(--gewu-border);
+  border-bottom: 1px solid var(--petri-border);
   /* Wrap long header text but never break words mid-character. */
   white-space: nowrap;
   overflow: hidden;
@@ -80,17 +80,17 @@
 }
 
 .bodyRow:nth-child(even) {
-  background: var(--gewu-bg-subtle);
+  background: var(--petri-bg-subtle);
 }
 
 .bodyRow:hover {
-  background: var(--gewu-bg-hover, color-mix(in srgb, var(--gewu-text) 6%, transparent));
+  background: var(--petri-bg-hover, color-mix(in srgb, var(--petri-text) 6%, transparent));
 }
 
 .cell {
   padding: 5px 10px;
-  border-bottom: 1px solid var(--gewu-border-subtle, var(--gewu-border));
-  color: var(--gewu-text);
+  border-bottom: 1px solid var(--petri-border-subtle, var(--petri-border));
+  color: var(--petri-text);
   /* Numbers render more cleanly with tabular figures. */
   font-variant-numeric: tabular-nums;
   vertical-align: top;
@@ -109,7 +109,7 @@
 }
 
 .cellNull {
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   text-align: center;
   font-style: italic;
 }
@@ -117,12 +117,12 @@
 .fallback {
   margin: 0;
   padding: 8px 10px;
-  border: 1px dashed var(--gewu-border);
+  border: 1px dashed var(--petri-border);
   border-radius: 6px;
-  background: var(--gewu-bg-subtle);
-  color: var(--gewu-text-secondary);
-  font-family: var(--gewu-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
-  font-size: var(--gewu-font-size-sm);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-secondary);
+  font-family: var(--petri-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: var(--petri-font-size-sm);
   line-height: 1.45;
   overflow-x: auto;
   white-space: pre;
@@ -130,9 +130,9 @@
 
 .fallbackNote {
   margin: 0 0 6px;
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-tertiary);
-  font-family: var(--gewu-font-sans, inherit);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-tertiary);
+  font-family: var(--petri-font-sans, inherit);
   font-style: normal;
 }
 
@@ -152,12 +152,12 @@
   justify-content: center;
   min-height: 22px;
   padding: 3px 10px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 999px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text-secondary);
-  font-family: var(--gewu-font-sans, inherit);
-  font-size: var(--gewu-font-size-sm);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
+  font-family: var(--petri-font-sans, inherit);
+  font-size: var(--petri-font-size-sm);
   font-weight: 500;
   line-height: 1.2;
   letter-spacing: 0.02em;
@@ -167,17 +167,17 @@
 }
 
 .downloadButton:hover {
-  background: var(--gewu-bg-subtle);
-  border-color: var(--gewu-text-tertiary, var(--gewu-border));
-  color: var(--gewu-text);
+  background: var(--petri-bg-subtle);
+  border-color: var(--petri-text-tertiary, var(--petri-border));
+  color: var(--petri-text);
 }
 
 .downloadButton:active {
-  background: var(--gewu-bg-hover, color-mix(in srgb, var(--gewu-text) 8%, transparent));
+  background: var(--petri-bg-hover, color-mix(in srgb, var(--petri-text) 8%, transparent));
 }
 
 .downloadButton:focus-visible {
-  outline: 2px solid var(--gewu-accent);
+  outline: 2px solid var(--petri-accent);
   outline-offset: 1px;
 }
 

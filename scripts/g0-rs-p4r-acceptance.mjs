@@ -34,10 +34,10 @@ const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8'
 const item = (id, passed, evidence, detail) => ({ id, passed: passed === true, evidence, detail });
 
 const sourceFiles = {
-  probe: 'core/biof3-server/helpers/perf-probe.js',
-  probeRoutes: 'core/biof3-server/routes/perf-probe.js',
-  bootstrap: 'core/biof3-server/bootstrap.js',
-  routes: 'core/biof3-server/routes/result-studio.js',
+  probe: 'core/petri-server/helpers/perf-probe.js',
+  probeRoutes: 'core/petri-server/routes/perf-probe.js',
+  bootstrap: 'core/petri-server/bootstrap.js',
+  routes: 'core/petri-server/routes/result-studio.js',
   background: 'core/shared-backend/result-studio-background.js',
   backgroundChild: 'core/shared-backend/result-studio-background-child.js',
   capture: 'scripts/g0-rs-p4r-capture.mjs',
@@ -258,17 +258,17 @@ function toObservation(capture) {
  */
 function probeIsolationBehaviour() {
   const REQUIRED = [
-    'BIOF3_DB_PATH', 'BIOF3_TEMP_DIR', 'BIOF3_LOCAL_RESULTS_DIR', 'BIOF3_LOCAL_UPLOADS_DIR',
-    'BIOF3_LOCAL_DATA_DIR', 'BIOF3_PLUGINS_DIR', 'BIOF3_HARNESS_LOCAL_ROOT',
+    'PETRI_DB_PATH', 'PETRI_TEMP_DIR', 'PETRI_LOCAL_RESULTS_DIR', 'PETRI_LOCAL_UPLOADS_DIR',
+    'PETRI_LOCAL_DATA_DIR', 'PETRI_PLUGINS_DIR', 'PETRI_HARNESS_LOCAL_ROOT',
   ];
   const allGuarded = REQUIRED.every((key) => key in ISOLATED_PATH_ENV);
-  const fakeRoot = '/tmp/biof3-acceptance-probe';
+  const fakeRoot = '/tmp/petri-acceptance-probe';
   const env = Object.fromEntries(
     Object.entries(ISOLATED_PATH_ENV).map(([key, leaf]) => [key, join(fakeRoot, leaf)]),
   );
   let rejectsRealDataRoot = false;
   try {
-    assertIsolated({ ...env, BIOF3_LOCAL_DATA_DIR: join(homedir(), 'Documents', 'BioF3-Local') }, fakeRoot);
+    assertIsolated({ ...env, PETRI_LOCAL_DATA_DIR: join(homedir(), 'Documents', 'Petri-Local') }, fakeRoot);
   } catch {
     rejectsRealDataRoot = true;
   }
@@ -277,9 +277,9 @@ function probeIsolationBehaviour() {
 
 /** Exercise the probe rather than grepping it: off by default, real samples when armed. */
 function probeBehaviourCheck() {
-  const perfProbe = createRequire(import.meta.url)(join(root, 'core/biof3-server/helpers/perf-probe.js'));
-  const hadFlag = process.env.BIOF3_PERF_PROBE;
-  delete process.env.BIOF3_PERF_PROBE;
+  const perfProbe = createRequire(import.meta.url)(join(root, 'core/petri-server/helpers/perf-probe.js'));
+  const hadFlag = process.env.PETRI_PERF_PROBE;
+  delete process.env.PETRI_PERF_PROBE;
   perfProbe.disableProbe();
   const offByDefault = perfProbe.enableProbe() === false
     && perfProbe.snapshotProbe().enabled === false;
@@ -291,7 +291,7 @@ function probeBehaviourCheck() {
   const reportsRealSamples = snapshot.eventLoop !== null
     && (snapshot.eventLoop.samples === 0 ? snapshot.eventLoop.maxMs === null : true);
   perfProbe.disableProbe();
-  if (hadFlag !== undefined) process.env.BIOF3_PERF_PROBE = hadFlag;
+  if (hadFlag !== undefined) process.env.PETRI_PERF_PROBE = hadFlag;
   return { offByDefault, resolutionMs, reportsRealSamples };
 }
 
@@ -488,7 +488,7 @@ function inspect(verification, observation) {
       attributedTo: observation?.slowestRequest ?? null,
       // The first version of this evidence attributed the whole peak to
       // `interaction` without noting that its first call lazily creates a
-      // ChangeSet, writes .biof3/revision/ and makes a Git commit. Measuring a
+      // ChangeSet, writes .petri/revision/ and makes a Git commit. Measuring a
       // second pass separates one-time creation from what every view pays, and
       // that distinction decides what P4R-1 should actually optimise.
       steadyStateWorstMs: steadyStateWorst?.warmMs ?? null,

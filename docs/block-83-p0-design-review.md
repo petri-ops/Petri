@@ -19,7 +19,7 @@
 | D6 | extraRenderers 升格 | 真渲染器扩展点，与已收口注入桥同契约 | ⏳ |
 | D7 | 关键词扫描硬门 | 词表+范围+豁免清单见下 | ⏳ |
 | D8 | P6 源绑定漂移 | 例外登记，重采属 G0-RS，不阻塞 | ⏳ |
-| D9 | 生信包交付形态 | 独立 git 仓库 `gewu-pack-bio` + 远程清单分发 | ⏳ |
+| D9 | 生信包交付形态 | 独立 git 仓库 `petri-pack-bio` + 远程清单分发 | ⏳ |
 | D10 | tools-executor 归属 | 泛化为领域中性脚本宿主**留核心** | ⏳ |
 | D11 | 命名残留 | 本包不动，品牌收尾另立包 | ⏳ |
 | D12/D13 | SPI 词表纪律 / 第二租户证明 | 纪律项，随 P3/P5 执行 | ⏳ |
@@ -41,7 +41,7 @@
 
 ## D3 确认/校验钩子化
 
-**代码事实**：`core/biof3-server/loop-orchestrator.js:429/:946` 硬编码 `'scientific_task_not_confirmed'`、`:454/:1106` `SCIENTIFIC_DESIGN_MISSING`；`core/biof3-server/db.js:1092` 直接 `require('../shared-backend/scientific-task-confirmation')`（DB 层反向依赖科学契约）。
+**代码事实**：`core/petri-server/loop-orchestrator.js:429/:946` 硬编码 `'scientific_task_not_confirmed'`、`:454/:1106` `SCIENTIFIC_DESIGN_MISSING`；`core/petri-server/db.js:1092` 直接 `require('../shared-backend/scientific-task-confirmation')`（DB 层反向依赖科学契约）。
 
 **建议**：finalize gate 改挂「任务确认钩子注册表」——核心零注册时**零确认直通**（行为=无生信安装态）；科学确认逻辑随生信包经注册进入。db.js 依赖倒置：DB 层只暴露回调注册点，不 require 具体契约模块。钩子粒度建议**任务级**（对齐现行 scientific task confirmation 语义）。这是全包最高风险点，P3 落地时配 agent loop 定向回归 + 实机对话双保险。
 
@@ -75,18 +75,18 @@
 
 **代码事实**：`src/plugin/manifest-source.js:10` `getRemoteManifest` HTTPS 远程清单通道已存在；`resources/built-in-plugins/` 现为 15 生信插件的内置清单源。
 
-**建议**：独立 git 仓库 **`gewu-pack-bio`**（15 插件 + 69 脚本 + registry 内容 + 目录数据 + R executor/依赖解析 + 科学校验钩子 + demo + 教程内容）；核心内置清单清空（仅保留通用示例如 example-hello）；dev 支持本地路径安装，生产走远程清单。
+**建议**：独立 git 仓库 **`petri-pack-bio`**（15 插件 + 69 脚本 + registry 内容 + 目录数据 + R executor/依赖解析 + 科学校验钩子 + demo + 教程内容）；核心内置清单清空（仅保留通用示例如 example-hello）；dev 支持本地路径安装，生产走远程清单。
 **⏳ 待确认**：① 仓库宿主（GitHub 同 org？）；② 首版是否同时发布 zip 附件（可先只走清单）。
 
 ## D10 tools-executor 归属
 
-**代码事实**：`core/biof3-server/helpers/tools-executor.js` **2,642 行**；机制=spawn 解释器执行脚本 + CSV/HTML 产物落 artifact truth（形态绑定科学工具，机制领域中性）。
+**代码事实**：`core/petri-server/helpers/tools-executor.js` **2,642 行**；机制=spawn 解释器执行脚本 + CSV/HTML 产物落 artifact truth（形态绑定科学工具，机制领域中性）。
 
 **建议**：泛化为「脚本工具宿主」**留核心**（契约=解释器 + 输入声明 + 输出/产物声明——插座不是电器）；R 专属部分（`r-executor.js`、`r-libs-resolver.js`、R 运行时探测）随生信包走。
 
 ## D11 命名残留边界
 
-**代码事实**：`core/biof3-server/` 目录名、`biof3://` URI（system-prompt 装配）、`biof3.db`（db 路径）、`BIOF3_*` env（env-coordinator/dev-electron）。
+**代码事实**：`core/petri-server/` 目录名、`petri://` URI（system-prompt 装配）、`petri.db`（db 路径）、`PETRI_*` env（env-coordinator/dev-electron）。
 
 **建议**：本包**全部不动**——属品牌遗留非生信功能；改名牵动已装实例 userData 路径与 env 兼容，属破坏面，另立品牌收尾包由用户届时裁决。
 

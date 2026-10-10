@@ -10,7 +10,7 @@ test('buildHarnessToolScaffold creates a valid starter scaffold', () => {
     id: 'demo-tool',
     title: 'Demo Tool',
     language: 'python',
-    targetRoot: path.join(os.tmpdir(), 'biof3-harness-scaffold-test'),
+    targetRoot: path.join(os.tmpdir(), 'petri-harness-scaffold-test'),
   });
 
   assert.equal(scaffold.id, 'demo-tool');
@@ -28,7 +28,7 @@ test('buildHarnessToolScaffold creates a valid starter scaffold', () => {
 });
 
 test('writeHarnessToolScaffold writes files to disk', () => {
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-harness-scaffold-'));
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-harness-scaffold-'));
   try {
     const scaffold = writeHarnessToolScaffold({
       id: 'disk-tool',

@@ -38,7 +38,7 @@ vi.mock('@/lib/copilotContext', () => ({
 
 import { SideChatDock } from './SideChatDock';
 
-const sideConvKey = 'gewu:side-chat-conv:p_1';
+const sideConvKey = 'petri:side-chat-conv:p_1';
 const propBag = () => globalThis as { __sideChatSimpleChatProps?: Array<Record<string, unknown>> };
 
 /** 开态受测控的 Harness：rerender open 即可模拟壳状态切换。 */
@@ -144,7 +144,7 @@ describe('UI-448 SideChatDock 开合（壳状态 props）', () => {
       />
     );
     act(() => {
-      window.dispatchEvent(new CustomEvent('gewu:side-chat-open'));
+      window.dispatchEvent(new CustomEvent('petri:side-chat-open'));
     });
     expect(onOpenChange).toHaveBeenCalledWith(true);
   });
@@ -160,7 +160,7 @@ describe('UI-448 SideChatDock 开合（壳状态 props）', () => {
       />
     );
     act(() => {
-      window.dispatchEvent(new CustomEvent('gewu:copilot-ask', { detail: { prompt: '悬挂面不应响应' } }));
+      window.dispatchEvent(new CustomEvent('petri:copilot-ask', { detail: { prompt: '悬挂面不应响应' } }));
     });
     expect(sub).not.toHaveBeenCalled();
   });
@@ -305,7 +305,7 @@ describe('UI-448 加映 v25 浮卡拖宽', () => {
     const surface = screen.getByTestId('side-chat-surface');
     drag(surface, 300, 248); // 向左拖 52px
     expect(surface.style.width).toBe('340px');
-    expect(window.localStorage.getItem('gewu:side-chat-float-width')).toBe('340');
+    expect(window.localStorage.getItem('petri:side-chat-float-width')).toBe('340');
 
     // 重挂载后偏好仍生效（优先于 width prop）
     cleanup();

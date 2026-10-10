@@ -16,7 +16,7 @@ import path from 'node:path';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const resolve = (...segments) => path.resolve(__dirname, '..', ...segments);
 const require = createRequire(import.meta.url);
-const sp = require(resolve('core/biof3-server/helpers/system-prompt.js'));
+const sp = require(resolve('core/petri-server/helpers/system-prompt.js'));
 
 const CTX = {
   page: 'desktop-project',

@@ -4,7 +4,7 @@
   "capturedAt": "2026-09-22T15:13:26.595Z",
   "sourceCommit": "68cd541e0f9ea5bb2b7809b71810028abfe51141",
   "model": "laya-typed-decisions (local supply)",
-  "wrapper": "core/biof3-server/helpers/decision-api.js",
+  "wrapper": "core/petri-server/helpers/decision-api.js",
   "decisionPoint": "routes/ai-agent/chat.js 提交链挂钩（W1-2 copilot 意图路由）",
   "result": {
     "corpus": {

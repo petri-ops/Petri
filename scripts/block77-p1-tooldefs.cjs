@@ -3,7 +3,7 @@
 // BLOCK-77 P1 — tool-defs 追加三个驻留任务工具定义（一次性手术脚本，用后即删）。
 const fs = require('fs');
 const path = require('path');
-const FILE = path.join(__dirname, '..', 'core', 'biof3-server', 'agent-tools', 'tool-defs.js');
+const FILE = path.join(__dirname, '..', 'core', 'petri-server', 'agent-tools', 'tool-defs.js');
 let t = fs.readFileSync(FILE, 'utf8');
 
 // 唯一锚：process_status 定义的 description 行（含长描述，全文唯一）
@@ -22,7 +22,7 @@ const defs = `
     function: {
       name: 'resident_task_create',
       description:
-        'BLOCK-77 驻留任务创建：后台启动长时命令（复用 workspace_exec_background 通道）并在项目 .gewu/resident/ 一次成型落盘「意图卡」（taskId/意图/成功标准/失败处置/backing pid/日志路径/状态机）。意图卡是跨会话交接班凭据：软件重开后可经 resident_task_list/read 读取续接。软件关闭不影响已在服务器/本机 detached 运行的进程。需完全访问模式。',
+        'BLOCK-77 驻留任务创建：后台启动长时命令（复用 workspace_exec_background 通道）并在项目 .petri/resident/ 一次成型落盘「意图卡」（taskId/意图/成功标准/失败处置/backing pid/日志路径/状态机）。意图卡是跨会话交接班凭据：软件重开后可经 resident_task_list/read 读取续接。软件关闭不影响已在服务器/本机 detached 运行的进程。需完全访问模式。',
       parameters: {
         type: 'object',
         properties: {
@@ -41,7 +41,7 @@ const defs = `
     function: {
       name: 'resident_task_list',
       description:
-        '列出本项目全部驻留任务意图卡（.gewu/resident/*.json，按创建时间倒序）。用于交接班：重开软件/新会话先读清单，了解有哪些挂机任务、各自意图与状态。',
+        '列出本项目全部驻留任务意图卡（.petri/resident/*.json，按创建时间倒序）。用于交接班：重开软件/新会话先读清单，了解有哪些挂机任务、各自意图与状态。',
       parameters: { type: 'object', properties: {} },
     },
   },

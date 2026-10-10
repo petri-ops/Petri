@@ -3,7 +3,7 @@
   "ui": "UI-275",
   "date": "2026-09-02",
   "environment": {
-    "devElectron": "BIOF3_ELECTRON_USER_DATA_DIR=$PWD/.biof3-dev-user-data BIOF3_LOCAL_DATA_DIR=$PWD/.biof3-dev-user-data/data",
+    "devElectron": "PETRI_ELECTRON_USER_DATA_DIR=$PWD/.petri-dev-user-data PETRI_LOCAL_DATA_DIR=$PWD/.petri-dev-user-data/data",
     "backend": ":3001（中断实验前 kill 旧后端并确认新 PID 18341 于 16:41 启动，晚于 BLOCK-38 代码 mtime 16:06，避免旧代码静默满足 health 检查）",
     "vite": ":3000",
     "cdp": "9222"

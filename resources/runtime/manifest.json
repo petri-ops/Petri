@@ -5,22 +5,22 @@
   "checksumAlgorithm": "sha256",
   "notes": "BLOCK-83 P4：核心运行时发行清单（仅 R/Python 运行时；领域插件清单随领域包交付）。",
   "plugins": {
-    "biof3-r-runtime": {
-      "id": "biof3-r-runtime",
+    "petri-r-runtime": {
+      "id": "petri-r-runtime",
       "title": "R 运行时（基础环境）",
       "version": "1.0.0",
       "kind": "runtime",
       "type": "runtime",
       "language": "r",
-      "description": "R 4.5.2 + Bioconductor 3.22 + ggplot2/dplyr/data.table/BiocGenerics 等 70+ 包，BioF3 所有 R 工具的运行基础。约 557MB（macOS arm64）。",
+      "description": "R 4.5.2 + Bioconductor 3.22 + ggplot2/dplyr/data.table/BiocGenerics 等 70+ 包，Petri 所有 R 工具的运行基础。约 557MB（macOS arm64）。",
       "artifacts": {
         "macos-arm64": {
-          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/macos-arm64.zip",
+          "url": "https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/macos-arm64.zip",
           "sha256": "60e1c9bc1eae529585ff8184b2f507331539a8302beb34249b2597fe7231e68c",
           "sizeBytes": 556916997
         },
         "windows-x64": {
-          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/windows-x64.zip",
+          "url": "https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/r-runtime/1.0.0/windows-x64.zip",
           "sha256": "26b05ba6f3439f2e7ccef9c979d5e157cdc67640fc45fdc759039f2a03dde462",
           "sizeBytes": 657224393
         }
@@ -34,22 +34,22 @@
         "bioconductor": "3.22"
       }
     },
-    "biof3-py-runtime": {
-      "id": "biof3-py-runtime",
+    "petri-py-runtime": {
+      "id": "petri-py-runtime",
       "title": "Python 运行时（基础环境）",
       "version": "1.0.0",
       "kind": "runtime",
       "type": "runtime",
       "language": "python",
-      "description": "Python 3.11.9 + pandas/numpy/scipy/sklearn/matplotlib/scanpy 等 200+ 包，BioF3 所有 Python 工具的运行基础。约 147MB（macOS arm64）。",
+      "description": "Python 3.11.9 + pandas/numpy/scipy/sklearn/matplotlib/scanpy 等 200+ 包，Petri 所有 Python 工具的运行基础。约 147MB（macOS arm64）。",
       "artifacts": {
         "macos-arm64": {
-          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/macos-arm64.zip",
+          "url": "https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/macos-arm64.zip",
           "sha256": "f88502026027aec32eaa03ea5d2faefe77dbd59d0524f99d365208385b2abec8",
           "sizeBytes": 154126592
         },
         "windows-x64": {
-          "url": "https://biof3-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/windows-x64.zip",
+          "url": "https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/plugins/py-runtime/1.0.0/windows-x64.zip",
           "sha256": "5a2e07c6504a49f617d81921e073d157e8fd14e37586e92f78211c2975ab6d11",
           "sizeBytes": 502819592
         }

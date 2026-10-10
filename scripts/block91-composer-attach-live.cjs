@@ -11,7 +11,7 @@
  */
 
 const path = require('node:path');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 
 const REPO = lib.findRepoRoot(__dirname);
 const EVIDENCE_DIR = path.join(REPO, 'acceptance', 'block-91');

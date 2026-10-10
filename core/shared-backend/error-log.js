@@ -1,8 +1,8 @@
 /**
- * BioF3 shared backend — Error Log
+ * Petri shared backend — Error Log
  *
  * Append-only JSONL error log shared by all backend roles. Replaces the
- * previous biof3-server/helpers/error-log.js. No external dependencies.
+ * previous petri-server/helpers/error-log.js. No external dependencies.
  */
 
 const fsPromises = require('fs').promises;
@@ -11,8 +11,8 @@ const path = require('path');
 // BLOCK-102 P1 — the /var/log default is unwritable on Windows/macOS desktop
 // (and the append failure was itself swallowed), so the dedicated error
 // surface was silently dead. Default to the data root instead.
-const errorLogFile = process.env.BIOF3_ERROR_LOG_FILE
-  || path.join(process.env.BIOF3_LOCAL_DATA_DIR || process.cwd(), 'biof3-errors.log');
+const errorLogFile = process.env.PETRI_ERROR_LOG_FILE
+  || path.join(process.env.PETRI_LOCAL_DATA_DIR || process.cwd(), 'petri-errors.log');
 
 function normalizeError(err) {
   if (err && typeof err === 'object') {

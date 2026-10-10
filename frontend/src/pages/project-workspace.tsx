@@ -34,7 +34,7 @@ import { useRightPanelTabs } from '@/hooks/useRightPanelTabs';
 import { segmentToMode, modeToSegment, type WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import { useHarnessWorkflowStatus } from '@/hooks/useHarnessWorkflowStatus';
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
-import { gewuEvents, subscribeGewuEvent, dispatchGewuEvent } from '@/lib/events';
+import { petriEvents, subscribePetriEvent, dispatchPetriEvent } from '@/lib/events';
 import { usePendingScroll } from '@/lib/pendingScrollContext';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { useAppRail } from '@/components/desktop/AppRailContext';
@@ -373,7 +373,7 @@ export function ProjectWorkspace(): React.ReactElement {
   }, []);
   // BLOCK-28.7 — 聊天区改动卡片点击：打开审阅 tab（文件选中由 useWorkingTreeReview 监听）
   useEffect(() => {
-    return subscribeGewuEvent(gewuEvents.reviewOpenFile, () => {
+    return subscribePetriEvent(petriEvents.reviewOpenFile, () => {
       openRightPanel('review');
     });
   }, [openRightPanel]);
@@ -388,7 +388,7 @@ export function ProjectWorkspace(): React.ReactElement {
   // 这里切 tab 并把面板指到该 runId。
   const [agentTabRunId, setAgentTabRunId] = useState<string | null>(null);
   useEffect(() => {
-    return subscribeGewuEvent(gewuEvents.agentOpenInRail, (detail) => {
+    return subscribePetriEvent(petriEvents.agentOpenInRail, (detail) => {
       setAgentTabRunId(detail.runId);
       openRightPanel('agent');
     });
@@ -485,7 +485,7 @@ export function ProjectWorkspace(): React.ReactElement {
   // UI-417 — 右栏 chat tab 退役：聊天入口收编为悬挂聊天面（SideChatDock）。
   // 原入口（home 空态卡/分析完成跳转）改派 sideChatOpen 事件展开悬挂面。
   const handleOpenRightChat = useCallback(() => {
-    dispatchGewuEvent(gewuEvents.sideChatOpen);
+    dispatchPetriEvent(petriEvents.sideChatOpen);
   }, []);
   const titleBarTitle = useMemo(
     () => buildResultTitleBarTitle(workspaceMode, project?.name, activeArtifact?.label || activeArtifact?.name),
@@ -586,7 +586,7 @@ export function ProjectWorkspace(): React.ReactElement {
   }, [projectId]);
   const handleOpenWorkspacePath = useCallback(async () => {
     if (!project?.workspacePath) return;
-    const result = await window.biof3Desktop?.files?.openPath?.(project.workspacePath);
+    const result = await window.petriDesktop?.files?.openPath?.(project.workspacePath);
     if (result && !result.ok) {
       setWorkspaceNotice(result.error || '无法打开工作目录');
     }
@@ -603,7 +603,7 @@ export function ProjectWorkspace(): React.ReactElement {
       void refreshConversations();
       // 项目列表刷新由 AppRailProvider 的 softRefresh 订阅负责（单一职责）
     };
-    const unsub = subscribeGewuEvent(gewuEvents.softRefresh, handler);
+    const unsub = subscribePetriEvent(petriEvents.softRefresh, handler);
     return unsub;
   }, [fetchData, refreshConversationJobs, refreshConversations]);
   // Listen for conversation fork events from SimpleChat (RightPanel or CenterPanel)
@@ -613,7 +613,7 @@ export function ProjectWorkspace(): React.ReactElement {
       updateWorkspaceMode('chat');
       void Promise.all([refreshConversations(), refreshOtherConversations()]);
     };
-    const unsub = subscribeGewuEvent(gewuEvents.conversationForked, handler);
+    const unsub = subscribePetriEvent(petriEvents.conversationForked, handler);
     return unsub;
   }, [updateWorkspaceMode, refreshConversations, refreshOtherConversations]);
   const activeJob = useMemo(() => {
@@ -851,7 +851,7 @@ export function ProjectWorkspace(): React.ReactElement {
       return false;
     }
     setWorkspaceNotice('');
-    dispatchGewuEvent(gewuEvents.copilotAsk, { prompt, analysisMode: options?.analysisMode });
+    dispatchPetriEvent(petriEvents.copilotAsk, { prompt, analysisMode: options?.analysisMode });
     return true;
   }, [activeConvId]);
   // BLOCK-80 — 欢迎页首问接力：欢迎页创建会话后经 sessionStorage 交接
@@ -860,13 +860,13 @@ export function ProjectWorkspace(): React.ReactElement {
   useEffect(() => {
     if (!activeConvId) return;
     try {
-      const raw = sessionStorage.getItem('gewu.welcomeLaunch');
+      const raw = sessionStorage.getItem('petri.welcomeLaunch');
       if (!raw) return;
       const launch = JSON.parse(raw) as { conversationId?: string; prompt?: string };
       if (launch.conversationId !== activeConvId || !launch.prompt) return;
-      sessionStorage.removeItem('gewu.welcomeLaunch');
+      sessionStorage.removeItem('petri.welcomeLaunch');
       if (isConversationRunning(activeConvId)) return;
-      dispatchGewuEvent(gewuEvents.copilotAsk, { prompt: String(launch.prompt) });
+      dispatchPetriEvent(petriEvents.copilotAsk, { prompt: String(launch.prompt) });
     } catch {
       /* 交接损坏即忽略——用户可在工作区手动发送 */
     }
@@ -991,7 +991,7 @@ export function ProjectWorkspace(): React.ReactElement {
     },
     onWorkflowChanged: () => setWorkflowRefreshKey((value) => value + 1),
     openRevisionWorkspaceFile: (relativePath: string) => {
-      dispatchGewuEvent(gewuEvents.projectOpenWorkspaceFile, {
+      dispatchPetriEvent(petriEvents.projectOpenWorkspaceFile, {
         projectId: projectId || '',
         relativePath,
         name: relativePath.split('/').pop() || relativePath,
@@ -1207,7 +1207,7 @@ export function ProjectWorkspace(): React.ReactElement {
           open={bottomTerminalOpen}
           height={bottomTerminalHeight}
           leftOffset={0}
-          rightOffset={rightRailVisible ? `var(--gewu-live-right-span, ${effectiveRightWidth + 1}px)` : 0}
+          rightOffset={rightRailVisible ? `var(--petri-live-right-span, ${effectiveRightWidth + 1}px)` : 0}
           workspacePath={project.workspacePath}
           ssh={project.workspaceKind === 'ssh' && project.sshHost && project.remotePath
             ? { alias: project.sshHost, remotePath: project.remotePath }

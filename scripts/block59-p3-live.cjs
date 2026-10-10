@@ -19,9 +19,9 @@ const { execFileSync } = require('node:child_process');
 const http = require('node:http');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
 const DB_PATH = process.env.BIOF59_DB
-  || path.join(__dirname, '..', '.biof3-dev-user-data', 'data', 'biof3.db');
+  || path.join(__dirname, '..', '.petri-dev-user-data', 'data', 'petri.db');
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-59');
 
 function fetchJson(url) {
@@ -104,18 +104,18 @@ async function main() {
 
   const targets = await listTargets();
   const page = targets.find((t) => t.type === 'page' && /localhost:3000/.test(t.url || '') && !/(\/window\/)/.test(t.url || ''));
-  if (!page) throw new Error('biof3_page_not_found');
+  if (!page) throw new Error('petri_page_not_found');
   const client = await new CdpClient(page.webSocketDebuggerUrl).connect();
   results.mainPage = page.url;
 
   // 1) 指挥中心弹出（单例）
-  const pop = await evalJSRetry(client, `window.biof3Desktop.windowManager.popOut('command-center')`);
+  const pop = await evalJSRetry(client, `window.petriDesktop.windowManager.popOut('command-center')`);
   assert('指挥中心弹出 → created（单例通道）', pop?.ok && (pop?.action === 'created' || pop?.action === 'focused'), JSON.stringify(pop));
   const ccHits = await pollTarget('/window/command-center');
   assert('指挥中心 target 出现', Array.isArray(ccHits) && ccHits.length === 1, `targets=${ccHits?.length}`);
 
   // 2) 单例不双开
-  const pop2 = await evalJSRetry(client, `window.biof3Desktop.windowManager.popOut('command-center')`);
+  const pop2 = await evalJSRetry(client, `window.petriDesktop.windowManager.popOut('command-center')`);
   const ccCount = (await listTargets()).filter((t) => (t.url || '').includes('/window/command-center')).length;
   assert('重复弹出 → focused（单例不双开）', pop2?.ok && pop2?.action === 'focused' && ccCount === 1, `action=${pop2?.action} targets=${ccCount}`);
 
@@ -145,7 +145,7 @@ async function main() {
   })()`);
   assert('点击瓦片触发下钻', drill?.ok === true, JSON.stringify(drill));
   const resultHits = await pollTarget('/window/result/');
-  const snapDrill = await evalJSRetry(client, `window.biof3Desktop.windowManager.snapshot()`);
+  const snapDrill = await evalJSRetry(client, `window.petriDesktop.windowManager.snapshot()`);
   const poppedEntry = (snapDrill?.snapshot?.entries || []).find((e) => e.state === 'popped');
   assert('下钻 → L1 结果窗弹出（popOut result + target 出现）',
     Array.isArray(resultHits) && resultHits.length >= 1 && !!poppedEntry,
@@ -155,15 +155,15 @@ async function main() {
   await evalJSRetry(ccClient, `(() => { window.close(); return true; })()`);
   const gone = await pollTarget('/window/command-center', { appear: false });
   assert('× 关闭指挥中心 → target 消失（不进轨道，随开随关）', Array.isArray(gone) && gone.length === 0, `targets=${gone?.length}`);
-  const snapFinal = await evalJSRetry(client, `window.biof3Desktop.windowManager.snapshot()`);
+  const snapFinal = await evalJSRetry(client, `window.petriDesktop.windowManager.snapshot()`);
   assert('指挥中心关闭不影响已下钻的结果窗（注册表 popped 仍在）',
     (snapFinal?.snapshot?.entries || []).some((e) => e.state === 'popped'), JSON.stringify(snapFinal?.snapshot?.entries?.map((e) => ({ id: e.id, state: e.state }))));
 
   // 清理：移除下钻残留
   const leftover = (snapFinal?.snapshot?.entries || []).find((e) => e.state === 'popped');
   if (leftover) {
-    await evalJSRetry(client, `window.biof3Desktop.windowManager.minimizeToRail(${JSON.stringify(leftover.id)})`);
-    await evalJSRetry(client, `window.biof3Desktop.windowManager.remove(${JSON.stringify(leftover.id)})`);
+    await evalJSRetry(client, `window.petriDesktop.windowManager.minimizeToRail(${JSON.stringify(leftover.id)})`);
+    await evalJSRetry(client, `window.petriDesktop.windowManager.remove(${JSON.stringify(leftover.id)})`);
   }
 
   const allPass = results.assertions.every((a) => a.pass);

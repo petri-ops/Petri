@@ -19,16 +19,16 @@ import { dirname } from 'node:path';
 const require = createRequire(import.meta.url);
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const selectionDbRoot = mkdtempSync(join(tmpdir(), 'biof3-rs-selection-db-'));
+const selectionDbRoot = mkdtempSync(join(tmpdir(), 'petri-rs-selection-db-'));
 const selectionDbPath = join(selectionDbRoot, 'test.db');
-process.env.BIOF3_DB_PATH = selectionDbPath;
+process.env.PETRI_DB_PATH = selectionDbPath;
 const { runMigrations } = require('../src/migration-runner');
 await runMigrations(selectionDbPath, join(REPO_ROOT, 'src', 'migrations'));
 const {
   tool_result_selection_run,
   tool_result_enrichment_from_revision,
-} = require('../core/biof3-server/agent-tools/result-selection-tools');
-process.env.BIOF3_DB_PATH = undefined;
+} = require('../core/petri-server/agent-tools/result-selection-tools');
+process.env.PETRI_DB_PATH = undefined;
 // Windows 下 better-sqlite3 连接句柄由模块级单例持有、进程退出前不释放，
 // rmSync 临时目录会抛 EPERM（POSIX 无此约束）。此处清理是尽力而为：
 // 目录位于 os.tmpdir()，残留无害且由 OS 回收；不得因清理失败让测试整体判红。
@@ -43,7 +43,7 @@ function sha256(value) {
 }
 
 function fixture(context, selectionOverrides = {}) {
-  const root = mkdtempSync(join(tmpdir(), 'biof3-rs-p2-selection-'));
+  const root = mkdtempSync(join(tmpdir(), 'petri-rs-p2-selection-'));
   context.after(() => rmSync(root, { recursive: true, force: true }));
   const csv = 'gene,log2FoldChange,padj\nTP53,2,0.01\nEGFR,1.5,0.02\nMYC,-2,0.03\nKRAS,0.2,0.9\n';
   const source = join(root, 'deg.csv');
@@ -223,7 +223,7 @@ test('RS-P2 rejects an unsafe persisted selection id before materializing projec
 });
 
 test('P6 selection materialization refuses directory and target symlinks without touching outside files', async (context) => {
-  const outside = mkdtempSync(join(tmpdir(), 'biof3-rs-p6-selection-outside-'));
+  const outside = mkdtempSync(join(tmpdir(), 'petri-rs-p6-selection-outside-'));
   context.after(() => rmSync(outside, { recursive: true, force: true }));
 
   const directoryFx = fixture(context);

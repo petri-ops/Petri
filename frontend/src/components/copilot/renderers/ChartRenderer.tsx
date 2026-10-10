@@ -13,7 +13,7 @@
 //   - When payload matches the contract, render a native <svg>
 //     viewBox="0 0 600 320" bar chart or line chart with a
 //     single-color legend + per-series names. All values use
-//     --gewu-* design tokens so light/dark themes stay aligned
+//     --petri-* design tokens so light/dark themes stay aligned
 //     with ResultCard.module.css.
 //   - When payload is malformed (unknown kind, missing series,
 //     empty labels, non-numeric value, etc.), fail-soft to a

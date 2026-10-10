@@ -18,14 +18,14 @@ const path = require('node:path');
 const fs = require('node:fs');
 
 const ROOT = path.join(__dirname, '..');
-const DEV_DB = path.join(ROOT, '.biof3-dev-user-data', 'data', 'biof3.db');
-process.env.BIOF3_DB_PATH = DEV_DB;
-process.env.BIOF3_LOCAL_DATA_DIR = path.join(ROOT, '.biof3-dev-user-data', 'data');
-process.env.BIOF3_BETTER_SQLITE3_ROOT = path.join(ROOT, 'core', 'biof3-server', 'node_modules');
+const DEV_DB = path.join(ROOT, '.petri-dev-user-data', 'data', 'petri.db');
+process.env.PETRI_DB_PATH = DEV_DB;
+process.env.PETRI_LOCAL_DATA_DIR = path.join(ROOT, '.petri-dev-user-data', 'data');
+process.env.PETRI_BETTER_SQLITE3_ROOT = path.join(ROOT, 'core', 'petri-server', 'node_modules');
 
-const { executeToolCall } = require(ROOT + '/core/biof3-server/agent-tools');
-require(ROOT + '/core/biof3-server/db');
-const agentTaskStore = require(ROOT + '/core/biof3-server/agent-task-store.js');
+const { executeToolCall } = require(ROOT + '/core/petri-server/agent-tools');
+require(ROOT + '/core/petri-server/db');
+const agentTaskStore = require(ROOT + '/core/petri-server/agent-task-store.js');
 
 const PROJECT_ID = 'p_mtlnsv0f_xpjb';
 const USER_ID = 'local-user';

@@ -3,7 +3,7 @@
  * BLOCK-70 实机验收（隔离探针）：mobile-gateway 真实起服双态全链。
  *
  * A1 关闭态 additive 红线：默认（无 env/无配置）起服 → 主后端健康、移动端口不监听
- * A2 启用态：BIOF3_MOBILE_ENABLED=1 → gateway 健康
+ * A2 启用态：PETRI_MOBILE_ENABLED=1 → gateway 健康
  * A3 静态移动页 /m/ 可达（独立 bundle，不进 Vite 图）
  * A4 管理 REST：主后端 /api/mobile/status 如实呈现 enabled/port
  * A5 配对 token + QR SVG（服务端渲染）
@@ -29,7 +29,7 @@ const require = createRequire(import.meta.url);
 const Database = require('better-sqlite3');
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SERVER_ENTRY = path.join(REPO_ROOT, 'core', 'biof3-server', 'server.js');
+const SERVER_ENTRY = path.join(REPO_ROOT, 'core', 'petri-server', 'server.js');
 const EVIDENCE_PATH = path.join(REPO_ROOT, 'acceptance', 'block-70', 'block70-mobile-gateway-live.json');
 
 const results = [];
@@ -95,8 +95,8 @@ async function main() {
   const offRoot = mkdtempSync(path.join(os.tmpdir(), 'block70-off-'));
   const offMobilePort = await freePort();
   const offEnvRoot = createCaptureEnv({ root: offRoot, port: await freePort() });
-  await applyMigrations(offEnvRoot.paths.BIOF3_DB_PATH, { quiet: true });
-  const offChild = spawnServer({ ...offEnvRoot.env, BIOF3_MOBILE_PORT: String(offMobilePort) });
+  await applyMigrations(offEnvRoot.paths.PETRI_DB_PATH, { quiet: true });
+  const offChild = spawnServer({ ...offEnvRoot.env, PETRI_MOBILE_PORT: String(offMobilePort) });
   const offBase = `http://127.0.0.1:${offEnvRoot.env.R_SERVER_PORT}`;
   try {
     await waitHealthy(offBase);
@@ -114,11 +114,11 @@ async function main() {
   const root = mkdtempSync(path.join(os.tmpdir(), 'block70-live-'));
   const mobilePort = await freePort();
   const envRoot = createCaptureEnv({ root, port: await freePort() });
-  await applyMigrations(envRoot.paths.BIOF3_DB_PATH, { quiet: true });
+  await applyMigrations(envRoot.paths.PETRI_DB_PATH, { quiet: true });
   const child = spawnServer({
     ...envRoot.env,
-    BIOF3_MOBILE_ENABLED: '1',
-    BIOF3_MOBILE_PORT: String(mobilePort),
+    PETRI_MOBILE_ENABLED: '1',
+    PETRI_MOBILE_PORT: String(mobilePort),
   });
   const mainBase = `http://127.0.0.1:${envRoot.env.R_SERVER_PORT}`;
   const gatewayBase = `http://127.0.0.1:${mobilePort}`;
@@ -127,11 +127,11 @@ async function main() {
     await waitHealthy(mainBase);
 
     const gwHealth = await (await fetch(`${gatewayBase}/m/api/health`)).json();
-    assert('A2 gateway 健康', gwHealth.ok === true && gwHealth.service === 'gewu-mobile-gateway', JSON.stringify(gwHealth));
+    assert('A2 gateway 健康', gwHealth.ok === true && gwHealth.service === 'petri-mobile-gateway', JSON.stringify(gwHealth));
 
     const page = await fetch(`${gatewayBase}/m/`);
     const pageText = await page.text();
-    assert('A3 移动页可达', page.status === 200 && pageText.includes('Gewu · 移动工作区'), `status ${page.status}`);
+    assert('A3 移动页可达', page.status === 200 && pageText.includes('Petri · 移动工作区'), `status ${page.status}`);
 
     const status = await (await fetch(`${mainBase}/api/mobile/status`)).json();
     assert('A4 管理面 status 如实', status.ok === true && status.enabled === true && status.port === mobilePort, JSON.stringify({ ...status, devices: (status.devices || []).length }));
@@ -204,7 +204,7 @@ async function main() {
     assert('B2b 取消未知任务结构化 404', cancelUnknown.status === 404, `status ${cancelUnknown.status}`);
 
     // 批准全链：向隔离 DB 插入两行 pending tool_job（真实 migrations schema）。
-    const db = new Database(envRoot.paths.BIOF3_DB_PATH);
+    const db = new Database(envRoot.paths.PETRI_DB_PATH);
     const columns = db.prepare('PRAGMA table_info(tool_jobs)').all();
     const columnNameSet = new Set(columns.map((column) => column.name));
     function insertPendingJob(id, ackToken, projectId) {
@@ -276,7 +276,7 @@ async function main() {
     allPass,
     checks: results,
     notes: {
-      method: 'isolated probe: real biof3-server child processes (off-state + on-state), fresh tmp dataDir, migrations applied',
+      method: 'isolated probe: real petri-server child processes (off-state + on-state), fresh tmp dataDir, migrations applied',
       redaction: 'pairing/session tokens never stored in evidence',
       honestBoundary: 'real-phone scan acceptance pending user; settings-panel CDP assertion pending dev-stack window',
     },

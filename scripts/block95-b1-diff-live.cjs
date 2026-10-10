@@ -3,7 +3,7 @@
 /**
  * block95-b1-diff-live.cjs — BLOCK-95 B1 实机 diff 对账（dev 栈，开关开）。
  *
- * 前置：dev 栈以 BIOF3_SERVER_HISTORY_ASSEMBLY=1 启动（restart-dev-stack.sh 透传）。
+ * 前置：dev 栈以 PETRI_SERVER_HISTORY_ASSEMBLY=1 启动（restart-dev-stack.sh 透传）。
  * 流程：
  *   S1 短会话全等对账：seed 4 条历史 → 模拟前端 POST tagged(4+1) → 等 task 完成 →
  *      transcript request.messages 与 DB 拼装重放逐字 diff（短请求不触发折叠）；
@@ -16,12 +16,12 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const http = require('node:http');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 
 const ROOT = path.join(__dirname, '..');
 const EVIDENCE_DIR = path.join(ROOT, 'acceptance', 'block-95');
-const DB_FILE = path.join(ROOT, '.biof3-dev-user-data', 'data', 'biof3.db');
-const TRANSCRIPT_DIR = path.join(ROOT, '.biof3-dev-user-data', 'data', 'llm-transcripts');
+const DB_FILE = path.join(ROOT, '.petri-dev-user-data', 'data', 'petri.db');
+const TRANSCRIPT_DIR = path.join(ROOT, '.petri-dev-user-data', 'data', 'llm-transcripts');
 const API = 'http://127.0.0.1:3001';
 const AUTH = { Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' };
 
@@ -39,7 +39,7 @@ function apiPost(pathname, body) {
   });
 }
 
-const Database = require(path.join(ROOT, 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
+const Database = require(path.join(ROOT, 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
 
 function readTranscriptFor(convId) {
   const file = path.join(TRANSCRIPT_DIR, `${convId}.jsonl`); // convId 本身已带 conv_ 前缀
@@ -124,7 +124,7 @@ function readTranscriptFor(convId) {
   const payload = await run.finish({
     conversationId: convS1,
     taskId: taskIdS1,
-    note: 'B1 开态实机：LLM 实际收到的 messages 与 DB 拼装逐字对账（开关=BIOF3_SERVER_HISTORY_ASSEMBLY=1）',
+    note: 'B1 开态实机：LLM 实际收到的 messages 与 DB 拼装逐字对账（开关=PETRI_SERVER_HISTORY_ASSEMBLY=1）',
   });
   db.close();
   console.log('ALLPASS=' + payload.allPass);

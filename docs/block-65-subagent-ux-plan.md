@@ -12,7 +12,7 @@
 
 ## 2. 子智能体运行逻辑（事实基线，2026-09-08 全量源码走读）
 
-**总链路**：模型调 `spawn_agent` → [spawn-agent-tools.js](../core/biof3-server/agent-tools/spawn-agent-tools.js) 校验（父必须 `kind='primary'` → **递归禁令**；权限整体继承不放大；模型 fail-closed 解析不静默回退）→ `createAgentTask` 落 SQLite `tasks` 表 → 并发槽获取（每用户子 agent 上限 4，全局 8，primary 预留 1）→ `setImmediate` 异步 `runAgentLoop({kind:'subagent'})` **进程内直调**（与 HTTP 派生分支同一执行链，不走 HTTP 自调用）→ spawn 工具**立即返回 agentId**，父 loop 继续。
+**总链路**：模型调 `spawn_agent` → [spawn-agent-tools.js](../core/petri-server/agent-tools/spawn-agent-tools.js) 校验（父必须 `kind='primary'` → **递归禁令**；权限整体继承不放大；模型 fail-closed 解析不静默回退）→ `createAgentTask` 落 SQLite `tasks` 表 → 并发槽获取（每用户子 agent 上限 4，全局 8，primary 预留 1）→ `setImmediate` 异步 `runAgentLoop({kind:'subagent'})` **进程内直调**（与 HTTP 派生分支同一执行链，不走 HTTP 自调用）→ spawn 工具**立即返回 agentId**，父 loop 继续。
 
 - **状态与持久化**：`tasks` 表（params JSON 含 parentTaskId/conversationId/模型信息）+ `task_events` 事件流（seq 每 task 独立自增）；终态正文落 `copilot_messages.task_id`；子 agent 全量时间线可经 `GET /ai/agent/task/:taskId?afterSeq=N` SSE 任意回放/订阅。
 - **消息流（诚实边界）**：子 agent 中间输出只写自己的 task_events，**不注入父模型上下文**；父会话实时可见 = SubAgentsBar 状态行 + `child_finished` 终态通知（summaryHead 200 字）；父模型拿结果靠 `wait_agent` 返回值（1s 轮询阻塞、1–600s 超时可让出）。终态摘要 4000 token 预算截断。

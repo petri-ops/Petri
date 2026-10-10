@@ -29,7 +29,7 @@ const { ModelGateway } = await import(
 );
 
 function tmpDir() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block37-'));
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block37-'));
 }
 
 function readRecords(file) {

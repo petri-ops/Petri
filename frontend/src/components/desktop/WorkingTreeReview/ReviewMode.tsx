@@ -363,7 +363,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                 <div className="wt-gitinit-actions">
                   <button
                     type="button"
-                    className="gewu-btn gewu-btn--sm"
+                    className="petri-btn petri-btn--sm"
                     onClick={() => setGitInitConfirmOpen(true)}
                     disabled={gitInitBusy}
                   >
@@ -371,7 +371,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                   </button>
                   <button
                     type="button"
-                    className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                    className="petri-btn petri-btn--ghost petri-btn--sm"
                     onClick={dismissGitInitPrompt}
                     disabled={gitInitBusy}
                   >
@@ -386,7 +386,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                   <div className="wt-gitinit-actions">
                     <button
                       type="button"
-                      className="gewu-btn gewu-btn--sm"
+                      className="petri-btn petri-btn--sm"
                       onClick={() => void handleGitInit()}
                       disabled={gitInitBusy}
                     >
@@ -394,7 +394,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
                     </button>
                     <button
                       type="button"
-                      className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                      className="petri-btn petri-btn--ghost petri-btn--sm"
                       onClick={() => setGitInitConfirmOpen(false)}
                       disabled={gitInitBusy}
                     >

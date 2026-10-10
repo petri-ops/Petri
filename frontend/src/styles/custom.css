@@ -18,7 +18,7 @@
   /* FONT-FAMILY-UNIFICATION UI-242 — Infima 元素与全局同一 sans 栈（补 CJK） */
   --ifm-font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
     'Microsoft YaHei', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --ifm-font-family-monospace: var(--gewu-font-mono);
+  --ifm-font-family-monospace: var(--petri-font-mono);
   --ifm-line-height-base: 1.65;
   --ifm-heading-line-height: 1.28;
   --ifm-heading-margin-bottom: 0.55rem;
@@ -28,141 +28,141 @@
   --ifm-table-cell-padding: 0.52rem 0.68rem;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 
-  /* Gewu brand palette — extracted from index.module.css for site-wide reuse */
-  --gewu-teal: #0f766e;
-  --gewu-teal-dark: #13523f;
-  --gewu-teal-bright: #43d1ae;
-  --gewu-teal-button: #38b27e;
-  --gewu-gold: #f7c96f;
-  --gewu-cream: #f4fbf8;
-  --gewu-ink: #12342f;
-  --gewu-mint: #e4f4ee;
-  --gewu-mint-bright: #8ff0d6;
-  --gewu-frost: #eef8f4;
+  /* Petri brand palette — extracted from index.module.css for site-wide reuse */
+  --petri-teal: #0f766e;
+  --petri-teal-dark: #13523f;
+  --petri-teal-bright: #43d1ae;
+  --petri-teal-button: #38b27e;
+  --petri-gold: #f7c96f;
+  --petri-cream: #f4fbf8;
+  --petri-ink: #12342f;
+  --petri-mint: #e4f4ee;
+  --petri-mint-bright: #8ff0d6;
+  --petri-frost: #eef8f4;
 
-  /* ===== Gewu semantic surface tokens (light mode) =====
-     --gewu-bg-canvas  : 页面级最外层背景（最暗一层）
-     --gewu-bg-surface : 卡片/面板/抽屉表面（比 canvas 亮一档）
-     --gewu-bg-subtle  : 次级容器（侧栏 / list 行 / 浅底）
-     --gewu-bg-elevated: 浮层（菜单 / popover）
-     --gewu-border         : 通用边框
-     --gewu-border-strong  : 重点边框
-     --gewu-text           : 主要文字
-     --gewu-text-secondary : 次要文字
-     --gewu-text-tertiary  : 弱化文字
-     --gewu-text-muted     : 最弱文字
-     --gewu-accent         : 品牌色（teal）
-     --gewu-accent-bg      : 品牌色弱化背景
-     --gewu-hover          : 通用 hover 高亮
+  /* ===== Petri semantic surface tokens (light mode) =====
+     --petri-bg-canvas  : 页面级最外层背景（最暗一层）
+     --petri-bg-surface : 卡片/面板/抽屉表面（比 canvas 亮一档）
+     --petri-bg-subtle  : 次级容器（侧栏 / list 行 / 浅底）
+     --petri-bg-elevated: 浮层（菜单 / popover）
+     --petri-border         : 通用边框
+     --petri-border-strong  : 重点边框
+     --petri-text           : 主要文字
+     --petri-text-secondary : 次要文字
+     --petri-text-tertiary  : 弱化文字
+     --petri-text-muted     : 最弱文字
+     --petri-accent         : 品牌色（teal）
+     --petri-accent-bg      : 品牌色弱化背景
+     --petri-hover          : 通用 hover 高亮
   */
   /* UI-238 LIGHT-THEME-PURITY — 浅色基底 slate(蓝灰) → zinc(无彩中性) + 纯白画布：
      脏感根源是蓝调灰大面积铺底；纯净感 = 白主导 + 中性发丝线 + 单一品牌彩。 */
-  --gewu-bg-canvas: #ffffff;
-  --gewu-bg-surface: #ffffff;
-  --gewu-bg-subtle: #f4f4f5;
-  --gewu-bg-elevated: #ffffff;
-  --gewu-bg: var(--gewu-bg-canvas);
-  --gewu-surface: var(--gewu-bg-surface);
-  --gewu-surface-alt: var(--gewu-bg-subtle);
-  --gewu-surface-translucent: color-mix(in srgb, var(--gewu-bg-surface) 82%, transparent);
-  --gewu-surface-hover: var(--gewu-hover);
-  --gewu-border-subtle: color-mix(in srgb, var(--gewu-border) 64%, transparent);
-  --gewu-input-bg: var(--gewu-bg-surface);
-  --gewu-overlay: rgba(24, 24, 27, 0.2);
-  --gewu-shadow-menu: 0 10px 24px rgba(24, 24, 27, 0.14);
+  --petri-bg-canvas: #ffffff;
+  --petri-bg-surface: #ffffff;
+  --petri-bg-subtle: #f4f4f5;
+  --petri-bg-elevated: #ffffff;
+  --petri-bg: var(--petri-bg-canvas);
+  --petri-surface: var(--petri-bg-surface);
+  --petri-surface-alt: var(--petri-bg-subtle);
+  --petri-surface-translucent: color-mix(in srgb, var(--petri-bg-surface) 82%, transparent);
+  --petri-surface-hover: var(--petri-hover);
+  --petri-border-subtle: color-mix(in srgb, var(--petri-border) 64%, transparent);
+  --petri-input-bg: var(--petri-bg-surface);
+  --petri-overlay: rgba(24, 24, 27, 0.2);
+  --petri-shadow-menu: 0 10px 24px rgba(24, 24, 27, 0.14);
   /* UI-448 — 悬浮面板族（项目摘要浮层/侧边聊天悬浮面）共用大柔和影；单源防漂移 */
-  --gewu-shadow-float: 0 12px 32px rgba(15, 23, 42, 0.18);
-  --gewu-on-accent: #ffffff;
-  --gewu-on-solid: #ffffff;
-  --gewu-warning-bg: var(--gewu-status-warning-bg);
-  --gewu-warning-text: var(--gewu-status-warning-fg);
-  --gewu-warning: var(--gewu-status-warning);
-  --gewu-danger-bg: var(--gewu-status-error-bg);
-  --gewu-border: #e4e4e7;
-  --gewu-border-color: var(--gewu-border);
-  --gewu-border-strong: #d4d4d8;
-  --gewu-border-tertiary: #ebebee;
-  --gewu-text: #18181b;
-  --gewu-text-primary: var(--gewu-text);
-  --gewu-text-secondary: #3f3f46;
-  --gewu-text-tertiary: #71717a;
-  --gewu-text-muted: #a1a1aa;
-  --gewu-accent: #0d9488;
+  --petri-shadow-float: 0 12px 32px rgba(15, 23, 42, 0.18);
+  --petri-on-accent: #ffffff;
+  --petri-on-solid: #ffffff;
+  --petri-warning-bg: var(--petri-status-warning-bg);
+  --petri-warning-text: var(--petri-status-warning-fg);
+  --petri-warning: var(--petri-status-warning);
+  --petri-danger-bg: var(--petri-status-error-bg);
+  --petri-border: #e4e4e7;
+  --petri-border-color: var(--petri-border);
+  --petri-border-strong: #d4d4d8;
+  --petri-border-tertiary: #ebebee;
+  --petri-text: #18181b;
+  --petri-text-primary: var(--petri-text);
+  --petri-text-secondary: #3f3f46;
+  --petri-text-tertiary: #71717a;
+  --petri-text-muted: #a1a1aa;
+  --petri-accent: #0d9488;
   /* BLOCK-76 清债补契约定义：派生 token（跟随各主题 accent/bg 级联取值） */
-  --gewu-accent-weak: color-mix(in srgb, var(--gewu-accent) 12%, transparent);
-  --gewu-bg-base: var(--gewu-bg);
-  --gewu-accent-soft: rgba(13, 148, 136, 0.16);
-  --gewu-accent-bg: #f0fdfa;
-  --gewu-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+  --petri-accent-weak: color-mix(in srgb, var(--petri-accent) 12%, transparent);
+  --petri-bg-base: var(--petri-bg);
+  --petri-accent-soft: rgba(13, 148, 136, 0.16);
+  --petri-accent-bg: #f0fdfa;
+  --petri-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
     'Microsoft YaHei', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --gewu-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --gewu-hover: #f4f4f5;
-  --gewu-surface-dim: #f4f4f5;
-  --gewu-accent-hover: #0f766e;
-  --gewu-danger: #ef4444;
-  --gewu-bg-terminal: #ffffff;
-  --gewu-text-terminal: #3f3f46;
-  --gewu-text-terminal-strong: #18181b;
-  --gewu-text-terminal-muted: #64748b;
-  --gewu-text-terminal-prompt: #0d9488;
+  --petri-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --petri-hover: #f4f4f5;
+  --petri-surface-dim: #f4f4f5;
+  --petri-accent-hover: #0f766e;
+  --petri-danger: #ef4444;
+  --petri-bg-terminal: #ffffff;
+  --petri-text-terminal: #3f3f46;
+  --petri-text-terminal-strong: #18181b;
+  --petri-text-terminal-muted: #64748b;
+  --petri-text-terminal-prompt: #0d9488;
 
   /* ===== 状态语义色（light mode） ===== */
-  --gewu-status-online: #22c55e;
-  --gewu-status-loading: #f59e0b;
-  --gewu-status-warning: #f97316;
-  --gewu-status-error: #ef4444;
-  --gewu-status-info: #3b82f6;
+  --petri-status-online: #22c55e;
+  --petri-status-loading: #f59e0b;
+  --petri-status-warning: #f97316;
+  --petri-status-error: #ef4444;
+  --petri-status-info: #3b82f6;
 
   /* ===== 状态卡背景（light mode） ===== */
-  --gewu-status-success-bg: #ecfdf5;
-  --gewu-status-error-bg: #fef2f2;
-  --gewu-status-warning-bg: #fef3c7;
-  --gewu-status-danger-bg: #fffafa;
+  --petri-status-success-bg: #ecfdf5;
+  --petri-status-error-bg: #fef2f2;
+  --petri-status-warning-bg: #fef3c7;
+  --petri-status-danger-bg: #fffafa;
 
  /* 状态卡前景文字（light） */
- --gewu-status-success-fg: #059669;
- --gewu-status-error-fg: #dc2626;
- --gewu-status-warning-fg: #b45309;
- --gewu-status-danger-fg: #991b1b;
- --gewu-status-error-border: #fecaca;
- --gewu-status-warning-border: #fbbf24;
- --gewu-accent-border: rgba(13, 148, 136, 0.4);
- --gewu-accent-surface: rgba(240, 253, 250, 0.78);
- --gewu-user-bubble-bg: rgba(15, 23, 42, 0.065);
- --gewu-accent-orange: #ea580c;
- --gewu-accent-orange-bg: rgba(249, 115, 22, 0.08);
+ --petri-status-success-fg: #059669;
+ --petri-status-error-fg: #dc2626;
+ --petri-status-warning-fg: #b45309;
+ --petri-status-danger-fg: #991b1b;
+ --petri-status-error-border: #fecaca;
+ --petri-status-warning-border: #fbbf24;
+ --petri-accent-border: rgba(13, 148, 136, 0.4);
+ --petri-accent-surface: rgba(240, 253, 250, 0.78);
+ --petri-user-bubble-bg: rgba(15, 23, 42, 0.065);
+ --petri-accent-orange: #ea580c;
+ --petri-accent-orange-bg: rgba(249, 115, 22, 0.08);
 
   /* ===== 设计系统补齐令牌（UI-151 / 关闭 #87 theme-token-contract 缺口） =====
-     以下 7 个令牌此前仅被组件以 var(--gewu-*) 引用却无 :root 定义，
+     以下 7 个令牌此前仅被组件以 var(--petri-*) 引用却无 :root 定义，
      导致 theme-token-contract 测试失败、且引用处回退为无效值。
      取值优先复用既有语义令牌（surface 类用 var() 引用，明暗双主题自动适配），
      颜色类对齐组件原 fallback，保证零视觉回归。 */
-  --gewu-success: #2e7d32;
-  --gewu-info: #1565c0;
-  --gewu-bg-hover: var(--gewu-hover);
-  --gewu-surface-raised: var(--gewu-bg-elevated);
-  --gewu-bg-surface-raised: var(--gewu-bg-elevated);
-  --gewu-surface-strong: var(--gewu-bg-surface);
-  --gewu-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
+  --petri-success: #2e7d32;
+  --petri-info: #1565c0;
+  --petri-bg-hover: var(--petri-hover);
+  --petri-surface-raised: var(--petri-bg-elevated);
+  --petri-bg-surface-raised: var(--petri-bg-elevated);
+  --petri-surface-strong: var(--petri-bg-surface);
+  --petri-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
   /* ===== UI-155 / 关闭合并后暴露的 theme-token-contract 缺口 =====
-     --gewu-surface-2 与 --gewu-status-idle 此前被 simple-chat.css
-     （origin/main PR #13 的 subagent UI）以 var(--gewu-*) 引用却无定义，
+     --petri-surface-2 与 --petri-status-idle 此前被 simple-chat.css
+     （origin/main PR #13 的 subagent UI）以 var(--petri-*) 引用却无定义，
      导致 theme-token-contract 测试失败、引用处回退为无效值。
      取值对齐组件原 fallback，保证零视觉回归。 */
-  --gewu-surface-2: rgba(127, 127, 127, 0.12);
-  --gewu-status-idle: #9ca3af;
+  --petri-surface-2: rgba(127, 127, 127, 0.12);
+  --petri-status-idle: #9ca3af;
   /* ===== UI-215 / BLOCK-28.6 补齐 theme-token-contract 缺口（第 3 批） =====
      CodeReviewDrawer.module.css 沿用旧抽屉时代的未定义变量名（引用处带
      fallback），project-workspace.module.css / useCodeMirrorEditor.ts 引用
-     裸 --gewu-status-success。取值优先 var() 引用既有语义令牌（明暗自动
+     裸 --petri-status-success。取值优先 var() 引用既有语义令牌（明暗自动
      适配），颜色类对齐组件原 fallback，保证零视觉回归。 */
-  --gewu-fg: var(--gewu-text);
-  --gewu-fg-muted: var(--gewu-text-muted);
-  --gewu-bg-elev: var(--gewu-bg-elevated);
-  --gewu-bg-button: var(--gewu-bg-surface);
-  --gewu-bg-button-hover: var(--gewu-bg-hover);
-  --gewu-mono: var(--gewu-font-mono);
-  --gewu-status-success: #22c55e;
+  --petri-fg: var(--petri-text);
+  --petri-fg-muted: var(--petri-text-muted);
+  --petri-bg-elev: var(--petri-bg-elevated);
+  --petri-bg-button: var(--petri-bg-surface);
+  --petri-bg-button-hover: var(--petri-bg-hover);
+  --petri-mono: var(--petri-font-mono);
+  --petri-status-success: #22c55e;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -181,103 +181,103 @@ html[data-theme='dark'],
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 
   /* Dark mode brand palette overrides */
-  --gewu-ink: #eef8f4;
-  --gewu-mint: rgba(67, 209, 174, 0.14);
-  --gewu-mint-bright: #8ff0d6;
+  --petri-ink: #eef8f4;
+  --petri-mint: rgba(67, 209, 174, 0.14);
+  --petri-mint-bright: #8ff0d6;
   /* BLOCK-103 — 状态徽章成功色暗色对（亮色 #2e7d32 定义于 :root 补齐令牌组） */
-  --gewu-success: #7fd8a4;
+  --petri-success: #7fd8a4;
 
-  /* ===== Gewu semantic surface tokens (dark mode) =====
+  /* ===== Petri semantic surface tokens (dark mode) =====
      暗色下：canvas 最深、surface 抬高一档、subtle 更亮一档；
      文字由浅到深对应层次；accent 提亮为更鲜艳的 teal。
   */
-  --gewu-bg-canvas: #0b1220;
-  --gewu-bg-surface: #111a2e;
-  --gewu-bg-subtle: #182339;
-  --gewu-bg-elevated: #1d2945;
-  --gewu-bg: var(--gewu-bg-canvas);
-  --gewu-surface: var(--gewu-bg-surface);
-  --gewu-surface-alt: var(--gewu-bg-subtle);
-  --gewu-surface-translucent: color-mix(in srgb, var(--gewu-bg-surface) 84%, transparent);
-  --gewu-surface-hover: rgba(230, 237, 243, 0.09);
-  --gewu-border-subtle: color-mix(in srgb, var(--gewu-border) 68%, transparent);
-  --gewu-input-bg: var(--gewu-bg-surface);
-  --gewu-overlay: rgba(2, 6, 23, 0.6);
-  --gewu-shadow-menu: 0 14px 36px rgba(0, 0, 0, 0.34);
-  --gewu-shadow-float: 0 12px 32px rgba(0, 0, 0, 0.5);
-  --gewu-on-accent: #ffffff;
-  --gewu-on-solid: #0b1220;
-  --gewu-warning-bg: var(--gewu-status-warning-bg);
-  --gewu-warning-text: var(--gewu-status-warning-fg);
-  --gewu-warning: var(--gewu-status-warning);
-  --gewu-danger-bg: var(--gewu-status-error-bg);
-  --gewu-border: #243149;
-  --gewu-border-strong: #324466;
-  --gewu-border-tertiary: #2a3a54;
-  --gewu-text: #e6edf3;
-  --gewu-text-primary: var(--gewu-text);
-  --gewu-text-secondary: #b1bac4;
-  --gewu-text-tertiary: #8b98ad;
-  --gewu-text-muted: #6b7689;
-  --gewu-accent: #2dd4bf;
-  --gewu-accent-soft: rgba(45, 212, 191, 0.20);
-  --gewu-accent-bg: rgba(45, 212, 191, 0.14);
-  --gewu-border-color: var(--gewu-border);
-  --gewu-hover: rgba(230, 237, 243, 0.07);
-  --gewu-surface-dim: #111a2e;
-  --gewu-accent-hover: #14b8a6;
-  --gewu-danger: #f87171;
-  --gewu-bg-terminal: var(--gewu-bg-surface);
-  --gewu-text-terminal: #cbd5e1;
-  --gewu-text-terminal-strong: #e6edf3;
-  --gewu-text-terminal-muted: #8b98ad;
-  --gewu-text-terminal-prompt: #2dd4bf;
+  --petri-bg-canvas: #0b1220;
+  --petri-bg-surface: #111a2e;
+  --petri-bg-subtle: #182339;
+  --petri-bg-elevated: #1d2945;
+  --petri-bg: var(--petri-bg-canvas);
+  --petri-surface: var(--petri-bg-surface);
+  --petri-surface-alt: var(--petri-bg-subtle);
+  --petri-surface-translucent: color-mix(in srgb, var(--petri-bg-surface) 84%, transparent);
+  --petri-surface-hover: rgba(230, 237, 243, 0.09);
+  --petri-border-subtle: color-mix(in srgb, var(--petri-border) 68%, transparent);
+  --petri-input-bg: var(--petri-bg-surface);
+  --petri-overlay: rgba(2, 6, 23, 0.6);
+  --petri-shadow-menu: 0 14px 36px rgba(0, 0, 0, 0.34);
+  --petri-shadow-float: 0 12px 32px rgba(0, 0, 0, 0.5);
+  --petri-on-accent: #ffffff;
+  --petri-on-solid: #0b1220;
+  --petri-warning-bg: var(--petri-status-warning-bg);
+  --petri-warning-text: var(--petri-status-warning-fg);
+  --petri-warning: var(--petri-status-warning);
+  --petri-danger-bg: var(--petri-status-error-bg);
+  --petri-border: #243149;
+  --petri-border-strong: #324466;
+  --petri-border-tertiary: #2a3a54;
+  --petri-text: #e6edf3;
+  --petri-text-primary: var(--petri-text);
+  --petri-text-secondary: #b1bac4;
+  --petri-text-tertiary: #8b98ad;
+  --petri-text-muted: #6b7689;
+  --petri-accent: #2dd4bf;
+  --petri-accent-soft: rgba(45, 212, 191, 0.20);
+  --petri-accent-bg: rgba(45, 212, 191, 0.14);
+  --petri-border-color: var(--petri-border);
+  --petri-hover: rgba(230, 237, 243, 0.07);
+  --petri-surface-dim: #111a2e;
+  --petri-accent-hover: #14b8a6;
+  --petri-danger: #f87171;
+  --petri-bg-terminal: var(--petri-bg-surface);
+  --petri-text-terminal: #cbd5e1;
+  --petri-text-terminal-strong: #e6edf3;
+  --petri-text-terminal-muted: #8b98ad;
+  --petri-text-terminal-prompt: #2dd4bf;
 
   /* ===== 状态语义色（dark mode） ===== */
-  --gewu-status-online: #4ade80;
-  --gewu-status-loading: #fbbf24;
-  --gewu-status-warning: #fb923c;
-  --gewu-status-error: #f87171;
-  --gewu-status-info: #60a5fa;
+  --petri-status-online: #4ade80;
+  --petri-status-loading: #fbbf24;
+  --petri-status-warning: #fb923c;
+  --petri-status-error: #f87171;
+  --petri-status-info: #60a5fa;
 
   /* ===== 状态卡背景（dark mode） ===== */
-  --gewu-status-success-bg: rgba(34, 197, 94, 0.16);
-  --gewu-status-error-bg: rgba(239, 68, 68, 0.16);
-  --gewu-status-warning-bg: rgba(245, 158, 11, 0.16);
-  --gewu-status-danger-bg: rgba(239, 68, 68, 0.12);
+  --petri-status-success-bg: rgba(34, 197, 94, 0.16);
+  --petri-status-error-bg: rgba(239, 68, 68, 0.16);
+  --petri-status-warning-bg: rgba(245, 158, 11, 0.16);
+  --petri-status-danger-bg: rgba(239, 68, 68, 0.12);
 
  /* 状态卡前景文字（dark） */
- --gewu-status-success-fg: #4ade80;
- --gewu-status-error-fg: #f87171;
- --gewu-status-warning-fg: #fbbf24;
- --gewu-status-danger-fg: #fca5a5;
- --gewu-status-error-border: rgba(248, 113, 113, 0.32);
- --gewu-status-warning-border: rgba(251, 191, 36, 0.3);
- --gewu-accent-border: rgba(45, 212, 191, 0.4);
- --gewu-accent-surface: rgba(45, 212, 191, 0.12);
- --gewu-user-bubble-bg: rgba(230, 237, 243, 0.06);
-  --gewu-accent-orange: #fb923c;
-  --gewu-accent-orange-bg: rgba(251, 146, 60, 0.16);
+ --petri-status-success-fg: #4ade80;
+ --petri-status-error-fg: #f87171;
+ --petri-status-warning-fg: #fbbf24;
+ --petri-status-danger-fg: #fca5a5;
+ --petri-status-error-border: rgba(248, 113, 113, 0.32);
+ --petri-status-warning-border: rgba(251, 191, 36, 0.3);
+ --petri-accent-border: rgba(45, 212, 191, 0.4);
+ --petri-accent-surface: rgba(45, 212, 191, 0.12);
+ --petri-user-bubble-bg: rgba(230, 237, 243, 0.06);
+  --petri-accent-orange: #fb923c;
+  --petri-accent-orange-bg: rgba(251, 146, 60, 0.16);
   /* ===== UI-155 / 合并后暴露的 theme-token-contract 缺口（dark 适配） ===== */
-  --gewu-surface-2: rgba(127, 127, 127, 0.08);
-  --gewu-status-idle: #94a3b8;
+  --petri-surface-2: rgba(127, 127, 127, 0.08);
+  --petri-status-idle: #94a3b8;
 
-  /* Infima emphasis overrides — 让 ifm 颜色也跟 biof3 深色对齐 */
-  --ifm-background-color: var(--gewu-bg-canvas);
-  --ifm-background-surface-color: var(--gewu-bg-surface);
-  --ifm-color-emphasis-100: var(--gewu-bg-subtle);
-  --ifm-color-emphasis-200: var(--gewu-border);
-  --ifm-color-emphasis-300: var(--gewu-border-strong);
-  --ifm-color-emphasis-500: var(--gewu-text-muted);
-  --ifm-color-emphasis-600: var(--gewu-text-tertiary);
-  --ifm-color-emphasis-700: var(--gewu-text-secondary);
-  --ifm-color-emphasis-800: var(--gewu-text-secondary);
-  --ifm-color-emphasis-900: var(--gewu-text);
+  /* Infima emphasis overrides — 让 ifm 颜色也跟 petri 深色对齐 */
+  --ifm-background-color: var(--petri-bg-canvas);
+  --ifm-background-surface-color: var(--petri-bg-surface);
+  --ifm-color-emphasis-100: var(--petri-bg-subtle);
+  --ifm-color-emphasis-200: var(--petri-border);
+  --ifm-color-emphasis-300: var(--petri-border-strong);
+  --ifm-color-emphasis-500: var(--petri-text-muted);
+  --ifm-color-emphasis-600: var(--petri-text-tertiary);
+  --ifm-color-emphasis-700: var(--petri-text-secondary);
+  --ifm-color-emphasis-800: var(--petri-text-secondary);
+  --ifm-color-emphasis-900: var(--petri-text);
 }
 
 /* Compact documentation reading density */
 .theme-doc-markdown {
-  font-size: var(--gewu-font-size-md);
+  font-size: var(--petri-font-size-md);
   line-height: 1.68;
   max-width: 860px;
 }
@@ -296,18 +296,18 @@ html[data-theme='dark'],
 .theme-doc-markdown h2 {
   margin-top: 1.75rem;
   padding-top: 0.2rem;
-  border-top: 1px solid var(--gewu-border);
-  font-size: var(--gewu-font-size-2xl);
+  border-top: 1px solid var(--petri-border);
+  font-size: var(--petri-font-size-2xl);
 }
 
 .theme-doc-markdown h3 {
   margin-top: 1.25rem;
-  font-size: var(--gewu-font-size-lg);
+  font-size: var(--petri-font-size-lg);
 }
 
 .theme-doc-markdown h4 {
   margin-top: 1rem;
-  font-size: var(--gewu-font-size-md);
+  font-size: var(--petri-font-size-md);
 }
 
 .theme-doc-markdown p {
@@ -338,7 +338,7 @@ html[data-theme='dark'],
   display: table;
   width: 100%;
   margin: 0.9rem 0 1rem;
-  font-size: var(--gewu-font-size-body);
+  font-size: var(--petri-font-size-body);
 }
 
 .theme-doc-markdown thead tr,
@@ -372,7 +372,7 @@ html[data-theme='dark'],
 }
 
 .theme-doc-markdown .theme-code-block {
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 4px;
 }
 
@@ -404,7 +404,7 @@ html[data-theme='dark'],
 }
 
 .theme-doc-toc-desktop {
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
 }
 
 /* 文档页桌面大屏：左栏贴左、TOC 贴右、正文在主区域内居中 */
@@ -448,7 +448,7 @@ html[data-theme='dark'],
 }
 
 .theme-doc-sidebar-menu {
-  font-size: var(--gewu-font-size-body);
+  font-size: var(--petri-font-size-body);
 }
 
 .theme-doc-sidebar-menu .menu__link {
@@ -457,36 +457,36 @@ html[data-theme='dark'],
 }
 
 /* 左侧栏底部：微信公众号卡片 */
-.gewu-sidebar-wechat {
+.petri-sidebar-wechat {
   display: grid;
   grid-template-columns: 56px 1fr;
   align-items: center;
   gap: 0.55rem;
   margin: 1rem 0.5rem 0;
   padding: 0.55rem 0.65rem;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
   background: transparent;
 }
 
-.gewu-sidebar-wechat img {
+.petri-sidebar-wechat img {
   width: 56px;
   height: 56px;
   border-radius: 4px;
   object-fit: cover;
 }
 
-.gewu-sidebar-wechat strong {
+.petri-sidebar-wechat strong {
   display: block;
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-caption);
   line-height: 1.3;
 }
 
-.gewu-sidebar-wechat p {
+.petri-sidebar-wechat p {
   margin: 0.22rem 0 0;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-sm);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-sm);
   line-height: 1.4;
 }
 
@@ -500,7 +500,7 @@ html[data-theme='dark'],
   flex: 1 1 auto;
 }
 
-.theme-doc-sidebar-container nav.menu > .gewu-sidebar-wechat {
+.theme-doc-sidebar-container nav.menu > .petri-sidebar-wechat {
   flex: 0 0 auto;
 }
 
@@ -522,7 +522,7 @@ html[data-theme='dark'],
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.gewu-download {
+.petri-download {
   justify-content: space-between;
   display: flex;
   align-items: center;
@@ -530,35 +530,35 @@ html[data-theme='dark'],
   flex-wrap: wrap;
   margin: 0.58rem 0;
   padding: 0.62rem 0.72rem;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
   background: transparent;
 }
 
-.gewu-download__meta {
+.petri-download__meta {
   display: grid;
   gap: 0.16rem;
   min-width: 0;
 }
 
-.gewu-download__name {
+.petri-download__name {
   overflow-wrap: anywhere;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   font-family: var(--ifm-font-family-monospace);
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   font-weight: 650;
 }
 
-.gewu-download__button {
+.petri-download__button {
   display: inline-flex;
   align-items: center;
   gap: 0.34rem;
-  border: 1px solid var(--gewu-border-strong);
+  border: 1px solid var(--petri-border-strong);
   border-radius: 6px;
   background: transparent;
   color: var(--ifm-color-primary);
   cursor: pointer;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   font-weight: 650;
   line-height: 1.2;
   padding: 0.38rem 0.58rem;
@@ -570,29 +570,29 @@ html[data-theme='dark'],
     transform 160ms ease;
 }
 
-.gewu-download__button:hover,
-.gewu-download__button:focus {
+.petri-download__button:hover,
+.petri-download__button:focus {
   border-color: var(--ifm-color-primary);
   color: var(--ifm-color-primary-dark);
   text-decoration: none;
   transform: translateY(-1px);
 }
 
-.gewu-download__icon {
-  font-size: var(--gewu-font-size-body-sm);
+.petri-download__icon {
+  font-size: var(--petri-font-size-body-sm);
   line-height: 1;
 }
 
-.gewu-download__size {
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-sm);
+.petri-download__size {
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-sm);
 }
 
-.theme-doc-markdown h2 + .gewu-download {
+.theme-doc-markdown h2 + .petri-download {
   margin-top: 0.35rem;
 }
 
-.gewu-export-panel {
+.petri-export-panel {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -600,59 +600,59 @@ html[data-theme='dark'],
   flex-wrap: wrap;
   margin: 1.6rem 0 1rem;
   padding: 1rem;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
 }
 
-.gewu-export-panel__text {
+.petri-export-panel__text {
   max-width: 30rem;
 }
 
-.gewu-export-panel__badge {
+.petri-export-panel__badge {
   width: fit-content;
   margin-bottom: 0.28rem;
   padding: 0.12rem 0.42rem;
   border-radius: 999px;
-  background: var(--gewu-accent-bg);
+  background: var(--petri-accent-bg);
   color: var(--ifm-color-primary-dark);
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   font-weight: 800;
   line-height: 1.35;
 }
 
-.gewu-export-panel__text h2 {
+.petri-export-panel__text h2 {
   margin: 0 0 0.28rem;
   padding: 0;
   border: 0;
-  font-size: var(--gewu-font-size-md);
+  font-size: var(--petri-font-size-md);
 }
 
-.gewu-export-panel__text p {
+.petri-export-panel__text p {
   margin: 0;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-body);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-body);
   line-height: 1.5;
 }
 
-.gewu-export-panel__actions {
+.petri-export-panel__actions {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
 }
 
-.gewu-export-panel__button {
+.petri-export-panel__button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 1.9rem;
-  border: 1px solid var(--gewu-border-strong);
+  border: 1px solid var(--petri-border-strong);
   border-radius: 6px;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   cursor: pointer;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   font-weight: 650;
   font-family: inherit;
   line-height: 1.2;
@@ -660,129 +660,129 @@ html[data-theme='dark'],
   text-decoration: none;
 }
 
-.gewu-export-panel__button:hover,
-.gewu-export-panel__button:focus {
+.petri-export-panel__button:hover,
+.petri-export-panel__button:focus {
   border-color: var(--ifm-color-primary);
   color: var(--ifm-color-primary);
   text-decoration: none;
 }
 
-.gewu-export-panel__button--primary {
+.petri-export-panel__button--primary {
   border-color: var(--ifm-color-primary);
   background: transparent;
   color: var(--ifm-color-primary);
 }
 
-.gewu-export-panel__button--primary:hover,
-.gewu-export-panel__button--primary:focus {
+.petri-export-panel__button--primary:hover,
+.petri-export-panel__button--primary:focus {
   background: transparent;
   color: var(--ifm-color-primary-dark);
 }
 
-.gewu-export-panel__button--quiet {
+.petri-export-panel__button--quiet {
   border-color: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
 }
 
-.gewu-export-panel__button--quiet:hover,
-.gewu-export-panel__button--quiet:focus {
-  border-color: var(--gewu-border-strong);
+.petri-export-panel__button--quiet:hover,
+.petri-export-panel__button--quiet:focus {
+  border-color: var(--petri-border-strong);
 }
 
-.gewu-export-panel__link {
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-body-sm);
+.petri-export-panel__link {
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-body-sm);
   font-weight: 700;
   text-decoration: none;
 }
 
-.gewu-export-panel__link:hover,
-.gewu-export-panel__link:focus {
+.petri-export-panel__link:hover,
+.petri-export-panel__link:focus {
   color: var(--ifm-color-primary);
   text-decoration: none;
 }
 
-.gewu-comments {
+.petri-comments {
   margin-top: 2.6rem;
   padding-top: 1.5rem;
-  border-top: 1px solid var(--gewu-border);
+  border-top: 1px solid var(--petri-border);
 }
 
-.gewu-comments__header {
+.petri-comments__header {
   margin-bottom: 1.1rem;
 }
 
-.gewu-comments__header h2 {
+.petri-comments__header h2 {
   margin: 0 0 0.32rem;
   padding: 0;
   border: 0;
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-lg);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-lg);
 }
 
-.gewu-comments__header p {
+.petri-comments__header p {
   margin: 0;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-body);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-body);
   line-height: 1.6;
 }
 
-.gewu-comments .wl-panel {
+.petri-comments .wl-panel {
   border-radius: 8px;
 }
 
 /* Compact mode for FigCode right panel */
-.gewu-comments--compact {
+.petri-comments--compact {
   margin-top: 0.8rem;
   padding-top: 0.5rem;
   border-top: none;
 }
-.gewu-comments--compact .gewu-comments__header h2 {
-  font-size: var(--gewu-font-size-caption);
+.petri-comments--compact .petri-comments__header h2 {
+  font-size: var(--petri-font-size-caption);
 }
-.gewu-comments--compact .gewu-comments__header p {
-  font-size: var(--gewu-font-size-sm);
+.petri-comments--compact .petri-comments__header p {
+  font-size: var(--petri-font-size-sm);
 }
-.gewu-comments--compact .wl-emoji-popup {
+.petri-comments--compact .wl-emoji-popup {
   transform: scale(0.7);
   transform-origin: top left;
 }
-.gewu-comments--compact .wl-emoji-popup img {
+.petri-comments--compact .wl-emoji-popup img {
   width: 20px !important;
   height: 20px !important;
 }
-.gewu-comments--compact .wl-reaction {
+.petri-comments--compact .wl-reaction {
   gap: 4px;
 }
-.gewu-comments--compact .wl-reaction-item {
-  font-size: var(--gewu-font-size-body);
+.petri-comments--compact .wl-reaction-item {
+  font-size: var(--petri-font-size-body);
   padding: 3px 6px;
 }
-.gewu-comments--compact .wl-reaction-item .wl-reaction-img {
+.petri-comments--compact .wl-reaction-item .wl-reaction-img {
   width: 16px;
   height: 16px;
 }
-.gewu-comments--compact .wl-panel,
-.gewu-comments--compact .wl-cards {
-  font-size: var(--gewu-font-size-caption);
+.petri-comments--compact .wl-panel,
+.petri-comments--compact .wl-cards {
+  font-size: var(--petri-font-size-caption);
 }
-.gewu-comments--compact .wl-editor {
+.petri-comments--compact .wl-editor {
   min-height: 60px;
 }
-.gewu-comments--compact .wl-panel .wl-header {
-  font-size: var(--gewu-font-size-sm);
+.petri-comments--compact .wl-panel .wl-header {
+  font-size: var(--petri-font-size-sm);
 }
-.gewu-comments--compact .wl-panel .wl-header input {
-  font-size: var(--gewu-font-size-sm);
+.petri-comments--compact .wl-panel .wl-header input {
+  font-size: var(--petri-font-size-sm);
   padding: 4px 6px;
 }
-.gewu-comments--compact .wl-btn {
-  font-size: var(--gewu-font-size-sm);
+.petri-comments--compact .wl-btn {
+  font-size: var(--petri-font-size-sm);
   padding: 4px 10px;
 }
-.gewu-comments--compact .wl-card .wl-meta,
-.gewu-comments--compact .wl-card .wl-content {
-  font-size: var(--gewu-font-size-sm);
+.petri-comments--compact .wl-card .wl-meta,
+.petri-comments--compact .wl-card .wl-content {
+  font-size: var(--petri-font-size-sm);
 }
 
 /* 响应式设计：在小屏幕上图片更小 */
@@ -796,7 +796,7 @@ html[data-theme='dark'],
   }
 
   .theme-doc-markdown h2 {
-    font-size: var(--gewu-font-size-xl);
+    font-size: var(--petri-font-size-xl);
   }
 
   .markdown img {
@@ -808,7 +808,7 @@ html[data-theme='dark'],
   .markdown pre {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    font-size: var(--gewu-font-size-body-sm);
+    font-size: var(--petri-font-size-body-sm);
   }
 
   /* Mobile: long tables get horizontal scroll instead of breaking layout */
@@ -826,26 +826,26 @@ html[data-theme='dark'],
     word-break: break-word;
   }
 
-  .gewu-download {
+  .petri-download {
     align-items: stretch;
   }
 
-  .gewu-download__button {
+  .petri-download__button {
     justify-content: center;
     width: 100%;
   }
 
-  .gewu-export-panel {
+  .petri-export-panel {
     align-items: stretch;
   }
 
-  .gewu-export-panel__actions,
-  .gewu-export-panel__button,
-  .gewu-export-panel__link {
+  .petri-export-panel__actions,
+  .petri-export-panel__button,
+  .petri-export-panel__link {
     width: 100%;
   }
 
-  .gewu-export-panel__link {
+  .petri-export-panel__link {
     text-align: center;
   }
 }
@@ -856,26 +856,26 @@ html[data-theme='dark'],
   .theme-doc-toc-desktop,
   .theme-doc-footer,
   .pagination-nav,
-  .gewu-export-panel,
-  .gewu-export-panel__button--quiet,
-  .gewu-comments {
+  .petri-export-panel,
+  .petri-export-panel__button--quiet,
+  .petri-comments {
     display: none !important;
   }
 
-  .gewu-download {
+  .petri-download {
     break-inside: avoid;
-    border-color: var(--gewu-border-strong);
+    border-color: var(--petri-border-strong);
     background: transparent;
   }
 
-  .gewu-download__button {
+  .petri-download__button {
     border-color: var(--ifm-color-primary);
     color: var(--ifm-color-primary);
   }
 
-  .gewu-download__button::after {
+  .petri-download__button::after {
     content: ' ↗';
-    font-size: var(--gewu-font-size-sm);
+    font-size: var(--petri-font-size-sm);
   }
 
   .theme-doc-markdown {
@@ -933,7 +933,7 @@ html[data-theme='dark'],
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
   border-radius: 12px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
   overflow: hidden;
@@ -978,8 +978,8 @@ html[data-theme='dark'],
   align-items: center;
   justify-content: space-between;
   padding: 14px 20px;
-  border-bottom: 1px solid var(--gewu-border);
-  background: var(--gewu-bg-subtle);
+  border-bottom: 1px solid var(--petri-border);
+  background: var(--petri-bg-subtle);
   flex-shrink: 0;
 }
 
@@ -993,9 +993,9 @@ html[data-theme='dark'],
 
 .run-modal-header h3 {
   margin: 0;
-  font-size: var(--gewu-font-size-body);
+  font-size: var(--petri-font-size-body);
   font-weight: 700;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   white-space: nowrap;
 }
 
@@ -1010,8 +1010,8 @@ html[data-theme='dark'],
 .run-modal-marquee-text {
   display: inline-block;
   white-space: nowrap;
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text-muted);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-text-muted);
   font-weight: 500;
   animation: marqueeScroll 12s linear infinite;
   padding-left: 100%;
@@ -1037,11 +1037,11 @@ html[data-theme='dark'],
   align-items: center;
   gap: 4px;
   padding: 5px 9px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 5px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-sm);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-sm);
   font-weight: 650;
   text-decoration: none;
   transition: all 0.12s;
@@ -1055,7 +1055,7 @@ html[data-theme='dark'],
 }
 
 .run-modal-dl-icon {
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   line-height: 1;
 }
 
@@ -1068,15 +1068,15 @@ html[data-theme='dark'],
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-xl);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xl);
   cursor: pointer;
   transition: all 0.12s;
 }
 
 .run-modal-close:hover {
-  background: var(--gewu-status-error-bg);
-  color: var(--gewu-status-error-fg);
+  background: var(--petri-status-error-bg);
+  color: var(--petri-status-error-fg);
 }
 
 .run-modal-body {
@@ -1104,7 +1104,7 @@ html[data-theme='dark'],
 .run-modal-left {
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--gewu-border);
+  border-right: 1px solid var(--petri-border);
   min-height: 0;
 }
 
@@ -1114,8 +1114,8 @@ html[data-theme='dark'],
   align-items: center;
   gap: 8px;
   padding: 6px 10px;
-  border-bottom: 1px solid var(--gewu-border);
-  background: var(--gewu-bg-subtle);
+  border-bottom: 1px solid var(--petri-border);
+  background: var(--petri-bg-subtle);
   flex-shrink: 0;
 }
 
@@ -1129,10 +1129,10 @@ html[data-theme='dark'],
   gap: 4px;
   padding: 5px 14px;
   border-radius: 6px;
-  border: 1px solid var(--gewu-status-online);
+  border: 1px solid var(--petri-status-online);
   background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
   color: #fff;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s;
@@ -1147,16 +1147,16 @@ html[data-theme='dark'],
   transform: translateY(0);
 }
 .run-modal-run-btn:disabled {
-  background: var(--gewu-text-muted);
-  border-color: var(--gewu-text-muted);
+  background: var(--petri-text-muted);
+  border-color: var(--petri-text-muted);
   cursor: wait;
   transform: none;
   box-shadow: none;
 }
 
 .run-modal-code-hint {
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-muted);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-muted);
   font-weight: 500;
 }
 
@@ -1167,10 +1167,10 @@ html[data-theme='dark'],
   width: 26px;
   height: 26px;
   padding: 0;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 5px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text-secondary);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
   cursor: pointer;
   transition: all 0.12s;
 }
@@ -1181,8 +1181,8 @@ html[data-theme='dark'],
 }
 
 .run-modal-copy-btn.copied {
-  border-color: var(--gewu-status-online);
-  color: var(--gewu-status-online);
+  border-color: var(--petri-status-online);
+  color: var(--petri-status-online);
 }
 
 .run-modal-fullscreen-btn {
@@ -1192,10 +1192,10 @@ html[data-theme='dark'],
   width: 28px;
   height: 28px;
   padding: 0;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text-secondary);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
   cursor: pointer;
   transition: all 0.12s;
 }
@@ -1215,7 +1215,7 @@ html[data-theme='dark'],
 }
 
 .run-modal:fullscreen .run-modal-left .run-modal-editor {
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
 }
 
 .run-modal-left .run-modal-editor {
@@ -1227,16 +1227,16 @@ html[data-theme='dark'],
   border: none;
   border-radius: 0;
   padding: 14px 16px;
-  background: var(--gewu-bg-subtle);
-  font-family: var(--gewu-font-mono, monospace);
-  font-size: var(--gewu-font-size-caption);
+  background: var(--petri-bg-subtle);
+  font-family: var(--petri-font-mono, monospace);
+  font-size: var(--petri-font-size-caption);
   line-height: 1.6;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   outline: none;
 }
 
 .run-modal-left .run-modal-editor:focus {
-  background: var(--gewu-bg-subtle);
+  background: var(--petri-bg-subtle);
   box-shadow: none;
 }
 
@@ -1266,9 +1266,9 @@ html[data-theme='dark'],
 /* Cards in right panel */
 .run-modal-card {
   padding: 10px 12px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
   min-width: 0;
   overflow: hidden;
 }
@@ -1277,9 +1277,9 @@ html[data-theme='dark'],
 }
 
 .run-modal-card-title {
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   font-weight: 750;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin-bottom: 4px;
@@ -1287,7 +1287,7 @@ html[data-theme='dark'],
 
 .run-modal-card-section {
   padding: 6px 0;
-  border-bottom: 1px solid var(--gewu-border);
+  border-bottom: 1px solid var(--petri-border);
 }
 
 .run-modal-card-section:first-child {
@@ -1300,8 +1300,8 @@ html[data-theme='dark'],
 }
 
 .run-modal-data-hint {
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-muted);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-muted);
   font-style: italic;
 }
 
@@ -1316,39 +1316,39 @@ html[data-theme='dark'],
 .run-modal-data-table-wrap {
   max-height: 120px;
   overflow: auto;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 4px;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
 }
 
 .run-modal-data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--gewu-font-size-xs);
-  font-family: var(--gewu-font-mono, monospace);
+  font-size: var(--petri-font-size-xs);
+  font-family: var(--petri-font-mono, monospace);
 }
 
 .run-modal-data-table th {
   position: sticky;
   top: 0;
-  background: var(--gewu-status-success-bg);
+  background: var(--petri-status-success-bg);
   padding: 3px 6px;
   text-align: left;
   font-weight: 700;
-  color: var(--gewu-status-success-fg);
-  border-bottom: 1px solid var(--gewu-border);
+  color: var(--petri-status-success-fg);
+  border-bottom: 1px solid var(--petri-border);
   white-space: nowrap;
 }
 
 .run-modal-data-table td {
   padding: 2px 6px;
-  border-bottom: 1px solid var(--gewu-border);
-  color: var(--gewu-text-secondary);
+  border-bottom: 1px solid var(--petri-border);
+  color: var(--petri-text-secondary);
   white-space: nowrap;
 }
 
 .run-modal-data-table tr:hover td {
-  background: var(--gewu-bg-subtle);
+  background: var(--petri-bg-subtle);
 }
 
 .run-modal-config-row {
@@ -1361,9 +1361,9 @@ html[data-theme='dark'],
   flex-shrink: 0;
   width: 32px;
   padding-top: 5px;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   font-weight: 750;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
   text-align: right;
 }
 
@@ -1388,7 +1388,7 @@ html[data-theme='dark'],
   gap: 6px;
   flex-shrink: 0;
   padding: 8px 14px;
-  border-bottom: 1px solid var(--gewu-border);
+  border-bottom: 1px solid var(--petri-border);
 }
 
 .run-modal-action-btn {
@@ -1396,11 +1396,11 @@ html[data-theme='dark'],
   align-items: center;
   gap: 3px;
   padding: 5px 10px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 5px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-sm);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-sm);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.12s;
@@ -1417,11 +1417,11 @@ html[data-theme='dark'],
   align-items: center;
   gap: 4px;
   padding: 3px 9px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 14px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-xs);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xs);
   font-weight: 650;
   cursor: pointer;
   transition: all 0.12s;
@@ -1430,15 +1430,15 @@ html[data-theme='dark'],
 }
 
 .run-modal-data-btn:hover {
-  border-color: var(--gewu-status-info);
-  color: var(--gewu-status-info);
+  border-color: var(--petri-status-info);
+  color: var(--petri-status-info);
   text-decoration: none;
 }
 
 .run-modal-data-btn.active {
-  border-color: var(--gewu-status-info);
+  border-color: var(--petri-status-info);
   background: rgba(96, 165, 250, 0.1);
-  color: var(--gewu-status-info);
+  color: var(--petri-status-info);
 }
 
 /* Data preview sub-modal */
@@ -1460,7 +1460,7 @@ html[data-theme='dark'],
   max-height: 70vh;
   display: flex;
   flex-direction: column;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
   border-radius: 10px;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
   overflow: hidden;
@@ -1471,14 +1471,14 @@ html[data-theme='dark'],
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px;
-  border-bottom: 1px solid var(--gewu-border);
-  background: var(--gewu-status-success-bg);
+  border-bottom: 1px solid var(--petri-border);
+  background: var(--petri-status-success-bg);
 }
 
 .run-modal-data-modal-header span {
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   font-weight: 700;
-  color: var(--gewu-status-success-fg);
+  color: var(--petri-status-success-fg);
 }
 
 .run-modal-data-modal-header button {
@@ -1487,14 +1487,14 @@ html[data-theme='dark'],
   border: none;
   border-radius: 4px;
   background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-lg);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-lg);
   cursor: pointer;
 }
 
 .run-modal-data-modal-header button:hover {
-  background: var(--gewu-status-error-bg);
-  color: var(--gewu-status-error-fg);
+  background: var(--petri-status-error-bg);
+  color: var(--petri-status-error-fg);
 }
 
 .run-modal-data-modal .run-modal-data-table-wrap {
@@ -1517,9 +1517,9 @@ html[data-theme='dark'],
 }
 
 .run-modal-theme-label {
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   font-weight: 700;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
   letter-spacing: 0.02em;
   white-space: nowrap;
   padding-top: 5px;
@@ -1537,11 +1537,11 @@ html[data-theme='dark'],
   display: inline-flex;
   align-items: center;
   padding: 3px 9px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 14px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-xs);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xs);
   font-weight: 650;
   cursor: pointer;
   transition: all 0.12s;
@@ -1555,7 +1555,7 @@ html[data-theme='dark'],
 
 .run-modal-theme-chip.active {
   border-color: var(--ifm-color-primary);
-  background: var(--gewu-accent-bg);
+  background: var(--petri-accent-bg);
   color: var(--ifm-color-primary);
   font-weight: 750;
 }
@@ -1564,11 +1564,11 @@ html[data-theme='dark'],
   display: inline-flex;
   align-items: center;
   padding: 3px 9px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 14px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-xs);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xs);
   font-weight: 650;
   cursor: pointer;
   transition: all 0.12s;
@@ -1576,14 +1576,14 @@ html[data-theme='dark'],
 }
 
 .run-modal-layout-chip:hover {
-  border-color: var(--gewu-status-warning-fg);
-  color: var(--gewu-status-warning-fg);
+  border-color: var(--petri-status-warning-fg);
+  color: var(--petri-status-warning-fg);
 }
 
 .run-modal-layout-chip.active {
-  border-color: var(--gewu-status-warning-fg);
-  background: var(--gewu-status-warning-bg);
-  color: var(--gewu-status-warning-fg);
+  border-color: var(--petri-status-warning-fg);
+  background: var(--petri-status-warning-bg);
+  color: var(--petri-status-warning-fg);
   font-weight: 750;
 }
 
@@ -1599,17 +1599,17 @@ html[data-theme='dark'],
   padding: 12px 14px;
   border: none;
   border-radius: 0;
-  background: var(--gewu-bg-subtle);
-  font-family: var(--gewu-font-mono, monospace);
-  font-size: var(--gewu-font-size-caption);
+  background: var(--petri-bg-subtle);
+  font-family: var(--petri-font-mono, monospace);
+  font-size: var(--petri-font-size-caption);
   line-height: 1.6;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   resize: none;
   outline: none;
 }
 
 .run-modal-editor:focus {
-  background: var(--gewu-bg-subtle);
+  background: var(--petri-bg-subtle);
   box-shadow: none;
 }
 
@@ -1621,14 +1621,14 @@ html[data-theme='dark'],
   border-radius: 5px;
   background: var(--ifm-color-primary);
   color: white;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s;
 }
 
 .run-modal-run-btn:hover:not(:disabled) {
-  background: var(--gewu-accent-hover);
+  background: var(--petri-accent-hover);
 }
 
 .run-modal-run-btn:disabled {
@@ -1641,8 +1641,8 @@ html[data-theme='dark'],
 }
 
 .run-modal-elapsed {
-  color: var(--gewu-text-muted);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-xs);
   font-weight: 500;
   margin-left: auto;
 }
@@ -1650,9 +1650,9 @@ html[data-theme='dark'],
 .run-modal-file-tag {
   padding: 3px 8px;
   border-radius: 4px;
-  background: var(--gewu-status-success-bg);
-  color: var(--gewu-status-success-fg);
-  font-size: var(--gewu-font-size-xs);
+  background: var(--petri-status-success-bg);
+  color: var(--petri-status-success-fg);
+  font-size: var(--petri-font-size-xs);
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -1664,19 +1664,19 @@ html[data-theme='dark'],
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   font-weight: 600;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
 }
 
 .run-modal-param input {
   width: 52px;
   padding: 3px 5px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 4px;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   font-weight: 600;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   text-align: center;
   outline: none;
   transition: border-color 0.12s;
@@ -1687,13 +1687,13 @@ html[data-theme='dark'],
 }
 
 .run-modal-param-unit {
-  color: var(--gewu-text-muted);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-xs);
 }
 
 .run-modal-param-sep {
-  color: var(--gewu-text-muted);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-xs);
   margin-left: 6px;
 }
 
@@ -1706,11 +1706,11 @@ html[data-theme='dark'],
 
 .run-modal-param select {
   padding: 2px 4px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 4px;
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text);
-  background: var(--gewu-bg-surface);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text);
+  background: var(--petri-bg-surface);
   outline: none;
   cursor: pointer;
 }
@@ -1720,10 +1720,10 @@ html[data-theme='dark'],
 }
 
 .run-modal-output {
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
   overflow: visible;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
   padding: 8px;
 }
 
@@ -1741,8 +1741,8 @@ html[data-theme='dark'],
   justify-content: center;
   height: 100%;
   min-height: 120px;
-  color: var(--gewu-text-muted);
-  font-size: var(--gewu-font-size-body-sm);
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-body-sm);
   text-align: center;
 }
 
@@ -1753,7 +1753,7 @@ html[data-theme='dark'],
   height: 100%;
   min-height: 120px;
   color: var(--ifm-color-primary);
-  font-size: var(--gewu-font-size-body);
+  font-size: var(--petri-font-size-body);
   font-weight: 600;
   animation: pulse 1.5s ease-in-out infinite;
 }
@@ -1764,12 +1764,12 @@ html[data-theme='dark'],
   z-index: 2;
   text-align: center;
   padding: 6px 12px;
-  background: var(--gewu-surface-translucent);
+  background: var(--petri-surface-translucent);
   backdrop-filter: blur(4px);
   border-radius: 6px;
   margin-bottom: 8px;
-  color: var(--gewu-status-warning-fg);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-status-warning-fg);
+  font-size: var(--petri-font-size-caption);
   font-weight: 600;
   animation: pulse 1.2s ease-in-out infinite;
 }
@@ -1787,10 +1787,10 @@ html[data-theme='dark'],
 .run-modal-stdout {
   margin: 0;
   padding: 12px 14px;
-  font-family: var(--gewu-font-mono, monospace);
-  font-size: var(--gewu-font-size-sm);
+  font-family: var(--petri-font-mono, monospace);
+  font-size: var(--petri-font-size-sm);
   line-height: 1.5;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   white-space: pre-wrap;
   word-break: break-all;
   max-height: 200px;
@@ -1803,7 +1803,7 @@ html[data-theme='dark'],
   height: auto;
   margin: 0 auto;
   border-radius: 4px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   cursor: zoom-in;
   transition: transform 0.15s;
 }
@@ -1835,24 +1835,24 @@ html[data-theme='dark'],
   display: inline-flex;
   align-items: center;
   padding: 6px 14px;
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   font-weight: 600;
   color: #fff;
-  background: var(--gewu-accent);
+  background: var(--petri-accent);
   border: none;
   border-radius: 20px;
   cursor: pointer;
   transition: background 0.15s;
 }
 .run-modal-save-btn:hover {
-  background: var(--gewu-accent-hover);
+  background: var(--petri-accent-hover);
 }
 .run-modal-save-btn:disabled {
   opacity: 0.7;
   cursor: wait;
 }
 .run-modal-save-btn.saved {
-  background: var(--gewu-status-success-fg);
+  background: var(--petri-status-success-fg);
 }
 
 .run-modal-img-dl {
@@ -1860,11 +1860,11 @@ html[data-theme='dark'],
   align-items: center;
   gap: 3px;
   padding: 4px 10px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 4px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-sm);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-sm);
   font-weight: 650;
   text-decoration: none;
   cursor: pointer;
@@ -1911,7 +1911,7 @@ html[data-theme='dark'],
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.15);
   color: white;
-  font-size: var(--gewu-font-size-2xl);
+  font-size: var(--petri-font-size-2xl);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1924,37 +1924,37 @@ html[data-theme='dark'],
 
 /* Dark mode */
 [data-theme='dark'] .run-modal {
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
 }
 
 [data-theme='dark'] .run-modal-header {
-  background: var(--gewu-bg-canvas);
-  border-bottom-color: var(--gewu-border);
+  background: var(--petri-bg-canvas);
+  border-bottom-color: var(--petri-border);
 }
 
 [data-theme='dark'] .run-modal-header h3 {
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 [data-theme='dark'] .run-modal-editor {
-  background: var(--gewu-bg-canvas);
-  border-color: var(--gewu-border);
-  color: var(--gewu-text);
+  background: var(--petri-bg-canvas);
+  border-color: var(--petri-border);
+  color: var(--petri-text);
 }
 
 [data-theme='dark'] .run-modal-output {
-  background: var(--gewu-bg-canvas);
-  border-color: var(--gewu-border);
+  background: var(--petri-bg-canvas);
+  border-color: var(--petri-border);
 }
 
 [data-theme='dark'] .run-modal-stdout {
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
 }
 
 [data-theme='dark'] .run-modal-reset-btn {
-  background: var(--gewu-bg-subtle);
-  border-color: var(--gewu-border-strong);
-  color: var(--gewu-text-secondary);
+  background: var(--petri-bg-subtle);
+  border-color: var(--petri-border-strong);
+  color: var(--petri-text-secondary);
 }
 
 /* Responsive: stack on narrow screens */
@@ -1965,7 +1965,7 @@ html[data-theme='dark'],
   }
   .run-modal-left {
     border-right: none;
-    border-bottom: 1px solid var(--gewu-border);
+    border-bottom: 1px solid var(--petri-border);
   }
 }
 
@@ -1998,7 +1998,7 @@ html[data-theme='dark'],
 
 [data-theme='dark'] .try-online-card {
   background: linear-gradient(135deg, rgba(15, 118, 110, 0.1) 0%, rgba(16, 185, 129, 0.08) 100%);
-  border-color: var(--gewu-accent-border);
+  border-color: var(--petri-accent-border);
 }
 
 .try-online-icon {
@@ -2010,7 +2010,7 @@ html[data-theme='dark'],
   justify-content: center;
   background: var(--ifm-color-primary);
   color: white;
-  font-size: var(--gewu-font-size-md);
+  font-size: var(--petri-font-size-md);
   font-weight: 800;
   flex-shrink: 0;
 }
@@ -2021,27 +2021,27 @@ html[data-theme='dark'],
 }
 
 .try-online-title {
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   font-weight: 700;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   margin-bottom: 2px;
 }
 
 [data-theme='dark'] .try-online-title {
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .try-online-desc {
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-secondary);
 }
 
 [data-theme='dark'] .try-online-desc {
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
 }
 
 .try-online-arrow {
-  font-size: var(--gewu-font-size-xl);
+  font-size: var(--petri-font-size-xl);
   color: var(--ifm-color-primary);
   flex-shrink: 0;
   transition: transform 0.15s;
@@ -2132,7 +2132,7 @@ button.DocSearch-Button .DocSearch-Button-Keys,
   height: 18px;
   margin: 0 6px;
   vertical-align: middle;
-  background: var(--gewu-border);
+  background: var(--petri-border);
   opacity: 0.6;
 }
 
@@ -2152,10 +2152,10 @@ button.DocSearch-Button .DocSearch-Button-Keys,
   display: inline-block;
   margin-left: 6px;
   padding: 1px 6px;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   font-weight: 600;
-  color: var(--gewu-status-warning-fg);
-  background: var(--gewu-status-warning-bg);
+  color: var(--petri-status-warning-fg);
+  background: var(--petri-status-warning-bg);
   border-radius: 4px;
   vertical-align: middle;
 }
@@ -2169,51 +2169,51 @@ button.DocSearch-Button .DocSearch-Button-Keys,
 }
 
 /* ===== 桌面版：取消 dock 让位，页面保持全宽 ===== */
-html.gewu-desktop {
+html.petri-desktop {
   padding-left: 0;
 }
 
 /* 文档页保持全宽 */
-html.gewu-desktop .theme-doc-sidebar-container {
+html.petri-desktop .theme-doc-sidebar-container {
   margin-left: 0 !important;
 }
 
 /* navbar 内容也右移对齐 */
-html.gewu-desktop .navbar__inner {
+html.petri-desktop .navbar__inner {
   padding-left: 0;
 }
 
 /* 非文档页的主内容 wrapper 保持全宽 */
-html.gewu-desktop .main-wrapper {
+html.petri-desktop .main-wrapper {
   margin-left: 0;
 }
 
 /* 首页 hero 区域不需要额外左移 */
-html.gewu-desktop .hero {
+html.petri-desktop .hero {
   margin-left: 0;
 }
 
 /* ===== docs 教程页：去 Web 痕迹，内容撑满 ===== */
 /* 隐藏右侧 TOC、底部 pagination、编辑此页、docs footer、移动端 TOC 按钮 */
-html.gewu-desktop .theme-doc-toc-desktop,
-html.gewu-desktop .pagination-nav,
-html.gewu-desktop .theme-edit-this-page,
-html.gewu-desktop .theme-doc-footer,
-html.gewu-desktop .tocCollapsibleButton {
+html.petri-desktop .theme-doc-toc-desktop,
+html.petri-desktop .pagination-nav,
+html.petri-desktop .theme-edit-this-page,
+html.petri-desktop .theme-doc-footer,
+html.petri-desktop .tocCollapsibleButton {
   display: none !important;
 }
 
 /* 内容区去掉右侧 col--3 留白，撑满 */
-html.gewu-desktop [class*='docMainContainer'] > .container > .row > .col {
+html.petri-desktop [class*='docMainContainer'] > .container > .row > .col {
   max-width: 100% !important;
 }
 
 /* DocSidebar 收紧：与 dock 视觉统一，去 Web 卡片感 */
-html.gewu-desktop .theme-doc-sidebar-container {
-  border-right: 1px solid var(--gewu-border, #e2e8f0);
+html.petri-desktop .theme-doc-sidebar-container {
+  border-right: 1px solid var(--petri-border, #e2e8f0);
   width: 280px;
 }
-html.gewu-desktop .theme-doc-sidebar-container .menu__link {
+html.petri-desktop .theme-doc-sidebar-container .menu__link {
   border-radius: 6px;
 }
 
@@ -2226,76 +2226,76 @@ html.gewu-desktop .theme-doc-sidebar-container .menu__link {
 
 /* ── 远蓝 blue ── */
 [data-accent='blue'] {
-  --gewu-accent: #2563eb;
-  --gewu-accent-soft: rgba(37, 99, 235, 0.16);
-  --gewu-accent-bg: #eff6ff;
-  --gewu-accent-hover: #1d4ed8;
-  --gewu-accent-border: rgba(37, 99, 235, 0.4);
-  --gewu-accent-surface: rgba(239, 246, 255, 0.78);
+  --petri-accent: #2563eb;
+  --petri-accent-soft: rgba(37, 99, 235, 0.16);
+  --petri-accent-bg: #eff6ff;
+  --petri-accent-hover: #1d4ed8;
+  --petri-accent-border: rgba(37, 99, 235, 0.4);
+  --petri-accent-surface: rgba(239, 246, 255, 0.78);
 }
 
 [data-accent='blue'][data-theme='dark'] {
-  --gewu-accent: #60a5fa;
-  --gewu-accent-soft: rgba(96, 165, 250, 0.2);
-  --gewu-accent-bg: rgba(96, 165, 250, 0.14);
-  --gewu-accent-hover: #3b82f6;
-  --gewu-accent-border: rgba(96, 165, 250, 0.4);
-  --gewu-accent-surface: rgba(96, 165, 250, 0.12);
+  --petri-accent: #60a5fa;
+  --petri-accent-soft: rgba(96, 165, 250, 0.2);
+  --petri-accent-bg: rgba(96, 165, 250, 0.14);
+  --petri-accent-hover: #3b82f6;
+  --petri-accent-border: rgba(96, 165, 250, 0.4);
+  --petri-accent-surface: rgba(96, 165, 250, 0.12);
 }
 
 /* ── 紫罗兰 violet ── */
 [data-accent='violet'] {
-  --gewu-accent: #7c3aed;
-  --gewu-accent-soft: rgba(124, 58, 237, 0.16);
-  --gewu-accent-bg: #f5f3ff;
-  --gewu-accent-hover: #6d28d9;
-  --gewu-accent-border: rgba(124, 58, 237, 0.4);
-  --gewu-accent-surface: rgba(245, 243, 255, 0.78);
+  --petri-accent: #7c3aed;
+  --petri-accent-soft: rgba(124, 58, 237, 0.16);
+  --petri-accent-bg: #f5f3ff;
+  --petri-accent-hover: #6d28d9;
+  --petri-accent-border: rgba(124, 58, 237, 0.4);
+  --petri-accent-surface: rgba(245, 243, 255, 0.78);
 }
 
 [data-accent='violet'][data-theme='dark'] {
-  --gewu-accent: #a78bfa;
-  --gewu-accent-soft: rgba(167, 139, 250, 0.2);
-  --gewu-accent-bg: rgba(167, 139, 250, 0.14);
-  --gewu-accent-hover: #8b5cf6;
-  --gewu-accent-border: rgba(167, 139, 250, 0.4);
-  --gewu-accent-surface: rgba(167, 139, 250, 0.12);
+  --petri-accent: #a78bfa;
+  --petri-accent-soft: rgba(167, 139, 250, 0.2);
+  --petri-accent-bg: rgba(167, 139, 250, 0.14);
+  --petri-accent-hover: #8b5cf6;
+  --petri-accent-border: rgba(167, 139, 250, 0.4);
+  --petri-accent-surface: rgba(167, 139, 250, 0.12);
 }
 
 /* ── 玫红 rose ── */
 [data-accent='rose'] {
-  --gewu-accent: #e11d48;
-  --gewu-accent-soft: rgba(225, 29, 72, 0.16);
-  --gewu-accent-bg: #fff1f2;
-  --gewu-accent-hover: #be123c;
-  --gewu-accent-border: rgba(225, 29, 72, 0.4);
-  --gewu-accent-surface: rgba(255, 241, 242, 0.78);
+  --petri-accent: #e11d48;
+  --petri-accent-soft: rgba(225, 29, 72, 0.16);
+  --petri-accent-bg: #fff1f2;
+  --petri-accent-hover: #be123c;
+  --petri-accent-border: rgba(225, 29, 72, 0.4);
+  --petri-accent-surface: rgba(255, 241, 242, 0.78);
 }
 
 [data-accent='rose'][data-theme='dark'] {
-  --gewu-accent: #fb7185;
-  --gewu-accent-soft: rgba(251, 113, 133, 0.2);
-  --gewu-accent-bg: rgba(251, 113, 133, 0.14);
-  --gewu-accent-hover: #f43f5e;
-  --gewu-accent-border: rgba(251, 113, 133, 0.4);
-  --gewu-accent-surface: rgba(251, 113, 133, 0.12);
+  --petri-accent: #fb7185;
+  --petri-accent-soft: rgba(251, 113, 133, 0.2);
+  --petri-accent-bg: rgba(251, 113, 133, 0.14);
+  --petri-accent-hover: #f43f5e;
+  --petri-accent-border: rgba(251, 113, 133, 0.4);
+  --petri-accent-surface: rgba(251, 113, 133, 0.12);
 }
 
 /* ── 琥珀 amber ── */
 [data-accent='amber'] {
-  --gewu-accent: #d97706;
-  --gewu-accent-soft: rgba(217, 119, 6, 0.16);
-  --gewu-accent-bg: #fffbeb;
-  --gewu-accent-hover: #b45309;
-  --gewu-accent-border: rgba(217, 119, 6, 0.4);
-  --gewu-accent-surface: rgba(255, 251, 235, 0.78);
+  --petri-accent: #d97706;
+  --petri-accent-soft: rgba(217, 119, 6, 0.16);
+  --petri-accent-bg: #fffbeb;
+  --petri-accent-hover: #b45309;
+  --petri-accent-border: rgba(217, 119, 6, 0.4);
+  --petri-accent-surface: rgba(255, 251, 235, 0.78);
 }
 
 [data-accent='amber'][data-theme='dark'] {
-  --gewu-accent: #fbbf24;
-  --gewu-accent-soft: rgba(251, 191, 36, 0.2);
-  --gewu-accent-bg: rgba(251, 191, 36, 0.14);
-  --gewu-accent-hover: #f59e0b;
-  --gewu-accent-border: rgba(251, 191, 36, 0.4);
-  --gewu-accent-surface: rgba(251, 191, 36, 0.12);
+  --petri-accent: #fbbf24;
+  --petri-accent-soft: rgba(251, 191, 36, 0.2);
+  --petri-accent-bg: rgba(251, 191, 36, 0.14);
+  --petri-accent-hover: #f59e0b;
+  --petri-accent-border: rgba(251, 191, 36, 0.4);
+  --petri-accent-surface: rgba(251, 191, 36, 0.12);
 }

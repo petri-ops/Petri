@@ -6,16 +6,16 @@ import test from 'node:test';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { createCredentialStore } = require('../core/biof3-server/helpers/credential-store.js');
+const { createCredentialStore } = require('../core/petri-server/helpers/credential-store.js');
 const {
   _extractCredentialUpdates,
   listAvailableModels,
   testApiKey,
-} = require('../core/biof3-server/helpers/ai-settings.js');
+} = require('../core/petri-server/helpers/ai-settings.js');
 const { registerProvider } = require('../core/shared-backend/llm-providers/index.js');
 
 test('file credential backend separates secrets with owner-only permissions', () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-credentials-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-credentials-'));
   const store = createCredentialStore({ settingsDir: dir, backend: 'file', platform: 'linux' });
   store.set('OpenAI', 'secret-value');
 
@@ -46,12 +46,12 @@ test('keychain backend uses provider account without returning command details',
   assert.equal(store.get('anthropic'), 'keychain-secret');
   assert.equal(calls[0].command, '/usr/bin/security');
   assert.deepEqual(calls[0].args.slice(0, 6), [
-    'add-generic-password', '-U', '-a', 'anthropic', '-s', 'com.biof3.desktop.ai',
+    'add-generic-password', '-U', '-a', 'anthropic', '-s', 'com.petri.desktop.ai',
   ]);
 });
 
 test('credential ids support separate keys for multiple compatible endpoints', () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-credentials-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-credentials-'));
   const store = createCredentialStore({ settingsDir: dir, backend: 'file', platform: 'linux' });
   store.set('lab-a', 'key-a');
   store.set('lab-b', 'key-b');

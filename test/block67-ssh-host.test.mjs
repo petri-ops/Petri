@@ -35,8 +35,8 @@ test('validateRegisterInput: 全字段 fail-closed', () => {
 });
 
 test('generateAlias: ip 归一 + 非 22 端口后缀', () => {
-  assert.strictEqual(generateAlias('47.110.228.168', 22), 'gewu-47-110-228-168');
-  assert.strictEqual(generateAlias('47.110.228.168', 6022), 'gewu-47-110-228-168-6022');
+  assert.strictEqual(generateAlias('47.110.228.168', 22), 'petri-47-110-228-168');
+  assert.strictEqual(generateAlias('47.110.228.168', 6022), 'petri-47-110-228-168-6022');
   assert.ok(/^[A-Za-z0-9._-]+$/.test(generateAlias('example.server.cn', 22)));
 });
 
@@ -46,25 +46,25 @@ test('upsertSshConfig: 新建 / 幂等 / 别名冲突拒绝 / 不覆盖其他条
     const cfg = join(dir, 'config');
     writeFileSync(cfg, 'Host oldbox\n  HostName 10.0.0.1\n  User admin\n');
 
-    const r1 = upsertSshConfig(cfg, 'gewu-1-2-3-4', '1.2.3.4', 22, 'root');
+    const r1 = upsertSshConfig(cfg, 'petri-1-2-3-4', '1.2.3.4', 22, 'root');
     assert.strictEqual(r1.ok, true);
     let text = readFileSync(cfg, 'utf8');
-    assert.ok(text.includes('Host gewu-1-2-3-4') && text.includes('HostName 1.2.3.4'));
+    assert.ok(text.includes('Host petri-1-2-3-4') && text.includes('HostName 1.2.3.4'));
     assert.ok(text.includes('Host oldbox'), '既有条目保留');
 
-    const r2 = upsertSshConfig(cfg, 'gewu-1-2-3-4', '1.2.3.4', 22, 'root');
+    const r2 = upsertSshConfig(cfg, 'petri-1-2-3-4', '1.2.3.4', 22, 'root');
     assert.strictEqual(r2.ok, true);
     assert.strictEqual(r2.alreadyRegistered, true);
 
-    const r3 = upsertSshConfig(cfg, 'gewu-1-2-3-4', '5.6.7.8', 22, 'root');
+    const r3 = upsertSshConfig(cfg, 'petri-1-2-3-4', '5.6.7.8', 22, 'root');
     assert.strictEqual(r3.ok, false);
     assert.match(r3.message, /已存在/);
 
-    const r4 = upsertSshConfig(cfg, 'gewu-5-6-7-8', '5.6.7.8', 6022, 'dev');
+    const r4 = upsertSshConfig(cfg, 'petri-5-6-7-8', '5.6.7.8', 6022, 'dev');
     assert.strictEqual(r4.ok, true);
     text = readFileSync(cfg, 'utf8');
     assert.ok(text.includes('Port 6022') && text.includes('User dev'));
-    assert.ok(text.includes('Host oldbox') && text.includes('Host gewu-1-2-3-4'));
+    assert.ok(text.includes('Host oldbox') && text.includes('Host petri-1-2-3-4'));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

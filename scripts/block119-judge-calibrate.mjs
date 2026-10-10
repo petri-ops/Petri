@@ -17,15 +17,15 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const decisionApi = require('../core/biof3-server/helpers/decision-api.js');
+const decisionApi = require('../core/petri-server/helpers/decision-api.js');
 const { buildJudgeRequest } = require('./lib/harness/judge-core.mjs');
 const { mapWithConcurrency, round4 } = await import('./lib/calibration-common.mjs');
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
 const CORPUS_FILE = path.join(root, 'acceptance', 'block-119', 'corpus-judge-fit.json');
-const SRC_DIR = path.join(root, '.biof3-dev-user-data', 'data', 'llm-transcripts');
-const BACKUP_ENV = path.join(root, '.biof3-dev-user-data', 'jev.env.bak-by-user-request');
+const SRC_DIR = path.join(root, '.petri-dev-user-data', 'data', 'llm-transcripts');
+const BACKUP_ENV = path.join(root, '.petri-dev-user-data', 'jev.env.bak-by-user-request');
 const EVIDENCE_OUT = path.join(root, 'acceptance', 'block-119', 'calibration-judge-fit.json');
 
 const THETA_MIN = 2.0, THETA_MAX = 4.0, THETA_STEP = 0.25;

@@ -34,7 +34,7 @@
   **678 处 / 34 文件**（simple-chat.css 79、project-workspace.module.css 234、
   desktop.css 70、custom.css 72、skills 34 等）。
 - 顺带补齐 theme-token-contract 第 3 批缺口（7 个被引用未定义的
-  `--biof3-fg/-fg-muted/-bg-elev/-bg-button/-bg-button-hover/-mono/-status-success`，
+  `--petri-fg/-fg-muted/-bg-elev/-bg-button/-bg-button-hover/-mono/-status-success`，
   沿用 UI-151/155 先例以 var() 别名 + 对齐 fallback 定义，该测试由 pre-existing
   失败转绿）。
 

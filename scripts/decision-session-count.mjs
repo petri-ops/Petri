@@ -17,24 +17,24 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 
 function anchorDecisionDbPath() {
-  if (process.env.BIOF3_DB_PATH) return;
+  if (process.env.PETRI_DB_PATH) return;
   const candidates = [
-    path.join(process.cwd(), '.biof3-dev-user-data', 'data', 'biof3.db'),
-    path.join(process.cwd(), 'data', 'biof3.db'),
+    path.join(process.cwd(), '.petri-dev-user-data', 'data', 'petri.db'),
+    path.join(process.cwd(), 'data', 'petri.db'),
   ];
   for (const c of candidates) {
-    if (fs.existsSync(c)) { process.env.BIOF3_DB_PATH = c; return; }
+    if (fs.existsSync(c)) { process.env.PETRI_DB_PATH = c; return; }
   }
 }
 
 function markerPath() {
-  return path.join(process.cwd(), '.biof3-dev-user-data', 'jev-session-start.txt');
+  return path.join(process.cwd(), '.petri-dev-user-data', 'jev-session-start.txt');
 }
 
 anchorDecisionDbPath();
-const dbPath = process.env.BIOF3_DB_PATH;
+const dbPath = process.env.PETRI_DB_PATH;
 if (!dbPath || !fs.existsSync(dbPath)) {
-  console.error('decision:session：找不到决策台账 DB（未设 BIOF3_DB_PATH 且无 dev 数据面）。');
+  console.error('decision:session：找不到决策台账 DB（未设 PETRI_DB_PATH 且无 dev 数据面）。');
   process.exit(3);
 }
 const mp = markerPath();

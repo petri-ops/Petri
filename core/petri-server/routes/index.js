@@ -1,0 +1,73 @@
+/**
+ * Route registry — central mount point for all modular API routes.
+ * Order matters: registered before legacy server.js endpoints, so
+ * Express first-match-wins gives priority to modular versions.
+ *
+ * 每个路由模块独立 try/catch，一个失败不影响其他路由注册。
+ */
+
+module.exports = async function registerRoutes(app) {
+  const routes = [
+    ['Health', () => {
+      const db = require('../db').getDatabase();
+      const version = require('../package.json').version;
+      app.get('/api/health', (_req, res) => {
+        let dbOk = false;
+        try {
+          dbOk = Boolean(db.prepare('SELECT 1').get());
+        } catch {}
+        res.json({ status: 'ok', timestamp: new Date().toISOString(), version, db_ok: dbOk });
+      });
+    }],
+    // Web-only 路由已移除（desktop 前端/copilot 不调用）：ai-report、ai-review、
+    // analytics、admin-ops、admin-compute、admin-users、observability。
+    // G0-RS-P4R baseline capture; self-disables unless PETRI_PERF_PROBE=1.
+    ['Perf probe', () => require('./perf-probe')(app)],
+    ['AI conversations', () => require('./ai-conversations')(app)],
+    ['AI memory', () => require('./ai-memory')(app)],
+    ['AI admin', () => require('./ai-admin')(app)],
+    ['AI plans', () => require('./ai-plans')(app)],
+    ['AI misc', () => require('./ai-misc')(app)],
+    ['Events bus', () => require('./events-bus')(app)],
+    ['AI legacy', () => require('./ai-legacy')(app)],
+    ['AI progress', () => require('./ai-progress')(app)],
+    ['Data CRUD', () => { app.use('/api/data', require('../api-data')); }],
+    ['Files', () => require('./files')(app)],
+    ['SSH projects', () => require('./ssh-projects')(app)],
+    ['Knowledge', () => require('./knowledge')(app)],
+    ['Feature flags', () => require('./feature-flags')(app)],
+    // Must precede Harness: harness.js retains the legacy
+    // GET /api/loop/:loopRunId catch-all, which would otherwise swallow
+    // /runs, /session-summary, /iterations, /recovery, etc.
+    ['AI Loop API', () => require('./ai-loop').registerAiLoopRoutes(app)],
+    ['Harness', () => require('./harness')(app)],
+    ['Tools', () => require('./tools')(app)],
+    ['Result Studio', () => require('./result-studio')(app)],
+    ['Feedback', () => require('./feedback')(app)],
+    ['AI chat', () => require('./ai-chat')(app)],
+    ['AI agent', () => require('./ai-agent')(app)],
+    ['AI settings', () => require('./ai-settings-api').registerAiSettingsRoutes(app)],
+    // BLOCK-70：手机远程同步管理面（桌面端本机 REST；移动面本体在 mobile-gateway 独立实例）。
+    ['Mobile sync admin', () => require('./mobile-admin')(app)],
+    // BLOCK-85：格物联邦协作节点管理面（指挥席侧；对端执行面本体在对端格物的 gateway）。
+    ['Federation admin', () => require('./federation-admin')(app)],
+    // BLOCK-86 L1：多端用户偏好（主题/字号/强调色服务端化——全端同步）。
+    ['User prefs', () => require('./user-prefs')(app)],
+    // BLOCK-87 L4：投影页面数据 HTTP 化（Skills 清单 / 已装插件——投影环境替代 IPC）。
+    ['Projection data', () => require('./projection-data')(app)],
+    // BLOCK-156 P2：MCP 客户端管理面（扩展中心 MCP 货架；连接与 agent 同进程）。
+    // 挂载即异步拉起 autoConnect server（fire-and-forget，不阻塞 boot）。
+    ['MCP client', () => {
+      require('./mcp-client').registerMcpClientRoutes(app);
+      void require('../mcp/client-manager').autoConnectConfigured().catch(() => {});
+    }],
+  ];
+
+  for (const [name, fn] of routes) {
+    try {
+      await fn();
+    } catch (e) {
+      console.warn(`[routes] ${name} failed: ${e && e.message}`);
+    }
+  }
+};

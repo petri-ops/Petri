@@ -16,7 +16,7 @@
 **aliyun 中继裁决（修订 1 追加）**：用户确认以既有 aliyun 服务器（BLOCK-57 注册目标，公网）作为远程中继——**真远程段用用户自有服务器，不建项目运营的云服务**。
 
 拆解为三条需求：
-1. **扫码直达**——桌面端展示二维码，手机相机扫码 → 浏览器直接打开 Gewu 工作区页面（无需装 App、不走聊天软件）
+1. **扫码直达**——桌面端展示二维码，手机相机扫码 → 浏览器直接打开 Petri 工作区页面（无需装 App、不走聊天软件）
 2. **远程可见**——手机页面实时看到智能体任务、会话、结果（对齐 ZCode「手机已连接」体感）
 3. **真远程**——不在同一 WiFi 也能用（aliyun 反向隧道）
 
@@ -32,7 +32,7 @@
 4. **能力面**：`SyncWebRemoteControlWorkspaces` + `SyncWebRemoteControlTasks` 同步工作区与任务真相；手机可**控制**当前工作区（切工作区/看任务/回到任务流，`initialTaskId` 任务桥）；单 relay 会话同时只支持一个手机页面（`singlePageNote`）
 5. **关键事实**：桌面不开任何入站端口——"扫码就能在任何网络看到"靠的是 **ZCode 自建云中继**。右侧 Bot Channel（微信 iLink / 飞书 / Telegram）与浏览器直连是并列的两条通道（iLink 取证见修订 0 版 plan，git 历史）
 
-**对 Gewu 的推论**：同样体感 = 「本地直连 HTTP（同 WiFi）」+「用户自有服务器做反向隧道（真远程）」两段组合，不需要自建云服务。
+**对 Petri 的推论**：同样体感 = 「本地直连 HTTP（同 WiFi）」+「用户自有服务器做反向隧道（真远程）」两段组合，不需要自建云服务。
 
 ## 3. 可行性结论
 
@@ -48,7 +48,7 @@
 
 ## 4. 代码事实基线
 
-- **数据面（全部现成，移动页只做投影与轻控制）**：conversations/messages REST（`core/biof3-server/routes/ai-conversations.js:52-140`）；agent 任务 `GET /api/ai/agent/tasks` + `task/:id/meta` + `message/followup/cancel/resume`（`routes/ai-agent/`）；SSE `GET /api/ai/agent/task/:taskId`（`ai-agent/events.js:22`，`?afterSeq=N` 断线续传）；tool_jobs 台账（`db.js:431`）
+- **数据面（全部现成，移动页只做投影与轻控制）**：conversations/messages REST（`core/petri-server/routes/ai-conversations.js:52-140`）；agent 任务 `GET /api/ai/agent/tasks` + `task/:id/meta` + `message/followup/cancel/resume`（`routes/ai-agent/`）；SSE `GET /api/ai/agent/task/:taskId`（`ai-agent/events.js:22`，`?afterSeq=N` 断线续传）；tool_jobs 台账（`db.js:431`）
 - **服务器形态**：Express 绑 `127.0.0.1:3001`（`server.js:308`）、origin 白名单 `shared-backend/local-request-boundary.js`、零 token 鉴权（`auth.js` 仅注入 LOCAL_USER）——移动面需**新增独立监听 + 鉴权中间件**，不改本地面（本地桌面路径零行为变化）
 - **权限批准链**：BLOCK-48 授权门两段式 ackToken + ai-legacy approve REST——手机批准 = 进程内调同一内部函数（对标 BLOCK-49 spawn-agent-tools 进程内直调先例，不经 HTTP 自调用）
 - **任务终态摘要先例**：BLOCK-49 `buildTerminalSummary`——移动页任务卡与推送摘要复用同语义
@@ -122,7 +122,7 @@
 
 - **修订 4（2026-09-13，用户反馈「这些记录没有意义 打开应该直接出来二维码 一次认证不应该有时间限制 除非主动变更」→ 裁决「插队」）**：**加映 4 手机连接体验**——①面板已启用态自动出码 + 4 分钟自动续期（无需手动点击）；②兑换复用有效会话（/m/api/pair 与 /pair 均不再每次新建，设备记录不再堆积）+ 会话 cookie 1 年长效（「一次认证长期有效，主动吊销才失效」）；③设备列表活跃/已吊销分区 + 一键全部吊销 + 新建会话名带短尾缀。安全语义不变（吊销即时/401/审计/限速）。门禁：集成 11/11 + 组件 3/3 + 实机隔离探针 28/28（顺带修两处探针存量漂移：user_id 身份未随 09766808 同步、A5a 断言未随 4bd0f0bd 双形态同步）+ CDP 实机 3/3（acceptance/block-70/ui354-auto-qr.json）。台账 UI-354 修订 3。
 
-- **修订 3（2026-09-13，用户裁决「我想要的是整个软件桌面原封不动的过来」）**：范围升级——D5 的「仅轻量移动页」边界被用户裁决推翻，新增 **P3.5 桌面投影**：网关根路径投射完整桌面 SPA（前端 dist 构建 + index.html 注入 biof3Desktop 垫片：rApiBase=/api 同源 + 万能链式 Proxy 桥，Electron 专属能力诚实降级 no-op）+ /pair?token 服务端兑换会话下发 cookie + **全量路由注册表挂载**（会话门内）。真机抓真修三件：LOCAL_USER 身份错位（local vs local-user）、桌面会话契约项目过滤致手机恒空（/m/api/overview 补齐）、隧道互抖（exit 迟到+树杀逃逸孤儿，集合跟踪+签名清场+守卫）。实机：项目工作区 rootLen 42527 零错误渲染。诚实边界：终端/窗口控制等 Electron 专属能力降级不可用；真机蜂窝实测待用户。
+- **修订 3（2026-09-13，用户裁决「我想要的是整个软件桌面原封不动的过来」）**：范围升级——D5 的「仅轻量移动页」边界被用户裁决推翻，新增 **P3.5 桌面投影**：网关根路径投射完整桌面 SPA（前端 dist 构建 + index.html 注入 petriDesktop 垫片：rApiBase=/api 同源 + 万能链式 Proxy 桥，Electron 专属能力诚实降级 no-op）+ /pair?token 服务端兑换会话下发 cookie + **全量路由注册表挂载**（会话门内）。真机抓真修三件：LOCAL_USER 身份错位（local vs local-user）、桌面会话契约项目过滤致手机恒空（/m/api/overview 补齐）、隧道互抖（exit 迟到+树杀逃逸孤儿，集合跟踪+签名清场+守卫）。实机：项目工作区 rootLen 42527 零错误渲染。诚实边界：终端/窗口控制等 Electron 专属能力降级不可用；真机蜂窝实测待用户。
 
 - **修订 0（2026-09-09）**：初版立项——以微信 iLink bot 通道为主路线（机制取证已入 git 历史 `dd11346e` 版本）。
 - **修订 1（2026-09-09，用户截图澄清 + aliyun 中继裁决）**：主路线重定为**移动浏览器直连**（用户明确"要左侧的，不是微信/飞书 bot"）；新增 A1 LAN 直连（P1/P2）与 A2 aliyun 反向隧道（P3，用户裁决"用 aliyun 当中继"）双段；bot 通道整体降为 P5 候选；补充 ZCode 左侧功能取证（云端 relay + WSS RPC + 云端托管移动页，§2）；设计裁决重写为 D1–D10。

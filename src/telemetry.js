@@ -15,7 +15,7 @@ const { app } = require('electron');
 const path = require('path');
 
 // 占位端点——上线前替换为真实接收服务。HTTPS 保证传输加密。
-const TELEMETRY_ENDPOINT = 'https://biof3.com/api/telemetry';
+const TELEMETRY_ENDPOINT = 'https://petri.com/api/telemetry';
 
 // errorSummary 最大长度，防止意外把长堆栈/路径泄出去。
 const MAX_SUMMARY_LEN = 200;
@@ -37,7 +37,7 @@ function _resolveResource(...parts) {
  */
 function isTelemetryEnabled() {
   try {
-    const { getAiSettings } = require(_resolveResource('biof3-server', 'helpers', 'ai-settings.js'));
+    const { getAiSettings } = require(_resolveResource('petri-server', 'helpers', 'ai-settings.js'));
     const s = getAiSettings();
     return !!(s && s.telemetry_enabled === true);
   } catch {

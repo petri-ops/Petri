@@ -84,6 +84,6 @@ describe('UI-453 加映二 拖出经 startDrag 真文件拖拽', () => {
     const dt = dataTransferStub();
     fireEvent.dragStart(view.getByRole('treeitem'), { dataTransfer: dt });
     expect(startFileDragMock).not.toHaveBeenCalled();
-    expect(dt.setData.mock.calls.some(([mime]) => mime === 'application/x-gewu-tree-item')).toBe(true);
+    expect(dt.setData.mock.calls.some(([mime]) => mime === 'application/x-petri-tree-item')).toBe(true);
   });
 });

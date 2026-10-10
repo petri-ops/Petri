@@ -12,7 +12,7 @@ import { Icon } from '@/components/icons/Icon';
 import { KnowledgeConsoleChat } from './KnowledgeConsoleChat';
 import styles from './KnowledgeConsoleDock.module.css';
 
-const CONSOLE_OPEN_KEY = 'gewu.knowledgeConsoleOpen';
+const CONSOLE_OPEN_KEY = 'petri.knowledgeConsoleOpen';
 
 function readInitialOpen(): boolean {
   try {

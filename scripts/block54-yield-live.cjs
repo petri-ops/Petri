@@ -39,7 +39,7 @@ const fakeDb = {
   },
 };
 
-const { createWorkspaceTools } = require(ROOT + '/core/biof3-server/agent-tools/workspace-tools.js');
+const { createWorkspaceTools } = require(ROOT + '/core/petri-server/agent-tools/workspace-tools.js');
 const tools = createWorkspaceTools({ dbProvider: () => fakeDb });
 const t = {
   exec: tools.executeCommand,

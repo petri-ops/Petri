@@ -8,7 +8,7 @@ import { readFileSync, writeFileSync, mkdirSync, lstatSync, realpathSync } from 
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const MARKER = 'BLOCK-165-PETRI-OSS-RENAME';
+const MARKER = 'BLOCK-165';
 const EXEMPT_FILES = new Set([
   'docs/block-165-petri-oss-rename-plan.md',
   'scripts/block165-rename-codemod.mjs',
@@ -95,7 +95,7 @@ function run({ write, reportPath }) {
     }
   }
 
-  // 路径重命名：目录深先序，再文件
+  // 路径重命名：目录浅先序（祖先先改名，子路径随后重映射），再文件
   const matching = files.filter((f) => RE.test(f) && !EXEMPT_FILES.has(f));
   const dirSet = new Set();
   for (const p of matching) {
@@ -105,28 +105,33 @@ function run({ write, reportPath }) {
       if (RE.test(d)) dirSet.add(d);
     }
   }
-  const dirs = [...dirSet].sort((a, b) => b.length - a.length);
-  const pendingFiles = new Set(matching);
-  for (const d of dirs) {
-    const nd = d.replace(RE, mapRenameCase);
-    if (nd === d) continue;
-    renameDirs.push([d, nd]);
-    if (write) execSync(`git mv "${d}" "${nd}"`);
-    for (const rest of [...pendingFiles]) {
-      if (rest.startsWith(d + '/')) {
-        pendingFiles.delete(rest);
-        const moved = nd + rest.slice(d.length);
-        if (RE.test(moved)) pendingFiles.add(moved);
-      }
+  const applied = [];
+  const remap = (p) => {
+    for (const [a, b] of applied) {
+      if (p === a) return b;
+      if (p.startsWith(a + '/')) p = b + p.slice(a.length);
     }
+    return p;
+  };
+  const dirs = [...dirSet].sort((a, b) => a.length - b.length);
+  for (const d of dirs) {
+    const rd = remap(d);
+    if (!RE.test(rd)) continue;
+    let st;
+    try { st = lstatSync(rd); } catch { continue; }
+    if (!st.isDirectory()) continue;
+    const nd = rd.replace(RE, mapRenameCase);
+    if (nd === rd) continue;
+    renameDirs.push([rd, nd]);
+    if (write) execSync(`git mv "${rd}" "${nd}"`);
+    applied.push([rd, nd]);
   }
-  for (const f of [...pendingFiles]) {
+  for (const f of new Set(matching.map(remap))) {
+    if (!RE.test(f)) continue;
     const nf = f.replace(RE, mapRenameCase);
     if (nf !== f) {
       renameFiles.push([f, nf]);
-      if (write) {
-        execSync(`git mv "${f}" "${nf}"`);
-      }
+      if (write) execSync(`git mv "${f}" "${nf}"`);
     }
   }
 

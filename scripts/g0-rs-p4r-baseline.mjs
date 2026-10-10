@@ -51,7 +51,7 @@ const require = createRequire(import.meta.url);
 function countRevisions(dbPath) {
   try {
     const Database = require(require.resolve('better-sqlite3', {
-      paths: [path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'core', 'biof3-server')],
+      paths: [path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'core', 'petri-server')],
     }));
     const db = new Database(dbPath, { readonly: true });
     try {
@@ -113,7 +113,7 @@ async function timeRequest(baseUrl, url) {
  *
  * The two passes are NOT redundant. `/api/result-studio/interaction` does real
  * work on first touch of an artifact: it lazily creates a ChangeSet, writes into
- * `.biof3/revision/`, makes a Git commit on a new branch, inserts an
+ * `.petri/revision/`, makes a Git commit on a new branch, inserts an
  * ArtifactRevision and adopts it. Reporting only the first call attributes
  * one-time creation cost to steady-state viewing, which is what an earlier
  * version of this baseline did.
@@ -195,7 +195,7 @@ async function calibrateSpawnCost() {
 }
 
 export async function captureBaseline({ keep = false, quiet = false, onLog } = {}) {
-  const root = mkdtempSync(path.join(tmpdir(), 'biof3-p4r-baseline-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-p4r-baseline-'));
   let server = null;
 
   try {
@@ -231,7 +231,7 @@ export async function captureBaseline({ keep = false, quiet = false, onLog } = {
     // Sampled AFTER the waterfall: the first interaction call is what registers
     // the baseline revision, so counting earlier reports 0 and understates the
     // very term workspace-status scales with.
-    const revisionCount = countRevisions(env.BIOF3_DB_PATH);
+    const revisionCount = countRevisions(env.PETRI_DB_PATH);
     const snapshot = await snapshotProbe(server.baseUrl);
 
     return {

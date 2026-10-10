@@ -13,7 +13,7 @@ const root = path.resolve(here, '..');
 const importScript = (rel) => import(pathToFileURL(path.join(root, rel)).href);
 const { evaluateGate } = await importScript('scripts/css-modules-ratchet.mjs');
 
-const baseline = (paths) => ({ schema: 'biof3/block154-css-plain-ratchet.v1', plainCssPaths: paths });
+const baseline = (paths) => ({ schema: 'petri/block154-css-plain-ratchet.v1', plainCssPaths: paths });
 
 test('P2-2 绿样本：白名单内 plain CSS 全在列 → pass', () => {
   const current = ['frontend/src/styles/global.css', 'frontend/src/components/ui/Lightbox.css'];

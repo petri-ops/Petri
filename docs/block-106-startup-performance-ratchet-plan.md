@@ -38,7 +38,7 @@ BLOCK-101 的目标语义是「瞬时加载 · 用户无感」，仪表（`src/m
 
 - `task_events` = **236,087 行 / 13 天 ≈ 18k 行/天**；dev 库文件 47.8 MB。
 - 行体积倒挂：`payload` 合计 11.6 MB，而 `task_id + event_type + created_at` 文本合计 **15.4 MB**（`avg_taskid=36` vs `avg_payload=52`）——36 字符 UUID 在 23.6 万行逐行重复。
-- 保留清扫缺索引：`core/biof3-server/agent-task-store.js:321` 的 `DELETE ... WHERE created_at < datetime('now','-30 day')` 计划为 `SCAN task_events`，该条件扫描实测 **35ms**；调用周期 24h 一次（`:337-340` 递归 `setTimeout`），**当前不痛，但成本随表线性增长**（表到千万行级即单次阻塞事件循环秒级）。副本实测补 `idx_task_events_created_at` 建索引 110ms，之后计划转 `SEARCH ... USING INDEX`。
+- 保留清扫缺索引：`core/petri-server/agent-task-store.js:321` 的 `DELETE ... WHERE created_at < datetime('now','-30 day')` 计划为 `SCAN task_events`，该条件扫描实测 **35ms**；调用周期 24h 一次（`:337-340` 递归 `setTimeout`），**当前不痛，但成本随表线性增长**（表到千万行级即单次阻塞事件循环秒级）。副本实测补 `idx_task_events_created_at` 建索引 110ms，之后计划转 `SEARCH ... USING INDEX`。
 - 契约错标：`agent-task-store.js:315` 注释写「created_at 为 SQLite `datetime('now')` 格式」，实测列值为 JS ISO 串（`2026-09-07T13:53:33.759Z`，含 `T`/`Z`）。与空格分隔的 cutoff 串做字典序比较时，边界当日行永不落入删除窗——注释是错的，且这个错会误导后续改动者。
 
 ### 0.4 一个安全路径文件在 diff 里不可见
@@ -64,12 +64,12 @@ BLOCK-101 的目标语义是「瞬时加载 · 用户无感」，仪表（`src/m
   - 新增中位数上限断言（首轮以 09-20 复采中位数 + 20% 裕量设线，之后**只许收缩不许放宽**，与 BLOCK-105 lint 抑制基线同族棘轮语义）；
   - 连采两轮估计方差，避免把抖动当回退。
 - **P1 首屏负载治理**：`App.tsx` 路由级 `lazy` + 共享 `Suspense` 骨架（不得出现白屏/布局跳动）；`@xterm/xterm`、`highlight.js`/`rehype-highlight` 改按需动态引入（pdfjs 为现成参照）；复测 `npm run build` chunk 报告。
-- **P2 数据层与可评审性**：补 `idx_task_events_created`（**实施时对 plan 原写法的一处纠正**：原写「新增 `src/migrations/0NN_*.sql`」，实查 `task_events` 的 DDL 与索引由 `core/biof3-server/agent-task-store.js:271/:300` 自持、桌面 `src/migrations` 不管这张表，故按模块既有姿势在 schema 数组补 `CREATE INDEX IF NOT EXISTS`，幂等且无需迁移文件）；纠正 `agent-task-store.js:315` 格式错标并把清扫谓词改为 **JS 侧 ISO cutoff 作参数**（原实现拿 SQLite 空格格式串比 ISO 列值，字典序在 `T`(0x54) vs 空格(0x20) 处失配 → cutoff 当日早于该时刻的行漏删 ≤24h；实测该表 236,087 行全为 ISO 形态、无混合行）；`src/ipc/file-dialog.js:171` 真实控制字节改转义写法；`hygiene:check` 增检查项 5「文本源码含真实控制字节」。
+- **P2 数据层与可评审性**：补 `idx_task_events_created`（**实施时对 plan 原写法的一处纠正**：原写「新增 `src/migrations/0NN_*.sql`」，实查 `task_events` 的 DDL 与索引由 `core/petri-server/agent-task-store.js:271/:300` 自持、桌面 `src/migrations` 不管这张表，故按模块既有姿势在 schema 数组补 `CREATE INDEX IF NOT EXISTS`，幂等且无需迁移文件）；纠正 `agent-task-store.js:315` 格式错标并把清扫谓词改为 **JS 侧 ISO cutoff 作参数**（原实现拿 SQLite 空格格式串比 ISO 列值，字典序在 `T`(0x54) vs 空格(0x20) 处失配 → cutoff 当日早于该时刻的行漏删 ≤24h；实测该表 236,087 行全为 ISO 形态、无混合行）；`src/ipc/file-dialog.js:171` 真实控制字节改转义写法；`hygiene:check` 增检查项 5「文本源码含真实控制字节」。
 - **P3 收口对账**：closeout 八门 + 启动 timeline 前后对账（**门禁必须变绿且 `dataReady`/`windowShown` 中位数实测下降**；未达成则如实登记未达成，不得以「方向正确」替代数字）+ canonical 回写（plan/registry/roadmap/AUDIT-LOG/handoff）。
 
 ## 2. 非范围（红线）
 
-- **轮询改推流不属本包**：`ToolActivityDock.tsx:104/:133` 两处 1s 轮询并入 SSE（`core/biof3-server/routes/ai-agent/events.js` 已有通道）属独立候选包——需先有帧时/事件循环基线，本包 P0 只登记不改。
+- **轮询改推流不属本包**：`ToolActivityDock.tsx:104/:133` 两处 1s 轮询并入 SSE（`core/petri-server/routes/ai-agent/events.js` 已有通道）属独立候选包——需先有帧时/事件循环基线，本包 P0 只登记不改。
 - **长列表虚拟化不属本包**：聊天消息流 / 文件树 / 知识文档列表无虚拟化是实测事实，但引入虚拟化库要过 `DEPENDENCY-CHANGE-CHECKLIST`（默认答案「不做」），且需实机帧时验收，另包裁决。
 - **`task_events` 数据模型改造不属本包**：UUID `task_id` → 整型外键可省约 8 MB 冗余，但涉跨表写入契约与历史行迁移，当前无实测痛点，不在本包动。
 - **`RightFileTree.tsx:199`「本地 fs 轮询零成本」断言**：本包只做度量取证与登记，优化另议。

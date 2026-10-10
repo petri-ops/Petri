@@ -21,15 +21,15 @@ aliyun 中转，**不走局域网直连**。每端各自启用 mobile-gateway（
 
 **Windows 端（已就绪，2026-09-18 实测）**：
 - 网关 enabled :3005（bind 0.0.0.0）+ 隧道 enabled（host=aliyun，publicUrl=
-  `https://47.110.228.168`；配置在 `.biof3-dev-user-data/data/mobile/tunnel.json`）。
+  `https://47.110.228.168`；配置在 `.petri-dev-user-data/data/mobile/tunnel.json`）。
 - 公网可达性实测：curl `https://47.110.228.168/api/mobile/status` → 401 session_invalid
   （穿 aliyun 到达本机网关，会话门正常）。
-- dev 栈在跑（数据面 `.biof3-dev-user-data/data`）。
+- dev 栈在跑（数据面 `.petri-dev-user-data/data`）。
 
 **Mac 端**：
 ```bash
 git pull                      # 确保 = origin/main（bffd97c5 或更新）
-BIOF3_MOBILE_ENABLED=1 npm run dev   # 启动 dev 栈 + 网关（联邦 REST 挂在网关会话门内）
+PETRI_MOBILE_ENABLED=1 npm run dev   # 启动 dev 栈 + 网关（联邦 REST 挂在网关会话门内）
 ```
 - 网关启用判据：启动日志出现 `📱 [mobile-gateway] listening on 0.0.0.0:3005`。
 - **Mac 需要自己的 aliyun 隧道**（不能与 Windows 共用 publicUrl——47.110.228.168 的
@@ -66,7 +66,7 @@ tools-executor.js:1654 分派分支）。
 ## 3. P3 真实模型委托跑通
 
 1. Windows 聊天（完全访问档）：「把下面任务委托给协作节点执行：……」——agent 调
-   `delegate_to_gewu_node(peerId, task, timeoutMinutes)`。
+   `delegate_to_petri_node(peerId, task, timeoutMinutes)`。
 2. 断言：Mac 开独立 agent 会话执行（Mac 端任务列表可查）；Windows 会话收到委托单 +
    流式回执 + 终态摘要。
 - 证据：`acceptance/block-85/dual-p3-delegate.json`（Windows 侧工具回执 + Mac 侧

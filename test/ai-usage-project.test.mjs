@@ -12,13 +12,13 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 const tempRoot = mkdtempSync(join(tmpdir(), 'block78-usage-'));
-process.env.BIOF3_DB_PATH = join(tempRoot, 'usage.db');
-process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
+process.env.PETRI_DB_PATH = join(tempRoot, 'usage.db');
+process.env.PETRI_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
 
 const require = createRequire(import.meta.url);
 {
-  const Database = require(resolve(__dirname, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const boot = new Database(process.env.BIOF3_DB_PATH);
+  const Database = require(resolve(__dirname, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const boot = new Database(process.env.PETRI_DB_PATH);
   const migDir = resolve(__dirname, '..', 'src', 'migrations');
   for (const f of require('node:fs').readdirSync(migDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(require('node:fs').readFileSync(require('node:path').resolve(migDir, f), 'utf8'));
@@ -26,10 +26,10 @@ const require = createRequire(import.meta.url);
   boot.close();
 }
 
-const { recordAiUsage, summarizeProjectUsage } = require('../core/biof3-server/helpers/ai-usage.js');
+const { recordAiUsage, summarizeProjectUsage } = require('../core/petri-server/helpers/ai-usage.js');
 // conversations helper 建 copilot_conversations 表（require 即建）
-require('../core/biof3-server/helpers/conversations.js');
-const db = require('../core/biof3-server/db');
+require('../core/petri-server/helpers/conversations.js');
+const db = require('../core/petri-server/db');
 const sqlite = db.getDatabase();
 
 function insertConversation(id, projectId) {

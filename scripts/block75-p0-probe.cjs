@@ -3,7 +3,7 @@
 
 /**
  * BLOCK-75 P0 实测探测（plan §4：原生文件对话框是标准 Win32 控件树，预期覆盖良好，P0 实测确认）：
- *   1) CDP 触发 window.biof3Desktop.diagnostic.export()（与设置页按钮同 IPC 链路，不 await）
+ *   1) CDP 触发 window.petriDesktop.diagnostic.export()（与设置页按钮同 IPC 链路，不 await）
  *   2) sidecar snapshot(frontmost) 轮询原生保存框（title「导出诊断日志」）
  *   3) 断言控件面可读：文件名 Edit + 保存/取消 Button
  *   4) screenshot 对话框 → acceptance/block-75/p0-dialog.png
@@ -15,9 +15,9 @@ const path = require('node:path');
 const fs = require('node:fs');
 
 const REPO = path.join(__dirname, '..');
-const lib = require(path.join(REPO, '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(REPO, '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 const osWin = require(path.join(__dirname, 'lib-block75-os.cjs'));
-const { getComputerUseHost } = require(path.join(REPO, 'core', 'biof3-server', 'helpers', 'computer-use-host.js'));
+const { getComputerUseHost } = require(path.join(REPO, 'core', 'petri-server', 'helpers', 'computer-use-host.js'));
 
 const EVIDENCE = path.join(REPO, 'acceptance', 'block-75');
 
@@ -42,9 +42,9 @@ async function main() {
     //    P0 第一跑 frontmost 恒为主窗即此因。
     await client.send('Page.bringToFront');
     await delay(800);
-    const bridge = await lib.evalJs(client, `JSON.stringify({ has: !!window.biof3Desktop?.diagnostic?.export })`);
+    const bridge = await lib.evalJs(client, `JSON.stringify({ has: !!window.petriDesktop?.diagnostic?.export })`);
     assert('p0-2 diagnostic_bridge_present', bridge === 'true' || /"has":true/.test(bridge), bridge);
-    await lib.evalJs(client, `window.__p0Result = null; window.biof3Desktop.diagnostic.export().then((r) => { window.__p0Result = r; }).catch((e) => { window.__p0Result = { ok: false, error: String(e) }; }); 'fired'`, 5_000);
+    await lib.evalJs(client, `window.__p0Result = null; window.petriDesktop.diagnostic.export().then((r) => { window.__p0Result = r; }).catch((e) => { window.__p0Result = { ok: false, error: String(e) }; }); 'fired'`, 5_000);
 
     // 3) 枚举定位对话框（前台锁免疫）：class #32770 + 标题 另存为|Save As|导出诊断日志
     //    P0 实测：弹窗受 Windows 前台锁影响可能不成为前台窗口，frontmost 快照不可靠；

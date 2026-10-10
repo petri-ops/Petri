@@ -17,7 +17,7 @@ const { execFileSync } = require('node:child_process');
 const http = require('node:http');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
 const PROJECT_ID = process.env.BIOF54_PROJECT || 'p_mtlnsv0f_xpjb';
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-54');
 
@@ -94,7 +94,7 @@ async function main() {
   fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
   const targets = await fetchJson(`http://127.0.0.1:${DEBUG_PORT}/json/list`);
   const page = targets.find((t) => t.type === 'page' && /localhost:3000/.test(t.url || ''));
-  if (!page) throw new Error('biof3_page_not_found');
+  if (!page) throw new Error('petri_page_not_found');
   const client = await new CdpClient(page.webSocketDebuggerUrl).connect();
 
   const results = { startedAt: new Date().toISOString(), page: page.url, projectId: PROJECT_ID, assertions: [] };
@@ -124,7 +124,7 @@ async function main() {
   console.log('[step] assert first tab');
   const tabsAfterOpen = await evalJS(client, `document.querySelectorAll('[data-tab-body]').length`);
   assert('面板展开后自动创建首个 tab（懒启动）', tabsAfterOpen === 1, `tab bodies=${tabsAfterOpen}`);
-  const sessions1 = await evalJS(client, `(async () => (await window.biof3Desktop.terminal.listSessions()))()`);
+  const sessions1 = await evalJS(client, `(async () => (await window.petriDesktop.terminal.listSessions()))()`);
   assert('首个 tab 已拉起独立 pty（listSessions 1 会话）',
     sessions1.ok && (sessions1.sessions || []).length === 1,
     JSON.stringify(sessions1.sessions || sessions1).slice(0, 200));
@@ -145,7 +145,7 @@ async function main() {
     tabBodies.length === 3 && ['tab-1', 'tab-2', 'tab-3'].every((id) => tabBodies.includes(id)),
     JSON.stringify(tabBodies));
 
-  const sessions3 = await evalJS(client, `(async () => (await window.biof3Desktop.terminal.listSessions()))()`);
+  const sessions3 = await evalJS(client, `(async () => (await window.petriDesktop.terminal.listSessions()))()`);
   const list3 = sessions3.sessions || [];
   const pids3 = new Map(list3.map((s) => [s.sessionId, s.pid]));
   assert('3 tab 各自独立 pty（3 会话、pid 互异）',
@@ -223,7 +223,7 @@ async function main() {
   })()`);
   assert('tab-3 × 关闭按钮可点击', closed === true, closed);
   await delay(1200);
-  const sessionsAfterClose = await evalJS(client, `(async () => (await window.biof3Desktop.terminal.listSessions()))()`);
+  const sessionsAfterClose = await evalJS(client, `(async () => (await window.petriDesktop.terminal.listSessions()))()`);
   const remainIds = (sessionsAfterClose.sessions || []).map((s) => s.sessionId);
   assert('关闭 tab-3 后会话回收（listSessions 2、无 tab-3）',
     remainIds.length === 2 && !remainIds.includes('tab-3'),
@@ -237,7 +237,7 @@ async function main() {
   // 6. 退出应用 → before-quit 全量 kill → 0 孤儿
   console.log('[step] quit app + orphan check');
   const remainingPids = (sessionsAfterClose.sessions || []).map((s) => s.pid);
-  await evalJS(client, `(window.biof3Desktop.window.close(), true)`);
+  await evalJS(client, `(window.petriDesktop.window.close(), true)`);
   let orphansGone = false;
   for (let i = 0; i < 20; i += 1) {
     await delay(500);

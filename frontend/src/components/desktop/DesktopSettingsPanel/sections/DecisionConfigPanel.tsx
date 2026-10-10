@@ -127,16 +127,16 @@ export function DecisionConfigPanel(): React.ReactElement {
   }, []);
 
   return (
-    <div className="gewu-usage-resource">
-      <p className="gewu-field__hint">
+    <div className="petri-usage-resource">
+      <p className="petri-field__hint">
         决策原语=「该用规则还是问模型」的判断接点：全部默认关闭或保守值（校准证据预填），
         可在此启用与微调；每次调用都会记录实际生效阈值（决策台账可审计）。
-        环境变量 BIOF3_JEV_*（=0）仍是最高级紧急开关。
+        环境变量 PETRI_JEV_*（=0）仍是最高级紧急开关。
       </p>
-      {error && <p className="gewu-field__hint" role="alert">{error}</p>}
-      {!points && !error ? <p className="gewu-field__hint">读取中…</p> : null}
+      {error && <p className="petri-field__hint" role="alert">{error}</p>}
+      {!points && !error ? <p className="petri-field__hint">读取中…</p> : null}
       {/* P5 — 模型接口（端点/Key/模型名；本地 Laya 等供给改此三项；换模型须重校准） */}
-      <div className="gewu-resource-heading">
+      <div className="petri-resource-heading">
         <div>
           <strong>决策模型接口 · 当前供给：{supplyLabelOf(provider?.baseUrl)}</strong>
           <p>端点与 Key 支持云 Jev 或本地同类供给（如 Laya）；修改模型后必须重校准对应接点阈值。</p>
@@ -144,7 +144,7 @@ export function DecisionConfigPanel(): React.ReactElement {
         <div style={{ display: 'flex', gap: 6 }}>
           <button
             type="button"
-            className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+            className="petri-btn petri-btn--ghost petri-btn--sm"
             title="一键切回云 Jev（保留已配置的 Key）"
             onClick={() => { void applyPreset('jev').catch((reason) => setError(reason instanceof Error ? reason.message : String(reason))); }}
           >
@@ -152,16 +152,16 @@ export function DecisionConfigPanel(): React.ReactElement {
           </button>
           <button
             type="button"
-            className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+            className="petri-btn petri-btn--ghost petri-btn--sm"
             title="一键切换到本机 laya_decide serve（需已启动：laya_decide.py serve --port 8765）"
             onClick={() => { void applyPreset('laya').catch((reason) => setError(reason instanceof Error ? reason.message : String(reason))); }}
           >
             用 Laya（本地）
           </button>
-          <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={() => { void saveProvider().catch((reason) => setError(reason instanceof Error ? reason.message : String(reason))); }}>保存模型接口</button>
+          <button type="button" className="petri-btn petri-btn--ghost petri-btn--sm" onClick={() => { void saveProvider().catch((reason) => setError(reason instanceof Error ? reason.message : String(reason))); }}>保存模型接口</button>
         </div>
       </div>
-      <div className="gewu-metric-grid">
+      <div className="petri-metric-grid">
         <div>
           <small>端点 URL</small>
           <input value={provUrl} onChange={(e) => setProvUrl(e.target.value)} placeholder="https://api.typesafe.ai" style={{ width: '100%' }} />
@@ -175,28 +175,28 @@ export function DecisionConfigPanel(): React.ReactElement {
           <input value={provModel} onChange={(e) => setProvModel(e.target.value)} placeholder="jev-1.13.0" style={{ width: '100%' }} />
         </div>
       </div>
-      {provSaved ? <p className="gewu-field__hint">模型接口已保存（Key 不回显）。更换模型后请重校准对应接点阈值。</p> : null}
-      <p className="gewu-field__hint">
+      {provSaved ? <p className="petri-field__hint">模型接口已保存（Key 不回显）。更换模型后请重校准对应接点阈值。</p> : null}
+      <p className="petri-field__hint">
         「用 Laya（本地）」指向本机 laya_decide serve（127.0.0.1:8765，需先启动：laya_decide.py serve --port 8765）。
         BLOCK-117 校准：本地 Laya 在现有 confidence 阈值下大概率回退——决策照常记账，不采纳不执行；切换随时可逆。
       </p>
       {points?.map((p) => {
         const drifted = p.threshold != null && p.defaultThreshold != null && p.threshold !== p.defaultThreshold;
         return (
-          <div key={p.point} className="gewu-resource-heading" style={{ alignItems: 'flex-start' }}>
+          <div key={p.point} className="petri-resource-heading" style={{ alignItems: 'flex-start' }}>
             <div>
               <strong>{p.label}</strong>
               <p>{POINT_NOTES[p.point] || ''}</p>
               {p.gates ? (
-                <p className="gewu-field__hint">
+                <p className="petri-field__hint">
                   双门限（只读）：{Object.entries(p.gates).map(([k, v]) => `${k}=${v}`).join(' · ')}
                 </p>
               ) : null}
               {p.envOverride ? (
-                <p className="gewu-field__hint">环境变量覆盖中：{p.envOverride === 'off' ? '强制关闭（杀开关）' : '强制启用'}</p>
+                <p className="petri-field__hint">环境变量覆盖中：{p.envOverride === 'off' ? '强制关闭（杀开关）' : '强制启用'}</p>
               ) : null}
               {drifted ? (
-                <p className="gewu-field__hint">已偏离校准默认值 {p.defaultThreshold}——建议重校准后再调整。</p>
+                <p className="petri-field__hint">已偏离校准默认值 {p.defaultThreshold}——建议重校准后再调整。</p>
               ) : null}
             </div>
             <div>
@@ -228,7 +228,7 @@ export function DecisionConfigPanel(): React.ReactElement {
                   {p.defaultThreshold != null && p.threshold !== p.defaultThreshold ? (
                     <button
                       type="button"
-                      className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                      className="petri-btn petri-btn--ghost petri-btn--sm"
                       onClick={() => void patch(p.point, { threshold: p.defaultThreshold! }).catch(() => {})}
                     >
                       还原 {p.defaultThreshold}
@@ -240,7 +240,7 @@ export function DecisionConfigPanel(): React.ReactElement {
           </div>
         );
       })}
-      {savedAt ? <p className="gewu-field__hint">已保存（{savedAt}）。调整立即生效，无需重启。</p> : null}
+      {savedAt ? <p className="petri-field__hint">已保存（{savedAt}）。调整立即生效，无需重启。</p> : null}
     </div>
   );
 }

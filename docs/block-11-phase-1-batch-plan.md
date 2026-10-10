@@ -22,7 +22,7 @@
 
 ## §1 批次目标
 
-交付 **5 个 P0 single-cell 真分析 plugin** + **1 个 single-cell 端到端 skill**，使 `single-cell` category 的 BioF3 覆盖度从 `partial（4 figcode-card）` 提升至 `integrated pipeline ready`。
+交付 **5 个 P0 single-cell 真分析 plugin** + **1 个 single-cell 端到端 skill**，使 `single-cell` category 的 Petri 覆盖度从 `partial（4 figcode-card）` 提升至 `integrated pipeline ready`。
 
 ### 1.1 单工作包串行纪律核验
 
@@ -45,11 +45,11 @@
 
 | # | Plugin ID | Runtime | 关联 bioSkills SKILL.md（来源 `/tmp/bioSkills/single-cell/`） | 复用现有 | 八件套就位清单 |
 |---|----------|---------|---------------------------------|---------|--------------|
-| 1 | `scanpy-advanced` | P（py-runtime） | batch-integration / cell-annotation / doublet-detection 等 17 个 SKILL.md 中 scanpy 相关 | ✅ 复用 biof3-py-runtime 内 `scanpy >=1.9` + `anndata >=0.9` | 见 §3.1 |
-| 2 | `seurat` | R（r-runtime） | 单细胞 R 侧完整 pipeline | ✅ 复用 biof3-r-runtime 内 `Seurat` + 已存 `core/r-server/tool-scripts/seurat-standard.R` + `_seurat-standard-scope.md` | 见 §3.2 |
-| 3 | `celltypist` | P（py-runtime） | cell-annotation 中 **celltypist** 流派（自动 + 手动 annotation） | ✅ 复用 biof3-py-runtime 基础栈；celltypist 本体**未装**需新增（PyPI ~10MB） | 见 §3.3 |
+| 1 | `scanpy-advanced` | P（py-runtime） | batch-integration / cell-annotation / doublet-detection 等 17 个 SKILL.md 中 scanpy 相关 | ✅ 复用 petri-py-runtime 内 `scanpy >=1.9` + `anndata >=0.9` | 见 §3.1 |
+| 2 | `seurat` | R（r-runtime） | 单细胞 R 侧完整 pipeline | ✅ 复用 petri-r-runtime 内 `Seurat` + 已存 `core/r-server/tool-scripts/seurat-standard.R` + `_seurat-standard-scope.md` | 见 §3.2 |
+| 3 | `celltypist` | P（py-runtime） | cell-annotation 中 **celltypist** 流派（自动 + 手动 annotation） | ✅ 复用 petri-py-runtime 基础栈；celltypist 本体**未装**需新增（PyPI ~10MB） | 见 §3.3 |
 | 4 | `cellchat` | P（py-runtime；亦可走 R 版） | cell-communication 中 **CellChat** | ⚠️ 部分复用 py-runtime 基础栈；**liana 已通过 figcode-spatial-lr-liana artifact**就位，但 cellchat 本体未装（PyPI ~5MB） | 见 §3.4 |
-| 5 | `scvi-tools` | P（py-runtime） | batch-integration / cell-annotation 中 **scvi-tools / scVI / scANVI** | ✅ 复用 biof3-py-runtime 基础栈；scvi-tools 本体**未装**需新增（PyPI ~50MB，含 PyTorch 依赖） | 见 §3.5 |
+| 5 | `scvi-tools` | P（py-runtime） | batch-integration / cell-annotation 中 **scvi-tools / scVI / scANVI** | ✅ 复用 petri-py-runtime 基础栈；scvi-tools 本体**未装**需新增（PyPI ~50MB，含 PyTorch 依赖） | 见 §3.5 |
 
 ### 2.2 Skill 清单
 
@@ -80,7 +80,7 @@ resources/built-in-plugins/scanpy-advanced/
 ├── scanpy-advanced-report-template.html    # NEW（参考 deseq2-report-template.html）
 ├── environment.json                         # NEW（依赖 scanpy/anndata/matplotlib/seaborn/pandas/numpy）
 ├── plugin.json                              # NEW（id/language=python/version/built-against/platform）
-├── scripts/scanpy-advanced.py               # NEW（py 版本三件套：sys.argv[1]=jobDir + _biof3-theme + params.json）
+├── scripts/scanpy-advanced.py               # NEW（py 版本三件套：sys.argv[1]=jobDir + _petri-theme + params.json）
 └── tool-definition.json                     # NEW（inputs: anndata_file/cell_type_col/batch_key/...; outputs: preprocessed.h5ad, marker_genes.csv, umap.png, report.html; failureModes: missing_required_file_inputs; resultStudio.semanticType=AnnDataEmbedding）
 ```
 
@@ -99,7 +99,7 @@ resources/built-in-plugins/scanpy-advanced/
   },
   "platforms": ["macos-arm64", "windows-x64"],
   "plugins": {
-    "requires": ["biof3-py-runtime"]
+    "requires": ["petri-py-runtime"]
   }
 }
 ```
@@ -148,14 +148,14 @@ resources/built-in-plugins/scanpy-advanced/
 
 schema 校验 32 → 33 plugin entry 通过；既有 32 plugin 0 diff。
 
-**真实可执行验证**（biof3-py-runtime scanpy 1.11.5 + anndata 0.12.18，dev Electron 边界内）：
+**真实可执行验证**（petri-py-runtime scanpy 1.11.5 + anndata 0.12.18，dev Electron 边界内）：
 
 - QC + normalize + log1p + HVG + scale + PCA + neighbors + UMAP + leiden(igraph res=0.5) + rank_genes_groups(wilcoxon)
 - 3 clusters × 20 markers = **60 marker rows** 全 gene names 为 `gene_NNN`，pvalue/padj 通过 wilcoxon 检验
 - 8 个 output 全部写盘：`marker_genes.csv` (60 行) / `qc_summary.csv` (n=270/100/270/100/3/60) / `preprocessed.h5ad` (含 PCA+UMAP+leiden) / `umap.png` / `umap_clustered.png` / `hvg_plot.png` / `report.html` / `manifest.json`
 - exit code: **0**（valid fixture 路径）
 
-**三段 failure mode**（在 biof3-py-runtime 下实测 exit code）：
+**三段 failure mode**（在 petri-py-runtime 下实测 exit code）：
 
 | 路径 | 触发条件 | exit code | 映射 |
 | --- | --- | --- | --- |
@@ -195,7 +195,7 @@ resources/built-in-plugins/seurat/
 ├── seurat-report-template.html              # NEW
 ├── environment.json                         # NEW（Seurat + ggplot2 + dplyr + jsonlite + base64enc + digest）
 ├── plugin.json                              # NEW
-├── scripts/seurat.R                         # NEW（基于 _seurat-standard-scope.md 重写为 plugin 八件套脚本；保持 BioF3 调度器 commandArgs+jobDir 契约）
+├── scripts/seurat.R                         # NEW（基于 _seurat-standard-scope.md 重写为 plugin 八件套脚本；保持 Petri 调度器 commandArgs+jobDir 契约）
 └── tool-definition.json                     # NEW
 ```
 
@@ -203,7 +203,7 @@ resources/built-in-plugins/seurat/
 - 直接参考 `core/r-server/tool-scripts/seurat-standard.R` 的步骤 0 ground truth（来自 `_seurat-standard-scope.md`）
 - `seurat-standard.R` 是现有 r-server 工具脚本，**不删除**，作为内部 helper/参考；新 `seurat.R` plugin 脚本是它对外暴露为 plugin 的标准八件套形式
 
-manifest entry 与 §3.1 同形（language=r，依赖 biof3-r-runtime）。
+manifest entry 与 §3.1 同形（language=r，依赖 petri-r-runtime）。
 
 ### 3.3 `celltypist`（P · 自动 + 手动 cell annotation）
 
@@ -255,9 +255,9 @@ resources/built-in-plugins/scvi-tools/
 ```
 
 **注意点**：
-- scvi-tools 依赖 PyTorch；biof3-py-runtime 当前声明只到 10 个核心包，不含 PyTorch。PHASE 1 启动时决策路径：
-  - 选项 A：在 `biof3-py-runtime` 增量加 PyTorch + scvi-tools（runtime 体积膨胀 ~200MB）
-  - 选项 B：scvi-tools 拆独立 `biof3-scvi-runtime` 子集
+- scvi-tools 依赖 PyTorch；petri-py-runtime 当前声明只到 10 个核心包，不含 PyTorch。PHASE 1 启动时决策路径：
+  - 选项 A：在 `petri-py-runtime` 增量加 PyTorch + scvi-tools（runtime 体积膨胀 ~200MB）
+  - 选项 B：scvi-tools 拆独立 `petri-scvi-runtime` 子集
   - 选项 C：先做占位 stub plugin，待 v2 单独建 runtime 子集
 - 决策点写在此处，PHASE 1 真实施时由主 agent 决定
 
@@ -338,7 +338,7 @@ resources/skills/sc-analysis-standard/
     ]
   },
   "metadata": {
-    "author": "BioF3 Team",
+    "author": "Petri Team",
     "license": "MIT",
     "source": "built-in",
     "compatibility": {
@@ -375,10 +375,10 @@ resources/skills/sc-analysis-standard/
        └──────┬───────┘            └───────────────┘               │
               │                                                    │
               ▼                                                    │
-   biof3-py-runtime + biof3-r-runtime                              │
+   petri-py-runtime + petri-r-runtime                              │
    （scanpy/Seurat 已就位）                                          │
                                                                   ▼
-                                                       biof3-py-runtime + PyTorch 增量（决策点）
+                                                       petri-py-runtime + PyTorch 增量（决策点）
 ```
 
 ### 4.2 推荐实施子批次（7 子批，逐批 commit + 4 治理门）
@@ -411,7 +411,7 @@ resources/skills/sc-analysis-standard/
 - `environment.json` R/Python 包字符串与 `plugin.json.packages` **严格一致**（同 deseq2 模式）
 - 至少 3 fixture：`valid` + `missing-inputs (blocked)` + `runtime-not-ready (skipOnSupportedPlatform:true)`
 - enrichment / annotation 类 plugin 另加 `empty-result`（celltypist / cellchat / scvi-tools 均适用）
-- R/Python 脚本满足三件套：`commandArgs[1]` = jobDir（Python 用 `sys.argv[1]`）；`_biof3-theme.R` source；`fromJSON(file.path(jobDir,"params.json"))`（Python 用 `json.load(open(...))`）
+- R/Python 脚本满足三件套：`commandArgs[1]` = jobDir（Python 用 `sys.argv[1]`）；`_petri-theme.R` source；`fromJSON(file.path(jobDir,"params.json"))`（Python 用 `json.load(open(...))`）
 - 末尾 PNG 重写：`png::writePNG(png::readPNG(f), f)`（R）；Pillow 等价（Python）
 
 ### 5.2 单 skill 验收
@@ -438,13 +438,13 @@ resources/skills/sc-analysis-standard/
 ### 6.1 SUB-1.5 runtime 扩展决策（关键决策点）
 
 PHASE 1 SUB-1.5 启动前，**主 agent 必须在 SUB-1.5 commit message 内显式声明**：
-- scvi-tools 走方案 A（在 `biof3-py-runtime` 增量加 PyTorch）
-- 还是方案 B（新建 `biof3-scvi-tools-runtime` 子集）
+- scvi-tools 走方案 A（在 `petri-py-runtime` 增量加 PyTorch）
+- 还是方案 B（新建 `petri-scvi-tools-runtime` 子集）
 - 还是方案 C（占位 stub plugin 留 v2）
 
 **当前本批次计划倾向**：方案 B（新建子集），理由：
-- 避免 biof3-py-runtime 体积膨胀（当前 147MB → 含 PyTorch 后 ~600MB）
-- 维持 biof3-py-runtime "通用 numpy/pandas/scipy/sklearn/scanpy" 基础栈定位
+- 避免 petri-py-runtime 体积膨胀（当前 147MB → 含 PyTorch 后 ~600MB）
+- 维持 petri-py-runtime "通用 numpy/pandas/scipy/sklearn/scanpy" 基础栈定位
 - scvi-tools 是 niche deep learning 工具，独立子集更可持续维护
 
 ### 6.2 pertpy / cassiopeia 显式 deferred-to-v2
@@ -482,7 +482,7 @@ PHASE 1 实施参照：
 - 主 agent 读毕：`v0.2 plan` + 本批次计划 + PHASE 0 三份报告
 - PHASE 0 三份报告收录至 active 工作包证据链（按 AUDIT-LOG 收口登记规则）
 - SUB-1.5 runtime 决策提案（A / B / C）已给出
-- 若选 B：`biof3-scvi-tools-runtime` 子集的 artifact 设计文档 v0.1 已写到 `agent-tools/` 候选路径
+- 若选 B：`petri-scvi-tools-runtime` 子集的 artifact 设计文档 v0.1 已写到 `agent-tools/` 候选路径
 - DOC-REGISTRY 同步：本批次计划登记为 BLOCK-11 sub-entry
 
 ---
@@ -494,7 +494,7 @@ PHASE 1 实施参照：
 - `skill-registry.js discover()` 输出包含全部新条目
 - 4 治理门 GREEN（docs:check / ui:audit:check / tsc / docs:reconcile）
 - `core/shared-backend/*` + `src/preload.js` + `electron.d.ts` + `desktopBridge.ts` 0 diff
-- biof3-r-runtime / biof3-py-runtime 基线 manifest 0 diff（除非 SUB-1.5 选中 A 或 B 触发增量）
+- petri-r-runtime / petri-py-runtime 基线 manifest 0 diff（除非 SUB-1.5 选中 A 或 B 触发增量）
 - G0 阶段纪律守住（不外推 packaged / Provider / GA / MCP expose）
 - closeout 报告 + DOC-REGISTRY `BLOCK-11-BIOSKILLS-INTEGRATION` 状态更新
 

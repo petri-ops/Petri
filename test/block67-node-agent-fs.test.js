@@ -1,7 +1,7 @@
 /**
  * BLOCK-67 P1 — node-agent fs verbs 零网络测试。
  *
- * 直接在本地 bash 执行 BIOF3_AGENT_SH 脚本体（不走 ssh），验证 fs_* verbs
+ * 直接在本地 bash 执行 PETRI_AGENT_SH 脚本体（不走 ssh），验证 fs_* verbs
  * 的行为契约：list/stat/read/write/mkdir/mv/rm + not_found 语义 + base64 传输。
  * 前置：本机有 bash（Windows 指挥席 = Git Bash）与 base64/tail/head。list 用例另需
  * GNU find -printf（目标面=Linux 节点；macOS BSD find 无该 primary → 平台门 skip 可见）。
@@ -14,7 +14,7 @@ const path = require('node:path');
 const { execFile } = require('node:child_process');
 const { promisify } = require('node:util');
 
-const { BIOF3_AGENT_SH, remoteAgentCommand } = require('../core/biof3-server/helpers/remote-execution/node-agent');
+const { PETRI_AGENT_SH, remoteAgentCommand } = require('../core/petri-server/helpers/remote-execution/node-agent');
 
 const execFileP = promisify(execFile);
 
@@ -22,7 +22,7 @@ const execFileP = promisify(execFile);
 // 脚本内的 fs verbs 全部以显式绝对路径为参，不触碰 JOBS_DIR。
 async function runAgent(args, { env } = {}) {
   const tmpScript = path.join(os.tmpdir(), `block67-agent-${process.pid}-${Date.now()}.sh`);
-  fs.writeFileSync(tmpScript, BIOF3_AGENT_SH, 'utf-8');
+  fs.writeFileSync(tmpScript, PETRI_AGENT_SH, 'utf-8');
   try {
     const { stdout } = await execFileP('bash', [tmpScript, ...args], { env: { ...process.env, ...(env || {}) } });
     return stdout;
@@ -65,7 +65,7 @@ test('block67 fs verbs: list 含目录排序语义条目与隐藏文件过滤（
 
   const out = await runAgent(['fs_list', b64(dir.replace(/\\/g, '/'))]);
   // BLOCK-96 F2 — stdout = 单行 base64(NUL 记录流)；解析契约归 gateway parseListEntries
-  const { parseListEntries } = require('../core/biof3-server/helpers/workspace-gateway');
+  const { parseListEntries } = require('../core/petri-server/helpers/workspace-gateway');
   const entries = parseListEntries(out);
   const names = entries.map((e) => e.name);
   assert.ok(names.includes('a.txt') && names.includes('bdir') && names.includes('space name.txt'));
@@ -184,7 +184,7 @@ test('block67 fs verbs: not_found 诚实语义（stat/list/read/rm）', async (t
 test('block67 remoteAgentCommand: fs verb 参数经 base64 落在白名单（无注入面）', () => {
   const evilPath = '/tmp/evil; rm -rf / #';
   const cmd = remoteAgentCommand(['fs_stat', b64(evilPath)]);
-  assert.ok(cmd.startsWith('bash "$HOME/.biof3-agent/bin/biof3-agent.sh"'));
+  assert.ok(cmd.startsWith('bash "$HOME/.petri-agent/bin/petri-agent.sh"'));
   assert.ok(!cmd.includes('rm -rf'));
   // 白名单拒绝含空格/引号的裸参数（base64 编码后才可传输）。
   assert.throws(() => remoteAgentCommand(['fs_stat', evilPath]), /remote_agent_arg_unsafe/);

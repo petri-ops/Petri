@@ -4,7 +4,7 @@ import type { NavigateFunction } from 'react-router-dom';
 import type { Project } from '@/lib/project-types';
 import type { ActiveWorkspaceFile } from './types';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
-import { gewuEvents, subscribeGewuEvent, dispatchGewuEvent } from '@/lib/events';
+import { petriEvents, subscribePetriEvent, dispatchPetriEvent } from '@/lib/events';
 import { usePendingScroll } from '@/lib/pendingScrollContext';
 import type { DiffRevision } from '@/components/editor/CodeMirror/types';
 import { workspaceFileUrlFor } from '@/lib/previewFileUtils';
@@ -131,7 +131,7 @@ export function useWorkspaceOpenEffects(options: UseWorkspaceOpenEffectsOptions)
         void handleOpenResult(d.toolJobId, d.projectId || null);
       }
     };
-    const unsub = subscribeGewuEvent(gewuEvents.projectOpenResult, handler);
+    const unsub = subscribePetriEvent(petriEvents.projectOpenResult, handler);
     return unsub;
   }, [handleOpenResult]);
   useEffect(() => {
@@ -149,7 +149,7 @@ export function useWorkspaceOpenEffects(options: UseWorkspaceOpenEffectsOptions)
       }
       void handleOpenResult(detail.jobId, targetProjectId || null, { preserveWorkspaceMode: true });
     };
-    const unsub = subscribeGewuEvent(gewuEvents.projectOpenArtifact, handler);
+    const unsub = subscribePetriEvent(petriEvents.projectOpenArtifact, handler);
     return unsub;
   }, [handleOpenResult, navigate, projectId]);
   // UI-385 — 指挥中心独立窗下钻 relay（agent/result 独立窗退役）：主窗 preload
@@ -159,8 +159,8 @@ export function useWorkspaceOpenEffects(options: UseWorkspaceOpenEffectsOptions)
     const wm = getBridge('windowManager');
     if (!wm?.onRelayToMain) return;
     return wm.onRelayToMain((payload) => {
-      if (payload?.type !== gewuEvents.projectOpenArtifact) return;
-      dispatchGewuEvent(gewuEvents.projectOpenArtifact, payload.detail as { jobId: string; artifactName: string; projectId?: string | null });
+      if (payload?.type !== petriEvents.projectOpenArtifact) return;
+      dispatchPetriEvent(petriEvents.projectOpenArtifact, payload.detail as { jobId: string; artifactName: string; projectId?: string | null });
     });
   }, []);
   useEffect(() => {
@@ -215,7 +215,7 @@ export function useWorkspaceOpenEffects(options: UseWorkspaceOpenEffectsOptions)
         void getBridge('files')?.openWorkspaceFile(workspacePath, detail.relativePath);
       }
     };
-    const unsub = subscribeGewuEvent(gewuEvents.projectOpenWorkspaceFile, handler);
+    const unsub = subscribePetriEvent(petriEvents.projectOpenWorkspaceFile, handler);
     return unsub;
   }, [handleOpenWorkspaceFile, navigate, openRightPanel, projectId, workspacePath, setPendingRequest]);
 }

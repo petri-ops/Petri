@@ -16,7 +16,7 @@ function sha256(value) {
 }
 
 function fixture() {
-  const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-hrt6-'));
+  const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-hrt6-'));
   const jobRoot = path.join(projectRoot, 'results', 'jobs', 'job_1');
   const outputDir = path.join(jobRoot, 'output');
   fs.mkdirSync(outputDir, { recursive: true });

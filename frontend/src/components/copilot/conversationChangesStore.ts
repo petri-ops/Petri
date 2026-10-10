@@ -4,7 +4,7 @@
 // 记录「哪个会话改了哪些文件」：
 //   - 运行中：conversationRunStore.onToolResult 实时记录成功的
 //     workspace_write / workspace_replace（per-conversation 维度）
-//   - 任务收尾：订阅 biof3:agent-task-done，用后端权威 filesChanged
+//   - 任务收尾：订阅 petri:agent-task-done，用后端权威 filesChanged
 //     清单（task_events 回放聚合产物）按 conversationId 对账合并
 //
 // 消费方：AgentChangesCard（默认只显示当前会话的改动）。
@@ -12,7 +12,7 @@
 // ============================================================
 
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import { gewuEvents, subscribeGewuEvent } from '@/lib/events';
+import { petriEvents, subscribePetriEvent } from '@/lib/events';
 import { getApiPrefix } from '@/lib/env';
 import { BridgeUnavailableError, getBridge } from '@/lib/desktopBridge';
 
@@ -55,7 +55,7 @@ function ensureSubscribed(): void {
   subscribed = true;
   // 权威对账：任务收尾时用后端清单覆盖该会话的归属（保留 live 记录中
   // 权威清单之外的路径，兼容 workspace_exec 等盲区与多任务并发）。
-  subscribeGewuEvent(gewuEvents.agentTaskDone, (detail) => {
+  subscribePetriEvent(petriEvents.agentTaskDone, (detail) => {
     if (!detail?.conversationId || !Array.isArray(detail.filesChanged)) return;
     const authoritative = detail.filesChanged.filter(
       (item) => item && typeof item.path === 'string'

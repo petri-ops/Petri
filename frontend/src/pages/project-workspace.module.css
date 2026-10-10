@@ -13,20 +13,20 @@
   min-height: 0;
   overflow: hidden;
   position: relative;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
 }
 
 /* compact（≤960px）：列变浮层无「列宽」语义 → fixed 整条回归，root 让位 38px */
 .workspaceRootCompact {
-  padding-top: var(--gewu-titlebar-height);
+  padding-top: var(--petri-titlebar-height);
 }
 
 /* loading/error 早退页：无列结构 → fixed 整条 + 让位容器（交通灯可达） */
 .earlyReturnWrap {
   height: 100vh;
   box-sizing: border-box;
-  padding-top: var(--gewu-titlebar-height);
+  padding-top: var(--petri-titlebar-height);
 }
 
 /* BLOCK-62 P1b regular：运行时缺失横幅悬浮在 header 带之下（列体占满视口，
@@ -34,7 +34,7 @@
    compact 分支不加此类 → 维持占流（root 已 padding-top 让位 fixed 条，与今天一致）。 */
 .runtimeMissingBannerOverlay {
   position: absolute;
-  top: var(--gewu-titlebar-height);
+  top: var(--petri-titlebar-height);
   left: 0;
   right: 0;
   z-index: 60;
@@ -47,8 +47,8 @@
   justify-content: space-between;
   padding: 0 10px 0 8px;
   height: 48px;
-  background: var(--gewu-bg-surface);
-  border-bottom: 1px solid var(--gewu-border);
+  background: var(--petri-bg-surface);
+  border-bottom: 1px solid var(--petri-border);
   flex-shrink: 0;
   -webkit-app-region: drag;
 }
@@ -73,20 +73,20 @@
   border: 1px solid transparent;
   border-radius: 8px;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   cursor: pointer;
   transition: background 0.15s, color 0.15s, box-shadow 0.15s;
   flex-shrink: 0;
 }
 
 .headerRailBtn:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 @keyframes breathe {
   0%, 100% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--gewu-accent) 15%, transparent);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--petri-accent) 15%, transparent);
     opacity: 0.7;
   }
   50% {
@@ -97,9 +97,9 @@
 
 .headerRailBtn.breathing {
   animation: breathe 2.4s ease-in-out infinite;
-  color: var(--gewu-accent);
-  border-color: var(--gewu-accent-border);
-  background: var(--gewu-accent-bg);
+  color: var(--petri-accent);
+  border-color: var(--petri-accent-border);
+  background: var(--petri-accent-bg);
 }
 
 .headerLeft {
@@ -118,10 +118,10 @@
 }
 
 .projectTitle {
-  font-size: var(--gewu-font-size-md);
+  font-size: var(--petri-font-size-md);
   font-weight: 600;
   margin: 0;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   max-width: 260px;
   white-space: nowrap;
   overflow: hidden;
@@ -129,11 +129,11 @@
 }
 
 .modalityBadge {
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   padding: 2px 8px;
   border-radius: 4px;
-  background: var(--gewu-accent-bg);
-  color: var(--gewu-accent);
+  background: var(--petri-accent-bg);
+  color: var(--petri-accent);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -146,17 +146,17 @@
   height: 32px;
   border: none;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   cursor: pointer;
   border-radius: 6px;
   transition: background 0.15s, color 0.15s;
   /* UI-215 补充：纯图标按钮收敛 UA 默认字号到 token */
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
 }
 
 .iconBtn:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .workspacePathBar {
@@ -168,17 +168,17 @@
   flex: 1 1 280px;
   margin: 0 16px;
   padding: 4px 8px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  background: var(--gewu-bg);
-  color: var(--gewu-text-secondary);
+  background: var(--petri-bg);
+  color: var(--petri-text-secondary);
   overflow: hidden;
 }
 
 .workspacePathLabel {
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   font-weight: 600;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   text-transform: uppercase;
   flex-shrink: 0;
 }
@@ -189,9 +189,9 @@
   border: none;
   padding: 0;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   font: inherit;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   text-align: left;
   white-space: nowrap;
   overflow: hidden;
@@ -201,32 +201,32 @@
 
 .workspacePathText:disabled {
   cursor: default;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .workspacePathText:not(:disabled):hover {
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
 }
 
 .workspacePathAction {
   flex-shrink: 0;
   border: none;
-  border-left: 1px solid var(--gewu-border);
+  border-left: 1px solid var(--petri-border);
   padding: 0 0 0 8px;
   background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-caption);
   cursor: pointer;
 }
 
 .workspacePathAction:hover {
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
 }
 
 .workspacePathNotice {
   flex-shrink: 0;
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-accent);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-accent);
 }
 
 .workspaceSummaryBar {
@@ -235,8 +235,8 @@
   justify-content: space-between;
   gap: 14px;
   padding: 10px 12px;
-  border-bottom: 1px solid var(--gewu-border);
-  background: var(--gewu-bg-surface);
+  border-bottom: 1px solid var(--petri-border);
+  background: var(--petri-bg-surface);
   flex-shrink: 0;
   min-width: 0;
 }
@@ -248,11 +248,11 @@
 }
 
 .workspaceSummaryEyebrow {
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .workspaceSummaryTitleRow {
@@ -265,9 +265,9 @@
 
 .workspaceSummaryTitle {
   min-width: 0;
-  font-size: var(--gewu-font-size-body);
+  font-size: var(--petri-font-size-body);
   font-weight: 700;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -279,9 +279,9 @@
   height: 20px;
   padding: 0 8px;
   border-radius: 999px;
-  background: var(--gewu-accent-bg);
-  color: var(--gewu-accent);
-  font-size: var(--gewu-font-size-sm);
+  background: var(--petri-accent-bg);
+  color: var(--petri-accent);
+  font-size: var(--petri-font-size-sm);
   font-weight: 700;
   white-space: nowrap;
 }
@@ -292,8 +292,8 @@
   gap: 10px;
   min-width: 0;
   flex-wrap: wrap;
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text-muted);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-text-muted);
 }
 
 .workspaceSummaryMeta span {
@@ -318,11 +318,11 @@
   gap: 6px;
   min-height: 28px;
   padding: 0 10px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 999px;
-  background: var(--gewu-surface-translucent);
-  color: var(--gewu-text-muted);
-  font-size: var(--gewu-font-size-caption);
+  background: var(--petri-surface-translucent);
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-caption);
   white-space: nowrap;
 }
 
@@ -331,24 +331,24 @@
 }
 
 .workspaceSummaryChipGood {
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .workspaceSummaryChipWarn {
-  color: var(--gewu-status-warning-fg);
+  color: var(--petri-status-warning-fg);
 }
 
 .workspaceSummaryChipMuted {
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .workspaceSummaryChipBtn:hover {
-  border-color: var(--gewu-accent-border);
-  color: var(--gewu-accent);
+  border-color: var(--petri-accent-border);
+  color: var(--petri-accent);
 }
 
 .workspaceSummaryChipBtn strong {
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .workspaceSummaryDot,
@@ -358,30 +358,30 @@
   height: 8px;
   flex-shrink: 0;
   border-radius: 999px;
-  background: var(--gewu-text-tertiary);
+  background: var(--petri-text-tertiary);
 }
 
 .workspaceSummaryDot[data-ready='true'] {
-  background: var(--gewu-status-online);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gewu-status-online) 15%, transparent);
+  background: var(--petri-status-online);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--petri-status-online) 15%, transparent);
 }
 
 .workspaceSummaryDot[data-ready='false'] {
-  background: var(--gewu-status-loading);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gewu-status-loading) 12%, transparent);
+  background: var(--petri-status-loading);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--petri-status-loading) 12%, transparent);
 }
 
 .workspaceSummaryMiniDot[data-status='online'],
 .workspaceSummaryMiniDot[data-status='runtime'] {
-  background: var(--gewu-status-online);
+  background: var(--petri-status-online);
 }
 
 .workspaceSummaryMiniDot[data-status='loading'] {
-  background: var(--gewu-status-loading);
+  background: var(--petri-status-loading);
 }
 
 .workspaceSummaryMiniDot[data-status='offline'] {
-  background: var(--gewu-status-warning);
+  background: var(--petri-status-warning);
 }
 
 /* ---- 4.5 Project switcher dropdown ---- */
@@ -399,15 +399,15 @@
   height: 24px;
   border: none;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   cursor: pointer;
   border-radius: 4px;
   transition: background 0.15s, color 0.15s;
 }
 
 .switcherBtn:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .switcherOverlay {
@@ -421,10 +421,10 @@
   top: calc(100% + 4px);
   left: 0;
   width: 280px;
-  background: var(--gewu-bg-elevated);
-  border: 1px solid var(--gewu-border);
+  background: var(--petri-bg-elevated);
+  border: 1px solid var(--petri-border);
   border-radius: 10px;
-  box-shadow: var(--gewu-shadow-menu);
+  box-shadow: var(--petri-shadow-menu);
   z-index: 999;
   overflow: hidden;
   display: flex;
@@ -435,16 +435,16 @@
   width: 100%;
   padding: 10px 14px;
   border: none;
-  border-bottom: 1px solid var(--gewu-border);
-  font-size: var(--gewu-font-size-body-sm);
+  border-bottom: 1px solid var(--petri-border);
+  font-size: var(--petri-font-size-body-sm);
   outline: none;
-  background: var(--gewu-bg);
-  color: var(--gewu-text);
+  background: var(--petri-bg);
+  color: var(--petri-text);
   box-sizing: border-box;
 }
 
 .switcherSearch:focus {
-  border-bottom-color: var(--gewu-accent);
+  border-bottom-color: var(--petri-accent);
 }
 
 .switcherList {
@@ -455,8 +455,8 @@
 
 .switcherEmpty {
   padding: 16px 14px;
-  font-size: var(--gewu-font-size-body-sm);
-  color: var(--gewu-text-muted);
+  font-size: var(--petri-font-size-body-sm);
+  color: var(--petri-text-muted);
   text-align: center;
 }
 
@@ -475,33 +475,33 @@
 }
 
 .switcherItem:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .switcherItemActive {
-  background: var(--gewu-accent-bg);
+  background: var(--petri-accent-bg);
   font-weight: 600;
 }
 
 .switcherItemActive:hover {
-  background: var(--gewu-accent-bg);
+  background: var(--petri-accent-bg);
 }
 
 .switcherItemName {
   flex: 1;
-  font-size: var(--gewu-font-size-body-sm);
-  color: var(--gewu-text);
+  font-size: var(--petri-font-size-body-sm);
+  color: var(--petri-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .switcherItemBadge {
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   padding: 1px 6px;
   border-radius: 3px;
-  background: var(--gewu-accent-bg);
-  color: var(--gewu-accent);
+  background: var(--petri-accent-bg);
+  color: var(--petri-accent);
   text-transform: uppercase;
   letter-spacing: 0.3px;
   flex-shrink: 0;
@@ -510,15 +510,15 @@
 .switcherNewProject {
   display: block;
   padding: 10px 14px;
-  font-size: var(--gewu-font-size-body-sm);
-  color: var(--gewu-accent);
+  font-size: var(--petri-font-size-body-sm);
+  color: var(--petri-accent);
   text-decoration: none;
-  border-top: 1px solid var(--gewu-border);
+  border-top: 1px solid var(--petri-border);
   transition: background 0.12s;
 }
 
 .switcherNewProject:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 /* Body — three columns */
@@ -529,7 +529,7 @@
   min-height: 0;
   overflow: hidden;
   position: relative;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
 }
 
 /* 运行时缺失引导横幅 —— 应用打开检测到 R/Python 缺失时主动引导安装 */
@@ -542,12 +542,12 @@
   padding: 10px 16px;
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--gewu-status-loading) 18%, transparent),
-    color-mix(in srgb, var(--gewu-status-loading) 6%, transparent)
+    color-mix(in srgb, var(--petri-status-loading) 18%, transparent),
+    color-mix(in srgb, var(--petri-status-loading) 6%, transparent)
   );
-  border-bottom: 1px solid color-mix(in srgb, var(--gewu-status-loading) 35%, transparent);
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-body-sm);
+  border-bottom: 1px solid color-mix(in srgb, var(--petri-status-loading) 35%, transparent);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body-sm);
   animation: runtimeBannerIn 0.25s ease-out;
 }
 
@@ -573,17 +573,17 @@
   flex: none;
   padding: 6px 14px;
   border-radius: 8px;
-  border: 1px solid color-mix(in srgb, var(--gewu-status-loading) 50%, transparent);
-  background: color-mix(in srgb, var(--gewu-status-loading) 18%, transparent);
-  color: var(--gewu-text);
+  border: 1px solid color-mix(in srgb, var(--petri-status-loading) 50%, transparent);
+  background: color-mix(in srgb, var(--petri-status-loading) 18%, transparent);
+  color: var(--petri-text);
   font-weight: 600;
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   cursor: pointer;
   transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .runtimeMissingBannerBtn:hover {
-  background: color-mix(in srgb, var(--gewu-status-loading) 32%, transparent);
+  background: color-mix(in srgb, var(--petri-status-loading) 32%, transparent);
   transform: translateY(-1px);
 }
 
@@ -594,15 +594,15 @@
 .panelBackdrop {
   display: none;
   /* UI-215 补充：纯图标遮罩按钮收敛 UA 默认字号到 token */
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
 }
 
 /* Left column */
 .leftCol {
   width: 220px;
   flex-shrink: 0;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -636,17 +636,17 @@
   min-height: 34px;
   margin: 0 0 10px;
   padding: 0 10px;
-  border: 1px solid color-mix(in srgb, var(--gewu-border) 76%, transparent 24%);
+  border: 1px solid color-mix(in srgb, var(--petri-border) 76%, transparent 24%);
   border-radius: 8px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text-secondary);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
   overflow: hidden;
 }
 
 .leftWorkspaceLabel {
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   font-weight: 600;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   text-transform: uppercase;
   flex-shrink: 0;
 }
@@ -657,9 +657,9 @@
   border: none;
   padding: 0;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   font: inherit;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   text-align: left;
   white-space: nowrap;
   overflow: hidden;
@@ -669,32 +669,32 @@
 
 .leftWorkspaceText:disabled {
   cursor: default;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .leftWorkspaceText:not(:disabled):hover {
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
 }
 
 .leftWorkspaceAction {
   flex-shrink: 0;
   border: none;
-  border-left: 1px solid var(--gewu-border);
+  border-left: 1px solid var(--petri-border);
   padding: 0 0 0 8px;
   background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-caption);
   cursor: pointer;
 }
 
 .leftWorkspaceAction:hover {
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
 }
 
 .leftWorkspaceNotice {
   flex-shrink: 0;
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-accent);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-accent);
 }
 
 .leftSidebarIntro {
@@ -705,7 +705,7 @@
   min-height: 40px;
   padding: 2px 4px;
   margin-bottom: 8px;
-  border-bottom: 1px solid var(--gewu-border);
+  border-bottom: 1px solid var(--petri-border);
 }
 
 .leftSidebarEyebrow {
@@ -722,10 +722,10 @@
 .leftSidebarTitle {
   flex: 1;
   min-width: 0;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   line-height: 20px;
   font-weight: 650;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -748,9 +748,9 @@
   border: none;
   padding: 0;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   font: inherit;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   line-height: 14px;
   text-align: left;
   white-space: nowrap;
@@ -761,11 +761,11 @@
 
 .leftSidebarPathText:disabled {
   cursor: default;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .leftSidebarPathText:not(:disabled):hover {
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
 }
 
 .leftSidebarPathAction {
@@ -773,8 +773,8 @@
   border: none;
   padding: 0;
   background: transparent;
-  color: var(--gewu-accent);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-accent);
+  font-size: var(--petri-font-size-xs);
   cursor: pointer;
 }
 
@@ -783,8 +783,8 @@
 }
 
 .leftSidebarPathNotice {
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-accent);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-accent);
 }
 
 .leftSidebarAction {
@@ -796,14 +796,14 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .leftSidebarAction:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-teal);
+  background: var(--petri-hover);
+  color: var(--petri-teal);
 }
 
 .leftQuickActions {
@@ -815,10 +815,10 @@
 
 .leftQuickSectionLabel {
   padding: 2px 8px 6px;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   font-weight: 700;
   letter-spacing: 0.4px;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
   text-transform: uppercase;
 }
 
@@ -832,8 +832,8 @@
   border-radius: 6px;
   padding: 0 10px;
   background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-body-sm);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-body-sm);
   font-weight: 500;
   text-align: left;
   cursor: pointer;
@@ -841,19 +841,19 @@
 }
 
 .leftQuickAction:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .leftQuickAction:focus-visible {
-  outline: 2px solid var(--gewu-border-color, var(--gewu-text-secondary));
+  outline: 2px solid var(--petri-border-color, var(--petri-text-secondary));
   outline-offset: 2px;
-  box-shadow: 0 0 0 3px var(--gewu-accent-bg, transparent);
+  box-shadow: 0 0 0 3px var(--petri-accent-bg, transparent);
 }
 
 .leftQuickActionActive {
-  background: var(--gewu-accent-bg);
-  color: var(--gewu-accent);
+  background: var(--petri-accent-bg);
+  color: var(--petri-accent);
 }
 
 .leftQuickAction span {
@@ -875,11 +875,11 @@
 }
 
 .leftPanelTitle {
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
 }
 
 /* UI-308 — header 右侧按钮组（新建项目；返回工作台入口已移除） */
@@ -909,8 +909,8 @@
   gap: 8px;
   padding: 8px;
   flex-shrink: 0;
-  border-bottom: 1px solid var(--gewu-border);
-  background: var(--gewu-bg-surface);
+  border-bottom: 1px solid var(--petri-border);
+  background: var(--petri-bg-surface);
 }
 
 .leftCreateRow {
@@ -922,39 +922,39 @@
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  font-size: var(--gewu-font-size-xs);
-  font-family: var(--gewu-font-mono);
+  font-size: var(--petri-font-size-xs);
+  font-family: var(--petri-font-mono);
   padding: 5px 8px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  background: var(--gewu-bg-canvas);
-  color: var(--gewu-text);
+  background: var(--petri-bg-canvas);
+  color: var(--petri-text);
 }
 
 .leftCreateInput:focus {
   outline: none;
-  border-color: var(--gewu-accent);
+  border-color: var(--petri-accent);
 }
 
 .leftCreateError {
   margin: 0;
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-danger, #d9534f);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-danger, #d9534f);
   word-break: break-all;
 }
 
 /* UI-304 — 确认态：完整路径展示 + 自动项目名（对齐首页 UI-253 确认面板口径） */
 .leftCreateConfirmLabel {
   margin: 0;
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-secondary, var(--gewu-text, inherit));
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-secondary, var(--petri-text, inherit));
 }
 
 .leftCreateConfirmPath {
   margin: 0;
-  font-size: var(--gewu-font-size-xs);
-  font-family: var(--gewu-font-mono);
-  color: var(--gewu-text);
+  font-size: var(--petri-font-size-xs);
+  font-family: var(--petri-font-mono);
+  color: var(--petri-text);
   word-break: break-all;
 }
 
@@ -995,17 +995,17 @@
   padding: 6px 8px;
   cursor: pointer;
   transition: background 0.12s ease;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   user-select: none;
 }
 
 .projectTreeRow:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .projectTreeRowActive {
-  background: var(--gewu-accent-bg);
-  color: var(--gewu-accent);
+  background: var(--petri-accent-bg);
+  color: var(--petri-accent);
   font-weight: 500;
 }
 
@@ -1019,7 +1019,7 @@
   font: inherit;
   text-align: left;
   cursor: text;
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1033,7 +1033,7 @@
   height: 20px;
   border: none;
   background: transparent;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   border-radius: 4px;
   cursor: pointer;
   opacity: 0;
@@ -1045,8 +1045,8 @@
 }
 
 .projectTreeAddBtn:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-accent);
+  background: var(--petri-hover);
+  color: var(--petri-accent);
 }
 
 .convList {
@@ -1057,8 +1057,8 @@
 
 .convEmpty {
   padding: 4px 8px 4px 34px;
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text-muted);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-text-muted);
 }
 
 .convItem {
@@ -1067,19 +1067,19 @@
   gap: 6px;
   padding: 5px 8px 5px 26px;
   cursor: pointer;
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-text-secondary);
   transition: background 0.12s ease;
   user-select: none;
 }
 
 .convItem:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .convItemActive {
-  background: var(--gewu-accent-bg);
-  color: var(--gewu-accent);
+  background: var(--petri-accent-bg);
+  color: var(--petri-accent);
   font-weight: 500;
 }
 
@@ -1089,8 +1089,8 @@
   margin: 0 2px;
   flex: 0 0 auto;
   border-radius: 999px;
-  background: var(--gewu-accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gewu-accent) 14%, transparent);
+  background: var(--petri-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--petri-accent) 14%, transparent);
   animation: conv-running-pulse 1.6s ease-in-out infinite;
 }
 
@@ -1131,7 +1131,7 @@
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
   cursor: pointer;
   opacity: 0;
 }
@@ -1142,8 +1142,8 @@
 }
 
 .convItemTrashBtn:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-status-error-fg);
+  background: var(--petri-hover);
+  color: var(--petri-status-error-fg);
 }
 
 .convItemTrashBtn:disabled {
@@ -1158,8 +1158,8 @@
 
 .convBranchIndicator {
   flex: 0 0 auto;
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-muted);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-muted);
   margin-right: 2px;
 }
 
@@ -1173,7 +1173,7 @@
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
   cursor: pointer;
   opacity: 0;
 }
@@ -1184,8 +1184,8 @@
 }
 
 .convItemForkBtn:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-accent);
+  background: var(--petri-hover);
+  color: var(--petri-accent);
 }
 
 .treeRenameInput {
@@ -1193,14 +1193,14 @@
   min-width: 0;
   height: 22px;
   padding: 0 5px;
-  border: 1px solid var(--gewu-accent-border);
+  border: 1px solid var(--petri-accent-border);
   border-radius: 5px;
   outline: none;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
   font: inherit;
-  font-size: var(--gewu-font-size-caption);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gewu-accent) 10%, transparent);
+  font-size: var(--petri-font-size-caption);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--petri-accent) 10%, transparent);
 }
 
 /* Center column — Agent main interaction area */
@@ -1210,7 +1210,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
   box-sizing: border-box;
   position: relative;
 }
@@ -1232,8 +1232,8 @@
   flex: 1;
   align-items: center;
   justify-content: center;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-caption);
 }
 
 /* UI-148 / T86 — 结果库（result 模式默认空态的库式浏览面板） */
@@ -1250,19 +1250,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: var(--gewu-text-primary, #1a1a1a);
+  color: var(--petri-text-primary, #1a1a1a);
 }
 .resultsLibraryHeader strong {
-  font-size: var(--gewu-font-size-body);
+  font-size: var(--petri-font-size-body);
 }
 .resultsLibraryCount {
   margin-left: 8px;
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text-tertiary, #8a8a8a);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-text-tertiary, #8a8a8a);
 }
 .resultsLibraryEmpty {
-  color: var(--gewu-text-tertiary, #8a8a8a);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-text-tertiary, #8a8a8a);
+  font-size: var(--petri-font-size-caption);
   padding: 12px 0;
 }
 .resultsLibraryList {
@@ -1282,16 +1282,16 @@
   width: 100%;
   text-align: left;
   padding: 10px 12px;
-  border: 1px solid var(--gewu-border, #e2e2e2);
+  border: 1px solid var(--petri-border, #e2e2e2);
   border-radius: 8px;
-  background: var(--gewu-surface, #ffffff);
-  color: var(--gewu-text-primary, #1a1a1a);
+  background: var(--petri-surface, #ffffff);
+  color: var(--petri-text-primary, #1a1a1a);
   cursor: pointer;
   transition: border-color 120ms ease, background 120ms ease;
 }
 .resultsLibraryItem:hover {
-  border-color: var(--gewu-accent, var(--gewu-border-strong, #cfcfcf));
-  background: var(--gewu-surface-hover, #f5f7fa);
+  border-color: var(--petri-accent, var(--petri-border-strong, #cfcfcf));
+  background: var(--petri-surface-hover, #f5f7fa);
 }
 .resultsLibraryItemMain {
   display: flex;
@@ -1300,37 +1300,37 @@
   min-width: 0;
 }
 .resultsLibraryItemTitle {
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .resultsLibraryItemMeta {
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-tertiary, #8a8a8a);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-tertiary, #8a8a8a);
 }
 .resultsLibraryBadge {
   flex: none;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   padding: 2px 8px;
   border-radius: 999px;
   border: 1px solid transparent;
 }
 .resultsLibraryBadge[data-status='done'] {
-  color: var(--gewu-success, #2e7d32);
+  color: var(--petri-success, #2e7d32);
   background: rgba(46, 125, 50, 0.12);
 }
 .resultsLibraryBadge[data-status='running'] {
-  color: var(--gewu-info, #1565c0);
+  color: var(--petri-info, #1565c0);
   background: rgba(21, 101, 192, 0.12);
 }
 .resultsLibraryBadge[data-status='pending'] {
-  color: var(--gewu-text-secondary, #5a5a5a);
-  background: var(--gewu-surface-strong, #f0f0f0);
+  color: var(--petri-text-secondary, #5a5a5a);
+  background: var(--petri-surface-strong, #f0f0f0);
 }
 .resultsLibraryBadge[data-status='failed'] {
-  color: var(--gewu-danger, #c62828);
+  color: var(--petri-danger, #c62828);
   background: rgba(198, 40, 40, 0.12);
 }
 
@@ -1350,12 +1350,12 @@
   gap: 2px;
 }
 .analysisLaunchHeader strong {
-  font-size: var(--gewu-font-size-body);
-  color: var(--gewu-text-primary, #1a1a1a);
+  font-size: var(--petri-font-size-body);
+  color: var(--petri-text-primary, #1a1a1a);
 }
 .analysisLaunchHint {
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-tertiary, #8a8a8a);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-tertiary, #8a8a8a);
 }
 .analysisLaunchList {
   overflow-y: auto;
@@ -1364,9 +1364,9 @@
   gap: 16px;
 }
 .analysisLaunchGroupTitle {
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   font-weight: 600;
-  color: var(--gewu-text-secondary, #5a5a5a);
+  color: var(--petri-text-secondary, #5a5a5a);
   margin: 0 0 8px;
 }
 .analysisLaunchCards {
@@ -1383,9 +1383,9 @@
   justify-content: space-between;
   gap: 12px;
   padding: 10px 12px;
-  border: 1px solid var(--gewu-border, #e2e2e2);
+  border: 1px solid var(--petri-border, #e2e2e2);
   border-radius: 8px;
-  background: var(--gewu-surface, #ffffff);
+  background: var(--petri-surface, #ffffff);
 }
 .analysisLaunchCardMain {
   display: flex;
@@ -1397,9 +1397,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   font-weight: 600;
-  color: var(--gewu-text-primary, #1a1a1a);
+  color: var(--petri-text-primary, #1a1a1a);
 }
 .analysisLaunchDot {
   width: 8px;
@@ -1408,8 +1408,8 @@
   flex: none;
 }
 .analysisLaunchCardDesc {
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-tertiary, #8a8a8a);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-tertiary, #8a8a8a);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1418,29 +1418,29 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-secondary, #5a5a5a);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-secondary, #5a5a5a);
 }
 .analysisLaunchLang {
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   padding: 1px 6px;
   border-radius: 4px;
-  border: 1px solid var(--gewu-border, #e2e2e2);
+  border: 1px solid var(--petri-border, #e2e2e2);
   text-transform: uppercase;
 }
 .analysisLaunchRun {
   flex: none;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   padding: 6px 14px;
   border-radius: 6px;
   border: 1px solid transparent;
-  background: var(--gewu-accent, #3b82f6);
-  color: var(--gewu-on-solid, #ffffff);
+  background: var(--petri-accent, #3b82f6);
+  color: var(--petri-on-solid, #ffffff);
   cursor: pointer;
 }
 .analysisLaunchRun:disabled {
-  background: var(--gewu-surface-strong, #f0f0f0);
-  color: var(--gewu-text-tertiary, #8a8a8a);
+  background: var(--petri-surface-strong, #f0f0f0);
+  color: var(--petri-text-tertiary, #8a8a8a);
   cursor: not-allowed;
 }
 
@@ -1493,12 +1493,12 @@
   width: 24px;
   height: 48px;
   border-radius: 4px;
-  background: var(--gewu-border);
-  border: 1px solid var(--gewu-border);
+  background: var(--petri-border);
+  border: 1px solid var(--petri-border);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   transition: opacity 0.15s, background 0.15s, box-shadow 0.15s;
 }
 
@@ -1521,7 +1521,7 @@
 /* Breathing animation — subtle pulse to draw attention */
 @keyframes breathe {
   0%, 100% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--gewu-accent) 15%, transparent);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--petri-accent) 15%, transparent);
     opacity: 0.7;
   }
   50% {
@@ -1534,16 +1534,16 @@
 .rightRailHandle.breathing,
 .bottomRailHandle.breathing {
   animation: breathe 2.4s ease-in-out infinite;
-  color: var(--gewu-accent);
-  border-color: var(--gewu-accent-border);
-  background: var(--gewu-accent-bg);
+  color: var(--petri-accent);
+  border-color: var(--petri-accent-border);
+  background: var(--petri-accent-bg);
 }
 
 .leftRailHandle:hover,
 .rightRailHandle:hover,
 .bottomRailHandle:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
@@ -1594,9 +1594,9 @@
   max-width: min(720px, calc(100% - 24px));
   overflow: auto;
   border-radius: 16px;
-  /* UI-448 — 大柔和影收编 --gewu-shadow-float 单源（原字面量同值，零视觉变化）；
+  /* UI-448 — 大柔和影收编 --petri-shadow-float 单源（原字面量同值，零视觉变化）；
      侧边聊天悬浮面同用此 token，两个悬浮物说同一套阴影语言 */
-  box-shadow: var(--gewu-shadow-float);
+  box-shadow: var(--petri-shadow-float);
   /* UI-351 加映 — 悬浮态默认轻微透出下层内容，hover 回到实感（渐进不突兀） */
   opacity: 0.92;
   transition: opacity 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
@@ -1649,7 +1649,7 @@
 
 [data-theme='dark'] .workspaceSummaryFloat {
   /* UI-448 — 暗色档同样收编 token（token 亮暗双套定义于 custom.css） */
-  box-shadow: var(--gewu-shadow-float);
+  box-shadow: var(--petri-shadow-float);
 }
 
 .workspaceSessionInset {
@@ -1711,7 +1711,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
 }
 
 .workspaceSessionChromeText {
@@ -1721,18 +1721,18 @@
 }
 
 .workspaceSessionChromeEyebrow {
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .workspaceSessionChromeTitle {
   min-width: 0;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   font-weight: 600;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1746,15 +1746,15 @@
   height: 30px;
   border: none;
   border-radius: 11px;
-  background: var(--gewu-bg-subtle);
-  color: var(--gewu-text-muted);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-muted);
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .workspaceSessionChromeBtn:hover {
-  background: var(--gewu-bg-subtle);
-  color: var(--gewu-text);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text);
 }
 
 .workspaceSessionChromeActions {
@@ -1850,7 +1850,7 @@
 
 .rightPanelCollapseBtn {
   flex-shrink: 0;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
 }
 
 .workspaceModeSurface {
@@ -1860,13 +1860,13 @@
   padding: 0;
 }
 
-.workspaceModeSurface :global(.gewu-plugin-store-panel) {
+.workspaceModeSurface :global(.petri-plugin-store-panel) {
   width: 100%;
   height: 100%;
 }
 
-.workspaceModeSurface :global(.gewu-desktop-panel),
-.workspaceModeSurface :global(.gewu-plugin-store-panel) {
+.workspaceModeSurface :global(.petri-desktop-panel),
+.workspaceModeSurface :global(.petri-plugin-store-panel) {
   width: 100%;
   height: 100%;
   border-radius: 0;
@@ -1878,7 +1878,7 @@
   flex: 1;
   min-height: 0;
   overflow: auto;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
 }
 
 .workspacePinnedSummary {
@@ -1887,9 +1887,9 @@
   height: auto;
   max-height: calc(100% - 16px);
   max-width: calc(100% - 24px);
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 16px;
-  background: var(--gewu-bg-elevated);
+  background: var(--petri-bg-elevated);
   box-shadow: none;
   overflow: hidden;
   display: flex;
@@ -1909,7 +1909,7 @@
   flex-shrink: 0;
   min-height: 52px;
   padding: 10px 13px 9px;
-  border-bottom: 1px solid color-mix(in srgb, var(--gewu-text) 6%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--petri-text) 6%, transparent);
 }
 
 .workspacePinnedSummaryTopBarLeft {
@@ -1926,19 +1926,19 @@
   gap: 7px;
   height: 38px;
   padding: 0 12px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 14px;
-  background: var(--gewu-surface-translucent);
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-body-sm);
+  background: var(--petri-surface-translucent);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body-sm);
   font-weight: 600;
   cursor: pointer;
   box-shadow: none;
 }
 
 .workspacePinnedSummaryActionBtn:hover {
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
 }
 
 .workspacePinnedSummaryHeaderText {
@@ -1949,11 +1949,11 @@
 }
 
 .workspacePinnedSummaryEyebrow {
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   font-weight: 650;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .workspacePinnedSummaryTitleRow {
@@ -1967,10 +1967,10 @@
 .workspacePinnedSummaryTitle {
   min-width: 0;
   flex: 1;
-  font-size: var(--gewu-font-size-md);
+  font-size: var(--petri-font-size-md);
   line-height: 1.2;
   font-weight: 650;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1981,28 +1981,28 @@
   align-items: center;
   gap: 5px;
   flex-shrink: 0;
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-secondary);
 }
 
 .workspacePinnedSummaryStatus > span {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--gewu-text-tertiary);
+  background: var(--petri-text-tertiary);
 }
 
 .workspacePinnedSummaryStatus[data-status='running'] > span {
-  background: var(--gewu-status-online);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gewu-status-online) 12%, transparent);
+  background: var(--petri-status-online);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--petri-status-online) 12%, transparent);
 }
 
 .workspacePinnedSummaryStatus[data-status='failed'] > span {
-  background: var(--gewu-status-error);
+  background: var(--petri-status-error);
 }
 
 .workspacePinnedSummaryStatus[data-status='done'] > span {
-  background: var(--gewu-status-info);
+  background: var(--petri-status-info);
 }
 
 .workspacePinnedSummaryBody {
@@ -2037,7 +2037,7 @@
   min-height: 44px;
   padding: 7px 3px;
   border: 0;
-  border-top: 1px solid var(--gewu-border-subtle);
+  border-top: 1px solid var(--petri-border-subtle);
   border-radius: 0;
   background: transparent;
   color: inherit;
@@ -2051,20 +2051,20 @@ button.workspacePinnedSummaryPrimaryCard {
 
 button.workspacePinnedSummaryPrimaryCard:hover {
   background: transparent;
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
 }
 
 .workspacePinnedSummaryPrimaryCard > svg {
   flex-shrink: 0;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .workspacePinnedSummaryMetricGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0;
-  border-top: 1px solid var(--gewu-border-subtle);
-  border-bottom: 1px solid var(--gewu-border-subtle);
+  border-top: 1px solid var(--petri-border-subtle);
+  border-bottom: 1px solid var(--petri-border-subtle);
 }
 
 .workspacePinnedSummaryMetricCard {
@@ -2084,7 +2084,7 @@ button.workspacePinnedSummaryPrimaryCard:hover {
 
 .workspacePinnedSummaryMetricCard + .workspacePinnedSummaryMetricCard {
   padding-left: 10px;
-  border-left: 1px solid var(--gewu-border-subtle);
+  border-left: 1px solid var(--petri-border-subtle);
 }
 
 button.workspacePinnedSummaryMetricCard {
@@ -2093,7 +2093,7 @@ button.workspacePinnedSummaryMetricCard {
 
 button.workspacePinnedSummaryMetricCard:hover {
   background: transparent;
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
 }
 
 .workspacePinnedSummaryMetricCard > span {
@@ -2101,22 +2101,22 @@ button.workspacePinnedSummaryMetricCard:hover {
   align-items: center;
   gap: 6px;
   min-width: 0;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs);
   font-weight: 600;
 }
 
 .workspacePinnedSummaryMetricCard > strong {
   margin-left: auto;
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-caption);
   font-weight: 650;
   line-height: 1;
 }
 
 .workspacePinnedSummaryMetricCard > strong small {
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs);
   font-weight: 500;
 }
 
@@ -2128,7 +2128,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   min-height: 40px;
   padding: 6px 3px;
   border: 0;
-  border-top: 1px solid var(--gewu-border-subtle);
+  border-top: 1px solid var(--petri-border-subtle);
   background: transparent;
   color: inherit;
   font: inherit;
@@ -2137,12 +2137,12 @@ button.workspacePinnedSummaryMetricCard:hover {
 }
 
 .workspacePinnedSummaryTaskRow:hover {
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
 }
 
 .workspacePinnedSummaryTaskRow > svg {
   flex-shrink: 0;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .workspacePinnedSummarySectionHeading {
@@ -2157,13 +2157,13 @@ button.workspacePinnedSummaryMetricCard:hover {
   border: 0;
   padding: 0;
   background: transparent;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs);
   cursor: pointer;
 }
 
 .workspacePinnedSummarySectionHeading > button:hover {
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .workspacePinnedSummaryContext,
@@ -2185,14 +2185,14 @@ button.workspacePinnedSummaryMetricCard:hover {
 .workspacePinnedSummaryContext:hover,
 .workspacePinnedSummaryActivity:hover,
 .workspacePinnedSummarySource:hover {
-  background: var(--gewu-user-bubble-bg);
+  background: var(--petri-user-bubble-bg);
 }
 
 .workspacePinnedSummaryContext > svg,
 .workspacePinnedSummaryContext > svg:last-child,
 .workspacePinnedSummaryActivity > svg {
   flex-shrink: 0;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .workspacePinnedSummaryContext > span,
@@ -2206,8 +2206,8 @@ button.workspacePinnedSummaryMetricCard:hover {
 .workspacePinnedSummaryContext strong,
 .workspacePinnedSummaryActivityText strong {
   overflow: hidden;
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-sm);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-sm);
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2216,8 +2216,8 @@ button.workspacePinnedSummaryMetricCard:hover {
 .workspacePinnedSummaryContext small,
 .workspacePinnedSummaryActivityText small {
   overflow: hidden;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs);
   white-space: nowrap;
   text-overflow: ellipsis;
 }
@@ -2231,17 +2231,17 @@ button.workspacePinnedSummaryMetricCard:hover {
   flex-shrink: 0;
   border-radius: 0;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
 }
 
 .workspacePinnedSummaryActivityIcon[data-status='running'] {
   background: transparent;
-  color: var(--gewu-status-success-fg);
+  color: var(--petri-status-success-fg);
 }
 
 .workspacePinnedSummaryActivityIcon[data-status='failed'] {
   background: transparent;
-  color: var(--gewu-status-error-fg);
+  color: var(--petri-status-error-fg);
 }
 
 /* UI-386 — 项目历史智能体图标带：每任务一枚状态色图标（悬停任务描述，
@@ -2295,7 +2295,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  background: var(--gewu-accent, #0d9488);
+  background: var(--petri-accent, #0d9488);
 }
 
 /* 运行组与历史组分隔线（位置即状态：线前=运行中，线后=已结束） */
@@ -2304,20 +2304,20 @@ button.workspacePinnedSummaryMetricCard:hover {
   height: 16px;
   flex-shrink: 0;
   margin: 0 4px;
-  background: var(--gewu-border, rgba(128, 128, 128, 0.35));
+  background: var(--petri-border, rgba(128, 128, 128, 0.35));
 }
 
 .workspacePinnedSummaryAgentMore {
-  font-size: var(--gewu-font-size-body-sm);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-body-sm);
+  color: var(--petri-text-tertiary);
   padding: 0 2px;
 }
 
 .workspacePinnedSummarySectionTitle {
   padding: 0;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   font-weight: 600;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .workspaceLoopBadge {
@@ -2325,9 +2325,9 @@ button.workspacePinnedSummaryMetricCard:hover {
   align-items: center;
   gap: 5px;
   flex-shrink: 0;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   font-weight: 600;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .workspaceLoopBadge::before {
@@ -2339,15 +2339,15 @@ button.workspacePinnedSummaryMetricCard:hover {
 }
 
 .workspaceLoopBadge[data-tone='running'] {
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
 }
 
 .workspaceLoopBadge[data-tone='success'] {
-  color: var(--gewu-status-success-fg);
+  color: var(--petri-status-success-fg);
 }
 
 .workspaceLoopBadge[data-tone='warning'] {
-  color: var(--gewu-status-warning-fg);
+  color: var(--petri-status-warning-fg);
 }
 
 .workspaceLoopRecovery {
@@ -2356,7 +2356,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   gap: 5px;
   min-width: 0;
   padding: 2px 3px;
-  color: var(--gewu-status-warning-fg);
+  color: var(--petri-status-warning-fg);
   font-size: 9.5px;
   line-height: 1.35;
 }
@@ -2366,8 +2366,8 @@ button.workspacePinnedSummaryMetricCard:hover {
   min-width: 0;
   overflow: hidden;
   padding: 1px 3px;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xs);
   line-height: 1.45;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -2377,22 +2377,22 @@ button.workspacePinnedSummaryMetricCard:hover {
   min-width: 0;
   overflow: hidden;
   padding: 0 3px;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs);
   line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .workspacePinnedSummaryQueueLabel {
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs);
 }
 
 .workspaceWorkflowStateLabel {
   padding-right: 6px;
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-tertiary);
 }
 
 .workspaceWorkflowRail {
@@ -2405,35 +2405,35 @@ button.workspacePinnedSummaryMetricCard:hover {
 .workspaceWorkflowRail > span {
   height: 3px;
   border-radius: 999px;
-  background: var(--gewu-border);
+  background: var(--petri-border);
 }
 
 .workspaceWorkflowRail > span[data-status='completed'] {
-  background: var(--gewu-accent);
+  background: var(--petri-accent);
 }
 
 .workspaceWorkflowRail > span[data-status='in_progress'] {
-  background: color-mix(in srgb, var(--gewu-accent) 70%, var(--gewu-bg-surface));
+  background: color-mix(in srgb, var(--petri-accent) 70%, var(--petri-bg-surface));
 }
 
 .workspaceWorkflowRail > span[data-status='needs_review'] {
-  background: var(--gewu-status-loading);
+  background: var(--petri-status-loading);
 }
 
 .workspaceWorkflowRail > span[data-status='failed'],
 .workspaceWorkflowRail > span[data-status='blocked'] {
-  background: var(--gewu-status-error);
+  background: var(--petri-status-error);
 }
 
 .workspaceWorkflowRail > span[data-status='cancelled'] {
-  background: var(--gewu-text-tertiary);
+  background: var(--petri-text-tertiary);
 }
 
 .workspaceWorkflowNextAction {
   padding: 1px 6px 0;
   overflow: hidden;
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-tertiary);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2445,9 +2445,9 @@ button.workspacePinnedSummaryMetricCard:hover {
 .workspacePinnedSummarySourceLabel {
   flex: 1;
   min-width: 0;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   font-weight: 600;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2455,22 +2455,22 @@ button.workspacePinnedSummaryMetricCard:hover {
 
 .workspacePinnedSummarySourceValue {
   flex-shrink: 0;
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-tertiary);
 }
 
 .workspacePinnedSummarySourceEmpty {
   padding: 3px 7px;
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-tertiary);
 }
 
 .workspacePinnedSummaryHistory {
   display: grid;
   gap: 0;
   padding: 0;
-  border-top: 1px solid var(--gewu-border-subtle);
-  border-bottom: 1px solid var(--gewu-border-subtle);
+  border-top: 1px solid var(--petri-border-subtle);
+  border-bottom: 1px solid var(--petri-border-subtle);
   border-radius: 0;
   background: transparent;
 }
@@ -2491,11 +2491,11 @@ button.workspacePinnedSummaryMetricCard:hover {
 
 .workspacePinnedSummaryHistoryItem:hover {
   background: transparent;
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
 }
 
 .workspacePinnedSummaryHistoryItem + .workspacePinnedSummaryHistoryItem {
-  border-top: 1px solid var(--gewu-border-subtle);
+  border-top: 1px solid var(--petri-border-subtle);
 }
 
 .workspacePinnedSummaryEmpty {
@@ -2503,8 +2503,8 @@ button.workspacePinnedSummaryMetricCard:hover {
   align-items: center;
   gap: 7px;
   padding: 4px 6px;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-sm);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-sm);
 }
 
 .workspacePinnedSummaryEnvironment {
@@ -2515,8 +2515,8 @@ button.workspacePinnedSummaryMetricCard:hover {
 
 .workspacePinnedSummaryEnvironmentCard {
   overflow: hidden;
-  border-top: 1px solid var(--gewu-border-subtle);
-  border-bottom: 1px solid var(--gewu-border-subtle);
+  border-top: 1px solid var(--petri-border-subtle);
+  border-bottom: 1px solid var(--petri-border-subtle);
   border-radius: 0;
   background: transparent;
 }
@@ -2528,12 +2528,12 @@ button.workspacePinnedSummaryMetricCard:hover {
   gap: 10px;
   min-height: 32px;
   padding: 6px 3px;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xs);
 }
 
 .workspacePinnedSummaryEnvironmentRow + .workspacePinnedSummaryEnvironmentRow {
-  border-top: 1px solid var(--gewu-border-subtle);
+  border-top: 1px solid var(--petri-border-subtle);
 }
 
 .workspacePinnedSummaryEnvironmentLabel {
@@ -2541,15 +2541,15 @@ button.workspacePinnedSummaryMetricCard:hover {
   align-items: center;
   gap: 7px;
   flex-shrink: 0;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-sm);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-sm);
   font-weight: 600;
 }
 
 .workspacePinnedSummaryResourceFacts {
   min-width: 0;
   overflow: hidden;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   text-align: right;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2564,9 +2564,9 @@ button.workspacePinnedSummaryMetricCard:hover {
   gap: 8px;
   min-height: 0;
   padding: 7px 6px 0;
-  border-top: 1px solid color-mix(in srgb, var(--gewu-text) 6%, transparent);
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-tertiary);
+  border-top: 1px solid color-mix(in srgb, var(--petri-text) 6%, transparent);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-tertiary);
 }
 
 .workspaceResourceSummary {
@@ -2574,16 +2574,16 @@ button.workspacePinnedSummaryMetricCard:hover {
   justify-content: space-between;
   gap: 10px;
   padding: 8px 12px;
-  border-top: 1px solid var(--gewu-border-subtle);
-  color: var(--gewu-text-muted);
-  font-size: var(--gewu-font-size-sm);
+  border-top: 1px solid var(--petri-border-subtle);
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-sm);
 }
 
 .workspaceResourceSummaryState {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   white-space: nowrap;
 }
 
@@ -2591,21 +2591,21 @@ button.workspacePinnedSummaryMetricCard:hover {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--gewu-status-online);
+  background: var(--petri-status-online);
 }
 
 .workspacePinnedSummaryEnvironmentRow[data-state='warning'] .workspaceResourceSummaryState i {
-  background: var(--gewu-status-warning-fg);
+  background: var(--petri-status-warning-fg);
 }
 
 .workspacePinnedSummaryEnvironmentRow[data-state='unavailable'] .workspaceResourceSummaryState i,
 .workspacePinnedSummaryEnvironmentRow[data-state='unknown'] .workspaceResourceSummaryState i {
-  background: var(--gewu-danger);
+  background: var(--petri-danger);
 }
 
-.workspaceResourceSummary[data-state='warning'] .workspaceResourceSummaryState i { background: var(--gewu-status-warning-fg); }
+.workspaceResourceSummary[data-state='warning'] .workspaceResourceSummaryState i { background: var(--petri-status-warning-fg); }
 .workspaceResourceSummary[data-state='unavailable'] .workspaceResourceSummaryState i,
-.workspaceResourceSummary[data-state='unknown'] .workspaceResourceSummaryState i { background: var(--gewu-danger); }
+.workspaceResourceSummary[data-state='unknown'] .workspaceResourceSummaryState i { background: var(--petri-danger); }
 
 .workspacePinnedSummaryFooter span {
   display: inline-flex;
@@ -2622,9 +2622,9 @@ button.workspacePinnedSummaryMetricCard:hover {
 
 .workspacePinnedSummaryRuntimeChip {
   gap: 3px !important;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   font-weight: 600;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
 }
 
 .workspacePinnedSummaryRuntimeChip > i {
@@ -2632,19 +2632,19 @@ button.workspacePinnedSummaryMetricCard:hover {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: var(--gewu-text-tertiary);
+  background: var(--petri-text-tertiary);
 }
 
 .workspacePinnedSummaryRuntimeChip[data-state='online'] > i {
-  background: var(--gewu-status-online);
+  background: var(--petri-status-online);
 }
 
 .workspacePinnedSummaryRuntimeChip[data-state='offline'] > i {
-  background: var(--gewu-status-loading);
+  background: var(--petri-status-loading);
 }
 
 .workspacePinnedSummaryRuntimeChip[data-state='missing'] {
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 
@@ -2666,17 +2666,17 @@ button.workspacePinnedSummaryMetricCard:hover {
 .workspacePinnedSummaryTaskRow:focus-visible,
 .workspacePinnedSummaryActionBtn:focus-visible,
 .workspacePinnedSummaryFooterBtn:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--gewu-accent) 35%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--petri-accent) 35%, transparent);
   outline-offset: 2px;
 }
 
-.workspaceEmbeddedPage :global(.gewu-page-header) {
+.workspaceEmbeddedPage :global(.petri-page-header) {
   padding-left: 16px;
   padding-right: 18px;
   margin-bottom: 10px;
 }
 
-.workspaceEmbeddedPage :global(.gewu-page-header__breadcrumb) {
+.workspaceEmbeddedPage :global(.petri-page-header__breadcrumb) {
   display: none;
 }
 
@@ -2704,18 +2704,18 @@ button.workspacePinnedSummaryMetricCard:hover {
   gap: 8px;
   height: 30px;
   padding: 0 10px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
-  background: var(--gewu-surface);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-caption);
+  background: var(--petri-surface);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-caption);
   font-weight: 500;
   cursor: pointer;
 }
 
 .scheduledWorkspaceBack:hover {
-  color: var(--gewu-text);
-  background: var(--gewu-hover);
+  color: var(--petri-text);
+  background: var(--petri-hover);
 }
 
 .scheduledStats {
@@ -2728,9 +2728,9 @@ button.workspacePinnedSummaryMetricCard:hover {
 .scheduledStatCard {
   min-width: 0;
   padding: 12px 14px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 10px;
-  background: var(--gewu-surface-translucent);
+  background: var(--petri-surface-translucent);
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -2740,12 +2740,12 @@ button.workspacePinnedSummaryMetricCard:hover {
 .scheduledStatCard strong {
   font-size: 24px;
   line-height: 1;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .scheduledStatLabel {
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-text-secondary);
 }
 
 .scheduledWorkspaceBody {
@@ -2767,9 +2767,9 @@ button.workspacePinnedSummaryMetricCard:hover {
   align-items: center;
   gap: 14px;
   padding: 32px 28px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 14px;
-  background: var(--gewu-surface-translucent);
+  background: var(--petri-surface-translucent);
 }
 
 .scheduledEmptyIcon {
@@ -2779,22 +2779,22 @@ button.workspacePinnedSummaryMetricCard:hover {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: var(--gewu-accent-bg);
-  color: var(--gewu-accent);
+  background: var(--petri-accent-bg);
+  color: var(--petri-accent);
 }
 
 .scheduledEmptyTitle {
   margin: 0;
-  font-size: var(--gewu-font-size-lg);
+  font-size: var(--petri-font-size-lg);
   font-weight: 600;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .scheduledEmptyDesc {
   margin: 0;
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   line-height: 1.6;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
 }
 
 .scheduledEmptyBack {
@@ -2803,27 +2803,27 @@ button.workspacePinnedSummaryMetricCard:hover {
   gap: 8px;
   height: 34px;
   padding: 0 16px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
-  background: var(--gewu-surface);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-body-sm);
+  background: var(--petri-surface);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-body-sm);
   font-weight: 500;
   cursor: pointer;
 }
 
 .scheduledEmptyBack:hover {
-  color: var(--gewu-text);
-  background: var(--gewu-hover);
+  color: var(--petri-text);
+  background: var(--petri-hover);
 }
 
 .scheduledHistoryCol,
 .scheduledResultCol {
   min-height: 0;
   overflow: hidden;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 12px;
-  background: var(--gewu-surface-translucent);
+  background: var(--petri-surface-translucent);
 }
 
 .scheduledHistoryCol {
@@ -2850,7 +2850,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   width: 360px;
   min-width: 96px;
   flex-shrink: 0;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -2869,11 +2869,11 @@ button.workspacePinnedSummaryMetricCard:hover {
 /* UI-309 加映 — 拖动期刚性一致：leftCol/rightCol 的 width transition 与
    embeddedTerminal 的 left transition 会让栏体以 0.2s 级缓动「追赶」实时变量，
    而顶栏分隔线随同一变量瞬时移动 → 拖动中肉眼可见两根线脱节。
-   useResizableColumns 拖动期间在 body 上挂 gewu-resizing-columns 标记
+   useResizableColumns 拖动期间在 body 上挂 petri-resizing-columns 标记
    （松手摘除），标记期间禁用这三条 transition；展开/收起动画不受影响。 */
-body:global(.gewu-resizing-columns) .leftCol,
-body:global(.gewu-resizing-columns) .rightCol,
-body:global(.gewu-resizing-columns) .embeddedTerminal {
+body:global(.petri-resizing-columns) .leftCol,
+body:global(.petri-resizing-columns) .rightCol,
+body:global(.petri-resizing-columns) .embeddedTerminal {
   transition: none;
 }
 
@@ -2905,7 +2905,7 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
 
   .projectTitle {
     max-width: 140px;
-    font-size: var(--gewu-font-size-body);
+    font-size: var(--petri-font-size-body);
   }
 
   .scheduledWorkspace {
@@ -2949,7 +2949,7 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
     display: block;
     border: none;
     padding: 0;
-    background: var(--gewu-overlay);
+    background: var(--petri-overlay);
     cursor: default;
   }
 
@@ -2997,7 +2997,7 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
     grid-template-columns: 1fr;
   }
 
-  .workspaceEmbeddedPage :global(.gewu-page-header) {
+  .workspaceEmbeddedPage :global(.petri-page-header) {
     padding-left: 12px;
     padding-right: 12px;
   }
@@ -3025,7 +3025,7 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
 }
 
 .resultPanelBody {
@@ -3043,23 +3043,23 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   justify-content: space-between;
   gap: 8px;
   padding: 8px 12px;
-  border-bottom: 1px solid var(--gewu-border);
-  background: var(--gewu-surface-alt);
+  border-bottom: 1px solid var(--petri-border);
+  background: var(--petri-surface-alt);
 }
 
 .resultScientificDelivery {
   padding: 10px 12px;
-  border-bottom: 1px solid var(--gewu-border);
-  border-left: 3px solid var(--gewu-status-online);
-  background: var(--gewu-bg-surface);
+  border-bottom: 1px solid var(--petri-border);
+  border-left: 3px solid var(--petri-status-online);
+  background: var(--petri-bg-surface);
 }
 
 .resultScientificDelivery[data-status='degraded'] {
-  border-left-color: var(--gewu-warning-text);
+  border-left-color: var(--petri-warning-text);
 }
 
 .resultScientificDelivery[data-status='blocked'] {
-  border-left-color: var(--gewu-danger);
+  border-left-color: var(--petri-danger);
 }
 
 .resultScientificDeliveryHeader,
@@ -3075,14 +3075,14 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
 }
 
 .resultScientificDeliveryHeader strong {
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-text);
 }
 
 .resultScientificDeliveryHeader span,
 .resultScientificDeliveryMeta {
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-tertiary);
 }
 
 .resultScientificDeliveryGrid {
@@ -3093,14 +3093,14 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
 }
 
 .resultScientificDeliveryGrid small {
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs);
 }
 
 .resultScientificDeliveryGrid p {
   margin: 3px 0 0;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-sm);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-sm);
   line-height: 1.45;
 }
 
@@ -3115,9 +3115,9 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   border: 0;
   padding: 0;
   background: transparent;
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
   font: inherit;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   text-decoration: none;
   cursor: pointer;
 }
@@ -3129,8 +3129,8 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
 
 .resultReplayPackageMessage {
   margin-top: 6px;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs);
 }
 
 .resultReportReproductionActions {
@@ -3145,9 +3145,9 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   border: 0;
   padding: 0;
   background: transparent;
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
   font: inherit;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   text-decoration: none;
   cursor: pointer;
 }
@@ -3173,19 +3173,19 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
 }
 
 .resultDeliveryCopy strong {
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-text);
 }
 
 .resultDeliveryCopy span,
 .resultDeliveryCopy em {
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-tertiary);
   font-style: normal;
 }
 
 .resultDeliveryCopy em {
-  color: var(--gewu-danger);
+  color: var(--petri-danger);
 }
 
 .resultDeliveryActions {
@@ -3202,18 +3202,18 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   align-items: center;
   height: 24px;
   padding: 0 8px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 7px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-xs);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xs);
   text-decoration: none;
   cursor: pointer;
 }
 
 .resultDeliveryActions button:first-child {
-  border-color: var(--gewu-accent-border);
-  background: var(--gewu-accent);
+  border-color: var(--petri-accent-border);
+  background: var(--petri-accent);
   color: #fff;
 }
 
@@ -3278,8 +3278,8 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-sm);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-sm);
   cursor: pointer;
 }
 
@@ -3290,13 +3290,13 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
 }
 
 .rightPanelTab:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text-secondary);
+  background: var(--petri-hover);
+  color: var(--petri-text-secondary);
 }
 
 .rightPanelTabActive {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
   font-weight: 600;
 }
 
@@ -3308,12 +3308,12 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   height: 16px;
   margin-right: -4px;
   border-radius: 4px;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .rightPanelTabClose:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .terminalPanel,
@@ -3323,7 +3323,7 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  background: var(--gewu-surface);
+  background: var(--petri-surface);
 }
 
 .embeddedTerminal {
@@ -3335,10 +3335,10 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   flex-direction: column;
   min-height: 0;
   margin: 0 8px;
-  border: 1px solid color-mix(in srgb, var(--gewu-border) 84%, transparent);
+  border: 1px solid color-mix(in srgb, var(--petri-border) 84%, transparent);
   border-radius: 9px;
-  background: var(--gewu-bg-terminal);
-  color: var(--gewu-text-terminal-strong);
+  background: var(--petri-bg-terminal);
+  color: var(--petri-text-terminal-strong);
   box-shadow: 0 6px 20px rgba(15, 23, 42, 0.1);
   overflow: hidden;
   opacity: 0;
@@ -3373,14 +3373,14 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   width: 34px;
   height: 2px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--gewu-border-strong) 68%, transparent);
+  background: color-mix(in srgb, var(--petri-border-strong) 68%, transparent);
   transform: translateX(-50%);
   transition: width 0.14s ease, background 0.14s ease;
 }
 
 .embeddedTerminalResize:hover::after {
   width: 44px;
-  background: var(--gewu-accent);
+  background: var(--petri-accent);
 }
 
 /* Compact terminal card header, shared by light and dark application themes. */
@@ -3392,22 +3392,22 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   height: 28px;
   min-height: 28px;
   padding: 1px 7px 0 11px;
-  border-bottom: 1px solid color-mix(in srgb, var(--gewu-border) 72%, transparent);
-  background: color-mix(in srgb, var(--gewu-bg-terminal) 94%, var(--gewu-bg-subtle) 6%);
-  color: var(--gewu-text-terminal-muted);
-  font-size: var(--gewu-font-size-sm);
+  border-bottom: 1px solid color-mix(in srgb, var(--petri-border) 72%, transparent);
+  background: color-mix(in srgb, var(--petri-bg-terminal) 94%, var(--petri-bg-subtle) 6%);
+  color: var(--petri-text-terminal-muted);
+  font-size: var(--petri-font-size-sm);
 }
 
 .embeddedTerminalHeader > div {
   display: flex;
   align-items: center;
   gap: 7px;
-  color: var(--gewu-text-terminal-muted);
+  color: var(--petri-text-terminal-muted);
 }
 
 .embeddedTerminalHeader small {
-  color: var(--gewu-text-terminal-muted);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-terminal-muted);
+  font-size: var(--petri-font-size-xs);
   letter-spacing: 0.2px;
 }
 
@@ -3416,13 +3416,13 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   width: 7px;
   height: 7px;
   border-radius: 999px;
-  background: var(--gewu-text-muted);
+  background: var(--petri-text-muted);
   flex-shrink: 0;
 }
 
 .embeddedTerminalStatusDot[data-running='true'] {
-  background: var(--gewu-status-online);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gewu-status-online) 18%, transparent);
+  background: var(--petri-status-online);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--petri-status-online) 18%, transparent);
 }
 
 .embeddedTerminalHeader button {
@@ -3435,14 +3435,14 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   border: none;
   border-radius: 5px;
   background: transparent;
-  color: var(--gewu-text-muted);
-  font-size: var(--gewu-font-size-sm);
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-sm);
   cursor: pointer;
 }
 
 .embeddedTerminalHeader button:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text-terminal-strong);
+  background: var(--petri-hover);
+  color: var(--petri-text-terminal-strong);
 }
 
 /* BLOCK-54 P2 — terminal tab strip (multi-tab, cap 4, codex-style pills). */
@@ -3452,8 +3452,8 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   gap: 4px;
   min-height: 24px;
   padding: 2px 7px 2px 8px;
-  border-bottom: 1px solid color-mix(in srgb, var(--gewu-border) 72%, transparent);
-  background: color-mix(in srgb, var(--gewu-bg-terminal) 92%, var(--gewu-bg-subtle) 8%);
+  border-bottom: 1px solid color-mix(in srgb, var(--petri-border) 72%, transparent);
+  background: color-mix(in srgb, var(--petri-bg-terminal) 92%, var(--petri-bg-subtle) 8%);
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -3470,7 +3470,7 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   padding: 0 3px 0 2px;
   border: 1px solid transparent;
   border-radius: 6px;
-  color: var(--gewu-text-terminal-muted);
+  color: var(--petri-text-terminal-muted);
 }
 
 .embeddedTerminalTab[data-exited='true'] {
@@ -3478,9 +3478,9 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
 }
 
 .embeddedTerminalTabActive {
-  border-color: color-mix(in srgb, var(--gewu-border-strong) 66%, transparent);
-  background: color-mix(in srgb, var(--gewu-hover) 70%, transparent);
-  color: var(--gewu-text-terminal-strong);
+  border-color: color-mix(in srgb, var(--petri-border-strong) 66%, transparent);
+  background: color-mix(in srgb, var(--petri-hover) 70%, transparent);
+  color: var(--petri-text-terminal-strong);
 }
 
 .embeddedTerminalTabLabel {
@@ -3492,7 +3492,7 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   border: none;
   background: transparent;
   color: inherit;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   line-height: 18px;
   cursor: pointer;
   white-space: nowrap;
@@ -3502,8 +3502,8 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   max-width: 90px;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--gewu-text-terminal-muted);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-terminal-muted);
+  font-size: var(--petri-font-size-xs);
   letter-spacing: 0.2px;
 }
 
@@ -3512,12 +3512,12 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  background: var(--gewu-text-muted);
+  background: var(--petri-text-muted);
   flex-shrink: 0;
 }
 
 .embeddedTerminalTabDot[data-running='true'] {
-  background: var(--gewu-status-online);
+  background: var(--petri-status-online);
 }
 
 .embeddedTerminalTabClose {
@@ -3530,14 +3530,14 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   border: none;
   border-radius: 4px;
   background: transparent;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .embeddedTerminalTabClose:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text-terminal-strong);
+  background: var(--petri-hover);
+  color: var(--petri-text-terminal-strong);
 }
 
 .embeddedTerminalTabAdd {
@@ -3550,14 +3550,14 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   border: none;
   border-radius: 5px;
   background: transparent;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .embeddedTerminalTabAdd:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text-terminal-strong);
+  background: var(--petri-hover);
+  color: var(--petri-text-terminal-strong);
 }
 
 /* UI-363 — tab 行右侧动作区（清空/关闭面板/上限提示），替代原独立 header 行 */
@@ -3572,9 +3572,9 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
 .embeddedTerminalNotice {
   padding: 1px 7px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--gewu-warning, #d97706) 14%, transparent);
-  color: var(--gewu-warning, #d97706);
-  font-size: var(--gewu-font-size-xs);
+  background: color-mix(in srgb, var(--petri-warning, #d97706) 14%, transparent);
+  color: var(--petri-warning, #d97706);
+  font-size: var(--petri-font-size-xs);
   white-space: nowrap;
 }
 
@@ -3594,16 +3594,16 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--gewu-text-terminal-muted);
-  font-size: var(--gewu-font-size-sm);
+  color: var(--petri-text-terminal-muted);
+  font-size: var(--petri-font-size-sm);
 }
 
 /* xterm host — Codex-like dark terminal area */
 .embeddedTerminalHost {
   flex: 1;
   min-height: 0;
-  background: var(--gewu-bg-terminal);
-  color: var(--gewu-text-terminal-strong);
+  background: var(--petri-bg-terminal);
+  color: var(--petri-text-terminal-strong);
   border-radius: 0 0 8px 8px;
 }
 
@@ -3615,7 +3615,7 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
 
 /* UI-215 补充：xterm 可访问性隐藏 textarea 收敛 UA 默认字号（canvas 渲染不受影响） */
 .embeddedTerminalHost :global(.xterm textarea) {
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
 }
 
 .embeddedTerminalHost :global(.xterm-viewport),
@@ -3632,9 +3632,9 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
 }
 
 .embeddedTerminalHost :global(.xterm-viewport)::-webkit-scrollbar-thumb {
-  border: 2px solid var(--gewu-bg-terminal);
+  border: 2px solid var(--petri-bg-terminal);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--gewu-text-terminal-muted) 52%, transparent);
+  background: color-mix(in srgb, var(--petri-text-terminal-muted) 52%, transparent);
 }
 
 .embeddedTerminalOutput {
@@ -3643,9 +3643,9 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   margin: 0;
   padding: 6px 10px 8px;
   overflow: auto;
-  background: var(--gewu-bg-terminal);
-  color: var(--gewu-text-terminal-strong);
-  font: var(--gewu-font-size-sm)/1.4 var(--gewu-font-mono, monospace);
+  background: var(--petri-bg-terminal);
+  color: var(--petri-text-terminal-strong);
+  font: var(--petri-font-size-sm)/1.4 var(--petri-font-mono, monospace);
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -3656,10 +3656,10 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   gap: 7px;
   min-height: 30px;
   padding: 3px 12px 5px;
-  border-top: 1px solid var(--gewu-border);
-  background: var(--gewu-bg-terminal);
-  color: var(--gewu-text-terminal-prompt);
-  font: var(--gewu-font-size-sm) var(--gewu-font-mono, monospace);
+  border-top: 1px solid var(--petri-border);
+  background: var(--petri-bg-terminal);
+  color: var(--petri-text-terminal-prompt);
+  font: var(--petri-font-size-sm) var(--petri-font-mono, monospace);
 }
 
 .embeddedTerminalInputRow input {
@@ -3668,12 +3668,12 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   border: none;
   outline: none;
   background: transparent;
-  color: var(--gewu-text-terminal-strong);
+  color: var(--petri-text-terminal-strong);
   font: inherit;
 }
 
 .embeddedTerminalInputRow input::placeholder {
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
 }
 
 .browserPanel {
@@ -3698,9 +3698,9 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   margin: 0;
   padding: 8px 10px;
   border: none;
-  border-bottom: 1px solid var(--gewu-border);
+  border-bottom: 1px solid var(--petri-border);
   border-radius: 0;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
   flex-shrink: 0;
 }
 
@@ -3711,14 +3711,14 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
 }
 
 .terminalPanelTitle {
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   font-weight: 600;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .terminalPanelMeta {
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-tertiary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3737,21 +3737,21 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   padding: 0 8px;
   height: 24px;
   background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-sm);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-sm);
   cursor: pointer;
 }
 
 .terminalPanelActionBtn:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
-  border-color: var(--gewu-accent-border);
+  background: var(--petri-hover);
+  color: var(--petri-text);
+  border-color: var(--petri-accent-border);
 }
 
 .terminalPanelHint {
   padding: 8px 10px 0;
-  color: var(--gewu-status-warning-fg);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-status-warning-fg);
+  font-size: var(--petri-font-size-caption);
 }
 
 .terminalPanelList {
@@ -3764,10 +3764,10 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
 }
 
 .terminalProcessCard {
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
   overflow: hidden;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
 }
 
 .terminalProcessSummary {
@@ -3789,48 +3789,48 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   align-items: center;
   gap: 8px;
   min-width: 0;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   font-weight: 600;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .terminalProcessMeta {
   flex-shrink: 0;
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-tertiary);
 }
 
 .terminalProcessDot {
   width: 7px;
   height: 7px;
   border-radius: 999px;
-  background: var(--gewu-text-muted);
+  background: var(--petri-text-muted);
 }
 
 .terminalProcessDot[data-status='running'] {
-  background: var(--gewu-status-online);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gewu-status-online) 16%, transparent);
+  background: var(--petri-status-online);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--petri-status-online) 16%, transparent);
 }
 
 .terminalProcessDot[data-status='stopped'] {
-  background: var(--gewu-status-warning);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gewu-status-warning) 14%, transparent);
+  background: var(--petri-status-warning);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--petri-status-warning) 14%, transparent);
 }
 
 .terminalProcessCommand {
   padding: 0 12px 8px;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-sm);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-sm);
   overflow-wrap: anywhere;
 }
 
 .terminalProcessOutput {
   margin: 0;
   padding: 10px 12px 12px;
-  border-top: 1px solid var(--gewu-border);
-  background: var(--gewu-bg-terminal);
-  color: var(--gewu-text-terminal);
-  font-size: var(--gewu-font-size-sm);
+  border-top: 1px solid var(--petri-border);
+  background: var(--petri-bg-terminal);
+  color: var(--petri-text-terminal);
+  font-size: var(--petri-font-size-sm);
   line-height: 1.5;
   white-space: pre-wrap;
   overflow: auto;
@@ -3850,16 +3850,16 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   justify-content: center;
   width: 28px;
   height: 28px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text-secondary);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
   cursor: pointer;
 }
 
 .browserControlBtn:hover {
-  color: var(--gewu-text);
-  border-color: var(--gewu-accent-border);
+  color: var(--petri-text);
+  border-color: var(--petri-accent-border);
 }
 
 .browserUrlBar {
@@ -3874,29 +3874,29 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   flex: 1;
   min-width: 0;
   height: 28px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
   padding: 0 10px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
   font: inherit;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
 }
 
 .browserUrlBar input:focus {
   outline: none;
-  border-color: var(--gewu-accent-border);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gewu-accent) 12%, transparent);
+  border-color: var(--petri-accent-border);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--petri-accent) 12%, transparent);
 }
 
 .browserGoBtn {
-  border: 1px solid color-mix(in srgb, var(--gewu-accent) 30%, transparent);
+  border: 1px solid color-mix(in srgb, var(--petri-accent) 30%, transparent);
   border-radius: 8px;
   padding: 0 10px;
   height: 28px;
-  background: var(--gewu-accent);
+  background: var(--petri-accent);
   color: #ffffff;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   cursor: pointer;
 }
 
@@ -3910,8 +3910,8 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   justify-content: space-between;
   gap: 8px;
   padding: 4px 10px 0;
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-tertiary);
 }
 
 .browserHost {
@@ -3922,7 +3922,7 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   margin: 0;
   border-top: none;
   border-radius: 0;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
   position: relative;
   overflow: hidden;
 }
@@ -3934,7 +3934,7 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   height: 100%;
   min-height: 0;
   border: 0;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
 }
 
 .browserHost :global(webview) {
@@ -3954,24 +3954,24 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text-secondary);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
   text-align: center;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
 }
 
 .browserError strong {
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-body-sm);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body-sm);
 }
 
 .browserError button {
   height: 28px;
   padding: 0 10px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 7px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
   cursor: pointer;
 }
 
@@ -3999,7 +3999,7 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
   bottom: 0;
   left: 4px;
   width: 1px;
-  background: color-mix(in srgb, var(--gewu-border) 62%, transparent 38%);
+  background: color-mix(in srgb, var(--petri-border) 62%, transparent 38%);
   opacity: 0.72;
 }
 
@@ -4010,13 +4010,13 @@ body:global(.gewu-resizing-columns) .embeddedTerminal {
 
 .resizeHandleV:hover::after,
 .resizeHandleV:active::after {
-  background: color-mix(in srgb, var(--gewu-accent) 58%, transparent 42%);
+  background: color-mix(in srgb, var(--petri-accent) 58%, transparent 42%);
   opacity: 0.88;
   width: 2px;
 }
 
-body:global(.gewu-resizing-columns) .rightCol iframe,
-body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
+body:global(.petri-resizing-columns) .rightCol iframe,
+body:global(.petri-resizing-columns) .rightPanelTabContent iframe {
   pointer-events: none;
 }
 
@@ -4035,8 +4035,8 @@ body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
   right: 0;
   bottom: 0;
   width: 320px;
-  background: var(--gewu-bg-surface);
-  border-left: 1px solid var(--gewu-border);
+  background: var(--petri-bg-surface);
+  border-left: 1px solid var(--petri-border);
   box-shadow: -4px 0 24px rgba(0, 0, 0, 0.1);
   z-index: 999;
   display: flex;
@@ -4050,19 +4050,19 @@ body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--gewu-border);
+  border-bottom: 1px solid var(--petri-border);
   flex-shrink: 0;
 }
 
 .settingsSiderTitle {
-  font-size: var(--gewu-font-size-md);
+  font-size: var(--petri-font-size-md);
   font-weight: 600;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .iconBtnActive {
-  background: var(--gewu-accent-bg);
-  color: var(--gewu-accent);
+  background: var(--petri-accent-bg);
+  color: var(--petri-accent);
 }
 
 @keyframes fadeIn {
@@ -4093,17 +4093,17 @@ body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   margin: 0;
 }
 
 .panelEmpty {
-  font-size: var(--gewu-font-size-body-sm);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-body-sm);
+  color: var(--petri-text-tertiary);
   padding: 8px 0;
 }
 
@@ -4112,9 +4112,9 @@ body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
   flex-direction: column;
   gap: 10px;
   padding: 12px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 10px;
-  background: var(--gewu-surface);
+  background: var(--petri-surface);
 }
 
 .resultSidebarTitleRow {
@@ -4126,9 +4126,9 @@ body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
 
 .resultSidebarTitleRow strong {
   flex: 1;
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   line-height: 1.35;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4139,8 +4139,8 @@ body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
   display: flex;
   flex-wrap: wrap;
   gap: 6px 10px;
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-tertiary);
 }
 
 .resultSidebarActions {
@@ -4156,27 +4156,27 @@ body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
   gap: 6px;
   height: 28px;
   padding: 0 10px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
-  background: var(--gewu-surface);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-caption);
+  background: var(--petri-surface);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-caption);
   cursor: pointer;
 }
 
 .resultSidebarBtn:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .resultSidebarBtnPrimary {
-  border-color: var(--gewu-accent-border);
-  background: var(--gewu-accent);
+  border-color: var(--petri-accent-border);
+  background: var(--petri-accent);
   color: #ffffff;
 }
 
 .resultSidebarBtnPrimary:hover {
-  background: var(--gewu-accent-hover);
+  background: var(--petri-accent-hover);
   color: #ffffff;
 }
 
@@ -4199,9 +4199,9 @@ body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
   gap: 7px;
   margin: 0 0 10px;
   padding: 9px 10px;
-  border: 1px solid color-mix(in srgb, var(--gewu-border) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--petri-border) 72%, transparent);
   border-radius: 10px;
-  background: var(--gewu-surface);
+  background: var(--petri-surface);
 }
 
 .harnessIndexCardHeader {
@@ -4209,9 +4209,9 @@ body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   font-weight: 600;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .harnessIndexCardHeader em,
@@ -4219,16 +4219,16 @@ body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
 .harnessIndexMuted {
   font-style: normal;
   font-weight: 400;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .harnessIndexStats {
   display: flex;
   flex-direction: column;
   gap: 3px;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   line-height: 1.35;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
 }
 
 .harnessIndexEntries {
@@ -4242,8 +4242,8 @@ body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
   justify-content: space-between;
   gap: 8px;
   min-width: 0;
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-secondary);
 }
 
 .harnessIndexEntry span {
@@ -4259,7 +4259,7 @@ body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
 
 .harnessIndexMuted {
   margin: 0;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   line-height: 1.4;
 }
 
@@ -4284,9 +4284,9 @@ body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
   flex-shrink: 0;
   min-height: 30px;
   padding: 5px 10px;
-  border-bottom: 1px solid color-mix(in srgb, var(--gewu-border) 64%, transparent);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-xs);
+  border-bottom: 1px solid color-mix(in srgb, var(--petri-border) 64%, transparent);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xs);
 }
 
 .resultWorkflowBarMain {
@@ -4304,8 +4304,8 @@ body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
 
 .resultWorkflowBarMain small {
   flex-shrink: 0;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs);
 }
 
 .resultWorkflowDot {
@@ -4313,11 +4313,11 @@ body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
   height: 6px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: var(--gewu-status-loading);
+  background: var(--petri-status-loading);
 }
 
 .resultWorkflowDot[data-terminal='true'] {
-  background: var(--gewu-accent);
+  background: var(--petri-accent);
 }
 
 .resultWorkflowBar > button {
@@ -4325,8 +4325,8 @@ body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
   border: 0;
   padding: 2px 5px;
   background: transparent;
-  color: var(--gewu-accent);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-accent);
+  font-size: var(--petri-font-size-xs);
   cursor: pointer;
 }
 
@@ -4348,10 +4348,10 @@ body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
   gap: 10px;
   flex-shrink: 0;
   padding: 7px 10px;
-  border-bottom: 1px solid color-mix(in srgb, var(--gewu-border) 64%, transparent);
-  background: color-mix(in srgb, var(--gewu-accent) 5%, var(--gewu-bg-surface));
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-xs);
+  border-bottom: 1px solid color-mix(in srgb, var(--petri-border) 64%, transparent);
+  background: color-mix(in srgb, var(--petri-accent) 5%, var(--petri-bg-surface));
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xs);
 }
 
 .resultWorkflowConfirmation > span {
@@ -4370,23 +4370,23 @@ body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
 .resultWorkflowConfirmation button {
   min-height: 23px;
   padding: 2px 8px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-xs);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xs);
   cursor: pointer;
 }
 
 .resultWorkflowConfirmation button:last-child {
-  border-color: color-mix(in srgb, var(--gewu-accent) 42%, var(--gewu-border));
-  color: var(--gewu-accent);
+  border-color: color-mix(in srgb, var(--petri-accent) 42%, var(--petri-border));
+  color: var(--petri-accent);
 }
 
 .resultWorkflowError {
   justify-content: flex-start;
-  background: var(--gewu-status-error-bg);
-  color: var(--gewu-status-error-fg);
+  background: var(--petri-status-error-bg);
+  color: var(--petri-status-error-fg);
 }
 
 .resultWorkflowError > span {
@@ -4411,7 +4411,7 @@ body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
 .resultView input:focus-visible,
 .resultView select:focus-visible,
 .resultView textarea:focus-visible {
-  outline: 2px solid var(--gewu-accent);
+  outline: 2px solid var(--petri-accent);
   outline-offset: 2px;
 }
 
@@ -4422,9 +4422,9 @@ body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
   flex: 1;
   min-height: 0;
   padding: 12px;
-  border: 1px solid color-mix(in srgb, var(--gewu-border) 78%, transparent);
+  border: 1px solid color-mix(in srgb, var(--petri-border) 78%, transparent);
   border-radius: 12px;
-  background: var(--gewu-surface);
+  background: var(--petri-surface);
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
   contain: layout paint;
 }
@@ -4437,21 +4437,21 @@ body:global(.gewu-resizing-columns) .rightPanelTabContent iframe {
   overflow: hidden;
   border: 0;
   border-radius: 0;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
   position: relative;
 }
 
 /* Keep the expensive embedded report out of the frame-by-frame layout pass.
  * The surrounding result workspace still follows the pointer in real time.
  * :global — body 类由 useResizableColumns 挂字面量，不能被 CSS Modules 本地化
- * （此前 body 类被 hash 成 _gewu-resizing-columns_xxx，整组规则从未生效）。 */
-body:global(.gewu-resizing-columns) .rightCol {
+ * （此前 body 类被 hash 成 _petri-resizing-columns_xxx，整组规则从未生效）。 */
+body:global(.petri-resizing-columns) .rightCol {
   transition: none;
   will-change: width;
 }
 
-body:global(.gewu-resizing-columns),
-body:global(.gewu-resizing-columns) * {
+body:global(.petri-resizing-columns),
+body:global(.petri-resizing-columns) * {
   cursor: ew-resize !important;
 }
 
@@ -4461,7 +4461,7 @@ body:global(.gewu-resizing-columns) * {
   height: 100%;
   min-height: 100%;
   border: 0;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
 }
 
 /* BLOCK-52 P2（图片/结果图引用）：结果图预览列——顶部引用操作行 + 图片画布 */
@@ -4505,11 +4505,11 @@ body:global(.gewu-resizing-columns) * {
 .resultSidebarText {
   margin: 0;
   padding: 10px;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   line-height: 1.55;
   white-space: pre-wrap;
   word-break: break-word;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
 }
 
 .resultSidebarFileList {
@@ -4522,35 +4522,35 @@ body:global(.gewu-resizing-columns) * {
   flex-direction: column;
   gap: 2px;
   width: 100%;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
   padding: 8px 10px;
-  background: var(--gewu-surface);
+  background: var(--petri-surface);
   cursor: pointer;
   text-align: left;
 }
 
 .resultSidebarFileItem:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .resultSidebarFileItemActive {
-  border-color: var(--gewu-accent-border);
-  background: var(--gewu-accent-bg);
+  border-color: var(--petri-accent-border);
+  background: var(--petri-accent-bg);
 }
 
 .resultSidebarFileName {
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   font-weight: 500;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .resultSidebarFileMeta {
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-tertiary);
 }
 
 .resultSidebarStats {
@@ -4564,39 +4564,39 @@ body:global(.gewu-resizing-columns) * {
   flex-direction: column;
   gap: 4px;
   padding: 8px 10px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
-  background: var(--gewu-surface);
+  background: var(--petri-surface);
 }
 
 .resultSidebarStat span {
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-tertiary);
 }
 
 .resultSidebarStat strong {
-  font-size: var(--gewu-font-size-body-sm);
-  color: var(--gewu-text);
+  font-size: var(--petri-font-size-body-sm);
+  color: var(--petri-text);
 }
 
 .resultSidebarDetails {
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
   padding: 8px 10px;
-  background: var(--gewu-surface);
+  background: var(--petri-surface);
 }
 
 .resultSidebarDetails summary {
   cursor: pointer;
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-text-secondary);
 }
 
 .resultSidebarDetails pre {
   margin: 8px 0 0;
   max-height: 160px;
   overflow: auto;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-word;
@@ -4623,7 +4623,7 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .itemRow:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .itemMeta {
@@ -4634,17 +4634,17 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .itemName {
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   font-weight: 500;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .itemSub {
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-tertiary);
 }
 
 /* Info block */
@@ -4659,16 +4659,16 @@ body:global(.gewu-resizing-columns) * {
   justify-content: space-between;
   gap: 8px;
   margin: 0;
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
 }
 
 .infoLabel {
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   flex-shrink: 0;
 }
 
 .infoValue {
-  color: var(--gewu-text);
+  color: var(--petri-text);
   text-align: right;
   word-break: break-word;
 }
@@ -4694,11 +4694,11 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .timelineItem:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .timelineItemActive {
-  background: var(--gewu-accent-bg);
+  background: var(--petri-accent-bg);
 }
 
 .timelineDot {
@@ -4707,20 +4707,20 @@ body:global(.gewu-resizing-columns) * {
   border-radius: 50%;
   margin-top: 5px;
   flex-shrink: 0;
-  background: var(--gewu-text-tertiary);
+  background: var(--petri-text-tertiary);
 }
 
 .timelineDot[data-status="running"],
 .timelineDot[data-status="pending"] {
-  background: var(--gewu-status-loading);
+  background: var(--petri-status-loading);
 }
 
 .timelineDot[data-status="done"] {
-  background: var(--gewu-status-online);
+  background: var(--petri-status-online);
 }
 
 .timelineDot[data-status="failed"] {
-  background: var(--gewu-status-error);
+  background: var(--petri-status-error);
 }
 
 .timelineContent {
@@ -4731,36 +4731,36 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .timelineTitle {
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   font-weight: 500;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .timelineTime {
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-tertiary);
 }
 
 .timelineStatus {
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .timelineStatus[data-status="running"],
 .timelineStatus[data-status="pending"] {
-  color: var(--gewu-status-loading);
+  color: var(--petri-status-loading);
 }
 
 .timelineStatus[data-status="done"] {
-  color: var(--gewu-status-online);
+  color: var(--petri-status-online);
 }
 
 .timelineStatus[data-status="failed"] {
-  color: var(--gewu-status-error);
+  color: var(--petri-status-error);
 }
 
 /* Result view */
@@ -4803,7 +4803,7 @@ body:global(.gewu-resizing-columns) * {
   gap: 6px;
   margin-top: 0;
   color: var(--text-tertiary);
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
 }
 
 .resultReportExportLinks a {
@@ -4816,7 +4816,7 @@ body:global(.gewu-resizing-columns) * {
   overflow-wrap: anywhere;
   color: var(--text-tertiary);
   font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   margin: 0;
   padding: 2px 0 6px;
 }
@@ -4824,12 +4824,12 @@ body:global(.gewu-resizing-columns) * {
 .resultReportActionStatus,
 .resultReportActionError {
   flex-basis: 100%;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   line-height: 1.45;
 }
 
-.resultReportActionStatus { color: var(--gewu-text-tertiary); }
-.resultReportActionError { color: var(--gewu-danger); }
+.resultReportActionStatus { color: var(--petri-text-tertiary); }
+.resultReportActionError { color: var(--petri-danger); }
 
 .resultReportSection {
   display: flex;
@@ -4859,7 +4859,7 @@ body:global(.gewu-resizing-columns) * {
   height: 100%;
   min-height: 100%;
   border: none;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
 }
 
 .resultReportSection .resultMetrics {
@@ -4900,9 +4900,9 @@ body:global(.gewu-resizing-columns) * {
   gap: 12px;
   margin: 4px 0 10px;
   padding: 12px 14px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 10px;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
 }
 
 .resultRawToggleCopy {
@@ -4912,9 +4912,9 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .resultRawToggleText {
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   line-height: 1.4;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
 }
 
 .resultHeader {
@@ -4923,9 +4923,9 @@ body:global(.gewu-resizing-columns) * {
   gap: 12px;
   margin-bottom: 14px;
   padding: 18px 18px 14px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 12px;
-  background: var(--gewu-surface);
+  background: var(--petri-surface);
 }
 
 .resultHeaderTitleRow {
@@ -4940,8 +4940,8 @@ body:global(.gewu-resizing-columns) * {
   display: flex;
   flex-wrap: wrap;
   gap: 6px 10px;
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-text-tertiary);
 }
 
 .resultHeaderMeta span {
@@ -4960,10 +4960,10 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .resultTitle {
-  font-size: var(--gewu-font-size-xl);
+  font-size: var(--petri-font-size-xl);
   font-weight: 600;
   margin: 0;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .resultMetrics {
@@ -4978,20 +4978,20 @@ body:global(.gewu-resizing-columns) * {
   flex-direction: column;
   gap: 6px;
   padding: 12px 14px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 10px;
-  background: var(--gewu-surface);
+  background: var(--petri-surface);
 }
 
 .resultMetricCard span {
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-tertiary);
 }
 
 .resultMetricCard strong {
-  font-size: var(--gewu-font-size-xl);
+  font-size: var(--petri-font-size-xl);
   line-height: 1;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .resultFocusPanel {
@@ -5000,9 +5000,9 @@ body:global(.gewu-resizing-columns) * {
   gap: 12px;
   margin-bottom: 16px;
   padding: 14px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 12px;
-  background: var(--gewu-surface);
+  background: var(--petri-surface);
 }
 
 .resultFocusHeader {
@@ -5019,17 +5019,17 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .resultFocusLabel {
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .resultFocusName {
-  font-size: var(--gewu-font-size-body);
+  font-size: var(--petri-font-size-body);
   font-weight: 600;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .resultFocusActions {
@@ -5047,19 +5047,19 @@ body:global(.gewu-resizing-columns) * {
   height: 28px;
   padding: 0 10px;
   border-radius: 8px;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   text-decoration: none;
 }
 
 .resultFocusActionLink {
-  border: 1px solid var(--gewu-border);
-  background: var(--gewu-surface);
-  color: var(--gewu-text-secondary);
+  border: 1px solid var(--petri-border);
+  background: var(--petri-surface);
+  color: var(--petri-text-secondary);
 }
 
 .resultFocusActionHint {
-  background: var(--gewu-accent-bg);
-  color: var(--gewu-accent);
+  background: var(--petri-accent-bg);
+  color: var(--petri-accent);
 }
 
 .resultFocusBody {
@@ -5067,8 +5067,8 @@ body:global(.gewu-resizing-columns) * {
   max-height: 62vh;
   overflow: auto;
   border-radius: 10px;
-  background: var(--gewu-bg);
-  border: 1px solid var(--gewu-border);
+  background: var(--petri-bg);
+  border: 1px solid var(--petri-border);
 }
 
 .resultPreviewFrame {
@@ -5076,7 +5076,7 @@ body:global(.gewu-resizing-columns) * {
   width: 100%;
   height: 520px;
   border: 0;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
 }
 
 .resultPreviewImage {
@@ -5098,24 +5098,24 @@ body:global(.gewu-resizing-columns) * {
   gap: 6px;
   margin: 0;
   padding: 18px 16px;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-body-sm);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-body-sm);
 }
 
 .resultPreviewPlaceholder strong {
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-caption);
 }
 
 .resultPreviewPlaceholder span {
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-sm);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-sm);
   overflow-wrap: anywhere;
 }
 
 .resultPreviewPlaceholder a {
-  color: var(--gewu-accent);
-  font-size: var(--gewu-font-size-sm);
+  color: var(--petri-accent);
+  font-size: var(--petri-font-size-sm);
   text-decoration: none;
 }
 
@@ -5128,23 +5128,23 @@ body:global(.gewu-resizing-columns) * {
   padding: 24px;
   border: 0;
   border-radius: 0;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text-secondary);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
   text-align: center;
 }
 
 .resultPreviewUnavailable > svg {
-  color: var(--gewu-danger);
+  color: var(--petri-danger);
 }
 
 .resultPreviewUnavailable strong {
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-body-sm);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body-sm);
 }
 
 .resultPreviewUnavailable span {
   max-width: 440px;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   line-height: 1.55;
 }
 
@@ -5158,18 +5158,18 @@ body:global(.gewu-resizing-columns) * {
 .resultPreviewUnavailable button {
   min-height: 29px;
   padding: 0 10px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  background: var(--gewu-bg);
-  color: var(--gewu-text-secondary);
+  background: var(--petri-bg);
+  color: var(--petri-text-secondary);
   cursor: pointer;
   font: inherit;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
 }
 
 .resultPreviewUnavailable button:hover {
-  border-color: var(--gewu-border-strong);
-  color: var(--gewu-text);
+  border-color: var(--petri-border-strong);
+  color: var(--petri-text);
 }
 
 .resultReportPreview {
@@ -5178,11 +5178,11 @@ body:global(.gewu-resizing-columns) * {
   height: 100%;
   min-height: 520px;
   border: 0;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
 }
 
 .resultStatus {
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   padding: 2px 10px;
   border-radius: 4px;
   text-transform: uppercase;
@@ -5191,40 +5191,40 @@ body:global(.gewu-resizing-columns) * {
 
 .resultStatus[data-status="running"],
 .resultStatus[data-status="pending"] {
-  background: var(--gewu-status-warning-bg);
-  color: var(--gewu-status-warning-fg);
+  background: var(--petri-status-warning-bg);
+  color: var(--petri-status-warning-fg);
 }
 
 .resultStatus[data-status="done"] {
-  background: var(--gewu-status-success-bg);
-  color: var(--gewu-status-success-fg);
+  background: var(--petri-status-success-bg);
+  color: var(--petri-status-success-fg);
 }
 
 .resultStatus[data-status="failed"] {
-  background: var(--gewu-status-error-bg);
-  color: var(--gewu-status-error-fg);
+  background: var(--petri-status-error-bg);
+  color: var(--petri-status-error-fg);
 }
 
 .resultBody {
-  background: var(--gewu-surface);
-  border: 1px solid var(--gewu-border);
+  background: var(--petri-surface);
+  border: 1px solid var(--petri-border);
   border-radius: 12px;
   padding: 24px;
 }
 
 .resultPlaceholder {
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-body);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-body);
 }
 
 .resultError {
   margin-top: 16px;
   padding: 12px;
-  background: var(--gewu-status-error-bg);
-  border: 1px solid var(--gewu-status-error-border);
+  background: var(--petri-status-error-bg);
+  border: 1px solid var(--petri-status-error-border);
   border-radius: 8px;
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-status-error-fg);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-status-error-fg);
   white-space: pre-wrap;
   overflow-x: auto;
 }
@@ -5241,8 +5241,8 @@ body:global(.gewu-resizing-columns) * {
 .spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid var(--gewu-border);
-  border-top-color: var(--gewu-accent);
+  border: 3px solid var(--petri-border);
+  border-top-color: var(--petri-accent);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -5256,27 +5256,27 @@ body:global(.gewu-resizing-columns) * {
   display: flex;
   gap: 0;
   margin-bottom: 16px;
-  border-bottom: 1px solid var(--gewu-border);
+  border-bottom: 1px solid var(--petri-border);
 }
 
 .resultTab {
   padding: 8px 16px;
   border: none;
   background: transparent;
-  font-size: var(--gewu-font-size-body-sm);
-  color: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-body-sm);
+  color: var(--petri-text-secondary);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: color 0.15s, border-color 0.15s;
 }
 
 .resultTab:hover {
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .resultTabActive {
-  color: var(--gewu-accent);
-  border-bottom-color: var(--gewu-accent);
+  color: var(--petri-accent);
+  border-bottom-color: var(--petri-accent);
 }
 
 /* Plot cards */
@@ -5287,8 +5287,8 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .plotCard {
-  background: var(--gewu-surface);
-  border: 1px solid var(--gewu-border);
+  background: var(--petri-surface);
+  border: 1px solid var(--petri-border);
   border-radius: 10px;
   overflow: hidden;
   display: flex;
@@ -5297,8 +5297,8 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .plotCardActive {
-  border-color: var(--gewu-accent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--gewu-accent) 16%, transparent);
+  border-color: var(--petri-accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--petri-accent) 16%, transparent);
 }
 
 .plotCardHeader {
@@ -5306,21 +5306,21 @@ body:global(.gewu-resizing-columns) * {
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  border-bottom: 1px solid var(--gewu-border);
+  border-bottom: 1px solid var(--petri-border);
 }
 
 .plotCardNum {
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   font-weight: 600;
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .plotCardLabel {
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   font-weight: 500;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5342,37 +5342,37 @@ body:global(.gewu-resizing-columns) * {
 
 .plotCardFooter {
   padding: 6px 12px;
-  border-top: 1px solid var(--gewu-border);
+  border-top: 1px solid var(--petri-border);
   display: flex;
   justify-content: flex-end;
 }
 
 .plotCardBtn {
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   padding: 4px 10px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  background: var(--gewu-surface);
-  color: var(--gewu-text-secondary);
+  background: var(--petri-surface);
+  color: var(--petri-text-secondary);
   text-decoration: none;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
 
 .plotCardBtn:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .plotCardBtnPrimary {
   composes: plotCardBtn;
-  background: var(--gewu-accent);
+  background: var(--petri-accent);
   color: #ffffff;
-  border-color: var(--gewu-accent);
+  border-color: var(--petri-accent);
 }
 
 .plotCardBtnPrimary:hover {
-  background: var(--gewu-accent-hover);
+  background: var(--petri-accent-hover);
   color: #ffffff;
 }
 
@@ -5384,8 +5384,8 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .fileCard {
-  background: var(--gewu-surface);
-  border: 1px solid var(--gewu-border);
+  background: var(--petri-surface);
+  border: 1px solid var(--petri-border);
   border-radius: 10px;
   padding: 16px;
   display: flex;
@@ -5395,24 +5395,24 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .fileCardActive {
-  border-color: var(--gewu-accent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--gewu-accent) 16%, transparent);
+  border-color: var(--petri-accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--petri-accent) 16%, transparent);
 }
 
 .fileCardIcon {
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
   margin-bottom: 4px;
 }
 
 .fileCardName {
-  font-size: var(--gewu-font-size-body);
+  font-size: var(--petri-font-size-body);
   font-weight: 600;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .fileCardDesc {
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-text-tertiary);
   word-break: break-all;
 }
 
@@ -5425,7 +5425,7 @@ body:global(.gewu-resizing-columns) * {
 /* CSV preview */
 .csvPreview {
   margin-top: 20px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 10px;
   overflow: hidden;
 }
@@ -5435,8 +5435,8 @@ body:global(.gewu-resizing-columns) * {
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  background: var(--gewu-hover);
-  font-size: var(--gewu-font-size-body-sm);
+  background: var(--petri-hover);
+  font-size: var(--petri-font-size-body-sm);
   font-weight: 500;
 }
 
@@ -5444,8 +5444,8 @@ body:global(.gewu-resizing-columns) * {
   border: none;
   background: transparent;
   cursor: pointer;
-  font-size: var(--gewu-font-size-md);
-  color: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-md);
+  color: var(--petri-text-secondary);
 }
 
 .csvPreviewBody {
@@ -5457,16 +5457,16 @@ body:global(.gewu-resizing-columns) * {
   display: grid;
   gap: 8px;
   padding: 10px 12px;
-  border-top: 1px dashed var(--gewu-border);
-  background: color-mix(in srgb, var(--gewu-accent) 4%, transparent);
+  border-top: 1px dashed var(--petri-border);
+  background: color-mix(in srgb, var(--petri-accent) 4%, transparent);
 }
 
 .analysisLaunchField {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-secondary);
 }
 
 .analysisLaunchField > span {
@@ -5478,7 +5478,7 @@ body:global(.gewu-resizing-columns) * {
   flex: 1;
   min-height: 27px;
   padding: 0 7px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
   background: transparent;
   color: inherit;
@@ -5487,7 +5487,7 @@ body:global(.gewu-resizing-columns) * {
 
 .analysisLaunchField select:focus-visible,
 .analysisLaunchField input:focus-visible {
-  outline: 2px solid var(--gewu-accent);
+  outline: 2px solid var(--petri-accent);
   outline-offset: 2px;
 }
 
@@ -5504,10 +5504,10 @@ body:global(.gewu-resizing-columns) * {
   align-items: center;
   gap: 8px;
   padding: 6px 8px;
-  border-top: 1px solid var(--gewu-border);
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-xs);
+  border-top: 1px solid var(--petri-border);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xs);
 }
 
 .csvPreviewPager span {
@@ -5517,12 +5517,12 @@ body:global(.gewu-resizing-columns) * {
 .csvPreviewBody table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
 }
 
 .csvPreviewBody td {
   padding: 4px 8px;
-  border-bottom: 1px solid var(--gewu-border);
+  border-bottom: 1px solid var(--petri-border);
   white-space: nowrap;
   max-width: 200px;
   overflow: hidden;
@@ -5531,7 +5531,7 @@ body:global(.gewu-resizing-columns) * {
 
 .csvPreviewBody tr:first-child td {
   font-weight: 600;
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
   position: sticky;
   top: 0;
 }
@@ -5541,10 +5541,10 @@ body:global(.gewu-resizing-columns) * {
   padding: 12px;
   max-height: 400px;
   overflow: auto;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   line-height: 1.5;
   white-space: pre-wrap;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .jobDetails {
@@ -5553,17 +5553,17 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .jobDetailSection {
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
-  background: var(--gewu-bg);
+  background: var(--petri-bg);
   padding: 12px;
 }
 
 .jobDetailSection h3 {
   margin: 0 0 10px;
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   font-weight: 700;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .jobDetailSection dl {
@@ -5576,17 +5576,17 @@ body:global(.gewu-resizing-columns) * {
   display: grid;
   grid-template-columns: 92px minmax(0, 1fr);
   gap: 10px;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
 }
 
 .jobDetailSection dt {
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
 }
 
 .jobDetailSection dd {
   min-width: 0;
   margin: 0;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   overflow-wrap: anywhere;
 }
 
@@ -5595,9 +5595,9 @@ body:global(.gewu-resizing-columns) * {
   margin: 0;
   overflow: auto;
   white-space: pre-wrap;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   line-height: 1.5;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .resultRawDetails {
@@ -5608,9 +5608,9 @@ body:global(.gewu-resizing-columns) * {
 .resultRawDetails summary {
   cursor: pointer;
   list-style: none;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   font-weight: 600;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
 }
 
 .resultRawDetails summary::-webkit-details-marker {
@@ -5660,21 +5660,21 @@ body:global(.gewu-resizing-columns) * {
   padding: 10px 12px;
   border: none;
   border-radius: 11px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
   text-align: left;
   cursor: pointer;
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
   /* UI-215 补充：卡片容器收敛 UA 默认字号（子级文本自带 token） */
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
 }
 
 .emptyResultLaunchCard:hover {
-  background: var(--gewu-bg-subtle);
+  background: var(--petri-bg-subtle);
 }
 
 .emptyResultLaunchCard span {
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   font-weight: 600;
 }
 
@@ -5688,7 +5688,7 @@ body:global(.gewu-resizing-columns) * {
 .tabBar {
   display: flex;
   gap: 0;
-  border-bottom: 1px solid var(--gewu-border);
+  border-bottom: 1px solid var(--petri-border);
   margin-bottom: 4px;
 }
 
@@ -5697,20 +5697,20 @@ body:global(.gewu-resizing-columns) * {
   padding: 6px 8px;
   border: none;
   background: transparent;
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-text-secondary);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: color 0.15s, border-color 0.15s;
 }
 
 .tabBtn:hover {
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .tabBtnActive {
-  color: var(--gewu-accent);
-  border-bottom-color: var(--gewu-accent);
+  color: var(--petri-accent);
+  border-bottom-color: var(--petri-accent);
 }
 
 /* File tree */
@@ -5736,28 +5736,28 @@ body:global(.gewu-resizing-columns) * {
   padding-right: 6px;
   padding-bottom: 3px;
   border: 0;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   background: transparent;
   text-align: left;
   cursor: pointer;
   border-radius: 6px;
   transition: background 0.12s ease, box-shadow 0.12s ease;
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   font-family: inherit;
 }
 
 .fileTreeRow:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .fileTreeRow:focus-visible {
   outline: none;
-  box-shadow: inset 0 0 0 1px var(--gewu-accent);
+  box-shadow: inset 0 0 0 1px var(--petri-accent);
 }
 
 .fileTreeRowActive {
-  background: var(--gewu-accent-bg);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gewu-accent) 46%, transparent);
+  background: var(--petri-accent-bg);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--petri-accent) 46%, transparent);
 }
 
 .fileTreeChevron {
@@ -5767,18 +5767,18 @@ body:global(.gewu-resizing-columns) * {
   align-items: center;
   justify-content: center;
   flex: 0 0 13px;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .fileTreeName {
-  color: var(--gewu-text);
+  color: var(--petri-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .fileTreeLink {
-  color: var(--gewu-text);
+  color: var(--petri-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5787,8 +5787,8 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .fileTreeSize {
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-tertiary);
   flex-shrink: 0;
   margin-left: auto;
   opacity: 0;
@@ -5805,8 +5805,8 @@ body:global(.gewu-resizing-columns) * {
 /* ── BLOCK-89 / UI-378 文件操作：拖拽落点高亮 + 右键菜单 + 弹层族 ── */
 
 .fileTreeRowDropTarget {
-  background: var(--gewu-accent-bg);
-  box-shadow: inset 0 0 0 1.5px var(--gewu-accent);
+  background: var(--petri-accent-bg);
+  box-shadow: inset 0 0 0 1.5px var(--petri-accent);
 }
 
 .fileTreeOpsError {
@@ -5815,8 +5815,8 @@ body:global(.gewu-resizing-columns) * {
   gap: 5px;
   margin: 0;
   padding: 5px 10px 7px;
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-danger);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-danger);
 }
 
 .fileTreeMenuLayer {
@@ -5831,8 +5831,8 @@ body:global(.gewu-resizing-columns) * {
   flex-direction: column;
   min-width: 148px;
   padding: 4px;
-  background: var(--gewu-bg-surface);
-  border: 1px solid var(--gewu-border);
+  background: var(--petri-bg-surface);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
 }
@@ -5846,19 +5846,19 @@ body:global(.gewu-resizing-columns) * {
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-body-sm);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body-sm);
   font-family: inherit;
   text-align: left;
   cursor: pointer;
 }
 
 .fileTreeMenuItem:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .fileTreeMenuItemDanger {
-  color: var(--gewu-danger);
+  color: var(--petri-danger);
 }
 
 .fileTreeDialogBackdrop {
@@ -5878,16 +5878,16 @@ body:global(.gewu-resizing-columns) * {
   width: min(360px, calc(100vw - 48px));
   max-height: min(420px, calc(100vh - 64px));
   padding: 14px;
-  background: var(--gewu-bg-surface);
-  border: 1px solid var(--gewu-border);
+  background: var(--petri-bg-surface);
+  border: 1px solid var(--petri-border);
   border-radius: 10px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
 }
 
 .fileTreeDialogTitle {
   margin: 0;
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-body);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body);
   font-weight: 600;
 }
 
@@ -5904,8 +5904,8 @@ body:global(.gewu-resizing-columns) * {
   align-items: center;
   gap: 6px;
   margin: 0;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-sm);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-sm);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5913,24 +5913,24 @@ body:global(.gewu-resizing-columns) * {
 
 .fileTreeDialogHint {
   margin: 4px 0 0;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs);
 }
 
 .fileTreeDialogInput {
   min-width: 0;
   padding: 6px 9px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  background: var(--gewu-bg-subtle);
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-body-sm);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body-sm);
   font-family: inherit;
 }
 
 .fileTreeDialogInput:focus {
   outline: none;
-  border-color: var(--gewu-accent);
+  border-color: var(--petri-accent);
 }
 
 .fileTreeDialogActions {
@@ -5942,17 +5942,17 @@ body:global(.gewu-resizing-columns) * {
 
 .fileTreeDialogButton {
   padding: 5px 12px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
   background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-body-sm);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-body-sm);
   font-family: inherit;
   cursor: pointer;
 }
 
 .fileTreeDialogButton:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .fileTreeDialogButton:disabled {
@@ -5961,14 +5961,14 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .fileTreeDialogButtonPrimary {
-  border-color: var(--gewu-accent);
-  background: var(--gewu-accent);
+  border-color: var(--petri-accent);
+  background: var(--petri-accent);
   color: #fff;
 }
 
 .fileTreeDialogButtonDanger {
-  border-color: var(--gewu-danger);
-  background: var(--gewu-danger);
+  border-color: var(--petri-danger);
+  background: var(--petri-danger);
   color: #fff;
 }
 
@@ -5978,26 +5978,26 @@ body:global(.gewu-resizing-columns) * {
   flex-wrap: wrap;
   gap: 3px;
   min-height: 22px;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
 }
 
 .fileTreeDirCrumbSeg {
   border: 0;
   padding: 1px 3px;
   background: transparent;
-  color: var(--gewu-accent);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-accent);
+  font-size: var(--petri-font-size-xs);
   font-family: inherit;
   cursor: pointer;
   border-radius: 4px;
 }
 
 .fileTreeDirCrumbSeg:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .fileTreeDirCrumbSep {
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .fileTreeDirList {
@@ -6007,7 +6007,7 @@ body:global(.gewu-resizing-columns) * {
   min-height: 120px;
   max-height: 200px;
   overflow-y: auto;
-  border: 1px solid var(--gewu-border-subtle);
+  border: 1px solid var(--petri-border-subtle);
   border-radius: 6px;
   padding: 4px;
 }
@@ -6021,26 +6021,26 @@ body:global(.gewu-resizing-columns) * {
   border: 0;
   border-radius: 5px;
   background: transparent;
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-body-sm);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body-sm);
   font-family: inherit;
   text-align: left;
   cursor: pointer;
 }
 
 .fileTreeDirRow:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .fileTreeDirRow svg:last-child {
   margin-left: auto;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .fileTreeDirEmpty {
   margin: auto;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs);
 }
 
 .workspaceFiles {
@@ -6052,7 +6052,7 @@ body:global(.gewu-resizing-columns) * {
   min-width: 0;
   min-height: 0;
   height: 100%;
-  background: var(--gewu-surface);
+  background: var(--petri-surface);
 }
 
 .workspaceFilesMain {
@@ -6072,8 +6072,8 @@ body:global(.gewu-resizing-columns) * {
   flex-shrink: 0;
   min-height: 40px;
   padding: 5px 8px;
-  border-bottom: 1px solid var(--gewu-border);
-  background: var(--gewu-surface);
+  border-bottom: 1px solid var(--petri-border);
+  background: var(--petri-surface);
 }
 
 .workspaceBreadcrumb {
@@ -6083,8 +6083,8 @@ body:global(.gewu-resizing-columns) * {
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-caption);
 }
 
 .workspaceBreadcrumbSegment {
@@ -6096,7 +6096,7 @@ body:global(.gewu-resizing-columns) * {
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   font: inherit;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -6104,20 +6104,20 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .workspaceBreadcrumbSegment:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .workspaceBreadcrumbSeparator {
   flex: 0 0 auto;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .workspaceBreadcrumbFile {
   flex: 0 1 auto;
   min-width: 32px;
   overflow: hidden;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -6126,7 +6126,7 @@ body:global(.gewu-resizing-columns) * {
 .workspaceBreadcrumbEmpty {
   flex: 0 0 auto;
   padding-left: 4px;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .workspaceTreeToggle {
@@ -6142,15 +6142,15 @@ body:global(.gewu-resizing-columns) * {
   height: 30px;
   border: none;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   cursor: pointer;
   padding: 0;
   border-radius: 6px;
 }
 
 .workspaceTreeToggle:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .workspaceFileTreePaneWrap {
@@ -6158,8 +6158,8 @@ body:global(.gewu-resizing-columns) * {
   flex-shrink: 0;
   min-height: 0;
   min-width: 96px;
-  border-left: 1px solid var(--gewu-border);
-  background: var(--gewu-bg-surface);
+  border-left: 1px solid var(--petri-border);
+  background: var(--petri-bg-surface);
   overflow: hidden;
 }
 
@@ -6169,7 +6169,7 @@ body:global(.gewu-resizing-columns) * {
   height: 100%;
   overflow: auto;
   padding: 10px 10px 8px;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
 }
 
 .workspaceFileTreeResize {
@@ -6180,7 +6180,7 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .workspaceFileTreeResize:hover {
-  background: var(--gewu-accent-bg);
+  background: var(--petri-accent-bg);
 }
 
 .workspaceFilePreviewPane {
@@ -6201,7 +6201,7 @@ body:global(.gewu-resizing-columns) * {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  background: var(--gewu-surface);
+  background: var(--petri-surface);
   /* UI-323 加映 — md 悬浮切换/错误条 overlay 的定位上下文 */
   position: relative;
 }
@@ -6211,8 +6211,8 @@ body:global(.gewu-resizing-columns) * {
   justify-content: center;
   gap: 8px;
   padding: 18px;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-body-sm);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-body-sm);
 }
 
 .workspacePreviewActions {
@@ -6230,19 +6230,19 @@ body:global(.gewu-resizing-columns) * {
   flex-shrink: 0;
   min-height: 26px;
   padding: 3px 6px;
-  border: 1px solid color-mix(in srgb, var(--gewu-border) 56%, transparent);
+  border: 1px solid color-mix(in srgb, var(--petri-border) 56%, transparent);
   border-radius: 4px;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   font: inherit;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   cursor: pointer;
 }
 
 .workspacePreviewOpen:hover:not(:disabled) {
-  border-color: var(--gewu-border-strong);
-  background: var(--gewu-bg-subtle);
-  color: var(--gewu-text);
+  border-color: var(--petri-border-strong);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text);
 }
 
 .workspacePreviewOpen:disabled {
@@ -6258,10 +6258,10 @@ body:global(.gewu-resizing-columns) * {
 
 .workspacePreviewError {
   padding: 6px 12px;
-  border-bottom: 1px solid var(--gewu-border);
-  background: color-mix(in srgb, var(--gewu-danger) 7%, transparent);
-  color: var(--gewu-danger);
-  font-size: var(--gewu-font-size-sm);
+  border-bottom: 1px solid var(--petri-border);
+  background: color-mix(in srgb, var(--petri-danger) 7%, transparent);
+  color: var(--petri-danger);
+  font-size: var(--petri-font-size-sm);
 }
 
 .workspacePreviewBody {
@@ -6270,7 +6270,7 @@ body:global(.gewu-resizing-columns) * {
   display: flex;
   flex-direction: column;
   overflow: auto;
-  background: var(--gewu-bg);
+  background: var(--petri-bg);
 }
 
 .workspaceBinaryFallback {
@@ -6280,31 +6280,31 @@ body:global(.gewu-resizing-columns) * {
   justify-content: center;
   gap: 6px;
   padding: 32px 18px;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-body-sm);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-body-sm);
   text-align: center;
 }
 
 .workspaceBinaryMeta {
   margin: 0;
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-text-tertiary);
 }
 
 .workspaceBinaryTitle {
   margin: 0;
-  font-size: var(--gewu-font-size-body);
+  font-size: var(--petri-font-size-body);
   font-weight: 600;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .workspaceOfficeDoc,
 .workspaceOfficeSheet,
 .workspaceOfficeListing {
   padding: 18px 22px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-body-sm);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body-sm);
   line-height: 1.7;
   display: flex;
   flex-direction: column;
@@ -6312,10 +6312,10 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .workspaceOfficeHeader {
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   font-weight: 600;
   letter-spacing: 0.02em;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   text-transform: uppercase;
 }
 
@@ -6324,30 +6324,30 @@ body:global(.gewu-resizing-columns) * {
   padding: 14px 16px;
   white-space: pre-wrap;
   word-break: break-word;
-  background: var(--gewu-bg-subtle);
-  border: 1px solid var(--gewu-border);
+  background: var(--petri-bg-subtle);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  font-family: var(--gewu-font-mono, monospace);
-  font-size: var(--gewu-font-size-caption);
+  font-family: var(--petri-font-mono, monospace);
+  font-size: var(--petri-font-size-caption);
   line-height: 1.55;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .workspaceOfficeHint {
   margin: 0;
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-text-tertiary);
 }
 
 .workspaceOfficeSheet table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
 }
 
 .workspaceOfficeSheet th,
 .workspaceOfficeSheet td {
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   padding: 5px 8px;
   text-align: left;
   white-space: nowrap;
@@ -6357,8 +6357,8 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .workspaceOfficeSheet td:first-child {
-  background: var(--gewu-bg-subtle);
-  color: var(--gewu-text-secondary);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-secondary);
   font-weight: 600;
 }
 
@@ -6374,9 +6374,9 @@ body:global(.gewu-resizing-columns) * {
   align-items: stretch;
   gap: 6px;
   padding: 8px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  background: var(--gewu-bg);
+  background: var(--petri-bg);
   font: inherit;
   color: inherit;
   cursor: zoom-in;
@@ -6388,8 +6388,8 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .workspaceOfficeAsset span {
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -6398,11 +6398,11 @@ body:global(.gewu-resizing-columns) * {
 .workspaceOfficeListing ul {
   margin: 0;
   padding: 8px 16px;
-  background: var(--gewu-bg-subtle);
-  border: 1px solid var(--gewu-border);
+  background: var(--petri-bg-subtle);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  font-family: var(--gewu-font-mono, monospace);
-  font-size: var(--gewu-font-size-caption);
+  font-family: var(--petri-font-mono, monospace);
+  font-size: var(--petri-font-size-caption);
   list-style-type: square;
 }
 
@@ -6412,23 +6412,23 @@ body:global(.gewu-resizing-columns) * {
   width: 100%;
   height: 100%;
   border: none;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
 }
 
 .workspaceCsvPreview {
   padding: 12px;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
 }
 
 .workspaceCsvPreview table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
 }
 
 .workspaceCsvPreview th,
 .workspaceCsvPreview td {
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   padding: 5px 8px;
   text-align: left;
   white-space: nowrap;
@@ -6438,8 +6438,8 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .workspaceCsvPreview th {
-  background: var(--gewu-bg-subtle);
-  color: var(--gewu-text-secondary);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-secondary);
   font-weight: 700;
   position: sticky;
   top: 0;
@@ -6447,20 +6447,20 @@ body:global(.gewu-resizing-columns) * {
 
 .workspaceCsvHint {
   margin: 10px 0 0;
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-tertiary);
 }
 
 .workspaceTextPreview {
   margin: 0;
   padding: 12px;
   min-height: 100%;
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-caption);
   line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-word;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
 }
 
 .workspaceCodePreview {
@@ -6468,9 +6468,9 @@ body:global(.gewu-resizing-columns) * {
   padding: 14px 16px;
   min-height: 100%;
   overflow: auto;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text);
-  font: var(--gewu-font-size-caption)/1.55 var(--gewu-font-mono, monospace);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
+  font: var(--petri-font-size-caption)/1.55 var(--petri-font-mono, monospace);
   tab-size: 2;
   white-space: pre;
 }
@@ -6490,9 +6490,9 @@ body:global(.gewu-resizing-columns) * {
   padding: 46px 18px 18px;
   /* UI-400-6 补——目录展开/收起时左侧预留空间平滑过渡 */
   transition: padding-left 0.18s ease;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-body-sm);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body-sm);
   line-height: 1.65;
   overflow-y: auto;
   box-sizing: border-box;
@@ -6511,22 +6511,22 @@ body:global(.gewu-resizing-columns) * {
 .workspaceMarkdownPreview h2,
 .workspaceMarkdownPreview h3 {
   margin: 1.1em 0 0.55em;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   line-height: 1.25;
   /* 目录跳转落点 = 右上角悬浮钮带（~36px）下方，满宽标题行着陆也不垫在按钮下 */
   scroll-margin-top: 48px;
 }
 
 .workspaceMarkdownPreview h1 {
-  font-size: var(--gewu-font-size-2xl);
+  font-size: var(--petri-font-size-2xl);
 }
 
 .workspaceMarkdownPreview h2 {
-  font-size: var(--gewu-font-size-lg);
+  font-size: var(--petri-font-size-lg);
 }
 
 .workspaceMarkdownPreview h3 {
-  font-size: var(--gewu-font-size-md);
+  font-size: var(--petri-font-size-md);
 }
 
 .workspaceMarkdownPreview p,
@@ -6538,17 +6538,17 @@ body:global(.gewu-resizing-columns) * {
 .workspaceMarkdownPreview code {
   border-radius: 4px;
   padding: 1px 4px;
-  background: var(--gewu-hover);
-  font-size: var(--gewu-font-size-caption);
+  background: var(--petri-hover);
+  font-size: var(--petri-font-size-caption);
 }
 
 .workspaceMarkdownPreview pre {
   margin: 12px 0;
   padding: 12px;
   overflow: auto;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  background: var(--gewu-bg-subtle);
+  background: var(--petri-bg-subtle);
 }
 
 .workspaceMarkdownPreview pre code {
@@ -6560,12 +6560,12 @@ body:global(.gewu-resizing-columns) * {
   width: 100%;
   border-collapse: collapse;
   margin: 12px 0;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
 }
 
 .workspaceMarkdownPreview th,
 .workspaceMarkdownPreview td {
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   padding: 6px 8px;
   text-align: left;
 }
@@ -6573,8 +6573,8 @@ body:global(.gewu-resizing-columns) * {
 .workspaceMarkdownPreview blockquote {
   margin: 12px 0;
   padding-left: 12px;
-  border-left: 3px solid var(--gewu-border);
-  color: var(--gewu-text-secondary);
+  border-left: 3px solid var(--petri-border);
+  color: var(--petri-text-secondary);
 }
 
 /* BLOCK-18 — markdown diff toggle + diff 视图 */
@@ -6590,17 +6590,17 @@ body:global(.gewu-resizing-columns) * {
   width: 26px;
   height: 26px;
   padding: 0;
-  border: 1px solid color-mix(in srgb, var(--gewu-border) 56%, transparent);
+  border: 1px solid color-mix(in srgb, var(--petri-border) 56%, transparent);
   border-radius: 6px;
-  background: color-mix(in srgb, var(--gewu-surface) 88%, transparent);
-  color: var(--gewu-text-secondary);
+  background: color-mix(in srgb, var(--petri-surface) 88%, transparent);
+  color: var(--petri-text-secondary);
   cursor: pointer;
 }
 
 .workspaceMdViewToggle:hover {
-  border-color: var(--gewu-border-strong);
-  background: var(--gewu-surface);
-  color: var(--gewu-text);
+  border-color: var(--petri-border-strong);
+  background: var(--petri-surface);
+  color: var(--petri-text);
 }
 
 /* 保存失败诚实面（含 ssh 409/502）：悬浮顶部，仅出错时出现，不再占常驻行 */
@@ -6612,9 +6612,9 @@ body:global(.gewu-resizing-columns) * {
   z-index: 5;
   /* 右侧 48px 让位右上角 mdViewToggle 悬浮钮（目录开关已按用户裁决移回左上角） */
   padding: 6px 48px 6px 12px;
-  background: color-mix(in srgb, var(--gewu-danger) 9%, transparent);
-  color: var(--gewu-danger);
-  font-size: var(--gewu-font-size-sm);
+  background: color-mix(in srgb, var(--petri-danger) 9%, transparent);
+  color: var(--petri-danger);
+  font-size: var(--petri-font-size-sm);
 }
 
 .workspaceMarkdownDiffActions {
@@ -6624,24 +6624,24 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .workspaceMarkdownDiffHint {
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-secondary);
 }
 
 .workspaceMarkdownDiffAction {
   appearance: none;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 4px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
   font: inherit;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   padding: 3px 10px;
   cursor: pointer;
 }
 
 .workspaceMarkdownDiffAction:hover:not(:disabled) {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .workspaceMarkdownDiffAction:disabled {
@@ -6652,9 +6652,9 @@ body:global(.gewu-resizing-columns) * {
 .workspaceMarkdownDiff {
   min-height: 100%;
   padding: 12px 0;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text);
-  font: var(--gewu-font-size-caption)/1.55 var(--gewu-font-mono, monospace);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
+  font: var(--petri-font-size-caption)/1.55 var(--petri-font-mono, monospace);
   tab-size: 2;
   overflow: auto;
 }
@@ -6670,11 +6670,11 @@ body:global(.gewu-resizing-columns) * {
   min-width: 38px;
   padding: 0 6px;
   text-align: right;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   user-select: none;
-  border-right: 1px solid var(--gewu-border);
-  font-size: var(--gewu-font-size-sm);
-  background: var(--gewu-bg-subtle);
+  border-right: 1px solid var(--petri-border);
+  font-size: var(--petri-font-size-sm);
+  background: var(--petri-bg-subtle);
 }
 
 .workspaceMarkdownDiffMarker {
@@ -6682,7 +6682,7 @@ body:global(.gewu-resizing-columns) * {
   min-width: 18px;
   padding: 0 4px;
   text-align: center;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   user-select: none;
   font-weight: 600;
 }
@@ -6695,7 +6695,7 @@ body:global(.gewu-resizing-columns) * {
 
 /* 上下文行：默认色 */
 .workspaceMarkdownDiffRow_ctx .workspaceMarkdownDiffContent {
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 /* 删除行：整行红色背景 */
@@ -6720,17 +6720,17 @@ body:global(.gewu-resizing-columns) * {
 }
 .workspaceMarkdownDiffHunk {
   padding: 4px 12px;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   font-style: italic;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
 }
 
 /* fold 占位：低调灰 */
 .workspaceMarkdownDiffRow_fold > .workspaceMarkdownDiffContent,
 .workspaceMarkdownDiffRow_fold > .workspaceMarkdownDiffMarker,
 .workspaceMarkdownDiffRow_fold > .workspaceMarkdownDiffGutter {
-  background: var(--gewu-bg-subtle);
-  color: var(--gewu-text-secondary);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-secondary);
   font-style: italic;
 }
 
@@ -6744,15 +6744,15 @@ body:global(.gewu-resizing-columns) * {
   border: none;
   outline: none;
   resize: none;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text);
-  font: var(--gewu-font-size-body-sm)/1.6 var(--gewu-font-mono, monospace);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
+  font: var(--petri-font-size-body-sm)/1.6 var(--petri-font-mono, monospace);
   tab-size: 2;
 }
 
 .workspaceMarkdownEditor:focus {
-  background: var(--gewu-bg-surface);
-  box-shadow: inset 2px 0 0 var(--gewu-accent, #4f86ff);
+  background: var(--petri-bg-surface);
+  box-shadow: inset 2px 0 0 var(--petri-accent, #4f86ff);
 }
 
 /* BLOCK-42 — CodeMirror 预览编辑器容器（text/json/markdown-edit）：
@@ -6763,8 +6763,8 @@ body:global(.gewu-resizing-columns) * {
   min-height: 0;
   box-sizing: border-box;
   overflow: hidden;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
 }
 
 .workspaceMarkdownSave {
@@ -6773,11 +6773,11 @@ body:global(.gewu-resizing-columns) * {
   gap: 6px;
   margin-right: 6px;
   padding: 4px 10px;
-  font-size: var(--gewu-font-size-caption);
-  border: 1px solid var(--gewu-border);
+  font-size: var(--petri-font-size-caption);
+  border: 1px solid var(--petri-border);
   border-radius: 4px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
   cursor: pointer;
 }
 
@@ -6793,7 +6793,7 @@ body:global(.gewu-resizing-columns) * {
   width: 100%;
   min-height: 100%;
   border: none;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
   padding: 12px;
   cursor: zoom-in;
 }
@@ -6803,9 +6803,9 @@ body:global(.gewu-resizing-columns) * {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  background: var(--gewu-bg-surface);
+  background: var(--petri-bg-surface);
 }
 
 /* Loading / error states */
@@ -6822,14 +6822,14 @@ body:global(.gewu-resizing-columns) * {
 
 .loadingWrap p,
 .errorWrap p {
-  font-size: var(--gewu-font-size-md);
-  color: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-md);
+  color: var(--petri-text-secondary);
 }
 
 .backLink {
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
   text-decoration: none;
-  font-size: var(--gewu-font-size-body);
+  font-size: var(--petri-font-size-body);
 }
 
 .backLink:hover {
@@ -6842,18 +6842,18 @@ body:global(.gewu-resizing-columns) * {
 .toolSearch {
   width: 100%;
   padding: 6px 10px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  font-size: var(--gewu-font-size-caption);
-  color: var(--gewu-text);
-  background: var(--gewu-surface);
+  font-size: var(--petri-font-size-caption);
+  color: var(--petri-text);
+  background: var(--petri-surface);
   margin-bottom: 8px;
   outline: none;
   box-sizing: border-box;
 }
 
 .toolSearch:focus {
-  border-color: var(--gewu-accent);
+  border-color: var(--petri-accent);
 }
 
 .toolCats {
@@ -6865,23 +6865,23 @@ body:global(.gewu-resizing-columns) * {
 
 .toolCat {
   padding: 2px 8px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 12px;
   background: transparent;
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-secondary);
   cursor: pointer;
   white-space: nowrap;
 }
 
 .toolCat:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .toolCatActive {
-  background: var(--gewu-accent);
+  background: var(--petri-accent);
   color: #fff;
-  border-color: var(--gewu-accent);
+  border-color: var(--petri-accent);
 }
 
 .toolList {
@@ -6904,7 +6904,7 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .toolItem:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .toolDot {
@@ -6923,28 +6923,28 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .toolName {
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   font-weight: 500;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .toolSub {
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-tertiary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .toolBadge {
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   padding: 1px 6px;
   border-radius: 8px;
-  background: var(--gewu-warning-bg);
-  color: var(--gewu-warning-text);
+  background: var(--petri-warning-bg);
+  color: var(--petri-warning-text);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -6954,16 +6954,16 @@ body:global(.gewu-resizing-columns) * {
   display: flex;
   gap: 0;
   margin-bottom: 8px;
-  border-bottom: 1px solid var(--gewu-border);
+  border-bottom: 1px solid var(--petri-border);
 }
 
 .toolboxTab {
   padding: 4px 12px;
   border: none;
   background: transparent;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   font-weight: 500;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
@@ -6974,19 +6974,19 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .toolboxTab:hover {
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .toolboxTabActive {
-  color: var(--gewu-accent);
-  border-bottom-color: var(--gewu-accent);
+  color: var(--petri-accent);
+  border-bottom-color: var(--petri-accent);
 }
 
 .toolboxTabBadge {
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   padding: 0 5px;
   border-radius: 8px;
-  background: var(--gewu-accent);
+  background: var(--petri-accent);
   color: #fff;
   line-height: 14px;
 }
@@ -6997,9 +6997,9 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .pluginSectionTitle {
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   font-weight: 600;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   margin: 0 0 4px 0;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -7015,7 +7015,7 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .pluginItem:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .pluginMeta {
@@ -7027,17 +7027,17 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .pluginName {
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   font-weight: 500;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .pluginSub {
-  font-size: var(--gewu-font-size-xs);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-tertiary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -7045,10 +7045,10 @@ body:global(.gewu-resizing-columns) * {
 
 .pluginBtnInstall,
 .pluginBtnUninstall {
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   padding: 2px 10px;
   border-radius: 4px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
@@ -7056,9 +7056,9 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .pluginBtnInstall {
-  background: var(--gewu-accent);
+  background: var(--petri-accent);
   color: #fff;
-  border-color: var(--gewu-accent);
+  border-color: var(--petri-accent);
 }
 
 .pluginBtnInstall:hover:not(:disabled) {
@@ -7067,12 +7067,12 @@ body:global(.gewu-resizing-columns) * {
 
 .pluginBtnUninstall {
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
 }
 
 .pluginBtnUninstall:hover:not(:disabled) {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .pluginBtnInstall:disabled,
@@ -7082,26 +7082,26 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .pluginError {
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-danger);
-  background: var(--gewu-danger-bg);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-danger);
+  background: var(--petri-danger-bg);
   padding: 4px 8px;
   border-radius: 4px;
   margin-bottom: 8px;
 }
 .workspaceNotice {
   position: fixed;
-  top: calc(var(--gewu-titlebar-height) + 8px);
+  top: calc(var(--petri-titlebar-height) + 8px);
   left: 50%;
   z-index: 9000;
   max-width: min(460px, calc(100vw - 24px));
   padding: 7px 10px;
-  border: 1px solid var(--gewu-border-strong);
+  border: 1px solid var(--petri-border-strong);
   border-radius: 6px;
-  background: var(--gewu-bg-elevated);
-  color: var(--gewu-text);
-  box-shadow: 0 8px 20px color-mix(in srgb, var(--gewu-text) 14%, transparent);
-  font-size: var(--gewu-font-size-caption);
+  background: var(--petri-bg-elevated);
+  color: var(--petri-text);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--petri-text) 14%, transparent);
+  font-size: var(--petri-font-size-caption);
   line-height: 18px;
   text-align: center;
   transform: translateX(-50%);
@@ -7112,16 +7112,16 @@ body:global(.gewu-resizing-columns) * {
 
 .taskMonitor {
   padding: 8px 12px;
-  border-top: 1px solid var(--gewu-border);
+  border-top: 1px solid var(--petri-border);
 }
 
 .taskMonitorHeader {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   font-weight: 600;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   margin-bottom: 6px;
 }
 
@@ -7130,7 +7130,7 @@ body:global(.gewu-resizing-columns) * {
   align-items: center;
   gap: 6px;
   padding: 4px 0;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
 }
 
 .taskDot {
@@ -7141,7 +7141,7 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .taskDot_running {
-  background: var(--gewu-accent, #3b82f6);
+  background: var(--petri-accent, #3b82f6);
   animation: taskDotPulse 1.2s ease-in-out infinite;
 }
 
@@ -7150,16 +7150,16 @@ body:global(.gewu-resizing-columns) * {
   50% { opacity: 0.35; }
 }
 
-.taskDot_done { background: var(--gewu-status-success, #22c55e); }
-.taskDot_error { background: var(--gewu-status-error, #ef4444); }
-.taskDot_stopped { background: var(--gewu-status-warning, #f59e0b); }
+.taskDot_done { background: var(--petri-status-success, #22c55e); }
+.taskDot_error { background: var(--petri-status-error, #ef4444); }
+.taskDot_stopped { background: var(--petri-status-warning, #f59e0b); }
 
 .taskText {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .taskStopBtn {
@@ -7167,7 +7167,7 @@ body:global(.gewu-resizing-columns) * {
   border: none;
   padding: 2px;
   cursor: pointer;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   display: flex;
   align-items: center;
   border-radius: 3px;
@@ -7175,8 +7175,8 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .taskStopBtn:hover {
-  color: var(--gewu-status-error, #ef4444);
-  background: var(--gewu-bg-elevated);
+  color: var(--petri-status-error, #ef4444);
+  background: var(--petri-bg-elevated);
 }
 
 /* UI-331 — 左栏会话行右侧短式相对时间（图1 形态：刚刚/N分/N小时） */
@@ -7184,12 +7184,12 @@ body:global(.gewu-resizing-columns) * {
   flex: 0 0 auto;
   font-size: 11px;
   line-height: 1;
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
   opacity: 0.85;
 }
 
 .convItemActive .convItemTime {
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
   opacity: 1;
 }
 
@@ -7198,9 +7198,9 @@ body:global(.gewu-resizing-columns) * {
   border: 0;
   background: transparent;
   padding: 0;
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
   cursor: pointer;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   font-weight: 500;
 }
 
@@ -7238,10 +7238,10 @@ body:global(.gewu-resizing-columns) * {
   max-height: min(70vh, 560px);
   overflow: auto;
   padding: 12px 14px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 12px;
-  background: var(--gewu-bg-elevated);
-  box-shadow: 0 14px 32px color-mix(in srgb, var(--gewu-text) 18%, transparent);
+  background: var(--petri-bg-elevated);
+  box-shadow: 0 14px 32px color-mix(in srgb, var(--petri-text) 18%, transparent);
 }
 
 .sidebarMobileCardHeader {
@@ -7261,13 +7261,13 @@ body:global(.gewu-resizing-columns) * {
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   cursor: pointer;
 }
 
 .leftFooterIconBtn:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 /* BLOCK-96 F2 — 大目录游标加载「加载更多」行 */
@@ -7276,7 +7276,7 @@ body:global(.gewu-resizing-columns) * {
   width: 100%;
   border: 0;
   background: transparent;
-  color: var(--gewu-text-secondary, #888);
+  color: var(--petri-text-secondary, #888);
   font-size: 12px;
   text-align: left;
   padding: 4px 0 6px 21px;
@@ -7284,7 +7284,7 @@ body:global(.gewu-resizing-columns) * {
 }
 
 .fileTreeLoadMore:hover {
-  color: var(--gewu-text, #333);
+  color: var(--petri-text, #333);
   text-decoration: underline;
 }
 
@@ -7307,7 +7307,7 @@ body:global(.gewu-resizing-columns) * {
    ============================================================ */
 /* UI-400-3 — 根目录落点高亮：树内拖拽悬停于背景/非目录行时整面板描边 */
 .workspaceFileTreeRootDropActive {
-  outline: 2px dashed var(--gewu-accent);
+  outline: 2px dashed var(--petri-accent);
   outline-offset: -2px;
 }
 
@@ -7325,19 +7325,19 @@ body:global(.gewu-resizing-columns) * {
   width: 26px;
   height: 26px;
   border-radius: 8px;
-  border: 1px solid var(--gewu-border);
-  background: var(--gewu-bg-subtle);
-  color: var(--gewu-text-secondary);
+  border: 1px solid var(--petri-border);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-secondary);
   cursor: pointer;
 }
 .workspaceMdTocToggle:hover {
-  border-color: var(--gewu-border-strong);
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  border-color: var(--petri-border-strong);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 .workspaceMdTocToggle[aria-pressed='true'] {
-  color: var(--gewu-accent);
-  border-color: var(--gewu-accent);
+  color: var(--petri-accent);
+  border-color: var(--petri-accent);
 }
 .workspaceMdTocPanel {
   position: absolute;
@@ -7351,9 +7351,9 @@ body:global(.gewu-resizing-columns) * {
   flex-direction: column;
   gap: 1px;
   padding: 8px 6px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 10px;
-  background: var(--gewu-bg-subtle);
+  background: var(--petri-bg-subtle);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 .workspaceMdTocItem {
@@ -7361,8 +7361,8 @@ body:global(.gewu-resizing-columns) * {
   background: transparent;
   text-align: left;
   cursor: pointer;
-  font-size: var(--gewu-font-size-sm, 12px);
-  color: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-sm, 12px);
+  color: var(--petri-text-secondary);
   padding: 3px 8px;
   border-radius: 6px;
   overflow: hidden;
@@ -7370,19 +7370,19 @@ body:global(.gewu-resizing-columns) * {
   white-space: nowrap;
 }
 .workspaceMdTocItem:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 .workspaceMdTocItem[data-level='1'] {
   font-weight: 600;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 .workspaceMdTocItem[data-level='2'] {
   padding-left: 16px;
 }
 .workspaceMdTocItem[data-level='3'] {
   padding-left: 26px;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 /* UI-400-1 — pdfjs 渲染容器与页卡片 */
@@ -7393,8 +7393,8 @@ body:global(.gewu-resizing-columns) * {
   padding: 12px;
 }
 .workspacePdfMeta {
-  font-size: var(--gewu-font-size-sm, 12px);
-  color: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-sm, 12px);
+  color: var(--petri-text-tertiary);
   margin-bottom: 8px;
 }
 .workspacePdfPages {
@@ -7421,28 +7421,28 @@ body:global(.gewu-resizing-columns) * {
   height: 16px;
   border-radius: 4px;
   font-size: 10px;
-  color: var(--gewu-accent, #0d9488);
-  border: 1px solid var(--gewu-border, #e4e4e7);
-  background: var(--gewu-bg-subtle, #f4f4f5);
+  color: var(--petri-accent, #0d9488);
+  border: 1px solid var(--petri-border, #e4e4e7);
+  background: var(--petri-bg-subtle, #f4f4f5);
 }
 
 /* UI-445 — 左栏会话标题搜索框（surface 内嵌输入，token 阶梯暗色安全） */
 .convSearchBox {
   padding: 6px 12px 8px;
-  border-bottom: 1px solid var(--gewu-border);
+  border-bottom: 1px solid var(--petri-border);
 }
 
 .convSearchBox input {
-  background: var(--gewu-input-bg, var(--gewu-bg-surface));
-  border: 1px solid var(--gewu-border);
+  background: var(--petri-input-bg, var(--petri-bg-surface));
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-caption, 12px);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-caption, 12px);
   padding: 5px 8px;
 }
 
 .convSearchBox input::placeholder {
-  color: var(--gewu-text-muted);
+  color: var(--petri-text-muted);
 }
 
 /* UI-446 v4 — 审阅磁贴未审文件数徽章（当前会话有未看工作区改动时显示） */
@@ -7454,8 +7454,8 @@ body:global(.gewu-resizing-columns) * {
   height: 16px;
   padding: 0 4px;
   border-radius: 8px;
-  background: color-mix(in srgb, var(--gewu-accent) 16%, transparent);
-  color: var(--gewu-accent);
+  background: color-mix(in srgb, var(--petri-accent) 16%, transparent);
+  color: var(--petri-accent);
   font-size: 10px;
   font-weight: 600;
   line-height: 16px;
@@ -7485,23 +7485,23 @@ body:global(.gewu-resizing-columns) * {
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   cursor: pointer;
   z-index: 45;
 }
 
 .sideChatFab:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .sideChatFab[aria-pressed='true'] {
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
 }
 
 /* ============================================================
    UI-451 — 文件面板多 tab 常驻：tab 条 + keep-alive 预览栈。
-   颜色全部走 --gewu-* token（亮暗自动跟随）；隐藏实例沿用右栏 tab 内容同款
+   颜色全部走 --petri-* token（亮暗自动跟随）；隐藏实例沿用右栏 tab 内容同款
    visibility 机制（保布局保滚动，出 tabindex/无障碍树）。
    ============================================================ */
 .workspaceFileTabbedPreview {
@@ -7521,13 +7521,13 @@ body:global(.gewu-resizing-columns) * {
   padding: 4px 6px 0;
   overflow-x: auto;
   overflow-y: hidden;
-  border-bottom: 1px solid var(--gewu-border);
-  background: var(--gewu-bg-subtle);
+  border-bottom: 1px solid var(--petri-border);
+  background: var(--petri-bg-subtle);
   scrollbar-width: thin;
 }
 
 .workspaceFileTabStripDropTail {
-  box-shadow: inset -2px 0 0 0 var(--gewu-accent);
+  box-shadow: inset -2px 0 0 0 var(--petri-accent);
 }
 
 .workspaceFileTab {
@@ -7543,35 +7543,35 @@ body:global(.gewu-resizing-columns) * {
   border-bottom: 0;
   border-radius: 8px 8px 0 0;
   background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-caption);
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
 }
 
 .workspaceFileTab:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .workspaceFileTab:focus-visible {
-  outline: 1px solid var(--gewu-accent);
+  outline: 1px solid var(--petri-accent);
   outline-offset: -1px;
 }
 
 .workspaceFileTabActive {
-  background: var(--gewu-bg-surface);
-  border-color: var(--gewu-border);
-  color: var(--gewu-accent);
+  background: var(--petri-bg-surface);
+  border-color: var(--petri-border);
+  color: var(--petri-accent);
 }
 
 .workspaceFileTabDropLeft {
-  box-shadow: inset 2px 0 0 0 var(--gewu-accent);
+  box-shadow: inset 2px 0 0 0 var(--petri-accent);
 }
 
 .workspaceFileTabDropRight {
-  box-shadow: inset -2px 0 0 0 var(--gewu-accent);
+  box-shadow: inset -2px 0 0 0 var(--petri-accent);
 }
 
 .workspaceFileTabName {
@@ -7584,7 +7584,7 @@ body:global(.gewu-resizing-columns) * {
   max-width: 90px;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .workspaceFileTabDot {
@@ -7592,7 +7592,7 @@ body:global(.gewu-resizing-columns) * {
   height: 6px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: var(--gewu-accent);
+  background: var(--petri-accent);
 }
 
 .workspaceFileTabClose {
@@ -7606,13 +7606,13 @@ body:global(.gewu-resizing-columns) * {
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   cursor: pointer;
 }
 
 .workspaceFileTabClose:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .workspaceFilePreviewStack {

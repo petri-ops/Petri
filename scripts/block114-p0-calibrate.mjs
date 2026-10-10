@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const decisionApi = require('../core/biof3-server/helpers/decision-api.js');
+const decisionApi = require('../core/petri-server/helpers/decision-api.js');
 // 单源：L3 请求组装与 L2 词表均引用 triage-core（形状漂移即校准失效）。
 const { buildTriageDecisionRequest, matchesEnvironmentPattern } = require('../scripts/lib/block114-triage-core.mjs');
 
@@ -189,7 +189,7 @@ async function main() {
     capturedAt: new Date().toISOString(),
     sourceCommit: require('node:child_process').execSync('git rev-parse HEAD', { cwd: root }).toString().trim(),
     model: decisionApi.DECISION_MODEL_PIN,
-    wrapper: 'core/biof3-server/helpers/decision-api.js',
+    wrapper: 'core/petri-server/helpers/decision-api.js',
     decisionPoint: 'scripts/lib/block114-triage-core.mjs L3 语义残差层（W1-4 测试失败归因）',
     result,
     gate,

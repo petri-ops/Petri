@@ -17,7 +17,7 @@ const REPO = path.join(__dirname, '..');
 const EVIDENCE = path.join(REPO, 'acceptance', 'block-76');
 const API = 'http://127.0.0.1:3001/api';
 const AUTH = { Authorization: 'Bearer desktop-local', 'content-type': 'application/json' };
-const REMOTE_ROOT = '/root/gewu-block76-demo';
+const REMOTE_ROOT = '/root/petri-block76-demo';
 
 function fetchRaw(url, opts = {}) {
   return new Promise((resolve, reject) => {
@@ -116,7 +116,7 @@ async function main() {
     JSON.stringify(rep.json || rep).slice(0, 140));
 
     // 本地零拉回
-    const localOut = path.join(REPO, '.biof3-dev-user-data', 'data', 'remote-projects', projectId, 'results', 'jobs', jobId, 'output');
+    const localOut = path.join(REPO, '.petri-dev-user-data', 'data', 'remote-projects', projectId, 'results', 'jobs', jobId, 'output');
     let localFiles = [];
     try { localFiles = fs.readdirSync(localOut); } catch {}
     assert('P4-10 no artifact pull-back (server-only truth)',

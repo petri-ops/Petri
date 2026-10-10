@@ -8,7 +8,7 @@
  * 证据：acceptance/ui-405/ui408-subagent-result-card.png + stdout 断言。
  */
 const path = require('node:path');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'ui-408');

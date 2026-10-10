@@ -2,10 +2,10 @@
 REM =============================================================================
 REM scripts/dev/patch-node-pty-spectre.bat
 REM
-REM BioF3 Desktop local development shim.
+REM Petri Desktop local development shim.
 REM
 REM Why this exists:
-REM   biof3-desktop depends on node-pty 1.1.0-beta34, which sets
+REM   petri-desktop depends on node-pty 1.1.0-beta34, which sets
 REM   `SpectreMitigation: 'Spectre'` in its MSVC configuration. Building that
 REM   variant requires the optional "MSVC v142/v143 - Spectre-mitigated libs"
 REM   component, which is NOT pulled in by `--includeRecommended`. Without
@@ -41,8 +41,8 @@ REM Trade-off:
 REM   Disabling Spectre mitigation trades a single optional CPU-side-channel
 REM   defense for the ability to ship a working build without the optional
 REM   Spectre libs component. This is acceptable for a local scientific tool
-REM   that already runs untrusted R/Python code via the biof3 backend; it is
-REM   NOT acceptable if biof3 ever ships as a service that processes
+REM   that already runs untrusted R/Python code via the petri backend; it is
+REM   NOT acceptable if petri ever ships as a service that processes
 REM   untrusted external input at scale.
 REM =============================================================================
 setlocal

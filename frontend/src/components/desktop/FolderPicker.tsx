@@ -42,9 +42,9 @@ export function FolderPicker({
   const [loading, setLoading] = useState(false);
 
   const load = useCallback(async (target: string) => {
-    const list = window.biof3Desktop?.files?.listDirectory;
+    const list = window.petriDesktop?.files?.listDirectory;
     if (typeof list !== 'function') {
-      setError('当前运行环境不支持文件夹浏览（请在 Gewu 桌面应用中使用）。');
+      setError('当前运行环境不支持文件夹浏览（请在 Petri 桌面应用中使用）。');
       return;
     }
     setLoading(true);
@@ -133,14 +133,14 @@ export function FolderPicker({
       <div className={styles.actions}>
         <button
           type="button"
-          className="gewu-btn gewu-btn--sm"
+          className="petri-btn petri-btn--sm"
           onClick={() => onPick(cur)}
           disabled={loading || !cur}
           title={cur}
         >
           <Icon name="check" size={13} /> {pickLabel}
         </button>
-        <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={onCancel}>
+        <button type="button" className="petri-btn petri-btn--ghost petri-btn--sm" onClick={onCancel}>
           收起
         </button>
       </div>

@@ -8,29 +8,29 @@ import { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const R_SERVER = resolve(__dirname, '..', 'core', 'biof3-server');
+const R_SERVER = resolve(__dirname, '..', 'core', 'petri-server');
 const req = createRequire(import.meta.url);
 
 // BLOCK-49 加映清债 —— 统一临时 DB 自举（存量：单跑/全量缺 projects 表）
-//（BIOF3_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）
+//（PETRI_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）
 {
   const fsx = req('node:fs');
   const osx = req('node:os');
   const pth = req('node:path');
   const urlx = req('node:url');
   const hereDir = pth.dirname(urlx.fileURLToPath(import.meta.url));
-  const Database = req(pth.resolve(hereDir, '..', 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const tempDbDir = fsx.mkdtempSync(pth.join(osx.tmpdir(), 'biof3-sweep-db-'));
-  const boot = new Database(pth.join(tempDbDir, 'biof3.db'));
+  const Database = req(pth.resolve(hereDir, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const tempDbDir = fsx.mkdtempSync(pth.join(osx.tmpdir(), 'petri-sweep-db-'));
+  const boot = new Database(pth.join(tempDbDir, 'petri.db'));
   const migrationsDir = pth.resolve(hereDir, '..', 'src', 'migrations');
   for (const f of fsx.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fsx.readFileSync(pth.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = pth.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = pth.join(tempDbDir, 'petri.db');
   // BLOCK-83 P4：registry 插件源指向中性夹具（sample-metrics 入 HEAVY_TOOLS，
   // dispatch 的 registeredTool 校验需要它可被发现）。
-  process.env.BIOF3_BUILT_IN_PLUGINS_DIR = pth.resolve(hereDir, 'fixtures', 'neutral-plugins');
+  process.env.PETRI_BUILT_IN_PLUGINS_DIR = pth.resolve(hereDir, 'fixtures', 'neutral-plugins');
   process.on('exit', () => { try { fsx.rmSync(tempDbDir, { recursive: true, force: true }); } catch {} });
 }
 
@@ -261,9 +261,9 @@ test('HEAVY_TOOLS 白名单成员必须真实存在（pack manifest ∪ 中性�
   );
   // 生信插件真源在同级 pack 仓（BIO-4 惯例）；仓缺席的环境（浅克隆）跳过 pack 侧
   // 检查——此时只锚夹具成员，避免环境性红。
-  const packManifestPath = pthx.resolve(__dirname, '..', '..', 'gewu-pack-bio', 'plugins', 'manifest.json');
+  const packManifestPath = pthx.resolve(__dirname, '..', '..', 'petri-pack-bio', 'plugins', 'manifest.json');
   if (!fsx.existsSync(packManifestPath)) {
-    return t.skip('同级 gewu-pack-bio 仓不在位，pack 侧死链检查跳过');
+    return t.skip('同级 petri-pack-bio 仓不在位，pack 侧死链检查跳过');
   }
   const packIds = new Set(
     Object.keys(JSON.parse(fsx.readFileSync(packManifestPath, 'utf8')).plugins || {}),

@@ -24,20 +24,20 @@ const require = createRequire(import.meta.url);
 // 内存 DB 自举（同 block34/block109-p0-baseline 先例）
 {
   const Database = require('better-sqlite3');
-  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'biof3-b109-p1-events-'));
-  const db = new Database(path.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'petri-b109-p1-events-'));
+  const db = new Database(path.join(tempDbDir, 'petri.db'));
   const migrationsDir = path.join(root, 'src', 'migrations');
   for (const file of fssync.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     db.exec(fssync.readFileSync(path.join(migrationsDir, file), 'utf8'));
   }
   db.close();
-  process.env.BIOF3_DB_PATH = path.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try { fssync.rmSync(tempDbDir, { recursive: true, force: true }); } catch { /* Windows 句柄延迟释放 */ }
   });
 }
 
-const agentTaskStore = require(path.join(root, 'core', 'biof3-server', 'agent-task-store.js'));
+const agentTaskStore = require(path.join(root, 'core', 'petri-server', 'agent-task-store.js'));
 
 const deltaContent = (text) => ({ choices: [{ delta: { content: text } }] });
 const deltaReasoning = (text) => ({ choices: [{ delta: { reasoning_content: text } }] });
@@ -159,7 +159,7 @@ test('P1.2 — listInFlightPrimaryTasks：只列 running 主任务、子任务�
 });
 
 test('P1.4 — legacy SSE 双轨退役 + 组装单链断言（源码契约，plan §4）', () => {
-  const chatSrc = fs.readFileSync(path.join(root, 'core', 'biof3-server', 'routes', 'ai-agent', 'chat.js'), 'utf8');
+  const chatSrc = fs.readFileSync(path.join(root, 'core', 'petri-server', 'routes', 'ai-agent', 'chat.js'), 'utf8');
   // legacy 直连 SSE handler 物理删除
   assert.ok(!chatSrc.includes('text/event-stream'), 'chat.js 不再产生 SSE 流（legacy handler 已删）');
   assert.ok(chatSrc.includes('legacy_sse_retired'), 'legacy 请求返回 410 诚实拒绝');
@@ -185,7 +185,7 @@ test('P1.4 — legacy SSE 双轨退役 + 组装单链断言（源码契约，pla
 });
 
 test('P1 E1 — agent-runner 生命周期事件与终态合并接线（源码契约）', () => {
-  const src = fs.readFileSync(path.join(root, 'core', 'biof3-server', 'agent-runner.js'), 'utf8');
+  const src = fs.readFileSync(path.join(root, 'core', 'petri-server', 'agent-runner.js'), 'utf8');
   assert.ok(src.includes("event: 'run_started'"), 'run_started 生命周期事件在位（E1）');
   assert.ok(src.includes("event: 'run_terminal'"), 'run_terminal 生命周期事件在位（E1）');
   assert.ok(/_emit\(\{\s*event: 'run_terminal'[^}]*status: terminal\.status/.test(src.replace(/\n/g, ' ')),

@@ -88,8 +88,8 @@ test('A-009.7 getBackendPorts returns every role', () => {
 test('A-009.8 scattered fallback sites now read from env-coordinator', () => {
   // The files that historically inlined `process.env.X_PORT || <default>`
   // must now delegate to env-coordinator. We assert source-text:
-  //   - core/biof3-server/server.js: must contain `getBackendPort('r')`
-  //   - core/biof3-server/config.js: must contain `getBackendPort('r')`
+  //   - core/petri-server/server.js: must contain `getBackendPort('r')`
+  //   - core/petri-server/config.js: must contain `getBackendPort('r')`
   //   - src/preload.js: must contain `getBackendPort('r')`
   //     （BLOCK-30 起 preload 只读 r 端口）
   //   - src/backend-health.js: must contain getBackendPort for r
@@ -101,12 +101,12 @@ test('A-009.8 scattered fallback sites now read from env-coordinator', () => {
   // behaviour are fine.
   const sites = [
     {
-      file: 'core/biof3-server/server.js',
+      file: 'core/petri-server/server.js',
       mustContain: [`getBackendPort('r')`],
       legacyEnvFallbacks: [/process\.env\.R_SERVER_PORT\s*\|\|\s*3003/],
     },
     {
-      file: 'core/biof3-server/config.js',
+      file: 'core/petri-server/config.js',
       mustContain: [`getBackendPort('r')`],
       legacyEnvFallbacks: [/process\.env\.R_SERVER_PORT\s*\|\|\s*['"]?3003/],
     },

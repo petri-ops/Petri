@@ -128,8 +128,8 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
   );
 
   return (
-    <div className="gewu-desktop-panel" role="dialog" aria-label="设置">
-      <div className="gewu-desktop-panel__header">
+    <div className="petri-desktop-panel" role="dialog" aria-label="设置">
+      <div className="petri-desktop-panel__header">
         {/* UI-393 — × 关闭按钮退役，左侧「← 返回」对齐 Skills/知识空间页头形态
             （backBtn 样式单一真源=global-page.module.css，onClose 语义即离开设置） */}
         <button
@@ -142,22 +142,22 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
           <Icon name="arrow-left" size={16} />
           <span>返回</span>
         </button>
-        <span className="gewu-desktop-panel__icon">
+        <span className="petri-desktop-panel__icon">
           <Icon name="settings" size={18} />
         </span>
-        <div className="gewu-desktop-panel__titles">
-          <h2 className="gewu-desktop-panel__title">设置</h2>
-          <p className="gewu-desktop-panel__subtitle">{activeSectionMeta.description}</p>
+        <div className="petri-desktop-panel__titles">
+          <h2 className="petri-desktop-panel__title">设置</h2>
+          <p className="petri-desktop-panel__subtitle">{activeSectionMeta.description}</p>
         </div>
       </div>
 
-      <div className="gewu-settings-layout">
-        <nav className="gewu-settings-nav" aria-label="设置分类">
+      <div className="petri-settings-layout">
+        <nav className="petri-settings-nav" aria-label="设置分类">
           {SETTINGS_SECTIONS.map((item) => (
             <button
               key={item.id}
               type="button"
-              className={`gewu-settings-nav__item${activeSection === item.id ? ' active' : ''}`}
+              className={`petri-settings-nav__item${activeSection === item.id ? ' active' : ''}`}
               onClick={() => setActiveSection(item.id)}
             >
               <Icon name={item.icon} size={15} />
@@ -169,17 +169,17 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
           ))}
         </nav>
 
-        <div className="gewu-desktop-panel__body gewu-settings-content">
+        <div className="petri-desktop-panel__body petri-settings-content">
         {activeSection === 'general' && (
-          <section className="gewu-settings-section">
-            <div className="gewu-settings-section__heading">
+          <section className="petri-settings-section">
+            <div className="petri-settings-section__heading">
               <h3>常规</h3>
               <p>调整应用外观与基础使用偏好。</p>
             </div>
-        <div className="gewu-field">
-          <label className="gewu-field__label">外观主题</label>
+        <div className="petri-field">
+          <label className="petri-field__label">外观主题</label>
           <ThemeControl menuPlacement="bottom" />
-          <span className="gewu-badge">
+          <span className="petri-badge">
             当前：
             {themePreference === 'system'
               ? '跟随系统'
@@ -187,10 +187,10 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                 ? '日间'
                 : '夜间'}
           </span>
-          <p className="gewu-field__hint">可跟随 macOS 外观，或固定使用日间/夜间模式。</p>
+          <p className="petri-field__hint">可跟随 macOS 外观，或固定使用日间/夜间模式。</p>
         </div>
-        <div className="gewu-field">
-          <label className="gewu-field__label" htmlFor="font-scale-input">界面字号</label>
+        <div className="petri-field">
+          <label className="petri-field__label" htmlFor="font-scale-input">界面字号</label>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
               id="font-scale-input"
@@ -204,40 +204,40 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                 if (Number.isFinite(pct)) setFontScale(pct / 100);
               }}
               style={{ width: 90, height: 32, textAlign: 'right',
-                border: '1px solid var(--gewu-border)', borderRadius: 6,
-                background: 'var(--gewu-bg-surface)', color: 'var(--gewu-text)' }}
+                border: '1px solid var(--petri-border)', borderRadius: 6,
+                background: 'var(--petri-bg-surface)', color: 'var(--petri-text)' }}
             />
-            <span style={{ color: 'var(--gewu-text-secondary)', fontSize: 13 }}>%</span>
+            <span style={{ color: 'var(--petri-text-secondary)', fontSize: 13 }}>%</span>
           </div>
-          <p className="gewu-field__hint">调整应用界面的文字大小（100% = 默认；80%–140%），图标和布局尺寸不受影响。</p>
+          <p className="petri-field__hint">调整应用界面的文字大小（100% = 默认；80%–140%），图标和布局尺寸不受影响。</p>
         </div>
-        <div className="gewu-field">
-          <label className="gewu-field__label">主题色</label>
+        <div className="petri-field">
+          <label className="petri-field__label">主题色</label>
           <AccentControl />
-          <p className="gewu-field__hint">更换应用的强调配色（按钮、链接、高亮等），明暗主题与布局不受影响。</p>
+          <p className="petri-field__hint">更换应用的强调配色（按钮、链接、高亮等），明暗主题与布局不受影响。</p>
         </div>
 
           </section>
         )}
 
         {activeSection === 'models' && (
-          <section className="gewu-settings-section gewu-settings-section--models">
-            <div className="gewu-settings-section__heading">
+          <section className="petri-settings-section petri-settings-section--models">
+            <div className="petri-settings-section__heading">
               <h3>API Endpoint</h3>
               <p>
                 为每个渠道选择接口协议，再配置供应商、Base URL、Key 和默认模型；模型能力由后端统一适配。Key
                 {credentialBackend === 'keychain' ? ' 保存在 macOS Keychain。' : ' 保存在独立本地凭据存储。'}
               </p>
-              <p className="gewu-field__hint">Key 默认隐藏，可点击眼睛显示或复制；导出前会确认是否把 Key 写入文件，请仅保存到安全位置。</p>
+              <p className="petri-field__hint">Key 默认隐藏，可点击眼睛显示或复制；导出前会确认是否把 Key 写入文件，请仅保存到安全位置。</p>
             </div>
             <VisionRoleBinding
               profiles={userModelProfiles}
               value={roleBindings.vision}
               onChange={(profileId) => setRoleBindings((prev) => ({ ...prev, vision: profileId }))}
             />
-            <div className="gewu-model-list">
+            <div className="petri-model-list">
               {userModelProfiles.length > 0 && (
-                <div className="gewu-endpoint-list-header" aria-hidden="true">
+                <div className="petri-endpoint-list-header" aria-hidden="true">
                   <span>协议</span>
                   <span>供应商</span>
                   <span>Base URL</span>
@@ -278,11 +278,11 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                   || connectionResult?.message
                   || (chatReady ? '连接正常，可在聊天窗口选择' : '测试接口并获取模型列表');
                 return (
-                <div key={profile.id} className="gewu-model-preset gewu-endpoint-card">
-                  <div className="gewu-endpoint-card__grid" role="group" aria-label={`${profile.label || '自定义'} 模型渠道`}>
-                    <span className="gewu-endpoint-field-label" aria-hidden="true">协议</span>
+                <div key={profile.id} className="petri-model-preset petri-endpoint-card">
+                  <div className="petri-endpoint-card__grid" role="group" aria-label={`${profile.label || '自定义'} 模型渠道`}>
+                    <span className="petri-endpoint-field-label" aria-hidden="true">协议</span>
                     <select
-                      className="gewu-select"
+                      className="petri-select"
                       value={profile.provider}
                       onChange={(event) => updateProfileProvider(
                         profile,
@@ -294,17 +294,17 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                         <option key={option.value} value={option.value}>{option.label}</option>
                       ))}
                     </select>
-                    <span className="gewu-endpoint-field-label" aria-hidden="true">供应商</span>
+                    <span className="petri-endpoint-field-label" aria-hidden="true">供应商</span>
                     <input
-                      className="gewu-input"
+                      className="petri-input"
                       value={profile.label}
                       onChange={(event) => updateProfile(profile.id, { label: event.target.value })}
                       placeholder="供应商"
                       aria-label="供应商"
                     />
-                    <span className="gewu-endpoint-field-label" aria-hidden="true">Base URL</span>
+                    <span className="petri-endpoint-field-label" aria-hidden="true">Base URL</span>
                     <input
-                      className="gewu-input"
+                      className="petri-input"
                       value={endpointBaseUrl(profile)}
                       onChange={(e) => {
                         updateProfileBaseUrl(profile, e.target.value || undefined);
@@ -313,11 +313,11 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       aria-label="Base URL"
                       title={endpointBaseUrl(profile)}
                     />
-                    <span className="gewu-endpoint-field-label" aria-hidden="true">Key</span>
-                    <div className="gewu-endpoint-key-field">
+                    <span className="petri-endpoint-field-label" aria-hidden="true">Key</span>
+                    <div className="petri-endpoint-key-field">
                       <input
                         type={visibleCredentialIds[id] ? 'text' : 'password'}
-                        className="gewu-input"
+                        className="petri-input"
                         value={credentialInputs[id] || ''}
                         onChange={(e) => {
                           setCredentialInputs((current) => ({ ...current, [id]: e.target.value }));
@@ -328,7 +328,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       />
                       <button
                         type="button"
-                        className="gewu-endpoint-key-action"
+                        className="petri-endpoint-key-action"
                         onClick={() => void revealCredential(id)}
                         aria-label="显示 API Key"
                         title="显示 API Key"
@@ -337,7 +337,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       </button>
                       <button
                         type="button"
-                        className="gewu-endpoint-key-action"
+                        className="petri-endpoint-key-action"
                         onClick={() => void copyCredential(id)}
                         aria-label="复制 API Key"
                         title="复制 API Key"
@@ -345,9 +345,9 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                         {copiedCredentialId === id ? <Icon name="check" size={13} /> : <Icon name="copy" size={13} />}
                       </button>
                     </div>
-                    <span className="gewu-endpoint-field-label" aria-hidden="true">默认模型</span>
+                    <span className="petri-endpoint-field-label" aria-hidden="true">默认模型</span>
                     <select
-                      className="gewu-select"
+                      className="petri-select"
                       value={configuredDefault}
                       onChange={(e) => updateProfile(profile.id, { defaultModel: e.target.value, model: profile.model || e.target.value })}
                       disabled={discovering || modelOptions.length === 0}
@@ -359,10 +359,10 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       )}
                       {modelOptions.map((model) => <option key={model} value={model}>{model}</option>)}
                     </select>
-                    <span className="gewu-endpoint-field-label" aria-hidden="true">上下文</span>
+                    <span className="petri-endpoint-field-label" aria-hidden="true">上下文</span>
                     <input
                       type="text"
-                      className="gewu-input gewu-input--sm"
+                      className="petri-input petri-input--sm"
                       // Render the user's literal text during editing so the
                       // cursor doesn't jump mid-typing; only format on blur
                       // and when state has a numeric value.
@@ -390,9 +390,9 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       aria-label="上下文窗口"
                       title="模型上下文窗口，如 64K、128K、1M；留空则使用默认值"
                     />
-                    <span className="gewu-endpoint-field-label" aria-hidden="true">思考</span>
+                    <span className="petri-endpoint-field-label" aria-hidden="true">思考</span>
                     <label
-                      className="gewu-endpoint-reasoning"
+                      className="petri-endpoint-reasoning"
                       title="声明该渠道支持思考档位：勾选后 composer 的档位控件才会出现，并按协议映射上游参数"
                     >
                       <input
@@ -408,9 +408,9 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                         aria-label={`${profile.label || '自定义渠道'} 支持思考档位`}
                       />
                     </label>
-                    <span className="gewu-endpoint-field-label" aria-hidden="true">视觉</span>
+                    <span className="petri-endpoint-field-label" aria-hidden="true">视觉</span>
                     <label
-                      className="gewu-endpoint-reasoning"
+                      className="petri-endpoint-reasoning"
                       title="声明该渠道支持图片输入（识图）：勾选后可在上方「识图模型」换绑；网关须真正支持 image_url 多模态，否则识图调用诚实报错"
                     >
                       <input
@@ -426,10 +426,10 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                         aria-label={`${profile.label || '自定义渠道'} 支持识图（视觉输入）`}
                       />
                     </label>
-                    <span className="gewu-endpoint-field-label" aria-hidden="true">连通性</span>
+                    <span className="petri-endpoint-field-label" aria-hidden="true">连通性</span>
                     <button
                       type="button"
-                      className={`gewu-btn gewu-btn--ghost gewu-btn--sm gewu-endpoint-card__test${connectionResult?.ok ? ' is-ok' : connectionResult || profileError ? ' is-error' : ''}`}
+                      className={`petri-btn petri-btn--ghost petri-btn--sm petri-endpoint-card__test${connectionResult?.ok ? ' is-ok' : connectionResult || profileError ? ' is-error' : ''}`}
                       onClick={() => void discoverModels(profile, credentialInputs[id] || '')}
                       disabled={
                         discovering ||
@@ -441,10 +441,10 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       {connectionResult?.ok && <Icon name="check" size={12} />}
                       {connectionLabel}
                     </button>
-                    <span className="gewu-endpoint-field-label" aria-hidden="true">删除</span>
+                    <span className="petri-endpoint-field-label" aria-hidden="true">删除</span>
                     <button
                       type="button"
-                      className="gewu-endpoint-card__delete"
+                      className="petri-endpoint-card__delete"
                       onClick={() => {
                         const label = profile.label?.trim() || '该渠道';
                         if (!window.confirm(`删除「${label}」？已保存的 URL、Key 与默认模型都会从面板移除，回收站不可恢复。`)) return;
@@ -459,10 +459,10 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                 </div>
               );
               })}
-              {userModelProfiles.length === 0 && <p className="gewu-field__hint">尚未配置模型。请添加 API 渠道并填写连接信息。</p>}
+              {userModelProfiles.length === 0 && <p className="petri-field__hint">尚未配置模型。请添加 API 渠道并填写连接信息。</p>}
             </div>
-            <div className="gewu-model-fallback" aria-label="Agent 模型自动容错">
-              <label className="gewu-model-fallback__toggle">
+            <div className="petri-model-fallback" aria-label="Agent 模型自动容错">
+              <label className="petri-model-fallback__toggle">
                 <input
                   type="checkbox"
                   checked={fallbackEnabled}
@@ -473,7 +473,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                   <small>主模型遇到限流、服务异常或最终整理协议失败时，按顺序尝试已选备用模型。</small>
                 </span>
               </label>
-              <div className="gewu-model-fallback__choices" aria-label="Agent 备用模型">
+              <div className="petri-model-fallback__choices" aria-label="Agent 备用模型">
                 {agentFallbackCandidates.map((profile) => {
                   const selected = agentFallbackProfileIds.includes(profile.id);
                   return (
@@ -494,23 +494,23 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                   );
                 })}
                 {agentFallbackCandidates.length === 0 && (
-                  <span className="gewu-field__hint">还没有其他支持工具调用的模型渠道。</span>
+                  <span className="petri-field__hint">还没有其他支持工具调用的模型渠道。</span>
                 )}
               </div>
             </div>
-            <div className="gewu-endpoint-list-actions">
-              <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={addProfile}>
+            <div className="petri-endpoint-list-actions">
+              <button type="button" className="petri-btn petri-btn--ghost petri-btn--sm" onClick={addProfile}>
                 添加 API 渠道
               </button>
               {userModelProfiles.length > 0 && (
-                <div className="gewu-endpoint-transfer-actions">
-                  <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={() => void exportEndpoints('json')}>
+                <div className="petri-endpoint-transfer-actions">
+                  <button type="button" className="petri-btn petri-btn--ghost petri-btn--sm" onClick={() => void exportEndpoints('json')}>
                     导出 JSON
                   </button>
-                  <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={() => void exportEndpoints('csv')}>
+                  <button type="button" className="petri-btn petri-btn--ghost petri-btn--sm" onClick={() => void exportEndpoints('csv')}>
                     导出 CSV
                   </button>
-                  <button type="button" className="gewu-btn gewu-btn--ghost gewu-btn--sm" onClick={() => endpointImportRef.current?.click()}>
+                  <button type="button" className="petri-btn petri-btn--ghost petri-btn--sm" onClick={() => endpointImportRef.current?.click()}>
                     导入配置
                   </button>
                   <input
@@ -523,7 +523,7 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
                       if (file) void importEndpoints(file);
                     }}
                   />
-                  {endpointTransferMessage && <span className="gewu-field__hint">{endpointTransferMessage}</span>}
+                  {endpointTransferMessage && <span className="petri-field__hint">{endpointTransferMessage}</span>}
                 </div>
               )}
             </div>
@@ -532,25 +532,25 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
         )}
 
         {activeSection === 'compute' && (
-          <section className="gewu-settings-section">
-            <div className="gewu-settings-section__heading">
+          <section className="petri-settings-section">
+            <div className="petri-settings-section__heading">
               <h3>计算与数据</h3>
               <p>管理远程执行目标，并查看本地数据占用。</p>
             </div>
-        {/* UI-355 — 「计算执行」遗留卡移除（BIOF3_COMPUTE_MODE 零读者，BLOCK-30 解耦后即死面）；
+        {/* UI-355 — 「计算执行」遗留卡移除（PETRI_COMPUTE_MODE 零读者，BLOCK-30 解耦后即死面）；
             远程执行目标（SSH）为 BLOCK-57/67 活功能，保留 */}
 
         <RemoteTargets />
 
-        <hr className="gewu-section-divider" />
+        <hr className="petri-section-divider" />
 
         <DataManagement />
 
-        <hr className="gewu-section-divider" />
+        <hr className="petri-section-divider" />
 
         <HarnessEnvironment />
 
-        <hr className="gewu-section-divider" />
+        <hr className="petri-section-divider" />
 
         <TrashManagement />
 
@@ -558,8 +558,8 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
         )}
 
         {activeSection === 'usage' && (
-          <section className="gewu-settings-section">
-            <div className="gewu-settings-section__heading">
+          <section className="petri-settings-section">
+            <div className="petri-settings-section__heading">
               <h3>用量与资源</h3>
               <p>查看模型成本、缓存命中和当前机器容量，不保存原始数据或密钥。</p>
             </div>
@@ -573,22 +573,22 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
 
         {/* BLOCK-160 W2 P2（ORC-1）— Agent 用户规则节（与决策观测节相邻） */}
         {activeSection === 'decisions' && (
-          <section className="gewu-settings-section">
+          <section className="petri-settings-section">
             <AgentRulesPanel />
           </section>
         )}
 
         {/* BLOCK-163 W3 P10（KNW-5）— 记忆治理节（同区相邻：治理面集中） */}
         {activeSection === 'decisions' && (
-          <section className="gewu-settings-section">
+          <section className="petri-settings-section">
             <MemoryPanel />
           </section>
         )}
 
         {/* BLOCK-116 P4 — 决策原语配置节（与观测节相邻：配置+观测同位） */}
         {activeSection === 'decisions' && (
-          <section className="gewu-settings-section">
-            <div className="gewu-settings-section__heading">
+          <section className="petri-settings-section">
+            <div className="petri-settings-section__heading">
               <h3>决策原语</h3>
               <p>各智能决策接点的启用与阈值（校准默认预填，可调整并自动保存；每次调用记录实际生效阈值）。</p>
             </div>
@@ -598,8 +598,8 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
 
         {/* UI-366 — 原全局「后端」页（/backend，BLOCK-72/UI-320）并入本分区 */}
         {activeSection === 'diagnostics' && (
-          <section className="gewu-settings-section">
-            <div className="gewu-settings-section__heading">
+          <section className="petri-settings-section">
+            <div className="petri-settings-section__heading">
               <h3>运行时与诊断</h3>
               <p>本地服务进程、R / Python 运行时状态与日志（设备级，不关联项目）。</p>
             </div>
@@ -608,40 +608,40 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
         )}
 
         {activeSection === 'maintenance' && (
-          <section className="gewu-settings-section">
-            <div className="gewu-settings-section__heading">
+          <section className="petri-settings-section">
+            <div className="petri-settings-section__heading">
               <h3>隐私与维护</h3>
               <p>控制匿名错误反馈，并处理诊断和应用更新。</p>
             </div>
         {/* M2-3：可选错误遥测开关（默认关闭，用户主动开启） */}
-        <div className="gewu-field">
-          <label className="gewu-field__label">开启错误反馈</label>
-          <div className="gewu-toggle-row">
+        <div className="petri-field">
+          <label className="petri-field__label">开启错误反馈</label>
+          <div className="petri-toggle-row">
             <input
               type="checkbox"
-              id="gewu-telemetry-toggle"
-              className="gewu-toggle"
+              id="petri-telemetry-toggle"
+              className="petri-toggle"
               checked={telemetryEnabled}
               onChange={(e) => void handleToggleTelemetry(e.target.checked)}
             />
-            <label htmlFor="gewu-telemetry-toggle" className="gewu-toggle-label">
+            <label htmlFor="petri-telemetry-toggle" className="petri-toggle-label">
               {telemetryEnabled ? '已开启' : '已关闭'}
             </label>
           </div>
-          <p className="gewu-field__hint">
+          <p className="petri-field__hint">
             开启后，分析出错时仅上报错误分类与应用版本（不含任何用户数据、文件路径或文件名），
             用于改进工具稳定性。可随时关闭。
           </p>
         </div>
-        <div className="gewu-maintenance-actions">
-          <div className="gewu-maintenance-row">
+        <div className="petri-maintenance-actions">
+          <div className="petri-maintenance-row">
             <div>
               <strong>应用更新</strong>
               <p>检查并下载适用于当前 Mac 的安装包。</p>
             </div>
             <UpdateChecker />
           </div>
-          <div className="gewu-maintenance-row">
+          <div className="petri-maintenance-row">
             <div>
               <strong>诊断日志</strong>
               <p>导出用于排查问题的本地诊断信息。</p>
@@ -653,26 +653,26 @@ export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
         )}
 
         {activeSection === 'experimental' && (
-          <section className="gewu-settings-section">
-            <div className="gewu-settings-section__heading">
+          <section className="petri-settings-section">
+            <div className="petri-settings-section__heading">
               <h3>实验特性</h3>
               <p>长会话与长任务开关已实机验证并默认开启（2026-09-18 裁决）；其余实验开关默认关闭，打开前请确认你的使用场景。</p>
             </div>
-            <ExperimentalFeaturesSection bridge={window.biof3?.agentWorkbenchFlags} />
+            <ExperimentalFeaturesSection bridge={window.petri?.agentWorkbenchFlags} />
           </section>
         )}
         </div>
       </div>
 
-      {showAiSave && <div className="gewu-desktop-panel__footer gewu-settings-footer">
+      {showAiSave && <div className="petri-desktop-panel__footer petri-settings-footer">
         {saved && (
-          <span className="gewu-saved-toast">
+          <span className="petri-saved-toast">
             <Icon name="check" size={14} /> 已保存
           </span>
         )}
         <button
           type="button"
-          className="gewu-btn gewu-btn--primary gewu-btn--sm"
+          className="petri-btn petri-btn--primary petri-btn--sm"
           onClick={() => void handleSave()}
           disabled={saving}
         >

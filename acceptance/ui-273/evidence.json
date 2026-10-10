@@ -25,7 +25,7 @@
     },
     {
       "id": "S4",
-      "name": "交叉核对后端权威清单 tasks.files_changed_json（biof3.db 只读查询）",
+      "name": "交叉核对后端权威清单 tasks.files_changed_json（petri.db 只读查询）",
       "evidence": "本文件内联记录",
       "observed": [
         "task 13e3a32b: u273-c1.txt {status:created, iteration:1, tool:workspace_write}; u273-c2.txt {status:created, iteration:2, tool:workspace_write}",

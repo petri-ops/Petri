@@ -4,7 +4,7 @@
   "capturedAt": "2026-09-22T08:42:53.957Z",
   "sourceCommit": "27d6f96c8673ee9e4963a6553cc1da4e97430ff8",
   "model": "jev-1.13.0",
-  "wrapper": "core/biof3-server/helpers/decision-api.js",
+  "wrapper": "core/petri-server/helpers/decision-api.js",
   "decisionPoint": "scripts/lib/block114-triage-core.mjs L3 语义残差层（W1-4 测试失败归因）",
   "result": {
     "corpus": {

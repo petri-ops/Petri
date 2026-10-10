@@ -37,7 +37,7 @@ status: completed
 
 - dynamic workflow：单实现员串行三项（同文件面禁并行互踩，红绿先行）→ 独立评审（P1 必修）→ 统一门禁（红了即修 ≤2 轮）。
 - **工作流内不提交**：改动留工作区，主代理终审后集成提交（既有形态）。
-- CSS 纪律（gewu-css-theme）：颜色一律走既有 CSS 变量/token（先读 ReviewMode.css 与 themes/ 现有写法），禁新增十六进制/slate 字面量，写完跑 theme-token-contract 契约测试。
+- CSS 纪律（petri-css-theme）：颜色一律走既有 CSS 变量/token（先读 ReviewMode.css 与 themes/ 现有写法），禁新增十六进制/slate 字面量，写完跑 theme-token-contract 契约测试。
 
 ## 5. 验收与证据
 

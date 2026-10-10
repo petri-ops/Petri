@@ -19,7 +19,7 @@ const { createRequire } = require('module');
  * whichever ABI the last packaging/test command left in root node_modules.
  */
 function loadDatabaseConstructor() {
-  const dependencyRoot = process.env.BIOF3_BETTER_SQLITE3_ROOT;
+  const dependencyRoot = process.env.PETRI_BETTER_SQLITE3_ROOT;
   if (!dependencyRoot) return require('better-sqlite3');
   const scopedRequire = createRequire(path.join(path.resolve(dependencyRoot), 'package.json'));
   return scopedRequire('better-sqlite3');
@@ -48,7 +48,7 @@ function getAppliedVersion(dbPath) {
 
 /**
  * 跑未应用的 migration。
- * @param {string} dbPath - biof3.db 路径
+ * @param {string} dbPath - petri.db 路径
  * @param {string} migrationsDir - 含 NNN_*.sql 的目录
  * @returns {Promise<number>} 应用后的最新版本号
  */

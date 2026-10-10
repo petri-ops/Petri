@@ -12,7 +12,7 @@
       },
       "evidence": "acceptance/block-110/calibration.json",
       "enabledDefault": true,
-      "envKey": "BIOF3_JEV_TOPIC_SHIFT"
+      "envKey": "PETRI_JEV_TOPIC_SHIFT"
     },
     {
       "point": "knowledge-guard",
@@ -26,7 +26,7 @@
       },
       "evidence": "acceptance/block-110/calibration.json",
       "enabledDefault": false,
-      "envKey": "BIOF3_JEV_KNOWLEDGE_GUARD"
+      "envKey": "PETRI_JEV_KNOWLEDGE_GUARD"
     },
     {
       "point": "marker-celltype",
@@ -38,7 +38,7 @@
       "gates": null,
       "evidence": "acceptance/block-111/calibration.json",
       "enabledDefault": false,
-      "envKey": "BIOF3_JEV_MARKER_GUARD"
+      "envKey": "PETRI_JEV_MARKER_GUARD"
     },
     {
       "point": "intent-route",
@@ -50,7 +50,7 @@
       "gates": null,
       "evidence": "acceptance/block-112/calibration.json",
       "enabledDefault": false,
-      "envKey": "BIOF3_JEV_INTENT_ROUTE"
+      "envKey": "PETRI_JEV_INTENT_ROUTE"
     },
     {
       "point": "tool-route",
@@ -62,7 +62,7 @@
       "gates": null,
       "evidence": "acceptance/block-113/calibration.json",
       "enabledDefault": false,
-      "envKey": "BIOF3_JEV_TOOL_ROUTE"
+      "envKey": "PETRI_JEV_TOOL_ROUTE"
     }
   ],
   "put1": {

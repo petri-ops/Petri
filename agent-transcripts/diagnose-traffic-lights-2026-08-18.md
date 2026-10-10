@@ -1,8 +1,8 @@
-# BioF3 Desktop 红绿灯消失 — 根因诊断报告
+# Petri Desktop 红绿灯消失 — 根因诊断报告
 
 - **日期**：2026-08-18 (Tue)
 - **诊断范围**：dev Electron 主窗口（vite dev server :3000, project=p_msok75w9_gh35）
-- **结论**：preload.js 加载失败 → `window.biof3Desktop` 不存在 → `getIsMac()` 与 `getIsDesktop()` 都为 false → 自定义 trafficZone 整个 JSX 块不渲染 → 三个交通灯按钮（关闭 / 最小化 / 全屏）整体消失。
+- **结论**：preload.js 加载失败 → `window.petriDesktop` 不存在 → `getIsMac()` 与 `getIsDesktop()` 都为 false → 自定义 trafficZone 整个 JSX 块不渲染 → 三个交通灯按钮（关闭 / 最小化 / 全屏）整体消失。
 
 ---
 
@@ -20,7 +20,7 @@ CDP `http://127.0.0.1:9222/json/version` 返回：
 
 ```
 Chrome/124.0.6367.243
-biof3-local/0.0.1-rc.7
+petri-local/0.0.1-rc.7
 Electron/30.5.1
 ```
 
@@ -28,7 +28,7 @@ CDP 唯一 page target：
 
 ```
 url=http://localhost:3000/project/p_msok75w9_gh35
-title=BioF3
+title=Petri
 ```
 
 dev Electron 主进程正在跑、CDP 9222 可用、vite SPA 已加载。
@@ -64,10 +64,10 @@ CDP `Runtime.evaluate` 数值证据：
 | `document.querySelectorAll('[class*="winBtn"]').length` | **0** |
 | `document.querySelectorAll('[class*="windowControls"]').length` | **0** |
 | `document.querySelectorAll('header button').length` | 6 |
-| `typeof window.biof3Desktop` | **undefined** |
-| `window.biof3Desktop?.isDesktop` | undefined |
-| `window.biof3Desktop?.platform` | undefined |
-| `window.process?.env?.BIOF3_DESKTOP` | undefined |
+| `typeof window.petriDesktop` | **undefined** |
+| `window.petriDesktop?.isDesktop` | undefined |
+| `window.petriDesktop?.platform` | undefined |
+| `window.process?.env?.PETRI_DESKTOP` | undefined |
 
 ---
 
@@ -77,7 +77,7 @@ CDP `Runtime.consoleAPICalled` 在主窗口 webContents 抓到两条错误（exe
 
 ```
 [error] Unable to load preload script:
-  /Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/src/preload.js
+  /Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/src/preload.js
 
 [error] Error: module not found: ./main/env-coordinator
     at preloadRequire (node:electron/js2c/sandbox_bundle:2:82852)
@@ -92,7 +92,7 @@ CDP `Runtime.consoleAPICalled` 在主窗口 webContents 抓到两条错误（exe
 const { getBackendPort } = require('./main/env-coordinator');
 ```
 
-—— **Electron sandbox 模式下，preload 只能 require 内置模块**（`electron` / `events` / `timers` / `url`），不能 `require` 同目录其它文件。`sandbox_bundle` 的 `preloadRequire` 找不到 `./main/env-coordinator`，**整个 preload 抛错中止**。`contextBridge.exposeInMainWorld('biof3Desktop', {...})` 那一句没跑到，`window.biof3Desktop` 就根本不存在。
+—— **Electron sandbox 模式下，preload 只能 require 内置模块**（`electron` / `events` / `timers` / `url`），不能 `require` 同目录其它文件。`sandbox_bundle` 的 `preloadRequire` 找不到 `./main/env-coordinator`，**整个 preload 抛错中止**。`contextBridge.exposeInMainWorld('petriDesktop', {...})` 那一句没跑到，`window.petriDesktop` 就根本不存在。
 
 ---
 
@@ -100,9 +100,9 @@ const { getBackendPort } = require('./main/env-coordinator');
 
 ```text
 preload.js 加载失败
-  └─ window.biof3Desktop 未注入
-       └─ getIsMac() → false    // 依赖 biof3Desktop?.platform === 'darwin'
-       └─ getIsDesktop() → false // 依赖 biof3Desktop?.isDesktop === true
+  └─ window.petriDesktop 未注入
+       └─ getIsMac() → false    // 依赖 petriDesktop?.platform === 'darwin'
+       └─ getIsDesktop() → false // 依赖 petriDesktop?.isDesktop === true
             └─ TitleBar.tsx:290 `isMac && (...)` 为 false
                  └─ trafficZone 整个 JSX 块（TitleBar.tsx:290-332）不渲染
                       └─ 三个 macTrafficBtn (close/minimize/fullscreen) 全消失
@@ -152,7 +152,7 @@ git show 引用：
 
 > src/preload.js:67-68 now reads getBackendPort('r' / 'python').
 
-即在 `src/preload.js` 第 19 行加了 `const { getBackendPort } = require('./main/env-coordinator');`。这条 require 在 sandbox 模式下不合法，整个 preload 抛错中止 —— 导致后续所有 `contextBridge.exposeInMainWorld(...)`（含 `biof3` / `process` / `biof3Desktop`）全部没注册。
+即在 `src/preload.js` 第 19 行加了 `const { getBackendPort } = require('./main/env-coordinator');`。这条 require 在 sandbox 模式下不合法，整个 preload 抛错中止 —— 导致后续所有 `contextBridge.exposeInMainWorld(...)`（含 `petri` / `process` / `petriDesktop`）全部没注册。
 
 ### 历史上红绿灯相关 commit
 
@@ -200,7 +200,7 @@ R_SERVER_PORT / PY_SERVER_PORT 由 Electron main 进程在 preload 之前写到 
 
 ## 7. 是否引入 regression
 
-- **不动 `preload.js` 的 IPC 契约**：方案 A 不动 `window.biof3Desktop.window.{minimize,maximize,close,isMaximized,onMaximizeChanged,isFullScreen,toggleFullScreen,onFullScreenChanged}` —— 八个 API 原样保留。
+- **不动 `preload.js` 的 IPC 契约**：方案 A 不动 `window.petriDesktop.window.{minimize,maximize,close,isMaximized,onMaximizeChanged,isFullScreen,toggleFullScreen,onFullScreenChanged}` —— 八个 API 原样保留。
 - **不动 `main.js` IPC handler**：方案 A 不动 `setupWindowIpc()` 里的 `window:minimize / window:maximize / window:close / window:isMaximized / window:isFullScreen / window:toggleFullScreen / window:maximize-changed / window:fullscreen-changed` 八个 handler（src/main.js:619-636 + 558-573）。
 - **不破坏 A-009 集中化语义**：端口兜底逻辑事实上由 Electron main 进程的 env-coordinator 写 `process.env`，A-009 提交说明明确说"Electron's main still writes the env vars first"，preload 直接读 `process.env.R_SERVER_PORT` 是**一致语义**，且没有第二个事实源。
 - **不影响非 macOS 路径**：方案 A 不会改变 `getIsMac() === false` 时 `WindowControls` (TitleBar.tsx:32-86) 走 `getBridge('window')` 的逻辑。
@@ -208,7 +208,7 @@ R_SERVER_PORT / PY_SERVER_PORT 由 Electron main 进程在 preload 之前写到 
 唯一要小心的边界：
 
 1. **独立子进程 (standalone) 启动场景**：如果没有 Electron main 进程预填 `process.env.R_SERVER_PORT`，会回落到硬编码 `3001` / `3004`。这是与 A-009 现状一致（也是当前 backend-health 的事实行为）。
-2. **单元测试**：TitleBar.test.tsx 之前用 `vi.stubGlobal('biof3Desktop', {...})` 注入；preload 修复不影响这条路径，因为单测不经过 Electron 沙盒。
+2. **单元测试**：TitleBar.test.tsx 之前用 `vi.stubGlobal('petriDesktop', {...})` 注入；preload 修复不影响这条路径，因为单测不经过 Electron 沙盒。
 3. **不能顺手改 main.js 的 `sandbox: true`**：那是单独的安全不变量，留给 G1+ / 维护者裁决。
 
 ---
@@ -217,7 +217,7 @@ R_SERVER_PORT / PY_SERVER_PORT 由 Electron main 进程在 preload 之前写到 
 
 Playwright `browser_take_screenshot` 在 vite dev 的重渲染里 5 秒超时（截图工具等待字体稳定），但 DOM 证据（0 个交通灯按钮、6 个工具按钮）已经足够确凿。证据链：
 
-- CDP `Runtime.evaluate`（数值）：0 macTraffic、0 trafficZone、0 winBtn、undefined biof3Desktop
+- CDP `Runtime.evaluate`（数值）：0 macTraffic、0 trafficZone、0 winBtn、undefined petriDesktop
 - Playwright `browser_snapshot`（结构）：banner 内只有 6 个按钮，无「关闭 / 最小化 / 全屏」按钮
 - CDP `Runtime.consoleAPICalled`（根因）：preload 加载失败、`module not found: ./main/env-coordinator`
 
@@ -227,4 +227,4 @@ Playwright `browser_take_screenshot` 在 vite dev 的重渲染里 5 秒超时（
 
 ## 9. 一句话总结
 
-> commit `48e19e2`（A-009）把 `getBackendPort` 集中化到 `env-coordinator`，preload.js 因此新增跨文件 `require('./main/env-coordinator')`；在 Electron `sandbox: true` 下 preload 不能 require 同目录其它文件，preload 整体加载失败 → `window.biof3Desktop` 没注入 → `isMac` 与 `isDesktop` 都为 false → trafficZone 整个 JSX 块不渲染 → 三个交通灯消失。最小修复：在 preload 内联 `process.env.R_SERVER_PORT || '3001'` / `process.env.PY_SERVER_PORT || '3004'`，删掉那条 `require`。
+> commit `48e19e2`（A-009）把 `getBackendPort` 集中化到 `env-coordinator`，preload.js 因此新增跨文件 `require('./main/env-coordinator')`；在 Electron `sandbox: true` 下 preload 不能 require 同目录其它文件，preload 整体加载失败 → `window.petriDesktop` 没注入 → `isMac` 与 `isDesktop` 都为 false → trafficZone 整个 JSX 块不渲染 → 三个交通灯消失。最小修复：在 preload 内联 `process.env.R_SERVER_PORT || '3001'` / `process.env.PY_SERVER_PORT || '3004'`，删掉那条 `require`。

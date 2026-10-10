@@ -1,10 +1,10 @@
-# Gewu Desktop（格物）项目指令
+# Petri Desktop（格物）项目指令
 
-本文件指导 AI Agent 理解和处理 Gewu（格物，原名 BioF3）桌面版项目。
+本文件指导 AI Agent 理解和处理 Petri（格物，原名 Petri）桌面版项目。
 
 ## 项目定位
 
-Gewu Desktop（格物，原名 BioF3）= Electron 桌面应用 + Vite SPA 前端 + MCP Server
+Petri Desktop（格物，原名 Petri）= Electron 桌面应用 + Vite SPA 前端 + MCP Server
 本地化 AI 陪伴的全组学学习与实战平台
 
 ## 当前阶段纪律（最高优先级 · G0 长期开发期）
@@ -36,8 +36,8 @@ Gewu Desktop（格物，原名 BioF3）= Electron 桌面应用 + Vite SPA 前端
 | ------ | ---------------------------- | ---------------------------------------------------------- |
 | 桌面壳  | Electron                     | `src/main.js`（装配入口，实拆于 `src/main/` + `src/ipc/`）       |
 | 前端   | React 18 + Vite + TypeScript | `frontend/src/`                                            |
-| 工具   | MCP Server                   | `src/mcp-server.js`（仅 stdio 壳）→ 工具真实注册在 `core/biof3-server/mcp/registry.js` + `core/biof3-server/agent-tools/` |
-| 数据库  | better-sqlite3               | 桌面侧 `src/database/` + 迁移 `src/migrations/`；后端侧 `core/biof3-server/db/` |
+| 工具   | MCP Server                   | `src/mcp-server.js`（仅 stdio 壳）→ 工具真实注册在 `core/petri-server/mcp/registry.js` + `core/petri-server/agent-tools/` |
+| 数据库  | better-sqlite3               | 桌面侧 `src/database/` + 迁移 `src/migrations/`；后端侧 `core/petri-server/db/` |
 
 ## 开发命令
 
@@ -107,7 +107,7 @@ desktop/
 │   │   └── desktopBridge.ts  # IPC 桥接
 │   └── themes/            # 主题系统
 ├── test/                   # Node 侧测试（317 个 .test.mjs，前端测试住在 frontend/src 同目录）
-└── core/                   # 核心后端（仓库内，已内联）：biof3-server / shared-backend / packages
+└── core/                   # 核心后端（仓库内，已内联）：petri-server / shared-backend / packages
 ```
 
 > 路由实际注册在 `frontend/src/App.tsx`（主窗）与窗口面路由；新增页面以该文件为准，不要按已删除的
@@ -120,7 +120,7 @@ desktop/
 
 1. **前端使用 TypeScript strict 模式**
 2. **Electron IPC 调用必须通过** **`lib/desktopBridge.ts`**
-3. **MCP 工具的真实注册处是** **`core/biof3-server/mcp/registry.js`**（`listTools()` / `callTool()` 单入口）与 **`core/biof3-server/agent-tools/`**（`tool-defs.js` + `registry.js`）；`src/mcp-server.js` 只是 stdio 协议壳，不得在壳内声明工具
+3. **MCP 工具的真实注册处是** **`core/petri-server/mcp/registry.js`**（`listTools()` / `callTool()` 单入口）与 **`core/petri-server/agent-tools/`**（`tool-defs.js` + `registry.js`）；`src/mcp-server.js` 只是 stdio 协议壳，不得在壳内声明工具
 4. **状态管理：React useState + 自定义 hooks，禁止使用 zustand**
 5. **路由页面在** **`pages/`** **下，非页面组件用** **`_`** **前缀**
 6. **新增 IPC 通道先在** **`src/ipc/channels.js`** **登记**（通道唯一注册表），再在 `preload.js` 增同名包装；`preload.js` 必须保持自包含字面量（sandbox 进程不能 require 本地模块），两侧漂移由 `test/ipc-channels-registry.test.mjs` 双向守护
@@ -167,13 +167,13 @@ desktop/
 
 ### 项目治理与文档生命周期
 
-- 创建或修改计划、Goal、工作包，完成阶段收口、Handoff、归档/替代文档，或创建/移除 Git Worktree 时，必须使用 `$gewu-project-governance`（BLOCK-61 改名前为 `$biof3-project-governance`）。该 skill 的 canonical 位置是 [`.agents/skills/gewu-project-governance/SKILL.md`](.agents/skills/gewu-project-governance/SKILL.md)。
-- 会话启动/收口/实机验收/工作区卫生/产品 Skill 编写/子 Agent 委派等日常开发实践，使用 `$gewu-dev-infra`（canonical：[`.agents/skills/gewu-dev-infra/SKILL.md`](.agents/skills/gewu-dev-infra/SKILL.md)，BLOCK-71 沉淀；自洽工具包——脚本/模板/原则随包携带，跨仓库复用见包内 PORTING.md，委派任务书模板在包内 `templates/`）。
-- **开发时决策建议器（Jev/Laya）主动行使（2026-09-24 用户裁决，无需用户提醒）**：规划定向测试前跑 `npm run test:suggest -- --supply=cloud`、台账回写前跑 `npm run doc:suggest -- --supply=cloud --context "<改动说明>"`、测试失败归因时跑 `node scripts/block114-failure-triage.mjs`、收口声明前跑 `npm run output:judge`——到点即跑，结果（含零建议）如实附在交付说明里；确定性规则优先于模型，零建议不是故障。用法/选型/红线见 [`.agents/skills/gewu-dev-infra/references/DEV-DECISION-TOOLS.md`](.agents/skills/gewu-dev-infra/references/DEV-DECISION-TOOLS.md)；**调用与否以 `decision_log` 为准（`npm run decision:report` 可查账）**。
-- **Skill 使用透明度（2026-09-24 用户裁决；2026-09-25 补充 Jev 计数）**：会话中实际使用（加载并依据其内容行事）了某个 skill 时，在该次交付/答复的收尾用标签列出，形如 `〔skills: gewu-dev-infra(SKILL, references/DEV-DECISION-TOOLS) · jev×N〕`；**jev×N = 本工作阶段（自上次收尾）Jev 决策建议器调用次数**（`npm run decision:session` 分段口径：每次收尾**重跑取数**得「本轮增量 + 会话累计」双数字——**复用上一轮数字即违规**〔2026-09-25 用户两次抓真：复用 60 与复用 1 均为执行违规〕；零次如实标 `jev×0`；禁止凭记忆估数）；**只标真实使用的**——未使用任何 skill 的纯问答可不标，不得虚标。
-- 评审代码变更/审查 diff/写审计报告时，使用 `$gewu-code-review`（canonical：[`.agents/skills/gewu-code-review/SKILL.md`](.agents/skills/gewu-code-review/SKILL.md)，BLOCK-71 沉淀；六维度评审 + P1/P2/Minor 分级 + 表行式报告模板；P1 修复后方可收口）。
+- 创建或修改计划、Goal、工作包，完成阶段收口、Handoff、归档/替代文档，或创建/移除 Git Worktree 时，必须使用 `$petri-project-governance`（BLOCK-61 改名前为 `$petri-project-governance`）。该 skill 的 canonical 位置是 [`.agents/skills/petri-project-governance/SKILL.md`](.agents/skills/petri-project-governance/SKILL.md)。
+- 会话启动/收口/实机验收/工作区卫生/产品 Skill 编写/子 Agent 委派等日常开发实践，使用 `$petri-dev-infra`（canonical：[`.agents/skills/petri-dev-infra/SKILL.md`](.agents/skills/petri-dev-infra/SKILL.md)，BLOCK-71 沉淀；自洽工具包——脚本/模板/原则随包携带，跨仓库复用见包内 PORTING.md，委派任务书模板在包内 `templates/`）。
+- **开发时决策建议器（Jev/Laya）主动行使（2026-09-24 用户裁决，无需用户提醒）**：规划定向测试前跑 `npm run test:suggest -- --supply=cloud`、台账回写前跑 `npm run doc:suggest -- --supply=cloud --context "<改动说明>"`、测试失败归因时跑 `node scripts/block114-failure-triage.mjs`、收口声明前跑 `npm run output:judge`——到点即跑，结果（含零建议）如实附在交付说明里；确定性规则优先于模型，零建议不是故障。用法/选型/红线见 [`.agents/skills/petri-dev-infra/references/DEV-DECISION-TOOLS.md`](.agents/skills/petri-dev-infra/references/DEV-DECISION-TOOLS.md)；**调用与否以 `decision_log` 为准（`npm run decision:report` 可查账）**。
+- **Skill 使用透明度（2026-09-24 用户裁决；2026-09-25 补充 Jev 计数）**：会话中实际使用（加载并依据其内容行事）了某个 skill 时，在该次交付/答复的收尾用标签列出，形如 `〔skills: petri-dev-infra(SKILL, references/DEV-DECISION-TOOLS) · jev×N〕`；**jev×N = 本工作阶段（自上次收尾）Jev 决策建议器调用次数**（`npm run decision:session` 分段口径：每次收尾**重跑取数**得「本轮增量 + 会话累计」双数字——**复用上一轮数字即违规**〔2026-09-25 用户两次抓真：复用 60 与复用 1 均为执行违规〕；零次如实标 `jev×0`；禁止凭记忆估数）；**只标真实使用的**——未使用任何 skill 的纯问答可不标，不得虚标。
+- 评审代码变更/审查 diff/写审计报告时，使用 `$petri-code-review`（canonical：[`.agents/skills/petri-code-review/SKILL.md`](.agents/skills/petri-code-review/SKILL.md)，BLOCK-71 沉淀；六维度评审 + P1/P2/Minor 分级 + 表行式报告模板；P1 修复后方可收口）。
 
-- 新建页面/组件、写样式、暗色模式与主题色工作、排查「颜色不一致」反馈，或评审涉及 CSS 的 diff 时，使用 `$gewu-css-theme`（canonical：[`.agents/skills/gewu-css-theme/SKILL.md`](.agents/skills/gewu-css-theme/SKILL.md)，UI-392/393 沉淀；海军蓝 token 阶梯 + 禁零定义/禁 slate 字面量 + infima 特异性战争规则 + 页头标准件；机械化门禁=theme-token-contract.test.ts，写样式后必跑）。
+- 新建页面/组件、写样式、暗色模式与主题色工作、排查「颜色不一致」反馈，或评审涉及 CSS 的 diff 时，使用 `$petri-css-theme`（canonical：[`.agents/skills/petri-css-theme/SKILL.md`](.agents/skills/petri-css-theme/SKILL.md)，UI-392/393 沉淀；海军蓝 token 阶梯 + 禁零定义/禁 slate 字面量 + infima 特异性战争规则 + 页头标准件；机械化门禁=theme-token-contract.test.ts，写样式后必跑）。
 
 - **Agent Skill 发现桥（canonical 只在 `.agents/skills/`，禁止第二份副本）**：各宿主的项目级 skill 目录用**同名相对符号链接**指向 `.agents/skills/<name>`——`.claude/skills/`（Claude Code）、`.codebuddy/skills/`（CodeBuddy）；两者均已入库随仓库分发。新增、改名或删除 Agent skill 时必须同步补齐全部发现桥，否则对应宿主静默发现不到（`use_skill <name>` 报 not found）。`.codebuddy/` 下除 `skills/` 外的运行时数据由 `.gitignore` 排除。**Windows 前提**：Git 默认 `core.symlinks=false` 会把桥检出为纯文本文件（内容为目标路径），宿主按目录加载不到 → 静默 `not found`；该形态目标可解析所以死链检查放行，退化由 `hygiene:check` 检查项 4 兜住（2026-09-20 实测 8 桥 7 文本时全链绿灯）。克隆后首件事：`git config core.symlinks true` → `git rm -r --cached .claude/skills .codebuddy/skills && git checkout -- .claude/skills .codebuddy/skills` → `npm run hygiene:check` 须报「全部为真 symlink」。
 
@@ -233,7 +233,7 @@ desktop/
 
 - [ ] Electron IPC → 先在 `src/ipc/channels.js` 登记通道，`src/ipc/` 加 handler，`preload.js` 加包装，前端只经 `desktopBridge`
 
-- [ ] MCP 工具 → 在 `core/biof3-server/mcp/registry.js` / `core/biof3-server/agent-tools/` 登记定义与执行
+- [ ] MCP 工具 → 在 `core/petri-server/mcp/registry.js` / `core/petri-server/agent-tools/` 登记定义与执行
 
 - [ ] 类型定义 → 在 `frontend/src/` 下创建 `*.types.ts`
 
@@ -263,7 +263,7 @@ desktop/
 
 - `frontend/src/lib/desktopBridge.ts` — IPC 通信封装
 
-- `core/biof3-server/mcp/registry.js` — MCP 工具注册与执行单入口（`src/mcp-server.js` 仅 stdio 壳）
+- `core/petri-server/mcp/registry.js` — MCP 工具注册与执行单入口（`src/mcp-server.js` 仅 stdio 壳）
 
 - `frontend/src/App.tsx` — 应用入口
 

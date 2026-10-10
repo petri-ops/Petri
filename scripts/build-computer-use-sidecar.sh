@@ -6,6 +6,6 @@ set -euo pipefail
 cd "$(dirname "$0")/../sidecars/computer-use"
 swift build -c release
 mkdir -p bin
-cp -f .build/release/gewu-computer-use bin/gewu-computer-use
+cp -f .build/release/petri-computer-use bin/petri-computer-use
 cp -f .build/release/axfixture bin/axfixture
-echo "built: $(pwd)/bin/gewu-computer-use + bin/axfixture"
+echo "built: $(pwd)/bin/petri-computer-use + bin/axfixture"

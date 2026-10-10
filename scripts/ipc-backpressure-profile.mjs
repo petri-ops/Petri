@@ -107,7 +107,7 @@ function generatePayload(targetBytes) {
   return {
     id: `ipc-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
     timestamp: new Date().toISOString(),
-    type: 'biof3.ipc.payload',
+    type: 'petri.ipc.payload',
     version: 1,
     meta: {
       source: 'ipc-backpressure-profile',

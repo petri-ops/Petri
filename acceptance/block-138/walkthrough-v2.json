@@ -12,7 +12,7 @@
     },
     "stack": "core :3001 /api/health=200；Vite :3000=200；CDP :9222（dev Electron pid 25499，--dev --remote-debugging-port=9222，d3ae13a3 工作区未提交即走查=与实机 HMR 一致）；输入事件走 CDP Input.dispatchMouseEvent（mouseMoved/mousePressed/mouseReleased 真实输入管线），断言与截图走 Runtime.evaluate/Page.captureScreenshot",
     "fixUnderTest": "git show d3ae13a3：LineageViewSwitch 挂载点自非完成态 stateBlock（旧 ResultArtifactShell.tsx:1042）迁移至 shellBody 顶部同位——完成态主渲染路径在场；本走查即其完成态实机验证",
-    "windowState": "走查窗口为真实用户在用机器：走查中用户两次并发操作（导航到 /project/p_mus4u230_wvib、随后窗口被移出可视区/最小化致 document.visibilityState=hidden、rAF 0 tick）；走查员经 app 自身 IPC（window.gewu.windowManager.openResultInMainWindow → src/ipc/window-manager.js:485-499 main.restore()+show()+focus()，payload=终端 job 自身 artifact，白名单类型）恢复主窗可见后，在可见窗条件下一轮原子脚本完成全部三断言。窗口可见性对 React Flow 为硬前提（见 environmentFinding）"
+    "windowState": "走查窗口为真实用户在用机器：走查中用户两次并发操作（导航到 /project/p_mus4u230_wvib、随后窗口被移出可视区/最小化致 document.visibilityState=hidden、rAF 0 tick）；走查员经 app 自身 IPC（window.petri.windowManager.openResultInMainWindow → src/ipc/window-manager.js:485-499 main.restore()+show()+focus()，payload=终端 job 自身 artifact，白名单类型）恢复主窗可见后，在可见窗条件下一轮原子脚本完成全部三断言。窗口可见性对 React Flow 为硬前提（见 environmentFinding）"
   },
   "checks": [
     {
@@ -30,7 +30,7 @@
     {
       "id": "T3-node-click-open",
       "pass": true,
-      "detail": "PASS——DAG 画布上真实点击非当前祖先节点（DESeq2 差异分析，tj_mus4uxjq_s69m，节点中心 CDP Input mousePressed/mouseReleased）→ projectOpenResult 打开链生效，URL/视图双实据：location.href 自 /project/p_mus4u230_wvib/result?job=tj_mus4vpzy_ztwn 变为 /project/p_mus4u230_wvib/result?job=tj_mus4uxjq_s69m（≤6s 内，updateWorkspaceMode 写 ?job=，project-workspace.tsx:341-366）；结果视图切换为祖先 job 的产物详情（页面标题「火山图 (PNG)」、右侧 inspector 来源=deseq2、版本=原始结果、jobStatus=done）；伴随可观察行为：LineageViewSwitch 随 job 切换重挂载回默认条带（[{条带,true},{画布,false}]、.react-flow 卸载）——组件语义（view 状态不跨 job 存续）非缺陷。打开链代码路径：LineageGraph.tsx:59-61 dispatchGewuEvent(projectOpenResult) → useWorkspaceOpenEffects.ts:127-136 → project-workspace.tsx:740-818 handleOpenResult。截图 node-click-opened.png=打开后实拍（来源=deseq2 可读）。命令：node /tmp/b138/walk-atomic.mjs 同一 attempt",
+      "detail": "PASS——DAG 画布上真实点击非当前祖先节点（DESeq2 差异分析，tj_mus4uxjq_s69m，节点中心 CDP Input mousePressed/mouseReleased）→ projectOpenResult 打开链生效，URL/视图双实据：location.href 自 /project/p_mus4u230_wvib/result?job=tj_mus4vpzy_ztwn 变为 /project/p_mus4u230_wvib/result?job=tj_mus4uxjq_s69m（≤6s 内，updateWorkspaceMode 写 ?job=，project-workspace.tsx:341-366）；结果视图切换为祖先 job 的产物详情（页面标题「火山图 (PNG)」、右侧 inspector 来源=deseq2、版本=原始结果、jobStatus=done）；伴随可观察行为：LineageViewSwitch 随 job 切换重挂载回默认条带（[{条带,true},{画布,false}]、.react-flow 卸载）——组件语义（view 状态不跨 job 存续）非缺陷。打开链代码路径：LineageGraph.tsx:59-61 dispatchPetriEvent(projectOpenResult) → useWorkspaceOpenEffects.ts:127-136 → project-workspace.tsx:740-818 handleOpenResult。截图 node-click-opened.png=打开后实拍（来源=deseq2 可读）。命令：node /tmp/b138/walk-atomic.mjs 同一 attempt",
       "evidence": { "clickedNode": "tj_mus4uxjq_s69m", "urlBefore": "/project/p_mus4u230_wvib/result?job=tj_mus4vpzy_ztwn", "urlAfter": "/project/p_mus4u230_wvib/result?job=tj_mus4uxjq_s69m", "jobStatus": "done", "viewAfter": { "strip": true, "flow": false, "pressed": ["条带:true", "画布:false"] } }
     }
   ],
@@ -50,7 +50,7 @@
   "sideEffects": [
     "dev Electron 主窗窗口状态变化（走查目的本身，如实登记）：location.assign 共 3 次导航至深链 /project/p_mus4u230_wvib/result?job=tj_mus4vpzy_ztwn（初始复位、T3 后复位）+1 次 assign 至 ?job=tj_mus4uxjq_s69m 后被 T3 的 event 打开链导航覆盖（T3 断言本体）；真实点击合计：条带/画布按钮多次（含诊断期）、DESeq2 节点 1 次（T3 成功点击）、诊断期落 pane 空点 3 次（无效果）；app 状态净残留=T3 后已复位回终端 job 深链",
     "并发用户操作如实登记：走查中段用户将窗口移出可视区（visibilityState=hidden）并曾导航至 /project/p_mus4u230_wvib（chat），期间出现一次计划外结果视图变化（activeJob 变为 deg-standardizer tj_mus4vg1b_tf2r 后又离开）——非走查员输入所致（脚本点击坐标均在按钮/pane 上，不在任何节点上），疑似用户物理交互；该状态未被采信为任何断言证据，随后均以深链整页加载重置",
-    "窗口恢复动作用了 app 自身 IPC：window.gewu.windowManager.openResultInMainWindow({type:'gewu:project-open-artifact', jobId:'tj_mus4vpzy_ztwn', artifactName:'volcano.png', projectId:'p_mus4u230_wvib'}) 两次（诊断期 1 次 + 走查脚本每次 attempt 前各 1 次，共 5 次调用）——effect=主窗 restore/show/focus + 右栏打开终端 job 的 volcano.png 产物；全部指向终端 job 自身，无跨 job 状态污染",
+    "窗口恢复动作用了 app 自身 IPC：window.petri.windowManager.openResultInMainWindow({type:'petri:project-open-artifact', jobId:'tj_mus4vpzy_ztwn', artifactName:'volcano.png', projectId:'p_mus4u230_wvib'}) 两次（诊断期 1 次 + 走查脚本每次 attempt 前各 1 次，共 5 次调用）——effect=主窗 restore/show/focus + 右栏打开终端 job 的 volcano.png 产物；全部指向终端 job 自身，无跨 job 状态污染",
     "诊断性 store 探针（React Flow 内部 store 读取 + 一次 store.updateNodeInternals 强制测量）在隐藏窗诊断期执行——仅读为主，强制测量 1 次发生在诊断期旧 flow 实例上（该实例随后被正常重挂载替换），不影响最终断言（最终断言全部在可见窗无干预条件下取得）",
     "零后端写路径：全程仅 GET /api/*（health/lineage）与前端只读 fetch；未触碰任何 ChangeSet、未 adopt、未 revert",
     "证据文件：覆写 acceptance/block-138/form-switch-default.png（第一轮瞬态帧→本轮稳定面实拍）+ 新增 dag-canvas.png、node-click-opened.png + 本 JSON（覆写第一轮全 FAIL 版本，原内容在 git 历史）；未改 docs/**、frontend/**、src/**、core/**、test/**；未 git commit"

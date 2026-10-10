@@ -31,7 +31,7 @@ const {
 } = require('../core/shared-backend/result-changeset-service');
 const { projectRevisionSource } = require('../core/shared-backend/result-revision-source');
 const { restoreArtifactRevision } = require('../core/shared-backend/result-compare-service');
-const { resolveResultStudioScriptOverride } = require('../core/biof3-server/mcp/registry')._test;
+const { resolveResultStudioScriptOverride } = require('../core/petri-server/mcp/registry')._test;
 
 function signedExecutionProvenance(payload) {
   return { ...payload, provenanceHash: computeExecutionProvenanceHash(payload) };
@@ -41,7 +41,7 @@ function signedExecutionProvenance(payload) {
 // 本文件用符号链接验证「脚本不得通过软链逃逸 ChangeSet 根目录」；
 // 不支持时跳过该子断言，避免 Windows 本地误报失败（macOS/CI 仍完整覆盖）。
 function symlinksSupported() {
-  const probe = mkdtempSync(join(tmpdir(), 'biof3-symlink-probe-'));
+  const probe = mkdtempSync(join(tmpdir(), 'petri-symlink-probe-'));
   try {
     symlinkSync(join(probe, 'target'), join(probe, 'link'));
     return true;
@@ -54,7 +54,7 @@ function symlinksSupported() {
 const SYMLINKS_SUPPORTED = symlinksSupported();
 
 function fixture(context, suffix = '') {
-  const workspaceRoot = mkdtempSync(join(tmpdir(), `biof3-rs5-${suffix}`));
+  const workspaceRoot = mkdtempSync(join(tmpdir(), `petri-rs5-${suffix}`));
   const db = new Database(join(workspaceRoot, '.rs5-test.db'));
   // 先关库再删目录：Windows 上打开的 SQLite 文件无法删除（EPERM）。
   context.after(() => {
@@ -75,7 +75,7 @@ function fixture(context, suffix = '') {
   const sourceParametersContent = `{\n  "deg_table": {\n    "inputRef": "inputs/deg/deg.csv",\n    "sha256": "${sourceInputHash}"\n  },\n  "palette": "red",\n  "point_size": 2\n}\n`;
   const gitPrefix = suffix.startsWith('git-prefix-') ? 'projects/p_1/' : '';
   const base = adapter.commitVirtualFiles({
-    ref: 'refs/heads/biof3/main',
+    ref: 'refs/heads/petri/main',
     expectedOld: '0'.repeat(40),
     message: 'RS5 source',
     files: [
@@ -89,7 +89,7 @@ function fixture(context, suffix = '') {
   const sourceOutputHash = sha256(readFileSync(sourceOutput));
   repository.createChangeSet({
     changeSetId: 'cs_source', projectId: 'p_1', baseCommit: base.commit,
-    workingBranchRef: 'refs/heads/biof3/source', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/source', createdBy: 'agent',
   });
   repository.transitionChangeSet({ changeSetId: 'cs_source', to: 'running' });
   repository.transitionChangeSet({
@@ -267,7 +267,7 @@ function attachServerIssuedSourceLineage(fx) {
   };
   fx.repository.createChangeSet({
     changeSetId: 'cs_upstream_deg', projectId: 'p_1', baseCommit: fx.sourceRevision.sourceCommit,
-    workingBranchRef: 'refs/heads/biof3/upstream-deg', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/upstream-deg', createdBy: 'agent',
   });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_upstream_deg', to: 'running' });
   fx.repository.transitionChangeSet({
@@ -357,7 +357,7 @@ test('RS5 registers a real Job Artifact as an idempotent current baseline', (con
   assert.equal(first.revision.sourceScriptRef.origin, 'project_materialized');
   assert.equal(fx.repository.getChangeSet(first.revision.changeSetId).status, 'adopted');
   assert.equal(
-    fx.adapter.revParse(`refs/heads/biof3/current/${first.revision.artifactFamilyId}`),
+    fx.adapter.revParse(`refs/heads/petri/current/${first.revision.artifactFamilyId}`),
     first.revision.sourceCommit,
   );
   const baselineCheckpoint = fx.repository.getLatestCheckpoint({ projectId: 'p_1', conversationId: null });
@@ -433,7 +433,7 @@ test('P5 baseline registration records every formal output from one Job as one c
   assert.equal(first.cohortRevisions.every((revision) => revision.isCurrent === true), true);
   for (const revision of first.cohortRevisions) {
     assert.equal(
-      fx.adapter.revParse(`refs/heads/biof3/current/${revision.artifactFamilyId}`),
+      fx.adapter.revParse(`refs/heads/petri/current/${revision.artifactFamilyId}`),
       revision.sourceCommit,
     );
   }
@@ -889,7 +889,7 @@ test('P5 historical branch resolves every formal parent from the selected Change
   const createCohort = ({ changeSetId, plotRevisionId, tableRevisionId, parents = {} }) => {
     fx.repository.createChangeSet({
       changeSetId, projectId: 'p_1', baseCommit: fx.sourceRevision.sourceCommit,
-      workingBranchRef: `refs/heads/biof3/changeset/${changeSetId}`, createdBy: 'agent',
+      workingBranchRef: `refs/heads/petri/changeset/${changeSetId}`, createdBy: 'agent',
     });
     fx.repository.transitionChangeSet({ changeSetId, to: 'running' });
     const plot = revisionFromSource(fx, changeSetId, {
@@ -971,7 +971,7 @@ test('RS5 materialization is private, immutable, and refuses input rebinding', (
 });
 
 test('P6 private materialization anchors a symlinked workspace but rejects private directory links and files', (context) => {
-  const container = mkdtempSync(join(tmpdir(), 'biof3-private-materialize-'));
+  const container = mkdtempSync(join(tmpdir(), 'petri-private-materialize-'));
   context.after(() => rmSync(container, { recursive: true, force: true }));
   const realWorkspace = join(container, 'workspace-real');
   const workspaceLink = join(container, 'workspace-link');
@@ -989,14 +989,14 @@ test('P6 private materialization anchors a symlinked workspace but rejects priva
   });
   assert.equal(
     realpathSync(safe.privateRoot),
-    join(realpathSync(realWorkspace), '.biof3', 'revision', 'cs_symlinked_workspace'),
+    join(realpathSync(realWorkspace), '.petri', 'revision', 'cs_symlinked_workspace'),
   );
 
   const attackedWorkspace = join(container, 'workspace-attacked');
   const outside = join(container, 'outside');
   mkdirSync(attackedWorkspace);
   mkdirSync(outside);
-  symlinkSync(outside, join(attackedWorkspace, '.biof3'), 'dir');
+  symlinkSync(outside, join(attackedWorkspace, '.petri'), 'dir');
   assert.throws(
     () => materializeResultEdit({
       workspaceRoot: attackedWorkspace,
@@ -1012,8 +1012,8 @@ test('P6 private materialization anchors a symlinked workspace but rejects priva
   );
   assert.equal(existsSync(join(outside, 'revision')), false);
 
-  unlinkSync(join(attackedWorkspace, '.biof3'));
-  writeFileSync(join(attackedWorkspace, '.biof3'), 'not a directory');
+  unlinkSync(join(attackedWorkspace, '.petri'));
+  writeFileSync(join(attackedWorkspace, '.petri'), 'not a directory');
   assert.throws(
     () => materializeResultEdit({
       workspaceRoot: attackedWorkspace,
@@ -1111,7 +1111,7 @@ test('P6 saturated atomic preview slots reject without a partial ChangeSet or ch
       changeSetId,
       projectId: 'p_1',
       baseCommit: fx.sourceRevision.sourceCommit,
-      workingBranchRef: `refs/heads/biof3/changeset/${changeSetId}`,
+      workingBranchRef: `refs/heads/petri/changeset/${changeSetId}`,
       createdBy: 'agent',
     });
     fx.repository.transitionChangeSet({ changeSetId, to: 'running' });
@@ -1288,7 +1288,7 @@ test('P5/P6 reruns verified direct DEG → GO-BP and volcano subgraphs with cand
   const degParamsText = '{\n  "padj_cutoff": 0.05,\n  "lfc_cutoff": 1\n}\n';
   const degBase = fx.adapter.commitVirtualFiles({
     parentCommit: fx.sourceRevision.sourceCommit,
-    ref: 'refs/heads/biof3/p5/deg-source', expectedOld: '0'.repeat(40), message: 'P5 DEG source',
+    ref: 'refs/heads/petri/p5/deg-source', expectedOld: '0'.repeat(40), message: 'P5 DEG source',
     files: [
       { path: 'analysis/scripts/deg-source/deg.R', content: sourceScript },
       { path: 'analysis/scripts/deg-source/parameters.json', content: degParamsText },
@@ -1296,7 +1296,7 @@ test('P5/P6 reruns verified direct DEG → GO-BP and volcano subgraphs with cand
   }).commit;
   fx.repository.createChangeSet({
     changeSetId: 'cs_deg_source', projectId: 'p_1', baseCommit: fx.sourceRevision.sourceCommit,
-    workingBranchRef: 'refs/heads/biof3/p5/deg-source', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/p5/deg-source', createdBy: 'agent',
   });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_deg_source', to: 'running' });
   fx.repository.transitionChangeSet({
@@ -1341,7 +1341,7 @@ test('P5/P6 reruns verified direct DEG → GO-BP and volcano subgraphs with cand
   const goOutputHash = sha256(readFileSync(goOutput));
   const goBase = fx.adapter.commitVirtualFiles({
     parentCommit: degBase,
-    ref: 'refs/heads/biof3/p5/go-source', expectedOld: '0'.repeat(40), message: 'P5 GO source',
+    ref: 'refs/heads/petri/p5/go-source', expectedOld: '0'.repeat(40), message: 'P5 GO source',
     files: [
       { path: 'analysis/scripts/go-source/go.R', content: goScript },
       { path: 'analysis/scripts/go-source/parameters.json', content: goParamsText },
@@ -1349,7 +1349,7 @@ test('P5/P6 reruns verified direct DEG → GO-BP and volcano subgraphs with cand
   }).commit;
   fx.repository.createChangeSet({
     changeSetId: 'cs_go_source', projectId: 'p_1', baseCommit: degBase,
-    workingBranchRef: 'refs/heads/biof3/p5/go-source', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/p5/go-source', createdBy: 'agent',
   });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_go_source', to: 'running' });
   fx.repository.transitionChangeSet({
@@ -1383,7 +1383,7 @@ test('P5/P6 reruns verified direct DEG → GO-BP and volcano subgraphs with cand
   const volcanoOutputHash = sha256(readFileSync(volcanoOutput));
   const volcanoBase = fx.adapter.commitVirtualFiles({
     parentCommit: goBase,
-    ref: 'refs/heads/biof3/p6/volcano-source', expectedOld: '0'.repeat(40), message: 'P6 volcano source',
+    ref: 'refs/heads/petri/p6/volcano-source', expectedOld: '0'.repeat(40), message: 'P6 volcano source',
     files: [
       { path: 'analysis/scripts/volcano-source/volcano.R', content: volcanoScript },
       { path: 'analysis/scripts/volcano-source/parameters.json', content: volcanoParamsText },
@@ -1391,7 +1391,7 @@ test('P5/P6 reruns verified direct DEG → GO-BP and volcano subgraphs with cand
   }).commit;
   fx.repository.createChangeSet({
     changeSetId: 'cs_volcano_source', projectId: 'p_1', baseCommit: goBase,
-    workingBranchRef: 'refs/heads/biof3/p6/volcano-source', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/p6/volcano-source', createdBy: 'agent',
   });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_volcano_source', to: 'running' });
   fx.repository.transitionChangeSet({
@@ -1678,7 +1678,7 @@ test('P5 atomically registers the complete Revision cohort, graph and preview pr
   ensureResultWorkflowGraphSchema(fx.db);
   fx.repository.createChangeSet({
     changeSetId: 'cs_atomic', projectId: 'p_1', baseCommit: fx.sourceRevision.sourceCommit,
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_atomic', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_atomic', createdBy: 'agent',
   });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_atomic', to: 'running' });
   const root = revisionFromSource(fx, 'cs_atomic', {
@@ -1852,7 +1852,7 @@ test('P5 atomically registers the complete Revision cohort, graph and preview pr
 
   fx.repository.createChangeSet({
     changeSetId: 'cs_atomic_ancestor', projectId: 'p_1', baseCommit: fx.sourceRevision.sourceCommit,
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_atomic_ancestor', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_atomic_ancestor', createdBy: 'agent',
   });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_atomic_ancestor', to: 'running' });
   const ancestorChild = revisionFromSource(fx, 'cs_atomic_ancestor', {
@@ -1910,7 +1910,7 @@ test('P5 revert restores the exact same-family parent instead of a higher unrela
   const fx = fixture(context, 'p5-revert-parent-');
   fx.repository.createChangeSet({
     changeSetId: 'cs_decoy', projectId: 'p_1', baseCommit: fx.sourceRevision.sourceCommit,
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_decoy', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_decoy', createdBy: 'agent',
   });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_decoy', to: 'running' });
   const decoy = fx.repository.appendRevision(revisionFromSource(fx, 'cs_decoy', {
@@ -1919,7 +1919,7 @@ test('P5 revert restores the exact same-family parent instead of a higher unrela
 
   fx.repository.createChangeSet({
     changeSetId: 'cs_exact_parent', projectId: 'p_1', baseCommit: fx.sourceRevision.sourceCommit,
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_exact_parent', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_exact_parent', createdBy: 'agent',
   });
   fx.repository.transitionChangeSet({ changeSetId: 'cs_exact_parent', to: 'running' });
   const candidateInput = revisionFromSource(fx, 'cs_exact_parent', {
@@ -1946,7 +1946,7 @@ test('P5 restore eligibility excludes interrupted, preview, failed, discarded an
   const createRunning = (changeSetId) => {
     fx.repository.createChangeSet({
       changeSetId, projectId: 'p_1', baseCommit: fx.sourceRevision.sourceCommit,
-      workingBranchRef: `refs/heads/biof3/changeset/${changeSetId}`, createdBy: 'agent',
+      workingBranchRef: `refs/heads/petri/changeset/${changeSetId}`, createdBy: 'agent',
     });
     fx.repository.transitionChangeSet({ changeSetId, to: 'running' });
   };
@@ -2020,7 +2020,7 @@ test('P5 records an exact ReplayPackage proof before atomically upgrading the ad
   const createRunning = (changeSetId) => {
     fx.repository.createChangeSet({
       changeSetId, projectId: 'p_1', baseCommit: fx.sourceRevision.sourceCommit,
-      workingBranchRef: `refs/heads/biof3/changeset/${changeSetId}`, createdBy: 'agent',
+      workingBranchRef: `refs/heads/petri/changeset/${changeSetId}`, createdBy: 'agent',
     });
     fx.repository.transitionChangeSet({ changeSetId, to: 'running' });
   };
@@ -2206,7 +2206,7 @@ test('RS5 recovery reports durable materialization and never marks interrupted w
   const changeSetId = 'cs_interrupted';
   fx.repository.createChangeSet({
     changeSetId, projectId: 'p_1', baseCommit: fx.sourceRevision.sourceCommit,
-    workingBranchRef: 'refs/heads/biof3/changeset/cs_interrupted', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/changeset/cs_interrupted', createdBy: 'agent',
   });
   fx.repository.transitionChangeSet({ changeSetId, to: 'running' });
   const materialized = materializeResultEdit({
@@ -2216,7 +2216,7 @@ test('RS5 recovery reports durable materialization and never marks interrupted w
   });
   fx.adapter.commitVirtualFiles({
     parentCommit: fx.sourceRevision.sourceCommit,
-    ref: 'refs/heads/biof3/changeset/cs_interrupted', expectedOld: '0'.repeat(40),
+    ref: 'refs/heads/petri/changeset/cs_interrupted', expectedOld: '0'.repeat(40),
     message: 'interrupted', files: materialized.gitFiles,
   });
   const recovery = inspectResultEditRecovery({
@@ -2231,7 +2231,7 @@ test('RS5 recovery reports durable materialization and never marks interrupted w
 
 test('RS5 execution bridge accepts only a hashed script inside the ChangeSet root', (context) => {
   const fx = fixture(context, 'bridge-');
-  const root = join(fx.workspaceRoot, '.biof3/revision/cs_bridge');
+  const root = join(fx.workspaceRoot, '.petri/revision/cs_bridge');
   mkdirSync(root, { recursive: true });
   const script = join(root, 'run-script.R');
   writeFileSync(script, 'print(1)\n');

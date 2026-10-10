@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 const require = createRequire(import.meta.url);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const sdk = require('../core/shared-backend/result-studio-plugin-sdk');
-const { normalizePluginManifest } = require('../core/biof3-server/plugin-loader');
+const { normalizePluginManifest } = require('../core/petri-server/plugin-loader');
 // BLOCK-83 P4：SDK lint 的被测对象=中性夹具插件（生信插件随领域包交付）
 const pluginIds = ['sample-metrics'];
 

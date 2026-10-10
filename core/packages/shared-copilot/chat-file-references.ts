@@ -1,5 +1,5 @@
 /**
- * BioF3 Shared — chat file reference resolution (pure logic)
+ * Petri Shared — chat file reference resolution (pure logic)
  *
  * Plan:  "会话文件直达预览" — pure classification + extraction helpers +
  *        a platform-agnostic resolver that takes a fetcher callback so
@@ -7,7 +7,7 @@
  *
  * The platform glue lives in
  * `frontend/src/lib/chat-file-references.ts` and wires `fetchJson` to the
- * `biof3-server` `/api/harness/file-references/resolve` endpoint.
+ * `petri-server` `/api/harness/file-references/resolve` endpoint.
  */
 
 // ---------------------------------------------------------------------------
@@ -100,12 +100,12 @@ export function classifyLink(raw: string): LinkKind {
   if (!value) return 'dangerous';
   if (/[\u0000-\u001F\u007F]/.test(value)) return 'dangerous';
   if (/^(javascript|data|vbscript|file|ftp):/i.test(value)) return 'dangerous';
-  // BLOCK-61 改名回归修复 —— 内部 URI 协议改名 biof3:// → gewu://。
-  // 双协议兼容：历史持久化消息里的 biof3:// 引用必须继续工作；
-  // 新产出的统一为 gewu://。
-  if (/^(?:biof3|gewu):\/\/workspace\//i.test(value)) return 'workspace';
-  if (/^(?:biof3|gewu):\/\/artifact\//i.test(value)) return 'artifact';
-  if (/^(?:biof3|gewu):/i.test(value)) return 'dangerous';
+  // BLOCK-61 改名回归修复 —— 内部 URI 协议改名 petri:// → petri://。
+  // 双协议兼容：历史持久化消息里的 petri:// 引用必须继续工作；
+  // 新产出的统一为 petri://。
+  if (/^(?:petri|petri):\/\/workspace\//i.test(value)) return 'workspace';
+  if (/^(?:petri|petri):\/\/artifact\//i.test(value)) return 'artifact';
+  if (/^(?:petri|petri):/i.test(value)) return 'dangerous';
   if (/^\/(?:Users|Volumes|private|tmp|var|etc|home)\//i.test(value)) return 'dangerous';
   if (isSafeRelativeUrl(value)) return 'internal';
   if (/^mailto:/i.test(value)) {
@@ -120,7 +120,7 @@ export function classifyLink(raw: string): LinkKind {
 // Candidate extraction
 // ---------------------------------------------------------------------------
 
-const INTERNAL_URI_RE = /\b((?:biof3|gewu):\/\/(?:artifact|workspace)\/[^\s)\]\>"']+)/gi;
+const INTERNAL_URI_RE = /\b((?:petri|petri):\/\/(?:artifact|workspace)\/[^\s)\]\>"']+)/gi;
 const TOOLS_FILE_URL_RE = /\/api\/(?:[^/]+\/)?tools\/file\/([A-Za-z0-9._-]+)\/([^\s)\]\>"']+)/gi;
 const PROJECT_RELATIVE_RE =
   /(?:^|[\s(\["'>])((?:\.{0,2}\/)?(?:[\p{L}\p{N}_.-]+\/)+[\p{L}\p{N}_.-]+\.[A-Za-z0-9]+)(?=$|[\s,.，。 、;；:：!?！？)\]"'])/gu;
@@ -136,7 +136,7 @@ const ARTIFACT_FILENAME_RE = new RegExp(
   'giu',
 );
 const INLINE_CODE_RE = /`([^`\n]+)`/g;
-const EXACT_INTERNAL_URI_RE = /^(?:biof3|gewu):\/\/(?:artifact|workspace)\/[^\s)\]\>"']+$/i;
+const EXACT_INTERNAL_URI_RE = /^(?:petri|petri):\/\/(?:artifact|workspace)\/[^\s)\]\>"']+$/i;
 const EXACT_TOOLS_FILE_URL_RE =
   /^\/api\/(?:[^/]+\/)?tools\/file\/([A-Za-z0-9._-]+)\/([^\s)\]\>"']+)$/i;
 const EXACT_PROJECT_RELATIVE_RE =

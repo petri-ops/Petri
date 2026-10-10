@@ -4,7 +4,7 @@
   "capturedAt": "2026-09-22T09:12:02.695Z",
   "sourceCommit": "37bd96b8b537220513f4052a1f7841f8f9bf0d9e",
   "model": "jev-1.13.0",
-  "wrapper": "core/biof3-server/helpers/decision-api.js",
+  "wrapper": "core/petri-server/helpers/decision-api.js",
   "decisionPoint": "scripts/block115-test-suggest.mjs 增量测试建议（W1-5）",
   "result": {
     "corpus": {

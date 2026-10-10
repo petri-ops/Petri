@@ -19,24 +19,24 @@ const require = createRequire(import.meta.url);
 const ROOT = path.resolve('.');
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'b157-skill-vis-'));
-process.env.BIOF3_LOCAL_DATA_DIR = tmpDir;
+process.env.PETRI_LOCAL_DATA_DIR = tmpDir;
 
 // registry 全图自举临时 DB（与 mcp-projection.test.mjs 同一修法）
 {
-  const Database = require(path.join(ROOT, 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const boot = new Database(path.join(tmpDir, 'biof3.db'));
+  const Database = require(path.join(ROOT, 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+  const boot = new Database(path.join(tmpDir, 'petri.db'));
   const migrationsDir = path.join(ROOT, 'src', 'migrations');
   for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fs.readFileSync(path.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = path.join(tmpDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tmpDir, 'petri.db');
 }
 
-const { TOOL_DEFS } = require(path.join(ROOT, 'core/biof3-server/agent-tools/tool-defs'));
-const registry = require(path.join(ROOT, 'core/biof3-server/agent-tools/registry'));
-const policy = require(path.join(ROOT, 'core/biof3-server/agent-tools/agent-tool-policy'));
-const skillTools = require(path.join(ROOT, 'core/biof3-server/agent-tools/skill-tools'));
+const { TOOL_DEFS } = require(path.join(ROOT, 'core/petri-server/agent-tools/tool-defs'));
+const registry = require(path.join(ROOT, 'core/petri-server/agent-tools/registry'));
+const policy = require(path.join(ROOT, 'core/petri-server/agent-tools/agent-tool-policy'));
+const skillTools = require(path.join(ROOT, 'core/petri-server/agent-tools/skill-tools'));
 
 test('BLOCK-157 KNW-1 注册表：skill_discover/skill_get 进静态面（76→78）', () => {
   const names = TOOL_DEFS.map((d) => d.function.name);

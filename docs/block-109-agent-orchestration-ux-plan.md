@@ -48,4 +48,4 @@
 - **P3 结果卡组化**：`useTerminalSubAgentResults` 弃 slice(-2)；新增 `SubAgentResultGroup`——汇总行恒定可见（「阶段汇总 · N 个子智能体 · 成功 X · 失败 Y」），有失败默认展开、全成功默认收起，点击切换；组内按派发序明细卡。
 - **P4 概览孤儿过滤**：`useProjectAgentOverview` 删 `!t.projectId` 兜底——孤儿任务不再泄漏进每个项目的智能体图标带（「18 个」= 6 真实 + 12 孤儿的根因修复）。
 - **门禁**：契约 test/block109-orchestration.test.mjs 3/3（重试四态 + spawn 软上限源码契约 + 孤儿过滤源码契约）+ SubAgentResultGroup 3/3 + block93 修复后全绿 + 九门全绿。实机：spawn 场景真模型轮次通过（运行中簇头带 wait_agent 秒表=尾轮展开、完成后「阶段汇总 · 1 个子智能体 · 成功 1」组卡），截图 acceptance/block-109/spawn-live.png。
-- **同批环境件**：restart-dev-stack.sh 加 CDP 端口覆盖（BIOF3_DEV_CDP_PORT，默认 9222 不变；当日 9222 幽灵端口绕行）；platform-branch-freeze BASELINE 登记 block101-startup-timeline-live.cjs（合并树存量，登记即留痕）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+- **同批环境件**：restart-dev-stack.sh 加 CDP 端口覆盖（PETRI_DEV_CDP_PORT，默认 9222 不变；当日 9222 幽灵端口绕行）；platform-branch-freeze BASELINE 登记 block101-startup-timeline-live.cjs（合并树存量，登记即留痕）。G0 开发期常态 · 不外推 packaged/Provider/GA。

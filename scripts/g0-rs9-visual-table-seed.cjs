@@ -4,14 +4,14 @@ const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const root = path.resolve(process.env.BIOF3_RS9_VISUAL_ROOT || '');
-if (!process.env.BIOF3_RS9_VISUAL_ROOT || root === path.parse(root).root) {
-  throw new Error('BIOF3_RS9_VISUAL_ROOT must be an explicit isolated directory.');
+const root = path.resolve(process.env.PETRI_RS9_VISUAL_ROOT || '');
+if (!process.env.PETRI_RS9_VISUAL_ROOT || root === path.parse(root).root) {
+  throw new Error('PETRI_RS9_VISUAL_ROOT must be an explicit isolated directory.');
 }
-process.env.BIOF3_DB_PATH = path.join(root, 'biof3.db');
-process.env.BIOF3_LOCAL_DATA_DIR = root;
+process.env.PETRI_DB_PATH = path.join(root, 'petri.db');
+process.env.PETRI_LOCAL_DATA_DIR = root;
 
-const db = require('../core/biof3-server/db');
+const db = require('../core/petri-server/db');
 const { ensureResultStudioSchema } = require('../core/shared-backend/result-studio-schema');
 const { createResultStudioRepository } = require('../core/shared-backend/result-studio-repository');
 const { bindProjectRepository } = require('../core/shared-backend/git-repository-binding');
@@ -57,10 +57,10 @@ fs.writeFileSync(candidateSnapshot, candidateScript);
 const familyId = `af_${sha(`${project.id}\0${sourceJob.id}\0deg_table`).slice(0, 32)}`;
 const sourceScriptPath = `analysis/scripts/${familyId}/rev_large_source/deg_table.R`;
 const sourceParamsPath = `analysis/scripts/${familyId}/rev_large_source/parameters.json`;
-const previousMain = adapter.revParse('refs/heads/biof3/main');
+const previousMain = adapter.revParse('refs/heads/petri/main');
 const sourceCommit = adapter.commitVirtualFiles({
   parentCommit: previousMain,
-  ref: 'refs/heads/biof3/main', expectedOld: previousMain,
+  ref: 'refs/heads/petri/main', expectedOld: previousMain,
   message: 'RS9 large table baseline',
   files: [
     { path: sourceScriptPath, content: sourceScript },
@@ -71,7 +71,7 @@ const candidateScriptPath = `analysis/scripts/${familyId}/rev_large_candidate/de
 const candidateParamsPath = `analysis/scripts/${familyId}/rev_large_candidate/parameters.json`;
 const candidateCommit = adapter.commitVirtualFiles({
   parentCommit: sourceCommit,
-  ref: 'refs/heads/biof3/changeset/cs_rs9_large_candidate', expectedOld: '0'.repeat(40),
+  ref: 'refs/heads/petri/changeset/cs_rs9_large_candidate', expectedOld: '0'.repeat(40),
   message: 'RS9 large table threshold candidate',
   files: [
     { path: candidateScriptPath, content: candidateScript },
@@ -96,7 +96,7 @@ function result(jobId, artifactPath, content, scriptPath, script) {
 db.updateToolJob(sourceJob.id, { status: 'completed', resultJson: result(sourceJob.id, sourceArtifact, sourceContent, sourceSnapshot, sourceScript), completedAt: Date.now() });
 db.updateToolJob(candidateJob.id, { status: 'completed', resultJson: result(candidateJob.id, candidateArtifact, candidateContent, candidateSnapshot, candidateScript), completedAt: Date.now() });
 
-repository.createChangeSet({ changeSetId: 'cs_rs9_large_source', projectId: project.id, baseCommit: sourceCommit, workingBranchRef: 'refs/heads/biof3/main', createdBy: 'agent' });
+repository.createChangeSet({ changeSetId: 'cs_rs9_large_source', projectId: project.id, baseCommit: sourceCommit, workingBranchRef: 'refs/heads/petri/main', createdBy: 'agent' });
 repository.transitionChangeSet({ changeSetId: 'cs_rs9_large_source', to: 'running' });
 repository.appendRevision({
   revisionId: 'rev_large_source', projectId: project.id, artifactFamilyId: familyId, artifactId: 'deg_table',
@@ -108,7 +108,7 @@ repository.appendRevision({
 repository.transitionChangeSet({ changeSetId: 'cs_rs9_large_source', to: 'preview_ready', candidateCommit: sourceCommit, candidateArtifactRefs: ['rev_large_source'], jobRefs: [sourceJob.id] });
 repository.adoptChangeSet({ changeSetId: 'cs_rs9_large_source', candidateCommit: sourceCommit });
 
-repository.createChangeSet({ changeSetId: 'cs_rs9_large_candidate', projectId: project.id, baseCommit: sourceCommit, workingBranchRef: 'refs/heads/biof3/changeset/cs_rs9_large_candidate', createdBy: 'agent', parentArtifactRefs: ['rev_large_source'] });
+repository.createChangeSet({ changeSetId: 'cs_rs9_large_candidate', projectId: project.id, baseCommit: sourceCommit, workingBranchRef: 'refs/heads/petri/changeset/cs_rs9_large_candidate', createdBy: 'agent', parentArtifactRefs: ['rev_large_source'] });
 repository.transitionChangeSet({ changeSetId: 'cs_rs9_large_candidate', to: 'running' });
 repository.appendRevision({
   revisionId: 'rev_large_candidate', projectId: project.id, artifactFamilyId: familyId, artifactId: 'deg_table', parentRevisionIds: ['rev_large_source'],

@@ -21,7 +21,7 @@ const {
   clearJobLiveLog,
   endJobLiveLog,
   readJobLiveLogTail,
-} = require('../core/biof3-server/helpers/job-live-log');
+} = require('../core/petri-server/helpers/job-live-log');
 
 test('append accumulates lines with stream prefixes and read returns the tail', () => {
   clearJobLiveLog('job_lines');

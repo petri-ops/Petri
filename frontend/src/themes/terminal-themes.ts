@@ -1,7 +1,7 @@
 /**
  * Embedded xterm theme registry + theme-resolution contract.
  *
- * Out-of-the-box light/dark palettes tuned for the Gewu workspace shell.
+ * Out-of-the-box light/dark palettes tuned for the Petri workspace shell.
  * Theme switching is driven by the application's resolved `light` / `dark`
  * value. Callers should pass that value explicitly so xterm and the React
  * shell update from the same source of truth.

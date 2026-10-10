@@ -8,11 +8,11 @@
  * acceptance/ui-457-458/、结束删播种项目）。
  *
  * T0  HTTP deseq2 播种 completed（files 内联 base64，demo 数据取
- *     ../gewu-pack-bio/plugins/deseq2/demo-data/）
+ *     ../petri-pack-bio/plugins/deseq2/demo-data/）
  * T1  UI-457 表单：右栏「分析」tab → DESeq2 卡片「配置」→ 文件下拉
  *     （<选择文件> 占位）+ 数值参数默认值 +「按以上参数运行」按钮在场
  * T2  UI-457 组装：选工作区文件 → 点「按以上参数运行」→ copilot-ask 投递
- *     prompt 含「请运行」与参数键值对（window 捕获 gewu:copilot-ask detail，
+ *     prompt 含「请运行」与参数键值对（window 捕获 petri:copilot-ask detail，
  *     对话末条消息文本为辅证）
  * T3  UI-458 菜单：深链两步法打开结果页 →「继续分析」按钮在场
  * T4  UI-458 展开：菜单列出目录驱动已装分析（go-kegg/gsea/volcano-plot 等）→
@@ -26,11 +26,11 @@
 const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'ui-457-458');
-const DEMO_DIR = path.join(__dirname, '..', '..', 'gewu-pack-bio', 'plugins', 'deseq2', 'demo-data');
+const DEMO_DIR = path.join(__dirname, '..', '..', 'petri-pack-bio', 'plugins', 'deseq2', 'demo-data');
 const AUTH = 'Bearer desktop-local';
 let client;
 const EVAL = (expr) => lib.evalJs(client, expr);
@@ -141,14 +141,14 @@ async function navigateToResult(projectId, jobId) {
 }
 
 /**
- * 武装 copilot-ask 捕获（window CustomEvent，dispatchGewuEvent 唯一通道）。
+ * 武装 copilot-ask 捕获（window CustomEvent，dispatchPetriEvent 唯一通道）。
  * 幂等：location.href 整页导航后 window 重置，需在每次导航后重挂。
  */
 async function armPromptCapture() {
   await EVAL(`(() => {
     if (!window.__ui457Prompts) window.__ui457Prompts = [];
     if (!window.__ui457Armed) {
-      window.addEventListener('gewu:copilot-ask', (e) => {
+      window.addEventListener('petri:copilot-ask', (e) => {
         window.__ui457Prompts.push(String((e.detail && e.detail.prompt) || ''));
       });
       window.__ui457Armed = true;
@@ -219,7 +219,7 @@ async function cancelRunningJobs(projectId) {
     await run.finish({
       extra: {
         stackMode: 'backend-only',
-        envNote: 'npm run dev 启动被 :3000 占用阻断（dev-electron 判定非 BioF3 进程；本机实证=本仓库 frontend 的遗留 vite 进程，疑似并行会话持有，未击杀不硬绕）；按预案降级为后端播种 + 前端面 fail 如实记录',
+        envNote: 'npm run dev 启动被 :3000 占用阻断（dev-electron 判定非 Petri 进程；本机实证=本仓库 frontend 的遗留 vite 进程，疑似并行会话持有，未击杀不硬绕）；按预案降级为后端播种 + 前端面 fail 如实记录',
       },
     });
     process.exit(run.allPass ? 0 : 1);

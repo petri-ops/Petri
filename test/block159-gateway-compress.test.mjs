@@ -28,7 +28,7 @@ import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const COMPRESS_PATH = path.join(ROOT, 'core/biof3-server/mobile-gateway/compress.js');
+const COMPRESS_PATH = path.join(ROOT, 'core/petri-server/mobile-gateway/compress.js');
 
 const {
   shouldCompressBuffer,
@@ -120,7 +120,7 @@ test('BLOCK-159 ② 无 gzip 客户端：响应原样（无 Content-Encoding）'
 // ── ③ 静态资产处理器 ─────────────────────────────────────────────────────
 
 test('BLOCK-159 ③ /assets gzip：压缩族 gzip+immutable、png/非 gzip 客户端透传、穿越拒绝、缓存有界', async () => {
-  const dist = mkdtempSync(path.join(tmpdir(), 'gewu-compress-dist-'));
+  const dist = mkdtempSync(path.join(tmpdir(), 'petri-compress-dist-'));
   const assets = path.join(dist, 'assets');
   mkdirSync(assets);
   writeFileSync(path.join(assets, 'app.js'), `console.log("${'a'.repeat(4096)}");`);

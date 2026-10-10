@@ -15,7 +15,7 @@
  */
 const path = require('node:path');
 const http = require('node:http');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const PROJECT_ID = process.argv[2] || 'p_mu5emekx_g13p';
@@ -136,14 +136,14 @@ async function pollTargets() {
   run.assert('V1_composer_sent', String(clicked).indexOf('clicked') === 0, String(clicked));
 
   // 等任务出现（页面 localStorage：streamChatViaTask 提交后写
-  // gewu_agent_task_<taskId>，done 后移除——主任务不走 /tasks 端点，那只列子 agent）
+  // petri_agent_task_<taskId>，done 后移除——主任务不走 /tasks 端点，那只列子 agent）
   let taskId = null;
   for (let i = 0; i < 30 && !taskId; i++) {
     await sleep(1000);
     const ids = await EVAL(
       "(function(){\n" +
       "  return JSON.stringify(Object.keys(localStorage)\n" +
-      "    .filter(function(k){ return k.indexOf('gewu_agent_task_') === 0 || k.indexOf('biof3_agent_task_') === 0; })\n" +
+      "    .filter(function(k){ return k.indexOf('petri_agent_task_') === 0 || k.indexOf('petri_agent_task_') === 0; })\n" +
       "    .map(function(k){ return k.split('agent_task_')[1]; }));\n" +
       "})()");
     try {

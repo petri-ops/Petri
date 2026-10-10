@@ -44,7 +44,7 @@ async function pollCdp(port) {
       log(`polling for dev Electron CDP on port ${port}...`);
     } else if (attempt % 20 === 0) {
       log(`still polling for CDP... (attempt ${attempt})`);
-      log(`start dev with: BIOF3_DEV_ELECTRON_CDP=1 npm run dev`);
+      log(`start dev with: PETRI_DEV_ELECTRON_CDP=1 npm run dev`);
     }
     try {
       const v = await fetchJson(`http://127.0.0.1:${port}/json/version`);

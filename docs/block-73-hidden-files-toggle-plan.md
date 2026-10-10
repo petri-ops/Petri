@@ -17,7 +17,7 @@
 
 - 文件树工具条新增「显示隐藏文件」toggle（eye/eye-off 图标，`aria-pressed`），**默认关**（维持现状体感）。
 - 服务端过滤参数化：local 分支 `?showHidden=1` 时跳过点文件过滤；前端 fetchDir 携带参数；
-  偏好持久化 `localStorage['gewu.fileTree.showHidden']`；切换即整树刷新（refreshFiles 链 + refreshVersion
+  偏好持久化 `localStorage['petri.fileTree.showHidden']`；切换即整树刷新（refreshFiles 链 + refreshVersion
   联动 FileTreeItem 子目录重取）。
 - 0 新依赖；审阅面板（git 通道）不受影响。
 

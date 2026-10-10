@@ -6,7 +6,7 @@ import { Icon } from '@/components/icons/Icon';
 const CodeMirrorDiffView = lazy(() =>
   import('@/components/desktop/WorkingTreeReview/CodeMirrorDiffView').then((m) => ({ default: m.CodeMirrorDiffView }))
 );
-import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
+import { petriEvents, dispatchPetriEvent } from '@/lib/events';
 import { getSubAgentTaskSnapshot, stopSubAgentTask, subscribeSubAgentTask } from '@/components/copilot/conversationRunStore';
 import { resolveAgentCategory } from '@/lib/agentCategories';
 import {
@@ -340,7 +340,7 @@ function ActivityBody({ activity, subSnap }: {
   // agentOpenInRail 事件，project-workspace 切 tab 并把面板指到该 runId。
   const openAgentDetail = () => {
     if (!activity.agentRunId) return;
-    dispatchGewuEvent(gewuEvents.agentOpenInRail, { runId: activity.agentRunId });
+    dispatchPetriEvent(petriEvents.agentOpenInRail, { runId: activity.agentRunId });
   };
   return (
     <div className="sc-tool-activity-body sc-tool-activity-detail">
@@ -364,7 +364,7 @@ function ActivityBody({ activity, subSnap }: {
           <div className="sc-tool-subagent-actions">
             <button
               type="button"
-              className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+              className="petri-btn petri-btn--ghost petri-btn--sm"
               onClick={openAgentDetail}
               title="在右侧栏「智能体」面板查看实时工作流 + 终态摘要"
             >
@@ -373,7 +373,7 @@ function ActivityBody({ activity, subSnap }: {
             {subSnap.status === 'running' && (
               <button
                 type="button"
-                className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                className="petri-btn petri-btn--ghost petri-btn--sm"
                 onClick={() => stopSubAgentTask(activity.agentRunId)}
                 title="中断该子智能体"
               >
@@ -386,7 +386,7 @@ function ActivityBody({ activity, subSnap }: {
       {activity.agentRunId && !subSnap && (
         <button
           type="button"
-          className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+          className="petri-btn petri-btn--ghost petri-btn--sm"
           onClick={openAgentDetail}
           title="在右侧栏「智能体」面板查看实时工作流 + 终态摘要"
         >
@@ -403,7 +403,7 @@ function ActivityBody({ activity, subSnap }: {
             className="sc-tool-changediff-file"
             title={`${activity.actionDetail || activity.name} — 点击在审阅中查看`}
             onClick={() =>
-              dispatchGewuEvent(gewuEvents.reviewOpenFile, {
+              dispatchPetriEvent(petriEvents.reviewOpenFile, {
                 filePath: activity.actionDetail || activity.name,
               })
             }

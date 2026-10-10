@@ -41,7 +41,7 @@ dynamic workflow 三轨并行（文件面互斥：A=frontend copilot/任务墙+a
 
 ## 6. 风险与边界
 
-- ①②③消费链涉及 real-time 事件接线：复用 gewuEvents/既有 SSE 通道，不新建通道；失效流已有后端事件源（BLOCK-126），前端接线即可。
+- ①②③消费链涉及 real-time 事件接线：复用 petriEvents/既有 SSE 通道，不新建通道；失效流已有后端事件源（BLOCK-126），前端接线即可。
 - ⑤HEAVY_TOOLS 死链：确认引用面后删除或修正列表（取舍留痕）；tool-metadata 漂移 2 处以单源校准为准（哪侧为真读代码定）。
 - ⑥/m 页 token 拔除：对齐 BLOCK-132 主链方案（token 出 URL）；若 /m 页依赖 token 认证无替代通道，如实登记边界不硬拆。
 - ⑦R 守卫对照 deg-standardizer.R:60-66 范式；deseq2.R 本波不加（刚重放过 parse_design_terms，守卫随下一 pack 波）。

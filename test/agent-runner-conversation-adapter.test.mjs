@@ -12,10 +12,10 @@ const __dirname = path.dirname(__filename);
 // BLOCK-51 测试基建修复（与 agent-concurrency.test.mjs 同一修复）：conversation-adapter
 // 依赖链模块顶层即 prepare projects——先跑生产 migration 链再加载。
 const require = createRequire(import.meta.url);
-const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-conv-adapter-'));
-process.env.BIOF3_DB_PATH = path.join(tempDir, 'conv-adapter.db');
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-conv-adapter-'));
+process.env.PETRI_DB_PATH = path.join(tempDir, 'conv-adapter.db');
 const { runMigrations } = require('../src/migration-runner');
-await runMigrations(process.env.BIOF3_DB_PATH, path.join(__dirname, '../src/migrations'));
+await runMigrations(process.env.PETRI_DB_PATH, path.join(__dirname, '../src/migrations'));
 
 function resolve(...segments) {
   return path.resolve(__dirname, '..', ...segments);
@@ -23,7 +23,7 @@ function resolve(...segments) {
 
 describe('agent-runner-conversation-adapter.test.mjs (BLOCK-14 PHASE 3.1 message/conversation helpers)', () => {
   it('buildConversationMetadata normalizes guest vs user audience and tolerates null inputs', () => {
-    const ca = require(resolve('core/biof3-server/conversation-adapter.js'));
+    const ca = require(resolve('core/petri-server/conversation-adapter.js'));
     assert.strictEqual(typeof ca.buildConversationMetadata, 'function');
 
     // user audience with full context
@@ -48,7 +48,7 @@ describe('agent-runner-conversation-adapter.test.mjs (BLOCK-14 PHASE 3.1 message
   });
 
   it('announceActiveConversation emits the conversation event with id+title and is a no-op for null conv (session-isolation guard)', () => {
-    const ca = require(resolve('core/biof3-server/conversation-adapter.js'));
+    const ca = require(resolve('core/petri-server/conversation-adapter.js'));
 
     // active conv present → emit {event, conversationId, title}
     const captured = [];
@@ -73,7 +73,7 @@ describe('agent-runner-conversation-adapter.test.mjs (BLOCK-14 PHASE 3.1 message
   });
 
   it('appendAssistantMessage fail-closed envelope returns {persisted:false, shifted:false} for empty/whitespace assistantAcc, missing userId, missing conversationId', () => {
-    const ca = require(resolve('core/biof3-server/conversation-adapter.js'));
+    const ca = require(resolve('core/petri-server/conversation-adapter.js'));
     assert.strictEqual(typeof ca.appendAssistantMessage, 'function');
 
     // empty assistantAcc → fail-closed before any DB write

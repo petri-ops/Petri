@@ -37,7 +37,7 @@ function run(label, command) {
     cwd: repoRoot,
     shell: true,
     stdio: 'inherit',
-    env: { ...process.env, CI: '1', BIOF3_HARNESS_OFFLINE: '1' },
+    env: { ...process.env, CI: '1', PETRI_HARNESS_OFFLINE: '1' },
   });
   return { label, command, exitCode: result.status ?? 1, signal: result.signal || null };
 }

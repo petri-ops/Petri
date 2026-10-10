@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Build a BioF3 R capability bundle from packages already verified on the
+ * Build a Petri R capability bundle from packages already verified on the
  * target machine.
  *
  * The builder intentionally copies the installed recursive dependency closure
@@ -240,7 +240,7 @@ function copyInstalledClosure(plan, libDir) {
 }
 
 function generateKeggSnapshots(libDir) {
-  const dataDir = join(libDir, '.biof3-data');
+  const dataDir = join(libDir, '.petri-data');
   mkdirSync(dataDir, { recursive: true });
   const program = `
 .libPaths(c(${JSON.stringify(libDir)}, .libPaths()))
@@ -266,7 +266,7 @@ for (organism in c("hsa", "mmu")) {
     }
     return {
       organism,
-      file: `.biof3-data/${basename(file)}`,
+      file: `.petri-data/${basename(file)}`,
       sizeBytes: statSync(file).size,
     };
   });

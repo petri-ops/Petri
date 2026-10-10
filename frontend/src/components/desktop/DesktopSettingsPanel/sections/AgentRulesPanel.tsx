@@ -3,7 +3,7 @@
 //
 // 规则列表式增删改：匹配器（path-glob / command-token）+ 动作（deny /
 // require-ack）+ 作用域（global）。数据源 = /api/ai/agent-rules CRUD，
-// 持久化 = $BIOF3_LOCAL_DATA_DIR/agent-rules.json（拦截器缓存读取，
+// 持久化 = $PETRI_LOCAL_DATA_DIR/agent-rules.json（拦截器缓存读取，
 // 重启不敏感——helper mtime 缓存 3s 内自愈）。语义：first-match 先到先判；
 // require-ack = 拦截并要求确认（确认 UI 为后续 rider，当前经 ack 通道）。
 // ============================================================
@@ -111,8 +111,8 @@ export function AgentRulesPanel(): React.ReactElement {
   }
 
   return (
-    <div className="gewu-usage-resource">
-      <div className="gewu-resource-heading">
+    <div className="petri-usage-resource">
+      <div className="petri-resource-heading">
         <div>
           <strong>Agent 用户规则</strong>
           <p>
@@ -122,14 +122,14 @@ export function AgentRulesPanel(): React.ReactElement {
         </div>
       </div>
 
-      {error && <p className="gewu-field__result gewu-field__result--err">{error}</p>}
-      {notice && <p className="gewu-field__result gewu-field__result--ok">{notice}</p>}
+      {error && <p className="petri-field__result petri-field__result--err">{error}</p>}
+      {notice && <p className="petri-field__result petri-field__result--ok">{notice}</p>}
 
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
         <select
           value={matcherType}
           onChange={(e) => setMatcherType(e.target.value as 'path-glob' | 'command-token')}
-          className="gewu-input"
+          className="petri-input"
           style={{ width: 140 }}
           aria-label="匹配器类型"
         >
@@ -138,7 +138,7 @@ export function AgentRulesPanel(): React.ReactElement {
         </select>
         <input
           type="text"
-          className="gewu-input"
+          className="petri-input"
           style={{ flex: 1, minWidth: 180 }}
           placeholder={matcherType === 'path-glob' ? '如 secrets/** 或 results/*.csv' : '如 npm、curl'}
           value={pattern}
@@ -148,7 +148,7 @@ export function AgentRulesPanel(): React.ReactElement {
         <select
           value={action}
           onChange={(e) => setAction(e.target.value as 'deny' | 'require-ack')}
-          className="gewu-input"
+          className="petri-input"
           style={{ width: 110 }}
           aria-label="动作"
         >
@@ -157,14 +157,14 @@ export function AgentRulesPanel(): React.ReactElement {
         </select>
         <input
           type="text"
-          className="gewu-input"
+          className="petri-input"
           style={{ width: 160 }}
           placeholder="备注（可选）"
           value={note}
           onChange={(e) => setNote(e.target.value)}
           aria-label="备注"
         />
-        <button type="button" className="gewu-btn gewu-btn--primary gewu-btn--sm" onClick={() => void addRule()}>
+        <button type="button" className="petri-btn petri-btn--primary petri-btn--sm" onClick={() => void addRule()}>
           添加规则
         </button>
       </div>
@@ -175,21 +175,21 @@ export function AgentRulesPanel(): React.ReactElement {
             <div
               key={rule.id}
               data-testid={`agent-rule-${rule.id}`}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', border: '1px solid var(--gewu-border, rgba(128,128,128,0.25))', borderRadius: 6 }}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', border: '1px solid var(--petri-border, rgba(128,128,128,0.25))', borderRadius: 6 }}
             >
               <span
-                className="gewu-btn gewu-btn--sm"
+                className="petri-btn petri-btn--sm"
                 style={{ pointerEvents: 'none', opacity: rule.action === 'deny' ? 1 : 0.7 }}
               >
                 {rule.action === 'deny' ? '拒绝' : '需确认'}
               </span>
-              <code style={{ flex: 1, fontSize: 'var(--gewu-font-size-caption, 12px)' }}>
+              <code style={{ flex: 1, fontSize: 'var(--petri-font-size-caption, 12px)' }}>
                 {rule.matcher.type === 'path-glob' ? '路径' : '命令'}: {rule.matcher.pattern}
                 {rule.note ? ` · ${rule.note}` : ''}
               </code>
               <button
                 type="button"
-                className="gewu-btn gewu-btn--danger-ghost gewu-btn--sm"
+                className="petri-btn petri-btn--danger-ghost petri-btn--sm"
                 onClick={() => void removeRule(rule.id)}
               >
                 删除
@@ -198,7 +198,7 @@ export function AgentRulesPanel(): React.ReactElement {
           ))}
         </div>
       ) : (
-        <p className="gewu-field__hint">暂无规则——Agent 工具调用按默认审批档位执行。</p>
+        <p className="petri-field__hint">暂无规则——Agent 工具调用按默认审批档位执行。</p>
       )}
     </div>
   );

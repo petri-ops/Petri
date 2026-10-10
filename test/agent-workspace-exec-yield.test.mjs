@@ -18,22 +18,22 @@ import path from 'node:path';
 const require = createRequire(import.meta.url);
 {
   const Database = require('better-sqlite3');
-  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'biof3-exec-yield-db-'));
-  const db = new Database(path.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'petri-exec-yield-db-'));
+  const db = new Database(path.join(tempDbDir, 'petri.db'));
   const migrationsDir = path.resolve('src/migrations');
   for (const file of fssync.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     db.exec(fssync.readFileSync(path.join(migrationsDir, file), 'utf8'));
   }
   db.close();
-  process.env.BIOF3_DB_PATH = path.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try {
       fssync.rmSync(tempDbDir, { recursive: true, force: true });
     } catch {}
   });
 }
-const { createWorkspaceTools } = require('../core/biof3-server/agent-tools/workspace-tools.js');
-const { getToolDefs } = require('../core/biof3-server/agent-tools/tool-defs.js');
+const { createWorkspaceTools } = require('../core/petri-server/agent-tools/workspace-tools.js');
+const { getToolDefs } = require('../core/petri-server/agent-tools/tool-defs.js');
 
 const isWindows = process.platform === 'win32';
 const maybeSkipShell = isWindows ? test.skip : test;
@@ -50,7 +50,7 @@ const ctx = {
 };
 
 before(async () => {
-  const sandboxRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'biof3-exec-yield-'));
+  const sandboxRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'petri-exec-yield-'));
   workspaceRoot = path.join(sandboxRoot, 'workspace');
   await fs.mkdir(workspaceRoot, { recursive: true });
 
@@ -100,7 +100,7 @@ maybeSkipShell('yield: 长命令超时 → yielded + processId 转后台表，pr
   assert.equal(res.yielded, true);
   assert.ok(res.processId, 'processId present');
   spawnedProcessIds.push(res.processId);
-  assert.ok(res.logPath.includes('.biof3-agent-tmp/'));
+  assert.ok(res.logPath.includes('.petri-agent-tmp/'));
   assert.match(res.note, /process_status/);
 
   // 进程表里查得到（running 或刚退出均可——轮询语义）

@@ -26,14 +26,14 @@ const require = createRequire(import.meta.url);
 let tempDbDir;
 {
   const Database = require('better-sqlite3');
-  tempDbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block34-p3-db-'));
-  const db = new Database(path.join(tempDbDir, 'biof3.db'));
+  tempDbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block34-p3-db-'));
+  const db = new Database(path.join(tempDbDir, 'petri.db'));
   const migrationsDir = resolve('src/migrations');
   for (const file of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     db.exec(fs.readFileSync(path.join(migrationsDir, file), 'utf8'));
   }
   db.close();
-  process.env.BIOF3_DB_PATH = path.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try {
       fs.rmSync(tempDbDir, { recursive: true, force: true });
@@ -82,10 +82,10 @@ async function waitFor(predicate, timeoutMs = 8000, intervalMs = 100) {
 }
 
 before(async () => {
-  workspaceRoot = await fsp.mkdtemp(path.join(os.tmpdir(), 'biof3-block34-p3-ws-'));
+  workspaceRoot = await fsp.mkdtemp(path.join(os.tmpdir(), 'petri-block34-p3-ws-'));
 
-  // 项目行（路由链路最终落到 db 模块 → 指向 BIOF3_DB_PATH）
-  const dbModule = require(resolve('core/biof3-server/db.js'));
+  // 项目行（路由链路最终落到 db 模块 → 指向 PETRI_DB_PATH）
+  const dbModule = require(resolve('core/petri-server/db.js'));
   const db = dbModule.default || dbModule;
   const project = db.createProject({
     name: 'P3 Route',
@@ -98,7 +98,7 @@ before(async () => {
 
   // 真实 Express + mock auth + 被测路由
   const express = require('express');
-  const route = require(resolve('core/biof3-server/routes/ai-agent/background-processes.js'));
+  const route = require(resolve('core/petri-server/routes/ai-agent/background-processes.js'));
   const app = express();
   app.use((req, _res, next) => {
     const uid = req.headers['x-mock-user'];
@@ -115,7 +115,7 @@ before(async () => {
   });
 
   // 通过同一 defaultTools 实例启动真实后台进程（conv A）
-  const ws = require(resolve('core/biof3-server/agent-tools/workspace-tools.js'));
+  const ws = require(resolve('core/petri-server/agent-tools/workspace-tools.js'));
   const start = await ws.tool_workspace_exec_background(
     { command: 'echo hello-bg-p3 && sleep 30' },
     { projectId: PROJECT_ID, userId: USER_ID, accessMode: 'full', conversationId: CONV_A }
@@ -127,7 +127,7 @@ before(async () => {
 after(async () => {
   if (spawnedProcessId) {
     try {
-      const ws = require(resolve('core/biof3-server/agent-tools/workspace-tools.js'));
+      const ws = require(resolve('core/petri-server/agent-tools/workspace-tools.js'));
       await ws.tool_process_stop(
         { processId: spawnedProcessId },
         { projectId: PROJECT_ID, userId: USER_ID, accessMode: 'full', conversationId: CONV_A }

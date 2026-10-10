@@ -10,12 +10,12 @@ import { fileURLToPath } from 'node:url';
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-const { buildMobileGateway } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/index.js'));
-const { resetStoresForTest, createSessionStore } = require(path.join(ROOT, 'core/biof3-server/mobile-gateway/pairing.js'));
-const registerProjectionDataRoutes = require(path.join(ROOT, 'core/biof3-server/routes/projection-data.js'));
+const { buildMobileGateway } = require(path.join(ROOT, 'core/petri-server/mobile-gateway/index.js'));
+const { resetStoresForTest, createSessionStore } = require(path.join(ROOT, 'core/petri-server/mobile-gateway/pairing.js'));
+const registerProjectionDataRoutes = require(path.join(ROOT, 'core/petri-server/routes/projection-data.js'));
 
 function tmpRoot() {
-  return mkdtempSync(path.join(tmpdir(), 'gewu-projection-l42-'));
+  return mkdtempSync(path.join(tmpdir(), 'petri-projection-l42-'));
 }
 
 function listen(app) {
@@ -77,33 +77,33 @@ test('BLOCK-87 gateway rate limit counts API paths only', async () => {
 // ── BLOCK-87 L4-2：投影数据端点（插件目录/运行时/领域包）──────────────────
 test('BLOCK-87 projection data: catalog, runtime status, packs read plane', async () => {
   const sandbox = tmpRoot();
-  const prevDataDir = process.env.BIOF3_LOCAL_DATA_DIR;
-  const prevProjectRoot = process.env.BIOF3_PROJECT_ROOT;
+  const prevDataDir = process.env.PETRI_LOCAL_DATA_DIR;
+  const prevProjectRoot = process.env.PETRI_PROJECT_ROOT;
   try {
-    // 沙盒布局：<sandbox>/proj/biof3-desktop（BIOF3_PROJECT_ROOT，资源/发现根）
-    //          <sandbox>/proj/gewu-pack-bio（projectRoot 的兄弟仓发现位）
+    // 沙盒布局：<sandbox>/proj/petri-desktop（PETRI_PROJECT_ROOT，资源/发现根）
+    //          <sandbox>/proj/petri-pack-bio（projectRoot 的兄弟仓发现位）
     //          <sandbox>/data（dataDir）
-    const projectRoot = path.join(sandbox, 'proj', 'biof3-desktop');
+    const projectRoot = path.join(sandbox, 'proj', 'petri-desktop');
     const dataDir = path.join(sandbox, 'data');
     mkdirSync(path.join(projectRoot, 'resources', 'runtime'), { recursive: true });
     writeFileSync(
       path.join(projectRoot, 'resources', 'runtime', 'manifest.json'),
-      JSON.stringify({ version: '2.0.0', plugins: { 'biof3-r-runtime': { id: 'biof3-r-runtime', type: 'runtime', title: 'R 运行时' } } }),
+      JSON.stringify({ version: '2.0.0', plugins: { 'petri-r-runtime': { id: 'petri-r-runtime', type: 'runtime', title: 'R 运行时' } } }),
     );
-    const packRoot = path.join(sandbox, 'proj', 'gewu-pack-bio');
+    const packRoot = path.join(sandbox, 'proj', 'petri-pack-bio');
     mkdirSync(path.join(packRoot, 'plugins'), { recursive: true });
-    writeFileSync(path.join(packRoot, 'pack.json'), JSON.stringify({ packId: 'gewu-pack-bio', name: '格物 · 生信分析包', version: '0.1.0', description: 'bio pack' }));
+    writeFileSync(path.join(packRoot, 'pack.json'), JSON.stringify({ packId: 'petri-pack-bio', name: '格物 · 生信分析包', version: '0.1.0', description: 'bio pack' }));
     writeFileSync(path.join(packRoot, 'plugins', 'installed.json'), JSON.stringify([{ id: 'deseq2', language: 'r', version: '1.0.0' }]));
     mkdirSync(path.join(packRoot, 'scripts', 'deseq2'), { recursive: true });
     mkdirSync(path.join(packRoot, 'demo-data', 'counts'), { recursive: true });
     mkdirSync(path.join(dataDir, 'packs'), { recursive: true });
     writeFileSync(
       path.join(dataDir, 'packs', 'installed.json'),
-      JSON.stringify([{ packId: 'gewu-pack-bio', packRoot, version: '0.1.0', installedAt: '2026-09-14T00:00:00.000Z' }]),
+      JSON.stringify([{ packId: 'petri-pack-bio', packRoot, version: '0.1.0', installedAt: '2026-09-14T00:00:00.000Z' }]),
     );
 
-    process.env.BIOF3_LOCAL_DATA_DIR = dataDir;
-    process.env.BIOF3_PROJECT_ROOT = projectRoot;
+    process.env.PETRI_LOCAL_DATA_DIR = dataDir;
+    process.env.PETRI_PROJECT_ROOT = projectRoot;
 
     const express = require('express');
     const app = express();
@@ -115,8 +115,8 @@ test('BLOCK-87 projection data: catalog, runtime status, packs read plane', asyn
     // 目录：与桌面 getBuiltInManifest 同一文件语义
     const catalog = await getJson('/api/plugins/catalog');
     assert.equal(catalog.ok, true);
-    assert.ok(catalog.manifest.plugins['biof3-r-runtime']);
-    assert.equal(catalog.manifest.plugins['biof3-r-runtime'].type, 'runtime');
+    assert.ok(catalog.manifest.plugins['petri-r-runtime']);
+    assert.equal(catalog.manifest.plugins['petri-r-runtime'].type, 'runtime');
 
     // 运行时状态：测试进程未注册执行器 → 诚实全 false（形状契约）
     const runtime = await getJson('/api/runtime/status');
@@ -130,7 +130,7 @@ test('BLOCK-87 projection data: catalog, runtime status, packs read plane', asyn
     const installed = await getJson('/api/packs/installed');
     assert.equal(installed.ok, true);
     assert.equal(installed.packs.length, 1);
-    assert.equal(installed.packs[0].packId, 'gewu-pack-bio');
+    assert.equal(installed.packs[0].packId, 'petri-pack-bio');
     // BLOCK-86 收口对齐 — contents 富化（手机端包卡片计数行数据源）
     assert.equal(installed.packs[0].contents.pluginCount, 1, JSON.stringify(installed.packs[0].contents));
     assert.equal(installed.packs[0].contents.scriptCount, 1);
@@ -143,10 +143,10 @@ test('BLOCK-87 projection data: catalog, runtime status, packs read plane', asyn
 
     await closeServer(server);
   } finally {
-    if (prevDataDir === undefined) delete process.env.BIOF3_LOCAL_DATA_DIR;
-    else process.env.BIOF3_LOCAL_DATA_DIR = prevDataDir;
-    if (prevProjectRoot === undefined) delete process.env.BIOF3_PROJECT_ROOT;
-    else process.env.BIOF3_PROJECT_ROOT = prevProjectRoot;
+    if (prevDataDir === undefined) delete process.env.PETRI_LOCAL_DATA_DIR;
+    else process.env.PETRI_LOCAL_DATA_DIR = prevDataDir;
+    if (prevProjectRoot === undefined) delete process.env.PETRI_PROJECT_ROOT;
+    else process.env.PETRI_PROJECT_ROOT = prevProjectRoot;
     rmSync(sandbox, { recursive: true, force: true });
   }
 });
@@ -235,8 +235,8 @@ test('BLOCK-87 gateway proxies Vite modules with 304 revalidation and gzip', asy
   });
   await new Promise((resolve) => upstream.listen(0, '127.0.0.1', resolve));
   const upstreamUrl = `http://127.0.0.1:${upstream.address().port}`;
-  const prevRenderer = process.env.BIOF3_RENDERER_DEV_URL;
-  process.env.BIOF3_RENDERER_DEV_URL = upstreamUrl;
+  const prevRenderer = process.env.PETRI_RENDERER_DEV_URL;
+  process.env.PETRI_RENDERER_DEV_URL = upstreamUrl;
   try {
     const { app, stores } = buildMobileGateway({ dataDir: root });
     const server = await listen(app);
@@ -259,8 +259,8 @@ test('BLOCK-87 gateway proxies Vite modules with 304 revalidation and gzip', asy
 
     await closeServer(server);
   } finally {
-    if (prevRenderer === undefined) delete process.env.BIOF3_RENDERER_DEV_URL;
-    else process.env.BIOF3_RENDERER_DEV_URL = prevRenderer;
+    if (prevRenderer === undefined) delete process.env.PETRI_RENDERER_DEV_URL;
+    else process.env.PETRI_RENDERER_DEV_URL = prevRenderer;
     upstream.closeAllConnections?.();
     upstream.close();
     rmSync(root, { recursive: true, force: true });

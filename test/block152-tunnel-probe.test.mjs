@@ -25,7 +25,7 @@ import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const TUNNEL_PATH = path.join(ROOT, 'core/biof3-server/mobile-gateway/tunnel.js');
+const TUNNEL_PATH = path.join(ROOT, 'core/petri-server/mobile-gateway/tunnel.js');
 
 const { createTunnelManager, writeTunnelConfig } = require(TUNNEL_PATH);
 
@@ -105,7 +105,7 @@ function buildProbeManager(root, {
 // ── ① 三态：401=ok / 非 401=fail / 超时=fail ─────────────────────────────
 
 test('BLOCK-152 T① probe 三态：401=ok、非 401=fail、超时=fail（probeState/probedAt 进 status()）', async () => {
-  const root = mkdtempSync(path.join(tmpdir(), 'gewu-tunnel-probe-tri-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-tunnel-probe-tri-'));
   const cleanups = [];
   async function outcome({ fetchOptions, expect, label, probeTimeoutMs = 400 }) {
     const fake = recordingFetch(fetchOptions);
@@ -145,7 +145,7 @@ test('BLOCK-152 T① probe 三态：401=ok、非 401=fail、超时=fail（probeS
 // ── ② 调度不叠加：串行链 + stop 撤销 ─────────────────────────────────────
 
 test('BLOCK-152 T② 调度不叠加：probe 慢于间隔也绝不并发；stop 后在途收尾、绝无新调用', async () => {
-  const root = mkdtempSync(path.join(tmpdir(), 'gewu-tunnel-probe-stack-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-tunnel-probe-stack-'));
   let manager = null;
   try {
     const fake = recordingFetch({ status: 401, delayMs: 25 }); // 单轮 25ms > 间隔 15ms
@@ -172,7 +172,7 @@ test('BLOCK-152 T② 调度不叠加：probe 慢于间隔也绝不并发；stop 
 // ── ③ 关键路径：connecting 期零探活；初始 unknown；未配 publicUrl 不探 ──
 
 test('BLOCK-152 T③ 冷启动零探活：connecting 期零调用、初始 unknown；未配 publicUrl 不起探活链', async () => {
-  const root = mkdtempSync(path.join(tmpdir(), 'gewu-tunnel-probe-idle-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-tunnel-probe-idle-'));
   let manager = null;
   let managerNoUrl = null;
   try {
@@ -209,7 +209,7 @@ test('BLOCK-152 T③ 冷启动零探活：connecting 期零调用、初始 unkno
 // ── ③ 计时器 unref：不吊住 event loop ────────────────────────────────────
 
 test('BLOCK-152 T③ probe 计时器 unref：不吊住 event loop（进程可自然退出）', async () => {
-  const root = mkdtempSync(path.join(tmpdir(), 'gewu-tunnel-probe-unref-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-tunnel-probe-unref-'));
   let manager = null;
   try {
     const fake = recordingFetch({ status: 401 });
@@ -239,7 +239,7 @@ test('BLOCK-152 T③ probe 计时器 unref：不吊住 event loop（进程可自
 // ── ② 断连即作废证据：exit 复位 unknown；在途陈旧结论不回写 ─────────────
 
 test('BLOCK-152 T② 断连即作废探活证据：exit 复位 unknown；在途 probe 的陈旧结论不回写', async () => {
-  const root = mkdtempSync(path.join(tmpdir(), 'gewu-tunnel-probe-stale-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-tunnel-probe-stale-'));
   let managerA = null;
   let managerB = null;
   try {

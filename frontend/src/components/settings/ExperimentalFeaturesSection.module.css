@@ -2,23 +2,23 @@
   display: grid;
   gap: 14px;
   padding: 16px;
-  border: 1px solid var(--gewu-border, var(--gewu-border-color, #2a3545));
+  border: 1px solid var(--petri-border, var(--petri-border-color, #2a3545));
   border-radius: 10px;
-  background: var(--gewu-bg-subtle, rgba(127, 127, 127, 0.06));
+  background: var(--petri-bg-subtle, rgba(127, 127, 127, 0.06));
 }
 
 .heading h3 {
   margin: 0;
-  font-size: var(--gewu-font-size-md);
-  color: var(--gewu-text, inherit);
+  font-size: var(--petri-font-size-md);
+  color: var(--petri-text, inherit);
 }
 
 .heading p,
 .description,
 .featureLabel small {
   margin: 4px 0 0;
-  color: var(--gewu-text-tertiary, inherit);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-text-tertiary, inherit);
+  font-size: var(--petri-font-size-caption);
   line-height: 1.45;
 }
 
@@ -34,12 +34,12 @@
   display: grid;
   gap: 2px;
   min-width: 0;
-  color: var(--gewu-text, inherit);
+  color: var(--petri-text, inherit);
   cursor: pointer;
 }
 
 .featureLabel > span {
-  font-size: var(--gewu-font-size-body);
+  font-size: var(--petri-font-size-body);
   font-weight: 650;
 }
 
@@ -54,7 +54,7 @@
   width: 36px;
   height: 20px;
   margin: 0;
-  accent-color: var(--gewu-accent, #4f9cf9);
+  accent-color: var(--petri-accent, #4f9cf9);
   cursor: pointer;
 }
 
@@ -64,12 +64,12 @@
 }
 
 .toggleControl:hover .toggle {
-  outline: 2px solid color-mix(in srgb, var(--gewu-accent, #4f9cf9) 35%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--petri-accent, #4f9cf9) 35%, transparent);
   outline-offset: 2px;
 }
 
 .toggle:focus-visible {
-  outline: 2px solid var(--gewu-accent, #4f9cf9);
+  outline: 2px solid var(--petri-accent, #4f9cf9);
   outline-offset: 2px;
 }
 
@@ -99,13 +99,13 @@
   display: grid;
   gap: 14px;
   padding-top: 12px;
-  border-top: 1px dashed var(--gewu-border, var(--gewu-border-color, #2a3545));
+  border-top: 1px dashed var(--petri-border, var(--petri-border-color, #2a3545));
 }
 
 .envLockError {
   padding: 8px 10px;
   border: 1px solid rgba(239, 68, 68, 0.35);
   border-radius: 8px;
-  color: var(--gewu-danger, #ef4444);
-  font-size: var(--gewu-font-size-caption);
+  color: var(--petri-danger, #ef4444);
+  font-size: var(--petri-font-size-caption);
 }

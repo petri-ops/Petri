@@ -4,7 +4,7 @@
   "capturedAt": "2026-09-22T00:32:45.913Z",
   "sourceCommit": "900d418b8f4075ceed49d0d356997c1ff301f27a",
   "model": "jev-1.13.0",
-  "wrapper": "core/biof3-server/helpers/decision-api.js",
+  "wrapper": "core/petri-server/helpers/decision-api.js",
   "domains": {
     "topic-shift": {
       "corpus": {

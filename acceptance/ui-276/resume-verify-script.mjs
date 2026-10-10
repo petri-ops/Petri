@@ -21,7 +21,7 @@ const ev = async (expr) => {
   const r = await send('Runtime.evaluate', { expression: expr, returnByValue: true });
   return r.result?.value;
 };
-const mtime = (f) => { try { return statSync(`/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/${f}`).mtimeMs; } catch { return -1; } };
+const mtime = (f) => { try { return statSync(`/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/${f}`).mtimeMs; } catch { return -1; } };
 const pre = { s1: mtime('p39s1.txt'), s2: mtime('p39s2.txt') };
 console.log('PRE_MT:', JSON.stringify(pre));
 
@@ -35,8 +35,8 @@ const t0 = Date.now();
 let done = false, s3s4 = false;
 while (Date.now() - t0 < 180000) {
   await sleep(2000);
-  s3s4 = existsSync('/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/p39s3.txt') && existsSync('/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/p39s4.txt');
-  const all4 = s3s4 && existsSync('/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/p39s1.txt') && existsSync('/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/p39s2.txt');
+  s3s4 = existsSync('/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/p39s3.txt') && existsSync('/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/p39s4.txt');
+  const all4 = s3s4 && existsSync('/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/p39s1.txt') && existsSync('/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/p39s2.txt');
   if (all4) {
     // wait a bit more for task to wrap up
     await sleep(4000);

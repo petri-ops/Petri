@@ -4,17 +4,17 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const root = path.resolve(process.env.BIOF3_RS6_VISUAL_ROOT || '');
-if (!process.env.BIOF3_RS6_VISUAL_ROOT || root === path.parse(root).root) {
-  throw new Error('BIOF3_RS6_VISUAL_ROOT must be an explicit isolated directory.');
+const root = path.resolve(process.env.PETRI_RS6_VISUAL_ROOT || '');
+if (!process.env.PETRI_RS6_VISUAL_ROOT || root === path.parse(root).root) {
+  throw new Error('PETRI_RS6_VISUAL_ROOT must be an explicit isolated directory.');
 }
 fs.mkdirSync(root, { recursive: true });
 const workspaceRoot = path.join(root, 'project');
 fs.mkdirSync(workspaceRoot, { recursive: true });
-process.env.BIOF3_DB_PATH = path.join(root, 'biof3.db');
-process.env.BIOF3_LOCAL_DATA_DIR = root;
+process.env.PETRI_DB_PATH = path.join(root, 'petri.db');
+process.env.PETRI_LOCAL_DATA_DIR = root;
 
-const db = require('../core/biof3-server/db');
+const db = require('../core/petri-server/db');
 const { ensureResultStudioSchema } = require('../core/shared-backend/result-studio-schema');
 const { createResultStudioRepository } = require('../core/shared-backend/result-studio-repository');
 const { bindProjectRepository } = require('../core/shared-backend/git-repository-binding');
@@ -77,14 +77,14 @@ const familyId = `af_${hash(`${project.id}\0${sourceJob.id}\0volcano_plot`).slic
 const sourceScriptPath = `analysis/scripts/${familyId}/rev_source/volcano_plot.R`;
 const sourceParamsPath = `analysis/scripts/${familyId}/rev_source/parameters.json`;
 const base = adapter.commitVirtualFiles({
-  ref: 'refs/heads/biof3/main', expectedOld: '0'.repeat(40), message: 'RS6 visual baseline',
+  ref: 'refs/heads/petri/main', expectedOld: '0'.repeat(40), message: 'RS6 visual baseline',
   files: [{ path: sourceScriptPath, content: sourceScript }, { path: sourceParamsPath, content: sourceParams }],
 });
 const candidateScriptPath = `analysis/scripts/${familyId}/rev_candidate/volcano_plot.R`;
 const candidateParamsPath = `analysis/scripts/${familyId}/rev_candidate/parameters.json`;
 const candidate = adapter.commitVirtualFiles({
   parentCommit: base.commit,
-  ref: 'refs/heads/biof3/changeset/cs_candidate', expectedOld: '0'.repeat(40), message: 'RS6 visual candidate',
+  ref: 'refs/heads/petri/changeset/cs_candidate', expectedOld: '0'.repeat(40), message: 'RS6 visual candidate',
   files: [{ path: candidateScriptPath, content: candidateScript }, { path: candidateParamsPath, content: candidateParams }],
 });
 
@@ -113,7 +113,7 @@ db.updateToolJob(candidateJob.id, { status: 'completed', resultJson: candidateRe
 
 repository.createChangeSet({
   changeSetId: 'cs_source', projectId: project.id, intentRef: `baseline:${sourceJob.id}:volcano_plot`,
-  baseCommit: base.commit, workingBranchRef: 'refs/heads/biof3/source', createdBy: 'agent',
+  baseCommit: base.commit, workingBranchRef: 'refs/heads/petri/source', createdBy: 'agent',
 });
 repository.transitionChangeSet({ changeSetId: 'cs_source', to: 'running' });
 repository.appendRevision({
@@ -129,7 +129,7 @@ repository.adoptChangeSet({ changeSetId: 'cs_source', candidateCommit: base.comm
 
 repository.createChangeSet({
   changeSetId: 'cs_candidate', projectId: project.id, conversationId: null, intentRef: 'rei_visual_rs6',
-  baseCommit: base.commit, workingBranchRef: 'refs/heads/biof3/changeset/cs_candidate', createdBy: 'agent', parentArtifactRefs: ['rev_source'],
+  baseCommit: base.commit, workingBranchRef: 'refs/heads/petri/changeset/cs_candidate', createdBy: 'agent', parentArtifactRefs: ['rev_source'],
 });
 repository.transitionChangeSet({ changeSetId: 'cs_candidate', to: 'running' });
 repository.appendRevision({

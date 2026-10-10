@@ -19,7 +19,7 @@
     {
       "name": "workspace_write 放行：探针文件真实落盘（内容 B56-OK）",
       "pass": true,
-      "detail": "/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f/b56-ui288-probe.txt → \"B56-OK\""
+      "detail": "/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/.petri-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f/b56-ui288-probe.txt → \"B56-OK\""
     },
     {
       "name": "场景 A 任务确曾调用 workspace_write",
@@ -49,7 +49,7 @@
     {
       "name": "探针文件已清理",
       "pass": true,
-      "detail": "/Users/zhangdiandian/Documents/1.WorkDir/BioF3-workspace/desktop/.biof3-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f/b56-ui288-probe.txt"
+      "detail": "/Users/zhangdiandian/Documents/1.WorkDir/Petri-workspace/desktop/.petri-dev-user-data/data/projects/block52-p3-09031507-mtlnsv0f/b56-ui288-probe.txt"
     }
   ],
   "screenshots": [

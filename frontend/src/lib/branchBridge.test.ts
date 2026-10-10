@@ -35,7 +35,7 @@ const BRANCH_FIXTURE: Branch = {
 type Envelope = { ok: boolean; data?: unknown; error?: string };
 
 function stubBridge(methods: Record<string, unknown>): void {
-  (window as unknown as Record<string, unknown>).gewu = { branch: methods };
+  (window as unknown as Record<string, unknown>).petri = { branch: methods };
 }
 
 async function loadBranchApi() {
@@ -45,13 +45,13 @@ async function loadBranchApi() {
 }
 
 beforeEach(() => {
-  delete (window as unknown as Record<string, unknown>).gewu;
-  delete (window as unknown as Record<string, unknown>).biof3Desktop;
+  delete (window as unknown as Record<string, unknown>).petri;
+  delete (window as unknown as Record<string, unknown>).petriDesktop;
 });
 
 afterEach(() => {
-  delete (window as unknown as Record<string, unknown>).gewu;
-  delete (window as unknown as Record<string, unknown>).biof3Desktop;
+  delete (window as unknown as Record<string, unknown>).petri;
+  delete (window as unknown as Record<string, unknown>).petriDesktop;
   vi.restoreAllMocks();
 });
 

@@ -5,26 +5,26 @@
   align-items: center;
   gap: 4px;
   padding: 5px 9px;
-  border-bottom: 1px solid var(--gewu-border);
-  font-size: var(--gewu-font-size-xs);
+  border-bottom: 1px solid var(--petri-border);
+  font-size: var(--petri-font-size-xs);
 }
 
 .caption {
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .arrow {
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
 }
 
 .node {
   max-width: 180px;
   overflow: hidden;
   padding: 1px 8px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 999px;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   cursor: pointer;
   font: inherit;
   text-overflow: ellipsis;
@@ -32,19 +32,19 @@
 }
 
 .node:hover {
-  border-color: var(--gewu-accent);
-  color: var(--gewu-text);
+  border-color: var(--petri-accent);
+  color: var(--petri-text);
 }
 
 .node[aria-current='true'] {
-  border-color: var(--gewu-accent);
-  background: color-mix(in srgb, var(--gewu-accent) 12%, transparent);
-  color: var(--gewu-text);
+  border-color: var(--petri-accent);
+  background: color-mix(in srgb, var(--petri-accent) 12%, transparent);
+  color: var(--petri-text);
   font-weight: 650;
 }
 
 .node:focus-visible {
-  outline: 2px solid var(--gewu-accent);
+  outline: 2px solid var(--petri-accent);
   outline-offset: 2px;
 }
 
@@ -61,10 +61,10 @@
   border: none;
   border-radius: 999px;
   background: transparent;
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   cursor: pointer;
   font: inherit;
-  font-size: var(--gewu-font-size-xs);
+  font-size: var(--petri-font-size-xs);
   white-space: nowrap;
   opacity: 0;
   transition: opacity 120ms ease;
@@ -76,11 +76,11 @@
 }
 
 .nodePin:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .nodePin:focus-visible {
-  outline: 2px solid var(--gewu-accent);
+  outline: 2px solid var(--petri-accent);
   outline-offset: 1px;
 }

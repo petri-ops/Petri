@@ -14,7 +14,7 @@
  */
 const path = require('node:path');
 const http = require('node:http');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const PROJECT_ID = process.argv[2] || 'p_mu5ftn3a_wxnq';
@@ -91,7 +91,7 @@ function restCall(method, apiPath, body) {
   // ── T1 拖出桥在场（startDrag 方案：合成 dragstart 会触发主进程真拖拽接管，不可派发；
   //     拖出载荷契约由组件测试覆盖：本地 localPath/ssh 附 token URL/目录行不触发）──
   const t1 = await EVAL(`(function(){
-    var b=window.biof3Desktop && window.biof3Desktop.files;
+    var b=window.petriDesktop && window.petriDesktop.files;
     return JSON.stringify({bridge:!!b, startDrag: !!(b && typeof b.startFileDrag==='function'), download: !!(b && typeof b.downloadFromUrl==='function')});
   })()`);
   let t1p = {}; try { t1p = JSON.parse(t1); } catch {}
@@ -101,7 +101,7 @@ function restCall(method, apiPath, body) {
   //     此处直接构造同源 REST+token URL 验证数据完整性通路）──
   const fetchProbe = await EVAL(
     `(async function(){
-      var base = (window.biof3Desktop && window.biof3Desktop.backendConfig && window.biof3Desktop.backendConfig.rApiBase) || 'http://localhost:3001/api';
+      var base = (window.petriDesktop && window.petriDesktop.backendConfig && window.petriDesktop.backendConfig.rApiBase) || 'http://localhost:3001/api';
       var url = base + '/workspaces/${PROJECT_ID}/file?path=' + encodeURIComponent('${FILE_NAME.replace(/'/g, "'")}') + '&token=desktop-local';
       var resp = await fetch(url, { cache: 'no-store' });
       var buf = await resp.arrayBuffer();
@@ -113,7 +113,7 @@ function restCall(method, apiPath, body) {
     `probe=${String(fetchProbe).slice(0, 200)}`);
 
   // ── T4 下载通道契约：preload bridge 在场（OS 级保存对话框由用户实机过目）──
-  const t4 = await EVAL(`typeof window.biof3Desktop !== 'undefined' && typeof window.biof3Desktop.files !== 'undefined' && typeof window.biof3Desktop.files.downloadFromUrl === 'function'`);
+  const t4 = await EVAL(`typeof window.petriDesktop !== 'undefined' && typeof window.petriDesktop.files !== 'undefined' && typeof window.petriDesktop.files.downloadFromUrl === 'function'`);
   run.assert('T4_download_bridge_present', t4 === true || t4 === 'true', String(t4));
 
   // ── T5 拖出通道守卫三态（UI-453 加映：Chromium 拖出下载的 GET 带 Origin:null）──

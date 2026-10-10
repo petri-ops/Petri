@@ -13,31 +13,31 @@
   min-width: 140px;
   max-width: 320px;
   padding: 3px 6px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  background: var(--gewu-bg-elevated);
-  color: var(--gewu-text-primary);
+  background: var(--petri-bg-elevated);
+  color: var(--petri-text-primary);
   font-size: 12px;
 }
 
 .btn {
   padding: 3px 8px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
   background: transparent;
-  color: var(--gewu-text-primary);
+  color: var(--petri-text-primary);
   font-size: 12px;
   cursor: pointer;
   white-space: nowrap;
 }
 
 .btn:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .btnDanger {
-  border-color: var(--gewu-danger, var(--gewu-warning-text));
-  color: var(--gewu-danger, var(--gewu-warning-text));
+  border-color: var(--petri-danger, var(--petri-warning-text));
+  color: var(--petri-danger, var(--petri-warning-text));
 }
 
 .createRow {
@@ -49,14 +49,14 @@
 .input {
   width: 180px;
   padding: 3px 6px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  background: var(--gewu-bg-elevated);
-  color: var(--gewu-text-primary);
+  background: var(--petri-bg-elevated);
+  color: var(--petri-text-primary);
   font-size: 12px;
 }
 
 .error {
   font-size: 11px;
-  color: var(--gewu-danger, var(--gewu-warning-text));
+  color: var(--petri-danger, var(--petri-warning-text));
 }

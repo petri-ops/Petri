@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://biof3.local/schemas/docs-governance-report.schema.json",
+  "$id": "https://petri.local/schemas/docs-governance-report.schema.json",
   "title": "docs-governance report",
   "description": "Machine-readable JSON report emitted by `scripts/docs-governance.mjs --report <path>`. Schema version 1. Not the default status text output.",
   "type": "object",

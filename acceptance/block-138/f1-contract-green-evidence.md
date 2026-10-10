@@ -26,7 +26,7 @@
 ```
 
 红点语义：①②③红在 `repository.findRevisionByJobArtifact` 为 null（bind 链形成点零注册）；
-④红在 `resolveResultStudioContext` 的裸 job 产物拒开（core/biof3-server/agent-tools/result-context-tools.js，
+④红在 `resolveResultStudioContext` 的裸 job 产物拒开（core/petri-server/agent-tools/result-context-tools.js，
 与 AUDIT-LOG 🟡 2026-10-02 attempt-3/blocker B1 实据同点）。各用例的 F1 前置链（op=plan、bind_artifact、
 下游 step ready 投影）在红运行中均已通过——红即缺注册本体，非夹具缺陷。
 （原 `f1-contract-red-evidence-full.txt` 全量运行日志随撤档移除；其有效内容=上列失败摘录，

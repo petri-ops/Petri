@@ -1,5 +1,5 @@
 /* BLOCK-100 / UI-409+UI-411 — 测试实例窗口管理条：顶部固定条，悬停解锁后
-   app-region:drag 可拖动移动窗口；琥珀警示色对齐既有 --gewu-warning-* token。 */
+   app-region:drag 可拖动移动窗口；琥珀警示色对齐既有 --petri-warning-* token。 */
 .bar {
   position: fixed;
   top: 0;
@@ -11,8 +11,8 @@
   align-items: center;
   gap: 8px;
   padding: 0 10px;
-  background: var(--gewu-warning-bg);
-  border-bottom: 1px solid var(--gewu-warning-text);
+  background: var(--petri-warning-bg);
+  border-bottom: 1px solid var(--petri-warning-text);
   /* 管理模式下整条为拖动区（移动窗口）；按钮自身 no-drag 可点。
      锁定态鼠标在 OS 层已穿透，此条拖动语义自然不生效。 */
   -webkit-app-region: drag;
@@ -29,15 +29,15 @@
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.04em;
-  color: var(--gewu-warning-text);
+  color: var(--petri-warning-text);
 }
 
 .btn {
   -webkit-app-region: no-drag;
-  border: 1px solid var(--gewu-warning-text);
+  border: 1px solid var(--petri-warning-text);
   border-radius: 999px;
   background: transparent;
-  color: var(--gewu-warning-text);
+  color: var(--petri-warning-text);
   font-size: 11px;
   font-weight: 600;
   padding: 1px 8px;
@@ -45,13 +45,13 @@
 }
 
 .btnOn {
-  background: var(--gewu-warning-text);
-  color: var(--gewu-bg-canvas, #0b1220);
+  background: var(--petri-warning-text);
+  color: var(--petri-bg-canvas, #0b1220);
 }
 
 .hint {
   margin-left: auto;
   font-size: 10px;
   opacity: 0.75;
-  color: var(--gewu-warning-text);
+  color: var(--petri-warning-text);
 }

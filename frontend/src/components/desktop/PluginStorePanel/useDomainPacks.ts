@@ -91,7 +91,7 @@ export function useDomainPacks(options: UseDomainPacksOptions): {
     try {
       // BLOCK-87 L4-2：桥解析走 getBridge 单点——桌面=IPC 桥，投影=gateway
       // HTTP 桥（手机端领域包/运行时与桌面同源）；普通 web 无桥返回 null。
-      // 直接读 window.biof3Desktop 在投影下拿到的是垫片 Proxy（解析为
+      // 直接读 window.petriDesktop 在投影下拿到的是垫片 Proxy（解析为
       // undefined），曾是手机端领域包分区空白的根因之一。
       const bridge = getBridge('packs');
       if (!bridge) return;

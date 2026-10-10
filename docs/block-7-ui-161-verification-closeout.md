@@ -36,7 +36,7 @@
 | ③ | App.tsx 无 SkillsSidebar 引用 | `frontend/src/App.tsx` | grep 无 SkillsSidebar import / JSX | ✅ PASS（无输出）|
 | ④ | SkillsSidebar 文件已删 | `frontend/src/components/desktop/SkillsSidebar*` | `ls` 无文件 | ✅ PASS（no matches found）|
 | ⑤ | pages/skills/index.tsx error 返回首页 | `frontend/src/pages/skills/index.tsx` L55 + L110-114 | `handleReturnHome` + `title="返回首页"` + `arrow-left` icon | ✅ PASS |
-| ⑥ | styles/custom.css 4 token | `frontend/src/styles/custom.css` L74/83/85/86 + L192/194 | `--biof3-border-color` + `--biof3-accent-soft` + `--biof3-font-sans` + `--biof3-font-mono` 明色 + 暗色 | ✅ PASS |
+| ⑥ | styles/custom.css 4 token | `frontend/src/styles/custom.css` L74/83/85/86 + L192/194 | `--petri-border-color` + `--petri-accent-soft` + `--petri-font-sans` + `--petri-font-mono` 明色 + 暗色 | ✅ PASS |
 | **git log 退化检查** | `git log 01c5e0b..HEAD -- <6 文件>` | 空输出（BLOCK-2 收口后 4 commit + BLOCK-3 7 commit + BLOCK-4 6 commit + BLOCK-5 5 commit + BLOCK-6 4 commit + BLOCK-7 2 commit 共 28 commit 全部不触碰 6 UI-161 文件）| ✅ PASS（空）|
 | **tsc --noEmit** | `cd frontend && npx tsc --noEmit` | 0 错误 | ✅ PASS |
 

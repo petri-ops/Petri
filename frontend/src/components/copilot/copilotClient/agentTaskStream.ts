@@ -3,7 +3,7 @@
 // SSE 事件分发（task/legacy 共用）与 legacy 直连流。
 // ============================================================
 
-import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
+import { petriEvents, dispatchPetriEvent } from '@/lib/events';
 import type { TokenBudgetDetail } from '@/lib/events';
 import { isProjectionEnv } from '@/lib/projectionDataBridges';
 import { emitAgentTaskDone, getApiPrefix, getAuthHeader } from './apiBase';
@@ -597,7 +597,7 @@ function _dispatchSseEvent(obj: AgentSseEvent, opts: StreamChatOptions): void {
       trimmed: typeof obj.trimmed === 'boolean' ? obj.trimmed : false,
       knowledgeTokens: typeof obj.knowledgeTokens === 'number' ? obj.knowledgeTokens : 0,
     };
-    dispatchGewuEvent(gewuEvents.tokenBudget, detail);
+    dispatchPetriEvent(petriEvents.tokenBudget, detail);
     return;
   }
   const delta = obj?.choices?.[0]?.delta?.content;

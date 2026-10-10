@@ -2,7 +2,7 @@
 
 - 日期：2026-09-02
 - 环境：dev Electron（CDP :9222），后端进程 22:25 启动晚于全部改动文件 mtime（新代码已加载）
-- 测试仓库：临时专用仓库（`/tmp/biof3-block41-repo` + bare remote，验收后已清理），通过 `POST /data/projects` 创建项目 `block41-test`（`p_mtk79a8i_ybr7`，验收后已删除），不触碰用户真实仓库
+- 测试仓库：临时专用仓库（`/tmp/petri-block41-repo` + bare remote，验收后已清理），通过 `POST /data/projects` 创建项目 `block41-test`（`p_mtk79a8i_ybr7`，验收后已删除），不触碰用户真实仓库
 
 ## 场景与证据
 

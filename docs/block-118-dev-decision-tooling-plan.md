@@ -1,15 +1,15 @@
 # BLOCK-118-DEV-DECISION-TOOLING 计划：开发时决策工具化（Jev/Laya 提效开发流程）
 
 **Plan ID**：`BLOCK-118-DEV-DECISION-TOOLING`
-**状态**：`completed（2026-09-23 当日立项当日收口：P0 供给打通（thresholdsByModel 每模型门控 + test:suggest 双供给实跑：Jev 云采纳 agent-backend 7 建议 conf=0.87 / Laya 零建议）+ Jev 云冒烟 1-call 通过 + Laya 版 test-suggest 校准裁决=不可采纳（confidence 门最优 θ0.05 精度 0.3913/覆盖 0.2473；top-probability 诊断最优精度 0.4516 亦不过门，证据=calibration-test-suggest-laya.json）→ P1 doc-suggest 接点（语料 150 条三轮 D-修订抓真=state 补 context 意图信号/gold 吸收 docs 伴随提交/逐文档专属 instructions；Jev 裁决=仅 planDoc 可采纳 θ=0.5 精度 0.8222/覆盖 0.8654，roadmap/handoff/auditLog 双供给均不可采纳=静默；uiAudit=frontend/src 确定性硬规则）+ doc:suggest CLI + 契约 block118 9/9 + block116 扩八接点 12/12 → P2 gewu-dev-infra 指引 + impact-map 补登记（并行会话提交后窗口打开，分类冲突解除）+ dogfood 3 份。门禁=定向 31/31 + test:changed 116 项 0 红 + docs:check PASS + secret/arch/types 绿；gate:code-size 红=并行 UI-437/438 在制面（e107da37 删文件未清台账 44 行，非本包文件面，如实归属）。裁决=「Laya 不可采纳」为合法完成态（证据如实，不硬凑 θ）；翻转需重校准）`
+**状态**：`completed（2026-09-23 当日立项当日收口：P0 供给打通（thresholdsByModel 每模型门控 + test:suggest 双供给实跑：Jev 云采纳 agent-backend 7 建议 conf=0.87 / Laya 零建议）+ Jev 云冒烟 1-call 通过 + Laya 版 test-suggest 校准裁决=不可采纳（confidence 门最优 θ0.05 精度 0.3913/覆盖 0.2473；top-probability 诊断最优精度 0.4516 亦不过门，证据=calibration-test-suggest-laya.json）→ P1 doc-suggest 接点（语料 150 条三轮 D-修订抓真=state 补 context 意图信号/gold 吸收 docs 伴随提交/逐文档专属 instructions；Jev 裁决=仅 planDoc 可采纳 θ=0.5 精度 0.8222/覆盖 0.8654，roadmap/handoff/auditLog 双供给均不可采纳=静默；uiAudit=frontend/src 确定性硬规则）+ doc:suggest CLI + 契约 block118 9/9 + block116 扩八接点 12/12 → P2 petri-dev-infra 指引 + impact-map 补登记（并行会话提交后窗口打开，分类冲突解除）+ dogfood 3 份。门禁=定向 31/31 + test:changed 116 项 0 红 + docs:check PASS + secret/arch/types 绿；gate:code-size 红=并行 UI-437/438 在制面（e107da37 删文件未清台账 44 行，非本包文件面，如实归属）。裁决=「Laya 不可采纳」为合法完成态（证据如实，不硬凑 θ）；翻转需重校准）`
 **立项日期**：2026-09-23
 **责任轨道**：BLOCK（开发时决策工具化 / 双供给打通 / 新决策点 doc-suggest）
 **上游文档**：`docs/block-115-test-suggest-plan.md`（建议器内核与校准先例）· `docs/block-116-decision-platform-plan.md`（阈值注册表与记账）· `docs/block-117-laya-supply-validation-plan.md`（本地供给先例与 confidence 语义结论）· `docs/planning/typesafe-jev-system-one-research.md`（技术底稿）
 
 ## 0. 立项来源与用户裁决留痕
 
-- 用户提问（2026-09-23）：「能否让 jev 或者 laya 来优化 gewu 项目开发呢 使用 skill 或者你觉得比较合适的方式」。
-- 本会话澄清确认：目标=**开发侧工具**（ZCode/agent/终端辅助 Gewu 开发），Gewu 产品运行时零改动。
+- 用户提问（2026-09-23）：「能否让 jev 或者 laya 来优化 petri 项目开发呢 使用 skill 或者你觉得比较合适的方式」。
+- 本会话澄清确认：目标=**开发侧工具**（ZCode/agent/终端辅助 Petri 开发），Petri 产品运行时零改动。
 - 用户裁决原话（AskUserQuestion 留痕）：
   - 供给：「**两者都支持**」（Jev 云端 + 本地 Laya；工具跟随设置页 provider，另补 Laya 校准让两种供给都可用）。
   - 范围：「**加文档回写建议**」（test-suggest 接线 + 新建 doc-suggest 决策点）。
@@ -27,22 +27,22 @@
 
 | 阶段 | 内容 | 核心落点 |
 | --- | --- | --- |
-| P0 | 供给打通 + test:suggest 接线 | `decision-thresholds.js` 注册表增可选 `thresholdsByModel` 字段（仅 dev-time 点）；建议器门控改 `thresholdForModel(point, outcome.model)` 默认回落现行 `threshold`；npm 包装 `scripts/dev-suggest-run.mjs`（git 改动收集 + 供给选择 `--supply=cloud\|file` + 显式 `BIOF3_DECISION_CONFIG_PATH` 锚定 `.biof3-dev-user-data/data/decision-config.json`）+ `package.json` 接 `test:suggest`；Jev 云 key 1-call 冒烟；Laya 版 test-suggest 校准（复用 block115 语料 + harness overrides，BLOCK-117 先例），达标落 per-model θ、不达标如实落「不可采纳」 | 
-| P1 | doc-suggest 新决策点 | 语料构建 `scripts/block118-build-doc-corpus.mjs`（git 历史挖掘：已收口提交文件清单 + 实际回写 canonical 文档自动标注 ≥100 条）；请求形状=单次调用并行多道 noul（每 canonical 文档一道）+ 确定性前置层；内核 `core/biof3-server/helpers/doc-suggest-core.js`（或与 CLI 同文件，与 block115 同构）+ CLI `npm run doc:suggest`；Jev + Laya 双供给校准，per-model gates 入注册表（证据绑定）；契约测试 `test/block118-doc-suggest.test.mjs` |
-| P2 | 工作流接线与收口 | `gewu-dev-infra` skill 增 `references/DEV-DECISION-TOOLS.md` + SKILL.md 挂入口（不新建 skill、零发现桥义务）；impact-map 补登记（UI-437 收口后）；dogfood 证据 `acceptance/block-118/dogfood.json`；closeout 门禁 + 台账回写 |
+| P0 | 供给打通 + test:suggest 接线 | `decision-thresholds.js` 注册表增可选 `thresholdsByModel` 字段（仅 dev-time 点）；建议器门控改 `thresholdForModel(point, outcome.model)` 默认回落现行 `threshold`；npm 包装 `scripts/dev-suggest-run.mjs`（git 改动收集 + 供给选择 `--supply=cloud\|file` + 显式 `PETRI_DECISION_CONFIG_PATH` 锚定 `.petri-dev-user-data/data/decision-config.json`）+ `package.json` 接 `test:suggest`；Jev 云 key 1-call 冒烟；Laya 版 test-suggest 校准（复用 block115 语料 + harness overrides，BLOCK-117 先例），达标落 per-model θ、不达标如实落「不可采纳」 | 
+| P1 | doc-suggest 新决策点 | 语料构建 `scripts/block118-build-doc-corpus.mjs`（git 历史挖掘：已收口提交文件清单 + 实际回写 canonical 文档自动标注 ≥100 条）；请求形状=单次调用并行多道 noul（每 canonical 文档一道）+ 确定性前置层；内核 `core/petri-server/helpers/doc-suggest-core.js`（或与 CLI 同文件，与 block115 同构）+ CLI `npm run doc:suggest`；Jev + Laya 双供给校准，per-model gates 入注册表（证据绑定）；契约测试 `test/block118-doc-suggest.test.mjs` |
+| P2 | 工作流接线与收口 | `petri-dev-infra` skill 增 `references/DEV-DECISION-TOOLS.md` + SKILL.md 挂入口（不新建 skill、零发现桥义务）；impact-map 补登记（UI-437 收口后）；dogfood 证据 `acceptance/block-118/dogfood.json`；closeout 门禁 + 台账回写 |
 
 ### 1.2 非范围（exclusions）
 
 - 产品运行时五接点（topic-shift/knowledge-guard/marker-celltype/intent-route/tool-route）的供给、阈值、设置页、UI：**零改动**。当前 Laya 供给下产品接点零采纳（confidence 语义）属 BLOCK-117 已裁决事实，处理与否另立裁决。
-- 不引入 hook 自动化、不建 MCP server、不新建独立 skill（扩展既有 gewu-dev-infra）。
-- 不动 `.biof3-dev-user-data/` 内任何密钥文件内容（cloud 供给只读）。
+- 不引入 hook 自动化、不建 MCP server、不新建独立 skill（扩展既有 petri-dev-infra）。
+- 不动 `.petri-dev-user-data/` 内任何密钥文件内容（cloud 供给只读）。
 - 不改 `test:changed` / `npm run closeout` 既有链路语义（建议器永远是增量附加，只加不减）。
 - 阈值注册表 schema 扩展仅限 dev-time 点使用 `thresholdsByModel`；产品接点注册表条目零漂移（契约测试承载）。
 - 0 npm 新依赖。
 
 ## 2. 设计要点
 
-- **双供给解析**：dev CLI 默认跟随 `decision-config.json` provider（与设置页同源，当前=本地 Laya）；`--supply=cloud` 时从 `.biof3-dev-user-data/jev.env.bak-by-user-request` 读 `TYPESAFE_API_KEY`（gitignored，不回显不入仓，quality:secret 红线）以 `askDecision overrides` 直连 Jev 云。校准 harness 同通道 overrides，与产品运行时供给完全隔离。
+- **双供给解析**：dev CLI 默认跟随 `decision-config.json` provider（与设置页同源，当前=本地 Laya）；`--supply=cloud` 时从 `.petri-dev-user-data/jev.env.bak-by-user-request` 读 `TYPESAFE_API_KEY`（gitignored，不回显不入仓，quality:secret 红线）以 `askDecision overrides` 直连 Jev 云。校准 harness 同通道 overrides，与产品运行时供给完全隔离。
 - **每模型阈值**：BLOCK-117 裁决「confidence 语义不可平移」→ 单一 θ 无法双供给通用。注册表条目增可选 `thresholdsByModel: { '<model-id>': θ|gates }`；解析顺序=response model 精确匹配 → 回落现行 `threshold/gates`（Jev 校准值保持默认）。契约测试：每条 per-model 阈值必须绑定证据文件（沿用 block116「无证据不改阈值」红线）。
 - **doc-suggest 请求形状**：state=改动文件清单（≤600 字符，与 test-suggest 同界）；questions=并行 noul（roadmap/handoff/ui-audit/audit-log/plan-doc 各一道，「本次改动是否需要回写该文档」）；一次调用出全部答案（Jev 加问几乎不增延迟）。确定性前置层：纯 docs//acceptance/ 改动→零建议零出站；含 `frontend/` UI 面文件→ui-audit 确定性命中（AGENTS.md 既有硬规则，无需模型）；模型只裁语义残差（roadmap/handoff/plan 归属）。
 - **建议语义**：与 block115 同构——低置信/弃权/降级=零建议（安全默认）、永不 throw、只附加不下判、执行由人/流程决定；`decision_log` 记账 meta `{point, threshold}`（BLOCK-116 既有面，观测面可见）。
@@ -67,7 +67,7 @@
 
 用户问「每次调用 jev/laya 的细节和用量会返回给我吗」→ 排查发现两缺口并当场收口：
 
-1. **缺口 A（抓真）**：dev 工具 CLI 调用未进决策台账——裸 shell 缺 `BIOF3_DB_PATH` 时
+1. **缺口 A（抓真）**：dev 工具 CLI 调用未进决策台账——裸 shell 缺 `PETRI_DB_PATH` 时
    logDecision 打开默认路径库（无 decision_log 表）→ INSERT 失败被 best-effort 静默跳过。
    修=包装脚本增 `anchorDecisionDbPath()`（与配置路径锚定同模式）。
 2. **缺口 B**：每次调用的 token 用量没有逐条落库。修=migration `012_decision_log_tokens.sql`

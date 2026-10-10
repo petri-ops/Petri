@@ -1,8 +1,8 @@
 /**
  * BLOCK-37 P3 — 模型 I/O 信息流客户端（UI-274）
  *
- * 只读查询 biof3-server 的 llm-transcripts 路由（数据源为
- * io-transcript.js 落盘的 <BIOF3_LOCAL_DATA_DIR>/llm-transcripts/<conversationId>.jsonl）：
+ * 只读查询 petri-server 的 llm-transcripts 路由（数据源为
+ * io-transcript.js 落盘的 <PETRI_LOCAL_DATA_DIR>/llm-transcripts/<conversationId>.jsonl）：
  *   - listLlmTranscripts: 会话级调用索引（不含正文）
  *   - fetchLlmTranscriptRecord: 单条完整记录（请求 messages 全量 + 响应聚合 + delta 帧）
  */

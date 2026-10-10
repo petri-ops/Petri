@@ -1,12 +1,12 @@
 /* extensions.module.css — BLOCK-156 扩展中心（货签栏 + 货架容器）
-   主题纪律：全部走 --gewu-* token；选中态 = accent 语义（不与 hover 混用）。 */
+   主题纪律：全部走 --petri-* token；选中态 = accent 语义（不与 hover 混用）。 */
 
 .shelfBar {
   display: flex;
   align-items: center;
   gap: 4px;
   padding: 8px 18px 0;
-  border-bottom: 1px solid var(--gewu-border);
+  border-bottom: 1px solid var(--petri-border);
   flex-shrink: 0;
   overflow-x: auto;
 }
@@ -20,8 +20,8 @@
   border: none;
   border-bottom: 2px solid transparent;
   background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-base, 13px);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-base, 13px);
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
@@ -29,13 +29,13 @@
 }
 
 .shelfTab:hover {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .shelfTabActive {
-  color: var(--gewu-accent);
-  border-bottom-color: var(--gewu-accent);
+  color: var(--petri-accent);
+  border-bottom-color: var(--petri-accent);
 }
 
 .shelfPane {
@@ -50,8 +50,8 @@
 }
 
 .shelfCount {
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs, 12px);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs, 12px);
   flex-shrink: 0;
 }
 
@@ -69,8 +69,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs, 12px);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs, 12px);
   min-width: 0;
 }
 
@@ -80,18 +80,18 @@
   gap: 6px;
   height: 28px;
   padding: 0 10px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
-  background: var(--gewu-bg-subtle);
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-caption, 12px);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-caption, 12px);
   cursor: pointer;
   flex-shrink: 0;
   transition: background 0.15s ease;
 }
 
 .mcpAddBtn:hover {
-  background: var(--gewu-hover);
+  background: var(--petri-hover);
 }
 
 .mcpAddBtn:disabled {
@@ -104,9 +104,9 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 10px;
-  background: var(--gewu-bg-subtle);
+  background: var(--petri-bg-subtle);
   flex-shrink: 0;
 }
 
@@ -125,23 +125,23 @@
 }
 
 .mcpField > span {
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs, 12px);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs, 12px);
 }
 
 .mcpField > input {
   height: 30px;
   padding: 0 8px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
-  background: var(--gewu-input-bg, var(--gewu-bg-surface));
-  color: var(--gewu-text);
-  font-size: var(--gewu-font-size-caption, 12px);
+  background: var(--petri-input-bg, var(--petri-bg-surface));
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-caption, 12px);
   min-width: 0;
 }
 
 .mcpField > input:focus {
-  outline: 1px solid var(--gewu-accent);
+  outline: 1px solid var(--petri-accent);
 }
 
 .mcpFieldGrow {
@@ -150,16 +150,16 @@
 
 .mcpFormError,
 .mcpErrorText {
-  color: var(--gewu-accent);
-  font-size: var(--gewu-font-size-xs, 12px);
+  color: var(--petri-accent);
+  font-size: var(--petri-font-size-xs, 12px);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .mcpNotice {
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-xs, 12px);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xs, 12px);
 }
 
 .mcpList {
@@ -174,9 +174,9 @@
   flex-direction: column;
   gap: 6px;
   padding: 12px 14px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 10px;
-  background: var(--gewu-bg-subtle);
+  background: var(--petri-bg-subtle);
 }
 
 .mcpCardHead {
@@ -188,7 +188,7 @@
 
 .mcpCardId {
   font-weight: 600;
-  color: var(--gewu-text);
+  color: var(--petri-text);
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -201,33 +201,33 @@
   align-items: center;
   padding: 0 8px;
   border-radius: 999px;
-  border: 1px solid var(--gewu-border);
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-xs, 12px);
+  border: 1px solid var(--petri-border);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xs, 12px);
 }
 
 .mcpStatus_connected {
-  border-color: var(--gewu-accent);
-  color: var(--gewu-accent);
-  background: var(--gewu-accent-surface);
+  border-color: var(--petri-accent);
+  color: var(--petri-accent);
+  background: var(--petri-accent-surface);
 }
 
 .mcpStatus_error {
-  color: var(--gewu-accent);
+  color: var(--petri-accent);
 }
 
 .mcpCardCmd {
-  color: var(--gewu-text-secondary);
-  font-family: var(--gewu-font-mono);
-  font-size: var(--gewu-font-size-xs, 12px);
+  color: var(--petri-text-secondary);
+  font-family: var(--petri-font-mono);
+  font-size: var(--petri-font-size-xs, 12px);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .mcpCardMeta {
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs, 12px);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs, 12px);
   min-width: 0;
 }
 
@@ -239,18 +239,18 @@
 .mcpCardActions > button {
   height: 26px;
   padding: 0 10px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 8px;
   background: transparent;
-  color: var(--gewu-text-secondary);
-  font-size: var(--gewu-font-size-xs, 12px);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xs, 12px);
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
 }
 
 .mcpCardActions > button:hover:not(:disabled) {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
 .mcpCardActions > button:disabled {
@@ -265,11 +265,11 @@
   align-self: flex-start;
   border: none;
   background: transparent;
-  color: var(--gewu-text-tertiary);
-  font-size: var(--gewu-font-size-xs, 12px);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs, 12px);
   cursor: pointer;
 }
 
 .mcpRefresh:hover {
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }

@@ -7,7 +7,7 @@ const { computeResultRefTransactionHash } = require('../result-ref-transaction-s
 
 const GIT_OID_PATTERN = /^[a-f0-9]{40}$/;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/;
-const BIOF3_REF_PATTERN = /^refs\/heads\/biof3\/[A-Za-z0-9][A-Za-z0-9._\-/]*$/;
+const PETRI_REF_PATTERN = /^refs\/heads\/petri\/[A-Za-z0-9][A-Za-z0-9._\-/]*$/;
 
 class ResultStudioRepositoryError extends Error {
   constructor(code, message, detail = null) {
@@ -227,7 +227,7 @@ function assertRefTransactionIntegrity(intent) {
 
 function assertRefTransactionRevisionBindings(intent, getRevision) {
   const currentRefUpdates = intent.refUpdates.filter(
-    (entry) => entry.ref.startsWith('refs/heads/biof3/current/'),
+    (entry) => entry.ref.startsWith('refs/heads/petri/current/'),
   );
   if (currentRefUpdates.length !== intent.targetRevisionIds.length) {
     throw new ResultStudioRepositoryError(
@@ -246,7 +246,7 @@ function assertRefTransactionRevisionBindings(intent, getRevision) {
   for (let index = 0; index < targetRevisions.length; index += 1) {
     const revision = targetRevisions[index];
     const update = currentRefUpdates[index];
-    const ref = `refs/heads/biof3/current/${revision.artifactFamilyId}`;
+    const ref = `refs/heads/petri/current/${revision.artifactFamilyId}`;
     // Array position is part of the immutable intent hash, so it also freezes
     // each target Revision's exact family/ref/commit binding across a restart.
     if (!update || update.ref !== ref || update.newOid !== revision.sourceCommit) {
@@ -268,7 +268,7 @@ function assertRefTransactionRevisionBindings(intent, getRevision) {
  */
 
 module.exports = {
-  BIOF3_REF_PATTERN,
+  PETRI_REF_PATTERN,
   SHA256_PATTERN,
   GIT_OID_PATTERN,
   ResultStudioRepositoryError,

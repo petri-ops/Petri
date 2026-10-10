@@ -12,7 +12,7 @@
 
 ## 2. 方案（P1，UI-238）
 
-Token 是唯一杠杆（全应用组件均消费 `--biof3-*`，硬编码灰审计后仅 2 处且属暗色语境）。浅色块整体从 slate 切 zinc（无彩中性）：
+Token 是唯一杠杆（全应用组件均消费 `--petri-*`，硬编码灰审计后仅 2 处且属暗色语境）。浅色块整体从 slate 切 zinc（无彩中性）：
 
 | token | 旧（slate） | 新（zinc/白） |
 | --- | --- | --- |
@@ -27,7 +27,7 @@ Token 是唯一杠杆（全应用组件均消费 `--biof3-*`，硬编码灰审�
 | overlay/shadow 基色 | rgba(15,23,42,…) | rgba(24,24,27,…) |
 
 - **不动**：暗色主题（navy 深底为刻意品牌冷调，用户投诉对象是浅灰）；teal accent 与状态色（唯一的彩，正是纯净感来源）；对比度不降（zinc-900 on white ≈ 原 slate-900）。
-- 硬编码清点：global.css `--biof3-surface-dim` 浅色值随调；desktop.css `.biof3-nav-panel` 的 #e2e8f0 属暗色导航面板语境，不动。
+- 硬编码清点：global.css `--petri-surface-dim` 浅色值随调；desktop.css `.petri-nav-panel` 的 #e2e8f0 属暗色导航面板语境，不动。
 
 ## 3. 门禁
 

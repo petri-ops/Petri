@@ -18,7 +18,7 @@ const item = (id, passed, evidence, detail) => ({ id, passed: passed === true, e
 function inspect(verification = null) {
   const source = read('core/shared-backend/result-studio-lifecycle.js');
   const changeset = read('core/shared-backend/result-changeset-service.js');
-  const routes = read('core/biof3-server/routes/result-studio.js');
+  const routes = read('core/petri-server/routes/result-studio.js');
   const panel = read('frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx');
   const commands = verification?.commands || [];
   const budgetBlocked = lifecycle.evaluatePreviewResourceBudget({ resourceSnapshot: { state: 'ready', memory: { availableBytes: 100 }, disk: { availableBytes: 1000 } }, estimatedMemoryBytes: 90 });
@@ -30,10 +30,10 @@ function inspect(verification = null) {
     item('RS8-04', /running_to_preview_ready/.test(source) && /restored_missing_current_ref/.test(source), ['core/shared-backend/result-studio-lifecycle.js'], 'Only evidence-complete previews and missing refs self-heal.'),
     item('RS8-05', typeof lifecycle.inspectResultStudioStorage === 'function' && typeof lifecycle.executeArtifactDeduplication === 'function', ['core/shared-backend/result-studio-lifecycle.js'], 'Storage summary and exact-hash content deduplication are available.'),
     item('RS8-06', /artifactDeletionCount: 0/.test(source) && /GC never deletes Artifact files or Revision history/.test(source), ['core/shared-backend/result-studio-lifecycle.js'], 'GC cannot delete formal Artifact or Revision history.'),
-    item('RS8-07', /MAX_TABLE_PAGE_BYTES = 1024 \* 1024/.test(source) && /nextCursor/.test(source) && /table-page/.test(routes), ['core/shared-backend/result-studio-lifecycle.js', 'core/biof3-server/routes/result-studio.js'], 'Large tables use a bounded progressive cursor API.'),
+    item('RS8-07', /MAX_TABLE_PAGE_BYTES = 1024 \* 1024/.test(source) && /nextCursor/.test(source) && /table-page/.test(routes), ['core/shared-backend/result-studio-lifecycle.js', 'core/petri-server/routes/result-studio.js'], 'Large tables use a bounded progressive cursor API.'),
     item('RS8-08', /readRevisionTablePage/.test(panel) && /virtualTable/.test(panel), ['frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx'], 'Result UI incrementally renders candidate table pages.'),
     item('RS8-09', budgetBlocked.decision === 'blocked' && budgetQueued.decision === 'queued' && budgetBlocked.scientificParametersChanged === false, ['core/shared-backend/result-studio-lifecycle.js'], 'Preview resource pressure blocks or queues without changing science.'),
-    item('RS8-10', /workspace\/status/.test(routes) && /workspace\/recover/.test(routes) && /storage\/gc/.test(routes) && /storage\/deduplicate/.test(routes), ['core/biof3-server/routes/result-studio.js'], 'Project-scoped lifecycle, recovery, GC and dedup APIs are wired.'),
+    item('RS8-10', /workspace\/status/.test(routes) && /workspace\/recover/.test(routes) && /storage\/gc/.test(routes) && /storage\/deduplicate/.test(routes), ['core/petri-server/routes/result-studio.js'], 'Project-scoped lifecycle, recovery, GC and dedup APIs are wired.'),
     item('RS8-11', commands.length >= 3 && commands.every((command) => command.passed), ['acceptance/g0-result-studio/rs8-lifecycle-acceptance.json'], 'All RS8 command gates pass.'),
     item('RS8-12', !/deleteRevision\(|DELETE FROM artifact_revisions/.test(source), ['core/shared-backend/result-studio-lifecycle.js'], 'Lifecycle service never erases revision records.'),
   ];

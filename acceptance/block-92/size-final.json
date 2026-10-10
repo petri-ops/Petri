@@ -1,5 +1,5 @@
 {
-  "schema": "biof3/block92-size-ledger.v1",
+  "schema": "petri/block92-size-ledger.v1",
   "head": "ref: refs/heads/main",
   "files": [
     {
@@ -81,13 +81,13 @@
       "lines": 780
     },
     {
-      "path": "core/biof3-server/helpers/tools-executor.js",
+      "path": "core/petri-server/helpers/tools-executor.js",
       "wave": "C",
       "module": "P-03",
       "lines": 1870
     },
     {
-      "path": "core/biof3-server/db.js",
+      "path": "core/petri-server/db.js",
       "wave": "C",
       "module": "P-01",
       "lines": 1477
@@ -99,13 +99,13 @@
       "lines": 1774
     },
     {
-      "path": "core/biof3-server/agent-tools/workspace-tools.js",
+      "path": "core/petri-server/agent-tools/workspace-tools.js",
       "wave": "C",
       "module": "P-03",
       "lines": 1521
     },
     {
-      "path": "core/biof3-server/mcp/registry.js",
+      "path": "core/petri-server/mcp/registry.js",
       "wave": "C",
       "module": "P-02",
       "lines": 958

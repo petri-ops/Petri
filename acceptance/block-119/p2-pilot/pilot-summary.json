@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "capturedAt": "2026-09-23T14:17:53.377Z",
   "setup": {
-    "guardEnv": "BIOF3_JEV_REPORT_GUARD=1（bash→powershell→electron→backend 全链继承验证：门真实触发）",
+    "guardEnv": "PETRI_JEV_REPORT_GUARD=1（bash→powershell→electron→backend 全链继承验证：门真实触发）",
     "supply": "decision-config provider 切 Jev 云（快照 decision-config.json.pre-p119-pilot 可还原 Laya）",
     "stack": "dev 栈 21:59:54 重启（backend pid 2560，守卫代码加载）"
   },

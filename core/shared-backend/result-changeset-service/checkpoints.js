@@ -12,12 +12,12 @@ const {
 function resolveBaseCommit(adapter, projectId) {
   const state = adapter.repositoryState();
   if (state.headCommit) return state.headCommit;
-  const managedMain = adapter.revParse('refs/heads/biof3/main');
+  const managedMain = adapter.revParse('refs/heads/petri/main');
   if (managedMain) return managedMain;
   return adapter.commitVirtualFiles({
-    ref: 'refs/heads/biof3/main',
+    ref: 'refs/heads/petri/main',
     expectedOld: '0'.repeat(40),
-    message: `BioF3 Result Studio baseline for ${projectId}`,
+    message: `Petri Result Studio baseline for ${projectId}`,
     files: [{
       path: 'analysis/workflows/result-studio-baseline.json',
       content: stableJson({ resultStudioBaselineVersion: 1, projectId }),
@@ -139,7 +139,7 @@ function inspectResultEditRecovery({ repository, adapter, workspaceRoot, project
     const candidateCommit = adapter.revParse(changeSet.workingBranchRef);
     let materializationPresent = false;
     try {
-      const components = ['.biof3', 'revision', changeSet.changeSetId];
+      const components = ['.petri', 'revision', changeSet.changeSetId];
       if (inspectPrivateDirectory(workspaceRoot, components, { allowMissing: true })) {
         materializationPresent = inspectPrivateEntry(
           workspaceRoot,

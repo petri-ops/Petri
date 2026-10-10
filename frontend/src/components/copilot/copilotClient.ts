@@ -66,7 +66,7 @@ export async function streamChat(opts: StreamChatOptions): Promise<void> {
 
 /**
  * BLOCK-109-CORE-ARCH P1.2 — 在途主任务查询（恢复的单一后端源）。
- * 取代原 localStorage gewu_agent_task_* 扫描双轨：tasks.status='running' 即权威
+ * 取代原 localStorage petri_agent_task_* 扫描双轨：tasks.status='running' 即权威
  * 在途真相（后端重启由 sweepInterruptedRunningTasks 清扫），无 TTL 猜测。
  * 返回该会话（可选过滤）在途主任务 taskId，新→旧排序。
  */
@@ -93,7 +93,7 @@ async function streamChatViaTask(opts: StreamChatOptions): Promise<void> {
     return;
   }
   opts.onTaskStarted?.(taskId);
-  // P1.2：原 localStorage 在途标记（gewu_agent_task_*）已退役——恢复改问后端
+  // P1.2：原 localStorage 在途标记（petri_agent_task_*）已退役——恢复改问后端
   // /ai/agent/tasks/inflight（status='running' 即权威，见 fetchInFlightPrimaryTasks）。
   try {
     await subscribeAgentTask(taskId, opts, 0);

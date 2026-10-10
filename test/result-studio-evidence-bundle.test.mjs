@@ -9,7 +9,7 @@ const require = createRequire(import.meta.url);
 const evidence = require('../core/shared-backend/result-studio-evidence-bundle');
 
 function fixture(run) {
-  const root = mkdtempSync(path.join(tmpdir(), 'biof3-p7-evidence-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-p7-evidence-'));
   try { return run(root); } finally { rmSync(root, { recursive: true, force: true }); }
 }
 

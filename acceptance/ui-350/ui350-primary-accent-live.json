@@ -11,7 +11,7 @@
     {
       "name": "V2_hover_token_available",
       "pass": true,
-      "detail": "hover 走 --gewu-accent-hover（各 accent 档均定义）；当前 accent=#d97706"
+      "detail": "hover 走 --petri-accent-hover（各 accent 档均定义）；当前 accent=#d97706"
     }
   ],
   "allPass": true,

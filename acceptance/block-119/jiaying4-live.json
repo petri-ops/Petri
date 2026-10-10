@@ -1,7 +1,7 @@
 {
   "generatedAt": "2026-09-24",
   "what": "BLOCK-119 加映 4（BK-01）实机验证——真 spawn 轮 × 汇报门 fit 阈值邻域复核",
-  "environment": "dev 栈带 BIOF3_JEV_REPORT_GUARD=1 重启（restart-dev-stack.sh READY，18 项目在库）；供给=Jev 云（decision-config.json）；加映 4 代码=提交 cdde817c",
+  "environment": "dev 栈带 PETRI_JEV_REPORT_GUARD=1 重启（restart-dev-stack.sh READY，18 项目在库）；供给=Jev 云（decision-config.json）；加映 4 代码=提交 cdde817c",
   "flow": "POST /api/ai/conversations → POST /api/ai/agent（task 模式，context.accessMode='full'，任务=派子智能体统计工作区并用 goals 声明 2 条可核对目标）→ 主任务 completed（真模型自觉 spawn_agent + goalsDeclared）→ 子汇报过汇报门",
   "privacy": "只存 fit 分数/延迟/门 meta，零汇报原文",
   "primaryTask": { "status": "completed", "type": "agent_loop", "childSpawned": true },

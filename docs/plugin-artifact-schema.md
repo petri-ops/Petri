@@ -1,12 +1,12 @@
-# BioF3 Plugin and Artifact Schema
+# Petri Plugin and Artifact Schema
 
 > 状态：当前兼容契约，Stage 1–2 只保持回归，Stage 3 新增标准流程时继续使用。
 
-This document defines the compatibility contract for Codex-style BioF3 analysis plugins.
+This document defines the compatibility contract for Codex-style Petri analysis plugins.
 
 ## Plugin Tool Contract
 
-Each runnable analysis plugin should normalize to `BioF3PluginManifest v1`.
+Each runnable analysis plugin should normalize to `PetriPluginManifest v1`.
 The runtime keeps backward compatibility with the existing split files:
 
 - `plugin.json`: install/runtime/platform metadata.
@@ -163,7 +163,7 @@ npm run harness:index -- <dataset-dir> --for-manifest <tool-definition.json>
 
 the output includes `inputSuggestions`, so Harness can prefill likely file parameters and later repair mismatches without rereading the entire dataset.
 
-BioF3-specific scopes are supported:
+Petri-specific scopes are supported:
 
 ```bash
 npm run harness:index -- --scope project --project-path <workspace>

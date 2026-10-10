@@ -18,7 +18,7 @@ const path = require('node:path');
 const http = require('node:http');
 const { CdpClient } = require('./g0-rs-p7-cdp.cjs');
 
-const DEBUG_PORT = process.env.BIOF3_DEBUG_PORT || '9222';
+const DEBUG_PORT = process.env.PETRI_DEBUG_PORT || '9222';
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-78');
 const API = 'http://127.0.0.1:3001/api';
 const AUTH = { Authorization: 'Bearer desktop-local', 'content-type': 'application/json' };
@@ -64,7 +64,7 @@ async function main() {
   // ── 准备项目：dell ssh（新建）+ local（列表里找） ──
   const created = await fetchJson(`${API}/data/projects`, {
     method: 'POST', headers: AUTH,
-    body: JSON.stringify({ name: `B78UI验收-${Date.now()}`, workspaceKind: 'ssh', sshHost: 'dell', remotePath: '/root/gewu-block78-demo' }),
+    body: JSON.stringify({ name: `B78UI验收-${Date.now()}`, workspaceKind: 'ssh', sshHost: 'dell', remotePath: '/root/petri-block78-demo' }),
   });
   const sshProjectId = created.project && created.project.id;
   assert('P0 dell ssh project created', !!sshProjectId, JSON.stringify(created).slice(0, 120));

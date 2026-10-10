@@ -7,9 +7,9 @@
 //   --check      只检查不安装（打印缺失清单）
 //
 // 这是用户显式运行的一次性维护动作（BLOCK-58 治理：分析执行路径零联网安装）。
-// 读 core/biof3-server/tool-scripts/_dependencies.json，CRAN/Bioconductor binary
+// 读 core/petri-server/tool-scripts/_dependencies.json，CRAN/Bioconductor binary
 // 优先安装；完成后打印实际安装版本快照（真实落库版本以本机 R library 为准，
-// 后续由预编译包插件 biof3-r-toolchain 候选提供版本锁定，登记于 BLOCK-58 plan）。
+// 后续由预编译包插件 petri-r-toolchain 候选提供版本锁定，登记于 BLOCK-58 plan）。
 // 0 新 npm 依赖（child_process 调本机 Rscript）。
 // ============================================================
 
@@ -19,7 +19,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const DEPS_FILE = path.join(ROOT, 'core', 'biof3-server', 'tool-scripts', '_dependencies.json');
+const DEPS_FILE = path.join(ROOT, 'core', 'petri-server', 'tool-scripts', '_dependencies.json');
 
 const args = process.argv.slice(2);
 const toolArgIdx = args.indexOf('--tool');
@@ -29,12 +29,12 @@ const checkOnly = args.includes('--check');
 const deps = JSON.parse(fs.readFileSync(DEPS_FILE, 'utf-8'));
 const tools = deps.tools || {};
 
-// Rscript 定位：与 biof3 运行时同源。优先 BIOF3_R_HOME（plugin-manager 装 R 时固化），
-// 其次默认安装位置（BioF3-Local/runtimes/R），最后 PATH（用户自备 R）。
+// Rscript 定位：与 petri 运行时同源。优先 PETRI_R_HOME（plugin-manager 装 R 时固化），
+// 其次默认安装位置（Petri-Local/runtimes/R），最后 PATH（用户自备 R）。
 function resolveRscript() {
   const candidates = [];
-  if (process.env.BIOF3_R_HOME) candidates.push(path.join(process.env.BIOF3_R_HOME, 'bin', 'Rscript'));
-  candidates.push(path.join(process.env.HOME || '', 'Documents', 'BioF3-Local', 'runtimes', 'R', 'bin', 'Rscript'));
+  if (process.env.PETRI_R_HOME) candidates.push(path.join(process.env.PETRI_R_HOME, 'bin', 'Rscript'));
+  candidates.push(path.join(process.env.HOME || '', 'Documents', 'Petri-Local', 'runtimes', 'R', 'bin', 'Rscript'));
   for (const c of candidates) {
     if (fs.existsSync(c)) return c;
   }

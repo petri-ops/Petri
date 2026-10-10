@@ -28,7 +28,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const SIDECAR = path.join(__dirname, '..', 'sidecars', 'computer-use-windows', 'bin', 'publish', 'gewu-computer-use-windows.exe');
+const SIDECAR = path.join(__dirname, '..', 'sidecars', 'computer-use-windows', 'bin', 'publish', 'petri-computer-use-windows.exe');
 const FIXTURE = path.join(__dirname, '..', 'sidecars', 'computer-use-windows', 'axfixture', 'bin', 'publish', 'axfixture-windows.exe');
 
 let sidecar = null;

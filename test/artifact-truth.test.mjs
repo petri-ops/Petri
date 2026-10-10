@@ -21,7 +21,7 @@ const {
   __dirname,
   '..',
   'core',
-  'biof3-server',
+  'petri-server',
   'helpers',
   'artifact-truth.js',
 ));
@@ -69,7 +69,7 @@ const { _test: metadataTest, reconcileToolJobArtifacts } = req(resolve(
   __dirname,
   '..',
   'core',
-  'biof3-server',
+  'petri-server',
   'routes',
   'tools-metadata.js',
 ));
@@ -77,13 +77,13 @@ const { _test: executorTest } = req(resolve(
   __dirname,
   '..',
   'core',
-  'biof3-server',
+  'petri-server',
   'helpers',
   'tools-executor.js',
 ));
 
 function tempResultDir() {
-  return fs.mkdtempSync(join(os.tmpdir(), 'biof3-artifact-truth-'));
+  return fs.mkdtempSync(join(os.tmpdir(), 'petri-artifact-truth-'));
 }
 
 test('filters optional manifest artifacts that do not exist on disk', () => {

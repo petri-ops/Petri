@@ -4,12 +4,12 @@
  * ui350-primary-accent-live.cjs — UI-350 实机验收：插件商店主按钮跟随主题色。
  *
  * 断言：
- *   V1 插件商店「安装」按钮背景 = 当前 --gewu-accent 解析值（不再锁死 --gewu-teal 青绿）；
- *   V2 hover 深色态同步：按钮 hover 变量定义存在（--gewu-accent-hover 非 teal 默认）。
+ *   V1 插件商店「安装」按钮背景 = 当前 --petri-accent 解析值（不再锁死 --petri-teal 青绿）；
+ *   V2 hover 深色态同步：按钮 hover 变量定义存在（--petri-accent-hover 非 teal 默认）。
  */
 
 const path = require('node:path');
-const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function attach() {
@@ -48,11 +48,11 @@ async function goto(client, url) {
   let probe = null;
   for (let i = 0; i < 25; i += 1) {
     probe = await lib.evalJs(client, `(function(){
-      var panel = document.querySelector('.gewu-plugin-store-panel');
+      var panel = document.querySelector('.petri-plugin-store-panel');
       if (!panel) return null;
-      var btns = [].slice.call(panel.querySelectorAll('.gewu-btn--primary'));
+      var btns = [].slice.call(panel.querySelectorAll('.petri-btn--primary'));
       if (btns.length === 0) return null;
-      var accent = getComputedStyle(document.documentElement).getPropertyValue('--gewu-accent').trim();
+      var accent = getComputedStyle(document.documentElement).getPropertyValue('--petri-accent').trim();
       var bg = getComputedStyle(btns[0]).backgroundColor;
       function hexToRgb(hex) {
         var m = hex.replace('#', '');
@@ -75,7 +75,7 @@ async function goto(client, url) {
   run.assert('V1_install_buttons_follow_accent', s.match === true && s.isOldTeal === false,
     `主按钮（${(s.labels || []).slice(0, 2).join('/')}…共 ${(s.labels || []).length} 颗）背景 ${s.bg} === 主题 accent ${s.accent} 解析值=${s.match}，旧青绿残留=${s.isOldTeal}`);
   run.assert('V2_hover_token_available', !!s.accent,
-    `hover 走 --gewu-accent-hover（各 accent 档均定义）；当前 accent=${s.accent}`);
+    `hover 走 --petri-accent-hover（各 accent 档均定义）；当前 accent=${s.accent}`);
 
   await lib.screenshotPng(client, path.join(__dirname, '..', 'acceptance', 'ui-350'), 'ui350-plugins-accent.png').catch(() => null);
   return await run.finish({ observations: s });

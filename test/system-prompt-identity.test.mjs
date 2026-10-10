@@ -3,7 +3,7 @@ import test from 'node:test';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { buildSystemPrompt } = require('../core/biof3-server/helpers/system-prompt.js');
+const { buildSystemPrompt } = require('../core/petri-server/helpers/system-prompt.js');
 
 test('system prompt keeps the assistant role brand-neutral and discloses the real provider and model', () => {
   const prompt = buildSystemPrompt(
@@ -16,8 +16,8 @@ test('system prompt keeps the assistant role brand-neutral and discloses the rea
   );
 
   assert.match(prompt, /生物信息学分析助手/);
-  assert.doesNotMatch(prompt, /BioF3 平台的 AI 助手 Copilot/);
-  assert.doesNotMatch(prompt, /“BioF3 Copilot”是你在本产品中的工作角色/);
+  assert.doesNotMatch(prompt, /Petri 平台的 AI 助手 Copilot/);
+  assert.doesNotMatch(prompt, /“Petri Copilot”是你在本产品中的工作角色/);
   assert.match(prompt, /供应商：DeepSeek/);
   assert.match(prompt, /模型：deepseek-v4-flash/);
   assert.match(prompt, /必须直接说明当前供应商和当前模型 ID/);

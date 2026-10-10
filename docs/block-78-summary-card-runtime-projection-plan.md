@@ -39,7 +39,7 @@
 | **运行环境** | `useBackendStatus()` + `useRuntimeResourceSnapshot()` | **本机全局 ❌** |
 
 - `useBackendStatus()` 是挂在 App 根的全局 Context（`components/backend/BackendStatusProvider.tsx`，注释原文「全局 Context + 5s 轮询」），数据源为本机 Electron 主进程 `backend:status`。
-- `useRuntimeResourceSnapshot()`（`hooks/useRuntimeResourceSnapshot.ts`）直接 `fetch('/api/harness/resource-snapshot')`，**不带任何 projectId 参数**；后端 `core/biof3-server/routes/harness/resources.js` 读的是 biof3-server 所在机器的 os 指标。
+- `useRuntimeResourceSnapshot()`（`hooks/useRuntimeResourceSnapshot.ts`）直接 `fetch('/api/harness/resource-snapshot')`，**不带任何 projectId 参数**；后端 `core/petri-server/routes/harness/resources.js` 读的是 petri-server 所在机器的 os 指标。
 - 定位漂移既有事实：眉题写「项目摘要」，`aria-label` 写「会话摘要」（`WorkspaceSummaryCard.tsx:98`）。
 
 **四类执行侧数据现状**
@@ -95,7 +95,7 @@
 |---|---|
 | 节数膨胀致卡片爆高、compact 档失控 | P0 先落 compact 三档降级表；无内容不渲染为硬纪律；新增节须过「消除盲区」论证 |
 | ssh 项目资源真值需 mux 新增动词，牵动 BLOCK-76 边界 | 分两步：先诚实标注本机来源（纯前端），远程真值作 P2 独立裁决；不改 mux 既有动词语义 |
-| 与本包并行的 BLOCK-76 文件面重叠（读面/后台进程） | 本包不触碰 BLOCK-76 在制面（`core/biof3-server/helpers/remote-execution/*`、`tools-executor.js`）；只消费其结果与已登记契约 |
+| 与本包并行的 BLOCK-76 文件面重叠（读面/后台进程） | 本包不触碰 BLOCK-76 在制面（`core/petri-server/helpers/remote-execution/*`、`tools-executor.js`）；只消费其结果与已登记契约 |
 | 通知聚合造第二套真相 | 「注意」节只读既有真值（job 状态/审批 store/进程表/agent task 投影），零新增业务表 |
 | 执行位置标注与 BLOCK-64 已修断链重复 | 复用 `ToolJob.execution_target_id` 既有字段与 mapper 修复成果，不新建字段 |
 

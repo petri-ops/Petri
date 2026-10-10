@@ -90,7 +90,7 @@ function installBridge(overrides: BridgeOverrides = {}): BridgeHandles {
     return () => set.delete(cb);
   });
 
-  (window as unknown as { biof3Desktop: unknown }).biof3Desktop = {
+  (window as unknown as { petriDesktop: unknown }).petriDesktop = {
     skills: {
       discover,
       execute,
@@ -103,7 +103,7 @@ function installBridge(overrides: BridgeOverrides = {}): BridgeHandles {
 }
 
 function uninstallBridge() {
-  delete (window as unknown as { biof3Desktop?: unknown }).biof3Desktop;
+  delete (window as unknown as { petriDesktop?: unknown }).petriDesktop;
 }
 
 beforeEach(() => {
@@ -196,8 +196,8 @@ describe('useSkillStore', () => {
     const handles = installBridge();
     // PHASE 1 IPC bridge wiring: bridge.skills.cancel(executionId) must be wired to SkillsSDK via main.js
     const bridge = (window as unknown as {
-      biof3Desktop: { skills: { cancel: Mock } };
-    }).biof3Desktop;
+      petriDesktop: { skills: { cancel: Mock } };
+    }).petriDesktop;
     let cancelResult: { ok: boolean; cancelled?: boolean; error?: string } = { ok: false };
     await act(async () => {
       cancelResult = (await bridge.skills.cancel('sre_test123')) as { ok: boolean; cancelled?: boolean; error?: string };
@@ -293,8 +293,8 @@ describe('useSkillStore', () => {
     });
     // Override onProgress to count fresh registrations only
     const bridge = (window as unknown as {
-      biof3Desktop: { skills: { onProgress: Mock } };
-    }).biof3Desktop;
+      petriDesktop: { skills: { onProgress: Mock } };
+    }).petriDesktop;
     bridge.skills.onProgress = onProgress;
 
     const { result } = renderHook(() => useSkillStore());
@@ -403,8 +403,8 @@ describe('useSkillStore', () => {
     // store-level cancel; the test exercises the bridge directly to verify
     // that the bridge's failure response does not mutate the store).
     const bridge = (window as unknown as {
-      biof3Desktop: { skills: { cancel: Mock } };
-    }).biof3Desktop;
+      petriDesktop: { skills: { cancel: Mock } };
+    }).petriDesktop;
     let cancelResult: { ok: boolean; cancelled?: boolean; error?: string } = { ok: true };
     await act(async () => {
       cancelResult = (await bridge.skills.cancel('nonexistent_id')) as { ok: boolean; cancelled?: boolean; error?: string };

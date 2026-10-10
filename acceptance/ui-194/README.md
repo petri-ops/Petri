@@ -8,7 +8,7 @@
 
 | # | 场景 | 结果 |
 |---|------|------|
-| 1 | `biof3:project-open-workspace-file` 事件（聊天卡片同路径）跳 300 行文件第 250 行 → CodeMirror 挂载、`.cm-line` 目标行在视口内 | PASS |
+| 1 | `petri:project-open-workspace-file` 事件（聊天卡片同路径）跳 300 行文件第 250 行 → CodeMirror 挂载、`.cm-line` 目标行在视口内 | PASS |
 | 2 | pulse 高亮：跳转后 `.cm-pulse-highlight` Decoration 出现（截图 `b42-codemirror-jump-pulse.png`） | PASS（relay 补 `pulseMs:3000` 后） |
 | 3 | 编辑回归：CM contenteditable insertText → onChange → 「有未保存修改」+ 保存可用 → 保存 → 磁盘文件核对含插入标记、badge 清除 | PASS |
 | 4 | 同文件重开跳转（rAF 修复场景）：已开文件再次 jump 不同行 → refetch 重建后滚动落点正确（可见 1-91、目标行 30 可见） | PASS |

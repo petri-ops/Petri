@@ -88,7 +88,7 @@ const {
   loadAllPlugins,
 } = require('./plugin/uninstall');
 
-const pluginLoader = require(path.join(PROJECT_ROOT, 'biof3-server', 'plugin-loader.js'));
+const pluginLoader = require(path.join(PROJECT_ROOT, 'petri-server', 'plugin-loader.js'));
 
 // ════════════════════════════════════════════════════════════════
 // Install orchestrators — kept in this module because each cross-
@@ -100,7 +100,7 @@ const pluginLoader = require(path.join(PROJECT_ROOT, 'biof3-server', 'plugin-loa
 // Content 插件安装路径：
 //   1. 内置则从 resources/built-in-plugins/{id} 复制；远程则下载 zip 校验解压
 //   2. 读取 plugin.json 校验 type === 'content-plugin' + contentType + omics
-//   3. 注册 docsDir 到 globalThis._biof3ContentPlugins
+//   3. 注册 docsDir 到 globalThis._petriContentPlugins
 //   4. 不装语言包、不走工具注册、不需要重启
 async function installContentPlugin(pluginId, plugin, platform, onProgress) {
   const pluginDir = path.join(PLUGINS_DIR, pluginId);
@@ -238,8 +238,8 @@ async function installRuntime(pluginId, plugin, platform, onProgress) {
     }
   }
 
-  if (lang === 'r') process.env.BIOF3_R_HOME = runtimeDir;
-  else process.env.BIOF3_PY_HOME = runtimeDir;
+  if (lang === 'r') process.env.PETRI_R_HOME = runtimeDir;
+  else process.env.PETRI_PY_HOME = runtimeDir;
 
   addInstalledPlugin({
     id: pluginId,

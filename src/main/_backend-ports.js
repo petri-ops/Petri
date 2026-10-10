@@ -21,7 +21,7 @@
 async function selectBackendPorts({ reserveAvailablePort, isDevMode }) {
   const r = await reserveAvailablePort(3001);
   const renderer = isDevMode ? null : await reserveAvailablePort(3002);
-  if (r !== 3001) console.warn(`[desktop] port 3001 occupied; using ${r} for biof3-server`);
+  if (r !== 3001) console.warn(`[desktop] port 3001 occupied; using ${r} for petri-server`);
   if (renderer && renderer !== 3002) console.warn(`[desktop] port 3002 occupied; using ${renderer} for renderer`);
   return { r, renderer };
 }

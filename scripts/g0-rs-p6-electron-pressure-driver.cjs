@@ -13,9 +13,9 @@ const { mkdirSync, readFileSync, writeFileSync } = require('node:fs');
 const path = require('node:path');
 const { probeUrl } = require('../src/backend-health.js');
 
-const CONFIG_ENV = 'BIOF3_P6_PRESSURE_DRIVER_CONFIG';
+const CONFIG_ENV = 'PETRI_P6_PRESSURE_DRIVER_CONFIG';
 const PRELOAD_PATH = path.resolve(__dirname, '..', 'src', 'preload.js');
-const requestedWaitMs = Number(process.env.BIOF3_P6_PRESSURE_WAIT_MS);
+const requestedWaitMs = Number(process.env.PETRI_P6_PRESSURE_WAIT_MS);
 const WAIT_MS = Number.isFinite(requestedWaitMs) && requestedWaitMs >= 5_000
   ? requestedWaitMs
   : 120_000;
@@ -686,7 +686,7 @@ async function inspectReport(webContents, target) {
         if (reportFrameId) {
           const world = await webContents.debugger.sendCommand('Page.createIsolatedWorld', {
             frameId: reportFrameId,
-            worldName: 'biof3-p6-report-observer',
+            worldName: 'petri-p6-report-observer',
             grantUniveralAccess: false,
           });
           reportObserver = { contextId: world.executionContextId, sessionId: null };
@@ -972,7 +972,7 @@ async function run() {
     width: 1440,
     height: 900,
     show: config.show === true,
-    title: 'BioF3 P6 isolated pressure observation',
+    title: 'Petri P6 isolated pressure observation',
     backgroundColor: '#ffffff',
     webPreferences: {
       contextIsolation: true,

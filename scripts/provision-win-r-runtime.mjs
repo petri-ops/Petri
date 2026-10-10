@@ -2,9 +2,9 @@
 /**
  * provision-win-r-runtime.mjs
  * ---------------------------------------------------------------
- * 开发机一键引导：在本机 Windows 上把 BioF3 的 R 运行时装进
- *   %USERPROFILE%/Documents/BioF3-Local/runtimes/R
- * （与 main.js resolveRuntime 的第一优先路径一致），从而 biof3-server
+ * 开发机一键引导：在本机 Windows 上把 Petri 的 R 运行时装进
+ *   %USERPROFILE%/Documents/Petri-Local/runtimes/R
+ * （与 main.js resolveRuntime 的第一优先路径一致），从而 petri-server
  * 在下次 `npm run dev` 时自动启动——无需手动安装 R，也无需等
  * OSS 上的官方 windows-x64 制品（Week 3/4）。
  *
@@ -14,9 +14,9 @@
  * 用法（在 Windows 开发机，需网络；R 安装可能弹 UAC，点允许）：
  *   node scripts/provision-win-r-runtime.mjs
  * 环境变量：
- *   BIOF3_R_VERSION       R 版本（默认 4.5.2×x；≥4.6.1 从 base 根目录拉取，历史版本从
+ *   PETRI_R_VERSION       R 版本（默认 4.5.2×x；≥4.6.1 从 base 根目录拉取，历史版本从
  *                         bin/windows/base/old/<ver>/ 拉取）
- *   BIOF3_LOCAL_DATA_DIR  覆盖数据根目录（默认 Documents/BioF3-Local）
+ *   PETRI_LOCAL_DATA_DIR  覆盖数据根目录（默认 Documents/Petri-Local）
  */
 
 import fs from 'node:fs';
@@ -29,10 +29,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
 const PACKAGES = path.join(REPO_ROOT, 'resources', 'built-in-plugins', 'r-runtime-packages.txt');
 
-const R_VERSION = process.env.BIOF3_R_VERSION || '4.5.2';
-const DATA_ROOT = process.env.BIOF3_LOCAL_DATA_DIR
-  ? path.resolve(process.env.BIOF3_LOCAL_DATA_DIR)
-  : path.join(os.homedir(), 'Documents', 'BioF3-Local');
+const R_VERSION = process.env.PETRI_R_VERSION || '4.5.2';
+const DATA_ROOT = process.env.PETRI_LOCAL_DATA_DIR
+  ? path.resolve(process.env.PETRI_LOCAL_DATA_DIR)
+  : path.join(os.homedir(), 'Documents', 'Petri-Local');
 const TARGET = path.join(DATA_ROOT, 'runtimes', 'R');
 
 function fail(msg, err) {
@@ -74,12 +74,12 @@ async function main() {
   const existing = rScriptExeAt(TARGET);
   if (existing) {
     console.log(`[provision-r] 已就绪，无需重复安装: ${existing}`);
-    console.log('[provision-r] 直接重启 `npm run dev` 即可启动 biof3-server。');
+    console.log('[provision-r] 直接重启 `npm run dev` 即可启动 petri-server。');
     return;
   }
 
   fs.mkdirSync(TARGET, { recursive: true });
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-r-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-r-'));
   const installer = path.join(tmp, `R-${R_VERSION}-win.exe`);
   // CRAN bin/windows/base 只保留当前最新版在根目录；历史版本(如 4.5.2)在
   // bin/windows/base/old/<version>/ 子目录。这里沿用与 macOS 一致的版本基线
@@ -118,13 +118,13 @@ async function main() {
     console.log(`[provision-r] installing ${packages.length} R packages (CRAN + Bioconductor)...`);
     const r = spawnSync(rscript, [tmpR], { stdio: 'inherit', windowsHide: true, timeout: 1000 * 60 * 90 });
     if (r.status !== 0) {
-      console.warn(`[provision-r] 部分 R 包安装失败（exit ${r.status}）。biof3-server 仍可启动；失败包待官方制品就绪后再补。`);
+      console.warn(`[provision-r] 部分 R 包安装失败（exit ${r.status}）。petri-server 仍可启动；失败包待官方制品就绪后再补。`);
     }
 
     console.log('\n==================== PROVISION COMPLETE ====================');
     console.log(`R 运行时已安装到: ${TARGET}`);
-    console.log('下一步：重启 `npm run dev`，main.js 会在启动时解析到该运行时并自动 spawn biof3-server(3001)。');
-    console.log('验证：dev 控制台应出现 `[desktop] R runtime: ...` 与 biof3-server 启动日志。');
+    console.log('下一步：重启 `npm run dev`，main.js 会在启动时解析到该运行时并自动 spawn petri-server(3001)。');
+    console.log('验证：dev 控制台应出现 `[desktop] R runtime: ...` 与 petri-server 启动日志。');
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }

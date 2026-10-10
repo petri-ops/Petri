@@ -16,7 +16,7 @@
     "scripts/**/*.{js,mjs,cjs}"
   ],
   "ignore": [
-    "core/biof3-server/build/**",
+    "core/petri-server/build/**",
     "**/__fixtures__/**"
   ],
   "ignoreBinaries": [

@@ -13,7 +13,7 @@ import { FileTreeList } from './FileTreeList';
 import { formatSize } from './helpers';
 
 // UI-400-3 — 树内拖拽内部 MIME 协议常量导出：RightFileTree 根目录落点复用同一协议
-export const TREE_DRAG_MIME = 'application/x-gewu-tree-item';
+export const TREE_DRAG_MIME = 'application/x-petri-tree-item';
 
 export function FileTreeItem({
   entry,

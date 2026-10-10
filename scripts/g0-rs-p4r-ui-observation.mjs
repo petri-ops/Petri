@@ -151,7 +151,7 @@ function pickArtifact(outputs) {
 
 function alignDisposableDesktopIdentity(databasePath, projectId) {
   const Database = require(require.resolve('better-sqlite3', {
-    paths: [path.join(repoRoot, 'core/biof3-server'), repoRoot],
+    paths: [path.join(repoRoot, 'core/petri-server'), repoRoot],
   }));
   const sqlite = new Database(databasePath);
   try {
@@ -179,7 +179,7 @@ function alignDisposableDesktopIdentity(databasePath, projectId) {
  */
 function bindCorpusTargetConversation(databasePath, jobId, conversationId) {
   const Database = require(require.resolve('better-sqlite3', {
-    paths: [path.join(repoRoot, 'core/biof3-server'), repoRoot],
+    paths: [path.join(repoRoot, 'core/petri-server'), repoRoot],
   }));
   const sqlite = new Database(databasePath);
   try {
@@ -199,7 +199,7 @@ async function runElectron(configPath, resultPath, { onSpawn, onRestartRequest }
   let controlChain = Promise.resolve();
   const child = spawn(electronPath, [driverPath], {
     cwd: repoRoot,
-    env: { ...process.env, BIOF3_P4R_UI_DRIVER_CONFIG: configPath },
+    env: { ...process.env, PETRI_P4R_UI_DRIVER_CONFIG: configPath },
     stdio: ['pipe', 'pipe', 'pipe'],
   });
   onSpawn?.(child);
@@ -270,7 +270,7 @@ export async function observeP4RUi({ writeEvidence = false, keep = false } = {})
   await assertPortFree(3000);
   await assertPortFree(BACKEND_PORT);
 
-  const root = mkdtempSync(path.join(tmpdir(), 'biof3-p4r-ui-'));
+  const root = mkdtempSync(path.join(tmpdir(), 'petri-p4r-ui-'));
   const captureDir = path.join(root, 'ui-captures');
   const configPath = path.join(root, 'ui-driver-config.json');
   const resultPath = path.join(root, 'ui-driver-result.json');
@@ -298,7 +298,7 @@ export async function observeP4RUi({ writeEvidence = false, keep = false } = {})
   try {
     const corpus = await generateCorpus({ root, keep: true, quiet: true });
     if (!corpus.ok) throw new Error('real P4R corpus did not complete');
-    alignDisposableDesktopIdentity(path.join(root, 'biof3.db'), corpus.projectId);
+    alignDisposableDesktopIdentity(path.join(root, 'petri.db'), corpus.projectId);
     const record = corpus.records.find((item) => item.id === 'volcano-plot');
     const artifact = pickArtifact(corpus.outputs['volcano-plot']);
     if (!record?.toolJobId || !artifact) throw new Error('standalone volcano target is unavailable');
@@ -332,7 +332,7 @@ export async function observeP4RUi({ writeEvidence = false, keep = false } = {})
     });
     const conversationId = agentCandidate.conversationId;
     if (!conversationId) throw new Error('agent child did not report its conversation');
-    bindCorpusTargetConversation(path.join(root, 'biof3.db'), record.toolJobId, conversationId);
+    bindCorpusTargetConversation(path.join(root, 'petri.db'), record.toolJobId, conversationId);
     const contextPreflight = await fetch(
       `${backend.baseUrl}/api/result-studio/context-envelope?projectId=${encodeURIComponent(corpus.projectId)}&conversationId=${encodeURIComponent(conversationId)}&jobId=${encodeURIComponent(record.toolJobId)}&artifact=${encodeURIComponent(artifact)}${revisionId ? `&revisionId=${encodeURIComponent(revisionId)}` : ''}`,
     );

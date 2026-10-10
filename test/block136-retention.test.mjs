@@ -18,13 +18,13 @@ import { createRequire } from 'node:module';
 import Database from 'better-sqlite3';
 
 const require = createRequire(import.meta.url);
-const { retentionSweep } = require('../core/biof3-server/helpers/tool-jobs-retention.js');
+const { retentionSweep } = require('../core/petri-server/helpers/tool-jobs-retention.js');
 const {
   runRetentionSweep,
   // PL-D2（BLOCK-149）——实现面新增导出：env 缺省解析器 + 缺省常量（红阶段尚不存在）
   resolveToolJobsRetentionDays,
   DEFAULT_TOOL_JOBS_RETENTION_DAYS,
-} = require('../core/biof3-server/jobs/retention-sweeper.js');
+} = require('../core/petri-server/jobs/retention-sweeper.js');
 
 const DAY = 24 * 60 * 60 * 1000;
 // 固定 now：边界（恰好等于 retentionDays 天龄）可精确断言，不依赖真实时钟
@@ -166,7 +166,7 @@ test('⑥ 超过一批（200）上限时分批循环删净且 ids 收集齐全',
 // F2（BLOCK-136 复核）：接线段契约——env 开关唯一激活路径此前零测试，
 // 拼写错/解析漂移都是静默永不生效。直接跑 runRetentionSweep（与生产线
 // 同一入口）断言 env 两分支。
-const ENV_KEY = 'BIOF3_TOOL_JOBS_RETENTION_DAYS';
+const ENV_KEY = 'PETRI_TOOL_JOBS_RETENTION_DAYS';
 
 function mkSweepDb() {
   const db = new Database(':memory:');

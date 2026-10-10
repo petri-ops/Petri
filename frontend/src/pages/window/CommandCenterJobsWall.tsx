@@ -166,7 +166,7 @@ export function CommandCenterJobsWall({
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `gewu-results-${Date.now()}.zip`;
+      link.download = `petri-results-${Date.now()}.zip`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -303,7 +303,7 @@ export function CommandCenterJobsWall({
       }
       // UI-385 — 结果独立窗退役：下钻转发主窗右栏打开（跨项目自动导航）
       const pop = await wm.openResultInMainWindow({
-        type: 'gewu:project-open-artifact',
+        type: 'petri:project-open-artifact',
         detail: { jobId: job.id, artifactName, projectId: job.project_id || null },
       });
       if (!pop?.ok) setDrillNote(pop?.error || pop?.code || '下钻失败');

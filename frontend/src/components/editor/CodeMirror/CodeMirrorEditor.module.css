@@ -17,15 +17,15 @@
 .cmEditor :global(.cm-scroller) {
   /* FONT-FAMILY-UNIFICATION UI-242 — 原 var(--font-family-mono) 为幽灵变量（恒回退
      generic monospace），统一走 canonical mono token。 */
-  font-family: var(--gewu-font-mono, monospace);
+  font-family: var(--petri-font-mono, monospace);
   /* TYPOGRAPHY-HIERARCHY UI-239 — CM 全链原本无字号（继承到 body 16px），
      与同屏 chrome 12~13px 断层；统一代码表面基准 13px。 */
-  font-size: var(--gewu-font-size-body-sm);
+  font-size: var(--petri-font-size-body-sm);
   overflow: auto;
 }
 
 .cmEditor :global(.cm-gutters) {
-  /* UI-395 — 行号栏与主内容同一平面：transparent 直接吃父面底色（曾用 --gewu-bg-elevated
+  /* UI-395 — 行号栏与主内容同一平面：transparent 直接吃父面底色（曾用 --petri-bg-elevated
      浮层色，暗色下比内容区浅一档＝「不是海军蓝」根因）；分隔线按用户裁决移除（行号与内容直接相连）。 */
   background-color: transparent;
   border-right: none;
@@ -33,8 +33,8 @@
 
 .cmEditor :global(.cm-activeLine),
 .cmEditor :global(.cm-activeLineGutter) {
-  /* UI-395 — CodeMirror 默认活动行浅灰在海军蓝上脱节，统一走 --gewu-hover（亮暗双态自适应）。 */
-  background-color: var(--gewu-hover);
+  /* UI-395 — CodeMirror 默认活动行浅灰在海军蓝上脱节，统一走 --petri-hover（亮暗双态自适应）。 */
+  background-color: var(--petri-hover);
 }
 
 /* ===== P1 unified diff 主题 ===== */

@@ -4,7 +4,7 @@
   "capturedAt": "2026-09-22T07:36:24.383Z",
   "sourceCommit": "477dfdf2f386961fade6e47a483125ba29b263e1",
   "model": "jev-1.13.0",
-  "wrapper": "core/biof3-server/helpers/decision-api.js",
+  "wrapper": "core/petri-server/helpers/decision-api.js",
   "decisionPoint": "routes/ai-agent/chat.js 提交链挂钩（W1-2 copilot 意图路由）",
   "result": {
     "corpus": {

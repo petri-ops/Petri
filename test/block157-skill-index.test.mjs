@@ -16,7 +16,7 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve('.');
 
-const skillTools = require(path.join(ROOT, 'core/biof3-server/agent-tools/skill-tools'));
+const skillTools = require(path.join(ROOT, 'core/petri-server/agent-tools/skill-tools'));
 const { buildSkillsIndexBlock } = skillTools;
 
 function mkSkill(i, descLen = 40) {
@@ -68,7 +68,7 @@ test('BLOCK-157 KNW-2 索引块：描述截 100；整块 ≤2200 超界截断带
 });
 
 test('BLOCK-157 KNW-2 接线钉：agent-runner 必须注入技能索引（源码扫描守卫）', () => {
-  const src = fs.readFileSync(path.join(ROOT, 'core/biof3-server/agent-runner.js'), 'utf8');
+  const src = fs.readFileSync(path.join(ROOT, 'core/petri-server/agent-runner.js'), 'utf8');
   assert.match(src, /buildSkillsIndexBlock/, 'agent-runner 应调用 buildSkillsIndexBlock（KNW-2 常驻注入）');
   assert.match(src, /tool_skill_discover/, 'agent-runner 应经 skill_discover 取索引数据');
 });

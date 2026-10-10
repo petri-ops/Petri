@@ -10,18 +10,18 @@
 const path = require('node:path');
 
 const ROOT = path.join(__dirname, '..');
-const DEV_DB = path.join(ROOT, '.biof3-dev-user-data', 'data', 'biof3.db');
-process.env.BIOF3_DB_PATH = DEV_DB;
-process.env.BIOF3_LOCAL_DATA_DIR = path.join(ROOT, '.biof3-dev-user-data', 'data');
-process.env.BIOF3_BETTER_SQLITE3_ROOT = path.join(ROOT, 'core', 'biof3-server', 'node_modules');
+const DEV_DB = path.join(ROOT, '.petri-dev-user-data', 'data', 'petri.db');
+process.env.PETRI_DB_PATH = DEV_DB;
+process.env.PETRI_LOCAL_DATA_DIR = path.join(ROOT, '.petri-dev-user-data', 'data');
+process.env.PETRI_BETTER_SQLITE3_ROOT = path.join(ROOT, 'core', 'petri-server', 'node_modules');
 
-const learning = require(ROOT + '/core/biof3-server/agent-tools/learning');
-const Database = require(ROOT + '/core/biof3-server/node_modules/better-sqlite3');
+const learning = require(ROOT + '/core/petri-server/agent-tools/learning');
+const Database = require(ROOT + '/core/petri-server/node_modules/better-sqlite3');
 
 const PROJECT_ID = 'p_mtlnsv0f_xpjb';
 const CONV_ID = 'conv_05dc94bc-561';
 const USER_ID = 'local-user';
-const PROJECT_DIR = path.join(ROOT, '.biof3-dev-user-data', 'data', 'projects', 'block52-p3-09031507-mtlnsv0f');
+const PROJECT_DIR = path.join(ROOT, '.petri-dev-user-data', 'data', 'projects', 'block52-p3-09031507-mtlnsv0f');
 
 async function main() {
   const db = new Database(DEV_DB, { readonly: true });

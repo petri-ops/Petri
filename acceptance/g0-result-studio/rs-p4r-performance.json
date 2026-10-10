@@ -347,7 +347,7 @@
       "id": "RS-P4R0-3",
       "passed": true,
       "evidence": [
-        "core/biof3-server/helpers/perf-probe.js"
+        "core/petri-server/helpers/perf-probe.js"
       ],
       "detail": "Event-loop delay came from a real histogram sample, not the empty-histogram sentinel."
     },
@@ -355,7 +355,7 @@
       "id": "RS-P4R0-4",
       "passed": true,
       "evidence": [
-        "core/biof3-server/helpers/perf-probe.js"
+        "core/petri-server/helpers/perf-probe.js"
       ],
       "detail": "The authoritative >250ms signal is declared as the 10ms-resolution histogram; the 1Hz tick sampler is explicitly rejected as unable to resolve it."
     },
@@ -380,8 +380,8 @@
       "id": "RS-P4R0-7",
       "passed": true,
       "evidence": [
-        "core/biof3-server/helpers/perf-probe.js",
-        "core/biof3-server/routes/perf-probe.js"
+        "core/petri-server/helpers/perf-probe.js",
+        "core/petri-server/routes/perf-probe.js"
       ],
       "detail": "The probe is env-gated: with the flag unset every export is a no-op and the /api/__perf surface is not mounted."
     },
@@ -438,7 +438,7 @@
       "id": "RS-P4R6-1",
       "passed": true,
       "evidence": [
-        "core/biof3-server/routes/result-studio.js",
+        "core/petri-server/routes/result-studio.js",
         "core/shared-backend/result-studio-background.js",
         "core/shared-backend/result-studio-background-child.js",
         "test/result-studio-background.test.mjs"

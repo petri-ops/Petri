@@ -120,7 +120,7 @@ if (args.includes('--write')) {
   fs.mkdirSync(path.dirname(BASELINE), { recursive: true });
   fs.writeFileSync(
     BASELINE,
-    JSON.stringify({ schema: 'biof3/block109-arch-cycles.v1', note: 'P3-2：存量循环依赖逐环签名入册（规范化=环链旋转到字典序最小模块）；新环即红；消亡环应随 --write 收紧。', cycles: current }, null, 2) + '\n',
+    JSON.stringify({ schema: 'petri/block109-arch-cycles.v1', note: 'P3-2：存量循环依赖逐环签名入册（规范化=环链旋转到字典序最小模块）；新环即红；消亡环应随 --write 收紧。', cycles: current }, null, 2) + '\n',
   );
   console.log(`[arch-cycles] 基线已写入（${current.length} 环）`);
   process.exit(0);

@@ -8,9 +8,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const nodeRequire = createRequire(import.meta.url);
-const Database = nodeRequire('../core/biof3-server/node_modules/better-sqlite3');
-const { runRetentionSweep } = nodeRequire('../core/biof3-server/jobs/retention-sweeper.js');
-const { PUBLIC_DEMO_JOB_IDS } = nodeRequire('../core/biof3-server/helpers/tools-assets.js');
+const Database = nodeRequire('../core/petri-server/node_modules/better-sqlite3');
+const { runRetentionSweep } = nodeRequire('../core/petri-server/jobs/retention-sweeper.js');
+const { PUBLIC_DEMO_JOB_IDS } = nodeRequire('../core/petri-server/helpers/tools-assets.js');
 
 const DAY = 24 * 60 * 60 * 1000;
 

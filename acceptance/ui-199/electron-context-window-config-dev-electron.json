@@ -20,11 +20,11 @@
     ]
   },
   "steps_executed": [
-    "1. CDP 直连 dev Electron page target（非 agent-browser 自开 Chrome），Runtime.evaluate 通道验证 navigator.userAgent 含 Electron + window.biof3Desktop 27 个命名空间",
+    "1. CDP 直连 dev Electron page target（非 agent-browser 自开 Chrome），Runtime.evaluate 通道验证 navigator.userAgent 含 Electron + window.petriDesktop 27 个命名空间",
     "2. 点击左栏 [title=设置] 打开设置面板 → 导航「模型接口」→ 渠道表表头含「上下文」列（协议/供应商/Base URL/Key/默认模型/上下文/连通性）",
     "3. 实机输入验证：DeepSeek 渠道上下文输入框输入 '256K'（native setter + input/change 事件）→ blur 提交 → 点保存",
-    "4. 桥接回读：window.biof3Desktop.aiSettings.get() → chat_model_presets[0].contextWindow === 256000（parse '256K' → 256000 正确）",
-    "5. 持久化验证：关闭面板（biof3-desktop-panel__close）→ 重开设置 → 模型接口区 → 输入框显示 '256K'（persisted_ok: true）",
+    "4. 桥接回读：window.petriDesktop.aiSettings.get() → chat_model_presets[0].contextWindow === 256000（parse '256K' → 256000 正确）",
+    "5. 持久化验证：关闭面板（petri-desktop-panel__close）→ 重开设置 → 模型接口区 → 输入框显示 '256K'（persisted_ok: true）",
     "6. 格式变体验证：输入 '1.5M' → blur 不跳光标（contextWindowDrafts 草稿态生效）→ 保存 → contextWindow === 1500000",
     "7. 非法输入验证：输入 '垃圾输入abc' → 保存 → contextWindow === undefined（fail-closed 清除，不写脏数据）",
     "8. 恢复 '256K' 并保存（final_value 256000），截取实机证据截图"

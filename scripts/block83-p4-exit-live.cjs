@@ -32,8 +32,8 @@ const probe = path.join(root, 'scripts', 'tmp-d13-probe.cjs');
 function runProbe({ builtInDir, pluginsDir }) {
   const env = {
     ...process.env,
-    BIOF3_BUILT_IN_PLUGINS_DIR: builtInDir,
-    BIOF3_PLUGINS_DIR: pluginsDir,
+    PETRI_BUILT_IN_PLUGINS_DIR: builtInDir,
+    PETRI_PLUGINS_DIR: pluginsDir,
   };
   const out = execFileSync(nodeBin, [probe], { env, encoding: 'utf8', timeout: 90_000 });
   const line = out.split(/\r?\n/).reverse().find((l) => l.startsWith('{'));
@@ -41,9 +41,9 @@ function runProbe({ builtInDir, pluginsDir }) {
 }
 
 (async () => {
-  const zeroDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gewu-zero-builtin-'));
-  const emptyDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gewu-empty-plugins-'));
-  const packPlugins = 'D:/1.WorkDir/gewu-pack-bio/plugins';
+  const zeroDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-zero-builtin-'));
+  const emptyDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-empty-plugins-'));
+  const packPlugins = 'D:/1.WorkDir/petri-pack-bio/plugins';
   const fixturePlugins = path.join(root, 'test/fixtures/neutral-plugins');
 
   assert('PRE_pack_installed_json', fs.existsSync(path.join(packPlugins, 'installed.json')), packPlugins);
@@ -59,15 +59,15 @@ function runProbe({ builtInDir, pluginsDir }) {
     ? Object.keys(JSON.parse(fs.readFileSync(runtimeManifestPath, 'utf8')).plugins || {})
     : [];
   assert('Z3_runtime_manifest_survives',
-    runtimeIds.includes('biof3-r-runtime') && runtimeIds.includes('biof3-py-runtime'),
+    runtimeIds.includes('petri-r-runtime') && runtimeIds.includes('petri-py-runtime'),
     'runtime=' + runtimeIds.join(','));
 
   const residueChecks = [
     'resources/built-in-plugins',
-    'core/biof3-server/tool-scripts',
-    'core/biof3-server/tool-demo-data',
-    'core/biof3-server/tool-demo-results',
-    'core/biof3-server/image',
+    'core/petri-server/tool-scripts',
+    'core/petri-server/tool-demo-data',
+    'core/petri-server/tool-demo-results',
+    'core/petri-server/image',
   ].filter((p) => fs.existsSync(path.join(root, p)));
   assert('Z4_zero_bio_files_in_core', residueChecks.length === 0,
     residueChecks.length ? residueChecks.join(',') : 'residue=0');

@@ -43,7 +43,7 @@
     "label": "已等待",
     "icon": "eye"
   },
-  "delegate_to_gewu_node": {
+  "delegate_to_petri_node": {
     "label": "已委派",
     "icon": "globe"
   },

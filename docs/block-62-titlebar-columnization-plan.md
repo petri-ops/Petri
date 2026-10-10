@@ -11,7 +11,7 @@
 TitleBar 是独立于工作区的整宽横条（`position: fixed`，[TitleBar.module.css](../frontend/src/components/desktop/TitleBar.module.css) L21-36），用 `grid-template-columns: 左span 1fr 右span` **模拟**下方三栏列宽。顶栏分隔线与栏体边缘分属两棵 DOM 树，只能靠同步对齐：
 
 - 同步链 v1：`leftWidth` state → `updateTitleBar` → `--titlebar-*-span`（React 提交晚一拍 → 拖动脱节，UI-309 主修）
-- 同步链 v2：拖动期 `--gewu-live-*` CSS 变量直写（UI-309 加映）
+- 同步链 v2：拖动期 `--petri-live-*` CSS 变量直写（UI-309 加映）
 - 同步链 v3：拖动标记禁 transition + `:global` 复活（UI-309 加映二次）
 
 每一环都是延迟面。结构性修复 = 让顶栏片段与栏内容**在同一容器内**，宽度由列容器自身决定，同步契约整体退役。
@@ -60,7 +60,7 @@ TitleBar 是独立于工作区的整宽横条（`position: fixed`，[TitleBar.mo
 
 - 数据源：继续走 `useWorkspacePanels` 的 `titleBar` state（**不新建第二真相**）；project-workspace 注册 effect 删除 `leftPanelWidth/rightPanelWidth` 两字段（宽度不再需要跨树同步），其余交互回调原样保留
 - `TitleBar.tsx`（603 行）拆为 `desktop/titlebar/` 下三片段 + 共享 hooks（菜单开合/结果选择器逻辑提取，不重写）；`TitleBar.module.css` 按片段拆三个 module.css
-- 退役清单：`--titlebar-left-span/--titlebar-right-span`、`--gewu-live-left/right-width|span`、TitleBar.tsx `collapsedLeftRail/collapsedRightRail`（180/146/80/196 魔数）、`titleBarStyle` 注入、useResizableColumns 拖动期变量写入（transition:none 规则保留——展开/收起仍受益）
+- 退役清单：`--titlebar-left-span/--titlebar-right-span`、`--petri-live-left/right-width|span`、TitleBar.tsx `collapsedLeftRail/collapsedRightRail`（180/146/80/196 魔数）、`titleBarStyle` 注入、useResizableColumns 拖动期变量写入（transition:none 规则保留——展开/收起仍受益）
 
 ### 3.3 drag 带
 
@@ -104,8 +104,8 @@ TitleBar 是独立于工作区的整宽横条（`position: fixed`，[TitleBar.mo
 - 2026-09-07 **P0 地基完成**（最小可回退）：App.tsx 按路由分流 `main` paddingTop（列体化路由 0 / 其余 38，归一化尾斜杠正则排除 `/results`）+ `.workspaceRoot` 改 `100vh + padding-top:38`（box-sizing 保内容区不变）。**未建 header-slot、未动 fixed TitleBar**——视觉与现状零差异，可整体回退。验证：tsc 0 / TitleBar+useResizableColumns vitest 31/31 / CDP 几何 workspace `main padTop=0·rootH=100vh·bodyTop=38·列高=100vh−38`、`/skills` 保持 38。顺带发现并登记 `/results` 既有崩溃（AUDIT-LOG 🟢，非本包引入，stash 验证）。提交 `dd4740dc`。
 - 2026-09-07 **P1a 行为保持提取完成**：TitleBar.tsx（603 行）三区内容 + 共享逻辑提取到 `titlebar/` 容器无关片段（shared/LeftZone/CenterZone/RightZone），TitleBar 收敛为 fixed 薄壳。唯一必要修正：双击改用不订阅 maximize 的纯 `handleTitleBarDoubleClick`（避免与交通灯片段双份 `onMaximizeChanged`）。tsc 0 / TitleBar.test 15/15 / 定向 47/47 / CDP fixed 条 8 控件全在位 seamGap=0。提交 `1995a598`。
 - 2026-09-07 **P1b 列内 header 结构翻转完成**：`ColumnHeader(side)` 作为各栏 flex-column 第一子元素（交叉轴 stretch → 宽=栏宽，同一元素派生同帧 → 刚性由构造保证）；收起态内联进中列 header（无 collapsedRail 魔数）；App 列体化路由不渲染全局条、ProjectWorkspace 自持顶栏（regular=列内 header / compact+早退=fixed 条，互斥无双条）；leftPanelWrap/resultPanel height:100%→flex:1（实测溢出归零）。实机（证据 `acceptance/ui-310/columnized-headers.png`）：拖拽 +70/+150 gap=0、「+」菜单不裁、收起态交通灯可达、compact 854px fixed 回归。tsc 0 / 定向 53/53 / 门禁 PASS。提交 `b2207a3d`。
-- **实施记录（P1b 教训）**：结构方案在 wrapper / aside-child / absolute 间反复漂移，靠 `git checkout` 回退到 P1a 检查点后一次性连贯完成——印证 §6「分阶段小提交」纪律；aside-child 胜出的决定性论据=aside 已消费 `--gewu-live-*`，header 交叉轴 stretch 即栏宽（同元素派生，无需再传宽）。
-- **下一步 P2**：同步链退役——`--gewu-live-*`（列体化路由内 header 已不依赖，但栏体 aside 仍消费 → 改为 plain state 同 commit）、fixed 条 `--titlebar-*-span` grid 模拟、`updateTitleBar` 宽度两字段、BottomTerminal offset 改列容器几何；P3 收口转 verified。
-- 2026-09-07 **P2 跨树同步链退役完成（范围经探针实测收敛，与初版计划的差异如实登记）**：**退役** ① `TitleBarState.leftPanelWidth/rightPanelWidth` + 每拖拽帧 `updateTitleBar` 跨树推送（regular 不消费宽度=死链+无谓 churn）→ fixed 条宽度改 props 同树直传（`TitleBarProps`，compact 渲染点传真实宽）；② fixed 条 grid 三处 `var(--gewu-live-*-span)` 死兜底（fixed 条只在 compact/非工作区渲染，拖拽禁用、span 永不写入）。**保留（计划偏差）**：`--gewu-live-*-width/-span` 实时变量与 collapsedRail 常量——探针证实 live 变量角色已从「跨树同步补丁」转为「aside 本体+终端的同树指针跟随」（删除会让 aside 本身退回每帧 commit 一拍滞后，是回归）；collapsedRail 供 fixed 条 compact/收起态。BottomTerminal offset 维持 live-span 消费（同树跟随，合法）。实机：regular gap=0 不回归 / compact 浮层 alignGap=1（rail 归属设计值）/ skills 默认宽不回归 / 零异常；tsc 0 / 定向 53/53 / 门禁 PASS。证据 `acceptance/ui-310/p2-sync-chain-retired.png`。
+- **实施记录（P1b 教训）**：结构方案在 wrapper / aside-child / absolute 间反复漂移，靠 `git checkout` 回退到 P1a 检查点后一次性连贯完成——印证 §6「分阶段小提交」纪律；aside-child 胜出的决定性论据=aside 已消费 `--petri-live-*`，header 交叉轴 stretch 即栏宽（同元素派生，无需再传宽）。
+- **下一步 P2**：同步链退役——`--petri-live-*`（列体化路由内 header 已不依赖，但栏体 aside 仍消费 → 改为 plain state 同 commit）、fixed 条 `--titlebar-*-span` grid 模拟、`updateTitleBar` 宽度两字段、BottomTerminal offset 改列容器几何；P3 收口转 verified。
+- 2026-09-07 **P2 跨树同步链退役完成（范围经探针实测收敛，与初版计划的差异如实登记）**：**退役** ① `TitleBarState.leftPanelWidth/rightPanelWidth` + 每拖拽帧 `updateTitleBar` 跨树推送（regular 不消费宽度=死链+无谓 churn）→ fixed 条宽度改 props 同树直传（`TitleBarProps`，compact 渲染点传真实宽）；② fixed 条 grid 三处 `var(--petri-live-*-span)` 死兜底（fixed 条只在 compact/非工作区渲染，拖拽禁用、span 永不写入）。**保留（计划偏差）**：`--petri-live-*-width/-span` 实时变量与 collapsedRail 常量——探针证实 live 变量角色已从「跨树同步补丁」转为「aside 本体+终端的同树指针跟随」（删除会让 aside 本身退回每帧 commit 一拍滞后，是回归）；collapsedRail 供 fixed 条 compact/收起态。BottomTerminal offset 维持 live-span 消费（同树跟随，合法）。实机：regular gap=0 不回归 / compact 浮层 alignGap=1（rail 归属设计值）/ skills 默认宽不回归 / 零异常；tsc 0 / 定向 53/53 / 门禁 PASS。证据 `acceptance/ui-310/p2-sync-chain-retired.png`。
 - 2026-09-07 **P3 收口 completed**：用户实机验收通过（拖拽顶栏线与栏边一根线实时移动 / 收起态交通灯与工具开关内联可达 / 「+」等菜单展开正常 / 缩窗 ≤960 回退整条顶栏 / 三段顶栏任意处可拖窗口），指示「收口 并 push」。提交链 `dd4740dc`(P0) → `1995a598`(P1a) → `b2207a3d`(P1b) → `fefc6942`(P2)。UI-310 转 verified（证据 `acceptance/ui-310/`）；roadmap active 槽清空、UI-305 恢复候选（启动需用户裁决）。收口门禁：docs:reconcile + docs:check + ui:audit:check。
-- **遗留候选（不阻塞收口，登记待裁决）**：① `--gewu-live-*` 变量与 collapsedRail 常量仍在（P2 实测证明它们是「同树指针跟随」与「fixed 条 compact/收起态」的合法机制，非死链，保留）；② `/project/:id/results` 既有崩溃（AUDIT-LOG 🟢，ResultStudio experimental 面，需单独立项）；③ UI-305 前端巨型组件拆分（本包让位方，恢复需用户裁决）。
+- **遗留候选（不阻塞收口，登记待裁决）**：① `--petri-live-*` 变量与 collapsedRail 常量仍在（P2 实测证明它们是「同树指针跟随」与「fixed 条 compact/收起态」的合法机制，非死链，保留）；② `/project/:id/results` 既有崩溃（AUDIT-LOG 🟢，ResultStudio experimental 面，需单独立项）；③ UI-305 前端巨型组件拆分（本包让位方，恢复需用户裁决）。

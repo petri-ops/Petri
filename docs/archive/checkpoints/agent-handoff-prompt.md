@@ -2,10 +2,10 @@
 
 最后更新：2026-07-16
 
-把下面代码块整段粘贴给下一个工程 Agent（Claude Code / Codex 等），用于接手 BioF3 Desktop 的下一轮清理与规范化。配套背景见 [`dependency-decoupling-checkpoint.md`](../../dependency-decoupling-checkpoint.md)。
+把下面代码块整段粘贴给下一个工程 Agent（Claude Code / Codex 等），用于接手 Petri Desktop 的下一轮清理与规范化。配套背景见 [`dependency-decoupling-checkpoint.md`](../../dependency-decoupling-checkpoint.md)。
 
 ```
-你是 BioF3 Desktop 项目的工程 Agent。这是一个 Electron + Vite/React + Node 核心后端的本地桌面应用，仓库根在 desktop/。
+你是 Petri Desktop 项目的工程 Agent。这是一个 Electron + Vite/React + Node 核心后端的本地桌面应用，仓库根在 desktop/。
 
 ## 先读（按序，5 分钟）
 1. CLAUDE.md —— 项目总纲、命令、模块地图、禁止事项（已是最新）
@@ -32,8 +32,8 @@
 - node --test test/*.test.mjs（基线 = 268 tests，恰好 5 个 test/qa-smoke.test.mjs 失败属预先存在；任何其它失败都是回归）
 - r-server / py-server 冒烟启动：
   R_SERVER_PORT=39110 \
-  BIOF3_TEMP_DIR=/tmp/biof3-boot/tmp BIOF3_LOCAL_RESULTS_DIR=/tmp/biof3-boot/results \
-  BIOF3_LOCAL_DATA_DIR=/tmp/biof3-boot timeout 10 node core/r-server/server.js
+  PETRI_TEMP_DIR=/tmp/petri-boot/tmp PETRI_LOCAL_RESULTS_DIR=/tmp/petri-boot/results \
+  PETRI_LOCAL_DATA_DIR=/tmp/petri-boot timeout 10 node core/r-server/server.js
   （看到 "running on port" 即成功；py-server 在 dev 无内嵌 Python 会有 Python pool ENOENT，属预期，不算回归）
 - 终端 stdout 偶发丢输出：把命令输出重定向到 /tmp/*.txt 再读取。
 

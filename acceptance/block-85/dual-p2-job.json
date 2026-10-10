@@ -6,7 +6,7 @@
     {
       "name": "P2-0 peer registered",
       "pass": true,
-      "detail": "{\"ok\":true,\"version\":1,\"peers\":[{\"peerId\":\"gpeer_1b29dffe41f7d531\",\"name\":\"MacBook-Pro.local\",\"baseUrl\":\"https://47.110.228.168:8443\",\"platform\":\"darwin\",\"arch\":\"arm64\",\"gewuVersion\":\"1.0.0\",\"executor"
+      "detail": "{\"ok\":true,\"version\":1,\"peers\":[{\"peerId\":\"gpeer_1b29dffe41f7d531\",\"name\":\"MacBook-Pro.local\",\"baseUrl\":\"https://47.110.228.168:8443\",\"platform\":\"darwin\",\"arch\":\"arm64\",\"petriVersion\":\"1.0.0\",\"executor"
     },
     {
       "name": "P2-1 submit accepted",
@@ -21,12 +21,12 @@
     {
       "name": "P2-3 result present (peer truth)",
       "pass": true,
-      "detail": "{\"files\":[{\"name\":\"deg_table.csv\",\"type\":\"table\",\"label\":\"差异基因表\",\"filename\":\"deg_table.csv\",\"path\":\"/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/deg_table.csv\",\"canonicalPath\":\"/work/biof3/tool-jobs/job_39195edf5df14725/output/deg_table.csv\",\"id\":\"deg_tabl"
+      "detail": "{\"files\":[{\"name\":\"deg_table.csv\",\"type\":\"table\",\"label\":\"差异基因表\",\"filename\":\"deg_table.csv\",\"path\":\"/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/deg_table.csv\",\"canonicalPath\":\"/work/petri/tool-jobs/job_39195edf5df14725/output/deg_table.csv\",\"id\":\"deg_tabl"
     },
     {
       "name": "P2-4 no artifact pull-back to Windows staging",
       "pass": true,
-      "detail": "local dirs checked: [D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\results\\jobs\\job_39195edf5df14725, D:\\1.WorkDir\\biof3-desktop\\.biof3-dev-user-data\\data\\tools-results\\job_39195edf5df14725] found: [none]"
+      "detail": "local dirs checked: [D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\results\\jobs\\job_39195edf5df14725, D:\\1.WorkDir\\petri-desktop\\.petri-dev-user-data\\data\\tools-results\\job_39195edf5df14725] found: [none]"
     }
   ],
   "submitResponse": {
@@ -70,8 +70,8 @@
             "type": "table",
             "label": "差异基因表",
             "filename": "deg_table.csv",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
             "id": "deg_table",
             "title": "差异基因表",
             "size": 1068,
@@ -81,7 +81,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "deg_table"
             }
@@ -91,8 +91,8 @@
             "type": "table",
             "label": "上调基因",
             "filename": "up_genes.csv",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
             "id": "artifact_2",
             "title": "上调基因",
             "size": 467,
@@ -102,7 +102,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_2"
             }
@@ -112,8 +112,8 @@
             "type": "table",
             "label": "下调基因",
             "filename": "down_genes.csv",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
             "id": "artifact_3",
             "title": "下调基因",
             "size": 162,
@@ -123,7 +123,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_3"
             }
@@ -133,8 +133,8 @@
             "type": "plot",
             "label": "火山图",
             "filename": "volcano.png",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.png",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/volcano.png",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.png",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/volcano.png",
             "id": "volcano",
             "title": "火山图",
             "size": 73857,
@@ -144,7 +144,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "volcano"
             }
@@ -154,8 +154,8 @@
             "type": "file",
             "label": "火山图 (PDF)",
             "filename": "volcano.pdf",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
             "id": "artifact_5",
             "title": "火山图 (PDF)",
             "size": 27949,
@@ -165,7 +165,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_5"
             }
@@ -175,8 +175,8 @@
             "type": "plot",
             "label": "PCA 图",
             "filename": "pca.png",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/pca.png",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/pca.png",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/pca.png",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/pca.png",
             "id": "pca",
             "title": "PCA 图",
             "size": 61251,
@@ -186,7 +186,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "pca"
             }
@@ -196,8 +196,8 @@
             "type": "file",
             "label": "PCA 图 (PDF)",
             "filename": "pca.pdf",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/pca.pdf",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/pca.pdf",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/pca.pdf",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/pca.pdf",
             "id": "artifact_7",
             "title": "PCA 图 (PDF)",
             "size": 14834,
@@ -207,7 +207,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_7"
             }
@@ -217,8 +217,8 @@
             "type": "plot",
             "label": "Top50 热图",
             "filename": "heatmap.png",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.png",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/heatmap.png",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.png",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/heatmap.png",
             "id": "heatmap",
             "title": "Top50 热图",
             "size": 70234,
@@ -228,7 +228,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "heatmap"
             }
@@ -238,8 +238,8 @@
             "type": "file",
             "label": "Top50 热图 (PDF)",
             "filename": "heatmap.pdf",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
             "id": "artifact_9",
             "title": "Top50 热图 (PDF)",
             "size": 17063,
@@ -249,7 +249,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_9"
             }
@@ -259,8 +259,8 @@
             "type": "plot",
             "label": "文库大小 (PNG)",
             "filename": "library_size.png",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.png",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/library_size.png",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.png",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/library_size.png",
             "id": "artifact_10",
             "title": "文库大小 (PNG)",
             "size": 48769,
@@ -270,7 +270,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_10"
             }
@@ -280,8 +280,8 @@
             "type": "file",
             "label": "文库大小 (PDF)",
             "filename": "library_size.pdf",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
             "id": "artifact_11",
             "title": "文库大小 (PDF)",
             "size": 13184,
@@ -291,7 +291,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_11"
             }
@@ -301,8 +301,8 @@
             "type": "plot",
             "label": "离散度估计 (PNG)",
             "filename": "dispersion.png",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.png",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/dispersion.png",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.png",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/dispersion.png",
             "id": "artifact_12",
             "title": "离散度估计 (PNG)",
             "size": 82659,
@@ -312,7 +312,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_12"
             }
@@ -322,8 +322,8 @@
             "type": "file",
             "label": "离散度估计 (PDF)",
             "filename": "dispersion.pdf",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
             "id": "artifact_13",
             "title": "离散度估计 (PDF)",
             "size": 20356,
@@ -333,7 +333,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_13"
             }
@@ -343,8 +343,8 @@
             "type": "plot",
             "label": "MA 图 (PNG)",
             "filename": "ma_plot.png",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
             "id": "artifact_14",
             "title": "MA 图 (PNG)",
             "size": 61052,
@@ -354,7 +354,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_14"
             }
@@ -364,8 +364,8 @@
             "type": "file",
             "label": "MA 图 (PDF)",
             "filename": "ma_plot.pdf",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
             "id": "artifact_15",
             "title": "MA 图 (PDF)",
             "size": 15805,
@@ -375,7 +375,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_15"
             }
@@ -385,8 +385,8 @@
             "type": "plot",
             "label": "样本距离 (PNG)",
             "filename": "sample_distance.png",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
             "id": "artifact_16",
             "title": "样本距离 (PNG)",
             "size": 68083,
@@ -396,7 +396,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_16"
             }
@@ -406,8 +406,8 @@
             "type": "file",
             "label": "样本距离 (PDF)",
             "filename": "sample_distance.pdf",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
             "id": "artifact_17",
             "title": "样本距离 (PDF)",
             "size": 14251,
@@ -417,7 +417,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_17"
             }
@@ -427,8 +427,8 @@
             "type": "data",
             "label": "VST 矩阵",
             "filename": "vst_matrix.csv",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
             "id": "vst_matrix",
             "title": "VST 矩阵",
             "size": 784,
@@ -438,7 +438,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "vst_matrix"
             }
@@ -448,8 +448,8 @@
             "type": "table",
             "label": "样本信息",
             "filename": "coldata_info.csv",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
             "id": "artifact_19",
             "title": "样本信息",
             "size": 63,
@@ -459,7 +459,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_19"
             }
@@ -469,8 +469,8 @@
             "type": "table",
             "label": "离散度数据",
             "filename": "dispersion_data.csv",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
             "id": "artifact_20",
             "title": "离散度数据",
             "size": 825,
@@ -480,7 +480,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_20"
             }
@@ -490,8 +490,8 @@
             "type": "text",
             "label": "分析摘要",
             "filename": "summary.txt",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/summary.txt",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/summary.txt",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/summary.txt",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/summary.txt",
             "id": "artifact_21",
             "title": "分析摘要",
             "size": 184,
@@ -501,7 +501,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_21"
             }
@@ -511,8 +511,8 @@
             "type": "report",
             "label": "解读报告",
             "filename": "report.html",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/report.html",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/report.html",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/report.html",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/report.html",
             "id": "report",
             "title": "解读报告",
             "size": 627945,
@@ -522,7 +522,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "report"
             }
@@ -534,16 +534,16 @@
             "label": "全部结果打包下载",
             "name": "all_results.zip",
             "title": "全部结果打包下载",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/all_results.zip",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/all_results.zip",
             "size": 833830,
             "sha256": "541170097b276feafa30021accb6cb3c605e4e105b69c976c5355bb8de79448e",
             "required": true,
             "preview": true,
             "download": true,
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/all_results.zip",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/all_results.zip",
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "zip"
             }
@@ -555,16 +555,16 @@
             "type": "text",
             "label": "run.log",
             "title": "run.log",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/run.log",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/run.log",
             "size": 1876,
             "sha256": "423e5b9910ca2143e846bc9e83446bbddd7433de95923ab4e0ac51b6a20b1d8d",
             "required": false,
             "preview": true,
             "download": true,
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/run.log",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/run.log",
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_24"
             }
@@ -701,12 +701,12 @@
           }
         },
         "toolJobId": "job_39195edf5df14725",
-        "jobDir": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725",
-        "outputDir": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output",
-        "resultDir": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output",
-        "canonicalJobDir": "/work/biof3/tool-jobs/job_39195edf5df14725",
-        "canonicalOutputDir": "/work/biof3/tool-jobs/job_39195edf5df14725/output",
-        "canonicalResultDir": "/work/biof3/tool-jobs/job_39195edf5df14725/output",
+        "jobDir": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725",
+        "outputDir": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output",
+        "resultDir": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output",
+        "canonicalJobDir": "/work/petri/tool-jobs/job_39195edf5df14725",
+        "canonicalOutputDir": "/work/petri/tool-jobs/job_39195edf5df14725/output",
+        "canonicalResultDir": "/work/petri/tool-jobs/job_39195edf5df14725/output",
         "execution": {
           "executionContextVersion": 2,
           "adapter": {
@@ -723,13 +723,13 @@
             "command": "/usr/local/bin/Rscript",
             "reason": null
           },
-          "workDir": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725",
-          "canonicalWorkDir": "/work/biof3/tool-jobs/job_39195edf5df14725",
-          "executionWorkDir": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725",
-          "outputDir": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output",
-          "canonicalOutputDir": "/work/biof3/tool-jobs/job_39195edf5df14725/output",
-          "resultDir": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output",
-          "canonicalResultDir": "/work/biof3/tool-jobs/job_39195edf5df14725/output"
+          "workDir": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725",
+          "canonicalWorkDir": "/work/petri/tool-jobs/job_39195edf5df14725",
+          "executionWorkDir": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725",
+          "outputDir": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output",
+          "canonicalOutputDir": "/work/petri/tool-jobs/job_39195edf5df14725/output",
+          "resultDir": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output",
+          "canonicalResultDir": "/work/petri/tool-jobs/job_39195edf5df14725/output"
         },
         "resourceUsage": {
           "start": {
@@ -813,7 +813,7 @@
           "artifactTruthVersion": 1,
           "status": "valid",
           "blocking": false,
-          "resultDir": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output",
+          "resultDir": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output",
           "declaredCount": 24,
           "actualCount": 24,
           "validCount": 24,
@@ -832,8 +832,8 @@
             "type": "table",
             "label": "差异基因表",
             "filename": "deg_table.csv",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
             "id": "deg_table",
             "title": "差异基因表",
             "size": 1068,
@@ -843,7 +843,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "deg_table"
             }
@@ -853,8 +853,8 @@
             "type": "table",
             "label": "上调基因",
             "filename": "up_genes.csv",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
             "id": "artifact_2",
             "title": "上调基因",
             "size": 467,
@@ -864,7 +864,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_2"
             }
@@ -874,8 +874,8 @@
             "type": "table",
             "label": "下调基因",
             "filename": "down_genes.csv",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
             "id": "artifact_3",
             "title": "下调基因",
             "size": 162,
@@ -885,7 +885,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_3"
             }
@@ -895,8 +895,8 @@
             "type": "plot",
             "label": "火山图",
             "filename": "volcano.png",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.png",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/volcano.png",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.png",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/volcano.png",
             "id": "volcano",
             "title": "火山图",
             "size": 73857,
@@ -906,7 +906,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "volcano"
             }
@@ -916,8 +916,8 @@
             "type": "file",
             "label": "火山图 (PDF)",
             "filename": "volcano.pdf",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
             "id": "artifact_5",
             "title": "火山图 (PDF)",
             "size": 27949,
@@ -927,7 +927,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_5"
             }
@@ -937,8 +937,8 @@
             "type": "plot",
             "label": "PCA 图",
             "filename": "pca.png",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/pca.png",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/pca.png",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/pca.png",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/pca.png",
             "id": "pca",
             "title": "PCA 图",
             "size": 61251,
@@ -948,7 +948,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "pca"
             }
@@ -958,8 +958,8 @@
             "type": "file",
             "label": "PCA 图 (PDF)",
             "filename": "pca.pdf",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/pca.pdf",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/pca.pdf",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/pca.pdf",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/pca.pdf",
             "id": "artifact_7",
             "title": "PCA 图 (PDF)",
             "size": 14834,
@@ -969,7 +969,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_7"
             }
@@ -979,8 +979,8 @@
             "type": "plot",
             "label": "Top50 热图",
             "filename": "heatmap.png",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.png",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/heatmap.png",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.png",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/heatmap.png",
             "id": "heatmap",
             "title": "Top50 热图",
             "size": 70234,
@@ -990,7 +990,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "heatmap"
             }
@@ -1000,8 +1000,8 @@
             "type": "file",
             "label": "Top50 热图 (PDF)",
             "filename": "heatmap.pdf",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
             "id": "artifact_9",
             "title": "Top50 热图 (PDF)",
             "size": 17063,
@@ -1011,7 +1011,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_9"
             }
@@ -1021,8 +1021,8 @@
             "type": "plot",
             "label": "文库大小 (PNG)",
             "filename": "library_size.png",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.png",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/library_size.png",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.png",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/library_size.png",
             "id": "artifact_10",
             "title": "文库大小 (PNG)",
             "size": 48769,
@@ -1032,7 +1032,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_10"
             }
@@ -1042,8 +1042,8 @@
             "type": "file",
             "label": "文库大小 (PDF)",
             "filename": "library_size.pdf",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
             "id": "artifact_11",
             "title": "文库大小 (PDF)",
             "size": 13184,
@@ -1053,7 +1053,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_11"
             }
@@ -1063,8 +1063,8 @@
             "type": "plot",
             "label": "离散度估计 (PNG)",
             "filename": "dispersion.png",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.png",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/dispersion.png",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.png",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/dispersion.png",
             "id": "artifact_12",
             "title": "离散度估计 (PNG)",
             "size": 82659,
@@ -1074,7 +1074,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_12"
             }
@@ -1084,8 +1084,8 @@
             "type": "file",
             "label": "离散度估计 (PDF)",
             "filename": "dispersion.pdf",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
             "id": "artifact_13",
             "title": "离散度估计 (PDF)",
             "size": 20356,
@@ -1095,7 +1095,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_13"
             }
@@ -1105,8 +1105,8 @@
             "type": "plot",
             "label": "MA 图 (PNG)",
             "filename": "ma_plot.png",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
             "id": "artifact_14",
             "title": "MA 图 (PNG)",
             "size": 61052,
@@ -1116,7 +1116,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_14"
             }
@@ -1126,8 +1126,8 @@
             "type": "file",
             "label": "MA 图 (PDF)",
             "filename": "ma_plot.pdf",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
             "id": "artifact_15",
             "title": "MA 图 (PDF)",
             "size": 15805,
@@ -1137,7 +1137,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_15"
             }
@@ -1147,8 +1147,8 @@
             "type": "plot",
             "label": "样本距离 (PNG)",
             "filename": "sample_distance.png",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
             "id": "artifact_16",
             "title": "样本距离 (PNG)",
             "size": 68083,
@@ -1158,7 +1158,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_16"
             }
@@ -1168,8 +1168,8 @@
             "type": "file",
             "label": "样本距离 (PDF)",
             "filename": "sample_distance.pdf",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
             "id": "artifact_17",
             "title": "样本距离 (PDF)",
             "size": 14251,
@@ -1179,7 +1179,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_17"
             }
@@ -1189,8 +1189,8 @@
             "type": "data",
             "label": "VST 矩阵",
             "filename": "vst_matrix.csv",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
             "id": "vst_matrix",
             "title": "VST 矩阵",
             "size": 784,
@@ -1200,7 +1200,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "vst_matrix"
             }
@@ -1210,8 +1210,8 @@
             "type": "table",
             "label": "样本信息",
             "filename": "coldata_info.csv",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
             "id": "artifact_19",
             "title": "样本信息",
             "size": 63,
@@ -1221,7 +1221,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_19"
             }
@@ -1231,8 +1231,8 @@
             "type": "table",
             "label": "离散度数据",
             "filename": "dispersion_data.csv",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
             "id": "artifact_20",
             "title": "离散度数据",
             "size": 825,
@@ -1242,7 +1242,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_20"
             }
@@ -1252,8 +1252,8 @@
             "type": "text",
             "label": "分析摘要",
             "filename": "summary.txt",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/summary.txt",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/summary.txt",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/summary.txt",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/summary.txt",
             "id": "artifact_21",
             "title": "分析摘要",
             "size": 184,
@@ -1263,7 +1263,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_21"
             }
@@ -1273,8 +1273,8 @@
             "type": "report",
             "label": "解读报告",
             "filename": "report.html",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/report.html",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/report.html",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/report.html",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/report.html",
             "id": "report",
             "title": "解读报告",
             "size": 627945,
@@ -1284,7 +1284,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "report"
             }
@@ -1296,16 +1296,16 @@
             "label": "全部结果打包下载",
             "name": "all_results.zip",
             "title": "全部结果打包下载",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/all_results.zip",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/all_results.zip",
             "size": 833830,
             "sha256": "541170097b276feafa30021accb6cb3c605e4e105b69c976c5355bb8de79448e",
             "required": true,
             "preview": true,
             "download": true,
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/all_results.zip",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/all_results.zip",
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "zip"
             }
@@ -1317,16 +1317,16 @@
             "type": "text",
             "label": "run.log",
             "title": "run.log",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/run.log",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/run.log",
             "size": 1876,
             "sha256": "423e5b9910ca2143e846bc9e83446bbddd7433de95923ab4e0ac51b6a20b1d8d",
             "required": false,
             "preview": true,
             "download": true,
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/run.log",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/run.log",
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_24"
             }
@@ -1338,8 +1338,8 @@
             "type": "table",
             "label": "差异基因表",
             "filename": "deg_table.csv",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
             "id": "deg_table",
             "title": "差异基因表",
             "size": 1068,
@@ -1349,7 +1349,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "deg_table"
             }
@@ -1359,8 +1359,8 @@
             "type": "table",
             "label": "上调基因",
             "filename": "up_genes.csv",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
             "id": "artifact_2",
             "title": "上调基因",
             "size": 467,
@@ -1370,7 +1370,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_2"
             }
@@ -1380,8 +1380,8 @@
             "type": "table",
             "label": "下调基因",
             "filename": "down_genes.csv",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
             "id": "artifact_3",
             "title": "下调基因",
             "size": 162,
@@ -1391,7 +1391,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_3"
             }
@@ -1401,8 +1401,8 @@
             "type": "plot",
             "label": "火山图",
             "filename": "volcano.png",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.png",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/volcano.png",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.png",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/volcano.png",
             "id": "volcano",
             "title": "火山图",
             "size": 73857,
@@ -1412,7 +1412,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "volcano"
             }
@@ -1422,8 +1422,8 @@
             "type": "file",
             "label": "火山图 (PDF)",
             "filename": "volcano.pdf",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
             "id": "artifact_5",
             "title": "火山图 (PDF)",
             "size": 27949,
@@ -1433,7 +1433,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_5"
             }
@@ -1443,8 +1443,8 @@
             "type": "plot",
             "label": "PCA 图",
             "filename": "pca.png",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/pca.png",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/pca.png",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/pca.png",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/pca.png",
             "id": "pca",
             "title": "PCA 图",
             "size": 61251,
@@ -1454,7 +1454,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "pca"
             }
@@ -1464,8 +1464,8 @@
             "type": "file",
             "label": "PCA 图 (PDF)",
             "filename": "pca.pdf",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/pca.pdf",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/pca.pdf",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/pca.pdf",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/pca.pdf",
             "id": "artifact_7",
             "title": "PCA 图 (PDF)",
             "size": 14834,
@@ -1475,7 +1475,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_7"
             }
@@ -1485,8 +1485,8 @@
             "type": "plot",
             "label": "Top50 热图",
             "filename": "heatmap.png",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.png",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/heatmap.png",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.png",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/heatmap.png",
             "id": "heatmap",
             "title": "Top50 热图",
             "size": 70234,
@@ -1496,7 +1496,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "heatmap"
             }
@@ -1506,8 +1506,8 @@
             "type": "file",
             "label": "Top50 热图 (PDF)",
             "filename": "heatmap.pdf",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
             "id": "artifact_9",
             "title": "Top50 热图 (PDF)",
             "size": 17063,
@@ -1517,7 +1517,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_9"
             }
@@ -1527,8 +1527,8 @@
             "type": "plot",
             "label": "文库大小 (PNG)",
             "filename": "library_size.png",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.png",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/library_size.png",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.png",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/library_size.png",
             "id": "artifact_10",
             "title": "文库大小 (PNG)",
             "size": 48769,
@@ -1538,7 +1538,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_10"
             }
@@ -1548,8 +1548,8 @@
             "type": "file",
             "label": "文库大小 (PDF)",
             "filename": "library_size.pdf",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
             "id": "artifact_11",
             "title": "文库大小 (PDF)",
             "size": 13184,
@@ -1559,7 +1559,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_11"
             }
@@ -1569,8 +1569,8 @@
             "type": "plot",
             "label": "离散度估计 (PNG)",
             "filename": "dispersion.png",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.png",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/dispersion.png",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.png",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/dispersion.png",
             "id": "artifact_12",
             "title": "离散度估计 (PNG)",
             "size": 82659,
@@ -1580,7 +1580,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_12"
             }
@@ -1590,8 +1590,8 @@
             "type": "file",
             "label": "离散度估计 (PDF)",
             "filename": "dispersion.pdf",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
             "id": "artifact_13",
             "title": "离散度估计 (PDF)",
             "size": 20356,
@@ -1601,7 +1601,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_13"
             }
@@ -1611,8 +1611,8 @@
             "type": "plot",
             "label": "MA 图 (PNG)",
             "filename": "ma_plot.png",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
             "id": "artifact_14",
             "title": "MA 图 (PNG)",
             "size": 61052,
@@ -1622,7 +1622,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_14"
             }
@@ -1632,8 +1632,8 @@
             "type": "file",
             "label": "MA 图 (PDF)",
             "filename": "ma_plot.pdf",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
             "id": "artifact_15",
             "title": "MA 图 (PDF)",
             "size": 15805,
@@ -1643,7 +1643,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_15"
             }
@@ -1653,8 +1653,8 @@
             "type": "plot",
             "label": "样本距离 (PNG)",
             "filename": "sample_distance.png",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
             "id": "artifact_16",
             "title": "样本距离 (PNG)",
             "size": 68083,
@@ -1664,7 +1664,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_16"
             }
@@ -1674,8 +1674,8 @@
             "type": "file",
             "label": "样本距离 (PDF)",
             "filename": "sample_distance.pdf",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
             "id": "artifact_17",
             "title": "样本距离 (PDF)",
             "size": 14251,
@@ -1685,7 +1685,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_17"
             }
@@ -1695,8 +1695,8 @@
             "type": "data",
             "label": "VST 矩阵",
             "filename": "vst_matrix.csv",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
             "id": "vst_matrix",
             "title": "VST 矩阵",
             "size": 784,
@@ -1706,7 +1706,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "vst_matrix"
             }
@@ -1716,8 +1716,8 @@
             "type": "table",
             "label": "样本信息",
             "filename": "coldata_info.csv",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
             "id": "artifact_19",
             "title": "样本信息",
             "size": 63,
@@ -1727,7 +1727,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_19"
             }
@@ -1737,8 +1737,8 @@
             "type": "table",
             "label": "离散度数据",
             "filename": "dispersion_data.csv",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
             "id": "artifact_20",
             "title": "离散度数据",
             "size": 825,
@@ -1748,7 +1748,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_20"
             }
@@ -1758,8 +1758,8 @@
             "type": "text",
             "label": "分析摘要",
             "filename": "summary.txt",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/summary.txt",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/summary.txt",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/summary.txt",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/summary.txt",
             "id": "artifact_21",
             "title": "分析摘要",
             "size": 184,
@@ -1769,7 +1769,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_21"
             }
@@ -1779,8 +1779,8 @@
             "type": "report",
             "label": "解读报告",
             "filename": "report.html",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/report.html",
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/report.html",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/report.html",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/report.html",
             "id": "report",
             "title": "解读报告",
             "size": 627945,
@@ -1790,7 +1790,7 @@
             "download": true,
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "report"
             }
@@ -1802,16 +1802,16 @@
             "label": "全部结果打包下载",
             "name": "all_results.zip",
             "title": "全部结果打包下载",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/all_results.zip",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/all_results.zip",
             "size": 833830,
             "sha256": "541170097b276feafa30021accb6cb3c605e4e105b69c976c5355bb8de79448e",
             "required": true,
             "preview": true,
             "download": true,
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/all_results.zip",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/all_results.zip",
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "zip"
             }
@@ -1823,16 +1823,16 @@
             "type": "text",
             "label": "run.log",
             "title": "run.log",
-            "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/run.log",
+            "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/run.log",
             "size": 1876,
             "sha256": "423e5b9910ca2143e846bc9e83446bbddd7433de95923ab4e0ac51b6a20b1d8d",
             "required": false,
             "preview": true,
             "download": true,
-            "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/run.log",
+            "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/run.log",
             "provenance": {
               "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-              "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+              "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
               "toolJobId": "job_39195edf5df14725",
               "reproductionTarget": "artifact_24"
             }
@@ -1903,17 +1903,17 @@
             }
           ],
           "script": {
-            "snapshotPath": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/run-script.R",
+            "snapshotPath": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/run-script.R",
             "sha256": "7c6bac471c53137bb69bfd6e112dffb71a0ade47cbea525b421bce15b9326dbb",
             "entryPoint": null
           },
           "command": {
             "executable": "/usr/local/bin/Rscript",
             "args": [
-              "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/run-script.R",
-              "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725"
+              "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/run-script.R",
+              "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725"
             ],
-            "cwd": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725"
+            "cwd": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725"
           },
           "startedAt": "2026-09-18T15:44:29.983Z",
           "completedAt": "2026-09-18T15:44:38.736Z",
@@ -2091,7 +2091,7 @@
         },
         "provenanceRef": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725"
         }
       }
@@ -2104,8 +2104,8 @@
         "type": "table",
         "label": "差异基因表",
         "filename": "deg_table.csv",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
         "id": "deg_table",
         "title": "差异基因表",
         "size": 1068,
@@ -2115,7 +2115,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "deg_table"
         }
@@ -2125,8 +2125,8 @@
         "type": "table",
         "label": "上调基因",
         "filename": "up_genes.csv",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
         "id": "artifact_2",
         "title": "上调基因",
         "size": 467,
@@ -2136,7 +2136,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_2"
         }
@@ -2146,8 +2146,8 @@
         "type": "table",
         "label": "下调基因",
         "filename": "down_genes.csv",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
         "id": "artifact_3",
         "title": "下调基因",
         "size": 162,
@@ -2157,7 +2157,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_3"
         }
@@ -2167,8 +2167,8 @@
         "type": "plot",
         "label": "火山图",
         "filename": "volcano.png",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.png",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/volcano.png",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.png",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/volcano.png",
         "id": "volcano",
         "title": "火山图",
         "size": 73857,
@@ -2178,7 +2178,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "volcano"
         }
@@ -2188,8 +2188,8 @@
         "type": "file",
         "label": "火山图 (PDF)",
         "filename": "volcano.pdf",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
         "id": "artifact_5",
         "title": "火山图 (PDF)",
         "size": 27949,
@@ -2199,7 +2199,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_5"
         }
@@ -2209,8 +2209,8 @@
         "type": "plot",
         "label": "PCA 图",
         "filename": "pca.png",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/pca.png",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/pca.png",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/pca.png",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/pca.png",
         "id": "pca",
         "title": "PCA 图",
         "size": 61251,
@@ -2220,7 +2220,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "pca"
         }
@@ -2230,8 +2230,8 @@
         "type": "file",
         "label": "PCA 图 (PDF)",
         "filename": "pca.pdf",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/pca.pdf",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/pca.pdf",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/pca.pdf",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/pca.pdf",
         "id": "artifact_7",
         "title": "PCA 图 (PDF)",
         "size": 14834,
@@ -2241,7 +2241,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_7"
         }
@@ -2251,8 +2251,8 @@
         "type": "plot",
         "label": "Top50 热图",
         "filename": "heatmap.png",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.png",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/heatmap.png",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.png",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/heatmap.png",
         "id": "heatmap",
         "title": "Top50 热图",
         "size": 70234,
@@ -2262,7 +2262,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "heatmap"
         }
@@ -2272,8 +2272,8 @@
         "type": "file",
         "label": "Top50 热图 (PDF)",
         "filename": "heatmap.pdf",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
         "id": "artifact_9",
         "title": "Top50 热图 (PDF)",
         "size": 17063,
@@ -2283,7 +2283,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_9"
         }
@@ -2293,8 +2293,8 @@
         "type": "plot",
         "label": "文库大小 (PNG)",
         "filename": "library_size.png",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.png",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/library_size.png",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.png",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/library_size.png",
         "id": "artifact_10",
         "title": "文库大小 (PNG)",
         "size": 48769,
@@ -2304,7 +2304,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_10"
         }
@@ -2314,8 +2314,8 @@
         "type": "file",
         "label": "文库大小 (PDF)",
         "filename": "library_size.pdf",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
         "id": "artifact_11",
         "title": "文库大小 (PDF)",
         "size": 13184,
@@ -2325,7 +2325,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_11"
         }
@@ -2335,8 +2335,8 @@
         "type": "plot",
         "label": "离散度估计 (PNG)",
         "filename": "dispersion.png",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.png",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/dispersion.png",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.png",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/dispersion.png",
         "id": "artifact_12",
         "title": "离散度估计 (PNG)",
         "size": 82659,
@@ -2346,7 +2346,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_12"
         }
@@ -2356,8 +2356,8 @@
         "type": "file",
         "label": "离散度估计 (PDF)",
         "filename": "dispersion.pdf",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
         "id": "artifact_13",
         "title": "离散度估计 (PDF)",
         "size": 20356,
@@ -2367,7 +2367,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_13"
         }
@@ -2377,8 +2377,8 @@
         "type": "plot",
         "label": "MA 图 (PNG)",
         "filename": "ma_plot.png",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
         "id": "artifact_14",
         "title": "MA 图 (PNG)",
         "size": 61052,
@@ -2388,7 +2388,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_14"
         }
@@ -2398,8 +2398,8 @@
         "type": "file",
         "label": "MA 图 (PDF)",
         "filename": "ma_plot.pdf",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
         "id": "artifact_15",
         "title": "MA 图 (PDF)",
         "size": 15805,
@@ -2409,7 +2409,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_15"
         }
@@ -2419,8 +2419,8 @@
         "type": "plot",
         "label": "样本距离 (PNG)",
         "filename": "sample_distance.png",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
         "id": "artifact_16",
         "title": "样本距离 (PNG)",
         "size": 68083,
@@ -2430,7 +2430,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_16"
         }
@@ -2440,8 +2440,8 @@
         "type": "file",
         "label": "样本距离 (PDF)",
         "filename": "sample_distance.pdf",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
         "id": "artifact_17",
         "title": "样本距离 (PDF)",
         "size": 14251,
@@ -2451,7 +2451,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_17"
         }
@@ -2461,8 +2461,8 @@
         "type": "data",
         "label": "VST 矩阵",
         "filename": "vst_matrix.csv",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
         "id": "vst_matrix",
         "title": "VST 矩阵",
         "size": 784,
@@ -2472,7 +2472,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "vst_matrix"
         }
@@ -2482,8 +2482,8 @@
         "type": "table",
         "label": "样本信息",
         "filename": "coldata_info.csv",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
         "id": "artifact_19",
         "title": "样本信息",
         "size": 63,
@@ -2493,7 +2493,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_19"
         }
@@ -2503,8 +2503,8 @@
         "type": "table",
         "label": "离散度数据",
         "filename": "dispersion_data.csv",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
         "id": "artifact_20",
         "title": "离散度数据",
         "size": 825,
@@ -2514,7 +2514,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_20"
         }
@@ -2524,8 +2524,8 @@
         "type": "text",
         "label": "分析摘要",
         "filename": "summary.txt",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/summary.txt",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/summary.txt",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/summary.txt",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/summary.txt",
         "id": "artifact_21",
         "title": "分析摘要",
         "size": 184,
@@ -2535,7 +2535,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_21"
         }
@@ -2545,8 +2545,8 @@
         "type": "report",
         "label": "解读报告",
         "filename": "report.html",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/report.html",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/report.html",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/report.html",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/report.html",
         "id": "report",
         "title": "解读报告",
         "size": 627945,
@@ -2556,7 +2556,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "report"
         }
@@ -2568,16 +2568,16 @@
         "label": "全部结果打包下载",
         "name": "all_results.zip",
         "title": "全部结果打包下载",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/all_results.zip",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/all_results.zip",
         "size": 833830,
         "sha256": "541170097b276feafa30021accb6cb3c605e4e105b69c976c5355bb8de79448e",
         "required": true,
         "preview": true,
         "download": true,
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/all_results.zip",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/all_results.zip",
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "zip"
         }
@@ -2589,16 +2589,16 @@
         "type": "text",
         "label": "run.log",
         "title": "run.log",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/run.log",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/run.log",
         "size": 1876,
         "sha256": "423e5b9910ca2143e846bc9e83446bbddd7433de95923ab4e0ac51b6a20b1d8d",
         "required": false,
         "preview": true,
         "download": true,
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/run.log",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/run.log",
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_24"
         }
@@ -2735,12 +2735,12 @@
       }
     },
     "toolJobId": "job_39195edf5df14725",
-    "jobDir": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725",
-    "outputDir": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output",
-    "resultDir": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output",
-    "canonicalJobDir": "/work/biof3/tool-jobs/job_39195edf5df14725",
-    "canonicalOutputDir": "/work/biof3/tool-jobs/job_39195edf5df14725/output",
-    "canonicalResultDir": "/work/biof3/tool-jobs/job_39195edf5df14725/output",
+    "jobDir": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725",
+    "outputDir": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output",
+    "resultDir": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output",
+    "canonicalJobDir": "/work/petri/tool-jobs/job_39195edf5df14725",
+    "canonicalOutputDir": "/work/petri/tool-jobs/job_39195edf5df14725/output",
+    "canonicalResultDir": "/work/petri/tool-jobs/job_39195edf5df14725/output",
     "execution": {
       "executionContextVersion": 2,
       "adapter": {
@@ -2757,13 +2757,13 @@
         "command": "/usr/local/bin/Rscript",
         "reason": null
       },
-      "workDir": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725",
-      "canonicalWorkDir": "/work/biof3/tool-jobs/job_39195edf5df14725",
-      "executionWorkDir": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725",
-      "outputDir": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output",
-      "canonicalOutputDir": "/work/biof3/tool-jobs/job_39195edf5df14725/output",
-      "resultDir": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output",
-      "canonicalResultDir": "/work/biof3/tool-jobs/job_39195edf5df14725/output"
+      "workDir": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725",
+      "canonicalWorkDir": "/work/petri/tool-jobs/job_39195edf5df14725",
+      "executionWorkDir": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725",
+      "outputDir": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output",
+      "canonicalOutputDir": "/work/petri/tool-jobs/job_39195edf5df14725/output",
+      "resultDir": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output",
+      "canonicalResultDir": "/work/petri/tool-jobs/job_39195edf5df14725/output"
     },
     "resourceUsage": {
       "start": {
@@ -2847,7 +2847,7 @@
       "artifactTruthVersion": 1,
       "status": "valid",
       "blocking": false,
-      "resultDir": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output",
+      "resultDir": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output",
       "declaredCount": 24,
       "actualCount": 24,
       "validCount": 24,
@@ -2866,8 +2866,8 @@
         "type": "table",
         "label": "差异基因表",
         "filename": "deg_table.csv",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
         "id": "deg_table",
         "title": "差异基因表",
         "size": 1068,
@@ -2877,7 +2877,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "deg_table"
         }
@@ -2887,8 +2887,8 @@
         "type": "table",
         "label": "上调基因",
         "filename": "up_genes.csv",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
         "id": "artifact_2",
         "title": "上调基因",
         "size": 467,
@@ -2898,7 +2898,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_2"
         }
@@ -2908,8 +2908,8 @@
         "type": "table",
         "label": "下调基因",
         "filename": "down_genes.csv",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
         "id": "artifact_3",
         "title": "下调基因",
         "size": 162,
@@ -2919,7 +2919,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_3"
         }
@@ -2929,8 +2929,8 @@
         "type": "plot",
         "label": "火山图",
         "filename": "volcano.png",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.png",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/volcano.png",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.png",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/volcano.png",
         "id": "volcano",
         "title": "火山图",
         "size": 73857,
@@ -2940,7 +2940,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "volcano"
         }
@@ -2950,8 +2950,8 @@
         "type": "file",
         "label": "火山图 (PDF)",
         "filename": "volcano.pdf",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
         "id": "artifact_5",
         "title": "火山图 (PDF)",
         "size": 27949,
@@ -2961,7 +2961,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_5"
         }
@@ -2971,8 +2971,8 @@
         "type": "plot",
         "label": "PCA 图",
         "filename": "pca.png",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/pca.png",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/pca.png",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/pca.png",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/pca.png",
         "id": "pca",
         "title": "PCA 图",
         "size": 61251,
@@ -2982,7 +2982,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "pca"
         }
@@ -2992,8 +2992,8 @@
         "type": "file",
         "label": "PCA 图 (PDF)",
         "filename": "pca.pdf",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/pca.pdf",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/pca.pdf",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/pca.pdf",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/pca.pdf",
         "id": "artifact_7",
         "title": "PCA 图 (PDF)",
         "size": 14834,
@@ -3003,7 +3003,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_7"
         }
@@ -3013,8 +3013,8 @@
         "type": "plot",
         "label": "Top50 热图",
         "filename": "heatmap.png",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.png",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/heatmap.png",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.png",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/heatmap.png",
         "id": "heatmap",
         "title": "Top50 热图",
         "size": 70234,
@@ -3024,7 +3024,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "heatmap"
         }
@@ -3034,8 +3034,8 @@
         "type": "file",
         "label": "Top50 热图 (PDF)",
         "filename": "heatmap.pdf",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
         "id": "artifact_9",
         "title": "Top50 热图 (PDF)",
         "size": 17063,
@@ -3045,7 +3045,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_9"
         }
@@ -3055,8 +3055,8 @@
         "type": "plot",
         "label": "文库大小 (PNG)",
         "filename": "library_size.png",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.png",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/library_size.png",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.png",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/library_size.png",
         "id": "artifact_10",
         "title": "文库大小 (PNG)",
         "size": 48769,
@@ -3066,7 +3066,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_10"
         }
@@ -3076,8 +3076,8 @@
         "type": "file",
         "label": "文库大小 (PDF)",
         "filename": "library_size.pdf",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
         "id": "artifact_11",
         "title": "文库大小 (PDF)",
         "size": 13184,
@@ -3087,7 +3087,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_11"
         }
@@ -3097,8 +3097,8 @@
         "type": "plot",
         "label": "离散度估计 (PNG)",
         "filename": "dispersion.png",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.png",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/dispersion.png",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.png",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/dispersion.png",
         "id": "artifact_12",
         "title": "离散度估计 (PNG)",
         "size": 82659,
@@ -3108,7 +3108,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_12"
         }
@@ -3118,8 +3118,8 @@
         "type": "file",
         "label": "离散度估计 (PDF)",
         "filename": "dispersion.pdf",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
         "id": "artifact_13",
         "title": "离散度估计 (PDF)",
         "size": 20356,
@@ -3129,7 +3129,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_13"
         }
@@ -3139,8 +3139,8 @@
         "type": "plot",
         "label": "MA 图 (PNG)",
         "filename": "ma_plot.png",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
         "id": "artifact_14",
         "title": "MA 图 (PNG)",
         "size": 61052,
@@ -3150,7 +3150,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_14"
         }
@@ -3160,8 +3160,8 @@
         "type": "file",
         "label": "MA 图 (PDF)",
         "filename": "ma_plot.pdf",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
         "id": "artifact_15",
         "title": "MA 图 (PDF)",
         "size": 15805,
@@ -3171,7 +3171,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_15"
         }
@@ -3181,8 +3181,8 @@
         "type": "plot",
         "label": "样本距离 (PNG)",
         "filename": "sample_distance.png",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
         "id": "artifact_16",
         "title": "样本距离 (PNG)",
         "size": 68083,
@@ -3192,7 +3192,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_16"
         }
@@ -3202,8 +3202,8 @@
         "type": "file",
         "label": "样本距离 (PDF)",
         "filename": "sample_distance.pdf",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
         "id": "artifact_17",
         "title": "样本距离 (PDF)",
         "size": 14251,
@@ -3213,7 +3213,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_17"
         }
@@ -3223,8 +3223,8 @@
         "type": "data",
         "label": "VST 矩阵",
         "filename": "vst_matrix.csv",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
         "id": "vst_matrix",
         "title": "VST 矩阵",
         "size": 784,
@@ -3234,7 +3234,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "vst_matrix"
         }
@@ -3244,8 +3244,8 @@
         "type": "table",
         "label": "样本信息",
         "filename": "coldata_info.csv",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
         "id": "artifact_19",
         "title": "样本信息",
         "size": 63,
@@ -3255,7 +3255,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_19"
         }
@@ -3265,8 +3265,8 @@
         "type": "table",
         "label": "离散度数据",
         "filename": "dispersion_data.csv",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
         "id": "artifact_20",
         "title": "离散度数据",
         "size": 825,
@@ -3276,7 +3276,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_20"
         }
@@ -3286,8 +3286,8 @@
         "type": "text",
         "label": "分析摘要",
         "filename": "summary.txt",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/summary.txt",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/summary.txt",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/summary.txt",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/summary.txt",
         "id": "artifact_21",
         "title": "分析摘要",
         "size": 184,
@@ -3297,7 +3297,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_21"
         }
@@ -3307,8 +3307,8 @@
         "type": "report",
         "label": "解读报告",
         "filename": "report.html",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/report.html",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/report.html",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/report.html",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/report.html",
         "id": "report",
         "title": "解读报告",
         "size": 627945,
@@ -3318,7 +3318,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "report"
         }
@@ -3330,16 +3330,16 @@
         "label": "全部结果打包下载",
         "name": "all_results.zip",
         "title": "全部结果打包下载",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/all_results.zip",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/all_results.zip",
         "size": 833830,
         "sha256": "541170097b276feafa30021accb6cb3c605e4e105b69c976c5355bb8de79448e",
         "required": true,
         "preview": true,
         "download": true,
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/all_results.zip",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/all_results.zip",
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "zip"
         }
@@ -3351,16 +3351,16 @@
         "type": "text",
         "label": "run.log",
         "title": "run.log",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/run.log",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/run.log",
         "size": 1876,
         "sha256": "423e5b9910ca2143e846bc9e83446bbddd7433de95923ab4e0ac51b6a20b1d8d",
         "required": false,
         "preview": true,
         "download": true,
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/run.log",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/run.log",
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_24"
         }
@@ -3372,8 +3372,8 @@
         "type": "table",
         "label": "差异基因表",
         "filename": "deg_table.csv",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/deg_table.csv",
         "id": "deg_table",
         "title": "差异基因表",
         "size": 1068,
@@ -3383,7 +3383,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "deg_table"
         }
@@ -3393,8 +3393,8 @@
         "type": "table",
         "label": "上调基因",
         "filename": "up_genes.csv",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/up_genes.csv",
         "id": "artifact_2",
         "title": "上调基因",
         "size": 467,
@@ -3404,7 +3404,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_2"
         }
@@ -3414,8 +3414,8 @@
         "type": "table",
         "label": "下调基因",
         "filename": "down_genes.csv",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/down_genes.csv",
         "id": "artifact_3",
         "title": "下调基因",
         "size": 162,
@@ -3425,7 +3425,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_3"
         }
@@ -3435,8 +3435,8 @@
         "type": "plot",
         "label": "火山图",
         "filename": "volcano.png",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.png",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/volcano.png",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.png",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/volcano.png",
         "id": "volcano",
         "title": "火山图",
         "size": 73857,
@@ -3446,7 +3446,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "volcano"
         }
@@ -3456,8 +3456,8 @@
         "type": "file",
         "label": "火山图 (PDF)",
         "filename": "volcano.pdf",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/volcano.pdf",
         "id": "artifact_5",
         "title": "火山图 (PDF)",
         "size": 27949,
@@ -3467,7 +3467,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_5"
         }
@@ -3477,8 +3477,8 @@
         "type": "plot",
         "label": "PCA 图",
         "filename": "pca.png",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/pca.png",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/pca.png",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/pca.png",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/pca.png",
         "id": "pca",
         "title": "PCA 图",
         "size": 61251,
@@ -3488,7 +3488,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "pca"
         }
@@ -3498,8 +3498,8 @@
         "type": "file",
         "label": "PCA 图 (PDF)",
         "filename": "pca.pdf",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/pca.pdf",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/pca.pdf",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/pca.pdf",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/pca.pdf",
         "id": "artifact_7",
         "title": "PCA 图 (PDF)",
         "size": 14834,
@@ -3509,7 +3509,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_7"
         }
@@ -3519,8 +3519,8 @@
         "type": "plot",
         "label": "Top50 热图",
         "filename": "heatmap.png",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.png",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/heatmap.png",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.png",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/heatmap.png",
         "id": "heatmap",
         "title": "Top50 热图",
         "size": 70234,
@@ -3530,7 +3530,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "heatmap"
         }
@@ -3540,8 +3540,8 @@
         "type": "file",
         "label": "Top50 热图 (PDF)",
         "filename": "heatmap.pdf",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/heatmap.pdf",
         "id": "artifact_9",
         "title": "Top50 热图 (PDF)",
         "size": 17063,
@@ -3551,7 +3551,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_9"
         }
@@ -3561,8 +3561,8 @@
         "type": "plot",
         "label": "文库大小 (PNG)",
         "filename": "library_size.png",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.png",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/library_size.png",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.png",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/library_size.png",
         "id": "artifact_10",
         "title": "文库大小 (PNG)",
         "size": 48769,
@@ -3572,7 +3572,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_10"
         }
@@ -3582,8 +3582,8 @@
         "type": "file",
         "label": "文库大小 (PDF)",
         "filename": "library_size.pdf",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/library_size.pdf",
         "id": "artifact_11",
         "title": "文库大小 (PDF)",
         "size": 13184,
@@ -3593,7 +3593,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_11"
         }
@@ -3603,8 +3603,8 @@
         "type": "plot",
         "label": "离散度估计 (PNG)",
         "filename": "dispersion.png",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.png",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/dispersion.png",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.png",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/dispersion.png",
         "id": "artifact_12",
         "title": "离散度估计 (PNG)",
         "size": 82659,
@@ -3614,7 +3614,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_12"
         }
@@ -3624,8 +3624,8 @@
         "type": "file",
         "label": "离散度估计 (PDF)",
         "filename": "dispersion.pdf",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/dispersion.pdf",
         "id": "artifact_13",
         "title": "离散度估计 (PDF)",
         "size": 20356,
@@ -3635,7 +3635,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_13"
         }
@@ -3645,8 +3645,8 @@
         "type": "plot",
         "label": "MA 图 (PNG)",
         "filename": "ma_plot.png",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/ma_plot.png",
         "id": "artifact_14",
         "title": "MA 图 (PNG)",
         "size": 61052,
@@ -3656,7 +3656,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_14"
         }
@@ -3666,8 +3666,8 @@
         "type": "file",
         "label": "MA 图 (PDF)",
         "filename": "ma_plot.pdf",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/ma_plot.pdf",
         "id": "artifact_15",
         "title": "MA 图 (PDF)",
         "size": 15805,
@@ -3677,7 +3677,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_15"
         }
@@ -3687,8 +3687,8 @@
         "type": "plot",
         "label": "样本距离 (PNG)",
         "filename": "sample_distance.png",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/sample_distance.png",
         "id": "artifact_16",
         "title": "样本距离 (PNG)",
         "size": 68083,
@@ -3698,7 +3698,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_16"
         }
@@ -3708,8 +3708,8 @@
         "type": "file",
         "label": "样本距离 (PDF)",
         "filename": "sample_distance.pdf",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/sample_distance.pdf",
         "id": "artifact_17",
         "title": "样本距离 (PDF)",
         "size": 14251,
@@ -3719,7 +3719,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_17"
         }
@@ -3729,8 +3729,8 @@
         "type": "data",
         "label": "VST 矩阵",
         "filename": "vst_matrix.csv",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/vst_matrix.csv",
         "id": "vst_matrix",
         "title": "VST 矩阵",
         "size": 784,
@@ -3740,7 +3740,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "vst_matrix"
         }
@@ -3750,8 +3750,8 @@
         "type": "table",
         "label": "样本信息",
         "filename": "coldata_info.csv",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/coldata_info.csv",
         "id": "artifact_19",
         "title": "样本信息",
         "size": 63,
@@ -3761,7 +3761,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_19"
         }
@@ -3771,8 +3771,8 @@
         "type": "table",
         "label": "离散度数据",
         "filename": "dispersion_data.csv",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/dispersion_data.csv",
         "id": "artifact_20",
         "title": "离散度数据",
         "size": 825,
@@ -3782,7 +3782,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_20"
         }
@@ -3792,8 +3792,8 @@
         "type": "text",
         "label": "分析摘要",
         "filename": "summary.txt",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/summary.txt",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/summary.txt",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/summary.txt",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/summary.txt",
         "id": "artifact_21",
         "title": "分析摘要",
         "size": 184,
@@ -3803,7 +3803,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_21"
         }
@@ -3813,8 +3813,8 @@
         "type": "report",
         "label": "解读报告",
         "filename": "report.html",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/report.html",
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/report.html",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/report.html",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/report.html",
         "id": "report",
         "title": "解读报告",
         "size": 627945,
@@ -3824,7 +3824,7 @@
         "download": true,
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "report"
         }
@@ -3836,16 +3836,16 @@
         "label": "全部结果打包下载",
         "name": "all_results.zip",
         "title": "全部结果打包下载",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/all_results.zip",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/all_results.zip",
         "size": 833830,
         "sha256": "541170097b276feafa30021accb6cb3c605e4e105b69c976c5355bb8de79448e",
         "required": true,
         "preview": true,
         "download": true,
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/all_results.zip",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/all_results.zip",
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "zip"
         }
@@ -3857,16 +3857,16 @@
         "type": "text",
         "label": "run.log",
         "title": "run.log",
-        "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/output/run.log",
+        "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/output/run.log",
         "size": 1876,
         "sha256": "423e5b9910ca2143e846bc9e83446bbddd7433de95923ab4e0ac51b6a20b1d8d",
         "required": false,
         "preview": true,
         "download": true,
-        "canonicalPath": "/work/biof3/tool-jobs/job_39195edf5df14725/output/run.log",
+        "canonicalPath": "/work/petri/tool-jobs/job_39195edf5df14725/output/run.log",
         "provenance": {
           "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-          "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+          "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
           "toolJobId": "job_39195edf5df14725",
           "reproductionTarget": "artifact_24"
         }
@@ -3937,17 +3937,17 @@
         }
       ],
       "script": {
-        "snapshotPath": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/run-script.R",
+        "snapshotPath": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/run-script.R",
         "sha256": "7c6bac471c53137bb69bfd6e112dffb71a0ade47cbea525b421bce15b9326dbb",
         "entryPoint": null
       },
       "command": {
         "executable": "/usr/local/bin/Rscript",
         "args": [
-          "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/run-script.R",
-          "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725"
+          "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/run-script.R",
+          "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725"
         ],
-        "cwd": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725"
+        "cwd": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725"
       },
       "startedAt": "2026-09-18T15:44:29.983Z",
       "completedAt": "2026-09-18T15:44:38.736Z",
@@ -4125,7 +4125,7 @@
     },
     "provenanceRef": {
       "provenanceHash": "bd3a71ca2331e1aacb1a3ba1b878fe7ac755421c50ef1cdeac326456c4356e3b",
-      "path": "/Users/zhangdiandian/Documents/BioF3-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
+      "path": "/Users/zhangdiandian/Documents/Petri-Local/results/tool-jobs/job_39195edf5df14725/provenance.json",
       "toolJobId": "job_39195edf5df14725"
     }
   },

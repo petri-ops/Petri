@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 # platform: darwin（BLOCK-104 P4 双端同形门）
-# auto-sync-mac-setup.sh — Mac 侧一键部署远程库自动同步（安全档，与 Windows Gewu-AutoSync 对称）
+# auto-sync-mac-setup.sh — Mac 侧一键部署远程库自动同步（安全档，与 Windows Petri-AutoSync 对称）
 # 用法（Mac 侧 pull 后仓库内执行）：
 #   bash scripts/auto-sync-mac-setup.sh              # 部署 + 启动 + 验证
 #   bash scripts/auto-sync-mac-setup.sh --dry-run    # 只打印将写入的 plist，不落盘不加载
 #   bash scripts/auto-sync-mac-setup.sh --uninstall  # 卸载 launchd agent
-# 产物：~/Library/LaunchAgents/com.gewu.auto-sync.plist → 每 120 秒跑仓库内 scripts/auto-sync-remote.sh
+# 产物：~/Library/LaunchAgents/com.petri.auto-sync.plist → 每 120 秒跑仓库内 scripts/auto-sync-remote.sh
 # 行为边界与 Windows 完全同形：仅 fetch + ff-only 快进；分叉只登记 events；推不自动（SKILL 第 8 条）。
 set -euo pipefail
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-LABEL="com.gewu.auto-sync"
+LABEL="com.petri.auto-sync"
 PLIST="$HOME/Library/LaunchAgents/${LABEL}.plist"
-LOG_DIR="$REPO_DIR/.biof3-dev-user-data"
+LOG_DIR="$REPO_DIR/.petri-dev-user-data"
 INTERVAL=120
 
 case "${1:-}" in

@@ -5,7 +5,7 @@
 ## 1. 总结
 
 修复 src/preload.js 第 19 行的 require('./main/env-coordinator') 在 Electron sandbox: true 下抛错，
-导致整个 preload 中止 → window.biof3Desktop 不存在 → React 端 getIsDesktop() 返回 false →
+导致整个 preload 中止 → window.petriDesktop 不存在 → React 端 getIsDesktop() 返回 false →
 trafficZone 整个 JSX 不渲染 → 自定义红绿灯（最小化/最大化/关闭）消失。
 
 ## 2. 根因链
@@ -13,7 +13,7 @@ trafficZone 整个 JSX 不渲染 → 自定义红绿灯（最小化/最大化/�
 1. src/main.js 第 417 行设置 BrowserWindow.webPreferences.sandbox: true（安全策略）
 2. Electron sandbox 模式限制 preload 只能 require 内置模块或 0 文件
 3. src/preload.js 第 19 行 require('./main/env-coordinator') 跨文件 require，sandbox 抛 Error: module not found
-4. preload 抛错 → contextBridge.exposeInMainWorld 全部不执行 → window.biof3Desktop === undefined
+4. preload 抛错 → contextBridge.exposeInMainWorld 全部不执行 → window.petriDesktop === undefined
 5. 前端 getIsDesktop() / getIsMac() 都为 false → trafficZone 条件渲染块不渲染 → 三个交通灯消失
 
 ## 3. 引入 commit
@@ -49,9 +49,9 @@ _readPort 同语义，无副作用。
 
 | 指标 | 修复前 | 修复后 |
 |------|--------|--------|
-| typeof window.biof3Desktop | undefined | object ✓ |
-| typeof window.biof3 | undefined | object ✓ |
-| typeof window.biof3Desktop.window.minimize | n/a | function ✓ |
+| typeof window.petriDesktop | undefined | object ✓ |
+| typeof window.petri | undefined | object ✓ |
+| typeof window.petriDesktop.window.minimize | n/a | function ✓ |
 | [class*="traffic"] DOM 匹配数 | 0 | 4 (1 zone + 3 btn) ✓ |
 | header <button> 总数 | 6 | 9 (+3 交通灯) ✓ |
 | 按钮 .click() 触发 | n/a | 成功 ✓ |
@@ -70,13 +70,13 @@ Console error 链消失：
 
 ## 7. 不变量守住
 
-- ✓ IPC contract 100% 保持：window.biof3Desktop.window.{minimize,maximize,close,
+- ✓ IPC contract 100% 保持：window.petriDesktop.window.{minimize,maximize,close,
   isMaximized,onMaximizeChanged,isFullScreen,toggleFullScreen,onFullScreenChanged}
   八件套签名 0 改动
 - ✓ electron.d.ts 0 diff
 - ✓ desktopBridge.ts 0 diff
 - ✓ main.js 第 417 行 sandbox: true 保持（不降级安全策略）
-- ✓ 其他 16 个 preload namespace（biof3.agentWorkbenchFlags / process.env / bioF3Desktop.* 各种）0 diff
+- ✓ 其他 16 个 preload namespace（petri.agentWorkbenchFlags / process.env / petriDesktop.* 各种）0 diff
 - ✓ core/shared-backend/* 0 diff
 - ✓ env-coordinator.js 0 diff（其他位置仍可正常使用 getBackendPort）
 

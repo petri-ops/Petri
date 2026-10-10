@@ -58,8 +58,8 @@ function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext & { project: P
     workspaceMode,
     sshConnectProject: vi.fn(),
     sshConnectHost: vi.fn(async () => ({ ok: true, home: '/root' })),
-    sshListDirs: vi.fn(async () => ({ ok: true, path: '/root', dirs: [{ name: 'gewu-block67-demo', path: '/root/gewu-block67-demo' }] })),
-    sshRegisterHost: vi.fn(async () => ({ ok: true, alias: 'gewu-1-2-3-4' })),
+    sshListDirs: vi.fn(async () => ({ ok: true, path: '/root', dirs: [{ name: 'petri-block67-demo', path: '/root/petri-block67-demo' }] })),
+    sshRegisterHost: vi.fn(async () => ({ ok: true, alias: 'petri-1-2-3-4' })),
     sshCreateAt: vi.fn(async () => ({ ok: true })),
     handleShowScheduled: vi.fn(),
     handleShowExtensions: vi.fn(),
@@ -177,7 +177,7 @@ describe('BLOCK-67 左栏 ssh 项目标识与远程连接', () => {
       ...(ctx.project),
       workspaceKind: 'ssh',
       sshHost: 'aliyun',
-      remotePath: '/root/gewu-block67-demo',
+      remotePath: '/root/petri-block67-demo',
     }];
     render(
       <MemoryRouter>
@@ -226,11 +226,11 @@ describe('UI-327 左栏 globe 行内创建向导（终端式路径输入）', ()
       return el;
     }));
     expect(ctx.sshListDirs).toHaveBeenCalledWith('aliyun', '/root');
-    await waitFor(() => expect(screen.getByText('/root/gewu-block67-demo/')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('/root/petri-block67-demo/')).toBeTruthy());
     void pathInput;
   });
 
-  it('Tab 补全：输入 /root/ge → Tab → 自动完成 /root/gewu-block67-demo/', async () => {
+  it('Tab 补全：输入 /root/ge → Tab → 自动完成 /root/petri-block67-demo/', async () => {
     const ctx = buildCtx('chat');
     render(
       <MemoryRouter>
@@ -252,7 +252,7 @@ describe('UI-327 左栏 globe 行内创建向导（终端式路径输入）', ()
     };
     setVal('/root/ge');
     fireEvent.keyDown(pathInput, { key: 'Tab', bubbles: true, cancelable: true });
-    await waitFor(() => expect(pathInput.value).toBe('/root/gewu-block67-demo/'));
+    await waitFor(() => expect(pathInput.value).toBe('/root/petri-block67-demo/'));
   });
 
   it('IP+密码模式：出现密码字段（type=password）与 IP/端口/用户名', () => {
@@ -297,8 +297,8 @@ describe('UI-327 Tab 多候选：补全到公共前缀', () => {
     ctx.sshListDirs = vi.fn(async () => ({
       ok: true, path: '/root',
       dirs: [
-        { name: 'gewu-a', path: '/root/gewu-a' },
-        { name: 'gewu-b', path: '/root/gewu-b' },
+        { name: 'petri-a', path: '/root/petri-a' },
+        { name: 'petri-b', path: '/root/petri-b' },
       ],
     }));
     render(
@@ -321,7 +321,7 @@ describe('UI-327 Tab 多候选：补全到公共前缀', () => {
     };
     setVal('/root/ge');
     fireEvent.keyDown(pathInput, { key: 'Tab', bubbles: true, cancelable: true });
-    await waitFor(() => expect(pathInput.value).toBe('/root/gewu-'));
+    await waitFor(() => expect(pathInput.value).toBe('/root/petri-'));
   });
 });
 

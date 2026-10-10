@@ -23,12 +23,12 @@ export async function dispatchAction(action: CopilotAction): Promise<ActionResul
       let url = String(action.url || '').trim();
       if (!url) return { ok: false, error: '缺少 URL' };
 
-      // Sanity: AI sometimes gives '#/figcode' or 'biof3.com/figcode' or other malformed URLs.
+      // Sanity: AI sometimes gives '#/figcode' or 'petri.com/figcode' or other malformed URLs.
       // Try to normalize to either an absolute https URL or a leading-slash site path.
       if (url.startsWith('#/')) {
         // Treat #/foo as /foo (likely AI confused single-cell hash routes with site paths)
         url = url.replace(/^#\//, '/');
-      } else if (url.startsWith('biof3.com/') || url.startsWith('www.biof3.com/')) {
+      } else if (url.startsWith('petri.com/') || url.startsWith('www.petri.com/')) {
         url = 'https://' + url;
       } else if (!url.startsWith('http') && !url.startsWith('/') && !url.startsWith('mailto:')) {
         // Bare path like 'figcode' → assume site-relative

@@ -139,7 +139,7 @@ function materializeResultEdit(input = {}) {
   };
   const manifestContent = stableJson(manifest);
 
-  const revisionComponents = ['.biof3', 'revision'];
+  const revisionComponents = ['.petri', 'revision'];
   // A ChangeSet has one root materialization and, only for an already
   // verified server-projected affected subgraph, isolated descendant
   // materializations.  They remain under the same private root so the MCP

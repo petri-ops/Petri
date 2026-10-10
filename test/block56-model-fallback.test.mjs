@@ -23,18 +23,18 @@ const __dirname = path.dirname(__filename);
 const resolve = (...segments) => path.resolve(__dirname, '..', ...segments);
 const require = createRequire(import.meta.url);
 
-// db / store 必须在 env 设置后加载（BIOF3_DB_PATH 单例解析）
-const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block56-'));
-process.env.BIOF3_DB_PATH = path.join(tmpRoot, 'agent-tasks.db');
-process.env.BIOF3_LOCAL_DATA_DIR = path.join(tmpRoot, 'local-data');
+// db / store 必须在 env 设置后加载（PETRI_DB_PATH 单例解析）
+const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block56-'));
+process.env.PETRI_DB_PATH = path.join(tmpRoot, 'agent-tasks.db');
+process.env.PETRI_LOCAL_DATA_DIR = path.join(tmpRoot, 'local-data');
 
 const {
   classifyDegradableError,
   resolveTaskFallbackProfile,
   buildFallbackResumeMessages,
-} = require(resolve('core/biof3-server/helpers/model-fallback-policy'));
-const { maybeLaunchTaskLevelFallback } = require(resolve('core/biof3-server/helpers/agent-fallback'));
-const agentTaskStore = require(resolve('core/biof3-server/agent-task-store'));
+} = require(resolve('core/petri-server/helpers/model-fallback-policy'));
+const { maybeLaunchTaskLevelFallback } = require(resolve('core/petri-server/helpers/agent-fallback'));
+const agentTaskStore = require(resolve('core/petri-server/agent-task-store'));
 
 const USER_ID = 'u_b56';
 

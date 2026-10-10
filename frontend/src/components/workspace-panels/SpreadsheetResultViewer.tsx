@@ -8,7 +8,7 @@ import styles from './SpreadsheetResultViewer.module.css';
  * bundle 语义同 pdfjs 先例：仅点开 xlsx 时加载）解析 → 首工作表网格渲染；
  * 行 ≤200 / 列 ≤50 有界预览，超限**如实标注截断**（展示真实总行/列数，不伪造）；
  * 多工作表列 sheet 名可切换；获取/解析失败如实显示错误。
- * xlsx 写回/编辑不在本包（红线）。样式只走 --gewu-* token。
+ * xlsx 写回/编辑不在本包（红线）。样式只走 --petri-* token。
  */
 
 const MAX_ROWS = 200;

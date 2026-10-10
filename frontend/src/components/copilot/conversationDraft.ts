@@ -1,4 +1,4 @@
-const COMPOSER_DRAFT_PREFIX = 'gewu:composer-draft:';
+const COMPOSER_DRAFT_PREFIX = 'petri:composer-draft:';
 
 function conversationDraftKey(projectId: string, conversationId: string | null): string {
   return `${projectId}:${conversationId || 'new'}`;

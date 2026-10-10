@@ -16,9 +16,9 @@ function normalizeHttpOrigin(value) {
 
 function trustedDesktopOrigins() {
   const configured = [
-    process.env.BIOF3_RENDERER_DEV_URL,
-    process.env.BIOF3_RENDERER_ORIGIN,
-    ...(process.env.BIOF3_TRUSTED_DESKTOP_ORIGINS || '').split(','),
+    process.env.PETRI_RENDERER_DEV_URL,
+    process.env.PETRI_RENDERER_ORIGIN,
+    ...(process.env.PETRI_TRUSTED_DESKTOP_ORIGINS || '').split(','),
   ].filter((value) => value && String(value).trim());
   const candidates = configured.length > 0 ? configured : DEFAULT_RENDERER_ORIGINS;
   return new Set(
@@ -41,7 +41,7 @@ function requireTrustedDesktopOrigin(req, res, next) {
     return res.status(403).json({
       status: 'error',
       error: 'untrusted_origin',
-      message: '该本地接口不接受来自非 BioF3 页面来源的请求。',
+      message: '该本地接口不接受来自非 Petri 页面来源的请求。',
     });
   }
   return next();

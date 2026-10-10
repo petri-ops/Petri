@@ -574,7 +574,7 @@ const response = {
   packageDigest: manifest && manifest.packageDigest || null,
   artifact: artifact || null,
   failures,
-  nextAction: failures.length ? 'repair_package' : 'submit_to_biof3_controlled_replay',
+  nextAction: failures.length ? 'repair_package' : 'submit_to_petri_controlled_replay',
   requiresConfirmation: true,
 };
 process.stdout.write(JSON.stringify(response, null, 2) + '\\n');
@@ -774,7 +774,7 @@ function buildScientificReplayPackage({
   };
   writeJson(path.join(packageDir, 'replay.json'), replay);
   writeText(path.join(packageDir, 'repro', 'reproduce.mjs'), replayWrapperSource());
-  writeText(path.join(packageDir, 'HANDOFF.md'), `# BioF3 scientific task handoff\n\n- Task: ${taskRecord.task_id} v${taskRecord.version}\n- Job: ${job.id}\n- Tool: ${job.tool_id}\n- Source digest: ${sourceDigest}\n- History checkpoint: ${checkpoint ? 'included' : 'unavailable; see context-checkpoint.json'}\n- Verify: \`node repro/reproduce.mjs\`\n- Prepare one artifact: \`node repro/reproduce.mjs --artifact <artifactId>\`\n\nThe wrapper verifies package integrity and prepares a controlled replay request. It never runs scientific code directly. Real replay must be confirmed and recorded as a BioF3 replay Job.\n`);
+  writeText(path.join(packageDir, 'HANDOFF.md'), `# Petri scientific task handoff\n\n- Task: ${taskRecord.task_id} v${taskRecord.version}\n- Job: ${job.id}\n- Tool: ${job.tool_id}\n- Source digest: ${sourceDigest}\n- History checkpoint: ${checkpoint ? 'included' : 'unavailable; see context-checkpoint.json'}\n- Verify: \`node repro/reproduce.mjs\`\n- Prepare one artifact: \`node repro/reproduce.mjs --artifact <artifactId>\`\n\nThe wrapper verifies package integrity and prepares a controlled replay request. It never runs scientific code directly. Real replay must be confirmed and recorded as a Petri replay Job.\n`);
 
   const files = collectPackageFiles(packageDir, new Set(['package-manifest.json']));
   const packageManifest = {

@@ -4,7 +4,7 @@
   "capturedAt": "2026-09-22T05:40:08.337Z",
   "sourceCommit": "70d8efb4c0aec838619eec81e04e31feec8a59cf",
   "model": "jev-1.13.0",
-  "productionPath": "core/biof3-server/helpers/interpret.js lookupCellTypeWithConfidence（guard=1 显式开启）",
+  "productionPath": "core/petri-server/helpers/interpret.js lookupCellTypeWithConfidence（guard=1 显式开启）",
   "corpus": {
     "file": "corpus-marker-celltype.json",
     "choiceEvaluable": 92,

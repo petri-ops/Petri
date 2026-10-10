@@ -9,17 +9,17 @@ import test from 'node:test';
  * BLOCK-150 加映（用户裁决 2026-10-09「杜绝走 env 这个就应该显式的设置」）：
  * 桌面版凭据唯一来源 = 设置页（credential store）。env 兜底路移除——
  * 隐性 env 通道正是「栈重启链路不同→识图时好时坏」的根因。
- * 子进程注入 BIOF3_LOCAL_DATA_DIR + DASHSCOPE_API_KEY 隔离验证。
+ * 子进程注入 PETRI_LOCAL_DATA_DIR + DASHSCOPE_API_KEY 隔离验证。
  */
 function probeWithStore(storeJson, extraEnv) {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-cred-'));
   fs.writeFileSync(path.join(tmp, 'ai-credentials.json'), storeJson);
   fs.writeFileSync(path.join(tmp, 'ai-settings.json'), '{}');
   const out = execFileSync(process.execPath, ['-e',
-    "const m=require('./core/biof3-server/helpers/ai-settings.js');process.stdout.write(m.getApiKey('dashscope'))",
+    "const m=require('./core/petri-server/helpers/ai-settings.js');process.stdout.write(m.getApiKey('dashscope'))",
   ], {
     cwd: path.resolve(import.meta.dirname, '..'),
-    env: { ...process.env, BIOF3_LOCAL_DATA_DIR: tmp, ...extraEnv },
+    env: { ...process.env, PETRI_LOCAL_DATA_DIR: tmp, ...extraEnv },
   });
   fs.rmSync(tmp, { recursive: true, force: true });
   return out.toString();

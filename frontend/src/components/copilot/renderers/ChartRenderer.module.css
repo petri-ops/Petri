@@ -7,7 +7,7 @@
    tint from the card chrome (no double-frame).
 
    Visual rules:
-   - Single-color chart strokes + bar fills using --gewu-*
+   - Single-color chart strokes + bar fills using --petri-*
      design tokens so light/dark themes stay aligned with the
      rest of the ResultCard family (ResultCard.module.css +
      TableRenderer.module.css).
@@ -22,7 +22,7 @@
      * .tooltip lives next to the <svg> with pointer-events:none
        so it never intercepts clicks on data points.
      * .barSelected / .dotSelected emphasize stroke for the
-       selected point; the stroke color uses --gewu-text so it
+       selected point; the stroke color uses --petri-text so it
        stays visible in both light and dark themes.
      * .legendButton is a real <button>; .legendButtonHidden
        dims the swatch + label to communicate "hidden" state
@@ -34,9 +34,9 @@
   position: relative;
   width: 100%;
   max-width: 100%;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   line-height: 1.45;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .svg {
@@ -49,7 +49,7 @@
 }
 
 .axis {
-  stroke: var(--gewu-border);
+  stroke: var(--petri-border);
   stroke-width: 1;
   /* Vector effect keeps the stroke crisp when the SVG is
      scaled down by the responsive wrapper. */
@@ -57,9 +57,9 @@
 }
 
 .bar {
-  fill: var(--gewu-accent, var(--gewu-text));
+  fill: var(--petri-accent, var(--petri-text));
   fill-opacity: 0.78;
-  stroke: var(--gewu-accent, var(--gewu-text));
+  stroke: var(--petri-accent, var(--petri-text));
   stroke-width: 0.5;
   /* P2: cursor change signals that bars are now interactive. */
   cursor: pointer;
@@ -73,23 +73,23 @@
 }
 
 /* P2: selected bar stroke emphasis. Selected stroke is
-   visibly thicker and uses --gewu-text instead of --gewu-
+   visibly thicker and uses --petri-text instead of --petri-
    accent so it stays legible when the bar fill is the same
    hue. */
 .barSelected {
-  stroke: var(--gewu-text);
+  stroke: var(--petri-text);
   stroke-width: 2;
   fill-opacity: 1;
 }
 
 .barLabel {
-  font-size: var(--gewu-font-size-xs);
-  fill: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-xs);
+  fill: var(--petri-text-secondary);
   font-variant-numeric: tabular-nums;
 }
 
 .line {
-  stroke: var(--gewu-accent, var(--gewu-text));
+  stroke: var(--petri-accent, var(--petri-text));
   stroke-width: 1.6;
   stroke-linejoin: round;
   stroke-linecap: round;
@@ -98,8 +98,8 @@
 }
 
 .dot {
-  fill: var(--gewu-bg-surface, #fff);
-  stroke: var(--gewu-accent, var(--gewu-text));
+  fill: var(--petri-bg-surface, #fff);
+  stroke: var(--petri-accent, var(--petri-text));
   stroke-width: 1.4;
   /* Vector effect keeps dot strokes sharp at smaller scales. */
   vector-effect: non-scaling-stroke;
@@ -115,13 +115,13 @@
 /* P2: selected dot stroke emphasis (radius is also bumped
    via the inline SVG `r` attribute — handled in TSX). */
 .dotSelected {
-  stroke: var(--gewu-text);
+  stroke: var(--petri-text);
   stroke-width: 2.2;
 }
 
 .tickLabel {
-  font-size: var(--gewu-font-size-xs);
-  fill: var(--gewu-text-tertiary);
+  font-size: var(--petri-font-size-xs);
+  fill: var(--petri-text-tertiary);
   /* Tick labels can be long; truncate visually rather than
      pushing the SVG wider than the card. */
   font-variant-numeric: tabular-nums;
@@ -144,12 +144,12 @@
   align-items: center;
   gap: 6px;
   padding: 4px 8px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 999px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text-secondary);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
   font: inherit;
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   line-height: 1;
   cursor: pointer;
   transition: background-color 120ms ease, color 120ms ease,
@@ -158,13 +158,13 @@
 
 .legendButton:hover,
 .legendButton:focus {
-  background: var(--gewu-bg-subtle);
-  color: var(--gewu-text);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text);
   outline: none;
 }
 
 .legendButton:focus-visible {
-  outline: 2px solid var(--gewu-accent, var(--gewu-text));
+  outline: 2px solid var(--petri-accent, var(--petri-text));
   outline-offset: 1px;
 }
 
@@ -173,7 +173,7 @@
   width: 10px;
   height: 10px;
   border-radius: 2px;
-  background: var(--gewu-accent, var(--gewu-text));
+  background: var(--petri-accent, var(--petri-text));
   fill-opacity: 0.78;
 }
 
@@ -186,7 +186,7 @@
 }
 
 .legendButtonHidden .legendSwatch {
-  background: var(--gewu-border);
+  background: var(--petri-border);
   fill-opacity: 0.5;
 }
 
@@ -195,8 +195,8 @@
 }
 
 .legendText {
-  font-size: var(--gewu-font-size-sm);
-  fill: var(--gewu-text-secondary);
+  font-size: var(--petri-font-size-sm);
+  fill: var(--petri-text-secondary);
   color: inherit;
 }
 
@@ -212,12 +212,12 @@
   align-items: baseline;
   gap: 8px;
   padding: 6px 10px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 6px;
-  background: var(--gewu-bg-surface);
-  color: var(--gewu-text);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  font-size: var(--gewu-font-size-sm);
+  font-size: var(--petri-font-size-sm);
   line-height: 1.2;
   pointer-events: none;
   max-width: 60%;
@@ -228,25 +228,25 @@
 }
 
 .tooltipX {
-  color: var(--gewu-text-tertiary);
+  color: var(--petri-text-tertiary);
   font-variant-numeric: tabular-nums;
 }
 
 .tooltipValue {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--gewu-text);
+  color: var(--petri-text);
 }
 
 .fallback {
   margin: 0;
   padding: 8px 10px;
-  border: 1px dashed var(--gewu-border);
+  border: 1px dashed var(--petri-border);
   border-radius: 6px;
-  background: var(--gewu-bg-subtle);
-  color: var(--gewu-text-secondary);
-  font-family: var(--gewu-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
-  font-size: var(--gewu-font-size-sm);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-secondary);
+  font-family: var(--petri-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: var(--petri-font-size-sm);
   line-height: 1.45;
   overflow-x: auto;
   white-space: pre;
@@ -254,8 +254,8 @@
 
 .fallbackNote {
   margin: 0 0 6px;
-  font-size: var(--gewu-font-size-sm);
-  color: var(--gewu-text-tertiary);
-  font-family: var(--gewu-font-sans, inherit);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-tertiary);
+  font-family: var(--petri-font-sans, inherit);
   font-style: normal;
 }

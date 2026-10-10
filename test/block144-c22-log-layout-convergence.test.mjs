@@ -9,20 +9,20 @@ import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const express = require('express');
-const { createToolsMetadataRoutes } = require('../core/biof3-server/routes/tools-metadata.js');
-const resultFiles = require('../core/biof3-server/helpers/tools-executor/result-files.js');
+const { createToolsMetadataRoutes } = require('../core/petri-server/routes/tools-metadata.js');
+const resultFiles = require('../core/petri-server/helpers/tools-executor/result-files.js');
 
 const { resolveToolJobExportDirs } = resultFiles;
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const toolsMetadataSource = fs.readFileSync(
-  path.join(repoRoot, 'core', 'biof3-server', 'routes', 'tools-metadata.js'),
+  path.join(repoRoot, 'core', 'petri-server', 'routes', 'tools-metadata.js'),
   'utf8',
 );
 
 // C-22（BLOCK-144 技术债清尾批）：tool-jobs 布局拼接第三处收敛契约。
 //
-// 主提名现场 = core/biof3-server/routes/tools-metadata.js:254 —— /api/tools/log/:id
+// 主提名现场 = core/petri-server/routes/tools-metadata.js:254 —— /api/tools/log/:id
 // 日志端点 UI-454 layout 解析失败兜底分支：
 //   dirs.push(path.join(projectRow.workspace_path, 'results', 'jobs', job.id, 'output'))
 // 其全局兜底孪生 = tools-metadata.js:259：

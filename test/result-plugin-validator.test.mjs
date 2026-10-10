@@ -14,7 +14,7 @@ function sha256(value) {
 }
 
 function workspace(context) {
-  const root = mkdtempSync(join(tmpdir(), 'biof3-result-validator-'));
+  const root = mkdtempSync(join(tmpdir(), 'petri-result-validator-'));
   context.after(() => rmSync(root, { recursive: true, force: true }));
   const inputPath = join(root, 'data', 'input.csv');
   const outputDir = join(root, 'results', 'job_1', 'output');

@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-declare module 'virtual:gewu-docs-sidebar' {
+declare module 'virtual:petri-docs-sidebar' {
   interface DocItem {
     id: string;
     title: string;

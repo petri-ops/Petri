@@ -17,7 +17,7 @@ const {
 } = require('../core/shared-backend/result-revision-source');
 
 function fixture(context) {
-  const workspaceRoot = mkdtempSync(join(tmpdir(), 'biof3-revision-source-'));
+  const workspaceRoot = mkdtempSync(join(tmpdir(), 'petri-revision-source-'));
   context.after(() => {
       // BLOCK-104 P2 — Windows 派生 git 进程延迟释放句柄；清理 best-effort 同上。
       try {
@@ -36,7 +36,7 @@ function fixture(context) {
   const sourcePath = 'analysis/scripts/family_1/rev_1/table.R';
   const parametersPath = 'analysis/scripts/family_1/rev_1/parameters.json';
   const committed = binding.adapter.commitVirtualFiles({
-    ref: 'refs/heads/biof3/source-test',
+    ref: 'refs/heads/petri/source-test',
     expectedOld: '0'.repeat(40),
     message: 'exact revision source fixture',
     files: [
@@ -46,7 +46,7 @@ function fixture(context) {
   });
   repository.createChangeSet({
     changeSetId: 'cs_1', projectId: 'p_1', baseCommit: committed.commit,
-    workingBranchRef: 'refs/heads/biof3/source-test', createdBy: 'agent',
+    workingBranchRef: 'refs/heads/petri/source-test', createdBy: 'agent',
   });
   repository.transitionChangeSet({ changeSetId: 'cs_1', to: 'running' });
   repository.transitionChangeSet({ changeSetId: 'cs_1', to: 'preview_ready', candidateCommit: committed.commit });

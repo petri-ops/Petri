@@ -25,11 +25,11 @@
  * required — this measures LLM decision quality in the Harness loop, mirroring
  * the (removed) acceptance/stage2/live-provider-check.mjs approach.
  *
- * Secrets: read only from environment variables (source .biof3-secrets first).
+ * Secrets: read only from environment variables (source .petri-secrets first).
  * Never hardcoded, never printed.
  *
  * Usage:
- *   source .biof3-secrets && npm run harness:provider-eval
+ *   source .petri-secrets && npm run harness:provider-eval
  *   # optional: EVAL_TARGETS=deepseek,anthropic,openai-compatible,ollama
  *               OLLAMA_MODEL=qwen3.5:4b-q4_K_M
  *               EVAL_REPORT_DIR=eval-reports
@@ -65,7 +65,7 @@ function env(name) {
 /**
  * Resolve evaluation targets from environment. Reuses the credential field
  * names established by the (removed) Stage 2 live-provider-check so an existing
- * .biof3-secrets keeps working.
+ * .petri-secrets keeps working.
  */
 export function resolveTargets(getEnv = env) {
   const selected = (getEnv('EVAL_TARGETS') || 'deepseek,anthropic,openai-compatible')
@@ -515,10 +515,10 @@ function printRow(row) {
 }
 
 async function main() {
-  console.log('BioF3 Stage 3 M3 — Harness 多 Provider 评测（真实网络）\n');
+  console.log('Petri Stage 3 M3 — Harness 多 Provider 评测（真实网络）\n');
   const targets = resolveTargets();
   if (targets.length === 0) {
-    console.log('未配置任何评测目标。请先 source .biof3-secrets（需要 DEEPSEEK_API_KEY 和/或 ANTHROPIC_API_KEY + ANTHROPIC_BASE_URL + ANTHROPIC_MODEL）。');
+    console.log('未配置任何评测目标。请先 source .petri-secrets（需要 DEEPSEEK_API_KEY 和/或 ANTHROPIC_API_KEY + ANTHROPIC_BASE_URL + ANTHROPIC_MODEL）。');
     console.log('可选：EVAL_TARGETS=deepseek,anthropic 控制评测哪些目标。');
     process.exit(0);
   }

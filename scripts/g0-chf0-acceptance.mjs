@@ -10,13 +10,13 @@ const evidenceDir = join(repoRoot, 'acceptance/g0-critical-crosscut-hardening');
 const files = [
   'package.json',
   'src/main.js',
-  'core/biof3-server/bootstrap.js',
-  'core/biof3-server/db.js',
-  'core/biof3-server/helpers/local-request-boundary.js',
-  'core/biof3-server/helpers/process-lifecycle.js',
-  'core/biof3-server/helpers/tools-executor.js',
-  'core/biof3-server/routes/files.js',
-  'core/biof3-server/routes/tools-platform.js',
+  'core/petri-server/bootstrap.js',
+  'core/petri-server/db.js',
+  'core/petri-server/helpers/local-request-boundary.js',
+  'core/petri-server/helpers/process-lifecycle.js',
+  'core/petri-server/helpers/tools-executor.js',
+  'core/petri-server/routes/files.js',
+  'core/petri-server/routes/tools-platform.js',
   'core/shared-backend/local-request-boundary.js',
   'core/shared-backend/storage/local-storage.js',
   // Bio plugin sources moved to the independent domain pack (BLOCK-83 P4);
@@ -31,7 +31,7 @@ const files = [
 const contracts = [
   {
     id: 'CHF0-SEC-1',
-    assertion: 'R/Python raw execution and replot code routes fail closed for non-BioF3 origins',
+    assertion: 'R/Python raw execution and replot code routes fail closed for non-Petri origins',
     testFile: 'test/g0-chf0-http.test.mjs',
     pattern: 'CHF0 SEC-1',
   },

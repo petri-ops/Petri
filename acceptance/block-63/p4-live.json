@@ -70,12 +70,12 @@
     {
       "name": "P4-7 screenshot 产物落项目工作区（路径白名单）",
       "pass": true,
-      "detail": "{\"ok\":true,\"out\":\"D:\\\\1.WorkDir\\\\biof3-desktop\\\\computer-use\\\\p4-1788840422876.png\",\"bytes\":24888,\"mode\":\"printwindow_renderfullcontent\"}"
+      "detail": "{\"ok\":true,\"out\":\"D:\\\\1.WorkDir\\\\petri-desktop\\\\computer-use\\\\p4-1788840422876.png\",\"bytes\":24888,\"mode\":\"printwindow_renderfullcontent\"}"
     },
     {
       "name": "P4-8 截图产物为真实 PNG",
       "pass": true,
-      "detail": "path=D:/1.WorkDir/biof3-desktop/computer-use/p4-1788840422876.png"
+      "detail": "path=D:/1.WorkDir/petri-desktop/computer-use/p4-1788840422876.png"
     },
     {
       "name": "确认卡 job 建立（computer_click）",

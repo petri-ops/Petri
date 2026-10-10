@@ -82,8 +82,8 @@
 - **报告 / 行**：arch §四 L302-327
 - **标题**：branch-db.js 与 result-db.js L31-49 / L36-54 逐字重复 singleton 包装；同时打开同 db 文件；better-sqlite3 WAL 模式可容忍多读但写者锁竞争加剧；违反"r-server 进程内 SQLite 唯一入口"原则
 - **核心代码位置**：`src/database/branch-db.js:31-49` ↔ `src/database/result-db.js:36-54`
-- **关联 ID**：PR-012（desktop main 同时打开 biof3.db 同根）+ E-019 full（busy_timeout 跨 connection 不一致同根）
-- **修复方向**：抽 `src/database/_db-singleton.js`：`const _cache = new Map(); function getDatabase(dbName='biof3.db') { ... } function closeDatabase(dbName='biof3.db') { ... } function _resetAllForTests() { ... }`；`branch-db.js` / `result-db.js` 改为 `const { getDatabase, closeDatabase } = require('./_db-singleton')`；测试时统一 `_resetAllForTests()`；r-server 进程与 electron main 进程是不同进程，从架构上需要分开（不重写 core/r-server/db.js），但代码层应共享 `getDatabase` 函数
+- **关联 ID**：PR-012（desktop main 同时打开 petri.db 同根）+ E-019 full（busy_timeout 跨 connection 不一致同根）
+- **修复方向**：抽 `src/database/_db-singleton.js`：`const _cache = new Map(); function getDatabase(dbName='petri.db') { ... } function closeDatabase(dbName='petri.db') { ... } function _resetAllForTests() { ... }`；`branch-db.js` / `result-db.js` 改为 `const { getDatabase, closeDatabase } = require('./_db-singleton')`；测试时统一 `_resetAllForTests()`；r-server 进程与 electron main 进程是不同进程，从架构上需要分开（不重写 core/r-server/db.js），但代码层应共享 `getDatabase` 函数
 - **当前状态**：✅ **PHASE 1**（主范围，DB 体系化 1 commit 与 PR-012 + E-019 full 同根）
 - **风险**：🟠 中（进程边界不破坏；仅代码层共享；既有 chf0-critical IPC contract 不退化）
 
@@ -110,8 +110,8 @@
 ### §1.10 A-010 — Dead deps（jspdf）+ 214 处隐式 env · ✅ PHASE 1（仅 jspdf + 6 处 env）
 
 - **报告 / 行**：arch §四 L356-372
-- **标题**：`frontend/package.json` `jspdf@^4.2.1` dead dep（前端零 import）；214 处 `process.env.*` 读取未通过单一 `config` 模块集中管理；9 处 `BIOF3_*` / `R_SERVER_PORT` / `PY_SERVER_PORT` 等
-- **核心代码位置**：`frontend/package.json` + `core/r-server/cache-manager.js`（8 处 env 读）/ `core/r-server/server.js`（6 处）/ `core/r-server/db.js`（2 处 `BIOF3_DB_PATH` / `BIOF3_LOCAL_DATA_DIR`）/ `core/r-server/helpers/system-prompt.js`（1 处）/ `src/main/env-coordinator.js`（14+ 处 env 写）
+- **标题**：`frontend/package.json` `jspdf@^4.2.1` dead dep（前端零 import）；214 处 `process.env.*` 读取未通过单一 `config` 模块集中管理；9 处 `PETRI_*` / `R_SERVER_PORT` / `PY_SERVER_PORT` 等
+- **核心代码位置**：`frontend/package.json` + `core/r-server/cache-manager.js`（8 处 env 读）/ `core/r-server/server.js`（6 处）/ `core/r-server/db.js`（2 处 `PETRI_DB_PATH` / `PETRI_LOCAL_DATA_DIR`）/ `core/r-server/helpers/system-prompt.js`（1 处）/ `src/main/env-coordinator.js`（14+ 处 env 写）
 - **关联 ID**：—
 - **修复方向**：移除 `frontend/jspdf`（dead dep）；在 `core/shared-backend/config-helper.js` 当前 DI 模式上扩展：把所有 env 读取都走 `getConfig()`；启动顺序文档化：`r-server` 启动前必跑 `shared-backend.configure({ getConfig })`；移除 `process.env.*` direct read 在 helper / business 层的位置
 - **当前状态**：✅ **PHASE 1**（主范围，端口 + Dead dep 快赢 1 commit 与 A-009 合并；仅移除 jspdf + 6 处 process.env.* 集中）
@@ -177,10 +177,10 @@
 - **当前状态**：⚠️ **关联不启动**（observability-work-package 候选）
 - **风险**：🟠 中（observability 缺口）
 
-### §1.17 PR-012 — branch-db + result-db 同时打开 biof3.db · ✅ PHASE 1
+### §1.17 PR-012 — branch-db + result-db 同时打开 petri.db · ✅ PHASE 1
 
 - **报告 / 行**：perf §四 L488-521
-- **标题**：desktop main 进程 branch-db + result-db 同时打开 biof3.db（与 r-server 进程共享文件）；WAL 锁竞争
+- **标题**：desktop main 进程 branch-db + result-db 同时打开 petri.db（与 r-server 进程共享文件）；WAL 锁竞争
 - **核心代码位置**：`src/database/branch-db.js:18-49` / `src/database/result-db.js:23-54`
 - **关联 ID**：A-007 同根 / PR-011 关联
 - **修复方向**：与 A-007 合并修复（抽 `_db-singleton.js` 统一 DB 访问入口）

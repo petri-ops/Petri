@@ -62,8 +62,8 @@ const noUpload = process.argv.includes('--no-upload');
 const flat = process.argv.includes('--flat');
 
 const RT = {
-  r:  { manifestKey: 'biof3-r-runtime', topName: 'R', ossSegment: 'r-runtime', lang: 'r' },
-  py: { manifestKey: 'biof3-py-runtime', topName: 'Python', ossSegment: 'py-runtime', lang: 'python' },
+  r:  { manifestKey: 'petri-r-runtime', topName: 'R', ossSegment: 'r-runtime', lang: 'r' },
+  py: { manifestKey: 'petri-py-runtime', topName: 'Python', ossSegment: 'py-runtime', lang: 'python' },
 };
 // 版本契约：macOS / Windows 运行时必须严格对齐，任意一方打运行时都不得偏离。
 // 改这里即视为升级运行时版本（需同步 Windows 侧与 manifest.builtAgainst）。
@@ -73,7 +73,7 @@ if (!rt) fail('--runtime 必须是 r 或 py');
 
 // ── 凭据加载（复用 upload-macos-runtime 逻辑） ──────────────
 function loadSecretsFile() {
-  const p = path.resolve(REPO_ROOT, '.biof3-secrets');
+  const p = path.resolve(REPO_ROOT, '.petri-secrets');
   if (!fs.existsSync(p)) return;
   const re = /^\s*export\s+([A-Z0-9_]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s#]+))/gm;
   let m;
@@ -83,7 +83,7 @@ function loadSecretsFile() {
   }
 }
 loadSecretsFile();
-const bucket = process.env.BIOF3_OSS_BUCKET || 'biof3-uploads';
+const bucket = process.env.PETRI_OSS_BUCKET || 'petri-uploads';
 const endpoint = process.env.OSS_ENDPOINT || 'oss-cn-hangzhou.aliyuncs.com';
 const region = process.env.OSS_REGION || 'cn-hangzhou';
 
@@ -265,16 +265,16 @@ function updateManifest(sha256, sizeBytes) {
 // ── 上传 ───────────────────────────────────────────────────
 async function upload(objectName, zipPath) {
   const OSS = (await import('ali-oss')).default;
-  const accessKeyId = process.env.OSS_AK || process.env.BIOF3_OSS_ACCESS_KEY_ID || process.env.OSS_ACCESS_KEY_ID;
-  const accessKeySecret = process.env.OSS_SK || process.env.BIOF3_OSS_ACCESS_KEY_SECRET || process.env.OSS_ACCESS_KEY_SECRET;
-  if (!accessKeyId || !accessKeySecret) fail('缺少 OSS 凭据（.biof3-secrets 或 OSS_AK/OSS_SK）');
+  const accessKeyId = process.env.OSS_AK || process.env.PETRI_OSS_ACCESS_KEY_ID || process.env.OSS_ACCESS_KEY_ID;
+  const accessKeySecret = process.env.OSS_SK || process.env.PETRI_OSS_ACCESS_KEY_SECRET || process.env.OSS_ACCESS_KEY_SECRET;
+  if (!accessKeyId || !accessKeySecret) fail('缺少 OSS 凭据（.petri-secrets 或 OSS_AK/OSS_SK）');
   const client = new OSS({
     region, endpoint: endpoint.startsWith('http') ? endpoint : `https://${endpoint}`, bucket, accessKeyId, accessKeySecret,
-    timeout: Number(process.env.BIOF3_OSS_UPLOAD_TIMEOUT_MS || 1800000),
+    timeout: Number(process.env.PETRI_OSS_UPLOAD_TIMEOUT_MS || 1800000),
   });
   console.log('[build-macos-runtime] uploading (multipart)...');
   await client.multipartUpload(objectName, zipPath, {
-    partSize: Number(process.env.BIOF3_OSS_UPLOAD_PART_SIZE || 10 * 1024 * 1024),
+    partSize: Number(process.env.PETRI_OSS_UPLOAD_PART_SIZE || 10 * 1024 * 1024),
     parallel: 4,
     headers: { 'Content-Type': 'application/zip', 'Cache-Control': 'public, immutable, max-age=31536000' },
   });

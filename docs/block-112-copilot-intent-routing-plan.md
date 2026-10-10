@@ -22,7 +22,7 @@
 | 阶段 | 内容 | 核心落点 |
 | --- | --- | --- |
 | P0 | 意图语料 + choice 校准 | 中文用户消息语料 ≥100 条（四类标注，构建法见 §3 D-2）+ confidence-accuracy 曲线 + θ 初值 + D 项评审；证据 `acceptance/block-112/` |
-| P1 | 提交链挂钩 + chitchat 快路径 | `core/biof3-server/helpers/intent-router.js`（决策接点，唯一接入 askDecision）+ `routes/ai-agent/chat.js` 分支（guard 显式开 + 门控采纳才分流）+ `helpers/chitchat-fast-path.js`（callModelTask 直答 → run_started/delta 事件回放 → markAgentTaskDone → 会话落库）；降级五态测试钉住 |
+| P1 | 提交链挂钩 + chitchat 快路径 | `core/petri-server/helpers/intent-router.js`（决策接点，唯一接入 askDecision）+ `routes/ai-agent/chat.js` 分支（guard 显式开 + 门控采纳才分流）+ `helpers/chitchat-fast-path.js`（callModelTask 直答 → run_started/delta 事件回放 → markAgentTaskDone → 会话落库）；降级五态测试钉住 |
 | P2 | 实机验收 + 收口 | dev-verify flow `block112-intent-live`（真实 Jev：闲聊走快路径 delta+done、任务走正常 loop、杀开关全走 loop）+ closeout 十门 |
 
 **快路径事件契约（逐字镜像 agent-runner 已有形状，零前端改动）**：
@@ -48,7 +48,7 @@
 - **D-1 类目集**：choice 四类 `chitchat`（闲聊寒暄/情绪陪伴/身份问答/致谢）/ `task`（分析执行/代码/文件/跑流程）/ `knowledge_qa`（概念/方法/领域知识问答）/ `result_studio`（结果库与 RS 面板操作指令）。推荐：四类定版（类目集为包内契约；动作面 PoC 只挂 chitchat）。
 - **D-2 分类 state**：仅最近一条用户消息（trim ≤600 字），不含历史——v1 最小面（省 token；边界=指代延续消息分类难度上升，靠 θ 门控兜底）。推荐照此。
 - **D-3 门控阈值**：单阈值 θ（confidence ≥ θ 且 argmax=chitchat 才分流）。P0 曲线定初值；预期偏保守（θ≈0.85——误路由代价=真任务被直答，属用户可见伤害；漏路由代价=多花一次往返，无害）。推荐：θ 取 corpus 内「task 类零误采纳」的最高覆盖档。
-- **D-4 默认开关位**：默认关 + 显式开 `BIOF3_JEV_INTENT_ROUTE=1`（同 W1-1/W0-P2 先例；本接点误路由直接改变用户可见行为，必须保守侧）。推荐照此；P2 实机零回归后翻默认另行裁决。
+- **D-4 默认开关位**：默认关 + 显式开 `PETRI_JEV_INTENT_ROUTE=1`（同 W1-1/W0-P2 先例；本接点误路由直接改变用户可见行为，必须保守侧）。推荐照此；P2 实机零回归后翻默认另行裁决。
 - **D-5 快路径直答形态**：`callModelTask({role:'explanation'})` 非流式单次调用（复用既有任务通道与模型设置），系统提示词=轻量陪伴面（格物助手身份+简洁中文+无工具），历史取 effectiveMessages 尾部 ≤8 条。推荐照此；流式直答另裁。
 
 ## 4. 关闭语义

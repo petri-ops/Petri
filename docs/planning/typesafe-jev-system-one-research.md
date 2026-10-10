@@ -1,4 +1,4 @@
-# TypeSafe Jev（System One）技术调研与 Gewu 落地评估
+# TypeSafe Jev（System One）技术调研与 Petri 落地评估
 
 ```yaml
 kind: reference
@@ -19,7 +19,7 @@ tags: [typesafe, jev, system-one, decision-model, ai-agent, routing, guardrails,
 - API 是单一 endpoint（`POST /v1/systemone`），一次请求可并行混合任意多道问题（加问几乎不增延迟）；只收输入 token（$42/Btok，$0.042/Mtok），输出免费。
 - 官方生态齐全但生态圈很小（发布仅一周）：Python/JS 官方 SDK、Claude Code agent skill、17 篇带量化数据的 cookbook、4 篇架构 pattern、1 个浏览器 agent 参考实现（browser-use/jev-ultrafast）。
 - **核心心法一条**：模型只做原子化窄判断，阈值、组合、权重、执行全部留在代码；confidence 是「敢不敢做」的第二轴，低置信转人工。
-- **Gewu 落地**：排查出 7 个候选接入点，top 3 为——① copilot 话题漂移判断（现有大模型 JSON 分类的毫秒级直替，`conversations.js`）；② 知识库检索相关性重排（`knowledge-space.js` 的 0.55 硬阈值之上加语义二跳）；③ 70+ MCP 工具下发前预路由（`agent-runner.js`）。中文能力初步实测可用但需自建语料校准。
+- **Petri 落地**：排查出 7 个候选接入点，top 3 为——① copilot 话题漂移判断（现有大模型 JSON 分类的毫秒级直替，`conversations.js`）；② 知识库检索相关性重排（`knowledge-space.js` 的 0.55 硬阈值之上加语义二跳）；③ 70+ MCP 工具下发前预路由（`agent-runner.js`）。中文能力初步实测可用但需自建语料校准。
 
 ## 1. Jev 与 System One 心智模型
 
@@ -165,7 +165,7 @@ GET  https://api.typesafe.ai/v1/models
 7. **题型对号入座**：闭集标签→Choice；P(yes)→Noul；有序等级且级即动作→Score。
 8. **级联摊薄成本**：Jev 当路由/验证器/特征器，贵模型只处理被标记的少数样本；同一次回答喂多个下游。
 
-## 6. Gewu 接入点盘点（file:line 已核实）
+## 6. Petri 接入点盘点（file:line 已核实）
 
 排查范围：agent 聊天链路、MCP 工具层、前端 copilot、知识库、产品 skills、Result Studio、其他判断类逻辑。
 
@@ -173,10 +173,10 @@ GET  https://api.typesafe.ai/v1/models
 
 | # | 决策点 | 位置 | 现状 | 题型 | 说明 |
 | --- | --- | --- | --- | --- | --- |
-| 1 | **copilot 话题漂移判断** | `core/biof3-server/helpers/conversations.js`（`_maybeDetectTopicShift`，约 :222-251） | 每 5 条消息调大模型返回 `{"shifted": bool, "reason"}` JSON | **noul** | 现成大模型分类调用，Jev 毫秒级直替、契约一致、改动最小的 PoC 首选 |
-| 2 | **知识库检索相关性重排/过滤** | `core/biof3-server/helpers/knowledge-space.js`（`VECTOR_THRESHOLD=0.55` :32，过滤 :421，RRF 融合 :292-320） | 0.55 硬阈值 + 规则式 RRF，无语义二跳 | **noul/score** 对 top-K chunk | rerank cookbook 的 top-1/top-10 提升数据直接背书；顺带加注入检测 noul |
-| 3 | **MCP 工具下发前预路由/裁剪** | `core/biof3-server/agent-runner.js`（全量下发 :614；system prompt 硬编码 open_tool 映射 :490-495）；`agent-tools/tool-defs.js` ~70+ 工具 | 全量 function-calling defs 交大模型自选，仅 knowledge-console 一处白名单收窄 | **choice**（先选工具族再裁剪） | 降低 token 与误选率的最大杠杆；skill_suggestion cookbook 的两跳渐进披露可直接套用 |
-| 4 | **marker→细胞类型判别** | `core/biof3-server/helpers/interpret.js`（`CELL_MARKERS` :19，`lookupCellType` :52） | 硬编码基因组合规则表，无置信度、覆盖有限 | **choice/score**（候选=规则表命中的细胞类型） | 科学价值高、边界清晰；模型只挑不造，规则表继续当候选生成器 |
+| 1 | **copilot 话题漂移判断** | `core/petri-server/helpers/conversations.js`（`_maybeDetectTopicShift`，约 :222-251） | 每 5 条消息调大模型返回 `{"shifted": bool, "reason"}` JSON | **noul** | 现成大模型分类调用，Jev 毫秒级直替、契约一致、改动最小的 PoC 首选 |
+| 2 | **知识库检索相关性重排/过滤** | `core/petri-server/helpers/knowledge-space.js`（`VECTOR_THRESHOLD=0.55` :32，过滤 :421，RRF 融合 :292-320） | 0.55 硬阈值 + 规则式 RRF，无语义二跳 | **noul/score** 对 top-K chunk | rerank cookbook 的 top-1/top-10 提升数据直接背书；顺带加注入检测 noul |
+| 3 | **MCP 工具下发前预路由/裁剪** | `core/petri-server/agent-runner.js`（全量下发 :614；system prompt 硬编码 open_tool 映射 :490-495）；`agent-tools/tool-defs.js` ~70+ 工具 | 全量 function-calling defs 交大模型自选，仅 knowledge-console 一处白名单收窄 | **choice**（先选工具族再裁剪） | 降低 token 与误选率的最大杠杆；skill_suggestion cookbook 的两跳渐进披露可直接套用 |
+| 4 | **marker→细胞类型判别** | `core/petri-server/helpers/interpret.js`（`CELL_MARKERS` :19，`lookupCellType` :52） | 硬编码基因组合规则表，无置信度、覆盖有限 | **choice/score**（候选=规则表命中的细胞类型） | 科学价值高、边界清晰；模型只挑不造，规则表继续当候选生成器 |
 | 5 | **copilot 发送前意图路由** | `frontend/src/components/copilot/conversationRunStore.ts`（现状：发送前零预处理） | 一切决策都在后端大模型 | **choice**（闲聊/任务/知识问答/RS 操作） | 属新增能力：闲聊直答或检索分流，省一次大模型往返；注意前端不持 key，路由须在后端 |
 
 ### 6.2 评估过、明确不适合的
@@ -189,7 +189,7 @@ GET  https://api.typesafe.ai/v1/models
 
 ### 6.3 工程前提（落地前必须满足）
 
-1. **key 只放 core/biof3-server 服务端**（进程内 env），绝不进前端/preload/desktopBridge——与 `quality:arch` IPC 边界纪律一致；现有 `callModelTask({role})`（`helpers/model-tasks.js:32`）是现成的任务调用口，Jev 可作为新 provider/role 接入 `model-gateway.js` 的 role→profile 路由 + fallback 体系。
+1. **key 只放 core/petri-server 服务端**（进程内 env），绝不进前端/preload/desktopBridge——与 `quality:arch` IPC 边界纪律一致；现有 `callModelTask({role})`（`helpers/model-tasks.js:32`）是现成的任务调用口，Jev 可作为新 provider/role 接入 `model-gateway.js` 的 role→profile 路由 + fallback 体系。
 2. **阈值用自有数据校准**：先画 confidence-accuracy 曲线再定门控线；pin `jev-1.13.0` 而非别名。
 3. **中文 PoC 先行**：官方明示 CJK 非等效；候选点 1/2 的语料都在中文语境，先各跑 ≥100 条标注样本。
 4. **降级路径**：Jev 不可用/超时时回退现行为（大模型分类/硬阈值），不得让决策 API 成为单点故障。

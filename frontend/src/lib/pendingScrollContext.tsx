@@ -4,7 +4,7 @@
  * 用途：建立"事件 → context → CodeMirrorEditor"的抽象桥接层
  *
  * 本文件**不**直接消费 SimpleChat.tsx / events.ts / WorkspaceFilePreview。
- * 按 gewu-project-governance §Guardrails "Never modify unknown WIP"，
+ * 按 petri-project-governance §Guardrails "Never modify unknown WIP"，
  * 业务侧入口（SimpleChat 聊天卡片 / WorkspaceFilePreview 容器）的具体
  * 接入动作**不在 P3 范围**，留给 WIP 收口后由业务侧 Agent 负责。
  *

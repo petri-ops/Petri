@@ -24,7 +24,7 @@ function run(label, command) {
     cwd: repoRoot,
     shell: true,
     stdio: 'inherit',
-    env: { ...process.env, CI: '1', BIOF3_HARNESS_OFFLINE: '1' },
+    env: { ...process.env, CI: '1', PETRI_HARNESS_OFFLINE: '1' },
   });
   return { label, command, exitCode: result.status ?? 1, signal: result.signal || null };
 }
@@ -34,8 +34,8 @@ const results = [];
 
 const filesToCheck = [
   'core/shared-backend/loop-contract.js',
-  'core/biof3-server/db.js',
-  'core/biof3-server/routes/harness.js',
+  'core/petri-server/db.js',
+  'core/petri-server/routes/harness.js',
 ];
 
 for (const file of filesToCheck) {

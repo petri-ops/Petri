@@ -148,7 +148,7 @@ export function CompactResultNavigator({
       {onModeChange && modes.length > 1 && (
         <nav className={styles.modeSwitcher} aria-label="结果视图">
           {modes.map((item) => (
-            <button className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+            <button className="petri-btn petri-btn--ghost petri-btn--sm"
               key={item.id}
               type="button"
               aria-current={activeMode === item.id ? 'page' : undefined}
@@ -222,7 +222,7 @@ export function CompactResultNavigator({
                   <div className={styles.menuLabel}>相关文件 · {relatedCount}</div>
                   {relatedSections.flatMap((section) =>
                     section.artifacts.map((artifact) => (
-                      <button className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+                      <button className="petri-btn petri-btn--ghost petri-btn--sm"
                         key={`${section.id}:${artifact.name}`}
                         type="button"
                         onClick={() => selectRelatedArtifact(artifact.name, section.id)}

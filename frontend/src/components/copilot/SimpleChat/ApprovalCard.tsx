@@ -62,7 +62,7 @@ export function ApprovalCard({
       <div className="sc-approval-actions">
         <button
           type="button"
-          className="gewu-btn sc-approval-btn sc-approval-approve"
+          className="petri-btn sc-approval-btn sc-approval-approve"
           onClick={onApprove}
           disabled={busy}
         >
@@ -71,7 +71,7 @@ export function ApprovalCard({
         </button>
         <button
           type="button"
-          className="gewu-btn sc-approval-btn sc-approval-cancel"
+          className="petri-btn sc-approval-btn sc-approval-cancel"
           onClick={onReject}
           disabled={busy}
         >

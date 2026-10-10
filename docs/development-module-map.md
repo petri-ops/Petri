@@ -1,8 +1,8 @@
-# BioF3 开发模块地图
+# Petri 开发模块地图
 
 最后更新：2026-07-23
 
-这份文档是 BioF3 Desktop 的统一开发词典。需求、缺陷、交接、提交和测试都应使用这里的模块名，避免把“右侧栏”“结果页”“后端”“主题”等不同层级的概念混在一起。
+这份文档是 Petri Desktop 的统一开发词典。需求、缺陷、交接、提交和测试都应使用这里的模块名，避免把“右侧栏”“结果页”“后端”“主题”等不同层级的概念混在一起。
 
 ## 1. 使用规则
 
@@ -190,7 +190,7 @@
 
 ### 架构去耦已完成（2026-07）
 
-- 核心后端从 `vendor/biof3-core` submodule 内联为仓库内 `core/`，桌面版完全独立、无外部依赖。
+- 核心后端从 `vendor/petri-core` submodule 内联为仓库内 `core/`，桌面版完全独立、无外部依赖。
 - 移除三条 web/ECS 时代双模式分支：**OSS 存储**（走本地文件存储）、**PostgreSQL**（纯 SQLite）、**docker 执行**（内嵌 R/Python 本地执行）。
 - 详见 [`dependency-decoupling-checkpoint.md`](./dependency-decoupling-checkpoint.md)。
 
@@ -224,7 +224,7 @@
 ```text
 fix(browser): fill the right workspace height
 feat(plugin-sdk): validate development plugin fixtures
-docs(modules): define stable BioF3 development boundaries
+docs(modules): define stable Petri development boundaries
 ```
 
 交接记录至少包含：主模块、影响模块、当前状态、验证证据、下一步和禁止破坏的不变量。

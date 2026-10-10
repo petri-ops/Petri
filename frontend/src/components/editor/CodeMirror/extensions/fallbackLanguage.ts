@@ -25,7 +25,7 @@ const COMMON_KEYWORDS = new Set([
 ]);
 
 const fallbackStream = StreamLanguage.define({
-  name: 'gewu-fallback-common',
+  name: 'petri-fallback-common',
   token(stream) {
     if (stream.eatSpace()) return null;
     const ch = stream.peek();

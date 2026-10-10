@@ -1,4 +1,4 @@
-# 产品战略定位评审 — BioF3 Desktop（2026-09-03）
+# 产品战略定位评审 — Petri Desktop（2026-09-03）
 
 > 性质：战略分析 reference（供用户裁决工作包优先级时参照，**不改变当前执行队列**——用户 2026-09-03 明示「先固化，当前工作不马上转向」）。
 > 状态：`reference`
@@ -50,7 +50,7 @@ chat UI、流式输出、agent loop、git 审阅、终端——通用 agent 标�
 1. **架构事实**：生信能力本来就跑在 agent 底座上（run\_tool 即一个工具），底座不可拆。
 2. **市场现实**：通用编码智能体是 Claude Code / Codex / Cursor 的红海；单人项目不打不必要的仗。
 3. **护城河在生信侧**：「一个 agent 真正理解你的 scRNA-seq 数据、每次分析都是版本化 artifact、可确定性回放」——通用 agent 说不出这句话。
-4. **反向约束**：纯「生信工作台 + AI 小挂件」也不对——2023 年形态的 BioF3 已被实践否定，agent 底座是刚需（生信工作流大量数据搬运/脚本/git 工作）。
+4. **反向约束**：纯「生信工作台 + AI 小挂件」也不对——2023 年形态的 Petri 已被实践否定，agent 底座是刚需（生信工作流大量数据搬运/脚本/git 工作）。
 
 ### 3.1 对「生信智能体作为功能模块」的辨析
 
@@ -68,7 +68,7 @@ chat UI、流式输出、agent loop、git 审阅、终端——通用 agent 标�
 
 1. **投资转向**：停止通用 agent UI 事件（审阅面板经 BLOCK-41/43/50 后边际收益趋零）；下一波投回生信——如 Result Studio 从 experimental 推向真实可用、bioSkills 从注册表驱动 agent 行为。
 2. **叙事收口**：回到 AGENTS.md 第一行「本地化 AI 陪伴的全组学学习与实战平台」——基础设施成熟度已足够支撑，缺的是兑现成体验。
-3. **差异化打法**：以「科学可信」为卖点——通用 agent 说「我改了代码」；BioF3 说「这次分析改了哪个参数、影响哪些结论、可一键回放验证」（Artifact Truth 链的天然产品语言）。
+3. **差异化打法**：以「科学可信」为卖点——通用 agent 说「我改了代码」；Petri 说「这次分析改了哪个参数、影响哪些结论、可一键回放验证」（Artifact Truth 链的天然产品语言）。
 
 ## 5. 若转向，现有候选队列的重排参照
 
@@ -103,7 +103,7 @@ chat UI、流式输出、agent loop、git 审阅、终端——通用 agent 标�
 
 ## 8. 证据清单
 
-- `core/biof3-server/agent-tools/registry.js` HANDLERS（工具构成统计）
+- `core/petri-server/agent-tools/registry.js` HANDLERS（工具构成统计）
 
 - `frontend/src/pages/` 目录结构（single-cell / spatial / figcode）
 

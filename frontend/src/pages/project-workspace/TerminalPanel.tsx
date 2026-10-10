@@ -34,7 +34,7 @@ export function TerminalPanel({
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await window.biof3Desktop?.terminal?.snapshot?.();
+      const result = await window.petriDesktop?.terminal?.snapshot?.();
       setSnapshot(result || null);
     } catch {
       setSnapshot(null);
@@ -69,14 +69,14 @@ export function TerminalPanel({
           <button
             type="button"
             className={styles.terminalPanelActionBtn}
-            onClick={() => void window.biof3Desktop?.terminal?.openLogDir?.()}
+            onClick={() => void window.petriDesktop?.terminal?.openLogDir?.()}
           >
             打开日志
           </button>
           <button
             type="button"
             className={styles.terminalPanelActionBtn}
-            onClick={() => void window.biof3Desktop?.terminal?.openShell?.(project?.workspacePath)}
+            onClick={() => void window.petriDesktop?.terminal?.openShell?.(project?.workspacePath)}
           >
             系统终端
           </button>

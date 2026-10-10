@@ -73,8 +73,8 @@ export function collectArtifactCounts(dataDir, reportDirs = []) {
 }
 
 function createRuntimeLinks(dataDir) {
-  const sourceRoot = process.env.BIOF3_QUALIFICATION_RUNTIME_ROOT
-    || join(homedir(), 'Documents', 'BioF3-Local', 'runtimes');
+  const sourceRoot = process.env.PETRI_QUALIFICATION_RUNTIME_ROOT
+    || join(homedir(), 'Documents', 'Petri-Local', 'runtimes');
   const targetRoot = join(dataDir, 'runtimes');
   mkdirSync(targetRoot, { recursive: true });
   const linked = { r: false, python: false, capabilities: false };
@@ -92,7 +92,7 @@ function appPaths(appPath) {
   const contents = join(appPath, 'Contents');
   return {
     appPath,
-    executable: join(contents, 'MacOS', 'BioF3'),
+    executable: join(contents, 'MacOS', 'Petri'),
     infoPlist: join(contents, 'Info.plist'),
     resources: join(contents, 'Resources'),
     buildSubject: join(contents, 'Resources', 'g0-build-subject.json'),
@@ -102,7 +102,7 @@ function appPaths(appPath) {
 function resolveAppPath() {
   return resolve(
     process.env.G0_QUALIFICATION_APP_PATH
-      || join(root, 'dist', 'mac-arm64', 'BioF3.app'),
+      || join(root, 'dist', 'mac-arm64', 'Petri.app'),
   );
 }
 
@@ -141,7 +141,7 @@ async function fetchJson(port, pathname, timeoutMs = 2500) {
 
 function appendBounded(state, chunk) {
   state.log = `${state.log}${String(chunk)}`.slice(-262144);
-  const match = state.log.match(/biof3-server spawned[^\n]*on :(\d+)/);
+  const match = state.log.match(/petri-server spawned[^\n]*on :(\d+)/);
   if (match) state.port = Number(match[1]);
 }
 
@@ -152,7 +152,7 @@ async function startPackagedApp(paths, sandbox) {
     detached: true,
     env: {
       ...process.env,
-      BIOF3_LOCAL_DATA_DIR: sandbox.dataDir,
+      PETRI_LOCAL_DATA_DIR: sandbox.dataDir,
       NODE_ENV: 'production',
     },
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -313,12 +313,12 @@ export async function runPackagedQualification({
 
   const requiredResources = [
     join(paths.resources, 'frontend/dist/index.html'),
-    join(paths.resources, 'core/biof3-server/server.js'),
+    join(paths.resources, 'core/petri-server/server.js'),
     join(paths.resources, 'core/shared-backend/g0-baseline.js'),
     join(paths.resources, 'built-in-plugins/manifest.json'),
     join(paths.resources, 'built-in-plugins/deseq2/scripts/deseq2.R'),
   ];
-  const tempRoot = mkdtempSync(join(tmpdir(), 'biof3-lf12-packaged-'));
+  const tempRoot = mkdtempSync(join(tmpdir(), 'petri-lf12-packaged-'));
   const sandbox = {
     dataDir: join(tempRoot, 'data'),
     electronDataDir: join(tempRoot, 'electron'),

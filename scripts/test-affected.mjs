@@ -81,7 +81,7 @@ function listScripts() {
 }
 
 function validateMap(map) {
-  if (map.schema !== 'biof3/test-impact-map.v1' || !Array.isArray(map.rules)) throw new Error('invalid test impact map schema');
+  if (map.schema !== 'petri/test-impact-map.v1' || !Array.isArray(map.rules)) throw new Error('invalid test impact map schema');
   const commandIds = new Set(Object.keys(COMMANDS));
   const scriptRules = [];
   for (const rule of map.rules) {

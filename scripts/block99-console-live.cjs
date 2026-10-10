@@ -175,7 +175,7 @@ async function main() {
 
   // ── U 系列：CDP 测试实例 UI 走查（/knowledge 双栏 + 会话台真轮次经 UI 输入）──
   try {
-    const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'gewu-dev-infra', 'dev-verify', 'lib.cjs'));
+    const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
     const fs = require('node:fs');
     const client = await lib.connectTestTarget({});
     const evalJs = async (expr) => {
@@ -187,7 +187,7 @@ async function main() {
     await evalJs("location.href='/knowledge'");
     await new Promise((r) => setTimeout(r, 2000));
     // BLOCK-103 — 抽屉开合有 localStorage 记忆：先清为收起再 reload，保证确定性起点
-    await evalJs(`localStorage.setItem('gewu.knowledgeConsoleOpen', '0'); location.reload()`);
+    await evalJs(`localStorage.setItem('petri.knowledgeConsoleOpen', '0'); location.reload()`);
     await new Promise((r) => setTimeout(r, 3000));
     // BLOCK-103 — 会话台改折叠抽屉（默认收起）：U1 断言把手挂载，再经把手展开后走原 composer 断言
     const mount = await evalJs(`(() => ({

@@ -1,1 +1,1 @@
-Markdown 是一种轻量级标记语言，由 John Gruber 于 2004 年创建，广泛用于 README、文档和博客。它的扩展名 .md 在 2008 年 GitHub 兴起后流行全球。据统计全球有超过 3.7 亿个 markdown 仓库。关于本项目的背景：Gewu 是一个全组学学习平台，支持单细胞与空间转录组分析。总之 markdown 文件是一种很好的文档格式，推荐使用 Typora 编辑器浏览。
+Markdown 是一种轻量级标记语言，由 John Gruber 于 2004 年创建，广泛用于 README、文档和博客。它的扩展名 .md 在 2008 年 GitHub 兴起后流行全球。据统计全球有超过 3.7 亿个 markdown 仓库。关于本项目的背景：Petri 是一个全组学学习平台，支持单细胞与空间转录组分析。总之 markdown 文件是一种很好的文档格式，推荐使用 Typora 编辑器浏览。

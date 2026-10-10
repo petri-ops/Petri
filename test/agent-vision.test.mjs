@@ -1,5 +1,5 @@
 // agent-led 阶段2 Task4 测试：agent 看图（read_image → qwen-vl-max）
-// 运行：cd desktop-app && RUN_VISION_LIVE=1 BIOF3_DB_PATH=... node --test test/agent-vision.test.mjs
+// 运行：cd desktop-app && RUN_VISION_LIVE=1 PETRI_DB_PATH=... node --test test/agent-vision.test.mjs
 // 需：DashScope API key（用户设置或 DASHSCOPE_API_KEY env）+ 已有完成的 volcano-plot tool_job
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -8,24 +8,24 @@ import { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const R_SERVER = resolve(__dirname, '..', 'core', 'biof3-server');
+const R_SERVER = resolve(__dirname, '..', 'core', 'petri-server');
 const req = createRequire(import.meta.url);
 
-// BLOCK-52 P2：自举临时 DB（src/migrations 全量）——default biof3.db 可能缺最新
-// schema；显式 BIOF3_DB_PATH 隔离，require db.js 前生效（CommonJS require 顺序执行）。
+// BLOCK-52 P2：自举临时 DB（src/migrations 全量）——default petri.db 可能缺最新
+// schema；显式 PETRI_DB_PATH 隔离，require db.js 前生效（CommonJS require 顺序执行）。
 {
   const fs = req('fs');
   const os = req('os');
   const dbPath = req('path');
   const Database = req(R_SERVER + '/node_modules/better-sqlite3');
-  const tempDbDir = fs.mkdtempSync(dbPath.join(os.tmpdir(), 'biof3-agent-vision-db-'));
-  const boot = new Database(dbPath.join(tempDbDir, 'biof3.db'));
+  const tempDbDir = fs.mkdtempSync(dbPath.join(os.tmpdir(), 'petri-agent-vision-db-'));
+  const boot = new Database(dbPath.join(tempDbDir, 'petri.db'));
   const migrationsDir = resolve(__dirname, '..', 'src', 'migrations');
   for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fs.readFileSync(dbPath.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = dbPath.join(tempDbDir, 'biof3.db');
+  process.env.PETRI_DB_PATH = dbPath.join(tempDbDir, 'petri.db');
   process.on('exit', () => {
     try { fs.rmSync(tempDbDir, { recursive: true, force: true }); } catch {}
   });
@@ -34,7 +34,7 @@ const req = createRequire(import.meta.url);
 const db = req(R_SERVER + '/db.js');
 const { tool_read_image } = req(R_SERVER + '/agent-tools/vision-tools.js');
 // 动态 import 必须用 file:// URL（Windows 绝对路径 D:/... 不被 ESM loader 接受）
-const { callTool } = await import(pathToFileURL(resolve(__dirname, '..', 'core', 'biof3-server', 'mcp', 'registry.js')).href);
+const { callTool } = await import(pathToFileURL(resolve(__dirname, '..', 'core', 'petri-server', 'mcp', 'registry.js')).href);
 
 const RUN_LIVE = process.env.RUN_VISION_LIVE === '1';
 
@@ -42,8 +42,8 @@ const RUN_LIVE = process.env.RUN_VISION_LIVE === '1';
 test('跑 sample-metrics 拿 toolJobId（live 前置）', { skip: !RUN_LIVE }, async () => {
   const builtInDir = resolve(__dirname, 'fixtures', 'neutral-plugins', 'sample-metrics');
   const demoCsv = resolve(builtInDir, 'demo-data', 'demo_deg.csv');
-  globalThis._biof3Plugins = new Map();
-  globalThis._biof3Plugins.set('sample-metrics', {
+  globalThis._petriPlugins = new Map();
+  globalThis._petriPlugins.set('sample-metrics', {
     id: 'volcano-plot', version: '1.0.0', language: 'r',
     pluginDir: builtInDir, scriptPath: resolve(builtInDir, 'scripts'),
   });
@@ -54,7 +54,7 @@ test('跑 sample-metrics 拿 toolJobId（live 前置）', { skip: !RUN_LIVE }, a
     // 存到全局供下一个测试用
     globalThis.__visionJobId = r.toolJobId;
   } finally {
-    globalThis._biof3Plugins = new Map();
+    globalThis._petriPlugins = new Map();
   }
 });
 
@@ -88,7 +88,7 @@ const osSync = req('os');
 const { resolveWorkspaceImagePath } = req(R_SERVER + '/agent-tools/vision-tools.js');
 
 // 建临时工作区：一张真 PNG + 一个指向工作区外的符号链接
-const wsDir = fsSync.mkdtempSync(pathSync.join(osSync.tmpdir(), 'biof3-p2-ws-'));
+const wsDir = fsSync.mkdtempSync(pathSync.join(osSync.tmpdir(), 'petri-p2-ws-'));
 fsSync.mkdirSync(pathSync.join(wsDir, 'figures'), { recursive: true });
 // 1x1 PNG（最小合法 PNG 字节）
 const PNG_BYTES = Buffer.from(

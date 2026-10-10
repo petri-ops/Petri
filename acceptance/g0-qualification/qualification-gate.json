@@ -8,7 +8,7 @@
     "baselineVersion": "1.1.1",
     "lifecycleStatus": "maintained",
     "qualificationStatus": "qualified",
-    "constitutionId": "biof3-g0-constitution-v1",
+    "constitutionId": "petri-g0-constitution-v1",
     "manifestDigest": "5c8a0246bd263a304f520e853dd9a4576a3be0fbb668523e67b028add1d70df5",
     "bundleDigest": "8799d7678debeab413628832872fdfceee73c0a9fe6ae46b414260797819df86"
   },
@@ -18,7 +18,7 @@
     "baselineVersion": "0.6.0",
     "lifecycleStatus": "establishing",
     "qualificationStatus": "not_yet_qualified",
-    "constitutionId": "biof3-g0-constitution-v1",
+    "constitutionId": "petri-g0-constitution-v1",
     "manifestDigest": "0c6dbb71acc20e18e4952c2a62c23a9d5655a5a0326dbdb45a8549d75dfd02cf",
     "bundleDigest": "2e3227ffdddb7b7e2884bf79eebfc4c63b76323158dc79f684fdc1f26cab13b3"
   },

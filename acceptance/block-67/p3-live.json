@@ -9,12 +9,12 @@
     {
       "name": "A1 ssh pty 挂通（远端 shell 回显，111538ms）",
       "pass": true,
-      "detail": "(base) root@iZbp13cl15p71npzz3ov4pZ:~/gewu-block67-demo#  "
+      "detail": "(base) root@iZbp13cl15p71npzz3ov4pZ:~/petri-block67-demo#  "
     },
     {
       "name": "A2 终端 pwd = 远程项目根",
       "pass": true,
-      "detail": "\"/root/gewu-block67-demo\""
+      "detail": "\"/root/petri-block67-demo\""
     },
     {
       "name": "A3 远程审阅：远程 git status/diff 数据面（README.md 修改 + remote-dirty-line 在 diff 中）",

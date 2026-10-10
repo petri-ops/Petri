@@ -19,7 +19,7 @@ const REPO = path.join(__dirname, '..');
 const EVIDENCE = path.join(REPO, 'acceptance', 'block-76');
 const API = 'http://127.0.0.1:3001/api';
 const AUTH = { Authorization: 'Bearer desktop-local', 'content-type': 'application/json' };
-const REMOTE_ROOT = '/root/gewu-block76-demo';
+const REMOTE_ROOT = '/root/petri-block76-demo';
 
 function fetchRaw(url, opts = {}) {
   return new Promise((resolve, reject) => {

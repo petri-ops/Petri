@@ -5,13 +5,13 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import resultFiles from '../core/biof3-server/helpers/tools-executor/result-files.js';
+import resultFiles from '../core/petri-server/helpers/tools-executor/result-files.js';
 
 const { resolveToolJobExportDirs } = resultFiles;
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const toolsPlatformSource = fs.readFileSync(
-  path.join(repoRoot, 'core', 'biof3-server', 'routes', 'tools-platform.js'),
+  path.join(repoRoot, 'core', 'petri-server', 'routes', 'tools-platform.js'),
   'utf8',
 );
 

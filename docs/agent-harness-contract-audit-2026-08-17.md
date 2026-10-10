@@ -1,4 +1,4 @@
-# BioF3 Desktop — Agent Harness 契约一致性审查报告
+# Petri Desktop — Agent Harness 契约一致性审查报告
 
 **审查日期**: 2026-08-17
 **审查范围**: agent harness 后端的 IPC / MCP / tool / Result Studio / Provider 契约
@@ -55,16 +55,16 @@
 ```8:11:frontend/src/lib/desktopBridge.ts
 import type {} from '@/lib/electron'; // ensure the global Window augmentation is loaded
 
-type DesktopBridge = NonNullable<Window['biof3Desktop']>;
+type DesktopBridge = NonNullable<Window['petriDesktop']>;
 
 /** Map of bridge name → its sub-handle type. Keyof the
- *  biof3Desktop declaration, so adding a new bridge in
+ *  petriDesktop declaration, so adding a new bridge in
  *  electron.d.ts automatically makes it available here. */
 export type DesktopBridgeName = keyof DesktopBridge;
 ```
 
 ```61:293:src/preload.js
-contextBridge.exposeInMainWorld('biof3Desktop', {
+contextBridge.exposeInMainWorld('petriDesktop', {
   isDesktop: true,
   platform: process.platform,
   arch: process.arch,
@@ -147,10 +147,10 @@ function createResultBridge(): ResultApi {
 
 **不一致描述**:
 
-- `electron.d.ts` 在 `biof3Desktop` 全局 Window 增强下声明了完整的 `branch` 与 `result` 两个 namespace（20+ 方法）。
-- `frontend/src/lib/desktopBridge.ts` 的 `getBridge<K>` 直接派生自 `Window['biof3Desktop']`，所以 TS 编译期能识别 `getBridge('branch')` 与 `getBridge('result')`。
+- `electron.d.ts` 在 `petriDesktop` 全局 Window 增强下声明了完整的 `branch` 与 `result` 两个 namespace（20+ 方法）。
+- `frontend/src/lib/desktopBridge.ts` 的 `getBridge<K>` 直接派生自 `Window['petriDesktop']`，所以 TS 编译期能识别 `getBridge('branch')` 与 `getBridge('result')`。
 - `frontend/src/lib/branchBridge.ts` / `resultBridge.ts` 在 SSR 检测后调用 `getBridge('branch')` / `getBridge('result')`。
-- `src/preload.js` 的 `contextBridge.exposeInMainWorld('biof3Desktop', {...})` **完全没有** `branch` 与 `result` 这两个 key —— 列举的子键只有 `window/app/aiSettings/computeSettings/harnessCapabilities/plugins/contentPlugins/runtime/backend/py/plumber/files/diagnostic/telemetry/data/terminal/skills/updater` 共 16 个。
+- `src/preload.js` 的 `contextBridge.exposeInMainWorld('petriDesktop', {...})` **完全没有** `branch` 与 `result` 这两个 key —— 列举的子键只有 `window/app/aiSettings/computeSettings/harnessCapabilities/plugins/contentPlugins/runtime/backend/py/plumber/files/diagnostic/telemetry/data/terminal/skills/updater` 共 16 个。
 - 实际 IPC handler 在 `src/ipc/branch-handlers.js`（11 个 handler，`branch:project:create/get/update/list` + `branch:create/get/list/switch/active/delete/rename/children` + `message:append/list/get/count/delete/clear`）和 `src/ipc/result-handlers.js`（9 个 handler）已存在，并在 `src/main.js:1045-1054` 通过 `setupBranchIpc()` + `setupResultIpc()` 注册。
 - IPC handler 与 d.ts 类型之间**没有** `ipcRenderer.invoke('branch:create', ...)` 调用绑定 —— preload.js 没有 `branch: { create: () => ipcRenderer.invoke('branch:create', ...), ... }` 这种映射。
 
@@ -167,7 +167,7 @@ function createResultBridge(): ResultApi {
 
 **修复方向**:
 
-1. 在 `src/preload.js` 的 `biof3Desktop` 对象下补充 `branch` 与 `result` 两个 namespace，11+9 个方法按 d.ts 形状一一映射到 `ipcRenderer.invoke('branch:create', { projectId, name, parentBranchId })` 等。
+1. 在 `src/preload.js` 的 `petriDesktop` 对象下补充 `branch` 与 `result` 两个 namespace，11+9 个方法按 d.ts 形状一一映射到 `ipcRenderer.invoke('branch:create', { projectId, name, parentBranchId })` 等。
 2. 命名统一：d.ts 用的 `create/list/switch/delete/rename/getActive/createWithBranch/byProject/version.create/version.get/version.getByNumber/version.list/createFromConversation` 需要在 preload 层 1:1 暴露。
 3. 类型安全加固：考虑把 `branchApi.create()` 等的 fallback stub 改为返回 `{ ok: false, error: 'bridge unavailable' }` 风格（与其他 IPC 一致），避免抛异常干扰 UI。
 
@@ -542,7 +542,7 @@ export async function createProject(input: { ... }) { ... }
 **结果链路**:
 
 - 这 4 个 IPC handler 是死代码：handler 已被 setupBranchIpc() 注册但无人调用。
-- IPC handler 的 DB 来源 `branch-db.js` 与 HTTP API 的 DB 来源可能是两个不同的 SQLite 实例（`biof3.db` vs branch-db），导致数据不一致风险。
+- IPC handler 的 DB 来源 `branch-db.js` 与 HTTP API 的 DB 来源可能是两个不同的 SQLite 实例（`petri.db` vs branch-db），导致数据不一致风险。
 
 **测试覆盖**:
 

@@ -24,7 +24,7 @@ status: completed
 ## 2. 范围
 
 ### P0（回路内核收口，用户低感知）
-- **选择总线**：跨 viewer 共享的单选择真相前端 store（自定义 hook + 既有 gewuEvents 事件模式延伸），产出结构化 SelectionContext v1 投影——词汇表镜像 `artifact-selection.ts` 既有契约（后端为权威），**不造第二套词汇**。
+- **选择总线**：跨 viewer 共享的单选择真相前端 store（自定义 hook + 既有 petriEvents 事件模式延伸），产出结构化 SelectionContext v1 投影——词汇表镜像 `artifact-selection.ts` 既有契约（后端为权威），**不造第二套词汇**。
 - **composer 结构化注入**：ResultAgentComposer / copilotContext 组装链携带选中实体坐标（artifactId/revisionId/entityType/样本≤12/计数≤2000，恒定有界）——Agent 上下文从此有坐标。
 - **ScientificInteractionViewer 平迁接总线**：行为不变，选择出口从组件内部状态换到总线（零行为平迁可审计）。
 
@@ -41,11 +41,11 @@ status: completed
 
 ## 4. 依赖
 
-零新依赖。前端既有资产：`artifact-selection.ts`（474 行契约镜像）、`result-studio-interaction-client.ts`、`events.ts`（gewu:selection-quote 先例）、`ResultAgentComposer.tsx`。
+零新依赖。前端既有资产：`artifact-selection.ts`（474 行契约镜像）、`result-studio-interaction-client.ts`、`events.ts`（petri:selection-quote 先例）、`ResultAgentComposer.tsx`。
 
 ## 5. 设计裁决
 
-- **D1 总线形态**：lib 层自定义 store hook（useState + gewuEvents 广播），单选择真相=「当前活跃 artifact 的当前选择」；切换 artifact 即换选择上下文。
+- **D1 总线形态**：lib 层自定义 store hook（useState + petriEvents 广播），单选择真相=「当前活跃 artifact 的当前选择」；切换 artifact 即换选择上下文。
 - **D2 注入通道**：走既有 copilotContext 组装链扩展，不另开注入通道（防第二注入真相）。
 - **D3 有界不变量**：沿用后端契约 MAX_PERSISTED_ENTITY_IDS=2000 / Agent 样本 12，前端不得放宽。
 

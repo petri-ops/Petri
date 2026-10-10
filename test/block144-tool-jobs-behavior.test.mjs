@@ -48,16 +48,16 @@ async function waitUntil(fn, label, timeoutMs = 20000, debugFn = null) {
 }
 
 // ── 共享 harness（单进程单 db.js 单例） ─────────────────────────────
-process.env.BIOF3_DB_PATH = path.join(
-  fs.mkdtempSync(path.join(os.tmpdir(), 'biof3-block144-c23-')),
-  'biof3.db',
+process.env.PETRI_DB_PATH = path.join(
+  fs.mkdtempSync(path.join(os.tmpdir(), 'petri-block144-c23-')),
+  'petri.db',
 );
 const { runMigrations } = require('../src/migration-runner');
-await runMigrations(process.env.BIOF3_DB_PATH, path.join(ROOT, 'src', 'migrations'));
-const dbMod = require('../core/biof3-server/db.js');
+await runMigrations(process.env.PETRI_DB_PATH, path.join(ROOT, 'src', 'migrations'));
+const dbMod = require('../core/petri-server/db.js');
 const db = dbMod.getAsyncDatabase();
 
-const tempDir = path.dirname(process.env.BIOF3_DB_PATH);
+const tempDir = path.dirname(process.env.PETRI_DB_PATH);
 const jobsDir = path.join(tempDir, 'tool-jobs');
 const scriptsDir = path.join(tempDir, 'tool-scripts');
 
@@ -133,9 +133,9 @@ const c23Lite = writePlugin(
 );
 
 // 测试进程独占替换全局插件注册表（block141 同形；本文件即唯一消费者）。
-globalThis._biof3Plugins = new Map();
-globalThis._biof3Plugins.set(c23Full.id, c23Full);
-globalThis._biof3Plugins.set(c23Lite.id, c23Lite);
+globalThis._petriPlugins = new Map();
+globalThis._petriPlugins.set(c23Full.id, c23Full);
+globalThis._petriPlugins.set(c23Lite.id, c23Lite);
 
 const notifyStub = {
   toolJobFailed() {},
@@ -143,7 +143,7 @@ const notifyStub = {
   custom() {},
 };
 
-const { createToolsExecutor } = require('../core/biof3-server/helpers/tools-executor.js');
+const { createToolsExecutor } = require('../core/petri-server/helpers/tools-executor.js');
 const executor = createToolsExecutor({
   db,
   dbMod,
@@ -164,8 +164,8 @@ const executor = createToolsExecutor({
 //（block130 同款前提）。
 await new Promise((resolve) => setTimeout(resolve, 80));
 
-const { notifyScheduler, setSchedulerPump } = require('../core/biof3-server/helpers/tool-job-lifecycle-registry.js');
-const { activeToolJobs } = require('../core/biof3-server/helpers/tool-job-lifecycle-registry.js');
+const { notifyScheduler, setSchedulerPump } = require('../core/petri-server/helpers/tool-job-lifecycle-registry.js');
+const { activeToolJobs } = require('../core/petri-server/helpers/tool-job-lifecycle-registry.js');
 
 async function submitToolRun(toolId, params = {}) {
   let response = null;
@@ -191,19 +191,19 @@ function jobDirOf(jobId) {
 // env 保全（泵的 maxConcurrent 与重试开关都按次读 env）。
 // env 名直写字面量（与 block135-retry-policy 同惯例，避开计算成员访问）。
 function withEnvClean(run) {
-  const hadMax = Object.prototype.hasOwnProperty.call(process.env, 'BIOF3_TOOL_MAX_CONCURRENT');
-  const savedMax = process.env.BIOF3_TOOL_MAX_CONCURRENT;
-  const hadRetry = Object.prototype.hasOwnProperty.call(process.env, 'BIOF3_TOOL_RETRY_MAX');
-  const savedRetry = process.env.BIOF3_TOOL_RETRY_MAX;
+  const hadMax = Object.prototype.hasOwnProperty.call(process.env, 'PETRI_TOOL_MAX_CONCURRENT');
+  const savedMax = process.env.PETRI_TOOL_MAX_CONCURRENT;
+  const hadRetry = Object.prototype.hasOwnProperty.call(process.env, 'PETRI_TOOL_RETRY_MAX');
+  const savedRetry = process.env.PETRI_TOOL_RETRY_MAX;
   try {
-    delete process.env.BIOF3_TOOL_MAX_CONCURRENT;
-    delete process.env.BIOF3_TOOL_RETRY_MAX;
+    delete process.env.PETRI_TOOL_MAX_CONCURRENT;
+    delete process.env.PETRI_TOOL_RETRY_MAX;
     return run();
   } finally {
-    if (hadMax) process.env.BIOF3_TOOL_MAX_CONCURRENT = savedMax;
-    else delete process.env.BIOF3_TOOL_MAX_CONCURRENT;
-    if (hadRetry) process.env.BIOF3_TOOL_RETRY_MAX = savedRetry;
-    else delete process.env.BIOF3_TOOL_RETRY_MAX;
+    if (hadMax) process.env.PETRI_TOOL_MAX_CONCURRENT = savedMax;
+    else delete process.env.PETRI_TOOL_MAX_CONCURRENT;
+    if (hadRetry) process.env.PETRI_TOOL_RETRY_MAX = savedRetry;
+    else delete process.env.PETRI_TOOL_RETRY_MAX;
   }
 }
 
@@ -244,8 +244,8 @@ test('C23-① finalizeJobRun 正常完成：status=completed + Artifact Truth + 
 
 test('C23-② finalizeJobRun 失败路径：markJobFailed 分支收敛 failed + failure 真值（重试默认关，不重排；直接绿）', async () => {
   await withEnvClean(async () => {
-    // 前提钉死：重试策略默认关闭（BIOF3_TOOL_RETRY_MAX 未设），失败直落终态不重排
-    assert.equal(Object.prototype.hasOwnProperty.call(process.env, 'BIOF3_TOOL_RETRY_MAX'), false);
+    // 前提钉死：重试策略默认关闭（PETRI_TOOL_RETRY_MAX 未设），失败直落终态不重排
+    assert.equal(Object.prototype.hasOwnProperty.call(process.env, 'PETRI_TOOL_RETRY_MAX'), false);
     const jobId = await submitToolRun('c23lite', { mode: 'boom' });
     const row = await waitUntil(async () => {
       const current = await getRow(jobId);
@@ -352,7 +352,7 @@ test('C23-④ 队列泵：pending 按创建序拉起、槽位释放后排空、m
     assert.equal(a1Final.status, 'completed');
 
     // 用户 B（max=1）：上限契约——k1 运行中 k2 不得并发拉起；k1 终态后 k2 才起
-    process.env.BIOF3_TOOL_MAX_CONCURRENT = '1';
+    process.env.PETRI_TOOL_MAX_CONCURRENT = '1';
     try {
       mkQueuedJob('c23q_b1', 'c23-pump-b', Date.now(), { mode: 'sleep', sleepMs: 1200 });
       mkQueuedJob('c23q_b2', 'c23-pump-b', Date.now() + 1);
@@ -371,7 +371,7 @@ test('C23-④ 队列泵：pending 按创建序拉起、槽位释放后排空、m
         b2: await getRow('c23q_b2'),
       }));
     } finally {
-      delete process.env.BIOF3_TOOL_MAX_CONCURRENT;
+      delete process.env.PETRI_TOOL_MAX_CONCURRENT;
     }
   });
 });

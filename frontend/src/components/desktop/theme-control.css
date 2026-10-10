@@ -1,9 +1,9 @@
-.gewu-theme-control {
+.petri-theme-control {
   position: relative;
   min-width: 0;
 }
 
-.gewu-theme-control__trigger {
+.petri-theme-control__trigger {
   width: 100%;
   min-height: 32px;
   display: flex;
@@ -13,43 +13,43 @@
   border: 1px solid transparent;
   border-radius: 6px;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   cursor: pointer;
   font: inherit;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   text-align: left;
 }
 
-.gewu-theme-control__trigger span {
+.petri-theme-control__trigger span {
   flex: 1;
 }
 
-.gewu-theme-control__trigger:hover,
-.gewu-theme-control__trigger[aria-expanded='true'] {
-  border-color: var(--gewu-border);
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+.petri-theme-control__trigger:hover,
+.petri-theme-control__trigger[aria-expanded='true'] {
+  border-color: var(--petri-border);
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
-.gewu-theme-control__menu {
+.petri-theme-control__menu {
   position: absolute;
   left: 0;
   bottom: calc(100% + 6px);
   z-index: 120;
   width: 168px;
   padding: 5px;
-  border: 1px solid var(--gewu-border);
+  border: 1px solid var(--petri-border);
   border-radius: 7px;
-  background: var(--gewu-bg-elevated);
-  box-shadow: var(--gewu-shadow-menu);
+  background: var(--petri-bg-elevated);
+  box-shadow: var(--petri-shadow-menu);
 }
 
-.gewu-theme-control--menu-bottom .gewu-theme-control__menu {
+.petri-theme-control--menu-bottom .petri-theme-control__menu {
   top: calc(100% + 6px);
   bottom: auto;
 }
 
-.gewu-theme-control__option {
+.petri-theme-control__option {
   width: 100%;
   height: 32px;
   display: flex;
@@ -59,24 +59,24 @@
   border: 0;
   border-radius: 5px;
   background: transparent;
-  color: var(--gewu-text-secondary);
+  color: var(--petri-text-secondary);
   cursor: pointer;
   font: inherit;
-  font-size: var(--gewu-font-size-caption);
+  font-size: var(--petri-font-size-caption);
   text-align: left;
 }
 
-.gewu-theme-control__option span {
+.petri-theme-control__option span {
   flex: 1;
 }
 
-.gewu-theme-control__option:hover,
-.gewu-theme-control__option[aria-checked='true'] {
-  background: var(--gewu-hover);
-  color: var(--gewu-text);
+.petri-theme-control__option:hover,
+.petri-theme-control__option[aria-checked='true'] {
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
 
-.gewu-theme-control--compact .gewu-theme-control__trigger {
+.petri-theme-control--compact .petri-theme-control__trigger {
   width: 36px;
   height: 36px;
   min-height: 36px;
@@ -84,6 +84,6 @@
   padding: 0;
 }
 
-.gewu-theme-control--compact .gewu-theme-control__menu {
+.petri-theme-control--compact .petri-theme-control__menu {
   left: 0;
 }

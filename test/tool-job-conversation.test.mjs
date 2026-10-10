@@ -8,19 +8,19 @@ import { spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { bootstrapTestDb } from './helpers/bootstrap-db.mjs';
 
-const tempRoot = mkdtempSync(join(tmpdir(), 'biof3-ux1g1-'));
-process.env.BIOF3_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
+const tempRoot = mkdtempSync(join(tmpdir(), 'petri-ux1g1-'));
+process.env.PETRI_LOCAL_DATA_DIR = join(tempRoot, 'local-data');
 
 bootstrapTestDb();
 const require = createRequire(import.meta.url);
-const db = require('../core/biof3-server/db');
+const db = require('../core/petri-server/db');
 // BLOCK-83 D3：本文件断言科学任务绑定域行为——按新装配语义，域钩子由测试自行注册
 // （生产环境由 plugin-loader 在装载 RS 插件时注册；零注册 = 直通）。
 const { registerTaskConfirmationHook } = require('../core/shared-backend/task-confirmation-hooks');
 const { createScientificTaskConfirmationHook } = require('../core/shared-backend/scientific-task-confirmation');
 registerTaskConfirmationHook(createScientificTaskConfirmationHook());
 const BetterSqlite = require('better-sqlite3');
-const dbModulePath = fileURLToPath(new URL('../core/biof3-server/db.js', import.meta.url));
+const dbModulePath = fileURLToPath(new URL('../core/petri-server/db.js', import.meta.url));
 
 after(() => {
   if (db.db?.open) db.db.close();
@@ -31,7 +31,7 @@ function seedLegacyDb(dbPath, { withConversationColumn = false } = {}) {
   const legacy = new BetterSqlite(dbPath);
   legacy.exec(`
     -- 最小 projects 表：db.js 在模块加载时预编译 listProjects/getProject 等语句
-    -- （core/biof3-server/db.js:527 stmts 段），生产环境由 migration-runner 先建表。
+    -- （core/petri-server/db.js:527 stmts 段），生产环境由 migration-runner 先建表。
     -- 本夹具模拟的是「已有 projects 的遗留库」，故必须补上这张表，否则 db.js
     -- require 期即抛 SqliteError: no such table: projects（与待测迁移逻辑无关）。
     CREATE TABLE projects (
@@ -118,7 +118,7 @@ function seedLegacyDb(dbPath, { withConversationColumn = false } = {}) {
 
 function runDbAgainst(dbPath) {
   const script = `
-    process.env.BIOF3_DB_PATH = ${JSON.stringify(dbPath)};
+    process.env.PETRI_DB_PATH = ${JSON.stringify(dbPath)};
     const db = require(${JSON.stringify(dbModulePath)});
     const rows = db.db.prepare('SELECT id, project_id, conversation_id FROM tool_jobs ORDER BY id').all();
     const columns = db.db.prepare('PRAGMA table_info(tool_jobs)').all().map((column) => column.name);
@@ -126,7 +126,7 @@ function runDbAgainst(dbPath) {
     process.stdout.write(JSON.stringify({ rows, columns, indexes }));
   `;
   const result = spawnSync(process.execPath, ['-e', script], {
-    env: { ...process.env, BIOF3_DB_PATH: dbPath },
+    env: { ...process.env, PETRI_DB_PATH: dbPath },
     encoding: 'utf8',
   });
   assert.equal(result.status, 0, result.stderr || result.stdout);
@@ -316,7 +316,7 @@ test('HTTP approval acknowledgement requires and verifies project/conversation s
   db.setToolJobApproval(job.id, 'ack-ux1g1-route', Date.now() + 60_000);
 
   const handlers = new Map();
-  require('../core/biof3-server/routes/ai-legacy')({
+  require('../core/petri-server/routes/ai-legacy')({
     post(path, ...callbacks) { handlers.set(path, callbacks.at(-1)); },
   });
   const handler = handlers.get('/api/ai/run-tool-ack/:token');
@@ -359,10 +359,10 @@ test('all-job history and status projections retain project and conversation ide
     projectId,
     conversationId: 'history-conversation',
   });
-  // BLOCK-30 P1: py-server 的 biof3-server-db 桥与 tools-router 契约镜像
-  // 断言随独立 Python 后端摘除；tool_jobs 现由 biof3-server 单写入方维护。
+  // BLOCK-30 P1: py-server 的 petri-server-db 桥与 tools-router 契约镜像
+  // 断言随独立 Python 后端摘除；tool_jobs 现由 petri-server 单写入方维护。
 
-  const routeSource = readFileSync(fileURLToPath(new URL('../core/biof3-server/routes/tools-metadata.js', import.meta.url)), 'utf8');
+  const routeSource = readFileSync(fileURLToPath(new URL('../core/petri-server/routes/tools-metadata.js', import.meta.url)), 'utf8');
   // 断言目标：该查询必须同时投影 project_id 与 conversation_id（身份保留），
   // 但不锁死列顺序——后续新增列（如 execution_target_id）不应误伤本断言。
   assert.match(routeSource, /SELECT id, tool_id,[^']*project_id,[^']*conversation_id[^']*FROM tool_jobs/);

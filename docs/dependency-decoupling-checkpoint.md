@@ -4,7 +4,7 @@
 
 ## 目标
 
-把 BioF3 Desktop 从「共享外部 submodule + web/ECS 双模式」彻底改造为**完全独立、纯本地**的桌面应用：核心后端内联仓库、去除外部依赖、剥离所有只服务于 web 版的双模式分支，为后续「规范化」打基础。
+把 Petri Desktop 从「共享外部 submodule + web/ECS 双模式」彻底改造为**完全独立、纯本地**的桌面应用：核心后端内联仓库、去除外部依赖、剥离所有只服务于 web 版的双模式分支，为后续「规范化」打基础。
 
 约束（全程遵守）：
 - 不破坏可运行的桌面应用；每个增量都过 `r-server + py-server 启动` + 全量测试 + 前端构建。
@@ -15,7 +15,7 @@
 
 ### Phase A — 去 vendor 化（`9ab94f3`）
 
-- 把 `vendor/biof3-core` git submodule 的工作树（`r-server` / `py-server` / `shared-backend` / `packages` / `test`）逐字内联到仓库根的 `core/`。
+- 把 `vendor/petri-core` git submodule 的工作树（`r-server` / `py-server` / `shared-backend` / `packages` / `test`）逐字内联到仓库根的 `core/`。
 - 修正外延路径（vendor 深 2 层 → core 深 1 层）：registry、content-plugins、harness。
 - 重写 `src/main.js` / `plugin-manager.js` / `mcp-server.js` 的 dev 路径解析；electron-builder / vite / tsconfig / package.json / CI 全部指向 `core/`。
 - 移除 submodule 机制：`.gitmodules`、`.vendor-lock`、`scripts/sync-vendor.sh`、gitlink。
@@ -63,17 +63,17 @@
 
 ### #3f — runMode 去耦（`1900b0f` / `be4d42f` / `b833590`）
 
-- r-server / py-server 先把 `runMode` 固定为 `all` 并删除 `BIOF3_RUN_MODE` 配置入口；后续 #3g 已删除无人读取的固定字段。
+- r-server / py-server 先把 `runMode` 固定为 `all` 并删除 `PETRI_RUN_MODE` 配置入口；后续 #3g 已删除无人读取的固定字段。
 - 删除 platform/api/worker 启动、路由、Agent prompt、zombie recovery 与 Python queue drain 分支，桌面恒走本地单进程路径。
 - `task-store` 在此前 SQLite 化后已无 worker 模式分支，无需额外修改。
 
 ### #3g — 执行模式与 canonical 路径彻底收口（`44830b5` / `be0c46d` / `ba65aec` / `8feca10`）
 
-- 删除主进程 `BIOF3_EXEC_MODE` 注入、两端 config 与 config-helper 的 `execMode`，并展开所有恒真本地分支。
+- 删除主进程 `PETRI_EXEC_MODE` 注入、两端 config 与 config-helper 的 `execMode`，并展开所有恒真本地分支。
 - execution-context 升级到 v2：删除 local/container/remote 归一化器及 `execMode`/`runMode`/重复 `mode` metadata，adapter 恒为 local；保留 canonical path 与 artifact metadata 能力。
 - 删除最终无人读取的 `runMode` 固定字段；生产代码不再存在运行模式开关。
-- `containerTempDir` 正名为 `canonicalTaskRoot=/work/biof3/tasks`；删除 `containerCacheDir`，Python 父缓存复用改用真实本地文件路径。
-- R/Python 默认临时目录回归 `/tmp` 本地路径，Python cache 默认跟随 `BIOF3_PY_TEMP_DIR`。
+- `containerTempDir` 正名为 `canonicalTaskRoot=/work/petri/tasks`；删除 `containerCacheDir`，Python 父缓存复用改用真实本地文件路径。
+- R/Python 默认临时目录回归 `/tmp` 本地路径，Python cache 默认跟随 `PETRI_PY_TEMP_DIR`。
 
 ### #3h — C 档旧异步引擎与执行残留移除
 
@@ -85,7 +85,7 @@
   分支，并把数据库访问器正名为 SQLite-only 接口。
 - MCP registry 只暴露注册插件；未知或已删除工具在创建 `tool_job` 前拒绝，旧
   `single-cell-core` 工作流、fixture 与弱模型 task pack 已清理。
-- 删除 `BIOF3_STORAGE` / `storageMode` 假选择器；本地存储是唯一实现。
+- 删除 `PETRI_STORAGE` / `storageMode` 假选择器；本地存储是唯一实现。
 - 主要提交：`a17fffb`、`8332602`、`744491a`、`fef97ac`、`63475df`、
   `d6b6eaf`、`cbaac59`、`5141fac`、`a469bcf`、`db2e357`、`d29588b`、
   `1940b42`、`45f7f26`、`c577c21`。
@@ -119,7 +119,7 @@
 
 - `core/py-server` 与 `core/gateway` 摘除（py-server 前端 0 直连、裸执行恒 410、
   `tool_jobs` 双写入方收敛为 r-server 单写入方；gateway 仅剩健康探活消费者）。
-- `core/r-server` 更名 `core/biof3-server`：它是唯一业务后端（Node/Express + SQLite），
+- `core/r-server` 更名 `core/petri-server`：它是唯一业务后端（Node/Express + SQLite），
   R/Python 分析由 shared-backend 执行器注册表直接 spawn 内嵌解释器——目录名不再撒谎。
 - py-server 的常驻 Python worker 池（`py-pool.js`）抢救至 `core/shared-backend/executors/`，
   未接线：池与 tool_job 的进程级取消契约（`process_pid` kill + heartbeat）冲突，详见

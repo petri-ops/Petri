@@ -16,7 +16,7 @@
     {
       "name": "C2b_persisted",
       "pass": true,
-      "detail": "persisted={\"point\":\"intent-route\",\"label\":\"copilot 意图路由\",\"enabled\":true,\"envOverride\":null,\"threshold\":0.75,\"defaultThreshold\":0.7,\"gates\":null,\"evidence\":\"acceptance/block-112/calibration.json\",\"enabledDefault\":false,\"envKey\":\"BIOF3_JEV_INTENT_ROUTE\"}"
+      "detail": "persisted={\"point\":\"intent-route\",\"label\":\"copilot 意图路由\",\"enabled\":true,\"envOverride\":null,\"threshold\":0.75,\"defaultThreshold\":0.7,\"gates\":null,\"evidence\":\"acceptance/block-112/calibration.json\",\"enabledDefault\":false,\"envKey\":\"PETRI_JEV_INTENT_ROUTE\"}"
     },
     {
       "name": "C3_invalid_threshold_400",

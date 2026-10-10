@@ -36,7 +36,7 @@ agent loop 首轮模型调用前，以决策原语（choice）对最近一条用
 - **D-1 类目集**：九域 + `all`（弃权=全量下发，路由永不比现行为更差的安全阀）。动作语义（推荐定版）：采纳域 → `DOMAIN_TOOL_DEFS[domain] ∪ DOMAIN_TOOL_DEFS.session`。
 - **D-2 state**：最近一条用户消息 ≤600 字（同 W1-2）。
 - **D-3 门控阈值**：单阈值 θ；P0 取「采纳精度 ≥0.90 且 gold=all 误采纳 ≤2」约束下覆盖最高档（预期 θ≈0.8——误路由代价=模型看不到邻域工具，任务能力受损）。
-- **D-4 默认开关位**：默认关 + 显式开 `BIOF3_JEV_TOOL_ROUTE=1`（误路由直接损伤任务能力面，必须保守侧；P2 实机零回归后翻默认另裁）。
+- **D-4 默认开关位**：默认关 + 显式开 `PETRI_JEV_TOOL_ROUTE=1`（误路由直接损伤任务能力面，必须保守侧；P2 实机零回归后翻默认另裁）。
 - **D-5 作用面**：agent-runner `resolveToolDefsForContext` 之后一次性过滤（每 run 一次，+1 次 Jev 调用 ≈280ms 延迟成本，guard on 才发生）；routing 不改变 tools 顺序相对关系。
 
 ## 3. 关闭语义

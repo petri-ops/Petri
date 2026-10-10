@@ -1,6 +1,6 @@
 @AGENTS.md
 
-# BioF3 Desktop — Claude Code 兼容入口
+# Petri Desktop — Claude Code 兼容入口
 
 本文件不是第二份项目规范，只负责把 Claude Code 路由到与 Codex 和其他 Agent 相同的项目事实。不得在这里复制当前阶段、分支、门禁数量或工作包进度。
 
@@ -13,7 +13,7 @@
  - [`docs/next-steps-roadmap.md`](./docs/next-steps-roadmap.md)
  - [`docs/project-workspace-handoff.md`](./docs/project-workspace-handoff.md)
  - [`docs/DOC-REGISTRY.json`](./docs/DOC-REGISTRY.json) 登记的当前唯一 active 工作包
-4. 创建或修改计划、选择验收范围、阶段收口、归档或处理 Worktree 时，使用 `$gewu-project-governance`。Claude Code 通过 [`.claude/skills/gewu-project-governance`](./.claude/skills/gewu-project-governance) 发现它；canonical 实体仍是 [`.agents/skills/gewu-project-governance/SKILL.md`](./.agents/skills/gewu-project-governance/SKILL.md)。
+4. 创建或修改计划、选择验收范围、阶段收口、归档或处理 Worktree 时，使用 `$petri-project-governance`。Claude Code 通过 [`.claude/skills/petri-project-governance`](./.claude/skills/petri-project-governance) 发现它；canonical 实体仍是 [`.agents/skills/petri-project-governance/SKILL.md`](./.agents/skills/petri-project-governance/SKILL.md)。
 
 ## 一致性边界
 

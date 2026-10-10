@@ -19,7 +19,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const PACK = path.resolve(ROOT, '..', 'gewu-pack-bio');
+const PACK = path.resolve(ROOT, '..', 'petri-pack-bio');
 const OUT_DIR = path.join(ROOT, 'acceptance', 'block-129');
 const AUTH = 'Bearer desktop-local';
 

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "updated": "2026-09-12",
   "checksumAlgorithm": "sha256",
-  "notes": "BLOCK-83 P4 中性夹具目录的内置清单：仅含核心测试用的中性插件（无任何领域内容）。生信运行时条目（biof3-r-runtime / biof3-py-runtime）属核心运行时发行物，随核心主清单处置，不在此处。",
+  "notes": "BLOCK-83 P4 中性夹具目录的内置清单：仅含核心测试用的中性插件（无任何领域内容）。生信运行时条目（petri-r-runtime / petri-py-runtime）属核心运行时发行物，随核心主清单处置，不在此处。",
   "plugins": {
     "sample-metrics": {
       "id": "sample-metrics",

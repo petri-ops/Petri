@@ -20,12 +20,12 @@
 
 ## 2. 现状与设计裁决
 
-**现状**：装/卸 = 手工设 `BIOF3_PLUGINS_DIR` + `BIOF3_DOMAIN_TOOL_REGISTRY` 两个 env + 重启；核心五插座已全部就绪（BLOCK-83 P3/P4）；插件商店已有完整插件级安装管道（`plugin:*` 8 IPC + PluginStorePanel + plugin-manager）。
+**现状**：装/卸 = 手工设 `PETRI_PLUGINS_DIR` + `PETRI_DOMAIN_TOOL_REGISTRY` 两个 env + 重启；核心五插座已全部就绪（BLOCK-83 P3/P4）；插件商店已有完整插件级安装管道（`plugin:*` 8 IPC + PluginStorePanel + plugin-manager）。
 
 **设计裁决**（机制级，内部裁决；产品可见项见 §3）：
 
-- **D1 安装记录**：`<dataDir>/packs/installed.json`（数组：`{packId, packRoot, version, installedAt}`）——文件制、additive、与插件 `installed.json` 先例同构；dataDir=`BIOF3_LOCAL_DATA_DIR`。
-- **D2 包来源（v1）**：本地目录选择（主进程 `dialog.showOpenDialog` 选含 `pack.json` 的目录）+ 兄弟仓自动发现（`../gewu-pack-bio`，dev 便利）；**远程分发 defer**（插件级 remote manifest 机制在，包级远程另立候选）。
+- **D1 安装记录**：`<dataDir>/packs/installed.json`（数组：`{packId, packRoot, version, installedAt}`）——文件制、additive、与插件 `installed.json` 先例同构；dataDir=`PETRI_LOCAL_DATA_DIR`。
+- **D2 包来源（v1）**：本地目录选择（主进程 `dialog.showOpenDialog` 选含 `pack.json` 的目录）+ 兄弟仓自动发现（`../petri-pack-bio`，dev 便利）；**远程分发 defer**（插件级 remote manifest 机制在，包级远程另立候选）。
 - **D3 boot 接线**：server 启动时读 packs 记录 → 每个已装包追加 `{type:'installed', root:<pack>/plugins}` 插件源 + `toolRegistry.registerDomainToolsFile(<pack>/registry/tool-registry.json)`。**tool-registry 从「env 单文件」升级为「env + 命令式注册可叠加」**（内部 map 可变，导出函数不变——消费方零改动）。
 - **D4 卸载语义**：移除安装记录 + 诚实提示「重启后生效」（plugin-loader 单例，与运行时安装的重启先例一致）；**不删包文件本身**（包是用户资产）。
 - **D5 包校验**：安装时校验 `pack.json`（packId 必填 + plugins/installed.json 存在）；重复安装 = 幂等更新。
@@ -41,10 +41,10 @@
 
 <sup>[1]</sup> 路径修正（2026-09-12 P1 收口）：立项版写的是 `src/pack-registry.js`，
 实现落在 `core/shared-backend/pack-registry.js`。选 core 侧的原因：boot 侧
-`core/biof3-server/server.js` 与主进程侧 `src/ipc/pack.js` **都要** require 同一份实现，
+`core/petri-server/server.js` 与主进程侧 `src/ipc/pack.js` **都要** require 同一份实现，
 放在 core 里两侧都是同层相对引用；放 `src/` 则 server.js 要跨出 core 边界反向依赖
 Electron 主进程目录。当前实现与测试均按 core 路径（`test/block84-pack-oneclick.test.mjs`、
-`src/ipc/pack.js:11`、`core/biof3-server/server.js:72` 三处一致）。
+`src/ipc/pack.js:11`、`core/petri-server/server.js:72` 三处一致）。
 
 ## 4. 阶段
 
@@ -60,7 +60,7 @@ Electron 主进程目录。当前实现与测试均按 core 路径（`test/block
 ## 6. 验收门禁预声明
 
 - 契约测试（pack-registry 读写/校验/幂等/tool-registry 叠加）全绿 + tsc 0 + docs/ui 门禁。
-- 实机（dev 栈重启循环或隔离探针）：装 gewu-pack-bio → catalog=15 → 卸 → catalog=0；D13 夹具第二租户同法可装可卸。
+- 实机（dev 栈重启循环或隔离探针）：装 petri-pack-bio → catalog=15 → 卸 → catalog=0；D13 夹具第二租户同法可装可卸。
 - 卸载后核心零残留（复用 BLOCK-83 Z4 文件级检查语义）。
 
 ---
@@ -86,7 +86,7 @@ Electron 主进程目录。当前实现与测试均按 core 路径（`test/block
    `ERR_INVALID_ARG_TYPE` → `getAllPluginManifests()` 崩 → `GET /api/tools/catalog` **恒 500**。
    **隐蔽点**：装载计数日志仍打印 `loaded 15 plugin(s)`，装载与目录投影是两条独立链路，
    缺陷被日志掩盖。修复：对齐 `loadPluginsFromSources` 的装配语义（P5 锁死）。
-2. **路径漂移** —— `core/biof3-server/server.js:72` 指向不存在的 `src/pack-registry.js`。已修为
+2. **路径漂移** —— `core/petri-server/server.js:72` 指向不存在的 `src/pack-registry.js`。已修为
    `core/shared-backend/pack-registry.js`（见 §3 脚注）。
 3. **调试残留** —— `plugin-loader.js` 遗留 `[block84-debug]` console.log，已删。
 
@@ -99,7 +99,7 @@ Electron 主进程目录。当前实现与测试均按 core 路径（`test/block
 | U1 页面可达 | PASS |
 | U2 商店页可达且非错误屏 | PASS（`errorScreen=false`） |
 | U3 「领域包」分区可见 | PASS（`sectionExists=true`） |
-| U4 包卡片存在 | PASS（`domain-pack-gewu-pack-bio`） |
+| U4 包卡片存在 | PASS（`domain-pack-petri-pack-bio`） |
 | U5 桥数据与分区渲染一致 | PASS（`bridgeInstalled=1`） |
 | U6 「重启生效」诚实提示 | PASS |
 

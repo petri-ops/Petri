@@ -53,10 +53,10 @@ export const LIVE_SOURCE_FILES = Object.freeze({
   producerTest: 'test/p4r-live-observation.test.mjs',
   corpus: 'scripts/g0-rs-p4r-corpus.mjs',
   capture: 'scripts/g0-rs-p4r-capture.mjs',
-  routes: 'core/biof3-server/routes/result-studio.js',
-  contextTools: 'core/biof3-server/agent-tools/result-context-tools.js',
-  contextEditTools: 'core/biof3-server/agent-tools/result-context-edit-tools.js',
-  editTools: 'core/biof3-server/agent-tools/result-edit-tools.js',
+  routes: 'core/petri-server/routes/result-studio.js',
+  contextTools: 'core/petri-server/agent-tools/result-context-tools.js',
+  contextEditTools: 'core/petri-server/agent-tools/result-context-edit-tools.js',
+  editTools: 'core/petri-server/agent-tools/result-edit-tools.js',
   changeSetService: 'core/shared-backend/result-changeset-service.js',
   compareService: 'core/shared-backend/result-compare-service.js',
   revisionSource: 'core/shared-backend/result-revision-source.js',
@@ -64,7 +64,7 @@ export const LIVE_SOURCE_FILES = Object.freeze({
   background: 'core/shared-backend/result-studio-background.js',
   backgroundChild: 'core/shared-backend/result-studio-background-child.js',
   repository: 'core/shared-backend/result-studio-repository.js',
-  conversations: 'core/biof3-server/helpers/conversations.js',
+  conversations: 'core/petri-server/helpers/conversations.js',
   packageScripts: 'package.json',
   impactMap: 'test/impact-map.json',
 });
@@ -280,7 +280,7 @@ function artifactName(outputs, preferred = 'volcano.png') {
 
 function openDatabase(dbPath, { readonly = false } = {}) {
   const Database = require(require.resolve('better-sqlite3', {
-    paths: [path.join(ROOT, 'core/biof3-server'), ROOT],
+    paths: [path.join(ROOT, 'core/petri-server'), ROOT],
   }));
   return new Database(dbPath, readonly ? { readonly: true } : undefined);
 }
@@ -466,16 +466,16 @@ async function runAgentChildMain() {
   const spec = JSON.parse(process.argv[index + 1]);
   const {
     createResultContextEditTools,
-  } = require(path.join(ROOT, 'core/biof3-server/agent-tools/result-context-edit-tools.js'));
+  } = require(path.join(ROOT, 'core/petri-server/agent-tools/result-context-edit-tools.js'));
   const {
     createResultChangeSetTools,
-  } = require(path.join(ROOT, 'core/biof3-server/agent-tools/result-edit-tools.js'));
-  const mcpRegistry = require(path.join(ROOT, 'core/biof3-server/mcp/registry.js'));
+  } = require(path.join(ROOT, 'core/petri-server/agent-tools/result-edit-tools.js'));
+  const mcpRegistry = require(path.join(ROOT, 'core/petri-server/mcp/registry.js'));
   const {
     getOrCreateActiveConversation,
     appendMessageToConversation,
-  } = require(path.join(ROOT, 'core/biof3-server/helpers/conversations.js'));
-  const db = require(path.join(ROOT, 'core/biof3-server/db.js'));
+  } = require(path.join(ROOT, 'core/petri-server/helpers/conversations.js'));
+  const db = require(path.join(ROOT, 'core/petri-server/db.js'));
   const project = db.getProject(spec.projectId);
   const ownerId = String(project?.user_id || '').trim();
   if (!project || !ownerId) throw new Error('live project owner is unavailable');
@@ -578,7 +578,7 @@ export async function captureLiveObservation({
     const corpus = await runCorpusChild(captureRoot, lifecycle);
     if (!corpus.ok) throw new Error('live corpus incomplete');
     const desktopIdentity = alignDisposableDesktopIdentity(
-      path.join(corpus.root, 'biof3.db'),
+      path.join(corpus.root, 'petri.db'),
       corpus.projectId,
     );
     const volcano = corpus.records.find((record) => record.id === 'volcano-plot');
@@ -611,7 +611,7 @@ export async function captureLiveObservation({
     }
     injectFailure('after_open', faultAt);
 
-    const beforeEdit = inspectTruth(env.BIOF3_DB_PATH, {
+    const beforeEdit = inspectTruth(env.PETRI_DB_PATH, {
       projectId: corpus.projectId,
       artifactFamilyId: interaction.data.manifest.artifactFamilyId,
       sourceRevisionId: sourceRevision.revisionId,
@@ -699,7 +699,7 @@ export async function captureLiveObservation({
       confirmBody,
       10 * 60 * 1000,
     ));
-    const afterFirstReplay = inspectTruth(env.BIOF3_DB_PATH, {
+    const afterFirstReplay = inspectTruth(env.PETRI_DB_PATH, {
       projectId: corpus.projectId,
       artifactFamilyId: agent.artifactFamilyId,
       sourceRevisionId: sourceRevision.revisionId,
@@ -713,7 +713,7 @@ export async function captureLiveObservation({
       confirmBody,
       10 * 60 * 1000,
     );
-    const afterDuplicateReplay = inspectTruth(env.BIOF3_DB_PATH, {
+    const afterDuplicateReplay = inspectTruth(env.PETRI_DB_PATH, {
       projectId: corpus.projectId,
       artifactFamilyId: agent.artifactFamilyId,
       sourceRevisionId: sourceRevision.revisionId,
@@ -737,7 +737,7 @@ export async function captureLiveObservation({
     ));
     injectFailure('before_restart', faultAt);
 
-    const beforeRestart = inspectTruth(env.BIOF3_DB_PATH, {
+    const beforeRestart = inspectTruth(env.PETRI_DB_PATH, {
       projectId: corpus.projectId,
       artifactFamilyId: agent.artifactFamilyId,
       sourceRevisionId: sourceRevision.revisionId,
@@ -778,7 +778,7 @@ export async function captureLiveObservation({
     if (!artifactAfterRestart.ok || hash(artifactBytesAfterRestart) !== agent.outputHash) {
       throw new Error('adopted Artifact failed hash verification after restart');
     }
-    const afterRestart = inspectTruth(env.BIOF3_DB_PATH, {
+    const afterRestart = inspectTruth(env.PETRI_DB_PATH, {
       projectId: corpus.projectId,
       artifactFamilyId: agent.artifactFamilyId,
       sourceRevisionId: sourceRevision.revisionId,

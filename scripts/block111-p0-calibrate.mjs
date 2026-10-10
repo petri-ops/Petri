@@ -23,12 +23,12 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const decisionApi = require('../core/biof3-server/helpers/decision-api.js');
+const decisionApi = require('../core/petri-server/helpers/decision-api.js');
 // P1 起候选生成与请求组装单源于 interpret.js（字节同形迁移，契约测试钉住形状）。
 const {
   deriveMarkerCandidates,
   buildMarkerDecisionRequest,
-} = require('../core/biof3-server/helpers/interpret.js');
+} = require('../core/petri-server/helpers/interpret.js');
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
@@ -229,7 +229,7 @@ async function main() {
     sourceCommit: require('node:child_process').execSync('git rev-parse HEAD', { cwd: root }).toString().trim(),
     // BLOCK-117：供给换接校准的模型标签重定向（默认行为不变）
     model: process.env.CALIBRATION_EVIDENCE_MODEL || decisionApi.DECISION_MODEL_PIN,
-    wrapper: 'core/biof3-server/helpers/decision-api.js',
+    wrapper: 'core/petri-server/helpers/decision-api.js',
     decisionPoint: 'interpret.js lookupCellType 二跳（W1-1 marker→细胞类型判别）',
     result,
     gate,
