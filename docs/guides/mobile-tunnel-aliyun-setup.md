@@ -88,6 +88,29 @@ curl -k https://47.110.228.168/m/api/health
 手机（任意网络）浏览器打开 `https://47.110.228.168/m` → 警告页点继续 →
 应显示「尚未配对」诚实空态 → 回桌面扫码即通。
 
+## ⑥ 中转看门狗（可选加固 · BLOCK-159 家族 · 软件独立性）
+
+> 把中转机的 nginx 从「手工态」变「看门狗态」，与桌面端 BLOCK-159 的探活自愈
+> 形成双闭环：nginx 进程挂了 systemd 自动拉起；每 120s 端到端探活（公网门
+> 期待 401，与桌面端 probe 同判据），异常自动重启 nginx 并 journal 留痕。
+> **与具体 IP/云厂商无关**：aliyun/腾讯/AWS/任何 VPS 通用；端口与间隔环境
+> 变量可覆写，换中转机=在新机器上重跑本脚本一次。
+
+在【中转服务器】上执行（root）：
+
+```bash
+# 仓库内脚本拷到服务器后运行（或 ssh <host> 'bash -s' < scripts/block159-relay-watchdog.sh）
+GW_GATE_PORT=443 GW_REMOTE_PORT=2233 GW_PROBE_SECS=120 bash block159-relay-watchdog.sh
+```
+
+- 安装内容：nginx systemd drop-in（Restart=always）+ `gewu-relay-probe.timer`
+  （探活→异常 `systemctl restart nginx` + `logger -t gewu-relay-probe` 留痕）。
+- 幂等可重跑；`--uninstall` 干净撤销（drop-in 一并移除，nginx 回归发行版默认）。
+- 换中转机/换 IP 三步：新机按 ①②⑥ 装一遍 → 桌面端「我的设备」面板隧道配置
+  改 host/publicUrl（或从中转档案切换）→ 手机扫新码重配对一次。
+- `GW_SSH_WATCHDOG=1` 可选连 ssh 服务一起看门狗（默认关：改 ssh 单元有锁死
+  远程访问的风险，确认有云控制台兜底再开）。
+
 ## 排障
 
 | 现象 | 处置 |
@@ -96,6 +119,7 @@ curl -k https://47.110.228.168/m/api/health
 | curl -k 超时 | 安全组 443 未放行，或 nginx 未启动（`systemctl status nginx`） |
 | curl -k 返回 502 | 桌面端隧道未连接（remotePort 未监听），先看面板隧道状态 |
 | 二维码还是局域网地址 | 隧道状态不是 connected，或公网地址没填/没保存 |
+| 装了看门狗仍间歇 502/超时 | `journalctl -t gewu-relay-probe` 看探活留痕；桌面端隧道是否 connected（服务器看门狗不代拨隧道，桌面断由桌面自愈） |
 
 ## 安全边界（务必知晓）
 
