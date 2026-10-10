@@ -1,0 +1,69 @@
+{
+  "name": "block156-mcp-agent-loop-live",
+  "startedAt": "2026-10-10T02:21:03.343Z",
+  "finishedAt": "2026-10-10T02:21:07.651Z",
+  "secret": "格物63521",
+  "assertions": [
+    {
+      "name": "dev_stack_api_ready",
+      "pass": true,
+      "detail": "GET /api/data/projects → 200"
+    },
+    {
+      "name": "fixture_server_added",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "fixture_connected_toolcount_1",
+      "pass": true,
+      "detail": "status=200 body={\"status\":\"ok\",\"id\":\"fixture\",\"toolCount\":1}"
+    },
+    {
+      "name": "chat_preset_available",
+      "pass": true,
+      "detail": "presets=4"
+    },
+    {
+      "name": "temp_project_created",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "agent_task_accepted",
+      "pass": true,
+      "detail": "status=200 body={\"taskId\":\"d041b162-9184-48b6-afc4-688d0be176eb\",\"status\":\"running\",\"kind\":\"primary\",\"parentTaskId\":null,\"conversationId"
+    },
+    {
+      "name": "task_completed",
+      "pass": true,
+      "detail": "status=completed agent=done"
+    },
+    {
+      "name": "assistant_echoes_tool_result",
+      "pass": true,
+      "detail": "reply=工具返回原文：\n\n```\n{\"contractVersion\":\"1.0.0\",\"traceId\":\"trace_a283e5ef-69ea-4b2e-b882-755fd11bbe27\",\"callId\":\"call_00_nTJ63k2ZGJpEKTsZpkHC5185\",\"tool\":\"mcp_fixture_fixture_echo\",\"status\":\"success\",\"termina"
+    },
+    {
+      "name": "model_called_projected_tool_by_name",
+      "pass": true,
+      "detail": "response.toolCalls[].function.name === mcp_fixture_fixture_echo（按名调用成功=投影进请求）"
+    },
+    {
+      "name": "tool_stream_frame_present",
+      "pass": true,
+      "detail": "流式帧含投影工具名"
+    },
+    {
+      "name": "disconnect_clears_tool_surface",
+      "pass": true,
+      "detail": "status=409（未连接=工具面 409）"
+    },
+    {
+      "name": "cleanup_server_removed",
+      "pass": true,
+      "detail": "[]"
+    }
+  ],
+  "allPass": true
+}

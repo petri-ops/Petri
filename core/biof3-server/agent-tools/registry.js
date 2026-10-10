@@ -433,12 +433,32 @@ const TOOL_BY_NAME = new Map(
   TOOL_REGISTRY.map((entry) => [entry.definition.function.name, entry])
 );
 
+// BLOCK-156 P3 — MCP 工具动态投影层（require 置后避免装载序耦合；投影自身零连接=零追加）
+const mcpProjection = require('./mcp-projection');
+
 function getProviderToolDefs() {
-  return TOOL_REGISTRY.map((entry) => projectProviderDefinition(entry.definition));
+  // 静态注册表 + 已连接 MCP server 工具投影（R1：投影失败不影响静态面）
+  let projected = [];
+  try {
+    projected = mcpProjection.projectMcpToolDefs();
+  } catch {
+    projected = [];
+  }
+  return TOOL_REGISTRY.map((entry) => projectProviderDefinition(entry.definition)).concat(projected);
 }
 
 function getToolEntry(name) {
-  return TOOL_BY_NAME.get(name);
+  // 静态优先（内建永不被 MCP 投影遮蔽）；mcp_* 前缀走投影兜底
+  const entry = TOOL_BY_NAME.get(name);
+  if (entry) return entry;
+  if (typeof name === 'string' && name.startsWith('mcp_')) {
+    try {
+      return mcpProjection.getMcpToolEntry(name);
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
 }
 
 function getToolHandler(name) {
