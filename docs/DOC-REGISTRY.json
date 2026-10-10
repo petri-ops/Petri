@@ -5947,8 +5947,30 @@
       ],
       "archivePolicy": "retain_stable_path",
       "notes": "联邦协作体验收口三波同日全交付（并行插队批 planned→completed）：W1 federation_list_peers 工具+W1 计数钉/夹具三面登记（f5011827）；W2 委托历史聚合端点+联邦面板委托记录卡（实机聚合出 BLOCK-85 真实历史）；W3 节点 60s 心跳（实机 lastProbe 三周陈旧→自动刷新 ok）。测试=block164 7+邻域 36+前端 16 全绿；两处 set-state-in-effect 顺手清偿。"
+    },
+    {
+      "id": "BLOCK-165-PETRI-OSS-RENAME",
+      "path": "docs/block-165-petri-oss-rename-plan.md",
+      "capability": "platform-branding",
+      "kind": "work-package",
+      "status": "active",
+      "phase": "P0-LAUNCH",
+      "canonical": true,
+      "truthDomain": "block-165-petri-oss-rename-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-10",
+      "tags": [
+        "BLOCK-165",
+        "petri",
+        "rename",
+        "open-source",
+        "repo-migration",
+        "codemod"
+      ],
+      "archivePolicy": "retain_stable_path",
+      "notes": "换库开源改名立项 planned（用户裁决「立一个独立的工作包 统统修改完成 再上传」+定名 Petri）：全仓 gewu/biof3→petri case-aware 替换（内容 ~1.9k 文件+382 路径 git mv）+行为锚八项红绿（db 不变式/env 族/事件桥/token 契约/MCP/CI/builder/IPC）+四基线重锚+4 技能改名与发现桥重建+OSS 三件套（LICENSE/根 README/tagline）+secret 与个人标识扫描+新仓 petri-ops/Petri 推送与旧 origin 退役；P0 codemod dry-run 用户过目放行后执行；决策点 D0-D7 待裁决；BLOCK-161 维持 planned 排队串行在后（token 治理待改名后新前缀上做）。doc:suggest 零建议（如实）。"
     }
   ],
   "lastUpdated": "2026-10-10",
-  "documentCount": 313
+  "documentCount": 314
 }
