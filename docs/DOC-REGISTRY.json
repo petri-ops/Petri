@@ -5892,7 +5892,7 @@
       "path": "docs/block-162-mobile-ws-transport-plan.md",
       "capability": "mobile-gateway",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-162-mobile-ws-transport-plan",
       "entrypoint": "docs/README.md",
@@ -5905,7 +5905,7 @@
         "agent-stream"
       ],
       "archivePolicy": "retain_stable_path",
-      "notes": "（并行插队批：唯一 active 槽位被 BLOCK-160 占用；用户显式裁决「能搞咱就搞起来」插队，文件面隔离=mobile-gateway+agentTaskStream，与 W2 波 agent-tools/skills/mcp 不相交；收口时翻 completed）手机面传输 WS 化：零依赖 RFC6455 最小 WS 服务端 + agent-task-store 进程内事件总线 + 网关 /m/api/ws + 前端投影 WS-first 回退 SSE。"
+      "notes": "手机面传输 WS 化（用户裁决「能搞咱就搞起来」，当日立项当日收口，并行插队批注册态 planned→completed）：零依赖 RFC6455 最小 WS 服务端 + agent-task-store 进程内事件总线（推送地板 500ms→0）+ 网关 /m/api/ws（upgrade 会话门/水位回放/即时推送+2s 兜底/终态帧对齐 SSE）+ 前端投影 WS-first 3 连失败回退 SSE（水位续传复用 BLOCK-159）。测试=后端 13+前端 3+邻域 58 全绿；实机=dev 栈重启后 WS 四探全绿（401/101/ping-pong/err）。非范围=终端流/数据桥 WS 化、桌面端切 WS。"
     },
     {
       "id": "BLOCK-163-MATURITY-WAVE3",

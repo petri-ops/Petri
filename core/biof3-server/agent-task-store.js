@@ -529,6 +529,13 @@ function getResumableTask(taskId) {
   return mapTaskRow(row);
 }
 
+// BLOCK-162 P1 — 进程内任务事件总线（additive）：appendAgentTaskEvent 落库成功
+// 后 emit，网关 WS 订阅者据此即时推送（推送延迟地板 500ms DB 轮询 → 0）。
+// 语义边界：总线只是「尽快知道」信号，不是投递保证——兜底仍走
+// getAgentTaskEventsSince 水位轮询（2s），漏帧由轮询补齐、前端单调 seq 去重。
+const taskEventBus = new (require('node:events').EventEmitter)();
+taskEventBus.setMaxListeners(50);
+
 function appendAgentTaskEvent(taskId, seq, eventType, payload) {
   stmts.insertEvent.run(
     taskId,
@@ -537,6 +544,7 @@ function appendAgentTaskEvent(taskId, seq, eventType, payload) {
     typeof payload === 'string' ? payload : JSON.stringify(payload),
     new Date().toISOString()
   );
+  taskEventBus.emit('event', { taskId, seq, eventType, payload });
 }
 
 function getAgentTaskEventsSince(taskId, afterSeq, limit = 500) {
@@ -960,6 +968,7 @@ module.exports = {
   sweepOldTaskEvents,
   TASK_EVENTS_RETENTION_DAYS,
   appendAgentTaskEvent,
+  taskEventBus, // BLOCK-162 P1 — 进程内事件总线（网关 WS 即时推送源）
   getAgentTaskEventsSince,
   coalesceTaskDeltas,
   listInFlightPrimaryTasks,

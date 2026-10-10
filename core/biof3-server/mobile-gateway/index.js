@@ -515,6 +515,8 @@ function startMobileGateway({ dataDir, mountRoutes, env = process.env } = {}) {
   const server = app.listen(port, config.bind, () => {
     console.log(`📱 [mobile-gateway] listening on ${config.bind}:${port} (LAN: ${(lanAddresses()).join(', ') || 'N/A'})`);
   });
+  // BLOCK-162 P2 — agent 任务流 WS 端点（单连接 + 进程内即时推送，/m/api/ws）。
+  require('./agent-ws').attachAgentWs(server, { stores });
   server.on('error', (error) => {
     console.warn(`[mobile-gateway] listen failed on :${port}:`, error.message);
   });

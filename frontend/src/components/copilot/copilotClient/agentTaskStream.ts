@@ -5,6 +5,7 @@
 
 import { gewuEvents, dispatchGewuEvent } from '@/lib/events';
 import type { TokenBudgetDetail } from '@/lib/events';
+import { isProjectionEnv } from '@/lib/projectionDataBridges';
 import { emitAgentTaskDone, getApiPrefix, getAuthHeader } from './apiBase';
 import {
   parseResultEditProgressEvent,
@@ -44,6 +45,25 @@ function streamRetryDelayMs(attempt: number): number {
   );
   const jitter = 1 + (Math.random() * 2 - 1) * 0.3;
   return Math.max(250, Math.round(capped * jitter));
+}
+
+/**
+ * BLOCK-162 P3 — 投影环境 WS-first：单连接 /m/api/ws（进程内即时推送，无 500ms
+ * 轮询地板），传输级连续失败 3 次 → 5 分钟内直走既有 SSE（防代理拦死 upgrade 的
+ * 死循环），随后恢复尝试。水位无限重连/退避抖动/非水位错误不重试语义全部不变
+ * （外层循环共用，仅单次订阅尝试内部换传输）。
+ */
+const WS_FALLBACK_FAILURE_THRESHOLD = 3;
+const WS_FALLBACK_COOLDOWN_MS = 5 * 60 * 1000;
+let wsFailStreak = 0;
+let wsDisabledUntil = 0;
+
+function shouldTryWs(): boolean {
+  return (
+    isProjectionEnv()
+    && typeof WebSocket !== 'undefined'
+    && Date.now() >= wsDisabledUntil
+  );
 }
 
 /**
@@ -121,11 +141,21 @@ export async function subscribeAgentTask(
 ): Promise<void> {
   let seq = afterSeq;
   for (let attempt = 0; ; attempt++) {
+    const useWs = shouldTryWs();
     try {
-      seq = await subscribeAgentTaskOnce(taskId, opts, seq);
+      seq = await (useWs
+        ? subscribeAgentTaskOnceWs(taskId, opts, seq)
+        : subscribeAgentTaskOnce(taskId, opts, seq));
+      wsFailStreak = 0;
       return;
     } catch (err: unknown) {
       if (err instanceof AgentStreamDisconnectedError) {
+        if (useWs) {
+          wsFailStreak += 1;
+          if (wsFailStreak >= WS_FALLBACK_FAILURE_THRESHOLD) {
+            wsDisabledUntil = Date.now() + WS_FALLBACK_COOLDOWN_MS;
+          }
+        }
         // 断线时已收到的最后 seq（可能大于进入时的 afterSeq），重连从其后续传。
         // 终态任务重连会回放 done/error/[DONE] 正常收口；非水位可续错误
         // （HTTP 4xx/5xx、用户 abort）不是本类型，照旧上抛不重试。
@@ -139,6 +169,101 @@ export async function subscribeAgentTask(
       throw err;
     }
   }
+}
+
+/** 单次 WS 订阅尝试：/m/api/ws 单连接；done 帧收口返回 lastSeq，传输断开抛 AgentStreamDisconnectedError(lastSeq)。 */
+function subscribeAgentTaskOnceWs(
+  taskId: string,
+  opts: StreamChatOptions,
+  afterSeq = 0
+): Promise<number> {
+  return new Promise<number>((resolve, reject) => {
+    let lastSeq = afterSeq;
+    let settled = false;
+    let doneFiles: Array<{ path: string; status: string }> | undefined;
+    const protocol = typeof location !== 'undefined' && location.protocol === 'https:' ? 'wss:' : 'ws:';
+    let ws: WebSocket;
+    try {
+      ws = new WebSocket(`${protocol}//${location.host}/m/api/ws`);
+    } catch {
+      reject(new AgentStreamDisconnectedError('WS 建连失败', afterSeq));
+      return;
+    }
+    const settle = (fn: () => void) => {
+      if (settled) return;
+      settled = true;
+      opts.signal?.removeEventListener('abort', onAbort);
+      try { ws.close(); } catch { /* 已关 */ }
+      fn();
+    };
+    const onAbort = () => {
+      const err = new Error('Aborted');
+      err.name = 'AbortError';
+      settle(() => reject(err));
+    };
+    opts.signal?.addEventListener('abort', onAbort, { once: true });
+
+    ws.onopen = () => {
+      try { ws.send(JSON.stringify({ t: 'sub', taskId, afterSeq: lastSeq })); } catch { /* close 会接手 */ }
+    };
+    ws.onmessage = (event) => {
+      let msg: {
+        t?: string; taskId?: string; seq?: number; eventType?: string; payload?: AgentSseEvent;
+        status?: string; error?: string; resumable?: boolean; interruptedAt?: string | null;
+        fallbackTaskId?: string | null; fallbackLabel?: string | null; fallbackCategory?: string | null;
+        filesChanged?: unknown; message?: string;
+      };
+      try { msg = JSON.parse(String(event.data)) as typeof msg; } catch { return; }
+      if (msg.t === 'ev') {
+        if (typeof msg.seq === 'number' && msg.seq > lastSeq) lastSeq = msg.seq;
+        // 信封形状与 SSE 对齐：{seq,eventType,payload}，payload 走原分发
+        const evt = msg.payload ?? { seq: msg.seq, eventType: msg.eventType };
+        if (evt && evt.event === 'done' && Array.isArray(evt.filesChanged)) {
+          doneFiles = evt.filesChanged as Array<{ path: string; status: string }>;
+        }
+        _handleSseEvent(evt, opts);
+        return;
+      }
+      if (msg.t === 'done') {
+        if (msg.status === 'failed') {
+          _handleSseEvent({
+            event: 'error',
+            error: msg.error,
+            resumable: msg.resumable === true,
+            interruptedAt: msg.interruptedAt ?? null,
+            fallbackTaskId: msg.fallbackTaskId ?? null,
+            fallbackLabel: msg.fallbackLabel ?? null,
+            fallbackCategory: msg.fallbackCategory ?? null,
+          }, opts);
+        } else if (msg.status === 'cancelled') {
+          _handleSseEvent({ event: 'agent_cancelled' }, opts);
+        } else {
+          if (Array.isArray(msg.filesChanged)) {
+            doneFiles = msg.filesChanged as Array<{ path: string; status: string }>;
+          }
+          _handleSseEvent({ event: 'done', filesChanged: msg.filesChanged }, opts);
+        }
+        settle(() => {
+          opts.onDone?.();
+          emitAgentTaskDone(taskId, opts.kind, {
+            filesChanged: doneFiles,
+            conversationId: opts.conversationId,
+          });
+          resolve(lastSeq);
+        });
+        return;
+      }
+      if (msg.t === 'err') {
+        // 服务端业务错（task_not_found/forbidden/too_many）：非水位可续，不重试
+        settle(() => reject(new Error(`WS ${msg.message || 'error'}`)));
+      }
+      // pong/未知帧：忽略
+    };
+    ws.onerror = () => settle(() => reject(new AgentStreamDisconnectedError('WS 连接中断', lastSeq)));
+    ws.onclose = () => {
+      if (!settled) settle(() => reject(new AgentStreamDisconnectedError('WS 连接在完成前关闭', lastSeq)));
+    };
+  });
 }
 
 /** 单次订阅尝试；正常完成（收到 [DONE]）返回最后的 seq，断线抛 AgentStreamDisconnectedError */
