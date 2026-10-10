@@ -46,6 +46,16 @@ const SUMMARY_TEXT_RETRY_INTERVAL_MS = 500;
 // tasks.status 终态集（markAgentTaskDone 写 status='completed'；retry_pending 非终态）
 const TERMINAL_TASK_STATUSES = new Set(['completed', 'failed', 'cancelled']);
 
+// BLOCK-163 W3 P1（ORC-3）— 子 Agent 终态事件总线：wait_agent 事件驱动聚合
+//（终态 emit 即醒，替代热 1s 轮询；轮询兜底片保留——事件丢失自愈）。
+// 通知点=spawn_agent 派生链 settle 之后（runAgentLoop 的 mark 已在其内部完成）。
+const { EventEmitter } = require('events');
+const childTerminalBus = new EventEmitter();
+childTerminalBus.setMaxListeners(0);
+function notifyChildTerminal(agentId) {
+  try { childTerminalBus.emit('terminal', String(agentId)); } catch {}
+}
+
 function fail(error, message, extra = {}) {
   return { ok: false, error, message, ...extra };
 }
@@ -386,6 +396,9 @@ function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, use
     }).catch((e) => {
       try { agentTaskStore.markAgentTaskFailed(taskId, e && e.message ? e.message : String(e)); } catch {}
       try { aiTaskConcurrencyRelease(userId, taskId); } catch {}
+    }).then(() => {
+      // ORC-3 — 派生链 settle 后广播终态（wait_agent 订阅即醒；幂等安全）
+      notifyChildTerminal(taskId);
     });
   });
 
@@ -805,7 +818,23 @@ async function wait_agent(args, ctx) {
     if (typeof ctx.isCancelled === 'function' && ctx.isCancelled()) {
       return { ok: false, error: 'cancelled', agentId, status: task.status, message: '父任务已请求取消。' };
     }
-    await sleep(WAIT_POLL_INTERVAL_MS);
+    // ORC-3 — 事件驱动等待：终态 emit 即醒；WAIT_POLL_INTERVAL_MS 片为兜底
+    // 轮询（事件丢失/外部终态自愈）。先订阅后睡眠，无竞窗。
+    const remaining = timeoutMs - (Date.now() - startedAt);
+    await new Promise((resolve) => {
+      const slice = Math.min(Math.max(WAIT_POLL_INTERVAL_MS, 2000), Math.max(remaining, 1));
+      const timer = setTimeout(() => {
+        childTerminalBus.off('terminal', onTerminal);
+        resolve(false);
+      }, slice);
+      const onTerminal = (id) => {
+        if (String(id) !== agentId) return;
+        clearTimeout(timer);
+        childTerminalBus.off('terminal', onTerminal);
+        resolve(true);
+      };
+      childTerminalBus.on('terminal', onTerminal);
+    });
   }
 }
 
@@ -838,6 +867,8 @@ module.exports = {
   followup_task,
   list_agents,
   wait_agent,
+  childTerminalBus,
+  notifyChildTerminal,
   // BLOCK-65 P1-a：用户侧（HTTP）等价——agent 专属窗留言/续派，语义与工具版单源
   queueUserMessage,
   launchUserFollowup,
