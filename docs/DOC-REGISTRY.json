@@ -5779,8 +5779,30 @@
       ],
       "archivePolicy": "retain_stable_path",
       "notes": "2026-10-10 同日整包收口：P1 货架重组/P2 MCP 客户端基座/P3 工具投影三阶段连打；实机 8+9+12 断言 ALL PASS；设计偏差四条登记 plan §8.2。"
+    },
+    {
+      "id": "G0-AGENT-MATURITY-BLUEPRINT",
+      "path": "docs/g0-agent-maturity-blueprint.md",
+      "capability": "agent-maturity",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "g0-agent-maturity-blueprint",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-10",
+      "tags": [
+        "maturity",
+        "direction",
+        "model-layer",
+        "orchestration-layer",
+        "capability-layer",
+        "knowledge-layer",
+        "distribution-layer"
+      ],
+      "archivePolicy": "retain_stable_path",
+      "notes": "2026-10-10 用户裁决落档（五层成熟度评估三路只读探查为据）：满级=G0 天花板定义 + 25 种子目录（MDL×4/ORC×5/CAP×5/KNW×6/DIST×5）+ 依赖 DAG 与三波推进序（出口判据/插队规则）；排队序唯一台账在 pending-work-backlog.md（C-EXT-1~4 已归并注记），单工作包串行不变，逐包发令；G1+ 画线（Provider 矩阵实机验证/签名公证/远程市场/packaged 分发）不越界。"
     }
   ],
   "lastUpdated": "2026-10-10",
-  "documentCount": 305
+  "documentCount": 306
 }

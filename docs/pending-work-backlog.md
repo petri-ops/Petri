@@ -5,7 +5,9 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
-最后更新：2026-10-08（**对账批（剩余工作地图 dwfrun-25f8657a 落账）**：C-20/C-22/C-23 销号 + 1j/1k/1m verified 注记补齐 + UI-456 由 UI-460 覆盖证据核销翻 verified + UI-458 菜单实机子项覆盖注记 + BIO-7 池首项多因子标注已交付。剩余工作三线：审视批高影响余量 6 条（A2×3/A5×1/B9×2）收敛为三批价值主线 + 平台域点状修补批，全部待用户发令；用户动作仅剩 UI-457 表单过目 + PL-D2 retention 裁决。）
+最后更新：2026-10-10（**G0 五层成熟度蓝图落档 reference + 候选池合并**（用户裁决「做好全方位的推进方案 接下来很长的一个阶段 就是按照此蓝图逐步推进 依赖链要做好 递进关系哦」）：蓝图 = docs/g0-agent-maturity-blueprint.md（25 种子 MDL×4/ORC×5/CAP×5/KNW×6/DIST×5 + 依赖 DAG + 三波递进 + 波次出口判据）；队列区 1v~1y = 第一波四件（KNW-1 队列头待发令，启动前置 = skill-registry.js 在制 WIP 收口），W2/W3 以汇总行挂蓝图 §3；C-EXT-1~4 归并注记入候选池（C-EXT-2 维持 deferred G1 邻界）；DOC-REGISTRY（306）+ README entry 180 登记。）
+
+此前 最后更新：2026-10-08（**对账批（剩余工作地图 dwfrun-25f8657a 落账）**：C-20/C-22/C-23 销号 + 1j/1k/1m verified 注记补齐 + UI-456 由 UI-460 覆盖证据核销翻 verified + UI-458 菜单实机子项覆盖注记 + BIO-7 池首项多因子标注已交付。剩余工作三线：审视批高影响余量 6 条（A2×3/A5×1/B9×2）收敛为三批价值主线 + 平台域点状修补批，全部待用户发令；用户动作仅剩 UI-457 表单过目 + PL-D2 retention 裁决。）
 此前 最后更新：2026-10-03（**队列头 1i BLOCK-138 收口 completed（UI-460 用户过目翻 verified）——唯一 active 槽位空出，下一工作包待用户裁决选举**。plan=docs/block-138-artifact-plane-kernel-plan.md（status: completed）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 此前 最后更新：2026-10-01（**BLOCK-128 收口 completed（实机三件当日落账，Mac 栈本批拉起）+ 队列头交棒 BLOCK-138 成果面首包 active**——①实机三件：chat MCP 链 deseq2 心跳推进✓/Jobs Wall 活动瓦片✓/owner 取消 SIGTERM 击杀✓（证据 acceptance/block-128/+探针×2）；缺陷 🟡 三条登记（取消终态误分类/墙面板跨后端取消/process_pid null）详 AUDIT-LOG；②BLOCK-138-ARTIFACT-PLANE-KERNEL 翻 active（P0-LAUNCH）——唯一 active 槽位交棒，实现流水线进行中（dynamic workflow 串行红绿+确定性门禁+独立评审），主代理终审后集成台账与提交。plan=docs/block-138-artifact-plane-kernel-plan.md + docs/block-128-execution-unification-plan.md §6。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
@@ -73,6 +75,8 @@
 
 > **G0 Goal 系列（2026-09-28 用户裁决）**：「可以的 按照你的建议来逐个推进」=按两 Goal plan §4 交织建议 v1 的预授权推进序（BIO-1 → PL-2 → BIO-2 → BIO-3 → PL-1 → BIO-4 → PL-3 → BIO-5 → BIO-6 → PL-4/5/6 穿插 → BIO-7 池）；每项启动仍走立项检查单，**项内产品语义裁决点单独问**（BIO-D1 解冻范围/PL-D1~D4/PL-D2 retention 数值等登记在两 plan §5）。
 
+> **成熟度蓝图系列（2026-10-10 用户裁决）**：「接下来很长的一个阶段 就是按照此蓝图逐步推进 依赖链要做好 递进关系」=按蓝图三波序推进的预授权（硬依赖不得倒置，独立件可插队，见蓝图 §3 依赖 DAG 与插队规则）；每包启动仍走立项检查单 + 用户发令，项内产品语义裁决点单独问；蓝图判据/依赖链 canonical = [docs/g0-agent-maturity-blueprint.md](./g0-agent-maturity-blueprint.md)（本表只持排队序）。
+
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
 | 1 | BIO-1 / UI-452 | **结果信息密度包 verified**（2026-09-29 六面实机 9/10：tooltip 全数值/搜索 25 命中/阈值线/组合筛选 25/25/Lightbox 全链/深链保持——ui452-density-live 双路联合走查；T6b demo 数据边界非缺陷；前置=pack 5036e86 goldenFixture 重锚恢复 RS3 交互投影） | G0-BIO plan §3 BIO-1 | **verified** |
@@ -98,6 +102,11 @@
 | 1s | 审视吸收一波 / BLOCK-150 | **completed（2026-10-09 当日立项当日收口）**：13/13 清账（A 消费链 6/B 生信 5/C 盲性 2；⑫ 经评审 P1 补做）；P2 携带两条登记（/m 竞态归下波/agent-approval 14/14 口径修正）；closeout 十一门 PASS；UI-469 in_progress 待实机 | acceptance/block-150/evidence.json + plan §8 | **completed** |
 | 1t | 审视吸收二波 / BLOCK-151 | **completed（2026-10-09 当日立项当日收口）**：20 条清点 15 fixed/1 销号/4 skipped/0 escalated（A1 从紧核心未动+/m 竞态/A4 四件/B7 title 四件/A3 act 对齐+30 秒措辞钉住）；评审 P1=0；closeout 十一门 PASS；UI-470 in_progress 待实机 | acceptance/block-151/evidence.json + plan §8 | **completed** |
 | 1u | 重构候选批 / BLOCK-152 | **completed（2026-10-09 当日立项当日收口）**：P 平台映射单源收敛（锚 37/37+WoA 统一登记）/H hunk 级 stage 根修复（隔离 index+rename 修复 10 场亲验）/T 隧道 60s 自探活喂徽标；评审 P1=1 修复复核；H 边缘 P2 三条归下波；预算例外登记 2026-11-30；closeout 十一门 PASS；UI-471 待实机 | acceptance/block-152/evidence.json + plan §8 | **completed** |
+| 1v | 蓝图 W1 / KNW-1 | **Skills 可见性投影**：skill_discover/get 投影进 agent-tools 或摘要注入 system prompt——模型第一次「看到」产品 skills（评估确认的最大断链：4 技能纯显式执行，agent 感知不到） | 蓝图 §2④；验收=实机 agent 自主发现并引用 skill | planned（**队列头待发令**；启动前置=skill-registry.js 在制 WIP 收口） |
+| 1w | 蓝图 W1 / KNW-2 | 渐进披露闭环：描述常驻 + 正文触发加载（对齐 SKILL.md 渐进披露） | 蓝图 §2④；验收=触发加载契约+token 预算有界 | planned（硬依赖 1v） |
+| 1x | 蓝图 W1 / CAP-1 | MCP 工具粒度审批：读 annotations 分级投影（只读检索族 read/plan 可用/执行族 full），替代一刀切 execution+R2 | 蓝图 §2③；验收=只读第三方工具低档可用实机全链 | planned |
+| 1y | 蓝图 W1 / DIST-1 | 插件启停粒度：installed.json 增 enabled + 加载器尊重 + 货架 UI 开关 | 蓝图 §2⑤；验收=停用即不注册、启用免重装 | planned |
+| — | 蓝图 W2/W3（汇总行） | W2=ORC-2（依赖 1x）→ ORC-1 → KNW-3 → CAP-2 → KNW-4⇄DIST-2（共轨，承接 C-EXT-4）；W3=ORC-3 → ORC-4 → CAP-3（承接 C-EXT-1）→ MDL-1 → MDL-2 → DIST-3⇄CAP-5（共轨）→ DIST-5 → MDL-3 → MDL-4 → KNW-5 → KNW-6 → DIST-4 | 蓝图 §3 波次表+出口判据 | 候选（按波递进，逐包发令） |
 | 2 | PL-2 / BLOCK-126 | **感知实时性 completed（含 2026-09-29 复验）**：终态 jobs 失效事件+运行期日志行缓冲；实机 allPass 6/6 两轮+端点兜底修复后复跑 6/6（source=run.log） | plan §5.1 + acceptance/block-126/ | completed |
 | 3 | BIO-2 | 交互上限与降级链：250 点 top-N 语义/静态 24 行分页/热图窗口/mojibake | G0-BIO plan §3 | planned |
 | 4 | BIO-3 | lineage 可视化 + 继续分析显式化（吸收 C-15 前半） | G0-BIO plan §3 | planned |
@@ -196,3 +205,7 @@
 - **汇报门重写丢运行中 steering 指令行**（AUDIT-LOG 🟡 2026-09-23）——BLOCK-119 加映 3 已修（report-guard steeringLines + 重写 prompt「必须逐字保留」段 + 契约），该 🟡 行已从 AUDIT-LOG 待处理表清除。
 
 | C-24 | **审视吸收三波余量候选（2026-10-09 BLOCK-153 登记）**：A4 两条（跨 job 钉住失败静默 Shell :228-232／lineage 切换导航空态与操作提示）+B7 报告模板内容扩充（pack 域）+H 边缘三条（staged 再编辑键基线不对称／staged 删除 pathspec rm --cached 形态／apply 失败已 stage 遗留）+A1 会话恢复核心语义（151 从紧未动）——全部审视/评审实证在案，重开条件=用户裁决吸收三波或触碰对应域时随批 | BLOCK-150/151/152 收口笔录携带登记 | 候选（逐项裁决） |
+| C-EXT-1 | **MCP HTTP/SSE 传输 + server 级信任配置——已归并成熟度蓝图（2026-10-10）**：传输半边 → CAP-3（W3）；server 级信任半边 → CAP-5⇄DIST-3 共轨（W3） | 来源=BLOCK-156 收口 §7；归档指针=docs/g0-agent-maturity-blueprint.md §5 |
+| C-EXT-2 | **marketplace 远程技能市场——维持 deferred（G1 邻界）**：蓝图 §6 画线内不排期；重开条件=G1+ 阶段启动或用户显式裁决 | 来源=BLOCK-156 收口 §7；蓝图 §5/§6 |
+| C-EXT-3 | **预路由 mcp 域收窄——已归并成熟度蓝图 CAP-4（W3）**：原重开条件（决策配置中心接线证据）随包保留 | 来源=BLOCK-156 收口 §7；蓝图 §2③ |
+| C-EXT-4 | **第三方技能本地导入——已归并成熟度蓝图 KNW-4⇄DIST-2 共轨（W2）**：SKILL.md 格式兼容 + 本地目录导入一体立项（2026-10-10 蓝图落档时观察到另一会话在制 skill-import-directory 面：ipc/channels/preload/extensions + 专项测试，其收口后按实际交付面注记归位） | 来源=BLOCK-156 收口 §8；蓝图 §2④⑤ |
