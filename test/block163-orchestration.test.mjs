@@ -20,18 +20,16 @@ const ROOT = path.resolve('.');
 // 与 agent-tool-registry.test.mjs 同一手法）
 const fs = require('node:fs');
 const os = require('node:os');
+const dbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'b163-orch-'));
 {
   const Database = require(path.join(ROOT, 'core', 'biof3-server', 'node_modules', 'better-sqlite3'));
-  const boot = new Database(path.join(tmpDbDir(), 'biof3.db'));
+  const boot = new Database(path.join(dbDir, 'biof3.db'));
   const migrationsDir = path.join(ROOT, 'src', 'migrations');
   for (const f of fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
     boot.exec(fs.readFileSync(path.join(migrationsDir, f), 'utf8'));
   }
   boot.close();
-  process.env.BIOF3_DB_PATH = path.join(tmpDbDir(), 'biof3.db');
-}
-function tmpDbDir() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'b163-orch-'));
+  process.env.BIOF3_DB_PATH = path.join(dbDir, 'biof3.db');
 }
 
 const spawnTools = require(path.join(ROOT, 'core/biof3-server/agent-tools/spawn-agent-tools.js'));
