@@ -3218,6 +3218,37 @@
         "test/ipc-channels-registry.test.mjs"
       ],
       "classifiesScripts": true
+    },
+    {
+      "id": "block164-federation-ux",
+      "note": "BLOCK-164 联邦协作体验收口：W1 federation_list_peers 工具（delegate 文案指向）/W2 委托历史聚合端点+联邦面板委托记录卡/W3 节点 60s 定时探活心跳。读者含联邦邻域（federation.test+registry 计数+labels 夹具）。",
+      "patterns": [
+        "core/biof3-server/routes/federation-admin.js",
+        "core/biof3-server/agent-tools/federation-tools.js",
+        "core/biof3-server/agent-tools/tool-defs/remote.js",
+        "core/biof3-server/agent-tools/tool-events.js",
+        "core/biof3-server/agent-tools/tool-metadata.js",
+        "core/biof3-server/agent-tools/registry.js",
+        "core/biof3-server/agent-task-store.js",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/Federation.tsx",
+        "frontend/src/components/copilot/toolActivity.ts",
+        "frontend/src/components/copilot/copilotClient/agentTaskStream.ts",
+        "test/fixtures/tool-activity-labels.json",
+        "acceptance/block-164/**"
+      ],
+      "tests": [
+        "test/block164-federation-ux.test.mjs",
+        "test/federation.test.mjs",
+        "test/agent-tool-registry.test.mjs",
+        "test/tool-activity-labels.test.mjs",
+        "test/block116-decision-platform.test.mjs",
+        "test/block157-skill-visibility.test.mjs",
+        "frontend/src/components/copilot/toolActivity.test.ts",
+        "frontend/src/components/copilot/copilotClient/agentTaskStream.reconnect.test.ts",
+        "frontend/src/components/copilot/copilotClient/agentTaskStream.ws.test.ts"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": false
     }
   ]
 }

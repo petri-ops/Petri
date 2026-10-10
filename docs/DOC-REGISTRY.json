@@ -5933,7 +5933,7 @@
       "path": "docs/block-164-federation-ux-closeout-plan.md",
       "capability": "mobile-gateway",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-164-federation-ux-closeout-plan",
       "entrypoint": "docs/README.md",
@@ -5946,7 +5946,7 @@
         "delegation-history"
       ],
       "archivePolicy": "retain_stable_path",
-      "notes": "（并行插队批，注册态 planned，收口翻 completed）联邦协作体验收口三波：W1 federation_list_peers 工具（委托入口可自足，解模型拿不到 peerId）/W2 联邦委托历史视图（真值=conversations origin=federation-delegation）/W3 节点定时探活在线态自动化（+fed: 友名映射搭车）。对标=无同类 P2P 形态（Codex Cloud/Copilot agent 为中心化云委托，ZCode=SSH attach 无协作面）。"
+      "notes": "联邦协作体验收口三波同日全交付（并行插队批 planned→completed）：W1 federation_list_peers 工具+W1 计数钉/夹具三面登记（f5011827）；W2 委托历史聚合端点+联邦面板委托记录卡（实机聚合出 BLOCK-85 真实历史）；W3 节点 60s 心跳（实机 lastProbe 三周陈旧→自动刷新 ok）。测试=block164 7+邻域 36+前端 16 全绿；两处 set-state-in-effect 顺手清偿。"
     }
   ],
   "lastUpdated": "2026-10-10",

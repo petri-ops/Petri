@@ -7,7 +7,7 @@ acceptance:
   - W3 节点在线态自动化：后端定时探活（默认 60s，unref）刷新 lastProbe/lastSeenAt——面板在线点与成员在线窗成为真值，不再依赖手动点探；探活失败静默降级不刷错误风暴
   - 门禁：定向红绿（工具契约/视图数据面/探活节流）+ 邻域（federation/联邦既有测试）+ tsc 0 + docs/ui 门禁 + quality 链；实机 riders=双实例或真机走查
 reopen: 范围改判需用户裁决；grants 全路由强制（D5 deferred）与跨端深链维持不在范围
-status: planned
+status: completed
 ---
 
 # BLOCK-164 — 联邦协作体验收口（三断点闭合）
@@ -54,4 +54,15 @@ status: planned
 
 ## 6. 收口笔录
 
-（收口时回写）
+**收口（2026-10-10，三波同日全交付；W1 提交 f5011827，W2/W3 随收口提交）**
+
+- **W1**：`federation_list_peers` 只读工具（节点 peerId/名称/署名/在线态/对端授权项目 3s 尽力探测 + 本机授权概览；空节点配对引导）；delegate 缺参/未知 peer 文案两处指向该工具；静态工具宇宙 78→79 四处计数钉同步 + 动词图标夹具/后端/前端三面登记。
+- **W2**：`GET /api/federation/delegations`（collectDelegations 聚合：task_events 中 delegate 工具 call/result 对 JOIN tasks，输出 task/peer/状态/回复头/conversationId/projectId，limit 50）；联邦面板新增「委托记录」卡（空态引导/状态标签/回复摘要/刷新；v1 边界=仅列表不做跨端深链，如实）。**实机**：端点在真实数据上聚合出 2026-09-18 BLOCK-85 双真机的历史委托记录。
+- **W3**：`startPeerHeartbeat`（默认 60s unref；空清单跳过；单 peer 失败静默；BIOF3_FED_HEARTBEAT_MS=0 关闭；注入式依赖可测）。**实机**：lastProbe 由 2026-09-19（三周陈旧）自动刷新为 2026-10-10T12:41 ok:true——「在线态靠手动点探」断点闭合。
+- **搭车项查证**：fed: 原始 ID 暴露面在当前代码仅 RemoteTargets 默认目标逻辑，未发现摘要卡裸 ID 渲染点——UI-422 候选维持候选（无改动需求）。
+- **测试**：block164 7/7（W1×4+W2 聚合+W3 心跳×2；db 引导按 agent-concurrency 先例 runMigrations）+ 邻域 36/36 + 前端 toolActivity 16/16 + tsc 0 + lint 新文件 0 error。
+- **lint 顺手清偿**：Federation.tsx 两处 react-hooks/set-state-in-effect（一处存量一处新增）改顺序 IIFE await 形态（同目录 RemoteTargets 同款过规形态）。
+- **非范围留痕**：grants 全路由强制（D5）/跨端深链/composer 委托表单（plan §4）；fed: 友名映射查证后无渲染点（见上）。
+- 实机 riders：双真机委托全链走查（模型自主查节点→委托→面板委托记录可见）。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -23,6 +23,7 @@ const {
   sanitizePeers,
   getPeer,
   getPeerToken,
+  loadPeers,
 } = require('../../shared-backend/federation-peers');
 const { getStores } = require('../mobile-gateway/pairing');
 const grants = require('../../shared-backend/federation-grants');
@@ -60,9 +61,83 @@ function resolveDataDir() {
     || path.join(process.cwd(), 'data');
 }
 
+// BLOCK-164 W2 — 委托历史聚合：委托方视角的「我委托过什么」。真值 = 本机 task_events
+// 中 delegate_to_gewu_node 的 tool_call/tool_result 对（receipt.toolResult.data 即回执）。
+// 只读聚合，无写面；limit 有界（默认 50）。
+const DELEGATIONS_DEFAULT_LIMIT = 50;
+
+function collectDelegations(db, userId, { limit = DELEGATIONS_DEFAULT_LIMIT } = {}) {
+  const calls = db.prepare(`
+    SELECT e.task_id AS taskId, e.seq AS callSeq, e.payload AS callPayload, e.created_at AS createdAt,
+           t.params AS taskParams, t.agent_status AS taskAgentStatus
+    FROM task_events e JOIN tasks t ON t.id = e.task_id
+    WHERE e.event_type = 'tool_call' AND t.user_id = ?
+      AND json_valid(e.payload) AND json_extract(e.payload, '$.name') = 'delegate_to_gewu_node'
+    ORDER BY e.created_at DESC LIMIT ?
+  `).all(userId, limit);
+  const resultStmt = db.prepare(`
+    SELECT payload FROM task_events
+    WHERE task_id = ? AND event_type = 'tool_result' AND seq > ?
+      AND json_valid(payload) AND json_extract(payload, '$.name') = 'delegate_to_gewu_node'
+    ORDER BY seq LIMIT 1
+  `);
+  return calls.map((row) => {
+    let call = {};
+    try { call = JSON.parse(row.callPayload || '{}'); } catch { /* 坏帧诚实降级 */ }
+    const args = call.args || {};
+    let params = {};
+    try { params = JSON.parse(row.taskParams || '{}'); } catch { /* 同上 */ }
+    let receipt = null;
+    try {
+      const r = resultStmt.get(row.taskId, row.callSeq);
+      if (r) {
+        const parsed = JSON.parse(r.payload);
+        receipt = parsed && parsed.toolResult ? parsed.toolResult.data : null;
+      }
+    } catch { /* 结果帧缺失=未知态 */ }
+    return {
+      taskId: row.taskId,
+      createdAt: row.createdAt,
+      task: String(args.task || '').slice(0, 300),
+      peerId: String(args.peerId || ''),
+      peerName: (receipt && receipt.peerName) || null,
+      projectId: params.projectId || null,
+      conversationId: params.conversationId || null,
+      status: receipt
+        ? (receipt.ok ? 'done' : (receipt.error || 'failed'))
+        : (String(row.taskAgentStatus || '') === 'running' ? 'running' : 'unknown'),
+      replyHead: receipt && typeof receipt.reply === 'string' ? receipt.reply.slice(0, 240) : null,
+    };
+  });
+}
+
+// BLOCK-164 W3 — 节点在线态自动化：60s 定时探活（unref，不吊事件循环；跳过空清单；
+// 单 peer 失败静默——在线点降级为「陈旧」，绝不刷错误风暴）。BIOF3_FED_HEARTBEAT_MS=0 关闭。
+const PEER_HEARTBEAT_MS_DEFAULT = 60_000;
+
+function startPeerHeartbeat({ dataDir, intervalMs, probe = probePeer, listPeers = loadPeers } = {}) {
+  const ms = Number.isFinite(intervalMs)
+    ? intervalMs
+    : (Number(process.env.BIOF3_FED_HEARTBEAT_MS) || PEER_HEARTBEAT_MS_DEFAULT);
+  if (ms <= 0) return { stop() {}, intervalMs: 0 };
+  const timer = setInterval(() => {
+    let peers = [];
+    try { peers = (listPeers(dataDir) || {}).peers || []; } catch { return; }
+    for (const peer of peers) {
+      try {
+        void Promise.resolve(probe(dataDir, peer.peerId)).catch(() => { /* 静默降级 */ });
+      } catch { /* 静默降级 */ }
+    }
+  }, ms);
+  if (timer.unref) timer.unref();
+  return { stop: () => clearInterval(timer), intervalMs: ms };
+}
+
 module.exports = function registerFederationAdmin(app, { dataDir } = {}) {
   const dir = dataDir || resolveDataDir();
   const forwardJson = makeForwardJson(dir);
+  // BLOCK-164 W3 — 节点在线态自动探活（60s；BIOF3_FED_HEARTBEAT_MS=0 可关）
+  startPeerHeartbeat({ dataDir: dir });
 
   app.get('/api/federation/peers', (_req, res) => {
     res.json({ ok: true, ...sanitizePeers(dir) });
@@ -143,6 +218,17 @@ module.exports = function registerFederationAdmin(app, { dataDir } = {}) {
 
   // 「打开界面」：向对端索取一次性配对链接（对端 gateway 会话门内的
   // mobile/pairing 端点），浏览器打开即见对端完整桌面投影（P3.5 复用）。
+  // BLOCK-164 W2 — 委托历史（委托方视角）：本机 task_events 中 delegate 工具调用聚合
+  app.get('/api/federation/delegations', (req, res) => {
+    try {
+      const db = require('../db').getDatabase();
+      const userId = require('../auth').LOCAL_USER.id;
+      res.json({ ok: true, delegations: collectDelegations(db, userId) });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e.message });
+    }
+  });
+
   app.post('/api/federation/peers/:id/projection-url', async (req, res) => {
     const peer = getPeer(dir, req.params.id);
     if (!peer) {
@@ -260,3 +346,7 @@ module.exports = function registerFederationAdmin(app, { dataDir } = {}) {
     }
   });
 };
+
+module.exports.collectDelegations = collectDelegations;
+module.exports.startPeerHeartbeat = startPeerHeartbeat;
+module.exports.PEER_HEARTBEAT_MS_DEFAULT = PEER_HEARTBEAT_MS_DEFAULT;

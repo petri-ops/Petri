@@ -34,6 +34,19 @@ interface FederationMember {
   identity: { displayName?: string; device?: string };
 }
 
+// BLOCK-164 W2 — 委托记录（委托方视角，真值=本机 task_events 的 delegate 工具调用聚合）。
+interface FederationDelegation {
+  taskId: string;
+  createdAt: string;
+  task: string;
+  peerId: string;
+  peerName: string | null;
+  projectId: string | null;
+  conversationId: string | null;
+  status: string;
+  replyHead: string | null;
+}
+
 // BLOCK-105 §7 Batch-6 — 联邦 REST 信封 wire 形状（JSON 解析出站边界契约文档；
   // 字段 optional/unknown＝后端可能发任意 JSON，运行时防御保持原样）。
 interface FederationEnvelope {
@@ -154,9 +167,11 @@ export function FederationPanel(): React.ReactElement {
   }, []);
 
   useEffect(() => {
-    void refresh();
-    void refreshMembers();
-    void refreshGrants();
+    void (async () => {
+      await refresh();
+      await refreshMembers();
+      await refreshGrants();
+    })();
     const timer = window.setInterval(() => {
       void refreshMembers();
     }, MEMBERS_REFRESH_MS);
@@ -588,6 +603,70 @@ export function FederationPanel(): React.ReactElement {
           })}
         </ul>
       )}
+
+      <FederationDelegations />
+    </div>
+  );
+}
+
+// BLOCK-164 W2 — 委托记录卡片：委托方一处可见全部委托（状态/对方/时间/回复摘要）。
+// v1 边界：仅列表，不做跨端深链（对端鉴权与投影 URL 另裁）；会话号以元信息展示。
+function statusLabel(status: string): string {
+  if (status === 'done') return '已完成';
+  if (status === 'running') return '运行中';
+  if (status === 'unknown') return '状态未知';
+  return '失败';
+}
+
+function FederationDelegations(): React.ReactElement {
+  const [records, setRecords] = useState<FederationDelegation[] | null>(null);
+
+  const load = useCallback(async () => {
+    try {
+      const response = await fetch(`${getPlatformApiPrefix()}/federation/delegations`, { headers: authHeaders() });
+      const data = (await response.json().catch(() => ({}))) as { ok?: unknown; delegations?: FederationDelegation[] };
+      setRecords(data.ok && Array.isArray(data.delegations) ? data.delegations : []);
+    } catch {
+      setRecords([]);
+    }
+  }, []);
+
+  useEffect(() => { void (async () => { await load(); })(); }, [load]);
+
+  return (
+    <div className={styles.addCard} data-testid="federation-delegations">
+      <h4 className={styles.addTitle}>
+        委托记录
+        <button
+          type="button"
+          className="gewu-btn gewu-btn--ghost gewu-btn--sm"
+          onClick={() => { void load(); }}
+          data-testid="federation-delegation-refresh"
+        >
+          刷新
+        </button>
+      </h4>
+      {records && records.length === 0 && (
+        <p className={styles.fedHint} data-testid="federation-delegation-empty">
+          还没有委托记录 · 在对话里让 AI 把工作委托给协作节点后，会在这里留痕
+        </p>
+      )}
+      {records && records.length > 0 && (
+        <ul className={styles.peerList}>
+          {records.map((r) => (
+            <li key={`${r.taskId}-${r.createdAt}`} className={styles.peerCard} data-testid="federation-delegation-row">
+              <div className={styles.peerMain}>
+                <span className={styles.peerName}>{r.task.slice(0, 60) || '（无任务描述）'}</span>
+                <span className={styles.peerMeta}>
+                  {[r.peerName || r.peerId, statusLabel(r.status), relTime(r.createdAt)].filter(Boolean).join(' · ')}
+                </span>
+                {r.replyHead && <span className={styles.fedHint}>{r.replyHead}</span>}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className={styles.fedHint}>记录来自本机委托工具调用；任务完整过程保存在协作成员的会话中。</p>
     </div>
   );
 }
