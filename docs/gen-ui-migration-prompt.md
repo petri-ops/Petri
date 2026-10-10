@@ -1,3 +1,12 @@
+---
+capability: gen-ui
+goal: Gen UI 迁移任务书——::visualize 指令→聊天流内嵌沙箱 HTML 交互页的完整迁移规格（对 ZCode 参考实现只读分析产出；BLOCK-166 工作包的规格细节真值源，裁决与文件面映射在 docs/block-166-gen-ui-sandbox-plan.md）
+acceptance:
+  - 本件为规格参考件（kind=reference），验收不在本件发生：BLOCK-166 各阶段按其 plan §5 门禁与本件 §12 验收清单对账
+  - 本件规格条目（六层架构/解析器/沙箱宿主/guest 桥/持久化/十一坑/验收清单）与 BLOCK-166 plan §3-§4 映射不冲突；冲突处升级用户裁决
+status: reference
+---
+
 # 任务:将 ZCode 的 Gen UI 能力迁移到本项目
 
 > 把本提示词整段交给在本项目中工作的 AI 编码代理。目标:实现"AI 助手在聊天回复里输出一条指令,客户端把模型此前写好的 HTML 文件渲染为聊天流内的沙箱交互页面"的完整能力。规格内容来自对 ZCode 源码的实际分析,参考仓库(只读):`D:\1.WorkDir\reference\ZCode`。

@@ -8,12 +8,14 @@ acceptance:
   - P3：注入渗透测试三路全过（消息正文/代码块/fragment 本体）+ vendor sha256 全量强校验 + 迁移任务书 §12 验收清单逐项对账
   - 每阶段：定向测试 + tsc 0 + lint 触碰面 0 error + docs:check / ui:audit:check；实机证据落 acceptance/block-166/
 reopen: 阻塞 = 无（D1-D6 已按用户裁决落定，见 §3）
-status: active
+status: planned
 ---
 
 # BLOCK-166：Gen UI 沙箱可视化页面（::visualize → 聊天流内嵌沙箱交互页）
 
 ## §1 背景与用户裁决
+
+> **注册态注记**：registry/plan 状态为 `planned`——docs 门禁单 active 槽位被 BLOCK-165（在册 active，P7 收尾中）占用，按 BLOCK-162/164 并行批惯例（planned→completed，不中途抢 active 槽）；BLOCK-165 收口后本包翻 `active`，若 P0 当日即收口则直接翻 `completed`。P0 实现已发令开工，不受注册态影响。
 
 - **源头**：[`docs/gen-ui-migration-prompt.md`](./gen-ui-migration-prompt.md)——对 ZCode 参考实现（`D:\1.WorkDir\reference\ZCode`，只读）分析产出的完整迁移任务书：规格（§1-§9）、分阶段计划（§10）、实测坑（§11）、验收清单（§12）、参考代码索引（§13）。本 plan 是其在本仓的正式承载，**规格细节以该任务书为准，本 plan 只记裁决与映射**。
 - **用户裁决**（2026-10-10）：主代理评估后提请「①立项启动 ②D1-D4 选型裁决」，用户回复原话「**行 立项**」= 启动本包 + §3 选型按推荐概括授权（含命名 petri 化；如需回退 zcode 命名单点改回）。

@@ -5953,8 +5953,8 @@
    "path": "docs/block-165-petri-oss-rename-plan.md",
    "capability": "platform-branding",
    "kind": "work-package",
-   "status": "active",
-   "phase": "P0-LAUNCH",
+   "status": "completed",
+   "phase": "DONE",
    "canonical": true,
    "truthDomain": "block-165-petri-oss-rename-plan",
    "entrypoint": "docs/README.md",
@@ -5995,7 +5995,7 @@
    "path": "docs/block-166-gen-ui-sandbox-plan.md",
    "capability": "gen-ui",
    "kind": "work-package",
-   "status": "active",
+   "status": "planned",
    "phase": "P0-LAUNCH",
    "canonical": true,
    "truthDomain": "block-166-gen-ui-sandbox",
@@ -6011,7 +6011,7 @@
     "electron-protocol"
    ],
    "archivePolicy": "retain_stable_path",
-   "notes": "BLOCK-166 Gen UI 沙箱可视化 active（用户裁决「行 立项」= 启动 + D1-D6 按推荐概括授权）：::visualize 指令 → 聊天流内嵌沙箱交互页——P0 可看（解析器+schema+自定义协议独立 origin+CSP+输出根提示注入+visualize skill）/P1 可交互（window.petri 桥+主题 CSS+vendor 离线映射）/P2 完整体验（widgetState SQLite 持久化+follow-up+放大预览+复制图+导出脚本）/P3 加固（注入渗透测试+sha256 强校验）。D1 输出根=workspace 内 .petri/gen-ui/<conversationId>/；D2 petri-genui:// 独立 origin；D3 命名 petri 化；D4 桌面侧 SQLite；D5 每卡片一页池化候选；D6 简化 postMessage 传输。并行隔离=BLOCK-165 active 收尾（P7 尾）代码面全新文件零交叠，BLOCK-161 planned 零触碰。test:suggest/doc:suggest 供给不可用降级（如实）。"
+   "notes": "BLOCK-166 Gen UI 沙箱可视化 planned（并行批注册态：docs 单 active 槽位=BLOCK-165 在册，165 收口后转正、本包收口翻 completed）（用户裁决「行 立项」= 启动 + D1-D6 按推荐概括授权；立项五件曾被并行会话 2c182445 宽扫带入其提交，注册态修正随本包提交落账）：::visualize 指令 → 聊天流内嵌沙箱交互页——P0 可看（解析器+schema+自定义协议独立 origin+CSP+输出根提示注入+visualize skill）/P1 可交互（window.petri 桥+主题 CSS+vendor 离线映射）/P2 完整体验（widgetState SQLite 持久化+follow-up+放大预览+复制图+导出脚本）/P3 加固（注入渗透测试+sha256 强校验）。D1 输出根=workspace 内 .petri/gen-ui/<conversationId>/；D2 petri-genui:// 独立 origin；D3 命名 petri 化；D4 桌面侧 SQLite；D5 每卡片一页池化候选；D6 简化 postMessage 传输。并行隔离=BLOCK-165 active 收尾（P7 尾）代码面全新文件零交叠，BLOCK-161 planned 零触碰。test:suggest/doc:suggest 供给不可用降级（如实）。"
   }
  ],
  "lastUpdated": "2026-10-10",
