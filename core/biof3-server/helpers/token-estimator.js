@@ -90,9 +90,23 @@ async function getContextWindow(modelName, providerName, baseUrl, apiKey, preset
   return resolve(modelName, providerName, baseUrl, apiKey);
 }
 
+/**
+ * BLOCK-163 W3 P4（MDL-1）— 预算专用窗口解析（去盲区）。
+ * 与 getContextWindow 的区别：未知模型不再返回 0（预算侧静默跳过=盲区），
+ * 改为保守缺省 32768 + resolved:false 标注（token_budget 事件透出，前端 additive）。
+ * 展示面（ContextBudgetBar 的「—」）继续消费 getContextWindow 的 0 语义不动。
+ * @returns {Promise<{window: number, resolved: boolean}>}
+ */
+async function getContextWindowForBudget(modelName, providerName, baseUrl, apiKey, presetContextWindow) {
+  const window = await getContextWindow(modelName, providerName, baseUrl, apiKey, presetContextWindow);
+  if (window > 0) return { window, resolved: true };
+  return { window: 32768, resolved: false };
+}
+
 module.exports = {
   countTokens,
   countMessages,
   estimateRequestTokens,
   getContextWindow,
+  getContextWindowForBudget,
 };

@@ -623,19 +623,28 @@ async function runAgentLoop({
         return profile && profile.contextWindow;
       } catch { return undefined; }
     })();
-    const { getContextWindow } = require('./helpers/token-estimator');
-    const ctxWindow = (await Promise.resolve(getContextWindow(modelName, providerName, baseUrl, null, presetCtx).catch((e) => {
+    const { getContextWindowForBudget } = require('./helpers/token-estimator');
+    const { window: ctxWindow, resolved: ctxResolved } = await getContextWindowForBudget(
+      modelName, providerName, baseUrl, null, presetCtx,
+    ).catch((e) => {
       // BLOCK-102 P1 — probe failure used to silently fall back to 64k, which
       // disabled the BLOCK-51 context fuse for small-window models with no trace.
       console.error('[agent-runner] context window probe failed:',
         e && e.message ? e.message : e);
-      return 0;
-    }))) || 0;
-    safeCtx = ctxWindow > 0 ? ctxWindow : 64000;
+      return { window: 0, resolved: false };
+    });
+    // BLOCK-163 W3 P4（MDL-1）— 盲区收口：未知模型 0 → 保守 32k + resolved:false
+    //（原 64000 对小窗口本地模型过于乐观；token_budget 事件 additive resolved 字段）
+    safeCtx = ctxWindow > 0 ? ctxWindow : 32768;
+    if (!ctxResolved) {
+      console.warn('[agent-runner] context window unknown for model, using conservative 32k budget:',
+        modelName || '(unnamed)');
+    }
     const pct = Math.min(100, Math.round((total / safeCtx) * 100));
     _emit({
       event: 'token_budget',
       contextWindow: safeCtx,
+      resolved: ctxResolved,
       messagesTokensUsed: total,
       systemPromptTokens,
       messagesTokens,

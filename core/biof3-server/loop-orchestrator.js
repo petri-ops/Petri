@@ -627,7 +627,11 @@ async function runLoop({
             messages: hasSystem ? messages.slice(1) : messages,
             maxTokens: 16384, // 与下方 reqBody.max_tokens 一致
           });
-          if (est.total > loopContextWindow * 0.85) {
+          // BLOCK-163 W3 P5（MDL-2）— 按模型校准系数修正估算（cl100k 对 CJK 重度
+          // 文本系统性高估；EWMA 自愈见 helpers/model-token-ratios.js）
+          const { calibratedEstimate } = require('./helpers/model-token-ratios');
+          const calibratedTotal = calibratedEstimate(est.total, modelName);
+          if (calibratedTotal > loopContextWindow * 0.85) {
             const result = trimMessagesToBudget({
               fullMessages: messages,
               contextWindow: loopContextWindow,

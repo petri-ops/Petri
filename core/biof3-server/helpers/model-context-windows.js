@@ -13,7 +13,9 @@
  * so first request for a new model returns 0 immediately while background fetch
  * populates the cache for subsequent requests.
  */
-require('tiktoken');
+// BLOCK-163 MDL-1 — 裸 require('tiktoken') 退役：tiktoken 未安装，此行曾使本模块
+// 整体加载失败 → OpenRouter 动态窗口路径全死（生产静默回退 preset/0→64k）。tiktoken
+// 真正接入时在 token-estimator.getEncoder 内挂依赖并回 core 解析域。
 
 // ---------------------------------------------------------------------------
 // LRU cache
