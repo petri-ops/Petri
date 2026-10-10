@@ -46,6 +46,11 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-10-10 BLOCK-163 P10 KNW-5 记忆治理面（5464d1a，feat(block-163)）：subject 走
+  // BLOCK 轨无 UI-###；UI 面仅设置面 MemoryPanel 节（管理 API 只读+删除消费，治理面
+  // 与 AgentRulesPanel 同分区），台账=UI-483 已由收口提交 a062879a 补登对账；
+  // 不重写共享历史。
+  '5464d1a65cf2520afa3312f8dd5d1ab31c39d8d9',
   // 2026-10-05 BLOCK-141 清尾批（b21db4d，feat(block-141)）：subject 走 BLOCK 轨无
   // UI-###；前端触碰=R-5/R-6（选择回路行为修复，归属 UI-463 域），台账=UI-463
   // riders 闭环注记已由 6c87a937 补登对账（先例 f6e58d04/f9cf2f5c）；不重写共享历史。
@@ -401,6 +406,8 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-10-10 BLOCK-163 P10 KNW-5 记忆治理面（5464d1a）：同提交漏 docs/ui-productization-audit.md 同步；台账=UI-483 已由 a062879a 补登对账（LEGACY_MESSAGE_EXEMPTIONS 同哈希）。
+  '5464d1a65cf2520afa3312f8dd5d1ab31c39d8d9',
   // 2026-10-03 BLOCK-138 F1 加映两笔（主代理终审批登记）：ea765eea（F1 链形成点
   // pending 信任层注册，触碰 LineageViewSwitch.test.tsx lint 收口）与 d3ae13a3
   // （走查抓真挂载点修复，ResultArtifactShell.tsx +3 行）均由另一会话 dynamic

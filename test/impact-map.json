@@ -3152,7 +3152,7 @@
     },
     {
       "id": "block159-mobile-remote-transport",
-      "note": "BLOCK-159 手机远程传输层优化：生产投影 gzip（compress.js，零依赖）/隧道探活连败自愈+ServerAlive 15→10/agent SSE 15s 心跳/审计异步写/限流按会话 token 分桶/agent 流水位续传（删 90s 硬预算）/投影 link 状态+回前台 resync/断连横幅 UI-482。读者含 mobile-gateway 邻域契约（block70/145/152）。 家族轻量批增补：scripts/block159-relay-watchdog.sh（中转服务器看门狗，软件独立性=零 IP/厂商写死）。（BLOCK-160 收口代登记：两个在制脚本补 exactly-one 分类，归属 BLOCK-159）",
+      "note": "BLOCK-159 手机远程传输层优化：生产投影 gzip（compress.js，零依赖）/隧道探活连败自愈+ServerAlive 15→10/agent SSE 15s 心跳/审计异步写/限流按会话 token 分桶/agent 流水位续传（删 90s 硬预算）/投影 link 状态+回前台 resync/断连横幅 UI-482。读者含 mobile-gateway 邻域契约（block70/145/152）。 家族轻量批增补：scripts/block159-relay-watchdog.sh（中转服务器看门狗，软件独立性=零 IP/厂商写死）。（BLOCK-160 收口代登记：两个在制脚本补 exactly-one 分类，归属 BLOCK-159）（BLOCK-160 收口代登记注记修正：ui-audit-probe.cjs 从 patterns 移除——scripts/** 通配已按 exactly-one 计入，双计即红）（BLOCK-160 收口代登记注记修正：ui-audit-probe.cjs 归还本规则 classifiesScripts 分类——platform-branch-freeze 的 scripts/** 为 pattern-only 不参与 exactly-one）（BLOCK-160 收口代登记：ui-ux-audit 报告目录归属 BLOCK-161 面随规则通配）",
       "patterns": [
         "core/biof3-server/mobile-gateway/**",
         "core/biof3-server/routes/ai-agent/events.js",
@@ -3165,7 +3165,8 @@
         "acceptance/block-159/**",
         "scripts/block159-*",
         "scripts/block159-relay-watchdog.sh",
-        "scripts/ui-audit-probe.cjs"
+        "scripts/ui-audit-probe.cjs",
+        "acceptance/ui-ux-audit-2026-10-10/**"
       ],
       "tests": [
         "test/block159-gateway-compress.test.mjs",
@@ -3204,7 +3205,8 @@
         "frontend/src/lib/projectionDataBridges.ts",
         "frontend/src/lib/electron.d.ts",
         "scripts/block160-*.mjs",
-        "acceptance/block-160/**"
+        "acceptance/block-160/**",
+        "frontend/src/components/copilot/SimpleChat/slashSources.test.ts"
       ],
       "tests": [
         "test/block160-dynamic-guards.test.mjs",

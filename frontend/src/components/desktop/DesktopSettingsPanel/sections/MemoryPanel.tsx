@@ -17,6 +17,12 @@ interface FactRow {
   created_at?: string;
 }
 
+interface MemoryStats {
+  status?: string;
+  facts?: number;
+  memories?: number;
+}
+
 function authHeaders(contentType?: string): Record<string, string> {
   const token = getToken();
   return {
@@ -25,30 +31,32 @@ function authHeaders(contentType?: string): Record<string, string> {
   };
 }
 
+async function fetchJson<T>(url: string): Promise<T> {
+  const response = await fetch(url, { headers: authHeaders() });
+  return (await response.json()) as T;
+}
+
 export function MemoryPanel(): React.ReactElement {
   const [facts, setFacts] = useState<FactRow[] | null>(null);
   const [summary, setSummary] = useState<string | null>(null);
-  const [stats, setStats] = useState<{ facts?: number; memories?: number } | null>(null);
+  const [stats, setStats] = useState<MemoryStats | null>(null);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
   useEffect(() => {
     let cancelled = false;
     const headers = authHeaders();
-    void fetch(`${getPlatformApiPrefix()}/ai/facts`, { headers })
-      .then(async (r) => r.json())
+    void fetchJson<{ facts?: FactRow[] }>(`${getPlatformApiPrefix()}/ai/facts`)
       .then((data) => {
-        if (!cancelled) setFacts(Array.isArray(data.facts) ? data.facts : Array.isArray(data) ? data : []);
+        if (!cancelled) setFacts(Array.isArray(data.facts) ? data.facts : []);
       })
       .catch(() => { if (!cancelled) setFacts([]); });
-    void fetch(`${getPlatformApiPrefix()}/ai/summary`, { headers })
-      .then(async (r) => r.json())
+    void fetchJson<{ summary?: string }>(`${getPlatformApiPrefix()}/ai/summary`)
       .then((data) => {
         if (!cancelled) setSummary(typeof data.summary === 'string' ? data.summary : null);
       })
       .catch(() => { if (!cancelled) setSummary(null); });
-    void fetch(`${getPlatformApiPrefix()}/ai/memory-stats`, { headers })
-      .then(async (r) => r.json())
+    void fetchJson<MemoryStats>(`${getPlatformApiPrefix()}/ai/memory-stats`)
       .then((data) => {
         if (!cancelled && data?.status === 'ok') setStats(data);
       })
