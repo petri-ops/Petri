@@ -3,6 +3,17 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "block165-rename-evidence",
+      "note": "BLOCK-165 换库改名证据目录（基线快照/codemod dry-run 报告/实机断言）：证据文件只随文档门，不触发代码测试。",
+      "patterns": [
+        "acceptance/block-165/**"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "governance-docs",
       "patterns": [
         "AGENTS.md",

@@ -430,6 +430,8 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-10-10 BLOCK-164 W2/W3 整包收口（b784fa37）：联邦面板「委托记录」卡随包入库漏台账同步；台账=UI-484 已补登对账（BLOCK-165 基线时按先例修复）。
+  'b784fa3746c6c354ba1fce17fec281200408550f',
   // 2026-10-10 BLOCK-160/163 W2+W3 批：subject 走 BLOCK 轨无 UI-###；台账=UI-483 已补登。
   'f5011827b1f8eae24369f09707e9e2b3365331ad',
   '24fc1261b1404ce02d6aa071ac99abddff449b88',

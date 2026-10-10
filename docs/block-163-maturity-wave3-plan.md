@@ -16,7 +16,7 @@ acceptance:
   - DIST-4：打包卫生债（electron-builder 陈旧引用清偿+resources/skills 纳入 extraResources）
   - 波末：蓝图 §2 五层画像逐项对照（达成/G1+ 出籍两态）+ closeout 门禁 + 台账回写
 reopen: 波内零停顿条款（蓝图 §3.4）；MDL-3 真机验证依赖 anthropic 渠道=外部条件不属停顿；整波范围改判需用户裁决
-status: active
+status: completed
 ---
 
 # BLOCK-163：成熟度蓝图 W3 波（天花板收尾 12 单元 + 蓝图对账）

@@ -4787,3 +4787,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 ## UI-482: 投影断连横幅 + 回前台重同步（2026-10-10 in_progress，BLOCK-159 P1-8/P1-9）
 
 手机投影的「易断」此前在 UI 上不可见：数据桥失败静默返空（页面数据变空/停旧值）、终端 EventSource 断线盲重试（黑终端），用户无法区分「慢」与「断了」。本条目交付两个可见面：①断连横幅——数据桥（getJson 网络错/429/5xx）与终端流（onerror）如实上报链路状态（projectionLink 总线），离线时固定顶横幅「与桌面连接中断，正在自动重试…（恢复后数据自动刷新）」，恢复自动隐藏，仅投影环境渲染（桌面零行为，`_ProjectionLinkBanner` 挂 App.tsx）；②回前台重同步——锁屏/切后台回来 visibilitychange 派发 resync，终端桥对存活会话立即重挂 EventSource（服务端环形缓冲重放，会话驻留 core 进程不丢）。证据=projectionLink 契约 5/5（状态转移通知/同态不重发/单方异常不阻断/回前台派发/install 幂等）+agentTaskStream 重连语义 4/4（断线恢复收口/无限重试 30s 封顶抖动/HTTP 5xx 不重试/abort 上抛）+tsc 0；实机（真机过隧道断连→横幅出现→恢复自动消失）待用户走查翻 verified。
+
+## UI-484: 联邦面板「委托记录」卡（2026-10-10 in_progress，BLOCK-164 W2·基线补登）
+
+联邦协作的委托此前只在「发送瞬间」回流一次性摘要，历史不可查。本条目交付联邦面板「委托记录」卡：GET /api/federation/delegations 聚合端点（task_events 中 delegate_to_gewu_node 的 tool_call/tool_result 对 JOIN tasks，输出 task/peerName/状态〔ok→done/error→failed/无结果→running〕/回复头/conversationId/projectId，limit 50，user_id 过滤）+ 前端卡片（空态引导/状态标签/回复摘要/刷新）。证据=block164 聚合契约测试（done/running/归属/回复头）+ 实机 delegations 端点聚合出 2026-09-18 BLOCK-85 双真机历史委托记录；双真机「查节点→委托→记录可见」全链走查（rider）待用户过目翻 verified。补登说明=UI 面随 b784fa37（BLOCK-164 整包收口）入库、同提交漏台账同步，BLOCK-165 基线时按 LEGACY_AUDIT_SYNC_EXEMPTIONS 先例补登+豁免登记（fb5174ee 同款）。

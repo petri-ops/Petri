@@ -5912,7 +5912,7 @@
       "path": "docs/block-163-maturity-wave3-plan.md",
       "capability": "agent-maturity",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-163-maturity-wave3-plan",
       "entrypoint": "docs/README.md",
@@ -5926,7 +5926,7 @@
         "plugin-permissions"
       ],
       "archivePolicy": "retain_stable_path",
-      "notes": "成熟度蓝图 W3 波整波承载（用户发令「开冲到W3波末」+ 波内零停顿）：12 单元天花板收尾+蓝图五层画像对账。"
+      "notes": "成熟度蓝图 W3 波整波承载（用户发令「开冲到W3波末」+ 波内零停顿）：12 单元天花板收尾+蓝图五层画像对账。2026-10-10 对账翻 completed：收口证据在案（fb5174ee 整波收口台账回写+6b2ced51/964eca49/de1d81f0 三笔收口尾笔+AUDIT-LOG 蓝图达成宣告），registry active 为陈旧态；BLOCK-165 启动时触发唯一 active 槽位门禁暴露，按 canonical 证据修复。"
     },
     {
       "id": "BLOCK-164-FEDERATION-UX-CLOSEOUT",
