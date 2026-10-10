@@ -25,10 +25,13 @@ test('BLOCK-156 settings roundtrip: save → list 恒等（规范化字段齐备
   assert.equal(saved.error, undefined);
   const list = settings.listMcpServers();
   assert.equal(list.length, 1);
+  // BLOCK-163 CAP-3 — normalize additive 字段（transport/url）随双传输入册；改子集断言
+  const { transport: _t, url: _u, ...roundtripCore } = list[0];
   assert.deepEqual(
-    { ...list[0] },
+    roundtripCore,
     { id: 'fixture', command: 'node', args: ['a.js'], env: { K: 'V' }, autoConnect: true },
   );
+  assert.equal(_t, 'stdio');
 });
 
 test('BLOCK-156 upsert 单条新增与按 id 覆盖', () => {

@@ -22,7 +22,8 @@ const CALL_TOOL_TIMEOUT_MS = 60_000;
 
 /** @type {Map<string, {
  *   status: 'connecting'|'connected'|'disconnected'|'error',
- *   tools: Array<object>, error: string|null, client: object|null, connectedAt: number|null
+ *   tools: Array<object>, error: string|null, client: object|null, connectedAt: number|null,
+ *   transport: 'stdio'|'http', lastErrorAt: number|null
  * }>} */
 const _sessions = new Map();
 
@@ -35,7 +36,13 @@ async function _loadSdk() {
         import('@modelcontextprotocol/sdk/client/index.js'),
         import('@modelcontextprotocol/sdk/client/stdio.js'),
       ]);
-      return { Client, StdioClientTransport };
+      // BLOCK-163 W3 P3（CAP-3）— streamable HTTP 传输（SDK ≥1.x 内建，零新增依赖；
+      // 加载失败不拖累 stdio——仅 http 传输按需 import）
+      let StreamableHTTPClientTransport = null;
+      try {
+        ({ StreamableHTTPClientTransport } = await import('@modelcontextprotocol/sdk/client/streamableHttp.js'));
+      } catch { /* 旧 SDK 无此传输：http 配置在 connect 时诚实报错 */ }
+      return { Client, StdioClientTransport, StreamableHTTPClientTransport };
     })().catch((e) => {
       _sdkPromise = null; // 失败不缓存——下次重试
       throw e;
@@ -48,6 +55,7 @@ function _session(id) {
   if (!_sessions.has(id)) {
     _sessions.set(id, {
       status: 'disconnected', tools: [], error: null, client: null, connectedAt: null,
+      transport: 'stdio', lastErrorAt: null,
     });
   }
   return _sessions.get(id);
@@ -74,17 +82,31 @@ async function connectServer(id) {
   sess.status = 'connecting';
   sess.error = null;
   try {
-    const { Client, StdioClientTransport } = await _loadSdk();
+    const { Client, StdioClientTransport, StreamableHTTPClientTransport } = await _loadSdk();
     const client = new Client({ name: 'gewu-desktop', version: '0.1.0' }, {
       capabilities: {},
     });
-    const transport = new StdioClientTransport({
-      command: cfg.command,
-      args: cfg.args || [],
-      env: { ...process.env, ...(cfg.env || {}) },
-    });
+    // BLOCK-163 W3 P3（CAP-3）— 双传输：transport==='http' 走 StreamableHTTP
+    //（配置 url）；缺省 stdio 子进程（语义零变化）。
+    let transport;
+    if (cfg.transport === 'http') {
+      if (!StreamableHTTPClientTransport) {
+        throw new Error('http_transport_unavailable_in_sdk');
+      }
+      if (!cfg.url || !/^https?:\/\//.test(cfg.url)) {
+        throw new Error('http_url_required');
+      }
+      transport = new StreamableHTTPClientTransport(new URL(cfg.url));
+    } else {
+      transport = new StdioClientTransport({
+        command: cfg.command,
+        args: cfg.args || [],
+        env: { ...process.env, ...(cfg.env || {}) },
+      });
+    }
     await _withTimeout(client.connect(transport), CONNECT_TIMEOUT_MS, 'connect');
     sess.client = client;
+    sess.transport = cfg.transport === 'http' ? 'http' : 'stdio';
     sess.status = 'connected';
     sess.connectedAt = Date.now();
     // 连接即拉一次工具清单（货架预览 + P3 投影数据源）
@@ -98,6 +120,7 @@ async function connectServer(id) {
   } catch (e) {
     sess.status = 'error';
     sess.error = e && e.message ? String(e.message) : String(e);
+    sess.lastErrorAt = Date.now();
     sess.client = null;
     return { ok: false, error: sess.error };
   }
@@ -163,6 +186,9 @@ function getStatuses() {
       error: sess ? sess.error : null,
       toolCount: sess ? sess.tools.length : 0,
       connectedAt: sess ? sess.connectedAt : null,
+      // CAP-3 健康面：传输类型 + 最近错误时间戳透出
+      transport: sess ? (sess.transport || 'stdio') : (cfg.transport || 'stdio'),
+      lastErrorAt: sess ? sess.lastErrorAt : null,
     };
   });
   return rows;

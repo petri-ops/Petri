@@ -39,6 +39,10 @@ function normalizeServerEntry(entry) {
   const command = typeof entry.command === 'string' ? entry.command.trim() : '';
   if (!id || /[\s/\\]/.test(id)) return { error: 'invalid_id' };
   if (!command) return { error: 'missing_command' };
+  // BLOCK-163 W3 P3（CAP-3）— 双传输：transport 缺省 stdio（零变化）；http 必带 url
+  const transport = entry.transport === 'http' ? 'http' : 'stdio';
+  const url = typeof entry.url === 'string' ? entry.url.trim() : '';
+  if (transport === 'http' && !/^https?:\/\//.test(url)) return { error: 'http_url_required' };
   const args = Array.isArray(entry.args)
     ? entry.args.filter((a) => typeof a === 'string' && a.length > 0)
     : [];
@@ -51,7 +55,7 @@ function normalizeServerEntry(entry) {
       )
     : {};
   const autoConnect = entry.autoConnect !== false;
-  return { server: { id, command, args, env, autoConnect } };
+  return { server: { id, command, args, env, autoConnect, transport, ...(transport === 'http' ? { url } : {}) } };
 }
 
 /** 读取全部 server 配置（文件缺失/损坏=空清单，不抛）。 */
