@@ -9,7 +9,7 @@
  */
 
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
+import { test, after } from 'node:test';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 
@@ -31,9 +31,7 @@ const os = require('node:os');
   process.env.BIOF3_DB_PATH = path.join(tmpDbDir(), 'biof3.db');
 }
 function tmpDbDir() {
-  const dir = path.join(os.tmpdir(), 'b163-orch-');
-  fs.mkdirSync(dir, { recursive: true });
-  return dir;
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'b163-orch-'));
 }
 
 const spawnTools = require(path.join(ROOT, 'core/biof3-server/agent-tools/spawn-agent-tools.js'));
@@ -112,7 +110,7 @@ test('BLOCK-160 ORC-3 父取消让出语义保持（事件等待期取消即返�
   assert.equal(result.error, 'cancelled');
 });
 
-test.after?.(() => {
+after(() => {
   agentTaskStore.getAgentTask = origGet;
   agentTaskStore.isAgentTaskCancellationRequested = origCancel;
 });

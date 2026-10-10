@@ -1101,12 +1101,14 @@ async function tool_run_tool(args, ctx) {
     if (!plan) return { ok: false, error: 'missing_workflow_plan', message: 'op=status 需要 workflowPlan' };
     try {
       const { projectWorkflowPlan, runToolJobs } = require('../../shared-backend/agent-workflow');
+      const { summarizeWorkflow } = require('../../shared-backend/orchestration-query');
       const scopedPlan = sanitizeWorkflowPlanJobRefs(plan, ctx, userId);
       const jobs = runToolJobs(scopedPlan, (id) => {
         const job = dbMod.getToolJob(id);
         return toolJobMatchesTrustedContext(job, ctx, userId) ? job : null;
       });
-      const projected = projectWorkflowPlan(scopedPlan, jobs);
+      // BLOCK-163 W3 P2（ORC-4）— 恢复投影走编排查询门面（单源）
+      const projected = summarizeWorkflow(projectWorkflowPlan, scopedPlan, jobs);
       return {
         ok: true,
         plan: projected,
@@ -1136,12 +1138,13 @@ async function tool_run_tool(args, ctx) {
     if (!plan) return { ok: false, error: 'missing_workflow_plan', message: 'op=next 需要 workflowPlan' };
     try {
       const { projectWorkflowPlan, runToolJobs } = require('../../shared-backend/agent-workflow');
+      const { summarizeWorkflow } = require('../../shared-backend/orchestration-query');
       const scopedPlan = sanitizeWorkflowPlanJobRefs(plan, ctx, userId);
       const jobs = runToolJobs(scopedPlan, (id) => {
         const job = dbMod.getToolJob(id);
         return toolJobMatchesTrustedContext(job, ctx, userId) ? job : null;
       });
-      const projected = projectWorkflowPlan(scopedPlan, jobs);
+      const projected = summarizeWorkflow(projectWorkflowPlan, scopedPlan, jobs);
       const next = projected.readyStepIds
         .filter((stepId) => {
           const step = projected.steps.find((s) => s.id === stepId);

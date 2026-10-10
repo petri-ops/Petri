@@ -753,8 +753,12 @@ async function list_agents(args, ctx) {
   const parentTaskId = ctx && ctx.taskId;
   if (!parentTaskId) return fail('no_parent', 'list_agents 只能在 agent 会话循环内调用。');
   const children = agentTaskStore.listChildAgentTasks(parentTaskId);
+  // BLOCK-163 W3 P2（ORC-4）— 编排查询门面恢复投影（additive；既有字段零变化）
+  const { summarizeChildAgents } = require('../../shared-backend/orchestration-query');
+  const recovery = summarizeChildAgents(children);
   return {
     ok: true,
+    recovery,
     agents: children.map((t) => ({
       agentId: t.taskId,
       status: t.status,
