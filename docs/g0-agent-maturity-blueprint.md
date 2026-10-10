@@ -75,7 +75,7 @@ status: reference
 | KNW-1 | Skills 可见性：skill_discover/skill_get 投影进 agent-tools（或 system prompt 注入技能摘要清单）——模型第一次「看到」产品 skills（当前最大断链：4 技能纯显式执行，agent 感知不到） | 实机 agent 自主发现并引用一个 skill | — | 候选 |
 | KNW-2 | 渐进披露闭环：描述常驻 + 正文触发加载（对齐 SKILL.md 渐进披露模式） | 触发加载契约 + token 预算有界 | KNW-1（硬） | 候选 |
 | KNW-3 | 斜杠命令层：composer /xxx → 技能与 run_tool 模板统一入口（CommandPalette 保持 UI 动作不动） | 双来源单入口实机 | KNW-1（软，在场后更完整） | 候选 |
-| KNW-4 | SKILL.md 兼容导入：格式兼容 + 本地目录导入落地（承接 C-EXT-4；与 DIST-2 共轨一包） | 外部技能导入即用 + skills:check 扩契约 | KNW-1、KNW-2（硬链） | 候选 |
+| KNW-4 | SKILL.md 兼容导入：格式兼容（本地目录导入管线已由 BLOCK-156 D7 补做以 skill.json 形态交付，2026-10-10 `4479aecf`；本种子剩余面 = SKILL.md 兼容并复用该管线；与 DIST-2 共轨一包） | 外部 SKILL.md 技能导入即用 + skills:check 扩契约 | KNW-1、KNW-2（硬链） | 候选（范围收缩注记） |
 | KNW-5 | 记忆治理面：facts/summary/vectors 细粒度查看/编辑/单条遗忘（现只有 wipe；管理 API 已有） | 治理 UI 实机 | — | 候选 |
 | KNW-6 | 知识→流程联动：RAG 命中建议相关技能（citations 事件已有挂点） | 联动建议实机 | KNW-2（软，复用触发加载机制） | 候选 |
 
@@ -86,7 +86,7 @@ status: reference
 | 种子 | 范围 | 验收锚点 | 依赖 | 状态 |
 | --- | --- | --- | --- | --- |
 | DIST-1 | 启停粒度：installed.json 增 enabled 状态 + 加载器尊重 + 货架 UI 开关 | 停用即不注册、启用免重装 | — | 候选 |
-| DIST-2 | 本地导入（C-EXT-4 落地；与 KNW-4 共轨）：技能目录导入 v1，插件/MCP 配置随批 | 导入 → 在场 → 可用全链 | DIST-1（软）+ KNW-4 共轨 | 候选 |
+| DIST-2 | 本地导入（与 KNW-4 共轨）：技能目录导入 v1 已由 BLOCK-156 D7 交付（`4479aecf`），剩余面 = 插件 / MCP 配置导入随批 | 插件/MCP 配置导入 → 在场 → 可用全链 | DIST-1（软）+ KNW-4 共轨 | 候选（范围收缩注记） |
 | DIST-3 | 插件权限声明（与 CAP-5 共轨合并立项） | 装前知情面 | — | 候选 |
 | DIST-4 | 打包卫生债（登记型）：electron-builder 陈旧 built-in-plugins 引用清偿 + resources/skills 纳入 extraResources（配置面修复，非 packaged 验证） | 配置面修复 + 卫生门绿 | — | 候选 |
 | DIST-5 | 更新体验：checkUpdates 只读 → 后台周期检查 + 一键更新（复用既有安装链） | 更新徽标 → 一键 → 版本翻新实机 | — | 候选 |

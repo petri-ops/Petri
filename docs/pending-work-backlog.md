@@ -106,7 +106,7 @@
 | 1w | 蓝图 W1 / KNW-2 | 渐进披露闭环：描述常驻 + 正文触发加载（对齐 SKILL.md 渐进披露） | 蓝图 §2④；验收=触发加载契约+token 预算有界 | planned（硬依赖 1v） |
 | 1x | 蓝图 W1 / CAP-1 | MCP 工具粒度审批：读 annotations 分级投影（只读检索族 read/plan 可用/执行族 full），替代一刀切 execution+R2 | 蓝图 §2③；验收=只读第三方工具低档可用实机全链 | planned |
 | 1y | 蓝图 W1 / DIST-1 | 插件启停粒度：installed.json 增 enabled + 加载器尊重 + 货架 UI 开关 | 蓝图 §2⑤；验收=停用即不注册、启用免重装 | planned |
-| — | 蓝图 W2/W3（汇总行） | W2=ORC-2（依赖 1x）→ ORC-1 → KNW-3 → CAP-2 → KNW-4⇄DIST-2（共轨，承接 C-EXT-4）；W3=ORC-3 → ORC-4 → CAP-3（承接 C-EXT-1）→ MDL-1 → MDL-2 → DIST-3⇄CAP-5（共轨）→ DIST-5 → MDL-3 → MDL-4 → KNW-5 → KNW-6 → DIST-4 | 蓝图 §3 波次表+出口判据 | 候选（按波递进，逐包发令） |
+| — | 蓝图 W2/W3（汇总行） | W2=ORC-2（依赖 1x）→ ORC-1 → KNW-3 → CAP-2 → KNW-4⇄DIST-2（共轨；C-EXT-4 的 skill.json 导入半边已由 BLOCK-156 D7 交付 4479aecf，剩余=SKILL.md 兼容+插件/MCP 配置导入）；W3=ORC-3 → ORC-4 → CAP-3（承接 C-EXT-1）→ MDL-1 → MDL-2 → DIST-3⇄CAP-5（共轨）→ DIST-5 → MDL-3 → MDL-4 → KNW-5 → KNW-6 → DIST-4 | 蓝图 §3 波次表+出口判据 | 候选（按波递进，逐包发令） |
 | 2 | PL-2 / BLOCK-126 | **感知实时性 completed（含 2026-09-29 复验）**：终态 jobs 失效事件+运行期日志行缓冲；实机 allPass 6/6 两轮+端点兜底修复后复跑 6/6（source=run.log） | plan §5.1 + acceptance/block-126/ | completed |
 | 3 | BIO-2 | 交互上限与降级链：250 点 top-N 语义/静态 24 行分页/热图窗口/mojibake | G0-BIO plan §3 | planned |
 | 4 | BIO-3 | lineage 可视化 + 继续分析显式化（吸收 C-15 前半） | G0-BIO plan §3 | planned |
@@ -208,4 +208,4 @@
 | C-EXT-1 | **MCP HTTP/SSE 传输 + server 级信任配置——已归并成熟度蓝图（2026-10-10）**：传输半边 → CAP-3（W3）；server 级信任半边 → CAP-5⇄DIST-3 共轨（W3） | 来源=BLOCK-156 收口 §7；归档指针=docs/g0-agent-maturity-blueprint.md §5 |
 | C-EXT-2 | **marketplace 远程技能市场——维持 deferred（G1 邻界）**：蓝图 §6 画线内不排期；重开条件=G1+ 阶段启动或用户显式裁决 | 来源=BLOCK-156 收口 §7；蓝图 §5/§6 |
 | C-EXT-3 | **预路由 mcp 域收窄——已归并成熟度蓝图 CAP-4（W3）**：原重开条件（决策配置中心接线证据）随包保留 | 来源=BLOCK-156 收口 §7；蓝图 §2③ |
-| C-EXT-4 | **第三方技能本地导入——已归并成熟度蓝图 KNW-4⇄DIST-2 共轨（W2）**：SKILL.md 格式兼容 + 本地目录导入一体立项（2026-10-10 蓝图落档时观察到另一会话在制 skill-import-directory 面：ipc/channels/preload/extensions + 专项测试，其收口后按实际交付面注记归位） | 来源=BLOCK-156 收口 §8；蓝图 §2④⑤ |
+| C-EXT-4 | **第三方技能本地导入——已交付销号（2026-10-10 BLOCK-156 D7 补做，4479aecf）**：skill.json 形态本地目录导入一条龙（installSkillFromDir/skills:import-directory/货架导入按钮，实机四断言）已落地；**剩余面归蓝图**——SKILL.md 格式兼容 → KNW-4，插件/MCP 配置导入 → DIST-2（W2 共轨包范围相应收缩） | 来源=BLOCK-156 收口 §8；归档指针=蓝图 §2④⑤ |
