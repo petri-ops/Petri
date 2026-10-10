@@ -53,18 +53,61 @@ async function tool_knowledge_search(args, _ctx) {
       message: '嵌入模型不可用（DashScope key 未配置或调用失败），仅全文通道可用且本次无命中。',
     };
   }
+  const hits = result.hits.map((hit) => ({
+    document: hit.docName,
+    chunk: hit.seq + 1,
+    score: Number(hit.score.toFixed(4)),
+    channels: hit.channels,
+    text: String(hit.text || '').slice(0, HIT_TEXT_CHARS),
+  }));
+  // BLOCK-163 W3 P11（KNW-6）— 检索→技能建议（纯规则映射零模型）：命中存在时
+  // 按查询词匹配内置技能的 id/name/description/category，TOP 3 additive 字段。
+  const suggestedSkills = suggestSkillsForQuery(query);
   return {
     spaceEnabled: true,
     embeddingAvailable: result.embeddingAvailable,
     readyChunks: result.readyChunks,
-    hits: result.hits.map((hit) => ({
-      document: hit.docName,
-      chunk: hit.seq + 1,
-      score: Number(hit.score.toFixed(4)),
-      channels: hit.channels,
-      text: String(hit.text || '').slice(0, HIT_TEXT_CHARS),
-    })),
+    hits,
+    ...(suggestedSkills.length ? { suggestedSkills } : {}),
   };
+}
+
+/**
+ * KNW-6 — 查询词 ↔ 产品技能匹配建议（纯函数，测试直打）：
+ * 查询分词后与技能 id/name/description/category/tags 求词面交集，命中 ≥1 词面
+ * 即候选，按命中词面数排序取 TOP 3。零模型、零 I/O（技能清单由调用方传入）。
+ */
+function suggestSkillsForQuery(query, skills) {
+  let list = Array.isArray(skills) ? skills : null;
+  if (!list) {
+    try {
+      const { SkillRegistry } = require('../../shared-backend/skill-registry');
+      list = new SkillRegistry().discover();
+    } catch {
+      return [];
+    }
+  }
+  const tokens = String(query || '').toLowerCase()
+    .split(/[\s,，。;；、/]+/).filter((t) => t.length >= 2);
+  if (tokens.length === 0) return [];
+  const scored = [];
+  for (const skill of list) {
+    const haystack = [
+      skill.id, skill.name, skill.description, skill.category,
+      ...(Array.isArray(skill.tags) ? skill.tags : []),
+    ].join(' ').toLowerCase();
+    let score = 0;
+    for (const token of tokens) {
+      if (haystack.includes(token)) score++;
+    }
+    if (score > 0) scored.push({ skill, score });
+  }
+  scored.sort((a, b) => b.score - a.score);
+  return scored.slice(0, 3).map(({ skill }) => ({
+    id: skill.id,
+    name: skill.name,
+    description: String(skill.description || '').slice(0, 120),
+  }));
 }
 
 function tool_knowledge_status(args) {
@@ -143,4 +186,4 @@ async function tool_knowledge_read(args) {
   };
 }
 
-module.exports = { tool_knowledge_search, tool_knowledge_status, tool_knowledge_read };
+module.exports = { tool_knowledge_search, tool_knowledge_status, tool_knowledge_read, suggestSkillsForQuery };
