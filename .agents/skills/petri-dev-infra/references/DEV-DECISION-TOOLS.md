@@ -32,6 +32,8 @@
   读 key 直连 Jev 云（只读不回显）——当前**唯一有校准证据**的供给，建议真实可用。
 - `--supply=file`：跟随 `data/decision-config.json`（设置页「决策模型接口」同源）。
   当前指向本地 Laya → 工具恒零建议（安全静默，非故障）。
+- **换机/新环境供给配不出来**（exit 3 缺 key / 451 区域封 / timeout 直连墙 / 台账静默丢）：
+  按 [JEV-CLOUD-PROVISIONING.md](./JEV-CLOUD-PROVISIONING.md) 的症状表诊断修复。
 
 ### 什么时候用 Laya、什么时候用 Jev（2026-09-23 校准证据 + 成本账）
 
