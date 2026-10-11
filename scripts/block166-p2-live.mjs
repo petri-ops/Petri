@@ -43,7 +43,7 @@ const FRAGMENT = `<!doctype html>
   <div style="margin-top:12px">
     <label for="threshold" style="color:var(--muted-foreground);font-size:12px">阈值：<span id="threshold-value">50</span></label>
     <input id="threshold" class="form-range" type="range" min="0" max="100" value="50"
-           data-tooltip="拖动保存状态（SQLite 持久化）" style="width:240px">
+           data-tooltip="拖动保存状态（SQLite 持久化）" style="width:100%">
   </div>
 </div>
 <script>

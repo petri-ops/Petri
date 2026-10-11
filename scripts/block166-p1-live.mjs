@@ -50,7 +50,7 @@ const FRAGMENT_TEMPLATE = `
   <div style="margin-top:12px">
     <label for="threshold" style="color:var(--muted-foreground);font-size:12px">阈值滑块：<span id="threshold-value">50</span></label>
     <input id="threshold" class="form-range" type="range" min="0" max="100" value="50"
-           data-tooltip="拖动调整高亮阈值，状态自动保存到宿主" style="width:240px">
+           data-tooltip="拖动调整高亮阈值，状态自动保存到宿主" style="width:100%">
   </div>
   <p style="margin:12px 0 0;font-size:12px">
     <a id="doc-link" href="https://example.com/petri-docs">外链示例（宿主裁决打开）</a>
