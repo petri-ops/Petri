@@ -9,7 +9,7 @@
   background: transparent;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
   cursor: pointer;
 }
 

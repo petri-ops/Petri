@@ -29,8 +29,8 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: nowrap;
-  gap: 12px;
-  padding: 6px 12px;
+  gap: var(--petri-space-4);
+  padding: var(--petri-space-2) var(--petri-space-4);
   border-bottom: 1px solid var(--petri-border);
   background: var(--petri-bg-surface);
   flex-shrink: 0;
@@ -40,7 +40,7 @@
 .rvw-summary-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--petri-space-4);
   min-width: 0;
 }
 
@@ -70,7 +70,7 @@
 .rvw-expand-all-btn {
   flex-shrink: 0;
   font-size: var(--petri-font-size-xs);
-  padding: 2px 8px;
+  padding: 2px var(--petri-space-3);
 }
 
 /* UI-260/261 — 文件树开合按钮：默认收起右侧文件树；图标形式与「文件」侧一致（chevron + 文件夹） */
@@ -79,7 +79,7 @@
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  padding: 2px 6px;
+  padding: 2px var(--petri-space-2);
 }
 
 .rvw-tree-toggle-btn .rvw-caret {
@@ -104,15 +104,15 @@
   background: var(--petri-bg-elevated, var(--petri-bg-surface));
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-lg);;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
+  box-shadow: var(--petri-shadow-menu);
   overflow: hidden;
 }
 
 .rvw-hover-preview-head {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
+  gap: var(--petri-space-3);
+  padding: var(--petri-space-2) 10px;
   border-bottom: 1px solid var(--petri-border);
   min-width: 0;
   flex-shrink: 0;
@@ -138,7 +138,7 @@
   flex-shrink: 0;
   flex-wrap: nowrap;
   justify-content: flex-end;
-  gap: 6px;
+  gap: var(--petri-space-2);
 }
 
 /* BLOCK-29.6 UI-243 — 快捷键提示 tooltip（info icon） */
@@ -156,7 +156,7 @@
 .rvw-summary-stats {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--petri-space-3);
   font-size: var(--petri-font-size-caption);
   color: var(--petri-text-secondary);
   white-space: nowrap;
@@ -173,7 +173,7 @@
 }
 
 .rvw-container--dock .rvw-summary {
-  padding: 6px 12px;
+  padding: var(--petri-space-2) var(--petri-space-4);
 }
 
 .rvw-container--dock .wt-title {
@@ -185,7 +185,7 @@
 }
 
 .rvw-review-progress {
-  padding: 1px 8px;
+  padding: 1px var(--petri-space-3);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-accent-soft);
   color: var(--petri-accent);
@@ -268,9 +268,9 @@
 .rvw-group-header {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
   width: 100%;
-  padding: 6px 12px;
+  padding: var(--petri-space-2) var(--petri-space-4);
   border: 0;
   background: transparent;
   color: var(--petri-text-tertiary);
@@ -347,7 +347,7 @@
 /* BLOCK-29.6 UI-243 — 文件头行内「编辑」按钮（accent-ghost，接管原 wt-edit-btn 语义） */
 .rvw-inline-edit-btn {
   height: 22px;
-  padding: 0 8px;
+  padding: 0 var(--petri-space-3);
   border-radius: var(--petri-radius-sm);;
   font-size: var(--petri-font-size-xs);
   background: var(--petri-accent-soft);
@@ -364,7 +364,7 @@
 .rvw-file-stats {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--petri-space-1);
   flex-shrink: 0;
   font-family: var(--petri-font-mono, monospace);
   font-size: var(--petri-font-size-xs);
@@ -445,10 +445,10 @@
 .wt-hunk-controls {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
   margin-left: 10px;
   vertical-align: baseline;
-  padding: 3px 6px;
+  padding: 3px var(--petri-space-2);
   background: var(--petri-bg-elevated);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-lg);;
@@ -510,10 +510,10 @@
   flex-shrink: 0;
   border-top: 1px solid var(--petri-border);
   background: var(--petri-bg-surface);
-  padding: 7px 12px;
+  padding: 7px var(--petri-space-4);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--petri-space-2);
 }
 
 .rvw-commitbox-input {
@@ -523,7 +523,7 @@
   color: var(--petri-text);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-md);;
-  padding: 6px 10px;
+  padding: var(--petri-space-2) 10px;
   font-family: inherit;
   font-size: var(--petri-font-size-caption);
 }
@@ -629,15 +629,15 @@
   flex: 1;
   min-width: 0;
   overflow-y: auto;
-  padding: 6px 0;
+  padding: var(--petri-space-2) 0;
 }
 
 .rvw-history-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--petri-space-3);
   width: 100%;
-  padding: 6px 12px;
+  padding: var(--petri-space-2) var(--petri-space-4);
   border: none;
   background: transparent;
   color: var(--petri-text-secondary);
@@ -682,7 +682,7 @@
   color: var(--petri-accent);
   font-size: var(--petri-font-size-caption);
   font-family: inherit;
-  padding: 4px 8px;
+  padding: var(--petri-space-1) var(--petri-space-3);
   border-radius: var(--petri-radius-md);;
   cursor: pointer;
   white-space: nowrap;
@@ -704,7 +704,7 @@
   flex: 1;
   min-width: 0;
   overflow-y: auto;
-  padding: 4px 0 8px;
+  padding: var(--petri-space-1) 0 var(--petri-space-3);
 }
 
 /* UI-254/260 — 右侧文件树（按钮切换显示）：并排占据右侧（flex 列，非浮层） */
@@ -715,11 +715,11 @@
   border-left: 1px solid var(--petri-border);
   overflow-y: auto;
   background: var(--petri-bg-canvas);
-  padding: 6px 0 10px;
+  padding: var(--petri-space-2) 0 10px;
 }
 
 .rvw-dock-tree-title {
-  padding: 0 12px 6px;
+  padding: 0 var(--petri-space-4) var(--petri-space-2);
   font-size: var(--petri-font-size-xs);
   font-weight: 600;
   color: var(--petri-text-secondary);
@@ -730,7 +730,7 @@
   align-items: center;
   gap: 5px;
   width: 100%;
-  padding: 4px 10px 4px 8px;
+  padding: var(--petri-space-1) 10px var(--petri-space-1) var(--petri-space-3);
   border: none;
   background: transparent;
   color: var(--petri-text-secondary);
@@ -757,7 +757,7 @@
   align-items: center;
   gap: 5px;
   width: 100%;
-  padding: 4px 10px 4px 24px;
+  padding: var(--petri-space-1) 10px var(--petri-space-1) var(--petri-space-6);
   border: none;
   background: transparent;
   color: var(--petri-text);
@@ -796,7 +796,7 @@
   align-items: center;
   gap: 7px;
   width: 100%;
-  padding: 6px 10px;
+  padding: var(--petri-space-2) 10px;
   border: none;
   background: transparent;
   color: var(--petri-text);
@@ -819,12 +819,12 @@
 /* BLOCK-29.7 UI-244 — dock 目录分组树：组头与 /review 主区左树同构，文件缩进 + 缩进参考线 */
 .rvw-acc-group-files {
   margin-left: 13px;
-  padding-left: 4px;
+  padding-left: var(--petri-space-1);
   border-left: 1px solid var(--petri-border-tertiary, var(--petri-border));
 }
 
 .rvw-acc-item--nested .rvw-acc-row {
-  padding: 5px 8px 5px 4px;
+  padding: 5px var(--petri-space-3) 5px var(--petri-space-1);
 }
 
 .rvw-acc-diff {
@@ -891,17 +891,17 @@
   top: 32px;
   z-index: 91;
   min-width: 168px;
-  padding: 4px;
+  padding: var(--petri-space-1);
   background: var(--petri-bg-elevated, var(--petri-bg-surface));
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-lg);;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
+  box-shadow: var(--petri-shadow-menu);
 }
 
 .rvw-overflow-menu-item {
   display: block;
   width: 100%;
-  padding: 6px 10px;
+  padding: var(--petri-space-2) 10px;
   border: none;
   border-radius: var(--petri-radius-md);;
   background: transparent;
@@ -929,7 +929,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 2px 8px;
+  padding: 2px var(--petri-space-3);
   border-radius: var(--petri-radius-pill);;
   background: var(--petri-accent-soft);
   color: var(--petri-accent);
@@ -957,7 +957,7 @@
 .rvw-history-more {
   display: block;
   width: calc(100% - 20px);
-  margin: 4px 10px 8px;
+  margin: var(--petri-space-1) 10px var(--petri-space-3);
   padding: 5px 0;
   border: 1px dashed var(--petri-border);
   border-radius: var(--petri-radius-md);;
@@ -988,8 +988,8 @@
 /* UI-236 — 视觉统一：内容区单一画布色，结构靠发丝线；
    灰底只保留给交互态（行 hover/选中、按钮）。展开区以左侧竖线标记，不再铺灰。 */
 .rvw-history-detail {
-  margin: 2px 0 8px;
-  padding: 2px 8px 6px 10px;
+  margin: 2px 0 var(--petri-space-3);
+  padding: 2px var(--petri-space-3) var(--petri-space-2) 10px;
   border-left: 2px solid var(--petri-border-strong);
   background: transparent;
   border-radius: 0 7px 7px 0;
@@ -1000,7 +1000,7 @@
   display: flex;
   align-items: stretch;
   gap: 0;
-  margin-top: 6px;
+  margin-top: var(--petri-space-2);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-md);;
   overflow: hidden;
@@ -1012,7 +1012,7 @@
   flex-shrink: 0;
   overflow-y: auto;
   max-height: 60vh;
-  padding: 4px 0;
+  padding: var(--petri-space-1) 0;
   border-right: 1px solid var(--petri-border);
   background: var(--petri-bg-surface);
 }
@@ -1022,7 +1022,7 @@
   align-items: center;
   gap: 5px;
   width: 100%;
-  padding: 4px 8px 2px;
+  padding: var(--petri-space-1) var(--petri-space-3) 2px;
   border: none;
   background: transparent;
   color: var(--petri-text-tertiary);
@@ -1049,9 +1049,9 @@
 .rvw-commit-tree-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
   width: 100%;
-  padding: 4px 8px 4px 22px;
+  padding: var(--petri-space-1) var(--petri-space-3) var(--petri-space-1) 22px;
   border: none;
   background: transparent;
   color: var(--petri-text);
@@ -1122,12 +1122,12 @@
 .rvw-viewmode-toggle {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 0;
+  gap: var(--petri-space-1);
+  padding: var(--petri-space-1) 0;
 }
 
 .rvw-viewmode-btn {
-  padding: 2px 8px;
+  padding: 2px var(--petri-space-3);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-md);;
   background: transparent;
@@ -1166,7 +1166,7 @@
 .rvw-branch-select {
   max-width: 180px;
   height: 28px;
-  padding: 0 6px;
+  padding: 0 var(--petri-space-2);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-canvas);
@@ -1187,8 +1187,8 @@
 .rvw-blame-row {
   display: grid;
   grid-template-columns: 3.5em 15em 1fr;
-  gap: 8px;
-  padding: 0 8px;
+  gap: var(--petri-space-3);
+  padding: 0 var(--petri-space-3);
   line-height: 1.7;
 }
 
@@ -1204,7 +1204,7 @@
 
 .rvw-blame-meta {
   display: inline-flex;
-  gap: 6px;
+  gap: var(--petri-space-2);
   min-width: 0;
   color: var(--petri-text-secondary);
   white-space: nowrap;
@@ -1228,8 +1228,8 @@
 
 /* BLOCK-29.5 — stash 只读列表（UI-236：去灰底与虚线，发丝线 + 左竖线标记） */
 .rvw-stash-list {
-  margin: 0 12px 6px;
-  padding: 2px 8px;
+  margin: 0 var(--petri-space-4) var(--petri-space-2);
+  padding: 2px var(--petri-space-3);
   border: none;
   border-left: 2px solid var(--petri-border);
   border-radius: 0;
@@ -1239,7 +1239,7 @@
 .rvw-stash-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--petri-space-3);
   min-width: 0;
   padding: 2px 0;
   font-size: var(--petri-font-size-xs);
@@ -1255,14 +1255,14 @@
 }
 
 .rvw-stage-section + .rvw-stage-section {
-  margin-top: 6px;
+  margin-top: var(--petri-space-2);
 }
 
 .rvw-stage-section-title {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 8px 4px;
+  gap: var(--petri-space-2);
+  padding: var(--petri-space-2) var(--petri-space-3) var(--petri-space-1);
   font-size: var(--petri-font-size-xs);
   font-weight: 600;
   color: var(--petri-text-muted);
@@ -1285,7 +1285,7 @@
 .rvw-checkout-error {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--petri-space-1);
 }
 
 .rvw-checkout-conflicts {
@@ -1304,7 +1304,7 @@
 .rvw-sync-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
   font-size: var(--petri-font-size-xs);
   color: var(--petri-text-muted);
   white-space: nowrap;

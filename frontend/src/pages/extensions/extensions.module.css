@@ -4,8 +4,8 @@
 .shelfBar {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 8px 18px 0;
+  gap: var(--petri-space-1);
+  padding: var(--petri-space-3) 18px 0;
   border-bottom: 1px solid var(--petri-border);
   flex-shrink: 0;
   overflow-x: auto;
@@ -14,9 +14,9 @@
 .shelfTab {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
   height: 32px;
-  padding: 0 12px;
+  padding: 0 var(--petri-space-4);
   border: none;
   border-bottom: 2px solid transparent;
   background: transparent;
@@ -41,7 +41,7 @@
 .shelfPane {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--petri-space-4);
   min-width: 0;
   min-height: 0;
   flex: 1;
@@ -61,14 +61,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--petri-space-4);
   flex-shrink: 0;
 }
 
 .mcpIntro {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
   color: var(--petri-text-tertiary);
   font-size: var(--petri-font-size-xs, 12px);
   min-width: 0;
@@ -77,7 +77,7 @@
 .mcpAddBtn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
   height: 28px;
   padding: 0 10px;
   border: 1px solid var(--petri-border);
@@ -102,8 +102,8 @@
 .mcpForm {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px;
+  gap: var(--petri-space-3);
+  padding: var(--petri-space-4);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
@@ -113,14 +113,14 @@
 .mcpFormRow {
   display: flex;
   align-items: flex-end;
-  gap: 8px;
+  gap: var(--petri-space-3);
   min-width: 0;
 }
 
 .mcpField {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--petri-space-1);
   min-width: 0;
 }
 
@@ -131,7 +131,7 @@
 
 .mcpField > input {
   height: 30px;
-  padding: 0 8px;
+  padding: 0 var(--petri-space-3);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-input-bg, var(--petri-bg-surface));
@@ -172,8 +172,8 @@
 .mcpCard {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 12px 14px;
+  gap: var(--petri-space-2);
+  padding: var(--petri-space-4) 14px;
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
@@ -183,7 +183,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--petri-space-3);
 }
 
 .mcpCardId {
@@ -199,7 +199,7 @@
   height: 20px;
   display: inline-flex;
   align-items: center;
-  padding: 0 8px;
+  padding: 0 var(--petri-space-3);
   border-radius: var(--petri-radius-pill);;
   border: 1px solid var(--petri-border);
   color: var(--petri-text-secondary);
@@ -233,7 +233,7 @@
 
 .mcpCardActions {
   display: flex;
-  gap: 8px;
+  gap: var(--petri-space-3);
 }
 
 .mcpCardActions > button {
@@ -261,7 +261,7 @@
 .mcpRefresh {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--petri-space-1);
   align-self: flex-start;
   border: none;
   background: transparent;

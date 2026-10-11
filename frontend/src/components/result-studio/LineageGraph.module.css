@@ -14,7 +14,7 @@
 .node :global(.react-flow__node-default) {
   width: auto;
   min-width: 72px;
-  padding: 4px 12px;
+  padding: var(--petri-space-1) var(--petri-space-4);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);

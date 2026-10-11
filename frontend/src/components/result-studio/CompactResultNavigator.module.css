@@ -4,7 +4,7 @@
   z-index: 12;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
   min-height: 44px;
   padding: 5px 10px;
   border-bottom: 1px solid var(--petri-border);
@@ -14,7 +14,7 @@
 .currentResult {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
   min-width: 0;
   flex: 1;
 }
@@ -39,7 +39,7 @@
   width: min(390px, 42vw);
   min-width: 150px;
   height: 24px;
-  padding: 0 24px 0 0;
+  padding: 0 var(--petri-space-6) 0 0;
   border: 0;
   border-radius: var(--petri-radius-sm);;
   background: transparent;
@@ -116,14 +116,14 @@ button.iconAction {
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-surface);
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
+  box-shadow: var(--petri-shadow-float);
 }
 
 .moreHeader {
   display: grid;
   gap: 2px;
   min-width: 0;
-  padding-bottom: 8px;
+  padding-bottom: var(--petri-space-3);
   border-bottom: 1px solid var(--petri-border-subtle);
 }
 
@@ -145,7 +145,7 @@ button.iconAction {
   flex: 0 0 auto;
   align-items: center;
   min-height: 19px;
-  padding: 0 6px;
+  padding: 0 var(--petri-space-2);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-pill);;
   color: var(--petri-text-secondary);
@@ -173,7 +173,7 @@ button.iconAction {
 
 .modeSwitcher button {
   min-height: 28px;
-  padding: 0 8px;
+  padding: 0 var(--petri-space-3);
   border: 0;
   border-radius: var(--petri-radius-sm);;
   background: transparent;
@@ -197,7 +197,7 @@ button.iconAction {
   display: grid;
   gap: 2px;
   margin-top: 10px;
-  padding-top: 8px;
+  padding-top: var(--petri-space-3);
   border-top: 1px solid var(--petri-border-subtle);
 }
 
@@ -205,8 +205,8 @@ button.iconAction {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
-  padding-top: 8px;
+  gap: var(--petri-space-2);
+  padding-top: var(--petri-space-3);
 }
 
 .secondaryActions a,
@@ -230,7 +230,7 @@ button.iconAction {
 }
 
 .menuLabel {
-  padding: 0 6px 4px;
+  padding: 0 var(--petri-space-2) var(--petri-space-1);
   font-weight: 650;
 }
 
@@ -238,10 +238,10 @@ button.iconAction {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--petri-space-4);
   width: 100%;
   min-height: 28px;
-  padding: 4px 6px;
+  padding: var(--petri-space-1) var(--petri-space-2);
   border: 0;
   border-radius: var(--petri-radius-sm);;
   background: transparent;
@@ -270,7 +270,7 @@ button.iconAction {
 
 @container (max-width: 520px) {
   .navigator {
-    gap: 6px;
+    gap: var(--petri-space-2);
     padding-inline: 6px;
   }
 

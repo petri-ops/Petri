@@ -11,7 +11,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--petri-space-3);
   color: var(--petri-text-secondary);
   font-weight: 600;
 }
@@ -29,9 +29,9 @@
 .group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--petri-space-2);
   margin: 0;
-  padding: 8px;
+  padding: var(--petri-space-3);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-md);;
 }
@@ -39,9 +39,9 @@
 .group legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--petri-space-2);
   align-items: baseline;
-  padding: 0 4px;
+  padding: 0 var(--petri-space-1);
   color: var(--petri-text-secondary);
   font-weight: 600;
 }
@@ -60,7 +60,7 @@
 .field {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 116px;
-  gap: 8px;
+  gap: var(--petri-space-3);
   align-items: center;
 }
 
@@ -78,7 +78,7 @@
 .field select {
   min-height: 26px;
   width: 100%;
-  padding: 0 6px;
+  padding: 0 var(--petri-space-2);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-sm);;
   background: var(--petri-bg-elevated);
@@ -100,13 +100,13 @@
 .outcome {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--petri-space-1);
   color: var(--petri-text-secondary);
 }
 
 .outcome input {
   min-height: 28px;
-  padding: 0 8px;
+  padding: 0 var(--petri-space-3);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-sm);;
   background: var(--petri-bg-elevated);
@@ -116,7 +116,7 @@
 
 .impact {
   margin: 0;
-  padding: 7px 8px;
+  padding: 7px var(--petri-space-3);
   border-radius: var(--petri-radius-sm);;
   background: color-mix(in srgb, var(--petri-accent) 8%, transparent);
   color: var(--petri-text-secondary);
@@ -130,7 +130,7 @@
 
 .confirm {
   display: flex;
-  gap: 6px;
+  gap: var(--petri-space-2);
   align-items: flex-start;
   color: var(--petri-status-loading);
   line-height: 1.5;
@@ -139,7 +139,7 @@
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--petri-space-2);
 }
 
 .actions button {
@@ -175,7 +175,7 @@
   min-height: 34px;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--petri-space-3);
   color: var(--petri-text-secondary);
   cursor: pointer;
   font-size: var(--petri-font-size-sm);

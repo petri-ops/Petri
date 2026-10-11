@@ -172,11 +172,6 @@ describe('theme token contract', () => {
       '--petri-shadow-sm',
       // 派生层（color-mix(var(--petri-*)) 自动适配主题）非缺失
       '--petri-accent-weak',
-      // W3 待清零冻结名单（审计 2.3 明暗未配对；收缩后从本表删除）：
-      // teal 家族（暗色 --petri-teal 3.17:1）/ cream/frost/gold 品牌辅助色 / info（3.02:1）/ status-success
-      '--petri-teal', '--petri-teal-bright', '--petri-teal-button', '--petri-teal-dark',
-      '--petri-cream', '--petri-frost', '--petri-gold',
-      '--petri-info', '--petri-status-success',
       '--petri-bg-base', '--petri-fg', '--petri-fg-muted', '--petri-bg-elev',
       '--petri-bg-button', '--petri-bg-button-hover', '--petri-bg-hover',
       '--petri-surface-raised', '--petri-bg-surface-raised', '--petri-surface-strong',
@@ -212,28 +207,7 @@ describe('theme token contract', () => {
       if (count > 0) offenders.push(`${path.relative(srcRoot, file)}:${count}`);
     }
     // 棘轮快照（W2 盘点时点）。收缩后更新此表（只许减不许增）；W3 清零后整表删除。
-    const RATCHET: Record<string, number> = {
-      // W2 盘点快照（2026-10-11 实测 121 处/19 文件；W3 清零后整表删除）
-      'components/copilot/gen-ui/GenUiCard.module.css': 9,
-      'components/copilot/LlmTranscriptViewer.css': 17,
-      'components/copilot/simple-chat.css': 3,
-      'components/copilot/ToolActivityDock.module.css': 1,
-      'components/desktop/desktop.css': 1,
-      'components/desktop/DesktopSettingsPanel/sections/Federation.module.css': 12,
-      'components/desktop/DesktopSettingsPanel/sections/MobileSync.module.css': 11,
-      'components/desktop/TestInstanceBadge.module.css': 3,
-      'components/desktop/TitleBar.module.css': 1,
-      'components/RouteErrorBoundary.module.css': 4,
-      'components/window/rail-page.module.css': 7,
-      'components/window/window-shell.module.css': 12,
-      'components/workspace-panels/KnowledgeSpacePanel.module.css': 4,
-      'components/workspace-panels/KnowledgeSpaceSwitcher.module.css': 4,
-      'components/workspace-panels/WorkspaceCitationsSection.module.css': 3,
-      'components/workspace-panels/WorkspaceTodoSection.module.css': 3,
-      'pages/project-workspace.module.css': 8,
-      'pages/welcome.module.css': 2,
-      'pages/window/command-center.module.css': 16,
-    };
+    const RATCHET: Record<string, number> = {}; // W3 已清零（2026-10-11）：121 处全部归档 --petri-font-size-* 档
     const actual: Record<string, number> = {};
     for (const entry of offenders) {
       const [rel, count] = entry.split(':');

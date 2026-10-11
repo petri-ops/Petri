@@ -135,15 +135,15 @@
 .legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 12px;
-  margin-top: 8px;
+  gap: var(--petri-space-2) var(--petri-space-4);
+  margin-top: var(--petri-space-3);
 }
 
 .legendButton {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
+  gap: var(--petri-space-2);
+  padding: var(--petri-space-1) var(--petri-space-3);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-pill);;
   background: var(--petri-bg-surface);
@@ -210,13 +210,13 @@
   right: 8px;
   display: inline-flex;
   align-items: baseline;
-  gap: 8px;
-  padding: 6px 10px;
+  gap: var(--petri-space-3);
+  padding: var(--petri-space-2) 10px;
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-surface);
   color: var(--petri-text);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--petri-shadow-sm);
   font-size: var(--petri-font-size-sm);
   line-height: 1.2;
   pointer-events: none;
@@ -240,7 +240,7 @@
 
 .fallback {
   margin: 0;
-  padding: 8px 10px;
+  padding: var(--petri-space-3) 10px;
   border: 1px dashed var(--petri-border);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-subtle);
@@ -253,7 +253,7 @@
 }
 
 .fallbackNote {
-  margin: 0 0 6px;
+  margin: 0 0 var(--petri-space-2);
   font-size: var(--petri-font-size-sm);
   color: var(--petri-text-tertiary);
   font-family: var(--petri-font-sans, inherit);

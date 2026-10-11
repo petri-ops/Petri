@@ -30,7 +30,7 @@
   background: var(--petri-surface-dim, #1e1e1e);
   color: var(--petri-fg, #e0e0e0);
   border-left: 1px solid var(--petri-border, #404040);
-  box-shadow: -6px 0 24px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--petri-shadow-menu);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -47,11 +47,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: var(--petri-space-4) var(--petri-space-5);
   border-bottom: 1px solid var(--petri-border, #404040);
   background: var(--petri-bg-elev, #2a2a2a);
   flex-shrink: 0;
-  gap: 12px;
+  gap: var(--petri-space-4);
   min-height: 52px;
   box-sizing: border-box;
 }
@@ -84,7 +84,7 @@
 .drawerHeaderActions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--petri-space-3);
   flex-shrink: 0;
 }
 
@@ -101,7 +101,7 @@
 
 /* Error bar — BLOCK-161 W1 对比度修复：原 #ffc8c8/rgba 硬编码亮色 1.45:1 且零暗色适配，改状态 token 明暗自适应 */
 .drawerError {
-  padding: 8px 16px;
+  padding: var(--petri-space-3) var(--petri-space-5);
   background: var(--petri-status-error-bg);
   border-bottom: 1px solid var(--petri-status-error-border);
   color: var(--petri-status-error-fg);
@@ -131,7 +131,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: var(--petri-space-6);
 }
 
 .binaryMarker {
@@ -165,7 +165,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 12px;
+  padding: var(--petri-space-2) var(--petri-space-4);
   background: var(--petri-bg-elev, #2a2a2a);
   border-bottom: 1px solid var(--petri-border, #404040);
   flex-shrink: 0;
@@ -194,7 +194,7 @@
   background: var(--petri-bg, #1e1e1e);
   color: var(--petri-fg, #e0e0e0);
   border: none;
-  padding: 10px 12px;
+  padding: 10px var(--petri-space-4);
   font-family: var(--petri-mono, monospace);
   font-size: var(--petri-font-size-caption);
   line-height: 1.6;
@@ -220,11 +220,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
+  padding: 10px var(--petri-space-5);
   border-top: 1px solid var(--petri-border, #404040);
   background: var(--petri-bg-elev, #2a2a2a);
   flex-shrink: 0;
-  gap: 12px;
+  gap: var(--petri-space-4);
   min-height: 48px;
   box-sizing: border-box;
 }
@@ -239,13 +239,13 @@
 .drawerFooterActions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--petri-space-3);
   flex-shrink: 0;
 }
 
 /* Buttons */
 .drawerBtn {
-  padding: 6px 14px;
+  padding: var(--petri-space-2) 14px;
   font-size: var(--petri-font-size-caption);
   border: 1px solid var(--petri-border, #404040);
   border-radius: var(--petri-radius-sm);;

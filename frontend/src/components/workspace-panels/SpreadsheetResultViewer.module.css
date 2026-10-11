@@ -5,14 +5,14 @@
 .sheetViewer {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--petri-space-3);
   min-width: 0;
 }
 
 .sheetTabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: var(--petri-space-1);
 }
 
 .sheetTab {
@@ -59,7 +59,7 @@
 .sheetGrid th,
 .sheetGrid td {
   border: 1px solid var(--petri-border);
-  padding: 4px 10px;
+  padding: var(--petri-space-1) 10px;
   text-align: left;
   font-size: var(--petri-font-size-body-sm);
   color: var(--petri-text);
@@ -94,8 +94,8 @@
 .sheetError {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 10px 12px;
+  gap: var(--petri-space-1);
+  padding: 10px var(--petri-space-4);
   border: 1px solid var(--petri-status-error-border);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-status-error-bg);

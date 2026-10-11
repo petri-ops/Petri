@@ -8,7 +8,7 @@
   font-size: var(--ifm-font-size-base);
   font-weight: 700;
   color: var(--petri-text-secondary);
-  margin-bottom: 6px;
+  margin-bottom: var(--petri-space-2);
 }
 
 .desc {

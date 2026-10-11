@@ -8,19 +8,19 @@
 .card {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px 14px;
+  gap: var(--petri-space-3);
+  padding: var(--petri-space-4) 14px;
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
   color: var(--petri-text);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--petri-shadow-sm);
 }
 
 .header {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: var(--petri-space-3);
   min-width: 0;
 }
 
@@ -104,8 +104,8 @@
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  padding-top: 4px;
+  gap: var(--petri-space-2);
+  padding-top: var(--petri-space-1);
   border-top: 1px solid var(--petri-border-subtle, var(--petri-border));
 }
 

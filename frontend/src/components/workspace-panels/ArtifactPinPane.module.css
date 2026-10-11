@@ -6,7 +6,7 @@
 .artifactPinSplit {
   display: grid;
   grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-  gap: 8px;
+  gap: var(--petri-space-3);
   align-items: start;
 }
 
@@ -18,8 +18,8 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 8px;
+  gap: var(--petri-space-2);
+  padding: var(--petri-space-3);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
@@ -28,13 +28,13 @@
 .artifactPinHeader {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
   min-width: 0;
 }
 
 .artifactPinLabel {
   flex-shrink: 0;
-  padding: 0 6px;
+  padding: 0 var(--petri-space-2);
   border-radius: var(--petri-radius-pill);;
   background: var(--petri-accent-bg);
   color: var(--petri-text-secondary);
@@ -94,7 +94,7 @@
 .artifactPinTableScroll th {
   position: sticky;
   top: 0;
-  padding: 4px 8px;
+  padding: var(--petri-space-1) var(--petri-space-3);
   text-align: left;
   background: var(--petri-bg-subtle);
   color: var(--petri-text);
@@ -103,7 +103,7 @@
 }
 
 .artifactPinTableScroll td {
-  padding: 4px 8px;
+  padding: var(--petri-space-1) var(--petri-space-3);
   border-bottom: 1px solid var(--petri-border);
   color: var(--petri-text-secondary);
   white-space: nowrap;
@@ -133,8 +133,8 @@
 .artifactPinPlaceholder {
   display: grid;
   justify-items: start;
-  gap: 6px;
-  padding: 12px;
+  gap: var(--petri-space-2);
+  padding: var(--petri-space-4);
   border: 1px dashed var(--petri-border);
   border-radius: var(--petri-radius-md);;
   color: var(--petri-text-tertiary);

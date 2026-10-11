@@ -7,8 +7,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 6px 12px;
+  gap: var(--petri-space-3);
+  padding: var(--petri-space-2) var(--petri-space-4);
   border-bottom: 1px solid var(--petri-border);
   border-left: none;
   border-right: none;

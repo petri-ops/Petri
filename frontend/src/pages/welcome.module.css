@@ -5,7 +5,7 @@
   min-height: 100%;
   display: grid;
   place-items: center;
-  padding: 48px 24px;
+  padding: var(--petri-space-8) var(--petri-space-6);
   overflow-y: auto;
 }
 
@@ -19,7 +19,7 @@
 
 .greeting {
   margin: 0;
-  font-size: 30px;
+  font-size: var(--petri-font-size-3xl);
   font-weight: 700;
   color: var(--petri-text);
   text-align: center;
@@ -50,20 +50,20 @@
 .composerTopRow {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--petri-space-4);
   flex-wrap: wrap;
 }
 
 .pickerLabel {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
   color: var(--petri-text-secondary);
 }
 
 .projectSelect {
   max-width: 260px;
-  padding: 4px 6px;
+  padding: var(--petri-space-1) var(--petri-space-2);
   border: 1px solid var(--petri-border-color, transparent);
   border-radius: var(--petri-radius-md);;
   background: transparent;
@@ -79,8 +79,8 @@
 .branchChip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
+  gap: var(--petri-space-1);
+  padding: 3px var(--petri-space-3);
   border-radius: var(--petri-radius-pill);;
   background: var(--petri-hover);
   color: var(--petri-text-secondary);
@@ -115,7 +115,7 @@
 }
 
 .chip {
-  padding: 6px 14px;
+  padding: var(--petri-space-2) 14px;
   border: 1px solid var(--petri-border-color, transparent);
   border-radius: var(--petri-radius-pill);;
   background: var(--petri-bg-surface);
@@ -140,7 +140,7 @@
 .pickerTrigger {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
   padding: 5px 10px;
   border: 1px solid transparent;
   border-radius: var(--petri-radius-lg);;
@@ -173,7 +173,7 @@
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
   border: 1px solid var(--petri-border-color, transparent);
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--petri-shadow-float);
   z-index: 31;
   overflow: hidden;
 }
@@ -181,7 +181,7 @@
 .projectSearch {
   width: 100%;
   box-sizing: border-box;
-  padding: 10px 12px;
+  padding: 10px var(--petri-space-4);
   border: none;
   border-bottom: 1px solid var(--petri-border-color, transparent);
   background: transparent;
@@ -194,15 +194,15 @@
 .projectList {
   max-height: 220px;
   overflow-y: auto;
-  padding: 4px;
+  padding: var(--petri-space-1);
 }
 
 .projectRow {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--petri-space-3);
   width: 100%;
-  padding: 8px 10px;
+  padding: var(--petri-space-3) 10px;
   border: none;
   border-radius: var(--petri-radius-lg);;
   background: transparent;
@@ -229,7 +229,7 @@
 }
 
 .projectRowTag {
-  font-size: 10px;
+  font-size: var(--petri-font-size-xs);
   padding: 1px 5px;
   border-radius: var(--petri-radius-sm);;
   background: var(--petri-hover);
@@ -237,7 +237,7 @@
 }
 
 .projectRowEmpty {
-  padding: 10px 12px;
+  padding: 10px var(--petri-space-4);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-caption);
 }
@@ -246,13 +246,13 @@
   display: flex;
   flex-direction: column;
   border-top: 1px solid var(--petri-border-color, transparent);
-  padding: 4px;
+  padding: var(--petri-space-1);
 }
 
 .panelAction {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--petri-space-3);
   padding: 9px 10px;
   border: none;
   border-radius: var(--petri-radius-lg);;
@@ -270,8 +270,8 @@
 .actionForm {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 6px 4px;
+  gap: var(--petri-space-3);
+  padding: var(--petri-space-2) var(--petri-space-1);
 }
 
 .actionInput {
@@ -296,7 +296,7 @@
 .actionBtnRow {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: var(--petri-space-3);
 }
 
 .actionBack {
@@ -308,7 +308,7 @@
 }
 
 .actionPrimary {
-  padding: 6px 14px;
+  padding: var(--petri-space-2) 14px;
   border: none;
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-accent);
@@ -335,7 +335,7 @@
 .sshAliasRow {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--petri-space-3);
 }
 
 .sshAliasRow .actionInput {
@@ -357,7 +357,7 @@
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-caption);
   text-align: left;
-  padding: 5px 8px;
+  padding: 5px var(--petri-space-3);
   border-radius: var(--petri-radius-md);;
   cursor: pointer;
   overflow: hidden;

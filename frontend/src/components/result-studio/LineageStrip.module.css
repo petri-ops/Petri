@@ -3,7 +3,7 @@
   min-width: 0;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
+  gap: var(--petri-space-1);
   padding: 5px 9px;
   border-bottom: 1px solid var(--petri-border);
   font-size: var(--petri-font-size-xs);
@@ -20,7 +20,7 @@
 .node {
   max-width: 180px;
   overflow: hidden;
-  padding: 1px 8px;
+  padding: 1px var(--petri-space-3);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-pill);;
   background: transparent;

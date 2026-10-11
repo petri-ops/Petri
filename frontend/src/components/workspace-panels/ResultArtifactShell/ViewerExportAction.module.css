@@ -2,5 +2,5 @@
 .actionsRow {
   display: flex;
   justify-content: flex-end;
-  margin: 0 0 8px;
+  margin: 0 0 var(--petri-space-3);
 }

@@ -8,8 +8,8 @@
   min-height: 32px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
+  gap: var(--petri-space-3);
+  padding: var(--petri-space-2) var(--petri-space-3);
   border: 1px solid transparent;
   border-radius: var(--petri-radius-md);;
   background: transparent;
@@ -54,8 +54,8 @@
   height: 32px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 8px;
+  gap: var(--petri-space-3);
+  padding: 0 var(--petri-space-3);
   border: 0;
   border-radius: var(--petri-radius-sm);;
   background: transparent;

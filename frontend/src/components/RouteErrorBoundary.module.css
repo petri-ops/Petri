@@ -5,42 +5,42 @@
   align-items: center;
   justify-content: center;
   min-height: 60vh;
-  padding: 24px;
+  padding: var(--petri-space-6);
   background: var(--petri-bg-surface);
 }
 
 .card {
   max-width: 520px;
   width: 100%;
-  padding: 24px;
+  padding: var(--petri-space-6);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
 }
 
 .title {
-  font-size: 16px;
+  font-size: var(--petri-font-size-md);
   font-weight: 600;
   color: var(--petri-text);
 }
 
 .message {
-  margin-top: 8px;
-  font-size: 13px;
+  margin-top: var(--petri-space-3);
+  font-size: var(--petri-font-size-body-sm);
   line-height: 1.6;
   color: var(--petri-text-secondary);
 }
 
 .detail {
-  margin: 12px 0 0;
-  padding: 10px 12px;
+  margin: var(--petri-space-4) 0 0;
+  padding: 10px var(--petri-space-4);
   max-height: 160px;
   overflow: auto;
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-canvas);
   font-family: var(--petri-font-mono, monospace);
-  font-size: 12px;
+  font-size: var(--petri-font-size-caption);
   line-height: 1.5;
   color: var(--petri-text-tertiary);
   white-space: pre-wrap;
@@ -48,16 +48,16 @@
 }
 
 .actions {
-  margin-top: 16px;
+  margin-top: var(--petri-space-5);
   display: flex;
   gap: 10px;
 }
 
 .primaryBtn,
 .secondaryBtn {
-  padding: 6px 14px;
+  padding: var(--petri-space-2) 14px;
   border-radius: var(--petri-radius-md);;
-  font-size: 13px;
+  font-size: var(--petri-font-size-body-sm);
   cursor: pointer;
   border: 1px solid var(--petri-border-strong);
 }

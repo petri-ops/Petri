@@ -1,7 +1,7 @@
 /* UI-365 — 设置独立页（与 /skills /plugins 同形态：设备级能力不绑项目） */
 .settingsPage {
   height: calc(100vh - var(--petri-titlebar-height));
-  padding: 16px 20px 20px;
+  padding: var(--petri-space-5) 20px 20px;
   background: var(--petri-bg-surface);
   display: flex;
   box-sizing: border-box;

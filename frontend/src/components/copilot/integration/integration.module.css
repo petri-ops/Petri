@@ -39,16 +39,16 @@
   right: 12px;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--petri-space-1);
   background-color: var(--petri-bg-elevated, rgba(255, 255, 255, 0.95));
   border: 1px solid var(--petri-border, rgba(0, 0, 0, 0.12));
   border-radius: var(--petri-radius-sm);;
-  padding: 4px 8px;
+  padding: var(--petri-space-1) var(--petri-space-3);
   color: var(--petri-accent);
   cursor: pointer;
   text-decoration: none;
   font: inherit;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--petri-shadow-sm);
   z-index: 10;
   transition: background-color 120ms ease;
 }

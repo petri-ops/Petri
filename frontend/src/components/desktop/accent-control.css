@@ -2,7 +2,7 @@
 .accent-control {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--petri-space-3);
 }
 
 .accent-control__swatch {

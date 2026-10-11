@@ -6,7 +6,7 @@
 .branchTabs {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--petri-space-1);
   flex: 0 1 auto;
   min-width: 0;
   max-width: 320px;
@@ -51,10 +51,10 @@
 .branchTabButton {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--petri-space-1);
   min-width: 0;
   height: 100%;
-  padding: 0 8px;
+  padding: 0 var(--petri-space-3);
   border: none;
   background: transparent;
   color: inherit;
@@ -82,7 +82,7 @@
   align-items: center;
   min-width: 0;
   height: 100%;
-  padding: 0 8px;
+  padding: 0 var(--petri-space-3);
 }
 
 .renameInput {
@@ -99,7 +99,7 @@
 .renameInput input {
   width: 100%;
   height: 20px;
-  padding: 0 6px;
+  padding: 0 var(--petri-space-2);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-sm);;
   background: var(--petri-bg-surface);
@@ -169,10 +169,10 @@
 .contextMenuItem {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--petri-space-3);
   width: 100%;
   min-height: 32px;
-  padding: 0 8px;
+  padding: 0 var(--petri-space-3);
   border: none;
   border-radius: var(--petri-radius-md);;
   background: transparent;

@@ -3324,7 +3324,8 @@
         "acceptance/block-161/**",
         "acceptance/ui-ux-audit-2026-10-10/**",
         "scripts/block161-w2-live.mjs",
-        "scripts/block161-shot.mjs"
+        "scripts/block161-shot.mjs",
+        "scripts/block161-w3-live.mjs"
       ],
       "tests": [
         "frontend/src/styles/theme-token-contract.test.ts"

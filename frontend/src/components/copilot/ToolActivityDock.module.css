@@ -12,15 +12,15 @@
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+  box-shadow: var(--petri-shadow-float);
   overflow: hidden;
 }
 
 .header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
+  gap: var(--petri-space-3);
+  padding: var(--petri-space-3) 10px;
   border-bottom: 1px solid var(--petri-border);
   flex-shrink: 0;
 }
@@ -34,7 +34,7 @@
 
 .tabs {
   display: flex;
-  gap: 4px;
+  gap: var(--petri-space-1);
   min-width: 0;
   overflow-x: auto;
   scrollbar-width: none;
@@ -47,13 +47,13 @@
 .tab {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--petri-space-1);
   border: 1px solid transparent;
   border-radius: var(--petri-radius-pill);;
   background: transparent;
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-body-sm);
-  padding: 1px 8px;
+  padding: 1px var(--petri-space-3);
   cursor: pointer;
   white-space: nowrap;
 }
@@ -80,7 +80,7 @@
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
   flex-shrink: 0;
 }
 
@@ -104,7 +104,7 @@
   border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-secondary);
-  font-size: 14px;
+  font-size: var(--petri-font-size-body);
   line-height: 1;
   cursor: pointer;
 }
@@ -117,13 +117,13 @@
 /* 工具活动分组详情区（复用 simple-chat.css 的 sc-tool-activity* 全局类） */
 
 .detail {
-  padding: 2px 12px 8px;
+  padding: 2px var(--petri-space-4) var(--petri-space-3);
   overflow-y: auto;
   min-height: 0;
 }
 
 .groupSummary {
-  padding: 6px 2px;
+  padding: var(--petri-space-2) 2px;
   font-size: var(--petri-font-size-body-sm);
   font-weight: 500;
   color: var(--petri-text-secondary);
@@ -143,7 +143,7 @@
 
 .log {
   margin: 0;
-  padding: 8px 10px;
+  padding: var(--petri-space-3) 10px;
   flex: 1;
   min-height: 0;
   overflow: auto;
@@ -174,7 +174,7 @@
   background: transparent;
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-body-sm);
-  padding: 1px 8px;
+  padding: 1px var(--petri-space-3);
   cursor: pointer;
 }
 
@@ -202,13 +202,13 @@
   z-index: 90;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
   height: 30px;
-  padding: 0 12px;
+  padding: 0 var(--petri-space-4);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-pill);;
   background: var(--petri-bg-surface);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--petri-shadow-menu);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-body-sm);
   cursor: pointer;

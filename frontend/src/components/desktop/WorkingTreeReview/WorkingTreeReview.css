@@ -34,7 +34,7 @@
   background: var(--petri-bg-surface);
   color: var(--petri-text);
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--petri-shadow-sm);
   transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
   /* UI-245 — 窄面板 flex 挤压下文字不得换行（对比按钮曾被压成竖排字） */
   white-space: nowrap;
@@ -44,7 +44,7 @@
 .wt-btn:hover:not(:disabled) {
   background: var(--petri-hover);
   border-color: var(--petri-border-strong);
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
+  box-shadow: var(--petri-shadow-sm);
 }
 
 .wt-btn:disabled,
@@ -104,7 +104,7 @@
 
 /* ---- 错误横幅 ---- */
 .wt-error {
-  padding: 8px 16px;
+  padding: var(--petri-space-3) var(--petri-space-5);
   background: var(--petri-status-error-bg);
   border-bottom: 1px solid color-mix(in srgb, var(--petri-status-error) 40%, transparent);
   color: var(--petri-status-error-fg);
@@ -114,7 +114,7 @@
 
 /* ---- 文件列表 ---- */
 .wt-file-list-title {
-  padding: 8px 12px;
+  padding: var(--petri-space-3) var(--petri-space-4);
   font-size: var(--petri-font-size-sm);
   font-weight: 600;
   text-transform: uppercase;
@@ -126,9 +126,9 @@
 .wt-file-list-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--petri-space-3);
   width: 100%;
-  padding: 7px 12px;
+  padding: 7px var(--petri-space-4);
   border: 0;
   background: transparent;
   color: var(--petri-text-secondary);
@@ -207,7 +207,7 @@
 
 /* ---- 空态 ---- */
 .wt-empty {
-  padding: 24px;
+  padding: var(--petri-space-6);
   text-align: center;
   color: var(--petri-text-muted);
   font-size: var(--petri-font-size-caption);
@@ -226,7 +226,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--petri-space-3);
 }
 
 .wt-gitinit-confirm-lead {
@@ -244,12 +244,12 @@
 
 /* ---- diff 文件头 ---- */
 .wt-file-header {
-  padding: 8px 12px;
+  padding: var(--petri-space-3) var(--petri-space-4);
   background: var(--petri-bg-surface);
   border-bottom: 1px solid var(--petri-border);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--petri-space-4);
   font-size: var(--petri-font-size-caption);
 }
 
@@ -276,13 +276,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
+  padding: 10px var(--petri-space-5);
   background: var(--petri-status-success-bg);
   border-bottom: 1px solid color-mix(in srgb, var(--petri-status-success-fg) 40%, transparent);
   color: var(--petri-status-success-fg);
   font-size: var(--petri-font-size-caption);
   flex-shrink: 0;
-  gap: 12px;
+  gap: var(--petri-space-4);
 }
 
 .wt-commit-hash {
@@ -311,7 +311,7 @@
 }
 
 .wt-file-binary {
-  padding: 16px;
+  padding: var(--petri-space-5);
   text-align: center;
   color: var(--petri-text-muted);
 }
@@ -327,13 +327,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: var(--petri-space-6);
   color: var(--petri-text-muted);
   font-size: var(--petri-font-size-body-sm);
 }
 
 .wt-diff-error {
-  padding: 12px 16px;
+  padding: var(--petri-space-4) var(--petri-space-5);
   color: var(--petri-status-error-fg);
   font-size: var(--petri-font-size-caption);
 }
@@ -343,13 +343,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: var(--petri-space-6);
   color: var(--petri-text-muted);
   font-size: var(--petri-font-size-body-sm);
 }
 
 .wt-diff-deleted-note {
-  padding: 6px 16px;
+  padding: var(--petri-space-2) var(--petri-space-5);
   color: var(--petri-text-muted);
   font-size: var(--petri-font-size-caption);
   border-bottom: 1px solid var(--petri-border-subtle);

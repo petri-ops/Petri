@@ -9,11 +9,11 @@
   display: flex;
   justify-content: flex-end;
   gap: 2px;
-  padding: 4px 9px 0;
+  padding: var(--petri-space-1) 9px 0;
 }
 
 .switchBtn {
-  padding: 1px 8px;
+  padding: 1px var(--petri-space-3);
   border: 1px solid transparent;
   border-radius: var(--petri-radius-pill);;
   background: transparent;

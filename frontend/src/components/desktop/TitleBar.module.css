@@ -84,13 +84,13 @@
      leftZone width stays stable. */
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--petri-space-3);
   box-sizing: border-box;
   width: 102px;
   height: 100%;
   flex: 0 0 102px;
-  padding-left: 12px;
-  padding-right: 8px;
+  padding-left: var(--petri-space-4);
+  padding-right: var(--petri-space-3);
 }
 
 .trafficPlaceholder {
@@ -208,7 +208,7 @@
   box-sizing: border-box;
   width: 32px;
   flex: 0 0 32px;
-  padding-left: 4px; /* keep the panel-left toggle visually distinct from the window controls at small zoom */
+  padding-left: var(--petri-space-1); /* keep the panel-left toggle visually distinct from the window controls at small zoom */
   min-width: 0;
 }
 
@@ -217,7 +217,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
+  gap: var(--petri-space-2);
   min-width: 0;
   justify-self: stretch;
   width: 100%;
@@ -233,7 +233,7 @@
 .centerTitleMain {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
   min-width: 0;
   flex: 1 1 auto;
   overflow: hidden;
@@ -353,11 +353,11 @@
 .resultMenuItem {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--petri-space-3);
   width: 100%;
   min-width: 0;
   min-height: 32px;
-  padding: 0 8px;
+  padding: 0 var(--petri-space-3);
   border: none;
   border-radius: var(--petri-radius-md);;
   background: transparent;
@@ -484,7 +484,7 @@
   gap: 9px;
   width: 100%;
   height: 32px;
-  padding: 0 8px;
+  padding: 0 var(--petri-space-3);
   border: none;
   border-radius: var(--petri-radius-md);;
   background: transparent;
@@ -561,7 +561,7 @@
 .tabPill {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--petri-space-1);
   flex: 0 1 auto;
   min-width: 0;
   max-width: 188px;
@@ -583,7 +583,7 @@
 .tabPillMain {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--petri-space-1);
   min-width: 0;
   height: 100%;
   padding: 0;
@@ -600,11 +600,11 @@
   min-width: 16px;
   height: 16px;
   padding: 0 5px;
-  margin-left: 4px;
+  margin-left: var(--petri-space-1);
   border-radius: var(--petri-radius-lg);;
   background: color-mix(in srgb, var(--petri-accent) 16%, transparent);
   color: var(--petri-accent);
-  font-size: 10px;
+  font-size: var(--petri-font-size-xs);
   font-weight: 600;
   line-height: 16px;
   text-align: center;
@@ -736,8 +736,8 @@
   }
 
   .windowTools {
-    gap: 4px;
-    margin-left: 4px;
-    padding-left: 4px;
+    gap: var(--petri-space-1);
+    margin-left: var(--petri-space-1);
+    padding-left: var(--petri-space-1);
   }
 }

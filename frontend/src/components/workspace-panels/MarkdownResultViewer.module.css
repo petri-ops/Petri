@@ -96,7 +96,7 @@
   background: var(--petri-bg-canvas);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-lg);;
-  padding: 10px 12px;
+  padding: 10px var(--petri-space-4);
   margin: 0 0 0.9em;
   overflow-x: auto;
 }
@@ -110,7 +110,7 @@
 /* 引用块 */
 .markdownBody blockquote {
   margin: 0 0 0.9em;
-  padding: 2px 0 2px 12px;
+  padding: 2px 0 2px var(--petri-space-4);
   border-left: 3px solid var(--petri-border-strong);
   color: var(--petri-text-secondary);
 }
@@ -133,7 +133,7 @@
 }
 
 .markdownBody li input[type='checkbox'] {
-  margin-right: 6px;
+  margin-right: var(--petri-space-2);
 }
 
 /* 长内容滚动条显式可见（覆盖式滚动条环境下不渲染则形似截断） */
@@ -156,8 +156,8 @@
 .markdownError {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 10px 12px;
+  gap: var(--petri-space-1);
+  padding: 10px var(--petri-space-4);
   border: 1px solid var(--petri-status-error-border);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-status-error-bg);

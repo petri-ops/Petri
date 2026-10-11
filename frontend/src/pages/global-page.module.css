@@ -13,7 +13,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 18px;
+  padding: var(--petri-space-4) 18px;
   border-bottom: 1px solid var(--petri-border);
   flex-shrink: 0;
 }
@@ -22,7 +22,7 @@
 .backBtn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--petri-space-3);
   height: 30px;
   padding: 0 10px;
   border: 1px solid var(--petri-border);

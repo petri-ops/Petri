@@ -5,9 +5,9 @@
 .menu > summary {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--petri-space-1);
   min-height: 28px;
-  padding: 0 8px;
+  padding: 0 var(--petri-space-3);
   border: 0;
   border-radius: var(--petri-radius-sm);;
   background: transparent;
@@ -35,15 +35,15 @@
   right: 0;
   z-index: 20;
   width: min(280px, calc(100vw - 32px));
-  padding: 8px;
+  padding: var(--petri-space-3);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-surface);
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
+  box-shadow: var(--petri-shadow-float);
 }
 
 .popupLabel {
-  padding: 2px 6px 6px;
+  padding: 2px var(--petri-space-2) var(--petri-space-2);
   border-bottom: 1px solid var(--petri-border-subtle);
   color: var(--petri-text-tertiary);
   font-size: var(--petri-font-size-xs);
@@ -53,17 +53,17 @@
 .items {
   display: grid;
   gap: 2px;
-  margin-top: 6px;
+  margin-top: var(--petri-space-2);
 }
 
 .items button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--petri-space-4);
   width: 100%;
   min-height: 28px;
-  padding: 4px 6px;
+  padding: var(--petri-space-1) var(--petri-space-2);
   border: 0;
   border-radius: var(--petri-radius-sm);;
   background: transparent;

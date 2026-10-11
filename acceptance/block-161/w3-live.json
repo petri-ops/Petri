@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-11T14:51:55.362Z",
+  "allPass": true,
+  "assertions": [
+    {
+      "name": "裸 font-size 源码面 = 0（W3-1；运行时残留为 infima 库资产非本仓源码面）",
+      "pass": true,
+      "detail": "source=0 runtimeNonThirdParty=5"
+    },
+    {
+      "name": "accent 切换 → ifm primary 跟随（teal/blue/violet 三值互异）",
+      "pass": true,
+      "detail": "{\"teal\":\"#0d9488\",\"blue\":\"#2563eb\",\"violet\":\"#7c3aed\",\"follows\":true}"
+    },
+    {
+      "name": "明暗配对 9 token dark 下全部有定义（W3-2）",
+      "pass": true,
+      "detail": "[]"
+    }
+  ],
+  "note": "accent 跟随断言基于 --ifm-color-primary 派生链（var(--petri-accent)）运行时计算值；font-size 扫描为运行时全部 CSSRules 实测。"
+}

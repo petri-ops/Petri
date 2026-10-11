@@ -3,7 +3,7 @@
 .picker {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--petri-space-2);
   width: 100%;
   min-width: 0;
 }
@@ -14,7 +14,7 @@
   flex-wrap: wrap;
   gap: 2px;
   min-width: 0;
-  padding: 4px 6px;
+  padding: var(--petri-space-1) var(--petri-space-2);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-canvas);
@@ -36,7 +36,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding: 1px 4px;
+  padding: 1px var(--petri-space-1);
   border: none;
   background: none;
   color: var(--petri-text);
@@ -82,7 +82,7 @@
   align-items: center;
   gap: 7px;
   width: 100%;
-  padding: 4px 8px;
+  padding: var(--petri-space-1) var(--petri-space-3);
   border: none;
   background: none;
   color: var(--petri-text);
@@ -105,14 +105,14 @@
 }
 
 .empty {
-  padding: 8px;
+  padding: var(--petri-space-3);
   font-size: var(--petri-font-size-xs);
   color: var(--petri-text-muted, var(--petri-text-secondary));
 }
 
 .error {
   margin: 0;
-  padding: 6px 8px;
+  padding: var(--petri-space-2) var(--petri-space-3);
   font-size: var(--petri-font-size-xs);
   color: var(--petri-danger, #d9534f);
   border: 1px solid var(--petri-border);
@@ -123,5 +123,5 @@
 .actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
 }

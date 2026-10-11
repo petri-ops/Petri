@@ -7,7 +7,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 12px 14px;
+  padding: var(--petri-space-4) 14px;
   height: 100%;
   overflow-y: auto;
   font-size: var(--petri-font-size-sm);
@@ -34,14 +34,14 @@
 .badgeRow {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
   flex-wrap: wrap;
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
+  padding: 2px var(--petri-space-3);
   border-radius: var(--petri-radius-pill);;
   font-size: var(--petri-font-size-xs);
   line-height: 1.5;
@@ -71,8 +71,8 @@
 .switchBtn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px 4px 4px;
+  gap: var(--petri-space-2);
+  padding: var(--petri-space-1) 10px var(--petri-space-1) var(--petri-space-1);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-pill);;
   background: var(--petri-bg-subtle);
@@ -112,8 +112,8 @@
 .noticeCard {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 8px 10px;
+  gap: var(--petri-space-2);
+  padding: var(--petri-space-3) 10px;
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
@@ -122,7 +122,7 @@
 .noticeRow {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--petri-space-3);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-xs);
   line-height: 1.5;
@@ -142,7 +142,7 @@
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--petri-space-1);
   padding: 3px 9px;
   border: 1px solid var(--petri-accent);
   border-radius: var(--petri-radius-md);;
@@ -160,7 +160,7 @@
 .tabsBar {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--petri-space-1);
   border-bottom: 1px solid var(--petri-border);
   padding-bottom: 0;
 }
@@ -169,7 +169,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 6px 12px;
+  padding: var(--petri-space-2) var(--petri-space-4);
   border: none;
   border-bottom: 2px solid transparent;
   border-radius: var(--petri-radius-md) var(--petri-radius-md) 0 0;
@@ -256,14 +256,14 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 4px;
+  margin-top: var(--petri-space-1);
 }
 
 .heroPrimaryBtn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 16px;
+  gap: var(--petri-space-2);
+  padding: 7px var(--petri-space-5);
   border: 1px solid var(--petri-accent);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-accent-surface);
@@ -280,7 +280,7 @@
 .heroGhostBtn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
   padding: 7px 14px;
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-lg);;
@@ -297,7 +297,7 @@
 
 /* ===== 通用通知/错误（上传报告、加载失败等沿用） ===== */
 .notice {
-  padding: 8px 10px;
+  padding: var(--petri-space-3) 10px;
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
@@ -309,13 +309,13 @@
 .loadMoreRow {
   display: flex;
   justify-content: center;
-  padding: 6px 0 2px;
+  padding: var(--petri-space-2) 0 2px;
 }
 
 .pasteBox {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--petri-space-3);
   padding: 10px;
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-lg);;
@@ -323,7 +323,7 @@
 }
 
 .pasteName {
-  padding: 6px 8px;
+  padding: var(--petri-space-2) var(--petri-space-3);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-elevated);
@@ -332,7 +332,7 @@
 }
 
 .pasteText {
-  padding: 8px;
+  padding: var(--petri-space-3);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-elevated);
@@ -345,18 +345,18 @@
 
 .pasteActions {
   display: flex;
-  gap: 8px;
+  gap: var(--petri-space-3);
 }
 
 .rejectedList {
-  margin: 6px 0 0;
+  margin: var(--petri-space-2) 0 0;
   padding-left: 18px;
   font-size: var(--petri-font-size-xs);
   color: var(--petri-text-secondary);
 }
 
 .errorBox {
-  padding: 8px 10px;
+  padding: var(--petri-space-3) 10px;
   border: 1px solid var(--petri-status-error-border);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-danger-bg);
@@ -370,7 +370,7 @@
 .toolbar {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
   flex-wrap: wrap;
 }
 
@@ -396,7 +396,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 8px;
+  padding: 5px var(--petri-space-3);
   border: none;
   border-radius: var(--petri-radius-lg);;
   background: transparent;
@@ -414,15 +414,15 @@
 .docList {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--petri-space-1);
   min-height: 60px;
 }
 
 .docRow {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
+  gap: var(--petri-space-3);
+  padding: var(--petri-space-2) var(--petri-space-3);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-lg);;
 }
@@ -444,7 +444,7 @@
 }
 
 .docStatus {
-  font-size: 10px;
+  font-size: var(--petri-font-size-xs);
   color: var(--petri-text-tertiary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -461,7 +461,7 @@
 
 .docMeta {
   flex-shrink: 0;
-  font-size: 10px;
+  font-size: var(--petri-font-size-xs);
   font-family: var(--petri-mono, monospace);
   color: var(--petri-text-tertiary);
 }
@@ -499,8 +499,8 @@
 .batchBar {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 0;
+  gap: var(--petri-space-3);
+  padding: var(--petri-space-1) 0;
   flex-wrap: wrap;
 }
 
@@ -539,13 +539,13 @@
 
 .previewBox {
   margin: -2px 0 6px;
-  padding: 8px 10px;
+  padding: var(--petri-space-3) 10px;
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--petri-space-2);
   max-height: 260px;
   overflow-y: auto;
 }
@@ -554,13 +554,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--petri-space-3);
   font-size: var(--petri-font-size-xs);
   color: var(--petri-text-tertiary);
 }
 
 .previewOpenRaw {
-  padding: 2px 8px;
+  padding: 2px var(--petri-space-3);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-elevated);
@@ -579,13 +579,13 @@
   color: var(--petri-text-secondary);
   white-space: pre-wrap;
   word-break: break-word;
-  padding-top: 4px;
+  padding-top: var(--petri-space-1);
   border-top: 1px dashed var(--petri-border);
 }
 
 .previewSeq {
   display: inline-block;
-  margin-right: 6px;
+  margin-right: var(--petri-space-2);
   color: var(--petri-text-tertiary);
   font-weight: 600;
 }
@@ -594,8 +594,8 @@
 .searchBox {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding-top: 8px;
+  gap: var(--petri-space-2);
+  padding-top: var(--petri-space-3);
 }
 
 .searchTitle {
@@ -613,13 +613,13 @@
 
 .searchRow {
   display: flex;
-  gap: 6px;
+  gap: var(--petri-space-2);
 }
 
 .searchInput {
   flex: 1;
   min-width: 0;
-  padding: 5px 8px;
+  padding: 5px var(--petri-space-3);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-elevated);
@@ -641,26 +641,26 @@
 .hitList {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--petri-space-2);
 }
 
 .hitRow {
-  padding: 6px 8px;
+  padding: var(--petri-space-2) var(--petri-space-3);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-lg);;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--petri-space-1);
 }
 
 .hitHead {
   display: flex;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--petri-space-3);
 }
 
 .hitDoc {
-  font-size: 10px;
+  font-size: var(--petri-font-size-xs);
   font-weight: 600;
   color: var(--petri-accent);
   overflow: hidden;
@@ -670,7 +670,7 @@
 
 .hitScore {
   flex-shrink: 0;
-  font-size: 10px;
+  font-size: var(--petri-font-size-xs);
   font-family: var(--petri-mono, monospace);
   color: var(--petri-text-tertiary);
 }
@@ -683,8 +683,8 @@
 }
 
 .searchFilter {
-  margin-bottom: 6px;
-  padding: 5px 8px;
+  margin-bottom: var(--petri-space-2);
+  padding: 5px var(--petri-space-3);
   border: 1px solid var(--petri-border);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-elevated);

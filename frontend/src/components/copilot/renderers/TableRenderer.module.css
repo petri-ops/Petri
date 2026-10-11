@@ -65,7 +65,7 @@
   font-size: var(--petri-font-size-sm);
   letter-spacing: 0.02em;
   color: var(--petri-text-secondary);
-  padding: 6px 10px;
+  padding: var(--petri-space-2) 10px;
   border-bottom: 1px solid var(--petri-border);
   /* Wrap long header text but never break words mid-character. */
   white-space: nowrap;
@@ -116,7 +116,7 @@
 
 .fallback {
   margin: 0;
-  padding: 8px 10px;
+  padding: var(--petri-space-3) 10px;
   border: 1px dashed var(--petri-border);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-subtle);
@@ -129,7 +129,7 @@
 }
 
 .fallbackNote {
-  margin: 0 0 6px;
+  margin: 0 0 var(--petri-space-2);
   font-size: var(--petri-font-size-sm);
   color: var(--petri-text-tertiary);
   font-family: var(--petri-font-sans, inherit);
@@ -142,8 +142,8 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 6px;
-  margin: 0 0 6px;
+  gap: var(--petri-space-2);
+  margin: 0 0 var(--petri-space-2);
 }
 
 .downloadButton {

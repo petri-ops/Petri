@@ -73,11 +73,11 @@
    （sc-body 12px + sc-messages 左 18px〔让位 rail〕右 18px 对称）；悬挂面
    rail 已隐藏（slimComposer 条件），内边距收窄让正文占满面板宽度 */
 .surfaceBody :global(.sc-body) {
-  padding: 8px 8px 10px;
+  padding: var(--petri-space-3) var(--petri-space-3) 10px;
 }
 
 .surfaceBody :global(.sc-messages) {
-  padding: 0 4px;
+  padding: 0 var(--petri-space-1);
 }
 
 /* UI-448 加映 v24 — 回复消息去头像直接左对齐（用户指认「消息回复内容沿用的
@@ -132,7 +132,7 @@
 .surfaceHeader {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
   min-height: 52px;
   padding: 10px 13px 9px;
   border-bottom: 1px solid color-mix(in srgb, var(--petri-text) 6%, transparent);
@@ -216,10 +216,10 @@
 }
 
 .dockedColumn :global(.sc-body) {
-  padding: 8px 8px 10px;
+  padding: var(--petri-space-3) var(--petri-space-3) 10px;
 }
 
 .dockedColumn :global(.sc-messages) {
-  padding: 0 4px;
+  padding: 0 var(--petri-space-1);
 }
 

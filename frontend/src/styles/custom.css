@@ -6,13 +6,15 @@
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  /* BLOCK-161 W3-3 — accent 接回 ifm：七档改 accent 派生（切主题色全局链接色跟随；
+     审计 2.4：原硬编码绿系压死 accent，5 个 [data-accent] 档零覆盖） */
+  --ifm-color-primary: var(--petri-accent);
+  --ifm-color-primary-dark: color-mix(in srgb, var(--petri-accent) 85%, #000);
+  --ifm-color-primary-darker: color-mix(in srgb, var(--petri-accent) 75%, #000);
+  --ifm-color-primary-darkest: color-mix(in srgb, var(--petri-accent) 60%, #000);
+  --ifm-color-primary-light: color-mix(in srgb, var(--petri-accent) 85%, #fff);
+  --ifm-color-primary-lighter: color-mix(in srgb, var(--petri-accent) 75%, #fff);
+  --ifm-color-primary-lightest: color-mix(in srgb, var(--petri-accent) 60%, #fff);
   --ifm-code-font-size: 88%;
   --ifm-font-size-base: 15.5px;
   /* FONT-FAMILY-UNIFICATION UI-242 — Infima 元素与全局同一 sans 栈（补 CJK） */
@@ -188,13 +190,7 @@
    曾恒为 infima 中性灰）。双选择器兼顾根挂载与子树挂载两种主题作用域。 */
 html[data-theme='dark'],
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
+  /* W3-3 — dark ifm primary 删显式定义：随 :root accent 派生自动生效 */
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 
   /* Dark mode brand palette overrides */
@@ -290,6 +286,17 @@ html[data-theme='dark'],
   --ifm-color-emphasis-700: var(--petri-text-secondary);
   --ifm-color-emphasis-800: var(--petri-text-secondary);
   --ifm-color-emphasis-900: var(--petri-text);
+
+  /* ===== BLOCK-161 W3-2 — 明暗未配对清零（审计 2.3）：品牌辅助色家族暗色版 ===== */
+  --petri-teal: #14b8a6;
+  --petri-teal-bright: #43d1ae;
+  --petri-teal-button: #4cd49a;
+  --petri-teal-dark: #1a6b52;
+  --petri-cream: #14261f;
+  --petri-frost: #16241f;
+  --petri-gold: #f7c96f;
+  --petri-info: #60a5fa;
+  --petri-status-success: #4ade80;
 }
 
 /* Compact documentation reading density */
@@ -530,13 +537,13 @@ html[data-theme='dark'],
   display: block;
   margin: 0.9rem auto 1.05rem;
   border-radius: var(--petri-radius-md);;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--petri-shadow-menu);
 }
 
 .markdown img:hover {
   opacity: 0.9;
   transition: opacity 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--petri-shadow-menu);
 }
 
 .petri-download {
@@ -769,11 +776,11 @@ html[data-theme='dark'],
   height: 20px !important;
 }
 .petri-comments--compact .wl-reaction {
-  gap: 4px;
+  gap: var(--petri-space-1);
 }
 .petri-comments--compact .wl-reaction-item {
   font-size: var(--petri-font-size-body);
-  padding: 3px 6px;
+  padding: 3px var(--petri-space-2);
 }
 .petri-comments--compact .wl-reaction-item .wl-reaction-img {
   width: 16px;
@@ -791,11 +798,11 @@ html[data-theme='dark'],
 }
 .petri-comments--compact .wl-panel .wl-header input {
   font-size: var(--petri-font-size-sm);
-  padding: 4px 6px;
+  padding: var(--petri-space-1) var(--petri-space-2);
 }
 .petri-comments--compact .wl-btn {
   font-size: var(--petri-font-size-sm);
-  padding: 4px 10px;
+  padding: var(--petri-space-1) 10px;
 }
 .petri-comments--compact .wl-card .wl-meta,
 .petri-comments--compact .wl-card .wl-content {
@@ -928,7 +935,7 @@ html[data-theme='dark'],
 .try-online-card:hover {
   border-color: var(--ifm-color-primary);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.12);
+  box-shadow: var(--petri-shadow-menu);
 }
 
 [data-theme='dark'] .try-online-card {
@@ -999,7 +1006,7 @@ html[data-theme='dark'],
 /* 右侧簇贴右边缘；搜索框作为其中一员自然排在颜色切换/用户菜单左侧。 */
 .navbar__items--right {
   margin-left: auto;
-  gap: 4px;
+  gap: var(--petri-space-1);
 }
 
 /* 搜索框：弹性宽度，窄屏自动收窄，聚焦时略微展开。 */
@@ -1065,7 +1072,7 @@ button.DocSearch-Button .DocSearch-Button-Keys,
   display: inline-block;
   width: 1px;
   height: 18px;
-  margin: 0 6px;
+  margin: 0 var(--petri-space-2);
   vertical-align: middle;
   background: var(--petri-border);
   opacity: 0.6;
@@ -1085,8 +1092,8 @@ button.DocSearch-Button .DocSearch-Button-Keys,
 
 .figcode-card-locked-badge {
   display: inline-block;
-  margin-left: 6px;
-  padding: 1px 6px;
+  margin-left: var(--petri-space-2);
+  padding: 1px var(--petri-space-2);
   font-size: var(--petri-font-size-xs);
   font-weight: 600;
   color: var(--petri-status-warning-fg);

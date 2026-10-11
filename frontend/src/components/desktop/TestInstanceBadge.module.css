@@ -9,7 +9,7 @@
   height: 26px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--petri-space-3);
   padding: 0 10px;
   background: var(--petri-warning-bg);
   border-bottom: 1px solid var(--petri-warning-text);
@@ -22,11 +22,11 @@
 /* UI-413 — 管理模式（已解锁）：实线边框加粗提示当前可操作 */
 .barUnlocked {
   border-bottom-width: 2px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--petri-shadow-menu);
 }
 
 .badge {
-  font-size: 11px;
+  font-size: var(--petri-font-size-sm);
   font-weight: 600;
   letter-spacing: 0.04em;
   color: var(--petri-warning-text);
@@ -38,9 +38,9 @@
   border-radius: var(--petri-radius-pill);;
   background: transparent;
   color: var(--petri-warning-text);
-  font-size: 11px;
+  font-size: var(--petri-font-size-sm);
   font-weight: 600;
-  padding: 1px 8px;
+  padding: 1px var(--petri-space-3);
   cursor: pointer;
 }
 
@@ -51,7 +51,7 @@
 
 .hint {
   margin-left: auto;
-  font-size: 10px;
+  font-size: var(--petri-font-size-xs);
   opacity: 0.75;
   color: var(--petri-warning-text);
 }

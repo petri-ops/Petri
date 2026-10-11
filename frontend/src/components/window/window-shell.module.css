@@ -12,9 +12,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--petri-space-4);
   height: 40px;
-  padding: 0 12px;
+  padding: 0 var(--petri-space-4);
   flex-shrink: 0;
   border-bottom: 1px solid var(--petri-border-color, #323848);
   background: var(--petri-bg-surface);
@@ -25,13 +25,13 @@
 .titleGroup {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--petri-space-3);
   min-width: 0;
 }
 
 .badge {
   flex-shrink: 0;
-  font-size: 11px;
+  font-size: var(--petri-font-size-sm);
   line-height: 1;
   padding: 3px 7px;
   border-radius: var(--petri-radius-pill);;
@@ -40,7 +40,7 @@
 }
 
 .title {
-  font-size: 13px;
+  font-size: var(--petri-font-size-body-sm);
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -48,7 +48,7 @@
 }
 
 .subtitle {
-  font-size: 12px;
+  font-size: var(--petri-font-size-caption);
   color: var(--petri-text-secondary, #9aa3b8);
   white-space: nowrap;
   overflow: hidden;
@@ -58,19 +58,19 @@
 .actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--petri-space-2);
   -webkit-app-region: no-drag;
 }
 
 .actionError {
-  font-size: 11px;
+  font-size: var(--petri-font-size-sm);
   color: var(--petri-danger, #ff7a7a);
 }
 
 .actionBtn {
   height: 26px;
   padding: 0 10px;
-  font-size: 12px;
+  font-size: var(--petri-font-size-caption);
   border: 1px solid var(--petri-border-color, #323848);
   border-radius: var(--petri-radius-md);;
   background: transparent;
@@ -85,13 +85,13 @@
 .demoteBtn {
   width: 26px;
   padding: 0;
-  font-size: 16px;
+  font-size: var(--petri-font-size-md);
   line-height: 1;
 }
 
 .degradedNote {
-  padding: 6px 12px;
-  font-size: 12px;
+  padding: var(--petri-space-2) var(--petri-space-4);
+  font-size: var(--petri-font-size-caption);
   color: var(--petri-text-secondary, #9aa3b8);
   background: var(--petri-bg-subtle);
   border-bottom: 1px solid var(--petri-border-color, #323848);
@@ -105,16 +105,16 @@
 
 /* ── 结果窗只读聚焦视图 ─────────────────────────────── */
 .resultBody {
-  padding: 16px;
+  padding: var(--petri-space-5);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--petri-space-4);
 }
 
 .statusChip {
   align-self: flex-start;
-  font-size: 12px;
-  padding: 4px 10px;
+  font-size: var(--petri-font-size-caption);
+  padding: var(--petri-space-1) 10px;
   border-radius: var(--petri-radius-pill);;
   background: var(--petri-bg-subtle);
   color: var(--petri-text-secondary, #9aa3b8);
@@ -130,11 +130,11 @@
 }
 
 .errorBlock {
-  padding: 10px 12px;
+  padding: 10px var(--petri-space-4);
   border-radius: var(--petri-radius-lg);;
   border: 1px solid var(--petri-danger, #ff7a7a);
   color: var(--petri-danger, #ff7a7a);
-  font-size: 13px;
+  font-size: var(--petri-font-size-body-sm);
   white-space: pre-wrap;
 }
 
@@ -162,13 +162,13 @@
 .previewTable {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: var(--petri-font-size-caption);
 }
 
 .previewTable th,
 .previewTable td {
   border: 1px solid var(--petri-border-color, #323848);
-  padding: 4px 8px;
+  padding: var(--petri-space-1) var(--petri-space-3);
   text-align: left;
   white-space: nowrap;
 }
@@ -181,10 +181,10 @@
 
 .textPreview {
   margin: 0;
-  padding: 12px;
+  padding: var(--petri-space-4);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
-  font-size: 12px;
+  font-size: var(--petri-font-size-caption);
   font-family: var(--petri-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
   white-space: pre-wrap;
   word-break: break-word;
@@ -193,10 +193,10 @@
 }
 
 .placeholder {
-  padding: 24px;
+  padding: var(--petri-space-6);
   text-align: center;
   color: var(--petri-text-secondary, #9aa3b8);
-  font-size: 13px;
+  font-size: var(--petri-font-size-body-sm);
 }
 
 .placeholder a {
