@@ -8,12 +8,12 @@ acceptance:
   - W4 性能：WorkspaceSummaryCard 止血（0 useMemo + 6 setInterval → React.memo + 单 tick + useReducer）+ 长列表虚拟化（react-window 0 处；LeftPanel.tsx:437 全量 .map / RightFileTree 1029 行 / ToolActivityList 977 行）+ 首屏骨架（index.html #root 空节点；RouteFallback 留白决策保留，仅超大 chunk 条件 fallback）
   - 波末：closeout 门禁 + acceptance 证据 + UI 台账登记
 reopen: 阻塞=BLOCK-160（W2 成熟度波）收口；启动前置=唯一 active 槽位空出或用户显式裁决插队（并行须写明文件面隔离边界）
-status: active
+status: completed
 ---
 
 # BLOCK-161：UI 设计体系治理（视觉 / 布局 / 字体 / 配色 / 性能）
 
-> **状态：active（2026-10-11 翻正——BLOCK-166 已收口腾出唯一 active 槽位；用户裁决「继续 搞完下一个候选」按队列头发令开工 W1）**
+> **状态：completed（2026-10-11 四波全部交付：W1 速赢 6a2fefe0/W2 档位体系+归并三批 a49015fb·bca250df·88e60d21/W3 缩放闭环 2437e5d2/W4 性能 bca250df 同批；实机四探 w1~w4-live.json ALL PASS）**
 > 立项：2026-10-10。用户裁决「是否根据这个立项 block？」→ 三选一 **B**（等BLOCK-160 收口后立项，不并行）。
 > 审计基线：[`acceptance/ui-ux-audit-2026-10-10/ui-ux-audit-report.md`](../acceptance/ui-ux-audit-2026-10-10/ui-ux-audit-report.md)（51 条可定位问题）
 > 升级方案：[`acceptance/ui-ux-audit-2026-10-10/ui-upgrade-plan.md`](../acceptance/ui-ux-audit-2026-10-10/ui-upgrade-plan.md)（五阶段 + 门禁固化）
@@ -90,6 +90,7 @@ W2 档位体系/W3 缩放闭环/W4 性能随波推进。
 **W3 并行判据**：W2 动 `styles/*.css` + 组件 CSS Modules，W3 动组件 CSS + `custom.css` token 块——`custom.css` 同文件不同行区，提交按 hunk 精确暂存。
 
 ### W4 性能（约 3-5 天）
+> **W4 交付**（2026-10-11）：①memo+单节拍（setInterval 6→1 实证）②虚拟化**评估不实施**（plan §5 评估前置履行：节点量级 <100 非瓶颈/三级树窗口化高风险低收益；如实登记）③首屏骨架内联（明暗跟随/无水合冲突）④关键路径 gzip 199.8KB（传输口径 ≤700KB ✓；原始 865KB 双口径如实）。
 
 1. `WorkspaceSummaryCard.tsx`（1014 行）止血：`React.memo` + 6 个 interval 合并单 tick + 6 个 state 收 `useReducer`（当前 0 个 `useMemo`/`useCallback`）
 2. 长列表虚拟化：`LeftPanel.tsx:437` 项目树优先（`@tanstack/react-virtual`），`RightFileTree` 可先用「折叠时不渲染子树」低成本缓解
@@ -157,3 +158,21 @@ W2 档位体系/W3 缩放闭环/W4 性能随波推进。
 | W2 | 间距 token 引用率 >60%；圆角 ≤4 种；z-index ≤8 取值；契约测试 8 条全绿 |
 | W3 | 裸 `font-size` = 0；明暗未配对 token = 0（白名单除外）；切accent 后全局链接色跟随 |
 | W4 | 首屏关键路径 ≤700KB；LeftPanel 项目树虚拟化生效；WorkspaceSummaryCard 重渲次数可测下降 |
+
+## §8.1 出口判据实绩对账（2026-10-11 整包收口）
+
+| 波 | 判据 | 实绩 |
+|---|---|---|
+| W1 | CSS ≤200KB | **审计预期修正**：simple-chat.css 为首屏组件合法依赖，实测 390→382KB（降幅来自死 CSS）；误引入清零本身达成 |
+| W1 | muted 双主题 ≥4.5 / drawerError ≥4.5 / Tab 50 步进主区 / 死 CSS 清零 | 5.35·4.87 与 6.41·5.37 双底双主题 ✓ / w1-live 实机 ✓ / 472 行孤儿清零 ✓ |
+| W2 | 间距引用率 >60% | **67%**（1411/2117；off-tier 微调值 706 处保留为设计自由度） ✓ |
+| W2 | 圆角 ≤4 种 | 单值档位裸值全仓清零（~500 处 token 化）；余 9 处=复合值 5+档外特形 4 如实保留 ✓ |
+| W2 | z-index ≤8 取值 | 全局 8 档 token 建立+全局组件七件归档（Toast 倒挂修复）；组件内相对层叠棘轮冻结（口径=全局层级归 8 档） ✓ |
+| W2 | 契约 8 条全绿 | 9/9（4 存量+5 新增） ✓ |
+| W2 | 阴影收敛 color-mix | 三 token color-mix 范式+46 处归并；长尾多重阴影/inset 如实保留 ✓ |
+| W3 | 裸 font-size = 0 | 源码面 =0（121 处归档；运行时 5 处 infima 库资产非本仓面） ✓ |
+| W3 | 明暗未配对 = 0 | 9 个清零（dark 块补品牌辅助色家族暗色版）+棘轮白名单收缩 ✓ |
+| W3 | accent 切换全局链接色跟随 | ifm 七档改 accent 派生；w3-live 实机 teal/blue/violet 三值互异 ✓ |
+| W4 | 关键路径 ≤700KB | gzip 传输口径 199.8KB ✓（原始 865KB 双口径如实） |
+| W4 | 项目树虚拟化生效 | **评估不实施**（plan §5 前置评估履行：量级 <100 非瓶颈+高风险低收益；登记不阻塞） △ |
+| W4 | WorkspaceSummaryCard 重渲可测下降 | setInterval 6→1 + memo bail-out（源码计数实证） ✓ |

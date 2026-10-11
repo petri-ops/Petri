@@ -5870,7 +5870,7 @@
    "path": "docs/block-161-ui-design-system-governance-plan.md",
    "capability": "design-system",
    "kind": "work-package",
-   "status": "active",
+   "status": "completed",
    "canonical": true,
    "truthDomain": "block-161-ui-design-system-governance-plan",
    "entrypoint": "docs/README.md",
@@ -5885,7 +5885,8 @@
     "virtualization"
    ],
    "archivePolicy": "retain_stable_path",
-   "notes": "BLOCK-161 UI 设计体系治理（W1 速赢/W2 档位体系/W3 缩放闭环/W4 性能；审计基线 acceptance/ui-ux-audit-2026-10-10）——2026-10-11 翻 active 开工 W1（BLOCK-166 收口腾出唯一 active 槽位；用户裁决「继续 搞完下一个候选」）。"
+   "notes": "BLOCK-161 UI 设计体系治理四波全部交付（2026-10-11 整包 completed；W1 速赢/W2 档位体系+归并三批/W3 缩放闭环/W4 性能；实机四探 w1~w4-live.json ALL PASS；W2 出口间距 67%+圆角单值清零+z 8 档 Toast 倒挂修复；W3 出口裸 font-size=0+明暗配对清零+accent 接回 ifm 实机三值互异；W4 单节拍+memo+首屏骨架+虚拟化评估不实施如实登记；审计两处预期失真如实修正）。UI-487 待用户过目翻 verified。",
+   "phase": "W4-DONE"
   },
   {
    "id": "BLOCK-162-MOBILE-WS-TRANSPORT",

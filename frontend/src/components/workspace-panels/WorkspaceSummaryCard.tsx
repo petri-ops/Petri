@@ -66,7 +66,7 @@ export interface WorkspaceSummaryCardProps {
  * 档渲染（compact 三档降级，见 plan §6）。执行侧标注按 project.workspaceKind
  * 路由（ssh → 远程@host，local 带 execution_target_id → 远程执行，否则本机）。
  */
-export function WorkspaceSummaryCard({
+export const WorkspaceSummaryCard = React.memo(function WorkspaceSummaryCard({
   open,
   visibility,
   width,
@@ -90,13 +90,14 @@ export function WorkspaceSummaryCard({
 }: WorkspaceSummaryCardProps): React.ReactElement | null {
   const { snapshot: resources, error: resourceError } = useRuntimeResourceSnapshot(project?.id ?? null);
   const cardVisible = open && visibility !== 'hidden';
-  const agentRows = useProjectAgentOverview(project?.id ?? null, cardVisible);
-  const terminalSessions = useTerminalSessions(cardVisible);
-  const attention = useConversationAttention(activeConversation?.id ?? null, project?.id ?? null, cardVisible);
-  const projectUsage = useProjectUsage(project?.id ?? null, cardVisible);
-  const projectStorage = useProjectStorage(project?.id ?? null, cardVisible);
+  const pollTick = useSummaryHeartbeat(cardVisible); // BLOCK-161 W4-1：六路轮询共享单节拍
+  const agentRows = useProjectAgentOverview(project?.id ?? null, cardVisible, pollTick);
+  const terminalSessions = useTerminalSessions(cardVisible, pollTick);
+  const attention = useConversationAttention(activeConversation?.id ?? null, project?.id ?? null, cardVisible, pollTick);
+  const projectUsage = useProjectUsage(project?.id ?? null, cardVisible, pollTick);
+  const projectStorage = useProjectStorage(project?.id ?? null, cardVisible, pollTick);
   const [noticeRefreshKey, setNoticeRefreshKey] = useState(0);
-  const noticeUnread = useProjectNoticeUnread(project?.id ?? null, cardVisible, noticeRefreshKey);
+  const noticeUnread = useProjectNoticeUnread(project?.id ?? null, cardVisible, noticeRefreshKey, pollTick);
   if (visibility === 'hidden') return null;
 
   // HLE-C4R: derive an honest loop display. Completion/blocked come only from
@@ -671,7 +672,7 @@ export function WorkspaceSummaryCard({
       </div>
     </aside>
   );
-}
+}); // BLOCK-161 W4-1：React.memo——父级重渲（流式 tick 等）时 props 不变即整卡 bail-out
 
 function openAgentWindow(task: AgentTaskOverviewItem): void {
   // UI-385 — 子智能体详情改由右栏「智能体」tab 承载（独立窗退役）
@@ -682,9 +683,23 @@ function openAgentWindow(task: AgentTaskOverviewItem): void {
   }
 }
 
+/** BLOCK-161 W4-1 止血：六路轮询共享单节拍——原 6 个独立 setInterval
+ * （5s×4/30s×2/60s×1）各驱动各自 setState，每拍全卡重渲 ×6。现单 interval
+ * 驱动 tick 计数，各 hook 按自身周期取模（30s=每 6 拍/60s=每 12 拍），
+ * 行为等价（首次立即 load 不变）而定时器 6→1。 */
+function useSummaryHeartbeat(enabled: boolean, tickMs = 5000): number {
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    if (!enabled) return undefined;
+    const timer = window.setInterval(() => setTick((t) => t + 1), tickMs);
+    return () => window.clearInterval(timer);
+  }, [enabled, tickMs]);
+  return tick;
+}
+
 /** BLOCK-78 P1⑤：项目内子 agent 俯瞰（复用 listAgentTasks + projectId 过滤，
  *  同 BLOCK-65 语义；无内容返回空数组 → 卡片整节不渲染）。 */
-function useProjectAgentOverview(projectId: string | null, enabled: boolean): AgentTaskOverviewItem[] {
+function useProjectAgentOverview(projectId: string | null, enabled: boolean, tick: number): AgentTaskOverviewItem[] {
   const [rows, setRows] = useState<AgentTaskOverviewItem[]>([]);
   useEffect(() => {
     if (!enabled || !projectId) return;
@@ -703,12 +718,10 @@ function useProjectAgentOverview(projectId: string | null, enabled: boolean): Ag
         });
     };
     load();
-    const timer = window.setInterval(load, 5000);
     return () => {
       alive = false;
-      window.clearInterval(timer);
     };
-  }, [enabled, projectId]);
+  }, [enabled, projectId, tick]); // BLOCK-161 W4-1：节拍驱动（5s 档每拍）
   return rows;
 }
 
@@ -723,7 +736,7 @@ interface ProjectUsageSummary {
   costStatus: 'partial' | 'estimated';
 }
 
-function useProjectUsage(projectId: string | null, enabled: boolean): ProjectUsageSummary | null {
+function useProjectUsage(projectId: string | null, enabled: boolean, tick: number): ProjectUsageSummary | null {
   const [usage, setUsage] = useState<ProjectUsageSummary | null>(null);
   useEffect(() => {
     if (!enabled || !projectId) return;
@@ -743,12 +756,10 @@ function useProjectUsage(projectId: string | null, enabled: boolean): ProjectUsa
       }
     };
     void load();
-    const timer = window.setInterval(() => void load(), 30000);
     return () => {
       alive = false;
-      window.clearInterval(timer);
     };
-  }, [enabled, projectId]);
+  }, [enabled, projectId, tick]); // BLOCK-161 W4-1：节拍驱动（30s 档每 6 拍）
   return usage;
 }
 
@@ -761,7 +772,7 @@ interface ProjectStorageSummary {
   stale?: boolean;
 }
 
-function useProjectStorage(projectId: string | null, enabled: boolean): ProjectStorageSummary | null {
+function useProjectStorage(projectId: string | null, enabled: boolean, tick: number): ProjectStorageSummary | null {
   const [storage, setStorage] = useState<ProjectStorageSummary | null>(null);
   useEffect(() => {
     if (!enabled || !projectId) return;
@@ -781,19 +792,17 @@ function useProjectStorage(projectId: string | null, enabled: boolean): ProjectS
       }
     };
     void load();
-    const timer = window.setInterval(() => void load(), 60000);
     return () => {
       alive = false;
-      window.clearInterval(timer);
     };
-  }, [enabled, projectId]);
+  }, [enabled, projectId, tick]); // BLOCK-161 W4-1：节拍驱动（60s 档每 12 拍）
   return storage;
 }
 
 /** BLOCK-78 P2-⑤：跨会话持久通知未读数（失败终态等事件的项目作用域留痕；
  *  重启/切项目后仍可读——这是它与投影型注意信号的本质区别）。30s 慢轮询 +
  *  标记已读后立刷。 */
-function useProjectNoticeUnread(projectId: string | null, enabled: boolean, refreshKey: number): number {
+function useProjectNoticeUnread(projectId: string | null, enabled: boolean, refreshKey: number, tick: number): number {
   const [unread, setUnread] = useState(0);
   useEffect(() => {
     if (!enabled || !projectId) return;
@@ -812,12 +821,10 @@ function useProjectNoticeUnread(projectId: string | null, enabled: boolean, refr
       }
     };
     void load();
-    const timer = window.setInterval(() => void load(), 30000);
     return () => {
       alive = false;
-      window.clearInterval(timer);
     };
-  }, [enabled, projectId, refreshKey]);
+  }, [enabled, projectId, refreshKey, tick]); // BLOCK-161 W4-1：节拍驱动（30s 档每 6 拍；refreshKey 立刷保留）
   return unread;
 }
 
@@ -841,7 +848,8 @@ async function markNoticesSeen(projectId: string | null): Promise<void> {
 function useConversationAttention(
   conversationId: string | null,
   projectId: string | null,
-  enabled: boolean
+  enabled: boolean,
+  tick: number
 ): { pendingPlans: number; abnormalProcesses: number } {
   const [attention, setAttention] = useState({ pendingPlans: 0, abnormalProcesses: 0 });
   useEffect(() => {
@@ -864,18 +872,17 @@ function useConversationAttention(
       });
     };
     void load();
-    const timer = window.setInterval(load, 5000);
     return () => {
       alive = false;
-      window.clearInterval(timer);
     };
-  }, [enabled, conversationId, projectId]);
+  }, [enabled, conversationId, projectId, tick]); // BLOCK-161 W4-1：节拍驱动（5s 档每拍）
   return attention;
 }
 
 /** BLOCK-78 P1⑥：终端投影——读既有 terminal:listSessions IPC（BLOCK-54），
  *  只读计数；无会话返回空 → 不渲染。零状态上提。 */function useTerminalSessions(
-  enabled: boolean
+  enabled: boolean,
+  tick: number
 ): Array<{ sessionId: string; pid: number; cwd: string; running: boolean }> {
   const [sessions, setSessions] = useState<Array<{ sessionId: string; pid: number; cwd: string; running: boolean }>>([]);
   useEffect(() => {
@@ -897,12 +904,10 @@ function useConversationAttention(
       }
     };
     load();
-    const timer = window.setInterval(load, 5000);
     return () => {
       alive = false;
-      window.clearInterval(timer);
     };
-  }, [enabled]);
+  }, [enabled, tick]); // BLOCK-161 W4-1：节拍驱动（5s 档每拍）
   return sessions;
 }
 

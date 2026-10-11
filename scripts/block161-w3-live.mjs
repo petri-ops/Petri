@@ -19,7 +19,6 @@ const {
   pollTargets, filterPageTargets, selectPageTarget, evalJs, screenshotPng, connectTarget,
 } = await import(pathToFileURL(libPath).href).then((m) => m.default ?? m);
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // 源码真值（契约同口径）：全部 css 源文件裸 font-size 计数
 function countSourceBare() {

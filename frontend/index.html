@@ -6,7 +6,83 @@
     <title>Petri</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- BLOCK-161 W4-3 — 首屏骨架：JS 下载/解析期间的结构占位（消纯白屏）。
+           React 挂载时整节点被 replaceChildren 覆盖，无水合冲突。骨架形态对齐
+           工作台首屏（左栏窄条 + 主区居中标题/输入卡），纯 CSS 无 JS、跟随
+           prefers-color-scheme 明暗。 -->
+      <style>
+        #petri-skeleton {
+          position: fixed;
+          inset: 0;
+          display: flex;
+          background: #ffffff;
+          font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        }
+        @media (prefers-color-scheme: dark) {
+          #petri-skeleton { background: #0b1220; }
+        }
+        #petri-skeleton .sk-rail {
+          width: 232px;
+          border-right: 1px solid #e4e4e7;
+          padding: 16px 12px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        @media (prefers-color-scheme: dark) {
+          #petri-skeleton .sk-rail { border-right-color: #243149; }
+        }
+        #petri-skeleton .sk-main {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 14px;
+        }
+        #petri-skeleton .sk-shimmer {
+          height: 12px;
+          border-radius: 6px;
+          background: #f4f4f5;
+          animation: sk-pulse 1.4s ease-in-out infinite;
+        }
+        @media (prefers-color-scheme: dark) {
+          #petri-skeleton .sk-shimmer { background: #182339; }
+        }
+        @keyframes sk-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+        #petri-skeleton .sk-title { width: 220px; height: 22px; }
+        #petri-skeleton .sk-card {
+          width: min(560px, 80%);
+          height: 88px;
+          border: 1px solid #e4e4e7;
+          border-radius: 10px;
+          padding: 14px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        @media (prefers-color-scheme: dark) {
+          #petri-skeleton .sk-card { border-color: #243149; }
+        }
+      </style>
+      <div id="petri-skeleton" aria-hidden="true">
+        <div class="sk-rail">
+          <div class="sk-shimmer" style="width: 60%"></div>
+          <div class="sk-shimmer" style="width: 85%"></div>
+          <div class="sk-shimmer" style="width: 75%"></div>
+          <div class="sk-shimmer" style="width: 80%"></div>
+          <div class="sk-shimmer" style="width: 55%"></div>
+        </div>
+        <div class="sk-main">
+          <div class="sk-shimmer sk-title"></div>
+          <div class="sk-card">
+            <div class="sk-shimmer" style="width: 90%"></div>
+            <div class="sk-shimmer" style="width: 60%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- 依赖升级批连带适配（BLOCK-108 实机抓真）：vite 8.3.0 的 @vite/client 含
          `const forwardConsole = __SERVER_FORWARD_CONSOLE__` 占位符，本仓库 dev 形态下
          该占位符未被服务端替换、原样到达浏览器 → ReferenceError → React 不挂载

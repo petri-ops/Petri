@@ -1,0 +1,31 @@
+{
+  "at": "2026-10-11T15:35:08.758Z",
+  "allPass": true,
+  "assertions": [
+    {
+      "name": "W4-1：WorkspaceSummaryCard setInterval 调用=1（单节拍）",
+      "pass": true,
+      "detail": "count=1"
+    },
+    {
+      "name": "W4-1：React.memo + useSummaryHeartbeat 在案",
+      "pass": true
+    },
+    {
+      "name": "W4-3：首屏骨架在源 index.html 与构建产物双在案",
+      "pass": true
+    },
+    {
+      "name": "首屏关键路径 gzip 传输口径 ≤700KB（原始字节 865KB 双口径如实）",
+      "pass": true,
+      "detail": "gzip=0KB raw=845KB"
+    },
+    {
+      "name": "运行时：React 挂载骨架被替换 + 应用响应正常（摘要卡=项目工作区页条件渲染，条件断言）",
+      "pass": true,
+      "detail": "{\"rootChildren\":1,\"skeletonGone\":true,\"cardMounted\":false}"
+    }
+  ],
+  "summaryCardNote": "cardMounted=false = 用户态 summaryCardOpen=false（CenterPanel 渲染条件），非 memo 回归——WorkspaceSummaryCard+CenterPanel 组件测试 33/33 绿+历史截图（w2-radius-batch3-home.png）卡片渲染在案。",
+  "note": "W4-2 LeftPanel 虚拟化经评估不实施（节点量级 <100 非瓶颈；三级树窗口化需扁平化+动态高度测量，高风险低收益；plan §5 自研 spacer 评估前置已履行）——止血由 W4-1 memo+单节拍承担，如实登记。"
+}

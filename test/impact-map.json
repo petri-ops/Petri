@@ -3325,10 +3325,17 @@
         "acceptance/ui-ux-audit-2026-10-10/**",
         "scripts/block161-w2-live.mjs",
         "scripts/block161-shot.mjs",
-        "scripts/block161-w3-live.mjs"
+        "scripts/block161-w3-live.mjs",
+        "scripts/block161-w4-live.mjs",
+        "frontend/index.html",
+        "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
+        "frontend/src/components/workspace-panels/WorkspaceSummaryCard.test.tsx",
+        "frontend/src/components/workspace-panels/CenterPanel.test.tsx"
       ],
       "tests": [
-        "frontend/src/styles/theme-token-contract.test.ts"
+        "frontend/src/styles/theme-token-contract.test.ts",
+        "frontend/src/components/workspace-panels/WorkspaceSummaryCard.test.tsx",
+        "frontend/src/components/workspace-panels/CenterPanel.test.tsx"
       ],
       "commands": [
         "docs-check"
