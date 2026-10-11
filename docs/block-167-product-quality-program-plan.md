@@ -1,0 +1,70 @@
+# BLOCK-167 — 产品质感提升计划（Product Quality Program）
+
+```yaml
+capability: ui-design-quality
+goal: 四个核心页第一观感脱离「管理后台」档位；设计默认值制度化并被门禁守护
+acceptance: W0-W4 五波出口断言全过 + §3 量化对账表终态承诺达成 + closeout 十一门绿
+reopen: 任一波量化承诺未达成即本波返工；新增设计档位/预算调整需用户裁决或新证据批
+status: active
+```
+
+## 0. 来源与裁决
+
+- 用户三轮评估递进（截图量化 → ZCode asar/Codex 源码对照 → 全方位辨析），结论过 output:judge（fit=3.78 / 3.85 两次 PASS）。
+- **用户裁决（2026-10-12）**：「按波次逐个推进完成」= 整包授权、波内零停顿（BLOCK-157/160 先例）：立项检查单照走、不再逐包等发令，D 决策点按 §5 预裁决缺省执行、波报集中复认。
+- 基线实测证据：本会话三轮评估数据（字号分布/色彩比/边框/按钮套数/动效），ZCode app.asar 解包对照、Codex style.rs 源码对照。
+
+## 1. 范围
+
+五波串行（单工作包纪律）：
+
+| 波 | 内容 | 出口断言（可机械/实机验证） |
+| --- | --- | --- |
+| W0 设计宪章 | 一页纸规范（字号 6 档/色彩预算/border 三语义/motion 档）+ theme-token-contract 门禁新增断言 | 新断言红→绿留痕；宪章落档 docs/design-charter.md |
+| W1 静态重校 | 字号体系重校（14px 基准/9→6 档）+ accent 预算收敛 + border 语义三分；按 聊天工作区→项目/扩展→设置/知识库 三域推进 | 每域前后同屏对比截图（acceptance/block-167/）+ §3 表 W1 列达成 |
+| W2 控件收敛 | Button/Input/Select/Chip/Empty 五件套单源变体；36 处分散按钮类逐域替换 | 按钮类定义套数 36→≤4（1 主+特例 ≤3 登记）；grep 守卫上线（新增 .xxxBtn 类定义即红） |
+| W3 动效+渲染细节 | motion token（duration 150/200/300 + ease 2 档）+ ::selection/滚动条/focus ring token 化 | 高频交互元素三态 transition 抽样断言；::selection 全局 1 处 |
+| W4 状态与文案 | 空/载/错三件套统一 + 语气 pass | 三件套核心页覆盖清点 100% |
+
+## 2. 非范围（exclusions）
+
+- 信息密度不降（科研工作台特性：变呈现不变信息量）
+- 不换色相、不换字体栈、不动信息架构、不重排路由
+- 感知性能（BLOCK-126/159/162 已有专项）不混入
+- G1+ 事项（packaged/Provider/GA）按阶段纪律不外推
+
+## 3. 量化对账表（基线 → W1 后 → 终态承诺）
+
+| 指标 | 基线 | W1 后 | 终态 | 测量方式 |
+| --- | --- | --- | --- | --- |
+| 14px 基准占比 | 3% | ≥40% | ≥50% | font-size 声明分布 |
+| 10/11px 使用 | 328 处 | ≤80 | ≤30（仅徽标） | 同上+豁免登记 |
+| 字号档位 | 11 | 8 | 6 | token 清点 |
+| 中性:强调 | 2.3:1 | ≥6:1 | ≥10:1 | var 引用计数 |
+| accent 引用 | 330 | ≤180 | ≤120 | 同上 |
+| 无语义 1px 细线 | 374 | ≤200 | 0（三语义全覆盖） | border 分类 |
+| 按钮实现套数 | 36 | — | ≤4 | 类清点+grep 守卫 |
+| 动效 token | 0 | — | duration×3+ease×2 | token 清点 |
+| ::selection | 0 | — | 1（全局） | 声明确认 |
+| 空/载/错三件套 | 2 ad-hoc | — | 核心页 100% | 组件清点 |
+
+## 4. 依赖与证据
+
+- 依赖：BLOCK-161 token 体系（地基，本包是「用法治理」增量，不推翻）
+- 证据目录：`acceptance/block-167/`（每波前后截图/量化复测 JSON/断言输出）
+- 测试面：`frontend/src/styles/theme-token-contract.test.ts` 扩展 + 触碰域定向测试 + tsc 0 + lint 触碰面 0
+
+## 5. D 决策点（预裁决缺省，波报集中复认）
+
+- **D1 字号 6 档终态**：2xl28 / xl20 / lg16 / body14 / sm12 / xs11（仅徽标）。caption(12)→sm(12)、body-sm(13)→body(14)、md(16)→lg(16)、3xl(28)→2xl(28)、xs(10)→非徽标归 sm、徽标留 xs(11)。
+- **D2 14px 占比达成路径**：caption/sm 中「正文性说明」改为 inherit（继承 body 14），仅真元信息保留 12px——按域逐个判定，不做全仓机械替换。
+- **D3 accent 收敛手法**：图标/次级动作/装饰默认中性色（--petri-text-secondary），accent 保留：主按钮/激活态/链接/焦点环/状态语义。
+- **D4 border 三语义**：`--petri-border-input`（输入类）/ `--petri-border-card`（容器卡）/ `--petri-divider`（分隔线，可用 alpha 混合）；其余 1px 描边退役。
+- **D5 控件单源位置**：`frontend/src/components/ui/controls/`（对齐既有 ui/ 惯例）；旧类先桥接后删除。
+- **D6 motion 档**：fast150（hover/press）/ base200（展开/切换）/ slow300（浮层）；ease=standard+emphasized 两档。
+
+## 6. 完成语义
+
+- 每波收口：出口断言+量化列达成+定向门禁绿+同提交 ui-productization-audit UI-### 登记+波报（含决策复认与 jev 账）
+- 整包收口：§3 终态列逐项对账 + `npm run closeout` 绿 + output:judge + canonical 回写（roadmap/handoff/backlog/AUDIT-LOG/DOC-REGISTRY status=completed）
+- 未达承诺值的波=未完成；如实报告差距，不带病翻 status

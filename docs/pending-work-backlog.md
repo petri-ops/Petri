@@ -5,6 +5,7 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
+最后更新：2026-10-12（**BLOCK-167 产品质感提升计划立项发令 active（用户裁决「按波次逐个推进完成」；plan=docs/block-167-product-quality-program-plan.md）**：唯一 active 槽位被本包占用——W0 宪章门禁→W1 静态重校→W2 控件收敛→W3 动效细节→W4 状态文案五波串行；量化对账表（14px 占比≥50%/accent 10:1/细线 0/按钮 1 套）为终态承诺；BLOCK-166 加映（OOPIF）planned 排队在后。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-10（**G0 五层成熟度蓝图当日达成宣告（蓝图对账 §7.1）**：W1/W2/W3 三波全部收口（BLOCK-157/160/163），25 种子全 completed，五层画像逐项覆盖（§7.1 对照表）；残余差距=G1+ 画线项已出籍；蓝图留 reference 态作方向 canonical；**成熟度蓝图系列=蓝图达成态，后续种子迭代需 G1+ 或用户新裁决另立**。）
 
 此前 最后更新：2026-10-10（**BLOCK-160 W2 波当日整波收口 completed（用户发令「开冲到W2波末」，plan=docs/block-160-maturity-wave2-plan.md §7）**：ORC-2 动态审批两维/ORC-1 用户规则层/KNW-3 斜杠命令双来源/CAP-2 env 密文化/KNW-4⇄DIST-2 共轨五种子全交付；**波末五出口断言 ALL PASS**（真实模型 dynamic_guard 拦截/用户规则拦截/斜杠菜单 7 徽标 CDP 实开/env 落盘零明文往返/SKILL.md 管线 5/5，acceptance/block-160/wave2-live.json）；残红归属=BLOCK-159 已提交面（lint agentTaskStream 系）+BLOCK-161/162 在制（test:changed 阻塞）+P1.4 main 预红，均非本批；riders=确认 UI 弹卡/KNW-3 chip v2 候选；蓝图六种子翻 completed；**队列头交棒 W3 首件 ORC-3**。）
