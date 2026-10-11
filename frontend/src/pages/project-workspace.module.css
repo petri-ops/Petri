@@ -71,7 +71,7 @@
   align-items: center;
   justify-content: center;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: transparent;
   color: var(--petri-text-secondary);
   cursor: pointer;
@@ -131,7 +131,7 @@
 .modalityBadge {
   font-size: var(--petri-font-size-sm);
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   background: var(--petri-accent-bg);
   color: var(--petri-accent);
   text-transform: uppercase;
@@ -148,7 +148,7 @@
   background: transparent;
   color: var(--petri-text-secondary);
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   transition: background 0.15s, color 0.15s;
   /* UI-215 补充：纯图标按钮收敛 UA 默认字号到 token */
   font-size: var(--petri-font-size-caption);
@@ -169,7 +169,7 @@
   margin: 0 16px;
   padding: 4px 8px;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg);
   color: var(--petri-text-secondary);
   overflow: hidden;
@@ -278,7 +278,7 @@
   align-items: center;
   height: 20px;
   padding: 0 8px;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: var(--petri-accent-bg);
   color: var(--petri-accent);
   font-size: var(--petri-font-size-sm);
@@ -319,7 +319,7 @@
   min-height: 28px;
   padding: 0 10px;
   border: 1px solid var(--petri-border);
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: var(--petri-surface-translucent);
   color: var(--petri-text-muted);
   font-size: var(--petri-font-size-caption);
@@ -357,7 +357,7 @@
   width: 8px;
   height: 8px;
   flex-shrink: 0;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: var(--petri-text-tertiary);
 }
 
@@ -401,7 +401,7 @@
   background: transparent;
   color: var(--petri-text-secondary);
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   transition: background 0.15s, color 0.15s;
 }
 
@@ -423,7 +423,7 @@
   width: 280px;
   background: var(--petri-bg-elevated);
   border: 1px solid var(--petri-border);
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   box-shadow: var(--petri-shadow-menu);
   z-index: 999;
   overflow: hidden;
@@ -469,7 +469,7 @@
   border: none;
   background: transparent;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   text-align: left;
   transition: background 0.12s;
 }
@@ -499,7 +499,7 @@
 .switcherItemBadge {
   font-size: var(--petri-font-size-xs);
   padding: 1px 6px;
-  border-radius: 3px;
+  border-radius: var(--petri-radius-sm);;
   background: var(--petri-accent-bg);
   color: var(--petri-accent);
   text-transform: uppercase;
@@ -572,7 +572,7 @@
 .runtimeMissingBannerBtn {
   flex: none;
   padding: 6px 14px;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   border: 1px solid color-mix(in srgb, var(--petri-status-loading) 50%, transparent);
   background: color-mix(in srgb, var(--petri-status-loading) 18%, transparent);
   color: var(--petri-text);
@@ -637,7 +637,7 @@
   margin: 0 0 10px;
   padding: 0 10px;
   border: 1px solid color-mix(in srgb, var(--petri-border) 76%, transparent 24%);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
   overflow: hidden;
@@ -794,7 +794,7 @@
   width: 20px;
   height: 20px;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-secondary);
   cursor: pointer;
@@ -829,7 +829,7 @@
   width: 100%;
   height: 30px;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   padding: 0 10px;
   background: transparent;
   color: var(--petri-text-secondary);
@@ -926,7 +926,7 @@
   font-family: var(--petri-font-mono);
   padding: 5px 8px;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-canvas);
   color: var(--petri-text);
 }
@@ -1034,7 +1034,7 @@
   border: none;
   background: transparent;
   color: var(--petri-text-tertiary);
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.15s, background 0.15s;
@@ -1056,7 +1056,7 @@
 .projectTreeAddBtn:focus-visible {
   outline: 2px solid var(--petri-accent);
   outline-offset: 1px;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
 }
 
 .convList {
@@ -1098,7 +1098,7 @@
   height: 8px;
   margin: 0 2px;
   flex: 0 0 auto;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: var(--petri-accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--petri-accent) 14%, transparent);
   animation: conv-running-pulse 1.6s ease-in-out infinite;
@@ -1139,7 +1139,7 @@
   height: 20px;
   padding: 0;
   border: 0;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   background: transparent;
   color: var(--petri-text-muted);
   cursor: pointer;
@@ -1181,7 +1181,7 @@
   height: 20px;
   padding: 0;
   border: 0;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   background: transparent;
   color: var(--petri-text-muted);
   cursor: pointer;
@@ -1204,7 +1204,7 @@
   height: 22px;
   padding: 0 5px;
   border: 1px solid var(--petri-accent-border);
-  border-radius: 5px;
+  border-radius: var(--petri-radius-sm);;
   outline: none;
   background: var(--petri-bg-surface);
   color: var(--petri-text);
@@ -1293,7 +1293,7 @@
   text-align: left;
   padding: 10px 12px;
   border: 1px solid var(--petri-border, #e2e2e2);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-surface, #ffffff);
   color: var(--petri-text-primary, #1a1a1a);
   cursor: pointer;
@@ -1324,7 +1324,7 @@
   flex: none;
   font-size: var(--petri-font-size-sm);
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   border: 1px solid transparent;
 }
 .resultsLibraryBadge[data-status='done'] {
@@ -1394,7 +1394,7 @@
   gap: 12px;
   padding: 10px 12px;
   border: 1px solid var(--petri-border, #e2e2e2);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-surface, #ffffff);
 }
 .analysisLaunchCardMain {
@@ -1434,7 +1434,7 @@
 .analysisLaunchLang {
   font-size: var(--petri-font-size-xs);
   padding: 1px 6px;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   border: 1px solid var(--petri-border, #e2e2e2);
   text-transform: uppercase;
 }
@@ -1442,7 +1442,7 @@
   flex: none;
   font-size: var(--petri-font-size-caption);
   padding: 6px 14px;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   border: 1px solid transparent;
   background: var(--petri-accent, #3b82f6);
   color: var(--petri-on-solid, #ffffff);
@@ -1502,7 +1502,7 @@
   position: absolute;
   width: 24px;
   height: 48px;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   background: var(--petri-border);
   border: 1px solid var(--petri-border);
   display: flex;
@@ -1603,7 +1603,7 @@
      拖宽偏好可达 720，钳制逻辑在 FloatCardResizer，此处只兜底不越视口） */
   max-width: min(720px, calc(100% - 24px));
   overflow: auto;
-  border-radius: 16px;
+  border-radius: var(--petri-radius-lg);;
   /* UI-448 — 大柔和影收编 --petri-shadow-float 单源（原字面量同值，零视觉变化）；
      侧边聊天悬浮面同用此 token，两个悬浮物说同一套阴影语言 */
   box-shadow: var(--petri-shadow-float);
@@ -1755,7 +1755,7 @@
   width: 30px;
   height: 30px;
   border: none;
-  border-radius: 11px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
   color: var(--petri-text-muted);
   cursor: pointer;
@@ -1898,7 +1898,7 @@
   max-height: calc(100% - 16px);
   max-width: calc(100% - 24px);
   border: 1px solid var(--petri-border);
-  border-radius: 16px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-elevated);
   box-shadow: none;
   overflow: hidden;
@@ -1937,7 +1937,7 @@
   height: 38px;
   padding: 0 12px;
   border: 1px solid var(--petri-border);
-  border-radius: 14px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-surface-translucent);
   color: var(--petri-text);
   font-size: var(--petri-font-size-body-sm);
@@ -2184,7 +2184,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   gap: 8px;
   width: 100%;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   padding: 4px 6px;
   background: transparent;
   color: inherit;
@@ -2304,7 +2304,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   right: 1px;
   width: 6px;
   height: 6px;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: var(--petri-accent, #0d9488);
 }
 
@@ -2414,7 +2414,7 @@ button.workspacePinnedSummaryMetricCard:hover {
 
 .workspaceWorkflowRail > span {
   height: 3px;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: var(--petri-border);
 }
 
@@ -2715,7 +2715,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   height: 30px;
   padding: 0 10px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-surface);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-caption);
@@ -2739,7 +2739,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   min-width: 0;
   padding: 12px 14px;
   border: 1px solid var(--petri-border);
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-surface-translucent);
   display: flex;
   align-items: baseline;
@@ -2778,7 +2778,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   gap: 14px;
   padding: 32px 28px;
   border: 1px solid var(--petri-border);
-  border-radius: 14px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-surface-translucent);
 }
 
@@ -2814,7 +2814,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   height: 34px;
   padding: 0 16px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-surface);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-body-sm);
@@ -2832,7 +2832,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   min-height: 0;
   overflow: hidden;
   border: 1px solid var(--petri-border);
-  border-radius: 12px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-surface-translucent);
 }
 
@@ -3213,7 +3213,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   height: 24px;
   padding: 0 8px;
   border: 1px solid var(--petri-border);
-  border-radius: 7px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-xs);
@@ -3286,7 +3286,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   height: 30px;
   padding: 0 8px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: transparent;
   color: var(--petri-text-tertiary);
   font-size: var(--petri-font-size-sm);
@@ -3317,7 +3317,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   width: 16px;
   height: 16px;
   margin-right: -4px;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   color: var(--petri-text-tertiary);
 }
 
@@ -3346,7 +3346,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   min-height: 0;
   margin: 0 8px;
   border: 1px solid color-mix(in srgb, var(--petri-border) 84%, transparent);
-  border-radius: 9px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-terminal);
   color: var(--petri-text-terminal-strong);
   box-shadow: 0 6px 20px rgba(15, 23, 42, 0.1);
@@ -3382,7 +3382,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   left: 50%;
   width: 34px;
   height: 2px;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: color-mix(in srgb, var(--petri-border-strong) 68%, transparent);
   transform: translateX(-50%);
   transition: width 0.14s ease, background 0.14s ease;
@@ -3425,7 +3425,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   display: inline-block;
   width: 7px;
   height: 7px;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: var(--petri-text-muted);
   flex-shrink: 0;
 }
@@ -3443,7 +3443,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   height: 22px;
   padding: 0 6px;
   border: none;
-  border-radius: 5px;
+  border-radius: var(--petri-radius-sm);;
   background: transparent;
   color: var(--petri-text-muted);
   font-size: var(--petri-font-size-sm);
@@ -3479,7 +3479,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   max-width: 170px;
   padding: 0 3px 0 2px;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   color: var(--petri-text-terminal-muted);
 }
 
@@ -3521,7 +3521,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   display: inline-block;
   width: 6px;
   height: 6px;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: var(--petri-text-muted);
   flex-shrink: 0;
 }
@@ -3538,7 +3538,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   height: 15px;
   padding: 0;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   background: transparent;
   color: var(--petri-text-muted);
   cursor: pointer;
@@ -3558,7 +3558,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   height: 19px;
   padding: 0;
   border: none;
-  border-radius: 5px;
+  border-radius: var(--petri-radius-sm);;
   background: transparent;
   color: var(--petri-text-muted);
   cursor: pointer;
@@ -3581,7 +3581,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
 
 .embeddedTerminalNotice {
   padding: 1px 7px;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: color-mix(in srgb, var(--petri-warning, #d97706) 14%, transparent);
   color: var(--petri-warning, #d97706);
   font-size: var(--petri-font-size-xs);
@@ -3643,7 +3643,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
 
 .embeddedTerminalHost :global(.xterm-viewport)::-webkit-scrollbar-thumb {
   border: 2px solid var(--petri-bg-terminal);
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: color-mix(in srgb, var(--petri-text-terminal-muted) 52%, transparent);
 }
 
@@ -3743,7 +3743,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
 
 .terminalPanelActionBtn {
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   padding: 0 8px;
   height: 24px;
   background: transparent;
@@ -3775,7 +3775,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
 
 .terminalProcessCard {
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   overflow: hidden;
   background: var(--petri-bg-surface);
 }
@@ -3813,7 +3813,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
 .terminalProcessDot {
   width: 7px;
   height: 7px;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: var(--petri-text-muted);
 }
 
@@ -3861,7 +3861,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   width: 28px;
   height: 28px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
   cursor: pointer;
@@ -3885,7 +3885,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   min-width: 0;
   height: 28px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   padding: 0 10px;
   background: var(--petri-bg-surface);
   color: var(--petri-text);
@@ -3901,7 +3901,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
 
 .browserGoBtn {
   border: 1px solid color-mix(in srgb, var(--petri-accent) 30%, transparent);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   padding: 0 10px;
   height: 28px;
   background: var(--petri-accent);
@@ -3979,7 +3979,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   height: 28px;
   padding: 0 10px;
   border: 1px solid var(--petri-border);
-  border-radius: 7px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-surface);
   color: var(--petri-text);
   cursor: pointer;
@@ -4123,7 +4123,7 @@ body:global(.petri-resizing-columns) .rightPanelTabContent iframe {
   gap: 10px;
   padding: 12px;
   border: 1px solid var(--petri-border);
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-surface);
 }
 
@@ -4167,7 +4167,7 @@ body:global(.petri-resizing-columns) .rightPanelTabContent iframe {
   height: 28px;
   padding: 0 10px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-surface);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-caption);
@@ -4210,7 +4210,7 @@ body:global(.petri-resizing-columns) .rightPanelTabContent iframe {
   margin: 0 0 10px;
   padding: 9px 10px;
   border: 1px solid color-mix(in srgb, var(--petri-border) 72%, transparent);
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-surface);
 }
 
@@ -4381,7 +4381,7 @@ body:global(.petri-resizing-columns) .rightPanelTabContent iframe {
   min-height: 23px;
   padding: 2px 8px;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-xs);
@@ -4408,7 +4408,7 @@ body:global(.petri-resizing-columns) .rightPanelTabContent iframe {
   flex: 0 0 auto;
   padding: 3px 8px;
   border: 1px solid currentColor;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: inherit;
   cursor: pointer;
@@ -4433,7 +4433,7 @@ body:global(.petri-resizing-columns) .rightPanelTabContent iframe {
   min-height: 0;
   padding: 12px;
   border: 1px solid color-mix(in srgb, var(--petri-border) 78%, transparent);
-  border-radius: 12px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-surface);
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
   contain: layout paint;
@@ -4533,7 +4533,7 @@ body:global(.petri-resizing-columns) * {
   gap: 2px;
   width: 100%;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   padding: 8px 10px;
   background: var(--petri-surface);
   cursor: pointer;
@@ -4575,7 +4575,7 @@ body:global(.petri-resizing-columns) * {
   gap: 4px;
   padding: 8px 10px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-surface);
 }
 
@@ -4591,7 +4591,7 @@ body:global(.petri-resizing-columns) * {
 
 .resultSidebarDetails {
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   padding: 8px 10px;
   background: var(--petri-surface);
 }
@@ -4627,7 +4627,7 @@ body:global(.petri-resizing-columns) * {
   align-items: flex-start;
   gap: 8px;
   padding: 8px;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   cursor: default;
   transition: background 0.15s;
 }
@@ -4698,7 +4698,7 @@ body:global(.petri-resizing-columns) * {
   align-items: flex-start;
   gap: 10px;
   padding: 8px;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   cursor: pointer;
   transition: background 0.15s;
 }
@@ -4911,7 +4911,7 @@ body:global(.petri-resizing-columns) * {
   margin: 4px 0 10px;
   padding: 12px 14px;
   border: 1px solid var(--petri-border);
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
 }
 
@@ -4934,7 +4934,7 @@ body:global(.petri-resizing-columns) * {
   margin-bottom: 14px;
   padding: 18px 18px 14px;
   border: 1px solid var(--petri-border);
-  border-radius: 12px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-surface);
 }
 
@@ -4989,7 +4989,7 @@ body:global(.petri-resizing-columns) * {
   gap: 6px;
   padding: 12px 14px;
   border: 1px solid var(--petri-border);
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-surface);
 }
 
@@ -5011,7 +5011,7 @@ body:global(.petri-resizing-columns) * {
   margin-bottom: 16px;
   padding: 14px;
   border: 1px solid var(--petri-border);
-  border-radius: 12px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-surface);
 }
 
@@ -5056,7 +5056,7 @@ body:global(.petri-resizing-columns) * {
   align-items: center;
   height: 28px;
   padding: 0 10px;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   font-size: var(--petri-font-size-caption);
   text-decoration: none;
 }
@@ -5076,7 +5076,7 @@ body:global(.petri-resizing-columns) * {
   min-height: 280px;
   max-height: 62vh;
   overflow: auto;
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg);
   border: 1px solid var(--petri-border);
 }
@@ -5169,7 +5169,7 @@ body:global(.petri-resizing-columns) * {
   min-height: 29px;
   padding: 0 10px;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg);
   color: var(--petri-text-secondary);
   cursor: pointer;
@@ -5194,7 +5194,7 @@ body:global(.petri-resizing-columns) * {
 .resultStatus {
   font-size: var(--petri-font-size-caption);
   padding: 2px 10px;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -5218,7 +5218,7 @@ body:global(.petri-resizing-columns) * {
 .resultBody {
   background: var(--petri-surface);
   border: 1px solid var(--petri-border);
-  border-radius: 12px;
+  border-radius: var(--petri-radius-lg);;
   padding: 24px;
 }
 
@@ -5232,7 +5232,7 @@ body:global(.petri-resizing-columns) * {
   padding: 12px;
   background: var(--petri-status-error-bg);
   border: 1px solid var(--petri-status-error-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   font-size: var(--petri-font-size-caption);
   color: var(--petri-status-error-fg);
   white-space: pre-wrap;
@@ -5299,7 +5299,7 @@ body:global(.petri-resizing-columns) * {
 .plotCard {
   background: var(--petri-surface);
   border: 1px solid var(--petri-border);
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -5347,7 +5347,7 @@ body:global(.petri-resizing-columns) * {
 .plotCardImg img {
   max-width: 100%;
   height: auto;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
 }
 
 .plotCardFooter {
@@ -5361,7 +5361,7 @@ body:global(.petri-resizing-columns) * {
   font-size: var(--petri-font-size-caption);
   padding: 4px 10px;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-surface);
   color: var(--petri-text-secondary);
   text-decoration: none;
@@ -5396,7 +5396,7 @@ body:global(.petri-resizing-columns) * {
 .fileCard {
   background: var(--petri-surface);
   border: 1px solid var(--petri-border);
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -5436,7 +5436,7 @@ body:global(.petri-resizing-columns) * {
 .csvPreview {
   margin-top: 20px;
   border: 1px solid var(--petri-border);
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   overflow: hidden;
 }
 
@@ -5489,7 +5489,7 @@ body:global(.petri-resizing-columns) * {
   min-height: 27px;
   padding: 0 7px;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: inherit;
   font: inherit;
@@ -5564,7 +5564,7 @@ body:global(.petri-resizing-columns) * {
 
 .jobDetailSection {
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg);
   padding: 12px;
 }
@@ -5669,7 +5669,7 @@ body:global(.petri-resizing-columns) * {
   min-height: 54px;
   padding: 10px 12px;
   border: none;
-  border-radius: 11px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
   color: var(--petri-text);
   text-align: left;
@@ -5750,7 +5750,7 @@ body:global(.petri-resizing-columns) * {
   background: transparent;
   text-align: left;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   transition: background 0.12s ease, box-shadow 0.12s ease;
   font-size: var(--petri-font-size-body-sm);
   font-family: inherit;
@@ -5843,7 +5843,7 @@ body:global(.petri-resizing-columns) * {
   padding: 4px;
   background: var(--petri-bg-surface);
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
 }
 
@@ -5854,7 +5854,7 @@ body:global(.petri-resizing-columns) * {
   min-height: 28px;
   padding: 4px 9px;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text);
   font-size: var(--petri-font-size-body-sm);
@@ -5890,7 +5890,7 @@ body:global(.petri-resizing-columns) * {
   padding: 14px;
   background: var(--petri-bg-surface);
   border: 1px solid var(--petri-border);
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
 }
 
@@ -5931,7 +5931,7 @@ body:global(.petri-resizing-columns) * {
   min-width: 0;
   padding: 6px 9px;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-subtle);
   color: var(--petri-text);
   font-size: var(--petri-font-size-body-sm);
@@ -5953,7 +5953,7 @@ body:global(.petri-resizing-columns) * {
 .fileTreeDialogButton {
   padding: 5px 12px;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-body-sm);
@@ -5999,7 +5999,7 @@ body:global(.petri-resizing-columns) * {
   font-size: var(--petri-font-size-xs);
   font-family: inherit;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
 }
 
 .fileTreeDirCrumbSeg:hover {
@@ -6018,7 +6018,7 @@ body:global(.petri-resizing-columns) * {
   max-height: 200px;
   overflow-y: auto;
   border: 1px solid var(--petri-border-subtle);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   padding: 4px;
 }
 
@@ -6029,7 +6029,7 @@ body:global(.petri-resizing-columns) * {
   min-height: 26px;
   padding: 2px 6px;
   border: 0;
-  border-radius: 5px;
+  border-radius: var(--petri-radius-sm);;
   background: transparent;
   color: var(--petri-text);
   font-size: var(--petri-font-size-body-sm);
@@ -6104,7 +6104,7 @@ body:global(.petri-resizing-columns) * {
   overflow: hidden;
   padding: 3px 2px;
   border: 0;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   background: transparent;
   color: var(--petri-text-secondary);
   font: inherit;
@@ -6155,7 +6155,7 @@ body:global(.petri-resizing-columns) * {
   color: var(--petri-text-secondary);
   cursor: pointer;
   padding: 0;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
 }
 
 .workspaceTreeToggle:hover {
@@ -6241,7 +6241,7 @@ body:global(.petri-resizing-columns) * {
   min-height: 26px;
   padding: 3px 6px;
   border: 1px solid color-mix(in srgb, var(--petri-border) 56%, transparent);
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   background: transparent;
   color: var(--petri-text-secondary);
   font: inherit;
@@ -6336,7 +6336,7 @@ body:global(.petri-resizing-columns) * {
   word-break: break-word;
   background: var(--petri-bg-subtle);
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   font-family: var(--petri-font-mono, monospace);
   font-size: var(--petri-font-size-caption);
   line-height: 1.55;
@@ -6385,7 +6385,7 @@ body:global(.petri-resizing-columns) * {
   gap: 6px;
   padding: 8px;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg);
   font: inherit;
   color: inherit;
@@ -6410,7 +6410,7 @@ body:global(.petri-resizing-columns) * {
   padding: 8px 16px;
   background: var(--petri-bg-subtle);
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   font-family: var(--petri-font-mono, monospace);
   font-size: var(--petri-font-size-caption);
   list-style-type: square;
@@ -6546,7 +6546,7 @@ body:global(.petri-resizing-columns) * {
 }
 
 .workspaceMarkdownPreview code {
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   padding: 1px 4px;
   background: var(--petri-hover);
   font-size: var(--petri-font-size-caption);
@@ -6557,7 +6557,7 @@ body:global(.petri-resizing-columns) * {
   padding: 12px;
   overflow: auto;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-subtle);
 }
 
@@ -6601,7 +6601,7 @@ body:global(.petri-resizing-columns) * {
   height: 26px;
   padding: 0;
   border: 1px solid color-mix(in srgb, var(--petri-border) 56%, transparent);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: color-mix(in srgb, var(--petri-surface) 88%, transparent);
   color: var(--petri-text-secondary);
   cursor: pointer;
@@ -6641,7 +6641,7 @@ body:global(.petri-resizing-columns) * {
 .workspaceMarkdownDiffAction {
   appearance: none;
   border: 1px solid var(--petri-border);
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   background: var(--petri-bg-surface);
   color: var(--petri-text);
   font: inherit;
@@ -6785,7 +6785,7 @@ body:global(.petri-resizing-columns) * {
   padding: 4px 10px;
   font-size: var(--petri-font-size-caption);
   border: 1px solid var(--petri-border);
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   background: var(--petri-bg-surface);
   color: var(--petri-text);
   cursor: pointer;
@@ -6814,7 +6814,7 @@ body:global(.petri-resizing-columns) * {
   max-height: 100%;
   object-fit: contain;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-surface);
 }
 
@@ -6853,7 +6853,7 @@ body:global(.petri-resizing-columns) * {
   width: 100%;
   padding: 6px 10px;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   font-size: var(--petri-font-size-caption);
   color: var(--petri-text);
   background: var(--petri-surface);
@@ -6876,7 +6876,7 @@ body:global(.petri-resizing-columns) * {
 .toolCat {
   padding: 2px 8px;
   border: 1px solid var(--petri-border);
-  border-radius: 12px;
+  border-radius: var(--petri-radius-lg);;
   background: transparent;
   font-size: var(--petri-font-size-sm);
   color: var(--petri-text-secondary);
@@ -6908,7 +6908,7 @@ body:global(.petri-resizing-columns) * {
   align-items: center;
   gap: 8px;
   padding: 6px 8px;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   cursor: pointer;
   transition: background 0.15s;
 }
@@ -6952,7 +6952,7 @@ body:global(.petri-resizing-columns) * {
 .toolBadge {
   font-size: var(--petri-font-size-xs);
   padding: 1px 6px;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-warning-bg);
   color: var(--petri-warning-text);
   white-space: nowrap;
@@ -6995,7 +6995,7 @@ body:global(.petri-resizing-columns) * {
 .toolboxTabBadge {
   font-size: var(--petri-font-size-xs);
   padding: 0 5px;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-accent);
   color: #fff;
   line-height: 14px;
@@ -7020,7 +7020,7 @@ body:global(.petri-resizing-columns) * {
   align-items: center;
   gap: 8px;
   padding: 6px 8px;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   transition: background 0.15s;
 }
 
@@ -7057,7 +7057,7 @@ body:global(.petri-resizing-columns) * {
 .pluginBtnUninstall {
   font-size: var(--petri-font-size-sm);
   padding: 2px 10px;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   border: 1px solid var(--petri-border);
   cursor: pointer;
   white-space: nowrap;
@@ -7096,7 +7096,7 @@ body:global(.petri-resizing-columns) * {
   color: var(--petri-danger);
   background: var(--petri-danger-bg);
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   margin-bottom: 8px;
 }
 .workspaceNotice {
@@ -7107,7 +7107,7 @@ body:global(.petri-resizing-columns) * {
   max-width: min(460px, calc(100vw - 24px));
   padding: 7px 10px;
   border: 1px solid var(--petri-border-strong);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-elevated);
   color: var(--petri-text);
   box-shadow: 0 8px 20px color-mix(in srgb, var(--petri-text) 14%, transparent);
@@ -7180,7 +7180,7 @@ body:global(.petri-resizing-columns) * {
   color: var(--petri-text-secondary);
   display: flex;
   align-items: center;
-  border-radius: 3px;
+  border-radius: var(--petri-radius-sm);;
   flex-shrink: 0;
 }
 
@@ -7249,7 +7249,7 @@ body:global(.petri-resizing-columns) * {
   overflow: auto;
   padding: 12px 14px;
   border: 1px solid var(--petri-border);
-  border-radius: 12px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-elevated);
   box-shadow: 0 14px 32px color-mix(in srgb, var(--petri-text) 18%, transparent);
 }
@@ -7269,7 +7269,7 @@ body:global(.petri-resizing-columns) * {
   width: 26px;
   height: 26px;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-secondary);
   cursor: pointer;
@@ -7334,7 +7334,7 @@ body:global(.petri-resizing-columns) * {
   justify-content: center;
   width: 26px;
   height: 26px;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   border: 1px solid var(--petri-border);
   background: var(--petri-bg-subtle);
   color: var(--petri-text-secondary);
@@ -7362,7 +7362,7 @@ body:global(.petri-resizing-columns) * {
   gap: 1px;
   padding: 8px 6px;
   border: 1px solid var(--petri-border);
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
@@ -7374,7 +7374,7 @@ body:global(.petri-resizing-columns) * {
   font-size: var(--petri-font-size-sm, 12px);
   color: var(--petri-text-secondary);
   padding: 3px 8px;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -7417,7 +7417,7 @@ body:global(.petri-resizing-columns) * {
   display: block;
   max-width: 100%;
   background: #ffffff;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 
@@ -7429,7 +7429,7 @@ body:global(.petri-resizing-columns) * {
   justify-content: center;
   width: 16px;
   height: 16px;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   font-size: 10px;
   color: var(--petri-accent, #0d9488);
   border: 1px solid var(--petri-border, #e4e4e7);
@@ -7445,7 +7445,7 @@ body:global(.petri-resizing-columns) * {
 .convSearchBox input {
   background: var(--petri-input-bg, var(--petri-bg-surface));
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   color: var(--petri-text);
   font-size: var(--petri-font-size-caption, 12px);
   padding: 5px 8px;
@@ -7463,7 +7463,7 @@ body:global(.petri-resizing-columns) * {
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: color-mix(in srgb, var(--petri-accent) 16%, transparent);
   color: var(--petri-accent);
   font-size: 10px;
@@ -7493,7 +7493,7 @@ body:global(.petri-resizing-columns) * {
   justify-content: center;
   padding: 0;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: transparent;
   color: var(--petri-text-tertiary);
   cursor: pointer;
@@ -7551,7 +7551,7 @@ body:global(.petri-resizing-columns) * {
   padding: 3px 6px 3px 8px;
   border: 1px solid transparent;
   border-bottom: 0;
-  border-radius: 8px 8px 0 0;
+  border-radius: var(--petri-radius-lg) var(--petri-radius-lg) 0 0;
   background: transparent;
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-caption);
@@ -7614,7 +7614,7 @@ body:global(.petri-resizing-columns) * {
   flex-shrink: 0;
   padding: 0;
   border: 0;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   background: transparent;
   color: var(--petri-text-tertiary);
   cursor: pointer;

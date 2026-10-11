@@ -70,7 +70,7 @@
   height: 24px;
   padding: 0;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-muted);
   cursor: pointer;
@@ -115,7 +115,7 @@
   height: 38px;
   padding: 0;
   border: none;
-  border-radius: 9px;
+  border-radius: var(--petri-radius-lg);;
   background: transparent;
   color: var(--petri-text-secondary);
   cursor: pointer;
@@ -239,7 +239,7 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-accent-surface);
   color: var(--petri-accent);
   flex-shrink: 0;
@@ -310,7 +310,7 @@
   gap: 9px;
   padding: 9px 10px;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: transparent;
   color: var(--petri-text-secondary);
   text-align: left;
@@ -397,7 +397,7 @@
   min-width: 0;
   padding: 12px;
   border: 1px solid var(--petri-border-subtle);
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
 }
 
@@ -411,7 +411,7 @@
   grid-template-columns: minmax(150px, 1.2fr) minmax(120px, 1fr);
   gap: 8px;
   padding: 8px 6px;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-surface);
   transition: background-color 120ms ease;
 }
@@ -484,7 +484,7 @@
   min-height: 28px;
   padding: 3px 8px;
   border: 1px solid var(--petri-border-subtle);
-  border-radius: 7px;
+  border-radius: var(--petri-radius-md);;
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-sm);
   cursor: pointer;
@@ -658,7 +658,7 @@
   width: 30px;
   padding: 0;
   border: 0;
-  border-radius: 7px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-tertiary);
   cursor: pointer;
@@ -694,7 +694,7 @@
 .petri-credential-card {
   padding: 12px;
   border: 1px solid var(--petri-border);
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
 }
 
@@ -723,7 +723,7 @@
   height: 30px;
   padding: 0;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-tertiary);
   cursor: pointer;
@@ -764,7 +764,7 @@
   gap: 18px;
   padding: 13px 14px;
   border: 1px solid var(--petri-border);
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
 }
 
@@ -817,7 +817,7 @@
   min-height: 38px;
   padding: 7px 9px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
 }
@@ -845,7 +845,7 @@
 .petri-trash-item button {
   padding: 3px 6px;
   border: 0;
-  border-radius: 5px;
+  border-radius: var(--petri-radius-sm);;
   background: transparent;
   color: var(--petri-accent);
   font: inherit;
@@ -869,7 +869,7 @@
 .petri-trash-empty {
   padding: 18px;
   border: 1px dashed var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   color: var(--petri-text-tertiary);
   text-align: center;
   font-size: var(--petri-font-size-caption);
@@ -1032,7 +1032,7 @@
 .petri-select {
   width: 100%;
   padding: 9px 11px;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   border: 1px solid var(--petri-border);
   background: var(--petri-bg-surface);
   color: var(--petri-text);
@@ -1072,7 +1072,7 @@
   appearance: none;
   width: 38px;
   height: 22px;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: var(--petri-border-strong);
   position: relative;
   cursor: pointer;
@@ -1110,7 +1110,7 @@
   gap: 3px;
   margin-left: 8px;
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   font-size: var(--petri-font-size-sm);
   font-weight: 600;
   background: var(--petri-accent-surface);
@@ -1125,7 +1125,7 @@
   gap: 6px;
   padding: 8px 16px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   font-size: var(--petri-font-size-body);
   font-weight: 600;
   font-family: inherit;
@@ -1195,7 +1195,7 @@
   color: var(--petri-text-tertiary);
   font-size: var(--petri-font-size-body);
   border: 1px dashed var(--petri-border);
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
 }
 
 .petri-saved-toast {
@@ -1226,7 +1226,7 @@
   gap: 8px;
   padding: 14px;
   margin-top: 8px;
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   border: 1px solid var(--petri-border);
   background: var(--petri-bg-surface);
 }
@@ -1235,7 +1235,7 @@
   font-size: var(--petri-font-size-caption);
   color: var(--petri-text-secondary);
   padding: 6px 8px;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-surface);
   border: 1px solid var(--petri-border);
   word-break: break-all;
@@ -1299,7 +1299,7 @@
   justify-content: center;
   width: 34px;
   height: 34px;
-  border-radius: 9px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-accent-surface);
   color: var(--petri-accent);
   flex-shrink: 0;
@@ -1327,7 +1327,7 @@
   width: 100%;
   padding: 7px 12px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   font-size: var(--petri-font-size-body-sm);
   background: var(--petri-bg-surface);
   color: var(--petri-text);
@@ -1378,7 +1378,7 @@
   gap: 8px;
   padding: 8px 10px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: transparent;
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-body-sm);
@@ -1430,7 +1430,7 @@
   color: var(--petri-text-muted);
   background: var(--petri-bg-subtle);
   padding: 1px 7px;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   flex-shrink: 0;
 }
 
@@ -1462,7 +1462,7 @@
   padding: 10px 14px;
   background: var(--petri-warning-bg);
   border: 1px solid var(--petri-status-warning-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   font-size: var(--petri-font-size-body-sm);
   color: var(--petri-warning-text);
 }
@@ -1486,7 +1486,7 @@
   align-items: center;
   gap: 12px;
   padding: 14px;
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   border: 1px solid var(--petri-border);
   background: var(--petri-bg-surface);
   transition: border-color 0.15s;
@@ -1512,7 +1512,7 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: 9px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-accent-surface);
   color: var(--petri-accent);
   flex-shrink: 0;
@@ -1552,7 +1552,7 @@
   color: var(--petri-warning-text);
   background: var(--petri-warning-bg);
   padding: 1px 6px;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
 }
 
 [data-theme='dark'] .petri-plugin-store__badge-drift {
@@ -1578,7 +1578,7 @@
   background: var(--petri-warning-bg);
   color: var(--petri-warning-text);
   padding: 1px 6px;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   font-size: var(--petri-font-size-sm);
   font-weight: 600;
 }
@@ -1619,7 +1619,7 @@
   display: flex;
   flex-direction: column;
   padding: 14px;
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   border: 1px solid var(--petri-border);
   background: var(--petri-bg-surface);
   transition:
@@ -1664,7 +1664,7 @@
   justify-content: center;
   width: 34px;
   height: 34px;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-accent-surface);
   color: var(--petri-accent);
   flex-shrink: 0;
@@ -1701,7 +1701,7 @@
   align-items: center;
   justify-content: center;
   padding: 1px 6px;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: var(--petri-warning-bg);
   color: var(--petri-warning-text);
   font-size: var(--petri-font-size-sm);
@@ -1818,7 +1818,7 @@
   background: var(--petri-accent-surface);
   color: var(--petri-accent);
   padding: 1px 6px;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   font-weight: 600;
 }
 
@@ -1826,7 +1826,7 @@
   background: var(--petri-bg-subtle);
   color: var(--petri-text-tertiary);
   padding: 1px 6px;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   font-weight: 600;
 }
 
@@ -1866,7 +1866,7 @@
 
 .petri-plugin-store__progress-bar {
   height: 4px;
-  border-radius: 2px;
+  border-radius: var(--petri-radius-sm);;
   background: var(--petri-border);
   overflow: hidden;
 }
@@ -1874,7 +1874,7 @@
 .petri-plugin-store__progress-bar > div {
   height: 100%;
   background: var(--petri-accent);
-  border-radius: 2px;
+  border-radius: var(--petri-radius-sm);;
   transition: width 0.3s ease;
 }
 
@@ -1944,7 +1944,7 @@
   width: 100%;
   padding: 9px 10px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: transparent;
   color: rgba(226, 232, 240, 0.84);
   font-size: var(--petri-font-size-body);
@@ -1967,7 +1967,7 @@
   justify-content: center;
   width: 28px;
   height: 28px;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: rgba(45, 212, 191, 0.12);
   color: var(--petri-accent);
   flex-shrink: 0;
