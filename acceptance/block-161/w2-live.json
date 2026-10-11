@@ -1,7 +1,12 @@
 {
-  "at": "2026-10-11T15:36:02.658Z",
+  "at": "2026-10-11T15:58:54.547Z",
   "allPass": true,
   "assertions": [
+    {
+      "name": "iframe 视口填满容器（高度回归钉：≥160 且与容器差 <8px）",
+      "pass": true,
+      "detail": "{\"frameH\":405.99932861328125,\"wrapH\":405.99932861328125}"
+    },
     {
       "name": "8 档 token 运行时可读且 Toast 为最高档",
       "pass": true,

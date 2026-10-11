@@ -19,6 +19,8 @@ const {
   pollTargets, filterPageTargets, selectPageTarget, evalJs, screenshotPng, connectTarget,
 } = await import(pathToFileURL(libPath).href).then((m) => m.default ?? m);
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 async function main() {
   fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
   let assertions = [];
@@ -30,6 +32,8 @@ async function main() {
       probe: async (c) => !!(await evalJs(c, 'document.querySelector("#root")')),
     });
     const client = await connectTarget(target);
+    await evalJs(client, `location.href = "http://localhost:3000/"`);
+    await sleep(2000); // 回首页：标题栏/dock 常驻面在首页断言（项目页探针导航残留会让选择器扑空）
 
     const zProbe = await evalJs(client, `(function () {
       function zOf(selector) {
@@ -57,7 +61,45 @@ async function main() {
 
     await screenshotPng(client, EVIDENCE_DIR, 'w2-live-z-tiers.png');
 
+    // 导航到含 Gen UI 卡片的项目页跑高度钉（block166-diag 为探针遗留项目，含 P1 卡片）
+    await evalJs(client, `(() => {
+      var els = Array.from(document.querySelectorAll('button, [role="button"], li, div'));
+      var hit = els.find(function (e) {
+        var t = (e.textContent || '').trim();
+        return t === 'block166-diag' && e.offsetParent !== null && e.querySelectorAll('*').length < 8;
+      });
+      if (!hit) return false;
+      var t = hit;
+      while (t && t !== document.body) { if (t.matches('button,[role="button"],li')) break; t = t.parentElement; }
+      (t || hit).click();
+      return true;
+    })()`);
+    await sleep(4000);
+    // 会话若未自动展开，点当前项目的会话行
+    await evalJs(client, `(() => {
+      var els = Array.from(document.querySelectorAll('[role="button"], button, li, div'));
+      var hit = els.find(function (e) { return /BLOCK-166 P1 交互/.test((e.textContent || '').trim()) && e.offsetParent !== null && e.querySelectorAll('*').length < 10; });
+      if (!hit) return false;
+      var t = hit;
+      while (t && t !== document.body) { if (t.matches('button,[role="button"],li')) break; t = t.parentElement; }
+      (t || hit).click();
+      return true;
+    })()`);
+    await sleep(4000);
+    await sleep(4000);
+    // BLOCK-166 高度缺陷回归钉：iframe 视口必须填满容器（150px 默认高度缺陷曾致下方空白）
+    const heightProbe = await evalJs(client, `(() => {
+      var wrap = document.querySelector('[data-testid="gen-ui-card"] [class*="frameWrap"]');
+      var frame = document.querySelector('[data-testid="gen-ui-card"] iframe');
+      if (!wrap || !frame) return null;
+      return { frameH: frame.getBoundingClientRect().height, wrapH: wrap.getBoundingClientRect().height };
+    })()`);
+
+    await sleep(1500);
+
+    const heightOk = !!heightProbe && Math.abs(heightProbe.frameH - heightProbe.wrapH) < 8 && heightProbe.frameH > 160;
     assertions = [
+      { name: 'iframe 视口填满容器（高度回归钉：≥160 且与容器差 <8px）', pass: heightOk, detail: JSON.stringify(heightProbe) },
       { name: '8 档 token 运行时可读且 Toast 为最高档', pass: tokens.toast === 10000 && tokens.toast > tokens.lightbox && tokens.toast > tokens.modal && tokens.toast > tokens.overlay && tokens.toast > tokens.base, detail: JSON.stringify(tokens) },
       { name: 'Toast 容器归档生效（computed z = toast 档）', pass: toastZ === 10000, detail: `toast z=${toastZ}` },
       { name: 'TitleBar 归档生效且语义序 Toast > TitleBar（倒挂修复实证）', pass: titleZ !== null && toastZ > titleZ, detail: `titlebar z=${titleZ}` },

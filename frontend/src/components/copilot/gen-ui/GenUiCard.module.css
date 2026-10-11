@@ -46,6 +46,10 @@
 .frame {
   display: block;
   width: 100%;
+  /* BLOCK-166 缺陷修复（实机抓真）：iframe 无 height 时为浏览器默认 150px 视口，
+     guest 内容在 150px 里滚动而容器按回报高度撑开 → 下方大片空白。填满容器
+     （容器高 = guest 回报文档高 + gutter），iframe 视口即文档真实可视区。 */
+  height: 100%;
   border: 0;
   background: var(--petri-bg);
 }
