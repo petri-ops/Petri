@@ -1,0 +1,31 @@
+{
+  "at": "2026-10-11T14:00:12.961Z",
+  "allPass": true,
+  "assertions": [
+    {
+      "name": "8 档 token 运行时可读且 Toast 为最高档",
+      "pass": true,
+      "detail": "{\"base\":10,\"raised\":100,\"sticky\":500,\"dropdown\":1000,\"overlay\":4000,\"modal\":6000,\"lightbox\":8000,\"toast\":10000}"
+    },
+    {
+      "name": "Toast 容器归档生效（computed z = toast 档）",
+      "pass": true,
+      "detail": "toast z=10000"
+    },
+    {
+      "name": "TitleBar 归档生效且语义序 Toast > TitleBar（倒挂修复实证）",
+      "pass": true,
+      "detail": "titlebar z=500"
+    },
+    {
+      "name": "常驻面未破坏：TitleBar 可见",
+      "pass": true
+    },
+    {
+      "name": "dock 可见性（条件渲染面：在场则可见）",
+      "pass": true,
+      "detail": "absent on this page (conditional render)"
+    }
+  ],
+  "note": "z 归档批（Toast/TitleBar/BranchTabs/徽标/横幅/dock/GenUi 七件）语义序与可见性实机断言；组件内部相对层叠不在本批（棘轮白名单冻结）。"
+}

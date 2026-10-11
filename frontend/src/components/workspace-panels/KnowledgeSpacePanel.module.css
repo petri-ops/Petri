@@ -42,7 +42,7 @@
   display: inline-flex;
   align-items: center;
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   font-size: var(--petri-font-size-xs);
   line-height: 1.5;
   border: 1px solid transparent;
@@ -74,7 +74,7 @@
   gap: 6px;
   padding: 4px 10px 4px 4px;
   border: 1px solid var(--petri-border);
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: var(--petri-bg-subtle);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-xs);
@@ -115,7 +115,7 @@
   gap: 6px;
   padding: 8px 10px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
 }
 
@@ -145,7 +145,7 @@
   gap: 4px;
   padding: 3px 9px;
   border: 1px solid var(--petri-accent);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-accent-surface);
   color: var(--petri-accent);
   font-size: var(--petri-font-size-xs);
@@ -172,7 +172,7 @@
   padding: 6px 12px;
   border: none;
   border-bottom: 2px solid transparent;
-  border-radius: 6px 6px 0 0;
+  border-radius: var(--petri-radius-md); 6px 0 0;
   background: transparent;
   color: var(--petri-text-tertiary);
   font-size: var(--petri-font-size-xs);
@@ -210,7 +210,7 @@
 .dropActive {
   outline: 2px dashed var(--petri-accent);
   outline-offset: -3px;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
 }
 
 /* ===== BLOCK-103 hero 空态 ===== */
@@ -223,7 +223,7 @@
   gap: 10px;
   padding: 40px 20px;
   border: 1.5px dashed var(--petri-border-strong);
-  border-radius: 12px;
+  border-radius: var(--petri-radius-lg);;
   text-align: center;
 }
 
@@ -233,7 +233,7 @@
   justify-content: center;
   width: 52px;
   height: 52px;
-  border-radius: 14px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-accent-surface);
   color: var(--petri-accent);
 }
@@ -265,7 +265,7 @@
   gap: 6px;
   padding: 7px 16px;
   border: 1px solid var(--petri-accent);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-accent-surface);
   color: var(--petri-accent);
   font-size: var(--petri-font-size-sm);
@@ -283,7 +283,7 @@
   gap: 6px;
   padding: 7px 14px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: transparent;
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-sm);
@@ -299,7 +299,7 @@
 .notice {
   padding: 8px 10px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-xs);
@@ -318,14 +318,14 @@
   gap: 8px;
   padding: 10px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
 }
 
 .pasteName {
   padding: 6px 8px;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-elevated);
   color: var(--petri-text-primary);
   font-size: var(--petri-font-size-sm);
@@ -334,7 +334,7 @@
 .pasteText {
   padding: 8px;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-elevated);
   color: var(--petri-text-primary);
   font-family: inherit;
@@ -358,7 +358,7 @@
 .errorBox {
   padding: 8px 10px;
   border: 1px solid var(--petri-status-error-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-danger-bg);
   color: var(--petri-danger);
   font-size: var(--petri-font-size-xs);
@@ -380,7 +380,7 @@
   gap: 5px;
   padding: 5px 10px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-elevated);
   color: var(--petri-text);
   font-size: var(--petri-font-size-xs);
@@ -398,7 +398,7 @@
   gap: 5px;
   padding: 5px 8px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: transparent;
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-xs);
@@ -424,7 +424,7 @@
   gap: 8px;
   padding: 6px 8px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
 }
 
 .docMain {
@@ -479,7 +479,7 @@
   width: 24px;
   height: 24px;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-secondary);
   cursor: pointer;
@@ -541,7 +541,7 @@
   margin: -2px 0 6px;
   padding: 8px 10px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
   display: flex;
   flex-direction: column;
@@ -562,7 +562,7 @@
 .previewOpenRaw {
   padding: 2px 8px;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-elevated);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-xs);
@@ -621,7 +621,7 @@
   min-width: 0;
   padding: 5px 8px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-elevated);
   color: var(--petri-text);
   font-size: var(--petri-font-size-xs);
@@ -647,7 +647,7 @@
 .hitRow {
   padding: 6px 8px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -686,7 +686,7 @@
   margin-bottom: 6px;
   padding: 5px 8px;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-elevated);
   color: var(--petri-text-primary);
   font-size: var(--petri-font-size-xs);
@@ -696,6 +696,6 @@
 .hitMark {
   background: var(--petri-accent);
   color: var(--petri-bg-elevated);
-  border-radius: 2px;
+  border-radius: var(--petri-radius-sm);;
   padding: 0 1px;
 }

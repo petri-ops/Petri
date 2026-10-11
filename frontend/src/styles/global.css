@@ -41,6 +41,9 @@
   --petri-space-4: 12px;
   --petri-space-5: 16px;
   --petri-space-6: 24px;
+  /* BLOCK-161 W2 — 间距 8 档补全（plan §3-W2；出口：间距 token 引用率 >60%） */
+  --petri-space-7: 32px;
+  --petri-space-8: 48px;
   --petri-live-result-right-width: 720px;
 
   /* dock/面板表面色 — UI-238 亮色切中性 zinc（与白底发丝线区分），暗色蓝灰深底

@@ -3322,7 +3322,9 @@
         "frontend/src/pages/extensions/extensions.module.css",
         "scripts/block161-w1-live.mjs",
         "acceptance/block-161/**",
-        "acceptance/ui-ux-audit-2026-10-10/**"
+        "acceptance/ui-ux-audit-2026-10-10/**",
+        "scripts/block161-w2-live.mjs",
+        "scripts/block161-shot.mjs"
       ],
       "tests": [
         "frontend/src/styles/theme-token-contract.test.ts"

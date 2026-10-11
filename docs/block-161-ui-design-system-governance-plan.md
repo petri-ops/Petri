@@ -67,7 +67,8 @@ status: active
 
 **W1 禁项**：不删 `.petri-docs-*`（需先确认 MDX 文档页消费者）；不重命名 `--petri-text-muted`（92 处引用，重命名单独排期至 W3）。
 
-### W2 档位体系 + 门禁棘轮（约 3-5 天）
+W2 档位体系/W3 缩放闭环/W4 性能随波推进。
+> **W2 首批交付**（2026-10-11）：token 定义层（space 8 档/radius 4 档/z 8 档 Toast 最高/shadow color-mix 三档）+ 契约 +5 断言红→绿 9/9（档位存在/重复定义禁/明暗成对棘轮/裸 font-size 棘轮 121 处冻结/颜色 fallback 棘轮 235 处冻结）+ z 归档批七件（Toast 倒挂修复实证 toast z=10000 > titlebar z=500）+ 圆角归并首批 KnowledgeSpacePanel 25 处。剩余=圆角其余高发文件（~320 处）/间距/阴影机械归并，按棘轮逐批收缩待后续会话。
 
 **顺序不可颠倒**：必须先建 token 与门禁，再做机械替换。
 

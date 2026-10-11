@@ -69,9 +69,9 @@
   --petri-border-subtle: color-mix(in srgb, var(--petri-border) 64%, transparent);
   --petri-input-bg: var(--petri-bg-surface);
   --petri-overlay: rgba(24, 24, 27, 0.2);
-  --petri-shadow-menu: 0 10px 24px rgba(24, 24, 27, 0.14);
+  --petri-shadow-menu: 0 10px 24px color-mix(in srgb, var(--petri-text) 14%, transparent);
   /* UI-448 — 悬浮面板族（项目摘要浮层/侧边聊天悬浮面）共用大柔和影；单源防漂移 */
-  --petri-shadow-float: 0 12px 32px rgba(15, 23, 42, 0.18);
+  --petri-shadow-float: 0 12px 32px color-mix(in srgb, var(--petri-text) 18%, transparent);
   --petri-on-accent: #ffffff;
   --petri-on-solid: #ffffff;
   --petri-warning-bg: var(--petri-status-warning-bg);
@@ -143,7 +143,7 @@
   --petri-surface-raised: var(--petri-bg-elevated);
   --petri-bg-surface-raised: var(--petri-bg-elevated);
   --petri-surface-strong: var(--petri-bg-surface);
-  --petri-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
+  --petri-shadow-sm: 0 1px 2px color-mix(in srgb, var(--petri-text) 8%, transparent);
   /* ===== UI-155 / 关闭合并后暴露的 theme-token-contract 缺口 =====
      --petri-surface-2 与 --petri-status-idle 此前被 simple-chat.css
      （origin/main PR #13 的 subagent UI）以 var(--petri-*) 引用却无定义，
@@ -163,6 +163,23 @@
   --petri-bg-button-hover: var(--petri-bg-hover);
   --petri-mono: var(--petri-font-mono);
   --petri-status-success: #22c55e;
+
+  /* ===== BLOCK-161 W2 — 档位体系（plan §3-W2）=====
+  /* 圆角 4 档：sm=4(收 2/3/4/5) md=6(收 6/7) lg=8(收 8/9/10/11/12/14/16) pill=999（50%/0/inherit 为功能语义非档位） */
+  --petri-radius-sm: 4px;
+  --petri-radius-md: 6px;
+  --petri-radius-lg: 8px;
+  --petri-radius-pill: 999px;
+  /* z-index 8 档：全局层级唯一来源；语义守卫=Toast 最高（审计 P0 倒挂：原 Toast 9999 < TitleBar 10001）。
+     组件内部相对层叠（≤base 档数值）不在本表管辖，见契约棘轮白名单。 */
+  --petri-z-base: 10;
+  --petri-z-raised: 100;
+  --petri-z-sticky: 500;
+  --petri-z-dropdown: 1000;
+  --petri-z-overlay: 4000;
+  --petri-z-modal: 6000;
+  --petri-z-lightbox: 8000;
+  --petri-z-toast: 10000;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */

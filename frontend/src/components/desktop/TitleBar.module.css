@@ -23,7 +23,7 @@
   left: 0;
   right: 0;
   height: var(--titlebar-height);
-  z-index: 9999;
+  z-index: var(--petri-z-sticky); /* BLOCK-161 W2 归档 */
   display: grid;
   /* BLOCK-62 P2 — live-span 兜底已退役：fixed 条只在 compact（拖拽禁用，span 变量
      永不写入）/ 非工作区路由（无侧栏拖拽）渲染；regular 工作区顶栏是列内
@@ -329,7 +329,7 @@
 .resultMenuOverlay {
   position: fixed;
   inset: 0;
-  z-index: 10000;
+  z-index: var(--petri-z-dropdown); /* BLOCK-161 W2 归档 */
   border: 0;
   background: transparent;
 }
@@ -338,7 +338,7 @@
   position: absolute;
   top: calc(100% + 5px);
   left: 50%;
-  z-index: 10001;
+  z-index: var(--petri-z-dropdown); /* BLOCK-161 W2 归档（原 10001 倒挂压过 Toast，已修） */
   display: grid;
   width: min(260px, calc(100vw - 20px));
   max-width: calc(100vw - 20px);
