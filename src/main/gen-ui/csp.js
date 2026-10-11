@@ -21,8 +21,10 @@ function httpsSources(domains) {
 }
 
 function buildGenUiCsp() {
-  const scriptSrc = ["'unsafe-inline'", httpsSources(STATIC_DOMAINS)].join(' ');
-  const styleFontSrc = ["'unsafe-inline'", httpsSources(STATIC_DOMAINS)].join(' ');
+  // 'self' = 页面自身 origin（petri-genui://gen-<id>）：vendor 走 /vendor/* 自源路径，
+  // 白名单 CDN 域只覆盖作者 fragment 显式引用的外域资产。
+  const scriptSrc = ["'self'", "'unsafe-inline'", httpsSources(STATIC_DOMAINS)].join(' ');
+  const styleFontSrc = ["'self'", "'unsafe-inline'", httpsSources(STATIC_DOMAINS)].join(' ');
   const imgMediaSrc = ['blob:', 'data:', httpsSources(STATIC_DOMAINS)].join(' ');
   return [
     "default-src 'none'",
@@ -31,7 +33,8 @@ function buildGenUiCsp() {
     `font-src ${styleFontSrc}`,
     `img-src ${imgMediaSrc}`,
     `media-src ${imgMediaSrc}`,
-    "connect-src 'blob:' 'data:'",
+    // scheme 源不加引号（'blob:' 带引号是非法源，Chromium 整条忽略——实测日志在案）
+    "connect-src blob: data:",
     "frame-src 'none'",
     "form-action 'none'",
     "base-uri 'none'",

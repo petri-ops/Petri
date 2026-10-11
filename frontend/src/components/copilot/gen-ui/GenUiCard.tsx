@@ -1,10 +1,13 @@
 /**
  * frontend/src/components/copilot/gen-ui/GenUiCard.tsx
  *
- * BLOCK-166 [B 层] 聊天流内嵌 Gen UI 卡片（P0 基础版）：
- * prepare IPC（主进程做 workspace 归属/1MB 校验并返回沙箱页 URL）→ 独立 origin
- * iframe 渲染 → guest 高度回报（240..10000px + 5px gutter）。
- * 放大预览/复制图（P2）、widgetState（P1/P2）不在本版。
+ * BLOCK-166 [B 层] 聊天流内嵌 Gen UI 卡片：
+ * P0：prepare IPC（主进程 workspace 归属/1MB 校验返回沙箱页 URL）→ 独立 origin
+ *     iframe 渲染 → guest 高度回报（240..10000px + 5px gutter）。
+ * P1：guest 桥 RPC 中继（D6 简化传输）——guest 的 petri-gen-ui-rpc 经本组件校验
+ *     source/origin 后转 desktopBridge（setState / openExternal），结果回投 iframe；
+ *     应用主题（html[data-theme]）经 petri-set-globals 推送进沙箱页。
+ * 放大预览/复制图/follow-up（P2）不在本版。
  */
 
 import React from 'react';
@@ -51,6 +54,25 @@ interface GenUiCardProps {
   cardKey: string;
 }
 
+interface GenUiRpcMessage {
+  type: 'petri-gen-ui-rpc';
+  id: number;
+  method: string;
+  params?: { state?: unknown; href?: unknown };
+}
+
+/** petri-genui://gen-<id>/index.html → { sessionId, origin }（自定协议不走 URL.origin）。 */
+function parseSandboxUrl(url: string): { sessionId: string; origin: string } | null {
+  const match = /^petri-genui:\/\/([^/]+)\//.exec(url);
+  if (!match) return null;
+  return { sessionId: match[1], origin: `petri-genui://${match[1]}` };
+}
+
+function currentAppTheme(): 'dark' | 'light' | null {
+  const theme = document.documentElement.dataset.theme;
+  return theme === 'dark' || theme === 'light' ? theme : null;
+}
+
 export const GenUiCard = React.memo(function GenUiCard({
   reference,
   projectId,
@@ -60,6 +82,11 @@ export const GenUiCard = React.memo(function GenUiCard({
   const [result, setResult] = React.useState<GenUiPrepareResult | null>(null);
   const [height, setHeight] = React.useState<number>(HEIGHT_MIN);
   const frameRef = React.useRef<HTMLIFrameElement | null>(null);
+  // 沙箱身份（prepare 成功后固定）：sessionId 用于 IPC 鉴权，origin 用于消息双向校验。
+  const sandbox = React.useMemo(
+    () => (result?.ok ? parseSandboxUrl(result.url) : null),
+    [result],
+  );
 
   React.useEffect(() => {
     let cancelled = false;
@@ -98,19 +125,85 @@ export const GenUiCard = React.memo(function GenUiCard({
     };
   }, [projectId, conversationId, reference.path, reference.title, cardKey]);
 
-  // guest 高度回报：只信 source 为本卡 iframe 的消息（规格 §6.3；P0 无桥）。
+  const postToFrame = React.useCallback((message: unknown) => {
+    const win = frameRef.current?.contentWindow;
+    if (win && sandbox) win.postMessage(message, sandbox.origin);
+  }, [sandbox]);
+
+  // guest 桥 RPC → desktopBridge IPC；结果回投 iframe（D6 中继，主进程是权威裁决）。
+  const relayRpc = React.useCallback(async (rpc: GenUiRpcMessage) => {
+    const bridge = getBridge('genUi');
+    const reply = (ok: boolean, payload: Record<string, unknown>) => {
+      postToFrame({ type: 'petri-gen-ui-rpc-result', id: rpc.id, ok, payload });
+    };
+    if (!bridge || !sandbox) {
+      reply(false, { message: 'gen-ui bridge unavailable' });
+      return;
+    }
+    try {
+      if (rpc.method === 'petri/gen-ui/state') {
+        await bridge.setState({ sessionId: sandbox.sessionId, state: rpc.params?.state ?? null });
+        reply(true, {});
+      } else if (rpc.method === 'petri/gen-ui/open-external') {
+        const href = typeof rpc.params?.href === 'string' ? rpc.params.href : '';
+        const res = await bridge.openExternal({ sessionId: sandbox.sessionId, href });
+        if (res.ok) reply(true, {});
+        else reply(false, { message: res.message || res.code });
+      } else {
+        reply(false, { message: `unknown gen-ui rpc method: ${rpc.method}` });
+      }
+    } catch (error) {
+      reply(false, { message: error instanceof Error ? error.message : String(error) });
+    }
+  }, [postToFrame, sandbox]);
+
+  // guest 消息（高度回报 + 桥 RPC）：只信 source 为本卡 iframe 且 origin 为沙箱 origin 的消息。
   React.useEffect(() => {
-    if (!result?.ok) return undefined;
+    if (!result?.ok || !sandbox) return undefined;
     const onMessage = (event: MessageEvent) => {
       if (event.source !== frameRef.current?.contentWindow) return;
-      const data = event.data as { type?: string; height?: unknown } | null;
-      if (!data || data.type !== 'petri-gen-ui-height') return;
-      const value = typeof data.height === 'number' && Number.isFinite(data.height) ? data.height : 0;
-      setHeight(Math.min(HEIGHT_MAX, Math.max(HEIGHT_MIN, Math.round(value))));
+      if (event.origin !== sandbox.origin) return;
+      const data = event.data as
+        | { type?: string; height?: unknown }
+        | GenUiRpcMessage
+        | null;
+      if (!data || typeof data.type !== 'string') return;
+      if (data.type === 'petri-gen-ui-height') {
+        const value = typeof (data as { height?: unknown }).height === 'number'
+          && Number.isFinite((data as { height: number }).height)
+          ? (data as { height: number }).height
+          : 0;
+        setHeight(Math.min(HEIGHT_MAX, Math.max(HEIGHT_MIN, Math.round(value))));
+        return;
+      }
+      if (data.type === 'petri-gen-ui-rpc') {
+        const rpc = data as GenUiRpcMessage;
+        if (typeof rpc.id === 'number' && typeof rpc.method === 'string') {
+          void relayRpc(rpc);
+        }
+      }
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [result]);
+  }, [result, sandbox, relayRpc]);
+
+  // 主题推送：iframe 就绪与应用主题变化两条路径都走 petri-set-globals。
+  React.useEffect(() => {
+    if (!result?.ok || !sandbox) return undefined;
+    const push = () => {
+      const theme = currentAppTheme();
+      if (theme) postToFrame({ type: 'petri-set-globals', detail: { globals: { theme } } });
+    };
+    push();
+    const observer = new MutationObserver(push);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => observer.disconnect();
+  }, [result, sandbox, postToFrame]);
+
+  const onFrameLoad = React.useCallback(() => {
+    const theme = currentAppTheme();
+    if (theme) postToFrame({ type: 'petri-set-globals', detail: { globals: { theme } } });
+  }, [postToFrame]);
 
   const title = reference.title || '可视化';
 
@@ -133,9 +226,13 @@ export const GenUiCard = React.memo(function GenUiCard({
               className={styles.frame}
               src={result.url}
               title={title}
-              sandbox="allow-scripts"
+              // allow-same-origin 让 petri-genui:// 文档保留真实 origin（任务书 §8 参考实现
+              // 同款）：独立 origin 与宿主 app 互不可见，双向 postMessage 的 origin 校验
+              // 才有意义；无它则 origin 退化为 opaque null，桥的 origin 校验全废。
+              sandbox="allow-scripts allow-same-origin"
               referrerPolicy="no-referrer"
               loading="lazy"
+              onLoad={onFrameLoad}
             />
           </div>
         ) : (

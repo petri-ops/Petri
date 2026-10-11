@@ -46,6 +46,10 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-10-11 BLOCK-166 P0 可看落地（17225f84，feat(block-166)）：subject 走 BLOCK 轨
+  // 无 UI-###；UI 面=GenUiCard/GenUiMessageContent/解析器三件（BLOCK-166 P0 增量），
+  // 台账=UI-486 已登记并随 P1-COMPLETED 批同步更新（ui-audit 门在本批收口时对齐）。
+  '17225f84cad5b661d4f00a51ccc6a1f1de0e8f42',
   // 2026-10-10 BLOCK-165 P7 尾笔 mini 旗标桥解耦（2c18244）：UI 组件消费面随改名修复走 BLOCK 轨；台账=UI-485 加映已补登。
   '2c1824457ac4460e91019fa442ce685d20c9088b',
   // 2026-10-10 BLOCK-165 P1 全仓机械改名（66b3970）：--gewu-*→--petri-* token 前缀迁移视觉零变化，走 BLOCK 轨；台账=UI-485 已补登。

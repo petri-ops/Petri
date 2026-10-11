@@ -9,6 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 let _manifestCache = null;
 
@@ -29,6 +30,21 @@ function loadVendorManifest() {
   }
   _manifestCache = { raw, byUrl, byFile };
   return _manifestCache;
+}
+
+/**
+ * P1 强校验（plan §5-P1/坑 1）：bytes 的 sha256 必须与清单一致，
+ * 不符即明确失败不回退网络（ZCode 实锤案例：缓存与 manifest 不同步 → 白屏）。
+ */
+function verifyVendorHash(resource, bytes) {
+  const actual = crypto.createHash('sha256').update(bytes).digest('hex');
+  if (actual !== resource.sha256) {
+    throw Object.assign(
+      new Error(`bundled resource hash mismatch: ${resource.file} (manifest ${resource.sha256}, actual ${actual})`),
+      { code: 'vendor-hash-mismatch' },
+    );
+  }
+  return true;
 }
 
 /** shell 重写：把 fragment 中的白名单 CDN URL 换成沙箱 vendor 路径；未知 URL 原样保留（CSP 决定命运）。 */
@@ -54,7 +70,9 @@ function readVendorFile(fileName) {
   if (!real.startsWith(path.resolve(vendorDir()) + path.sep)) {
     throw Object.assign(new Error('vendor path escape'), { code: 'vendor-escape' });
   }
-  return { resource, bytes: fs.readFileSync(real) };
+  const bytes = fs.readFileSync(real);
+  verifyVendorHash(resource, bytes);
+  return { resource, bytes };
 }
 
 function vendorMimeFor(fileName) {
@@ -64,4 +82,4 @@ function vendorMimeFor(fileName) {
   return 'application/octet-stream';
 }
 
-module.exports = { loadVendorManifest, rewriteVendorUrls, readVendorFile, vendorMimeFor };
+module.exports = { loadVendorManifest, rewriteVendorUrls, readVendorFile, verifyVendorHash, vendorMimeFor };

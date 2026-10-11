@@ -794,7 +794,6 @@ async function wait_agent(args, ctx) {
 
   const timeoutMs = clampWaitTimeoutMs(args && args.timeout);
   const startedAt = Date.now();
-  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   for (;;) {
     const task = agentTaskStore.getAgentTask(agentId);

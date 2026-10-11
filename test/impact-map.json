@@ -4,7 +4,7 @@
   "rules": [
     {
       "id": "block166-gen-ui",
-      "note": "BLOCK-166 Gen UI 沙箱：前端解析器/卡片面走 vitest（references.test），主进程宿主与后端注入面走 node:test（host 测试），模型技能随 skills:check；IPC 双向守卫由 ipc-channels-registry 自动覆盖。",
+      "note": "BLOCK-166 Gen UI 沙箱：前端解析器/卡片面走 vitest（references.test），主进程宿主与 guest 桥/主题映射/外链白名单走 node:test（host/bridge/theme/external-link 测试），模型技能随 skills:check；IPC 双向守卫由 ipc-channels-registry 自动覆盖。",
       "patterns": [
         "frontend/src/components/copilot/gen-ui/**",
         "src/main/gen-ui/**",
@@ -15,10 +15,14 @@
         "resources/gen-ui/**",
         "test/block166-*.test.mjs",
         "acceptance/block-166/**",
-        "scripts/block166-p0-live.mjs"
+        "scripts/block166-p0-live.mjs",
+        "scripts/block166-p1-live.mjs"
       ],
       "tests": [
-        "test/block166-gen-ui-host.test.mjs"
+        "test/block166-gen-ui-host.test.mjs",
+        "test/block166-gen-ui-guest-bridge.test.mjs",
+        "test/gen-ui-theme-tokens.test.mjs",
+        "test/block166-gen-ui-external-link.test.mjs"
       ],
       "commands": [
         "docs-check"

@@ -45,7 +45,6 @@ export function MemoryPanel(): React.ReactElement {
 
   useEffect(() => {
     let cancelled = false;
-    const headers = authHeaders();
     void fetchJson<{ facts?: FactRow[] }>(`${getPlatformApiPrefix()}/ai/facts`)
       .then((data) => {
         if (!cancelled) setFacts(Array.isArray(data.facts) ? data.facts : []);

@@ -776,6 +776,16 @@ declare global {
           | { ok: true; url: string }
           | { ok: false; code: string; message: string }
         >;
+        // BLOCK-166 P1 — guest 桥 RPC 中继：widgetState 内存落主进程（≤16KiB，
+        // 宿主 ack 后 guest promise 才 resolve）+ 绝对 http(s) 外链白名单。
+        setState: (payload: { sessionId: string; state: unknown }) => Promise<
+          | { ok: true }
+          | { ok: false; code: string; message: string }
+        >;
+        openExternal: (payload: { sessionId: string; href: string }) => Promise<
+          | { ok: true }
+          | { ok: false; code: string; message: string }
+        >;
       };
     };
     /** BLOCK-61 兼容别名：与 petri 同一 surface（preload 双暴露）。 */

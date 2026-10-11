@@ -9,7 +9,7 @@
  */
 
 import assert from 'node:assert/strict';
-import { after, test } from 'node:test';
+import { test } from 'node:test';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -78,7 +78,7 @@ test('BLOCK-160 KNW-4 front-matter 受限解析：name/version/category 进入�
 });
 
 test('BLOCK-160 KNW-4 回滚面：built-in id 冲突拒绝且零写入', () => {
-  const sourceDir = makeSkillMdDir('conflict-skill', `---\nname: x\ndescription: y\n---\nbody`);
+  makeSkillMdDir('conflict-skill', `---\nname: x\ndescription: y\n---\nbody`);
   // 目录名映射 id 后与内置冲突：直接用内置 id 的目录名
   const conflictDir = path.join(tmpRoot, 'coding-playbook');
   fs.mkdirSync(conflictDir, { recursive: true });

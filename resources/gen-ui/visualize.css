@@ -1,3 +1,9 @@
+/*
+ * BLOCK-166 P1 — Gen UI 基础 CSS（agent 契约变量 + 工具类），自 ZCode
+ * visualize-plugin assets/visualize.css 原样移植（任务书 §7；参考件权属见 plan §7）。
+ * :root 变量层的 ZCode token 回退在本沙箱内不解析，实际取值由壳内后注入的
+ * petri 主题层（src/main/gen-ui/theme.js）覆盖——注入顺序不可对调。
+ */
 :root {
   color-scheme: light dark;
   background-color: var(

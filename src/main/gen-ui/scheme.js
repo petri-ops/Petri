@@ -17,8 +17,12 @@ const { readVendorFile, vendorMimeFor } = require('./vendor');
 
 const SCHEME = 'petri-genui';
 const MAX_SESSIONS = 64;
+const MAX_WIDGET_STATES = 256;
 
-const sessions = new Map(); // id → { id, filePath, title }
+const sessions = new Map(); // id → { id, filePath, title, hostOrigin, ownerWebContentsId }
+// P1 widgetState 内存版（plan §5-P1）：按 fragment 真实路径键，同一文件重新
+// prepare 可回读上次交互状态；P2 换 SQLite（D4 scope key）后本表退役。
+const widgetStates = new Map(); // filePath → state object
 
 function registerGenUiSchemePrivileges() {
   const { protocol } = require('electron');
@@ -30,9 +34,15 @@ function registerGenUiSchemePrivileges() {
   ]);
 }
 
-function createGenUiSession({ filePath, title }) {
+function createGenUiSession({ filePath, title, hostOrigin = '', ownerWebContentsId = null }) {
   const id = `gen-${crypto.randomBytes(12).toString('hex')}`;
-  sessions.set(id, { id, filePath, title: title || '' });
+  sessions.set(id, {
+    id,
+    filePath,
+    title: title || '',
+    hostOrigin,
+    ownerWebContentsId,
+  });
   // 简单容量治理：超限逐出最旧（P2 页面池/租约接口的预留位，plan D5）。
   while (sessions.size > MAX_SESSIONS) {
     const oldest = sessions.keys().next().value;
@@ -43,6 +53,18 @@ function createGenUiSession({ filePath, title }) {
 
 function getGenUiSession(id) {
   return sessions.get(id) || null;
+}
+
+function getGenUiWidgetState(filePath) {
+  return widgetStates.get(filePath) ?? null;
+}
+
+function setGenUiWidgetState(filePath, state) {
+  widgetStates.set(filePath, state);
+  while (widgetStates.size > MAX_WIDGET_STATES) {
+    const oldest = widgetStates.keys().next().value;
+    widgetStates.delete(oldest);
+  }
 }
 
 function htmlResponse(body) {
@@ -84,6 +106,8 @@ function setupGenUiProtocol() {
         const html = assembleGenUiShell({
           fragmentHtml: fs.readFileSync(session.filePath, 'utf8'),
           sandboxOrigin: `${SCHEME}://${id}`,
+          hostOrigin: session.hostOrigin || '',
+          initialState: getGenUiWidgetState(session.filePath),
         });
         return htmlResponse(html);
       } catch (error) {
@@ -110,6 +134,8 @@ module.exports = {
   SCHEME,
   registerGenUiSchemePrivileges,
   createGenUiSession,
+  getGenUiSession,
+  setGenUiWidgetState,
   setupGenUiProtocol,
   HTML_MAX_BYTES,
 };

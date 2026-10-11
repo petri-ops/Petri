@@ -71,6 +71,8 @@ status: active
 4. **门禁**：解析器单测 ≥15 用例（三种形态/围栏排除/pending 半截整体隐藏/invalid/路径归一化去重/schema 各拒绝分支）+ shell/CSP/包含/1MB 单测 + IPC 双向守卫测试自动覆盖 + `test/impact-map.json` 登记新文件分类 + tsc 0 + lint 触碰面 0 error + `skills:check` + docs/ui 门禁；**实机**：dev 栈真模型输出静态图表页渲染截图，证据 `acceptance/block-166/`。
 
 ### P1 可交互
+> **P1-COMPLETED**（2026-10-11，提交见 git log；实机 8/8 ALL PASS 证据 `acceptance/block-166/p1-live.json`）。交付四件=①`window.petri` 完整桥（`src/main/gen-ui/guest-bridge.js` 真实函数体序列化内联，Node 桩直测同一代码：widgetState 内存版 16KiB 双侧校验/宿主 ack 后 resolve/禁 load 自动保存 + `petri:set_globals` + openExternal 白名单 + anchor 拦截 + data-tooltip）；②主题 CSS/工具类（`resources/gen-ui/visualize.css` 移植 + `src/main/gen-ui/theme.js` petri token 映射 light-dark 双值 + `test/gen-ui-theme-tokens.test.mjs` 漂移守卫）；③vendor sha256 逐文件强校验（`vendor.js` verifyVendorHash，缺失/不符明确失败不白屏，壳内资源失败横幅）；④D6 中继 IPC（`gen-ui:set-state`/`gen-ui:open-external` 三步登记 + GenUiCard origin/source 双校验 relay + 主题 MutationObserver 推送）。**实机真雷修正留痕三件**：①iframe `sandbox` 需 `allow-scripts allow-same-origin`（无 allow-same-origin 则 origin 退化 opaque null，双向 origin 校验全废——任务书 §8 参考实现同款）；②应用级 CSP（csp-config.js）`frame-src` 放行 `petri-genui:` 且对 gen-ui 响应跳过注入（否则 guest 自带全禁 CSP 被覆盖——P0 期 iframe 实为 chrome-error 页，「高度 250」断言空洞由本阶段实机内容断言补足）；③CSP scheme 源不加引号（`'blob:'` 非法源整条被忽略，实改为 `connect-src blob: data:`）。测试面 43 用例全绿（host 8 + bridge 15 + theme 漂移守卫 2 + external-link 8 + IPC 守卫 5 + 前端解析器 21 中 gen-ui 相关）。
+
 1. `window.petri` 完整桥（widgetState 内存版 + `petri:set_globals` + `openExternal` 白名单校验 + 主题事件）。
 2. 主题 CSS/工具类（任务书 §7 清单移植 + `--petri-*` 值映射）+ `data-tooltip`。
 3. vendor 三库离线映射（manifest + sha256 逐文件校验）。

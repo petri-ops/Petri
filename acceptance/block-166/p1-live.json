@@ -1,0 +1,45 @@
+{
+  "at": "2026-10-11T10:01:57.876Z",
+  "allPass": true,
+  "assertions": [
+    {
+      "name": "P0 面复核：卡片+petri-genui:// iframe",
+      "pass": true,
+      "detail": "petri-genui://gen-0569955701346c9c84c92688/index.html"
+    },
+    {
+      "name": "guest 桥安装（在线）",
+      "pass": true
+    },
+    {
+      "name": "CSP connect-src 拦截 fetch/WS（securitypolicyviolation 实证）",
+      "pass": true,
+      "detail": "[\"connect-src:\",\"connect-src:\"]"
+    },
+    {
+      "name": "断网渲染成功（offline 重载：d3+图表+桥在场，无失败横幅）",
+      "pass": true,
+      "detail": "{\"d3\":true,\"bars\":7,\"bridge\":true,\"badge\":\"P1 pipeline OK · threshold=50\",\"fatalBanner\":false}"
+    },
+    {
+      "name": "主题跟随：data-theme 切换 → guest theme/colorScheme/背景色变化",
+      "pass": true,
+      "detail": "before={\"dataset\":\"light\",\"bg\":\"rgb(255, 255, 255)\"} after={\"dataset\":\"dark\",\"colorScheme\":\"dark\",\"bg\":\"rgb(11, 18, 32)\"}"
+    },
+    {
+      "name": "widgetState 内存回读（setWidgetState → 重载恢复）",
+      "pass": true,
+      "detail": "saved=saved restored={\"present\":true,\"threshold\":73}"
+    },
+    {
+      "name": "openExternal 非 http(s) 拒绝（live）",
+      "pass": true
+    },
+    {
+      "name": "data-tooltip 建立角色 tooltip",
+      "pass": true,
+      "detail": "{\"present\":true,\"text\":\"拖动调整高亮阈值，状态自动保存到宿主\"}"
+    }
+  ],
+  "note": "模型手写 fragment 环节以预置文件替代（dev 数据面无渠道 key）；解析器/prepare/协议宿主/壳拼装/guest 桥/vendor sha256/主题/离线全链真实路径。"
+}

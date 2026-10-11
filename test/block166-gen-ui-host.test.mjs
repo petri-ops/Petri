@@ -51,10 +51,10 @@ test('assertInsideScope：scope 内文件通过，scope 外/不存在分别拒�
 test('CSP：default-src none、connect 仅 blob/data、frame/form 全禁、白名单域在场', () => {
   const csp = buildGenUiCsp();
   assert.match(csp, /default-src 'none'/);
-  assert.match(csp, /connect-src 'blob:' 'data:'/);
+  assert.match(csp, /connect-src blob: data:/);
   assert.match(csp, /frame-src 'none'/);
   assert.match(csp, /form-action 'none'/);
-  assert.match(csp, /script-src 'unsafe-inline'/);
+  assert.match(csp, /script-src 'self' 'unsafe-inline'/, "'self' 放行自源 vendor 路径");
   for (const domain of STATIC_DOMAINS) assert.ok(csp.includes(domain), `missing ${domain}`);
   assert.ok(!csp.includes('*'), 'no wildcard');
 });

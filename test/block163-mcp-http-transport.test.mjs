@@ -8,7 +8,7 @@
  */
 
 import assert from 'node:assert/strict';
-import { test, after } from 'node:test';
+import { test } from 'node:test';
 import fs from 'node:fs';
 import os from 'node:os';
 import http from 'node:http';

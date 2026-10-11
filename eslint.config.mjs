@@ -34,6 +34,9 @@ export default tseslint.config(
       'frontend/dist/**',
       // skill 资产目录：dev-verify flows 用 node 全局但无包上下文，且含合法占位模板
       '.agents/**',
+      // Gen UI vendor 第三方压缩库（d3/lucide/floating-ui，BLOCK-166 随包静态资产，
+      // sha256 清单校验管完整性）：minified 代码非本仓源码面，同 node_modules 先例不 lint
+      'resources/gen-ui/vendor/**',
     ],
   },
 

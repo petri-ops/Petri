@@ -507,6 +507,10 @@ const desktopBridgeSurface = {
     // BLOCK-166 — Gen UI 卡片准备：主进程做 workspace 归属/scope 包含/1MB 校验后
     // 返回独立 origin 沙箱页 URL（petri-genui://gen-<id>/index.html）或结构化错误。
     prepare: (payload) => ipcRenderer.invoke('gen-ui:prepare', payload || {}),
+    // BLOCK-166 P1 — guest 桥 RPC 中继（GenUiCard 把沙箱页 postMessage 转成这两路）：
+    // set-state = widgetState 内存落主进程（≤16KiB）；open-external = 绝对 http(s) 白名单。
+    setState: (payload) => ipcRenderer.invoke('gen-ui:set-state', payload || {}),
+    openExternal: (payload) => ipcRenderer.invoke('gen-ui:open-external', payload || {}),
   },
 };
 
