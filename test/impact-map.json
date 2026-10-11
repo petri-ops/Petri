@@ -3,6 +3,29 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "block166-gen-ui",
+      "note": "BLOCK-166 Gen UI 沙箱：前端解析器/卡片面走 vitest（references.test），主进程宿主与后端注入面走 node:test（host 测试），模型技能随 skills:check；IPC 双向守卫由 ipc-channels-registry 自动覆盖。",
+      "patterns": [
+        "frontend/src/components/copilot/gen-ui/**",
+        "src/main/gen-ui/**",
+        "src/ipc/gen-ui.js",
+        "core/petri-server/helpers/gen-ui-prompt.js",
+        "resources/skills/visualize/**",
+        "resources/skills/manifest.json",
+        "resources/gen-ui/**",
+        "test/block166-*.test.mjs",
+        "acceptance/block-166/**",
+        "scripts/block166-p0-live.mjs"
+      ],
+      "tests": [
+        "test/block166-gen-ui-host.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true
+    },
+    {
       "id": "brand-binary-assets",
       "note": "品牌二进制资产（应用图标/favicon/PWA 家族）：无测试面，只随文档门；换标批次由实机过目承载。",
       "patterns": [

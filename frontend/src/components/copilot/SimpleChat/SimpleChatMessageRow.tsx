@@ -29,6 +29,7 @@ import { ErrorBanner } from './ErrorBanner';
 import { ResumePrompt } from './ResumePrompt';
 import { ResultEditProgressList } from './ResultEditProgressList';
 import { AssistantResultNodes } from '../extraRenderers';
+import { GenUiMessageContent } from '../gen-ui/GenUiMessageContent';
 import { resumeInterruptedConversation } from '../conversationRunStore';
 import type { SimpleMessage } from './types';
 import type { ExtractContext, FileReferenceClickDetail } from '@/lib/chat-file-references';
@@ -163,6 +164,22 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
               {m.modelFallbackNotice}
             </div>
           )}
+          {/* BLOCK-166：assistant 已完结且非流式消息走 Gen UI 投影（无指令时快路径
+              等价原 CopilotMarkdown，零行为变化）；其余（user/流式/pending）原样。 */}
+          {m.role === 'assistant' && !m.pending && !streaming && m.content ? (
+            <GenUiMessageContent
+              content={m.content}
+              projectId={projectId}
+              conversationId={conversationId}
+              rowKey={messageKey}
+              onFileReferenceClick={onFileReferenceClick}
+              resolveContext={settledContext}
+              resolveNonce={resolveNonce}
+              highlightCode={m.role === 'assistant' ? ((code, language) => (
+                <HighlightedCode code={code} language={language} />
+              )) : undefined}
+            />
+          ) : (
           <CopilotMarkdown
             text={m.role === 'user' && inlineImages.images.length > 0
               ? (inlineImages.text || m.statusMessage || (m.pending ? '…' : ''))
@@ -174,6 +191,7 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
               <HighlightedCode code={code} language={language} />
             )) : undefined}
           />
+          )}
           {m.role === 'user' && inlineImages.images.length > 0 && (
             <div className="sc-msg-inline-images">
               {inlineImages.images.map((img) => (

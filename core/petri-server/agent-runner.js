@@ -335,6 +335,17 @@ async function runAgentLoop({
     model: modelName,
   });
 
+  // BLOCK-166 P0 — Gen UI 可视化输出根（仅 workspace 绑定会话注入；未绑定=能力诚实缺席）
+  try {
+    const genUiBlock = require('./helpers/gen-ui-prompt').buildGenUiOutputRootBlock({
+      projectId: context && context.projectId,
+      conversationId: (_activeConv && _activeConv.id) || conversationId || null,
+    });
+    if (genUiBlock) systemPrompt += '\n\n' + genUiBlock;
+  } catch (e) {
+    console.error('[agent-runner] gen-ui output root injection failed:', e && e.message ? e.message : e);
+  }
+
   // BLOCK-93 P1 — 子智能体角色专职约束（注册表指令片段，prompt 级软约束；
   // 紧跟基础 system prompt 之后，后续增量块仍在其后追加）
   if (roleDirective) {

@@ -1,0 +1,22 @@
+{
+  "skillManifestVersion": 1,
+  "id": "visualize",
+  "name": "沙箱可视化（Gen UI）",
+  "version": "1.0.0",
+  "description": "在聊天回复中产出内嵌沙箱交互页：把 HTML fragment 写入会话专属可视化目录，再用 ::visualize 指令引用。涵盖 fragment 写作规范（片段结构/字面换行/白名单 CDN/禁网络 API/CSS 变量主题/1MB 上限）与指令格式。",
+  "category": "coding/visualize",
+  "tags": ["visualization", "gen-ui", "html", "sandbox", "chart"],
+  "source": "built-in",
+  "capabilities": ["gen-ui-fragment", "visualization"],
+  "plugins": {
+    "required": [],
+    "optional": []
+  },
+  "workflows": {
+    "default": "default"
+  },
+  "prompts": {
+    "system": "prompts/system.md",
+    "user_templates": []
+  }
+}

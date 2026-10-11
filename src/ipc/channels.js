@@ -214,6 +214,9 @@ const CHANNELS = {
   workspace: {
     writeTextFile: 'workspace:write-text-file',
   },
+  genUi: {
+    prepare: 'gen-ui:prepare',
+  },
 };
 
 module.exports = CHANNELS;

@@ -1,0 +1,81 @@
+/* BLOCK-166 [B 层] Gen UI 卡片——全部走 --petri-* token（theme-token 契约）。 */
+
+.card {
+  margin: 10px 0;
+  border: 1px solid var(--petri-border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--petri-bg-subtle);
+}
+
+.cardWide {
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--petri-border);
+  background: var(--petri-bg);
+}
+
+.headerTitle {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--petri-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge {
+  font-size: 11px;
+  color: var(--petri-text-muted);
+  border: 1px solid var(--petri-border);
+  border-radius: 99px;
+  padding: 0 8px;
+}
+
+.body {
+  position: relative;
+}
+
+.frame {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: var(--petri-bg);
+}
+
+/* 宿主 5px 绘制 gutter 补偿（规格 §6.3）：高度 +10px / margin -5px。 */
+.frameWrap {
+  height: calc(100% + 10px);
+  margin: -5px 0;
+}
+
+.errorBox {
+  padding: 14px 12px;
+  font-size: 13px;
+  color: var(--petri-text);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.errorHint {
+  font-size: 12px;
+  color: var(--petri-text-muted);
+  word-break: break-all;
+}
+
+.placeholder {
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--petri-text-muted);
+}

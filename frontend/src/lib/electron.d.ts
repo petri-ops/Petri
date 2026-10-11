@@ -768,6 +768,15 @@ declare global {
         rename: (params: { id: string; newName: string }) => Promise<ResultIpcEnvelope<BranchRowRecord>>;
         getActive: (params: { projectId: string }) => Promise<ResultIpcEnvelope<BranchRowRecord | null>>;
       };
+      // BLOCK-166 — Gen UI 沙箱卡片（prepare 结果为判别联合：ok 携带沙箱页 URL，
+      // 否则 code ∈ no-workspace/project-not-found/outside-scope/file-not-found/
+      // too-large/read-failed/failed。真值源：src/ipc/gen-ui.js）。
+      genUi: {
+        prepare: (payload: { projectId: string; conversationId: string; path: string; title?: string }) => Promise<
+          | { ok: true; url: string }
+          | { ok: false; code: string; message: string }
+        >;
+      };
     };
     /** BLOCK-61 兼容别名：与 petri 同一 surface（preload 双暴露）。 */
     petriDesktop?: Window['petri'];

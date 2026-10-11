@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-11T05:25:49.265Z",
+  "allPass": true,
+  "assertions": [
+    {
+      "name": "会话点选/自动选中",
+      "pass": true
+    },
+    {
+      "name": "GenUiCard 渲染在场",
+      "pass": true,
+      "detail": "count=1, state=IFRAME petri-genui://gen-8d68b98ca1a61eba87f540ef/index.html"
+    },
+    {
+      "name": "沙箱 iframe petri-genui:// origin",
+      "pass": true,
+      "detail": "petri-genui://gen-8d68b98ca1a61eba87f540ef/index.html"
+    },
+    {
+      "name": "高度回报生效（>240 初始）",
+      "pass": true,
+      "detail": "height=250"
+    }
+  ],
+  "note": "模型手写 fragment 环节以预置文件替代（dev 数据面无渠道 key）；解析器/IPC 校验/协议宿主/CSP/高度/渲染全链真实路径。"
+}

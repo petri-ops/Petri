@@ -503,6 +503,11 @@ const desktopBridgeSurface = {
     // BLOCK-53 P2 — 非 git 工作区一次性引导：git init + 初始提交（幂等，已 init 时 alreadyGit）
     initRepository: (params) => ipcRenderer.invoke('git:init-repository', params || {}),
   },
+  genUi: {
+    // BLOCK-166 — Gen UI 卡片准备：主进程做 workspace 归属/scope 包含/1MB 校验后
+    // 返回独立 origin 沙箱页 URL（petri-genui://gen-<id>/index.html）或结构化错误。
+    prepare: (payload) => ipcRenderer.invoke('gen-ui:prepare', payload || {}),
+  },
 };
 
 contextBridge.exposeInMainWorld('petri', desktopBridgeSurface);

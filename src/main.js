@@ -634,6 +634,12 @@ async function main() {
   setupSshHostIpc();
   setupSkillsIpc();
 
+  // BLOCK-166 — Gen UI 沙箱宿主与 IPC（prepare 通道；协议 handler 读文件/拼壳/CSP/vendor）
+  const { setupGenUiProtocol } = require("./main/gen-ui/scheme");
+  const { setupGenUiIpc } = require("./ipc/gen-ui");
+  setupGenUiProtocol();
+  setupGenUiIpc();
+
   // 6. CSP 加固——禁用 unsafe-eval，限制资源来源到 self + localhost（后端/SSE/dev server）
   setupCsp({ isDevMode });
 
@@ -675,6 +681,10 @@ async function main() {
 if (process.argv.includes("--dev") && !app.commandLine.hasSwitch("remote-debugging-port")) {
   app.commandLine.appendSwitch("remote-debugging-port", "9222");
 }
+
+// BLOCK-166 — Gen UI 沙箱 scheme：privileged 注册必须在 app ready 前完成。
+const { registerGenUiSchemePrivileges } = require("./main/gen-ui/scheme");
+registerGenUiSchemePrivileges();
 
 app.whenReady().then(main);
 

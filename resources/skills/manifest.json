@@ -96,6 +96,27 @@
           "sha256": null
         }
       }
+    },
+    "visualize": {
+      "id": "visualize",
+      "version": "1.0.0",
+      "source": "built-in",
+      "kind": "skill",
+      "category": "coding/visualize",
+      "capabilities": [
+        "gen-ui-fragment",
+        "visualization"
+      ],
+      "plugins": {
+        "required": [],
+        "optional": []
+      },
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://skills/visualize",
+          "sha256": null
+        }
+      }
     }
   }
 }
