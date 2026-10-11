@@ -12,6 +12,7 @@
 const CHANNELS = require('../ipc/channels');
 
 const fs = require("fs");
+const path = require("path");
 const { BRAND } = require("./brand");
 const { zoomBy, zoomReset } = require("./_zoom.js");
 
@@ -111,6 +112,9 @@ async function createWindow({
     // on Windows/Linux it draws the square WindowControls.
     frame: false,
     backgroundColor: "#1f2330",
+    // 窗口/任务栏图标（mac 走 app bundle 会忽略此值；win/linux dev 态即时可见，
+    // packaged 态由 electron-builder 的 icon 条目接管）
+    icon: path.join(__dirname, "..", "..", "icons", "icon.png"),
     // Mac fullscreen support: enable native fullscreen behavior
     // fullscreenable: true allows the green button and Cmd+Ctrl+F to enter true fullscreen
     // simpleFullScreen: false uses the native macOS fullscreen transition (hides menu bar)

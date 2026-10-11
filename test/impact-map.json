@@ -3,6 +3,18 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "brand-binary-assets",
+      "note": "品牌二进制资产（应用图标/favicon/PWA 家族）：无测试面，只随文档门；换标批次由实机过目承载。",
+      "patterns": [
+        "icons/**",
+        "static/img/**"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "block165-rename-evidence",
       "note": "BLOCK-165 换库改名证据目录与执行器（基线快照/codemod dry-run 报告/实机断言/改名脚本+幂等测试）：证据与机械工具只随文档门，不触发代码测试。",
       "patterns": [
