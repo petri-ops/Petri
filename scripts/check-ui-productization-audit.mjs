@@ -438,6 +438,10 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-10-12 BLOCK-166 加映两笔（70718a9 iframe 视口缺陷修复 / f02c3a1 全宽化）：
+  // 同提交漏台账同步；台账=UI-486 加映已由 8caa897d 补登（含两笔提交面与全宽化后续）。
+  '70718a9f9e3bf49943a1d89d41eca7b6c44d1dcb',
+  'f02c3a101ed4274a2af34fdf034c6026f4af3c59',
   // 2026-10-10 BLOCK-165 P7 尾笔 mini 旗标桥解耦（2c18244）：同提交漏台账同步；台账=UI-485 加映已补登。
   '2c1824457ac4460e91019fa442ce685d20c9088b',
   // 2026-10-10 BLOCK-165 P1 全仓机械改名（66b3970）：同提交漏 docs/ui-productization-audit.md 同步；台账=UI-485 已补登。
