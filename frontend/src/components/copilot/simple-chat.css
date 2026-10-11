@@ -4308,3 +4308,20 @@
 .sc-attachment:has(.sc-attachment-preview-btn):hover .sc-attachment-remove {
   opacity: 1;
 }
+
+/* ============================================================
+ * BLOCK-166 用户反馈（2026-10-12）——Gen UI 卡片占满会话流全宽。
+ * 卡片宿主行默认按内容收缩（336px 窄列），可视化页需要全宽才可读；
+ * 高度已由 guest 回报内容自适应，宽度同样跟随会话流容器（不再锁窄列）。
+ * :has 为 Chromium 105+ 原生能力（本仓 Electron 41）。放大按钮保留为
+ * 可选项（全屏细看场景），不再是达到可用宽度的必要动作。
+ * ============================================================ */
+.sc-msg:has([data-testid='gen-ui-card']) {
+  width: 100%;
+  max-width: 100%;
+}
+
+.sc-msg:has([data-testid='gen-ui-card']) .sc-msg-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
