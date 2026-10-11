@@ -8,12 +8,12 @@ acceptance:
   - W4 性能：WorkspaceSummaryCard 止血（0 useMemo + 6 setInterval → React.memo + 单 tick + useReducer）+ 长列表虚拟化（react-window 0 处；LeftPanel.tsx:437 全量 .map / RightFileTree 1029 行 / ToolActivityList 977 行）+ 首屏骨架（index.html #root 空节点；RouteFallback 留白决策保留，仅超大 chunk 条件 fallback）
   - 波末：closeout 门禁 + acceptance 证据 + UI 台账登记
 reopen: 阻塞=BLOCK-160（W2 成熟度波）收口；启动前置=唯一 active 槽位空出或用户显式裁决插队（并行须写明文件面隔离边界）
-status: planned
+status: active
 ---
 
 # BLOCK-161：UI 设计体系治理（视觉 / 布局 / 字体 / 配色 / 性能）
 
-> **状态：planned（排队中，未启动）**
+> **状态：active（2026-10-11 翻正——BLOCK-166 已收口腾出唯一 active 槽位；用户裁决「继续 搞完下一个候选」按队列头发令开工 W1）**
 > 立项：2026-10-10。用户裁决「是否根据这个立项 block？」→ 三选一 **B**（等BLOCK-160 收口后立项，不并行）。
 > 审计基线：[`acceptance/ui-ux-audit-2026-10-10/ui-ux-audit-report.md`](../acceptance/ui-ux-audit-2026-10-10/ui-ux-audit-report.md)（51 条可定位问题）
 > 升级方案：[`acceptance/ui-ux-audit-2026-10-10/ui-upgrade-plan.md`](../acceptance/ui-ux-audit-2026-10-10/ui-upgrade-plan.md)（五阶段 + 门禁固化）

@@ -99,12 +99,12 @@
   50% { opacity: 0.4; }
 }
 
-/* Error bar */
+/* Error bar — BLOCK-161 W1 对比度修复：原 #ffc8c8/rgba 硬编码亮色 1.45:1 且零暗色适配，改状态 token 明暗自适应 */
 .drawerError {
   padding: 8px 16px;
-  background: rgba(220, 80, 80, 0.18);
-  border-bottom: 1px solid rgba(220, 80, 80, 0.4);
-  color: #ffc8c8;
+  background: var(--petri-status-error-bg);
+  border-bottom: 1px solid var(--petri-status-error-border);
+  color: var(--petri-status-error-fg);
   font-size: var(--petri-font-size-caption);
   flex-shrink: 0;
 }

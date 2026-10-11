@@ -5870,7 +5870,7 @@
    "path": "docs/block-161-ui-design-system-governance-plan.md",
    "capability": "design-system",
    "kind": "work-package",
-   "status": "planned",
+   "status": "active",
    "canonical": true,
    "truthDomain": "block-161-ui-design-system-governance-plan",
    "entrypoint": "docs/README.md",
@@ -5885,7 +5885,7 @@
     "virtualization"
    ],
    "archivePolicy": "retain_stable_path",
-   "notes": "UI 设计体系治理（BLOCK 轨四波，用户裁决「B」=等 BLOCK-160 收口后立项不并行）：承接 2026-10-10 UI/UX 全面审计（51 条问题，实测证据）分四波落地——W1 速赢（P0：CommandPalette 误引入 CSS 删除首屏 391→150KB / 4 处对比度改色 / Tab 困陷修 focus-within / 375 行死 CSS 清理）/ W2 档位体系+门禁棘轮（间距 8 档+圆角 4 档+z-index 7 档+阴影收敛+契约测试补 4 条断言）/ W3 缩放闭环（112 处裸 font-size 清零使设置面板字号真生效+24 个明暗未配对 token 补齐+accent 接回 62 处 ifm-primary）/ W4 性能（WorkspaceSummaryCard 止血 0 useMemo+6 interval→memo+单 tick / 长列表虚拟化 react-window 0 处 / 首屏骨架）。形态判定=BLOCK 非 UI 增量（文件面四区+四波多裁决项+跨会话，§1 判据自检）。启动前置=BLOCK-160 收口腾出唯一 active 槽位；W4 虚拟化依赖须先评估自研 spacer 免新增 npm 依赖。证据=acceptance/ui-ux-audit-2026-10-10/ + acceptance/block-161/。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+   "notes": "BLOCK-161 UI 设计体系治理（W1 速赢/W2 档位体系/W3 缩放闭环/W4 性能；审计基线 acceptance/ui-ux-audit-2026-10-10）——2026-10-11 翻 active 开工 W1（BLOCK-166 收口腾出唯一 active 槽位；用户裁决「继续 搞完下一个候选」）。"
   },
   {
    "id": "BLOCK-162-MOBILE-WS-TRANSPORT",

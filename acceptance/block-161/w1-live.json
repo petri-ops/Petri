@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-11T13:23:33.709Z",
+  "allPass": true,
+  "assertions": [
+    {
+      "name": "muted 亮色对比度 ≥4.5（W1-b 实测）",
+      "pass": true,
+      "detail": "fg=#6a6a73 canvas=5.35 surface=4.87"
+    },
+    {
+      "name": "muted 暗色对比度 ≥4.5（W1-b 实测）",
+      "pass": true,
+      "detail": "fg=#8b98ad canvas=6.41 surface=5.37"
+    },
+    {
+      "name": "Tab 50 步焦点可进主区（真实键盘事件）",
+      "pass": true,
+      "detail": "mainEntryStep=1; trailTail=TEXTAREA.sc-input < DIV.sc-composer-body < DIV.sc-composer < DIV.sc-input-area | TEXTAREA.sc-input < DIV.sc-composer-body < DIV.sc-composer "
+    }
+  ],
+  "note": "对比度按 WCAG 2.1 相对亮度公式对 token 真实渲染值逐元素计算；Tab 遍历经 CDP Input.dispatchKeyEvent 真实键盘事件（禁 el.focus() 推断）。"
+}

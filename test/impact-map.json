@@ -3308,6 +3308,29 @@
       ],
       "frontendRelated": true,
       "classifiesScripts": false
+    },
+    {
+      "id": "block161-design-system",
+      "note": "BLOCK-161 UI 设计体系治理：styles token 面/对比度/死 CSS/键盘可达性走 theme-token-contract + vitest；实机验收探针（对比度逐元素计算+真实 Tab 遍历）随 W1。",
+      "patterns": [
+        "frontend/src/styles/custom.css",
+        "frontend/src/components/copilot/CommandPalette.tsx",
+        "frontend/src/components/auth/LoginModal.css",
+        "frontend/src/components/ui/PageHeader.css",
+        "frontend/src/pages/project-workspace.module.css",
+        "frontend/src/components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css",
+        "frontend/src/pages/extensions/extensions.module.css",
+        "scripts/block161-w1-live.mjs",
+        "acceptance/block-161/**",
+        "acceptance/ui-ux-audit-2026-10-10/**"
+      ],
+      "tests": [
+        "frontend/src/styles/theme-token-contract.test.ts"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true
     }
   ]
 }

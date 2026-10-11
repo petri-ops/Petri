@@ -1040,13 +1040,23 @@
   transition: opacity 0.15s, background 0.15s;
 }
 
-.projectTreeRow:hover .projectTreeAddBtn {
+.projectTreeRow:hover .projectTreeAddBtn,
+.projectTreeRow:focus-within .projectTreeAddBtn,
+.projectTreeAddBtn:focus-visible {
   opacity: 1;
 }
 
 .projectTreeAddBtn:hover {
   background: var(--petri-hover);
   color: var(--petri-accent);
+}
+
+/* BLOCK-161 W1 键盘可达性：focus 环显形（原 opacity:0 仅 hover 显形，
+   实机 Tab 50 步困左栏——键盘用户须能看到焦点落点） */
+.projectTreeAddBtn:focus-visible {
+  outline: 2px solid var(--petri-accent);
+  outline-offset: 1px;
+  border-radius: 4px;
 }
 
 .convList {

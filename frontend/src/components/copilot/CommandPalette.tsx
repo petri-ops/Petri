@@ -7,7 +7,6 @@ import { Icon } from '@/components/icons/Icon';
 import type { IconName } from '@/components/icons/Icon';
 import { formatRelativeTime } from '@/lib/format';
 import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
-import './simple-chat.css';
 
 // ---- Types ----
 
