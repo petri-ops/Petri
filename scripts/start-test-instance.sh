@@ -80,10 +80,10 @@ if [ "$(uname -s)" = "Darwin" ]; then
     > .petri-test-instance.log 2> .petri-test-instance.err.log &
   echo "start dispatched (darwin nohup pid $!)"
 else
-  # BLOCK-165 — 仓库根/userData 自定位（同 restart-dev-stack：旧名目录优先回退，D3/D7 见其注释）
+  # BLOCK-165 — 仓库根/userData 自定位（同 restart-dev-stack；2026-10-11 旧名回退
+  # 分支退役，数据面唯一 .petri-dev-user-data，详见其注释）
   ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-  UD="$ROOT/.biof3-dev-user-data"
-  [ -d "$UD" ] || UD="$ROOT/.petri-dev-user-data"
+  UD="$ROOT/.petri-dev-user-data"
   WROOT="$(cygpath -w "$ROOT" 2>/dev/null || echo "$ROOT")"
   FNMR="/c/Users/Admin/AppData/Roaming/fnm/node-versions/v24.20.0/installation"
   if [ -d "$FNMR" ]; then

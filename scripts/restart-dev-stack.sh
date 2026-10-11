@@ -54,12 +54,12 @@ for p in 3001 "${CDP_PORT}"; do
   fi
 done
 
-# BLOCK-165 — 仓库根自定位（去本机绝对路径硬编码，OSS 化后任何克隆位置可用）；
-# userData 目录旧名优先回退（D3：petri.db 新库名天然全新起；.petri-secrets/证书等
-# 非库数据随旧目录延续，本地目录改名〔D7 用户自选〕后自动切新名）。
+# BLOCK-165 — 仓库根自定位（去本机绝对路径硬编码，OSS 化后任何克隆位置可用）。
+# 2026-10-11 残留清扫：旧名 .biof3-dev-user-data 回退分支退役（用户裁决删除旧目录，
+# 数据面唯一收敛 .petri-dev-user-data——DB/.petri-secrets/证书全以新名为准；
+# ecs-petri.crt 若需跨端 CA 信任，按 dev-infra SKILL「端口与后端实例纪律」第 6 条重新拷入新目录）。
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-UD="$ROOT/.biof3-dev-user-data"
-[ -d "$UD" ] || UD="$ROOT/.petri-dev-user-data"
+UD="$ROOT/.petri-dev-user-data"
 FNMR="/c/Users/Admin/AppData/Roaming/fnm/node-versions/v24.20.0/installation"
 [ -d "$FNMR" ] && export PATH="$FNMR:$PATH"
 WROOT="$(cygpath -w "$ROOT" 2>/dev/null || echo "$ROOT")"
