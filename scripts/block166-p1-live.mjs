@@ -34,7 +34,75 @@ function openDb() {
   return new Database(DB_PATH);
 }
 
-const FRAGMENT_TEMPLATE = fs.readFileSync(path.join(ROOT, 'tmp', 'block166-p1-fragment.html'), 'utf8');
+const FRAGMENT_TEMPLATE = `
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>BLOCK-166 P1 交互探针</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+</head>
+<body>
+<div id="gen-ui-p1-demo" style="padding:20px">
+  <h3 style="margin:0 0 4px;color:var(--foreground);font-size:15px">Gen UI P1 交互探针 · D3 图表 + 滑块</h3>
+  <p style="margin:0 0 12px;color:var(--muted-foreground);font-size:12px">vendor 离线映射 · 主题变量 · widgetState · tooltip</p>
+  <div id="chart"></div>
+  <div style="margin-top:12px">
+    <label for="threshold" style="color:var(--muted-foreground);font-size:12px">阈值滑块：<span id="threshold-value">50</span></label>
+    <input id="threshold" class="form-range" type="range" min="0" max="100" value="50"
+           data-tooltip="拖动调整高亮阈值，状态自动保存到宿主" style="width:240px">
+  </div>
+  <p style="margin:12px 0 0;font-size:12px">
+    <a id="doc-link" href="https://example.com/petri-docs">外链示例（宿主裁决打开）</a>
+    <span data-tooltip="内联提示目标"> · tooltip 演示文本</span>
+  </p>
+</div>
+<script>
+(function () {
+  'use strict';
+  var state = window.petri && window.petri.widgetState ? window.petri.widgetState : null;
+  var thresholdValue = (state && state.modelContent && typeof state.modelContent.threshold === 'number')
+    ? state.modelContent.threshold : 50;
+
+  var data = [
+    ['解析器', 96], ['prepare IPC', 88], ['协议宿主', 80],
+    ['vendor 离线', 72], ['主题注入', 64], ['guest 桥', 58],
+  ];
+  var threshold = thresholdValue;
+
+  function render() {
+    var root = d3.select('#chart');
+    root.selectAll('*').remove();
+    var bars = root.selectAll('div.bar').data(data).enter().append('div')
+      .style('display', 'flex').style('align-items', 'center').style('gap', '10px').style('margin-bottom', '6px');
+    bars.append('span').text(function (d) { return d[0]; })
+      .style('width', '90px').style('color', 'var(--muted-foreground)').style('font-size', '12px');
+    bars.append('div').style('flex', '1').style('height', '16px').style('border-radius', '8px')
+      .style('background', 'var(--muted)')
+      .append('div').style('height', '16px').style('border-radius', '8px')
+      .style('background', function (d) { return d[1] >= threshold ? 'var(--primary)' : 'var(--border)'; })
+      .style('width', function (d) { return d[1] + '%'; });
+    var badge = root.append('div').attr('class', 'viz-badge')
+      .text('P1 pipeline OK · threshold=' + threshold);
+    d3.select('#threshold-value').text(String(threshold));
+  }
+
+  var slider = document.getElementById('threshold');
+  slider.value = String(threshold);
+  slider.addEventListener('input', function () {
+    threshold = Number(slider.value);
+    render();
+    if (window.petri && typeof window.petri.setWidgetState === 'function') {
+      window.petri.setWidgetState({ modelContent: { threshold: threshold } }).catch(function () {});
+    }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
+`;
 
 function seed() {
   const ws = path.join(ROOT, 'tmp', 'block166-ws');

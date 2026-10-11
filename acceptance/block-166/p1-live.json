@@ -1,11 +1,11 @@
 {
-  "at": "2026-10-11T10:01:57.876Z",
+  "at": "2026-10-11T10:26:40.550Z",
   "allPass": true,
   "assertions": [
     {
       "name": "P0 面复核：卡片+petri-genui:// iframe",
       "pass": true,
-      "detail": "petri-genui://gen-0569955701346c9c84c92688/index.html"
+      "detail": "petri-genui://gen-79293018ecedcc0d6d299155/index.html"
     },
     {
       "name": "guest 桥安装（在线）",
