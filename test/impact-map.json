@@ -4,7 +4,7 @@
   "rules": [
     {
       "id": "block166-gen-ui",
-      "note": "BLOCK-166 Gen UI 沙箱：前端解析器/卡片/followUp 判定走 vitest（references/followUp/GenUiCard 测试），主进程宿主与 guest 桥/主题映射/外链白名单/持久化往返/导出走 node:test（host/bridge/theme/external-link/p2 测试），后端 REST 路由 gen-ui.js 纯函数同测；IPC 双向守卫由 ipc-channels-registry 自动覆盖。",
+      "note": "BLOCK-166 Gen UI 沙箱：前端解析器/卡片/followUp 判定/渗透对抗走 vitest（references/followUp/GenUiCard/pentest 测试），主进程宿主与 guest 桥/主题映射/外链白名单/持久化往返/导出/渗透静态面走 node:test（host/bridge/theme/external-link/p2/p3-pentest 测试），后端 REST 路由 gen-ui.js 纯函数同测；IPC 双向守卫由 ipc-channels-registry 自动覆盖。",
       "patterns": [
         "frontend/src/components/copilot/gen-ui/**",
         "src/main/gen-ui/**",
@@ -20,14 +20,16 @@
         "core/petri-server/routes/gen-ui.js",
         "core/petri-server/db/schema.js",
         "scripts/gen-ui-export.mjs",
-        "scripts/block166-p2-live.mjs"
+        "scripts/block166-p2-live.mjs",
+        "scripts/block166-p3-live.mjs"
       ],
       "tests": [
         "test/block166-gen-ui-host.test.mjs",
         "test/block166-gen-ui-guest-bridge.test.mjs",
         "test/gen-ui-theme-tokens.test.mjs",
         "test/block166-gen-ui-external-link.test.mjs",
-        "test/block166-gen-ui-p2.test.mjs"
+        "test/block166-gen-ui-p2.test.mjs",
+        "test/block166-gen-ui-p3-pentest.test.mjs"
       ],
       "commands": [
         "docs-check"

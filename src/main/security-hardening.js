@@ -162,6 +162,36 @@ function applyWebContentsHardening({ app, shell, log = console } = {}) {
       }
       return { action: 'deny' };
     });
+
+    // BLOCK-166 P3（实机渗透实证，勿回退）：OOPIF 沙箱页自身导航阻断。
+    // CSP frame-src 只约束「嵌入子框架的 src」，frame 自身 location 赋值不受它管
+    // （p3-live 实测：恶意 fragment location.href 把沙箱页导航到外域成功）。
+    // 本项目唯一跨进程 iframe（OOPIF）= petri-genui guest；规格 §6.5「页面内导航
+    // 一律阻断」在此落地。页内 #fragment 跳转走 scrollIntoView，不经导航。
+    // 注：will-navigate 对 OOPIF 不派发（Electron 实测），子框架导航经宿主的
+    // will-frame-navigate 到达。
+    contents.on('will-navigate', (event, url) => {
+      if (contents.getType() !== 'iframe') return;
+      event.preventDefault();
+      log.warn?.('[security] gen-ui 沙箱导航已阻断:', String(url).slice(0, 80));
+    });
+    contents.on('will-frame-navigate', (event, params) => {
+      if (params.isMainFrame) return;
+      let frameOrigin = '';
+      try {
+        frameOrigin = new URL(params.frame.url).origin;
+      } catch { /* 非法 origin 不匹配 gen-ui，放行给其它策略 */ }
+      if (!frameOrigin.startsWith('petri-genui:')) return;
+      let targetOrigin = '';
+      try {
+        targetOrigin = new URL(params.url).origin;
+      } catch {
+        targetOrigin = '';
+      }
+      if (targetOrigin === frameOrigin) return; // 同 origin 自身重载放行
+      event.preventDefault();
+      log.warn?.('[security] gen-ui 沙箱子框架导航已阻断:', String(params.url).slice(0, 80));
+    });
   });
 }
 

@@ -8,7 +8,7 @@ acceptance:
   - P3：注入渗透测试三路全过（消息正文/代码块/fragment 本体）+ vendor sha256 全量强校验 + 迁移任务书 §12 验收清单逐项对账
   - 每阶段：定向测试 + tsc 0 + lint 触碰面 0 error + docs:check / ui:audit:check；实机证据落 acceptance/block-166/
 reopen: 阻塞 = 无（D1-D6 已按用户裁决落定，见 §3）
-status: active
+status: completed
 ---
 
 # BLOCK-166：Gen UI 沙箱可视化页面（::visualize → 聊天流内嵌沙箱交互页）
@@ -88,6 +88,30 @@ status: active
 5. **门禁**：持久化往返与恢复测试 + follow-up 绑定拒绝分支测试 + 预览迁移不重载测试 + 导出产物离线可开测试；**实机**：交互页（D3+滑块）重开会话状态恢复证据。
 
 ### P3 加固
+> **P3-COMPLETED → 整包 COMPLETED**（2026-10-11；实机 6/6 ALL PASS 证据 `acceptance/block-166/p3-live.json`；渗透测试抓真修 1 件缺陷 + 1 件真缺口如实登记）。
+
+**渗透测试三路交付**：
+- 路由 A/B（消息正文注入/代码围栏绕过，`frontend/src/components/copilot/gen-ui/pentest.test.ts` + Node 静态面 `test/block166-gen-ui-p3-pentest.test.mjs`）：对抗 title 原样保留为数据（React 文本节点无 innerHTML 注入面）、伪协议/HTML path 产 invalid、原型污染载荷（__proto__ 未知键）schema 拒绝、围栏内对抗指令整体保持普通文本。**抓真修缺陷 1 件**：`references.ts` decode 的 JSON.parse 无兜底——坏 JSON 参数（模型截断/嵌套超提取器形态）会炸穿整个消息投影，修为 try/catch → null → invalid 占位（红→绿留痕）。
+- 路由 C（fragment 本体，`scripts/block166-p3-live.mjs` 实机 6/6）：八类载荷（外域 iframe/表单外传/window.open/fetch/WS/location 导航/外域图/download 锚点）注入真实沙箱——CSP 违规事件实证三类（connect-src/img-src/frame-src）、window.open 零逃逸（sandbox 无 allow-popups）、外域 iframe 未注入（frame-src 'none'，主进程 ERR_BLOCKED_BY_CSP 实证）、外域内容零加载、宿主页面未被导航。
+
+**真缺口如实登记（knownGap，登记不阻塞）**：frame 自身导航劫持——`location.href` 赋值把沙箱页导航为外域错误页（DoS 向量：卡片死亡，widgetState 已持久化无数据丢失）。**安全边界未破**：外域内容加载被 CSP 拒（主进程 ERR_BLOCKED_BY_CSP 实证）。三路封堵实测不可达：will-navigate / will-frame-navigate（OOPIF 不派发）、webRequest（OOPIF 请求不过主进程 session 栈）；beforeunload 方案确认无效（沙箱无 allow-modals，其对话框被抑制=导航继续）。候选=升级 Electron 复测或 CSP navigate-to 规范落地；登记 AUDIT-LOG 待裁决。
+
+**vendor sha256 全量强校验核验（三读路径）**：协议服务（readVendorFile 内强制 verifyVendorHash）、独立导出（gen-ui-export.mjs 内联复验 fail-closed）、清单完整性（p3-pentest 静态断言全量文件哈希）——篡改字节/清单外文件名/哈希不符均明确失败不回退（P1 起生效，P3 复核）。
+
+**CSP/origin 审计笔录**：guest CSP=`default-src 'none'` 打底 + script/style-src `'self' 'unsafe-inline' + 白名单域`（无通配源，静态断言钉）+ connect-src 仅 blob:/data:（网络 API 全禁）+ frame-src/form-action/base-uri/object-src 全 'none'；scheme 源不加引号（'blob:' 非法源整条被忽略，P1 真雷）。iframe sandbox 白名单=`allow-scripts allow-same-origin` 二值枚举钉死（无 popups/forms/top-navigation/downloads）。origin 模型=privileged scheme `petri-genui:`（standard+secure，supportFetchAPI:false + corsEnabled:false 断言钉）+ 每 card 独立 origin `gen-<id>`；应用级 CSP 对 gen-ui 响应跳过注入（P1 真雷回归钉）、frame-src 对父页放行 petri-genui:。guest 桥消息双向校验=source iframe 身份 + event.origin 严格匹配（伪造 origin/source 测试在案）。
+
+**任务书 §12 验收清单逐项对账**：
+| # | 验收项 | 证据 | 结论 |
+|---|---|---|---|
+| 1 | 静态图表页渲染/高度自适应/深浅色 | p0-live（渲染+高度）+ p1-live（主题 rgb 实测跟随） | ✓ |
+| 2 | 交互页可用/重开 widgetState 恢复 | p2-live（threshold=88 重开恢复） | ✓ |
+| 3 | pending 不渲染/围栏不渲染/invalid 占位 | references.test.ts（P0 21 用例）+ pentest.test.ts（P3 对抗） | ✓ |
+| 4 | 断网渲染/删除 vendor 明确失败不回退 | p1-live（offline 重载渲染）+ vendor 缺失/篡改 fail-closed 测试 | ✓ |
+| 5 | fetch/XHR/WS 禁；window.open/表单/下载/导航阻断 | p3-live（违规事件+零逃逸）+ sandbox 枚举钉 | ✓（导航面=knownGap 登记：内容零逃逸，frame 劫持 DoS 候选） |
+| 6 | openExternal 仅 http(s)/追问进当前会话 | external-link 8 分支 + p1-live 拒绝 + p2-live follow-up 真发 | ✓ |
+| 7 | 放大预览不重载/折叠不重载 | GenUiCard.test（同一 DOM 节点往返）+ p2-live（src 保持） | ✓（「折叠」未列入交付范围——plan §2 未含，登记候选） |
+| 8 | >1MB 拒绝报错/非法路径拒绝 | P0 too-large 测试/1MB 常量 + p3-pentest 路径全拒 | ✓ |
+
 1. 注入渗透测试：恶意 `::visualize` 三路（消息正文 / 代码块内 / fragment 本体：脚本逃逸、fetch 外联、`<iframe>` 子框架、表单提交、`window.open`）。
 2. vendor sha256 全量强校验 + CSP/origin 审计笔录。
 3. **门禁**：渗透清单全过 + 任务书 §12 验收清单逐项对账 + closeout 十一门。

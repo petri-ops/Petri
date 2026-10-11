@@ -39,7 +39,15 @@ export function projectGenUiReferences(text: string, completed: boolean): GenUiP
     start: directive.start,
     end: directive.end,
     // 通用 directive 只解析 key=value；JSON 参数形态在此解码后统一走严格 schema。
-    decode: () => directive.parameters ?? (JSON.parse(directive.raw.slice(directive.raw.indexOf('{'))) as unknown),
+    // 坏 JSON（模型截断/嵌套超出提取器形态）→ null → invalid 占位，不炸穿消息投影。
+    decode: () => {
+      if (directive.parameters !== null && directive.parameters !== undefined) return directive.parameters;
+      try {
+        return JSON.parse(directive.raw.slice(directive.raw.indexOf('{'))) as unknown;
+      } catch {
+        return null;
+      }
+    },
   }));
 
   const unclosed = findUnclosedAssistantDirectiveStart(text, 'visualize', ranges, {

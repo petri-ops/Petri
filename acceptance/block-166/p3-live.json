@@ -1,0 +1,40 @@
+{
+  "at": "2026-10-11T12:20:45.775Z",
+  "allPass": true,
+  "assertions": [
+    {
+      "name": "导航向量触发前：沙箱页存活（petri-genui: origin）",
+      "pass": true
+    },
+    {
+      "name": "导航向量触发前：桥存活（guest API 完整）",
+      "pass": true
+    },
+    {
+      "name": "CSP 违规事件实证（connect-src/img-src 至少各一）",
+      "pass": true,
+      "detail": "[\"img-src\",\"connect-src\",\"frame-src\"]"
+    },
+    {
+      "name": "无弹窗逃逸（window.open 未产生任何窗口）",
+      "pass": true,
+      "detail": "popups=0"
+    },
+    {
+      "name": "外域内容零加载（evil target 若有均为 CSP 拒载错误态；无正文逃逸）",
+      "pass": true,
+      "detail": "evilTargets=1 contentLoaded=false"
+    },
+    {
+      "name": "宿主页面未被导航（仍是项目页 localhost:3000）",
+      "pass": true,
+      "detail": "http://localhost:3000/project/p_blk166p3_mv3sk3xv"
+    }
+  ],
+  "knownGap": {
+    "name": "已知缺口（登记不阻塞）：frame 自身导航劫持沙箱页（DoS 向量）",
+    "observed": "https://evil.example/redirect",
+    "note": "安全边界未破（内容加载被 CSP 拒）；Electron 平台限制，登记 AUDIT-LOG 待裁决（beforeunload 方案/升级复测）"
+  },
+  "note": "路由 C 运行时取证：八类载荷（iframe/表单/window.open/fetch/WS/导航/外域图/download 锚点）注入真实沙箱。外域内容加载被 CSP 拒（ERR_BLOCKED_BY_CSP 主进程实证）；frame 自身导航劫持为已知缺口登记（安全边界未破，DoS 向量）。"
+}
