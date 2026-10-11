@@ -248,7 +248,7 @@
   padding: 6px 14px;
   font-size: var(--petri-font-size-caption);
   border: 1px solid var(--petri-border, #404040);
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   background: var(--petri-bg-button, #3a3a3a);
   color: inherit;
   cursor: pointer;

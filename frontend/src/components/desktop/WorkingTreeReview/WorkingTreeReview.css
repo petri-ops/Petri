@@ -30,7 +30,7 @@
   padding: 0 10px;
   font-size: var(--petri-font-size-caption);
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-surface);
   color: var(--petri-text);
   cursor: pointer;
@@ -62,7 +62,7 @@
   height: 28px;
   padding: 0;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-secondary);
   cursor: pointer;
@@ -163,7 +163,7 @@
   justify-content: center;
   min-width: 16px;
   height: 16px;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   font-size: var(--petri-font-size-xs);
   font-weight: 700;
   padding: 0 3px;

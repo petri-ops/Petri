@@ -21,7 +21,7 @@
   gap: 6px;
   padding: 8px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
 }
 
@@ -35,7 +35,7 @@
 .artifactPinLabel {
   flex-shrink: 0;
   padding: 0 6px;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: var(--petri-accent-bg);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-xs);
@@ -66,7 +66,7 @@
   max-height: 400px;
   overflow: auto;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-canvas);
   color: var(--petri-text);
   font-family: var(--petri-font-mono);
@@ -79,7 +79,7 @@
   max-height: 400px;
   overflow: auto;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   /* 画布 inset（铁律 1/4）：表格体沉到 canvas，表头走 hover 提亮 */
   background: var(--petri-bg-canvas);
 }
@@ -118,7 +118,7 @@
   max-height: 400px;
   margin: 0 auto;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-canvas);
 }
 
@@ -126,7 +126,7 @@
   width: 100%;
   height: 400px;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-canvas);
 }
 
@@ -136,7 +136,7 @@
   gap: 6px;
   padding: 12px;
   border: 1px dashed var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   color: var(--petri-text-tertiary);
   font-size: var(--petri-font-size-xs);
 }

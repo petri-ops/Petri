@@ -35,7 +35,7 @@
 .btn {
   -webkit-app-region: no-drag;
   border: 1px solid var(--petri-warning-text);
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: transparent;
   color: var(--petri-warning-text);
   font-size: 11px;

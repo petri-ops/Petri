@@ -16,7 +16,7 @@
   min-width: 72px;
   padding: 4px 12px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-xs);

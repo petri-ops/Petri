@@ -65,7 +65,7 @@
   max-width: 260px;
   padding: 4px 6px;
   border: 1px solid var(--petri-border-color, transparent);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text);
   font-size: var(--petri-font-size-body-sm);
@@ -81,7 +81,7 @@
   align-items: center;
   gap: 4px;
   padding: 3px 8px;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: var(--petri-hover);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-caption);
@@ -117,7 +117,7 @@
 .chip {
   padding: 6px 14px;
   border: 1px solid var(--petri-border-color, transparent);
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-caption);
@@ -143,7 +143,7 @@
   gap: 6px;
   padding: 5px 10px;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-hover);
   color: var(--petri-text);
   font-size: var(--petri-font-size-body-sm);
@@ -170,7 +170,7 @@
   left: 0;
   width: 340px;
   max-width: 80vw;
-  border-radius: 12px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
   border: 1px solid var(--petri-border-color, transparent);
   box-shadow: 0 10px 32px rgba(0, 0, 0, 0.18);
@@ -204,7 +204,7 @@
   width: 100%;
   padding: 8px 10px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: transparent;
   color: var(--petri-text);
   font-size: var(--petri-font-size-body-sm);
@@ -231,7 +231,7 @@
 .projectRowTag {
   font-size: 10px;
   padding: 1px 5px;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   background: var(--petri-hover);
   color: var(--petri-text-secondary);
 }
@@ -255,7 +255,7 @@
   gap: 8px;
   padding: 9px 10px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: transparent;
   color: var(--petri-text);
   font-size: var(--petri-font-size-body-sm);
@@ -277,7 +277,7 @@
 .actionInput {
   padding: 7px 9px;
   border: 1px solid var(--petri-border-color, transparent);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg);
   color: var(--petri-text);
   font: inherit;
@@ -310,7 +310,7 @@
 .actionPrimary {
   padding: 6px 14px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-accent);
   color: #fff;
   font-weight: 600;
@@ -358,7 +358,7 @@
   font-size: var(--petri-font-size-caption);
   text-align: left;
   padding: 5px 8px;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;

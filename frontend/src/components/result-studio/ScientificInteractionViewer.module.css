@@ -3,7 +3,7 @@
 .selectionBar > span { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .selectionBar em { color: var(--petri-status-loading); font-style: normal; }
 .selectionBar em[data-status='invalid'] { color: var(--petri-danger); }
-.selectionBar button, .tableToolbar button, .tableToolbar select, .tableToolbar input, .legend button { min-height: 27px; border: 1px solid var(--petri-border); border-radius: 6px; background: transparent; color: inherit; font: inherit; }
+.selectionBar button, .tableToolbar button, .tableToolbar select, .tableToolbar input, .legend button { min-height: 27px; border: 1px solid var(--petri-border); border-radius: var(--petri-radius-md);; background: transparent; color: inherit; font: inherit; }
 .selectionBar button, .tableToolbar button, .legend button { cursor: pointer; }
 .tableToolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 7px 9px; border-bottom: 1px solid var(--petri-border); font-size: var(--petri-font-size-sm); }
 .tableToolbar input { min-width: 110px; flex: 0 1 190px; padding: 0 7px; }
@@ -24,7 +24,7 @@
 .virtualRow input { margin: auto; }
 .virtualRow span { overflow: hidden; padding: 0 8px; text-overflow: ellipsis; white-space: nowrap; }
 .virtualRow:hover { background: color-mix(in srgb, var(--petri-accent) 6%, transparent); }
-.loading { position: sticky; bottom: 6px; width: fit-content; margin: auto; padding: 4px 8px; border: 1px solid var(--petri-border); border-radius: 999px; background: var(--petri-bg-surface); font-size: var(--petri-font-size-xs); }
+.loading { position: sticky; bottom: 6px; width: fit-content; margin: auto; padding: 4px 8px; border: 1px solid var(--petri-border); border-radius: var(--petri-radius-pill);; background: var(--petri-bg-surface); font-size: var(--petri-font-size-xs); }
 .error { padding: 6px 9px; color: var(--petri-danger); font-size: var(--petri-font-size-xs); }
 .readOnlyNotice { display: grid; place-content: center; gap: 4px; min-height: 220px; color: var(--petri-text-tertiary); text-align: center; }
 .readOnlyNotice strong { color: var(--petri-text); font-size: var(--petri-font-size-caption); }
@@ -41,8 +41,8 @@
 .filterClauseRow { display: flex; min-width: 260px; flex: 1 1 100%; flex-wrap: wrap; align-items: center; gap: 6px; }
 .filterClauseRow input { min-width: 90px; flex: 0 1 150px; }
 .scatterTools { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 7px 9px 0; color: var(--petri-text-secondary); font-size: var(--petri-font-size-xs); }
-.scatterTools input[type='text'] { min-width: 120px; min-height: 27px; padding: 0 7px; border: 1px solid var(--petri-border); border-radius: 6px; background: transparent; color: inherit; font: inherit; }
-.scatterTools input[type='number'] { width: 64px; min-height: 27px; padding: 0 4px; border: 1px solid var(--petri-border); border-radius: 6px; background: transparent; color: inherit; font: inherit; }
+.scatterTools input[type='text'] { min-width: 120px; min-height: 27px; padding: 0 7px; border: 1px solid var(--petri-border); border-radius: var(--petri-radius-md);; background: transparent; color: inherit; font: inherit; }
+.scatterTools input[type='number'] { width: 64px; min-height: 27px; padding: 0 4px; border: 1px solid var(--petri-border); border-radius: var(--petri-radius-md);; background: transparent; color: inherit; font: inherit; }
 .scatterTools label { display: inline-flex; align-items: center; gap: 4px; }
 .scatterTools em { color: var(--petri-text-tertiary); font-style: normal; }
 .scatter .thresholdLine { stroke: var(--petri-text-tertiary); stroke-dasharray: 5 4; stroke-width: 1; }

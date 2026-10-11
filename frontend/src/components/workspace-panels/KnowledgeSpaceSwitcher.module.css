@@ -14,7 +14,7 @@
   max-width: 320px;
   padding: 3px 6px;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-elevated);
   color: var(--petri-text-primary);
   font-size: 12px;
@@ -23,7 +23,7 @@
 .btn {
   padding: 3px 8px;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-primary);
   font-size: 12px;
@@ -50,7 +50,7 @@
   width: 180px;
   padding: 3px 6px;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-elevated);
   color: var(--petri-text-primary);
   font-size: 12px;

@@ -145,7 +145,7 @@
   gap: 6px;
   padding: 4px 8px;
   border: 1px solid var(--petri-border);
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
   font: inherit;
@@ -172,7 +172,7 @@
   display: inline-block;
   width: 10px;
   height: 10px;
-  border-radius: 2px;
+  border-radius: var(--petri-radius-sm);;
   background: var(--petri-accent, var(--petri-text));
   fill-opacity: 0.78;
 }
@@ -213,7 +213,7 @@
   gap: 8px;
   padding: 6px 10px;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-surface);
   color: var(--petri-text);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
@@ -242,7 +242,7 @@
   margin: 0;
   padding: 8px 10px;
   border: 1px dashed var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-subtle);
   color: var(--petri-text-secondary);
   font-family: var(--petri-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);

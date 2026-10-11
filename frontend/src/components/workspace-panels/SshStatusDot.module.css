@@ -16,7 +16,7 @@
 .withLabel {
   padding: 3px 10px;
   border: 1px solid var(--petri-border);
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: var(--petri-bg-subtle);
 }
 
@@ -27,7 +27,7 @@
 .dot {
   width: 8px;
   height: 8px;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   flex-shrink: 0;
 }
 

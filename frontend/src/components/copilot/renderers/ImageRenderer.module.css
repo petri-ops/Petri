@@ -36,7 +36,7 @@
   /* The renderer never specifies max-height so aspect ratio
      remains intact for both landscape and portrait payloads. */
   max-width: 100%;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-subtle);
   border: 1px solid var(--petri-border);
 }
@@ -54,7 +54,7 @@
   margin: 0;
   padding: 8px 10px;
   border: 1px dashed var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-subtle);
   color: var(--petri-text-secondary);
   font-family: var(--petri-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);

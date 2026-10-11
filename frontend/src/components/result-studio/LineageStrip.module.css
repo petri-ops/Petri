@@ -22,7 +22,7 @@
   overflow: hidden;
   padding: 1px 8px;
   border: 1px solid var(--petri-border);
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: transparent;
   color: var(--petri-text-secondary);
   cursor: pointer;
@@ -59,7 +59,7 @@
 .nodePin {
   padding: 1px 5px;
   border: none;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: transparent;
   color: var(--petri-text-tertiary);
   cursor: pointer;

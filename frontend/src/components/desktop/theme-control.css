@@ -11,7 +11,7 @@
   gap: 8px;
   padding: 6px 8px;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-secondary);
   cursor: pointer;
@@ -39,7 +39,7 @@
   width: 168px;
   padding: 5px;
   border: 1px solid var(--petri-border);
-  border-radius: 7px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-elevated);
   box-shadow: var(--petri-shadow-menu);
 }
@@ -57,7 +57,7 @@
   gap: 8px;
   padding: 0 8px;
   border: 0;
-  border-radius: 5px;
+  border-radius: var(--petri-radius-sm);;
   background: transparent;
   color: var(--petri-text-secondary);
   cursor: pointer;

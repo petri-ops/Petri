@@ -272,7 +272,7 @@
   min-width: 0;
   max-width: min(180px, 28vw);
   border: 1px solid var(--titlebar-pill-border);
-  border-radius: 7px;
+  border-radius: var(--petri-radius-md);;
   background: var(--titlebar-pill-bg);
   color: var(--titlebar-ink-muted);
 }
@@ -344,7 +344,7 @@
   max-width: calc(100vw - 20px);
   padding: 5px;
   border: 1px solid var(--petri-border);
-  border-radius: 9px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-elevated);
   box-shadow: 0 14px 32px color-mix(in srgb, var(--petri-text) 18%, transparent);
   transform: translateX(-50%);
@@ -359,7 +359,7 @@
   min-height: 32px;
   padding: 0 8px;
   border: none;
-  border-radius: 7px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-sm);
@@ -472,7 +472,7 @@
   width: 176px;
   padding: 5px;
   border: 1px solid var(--petri-border);
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-elevated);
   box-shadow: 0 14px 32px color-mix(in srgb, var(--petri-text) 18%, transparent);
   -webkit-app-region: no-drag;
@@ -486,7 +486,7 @@
   height: 32px;
   padding: 0 8px;
   border: none;
-  border-radius: 7px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-sm);
@@ -522,7 +522,7 @@
   width: 28px;
   height: 28px;
   border: none;
-  border-radius: 7px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--titlebar-ink-muted);
   cursor: pointer;
@@ -568,7 +568,7 @@
   height: 22px;
   padding: 0 7px;
   border: 1px solid var(--titlebar-pill-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--titlebar-pill-bg);
   color: var(--titlebar-ink);
   cursor: pointer;
@@ -601,7 +601,7 @@
   height: 16px;
   padding: 0 5px;
   margin-left: 4px;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: color-mix(in srgb, var(--petri-accent) 16%, transparent);
   color: var(--petri-accent);
   font-size: 10px;
@@ -631,7 +631,7 @@
   justify-content: center;
   width: 18px;
   height: 18px;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: color-mix(in srgb, var(--petri-accent) 18%, transparent 82%);
   color: var(--petri-accent);
   flex-shrink: 0;
@@ -644,7 +644,7 @@
   width: 16px;
   height: 16px;
   border: none;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: transparent;
   color: color-mix(in srgb, var(--titlebar-ink-muted) 72%, transparent 28%);
   font-size: var(--petri-font-size-body-sm);
@@ -683,7 +683,7 @@
   width: 30px;
   height: 28px;
   border: none;
-  border-radius: 7px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--titlebar-ink-muted);
   cursor: pointer;

@@ -30,7 +30,7 @@
   justify-content: center;
   width: 44px;
   height: 44px;
-  border-radius: 12px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-accent-bg);
   color: var(--petri-accent);
   flex-shrink: 0;
@@ -98,7 +98,7 @@
   height: 36px;
   padding: 0 36px;
   border: 1px solid var(--petri-border);
-  border-radius: 9px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-input-bg);
   color: var(--petri-text);
   font-size: var(--petri-font-size-body-sm);
@@ -126,7 +126,7 @@
   width: 24px;
   height: 24px;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-tertiary);
   cursor: pointer;
@@ -150,7 +150,7 @@
   height: 32px;
   padding: 0 12px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-caption);
@@ -176,7 +176,7 @@
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
-  border-radius: 9px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-canvas);
   font-size: var(--petri-font-size-xs);
   font-weight: 600;
@@ -204,7 +204,7 @@
   height: 30px;
   padding: 0 12px;
   border: 1px solid var(--petri-border);
-  border-radius: 7px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-sm);
@@ -251,7 +251,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
   margin-bottom: 12px;
 }
@@ -277,7 +277,7 @@
   flex-direction: column;
   padding: 16px;
   border: 1px solid var(--petri-border);
-  border-radius: 12px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
   transition: border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
               transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
@@ -323,7 +323,7 @@
   color: var(--petri-text-tertiary);
   background: var(--petri-bg-surface);
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
 }
 
 .sourceBadge {
@@ -331,7 +331,7 @@
   font-size: var(--petri-font-size-xs);
   font-weight: 600;
   padding: 3px 8px;
-  border-radius: 5px;
+  border-radius: var(--petri-radius-sm);;
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
@@ -370,7 +370,7 @@
   color: var(--petri-text-tertiary);
   background: var(--petri-bg-surface);
   padding: 3px 8px;
-  border-radius: 5px;
+  border-radius: var(--petri-radius-sm);;
 }
 
 .tagMore {
@@ -411,7 +411,7 @@
   gap: 6px;
   height: 32px;
   padding: 0 14px;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   font-size: var(--petri-font-size-caption);
   font-weight: 500;
   cursor: pointer;
@@ -476,7 +476,7 @@
   flex-direction: column;
   background: var(--petri-bg-surface);
   border: 1px solid var(--petri-border);
-  border-radius: 16px;
+  border-radius: var(--petri-radius-lg);;
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
   animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -520,7 +520,7 @@
   color: var(--petri-text-tertiary);
   background: var(--petri-bg-canvas);
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
 }
 
 .closeButton {
@@ -530,7 +530,7 @@
   width: 32px;
   height: 32px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: transparent;
   color: var(--petri-text-tertiary);
   cursor: pointer;
@@ -582,7 +582,7 @@
   display: inline-flex;
   align-items: center;
   padding: 4px 10px;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-accent-bg);
   color: var(--petri-accent);
   font-size: var(--petri-font-size-sm);
@@ -608,7 +608,7 @@
   align-items: center;
   gap: 4px;
   padding: 4px 10px;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-canvas);
   border: 1px solid var(--petri-border);
   font-size: var(--petri-font-size-sm);
@@ -675,7 +675,7 @@
   height: 34px;
   padding: 0 12px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-canvas);
   color: var(--petri-text);
   font-size: var(--petri-font-size-caption);
@@ -717,7 +717,7 @@
 .toggleSlider {
   width: 40px;
   height: 22px;
-  border-radius: 11px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-border);
   transition: background 0.2s ease;
 }
@@ -764,7 +764,7 @@
   align-items: flex-start;
   gap: 8px;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-canvas);
   font-size: var(--petri-font-size-caption);
 }
@@ -803,7 +803,7 @@
   height: 36px;
   padding: 0 16px;
   border: 1px solid var(--petri-border);
-  border-radius: 9px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-body-sm);
@@ -876,7 +876,7 @@
   color: var(--petri-text);
   background: var(--petri-bg-surface);
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   cursor: pointer;
   transition:
     background 0.15s ease,
@@ -901,7 +901,7 @@
   padding: 0 10px;
   background: var(--petri-surface);
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-caption);
   font-weight: 500;

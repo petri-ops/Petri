@@ -7,7 +7,7 @@
 .drillNote {
   margin-bottom: 10px;
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   font-size: 12px;
 }
 
@@ -39,7 +39,7 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   border: 1px solid var(--petri-border-color, #323848);
   background: var(--petri-bg-surface);
   color: var(--petri-text-primary, #e6e9f2);
@@ -109,7 +109,7 @@
 
 .remoteBadge {
   padding: 2px 7px;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: var(--petri-accent-soft, rgba(90, 156, 255, 0.16));
   color: var(--petri-accent, #5a9cff);
   max-width: 160px;
@@ -146,7 +146,7 @@
 
 .projectTag {
   padding: 2px 7px;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: var(--petri-bg-surface, rgba(154, 163, 184, 0.12));
   border: 1px solid var(--petri-border-color, #323848);
   color: var(--petri-text-secondary, #9aa3b8);
@@ -174,7 +174,7 @@
 .cancelArmBtn {
   flex: 1;
   padding: 4px 8px;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   border: 1px solid var(--petri-border-color, #323848);
   background: transparent;
   color: var(--petri-text-secondary, #9aa3b8);
@@ -222,7 +222,7 @@
   resize: vertical;
   min-height: 44px;
   padding: 8px 10px;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   border: 1px solid var(--petri-border-color, #323848);
   background: var(--petri-bg-surface);
   color: var(--petri-text-primary, #e6e9f2);
@@ -239,7 +239,7 @@
 .tileLog {
   margin: 0;
   padding: 8px;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
   border: 1px solid var(--petri-border-color, #323848);
   font-size: 11px;
@@ -302,7 +302,7 @@
   align-items: center;
   gap: 8px;
   padding: 4px 8px;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-surface);
 }
 
@@ -340,7 +340,7 @@
 .agentSummary {
   margin: 0;
   padding: 12px;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
   font-size: 12px;
   line-height: 1.6;
@@ -358,7 +358,7 @@
   padding: 4px 6px;
   margin: -2px -6px 0;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: none;
   cursor: pointer;
   text-align: left;
@@ -405,7 +405,7 @@
 .govBtn,
 .govBtnDanger {
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-surface);
   color: var(--petri-text);
   font-size: var(--petri-font-size-caption);

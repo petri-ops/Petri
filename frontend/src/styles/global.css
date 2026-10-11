@@ -103,7 +103,7 @@ body {
 }
 ::-webkit-scrollbar-thumb {
   background: color-mix(in srgb, var(--petri-border) 60%, var(--petri-bg-subtle) 40%);
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: color-mix(in srgb, var(--petri-text-secondary) 50%, transparent 50%);

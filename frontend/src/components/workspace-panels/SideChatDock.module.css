@@ -41,7 +41,7 @@
   /* UI-448 加映 v3 — 底色对齐摘要卡（--petri-bg-elevated，原 surface 档偏深） */
   background: var(--petri-bg-elevated);
   border: 1px solid var(--petri-border);
-  border-radius: 16px;
+  border-radius: var(--petri-radius-lg);;
   box-shadow: var(--petri-shadow-float);
   overflow: hidden;
   pointer-events: auto;
@@ -154,7 +154,7 @@
   width: 22px;
   height: 22px;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-tertiary);
   cursor: pointer;
@@ -197,7 +197,7 @@
   flex-direction: column;
   background: var(--petri-bg-elevated);
   border: 1px solid var(--petri-border);
-  border-radius: 16px;
+  border-radius: var(--petri-radius-lg);;
   box-shadow: var(--petri-shadow-float);
   overflow: hidden;
   pointer-events: auto;

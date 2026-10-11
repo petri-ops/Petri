@@ -16,7 +16,7 @@
   align-items: flex-start;
   gap: 10px;
   padding: 12px 14px;
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   border: 1px solid var(--petri-border);
   border-left: 4px solid var(--petri-info);
   background: var(--petri-bg-elevated);
@@ -54,7 +54,7 @@
   line-height: 1;
   cursor: pointer;
   padding: 0 2px;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
 }
 
 .dismiss:hover {

@@ -25,7 +25,7 @@
   height: 100%;
   min-width: 0;
   border: 1px solid var(--petri-border);
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-surface);
   overflow: hidden;
 }
@@ -68,7 +68,7 @@
   line-height: 1.7;
   background: var(--petri-bg-subtle);
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   padding: 10px 12px;
 }
 
@@ -85,7 +85,7 @@
 .msg {
   max-width: 92%;
   padding: 7px 10px;
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   font-size: var(--petri-font-size-caption);
   line-height: 1.6;
   white-space: pre-wrap;
@@ -112,7 +112,7 @@
   gap: 6px;
   padding: 5px 9px;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-xs);
@@ -150,7 +150,7 @@
   margin-top: 4px;
   padding: 8px 10px;
   border: 1px solid var(--petri-danger);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-danger-bg);
   display: flex;
   flex-direction: column;
@@ -174,7 +174,7 @@
 
 .confirmBtnDanger {
   border: 1px solid var(--petri-danger);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-danger);
   color: var(--petri-text);
   font-size: var(--petri-font-size-xs);
@@ -184,7 +184,7 @@
 
 .confirmBtnGhost {
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-xs);
@@ -205,7 +205,7 @@
   margin: 0 12px 8px;
   padding: 6px 10px;
   border: 1px solid var(--petri-danger);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-danger-bg);
   color: var(--petri-danger);
   font-size: var(--petri-font-size-xs);
@@ -225,7 +225,7 @@
   min-width: 0;
   resize: none;
   border: 1px solid var(--petri-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
   color: var(--petri-text);
   font-size: var(--petri-font-size-caption);
@@ -250,7 +250,7 @@
   width: 32px;
   height: 32px;
   border: 1px solid var(--petri-accent);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-accent-surface);
   color: var(--petri-text);
   cursor: pointer;

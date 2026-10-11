@@ -36,7 +36,7 @@
 .inspectorActions button,
 .inspectorActions a {
   border: 1px solid var(--petri-border);
-  border-radius: 7px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-secondary);
   cursor: pointer;
@@ -102,7 +102,7 @@
 
 .modeSwitcher button {
   border: 0;
-  border-radius: 5px;
+  border-radius: var(--petri-radius-sm);;
   background: transparent;
   color: var(--petri-text-tertiary);
   cursor: pointer;
@@ -129,7 +129,7 @@
   min-height: 19px;
   padding: 0 7px;
   border: 1px solid var(--petri-border);
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-xs);
   font-weight: 600;
@@ -147,7 +147,7 @@
   min-height: 19px;
   padding: 0 7px;
   border: 1px solid color-mix(in srgb, var(--petri-danger) 42%, var(--petri-border));
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   color: var(--petri-danger);
   font-size: var(--petri-font-size-xs);
   font-weight: 650;
@@ -298,7 +298,7 @@
   margin: 0;
   padding: 7px 8px;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-sm);
   line-height: 1.5;

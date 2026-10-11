@@ -27,7 +27,7 @@
   max-width: 140px;
   height: 24px;
   border: 1px solid var(--titlebar-pill-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--titlebar-pill-bg);
   color: var(--titlebar-ink-muted);
   transition: background 0.14s ease, border-color 0.14s ease, color 0.14s ease;
@@ -101,7 +101,7 @@
   height: 20px;
   padding: 0 6px;
   border: 1px solid var(--petri-border);
-  border-radius: 5px;
+  border-radius: var(--petri-radius-sm);;
   background: var(--petri-bg-surface);
   color: var(--petri-text);
   font-size: var(--petri-font-size-sm);
@@ -126,7 +126,7 @@
   width: 24px;
   height: 24px;
   border: 1px dashed var(--titlebar-pill-border);
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   background: transparent;
   color: var(--titlebar-ink-muted);
   cursor: pointer;
@@ -161,7 +161,7 @@
   width: 140px;
   padding: 5px;
   border: 1px solid var(--petri-border);
-  border-radius: 9px;
+  border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-elevated);
   box-shadow: 0 14px 32px color-mix(in srgb, var(--petri-text) 18%, transparent);
 }
@@ -174,7 +174,7 @@
   min-height: 32px;
   padding: 0 8px;
   border: none;
-  border-radius: 7px;
+  border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-sm);

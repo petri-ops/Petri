@@ -15,7 +15,7 @@
 .switchBtn {
   padding: 1px 8px;
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: var(--petri-radius-pill);;
   background: transparent;
   color: var(--petri-text-tertiary);
   cursor: pointer;

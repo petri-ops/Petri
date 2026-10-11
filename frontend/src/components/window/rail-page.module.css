@@ -37,7 +37,7 @@
   width: 20px;
   height: 32px;
   flex-shrink: 0;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   border: none;
   padding: 0;
   cursor: pointer;
@@ -86,7 +86,7 @@
   max-height: calc(100vh - 24px);
   overflow: auto;
   padding: 12px;
-  border-radius: 10px;
+  border-radius: var(--petri-radius-lg);;
   border: 1px solid var(--petri-border);
   background: var(--petri-bg-elevated);
   box-shadow: var(--petri-shadow-menu);
@@ -95,7 +95,7 @@
 .thumbWrap {
   margin-bottom: 10px;
   padding: 6px;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   border: 1px solid var(--petri-border);
   background: var(--petri-bg-subtle);
   display: flex;
@@ -114,7 +114,7 @@
 .thumbFallback {
   margin-bottom: 10px;
   padding: 18px 12px;
-  border-radius: 8px;
+  border-radius: var(--petri-radius-lg);;
   border: 1px dashed var(--petri-border);
   background: var(--petri-bg-subtle);
   text-align: center;
@@ -147,7 +147,7 @@
   flex: 1;
   height: 28px;
   font-size: 12px;
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   border: 1px solid var(--petri-border);
   background: transparent;
   color: var(--petri-text);

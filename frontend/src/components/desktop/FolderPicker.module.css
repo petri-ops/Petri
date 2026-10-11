@@ -16,7 +16,7 @@
   min-width: 0;
   padding: 4px 6px;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-canvas);
 }
 
@@ -43,7 +43,7 @@
   font-size: var(--petri-font-size-xs);
   font-family: var(--petri-font-mono);
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
 }
 
 .crumbBtn:hover {
@@ -59,7 +59,7 @@
   background: none;
   color: var(--petri-text-secondary, var(--petri-text-muted));
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
 }
 
 .upBtn:hover {
@@ -73,7 +73,7 @@
   max-height: 220px;
   overflow-y: auto;
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-canvas);
 }
 
@@ -88,7 +88,7 @@
   color: var(--petri-text);
   font-size: var(--petri-font-size-xs);
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: var(--petri-radius-sm);;
   text-align: left;
 }
 
@@ -116,7 +116,7 @@
   font-size: var(--petri-font-size-xs);
   color: var(--petri-danger, #d9534f);
   border: 1px solid var(--petri-border);
-  border-radius: 6px;
+  border-radius: var(--petri-radius-md);;
   word-break: break-all;
 }
 
