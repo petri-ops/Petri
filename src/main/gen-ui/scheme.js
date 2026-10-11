@@ -34,7 +34,7 @@ function registerGenUiSchemePrivileges() {
   ]);
 }
 
-function createGenUiSession({ filePath, title, hostOrigin = '', ownerWebContentsId = null }) {
+function createGenUiSession({ filePath, title, hostOrigin = '', ownerWebContentsId = null, scopeKey = '' }) {
   const id = `gen-${crypto.randomBytes(12).toString('hex')}`;
   sessions.set(id, {
     id,
@@ -42,6 +42,7 @@ function createGenUiSession({ filePath, title, hostOrigin = '', ownerWebContents
     title: title || '',
     hostOrigin,
     ownerWebContentsId,
+    scopeKey,
   });
   // 简单容量治理：超限逐出最旧（P2 页面池/租约接口的预留位，plan D5）。
   while (sessions.size > MAX_SESSIONS) {

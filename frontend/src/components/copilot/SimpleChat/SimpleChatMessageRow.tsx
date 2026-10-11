@@ -30,6 +30,7 @@ import { ResumePrompt } from './ResumePrompt';
 import { ResultEditProgressList } from './ResultEditProgressList';
 import { AssistantResultNodes } from '../extraRenderers';
 import { GenUiMessageContent } from '../gen-ui/GenUiMessageContent';
+import type { GenUiFollowUpRequest, GenUiFollowUpResult } from '../gen-ui/followUp';
 import { resumeInterruptedConversation } from '../conversationRunStore';
 import type { SimpleMessage } from './types';
 import type { ExtractContext, FileReferenceClickDetail } from '@/lib/chat-file-references';
@@ -67,6 +68,8 @@ export interface SimpleChatMessageRowProps {
   // void | Promise<void>：调用方多为 hook 的 async 回调；行内统一 `void fn()` 消费，
   // 类型放宽亦规避 no-misused-promises 对「Promise 传 void 属性」的误报。
   onFileReferenceClick: (detail: FileReferenceClickDetail) => void;
+  /** P2 follow-up 宿主回调（SimpleChat 输入绑定执行）。 */
+  onGenUiFollowUp?: (request: GenUiFollowUpRequest) => Promise<GenUiFollowUpResult>;
   onCopyMessage: (messageKey: string, content: string) => void | Promise<void>;
   onRegenerate: () => void | Promise<void>;
   onForkAt: (absoluteIndex: number) => void | Promise<void>;
@@ -97,6 +100,7 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
   formatError,
   getTechnicalDetails,
   onFileReferenceClick,
+  onGenUiFollowUp,
   onCopyMessage,
   onRegenerate,
   onForkAt,
@@ -173,6 +177,7 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
               conversationId={conversationId}
               rowKey={messageKey}
               onFileReferenceClick={onFileReferenceClick}
+              onFollowUp={onGenUiFollowUp}
               resolveContext={settledContext}
               resolveNonce={resolveNonce}
               highlightCode={m.role === 'assistant' ? ((code, language) => (

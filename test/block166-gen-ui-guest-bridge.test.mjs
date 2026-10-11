@@ -355,3 +355,37 @@ test('脚本加载失败：capture error 呈现明确失败横幅（不白屏）
 function await0(promise) {
   promise.then(() => { throw new Error('expected rejection'); }, () => {});
 }
+
+test('sendFollowUpMessage：合法 {prompt,title} → RPC；ack 后 resolve', async () => {
+  const env = createEnv({ activation: true });
+  try {
+    env.run();
+    const promise = env.window.petri.sendFollowUpMessage({ prompt: '把阈值改成 80', title: '图表确认' });
+    await env.flushAsync();
+    const msgs = rpcMessages(env);
+    assert.equal(msgs.length, 1);
+    assert.equal(msgs[0].msg.method, 'petri/gen-ui/follow-up');
+    assert.deepEqual(msgs[0].msg.params, { prompt: '把阈值改成 80', title: '图表确认' });
+    env.emitFromParent({ type: 'petri-gen-ui-rpc-result', id: msgs[0].msg.id, ok: true, payload: {} });
+    await promise;
+  } finally { env.restore(); }
+});
+
+test('sendFollowUpMessage：坏形状/超长/无手势本地拒绝且不发 RPC', () => {
+  const env = createEnv({});
+  try {
+    env.run();
+    await0(env.window.petri.sendFollowUpMessage({}));
+    await0(env.window.petri.sendFollowUpMessage({ prompt: '   ' }));
+    await0(env.window.petri.sendFollowUpMessage({ prompt: 'x'.repeat(8001) }));
+    await0(env.window.petri.sendFollowUpMessage({ prompt: 'p', title: 't'.repeat(251) }));
+    await0(env.window.petri.sendFollowUpMessage({ prompt: 'p', extra: 1 }));
+    await0(env.window.petri.sendFollowUpMessage({ prompt: 42 }));
+    const noGesture = createEnv({ activation: false });
+    noGesture.run();
+    await0(noGesture.window.petri.sendFollowUpMessage({ prompt: 'p' }));
+    assert.equal(rpcMessages(env).length, 0, 'shape rejections post nothing');
+    assert.equal(rpcMessages(noGesture).length, 0, 'no-gesture rejection posts nothing');
+    noGesture.restore();
+  } finally { env.restore(); }
+});

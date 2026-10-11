@@ -79,6 +79,8 @@ status: active
 4. **门禁**：桥单测（方法分发/参数校验/16KiB 上限/禁 load 自动保存）+ vendor 映射与缺失失败测试 + CSP 禁断言（fetch/XHR/WS 注入样本被拦）+ openExternal 拒绝分支测试；**实机**：断网渲染 D3 交互页证据。
 
 ### P2 完整体验
+> **P2-COMPLETED**（2026-10-11；实机 6/6 ALL PASS 证据 `acceptance/block-166/p2-live.json`）。交付四件=①widgetState 持久化（`gen_ui_widget_state` 表 + 后端 REST `routes/gen-ui.js` GET/PUT 纯函数直测；**D4 修订注记**：dev 主进程不进程内开 better-sqlite3（Electron ABI≠系统 Node），持久化面走后端 REST——P0 prepare 的 REST 先例同款，桌面侧 prepare 回读初始状态 + setState 双写、宿主持久化成功才 ack）+ 重开恢复（reload→prepare→回读 threshold=88 实证）；②follow-up 追问（guest `sendFollowUpMessage` 手势/8000/250 校验 + relay + `followUp.ts` 纯判定 vitest 直测 + 确认框 title≤250 + 非流式直发/流式既有排队同构 Enter 路径；只读=输入绑定缺席、过期/非当前=会话不一致，均明确拒绝）；③放大预览（锚点迁移不重载：iframe DOM 节点在卡片锚点与覆盖层间搬移，节点身份/src 不变，D5 bind/unbind；React 常驻锚点树 + layout effect 搬移）+ 复制图片（sender/会话/几何三重校验 `geometry.js` → capturePage 区域 → 原生剪贴板）；④独立导出 `scripts/gen-ui-export.mjs`（vendor CDN→data URL 内嵌 + sha256 复验 + standalone petri shim：localStorage 持久化/prefers-color-scheme/window.open；产物零外链 script/url()/href 实测）。测试面=Node 48（p2 增 8：持久化往返/16KiB/坏键/几何/导出零外链×2/哈希门）+ 前端 29（followUp 判定 7 + GenUiCard 迁移不重载/复制图 2 增）；code-size 基线随 SimpleChat +30 行重打。
+
 1. widgetState 持久化（D4 迁移 + scope key）+ 重开恢复（初始状态快照）。
 2. follow-up 追问（接 `SimpleChat` 现有输入绑定；只读/过期/非当前会话明确拒绝）。
 3. 放大预览（锚点迁移不重载）+ 复制图片（sender/沙箱 ID/几何校验后原生剪贴板）。

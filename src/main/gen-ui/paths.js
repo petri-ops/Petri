@@ -6,8 +6,14 @@
  */
 
 const path = require('path');
+const crypto = require('crypto');
 
 const CONVERSATION_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
+
+/** D4 scope key：sha256(workspacePath + conversationId) 十六进制（widgetState 持久化键）。 */
+function computeScopeKey(workspacePath, conversationId) {
+  return crypto.createHash('sha256').update(`${workspacePath}${conversationId}`).digest('hex');
+}
 
 /** 会话 id 形状校验（防 scope 根构造穿越）。 */
 function isValidConversationId(conversationId) {
@@ -58,6 +64,7 @@ function realpathScopeRoot(scopeRoot) {
 module.exports = {
   isValidConversationId,
   computeScopeRoot,
+  computeScopeKey,
   realpathScopeRoot,
   assertInsideScope,
 };

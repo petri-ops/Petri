@@ -511,6 +511,8 @@ const desktopBridgeSurface = {
     // set-state = widgetState 内存落主进程（≤16KiB）；open-external = 绝对 http(s) 白名单。
     setState: (payload) => ipcRenderer.invoke('gen-ui:set-state', payload || {}),
     openExternal: (payload) => ipcRenderer.invoke('gen-ui:open-external', payload || {}),
+    // BLOCK-166 P2 — 复制图片：渲染层提交卡片可视区域，主进程校验后 capturePage→剪贴板。
+    copyImage: (payload) => ipcRenderer.invoke('gen-ui:copy-image', payload || {}),
   },
 };
 

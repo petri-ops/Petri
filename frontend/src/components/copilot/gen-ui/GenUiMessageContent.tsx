@@ -13,6 +13,7 @@ import { CopilotMarkdown } from '../copilotMarkdown';
 import type { FileReferenceClickDetail, ExtractContext } from '@/lib/chat-file-references';
 import { dedupeGenUiParts, projectGenUiReferences } from './references';
 import { GenUiCard } from './GenUiCard';
+import type { GenUiFollowUpRequest, GenUiFollowUpResult } from './followUp';
 
 interface GenUiMessageContentProps {
   content: string;
@@ -23,6 +24,8 @@ interface GenUiMessageContentProps {
   resolveContext: ExtractContext | null;
   resolveNonce: number;
   highlightCode?: ((code: string, language: string | undefined) => React.ReactNode) | undefined;
+  /** P2 follow-up 宿主回调（SimpleChat 输入绑定执行）。 */
+  onFollowUp?: (request: GenUiFollowUpRequest) => Promise<GenUiFollowUpResult>;
 }
 
 export function GenUiMessageContent({
@@ -34,6 +37,7 @@ export function GenUiMessageContent({
   resolveContext,
   resolveNonce,
   highlightCode,
+  onFollowUp,
 }: GenUiMessageContentProps) {
   const parts = React.useMemo(() => dedupeGenUiParts(projectGenUiReferences(content, true)), [content]);
   const hasGenUi = parts.some((part) => part.kind !== 'text');
@@ -63,6 +67,7 @@ export function GenUiMessageContent({
               reference={part.reference}
               projectId={projectId}
               conversationId={conversationId}
+              onFollowUp={onFollowUp}
             />
           );
         }

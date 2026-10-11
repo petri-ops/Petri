@@ -495,6 +495,20 @@ try {
   db.exec('CREATE INDEX IF NOT EXISTS idx_tool_jobs_project_conversation ON tool_jobs(project_id, conversation_id, created_at DESC)');
 } catch {}
 
+// BLOCK-166 P2 — Gen UI widgetState 持久化（D4）：scope_key = sha256(workspacePath
+// + conversationId)，file_path = fragment 绝对路径；整体替换式快照 ≤16KiB。
+// dev 主进程不进程内开 better-sqlite3（Electron ABI≠系统 Node），桌面侧经本表
+// 的 REST 面（routes/gen-ui.js）读写——P0 prepare 的 REST 先例同款。
+try {
+  db.exec(`CREATE TABLE IF NOT EXISTS gen_ui_widget_state (
+    scope_key TEXT NOT NULL,
+    file_path TEXT NOT NULL,
+    state_json TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    PRIMARY KEY (scope_key, file_path)
+  )`);
+} catch {}
+
 // ============================================================
 // Projects
 // ============================================================

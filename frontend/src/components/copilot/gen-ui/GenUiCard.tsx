@@ -7,12 +7,16 @@
  * P1：guest 桥 RPC 中继（D6 简化传输）——guest 的 petri-gen-ui-rpc 经本组件校验
  *     source/origin 后转 desktopBridge（setState / openExternal），结果回投 iframe；
  *     应用主题（html[data-theme]）经 petri-set-globals 推送进沙箱页。
- * 放大预览/复制图/follow-up（P2）不在本版。
+ * P2：放大预览（锚点迁移不重载——iframe DOM 节点在卡片锚点与覆盖层间搬移，
+ *     D5 bind/unbind）+ 复制图片（可视区域几何 → gen-ui:copy-image → capturePage
+ *     → 原生剪贴板）+ follow-up 追问 relay（petri/gen-ui/follow-up → 宿主回调）。
  */
 
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { getBridge } from '@/lib/desktopBridge';
 import type { GenUiReference } from './schema';
+import type { GenUiFollowUpRequest, GenUiFollowUpResult } from './followUp';
 import styles from './GenUiCard.module.css';
 
 const HEIGHT_MIN = 240;
@@ -52,13 +56,15 @@ interface GenUiCardProps {
   conversationId: string | null;
   /** 卡片实例键（prepare 结果缓存键用）。 */
   cardKey: string;
+  /** P2 follow-up 宿主回调（SimpleChat 输入绑定执行；缺席时 guest 收到明确拒绝）。 */
+  onFollowUp?: (request: GenUiFollowUpRequest) => Promise<GenUiFollowUpResult>;
 }
 
 interface GenUiRpcMessage {
   type: 'petri-gen-ui-rpc';
   id: number;
   method: string;
-  params?: { state?: unknown; href?: unknown };
+  params?: { state?: unknown; href?: unknown; prompt?: unknown; title?: unknown };
 }
 
 /** petri-genui://gen-<id>/index.html → { sessionId, origin }（自定协议不走 URL.origin）。 */
@@ -78,10 +84,15 @@ export const GenUiCard = React.memo(function GenUiCard({
   projectId,
   conversationId,
   cardKey,
+  onFollowUp,
 }: GenUiCardProps) {
   const [result, setResult] = React.useState<GenUiPrepareResult | null>(null);
   const [height, setHeight] = React.useState<number>(HEIGHT_MIN);
+  const [zoomed, setZoomed] = React.useState<boolean>(false);
+  const [copyNotice, setCopyNotice] = React.useState<string>('');
   const frameRef = React.useRef<HTMLIFrameElement | null>(null);
+  const anchorRef = React.useRef<HTMLDivElement | null>(null);
+  const overlayContentRef = React.useRef<HTMLDivElement | null>(null);
   // 沙箱身份（prepare 成功后固定）：sessionId 用于 IPC 鉴权，origin 用于消息双向校验。
   const sandbox = React.useMemo(
     () => (result?.ok ? parseSandboxUrl(result.url) : null),
@@ -91,6 +102,7 @@ export const GenUiCard = React.memo(function GenUiCard({
   React.useEffect(() => {
     let cancelled = false;
     setResult(null);
+    setZoomed(false);
     if (!conversationId) {
       setResult({ ok: false, code: 'no-workspace', message: 'conversationId missing' });
       return undefined;
@@ -149,13 +161,26 @@ export const GenUiCard = React.memo(function GenUiCard({
         const res = await bridge.openExternal({ sessionId: sandbox.sessionId, href });
         if (res.ok) reply(true, {});
         else reply(false, { message: res.message || res.code });
+      } else if (rpc.method === 'petri/gen-ui/follow-up') {
+        // P2 follow-up：宿主回调缺席 = 绑定不可用（明确拒绝，规格 §8）。
+        if (typeof onFollowUp !== 'function') {
+          reply(false, { message: 'follow-up binding unavailable (read-only)' });
+          return;
+        }
+        const outcome = await onFollowUp({
+          prompt: typeof rpc.params?.prompt === 'string' ? rpc.params.prompt : '',
+          title: typeof rpc.params?.title === 'string' ? rpc.params.title : undefined,
+          messageConversationId: conversationId,
+        });
+        if (outcome.ok) reply(true, {});
+        else reply(false, { message: outcome.reason || 'follow-up rejected' });
       } else {
         reply(false, { message: `unknown gen-ui rpc method: ${rpc.method}` });
       }
     } catch (error) {
       reply(false, { message: error instanceof Error ? error.message : String(error) });
     }
-  }, [postToFrame, sandbox]);
+  }, [postToFrame, sandbox, onFollowUp, conversationId]);
 
   // guest 消息（高度回报 + 桥 RPC）：只信 source 为本卡 iframe 且 origin 为沙箱 origin 的消息。
   React.useEffect(() => {
@@ -200,12 +225,90 @@ export const GenUiCard = React.memo(function GenUiCard({
     return () => observer.disconnect();
   }, [result, sandbox, postToFrame]);
 
+  // P2 放大预览（锚点迁移）：把同一 iframe DOM 节点在卡片锚点与覆盖层间搬移，
+  // 不重建不重导航 → 交互状态与页面实例完整保留（D5 bind/unbind 接口）。
+  React.useLayoutEffect(() => {
+    if (!result?.ok) return;
+    const node = frameRef.current;
+    if (!node) return;
+    const target = zoomed ? overlayContentRef.current : anchorRef.current;
+    if (target && node.parentElement !== target) target.appendChild(node);
+  }, [zoomed, result]);
+
   const onFrameLoad = React.useCallback(() => {
     const theme = currentAppTheme();
     if (theme) postToFrame({ type: 'petri-set-globals', detail: { globals: { theme } } });
   }, [postToFrame]);
 
+  const onToggleZoom = React.useCallback(() => {
+    setZoomed((current) => !current);
+  }, []);
+
+  const onCopyImage = React.useCallback(() => {
+    const bridge = getBridge('genUi');
+    const rectEl = anchorRef.current;
+    if (!bridge || !sandbox || !rectEl) return;
+    const rect = rectEl.getBoundingClientRect();
+    setCopyNotice('');
+    bridge
+      .copyImage({
+        sessionId: sandbox.sessionId,
+        rect: {
+          x: Math.round(rect.left),
+          y: Math.round(rect.top),
+          width: Math.round(rect.width),
+          height: Math.round(rect.height),
+        },
+      })
+      .then((res: { ok: boolean; message?: string; code?: string }) => {
+        setCopyNotice(res.ok ? '已复制到剪贴板' : `复制失败：${res.message || res.code || '未知原因'}`);
+        setTimeout(() => setCopyNotice(''), 2500);
+      })
+      .catch(() => {
+        setCopyNotice('复制失败：IPC 错误');
+        setTimeout(() => setCopyNotice(''), 2500);
+      });
+  }, [sandbox]);
+
   const title = reference.title || '可视化';
+
+  const toolbar = result?.ok ? (
+    <>
+      {copyNotice ? <span className={styles.copyNotice}>{copyNotice}</span> : null}
+      <button
+        type="button"
+        className={styles.toolbarBtn}
+        onClick={onCopyImage}
+        title="复制可视化画面到剪贴板"
+      >
+        复制图
+      </button>
+      <button
+        type="button"
+        className={styles.toolbarBtn}
+        onClick={onToggleZoom}
+        title={zoomed ? '还原到聊天流' : '放大预览（不重载页面）'}
+      >
+        {zoomed ? '还原' : '放大'}
+      </button>
+    </>
+  ) : null;
+
+  const frame = result?.ok ? (
+    <iframe
+      ref={frameRef}
+      className={styles.frame}
+      src={result.url}
+      title={title}
+      // allow-same-origin 让 petri-genui:// 文档保留真实 origin（任务书 §8 参考实现
+      // 同款）：独立 origin 与宿主 app 互不可见，双向 postMessage 的 origin 校验
+      // 才有意义；无它则 origin 退化为 opaque null，桥的 origin 校验全废。
+      sandbox="allow-scripts allow-same-origin"
+      referrerPolicy="no-referrer"
+      loading="lazy"
+      onLoad={onFrameLoad}
+    />
+  ) : null;
 
   return (
     <div
@@ -215,25 +318,24 @@ export const GenUiCard = React.memo(function GenUiCard({
       <div className={styles.header}>
         <span className={styles.headerTitle}>{title}</span>
         {result?.ok ? <span className={styles.badge}>沙箱页面</span> : null}
+        {/* 放大期间工具钮随 iframe 迁入覆盖层头部，避免双份还原/复制入口。 */}
+        {!zoomed ? toolbar : null}
       </div>
       <div className={styles.body}>
         {result === null ? (
           <div className={styles.placeholder}>正在加载可视化…</div>
         ) : result.ok ? (
-          <div className={styles.frameWrap} style={{ height: height + 10 }}>
-            <iframe
-              ref={frameRef}
-              className={styles.frame}
-              src={result.url}
-              title={title}
-              // allow-same-origin 让 petri-genui:// 文档保留真实 origin（任务书 §8 参考实现
-              // 同款）：独立 origin 与宿主 app 互不可见，双向 postMessage 的 origin 校验
-              // 才有意义；无它则 origin 退化为 opaque null，桥的 origin 校验全废。
-              sandbox="allow-scripts allow-same-origin"
-              referrerPolicy="no-referrer"
-              loading="lazy"
-              onLoad={onFrameLoad}
-            />
+          <div
+            ref={anchorRef}
+            className={styles.frameWrap}
+            style={{ height: height + 10 }}
+          >
+            {/* iframe 常驻 React 树（锚点位）；放大期间由 layout effect 把 DOM 节点
+                搬移到覆盖层（节点身份不变=不重载），锚点留占位保持行高。 */}
+            {frame}
+            {zoomed ? (
+              <div className={styles.zoomPlaceholder}>可视化页已在放大预览中打开</div>
+            ) : null}
           </div>
         ) : (
           <div className={styles.errorBox} role="alert">
@@ -242,6 +344,18 @@ export const GenUiCard = React.memo(function GenUiCard({
           </div>
         )}
       </div>
+      {zoomed && result?.ok
+        ? createPortal(
+            <div className={styles.overlay} role="dialog" aria-label={`${title} 放大预览`} data-testid="gen-ui-overlay">
+              <div className={styles.overlayHeader}>
+                <span className={styles.overlayTitle}>{title}</span>
+                {toolbar}
+              </div>
+              <div ref={overlayContentRef} className={styles.overlayContent} />
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   );
 });

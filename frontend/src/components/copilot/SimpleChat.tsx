@@ -80,6 +80,7 @@ import { ApprovalCard } from './SimpleChat/ApprovalCard';
 import { ResultEditProgressList } from './SimpleChat/ResultEditProgressList';
 // BLOCK-154 波次 3 — 消息行组件（memo 渲染边界，契约见该文件头与 SimpleChatMessageRow.test.tsx）。
 import { SimpleChatMessageRow } from './SimpleChat/SimpleChatMessageRow';
+import { resolveGenUiFollowUp, type GenUiFollowUpRequest, type GenUiFollowUpResult } from './gen-ui/followUp';
 import { useSummaryRetry } from './SimpleChat/hooks/useSummaryRetry';
 import { useModelAccessMenus } from './SimpleChat/hooks/useModelAccessMenus';
 import { useConversationResume } from './SimpleChat/hooks/useConversationResume';
@@ -911,6 +912,34 @@ export function SimpleChat({
     return ok;
   }, [send, attachments, projectId]);
 
+  // BLOCK-166 P2 — Gen UI follow-up 追问（规格 §8）：判定走 followUp.ts 纯函数
+  // （只读/过期/非当前会话明确拒绝），确认框标题=卡片给定的 title（≤250）；
+  // 通过后写入现有输入绑定的发送路径——非流式直接发，流式走既有排队（BLOCK-52），
+  // 与 Enter 路径完全同构；状态变化绝不自动开启新模型轮次，follow-up 是唯一显式入口。
+  const handleGenUiFollowUp = useCallback((request: GenUiFollowUpRequest): Promise<GenUiFollowUpResult> => {
+    const verdict = resolveGenUiFollowUp({
+      request,
+      currentConversationId: conversationId,
+      inputAvailable: Boolean(taRef.current),
+    });
+    if (!verdict.ok) return Promise.resolve({ ok: false, reason: verdict.reason });
+    const prompt = verdict.prompt ?? '';
+    const confirmed = window.confirm(`${verdict.title}\n\n${prompt.length > 500 ? `${prompt.slice(0, 500)}…` : prompt}`);
+    if (!confirmed) return Promise.resolve({ ok: false, reason: '已取消' });
+    if (streaming) {
+      const queuedWithRefs = composeMessageWithSelectionReferences(prompt, selectionRefsRef.current);
+      setQueuedPrompts((current) => [...current, { conversationId: conversationId ?? '', text: queuedWithRefs }].slice(-5));
+      setInput('');
+      historyNavRef.current = INITIAL_NAV_STATE;
+      clearConversationDraft(projectId, conversationId);
+      if (taRef.current) taRef.current.style.height = 'auto';
+      setSelectionRefs([]);
+    } else {
+      void sendWithRefs(prompt);
+    }
+    return Promise.resolve({ ok: true });
+  }, [conversationId, projectId, streaming, sendWithRefs]);
+
   // BLOCK-68 / UI-317 —— 「刷新文件链接」入口删除后改自动化（hook 外迁可单测）：
   // 订阅 agent 写档/数据导入信号，debounce 后清解析缓存并 bump resolveNonce。
   useAutoFileReferenceRefresh(() => setResolveNonce((value) => value + 1));
@@ -1158,6 +1187,7 @@ export function SimpleChat({
                 onRegenerate={regenerate}
                 onForkAt={handleForkAt}
                 onRetrySummary={retrySummary}
+                onGenUiFollowUp={handleGenUiFollowUp}
               />
             );
           })}

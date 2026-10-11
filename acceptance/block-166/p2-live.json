@@ -1,0 +1,37 @@
+{
+  "at": "2026-10-11T11:29:29.332Z",
+  "allPass": true,
+  "assertions": [
+    {
+      "name": "会话点选 + 沙箱 iframe（首次打开）",
+      "pass": true,
+      "detail": "petri-genui://gen-ec549c12df09607005cb79d4/index.html"
+    },
+    {
+      "name": "widgetState 保存走宿主持久化（ack=saved）",
+      "pass": true,
+      "detail": "saved"
+    },
+    {
+      "name": "放大预览：overlay 在场 + iframe 节点迁入（src 保持）",
+      "pass": true,
+      "detail": "{\"overlay\":true,\"moved\":true,\"src\":\"petri-genui://gen-ec549c12df09607005cb79d4/index.html\",\"stillInCard\":false}"
+    },
+    {
+      "name": "还原：overlay 消失 + iframe 回卡片",
+      "pass": true,
+      "detail": "{\"overlay\":false,\"backInCard\":true}"
+    },
+    {
+      "name": "重开会话状态恢复（reload→回读 SQLite threshold=88）",
+      "pass": true,
+      "detail": "{\"present\":true,\"threshold\":88}"
+    },
+    {
+      "name": "follow-up 真发进入当前会话（真实手势+stub confirm）",
+      "pass": true,
+      "detail": "gesture=true kick=kicked visible=true"
+    }
+  ],
+  "note": "模型手写 fragment 环节以预置文件替代（dev 数据面无渠道 key）；持久化/恢复/放大/follow-up 全链真实路径（widgetState 经主进程 REST 落 SQLite）。"
+}

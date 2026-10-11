@@ -39,9 +39,44 @@ function senderOrigin(event) {
   return '';
 }
 
+/** 后端 REST 基址（desktop-local 鉴权，P0 prepare 先例同款）。 */
+function backendBase() {
+  return `http://127.0.0.1:${process.env.R_SERVER_PORT || '3001'}`;
+}
+
+/** D4 持久化回读：prepare 时把已持久化的 widgetState 预置进内存（壳拼装注入用）。 */
+async function loadPersistedWidgetState(scopeKey, filePath) {
+  try {
+    const url = `${backendBase()}/api/gen-ui/widget-state?scopeKey=${encodeURIComponent(scopeKey)}&filePath=${encodeURIComponent(filePath)}`;
+    const resp = await fetch(url, { headers: { Authorization: 'Bearer desktop-local' } });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return data && data.ok ? data.state : null;
+  } catch {
+    return null; // 后端缺席降级内存版（诚实降级，不阻塞 prepare）
+  }
+}
+
+/** D4 持久化写入：宿主 ack 前置条件（规格 §8——持久化成功才 resolve）。 */
+async function persistWidgetState(scopeKey, filePath, state) {
+  const resp = await fetch(`${backendBase()}/api/gen-ui/widget-state`, {
+    method: 'PUT',
+    headers: { Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ scopeKey, filePath, state }),
+  });
+  if (!resp.ok) {
+    const detail = await resp.json().catch(() => ({}));
+    throw Object.assign(new Error(detail.message || `backend status ${resp.status}`), { code: 'persist-failed' });
+  }
+  const data = await resp.json();
+  if (!data || data.ok !== true) {
+    throw Object.assign(new Error((data && data.message) || 'persist rejected'), { code: 'persist-failed' });
+  }
+}
+
 async function prepareGenUi(event, payload) {
-  const { computeScopeRoot, realpathScopeRoot, assertInsideScope } = require('../main/gen-ui/paths');
-  const { HTML_MAX_BYTES, createGenUiSession, SCHEME } = require('../main/gen-ui/scheme');
+  const { computeScopeRoot, computeScopeKey, realpathScopeRoot, assertInsideScope } = require('../main/gen-ui/paths');
+  const { HTML_MAX_BYTES, createGenUiSession, setGenUiWidgetState, SCHEME } = require('../main/gen-ui/scheme');
   const fs = require('fs');
 
   const projectId = String((payload && payload.projectId) || '').trim();
@@ -67,11 +102,16 @@ async function prepareGenUi(event, payload) {
       return { ok: false, code: 'too-large', message: `fragment is ${stat.size} bytes (limit ${HTML_MAX_BYTES})` };
     }
 
+    const scopeKey = computeScopeKey(workspacePath, conversationId);
+    const persisted = await loadPersistedWidgetState(scopeKey, realFilePath);
+    if (persisted !== null) setGenUiWidgetState(realFilePath, persisted);
+
     const session = createGenUiSession({
       filePath: realFilePath,
       title,
       hostOrigin: senderOrigin(event),
       ownerWebContentsId: event && event.sender ? event.sender.id : null,
+      scopeKey,
     });
     return { ok: true, url: `${SCHEME}://${session.id}/index.html` };
   } catch (error) {
@@ -93,9 +133,9 @@ function findOwnedSession(event, sessionId) {
   return session;
 }
 
-function setGenUiState(_event, payload) {
+async function setGenUiState(event, payload) {
   const { setGenUiWidgetState } = require('../main/gen-ui/scheme');
-  const session = findOwnedSession(_event, payload && payload.sessionId);
+  const session = findOwnedSession(event, payload && payload.sessionId);
   if (!session) return { ok: false, code: 'no-session', message: 'gen-ui session not found' };
   const state = payload && payload.state;
   if (state === null || typeof state !== 'object' || Array.isArray(state)) {
@@ -109,6 +149,14 @@ function setGenUiState(_event, payload) {
   }
   if (Buffer.byteLength(serialized, 'utf8') > WIDGET_STATE_MAX_BYTES) {
     return { ok: false, code: 'too-large', message: `widget state exceeds ${WIDGET_STATE_MAX_BYTES} bytes` };
+  }
+  // D4：宿主持久化成功后才 ack（规格 §8）——后端缺席时明确失败，guest promise reject。
+  if (session.scopeKey) {
+    try {
+      await persistWidgetState(session.scopeKey, session.filePath, JSON.parse(serialized));
+    } catch (error) {
+      return { ok: false, code: error.code || 'persist-failed', message: error.message || String(error) };
+    }
   }
   setGenUiWidgetState(session.filePath, JSON.parse(serialized));
   return { ok: true };
@@ -134,11 +182,36 @@ async function openGenUiExternal(event, payload) {
   }
 }
 
+/** P2 复制图片：sender/会话/几何三重校验后 capturePage 区域 → 原生剪贴板
+ * （规格 §6.5：不向页面暴露任意 guest ID 或图像字节）。 */
+async function copyGenUiImage(event, payload) {
+  const { validateCaptureRect } = require('../main/gen-ui/geometry');
+  const session = findOwnedSession(event, payload && payload.sessionId);
+  if (!session) return { ok: false, code: 'no-session', message: 'gen-ui session not found' };
+  if (!event || !event.sender || event.sender.isDestroyed()) {
+    return { ok: false, code: 'no-visible-instance', message: 'sender window unavailable' };
+  }
+  const rect = validateCaptureRect(payload && payload.rect);
+  if (!rect) return { ok: false, code: 'invalid-rect', message: 'capture rect must be finite and within 1..10000 px' };
+  try {
+    const image = await event.sender.capturePage(rect);
+    if (image.isEmpty()) {
+      return { ok: false, code: 'capture-empty', message: 'captured image is empty (window occluded or minimized?)' };
+    }
+    const { clipboard } = require('electron');
+    clipboard.writeImage(image);
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, code: 'failed', message: error.message || String(error) };
+  }
+}
+
 function setupGenUiIpc() {
   const { ipcMain } = require('electron');
   ipcMain.handle(CHANNELS.genUi.prepare, async (event, payload) => prepareGenUi(event, payload));
   ipcMain.handle(CHANNELS.genUi.setState, (event, payload) => setGenUiState(event, payload));
   ipcMain.handle(CHANNELS.genUi.openExternal, (event, payload) => openGenUiExternal(event, payload));
+  ipcMain.handle(CHANNELS.genUi.copyImage, (event, payload) => copyGenUiImage(event, payload));
 }
 
 module.exports = { setupGenUiIpc };

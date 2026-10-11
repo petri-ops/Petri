@@ -786,6 +786,11 @@ declare global {
           | { ok: true }
           | { ok: false; code: string; message: string }
         >;
+        // BLOCK-166 P2 — 复制图片：sender/会话/几何三重校验后 capturePage→剪贴板。
+        copyImage: (payload: { sessionId: string; rect: { x: number; y: number; width: number; height: number } }) => Promise<
+          | { ok: true }
+          | { ok: false; code: string; message: string }
+        >;
       };
     };
     /** BLOCK-61 兼容别名：与 petri 同一 surface（preload 双暴露）。 */

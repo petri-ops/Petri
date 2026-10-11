@@ -53,6 +53,9 @@ module.exports = async function registerRoutes(app) {
     ['Federation admin', () => require('./federation-admin')(app)],
     // BLOCK-86 L1：多端用户偏好（主题/字号/强调色服务端化——全端同步）。
     ['User prefs', () => require('./user-prefs')(app)],
+    // BLOCK-166 P2：Gen UI widgetState 持久化（D4；桌面侧经 REST 读写——dev 主进程
+    // 不进程内开 better-sqlite3，P0 prepare 的 REST 先例同款）。
+    ['Gen UI widget state', () => require('./gen-ui')(app)],
     // BLOCK-87 L4：投影页面数据 HTTP 化（Skills 清单 / 已装插件——投影环境替代 IPC）。
     ['Projection data', () => require('./projection-data')(app)],
     // BLOCK-156 P2：MCP 客户端管理面（扩展中心 MCP 货架；连接与 agent 同进程）。

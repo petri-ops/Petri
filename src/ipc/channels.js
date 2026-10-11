@@ -220,6 +220,8 @@ const CHANNELS = {
     // set-state = widgetState 内存落主进程；open-external = 绝对 http(s) 白名单裁决。
     setState: 'gen-ui:set-state',
     openExternal: 'gen-ui:open-external',
+    // BLOCK-166 P2 — 复制图片（sender/会话/几何三重校验后 capturePage→剪贴板）。
+    copyImage: 'gen-ui:copy-image',
   },
 };
 

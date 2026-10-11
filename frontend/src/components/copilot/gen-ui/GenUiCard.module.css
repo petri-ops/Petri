@@ -79,3 +79,85 @@
   font-size: 13px;
   color: var(--petri-text-muted);
 }
+
+.toolbarBtn {
+  font-size: 11px;
+  color: var(--petri-text-secondary);
+  background: transparent;
+  border: 1px solid var(--petri-border);
+  border-radius: 6px;
+  padding: 1px 8px;
+  cursor: pointer;
+}
+
+.toolbarBtn:hover {
+  background: var(--petri-hover);
+  color: var(--petri-text);
+}
+
+.copyNotice {
+  font-size: 11px;
+  color: var(--petri-text-muted);
+}
+
+.zoomPlaceholder {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--petri-text-muted);
+  border: 1px dashed var(--petri-border);
+  border-radius: 8px;
+  margin: 0 5px;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--petri-overlay);
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+}
+
+.overlayHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--petri-border);
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
+  background: var(--petri-bg);
+}
+
+.overlayTitle {
+  flex: 1;
+  font-size: 13px;
+  color: var(--petri-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.overlayContent {
+  flex: 1;
+  min-height: 0;
+  border: 1px solid var(--petri-border);
+  border-radius: 0 0 10px 10px;
+  background: var(--petri-bg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 覆盖层内 iframe 撑满内容区（卡片内 .frame 行为保持 P1 不变）。 */
+.overlayContent > iframe {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  border: 0;
+  background: var(--petri-bg);
+}

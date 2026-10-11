@@ -174,6 +174,28 @@ const GUEST_BRIDGE_FN = function petriGenUiGuestBridge(config) {
         return postRpc('petri/gen-ui/open-external', { href: value.href });
       },
     },
+    sendFollowUpMessage: {
+      enumerable: true,
+      value: function (value) {
+        var keys = value && typeof value === 'object' && !Array.isArray(value) ? Object.keys(value) : null;
+        if (!keys || keys.length < 1 || keys.length > 2 || keys.indexOf('prompt') === -1
+          || (keys.length === 2 && keys.indexOf('title') === -1)) {
+          return Promise.reject(new TypeError('sendFollowUpMessage expects { prompt: string, title?: string }'));
+        }
+        var prompt = value.prompt;
+        if (typeof prompt !== 'string' || prompt.trim().length === 0 || prompt.length > 8000) {
+          return Promise.reject(new TypeError('sendFollowUpMessage prompt must be a non-empty string of at most 8000 chars'));
+        }
+        var title = value.title;
+        if (title !== undefined && (keys.length !== 2 || keys.indexOf('title') === -1 || typeof title !== 'string' || title.length > 250)) {
+          return Promise.reject(new TypeError('sendFollowUpMessage title must be a string of at most 250 chars'));
+        }
+        if (!(navigator.userActivation && navigator.userActivation.isActive === true)) {
+          return Promise.reject(new Error('follow-up requires a user gesture'));
+        }
+        return postRpc('petri/gen-ui/follow-up', { prompt: prompt, title: title });
+      },
+    },
   });
   Object.freeze(api);
   Object.defineProperty(window, 'petri', { value: api, writable: false, configurable: false });
