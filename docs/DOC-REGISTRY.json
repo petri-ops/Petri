@@ -5995,7 +5995,7 @@
    "path": "docs/block-166-gen-ui-sandbox-plan.md",
    "capability": "gen-ui",
    "kind": "work-package",
-   "status": "planned",
+   "status": "active",
    "phase": "P0-LAUNCH",
    "canonical": true,
    "truthDomain": "block-166-gen-ui-sandbox",
