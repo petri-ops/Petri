@@ -329,3 +329,45 @@ describe('BLOCK-151 A1 loadOlder 会话切换竞态守卫（BLOCK-102 P2 现状�
     expect(flat.some((m) => m.id === 'a-old')).toBe(false);
   });
 });
+// ---------------------------------------------------------------------------
+// BLOCK-169 A1 — 反例行为测锁（C-24 吸收批；现状语义留痕，算法换装=升级登记面）。
+// 三条锁住 mergeKeepOlderPrefix 的已知语义边界，作为「换算法（id 全集+ts 排序
+// 对账/区间并集）」立项前的事实基线：换算法时本组断言按新语义改写。
+// ---------------------------------------------------------------------------
+describe('BLOCK-169 A1 反例行为测锁（现状语义；升级登记见 C-24 收口）', () => {
+  const msg = (id: string, ts: string, content = id) => ({ id, role: 'user', content, ts }) as never[];
+
+  it('窗口空洞：ts<边界但非连续前缀的本地消息会被并入（现状按 ts 阈值不辨连续性）', () => {
+    // loadOlder 中间页缺失时（窗口空洞），hole 的 ts 早于窗口首条——
+    // 现状语义把它并入前缀；若 hole 实为「已被丢弃的分叉内容」则会复活。
+    const current = [msg('old1', '2026-09-17T00:00:00.000Z'), msg('hole', '2026-09-17T00:30:00.000Z')] as never[];
+    const persisted = [
+      msg('w1', '2026-09-17T01:00:00.000Z'),
+      msg('w2', '2026-09-17T02:00:00.000Z'),
+    ] as never[];
+    const merged = mergeKeepOlderPrefix(current, persisted);
+    // 现状：old1 与 hole 都进前缀（空洞不辨）——换算法后预期 hole 按区间并集裁决
+    expect(merged.map((m) => (m as { id: string }).id)).toEqual(['old1', 'hole', 'w1', 'w2']);
+  });
+
+  it('同 ts 边界：本地与窗口首条同 ts 时本地被丢弃（严格早于）', () => {
+    const current = [msg('twin', '2026-09-17T01:00:00.000Z')] as never[];
+    const persisted = [
+      msg('w1', '2026-09-17T01:00:00.000Z'),
+      msg('w2', '2026-09-17T02:00:00.000Z'),
+    ] as never[];
+    const merged = mergeKeepOlderPrefix(current, persisted);
+    // 现状：严格 `<` 使同 ts 本地消息丢失（即便 id 不同、内容不同）
+    expect(merged.map((m) => (m as { id: string }).id)).toEqual(['w1', 'w2']);
+  });
+
+  it('id 冲突去重：同 id 且 ts 更旧的本地产物不重复入列（既有防线锁）', () => {
+    const current = [msg('dup', '2026-09-17T00:00:00.000Z')] as never[];
+    const persisted = [
+      msg('dup', '2026-09-17T01:00:00.000Z'),
+      msg('w2', '2026-09-17T02:00:00.000Z'),
+    ] as never[];
+    const merged = mergeKeepOlderPrefix(current, persisted);
+    expect(merged.map((m) => (m as { id: string }).id)).toEqual(['dup', 'w2']);
+  });
+});

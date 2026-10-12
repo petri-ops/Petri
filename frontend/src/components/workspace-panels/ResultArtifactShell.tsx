@@ -226,11 +226,17 @@ export function ResultArtifactShell({
   }, [job?.id, lang, result?.deliveryManifest]);
 
   // BLOCK-140 P1 — 跨 job 钉住：血缘节点「钉住」→ 拉目标 job 产物构建视图级快照
-  // （一次取数；副栏照常零取数渲染）；失败静默（诚实不猜，不动现有钉住态）。
-  // 位于早退守卫之前（react-hooks/rules-of-hooks：不得条件调用）。
+  // （一次取数；副栏照常零取数渲染）。失败不猜、不动现有钉住态（D1 语义不变）；
+  // BLOCK-169 A4-1 — 失败不再静默：行内提示用户可见（job 无产物/网络失败分文案）。
+  const [lineagePinNotice, setLineagePinNotice] = useState('');
   const handleLineagePin = useCallback((request: { projectId: string | null; toolJobId: string }) => {
     void fetchCrossJobPinSnapshot({ toolJobId: request.toolJobId, lang }).then((snapshot) => {
-      if (snapshot) setPinnedArtifact(snapshot);
+      if (snapshot) {
+        setPinnedArtifact(snapshot);
+        setLineagePinNotice('');
+        return;
+      }
+      setLineagePinNotice(`钉住失败：job ${request.toolJobId} 无可用产物或取数失败，已保留现有钉住态`);
     });
   }, [lang]);
 
@@ -1119,6 +1125,9 @@ export function ResultArtifactShell({
       <div className={containerClass}>
         {mode === 'result' && resultToolbar}
         {mode === 'result' && <LineageViewSwitch projectId={project.id} jobId={job.id} onPinArtifact={handleLineagePin} />}
+        {mode === 'result' && lineagePinNotice && (
+          <div className={styles.resultError} role="status">{lineagePinNotice}</div>
+        )}
         {workflowBar}
         {recoveryConfirmation}
         <div className={styles.resultHeader}>

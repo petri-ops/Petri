@@ -347,8 +347,23 @@ function setupWorkingTreeReviewIpc(options = {}) {
         throw new GitAdapterError('no_files_to_commit', 'No accepted files to commit.');
       }
 
-      // 以当前 fresh diff（工作树 vs HEAD，与审阅面板同一基线）对账决策键
-      const diffText = diffForReview(adapter, [...acceptedFiles], false).patch || '';
+      // BLOCK-169 H-1 — 对账基线与面板同源：staged 文件（indexStatus 非空）的面板键
+      // 来自 HEAD→index 面；统一用工作树面对账会把「staged 后再编辑」误判 stale。
+      const statusEntriesForBaseline = adapter.repositoryStatus({ untracked: 'all' }).entries;
+      const stagedIndex = new Set(statusEntriesForBaseline
+        .filter((entry) => entry.indexStatus && entry.indexStatus !== ' '
+          && acceptedFiles.has(entry.path))
+        .map((entry) => entry.path));
+      const worktreeAccepted = [...acceptedFiles].filter((p) => !stagedIndex.has(p));
+      const stagedAccepted = [...acceptedFiles].filter((p) => stagedIndex.has(p));
+      const diffText = [
+        stagedAccepted.length > 0
+          ? diffForReview(adapter, stagedAccepted, true).patch || ''
+          : '',
+        worktreeAccepted.length > 0
+          ? diffForReview(adapter, worktreeAccepted, false).patch || ''
+          : '',
+      ].filter(Boolean).join('\n');
       const surface = classifyReviewStageSurface({ decisions, diffText });
       const committedFiles = [...surface.wholeFiles, ...surface.patches.map((p) => p.path)];
 
@@ -366,16 +381,34 @@ function setupWorkingTreeReviewIpc(options = {}) {
       // 真实 index 侧无需处理：indexStatus=R 的定义即真实 index 已删 originalPath
       // （git mv/index rm 后 add），提交后天然与新 HEAD 一致（场景 8/9 status 干净断言兜底）。
       const committedPathSet = new Set(committedFiles);
-      const renameOriginalPaths = adapter
-        .repositoryStatus({ untracked: 'all' })
-        .entries
+      const renameOriginalPaths = statusEntriesForBaseline
         .filter((entry) => entry.indexStatus === 'R' && entry.originalPath && committedPathSet.has(entry.path))
         .map((entry) => entry.originalPath);
 
-      // 整文件面：真实 index 先行（与旧实现同一 stage 调用，全 accept 路径保绿）
-      if (surface.wholeFiles.length > 0) {
-        adapter.stage({ paths: surface.wholeFiles });
+      // BLOCK-169 H-2 — staged 删除条目分流：index 已删且工作树无文件的 pathspec
+      // 走 git add 会 fatal；删除语义经 removePaths 进隔离 index（对照 unstage 的
+      // git rm --cached 先例）。真实 index 对这类条目无需动作（indexStatus=D 的
+      // 定义即 index 已删，提交后与新 HEAD 天然一致）。
+      // BLOCK-169 H-1 内容面 — staged 文件（M/A/D）整文件面不走 git add（工作树
+      // 内容可能含未审阅再编辑），改用其 staged 基线 patch 进 apply --cached 管线：
+      // 提交内容恰为面板审阅的 staged 快照，再编辑以未暂存形态保留。R/C 条目保留
+      // add 语义（BLOCK-152 rename 配对修复的行为面）。
+      const stagedWholePatches = [];
+      const stageWhole = [];
+      for (const p of surface.wholeFiles) {
+        const entry = statusEntriesForBaseline.find((e) => e.path === p);
+        const indexStatus = (entry && entry.indexStatus) || '';
+        if (indexStatus === 'M' || indexStatus === 'A' || indexStatus === 'D') {
+          const stagedPatch = diffForReview(adapter, [p], true).patch || '';
+          if (stagedPatch) {
+            stagedWholePatches.push({ path: p, patch: stagedPatch });
+            continue;
+          }
+        }
+        stageWhole.push(p);
       }
+      const patches = [...surface.patches, ...stagedWholePatches];
+      const removePaths = renameOriginalPaths;
 
       // 隔离 index 提交：临时 index 自 HEAD 出发，rename original 侧 force-remove +
       // 整文件 add + per-hunk patch apply --cached，write-tree/commit-tree/
@@ -383,10 +416,24 @@ function setupWorkingTreeReviewIpc(options = {}) {
       // 会把未决 hunk 一起带进提交。
       const commitResult = adapter.commitFromIsolatedIndex({
         message,
-        stagePaths: surface.wholeFiles,
-        patches: surface.patches,
-        removePaths: renameOriginalPaths,
+        stagePaths: stageWhole,
+        patches,
+        removePaths,
       });
+
+      // BLOCK-169 H-3 — 真实 index 对齐后移到成功路径：apply 失败 fail-closed 时
+      // 真实 index 不残留先行 stage（提交意图一致性；原实现 wholeFiles 先行 stage
+      // 失败后遗留用户可见）。staged 文件经 patch 管线后真实 index 需重 stage 对齐
+      // 新 HEAD（git add 取工作树内容；staged-only 文件工作树==staged 内容时零差异）。
+      // 对齐步骤排除 staged 删除条目（git add 对工作树已无文件的 pathspec fatal；
+      // 其真实 index 本就不含该文件，提交后天然对齐）。
+      const alignPaths = surface.wholeFiles.filter((p) => {
+        const entry = statusEntriesForBaseline.find((e) => e.path === p);
+        return !entry || entry.indexStatus !== 'D';
+      });
+      if (alignPaths.length > 0) {
+        adapter.stage({ paths: alignPaths });
+      }
 
       // 混合文件对账：真实 index 对齐新 HEAD，未决改动以未暂存形态留在工作树
       if (surface.patches.length > 0) {

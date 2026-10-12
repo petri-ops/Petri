@@ -38,3 +38,10 @@
   color: var(--petri-text);
   font-weight: 650;
 }
+
+/* BLOCK-169 A4-2 — 空态/失败提示（次级文字；token 化） */
+.emptyHint {
+  padding: var(--petri-space-3) 0;
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-sm);
+}

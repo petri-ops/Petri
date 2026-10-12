@@ -69,7 +69,7 @@ export function LineageGraph({ projectId, jobId, onPinArtifact }: {
   };
 
   return (
-    <section className={styles.lineageGraph} aria-label="结果血缘图">
+    <section className={styles.lineageGraph} aria-label="结果血缘图" title="点击节点打开链 · 右键节点钉住">
       <ReactFlow
         nodes={nodes}
         edges={projection.edges}

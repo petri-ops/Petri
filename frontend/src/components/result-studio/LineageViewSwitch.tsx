@@ -30,9 +30,11 @@ export function LineageViewSwitch({ projectId, jobId, onPinArtifact }: {
   // 状态携带观察键：换 job/项目时键失配即同步隐藏（旧链不闪现），响应落地才复亮
   // ——避免在 effect 体内同步 setState（react-hooks/set-state-in-effect）。
   const observedKey = `${jobId}::${projectId ?? ''}`;
-  const [observation, setObservation] = React.useState<{ key: string; ready: boolean }>({
+  // BLOCK-169 A4-2 — 三态化：ready（链≥2 亮组）/ empty（链<2）/ error（取数失败）；
+  // empty/error 不再整组静默，给最低限度行内提示（键失配仍 null——旧链不闪现）。
+  const [observation, setObservation] = React.useState<{ key: string; state: 'loading' | 'ready' | 'empty' | 'error' }>({
     key: observedKey,
-    ready: false,
+    state: 'loading',
   });
 
   React.useEffect(() => {
@@ -42,19 +44,31 @@ export function LineageViewSwitch({ projectId, jobId, onPinArtifact }: {
         if (cancelled) return;
         setObservation({
           key: `${jobId}::${projectId ?? ''}`,
-          ready: Boolean(response.lineage && response.lineage.chain.length >= 2),
+          state: Boolean(response.lineage && response.lineage.chain.length >= 2) ? 'ready' : 'empty',
         });
       })
       .catch(() => {
         if (cancelled) return;
-        setObservation({ key: `${jobId}::${projectId ?? ''}`, ready: false });
+        setObservation({ key: `${jobId}::${projectId ?? ''}`, state: 'error' });
       });
     return () => {
       cancelled = true;
     };
   }, [jobId, projectId]);
 
-  if (!observation.ready || observation.key !== observedKey) return null;
+  if (observation.key !== observedKey) return null;
+  if (observation.state === 'empty' || observation.state === 'error') {
+    return (
+      <div className={styles.lineageView}>
+        <div className={styles.emptyHint} role="status">
+          {observation.state === 'error'
+            ? '血缘取数失败，暂无可视血缘链'
+            : '暂无可视血缘链（单节点任务无可展示的上下游）'}
+        </div>
+      </div>
+    );
+  }
+  if (observation.state !== 'ready') return null;
 
   return (
     <div className={styles.lineageView}>

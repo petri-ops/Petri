@@ -1,5 +1,6 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-12（**UI-495 落地（BLOCK-169 commitReview 三边缘+C-24 UI 两项+A1 锁测）**：H-1 键基线同源（staged 文件面板键不再误判 stale，内容面=staged 快照防再编辑夹带）+H-2 staged 删除 rm --cached 分流+H-3 stage 后移零遗留+A4-1 钉住失败行内反馈+A4-2 lineage 空态提示/Graph 操作提示+A1 反例锁测 13/13。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-494 落地（BLOCK-167 加映·质感渐进迁移批）**：iconBtn 双族单源化（KSP 精确重复删除+PWS 32px 覆盖收编，LeftPanel/KnowledgeDocLibrary tsx 组合）+RouteErrorBoundary 按钮收编（primary/ghost 变体，hover 随共享）；按钮清单 32 文件/122 定义（棘轮随批下调）。残红=agentStream 4 失败 HEAD 同红（stash 实证，BLOCK-159 系）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-493 落地（BLOCK-168 OOPIF 自愈守护）**：guest 心跳+GenUiCard 宽限重置=劫持后 t+8s 自动恢复干净沙箱（双次 live PASS）+主进程侦测遥测；Electron 44.7.0 保留。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-488~492 用户过目翻 verified**（「剩余待你 这些都好了没什么问题」）+checkpoint 修正三项复认通过落账。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -4866,3 +4867,13 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **PWS iconBtn**：32px+transition 保留为本地覆盖，LeftPanel 三处 `${button.iconBase} ${styles.iconBtn}`。
 - **RouteErrorBoundary**：primaryBtn→shared primary、secondaryBtn→shared ghost（含 hover/分组残留规则清理）。
 - **棘轮**：按钮清单 31 文件/125→32 文件/122（新增 status.module.css W4 件+三文件随批下调）；契约 17/17+tsc 0+邻域 254/254+build 绿。
+
+## UI-495: commitReview 三边缘修复+钉住失败反馈+lineage 空态提示（2026-10-12 in_progress，BLOCK-169/C-24）
+
+- **H-1 键基线对称**：对账基线与面板同源（staged 文件用 HEAD→index 面）；内容面同修——staged 文件（M/A/D）整文件面经 staged 基线 patch 进 apply --cached 管线，提交恰为审阅的 staged 快照，工作树再编辑不夹带。
+- **H-2 删除分流**：indexStatus=D 的整文件面走 removePaths（git rm --cached 语义），成功路径对齐排除删除条目。
+- **H-3 零遗留**：真实 index 对齐后移到成功路径——apply 失败 fail-closed 时不再残留先行 stage。
+- **A4-1**：跨 job 钉住失败行内反馈（job 无产物/取数失败分文案；不动 D1 快照语义）。
+- **A4-2**：LineageViewSwitch 三态化——empty/error 行内提示替代整组静默；LineageGraph 容器操作提示。
+- **A1**：mergeKeepOlderPrefix 反例锁测三条（窗口空洞/同 ts 边界/id 冲突）——现状留痕，换算法=升级登记面。
+- **红绿**：block169-review-commit-edge 4/4；ReviewMode 59/60（1=block41 存量）；lineage 246 绿；A1 锁测 13/13。
