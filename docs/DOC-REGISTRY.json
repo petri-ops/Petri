@@ -5648,6 +5648,28 @@
    "notes": "2026-10-12 发令 active（用户 /goal 整波授权连续行使，W1~W4 先例）：总纲 W5 波数据资产面接线——CP-14 canSelect/canCompare 占位接线（只读族 ≥4 viewer+表格族成对比较+选择→继续分析链）/CP-15 ArtifactPinPane 可拖拽比例（20-80 钳制+持久化）+renderer 清单对账。artifact-plane-direction 切片 C/E 承接（方向文档不重写）。closeout 十三门+实机断言（acceptance/block-175/）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
   },
   {
+   "id": "BLOCK-176-COMPETITIVENESS-WAVE7",
+   "capability": "agent-competitiveness",
+   "path": "docs/block-176-competitiveness-wave7-plan.md",
+   "kind": "work-package",
+   "status": "planned",
+   "phase": "P0-LAUNCH",
+   "canonical": true,
+   "truthDomain": "block-176-competitiveness-wave7-plan",
+   "entrypoint": "docs/README.md",
+   "registeredAt": "2026-10-12",
+   "archivePolicy": "retain_stable_path",
+   "tags": [
+    "agent-competitiveness",
+    "wave7",
+    "skill-format",
+    "skill-preflight",
+    "skill-governance",
+    "skill-migration"
+   ],
+   "notes": "2026-10-12 扩纲立项 planned（用户裁决「应该加到 petri 并且应该是作为主要的功能之一」+ AskUserQuestion「W7 先行（推荐）」=W6 顺延；W5 在制收口后顶队列头发令）：总纲 W7 波 Agent Skill 知识面——CP-20 SKILL.md 常驻双格式注册+声明式依赖（os 门控+requires.bins+install 配方；KNW-4 导入通道扩展不重建，roadmap 候选池③转正出籍）/CP-21 依赖自检与安装治理（preflight 三态+审批留痕对齐 guard-ack+Skills 页状态面）/CP-22 首批通用技能包迁移（Obsidian 九技能转写，可视化产出接 Gen UI 模板优先节）。非范围=云 marketplace/skill_execute 投影/Obsidian 产物格式/既有内置 skill 契约改写。closeout 十三门+实机断言（acceptance/block-176/）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+  },
+  {
    "id": "BLOCK-138-ARTIFACT-PLANE-KERNEL",
    "capability": "artifact-plane-kernel",
    "path": "docs/block-138-artifact-plane-kernel-plan.md",

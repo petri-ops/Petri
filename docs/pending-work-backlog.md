@@ -5,6 +5,7 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
+最后更新：2026-10-12（**BLOCK-176 W7 扩纲立项 planned 队列最前（用户裁决「应该加到 petri 并且应该是作为主要的功能之一」+ AskUserQuestion「W7 先行（推荐）」）**：Agent Skill 知识面三包——CP-20 SKILL.md 常驻双格式+声明式依赖（KNW-4 通道扩展，候选池③转正出籍）/CP-21 依赖自检与安装治理（preflight+审批留痕+Skills 页状态面）/CP-22 首批通用技能包迁移（Obsidian 九技能）。W5 在制收口后顶队列头发令，W6 顺延。plan=docs/block-176-competitiveness-wave7-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**C-24 审视吸收三波余量整批销号 completed（用户裁决「按推荐 除BIO-7 搞完」）+ 隧道候选核实销号**：①H 边缘三条全绿（H-1 键基线同源+staged 快照内容面/H-2 删除 rm --cached 分流/H-3 stage 后移零遗留——block169-review-commit-edge 4/4 红绿）；②A4 两条（钉住失败行内反馈/lineage 空态提示+Graph 操作提示）；③A1 反例锁测三条落盘（现状语义留痕，mergeKeepOlderPrefix 换算法=升级登记面在册）；④B7 pack 报告模板收敛 deseq2 范式（三份孤儿模板+R generate_report 模板化，占位符 11/10/9 机械核对零差异，pack 仓提交 9df1d16，主代理终审过）；⑤「tunnel 清场异步化」核实=已被 BLOCK-145 D1+159 P0-5 交付（异步化+并行化，block145 测试 4/4），候选销号。UI-494/495 in_progress 待过目；mergeKeepOlderPrefix 换算法升级登记面在册。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**BLOCK-168 OOPIF 加固整包收口 completed（active 槽位空出**；knownGap 🟡 关闭为自愈形态+Electron 44 保留）。下一工作包待用户裁决。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**BLOCK-168 OOPIF 加固立项发令 active（唯一 active 槽位被本包占用**；BLOCK-167 已收口、UI-488~492 用户过目翻 verified、checkpoint 修正复认通过）：P0 Electron 44 升级复测事件矩阵→P1 守卫二选一→P2 升级去留安全阀。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -90,8 +91,11 @@
 
 > **成熟度蓝图系列（2026-10-10 用户裁决）**：「接下来很长的一个阶段 就是按照此蓝图逐步推进 依赖链要做好 递进关系」=按蓝图三波序推进的预授权（硬依赖不得倒置，独立件可插队，见蓝图 §3 依赖 DAG 与插队规则）；**「波内 我需要 0 停顿」（2026-10-10 二次裁决）= 整波授权一次覆盖整波**：立项检查单照走但不再逐包等发令，四处产品语义裁决点按蓝图 §3.4 预裁决缺省执行、波报集中复认（推翻按进度重做）；蓝图判据/依赖链 canonical = [docs/g0-agent-maturity-blueprint.md](./g0-agent-maturity-blueprint.md)（本表只持排队序）。
 
+> **竞争力总纲系列（2026-10-12 用户裁决）**：「按照波次 逐个推进 能自己判断就自己判断 不需要问我」（/goal 整波授权，W1~W5 连续行使）+ **W7 插队裁决（2026-10-12 AskUserQuestion「W7 先行（推荐）」）**：总纲 canonical = [docs/agent-competitiveness-program.md](./agent-competitiveness-program.md) §4；W7（BLOCK-176，Agent Skill 知识面）planned 排队最前，**W5 在制收口后 W7 顶队列头发令**，W6 顺延其后。
+
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
+| 0 | W7 / BLOCK-176 | **Agent Skill 知识面（planned，队列最前）**：CP-20 SKILL.md 常驻双格式注册+声明式依赖（KNW-4 通道扩展，候选池③转正）→CP-21 依赖自检与安装治理（preflight+审批留痕+Skills 页状态面）→CP-22 首批通用技能包迁移（Obsidian 九技能转写） | 总纲 §4-W7 + docs/block-176-competitiveness-wave7-plan.md | **planned**（W5 在制收口后发令；W6 顺延） |
 | 1 | BIO-1 / UI-452 | **结果信息密度包 verified**（2026-09-29 六面实机 9/10：tooltip 全数值/搜索 25 命中/阈值线/组合筛选 25/25/Lightbox 全链/深链保持——ui452-density-live 双路联合走查；T6b demo 数据边界非缺陷；前置=pack 5036e86 goldenFixture 重锚恢复 RS3 交互投影） | G0-BIO plan §3 BIO-1 | **verified** |
 | 1b | BIO-2 / UI-454 | **交互上限与降级链**（散点 backing 250→600/热图解除前端自缚全量渲染/静态 CSV 本地分页 50 行页/日志端点项目目录兜底修 BLOCK-126 发现缺陷；组件级 32/32+Node 640/0——**实机生效待 dev 栈重启**，重启后复跑 perception-live 即见端点 run.log 兜底；mojibake 移 BIO-4、top-N 排序移 BIO-3 留痕） | G0-BIO plan §3 BIO-2；台账 UI-454 | in_progress（实机待栈重启） |
 | 1c | BIO-3 / UI-455（P0 首刀） | **打开链修复 verified**（2026-09-29 实机铁证：SPA 深链 URL 保持 /result?job= 不归零+HTTP job 结果页可达——ui452-density-live T1 PASS；冷启动完整重载的归零竞争=独立缺陷仍登记） | G0-BIO plan §3 BIO-3；台账 UI-455 | **verified** |
