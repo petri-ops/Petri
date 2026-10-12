@@ -1,6 +1,4 @@
-# BLOCK-168 — Gen UI OOPIF 导航劫持加固（Electron 44 复测 + 自愈守护）
-
-```yaml
+---
 capability: gen-ui
 goal: 关闭 BLOCK-166 knownGap 🟡——沙箱卡片被 fragment 内 location.href 劫持的 DoS 向量
 acceptance:
@@ -9,7 +7,9 @@ acceptance:
   - 升级批回归=契约+gen-ui+pentest+test:changed+dev 冒烟全绿才保留升级，否则回退 41 只落守护
 reopen: Electron 后续版本若原生修复可简化守护；劫持复现即返工
 status: active
-```
+---
+
+# BLOCK-168 — Gen UI OOPIF 导航劫持加固（Electron 44 复测 + 自愈守护）
 
 ## 0. 来源与裁决
 
