@@ -25,7 +25,7 @@ const API = 'http://localhost:3001/api';
 const AUTH = { 'Content-Type': 'application/json', Authorization: 'Bearer desktop-local' };
 
 const libPath = path.join(ROOT, '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs');
-const { pollTargets, filterPageTargets, selectPageTarget, evalJs, connectTarget } = await import(
+const { pollTargets, filterPageTargets, evalJs, connectTarget } = await import(
   pathToFileURL(libPath).href
 ).then((m) => m.default ?? m);
 
@@ -170,7 +170,7 @@ const summary = {
   fail: results.length - pass,
   results,
 };
-fs: {
+{
   const fs = await import('node:fs');
   fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
   fs.writeFileSync(path.join(EVIDENCE_DIR, 'w1-live.json'), JSON.stringify(summary, null, 2) + '\n');

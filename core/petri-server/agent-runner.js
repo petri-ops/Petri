@@ -741,6 +741,9 @@ async function runAgentLoop({
   // Build tool context
   const toolCtx = {
     userId,
+    // BLOCK-172 CP-7 — 生成参数全局缺省进 loop（reqBody temperature/max_tokens 与
+    // 预算 headroom 消费；未配置=loop 侧既有 0.4/16384 零行为变化）
+    generationDefaults: getGenerationDefaults(),
     // BLOCK-49 — 子 agent 派生工具（spawn/list/wait_agent）的父子关系锚点
     taskId,
     projectId: context && context.projectId,
@@ -795,9 +798,6 @@ async function runAgentLoop({
     disableProviderFallback,
     // BLOCK-81 P1 — 思考档位进 loop（网关侧按 profile 能力位门控后映射上游参数）
     thinkingLevel,
-    // BLOCK-172 CP-7 — 生成参数全局缺省进 loop（reqBody temperature/max_tokens 与
-    // 预算 headroom 消费；未配置=loop 侧既有 0.4/16384 零行为变化）
-    generationDefaults: getGenerationDefaults(),
     // BLOCK-155 — 真·单通道 vision：loop 组 reqBody 时把最后一条 user 消息的
     // 图片附件行内联为 image_url 部件（loop-orchestrator 侧实现，messages 不突变）
     visionInline,

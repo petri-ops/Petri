@@ -602,8 +602,8 @@ async function runLoop({
     const toolCancellation = toolCtx.taskId ? createToolCancellation(toolCtx.taskId) : null;
     // BLOCK-172 CP-7 — 生成参数全局缺省（ai-settings generation 键/env 覆盖；
     // 未配置=0.4/16384 零行为变化）。预算 est/headroom 同源消费，口径一致。
-    const generationDefaults = (typeof loopConfig === 'object' && loopConfig && typeof loopConfig.generationDefaults === 'object')
-      ? loopConfig.generationDefaults
+    const generationDefaults = (typeof toolCtx === 'object' && toolCtx && typeof toolCtx.generationDefaults === 'object')
+      ? toolCtx.generationDefaults
       : {};
     const reqTemperature = typeof generationDefaults.temperature === 'number' && generationDefaults.temperature >= 0 && generationDefaults.temperature <= 2
       ? generationDefaults.temperature
