@@ -34,7 +34,6 @@
   position: relative;
   width: 100%;
   max-width: 100%;
-  font-size: var(--petri-font-size-caption);
   line-height: 1.45;
   color: var(--petri-text);
 }
@@ -83,7 +82,6 @@
 }
 
 .barLabel {
-  font-size: var(--petri-font-size-xs);
   fill: var(--petri-text-secondary);
   font-variant-numeric: tabular-nums;
 }
@@ -120,7 +118,6 @@
 }
 
 .tickLabel {
-  font-size: var(--petri-font-size-xs);
   fill: var(--petri-text-tertiary);
   /* Tick labels can be long; truncate visually rather than
      pushing the SVG wider than the card. */
@@ -144,12 +141,11 @@
   align-items: center;
   gap: var(--petri-space-2);
   padding: var(--petri-space-1) var(--petri-space-3);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-pill);;
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
   font: inherit;
-  font-size: var(--petri-font-size-sm);
   line-height: 1;
   cursor: pointer;
   transition: background-color 120ms ease, color 120ms ease,
@@ -195,7 +191,6 @@
 }
 
 .legendText {
-  font-size: var(--petri-font-size-sm);
   fill: var(--petri-text-secondary);
   color: inherit;
 }
@@ -212,12 +207,11 @@
   align-items: baseline;
   gap: var(--petri-space-3);
   padding: var(--petri-space-2) 10px;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-surface);
   color: var(--petri-text);
   box-shadow: var(--petri-shadow-sm);
-  font-size: var(--petri-font-size-sm);
   line-height: 1.2;
   pointer-events: none;
   max-width: 60%;
@@ -246,7 +240,6 @@
   background: var(--petri-bg-subtle);
   color: var(--petri-text-secondary);
   font-family: var(--petri-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
-  font-size: var(--petri-font-size-sm);
   line-height: 1.45;
   overflow-x: auto;
   white-space: pre;
@@ -254,7 +247,6 @@
 
 .fallbackNote {
   margin: 0 0 var(--petri-space-2);
-  font-size: var(--petri-font-size-sm);
   color: var(--petri-text-tertiary);
   font-family: var(--petri-font-sans, inherit);
   font-style: normal;

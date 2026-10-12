@@ -38,7 +38,6 @@
   border-radius: var(--petri-radius-pill);;
   background: transparent;
   color: var(--petri-warning-text);
-  font-size: var(--petri-font-size-sm);
   font-weight: 600;
   padding: 1px var(--petri-space-3);
   cursor: pointer;

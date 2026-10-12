@@ -5,8 +5,7 @@
   align-items: center;
   gap: var(--petri-space-1);
   padding: 5px 9px;
-  border-bottom: 1px solid var(--petri-border);
-  font-size: var(--petri-font-size-xs);
+  border-bottom: 1px solid var(--petri-divider);
 }
 
 .caption {
@@ -21,7 +20,7 @@
   max-width: 180px;
   overflow: hidden;
   padding: 1px var(--petri-space-3);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-pill);;
   background: transparent;
   color: var(--petri-text-secondary);
@@ -64,7 +63,6 @@
   color: var(--petri-text-tertiary);
   cursor: pointer;
   font: inherit;
-  font-size: var(--petri-font-size-xs);
   white-space: nowrap;
   opacity: 0;
   transition: opacity 120ms ease;

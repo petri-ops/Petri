@@ -12,7 +12,7 @@
 
 .fedHint {
   margin: 0;
-  font-size: var(--petri-font-size-caption);
+  font-size: var(--petri-font-size-sm);
   line-height: 1.55;
   color: var(--petri-text-tertiary);
 }
@@ -22,22 +22,21 @@
   flex-direction: column;
   gap: var(--petri-space-3);
   padding: var(--petri-space-4);
-  border: 1px solid var(--petri-border, #e4e4e7);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
 }
 
 .addTitle {
   margin: 0;
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   font-weight: 600;
 }
 
 .addInput {
   width: 100%;
-  font-size: var(--petri-font-size-caption);
   padding: var(--petri-space-3) 9px;
-  border: 1px solid var(--petri-border, #e4e4e7);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
   color: var(--petri-text);
@@ -68,7 +67,7 @@
   align-items: center;
   gap: 10px;
   padding: 10px var(--petri-space-4);
-  border: 1px solid var(--petri-border, #e4e4e7);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
 }
@@ -99,7 +98,7 @@
 }
 
 .peerName {
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -115,7 +114,7 @@
 }
 
 .emptyState {
-  font-size: var(--petri-font-size-caption);
+  font-size: var(--petri-font-size-sm);
   color: var(--petri-text-muted);
   text-align: center;
   padding: 14px var(--petri-space-3);
@@ -125,7 +124,6 @@
 
 .errorText {
   margin: 0;
-  font-size: var(--petri-font-size-caption);
   color: #dc2626;
 }
 
@@ -141,7 +139,7 @@
   height: 148px;
   border-radius: var(--petri-radius-lg);;
   background: #fff;
-  border: 1px solid var(--petri-border, #e4e4e7);
+  border: 1px solid var(--petri-border-card);
 }
 
 .inviteLinkRow {
@@ -153,7 +151,6 @@
 .inviteLink {
   flex: 1;
   min-width: 0;
-  font-size: var(--petri-font-size-sm);
   color: var(--petri-text-tertiary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -166,11 +163,10 @@
   flex-direction: column;
   gap: var(--petri-space-2);
   padding: var(--petri-space-3) 0;
-  border-top: 1px solid var(--petri-border, #e4e4e7);
+  border-top: 1px solid var(--petri-divider);
 }
 
 .grantEngineer {
-  font-size: var(--petri-font-size-caption);
   font-weight: 600;
   color: var(--petri-text);
 }
@@ -188,7 +184,7 @@
   padding: 2px var(--petri-space-3);
   border-radius: var(--petri-radius-pill);;
   font-size: var(--petri-font-size-sm);
-  border: 1px solid var(--petri-border, #e4e4e7);
+  border: 1px solid var(--petri-border-card);
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
   max-width: 100%;
@@ -202,7 +198,6 @@
   border: none;
   background: transparent;
   padding: 0 2px;
-  font-size: var(--petri-font-size-caption);
   line-height: 1;
   cursor: pointer;
   color: var(--petri-text-muted);
@@ -221,9 +216,8 @@
 .grantSelect {
   flex: 1 1 auto;
   min-width: 0;
-  font-size: var(--petri-font-size-caption);
   padding: var(--petri-space-2) var(--petri-space-3);
-  border: 1px solid var(--petri-border, #e4e4e7);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
   color: var(--petri-text);

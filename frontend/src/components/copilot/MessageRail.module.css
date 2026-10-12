@@ -58,7 +58,7 @@
   max-height: min(320px, 55%);
   overflow-y: auto;
   padding: var(--petri-space-4) 14px;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-elevated, var(--petri-bg-surface));
   box-shadow: var(--petri-shadow-menu);

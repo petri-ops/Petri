@@ -20,7 +20,7 @@
   font-family: var(--petri-font-mono, monospace);
   /* TYPOGRAPHY-HIERARCHY UI-239 — CM 全链原本无字号（继承到 body 16px），
      与同屏 chrome 12~13px 断层；统一代码表面基准 13px。 */
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   overflow: auto;
 }
 

@@ -14,7 +14,6 @@
   color: var(--petri-text-tertiary);
   cursor: pointer;
   font: inherit;
-  font-size: var(--petri-font-size-xs);
   list-style: none;
   white-space: nowrap;
 }
@@ -36,7 +35,7 @@
   z-index: 20;
   width: min(280px, calc(100vw - 32px));
   padding: var(--petri-space-3);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-surface);
   box-shadow: var(--petri-shadow-float);
@@ -44,9 +43,8 @@
 
 .popupLabel {
   padding: 2px var(--petri-space-2) var(--petri-space-2);
-  border-bottom: 1px solid var(--petri-border-subtle);
+  border-bottom: 1px solid var(--petri-border-card);
   color: var(--petri-text-tertiary);
-  font-size: var(--petri-font-size-xs);
   font-weight: 650;
 }
 
@@ -89,5 +87,4 @@
   flex: 0 0 auto;
   color: var(--petri-text-tertiary);
   font-family: var(--petri-font-mono);
-  font-size: var(--petri-font-size-xs);
 }

@@ -20,7 +20,6 @@
   color: var(--petri-text-tertiary);
   cursor: pointer;
   font: inherit;
-  font-size: var(--petri-font-size-xs);
 }
 
 .switchBtn:hover {

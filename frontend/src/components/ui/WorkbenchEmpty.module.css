@@ -12,7 +12,6 @@
 }
 
 .desc {
-  font-size: var(--petri-font-size-caption);
   margin-bottom: var(--petri-space-5);
   line-height: 1.6;
 }

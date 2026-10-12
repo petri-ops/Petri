@@ -21,7 +21,6 @@
   display: flex;
   align-items: baseline;
   gap: var(--petri-space-2);
-  font-size: var(--petri-font-size-caption);
   line-height: 1.45;
   min-width: 0;
 }
@@ -42,9 +41,8 @@
 
 .channel {
   flex: none;
-  font-size: var(--petri-font-size-xs);
   color: var(--petri-text-tertiary);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-sm);;
   padding: 0 var(--petri-space-1);
 }

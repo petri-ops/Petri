@@ -16,7 +16,6 @@
   color: var(--petri-text-secondary);
   cursor: pointer;
   font: inherit;
-  font-size: var(--petri-font-size-caption);
   text-align: left;
 }
 
@@ -38,7 +37,7 @@
   z-index: 120;
   width: 168px;
   padding: 5px;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-elevated);
   box-shadow: var(--petri-shadow-menu);
@@ -62,7 +61,6 @@
   color: var(--petri-text-secondary);
   cursor: pointer;
   font: inherit;
-  font-size: var(--petri-font-size-caption);
   text-align: left;
 }
 

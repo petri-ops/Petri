@@ -32,7 +32,7 @@
   height: 44px;
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-accent-bg);
-  color: var(--petri-accent);
+  color: var(--petri-text-secondary);
   flex-shrink: 0;
 }
 
@@ -49,7 +49,7 @@
   display: flex;
   align-items: center;
   gap: var(--petri-space-3);
-  font-size: var(--petri-font-size-caption);
+  font-size: var(--petri-font-size-sm);
   color: var(--petri-text-secondary);
 }
 
@@ -60,7 +60,7 @@
   padding: var(--petri-space-1) 10px;
   border-radius: 20px;
   background: var(--petri-bg-subtle);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
 }
 
 /* ============================================================
@@ -97,11 +97,11 @@
   width: 100%;
   height: 36px;
   padding: 0 36px;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-input-bg);
   color: var(--petri-text);
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -149,11 +149,11 @@
   gap: var(--petri-space-2);
   height: 32px;
   padding: 0 var(--petri-space-4);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-caption);
+  font-size: var(--petri-font-size-sm);
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -203,7 +203,7 @@
   gap: var(--petri-space-2);
   height: 30px;
   padding: 0 var(--petri-space-4);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
@@ -258,14 +258,13 @@
 
 .emptyTitle {
   margin: 0 0 var(--petri-space-1);
-  font-size: var(--petri-font-size-md);
+  font-size: var(--petri-font-size-lg);
   font-weight: 600;
   color: var(--petri-text-secondary);
 }
 
 .emptyText {
   margin: 0;
-  font-size: var(--petri-font-size-caption);
 }
 
 /* ============================================================
@@ -276,7 +275,7 @@
   display: flex;
   flex-direction: column;
   padding: var(--petri-space-5);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
   transition: border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
@@ -338,7 +337,7 @@
 
 .sourceBuiltin {
   background: rgba(67, 209, 174, 0.15);
-  color: var(--petri-accent);
+  color: var(--petri-text-muted);
 }
 
 .sourceInstalled {
@@ -349,7 +348,6 @@
 
 .cardDescription {
   margin: 0 0 var(--petri-space-4);
-  font-size: var(--petri-font-size-caption);
   line-height: 1.6;
   color: var(--petri-text-secondary);
   display: -webkit-box;
@@ -385,7 +383,7 @@
   gap: var(--petri-space-4);
   margin-bottom: 14px;
   padding-top: var(--petri-space-4);
-  border-top: 1px solid var(--petri-border);
+  border-top: 1px solid var(--petri-divider);
 }
 
 .categoryLabel,
@@ -412,7 +410,6 @@
   height: 32px;
   padding: 0 14px;
   border-radius: var(--petri-radius-lg);;
-  font-size: var(--petri-font-size-caption);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -420,7 +417,7 @@
 
 .detailButton {
   flex: 1;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
 }
@@ -475,7 +472,7 @@
   display: flex;
   flex-direction: column;
   background: var(--petri-bg-surface);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   box-shadow: var(--petri-shadow-float);
   animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -497,7 +494,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 18px 20px;
-  border-bottom: 1px solid var(--petri-border);
+  border-bottom: 1px solid var(--petri-divider);
   flex-shrink: 0;
 }
 
@@ -509,7 +506,7 @@
 
 .modalTitle {
   margin: 0;
-  font-size: var(--petri-font-size-md);
+  font-size: var(--petri-font-size-lg);
   font-weight: 700;
   color: var(--petri-text);
 }
@@ -558,7 +555,6 @@
 
 .sectionTitle {
   margin: 0 0 10px;
-  font-size: var(--petri-font-size-caption);
   font-weight: 600;
   color: var(--petri-text-tertiary);
   text-transform: uppercase;
@@ -567,7 +563,7 @@
 
 .description {
   margin: 0;
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   line-height: 1.7;
   color: var(--petri-text-secondary);
 }
@@ -598,7 +594,6 @@
 }
 
 .pluginLabel {
-  font-size: var(--petri-font-size-sm);
   color: var(--petri-text-tertiary);
   margin-right: var(--petri-space-1);
 }
@@ -610,7 +605,7 @@
   padding: var(--petri-space-1) 10px;
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-canvas);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   font-size: var(--petri-font-size-sm);
   color: var(--petri-text-secondary);
 }
@@ -622,7 +617,6 @@
 
 .emptyText {
   margin: 0;
-  font-size: var(--petri-font-size-caption);
   color: var(--petri-text-tertiary);
   font-style: italic;
 }
@@ -636,8 +630,7 @@
 
 .requiredNote {
   margin: 0 0 var(--petri-space-3);
-  font-size: var(--petri-font-size-sm);
-  color: var(--petri-accent);
+  color: var(--petri-text-tertiary);
   font-weight: 500;
 }
 
@@ -651,13 +644,11 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  font-size: var(--petri-font-size-caption);
   font-weight: 500;
   color: var(--petri-text);
 }
 
 .paramDescription {
-  font-size: var(--petri-font-size-sm);
   font-weight: 400;
   color: var(--petri-text-tertiary);
 }
@@ -674,11 +665,10 @@
   flex: 1;
   height: 34px;
   padding: 0 var(--petri-space-4);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-canvas);
   color: var(--petri-text);
-  font-size: var(--petri-font-size-caption);
   outline: none;
   transition: border-color 0.2s ease;
 }
@@ -694,7 +684,6 @@
 }
 
 .paramDefault {
-  font-size: var(--petri-font-size-xs);
   color: var(--petri-text-tertiary);
   white-space: nowrap;
 }
@@ -745,7 +734,6 @@
 /* 输出列表 */
 .outputGroupTitle {
   margin: 0 0 var(--petri-space-3);
-  font-size: var(--petri-font-size-sm);
   font-weight: 500;
   color: var(--petri-text-secondary);
 }
@@ -766,7 +754,6 @@
   padding: 10px var(--petri-space-4);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-canvas);
-  font-size: var(--petri-font-size-caption);
 }
 
 .outputItem > svg {
@@ -792,7 +779,7 @@
   justify-content: flex-end;
   gap: 10px;
   padding: var(--petri-space-5) 20px;
-  border-top: 1px solid var(--petri-border);
+  border-top: 1px solid var(--petri-divider);
   flex-shrink: 0;
 }
 
@@ -802,11 +789,11 @@
   justify-content: center;
   height: 36px;
   padding: 0 var(--petri-space-5);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -862,7 +849,7 @@
 }
 
 .loadingText {
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
 }
 
 .retryBtn {
@@ -871,11 +858,11 @@
   gap: var(--petri-space-2);
   margin-top: 14px;
   padding: var(--petri-space-2) 14px;
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   font-weight: 500;
   color: var(--petri-text);
   background: var(--petri-bg-surface);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   cursor: pointer;
   transition:
@@ -900,10 +887,9 @@
   height: 30px;
   padding: 0 10px;
   background: var(--petri-surface);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-caption);
   font-weight: 500;
   cursor: pointer;
   transition:

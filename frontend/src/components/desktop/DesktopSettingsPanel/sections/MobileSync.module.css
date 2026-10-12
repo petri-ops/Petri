@@ -22,7 +22,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--petri-space-2);
-  font-size: var(--petri-font-size-caption);
+  font-size: var(--petri-font-size-sm);
   color: var(--petri-text-secondary);
 }
 
@@ -46,7 +46,7 @@
   align-items: center;
   gap: 10px;
   padding: 14px;
-  border: 1px solid var(--petri-border, #e4e4e7);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
 }
@@ -55,7 +55,7 @@
   padding: var(--petri-space-3);
   border-radius: var(--petri-radius-lg);;
   background: #fff;
-  border: 1px solid var(--petri-border, #e4e4e7);
+  border: 1px solid var(--petri-border-card);
   line-height: 0;
 }
 
@@ -67,7 +67,7 @@
 }
 
 .qrHint {
-  font-size: var(--petri-font-size-caption);
+  font-size: var(--petri-font-size-sm);
   color: var(--petri-text-tertiary);
   text-align: center;
   line-height: 1.5;
@@ -85,10 +85,9 @@
   flex: 1 1 auto;
   min-width: 0;
   font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: var(--petri-font-size-sm);
   color: var(--petri-text-secondary);
   background: var(--petri-bg-elevated, var(--petri-bg-surface));
-  border: 1px solid var(--petri-border, #e4e4e7);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   padding: var(--petri-space-2) var(--petri-space-3);
   white-space: nowrap;
@@ -101,7 +100,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: var(--petri-font-size-caption);
   color: var(--petri-text-tertiary);
 }
 
@@ -120,13 +118,13 @@
   justify-content: space-between;
   gap: var(--petri-space-3);
   padding: 7px 10px;
-  border: 1px solid var(--petri-border, #e4e4e7);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
 }
 
 .deviceName {
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   color: var(--petri-text);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -140,7 +138,7 @@
 }
 
 .emptyHint {
-  font-size: var(--petri-font-size-caption);
+  font-size: var(--petri-font-size-sm);
   color: var(--petri-text-muted);
   text-align: center;
   padding: var(--petri-space-3) 0 2px;
@@ -152,7 +150,7 @@
   flex-direction: column;
   gap: var(--petri-space-3);
   padding-top: var(--petri-space-4);
-  border-top: 1px solid var(--petri-border, #e4e4e7);
+  border-top: 1px solid var(--petri-divider);
 }
 
 .tunnelHead {
@@ -164,7 +162,7 @@
 
 .tunnelTitle {
   margin: 0;
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   font-weight: 600;
   color: var(--petri-text);
 }
@@ -176,7 +174,7 @@
   font-size: var(--petri-font-size-sm);
   padding: 2px var(--petri-space-3);
   border-radius: var(--petri-radius-pill);;
-  border: 1px solid var(--petri-border, #e4e4e7);
+  border: 1px solid var(--petri-border-card);
   color: var(--petri-text-secondary);
   background: var(--petri-bg-subtle);
 }
@@ -195,16 +193,15 @@
 
 .tunnelHint {
   margin: 0;
-  font-size: var(--petri-font-size-caption);
+  font-size: var(--petri-font-size-sm);
   line-height: 1.5;
   color: var(--petri-text-tertiary);
 }
 
 .tunnelInput {
   width: 100%;
-  font-size: var(--petri-font-size-caption);
   padding: 7px 9px;
-  border: 1px solid var(--petri-border, #e4e4e7);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
   color: var(--petri-text);

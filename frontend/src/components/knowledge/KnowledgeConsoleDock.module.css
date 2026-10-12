@@ -17,7 +17,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--petri-space-2);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
   color: var(--petri-text-secondary);
@@ -39,7 +39,6 @@
 .handleText {
   writing-mode: vertical-rl;
   letter-spacing: 2px;
-  font-size: var(--petri-font-size-xs);
 }
 
 /* overlay：覆盖在文档区上方（不挤压布局），右缘留把手位 */
@@ -52,7 +51,7 @@
   z-index: 30;
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
   box-shadow: var(--petri-shadow-menu);
@@ -81,7 +80,7 @@
   justify-content: center;
   width: 24px;
   height: 24px;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-surface);
   color: var(--petri-text-tertiary);

@@ -40,7 +40,7 @@
   flex-direction: column;
   /* UI-448 加映 v3 — 底色对齐摘要卡（--petri-bg-elevated，原 surface 档偏深） */
   background: var(--petri-bg-elevated);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   box-shadow: var(--petri-shadow-float);
   overflow: hidden;
@@ -62,11 +62,9 @@
    档（实测 12.13px@scale1.1025；caption 档实为 13.23px，勿混）。.sc-msg-body 与
    其 p 层均有显式字号，继承覆盖不到，需定点覆写 */
 .surfaceBody :global(.sc-msg-body) {
-  font-size: var(--petri-font-size-sm);
 }
 
 .surfaceBody :global(.sc-msg-body p) {
-  font-size: var(--petri-font-size-sm);
 }
 
 /* UI-448 加映 v5 — 内容贴左、去早换行：面板 300px 被三层内缩吃掉 ~60px
@@ -137,7 +135,6 @@
   padding: 10px 13px 9px;
   border-bottom: 1px solid color-mix(in srgb, var(--petri-text) 6%, transparent);
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-caption);
   flex-shrink: 0;
 }
 
@@ -196,7 +193,7 @@
   display: flex;
   flex-direction: column;
   background: var(--petri-bg-elevated);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   box-shadow: var(--petri-shadow-float);
   overflow: hidden;
@@ -212,7 +209,6 @@
 
 .dockedColumn :global(.sc-msg-body),
 .dockedColumn :global(.sc-msg-body p) {
-  font-size: var(--petri-font-size-sm);
 }
 
 .dockedColumn :global(.sc-body) {

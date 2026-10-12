@@ -17,12 +17,12 @@
   gap: 10px;
   padding: var(--petri-space-4) 14px;
   border-radius: var(--petri-radius-lg);;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-left: 4px solid var(--petri-info);
   background: var(--petri-bg-elevated);
   color: var(--petri-text);
   box-shadow: var(--petri-shadow-sm);
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   line-height: 1.4;
 }
 
@@ -50,7 +50,7 @@
   border: none;
   background: transparent;
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-md);
+  font-size: var(--petri-font-size-lg);
   line-height: 1;
   cursor: pointer;
   padding: 0 2px;

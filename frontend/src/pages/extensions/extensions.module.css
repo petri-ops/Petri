@@ -6,7 +6,7 @@
   align-items: center;
   gap: var(--petri-space-1);
   padding: var(--petri-space-3) 18px 0;
-  border-bottom: 1px solid var(--petri-border);
+  border-bottom: 1px solid var(--petri-divider);
   flex-shrink: 0;
   overflow-x: auto;
 }
@@ -80,11 +80,11 @@
   gap: var(--petri-space-2);
   height: 28px;
   padding: 0 10px;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
   color: var(--petri-text);
-  font-size: var(--petri-font-size-caption, 12px);
+  font-size: var(--petri-font-size-sm);
   cursor: pointer;
   flex-shrink: 0;
   transition: background 0.15s ease;
@@ -104,7 +104,7 @@
   flex-direction: column;
   gap: var(--petri-space-3);
   padding: var(--petri-space-4);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
   flex-shrink: 0;
@@ -132,11 +132,11 @@
 .mcpField > input {
   height: 30px;
   padding: 0 var(--petri-space-3);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-input-bg, var(--petri-bg-surface));
   color: var(--petri-text);
-  font-size: var(--petri-font-size-caption, 12px);
+  font-size: var(--petri-font-size-sm);
   min-width: 0;
 }
 
@@ -150,7 +150,7 @@
 
 .mcpFormError,
 .mcpErrorText {
-  color: var(--petri-accent);
+  color: var(--petri-danger);
   font-size: var(--petri-font-size-xs, 12px);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -174,7 +174,7 @@
   flex-direction: column;
   gap: var(--petri-space-2);
   padding: var(--petri-space-4) 14px;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
 }
@@ -201,7 +201,7 @@
   align-items: center;
   padding: 0 var(--petri-space-3);
   border-radius: var(--petri-radius-pill);;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-xs, 12px);
 }
@@ -239,7 +239,7 @@
 .mcpCardActions > button {
   height: 26px;
   padding: 0 10px;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: transparent;
   color: var(--petri-text-secondary);

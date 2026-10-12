@@ -20,18 +20,16 @@
   /* 桌面版字号 token — Infima 无 heading 字号 token，统一在此定义供 module 引用。
      BLOCK-49 加映三 — 全部 token 走 calc(var(--petri-font-scale) × 基准)：
      设置面板「界面字号」调节 root 缩放系数（html.style 注入，默认 1），
-     图标与布局尺寸不受影响。 */
+     图标与布局尺寸不受影响。
+     BLOCK-167 W1 — 6 档终态（docs/design-charter.md §1）：退役 caption/body-sm/
+     md/3xl（存量引用已全仓改名归并）；根默认 html/body=body(14px)。 */
   --petri-font-scale: 1;
-  --petri-font-size-xs: calc(0.625rem * var(--petri-font-scale)); /* 10px 徽标/角标 */
-  --petri-font-size-sm: calc(0.6875rem * var(--petri-font-scale)); /* 11px 辅助文字 */
-  --petri-font-size-caption: calc(0.75rem * var(--petri-font-scale)); /* 12px 说明/caption */
-  --petri-font-size-body-sm: calc(0.8125rem * var(--petri-font-scale)); /* 13px 紧凑正文/表格 */
-  --petri-font-size-body: calc(0.875rem * var(--petri-font-scale)); /* 14px 正文 */
-  --petri-font-size-md: calc(1rem * var(--petri-font-scale)); /* 16px 小标题/MD h2 */
-  --petri-font-size-lg: calc(1.125rem * var(--petri-font-scale)); /* 18px 小标题 */
-  --petri-font-size-xl: calc(1.25rem * var(--petri-font-scale)); /* 20px 标题 */
-  --petri-font-size-2xl: calc(1.375rem * var(--petri-font-scale)); /* 22px 大标题 */
-  --petri-font-size-3xl: calc(1.75rem * var(--petri-font-scale)); /* 28px 页标题 */
+  --petri-font-size-xs: calc(0.6875rem * var(--petri-font-scale)); /* 11px 徽标/角标专用（宪章：出徽标域即违规） */
+  --petri-font-size-sm: calc(0.75rem * var(--petri-font-scale)); /* 12px 次级元信息 */
+  --petri-font-size-body: calc(0.875rem * var(--petri-font-scale)); /* 14px 正文=全局默认 */
+  --petri-font-size-lg: calc(1rem * var(--petri-font-scale)); /* 16px 卡片标题/强调 */
+  --petri-font-size-xl: calc(1.25rem * var(--petri-font-scale)); /* 20px 页/区块标题 */
+  --petri-font-size-2xl: calc(1.75rem * var(--petri-font-scale)); /* 28px 页 hero 标题 */
   --petri-font-size-base: var(--petri-font-size-body); /* 别名：三档基线（BLOCK-76 清债补契约定义） */
 
   /* 桌面版间距 token — 常用 px 档位，零碎值（3/5/10/14px）保留 */
@@ -74,7 +72,7 @@ body {
   padding: 0;
   overflow: hidden;
   font-family: var(--petri-font-sans);
-  font-size: var(--petri-font-size-md);
+  font-size: var(--petri-font-size-body); /* BLOCK-167 W1：根默认=正文 14px（原 16/18 档与全站小字显式声明互相打架） */
   background: var(--ifm-background-color);
   color: var(--petri-text-secondary);
   -webkit-font-smoothing: antialiased;
@@ -125,7 +123,7 @@ body {
   align-items: center;
   justify-content: center;
   color: var(--petri-text-muted);
-  font-size: var(--petri-font-size-md);
+  font-size: var(--petri-font-size-lg);
 }
 .petri-docs-frame {
   width: 100%;
@@ -156,7 +154,6 @@ code {
   border: none;
   background-color: var(--petri-bg-subtle);
   font-family: var(--petri-font-mono, monospace);
-  font-size: var(--petri-font-size-caption);
 }
 /* pre 代码块：去掉 infima 默认背景，让应用页自己的代码块样式生效；
    docs/blog 的 .petri-docs-content pre 会重新给深色背景；
@@ -166,7 +163,7 @@ pre {
   background-color: transparent;
   padding: 0;
   margin: 0;
-  font: var(--petri-font-size-body-sm) / 1.5 var(--petri-font-mono, monospace);
+  font: var(--petri-font-size-body) / 1.5 var(--petri-font-mono, monospace);
 }
 pre code {
   background-color: transparent;

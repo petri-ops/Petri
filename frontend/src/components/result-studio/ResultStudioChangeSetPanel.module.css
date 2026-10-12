@@ -1,6 +1,6 @@
 .root {
-  border-top: 1px solid var(--petri-border);
-  border-bottom: 1px solid var(--petri-border);
+  border-top: 1px solid var(--petri-divider);
+  border-bottom: 1px solid var(--petri-divider);
   color: var(--petri-text);
   padding: var(--petri-space-3) 0;
 }
@@ -28,14 +28,14 @@
   min-width: 0;
 }
 
-.title strong { font-size: var(--petri-font-size-caption); font-weight: 650; }
+.title strong { font-size: var(--petri-font-size-sm); font-weight: 650; }
 .title span,
 .summary,
 .diffMeta,
 .historyRow small { color: var(--petri-text-tertiary); font-size: var(--petri-font-size-sm); }
 
 .status {
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-pill);;
   color: var(--petri-text-secondary);
   flex: 0 0 auto;
@@ -59,7 +59,6 @@
   color: var(--petri-text-tertiary);
   display: flex;
   flex-wrap: wrap;
-  font-size: var(--petri-font-size-xs);
   gap: var(--petri-space-1) 9px;
   margin-top: var(--petri-space-1);
 }
@@ -70,7 +69,6 @@
   color: var(--petri-accent);
   cursor: pointer;
   font: inherit;
-  font-size: var(--petri-font-size-xs);
   padding: 0;
 }
 
@@ -84,7 +82,6 @@
 
 .intentSummary {
   color: var(--petri-text);
-  font-size: var(--petri-font-size-caption);
   line-height: 1.45;
   margin: var(--petri-space-3) 0 0;
 }
@@ -93,14 +90,13 @@
   align-items: center;
   color: var(--petri-text-tertiary);
   display: flex;
-  font-size: var(--petri-font-size-xs);
   gap: 7px;
   margin-top: 7px;
 }
 
 .changeSetPicker select {
   background: var(--petri-bg-surface);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-sm);;
   color: var(--petri-text-secondary);
   font: inherit;
@@ -112,12 +108,11 @@
 .historyRow button,
 .toggle {
   background: transparent;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-sm);;
   color: var(--petri-text-secondary);
   cursor: pointer;
   font: inherit;
-  font-size: var(--petri-font-size-sm);
   line-height: 24px;
   padding: 0 var(--petri-space-3);
 }
@@ -135,12 +130,12 @@
 .loading { color: var(--petri-text-tertiary); font-size: var(--petri-font-size-sm); padding: 2px 0; }
 
 .details {
-  border-top: 1px solid var(--petri-border);
+  border-top: 1px solid var(--petri-divider);
   margin-top: var(--petri-space-3);
   padding-top: var(--petri-space-3);
 }
 
-.section + .section { border-top: 1px solid var(--petri-border); margin-top: 9px; padding-top: 9px; }
+.section + .section { border-top: 1px solid var(--petri-divider); margin-top: 9px; padding-top: 9px; }
 .section h4 { font-size: var(--petri-font-size-sm); font-weight: 650; margin: 0 0 var(--petri-space-2); }
 
 .visualGrid {
@@ -151,22 +146,20 @@
 
 .visualFigure { margin: 0; min-width: 0; }
 .visualFigure figcaption { color: var(--petri-text-tertiary); font-size: var(--petri-font-size-xs); margin-bottom: var(--petri-space-1); }
-.visualFigure img { border: 1px solid var(--petri-border); display: block; max-height: 280px; object-fit: contain; width: 100%; }
+.visualFigure img { border: 1px solid var(--petri-border-card); display: block; max-height: 280px; object-fit: contain; width: 100%; }
 .visualFigureUnavailable {
   border: 1px dashed var(--petri-border);
   border-radius: var(--petri-radius-sm);;
   color: var(--petri-text-tertiary);
-  font-size: var(--petri-font-size-xs);
   padding: var(--petri-space-4);
   text-align: center;
 }
 
 .tableCompare {
   border-collapse: collapse;
-  font-size: var(--petri-font-size-xs);
   width: 100%;
 }
-.tableCompare td { border-bottom: 1px solid var(--petri-border); padding: var(--petri-space-1) 5px; text-align: left; vertical-align: top; }
+.tableCompare td { border-bottom: 1px solid var(--petri-divider); padding: var(--petri-space-1) 5px; text-align: left; vertical-align: top; }
 .tableCompare td:first-child { color: var(--petri-text-tertiary); width: 96px; }
 
 .scientificDifference {
@@ -177,13 +170,11 @@
 
 .scientificDifference h5 {
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-sm);
   margin: 0 0 5px;
 }
 
 .scientificUnavailable {
   color: var(--petri-text-tertiary);
-  font-size: var(--petri-font-size-sm);
   margin: var(--petri-space-1) 0;
 }
 
@@ -193,13 +184,12 @@
   color: var(--petri-accent);
   cursor: pointer;
   font: inherit;
-  font-size: var(--petri-font-size-xs);
   margin-top: 5px;
   padding: 0;
 }
 
 .virtualTable {
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   margin-top: var(--petri-space-2);
   max-height: 260px;
   overflow: auto;
@@ -207,7 +197,7 @@
 
 .virtualTable table { border-collapse: collapse; font-size: var(--petri-font-size-xs); min-width: 100%; width: max-content; }
 .virtualTable th,
-.virtualTable td { border-bottom: 1px solid var(--petri-border); max-width: 220px; overflow: hidden; padding: 3px 5px; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.virtualTable td { border-bottom: 1px solid var(--petri-divider); max-width: 220px; overflow: hidden; padding: 3px 5px; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
 .virtualTable th { background: var(--petri-surface); position: sticky; top: 0; }
 
 .jsonList { display: grid; gap: 3px; }
@@ -216,9 +206,8 @@
 .jsonRow span { color: var(--petri-text-tertiary); flex: 0 0 auto; font-size: var(--petri-font-size-xs); }
 
 .patch {
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-xs);
   line-height: 1.45;
   margin: 5px 0 0;
   max-height: 320px;
@@ -245,7 +234,6 @@
   color: var(--petri-accent);
   cursor: pointer;
   font: inherit;
-  font-size: var(--petri-font-size-xs);
   padding: 5px var(--petri-space-3);
 }
 

@@ -168,7 +168,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
             <div className="petri-plugin-store__packs" data-testid="domain-packs-section">
               <div className="petri-plugin-store__packs-header">
                 <strong>领域包</strong>
-                <span style={{ fontSize: 'var(--petri-font-size-caption, 12px)', color: 'var(--petri-text-tertiary)' }}>
+                <span style={{ fontSize: 'var(--petri-font-size-sm)', color: 'var(--petri-text-tertiary)' }}>
                   整包安装/卸载一组领域能力（分析插件 + 脚本 + 运行时）；装/卸后需重启应用生效
                 </span>
               </div>
@@ -241,7 +241,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                           <div style={{ fontWeight: 600 }}>
                             {pack.name} <span style={{ color: 'var(--petri-text-tertiary)', fontWeight: 400 }}>v{pack.version}</span>
                             {pack.installed && (
-                              <span style={{ marginLeft: 8, fontSize: 'var(--petri-font-size-caption, 12px)', color: 'var(--petri-accent, #3b82f6)' }}>已安装</span>
+                              <span style={{ marginLeft: 8, fontSize: 'var(--petri-font-size-sm)', color: 'var(--petri-accent, #3b82f6)' }}>已安装</span>
                             )}
                             {pack.installed && (() => {
                               // BLOCK-163 W3 P7（DIST-5）— 更新徽标：包根版本 > 已装版本
@@ -249,7 +249,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                               return update ? (
                                 <span
                                   data-testid={`pack-update-${pack.packId}`}
-                                  style={{ marginLeft: 6, fontSize: 'var(--petri-font-size-caption, 12px)', color: 'var(--petri-warning, #d97706)' }}
+                                  style={{ marginLeft: 6, fontSize: 'var(--petri-font-size-sm)', color: 'var(--petri-warning, #d97706)' }}
                                   title={`有新版本 v${update.latestVersion}（当前 v${update.installedVersion}）`}
                                 >
                                   ↑ v{update.latestVersion}
@@ -257,7 +257,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                               ) : null;
                             })()}
                           </div>
-                          <div style={{ color: 'var(--petri-text-tertiary)', fontSize: 'var(--petri-font-size-caption, 12px)' }}>
+                          <div style={{ color: 'var(--petri-text-tertiary)', fontSize: 'var(--petri-font-size-sm)' }}>
                             {contents
                               ? `${contents.pluginCount} 个分析插件 · ${contents.scriptCount} 个脚本模块 · ${contents.demoDataCount} 个演示数据集`
                               : (pack.description || pack.packId)}
@@ -320,7 +320,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                       {/* UI-374 — 展开区：运行时子项（状态/体积/进度）随契约渲染 */}
                       {expanded && requiredRuntimes.length > 0 && (
                         <div style={{ borderTop: '1px dashed var(--petri-border, rgba(128,128,128,0.25))', padding: '8px 12px 10px 36px' }} data-testid={`pack-runtimes-${pack.packId}`}>
-                          <div style={{ fontSize: 'var(--petri-font-size-caption, 12px)', color: 'var(--petri-text-tertiary)', marginBottom: 6 }}>
+                          <div style={{ fontSize: 'var(--petri-font-size-sm)', color: 'var(--petri-text-tertiary)', marginBottom: 6 }}>
                             运行时基础环境（随包安装）
                           </div>
                           {requiredRuntimes.map((req) => {
@@ -335,15 +335,15 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                                 <Icon name="cpu" size={14} />
                                 <span style={{ flex: 1, minWidth: 0 }}>
                                   {runtimeTitleOf(req.pluginId)}
-                                  <span style={{ color: 'var(--petri-text-tertiary)', marginLeft: 8, fontSize: 'var(--petri-font-size-caption, 12px)' }}>
+                                  <span style={{ color: 'var(--petri-text-tertiary)', marginLeft: 8, fontSize: 'var(--petri-font-size-sm)' }}>
                                     {sizeLabel}
                                     {req.version ? ` · ${req.version}` : ''}
                                   </span>
                                   {rtInstalled && (
-                                    <span style={{ color: 'var(--petri-text-tertiary)', marginLeft: 8, fontSize: 'var(--petri-font-size-caption, 12px)' }}>✓ 已安装</span>
+                                    <span style={{ color: 'var(--petri-text-tertiary)', marginLeft: 8, fontSize: 'var(--petri-font-size-sm)' }}>✓ 已安装</span>
                                   )}
                                   {missingButRequired && (
-                                    <span style={{ color: 'var(--petri-warning, #d97706)', marginLeft: 8, fontSize: 'var(--petri-font-size-caption, 12px)' }}>
+                                    <span style={{ color: 'var(--petri-warning, #d97706)', marginLeft: 8, fontSize: 'var(--petri-font-size-sm)' }}>
                                       必需 · 缺失
                                     </span>
                                   )}
@@ -397,7 +397,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                 boxShadow: '0 12px 32px rgba(15,23,42,0.18)',
               }}>
                 <div style={{ fontWeight: 600, marginBottom: 8 }}>卸载「{confirmPack.name}」</div>
-                <div style={{ fontSize: 'var(--petri-font-size-caption, 12px)', color: 'var(--petri-text-secondary)', marginBottom: 10 }}>
+                <div style={{ fontSize: 'var(--petri-font-size-sm)', color: 'var(--petri-text-secondary)', marginBottom: 10 }}>
                   卸载后需重启应用生效。请确认以下处置（可逐项勾选）：
                 </div>
                 <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '6px 0', cursor: 'pointer' }}>
@@ -446,7 +446,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
                     <div style={{ color: 'var(--petri-text-tertiary)' }}>内含分析插件、脚本与演示数据；默认保留</div>
                   </span>
                 </label>
-                <div style={{ padding: '8px 0', color: 'var(--petri-text-secondary)', fontSize: 'var(--petri-font-size-caption, 12px)' }}>
+                <div style={{ padding: '8px 0', color: 'var(--petri-text-secondary)', fontSize: 'var(--petri-font-size-sm)' }}>
                   {confirmPlan.userDataPolicy || 'results、项目文件与数据库不受影响'}——用户数据永不删除。
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
@@ -486,7 +486,7 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
           {/* UI-374 — 包交付的插件：标注来源包，随包装卸（无独立安装按钮） */}
           {packDeliveredPlugins.length > 0 && (
             <div style={{ marginTop: 14 }} data-testid="pack-delivered-plugins">
-              <div style={{ fontSize: 'var(--petri-font-size-caption, 12px)', color: 'var(--petri-text-tertiary)', marginBottom: 6 }}>
+              <div style={{ fontSize: 'var(--petri-font-size-sm)', color: 'var(--petri-text-tertiary)', marginBottom: 6 }}>
                 来自已安装领域包（随包装卸，重启生效）
               </div>
               <div className="petri-plugin-store__grid">

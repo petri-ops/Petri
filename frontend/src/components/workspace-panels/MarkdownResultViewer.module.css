@@ -70,10 +70,10 @@
 
 .markdownBody th,
 .markdownBody td {
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   padding: 5px 10px;
   text-align: left;
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   color: var(--petri-text);
 }
 
@@ -94,7 +94,7 @@
 
 .markdownBody pre {
   background: var(--petri-bg-canvas);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   padding: 10px var(--petri-space-4);
   margin: 0 0 0.9em;
@@ -104,7 +104,7 @@
 .markdownBody pre code {
   background: transparent;
   padding: 0;
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
 }
 
 /* 引用块 */
@@ -118,7 +118,7 @@
 /* 分隔线 / 列表 / 任务列表 */
 .markdownBody hr {
   border: none;
-  border-top: 1px solid var(--petri-border);
+  border-top: 1px solid var(--petri-divider);
   margin: 1.1em 0;
 }
 
@@ -149,7 +149,7 @@
 
 .markdownLoading {
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
 }
 
 /* 错误态：如实显示（status-error 族 token 亮暗双套有定义） */
@@ -162,5 +162,5 @@
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-status-error-bg);
   color: var(--petri-status-error-fg);
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
 }

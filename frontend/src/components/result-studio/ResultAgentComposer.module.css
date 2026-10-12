@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: var(--petri-space-2);
   padding: var(--petri-space-3) var(--petri-space-4);
-  border-top: 1px solid var(--petri-border);
+  border-top: 1px solid var(--petri-divider);
   background: var(--petri-bg-surface);
   color: var(--petri-text-primary);
 }
@@ -13,7 +13,7 @@
   align-items: flex-end;
   gap: var(--petri-space-2);
   min-width: 0;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   padding: 3px var(--petri-space-1) 3px 9px;
   background: var(--petri-bg-elevated);
@@ -37,7 +37,6 @@
   background: transparent;
   color: var(--petri-text-primary);
   font: inherit;
-  font-size: var(--petri-font-size-caption);
   line-height: 18px;
   transition: min-height 120ms ease;
 }
@@ -71,7 +70,6 @@
   margin: 0;
   padding: 0 2px;
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-xs);
   line-height: 1.4;
 }
 
@@ -98,7 +96,7 @@
   align-items: center;
   gap: 5px;
   padding: 3px var(--petri-space-2);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-sm);;
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-xs);
@@ -112,7 +110,6 @@
 .terminal {
   margin: 0;
   color: var(--petri-status-error);
-  font-size: var(--petri-font-size-xs);
   line-height: 1.4;
 }
 

@@ -10,12 +10,12 @@
 
 .homeState {
   gap: 9px;
-  font-size: var(--petri-font-size-caption);
+  font-size: var(--petri-font-size-sm);
 }
 
 .homeState button,
 .emptyHomeCreate button {
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-surface);
   color: var(--petri-text);
@@ -50,7 +50,7 @@
   justify-content: center;
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-accent-bg);
-  color: var(--petri-accent);
+  color: var(--petri-text-secondary);
 }
 
 .emptyHome h1 {
@@ -61,7 +61,6 @@
 
 .emptyHome p {
   margin: 0;
-  font-size: var(--petri-font-size-caption);
 }
 
 .emptyHomeCreate {
@@ -85,7 +84,6 @@
 .emptyHomeError {
   margin: var(--petri-space-3) 0 0;
   color: var(--petri-status-error-fg, #b91c1c);
-  font-size: var(--petri-font-size-caption);
 }
 
 /* UI-257 — 手动输入路径兜底（按需显示） */
@@ -131,8 +129,8 @@
   justify-content: center;
   border-radius: 15px;
   background: var(--petri-accent-bg);
-  color: var(--petri-accent);
-  border: 1px solid var(--petri-border);
+  color: var(--petri-text-secondary);
+  border: 1px solid var(--petri-border-card);
 }
 
 .workbench h1 {
@@ -144,7 +142,6 @@
 
 .workbenchLead {
   margin: 0;
-  font-size: var(--petri-font-size-caption);
   color: var(--petri-text-secondary);
 }
 
@@ -159,7 +156,6 @@
 
 .workbenchSectionLabel {
   margin-top: 10px;
-  font-size: var(--petri-font-size-caption);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -178,7 +174,7 @@
   gap: 11px;
   padding: 11px 14px;
   text-align: left;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-canvas);
   color: var(--petri-text);
@@ -201,7 +197,7 @@
   justify-content: center;
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-accent-bg);
-  color: var(--petri-accent);
+  color: var(--petri-text-secondary);
 }
 
 .workbenchCardMain {
@@ -213,7 +209,7 @@
 }
 
 .workbenchCardName {
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   font-weight: 600;
   color: var(--petri-text);
   overflow: hidden;
@@ -225,7 +221,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: var(--petri-font-size-caption);
   font-family: var(--petri-font-mono);
   color: var(--petri-text-muted, var(--petri-text-secondary));
 }
@@ -233,7 +228,7 @@
 .workbenchCardDate {
   flex-shrink: 0;
   align-self: flex-start;
-  font-size: var(--petri-font-size-caption);
+  font-size: var(--petri-font-size-sm);
   color: var(--petri-text-muted, var(--petri-text-secondary));
   font-variant-numeric: tabular-nums;
 }
@@ -243,7 +238,7 @@
   flex-direction: column;
   gap: var(--petri-space-2);
   padding: 14px var(--petri-space-5) var(--petri-space-5);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-canvas);
 }
@@ -272,9 +267,8 @@
   height: 30px;
   box-sizing: border-box;
   padding: 0 9px;
-  font-size: var(--petri-font-size-caption);
   font-family: var(--petri-font-mono);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-canvas);
   color: var(--petri-text);
@@ -296,7 +290,6 @@
 /* UI-253 — 选定目录确认：具体项目路径可见、可反悔 */
 .emptyHomePendingLabel {
   margin: var(--petri-space-2) 0 0;
-  font-size: var(--petri-font-size-caption);
   color: var(--petri-text-secondary);
 }
 
@@ -307,11 +300,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle);
   font-family: var(--petri-font-mono);
-  font-size: var(--petri-font-size-xs);
   color: var(--petri-text);
   text-align: left;
 }
@@ -364,8 +356,8 @@
   justify-content: center;
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-accent-bg);
-  color: var(--petri-accent);
-  border: 1px solid var(--petri-border);
+  color: var(--petri-text-secondary);
+  border: 1px solid var(--petri-border-card);
 }
 
 .setupHome h1 {
@@ -378,7 +370,6 @@
 .setupLead {
   margin: 0;
   max-width: 460px;
-  font-size: var(--petri-font-size-caption);
   line-height: 1.7;
 }
 
@@ -398,7 +389,7 @@
   align-items: center;
   gap: 10px;
   padding: var(--petri-space-4) 14px;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-canvas);
   color: var(--petri-text-secondary);
@@ -418,7 +409,7 @@
 
 .setupCheckName {
   color: var(--petri-text);
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   font-weight: 500;
 }
 
@@ -449,7 +440,6 @@
   height: 36px;
   padding: 0 var(--petri-space-5);
   border-radius: var(--petri-radius-lg);;
-  font-size: var(--petri-font-size-caption);
   cursor: pointer;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
               box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -467,7 +457,7 @@
 }
 
 .setupSecondary {
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   background: var(--petri-bg-surface);
   color: var(--petri-text);
 }
@@ -487,7 +477,6 @@
 
 .setupReason {
   margin: var(--petri-space-1) 0 0;
-  font-size: var(--petri-font-size-sm);
   opacity: 0.75;
 }
 
@@ -513,10 +502,9 @@
   justify-content: center;
   gap: 14px;
   padding: 11px var(--petri-space-5);
-  border-top: 1px solid var(--petri-border);
+  border-top: 1px solid var(--petri-divider);
   background: var(--petri-accent-bg);
   color: var(--petri-text);
-  font-size: var(--petri-font-size-caption);
   animation: setupEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -524,7 +512,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--petri-space-2);
-  color: var(--petri-accent);
+  color: var(--petri-text-muted);
 }
 
 .setupStoreFooter button {
@@ -534,7 +522,6 @@
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-accent);
   color: #fff;
-  font-size: var(--petri-font-size-caption);
   cursor: pointer;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -556,12 +543,12 @@
   gap: 10px;
   margin: 0 0 18px;
   padding: 10px 14px;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-left: 3px solid var(--petri-accent);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-caption);
+  font-size: var(--petri-font-size-sm);
   line-height: 1.5;
 }
 

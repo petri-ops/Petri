@@ -244,7 +244,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: var(--petri-font-size-caption);
   font-weight: 630;
   line-height: 16px;
 }
@@ -292,7 +291,6 @@
   min-width: 0;
   max-width: 100%;
   padding: 0 7px;
-  font-size: var(--petri-font-size-sm);
   font-weight: 620;
   line-height: 16px;
   white-space: nowrap;
@@ -343,7 +341,7 @@
   width: min(260px, calc(100vw - 20px));
   max-width: calc(100vw - 20px);
   padding: 5px;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-elevated);
   box-shadow: 0 14px 32px color-mix(in srgb, var(--petri-text) 18%, transparent);
@@ -362,7 +360,6 @@
   border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-sm);
   text-align: left;
   cursor: pointer;
 }
@@ -471,7 +468,7 @@
   display: grid;
   width: 176px;
   padding: 5px;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-elevated);
   box-shadow: 0 14px 32px color-mix(in srgb, var(--petri-text) 18%, transparent);
@@ -489,7 +486,6 @@
   border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-sm);
   text-align: left;
   cursor: pointer;
 }
@@ -530,7 +526,7 @@
   padding: 0;
   flex-shrink: 0;
   /* UI-215 补充：纯图标按钮收敛 UA 默认字号（13.3333px）到 token */
-  font-size: var(--petri-font-size-caption);
+  font-size: var(--petri-font-size-sm);
 }
 
 .iconBtn:focus-visible,
@@ -647,7 +643,7 @@
   border-radius: var(--petri-radius-pill);;
   background: transparent;
   color: color-mix(in srgb, var(--titlebar-ink-muted) 72%, transparent 28%);
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   line-height: 1;
   padding: 0;
   cursor: pointer;

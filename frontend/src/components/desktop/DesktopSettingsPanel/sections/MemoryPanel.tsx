@@ -131,7 +131,7 @@ export function MemoryPanel(): React.ReactElement {
               data-testid={`memory-fact-${fact.id}`}
               style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', border: '1px solid var(--petri-border, rgba(128,128,128,0.25))', borderRadius: 6 }}
             >
-              <code style={{ flex: 1, fontSize: 'var(--petri-font-size-caption, 12px)' }}>
+              <code style={{ flex: 1, fontSize: 'var(--petri-font-size-sm)' }}>
                 {fact.category ? `[${fact.category}] ` : ''}{fact.content}
               </code>
               <button
@@ -156,7 +156,7 @@ export function MemoryPanel(): React.ReactElement {
         ) : null}
       </div>
       {summary ? (
-        <p style={{ fontSize: 'var(--petri-font-size-caption, 12px)', color: 'var(--petri-text-secondary)', whiteSpace: 'pre-wrap', maxHeight: 120, overflow: 'auto' }}>
+        <p style={{ fontSize: 'var(--petri-font-size-sm)', color: 'var(--petri-text-secondary)', whiteSpace: 'pre-wrap', maxHeight: 120, overflow: 'auto' }}>
           {summary}
         </p>
       ) : (

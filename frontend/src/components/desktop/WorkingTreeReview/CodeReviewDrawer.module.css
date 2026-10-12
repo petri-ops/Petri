@@ -29,7 +29,7 @@
   height: 100%;
   background: var(--petri-surface-dim, #1e1e1e);
   color: var(--petri-fg, #e0e0e0);
-  border-left: 1px solid var(--petri-border, #404040);
+  border-left: 1px solid var(--petri-divider);
   box-shadow: var(--petri-shadow-menu);
   display: flex;
   flex-direction: column;
@@ -48,7 +48,7 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--petri-space-4) var(--petri-space-5);
-  border-bottom: 1px solid var(--petri-border, #404040);
+  border-bottom: 1px solid var(--petri-divider);
   background: var(--petri-bg-elev, #2a2a2a);
   flex-shrink: 0;
   gap: var(--petri-space-4);
@@ -73,7 +73,6 @@
 
 .drawerFilePath {
   font-family: var(--petri-mono, monospace);
-  font-size: var(--petri-font-size-caption);
   color: var(--petri-fg-muted, #888);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -90,7 +89,6 @@
 
 .unsavedMarker {
   color: #e0a040;
-  font-size: var(--petri-font-size-caption);
   animation: pulse 1.4s ease-in-out infinite;
 }
 
@@ -105,7 +103,6 @@
   background: var(--petri-status-error-bg);
   border-bottom: 1px solid var(--petri-status-error-border);
   color: var(--petri-status-error-fg);
-  font-size: var(--petri-font-size-caption);
   flex-shrink: 0;
 }
 
@@ -123,7 +120,7 @@
   align-items: center;
   justify-content: center;
   color: var(--petri-fg-muted, #888);
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
 }
 
 .drawerBinary {
@@ -137,7 +134,7 @@
 .binaryMarker {
   color: var(--petri-fg-muted, #888);
   font-style: italic;
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   text-align: center;
 }
 
@@ -158,7 +155,7 @@
 }
 
 .diffPane:first-child {
-  border-right: 1px solid var(--petri-border, #404040);
+  border-right: 1px solid var(--petri-divider);
 }
 
 .diffPaneHeader {
@@ -167,13 +164,12 @@
   justify-content: space-between;
   padding: var(--petri-space-2) var(--petri-space-4);
   background: var(--petri-bg-elev, #2a2a2a);
-  border-bottom: 1px solid var(--petri-border, #404040);
+  border-bottom: 1px solid var(--petri-divider);
   flex-shrink: 0;
 }
 
 .diffPaneLabel {
   font-family: var(--petri-mono, monospace);
-  font-size: var(--petri-font-size-sm);
   color: var(--petri-fg-muted, #888);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -181,7 +177,6 @@
 }
 
 .editedMarker {
-  font-size: var(--petri-font-size-xs);
   color: #e0a040;
   font-family: var(--petri-mono, monospace);
 }
@@ -196,7 +191,6 @@
   border: none;
   padding: 10px var(--petri-space-4);
   font-family: var(--petri-mono, monospace);
-  font-size: var(--petri-font-size-caption);
   line-height: 1.6;
   resize: none;
   overflow: auto;
@@ -221,7 +215,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px var(--petri-space-5);
-  border-top: 1px solid var(--petri-border, #404040);
+  border-top: 1px solid var(--petri-divider);
   background: var(--petri-bg-elev, #2a2a2a);
   flex-shrink: 0;
   gap: var(--petri-space-4);
@@ -246,8 +240,7 @@
 /* Buttons */
 .drawerBtn {
   padding: var(--petri-space-2) 14px;
-  font-size: var(--petri-font-size-caption);
-  border: 1px solid var(--petri-border, #404040);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-sm);;
   background: var(--petri-bg-button, #3a3a3a);
   color: inherit;

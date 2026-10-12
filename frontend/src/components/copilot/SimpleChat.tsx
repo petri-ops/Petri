@@ -1279,7 +1279,7 @@ export function SimpleChat({
                       {cmd.kind !== 'action' && (
                         <span
                           className="sc-slash-item-label"
-                          style={{ marginRight: 6, fontSize: 'var(--petri-font-size-caption, 12px)', color: 'var(--petri-accent, #3b82f6)' }}
+                          style={{ marginRight: 6, fontSize: 'var(--petri-font-size-sm)', color: 'var(--petri-accent, #3b82f6)' }}
                         >
                           {cmd.kind === 'skill' ? '技能' : '模板'}
                         </span>

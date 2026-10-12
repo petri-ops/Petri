@@ -15,7 +15,7 @@
   gap: 2px;
   min-width: 0;
   padding: var(--petri-space-1) var(--petri-space-2);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-canvas);
 }
@@ -72,7 +72,7 @@
   padding: 2px;
   max-height: 220px;
   overflow-y: auto;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-canvas);
 }
@@ -86,7 +86,6 @@
   border: none;
   background: none;
   color: var(--petri-text);
-  font-size: var(--petri-font-size-xs);
   cursor: pointer;
   border-radius: var(--petri-radius-sm);;
   text-align: left;
@@ -106,16 +105,14 @@
 
 .empty {
   padding: var(--petri-space-3);
-  font-size: var(--petri-font-size-xs);
   color: var(--petri-text-muted, var(--petri-text-secondary));
 }
 
 .error {
   margin: 0;
   padding: var(--petri-space-2) var(--petri-space-3);
-  font-size: var(--petri-font-size-xs);
   color: var(--petri-danger, #d9534f);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   word-break: break-all;
 }

@@ -7,7 +7,7 @@
   gap: var(--petri-space-2);
   min-height: 44px;
   padding: 5px 10px;
-  border-bottom: 1px solid var(--petri-border);
+  border-bottom: 1px solid var(--petri-divider);
   background: var(--petri-bg-surface);
 }
 
@@ -45,7 +45,7 @@
   background: transparent;
   color: var(--petri-text);
   font: inherit;
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   font-weight: 650;
   text-overflow: ellipsis;
   cursor: pointer;
@@ -55,7 +55,7 @@
   min-width: 0;
   overflow: hidden;
   color: var(--petri-text);
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   line-height: 24px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -113,7 +113,7 @@ button.iconAction {
   max-height: min(440px, calc(100vh - 120px));
   overflow: auto;
   padding: 10px;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-surface);
   box-shadow: var(--petri-shadow-float);
@@ -124,19 +124,17 @@ button.iconAction {
   gap: 2px;
   min-width: 0;
   padding-bottom: var(--petri-space-3);
-  border-bottom: 1px solid var(--petri-border-subtle);
+  border-bottom: 1px solid var(--petri-border-card);
 }
 
 .moreHeader strong {
   overflow-wrap: anywhere;
   color: var(--petri-text);
-  font-size: var(--petri-font-size-caption);
 }
 
 .moreHeader span,
 .menuLabel {
   color: var(--petri-text-tertiary);
-  font-size: var(--petri-font-size-xs);
 }
 
 .truthBadge,
@@ -146,7 +144,7 @@ button.iconAction {
   align-items: center;
   min-height: 19px;
   padding: 0 var(--petri-space-2);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-pill);;
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-xs);
@@ -180,7 +178,6 @@ button.iconAction {
   color: var(--petri-text-tertiary);
   cursor: pointer;
   font: inherit;
-  font-size: var(--petri-font-size-xs);
 }
 
 .modeSwitcher button:hover {
@@ -198,7 +195,7 @@ button.iconAction {
   gap: 2px;
   margin-top: 10px;
   padding-top: var(--petri-space-3);
-  border-top: 1px solid var(--petri-border-subtle);
+  border-top: 1px solid var(--petri-border-card);
 }
 
 .secondaryActions {
@@ -213,12 +210,11 @@ button.iconAction {
 .secondaryActions button {
   min-height: 26px;
   padding: 3px 7px;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-sm);;
   background: transparent;
   color: var(--petri-text-secondary);
   font: inherit;
-  font-size: var(--petri-font-size-xs);
   text-decoration: none;
   cursor: pointer;
 }
@@ -265,7 +261,6 @@ button.iconAction {
 .relatedFiles button small {
   flex: 0 0 auto;
   color: var(--petri-text-tertiary);
-  font-size: var(--petri-font-size-xs);
 }
 
 @container (max-width: 520px) {

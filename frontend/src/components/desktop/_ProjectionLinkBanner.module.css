@@ -9,13 +9,13 @@
   justify-content: center;
   gap: var(--petri-space-3);
   padding: var(--petri-space-2) var(--petri-space-4);
-  border-bottom: 1px solid var(--petri-border);
+  border-bottom: 1px solid var(--petri-divider);
   border-left: none;
   border-right: none;
   border-top: none;
   background: var(--petri-bg-elevated);
   color: var(--petri-text);
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   box-shadow: var(--petri-shadow-sm);
   pointer-events: none;
 }

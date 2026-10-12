@@ -20,7 +20,7 @@
   gap: var(--petri-space-2);
   padding: 10px 0;
   background: var(--petri-bg-surface);
-  border-left: 1px solid var(--petri-border);
+  border-left: 1px solid var(--petri-divider);
   opacity: 0.45;
   transition: width 0.16s ease, opacity 0.16s ease;
   overflow: hidden;
@@ -87,7 +87,7 @@
   overflow: auto;
   padding: var(--petri-space-4);
   border-radius: var(--petri-radius-lg);;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   background: var(--petri-bg-elevated);
   box-shadow: var(--petri-shadow-menu);
 }
@@ -96,7 +96,7 @@
   margin-bottom: 10px;
   padding: var(--petri-space-2);
   border-radius: var(--petri-radius-lg);;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   background: var(--petri-bg-subtle);
   display: flex;
   align-items: center;
@@ -118,13 +118,12 @@
   border: 1px dashed var(--petri-border);
   background: var(--petri-bg-subtle);
   text-align: center;
-  font-size: var(--petri-font-size-sm);
   color: var(--petri-text-muted);
 }
 
 .cardTitle {
   display: block;
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   font-weight: 600;
   color: var(--petri-text);
   margin-bottom: var(--petri-space-1);
@@ -146,9 +145,8 @@
 .cardBtn {
   flex: 1;
   height: 28px;
-  font-size: var(--petri-font-size-caption);
   border-radius: var(--petri-radius-md);;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   background: transparent;
   color: var(--petri-text);
   cursor: pointer;
@@ -176,7 +174,6 @@
 
 .fadedNote {
   display: block;
-  font-size: var(--petri-font-size-sm);
   color: var(--petri-text-muted);
   margin-bottom: var(--petri-space-3);
 }

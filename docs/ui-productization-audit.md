@@ -1,5 +1,6 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-12（**UI-489 落地（BLOCK-167 W1 静态重校）**：字号 6 档终态+根默认 14px+519 处正文小字 inherit 化（14px 占比 40.3%）+装饰 accent 清除 37 处+结构细线 533→0（三语义 token 全覆盖）；契约棘轮随波收紧 15/15 绿。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-488 落地（BLOCK-167 W0 设计宪章+用法门禁）**：design-charter 落档（字号 6 档终态/色彩预算 10:1/border 三语义/motion 150/200/300+ease×2）+custom.css 宪章 token 组+global.css ::selection 全局唯一（accent 28% mix，此前全站缺失）+theme-token-contract +6 断言 15/15 绿（三棘轮 450/372/533 冻结+token 存在性+duration 档序+合成违例红证据自检）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-09（**UI-469 落地（BLOCK-150 审视吸收批·第一波，dynamic workflow 三轨并行，主代理终审待集成提交）**——平台消费链补全：任务墙「排队中 #N」位次（/api/tools/history 同源重投影）+ jobs 终态失效流即时刷新（useInvalidationStream 复用）+ message_persist_failed 会话级诚实呈现（setFallbackNotice 复用）；治理文案：DataManagement 话术 + 散点 caveat 因果点破 + compare 面领域词中立化。同批非 UI 面（TOOL_METADATA readOnly 漂移 2 处修齐/HEAVY_TOOLS 死链 9 清//m 页 token 出 URL/pack R 守卫×4/go-kegg 收敛/data-management 键/报告图兜底）随主包收口。集成实跑 test:changed Node 754/746 pass 0 fail + 前端 68/68。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 此前 最后更新：2026-10-08（**UI-466 落地（BLOCK-147 审阅正确性批三项，dynamic workflow 串行红绿，主代理终审待集成提交）**——①#1 hunk 决策键内容寻址（`path#h{oldStart}-{FNV-1a 指纹}`，refresh 重解析后被拒 hunk 消失不再错位挂未审 hunk；后端零改动，键形态与 commitReview `lastIndexOf('#')` 切分兼容）②#2 未决 hunk 计数真实可见（当前 diff hunk 全集−已决策键集合，按文件明细）+ 提交确认前拦截（列文件×条数，可显式继续/取消回去审，⌘+Enter 与按钮同路径不绕过）③#3 键盘焦点视觉反馈（↑↓/j/k 联动 scrollToLine pulse + 焦点 hunk 控件/标记条持续高亮，token 样式）。红绿三环全留痕；code-size 随批 R-2 重锚（ReviewMode.tsx 1330 / useWorkingTreeReview.ts 661）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -4812,3 +4813,12 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **门禁**：theme-token-contract.test.ts BLOCK-167 断言组——小字号棘轮（xs+sm 450 冻结→W1≤110→终态≤40）/accent 棘轮（372 冻结→W1≤200→终态≤130）/无语义 1px 细线棘轮（533 冻结→W1≤285→终态 0）/宪章 token 存在性+duration 档序/::selection 唯一性+accent 派生/合成违例红证据自检；15/15 绿。
 - **实机**：dev 栈 Vite HMR 生效面（token/::selection 即时可见）；截图验收义务随 W1 三域前后对比履行。
 - **决策记录**：test:suggest 建议 window-manager.test.mjs——W0 零窗口面改动不采纳（如实）；计数器口径=全 CSS 面 450/372/533 为 canonical（plan §3 注记）。
+
+## UI-489: 字号 6 档终态+根默认 14px+小字 inherit 化+装饰 accent 清除+结构细线归零（2026-10-12 in_progress，BLOCK-167 W1）
+
+- **字号**：token 退役归并（caption/body-sm/md/3xl→sm/body/lg/2xl，494 处含 tsx fallback）；值重校 xs11/sm12/lg16/2xl28；根默认 html/body=body(14)。
+- **重分类**：519 处正文性 xs/sm 声明删除→继承 14px（选择器词汇判定：真徽标/meta 保留）；14px 声明占比 3%→40.3%。
+- **accent**：装饰性 37 处转中性（desktop 图标族/sc-example/llm-tr 角色/notice 文本/hero 图标等）+2 处 danger 语义修正；交互态/链接/状态点按宪章五类保留。
+- **细线**：533→0（border-card 287/petri-divider 131/subtle 等价 36/手工收尾 10；transparent 占位+状态信号色边+titlebar 族=宪章豁免族）。
+- **实机**：四屏前后对比验收（w1-after/，before=git af3c8114+量化基线，覆盖失误如实登记 w1-evidence-note.md）；零布局破坏。
+- **门禁**：契约 15/15（小字号棘轮 227 逐文件冻结/accent 棘轮 335/细线零容忍断言）+tsc 0+test:changed 715/716（残红 block41=HEAD 存量 stash 实证）。

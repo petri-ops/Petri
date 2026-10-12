@@ -57,7 +57,7 @@
 .fileIcon[data-kind='config'] {
   color: #d56a24;
   background: transparent;
-  font-size: var(--petri-font-size-caption);
+  font-size: var(--petri-font-size-sm);
   font-weight: 500;
 }
 
@@ -86,7 +86,7 @@
 .fileIcon[data-kind='web'] {
   color: #d8752c;
   background: rgb(216 117 44 / 10%);
-  font-size: var(--petri-font-size-caption);
+  font-size: var(--petri-font-size-sm);
 }
 
 .fileIcon[data-kind='style'] {

@@ -183,7 +183,7 @@ export function AgentRulesPanel(): React.ReactElement {
               >
                 {rule.action === 'deny' ? '拒绝' : '需确认'}
               </span>
-              <code style={{ flex: 1, fontSize: 'var(--petri-font-size-caption, 12px)' }}>
+              <code style={{ flex: 1, fontSize: 'var(--petri-font-size-sm)' }}>
                 {rule.matcher.type === 'path-glob' ? '路径' : '命令'}: {rule.matcher.pattern}
                 {rule.note ? ` · ${rule.note}` : ''}
               </code>

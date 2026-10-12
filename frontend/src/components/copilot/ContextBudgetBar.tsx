@@ -129,7 +129,7 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
           padding: 0,
           transition: 'background 0.15s ease',
           /* UI-215 补充：纯图标圆钮收敛 UA 默认字号到 token */
-          fontSize: 'var(--petri-font-size-caption)',
+          fontSize: 'var(--petri-font-size-sm)',
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.background = 'var(--petri-bg-subtle, rgba(0,0,0,0.04))';
@@ -152,7 +152,7 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
             border: '1px solid var(--petri-border)',
             borderRadius: '10px',
             padding: '10px 12px',
-            fontSize: 'var(--petri-font-size-caption)',
+            fontSize: 'var(--petri-font-size-sm)',
             color: 'var(--petri-text)',
             boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
             whiteSpace: 'nowrap',
@@ -161,7 +161,7 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-            <span style={{ fontWeight: 600, fontSize: 'var(--petri-font-size-caption)' }}>上下文用量</span>
+            <span style={{ fontWeight: 600, fontSize: 'var(--petri-font-size-sm)' }}>上下文用量</span>
             <span style={{ fontSize: 'var(--petri-font-size-sm)', color, fontWeight: 600 }}>
               {hasData ? `${pct}%` : '待机'}
               {isIdle && lastBudget && <span style={{ fontSize: 'var(--petri-font-size-xs)', color: 'var(--petri-text-tertiary)', fontWeight: 400 }}> · 上次</span>}

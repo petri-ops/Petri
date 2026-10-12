@@ -14,7 +14,7 @@
   align-items: center;
   gap: 10px;
   padding: var(--petri-space-4) 18px;
-  border-bottom: 1px solid var(--petri-border);
+  border-bottom: 1px solid var(--petri-divider);
   flex-shrink: 0;
 }
 
@@ -25,11 +25,10 @@
   gap: var(--petri-space-3);
   height: 30px;
   padding: 0 10px;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-surface);
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-caption);
   font-weight: 500;
   cursor: pointer;
   flex-shrink: 0;
@@ -49,7 +48,7 @@
   height: 34px;
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-accent-surface);
-  color: var(--petri-accent);
+  color: var(--petri-text-secondary);
   flex-shrink: 0;
 }
 

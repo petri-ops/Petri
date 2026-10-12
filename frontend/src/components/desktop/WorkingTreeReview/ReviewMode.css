@@ -31,7 +31,7 @@
   flex-wrap: nowrap;
   gap: var(--petri-space-4);
   padding: var(--petri-space-2) var(--petri-space-4);
-  border-bottom: 1px solid var(--petri-border);
+  border-bottom: 1px solid var(--petri-divider);
   background: var(--petri-bg-surface);
   flex-shrink: 0;
 }
@@ -69,7 +69,6 @@
 /* UI-248 — 批量展开/收起按钮（dock 摘要行） */
 .rvw-expand-all-btn {
   flex-shrink: 0;
-  font-size: var(--petri-font-size-xs);
   padding: 2px var(--petri-space-3);
 }
 
@@ -102,7 +101,7 @@
   display: flex;
   flex-direction: column;
   background: var(--petri-bg-elevated, var(--petri-bg-surface));
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   box-shadow: var(--petri-shadow-menu);
   overflow: hidden;
@@ -113,7 +112,7 @@
   align-items: center;
   gap: var(--petri-space-3);
   padding: var(--petri-space-2) 10px;
-  border-bottom: 1px solid var(--petri-border);
+  border-bottom: 1px solid var(--petri-divider);
   min-width: 0;
   flex-shrink: 0;
 }
@@ -125,7 +124,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-family: var(--petri-font-mono);
-  font-size: var(--petri-font-size-xs);
   color: var(--petri-text-secondary);
 }
 
@@ -157,7 +155,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--petri-space-3);
-  font-size: var(--petri-font-size-caption);
+  font-size: var(--petri-font-size-sm);
   color: var(--petri-text-secondary);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
@@ -188,7 +186,7 @@
   padding: 1px var(--petri-space-3);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-accent-soft);
-  color: var(--petri-accent);
+  color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-xs);
   font-weight: 600;
 }
@@ -225,7 +223,7 @@
 .rvw-sidebar {
   width: 300px;
   flex-shrink: 0;
-  border-right: 1px solid var(--petri-border);
+  border-right: 1px solid var(--petri-divider);
   overflow-y: auto;
   background: var(--petri-bg-canvas);
 }
@@ -262,7 +260,7 @@
 
 /* ===== P2 — 文件树：目录分组 ===== */
 .rvw-group {
-  border-bottom: 1px solid var(--petri-border-subtle);
+  border-bottom: 1px solid var(--petri-border-card);
 }
 
 .rvw-group-header {
@@ -275,7 +273,6 @@
   background: transparent;
   color: var(--petri-text-tertiary);
   cursor: pointer;
-  font-size: var(--petri-font-size-sm);
   font-weight: 600;
   text-align: left;
 }
@@ -349,7 +346,6 @@
   height: 22px;
   padding: 0 var(--petri-space-3);
   border-radius: var(--petri-radius-sm);;
-  font-size: var(--petri-font-size-xs);
   background: var(--petri-accent-soft);
   border-color: color-mix(in srgb, var(--petri-accent) 45%, transparent);
   color: var(--petri-accent);
@@ -388,7 +384,6 @@
 
 .rvw-reviewed-mark {
   color: var(--petri-status-success-fg);
-  font-size: var(--petri-font-size-xs);
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -450,14 +445,13 @@
   vertical-align: baseline;
   padding: 3px var(--petri-space-2);
   background: var(--petri-bg-elevated);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   box-shadow: var(--petri-shadow-menu);
 }
 
 .wt-hunk-btn {
   padding: 2px 10px;
-  font-size: var(--petri-font-size-caption);
   line-height: 1.5;
   border-radius: var(--petri-radius-sm);;
   border: 1px solid transparent;
@@ -508,7 +502,7 @@
    meta 统计行 + 输入行 + 提交按钮 */
 .rvw-commitbox {
   flex-shrink: 0;
-  border-top: 1px solid var(--petri-border);
+  border-top: 1px solid var(--petri-divider);
   background: var(--petri-bg-surface);
   padding: 7px var(--petri-space-4);
   display: flex;
@@ -521,11 +515,10 @@
   box-sizing: border-box;
   background: var(--petri-input-bg);
   color: var(--petri-text);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   padding: var(--petri-space-2) 10px;
   font-family: inherit;
-  font-size: var(--petri-font-size-caption);
 }
 
 .rvw-commitbox-input::placeholder {
@@ -593,7 +586,7 @@
 }
 
 .rvw-empty-state .rvw-empty-hint {
-  font-size: var(--petri-font-size-caption);
+  font-size: var(--petri-font-size-sm);
   color: var(--petri-text-muted);
   max-width: 420px;
   text-align: center;
@@ -603,7 +596,7 @@
 /* ===== BLOCK-29 — 改动/历史分区切换 + 提交历史列表 ===== */
 .rvw-view-switch {
   display: inline-flex;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   overflow: hidden;
   flex-shrink: 0;
@@ -613,7 +606,6 @@
   border: none;
   background: transparent;
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-caption);
   font-family: inherit;
   padding: 3px 10px;
   cursor: pointer;
@@ -643,7 +635,6 @@
   color: var(--petri-text-secondary);
   cursor: pointer;
   text-align: left;
-  font-size: var(--petri-font-size-caption);
 }
 
 /* UI-237 — hover 只留极轻反馈 */
@@ -654,8 +645,7 @@
 
 .rvw-history-sha {
   font-family: var(--petri-font-mono, monospace);
-  font-size: var(--petri-font-size-xs);
-  color: var(--petri-accent);
+  color: var(--petri-text-muted);
   flex-shrink: 0;
 }
 
@@ -680,7 +670,6 @@
   border: none;
   background: transparent;
   color: var(--petri-accent);
-  font-size: var(--petri-font-size-caption);
   font-family: inherit;
   padding: var(--petri-space-1) var(--petri-space-3);
   border-radius: var(--petri-radius-md);;
@@ -712,7 +701,7 @@
   width: 230px;
   max-width: 46%;
   flex-shrink: 0;
-  border-left: 1px solid var(--petri-border);
+  border-left: 1px solid var(--petri-divider);
   overflow-y: auto;
   background: var(--petri-bg-canvas);
   padding: var(--petri-space-2) 0 10px;
@@ -720,7 +709,6 @@
 
 .rvw-dock-tree-title {
   padding: 0 var(--petri-space-4) var(--petri-space-2);
-  font-size: var(--petri-font-size-xs);
   font-weight: 600;
   color: var(--petri-text-secondary);
 }
@@ -734,7 +722,6 @@
   border: none;
   background: transparent;
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-xs);
   font-family: inherit;
   text-align: left;
   cursor: pointer;
@@ -761,7 +748,6 @@
   border: none;
   background: transparent;
   color: var(--petri-text);
-  font-size: var(--petri-font-size-xs);
   font-family: inherit;
   text-align: left;
   cursor: pointer;
@@ -784,7 +770,7 @@
 }
 
 .rvw-acc-item {
-  border-bottom: 1px solid var(--petri-border-subtle);
+  border-bottom: 1px solid var(--petri-border-card);
 }
 
 .rvw-acc-item.active {
@@ -802,7 +788,6 @@
   color: var(--petri-text);
   cursor: pointer;
   text-align: left;
-  font-size: var(--petri-font-size-caption);
 }
 
 .rvw-acc-row:hover {
@@ -820,7 +805,7 @@
 .rvw-acc-group-files {
   margin-left: 13px;
   padding-left: var(--petri-space-1);
-  border-left: 1px solid var(--petri-border-tertiary, var(--petri-border));
+  border-left: 1px solid var(--petri-divider));
 }
 
 .rvw-acc-item--nested .rvw-acc-row {
@@ -828,7 +813,7 @@
 }
 
 .rvw-acc-diff {
-  border-top: 1px solid var(--petri-border-subtle);
+  border-top: 1px solid var(--petri-border-card);
   background: var(--petri-bg-canvas);
   max-height: 60vh;
   overflow-y: auto;
@@ -893,7 +878,7 @@
   min-width: 168px;
   padding: var(--petri-space-1);
   background: var(--petri-bg-elevated, var(--petri-bg-surface));
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   box-shadow: var(--petri-shadow-menu);
 }
@@ -906,7 +891,6 @@
   border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text);
-  font-size: var(--petri-font-size-caption);
   font-family: inherit;
   text-align: left;
   cursor: pointer;
@@ -932,8 +916,7 @@
   padding: 2px var(--petri-space-3);
   border-radius: var(--petri-radius-pill);;
   background: var(--petri-accent-soft);
-  color: var(--petri-accent);
-  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-muted);
   max-width: 60%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -963,7 +946,6 @@
   border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-caption);
   font-family: inherit;
   cursor: pointer;
 }
@@ -1001,7 +983,7 @@
   align-items: stretch;
   gap: 0;
   margin-top: var(--petri-space-2);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   overflow: hidden;
   background: var(--petri-bg-canvas);
@@ -1013,7 +995,7 @@
   overflow-y: auto;
   max-height: 60vh;
   padding: var(--petri-space-1) 0;
-  border-right: 1px solid var(--petri-border);
+  border-right: 1px solid var(--petri-divider);
   background: var(--petri-bg-surface);
 }
 
@@ -1026,7 +1008,6 @@
   border: none;
   background: transparent;
   color: var(--petri-text-tertiary);
-  font-size: var(--petri-font-size-xs);
   font-weight: 600;
   font-family: inherit;
   text-align: left;
@@ -1057,7 +1038,6 @@
   color: var(--petri-text);
   cursor: pointer;
   text-align: left;
-  font-size: var(--petri-font-size-caption);
 }
 
 .rvw-commit-tree-row:hover {
@@ -1109,7 +1089,7 @@
   white-space: pre-wrap;
   word-break: break-word;
   font-family: var(--petri-font-mono);
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   line-height: 1.6;
   color: var(--petri-text-secondary);
   background: transparent;
@@ -1128,11 +1108,10 @@
 
 .rvw-viewmode-btn {
   padding: 2px var(--petri-space-3);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-xs);
   font-family: inherit;
   cursor: pointer;
 }
@@ -1157,7 +1136,7 @@
 .rvw-fulltext-wrap {
   max-height: 60vh;
   overflow: auto;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-canvas);
 }
@@ -1167,11 +1146,10 @@
   max-width: 180px;
   height: 28px;
   padding: 0 var(--petri-space-2);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-canvas);
   color: var(--petri-text);
-  font-size: var(--petri-font-size-caption);
   font-family: inherit;
   cursor: pointer;
   /* UI-245 — 分支选择器不参与 flex 挤压 */
@@ -1181,7 +1159,6 @@
 /* BLOCK-29.5 — blame 逐行归属视图 */
 .rvw-blame-grid {
   font-family: var(--petri-font-mono);
-  font-size: var(--petri-font-size-xs);
 }
 
 .rvw-blame-row {
@@ -1242,7 +1219,6 @@
   gap: var(--petri-space-3);
   min-width: 0;
   padding: 2px 0;
-  font-size: var(--petri-font-size-xs);
 }
 
 /* ===== BLOCK-41 — git 写操作三期：暂存两栏 / stage-unstage / 分支切换错误 / push-pull ===== */
@@ -1297,7 +1273,6 @@
 
 .rvw-checkout-conflict-path {
   font-family: var(--petri-font-mono, monospace);
-  font-size: var(--petri-font-size-xs);
 }
 
 /* ahead/behind 徽标 + push/pull 按钮组（summary 行内） */
@@ -1311,7 +1286,7 @@
 }
 
 .rvw-sync-ahead {
-  color: var(--petri-accent);
+  color: var(--petri-text-secondary);
 }
 
 .rvw-sync-behind {
@@ -1320,5 +1295,5 @@
 
 /* staged 栏提交框：与 AI 审阅提交条同构，顶部细线区分 */
 .rvw-commitbox--staged {
-  border-top: 1px solid var(--petri-border);
+  border-top: 1px solid var(--petri-divider);
 }

@@ -2,7 +2,7 @@
 
 .card {
   margin: 10px 0;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   overflow: hidden;
   background: var(--petri-bg-subtle);
@@ -17,14 +17,13 @@
   align-items: center;
   gap: var(--petri-space-3);
   padding: var(--petri-space-2) 10px;
-  border-bottom: 1px solid var(--petri-border);
+  border-bottom: 1px solid var(--petri-divider);
   background: var(--petri-bg);
 }
 
 .headerTitle {
   flex: 1;
   min-width: 0;
-  font-size: var(--petri-font-size-caption);
   color: var(--petri-text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -34,7 +33,7 @@
 .badge {
   font-size: var(--petri-font-size-sm);
   color: var(--petri-text-muted);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-pill);;
   padding: 0 var(--petri-space-3);
 }
@@ -62,7 +61,7 @@
 
 .errorBox {
   padding: 14px var(--petri-space-4);
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   color: var(--petri-text);
   display: flex;
   flex-direction: column;
@@ -70,7 +69,7 @@
 }
 
 .errorHint {
-  font-size: var(--petri-font-size-caption);
+  font-size: var(--petri-font-size-sm);
   color: var(--petri-text-muted);
   word-break: break-all;
 }
@@ -80,15 +79,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   color: var(--petri-text-muted);
 }
 
 .toolbarBtn {
-  font-size: var(--petri-font-size-sm);
   color: var(--petri-text-secondary);
   background: transparent;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   padding: 1px var(--petri-space-3);
   cursor: pointer;
@@ -100,7 +98,6 @@
 }
 
 .copyNotice {
-  font-size: var(--petri-font-size-sm);
   color: var(--petri-text-muted);
 }
 
@@ -109,7 +106,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--petri-font-size-caption);
   color: var(--petri-text-muted);
   border: 1px dashed var(--petri-border);
   border-radius: var(--petri-radius-lg);;
@@ -131,7 +127,7 @@
   align-items: center;
   gap: var(--petri-space-3);
   padding: var(--petri-space-3) var(--petri-space-4);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-bottom: 0;
   border-radius: 10px 10px 0 0;
   background: var(--petri-bg);
@@ -139,7 +135,7 @@
 
 .overlayTitle {
   flex: 1;
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   color: var(--petri-text);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -149,7 +145,7 @@
 .overlayContent {
   flex: 1;
   min-height: 0;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: 0 0 10px 10px;
   background: var(--petri-bg);
   overflow: hidden;

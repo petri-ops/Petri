@@ -19,7 +19,7 @@
 
 .greeting {
   margin: 0;
-  font-size: var(--petri-font-size-3xl);
+  font-size: var(--petri-font-size-2xl);
   font-weight: 700;
   color: var(--petri-text);
   text-align: center;
@@ -64,15 +64,14 @@
 .projectSelect {
   max-width: 260px;
   padding: var(--petri-space-1) var(--petri-space-2);
-  border: 1px solid var(--petri-border-color, transparent);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   background: transparent;
   color: var(--petri-text);
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
 }
 
 .pickerEmpty {
-  font-size: var(--petri-font-size-caption);
   color: var(--petri-text-secondary);
 }
 
@@ -84,7 +83,7 @@
   border-radius: var(--petri-radius-pill);;
   background: var(--petri-hover);
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-caption);
+  font-size: var(--petri-font-size-sm);
 }
 
 .manageLink {
@@ -93,7 +92,6 @@
   background: transparent;
   color: var(--petri-text-secondary);
   cursor: pointer;
-  font-size: var(--petri-font-size-caption);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -104,7 +102,6 @@
 
 .errorText {
   color: var(--petri-danger, #c0392b);
-  font-size: var(--petri-font-size-caption);
 }
 
 .chips {
@@ -116,11 +113,11 @@
 
 .chip {
   padding: var(--petri-space-2) 14px;
-  border: 1px solid var(--petri-border-color, transparent);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-pill);;
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-caption);
+  font-size: var(--petri-font-size-sm);
   cursor: pointer;
   transition: color 0.12s, border-color 0.12s;
 }
@@ -146,7 +143,7 @@
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-hover);
   color: var(--petri-text);
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   font-weight: 600;
   cursor: pointer;
 }
@@ -172,7 +169,7 @@
   max-width: 80vw;
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-surface);
-  border: 1px solid var(--petri-border-color, transparent);
+  border: 1px solid var(--petri-border-card);
   box-shadow: var(--petri-shadow-float);
   z-index: 31;
   overflow: hidden;
@@ -183,11 +180,11 @@
   box-sizing: border-box;
   padding: 10px var(--petri-space-4);
   border: none;
-  border-bottom: 1px solid var(--petri-border-color, transparent);
+  border-bottom: 1px solid var(--petri-divider);
   background: transparent;
   color: var(--petri-text);
   font: inherit;
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   outline: none;
 }
 
@@ -207,7 +204,7 @@
   border-radius: var(--petri-radius-lg);;
   background: transparent;
   color: var(--petri-text);
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   text-align: left;
   cursor: pointer;
 }
@@ -239,13 +236,12 @@
 .projectRowEmpty {
   padding: 10px var(--petri-space-4);
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-caption);
 }
 
 .panelActions {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid var(--petri-border-color, transparent);
+  border-top: 1px solid var(--petri-divider);
   padding: var(--petri-space-1);
 }
 
@@ -258,7 +254,7 @@
   border-radius: var(--petri-radius-lg);;
   background: transparent;
   color: var(--petri-text);
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   text-align: left;
   cursor: pointer;
 }
@@ -276,17 +272,16 @@
 
 .actionInput {
   padding: 7px 9px;
-  border: 1px solid var(--petri-border-color, transparent);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg);
   color: var(--petri-text);
   font: inherit;
-  font-size: var(--petri-font-size-body-sm);
+  font-size: var(--petri-font-size-body);
   outline: none;
 }
 
 .actionPath {
-  font-size: var(--petri-font-size-caption);
   color: var(--petri-text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -304,7 +299,6 @@
   background: transparent;
   color: var(--petri-text-secondary);
   cursor: pointer;
-  font-size: var(--petri-font-size-caption);
 }
 
 .actionPrimary {
@@ -314,7 +308,6 @@
   background: var(--petri-accent);
   color: #fff;
   font-weight: 600;
-  font-size: var(--petri-font-size-caption);
   cursor: pointer;
 }
 
@@ -324,7 +317,7 @@
 }
 
 .actionHint {
-  font-size: var(--petri-font-size-caption);
+  font-size: var(--petri-font-size-sm);
   color: var(--petri-text-secondary);
 }
 
@@ -355,7 +348,6 @@
   border: none;
   background: transparent;
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-caption);
   text-align: left;
   padding: 5px var(--petri-space-3);
   border-radius: var(--petri-radius-md);;

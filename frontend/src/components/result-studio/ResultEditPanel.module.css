@@ -3,8 +3,7 @@
   flex-direction: column;
   gap: 10px;
   padding: 10px 0 0;
-  border-top: 1px solid var(--petri-border);
-  font-size: var(--petri-font-size-sm);
+  border-top: 1px solid var(--petri-divider);
 }
 
 .header {
@@ -32,7 +31,7 @@
   gap: var(--petri-space-2);
   margin: 0;
   padding: var(--petri-space-3);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
 }
 
@@ -79,11 +78,10 @@
   min-height: 26px;
   width: 100%;
   padding: 0 var(--petri-space-2);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-sm);;
   background: var(--petri-bg-elevated);
   color: var(--petri-text-primary);
-  font-size: var(--petri-font-size-sm);
 }
 
 .field input[type='checkbox'] {
@@ -107,11 +105,10 @@
 .outcome input {
   min-height: 28px;
   padding: 0 var(--petri-space-3);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-sm);;
   background: var(--petri-bg-elevated);
   color: var(--petri-text-primary);
-  font-size: var(--petri-font-size-sm);
 }
 
 .impact {
@@ -148,11 +145,10 @@
   align-items: center;
   gap: 5px;
   padding: 0 10px;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-sm);;
   background: var(--petri-bg-elevated);
   color: var(--petri-accent);
-  font-size: var(--petri-font-size-sm);
   cursor: pointer;
 }
 
@@ -167,7 +163,7 @@
 
 .advancedDrawer {
   margin-top: 10px;
-  border-top: 1px solid var(--petri-border);
+  border-top: 1px solid var(--petri-divider);
 }
 
 .advancedDrawer > summary {
@@ -178,7 +174,6 @@
   gap: var(--petri-space-3);
   color: var(--petri-text-secondary);
   cursor: pointer;
-  font-size: var(--petri-font-size-sm);
   font-weight: 600;
   list-style: none;
 }
@@ -190,7 +185,7 @@
 .advancedDrawer > summary::after {
   content: '›';
   color: var(--petri-text-tertiary);
-  font-size: var(--petri-font-size-md);
+  font-size: var(--petri-font-size-lg);
   transform: rotate(90deg);
 }
 
@@ -201,7 +196,6 @@
 .advancedDrawer > summary small {
   margin-left: auto;
   color: var(--petri-text-tertiary);
-  font-size: var(--petri-font-size-xs);
   font-weight: 400;
 }
 

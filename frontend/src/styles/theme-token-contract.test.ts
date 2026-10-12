@@ -160,9 +160,9 @@ describe('theme token contract', () => {
     // W3 将把存量清零；本断言冻结现状：新 token 只许成对定义，未配对名单只许收缩。
     const PAIRED_EXEMPT = new Set([
       // 功能性/派生 token：仅亮色语义或由暗色块整体继承（BLOCK-161 W2 核实）
-      '--petri-font-scale', '--petri-font-size-xs', '--petri-font-size-sm', '--petri-font-size-caption',
-      '--petri-font-size-body-sm', '--petri-font-size-body', '--petri-font-size-md', '--petri-font-size-lg',
-      '--petri-font-size-xl', '--petri-font-size-2xl', '--petri-font-size-3xl', '--petri-font-size-base',
+      '--petri-font-scale', '--petri-font-size-xs', '--petri-font-size-sm',
+      '--petri-font-size-body', '--petri-font-size-lg',
+      '--petri-font-size-xl', '--petri-font-size-2xl', '--petri-font-size-base',
       '--petri-space-1', '--petri-space-2', '--petri-space-3', '--petri-space-4', '--petri-space-5',
       '--petri-space-6', '--petri-space-7', '--petri-space-8', '--petri-live-result-right-width',
       '--petri-titlebar-height', '--petri-radius-sm', '--petri-radius-md', '--petri-radius-lg',
@@ -341,79 +341,69 @@ describe('theme token contract', () => {
     );
   });
 
-  it('small font usage holds the frozen ratchet (小字号棘轮 450→W1≤110→终态≤40)', () => {
-    // xs(10px)+sm(11px) 引用——宪章 §1：xs 终态仅徽标域；W1 收缩后下调快照。
+  it('small font usage holds the frozen ratchet (小字号棘轮 W1=227；终态≤40 仅徽标域)', () => {
+    // xs(11px)+sm(12px) 引用——W1 已重分类 519 处正文性小字→inherit(14)；
+    // 剩余应为徽标/元信息语境（宪章 §1）。W2/W4 逐域审计后继续收缩并下调快照。
     const RATCHET: Record<string, number> = {
-      'pages/project-workspace.module.css': 125,
-      'components/copilot/simple-chat.css': 54,
-      'components/workspace-panels/KnowledgeSpacePanel.module.css': 31,
-      'components/desktop/WorkingTreeReview/ReviewMode.css': 24,
-      'components/result-studio/ResultStudioChangeSetPanel.module.css': 23,
-      'components/desktop/desktop.css': 19,
-      'pages/extensions/styles.module.css': 15,
-      'components/result-studio/ScientificInteractionViewer.module.css': 14,
-      'components/result-studio/ResultStudioSurface.module.css': 12,
-      'styles/custom.css': 11,
-      'components/copilot/renderers/ChartRenderer.module.css': 7,
-      'components/result-studio/ResultEditPanel.module.css': 7,
-      'components/workspace-panels/WorkspaceFileIcon.module.css': 7,
-      'components/desktop/TitleBar.module.css': 6,
-      'components/desktop/WorkingTreeReview/WorkingTreeReview.css': 6,
-      'components/copilot/LlmTranscriptViewer.css': 5,
-      'components/knowledge/KnowledgeConsoleChat.module.css': 5,
-      'components/result-studio/CompactResultNavigator.module.css': 5,
-      'components/window/rail-page.module.css': 5,
+      'pages/project-workspace.module.css': 52,
+      'components/copilot/simple-chat.css': 24,
+      'components/desktop/desktop.css': 16,
+      'components/result-studio/ScientificInteractionViewer.module.css': 15,
+      'components/result-studio/ResultStudioChangeSetPanel.module.css': 13,
+      'pages/extensions/styles.module.css': 12,
+      'components/desktop/WorkingTreeReview/ReviewMode.css': 11,
+      'components/workspace-panels/WorkspaceFileIcon.module.css': 9,
+      'components/desktop/DesktopSettingsPanel/sections/MobileSync.module.css': 6,
+      'components/result-studio/ResultStudioSurface.module.css': 5,
+      'components/workspace-panels/KnowledgeSpacePanel.module.css': 5,
+      'pages/home.module.css': 5,
       'pages/window/command-center.module.css': 5,
-      'components/copilot/renderers/TableRenderer.module.css': 4,
-      'components/desktop/FolderPicker.module.css': 4,
-      'components/result-studio/ResultAgentComposer.module.css': 4,
-      'pages/home.module.css': 4,
-      'components/branch/BranchTabs.module.css': 3,
-      'components/copilot/gen-ui/GenUiCard.module.css': 3,
-      'components/copilot/renderers/ImageRenderer.module.css': 3,
-      'components/desktop/DesktopSettingsPanel/sections/Federation.module.css': 3,
-      'components/desktop/DesktopSettingsPanel/sections/MobileSync.module.css': 3,
-      'components/desktop/TestInstanceBadge.module.css': 3,
-      'components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css': 3,
-      'components/result-studio/ContinueAnalysisMenu.module.css': 3,
-      'components/workspace-panels/ArtifactPinPane.module.css': 3,
-      'components/workspace-panels/SideChatDock.module.css': 3,
-      'components/result-studio/LineageGraph.module.css': 2,
-      'components/result-studio/LineageStrip.module.css': 2,
+      'components/desktop/DesktopSettingsPanel/sections/Federation.module.css': 4,
+      'components/desktop/TitleBar.module.css': 4,
+      'components/desktop/WorkingTreeReview/WorkingTreeReview.css': 4,
+      'components/result-studio/RevisionCodeView.module.css': 4,
+      'pages/welcome.module.css': 4,
+      'components/copilot/LlmTranscriptViewer.css': 3,
+      'components/window/rail-page.module.css': 3,
+      'components/copilot/gen-ui/GenUiCard.module.css': 2,
+      'components/copilot/ResultCard.module.css': 2,
+      'components/desktop/TestInstanceBadge.module.css': 2,
+      'components/result-studio/ResultAgentComposer.module.css': 2,
       'components/window/window-shell.module.css': 2,
-      'components/workspace-panels/WorkspaceCitationsSection.module.css': 2,
-      'components/workspace-panels/WorkspaceTodoSection.module.css': 2,
-      'components/copilot/ResultCard.module.css': 1,
-      'components/knowledge/KnowledgeConsoleDock.module.css': 1,
-      'components/result-studio/LineageViewSwitch.module.css': 1,
-      'components/result-studio/RevisionCodeView.module.css': 1,
+      'pages/extensions/extensions.module.css': 2,
+      'styles/custom.css': 2,
+      'components/desktop/FolderPicker.module.css': 1,
+      'components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css': 1,
+      'components/knowledge/KnowledgeConsoleChat.module.css': 1,
+      'components/result-studio/CompactResultNavigator.module.css': 1,
+      'components/result-studio/ResultEditPanel.module.css': 1,
       'components/ui/Lightbox.css': 1,
       'components/ui/WorkbenchEmpty.module.css': 1,
-      'components/workspace-panels/KnowledgeSpaceSwitcher.module.css': 1,
-      'pages/welcome.module.css': 1,
+      'components/workspace-panels/WorkspaceCitationsSection.module.css': 1,
+      'components/workspace-panels/WorkspaceTodoSection.module.css': 1,
     };
     expectRatchet(RATCHET, countPerFile(/var\(--petri-font-size-(?:xs|sm)\)/));
   });
 
-  it('accent usage holds the frozen ratchet (accent 棘轮 371→W1≤200→终态≤130)', () => {
-    // 宪章 §2 色彩预算：accent 本体引用只减不增；W1/W2 收缩后下调快照。
-    // global.css:1 = ::selection（W0 宪章批落地，属五类合法语义之一，仍占预算）。
+  it('accent usage holds the frozen ratchet (accent 棘轮 W1=335；预算可执行形态=五类语义)', () => {
+    // 宪章 §2：W1 装饰性清除 37 处（图标族/标签文本/notice 文本），其余为交互态/
+    // 链接/状态点/badge=合法五类语义。预算的机械守护随 W2 控件收敛加 grep 守卫
+    // （装饰性新增即红）；W2 后继续收缩并下调快照。
     const RATCHET: Record<string, number> = {
-      'styles/global.css': 1,
-      'pages/project-workspace.module.css': 101,
-      'components/copilot/simple-chat.css': 35,
-      'components/desktop/desktop.css': 33,
-      'pages/extensions/styles.module.css': 23,
-      'components/desktop/WorkingTreeReview/ReviewMode.css': 21,
-      'components/workspace-panels/KnowledgeSpacePanel.module.css': 19,
-      'pages/home.module.css': 19,
+      'pages/project-workspace.module.css': 93,
+      'components/copilot/simple-chat.css': 31,
+      'components/desktop/desktop.css': 24,
+      'pages/extensions/styles.module.css': 20,
+      'components/workspace-panels/KnowledgeSpacePanel.module.css': 18,
+      'components/desktop/WorkingTreeReview/ReviewMode.css': 17,
+      'pages/home.module.css': 14,
       'components/desktop/TitleBar.module.css': 10,
+      'styles/custom.css': 9,
       'components/result-studio/ResultStudioChangeSetPanel.module.css': 8,
-      'styles/custom.css': 8,
       'components/copilot/ToolActivityDock.module.css': 7,
       'components/result-studio/ScientificInteractionViewer.module.css': 7,
-      'pages/extensions/extensions.module.css': 7,
       'components/branch/BranchTabs.module.css': 6,
+      'pages/extensions/extensions.module.css': 6,
       'components/result-studio/LineageStrip.module.css': 5,
       'pages/welcome.module.css': 5,
       'components/copilot/integration/integration.module.css': 4,
@@ -421,7 +411,6 @@ describe('theme token contract', () => {
       'components/result-studio/CompactResultNavigator.module.css': 4,
       'components/result-studio/ResultEditPanel.module.css': 4,
       'components/result-studio/ResultStudioSurface.module.css': 4,
-      'components/copilot/LlmTranscriptViewer.css': 3,
       'components/knowledge/KnowledgeConsoleChat.module.css': 3,
       'components/result-studio/LineageGraph.module.css': 3,
       'components/result-studio/ResultAgentComposer.module.css': 3,
@@ -434,88 +423,33 @@ describe('theme token contract', () => {
       'components/workspace-panels/FloatCardResizer.module.css': 2,
       'components/workspace-panels/MarkdownResultViewer.module.css': 2,
       'components/workspace-panels/SpreadsheetResultViewer.module.css': 2,
+      'components/copilot/LlmTranscriptViewer.css': 1,
       'components/copilot/renderers/TableRenderer.module.css': 1,
       'components/copilot/ResultCard.module.css': 1,
       'components/result-studio/RevisionCodeView.module.css': 1,
-      'pages/global-page.module.css': 1,
       'pages/window/command-center.module.css': 1,
+      'styles/global.css': 1,
     };
     expectRatchet(RATCHET, countPerFile(/var\(--petri-accent\)/));
   });
 
-  it('non-semantic 1px borders hold the frozen ratchet (无语义细线棘轮 533→W1≤285→终态0)', () => {
-    // 宪章 §3：所有 1px solid 必须用 border-input/border-card/divider 三语义之一；
-    // 本计数器只统计「值不含三语义 token」的裸细线——迁移即降、终态 0。
+  it('non-semantic 1px borders hold zero tolerance (结构无语义细线=0·宪章 §3 终态)', () => {
+    // W1 迁移 447 处后达成 0。计数器排除四类非治理对象（宪章豁免族）：
+    // ①三语义 token 本体 ②transparent 占位（非视觉线）③状态/信号色边
+    // （danger/warning/accent/status/titlebar/sc-border 沙箱族=彩色信号线）
+    // ④currentControl 语义线。新增任何结构性 1px solid 即红。
     const BORDER_SEMANTIC = /border[^:{}]*:\s*[^;{}]*\b1px\s+solid[^;}]*var\(--petri-(?:border-input|border-card|divider)\)/;
     const ALL_1PX = /border[^:{}]*:\s*[^;{}]*\b1px\s+solid[^;}]*(:?;|\}|$)/;
+    const EXEMPT = /transparent|status|danger|warning|accent|titlebar|sc-border|currentcolor/i;
     const actual: Record<string, number> = {};
     for (const file of CSS_FILES()) {
       const css = stripCss(file);
       const all = (css.match(new RegExp(ALL_1PX.source, 'g')) || []).filter(
-        (decl) => !BORDER_SEMANTIC.test(decl),
+        (decl) => !BORDER_SEMANTIC.test(decl) && !EXEMPT.test(decl),
       ).length;
       if (all > 0) actual[path.relative(srcRoot, file).replaceAll('\\', '/')] = all;
     }
-    const RATCHET: Record<string, number> = {
-      'pages/project-workspace.module.css': 129,
-      'components/copilot/simple-chat.css': 78,
-      'components/desktop/desktop.css': 29,
-      'components/desktop/WorkingTreeReview/ReviewMode.css': 21,
-      'components/workspace-panels/KnowledgeSpacePanel.module.css': 20,
-      'pages/extensions/styles.module.css': 16,
-      'pages/home.module.css': 13,
-      'components/result-studio/ResultStudioChangeSetPanel.module.css': 12,
-      'components/knowledge/KnowledgeConsoleChat.module.css': 11,
-      'components/copilot/LlmTranscriptViewer.css': 10,
-      'styles/custom.css': 10,
-      'components/desktop/WorkingTreeReview/WorkingTreeReview.css': 9,
-      'components/result-studio/ScientificInteractionViewer.module.css': 9,
-      'pages/window/command-center.module.css': 9,
-      'components/desktop/TitleBar.module.css': 8,
-      'components/result-studio/ResultStudioSurface.module.css': 8,
-      'components/copilot/ToolActivityDock.module.css': 7,
-      'components/desktop/DesktopSettingsPanel/sections/Federation.module.css': 7,
-      'components/desktop/DesktopSettingsPanel/sections/MobileSync.module.css': 7,
-      'components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css': 7,
-      'pages/extensions/extensions.module.css': 7,
-      'pages/welcome.module.css': 7,
-      'components/copilot/gen-ui/GenUiCard.module.css': 6,
-      'components/result-studio/CompactResultNavigator.module.css': 6,
-      'components/result-studio/ResultEditPanel.module.css': 6,
-      'components/window/window-shell.module.css': 6,
-      'components/workspace-panels/ArtifactPinPane.module.css': 6,
-      'components/result-studio/RevisionCodeView.module.css': 5,
-      'components/window/rail-page.module.css': 4,
-      'components/workspace-panels/MarkdownResultViewer.module.css': 4,
-      'components/workspace-panels/SpreadsheetResultViewer.module.css': 4,
-      'components/branch/BranchTabs.module.css': 3,
-      'components/copilot/renderers/TableRenderer.module.css': 3,
-      'components/copilot/ResultCard.module.css': 3,
-      'components/desktop/FolderPicker.module.css': 3,
-      'components/knowledge/KnowledgeConsoleDock.module.css': 3,
-      'components/result-studio/ResultAgentComposer.module.css': 3,
-      'components/RouteErrorBoundary.module.css': 3,
-      'components/workspace-panels/KnowledgeSpaceSwitcher.module.css': 3,
-      'components/workspace-panels/SideChatDock.module.css': 3,
-      'components/copilot/renderers/ChartRenderer.module.css': 2,
-      'components/desktop/TestInstanceBadge.module.css': 2,
-      'components/desktop/theme-control.css': 2,
-      'components/result-studio/ContinueAnalysisMenu.module.css': 2,
-      'components/result-studio/LineageGraph.module.css': 2,
-      'components/result-studio/LineageStrip.module.css': 2,
-      'components/settings/ExperimentalFeaturesSection.module.css': 2,
-      'pages/global-page.module.css': 2,
-      'components/common/ToastProvider.module.css': 1,
-      'components/copilot/integration/integration.module.css': 1,
-      'components/copilot/MessageRail.module.css': 1,
-      'components/copilot/renderers/ImageRenderer.module.css': 1,
-      'components/desktop/titlebar/ColumnizedTitleBar.module.css': 1,
-      'components/desktop/_ProjectionLinkBanner.module.css': 1,
-      'components/result-studio/LineageViewSwitch.module.css': 1,
-      'components/workspace-panels/SshStatusDot.module.css': 1,
-      'components/workspace-panels/WorkspaceCitationsSection.module.css': 1,
-    };
-    expectRatchet(RATCHET, actual);
+    expect(Object.entries(actual)).toEqual([]);
   });
 
   it('charter counters catch synthetic violations (红证据自检)', () => {

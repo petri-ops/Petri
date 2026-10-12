@@ -1,20 +1,20 @@
 .surface { display: grid; gap: var(--petri-space-4); padding: var(--petri-space-5); min-width: 0; }
 .header { display: flex; justify-content: space-between; gap: var(--petri-space-4); align-items: flex-start; }
-.header h3 { margin: 0; font-size: var(--petri-font-size-md); }
-.header p { margin: var(--petri-space-1) 0 0; color: var(--petri-text-secondary); font-size: var(--petri-font-size-caption); }
+.header h3 { margin: 0; font-size: var(--petri-font-size-lg); }
+.header p { margin: var(--petri-space-1) 0 0; color: var(--petri-text-secondary); font-size: var(--petri-font-size-sm); }
 .actions { display: flex; gap: var(--petri-space-2); align-items: flex-start; flex-wrap: wrap; }
-.actions button, .status button, .surface > button { border: 1px solid var(--petri-border); border-radius: var(--petri-radius-md);; background: var(--petri-surface); color: var(--petri-text-primary); padding: 5px 9px; cursor: pointer; }
-.menu { display: grid; gap: var(--petri-space-1); position: absolute; right: 0; z-index: 2; min-width: 150px; padding: var(--petri-space-3); background: var(--petri-surface); border: 1px solid var(--petri-border); border-radius: var(--petri-radius-md);; box-shadow: var(--petri-shadow-sm); }
+.actions button, .status button, .surface > button { border: 1px solid var(--petri-border-card); border-radius: var(--petri-radius-md);; background: var(--petri-surface); color: var(--petri-text-primary); padding: 5px 9px; cursor: pointer; }
+.menu { display: grid; gap: var(--petri-space-1); position: absolute; right: 0; z-index: 2; min-width: 150px; padding: var(--petri-space-3); background: var(--petri-surface); border: 1px solid var(--petri-border-card); border-radius: var(--petri-radius-md);; box-shadow: var(--petri-shadow-sm); }
 .actions details { position: relative; }
-.actions summary { list-style: none; border: 1px solid var(--petri-border); border-radius: var(--petri-radius-md);; padding: 5px 9px; cursor: pointer; }
-.status { display: flex; gap: var(--petri-space-3); align-items: center; color: var(--petri-text-secondary); font-size: var(--petri-font-size-caption); }
-.replayConfirm { display: grid; gap: var(--petri-space-3); padding: var(--petri-space-4); border: 1px solid var(--petri-border); border-radius: var(--petri-radius-lg);; background: var(--petri-surface-raised); }
-.replayConfirm ul { margin: 0; padding-left: 20px; color: var(--petri-text-secondary); font-size: var(--petri-font-size-caption); line-height: 1.55; }
+.actions summary { list-style: none; border: 1px solid var(--petri-border-card); border-radius: var(--petri-radius-md);; padding: 5px 9px; cursor: pointer; }
+.status { display: flex; gap: var(--petri-space-3); align-items: center; color: var(--petri-text-secondary); font-size: var(--petri-font-size-sm); }
+.replayConfirm { display: grid; gap: var(--petri-space-3); padding: var(--petri-space-4); border: 1px solid var(--petri-border-card); border-radius: var(--petri-radius-lg);; background: var(--petri-surface-raised); }
+.replayConfirm ul { margin: 0; padding-left: 20px; color: var(--petri-text-secondary); font-size: var(--petri-font-size-sm); line-height: 1.55; }
 .technical { color: var(--petri-text-secondary); font-size: var(--petri-font-size-sm); }
 .technical dl { display: grid; grid-template-columns: max-content 1fr; gap: var(--petri-space-1) 10px; }
 .technical dd { margin: 0; overflow-wrap: anywhere; font-family: var(--petri-font-mono, monospace); }
-.code { margin: 0; padding: 14px; overflow: auto; border: 1px solid var(--petri-border); border-radius: var(--petri-radius-lg);; background: var(--petri-surface-raised); max-height: 68vh; }
-.code code { white-space: pre; font: var(--petri-font-size-body-sm) / 1.55 var(--petri-font-mono, monospace); }
+.code { margin: 0; padding: 14px; overflow: auto; border: 1px solid var(--petri-border-card); border-radius: var(--petri-radius-lg);; background: var(--petri-surface-raised); max-height: 68vh; }
+.code code { white-space: pre; font: var(--petri-font-size-body) / 1.55 var(--petri-font-mono, monospace); }
 
 .surface button:focus-visible,
 .surface summary:focus-visible,
