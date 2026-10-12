@@ -41,15 +41,9 @@ export function ArtifactPinPane({
   /** 主区投影（全 mode 在场；副栏仅 result 模式在场）。 */
   children: React.ReactNode;
 }): React.ReactElement {
-  // 未钉住或非 result 模式：单栏——副栏（含其 DOM）彻底不在场，主区投影原样。
-  if (!snapshot || mode !== 'result') {
-    return <>{children}</>;
-  }
-
-  // BLOCK-175 CP-15 — 分屏比例可拖拽：主列占比（20-80% 钳制），localStorage
-  // 持久化（petri.pinSplitRatio）；分隔条 pointer 拖拽 + 键盘可达（左右箭头 ±5%）。
+  // BLOCK-175 CP-15 — hooks 无条件调用（rules-of-hooks：必须在 early return 前）。
   const RATIO_KEY = 'petri.pinSplitRatio';
-  const clampRatio = (raw: number): number => Math.max(20, Math.min(80, Math.round(raw)));
+  const clampRatio = useCallback((raw: number): number => Math.max(20, Math.min(80, Math.round(raw))), []);
   const [mainRatio, setMainRatio] = useState<number>(() => {
     try {
       const saved = Number(localStorage.getItem(RATIO_KEY));
@@ -94,6 +88,11 @@ export function ArtifactPinPane({
       applyRatio(mainRatio + 5);
     }
   }, [applyRatio, mainRatio]);
+
+  // 未钉住或非 result 模式：单栏——副栏（含其 DOM）彻底不在场，主区投影原样。
+  if (!snapshot || mode !== 'result') {
+    return <>{children}</>;
+  }
 
   // 快照离线渲染：与 renderPreview 同一渲染原语（iframe/img/table/pre），
   // 只消费快照载荷，零 fetch。
