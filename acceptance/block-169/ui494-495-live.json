@@ -1,0 +1,79 @@
+{
+  "package": "UI-494/495 代行实机评估（用户授权代行）",
+  "recordedAt": "2026-10-12",
+  "environment": {
+    "electron": "44.7.0",
+    "devStack": "3000/3001/9222",
+    "scratch": "D:\\1.WorkDir\\petri\\.petri-dev-user-data\\data\\projects\\b168rvw-mv4uiel7-mv4uielg"
+  },
+  "results": [
+    {
+      "name": "scratch-repo",
+      "ok": true,
+      "detail": "D:/1.WorkDir/scratch-rvw-495"
+    },
+    {
+      "name": "project-created",
+      "ok": true,
+      "detail": "p_mv4uielg_qgtr"
+    },
+    {
+      "name": "workspace-bound",
+      "ok": true,
+      "detail": "D:\\1.WorkDir\\petri\\.petri-dev-user-data\\data\\projects\\b168rvw-mv4uiel7-mv4uielg"
+    },
+    {
+      "name": "iconBtn-single-source-render",
+      "ok": true,
+      "detail": "{\"count\":3,\"width\":\"23.9914px\",\"display\":\"flex\"}"
+    },
+    {
+      "name": "review-mode-opens",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "a-txt-staged",
+      "ok": false,
+      "detail": "{\"stagedBox\":false,\"stats\":[]}"
+    },
+    {
+      "name": "diff-hunks-render",
+      "ok": false,
+      "detail": "markers=0"
+    },
+    {
+      "name": "hunks-accepted",
+      "ok": true,
+      "detail": "accepted=0/0"
+    },
+    {
+      "name": "H1-live-commit-staged-snapshot",
+      "ok": false,
+      "detail": "HEAD==OTHER"
+    },
+    {
+      "name": "H1-live-reedit-kept",
+      "ok": true,
+      "detail": "worktree==V3"
+    },
+    {
+      "name": "H2-live-staged-deletion-committed",
+      "ok": false,
+      "detail": "HEAD b.txt gone=false"
+    }
+  ],
+  "passCount": 7,
+  "failCount": 4,
+  "screenshots": [
+    "ui494-495-live.json",
+    "ui494-leftpanel.png",
+    "ui495-h1-after-commit.png",
+    "ui495-h1-before-commit.png",
+    "ui495-h2-after-commit.png"
+  ],
+  "notes": [
+    "A4-2 空态提示与 A4-1 钉住失败反馈由组件级测试承载（lineage 246 绿 + ReviewMode 163），live 样本（单节点 job/无产物 job）缺，如实登记",
+    "RouteErrorBoundary 按钮为错误页低频面，类收编由 tsc+测试承载"
+  ]
+}

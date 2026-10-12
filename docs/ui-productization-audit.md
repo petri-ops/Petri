@@ -1,5 +1,6 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-12（**UI-494/495 代行实机评估完成翻 verified**（用户授权「代行」；U-02/03/04 先例）：iconBase live 在场 3 处 24px+ReviewMode 面板打开零崩溃+scratch 仓播种走查（审阅列表驱动迭代两次未走通=脚本层，如实登记；H 语义证据=block169 真实 handler 临时仓 4/4）；播种项目已清理。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-495 加映**：A4-2 三态化落地（empty/error 行内提示）+closeout lint 抓真两处修复。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-495 落地（BLOCK-169 commitReview 三边缘+C-24 UI 两项+A1 锁测）**：H-1 键基线同源（staged 文件面板键不再误判 stale，内容面=staged 快照防再编辑夹带）+H-2 staged 删除 rm --cached 分流+H-3 stage 后移零遗留+A4-1 钉住失败行内反馈+A4-2 lineage 空态提示/Graph 操作提示+A1 反例锁测 13/13。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-494 落地（BLOCK-167 加映·质感渐进迁移批）**：iconBtn 双族单源化（KSP 精确重复删除+PWS 32px 覆盖收编，LeftPanel/KnowledgeDocLibrary tsx 组合）+RouteErrorBoundary 按钮收编（primary/ghost 变体，hover 随共享）；按钮清单 32 文件/122 定义（棘轮随批下调）。残红=agentStream 4 失败 HEAD 同红（stash 实证，BLOCK-159 系）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -4862,14 +4863,14 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **升级**：Electron 41.10.7→44.7.0 保留（回归=契约+gen-ui 50/50+test:changed+build+dev 冒烟；better-sqlite3 保持系统 Node ABI，恢复命令进 handoff）。
 - **连带走查**：升级后全 UI 面抽验（欢迎/项目/扩展/设置/知识库截图级走查零破坏）；侧聊跨会话卡片引用被 scope 守卫正确拒绝（纵深防御工作正常，属既有设计）。
 
-## UI-494: iconBtn 双族单源化+RouteErrorBoundary 按钮收编（2026-10-12 in_progress，BLOCK-167 加映·渐进迁移批）
+## UI-494: iconBtn 双族单源化+RouteErrorBoundary 按钮收编（2026-10-12 in_progress→**verified**（2026-10-12 用户授权代行实机评估：iconBase 渲染 live 在场 3 处 24px+面板打开零崩溃，acceptance/block-169/ui494-495-live.json），BLOCK-167 加映·渐进迁移批）
 
 - **KSP iconBtn**：与 iconBase 逐语义相同→本地定义删除，KnowledgeDocLibrary(2)/LeftPanel(3) tsx 组合消费。
 - **PWS iconBtn**：32px+transition 保留为本地覆盖，LeftPanel 三处 `${button.iconBase} ${styles.iconBtn}`。
 - **RouteErrorBoundary**：primaryBtn→shared primary、secondaryBtn→shared ghost（含 hover/分组残留规则清理）。
 - **棘轮**：按钮清单 31 文件/125→32 文件/122（新增 status.module.css W4 件+三文件随批下调）；契约 17/17+tsc 0+邻域 254/254+build 绿。
 
-## UI-495: commitReview 三边缘修复+钉住失败反馈+lineage 空态提示（2026-10-12 in_progress，BLOCK-169/C-24）
+## UI-495: commitReview 三边缘修复+钉住失败反馈+lineage 空态提示（2026-10-12 in_progress→**verified**（同批代行：live 渲染回归零破坏+H 语义由 block169 真实 handler 行为测 4/4 承载——真实 IPC+真实临时仓；A4-2/A4-1 live 样本缺由组件级 246 绿覆盖，如实登记），BLOCK-169/C-24）
 
 - **H-1 键基线对称**：对账基线与面板同源（staged 文件用 HEAD→index 面）；内容面同修——staged 文件（M/A/D）整文件面经 staged 基线 patch 进 apply --cached 管线，提交恰为审阅的 staged 快照，工作树再编辑不夹带。
 - **H-2 删除分流**：indexStatus=D 的整文件面走 removePaths（git rm --cached 语义），成功路径对齐排除删除条目。
