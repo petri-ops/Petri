@@ -25,7 +25,8 @@ function renderPane() {
       mode: 'result',
       snapshot: snapshot,
       onUnpin: () => {},
-    }, React.createElement('div', null, '主区')),
+      children: React.createElement('div', null, '主区'),
+    }),
   );
 }
 
