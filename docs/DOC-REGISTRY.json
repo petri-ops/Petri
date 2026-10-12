@@ -6057,8 +6057,30 @@
    ],
    "archivePolicy": "retain_stable_path",
    "notes": "设计宪章（BLOCK-167 W0 落档）：字号 6 档终态/色彩预算（中性:强调≥10:1，accent 五类合法语义）/border 三语义（input/card/divider，无语义细线终态 0）/motion 3+2 档/渲染细节基线/控件单源纪律。机械守护=theme-token-contract BLOCK-167 断言组（三棘轮+存在性+红证据自检）。档位/预算调整须证据批+用户裁决。"
+  },
+  {
+   "id": "BLOCK-168-GEN-UI-OOPIF-HARDENING",
+   "path": "docs/block-168-oopif-hijack-hardening-plan.md",
+   "capability": "gen-ui",
+   "kind": "work-package",
+   "status": "active",
+   "canonical": true,
+   "truthDomain": "block-168-oopif-hardening",
+   "entrypoint": "docs/README.md",
+   "registeredAt": "2026-10-12",
+   "tags": [
+    "block-168",
+    "gen-ui",
+    "oopif",
+    "electron-44",
+    "security-hardening",
+    "known-gap",
+    "G0"
+   ],
+   "archivePolicy": "retain_stable_path",
+   "notes": "Gen UI OOPIF 导航劫持加固：P0 Electron 41→44 升级复测事件矩阵（will-frame-navigate/WebFrameMain/webRequest 三路）→P1 按结论落事件守卫或自愈守护（iframe load 守卫重置恢复）→P2 升级去留（回归全绿留 44，否则回退 41 只落解耦守护）。裁决链=「可以排期修」+「下一个工作包开整」（队列头唯一 planned）。证据=acceptance/block-168/。"
   }
  ],
  "lastUpdated": "2026-10-12",
- "documentCount": 318
+ "documentCount": 319
 }
