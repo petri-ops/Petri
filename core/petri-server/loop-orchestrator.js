@@ -686,7 +686,51 @@ async function runLoop({
             if (result.stats && result.stats.trimmed) {
               contextBudgetTrimmed = true;
               const trimmed = result.messages;
+              // BLOCK-172 CP-5 — 摘要式 auto-compact：丢弃前对将丢头部生成摘要
+              // （走既有 chat 通道→io-transcript 天然留证=可审计压缩），注入摘要
+              // 系统消息到保留下文头部。fail-open：摘要失败/无渠道→回退纯丢弃
+              // （既有行为），不阻塞任务。dropped 太少（<4 条）不值得一跳模型调用。
+              const droppedCount = messages.length - trimmed.length;
+              let compactSummaryText = null;
+              if (droppedCount >= 4) {
+                try {
+                  const droppedForSummary = messages
+                    .slice(0, droppedCount)
+                    .slice(-24) // 摘要源窗口：最近 24 条将丢消息（更早的仪式性内容价值低）
+                    .map((m) => `${m.role === 'user' ? '用户' : m.role === 'assistant' ? 'AI' : m.role}: ${String(m.content || '').slice(0, 400)}`);
+                  const summaryBody = droppedForSummary.join('\n\n').slice(-24000);
+                  const summaryJson = await callProviderWithNetworkRetry(() =>
+                    callChatProvider(
+                      providerName,
+                      apiKey,
+                      {
+                        ...(modelName ? { model: modelName } : {}),
+                        messages: [
+                          { role: 'system', content: '你是会话压缩器。把给定的较早对话压缩为一份事实性摘要：保留用户目标、已完成的步骤与工具、关键结论与数字、未完成事项。不新增臆测。直接输出摘要正文。' },
+                          { role: 'user', content: summaryBody },
+                        ],
+                        temperature: 0.2,
+                        max_tokens: 1200,
+                      },
+                      { userId, conversationId: _activeConv && _activeConv.id, kind: 'agent_context_compaction' },
+                    )
+                  );
+                  const summaryChoice = summaryJson && summaryJson.choices && summaryJson.choices[0];
+                  compactSummaryText = summaryChoice && summaryChoice.message && typeof summaryChoice.message.content === 'string'
+                    ? summaryChoice.message.content.trim()
+                    : null;
+                } catch (e) {
+                  console.log('[cp5-compact-summary] fail-open to plain trim:', e && e.message);
+                }
+              }
               messages.length = 0;
+              if (compactSummaryText) {
+                messages.push({
+                  role: 'system',
+                  content: `（BLOCK-172 CP-5 自动压缩摘要 · 覆盖较早 ${droppedCount} 条对话，原文见 llm-transcripts）
+${compactSummaryText}`,
+                });
+              }
               for (const m of trimmed) messages.push(m);
               _emit({
                 event: 'token_budget',
@@ -698,7 +742,14 @@ async function runLoop({
                 trimmed: true,
                 messagesDropped: result.stats.messagesDropped,
               });
-              console.log(`[context-breaker] iter ${iter + 1} trimmed ${result.stats.messagesDropped} messages: ${est.total} → ${result.stats.messagesTokensUsed} tokens (ctx ${loopContextWindow})`);
+              _emit({
+                event: 'context_compacted',
+                dropped: droppedCount,
+                summarized: Boolean(compactSummaryText),
+                summaryHead: compactSummaryText ? compactSummaryText.slice(0, 300) : null,
+                at: new Date().toISOString(),
+              });
+              console.log(`[context-breaker] iter ${iter + 1} trimmed ${result.stats.messagesDropped} messages${compactSummaryText ? ' +summary(CP-5)' : ''}: ${est.total} → ${result.stats.messagesTokensUsed} tokens (ctx ${loopContextWindow})`);
             }
           }
         } catch (e) {
