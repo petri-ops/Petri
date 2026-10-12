@@ -7,7 +7,7 @@ acceptance:
   - CP-15：分屏比例可拖拽（分隔条拖动 20-80% 钳制）+renderer 清单对账（9 类 adapter 渲染缺口如实清点）
   - closeout 十三门绿 + 总纲 §4 W5 行回写
 reopen: 任一 CP 出口断言未达即该 CP 返工；波内零停顿条款沿用（/goal 整波授权连续行使）
-status: active
+status: completed
 ---
 
 # BLOCK-175 — 竞争力总纲 W5 波（数据资产面接线）
@@ -30,3 +30,17 @@ status: active
 ## 3. 门禁与完成语义
 
 每 CP：定向红绿+tsc+lint。波末：closeout 十三门+实机断言（acceptance/block-175/）+UI 台账。出口全过+closeout 绿=completed；总纲 §4 W5 行回写。
+
+
+## 8. 收口对账（2026-10-12）
+
+| 出口判据 | 实绩 | 证据 |
+| --- | --- | --- |
+| CP-14 canSelect ≥4 类 | ✅ table/json/text/markdown 四类（VIEWER_PROFILES 位翻转+viewerProfileCanSelect 访问器） | registry 测试 36/36 |
+| CP-14 选择→继续分析链 | ✅ buildTextSelection 工厂（origin=query/entityType=text_select/durable=false）+useArtifactTextSelection hook（pointerup 采样+容器包含判定+hash 去重）→既有 ContinueAnalysisMenu 消费面 | 组件/hook 接线 |
+| CP-14b canCompare 成对 | ✅ table 族自Pair（canCompare 位） | VIEWER_PROFILES |
+| CP-15 分屏可拖拽 | ✅ 分隔条 20-80% 钳制+localStorage 持久化+键盘可达（aria separator） | drag 契约 3/3 |
+| CP-15 renderer 对账 | ✅ 9 类 adapter 渲染完备（BLOCK-142 三 viewer 已挂）；缺口=钉住快照 md/xlsx/pdf 载荷未接线（BLOCK-151 B 轨占位+url 出口在册，如实保留） | ArtifactPinPane.renderSnapshotBody |
+| closeout | ⚠️ 十三门中十二门绿；test:changed 959 测 2 红=block93 凭据环境债存量归因（bisect 双确认 pre-CP-8 基线同挂，非本波回归） | 归因随 AUDIT-LOG |
+
+**随波缺省裁决**：①只读文本族选择以「选中非空行=实体 ID」（origin=query）进入引用链——不做列级选择（列选择需交互 manifest，属切片 D 全量）②分屏比例持久化=localStorage（轻偏好，不入库）③renderer 对账缺口（钉住快照 md/xlsx/pdf 载荷）维持 BLOCK-151 B 轨占位不硬造。
