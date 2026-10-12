@@ -11,6 +11,7 @@ import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import { useConversationRun } from '@/components/copilot/conversationRunStore';
 import { formatDate, formatRelativeShort } from '@/lib/format';
 import styles from '@/pages/project-workspace.module.css';
+import button from '@/components/ui/controls/button.module.css';
 
 export interface LeftPanelContext {
   // Layout
@@ -392,7 +393,7 @@ function ProjectTreeHeader({ ctx, sshCreateOpen, onToggleSshCreate, convSearchOp
         <div className={styles.leftPanelHeaderActions}>
           {/* UI-445 — 会话标题搜索开关（跨项目过滤，点结果直达会话） */}
           <button
-            className={`${styles.iconBtn} ${convSearchOpen ? styles.iconBtnInactive : ''}`}
+            className={`${button.iconBase} ${styles.iconBtn} ${convSearchOpen ? styles.iconBtnInactive : ''}`}
             onClick={onToggleConvSearch}
             title={convSearchOpen ? '收起会话搜索' : '搜索会话标题'}
             aria-label={convSearchOpen ? '收起会话搜索' : '搜索会话标题'}
@@ -402,7 +403,7 @@ function ProjectTreeHeader({ ctx, sshCreateOpen, onToggleSshCreate, convSearchOp
           </button>
           {/* UI-327 — ssh 创建入口前置到左栏：行内面板，不跳首页 */}
           <button
-            className={`${styles.iconBtn} ${sshCreateOpen ? styles.iconBtnInactive : ''}`}
+            className={`${button.iconBase} ${styles.iconBtn} ${sshCreateOpen ? styles.iconBtnInactive : ''}`}
             onClick={onToggleSshCreate}
             title={sshCreateOpen ? '收起 SSH 远程项目创建' : '新建 SSH 远程项目（IP/密码 或 别名）'}
             aria-label={sshCreateOpen ? '收起 SSH 远程项目创建' : '新建 SSH 远程项目'}
@@ -411,7 +412,7 @@ function ProjectTreeHeader({ ctx, sshCreateOpen, onToggleSshCreate, convSearchOp
             <Icon name="globe" size={14} />
           </button>
           <button
-            className={styles.iconBtn}
+            className={`${button.iconBase} ${styles.iconBtn}`}
             onClick={() => void ctx.createPanel.onOpen()}
             title="新建项目（选择工作目录）"
             aria-expanded={ctx.createPanel.open}

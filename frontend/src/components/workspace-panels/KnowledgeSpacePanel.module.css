@@ -456,18 +456,7 @@
   flex-shrink: 0;
 }
 
-.iconBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border: none;
-  border-radius: var(--petri-radius-md);;
-  background: transparent;
-  color: var(--petri-text-secondary);
-  cursor: pointer;
-}
+/* BLOCK-167 加映：iconBtn 已单源到 ui/controls/button.module.css iconBase（24px 同款） */
 
 .iconBtn:disabled {
   opacity: 0.4;

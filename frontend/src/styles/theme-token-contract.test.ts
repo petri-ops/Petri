@@ -467,12 +467,12 @@ describe('theme token contract', () => {
     const RATCHET: Record<string, number> = {
       'components/ui/controls/status.module.css': 1, // W4 三件套 retryBtn（controls 家族豁免同 button.module.css）
       'pages/project-workspace.module.css': 40,
-      'components/workspace-panels/KnowledgeSpacePanel.module.css': 11,
+      'components/workspace-panels/KnowledgeSpacePanel.module.css': 10,
       'components/desktop/TitleBar.module.css': 10,
       'pages/extensions/styles.module.css': 8,
       'pages/window/command-center.module.css': 8,
       'components/result-studio/ResultStudioSurface.module.css': 7,
-      'components/RouteErrorBoundary.module.css': 4,
+      'components/RouteErrorBoundary.module.css': 1,
       'components/copilot/ToolActivityDock.module.css': 3,
       'components/knowledge/KnowledgeConsoleChat.module.css': 3,
       'components/branch/BranchTabs.module.css': 2,

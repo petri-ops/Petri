@@ -1,5 +1,6 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-12（**UI-494 落地（BLOCK-167 加映·质感渐进迁移批）**：iconBtn 双族单源化（KSP 精确重复删除+PWS 32px 覆盖收编，LeftPanel/KnowledgeDocLibrary tsx 组合）+RouteErrorBoundary 按钮收编（primary/ghost 变体，hover 随共享）；按钮清单 32 文件/122 定义（棘轮随批下调）。残红=agentStream 4 失败 HEAD 同红（stash 实证，BLOCK-159 系）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-493 落地（BLOCK-168 OOPIF 自愈守护）**：guest 心跳+GenUiCard 宽限重置=劫持后 t+8s 自动恢复干净沙箱（双次 live PASS）+主进程侦测遥测；Electron 44.7.0 保留。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-488~492 用户过目翻 verified**（「剩余待你 这些都好了没什么问题」）+checkpoint 修正三项复认通过落账。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-492 加映三**：McpShelfPane unused import 清理（closeout lint 抓真）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -4858,3 +4859,10 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **侦测遥测**：security-hardening will-frame-navigate 对 petri-genui 帧外导航打日志（Electron 44 实证 preventDefault 对子框无效，如实注释）。
 - **升级**：Electron 41.10.7→44.7.0 保留（回归=契约+gen-ui 50/50+test:changed+build+dev 冒烟；better-sqlite3 保持系统 Node ABI，恢复命令进 handoff）。
 - **连带走查**：升级后全 UI 面抽验（欢迎/项目/扩展/设置/知识库截图级走查零破坏）；侧聊跨会话卡片引用被 scope 守卫正确拒绝（纵深防御工作正常，属既有设计）。
+
+## UI-494: iconBtn 双族单源化+RouteErrorBoundary 按钮收编（2026-10-12 in_progress，BLOCK-167 加映·渐进迁移批）
+
+- **KSP iconBtn**：与 iconBase 逐语义相同→本地定义删除，KnowledgeDocLibrary(2)/LeftPanel(3) tsx 组合消费。
+- **PWS iconBtn**：32px+transition 保留为本地覆盖，LeftPanel 三处 `${button.iconBase} ${styles.iconBtn}`。
+- **RouteErrorBoundary**：primaryBtn→shared primary、secondaryBtn→shared ghost（含 hover/分组残留规则清理）。
+- **棘轮**：按钮清单 31 文件/125→32 文件/122（新增 status.module.css W4 件+三文件随批下调）；契约 17/17+tsc 0+邻域 254/254+build 绿。

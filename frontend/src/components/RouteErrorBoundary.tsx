@@ -10,6 +10,7 @@
 
 import React from 'react';
 import styles from './RouteErrorBoundary.module.css';
+import button from '@/components/ui/controls/button.module.css';
 
 interface Props {
   children: React.ReactNode;
@@ -54,10 +55,10 @@ export class RouteErrorBoundary extends React.Component<Props, State> {
             <pre className={styles.detail}>{error.message}</pre>
           ) : null}
           <div className={styles.actions}>
-            <button type="button" className={styles.primaryBtn} onClick={this.handleReload}>
+            <button type="button" className={button.primary} onClick={this.handleReload}>
               重新加载
             </button>
-            <button type="button" className={styles.secondaryBtn} onClick={this.handleGoHome}>
+            <button type="button" className={button.ghost} onClick={this.handleGoHome}>
               返回主页
             </button>
           </div>

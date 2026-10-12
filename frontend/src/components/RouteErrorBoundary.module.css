@@ -52,31 +52,6 @@
   gap: 10px;
 }
 
-.primaryBtn,
-.secondaryBtn {
-  padding: var(--petri-space-2) 14px;
-  border-radius: var(--petri-radius-md);;
-  font-size: var(--petri-font-size-body);
-  cursor: pointer;
-  border: 1px solid var(--petri-border-input);
-}
+/* BLOCK-167 加映：primaryBtn/secondaryBtn 已单源到 ui/controls/button.module.css
+   （primary/ghost 变体；hover 态随共享变体）。 */
 
-.primaryBtn {
-  background: var(--petri-accent-bg);
-  color: var(--petri-accent);
-  border-color: var(--petri-accent);
-}
-
-.primaryBtn:hover {
-  background: var(--petri-hover);
-}
-
-.secondaryBtn {
-  background: transparent;
-  color: var(--petri-text-secondary);
-}
-
-.secondaryBtn:hover {
-  background: var(--petri-hover);
-  color: var(--petri-text);
-}

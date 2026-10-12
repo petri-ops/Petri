@@ -139,19 +139,9 @@
 }
 
 .iconBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: 32px;
   height: 32px;
-  border: none;
-  background: transparent;
-  color: var(--petri-text-secondary);
-  cursor: pointer;
-  border-radius: var(--petri-radius-md);;
   transition: background var(--petri-duration-fast), color var(--petri-duration-fast);
-  /* UI-215 补充：纯图标按钮收敛 UA 默认字号到 token */
-  font-size: var(--petri-font-size-sm);
 }
 
 .iconBtn:hover {

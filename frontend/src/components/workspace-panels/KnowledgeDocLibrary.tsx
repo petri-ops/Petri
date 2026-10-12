@@ -22,6 +22,7 @@ import {
 } from '@/lib/knowledgeClient';
 import { formatBytes, STATUS_LABEL } from './knowledge-utils';
 import styles from './KnowledgeSpacePanel.module.css';
+import button from '../ui/controls/button.module.css';
 
 export function KnowledgeDocLibrary({
   spaceId,
@@ -382,7 +383,7 @@ export function KnowledgeDocLibrary({
                   <div className={styles.docActions}>
                     <button
                       type="button"
-                      className={styles.iconBtn}
+                      className={button.iconBase}
                       title="重建索引"
                       disabled={busyDocId === doc.id}
                       onClick={() => void handleReindex(doc)}
@@ -391,7 +392,7 @@ export function KnowledgeDocLibrary({
                     </button>
                     <button
                       type="button"
-                      className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
+                      className={`${button.iconBase} ${styles.iconBtnDanger}`}
                       title="删除文档"
                       disabled={busyDocId === doc.id}
                       onClick={() => void handleDelete(doc)}
