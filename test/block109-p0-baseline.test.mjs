@@ -105,14 +105,18 @@ const baseArgs = (events) => ({
 
 // 拆前事件序列实况（2026-09-21 干跑钉死；P1 重写后须原样复现）。
 // 终止信号不走 emitAssistant：runLoop 结尾以无参 emitDone() 收束（拆前实况）。
+// BLOCK-172 CP-7 — token_budget 每轮发放（预算环全程实数）后事件序列修订：
+// 每轮 iter 后紧跟当轮预算事件（trimmed=false；原形态仅 0.85 危机时发放一次）。
 const PINNED_SEQUENCE = [
   'iter',
+  'token_budget',
   'delta:reasoning',
   'delta:content',
   'agent_progress',
   'tool_call',
   'tool_result',
   'iter',
+  'token_budget',
   'delta:content',
 ];
 
@@ -130,7 +134,7 @@ test('P0 基线①② — 一轮带工具调用会话的 SSE 事件序列 + runL
   assert.deepEqual(
     events.map(classify),
     PINNED_SEQUENCE,
-    '拆前事件序列漂移——若为有意行为变更，修订 PINNED_SEQUENCE 并在 plan §1 P0-2 留痕',
+    '拆前事件序列漂移——若为有意行为变更，修订 PINNED_SEQUENCE 并在 plan §1 P0-2 留痕（BLOCK-172 CP-7 已修订：+token_budget 每轮）',
   );
   assert.equal(doneCalls, 1, '终止信号 = 恰一次 emitDone');
   assert.equal(doneArg, undefined, '拆前实况：emitDone 无参调用（不携带终态载荷）');

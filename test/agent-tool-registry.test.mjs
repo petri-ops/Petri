@@ -122,8 +122,15 @@ test('agent registry pairs every model-visible definition with one handler and c
     assert.deepEqual(Object.keys(entry.contract).sort(), [...INTERNAL_CONTRACT_KEYS].sort());
     assert.equal(Object.isFrozen(entry), true);
     assert.equal(Object.isFrozen(entry.contract), true);
-    assert.equal(entry.contract.cancellable, false);
+    // BLOCK-171 CP-1 — cancellable 收敛为「协作取消已贯通」布尔：true 集合必须
+    // 与显式声明一致（当前=workspace_search/wait_agent），新工具默认 false。
+    assert.equal(typeof entry.contract.cancellable, 'boolean');
   }
+  const cancellableTools = registry
+    .filter((entry) => entry.contract.cancellable === true)
+    .map((entry) => entry.definition.function.name)
+    .sort();
+  assert.deepEqual(cancellableTools, ['wait_agent', 'workspace_search']);
 });
 
 test('registry validation rejects duplicate definitions and definition-handler drift', () => {

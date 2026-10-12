@@ -90,8 +90,16 @@ test('buildToolRouteDecisionRequest：state 截 600 字 + criteria 与类目集�
   assert.match(questions.family.instructions, /all/);
 });
 
-test('guard 默认关：零出站零行为变化（D-4）', async (t) => {
+test('CP-10 转正：无 env/无 stored 配置默认启用（route 尝试出站；失败回退全量）', async (t) => {
   useEnv(t, { PETRI_JEV_TOOL_ROUTE: undefined });
+  const spy = errorFetch('TimeoutError');
+  const r = await resolveToolRoute('画一个火山图', { ...API_KEY_OVERRIDE, fetchImpl: spy.impl, sleep: NO_SLEEP });
+  assert.notEqual(r.reason, 'guard_disabled', '转正后不得再以 guard_disabled 拒绝');
+  assert.ok(spy.count() >= 1, 'guard 开必须出站尝试（含网络重试）');
+});
+
+test('env 杀开关仍最高：PETRI_JEV_TOOL_ROUTE=0 → guard_disabled 零出站', async (t) => {
+  useEnv(t, { PETRI_JEV_TOOL_ROUTE: '0' });
   const spy = errorFetch('TimeoutError');
   const r = await resolveToolRoute('画一个火山图', { ...API_KEY_OVERRIDE, fetchImpl: spy.impl, sleep: NO_SLEEP });
   assert.equal(r.route, false);
