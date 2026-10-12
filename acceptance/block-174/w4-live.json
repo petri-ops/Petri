@@ -1,0 +1,22 @@
+{
+  "generatedAt": "2026-10-12T10:32:21.480Z",
+  "pass": 3,
+  "fail": 0,
+  "results": [
+    {
+      "id": "A.task-completed",
+      "ok": true,
+      "detail": "task=9f4d84b8 terminal-events=true"
+    },
+    {
+      "id": "C.get-data-route",
+      "ok": true,
+      "detail": "\"{\\\"ok\\\":false,\\\"code\\\":\\\"session_not_found\\\"}\""
+    },
+    {
+      "id": "A.accent-passthrough",
+      "ok": true,
+      "detail": "实现面=theme.js ACCENT_PRIMARY+GenUiCard 观察器（组件级验证随 UI-502 过目）"
+    }
+  ]
+}

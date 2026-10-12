@@ -33,7 +33,13 @@
         "acceptance/block-169/**",
         "scripts/block172-w2-live.mjs",
         "test/block172-cp5-compact.test.mjs",
-        "acceptance/block-172/**"
+        "acceptance/block-172/**",
+        "scripts/block173-w3-live.mjs",
+        "scripts/block174-w4-live.mjs",
+        "test/block173-w3-contracts.test.mjs",
+        "acceptance/block-173/**",
+        "acceptance/block-174/**",
+        "core/petri-server/agent-tools/agent-tool-interceptor.js"
       ],
       "tests": [
         "test/block166-gen-ui-host.test.mjs",
