@@ -146,7 +146,7 @@ status: planned
 | CP-12 模板库 | 场景锚定 widget 模板（图表/表格/KPI/流程）+ 模板命中契约 | 模板命中率统计；输出一致性抽检 | CP-11（软） |
 | CP-13 表达面收尾 | accent 透传+文件导出+联邦委托回流 Gen UI 化 | accent 生效；委托结果为交互件（双机） | CP-11（硬） |
 
-### W5 数据资产面接线（artifact plane 切片 C/E 收尾，2 包）——**active（2026-10-12 BLOCK-175 发令，用户 /goal 整波授权连续行使）**
+### W5 数据资产面接线（artifact plane 切片 C/E 收尾，2 包）——**completed（2026-10-12 BLOCK-175 两包全交付；canSelect 四类接线+分屏可拖拽；docs 门绿）**
 
 | 包 | 范围 | 出口判据 | 依赖 |
 | --- | --- | --- | --- |
