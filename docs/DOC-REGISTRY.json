@@ -5604,6 +5604,28 @@
    "notes": "2026-10-12 发令 active（用户 /goal 整波授权连续行使，W1/W2 先例）：总纲 W3 波编排与多智能体深化——CP-8 并发上限可配（PETRI_SPAWN_CONCURRENCY_LIMIT 1-8 缺省 3）+派生深度受控放开（PETRI_SPAWN_MAX_DEPTH 缺省 1=现状）+汇报门评估落结论/CP-10 tool-route 默认开+校准门/CP-9 编排 DAG（spawn 树 @xyflow 只读投影，AgentRunPanel 形态）。closeout 十三门+实机断言（acceptance/block-173/）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
   },
   {
+   "id": "BLOCK-174-COMPETITIVENESS-WAVE4",
+   "capability": "agent-competitiveness",
+   "path": "docs/block-174-competitiveness-wave4-plan.md",
+   "kind": "work-package",
+   "status": "active",
+   "phase": "P1-WAVE",
+   "canonical": true,
+   "truthDomain": "block-174-competitiveness-wave4-plan",
+   "entrypoint": "docs/README.md",
+   "registeredAt": "2026-10-12",
+   "archivePolicy": "retain_stable_path",
+   "tags": [
+    "agent-competitiveness",
+    "wave4",
+    "gen-ui",
+    "data-binding",
+    "templates",
+    "accent"
+   ],
+   "notes": "2026-10-12 发令 active（用户 /goal 整波授权连续行使，W1~W3 先例）：总纲 W4 波 Gen UI 表达面双轨——CP-13a accent 透传/CP-13b fragment 文件导出/CP-11 artifact 数据面只读绑定（getData RPC+归属校验+prompt 注入 jobIds）/CP-12 场景模板库（bar/line/kpi/table+visualize 模板节）。双轨=模板通用形+artifact 数据自有锚并轨（用户裁决「不仅仅是增加数据资产」修正后形态）。closeout 十三门+实机探针（acceptance/block-174/）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+  },
+  {
    "id": "BLOCK-138-ARTIFACT-PLANE-KERNEL",
    "capability": "artifact-plane-kernel",
    "path": "docs/block-138-artifact-plane-kernel-plan.md",
