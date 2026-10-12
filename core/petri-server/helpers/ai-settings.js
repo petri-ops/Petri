@@ -336,7 +336,14 @@ function getGenerationDefaults() {
 function saveGenerationDefaults(partial) {
   const clean = _sanitizeGeneration(partial);
   const stored = getAiSettings() || {};
-  const next = { ...stored, generation: { ...(stored.generation || {}), ...clean } };
+  const generation = { ...(stored.generation || {}), ...clean };
+  // 显式 null = 清键（回退 loop 内置缺省；部分更新语义的标准形态）
+  for (const key of ['temperature', 'maxTokens']) {
+    if (partial && typeof partial === 'object' && Object.prototype.hasOwnProperty.call(partial, key) && partial[key] === null) {
+      delete generation[key];
+    }
+  }
+  const next = { ...stored, generation };
   _ensureDir();
   fs.writeFileSync(SETTINGS_FILE, JSON.stringify(next, null, 2));
   fs.chmodSync(SETTINGS_FILE, 0o600);
