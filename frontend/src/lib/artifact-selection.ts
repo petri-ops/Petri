@@ -220,6 +220,41 @@ function baseSelection(
  * 取不到稳定 ID 的行被丢弃并记入 droppedRowCount，调用方应提示用户
  * 该产物不支持持久选择，而不是静默少选。
  */
+/**
+ * BLOCK-175 CP-14 — 只读文本族（text/json/markdown）的文本选择→选择总线工厂。
+ *
+ * 无交互 manifest 的只读产物没有稳定实体 ID 列，这里把**选中的非空行**当作
+ * 实体 ID（origin=query：以文本查询语义进入 agent 引用链）；durable=false
+ * （选区不可跨会话恢复，诚实边界）。空选择返回 null。
+ */
+export function buildTextSelection(
+  source: { artifactId: string; revisionId: string | null },
+  selectedText: string,
+): ArtifactSelection | null {
+  const trimmed = String(selectedText || '');
+  if (!trimmed.trim()) return null;
+  const lines = uniqueStrings(trimmed.split(/\r?\n/)).slice(0, MAX_PERSISTED_ENTITY_IDS);
+  if (lines.length === 0) return null;
+  const selection: ArtifactSelection = {
+    contractVersion: 1,
+    artifactId: source.artifactId,
+    revisionId: source.revisionId,
+    entityType: 'text_select',
+    origin: 'query',
+    entityIds: lines,
+    entityIdCount: lines.length,
+    entityIdsTruncated: false,
+    entityIdsHash: hashEntityIds(lines),
+    fields: [],
+    filterExpression: null,
+    sort: [],
+    region: null,
+    durable: false,
+    createdAt: new Date().toISOString(),
+  };
+  return selection;
+}
+
 export function buildRowSelection(
   manifest: ArtifactInteractionManifest,
   rows: Array<Record<string, unknown>>,

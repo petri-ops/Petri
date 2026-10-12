@@ -53,14 +53,18 @@ export interface ResolvedResultViewer {
  * BLOCK-151 B 轨（审视吸收二波）：canExport 位经 viewerProfileCanExport 接线消费
  * （Shell 挂载面「打开原文件」出口）；canSelect/canCompare 仍为占位。
  */
+// BLOCK-175 CP-14 — 能力位接线（切片 C）：只读文本族（table/json/text/markdown）
+// 的文本选择经选择总线→「继续分析」引用链（useArtifactTextSelection 消费）；
+// table 族自Pair可比较（canCompare，分屏钉住面消费）。report/image/binary/
+// spreadsheet 维持 false（无文本选择面/比较语义不成立），pdf canExport 既有。
 const VIEWER_PROFILES: Record<ResultViewerAdapter, Omit<ResolvedResultViewer, 'adapter'>> = {
   report: { canSelect: false, canCompare: false, canExport: false },
   image: { canSelect: false, canCompare: false, canExport: false },
-  table: { canSelect: false, canCompare: false, canExport: false },
-  json: { canSelect: false, canCompare: false, canExport: false },
-  text: { canSelect: false, canCompare: false, canExport: false },
+  table: { canSelect: true, canCompare: true, canExport: false },
+  json: { canSelect: true, canCompare: false, canExport: false },
+  text: { canSelect: true, canCompare: false, canExport: false },
   binary: { canSelect: false, canCompare: false, canExport: false },
-  markdown: { canSelect: false, canCompare: false, canExport: true },
+  markdown: { canSelect: true, canCompare: false, canExport: true },
   spreadsheet: { canSelect: false, canCompare: false, canExport: false },
   pdf: { canSelect: false, canCompare: false, canExport: true },
 };
@@ -107,6 +111,16 @@ const ADAPTER_RULES: readonly AdapterRule[] = [
  */
 export function viewerProfileCanExport(adapter: ResultViewerAdapter): boolean {
   return VIEWER_PROFILES[adapter].canExport;
+}
+
+/** BLOCK-175 CP-14 — adapter 是否声明「文本选择→选择总线」能力。 */
+export function viewerProfileCanSelect(adapter: ResultViewerAdapter): boolean {
+  return VIEWER_PROFILES[adapter].canSelect;
+}
+
+/** BLOCK-175 CP-14 — adapter 是否声明「成对比较」能力（table 族自 Pair）。 */
+export function viewerProfileCanCompare(adapter: ResultViewerAdapter): boolean {
+  return VIEWER_PROFILES[adapter].canCompare;
 }
 
 export function resolveResultViewer(input: {

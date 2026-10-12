@@ -79,11 +79,12 @@ describe('BLOCK-142 新规则③：.pdf -> pdf（替换现 .pdf→binary 规则�
 });
 
 describe('BLOCK-142 新 adapter 能力声明档案（VIEWER_PROFILES，plan §1.4 能力声明位）', () => {
-  it('markdown/pdf 档案 canExport=true，canSelect/canCompare=false', () => {
+  it('markdown/pdf 档案 canExport=true；CP-14 起markdown canSelect=true（选择总线接线），canCompare/pdf 仍 false', () => {
     const markdownResolved = resolveResultViewer({ kind: 'text', fileName: 'README.md' });
     expect(markdownResolved.adapter).toBe('markdown');
     expect(markdownResolved.canExport).toBe(true);
-    expect(markdownResolved.canSelect).toBe(false);
+    // BLOCK-175 CP-14 — 只读文本族接线进选择总线：markdown canSelect 翻 true
+    expect(markdownResolved.canSelect).toBe(true);
     expect(markdownResolved.canCompare).toBe(false);
 
     const pdfResolved = resolveResultViewer({ kind: 'data', fileName: 'paper.pdf' });

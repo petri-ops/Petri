@@ -135,3 +135,26 @@
   border-radius: var(--petri-radius-md);;
   color: var(--petri-text-tertiary);
 }
+
+/* BLOCK-175 CP-15 — 可拖拽分隔条（20-80% 钳制；键盘可达） */
+.artifactPinDivider {
+  width: var(--petri-space-2);
+  align-self: stretch;
+  border: none;
+  border-radius: var(--petri-radius-pill);
+  background: var(--petri-border);
+  cursor: col-resize;
+  padding: 0;
+  touch-action: none;
+  transition: background var(--petri-duration-fast) ease;
+}
+
+.artifactPinDivider:hover,
+.artifactPinDivider[data-dragging] {
+  background: var(--petri-accent);
+}
+
+.artifactPinDivider:focus-visible {
+  outline: var(--petri-ring-width, 2px) solid var(--petri-accent);
+  outline-offset: 2px;
+}

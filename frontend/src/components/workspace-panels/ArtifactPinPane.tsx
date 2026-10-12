@@ -11,7 +11,7 @@
  * 契约面与寻址面见同目录 ArtifactPinPane.test.tsx（HK-01 先红后绿）。
  */
 
-import React from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import type { ResultSurfaceMode, ResultViewerAdapter } from '@/components/result-studio/resultSurface';
 import styles from './ArtifactPinPane.module.css';
 
@@ -45,6 +45,55 @@ export function ArtifactPinPane({
   if (!snapshot || mode !== 'result') {
     return <>{children}</>;
   }
+
+  // BLOCK-175 CP-15 — 分屏比例可拖拽：主列占比（20-80% 钳制），localStorage
+  // 持久化（petri.pinSplitRatio）；分隔条 pointer 拖拽 + 键盘可达（左右箭头 ±5%）。
+  const RATIO_KEY = 'petri.pinSplitRatio';
+  const clampRatio = (raw: number): number => Math.max(20, Math.min(80, Math.round(raw)));
+  const [mainRatio, setMainRatio] = useState<number>(() => {
+    try {
+      const saved = Number(localStorage.getItem(RATIO_KEY));
+      if (Number.isFinite(saved) && saved >= 20 && saved <= 80) return Math.round(saved);
+    } catch { /* storage unavailable */ }
+    return 60;
+  });
+  const splitRef = React.useRef<HTMLDivElement | null>(null);
+  const [dragging, setDragging] = useState(false);
+
+  const applyRatio = useCallback((next: number) => {
+    const clamped = clampRatio(next);
+    setMainRatio(clamped);
+    try { localStorage.setItem(RATIO_KEY, String(clamped)); } catch { /* storage unavailable */ }
+  }, []);
+
+  const onDividerPointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const splitEl = splitRef.current;
+    if (!splitEl) return;
+    setDragging(true);
+    const rect = splitEl.getBoundingClientRect();
+    const move = (e: PointerEvent) => {
+      const ratio = ((e.clientX - rect.left) / rect.width) * 100;
+      applyRatio(clampRatio(ratio));
+    };
+    const up = () => {
+      setDragging(false);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  }, [applyRatio]);
+
+  const onDividerKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      applyRatio(mainRatio - 5);
+    } else if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      applyRatio(mainRatio + 5);
+    }
+  }, [applyRatio, mainRatio]);
 
   // 快照离线渲染：与 renderPreview 同一渲染原语（iframe/img/table/pre），
   // 只消费快照载荷，零 fetch。
@@ -104,10 +153,28 @@ export function ArtifactPinPane({
   };
 
   return (
-    <div className={styles.artifactPinSplit}>
+    <div
+      className={styles.artifactPinSplit}
+      ref={splitRef}
+      style={{ gridTemplateColumns: `minmax(0, ${mainRatio}fr) minmax(0, ${100 - mainRatio}fr)` }}
+    >
       <div className={styles.artifactPinMain} data-testid="artifact-pin-main">
         {children}
       </div>
+      <div
+        className={styles.artifactPinDivider}
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="拖拽调整分屏比例"
+        aria-valuenow={mainRatio}
+        aria-valuemin={20}
+        aria-valuemax={80}
+        tabIndex={0}
+        data-dragging={dragging || undefined}
+        onPointerDown={onDividerPointerDown}
+        onKeyDown={onDividerKeyDown}
+        data-testid="artifact-pin-divider"
+      />
       <aside
         className={styles.artifactPinSide}
         data-testid="artifact-pin-pane"
