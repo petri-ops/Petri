@@ -1,4 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+// BLOCK-173 CP-9 — 编排 DAG 可视化（spawn 树只读投影；数据源=既有 run 快照）
+import { useSubAgentTasksForConversation, listSubAgentTasksForConversation } from './conversationRunStore/subAgentTasks';
+import { getConversationRunSnapshot } from './conversationRunStore';
+import { OrchestrationGraph } from '@/components/workspace-panels/OrchestrationGraph';
 import {
   fetchProcessLogTail,
   listBackgroundProcesses,
@@ -58,6 +62,9 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
   const [expanded, setExpanded] = useState(true);
   const [processes, setProcesses] = useState<BackgroundProcessView[]>([]);
   const [autoScroll, setAutoScroll] = useState(true);
+  // BLOCK-173 CP-9 — 编排图形态开关（有子 agent 任务时头部出现切换钮）
+  const [showGraph, setShowGraph] = useState(false);
+  const subAgentTasks = useSubAgentTasksForConversation(conversationId);
   const logRef = useRef<HTMLPreElement | null>(null);
   // 轮询回调里读到的最新会话/项目（避免 interval 反复重建）
   const ctxRef = useRef({ conversationId, projectId });
@@ -195,6 +202,18 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
               {isProcessActive(activeProcess.status) ? ` · ${formatDuration(activeProcess.durationMs)}` : ''}
             </span>
           )}
+          {subAgentTasks.length > 0 && (
+            <button
+              type="button"
+              className={`${button.iconBase} ${styles.iconBtn}`}
+              onClick={() => setShowGraph((v) => !v)}
+              title={showGraph ? '查看日志' : '查看编排图'}
+              aria-label={showGraph ? '查看日志' : '查看编排图'}
+              data-testid="dock-graph-toggle"
+            >
+              ⎇
+            </button>
+          )}
           <button
             type="button"
             className={`${button.iconBase} ${styles.iconBtn}`}
@@ -220,14 +239,26 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
           <div className={styles.command} title={activeProcess.command}>
             {activeProcess.command}
           </div>
-          <pre
-            ref={logRef}
-            className={styles.log}
-            onScroll={handleLogScroll}
-            data-empty={!activeProcess.logTail ? true : undefined}
-          >
-            {activeProcess.logTail || '（暂无输出）'}
-          </pre>
+          {showGraph && subAgentTasks.length > 0 ? (
+            <OrchestrationGraph
+              tasks={subAgentTasks.map((t) => ({
+                taskId: t.taskId,
+                parentTaskId: t.parentTaskId,
+                status: t.status,
+                userContent: t.userContent,
+              }))}
+              rootTaskId={conversationId ? getConversationRunSnapshot(conversationId)?.taskId ?? null : null}
+            />
+          ) : (
+            <pre
+              ref={logRef}
+              className={styles.log}
+              onScroll={handleLogScroll}
+              data-empty={!activeProcess.logTail ? true : undefined}
+            >
+              {activeProcess.logTail || '（暂无输出）'}
+            </pre>
+          )}
           <div className={styles.footer}>
             <button
               type="button"

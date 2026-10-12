@@ -23,7 +23,9 @@ const RUNTIME_POINTS = {
   'knowledge-guard': { label: '知识库二跳守卫', enabledDefault: false, envKey: 'PETRI_JEV_KNOWLEDGE_GUARD' },
   'marker-celltype': { label: 'marker→细胞类型判别', enabledDefault: false, envKey: 'PETRI_JEV_MARKER_GUARD' },
   'intent-route': { label: 'copilot 意图路由', enabledDefault: false, envKey: 'PETRI_JEV_INTENT_ROUTE' },
-  'tool-route': { label: '工具两跳预路由', enabledDefault: false, envKey: 'PETRI_JEV_TOOL_ROUTE' },
+  // BLOCK-173 CP-10 — 转正：defaultOn=true（无 stored/env 配置时默认启用）。
+  // env '0' 杀开关与设置页显式关仍最高优先。
+  'tool-route': { label: '工具两跳预路由', enabledDefault: false, defaultOn: true, envKey: 'PETRI_JEV_TOOL_ROUTE' },
 };
 
 function configPath() {
@@ -44,7 +46,8 @@ function seedDoc() {
   const points = {};
   for (const [point, meta] of Object.entries(RUNTIME_POINTS)) {
     points[point] = {
-      enabled: envValue(meta.envKey) === 'on' ? true : meta.enabledDefault,
+      // BLOCK-173 CP-10 — seedDoc 同样尊重 defaultOn（内存种子与解析口径一致）
+      enabled: envValue(meta.envKey) === 'on' ? true : (meta.defaultOn === true || meta.enabledDefault === true),
       ...(thresholds[point]?.threshold != null ? { threshold: thresholds[point].threshold } : {}),
     };
   }
@@ -84,7 +87,13 @@ function getPointRuntime(point) {
   return {
     point,
     label: meta.label,
-    enabled: env === 'off' ? false : stored.enabled === true,
+    // BLOCK-173 CP-10 — defaultOn 接点（tool-route）无 stored/env 配置时默认启用；
+    // 其余接点维持「显式存储才启用」不变。
+    enabled: env === 'off'
+      ? false
+      : env === 'on'
+        ? true
+        : (stored.enabled === undefined ? meta.defaultOn === true : stored.enabled === true),
     envOverride: env || null,
     threshold: typeof stored.threshold === 'number' ? stored.threshold : registry.threshold,
     defaultThreshold: registry.threshold ?? null,

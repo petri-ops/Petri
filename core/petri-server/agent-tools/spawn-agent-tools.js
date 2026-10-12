@@ -34,8 +34,24 @@ const MAX_GOALS = 5;
 const MAX_GOAL_CHARS = 200;
 const WAIT_POLL_INTERVAL_MS = 1000;
 const WAIT_DEFAULT_TIMEOUT_MS = 300000;
-// BLOCK-109 P2 — 单父任务同时活跃子智能体上限（软：超出即软指引，非硬拒）
-const SPAWN_CONCURRENCY_LIMIT = 3;
+// BLOCK-109 P2 — 单父任务同时活跃子智能体上限（软：超出即软指引，非硬拒）。
+// BLOCK-173 CP-8 — 上限用户可配：env PETRI_SPAWN_CONCURRENCY_LIMIT（1-8 钳制，
+// 缺省 3=既有保守值）。解析函数化（测试契约直测）；语义仍是软指引非硬拒。
+function resolveSpawnConcurrencyLimit() {
+  const raw = Number(process.env.PETRI_SPAWN_CONCURRENCY_LIMIT);
+  if (!Number.isFinite(raw)) return 3;
+  return Math.max(1, Math.min(8, Math.floor(raw)));
+}
+
+// BLOCK-173 CP-8 — 派生深度受控放开：env PETRI_SPAWN_MAX_DEPTH（≥1，缺省 1=
+// 既有「子不可再生子」零行为变化）。深度=父链上的 spawn 代数；depth=2 时
+// 子 agent（作为父）可再派孙代。放开语义：父链校验从「父必须 primary」放宽为
+// 「父为 primary 或（子且当前代数 < maxDepth-1）」。
+function resolveSpawnMaxDepth() {
+  const raw = Number(process.env.PETRI_SPAWN_MAX_DEPTH);
+  if (!Number.isFinite(raw) || raw < 1) return 1;
+  return Math.min(3, Math.floor(raw));
+}
 const WAIT_MIN_TIMEOUT_MS = 1000;
 const WAIT_MAX_TIMEOUT_MS = 600000;
 const SUMMARY_TOKEN_BUDGET = 4000;
@@ -214,8 +230,27 @@ async function spawn_agent(args, ctx) {
   if (parentTask.userId && parentTask.userId !== userId) {
     return fail('permission_denied', '无权以该任务派生子 agent。');
   }
-  if ((parentTask.params && parentTask.params.kind || 'primary') !== 'primary') {
-    return fail('parent_not_primary', '只有主 agent 会话可以派生子 agent（子 agent 不允许再生子 agent）。');
+  // BLOCK-173 CP-8 — 深度受控放开：maxDepth=1（缺省）维持「父必须 primary」；
+  // maxDepth≥2 时允许运行中的子 agent 作为父再派下一代（深度=父链 spawn 代数），
+  // 仍然 fail-closed 校验父链（非 primary 父必须是 subagent 且未超深度）。
+  const maxDepth = resolveSpawnMaxDepth();
+  const parentKind = (parentTask.params && parentTask.params.kind) || 'primary';
+  if (parentKind !== 'primary') {
+    if (maxDepth < 2) {
+      return fail('parent_not_primary', '只有主 agent 会话可以派生子 agent（子 agent 不允许再生子 agent）。');
+    }
+    // 深度上限校验：沿 parentTaskId 上溯统计代数（有界防环）。
+    let ancestryDepth = 1;
+    let cursor = parentTask;
+    while (cursor && cursor.params && cursor.params.parentTaskId && ancestryDepth < maxDepth + 2) {
+      const ancestor = agentTaskStore.getAgentTask(cursor.params.parentTaskId);
+      if (!ancestor) break;
+      ancestryDepth += 1;
+      cursor = ancestor;
+    }
+    if (ancestryDepth >= maxDepth) {
+      return fail('spawn_depth_exceeded', `已达派生深度上限（${maxDepth}）：当前允许的最大 spawn 代数为 ${maxDepth}。`);
+    }
   }
   if (parentTask.status !== 'running' || parentTask.agentStatus !== 'running') {
     return fail('parent_not_running', '父任务已结束，不能再派生子 agent。');
@@ -226,13 +261,14 @@ async function spawn_agent(args, ctx) {
   // （2026-09-21 用户实测 4 并行派发后主/子双双 ECONNRESET）；同时保持模型
   // 控制权——wait_agent 腾位后可再派。
   const runningChildren = agentTaskStore.getRunningChildAgentTasks(parentTaskId) || [];
-  if (runningChildren.length >= SPAWN_CONCURRENCY_LIMIT) {
+  const spawnConcurrencyLimit = resolveSpawnConcurrencyLimit();
+  if (runningChildren.length >= spawnConcurrencyLimit) {
     const activeList = runningChildren
       .map((t) => String(t.taskId || '').slice(0, 8))
       .join(', ');
     return fail(
       'concurrency_limit',
-      `活跃子智能体已达并行上限（${runningChildren.length}/${SPAWN_CONCURRENCY_LIMIT}：${activeList}）。`
+      `活跃子智能体已达并行上限（${runningChildren.length}/${spawnConcurrencyLimit}：${activeList}）。`
         + '请先调用 wait_agent 等待其中一个完成以腾出位置，或先执行不依赖新子智能体的其他工作。'
     );
   }
@@ -866,6 +902,9 @@ async function buildTerminalSummary(task) {
 }
 
 module.exports = {
+  // BLOCK-173 CP-8 — 配置解析器导出（契约测试直测；非工具面）
+  resolveSpawnConcurrencyLimit,
+  resolveSpawnMaxDepth,
   spawn_agent,
   interrupt_agent,
   send_message,
