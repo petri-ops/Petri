@@ -182,6 +182,20 @@
   --petri-z-modal: 6000;
   --petri-z-lightbox: 8000;
   --petri-z-toast: 10000;
+
+  /* ===== BLOCK-167 W0 — 设计宪章 token（docs/design-charter.md）=====
+     motion 3 档：fast=hover/press 反馈，base=展开/切换，slow=浮层进出场 */
+  --petri-duration-fast: 150ms;
+  --petri-duration-base: 200ms;
+  --petri-duration-slow: 300ms;
+  /* ease 2 档：standard=常规过渡，emphasized=进出场强调 */
+  --petri-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --petri-ease-emphasized: cubic-bezier(0.3, 0, 0.2, 1);
+  /* border 三语义（D4）：input=输入类可视边界 / card=容器卡 Quiet 边 / divider=分隔线最 Quiet。
+     值引用主题变量按元素解析，明暗自动适配；契约按「派生层」豁免明暗成对检查。 */
+  --petri-border-input: var(--petri-border-strong);
+  --petri-border-card: var(--petri-border-subtle);
+  --petri-divider: color-mix(in srgb, var(--petri-border) 55%, transparent);
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */

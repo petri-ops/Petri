@@ -1,12 +1,15 @@
-# BLOCK-167 — 产品质感提升计划（Product Quality Program）
-
-```yaml
+---
 capability: ui-design-quality
 goal: 四个核心页第一观感脱离「管理后台」档位；设计默认值制度化并被门禁守护
-acceptance: W0-W4 五波出口断言全过 + §3 量化对账表终态承诺达成 + closeout 十一门绿
+acceptance:
+  - W0-W4 五波出口断言全过（各波 acceptance/block-167/ 证据）
+  - §3 量化对账表终态承诺逐项达成（契约口径）
+  - closeout 十一门绿 + output:judge
 reopen: 任一波量化承诺未达成即本波返工；新增设计档位/预算调整需用户裁决或新证据批
 status: active
-```
+---
+
+# BLOCK-167 — 产品质感提升计划（Product Quality Program）
 
 ## 0. 来源与裁决
 
@@ -34,6 +37,11 @@ status: active
 - G1+ 事项（packaged/Provider/GA）按阶段纪律不外推
 
 ## 3. 量化对账表（基线 → W1 后 → 终态承诺）
+
+> **计数器口径注记（W0 定版）**：canonical 计数器=契约测试的全 CSS 面（module.css+普通 css），
+> W0 实测基线：小字号（xs+sm 引用）**450**、accent 本体引用 **372**（含 ::selection 合法语义 1）、
+> 无语义 1px 细线 **533**。下表前两列数字为立项时 module.css 面口径（328/330/374），仅作方向参考；
+> 波次收缩按契约口径执行：小字号 W1≤110 终态≤40 / accent W1≤200 终态≤130 / 细线 W1≤285 终态 0。
 
 | 指标 | 基线 | W1 后 | 终态 | 测量方式 |
 | --- | --- | --- | --- | --- |

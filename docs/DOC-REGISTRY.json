@@ -6036,8 +6036,29 @@
    ],
    "archivePolicy": "retain_stable_path",
    "notes": "产品质感提升计划（五波）：W0 设计宪章+theme-token-contract 用法门禁 / W1 静态重校（14px 基准、字号 9→6 档、accent 预算 10:1、border 三语义）/ W2 控件收敛（36 套按钮→单源变体）/ W3 动效 token+渲染细节 / W4 状态与文案三件套。用户裁决「按波次逐个推进完成」（2026-10-12）=整包授权波内零停顿；量化对账表与 D1-D6 预裁决在 plan §3/§5；证据 acceptance/block-167/。三轮评估证据=截图量化+ZCode asar 解包对照+Codex style.rs 源码对照，output:judge 两次 PASS（3.78/3.85）。"
+  },
+  {
+   "id": "DESIGN-CHARTER",
+   "path": "docs/design-charter.md",
+   "capability": "ui-design-quality",
+   "kind": "reference",
+   "status": "active",
+   "canonical": true,
+   "truthDomain": "design-charter",
+   "entrypoint": "docs/README.md",
+   "registeredAt": "2026-10-12",
+   "tags": [
+    "design-charter",
+    "font-scale",
+    "color-budget",
+    "border-semantics",
+    "motion-tokens",
+    "block-167"
+   ],
+   "archivePolicy": "retain_stable_path",
+   "notes": "设计宪章（BLOCK-167 W0 落档）：字号 6 档终态/色彩预算（中性:强调≥10:1，accent 五类合法语义）/border 三语义（input/card/divider，无语义细线终态 0）/motion 3+2 档/渲染细节基线/控件单源纪律。机械守护=theme-token-contract BLOCK-167 断言组（三棘轮+存在性+红证据自检）。档位/预算调整须证据批+用户裁决。"
   }
  ],
  "lastUpdated": "2026-10-12",
- "documentCount": 317
+ "documentCount": 318
 }
