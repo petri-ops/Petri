@@ -1,0 +1,17 @@
+{
+  "generatedAt": "2026-10-12T10:03:09.509Z",
+  "pass": 2,
+  "fail": 0,
+  "results": [
+    {
+      "id": "B.tool-route-enabled",
+      "ok": true,
+      "detail": "tool-route runtime enabled=true（转正=无 stored/env 默认启用）"
+    },
+    {
+      "id": "C.routes-coexist",
+      "ok": true,
+      "detail": "tool-cancel={\"ok\":true,\"cancelled\":[]} guard-ack={\"ok\":true,\"guardKey\":\"cmd:probe-b173\",\"always\":false}"
+    }
+  ]
+}

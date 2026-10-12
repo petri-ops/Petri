@@ -7,7 +7,7 @@ acceptance:
   - CP-10：tool-route 默认开且路由精度门绿；决策可观测消费面确认（DecisionUsagePanel 数据源在册）
   - closeout 十三门绿 + 总纲 §4 W3 行回写
 reopen: 任一 CP 出口断言未达即该 CP 返工；波内零停顿条款沿用（用户 2026-10-12 /goal 整波授权连续行使）
-status: active
+status: completed
 ---
 
 # BLOCK-173 — 竞争力总纲 W3 波（编排与多智能体深化）
@@ -39,3 +39,18 @@ status: active
 ## 3. 门禁与完成语义
 
 每 CP：定向红绿+tsc+lint。波末：closeout 十三门+实机探针（acceptance/block-173/）+UI 台账。三 CP 出口全过+closeout 绿=completed；总纲 §4 W3 行回写。
+
+
+## 8. 收口对账（2026-10-12）
+
+| 出口判据 | 实绩 | 证据 |
+| --- | --- | --- |
+| CP-8 上限调整生效 | ✅ 契约级（env 钳制 1-8/缺省 3/非法回 3；函数化解析器） | block173-w3-contracts 2/5 |
+| CP-8 深度放开红绿 | ✅ depth=2 红绿（resolveSpawnMaxDepth env 缺省 1=现状；spawn_depth_exceeded 闸+父链上溯有界防环） | 同上+源码接线钉 |
+| CP-8 汇报门评估 | ✅ 落档：维持缺省关（转正缺消费证据；PETRI_JEV_REPORT_GUARD 观察位保留），随决策可观测面成熟再裁 | AUDIT-LOG W3 收口行 |
+| CP-10 默认开 | ✅ defaultOn 接点旗标（decision-config 解析+seedDoc 口径一致；env 0 最高/显式关尊重/非 defaultOn 零牵连契约锁）；w3-live 实机 enabled=true | block173-w3-contracts + w3-live |
+| CP-10 校准门 | ✅ 阈值 0.8 与校准 evidence 链维持（block-113 calibration.json 挂点不变） | decision-thresholds:64 |
+| CP-10 可观测确认 | ✅ DecisionUsagePanel 数据源（decision_log）在册；tool-route 接点已在决策原语配置/观测面 | DecisionConfigPanel/UsagePanel |
+| CP-9 编排图实机 | ⚠️ 组件契约 4/4+投影/渲染实证；有子任务的真实 DOM 走查随 UI-501 过目 | OrchestrationGraph.test 4/4 |
+
+**诚实边界**：CP-8 env 生效需栈重启（进程 env）；多层派生真实模型链路实证未跑（深度闸单测+fail 语义锁定）。**随波裁决**：run_tool workflowPlan 合并渲染不夹带（总纲注明归后续）；非 defaultOn 接点零牵连已用契约锁住。

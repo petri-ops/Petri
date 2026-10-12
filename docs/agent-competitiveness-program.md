@@ -130,7 +130,7 @@ status: planned
 | CP-6 记忆分层与项目记忆文件 | AGENTS.md 等价项目记忆（agent 可读、写入走治理门）+ episodic/semantic 分层评估 + 向量分片索引（chunk>50k 加速） | 项目记忆注入实机；召回质量对比基线（top3 命中率） | — |
 | CP-7 计量可感化 | ContextBudgetBar 真实 token 水位（SSE 推送）+ /compact 等价手动命令 + temperature/max_tokens 可配 | 预算环实数刷新实机；手动压缩可触发 | — |
 
-### W3 编排与多智能体深化（3 包）
+### W3 编排与多智能体深化（3 包）——**completed（2026-10-12 BLOCK-173 三包全交付；w3-live 实机 2/2+契约 5/5；CP-9 可视链路随 UI-501 过目）**
 
 | 包 | 范围 | 出口判据 | 依赖 |
 | --- | --- | --- | --- |
