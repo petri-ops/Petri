@@ -90,4 +90,4 @@ const ACCENT_PRIMARY = {
   amber: { light: '#d97706', dark: '#fbbf24' },
 };
 
-module.exports = { THEME_VAR_MAP, ACCENT_PRIMARY, buildGenUiThemeCss, loadVisualizeCss };
+module.exports = { THEME_VAR_MAP, buildGenUiThemeCss, loadVisualizeCss };
