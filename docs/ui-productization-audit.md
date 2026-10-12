@@ -1,4 +1,5 @@
 # Petri Desktop UI 产品化审计台账
+最后更新：2026-10-12（**UI-503 加映（BLOCK-175 W5 registry 位翻转收口补登）**：viewerRegistry.block142 测试随 CP-14 契约同步更新（markdown canSelect 翻 true）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-503 落地（BLOCK-175 CP-14/15 数据资产面接线）**：①viewerRegistry canSelect/canCompare 能力位接线（table canSelect+canCompare、json/text/markdown canSelect；新增 viewerProfileCanSelect/CanCompare 访问器；block142 测试随 CP-14 契约更新）；②ResultArtifactShell 只读文本族文本选择→选择总线（useArtifactTextSelection：pointerup 采样+容器包含判定+hash 去重+buildTextSelection 工厂〔origin=query/entityType=text_select/durable=false 诚实〕→ContinueAnalysisMenu 继续分析链自动消费）；③ArtifactPinPane 可拖拽分隔条（20-80% 钳制+localStorage 持久化+键盘可达 aria separator）。测试=ArtifactPinPane.drag 3/3+registry 36/36；tsc 绿。in_progress 待用户过目。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-502 加映（closeout knip 抓真）**：theme.js ACCENT_PRIMARY 去导出（同文件 buildGenUiThemeCss 内部消费，knip 保留面清偿）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-501 加映（closeout lint 抓真）**：ToolActivityDock 存量 react-hooks 模式机械修复（ctxRef 写入入 effect+会话切换改 render 期 adjust-state；零语义变化，随 W3 选中面浮现）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
