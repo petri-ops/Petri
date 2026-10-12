@@ -23,7 +23,13 @@
         "core/petri-server/db/schema.js",
         "scripts/gen-ui-export.mjs",
         "scripts/block166-p2-live.mjs",
-        "scripts/block166-p3-live.mjs"
+        "scripts/block166-p3-live.mjs",
+        "scripts/block171-w1-live.mjs",
+        "core/petri-server/helpers/tool-cancel-registry.js",
+        "core/petri-server/helpers/guard-ack-store.js",
+        "test/block171-tool-cancel.test.mjs",
+        "test/block171-guard-ack.test.mjs",
+        "acceptance/block-171/**"
       ],
       "tests": [
         "test/block166-gen-ui-host.test.mjs",

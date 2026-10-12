@@ -1,0 +1,47 @@
+{
+  "generatedAt": "2026-10-12T08:49:41.363Z",
+  "pass": 7,
+  "fail": 1,
+  "results": [
+    {
+      "id": "A.cancel-requested",
+      "ok": true,
+      "detail": "{\"status\":\"cancel_requested\",\"taskId\":\"8cf9c4ac-6cb2-4672-9b45-5bdbabf787fd\"}"
+    },
+    {
+      "id": "A.cancel-terminal",
+      "ok": true,
+      "detail": "终态=cancelled"
+    },
+    {
+      "id": "B.tool-cancel-route",
+      "ok": true,
+      "detail": "{\"ok\":true,\"cancelled\":[],\"note\":\"当前无可取消的在途工具\"}"
+    },
+    {
+      "id": "A.events-visible",
+      "ok": true,
+      "detail": "task_events 可读（截取 2B）"
+    },
+    {
+      "id": "C.guard-ack-route",
+      "ok": true,
+      "detail": "{\"ok\":true,\"guardKey\":\"cmd:probe-b171\",\"always\":true}"
+    },
+    {
+      "id": "C.guard-ack-event",
+      "ok": true,
+      "detail": "guard_ack 留痕 1 条（task_events 直查）"
+    },
+    {
+      "id": "C.guard-events-review",
+      "ok": true,
+      "detail": "复审端点回流探针裁定"
+    },
+    {
+      "id": "D.palette-source",
+      "ok": false,
+      "detail": "open=false options=0 input=null"
+    }
+  ]
+}

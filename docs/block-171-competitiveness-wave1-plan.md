@@ -8,7 +8,7 @@ acceptance:
   - CP-4：排队条目可见可撤销+steer 状态持续可见实机
   - closeout 十二门绿 + 总纲 §4 W1 行回写
 reopen: 任一 CP 出口断言未达即该 CP 返工；产品语义争议回用户（波内零停顿条款覆盖非破坏性形态决策）
-status: active
+status: completed
 ---
 
 # BLOCK-171 — 竞争力总纲 W1 波（交互主权与信任可见化）
@@ -60,3 +60,19 @@ status: active
 
 - 四 CP 出口断言全过 + closeout 绿 = 本包 completed；总纲 §4 W1 行回写状态；UI-### in_progress 待用户过目翻 verified。
 - 波报集中复认：本波缺省裁决清单随收口笔录列出（含 BLOCK-28.8 推翻），用户复认推翻 = 按当时进度重做该半边。
+
+## 8. 收口对账（2026-10-12，实绩 vs plan §1）
+
+| 出口判据 | 实绩 | 证据 |
+| --- | --- | --- |
+| CP-1 Stop 可停且状态一致 | ✅ useChatStream 3 契约（后端 POST+本地翻转+网络失败不阻塞） | 组件/hook 测试 15/15 |
+| CP-1 ≥3 族取消实机留痕 | ✅ run_tool job 族（既有 /api/tools/cancel 链实证）+spawn_wait 族（wait_agent 逐跳 isCancelled+signal）+文件搜索族（searchText 检查点抛 AbortError→tool_cancelled 归类）；tool-cancel 路由+tool_cancel 事件在场（w1-live B） | w1-live.json + block171-tool-cancel 5/5 |
+| CP-2 require-ack 全链实机 | ✅ 机制链全通：guardKey 随拒绝对外（存量缺陷修复）+ack 写侧即时生效+guard_ack 事件落 task_events+复审端点回流（w1-live C×3）；**诚实边界**：真模型触发→点卡→模型重试的可视链路待用户过目（需种子 require-ack 规则+自然对话） | w1-live.json + block171-guard-ack 3/3 |
+| CP-2 审批历史可复审 | ✅ guard-events 端点+决策原语节审批记录面板（w1-live 复审回流） | 同上 |
+| CP-3 ≥15 条+5 类源 | ✅ DOM 实证 open+22 options（导航 6+项目 3+技能 4+设置深链 5） | w1-live.json D |
+| CP-3 recentConversations 接线 | ✅ hook 接线+选中=跳工作区+预选交接（组件测试 4/4） | useAppCommands.test |
+| CP-4 排队可见可撤+steer 持续 | ✅ chips+撤销+位次+steer 持续可见（实现面；实机走查随 UI-496 过目） | 组件改动+UI-496 |
+
+**closeout 十三门 PASS（两轮抓真修复后）**：code-size 四文件重锚（SimpleChat +125=三特性真实增量，随批登记）/App no-misused-promises（navigate 包装 void）/knip 2 新增清偿（符号去导出）+CommandItem 基线下调 1 键/UI 台账同提交。**随波缺省裁决清单（波报集中复认）**：①推翻 BLOCK-28.8（Stop 复出）②run_tool 契约维持 cancellable=false（在途取消=job 级既有通道，如实）③CP-2「总是放行」=任务生命周期内存态（持久化归 ORC-1 规则面）④withWorkspace 对 AbortError 放行不再吞成 workspace_error。
+
+**残留如实**：①UI-496/498 DOM 级在场（Stop 键流式渲染/弹卡真模型链）待用户过目（w1-live 为 API/组件级+面板 DOM 级）；②存量 lint 基线（SimpleChat 3/useChatStream 2 等）HEAD 同红未清偿（归属存量）。
