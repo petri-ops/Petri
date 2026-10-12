@@ -1,5 +1,6 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-12（**UI-488~492 用户过目翻 verified**（「剩余待你 这些都好了没什么问题」）+checkpoint 修正三项复认通过落账。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-492 加映三**：McpShelfPane unused import 清理（closeout lint 抓真）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-492 加映二（knip 抓真清偿）**：McpShelfPane 加载/空态双迁三件套（LoadingBlock+EmptyState，testid 保留）——knip 未消费导出清零。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-492 加映（BLOCK-167 收口对账批）**：ErrorNotice 用法压回原行数（code-size 棘轮 1305 守住）+code-size 基线重锚（W1 token 改名致 2 文件指纹漂移，先例流程 --write）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -4813,14 +4814,14 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 
 聊天流内嵌沙箱交互页的 P0+P1+P2 面：助手已完结消息经 `projectGenUiReferences` 切分（text/ui/invalid），ui 段渲染 `GenUiCard`（prepare IPC → 主进程 workspace 归属/scope realpath 包含校验/1MB 硬校验 → `petri-genui://gen-<id>/index.html` 独立 origin 沙箱 iframe + CSP `default-src 'none'` 响应头 + 高度回报 240..10000px + 5px gutter）；无指令消息走快路径零行为变化（SimpleChatMessageRow 契约测试 3/3 保绿）。invalid 占位/超限与 scope 外路径为可操作报错态。**P1 可交互**（2026-10-11）：`window.petri` guest 桥（widgetState 16KiB 双侧校验/宿主 ack 后 resolve/禁 load 自动保存 + `petri:set_globals` 主题事件 + openExternal 绝对 http(s) 白名单 + anchor 拦截 + data-tooltip）经 D6 中继（GenUiCard origin/source 双校验 → desktopBridge IPC）；vendor 三库离线映射 sha256 逐文件强校验；主题层（visualize.css 工具类移植 + petri token 映射 light-dark 双值 + 漂移守卫）。实机 8/8 ALL PASS（p1-live.json；真雷修三件=sandbox allow-same-origin/应用 CSP frame-src 放行+guest CSP 不被覆盖/CSP scheme 源不加引号）。**P2 完整体验**（2026-10-11）：①widgetState SQLite 持久化（gen_ui_widget_state 表 + 后端 REST `/api/gen-ui/widget-state`——D4 修订注记：dev 主进程不进程内开 better-sqlite3（Electron ABI≠系统 Node），走 P0 prepare 的 REST 先例；prepare 回读初始状态 + setState 双写、宿主持久化成功才 ack）+ **重开会话恢复**（reload→prepare→回读 threshold=88 实证）；②follow-up 追问（guest sendFollowUpMessage 手势校验/8000·250 上限 → relay → `followUp.ts` 纯判定（空/超长/非当前会话/输入绑定只读拒绝）→ 确认框（title≤250 作标题）→ 非流式直发/流式走既有排队，与 Enter 路径同构；状态变化绝不自动开启模型轮次）；③放大预览（锚点迁移不重载——iframe DOM 节点在卡片锚点与覆盖层间搬移，节点身份/src 不变，D5 bind/unbind）+ 复制图片（sender/会话/几何三重校验 → capturePage 区域 → 原生剪贴板，validateCaptureRect 纯函数）；④独立导出脚本 `scripts/gen-ui-export.mjs`（vendor CDN URL → data URL 内嵌 + standalone petri shim：localStorage 持久化/prefers-color-scheme 主题/window.open 外链）。**实机 6/6 ALL PASS**（p2-live.json：保存 ack/放大迁入/还原/重开恢复 threshold=88/follow-up 真发可见——手势经 CDP Input 真实点击产生）。P2 持久化/放大预览/follow-up 已交付（p2-live 6/6；D4 走后端 REST 先例）。**P3 加固**（2026-10-11，整包 completed）：渗透测试三路全过——路由 A/B 对抗（对抗 title 数据化/伪协议与 HTML path invalid/原型污染拒绝/围栏绕过；**抓真修缺陷=references.ts decode 坏 JSON 炸穿消息投影→invalid 占位**）+ 路由 C 八类载荷实机（p3-live 6/6：CSP 违规三类实证/window.open 零逃逸/外域内容零加载/宿主未被动持；knownGap=OOPIF 导航劫持 DoS 登记 AUDIT-LOG 待裁决）+ vendor sha256 三读路径核验 + CSP/origin 审计笔录与 §12 八项对账入 plan §5-P3。plan/DOC-REGISTRY 翻 completed。**2026-10-12 用户实机过目裁决「行！」翻 verified**（Gen UI 卡片滑块/全宽/状态持久化实机使用确认；p0~p3 四轮实机证据 + w1~w4-live 五探 ALL PASS 在案）。
 
-## UI-488: 设计宪章落档 + 用法门禁棘轮三组 + ::selection 全局唯一（2026-10-12 in_progress，BLOCK-167 W0）
+## UI-488: 设计宪章落档 + 用法门禁棘轮三组 + ::selection 全局唯一（2026-10-12 in_progress→**verified**（2026-10-12 用户「都好了没什么问题」过目确认），BLOCK-167 W0）
 
 - **落点**：docs/design-charter.md（宪章 canonical，DOC-REGISTRY=DESIGN-CHARTER）+ frontend/src/styles/custom.css（motion 3 档/ease 2 档/border 三语义 token，派生层明暗自适应）+ frontend/src/styles/global.css（::selection accent 28% mix 全局唯一——此前全站无定义，浏览器默认蓝与海军蓝家族脱节）。
 - **门禁**：theme-token-contract.test.ts BLOCK-167 断言组——小字号棘轮（xs+sm 450 冻结→W1≤110→终态≤40）/accent 棘轮（372 冻结→W1≤200→终态≤130）/无语义 1px 细线棘轮（533 冻结→W1≤285→终态 0）/宪章 token 存在性+duration 档序/::selection 唯一性+accent 派生/合成违例红证据自检；15/15 绿。
 - **实机**：dev 栈 Vite HMR 生效面（token/::selection 即时可见）；截图验收义务随 W1 三域前后对比履行。
 - **决策记录**：test:suggest 建议 window-manager.test.mjs——W0 零窗口面改动不采纳（如实）；计数器口径=全 CSS 面 450/372/533 为 canonical（plan §3 注记）。
 
-## UI-489: 字号 6 档终态+根默认 14px+小字 inherit 化+装饰 accent 清除+结构细线归零（2026-10-12 in_progress，BLOCK-167 W1）
+## UI-489: 字号 6 档终态+根默认 14px+小字 inherit 化+装饰 accent 清除+结构细线归零（2026-10-12 in_progress→**verified**（同上用户过目），BLOCK-167 W1）
 
 - **字号**：token 退役归并（caption/body-sm/md/3xl→sm/body/lg/2xl，494 处含 tsx fallback）；值重校 xs11/sm12/lg16/2xl28；根默认 html/body=body(14)。
 - **重分类**：519 处正文性 xs/sm 声明删除→继承 14px（选择器词汇判定：真徽标/meta 保留）；14px 声明占比 3%→40.3%。
@@ -4829,7 +4830,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **实机**：四屏前后对比验收（w1-after/，before=git af3c8114+量化基线，覆盖失误如实登记 w1-evidence-note.md）；零布局破坏。
 - **门禁**：契约 15/15（小字号棘轮 227 逐文件冻结/accent 棘轮 335/细线零容忍断言）+tsc 0+test:changed 715/716（残红 block41=HEAD 存量 stash 实证）。
 
-## UI-490: 共享按钮变体单源+按钮清单棘轮+死代码清除（2026-10-12 in_progress，BLOCK-167 W2）
+## UI-490: 共享按钮变体单源+按钮清单棘轮+死代码清除（2026-10-12 in_progress→**verified**（同上），BLOCK-167 W2）
 
 - **共享模块**：components/ui/controls/button.module.css（base/primary/ghost/ghostCard/danger/iconBase；全 token 化；新按钮唯一入口）。
 - **迁移**：extensions 死 .backBtn（+hover）删除（页面消费 globalStyles.backBtn 单源）；ToolActivityDock iconBtn→button.iconBase+本地 22px 覆盖（跨文件 composes 不可用=vite+rolldown fileResolve 限制，tsx 级组合替代）。
@@ -4837,13 +4838,13 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **连带修复**：W1 pass2 正则少食右括号的 12 处 var(--petri-divider)) 非法声明（7 文件）——build 门禁抓住全修。
 - **门禁**：契约 16/16+build 绿+quality:lint 0 error；ToolActivityDock 2 error=HEAD 存量（stash 实证）。
 
-## UI-491: 动效 token 应用——transition 时长全站 token 化+motion 棘轮（2026-10-12 in_progress，BLOCK-167 W3）
+## UI-491: 动效 token 应用——transition 时长全站 token 化+motion 棘轮（2026-10-12 in_progress→**verified**（同上），BLOCK-167 W3）
 
 - **转换**：~235 处时长值→var(--petri-duration-fast/base/slow)（三遍：首值/行内/多行 continuation；0 与 >420ms 动画特形保留）。
 - **守卫**：motion 棘轮（字面量时长仅存 global.css reduced-motion 功能保留 2 处）+duration token 引用 ≥150 防退化，入 theme-token-contract。
 - **核实**：滚动条 28 规则/focus-visible 78 规则=既有 token 化成果；::selection W0 已落。渲染细节出口达成。
 
-## UI-492: 空/载/错三件套单源+结果错误态迁移（2026-10-12 in_progress，BLOCK-167 W4）
+## UI-492: 空/载/错三件套单源+结果错误态迁移（2026-10-12 in_progress→**verified**（同上），BLOCK-167 W4）
 
 - **三件套**：components/ui/controls/Status.tsx（EmptyState/ErrorNotice/LoadingBlock）+status.module.css——全 token 化（细线 danger color-mix、动画走 duration token）。
 - **首迁**：ResultArtifactShell「结果加载失败」→ErrorNotice（重试语义不变，样式单源化）。
