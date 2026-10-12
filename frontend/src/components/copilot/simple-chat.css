@@ -4331,3 +4331,146 @@
   background: var(--petri-danger-bg);
   color: var(--petri-danger);
 }
+
+
+/* BLOCK-171 CP-2 — 动态防护确认卡（danger 语义 + 宪章档位） */
+.sc-guard-card {
+  margin: 0 var(--petri-space-2) var(--petri-space-2);
+  padding: var(--petri-space-3);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-danger-bg);
+}
+
+.sc-guard-card__head {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-2);
+}
+
+.sc-guard-card__icon {
+  display: inline-flex;
+  color: var(--petri-danger);
+}
+
+.sc-guard-card__title {
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text);
+}
+
+.sc-guard-card__key {
+  margin-inline-start: auto;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 1px var(--petri-space-2);
+  border-radius: var(--petri-radius-pill);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-xs);
+}
+
+.sc-guard-card__message {
+  margin: var(--petri-space-2) 0;
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-sm);
+}
+
+.sc-guard-card__actions {
+  display: flex;
+  gap: var(--petri-space-2);
+}
+
+.sc-guard-card__btn {
+  padding: var(--petri-space-1) var(--petri-space-3);
+  border: none;
+  border-radius: var(--petri-radius-pill);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-sm);
+  cursor: pointer;
+  transition: background var(--petri-duration-fast) ease;
+}
+
+.sc-guard-card__btn:hover:not(:disabled) {
+  background: var(--petri-hover);
+}
+
+.sc-guard-card__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.sc-guard-card__btn-primary {
+  background: var(--petri-danger);
+  color: var(--petri-on-solid);
+}
+
+.sc-guard-card__btn-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--petri-danger) 85%, var(--petri-text));
+}
+
+.sc-guard-card__btn-ghost {
+  background: transparent;
+  color: var(--petri-text-muted);
+}
+
+/* 审批记录（设置→决策原语） */
+.sc-guard-history {
+  margin-top: var(--petri-space-3);
+}
+
+.sc-guard-history__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-1);
+}
+
+.sc-guard-history__row {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-2);
+  padding: var(--petri-space-1) var(--petri-space-2);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-subtle);
+  font-size: var(--petri-font-size-sm);
+}
+
+.sc-guard-history__time {
+  color: var(--petri-text-muted);
+}
+
+.sc-guard-history__key {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--petri-text);
+}
+
+.sc-guard-history__scope {
+  color: var(--petri-text-muted);
+}
+
+.sc-guard-history__task {
+  margin-inline-start: auto;
+  color: var(--petri-text-muted);
+}
+
+.sc-guard-history__empty {
+  margin-top: var(--petri-space-3);
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-sm);
+}
+
+.sc-guard-history__retry {
+  margin-inline-start: var(--petri-space-2);
+  border: none;
+  background: transparent;
+  color: var(--petri-text);
+  text-decoration: underline;
+  cursor: pointer;
+}

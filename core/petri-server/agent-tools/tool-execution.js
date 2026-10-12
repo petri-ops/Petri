@@ -177,6 +177,9 @@ function commonData(data) {
   for (const key of [
     'ok', 'error', 'reason', 'message', 'messageKey', 'needApproval', 'ackToken',
     'toolJobId', 'toolId', 'unhandled', 'dryRun',
+    // BLOCK-171 CP-2 — 确认通道键（dynamic_guard / user_rule_require_ack 拒绝
+    // 携带；前端确认卡与模型重试都依赖该键可见）
+    'guardKey', 'dimension', 'ruleId',
   ]) {
     if (data[key] !== undefined) compact[key] = data[key];
   }

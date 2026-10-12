@@ -37,6 +37,7 @@ import { DecisionUsagePanel } from './DesktopSettingsPanel/sections/DecisionUsag
 // BLOCK-160 W2 P2（ORC-1）— Agent 用户规则面板（rules.json CRUD 读面）
 import { AgentRulesPanel } from './DesktopSettingsPanel/sections/AgentRulesPanel';
 import { DecisionConfigPanel } from './DesktopSettingsPanel/sections/DecisionConfigPanel';
+import { GuardAckHistoryPanel } from '@/components/copilot/SimpleChat/GuardAckCard';
 import { UpdateChecker } from './DesktopSettingsPanel/sections/UpdateChecker';
 import { ExportDiagnostic } from './DesktopSettingsPanel/sections/ExportDiagnostic';
 import { DataManagement } from './DesktopSettingsPanel/sections/DataManagement';
@@ -594,6 +595,8 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
               <p>各智能决策接点的启用与阈值（校准默认预填，可调整并自动保存；每次调用记录实际生效阈值）。</p>
             </div>
             <DecisionConfigPanel />
+            {/* BLOCK-171 CP-2 — 审批记录（guard_ack 事件复审；治理可见化） */}
+            <GuardAckHistoryPanel />
           </section>
         )}
 

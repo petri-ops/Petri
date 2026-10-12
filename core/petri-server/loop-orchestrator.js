@@ -33,6 +33,11 @@ const {
   createToolCancellation,
   releaseToolCancellation,
 } = require('./helpers/tool-cancel-registry');
+// BLOCK-171 CP-2 — 动态防护确认通道写侧（require-ack 放行真值，task 内内存态）
+const {
+  createGuardAcks,
+  releaseGuardAcks,
+} = require('./helpers/guard-ack-store');
 const {
   persistLoopRun,
   updateLoopRunStatus,
@@ -595,6 +600,12 @@ async function runLoop({
     // BLOCK-171 CP-1 — 每运行建工具取消注册表（task 锚定；单返回点 release）。
     // run_tool 等异步 job 族不受此表管辖（job 级取消走既有 /api/tools/cancel 链）。
     const toolCancellation = toolCtx.taskId ? createToolCancellation(toolCtx.taskId) : null;
+    // BLOCK-171 CP-2 — 确认通道：ctx.dynamicGuardAcks 注入（isGuardAcked 读侧
+    // 早已在册；写侧首次接线——guard-ack 路由写、策略读，同 Set 引用即时生效）。
+    if (toolCtx.taskId && !toolCtx.dynamicGuardAcks) {
+      const guardAcks = createGuardAcks(toolCtx.taskId);
+      if (guardAcks) toolCtx.dynamicGuardAcks = guardAcks;
+    }
 
     for (let iter = 0; iter < MAX_AGENT_ITERS && !aborted(); iter++) {
       _emit({ event: 'iter', n: iter + 1 });
@@ -1332,6 +1343,8 @@ async function runLoop({
 
   // BLOCK-171 CP-1 — 运行收口释放取消注册表（防 task 键泄漏）。
   if (toolCtx.taskId) releaseToolCancellation(toolCtx.taskId);
+  // BLOCK-171 CP-2 — 确认集随运行收口释放（「本任务总是放行」= 任务生命周期）。
+  if (toolCtx.taskId) releaseGuardAcks(toolCtx.taskId);
 
   return {
     assistantText: assistantAcc,

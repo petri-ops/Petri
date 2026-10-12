@@ -18,6 +18,7 @@ const agentTaskStore = require('../../agent-task-store');
 const conversationHelper = require('../../helpers/conversations');
 const { queueUserMessage, launchUserFollowup } = require('../../agent-tools/spawn-agent-tools');
 const { getToolCancellation } = require('../../helpers/tool-cancel-registry');
+const { ackGuard } = require('../../helpers/guard-ack-store');
 const db = require('../../db').getAsyncDatabase();
 
 const STATUS_HTTP = {
@@ -84,6 +85,60 @@ module.exports = {
       );
     } catch { /* SSE 可见性失败不阻塞取消 */ }
     return res.json({ ok: true, cancelled: result.cancelled });
+  });
+
+  // BLOCK-171 CP-2 — 确认通道写侧：require-ack 弹卡的用户裁定落点。
+  // ack 写入 task 内确认集（策略读侧即时生效）；guard_ack 事件入 task_events
+  // （审批记录可复审=可审计治理的自有形态）。
+  app.post('/api/ai/agent/task/:taskId/guard-ack', async (req, res) => {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({ ok: false, error: 'unauthorized', message: '未登录' });
+    const task = agentTaskStore.getAgentTask(req.params.taskId);
+    if (!task) return res.status(404).json({ ok: false, error: 'not_found', message: '任务不存在' });
+    if (task.user_id && task.user_id !== userId) return res.status(403).json({ ok: false, error: 'forbidden', message: '无权确认该任务防护' });
+    const guardKey = String((req.body && req.body.guardKey) || '').trim();
+    if (!guardKey) return res.status(400).json({ ok: false, error: 'invalid_arguments', message: 'guardKey 不能为空' });
+    const always = (req.body && req.body.always) === true;
+    const result = ackGuard(task.taskId || req.params.taskId, guardKey);
+    if (!result.ok) return res.status(400).json({ ok: false, ...result });
+    try {
+      const events = agentTaskStore.getAgentTaskEventsSince(task.taskId || req.params.taskId, 0, 1000000);
+      const seq = (events.length ? events[events.length - 1].seq : 0) + 1;
+      agentTaskStore.appendAgentTaskEvent(
+        task.taskId || req.params.taskId, seq,
+        'guard_ack',
+        { event: 'guard_ack', guardKey, always, at: new Date().toISOString() }
+      );
+    } catch { /* SSE 可见性失败不阻塞确认 */ }
+    return res.json({ ok: true, guardKey, always });
+  });
+
+  // BLOCK-171 CP-2 — 审批记录复查（guard_ack 事件 × 本人任务，最新 50）。
+  app.get('/api/ai/agent/guard-events', async (req, res) => {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({ ok: false, error: 'unauthorized', message: '未登录' });
+    try {
+      const limit = Math.max(1, Math.min(Number(req.query.limit) || 50, 200));
+      const rows = await db.prepare(
+        `SELECT e.task_id AS task_id, e.payload AS payload, e.created_at AS created_at
+         FROM task_events e JOIN tasks t ON t.id = e.task_id
+         WHERE e.event_type = 'guard_ack' AND t.user_id = ?
+         ORDER BY e.created_at DESC LIMIT ?`
+      ).all(userId, limit);
+      const events = rows.map((row) => {
+        let payload = {};
+        try { payload = JSON.parse(row.payload || '{}'); } catch { /* 损坏留痕按空投影 */ }
+        return {
+          taskId: row.task_id,
+          guardKey: String(payload.guardKey || ''),
+          always: payload.always === true,
+          at: row.created_at,
+        };
+      });
+      return res.json({ ok: true, events });
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: 'guard_events_failed', message: e && e.message ? e.message : String(e) });
+    }
   });
 
   // 俯瞰面板数据源：该用户最近子 agent 任务（跨会话，只读 tasks 投影）。

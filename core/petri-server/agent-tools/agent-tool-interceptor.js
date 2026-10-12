@@ -114,14 +114,28 @@ function createAgentToolInterceptor(options = {}) {
     }
 
     const initialDecision = decide({ name, args, ctx, contract: entry.contract });
-    if (initialDecision.decision === 'deny') return policyResult(initialDecision);
+    if (initialDecision.decision === 'deny') {
+      // BLOCK-171 CP-2 — 确认通道键随拒绝对外透出（存量缺陷修复：policyResult
+      // 曾丢弃 extra，guardKey 从未到达 envelope，确认 UI 无从确认）。
+      return policyResult(initialDecision, {
+        guardKey: initialDecision.guardKey,
+        dimension: initialDecision.dimension,
+        ruleId: initialDecision.ruleId,
+      });
+    }
 
     let preflight = null;
     if (entry.contract.category === 'workspace') {
       preflight = await workspacePreflight(name, args, ctx);
     }
     const decision = decide({ name, args, ctx, contract: entry.contract, preflight });
-    if (decision.decision === 'deny') return policyResult(decision);
+    if (decision.decision === 'deny') {
+      return policyResult(decision, {
+        guardKey: decision.guardKey,
+        dimension: decision.dimension,
+        ruleId: decision.ruleId,
+      });
+    }
 
     // BLOCK-33 P3 — handlerOptions（可选 { onOutput }）透传给 handler；
     // 现有 handler 均为 (args, ctx) 签名，多余的实参会被安全忽略。

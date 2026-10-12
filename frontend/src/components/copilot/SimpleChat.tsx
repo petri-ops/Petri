@@ -80,6 +80,7 @@ import { ApprovalCard } from './SimpleChat/ApprovalCard';
 import { ResultEditProgressList } from './SimpleChat/ResultEditProgressList';
 // BLOCK-154 波次 3 — 消息行组件（memo 渲染边界，契约见该文件头与 SimpleChatMessageRow.test.tsx）。
 import { SimpleChatMessageRow } from './SimpleChat/SimpleChatMessageRow';
+import { GuardAckCard } from './SimpleChat/GuardAckCard';
 import { resolveGenUiFollowUp, type GenUiFollowUpRequest, type GenUiFollowUpResult } from './gen-ui/followUp';
 import { useSummaryRetry } from './SimpleChat/hooks/useSummaryRetry';
 import { useModelAccessMenus } from './SimpleChat/hooks/useModelAccessMenus';
@@ -843,6 +844,46 @@ export function SimpleChat({
     return () => window.clearTimeout(t);
   }, [steerNotice, streaming]);
 
+  // BLOCK-171 CP-2 — 确认通道卡：从 run 快照工具活动派生最新一条待确认拒绝
+  // （dynamic_guard / user_rule_require_ack 且带 guardKey；本地已裁定键跳过）。
+  const [ackedGuardKeys, setAckedGuardKeys] = useState<string[]>([]);
+  const [guardAckBusy, setGuardAckBusy] = useState(false);
+  const pendingGuardAck = useMemo(() => {
+    const acts = activeRun?.toolActivities || [];
+    for (let i = acts.length - 1; i >= 0; i -= 1) {
+      const activity = acts[i] as { status?: string; name?: string; resultData?: unknown };
+      if (activity.status !== 'denied' && activity.status !== 'error') continue;
+      const data = activity.resultData as { error?: string; guardKey?: string; message?: string } | undefined;
+      if (!data || !data.guardKey) continue;
+      if (data.error !== 'dynamic_guard' && data.error !== 'user_rule_require_ack') continue;
+      if (ackedGuardKeys.includes(data.guardKey)) continue;
+      return { guardKey: data.guardKey, toolName: activity.name || '', message: data.message || '' };
+    }
+    return null;
+  }, [activeRun, ackedGuardKeys]);
+  const handleGuardAck = useCallback((mode: 'once' | 'always') => {
+    if (!pendingGuardAck || !conversationId) return;
+    const runTaskId = getConversationRunSnapshot(conversationId)?.taskId;
+    if (!runTaskId) return;
+    setGuardAckBusy(true);
+    void fetch(getPlatformApiPrefix() + '/ai/agent/task/' + encodeURIComponent(runTaskId) + '/guard-ack', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(getToken() ? { Authorization: 'Bearer ' + getToken() } : {}),
+      },
+      body: JSON.stringify({ guardKey: pendingGuardAck.guardKey, always: mode === 'always' }),
+    })
+      .then((response) => response.json().catch(() => ({})))
+      .then((data: { ok?: unknown }) => {
+        if (data && data.ok) setAckedGuardKeys((current) => [...current, pendingGuardAck.guardKey]);
+      })
+      .catch(() => {
+        // 网络失败保留卡片（用户可重试）；本地态不变
+      })
+      .finally(() => setGuardAckBusy(false));
+  }, [conversationId, pendingGuardAck]);
+
   // BLOCK-171 CP-4 — 排队追问可见可撤（当前会话的 queued 条目，带位次）。
   const visibleQueuedPrompts = queuedPrompts
     .map((q, index) => ({ ...q, index }))
@@ -1347,6 +1388,17 @@ export function SimpleChat({
             )}
             {steerNotice && (
               <div className="sc-attachment-notice" role="status">{steerNotice}</div>
+            )}
+            {/* BLOCK-171 CP-2 — 动态防护确认卡（require-ack 用户可见面） */}
+            {pendingGuardAck && (
+              <GuardAckCard
+                toolName={pendingGuardAck.toolName}
+                guardKey={pendingGuardAck.guardKey}
+                message={pendingGuardAck.message}
+                busy={guardAckBusy}
+                onAck={handleGuardAck}
+                onDismiss={() => setAckedGuardKeys((current) => [...current, pendingGuardAck.guardKey])}
+              />
             )}
             {/* BLOCK-171 CP-4 — 排队追问可见可撤（位次+撤销） */}
             {visibleQueuedPrompts.length > 0 && (
