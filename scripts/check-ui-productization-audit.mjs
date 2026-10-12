@@ -438,6 +438,8 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-10-12 BLOCK-173 CP-15 hooks 顺序合规修复（dcfc0c3）：同提交漏台账同步（ff64f30d 已补登）。
+  'dcfc0c3de4b7e193cc092642933ee70dfafb5930',
   // 2026-10-12 BLOCK-175 CP-14/15 数据资产面接线（ec12a3e）：同提交漏台账同步；
   // 台账=UI-503 条目已在后续 72c6bf01/c2442dff 补登（含 registry 契约测试面）。
   'ec12a3e0f8422fbf7eb21966dac43130c6293fa3',
