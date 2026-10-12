@@ -329,7 +329,7 @@ export const GenUiCard = React.memo(function GenUiCard({
           setTimeout(() => setCopyNotice(''), 2500);
           return;
         }
-        const baseName = (res.title || res.name || 'gen-ui').replace(/[\/:*?"<>|]/g, '_').slice(0, 60);
+        const baseName = (res.title || res.name || 'gen-ui').replace(/[/:*?"<>|]/g, '_').slice(0, 60);
         return filesBridge.saveTextFile(`${baseName}.html`, res.content ?? '');
       })
       .then((saved: unknown) => {

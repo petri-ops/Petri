@@ -4,7 +4,7 @@
 // selection，pointerup 采样 + 防抖去重）。启用条件由宿主按
 // viewerProfileCanSelect(adapter) && activeIsPreviewText 计算。
 // ============================================================
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { buildTextSelection } from '@/lib/artifact-selection';
 import { setSelectionBusSelection } from '@/lib/selectionBus';
 

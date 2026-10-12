@@ -11,7 +11,7 @@
  * 契约面与寻址面见同目录 ArtifactPinPane.test.tsx（HK-01 先红后绿）。
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { ResultSurfaceMode, ResultViewerAdapter } from '@/components/result-studio/resultSurface';
 import styles from './ArtifactPinPane.module.css';
 

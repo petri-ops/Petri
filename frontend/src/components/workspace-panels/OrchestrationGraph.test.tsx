@@ -15,7 +15,7 @@ const tasks = [
 
 describe('OrchestrationGraph 投影（BLOCK-173 CP-9）', () => {
   it('节点=主任务+全部有 id 任务；边=父子链；无 id 快照被防御过滤', () => {
-    const { nodes, edges } = projectOrchestration(tasks as never, 'root');
+    const { nodes, edges } = projectOrchestration(tasks, 'root');
     const ids = nodes.map((n) => n.id);
     expect(ids).toContain('root');
     expect(ids).toContain('child-1');
@@ -27,7 +27,7 @@ describe('OrchestrationGraph 投影（BLOCK-173 CP-9）', () => {
   });
 
   it('运行中边带 animated；完成边不带', () => {
-    const { edges } = projectOrchestration(tasks as never, 'root');
+    const { edges } = projectOrchestration(tasks, 'root');
     const runningEdge = edges.find((e) => e.id === 'e:root->child-1');
     const doneEdge = edges.find((e) => e.id === 'e:child-2->' + '');
     expect(runningEdge?.animated).toBe(true);

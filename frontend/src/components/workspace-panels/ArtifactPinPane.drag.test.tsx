@@ -1,5 +1,5 @@
 // BLOCK-175 CP-15 — 分屏可拖拽分隔条契约（钳制/持久化/键盘可达）。
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { ArtifactPinPane } from './ArtifactPinPane';
