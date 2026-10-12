@@ -1,0 +1,40 @@
+{
+  "package": "BLOCK-168-GEN-UI-OOPIF-HARDENING",
+  "recordedAt": "2026-10-12",
+  "environment": {
+    "electron": "44.7.0 (upgraded from 41.10.7)",
+    "platform": "win32",
+    "node": "24.20.0",
+    "devStack": "3000/3001/9222 live"
+  },
+  "p0_matrix": {
+    "electron41_baseline": "will-navigate/will-frame-navigate/webRequest 三路对 OOPIF 渲染器自导航不可达（BLOCK-166 P3 实测）",
+    "electron44_finding": [
+      "初始帧加载：will-frame-navigate + did-frame-navigate 均触发（宿主 webContents，main=false）——事件可达性已修复",
+      "渲染器发起的 OOPIF 自导航（location.href）：同样触发宿主 will-frame-navigate（实测 url=http://127.0.0.1:3000/ 帧号20）",
+      "preventDefault 对子框导航无效：调用后导航照走（Chromium 不允许阻塞子框导航）——事件守卫路线否决",
+      "劫持后 OOPIF target 直接变为目标 URL（CDP 可见）"
+    ],
+    "conclusion": "P1-A 事件守卫否决；P1-B 心跳自愈守护落地"
+  },
+  "p1_selfheal": {
+    "mechanism": "guest 桥 2.5s 心跳 → GenUiCard 9s 宽限停跳判定 → resetSeq 重置 iframe 重新加载干净沙箱副本",
+    "live_evidence": "劫持确认（frame→http://127.0.0.1:3000/）后 t+8s 自动恢复全新 petri-genui 帧（两次独立运行 PASS；主进程遥测「沙箱帧外导航遥测」同步留痕）",
+    "main_process_telemetry": "src/main/security-hardening.js will-frame-navigate 侦测日志（不可取消，仅遥测——注释如实）"
+  },
+  "p2_upgrade": {
+    "kept": "Electron 44.7.0 保留",
+    "regression": "theme-token-contract 17/17 + gen-ui 33/33 + 契约+gen-ui 50/50 + test:changed 全绿（impact-map 补登 acceptance/block-167|168/**）+ vite build 1.29s + dev 栈冒烟（3000/3001/9222）",
+    "native_abi_note": "better-sqlite3 根安装保持系统 Node ABI（prebuild-install -r node -t 24.20.0 恢复；dev 主进程不进程内开 better-sqlite3——schema.js:500 设计注释；Electron main 零改动兼容）",
+    "packaging_note": "electron-builder 对 44 的打包兼容属 G0 不外推面，如实登记不验证"
+  },
+  "files_touched": [
+    "package.json(electron 44.7.0)",
+    "src/main/security-hardening.js(侦测遥测)",
+    "src/main/gen-ui/guest-bridge.js(心跳)",
+    "frontend/src/components/copilot/gen-ui/GenUiCard.tsx(自愈)",
+    "frontend/src/components/ui/controls/status.module.css(W4 棘轮补登)",
+    "test/impact-map.json",
+    "src/ipc/gen-ui.js(探针已移除)"
+  ]
+}

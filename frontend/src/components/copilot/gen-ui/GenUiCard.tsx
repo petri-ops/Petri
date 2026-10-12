@@ -21,6 +21,8 @@ import styles from './GenUiCard.module.css';
 
 const HEIGHT_MIN = 240;
 const HEIGHT_MAX = 10000;
+// BLOCK-168 P1-B：心跳宽限期（覆盖慢机抖动；劫持后桥上下文销毁必然超限）
+const HIJACK_GRACE_MS = 9000;
 
 interface GenUiPrepareOk {
   ok: true;
@@ -91,6 +93,9 @@ export const GenUiCard = React.memo(function GenUiCard({
   const [zoomed, setZoomed] = React.useState<boolean>(false);
   const [copyNotice, setCopyNotice] = React.useState<string>('');
   const frameRef = React.useRef<HTMLIFrameElement | null>(null);
+  const lastHeartbeatRef = React.useRef(0);
+  const hijackRef = React.useRef(false);
+  const [resetSeq, setResetSeq] = React.useState(0);
   const anchorRef = React.useRef<HTMLDivElement | null>(null);
   const overlayContentRef = React.useRef<HTMLDivElement | null>(null);
   // 沙箱身份（prepare 成功后固定）：sessionId 用于 IPC 鉴权，origin 用于消息双向校验。
@@ -193,6 +198,11 @@ export const GenUiCard = React.memo(function GenUiCard({
         | GenUiRpcMessage
         | null;
       if (!data || typeof data.type !== 'string') return;
+      if (data.type === 'petri-gen-ui-heartbeat') {
+        lastHeartbeatRef.current = Date.now();
+        hijackRef.current = false;
+        return;
+      }
       if (data.type === 'petri-gen-ui-height') {
         const value = typeof (data as { height?: unknown }).height === 'number'
           && Number.isFinite((data as { height: number }).height)
@@ -211,6 +221,28 @@ export const GenUiCard = React.memo(function GenUiCard({
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
   }, [result, sandbox, relayRpc]);
+
+  // BLOCK-168 P1-B — 劫持自愈守卫：guest 心跳停跳超过宽限期即视为帧被劫持/崩溃
+  // （location.href 替换页面后桥上下文销毁、心跳停止），重置 iframe 重新加载干净的
+  // 沙箱副本——DoS 从「卡片永久丢失」降为「瞬闪+自动恢复」。Electron 44 实证
+  // will-frame-navigate 对 OOPIF 渲染器自导航不可取消（preventDefault 无效），
+  // 故采用侦测（guard 遥测）+ 自愈（本 effect）双层。
+  React.useEffect(() => {
+    if (!result?.ok || !sandbox) return undefined;
+    lastHeartbeatRef.current = Date.now();
+    const timer = window.setInterval(() => {
+      if (hijackRef.current) return;
+      if (Date.now() - lastHeartbeatRef.current > HIJACK_GRACE_MS) {
+        hijackRef.current = true;
+        setResetSeq((value) => value + 1);
+        // eslint-disable-next-line no-console -- 劫持自愈遥测（安全事件面）
+        console.warn('[gen-ui] 沙箱帧心跳丢失，判定劫持/失联，已重置恢复', {
+          conversationId,
+        });
+      }
+    }, 2000);
+    return () => window.clearInterval(timer);
+  }, [result, sandbox, conversationId]);
 
   // 主题推送：iframe 就绪与应用主题变化两条路径都走 petri-set-globals。
   React.useEffect(() => {
@@ -296,6 +328,7 @@ export const GenUiCard = React.memo(function GenUiCard({
 
   const frame = result?.ok ? (
     <iframe
+      key={`gen-ui-frame-${resetSeq}`}
       ref={frameRef}
       className={styles.frame}
       src={result.url}

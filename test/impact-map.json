@@ -15,6 +15,8 @@
         "resources/gen-ui/**",
         "test/block166-*.test.mjs",
         "acceptance/block-166/**",
+        "acceptance/block-167/**",
+        "acceptance/block-168/**",
         "scripts/block166-p0-live.mjs",
         "scripts/block166-p1-live.mjs",
         "core/petri-server/routes/gen-ui.js",

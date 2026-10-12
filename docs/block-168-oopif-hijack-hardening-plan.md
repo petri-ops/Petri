@@ -6,7 +6,7 @@ acceptance:
   - 可达→事件守卫红绿；不可达→自愈守护红绿（劫持后自动恢复+telemetry）
   - 升级批回归=契约+gen-ui+pentest+test:changed+dev 冒烟全绿才保留升级，否则回退 41 只落守护
 reopen: Electron 后续版本若原生修复可简化守护；劫持复现即返工
-status: active
+status: completed
 ---
 
 # BLOCK-168 — Gen UI OOPIF 导航劫持加固（Electron 44 复测 + 自愈守护）
@@ -39,3 +39,12 @@ status: active
 ## 4. 完成语义
 
 - knownGap 🟡 关闭或降级为「瞬闪自愈」形态并留证；两态均视为本包完成（以 P0 实证结论为准）
+
+## 5. 收口笔录（2026-10-12）
+
+- **P0 矩阵实证（Electron 44.7.0）**：初始帧加载与渲染器发起的 OOPIF 自导航均触发宿主 `will-frame-navigate`/`did-frame-navigate`（41 不可达→44 可达）；`preventDefault` 对子框导航无效（Chromium 不允许阻塞子框导航）——**P1-A 事件守卫否决**（含一次实证失败：preventDefault 调用后导航照走）。
+- **P1-B 自愈守护落地 PASS**：guest 桥 2.5s 心跳 + GenUiCard 9s 宽限停跳判定 + iframe resetSeq 重置；live 双次运行：劫持确认（frame→http://127.0.0.1:3000/）后 **t+8s 自动恢复全新 petri-genui 帧**；主进程 will-frame-navigate 降级为劫持侦测遥测（不可取消如实注释）。
+- **P2 升级保留**：回归=契约+gen-ui 50/50+test:changed 全绿（impact-map 补登 acceptance/block-167|168/**）+vite build+dev 冒烟；better-sqlite3 根安装保持系统 Node ABI（electron-rebuild 破坏测试面→prebuild-install 恢复，dev 主进程不进程内开 better-sqlite3 的设计注释兑现）；electron-builder 打包兼容 G0 不外推。
+- **knownGap 🟡 关闭形态**：劫持向量仍不可阻止，但后果从「卡片永久丢失」降为「瞬闪+≤9s 自动恢复干净副本」+主进程遥测留痕——AUDIT-LOG 🟡 行更新为此形态。
+- 附带抓真：小字/按钮两张棘轮表补登 W4 status.module.css（3/1）；probe 代码全部移除。
+- 证据=acceptance/block-168/evidence.json；G0 开发期常态 · 不外推 packaged/Provider/GA。

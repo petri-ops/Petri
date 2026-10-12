@@ -5,6 +5,7 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
+最后更新：2026-10-12（**BLOCK-168 OOPIF 加固整包收口 completed（active 槽位空出**；knownGap 🟡 关闭为自愈形态+Electron 44 保留）。下一工作包待用户裁决。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**BLOCK-168 OOPIF 加固立项发令 active（唯一 active 槽位被本包占用**；BLOCK-167 已收口、UI-488~492 用户过目翻 verified、checkpoint 修正复认通过）：P0 Electron 44 升级复测事件矩阵→P1 守卫二选一→P2 升级去留安全阀。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**BLOCK-167 产品质感提升计划整包收口 completed（五波全交付；closeout 十二门 PASS；唯一 active 槽位空出**）——长期资产=设计宪章（reference）+契约用法棘轮三组+controls 单源（button/status）；checkpoint 修正三项随波报复认；剩余=棘轮守护下的存量渐进迁移（按钮族 30 文件/小字与 accent 终态收缩），触域随批不做无收益 churn。下一工作包候选待用户裁决。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**BLOCK-167 产品质感提升计划立项发令 active（用户裁决「按波次逐个推进完成」；plan=docs/block-167-product-quality-program-plan.md）**：唯一 active 槽位被本包占用——W0 宪章门禁→W1 静态重校→W2 控件收敛→W3 动效细节→W4 状态文案五波串行；量化对账表（14px 占比≥50%/accent 10:1/细线 0/按钮 1 套）为终态承诺；BLOCK-166 加映（OOPIF）planned 排队在后。G0 开发期常态 · 不外推 packaged/Provider/GA。）

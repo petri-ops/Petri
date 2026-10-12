@@ -1,5 +1,6 @@
 # Petri Desktop Current Handoff
 
+最后更新：2026-10-12（**BLOCK-168 整包 COMPLETED（active → completed）**：恢复要点=dev 栈在跑（Electron 44.7.0；3000/3001/9222）；better-sqlite3 根安装=系统 Node ABI（勿 electron-rebuild——破坏 Node 测试面，恢复用 `cd node_modules/better-sqlite3 && npx prebuild-install -r node -t 24.20.0`）；OOPIF 自愈=guest 心跳+GenUiCard 宽限重置（plan §5）；证据=acceptance/block-168/evidence.json。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**BLOCK-168-GEN-UI-OOPIF-HARDENING active（P0-LAUNCH）**：Electron 44 升级复测+OOPIF 守卫（plan=docs/block-168-oopif-hardening-plan.md；证据=acceptance/block-168/）。恢复要点：dev 栈在跑（3000/9222）；P2 安全阀=升级回归任一红即回退 41.10.7 只落解耦自愈守护；升级批回归面=契约+gen-ui 33+pentest+test:changed+build+dev 冒烟。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**BLOCK-167 整包 COMPLETED（active → completed；closeout 十二门 PASS）**：恢复要点=dev 栈在跑（3000/9222，本会话拉起）；证据=acceptance/block-167/；长期资产=design-charter（reference）+契约 BLOCK-167 断言组+controls/button+status 单源；checkpoint 修正三项在 plan §3.1/§7；UI-488/489/490/491/492 in_progress 待用户过目翻 verified。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**BLOCK-167-PRODUCT-QUALITY-PROGRAM active（P0-LAUNCH）**：产品质感提升五波（plan=docs/block-167-product-quality-program-plan.md；用户裁决「按波次逐个推进完成」波内零停顿）。恢复要点：dev 栈在跑（3000/3001/9222）；证据=acceptance/block-167/；D1-D6 预裁决缺省执行波报集中复认；量化对账表 plan §3 为收口对账真值。G0 开发期常态 · 不外推 packaged/Provider/GA。）

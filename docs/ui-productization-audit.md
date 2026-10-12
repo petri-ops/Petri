@@ -1,5 +1,6 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-12（**UI-493 落地（BLOCK-168 OOPIF 自愈守护）**：guest 心跳+GenUiCard 宽限重置=劫持后 t+8s 自动恢复干净沙箱（双次 live PASS）+主进程侦测遥测；Electron 44.7.0 保留。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-488~492 用户过目翻 verified**（「剩余待你 这些都好了没什么问题」）+checkpoint 修正三项复认通过落账。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-492 加映三**：McpShelfPane unused import 清理（closeout lint 抓真）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-492 加映二（knip 抓真清偿）**：McpShelfPane 加载/空态双迁三件套（LoadingBlock+EmptyState，testid 保留）——knip 未消费导出清零。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -4850,3 +4851,10 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **首迁**：ResultArtifactShell「结果加载失败」→ErrorNotice（重试语义不变，样式单源化）。
 - **清点**：知识库/扩展空态=结构化保留；项目工作区错误态=本次统一；聊天=起始态自洽。三件套为新状态强制入口，存量按触域渐进。
 - **语气**：12 处抽查零硬伤，零改动登记。
+
+## UI-493: Gen UI 沙箱帧劫持自愈守护+Electron 44 升级（2026-10-12 in_progress，BLOCK-168）
+
+- **自愈**：guest-bridge 2.5s 心跳（petri-gen-ui-heartbeat）+ GenUiCard 9s 宽限停跳判定 + iframe resetSeq 重置——劫持后 t+8s 自动恢复干净沙箱（live 双次 PASS，acceptance/block-168/evidence.json）。
+- **侦测遥测**：security-hardening will-frame-navigate 对 petri-genui 帧外导航打日志（Electron 44 实证 preventDefault 对子框无效，如实注释）。
+- **升级**：Electron 41.10.7→44.7.0 保留（回归=契约+gen-ui 50/50+test:changed+build+dev 冒烟；better-sqlite3 保持系统 Node ABI，恢复命令进 handoff）。
+- **连带走查**：升级后全 UI 面抽验（欢迎/项目/扩展/设置/知识库截图级走查零破坏）；侧聊跨会话卡片引用被 scope 守卫正确拒绝（纵深防御工作正常，属既有设计）。

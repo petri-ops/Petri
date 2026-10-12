@@ -6063,7 +6063,7 @@
    "path": "docs/block-168-oopif-hijack-hardening-plan.md",
    "capability": "gen-ui",
    "kind": "work-package",
-   "status": "active",
+   "status": "completed",
    "canonical": true,
    "truthDomain": "block-168-oopif-hardening",
    "entrypoint": "docs/README.md",

@@ -317,6 +317,12 @@ const GUEST_BRIDGE_FN = function petriGenUiGuestBridge(config) {
   window.addEventListener('load', scheduleHeight);
   reportHeight();
 
+  // BLOCK-168 P1-B — 存活心跳：宿主 (GenUiCard) 以停跳检测帧劫持/崩溃并自动重置。
+  // 页面被导航替换后本上下文销毁、心跳停止 → 宿主在宽限期后重置 iframe src 自愈。
+  setInterval(function () {
+    postToParent({ type: 'petri-gen-ui-heartbeat' });
+  }, 2500);
+
   dispatchGlobals();
   if (document.currentScript && document.currentScript.parentNode) {
     document.currentScript.parentNode.removeChild(document.currentScript);

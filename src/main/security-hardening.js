@@ -139,6 +139,23 @@ function applyWebContentsHardening({ app, shell, log = console } = {}) {
     throw new TypeError('applyWebContentsHardening requires the Electron app object');
   }
   app.on('web-contents-created', (_event, contents) => {
+    // BLOCK-168 P0 — 沙箱帧劫持侦测遥测。实证矩阵（acceptance/block-168/）：
+    // Electron 44 对 OOPIF 渲染器发起的自导航会触发宿主 will-frame-navigate（41 不可达），
+    // 但 preventDefault 对子框导航无效（Chromium 不允许阻塞子框导航）——事件只作
+    // 劫持侦测遥测，恢复由 GenUiCard 的心跳自愈层完成（P1-B）。
+    contents.on('will-frame-navigate', (event, url, isMainFrame, _flag, frameProcessId, frameRoutingId) => {
+      if (isMainFrame) return;
+      try {
+        const { webFrameMain } = require('electron');
+        const frame = webFrameMain.fromId(frameProcessId, frameRoutingId);
+        const origin = (frame && frame.origin) || '';
+        if (origin.startsWith('petri-genui://') && !String(url).startsWith('petri-genui://')) {
+          log.warn?.('[gen-ui] 沙箱帧外导航遥测（由卡片心跳自愈层恢复）:', String(url).slice(0, 90));
+        }
+      } catch {
+        /* frame 已销毁等竞态 */
+      }
+    });
     contents.on('will-attach-webview', (event, webPreferences, params) => {
       const verdict = verifyWebviewAttach({ webPreferences, params });
       if (verdict.mutations.length > 0) {
