@@ -5541,6 +5541,28 @@
    "notes": "2026-10-12 用户 /goal 整波授权发令（原话「按照波次 逐个推进 能自己判断就自己判断 不需要问我 相信你的能力和水准」= 波内零停顿条款行使，blueprint §3.4 先例）：总纲 W1 波四包——CP-1 停止与取消全线贯通（主聊天 Stop 复出〔推翻 BLOCK-28.8〕+spawn_wait/run_tool job/文件搜索三族可取消+取消事件入 task_events）/CP-2 dynamicGuardAck 确认弹卡+审批复审面板/CP-3 CommandPalette 真命令源五类 ≥15 条/CP-4 排队可视化可撤销+steer 持续可见。专项推翻登记=BLOCK-28.8（Stop UI 复出）。出口断言与门禁见 plan；波报集中复认随收口。G0 开发期常态 · 不外推 packaged/Provider/GA。"
   },
   {
+   "id": "BLOCK-172-COMPETITIVENESS-WAVE2",
+   "capability": "agent-competitiveness",
+   "path": "docs/block-172-competitiveness-wave2-plan.md",
+   "kind": "work-package",
+   "status": "active",
+   "phase": "P1-WAVE",
+   "canonical": true,
+   "truthDomain": "block-172-competitiveness-wave2-plan",
+   "entrypoint": "docs/README.md",
+   "registeredAt": "2026-10-12",
+   "archivePolicy": "retain_stable_path",
+   "tags": [
+    "agent-competitiveness",
+    "wave2",
+    "context-budget",
+    "auto-compact",
+    "memory-layers",
+    "project-memory"
+   ],
+   "notes": "2026-10-12 发令 active（用户 /goal 整波授权连续行使，W1 同款）：总纲 W2 波长程上下文与记忆——CP-7 计量可感化（预算环真实水位/手动压缩/生成参数可配，DAG 建议先行）→CP-5 loop 摘要式 auto-compact（丢前摘要+覆盖 fullMessages）→CP-6 记忆分层评估+项目记忆文件+召回基线。closeout 十三门+实机断言（acceptance/block-172/）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+  },
+  {
    "id": "BLOCK-138-ARTIFACT-PLANE-KERNEL",
    "capability": "artifact-plane-kernel",
    "path": "docs/block-138-artifact-plane-kernel-plan.md",
