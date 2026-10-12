@@ -1,0 +1,37 @@
+<!-- PETRI 模板 · table（数据表）——BLOCK-174 CP-12
+     用法：headers/rows 替换为真实数据；行数建议 ≤50（超出由模型预聚合）。 -->
+<div style="font-family:system-ui,sans-serif;padding:16px">
+  <h3 style="margin:0 0 12px;font-size:15px;color:var(--foreground)">数据表（替换我）</h3>
+  <div id="table-host"></div>
+  <script>
+    (function () {
+      var headers = ['基因', 'log2FC', 'padj'];
+      var rows = [
+        ['GENE01', 2.45, 0.0012],
+        ['GENE02', -1.87, 0.0089],
+        ['GENE03', 0.94, 0.0431]
+      ];
+      var table = document.createElement('table');
+      table.style.cssText = 'border-collapse:collapse;width:100%;font-size:12px';
+      var thead = document.createElement('tr');
+      headers.forEach(function (h) {
+        var th = document.createElement('th');
+        th.textContent = h;
+        th.style.cssText = 'text-align:left;padding:6px 10px;border-bottom:1px solid var(--border,#ccc);color:var(--muted-foreground)';
+        thead.appendChild(th);
+      });
+      table.appendChild(thead);
+      rows.forEach(function (row) {
+        var tr = document.createElement('tr');
+        row.forEach(function (cell) {
+          var td = document.createElement('td');
+          td.textContent = String(cell);
+          td.style.cssText = 'padding:5px 10px;border-bottom:1px solid var(--muted)';
+          tr.appendChild(td);
+        });
+        table.appendChild(tr);
+      });
+      document.getElementById('table-host').appendChild(table);
+    })();
+  </script>
+</div>

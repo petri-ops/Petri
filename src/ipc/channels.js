@@ -222,6 +222,10 @@ const CHANNELS = {
     openExternal: 'gen-ui:open-external',
     // BLOCK-166 P2 — 复制图片（sender/会话/几何三重校验后 capturePage→剪贴板）。
     copyImage: 'gen-ui:copy-image',
+    // BLOCK-174 CP-13b — fragment 导出（主进程读会话 filePath 原文交渲染层另存）。
+    export: 'gen-ui:export',
+    // BLOCK-174 CP-11 — artifact/job 数据面只读绑定（guest getData 中继落点）。
+    getData: 'gen-ui:get-data',
   },
 };
 

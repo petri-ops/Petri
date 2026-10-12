@@ -12,6 +12,13 @@
 - `title` ≤250 字符；`mode` 仅支持 `"wide"`（占满全宽）
 - 同一回复可输出多条指令（每条渲染一张卡）；写文件必须先于输出指令
 
+## 模板优先（BLOCK-174 CP-12）
+
+常见图形**优先套用内置模板**（resources/gen-ui/templates/：bar/line/kpi/table），把模板中
+`data`/`headers`/`cards` 数组替换为真实数据后写入输出目录——比从零手写更快、主题一致性更好。
+模板要点：纯片段 + CSS 变量主题（--primary/--muted/--foreground 自动跟随明暗与主题色）+ 无网络 API。
+没有贴合的模板时才从零手写（仍遵守下方 fragment 硬约束）。
+
 ## fragment 写作规范（硬约束）
 
 1. **只写 HTML 片段**：禁止 `<!doctype>`、`<html>`、`<head>`、`<body>` 标签——宿主会包壳

@@ -1,0 +1,27 @@
+<!-- PETRI 模板 · line（折线/时序）——BLOCK-174 CP-12
+     用法：series 替换为真实数据（points 数组 [x, y]）；零依赖 SVG 折线。 -->
+<div style="font-family:system-ui,sans-serif;padding:16px">
+  <h3 style="margin:0 0 12px;font-size:15px;color:var(--foreground)">趋势（替换我）</h3>
+  <svg id="line" width="100%" height="180" viewBox="0 0 600 180" preserveAspectRatio="none"></svg>
+  <script>
+    (function () {
+      var points = [[0, 40], [60, 52], [120, 48], [180, 88], [240, 72], [300, 120], [360, 140]];
+      var svg = document.getElementById('line');
+      var xs = points.map(function (p) { return p[0]; });
+      var ys = points.map(function (p) { return p[1]; });
+      var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
+      var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
+      function toXY(p) {
+        var x = ((p[0] - minX) / (maxX - minX || 1)) * 580 + 10;
+        var y = 170 - ((p[1] - minY) / (maxY - minY || 1)) * 150;
+        return x.toFixed(1) + ',' + y.toFixed(1);
+      }
+      var polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      polyline.setAttribute('points', points.map(toXY).join(' '));
+      polyline.setAttribute('fill', 'none');
+      polyline.setAttribute('stroke', 'var(--primary)');
+      polyline.setAttribute('stroke-width', '2');
+      svg.appendChild(polyline);
+    })();
+  </script>
+</div>

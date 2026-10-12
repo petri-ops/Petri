@@ -73,7 +73,21 @@ function buildGenUiThemeCss() {
   lines.push('}');
   lines.push('html>body{margin:0;background:var(--background);color:var(--foreground);');
   lines.push('font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:var(--font-size-base);}');
+  // BLOCK-174 CP-13a — accent 透传：宿主 data-accent 档（teal=基础块无覆盖），
+  // --primary/--ring 按档覆盖（light-dark 双套，值与 custom.css [data-accent] 对齐）。
+  for (const [accentId, primary] of Object.entries(ACCENT_PRIMARY)) {
+    lines.push(`html[data-petri-accent='${accentId}']{--primary:light-dark(${primary.light},${primary.dark});--ring:light-dark(${primary.light},${primary.dark});`);
+    lines.push(`--viz-series-1:var(--primary);}`);
+  }
   return lines.join('');
 }
 
-module.exports = { THEME_VAR_MAP, buildGenUiThemeCss, loadVisualizeCss };
+// BLOCK-174 CP-13a — accent 档主色映射（值=custom.css [data-accent] light/dark 对齐）
+const ACCENT_PRIMARY = {
+  blue: { light: '#2563eb', dark: '#60a5fa' },
+  violet: { light: '#7c3aed', dark: '#a78bfa' },
+  rose: { light: '#e11d48', dark: '#fb7185' },
+  amber: { light: '#d97706', dark: '#fbbf24' },
+};
+
+module.exports = { THEME_VAR_MAP, ACCENT_PRIMARY, buildGenUiThemeCss, loadVisualizeCss };

@@ -16,6 +16,9 @@
  */
 
 const CHANNELS = require('./channels');
+const fsSync = require('node:fs');
+const path = require('node:path');
+const { getGenUiSession } = require('../main/gen-ui/scheme');
 
 const WIDGET_STATE_MAX_BYTES = 16 * 1024;
 
@@ -211,7 +214,62 @@ function setupGenUiIpc() {
   ipcMain.handle(CHANNELS.genUi.prepare, async (event, payload) => prepareGenUi(event, payload));
   ipcMain.handle(CHANNELS.genUi.setState, (event, payload) => setGenUiState(event, payload));
   ipcMain.handle(CHANNELS.genUi.openExternal, (event, payload) => openGenUiExternal(event, payload));
-  ipcMain.handle(CHANNELS.genUi.copyImage, (event, payload) => copyGenUiImage(event, payload));
+    ipcMain.handle(CHANNELS.genUi.copyImage, (event, payload) => copyGenUiImage(event, payload));
+  // BLOCK-174 CP-13b — fragment 导出：会话归属/sender 校验后读 filePath 原文返回
+  // （渲染层经 files.saveTextFile 原生另存；主进程不弹对话框保持读写分离）。
+  // BLOCK-174 CP-11 — artifact/job 数据面只读绑定：guest getData(jobId) 中继落点。
+  // 归属校验=job.conversation_id 必须匹配会话文件路径内编码的 conversationId
+  // （filePath=<ws>/.petri/gen-ui/<conversationId>/<file>），跨会话即拒。
+  ipcMain.handle(CHANNELS.genUi.getData, async (event, payload) => {
+    const session = getGenUiSession(String((payload && payload.sessionId) || ''));
+    if (!session) return { ok: false, code: 'session_not_found', message: '会话不存在或已过期' };
+    if (session.ownerWebContentsId != null && event.sender.id !== session.ownerWebContentsId) {
+      return { ok: false, code: 'forbidden', message: '仅创建该卡片的窗口可读数据' };
+    }
+    const jobId = String((payload && payload.jobId) || '').trim();
+    if (!jobId) return { ok: false, code: 'invalid_arguments', message: 'jobId 不能为空' };
+    try {
+      const segments = session.filePath.split(/[\/]/);
+      const sessionConversationId = segments.find((segment) => segment.indexOf('conv_') === 0 || segment.indexOf('conv-') === 0) || null;
+      const adb = require('../db').getAsyncDatabase();
+      const job = await adb.prepare(
+        'SELECT id, user_id, conversation_id, tool_id, status, result_json FROM tool_jobs WHERE id = ?'
+      ).get(jobId);
+      if (!job) return { ok: false, code: 'job_not_found', message: '数据源任务不存在' };
+      if (sessionConversationId && job.conversation_id && job.conversation_id !== sessionConversationId) {
+        return { ok: false, code: 'cross_conversation', message: '数据源任务不属于本会话' };
+      }
+      if (job.status !== 'done' || !job.result_json) {
+        return { ok: false, code: 'job_not_done', message: '任务尚未完成或无结果数据' };
+      }
+      let result = null;
+      try { result = JSON.parse(job.result_json); } catch { result = String(job.result_json); }
+      // 有界投影（超 12KB 标记 truncated 并截尾；与工具面投影上限同量级）
+      let data = { jobId: job.id, toolId: job.tool_id, status: job.status, result };
+      if (JSON.stringify(data).length > 12 * 1024) {
+        data = { jobId: job.id, toolId: job.tool_id, status: job.status, truncated: true, result: String(job.result_json).slice(0, 12 * 1024) };
+      }
+      return { ok: true, data };
+    } catch (error) {
+      return { ok: false, code: 'get_data_failed', message: error && error.message ? error.message : String(error) };
+    }
+  });
+
+  // BLOCK-174 CP-13b — fragment 导出：会话归属/sender 校验后读 filePath 原文返回
+  // （渲染层经 files.saveTextFile 原生另存；主进程不弹对话框保持读写分离）。
+  ipcMain.handle(CHANNELS.genUi.export, (event, payload) => {
+    const session = getGenUiSession(String((payload && payload.sessionId) || ''));
+    if (!session) return { ok: false, code: 'session_not_found', message: '会话不存在或已过期' };
+    if (session.ownerWebContentsId != null && event.sender.id !== session.ownerWebContentsId) {
+      return { ok: false, code: 'forbidden', message: '仅创建该卡片的窗口可导出' };
+    }
+    try {
+      const content = fsSync.readFileSync(session.filePath, 'utf8');
+      return { ok: true, content, title: session.title || '', name: path.basename(session.filePath) };
+    } catch (error) {
+      return { ok: false, code: 'read_failed', message: error && error.message ? error.message : String(error) };
+    }
+  });
 }
 
 module.exports = { setupGenUiIpc };

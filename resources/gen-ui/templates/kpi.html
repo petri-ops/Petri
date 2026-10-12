@@ -1,0 +1,31 @@
+<!-- PETRI 模板 · kpi（指标卡行）——BLOCK-174 CP-12
+     用法：cards 数组替换为真实指标（label/value/delta），delta 正负自动着色。 -->
+<div style="font-family:system-ui,sans-serif;padding:16px">
+  <h3 style="margin:0 0 12px;font-size:15px;color:var(--foreground)">指标概览（替换我）</h3>
+  <div id="cards" style="display:flex;flex-wrap:wrap;gap:12px"></div>
+  <script>
+    (function () {
+      var cards = [
+        { label: '样本数', value: '2 684', delta: '+3.2%' },
+        { label: '差异基因', value: '317', delta: '-12' },
+        { label: '运行时长', value: '96s', delta: null }
+      ];
+      var host = document.getElementById('cards');
+      cards.forEach(function (c) {
+        var card = document.createElement('div');
+        card.style.cssText = 'min-width:120px;padding:12px 16px;border-radius:8px;background:var(--muted)';
+        var label = document.createElement('div');
+        label.textContent = c.label;
+        label.style.cssText = 'font-size:12px;color:var(--muted-foreground)';
+        var value = document.createElement('div');
+        value.textContent = c.value;
+        value.style.cssText = 'font-size:22px;font-weight:600;color:var(--foreground);margin:4px 0';
+        var delta = document.createElement('div');
+        delta.textContent = c.delta || '—';
+        delta.style.cssText = 'font-size:12px;color:' + (c.delta && c.delta.indexOf('-') === 0 ? 'var(--danger,#ef4444)' : 'var(--primary)');
+        card.appendChild(label); card.appendChild(value); card.appendChild(delta);
+        host.appendChild(card);
+      });
+    })();
+  </script>
+</div>

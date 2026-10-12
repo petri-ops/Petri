@@ -513,6 +513,10 @@ const desktopBridgeSurface = {
     openExternal: (payload) => ipcRenderer.invoke('gen-ui:open-external', payload || {}),
     // BLOCK-166 P2 — 复制图片：渲染层提交卡片可视区域，主进程校验后 capturePage→剪贴板。
     copyImage: (payload) => ipcRenderer.invoke('gen-ui:copy-image', payload || {}),
+    // BLOCK-174 CP-13b — fragment 导出（读会话原文交渲染层另存）。
+    exportFragment: (payload) => ipcRenderer.invoke('gen-ui:export', payload || {}),
+    // BLOCK-174 CP-11 — artifact/job 数据面只读绑定（guest getData 中继落点）。
+    getData: (payload) => ipcRenderer.invoke('gen-ui:get-data', payload || {}),
   },
 };
 

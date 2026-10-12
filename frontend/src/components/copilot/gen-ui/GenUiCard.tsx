@@ -66,7 +66,7 @@ interface GenUiRpcMessage {
   type: 'petri-gen-ui-rpc';
   id: number;
   method: string;
-  params?: { state?: unknown; href?: unknown; prompt?: unknown; title?: unknown };
+  params?: { state?: unknown; href?: unknown; prompt?: unknown; title?: unknown; jobId?: unknown };
 }
 
 /** petri-genui://gen-<id>/index.html → { sessionId, origin }（自定协议不走 URL.origin）。 */
@@ -166,6 +166,16 @@ export const GenUiCard = React.memo(function GenUiCard({
         const res = await bridge.openExternal({ sessionId: sandbox.sessionId, href });
         if (res.ok) reply(true, {});
         else reply(false, { message: res.message || res.code });
+      } else if (rpc.method === 'petri/gen-ui/get-data') {
+        // BLOCK-174 CP-11 — 数据面只读绑定：jobId 归属校验与有界投影在主进程侧。
+        const jobId = typeof rpc.params?.jobId === 'string' ? rpc.params.jobId : '';
+        if (!jobId) {
+          reply(false, { message: 'jobId required' });
+          return;
+        }
+        const res = await bridge.getData({ sessionId: sandbox.sessionId, jobId });
+        if (res.ok) reply(true, res.data);
+        else reply(false, { message: res.message || res.code });
       } else if (rpc.method === 'petri/gen-ui/follow-up') {
         // P2 follow-up：宿主回调缺席 = 绑定不可用（明确拒绝，规格 §8）。
         if (typeof onFollowUp !== 'function') {
@@ -249,11 +259,13 @@ export const GenUiCard = React.memo(function GenUiCard({
     if (!result?.ok || !sandbox) return undefined;
     const push = () => {
       const theme = currentAppTheme();
-      if (theme) postToFrame({ type: 'petri-set-globals', detail: { globals: { theme } } });
+      // BLOCK-174 CP-13a — accent 随主题一并透传（teal 缺省=不设属性→'teal'）
+      const accent = document.documentElement.dataset.accent || 'teal';
+      if (theme) postToFrame({ type: 'petri-set-globals', detail: { globals: { theme, accent } } });
     };
     push();
     const observer = new MutationObserver(push);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-accent'] });
     return () => observer.disconnect();
   }, [result, sandbox, postToFrame]);
 
@@ -269,7 +281,8 @@ export const GenUiCard = React.memo(function GenUiCard({
 
   const onFrameLoad = React.useCallback(() => {
     const theme = currentAppTheme();
-    if (theme) postToFrame({ type: 'petri-set-globals', detail: { globals: { theme } } });
+    const accent = document.documentElement.dataset.accent || 'teal';
+    if (theme) postToFrame({ type: 'petri-set-globals', detail: { globals: { theme, accent } } });
   }, [postToFrame]);
 
   const onToggleZoom = React.useCallback(() => {
@@ -302,6 +315,33 @@ export const GenUiCard = React.memo(function GenUiCard({
       });
   }, [sandbox]);
 
+  // BLOCK-174 CP-13b — fragment 导出：bridge 读会话原文 → files.saveTextFile 原生另存。
+  const onExportHtml = React.useCallback(() => {
+    const bridge = getBridge('genUi');
+    const filesBridge = getBridge('files');
+    if (!bridge || !filesBridge || !sandbox) return;
+    setCopyNotice('');
+    bridge
+      .exportFragment({ sessionId: sandbox.sessionId })
+      .then((res: { ok: boolean; content?: string; title?: string; name?: string; message?: string; code?: string }) => {
+        if (!res.ok) {
+          setCopyNotice(`导出失败：${res.message || res.code || '未知原因'}`);
+          setTimeout(() => setCopyNotice(''), 2500);
+          return;
+        }
+        const baseName = (res.title || res.name || 'gen-ui').replace(/[\/:*?"<>|]/g, '_').slice(0, 60);
+        return filesBridge.saveTextFile(`${baseName}.html`, res.content ?? '');
+      })
+      .then((saved: unknown) => {
+        setCopyNotice(saved ? '已导出 HTML 文件' : '已导出');
+        setTimeout(() => setCopyNotice(''), 2500);
+      })
+      .catch(() => {
+        setCopyNotice('导出失败：IPC 错误');
+        setTimeout(() => setCopyNotice(''), 2500);
+      });
+  }, [sandbox]);
+
   const title = reference.title || '可视化';
 
   const toolbar = result?.ok ? (
@@ -314,6 +354,15 @@ export const GenUiCard = React.memo(function GenUiCard({
         title="复制可视化画面到剪贴板"
       >
         复制图
+      </button>
+      <button
+        type="button"
+        className={styles.toolbarBtn}
+        onClick={onExportHtml}
+        title="导出可视化 HTML 文件"
+        data-testid="gen-ui-export"
+      >
+        导出
       </button>
       <button
         type="button"

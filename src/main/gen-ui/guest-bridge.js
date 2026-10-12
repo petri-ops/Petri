@@ -67,6 +67,11 @@ const GUEST_BRIDGE_FN = function petriGenUiGuestBridge(config) {
       document.documentElement.dataset.theme = globals.theme;
       document.documentElement.style.colorScheme = globals.theme;
     }
+    // BLOCK-174 CP-13a — accent 透传（主题 CSS 按 data-petri-accent 覆盖 --primary）
+    if (typeof globals.accent === 'string' && globals.accent) {
+      if (globals.accent === 'teal') delete document.documentElement.dataset.petriAccent;
+      else document.documentElement.dataset.petriAccent = globals.accent;
+    }
     dispatchGlobals();
   }
 
@@ -156,6 +161,17 @@ const GUEST_BRIDGE_FN = function petriGenUiGuestBridge(config) {
           });
         saves = pending;
         return pending;
+      },
+    },
+    // BLOCK-174 CP-11 — artifact/job 数据面只读绑定（归属校验与有界投影在宿主侧）。
+    getData: {
+      enumerable: true,
+      value: function (value) {
+        var jobId = value && typeof value.jobId === 'string' ? value.jobId.trim() : '';
+        if (!jobId) {
+          return Promise.reject(new TypeError('getData expects { jobId: string }'));
+        }
+        return postRpc('petri/gen-ui/get-data', { jobId: jobId });
       },
     },
     openExternal: {

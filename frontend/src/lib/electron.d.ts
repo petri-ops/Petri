@@ -791,6 +791,16 @@ declare global {
           | { ok: true }
           | { ok: false; code: string; message: string }
         >;
+        // BLOCK-174 CP-13b — fragment 导出（读会话原文；渲染层经 files.saveTextFile 另存）。
+        exportFragment: (payload: { sessionId: string }) => Promise<
+          | { ok: true; content: string; title: string; name: string }
+          | { ok: false; code: string; message: string }
+        >;
+        // BLOCK-174 CP-11 — artifact/job 数据面只读绑定（guest getData 中继落点）。
+        getData: (payload: { sessionId: string; jobId: string }) => Promise<
+          | { ok: true; data: Record<string, unknown> }
+          | { ok: false; code: string; message: string }
+        >;
       };
     };
     /** BLOCK-61 兼容别名：与 petri 同一 surface（preload 双暴露）。 */
