@@ -33,3 +33,16 @@ status: active
 ## 3. 门禁与完成语义
 
 每 CP：定向红绿+tsc+lint。波末：closeout 十三门+实机探针（沙箱 accent/导出/数据通道，acceptance/block-174/）+UI 台账。出口全过+closeout 绿=completed；总纲 §4 W4 行回写。
+
+
+## 9. 实机与门禁对账（2026-10-12）
+
+| 出口判据 | 实绩 | 证据 |
+| --- | --- | --- |
+| CP-13a accent 透传 | ✅ 实现面三点（GenUiCard 观察器扩 data-accent+push {theme,accent}+guest data-petri-accent+theme.js 四档覆盖 CSS）；实机 DOM 断言随 UI-502 过目 | 组件改动+w4-live |
+| CP-13b 导出 | ✅ gen-ui:export IPC（会话归属/sender 校验→filePath 原文）+卡「导出」钮→saveTextFile 原生另存 | gen-ui.js+GenUiCard |
+| CP-11 getData 通道 | ✅ 归属校验（job.conversation_id vs 会话路径段）+done+result_json+12KB 有界投影+prompt 数据源清单注入（≤5 最近 done jobs）；w4-live 未知会话 session_not_found 诚实拒绝 | gen-ui.js+w4-live C |
+| CP-12 模板库 | ✅ 四模板（bar/line/kpi/table，CSS 变量主题）+visualize「模板优先」节；skills:check PASS 5 Skill | resources/gen-ui/templates/ |
+| 真模型链 | ✅ 真实任务完成事件链直查（done/run_terminal） | w4-live A |
+
+**门禁对账**：closeout 十三门中十二门绿+test:changed 959 测 2 红=BLOCK-93 deepseek 凭据环境债（双确认：pre-CP-8 spawn 基线同挂，git stash 对照；非本波回归，归因=本机凭据存储无该测试所需 key，登记存量）。**随波缺省裁决**：①联邦回流 Gen UI 化出 W4 范围（依赖双机，W6 评估）②CP-12 不做模板运行时引擎（保持模型填数据的显式形态）③CP-11 投影上限 12KB（与工具面同量级）。

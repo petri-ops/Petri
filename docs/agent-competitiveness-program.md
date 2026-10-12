@@ -138,7 +138,7 @@ status: planned
 | CP-9 编排 DAG 可视化 | run 结构（spawn 树+tool_plan 步骤）投影到画布（复用血缘 DAG 先例）+ checkpoint/恢复统一叙事 | 编排图实机可看可追（点击下钻任务） | — |
 | CP-10 工具路由转正 | tool-route 默认开（九域路由）+ 精度校准门 + 决策可观测面板消费 | 路由精度门绿；decision_log 可视消费实机 | — |
 
-### W4 表达面 Gen UI 双轨（3 包）
+### W4 表达面 Gen UI 双轨（3 包）——**completed（2026-10-12 BLOCK-174 三包全交付；w4-live 3/3；十二门绿+test:changed 2 红=block93 凭据环境债存量归因；CP-9 同波 CP-13 可视随 UI-502 过目）**
 
 | 包 | 范围 | 出口判据 | 依赖 |
 | --- | --- | --- | --- |
