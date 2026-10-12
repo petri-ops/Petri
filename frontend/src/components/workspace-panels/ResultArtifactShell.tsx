@@ -54,6 +54,9 @@ import { fetchCrossJobPinSnapshot } from './crossJobPinSnapshot';
 import { MarkdownResultViewer } from './MarkdownResultViewer';
 import { SpreadsheetResultViewer } from './SpreadsheetResultViewer';
 import { PdfResultViewer } from './PdfResultViewer';
+// BLOCK-175 CP-14 — 只读文本族选择总线接线（canSelect 位消费面）
+import { viewerProfileCanSelect } from '@/components/result-studio/viewerRegistry';
+import { useArtifactTextSelection } from './ResultArtifactShell/useArtifactTextSelection';
 import {
   beginResultSurfaceMeasure,
   chooseResultArtifactName,
@@ -921,6 +924,19 @@ export function ResultArtifactShell({
     );
   };
 
+  // BLOCK-175 CP-14 — 只读文本族文本选择→选择总线（canSelect 位消费面）。
+  // 容器=预览体包裹层；window 级 pointerup 采样，容器包含判定防跨容器误采。
+  // 位置：早退（if !job）之前——hooks 规则要求无条件调用。
+  const previewBodyRef = useRef<HTMLDivElement | null>(null);
+  const textSelectionEnabled = viewerProfileCanSelect(viewerAdapter) && activeIsPreviewText
+    && Boolean(selectedArtifact) && Boolean(viewedRevision || job);
+  useArtifactTextSelection({
+    enabled: textSelectionEnabled,
+    containerRef: previewBodyRef,
+    artifactId: viewedRevision?.revisionId || job?.id || selectedArtifactName,
+    revisionId: viewedRevision?.revisionId ?? null,
+  });
+
   if (!job) {
     return <EmptyAnalysisResult />;
   }
@@ -1235,7 +1251,7 @@ export function ResultArtifactShell({
       {mode === 'result' && (
       viewedRevision && !viewedRevision.isCurrent ? (
         <section className={styles.resultReportSection} data-viewing="historical-revision">
-          <div className={styles.resultSidebarPreviewBody}>{renderPreview()}</div>
+          <div className={styles.resultSidebarPreviewBody} ref={previewBodyRef}>{renderPreview()}</div>
         </section>
       ) : (
       <section className={styles.resultReportSection}>
@@ -1254,7 +1270,7 @@ export function ResultArtifactShell({
             <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={() => setInteractionRetryVersion((value) => value + 1)}>重试交互能力</button>
           </div>
         )}
-        <div className={styles.resultSidebarPreviewBody}>
+        <div className={styles.resultSidebarPreviewBody} ref={previewBodyRef}>
           {renderPreview()}
         </div>
       </section>

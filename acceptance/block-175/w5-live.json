@@ -1,0 +1,22 @@
+{
+  "generatedAt": "2026-10-12T11:33:45.385Z",
+  "pass": 2,
+  "fail": 1,
+  "results": [
+    {
+      "id": "A.registry-capability-bits",
+      "ok": true,
+      "detail": "canSelect=true ×4（≥4 只读族）canCompare=true ×1"
+    },
+    {
+      "id": "B.shell-wiring",
+      "ok": false,
+      "detail": "shell 文本选择 hook 接线在场"
+    },
+    {
+      "id": "C.pane-divider",
+      "ok": true,
+      "detail": "分隔条与 aria/钳制接线在场"
+    }
+  ]
+}
