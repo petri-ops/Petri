@@ -14,7 +14,7 @@ const snapshot = {
   artifactName: 'result.csv',
   label: '结果表',
   viewerAdapter: 'table' as const,
-  previewData: [['gene', 'fc'], ['A', 2]],
+  previewData: [['gene', 'fc'], ['A', '2']],
   previewText: null,
   url: 'http://localhost/x',
 };
