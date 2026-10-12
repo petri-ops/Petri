@@ -34,6 +34,8 @@
         "scripts/block172-w2-live.mjs",
         "test/block172-cp5-compact.test.mjs",
         "acceptance/block-172/**",
+        "scripts/block175-w5-live.mjs",
+        "acceptance/block-175/**",
         "scripts/block173-w3-live.mjs",
         "scripts/block174-w4-live.mjs",
         "test/block173-w3-contracts.test.mjs",
