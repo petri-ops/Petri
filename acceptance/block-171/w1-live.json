@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-12T08:49:41.363Z",
-  "pass": 7,
-  "fail": 1,
+  "generatedAt": "2026-10-12T09:17:07.073Z",
+  "pass": 8,
+  "fail": 0,
   "results": [
     {
       "id": "A.cancel-requested",
       "ok": true,
-      "detail": "{\"status\":\"cancel_requested\",\"taskId\":\"8cf9c4ac-6cb2-4672-9b45-5bdbabf787fd\"}"
+      "detail": "{\"status\":\"cancel_requested\",\"taskId\":\"cfcb0684-de8c-4098-a528-2837d0c06c77\"}"
     },
     {
       "id": "A.cancel-terminal",
@@ -40,8 +40,8 @@
     },
     {
       "id": "D.palette-source",
-      "ok": false,
-      "detail": "open=false options=0 input=null"
+      "ok": true,
+      "detail": "open=true options=22 input=\"\""
     }
   ]
 }
