@@ -1,5 +1,6 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-12（**UI-492 加映三**：McpShelfPane unused import 清理（closeout lint 抓真）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-492 加映二（knip 抓真清偿）**：McpShelfPane 加载/空态双迁三件套（LoadingBlock+EmptyState，testid 保留）——knip 未消费导出清零。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-492 加映（BLOCK-167 收口对账批）**：ErrorNotice 用法压回原行数（code-size 棘轮 1305 守住）+code-size 基线重锚（W1 token 改名致 2 文件指纹漂移，先例流程 --write）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-492 落地（BLOCK-167 W4 状态三件套）**：Status.tsx 三件套单源+ResultArtifactShell 错误态首迁+覆盖清点+语气 pass 抽查零硬伤。G0 开发期常态 · 不外推 packaged/Provider/GA。）

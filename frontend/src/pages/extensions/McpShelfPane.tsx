@@ -11,7 +11,6 @@ import { Icon } from '@/components/icons/Icon';
 import { useMcpServers, type McpServerStatus } from '@/hooks/useMcpServers';
 import styles from './extensions.module.css';
 import { EmptyState, LoadingBlock } from '../../components/ui/controls/Status';
-import skillStyles from './styles.module.css';
 
 const STATUS_LABELS: Record<McpServerStatus, string> = {
   connected: '已连接',
