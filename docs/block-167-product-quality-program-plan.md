@@ -6,7 +6,7 @@ acceptance:
   - §3 量化对账表终态承诺逐项达成（契约口径）
   - closeout 十一门绿 + output:judge
 reopen: 任一波量化承诺未达成即本波返工；新增设计档位/预算调整需用户裁决或新证据批
-status: active
+status: completed
 ---
 
 # BLOCK-167 — 产品质感提升计划（Product Quality Program）
@@ -90,3 +90,13 @@ status: active
 - 每波收口：出口断言+量化列达成+定向门禁绿+同提交 ui-productization-audit UI-### 登记+波报（含决策复认与 jev 账）
 - 整包收口：§3 终态列逐项对账 + `npm run closeout` 绿 + output:judge + canonical 回写（roadmap/handoff/backlog/AUDIT-LOG/DOC-REGISTRY status=completed）
 - 未达承诺值的波=未完成；如实报告差距，不带病翻 status
+
+## 7. 整包收口笔录（2026-10-12）
+
+- 五波全交付：W0 `8ff9b9ee` 宪章+门禁 15/15 / W1 `5149fced→5149fc8d` 静态重校（14px 40.3%、6 档、细线 533→0）/ W2 `0fd9c08e` 控件单源+清单棘轮（含 pass2 双括号缺陷 12 处修复）/ W3 `954afc61` 动效 token ~235 处 / W4 `afe8e36b`+加映 状态三件套+knip 清偿。
+- 收口追加：`d194dcc8` knip 抓真清偿（McpShelfPane 双迁三件套）、`cfa715e6` unused import 清理（closeout lint 抓真，与台账同提交纪律同行）。
+- **closeout 十二门 PASS**（hygiene/docs/ui-audit/test:changed/code-size/arch-cycles/css-modules/secret/arch/lint/types/knip）。
+- checkpoint 修正三项随波报集中复认（plan §3.1 两项+W2「套数 ≤4」→单源模块+清单棘轮+增量迁移）。
+- 证据=acceptance/block-167/（w1-after 四屏+evidence-note）；计划内未竟=W2 存量按钮族迁移（30 文件一次性微按钮类，清单棘轮冻结下按触域渐进）、小字/accent 终态收缩（棘轮守护下随 W4 后审计批）。
+- 长期资产=design-charter.md（转 reference）+契约 BLOCK-167 断言组+controls/（button/status）单源。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

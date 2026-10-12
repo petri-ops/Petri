@@ -5,7 +5,7 @@ acceptance:
   - theme-token-contract BLOCK-167 断言组全绿（三棘轮+存在性+红证据自检）
   - 与本文件冲突的实现即违规（契约棘轮守护）
 reopen: 档位/预算调整须证据批+用户裁决；本文件是 BLOCK-167 收口后的长期 reference
-status: active
+status: reference
 ---
 
 # Petri 设计宪章（Design Charter）
