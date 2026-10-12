@@ -63,14 +63,14 @@ export function GuardAckCard({ toolName, guardKey, message, busy = false, onAck,
 }
 
 /** 审批复审面板数据行（/ai/agent/guard-events 投影）。 */
-export interface GuardAckRecord {
+interface GuardAckRecord {
   taskId: string;
   guardKey: string;
   always: boolean;
   at: string;
 }
 
-export function useGuardAckHistory(enabled: boolean): { records: GuardAckRecord[]; loading: boolean; error: string | null; reload: () => void } {
+function useGuardAckHistory(enabled: boolean): { records: GuardAckRecord[]; loading: boolean; error: string | null; reload: () => void } {
   const [records, setRecords] = useState<GuardAckRecord[]>([]);
   const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);

@@ -6,7 +6,7 @@
     "types",
     "files"
   ],
-  "updatedAt": "2026-10-11",
+  "updatedAt": "2026-10-12",
   "keys": [
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::DEFAULT_PORT",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::TEST_INSTANCE_PORT",
@@ -124,7 +124,6 @@
     "types::frontend/src/components/common/ToastProvider.tsx::ToastItem",
     "types::frontend/src/components/common/ToastProvider.tsx::ToastOptions",
     "types::frontend/src/components/common/ToastProvider.tsx::ToastVariant",
-    "types::frontend/src/components/copilot/CommandPalette.tsx::CommandItem",
     "types::frontend/src/components/copilot/CommandPalette.tsx::CommandPaletteResult",
     "types::frontend/src/components/copilot/CommandPalette.tsx::UseCommandPaletteOptions",
     "types::frontend/src/components/copilot/ConversationTimeline.tsx::ProgressSegmentMeta",
