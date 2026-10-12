@@ -5582,6 +5582,28 @@
    "notes": "2026-10-12 CP-6 评估落档：项目记忆文件（.petri/MEMORY.md 读侧有界注入+写侧 workspace_write 治理门继承）已实施；分层/ANN 评估结论=事实生命周期治理优先、ANN 触发条件（>50k 向量或 p95>200ms）登记不预做、召回基线=30 问 top3 命中率法（随知识域包落地）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
   },
   {
+   "id": "BLOCK-173-COMPETITIVENESS-WAVE3",
+   "capability": "agent-competitiveness",
+   "path": "docs/block-173-competitiveness-wave3-plan.md",
+   "kind": "work-package",
+   "status": "active",
+   "phase": "P1-WAVE",
+   "canonical": true,
+   "truthDomain": "block-173-competitiveness-wave3-plan",
+   "entrypoint": "docs/README.md",
+   "registeredAt": "2026-10-12",
+   "archivePolicy": "retain_stable_path",
+   "tags": [
+    "agent-competitiveness",
+    "wave3",
+    "orchestration",
+    "spawn-config",
+    "orchestration-graph",
+    "tool-route"
+   ],
+   "notes": "2026-10-12 发令 active（用户 /goal 整波授权连续行使，W1/W2 先例）：总纲 W3 波编排与多智能体深化——CP-8 并发上限可配（PETRI_SPAWN_CONCURRENCY_LIMIT 1-8 缺省 3）+派生深度受控放开（PETRI_SPAWN_MAX_DEPTH 缺省 1=现状）+汇报门评估落结论/CP-10 tool-route 默认开+校准门/CP-9 编排 DAG（spawn 树 @xyflow 只读投影，AgentRunPanel 形态）。closeout 十三门+实机断言（acceptance/block-173/）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+  },
+  {
    "id": "BLOCK-138-ARTIFACT-PLANE-KERNEL",
    "capability": "artifact-plane-kernel",
    "path": "docs/block-138-artifact-plane-kernel-plan.md",
