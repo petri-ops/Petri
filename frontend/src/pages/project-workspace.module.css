@@ -75,7 +75,7 @@
   background: transparent;
   color: var(--petri-text-secondary);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+  transition: background var(--petri-duration-fast), color var(--petri-duration-fast), box-shadow var(--petri-duration-fast);
   flex-shrink: 0;
 }
 
@@ -149,7 +149,7 @@
   color: var(--petri-text-secondary);
   cursor: pointer;
   border-radius: var(--petri-radius-md);;
-  transition: background 0.15s, color 0.15s;
+  transition: background var(--petri-duration-fast), color var(--petri-duration-fast);
   /* UI-215 补充：纯图标按钮收敛 UA 默认字号到 token */
   font-size: var(--petri-font-size-sm);
 }
@@ -398,7 +398,7 @@
   color: var(--petri-text-secondary);
   cursor: pointer;
   border-radius: var(--petri-radius-sm);;
-  transition: background 0.15s, color 0.15s;
+  transition: background var(--petri-duration-fast), color var(--petri-duration-fast);
 }
 
 .switcherBtn:hover {
@@ -467,7 +467,7 @@
   cursor: pointer;
   border-radius: var(--petri-radius-md);;
   text-align: left;
-  transition: background 0.12s;
+  transition: background var(--petri-duration-fast);
 }
 
 .switcherItem:hover {
@@ -510,7 +510,7 @@
   color: var(--petri-accent);
   text-decoration: none;
   border-top: 1px solid var(--petri-divider);
-  transition: background 0.12s;
+  transition: background var(--petri-duration-fast);
 }
 
 .switcherNewProject:hover {
@@ -575,7 +575,7 @@
   font-weight: 600;
   font-size: var(--petri-font-size-body);
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition: background var(--petri-duration-base) ease, transform var(--petri-duration-base) ease;
 }
 
 .runtimeMissingBannerBtn:hover {
@@ -602,7 +602,7 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width var(--petri-duration-base) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* UI-341 加映二 — 收起态：宽度由内联 style 收到 0（由上面的 transition 平滑
@@ -823,7 +823,7 @@
   font-weight: 500;
   text-align: left;
   cursor: pointer;
-  transition: background-color 150ms ease-in-out, color 150ms ease-in-out, box-shadow 150ms ease-in-out;
+  transition: background-color var(--petri-duration-fast) ease-in-out, color var(--petri-duration-fast) ease-in-out, box-shadow var(--petri-duration-fast) ease-in-out;
 }
 
 .leftQuickAction:hover {
@@ -976,7 +976,7 @@
   gap: var(--petri-space-1);
   padding: var(--petri-space-2) var(--petri-space-3);
   cursor: pointer;
-  transition: background 0.12s ease;
+  transition: background var(--petri-duration-fast) ease;
   color: var(--petri-text-secondary);
   user-select: none;
 }
@@ -1019,7 +1019,7 @@
   border-radius: var(--petri-radius-sm);;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.15s, background 0.15s;
+  transition: opacity var(--petri-duration-fast), background var(--petri-duration-fast);
 }
 
 .projectTreeRow:hover .projectTreeAddBtn,
@@ -1059,7 +1059,7 @@
   padding: 5px var(--petri-space-3) 5px 26px;
   cursor: pointer;
   color: var(--petri-text-secondary);
-  transition: background 0.12s ease;
+  transition: background var(--petri-duration-fast) ease;
   user-select: none;
 }
 
@@ -1273,7 +1273,7 @@
   background: var(--petri-surface, #ffffff);
   color: var(--petri-text-primary, #1a1a1a);
   cursor: pointer;
-  transition: border-color 120ms ease, background 120ms ease;
+  transition: border-color var(--petri-duration-fast) ease, background var(--petri-duration-fast) ease;
 }
 .resultsLibraryItem:hover {
   border-color: var(--petri-accent, var(--petri-border-strong, #cfcfcf));
@@ -1481,7 +1481,7 @@
   align-items: center;
   justify-content: center;
   color: var(--petri-text-secondary);
-  transition: opacity 0.15s, background 0.15s, box-shadow 0.15s;
+  transition: opacity var(--petri-duration-fast), background var(--petri-duration-fast), box-shadow var(--petri-duration-fast);
 }
 
 .leftRailHandle {
@@ -1581,7 +1581,7 @@
   box-shadow: var(--petri-shadow-float);
   /* UI-351 加映 — 悬浮态默认轻微透出下层内容，hover 回到实感（渐进不突兀） */
   opacity: 0.92;
-  transition: opacity 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  transition: opacity var(--petri-duration-base) ease, box-shadow var(--petri-duration-base) ease, transform var(--petri-duration-base) ease;
   animation: workspaceSummaryFloatIn 0.28s ease-out;
 }
 
@@ -2245,7 +2245,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   flex-shrink: 0;
   background: transparent;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background var(--petri-duration-fast) ease;
 }
 
 .workspacePinnedSummaryAgentEmoji {
@@ -2817,7 +2817,7 @@ button.workspacePinnedSummaryMetricCard:hover {
   flex-direction: column;
   position: relative;
   box-sizing: border-box;
-  transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width var(--petri-duration-base) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* UI-341 加映二 — 收起态：宽度由内联 style 收到 0；min-width:96px 会挡住
@@ -3296,8 +3296,8 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   visibility: hidden;
   /* UI-341 加映二 — left/right 与侧栏 width 同曲线同时长（0.22s），
      否则侧栏收合时终端边界会以不同节奏「追赶」，肉眼可见错位 */
-  transition: height 0.16s ease, left 0.22s cubic-bezier(0.4, 0, 0.2, 1),
-    right 0.22s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.12s ease;
+  transition: height var(--petri-duration-fast) ease, left var(--petri-duration-base) cubic-bezier(0.4, 0, 0.2, 1),
+    right var(--petri-duration-base) cubic-bezier(0.4, 0, 0.2, 1), opacity var(--petri-duration-fast) ease;
   pointer-events: none;
 }
 
@@ -3326,7 +3326,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   border-radius: var(--petri-radius-pill);;
   background: color-mix(in srgb, var(--petri-border-strong) 68%, transparent);
   transform: translateX(-50%);
-  transition: width 0.14s ease, background 0.14s ease;
+  transition: width var(--petri-duration-fast) ease, background var(--petri-duration-fast) ease;
 }
 
 .embeddedTerminalResize:hover::after {
@@ -3925,7 +3925,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
      「header 带细、栏体带粗」的上下断层；提到 10000 让命中带与高亮线在 header
      带同样连续（compact 断点内本元素 display:none，不参与 backdrop/absolute 列竞争）。 */
   z-index: 10000;
-  transition: background 0.15s ease;
+  transition: background var(--petri-duration-fast) ease;
 }
 
 .resizeHandleV::after {
@@ -4541,7 +4541,7 @@ body:global(.petri-resizing-columns) * {
   padding: var(--petri-space-3);
   border-radius: var(--petri-radius-md);;
   cursor: default;
-  transition: background 0.15s;
+  transition: background var(--petri-duration-fast);
 }
 
 .itemRow:hover {
@@ -4611,7 +4611,7 @@ body:global(.petri-resizing-columns) * {
   padding: var(--petri-space-3);
   border-radius: var(--petri-radius-md);;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background var(--petri-duration-fast);
 }
 
 .timelineItem:hover {
@@ -5177,7 +5177,7 @@ body:global(.petri-resizing-columns) * {
   color: var(--petri-text-secondary);
   cursor: pointer;
   border-bottom: 2px solid transparent;
-  transition: color 0.15s, border-color 0.15s;
+  transition: color var(--petri-duration-fast), border-color var(--petri-duration-fast);
 }
 
 .resultTab:hover {
@@ -5264,7 +5264,7 @@ body:global(.petri-resizing-columns) * {
   color: var(--petri-text-secondary);
   text-decoration: none;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background var(--petri-duration-fast), color var(--petri-duration-fast);
 }
 
 .plotCardBtn:hover {
@@ -5599,7 +5599,7 @@ body:global(.petri-resizing-columns) * {
   color: var(--petri-text-secondary);
   cursor: pointer;
   border-bottom: 2px solid transparent;
-  transition: color 0.15s, border-color 0.15s;
+  transition: color var(--petri-duration-fast), border-color var(--petri-duration-fast);
 }
 
 .tabBtn:hover {
@@ -5639,7 +5639,7 @@ body:global(.petri-resizing-columns) * {
   text-align: left;
   cursor: pointer;
   border-radius: var(--petri-radius-md);;
-  transition: background 0.12s ease, box-shadow 0.12s ease;
+  transition: background var(--petri-duration-fast) ease, box-shadow var(--petri-duration-fast) ease;
   font-size: var(--petri-font-size-body);
   font-family: inherit;
 }
@@ -5690,7 +5690,7 @@ body:global(.petri-resizing-columns) * {
   margin-left: auto;
   opacity: 0;
   font-variant-numeric: tabular-nums;
-  transition: opacity 0.12s ease;
+  transition: opacity var(--petri-duration-fast) ease;
 }
 
 .fileTreeRow:hover .fileTreeSize,
@@ -6374,7 +6374,7 @@ body:global(.petri-resizing-columns) * {
      任何栏宽下长标题首行都不伸进按钮区（沿用 UI-323 悬浮设计，不设常驻工具条行） */
   padding: 46px 18px 18px;
   /* UI-400-6 补——目录展开/收起时左侧预留空间平滑过渡 */
-  transition: padding-left 0.18s ease;
+  transition: padding-left var(--petri-duration-base) ease;
   background: var(--petri-bg-surface);
   color: var(--petri-text);
   font-size: var(--petri-font-size-body);
@@ -6776,7 +6776,7 @@ body:global(.petri-resizing-columns) * {
   padding: var(--petri-space-2) var(--petri-space-3);
   border-radius: var(--petri-radius-md);;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background var(--petri-duration-fast);
 }
 
 .toolItem:hover {
@@ -6843,7 +6843,7 @@ body:global(.petri-resizing-columns) * {
   display: flex;
   align-items: center;
   gap: var(--petri-space-1);
-  transition: color 0.15s, border-color 0.15s;
+  transition: color var(--petri-duration-fast), border-color var(--petri-duration-fast);
 }
 
 .toolboxTab:hover {
@@ -6883,7 +6883,7 @@ body:global(.petri-resizing-columns) * {
   gap: var(--petri-space-3);
   padding: var(--petri-space-2) var(--petri-space-3);
   border-radius: var(--petri-radius-md);;
-  transition: background 0.15s;
+  transition: background var(--petri-duration-fast);
 }
 
 .pluginItem:hover {
@@ -6921,7 +6921,7 @@ body:global(.petri-resizing-columns) * {
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background var(--petri-duration-fast), border-color var(--petri-duration-fast);
 }
 
 .pluginBtnInstall {

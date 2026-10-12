@@ -1,5 +1,6 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-12（**UI-491 落地（BLOCK-167 W3 动效 token）**：全站 transition 时长 ~235 处→motion 三档 token+motion 棘轮断言（字面量仅存 reduced-motion 功能保留）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-490 落地（BLOCK-167 W2 控件收敛首掷）**：共享按钮变体模块六变体+ToolActivityDock iconBtn 迁移+extensions 死 backBtn 清除+按钮清单棘轮 31 文件冻结+pass2 双括号缺陷 12 处修复（build 门禁抓住）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-489 落地（BLOCK-167 W1 静态重校）**：字号 6 档终态+根默认 14px+519 处正文小字 inherit 化（14px 占比 40.3%）+装饰 accent 清除 37 处+结构细线 533→0（三语义 token 全覆盖）；契约棘轮随波收紧 15/15 绿。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-488 落地（BLOCK-167 W0 设计宪章+用法门禁）**：design-charter 落档（字号 6 档终态/色彩预算 10:1/border 三语义/motion 150/200/300+ease×2）+custom.css 宪章 token 组+global.css ::selection 全局唯一（accent 28% mix，此前全站缺失）+theme-token-contract +6 断言 15/15 绿（三棘轮 450/372/533 冻结+token 存在性+duration 档序+合成违例红证据自检）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -4831,3 +4832,9 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **守卫**：按钮清单棘轮（31 文件/125 定义冻结；新增定义文件/存量加定义即红）入 theme-token-contract。
 - **连带修复**：W1 pass2 正则少食右括号的 12 处 var(--petri-divider)) 非法声明（7 文件）——build 门禁抓住全修。
 - **门禁**：契约 16/16+build 绿+quality:lint 0 error；ToolActivityDock 2 error=HEAD 存量（stash 实证）。
+
+## UI-491: 动效 token 应用——transition 时长全站 token 化+motion 棘轮（2026-10-12 in_progress，BLOCK-167 W3）
+
+- **转换**：~235 处时长值→var(--petri-duration-fast/base/slow)（三遍：首值/行内/多行 continuation；0 与 >420ms 动画特形保留）。
+- **守卫**：motion 棘轮（字面量时长仅存 global.css reduced-motion 功能保留 2 处）+duration token 引用 ≥150 防退化，入 theme-token-contract。
+- **核实**：滚动条 28 规则/focus-visible 78 规则=既有 token 化成果；::selection W0 已落。渲染细节出口达成。

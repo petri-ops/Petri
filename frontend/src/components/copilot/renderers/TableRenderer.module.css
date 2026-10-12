@@ -157,8 +157,8 @@
   line-height: 1.2;
   letter-spacing: 0.02em;
   cursor: pointer;
-  transition: background-color 80ms ease, border-color 80ms ease,
-    color 80ms ease;
+  transition: background-color var(--petri-duration-fast) ease, border-color var(--petri-duration-fast) ease,
+    color var(--petri-duration-fast) ease;
 }
 
 .downloadButton:hover {

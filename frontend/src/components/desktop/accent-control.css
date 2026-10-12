@@ -16,7 +16,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  transition: transform var(--petri-duration-fast) ease, box-shadow var(--petri-duration-fast) ease;
 }
 
 .accent-control__swatch:hover {

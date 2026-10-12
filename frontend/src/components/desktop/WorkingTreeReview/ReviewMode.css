@@ -204,7 +204,7 @@
   position: absolute;
   inset: 0 auto 0 0;
   background: var(--petri-accent);
-  transition: width 200ms ease;
+  transition: width var(--petri-duration-base) ease;
 }
 
 /* ===== 主体：左栏文件树 + 右栏大空间 diff ===== */
@@ -286,7 +286,7 @@
   display: inline-flex;
   align-items: center;
   color: var(--petri-text-muted);
-  transition: transform 120ms ease;
+  transition: transform var(--petri-duration-fast) ease;
 }
 
 .rvw-caret-collapsed .rvw-caret-icon {
@@ -294,7 +294,7 @@
 }
 
 .rvw-caret-icon {
-  transition: transform 120ms ease;
+  transition: transform var(--petri-duration-fast) ease;
   display: inline-flex;
 }
 
@@ -829,7 +829,7 @@
   border-radius: var(--petri-radius-sm);;
   color: var(--petri-text-muted);
   opacity: 0;
-  transition: opacity 0.12s ease, background 0.12s ease;
+  transition: opacity var(--petri-duration-fast) ease, background var(--petri-duration-fast) ease;
   flex-shrink: 0;
 }
 

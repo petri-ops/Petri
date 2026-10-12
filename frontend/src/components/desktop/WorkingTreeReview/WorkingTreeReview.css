@@ -33,7 +33,7 @@
   color: var(--petri-text);
   cursor: pointer;
   box-shadow: var(--petri-shadow-sm);
-  transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+  transition: background var(--petri-duration-fast) ease, border-color var(--petri-duration-fast) ease, box-shadow var(--petri-duration-fast) ease;
   /* UI-245 — 窄面板 flex 挤压下文字不得换行（对比按钮曾被压成竖排字） */
   white-space: nowrap;
   flex-shrink: 0;
@@ -66,7 +66,7 @@
   cursor: pointer;
   font-size: var(--petri-font-size-sm);
   line-height: 1;
-  transition: background 120ms ease, color 120ms ease;
+  transition: background var(--petri-duration-fast) ease, color var(--petri-duration-fast) ease;
 }
 
 .wt-icon-btn:hover:not(:disabled) {

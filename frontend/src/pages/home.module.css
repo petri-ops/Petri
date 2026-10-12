@@ -179,8 +179,8 @@
   background: var(--petri-bg-canvas);
   color: var(--petri-text);
   cursor: pointer;
-  transition: border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: border-color var(--petri-duration-base) cubic-bezier(0.16, 1, 0.3, 1),
+              transform var(--petri-duration-base) cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .workbenchCard:hover {
@@ -393,8 +393,8 @@
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-canvas);
   color: var(--petri-text-secondary);
-  transition: border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: border-color var(--petri-duration-base) cubic-bezier(0.16, 1, 0.3, 1),
+              transform var(--petri-duration-base) cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .setupCheckItem:hover {
@@ -441,8 +441,8 @@
   padding: 0 var(--petri-space-5);
   border-radius: var(--petri-radius-lg);;
   cursor: pointer;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform var(--petri-duration-base) cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow var(--petri-duration-base) cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .setupPrimary {
@@ -523,7 +523,7 @@
   background: var(--petri-accent);
   color: #fff;
   cursor: pointer;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform var(--petri-duration-base) cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .setupStoreFooter button:hover {

@@ -44,7 +44,7 @@
   color: var(--petri-text-primary, #e6e9f2);
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.15s ease, transform 0.15s ease;
+  transition: border-color var(--petri-duration-fast) ease, transform var(--petri-duration-fast) ease;
 }
 
 .tile:hover {
@@ -177,7 +177,7 @@
   background: transparent;
   color: var(--petri-text-secondary, #9aa3b8);
   cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  transition: border-color var(--petri-duration-fast) ease, color var(--petri-duration-fast) ease;
 }
 
 .actionBtn:hover {

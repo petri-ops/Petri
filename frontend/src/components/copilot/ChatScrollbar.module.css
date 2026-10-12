@@ -17,7 +17,7 @@
   border-radius: var(--petri-radius-pill);;
   /* 深色中性灰常态（用户裁决：不用主题青绿），hover/拖拽加深 */
   background: color-mix(in srgb, var(--petri-text-secondary) 55%, transparent);
-  transition: background 0.15s, width 0.15s, right 0.15s;
+  transition: background var(--petri-duration-fast), width var(--petri-duration-fast), right var(--petri-duration-fast);
   cursor: pointer;
 }
 

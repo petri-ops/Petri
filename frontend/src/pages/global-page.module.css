@@ -32,7 +32,7 @@
   font-weight: 500;
   cursor: pointer;
   flex-shrink: 0;
-  transition: color 0.15s ease, background 0.15s ease;
+  transition: color var(--petri-duration-fast) ease, background var(--petri-duration-fast) ease;
 }
 
 .backBtn:hover {

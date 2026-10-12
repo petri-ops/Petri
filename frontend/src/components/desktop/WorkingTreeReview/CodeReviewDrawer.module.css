@@ -245,7 +245,7 @@
   background: var(--petri-bg-button, #3a3a3a);
   color: inherit;
   cursor: pointer;
-  transition: background 120ms ease;
+  transition: background var(--petri-duration-fast) ease;
   font-family: inherit;
   line-height: 1.4;
 }

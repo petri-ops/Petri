@@ -50,7 +50,7 @@
      用户指认「我要的会话是现在项目摘要的效果」）：悬浮态轻微透出下层
      内容，hover 回到实感并上浮 1px；同款 0.25s 三属性过渡。 */
   opacity: 0.92;
-  transition: opacity 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  transition: opacity var(--petri-duration-base) ease, box-shadow var(--petri-duration-base) ease, transform var(--petri-duration-base) ease;
 }
 
 .surface:hover {

@@ -25,8 +25,8 @@
   width: 64px;
   box-sizing: border-box;
   transition:
-    width 0.25s ease,
-    padding 0.25s ease;
+    width var(--petri-duration-base) ease,
+    padding var(--petri-duration-base) ease;
 }
 
 /* 收缩状态：宽度压缩到只留一个 toggle 按钮 */
@@ -75,8 +75,8 @@
   color: var(--petri-text-muted);
   cursor: pointer;
   transition:
-    background 0.15s ease,
-    color 0.15s ease;
+    background var(--petri-duration-fast) ease,
+    color var(--petri-duration-fast) ease;
 }
 /* 展开状态下，让 toggle 略靠右，避免贴左缘 */
 .petri-desktop-dock:not(.petri-desktop-dock--collapsed) .petri-desktop-dock__toggle {
@@ -120,8 +120,8 @@
   color: var(--petri-text-secondary);
   cursor: pointer;
   transition:
-    background 0.15s ease,
-    color 0.15s ease;
+    background var(--petri-duration-fast) ease,
+    color var(--petri-duration-fast) ease;
 }
 
 .petri-desktop-dock__btn:hover {
@@ -201,7 +201,7 @@
   cursor: col-resize;
   z-index: 10;
   background: transparent;
-  transition: background 0.15s;
+  transition: background var(--petri-duration-fast);
 }
 
 .petri-desktop-workarea__resize-handle:hover,
@@ -409,7 +409,7 @@
   padding: var(--petri-space-3) var(--petri-space-2);
   border-radius: var(--petri-radius-md);;
   background: var(--petri-bg-surface);
-  transition: background-color 120ms ease;
+  transition: background-color var(--petri-duration-fast) ease;
 }
 
 .petri-model-preset:hover,
@@ -1023,8 +1023,8 @@
   font-size: var(--petri-font-size-body);
   font-family: inherit;
   transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
+    border-color var(--petri-duration-fast) ease,
+    box-shadow var(--petri-duration-fast) ease;
   box-sizing: border-box;
 }
 
@@ -1060,7 +1060,7 @@
   background: var(--petri-border-strong);
   position: relative;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background var(--petri-duration-fast) ease;
   flex-shrink: 0;
   margin: 0;
 }
@@ -1076,7 +1076,7 @@
   height: 18px;
   border-radius: 50%;
   background: var(--petri-bg-surface);
-  transition: transform 0.15s ease;
+  transition: transform var(--petri-duration-fast) ease;
 }
 .petri-toggle:checked::after {
   transform: translateX(16px);
@@ -1115,8 +1115,8 @@
   font-family: inherit;
   cursor: pointer;
   transition:
-    background 0.15s ease,
-    opacity 0.15s ease;
+    background var(--petri-duration-fast) ease,
+    opacity var(--petri-duration-fast) ease;
   white-space: nowrap;
 }
 
@@ -1315,7 +1315,7 @@
   background: var(--petri-bg-surface);
   color: var(--petri-text);
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color var(--petri-duration-fast);
 }
 
 .petri-plugin-store__search input:focus {
@@ -1368,8 +1368,8 @@
   font-weight: 600;
   cursor: pointer;
   transition:
-    background 0.12s,
-    color 0.12s;
+    background var(--petri-duration-fast),
+    color var(--petri-duration-fast);
   text-align: left;
   font-family: inherit;
 }
@@ -1472,7 +1472,7 @@
   border-radius: var(--petri-radius-lg);;
   border: 1px solid var(--petri-border-card);
   background: var(--petri-bg-surface);
-  transition: border-color 0.15s;
+  transition: border-color var(--petri-duration-fast);
 }
 
 .petri-plugin-store__runtime-item.installed {
@@ -1606,8 +1606,8 @@
   border: 1px solid var(--petri-border-card);
   background: var(--petri-bg-surface);
   transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
+    border-color var(--petri-duration-fast),
+    box-shadow var(--petri-duration-fast);
 }
 
 .petri-plugin-card:hover {
@@ -1857,7 +1857,7 @@
   height: 100%;
   background: var(--petri-accent);
   border-radius: var(--petri-radius-sm);;
-  transition: width 0.3s ease;
+  transition: width var(--petri-duration-slow) ease;
 }
 
 [data-theme='dark'] .petri-plugin-store__progress-bar {
@@ -1898,7 +1898,7 @@
 
 /* main 内容区定位（与 SkillsSidebar 配合）*/
 .petri-spa-main {
-  transition: margin-left 0.25s ease;
+  transition: margin-left var(--petri-duration-base) ease;
 }
 
 /* ============================================================
@@ -1933,8 +1933,8 @@
   font-family: inherit;
   cursor: pointer;
   transition:
-    background 0.15s ease,
-    color 0.15s ease;
+    background var(--petri-duration-fast) ease,
+    color var(--petri-duration-fast) ease;
   text-align: left;
 }
 
@@ -1967,7 +1967,7 @@
 .petri-nav-item__arrow {
   color: rgba(139, 152, 173, 0.92);
   flex-shrink: 0;
-  transition: color 0.15s ease;
+  transition: color var(--petri-duration-fast) ease;
 }
 
 .petri-nav-item:hover .petri-nav-item__arrow {
@@ -2028,8 +2028,8 @@
 .petri-desktop-dock__draggable {
   cursor: grab;
   transition:
-    transform 0.15s ease,
-    opacity 0.15s ease;
+    transform var(--petri-duration-fast) ease,
+    opacity var(--petri-duration-fast) ease;
 }
 
 .petri-desktop-dock__draggable:active {
@@ -2078,7 +2078,7 @@
   border-right: 1px solid var(--petri-divider);
   box-shadow: var(--petri-shadow-menu);
   transform: translateX(-110%); /* 默认隐藏：往左滑出被 dock 遮住 */
-  transition: transform 0.22s ease;
+  transition: transform var(--petri-duration-base) ease;
   overflow: hidden auto;
   visibility: hidden;
 }

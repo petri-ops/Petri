@@ -62,7 +62,7 @@
   stroke-width: 0.5;
   /* P2: cursor change signals that bars are now interactive. */
   cursor: pointer;
-  transition: fill-opacity 120ms ease, stroke-width 120ms ease;
+  transition: fill-opacity var(--petri-duration-fast) ease, stroke-width var(--petri-duration-fast) ease;
 }
 
 .bar:hover,
@@ -102,7 +102,7 @@
   /* Vector effect keeps dot strokes sharp at smaller scales. */
   vector-effect: non-scaling-stroke;
   cursor: pointer;
-  transition: stroke-width 120ms ease, r 120ms ease;
+  transition: stroke-width var(--petri-duration-fast) ease, r var(--petri-duration-fast) ease;
 }
 
 .dot:hover,
@@ -148,8 +148,8 @@
   font: inherit;
   line-height: 1;
   cursor: pointer;
-  transition: background-color 120ms ease, color 120ms ease,
-    opacity 120ms ease;
+  transition: background-color var(--petri-duration-fast) ease, color var(--petri-duration-fast) ease,
+    opacity var(--petri-duration-fast) ease;
 }
 
 .legendButton:hover,

@@ -34,7 +34,7 @@
   border-radius: var(--petri-radius-pill);;
   background: var(--petri-text-tertiary, var(--petri-text-secondary));
   opacity: 0.45;
-  transition: width 0.15s, background 0.15s, opacity 0.15s;
+  transition: width var(--petri-duration-fast), background var(--petri-duration-fast), opacity var(--petri-duration-fast);
 }
 
 .rail:hover .tickBar {

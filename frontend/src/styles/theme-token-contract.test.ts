@@ -499,6 +499,31 @@ describe('theme token contract', () => {
     expectRatchet(RATCHET, actual);
   });
 
+  it('transition durations use motion tokens (motion 棘轮：字面量时长仅存功能保留)', () => {
+    // 宪章 §4：W3 起全站 transition 时长走 duration 三档 token；唯一豁免=
+    // global.css reduced-motion 功能块的 transition-delay: 0ms（0 值非档位语义）。
+    const LITERAL_TIME = /transition[a-z-]*:\s*[^;]*\d*\.?\d+m?s/;
+    const offenders: { file: string; decl: string }[] = [];
+    for (const file of CSS_FILES()) {
+      const css = stripCss(file);
+      for (const m of css.matchAll(new RegExp(LITERAL_TIME.source, 'g'))) {
+        offenders.push({ file: path.relative(srcRoot, file), decl: m[0].trim().slice(0, 70) });
+      }
+    }
+    const ALLOWED = offenders.filter(
+      (o) => o.file.replaceAll('\\', '/') === 'styles/global.css' && /transition-delay:\s*0/.test(o.decl),
+    );
+    expect(offenders.filter((o) => !ALLOWED.includes(o))).toEqual([]);
+    // token 化存量守卫：duration token 引用必须存在（防整段退化）
+    let tokenUses = 0;
+    for (const file of CSS_FILES()) {
+      tokenUses += (
+        stripCss(file).match(/var\(--petri-duration-(?:fast|base|slow)\)/g) || []
+      ).length;
+    }
+    expect(tokenUses).toBeGreaterThan(150);
+  });
+
   it('charter counters catch synthetic violations (红证据自检)', () => {
     // 合成违例必须被计数器抓住——棘轮「新增即红」的机制证明（HK-04 精确红先例）。
     const count = (css: string, re: RegExp) => (css.match(new RegExp(re.source, 'g')) || []).length;

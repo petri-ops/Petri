@@ -282,7 +282,7 @@
   cursor: pointer;
   text-align: left;
   font: inherit;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  transition: border-color var(--petri-duration-fast) ease, box-shadow var(--petri-duration-fast) ease, background var(--petri-duration-fast) ease;
 }
 
 .sc-example-card:hover {
@@ -429,7 +429,7 @@
   gap: var(--petri-space-1);
   margin-top: var(--petri-space-3);
   opacity: 0;
-  transition: opacity 0.15s ease;
+  transition: opacity var(--petri-duration-fast) ease;
 }
 
 .sc-msg-assistant:hover .sc-msg-actions,
@@ -840,7 +840,7 @@
   color: var(--petri-text-tertiary);
   cursor: pointer;
   opacity: 0.45;
-  transition: color 120ms ease, background-color 120ms ease, opacity 120ms ease;
+  transition: color var(--petri-duration-fast) ease, background-color var(--petri-duration-fast) ease, opacity var(--petri-duration-fast) ease;
 }
 
 .cp-copy-button:hover,
@@ -1446,7 +1446,7 @@
   top: 6px;
   right: 6px;
   opacity: 0;
-  transition: opacity 0.15s ease;
+  transition: opacity var(--petri-duration-fast) ease;
 }
 
 .sc-tool-term-output-wrap:hover .sc-tool-term-copy-out {
@@ -1912,7 +1912,7 @@
   overflow: visible;
   display: flex;
   flex-direction: column;
-  transition: width 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+  transition: width var(--petri-duration-fast) ease, border-color var(--petri-duration-fast) ease, background var(--petri-duration-fast) ease;
 }
 
 .sc-composer-body {
@@ -1932,7 +1932,7 @@
   line-height: 1.6;
   color: var(--petri-text);
   background: transparent;
-  transition: background 0.15s ease;
+  transition: background var(--petri-duration-fast) ease;
   outline: none;
   overflow-y: auto;
 }
@@ -2010,7 +2010,7 @@
   background: transparent;
   color: var(--petri-text-tertiary);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background var(--petri-duration-fast) ease, color var(--petri-duration-fast) ease;
   /* UI-215 补充：纯图标按钮收敛 UA 默认字号到 token */
   font-size: var(--petri-font-size-sm);
 }
@@ -2156,7 +2156,7 @@
   border-radius: var(--petri-radius-pill);;
   box-shadow: none;
   cursor: pointer;
-  transition: transform 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+  transition: transform var(--petri-duration-fast) ease, background var(--petri-duration-fast) ease, opacity var(--petri-duration-fast) ease;
   /* UI-215 补充：纯图标按钮收敛 UA 默认字号到 token */
 }
 
@@ -2444,7 +2444,7 @@
   font-weight: 500;
   cursor: pointer;
   opacity: 0.8;
-  transition: opacity 0.15s ease;
+  transition: opacity var(--petri-duration-fast) ease;
 }
 
 .sc-error-toggle:hover {
@@ -2716,7 +2716,7 @@
   color: var(--petri-text);
   text-align: left;
   cursor: pointer;
-  transition: background 0.08s;
+  transition: background var(--petri-duration-fast);
 }
 
 .sc-slash-item:hover,
@@ -2851,7 +2851,7 @@
   background: transparent;
   color: var(--petri-text-tertiary);
   cursor: pointer;
-  transition: background 0.1s, color 0.1s;
+  transition: background var(--petri-duration-fast), color var(--petri-duration-fast);
 }
 
 .cp-search-clear:hover {
@@ -2907,7 +2907,7 @@
   padding: 9px 10px;
   border-radius: var(--petri-radius-lg);;
   cursor: pointer;
-  transition: background 0.08s;
+  transition: background var(--petri-duration-fast);
   min-height: 0;
 }
 
@@ -3043,7 +3043,7 @@
   font-size: var(--petri-font-size-body);
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--petri-duration-fast) ease;
 }
 
 .sc-fork-btn:hover:not(:disabled) {
@@ -3170,7 +3170,7 @@
   background: rgba(0, 0, 0, 0.5);
   color: white;
   opacity: 0;
-  transition: opacity 0.15s ease;
+  transition: opacity var(--petri-duration-fast) ease;
 }
 
 .sc-attachment-preview-btn:hover .sc-attachment-overlay {
@@ -3211,7 +3211,7 @@
   background: transparent;
   color: var(--petri-text-muted);
   cursor: pointer;
-  transition: background 0.12s ease, color 0.12s ease;
+  transition: background var(--petri-duration-fast) ease, color var(--petri-duration-fast) ease;
 }
 
 .sc-attachment-remove:hover {
@@ -3273,7 +3273,7 @@
   background: transparent;
   color: var(--petri-text-muted);
   cursor: pointer;
-  transition: background 0.12s ease, color 0.12s ease;
+  transition: background var(--petri-duration-fast) ease, color var(--petri-duration-fast) ease;
 }
 
 .sc-selection-ref-remove:hover {
@@ -3348,7 +3348,7 @@
   background: transparent;
   color: var(--petri-text-muted);
   cursor: pointer;
-  transition: background 0.12s ease, color 0.12s ease;
+  transition: background var(--petri-duration-fast) ease, color var(--petri-duration-fast) ease;
 }
 
 .sc-image-ref-remove:hover {
@@ -3443,7 +3443,7 @@
   color: var(--petri-text-secondary);
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+  transition: background var(--petri-duration-fast) ease, color var(--petri-duration-fast) ease, border-color var(--petri-duration-fast) ease;
 }
 
 .sc-preview-control-btn:hover {
@@ -3479,7 +3479,7 @@
   background: transparent;
   color: var(--petri-text-secondary);
   cursor: pointer;
-  transition: background 0.12s ease, color 0.12s ease;
+  transition: background var(--petri-duration-fast) ease, color var(--petri-duration-fast) ease;
 }
 
 .sc-preview-close-btn:hover {
@@ -3502,7 +3502,7 @@
   max-width: 100%;
   max-height: calc(90vh - 100px);
   object-fit: contain;
-  transition: transform 0.2s ease;
+  transition: transform var(--petri-duration-base) ease;
   cursor: grab;
 }
 
@@ -3669,7 +3669,7 @@
   font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
-  transition: color 0.15s, background 0.15s;
+  transition: color var(--petri-duration-fast), background var(--petri-duration-fast);
 }
 
 .sc-changes-scope-btn:hover {
@@ -4036,7 +4036,7 @@
   padding: 2px var(--petri-space-1);
   border-radius: var(--petri-radius-sm);;
   opacity: 0;
-  transition: opacity 0.12s ease;
+  transition: opacity var(--petri-duration-fast) ease;
 }
 
 .sc-tool-qoder-row:hover .sc-tool-row-copy,
@@ -4182,7 +4182,7 @@
   box-shadow: var(--petri-shadow-float, 0 4px 12px rgb(0 0 0 / 12%));
   cursor: zoom-in;
   overflow: hidden;
-  transition: transform 120ms ease, box-shadow 120ms ease;
+  transition: transform var(--petri-duration-fast) ease, box-shadow var(--petri-duration-fast) ease;
 }
 
 .sc-msg-inline-image-btn:hover {
@@ -4218,7 +4218,7 @@
   border: 1px solid var(--petri-border-card);
   background: var(--petri-bg-elevated);
   opacity: 0;
-  transition: opacity 120ms ease;
+  transition: opacity var(--petri-duration-fast) ease;
 }
 
 .sc-attachment:has(.sc-attachment-preview-btn) {

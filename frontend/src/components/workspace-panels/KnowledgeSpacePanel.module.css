@@ -95,7 +95,7 @@
   height: 14px;
   border-radius: 50%;
   background: var(--petri-text-tertiary);
-  transition: background 0.15s ease;
+  transition: background var(--petri-duration-fast) ease;
 }
 
 .switchBtnOn .switchKnob {

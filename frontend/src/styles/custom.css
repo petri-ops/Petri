@@ -554,7 +554,7 @@ html[data-theme='dark'],
 
 .markdown img:hover {
   opacity: 0.9;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--petri-duration-slow) ease;
   box-shadow: var(--petri-shadow-menu);
 }
 
@@ -599,9 +599,9 @@ html[data-theme='dark'],
   text-decoration: none;
   white-space: nowrap;
   transition:
-    border-color 160ms ease,
-    color 160ms ease,
-    transform 160ms ease;
+    border-color var(--petri-duration-fast) ease,
+    color var(--petri-duration-fast) ease,
+    transform var(--petri-duration-fast) ease;
 }
 
 .petri-download__button:hover,
@@ -929,7 +929,7 @@ html[data-theme='dark'],
   border-radius: var(--petri-radius-lg);;
   text-decoration: none !important;
   color: inherit !important;
-  transition: all 0.15s;
+  transition: all var(--petri-duration-fast);
 }
 
 .try-online-card:hover {
@@ -985,7 +985,7 @@ html[data-theme='dark'],
   font-size: var(--petri-font-size-xl);
   color: var(--ifm-color-primary);
   flex-shrink: 0;
-  transition: transform 0.15s;
+  transition: transform var(--petri-duration-fast);
 }
 
 .try-online-card:hover .try-online-arrow {
@@ -1012,7 +1012,7 @@ html[data-theme='dark'],
 .navbar .navbar__search-input {
   width: 200px;
   max-width: 22vw;
-  transition: width 150ms ease;
+  transition: width var(--petri-duration-fast) ease;
 }
 .navbar .navbar__search-input:focus {
   width: 240px;

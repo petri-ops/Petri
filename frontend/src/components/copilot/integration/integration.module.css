@@ -20,7 +20,7 @@
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 2px;
-  transition: color 120ms ease;
+  transition: color var(--petri-duration-fast) ease;
 }
 
 .chatCardLink:hover {
@@ -50,7 +50,7 @@
   font: inherit;
   box-shadow: var(--petri-shadow-sm);
   z-index: 10;
-  transition: background-color 120ms ease;
+  transition: background-color var(--petri-duration-fast) ease;
 }
 
 .chatCardLinkFloating:hover {

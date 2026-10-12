@@ -25,7 +25,7 @@
   width: 3px;
   border-radius: var(--petri-radius-sm);;
   background: color-mix(in srgb, var(--petri-text-tertiary) 35%, transparent);
-  transition: background 0.2s ease;
+  transition: background var(--petri-duration-base) ease;
 }
 
 .handle:hover::after {

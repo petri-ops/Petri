@@ -116,7 +116,7 @@
   color: var(--win-btn-fg);
   cursor: pointer;
   flex-shrink: 0;
-  transition: background 0.12s ease, color 0.12s ease, transform 0.12s ease;
+  transition: background var(--petri-duration-fast) ease, color var(--petri-duration-fast) ease, transform var(--petri-duration-fast) ease;
   outline: none;
 }
 
@@ -162,7 +162,7 @@
   color: var(--win-btn-fg);
   cursor: pointer;
   flex-shrink: 0;
-  transition: background 0.12s ease, color 0.12s ease, transform 0.12s ease;
+  transition: background var(--petri-duration-fast) ease, color var(--petri-duration-fast) ease, transform var(--petri-duration-fast) ease;
   outline: none;
 }
 
@@ -522,7 +522,7 @@
   background: transparent;
   color: var(--titlebar-ink-muted);
   cursor: pointer;
-  transition: background 0.14s ease, color 0.14s ease, opacity 0.14s ease;
+  transition: background var(--petri-duration-fast) ease, color var(--petri-duration-fast) ease, opacity var(--petri-duration-fast) ease;
   padding: 0;
   flex-shrink: 0;
   /* UI-215 补充：纯图标按钮收敛 UA 默认字号（13.3333px）到 token */
@@ -568,7 +568,7 @@
   background: var(--titlebar-pill-bg);
   color: var(--titlebar-ink);
   cursor: pointer;
-  transition: background 0.14s ease, border-color 0.14s ease, color 0.14s ease;
+  transition: background var(--petri-duration-fast) ease, border-color var(--petri-duration-fast) ease, color var(--petri-duration-fast) ease;
 }
 
 .tabPillActive {
@@ -685,7 +685,7 @@
   cursor: pointer;
   padding: 0;
   flex-shrink: 0;
-  transition: background 0.14s ease, color 0.14s ease;
+  transition: background var(--petri-duration-fast) ease, color var(--petri-duration-fast) ease;
 }
 
 .winBtn:hover {

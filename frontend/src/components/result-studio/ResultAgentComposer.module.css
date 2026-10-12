@@ -17,7 +17,7 @@
   border-radius: var(--petri-radius-md);;
   padding: 3px var(--petri-space-1) 3px 9px;
   background: var(--petri-bg-elevated);
-  transition: border-color 120ms ease;
+  transition: border-color var(--petri-duration-fast) ease;
 }
 
 .composerRow:focus-within {
@@ -38,7 +38,7 @@
   color: var(--petri-text-primary);
   font: inherit;
   line-height: 18px;
-  transition: min-height 120ms ease;
+  transition: min-height var(--petri-duration-fast) ease;
 }
 
 .root:focus-within .composerRow textarea {

@@ -48,7 +48,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s;
+  transition: background var(--petri-duration-fast);
 }
 .petri-lightbox__close:hover {
   background: rgba(255, 255, 255, 0.25);
