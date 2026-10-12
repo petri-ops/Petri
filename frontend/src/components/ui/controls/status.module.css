@@ -1,0 +1,98 @@
+/* BLOCK-167 W4 — 状态三件套（空/载/错）单源（宪章 §6） */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--petri-space-3);
+  padding: var(--petri-space-7) var(--petri-space-5);
+  text-align: center;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--petri-radius-lg);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-secondary);
+}
+
+.title {
+  font-size: var(--petri-font-size-body);
+  font-weight: 600;
+  color: var(--petri-text);
+}
+
+.description {
+  max-width: 46ch;
+  margin: 0;
+  color: var(--petri-text-muted);
+}
+
+.actions {
+  display: flex;
+  gap: var(--petri-space-2);
+  margin-top: var(--petri-space-1);
+}
+
+/* 错误通告条：danger 语义边+浅底（状态信号色=宪章豁免族） */
+.errorNotice {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-3);
+  padding: var(--petri-space-3) var(--petri-space-4);
+  border: 1px solid color-mix(in srgb, var(--petri-danger) 35%, transparent);
+  border-radius: var(--petri-radius-md);
+  background: color-mix(in srgb, var(--petri-danger) 6%, transparent);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-sm);
+}
+
+.errorMsg {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.retryBtn {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--petri-danger);
+  font-weight: 500;
+  cursor: pointer;
+  font-size: var(--petri-font-size-sm);
+}
+
+.retryBtn:hover {
+  text-decoration: underline;
+}
+
+/* 加载块 */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--petri-space-2);
+  padding: var(--petri-space-6);
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-sm);
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--petri-border-card);
+  border-top-color: var(--petri-text-secondary);
+  border-radius: 50%;
+  animation: spin var(--petri-duration-slow) linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

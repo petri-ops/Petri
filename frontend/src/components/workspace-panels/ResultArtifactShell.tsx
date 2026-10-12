@@ -6,6 +6,7 @@ import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { Icon } from '@/components/icons/Icon';
 import type { Project, ToolJob } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
+import { ErrorNotice } from '@/components/ui/controls/Status';
 import { findCatalogTool, useToolCatalog } from '@/lib/tool-catalog';
 import { buildPreviewTable } from '@/lib/file-preview/buildPreviewTable';
 import { csvPreviewPageCount, csvPreviewPageRows } from '@/lib/csv-preview-pagination';
@@ -1163,10 +1164,10 @@ export function ResultArtifactShell({
       // 网络/服务错误：如实告知并提供重试，绝不谎报为"未生成结果"
       return stateBlock(
         job.name || job.tool_id,
-        <div className={styles.resultPlaceholder}>
-          <p>结果加载失败：{resultError}</p>
-          <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={() => setResultRetryVersion((value) => value + 1)}>重试</button>
-        </div>,
+        <ErrorNotice
+          message={`结果加载失败：${resultError}`}
+          onRetry={() => setResultRetryVersion((value) => value + 1)}
+        />,
         'done'
       );
     }

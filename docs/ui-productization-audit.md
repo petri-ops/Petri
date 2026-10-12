@@ -1,5 +1,6 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-12（**UI-492 落地（BLOCK-167 W4 状态三件套）**：Status.tsx 三件套单源+ResultArtifactShell 错误态首迁+覆盖清点+语气 pass 抽查零硬伤。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-491 落地（BLOCK-167 W3 动效 token）**：全站 transition 时长 ~235 处→motion 三档 token+motion 棘轮断言（字面量仅存 reduced-motion 功能保留）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-490 落地（BLOCK-167 W2 控件收敛首掷）**：共享按钮变体模块六变体+ToolActivityDock iconBtn 迁移+extensions 死 backBtn 清除+按钮清单棘轮 31 文件冻结+pass2 双括号缺陷 12 处修复（build 门禁抓住）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-489 落地（BLOCK-167 W1 静态重校）**：字号 6 档终态+根默认 14px+519 处正文小字 inherit 化（14px 占比 40.3%）+装饰 accent 清除 37 处+结构细线 533→0（三语义 token 全覆盖）；契约棘轮随波收紧 15/15 绿。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -4838,3 +4839,10 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **转换**：~235 处时长值→var(--petri-duration-fast/base/slow)（三遍：首值/行内/多行 continuation；0 与 >420ms 动画特形保留）。
 - **守卫**：motion 棘轮（字面量时长仅存 global.css reduced-motion 功能保留 2 处）+duration token 引用 ≥150 防退化，入 theme-token-contract。
 - **核实**：滚动条 28 规则/focus-visible 78 规则=既有 token 化成果；::selection W0 已落。渲染细节出口达成。
+
+## UI-492: 空/载/错三件套单源+结果错误态迁移（2026-10-12 in_progress，BLOCK-167 W4）
+
+- **三件套**：components/ui/controls/Status.tsx（EmptyState/ErrorNotice/LoadingBlock）+status.module.css——全 token 化（细线 danger color-mix、动画走 duration token）。
+- **首迁**：ResultArtifactShell「结果加载失败」→ErrorNotice（重试语义不变，样式单源化）。
+- **清点**：知识库/扩展空态=结构化保留；项目工作区错误态=本次统一；聊天=起始态自洽。三件套为新状态强制入口，存量按触域渐进。
+- **语气**：12 处抽查零硬伤，零改动登记。
