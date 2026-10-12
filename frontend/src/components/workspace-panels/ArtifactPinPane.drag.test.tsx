@@ -23,7 +23,7 @@ function renderPane() {
   return render(
     React.createElement(ArtifactPinPane, {
       mode: 'result',
-      snapshot: snapshot as any,
+      snapshot: snapshot,
       onUnpin: () => {},
     }, React.createElement('div', null, '主区')),
   );

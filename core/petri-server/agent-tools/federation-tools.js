@@ -97,7 +97,7 @@ async function mirrorPeerTaskEvents(peer, token, peerTaskId, timeoutMs) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const base = String(peer.baseUrl || '').replace(/\/$/, '');
+    const base = String(peer.baseUrl || '').replace(/\/+$/, '');
     const response = await fetch(
       base + '/api/ai/agent/task/' + encodeURIComponent(peerTaskId),
       { headers: { Authorization: 'Bearer ' + token, Accept: 'text/event-stream' }, signal: controller.signal },
