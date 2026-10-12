@@ -5497,6 +5497,28 @@
    "notes": "2026-10-01 用户裁决方向立项（通用 agent+垂直生信+未来领域；灵活+有效三判据=内核领域无关/垂直域配方入驻/每切片对已立案痛点）。三层契约=对象层 artifact 模型/渲染层 viewer 注册表/回路层选择总线+画布视图；切片 A-E；领域入驻配方=工具包+skill 包+viewer 包，内核零改动判据；反目标六条（不引 tldraw/不推翻 isSingleActiveMode/registry 非第二真相/不预置未来领域代码等）。首包 BLOCK-138 承载切片 A+B；切片启动逐个过立项检查单，本文件不预设推进序。"
   },
   {
+   "id": "AGENT-COMPETITIVENESS-PROGRAM",
+   "capability": "agent-competitiveness",
+   "path": "docs/agent-competitiveness-program.md",
+   "kind": "vision",
+   "status": "planned",
+   "canonical": true,
+   "truthDomain": "agent-competitiveness",
+   "entrypoint": "docs/README.md",
+   "registeredAt": "2026-10-12",
+   "archivePolicy": "retain_stable_path",
+   "tags": [
+    "agent-competitiveness",
+    "direction",
+    "orchestration",
+    "context-memory",
+    "governance",
+    "gen-ui",
+    "local-sovereignty"
+   ],
+   "notes": "2026-10-12 用户裁决三连落档（反克隆借形不改魂+agent 通用能力为主线核心+方案要更全面）：行业竞争力标尺取代 G0 内部天花板为新量尺——双口径评分卡（8 维）+差距矩阵 18 项（双路只读探查 60+ 锚点）+六波 19 候选包（CP-1~CP-19：W1 交互主权与信任可见化/W2 长程上下文与记忆/W3 编排多智能体/W4 Gen UI 双轨/W5 数据资产面接线/W6 协作与可靠性长尾）+总对账表 15 指标+依赖 DAG。蓝图 G1+ 残余三件（确认弹卡/chip v2/DAG 化）经用户裁决拉回 G0 由 CP-2/CP-3/CP-9 承载。planned=方向采纳未发令；排队序唯一在 pending-work-backlog，波次发令时入队列。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+  },
+  {
    "id": "BLOCK-138-ARTIFACT-PLANE-KERNEL",
    "capability": "artifact-plane-kernel",
    "path": "docs/block-138-artifact-plane-kernel-plan.md",
