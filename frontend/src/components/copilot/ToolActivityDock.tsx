@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 // BLOCK-173 CP-9 — 编排 DAG 可视化（spawn 树只读投影；数据源=既有 run 快照）
-import { useSubAgentTasksForConversation, listSubAgentTasksForConversation } from './conversationRunStore/subAgentTasks';
+import { useSubAgentTasksForConversation } from './conversationRunStore/subAgentTasks';
 import { getConversationRunSnapshot } from './conversationRunStore';
 import { OrchestrationGraph } from '@/components/workspace-panels/OrchestrationGraph';
 import {
@@ -66,17 +66,25 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
   const [showGraph, setShowGraph] = useState(false);
   const subAgentTasks = useSubAgentTasksForConversation(conversationId);
   const logRef = useRef<HTMLPreElement | null>(null);
-  // 轮询回调里读到的最新会话/项目（避免 interval 反复重建）
+  // 轮询回调里读到的最新会话/项目（避免 interval 反复重建）。
+  // BLOCK-173 W3 — ref 写入移出 render（react-hooks 新规）：effect 每渲染同步，
+  // 轮询 interval 读取时点在 effect 之后，语义不变。
   const ctxRef = useRef({ conversationId, projectId });
-  ctxRef.current = { conversationId, projectId };
+  useEffect(() => {
+    ctxRef.current = { conversationId, projectId };
+  });
 
   const runningProcessCount = processes.filter((p) => isProcessActive(p.status)).length;
 
-  // 会话切换后重置回关闭态（避免打开会话即弹历史浮窗）
-  useEffect(() => {
+  // 会话切换后重置回关闭态（避免打开会话即弹历史浮窗）。
+  // BLOCK-173 W3 — 改用 React 官方「render 期 adjust-state」模式（prev 对比），
+  // 消除 effect 内同步 setState（react-hooks/set-state-in-effect）。
+  const [prevConversationId, setPrevConversationId] = useState(conversationId);
+  if (prevConversationId !== conversationId) {
+    setPrevConversationId(conversationId);
     setDismissed(true);
     setProcesses([]);
-  }, [conversationId]);
+  }
 
   // 后台进程事件：绑定到当前会话才弹出
   useEffect(() => {
