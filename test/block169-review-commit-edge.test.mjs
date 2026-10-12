@@ -115,7 +115,6 @@ function hunkSignatureOf(hunk) {
 const keyOf = (file, hunk) => `${file}#${hunkSignatureOf(hunk)}`;
 const readTarget = (repo) => fs.readFileSync(path.join(repo.repoDir, TARGET), 'utf-8');
 const headTarget = (repo) => repo.git(['show', `HEAD:${TARGET}`]);
-const indexTarget = (repo) => repo.git(['show', `:${TARGET}`]);
 
 async function getStagedHunks(repo, filePath = TARGET) {
   const res = await callDiff({ paths: [filePath], staged: true });

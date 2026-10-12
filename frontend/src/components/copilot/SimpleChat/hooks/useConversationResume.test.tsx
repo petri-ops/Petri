@@ -335,7 +335,7 @@ describe('BLOCK-151 A1 loadOlder 会话切换竞态守卫（BLOCK-102 P2 现状�
 // 对账/区间并集）」立项前的事实基线：换算法时本组断言按新语义改写。
 // ---------------------------------------------------------------------------
 describe('BLOCK-169 A1 反例行为测锁（现状语义；升级登记见 C-24 收口）', () => {
-  const msg = (id: string, ts: string, content = id) => ({ id, role: 'user', content, ts }) as never[];
+  const msg = (id: string, ts: string, content = id) => ({ id, role: 'user', content, ts }) as never;
 
   it('窗口空洞：ts<边界但非连续前缀的本地消息会被并入（现状按 ts 阈值不辨连续性）', () => {
     // loadOlder 中间页缺失时（窗口空洞），hole 的 ts 早于窗口首条——

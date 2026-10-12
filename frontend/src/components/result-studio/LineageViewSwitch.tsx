@@ -44,7 +44,7 @@ export function LineageViewSwitch({ projectId, jobId, onPinArtifact }: {
         if (cancelled) return;
         setObservation({
           key: `${jobId}::${projectId ?? ''}`,
-          state: Boolean(response.lineage && response.lineage.chain.length >= 2) ? 'ready' : 'empty',
+          state: response.lineage && response.lineage.chain.length >= 2 ? 'ready' : 'empty',
         });
       })
       .catch(() => {

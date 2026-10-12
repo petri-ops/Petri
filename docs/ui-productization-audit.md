@@ -1,5 +1,6 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-12（**UI-495 加映**：A4-2 三态化落地（empty/error 行内提示）+closeout lint 抓真两处修复。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-495 落地（BLOCK-169 commitReview 三边缘+C-24 UI 两项+A1 锁测）**：H-1 键基线同源（staged 文件面板键不再误判 stale，内容面=staged 快照防再编辑夹带）+H-2 staged 删除 rm --cached 分流+H-3 stage 后移零遗留+A4-1 钉住失败行内反馈+A4-2 lineage 空态提示/Graph 操作提示+A1 反例锁测 13/13。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-494 落地（BLOCK-167 加映·质感渐进迁移批）**：iconBtn 双族单源化（KSP 精确重复删除+PWS 32px 覆盖收编，LeftPanel/KnowledgeDocLibrary tsx 组合）+RouteErrorBoundary 按钮收编（primary/ghost 变体，hover 随共享）；按钮清单 32 文件/122 定义（棘轮随批下调）。残红=agentStream 4 失败 HEAD 同红（stash 实证，BLOCK-159 系）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-493 落地（BLOCK-168 OOPIF 自愈守护）**：guest 心跳+GenUiCard 宽限重置=劫持后 t+8s 自动恢复干净沙箱（双次 live PASS）+主进程侦测遥测；Electron 44.7.0 保留。G0 开发期常态 · 不外推 packaged/Provider/GA。）
