@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-10-12T09:27:48.308Z",
+  "pass": 4,
+  "fail": 0,
+  "results": [
+    {
+      "id": "A.token-budget-stream",
+      "ok": true,
+      "detail": "token_budget 事件 3 条（非危机发放 3 条，pct 样本 30）"
+    },
+    {
+      "id": "B.compact-endpoint",
+      "ok": true,
+      "detail": "reason=too_few_messages"
+    },
+    {
+      "id": "C.generation-roundtrip",
+      "ok": true,
+      "detail": "{\"temperature\":0.7,\"maxTokens\":8192}"
+    },
+    {
+      "id": "C.generation-reset",
+      "ok": true,
+      "detail": "{}"
+    }
+  ]
+}

@@ -29,7 +29,11 @@
         "core/petri-server/helpers/guard-ack-store.js",
         "test/block171-tool-cancel.test.mjs",
         "test/block171-guard-ack.test.mjs",
-        "acceptance/block-171/**"
+        "acceptance/block-171/**",
+        "acceptance/block-169/**",
+        "scripts/block172-w2-live.mjs",
+        "test/block172-cp5-compact.test.mjs",
+        "acceptance/block-172/**"
       ],
       "tests": [
         "test/block166-gen-ui-host.test.mjs",
