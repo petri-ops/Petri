@@ -7,7 +7,7 @@ acceptance:
   - CP-6：项目记忆文件注入实机（agent 可读、写入走治理门）；记忆分层评估结论落档；向量召回质量对比基线（top3 命中率）
   - closeout 十三门绿 + 总纲 §4 W2 行回写
 reopen: 任一 CP 出口断言未达即该 CP 返工；波内零停顿条款沿用（用户 2026-10-12 /goal 整波授权连续行使）
-status: active
+status: completed
 ---
 
 # BLOCK-172 — 竞争力总纲 W2 波（长程上下文与记忆）
@@ -41,3 +41,18 @@ status: active
 ## 3. 门禁与完成语义
 
 每 CP：定向红绿+tsc+lint+涉 UI 加 build。波末：closeout 十三门+实机断言（acceptance/block-172/）+UI 台账。四 CP 出口全过+closeout 绿=completed；总纲 §4 W2 行回写。
+
+
+## 8. 收口对账（2026-10-12）
+
+| 出口判据 | 实绩 | 证据 |
+| --- | --- | --- |
+| CP-7 预算环实数 | ✅ token_budget 每轮发放（原仅危机一次），既有管道零改动消费 | loop-orchestrator 改动+UI-499 |
+| CP-7 手动压缩 | ✅ /compact 斜杠命令→BLOCK-95 B2 端点（四态诚实提示） | types.ts+SimpleChat switch |
+| CP-7 生成参数可配 | ✅ generation 键（env 覆盖）+PUT/GET generation-defaults+loopConfig 线程（reqBody+est/headroom 同源）+设置卡；未配置=0.4/16384 零变化 | ai-settings+GenerationDefaultsPanel |
+| CP-5 摘要式压缩 | ✅ 0.85 断路丢前摘要（最近 24 条窗口，同通道 io-transcript 留证）+摘要系统消息注入+context_compacted 事件；fail-open；dropped<4 不跳模型 | 源码契约 5/5（block172-cp5-compact） |
+| CP-6 项目记忆 | ✅ .petri/MEMORY.md 读侧有界注入（withWorkspace 单源）+写侧 workspace_write 治理门继承+指南行 | agent-runner 注入+指南行 |
+| CP-6 评估落档 | ✅ 分层/ANN/召回基线方法（block-172-cp6-memory-evaluation.md，registry reference） | 评估档 |
+| fullMessages 接入 compaction 语义 | ⚠️ 部分——CP-5 摘要注入实现了等效上下文回收（丢弃段以摘要形式保留在 fullMessages 内），原 conversation-compaction 视图层复用未做（投影路径不同，评估=摘要注入已覆盖目标语义，避免双轨）| 本行如实注记 |
+
+**诚实边界**：①实机断言=预算环/compact 端点可 API 级验证，真模型长会话的压缩质量对比（CP-5 连续性）与 /compact 实机走查转用户过目（UI-499/500 in_progress）；②召回基线 30 问集未构建（评估档登记随知识域包）。

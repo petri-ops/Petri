@@ -415,6 +415,31 @@ async function runAgentLoop({
       if (factsBlock && factsBlock.trim()) {
         systemPrompt += '\n\n=== 关于该用户的已知事实（请记住并参考） ===' + factsBlock;
       }
+      // BLOCK-172 CP-6 — 项目记忆文件注入（.petri/MEMORY.md，有界 6000 字符）。
+      // 复用 workspace 解析单源；读取失败/缺席=能力诚实缺席。写入不经特权通道：
+      // 模型用既有 workspace_write（走 sha256 乐观锁/科学源不可变等全部治理门）。
+      try {
+        const pathMod = require('node:path');
+        const fspMod = require('node:fs/promises');
+        const { createWorkspaceTools } = require('./agent-tools/workspace-tools');
+        const memoryWorkspace = await createWorkspaceTools().withWorkspace(
+          { userId, projectId },
+          async ({ root }) => {
+            try {
+              const memoryPath = pathMod.join(root, '.petri', 'MEMORY.md');
+              const memoryContent = await fspMod.readFile(memoryPath, 'utf8');
+              if (!memoryContent || !memoryContent.trim()) return null;
+              return '=== 项目记忆（.petri/MEMORY.md · 跨会话长期事实，注入有界 6000 字符） ===\n'
+                + memoryContent.trim().slice(0, 6000);
+            } catch {
+              return null; // 缺席=诚实缺席（首会话无记忆文件）
+            }
+          }
+        );
+        if (memoryWorkspace) systemPrompt += '\n\n' + memoryWorkspace;
+      } catch (e) {
+        console.warn('[agent-runner] project memory injection failed:', e && e.message ? e.message : e);
+      }
       const sumRow = await getChatSummaryAsync(userId, projectId);
       if (sumRow && sumRow.summary) {
         systemPrompt +=
@@ -576,6 +601,9 @@ async function runAgentLoop({
   systemPrompt +=
     '\n- 提到工具产物（toolJobId / harness 摘要里的文件）或项目工作区文件时，渲染为 Markdown 链接：[产物.csv](petri://artifact/<toolJobId>/<产物名>) 或 [data.csv](petri://workspace/<projectId>/<relativePath>)。严禁出现 file:// 或 /Users/... 这类本地绝对路径。详见 system prompt 末尾【文件引用格式】。';
   systemPrompt += '\n- 科学源数据不可变：不得用 workspace_write/workspace_replace/workspace_exec 原地修改已有 CSV/TSV/H5AD/RDS/测序文件来迎合插件。格式或标签修复必须写入 derived/ 或由转换插件生成新 Artifact，保留原文件和输入 hash，再把派生 Artifact 绑定给下游 Job。';
+  // BLOCK-172 CP-6 — 项目记忆写入通道告知（读侧=.petri/MEMORY.md 自动注入；
+  // 写侧=既有 workspace_write，全部治理门继承：sha256 乐观锁/访问档位/审计）。
+  systemPrompt += '\n- 项目长期记忆：需要跨会话记住的项目级事实（偏好/约定/环境特性/常用路径）写入 .petri/MEMORY.md（workspace_write，一条事实一行）。该文件会在后续会话自动注入你的系统提示；会话级临时信息不要写入。';
   systemPrompt += '\n\n旧的【结果页】UI 控制：';
   systemPrompt +=
     '\n- act(type="switch_result_tab", tab="preview|plots|data|params") 切 tab；' +

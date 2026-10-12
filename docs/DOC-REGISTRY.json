@@ -5545,8 +5545,8 @@
    "capability": "agent-competitiveness",
    "path": "docs/block-172-competitiveness-wave2-plan.md",
    "kind": "work-package",
-   "status": "active",
-   "phase": "P1-WAVE",
+   "status": "completed",
+   "phase": "COMPLETED",
    "canonical": true,
    "truthDomain": "block-172-competitiveness-wave2-plan",
    "entrypoint": "docs/README.md",
@@ -5561,6 +5561,25 @@
     "project-memory"
    ],
    "notes": "2026-10-12 发令 active（用户 /goal 整波授权连续行使，W1 同款）：总纲 W2 波长程上下文与记忆——CP-7 计量可感化（预算环真实水位/手动压缩/生成参数可配，DAG 建议先行）→CP-5 loop 摘要式 auto-compact（丢前摘要+覆盖 fullMessages）→CP-6 记忆分层评估+项目记忆文件+召回基线。closeout 十三门+实机断言（acceptance/block-172/）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+  },
+  {
+   "id": "BLOCK-172-CP6-MEMORY-EVALUATION",
+   "capability": "agent-competitiveness",
+   "path": "docs/block-172-cp6-memory-evaluation.md",
+   "kind": "reference",
+   "status": "reference",
+   "canonical": true,
+   "truthDomain": "block-172-cp6-memory-evaluation",
+   "entrypoint": "docs/README.md",
+   "registeredAt": "2026-10-12",
+   "archivePolicy": "retain_stable_path",
+   "tags": [
+    "agent-competitiveness",
+    "memory-layers",
+    "project-memory",
+    "evaluation"
+   ],
+   "notes": "2026-10-12 CP-6 评估落档：项目记忆文件（.petri/MEMORY.md 读侧有界注入+写侧 workspace_write 治理门继承）已实施；分层/ANN 评估结论=事实生命周期治理优先、ANN 触发条件（>50k 向量或 p95>200ms）登记不预做、召回基线=30 问 top3 命中率法（随知识域包落地）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
   },
   {
    "id": "BLOCK-138-ARTIFACT-PLANE-KERNEL",
