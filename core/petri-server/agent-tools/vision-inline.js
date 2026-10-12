@@ -123,8 +123,22 @@ function chatVisionInlineCapable(profile) {
   return OPENAI_FAMILY_PROVIDERS.has(provider) || provider === 'anthropic';
 }
 
+// BLOCK-174 CP-11 随批（P1.4 单链契约清偿）：chat.js 的 vision 能力预检下沉到
+// 本模块（chat.js 不再直 require helpers/llm-client；fail-closed 语义不变）。
+function chatVisionInlineCapableForProfile(presetId) {
+  try {
+    const { modelGateway } = require('../helpers/llm-client');
+    const resolved = modelGateway.resolve('agent', presetId);
+    if (resolved && !resolved.error && resolved.profile) {
+      return { ok: true, capable: chatVisionInlineCapable(resolved.profile) };
+    }
+  } catch { /* fail-closed 回旧 read_image 路径 */ }
+  return { ok: false, capable: false };
+}
+
 module.exports = {
   inlineVisionImagesForRequest,
   chatVisionInlineCapable,
+  chatVisionInlineCapableForProfile,
   lastUserAttachmentImagePaths,
 };

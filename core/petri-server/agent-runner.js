@@ -342,6 +342,22 @@ async function runAgentLoop({
       conversationId: (_activeConv && _activeConv.id) || conversationId || null,
     });
     if (genUiBlock) systemPrompt += '\n\n' + genUiBlock;
+    // BLOCK-174 CP-11 — 数据面绑定：列出本会话已完成且带结果的 tool_jobs（≤5，
+    // 最近优先），模型可在 Gen UI 片段里经 petri.getData(jobId) 只读引用真实数据。
+    try {
+      const adbGen = require('../db').getAsyncDatabase();
+      const dataJobs = await adbGen.prepare(
+        `SELECT id, tool_id, name FROM tool_jobs
+         WHERE conversation_id = ? AND status = 'done' AND result_json IS NOT NULL
+         ORDER BY created_at DESC LIMIT 5`
+      ).all(conversationId);
+      if (dataJobs.length > 0) {
+        const lines = dataJobs.map((job) => `- jobId=${job.id}（${job.tool_id}${job.name ? ' · ' + job.name : ''}）`);
+        systemPrompt += '\n\n=== Gen UI 可用数据源（petri.getData(jobId) 只读；片段中绑定真实数据） ===\n' + lines.join('\n');
+      }
+    } catch (e) {
+      console.warn('[agent-runner] gen-ui data sources injection failed:', e && e.message ? e.message : e);
+    }
   } catch (e) {
     console.error('[agent-runner] gen-ui output root injection failed:', e && e.message ? e.message : e);
   }

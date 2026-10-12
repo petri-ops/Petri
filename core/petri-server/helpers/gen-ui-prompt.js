@@ -12,6 +12,8 @@ const path = require('path');
 const CONVERSATION_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 
 function buildGenUiOutputRootBlock({ projectId, conversationId }) {
+  // BLOCK-174 CP-11 — 可用数据源注入由此函数的调用方（agent-runner）在拿到
+  // 系统提示块后追加（本模块保持纯字符串构造、不触 DB）。
   const pid = String(projectId || '').trim();
   const cid = String(conversationId || '').trim();
   if (!pid || !cid || !CONVERSATION_ID_PATTERN.test(cid)) return null;

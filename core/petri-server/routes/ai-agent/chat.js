@@ -85,11 +85,11 @@ module.exports = {
         const visionProfileId = selectedPreset && selectedPreset.id;
         if (visionProfileId) {
           try {
-            const { modelGateway } = require('../../helpers/llm-client');
-            const { chatVisionInlineCapable } = require('../../agent-tools/vision-inline');
-            const resolved = modelGateway.resolve('agent', visionProfileId);
-            if (resolved && !resolved.error && resolved.profile) {
-              visionInline = chatVisionInlineCapable(resolved.profile);
+            // BLOCK-174 CP-11 随批——profile 解析下沉（P1.4 单链契约：chat.js 不再直 require llm-client）
+            const { chatVisionInlineCapableForProfile } = require('../../agent-tools/vision-inline');
+            const capability = chatVisionInlineCapableForProfile(visionProfileId);
+            if (capability.ok) {
+              visionInline = capability.capable;
             }
           } catch (e) {
             // fail-closed 回旧 read_image 路径；留一行诊断便于「勾了视觉却不直发」排查
