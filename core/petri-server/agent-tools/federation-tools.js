@@ -85,6 +85,54 @@ async function tool_federation_list_peers() {
   return { ok: true, nodes, myGrants };
 }
 
+/**
+ * BLOCK-176 CP-16 — 委托期事件流回传：订阅对端任务 SSE（/api/ai/agent/task/:id，
+ * 配对 token 鉴权沿用 peerFetch 同源），把关键事件镜像写入本地 task_events。
+ * - 纯叠加：只写本地事件流（委托留痕/联邦面板可见），不改变委托返回语义；
+ * - SSE 不可达/解析失败 → 静默返回（轮询兜底语义不变）；
+ * - 跨机实测段=双机环境依赖，本机以 mock 对端契约测试分档覆盖（plan §3）。
+ */
+async function mirrorPeerTaskEvents(peer, token, peerTaskId, timeoutMs) {
+  const agentTaskStore = require('../../agent-task-store');
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const base = String(peer.baseUrl || '').replace(/\/$/, '');
+    const response = await fetch(
+      base + '/api/ai/agent/task/' + encodeURIComponent(peerTaskId),
+      { headers: { Authorization: 'Bearer ' + token, Accept: 'text/event-stream' }, signal: controller.signal },
+    );
+    if (!response.ok || !response.body) return;
+    const decoder = new TextDecoder();
+    let buffer = '';
+    for await (const chunk of response.body) {
+      buffer += decoder.decode(chunk, { stream: true });
+      let index;
+      while ((index = buffer.indexOf('\n\n')) >= 0) {
+        const frame = buffer.slice(0, index);
+        buffer = buffer.slice(index + 2);
+        for (const line of frame.split('\n')) {
+          if (!line.startsWith('data:')) continue;
+          try {
+            const payload = JSON.parse(line.slice(5).trim());
+            const eventType = String(payload.event || '');
+            if (!eventType || eventType === 'delta') continue; // 流式增量不镜像（量大）
+            const events = agentTaskStore.getAgentTaskEventsSince(peerTaskId, 0, 1_000_000);
+            const seq = (events.length ? events[events.length - 1].seq : 0) + 1;
+            agentTaskStore.appendAgentTaskEvent(peerTaskId, seq, eventType, {
+              ...payload,
+              peerName: peer.name,
+            });
+          } catch { /* 单帧解析失败容忍（SSE 分帧边界） */ }
+        }
+      }
+    }
+  } catch { /* SSE 不可达 → 轮询兜底语义不变 */ }
+  finally {
+    clearTimeout(timer);
+  }
+}
+
 async function tool_delegate_to_petri_node(args = {}) {
   const peerId = String(args.peerId || '').trim();
   const task = String(args.task || '').trim();
@@ -137,7 +185,10 @@ async function tool_delegate_to_petri_node(args = {}) {
   }
   const conversationId = (started.data && started.data.conversationId) || null;
 
-  // 2. 轮询终态
+  // 2. 轮询终态。BLOCK-176 CP-16 — 委托期叠加对端任务 SSE 事件流订阅：
+  //    关键事件镜像回本地 task_events（委托留痕/联邦面板可见）；
+  //    SSE 不可达/解析失败 → 静默回退既有 5s meta 轮询（语义不变）。
+  await mirrorPeerTaskEvents(peer, token, taskId, timeoutMs).catch(() => {});
   const deadline = Date.now() + timeoutMs;
   let meta = null;
   while (Date.now() < deadline) {
