@@ -5,6 +5,7 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
+最后更新：2026-10-12（**C-24 审视吸收三波余量整批销号 completed（用户裁决「按推荐 除BIO-7 搞完」）+ 隧道候选核实销号**：①H 边缘三条全绿（H-1 键基线同源+staged 快照内容面/H-2 删除 rm --cached 分流/H-3 stage 后移零遗留——block169-review-commit-edge 4/4 红绿）；②A4 两条（钉住失败行内反馈/lineage 空态提示+Graph 操作提示）；③A1 反例锁测三条落盘（现状语义留痕，mergeKeepOlderPrefix 换算法=升级登记面在册）；④B7 pack 报告模板收敛 deseq2 范式（三份孤儿模板+R generate_report 模板化，占位符 11/10/9 机械核对零差异，pack 仓提交 9df1d16，主代理终审过）；⑤「tunnel 清场异步化」核实=已被 BLOCK-145 D1+159 P0-5 交付（异步化+并行化，block145 测试 4/4），候选销号。UI-494/495 in_progress 待过目；mergeKeepOlderPrefix 换算法升级登记面在册。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**BLOCK-168 OOPIF 加固整包收口 completed（active 槽位空出**；knownGap 🟡 关闭为自愈形态+Electron 44 保留）。下一工作包待用户裁决。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**BLOCK-168 OOPIF 加固立项发令 active（唯一 active 槽位被本包占用**；BLOCK-167 已收口、UI-488~492 用户过目翻 verified、checkpoint 修正复认通过）：P0 Electron 44 升级复测事件矩阵→P1 守卫二选一→P2 升级去留安全阀。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**BLOCK-167 产品质感提升计划整包收口 completed（五波全交付；closeout 十二门 PASS；唯一 active 槽位空出**）——长期资产=设计宪章（reference）+契约用法棘轮三组+controls 单源（button/status）；checkpoint 修正三项随波报复认；剩余=棘轮守护下的存量渐进迁移（按钮族 30 文件/小字与 accent 终态收缩），触域随批不做无收益 churn。下一工作包候选待用户裁决。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -216,7 +217,7 @@
 - **灰度开关翻默认裁决**（PETRI_SERVER_HISTORY_ASSEMBLY / SESSION_COMPACTION / AGENT_RESILIENCE）——`core/petri-server/helpers/feature-flags.js` `FLAG_DEFAULTS` 现全为 `true`（Git 事实），handoff 2026-09-17「翻默认待用户显式裁决（呈报中）」记载已过时。
 - **汇报门重写丢运行中 steering 指令行**（AUDIT-LOG 🟡 2026-09-23）——BLOCK-119 加映 3 已修（report-guard steeringLines + 重写 prompt「必须逐字保留」段 + 契约），该 🟡 行已从 AUDIT-LOG 待处理表清除。
 
-| C-24 | **审视吸收三波余量候选（2026-10-09 BLOCK-153 登记）**：A4 两条（跨 job 钉住失败静默 Shell :228-232／lineage 切换导航空态与操作提示）+B7 报告模板内容扩充（pack 域）+H 边缘三条（staged 再编辑键基线不对称／staged 删除 pathspec rm --cached 形态／apply 失败已 stage 遗留）+A1 会话恢复核心语义（151 从紧未动）——全部审视/评审实证在案，重开条件=用户裁决吸收三波或触碰对应域时随批 | BLOCK-150/151/152 收口笔录携带登记 | 候选（逐项裁决） |
+| C-24 | **审视吸收三波余量候选（2026-10-09 BLOCK-153 登记）**：A4 两条（跨 job 钉住失败静默 Shell :228-232／lineage 切换导航空态与操作提示）+B7 报告模板内容扩充（pack 域）+H 边缘三条（staged 再编辑键基线不对称／staged 删除 pathspec rm --cached 形态／apply 失败已 stage 遗留）+A1 会话恢复核心语义（151 从紧未动）——全部审视/评审实证在案，重开条件=用户裁决吸收三波或触碰对应域时随批 | BLOCK-150/151/152 收口笔录携带登记 | 候选（逐项裁决） | **已销号（2026-10-12 整批吸收：H 边缘三条+A4 两条+A1 锁测落地，B7 pack 仓 9df1d16；见顶部收口行）**
 | C-EXT-1 | **MCP HTTP/SSE 传输 + server 级信任配置——已归并成熟度蓝图（2026-10-10）**：传输半边 → CAP-3（W3）；server 级信任半边 → CAP-5⇄DIST-3 共轨（W3） | 来源=BLOCK-156 收口 §7；归档指针=docs/g0-agent-maturity-blueprint.md §5 |
 | C-EXT-5 | **桌面端商店安装面退役——已完成（2026-10-10 BLOCK-158，用户裁决「清 尽可能的纯净 后期有需要我们再来调整」）**：商店卡片/plugin:install·uninstall·checkUpdates/OSS 远程抓取半边全链移除；OSS bucket+manifest 基建不动，G1 恢复在线商店在 manifest-source 挂点重接远程半边即可；更新体验改道=领域包版本比对（蓝图 DIST-5） | 用户裁决 2026-10-10；docs/AUDIT-LOG BLOCK-158 条目 |
 | C-EXT-2 | **marketplace 远程技能市场——维持 deferred（G1 邻界）**：蓝图 §6 画线内不排期；重开条件=G1+ 阶段启动或用户显式裁决 | 来源=BLOCK-156 收口 §7；蓝图 §5/§6 |
