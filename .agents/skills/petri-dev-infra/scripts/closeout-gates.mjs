@@ -7,8 +7,10 @@
  * 目标仓库缺失时如实标 SKIP-with-reason（不算 PASS），见 PORTING.md。
  *
  * 把治理纪律要求收口必跑的门禁按序执行、fail-fast、最后输出证据清单摘要：
+ *   0. audit-compact  AUDIT-LOG 自稳（BLOCK-170；修剪自动化=搬移不改写，属自稳步非门禁语义，
+ *      目标仓库无该脚本时自动 SKIP-with-reason）
  *   1. hygiene   工作区卫生（未知 WIP / 死链 / 临时残留 fail-closed）
- *   2. docs      docs:check（文档注册 / canonical 唯一 / 入口）
+ *   2. docs      docs:check（文档注册 / canonical 唯一 / 入口 / AUDIT-LOG 台账健康）
  *   3. ui-audit  ui:audit:check（UI 台账契约）
  *   4. tests     test:changed（impact-map 影响范围定向测试）
  *
@@ -68,6 +70,8 @@ function repoGate(id, title, relScript, args) {
 
 function plan(skips, noTests, extraGates) {
   const fixed = [
+    // BLOCK-170 自稳先行：AUDIT-LOG 修剪自动化（搬移不改写），脚本缺失时 repoGate 自动 SKIP-with-reason。
+    repoGate('audit-compact', 'AUDIT-LOG 自稳（audit:compact）', path.join('scripts', 'audit-log-compact.mjs'), []),
     { id: 'hygiene', title: '工作区卫生（hygiene:check）', cmd: process.execPath, args: [path.join(SELF_DIR, 'hygiene-check.mjs')] },
     repoGate('docs', '文档治理（docs:check）', path.join('scripts', 'docs-governance.mjs'), ['--check']),
     repoGate('ui-audit', 'UI 台账（ui:audit:check）', path.join('scripts', 'check-ui-productization-audit.mjs'), []),

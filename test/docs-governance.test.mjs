@@ -6,11 +6,15 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 import {
+  AUDIT_LEDGER_ENTRY_WARN_BYTES,
+  AUDIT_LEDGER_FAIL_BYTES,
   buildReconciliationReport,
+  checkAuditLedgerHealth,
   collectManagedMarkdown,
   loadDocumentRegistry,
   validateDocumentRegistry,
 } from '../scripts/docs-governance.mjs';
+import { compactLedgerLines } from '../scripts/audit-log-compact.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -306,4 +310,95 @@ test('capability front-matter：registry 声明 capability 但文档缺 front-ma
     { rootDir: tempRoot },
   );
   assert.equal(issues.some((item) => item.code === 'FRONTMATTER_INVALID_FORMAT'), true);
+});
+
+// ── BLOCK-170：AUDIT-LOG 自稳（audit-log-compact.mjs v2 搬移不改写 + docs:check 台账健康断言）──
+
+function buildLedgerFixture({ chainEntries = 12, tableRows = 14 } = {}) {
+  const lines = [
+    '# 审计广播台 (AUDIT-LOG)',
+    '',
+    '> 本文件只保存需要主 Agent 看见的活跃广播与最近处理记录。',
+    '> 入口直链（registry `entrypoint` 指向本台的 canonical 文档）：[block-14-closeout](./block-14-left-panel-qa-fix-closeout.md)',
+    '',
+  ];
+  for (let i = chainEntries; i >= 1; i -= 1) {
+    const day = String(i).padStart(2, '0');
+    const prefix = i > chainEntries - 2 ? '最后更新：' : '此前 最后更新：';
+    lines.push(`${prefix}2026-03-${day}（**条目 ${i}**：内容行。）`);
+  }
+  lines.push('', '## 当前待处理项', '', '| 状态 | 日期 | 事项 | 处置边界 |', '| --- | --- | --- | --- |', '| 🟡 | 2026-03-12 | 观察项 | 随使用累计 |', '');
+  lines.push('## 最近处理记录', '', '| 状态 | 日期 | 事项 | 边界 |', '| --- | --- | --- | --- |');
+  for (let i = tableRows; i >= 1; i -= 1) {
+    const day = String(i).padStart(2, '0');
+    lines.push(`| ✅ 收口 | 2026-02-${day} | **记录 ${i}**：一行摘要。 | PKG-${i} / COMPLETED |`);
+  }
+  lines.push('', '## 广播规则', '', '- 🔴：阻塞当前验收。', '');
+  return lines;
+}
+
+test('audit-log-compact：链只留最近 N 条，淘汰行原文剪切且 through 日期=被剪行最新日期', () => {
+  const result = compactLedgerLines(buildLedgerFixture({ chainEntries: 12, tableRows: 4 }), { chainKeep: 8 });
+  assert.equal(result.chainCutLines.length, 4);
+  assert.equal(result.throughDate, '2026-03-04');
+  const out = result.outLines.join('\n');
+  assert.equal(out.includes('**条目 12**'), true, '最新条目保留');
+  assert.equal(out.includes('**条目 5**'), true, '窗口边界内条目保留');
+  assert.equal(out.includes('**条目 4**'), false, '窗口外条目剪除');
+  assert.equal(result.chainCutLines.join('\n').includes('**条目 4**'), true, '淘汰行原文进归档内容');
+  assert.equal(out.includes('入口直链'), true, '头部入口直链行永不剪切');
+  assert.equal(out.includes('## 当前待处理项'), true);
+  assert.equal(out.includes('## 广播规则'), true);
+});
+
+test('audit-log-compact：记录表窗口淘汰含「老包唯一行」（窗口规则覆盖每包一条规则）', () => {
+  const result = compactLedgerLines(buildLedgerFixture({ chainEntries: 2, tableRows: 14 }), { rowsKeep: 10 });
+  assert.equal(result.rowsCutLines.length, 4);
+  const out = result.outLines.join('\n');
+  assert.equal(out.includes('PKG-1 / COMPLETED'), false, '最老的唯一包行也被窗口剪除——包状态真相在 roadmap/plan');
+  assert.equal(out.includes('PKG-14 / COMPLETED'), true, '窗口内最新行保留');
+  assert.equal(out.includes('| --- |'), true, '表结构行保留');
+});
+
+test('audit-log-compact：幂等——对已精简结果再跑零淘汰', () => {
+  const first = compactLedgerLines(buildLedgerFixture({ chainEntries: 12, tableRows: 14 }));
+  const second = compactLedgerLines(first.outLines);
+  assert.equal(second.chainCutLines.length, 0);
+  assert.equal(second.rowsCutLines.length, 0);
+});
+
+test('audit-log-compact：结构不变量缺失时 fail-closed 抛错（人工核查，不静默猜）', () => {
+  assert.throws(() => compactLedgerLines(['# 只有标题', '最后更新：2026-03-01（孤儿条目）']));
+});
+
+test('docs:check 台账健康：超单读安全阈 → AUDIT_LOG_OVERSIZE 硬红', async (context) => {
+  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'petri-audit-ledger-'));
+  context.after(() => fs.rm(tempRoot, { recursive: true, force: true }));
+  await fs.mkdir(path.join(tempRoot, 'docs'), { recursive: true });
+  await fs.writeFile(path.join(tempRoot, 'docs', 'AUDIT-LOG.md'), 'x'.repeat(AUDIT_LEDGER_FAIL_BYTES + 1), 'utf8');
+  const { issues } = await checkAuditLedgerHealth(tempRoot);
+  assert.equal(issues.some((item) => item.code === 'AUDIT_LOG_OVERSIZE'), true);
+});
+
+test('docs:check 台账健康：超保留阈/超长行 → 建议级提示不红；缺失 → AUDIT_LOG_MISSING', async (context) => {
+  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'petri-audit-ledger-'));
+  context.after(() => fs.rm(tempRoot, { recursive: true, force: true }));
+  await fs.mkdir(path.join(tempRoot, 'docs'), { recursive: true });
+  const ledgerPath = path.join(tempRoot, 'docs', 'AUDIT-LOG.md');
+  await fs.writeFile(
+    ledgerPath,
+    `# 审计广播台\n\n最后更新：2026-03-12（正常条目）\n${'超长行。'.repeat(600)}\n`,
+    'utf8',
+  );
+  const healthy = await checkAuditLedgerHealth(tempRoot);
+  assert.equal(healthy.issues.length, 0, '阈值内零硬红');
+  assert.equal(
+    healthy.advisories.some((line) => line.includes('台账行超')),
+    true,
+    `超 ${AUDIT_LEDGER_ENTRY_WARN_BYTES}B 的行出建议级提示`,
+  );
+
+  await fs.rm(ledgerPath);
+  const missing = await checkAuditLedgerHealth(tempRoot);
+  assert.equal(missing.issues.some((item) => item.code === 'AUDIT_LOG_MISSING'), true);
 });

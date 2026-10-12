@@ -643,6 +643,59 @@ function countByKind(documents) {
  * The report is written BEFORE exit; on exit 2 the partial report is still
  * emitted for diagnosis, but `summary.status` is `CLASSIFICATION_CONFLICT`.
  */
+// ── AUDIT-LOG 台账健康（BLOCK-170 自稳设计的门禁半边；修剪半边=scripts/audit-log-compact.mjs）──
+// 硬阈=单读工具安全阈（超限连「整读」都做不到，fail-closed）；建议阈=广播规则保留策略目标；
+// 行预算提示=行写入纪律「≤3 行约 600 字符」的宽裕上界，疑似整包收口报告误入台账时提示收进 plan 文档。
+export const AUDIT_LEDGER_REL_PATH = 'docs/AUDIT-LOG.md';
+export const AUDIT_LEDGER_FAIL_BYTES = 120 * 1024;
+export const AUDIT_LEDGER_WARN_BYTES = 50 * 1024;
+export const AUDIT_LEDGER_ENTRY_WARN_BYTES = 3072;
+
+export async function checkAuditLedgerHealth(rootDir = DEFAULT_ROOT) {
+  const issues = [];
+  const advisories = [];
+  const ledgerPath = path.join(rootDir, AUDIT_LEDGER_REL_PATH);
+  let stat;
+  try {
+    stat = await fs.stat(ledgerPath);
+  } catch {
+    issues.push(issue('AUDIT_LOG_MISSING', `${AUDIT_LEDGER_REL_PATH} 不存在——审计广播台缺位，人工核查。`, 'AUDIT-LOG', AUDIT_LEDGER_REL_PATH));
+    return { issues, advisories };
+  }
+
+  if (stat.size > AUDIT_LEDGER_FAIL_BYTES) {
+    issues.push(
+      issue(
+        'AUDIT_LOG_OVERSIZE',
+        `${AUDIT_LEDGER_REL_PATH} ${stat.size} bytes > ${AUDIT_LEDGER_FAIL_BYTES}（单读安全阈）——跑 npm run audit:compact 自稳后复跑本门。`,
+        'AUDIT-LOG',
+        AUDIT_LEDGER_REL_PATH,
+      ),
+    );
+  } else if (stat.size > AUDIT_LEDGER_WARN_BYTES) {
+    advisories.push(
+      `[audit-ledger] ${Math.round(stat.size / 1024)}KB > ${Math.round(AUDIT_LEDGER_WARN_BYTES / 1024)}KB 保留阈——npm run audit:compact 幂等自稳（closeout 首步已自动执行）。`,
+    );
+  }
+
+  const raw = await fs.readFile(ledgerPath, 'utf8');
+  const fatEntries = raw
+    .split('\n')
+    .map((text, index) => ({ line: index + 1, bytes: Buffer.byteLength(text, 'utf8'), text }))
+    .filter((entry) => entry.bytes > AUDIT_LEDGER_ENTRY_WARN_BYTES)
+    .sort((a, b) => b.bytes - a.bytes)
+    .slice(0, 3);
+  if (fatEntries.length > 0) {
+    advisories.push(
+      `[audit-ledger] ${fatEntries.length} 条台账行超 ${AUDIT_LEDGER_ENTRY_WARN_BYTES}B（行写入纪律 ≤600 字符的宽裕上界）——详情移 plan/closeout 文档，台账行留指针：`,
+    );
+    for (const entry of fatEntries) {
+      advisories.push(`  L${entry.line} ${entry.bytes}B：${entry.text.slice(0, 60)}…`);
+    }
+  }
+  return { issues, advisories };
+}
+
 async function runReportMode(reportPathRaw) {
   const reportPath = path.resolve(reportPathRaw);
   let registry;
@@ -750,15 +803,18 @@ async function runCli() {
 
   const registry = await loadDocumentRegistry(DEFAULT_ROOT);
   const issues = await validateDocumentRegistry(registry, { rootDir: DEFAULT_ROOT });
+  const ledgerHealth = await checkAuditLedgerHealth(DEFAULT_ROOT);
 
   if (mode === '--check') {
-    if (issues.length > 0) {
-      console.error(`[docs:check] FAIL (${issues.length} issue(s))`);
-      printIssueList(issues);
+    const allIssues = issues.concat(ledgerHealth.issues);
+    if (allIssues.length > 0) {
+      console.error(`[docs:check] FAIL (${allIssues.length} issue(s))`);
+      printIssueList(allIssues);
       process.exitCode = 1;
       return;
     }
     console.log(`[docs:check] PASS (${registry.documents.length} registered documents)`);
+    for (const line of ledgerHealth.advisories) console.log(line);
     return;
   }
 
@@ -780,6 +836,7 @@ async function runCli() {
     for (const row of capabilityRows) {
       console.log(`    ${row.capability}: ${row.id}(${row.status})`);
     }
+    for (const line of ledgerHealth.advisories) console.log(`  ${line}`);
     if (issues.length > 0) printIssueList(issues);
     return;
   }
