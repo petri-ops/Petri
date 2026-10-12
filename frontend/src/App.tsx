@@ -7,7 +7,7 @@ import React, { useEffect, lazy, Suspense } from 'react';
 const PetriOpenFileDevBridge = lazy(() =>
   import('./components/editor/integration/PetriOpenFileDevBridge')
 );
-import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useParams , useNavigate } from 'react-router-dom';
 import { TitleBar } from '@/components/desktop/TitleBar';
 import { TestInstanceBadge } from '@/components/desktop/TestInstanceBadge';
 import { WorkspacePanelsProvider, useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
@@ -19,6 +19,7 @@ import { BackendStatusProvider } from '@/components/backend/BackendStatusProvide
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { getBridge } from '@/lib/desktopBridge';
 import { CommandPalette, useCommandPalette } from '@/components/copilot/CommandPalette';
+import { useAppCommands } from '@/components/copilot/useAppCommands';
 import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
 // BLOCK-42 — pending-scroll 全局 Provider（见 AppShell 内注释）
 import { PendingScrollProvider } from '@/lib/pendingScrollContext';
@@ -67,6 +68,17 @@ function RouteFallback(): React.ReactElement {
 function AppShell(): React.ReactElement {
   const { isOpen, close } = useCommandPalette();
   const location = useLocation();
+  const navigate = useNavigate();
+  // BLOCK-171 CP-3 — 命令面板真命令源（五类：导航/项目/会话/技能/设置深链）。
+  const currentProjectId = (() => {
+    const m = location.pathname.match(/^\/project\/([^/]+)/);
+    return m ? m[1] : null;
+  })();
+  const { commands, recentConversations, selectConversation } = useAppCommands({
+    enabled: isOpen,
+    navigate,
+    currentProjectId,
+  });
   const panels = useWorkspacePanelsContext();
   // (/project/:id/results) 与其余路由维持原状。归一化尾斜杠后取 :id 后的子段判定。
   // BLOCK-62 P0 — 列体化壳：仅 ProjectWorkspace 路由（/project/:id/*）走「列容器
@@ -176,8 +188,9 @@ function AppShell(): React.ReactElement {
         <CommandPalette
           open={isOpen}
           onClose={close}
-          commands={[]}
-          recentConversations={[]}
+          commands={commands}
+          recentConversations={recentConversations}
+          onSelectConversation={selectConversation}
         />
         {/* BLOCK-22 P4.6: DEV ONLY — do NOT use in production */}
         <Suspense fallback={null}>

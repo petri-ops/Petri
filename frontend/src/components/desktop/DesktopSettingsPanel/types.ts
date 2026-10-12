@@ -10,6 +10,8 @@
 
 export interface Props {
   onClose: () => void;
+  /** BLOCK-171 CP-3 — 设置深链（?section=）初始节；缺省 general。 */
+  initialSection?: SettingsSection;
 }
 
 export type SettingsSection =

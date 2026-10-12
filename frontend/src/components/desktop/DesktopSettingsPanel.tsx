@@ -49,8 +49,9 @@ import { TerminalPanel } from '@/pages/project-workspace';
 
 import { credentialId } from './DesktopSettingsPanel/model-types';
 
-export function DesktopSettingsPanel({ onClose }: Props): React.ReactElement {
-  const [activeSection, setActiveSection] = useState<SettingsSection>('general');
+export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.ReactElement {
+  // BLOCK-171 CP-3 — 深链初始节（?section= 经设置页透传；非法值由类型域外校验兜底 general）
+  const [activeSection, setActiveSection] = useState<SettingsSection>(initialSection ?? 'general');
   const backendStatus = useBackendStatus();
   const { preference: themePreference, fontScale, setFontScale } = useTheme();
   // BLOCK-92 Wave B-4 — API Endpoint 编辑器状态簇外迁

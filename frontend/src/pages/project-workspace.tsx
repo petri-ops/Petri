@@ -436,6 +436,21 @@ export function ProjectWorkspace(): React.ReactElement {
     if (!projectId) return;
     if (activeConvId) return;
     if (conversations.length === 0) return;
+    // BLOCK-171 CP-3 — 命令面板「最近会话」预选交接（一次性；命中即消费，
+    // 未命中/损坏即丢弃回落 conversations[0] 自动选）。
+    try {
+      const raw = sessionStorage.getItem('petri.conversationPreselect');
+      if (raw) {
+        sessionStorage.removeItem('petri.conversationPreselect');
+        const preselect = JSON.parse(raw) as { conversationId?: string };
+        if (preselect.conversationId && conversations.some((c) => c.id === preselect.conversationId)) {
+          setActiveConvId(preselect.conversationId);
+          return;
+        }
+      }
+    } catch {
+      /* 交接损坏即忽略 */
+    }
     setActiveConvId(conversations[0].id);
   }, [projectId, conversations, activeConvId]);
   // Reset active conv when the project changes — hook re-seeds the list.
