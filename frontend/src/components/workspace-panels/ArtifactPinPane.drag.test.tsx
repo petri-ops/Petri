@@ -21,9 +21,11 @@ const snapshot = {
 
 function renderPane() {
   return render(
-    <ArtifactPinPane mode={'result' as never} snapshot={snapshot as never} onUnpin={() => {}}>
-      <div>主区</div>
-    </ArtifactPinPane>
+    React.createElement(ArtifactPinPane, {
+      mode: 'result',
+      snapshot: snapshot as any,
+      onUnpin: () => {},
+    }, React.createElement('div', null, '主区')),
   );
 }
 
