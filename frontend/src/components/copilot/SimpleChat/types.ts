@@ -33,6 +33,8 @@ export const SLASH_COMMANDS: SlashCommand[] = [
   { id: 'clear', label: '清空对话', description: '清除当前对话历史', shortcut: null },
   { id: 'model', label: '切换模型', description: '选择 AI 模型', shortcut: null },
   { id: 'export', label: '导出对话', description: '导出当前对话为 Markdown', shortcut: null },
+  // BLOCK-172 CP-7 — 手动压缩（BLOCK-95 B2 后端端点的用户入口；低于阈值时诚实提示）
+  { id: 'compact', label: '压缩上下文', description: '立即压缩较早对话为摘要（释放上下文预算）', shortcut: null },
   { id: 'help', label: '帮助', description: '显示所有命令', shortcut: null },
 ];
 

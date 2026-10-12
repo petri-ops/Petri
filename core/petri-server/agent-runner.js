@@ -15,7 +15,7 @@
  */
 
 const { estimateRequestTokens } = require('./helpers/token-estimator');
-const { getAiSettings } = require('./helpers/ai-settings');
+const { getAiSettings, getGenerationDefaults } = require('./helpers/ai-settings');
 const { buildSystemPrompt, loadWorkingTreeRejectEntries, resolveWorkingTreeRejectRoot } = require('./helpers/system-prompt');
 const { appendDesktopAgentInstructions } = require('./helpers/desktop-agent-prompt');
 // BLOCK-157 W1 P2（KNW-2）— 技能索引常驻注入（渐进披露闭环）
@@ -767,6 +767,9 @@ async function runAgentLoop({
     disableProviderFallback,
     // BLOCK-81 P1 — 思考档位进 loop（网关侧按 profile 能力位门控后映射上游参数）
     thinkingLevel,
+    // BLOCK-172 CP-7 — 生成参数全局缺省进 loop（reqBody temperature/max_tokens 与
+    // 预算 headroom 消费；未配置=loop 侧既有 0.4/16384 零行为变化）
+    generationDefaults: getGenerationDefaults(),
     // BLOCK-155 — 真·单通道 vision：loop 组 reqBody 时把最后一条 user 消息的
     // 图片附件行内联为 image_url 部件（loop-orchestrator 侧实现，messages 不突变）
     visionInline,

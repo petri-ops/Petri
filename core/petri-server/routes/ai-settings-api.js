@@ -6,7 +6,7 @@
  */
 
 const express = require('express');
-const { getAiSettings, saveAiSettings, testApiKey, getChatProviderName, getEmbedProviderName } = require('../helpers/ai-settings');
+const { getAiSettings, saveAiSettings, testApiKey, getChatProviderName, getEmbedProviderName, getGenerationDefaults, saveGenerationDefaults } = require('../helpers/ai-settings');
 
 /**
  * BLOCK-150 加映 — vision 角色是否可用（档位在场且凭据可解析）。
@@ -55,6 +55,24 @@ function registerAiSettingsRoutes(app) {
   });
 
   // 测试 API key 连通性
+  // BLOCK-172 CP-7 — 生成参数全局缺省（temperature/maxTokens；env 覆盖优先）。
+  app.get('/api/ai/generation-defaults', (req, res) => {
+    try {
+      return res.json({ status: 'ok', generation: getGenerationDefaults() });
+    } catch (e) {
+      return res.status(500).json({ status: 'error', error: e.message });
+    }
+  });
+
+  app.put('/api/ai/generation-defaults', express.json(), (req, res) => {
+    try {
+      const generation = saveGenerationDefaults(req.body || {});
+      return res.json({ status: 'ok', generation });
+    } catch (e) {
+      return res.status(500).json({ status: 'error', error: e.message });
+    }
+  });
+
   app.post('/api/ai/settings/test', express.json(), async (req, res) => {
     const { provider, profile, apiKey } = req.body || {};
     if (!provider && !profile) {

@@ -1240,3 +1240,57 @@ html.petri-desktop .theme-doc-sidebar-container .menu__link {
   --petri-accent-border: rgba(251, 191, 36, 0.4);
   --petri-accent-surface: rgba(251, 191, 36, 0.12);
 }
+
+
+/* BLOCK-172 CP-7 — 生成参数全局缺省卡 */
+.petri-generation-defaults {
+  margin-bottom: var(--petri-space-3);
+  padding: var(--petri-space-3);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-subtle);
+}
+
+.petri-generation-defaults__fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--petri-space-3);
+}
+
+.petri-generation-defaults__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-1);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-muted);
+}
+
+.petri-generation-defaults__field input {
+  width: 120px;
+  padding: var(--petri-space-1) var(--petri-space-2);
+  border: 1px solid var(--petri-border);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-sm);
+}
+
+.petri-generation-defaults__save {
+  padding: var(--petri-space-1) var(--petri-space-3);
+  border: none;
+  border-radius: var(--petri-radius-pill);
+  background: var(--petri-text);
+  color: var(--petri-on-solid);
+  font-size: var(--petri-font-size-sm);
+  cursor: pointer;
+}
+
+.petri-generation-defaults__save:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.petri-generation-defaults__notice {
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-muted);
+}

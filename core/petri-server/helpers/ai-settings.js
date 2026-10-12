@@ -307,6 +307,44 @@ async function listAvailableModels(provider, apiKey) {
   }
 }
 
+/**
+ * BLOCK-172 CP-7 — 生成参数全局缺省（temperature/maxTokens）。
+ * 来源优先级：env 覆盖 > ai-settings.json `generation` 键 > 缺省（loop 侧 0.4/16384）。
+ * 诚实边界：仅收数值域合法值；maxTokens 下限 256 防误配物理截断。
+ */
+function _sanitizeGeneration(raw) {
+  const source = raw && typeof raw === 'object' ? raw : {};
+  const out = {};
+  const envTemp = process.env.PETRI_LLM_TEMPERATURE;
+  const envMax = process.env.PETRI_LLM_MAX_TOKENS;
+  const temperature = envTemp != null ? Number(envTemp) : Number(source.temperature);
+  if (Number.isFinite(temperature) && temperature >= 0 && temperature <= 2) {
+    out.temperature = temperature;
+  }
+  const maxTokens = envMax != null ? Number(envMax) : Number(source.maxTokens);
+  if (Number.isFinite(maxTokens) && maxTokens >= 256 && maxTokens <= 1_000_000) {
+    out.maxTokens = Math.floor(maxTokens);
+  }
+  return out;
+}
+
+function getGenerationDefaults() {
+  const stored = getAiSettings();
+  return _sanitizeGeneration(stored && typeof stored === 'object' ? stored.generation : null);
+}
+
+function saveGenerationDefaults(partial) {
+  const clean = _sanitizeGeneration(partial);
+  const stored = getAiSettings() || {};
+  const next = { ...stored, generation: { ...(stored.generation || {}), ...clean } };
+  _ensureDir();
+  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(next, null, 2));
+  fs.chmodSync(SETTINGS_FILE, 0o600);
+  _cache = next;
+  _cacheSignature = _settingsFileSignature();
+  return getGenerationDefaults();
+}
+
 module.exports = {
   getAiSettings,
   getApiKey,
@@ -318,6 +356,8 @@ module.exports = {
   testApiKey,
   listAvailableModels,
   normalizeAiSettings,
+  getGenerationDefaults,
+  saveGenerationDefaults,
   resolveChatModelCredential,
   _extractCredentialUpdates,
   credentialStore,

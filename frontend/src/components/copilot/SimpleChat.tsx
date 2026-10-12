@@ -1144,6 +1144,38 @@ export function SimpleChat({
         URL.revokeObjectURL(url);
         break;
       }
+      case 'compact': {
+        // BLOCK-172 CP-7 — /compact 手动压缩（后端 BLOCK-95 B2 端点；同步等摘要）。
+        if (!conversationId) {
+          setSteerNotice('压缩上下文：当前无会话');
+          break;
+        }
+        setSteerNotice('正在压缩上下文（生成摘要中）…');
+        void (async () => {
+          try {
+            const response = await fetch(getPlatformApiPrefix() + '/ai/conversations/' + encodeURIComponent(conversationId) + '/compact', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...(getToken() ? { Authorization: 'Bearer ' + getToken() } : {}),
+              },
+            });
+            const data = (await response.json().catch(() => ({}))) as { status?: string; compacted?: boolean; reason?: string; compaction?: { coversCount?: number }; error?: string };
+            if (response.ok && data.status === 'ok' && data.compacted) {
+              setSteerNotice(`上下文已压缩（覆盖 ${data.compaction?.coversCount ?? 0} 条较早消息）`);
+            } else if (data.reason === 'below_threshold' || data.reason === 'too_few_messages') {
+              setSteerNotice('上下文尚未达到压缩阈值，无需压缩');
+            } else if (data.error === 'session compaction disabled') {
+              setSteerNotice('会话压缩开关未开启（设置→实验特性）');
+            } else {
+              setSteerNotice('压缩失败：' + (data.error || 'HTTP ' + response.status));
+            }
+          } catch (e) {
+            setSteerNotice('压缩失败：' + (e instanceof Error ? e.message : '网络错误'));
+          }
+        })();
+        break;
+      }
       case 'help':
         setSlashQuery('');
         break;

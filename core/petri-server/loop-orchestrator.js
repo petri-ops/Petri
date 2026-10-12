@@ -600,6 +600,17 @@ async function runLoop({
     // BLOCK-171 CP-1 — 每运行建工具取消注册表（task 锚定；单返回点 release）。
     // run_tool 等异步 job 族不受此表管辖（job 级取消走既有 /api/tools/cancel 链）。
     const toolCancellation = toolCtx.taskId ? createToolCancellation(toolCtx.taskId) : null;
+    // BLOCK-172 CP-7 — 生成参数全局缺省（ai-settings generation 键/env 覆盖；
+    // 未配置=0.4/16384 零行为变化）。预算 est/headroom 同源消费，口径一致。
+    const generationDefaults = (typeof loopConfig === 'object' && loopConfig && typeof loopConfig.generationDefaults === 'object')
+      ? loopConfig.generationDefaults
+      : {};
+    const reqTemperature = typeof generationDefaults.temperature === 'number' && generationDefaults.temperature >= 0 && generationDefaults.temperature <= 2
+      ? generationDefaults.temperature
+      : 0.4;
+    const reqMaxTokens = typeof generationDefaults.maxTokens === 'number' && generationDefaults.maxTokens >= 256
+      ? Math.floor(generationDefaults.maxTokens)
+      : 16384;
     // BLOCK-171 CP-2 — 确认通道：ctx.dynamicGuardAcks 注入（isGuardAcked 读侧
     // 早已在册；写侧首次接线——guard-ack 路由写、策略读，同 Set 引用即时生效）。
     if (toolCtx.taskId && !toolCtx.dynamicGuardAcks) {
@@ -645,17 +656,31 @@ async function runLoop({
           const est = estimateRequestTokens({
             systemPrompt: hasSystem ? (messages[0].content || '') : '',
             messages: hasSystem ? messages.slice(1) : messages,
-            maxTokens: 16384, // 与下方 reqBody.max_tokens 一致
+            maxTokens: reqMaxTokens, // 与下方 reqBody.max_tokens 一致（CP-7 可配）
           });
           // BLOCK-163 W3 P5（MDL-2）— 按模型校准系数修正估算（cl100k 对 CJK 重度
           // 文本系统性高估；EWMA 自愈见 helpers/model-token-ratios.js）
           const { calibratedEstimate } = require('./helpers/model-token-ratios');
           const calibratedTotal = calibratedEstimate(est.total, modelName);
+          // BLOCK-172 CP-7 — 每轮发放 token_budget（trimmed=false）：预算环全程
+          // 实数（原形态=仅 0.85 危机时发一次，UI 恒占位 `—`）。事件面 additive，
+          // 既有消费方（agentTaskStream→petriEvents.tokenBudget→ContextBudgetBar）
+          // 零改动。
+          _emit({
+            event: 'token_budget',
+            contextWindow: loopContextWindow,
+            messagesTokensUsed: est.total,
+            systemPromptTokens: est.systemPromptTokens,
+            messagesTokens: est.total,
+            pct: Math.min(100, Math.round((calibratedTotal / loopContextWindow) * 100)),
+            trimmed: false,
+            messagesDropped: 0,
+          });
           if (calibratedTotal > loopContextWindow * 0.85) {
             const result = trimMessagesToBudget({
               fullMessages: messages,
               contextWindow: loopContextWindow,
-              headroom: 16384, // 与 reqBody.max_tokens 一致，预算 = ctx - system - headroom
+              headroom: reqMaxTokens, // 与 reqBody.max_tokens 一致，预算 = ctx - system - headroom
               systemPromptTokens: est.systemPromptTokens,
             });
             if (result.stats && result.stats.trimmed) {
@@ -712,8 +737,9 @@ async function runLoop({
       const reqBody = {
         ...(modelName ? { model: modelName } : {}),
         messages: requestMessages,
-        temperature: 0.4,
-        max_tokens: 16384, // 方案 B：用足够大的值让模型自然停止，而不是物理截断
+        // BLOCK-172 CP-7 — 全局缺省可配（ai-settings generation/env；未配置=0.4/16384）
+        temperature: reqTemperature,
+        max_tokens: reqMaxTokens, // 方案 B：用足够大的值让模型自然停止，而不是物理截断
         tools: finalizing ? undefined : config.tools,
         tool_choice: finalizing
           ? undefined

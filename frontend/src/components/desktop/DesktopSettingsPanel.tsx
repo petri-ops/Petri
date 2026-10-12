@@ -37,6 +37,7 @@ import { DecisionUsagePanel } from './DesktopSettingsPanel/sections/DecisionUsag
 // BLOCK-160 W2 P2（ORC-1）— Agent 用户规则面板（rules.json CRUD 读面）
 import { AgentRulesPanel } from './DesktopSettingsPanel/sections/AgentRulesPanel';
 import { DecisionConfigPanel } from './DesktopSettingsPanel/sections/DecisionConfigPanel';
+import { GenerationDefaultsPanel } from './DesktopSettingsPanel/sections/GenerationDefaultsPanel';
 import { GuardAckHistoryPanel } from '@/components/copilot/SimpleChat/GuardAckCard';
 import { UpdateChecker } from './DesktopSettingsPanel/sections/UpdateChecker';
 import { ExportDiagnostic } from './DesktopSettingsPanel/sections/ExportDiagnostic';
@@ -224,6 +225,7 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
 
         {activeSection === 'models' && (
           <section className="petri-settings-section petri-settings-section--models">
+            <GenerationDefaultsPanel />
             <div className="petri-settings-section__heading">
               <h3>API Endpoint</h3>
               <p>
