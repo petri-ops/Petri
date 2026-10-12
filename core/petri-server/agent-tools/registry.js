@@ -211,7 +211,7 @@ const HANDLERS = {
   skill_get: tool_skill_get,
 };
 
-function contract(category, sideEffect, riskTier, resources, estimatedDurationMs) {
+function contract(category, sideEffect, riskTier, resources, estimatedDurationMs, cancellable = false) {
   return {
     contractVersion: CONTRACT_VERSION,
     category,
@@ -219,16 +219,17 @@ function contract(category, sideEffect, riskTier, resources, estimatedDurationMs
     riskTier,
     resources,
     estimatedDurationMs,
-    // Tool handlers do not yet receive a common AbortSignal. P7-B records the
-    // current capability truth rather than claiming cancellation support.
-    cancellable: false,
+    // BLOCK-171 CP-1 — cancellable 语义收敛为「协作取消已贯通」：true = handler
+    // 检查 toolCtx.toolCancelSignal 且 loop 侧注册表可精确取消该 callId。
+    // P7-B 的全量 false 形态由显式声明位取代（未声明仍为 false，零行为变化）。
+    cancellable: cancellable === true,
   };
 }
 
 const CONTRACTS = {
   workspace_list: contract('workspace', 'none', 'R0', ['project.files'], 100),
   workspace_find: contract('workspace', 'none', 'R0', ['project.files'], 500),
-  workspace_search: contract('workspace', 'none', 'R0', ['project.files'], 1000),
+  workspace_search: contract('workspace', 'none', 'R0', ['project.files'], 1000, true),
   workspace_read: contract('workspace', 'none', 'R0', ['project.files'], 100),
   workspace_write: contract('workspace', 'workspace-write', 'R2', ['project.files'], 200),
   workspace_replace: contract('workspace', 'workspace-write', 'R2', ['project.files'], 200),
@@ -302,7 +303,7 @@ const CONTRACTS = {
   // BLOCK-49 — spawn 立即返回（子 agent 时长不占工具执行预算）；wait 阻塞等待终态
   spawn_agent: contract('agent-management', 'state-write', 'R2', ['agent_tasks', 'loop_runs'], 2000),
   list_agents: contract('agent-management', 'none', 'R0', ['agent_tasks'], 500),
-  wait_agent: contract('agent-management', 'none', 'R1', ['agent_tasks', 'loop_runs'], 300000),
+  wait_agent: contract('agent-management', 'none', 'R1', ['agent_tasks', 'loop_runs'], 300000, true),
   // BLOCK-69 — 知识空间：只读检索（搜索走 embedding 供应商；status 零外部依赖）
   knowledge_search: contract('retrieval', 'none', 'R0', ['knowledge.index', 'llm.provider'], 2500),
   knowledge_status: contract('retrieval', 'none', 'R0', ['knowledge.index'], 100),

@@ -137,6 +137,7 @@ import {
   useConversationRun,
   useSubAgentTasksForConversation,
   resumeOrphanAgentTasks,
+  getConversationRunSnapshot,
 } from './conversationRunStore';
 import { useErrorFormatter } from './useErrorFormatter';
 import { useDurableConversationLoop } from '@/hooks/useDurableConversationLoop';
@@ -254,8 +255,9 @@ export function SimpleChat({
       .catch(() => { /* 保守：取数失败不阻断 */ });
     return () => { cancelled = true; };
   }, []);
-  // CK-01（C-06）— 运行中发送自动 steer 的行内回执提示（几秒自动消退）
-  const [steerNotice, setSteerNotice] = useState<string | null>(null);
+  // BLOCK-171 CP-4 — steer 状态行内提示（原 CK-01 4s 自动消退形态；
+  // 持续可见语义见 hook 调用后的 steerNotice 副本——state 移至 useChatStream
+  // 之后声明，使 effect 依赖可读 streaming）
 
   // UI-444 加映（用户反馈「点击了下载但没有窗口出来」）——改为原生另存为：
   // fetch 后端组合的 Markdown → files.saveTextFile（原生保存对话框，位置可控、
@@ -291,11 +293,6 @@ export function SimpleChat({
       URL.revokeObjectURL(a.href);
     })();
   }, [conversationId]);
-  useEffect(() => {
-    if (!steerNotice) return undefined;
-    const t = window.setTimeout(() => setSteerNotice(null), 4000);
-    return () => window.clearTimeout(t);
-  }, [steerNotice]);
   // BLOCK-52 P1（选中即引用）: 右栏预览选中文字 → 引用块，随下一条消息发送。
   const [selectionRefs, setSelectionRefs] = useState<SelectionReference[]>([]);
   const selectionRefsRef = useRef<SelectionReference[]>([]);
@@ -798,6 +795,8 @@ export function SimpleChat({
     send,
     regenerate,
     streaming,
+    // BLOCK-171 CP-1 — Stop 复出（hook 内已接后端级联取消）
+    stop,
   } = useChatStream({
     projectId,
     conversationId,
@@ -833,6 +832,44 @@ export function SimpleChat({
       }
     },
   });
+
+  // BLOCK-171 CP-4 — steer 状态持续可见：state 移到 hook 后声明（effect 依赖
+  // 可读 streaming）。流式期间不自动消退；run 结束 4s 后消退。
+  const [steerNotice, setSteerNotice] = useState<string | null>(null);
+  useEffect(() => {
+    if (!steerNotice) return undefined;
+    if (streaming) return undefined;
+    const t = window.setTimeout(() => setSteerNotice(null), 4000);
+    return () => window.clearTimeout(t);
+  }, [steerNotice, streaming]);
+
+  // BLOCK-171 CP-4 — 排队追问可见可撤（当前会话的 queued 条目，带位次）。
+  const visibleQueuedPrompts = queuedPrompts
+    .map((q, index) => ({ ...q, index }))
+    .filter((q) => q.conversationId === conversationId);
+  const removeQueuedPrompt = useCallback((index: number) => {
+    setQueuedPrompts((current) => current.filter((_, i) => i !== index));
+  }, [setQueuedPrompts]);
+
+  // BLOCK-171 CP-1 — 运行簇取消：POST tool-cancel（后端注册表精确 abort + tool_cancel
+  // 事件留痕）。标识稳定（taskId 经 snapshot 读，不入依赖）→ 不破坏行级 memo。
+  const handleCancelTools = useCallback((callIds: string[]) => {
+    if (!conversationId || callIds.length === 0) return;
+    const runTaskId = getConversationRunSnapshot(conversationId)?.taskId;
+    if (!runTaskId) return;
+    for (const callId of callIds) {
+      void fetch(getPlatformApiPrefix() + '/ai/agent/task/' + encodeURIComponent(runTaskId) + '/tool-cancel', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(getToken() ? { Authorization: 'Bearer ' + getToken() } : {}),
+        },
+        body: JSON.stringify({ callId }),
+      }).catch(() => {
+        // 取消请求失败不阻塞界面（run 仍受 Stop/轮边界收尾兜底）
+      });
+    }
+  }, [conversationId]);
 
   // BLOCK-92 Wave A-3 — 审批流状态簇外迁（参数草稿同步/harness 修复/自动批准门，
   // 见 ./SimpleChat/hooks/useApprovalFlow.ts）+ 计划批准状态簇外迁（BLOCK-55，
@@ -1029,9 +1066,9 @@ export function SimpleChat({
     }
   };
 
-  // BLOCK-28.8 — 移除排队/停止生成按钮（用户裁决）：
-  // 流式期间仅保留禁用态发送按钮；stop/queue 能力保留在 useChatStream 内，
-  // 需要时可经事件或快捷键恢复。
+  // BLOCK-28.8 — 排队/停止按钮曾按用户裁决移除；BLOCK-171 CP-1/CP-4 经用户
+  // 整波授权恢复（Stop 键随 streaming 条件渲染、排队 chips 可见可撤），
+  // stop/queue 能力仍以 useChatStream 为单一实现源。
 
   // Create new conversation
   const newConversation = useCallback(() => {
@@ -1166,6 +1203,7 @@ export function SimpleChat({
                 topicShiftReason={topicShiftReason}
                 segments={timelineSegmentsByMessage.get(m.id ?? `idx:${i}`) ?? EMPTY_ROW_SEGMENTS}
                 streaming={streaming}
+                onCancelTools={handleCancelTools}
                 settledContext={settledContext}
                 resolveNonce={resolveNonce}
                 extraRenderersFlag={extraRenderersFlag}
@@ -1309,6 +1347,27 @@ export function SimpleChat({
             )}
             {steerNotice && (
               <div className="sc-attachment-notice" role="status">{steerNotice}</div>
+            )}
+            {/* BLOCK-171 CP-4 — 排队追问可见可撤（位次+撤销） */}
+            {visibleQueuedPrompts.length > 0 && (
+              <div className="sc-queue-chips" role="list" aria-label="排队中的追问">
+                {visibleQueuedPrompts.map((q, i) => (
+                  <span key={`${q.index}:${i}`} className="sc-queue-chip" role="listitem">
+                    <span className="sc-queue-chip-pos">#{i + 1}</span>
+                    <span className="sc-queue-chip-text">{q.text.length > 40 ? q.text.slice(0, 40) + '…' : q.text}</span>
+                    <button
+                      type="button"
+                      className="sc-queue-chip-remove"
+                      aria-label="撤销该排队消息"
+                      title="撤销该排队消息"
+                      data-testid="queue-chip-remove"
+                      onClick={() => removeQueuedPrompt(q.index)}
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
             )}
             {/* Attachments preview */}
             {attachments.length > 0 && (
@@ -1640,14 +1699,28 @@ export function SimpleChat({
                     </>
                   )}
                 </div>
-                <button
-                  className="sc-send-cta sc-send-cta-send"
-                  onClick={() => void sendWithRefs(input)}
-                  disabled={!input.trim() || streaming}
-                  title={streaming ? '任务进行中…' : activeRun?.status === 'running' ? '发送 · 将转向当前任务' : '发送消息'}
-                >
-                  <Icon name="arrow-up" size={12} />
-                </button>
+                {streaming ? (
+                  /* BLOCK-171 CP-1 — Stop 复出（推翻 BLOCK-28.8；hook 内接后端级联取消） */
+                  <button
+                    type="button"
+                    className="sc-send-cta sc-send-cta-stop"
+                    onClick={stop}
+                    title="停止生成"
+                    aria-label="停止生成"
+                    data-testid="chat-stop"
+                  >
+                    <Icon name="square" size={12} />
+                  </button>
+                ) : (
+                  <button
+                    className="sc-send-cta sc-send-cta-send"
+                    onClick={() => void sendWithRefs(input)}
+                    disabled={!input.trim()}
+                    title={activeRun?.status === 'running' ? '发送 · 将转向当前任务' : '发送消息'}
+                  >
+                    <Icon name="arrow-up" size={12} />
+                  </button>
+                )}
               </div>
             </div>
           </div>

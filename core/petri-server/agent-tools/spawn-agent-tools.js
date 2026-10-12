@@ -817,8 +817,10 @@ async function wait_agent(args, ctx) {
         message: '等待超时，子 agent 仍在运行；可稍后再次调用 wait_agent，或用 list_agents 查看状态。',
       };
     }
-    // 父 loop 被取消时立即让出，不空等
-    if (typeof ctx.isCancelled === 'function' && ctx.isCancelled()) {
+    // 父 loop 被取消时立即让出，不空等；BLOCK-171 CP-1 — tool-call 级
+    // 精确取消（tool-cancel 路由经注册表 abort signal）同效。
+    if ((typeof ctx.isCancelled === 'function' && ctx.isCancelled())
+      || (ctx.toolCancelSignal && ctx.toolCancelSignal.aborted)) {
       return { ok: false, error: 'cancelled', agentId, status: task.status, message: '父任务已请求取消。' };
     }
     // ORC-3 — 事件驱动等待：终态 emit 即醒；WAIT_POLL_INTERVAL_MS 片为兜底

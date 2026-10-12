@@ -1,5 +1,6 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-12（**UI-496 落地（BLOCK-171 CP-1/CP-4 停止取消贯通+队列可视化）**：①主聊天流式期间常驻 Stop 键（sc-send-cta-stop，danger token；hook 内 POST task/:taskId/cancel 级联主+子+在途可取消工具）；②运行簇「取消」钮（ConversationTimeline 簇头，callId 精确 POST tool-cancel；后端注册表协作 abort+tool_cancel 事件留痕；workspace_search/wait_agent 契约翻 cancellable=true，searchText 文件检查点+wait_agent 逐跳检查）；③排队追问 chips 可见可撤（位次+撤销）+steer 状态流式期间持续可见；④专项推翻 BLOCK-28.8（Stop 复出，用户整波授权采纳总纲 CP-1）。测试=useChatStream 15/15（+3 Stop 贯通契约）+block171-tool-cancel 5/5+ConversationTimeline 31/31 邻域；实机断言待收口批。in_progress 待用户过目翻 verified。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-494/495 代行实机评估完成翻 verified**（用户授权「代行」；U-02/03/04 先例）：iconBase live 在场 3 处 24px+ReviewMode 面板打开零崩溃+scratch 仓播种走查（审阅列表驱动迭代两次未走通=脚本层，如实登记；H 语义证据=block169 真实 handler 临时仓 4/4）；播种项目已清理。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-495 加映**：A4-2 三态化落地（empty/error 行内提示）+closeout lint 抓真两处修复。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-495 落地（BLOCK-169 commitReview 三边缘+C-24 UI 两项+A1 锁测）**：H-1 键基线同源（staged 文件面板键不再误判 stale，内容面=staged 快照防再编辑夹带）+H-2 staged 删除 rm --cached 分流+H-3 stage 后移零遗留+A4-1 钉住失败行内反馈+A4-2 lineage 空态提示/Graph 操作提示+A1 反例锁测 13/13。G0 开发期常态 · 不外推 packaged/Provider/GA。）

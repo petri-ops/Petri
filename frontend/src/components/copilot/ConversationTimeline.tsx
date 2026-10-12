@@ -64,17 +64,38 @@ function ReasoningSegmentRow({ segment }: { segment: ReasoningSegment }): React.
  * 内部 `processingDurationMs ?? totalDurationMs` 的既有回退）。
  * UI-437 v4 — `forceOpen`：运行级展开后由外层托管折叠态，簇内无簇头、行常驻。
  */
-function ToolsSegmentBlock({ segment, forceOpen }: { segment: ToolsSegment; forceOpen: boolean }): React.ReactElement {
+function ToolsSegmentBlock({ segment, forceOpen, onCancelTools }: {
+  segment: ToolsSegment;
+  forceOpen: boolean;
+  onCancelTools?: (callIds: string[]) => void;
+}): React.ReactElement {
   // BLOCK-108 P2 — 本迭代思考折入簇内（Qoder 形态：已思考单行在工具行之上）。
   const reasoningByIteration = segment.reasoning
     ? { [segment.iteration]: segment.reasoning }
     : undefined;
+  // BLOCK-171 CP-1 — 运行簇取消：本簇在途 callId 列表（有注册 callId 的 running 项）。
+  const runningCallIds = segment.state === 'running'
+    ? segment.activities.filter((a) => a.status === 'running' && a.callId).map((a) => a.callId as string)
+    : [];
   return (
     <div
       className="sc-timeline-cluster"
       data-state={segment.state}
       data-iteration={segment.iteration}
     >
+      {onCancelTools && runningCallIds.length > 0 && (
+        <button
+          type="button"
+          className="sc-tool-cluster-cancel"
+          aria-label="取消本簇在途工具"
+          title="取消本簇在途工具"
+          data-testid="tool-cluster-cancel"
+          onClick={() => onCancelTools(runningCallIds)}
+        >
+          <Icon name="square" size={10} />
+          <span>取消</span>
+        </button>
+      )}
       <ToolActivityList
         activities={segment.activities}
         reasoningByIteration={reasoningByIteration}
@@ -114,6 +135,12 @@ export interface ConversationTimelineProps {
   ) => React.ReactNode;
   /** 时间线容器附加类名。 */
   className?: string;
+  /**
+   * BLOCK-171 CP-1 — 运行簇取消：传入后，运行中簇头出现「取消」钮，
+   * 点击携带本簇在途 callId 列表（宿主 POST task/:taskId/tool-cancel）。
+   * 不传=零变化（历史消息/其他宿主不受影响）。
+   */
+  onCancelTools?: (callIds: string[]) => void;
 }
 
 export function ConversationTimeline({
@@ -121,6 +148,7 @@ export function ConversationTimeline({
   renderProgress,
   className,
   runActive = false,
+  onCancelTools,
 }: ConversationTimelineProps): React.ReactElement | null {
   // UI-437 v4 — 运行级折叠：一次任务的多轮工具段收敛为一行运行摘要。
   const toolsSegments = segments.filter((segment): segment is ToolsSegment => segment.kind === 'tools');
@@ -158,6 +186,7 @@ export function ConversationTimeline({
           // （落定簇换装成摘要按钮=每工具一次「卡片→摘要行→新卡片」闪烁残根，
           // 换装与 run 级折叠是两层）。run 结束后仍按设计折叠为运行摘要行。
           forceOpen={runExpanded || runRunning || runActive}
+          onCancelTools={onCancelTools}
         />
       );
       continue;

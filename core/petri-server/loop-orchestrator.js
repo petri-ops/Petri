@@ -28,6 +28,11 @@ const {
   deriveObservedStateDigest,
   mapDecisionToIterationStatus,
 } = require('../shared-backend/loop-controller');
+// BLOCK-171 CP-1 — 运行内工具协作取消注册表（cancellable 族 AbortSignal 原语）
+const {
+  createToolCancellation,
+  releaseToolCancellation,
+} = require('./helpers/tool-cancel-registry');
 const {
   persistLoopRun,
   updateLoopRunStatus,
@@ -587,6 +592,10 @@ async function runLoop({
 
   // ---------- Loop body ----------
   try {
+    // BLOCK-171 CP-1 — 每运行建工具取消注册表（task 锚定；单返回点 release）。
+    // run_tool 等异步 job 族不受此表管辖（job 级取消走既有 /api/tools/cancel 链）。
+    const toolCancellation = toolCtx.taskId ? createToolCancellation(toolCtx.taskId) : null;
+
     for (let iter = 0; iter < MAX_AGENT_ITERS && !aborted(); iter++) {
       _emit({ event: 'iter', n: iter + 1 });
 
@@ -918,11 +927,15 @@ async function runLoop({
               }
             },
           });
-          let envelope = await executeToolCall(name, args, toolCtx, {
+          // BLOCK-171 CP-1 — 可取消调用：注册 signal 注入 toolCtx（协作取消），
+          // 结算后立即 release；不可取消调用 toolCtx 原样（零行为变化）。
+          const toolCancelSignal = toolCancellation ? toolCancellation.register(callId, name) : undefined;
+          let envelope = await executeToolCall(name, args, toolCancelSignal ? { ...toolCtx, toolCancelSignal } : toolCtx, {
             traceId,
             callId,
             ...(name === 'workspace_exec' ? { onOutput: outputStream.onOutput } : {}),
           });
+          if (toolCancellation) toolCancellation.release(callId);
           outputStream.flush();
           let result = localizeToolResult(envelope.data);
           // BLOCK-56 P3 — workspace_read 附内容短指纹 + unchanged/changedSinceLastRead
@@ -1316,6 +1329,9 @@ async function runLoop({
       _loopPersistPhase('failed', 'Harness Loop 收口失败，执行记录与已有产物已保留。');
     }
   }
+
+  // BLOCK-171 CP-1 — 运行收口释放取消注册表（防 task 键泄漏）。
+  if (toolCtx.taskId) releaseToolCancellation(toolCtx.taskId);
 
   return {
     assistantText: assistantAcc,

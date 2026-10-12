@@ -2179,8 +2179,67 @@
   color: var(--petri-on-solid);
 }
 
-/* BLOCK-28.8: .sc-send-cta-stop / .sc-send-cta-queue / .sc-queued-count
-   已随「停止生成 / 排队」按钮移除（用户裁决）。 */
+/* BLOCK-171 CP-1/CP-4 — Stop 键与排队 chips 复位（原 BLOCK-28.8 移除位；
+   全 token 化，宪章档位） */
+.sc-send-cta-stop {
+  background: var(--petri-danger);
+  color: var(--petri-on-solid);
+}
+
+.sc-send-cta-stop:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--petri-danger) 85%, var(--petri-text));
+}
+
+.sc-queue-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--petri-space-1);
+  padding: 0 var(--petri-space-2) var(--petri-space-2);
+}
+
+.sc-queue-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--petri-space-1);
+  max-width: 320px;
+  padding: 2px var(--petri-space-2);
+  border-radius: var(--petri-radius-pill);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-xs);
+}
+
+.sc-queue-chip-pos {
+  color: var(--petri-text);
+}
+
+.sc-queue-chip-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sc-queue-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: none;
+  border-radius: var(--petri-radius-pill);
+  background: transparent;
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-sm);
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--petri-duration-fast) ease, color var(--petri-duration-fast) ease;
+}
+
+.sc-queue-chip-remove:hover {
+  background: var(--petri-hover);
+  color: var(--petri-text);
+}
 
 /* HLE-C4R: durable loop status panel. Shows the backend loop phase, attempt
    count and public stage conclusions. Colour tone is honest — a blocked /
@@ -4244,4 +4303,31 @@
 .sc-msg:has([data-testid='gen-ui-card']) .sc-msg-body {
   flex: 1 1 auto;
   min-width: 0;
+}
+
+/* BLOCK-171 CP-1 — 运行簇取消钮（簇头右上角，danger 语义 token） */
+.sc-timeline-cluster {
+  position: relative;
+}
+
+.sc-tool-cluster-cancel {
+  position: absolute;
+  top: var(--petri-space-1);
+  right: var(--petri-space-2);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--petri-space-1);
+  padding: 2px var(--petri-space-2);
+  border: none;
+  border-radius: var(--petri-radius-pill);
+  background: transparent;
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-xs);
+  cursor: pointer;
+  transition: background var(--petri-duration-fast) ease, color var(--petri-duration-fast) ease;
+}
+
+.sc-tool-cluster-cancel:hover {
+  background: var(--petri-danger-bg);
+  color: var(--petri-danger);
 }

@@ -128,11 +128,21 @@ async function executeToolCall(name, args = {}, ctx = {}, options = {}) {
       typeof options.onOutput === 'function' ? { onOutput: options.onOutput } : {}
     );
   } catch (error) {
-    data = {
-      ok: false,
-      error: 'tool_failed',
-      message: error && error.message ? error.message : String(error),
-    };
+    // BLOCK-171 CP-1 — 协作取消归类：handler 抛 AbortError('tool_cancel_requested')
+    // 时诚实入 envelope 为 tool_cancelled（区别于真失败；模型可据此收尾叙事）。
+    const cancelled = Boolean(error)
+      && (error.name === 'AbortError' || /tool_cancel_requested/.test(String(error.message || '')));
+    data = cancelled
+      ? {
+          ok: false,
+          error: 'tool_cancelled',
+          message: '工具执行已被用户请求取消。',
+        }
+      : {
+          ok: false,
+          error: 'tool_failed',
+          message: error && error.message ? error.message : String(error),
+        };
   }
   const durationMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
   const envelope = buildEnvelope(name, args, data, ctx, options, durationMs);

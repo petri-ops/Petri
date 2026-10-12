@@ -47,6 +47,11 @@ export interface SimpleChatMessageRowProps {
   /** 该消息的时间线分段（父级 WeakMap 缓存，消息对象身份不变则引用不变）。 */
   segments: ConversationSegment[];
   streaming: boolean;
+  /**
+   * BLOCK-171 CP-1 — 运行簇取消（宿主提供，POST task/:taskId/tool-cancel）。
+   * 宿主侧 useCallback 稳定标识（不破坏行级 memo）；不传=零变化。
+   */
+  onCancelTools?: (callIds: string[]) => void;
   settledContext: ExtractContext | null;
   resolveNonce: number;
   extraRenderersFlag: boolean;
@@ -77,6 +82,7 @@ export interface SimpleChatMessageRowProps {
 }
 
 export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
+  onCancelTools,
   m,
   messageKey,
   isTopicShiftStart,
@@ -136,6 +142,7 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
           <ConversationTimeline
             segments={segments}
             runActive={Boolean(m.pending)}
+            onCancelTools={onCancelTools}
             renderProgress={(segment, meta) => {
               // BLOCK-108 P2 — 过渡叙述正文式渲染（Qoder 形态「模型说话 →
               // 模型做事」）：全部显示、含首条（UI-305「首条意图省略」在时间线

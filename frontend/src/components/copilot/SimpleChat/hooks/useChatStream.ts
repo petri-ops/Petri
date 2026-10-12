@@ -360,8 +360,25 @@ export function useChatStream({
   }, [ownsCopilotAsk]);
 
   // 6. `stop` — terminates the active run for the current conversation.
+  // BLOCK-171 CP-1 — Stop 贯通后端：POST task/:taskId/cancel（context.js
+  // cancelAgentTaskCascade 级联主任务+子 agent → loop controller 预轮检查收尾）。
+  // 本地态翻转保留即时反馈；后端请求 fire-and-forget（网络失败不阻塞本地停止，
+  // run 终态以 SSE/对账投影为准）。
   const stop = useCallback(() => {
-    if (conversationId) stopConversationRun(conversationId);
+    if (!conversationId) return;
+    const runTaskId = getConversationRunSnapshot(conversationId)?.taskId;
+    if (runTaskId) {
+      void fetch(getApiPrefix() + '/ai/agent/task/' + encodeURIComponent(runTaskId) + '/cancel', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(getToken() ? { Authorization: 'Bearer ' + getToken() } : {}),
+        },
+      }).catch(() => {
+        // 后端取消请求失败不阻塞本地停止（与既有 steer 失败仅提示同语义级别）
+      });
+    }
+    stopConversationRun(conversationId);
   }, [conversationId]);
 
   // 7. `regenerate` — re-sends the most recent user message with

@@ -13,6 +13,8 @@
 
 const agentTaskStore = require('../../agent-task-store');
 const dbMod = require('../../db');
+// BLOCK-171 CP-1 — Stop 级联取消在途可取消工具（注册表协作 abort；无在途=零操作）
+const { getToolCancellation } = require('../../helpers/tool-cancel-registry');
 
 module.exports = {
   register(app) {
@@ -38,6 +40,10 @@ module.exports = {
       // AGENT-CONCURRENCY：取消主 agent 时级联取消其子 agent（按 parent_loop_run_id）。
       // cancelAgentTaskCascade 同时请求取消主 task 本身，并在其为 primary 时级联子 agent。
       agentTaskStore.cancelAgentTaskCascade(taskId, { dbMod });
+      // BLOCK-171 CP-1 — Stop 同时中止在途可取消工具（wait_agent/workspace_search 等），
+      // 长工具不再拖到轮边界才让出。
+      const inFlightCancellation = getToolCancellation(taskId);
+      if (inFlightCancellation) inFlightCancellation.cancel({});
 
       return res.json({ status: 'cancel_requested', taskId });
     });

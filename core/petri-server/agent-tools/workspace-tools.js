@@ -157,6 +157,9 @@ function createWorkspaceTools(options = {}) {
       const workspace = await getWorkspace(ctx, options);
       return await callback(workspace);
     } catch (error) {
+      // BLOCK-171 CP-1 — 协作取消信号原样上抛（executeToolCall 归类 tool_cancelled，
+      // 不得被 workspace_error 吞掉伪装成域错误）
+      if (error && (error.name === 'AbortError' || /tool_cancel_requested/.test(String(error.message || '')))) throw error;
       return errorResult(error.code || 'workspace_error', error.message || String(error));
     }
   }
@@ -287,6 +290,12 @@ function createWorkspaceTools(options = {}) {
       let skippedBinaryOrLarge = 0;
 
       async function inspectFile(fullPath, relativePath) {
+        // BLOCK-171 CP-1 — 协作取消：每文件检查点（signal 由 loop 侧注册表注入）
+        if (ctx && ctx.toolCancelSignal && ctx.toolCancelSignal.aborted) {
+          const cancelError = new Error('tool_cancel_requested');
+          cancelError.name = 'AbortError';
+          throw cancelError;
+        }
         if (matches.length >= limit) return;
         if (fileMatcher && !fileMatcher.test(relativePath) && !fileMatcher.test(path.basename(relativePath))) return;
         const stat = await fsp.stat(fullPath);

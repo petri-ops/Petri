@@ -347,3 +347,70 @@ describe('useChatStream 排队追问 drain（BLOCK-102 P2 守卫行为锁）', (
     expect(setInput).toHaveBeenCalledWith('');
   });
 });
+
+
+// ============================================================
+// BLOCK-171 CP-1 —— Stop 贯通后端契约。
+// stop() 必须同时做两件事：①向后端级联取消端点 POST
+// /ai/agent/task/:taskId/cancel（cancelAgentTaskCascade 主+子级联）；
+// ②翻转本地 run 状态（即时反馈）。极旧运行态（无 taskId）退化为
+// 纯本地翻转；后端请求网络失败不阻塞本地停止。
+// ============================================================
+import { stopConversationRun } from '@/components/copilot/conversationRunStore';
+
+describe('useChatStream Stop 贯通后端（BLOCK-171 CP-1）', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('stop 时向后端级联取消端点发 POST 并翻转本地 run 状态', () => {
+    getConversationRunSnapshotMock.mockReturnValue({ taskId: 'task_primary_1' });
+    const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<{ ok: boolean; json: () => Promise<{ ok: boolean }> }>>(() => Promise.resolve({ ok: true, json: () => Promise.resolve({ ok: true }) }));
+    vi.stubGlobal('fetch', fetchMock);
+    const { result } = renderHook((props: UseChatStreamArgs) => useChatStream(props), {
+      initialProps: makeArgs(),
+    });
+
+    act(() => {
+      result.current.stop();
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe('/api/ai/agent/task/task_primary_1/cancel');
+    expect(init.method).toBe('POST');
+    expect((init.headers as Record<string, string>).Authorization).toBe('Bearer desktop-local');
+    expect(vi.mocked(stopConversationRun)).toHaveBeenCalledWith('conv_test');
+  });
+
+  it('无 taskId（极旧运行态）：不请求后端，仍翻转本地态', () => {
+    getConversationRunSnapshotMock.mockReturnValue(null);
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    const { result } = renderHook((props: UseChatStreamArgs) => useChatStream(props), {
+      initialProps: makeArgs(),
+    });
+
+    act(() => {
+      result.current.stop();
+    });
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(vi.mocked(stopConversationRun)).toHaveBeenCalledWith('conv_test');
+  });
+
+  it('后端请求网络失败：不阻塞本地停止', async () => {
+    getConversationRunSnapshotMock.mockReturnValue({ taskId: 'task_x' });
+    vi.stubGlobal('fetch', vi.fn(() => Promise.reject(new Error('network down'))));
+    const { result } = renderHook((props: UseChatStreamArgs) => useChatStream(props), {
+      initialProps: makeArgs(),
+    });
+
+    await act(async () => {
+      result.current.stop();
+      await Promise.resolve(); // 冲刷 fire-and-forget 的 rejection catch 分支
+    });
+
+    expect(vi.mocked(stopConversationRun)).toHaveBeenCalledWith('conv_test');
+  });
+});

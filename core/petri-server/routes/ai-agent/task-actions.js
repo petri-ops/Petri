@@ -17,6 +17,7 @@ const resilienceMod = require('../../helpers/agent-resilience');
 const agentTaskStore = require('../../agent-task-store');
 const conversationHelper = require('../../helpers/conversations');
 const { queueUserMessage, launchUserFollowup } = require('../../agent-tools/spawn-agent-tools');
+const { getToolCancellation } = require('../../helpers/tool-cancel-registry');
 const db = require('../../db').getAsyncDatabase();
 
 const STATUS_HTTP = {
@@ -57,6 +58,32 @@ module.exports = {
       );
     } catch { /* SSE 可见性失败不阻塞入队 */ }
     return res.json({ ok: true, queued: true, depth: enq.depth, note: '已排队，将在当前步骤结束后加入' });
+  });
+
+  // BLOCK-171 CP-1 — 运行内工具协作取消（cancellable 族）：callId 精确取消；
+  // 取消动作写 tool_cancel 事件入 task_events（可审计取消）。
+  app.post('/api/ai/agent/task/:taskId/tool-cancel', async (req, res) => {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({ ok: false, error: 'unauthorized', message: '未登录' });
+    const task = agentTaskStore.getAgentTask(req.params.taskId);
+    if (!task) return res.status(404).json({ ok: false, error: 'not_found', message: '任务不存在' });
+    if (task.user_id && task.user_id !== userId) return res.status(403).json({ ok: false, error: 'forbidden', message: '无权取消该任务工具' });
+    const callId = req.body && req.body.callId ? String(req.body.callId) : undefined;
+    const registry = getToolCancellation(task.taskId || req.params.taskId);
+    if (!registry) {
+      return res.json({ ok: true, cancelled: [], note: '当前无可取消的在途工具' });
+    }
+    const result = registry.cancel(callId ? { callId } : {});
+    try {
+      const events = agentTaskStore.getAgentTaskEventsSince(task.taskId || req.params.taskId, 0, 1000000);
+      const seq = (events.length ? events[events.length - 1].seq : 0) + 1;
+      agentTaskStore.appendAgentTaskEvent(
+        task.taskId || req.params.taskId, seq,
+        'tool_cancel',
+        { event: 'tool_cancel', callId: callId || null, cancelled: result.cancelled, at: new Date().toISOString() }
+      );
+    } catch { /* SSE 可见性失败不阻塞取消 */ }
+    return res.json({ ok: true, cancelled: result.cancelled });
   });
 
   // 俯瞰面板数据源：该用户最近子 agent 任务（跨会话，只读 tasks 投影）。
