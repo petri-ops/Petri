@@ -7,7 +7,7 @@
 // 「部分调用成本未知」。
 // ============================================================
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 
 interface ModelUsageRow {
@@ -44,6 +44,10 @@ function fmtTokens(n?: number): string {
 export function UsageCostPanel(): React.ReactElement {
   const [data, setData] = useState<UsageMineResponse | null>(null);
   const [error, setError] = useState('');
+  // BLOCK-176 CP-18 — 任务级成本硬熔断（ai-settings costCapCny；0=清除=无熔断）。
+  const [capInput, setCapInput] = useState('');
+  const [capBusy, setCapBusy] = useState(false);
+  const [capNotice, setCapNotice] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -57,10 +61,55 @@ export function UsageCostPanel(): React.ReactElement {
     }).catch((reason) => {
       if (!cancelled) setError(reason instanceof Error ? reason.message : String(reason));
     });
+    void fetch(`${getPlatformApiPrefix()}/ai/agent/cost-cap`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    }).then(async (response) => {
+      const json = (await response.json()) as { ok?: boolean; capCny?: number };
+      if (!cancelled && response.ok && json.ok) {
+        setCapInput(Number(json.capCny) > 0 ? String(json.capCny) : '');
+      }
+    }).catch(() => { /* 熔断读面失败不阻塞用量展示 */ });
     return () => {
       cancelled = true;
     };
   }, []);
+
+  const saveCap = useCallback(async () => {
+    setCapBusy(true);
+    setCapNotice(null);
+    try {
+      const raw = capInput.trim();
+      let capCny = 0;
+      if (raw !== '') {
+        const parsed = Number(raw);
+        if (!Number.isFinite(parsed) || parsed <= 0) {
+          setCapNotice('上限需为正数（留空=不熔断）');
+          return;
+        }
+        capCny = Math.round(parsed * 100) / 100;
+      }
+      const token = getToken();
+      const response = await fetch(`${getPlatformApiPrefix()}/ai/agent/cost-cap`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ capCny }),
+      });
+      const json = (await response.json().catch(() => ({}))) as { ok?: boolean; capCny?: number; message?: string };
+      if (response.ok && json.ok) {
+        setCapInput(Number(json.capCny) > 0 ? String(json.capCny) : '');
+        setCapNotice(Number(json.capCny) > 0 ? `已保存（新任务生效，≥¥${json.capCny} 停机收尾）` : '已清除（不熔断）');
+      } else {
+        setCapNotice('保存失败：' + (json.message || `HTTP ${response.status}`));
+      }
+    } catch (e) {
+      setCapNotice('保存失败：' + (e instanceof Error ? e.message : String(e)));
+    } finally {
+      setCapBusy(false);
+    }
+  }, [capInput]);
 
   const costStatusNote = data?.cost_status === 'partial'
     ? `（${data.unknown_cost_calls} 次调用成本未知，估算为部分口径）`
@@ -118,6 +167,34 @@ export function UsageCostPanel(): React.ReactElement {
               </div>
             </div>
           )}
+          {/* BLOCK-176 CP-18 — 任务级成本硬熔断（用量节输入；每任务累计，超限诚实收尾停机） */}
+          <div style={{ marginTop: 12, borderTop: '1px solid var(--petri-border)', paddingTop: 10 }} data-testid="cost-cap">
+            <small style={{ color: 'var(--petri-text-tertiary)' }}>任务成本熔断（¥）</small>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 4 }}>
+              <input
+                type="number"
+                step="0.5"
+                min="0"
+                value={capInput}
+                onChange={(event) => setCapInput(event.target.value)}
+                placeholder="不熔断"
+                disabled={capBusy}
+                data-testid="cost-cap-input"
+              />
+              <button
+                type="button"
+                disabled={capBusy}
+                onClick={() => void saveCap()}
+                data-testid="cost-cap-save"
+              >
+                保存上限
+              </button>
+              {capNotice && <small role="status">{capNotice}</small>}
+            </div>
+            <small style={{ color: 'var(--petri-text-tertiary)' }}>
+              单任务累计估算成本达上限即停止并如实收尾（0/留空=不熔断）；env PETRI_TASK_COST_CAP_CNY 覆盖优先。
+            </small>
+          </div>
         </>
       )}
     </div>

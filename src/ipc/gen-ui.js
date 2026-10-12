@@ -229,7 +229,7 @@ function setupGenUiIpc() {
     const jobId = String((payload && payload.jobId) || '').trim();
     if (!jobId) return { ok: false, code: 'invalid_arguments', message: 'jobId 不能为空' };
     try {
-      const segments = session.filePath.split(/[\/]/);
+      const segments = session.filePath.split('/');
       const sessionConversationId = segments.find((segment) => segment.indexOf('conv_') === 0 || segment.indexOf('conv-') === 0) || null;
       const adb = require('../db').getAsyncDatabase();
       const job = await adb.prepare(

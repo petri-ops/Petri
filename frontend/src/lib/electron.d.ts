@@ -716,6 +716,19 @@ declare global {
           message?: string;
           detail?: { conflicts?: string[]; dirtyCount?: number } | null;
         }>;
+        // BLOCK-176 CP-17 — 工作树 checkpoint 安全网
+        checkpointCreate: (params?: { projectId?: string }) => Promise<{
+          ok: boolean;
+          data?: { ok: boolean; created: boolean; ref: string | null; code?: string; message?: string };
+          error?: string;
+          message?: string;
+        }>;
+        checkpointRollback: (params?: { projectId?: string; ref?: string }) => Promise<{
+          ok: boolean;
+          data?: { ok: boolean; ref: string; code?: string; message?: string };
+          error?: string;
+          message?: string;
+        }>;
         remoteList: (params?: { projectId?: string }) => Promise<{
           ok: boolean;
           data?: { remotes: Array<{ name: string; fetchUrl?: string; pushUrl?: string }>; count: number };

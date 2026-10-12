@@ -15,6 +15,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
@@ -68,7 +69,9 @@ function cruiseCycles() {
     ],
     options: { doNotFollow: { path: 'node_modules' }, tsPreCompilationDeps: true },
   };
-  const configFile = path.join(ROOT, '.tmp-arch-cycles-config.cjs');
+  // os.tmpdir 而非仓库根：Windows 下 unlink 竞态（AV/索引器短暂持句柄）会把残留
+  // 留进工作区，污染 knip 保留面扫描（test:changed 棘轮误红）。绝对路径配置跨目录可用。
+  const configFile = path.join(os.tmpdir(), `petri-arch-cycles-config-${process.pid}.cjs`);
   fs.writeFileSync(configFile, `module.exports = ${JSON.stringify(config)};`);
   // 直连 dependency-cruiser bin（node 执行本仓依赖内的 .mjs 入口，跨平台免 shell、
   // 免 npx 的 Windows spawn 陷阱）。bin 缺失=依赖损坏，fail-fast。

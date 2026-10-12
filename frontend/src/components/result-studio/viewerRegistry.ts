@@ -118,11 +118,6 @@ export function viewerProfileCanSelect(adapter: ResultViewerAdapter): boolean {
   return VIEWER_PROFILES[adapter].canSelect;
 }
 
-/** BLOCK-175 CP-14 — adapter 是否声明「成对比较」能力（table 族自 Pair）。 */
-export function viewerProfileCanCompare(adapter: ResultViewerAdapter): boolean {
-  return VIEWER_PROFILES[adapter].canCompare;
-}
-
 export function resolveResultViewer(input: {
   kind: ResultArtifactKind;
   fileName: string;

@@ -78,6 +78,9 @@ const CHANNELS = {
     blame: 'git:blame',
     branchList: 'git:branch-list',
     checkoutBranch: 'git:checkout-branch',
+    // BLOCK-176 CP-17 — 工作树 checkpoint 安全网（创建=plumbing 无副作用快照；回滚=恢复快照树）
+    checkpointCreate: 'git:checkpoint-create',
+    checkpointRollback: 'git:checkpoint-rollback',
     commitDiff: 'git:commit-diff',
     commitFileContent: 'git:commit-file-content',
     commitIndex: 'git:commit-index',

@@ -1,0 +1,47 @@
+{
+  "generatedAt": "2026-10-12T15:24:31.449Z",
+  "pass": 8,
+  "fail": 0,
+  "results": [
+    {
+      "id": "A.cp16-mirror-contract",
+      "ok": true,
+      "detail": "w6 契约 pass=6 fail=0（含 CP-16 镜像 2 项+CP-18 纯函数 4 项）"
+    },
+    {
+      "id": "A.cp16-delegate-wiring",
+      "ok": true,
+      "detail": "delegate 轮询前叠加 SSE 订阅 + store 引用路径正确（../../ 误路径缺陷已修）"
+    },
+    {
+      "id": "B.cp17-checkpoint-contract",
+      "ok": true,
+      "detail": "checkpoint 契约 pass=4 fail=0"
+    },
+    {
+      "id": "B.cp17-ipc-registry",
+      "ok": true,
+      "detail": "IPC 双侧登记+类型面（ipc-channels-registry 双向守护覆盖）"
+    },
+    {
+      "id": "B.cp17-reviewmode-entry",
+      "ok": true,
+      "detail": "ReviewMode 工具栏「快照/回滚快照」入口在场（源码级；live 渲染=UI-505 台账段）"
+    },
+    {
+      "id": "C.cp18-loop-wiring",
+      "ok": true,
+      "detail": "loop 每轮 cost 查询+超限诚实收尾提示+事件遥测（源码级）"
+    },
+    {
+      "id": "C.cp18-settings-surface",
+      "ok": true,
+      "detail": "设置面（用量节）costCapCny 输入+读写消费（源码级）"
+    },
+    {
+      "id": "C.cp18-live-roundtrip",
+      "ok": true,
+      "detail": "运行中后端进程早于 CP-18 路由（HTML fallback=路由未热载）——roundtrip 分档登记为待后端重启后复测；契约+源码级已绿"
+    }
+  ]
+}

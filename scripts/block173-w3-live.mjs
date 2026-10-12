@@ -9,11 +9,7 @@
  *         存在语义）经 /api/ai/decision-config（在册端点）读 tool-route enabled。
  */
 import { execSync } from 'node:child_process';
-import { createRequire } from 'node:module';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-const require = createRequire(import.meta.url);
 const ROOT = execSync('git rev-parse --show-toplevel', { encoding: 'utf8' }).trim();
 const API = 'http://localhost:3001/api';
 const AUTH = { 'Content-Type': 'application/json', Authorization: 'Bearer desktop-local' };

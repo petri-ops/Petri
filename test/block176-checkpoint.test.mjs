@@ -14,7 +14,7 @@ const {
   createCheckpoint,
   rollbackToCheckpoint,
   listCheckpoints,
-} = require('../core/petri-server/helpers/workspace-checkpoint.js');
+} = require('../core/shared-backend/workspace-checkpoint.js');
 
 function git(cwd, args) {
   return execFileSync('git', args, { cwd, encoding: 'utf8' });

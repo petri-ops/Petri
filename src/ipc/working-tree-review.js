@@ -32,6 +32,8 @@ const { diffForReview, parseDiffFiles, buildReversePatchForReject } = require('.
 const { _writeRejectEntry } = require('./working-tree-review/reject-store');
 // BLOCK-152 H 轨 — commitReview hunk 级 stage 面分类（纯函数：签名复算/diff 切片/patch 构造）。
 const { classifyReviewStageSurface } = require('./working-tree-review/review-stage');
+// BLOCK-176 CP-17 — 工作树 checkpoint 安全网（shared-backend 共享层；R5 放行面）。
+const { createCheckpoint, rollbackToCheckpoint } = require('../../core/shared-backend/workspace-checkpoint');
 
 // BLOCK-125：拒绝清单根目录解析——与 core/petri-server/helpers/system-prompt.js
 // resolveWorkingTreeRejectRoot 同优先级（LOCAL_DATA_DIR 优先 / USER_DATA_DIR 回退），
@@ -85,6 +87,26 @@ function setupWorkingTreeReviewIpc(options = {}) {
       return { tracked: stat.tracked, untrackedFiles: stat.untrackedFiles, empty: stat.empty };
     });
   });
+
+  // BLOCK-176 CP-17 — 工作树 checkpoint 安全网：创建=plumbing 三步无副作用快照
+  // （不动真实索引/工作树/HEAD）；非 git 工作空间/纯净树=诚实拒绝或 created:false。
+  ipcMain.handle(CHANNELS.git.checkpointCreate, async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const workspaceRoot = await getProjectWorkspacePath(args.projectId);
+      return createCheckpoint(workspaceRoot);
+    });
+  });
+
+  // 回滚到指定（缺省最新未回滚）checkpoint：恢复跟踪文件+清理快照后新增未跟踪文件。
+  ipcMain.handle(CHANNELS.git.checkpointRollback, async (event, args = {}) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return safeInvoke(async () => {
+      const workspaceRoot = await getProjectWorkspacePath(args.projectId);
+      return rollbackToCheckpoint(workspaceRoot, typeof args.ref === 'string' && args.ref ? args.ref : undefined);
+    });
+  });
+
 
   ipcMain.handle(CHANNELS.git.workingTreeDiff, async (event, args = {}) => {
     const deny = assertSender(event); if (deny) return deny;

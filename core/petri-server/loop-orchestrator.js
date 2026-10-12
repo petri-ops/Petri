@@ -38,6 +38,10 @@ const {
   createGuardAcks,
   releaseGuardAcks,
 } = require('./helpers/guard-ack-store');
+// BLOCK-176 CP-18 — 任务级成本硬熔断（ai-settings costCapCny；上限未配置=零行为变化）
+const { resolveCostCapCny, isCostCapExceeded } = require('./helpers/cost-cap');
+const { getAiSettings } = require('./helpers/ai-settings');
+const { summarizeAiUsage } = require('./helpers/ai-usage');
 const {
   persistLoopRun,
   updateLoopRunStatus,
@@ -611,6 +615,10 @@ async function runLoop({
     const reqMaxTokens = typeof generationDefaults.maxTokens === 'number' && generationDefaults.maxTokens >= 256
       ? Math.floor(generationDefaults.maxTokens)
       : 16384;
+    // BLOCK-176 CP-18 — 成本熔断上限一次性解析（env 覆盖 ai-settings costCapCny；
+    // 未配置=null=不熔断）。每轮只查不解析；costCapAnnounced 防多轮重复提示。
+    const costCapCny = resolveCostCapCny(getAiSettings(), process.env);
+    let costCapAnnounced = false;
     // BLOCK-171 CP-2 — 确认通道：ctx.dynamicGuardAcks 注入（isGuardAcked 读侧
     // 早已在册；写侧首次接线——guard-ack 路由写、策略读，同 Set 引用即时生效）。
     if (toolCtx.taskId && !toolCtx.dynamicGuardAcks) {
@@ -645,6 +653,24 @@ async function runLoop({
             ? '已达到显式配置的工具调用保护上限。请基于已收到的工具结果直接说明停止原因、已完成工作和未执行步骤，不要再调用工具，也不得声称尚未启动的工作正在执行。'
             : '检测到相同工具和参数反复调用，任务可能陷入异常循环。请停止调用工具，直接说明异常、已完成工作和未执行步骤；不得声称尚未启动的工作正在执行。',
         });
+      }
+
+      // BLOCK-176 CP-18 — 任务级成本硬熔断：每轮请求前查 conversation 维度 ai_usage
+      // 累计成本，≥ 上限走与 capHit 同型的诚实收尾提示（不虚报完成）。
+      // 上限未配置=不进入本分支（现状零变化）；读取失败 fail-open（观测面故障不停任务）。
+      if (costCapCny != null && !costCapAnnounced) {
+        try {
+          const usage = summarizeAiUsage({ conversationId: toolCtx.conversationId });
+          const check = isCostCapExceeded({ capCny: costCapCny, spentCny: usage && usage.estimatedCostCny });
+          if (check.exceeded) {
+            costCapAnnounced = true;
+            _emit({ event: 'cost_cap_exceeded', capCny: check.capCny, spentCny: check.spentCny });
+            messages.push({
+              role: 'system',
+              content: `已达到本任务配置的成本上限（估算累计 ¥${check.spentCny.toFixed(2)} ≥ 上限 ¥${check.capCny.toFixed(2)}）。请停止调用工具，基于已收到的结果直接说明停止原因、已完成工作和未执行步骤；不得声称尚未启动的工作正在执行。`,
+            });
+          }
+        } catch { /* fail-open：成本观测面故障不熔断任务 */ }
       }
 
       // BLOCK-51 P2 — 上下文熔断：每轮请求构造前预算检查，超过 ctxWindow*0.85 时

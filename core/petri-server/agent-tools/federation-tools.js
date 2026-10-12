@@ -93,7 +93,7 @@ async function tool_federation_list_peers() {
  * - 跨机实测段=双机环境依赖，本机以 mock 对端契约测试分档覆盖（plan §3）。
  */
 async function mirrorPeerTaskEvents(peer, token, peerTaskId, timeoutMs) {
-  const agentTaskStore = require('../../agent-task-store');
+  const agentTaskStore = require('../agent-task-store');
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -238,4 +238,5 @@ async function tool_delegate_to_petri_node(args = {}) {
 module.exports = {
   tool_delegate_to_petri_node,
   tool_federation_list_peers,
+  mirrorPeerTaskEvents, // BLOCK-176 CP-16（契约测试消费；工具面不直出）
 };

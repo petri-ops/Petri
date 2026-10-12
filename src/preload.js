@@ -496,6 +496,9 @@ const desktopBridgeSurface = {
     unstagePaths: (params) => ipcRenderer.invoke('git:unstage-paths', params || {}),
     commitIndex: (params) => ipcRenderer.invoke('git:commit-index', params || {}),
     checkoutBranch: (params) => ipcRenderer.invoke('git:checkout-branch', params || {}),
+    // BLOCK-176 CP-17 — 工作树 checkpoint 安全网（创建/回滚）
+    checkpointCreate: (params) => ipcRenderer.invoke('git:checkpoint-create', params || {}),
+    checkpointRollback: (params) => ipcRenderer.invoke('git:checkpoint-rollback', params || {}),
     remoteList: (params) => ipcRenderer.invoke('git:remote-list', params || {}),
     remoteStatus: (params) => ipcRenderer.invoke('git:remote-status', params || {}),
     push: (params) => ipcRenderer.invoke('git:push', params || {}),

@@ -4896,3 +4896,10 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **A4-2**：LineageViewSwitch 三态化——empty/error 行内提示替代整组静默；LineageGraph 容器操作提示。
 - **A1**：mergeKeepOlderPrefix 反例锁测三条（窗口空洞/同 ts 边界/id 冲突）——现状留痕，换算法=升级登记面。
 - **红绿**：block169-review-commit-edge 4/4；ReviewMode 59/60（1=block41 存量）；lineage 246 绿；A1 锁测 13/13。
+
+## UI-505: 死导出清理（2026-10-12 in_progress，BLOCK-176/W6 收口棘轮）
+
+- **knip 棘轮红**：viewerRegistry.ts `viewerProfileCanCompare` 包装函数零消费（`canCompare` 能力位真实消费路径在 resultMode.ts capabilities，不经包装）——按 CK-11 冻结纪律删除死导出，`VIEWER_PROFILES` 数据面不动。
+- **eslint 化石**：ToolActivityDock.tsx hooks 修复（UI-502 批）后 2 条抑制失效——`--prune-suppressions` 收缩（存量只许收缩方向）。
+- **契约**：viewerRegistry 契约测试不触该导出（246 绿不动）；knip 棘轮零新增。
+- **补登（同批 CP 实现面）**：ReviewMode 工具栏「快照/回滚快照」安全网按钮（CP-17，wt-btn 族+确认对话+行内反馈，快照创建后条件出回滚钮）；UsageCostPanel「任务成本熔断（¥）」输入块（CP-18，纯 token 内联边线+testid+读写反馈）。均 dev Electron 边界内 in_progress 待过目。

@@ -216,6 +216,8 @@ describe('ReviewMode BLOCK-41（暂存两栏 / 写操作 / 分支切换 / push-p
   it('staged commit box appears with staged files and commitIndex submits the message', async () => {
     const commitIndex = vi.fn(() => Promise.resolve({ ok: true, data: { commit: 'abc1234', message: 'msg', remaining: 0 } }));
     getBridgeMock.mockReturnValue(makeBridge({ commitIndex }));
+    // BLOCK-147 未决拦截走 window.confirm（happy-dom 未实现；staged 文件带未决 hunk 必触发）
+    vi.stubGlobal('confirm', vi.fn(() => true));
 
     renderReview();
 

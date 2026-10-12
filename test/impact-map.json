@@ -41,7 +41,8 @@
         "test/block173-w3-contracts.test.mjs",
         "acceptance/block-173/**",
         "acceptance/block-174/**",
-        "core/petri-server/agent-tools/agent-tool-interceptor.js"
+        "core/petri-server/agent-tools/agent-tool-interceptor.js",
+        "scripts/block176-w6-live.mjs"
       ],
       "tests": [
         "test/block166-gen-ui-host.test.mjs",
@@ -220,7 +221,8 @@
         "test/block152-hunk-stage.test.mjs",
         "test/working-tree-review-file-content.test.mjs",
         "test/working-tree-review-init.test.mjs",
-        "test/git-adapter-block20-per-hunk.test.mjs"
+        "test/git-adapter-block20-per-hunk.test.mjs",
+        "test/block176-checkpoint.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -3361,6 +3363,23 @@
         "docs-check"
       ],
       "classifiesScripts": true
+    },
+    {
+      "id": "block176-w6",
+      "note": "BLOCK-176 W6 竞争力波六：CP-16 联邦事件镜像（federation-tools mirror+mock 对端契约）/CP-17 工作树 checkpoint（shared-backend helper+working-tree-review IPC+ReviewMode 安全网入口）/CP-18 成本硬熔断（cost-cap 纯函数+route+loop 执行面+用量节设置面）。",
+      "patterns": [
+        "core/petri-server/helpers/cost-cap.js",
+        "core/petri-server/routes/ai-agent/cost-cap.js",
+        "core/shared-backend/workspace-checkpoint.js",
+        "test/block176-checkpoint.test.mjs",
+        "test/block176-w6-contract.test.mjs",
+        "acceptance/block-176/**"
+      ],
+      "tests": [
+        "test/block176-checkpoint.test.mjs",
+        "test/block176-w6-contract.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

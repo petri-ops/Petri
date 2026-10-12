@@ -14,6 +14,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { WorkspaceFileIcon } from '@/components/workspace-panels/WorkspaceFileIcon';
 import { useWorkingTreeReview, type DiffFile } from './useWorkingTreeReview';
+import { getBridge } from '@/lib/desktopBridge';
 // BLOCK-92 Wave B-3 — 界面逻辑簇外迁（./useReviewModeState.ts，纯搬运零行为变化）。
 import {
   useDockAccordion,
@@ -63,6 +64,10 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
   const [commitMsg, setCommitMsg] = useState('');
   const [commitSuccess, setCommitSuccess] = useState<CommitSuccess | null>(null);
   const [commitError, setCommitError] = useState<string | null>(null);
+  // BLOCK-176 CP-17 — 工作树 checkpoint 安全网（审阅/还原前的无副作用快照）
+  const [checkpointBusy, setCheckpointBusy] = useState(false);
+  const [checkpointNotice, setCheckpointNotice] = useState<string | null>(null);
+  const [hasCheckpoint, setHasCheckpoint] = useState(false);
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const [focusedHunk, setFocusedHunk] = useState(0);
   const [collapsedDirs, setCollapsedDirs] = useState<Record<string, boolean>>({});
@@ -295,6 +300,56 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
   const decisionCount = Object.keys(review.decisions).length;
   const acceptedCount = review.appliedCount;
   const rejectedCount = review.rejectedCount;
+
+  // BLOCK-176 CP-17 — 创建无副作用快照（plumbing；不动工作树/索引/HEAD）
+  const handleCheckpointCreate = useCallback(async () => {
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge?.checkpointCreate) return;
+    setCheckpointBusy(true);
+    setCheckpointNotice(null);
+    try {
+      const res = await bridge.checkpointCreate({ projectId });
+      const data = res?.data;
+      if (res?.ok && data?.ok) {
+        if (data.created) {
+          setHasCheckpoint(true);
+          setCheckpointNotice(`已建安全网快照 ${(data.ref || '').slice(0, 7)}`);
+        } else {
+          setCheckpointNotice(data.message || '工作树与 HEAD 一致，无需快照');
+        }
+      } else {
+        setCheckpointNotice(data?.message || res?.message || '快照创建失败');
+      }
+    } catch (e) {
+      setCheckpointNotice('快照创建失败：' + (e instanceof Error ? e.message : String(e)));
+    } finally {
+      setCheckpointBusy(false);
+    }
+  }, [projectId]);
+
+  // 回滚到最近快照：恢复跟踪文件 + 清理快照后新增文件（破坏性，二次确认）
+  const handleCheckpointRollback = useCallback(async () => {
+    const bridge = getBridge('workingTreeReview');
+    if (!bridge?.checkpointRollback) return;
+    if (!window.confirm('回滚到最近的安全网快照？工作树将恢复到快照状态，快照后新增文件将被删除。')) return;
+    setCheckpointBusy(true);
+    setCheckpointNotice(null);
+    try {
+      const res = await bridge.checkpointRollback({ projectId });
+      const data = res?.data;
+      if (res?.ok && data?.ok) {
+        setHasCheckpoint(false);
+        setCheckpointNotice(`已回滚到快照 ${(data.ref || '').slice(0, 7)}`);
+        await review.refresh();
+      } else {
+        setCheckpointNotice(data?.message || res?.message || '回滚失败');
+      }
+    } catch (e) {
+      setCheckpointNotice('回滚失败：' + (e instanceof Error ? e.message : String(e)));
+    } finally {
+      setCheckpointBusy(false);
+    }
+  }, [projectId, review]);
 
   const handleCommitReviewClick = () => {
     if (!hasDecisions) return;
@@ -629,6 +684,32 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
           >
             <Icon name="refresh" size={13} />
           </button>
+          {/* BLOCK-176 CP-17 — 安全网：审阅/还原前无副作用快照 + 会话内回滚 */}
+          <button
+            type="button"
+            className="wt-btn"
+            onClick={() => void handleCheckpointCreate()}
+            disabled={checkpointBusy}
+            title="创建无副作用快照（不动工作树/暂存区/提交历史）"
+            data-testid="checkpoint-create"
+          >
+            快照
+          </button>
+          {hasCheckpoint && (
+            <button
+              type="button"
+              className="wt-btn"
+              onClick={() => void handleCheckpointRollback()}
+              disabled={checkpointBusy}
+              title="回滚到最近快照（恢复跟踪文件+清理快照后新增文件）"
+              data-testid="checkpoint-rollback"
+            >
+              回滚快照
+            </button>
+          )}
+          {checkpointNotice && (
+            <span style={{ color: 'var(--petri-text-tertiary)', fontSize: 12 }} role="status" data-testid="checkpoint-notice">{checkpointNotice}</span>
+          )}
           <button
             type="button"
             className="wt-btn wt-btn-danger"

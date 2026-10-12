@@ -17,6 +17,7 @@
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
+| ✅ | 2026-10-12 | BLOCK-176 W6 整包 completed（十三门 PASS；w6-live 8/8 分档）：CP-16 镜像（契约抓真修 require 误路径死缺陷）/CP-17 checkpoint 安全网（shared-backend 同源+IPC+ReviewMode 入口）/CP-18 成本熔断（loop 执行面+用量节设置面）/CP-19 deferred。plan §4 波报；UI-505 随批。 | zcode |
 | --- | --- | --- | --- |
 | 🟡→🟢自愈形态 | 2026-10-12 | **BLOCK-166 knownGap：Gen UI 沙箱 OOPIF frame 自身导航劫持（DoS 向量）→BLOCK-168 已加固**——fragment 内 location.href 赋值可把沙箱 iframe 劫为外域错误页（卡片死亡）；**安全边界未破**=外域内容加载被 guest CSP 拒（ERR_BLOCKED_BY_CSP 主进程实证）、widgetState 持久化无数据丢失；封堵三路实测不可达=will-navigate/will-frame-navigate（OOPIF 不派发）+webRequest（OOPIF 请求不过主进程 session 栈）+beforeunload（sandboxed-modals 抑制对话框=无效） | **用户裁决 2026-10-12：排期修**（「BLOCK-166 knownGap 裁决 可以排期修」）——落点=Electron 升级时优先复测 will-navigate/will-frame-navigate 派发矩阵，候选修复=事件复测+beforeunload 组合；登记 roadmap 排队候选（BLOCK-166 加映：OOPIF 导航劫持修复，planned） |
 | 🟡建议 | 2026-10-01 | **BLOCK-128 实机验收抓真三条**：①**取消终态误分类**——MCP 链 job 被 SIGTERM 击杀后，finalize 的 artifact 完整性校验（"Required artifact… not produced"）覆盖取消分类，终态落 failed 而非 cancelled（Jobs Wall 将显示已失败+误导性错误文案）；修法方向=finalizer 在 artifact 校验前优先按 cancelRequested/信号击杀分类 cancelled。②**墙面板取消跨后端可达性未定**——Jobs Wall 取消钮 POST rApiBase（:53542 Electron 自spawn 后端），对 owner=:3001 的 job 15s 无效果；双后端脑裂家族（dev-infra §76 长期条款），durable flag 30s 慢路径被探针 fallback 掩蔽未能排除。③**process_pid 落库恒 null**（内存持有由取消响应 local.active=true 佐证），僵尸扫描 pid 召回路径待核实 | ①归属 BLOCK-128 加映候选（小修，core finalizer 单点）；②归属 dev 双后端结构性修复方向（dev-infra §76③ attach 机制），非本包缺陷；③随①同批核实；三者均非阻塞 BLOCK-128 收口（取消链本体 SIGTERM 击杀已实证） |
