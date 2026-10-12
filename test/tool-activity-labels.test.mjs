@@ -19,10 +19,10 @@ const fixture = JSON.parse(
 const { TOOL_DEFS } = require(`${repoRoot}/core/petri-server/agent-tools/tool-defs.js`);
 const { TOOL_ACTIVITY_VERBS, summarizeToolCallForActivity } = require(`${repoRoot}/core/petri-server/agent-tools/tool-events.js`);
 
-test('fixture 覆盖全量静态工具宇宙（TOOL_DEFS 78 个）', () => {
+test('fixture 覆盖全量静态工具宇宙（TOOL_DEFS 80 个）', () => {
   const universe = TOOL_DEFS.map((t) => t.function.name).sort();
   const fixtureKeys = Object.keys(fixture).sort();
-  assert.equal(universe.length, 79);
+  assert.equal(universe.length, 80);
   assert.deepEqual(fixtureKeys, universe);
 });
 

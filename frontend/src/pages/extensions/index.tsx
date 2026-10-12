@@ -7,12 +7,13 @@
  * 红线：货架合并是入口层合并——插件与技能的运行时（plugin-loader / skill-registry）不动。
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
 import { useSkillStore, type Skill } from '@/hooks/useSkillStore';
 import { getBridge } from '@/lib/desktopBridge';
+import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 import {
   EXTENSION_SHELVES,
   classifySkillShelf,
@@ -138,6 +139,24 @@ function SkillShelfPane({ shelfId }: { shelfId: 'domain-skills' | 'general-skill
     () => skills.filter((s) => classifySkillShelf(s.category) === shelfId),
     [skills, shelfId]
   );
+  // BLOCK-176 W7 CP-21 — 依赖三态徽章数据面（后端 which/where 只读探测；
+  // 探测失败静默=卡片如实不显示状态，与「不可用即不虚报」一致）
+  const [depsMap, setDepsMap] = useState<Record<string, { status: 'available' | 'installable' | 'missing_deps' | 'blocked_platform'; missingBins: string[]; install?: string | null }>>({});
+  useEffect(() => {
+    let cancelled = false;
+    const token = getToken();
+    void fetch(`${getPlatformApiPrefix()}/skills/preflight`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    })
+      .then(async (response) => {
+        const json = (await response.json().catch(() => null)) as { ok?: boolean; results?: Record<string, { status: 'available' | 'installable' | 'missing_deps' | 'blocked_platform'; missingBins: string[]; install?: string | null }> } | null;
+        if (!cancelled && response.ok && json?.ok && json.results) setDepsMap(json.results);
+      })
+      .catch(() => { /* 探测面不可达=徽章缺省，不阻塞货架 */ });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const visibleSkills = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -239,6 +258,7 @@ function SkillShelfPane({ shelfId }: { shelfId: 'domain-skills' | 'general-skill
               onViewDetail={setSelectedSkill}
               onExecute={(s) => setSelectedSkill(s)}
               canExecute={executingSkillId === null}
+              deps={depsMap[skill.id] ?? null}
             />
           ))}
         </div>

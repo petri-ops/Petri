@@ -16,7 +16,7 @@ const { tool_todo_write } = require('./todo-tools');
 const { tool_decision_summary, tool_decision_recent } = require('./decision-tools');
 const { tool_result_summary } = require('./result-summary-tools');
 // BLOCK-157 W1 P1（KNW-1）— 产品 Skills 会话台只读工具（渐进披露：discover 无正文 / get 有界手册）
-const { tool_skill_discover, tool_skill_get } = require('./skill-tools');
+const { tool_skill_discover, tool_skill_get, tool_skill_preflight } = require('./skill-tools');
 // BLOCK-124（C-13）— 符号图只读查询（内核单源 helpers/code-graph）
 const { tool_codegraph_who_imports, tool_codegraph_classify_edges } = require('./codegraph-tools');
 const {
@@ -209,6 +209,8 @@ const HANDLERS = {
   // BLOCK-157 W1 P1（KNW-1）— 产品 Skills 会话台（只读；执行面不投影，plan §2 裁决）
   skill_discover: tool_skill_discover,
   skill_get: tool_skill_get,
+  // BLOCK-176 W7 CP-21 — 依赖自检（which/where 只读探测；安装指引走既有 cmd 审批链）
+  skill_preflight: tool_skill_preflight,
 };
 
 function contract(category, sideEffect, riskTier, resources, estimatedDurationMs, cancellable = false) {
@@ -326,6 +328,7 @@ const CONTRACTS = {
   // retrieval/none/R0 → 全档可用（read/plan 亦可，与知识检索同族）
   skill_discover: contract('retrieval', 'none', 'R0', [], 500),
   skill_get: contract('retrieval', 'none', 'R0', [], 500),
+  skill_preflight: contract('retrieval', 'none', 'R0', [], 2000),
 };
 
 function cloneJson(value) {

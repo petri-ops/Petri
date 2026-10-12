@@ -355,6 +355,7 @@ const TOOL_ACTIVITY_VERBS = Object.freeze({
   "decision_recent": "已回放",
   "skill_discover": "已列技能",
   "skill_get": "已读技能",
+  "skill_preflight": "已检技能依赖",
   "codegraph_who_imports": "已查引用",
   "codegraph_classify_edges": "已盘点依赖",
   "artifact_revision_list": "已列出",

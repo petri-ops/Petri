@@ -38,11 +38,11 @@ const registry = require(path.join(ROOT, 'core/petri-server/agent-tools/registry
 const policy = require(path.join(ROOT, 'core/petri-server/agent-tools/agent-tool-policy'));
 const skillTools = require(path.join(ROOT, 'core/petri-server/agent-tools/skill-tools'));
 
-test('BLOCK-157 KNW-1 注册表：skill_discover/skill_get 进静态面（76→78）', () => {
+test('BLOCK-157 KNW-1 注册表：skill_discover/skill_get 进静态面（含 W7 skill_preflight=80）', () => {
   const names = TOOL_DEFS.map((d) => d.function.name);
   assert.ok(names.includes('skill_discover'), 'skill_discover 应在 TOOL_DEFS');
   assert.ok(names.includes('skill_get'), 'skill_get 应在 TOOL_DEFS');
-  assert.equal(TOOL_DEFS.length, 79, '静态工具总数 78→79（BLOCK-164 W1 federation_list_peers +1）');
+  assert.equal(TOOL_DEFS.length, 80, '静态工具总数 79→80（BLOCK-176 W7 CP-21 skill_preflight +1）');
   // 三方一致性：handler/contract 已接线（registry 模块加载即校验，此处显式双查）
   assert.equal(typeof registry.getToolHandler('skill_discover'), 'function');
   assert.equal(typeof registry.getToolHandler('skill_get'), 'function');

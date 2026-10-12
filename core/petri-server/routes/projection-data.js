@@ -53,6 +53,20 @@ module.exports = function registerProjectionDataRoutes(app) {
     }
   });
 
+  // BLOCK-176 W7 CP-21 — 技能依赖 preflight（which/where 只读探测；
+  // 与 /api/skills/registry 同一注册表数据源）。Skills 页依赖三态徽章数据面。
+  app.get('/api/skills/preflight', (_req, res) => {
+    try {
+      const { createDefaultSDK } = require('../../shared-backend/skills-sdk.js');
+      const sdk = createDefaultSDK();
+      const preflight = require('../../shared-backend/skill-preflight.js');
+      const results = preflight.preflightAll(sdk.listSkills());
+      res.json({ ok: true, platform: process.platform, results });
+    } catch (error) {
+      res.status(500).json({ ok: false, error: 'skills_preflight_failed', message: error.message });
+    }
+  });
+
   // 已装插件清单（plugin-loader 单一真相的安全投影）——与桌面 IPC
   // `plugin:list-installed` 同为裸数组语义；桥层负责包前端要的形状。
   app.get('/api/plugins/installed', (_req, res) => {

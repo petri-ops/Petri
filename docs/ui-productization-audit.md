@@ -4903,3 +4903,10 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **eslint 化石**：ToolActivityDock.tsx hooks 修复（UI-502 批）后 2 条抑制失效——`--prune-suppressions` 收缩（存量只许收缩方向）。
 - **契约**：viewerRegistry 契约测试不触该导出（246 绿不动）；knip 棘轮零新增。
 - **补登（同批 CP 实现面）**：ReviewMode 工具栏「快照/回滚快照」安全网按钮（CP-17，wt-btn 族+确认对话+行内反馈，快照创建后条件出回滚钮）；UsageCostPanel「任务成本熔断（¥）」输入块（CP-18，纯 token 内联边线+testid+读写反馈）。均 dev Electron 边界内 in_progress 待过目。
+
+## UI-506: Skills 页依赖三态徽章（2026-10-12 in_progress，BLOCK-176/W7 CP-21）
+
+- **数据面**：`GET /api/skills/preflight`（后端 which/where 只读探测）→ SkillShelfPane 单次拉取 → SkillCard 新增可选 `deps` prop；仅声明 requires.bins 的技能卡显示徽章（可用/待装/缺依赖/平台不适用四态文案），title 悬浮给缺失二进制与安装配方。
+- **诚实边界**：探测面不可达=徽章缺省不显示状态（不虚报）；blocked_platform 与缺依赖视觉同位、文案区分。
+- **红绿**：契约 8/8（test/block176-w7-contracts.test.mjs）；tsc 0；skills:check 14 全绿；w7-live 9/9。
+

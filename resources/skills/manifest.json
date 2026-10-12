@@ -117,6 +117,141 @@
           "sha256": null
         }
       }
+    },
+    "obsidian-markdown": {
+      "id": "obsidian-markdown",
+      "version": "1.0.0",
+      "source": "built-in",
+      "kind": "skill",
+      "format": "skill-md",
+      "category": "coding/notes",
+      "capabilities": [],
+      "artifacts": {
+        "built-in": {
+          "url": "built-in://skills/obsidian-markdown",
+          "sha256": null
+        }
+      }
+    },
+    "mermaid-visualizer": {
+      "id": "mermaid-visualizer",
+      "version": "1.0.0",
+      "source": "built-in",
+      "kind": "skill",
+      "format": "skill-md",
+      "category": "coding/notes",
+      "capabilities": [],
+      "artifacts": {
+        "built-in": {
+          "url": "built-in://skills/mermaid-visualizer",
+          "sha256": null
+        }
+      }
+    },
+    "excalidraw-diagram": {
+      "id": "excalidraw-diagram",
+      "version": "1.0.0",
+      "source": "built-in",
+      "kind": "skill",
+      "format": "skill-md",
+      "category": "coding/notes",
+      "capabilities": [],
+      "artifacts": {
+        "built-in": {
+          "url": "built-in://skills/excalidraw-diagram",
+          "sha256": null
+        }
+      }
+    },
+    "json-canvas": {
+      "id": "json-canvas",
+      "version": "1.0.0",
+      "source": "built-in",
+      "kind": "skill",
+      "format": "skill-md",
+      "category": "coding/notes",
+      "capabilities": [],
+      "artifacts": {
+        "built-in": {
+          "url": "built-in://skills/json-canvas",
+          "sha256": null
+        }
+      }
+    },
+    "obsidian-bases": {
+      "id": "obsidian-bases",
+      "version": "1.0.0",
+      "source": "built-in",
+      "kind": "skill",
+      "format": "skill-md",
+      "category": "coding/notes",
+      "capabilities": [],
+      "artifacts": {
+        "built-in": {
+          "url": "built-in://skills/obsidian-bases",
+          "sha256": null
+        }
+      }
+    },
+    "obsidian-cli": {
+      "id": "obsidian-cli",
+      "version": "1.0.0",
+      "source": "built-in",
+      "kind": "skill",
+      "format": "skill-md",
+      "category": "coding/notes",
+      "capabilities": [],
+      "artifacts": {
+        "built-in": {
+          "url": "built-in://skills/obsidian-cli",
+          "sha256": null
+        }
+      }
+    },
+    "defuddle": {
+      "id": "defuddle",
+      "version": "1.0.0",
+      "source": "built-in",
+      "kind": "skill",
+      "format": "skill-md",
+      "category": "coding/extract",
+      "capabilities": [],
+      "artifacts": {
+        "built-in": {
+          "url": "built-in://skills/defuddle",
+          "sha256": null
+        }
+      }
+    },
+    "knap": {
+      "id": "knap",
+      "version": "1.0.0",
+      "source": "built-in",
+      "kind": "skill",
+      "format": "skill-md",
+      "category": "coding/notes",
+      "capabilities": [],
+      "artifacts": {
+        "built-in": {
+          "url": "built-in://skills/knap",
+          "sha256": null
+        }
+      }
+    },
+    "obsidian-setup": {
+      "id": "obsidian-setup",
+      "version": "1.0.0",
+      "source": "built-in",
+      "kind": "skill",
+      "format": "skill-md",
+      "category": "coding/notes",
+      "capabilities": [],
+      "artifacts": {
+        "built-in": {
+          "url": "built-in://skills/obsidian-setup",
+          "sha256": null
+        }
+      }
     }
   }
 }

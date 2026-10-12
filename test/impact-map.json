@@ -42,7 +42,8 @@
         "acceptance/block-173/**",
         "acceptance/block-174/**",
         "core/petri-server/agent-tools/agent-tool-interceptor.js",
-        "scripts/block176-w6-live.mjs"
+        "scripts/block176-w6-live.mjs",
+        "scripts/block176-w7-live.mjs"
       ],
       "tests": [
         "test/block166-gen-ui-host.test.mjs",
@@ -3378,6 +3379,27 @@
       "tests": [
         "test/block176-checkpoint.test.mjs",
         "test/block176-w6-contract.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "block176-w7",
+      "note": "BLOCK-176 W7 竞争力波七：CP-20 SKILL.md 双格式注册+依赖字段（skill-registry+skills:check）/CP-21 preflight 三态（skill-preflight+skill_preflight 工具+路由+Skills 页徽章）/CP-22 Obsidian 九技能（resources/skills/*/SKILL.md）。",
+      "patterns": [
+        "core/shared-backend/skill-preflight.js",
+        "core/petri-server/agent-tools/skill-tools.js",
+        "core/petri-server/agent-tools/tool-defs/skill.js",
+        "scripts/skill-scaffold.mjs",
+        "resources/skills/*/SKILL.md",
+        "resources/skills/manifest.json",
+        "frontend/src/pages/extensions/SkillCard.tsx",
+        "frontend/src/pages/extensions/index.tsx",
+        "test/block176-w7-contracts.test.mjs",
+        "scripts/block176-w7-live.mjs",
+        "acceptance/block-176/**"
+      ],
+      "tests": [
+        "test/block176-w7-contracts.test.mjs"
       ],
       "classifiesScripts": false
     }

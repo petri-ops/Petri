@@ -21,6 +21,12 @@ const BASELINE = new Set([
   // 实机 flow 采集脚本）内 process.platform 仅用于证据头 platform 字段与 darwin 采样
   // 门控——dev-only 一次性脚本，收敛到 platform-compat 收益为零，登记即留痕。
   'scripts/block101-startup-timeline-live.cjs',
+  // BLOCK-176 W7 CP-21/22 — 技能依赖 preflight 面的 win32 差异（where/which、npm.cmd、
+  // 平台门控展示字段）：探测原语属 OS 语义本身，收敛到 platform-compat 无收益，登记留痕。
+  'core/shared-backend/skill-preflight.js',
+  'core/petri-server/agent-tools/skill-tools.js',
+  'core/petri-server/routes/projection-data.js',
+  'scripts/block176-w7-live.mjs',
   'core/petri-server/agent-tools/system-info-tools.js',
   'core/petri-server/agent-tools/workspace-tools.js',
   'core/petri-server/agent-tools/workspace-tools/internals.js',

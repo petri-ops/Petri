@@ -53,6 +53,8 @@ function boundDiscoverRows(skills, limit = DISCOVER_HARD_LIMIT) {
     plugins: {
       required: skill.plugins && Array.isArray(skill.plugins.required) ? skill.plugins.required : [],
     },
+    // BLOCK-176 W7 CP-20 — 声明式依赖透出（os 平台门控/requires.bins/install 配方）
+    dependencies: skill.dependencies || null,
     parameters: {
       required: skill.parameters && skill.parameters.required ? skill.parameters.required : {},
       optional: skill.parameters && skill.parameters.optional ? skill.parameters.optional : {},
@@ -148,6 +150,51 @@ async function tool_skill_get(args = {}) {
 }
 
 /**
+ * BLOCK-176 W7 CP-21 — skill_preflight：依赖自检（真实 which/where 探测）。
+ * 单技能（id）或全量；缺依赖技能在 get/执行前先装——安装走既有 run_cmd 审批链
+ * （guard-ack/审批记录留痕），不建第二确认通道。
+ * @param {{id?: string}} args
+ */
+async function tool_skill_preflight(args = {}) {
+  const registry = getRegistry();
+  if (!registry) {
+    return { ok: false, error: 'skill_registry_unavailable', message: '技能注册表不可用（加载失败）。' };
+  }
+  let preflight;
+  try {
+    preflight = require('../../shared-backend/skill-preflight');
+  } catch (e) {
+    return { ok: false, error: 'preflight_unavailable', message: e && e.message ? e.message : String(e) };
+  }
+  try {
+    const id = args && typeof args.id === 'string' ? args.id.trim() : '';
+    const skills = id ? [registry.get(id)].filter(Boolean) : registry.discover();
+    if (id && skills.length === 0) {
+      return { ok: false, error: 'skill_not_found', message: `未找到技能：${id}（用 skill_discover 查看在册清单）。` };
+    }
+    const results = preflight.preflightAll(skills);
+    const summary = { available: 0, installable: 0, missing_deps: 0, blocked_platform: 0 };
+    for (const r of Object.values(results)) summary[r.status] = (summary[r.status] || 0) + 1;
+    const actionable = Object.entries(results)
+      .filter(([, r]) => r.status === 'installable' || r.status === 'missing_deps')
+      .map(([sid, r]) => ({ id: sid, status: r.status, missingBins: r.missingBins, install: r.install }));
+    return {
+      ok: true,
+      platform: process.platform,
+      results,
+      summary,
+      actionable,
+      message: actionable.length === 0
+        ? `全部技能依赖满足（platform=${process.platform}）。`
+        : `依赖缺口 ${actionable.length} 项（platform=${process.platform}）：缺二进制的技能，其 install 配方见 actionable；安装须经既有命令执行工具走审批确认（未批准不执行），装后重跑 skill_preflight 复核。`,
+    };
+  } catch (e) {
+    console.error('[skill-tools] preflight error:', e);
+    return { ok: false, error: 'skill_preflight_failed', message: e && e.message ? e.message : 'unknown' };
+  }
+}
+
+/**
  * KNW-2 — 技能索引常驻块（agent-runner 注入；纯函数，测试直打）。
  * 有界：≤12 条 × 描述 ≤100 字符，整块 ≤2200 字符；空清单返回 null（零注入）。
  */
@@ -181,4 +228,5 @@ module.exports = {
   buildSkillsIndexBlock,
   tool_skill_discover,
   tool_skill_get,
+  tool_skill_preflight,
 };

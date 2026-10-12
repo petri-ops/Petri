@@ -5652,7 +5652,7 @@
       "capability": "agent-competitiveness",
       "path": "docs/block-176-competitiveness-wave7-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "phase": "P0-LAUNCH",
       "canonical": true,
       "truthDomain": "block-176-competitiveness-wave7-plan",
@@ -5667,7 +5667,7 @@
         "skill-governance",
         "skill-migration"
       ],
-      "notes": "2026-10-12 扩纲立项 planned（用户裁决「应该加到 petri 并且应该是作为主要的功能之一」+ AskUserQuestion「W7 先行（推荐）」=W6 顺延；W5 在制收口后顶队列头发令）：总纲 W7 波 Agent Skill 知识面——CP-20 SKILL.md 常驻双格式注册+声明式依赖（os 门控+requires.bins+install 配方；KNW-4 导入通道扩展不重建，roadmap 候选池③转正出籍）/CP-21 依赖自检与安装治理（preflight 三态+审批留痕对齐 guard-ack+Skills 页状态面）/CP-22 首批通用技能包迁移（Obsidian 九技能转写，可视化产出接 Gen UI 模板优先节）。非范围=云 marketplace/skill_execute 投影/Obsidian 产物格式/既有内置 skill 契约改写。closeout 十三门+实机断言（acceptance/block-176/）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "2026-10-12 整包 completed（closeout 十三门 PASS；w7-live 9/9 含 defuddle 探测→隔离安装→可用全链留痕，acceptance/block-176/w7-live.json）：CP-20 双格式常驻注册+依赖字段归一+skills:check 双格式 14 技能全绿/CP-21 skill_preflight 工具+路由+Skills 页三态徽章+安装治理对齐 guard-ack 审批链/CP-22 Obsidian 九技能迁移在册（mermaid 打通 Gen UI 模板优先节）。契约 8/8。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "BLOCK-176-COMPETITIVENESS-WAVE6",

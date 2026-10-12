@@ -132,6 +132,8 @@ const TOOL_METADATA = {
   // ---- skill 元工具（mcp/registry 注册）----
   skill_discover: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
   skill_get: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
+  // BLOCK-176 W7 CP-21 — 只读探测（which/where）；安装动作本身走 cmd 工具审批链
+  skill_preflight: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: 5000 },
   skill_execute: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
 };
 

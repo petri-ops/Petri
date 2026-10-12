@@ -7,7 +7,7 @@ acceptance:
   - CP-22：w7-live 实机 discover→get→按手册产出全链留痕（acceptance/block-176/）
   - closeout 十三门绿 + 总纲 §4 W7 行回写
 reopen: 任一 CP 出口断言未达即该 CP 返工；波内零停顿条款沿用 W1~W5 先例（发令时确认行使）
-status: planned
+status: completed
 ---
 
 # BLOCK-176 — 竞争力总纲 W7 波（Agent Skill 知识面）
@@ -67,3 +67,13 @@ status: planned
 
 - 发令后 CP-20 → CP-21 → CP-22 波内零停顿（沿用 W1~W5 整波授权先例，发令时随口确认）；预期当日~次日收口。
 - 收口回写：总纲 §4 W7 行 + §4.7 对账表 + roadmap + backlog + 本 plan status。
+
+## 7. 波报（2026-10-12 收口）
+
+- **CP-20 双格式注册**：`loadSkillFromDir` 双格式单点（skill.json 优先，缺则 SKILL.md 直装载 `loadSkillMdEntry`，`_format` 标注）；依赖三字段（os 门控/requires.bins/install 配方）经 `normalizeDependencies` 归一（别名 darwin/macos→darwin、win/windows→win32；非法 token 进 invalid fail-closed 报告），skill.json 契约 additive `dependencies` 字段同语义；`skills:check` 双格式校验（SKILL.md 目录 frontmatter name/description 必填+依赖结构+顶层 manifest format 标注核对）——14 技能（5 json+9 md）全绿。既有 5 skill.json 零改写。
+- **CP-21 治理链**：`skill-preflight.js` 纯函数三态（available/installable/missing_deps）+诚实第四态 blocked_platform（注入 platform/hasBin 测试直打；运行时 which/where 探测，失败=未检出不虚报）；`skill_preflight` agent 工具（retrieval/none/R0，tool-defs 契约）+`GET /api/skills/preflight` 路由+Skills 页（extensions 货架）依赖三态徽章（探测面不可达=徽章缺省不虚报状态）；**安装治理=既有 run_cmd guard-ack 审批链**（preflight 指引明示「未批准不执行」，不建第二确认通道——plan §1 裁决兑现）。
+- **CP-22 迁移**：九技能 SKILL.md 落 resources/skills/（obsidian-markdown/mermaid-visualizer/excalidraw-diagram/json-canvas/obsidian-bases 生成五；obsidian-cli/defuddle/knap 挂 requires.bins+install；obsidian-setup 转写 preflight 引导）；类别 coding/notes + coding/extract；mermaid 手册打通 Gen UI 卡片+visualize 模板优先节；不迁产物格式（.canvas/.base/.excalidraw 为数据文件，Petri 不做运行时渲染——plan §3 红线兑现）。
+- **实机**：w7-live 9/9（acceptance/block-176/w7-live.json）——含 defuddle「探测(installable)→本地隔离安装(npm --prefix 临时目录，零全局污染)→复核(available)」全链真实留痕；真实全局安装留待用户授权会话（不越权）。
+- **随批缺省裁决**：SKILL.md frontmatter 键用点号直书 `requires.bins:`（等价 `requires-bins` 双收）；preflight 安装不自动执行（指引+审批链，安装动作永远人审）；Skills 页徽章只在声明了 requires.bins 的技能卡显示。
+- **契约**：test/block176-w7-contracts.test.mjs 8/8（归一/解析/双格式装载/真实仓发现/三态/接线源码面/manifest 标注/注册表集成）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

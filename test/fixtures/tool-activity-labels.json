@@ -312,5 +312,9 @@
   "federation_list_peers": {
     "label": "已查询协作节点",
     "icon": "globe"
+  },
+  "skill_preflight": {
+    "label": "已检技能依赖",
+    "verb": "inspect"
   }
 }

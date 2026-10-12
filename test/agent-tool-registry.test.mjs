@@ -182,8 +182,9 @@ test('schema-first loading does not capture partial act helper exports', () => {
       const actTools = require('./core/petri-server/agent-tools/act-tools.js');
       // BLOCK-99 G4：空间管理会话台工具族 71 件；BLOCK-116 W2（BK-04）决策观测 +2 = 73；
       // BLOCK-121 P2（B1）result_summary +1 = 74；BLOCK-124（C-13）codegraph +2 = 76；
-      // BLOCK-157 W1（KNW-1）skill_discover/skill_get +2 = 78；BLOCK-164 W1 federation_list_peers +1 = 79
-      if (getToolDefs().length !== 79) throw new Error('unexpected tool count');
+      // BLOCK-157 W1（KNW-1）skill_discover/skill_get +2 = 78；BLOCK-164 W1 federation_list_peers +1 = 79；
+      // BLOCK-176 W7（CP-21）skill_preflight +1 = 80
+      if (getToolDefs().length !== 80) throw new Error('unexpected tool count');
       if (!actTools.testFilterExpr('5', '>3')) throw new Error('filter helper unavailable');
       const context = {};
       const result = await planTools.actOpenFigcodePlot({ figcardId: 'volcano' }, context);
@@ -296,8 +297,8 @@ test('OpenAI-compatible outbound JSON contains Provider schema only', async () =
     );
     assert.equal(result.choices[0].message.content, 'ok');
     // BLOCK-99 G4 71 件 + BLOCK-116 W2（BK-04）决策观测 2 件 = 73；BLOCK-121 result_summary +1 = 74；
-    // BLOCK-124（C-13）codegraph +2 = 76
-    assert.equal(receivedBody.tools.length, 79);
+    // BLOCK-124（C-13）codegraph +2 = 76；BLOCK-176 W7（CP-21）skill_preflight +1 = 80
+    assert.equal(receivedBody.tools.length, 80);
     const keys = collectKeys(receivedBody.tools);
     for (const key of INTERNAL_CONTRACT_KEYS) assert.equal(keys.has(key), false, `${key} leaked`);
   } finally {

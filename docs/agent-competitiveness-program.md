@@ -153,7 +153,9 @@ status: planned
 | CP-14 选择总线跨 viewer | canSelect/canCompare 能力位接线（表格/markdown/图表≥4 类）+「选择→agent」链路 | 表格选行→继续分析引用实体实机 | — |
 | CP-15 分屏与 renderer 补课 | ArtifactPinPane 可拖拽比例+切片 E renderer 补课 | 分屏自由排布实机；renderer 清单对账 | — |
 
-### W7 Agent Skill 知识面（3 包）——**planned（2026-10-12 扩纲立项；用户裁决「W7 先行」（W6 顺延）；W5 在制收口后顶队列头发令。BLOCK-176）**
+### W7 Agent Skill 知识面（3 包）——**completed（2026-10-12 整波交付；closeout 十三门 PASS；w7-live 9/9，acceptance/block-176/w7-live.json。BLOCK-176）**
+
+> 波报：CP-20 双格式常驻注册（skill.json 契约不动+SKILL.md 直装载；依赖字段 os/requires.bins/install 经 normalizeDependencies 归一，skills:check 双格式校验 14 技能全绿）/CP-21 skill_preflight 工具+GET /api/skills/preflight 路由+Skills 页依赖三态徽章；安装治理对齐既有 run_cmd guard-ack 审批链（未建第二通道）；**全链本机实证：defuddle 探测(installable)→本地隔离安装(npm --prefix 临时目录零全局污染)→复核(available)**/CP-22 Obsidian 九技能迁移在册（生成五+CLI 三挂依赖+setup 转写），mermaid 手册打通 Gen UI+visualize 模板优先节。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 > 来源：用户 2026-10-12 演示 ZCode Obsidian 插件后裁决「应该加到 petri 并且应该是作为主要的功能之一」+ AskUserQuestion「W7 先行」；roadmap 研究候选池③「skill 声明式依赖三件套」（2026-09-06 登记）由 CP-20 承接转正。防重复开发：KNW-4（BLOCK-160 P5）已有 SKILL.md 受限解析导入（合成 skill.json 落库）——CP-20 为导入通道扩展，不重建。
 

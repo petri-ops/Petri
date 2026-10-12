@@ -242,6 +242,7 @@ const TOOL_ACTIVITY_VERBS: Readonly<Record<string, string>> = {
   "federation_list_peers": "已查询协作节点",
   "skill_discover": "已列技能",
   "skill_get": "已读技能",
+  "skill_preflight": "已检技能依赖",
   "followup_task": "已派发",
   "generate_methods": "已生成",
   "interrupt_agent": "已中断",

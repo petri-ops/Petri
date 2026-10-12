@@ -87,6 +87,38 @@ function isValidSkillId(id) {
   return /^[a-z][a-z0-9-]*$/.test(id);
 }
 
+// ── BLOCK-176 W7 CP-20 — 声明式依赖（skill 格式 v2·additive）────────────────
+// 双格式同语义：SKILL.md frontmatter（os / requires.bins / install）与 skill.json
+// `dependencies` 字段归一到同一结构；既有 5 个 skill.json 零改写（缺字段=无依赖）。
+const OS_ALIASES = { darwin: 'darwin', macos: 'darwin', mac: 'darwin', win32: 'win32', windows: 'win32', win: 'win32', linux: 'linux' };
+
+/**
+ * 归一声明式依赖（纯函数，测试直打）。
+ * @param {{os?: string|string[], requiresBins?: string|string[], install?: string}} raw
+ * @returns {{ os: string[]|null, requiresBins: string[], install: string|null, invalid: string[] }}
+ *  os=null=全平台；invalid 收集非法平台 token（fail-closed 报告面，不静默丢弃）。
+ */
+function normalizeDependencies(raw) {
+  const out = { os: null, requiresBins: [], install: null, invalid: [] };
+  if (!raw || typeof raw !== 'object') return out;
+  const splitList = (v) => Array.isArray(v) ? v.map((x) => String(x).trim()) : String(v || '').split(/[,\s]+/);
+  const osTokens = splitList(raw.os).filter(Boolean).map((t) => t.toLowerCase());
+  if (osTokens.length) {
+    const mapped = [];
+    for (const t of osTokens) {
+      if (OS_ALIASES[t]) mapped.push(OS_ALIASES[t]);
+      else out.invalid.push(t);
+    }
+    out.os = mapped.length ? Array.from(new Set(mapped)) : null;
+  }
+  const bins = splitList(raw.requiresBins).map((b) => b.trim()).filter(Boolean);
+  out.requiresBins = Array.from(new Set(bins));
+  if (raw.install !== undefined && raw.install !== null && String(raw.install).trim() !== '') {
+    out.install = String(raw.install).trim();
+  }
+  return out;
+}
+
 // ── Manifest 解析与校验 ────────────────────────────────────────────────────
 
 /**
@@ -103,7 +135,7 @@ function parseSkillManifest(manifest, source, baseDir) {
 
   const { id, name, version, description, category, tags = [], capabilities = [],
     plugins = {}, workflows = {}, prompts = {}, parameters = {},
-    recovery_strategies = [], outputs = {}, metadata = {} } = manifest;
+    recovery_strategies = [], outputs = {}, metadata = {}, dependencies = {} } = manifest;
 
   // 基本字段校验
   if (!id || !name || !version || !description) {
@@ -147,6 +179,7 @@ function parseSkillManifest(manifest, source, baseDir) {
       required: Array.isArray(parameters.required) ? parameters.required : [],
       optional: parameters.optional || {},
     },
+    dependencies: normalizeDependencies(dependencies),
     recoveryStrategies: Array.isArray(recovery_strategies) ? recovery_strategies : [],
     outputs: {
       primary: Array.isArray(outputs.primary) ? outputs.primary : [],
@@ -207,6 +240,11 @@ function validateSkillManifest(skill) {
     }
   }
 
+  // BLOCK-176 W7 CP-20 — 依赖结构校验（存在即校验；缺字段=无依赖合法）
+  if (skill.dependencies && Array.isArray(skill.dependencies.invalid) && skill.dependencies.invalid.length) {
+    errors.push(`dependencies.os 含非法平台 token: ${skill.dependencies.invalid.join(', ')}（合法 darwin/win32/linux 及别名）`);
+  }
+
   // 校验输出定义
   for (const output of [...(skill.outputs?.primary || []), ...(skill.outputs?.secondary || [])]) {
     if (!output.id) errors.push('Output missing id field');
@@ -241,9 +279,14 @@ function scanSkillDirs(dir) {
 function loadSkillFromDir(skillDir, source) {
   const manifestPath = path.join(skillDir, 'skill.json');
   const manifest = readJson(manifestPath);
-  if (!manifest) return null;
+  if (!manifest) {
+    // BLOCK-176 W7 CP-20 — 双格式：无 skill.json 但含 SKILL.md = 直装载（常驻注册）
+    return loadSkillMdEntry(skillDir, source);
+  }
 
-  return parseSkillManifest(manifest, source, skillDir);
+  const entry = parseSkillManifest(manifest, source, skillDir);
+  if (entry) entry._format = 'skill-json';
+  return entry;
 }
 
 /**
@@ -310,8 +353,9 @@ function parseSkillMd(sourceDir) {
     if (raw.startsWith('---')) {
       const frontEnd = raw.indexOf('\n---', 3);
       if (frontEnd > 0) {
+        // BLOCK-176 W7 CP-20 — 键名允许点号（requires.bins）；依赖三字段 os/requires.bins/install
         for (const line of raw.slice(3, frontEnd).split('\n')) {
-          const m = line.match(/^([A-Za-z_][\w-]*):\s*(.*)$/);
+          const m = line.match(/^([A-Za-z_][\w.-]*):\s*(.*)$/);
           if (m) front[m[1].toLowerCase()] = m[2].trim().replace(/^["']|["']$/g, '');
         }
         body = raw.slice(frontEnd + 4).trim();
@@ -319,6 +363,11 @@ function parseSkillMd(sourceDir) {
     }
     const dirName = (path.basename(sourceDir).toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '')) || 'imported-skill';
     const firstLine = body.split('\n').map((l) => l.trim()).find((l) => l && !l.startsWith('#')) || '';
+    const dependencies = normalizeDependencies({
+      os: front.os,
+      requiresBins: front['requires.bins'] !== undefined ? front['requires.bins'] : front['requires-bins'],
+      install: front.install,
+    });
     return {
       manifest: {
         skillManifestVersion: 1,
@@ -327,11 +376,12 @@ function parseSkillMd(sourceDir) {
         version: front.version || '0.1.0',
         description: String(front.description || firstLine || `SKILL.md 导入技能 ${dirName}`).slice(0, 200),
         category: front.category || 'imported',
-        tags: ['imported'],
+        tags: front.tags ? String(front.tags).split(/[\s,]+/).filter(Boolean) : ['imported'],
         plugins: { required: [], optional: [] },
         workflows: { default: 'default' },
         prompts: { system: 'prompts/system.md', user_templates: [`按技能 ${dirName} 完成任务：{task}`] },
         parameters: { required: [], optional: {} },
+        dependencies,
       },
       systemPrompt: body || `# ${front.name || dirName}
 `,
@@ -339,6 +389,20 @@ function parseSkillMd(sourceDir) {
   } catch {
     return null;
   }
+}
+
+/**
+ * BLOCK-176 W7 CP-20 — SKILL.md 目录直装载（常驻注册面，区别于 installSkillFromDir
+ * 的「导入即合成 skill.json」安装面）：合成清单直接装配为 SkillEntry（手册正文进
+ * prompts.system），依赖字段随 normalizeDependencies 归一。目录无 SKILL.md = null。
+ */
+function loadSkillMdEntry(skillDir, source) {
+  const parsed = parseSkillMd(skillDir);
+  if (!parsed) return null;
+  const manifest = { ...parsed.manifest, prompts: { system: parsed.systemPrompt } };
+  const entry = parseSkillManifest(manifest, source, skillDir);
+  if (entry) entry._format = 'skill-md';
+  return entry;
 }
 
 function installSkillFromDir(sourceDir) {
@@ -749,12 +813,15 @@ module.exports = {
 
   // 工具函数导出
   parseSkillManifest,
+  parseSkillMd,
+  normalizeDependencies,
   validateSkillManifest,
   loadSkillFromDir,
   loadBuiltInSkills,
   loadInstalledSkills,
   installSkillFromDir,
   uninstallImportedSkill,
+  loadSkillMdEntry,
   discoverSkills,
 
   // 常量导出

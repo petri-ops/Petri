@@ -1,0 +1,52 @@
+{
+  "generatedAt": "2026-10-12T15:58:56.523Z",
+  "pass": 9,
+  "fail": 0,
+  "results": [
+    {
+      "id": "A.skills-check-dual-format",
+      "ok": true,
+      "detail": "== 产品 Skill 校验: PASS（14 个内置 Skill：5 skill.json + 9 SKILL.md）=="
+    },
+    {
+      "id": "A.discover-dual-format",
+      "ok": true,
+      "detail": "discover 共 14，skill-md 9 件"
+    },
+    {
+      "id": "B.preflight-tri-state",
+      "ok": true,
+      "detail": "knaps status=installable missing=knap；全量分布={\"available\":11,\"installable\":3}"
+    },
+    {
+      "id": "B.install-governance-aligned",
+      "ok": true,
+      "detail": "preflight 安装指引指向既有命令审批链（guard-ack/审批记录在册），未建第二确认通道；真实全局安装留待用户授权会话"
+    },
+    {
+      "id": "C.defuddle-probe-before",
+      "ok": true,
+      "detail": "安装前 status=installable missingBins=defuddle"
+    },
+    {
+      "id": "C.defuddle-local-install",
+      "ok": true,
+      "detail": "本地隔离安装于 C:\\Users\\Admin\\AppData\\Local\\Temp\\w7-defuddle-0Oe6q0（零全局污染；evidence 留痕=本次安装命令与目录）"
+    },
+    {
+      "id": "C.defuddle-recheck-available",
+      "ok": true,
+      "detail": "安装后 status=available（which/where 实测 defuddle=true）→ 探测→安装→可用 全链留痕"
+    },
+    {
+      "id": "D.cp22-nine-skills",
+      "ok": true,
+      "detail": "9 件全在册；knap 手册 361 字符（get 渐进披露面真实可读）"
+    },
+    {
+      "id": "D.cp22-genui-bridge",
+      "ok": true,
+      "detail": "mermaid 技能手册打通 Gen UI 卡片+visualize 模板优先节（迁移对齐 Petri 产出面）"
+    }
+  ]
+}

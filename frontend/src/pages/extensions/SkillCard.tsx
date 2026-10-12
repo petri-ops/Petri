@@ -8,12 +8,27 @@ import { Icon } from '@/components/icons/Icon';
 import type { Skill } from '@/hooks/useSkillStore';
 import styles from './styles.module.css';
 
+/** BLOCK-176 W7 CP-21 — 依赖自检三态（/api/skills/preflight 数据面；仅本卡消费不导出）。 */
+interface SkillDepsState {
+  status: 'available' | 'installable' | 'missing_deps' | 'blocked_platform';
+  missingBins: string[];
+  install?: string | null;
+}
+
 interface SkillCardProps {
   skill: Skill;
   onViewDetail: (skill: Skill) => void;
   onExecute: (skill: Skill) => void;
   canExecute?: boolean;
+  deps?: SkillDepsState | null;
 }
+
+const DEPS_STATUS_LABELS: Record<SkillDepsState['status'], string> = {
+  available: '依赖可用',
+  installable: '依赖待装',
+  missing_deps: '缺依赖',
+  blocked_platform: '平台不适用',
+};
 
 const SOURCE_LABELS: Record<string, string> = {
   'built-in': '内置',
@@ -30,7 +45,11 @@ export function SkillCard({
   onViewDetail,
   onExecute,
   canExecute = true,
+  deps = null,
 }: SkillCardProps): React.ReactElement {
+  // 声明了 requires.bins 的技能才显示依赖徽章（数据面 preflight 未达时如实不显示状态色）
+  const declaredBins = (skill as Skill & { dependencies?: { requiresBins?: string[] } | null }).dependencies?.requiresBins ?? [];
+  const showDeps = Array.isArray(declaredBins) && declaredBins.length > 0 && !!deps;
   const handleViewDetail = useCallback(() => {
     onViewDetail(skill);
   }, [skill, onViewDetail]);
@@ -65,6 +84,16 @@ export function SkillCard({
       </div>
 
       <div className={styles.cardMeta}>
+        {showDeps && deps && (
+          <span
+            className={styles.pluginCount}
+            title={deps.status !== 'available' && deps.missingBins.length > 0 ? `缺二进制：${deps.missingBins.join(', ')}${deps.install ? `（安装：${deps.install}）` : ''}` : undefined}
+            data-testid={`skill-deps-${skill.id}`}
+          >
+            <Icon name="puzzle" size={12} />
+            {DEPS_STATUS_LABELS[deps.status]}
+          </span>
+        )}
         <span className={styles.categoryLabel}>
           <Icon name="folder" size={12} />
           {skill.category}

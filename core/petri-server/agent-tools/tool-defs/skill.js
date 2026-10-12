@@ -1,7 +1,8 @@
 /**
  * agent-tools/tool-defs/skill.js — skill 域工具 Schema（BLOCK-157 W1 P1/KNW-1 新域）。
  * 由 tool-defs.js facade 汇编，勿直接 require（统一走 facade）。
- * 只读会话台两件：discover（清单）/ get（完整手册=渐进披露触发加载通道）。
+ * 只读会话台三件：discover（清单）/ get（完整手册=渐进披露触发加载通道）/
+ * preflight（依赖自检，BLOCK-176 W7 CP-21）。
  * 不含 skill_execute（执行自动化产品语义另裁，见 BLOCK-157 plan §2）。
  */
 
@@ -47,6 +48,23 @@ module.exports = [
           }
         },
         required: ['id']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'skill_preflight',
+      description:
+        '检查技能的外部依赖在本机是否就绪（声明 os 平台门控与 requires.bins 二进制清单的技能）：可用 / 待装 / 缺依赖 / 平台不适用。待装技能的 install 配方在结果中给出；执行安装必须经既有命令执行工具走用户审批确认（未批准不执行），装完重跑本工具复核。不带 id 时检查全部技能。只读探测。',
+      parameters: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: '可选；只检查这一个技能 id（缺省=全部技能）'
+          }
+        }
       }
     }
   }

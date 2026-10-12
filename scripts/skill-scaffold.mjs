@@ -30,7 +30,7 @@ const SKILLS_DIR = path.join(ROOT, 'resources', 'skills');
 const PLUGINS_DIR = path.join(ROOT, 'resources', 'built-in-plugins');
 
 // 单源复用产品侧校验逻辑（skill-registry 同时服务 MCP skill_* 工具）
-const { validateSkillManifest, isValidSkillId } = require(
+const { validateSkillManifest, isValidSkillId, normalizeDependencies, loadSkillMdEntry } = require(
   path.join(ROOT, 'core', 'shared-backend', 'skill-registry.js'),
 );
 
@@ -81,19 +81,47 @@ function checkAll() {
     const skillDir = path.join(SKILLS_DIR, dir);
     const label = `skills/${dir}`;
 
-    const skill = readJson(path.join(skillDir, 'skill.json'));
-    if (!skill) {
-      problems.push(`${label}: skill.json 缺失或 JSON 非法`);
+    const hasSkillJson = fs.existsSync(path.join(skillDir, 'skill.json'));
+    const hasSkillMd = fs.existsSync(path.join(skillDir, 'SKILL.md'));
+
+    // BLOCK-176 W7 CP-20 — 双格式：skill.json（既有契约）或 SKILL.md（frontmatter
+    // name/description 必填 + os/requires.bins/install 依赖字段结构校验）。
+    if (!hasSkillJson && !hasSkillMd) {
+      problems.push(`${label}: skill.json 与 SKILL.md 均缺失`);
       continue;
     }
-    if (skill.id !== dir) problems.push(`${label}: skill.json id "${skill.id}" 与目录名不一致`);
 
-    const v = validateSkillManifest(skill);
+    let skill = null;
+    let format = null;
+    if (hasSkillJson) {
+      skill = readJson(path.join(skillDir, 'skill.json'));
+      if (!skill) {
+        problems.push(`${label}: skill.json JSON 非法`);
+        continue;
+      }
+      if (skill.id !== dir) problems.push(`${label}: skill.json id "${skill.id}" 与目录名不一致`);
+      format = 'skill-json';
+    } else {
+      skill = loadSkillMdEntry(skillDir, 'built-in');
+      if (!skill) {
+        problems.push(`${label}: SKILL.md 解析失败（front-matter 结构）`);
+        continue;
+      }
+      format = 'skill-md';
+    }
+
+    const v = validateSkillManifest({ ...skill, skillManifestVersion: skill.skillManifestVersion ?? (format === 'skill-json' ? skill.skillManifestVersion : 1) });
     if (!v.ok) for (const e of v.errors) problems.push(`${label}: ${e}`);
 
-    if (!fs.existsSync(path.join(skillDir, 'README.md'))) problems.push(`${label}: 缺 README.md`);
+    // 依赖字段结构（skill.json 走 dependencies 字段；SKILL.md 已经 loadSkillMdEntry 归一）
+    if (format === 'skill-json' && skill.dependencies !== undefined) {
+      const deps = normalizeDependencies(skill.dependencies);
+      if (deps.invalid.length) problems.push(`${label}: dependencies.os 含非法平台 token: ${deps.invalid.join(', ')}`);
+    }
 
-    for (const [key, rel] of Object.entries(skill.prompts || {})) {
+    if (format === 'skill-json' && !fs.existsSync(path.join(skillDir, 'README.md'))) problems.push(`${label}: 缺 README.md`);
+
+    for (const [key, rel] of Object.entries((format === 'skill-json' && skill.prompts) || {})) {
       if (typeof rel !== 'string') continue;
       if (!fs.existsSync(path.join(skillDir, rel))) problems.push(`${label}: prompts.${key} 指向不存在的文件 ${rel}`);
     }
@@ -112,8 +140,14 @@ function checkAll() {
     const registered = topLevelManifest?.skills?.[dir];
     if (!registered) {
       problems.push(`${label}: 未登记进顶层 manifest.json`);
-    } else if (registered.version && skill.version && registered.version !== skill.version) {
-      problems.push(`${label}: 顶层 manifest version ${registered.version} ≠ skill.json version ${skill.version}`);
+    } else {
+      if (registered.version && skill.version && registered.version !== skill.version) {
+        problems.push(`${label}: 顶层 manifest version ${registered.version} ≠ ${format} version ${skill.version}`);
+      }
+      // 双格式登记自检：SKILL.md 目录应在顶层 manifest 标注 format（防误当 skill.json 目录）
+      if (format === 'skill-md' && registered.format && registered.format !== 'skill-md') {
+        problems.push(`${label}: 顶层 manifest format "${registered.format}" 与实际 SKILL.md 格式不符`);
+      }
     }
   }
 
@@ -127,7 +161,8 @@ function checkAll() {
     for (const p of problems) console.log(`  ❌ ${p}`);
     process.exit(1);
   }
-  console.log(`== 产品 Skill 校验: PASS（${dirs.length} 个内置 Skill）==`);
+  const mdCount = dirs.filter((d) => !fs.existsSync(path.join(SKILLS_DIR, d, 'skill.json')) && fs.existsSync(path.join(SKILLS_DIR, d, 'SKILL.md'))).length;
+  console.log(`== 产品 Skill 校验: PASS（${dirs.length} 个内置 Skill：${dirs.length - mdCount} skill.json + ${mdCount} SKILL.md）==`);
 }
 
 function scaffold(args) {
