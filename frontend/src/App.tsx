@@ -74,9 +74,14 @@ function AppShell(): React.ReactElement {
     const m = location.pathname.match(/^\/project\/([^/]+)/);
     return m ? m[1] : null;
   })();
+  // react-router navigate 返回 void | Promise<void>；面板契约约定 void，
+  // 包装消掉 no-misused-promises（异步导航语义不外泄）。
+  const navigateForPalette = (to: string): void => {
+    void navigate(to);
+  };
   const { commands, recentConversations, selectConversation } = useAppCommands({
     enabled: isOpen,
-    navigate,
+    navigate: navigateForPalette,
     currentProjectId,
   });
   const panels = useWorkspacePanelsContext();

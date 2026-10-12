@@ -19,8 +19,8 @@
       "path": "frontend/src/components/copilot/SimpleChat.tsx",
       "wave": "A",
       "module": "W-03",
-      "lines": 1684,
-      "sha256": "d432cd5915af80d4923639f17998fee02808b398487753bea3d2da374dc55009"
+      "lines": 1809,
+      "sha256": "77676e1300fccae3b134340c7cae4754d8d18a42b298ce30c0a1716599c117bb"
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat/hooks/useThinkingLevel.ts",
@@ -40,8 +40,8 @@
       "path": "frontend/src/pages/project-workspace.tsx",
       "wave": "B",
       "module": "W-02",
-      "lines": 1232,
-      "sha256": "b427f10b02a95eab74b2b1ca43b7d871fa5ae58ba3bee043c9f33d4b8bcad5a0"
+      "lines": 1247,
+      "sha256": "601a33c5a6c6ae8be3f6b9c0508bee9efb480906650fd10c7732a7db8a3fbae6"
     },
     {
       "path": "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
@@ -61,8 +61,8 @@
       "path": "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
       "wave": "B",
       "module": "W-01",
-      "lines": 685,
-      "sha256": "c63c07e3bef71cdf43ad486465fb343d29454d92f1e87dcf621df24b9b0303df"
+      "lines": 689,
+      "sha256": "bbf36706dd062baafabbbf06493ab06af28d8952205326609e3b019598b948d1"
     },
     {
       "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
@@ -131,8 +131,8 @@
       "path": "core/petri-server/agent-tools/workspace-tools.js",
       "wave": "C",
       "module": "P-03",
-      "lines": 1610,
-      "sha256": "f32031504b46f8f591a7f45f6743cacfb764fae0362c48cc584474f77d5b1f67"
+      "lines": 1619,
+      "sha256": "67d6978c47058fcfad283a27269ffc87afc2ec77651c4304ecb3e41280ecd522"
     },
     {
       "path": "core/petri-server/mcp/registry.js",
@@ -170,5 +170,5 @@
       "sha256": "b32867146a647a4ae2f42aaeb417e15fb754ae5af27539086050a31062aa6bc5"
     }
   ],
-  "total": 22816
+  "total": 22969
 }

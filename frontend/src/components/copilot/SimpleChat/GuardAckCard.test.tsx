@@ -35,7 +35,7 @@ describe('GuardAckCard（BLOCK-171 CP-2）', () => {
   it('busy 时按钮禁用', () => {
     render(<GuardAckCard {...base} busy onAck={vi.fn()} onDismiss={vi.fn()} />);
     for (const id of ['guard-ack-once', 'guard-ack-always']) {
-      expect((screen.getByTestId(id) as HTMLButtonElement).disabled).toBe(true);
+      expect(screen.getByTestId(id).getAttribute('disabled')).not.toBeNull();
     }
   });
 });
