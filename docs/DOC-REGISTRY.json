@@ -5608,8 +5608,8 @@
    "capability": "agent-competitiveness",
    "path": "docs/block-174-competitiveness-wave4-plan.md",
    "kind": "work-package",
-   "status": "active",
-   "phase": "P1-WAVE",
+   "status": "completed",
+   "phase": "COMPLETED",
    "canonical": true,
    "truthDomain": "block-174-competitiveness-wave4-plan",
    "entrypoint": "docs/README.md",
@@ -5624,6 +5624,28 @@
     "accent"
    ],
    "notes": "2026-10-12 发令 active（用户 /goal 整波授权连续行使，W1~W3 先例）：总纲 W4 波 Gen UI 表达面双轨——CP-13a accent 透传/CP-13b fragment 文件导出/CP-11 artifact 数据面只读绑定（getData RPC+归属校验+prompt 注入 jobIds）/CP-12 场景模板库（bar/line/kpi/table+visualize 模板节）。双轨=模板通用形+artifact 数据自有锚并轨（用户裁决「不仅仅是增加数据资产」修正后形态）。closeout 十三门+实机探针（acceptance/block-174/）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+  },
+  {
+   "id": "BLOCK-175-COMPETITIVENESS-WAVE5",
+   "capability": "agent-competitiveness",
+   "path": "docs/block-175-competitiveness-wave5-plan.md",
+   "kind": "work-package",
+   "status": "active",
+   "phase": "P1-WAVE",
+   "canonical": true,
+   "truthDomain": "block-175-competitiveness-wave5-plan",
+   "entrypoint": "docs/README.md",
+   "registeredAt": "2026-10-12",
+   "archivePolicy": "retain_stable_path",
+   "tags": [
+    "agent-competitiveness",
+    "wave5",
+    "selection-bus",
+    "viewer-capabilities",
+    "split-pane",
+    "artifact-plane"
+   ],
+   "notes": "2026-10-12 发令 active（用户 /goal 整波授权连续行使，W1~W4 先例）：总纲 W5 波数据资产面接线——CP-14 canSelect/canCompare 占位接线（只读族 ≥4 viewer+表格族成对比较+选择→继续分析链）/CP-15 ArtifactPinPane 可拖拽比例（20-80 钳制+持久化）+renderer 清单对账。artifact-plane-direction 切片 C/E 承接（方向文档不重写）。closeout 十三门+实机断言（acceptance/block-175/）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
   },
   {
    "id": "BLOCK-138-ARTIFACT-PLANE-KERNEL",

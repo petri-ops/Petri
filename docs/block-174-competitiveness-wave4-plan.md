@@ -8,7 +8,7 @@ acceptance:
   - CP-12：模板文件 ≥3（bar/kpi/table）+visualize 技能模板节；技能契约校验绿
   - closeout 十三门绿 + 总纲 §4 W4 行回写
 reopen: 任一 CP 出口断言未达即该 CP 返工；波内零停顿条款沿用（/goal 整波授权连续行使）
-status: active
+status: completed
 ---
 
 # BLOCK-174 — 竞争力总纲 W4 波（Gen UI 表达面双轨）
