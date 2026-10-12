@@ -1,5 +1,6 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-12（**UI-492 加映（BLOCK-167 收口对账批）**：ErrorNotice 用法压回原行数（code-size 棘轮 1305 守住）+code-size 基线重锚（W1 token 改名致 2 文件指纹漂移，先例流程 --write）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-492 落地（BLOCK-167 W4 状态三件套）**：Status.tsx 三件套单源+ResultArtifactShell 错误态首迁+覆盖清点+语气 pass 抽查零硬伤。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-491 落地（BLOCK-167 W3 动效 token）**：全站 transition 时长 ~235 处→motion 三档 token+motion 棘轮断言（字面量仅存 reduced-motion 功能保留）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-490 落地（BLOCK-167 W2 控件收敛首掷）**：共享按钮变体模块六变体+ToolActivityDock iconBtn 迁移+extensions 死 backBtn 清除+按钮清单棘轮 31 文件冻结+pass2 双括号缺陷 12 处修复（build 门禁抓住）。G0 开发期常态 · 不外推 packaged/Provider/GA。）

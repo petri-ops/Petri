@@ -1164,10 +1164,7 @@ export function ResultArtifactShell({
       // 网络/服务错误：如实告知并提供重试，绝不谎报为"未生成结果"
       return stateBlock(
         job.name || job.tool_id,
-        <ErrorNotice
-          message={`结果加载失败：${resultError}`}
-          onRetry={() => setResultRetryVersion((value) => value + 1)}
-        />,
+        <ErrorNotice message={`结果加载失败：${resultError}`} onRetry={() => setResultRetryVersion((value) => value + 1)} />,
         'done'
       );
     }
