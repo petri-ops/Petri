@@ -2,7 +2,7 @@
   display: grid;
   gap: 14px;
   padding: var(--petri-space-5);
-  border: 1px solid var(--petri-border-card));
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-bg-subtle, rgba(127, 127, 127, 0.06));
 }

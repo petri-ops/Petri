@@ -1,5 +1,6 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-12（**UI-490 落地（BLOCK-167 W2 控件收敛首掷）**：共享按钮变体模块六变体+ToolActivityDock iconBtn 迁移+extensions 死 backBtn 清除+按钮清单棘轮 31 文件冻结+pass2 双括号缺陷 12 处修复（build 门禁抓住）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-489 落地（BLOCK-167 W1 静态重校）**：字号 6 档终态+根默认 14px+519 处正文小字 inherit 化（14px 占比 40.3%）+装饰 accent 清除 37 处+结构细线 533→0（三语义 token 全覆盖）；契约棘轮随波收紧 15/15 绿。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-488 落地（BLOCK-167 W0 设计宪章+用法门禁）**：design-charter 落档（字号 6 档终态/色彩预算 10:1/border 三语义/motion 150/200/300+ease×2）+custom.css 宪章 token 组+global.css ::selection 全局唯一（accent 28% mix，此前全站缺失）+theme-token-contract +6 断言 15/15 绿（三棘轮 450/372/533 冻结+token 存在性+duration 档序+合成违例红证据自检）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-09（**UI-469 落地（BLOCK-150 审视吸收批·第一波，dynamic workflow 三轨并行，主代理终审待集成提交）**——平台消费链补全：任务墙「排队中 #N」位次（/api/tools/history 同源重投影）+ jobs 终态失效流即时刷新（useInvalidationStream 复用）+ message_persist_failed 会话级诚实呈现（setFallbackNotice 复用）；治理文案：DataManagement 话术 + 散点 caveat 因果点破 + compare 面领域词中立化。同批非 UI 面（TOOL_METADATA readOnly 漂移 2 处修齐/HEAVY_TOOLS 死链 9 清//m 页 token 出 URL/pack R 守卫×4/go-kegg 收敛/data-management 键/报告图兜底）随主包收口。集成实跑 test:changed Node 754/746 pass 0 fail + 前端 68/68。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -4822,3 +4823,11 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **细线**：533→0（border-card 287/petri-divider 131/subtle 等价 36/手工收尾 10；transparent 占位+状态信号色边+titlebar 族=宪章豁免族）。
 - **实机**：四屏前后对比验收（w1-after/，before=git af3c8114+量化基线，覆盖失误如实登记 w1-evidence-note.md）；零布局破坏。
 - **门禁**：契约 15/15（小字号棘轮 227 逐文件冻结/accent 棘轮 335/细线零容忍断言）+tsc 0+test:changed 715/716（残红 block41=HEAD 存量 stash 实证）。
+
+## UI-490: 共享按钮变体单源+按钮清单棘轮+死代码清除（2026-10-12 in_progress，BLOCK-167 W2）
+
+- **共享模块**：components/ui/controls/button.module.css（base/primary/ghost/ghostCard/danger/iconBase；全 token 化；新按钮唯一入口）。
+- **迁移**：extensions 死 .backBtn（+hover）删除（页面消费 globalStyles.backBtn 单源）；ToolActivityDock iconBtn→button.iconBase+本地 22px 覆盖（跨文件 composes 不可用=vite+rolldown fileResolve 限制，tsx 级组合替代）。
+- **守卫**：按钮清单棘轮（31 文件/125 定义冻结；新增定义文件/存量加定义即红）入 theme-token-contract。
+- **连带修复**：W1 pass2 正则少食右括号的 12 处 var(--petri-divider)) 非法声明（7 文件）——build 门禁抓住全修。
+- **门禁**：契约 16/16+build 绿+quality:lint 0 error；ToolActivityDock 2 error=HEAD 存量（stash 实证）。

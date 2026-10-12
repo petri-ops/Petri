@@ -1,0 +1,77 @@
+/* BLOCK-167 W2 — 控件单源（宪章 §6；D5）
+   共享按钮变体唯一真源：组件级按钮类通过 composes 引用本文件，禁止再复制形态。
+   守卫：theme-token-contract 按钮类清单棘轮（新增定义文件即红）。 */
+
+/* 图标按钮基形：正方形透明底、居中、次级色（24px 标准档，尺寸覆盖走本地类） */
+.iconBase {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: var(--petri-radius-md);
+  background: transparent;
+  color: var(--petri-text-secondary);
+  cursor: pointer;
+}
+
+/* 页头返回按钮（global-page 单源的唯一形态，页头标准件配套） */
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--petri-space-3);
+  height: 30px;
+  padding: 0 10px;
+  background: var(--petri-bg-surface);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-lg);
+  color: var(--petri-text-secondary);
+  cursor: pointer;
+}
+
+/* 标准按钮基形 */
+.base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--petri-space-2);
+  height: 30px;
+  padding: 0 var(--petri-space-4);
+  border: 1px solid transparent;
+  border-radius: var(--petri-radius-md);
+  font-size: var(--petri-font-size-body);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--petri-duration-fast) var(--petri-ease-standard);
+}
+
+/* 主按钮：accent 底白字（五类合法语义之主按钮） */
+.primary {
+  composes: base;
+  background: var(--petri-accent);
+  color: #ffffff;
+}
+
+/* 幽灵按钮：透明底次级字 */
+.ghost {
+  composes: base;
+  background: transparent;
+  color: var(--petri-text-secondary);
+}
+
+/* 幽灵-卡底：卡面色+quiet 边（表单工具行） */
+.ghostCard {
+  composes: base;
+  background: var(--petri-bg-subtle);
+  border-color: var(--petri-border-card);
+  color: var(--petri-text-secondary);
+}
+
+/* 危险按钮：danger 语义 */
+.danger {
+  composes: base;
+  background: transparent;
+  border-color: color-mix(in srgb, var(--petri-danger) 40%, transparent);
+  color: var(--petri-danger);
+}

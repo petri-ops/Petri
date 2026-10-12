@@ -879,31 +879,8 @@
 /* ============================================================
    返回按钮
    ============================================================ */
+  /* BLOCK-167 W2：本地 .backBtn 死代码删除——页面消费 global-page 单源（globalStyles.backBtn） */
 
-.backBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--petri-space-3);
-  height: 30px;
-  padding: 0 10px;
-  background: var(--petri-surface);
-  border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
-  color: var(--petri-text-secondary);
-  font-weight: 500;
-  cursor: pointer;
-  transition:
-    background 0.15s ease,
-    color 0.15s ease,
-    border-color 0.15s ease;
-  flex-shrink: 0;
-}
-
-.backBtn:hover {
-  background: var(--petri-hover);
-  color: var(--petri-accent);
-  border-color: var(--petri-accent);
-}
 
 /* ============================================================
    重试按钮

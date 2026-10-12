@@ -1138,7 +1138,7 @@
 .petri-btn--ghost {
   background: transparent;
   color: var(--petri-text-secondary, var(--petri-text-secondary));
-  border: 1px solid var(--petri-border-card));
+  border: 1px solid var(--petri-border-card);
 }
 .petri-btn--ghost:hover:not(:disabled) {
   background: var(--petri-hover);
@@ -2075,7 +2075,7 @@
   width: 320px;
   z-index: 9998;
   background: var(--petri-bg-canvas, var(--petri-bg-canvas));
-  border-right: 1px solid var(--petri-divider));
+  border-right: 1px solid var(--petri-divider);
   box-shadow: var(--petri-shadow-menu);
   transform: translateX(-110%); /* 默认隐藏：往左滑出被 dock 遮住 */
   transition: transform 0.22s ease;

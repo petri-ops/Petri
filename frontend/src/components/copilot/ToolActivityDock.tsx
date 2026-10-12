@@ -11,6 +11,7 @@ import {
   type AgentBackgroundProcessDetail,
 } from '@/lib/events';
 import styles from './ToolActivityDock.module.css';
+import button from '../ui/controls/button.module.css';
 
 /**
  * UI-268 — 「后台进程」浮窗（右下角，持久输出独立小窗口）
@@ -196,7 +197,7 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
           )}
           <button
             type="button"
-            className={styles.iconBtn}
+            className={`${button.iconBase} ${styles.iconBtn}`}
             onClick={() => setExpanded(false)}
             title="折叠"
             aria-label="折叠后台进程浮窗"
@@ -205,7 +206,7 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
           </button>
           <button
             type="button"
-            className={styles.iconBtn}
+            className={`${button.iconBase} ${styles.iconBtn}`}
             onClick={close}
             title="关闭"
             aria-label="关闭后台进程浮窗"

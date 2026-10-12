@@ -390,6 +390,7 @@ describe('theme token contract', () => {
     // 链接/状态点/badge=合法五类语义。预算的机械守护随 W2 控件收敛加 grep 守卫
     // （装饰性新增即红）；W2 后继续收缩并下调快照。
     const RATCHET: Record<string, number> = {
+      'components/ui/controls/button.module.css': 1, // W2 共享 .primary 主按钮（五类合法语义）
       'pages/project-workspace.module.css': 93,
       'components/copilot/simple-chat.css': 31,
       'components/desktop/desktop.css': 24,
@@ -450,6 +451,52 @@ describe('theme token contract', () => {
       if (all > 0) actual[path.relative(srcRoot, file).replaceAll('\\', '/')] = all;
     }
     expect(Object.entries(actual)).toEqual([]);
+  });
+
+  it('button class definitions hold the frozen inventory (按钮清单棘轮 W2=31 文件/125 定义)', () => {
+    // 宪章 §6：新按钮一律用 ui/controls/button.module.css 变体（base/primary/ghost/
+    // ghostCard/danger/iconBase）；组件文件不再新增按钮类定义——既有清单冻结，
+    // 新文件出现定义或存量文件加定义即红。W2 起逐域迁移后下调快照。
+    const RE = /\.([a-zA-Z]*[bB]tn[a-zA-Z]*|[a-zA-Z]*utton[a-zA-Z]*)\s*[,{]/g;
+    const actual: Record<string, number> = {};
+    for (const file of CSS_FILES()) {
+      const count = (stripCss(file).match(new RegExp(RE.source, 'g')) || []).length;
+      if (count > 0) actual[path.relative(srcRoot, file).replaceAll('\\', '/')] = count;
+    }
+    const RATCHET: Record<string, number> = {
+      'pages/project-workspace.module.css': 40,
+      'components/workspace-panels/KnowledgeSpacePanel.module.css': 11,
+      'components/desktop/TitleBar.module.css': 10,
+      'pages/extensions/styles.module.css': 8,
+      'pages/window/command-center.module.css': 8,
+      'components/result-studio/ResultStudioSurface.module.css': 7,
+      'components/RouteErrorBoundary.module.css': 4,
+      'components/copilot/ToolActivityDock.module.css': 3,
+      'components/knowledge/KnowledgeConsoleChat.module.css': 3,
+      'components/branch/BranchTabs.module.css': 2,
+      'components/copilot/renderers/ChartRenderer.module.css': 2,
+      'components/desktop/FolderPicker.module.css': 2,
+      'components/desktop/TestInstanceBadge.module.css': 2,
+      'components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css': 2,
+      'components/result-studio/LineageViewSwitch.module.css': 2,
+      'components/window/rail-page.module.css': 2,
+      'components/window/window-shell.module.css': 2,
+      'components/workspace-panels/KnowledgeSpaceSwitcher.module.css': 2,
+      'components/copilot/gen-ui/GenUiCard.module.css': 1,
+      'components/copilot/MessageRail.module.css': 1,
+      'components/copilot/renderers/TableRenderer.module.css': 1,
+      'components/desktop/desktop.css': 1,
+      'components/knowledge/KnowledgeConsoleDock.module.css': 1,
+      'components/result-studio/ResultStudioChangeSetPanel.module.css': 1,
+      'components/ui/controls/button.module.css': 6,
+      'components/workspace-panels/SideChatDock.module.css': 1,
+      'components/workspace-panels/SshStatusDot.module.css': 1,
+      'pages/extensions/extensions.module.css': 1,
+      'pages/global-page.module.css': 1,
+      'pages/welcome.module.css': 1,
+      'styles/custom.css': 1,
+    };
+    expectRatchet(RATCHET, actual);
   });
 
   it('charter counters catch synthetic violations (红证据自检)', () => {

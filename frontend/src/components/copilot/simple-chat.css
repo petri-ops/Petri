@@ -2296,7 +2296,7 @@
   border-radius: var(--petri-radius-lg);;
   color: var(--petri-text-secondary);
   background: var(--petri-surface-2, rgba(127, 127, 127, 0.12));
-  border: 1px solid var(--petri-border-card));
+  border: 1px solid var(--petri-border-card);
 }
 
 .sc-send-cta-bg:hover:not(:disabled) {
@@ -2322,7 +2322,7 @@
   padding: var(--petri-space-3) 10px;
   border-radius: var(--petri-radius-lg);;
   background: var(--petri-surface-2, rgba(127, 127, 127, 0.08));
-  border: 1px solid var(--petri-border-card));
+  border: 1px solid var(--petri-border-card);
   font-size: var(--petri-font-size-body);
   color: var(--petri-text);
 }
@@ -2361,7 +2361,7 @@
   flex: 0 0 auto;
   padding: 2px var(--petri-space-3);
   border-radius: var(--petri-radius-md);;
-  border: 1px solid var(--petri-border-card));
+  border: 1px solid var(--petri-border-card);
   background: transparent;
   color: var(--petri-text-secondary);
   cursor: pointer;
@@ -2517,7 +2517,7 @@
 .sc-resume-section {
   margin-top: var(--petri-space-3);
   padding-top: var(--petri-space-3);
-  border-top: 1px solid var(--petri-divider));
+  border-top: 1px solid var(--petri-divider);
 }
 
 .sc-resume-row {
@@ -2541,7 +2541,7 @@
 .sc-resume-digest {
   margin: var(--petri-space-3) 0 0;
   padding: var(--petri-space-3) 10px;
-  border: 1px solid var(--petri-border-card));
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);;
   max-height: 132px;
   overflow: auto;

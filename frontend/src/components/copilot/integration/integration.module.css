@@ -41,7 +41,7 @@
   align-items: center;
   gap: var(--petri-space-1);
   background-color: var(--petri-bg-elevated, rgba(255, 255, 255, 0.95));
-  border: 1px solid var(--petri-border-card));
+  border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-sm);;
   padding: var(--petri-space-1) var(--petri-space-3);
   color: var(--petri-accent);

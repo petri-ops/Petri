@@ -87,7 +87,7 @@
 
 .cell {
   padding: 5px 10px;
-  border-bottom: 1px solid var(--petri-divider));
+  border-bottom: 1px solid var(--petri-divider);
   color: var(--petri-text);
   /* Numbers render more cleanly with tabular figures. */
   font-variant-numeric: tabular-nums;

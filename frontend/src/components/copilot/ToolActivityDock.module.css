@@ -95,18 +95,9 @@
 }
 
 .iconBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: 22px;
   height: 22px;
-  border: none;
-  border-radius: var(--petri-radius-md);;
-  background: transparent;
-  color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-body);
   line-height: 1;
-  cursor: pointer;
 }
 
 .iconBtn:hover {

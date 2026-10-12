@@ -805,7 +805,7 @@
 .rvw-acc-group-files {
   margin-left: 13px;
   padding-left: var(--petri-space-1);
-  border-left: 1px solid var(--petri-divider));
+  border-left: 1px solid var(--petri-divider);
 }
 
 .rvw-acc-item--nested .rvw-acc-row {
