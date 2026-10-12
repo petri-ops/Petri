@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { useMcpServers, type McpServerStatus } from '@/hooks/useMcpServers';
 import styles from './extensions.module.css';
+import { EmptyState, LoadingBlock } from '../../components/ui/controls/Status';
 import skillStyles from './styles.module.css';
 
 const STATUS_LABELS: Record<McpServerStatus, string> = {
@@ -131,16 +132,14 @@ export function McpShelfPane(): React.ReactElement {
       {error && <p className={styles.mcpFormError} role="alert">后端不可达：{error}</p>}
 
       {loading ? (
-        <div className={skillStyles.skillsEmpty}>
-          <h3 className={skillStyles.emptyTitle}>加载 MCP 服务清单…</h3>
-        </div>
+        <LoadingBlock label="加载 MCP 服务清单…" />
       ) : servers.length === 0 ? (
-        <div className={skillStyles.skillsEmpty} data-testid="mcp-empty">
-          <div className={skillStyles.emptyIcon}>
-            <Icon name="zap" size={24} />
-          </div>
-          <h3 className={skillStyles.emptyTitle}>还没有配置 MCP 服务</h3>
-          <p className={skillStyles.emptyText}>点右上「添加 server」接入第一个第三方 MCP server</p>
+        <div data-testid="mcp-empty">
+          <EmptyState
+            icon={<Icon name="zap" size={24} />}
+            title="还没有配置 MCP 服务"
+            description="点右上「添加 server」接入第一个第三方 MCP server"
+          />
         </div>
       ) : (
         <div className={styles.mcpList}>
