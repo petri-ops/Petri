@@ -46,6 +46,7 @@ status: completed
 - **不改 BLOCK-157 plan §2 裁决**：`skill_execute` 仍不投影给模型——「读手册→用既有工具执行」已实机验证够用（w1-live 断言①先例）。
 - **不迁 Obsidian 产物格式**：.canvas/.base/.excalidraw 文件格式原样不进 Petri——迁移的是**技能形态**（触发描述+渐进披露+依赖声明），可视化产出走 Petri 自己的 Gen UI/artifact plane。
 - **既有内置 skill 契约不动**：5 个既有 skill.json（deg/go/scrna/coding-playbook/visualize）零改写，双格式=并存不替换。
+- **尾巴清偿（2026-10-12 追加，用户「小尾巴都搞完」授权）**：①defuddle 0.1.0 + knap 0.6.0 经 `npm install -g` 全局就位（包身份与技能语义核对后安装；w7-live 复跑 9/9，preflight 分布 13 available/1 installable）；②obsidian-cli **如实 blocked**：本机未装 Obsidian 本体，官方 CLI 随 1.12+ 应用分发——第三方同名 npm 包非官方件，装之会制造假 available，不装；装机后跑 `skill_preflight` 复核即可转 available。③W6 CP-18 roundtrip 分档同批清偿：dev 栈后端经 supervisor 重生后复跑 w6-live 8/8（PUT 12.5→读 12.5→清 0 真实留痕）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## 4. 依赖与并行隔离

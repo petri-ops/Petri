@@ -57,7 +57,7 @@ record('B.preflight-tri-state', ['available', 'installable', 'missing_deps', 'bl
   const st = fs.readFileSync(path.join(ROOT, 'core/petri-server/agent-tools/skill-tools.js'), 'utf8');
   const guardAckExists = fs.existsSync(path.join(ROOT, 'core/petri-server/helpers/guard-ack-store.js'));
   record('B.install-governance-aligned', /审批确认/.test(st) && /未批准不执行/.test(st) && guardAckExists,
-    'preflight 安装指引指向既有命令审批链（guard-ack/审批记录在册），未建第二确认通道；真实全局安装留待用户授权会话');
+    'preflight 安装指引指向既有命令审批链（guard-ack/审批记录在册），未建第二确认通道；安装动作经用户授权会话按配方执行（defuddle/knap 已全局就位见 C 段）');
 }
 
 // C[CP-21 全链本机实证]：defuddle 探测→本地隔离安装→复核

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-12T15:58:56.523Z",
+  "generatedAt": "2026-10-13T00:53:04.466Z",
   "pass": 9,
   "fail": 0,
   "results": [
@@ -16,22 +16,22 @@
     {
       "id": "B.preflight-tri-state",
       "ok": true,
-      "detail": "knaps status=installable missing=knap；全量分布={\"available\":11,\"installable\":3}"
+      "detail": "knaps status=available missing=；全量分布={\"available\":13,\"installable\":1}"
     },
     {
       "id": "B.install-governance-aligned",
       "ok": true,
-      "detail": "preflight 安装指引指向既有命令审批链（guard-ack/审批记录在册），未建第二确认通道；真实全局安装留待用户授权会话"
+      "detail": "preflight 安装指引指向既有命令审批链（guard-ack/审批记录在册），未建第二确认通道；安装动作经用户授权会话按配方执行（defuddle/knap 已全局就位见 C 段）"
     },
     {
       "id": "C.defuddle-probe-before",
       "ok": true,
-      "detail": "安装前 status=installable missingBins=defuddle"
+      "detail": "安装前 status=available missingBins="
     },
     {
       "id": "C.defuddle-local-install",
       "ok": true,
-      "detail": "本地隔离安装于 C:\\Users\\Admin\\AppData\\Local\\Temp\\w7-defuddle-0Oe6q0（零全局污染；evidence 留痕=本次安装命令与目录）"
+      "detail": "本机已有 defuddle，跳过安装步"
     },
     {
       "id": "C.defuddle-recheck-available",

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-12T15:24:31.449Z",
+  "generatedAt": "2026-10-13T00:50:43.015Z",
   "pass": 8,
   "fail": 0,
   "results": [
@@ -41,7 +41,7 @@
     {
       "id": "C.cp18-live-roundtrip",
       "ok": true,
-      "detail": "运行中后端进程早于 CP-18 路由（HTML fallback=路由未热载）——roundtrip 分档登记为待后端重启后复测；契约+源码级已绿"
+      "detail": "PUT 12.5→12.5 GET=12.5 清除回 0（写读清 roundtrip）"
     }
   ]
 }
