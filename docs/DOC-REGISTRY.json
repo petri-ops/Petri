@@ -6353,8 +6353,29 @@
       "status": "active",
       "canonical": false,
       "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "BLOCK-180-APPROVAL-RESOURCE",
+      "capability": "execution-governance",
+      "path": "docs/block-180-approval-resource-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "phase": "P0-LAUNCH",
+      "canonical": true,
+      "truthDomain": "block-180-approval-resource-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-13",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "approval",
+        "guard-ack",
+        "command-span",
+        "arm-before-use",
+        "auditability"
+      ],
+      "notes": "2026-10-13 立项 active（研究池②转正出籍；用户 AskUserQuestion 裁决「② 审批二阶段（推荐）」）：审批一等资源（requestId/TTL/决策记录）+commandSpan 服务端分析前端高亮+总是放行两步武装。增强 BLOCK-48/160/171/177 既有链不重建；原生审批窗/socket 鉴权不移植。plan=docs/block-180-approval-resource-plan.md。"
     }
   ],
   "lastUpdated": "2026-10-13",
-  "documentCount": 333
+  "documentCount": 334
 }
