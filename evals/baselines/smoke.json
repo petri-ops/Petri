@@ -1,7 +1,34 @@
 {
   "suite": "smoke",
-  "updatedAt": "2026-10-13T15:03:45.352Z",
+  "updatedAt": "2026-10-13T15:25:12.813Z",
   "tasks": [
+    {
+      "id": "smoke-continuation",
+      "passed": true,
+      "status": "completed",
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": true,
+          "detail": "任务正常收口"
+        },
+        {
+          "kind": "event_present",
+          "event": "agent_status",
+          "phase": "continuation",
+          "passed": true,
+          "detail": "事件在场（agent_status:continuation）"
+        },
+        {
+          "kind": "final_answer_contains",
+          "value": "第二段",
+          "passed": true,
+          "detail": "最终答复含「第二段」"
+        }
+      ],
+      "finalText": "第一段：春风拂过山岗，第二段：溪水绕过村庄。完成。",
+      "durationMs": 553
+    },
     {
       "id": "smoke-policy-guard",
       "passed": true,
@@ -26,7 +53,28 @@
         }
       ],
       "finalText": "该命令命中系统级防护被拦截，我不能执行格式化操作，已停止。",
-      "durationMs": 547
+      "durationMs": 550
+    },
+    {
+      "id": "smoke-readonly-denial",
+      "passed": true,
+      "status": "completed",
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": true,
+          "detail": "任务正常收口"
+        },
+        {
+          "kind": "tool_error",
+          "tool": "workspace_exec",
+          "error": "execution_not_allowed",
+          "passed": true,
+          "detail": "工具错误在场（execution_not_allowed）"
+        }
+      ],
+      "finalText": "当前处于只读模式，命令执行被拒绝，我无法运行命令。",
+      "durationMs": 552
     },
     {
       "id": "smoke-text-repair",
@@ -59,7 +107,7 @@
         }
       ],
       "finalText": "我来读取文件。\n\n```json\n{\"name\": \"workspace_read\", \"arguments\": {\"path\": \"notes/intro.md\"}}\n```修复链路收口：intro.md 内容为 intro 正文，总结完成。",
-      "durationMs": 523
+      "durationMs": 569
     },
     {
       "id": "smoke-tool-chain-write",
@@ -92,7 +140,7 @@
         }
       ],
       "finalText": "已在 derived/note.md 写入完成，文件位于项目 derived 目录。",
-      "durationMs": 517
+      "durationMs": 551
     }
   ]
 }

@@ -1,0 +1,30 @@
+{
+  "id": "smoke-continuation",
+  "title": "截断续写：finish=length 触发自动续写，两段拼接",
+  "category": "robustness",
+  "accessMode": "full",
+  "prompt": "写一首两段的小诗。",
+  "mockScript": [
+    {
+      "content": "第一段：春风拂过山岗，",
+      "finish": "length"
+    },
+    {
+      "content": "第二段：溪水绕过村庄。完成。"
+    }
+  ],
+  "criteria": [
+    {
+      "kind": "task_completed"
+    },
+    {
+      "kind": "event_present",
+      "event": "agent_status",
+      "phase": "continuation"
+    },
+    {
+      "kind": "final_answer_contains",
+      "value": "第二段"
+    }
+  ]
+}

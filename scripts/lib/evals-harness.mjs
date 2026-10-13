@@ -123,7 +123,7 @@ export function startMockProvider() {
           const mid = Math.max(1, Math.floor(content.length / 2));
           res.write(`data: ${JSON.stringify({ choices: [{ delta: { content: content.slice(0, mid) } }] })}\n\n`);
           res.write(`data: ${JSON.stringify({ choices: [{ delta: { content: content.slice(mid) } }] })}\n\n`);
-          res.write(`data: ${JSON.stringify({ choices: [{ delta: {}, finish_reason: 'stop' }] })}\n\n`);
+          res.write(`data: ${JSON.stringify({ choices: [{ delta: {}, finish_reason: turn.finish || 'stop' }] })}\n\n`);
         }
         res.write('data: [DONE]\n\n');
         res.end();
@@ -333,6 +333,14 @@ export function evaluateCriterion(criterion, ctx) {
           && (!criterion.guardKeyPrefix || String(data.guardKey || '').startsWith(criterion.guardKeyPrefix));
       });
       return result(Boolean(denied), denied ? `policy 拦截在场（${denied.toolResult.data.guardKey}）` : '无 dynamic_guard 拦截');
+    }
+    case 'tool_error': {
+      const hit = events.find((e) => {
+        const data = e.toolResult && e.toolResult.data;
+        return data && data.error === criterion.error
+          && (!criterion.tool || e.name === criterion.tool);
+      });
+      return result(Boolean(hit), hit ? `工具错误在场（${criterion.error}）` : '无该工具错误');
     }
     case 'no_policy_denial':
       return result(!events.some((e) => e.toolResult && e.toolResult.data && String(e.toolResult.data.error || '').includes('guard')), '无策略拦截');

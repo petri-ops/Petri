@@ -1,0 +1,33 @@
+{
+  "id": "smoke-readonly-denial",
+  "title": "只读档位：exec 被访问模式拒绝（accessMode 门）",
+  "category": "policy",
+  "accessMode": "read",
+  "prompt": "运行 ls -la 看看目录。",
+  "mockScript": [
+    {
+      "toolCalls": [
+        {
+          "name": "workspace_exec",
+          "arguments": {
+            "command": "ls -la",
+            "intent": "列目录"
+          }
+        }
+      ]
+    },
+    {
+      "content": "当前处于只读模式，命令执行被拒绝，我无法运行命令。"
+    }
+  ],
+  "criteria": [
+    {
+      "kind": "task_completed"
+    },
+    {
+      "kind": "tool_error",
+      "tool": "workspace_exec",
+      "error": "execution_not_allowed"
+    }
+  ]
+}

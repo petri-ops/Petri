@@ -1,0 +1,23 @@
+{
+  "id": "real-coding-fix",
+  "title": "真实编码修复：fixture 含越界 bug，模型需定位并修复",
+  "category": "coding",
+  "accessMode": "full",
+  "fixtureFiles": {
+    "src/calc.js": "function sumLast(items) {\n  let total = 0;\n  for (let i = 0; i <= items.length; i++) {\n    total += items[i].value;\n  }\n  return total;\n}\n\nmodule.exports = { sumLast };\n"
+  },
+  "prompt": "src/calc.js 的 sumLast 对某些输入会抛错，找到 bug 并修复文件，保持函数签名不变。",
+  "criteria": [
+    {
+      "kind": "task_completed"
+    },
+    {
+      "kind": "file_contains",
+      "path": "src/calc.js",
+      "value": "i < items.length"
+    },
+    {
+      "kind": "no_policy_denial"
+    }
+  ]
+}
