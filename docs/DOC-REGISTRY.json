@@ -6359,8 +6359,8 @@
       "capability": "execution-governance",
       "path": "docs/block-180-approval-resource-plan.md",
       "kind": "work-package",
-      "status": "active",
-      "phase": "P0-LAUNCH",
+      "status": "completed",
+      "phase": "P0-P3",
       "canonical": true,
       "truthDomain": "block-180-approval-resource-plan",
       "entrypoint": "docs/README.md",
@@ -6373,7 +6373,7 @@
         "arm-before-use",
         "auditability"
       ],
-      "notes": "2026-10-13 立项 active（研究池②转正出籍；用户 AskUserQuestion 裁决「② 审批二阶段（推荐）」）：审批一等资源（requestId/TTL/决策记录）+commandSpan 服务端分析前端高亮+总是放行两步武装。增强 BLOCK-48/160/171/177 既有链不重建；原生审批窗/socket 鉴权不移植。plan=docs/block-180-approval-resource-plan.md。"
+      "notes": "2026-10-13 整包 completed（当日立项当日收口；live 12/12，acceptance/block-180/block180-live.json）：P0 审批资源（requestId/TTL 惰性过期/决策终态机/store 自持指纹集双挂 toolCtx）/P1 指纹放行（once=指纹级抓真修复路由误写维度级缺陷；always=维度级零改写）/P2 commandSpan（规则单源+三维度 span+前端高亮）/P3 两步武装+always 形参真实消费。红绿 21/21+审批族回归 52 项 0 红+vitest 7/7。UI-509 in_progress 待过目。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-10-13",

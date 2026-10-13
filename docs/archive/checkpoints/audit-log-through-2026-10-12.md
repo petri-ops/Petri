@@ -38,3 +38,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-13T12:03:13.078Z -->
 最后更新：2026-10-12（**BLOCK-172 W2 实机探针 w2-live 4/4 PASS**（acceptance/block-172/w2-live.json）：真实任务 token_budget 每轮发放 3 条全非危机（pct=30 实数=预算环全程实数达成）+/compact too_few_messages 诚实语义+generation-defaults 往返与显式 null 清键（saveGenerationDefaults 补部分更新标准语义）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-13T13:22:56.124Z -->
+最后更新：2026-10-12（**BLOCK-173-COMPETITIVENESS-WAVE3 立项发令 active（用户 /goal 整波授权连续行使；W2 completed 腾出槽位）**：plan=docs/block-173-competitiveness-wave3-plan.md（registry/README/roadmap 同步）；三包串行红绿先行——CP-8 并发上限可配（1-8 缺省 3）+派生深度受控放开（缺省 1=现状零变化）+汇报门评估落结论→CP-10 tool-route 默认开+精度校准门→CP-9 编排 DAG 可视化（spawn 树投影）。G0 开发期常态 · 不外推 packaged/Provider/GA。）

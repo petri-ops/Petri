@@ -1,0 +1,68 @@
+{
+  "taskId": "e229272f-adae-4d4e-808c-e45555740a7d",
+  "inventory": [
+    "run_started",
+    "conversation",
+    "token_budget",
+    "iter",
+    "token_budget",
+    "tool_call",
+    "tool_result",
+    "iter",
+    "token_budget",
+    "guard_ack",
+    "tool_call",
+    "tool_result",
+    "iter",
+    "token_budget",
+    "delta",
+    "done",
+    "run_terminal",
+    "done"
+  ],
+  "denyEvent": {
+    "event": "tool_result",
+    "name": "workspace_exec",
+    "summary": "错误: dynamic_guard_triggered",
+    "iteration": 1,
+    "toolResult": {
+      "contractVersion": "1.0.0",
+      "traceId": "trace_efe463a1-9593-4d4c-8032-e3481d6de472",
+      "callId": "call_b180_1",
+      "tool": "workspace_exec",
+      "status": "denied",
+      "terminationReason": "dynamic_guard",
+      "durationMs": 1.5,
+      "sourceTruncated": false,
+      "previewTruncated": false,
+      "truncated": false,
+      "sideEffects": {
+        "type": "none",
+        "riskTier": "R0",
+        "resources": []
+      },
+      "data": {
+        "ok": false,
+        "error": "dynamic_guard_triggered",
+        "reason": "dynamic_guard",
+        "message": "动态防护拦截：命令「vssadmin」命中系统级破坏命令维度（guardKey=cmd:vssadmin）。该调用命中动态审批维度；如属误判请调整调用方式，放行需经用户确认通道。",
+        "messageKey": "agent_tool.dynamic_guard",
+        "guardKey": "cmd:vssadmin",
+        "dimension": "command",
+        "requestId": "apr_bd7f8239f910849013",
+        "expiresAt": "2026-10-13T13:27:39.428Z",
+        "command": "vssadmin list shadows",
+        "spans": [
+          {
+            "start": 0,
+            "end": 8,
+            "kind": "destructive-token"
+          }
+        ]
+      }
+    },
+    "_seq": 7,
+    "_eventType": "tool_result"
+  },
+  "providerCalls": 3
+}

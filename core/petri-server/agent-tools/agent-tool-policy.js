@@ -8,42 +8,26 @@
 const MUTATING_SIDE_EFFECTS = new Set(['state-write', 'workspace-write', 'execution']);
 const READ_ONLY_RUN_TOOL_OPS = new Set(['list', 'plan', 'status', 'next', 'bind_artifact']);
 const READ_ONLY_PLAN_OPS = new Set(['list', 'get']);
+// BLOCK-180 P2 — 命令/路径风险规则单源（原内联定义原样迁 helpers/command-risk-rules.js，
+// 动态防护判定与 span 分析共用，拦截与高亮不漂移）。
+const {
+  DANGEROUS_FIRST_TOKENS,
+  firstToken,
+  normalizePathLike,
+  matchesSensitivePath,
+} = require('../helpers/command-risk-rules');
+// BLOCK-180 P0/P1 — 审批请求资源：指纹计算与指纹放行读侧（policy 保持纯函数，
+// 资源注册/决策在拦截器与路由层）。
+const {
+  callFingerprint,
+  isFingerprintApproved,
+} = require('../helpers/approval-request-store');
 const SCIENTIFIC_SOURCE_EXTENSIONS = new Set([
   '.csv', '.tsv', '.h5ad', '.h5', '.loom', '.rds', '.rdata', '.mtx',
   '.vcf', '.bam', '.sam', '.fastq', '.fq', '.bed', '.gff', '.gtf',
   '.xlsx', '.xls',
 ]);
 const DERIVED_DATA_PREFIXES = ['results/', 'derived/', 'outputs/', 'work/', '.petri/'];
-
-// BLOCK-160 W2 P1（ORC-2）— 动态审批两维（预裁决缺省，蓝图 §3.4）。
-// 命令维度 = 系统级破坏命令首 token（**不含 rm/del 等常规命令**——日常操作不拦，
-// 用户需更严由 ORC-1 规则自配；静态黑名单已兜底最坏面）。
-const DANGEROUS_FIRST_TOKENS = new Set([
-  'format', 'mkfs', 'dd', 'diskpart', 'fsutil', 'cipher',
-  'vssadmin', 'bcdedit', 'wipefs', 'shutdown',
-]);
-// 路径维度 = 敏感系统/凭证目录子串模式（大小写不敏感；刻意排除 /usr/bin、
-// Program Files 等高频合法前缀，控制误报面）。
-const SENSITIVE_PATH_PATTERNS = [
-  '\\windows\\', '/windows/', 'system32', '/etc/', '/boot/', '/proc/',
-  '/sys/kernel', '.ssh', '.gnupg', '.aws', '$recycle.bin',
-];
-
-function firstToken(command) {
-  const raw = String(command || '').trim().split(/\s+/)[0]?.toLowerCase() || '';
-  // 归一化：剥可执行后缀与派生名（format.com→format / mkfs.ext4→mkfs）
-  const base = raw.replace(/\.(exe|com|cmd|bat)$/, '');
-  return base.includes('.') ? base.split('.')[0] : base;
-}
-
-function normalizePathLike(value) {
-  return String(value || '').replaceAll('\\', '/').toLowerCase();
-}
-
-function matchesSensitivePath(value) {
-  const normalized = normalizePathLike(value);
-  return SENSITIVE_PATH_PATTERNS.some((pattern) => normalized.includes(pattern));
-}
 
 /** PATH_ARG_FIELDS：显式路径字段的内建工具映射（v1；MCP 参数无标准字段，留 v2）。 */
 const PATH_ARG_FIELDS = {
@@ -267,15 +251,22 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
     return deny('policy_denied', 'policy_denied', '该工具风险等级不允许由 Agent 执行。');
   }
 
+  // BLOCK-180 P1 — 指纹放行经此标记透出（拦截器在执行前消耗指纹=「放行一次」
+  // 只放行一次执行尝试）。
+  let fingerprintConsumable = null;
   // BLOCK-160 W2 P2（ORC-1）— 用户规则层（判定序第二层，first-match 先到先判）：
   // deny = 直接拦截；require-ack = 拦截并要求确认（ctx.dynamicGuardAcks 含
   // `rule:<id>` 键放行——与动态防护共用统一确认通道）。规则经 ctx.userRules 注入
   //（拦截器 fail-soft 缓存读），policy 保持纯函数。
+  // BLOCK-180 P1 — 指纹放行层：ctx.approvedFingerprints 含调用指纹时放行该调用
+  // 一次（「放行一次」的请求级语义；维度级 always 仍走既有 guardKey Set）。
   if (operation.mutating) {
     const match = evaluateUserRules(name, args, ctx);
     if (match) {
+      const fingerprint = callFingerprint(name, args);
       const acked = isGuardAcked(ctx, match.guardKey);
-      if (match.rule.action === 'deny' || !acked) {
+      const fingerprintApproved = isFingerprintApproved(ctx, fingerprint);
+      if (match.rule.action === 'deny' || (!acked && !fingerprintApproved)) {
         return deny(
           match.rule.action === 'deny' ? 'user_rule_denied' : 'user_rule_require_ack',
           'user_rule_triggered',
@@ -284,22 +275,28 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
           { ruleId: match.rule.id, guardKey: match.guardKey }
         );
       }
+      if (!acked && fingerprintApproved) fingerprintConsumable = fingerprint;
     }
   }
 
   // BLOCK-160 W2 P1（ORC-2）— 动态维度（判定序第三层，取最严）：mutating 调用
   // 命中系统破坏命令/敏感路径 → deny+guardKey；ctx.dynamicGuardAcks 含键则放行
   //（统一确认通道：ORC-1 require-ack 规则与未来确认 UI 共用）。
+  // BLOCK-180 P1 — 指纹放行层同上（「放行一次」= 该调用指纹被批准一次）。
   if (operation.mutating) {
     const guard = evaluateDynamicGuards(name, args);
     if (guard.flagged && !isGuardAcked(ctx, guard.guardKey)) {
-      return deny(
-        'dynamic_guard',
-        'dynamic_guard_triggered',
-        `动态防护拦截：${guard.detail}（guardKey=${guard.guardKey}）。` +
-        '该调用命中动态审批维度；如属误判请调整调用方式，放行需经用户确认通道。',
-        { guardKey: guard.guardKey, dimension: guard.dimension }
-      );
+      const fingerprint = callFingerprint(name, args);
+      if (!isFingerprintApproved(ctx, fingerprint)) {
+        return deny(
+          'dynamic_guard',
+          'dynamic_guard_triggered',
+          `动态防护拦截：${guard.detail}（guardKey=${guard.guardKey}）。` +
+          '该调用命中动态审批维度；如属误判请调整调用方式，放行需经用户确认通道。',
+          { guardKey: guard.guardKey, dimension: guard.dimension }
+        );
+      }
+      fingerprintConsumable = fingerprint;
     }
   }
 
@@ -354,6 +351,7 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
 
   return allow(operation.delegatedApproval ? 'delegated_approval' : 'policy_allowed', {
     delegatedApproval: operation.delegatedApproval,
+    ...(fingerprintConsumable ? { fingerprintConsumable } : {}),
   });
 }
 

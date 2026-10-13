@@ -901,6 +901,7 @@ export function SimpleChat({
 
   // BLOCK-171 CP-2 — 确认通道卡：从 run 快照工具活动派生最新一条待确认拒绝
   // （dynamic_guard / user_rule_require_ack 且带 guardKey；本地已裁定键跳过）。
+  // BLOCK-180 — 派生扩展字段：requestId/command/spans（审批一等资源面）。
   const [ackedGuardKeys, setAckedGuardKeys] = useState<string[]>([]);
   const [guardAckBusy, setGuardAckBusy] = useState(false);
   const pendingGuardAck = useMemo(() => {
@@ -908,11 +909,21 @@ export function SimpleChat({
     for (let i = acts.length - 1; i >= 0; i -= 1) {
       const activity = acts[i] as { status?: string; name?: string; resultData?: unknown };
       if (activity.status !== 'denied' && activity.status !== 'error') continue;
-      const data = activity.resultData as { error?: string; guardKey?: string; message?: string } | undefined;
+      const data = activity.resultData as {
+        error?: string; guardKey?: string; message?: string;
+        requestId?: string; command?: string; spans?: Array<{ start: number; end: number; kind: string }>;
+      } | undefined;
       if (!data || !data.guardKey) continue;
       if (data.error !== 'dynamic_guard' && data.error !== 'user_rule_require_ack') continue;
       if (ackedGuardKeys.includes(data.guardKey)) continue;
-      return { guardKey: data.guardKey, toolName: activity.name || '', message: data.message || '' };
+      return {
+        guardKey: data.guardKey,
+        toolName: activity.name || '',
+        message: data.message || '',
+        requestId: typeof data.requestId === 'string' ? data.requestId : undefined,
+        command: typeof data.command === 'string' ? data.command : null,
+        spans: Array.isArray(data.spans) ? data.spans : null,
+      };
     }
     return null;
   }, [activeRun, ackedGuardKeys]);
@@ -927,7 +938,12 @@ export function SimpleChat({
         'Content-Type': 'application/json',
         ...(getToken() ? { Authorization: 'Bearer ' + getToken() } : {}),
       },
-      body: JSON.stringify({ guardKey: pendingGuardAck.guardKey, always: mode === 'always' }),
+      // BLOCK-180 — requestId 在场=请求级决策；缺席=存量键级放行（向后兼容）
+      body: JSON.stringify({
+        guardKey: pendingGuardAck.guardKey,
+        always: mode === 'always',
+        ...(pendingGuardAck.requestId ? { requestId: pendingGuardAck.requestId, decision: 'approve' } : {}),
+      }),
     })
       .then((response) => response.json().catch(() => ({})))
       .then((data: { ok?: unknown }) => {
@@ -937,6 +953,21 @@ export function SimpleChat({
         // 网络失败保留卡片（用户可重试）；本地态不变
       })
       .finally(() => setGuardAckBusy(false));
+  }, [conversationId, pendingGuardAck]);
+  // BLOCK-180 P0 — 拒绝上送（请求级 deny 留痕；键级退化为本地关卡）
+  const handleGuardDismiss = useCallback(() => {
+    if (!pendingGuardAck || !conversationId) return;
+    const runTaskId = getConversationRunSnapshot(conversationId)?.taskId;
+    setAckedGuardKeys((current) => [...current, pendingGuardAck.guardKey]);
+    if (!pendingGuardAck.requestId || !runTaskId) return;
+    void fetch(getPlatformApiPrefix() + '/ai/agent/task/' + encodeURIComponent(runTaskId) + '/guard-ack', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(getToken() ? { Authorization: 'Bearer ' + getToken() } : {}),
+      },
+      body: JSON.stringify({ requestId: pendingGuardAck.requestId, guardKey: pendingGuardAck.guardKey, decision: 'deny' }),
+    }).catch(() => { /* deny 上送失败不阻塞本地关卡 */ });
   }, [conversationId, pendingGuardAck]);
 
   // BLOCK-171 CP-4 — 排队追问可见可撤（当前会话的 queued 条目，带位次）。
@@ -1570,15 +1601,20 @@ export function SimpleChat({
             {steerNotice && (
               <div className="sc-attachment-notice" role="status">{steerNotice}</div>
             )}
-            {/* BLOCK-171 CP-2 — 动态防护确认卡（require-ack 用户可见面） */}
+            {/* BLOCK-171 CP-2 — 动态防护确认卡（require-ack 用户可见面）；
+                BLOCK-180 — 审批资源面：requestId 级决策/command span 高亮/两步武装 */}
             {pendingGuardAck && (
               <GuardAckCard
                 toolName={pendingGuardAck.toolName}
                 guardKey={pendingGuardAck.guardKey}
                 message={pendingGuardAck.message}
                 busy={guardAckBusy}
+                requestId={pendingGuardAck.requestId}
+                command={pendingGuardAck.command}
+                spans={pendingGuardAck.spans}
+                armedGuardKeys={ackedGuardKeys}
                 onAck={handleGuardAck}
-                onDismiss={() => setAckedGuardKeys((current) => [...current, pendingGuardAck.guardKey])}
+                onDismiss={handleGuardDismiss}
               />
             )}
             {/* BLOCK-171 CP-4 + BLOCK-178 加映 — 排队面板（ZCode ConversationQueuePanel 形态：

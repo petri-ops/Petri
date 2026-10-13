@@ -19,6 +19,8 @@ const conversationHelper = require('../../helpers/conversations');
 const { queueUserMessage, launchUserFollowup } = require('../../agent-tools/spawn-agent-tools');
 const { getToolCancellation } = require('../../helpers/tool-cancel-registry');
 const { ackGuard } = require('../../helpers/guard-ack-store');
+// BLOCK-180 P0 — 审批请求一等资源决策（requestId 级 approve/deny + 指纹放行）
+const { decideApprovalRequest, approveTaskFingerprint } = require('../../helpers/approval-request-store');
 const db = require('../../db').getAsyncDatabase();
 
 const STATUS_HTTP = {
@@ -90,27 +92,73 @@ module.exports = {
   // BLOCK-171 CP-2 — 确认通道写侧：require-ack 弹卡的用户裁定落点。
   // ack 写入 task 内确认集（策略读侧即时生效）；guard_ack 事件入 task_events
   // （审批记录可复审=可审计治理的自有形态）。
+  // BLOCK-180 P0/P1/P3 — 审批一等资源决策面：请求体带 requestId 时走请求级
+  // 决策（approve+once=指纹放行一次 / approve+always=指纹+维度级 guardKey 放行 /
+  // deny=拒绝并留痕）；仅 guardKey 时保持存量键级放行（向后兼容）。`always`
+  // 形参自此真实消费（语义=任务内 always；跨会话仍归 ORC-1 用户规则面）。
   app.post('/api/ai/agent/task/:taskId/guard-ack', async (req, res) => {
     const userId = req.user && req.user.id;
     if (!userId) return res.status(401).json({ ok: false, error: 'unauthorized', message: '未登录' });
     const task = agentTaskStore.getAgentTask(req.params.taskId);
     if (!task) return res.status(404).json({ ok: false, error: 'not_found', message: '任务不存在' });
     if (task.user_id && task.user_id !== userId) return res.status(403).json({ ok: false, error: 'forbidden', message: '无权确认该任务防护' });
+    const taskKey = task.taskId || req.params.taskId;
     const guardKey = String((req.body && req.body.guardKey) || '').trim();
-    if (!guardKey) return res.status(400).json({ ok: false, error: 'invalid_arguments', message: 'guardKey 不能为空' });
+    const requestId = String((req.body && req.body.requestId) || '').trim();
     const always = (req.body && req.body.always) === true;
-    const result = ackGuard(task.taskId || req.params.taskId, guardKey);
-    if (!result.ok) return res.status(400).json({ ok: false, ...result });
+    const decision = String((req.body && req.body.decision) || 'approve').trim();
+    if (!guardKey && !requestId) return res.status(400).json({ ok: false, error: 'invalid_arguments', message: 'guardKey 或 requestId 必须提供一个' });
+
+    let requestOutcome = null;
+    if (requestId) {
+      requestOutcome = decideApprovalRequest({
+        taskId: taskKey,
+        requestId,
+        decision,
+        mode: always ? 'always' : 'once',
+        ackGuardKey: (key) => ackGuard(taskKey, key),
+      });
+      if (!requestOutcome.ok) {
+        const status = ['request_not_found', 'request_expired', 'request_already_decided'].includes(requestOutcome.error) ? 409 : 400;
+        return res.status(status).json({ ok: false, ...requestOutcome });
+      }
+    }
+    const effectiveGuardKey = guardKey || (requestOutcome && requestOutcome.request && requestOutcome.request.guardKey) || '';
+    let keyAcked = null;
+    if (requestOutcome && requestOutcome.ok && decision === 'approve' && requestOutcome.consumeOnUse) {
+      // BLOCK-180 P1 — 「放行一次」=请求级指纹放行（不写维度级确认集——
+      // 维度级是 always 语义；指纹由拦截器执行前消耗）
+      const fingerprinted = approveTaskFingerprint(taskKey, requestOutcome.fingerprint);
+      if (!fingerprinted.ok) return res.status(400).json({ ok: false, ...fingerprinted });
+    } else if (effectiveGuardKey && (decision === 'approve' || !requestId)) {
+      // always（或旧形态无 requestId）写维度级确认集；deny 请求级决策不写维度放行
+      keyAcked = ackGuard(taskKey, effectiveGuardKey);
+      if (keyAcked && keyAcked.ok === false) return res.status(400).json({ ok: false, ...keyAcked });
+    }
     try {
-      const events = agentTaskStore.getAgentTaskEventsSince(task.taskId || req.params.taskId, 0, 1000000);
+      const events = agentTaskStore.getAgentTaskEventsSince(taskKey, 0, 1000000);
       const seq = (events.length ? events[events.length - 1].seq : 0) + 1;
+      const request = requestOutcome && requestOutcome.request;
       agentTaskStore.appendAgentTaskEvent(
-        task.taskId || req.params.taskId, seq,
+        taskKey, seq,
         'guard_ack',
-        { event: 'guard_ack', guardKey, always, at: new Date().toISOString() }
+        {
+          event: 'guard_ack',
+          guardKey: effectiveGuardKey || (request && request.guardKey) || guardKey,
+          always,
+          // BLOCK-180 — 请求级决策留痕（旧字段全保留，事件向后兼容）
+          ...(requestId ? { requestId, decision, toolName: request && request.toolName } : {}),
+          ...(request && request.command ? { command: request.command, spans: request.spans } : {}),
+          at: new Date().toISOString(),
+        }
       );
     } catch { /* SSE 可见性失败不阻塞确认 */ }
-    return res.json({ ok: true, guardKey, always });
+    return res.json({
+      ok: true,
+      guardKey: effectiveGuardKey,
+      always,
+      ...(requestOutcome && requestOutcome.ok ? { requestId, decision, status: requestOutcome.request.status } : {}),
+    });
   });
 
   // BLOCK-171 CP-2 — 审批记录复查（guard_ack 事件 × 本人任务，最新 50）。

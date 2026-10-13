@@ -4916,6 +4916,13 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **数据面**：`skills:set-disabled/uninstall/get-install-info/reinstall` IPC 四通道；卸载前 sourceDir 留存 prefs（卸载不丢「再次获取」依据）；治理动作落本地审计 jsonl。
 - **红绿**：契约 5/5（test/block177-governance.test.mjs，真实仓+临时 userData）；live 11/11（acceptance/block-177/block177-live.json，真实后端旗标翻转+真实卸载重装链）；tsc 0；knip 绿。
 
+## UI-509: 审批确认卡一等资源面（2026-10-13 in_progress，BLOCK-180）
+
+- **commandSpan 风险片段高亮**：GuardAckCard 按 deny 信封携带的服务端 span（command-risk-spans 单源分析）高亮命令危险片段（destructive-token/sensitive-path/pipe-exec 三色），无 command 退化存量形态；前端零风险规则实现（单一真相在服务端）。
+- **两步武装**：「本任务总是放行」首点出内联确认条（「武装后本任务内该维度不再询问」）二次点击才生效（先武装后使用）；已武装维度徽标在卡面可见。
+- **请求级决策展示**：requestId 徽标随卡显示；「拒绝」上送请求级 deny 留痕（存量键级退化兼容）。
+- 验证：vitest 7/7（GuardAckCard 契约扩展+存量三按钮语义保留）；实机探针 12/12（acceptance/block-180/）。
+
 ## UI-508: 消息队列与忙碌态投递一等化（2026-10-13 in_progress→**verified**（2026-10-13 用户实机截图过目：真实任务流式+排队 3 条暂停态截图逐项核对——面板竖排/位次/动作簇/暂停横幅全部在场，用户裁决「不错 翻牌子」；排队面板加映同批 verified），BLOCK-178）
 
 - **Send/Stop 并存**：运行中发送钮保持可点（busy 视觉+按投递模式路由 title 提示），不再被 Stop 替换（推翻 W1 的互斥渲染）。

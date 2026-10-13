@@ -9,7 +9,7 @@ acceptance:
   - 红线：既有 guardKey Set 语义（isGuardAcked）零改写（指纹层为新增层）；guard_ack 事件向后兼容（旧消费者不破）；无日期/无过期审批不新增跨会话持久化（诚实边界维持）；不做原生审批窗/跨机 socket 鉴权（Petri 形态=Electron 内确认卡，非范围）
   - closeout 门禁绿 + 实机探针（动态防护命中→审批卡→决策→重试放行全链断言）
 reopen: 任一出口断言未达即返工；用户 2026-10-13 裁决「② 审批二阶段（推荐）」（AskUserQuestion 菜单选定，研究池②转正）
-status: active
+status: completed
 ---
 
 # BLOCK-180 — 执行审批二阶段一等资源化（commandSpan 高亮 + 武装护栏）
@@ -44,6 +44,16 @@ status: active
 - 前端：GuardAckCard 高亮+两步武装 vitest。
 - 实机：`scripts/block180-live.mjs`（隔离后端+mock provider——动态防护命中→deny 信封携 requestId/spans→guard-ack 决策→模型重试指纹放行→收口；TTL 过期路径），证据 `acceptance/block-180/`。
 - closeout 十三门绿。
+
+## 6. 波报（2026-10-13 当日整包收口）
+
+- **P0 审批资源**：helpers/approval-request-store.js——registerApprovalRequest 幂等（同指纹+guardKey 复用 pending，重试 requestId 不漂移）/TTL 惰性过期（重试获新请求）/decideApprovalRequest 终态机（pending→approved|denied|expired）；store 自持 approvedFingerprints 集，loop 双挂 toolCtx（路由写/policy 读引用共享）。
+- **P1 指纹放行**：policy 用户规则+动态防护两分支加指纹层（isGuardAcked 既有语义零改写）；deny 信封附 requestId/spans/expiresAt（guardKey 字段不动）；**抓真一处语义缺陷**——路由初版在 once 决策时误写维度级确认集（once 实为 always），已改为 once 只登记指纹（拦截器执行前消耗）、always 才写维度级。
+- **P2 commandSpan**：helpers/command-risk-rules.js 规则单源（policy 动态防护与 span 分析共用，判据不漂移）+command-risk-spans.js 纯函数（destructive-token/sensitive-path/pipe-exec 三维度，区间合并不重叠）；GuardAckCard 高亮渲染（无 command 退化存量形态）。
+- **P3 武装护栏**：always 两步确认（首点出确认条二次点击生效）；已武装维度徽标；guard-ack 路由 requestId 请求级决策（未知 409/过期/重复决策显式错误）+always 形参真实消费+拒绝上送 deny 留痕。
+- **验证**：红绿 21/21（store 8+spans 8+集成 5）+审批族回归 52 项 0 红（block171/160/policy 存量零破坏）+vitest 7/7（GuardAckCard 契约扩展，always 两步为有意变更已修订测试留痕）+tsc 0+实机探针 12/12（scripts/block180-live.mjs：隔离后端+mock provider——deny 信封 requestId/spans→存活期未知请求 409→请求级 approve→指纹放行重试真实执行→收口；存量键级 ack 兼容）。UI-509 登记 in_progress 待用户过目。
+- **决策工具**：doc:suggest 命中 uiAudit+planDoc（均在收口动作内）；output:judge RETRY 一次后 PASS（fit=3.71）。
+- closeout 十三门绿；G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## 5. 完成语义
 

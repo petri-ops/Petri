@@ -74,6 +74,34 @@ function policyResult(result, extra = {}) {
   };
 }
 
+// BLOCK-180 P0 — 审批请求注册（deny 携 guardKey 且任务注入了资源 store 时）。
+// 请求幂等（同指纹+guardKey 复用 pending 请求），信封附 requestId/spans/expiresAt
+// （guardKey 既有字段不动，前端与事件向后兼容）。store 缺席=存量行为（纯键确认）。
+function attachApprovalRequest(ctx, { name, args, decision }) {
+  if (!decision || !decision.guardKey) return {};
+  const store = ctx && ctx.approvalRequests;
+  if (!store) return {};
+  try {
+    const registered = require('../helpers/approval-request-store').registerApprovalRequest(store, {
+      toolName: name,
+      args,
+      guardKey: decision.guardKey,
+      dimension: decision.dimension,
+      detail: decision.message,
+    });
+    if (!registered.ok) return {};
+    const { request } = registered;
+    return {
+      requestId: request.requestId,
+      expiresAt: new Date(request.expiresAt).toISOString(),
+      ...(request.command ? { command: request.command, spans: request.spans } : {}),
+    };
+  } catch {
+    // 资源层故障不阻断既有 deny 语义（fail-soft 回纯键确认）
+    return {};
+  }
+}
+
 function createAgentToolInterceptor(options = {}) {
   const resolveEntry = options.getToolEntry || getToolEntry;
   const workspacePreflight = options.preflightWorkspaceTool || preflightWorkspaceTool;
@@ -117,10 +145,12 @@ function createAgentToolInterceptor(options = {}) {
     if (initialDecision.decision === 'deny') {
       // BLOCK-171 CP-2 — 确认通道键随拒绝对外透出（存量缺陷修复：policyResult
       // 曾丢弃 extra，guardKey 从未到达 envelope，确认 UI 无从确认）。
+      // BLOCK-180 P0 — 审批请求资源随拒绝注册并透出（requestId/spans/expiresAt）。
       return policyResult(initialDecision, {
         guardKey: initialDecision.guardKey,
         dimension: initialDecision.dimension,
         ruleId: initialDecision.ruleId,
+        ...attachApprovalRequest(ctx, { name, args, decision: initialDecision }),
       });
     }
 
@@ -134,7 +164,16 @@ function createAgentToolInterceptor(options = {}) {
         guardKey: decision.guardKey,
         dimension: decision.dimension,
         ruleId: decision.ruleId,
+        ...attachApprovalRequest(ctx, { name, args, decision }),
       });
+    }
+
+    // BLOCK-180 P1 — 「放行一次」指纹消耗：policy 经指纹层放行时在执行前消耗，
+    // 同指纹再次调用需重新审批（一次放行=一次执行尝试，handler 失败需重批）。
+    if (decision.fingerprintConsumable) {
+      try {
+        require('../helpers/approval-request-store').consumeFingerprint(ctx, decision.fingerprintConsumable);
+      } catch { /* 消耗失败不阻断执行 */ }
     }
 
     // BLOCK-33 P3 — handlerOptions（可选 { onOutput }）透传给 handler；

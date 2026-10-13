@@ -38,6 +38,11 @@ const {
   createGuardAcks,
   releaseGuardAcks,
 } = require('./helpers/guard-ack-store');
+// BLOCK-180 P0 — 审批请求一等资源（任务内生命周期；注册/决策/指纹放行）
+const {
+  createApprovalRequests,
+  releaseApprovalRequests,
+} = require('./helpers/approval-request-store');
 // BLOCK-176 CP-18 — 任务级成本硬熔断（ai-settings costCapCny；上限未配置=零行为变化）
 const { resolveCostCapCny, isCostCapExceeded } = require('./helpers/cost-cap');
 const { getAiSettings } = require('./helpers/ai-settings');
@@ -633,6 +638,16 @@ async function runLoop({
     if (toolCtx.taskId && !toolCtx.dynamicGuardAcks) {
       const guardAcks = createGuardAcks(toolCtx.taskId);
       if (guardAcks) toolCtx.dynamicGuardAcks = guardAcks;
+    }
+    // BLOCK-180 P0 — 审批请求资源与指纹放行集注入（拦截器注册请求/消耗指纹，
+    // policy 读 ctx.approvedFingerprints 放行「放行一次」，guard-ack 路由决策）。
+    if (toolCtx.taskId && !toolCtx.approvalRequests) {
+      const approvalRequests = createApprovalRequests(toolCtx.taskId);
+      if (approvalRequests) {
+        toolCtx.approvalRequests = approvalRequests;
+        // 同一 Set 双挂：路由决策侧经 store 写、policy 经 ctx 读（引用共享即时生效）
+        toolCtx.approvedFingerprints = approvalRequests.approvedFingerprints;
+      }
     }
 
     for (let iter = 0; iter < MAX_AGENT_ITERS && !aborted(); iter++) {
@@ -1486,6 +1501,9 @@ ${compactSummaryText}`,
   if (toolCtx.taskId) releaseToolCancellation(toolCtx.taskId);
   // BLOCK-171 CP-2 — 确认集随运行收口释放（「本任务总是放行」= 任务生命周期）。
   if (toolCtx.taskId) releaseGuardAcks(toolCtx.taskId);
+  // BLOCK-180 P0 — 审批请求资源随任务释放（同上生命周期；过期惰性判定，
+  // 不靠定时器，释放即终局）。
+  if (toolCtx.taskId) releaseApprovalRequests(toolCtx.taskId);
 
   return {
     assistantText: assistantAcc,
