@@ -161,6 +161,7 @@
     "docs:status": "node scripts/docs-governance.mjs --status",
     "docs:check": "node scripts/docs-governance.mjs --check",
     "docs:reconcile": "node scripts/docs-governance.mjs --reconcile",
+    "docs:roll-index": "node scripts/docs-roll-index.mjs",
     "ui:audit:check": "node scripts/check-ui-productization-audit.mjs",
     "state": "node .agents/skills/petri-dev-infra/scripts/workspace-state.mjs",
     "hygiene:check": "node .agents/skills/petri-dev-infra/scripts/hygiene-check.mjs",

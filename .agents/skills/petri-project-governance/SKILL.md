@@ -81,6 +81,7 @@ Run `references/STAGE-CLOSEOUT-CHECKLIST.md` in order and write ledger entries p
 - Do not bulk-archive while the workspace contains unknown WIP.
 - Mark a replacement with `supersedes`, update all canonical entrypoints, and keep the old document discoverable as `superseded` until safe archival.
 - Treat `npm run docs:reconcile` as advice. It never authorizes automatic deletion or movement.
+- README 编号条目按月滚动（2026-10-13 用户裁决「每次只读取近期有效内容 按需索引更多」）：`docs/README.md` 只承载当月条目；跨月条目经 `npm run docs:roll-index`（`--check` 预览）机械迁入 `docs/doc-index-YYYY-MM.md`（搬移不改写零删除），迁出文档的 DOC-REGISTRY `entrypoint` 由脚本按链接实际在场改指（含嵌在宿主条目描述文本内的嵌链），新索引自动注册。行为以脚本与其测试（test/docs-roll-index.test.mjs）为准，不做手工迁移复刻；`docs/README.md`「## 维护规则」区条款与 skill 本条为同一规则的 README 侧表述。
 
 ### Use worktrees
 

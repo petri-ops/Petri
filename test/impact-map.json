@@ -757,11 +757,13 @@
         "scripts/audit-log-compact.mjs",
         "scripts/check-*.mjs",
         "scripts/test-affected.mjs",
-        "scripts/verify-schema.js"
+        "scripts/verify-schema.js",
+        "scripts/docs-roll-index.mjs"
       ],
       "tests": [
         "test/docs-governance.test.mjs",
-        "test/test-affected.test.mjs"
+        "test/test-affected.test.mjs",
+        "test/docs-roll-index.test.mjs"
       ],
       "classifiesScripts": true,
       "scriptRole": "governance"
