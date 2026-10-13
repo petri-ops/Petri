@@ -4916,11 +4916,12 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **数据面**：`skills:set-disabled/uninstall/get-install-info/reinstall` IPC 四通道；卸载前 sourceDir 留存 prefs（卸载不丢「再次获取」依据）；治理动作落本地审计 jsonl。
 - **红绿**：契约 5/5（test/block177-governance.test.mjs，真实仓+临时 userData）；live 11/11（acceptance/block-177/block177-live.json，真实后端旗标翻转+真实卸载重装链）；tsc 0；knip 绿。
 
-## UI-508: 消息队列与忙碌态投递一等化（2026-10-13 in_progress，BLOCK-178）
+## UI-508: 消息队列与忙碌态投递一等化（2026-10-13 in_progress→**verified**（2026-10-13 用户实机截图过目：真实任务流式+排队 3 条暂停态截图逐项核对——面板竖排/位次/动作簇/暂停横幅全部在场，用户裁决「不错 翻牌子」；排队面板加映同批 verified），BLOCK-178）
 
 - **Send/Stop 并存**：运行中发送钮保持可点（busy 视觉+按投递模式路由 title 提示），不再被 Stop 替换（推翻 W1 的互斥渲染）。
 - **投递模式显式化**：composer 工具行「转向/排队」切换钮（localStorage 记忆）；Alt+Enter/Alt+点击单次反向；转向走既有 task/:id/steer（入队不可撤语义保留），被拒回退排队并诚实提示。
 - **队列一等化**：**排队面板（加映，用户裁决「应在输入框上方、多条依次放好」——对照 ZCode ConversationQueuePanel 竖排形态）**：输入框上方竖排全宽行（位次+文本 truncate+动作簇 ✎▶↑↓×），面板头=「排队 N 条」+暂停/恢复排水+溢出状态行内联；上限 20 超限诚实提示（不再静默丢）。
+- **加映 verified**：横排 chips 挤窄列问题用户实测抓出后当日重构——sc-queue-panel 竖排全宽行实机截图核对（真实 deepseek 任务流式中+排队 3 条暂停锁态），恢复排水/撤回/排序/立即发送实机可点。
 - **编辑重发**：用户消息 hover「编辑」（历史件限定；run 投影件不出钮）——回退到该消息前+回填输入框。
 - **P2**：队列随会话持久化（刷新不丢）；失焦完成桌面通知（实验特性节开关 petri:notify-on-done 默认开）；prompt 历史跨会话持久化（按项目 50 条）。
 - **红绿**：vitest 27/27（block178 9 + 既有 hook 15 + row 3——既有 queue updater 契约测试抓真修复 React updater 回读失效缺陷）；live 14/14（真实任务 steer ok=true depth=1）；tsc 0。
