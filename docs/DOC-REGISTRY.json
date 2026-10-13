@@ -6374,8 +6374,29 @@
         "auditability"
       ],
       "notes": "2026-10-13 整包 completed（当日立项当日收口；live 12/12，acceptance/block-180/block180-live.json）：P0 审批资源（requestId/TTL 惰性过期/决策终态机/store 自持指纹集双挂 toolCtx）/P1 指纹放行（once=指纹级抓真修复路由误写维度级缺陷；always=维度级零改写）/P2 commandSpan（规则单源+三维度 span+前端高亮）/P3 两步武装+always 形参真实消费。红绿 21/21+审批族回归 52 项 0 红+vitest 7/7。UI-509 in_progress 待过目。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-181-EVALS-HARNESS",
+      "capability": "agent-evals",
+      "path": "docs/block-181-evals-harness-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "phase": "P0-LAUNCH",
+      "canonical": true,
+      "truthDomain": "block-181-evals-harness-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-13",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "evals",
+        "golden-tasks",
+        "regression-gate",
+        "mock-provider",
+        "evidence"
+      ],
+      "notes": "2026-10-13 立项 active（用户裁决「可以的 开」批准评测基线方向）：黄金任务集+隔离后端运行器（mock/real 双模式）+确定性判据+基线回归门；v1 判据全确定性（LLM judge 登记不做）；block93 凭据种子根治同包。plan=docs/block-181-evals-harness-plan.md。"
     }
   ],
   "lastUpdated": "2026-10-13",
-  "documentCount": 334
+  "documentCount": 335
 }
