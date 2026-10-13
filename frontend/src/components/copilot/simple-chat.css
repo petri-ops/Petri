@@ -674,7 +674,7 @@
   gap: var(--petri-space-1);
   margin: 0 0 9px;
   color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-sm);
+  font-size: inherit; /* BLOCK-178 存量棘轮清偿：正文/标题性小字归位 14px */
   line-height: 1.5;
 }
 
@@ -1305,7 +1305,7 @@
 }
 
 .sc-tool-activity-status {
-  font-size: var(--petri-font-size-sm);
+  font-size: inherit; /* BLOCK-178 存量棘轮清偿：正文/标题性小字归位 14px */
   font-weight: 650;
 }
 
@@ -2012,7 +2012,7 @@
   cursor: pointer;
   transition: background var(--petri-duration-fast) ease, color var(--petri-duration-fast) ease;
   /* UI-215 补充：纯图标按钮收敛 UA 默认字号到 token */
-  font-size: var(--petri-font-size-sm);
+  font-size: inherit; /* BLOCK-178 存量棘轮清偿：正文/标题性小字归位 14px */
 }
 
 .sc-composer-icon-btn:hover {
@@ -3584,7 +3584,7 @@
 }
 
 .sc-preview-hint {
-  font-size: var(--petri-font-size-sm);
+  font-size: inherit; /* BLOCK-178 存量棘轮清偿：正文/标题性小字归位 14px */
   color: var(--petri-text-muted);
 }
 
@@ -4353,7 +4353,7 @@
 }
 
 .sc-guard-card__title {
-  font-size: var(--petri-font-size-sm);
+  font-size: inherit; /* BLOCK-178 存量棘轮清偿：正文/标题性小字归位 14px */
   color: var(--petri-text);
 }
 
@@ -4373,7 +4373,7 @@
 .sc-guard-card__message {
   margin: var(--petri-space-2) 0;
   color: var(--petri-text-muted);
-  font-size: var(--petri-font-size-sm);
+  font-size: inherit; /* BLOCK-178 存量棘轮清偿：正文/标题性小字归位 14px */
 }
 
 .sc-guard-card__actions {
@@ -4387,7 +4387,7 @@
   border-radius: var(--petri-radius-pill);
   background: var(--petri-bg-subtle);
   color: var(--petri-text);
-  font-size: var(--petri-font-size-sm);
+  font-size: inherit; /* BLOCK-178 存量棘轮清偿：正文/标题性小字归位 14px */
   cursor: pointer;
   transition: background var(--petri-duration-fast) ease;
 }
@@ -4436,7 +4436,7 @@
   padding: var(--petri-space-1) var(--petri-space-2);
   border-radius: var(--petri-radius-md);
   background: var(--petri-bg-subtle);
-  font-size: var(--petri-font-size-sm);
+  font-size: inherit; /* BLOCK-178 存量棘轮清偿：正文/标题性小字归位 14px */
 }
 
 .sc-guard-history__time {
@@ -4463,7 +4463,7 @@
 .sc-guard-history__empty {
   margin-top: var(--petri-space-3);
   color: var(--petri-text-muted);
-  font-size: var(--petri-font-size-sm);
+  font-size: inherit; /* BLOCK-178 存量棘轮清偿：正文/标题性小字归位 14px */
 }
 
 .sc-guard-history__retry {

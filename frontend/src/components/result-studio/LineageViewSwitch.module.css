@@ -43,5 +43,5 @@
 .emptyHint {
   padding: var(--petri-space-3) 0;
   color: var(--petri-text-muted);
-  font-size: var(--petri-font-size-sm);
+  font-size: inherit; /* BLOCK-178 存量棘轮清偿：空态提示归位 14px */
 }

@@ -46,7 +46,7 @@ vi.mock('@/lib/result-edit-agent-bridge', () => ({ copilotContextOverrideForAsk:
 
 import { INITIAL_NAV_STATE } from '@/components/copilot/chatHistoryNav';
 
-import { useChatStream, type UseChatStreamArgs } from './useChatStream';
+import { useChatStream, type QueuedPrompt, type UseChatStreamArgs } from './useChatStream';
 
 type Level = 'off' | 'standard' | 'high';
 
@@ -268,8 +268,8 @@ describe('useChatStream 排队追问 drain（BLOCK-102 P2 守卫行为锁）', (
     renderHook(() => useChatStream(makeArgs({
       conversationId: 'conv_test',
       queuedPrompts: [
-        { conversationId: 'conv_other', text: '别的会话的追问' },
-        { conversationId: 'conv_test', text: '当前会话的追问' },
+        { id: 'q_test_1', createdAt: 1700000000000, conversationId: 'conv_other', text: '别的会话的追问'  },
+        { id: 'q_test_2', createdAt: 1700000000000, conversationId: 'conv_test', text: '当前会话的追问'  },
       ],
       setQueuedPrompts,
     })));
@@ -279,8 +279,8 @@ describe('useChatStream 排队追问 drain（BLOCK-102 P2 守卫行为锁）', (
     expect(runOptions.userContent).toBe('当前会话的追问');
     // 消费当前会话条目后，conv_other 的条目必须原样留在队列
     expect(setQueuedPrompts).toHaveBeenCalledTimes(1);
-    const kept = setQueuedPrompts.mock.calls[0][0] as Array<{ conversationId: string; text: string }>;
-    expect(kept).toEqual([{ conversationId: 'conv_other', text: '别的会话的追问' }]);
+    const kept = setQueuedPrompts.mock.calls[0][0] as Array<{ id: 'q_test_3', createdAt: 1700000000000, conversationId: string; text: string }>;
+    expect(kept.map((q) => [q.conversationId, q.text])).toEqual([['conv_other', '别的会话的追问']]); // BLOCK-178 加了 id/createdAt，守卫点=归属+文本
   });
 
   it('对账门：run 完结但尚未从 SQLite 对账时不 drain；对账标记写入后才发送', async () => {
@@ -288,7 +288,7 @@ describe('useChatStream 排队追问 drain（BLOCK-102 P2 守卫行为锁）', (
     const reconciledRunRef = { current: null as string | null };
     const base = makeArgs({
       conversationId: 'conv_test',
-      queuedPrompts: [{ conversationId: 'conv_test', text: '等对账的追问' }],
+      queuedPrompts: [{ id: 'q_test_4', createdAt: 1700000000000, conversationId: 'conv_test', text: '等对账的追问'  }],
       setQueuedPrompts,
       reconciledRunRef,
       activeRun: { status: 'done', completedAt: 12345 } as never,
@@ -313,7 +313,7 @@ describe('useChatStream 排队追问 drain（BLOCK-102 P2 守卫行为锁）', (
     const setQueuedPrompts = vi.fn();
     renderHook(() => useChatStream(makeArgs({
       conversationId: 'conv_test',
-      queuedPrompts: [{ conversationId: 'conv_test', text: '会被丢弃的追问' }],
+      queuedPrompts: [{ id: 'q_test_5', createdAt: 1700000000000, conversationId: 'conv_test', text: '会被丢弃的追问'  }],
       setQueuedPrompts,
     })));
     await act(async () => {});
@@ -342,8 +342,12 @@ describe('useChatStream 排队追问 drain（BLOCK-102 P2 守卫行为锁）', (
       result.current.queue('流中追问');
     });
     expect(setQueuedPrompts).toHaveBeenCalledTimes(1);
-    const updater = setQueuedPrompts.mock.calls[0][0] as (current: Array<{ conversationId: string; text: string }>) => Array<{ conversationId: string; text: string }>;
-    expect(updater([])).toEqual([{ conversationId: 'conv_test', text: '流中追问' }]);
+    // BLOCK-178 — queue 改为从 props 权威态计算后直接落值（不再传 updater）
+    const drafted = setQueuedPrompts.mock.calls[0][0] as QueuedPrompt[];
+    expect(drafted).toHaveLength(1);
+    expect(drafted[0].conversationId).toBe('conv_test');
+    expect(drafted[0].text).toBe('流中追问');
+    expect(drafted[0].id).toBeTruthy(); // BLOCK-178 — 稳定 ID
     expect(setInput).toHaveBeenCalledWith('');
   });
 });

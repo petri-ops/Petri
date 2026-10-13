@@ -1,0 +1,77 @@
+{
+  "generatedAt": "2026-10-13T08:16:53.754Z",
+  "pass": 14,
+  "fail": 0,
+  "results": [
+    {
+      "id": "A.steer-real-task",
+      "ok": true,
+      "detail": "steer 受理 ok=true depth=1（composer「转向」模式后端通道）"
+    },
+    {
+      "id": "A.cleanup",
+      "ok": true,
+      "detail": "探针任务 fe20e1c1-6414-4951-afa7-b233d3d5e5e2 已取消清场"
+    },
+    {
+      "id": "B.send-stop 并存",
+      "ok": true,
+      "detail": "在场"
+    },
+    {
+      "id": "B.投递模式切换",
+      "ok": true,
+      "detail": "在场"
+    },
+    {
+      "id": "B.Alt 反向",
+      "ok": true,
+      "detail": "在场"
+    },
+    {
+      "id": "B.队列管理五钮",
+      "ok": true,
+      "detail": "在场"
+    },
+    {
+      "id": "B.暂停/恢复排水",
+      "ok": true,
+      "detail": "在场"
+    },
+    {
+      "id": "B.溢出诚实提示",
+      "ok": true,
+      "detail": "在场"
+    },
+    {
+      "id": "B.编辑重发",
+      "ok": true,
+      "detail": "在场"
+    },
+    {
+      "id": "B.队列持久化",
+      "ok": true,
+      "detail": "在场"
+    },
+    {
+      "id": "B.完成通知",
+      "ok": true,
+      "detail": "在场"
+    },
+    {
+      "id": "B.prompt 历史持久化",
+      "ok": true,
+      "detail": "在场"
+    },
+    {
+      "id": "B.notify-toggle-settings",
+      "ok": true,
+      "detail": "设置面（实验特性节）通知开关在场"
+    },
+    {
+      "id": "C.vitest-block178",
+      "ok": true,
+      "detail": "useChatStream.block178 9/9（真实 vitest 执行）"
+    }
+  ]
+}

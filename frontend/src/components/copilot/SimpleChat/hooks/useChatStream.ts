@@ -58,8 +58,37 @@ import { type SimpleMessage } from '../types';
 /** BLOCK-102 P2 — 排队追问带会话归属：drain 只消费当前会话的条目，
  *  修复「流式期间切会话后 A 的追问注入 B 会话」竞态。 */
 export interface QueuedPrompt {
+  /** BLOCK-178 P1 — 稳定条目 ID（撤回/立即发送/排序的单一锚点）。 */
+  id: string;
   conversationId: string | null;
   text: string;
+  createdAt: number;
+}
+
+/** BLOCK-178 P1 — 队列上限（超限诚实提示，不再静默丢最旧）。 */
+export const QUEUE_CAP = 20;
+
+let _queueSeq = 0;
+
+/** BLOCK-178 P1 — 入队纯函数（稳定 ID + 上限 + 诚实溢出；测试直打）。 */
+export function enqueueQueuedPrompt(
+  current: QueuedPrompt[],
+  text: string,
+  conversationId: string | null,
+): { next: QueuedPrompt[]; ok: boolean; overflow: boolean } {
+  const trimmed = text.trim();
+  if (!trimmed) return { next: current, ok: false, overflow: false };
+  if (current.length >= QUEUE_CAP) {
+    return { next: current, ok: false, overflow: true };
+  }
+  _queueSeq += 1;
+  const entry: QueuedPrompt = {
+    id: `q_${Date.now().toString(36)}_${_queueSeq}`,
+    conversationId,
+    text: trimmed,
+    createdAt: Date.now(),
+  };
+  return { next: [...current, entry], ok: true, overflow: false };
 }
 
 export interface UseChatStreamArgs {
@@ -86,6 +115,8 @@ export interface UseChatStreamArgs {
   input: string;
   messages: SimpleMessage[];
   queuedPrompts: QueuedPrompt[];
+  /** BLOCK-178 P1 — 自动排水开关（暂停后跑完不自动发；管理面可见）。 */
+  autoDrain: boolean;
   displayMessages: SimpleMessage[];
   activeRun: ConversationRunSnapshot | null;
   activeModel: ChatModelPreset | undefined;
@@ -131,6 +162,14 @@ export interface UseChatStreamReturn {
   runInBackground: (text: string) => void;
   /** Active run is streaming OR a transient send is in flight. */
   streaming: boolean;
+  /** BLOCK-178 P1 — 删除队列项。 */
+  removeQueuedById: (id: string) => void;
+  /** BLOCK-178 P1 — 撤回队列项（出队并交还文本供编辑重发）。 */
+  withdrawQueued: (id: string) => { ok: boolean; text?: string };
+  /** BLOCK-178 P1 — 上移/下移（同名会话子序列内换位）。 */
+  moveQueued: (id: string, dir: -1 | 1) => void;
+  /** BLOCK-178 P1 — 立即发送：挪到会话子序列首位并停当前轮，排水优先消费。 */
+  sendNowQueued: (id: string) => boolean;
 }
 
 /**
@@ -159,6 +198,7 @@ export function useChatStream({
   input,
   messages,
   queuedPrompts,
+  autoDrain,
   displayMessages,
   activeRun,
   activeModel,
@@ -440,16 +480,67 @@ export function useChatStream({
   // the drain effect (next hook) auto-fires the queued prompt
   // once the run completes and the SQLite history has been
   // reconciled.
-  const queue = useCallback((text: string) => {
+  const queue = useCallback((text: string): { ok: boolean; overflow: boolean } => {
     const trimmed = text.trim();
-    if (!trimmed || !streaming) return;
-    // BLOCK-102 P2 — 归属标记：追问属于发起它的会话
-    setQueuedPrompts((current) => [...current, { conversationId, text: trimmed }].slice(-5));
+    if (!trimmed || !streaming) return { ok: false, overflow: false };
+    // BLOCK-102 P2 — 归属标记：追问属于发起它的会话。
+    // BLOCK-178 — 从 props 权威态计算入队（React 不保证 updater 同步执行，
+    // 在 updater 内回读结果会静默失效——契约测试抓真后修正）。
+    const enqueued = enqueueQueuedPrompt(queuedPrompts, trimmed, conversationId);
+    if (!enqueued.ok) return { ok: false, overflow: enqueued.overflow }; // 溢出：输入原样保留
+    setQueuedPrompts(enqueued.next);
     setInput('');
     historyNavRef.current = INITIAL_NAV_STATE;
     clearConversationDraft(projectId, conversationId);
     if (taRef.current) taRef.current.style.height = 'auto';
-  }, [conversationId, projectId, streaming]);
+    return { ok: true, overflow: false };
+  }, [conversationId, projectId, queuedPrompts, setQueuedPrompts, streaming]);
+
+  // BLOCK-178 P1 — 队列管理操作（撤回编辑/删除/排序/立即发送；按 id 锚定）。
+  const removeQueuedById = useCallback((id: string) => {
+    setQueuedPrompts((current) => current.filter((q) => q.id !== id));
+  }, [setQueuedPrompts]);
+
+  /** 撤回队列项：出队并把文本交还调用方回填输入框（编辑后重发）。 */
+  const withdrawQueued = useCallback((id: string): { ok: boolean; text?: string } => {
+    const target = queuedPrompts.find((q) => q.id === id);
+    if (!target) return { ok: false };
+    setQueuedPrompts((current) => current.filter((q) => q.id !== id));
+    return { ok: true, text: target.text };
+  }, [queuedPrompts, setQueuedPrompts]);
+
+  /** 上移/下移：仅在同名会话子序列内换位（跨会话归属语义不动）。 */
+  const moveQueued = useCallback((id: string, dir: -1 | 1) => {
+    setQueuedPrompts((current) => {
+      const idx = current.findIndex((q) => q.id === id);
+      if (idx < 0) return current;
+      const cid = current[idx].conversationId;
+      let anchorIdx = idx + dir;
+      while (anchorIdx >= 0 && anchorIdx < current.length && current[anchorIdx].conversationId !== cid) {
+        anchorIdx += dir;
+      }
+      if (anchorIdx < 0 || anchorIdx >= current.length) return current;
+      const next = current.slice();
+      const [item] = next.splice(idx, 1);
+      next.splice(anchorIdx, 0, item);
+      return next;
+    });
+  }, [setQueuedPrompts]);
+
+  /** 立即发送：把该项挪到同名会话子序列首位 + 停当前轮——排水效果在对账完成后优先消费它。 */
+  const sendNowQueued = useCallback((id: string): boolean => {
+    const target = queuedPrompts.find((q) => q.id === id);
+    if (!target) return false;
+    setQueuedPrompts((current) => {
+      const rest = current.filter((q) => q.id !== id);
+      const idx = rest.findIndex((q) => q.conversationId === target.conversationId);
+      if (idx < 0) rest.push(target);
+      else rest.splice(idx, 0, target);
+      return rest;
+    });
+    if (streaming) stop();
+    return true;
+  }, [queuedPrompts, setQueuedPrompts, stop, streaming]);
 
   // 10. Queue drain effect — fires one queued prompt only after
   // the completed run has been reconciled from SQLite, so the
@@ -457,6 +548,7 @@ export function useChatStream({
   // the inline effect that previously lived in SimpleChat.tsx.
   useEffect(() => {
     if (streaming || queuedPrompts.length === 0 || !conversationId) return;
+    if (autoDrain === false) return; // BLOCK-178 P1 — 显式暂停门（undefined=开启，旧调用方零回归）
     if (activeRun?.completedAt
       && reconciledRunRef.current !== `${conversationId}:${activeRun.completedAt}`) return;
     // BLOCK-102 P2 — 只 drain 归属当前会话的条目：切走的会话其追问留在队列，
@@ -466,7 +558,7 @@ export function useChatStream({
     const next = queuedPrompts[idx];
     setQueuedPrompts(queuedPrompts.filter((_, i) => i !== idx));
     void send(next.text);
-  }, [activeRun, conversationId, messages, queuedPrompts, send, streaming]);
+  }, [autoDrain, activeRun, conversationId, messages, queuedPrompts, send, streaming]);
 
   // `input` is read by the public API surface (the parent passes
   // input.trim() into queue/runInBackground), so we intentionally
@@ -479,5 +571,17 @@ export function useChatStream({
 
   // BLOCK-102 P2 — 回填最新 runInBackground（声明在其定义之后、return 之前）
   runInBackgroundRef.current = runInBackground;
-  return { send, stop, regenerate, queue, runInBackground, streaming };
+  return {
+    send,
+    stop,
+    regenerate,
+    queue,
+    runInBackground,
+    streaming,
+    // BLOCK-178 — 队列一等化操作面
+    removeQueuedById,
+    withdrawQueued,
+    moveQueued,
+    sendNowQueued,
+  };
 }

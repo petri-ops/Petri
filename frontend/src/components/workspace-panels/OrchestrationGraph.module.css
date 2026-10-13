@@ -1,7 +1,7 @@
 .orchestrationGraph {
   position: relative;
   height: 260px;
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-card); /* BLOCK-178 棘轮清偿：语义化 */
   border-radius: var(--petri-radius-md);
   overflow: hidden;
   margin-bottom: var(--petri-space-3);

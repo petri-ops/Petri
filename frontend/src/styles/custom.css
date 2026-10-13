@@ -196,6 +196,8 @@
   --petri-border-input: var(--petri-border-strong);
   --petri-border-card: var(--petri-border-subtle);
   --petri-divider: color-mix(in srgb, var(--petri-border) 55%, transparent);
+  /* BLOCK-178 — 焦点环宽度 token（ArtifactPinPane 键盘可达分隔条 focus ring 定性） */
+  --petri-ring-width: 2px;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -1261,18 +1263,18 @@ html.petri-desktop .theme-doc-sidebar-container .menu__link {
   display: flex;
   flex-direction: column;
   gap: var(--petri-space-1);
-  font-size: var(--petri-font-size-sm);
+  font-size: inherit; /* BLOCK-178 存量棘轮清偿：正文性小字归位 14px */
   color: var(--petri-text-muted);
 }
 
 .petri-generation-defaults__field input {
   width: 120px;
   padding: var(--petri-space-1) var(--petri-space-2);
-  border: 1px solid var(--petri-border);
+  border: 1px solid var(--petri-border-input); /* BLOCK-178 棘轮清偿：语义化 */
   border-radius: var(--petri-radius-md);
   background: var(--petri-bg);
   color: var(--petri-text);
-  font-size: var(--petri-font-size-sm);
+  font-size: inherit; /* BLOCK-178 存量棘轮清偿：正文性小字归位 14px */
 }
 
 .petri-generation-defaults__save {
@@ -1281,7 +1283,7 @@ html.petri-desktop .theme-doc-sidebar-container .menu__link {
   border-radius: var(--petri-radius-pill);
   background: var(--petri-text);
   color: var(--petri-on-solid);
-  font-size: var(--petri-font-size-sm);
+  font-size: inherit; /* BLOCK-178 存量棘轮清偿：正文性小字归位 14px */
   cursor: pointer;
 }
 
@@ -1291,6 +1293,6 @@ html.petri-desktop .theme-doc-sidebar-container .menu__link {
 }
 
 .petri-generation-defaults__notice {
-  font-size: var(--petri-font-size-sm);
+  font-size: inherit; /* BLOCK-178 存量棘轮清偿：正文性小字归位 14px */
   color: var(--petri-text-muted);
 }

@@ -5,6 +5,9 @@ import styles from './ExperimentalFeaturesSection.module.css';
 
 export const EXPERIMENTAL_FEATURES_LABEL = 'Experimental Features';
 export const EXTRA_RENDERERS_LABEL = 'Agent 工作台：ResultCard 渲染';
+/** BLOCK-178 P2 — 失焦任务完成桌面通知开关（localStorage；默认开；仅本组件消费不导出）。 */
+const NOTIFY_ON_DONE_STORAGE_KEY = 'petri:notify-on-done';
+const NOTIFY_ON_DONE_LABEL = '任务完成桌面通知';
 
 type AgentWorkbenchFlagBridge = NonNullable<Window['petriAgentFlags']>['agentWorkbenchFlags'];
 
@@ -30,6 +33,9 @@ function notifyStorage(flag: boolean): void {
 export function ExperimentalFeaturesSection({ bridge }: Props): React.ReactElement {
   const [enabled, setEnabled] = useState<boolean>(() => resolveInitialFlag());
   const [saving, setSaving] = useState(false);
+  const [notifyOnDone, setNotifyOnDone] = useState<boolean>(() => {
+    try { return window.localStorage.getItem(NOTIFY_ON_DONE_STORAGE_KEY) !== '0'; } catch { return true; }
+  });
 
   const handleToggle = async (next: boolean) => {
     if (saving) return;
@@ -58,6 +64,28 @@ export function ExperimentalFeaturesSection({ bridge }: Props): React.ReactEleme
       <div className={styles.heading}>
         <h3 id="petri-experimental-features-heading">{EXPERIMENTAL_FEATURES_LABEL}</h3>
         <p>控制当前版本仍处于实验阶段的工作台能力。</p>
+      </div>
+      <div className={styles.featureRow} data-testid="experimental-feature-notify-on-done">
+        <label className={styles.featureLabel} htmlFor="petri-notify-on-done-toggle">
+          <span>{NOTIFY_ON_DONE_LABEL}</span>
+          <small>窗口失焦时，任务完成弹系统通知（点击通知回到窗口）。</small>
+        </label>
+        <div className={styles.toggleControl}>
+          <input
+            id="petri-notify-on-done-toggle"
+            className={styles.toggle}
+            type="checkbox"
+            role="switch"
+            aria-label={NOTIFY_ON_DONE_LABEL}
+            checked={notifyOnDone}
+            onChange={(event) => {
+              const next = event.target.checked;
+              setNotifyOnDone(next);
+              try { window.localStorage.setItem(NOTIFY_ON_DONE_STORAGE_KEY, next ? '1' : '0'); } catch { /* 忽略 */ }
+            }}
+          />
+          <span className={styles.description}>{notifyOnDone ? '已开启' : '已关闭'}</span>
+        </div>
       </div>
       <div className={styles.featureRow} data-testid="experimental-feature-extra-renderers">
         <label className={styles.featureLabel} htmlFor="petri-extra-renderers-toggle">

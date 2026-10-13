@@ -170,6 +170,8 @@ describe('theme token contract', () => {
       '--petri-z-dropdown', '--petri-z-overlay', '--petri-z-modal', '--petri-z-lightbox',
       '--petri-z-toast', '--petri-font-sans', '--petri-font-mono', '--petri-mono',
       '--petri-shadow-sm',
+      // BLOCK-178 — 功能性尺寸 token（焦点环宽度，非颜色；主题无关）
+      '--petri-ring-width',
       // 派生层（color-mix(var(--petri-*)) 自动适配主题）非缺失
       '--petri-accent-weak',
       // BLOCK-167 W0 — 宪章派生 token：border 三语义引用主题变量按元素解析；
@@ -348,6 +350,7 @@ describe('theme token contract', () => {
       'components/ui/controls/status.module.css': 3, // W4 三件套元信息（ErrorNotice/LoadingLabel）合法 sm 域
       'pages/project-workspace.module.css': 52,
       'components/copilot/simple-chat.css': 24,
+      'components/workspace-panels/OrchestrationGraph.module.css': 1, // BLOCK-178 定性：节点状态徽标 pill（合法徽标域）
       'components/desktop/desktop.css': 16,
       'components/result-studio/ScientificInteractionViewer.module.css': 15,
       'components/result-studio/ResultStudioChangeSetPanel.module.css': 13,
@@ -392,6 +395,10 @@ describe('theme token contract', () => {
     // （装饰性新增即红）；W2 后继续收缩并下调快照。
     const RATCHET: Record<string, number> = {
       'components/ui/controls/button.module.css': 1, // W2 共享 .primary 主按钮（五类合法语义）
+      // BLOCK-178 存量清偿定性：W3/W5 两件的交互态焦点环/拖拽把手态（宪章五类合法；
+      // LineageViewSwitch 既有条目 2 已覆盖其选中态计数，不重复登记）
+      'components/workspace-panels/ArtifactPinPane.module.css': 2, // 拖拽把手态+键盘可达 focus ring
+      'components/workspace-panels/OrchestrationGraph.module.css': 1, // 节点选中态
       'pages/project-workspace.module.css': 93,
       'components/copilot/simple-chat.css': 31,
       'components/desktop/desktop.css': 24,

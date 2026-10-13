@@ -19,6 +19,7 @@
 | 状态 | 日期 | 事项 | 处置边界 |
 | ✅ | 2026-10-12 | BLOCK-176 W6 整包 completed（十三门 PASS；w6-live 8/8 分档）：CP-16 镜像（契约抓真修 require 误路径死缺陷）/CP-17 checkpoint 安全网（shared-backend 同源+IPC+ReviewMode 入口）/CP-18 成本熔断（loop 执行面+用量节设置面）/CP-19 deferred。plan §4 波报；UI-505 随批。 | zcode |
 | --- | --- | --- | --- |
+| ✅ | 2026-10-13 | BLOCK-178 对话投递一等化 completed（live 14/14 真实 steer 链）：Send/Stop 并存+投递模式显式化+编辑重发+队列一等化+持久化+桌面通知；契约抓真 updater 回读缺陷。UI-508。 | zcode |
 | ✅ | 2026-10-13 | BLOCK-177 技能治理面 completed（live 11/11）：内置停用/启用（agent/执行双面过滤+管理面置灰）+已导入卸载/sourceDir 留存重装+审计 jsonl；UI-507。 | zcode |
 | ✅ | 2026-10-12 | BLOCK-176 W7 整包 completed（十三门 PASS；w7-live 9/9 含 defuddle 探测→隔离安装→可用全链）：CP-20 双格式注册+依赖字段/skills:check 14 全绿；CP-21 preflight 三态+Skills 页徽章+安装审批链对齐；CP-22 Obsidian 九技能迁移。plan §7 波报；UI-506。 | zcode |
 | 🟡→🟢自愈形态 | 2026-10-12 | **BLOCK-166 knownGap：Gen UI 沙箱 OOPIF frame 自身导航劫持（DoS 向量）→BLOCK-168 已加固**——fragment 内 location.href 赋值可把沙箱 iframe 劫为外域错误页（卡片死亡）；**安全边界未破**=外域内容加载被 guest CSP 拒（ERR_BLOCKED_BY_CSP 主进程实证）、widgetState 持久化无数据丢失；封堵三路实测不可达=will-navigate/will-frame-navigate（OOPIF 不派发）+webRequest（OOPIF 请求不过主进程 session 栈）+beforeunload（sandboxed-modals 抑制对话框=无效） | **用户裁决 2026-10-12：排期修**（「BLOCK-166 knownGap 裁决 可以排期修」）——落点=Electron 升级时优先复测 will-navigate/will-frame-navigate 派发矩阵，候选修复=事件复测+beforeunload 组合；登记 roadmap 排队候选（BLOCK-166 加映：OOPIF 导航劫持修复，planned） |

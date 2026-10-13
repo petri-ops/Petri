@@ -27,6 +27,8 @@ const BASELINE = new Set([
   'core/petri-server/agent-tools/skill-tools.js',
   'core/petri-server/routes/projection-data.js',
   'scripts/block176-w7-live.mjs',
+  // BLOCK-178 — 探针 win32 npm.cmd spawn 差异（Node spawnSync 对 .cmd 需 shell，同 W7 登记理由）
+  'scripts/block178-live.mjs',
   'core/petri-server/agent-tools/system-info-tools.js',
   'core/petri-server/agent-tools/workspace-tools.js',
   'core/petri-server/agent-tools/workspace-tools/internals.js',

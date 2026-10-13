@@ -139,6 +139,7 @@ import {
   useSubAgentTasksForConversation,
   resumeOrphanAgentTasks,
   getConversationRunSnapshot,
+  clearConversationRun,
 } from './conversationRunStore';
 import { useErrorFormatter } from './useErrorFormatter';
 import { useDurableConversationLoop } from '@/hooks/useDurableConversationLoop';
@@ -161,7 +162,7 @@ import {
 // The hook owns send/stop/regenerate/queue/runInBackground plus the
 // `starting` state, messagesRef/sendRef indirection, the copilotAsk
 // event subscription, and the queue drain effect.
-import { useChatStream, type QueuedPrompt } from './SimpleChat/hooks/useChatStream';
+import { useChatStream, enqueueQueuedPrompt, QUEUE_CAP, type QueuedPrompt } from './SimpleChat/hooks/useChatStream';
 // BLOCK-52 P1（选中即引用）: 引用块纯函数助手（状态管理 + 发送渲染）。
 import {
   appendSelectionReference,
@@ -227,8 +228,38 @@ export function SimpleChat({
   const [messages, setMessages] = useState<SimpleMessage[]>([]);
   const [copiedMessageKey, setCopiedMessageKey] = useState<string | null>(null);
   const [input, setInput] = useState('');
-  // BLOCK-102 P2 — 队列条目带会话归属（修复排队追问跨会话注入竞态）
-  const [queuedPrompts, setQueuedPrompts] = useState<QueuedPrompt[]>([]);
+  // BLOCK-102 P2 — 队列条目带会话归属（修复排队追问跨会话注入竞态）。
+  // BLOCK-178 P2 — 懒初始化从 localStorage 水合（刷新不丢；避免 mount effect 同步 setState）。
+  const [queuedPrompts, setQueuedPrompts] = useState<QueuedPrompt[]>(() => {
+    try {
+      const raw = localStorage.getItem('petri:chat-queue:v1');
+      return raw ? (JSON.parse(raw) as QueuedPrompt[]) : [];
+    } catch { return []; }
+  });
+  // BLOCK-178 — 投递模式（转向=steer 立即注入下一轮；排队=收尾后自动发）+ 暂停排水 + 溢出提示
+  const [deliveryMode, setDeliveryMode] = useState<'steer' | 'queue'>(() => {
+    try { return localStorage.getItem('petri:delivery-mode') === 'queue' ? 'queue' : 'steer'; } catch { return 'steer'; }
+  });
+  const [autoDrain, setAutoDrain] = useState(true);
+  const [queueOverflow, setQueueOverflow] = useState(false);
+  const queueOverflowTimerRef = useRef<number | null>(null);
+  const showQueueOverflow = useCallback(() => {
+    setQueueOverflow(true);
+    if (queueOverflowTimerRef.current) window.clearTimeout(queueOverflowTimerRef.current);
+    queueOverflowTimerRef.current = window.setTimeout(() => setQueueOverflow(false), 4000);
+  }, []);
+  const toggleDeliveryMode = useCallback((next: 'steer' | 'queue') => {
+    setDeliveryMode(next);
+    try { localStorage.setItem('petri:delivery-mode', next); } catch { /* 存储不可用=会话内有效 */ }
+  }, []);
+  const effectiveDelivery = useCallback((reverse?: boolean): 'steer' | 'queue' => {
+    if (!reverse) return deliveryMode;
+    return deliveryMode === 'steer' ? 'queue' : 'steer';
+  }, [deliveryMode]);
+  // BLOCK-178 P2 — 队列随会话持久化（写面；归属标记 BLOCK-102 语义不变）
+  useEffect(() => {
+    try { localStorage.setItem('petri:chat-queue:v1', JSON.stringify(queuedPrompts)); } catch { /* 忽略 */ }
+  }, [queuedPrompts]);
   const [attachments, setAttachments] = useState<AttachmentFile[]>([]);
   // BLOCK-91 — 附件发送失败/守卫提示（诚实可见，不再静默丢弃）。
   const [attachmentNotice, setAttachmentNotice] = useState<string | null>(null);
@@ -798,6 +829,11 @@ export function SimpleChat({
     streaming,
     // BLOCK-171 CP-1 — Stop 复出（hook 内已接后端级联取消）
     stop,
+    // BLOCK-178 — 队列一等化操作面
+    removeQueuedById,
+    withdrawQueued,
+    moveQueued,
+    sendNowQueued,
   } = useChatStream({
     projectId,
     conversationId,
@@ -813,6 +849,7 @@ export function SimpleChat({
     input,
     messages,
     queuedPrompts,
+    autoDrain,
     displayMessages,
     activeRun,
     activeModel,
@@ -833,6 +870,24 @@ export function SimpleChat({
       }
     },
   });
+
+  // BLOCK-178 P2 — 失焦任务完成桌面通知（实验特性开关 petri:notify-on-done，默认开）。
+  // 仅 streaming true→false 边沿 + 窗口失焦时触发；通知点击回窗。
+  const prevStreamingRef = useRef(false);
+  useEffect(() => {
+    const was = prevStreamingRef.current;
+    prevStreamingRef.current = streaming;
+    if (!was || streaming) return;
+    try {
+      if (typeof document !== 'undefined' && !document.hidden) return;
+      if (typeof window === 'undefined' || typeof Notification === 'undefined') return;
+      if (window.localStorage.getItem('petri:notify-on-done') === '0') return;
+      const notification = new Notification('Petri · 任务完成', { body: '当前任务已收尾——点击回到窗口查看结果' });
+      notification.onclick = () => {
+        try { window.focus(); notification.close(); } catch { /* 聚焦失败忽略 */ }
+      };
+    } catch { /* 通知面失败不阻塞主流程 */ }
+  }, [streaming]);
 
   // BLOCK-171 CP-4 — steer 状态持续可见：state 移到 hook 后声明（effect 依赖
   // 可读 streaming）。流式期间不自动消退；run 结束 4s 后消退。
@@ -885,12 +940,44 @@ export function SimpleChat({
   }, [conversationId, pendingGuardAck]);
 
   // BLOCK-171 CP-4 — 排队追问可见可撤（当前会话的 queued 条目，带位次）。
-  const visibleQueuedPrompts = queuedPrompts
-    .map((q, index) => ({ ...q, index }))
-    .filter((q) => q.conversationId === conversationId);
-  const removeQueuedPrompt = useCallback((index: number) => {
-    setQueuedPrompts((current) => current.filter((_, i) => i !== index));
-  }, [setQueuedPrompts]);
+  // BLOCK-178 P1 — 管理操作锚点改稳定 id；撤回=回填输入框编辑重发。
+  const visibleQueuedPrompts = queuedPrompts.filter((q) => q.conversationId === conversationId);
+  const handleWithdrawQueued = useCallback((id: string) => {
+    const result = withdrawQueued(id);
+    if (result.ok && result.text) {
+      setInput(result.text);
+      if (taRef.current) {
+        taRef.current.focus();
+        const len = result.text.length;
+        taRef.current.setSelectionRange(len, len);
+      }
+    }
+  }, [withdrawQueued]);
+  const handleSendNowQueued = useCallback((id: string) => {
+    sendNowQueued(id);
+  }, [sendNowQueued]);
+  const handleMoveQueued = useCallback((id: string, dir: -1 | 1) => {
+    moveQueued(id, dir);
+  }, [moveQueued]);
+
+  // BLOCK-178 P0 — 用户消息「编辑」：回退到该消息之前 + 文本回填输入框（重发即新轮）。
+  // 仅历史消息可编辑（run 投影件 indexOf 不到，行组件不渲染编辑钮——诚实边界）。
+  const handleEditUserMessage = useCallback((m: SimpleMessage) => {
+    if (streaming) return;
+    const idx = messages.indexOf(m);
+    if (idx < 0) return;
+    const truncated = messages.slice(0, idx);
+    setMessages(truncated);
+    if (conversationId) clearConversationRun(conversationId);
+    const content = m.content ?? '';
+    setInput(content);
+    try { saveConversationDraft(projectId, conversationId, content); } catch { /* 草稿面失败不阻塞 */ }
+    if (taRef.current) {
+      taRef.current.focus();
+      const len = content.length;
+      taRef.current.setSelectionRange(len, len);
+    }
+  }, [conversationId, messages, projectId, setInput, streaming]);
 
   // BLOCK-171 CP-1 — 运行簇取消：POST tool-cancel（后端注册表精确 abort + tool_cancel
   // 事件留痕）。标识稳定（taskId 经 snapshot 读，不入依赖）→ 不破坏行级 memo。
@@ -947,6 +1034,24 @@ export function SimpleChat({
   // BLOCK-52 P1（选中即引用）：带引用块的发送包装——发送前把引用块渲染进
   // 消息正文，接受成功后清空引用块；被守卫拦截（空文本 / 运行中）时保留待重试。
   // BLOCK-52 P2：图片引用卡同管道——artifact 元数据合成进正文，成功后一并清空。
+  // BLOCK-178 P2 — prompt 历史跨会话持久化（按项目隔离；去重连续项，上限 50）。
+  const appendPromptHistory = useCallback((text: string) => {
+    try {
+      const key = `petri:prompt-history:v1:${projectId || 'global'}`;
+      const raw = localStorage.getItem(key);
+      const list: string[] = raw ? (JSON.parse(raw) as string[]) : [];
+      if (list[list.length - 1] !== text) list.push(text);
+      localStorage.setItem(key, JSON.stringify(list.slice(-50)));
+    } catch { /* 存储不可用=会话内历史兜底 */ }
+  }, [projectId]);
+  const loadPromptHistory = useCallback((): string[] => {
+    try {
+      const key = `petri:prompt-history:v1:${projectId || 'global'}`;
+      const raw = localStorage.getItem(key);
+      return raw ? (JSON.parse(raw) as string[]).slice().reverse() : [];
+    } catch { return []; }
+  }, [projectId]);
+
   const sendWithRefs = useCallback(async (text: string): Promise<boolean> => {
     // BLOCK-91 — 附件真实接入：发送前上传到工作区 .chat-attachments/，
     // 消息追加引用行（模型按路径读取，与 imageRefs 同构）。无项目（欢迎页）
@@ -977,6 +1082,7 @@ export function SimpleChat({
     setShowJumpToBottom(false);
     const ok = await send(composed);
     if (ok) {
+      appendPromptHistory(composed);
       setSelectionRefs([]);
       setImageRefs([]);
       if (attachments.length > 0) {
@@ -988,7 +1094,7 @@ export function SimpleChat({
       }
     }
     return ok;
-  }, [send, attachments, projectId]);
+  }, [send, attachments, projectId, appendPromptHistory]);
 
   // BLOCK-166 P2 — Gen UI follow-up 追问（规格 §8）：判定走 followUp.ts 纯函数
   // （只读/过期/非当前会话明确拒绝），确认框标题=卡片给定的 title（≤250）；
@@ -1006,7 +1112,9 @@ export function SimpleChat({
     if (!confirmed) return Promise.resolve({ ok: false, reason: '已取消' });
     if (streaming) {
       const queuedWithRefs = composeMessageWithSelectionReferences(prompt, selectionRefsRef.current);
-      setQueuedPrompts((current) => [...current, { conversationId: conversationId ?? '', text: queuedWithRefs }].slice(-5));
+      const enqueued = enqueueQueuedPrompt(queuedPrompts, queuedWithRefs, conversationId ?? '');
+      if (!enqueued.ok) { showQueueOverflow(); return Promise.resolve({ ok: false, reason: '队列已满（上限 20）' }); }
+      setQueuedPrompts(enqueued.next);
       setInput('');
       historyNavRef.current = INITIAL_NAV_STATE;
       clearConversationDraft(projectId, conversationId);
@@ -1069,11 +1177,14 @@ export function SimpleChat({
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       const direction = e.key === 'ArrowUp' ? 'up' : 'down';
       // 历史源：本会话已发送的用户消息，最新在前（反序）。
-      const history = messages
+      // BLOCK-178 P2 — 并入跨会话持久历史（会话内消息优先，去重补位）。
+      const inConversation = messages
         .filter((m) => m.role === 'user')
         .map((m) => m.content ?? '')
         .filter((c) => c.trim() !== '')
         .reverse();
+      const seen = new Set(inConversation);
+      const history = [...inConversation, ...loadPromptHistory().filter((h) => !seen.has(h))];
       const { state, value } = stepHistoryNavigation(
         history,
         historyNavRef.current,
@@ -1091,21 +1202,58 @@ export function SimpleChat({
       e.preventDefault();
       const trimmed = input.trim();
       if (!trimmed) return;
-      if (streaming) {
-        // BLOCK-52 P1：排队消息同样携带当前引用块，入列后清空。
-        const queuedWithRefs = composeMessageWithSelectionReferences(trimmed, selectionRefsRef.current);
-        // BLOCK-102 P2 — 归属标记与 queue() 同款
-        setQueuedPrompts((current) => [...current, { conversationId, text: queuedWithRefs }].slice(-5));
+      // BLOCK-178 P0 — Alt+Enter 单次反向投递（转向↔排队）；默认按投递模式路由。
+      void submitComposer(trimmed, { reverse: e.altKey });
+    }
+  };
+
+  // BLOCK-178 P0 — 统一提交路由：空闲直发；运行中按投递模式（转向=send() 走
+  // task/:id/steer 立即注入下一轮边界；排队=BLOCK-52 本地队列收尾后自动发）。
+  // steer 被拒（非运行/网络）时回退排队并诚实提示；入队即不可撤语义不变。
+  const submitComposer = useCallback(async (rawText: string, opts?: { reverse?: boolean }) => {
+    const trimmed = rawText.trim();
+    if (!trimmed) return;
+    const mode = effectiveDelivery(opts?.reverse);
+    if (!streaming) {
+      await sendWithRefs(trimmed);
+      return;
+    }
+    const composed = composeMessageWithSelectionReferences(trimmed, selectionRefsRef.current);
+    if (mode === 'queue') {
+      const enqueued = enqueueQueuedPrompt(queuedPrompts, composed, conversationId);
+      if (!enqueued.ok) { showQueueOverflow(); return; }
+      setQueuedPrompts(enqueued.next);
+      setInput('');
+      historyNavRef.current = INITIAL_NAV_STATE;
+      clearConversationDraft(projectId, conversationId);
+      if (taRef.current) taRef.current.style.height = 'auto';
+      setSelectionRefs([]);
+      return;
+    }
+    // steer：send() 流式期自动改走 task/:id/steer（CK-01）；ok=true 由本处清输入
+    const accepted = await send(composed);
+    if (accepted) {
+      setInput('');
+      historyNavRef.current = INITIAL_NAV_STATE;
+      clearConversationDraft(projectId, conversationId);
+      if (taRef.current) taRef.current.style.height = 'auto';
+      setSelectionRefs([]);
+    } else {
+      // 转向失败（无运行 taskId/网络）→ 回退排队（诚实：溢出则保留输入）
+      const enqueued = enqueueQueuedPrompt(queuedPrompts, composed, conversationId);
+      if (enqueued.ok) {
+        setQueuedPrompts(enqueued.next);
         setInput('');
+        setSteerNotice('转向未受理，已转入排队（收尾后自动发送）');
         historyNavRef.current = INITIAL_NAV_STATE;
         clearConversationDraft(projectId, conversationId);
         if (taRef.current) taRef.current.style.height = 'auto';
         setSelectionRefs([]);
       } else {
-        void sendWithRefs(trimmed);
+        setQueueOverflow(true);
       }
     }
-  };
+  }, [conversationId, effectiveDelivery, projectId, queuedPrompts, send, sendWithRefs, showQueueOverflow, streaming]);
 
   // BLOCK-28.8 — 排队/停止按钮曾按用户裁决移除；BLOCK-171 CP-1/CP-4 经用户
   // 整波授权恢复（Stop 键随 streaming 条件渲染、排队 chips 可见可撤），
@@ -1296,6 +1444,7 @@ export function SimpleChat({
                 onFileReferenceClick={handleFileReferenceClick}
                 onCopyMessage={copyMessage}
                 onRegenerate={regenerate}
+                onEditUserMessage={m.role === 'user' && !m.pending && i < messages.length && !streaming ? handleEditUserMessage : undefined}
                 onForkAt={handleForkAt}
                 onRetrySummary={retrySummary}
                 onGenUiFollowUp={handleGenUiFollowUp}
@@ -1436,21 +1585,52 @@ export function SimpleChat({
             {visibleQueuedPrompts.length > 0 && (
               <div className="sc-queue-chips" role="list" aria-label="排队中的追问">
                 {visibleQueuedPrompts.map((q, i) => (
-                  <span key={`${q.index}:${i}`} className="sc-queue-chip" role="listitem">
+                  <span key={q.id} className="sc-queue-chip" role="listitem">
                     <span className="sc-queue-chip-pos">#{i + 1}</span>
                     <span className="sc-queue-chip-text">{q.text.length > 40 ? q.text.slice(0, 40) + '…' : q.text}</span>
+                    {/* BLOCK-178 P1 — 队列一等化：撤回编辑/立即发送/上移/下移/移除 */}
+                    <button type="button" className="sc-queue-chip-remove" aria-label="撤回该排队消息到输入框" title="撤回编辑（回填输入框）" data-testid="queue-chip-withdraw" onClick={() => handleWithdrawQueued(q.id)}>✎</button>
+                    <button type="button" className="sc-queue-chip-remove" aria-label="立即发送该条" title="立即发送：停止当前轮并优先消费该条" data-testid="queue-chip-send-now" onClick={() => handleSendNowQueued(q.id)}>▶</button>
+                    <button type="button" className="sc-queue-chip-remove" aria-label="上移" title="上移一位" data-testid="queue-chip-up" onClick={() => handleMoveQueued(q.id, -1)}>↑</button>
+                    <button type="button" className="sc-queue-chip-remove" aria-label="下移" title="下移一位" data-testid="queue-chip-down" onClick={() => handleMoveQueued(q.id, 1)}>↓</button>
                     <button
                       type="button"
                       className="sc-queue-chip-remove"
-                      aria-label="撤销该排队消息"
-                      title="撤销该排队消息"
+                      aria-label="移除该排队消息"
+                      title="移除该排队消息"
                       data-testid="queue-chip-remove"
-                      onClick={() => removeQueuedPrompt(q.index)}
+                      onClick={() => removeQueuedById(q.id)}
                     >
                       ×
                     </button>
                   </span>
                 ))}
+              </div>
+            )}
+            {/* BLOCK-178 — 队列状态行：溢出提示 / 暂停排水恢复 */}
+            {queueOverflow && (
+              <div className="sc-queue-chips" role="status" data-testid="queue-overflow">
+                <span className="sc-queue-chip">队列已满（上限 {QUEUE_CAP} 条）——请先处理既有排队项</span>
+              </div>
+            )}
+            {autoDrain && visibleQueuedPrompts.length > 0 && (
+              <div className="sc-queue-chips" data-testid="queue-pause-row">
+                <button
+                  type="button"
+                  className="sc-queue-chip-remove"
+                  aria-label="暂停自动排水"
+                  title="暂停自动排水：跑完当前轮后不自动发送，排队项保留"
+                  data-testid="queue-pause"
+                  onClick={() => setAutoDrain(false)}
+                >
+                  ‖ 暂停排水
+                </button>
+              </div>
+            )}
+            {!autoDrain && visibleQueuedPrompts.length > 0 && (
+              <div className="sc-queue-chips" role="status" data-testid="queue-paused">
+                <span className="sc-queue-chip">自动排水已暂停：跑完当前轮后不自动发送（{visibleQueuedPrompts.length} 条待发）</span>
+                <button type="button" className="sc-queue-chip-remove" aria-label="恢复自动排水" title="恢复自动排水" data-testid="queue-resume" onClick={() => setAutoDrain(true)}>▶ 恢复</button>
               </div>
             )}
             {/* Attachments preview */}
@@ -1706,6 +1886,38 @@ export function SimpleChat({
                       <Icon name="chevron-down" size={12} />
                     </button>
                   </div>
+                  {/* BLOCK-178 P0 — 投递模式显式切换（运行中提交的路由语义） */}
+                  <div className="sc-model-picker sc-model-picker-footer">
+                    <button
+                      type="button"
+                      className="sc-model-btn sc-thinking-btn"
+                      onClick={() => toggleDeliveryMode(deliveryMode === 'steer' ? 'queue' : 'steer')}
+                      title={deliveryMode === 'steer'
+                        ? '投递模式：转向（运行中发送=立即注入当前任务下一轮）——点击切换为排队'
+                        : '投递模式：排队（运行中发送=收尾后自动发送）——点击切换为转向'}
+                      aria-label={`投递模式：${deliveryMode === 'steer' ? '转向' : '排队'}`}
+                      data-testid="delivery-mode-toggle"
+                      data-mode={deliveryMode}
+                    >
+                      <Icon name={deliveryMode === 'steer' ? 'arrow-right' : 'layers'} size={14} />
+                      {!composerNarrow && <span>{deliveryMode === 'steer' ? '转向' : '排队'}</span>}
+                    </button>
+                  </div>
+                  {autoDrain ? null : (
+                    <div className="sc-model-picker sc-model-picker-footer">
+                      <button
+                        type="button"
+                        className="sc-model-btn sc-thinking-btn"
+                        onClick={() => setAutoDrain(true)}
+                        title="自动排水已暂停——点击恢复（跑完自动发送排队项）"
+                        aria-label="恢复自动排水"
+                        data-testid="autodrain-toggle"
+                      >
+                        <Icon name="clock" size={14} />
+                        {!composerNarrow && <span>已暂停</span>}
+                      </button>
+                    </div>
+                  )}
                   {reasoningSupported && (
                     <div className="sc-model-picker sc-model-picker-footer">
                       <button
@@ -1783,28 +1995,37 @@ export function SimpleChat({
                     </>
                   )}
                 </div>
-                {streaming ? (
-                  /* BLOCK-171 CP-1 — Stop 复出（推翻 BLOCK-28.8；hook 内接后端级联取消） */
-                  <button
-                    type="button"
-                    className="sc-send-cta sc-send-cta-stop"
-                    onClick={stop}
-                    title="停止生成"
-                    aria-label="停止生成"
-                    data-testid="chat-stop"
-                  >
-                    <Icon name="square" size={12} />
-                  </button>
-                ) : (
+                {/* BLOCK-171 CP-1 — Stop 复出（推翻 BLOCK-28.8；hook 内接后端级联取消）。
+                    BLOCK-178 P0 — Stop 与发送并存：运行中发送钮保持可点，
+                    点击按投递模式路由（转向=立即注入下一轮边界；排队=收尾后自动发）。 */}
+                <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                  {streaming && (
+                    <button
+                      type="button"
+                      className="sc-send-cta sc-send-cta-stop"
+                      onClick={stop}
+                      title="停止生成"
+                      aria-label="停止生成"
+                      data-testid="chat-stop"
+                    >
+                      <Icon name="square" size={12} />
+                    </button>
+                  )}
                   <button
                     className="sc-send-cta sc-send-cta-send"
-                    onClick={() => void sendWithRefs(input)}
+                    onClick={(e) => void submitComposer(input, { reverse: e.altKey })}
                     disabled={!input.trim()}
-                    title={activeRun?.status === 'running' ? '发送 · 将转向当前任务' : '发送消息'}
+                    title={streaming
+                      ? (deliveryMode === 'steer'
+                        ? '发送 · 转向当前任务（Alt+点击 改为排队）'
+                        : '发送 · 加入排队（Alt+点击 改为转向）')
+                      : '发送消息'}
+                    aria-label={streaming ? '发送（按投递模式路由）' : '发送消息'}
+                    data-testid="chat-send"
                   >
                     <Icon name="arrow-up" size={12} />
                   </button>
-                )}
+                </div>
               </div>
             </div>
           </div>

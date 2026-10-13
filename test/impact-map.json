@@ -44,7 +44,8 @@
         "core/petri-server/agent-tools/agent-tool-interceptor.js",
         "scripts/block176-w6-live.mjs",
         "scripts/block176-w7-live.mjs",
-        "scripts/block177-live.mjs"
+        "scripts/block177-live.mjs",
+        "scripts/block178-live.mjs"
       ],
       "tests": [
         "test/block166-gen-ui-host.test.mjs",
@@ -3415,6 +3416,21 @@
       ],
       "tests": [
         "test/block177-governance.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "block178-composer-delivery",
+      "note": "BLOCK-178 消息队列与忙碌态投递一等化：useChatStream 队列一等化（稳定 ID/上限/撤回/立即发送/排序/autoDrain 门）+SimpleChat 投递路由（转向/排队/Alt 反向）+Send/Stop 并存+编辑重发+队列持久化+完成通知+prompt 历史持久化。",
+      "patterns": [
+        "frontend/src/components/copilot/SimpleChat/hooks/useChatStream.block178.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.tsx",
+        "frontend/src/components/settings/ExperimentalFeaturesSection.tsx",
+        "scripts/block178-live.mjs",
+        "acceptance/block-178/**"
+      ],
+      "tests": [
+        "frontend/src/components/copilot/SimpleChat/hooks/useChatStream.block178.test.tsx"
       ],
       "classifiesScripts": false
     }

@@ -77,6 +77,8 @@ export interface SimpleChatMessageRowProps {
   onGenUiFollowUp?: (request: GenUiFollowUpRequest) => Promise<GenUiFollowUpResult>;
   onCopyMessage: (messageKey: string, content: string) => void | Promise<void>;
   onRegenerate: () => void | Promise<void>;
+  /** BLOCK-178 P0 — 用户消息编辑重发（仅历史消息由父层给值；run 投影件/流式期=undefined）。 */
+  onEditUserMessage?: (m: SimpleMessage) => void;
   onForkAt: (absoluteIndex: number) => void | Promise<void>;
   onRetrySummary: (toolJobId: string) => void | Promise<void>;
 }
@@ -109,6 +111,7 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
   onGenUiFollowUp,
   onCopyMessage,
   onRegenerate,
+  onEditUserMessage,
   onForkAt,
   onRetrySummary,
 }: SimpleChatMessageRowProps): React.ReactElement {
@@ -223,6 +226,23 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
                   />
                 </button>
               ))}
+            </div>
+          )}
+          {m.role === 'user' && m.content && !m.pending && onEditUserMessage && (
+            <div className="sc-msg-actions">
+              <button
+                type="button"
+                className="sc-msg-action"
+                onClick={() => onEditUserMessage(m)}
+                title="编辑并重发：回退到这条消息之前，文本回填输入框"
+                aria-label="编辑并重发"
+                data-testid="msg-edit-user"
+              >
+                <Icon name="pencil" size={14} />
+                编辑
+              </button>
+              <span className="sc-msg-action-divider" aria-hidden="true" />
+              <MessageTime ts={m.ts} />
             </div>
           )}
           {zoomedImage && createPortal(
