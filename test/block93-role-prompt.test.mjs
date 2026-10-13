@@ -36,6 +36,10 @@ const require = createRequire(import.meta.url);
   }
   boot.close();
   process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
+  // BLOCK-181 教训（用户数据污染事故修复）：本测试 saveAiSettings 会写
+  // credential_updates，SETTINGS_DIR 必须随 DB 一起隔离到临时目录——
+  // 否则 mock 凭据会覆盖用户真实 ai-credentials.json（2026-10-13 事故根因）。
+  process.env.PETRI_LOCAL_DATA_DIR = tempDbDir;
 }
 
 // ── mock OpenAI 兼容上游：捕获请求体 + 回最小 SSE 收敛 ──────────
