@@ -89,8 +89,8 @@
       "path": "frontend/src/hooks/useSkillStore.ts",
       "wave": "B",
       "module": "W-02",
-      "lines": 528,
-      "sha256": "55156f42fc22e44598b9885885c6aa0f7e265f25f154ff5ec6b44a4cc17ebdfb"
+      "lines": 623,
+      "sha256": "5583098b47462a1853dc94f606284e17ba7b0d0d96a8174bd3350a9b3085dffc"
     },
     {
       "path": "frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx",
@@ -170,5 +170,5 @@
       "sha256": "6f08befd152ee1a707051d0131a521a85e2572a883a2c9e912bbd0994fa69e72"
     }
   ],
-  "total": 23122
+  "total": 23217
 }

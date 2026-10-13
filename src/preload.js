@@ -379,6 +379,11 @@ const desktopBridgeSurface = {
     cancel: (executionId) =>
       ipcRenderer.invoke('skills:cancel', String(executionId ?? '')),
     // BLOCK-156 D7 — 第三方技能本地目录导入（对话框一条龙；canceled=用户取消非错误）
+    // BLOCK-177 — 技能治理（停用/卸载/安装信息/重装；动作落 skill-prefs 审计）
+    setDisabled: (skillId, disabled, reason) => ipcRenderer.invoke('skills:set-disabled', { skillId, disabled, reason }),
+    uninstall: (skillId) => ipcRenderer.invoke('skills:uninstall', { skillId }),
+    getInstallInfo: (skillId) => ipcRenderer.invoke('skills:get-install-info', { skillId }),
+    reinstall: (skillId) => ipcRenderer.invoke('skills:reinstall', { skillId }),
     importDirectory: () => ipcRenderer.invoke('skills:import-directory'),
     importPath: (dir) => ipcRenderer.invoke('skills:import-path', String(dir ?? '')),
     // BLOCK-160 W2 P5（DIST-2）— MCP 配置文件导入（对话框/直路径）

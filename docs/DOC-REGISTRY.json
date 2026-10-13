@@ -6274,8 +6274,29 @@
       ],
       "archivePolicy": "retain_stable_path",
       "notes": "Gen UI OOPIF 导航劫持加固：P0 Electron 41→44 升级复测事件矩阵（will-frame-navigate/WebFrameMain/webRequest 三路）→P1 按结论落事件守卫或自愈守护（iframe load 守卫重置恢复）→P2 升级去留（回归全绿留 44，否则回退 41 只落解耦守护）。裁决链=「可以排期修」+「下一个工作包开整」（队列头唯一 planned）。证据=acceptance/block-168/。"
+    },
+    {
+      "id": "BLOCK-177-SKILL-GOVERNANCE",
+      "capability": "skill-governance",
+      "path": "docs/block-177-skill-governance-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P0-P1",
+      "canonical": true,
+      "truthDomain": "block-177-skill-governance-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-13",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "skills",
+        "governance",
+        "disable-enable",
+        "uninstall-reinstall",
+        "audit-trail"
+      ],
+      "notes": "2026-10-13 整包 completed（closeout 门禁 PASS；live 11/11，acceptance/block-177/block177-live.json）：P0 停用/启用（prefs 单源真幂等+SDK/agent 双面过滤+UI 置灰）/P1 卸载与 sourceDir 留存重装（契约抓真修复卸载丢来源记录缺陷；built-in 诚实拒绝）+治理审计 jsonl。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
-  "lastUpdated": "2026-10-12",
-  "documentCount": 319
+  "lastUpdated": "2026-10-13",
+  "documentCount": 329
 }

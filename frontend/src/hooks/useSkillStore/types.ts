@@ -42,6 +42,10 @@ export interface Skill {
   category: string;
   source: SkillSource;
   tags: string[];
+  /** BLOCK-177 — 治理旗标：停用件管理面置灰可见（agent/执行面拒绝）。 */
+  disabled?: boolean;
+  /** BLOCK-177 — 已导入技能的来源目录（installed manifest sourceDir 透出）。 */
+  sourceDir?: string | null;
   capabilities?: string[];
   parameters: {
     required: string[];

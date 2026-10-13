@@ -104,7 +104,7 @@ export default function ExtensionsPage(): React.ReactElement {
 
 /** 技能货架：按 D2 分类学过滤 + 搜索 + 卡片网格 + 执行详情弹层。 */
 function SkillShelfPane({ shelfId }: { shelfId: 'domain-skills' | 'general-skills' }): React.ReactElement {
-  const { skills, loading, error, execute, discover } = useSkillStore({ autoLoad: true });
+  const { skills, loading, error, execute, discover, setSkillDisabled, uninstallSkill, getInstallInfo, reinstallSkill } = useSkillStore({ autoLoad: true });
   const [query, setQuery] = useState('');
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
   const [executingSkillId, setExecutingSkillId] = useState<string | null>(null);
@@ -271,6 +271,13 @@ function SkillShelfPane({ shelfId }: { shelfId: 'domain-skills' | 'general-skill
           onExecute={(skill, params) => void handleExecute(skill, params)}
           canExecute={executingSkillId === null}
           isExecuting={executingSkillId === selectedSkill.id}
+          governance={{
+            setDisabled: setSkillDisabled,
+            uninstall: uninstallSkill,
+            getInstallInfo,
+            reinstall: reinstallSkill,
+            onChanged: () => void discover(),
+          }}
         />
       )}
     </div>

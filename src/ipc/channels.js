@@ -148,6 +148,11 @@ const CHANNELS = {
     getExecution: 'skills:getExecution',
     progress: 'skills:progress',
     // BLOCK-156 D7 — 第三方技能本地目录导入（对话框一条龙/直路径，复刻 pack 先例）
+    // BLOCK-177 — 技能治理（停用/卸载/安装信息/重装；动作落 skill-prefs 审计）
+    setDisabled: 'skills:set-disabled',
+    uninstall: 'skills:uninstall',
+    getInstallInfo: 'skills:get-install-info',
+    reinstall: 'skills:reinstall',
     importDirectory: 'skills:import-directory',
     importPath: 'skills:import-path',
   },

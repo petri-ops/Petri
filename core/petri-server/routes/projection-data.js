@@ -46,7 +46,7 @@ module.exports = function registerProjectionDataRoutes(app) {
     try {
       const { createDefaultSDK } = require('../../shared-backend/skills-sdk.js');
       const sdk = createDefaultSDK();
-      const skills = sdk.listSkills();
+      const skills = sdk.listSkills(); // BLOCK-177 — 行已附 disabled 旗标（管理视图）
       res.json({ ok: true, skills });
     } catch (error) {
       res.status(500).json({ ok: false, error: 'skills_discover_failed', message: error.message });

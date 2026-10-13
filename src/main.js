@@ -247,6 +247,59 @@ function setupSkillsIpc() {
     }
   });
 
+  // BLOCK-177 — 技能治理四通道（停用/卸载/安装信息/重装；动作经 SDK 落 skill-prefs 审计）
+  ipcMain.handle(CHANNELS.skills.setDisabled, async (event, args = {}) => {
+    if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };
+    try {
+      const sdk = _getSkillsSDK({ ..._skillsCtx, getMainWindow: () => mainWindow });
+      if (!sdk) return { ok: false, error: "skills SDK unavailable" };
+      const { skillId, disabled, reason } = args || {};
+      if (!skillId || typeof skillId !== "string") return { ok: false, error: "skill_id_required" };
+      return sdk.setSkillDisabled(skillId, disabled === true, typeof reason === "string" ? reason : undefined);
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle(CHANNELS.skills.uninstall, async (event, args = {}) => {
+    if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };
+    try {
+      const sdk = _getSkillsSDK({ ..._skillsCtx, getMainWindow: () => mainWindow });
+      if (!sdk) return { ok: false, error: "skills SDK unavailable" };
+      const { skillId } = args || {};
+      if (!skillId || typeof skillId !== "string") return { ok: false, error: "skill_id_required" };
+      return sdk.uninstallSkill(skillId);
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle(CHANNELS.skills.getInstallInfo, async (event, args = {}) => {
+    if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };
+    try {
+      const sdk = _getSkillsSDK({ ..._skillsCtx, getMainWindow: () => mainWindow });
+      if (!sdk) return { ok: false, error: "skills SDK unavailable" };
+      const { skillId } = args || {};
+      if (!skillId || typeof skillId !== "string") return { ok: false, error: "skill_id_required" };
+      return sdk.getInstallInfo(skillId);
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle(CHANNELS.skills.reinstall, async (event, args = {}) => {
+    if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };
+    try {
+      const sdk = _getSkillsSDK({ ..._skillsCtx, getMainWindow: () => mainWindow });
+      if (!sdk) return { ok: false, error: "skills SDK unavailable" };
+      const { skillId } = args || {};
+      if (!skillId || typeof skillId !== "string") return { ok: false, error: "skill_id_required" };
+      return sdk.reinstallFromSource(skillId);
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+
   // BLOCK-156 D7 — 第三方技能本地目录导入（复刻 pack installFromDialog 先例：主进程对话框+安装一条龙）
   ipcMain.handle(CHANNELS.skills.importDirectory, async (event) => {
     if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };

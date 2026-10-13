@@ -24,8 +24,13 @@ const {
   loadBuiltInSkills,
   loadInstalledSkills,
   discoverSkills,
+  uninstallImportedSkill,
+  installSkillFromDir,
   SOURCE_PRIORITY,
 } = require('./skill-registry');
+
+// BLOCK-177 — 治理偏好单源（停用/审计；与 registry 同 userData 口径）
+const skillPrefs = require('./skill-prefs.js');
 
 const {
   SkillSchema,
@@ -123,7 +128,8 @@ class SkillsSDK {
       );
     }
 
-    return skills;
+    // BLOCK-177 — 停用旗标（管理面置灰可见；agent/执行面另行过滤/拒绝）
+    return skillPrefs.annotateDisabled(skills);
   }
 
   /**
@@ -133,6 +139,66 @@ class SkillsSDK {
    */
   getSkill(id) {
     return this.registry.get(id);
+  }
+
+  // ── BLOCK-177 治理面（停用/卸载/重装；全部落审计）──────────────────────
+
+  /** 停用/启用技能（幂等；审计留痕）。built-in 与 installed 同语义（停用不删件）。 */
+  setSkillDisabled(skillId, disabled, reason) {
+    const skill = this.registry.get(skillId);
+    if (!skill) return { ok: false, error: 'skill_not_found', message: `未找到技能：${skillId}` };
+    const result = skillPrefs.setSkillDisabled(skillId, disabled, reason);
+    return result;
+  }
+
+  /** 卸载已导入技能（built-in 诚实拒绝；审计留痕）。 */
+  uninstallSkill(skillId) {
+    const skill = this.registry.get(skillId);
+    if (!skill) return { ok: false, error: 'skill_not_found', message: `未找到技能：${skillId}` };
+    if (skill.source === 'built-in') {
+      return { ok: false, error: 'builtin_cannot_uninstall', message: `「${skill.name}」是内置技能，不提供卸载——如不需要可在 Skills 页停用（随时可重新启用）。` };
+    }
+    // 卸载会删 installed manifest 条目——先把来源目录留存进 prefs（重装面依据）
+    const info = this.getInstallInfo(skillId);
+    if (info.ok && info.sourceDir) skillPrefs.recordUninstalledSource(skillId, info.sourceDir);
+    const result = uninstallImportedSkill(skillId);
+    if (result.ok) skillPrefs.appendAudit('uninstall', skillId, { source: skill.source });
+    return result;
+  }
+
+  /** 已导入技能的安装信息（来源目录/导入时间；卸载后「从哪里再次获取」的答案）。 */
+  getInstallInfo(skillId) {
+    const fs = require('fs');
+    const path = require('path');
+    const prefsDir = skillPrefs.getUserDataBaseDir();
+    let sourceDir = null;
+    let importedAt = null;
+    try {
+      const raw = JSON.parse(fs.readFileSync(path.join(prefsDir, 'skills', 'manifest.json'), 'utf8'));
+      const entry = raw.skills && raw.skills[skillId];
+      if (entry) { sourceDir = entry.sourceDir || null; importedAt = entry.importedAt || null; }
+    } catch { /* installed manifest 缺失 = 无来源记录 */ }
+    // BLOCK-177 — 已卸载技能：来源记录从 prefs 留存面回退（卸载后仍可一键重装）
+    let uninstalled = false;
+    if (!sourceDir) {
+      const retained = skillPrefs.getUninstalledSource(skillId);
+      if (retained) { sourceDir = retained; uninstalled = true; }
+    }
+    if (!sourceDir) return { ok: false, error: 'skill_not_installed', message: `无安装/来源记录：${skillId}` };
+    let sourceExists = false;
+    try { sourceExists = fs.existsSync(sourceDir); } catch { sourceExists = false; }
+    return { ok: true, skillId, sourceDir, sourceExists, importedAt, uninstalled };
+  }
+
+  /** 从记录的来源目录重装（同 id 覆盖语义沿用 installSkillFromDir；审计留痕）。 */
+  reinstallFromSource(skillId) {
+    const info = this.getInstallInfo(skillId);
+    if (!info.ok) return info;
+    if (!info.sourceDir) return { ok: false, error: 'source_dir_unknown', message: '导入记录未包含来源目录——请从原始位置重新导入。' };
+    if (!info.sourceExists) return { ok: false, error: 'source_dir_missing', message: `来源目录已不存在：${info.sourceDir}——请从原始位置重新导入。` };
+    const result = installSkillFromDir(info.sourceDir);
+    if (result.ok) skillPrefs.appendAudit('reinstall', skillId, { sourceDir: info.sourceDir });
+    return result;
   }
 
   /**
@@ -234,6 +300,15 @@ class SkillsSDK {
       return {
         success: false,
         error: { code: 'SKILL_NOT_FOUND', message: `Skill not found: ${skillId}` },
+        skillId,
+      };
+    }
+
+    // BLOCK-177 — 停用件拒绝执行（诚实报错；管理面仍可见可重新启用）
+    if (skillPrefs.isSkillDisabled(skillId)) {
+      return {
+        success: false,
+        error: { code: 'SKILL_DISABLED', message: `技能已停用：${skillId}（在 Skills 页重新启用后可执行）` },
         skillId,
       };
     }

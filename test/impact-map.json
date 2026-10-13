@@ -43,7 +43,8 @@
         "acceptance/block-174/**",
         "core/petri-server/agent-tools/agent-tool-interceptor.js",
         "scripts/block176-w6-live.mjs",
-        "scripts/block176-w7-live.mjs"
+        "scripts/block176-w7-live.mjs",
+        "scripts/block177-live.mjs"
       ],
       "tests": [
         "test/block166-gen-ui-host.test.mjs",
@@ -3400,6 +3401,20 @@
       ],
       "tests": [
         "test/block176-w7-contracts.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "block177-skill-governance",
+      "note": "BLOCK-177 技能治理面：skill-prefs 单源（停用/来源留存/审计 jsonl）+SDK 治理方法（停用/卸载/重装）+agent 面过滤（skill-tools）+IPC 四通道+Skills 页分叉操作区/置灰。",
+      "patterns": [
+        "core/shared-backend/skill-prefs.js",
+        "test/block177-governance.test.mjs",
+        "scripts/block177-live.mjs",
+        "acceptance/block-177/**"
+      ],
+      "tests": [
+        "test/block177-governance.test.mjs"
       ],
       "classifiesScripts": false
     }

@@ -282,6 +282,19 @@ declare global {
         cancel: (executionId: string) => Promise<{ ok: boolean; cancelled?: boolean; error?: string }>;
         /** BLOCK-156 D7 — 导入本地技能目录（主进程文件对话框一条龙；canceled=用户取消）。 */
         importDirectory: () => Promise<{ ok: boolean; skillId?: string; canceled?: boolean; error?: string; message?: string; errors?: string[] }>;
+        /** BLOCK-177 — 技能治理（动作落 skill-prefs 审计）。 */
+        setDisabled: (skillId: string, disabled: boolean, reason?: string) => Promise<{ ok: boolean; disabled?: boolean; error?: string; message?: string }>;
+        uninstall: (skillId: string) => Promise<{ ok: boolean; removed?: string; error?: string; message?: string }>;
+        getInstallInfo: (skillId: string) => Promise<{
+          ok: boolean;
+          skillId?: string;
+          sourceDir?: string | null;
+          sourceExists?: boolean;
+          importedAt?: string | null;
+          error?: string;
+          message?: string;
+        }>;
+        reinstall: (skillId: string) => Promise<{ ok: boolean; skillId?: string; version?: string; error?: string; message?: string }>;
         /** BLOCK-156 D7 — 按路径导入（测试/探针通道，与对话框共用安装函数）。 */
         importPath: (dir: string) => Promise<{ ok: boolean; skillId?: string; error?: string; message?: string; errors?: string[] }>;
         /** 订阅 SkillsSDK 进度推送。Callback 收到 main.js 通过 webContents.send('skills:progress') 推送的 payload；返回 unsubscribe 函数。 */

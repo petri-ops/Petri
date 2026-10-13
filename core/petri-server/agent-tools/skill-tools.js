@@ -23,6 +23,19 @@ const DISCOVER_DESC_LIMIT = 160;
 const PROMPT_CHAR_BUDGET = 8000;
 const TRUNCATION_MARKER = '…[truncated]';
 
+// BLOCK-177 — 治理偏好单源（停用过滤：agent 面整体不可见不可执行）
+let _skillPrefs = null;
+function getSkillPrefs() {
+  if (_skillPrefs === null) {
+    try {
+      _skillPrefs = require('../../shared-backend/skill-prefs.js');
+    } catch {
+      _skillPrefs = false;
+    }
+  }
+  return _skillPrefs || null;
+}
+
 let _registry = null;
 
 function getRegistry() {
@@ -84,6 +97,8 @@ async function tool_skill_discover(args = {}) {
   }
   try {
     let skills = registry.discover();
+    const prefs = getSkillPrefs();
+    if (prefs) skills = prefs.filterDisabled(skills); // BLOCK-177 — 停用件 agent 面不可见
     if (args.source) {
       skills = skills.filter((s) => s.source === args.source);
     }
@@ -136,6 +151,11 @@ async function tool_skill_get(args = {}) {
     const skill = registry.get(id);
     if (!skill) {
       return { ok: false, error: 'skill_not_found', message: `未找到技能：${id}（用 skill_discover 查看在册清单）。` };
+    }
+    // BLOCK-177 — 停用件拒绝读手册（诚实指向管理面重新启用）
+    const prefs = getSkillPrefs();
+    if (prefs && prefs.isSkillDisabled(id)) {
+      return { ok: false, error: 'skill_disabled', message: `技能「${skill.name}」已停用（用户可在 Skills 页重新启用后再用）。` };
     }
     const bounded = boundSkillPrompts(skill);
     return {

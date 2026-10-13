@@ -58,8 +58,14 @@ export function SkillCard({
     onExecute(skill);
   }, [skill, onExecute]);
 
+  const isDisabled = skill.disabled === true;
+
   return (
-    <article className={styles.skillCard}>
+    <article
+      className={styles.skillCard}
+      style={isDisabled ? { opacity: 0.55 } : undefined}
+      data-disabled={isDisabled || undefined}
+    >
       <header className={styles.cardHeader}>
         <div className={styles.cardTitleRow}>
           <h3 className={styles.cardTitle}>{skill.name}</h3>
@@ -68,6 +74,9 @@ export function SkillCard({
         <span className={`${styles.sourceBadge} ${styles[SOURCE_COLORS[skill.source] ?? '']}`}>
           {SOURCE_LABELS[skill.source] ?? skill.source}
         </span>
+        {isDisabled && (
+          <span className={styles.sourceBadge} data-testid={`skill-disabled-${skill.id}`}>已停用</span>
+        )}
       </header>
 
       <p className={styles.cardDescription}>{skill.description}</p>
@@ -119,7 +128,8 @@ export function SkillCard({
           type="button"
           className={styles.executeButton}
           onClick={handleExecute}
-          disabled={!canExecute}
+          disabled={!canExecute || isDisabled}
+          title={isDisabled ? '技能已停用——在详情中重新启用' : undefined}
         >
           <Icon name="play" size={14} />
           执行

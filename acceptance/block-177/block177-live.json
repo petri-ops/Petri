@@ -1,0 +1,62 @@
+{
+  "generatedAt": "2026-10-13T01:54:02.554Z",
+  "pass": 11,
+  "fail": 0,
+  "results": [
+    {
+      "id": "A.disable-flag-registry",
+      "ok": true,
+      "detail": "停用后 /api/skills/registry 中 knap.disabled=true（管理面置灰数据源）"
+    },
+    {
+      "id": "A.enable-restore",
+      "ok": true,
+      "detail": "启用后 knap.disabled=false（再次获取=重新启用，零网络）"
+    },
+    {
+      "id": "B.import",
+      "ok": true,
+      "detail": "真实目录导入 ok id=block177-live-skill"
+    },
+    {
+      "id": "B.install-info",
+      "ok": true,
+      "detail": "安装信息：sourceDir=C:\\Users\\Admin\\AppData\\Local\\Temp\\w177-live-skill-QqXExZ exists=true"
+    },
+    {
+      "id": "B.uninstall",
+      "ok": true,
+      "detail": "卸载 ok=true；discover 已不可见=true"
+    },
+    {
+      "id": "B.source-retained",
+      "ok": true,
+      "detail": "卸载后来源留存 prefs：C:\\Users\\Admin\\AppData\\Local\\Temp\\w177-live-skill-QqXExZ"
+    },
+    {
+      "id": "B.reinstall",
+      "ok": true,
+      "detail": "从留存来源重装 ok=true；discover 恢复=true"
+    },
+    {
+      "id": "B.builtin-refuse",
+      "ok": true,
+      "detail": "built-in 卸载=诚实拒绝（builtin_cannot_uninstall）"
+    },
+    {
+      "id": "B.cleanup",
+      "ok": true,
+      "detail": "探针临时件已清场（零残留）"
+    },
+    {
+      "id": "C.audit-trail",
+      "ok": true,
+      "detail": "审计序列尾部含 disable/enable/uninstall/reinstall（jsonl=C:\\Users\\Admin\\.petri\\skills-prefs-audit.jsonl）"
+    },
+    {
+      "id": "D.wiring",
+      "ok": true,
+      "detail": "IPC 四通道双侧+SkillDetail 分叉操作区 testid 在场"
+    }
+  ]
+}

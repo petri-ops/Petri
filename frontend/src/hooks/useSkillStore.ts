@@ -186,6 +186,24 @@ export interface UseSkillStoreResult {
   cancel: (
     executionId: string
   ) => Promise<{ ok: boolean; cancelled?: boolean; error?: string }>;
+  /** BLOCK-177 — 停用/启用技能（幂等；成功后重发现）。 */
+  setSkillDisabled: (
+    skillId: string,
+    disabled: boolean,
+    reason?: string
+  ) => Promise<{ ok: boolean; error?: string; message?: string }>;
+  /** BLOCK-177 — 卸载已导入技能（built-in 拒绝；成功后重发现）。 */
+  uninstallSkill: (skillId: string) => Promise<{ ok: boolean; error?: string; message?: string }>;
+  /** BLOCK-177 — 已导入技能的安装信息（来源目录/导入时间）。 */
+  getInstallInfo: (skillId: string) => Promise<{
+    ok: boolean;
+    sourceDir?: string | null;
+    sourceExists?: boolean;
+    importedAt?: string | null;
+    error?: string;
+  }>;
+  /** BLOCK-177 — 从记录的来源目录重装（成功后重发现）。 */
+  reinstallSkill: (skillId: string) => Promise<{ ok: boolean; error?: string; message?: string }>;
   /** Invalidate cache and force reload on next use. */
   invalidateCache: () => void;
 }
@@ -487,6 +505,79 @@ export function useSkillStore(
     _notify();
   }, []);
 
+  // BLOCK-177 — 治理 actions（停用/卸载/安装信息/重装；成功后失效缓存触发重发现）
+  const setSkillDisabled = useCallback(
+    async (skillId: string, disabled: boolean, reason?: string): Promise<{ ok: boolean; error?: string }> => {
+      const bridge = getBridge('skills');
+      if (!bridge || typeof bridge.setDisabled !== 'function') {
+        return { ok: false, error: 'skills bridge unavailable' };
+      }
+      try {
+        const result = await bridge.setDisabled(skillId, disabled, reason);
+        if (result.ok) invalidateCache();
+        return result;
+      } catch (err) {
+        return { ok: false, error: err instanceof Error ? err.message : String(err) };
+      }
+    },
+    [invalidateCache]
+  );
+
+  const uninstallSkill = useCallback(
+    async (skillId: string): Promise<{ ok: boolean; error?: string }> => {
+      const bridge = getBridge('skills');
+      if (!bridge || typeof bridge.uninstall !== 'function') {
+        return { ok: false, error: 'skills bridge unavailable' };
+      }
+      try {
+        const result = await bridge.uninstall(skillId);
+        if (result.ok) invalidateCache();
+        return result;
+      } catch (err) {
+        return { ok: false, error: err instanceof Error ? err.message : String(err) };
+      }
+    },
+    [invalidateCache]
+  );
+
+  const getInstallInfo = useCallback(
+    async (skillId: string): Promise<{
+      ok: boolean;
+      sourceDir?: string | null;
+      sourceExists?: boolean;
+      importedAt?: string | null;
+      error?: string;
+    }> => {
+      const bridge = getBridge('skills');
+      if (!bridge || typeof bridge.getInstallInfo !== 'function') {
+        return { ok: false, error: 'skills bridge unavailable' };
+      }
+      try {
+        return await bridge.getInstallInfo(skillId);
+      } catch (err) {
+        return { ok: false, error: err instanceof Error ? err.message : String(err) };
+      }
+    },
+    []
+  );
+
+  const reinstallSkill = useCallback(
+    async (skillId: string): Promise<{ ok: boolean; error?: string }> => {
+      const bridge = getBridge('skills');
+      if (!bridge || typeof bridge.reinstall !== 'function') {
+        return { ok: false, error: 'skills bridge unavailable' };
+      }
+      try {
+        const result = await bridge.reinstall(skillId);
+        if (result.ok) invalidateCache();
+        return result;
+      } catch (err) {
+        return { ok: false, error: err instanceof Error ? err.message : String(err) };
+      }
+    },
+    [invalidateCache]
+  );
+
   return {
     skills: snapshot.skills,
     filteredSkills,
@@ -506,6 +597,10 @@ export function useSkillStore(
     execute,
     getExecution,
     cancel,
+    setSkillDisabled,
+    uninstallSkill,
+    getInstallInfo,
+    reinstallSkill,
     invalidateCache,
   };
 }

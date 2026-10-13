@@ -4910,3 +4910,9 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **诚实边界**：探测面不可达=徽章缺省不显示状态（不虚报）；blocked_platform 与缺依赖视觉同位、文案区分。
 - **红绿**：契约 8/8（test/block176-w7-contracts.test.mjs）；tsc 0；skills:check 14 全绿；w7-live 9/9。
 
+## UI-507: 技能治理操作区（2026-10-13 in_progress，BLOCK-177）
+
+- **SkillDetail 分叉**：内置=停用/启用 toggle；已导入=卸载（confirm）+来源目录展示+「从原目录重装」（源目录缺失如实禁用带提示）；停用件执行钮禁用带指引。SkillCard 停用置灰+「已停用」徽章。
+- **数据面**：`skills:set-disabled/uninstall/get-install-info/reinstall` IPC 四通道；卸载前 sourceDir 留存 prefs（卸载不丢「再次获取」依据）；治理动作落本地审计 jsonl。
+- **红绿**：契约 5/5（test/block177-governance.test.mjs，真实仓+临时 userData）；live 11/11（acceptance/block-177/block177-live.json，真实后端旗标翻转+真实卸载重装链）；tsc 0；knip 绿。
+

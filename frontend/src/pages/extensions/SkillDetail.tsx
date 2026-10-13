@@ -4,10 +4,26 @@
  */
 
 import { unknownText } from '@/lib/unknownText';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import type { Skill, ParameterSchema } from '@/hooks/useSkillStore';
 import styles from './styles.module.css';
+
+/** BLOCK-177 — 治理操作回调（父层接 useSkillStore；onChanged = 成功后刷新货架；仅本组件消费）。 */
+interface SkillGovernance {
+  setDisabled: (skillId: string, disabled: boolean, reason?: string) => Promise<{ ok: boolean; error?: string; message?: string }>;
+  uninstall: (skillId: string) => Promise<{ ok: boolean; error?: string; message?: string }>;
+  getInstallInfo: (skillId: string) => Promise<{
+    ok: boolean;
+    sourceDir?: string | null;
+    sourceExists?: boolean;
+    importedAt?: string | null;
+    error?: string;
+    message?: string;
+  }>;
+  reinstall: (skillId: string) => Promise<{ ok: boolean; error?: string; message?: string }>;
+  onChanged: () => void;
+}
 
 interface SkillDetailProps {
   skill: Skill;
@@ -15,6 +31,7 @@ interface SkillDetailProps {
   onExecute: (skill: Skill, params: Record<string, unknown>) => void;
   canExecute?: boolean;
   isExecuting?: boolean;
+  governance?: SkillGovernance;
 }
 
 interface ParamValues {
@@ -111,7 +128,91 @@ export function SkillDetail({
   onExecute,
   canExecute = true,
   isExecuting = false,
+  governance,
 }: SkillDetailProps): React.ReactElement {
+  // BLOCK-177 — 治理操作区状态（停用/卸载/重装 + 来源信息）
+  const [govNotice, setGovNotice] = useState<string | null>(null);
+  const [govBusy, setGovBusy] = useState(false);
+  const [installInfo, setInstallInfo] = useState<{
+    sourceDir?: string | null;
+    sourceExists?: boolean;
+    importedAt?: string | null;
+  } | null>(null);
+
+  const isGovernable = Boolean(governance);
+  const isBuiltin = skill.source === 'built-in';
+
+  // BLOCK-177 — 切技能时重置治理态（React 官方 render 期调整模式；避免 effect 内同步 setState）
+  const [prevGovKey, setPrevGovKey] = useState(skill.id);
+  if (prevGovKey !== skill.id) {
+    setPrevGovKey(skill.id);
+    setGovNotice(null);
+    setInstallInfo(null);
+  }
+
+  useEffect(() => {
+    if (!governance || skill.source !== 'installed') return;
+    let cancelled = false;
+    void governance.getInstallInfo(skill.id).then((info) => {
+      if (!cancelled && info.ok) {
+        setInstallInfo({ sourceDir: info.sourceDir, sourceExists: info.sourceExists, importedAt: info.importedAt });
+      }
+    }).catch(() => { /* 来源信息缺失不阻塞详情 */ });
+    return () => { cancelled = true; };
+  }, [governance, skill.id, skill.source]);
+
+  const handleToggleDisabled = useCallback(async () => {
+    if (!governance) return;
+    setGovBusy(true);
+    setGovNotice(null);
+    try {
+      const result = await governance.setDisabled(skill.id, !skill.disabled);
+      if (result.ok) {
+        setGovNotice(!skill.disabled ? '已停用（agent 不再可见/可执行；随时可重新启用）' : '已启用');
+        governance.onChanged();
+      } else {
+        setGovNotice('操作失败：' + (result.error || 'unknown'));
+      }
+    } finally {
+      setGovBusy(false);
+    }
+  }, [governance, skill.id, skill.disabled]);
+
+  const handleUninstall = useCallback(async () => {
+    if (!governance) return;
+    if (!window.confirm(`卸载技能「${skill.name}」？将删除其安装副本；导入记录中的来源目录可用于重装。`)) return;
+    setGovBusy(true);
+    setGovNotice(null);
+    try {
+      const result = await governance.uninstall(skill.id);
+      if (result.ok) {
+        governance.onChanged();
+        onClose();
+      } else {
+        setGovNotice('卸载失败：' + (result.message || result.error || 'unknown'));
+      }
+    } finally {
+      setGovBusy(false);
+    }
+  }, [governance, skill.id, skill.name, onClose]);
+
+  const handleReinstall = useCallback(async () => {
+    if (!governance) return;
+    setGovBusy(true);
+    setGovNotice(null);
+    try {
+      const result = await governance.reinstall(skill.id);
+      if (result.ok) {
+        setGovNotice('已从来源目录重装');
+        governance.onChanged();
+      } else {
+        setGovNotice('重装失败：' + (result.message || result.error || 'unknown'));
+      }
+    } finally {
+      setGovBusy(false);
+    }
+  }, [governance, skill.id]);
+
   const [paramValues, setParamValues] = useState<ParamValues>(() => {
     const defaults: ParamValues = {};
     const optionalParams = skill.parameters?.optional ?? {};
@@ -278,6 +379,51 @@ export function SkillDetail({
         </div>
 
         <footer className={styles.modalFooter}>
+          {/* BLOCK-177 — 治理操作区（按来源分叉：内置=停用/启用；已导入=卸载/来源/重装） */}
+          {isGovernable && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginRight: 'auto' }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <button
+                  type="button"
+                  className={styles.cancelButton}
+                  disabled={govBusy}
+                  onClick={() => void handleToggleDisabled()}
+                  data-testid="skill-toggle-disabled"
+                >
+                  {skill.disabled ? '启用' : '停用'}
+                </button>
+                {!isBuiltin && (
+                  <button
+                    type="button"
+                    className={styles.cancelButton}
+                    disabled={govBusy}
+                    onClick={() => void handleUninstall()}
+                    data-testid="skill-uninstall"
+                  >
+                    卸载
+                  </button>
+                )}
+                {!isBuiltin && installInfo?.sourceDir && (
+                  <button
+                    type="button"
+                    className={styles.cancelButton}
+                    disabled={govBusy || installInfo.sourceExists === false}
+                    title={installInfo.sourceExists === false ? `来源目录已不存在：${installInfo.sourceDir}` : `从 ${installInfo.sourceDir} 重装`}
+                    onClick={() => void handleReinstall()}
+                    data-testid="skill-reinstall"
+                  >
+                    从原目录重装
+                  </button>
+                )}
+              </div>
+              {!isBuiltin && installInfo?.sourceDir && (
+                <small style={{ color: 'var(--petri-text-tertiary)' }}>
+                  来源：{installInfo.sourceDir}
+                </small>
+              )}
+              {govNotice && <small role="status" data-testid="skill-gov-notice">{govNotice}</small>}
+            </div>
+          )}
           <button
             type="button"
             className={styles.cancelButton}
@@ -289,7 +435,8 @@ export function SkillDetail({
             type="button"
             className={styles.executeButton}
             onClick={handleExecute}
-            disabled={!canExecute || isExecuting}
+            disabled={!canExecute || isExecuting || skill.disabled === true}
+            title={skill.disabled ? '技能已停用——先在左侧重新启用' : undefined}
           >
             {isExecuting ? (
               <>
@@ -299,7 +446,7 @@ export function SkillDetail({
             ) : (
               <>
                 <Icon name="play" size={14} />
-                执行 Skill
+                {skill.disabled ? '已停用' : '执行 Skill'}
               </>
             )}
           </button>
