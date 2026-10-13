@@ -1,4 +1,6 @@
 # Petri Desktop UI 产品化审计台账
+
+最后更新：2026-10-13（**UI-496~509 代行评估批（用户裁决「你能自助搞定吗」→ 代行评估方式，先例 U-02/03/04；真软件 dev 栈+CDP 真界面驱动，证据 acceptance/ui-proxy-review/）**：①翻 **verified（代行评估）**=UI-496（Stop 链 DOM 级：Stop 钮在场→点击→「任务已由用户停止」反馈，截图 ui496-after-cancel.png）/UI-498（GuardAckCard live 在场：requestId+arm 钮+放行一次全链，stage2 5/5）/UI-499（设置→模型接口生成参数卡 data-testid=generation-defaults 在场）/UI-506（通用技能 11 卡三态徽章：依赖可用/依赖待装/缺依赖）/UI-507（治理往返：停用→已停用→启用恢复 live 全链）/UI-509（审批卡一等资源面：requestId 徽标+两步武装确认条 live；notes 写档无危险片段 span 行正确退化隐藏）；②**UI-505 销号**（仓库卫生棘轮条目，非 UI 面，门禁数据即证据）；③**留待用户**=UI-500（0.85 断路需超长对话构造）/UI-501（编排图需 spawn 子任务跑）/UI-502（GenUI 卡+导出需 visualize 任务）/UI-503（选择总线需 artifact 数据）/UI-504 联邦镜像部分（需双机；成本卡部分已 verified）。**代行评估抓真修复两处真缺陷**：①SkillDetail 详情持开卡快照——停用后按钮不翻转、再点重复提交（index.tsx 按 id 从刷新列表派生活引用，已修+live 往返验证）；②SimpleChat 审批卡过滤字段错位——信封 error 实为 dynamic_guard_triggered/user_rule_triggered（reason 才是 dynamic_guard/user_rule_require_ack），live 过滤永不命中=**审批卡自 BLOCK-171 以来真界面从未出现过**（修为 error/reason 双字段兼容，stage2 5/5 复验）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-501 加映二（closeout lint 抓真）**：ArtifactPinPane CP-15 hooks 移到 early return 前（rules-of-hooks 合规）+federation-tools escape 清理。零语义变化。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-504 落地（BLOCK-176 W6 协作与可靠性长尾）**：①CP-16 联邦委托事件流回传=mirrorPeerTaskEvents（对端任务 SSE 订阅替代 5s meta 轮询，关键事件镜像本地 task_events，SSE 不可达→轮询兜底语义不变）；②CP-17 工作树 checkpoint 安全网（workspace-checkpoint.js：plumbing 三步零副作用快照+回滚+清单，非 git 诚实拒绝）；③CP-18 成本硬熔断（costCapCny 设置键+PUT/GET /ai/agent/cost-cap 路由+resolveCostCapCny env 覆盖）；④CP-19 数据桥 WS-first 传输协商契约（回退 HTTP 现状语义）。w4/w5 收口遗留 backend 面（chat.js 视觉解析下沉+数据源清单注入+prompt 注记）同批。UI-504 in_progress 待用户过目。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-12（**UI-503 加映（BLOCK-175 W5 registry 位翻转收口补登）**：viewerRegistry.block142 测试随 CP-14 契约同步更新（markdown canSelect 翻 true）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -4904,19 +4906,19 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **契约**：viewerRegistry 契约测试不触该导出（246 绿不动）；knip 棘轮零新增。
 - **补登（同批 CP 实现面）**：ReviewMode 工具栏「快照/回滚快照」安全网按钮（CP-17，wt-btn 族+确认对话+行内反馈，快照创建后条件出回滚钮）；UsageCostPanel「任务成本熔断（¥）」输入块（CP-18，纯 token 内联边线+testid+读写反馈）。均 dev Electron 边界内 in_progress 待过目。
 
-## UI-506: Skills 页依赖三态徽章（2026-10-12 in_progress，BLOCK-176/W7 CP-21）
+## UI-506: Skills 页依赖三态徽章（2026-10-12 in_progress→**verified（2026-10-13 代行评估：通用技能 11 卡，依赖可用/依赖待装·缺依赖徽章 live 断言，截图 ui506-skills-badges.png）**，BLOCK-176/W7 CP-21）
 
 - **数据面**：`GET /api/skills/preflight`（后端 which/where 只读探测）→ SkillShelfPane 单次拉取 → SkillCard 新增可选 `deps` prop；仅声明 requires.bins 的技能卡显示徽章（可用/待装/缺依赖/平台不适用四态文案），title 悬浮给缺失二进制与安装配方。
 - **诚实边界**：探测面不可达=徽章缺省不显示状态（不虚报）；blocked_platform 与缺依赖视觉同位、文案区分。
 - **红绿**：契约 8/8（test/block176-w7-contracts.test.mjs）；tsc 0；skills:check 14 全绿；w7-live 9/9。
 
-## UI-507: 技能治理操作区（2026-10-13 in_progress，BLOCK-177）
+## UI-507: 技能治理操作区（2026-10-13 in_progress→**verified（2026-10-13 代行评估：停用→已停用→启用恢复 live 往返全链+抓真修复 SkillDetail 开卡快照缺陷，截图 ui507-*.png）**，BLOCK-177）
 
 - **SkillDetail 分叉**：内置=停用/启用 toggle；已导入=卸载（confirm）+来源目录展示+「从原目录重装」（源目录缺失如实禁用带提示）；停用件执行钮禁用带指引。SkillCard 停用置灰+「已停用」徽章。
 - **数据面**：`skills:set-disabled/uninstall/get-install-info/reinstall` IPC 四通道；卸载前 sourceDir 留存 prefs（卸载不丢「再次获取」依据）；治理动作落本地审计 jsonl。
 - **红绿**：契约 5/5（test/block177-governance.test.mjs，真实仓+临时 userData）；live 11/11（acceptance/block-177/block177-live.json，真实后端旗标翻转+真实卸载重装链）；tsc 0；knip 绿。
 
-## UI-509: 审批确认卡一等资源面（2026-10-13 in_progress，BLOCK-180）
+## UI-509: 审批确认卡一等资源面（2026-10-13 in_progress→**verified（2026-10-13 代行评估：requestId 徽标+两步武装确认条 live，抓真修复 SimpleChat 审批卡过滤字段错位〔信封 error=*_triggered 而 live 过滤查的是 semantic 名→真界面从未出现，本条与 UI-498 同根因〕，截图 ui498-509-guard-card.png/ui509-arm-confirm.png，stage2 5/5）**，BLOCK-180）
 
 - **commandSpan 风险片段高亮**：GuardAckCard 按 deny 信封携带的服务端 span（command-risk-spans 单源分析）高亮命令危险片段（destructive-token/sensitive-path/pipe-exec 三色），无 command 退化存量形态；前端零风险规则实现（单一真相在服务端）。
 - **两步武装**：「本任务总是放行」首点出内联确认条（「武装后本任务内该维度不再询问」）二次点击才生效（先武装后使用）；已武装维度徽标在卡面可见。

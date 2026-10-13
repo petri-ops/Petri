@@ -266,7 +266,9 @@ function SkillShelfPane({ shelfId }: { shelfId: 'domain-skills' | 'general-skill
 
       {selectedSkill && (
         <SkillDetail
-          skill={selectedSkill}
+          // BLOCK-181 代行评估抓真——详情持开卡时快照会导致停用后按钮不翻转
+          // （再次点击重复提交同一操作）；按 id 从刷新后列表派生活引用。
+          skill={skills.find((s) => s.id === selectedSkill.id) ?? selectedSkill}
           onClose={() => setSelectedSkill(null)}
           onExecute={(skill, params) => void handleExecute(skill, params)}
           canExecute={executingSkillId === null}

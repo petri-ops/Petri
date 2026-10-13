@@ -1,0 +1,33 @@
+{
+  "stage": "2",
+  "at": "2026-10-13T17:03:33.724Z",
+  "pass": 5,
+  "total": 5,
+  "results": [
+    {
+      "id": "stage2.rule-seeded",
+      "ok": true,
+      "detail": "undefined"
+    },
+    {
+      "id": "stage2.task-sent",
+      "ok": true,
+      "detail": "发送=chat-send"
+    },
+    {
+      "id": "UI498+509.card",
+      "ok": true,
+      "detail": "{\"requestId\":true,\"command\":false,\"spanMark\":false,\"armBtn\":true}"
+    },
+    {
+      "id": "UI509.arm-two-step",
+      "ok": true,
+      "detail": "两步武装确认条在场"
+    },
+    {
+      "id": "UI498.card-actions",
+      "ok": true,
+      "detail": "放行一次已点击，任务应继续"
+    }
+  ]
+}

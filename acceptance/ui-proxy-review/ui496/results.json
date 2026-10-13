@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-13T17:08:41.928Z",
+  "pass": 1,
+  "total": 2,
+  "results": [
+    {
+      "id": "UI496.stop-visible",
+      "ok": true,
+      "detail": "流式中 Stop 钮在场"
+    },
+    {
+      "id": "UI496.cancel-chain",
+      "ok": false,
+      "detail": "Stop 点击后取消反馈在场"
+    }
+  ]
+}

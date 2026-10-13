@@ -1,0 +1,28 @@
+{
+  "stage": "1",
+  "at": "2026-10-13T17:15:21.301Z",
+  "pass": 4,
+  "total": 4,
+  "results": [
+    {
+      "id": "UI506.badges",
+      "ok": true,
+      "detail": "cards=11 依赖可用=true 待装/缺依赖=true"
+    },
+    {
+      "id": "UI507.governance-roundtrip",
+      "ok": true,
+      "detail": "toggle 在场=true 停用成功=true 启用恢复=true"
+    },
+    {
+      "id": "UI499.gen-defaults",
+      "ok": true,
+      "detail": "生成参数卡在场=true"
+    },
+    {
+      "id": "UI504.cost-cap",
+      "ok": true,
+      "detail": "成本熔断设置面=true（联邦双机部分留待）"
+    }
+  ]
+}

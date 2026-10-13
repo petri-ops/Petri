@@ -910,11 +910,16 @@ export function SimpleChat({
       const activity = acts[i] as { status?: string; name?: string; resultData?: unknown };
       if (activity.status !== 'denied' && activity.status !== 'error') continue;
       const data = activity.resultData as {
-        error?: string; guardKey?: string; message?: string;
+        error?: string; reason?: string; guardKey?: string; message?: string;
         requestId?: string; command?: string; spans?: Array<{ start: number; end: number; kind: string }>;
       } | undefined;
       if (!data || !data.guardKey) continue;
-      if (data.error !== 'dynamic_guard' && data.error !== 'user_rule_require_ack') continue;
+      // BLOCK-181 代行评估抓真 — 信封 error 实为 *_triggered（reason 才是
+      // dynamic_guard/user_rule_require_ack）；两字段都接受以兼容历史快照。
+      const isGuardDeny = data.error === 'dynamic_guard' || data.error === 'dynamic_guard_triggered'
+        || data.reason === 'dynamic_guard' || data.error === 'user_rule_require_ack'
+        || data.reason === 'user_rule_require_ack';
+      if (!isGuardDeny) continue;
       if (ackedGuardKeys.includes(data.guardKey)) continue;
       return {
         guardKey: data.guardKey,
