@@ -6316,8 +6316,29 @@
         "notification"
       ],
       "notes": "2026-10-13 整包 completed（live 14/14 真实任务 steer 链，acceptance/block-178/block178-live.json）：P0 Send/Stop 并存+投递模式显式化（转向/排队+Alt 反向）+编辑重发/P1 队列一等化（稳定 ID+上限 20 诚实溢出+撤回编辑+立即发送+排序+暂停排水）/P2 队列持久化+失焦完成桌面通知+prompt 历史持久化。契约抓真 React updater 回读失效缺陷。vitest 27/27。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-179-TOOL-CALL-REPAIR",
+      "capability": "agent-robustness",
+      "path": "docs/block-179-tool-call-repair-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P0-P1",
+      "canonical": true,
+      "truthDomain": "block-179-tool-call-repair-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-13",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "agent-runner",
+        "robustness",
+        "tool-call-repair",
+        "text-promotion",
+        "auditability"
+      ],
+      "notes": "2026-10-13 整包 completed（当日立项当日收口；live 12/12，acceptance/block-179/block179-live.json）：P0 解析器（helpers/tool-call-repair.js 三形态字符串感知平衡扫描+保护区间 fail-closed：任一未知名整轮 keep/参数非对象块弃/上限5/畸形恒 keep）/P1 loop 接线（toolCalls===0 分支提升走 runAgentToolCallBatch 同权审批门+tool_call_repair 透明事件+退化原文诚实保留入历史）。红绿 21/21+集成 2/2+suggest 域 71/71。openclaw 镜像不在盘上按 roadmap 四轴自主设计。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-10-13",
-  "documentCount": 330
+  "documentCount": 331
 }
