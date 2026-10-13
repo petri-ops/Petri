@@ -1581,56 +1581,66 @@ export function SimpleChat({
                 onDismiss={() => setAckedGuardKeys((current) => [...current, pendingGuardAck.guardKey])}
               />
             )}
-            {/* BLOCK-171 CP-4 — 排队追问可见可撤（位次+撤销） */}
-            {visibleQueuedPrompts.length > 0 && (
-              <div className="sc-queue-chips" role="list" aria-label="排队中的追问">
-                {visibleQueuedPrompts.map((q, i) => (
-                  <span key={q.id} className="sc-queue-chip" role="listitem">
-                    <span className="sc-queue-chip-pos">#{i + 1}</span>
-                    <span className="sc-queue-chip-text">{q.text.length > 40 ? q.text.slice(0, 40) + '…' : q.text}</span>
-                    {/* BLOCK-178 P1 — 队列一等化：撤回编辑/立即发送/上移/下移/移除 */}
-                    <button type="button" className="sc-queue-chip-remove" aria-label="撤回该排队消息到输入框" title="撤回编辑（回填输入框）" data-testid="queue-chip-withdraw" onClick={() => handleWithdrawQueued(q.id)}>✎</button>
-                    <button type="button" className="sc-queue-chip-remove" aria-label="立即发送该条" title="立即发送：停止当前轮并优先消费该条" data-testid="queue-chip-send-now" onClick={() => handleSendNowQueued(q.id)}>▶</button>
-                    <button type="button" className="sc-queue-chip-remove" aria-label="上移" title="上移一位" data-testid="queue-chip-up" onClick={() => handleMoveQueued(q.id, -1)}>↑</button>
-                    <button type="button" className="sc-queue-chip-remove" aria-label="下移" title="下移一位" data-testid="queue-chip-down" onClick={() => handleMoveQueued(q.id, 1)}>↓</button>
+            {/* BLOCK-171 CP-4 + BLOCK-178 加映 — 排队面板（ZCode ConversationQueuePanel 形态：
+                竖排全宽行=位次+文本+动作簇；溢出/暂停状态行内联面板顶部；输入框上方） */}
+            {(visibleQueuedPrompts.length > 0 || queueOverflow || !autoDrain) && (
+              <div className="sc-queue-panel" role="list" aria-label="排队中的追问" data-testid="queue-panel">
+                <div className="sc-queue-panel__head">
+                  <span className="sc-queue-panel__title">
+                    排队 {visibleQueuedPrompts.length} 条{!autoDrain ? ' · 自动排水已暂停' : ''}
+                  </span>
+                  {visibleQueuedPrompts.length > 0 && autoDrain && (
                     <button
                       type="button"
-                      className="sc-queue-chip-remove"
-                      aria-label="移除该排队消息"
-                      title="移除该排队消息"
-                      data-testid="queue-chip-remove"
-                      onClick={() => removeQueuedById(q.id)}
+                      className="sc-queue-panel__headbtn"
+                      aria-label="暂停自动排水"
+                      title="暂停自动排水：跑完当前轮后不自动发送，排队项保留"
+                      data-testid="queue-pause"
+                      onClick={() => setAutoDrain(false)}
                     >
-                      ×
+                      ‖ 暂停排水
                     </button>
-                  </span>
+                  )}
+                  {!autoDrain && (
+                    <button
+                      type="button"
+                      className="sc-queue-panel__headbtn"
+                      aria-label="恢复自动排水"
+                      title="恢复自动排水（跑完自动发送排队项）"
+                      data-testid="queue-resume"
+                      onClick={() => setAutoDrain(true)}
+                    >
+                      ▶ 恢复排水
+                    </button>
+                  )}
+                </div>
+                {queueOverflow && (
+                  <div className="sc-queue-panel__notice" role="status" data-testid="queue-overflow">
+                    队列已满（上限 {QUEUE_CAP} 条）——请先处理既有排队项
+                  </div>
+                )}
+                {visibleQueuedPrompts.map((q, i) => (
+                  <div key={q.id} className="sc-queue-row" role="listitem" data-testid={`queue-row-${q.id}`}>
+                    <span className="sc-queue-row__pos">#{i + 1}</span>
+                    <span className="sc-queue-row__text" title={q.text}>{q.text}</span>
+                    <span className="sc-queue-row__actions">
+                      <button type="button" className="sc-queue-row__btn" aria-label="立即发送该条" title="立即发送：停止当前轮并优先消费该条" data-testid="queue-chip-send-now" onClick={() => handleSendNowQueued(q.id)}>▶</button>
+                      <button type="button" className="sc-queue-row__btn" aria-label="撤回该排队消息到输入框" title="撤回编辑（回填输入框）" data-testid="queue-chip-withdraw" onClick={() => handleWithdrawQueued(q.id)}>✎</button>
+                      <button type="button" className="sc-queue-row__btn" aria-label="上移" title="上移一位" data-testid="queue-chip-up" onClick={() => handleMoveQueued(q.id, -1)}>↑</button>
+                      <button type="button" className="sc-queue-row__btn" aria-label="下移" title="下移一位" data-testid="queue-chip-down" onClick={() => handleMoveQueued(q.id, 1)}>↓</button>
+                      <button
+                        type="button"
+                        className="sc-queue-row__btn sc-queue-row__btn--danger"
+                        aria-label="移除该排队消息"
+                        title="移除该排队消息"
+                        data-testid="queue-chip-remove"
+                        onClick={() => removeQueuedById(q.id)}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  </div>
                 ))}
-              </div>
-            )}
-            {/* BLOCK-178 — 队列状态行：溢出提示 / 暂停排水恢复 */}
-            {queueOverflow && (
-              <div className="sc-queue-chips" role="status" data-testid="queue-overflow">
-                <span className="sc-queue-chip">队列已满（上限 {QUEUE_CAP} 条）——请先处理既有排队项</span>
-              </div>
-            )}
-            {autoDrain && visibleQueuedPrompts.length > 0 && (
-              <div className="sc-queue-chips" data-testid="queue-pause-row">
-                <button
-                  type="button"
-                  className="sc-queue-chip-remove"
-                  aria-label="暂停自动排水"
-                  title="暂停自动排水：跑完当前轮后不自动发送，排队项保留"
-                  data-testid="queue-pause"
-                  onClick={() => setAutoDrain(false)}
-                >
-                  ‖ 暂停排水
-                </button>
-              </div>
-            )}
-            {!autoDrain && visibleQueuedPrompts.length > 0 && (
-              <div className="sc-queue-chips" role="status" data-testid="queue-paused">
-                <span className="sc-queue-chip">自动排水已暂停：跑完当前轮后不自动发送（{visibleQueuedPrompts.length} 条待发）</span>
-                <button type="button" className="sc-queue-chip-remove" aria-label="恢复自动排水" title="恢复自动排水" data-testid="queue-resume" onClick={() => setAutoDrain(true)}>▶ 恢复</button>
               </div>
             )}
             {/* Attachments preview */}
