@@ -21,7 +21,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-65-subagent-ux",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-65",
         "subagent",
@@ -46,7 +46,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-64-command-center-ux",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-64",
         "command-center",
@@ -71,7 +71,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-66-runtime-decouple",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-66",
         "runtime",
@@ -99,7 +99,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-67-ssh-remote-project",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-67",
         "ssh",
@@ -121,7 +121,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-68-ui-declutter",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-68",
         "ui-declutter",
@@ -144,7 +144,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-69-knowledge-space",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-69",
         "knowledge-space",
@@ -167,7 +167,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "ui-305-frontend-large-file-refactor",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "ui-305",
         "refactor",
@@ -196,7 +196,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-40-conv-changes-hydration",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-40",
         "agent-task",
@@ -216,7 +216,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-41-git-write-ops-phase3",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-41",
         "git",
@@ -239,7 +239,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-39-agent-stream-reconnect",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-39",
         "agent-task",
@@ -260,7 +260,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-38-agent-task-resume",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-38",
         "agent-task",
@@ -282,7 +282,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-37-llm-io-transcript",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-37",
         "llm-io",
@@ -304,7 +304,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-36-tool-activity-dock",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-36",
         "simple-chat",
@@ -325,7 +325,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "agent-concurrency-design",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path"
     },
     {
@@ -589,7 +589,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "agent-workbench-t-aw-013-packaged-verification",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path",
       "tags": [
         "agent",
@@ -608,7 +608,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "agent-workbench-dev-electron-verification",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path",
       "tags": [
         "agent",
@@ -626,7 +626,7 @@
       "status": "active",
       "canonical": true,
       "truthDomain": "pending-work-queue",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "archivePolicy": "never_archive",
       "registeredAt": "2026-09-24",
       "tags": [
@@ -661,7 +661,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "agent-harness-architecture-refactor",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path",
       "tags": [
         "block-10-architecture",
@@ -834,7 +834,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "agent-harness-audit-closeout",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path",
       "tags": [
         "audit",
@@ -969,7 +969,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-2-ui-157-review",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path",
       "tags": [
         "ui",
@@ -1002,7 +1002,7 @@
         "7e010a4",
         "5c98ca8"
       ],
-      "entrypoint": "docs/README.md"
+      "entrypoint": "docs/doc-index-2026-08.md"
     },
     {
       "id": "BLOCK-3-IPC-BRIDGE-HARDENING",
@@ -1011,7 +1011,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-3-ipc-bridge-hardening",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path",
       "linkedCommits": [
         "786a8d6 docs(ui-157): start BLOCK-3-IPC-BRIDGE-HARDENING work package",
@@ -1038,7 +1038,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-4-ipc-bridge-polish",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path",
       "linkedCommits": [
         "91ea1be docs(ui-157): start BLOCK-4-IPC-BRIDGE-POLISH work package",
@@ -1064,7 +1064,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-5-ipc-bridge-finalize",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path",
       "linkedCommits": [
         "6a42592 docs(ui-157): start BLOCK-5-IPC-BRIDGE-FINALIZE work package",
@@ -1156,7 +1156,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-9-mega-file-refactor",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path",
       "linkedCommits": [
         "d87a0f8",
@@ -1184,7 +1184,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-9-1-main-js-split",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path",
       "linkedCommits": [
         "fa8353a",
@@ -1221,7 +1221,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-9-2-mega-file-refactor",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path",
       "linkedCommits": [
         "1ddd61d",
@@ -1321,7 +1321,7 @@
       "status": "active",
       "canonical": true,
       "truthDomain": "desktop-evaluation",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path"
     },
     {
@@ -1331,7 +1331,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "docs-governance-gates",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path",
       "tags": [
         "docs",
@@ -1359,7 +1359,7 @@
       "status": "reference",
       "canonical": true,
       "truthDomain": "docs-governance-gates-closeout",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path",
       "registeredAt": "2026-08-16",
       "linkedCommits": [
@@ -1415,7 +1415,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "agent-ide-mcp-tools",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path",
       "tags": [
         "agent",
@@ -1462,7 +1462,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "g0-current-work-package",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path"
     },
     {
@@ -1962,7 +1962,7 @@
       "kind": "work-package",
       "status": "superseded",
       "canonical": false,
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path",
       "tags": [
         "block-11",
@@ -1981,7 +1981,7 @@
       "kind": "work-package",
       "status": "superseded",
       "canonical": false,
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path",
       "tags": [
         "block-17",
@@ -2315,7 +2315,7 @@
         "59aeb95",
         "da48006"
       ],
-      "entrypoint": "docs/README.md"
+      "entrypoint": "docs/doc-index-2026-08.md"
     },
     {
       "id": "BLOCK-16-WORKING-TREE-REVIEW-MODE",
@@ -2326,7 +2326,7 @@
       "canonical": true,
       "title": "BLOCK-16 Working Tree Review Mode",
       "path": "docs/block-16-working-tree-review-mode-plan.md",
-      "entrypoint": "docs/README.md"
+      "entrypoint": "docs/doc-index-2026-08.md"
     },
     {
       "id": "BLOCK-18-WORKSPACE-MD-DIFF",
@@ -2334,7 +2334,7 @@
       "kind": "work-package",
       "status": "superseded",
       "canonical": false,
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path",
       "tags": [
         "block-18",
@@ -2357,7 +2357,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-20-code-review",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path",
       "tags": [
         "block-20",
@@ -2390,7 +2390,7 @@
         "0d5b7e3",
         "1292e24"
       ],
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-20",
         "code-review",
@@ -2408,7 +2408,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-21-harness-index-500",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path",
       "tags": [
         "block-21",
@@ -2430,7 +2430,7 @@
       "status": "reference",
       "canonical": true,
       "truthDomain": "block-21-harness-index-500-closeout",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "archivePolicy": "retain_stable_path",
       "tags": [
         "block-21",
@@ -2486,7 +2486,7 @@
         "0e28498",
         "b1f4453"
       ],
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-22",
         "codemirror",
@@ -2504,7 +2504,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-23-review-codemirror-upgrade",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-23",
         "review",
@@ -2531,7 +2531,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "ui-201-result-studio-p6-evidence-repair",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "ui-201",
         "result-studio",
@@ -2560,7 +2560,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-24-ui-ledger-backfill",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-24",
         "ui-ledger",
@@ -2585,7 +2585,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-25-codex-parity-review",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-25",
         "code-review",
@@ -2614,7 +2614,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-26-review-ux-parity",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-26",
         "review-ux",
@@ -2641,7 +2641,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-27-ai-review-removal",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-27",
         "review",
@@ -2666,7 +2666,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-28-review-mode",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-28",
         "review-mode",
@@ -2694,7 +2694,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-28-review-mode-polish",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-28-1",
         "review-mode",
@@ -2720,7 +2720,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-28-review-mode-dock",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-28-2",
         "review-mode",
@@ -2744,7 +2744,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-28-review-mode-chrome-fix",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-28-3",
         "review-mode",
@@ -2766,7 +2766,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-28-review-exit-entry",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-28-4",
         "review-mode",
@@ -2789,7 +2789,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-28-review-embed-right-panel",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-28-5",
         "review-mode",
@@ -2812,7 +2812,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-28-font-size-token-unification",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-28-6",
         "font-size",
@@ -2835,7 +2835,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-28-chat-changes-card",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-28-7",
         "chat",
@@ -2858,7 +2858,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-28-composer-cta-trim",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-28-8",
         "chat",
@@ -2881,7 +2881,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-28-commit-bar-on-demand",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-28-9",
         "review-mode",
@@ -2903,7 +2903,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-29-commit-history",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-29",
         "review-mode",
@@ -2926,7 +2926,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-29-accordion-file-list",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-29-1",
         "review-mode",
@@ -2949,7 +2949,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-30-backend-convergence",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-30",
         "backend",
@@ -2974,7 +2974,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-31-conv-scoped-changes",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-31",
         "conversation-scoped",
@@ -2997,7 +2997,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-29-git-tools-phase2",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-29-2",
         "review-mode",
@@ -3022,7 +3022,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-29-3-commit-detail",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-29-3",
         "review-mode",
@@ -3045,7 +3045,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-29-4-commit-file-fulltext",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-29-4",
         "review-mode",
@@ -3068,7 +3068,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-29-5-review-readonly-vision",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "block-29-5",
         "review-mode",
@@ -3099,7 +3099,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "light-theme-purity",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "light-theme",
         "design-tokens",
@@ -3122,7 +3122,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "typography-hierarchy",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "typography",
         "font-size",
@@ -3146,7 +3146,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "font-family-unification",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "typography",
         "font-family",
@@ -3168,7 +3168,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-29-review-mode",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "review-mode",
         "chrome",
@@ -3190,7 +3190,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-29-review-changes-tree",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-08.md",
       "tags": [
         "review-mode",
         "file-tree",
@@ -3212,7 +3212,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-32-project-scoped-review",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-32",
         "project-scoped",
@@ -3235,7 +3235,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-33-general-coding-agent",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-33",
         "general-coding-agent",
@@ -3259,7 +3259,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-34-agent-tool-trail-dock",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-34",
         "tool-activities",
@@ -3282,7 +3282,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-35-dev-electron-kill-scope",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-35",
         "dev-electron",
@@ -3303,7 +3303,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-42-pending-scroll-consumer-mount",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-42",
         "ui-194",
@@ -3325,7 +3325,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-43-ui193-widget-business-path-closeout",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-43",
         "ui-193",
@@ -3346,7 +3346,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-44-ui-audit-report-case-debt",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-44",
         "ui-audit",
@@ -3368,7 +3368,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-45-dev-electron-stop-collateral-fix",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-45",
         "dev-electron",
@@ -3389,7 +3389,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-46-in-progress-batch-review",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-46",
         "ui-audit",
@@ -3411,7 +3411,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-47-ui255-popover-vertical-clamp",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-47",
         "ui-audit",
@@ -3432,7 +3432,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-50-review-file-not-found",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-50",
         "ui-audit",
@@ -3453,7 +3453,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-48-computer-use",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-48",
         "computer-use",
@@ -3476,7 +3476,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-49-multi-agent-spawn",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-49",
         "multi-agent",
@@ -3498,7 +3498,7 @@
       "status": "reference",
       "canonical": true,
       "truthDomain": "design-review-2026-09",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "design-review",
         "architecture",
@@ -3520,7 +3520,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-51-audit-fixes",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-51",
         "audit-fixes",
@@ -3542,7 +3542,7 @@
       "status": "reference",
       "canonical": true,
       "truthDomain": "product-strategy-review-2026-09",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "product-strategy",
         "positioning",
@@ -3562,7 +3562,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-52-select-to-chat",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-52",
         "select-to-chat",
@@ -3585,7 +3585,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-53-project-creation-ux",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-53",
         "project-creation",
@@ -3606,7 +3606,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-54-terminal-upgrade",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-54",
         "terminal",
@@ -3628,7 +3628,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-55-engineering-plan-mode",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-55",
         "plan-mode",
@@ -3654,7 +3654,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-56-reliability-depth",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-56",
         "model-fallback",
@@ -3676,7 +3676,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-57-remote-execution",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-57",
         "remote-execution",
@@ -3722,7 +3722,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-58-r-dependency-governance",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-58",
         "r-dependency",
@@ -3744,7 +3744,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-59-window-system",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-59",
         "window-system",
@@ -3773,7 +3773,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-60-composer-toolbar",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-60",
         "composer",
@@ -3794,7 +3794,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-61-brand-rename-petri",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-61",
         "brand",
@@ -3815,7 +3815,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-62-titlebar-columnization",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-62",
         "titlebar",
@@ -3837,7 +3837,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-63-windows-computer-use",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-63",
         "computer-use",
@@ -3862,7 +3862,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "ui-ledger-closeout",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "ui-audit",
         "ledger",
@@ -3889,7 +3889,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-70-mobile-sync",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-09",
       "archivePolicy": "archive_when_superseded",
       "phase": "P0-P4-COMPLETED",
@@ -3913,7 +3913,7 @@
       "status": "reference",
       "canonical": true,
       "truthDomain": "block-70-p0-design-review",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-70",
         "p0-design-review",
@@ -3951,7 +3951,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-72-workbench-global-entries",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-72",
         "workbench",
@@ -3973,7 +3973,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-73-hidden-files-toggle",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-73",
         "file-tree",
@@ -3994,7 +3994,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-74-preview-header-cleanup",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-74",
         "file-preview",
@@ -4015,7 +4015,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-75-oslevel-acceptance",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-75",
         "os-level-acceptance",
@@ -4037,7 +4037,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-76-ssh-native-execution",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-76",
         "ssh-native-execution",
@@ -4058,7 +4058,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-76-p0-design-review",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-76",
         "p0-design-review",
@@ -4076,7 +4076,7 @@
       "status": "reference",
       "canonical": true,
       "truthDomain": "session-handoff-2026-09-10",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "session-handoff",
         "2026-09-10",
@@ -4096,7 +4096,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-77-resident-tasks",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-77",
         "resident-tasks",
@@ -4118,7 +4118,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-77-p0-design-review",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-77",
         "p0-design-review",
@@ -4136,7 +4136,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-78-summary-card-runtime-projection",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-78",
         "summary-card",
@@ -4178,7 +4178,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-79-token-speed-observability",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-79",
         "token-speed",
@@ -4203,7 +4203,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-80-welcome-home",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-80",
         "welcome-home",
@@ -4224,7 +4224,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-81-thinking-level-endpoint",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-81",
         "thinking-level",
@@ -4252,7 +4252,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-82-thinking-channel-compat",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "block-82",
         "thinking-channel",
@@ -4276,7 +4276,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-83-general-agent-base",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-12",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -4300,7 +4300,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-83-p0-design-review",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-12",
       "archivePolicy": "archive_when_superseded",
       "phase": "CONFIRMED",
@@ -4320,7 +4320,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-84-domain-pack-oneclick",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-12",
       "archivePolicy": "archive_when_superseded",
       "phase": "P0-P3-COMPLETED",
@@ -4342,7 +4342,7 @@
       "status": "reference",
       "canonical": true,
       "truthDomain": "session-handoff-2026-09-13",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "session-handoff",
         "2026-09-13",
@@ -4398,7 +4398,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-86-domain-pack-lifecycle",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-14",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -4436,7 +4436,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-89-workspace-file-ops",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-15",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -4458,7 +4458,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-96-ssh-channel-perf",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-16",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -4480,7 +4480,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-95-session-io",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-16",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -4500,7 +4500,7 @@
       "kind": "work-package",
       "status": "superseded",
       "canonical": false,
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-16",
       "archivePolicy": "retain_stable_path",
       "cancelReason": "2026-09-16 撞号对账：与同日并行推进并整包收口的 BLOCK-96-SSH-CHANNEL-PERF 撞号；W1-W4 由彼包兑现、W5/W6 部分兑现，残余候选（ProxyJump/探测熔断编排/连接徽标）保留于本 plan 文件，重启需用户裁决并重新查号。",
@@ -4523,7 +4523,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-94-knowledge-space-pro",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-16",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -4543,7 +4543,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-93-agent-optimization",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-16",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -4563,7 +4563,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-92-code-modularization",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-16",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -4607,7 +4607,7 @@
       "status": "reference",
       "canonical": true,
       "truthDomain": "session-handoff-2026-09-15",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "session-handoff",
         "2026-09-15",
@@ -4628,7 +4628,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-97-agent-todo-card",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-17",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -4649,7 +4649,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-98-agent-resilience",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-17",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -4671,7 +4671,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-88-engineer-collab",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-18",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -4691,7 +4691,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-99-knowledge-multispace-console",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-18",
       "archivePolicy": "archive_when_superseded",
       "phase": "P0-LAUNCH",
@@ -4712,7 +4712,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-100-cdp-test-instance",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-18",
       "archivePolicy": "archive_when_superseded",
       "phase": "P6-CLOSEOUT",
@@ -4733,7 +4733,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-101-startup-performance",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-18",
       "archivePolicy": "archive_when_superseded",
       "phase": "P0-PLANNED",
@@ -4754,7 +4754,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-102-stability-hardening",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-19",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -4775,7 +4775,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-103-knowledge-space-ux",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-19",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -4795,7 +4795,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-104-platform-test-governance",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-20",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -4816,7 +4816,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-105-code-quality-governance",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-20",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -4838,7 +4838,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-106-startup-performance-ratchet",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-20",
       "completedAt": "2026-09-20",
       "archivePolicy": "archive_when_superseded",
@@ -4860,7 +4860,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-107-conversation-stream-ux",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-20",
       "completedAt": "2026-09-21",
       "archivePolicy": "archive_when_superseded",
@@ -4881,7 +4881,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-108-conversation-stream-qoder-fidelity",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-21",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -4902,7 +4902,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-109-core-arch-convergence",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-21",
       "archivePolicy": "archive_when_superseded",
       "phase": "P0-LAUNCH",
@@ -4924,7 +4924,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-109-agent-orchestration-ux",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-21",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -4967,7 +4967,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-110-jev-decision-integration",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-21",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -4989,7 +4989,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-111-jev-w1-marker-classification",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-22",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -5012,7 +5012,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-112-copilot-intent-routing",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-22",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -5035,7 +5035,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-113-tool-prerouting",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-22",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -5058,7 +5058,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-114-test-failure-triage",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-22",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -5082,7 +5082,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-115-test-suggest",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-22",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -5106,7 +5106,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-116-decision-platform",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-22",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -5151,7 +5151,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-117-laya-supply-validation",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-22",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -5175,7 +5175,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-118-dev-decision-tooling",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-23",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -5201,7 +5201,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-121-result-loop-vertical",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-25",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -5220,7 +5220,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-120-reconciliation-linkage",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-24",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -5241,7 +5241,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-119-output-judge-harness",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-24",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -5314,7 +5314,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "coding-harness-ui-plan",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-26",
       "tags": [
         "BLOCK-123",
@@ -5331,7 +5331,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "harness-productization-plan",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-26",
       "tags": [
         "BLOCK-124",
@@ -5348,7 +5348,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "ui-448-side-chat-dock-alignment",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "tags": [
         "ui-448",
         "side-chat-dock",
@@ -5375,7 +5375,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "reject-loop-plan",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-26",
       "tags": [
         "BLOCK-125",
@@ -5392,7 +5392,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "g0-platform-reliability",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-28",
       "archivePolicy": "retain_stable_path",
       "tags": [
@@ -5411,7 +5411,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "g0-bio-delivery",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-28",
       "archivePolicy": "retain_stable_path",
       "tags": [
@@ -5431,7 +5431,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-126-platform-perception",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-28",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -5452,7 +5452,7 @@
       "status": "completed",
       "canonical": true,
       "truthDomain": "block-128-execution-unification",
-      "entrypoint": "docs/README.md",
+      "entrypoint": "docs/doc-index-2026-09.md",
       "registeredAt": "2026-09-29",
       "archivePolicy": "archive_when_superseded",
       "phase": "COMPLETED",
@@ -6337,8 +6337,24 @@
         "auditability"
       ],
       "notes": "2026-10-13 整包 completed（当日立项当日收口；live 12/12，acceptance/block-179/block179-live.json）：P0 解析器（helpers/tool-call-repair.js 三形态字符串感知平衡扫描+保护区间 fail-closed：任一未知名整轮 keep/参数非对象块弃/上限5/畸形恒 keep）/P1 loop 接线（toolCalls===0 分支提升走 runAgentToolCallBatch 同权审批门+tool_call_repair 透明事件+退化原文诚实保留入历史）。红绿 21/21+集成 2/2+suggest 域 71/71。openclaw 镜像不在盘上按 roadmap 四轴自主设计。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "DOC-INDEX-2026-09",
+      "path": "docs/doc-index-2026-09.md",
+      "kind": "governance",
+      "status": "active",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
+    },
+    {
+      "id": "DOC-INDEX-2026-08",
+      "path": "docs/doc-index-2026-08.md",
+      "kind": "governance",
+      "status": "active",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path"
     }
   ],
   "lastUpdated": "2026-10-13",
-  "documentCount": 331
+  "documentCount": 333
 }
