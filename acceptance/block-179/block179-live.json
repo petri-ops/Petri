@@ -1,0 +1,69 @@
+{
+  "probe": "block179-live",
+  "at": "2026-10-13T11:58:30.947Z",
+  "platform": "win32-x64",
+  "pass": 12,
+  "total": 12,
+  "results": [
+    {
+      "id": "env.isolated-backend",
+      "ok": true,
+      "detail": "隔离后端 :65472 健康（PETRI_DB_PATH/PETRI_LOCAL_DATA_DIR=C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-block179-live-4JPAf8）"
+    },
+    {
+      "id": "env.project-conversation",
+      "ok": true,
+      "detail": "projectId=p_mv6mnj56_lqdl conversationId=conv_328443c0-97b"
+    },
+    {
+      "id": "A.task-started",
+      "ok": true,
+      "detail": "taskId=8503f605-20ef-44cf-aa71-4008e3e9be1e"
+    },
+    {
+      "id": "A.repair-event",
+      "ok": true,
+      "detail": "phase=tool_call_repair repaired=1 tools=[\"system_info\"] msg=检测到模型以文本形式输出工具调用（1 处），已自动修复为真实调用继续执行"
+    },
+    {
+      "id": "A.tool-executed",
+      "ok": true,
+      "detail": "tool_call(system_info)+tool_result 在场（提升后真实执行）"
+    },
+    {
+      "id": "A.task-completed",
+      "ok": true,
+      "detail": "任务正常收口（done 在场）"
+    },
+    {
+      "id": "A.history-preserves-raw-text",
+      "ok": true,
+      "detail": "第 2 轮请求 assistant 历史=退化原文保留+修复后 tool_calls（可审计）"
+    },
+    {
+      "id": "A.final-answer",
+      "ok": true,
+      "detail": "第 2 轮收口文本经 SSE 下发（delta 聚合 93 字符）"
+    },
+    {
+      "id": "B.no-repair",
+      "ok": true,
+      "detail": "未知名正文零修复零执行（fail-closed 保护）"
+    },
+    {
+      "id": "B.kept-as-answer",
+      "ok": true,
+      "detail": "演示正文按最终回答收口（存量行为不变）"
+    },
+    {
+      "id": "B.single-round",
+      "ok": true,
+      "detail": "B 阶段任务请求数=1（1 轮即收口；末条用户消息精确匹配，排除后台档案提取异步调用）"
+    },
+    {
+      "id": "cleanup",
+      "ok": true,
+      "detail": "隔离后端+mock+临时目录已清场（用户空间零残留）"
+    }
+  ]
+}

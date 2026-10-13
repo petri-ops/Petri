@@ -42,6 +42,8 @@ const {
 const { resolveCostCapCny, isCostCapExceeded } = require('./helpers/cost-cap');
 const { getAiSettings } = require('./helpers/ai-settings');
 const { summarizeAiUsage } = require('./helpers/ai-usage');
+// BLOCK-179 — 正文工具块修复提升（扫描+fail-closed 决策；keep 零行为变化）
+const { scanPlainTextToolCalls } = require('./helpers/tool-call-repair');
 const {
   persistLoopRun,
   updateLoopRunStatus,
@@ -572,6 +574,13 @@ async function runLoop({
   const resultEditProgress = createResultEditProgressRecorder();
   const traceId = createTraceId();
   const toolCallController = createAgentToolCallController({ maxToolCalls: config.MAX_AGENT_TOOL_CALLS || 50 });
+  // BLOCK-179 — 正文工具块修复的可用名单（config.tools = run 声明面收窄后口径；
+  // 名单外候选一律 keep，防演示/文档引用误提升）。
+  const block179AvailableToolNames = new Set(
+    (Array.isArray(config.tools) ? config.tools : [])
+      .map((toolDef) => (toolDef && ((toolDef.function && toolDef.function.name) || toolDef.name)))
+      .filter((name) => typeof name === 'string' && name),
+  );
   const latestUserMessage = [...messages].reverse().find((message) => message && message.role === 'user');
   const resultEditCompletionGuard = createResultEditCompletionGuard({
     expectation: toolCtx.resultStudioCompletionExpectation,
@@ -945,7 +954,36 @@ ${compactSummaryText}`,
         break;
       }
 
+      // BLOCK-179 — 正文工具块修复提升（此处恒非 finalizing——finalizing 已 break）。
+      // 模型退化把工具调用写成正文时，扫描并提升为真实调用，任务不再静默死亡；
+      // 退化原文诚实保留在 assistant 历史（可审计），修复决策经 agent_status 透明外发；
+      // keep 决策（未知名/超上限/零候选）零行为变化，reasons 落 console 供开发观测。
+      let effectiveToolCalls = toolCalls;
+      let assistantContentForHistory = msg.content || '';
       if (toolCalls.length === 0) {
+        const repairScan = scanPlainTextToolCalls(streamedText || msg.content || '', {
+          availableToolNames: block179AvailableToolNames,
+        });
+        if (repairScan.decision === 'repair' && repairScan.calls.length > 0) {
+          _emit({
+            event: 'agent_status',
+            phase: 'tool_call_repair',
+            repaired: repairScan.calls.length,
+            tools: repairScan.calls.map((call) => call.name),
+            message: `检测到模型以文本形式输出工具调用（${repairScan.calls.length} 处），已自动修复为真实调用继续执行`,
+          });
+          effectiveToolCalls = repairScan.calls.map((call) => ({
+            id: createCallId(),
+            type: 'function',
+            function: { name: call.name, arguments: call.arguments },
+          }));
+          assistantContentForHistory = streamedText || msg.content || '';
+        } else if (repairScan.reasons.length > 0) {
+          try { console.log(`[block179] tool-call repair keep: ${JSON.stringify(repairScan.reasons)}`); } catch {}
+        }
+      }
+
+      if (effectiveToolCalls.length === 0) {
         let assessment = assessFinalizationResult(upJson, streamedText);
         
         // 方案 B complete：截断自动续写时受 continuationGuard 硬保护。
@@ -1010,13 +1048,13 @@ ${compactSummaryText}`,
 
       await runAgentToolCallBatch({
         controller: toolCallController,
-        toolCalls,
+        toolCalls: effectiveToolCalls,
         createCallId,
         shouldAbort: aborted,
         onReserved: (accepted) => {
           messages.push({
             role: 'assistant',
-            content: msg.content || '',
+            content: assistantContentForHistory,
             tool_calls: accepted,
           });
         },

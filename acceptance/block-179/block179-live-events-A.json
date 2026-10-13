@@ -1,0 +1,24 @@
+{
+  "taskId": "8503f605-20ef-44cf-aa71-4008e3e9be1e",
+  "inventory": [
+    "run_started",
+    "conversation",
+    "token_budget",
+    "iter",
+    "token_budget",
+    "delta",
+    "delta",
+    "agent_status:tool_call_repair",
+    "agent_progress",
+    "tool_call",
+    "tool_result",
+    "iter",
+    "token_budget",
+    "delta",
+    "delta",
+    "done",
+    "run_terminal",
+    "done"
+  ],
+  "eventsCount": 18
+}
