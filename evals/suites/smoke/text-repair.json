@@ -1,0 +1,36 @@
+{
+  "id": "smoke-text-repair",
+  "title": "正文退化修复：模型把工具调用写成正文，系统提升为真实调用",
+  "category": "robustness",
+  "accessMode": "full",
+  "prompt": "读取 notes/intro.md 并总结。",
+  "fixtureFiles": {
+    "notes/intro.md": "这是 intro 的正文内容，供读取测试。"
+  },
+  "mockScript": [
+    {
+      "content": "我来读取文件。\n\n```json\n{\"name\": \"workspace_read\", \"arguments\": {\"path\": \"notes/intro.md\"}}\n```"
+    },
+    {
+      "content": "修复链路收口：intro.md 内容为 intro 正文，总结完成。"
+    }
+  ],
+  "criteria": [
+    {
+      "kind": "task_completed"
+    },
+    {
+      "kind": "event_present",
+      "event": "agent_status",
+      "phase": "tool_call_repair"
+    },
+    {
+      "kind": "tool_used",
+      "name": "workspace_read"
+    },
+    {
+      "kind": "final_answer_contains",
+      "value": "intro"
+    }
+  ]
+}

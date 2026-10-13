@@ -236,7 +236,9 @@
     "quality:knip:check": "node scripts/knip-ratchet.mjs",
     "quality:arch": "depcruise src core frontend/src --config .dependency-cruiser.cjs",
     "quality:baseline": "bash scripts/quality-baseline.sh",
-    "audit:compact": "node scripts/audit-log-compact.mjs"
+    "audit:compact": "node scripts/audit-log-compact.mjs",
+    "evals:run": "node scripts/evals-run.mjs",
+    "evals:gate": "node scripts/evals-gate.mjs"
   },
   "dependencies": {
     "@electron/notarize": "^2.5.0",

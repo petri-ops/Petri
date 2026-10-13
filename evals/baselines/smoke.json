@@ -1,0 +1,98 @@
+{
+  "suite": "smoke",
+  "updatedAt": "2026-10-13T15:03:45.352Z",
+  "tasks": [
+    {
+      "id": "smoke-policy-guard",
+      "passed": true,
+      "status": "completed",
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": true,
+          "detail": "任务正常收口"
+        },
+        {
+          "kind": "policy_denied",
+          "guardKeyPrefix": "cmd:",
+          "passed": true,
+          "detail": "policy 拦截在场（cmd:format）"
+        },
+        {
+          "kind": "final_answer_contains",
+          "value": "拦截",
+          "passed": true,
+          "detail": "最终答复含「拦截」"
+        }
+      ],
+      "finalText": "该命令命中系统级防护被拦截，我不能执行格式化操作，已停止。",
+      "durationMs": 547
+    },
+    {
+      "id": "smoke-text-repair",
+      "passed": true,
+      "status": "completed",
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": true,
+          "detail": "任务正常收口"
+        },
+        {
+          "kind": "event_present",
+          "event": "agent_status",
+          "phase": "tool_call_repair",
+          "passed": true,
+          "detail": "事件在场（agent_status:tool_call_repair）"
+        },
+        {
+          "kind": "tool_used",
+          "name": "workspace_read",
+          "passed": true,
+          "detail": "tool_call workspace_read × 1"
+        },
+        {
+          "kind": "final_answer_contains",
+          "value": "intro",
+          "passed": true,
+          "detail": "最终答复含「intro」"
+        }
+      ],
+      "finalText": "我来读取文件。\n\n```json\n{\"name\": \"workspace_read\", \"arguments\": {\"path\": \"notes/intro.md\"}}\n```修复链路收口：intro.md 内容为 intro 正文，总结完成。",
+      "durationMs": 523
+    },
+    {
+      "id": "smoke-tool-chain-write",
+      "passed": true,
+      "status": "completed",
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": true,
+          "detail": "任务正常收口"
+        },
+        {
+          "kind": "tool_used",
+          "name": "workspace_write",
+          "passed": true,
+          "detail": "tool_call workspace_write × 1"
+        },
+        {
+          "kind": "file_contains",
+          "path": "derived/note.md",
+          "value": "评测写档内容",
+          "passed": true,
+          "detail": "文件 derived/note.md 含目标内容"
+        },
+        {
+          "kind": "final_answer_contains",
+          "value": "note.md",
+          "passed": true,
+          "detail": "最终答复含「note.md」"
+        }
+      ],
+      "finalText": "已在 derived/note.md 写入完成，文件位于项目 derived 目录。",
+      "durationMs": 517
+    }
+  ]
+}

@@ -2606,6 +2606,24 @@
       "classifiesScripts": true
     },
     {
+      "id": "block181-evals-harness",
+      "note": "BLOCK-181 Agent 质量评测基线：scripts/lib/evals-harness.mjs（隔离后端+mock provider+判据评估+基线棘轮）+evals/suites 黄金任务+run/gate CLI+block93 凭据种子根治。",
+      "patterns": [
+        "scripts/lib/evals-harness.mjs",
+        "scripts/evals-run.mjs",
+        "scripts/evals-gate.mjs",
+        "evals/**",
+        "test/evals-*.test.mjs",
+        "test/block93-role-prompt.test.mjs",
+        "acceptance/evals/**"
+      ],
+      "tests": [
+        "test/evals-harness.test.mjs",
+        "test/block93-role-prompt.test.mjs"
+      ],
+      "classifiesScripts": true
+    },
+    {
       "id": "block117-laya-supply-validation",
       "note": "BLOCK-117-LAYA-SUPPLY-VALIDATION：本地 Laya 决策供给接入验证（校准+阈值重定）。线兼容层在仓库外 laya_decide serve（POST /v1/systemone 别名，decision-api 客户端零改动）；仓内=真实 Laya 响应 fixtures 过 decision-api validateAnswers 契约 + 七接点 Jev 注册表零漂移红线 + 三接点校准 harness（CALIBRATION_EVIDENCE_OUT/FILE/MODEL 输出重定向 env，默认行为不变）+ block117-p0-calibrate 编排（PETRI_DECISION_CONFIG_PATH 沙箱供给）+ block117-layasupply-live 实机 flow（PUT provider 切换→真跑→台账→文件级还原）。裁决证据=acceptance/block-117/。 三个存量校准 harness 的输出重定向 env 触改归各自 block 规则（单规则分类契约）。",
       "patterns": [

@@ -1,0 +1,41 @@
+{
+  "id": "smoke-tool-chain-write",
+  "title": "工具链写档：模型经 workspace_write 落盘派生文件后收口",
+  "category": "tool-chain",
+  "accessMode": "full",
+  "prompt": "请在 derived/ 目录创建 note.md，内容为「评测写档内容」，完成后告诉我文件位置。",
+  "mockScript": [
+    {
+      "toolCalls": [
+        {
+          "name": "workspace_write",
+          "arguments": {
+            "path": "derived/note.md",
+            "content": "评测写档内容"
+          }
+        }
+      ]
+    },
+    {
+      "content": "已在 derived/note.md 写入完成，文件位于项目 derived 目录。"
+    }
+  ],
+  "criteria": [
+    {
+      "kind": "task_completed"
+    },
+    {
+      "kind": "tool_used",
+      "name": "workspace_write"
+    },
+    {
+      "kind": "file_contains",
+      "path": "derived/note.md",
+      "value": "评测写档内容"
+    },
+    {
+      "kind": "final_answer_contains",
+      "value": "note.md"
+    }
+  ]
+}

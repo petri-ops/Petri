@@ -9,7 +9,7 @@ acceptance:
   - 红线：评测全程本地（无云依赖，judge LLM 层 v1 不做——判据全确定性）；mock 模式测的是 harness 与 loop 机制回归而非模型质量（诚实边界写进报告）；不改 block93 测试断言语义（只修凭据供给根因）；0 新 npm 依赖
   - closeout 门禁绿（test:changed block93 转绿为收口证据之一）
 reopen: 任一出口断言未达即返工；用户 2026-10-13 裁决「可以的 开」（批准主代理方向推荐「Agent 质量评测基线」）
-status: active
+status: completed
 ---
 
 # BLOCK-181 — Agent 质量评测基线（evals harness）
@@ -43,6 +43,16 @@ status: active
 - 套件自证：`npm run evals:run -- --suite=smoke --provider=mock` 全绿 + `evals:gate` PASS（smoke 套件即 harness 集成测试）。
 - block93 转绿：`node --test test/block93-role-prompt.test.mjs` 2/2。
 - test:changed 收口（block93 转绿后此门应恢复全绿）+ closeout 十三门。
+
+## 6. 波报（2026-10-13 当日整包收口）
+
+- **P0 基建**：scripts/lib/evals-harness.mjs——spawnIsolatedBackend（DB 自举+provider 种子+健康等待）/startMockProvider（有序回合队列，tool_calls 与文本双形态 SSE）/runGoldenTask（fixture 项目/会话播种〔API 取 workspace_path+id 扫描兜底〕/projectId 绑定/SSE 收集/终态等待）/evaluateCriterion（8 判据）/compareRunVsBaseline（纯函数棘轮）。
+- **P1 判据与套件**：8 判据全实现（task_completed/final_answer_contains/tool_used/tool_not_used/policy_denied〔嵌套 toolResult.data 取数〕/no_policy_denial/event_present/file_contains）；smoke 三任务全绿（工具链写档含 file 实证/策略拦截 cmd: 前缀/正文退化修复 repair 事件+指纹链）。
+- **P2 基线门**：evals-run 报告（latest+时间戳双写，measures=harness|model 诚实标注，skip 不计失败）+evals-gate 棘轮（回归红/改善绿/新任务只记/--update 显式升级）+npm evals:run|gate。**门禁三态实证：clean=0/篡改=1/再生成=0**（棘轮真会抓回归）。
+- **P3 真模式与债务清偿**：provider=real 通道+real/provider-sanity 任务（无凭据 SKIP exit 0 实证）；**block93 凭据种子根治**——credential_updates 路径替换失活 env 占位，2 红转绿，test:changed 恢复全绿（41 测 0 红 exit 0），2026-10-12 在册 env 债正式清偿。
+- **抓真两处**：①评测任务缺 context.projectId 致 workspace 工具 project_required、file 判据空转（已修，判据现在验证真实落盘）；②once 决策初版误写维度级（BLOCK-180 同族教训：放行语义与确认集写入分离）。
+- **决策工具**：doc:suggest 零建议；实现中 lint 触碰面 0 error。
+- closeout 十三门 PASS（test:changed 全绿含 block93）；G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## 5. 完成语义
 

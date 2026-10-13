@@ -81,10 +81,11 @@ const USER = 'u_block93_live';
 let PARENT_ID = null;
 
 before(() => {
-  // mock 上游不校验鉴权——env 提供占位 key 满足网关前置校验
-  process.env.DEEPSEEK_API_KEY = 'mock-key-block93';
-  // seed 模型配置：profile/preset 同指 mock 上游（gateway 按 profileId 解析）
+  // BLOCK-181 — mock 上游不校验鉴权；凭据供给走 credential_updates（迁移至
+  // credential-store 后的正道；原 env 占位 DEEPSEEK_API_KEY 因供给路径失活致
+  // 「API key 未配置」2 红，2026-10-12 在册 env 债的根因）。
   saveAiSettings({
+    credential_updates: { deepseek: 'mock-key-block93' },
     model_profiles: [{ id: 'deepseek', provider: 'deepseek', model: 'mock-model', baseUrl }],
     chat_model_presets: [{ id: 'deepseek', provider: 'deepseek', model: 'mock-model', label: 'mock', baseUrl }],
     active_chat_model_id: 'deepseek',

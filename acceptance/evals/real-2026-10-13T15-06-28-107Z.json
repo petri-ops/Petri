@@ -1,0 +1,18 @@
+{
+  "suite": "real",
+  "provider": "real",
+  "measures": "model",
+  "at": "2026-10-13T15:06:28.107Z",
+  "tasks": [
+    {
+      "id": "real-provider-sanity",
+      "skipped": true,
+      "passed": false,
+      "reason": "real provider 未配置凭据",
+      "criteriaResults": []
+    }
+  ],
+  "pass": 0,
+  "total": 1,
+  "skipped": 1
+}

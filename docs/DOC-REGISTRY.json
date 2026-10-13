@@ -6380,8 +6380,8 @@
       "capability": "agent-evals",
       "path": "docs/block-181-evals-harness-plan.md",
       "kind": "work-package",
-      "status": "active",
-      "phase": "P0-LAUNCH",
+      "status": "completed",
+      "phase": "P0-P3",
       "canonical": true,
       "truthDomain": "block-181-evals-harness-plan",
       "entrypoint": "docs/README.md",
@@ -6394,7 +6394,7 @@
         "mock-provider",
         "evidence"
       ],
-      "notes": "2026-10-13 立项 active（用户裁决「可以的 开」批准评测基线方向）：黄金任务集+隔离后端运行器（mock/real 双模式）+确定性判据+基线回归门；v1 判据全确定性（LLM judge 登记不做）；block93 凭据种子根治同包。plan=docs/block-181-evals-harness-plan.md。"
+      "notes": "2026-10-13 整包 completed（当日立项当日收口；smoke 3/3+门禁三态实证 clean=0/篡改=1/再生成=0，acceptance/evals/）：evals-harness（隔离后端+mock provider+8 确定性判据+基线棘轮）+smoke 三黄金任务（工具链写档/策略拦截/正文退化修复）+npm evals:run|gate+real 模式诚实 skip+block93 凭据种子根治（env 债清偿 test:changed 全绿）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-10-13",

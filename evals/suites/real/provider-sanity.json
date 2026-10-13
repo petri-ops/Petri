@@ -1,0 +1,24 @@
+{
+  "id": "real-provider-sanity",
+  "title": "真实 provider 冒烟：模型经原生工具调用完成一次项目写档（PETRI_EVALS_PROVIDER_KEY 在场时运行，否则诚实 skip）",
+  "category": "sanity",
+  "accessMode": "full",
+  "prompt": "请在 derived/evals-sanity.md 写入一行「evals sanity ok」，完成后简短确认。",
+  "criteria": [
+    {
+      "kind": "task_completed"
+    },
+    {
+      "kind": "tool_used",
+      "name": "workspace_write"
+    },
+    {
+      "kind": "file_contains",
+      "path": "derived/evals-sanity.md",
+      "value": "evals sanity ok"
+    },
+    {
+      "kind": "no_policy_denial"
+    }
+  ]
+}
