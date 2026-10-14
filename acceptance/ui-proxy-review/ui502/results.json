@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-14T00:41:51.375Z",
+  "pass": 1,
+  "total": 2,
+  "results": [
+    {
+      "id": "UI502.genui-card",
+      "ok": false,
+      "detail": "{\"iframes\":0,\"hasCard\":false,\"hasExport\":true}"
+    },
+    {
+      "id": "UI502.export-button",
+      "ok": true,
+      "detail": "导出钮在场"
+    }
+  ]
+}

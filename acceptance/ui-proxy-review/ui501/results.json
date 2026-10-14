@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-14T00:39:41.805Z",
+  "pass": 1,
+  "total": 2,
+  "results": [
+    {
+      "id": "UI501.graph-button",
+      "ok": true,
+      "detail": "dock 自动弹出+编排图切换钮在场"
+    },
+    {
+      "id": "UI501.graph-rendered",
+      "ok": false,
+      "detail": "ReactFlow 节点=0"
+    }
+  ]
+}

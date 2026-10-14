@@ -172,7 +172,20 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
     setProcesses([]);
   }, []);
 
-  if (dismissed || !conversationId || processes.length === 0) return null;
+  // BLOCK-181 代行评估抓真 — spawn 子任务是编排图的一等数据源，但子任务
+  // 从不发 background-process 事件（该事件仅 workspace_exec_background 发），
+  // dock 缺省 dismissed + processes 空 → 编排图钮在纯 spawn 流结构性不可达。
+  // 修复：子任务出现（0→>0 跳变）时自动弹出；用户手动关闭仍优先到下一个
+  // 新子任务出现为止。
+  const prevSubAgentCount = useRef(0);
+  useEffect(() => {
+    if (subAgentTasks.length > 0 && prevSubAgentCount.current === 0) {
+      setDismissed(false);
+    }
+    prevSubAgentCount.current = subAgentTasks.length;
+  }, [subAgentTasks.length]);
+
+  if (dismissed || !conversationId || (processes.length === 0 && subAgentTasks.length === 0)) return null;
 
   if (!expanded) {
     return (
