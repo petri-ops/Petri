@@ -5,7 +5,6 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { createRequire } from 'node:module';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -58,10 +57,6 @@ async function shot(client, name) {
   const dir = path.join(EVIDENCE, stage);
   fs.mkdirSync(dir, { recursive: true });
   return screenshotPng(client, dir, name);
-}
-
-async function bodySample(client) {
-  return evalJs(client, `(() => (document.body.innerText || '').replace(/\\n+/g, ' | ').slice(0, 600))()`);
 }
 
 // ── Stage 1：静态面 ──
