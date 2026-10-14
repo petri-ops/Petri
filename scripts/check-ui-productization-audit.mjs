@@ -48,6 +48,8 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
   // 2026-10-12 BLOCK-173 dcfc0c3 ArtifactPinPane hooks 顺序合规修复——feat/fix BLOCK 轨无 UI-###（UI-501 加映已补登）
   'dcfc0c3de4b7e193cc092642933ee70dfafb5930',
+  // 2026-10-13 BLOCK-181 代行评估 1cae944 gen-ui fragment 路径修复（fix 轨无 UI-###；UI-502 修复本体，台账=UI-502 代行评估补登行已对账）
+  '1cae9440674df224862a05878759416421ad1f7d',
   // 2026-10-11 BLOCK-166 P0 可看落地（17225f84，feat(block-166)）：subject 走 BLOCK 轨
   // 无 UI-###；UI 面=GenUiCard/GenUiMessageContent/解析器三件（BLOCK-166 P0 增量），
   // 台账=UI-486 已登记并随 P1-COMPLETED 批同步更新（ui-audit 门在本批收口时对齐）。
@@ -442,6 +444,12 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
   // 2026-10-12 BLOCK-173 CP-15 hooks 顺序合规修复（dcfc0c3）：同提交漏台账同步（ff64f30d 已补登）。
   'dcfc0c3de4b7e193cc092642933ee70dfafb5930',
+  // 2026-10-13 BLOCK-181 代行评估（1cae944 gen-ui fragment 路径修复）：同提交漏台账同步；
+  // 台账=UI-502 代行评估补登行已对账（含 0602901 关联）。
+  '1cae9440674df224862a05878759416421ad1f7d',
+  // 2026-10-13 BLOCK-181 代行评估第二批（0602901 UI-501 可达性修复+UI-502 缺陷登记）：
+  // 同提交漏台账同步；台账=UI-501/UI-502 代行评估补登行已对账。
+  '06029018318f864da8456e585f8c14fcab45e261',
   // 2026-10-12 BLOCK-175 CP-14/15 数据资产面接线（ec12a3e）：同提交漏台账同步；
   // 台账=UI-503 条目已在后续 72c6bf01/c2442dff 补登（含 registry 契约测试面）。
   'ec12a3e0f8422fbf7eb21966dac43130c6293fa3',

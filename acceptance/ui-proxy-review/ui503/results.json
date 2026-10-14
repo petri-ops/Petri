@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-14T02:17:50.255Z",
+  "pass": 2,
+  "total": 3,
+  "results": [
+    {
+      "id": "UI503.task-done",
+      "ok": true,
+      "detail": "报告任务收口"
+    },
+    {
+      "id": "UI503.file-visible",
+      "ok": true,
+      "detail": "analysis-report.md 在界面可见"
+    },
+    {
+      "id": "UI503.selection-bus",
+      "ok": false,
+      "detail": "选中文字→继续分析菜单出现（选择总线进数据）"
+    }
+  ]
+}
