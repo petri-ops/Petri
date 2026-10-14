@@ -1,9 +1,13 @@
 /**
  * BLOCK-181 — evals 判据评估器与基线棘轮单测（纯函数，离线）。
+ * 批次B 加映：审批消耗语义/子任务终态/GenUI 路径自愈判据 + mock 定向投递。
  */
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import test from 'node:test';
-import { evaluateCriterion, compareRunVsBaseline } from '../scripts/lib/evals-harness.mjs';
+import { evaluateCriterion, compareRunVsBaseline, startMockProvider } from '../scripts/lib/evals-harness.mjs';
 
 function ctx(overrides = {}) {
   return {
@@ -58,6 +62,111 @@ test('file_contains：文件读取器在场/缺失两态', () => {
   assert.equal(evaluateCriterion(c, ctx({ fileReader: () => 'hello world' })).passed, true);
   assert.equal(evaluateCriterion(c, ctx({ fileReader: () => 'other' })).passed, false);
   assert.equal(evaluateCriterion(c, ctx({ fileReader: () => null })).passed, false);
+});
+
+test('policy_denied requireRequestId：审批资源形态拦截（无 requestId 不算）', () => {
+  const withReq = [{ event: 'tool_result', toolResult: { data: { error: 'dynamic_guard_triggered', guardKey: 'cmd:vssadmin', requestId: 'apr_x' } } }];
+  const noReq = [{ event: 'tool_result', toolResult: { data: { error: 'dynamic_guard_triggered', guardKey: 'cmd:vssadmin' } } }];
+  assert.equal(evaluateCriterion({ kind: 'policy_denied', requireRequestId: true }, ctx({ events: withReq })).passed, true);
+  assert.equal(evaluateCriterion({ kind: 'policy_denied', requireRequestId: true }, ctx({ events: noReq })).passed, false);
+});
+
+test('tool_succeeded / deny_after_success：放行一次=指纹消耗（新请求重拦才算）', () => {
+  const events = [
+    { event: 'tool_result', name: 'workspace_exec', toolResult: { status: 'error', data: { error: 'dynamic_guard_triggered', requestId: 'apr_1' } } },
+    { event: 'tool_result', name: 'workspace_exec', toolResult: { status: 'success', data: { ok: true } } },
+    { event: 'tool_result', name: 'workspace_exec', toolResult: { status: 'error', data: { error: 'dynamic_guard_triggered', requestId: 'apr_1' } } },
+    { event: 'tool_result', name: 'workspace_exec', toolResult: { status: 'error', data: { error: 'dynamic_guard_triggered', requestId: 'apr_2' } } },
+  ];
+  assert.equal(evaluateCriterion({ kind: 'tool_succeeded', tool: 'workspace_exec' }, ctx({ events })).passed, true);
+  assert.equal(evaluateCriterion({ kind: 'deny_after_success', tool: 'workspace_exec' }, ctx({ events })).passed, true, 'apr_2 新请求重拦=已消耗');
+  assert.equal(
+    evaluateCriterion({ kind: 'deny_after_success', tool: 'workspace_exec' }, ctx({ events: events.slice(0, 3) })).passed,
+    false,
+    '同 apr_1 重拦=决策未落地，非消耗',
+  );
+  assert.equal(
+    evaluateCriterion({ kind: 'deny_after_success', tool: 'workspace_exec' }, ctx({ events: [events[0], events[3]] })).passed,
+    false,
+    '无成功执行在前=消耗语义无从谈起',
+  );
+});
+
+test('subagent_completed / task_terminal_status：终态计数与终态断言', () => {
+  assert.equal(evaluateCriterion({ kind: 'subagent_completed', minTimes: 1 }, ctx({ subagentDoneCount: 1 })).passed, true);
+  assert.equal(evaluateCriterion({ kind: 'subagent_completed', minTimes: 2 }, ctx({ subagentDoneCount: 1 })).passed, false);
+  assert.equal(evaluateCriterion({ kind: 'task_terminal_status', status: 'cancelled' }, ctx({ terminalStatus: 'cancelled' })).passed, true);
+  assert.equal(evaluateCriterion({ kind: 'task_terminal_status', status: 'cancelled' }, ctx({ terminalStatus: 'done' })).passed, false);
+});
+
+test('genui_fragment_resolves：直调生产 resolver（临时目录播种，截断目录自愈改名）', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'genui-eval-'));
+  const truncDir = path.join(dir, '.petri', 'gen-ui', 'conv_3c15-3c1');
+  fs.mkdirSync(truncDir, { recursive: true });
+  fs.writeFileSync(path.join(truncDir, 'chart.html'), '<h1>销售柱状图</h1>');
+  const hit = evaluateCriterion(
+    { kind: 'genui_fragment_resolves', conversationId: 'conv_full_sim', basename: 'chart.html', expectRepaired: true, contains: '销售柱状图' },
+    ctx({ workspacePath: dir }),
+  );
+  assert.equal(hit.passed, true, JSON.stringify(hit.detail));
+  assert.ok(fs.existsSync(path.join(dir, '.petri', 'gen-ui', 'conv_full_sim', 'chart.html')), '自愈改名后规范目录在');
+  const miss = evaluateCriterion(
+    { kind: 'genui_fragment_resolves', conversationId: 'conv_x', basename: 'nope.html' },
+    ctx({ workspacePath: dir }),
+  );
+  assert.equal(miss.passed, false, '无候选=红');
+  const noWs = evaluateCriterion({ kind: 'genui_fragment_resolves', conversationId: 'c', basename: 'a.html' }, ctx());
+  assert.equal(noWs.passed, false, 'workspacePath 缺失=红');
+});
+
+test('startMockProvider：whenIncludes 定向投递（标记回合不被无匹配请求消费）', async () => {
+  const mock = startMockProvider();
+  const port = await mock.ready;
+  mock.push(
+    { whenIncludes: 'PARENT_TOKEN', content: '给父回合的内容' },
+    { whenIncludes: 'CHILD_TOKEN', content: '给子回合的内容' },
+  );
+  const post = async (content) => {
+    const r = await fetch(`http://127.0.0.1:${port}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: [{ role: 'user', content }] }),
+    });
+    return await r.text();
+  };
+  // mock 按中点拆两帧流式下发——拼 delta 还原正文再断言。
+  const readContent = (sse) => sse.split('\n')
+    .filter((l) => l.startsWith('data: ') && l.trim() !== 'data: [DONE]')
+    .map((l) => { try { const j = JSON.parse(l.slice(6)); return (j.choices && j.choices[0] && j.choices[0].delta && j.choices[0].delta.content) || ''; } catch { return ''; } })
+    .join('');
+  const stray = readContent(await post('无关请求'));
+  assert.ok(stray.includes('无匹配回合'), '无匹配请求不消费标记回合');
+  const child = readContent(await post('带 CHILD_TOKEN 的子请求'));
+  assert.ok(child.includes('给子回合'), `child=${child}`);
+  const parent = readContent(await post('带 PARENT_TOKEN 的父请求'));
+  assert.ok(parent.includes('给父回合'), `parent=${parent}`);
+  await mock.close();
+});
+
+test('startMockProvider：无标记回合保持 FIFO 旧行为（既有套件零漂移）', async () => {
+  const mock = startMockProvider();
+  const port = await mock.ready;
+  mock.push({ content: '第一回合的正文' }, { content: '第二回合的正文' });
+  const post = async () => {
+    const r = await fetch(`http://127.0.0.1:${port}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: [{ role: 'user', content: 'x' }] }),
+    });
+    const sse = await r.text();
+    return sse.split('\n')
+      .filter((l) => l.startsWith('data: ') && l.trim() !== 'data: [DONE]')
+      .map((l) => { try { const j = JSON.parse(l.slice(6)); return (j.choices && j.choices[0] && j.choices[0].delta && j.choices[0].delta.content) || ''; } catch { return ''; } })
+      .join('');
+  };
+  assert.ok((await post()).includes('第一回合'));
+  assert.ok((await post()).includes('第二回合'));
+  await mock.close();
 });
 
 test('compareRunVsBaseline：回归红/改善绿/新任务不判红/缺任务判红/skip 旁路', () => {

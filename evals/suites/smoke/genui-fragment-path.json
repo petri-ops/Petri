@@ -1,0 +1,25 @@
+{
+  "id": "smoke-genui-fragment-path",
+  "title": "GenUI 卡路径自愈：模型写截断会话目录 fragment→resolveFragmentPath basename 回退+自愈改名可解析（UI-502 缺陷回归）",
+  "category": "gen-ui",
+  "accessMode": "full",
+  "prompt": "请生成一个销售数据柱状图可视化页面，文件名 chart.html。本条请求标记 GENUI3W。",
+  "mockScript": [
+    {
+      "whenIncludes": "GENUI3W",
+      "toolCalls": [
+        { "name": "workspace_write", "arguments": { "path": ".petri/gen-ui/conv_3c15-3c1/chart.html", "content": "<!doctype html><html><head><meta charset=\"utf-8\"></head><body><h1>销售柱状图</h1><div class=\"bar-chart\"><div class=\"bar\" style=\"height:80px\">Q1</div><div class=\"bar\" style=\"height:120px\">Q2</div></div></body></html>" } }
+      ]
+    },
+    {
+      "whenIncludes": "GENUI3W",
+      "content": "已生成柱状图可视化页面 chart.html（写入会话目录 conv_3c15-3c1）。"
+    }
+  ],
+  "criteria": [
+    { "kind": "task_completed" },
+    { "kind": "tool_used", "name": "workspace_write" },
+    { "kind": "file_contains", "path": ".petri/gen-ui/conv_3c15-3c1/chart.html", "value": "销售柱状图" },
+    { "kind": "genui_fragment_resolves", "conversationId": "conv_7f268d84-full-sim", "basename": "chart.html", "expectRepaired": true, "contains": "销售柱状图" }
+  ]
+}

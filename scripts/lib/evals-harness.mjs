@@ -18,8 +18,10 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
+const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 export const AUTH = { 'Content-Type': 'application/json', Authorization: 'Bearer desktop-local' };
 
@@ -96,6 +98,10 @@ export async function spawnIsolatedBackend({ root, tmpDir }) {
 
 // ---------- 脚本化 mock provider ----------
 // 有序回合队列：每个请求 shift 一回合。回合={content,finish} 或 {toolCalls:[{name,arguments}]}。
+// BLOCK-181 加映（批次B）——回合可选字段：
+// - whenIncludes：<子串>，仅当请求体含该子串时投递（父子 agent 并发复用同一
+//   provider 队列时按请求形状定向，父/子回合各自带唯一标记防错序串扰）；
+// - delayMs：<毫秒>，延迟响应（给运行中决策钩子/取消留确定性时窗）。
 export function startMockProvider() {
   const queue = [];
   const captured = [];
@@ -107,7 +113,10 @@ export function startMockProvider() {
         let parsed = {};
         try { parsed = JSON.parse(body); } catch { /* 容忍 */ }
         captured.push({ messages: parsed.messages || [] });
-        const turn = queue.shift() || { content: '[evals] mock 脚本耗尽', finish: 'stop' };
+        const bodyStr = JSON.stringify(parsed);
+        let idx = queue.findIndex((t) => !t.whenIncludes || bodyStr.includes(t.whenIncludes));
+        const turn = idx >= 0 ? queue.splice(idx, 1)[0] : { content: '[evals] mock 脚本耗尽（无匹配回合）', finish: 'stop' };
+        if (turn.delayMs) await new Promise((r) => setTimeout(r, turn.delayMs));
         res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache' });
         if (turn.toolCalls) {
           const toolCalls = turn.toolCalls.map((tc, index) => ({
@@ -149,7 +158,8 @@ export function startMockProvider() {
 }
 
 // ---------- SSE 收集（信封帧归一，同 block180） ----------
-export async function collectTaskEvents(apiBase, taskId, { timeoutMs = 120_000 } = {}) {
+// options.onEvent：每帧归一后异步回调（批次B——审批决策/取消等运行中钩子挂点）。
+export async function collectTaskEvents(apiBase, taskId, { timeoutMs = 120_000, onEvent } = {}) {
   const events = [];
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -180,6 +190,7 @@ export async function collectTaskEvents(apiBase, taskId, { timeoutMs = 120_000 }
               ? { ...parsed.payload, _seq: parsed.seq, _eventType: parsed.eventType }
               : parsed;
             events.push(ev);
+            if (onEvent) await onEvent(ev);
             if (ev && ['done', 'error', 'agent_cancelled', 'fatal_agent_error'].includes(ev.event)) done = true;
           } catch { /* 心跳注释行 */ }
         }
@@ -198,6 +209,29 @@ export async function collectTaskEvents(apiBase, taskId, { timeoutMs = 120_000 }
 async function apiCall(api, method, url, body) {
   const r = await fetch(api + url, { method, headers: AUTH, body: body === undefined ? undefined : JSON.stringify(body) });
   return { status: r.status, json: await r.json().catch(() => null) };
+}
+
+// 批次B——轮询父任务名下 done 子任务数（子 agent 异步跑，父任务可先收口；
+// 上限 30s，超时按当前计数如实评估）。终态双列实测=status='completed'/agentStatus='done'
+//（markAgentTaskDone），两列任一命中即算完成。
+async function pollSubagentDone(api, parentTaskId, conversationId, { timeoutMs = 30_000 } = {}) {
+  const deadline = Date.now() + timeoutMs;
+  let count = 0;
+  while (Date.now() < deadline) {
+    const res = await apiCall(api, 'GET', `/api/ai/agent/tasks${conversationId ? `?conversationId=${encodeURIComponent(conversationId)}` : ''}`);
+    const tasks = res.json?.tasks || [];
+    count = tasks.filter((t) => t.parentTaskId === parentTaskId
+      && (t.agentStatus === 'done' || t.agentStatus === 'completed' || t.status === 'done' || t.status === 'completed')).length;
+    if (count > 0) return count;
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  return count;
+}
+
+// 批次B——任务终态查询（Stop 链判据：agentStatus/status 取其一）。
+async function fetchTerminalStatus(api, taskId) {
+  const res = await apiCall(api, 'GET', `/api/ai/agent/task/${encodeURIComponent(taskId)}/meta`);
+  return res.json?.agentStatus || res.json?.status || null;
 }
 
 function findWorkspaceFile(tmpDir, relativePath) {
@@ -273,7 +307,37 @@ export async function runGoldenTask({ api, tmpDir, task }) {
   if (!taskId_) {
     return { id: task.id, passed: false, status: 'not_started', criteriaResults: [], finalText: '', durationMs: Date.now() - startedAt, error: `task 启动失败：${JSON.stringify(start.json || {}).slice(0, 160)}` };
   }
-  const events = await collectTaskEvents(api, taskId_, { timeoutMs: task.timeoutMs || 120_000 });
+
+  // 批次B——运行中决策钩子：审批规则（deny 信封 requestId → guard-ack approve，
+  // 同 block180 探针姿势；max 限制放行次数，「放行一次」语义由服务端指纹消耗承载）。
+  const approvalRules = Array.isArray(task.approvals) ? task.approvals.map((r) => ({ ...r, _approved: new Set() })) : [];
+  const onEvent = approvalRules.length
+    ? async (ev) => {
+      const data = ev.toolResult && ev.toolResult.data;
+      if (!data || data.error !== 'dynamic_guard_triggered' || !data.requestId) return;
+      const rule = approvalRules.find((r) => !r._approved.has(data.requestId)
+        && (!r.guardKeyPrefix || String(data.guardKey || '').startsWith(r.guardKeyPrefix))
+        && r._approved.size < (r.max ?? 1));
+      if (!rule) return;
+      rule._approved.add(data.requestId);
+      await apiCall(api, 'POST', `/api/ai/agent/task/${encodeURIComponent(taskId_)}/guard-ack`, {
+        requestId: data.requestId,
+        decision: rule.decision || 'approve',
+        always: rule.always === true,
+      });
+    }
+    : undefined;
+
+  // 批次B——Stop 链钩子：cancelAfterMs 后请求取消（任务运行中触发）。
+  let cancelTimer = null;
+  if (Number.isFinite(task.cancelAfterMs) && task.cancelAfterMs > 0) {
+    cancelTimer = setTimeout(() => {
+      apiCall(api, 'POST', `/api/ai/agent/task/${encodeURIComponent(taskId_)}/cancel`, {}).catch(() => { /* 收集面承载 */ });
+    }, task.cancelAfterMs);
+  }
+
+  const events = await collectTaskEvents(api, taskId_, { timeoutMs: task.timeoutMs || 120_000, onEvent });
+  if (cancelTimer) clearTimeout(cancelTimer);
   const finalText = events
     .filter((e) => e.choices && e.choices[0] && e.choices[0].delta && typeof e.choices[0].delta.content === 'string')
     .map((e) => e.choices[0].delta.content)
@@ -285,12 +349,25 @@ export async function runGoldenTask({ api, tmpDir, task }) {
     const abs = findWorkspaceFile(tmpDir, relativePath);
     return abs ? fs.readFileSync(abs, 'utf8') : null;
   };
-  const criteriaResults = (task.criteria || []).map((c) => evaluateCriterion(c, {
+  // 批次B——判据上下文按需补齐（子任务终态/任务终态/workspace 根）。
+  const criteriaAll = task.criteria || [];
+  const needsWorkspacePath = criteriaAll.some((c) => c.kind === 'genui_fragment_resolves');
+  const needsSubagents = criteriaAll.some((c) => c.kind === 'subagent_completed');
+  const needsTerminal = criteriaAll.some((c) => c.kind === 'task_terminal_status');
+  const workspacePath = needsWorkspacePath && projectId
+    ? await resolveProjectWorkspace(api, tmpDir, projectId)
+    : null;
+  const subagentDoneCount = needsSubagents ? await pollSubagentDone(api, taskId_, conversationId) : 0;
+  const terminalStatus = needsTerminal ? await fetchTerminalStatus(api, taskId_) : null;
+  const criteriaResults = criteriaAll.map((c) => evaluateCriterion(c, {
     events,
     finalText,
     completed,
     failedEvent: failedEvent ? String(failedEvent.error || failedEvent.event) : null,
     fileReader,
+    workspacePath,
+    subagentDoneCount,
+    terminalStatus,
   }));
   return {
     id: task.id,
@@ -310,7 +387,9 @@ function toolCallEvents(events) {
 /**
  * 单条判据评估。kind 取值：
  * task_completed / final_answer_contains / tool_used / tool_not_used /
- * policy_denied / no_policy_denial / event_present / file_contains
+ * policy_denied / no_policy_denial / event_present / file_contains /
+ * tool_succeeded / deny_after_success / subagent_completed / task_terminal_status /
+ * genui_fragment_resolves（批次B 扩充，全确定性）
  */
 export function evaluateCriterion(criterion, ctx) {
   const { events, finalText, completed, failedEvent, fileReader } = ctx;
@@ -330,9 +409,30 @@ export function evaluateCriterion(criterion, ctx) {
       const denied = events.find((e) => {
         const data = e.toolResult && e.toolResult.data;
         return data && data.error === 'dynamic_guard_triggered'
-          && (!criterion.guardKeyPrefix || String(data.guardKey || '').startsWith(criterion.guardKeyPrefix));
+          && (!criterion.guardKeyPrefix || String(data.guardKey || '').startsWith(criterion.guardKeyPrefix))
+          && (!criterion.requireRequestId || data.requestId);
       });
-      return result(Boolean(denied), denied ? `policy 拦截在场（${denied.toolResult.data.guardKey}）` : '无 dynamic_guard 拦截');
+      return result(Boolean(denied), denied ? `policy 拦截在场（${denied.toolResult.data.guardKey}${denied.toolResult.data.requestId ? ` req=${denied.toolResult.data.requestId}` : ''}）` : '无 dynamic_guard 拦截');
+    }
+    case 'tool_succeeded': {
+      const hits = events.filter((e) => e.event === 'tool_result' && e.name === criterion.tool
+        && e.toolResult && e.toolResult.status === 'success');
+      return result(hits.length >= (criterion.minTimes || 1), `tool 真实成功执行 ${criterion.tool} × ${hits.length}`);
+    }
+    case 'deny_after_success': {
+      // 审批指纹消耗语义：先有同工具真实成功执行，其后同工具再次被拦且 requestId
+      // 为新请求（放行一次=指纹级一次性，重发同调用必须重新审批）。
+      const successIdx = events.findIndex((e) => e.event === 'tool_result' && e.name === criterion.tool
+        && e.toolResult && e.toolResult.status === 'success');
+      if (successIdx < 0) return result(false, '无成功执行在前，消耗语义无从谈起');
+      const earlierIds = new Set(events.slice(0, successIdx)
+        .filter((e) => e.toolResult && e.toolResult.data && e.toolResult.data.requestId)
+        .map((e) => e.toolResult.data.requestId));
+      const laterDeny = events.slice(successIdx + 1).find((e) => {
+        const data = e.toolResult && e.toolResult.data;
+        return data && data.error === 'dynamic_guard_triggered' && data.requestId && !earlierIds.has(data.requestId);
+      });
+      return result(Boolean(laterDeny), laterDeny ? `成功后再拦（新请求 ${laterDeny.toolResult.data.requestId}）= 指纹已消耗` : '成功后无新请求拦截');
     }
     case 'tool_error': {
       const hit = events.find((e) => {
@@ -367,6 +467,37 @@ export function evaluateCriterion(criterion, ctx) {
       const content = fileReader ? fileReader(criterion.path) : null;
       if (content === null) return result(false, `文件不存在：${criterion.path}`);
       return result(content.includes(criterion.value), `文件 ${criterion.path} ${content.includes(criterion.value) ? '含' : '不含'}目标内容`);
+    }
+    case 'subagent_completed': {
+      const count = Number(ctx.subagentDoneCount) || 0;
+      return result(count >= (criterion.minTimes || 1), `done 子任务 × ${count}`);
+    }
+    case 'task_terminal_status': {
+      const actual = ctx.terminalStatus || null;
+      return result(actual === criterion.status, `任务终态=${actual}（期望 ${criterion.status}）`);
+    }
+    case 'genui_fragment_resolves': {
+      // UI-502 缺陷回归（批次B）：直调生产 resolveFragmentPath（src/main/gen-ui/paths.js）
+      // 断言卡片路径解析可自愈回退（截断会话目录 → basename 命中 + repaired 改名）。
+      if (!ctx.workspacePath) return result(false, 'workspacePath 未解析');
+      let outcome = null;
+      try {
+        const pathsMod = require(path.join(ROOT_DIR, 'src', 'main', 'gen-ui', 'paths.js'));
+        outcome = pathsMod.resolveFragmentPath({
+          workspacePath: ctx.workspacePath,
+          conversationId: criterion.conversationId,
+          filePath: criterion.basename,
+        });
+      } catch (e) {
+        return result(false, `resolveFragmentPath 抛错：${e && e.message}`);
+      }
+      if (!outcome) return result(false, 'resolveFragmentPath 无候选');
+      const repairedOk = criterion.expectRepaired ? outcome.repaired === true : true;
+      let containsOk = true;
+      if (criterion.contains) {
+        try { containsOk = fs.readFileSync(outcome.path, 'utf8').includes(criterion.contains); } catch { containsOk = false; }
+      }
+      return result(repairedOk && containsOk, `解析命中 repaired=${outcome.repaired} contains=${containsOk}`);
     }
     default:
       return result(false, `未知判据 kind：${criterion.kind}`);

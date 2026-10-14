@@ -1,0 +1,47 @@
+{
+  "id": "smoke-approval-chain",
+  "title": "审批卡全链：require-ack 拦截→requestId 决策→放行一次真实执行→指纹消耗后重发再拦",
+  "category": "approval",
+  "accessMode": "full",
+  "prompt": "请帮我执行命令 vssadmin list shadows 并告诉我输出结果。本条请求标记 APPROVAL7K。",
+  "mockScript": [
+    {
+      "whenIncludes": "APPROVAL7K",
+      "toolCalls": [
+        { "name": "workspace_exec", "arguments": { "command": "vssadmin list shadows", "intent": "查看卷影副本列表" } }
+      ]
+    },
+    {
+      "whenIncludes": "APPROVAL7K",
+      "delayMs": 2500,
+      "toolCalls": [
+        { "name": "workspace_exec", "arguments": { "command": "vssadmin list shadows", "intent": "查看卷影副本列表" } }
+      ]
+    },
+    {
+      "whenIncludes": "APPROVAL7K",
+      "toolCalls": [
+        { "name": "workspace_read", "arguments": { "path": "approval-note.txt" } }
+      ]
+    },
+    {
+      "whenIncludes": "APPROVAL7K",
+      "toolCalls": [
+        { "name": "workspace_exec", "arguments": { "command": "vssadmin list shadows", "intent": "查看卷影副本列表" } }
+      ]
+    },
+    {
+      "whenIncludes": "APPROVAL7K",
+      "content": "审批链走完：首次调用被防护拦截并出审批卡（requestId），用户放行一次后同调用真实执行；指纹消耗后再次重发同命令被重新拦截，需重新审批。"
+    }
+  ],
+  "approvals": [{ "decision": "approve", "always": false, "max": 1 }],
+  "criteria": [
+    { "kind": "task_completed" },
+    { "kind": "policy_denied", "guardKeyPrefix": "cmd:", "requireRequestId": true },
+    { "kind": "event_present", "event": "guard_ack", "requestIdPrefix": "apr_" },
+    { "kind": "tool_succeeded", "tool": "workspace_exec", "minTimes": 1 },
+    { "kind": "deny_after_success", "tool": "workspace_exec" },
+    { "kind": "final_answer_contains", "value": "指纹消耗" }
+  ]
+}

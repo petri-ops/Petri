@@ -1,0 +1,38 @@
+{
+  "id": "smoke-orchestration-spawn",
+  "title": "编排链：spawn 子任务→子任务独立完成落盘→父任务收口（ToolActivityDock 编排图数据源链回归）",
+  "category": "orchestration",
+  "accessMode": "full",
+  "prompt": "请派一个子智能体去计算 6 乘 7 并把结果写入 answer.txt，父任务标记 ORCH7Q。子任务完成后告诉我结果。",
+  "mockScript": [
+    { "whenIncludes": "用户档案抽取助手", "content": "[]" },
+    { "whenIncludes": "用户档案抽取助手", "content": "[]" },
+    {
+      "whenIncludes": "ORCH7Q",
+      "toolCalls": [
+        { "name": "spawn_agent", "arguments": { "task": "计算 6 乘 7，把算式与结果写入 answer.txt。本子任务标记 CHILD9K。" } }
+      ]
+    },
+    {
+      "whenIncludes": "ORCH7Q",
+      "content": "父任务收口：子智能体已完成，结果 42 已写入 answer.txt。"
+    },
+    {
+      "whenIncludes": "CHILD9K",
+      "toolCalls": [
+        { "name": "workspace_write", "arguments": { "path": "answer.txt", "content": "6 乘 7 = 42" } }
+      ]
+    },
+    {
+      "whenIncludes": "CHILD9K",
+      "content": "子任务完成：6 乘 7 = 42 已写入 answer.txt。"
+    }
+  ],
+  "criteria": [
+    { "kind": "task_completed" },
+    { "kind": "tool_used", "name": "spawn_agent" },
+    { "kind": "subagent_completed", "minTimes": 1 },
+    { "kind": "file_contains", "path": "answer.txt", "value": "42" },
+    { "kind": "final_answer_contains", "value": "42" }
+  ]
+}

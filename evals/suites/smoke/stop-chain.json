@@ -1,0 +1,24 @@
+{
+  "id": "smoke-stop-chain",
+  "title": "Stop 链：运行中取消请求→agent_cancelled 事件→任务终态 cancelled",
+  "category": "stop",
+  "accessMode": "full",
+  "prompt": "请尽可能详细地介绍一个话题（长回答）。本条请求标记 STOP4V。",
+  "mockScript": [
+    {
+      "whenIncludes": "STOP4V",
+      "delayMs": 6000,
+      "content": "这是一段很长的回答……"
+    },
+    {
+      "whenIncludes": "STOP4V",
+      "content": "取消后不应到达的第二段。"
+    }
+  ],
+  "cancelAfterMs": 2000,
+  "criteria": [
+    { "kind": "event_present", "event": "agent_cancelled" },
+    { "kind": "task_terminal_status", "status": "cancelled" },
+    { "kind": "tool_not_used", "name": "workspace_exec" }
+  ]
+}
