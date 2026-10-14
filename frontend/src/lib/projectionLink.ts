@@ -13,6 +13,16 @@
 
 export type ProjectionLinkStatus = 'online' | 'offline';
 
+/**
+ * BLOCK-183 — 投影环境判定 canonical（原 projectionDataBridges 内联定义迁此：
+ * 数据桥 WS 传输层与本链共用该判定，放叶子模块避免循环导入）。桌面环境
+ * data-projection 属性不存在 → false，WS/桥全部不激活。
+ */
+export function isProjectionEnv(): boolean {
+  return typeof document !== 'undefined'
+    && document.documentElement.getAttribute('data-projection') === '1';
+}
+
 let status: ProjectionLinkStatus = 'online';
 let installed = false;
 const linkListeners = new Set<(status: ProjectionLinkStatus) => void>();

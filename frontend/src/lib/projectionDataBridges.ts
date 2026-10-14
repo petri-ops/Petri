@@ -15,7 +15,16 @@
  * 同形状，消费方 unpackPacks 双形态兼容。
  */
 import { getToken } from '@/lib/authClient';
-import { markProjectionBridgeFailure, markProjectionBridgeSuccess } from '@/lib/projectionLink';
+import {
+  isProjectionEnv,
+  markProjectionBridgeFailure,
+  markProjectionBridgeSuccess,
+} from '@/lib/projectionLink';
+import { WS_DATA_READ_PATHS, wsDataAvailable, wsDataRequest } from '@/lib/projectionWsData';
+
+// BLOCK-183 — 判定 canonical 已迁 projectionLink（WS 传输层共用）；此处
+// re-export 保持既有消费方（agentTaskStream 等）导入路径不变。
+export { isProjectionEnv };
 
 function authHeaders(): Record<string, string> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -25,6 +34,18 @@ function authHeaders(): Record<string, string> {
 }
 
 async function getJson(path: string): Promise<{ status: number; data: Record<string, unknown> }> {
+  // BLOCK-183 — 白名单读面 WS-first：成功即返回（HTTP 零调用）；任何 reject
+  // （传输失败/业务错）静默落回下方既有 HTTP fetch——横幅语义由 HTTP 最终
+  // 结果决定，冷却与连击记账全在 projectionWsData 内部。
+  if (wsDataAvailable() && WS_DATA_READ_PATHS.has(path)) {
+    try {
+      const wsResult = await wsDataRequest(path);
+      markProjectionBridgeSuccess();
+      return wsResult;
+    } catch {
+      // 回退 HTTP（现状语义）
+    }
+  }
   let response: Response;
   try {
     response = await fetch(path, { headers: authHeaders() });
@@ -226,9 +247,4 @@ export function getProjectionDataBridge(name: ProjectionDataBridgeName): unknown
   if (name === 'packs') return packsBridge;
   if (name === 'aiSettings') return aiSettingsBridge;
   return runtimeBridge;
-}
-
-export function isProjectionEnv(): boolean {
-  return typeof document !== 'undefined'
-    && document.documentElement.getAttribute('data-projection') === '1';
 }

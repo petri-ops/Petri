@@ -42,6 +42,24 @@ function mockFetchByPath(routes: Record<string, unknown>): void {
 describe('projectionDataBridges', () => {
   beforeEach(() => {
     document.documentElement.setAttribute('data-projection', '1');
+    // BLOCK-183 — 本文件锚定 HTTP 契约形状；WS 传输层契约在 projectionWsData.test.ts。
+    // 桩一个确定性立即失败的 WebSocket（真实 happy-dom WebSocket 会发起真连接，时序不定），
+    // 3 连失败后 5min 冷却 → 其余用例直走 HTTP 路径，零时序抖动。
+    vi.stubGlobal('WebSocket', class {
+      constructor() {
+        queueMicrotask(() => {
+          this.onerror?.();
+          this.onclose?.();
+        });
+      }
+      onopen: (() => void) | null = null;
+      onmessage: ((event: { data: string }) => void) | null = null;
+      onerror: (() => void) | null = null;
+      onclose: (() => void) | null = null;
+      readyState = 0;
+      send() { throw new Error('not open'); }
+      close() { /* no-op */ }
+    });
   });
 
   afterEach(() => {

@@ -6104,6 +6104,27 @@
       "notes": "手机面传输 WS 化（用户裁决「能搞咱就搞起来」，当日立项当日收口，并行插队批注册态 planned→completed）：零依赖 RFC6455 最小 WS 服务端 + agent-task-store 进程内事件总线（推送地板 500ms→0）+ 网关 /m/api/ws（upgrade 会话门/水位回放/即时推送+2s 兜底/终态帧对齐 SSE）+ 前端投影 WS-first 3 连失败回退 SSE（水位续传复用 BLOCK-159）。测试=后端 13+前端 3+邻域 58 全绿；实机=dev 栈重启后 WS 四探全绿（401/101/ping-pong/err）。非范围=终端流/数据桥 WS 化、桌面端切 WS。"
     },
     {
+      "id": "BLOCK-183-DATA-BRIDGE-WS",
+      "path": "docs/block-183-data-bridge-ws-plan.md",
+      "capability": "mobile-gateway",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-183-data-bridge-ws-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-14",
+      "tags": [
+        "BLOCK-183",
+        "CP-19",
+        "websocket",
+        "mobile-gateway",
+        "projection-bridge"
+      ],
+      "archivePolicy": "retain_stable_path",
+      "notes": "竞争力总纲 CP-19 数据桥 WS 化收官（W6 deferred 项转正，用户裁决「行 你启动我来测试看看」，当日立项当日收口=总纲 19 包全闭环）：/m/api/ws 扩 data 请求/响应信封（GET 七路径严格白名单 fail-closed + 并发上限 + 8s 超时；服务端 loopback 自调既有路由零第二实现）+ 前端 projectionWsData 共享单连接 WS-first + 3 连传输失败 5min 冷却回退 HTTP（对齐 BLOCK-162 P3 形态）；POST/写面/agent 流/终端流零触碰。红绿先行 8+6 用例；block162 邻域 13/13；tsc 0；test:changed 全绿（顺手清偿 streamReconnect 4 存量红=BLOCK-159 抖动/无硬上限语义未同步，干净树 bisect 坐实）；隔离网关探针七路径 data-res 与 HTTP 逐字节同形状+延迟对比（loopback 持平，隧道增益属 riders）。",
+      "phase": "COMPLETED"
+    },
+    {
       "id": "BLOCK-163-MATURITY-WAVE3",
       "path": "docs/block-163-maturity-wave3-plan.md",
       "capability": "agent-maturity",

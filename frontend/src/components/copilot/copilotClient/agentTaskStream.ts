@@ -20,7 +20,8 @@ import type { AgentTaskTodoItem, KnowledgeCitation, StreamChatOptions } from './
  * reader.read() reject（连接被切断）、流结束未见 [DONE]（干净截断）。携带 lastSeq
  * 供重连时 afterSeq 续传；HTTP 4xx/5xx 与 AbortError 不属于此类型（不重试）。
  */
-export class AgentStreamDisconnectedError extends Error {
+/** 模块内断线信号（BLOCK-159 重试语义重构后无外部消费者，导出面随 knip 棘轮收缩） */
+class AgentStreamDisconnectedError extends Error {
   readonly lastSeq: number;
   constructor(message: string, lastSeq: number) {
     super(message);

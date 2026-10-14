@@ -5,9 +5,17 @@
  * （免刷新自动亮「继续执行」的核心判据）；fetch 网络拒绝退避重连；重试耗尽
  * 如实上抛；HTTP 4xx 不重试；用户停止（abort）不重试且不触发 onError。
  */
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { AgentStreamDisconnectedError, subscribeAgentTask } from './copilotClient';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { subscribeAgentTask } from './copilotClient';
 import type { StreamChatOptions } from './copilotClient';
+
+beforeEach(() => {
+  // BLOCK-159 P1-6 给 streamRetryDelayMs 加了 ±30% 抖动；本组断言精确锚定
+  // 基线退避序列（1000/2000）——固定随机数使抖动乘子恰为 1（本测试存量缺陷
+  // 2026-10-14 随 BLOCK-183 受影响集合首次暴露：加抖动时未同步本文件断言，
+  // 干净树 bisect 同挂坐实非新包面）。
+  vi.spyOn(Math, 'random').mockReturnValue(0.5);
+});
 
 afterEach(() => {
   vi.useRealTimers();
@@ -158,34 +166,39 @@ describe('BLOCK-39 agent 事件流断线重连', () => {
     expect(opts.onError).not.toHaveBeenCalled();
   });
 
-  it('重试耗尽后如实上抛 AgentStreamDisconnectedError（不假完成）', async () => {
+  it('断线退避重连无硬上限（BLOCK-159）：持续重试不假完成，仅 abort 退出', async () => {
     vi.useFakeTimers();
     const fetchMock = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'));
     vi.stubGlobal('fetch', fetchMock);
 
-    const opts = makeOpts();
+    const controller = new AbortController();
+    const opts = makeOpts({ signal: controller.signal });
     const promise = subscribeAgentTask('t-down', opts, 0);
-    const expectation = expect(promise).rejects.toBeInstanceOf(AgentStreamDisconnectedError);
-    await vi.runAllTimersAsync();
-    await expectation;
-
-    // 初始 1 次 + 有界重连 24 次
-    expect(fetchMock).toHaveBeenCalledTimes(25);
+    const expectation = expect(promise).rejects.toThrow('Aborted');
+    // 60s 有界窗：1s 起指数退避（30s 封顶）持续多轮重试——旧 24 次硬顶已废除
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(fetchMock.mock.calls.length).toBeGreaterThanOrEqual(5);
     expect(opts.onDone).not.toHaveBeenCalled();
+    expect(opts.onError).not.toHaveBeenCalled();
+    controller.abort();
+    await expectation;
   });
 
-  it('干净截断且重试耗尽时不误调 onDone（消除假完成）', async () => {
+  it('干净截断持续重连期间不误调 onDone（消除假完成；BLOCK-159 无硬上限语义）', async () => {
     vi.useFakeTimers();
     const fetchMock = vi.fn().mockResolvedValue(sseResponse([]));
     vi.stubGlobal('fetch', fetchMock);
 
-    const opts = makeOpts();
+    const controller = new AbortController();
+    const opts = makeOpts({ signal: controller.signal });
     const promise = subscribeAgentTask('t-truncated', opts, 0);
-    const expectation = expect(promise).rejects.toBeInstanceOf(AgentStreamDisconnectedError);
-    await vi.runAllTimersAsync();
-    await expectation;
-
+    const expectation = expect(promise).rejects.toThrow('Aborted');
+    // 干净截断（未见 [DONE]）→ 无限水位重连（每轮重放后截断→AgentStreamDisconnectedError）
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(fetchMock.mock.calls.length).toBeGreaterThanOrEqual(5);
     expect(opts.onDone).not.toHaveBeenCalled();
+    controller.abort();
+    await expectation;
   });
 
   it('HTTP 4xx 不重试，如实上抛', async () => {

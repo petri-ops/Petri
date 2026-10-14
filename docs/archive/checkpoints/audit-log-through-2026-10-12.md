@@ -44,3 +44,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-13T15:10:00.002Z -->
 最后更新：2026-10-12（**BLOCK-173-COMPETITIVENESS-WAVE3 整包 completed（三 CP 同日交付；w3-live 实机 2/2 PASS**，acceptance/block-173/w3-live.json：tool-route 运行时 enabled=true 实证+路由面共存冒烟；契约 5/5）**：CP-8 并发与派生升级（PETRI_SPAWN_CONCURRENCY_LIMIT 1-8 钳制可配+PETRI_SPAWN_MAX_DEPTH 受控放开缺省 1=现状零变化+spawn_depth_exceeded 闸+父链上溯有界防环）/CP-10 工具路由转正（decision-config defaultOn 接点旗标=tool-route 无 stored/env 默认启用；seedDoc 与解析口径一致；env 杀开关与显式关仍最高；knowledge-guard 等非 defaultOn 接点零牵连〔契约锁〕）/CP-9 编排 DAG 可视化（UI-501=OrchestrationGraph spawn 树 @xyflow 只读投影入 dock 形态，组件契约 4/4）。汇报门评估结论=维持缺省关（转正缺消费证据，登记观察）。诚实边界=CP-9 可视链路（有子任务任务）与 CP-8 env 生效待用户过目（UI-501 in_progress）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-14T11:54:39.115Z -->
+最后更新：2026-10-12（**BLOCK-174-COMPETITIVENESS-WAVE4 立项发令 active（用户 /goal 整波授权连续行使；W3 completed 腾出槽位）**：plan=docs/block-174-competitiveness-wave4-plan.md（registry/README/roadmap 同步）；Gen UI 双轨——CP-13a accent 透传+CP-13b 导出+CP-11 getData 数据面只读绑定（归属校验）+CP-12 模板库与 visualize 模板优先节；波内零停顿继续。G0 开发期常态 · 不外推 packaged/Provider/GA。）

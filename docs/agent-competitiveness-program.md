@@ -172,7 +172,7 @@ status: planned
 | CP-16 联邦委托 v2 | 事件流回传替代 5s 轮询+跨机 artifact 引用+回执结构化 | 双机委托流式回传延迟 <1s 实机 | — |
 | CP-17 工作树安全网 | workspace checkpoint 快照原语+一键回滚+回滚留痕 | 任意写后一键回滚实机（含 R 产物域） | — |
 | CP-18 成本硬熔断 | 用户级预算上限+超限自动停机（走 finalization 语义）+价格表可配 | 预算熔断实机；价格改动生效 | CP-7（软） |
-| CP-19 移动数据桥 WS 化 | projectionDataBridges WS-first（复用 BLOCK-162 服务端）+降级回退 | 数据桥推送延迟对比（轮询→推送） | — |
+| CP-19 移动数据桥 WS 化 | projectionDataBridges WS-first（复用 BLOCK-162 服务端）+降级回退 | 数据桥推送延迟对比（轮询→推送） | **BLOCK-183 completed（2026-10-14 当日立项当日收口=总纲 19 包全闭环；探针 allPass；loopback 延迟持平，隧道增益属 riders）** |
 
 ### 4.7 总对账表（基线 → 终态承诺）
 

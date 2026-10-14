@@ -5,10 +5,13 @@
  *
  * 协议（与 SSE 端点 routes/ai-agent/events.js 语义对齐，差异仅传输）：
  *   C→S  {"t":"sub","taskId","afterSeq"} | {"t":"unsub","taskId"} | {"t":"ping"}
+ *        | {"t":"data","id","url"}                            ← BLOCK-183 数据桥读面
  *   S→C  {"t":"hello"}
  *        {"t":"ev","taskId","seq","eventType","payload"}     ← 形状=SSE data 帧
  *        {"t":"done","taskId","status","error"?,"resumable"?,"filesChanged"?}
  *        {"t":"pong"} | {"t":"err","message"}
+ *        | {"t":"data-res","id","status","data"}              ← BLOCK-183（HTTP 同形状透传）
+ *        | {"t":"data-err","id","error"}
  *
  * 推送双轨：进程内 taskEventBus 即时推送（appendAgentTaskEvent 落库后 emit，
  * 地板 500ms DB 轮询 → 0）+ 2s 兜底水位轮询（漏帧补齐；前端单调 seq 去重）。
@@ -21,6 +24,21 @@ const { attachWsServer } = require('./ws');
 const FALLBACK_POLL_MS = 2000;
 const MAX_SUBS_PER_CONN = 8;
 const TERMINAL_STATUSES = ['done', 'failed', 'cancelled'];
+
+// BLOCK-183 P0 — 数据桥读面 GET 白名单（严格整串相等）：与前端
+// projectionDataBridges 读面调用一一对应；白名单外 fail-closed。v1 无查询
+// 参数面——带 query 的 URL 不匹配即拒，参数透传属显式登记项。
+const DATA_ALLOWED_PATHS = new Set([
+  '/api/skills/registry',
+  '/api/plugins/installed',
+  '/api/plugins/catalog',
+  '/api/packs/installed',
+  '/api/packs/available',
+  '/api/runtime/status',
+  '/api/ai/settings',
+]);
+const DATA_REQUEST_TIMEOUT_MS = 8000;
+const MAX_INFLIGHT_DATA_REQUESTS = 16;
 
 function tokenFromUpgradeReq(req) {
   const cookieToken = String((req.headers.cookie || '')
@@ -65,6 +83,8 @@ function attachAgentWs(server, {
   localUserId = require('../auth').LOCAL_USER.id,
   fallbackPollMs = FALLBACK_POLL_MS,
   pingIntervalMs,
+  dataTimeoutMs = DATA_REQUEST_TIMEOUT_MS,
+  maxInflightDataRequests = MAX_INFLIGHT_DATA_REQUESTS,
 } = {}) {
   if (!stores) throw new Error('agent_ws_stores_required');
 
@@ -88,8 +108,12 @@ function attachAgentWs(server, {
     },
   });
 
-  hub.on('connection', (conn) => {
+  hub.on('connection', (conn, upgradeReq) => {
     const subs = new Map(); // taskId -> { lastSeq, timer }
+    // BLOCK-183 — 连接会话 token（upgrade 时已过会话门）；data 自调以其过
+    // HTTP sessionAuth，与桌面/投影 HTTP 读面同源同门。
+    const sessionToken = tokenFromUpgradeReq(upgradeReq);
+    let inflightDataRequests = 0;
 
     const pollOnce = (taskId, sub) => {
       try {
@@ -135,6 +159,43 @@ function attachAgentWs(server, {
       if (sub.timer.unref) sub.timer.unref();
     };
 
+    // BLOCK-183 P0 — 数据桥读面自调：白名单内 GET → loopback 打回本进程既有
+    // Express 路由（sessionAuth/限流/审计中间件全量在链，读面形状单一真相零
+    // 第二实现），响应按 id 关联回帧。传输级失败不影响连接与其余在途请求。
+    const handleDataRequest = (msg) => {
+      const id = (typeof msg.id === 'string' || typeof msg.id === 'number') ? msg.id : null;
+      if (id === null || typeof msg.url !== 'string') {
+        conn.send({ t: 'data-err', id, error: 'invalid_request' });
+        return;
+      }
+      if (!DATA_ALLOWED_PATHS.has(msg.url)) {
+        conn.send({ t: 'data-err', id, error: 'path_not_allowed' });
+        return;
+      }
+      if (inflightDataRequests >= maxInflightDataRequests) {
+        conn.send({ t: 'data-err', id, error: 'data_overloaded' });
+        return;
+      }
+      const addr = server.address();
+      if (!addr || typeof addr.port !== 'number') {
+        conn.send({ t: 'data-err', id, error: 'data_fetch_failed' });
+        return;
+      }
+      inflightDataRequests += 1;
+      fetch(`http://127.0.0.1:${addr.port}${msg.url}`, {
+        headers: { Authorization: `Bearer ${sessionToken}`, Accept: 'application/json' },
+        signal: AbortSignal.timeout(dataTimeoutMs),
+      })
+        .then(async (res) => {
+          const data = await res.json().catch(() => ({}));
+          conn.send({ t: 'data-res', id, status: res.status, data });
+        })
+        .catch((err) => {
+          conn.send({ t: 'data-err', id, error: err && err.name === 'TimeoutError' ? 'data_timeout' : 'data_fetch_failed' });
+        })
+        .finally(() => { inflightDataRequests -= 1; });
+    };
+
     conn.on('message', (msg) => {
       try {
         if (msg && msg.t === 'sub') startSub(msg);
@@ -142,6 +203,7 @@ function attachAgentWs(server, {
           const sub = subs.get(String(msg.taskId || ''));
           if (sub) { clearInterval(sub.timer); subs.delete(String(msg.taskId)); }
         } else if (msg && msg.t === 'ping') conn.send({ t: 'pong' });
+        else if (msg && msg.t === 'data') handleDataRequest(msg);
       } catch { /* 单消息异常不杀连接 */ }
     });
 
@@ -163,4 +225,4 @@ function attachAgentWs(server, {
   return { hub, close };
 }
 
-module.exports = { attachAgentWs, FALLBACK_POLL_MS, MAX_SUBS_PER_CONN, tokenFromUpgradeReq, buildDoneFrame };
+module.exports = { attachAgentWs, FALLBACK_POLL_MS, MAX_SUBS_PER_CONN, DATA_ALLOWED_PATHS, DATA_REQUEST_TIMEOUT_MS, MAX_INFLIGHT_DATA_REQUESTS, tokenFromUpgradeReq, buildDoneFrame };

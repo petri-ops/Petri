@@ -49,7 +49,7 @@ export {
   retryToolSummary,
   sendAgentTaskMessage,
 } from './copilotClient/agentTaskApi';
-export { AgentStreamDisconnectedError, subscribeAgentTask } from './copilotClient/agentTaskStream';
+export { subscribeAgentTask } from './copilotClient/agentTaskStream';
 
 /**
  * Stream a chat completion. Talks to /api/ai/agent (multi-turn tool calling),
