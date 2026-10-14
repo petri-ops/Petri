@@ -827,6 +827,8 @@ declare global {
           | { ok: true; data: Record<string, unknown> }
           | { ok: false; code: string; message: string }
         >;
+        // BLOCK-166-NAV-GUARD — 沙箱帧劫持侦测推送（main→renderer）：返回取消订阅函数。
+        onSandboxHijacked?: (callback: (payload: { frameUrl?: string; targetUrl?: string; at?: string }) => void) => void | (() => void);
       };
     };
     /** BLOCK-61 兼容别名：与 petri 同一 surface（preload 双暴露）。 */

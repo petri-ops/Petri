@@ -234,6 +234,10 @@ const CHANNELS = {
     export: 'gen-ui:export',
     // BLOCK-174 CP-11 — artifact/job 数据面只读绑定（guest getData 中继落点）。
     getData: 'gen-ui:get-data',
+    // BLOCK-166-NAV-GUARD — 沙箱帧劫持侦测推送（main→renderer）：OOPIF 子框导航
+    // 不可取消（BLOCK-168 实证），主进程侦测到 petri-genui 帧外导航即推此通道，
+    // GenUiCard 按帧 URL 精确匹配即时重置（心跳宽限 9s → 亚秒）。
+    sandboxHijacked: 'gen-ui:sandbox-hijacked',
   },
 };
 

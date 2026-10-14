@@ -6417,8 +6417,29 @@
         "approval-gate"
       ],
       "notes": "2026-10-14 当日立项当日收口 completed（用户预授权四批次之 D；CP-6 评估结论承接）：user_facts 事实衰减/用户纠错流（免费直生效）/矛盾消解（等值合并）/全链审计四件+模型通道 MEMORY.md 写入过审批门（policy memory 维度走 BLOCK-180 审批卡全链）；红绿 6/6+实机三链 PASS（block182-live）+UI-510 verified。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-166-NAV-GUARD",
+      "capability": "gen-ui-sandbox",
+      "path": "docs/block-166-nav-guard-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P1-P4",
+      "canonical": true,
+      "truthDomain": "block-166-nav-guard-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-14",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "gen-ui",
+        "oopif",
+        "hijack-detection",
+        "self-heal",
+        "rate-limit"
+      ],
+      "notes": "2026-10-14 当日立项当日收口 completed（2026-10-12 用户裁决「可以排期修」的 knownGap 落地）：拆除失实死码+主进程侦测推送（gen-ui:sandbox-hijacked，进程登记法+did-fail-load CSP 拦截路——OOPIF routingId 跨导航会变/fragment 自导航不派发 will/CSP 拦截不提交 did，全参位实测定案）+GenUiCard 帧匹配即时重置（恢复窗口 9-11s→亚秒）+30s×3 循环限幅挂起面；组件红绿 4/4+gen-ui 37/37+实机探针全链 PASS。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-10-14",
-  "documentCount": 336
+  "documentCount": 337
 }

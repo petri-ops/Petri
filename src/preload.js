@@ -525,6 +525,15 @@ const desktopBridgeSurface = {
     exportFragment: (payload) => ipcRenderer.invoke('gen-ui:export', payload || {}),
     // BLOCK-174 CP-11 — artifact/job 数据面只读绑定（guest getData 中继落点）。
     getData: (payload) => ipcRenderer.invoke('gen-ui:get-data', payload || {}),
+    // BLOCK-166-NAV-GUARD — 沙箱帧劫持侦测推送（main→renderer，不可 invoke）：
+    // 主进程侦测到 petri-genui 帧外导航即推 { frameUrl, targetUrl, at }，
+    // GenUiCard 按帧 URL 精确匹配即时重置（心跳宽限 9s → 亚秒）。
+    onSandboxHijacked: (callback) => {
+      if (typeof callback !== 'function') return () => {};
+      const listener = (_event, payload) => callback(payload);
+      ipcRenderer.on('gen-ui:sandbox-hijacked', listener);
+      return () => ipcRenderer.removeListener('gen-ui:sandbox-hijacked', listener);
+    },
   },
 };
 

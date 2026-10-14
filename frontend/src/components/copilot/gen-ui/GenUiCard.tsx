@@ -23,6 +23,9 @@ const HEIGHT_MIN = 240;
 const HEIGHT_MAX = 10000;
 // BLOCK-168 P1-B：心跳宽限期（覆盖慢机抖动；劫持后桥上下文销毁必然超限）
 const HIJACK_GRACE_MS = 9000;
+// BLOCK-166-NAV-GUARD：劫持循环限幅——30s 滑窗 ≥3 次劫持即挂起（防无限重置循环）。
+const HIJACK_RATE_WINDOW_MS = 30_000;
+const HIJACK_SUSPEND_THRESHOLD = 3;
 
 interface GenUiPrepareOk {
   ok: true;
@@ -96,6 +99,12 @@ export const GenUiCard = React.memo(function GenUiCard({
   const lastHeartbeatRef = React.useRef(0);
   const hijackRef = React.useRef(false);
   const [resetSeq, setResetSeq] = React.useState(0);
+  // BLOCK-166-NAV-GUARD — 劫持即时恢复+循环限幅：主进程侦测推送（gen-ui:sandbox-hijacked）
+  // 按帧 URL 精确匹配即时重置（心跳宽限 9s → 亚秒）；30s 窗口 ≥3 次劫持转挂起态
+  // （诚实提示+手动恢复），防恶意 fragment 无限重置循环。
+  const hijackTimesRef = React.useRef<number[]>([]);
+  const [suspended, setSuspended] = React.useState<boolean>(false);
+  const suspendedRef = React.useRef(false);
   const anchorRef = React.useRef<HTMLDivElement | null>(null);
   const overlayContentRef = React.useRef<HTMLDivElement | null>(null);
   // 沙箱身份（prepare 成功后固定）：sessionId 用于 IPC 鉴权，origin 用于消息双向校验。
@@ -254,6 +263,48 @@ export const GenUiCard = React.memo(function GenUiCard({
     return () => window.clearInterval(timer);
   }, [result, sandbox, conversationId]);
 
+  // BLOCK-166-NAV-GUARD — 劫持侦测推送订阅：主进程 will-frame-navigate 确认
+  // petri-genui 帧外导航后推送 { frameUrl, targetUrl, at }；本卡 iframe src 精确
+  // 匹配者跳过心跳宽限即时重置，并做 30s×3 循环限幅（超出转挂起态）。
+  React.useEffect(() => {
+    if (!result?.ok || !sandbox) return undefined;
+    const bridge = getBridge('genUi');
+    const unsubscribe = bridge?.onSandboxHijacked?.((payload: { frameUrl?: string }) => {
+      if (suspendedRef.current) return; // 挂起态不再自动重置（等手动恢复）
+      const frameUrl = String(payload?.frameUrl || '');
+      if (!frameUrl || frameUrl !== result.url) return; // 非本卡帧，零扰动
+      const now = Date.now();
+      hijackTimesRef.current = [
+        ...hijackTimesRef.current.filter((t) => now - t < HIJACK_RATE_WINDOW_MS),
+        now,
+      ];
+      // eslint-disable-next-line no-console
+      if (hijackTimesRef.current.length >= HIJACK_SUSPEND_THRESHOLD) {
+        suspendedRef.current = true;
+        setSuspended(true);
+        // eslint-disable-next-line no-console -- 劫持循环限幅遥测（安全事件面）
+        console.warn('[gen-ui] 沙箱帧反复被劫持，已挂起等待手动恢复', { conversationId });
+        return;
+      }
+      hijackRef.current = true;
+      setResetSeq((value) => value + 1);
+      // eslint-disable-next-line no-console -- 劫持即时恢复遥测（安全事件面）
+      console.warn('[gen-ui] 沙箱帧劫持信号命中本卡，已即时重置', { conversationId });
+    });
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
+  }, [result, sandbox, conversationId]);
+
+  // 挂起恢复：清空劫持计数并重载干净副本。
+  const resumeFromSuspension = React.useCallback(() => {
+    hijackTimesRef.current = [];
+    suspendedRef.current = false;
+    setSuspended(false);
+    hijackRef.current = true;
+    setResetSeq((value) => value + 1);
+  }, []);
+
   // 主题推送：iframe 就绪与应用主题变化两条路径都走 petri-set-globals。
   React.useEffect(() => {
     if (!result?.ok || !sandbox) return undefined;
@@ -406,6 +457,19 @@ export const GenUiCard = React.memo(function GenUiCard({
       <div className={styles.body}>
         {result === null ? (
           <div className={styles.placeholder}>正在加载可视化…</div>
+        ) : result.ok && suspended ? (
+          // BLOCK-166-NAV-GUARD — 劫持循环限幅挂起态：不再自动重置（防无限循环），
+          // 手动恢复重载干净沙箱副本。widgetState 已持久化，恢复后自动回填。
+          <div className={styles.placeholder} data-testid="gen-ui-sandbox-suspended">
+            <p>检测到该可视化被反复劫持，已暂停自动恢复。</p>
+            <button
+              type="button"
+              className="petri-btn petri-btn--ghost petri-btn--sm"
+              onClick={resumeFromSuspension}
+            >
+              恢复可视化
+            </button>
+          </div>
         ) : result.ok ? (
           <div
             ref={anchorRef}

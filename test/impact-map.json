@@ -24,6 +24,7 @@
         "scripts/gen-ui-export.mjs",
         "scripts/block166-p2-live.mjs",
         "scripts/block166-p3-live.mjs",
+        "scripts/block166-nav-guard-live.mjs",
         "scripts/block171-w1-live.mjs",
         "core/petri-server/helpers/tool-cancel-registry.js",
         "core/petri-server/helpers/guard-ack-store.js",

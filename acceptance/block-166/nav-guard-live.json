@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-14T10:10:19.076Z",
+  "conversationId": "conv_2737efa3-f90",
+  "results": [
+    {
+      "id": "setup",
+      "ok": true,
+      "detail": "project=p_mv7y7wwr_oips conv=conv_2737efa3-f90 ws=found"
+    },
+    {
+      "id": "card-mounted",
+      "ok": true,
+      "detail": "GenUiCard 在场"
+    },
+    {
+      "id": "hijack-cycle-converges",
+      "ok": true,
+      "detail": "导航→挂起 17009ms attaches=0（计数仅参考）"
+    },
+    {
+      "id": "rate-limit-suspend",
+      "ok": true,
+      "detail": "30s×3 限幅挂起面在场"
+    }
+  ]
+}

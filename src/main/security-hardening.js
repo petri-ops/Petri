@@ -35,6 +35,8 @@
  */
 
 const { URL } = require('node:url');
+// BLOCK-166-NAV-GUARD — 沙箱劫持侦测推送通道（同 _window-create 装配先例）。
+const CHANNELS = require('../ipc/channels');
 
 /** 允许承载 `<webview>` 的 session 分区白名单（唯一使用点：结果浏览器面板）。 */
 const WEBVIEW_PARTITION_ALLOWLIST = Object.freeze(['persist:petri-browser']);
@@ -139,22 +141,75 @@ function applyWebContentsHardening({ app, shell, log = console } = {}) {
     throw new TypeError('applyWebContentsHardening requires the Electron app object');
   }
   app.on('web-contents-created', (_event, contents) => {
-    // BLOCK-168 P0 — 沙箱帧劫持侦测遥测。实证矩阵（acceptance/block-168/）：
-    // Electron 44 对 OOPIF 渲染器发起的自导航会触发宿主 will-frame-navigate（41 不可达），
-    // 但 preventDefault 对子框导航无效（Chromium 不允许阻塞子框导航）——事件只作
-    // 劫持侦测遥测，恢复由 GenUiCard 的心跳自愈层完成（P1-B）。
-    contents.on('will-frame-navigate', (event, url, isMainFrame, _flag, frameProcessId, frameRoutingId) => {
-      if (isMainFrame) return;
-      try {
-        const { webFrameMain } = require('electron');
-        const frame = webFrameMain.fromId(frameProcessId, frameRoutingId);
-        const origin = (frame && frame.origin) || '';
-        if (origin.startsWith('petri-genui://') && !String(url).startsWith('petri-genui://')) {
-          log.warn?.('[gen-ui] 沙箱帧外导航遥测（由卡片心跳自愈层恢复）:', String(url).slice(0, 90));
-        }
-      } catch {
-        /* frame 已销毁等竞态 */
+    // BLOCK-168 P0 / BLOCK-166-NAV-GUARD — 沙箱帧劫持侦测+即时恢复推送（进程登记法）。
+    // 实证矩阵（2026-10-14 全参位实测，acceptance/block-166/）：
+    // - will-frame-navigate=(event,url,isMainFrame,isOutermostMainFrame,frameProcessId,
+    //   frameRoutingId)；渲染器 location.href 自导航不派发 will、CSP 拦截的加载不提交
+    //   did-frame-navigate，did-fail-load(-30) 是主形态实测可达路；
+    // - preventDefault 对子框导航无效（BLOCK-168 P1-A 否决）；
+    // - OOPIF 帧的 frameRoutingId 跨导航会变（实测 5→17→11），帧 ID 键登记不可行——
+    //   改进程级登记：子框导航至 petri-genui:// 时登记 renderProcessId→最新 fragment
+    //   URL，同进程子框离开 gen-ui 作用域即确认劫持 → 推送 gen-ui:sandbox-hijacked，
+    //   GenUiCard 按帧 URL 精确匹配即时重置（DoS 恢复窗口 9-11s → 亚秒）；登记表
+    //   有界，信号未命中场景仍由卡片心跳宽限兜底。
+    const genUiProcessRegistry = new Map(); // pid → { url, at }
+    const rememberGenUiProcess = (pid, url) => {
+      if (!Number.isFinite(pid)) return;
+      genUiProcessRegistry.set(pid, { url: String(url), at: Date.now() });
+      if (genUiProcessRegistry.size > 50) {
+        const oldest = genUiProcessRegistry.keys().next().value;
+        if (oldest !== undefined) genUiProcessRegistry.delete(oldest);
       }
+    };
+    const handleSubframeNavigate = (url, frameProcessId) => {
+      const urlText = String(url || '');
+      if (urlText.startsWith('petri-genui://')) {
+        rememberGenUiProcess(frameProcessId, urlText);
+        return;
+      }
+      const hit = genUiProcessRegistry.get(frameProcessId);
+      if (!hit) return; // 非 gen-ui 进程的普通子框导航
+      genUiProcessRegistry.delete(frameProcessId);
+      log.warn?.('[gen-ui] 沙箱帧劫持侦测，已推送即时恢复信号:', `${urlText.slice(0, 80)}（原帧 ${hit.url.slice(0, 60)}）`);
+      try {
+        contents.send(CHANNELS.genUi.sandboxHijacked, {
+          frameUrl: hit.url,
+          targetUrl: urlText.slice(0, 500),
+          at: new Date().toISOString(),
+        });
+      } catch { /* 渲染层不可达时由心跳宽限兜底 */ }
+    };
+    // 签名（全参位实测）：(event,url,isMainFrame,isOutermostMainFrame,frameProcessId,frameRoutingId)
+    contents.on('will-frame-navigate', (event, url, isMainFrame, _isOutermostMainFrame, frameProcessId, frameRoutingId) => {
+      if (isMainFrame) return;
+      handleSubframeNavigate(url, frameProcessId);
+      void frameRoutingId;
+    });
+    // 签名（实测）：(event,url,httpResponseCode,httpStatusText,isMainFrame,frameProcessId,frameRoutingId)
+    contents.on('did-frame-navigate', (event, url, _httpResponseCode, _httpStatusText, isMainFrame, frameProcessId, frameRoutingId) => {
+      if (isMainFrame) return;
+      handleSubframeNavigate(url, frameProcessId);
+      void frameRoutingId;
+    });
+    // 第三路（劫持主形态的实测可达路）：CSP 拦截的外域加载在宿主 did-fail-load
+    // 可见（-30）——同进程已登记 gen-ui 帧即确认劫持。
+    // 签名（实测）：(event,errorCode,errorDescription,validatedURL,isMainFrame,frameProcessId,frameRoutingId)
+    contents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL, isMainFrame, frameProcessId, frameRoutingId) => {
+      if (isMainFrame) return;
+      const urlText = String(validatedURL || '');
+      if (urlText.startsWith('petri-genui://')) return;
+      const hit = errorCode === -30 ? genUiProcessRegistry.get(frameProcessId) : undefined; // -30=ERR_BLOCKED_BY_CSP（guest 外域加载主形态）
+      if (!hit) return;
+      genUiProcessRegistry.delete(frameProcessId);
+      log.warn?.('[gen-ui] 沙箱帧劫持侦测（did-fail-load CSP 拦截路），已推送即时恢复信号:', urlText.slice(0, 80));
+      try {
+        contents.send(CHANNELS.genUi.sandboxHijacked, {
+          frameUrl: hit.url,
+          targetUrl: urlText.slice(0, 500),
+          at: new Date().toISOString(),
+        });
+      } catch { /* 渲染层不可达时由心跳宽限兜底 */ }
+      void frameRoutingId;
     });
     contents.on('will-attach-webview', (event, webPreferences, params) => {
       const verdict = verifyWebviewAttach({ webPreferences, params });
@@ -180,34 +235,14 @@ function applyWebContentsHardening({ app, shell, log = console } = {}) {
       return { action: 'deny' };
     });
 
-    // BLOCK-166 P3（实机渗透实证，勿回退）：OOPIF 沙箱页自身导航阻断。
-    // CSP frame-src 只约束「嵌入子框架的 src」，frame 自身 location 赋值不受它管
-    // （p3-live 实测：恶意 fragment location.href 把沙箱页导航到外域成功）。
-    // 本项目唯一跨进程 iframe（OOPIF）= petri-genui guest；规格 §6.5「页面内导航
-    // 一律阻断」在此落地。页内 #fragment 跳转走 scrollIntoView，不经导航。
-    // 注：will-navigate 对 OOPIF 不派发（Electron 实测），子框架导航经宿主的
-    // will-frame-navigate 到达。
+    // BLOCK-166 P3 历史注记（2026-10-14 NAV-GUARD 拆除失实死码）：此处曾有第二
+    // will-frame-navigate「阻断」处理器（params 对象签名+preventDefault）——签名
+    // 与实际 API 不匹配（positional 形态）为死代码，且 BLOCK-168 已实证 preventDefault
+    // 对子框导航无效（Chromium 不允许阻塞），恢复走上方侦测推送+卡片即时重置。
     contents.on('will-navigate', (event, url) => {
       if (contents.getType() !== 'iframe') return;
       event.preventDefault();
       log.warn?.('[security] gen-ui 沙箱导航已阻断:', String(url).slice(0, 80));
-    });
-    contents.on('will-frame-navigate', (event, params) => {
-      if (params.isMainFrame) return;
-      let frameOrigin = '';
-      try {
-        frameOrigin = new URL(params.frame.url).origin;
-      } catch { /* 非法 origin 不匹配 gen-ui，放行给其它策略 */ }
-      if (!frameOrigin.startsWith('petri-genui:')) return;
-      let targetOrigin = '';
-      try {
-        targetOrigin = new URL(params.url).origin;
-      } catch {
-        targetOrigin = '';
-      }
-      if (targetOrigin === frameOrigin) return; // 同 origin 自身重载放行
-      event.preventDefault();
-      log.warn?.('[security] gen-ui 沙箱子框架导航已阻断:', String(params.url).slice(0, 80));
     });
   });
 }
