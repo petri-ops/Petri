@@ -65,5 +65,6 @@ P0+P1 交付 + 门禁 1-4 全过 + 台账回写 → `completed`（当日立项�
 - **doc:suggest**（cloud）：建议 uiAudit+planDoc——planDoc 已承载与本批动作一致；uiAudit 按 BLOCK-162 同质先例（纯传输层无新 UI 元素）不登记，如实留痕。test:suggest（cloud）：零建议（conf 0.56<0.8 below_threshold）。jev×3（会话口径 npm run decision:session 取数）。
 - **台账**：registry BLOCK-183 → completed；roadmap/backlog/AUDIT-LOG/总纲 §4-W6 CP-19 行（**总纲 19 包全闭环**）/handoff 同步；impact-map 登记 block183-data-ws-probe 规则（探针脚本 governance 角色，同 ui-proxy-review 先例）。
 - **非范围留痕（plan §2）**：带查询参数读面/多连接池/桌面端激活/真机过隧道实测（riders：双机/隧道环境齐备后随 CP-16 联邦实测同批）。
+- **riders/UI-512（同日代行实机评估 verified）**：真浏览器全链验收通过（/pair 配对→/ 入口→技能货架 11 卡渲染；页面内应用模块本体 wsDataRequest=200/14 技能/7ms/零浏览器直连，acceptance/block-183/ui512-live.json+截图）。随批登记两 findings：①BackendStatusProvider 直连 runtime/status 轮询=桥外消费方（BLOCK-86 既有设计，迁移候选不立项）；②**dev 环境深链陷阱**——/skills 等深链在 dev 落 frontend/dist 旧构建（10-12，无本包代码）走 HTTP，系 BLOCK-87 窄 Vite 代理设计+dist 陈旧叠加，生产单构建不受影响；重开条件=dev 深链测试误导诊断再现（建议：dev 投影测试一律从 / 入口进）。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。

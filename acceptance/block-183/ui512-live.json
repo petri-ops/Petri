@@ -1,0 +1,48 @@
+{
+  "capturedAt": "2026-10-14",
+  "verifiedBy": "代行实机评估（真实浏览器驱动，用户裁决「你来搞」）",
+  "entry": "投影 / 入口（/pair 兑换会话 → 302 → SPA，dev=Vite 源码与生产同代码路径）",
+  "steps": [
+    {
+      "step": "pair",
+      "result": "302 + Set-Cookie gw_session（一年期）+ Location: /",
+      "pass": true
+    },
+    {
+      "step": "session probe",
+      "result": "GET /api/mobile/status → 200 ok activeDevices:1",
+      "pass": true
+    },
+    {
+      "step": "ws data envelope（隔离探针）",
+      "result": "runtime/status 与 skills/registry → data-res 200，七路径与 HTTP 逐字节同形状（data-ws-live.json）",
+      "pass": true
+    },
+    {
+      "step": "真网关真会话 WS 信封",
+      "result": "runtime/status → 200 真实数据；skills/registry → 200 skills=14",
+      "pass": true
+    },
+    {
+      "step": "页面内应用模块本体调用（同 Vite 模块实例）",
+      "result": "wsDataRequest('/api/skills/registry') → ok status=200 skills=14 耗时 7ms，浏览器直连 fetch 新增=0",
+      "pass": true
+    },
+    {
+      "step": "技能货架渲染",
+      "result": "通用技能 11 卡全量渲染（截图 ui512-skills-ws-live.png）",
+      "pass": true
+    }
+  ],
+  "findings": [
+    {
+      "finding": "BackendStatusProvider 直连 /api/runtime/status 5s 轮询",
+      "classification": "桥外自有消费方（BLOCK-86 设计），非本包范围；后续可选迁移到桥（登记不立项）"
+    },
+    {
+      "finding": "dev 下 /skills 深链加载 frontend/dist 旧构建（10-12），无 WS-first 代码 → 该入口数据桥走 HTTP",
+      "classification": "BLOCK-87 窄 Vite 代理设计+dist 陈旧的 dev 环境特有行为；生产单构建不受影响；重开=dist 陈旧困扰再现时（如 dev 深链测试误导诊断）"
+    }
+  ],
+  "allPass": true
+}
