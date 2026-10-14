@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-14T06:35:21.433Z",
+  "surface": "DesktopSettingsPanel decisions 节 MemoryPanel（BLOCK-182 生命周期面）",
+  "method": "CDP 真界面驱动（设置 dock → 决策原语节）",
+  "assertions": {
+    "hasKnownFacts": true,
+    "hasAuditSection": true,
+    "hasCorrectBtn": true,
+    "factCount": 3
+  },
+  "note": "DOM 断言证据；截图 capture 未落盘（screenshotPng 静默失败，如实登记）",
+  "chain": "纠错全链 API 级由 scripts/block182-live.mjs B 链承载（superseded 链+审计）"
+}

@@ -71,6 +71,20 @@ function evaluateDynamicGuards(name, args = {}) {
           detail: `参数 ${field} 指向敏感系统/凭证路径`,
         };
       }
+      // BLOCK-182 写入过审批门（用户裁决）：模型通道写项目记忆文件 .petri/MEMORY.md
+      // 需经审批卡（guardKey=memory:<path>，走 BLOCK-180 审批资源/指纹放行全链）；
+      // 用户面板/REST 通道不经此门。记忆是长期自我叙事面，模型自主改写须用户知情。
+      if (
+        typeof value === 'string' && value
+        && (name === 'workspace_write' || name === 'workspace_replace')
+        && /(^|[\\/])\.petri([\\/])MEMORY\.md$/i.test(value.trim().replaceAll('\\', '/'))
+      ) {
+        return {
+          flagged: true, dimension: 'memory',
+          guardKey: `memory:${normalizePathLike(value).slice(0, 120)}`,
+          detail: '写入目标为项目记忆文件 .petri/MEMORY.md（长期记忆面，须用户审批）',
+        };
+      }
     }
   }
   return { flagged: false };

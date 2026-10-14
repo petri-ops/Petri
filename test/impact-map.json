@@ -2606,6 +2606,25 @@
       "classifiesScripts": true
     },
     {
+      "id": "block182-memory-lifecycle",
+      "note": "BLOCK-182 记忆生命周期治理：helpers/memory-lifecycle.js（衰减/合并/替代/审计单源）+user-facts 接线+ai-memory 路由（纠错语义/审计端点）+迁移 013+policy memory 维度（审批门）+MemoryPanel 纠错面；agent-tool-policy.js 本体归 block160 规则。",
+      "patterns": [
+        "core/petri-server/helpers/memory-lifecycle.js",
+        "core/petri-server/helpers/user-facts.js",
+        "core/petri-server/routes/ai-memory.js",
+        "src/migrations/013_memory_lifecycle.sql",
+        "test/memory-lifecycle.test.mjs",
+        "scripts/block182-*.mjs",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/MemoryPanel.tsx",
+        "acceptance/block-182/**"
+      ],
+      "tests": [
+        "test/memory-lifecycle.test.mjs"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true
+    },
+    {
       "id": "block181-evals-harness",
       "note": "BLOCK-181 Agent 质量评测基线：scripts/lib/evals-harness.mjs（隔离后端+mock provider+判据评估+基线棘轮）+evals/suites 黄金任务+run/gate CLI+block93 凭据种子根治。",
       "patterns": [
@@ -2625,10 +2644,12 @@
     },
     {
       "id": "ui-proxy-review-probe",
-      "note": "UI 代行评估探针（scripts/ui-proxy-review.mjs，UI-496~509 批引入）：CDP 驱动真界面+截图留证，实机走查证据工具非回归测试（同 block123-p0-probes 形态）；证据=acceptance/ui-proxy-review/。",
+      "note": "UI 代行评估/构造探针（scripts/ui-proxy-review.mjs，UI-496~509 批引入；scripts/ui500-compaction-live.mjs，UI-500 压缩构造批）：CDP 驱动真界面+截图留证，实机走查证据工具非回归测试（同 block123-p0-probes 形态）；证据=acceptance/ui-proxy-review/ 与 acceptance/ui-500/。",
       "patterns": [
         "scripts/ui-proxy-review.mjs",
-        "acceptance/ui-proxy-review/**"
+        "scripts/ui500-*.mjs",
+        "acceptance/ui-proxy-review/**",
+        "acceptance/ui-500/**"
       ],
       "tests": [],
       "frontendRelated": false,

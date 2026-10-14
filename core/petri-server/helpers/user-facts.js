@@ -23,8 +23,7 @@ let _tableChecked = false;
 async function _ensureTable() {
   if (_tableChecked) return;
   _tableChecked = true;
-  const adb = dbMod.getAsyncDatabase();
-  try {
+  const adb = dbMod.getAsyncDatabase();  try {
     await adb.exec(`
       CREATE TABLE IF NOT EXISTS user_facts (
         id TEXT PRIMARY KEY,
@@ -44,6 +43,13 @@ async function _ensureTable() {
   }
   try { await adb.prepare('ALTER TABLE user_facts ADD COLUMN project_id TEXT').run(); } catch {}
   try { await adb.prepare('CREATE INDEX IF NOT EXISTS idx_user_facts_project ON user_facts(user_id, project_id, pinned DESC, updated_at DESC)').run(); } catch {}
+  // BLOCK-182 — 生命周期三列幂等升级（status/superseded_by/last_confirmed_at，try/catch 已存在静默）。
+  try { lifecycleEnsure()(dbMod.getDatabase()); } catch { /* 升级失败不阻塞建表 */ }
+}
+
+// 惰性 require 防初始化环（memory-lifecycle 不反向依赖本模块，但保持装配顺序自由）。
+function lifecycleEnsure() {
+  return require('./memory-lifecycle').ensureLifecycleColumns;
 }
 
 const FACT_CATEGORIES = [
@@ -87,6 +93,8 @@ async function upsertUserFactAsync({ id, userId, projectId = null, category, con
   if (!userId || !content || !category) return null;
   await _ensureTable();
   const adb = dbMod.getAsyncDatabase();
+  const lifecycle = require('./memory-lifecycle');
+  const sqlite = dbMod.getDatabase();
   const now = new Date().toISOString();
   const pinnedVal = pinned ? 1 : 0;
   if (id) {
@@ -94,6 +102,17 @@ async function upsertUserFactAsync({ id, userId, projectId = null, category, con
       .prepare('SELECT * FROM user_facts WHERE id = ? AND user_id = ?')
       .get(id, userId);
     if (existing) {
+      // BLOCK-182 纠错流（免费直生效）：内容变化=旧事实 superseded 替代链+新行插入，
+      // 不原地覆盖丢历史；同内容（pin 切换等）维持原行原地更新。
+      if (String(existing.content || '').trim() !== String(content).trim()) {
+        const newId = lifecycle.supersedeWithCorrection(sqlite, {
+          userId, oldFactId: id, category, content: String(content), projectId: existing.project_id || projectId,
+        });
+        if (pinnedVal) {
+          await adb.prepare('UPDATE user_facts SET pinned=? WHERE id=? AND user_id=?').run(pinnedVal, newId, userId);
+        }
+        return getUserFactAsync(newId, userId);
+      }
       await adb
         .prepare(
           `UPDATE user_facts SET category=?, content=?, pinned=?, source=?, updated_at=? WHERE id=? AND user_id=?`
@@ -105,9 +124,13 @@ async function upsertUserFactAsync({ id, userId, projectId = null, category, con
   const newId = id || 'fact_' + uuidv4().slice(0, 12);
   await adb
     .prepare(
-      `INSERT INTO user_facts(id, user_id, category, content, pinned, source, project_id, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?)`
+      `INSERT INTO user_facts(id, user_id, category, content, pinned, source, project_id, status, last_confirmed_at, created_at, updated_at) VALUES (?,?,?,?,?,?,?,'active',?,?,?)`
     )
-    .run(newId, userId, category, content, pinnedVal, source, projectId ? String(projectId) : null, now, now);
+    .run(newId, userId, category, content, pinnedVal, source, projectId ? String(projectId) : null, now, now, now);
+  lifecycle.appendAudit(sqlite, {
+    userId, actor: source === 'auto' ? 'system' : 'user', action: 'extract_write',
+    factId: newId, detail: { category, source },
+  });
   return getUserFactAsync(newId, userId);
 }
 
@@ -125,6 +148,12 @@ async function clearUserFactsAsync(userId, projectId = null) {
   } else {
     await adb.prepare("DELETE FROM user_facts WHERE user_id = ? AND COALESCE(project_id, '') = ''").run(userId);
   }
+  // BLOCK-182 — 全链审计：清空动作留痕（删的是哪些类别随行记 note，行级历史在 llm-transcripts）。
+  try {
+    require('./memory-lifecycle').appendAudit(dbMod.getDatabase(), {
+      userId, actor: 'user', action: 'clear', detail: { projectId: projectId || null },
+    });
+  } catch { /* 审计失败不阻塞 */ }
 }
 
 function _normFact(s) {
@@ -132,16 +161,23 @@ function _normFact(s) {
 }
 
 /** Build a compact text block of top facts for system prompt injection.
- *  FACTS_TTL_v1 — age-aware filter so old auto-extracted facts don't pollute current convo. */
+ *  FACTS_TTL_v1 — age-aware filter so old auto-extracted facts don't pollute current convo.
+ *  BLOCK-182 — 注入仅取 status='active'（superseded/decayed 不进 prompt）+ 惰性衰减顺带触发。 */
 async function buildFactsBlockAsync(userId, maxChars = 1200, projectId = null) {
+  // BLOCK-182 — 惰性衰减顺带触发（与 sync 版同款，读路径顺手扫）。
+  try {
+    require('./memory-lifecycle').lazyDecayFacts(dbMod.getDatabase(), userId);
+  } catch { /* 衰减失败不阻塞注入 */ }
   const facts = await listUserFactsAsync(userId, 80, projectId);
   if (!facts || facts.length === 0) return '';
+  const active = facts.filter((f) => !f.status || f.status === 'active');
+  if (active.length === 0) return '';
   const now = Date.now();
   const DAY = 86400_000;
   const fresh = [];
   const aging = [];
   const old = [];
-  for (const f of facts) {
+  for (const f of active) {
     if (f.pinned) {
       fresh.push(f);
       continue;
@@ -184,6 +220,10 @@ async function buildFactsBlockAsync(userId, maxChars = 1200, projectId = null) {
 function buildFactsBlock(userId, maxChars = 1200, projectId = null) {
   const _adb = dbMod.getAsyncDatabase();
   const sqlite = dbMod.getDatabase();
+  // BLOCK-182 — 惰性衰减顺带触发（读路径顺手扫，同 BLOCK-180 TTL 模式）。
+  try {
+    require('./memory-lifecycle').lazyDecayFacts(sqlite, userId);
+  } catch { /* 衰减失败不阻塞注入 */ }
   let rows;
   try {
     rows = projectId
@@ -193,6 +233,8 @@ function buildFactsBlock(userId, maxChars = 1200, projectId = null) {
     return '';
   }
   if (!rows || rows.length === 0) return '';
+  rows = rows.filter((f) => !f.status || f.status === 'active');
+  if (rows.length === 0) return '';
   const now = Date.now();
   const DAY = 86400_000;
   const fresh = [],
@@ -314,11 +356,20 @@ async function backgroundExtractFacts(userId, messages, projectId = null) {
     const existing = await listUserFactsAsync(userId, 60, projectId);
     const newFacts = await extractFactsFromMessages(messages, existing);
     if (newFacts.length === 0) return;
-    const existingSet = new Set(existing.map((f) => f.category + '||' + _normFact(f.content)));
+    const existingByKey = new Map(existing.map((f) => [f.category + '||' + _normFact(f.content), f]));
     let saved = 0;
+    let merged = 0;
     for (const f of newFacts) {
       const key = f.category + '||' + _normFact(f.content);
-      if (existingSet.has(key)) continue;
+      const hit = existingByKey.get(key);
+      if (hit) {
+        // BLOCK-182 矛盾消解（合并语义）：等值命中不再是静默 skip——刷新确认时间戳，
+        // 用户持续提及的事实不被衰减误伤；审计 merge 留痕。
+        const lifecycle = require('./memory-lifecycle');
+        lifecycle.markConfirmed(dbMod.getDatabase(), { userId, factId: hit.id, detail: { category: f.category } });
+        merged++;
+        continue;
+      }
       await upsertUserFactAsync({
         userId,
         projectId,
@@ -326,10 +377,10 @@ async function backgroundExtractFacts(userId, messages, projectId = null) {
         content: f.content.trim(),
         source: 'auto',
       });
-      existingSet.add(key);
+      existingByKey.set(key, { id: 'new', category: f.category, content: f.content });
       saved++;
     }
-    if (saved > 0) console.log('[user-facts] saved', saved, 'new facts for user', userId);
+    if (saved > 0 || merged > 0) console.log('[user-facts] saved', saved, 'new /', merged, 'confirmed facts for user', userId);
   } catch (e) {
     console.log('[user-facts] extraction error:', e.message);
   }

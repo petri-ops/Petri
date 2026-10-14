@@ -1,0 +1,70 @@
+{
+  "at": "2026-10-14T06:14:54.853Z",
+  "results": [
+    {
+      "id": "A.task-started",
+      "ok": true,
+      "detail": "taskId=96657798-b37b-4bae-aaa8-0e56b2828a17"
+    },
+    {
+      "id": "A.guard-ack",
+      "ok": true,
+      "detail": "requestId=apr_76b4fd05c242b9c143 status=200"
+    },
+    {
+      "id": "A.odd-events",
+      "ok": true,
+      "detail": "{\"choices\":[{\"delta\":{\"content\":\"项目记忆已写入（经用户审批\"}}],\"_seq\":14,\"_eventType\":\"delta\"} || {\"choices\":[{\"delta\":{\"content\":\"放行）。BLOCK182A\"}}],\"_seq\":15,\"_eventType\":\"delta\"}"
+    },
+    {
+      "id": "A.err-detail",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "id": "A.deny-envelope",
+      "ok": true,
+      "detail": "guardKey=memory:.petri/memory.md requestId=apr_76b4fd05c242b9c143"
+    },
+    {
+      "id": "A.approved-exec",
+      "ok": true,
+      "detail": "审批后真实执行"
+    },
+    {
+      "id": "A.file-written",
+      "ok": true,
+      "detail": "内容含 Python=true"
+    },
+    {
+      "id": "B.fact-created",
+      "ok": true,
+      "detail": "id=fact_643742f7-101"
+    },
+    {
+      "id": "B.correction-applied",
+      "ok": true,
+      "detail": "newId=fact_23a48cb6d80be40543 correctedFrom=fact_643742f7-101"
+    },
+    {
+      "id": "B.old-superseded",
+      "ok": true,
+      "detail": "old.status=superseded → fact_23a48cb6d80be40543"
+    },
+    {
+      "id": "B.audit-chain",
+      "ok": true,
+      "detail": "audit n=2 actions=supersede,correction"
+    },
+    {
+      "id": "C.lazy-decay",
+      "ok": true,
+      "detail": "status=decayed"
+    },
+    {
+      "id": "C.decay-audit",
+      "ok": true,
+      "detail": "decay 动作入审计"
+    }
+  ]
+}
