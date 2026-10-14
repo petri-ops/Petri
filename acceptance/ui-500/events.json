@@ -1,0 +1,120 @@
+{
+  "at": "2026-10-14T05:53:23.936Z",
+  "conversationId": "conv_faa7b194-4a4",
+  "activePreset": "deepseek-chat",
+  "contextWindow": 8000,
+  "maxTokens": 8192,
+  "compacted": [
+    {
+      "taskId": "49c9b9de-8aa4-4107-bc48-1dab07c7dc7c",
+      "dropped": 3,
+      "summarized": false,
+      "summaryHead": null
+    }
+  ],
+  "budgetTrimmed": [
+    {
+      "taskId": "6825af36-e81c-4100-9b49-f603a33e511d",
+      "pct": 100,
+      "messagesTokensUsed": 10028,
+      "contextWindow": 8000
+    },
+    {
+      "taskId": "49c9b9de-8aa4-4107-bc48-1dab07c7dc7c",
+      "pct": 100,
+      "messagesTokensUsed": 11724,
+      "contextWindow": 8000
+    },
+    {
+      "taskId": "49c9b9de-8aa4-4107-bc48-1dab07c7dc7c",
+      "pct": 0,
+      "messagesDropped": 3,
+      "messagesTokensUsed": 0,
+      "contextWindow": 8000
+    }
+  ],
+  "uiBudgetEvents": [
+    {
+      "contextWindow": 8000,
+      "messagesTokensUsed": 10028,
+      "systemPromptTokens": 1532,
+      "messagesTokens": 304,
+      "pct": 100,
+      "trimmed": true,
+      "knowledgeTokens": 0
+    },
+    {
+      "contextWindow": 8000,
+      "messagesTokensUsed": 10028,
+      "systemPromptTokens": 1532,
+      "messagesTokens": 10028,
+      "pct": 81,
+      "trimmed": false,
+      "knowledgeTokens": 0
+    },
+    {
+      "contextWindow": 8000,
+      "messagesTokensUsed": 11724,
+      "systemPromptTokens": 1532,
+      "messagesTokens": 2000,
+      "pct": 100,
+      "trimmed": true,
+      "knowledgeTokens": 0
+    },
+    {
+      "contextWindow": 8000,
+      "messagesTokensUsed": 11724,
+      "systemPromptTokens": 1532,
+      "messagesTokens": 11724,
+      "pct": 95,
+      "trimmed": false,
+      "knowledgeTokens": 0
+    },
+    {
+      "contextWindow": 8000,
+      "messagesTokensUsed": 0,
+      "systemPromptTokens": 1532,
+      "messagesTokens": 0,
+      "pct": 0,
+      "trimmed": true,
+      "knowledgeTokens": 0
+    }
+  ],
+  "results": [
+    {
+      "id": "setup.conversation",
+      "ok": true,
+      "detail": "project=p_mv7p0pct_wvai conv=conv_faa7b194-4a4"
+    },
+    {
+      "id": "round1.evidence",
+      "ok": true,
+      "detail": "idle=true trimmed=1 compacted=0"
+    },
+    {
+      "id": "round2.evidence",
+      "ok": true,
+      "detail": "idle=true trimmed=3 compacted=1 dropped=3 summarized=false"
+    },
+    {
+      "id": "ui.token-budget-events",
+      "ok": true,
+      "detail": "帧数=5 trimmed帧=3 最大pct=100"
+    },
+    {
+      "id": "api.compaction-events",
+      "ok": true,
+      "detail": "context_compacted=1 首条={\"taskId\":\"49c9b9de-8aa4-4107-bc48-1dab07c7dc7c\",\"dropped\":3,\"summarized\":false,\"summaryHead\":null}"
+    },
+    {
+      "id": "api.trimmed-budget-events",
+      "ok": true,
+      "detail": "token_budget(trimmed)=3 首条={\"taskId\":\"6825af36-e81c-4100-9b49-f603a33e511d\",\"pct\":100,\"messagesTokensUsed\":10028,\"contextWindow\":8000}"
+    },
+    {
+      "id": "ui.trimmed-budget-events",
+      "ok": true,
+      "detail": "UI 侧 trimmed 帧=3"
+    }
+  ]
+}
