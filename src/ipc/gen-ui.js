@@ -78,7 +78,7 @@ async function persistWidgetState(scopeKey, filePath, state) {
 }
 
 async function prepareGenUi(event, payload) {
-  const { computeScopeRoot, computeScopeKey, realpathScopeRoot, assertInsideScope } = require('../main/gen-ui/paths');
+  const { computeScopeRoot, computeScopeKey, realpathScopeRoot, assertInsideScope, resolveFragmentPath } = require('../main/gen-ui/paths');
   const { HTML_MAX_BYTES, createGenUiSession, setGenUiWidgetState, SCHEME } = require('../main/gen-ui/scheme');
   const fs = require('fs');
 
@@ -95,9 +95,30 @@ async function prepareGenUi(event, payload) {
     const workspacePath = await resolveWorkspacePath(projectId);
     if (!workspacePath) return { ok: false, code: 'project-not-found', message: 'project workspace not found' };
 
-    const scopeRoot = computeScopeRoot(workspacePath, conversationId);
-    const scopeRootReal = realpathScopeRoot(scopeRoot);
-    const realFilePath = assertInsideScope(scopeRootReal, filePath);
+    // BLOCK-181 代行评估抓真 — 两处路径缺陷一次修：
+    // ① 渲染层传的是相对 filePath，assertInsideScope 的 realpathSync 按
+    //    主进程 CWD 解析 → 永远找不到文件（dev/打包均复现）。相对路径必须
+    //    先按 scopeRoot 解析为绝对。
+    // ② 模型手写 ::visualize 路径可能截断/变形 conversationId——exact 寻址
+    //    失败时按 basename 回退解析+自愈改名（下游卡片/getData 全链可用）。
+    let scopeRoot = computeScopeRoot(workspacePath, conversationId);
+    let realFilePath;
+    try {
+      const scopeRootReal = realpathScopeRoot(scopeRoot);
+      const candidate = path.isAbsolute(filePath)
+        ? filePath
+        : path.join(scopeRootReal, filePath);
+      realFilePath = assertInsideScope(scopeRootReal, candidate);
+    } catch (error) {
+      const rescued = resolveFragmentPath({ workspacePath, conversationId, filePath });
+      if (!rescued) throw error;
+      scopeRoot = computeScopeRoot(workspacePath, conversationId);
+      const scopeRootReal = realpathScopeRoot(scopeRoot);
+      const candidate = path.isAbsolute(rescued.path)
+        ? rescued.path
+        : path.join(scopeRootReal, rescued.path);
+      realFilePath = assertInsideScope(scopeRootReal, candidate);
+    }
 
     const stat = fs.statSync(realFilePath);
     if (!stat.isFile()) return { ok: false, code: 'file-not-found', message: 'not a regular file' };

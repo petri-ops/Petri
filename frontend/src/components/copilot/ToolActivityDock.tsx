@@ -255,11 +255,16 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
           </button>
         </div>
       </div>
-      {activeProcess && (
+      {/* BLOCK-181 代行评估抓真 — 纯 spawn 流没有 activeProcess（后台进程事件仅
+          workspace_exec_background 发），但编排图的数据源是 subAgentTasks：
+          图形态开启或有子任务时渲染 dock 体，不再被 activeProcess 一票否决。 */}
+      {(activeProcess || (showGraph && subAgentTasks.length > 0)) && (
         <>
-          <div className={styles.command} title={activeProcess.command}>
-            {activeProcess.command}
-          </div>
+          {activeProcess && (
+            <div className={styles.command} title={activeProcess.command}>
+              {activeProcess.command}
+            </div>
+          )}
           {showGraph && subAgentTasks.length > 0 ? (
             <OrchestrationGraph
               tasks={subAgentTasks.map((t) => ({
@@ -270,7 +275,7 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
               }))}
               rootTaskId={conversationId ? getConversationRunSnapshot(conversationId)?.taskId ?? null : null}
             />
-          ) : (
+          ) : activeProcess ? (
             <pre
               ref={logRef}
               className={styles.log}
@@ -279,19 +284,21 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
             >
               {activeProcess.logTail || '（暂无输出）'}
             </pre>
+          ) : null}
+          {activeProcess && (
+            <div className={styles.footer}>
+              <button
+                type="button"
+                className={`${styles.footerBtn} ${autoScroll ? styles.footerBtnActive : ''}`}
+                onClick={() => setAutoScroll((v) => !v)}
+                title="自动滚动到最新输出"
+              >
+                自动滚动{autoScroll ? '开' : '关'}
+              </button>
+              {activeProcess.logTruncated && <span className={styles.truncated}>日志仅显示尾部</span>}
+              <span className={styles.meta}>PID {activeProcess.pid}</span>
+            </div>
           )}
-          <div className={styles.footer}>
-            <button
-              type="button"
-              className={`${styles.footerBtn} ${autoScroll ? styles.footerBtnActive : ''}`}
-              onClick={() => setAutoScroll((v) => !v)}
-              title="自动滚动到最新输出"
-            >
-              自动滚动{autoScroll ? '开' : '关'}
-            </button>
-            {activeProcess.logTruncated && <span className={styles.truncated}>日志仅显示尾部</span>}
-            <span className={styles.meta}>PID {activeProcess.pid}</span>
-          </div>
         </>
       )}
     </div>

@@ -1,0 +1,32 @@
+{
+  "suite": "real",
+  "provider": "real",
+  "measures": "model",
+  "at": "2026-10-14T01:09:31.527Z",
+  "tasks": [
+    {
+      "id": "real-coding-fix",
+      "skipped": true,
+      "passed": false,
+      "reason": "real provider 未配置凭据",
+      "criteriaResults": []
+    },
+    {
+      "id": "real-policy-respect",
+      "skipped": true,
+      "passed": false,
+      "reason": "real provider 未配置凭据",
+      "criteriaResults": []
+    },
+    {
+      "id": "real-provider-sanity",
+      "skipped": true,
+      "passed": false,
+      "reason": "real provider 未配置凭据",
+      "criteriaResults": []
+    }
+  ],
+  "pass": 0,
+  "total": 3,
+  "skipped": 3
+}

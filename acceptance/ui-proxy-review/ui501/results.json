@@ -1,6 +1,6 @@
 {
-  "at": "2026-10-14T00:39:41.805Z",
-  "pass": 1,
+  "at": "2026-10-14T01:49:38.049Z",
+  "pass": 2,
   "total": 2,
   "results": [
     {
@@ -10,8 +10,8 @@
     },
     {
       "id": "UI501.graph-rendered",
-      "ok": false,
-      "detail": "ReactFlow 节点=0"
+      "ok": true,
+      "detail": "ReactFlow 节点=2"
     }
   ]
 }
