@@ -1,5 +1,9 @@
 # Petri Desktop Current Handoff
 
+最后更新：2026-10-15（**BLOCK-184-UI-REVIEW-CLEARING 立项发令 active（用户发令「按 plan 全按推荐执行，人眼最小集 4 条留我一次栈窗口过目」=预授权整批+终审窗口一次性集中；评估研判批 11 文档已于 a6f1f76b 提交）**）
+
+**恢复要点（换会话必读）**：①**active 工作包=BLOCK-184 UI 过目清偿批**（plan=docs/block-184-ui-review-clearing-plan.md，status active）。②执行序列=P0 重拉 dev 栈+冻结 12 条清偿清单（UI-466/467/468/469/470/471/481/482/501/503/504/457）→ P1 代行 CDP 走查（证据包=截图+断言 JSON+可复跑探针，落 acceptance/block-184/）→ P2 人眼最小集 4 条（UI-501 画布挂载/UI-503 触发面/UI-457 表单/UI-504 双机分档）**留用户一次栈窗口集中过目** → P3 抓真小修随批 → 收口。③dev 栈 2026-10-15 实测 3000/3001/9222 全不在听，实机前须 `npm run dev`；后端 agent-ws.js 有改码——杀 3001 PID 让 supervisor 重生。④零产品码默认；G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-15（**评估研判批落档（用户裁决「蓝图说明白一点」+「后端 harness 与前端界面同类型比较…确定到每个细节点」）：三份reference 施工图 + 阶段视图已进canonical**
 
 **恢复要点（换会话必读）**：①**无 active 工作包**；队列头=1z BLOCK-184（UI 过目清偿，plan 已就绪，**等用户发令**）。②**读法**：方向=评估报告（§0 七级追踪链 / §5.1 五阶段 / §5.3 注记制为进度真值）；施工=全层对标蓝图（后端 12 层+前端 12 层）+ 设置差距分析。③**下一步三选一待用户拍板**：发令 1z / 先立 2a 阶段 A plan / 先做只读补查（npm audit + 启动性能基线）。④dev 栈实测 3000/3001/9222 全不在听，任何实机前须 `npm run dev`（后端有改码→杀 3001 PID 让 supervisor 重生）。⑤⛔ 不进路线：hooks 产品化（BLOCK-124 定性需改判）、i18n（D-04 待产品决策）、任何 G1+。⑥本批工作树 **11 文件未提交**（M 六份：AUDIT-LOG/DOC-REGISTRY/README/roadmap/backlog/handoff + ?? 五份新文档：评估报告/设置差距/全层对标/BLOCK-184 plan/archive audit-compact），提交随下次收口批走。G0 开发期常态 · 不外推 packaged/Provider/GA。）

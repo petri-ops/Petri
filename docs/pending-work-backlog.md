@@ -5,6 +5,8 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
+最后更新：2026-10-15（**BLOCK-184 立项发令 active（用户发令「按 plan 全按推荐执行，人眼最小集 4 条留我一次栈窗口过目」=预授权整批+终审窗口一次性集中；评估研判批 11 文档已提交 a6f1f76b）**）：1z 翻 active——P0 重拉 dev 栈+冻结 12 条清偿清单 → P1 代行 CDP 走查 → P2 人眼最小集 4 条一次栈窗口过目 → P3 抓真小修 → 收口。2a~2e 维持候选待本包收口后逐项裁决。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-10-15（**评估研判批：队列新增 1z + 2a-2e 六行（规划登记，非发令）**：1z=UI 过目清偿/BLOCK-184（planned，发令待用户确认）→ 2a=设置序列阶段 A 速赢四合一（快捷键面/搜索重置导出/代理/推理档位）→ 2b=评测基线 v2（含双后端 attach 前置）→ 2c=harness 地基三件（事件信封+目录/工具并行调度与暴露面/存储能力协商）→ 2d=设置阶段 B 结构 → 2e=设置阶段 C 治理；依据=评估报告 §5.1 五阶段队列 + 设置差距分析 §7 + 全层对标蓝图 §5；⛔ hooks 产品化与 i18n 待裁决不并入。DOC-REGISTRY 342+README 209-212。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-10-14（**BLOCK-183-DATA-BRIDGE-WS 整包 completed（当日立项当日收口；CP-19 收官=竞争力总纲 19 包全闭环）**：数据桥 WS 化全交付——/m/api/ws `data` 信封（七路径白名单+loopback 自调）+前端 WS-first 3 连失败回退 HTTP；探针 allPass（acceptance/block-183/）；顺手清偿 streamReconnect 4 存量红；真机过隧道属 riders。plan §6。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -127,7 +129,7 @@
 | 1w | 蓝图 W1 / KNW-2 | 渐进披露闭环 completed（BLOCK-157 P2，23ad1154）：agent-runner 技能索引常驻注入（≤12 条/整块 ≤2200/空清单零注入/源码扫描接线钉）+skill_get 正文触发加载（8000 字符截断） | 蓝图 §2④ | **completed** |
 | 1x | 蓝图 W1 / CAP-1 | MCP 粒度审批 completed（BLOCK-157 P3，5cd195d7）：readOnlyHint→retrieval/none/R1（read/plan 档可用），无注释保守维持 execution/R2；实机 workspace-write 档 readOnly 工具回流（波末断言②）——**ORC-2 前置已解锁** | 蓝图 §2③ | **completed** |
 | 1y | 蓝图 W1 / DIST-1 | 插件启停粒度 completed（BLOCK-157 P4，4ef6d666+拓扑修复 cd7c58ac）：installed enabled 标志+加载器尊重+plugin:set-enabled IPC+货架开关；三态重启实机 在场→消失→复现（波末断言③）；**实机抓真=插件目录拓扑脑裂修复（BLOCK-125 家族）**；UI-481 in_progress 待过目 | 蓝图 §2⑤ | **completed** |
-| 1z | UI 过目清偿 / BLOCK-184 | **12 条 in_progress 清偿 + 人眼最小集 4 条**（P1 代行 CDP 走查证据包=截图+断言 JSON+可复跑探针；P2 用户一次栈窗口过目 UI-501 画布/UI-503 触发面/UI-504 双机分档/UI-457 表单；P3 抓真小修随批）；前置=dev 栈重拉（2026-10-15 实测 3000/3001/9222 全不在听，后端有改码须杀 3001）；零产品码为默认；UI-487 复核已 verified 剔除 | plan docs/block-184-ui-review-clearing-plan.md | **planned（2026-10-15 立项文书；发令待用户显式确认）** |
+| 1z | UI 过目清偿 / BLOCK-184 | **12 条 in_progress 清偿 + 人眼最小集 4 条**（P1 代行 CDP 走查证据包=截图+断言 JSON+可复跑探针；P2 用户一次栈窗口过目 UI-501 画布/UI-503 触发面/UI-504 双机分档/UI-457 表单；P3 抓真小修随批）；前置=dev 栈重拉（2026-10-15 实测 3000/3001/9222 全不在听，后端有改码须杀 3001）；零产品码为默认；UI-487 复核已 verified 剔除 | plan docs/block-184-ui-review-clearing-plan.md | **active（2026-10-15 发令；用户「按 plan 全按推荐执行，人眼最小集 4 条留我一次栈窗口过目」）** |
 | 2a | 设置序列·阶段 A 速赢 | **四合一包（零/低依赖，与 1z 文件面零交叠）**：快捷键设置面（键位录制+冲突检测+恢复默认）/ 设置搜索+全景导出与按区重置（凭据沿用既有安全确认）/ 代理设置（httpProxy+noProxy+CA，隧道与网关刚需）/ 模型推理档位（reasoning effort 档位+映射） | docs/settings-capability-gap-analysis-2026-10-15.md §6 P0-1~P0-5 + §7 阶段 A | 候选（待用户裁决；建议紧随 1z） |
 | 2b | 评测基线 v2 | **施工图已备**：ZCode=catalog 五列/判据七层（补 Protocol 帧与「无错误横幅」负向）/mock capture-replay 哨兵防作弊/9 类结构化 diff/formal admission 棘轮；Codex=判据三件套（事件谓词+出站请求归一化+产物断言，禁 sleep）+context_snapshot Normalizer（prompt/工具 schema 变更显形）；含双后端 attach 前置 | 评估报告 §5.1 阶段 2 + 全层对标蓝图 §2 评测层 + §4「学」清单 | 候选（待用户裁决） |
 | 2c | harness 地基三件 | **事件信封+事件目录（traceId/turnId 缺、类型不可枚举）/ 工具元数据单源+并行调度（拓扑分组/环检测/并发上限）+暴露面 6 档 / 存储能力协商（supports_* 式可插拔）**；现存债=tool-metadata 与 CONTRACTS 两套元数据并存未消费 | 全层对标蓝图 §2（协议/工具/持久化三层）+ §5 阶段 3 映射 | 候选（待用户裁决；越晚做越贵） |

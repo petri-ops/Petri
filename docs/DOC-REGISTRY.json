@@ -6465,7 +6465,7 @@
       "capability": "ui-productization",
       "path": "docs/block-184-ui-review-clearing-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "active",
       "phase": "P0-P4",
       "canonical": true,
       "truthDomain": "block-184-ui-review-clearing-plan",
