@@ -16,7 +16,6 @@ import {
 } from '@/lib/events';
 import styles from './ToolActivityDock.module.css';
 import button from '../ui/controls/button.module.css';
-import { Icon } from '@/components/icons/Icon';
 
 /**
  * UI-268 — 「后台进程」指示器（composer 工具栏内联图标 + 展开浮层面板）
@@ -198,7 +197,7 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
         aria-label="后台进程"
         data-testid="tool-activity-dock-trigger"
       >
-        <Icon name="zap" size={14} />
+        <span className={styles.glyph} aria-hidden="true">⎇</span>
         {hasActive && (
           <span
             className={styles.dot}
