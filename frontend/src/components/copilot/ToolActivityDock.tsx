@@ -187,7 +187,6 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
   if (dismissed || !conversationId || (processes.length === 0 && subAgentTasks.length === 0)) return null;
 
   if (!expanded) {
-    const hasActive = runningProcessCount > 0 || subAgentTasks.some((t) => t.status === 'running');
     return (
       <button
         type="button"
@@ -198,13 +197,6 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
         data-testid="tool-activity-dock-trigger"
       >
         <span className={styles.glyph} aria-hidden="true">⎇</span>
-        {hasActive && (
-          <span
-            className={styles.dot}
-            data-status="running"
-            aria-hidden="true"
-          />
-        )}
       </button>
     );
   }
