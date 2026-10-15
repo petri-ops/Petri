@@ -206,12 +206,6 @@
   height: 7px;
 }
 
-/* 旧折叠 chip（保留兼容，不再渲染） */
-
-.chip {
-  display: none;
-}
-
 .dot {
   width: 8px;
   height: 8px;
