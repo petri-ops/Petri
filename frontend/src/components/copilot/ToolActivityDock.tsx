@@ -198,7 +198,7 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
         aria-label="后台进程"
         data-testid="tool-activity-dock-trigger"
       >
-        <Icon name="git-branch" size={14} />
+        <Icon name="zap" size={14} />
         {hasActive && (
           <span
             className={styles.dot}
