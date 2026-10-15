@@ -90,24 +90,24 @@ describe('ToolActivityDock (UI-268 后台进程浮窗)', () => {
       expect(screen.getByTestId('tool-activity-dock')).toBeTruthy();
     });
 
-    // 折叠为 chip
+    // 折叠为图标钮（UI-268 改造：composer 内联图标，无可见文本）
     fireEvent.click(screen.getByTitle('折叠'));
     expect(screen.queryByTestId('tool-activity-dock')).toBeNull();
-    expect(screen.getByText(/后台进程/)).toBeTruthy();
+    expect(screen.getByTestId('tool-activity-dock-trigger')).toBeTruthy();
 
     // 折叠态重渲染不强拆
     rerender(<ToolActivityDock conversationId="conv-1" projectId="p-1" />);
     expect(screen.queryByTestId('tool-activity-dock')).toBeNull();
-    expect(screen.getByText(/后台进程/)).toBeTruthy();
+    expect(screen.getByTestId('tool-activity-dock-trigger')).toBeTruthy();
 
-    // chip 展开
-    fireEvent.click(screen.getByTitle('后台进程'));
+    // 图标钮展开
+    fireEvent.click(screen.getByTestId('tool-activity-dock-trigger'));
     expect(screen.getByTestId('tool-activity-dock')).toBeTruthy();
 
     // 关闭后隐藏，新事件再弹出
     fireEvent.click(screen.getByTitle('关闭'));
     expect(screen.queryByTestId('tool-activity-dock')).toBeNull();
-    expect(screen.queryByText(/后台进程/)).toBeNull();
+    expect(screen.queryByTestId('tool-activity-dock-trigger')).toBeNull();
     act(() => {
       dispatchPetriEvent(petriEvents.agentBackgroundProcess, {
         processId: 'bg-2',

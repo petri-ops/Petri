@@ -1,9 +1,9 @@
-/* BLOCK-36 — 会话级「执行记录」浮窗（右下角固定锚点，吸收 BLOCK-34 样式并扩展分组详情区） */
+/* UI-268 改造 — 会话级「后台进程」浮窗（锚定 composer 工具栏上方，点击图标展开） */
 
 .dock {
   position: fixed;
   right: 16px;
-  bottom: 16px;
+  bottom: 60px;
   z-index: 90;
   display: flex;
   flex-direction: column;
@@ -184,33 +184,24 @@
   margin-left: auto;
 }
 
-/* 折叠 chip */
+/* 折叠态：composer 工具栏内联图标钮（UI-268 改造：从独立浮条收入 composer bar） */
+
+.composerIcon {
+  position: relative;
+}
+
+.composerIcon .dot {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 7px;
+  height: 7px;
+}
+
+/* 旧折叠 chip（保留兼容，不再渲染） */
 
 .chip {
-  position: fixed;
-  right: 16px;
-  bottom: 16px;
-  z-index: 90;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--petri-space-2);
-  height: 30px;
-  padding: 0 var(--petri-space-4);
-  border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-pill);;
-  background: var(--petri-bg-surface);
-  box-shadow: var(--petri-shadow-menu);
-  color: var(--petri-text-secondary);
-  font-size: var(--petri-font-size-body);
-  cursor: pointer;
-}
-
-.chip:hover {
-  color: var(--petri-text);
-}
-
-.chipLabel {
-  white-space: nowrap;
+  display: none;
 }
 
 .dot {

@@ -16,15 +16,15 @@ import {
 } from '@/lib/events';
 import styles from './ToolActivityDock.module.css';
 import button from '../ui/controls/button.module.css';
+import { Icon } from '@/components/icons/Icon';
 
 /**
- * UI-268 — 「后台进程」浮窗（右下角，持久输出独立小窗口）
+ * UI-268 — 「后台进程」指示器（composer 工具栏内联图标 + 展开浮层面板）
  *
- * BLOCK-36 曾同时承载工具活动分组 + 后台进程 tab；UI-268 起工具活动记录
- * 改为会话内摘要条就地向下展开（SimpleChat ToolActivityList 手风琴），
- * 本浮窗只保留后台进程（workspace_exec_background）职责：
+ * 折叠态=28×28 图标钮（cpu 图标+状态脉冲点），位于 sc-composer-right 预算环左侧；
+ * 展开态=fixed 浮层面板（右下角锚定 composer 上方）。
  * - 检测到后台进程事件自动弹出，1s 轮询进程表 + 日志尾部；
- * - 手动关闭（×）后新进程再弹出；可折叠为 chip（运行数 + 状态点）。
+ * - 手动关闭（×）后新进程再弹出；可折叠回图标。
  */
 
 const POLL_INTERVAL_MS = 1000;
@@ -191,18 +191,18 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
     return (
       <button
         type="button"
-        className={styles.chip}
+        className={`sc-composer-icon-btn ${styles.composerIcon}`}
         onClick={() => setExpanded(true)}
-        title="后台进程"
+        title={runningProcessCount > 0 ? `后台进程 ${runningProcessCount} 运行中` : '后台进程'}
+        aria-label="后台进程"
+        data-testid="tool-activity-dock-trigger"
       >
+        <Icon name="git-branch" size={14} />
         <span
           className={styles.dot}
           data-status={runningProcessCount > 0 ? 'running' : 'idle'}
           aria-hidden="true"
         />
-        <span className={styles.chipLabel}>
-          后台进程 {runningProcessCount > 0 ? `${runningProcessCount} 运行中` : ''}
-        </span>
       </button>
     );
   }

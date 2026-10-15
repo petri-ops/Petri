@@ -1901,6 +1901,8 @@ export function SimpleChat({
               <div className="sc-composer-right">
                 {/* BLOCK-68 / UI-317 —— ⋯ 工具菜单整体移除：刷新文件链接改自动化
                     （订阅 projectWorkspaceChanged），模型 I/O 迁右栏 tab；不预留空壳 */}
+                {/* UI-268 改造：后台进程指示器从独立浮条收入 composer 工具栏（图标+状态点，点击展开浮层） */}
+                <ToolActivityDock conversationId={conversationId} projectId={projectId} />
                 {/* BLOCK-20: live context-budget ring — UI-301 加映：移到供应商左侧；
                     UI-448 加映 v3 — slimComposer 悬挂面不渲染 */}
                 {!slimComposer && <ContextBudgetButton budget={tokenBudget} activeContextWindow={undefined} />}
@@ -2092,9 +2094,6 @@ export function SimpleChat({
       {/* UI-269 — 右缘自定义滚动条：锚定 sc-outer（会话栏最右边界），与 rail 左右对称；
           隐藏系统原生 thumb，常驻纤细 thumb + 轨道线 */}
       {!composerOnly && <ChatScrollbar containerRef={scrollRef} />}
-
-      {/* UI-268: 「后台进程」浮窗（持久输出独立小窗口） */}
-      <ToolActivityDock conversationId={conversationId} projectId={projectId} />
 
       {/* Image Preview Modal */}
       {previewImage && (
