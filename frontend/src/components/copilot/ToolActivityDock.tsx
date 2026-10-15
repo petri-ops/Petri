@@ -188,21 +188,24 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
   if (dismissed || !conversationId || (processes.length === 0 && subAgentTasks.length === 0)) return null;
 
   if (!expanded) {
+    const hasActive = runningProcessCount > 0 || subAgentTasks.some((t) => t.status === 'running');
     return (
       <button
         type="button"
         className={`sc-composer-icon-btn ${styles.composerIcon}`}
         onClick={() => setExpanded(true)}
-        title={runningProcessCount > 0 ? `后台进程 ${runningProcessCount} 运行中` : '后台进程'}
+        title={runningProcessCount > 0 ? `后台进程 ${runningProcessCount} 运行中` : '编排子任务'}
         aria-label="后台进程"
         data-testid="tool-activity-dock-trigger"
       >
         <Icon name="git-branch" size={14} />
-        <span
-          className={styles.dot}
-          data-status={runningProcessCount > 0 ? 'running' : 'idle'}
-          aria-hidden="true"
-        />
+        {hasActive && (
+          <span
+            className={styles.dot}
+            data-status="running"
+            aria-hidden="true"
+          />
+        )}
       </button>
     );
   }
