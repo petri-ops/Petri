@@ -6459,8 +6459,96 @@
         "rate-limit"
       ],
       "notes": "2026-10-14 当日立项当日收口 completed（2026-10-12 用户裁决「可以排期修」的 knownGap 落地）：拆除失实死码+主进程侦测推送（gen-ui:sandbox-hijacked，进程登记法+did-fail-load CSP 拦截路——OOPIF routingId 跨导航会变/fragment 自导航不派发 will/CSP 拦截不提交 did，全参位实测定案）+GenUiCard 帧匹配即时重置（恢复窗口 9-11s→亚秒）+30s×3 循环限幅挂起面；组件红绿 4/4+gen-ui 37/37+实机探针全链 PASS。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-184-UI-REVIEW-CLEARING",
+      "capability": "ui-productization",
+      "path": "docs/block-184-ui-review-clearing-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "phase": "P0-P4",
+      "canonical": true,
+      "truthDomain": "block-184-ui-review-clearing-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-15",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "ui-review",
+        "proxy-evaluation",
+        "evidence-pack",
+        "human-eye-minimal-set",
+        "ledger-clearing"
+      ],
+      "notes": "2026-10-15 立项文书 planned（用户裁决「按照我们项目内部的规范 是不是应该建立plan」+「继续」；发令待显式确认）：UI 过目清偿批——台账 in_progress 存量（预估 12 条：UI-457/466/467/468/469/470/471/481/482/501/503/504；UI-487 复核已 verified 剔除）按「代行评估批+人眼最小集 4 条」分层收口；前置=dev 栈重拉（10-15 实测三端口全不在听）；走查断言借鉴 ZCode testid 合同/唯一去向不变量（模式借鉴零拷贝）；抓真小修随批；零产品码为默认。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "DESKTOP-EVAL-20261015",
+      "path": "docs/Petri-Desktop-Evaluation-Report-2026-10-15.md",
+      "kind": "audit",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "desktop-eval-20261015",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-15",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "evaluation",
+        "blueprint",
+        "scorecard",
+        "reference-benchmark",
+        "iteration-roadmap",
+        "G0"
+      ],
+      "notes": "2026-10-15 落档 reference（用户裁决「这应该是个蓝图研判 有落档吗」）：全方位评估报告 v2——进度追踪链（§0 六级读序回答「做到哪里了」）+11 棱镜合并评分卡（4 族：结果/投入/风险/外部标尺）+ZCode/Codex 参照库 evals v2 施工图（catalog 五列/判据七层/mock capture-replay/判据三件套禁 sleep/context_snapshot 棘轮；Apache-2.0 模式借鉴零拷贝）+五步迭代路线（①BLOCK-184 UI 过目清偿批 planned → ②TTFS/v2 二选一 → ③v2 含双后端 attach → ④8 维复测随包 → ⑤收尾族）+外部专家团映射。核心判词=病因从能力缺失转为确认与兑现缺失。进度真值以 §0 追踪链 canonical 台账为准。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "SETTINGS-CAPABILITY-GAP-20261015",
+      "path": "docs/settings-capability-gap-analysis-2026-10-15.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "settings-capability-gap",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-15",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "settings",
+        "gap-analysis",
+        "zcode",
+        "codex",
+        "shortcuts",
+        "approval",
+        "config-schema",
+        "proxy",
+        "phase-plan",
+        "G0"
+      ],
+      "notes": "2026-10-15 落档 reference（用户指令：全面梳理 ZCode/Codex 设置页全部配置项并与本项目对比给出优先级与分阶段方案）：三方全量盘点（ZCode≈150 项三层落点+zod schema；Codex 103 顶层键/1402 字段路径/9 层优先级+profile+requirements；Petri 8 分区≈60 项六落点无 schema）+架构对比+差距矩阵+优先级表+三阶段落地（速赢4/结构3/治理5）。核心缺口=快捷键面/全局审批档位/设置搜索重置导出/配置 schema 优先级/代理设置/推理档位；Petri 独有优势=决策原语阈值台账/成本熔断/记忆审计。i18n 与 hooks 保持待裁决不并入路线。模式借鉴零拷贝。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "FULL-STACK-BENCHMARK-BLUEPRINT-20261015",
+      "path": "docs/full-stack-benchmark-blueprint-2026-10-15.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "full-stack-benchmark-blueprint",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-15",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "benchmark",
+        "harness",
+        "ui",
+        "layer-comparison",
+        "upgrade-direction",
+        "zcode",
+        "codex",
+        "blueprint",
+        "G0"
+      ],
+      "notes": "2026-10-15 落档 reference（用户指令「蓝图内容不够全面…后端 harness 与前端界面同类型比较…确定到每个细节点…规划优化升级计划」）：六路只读清点（ZCode/Codex/Petri × 后端/前端）后统一比对——①架构分层三方对照（后端 12 层 + 前端 12 层）②逐层细颗粒缺口表（含机制名+代码锚点+价值+方向判定）③四类筛子（学/借/不做/自强化）④缺口映射回五阶段队列。三反转发现：Petri loop 工程四件套（contract/controller/validators/repair/checkpoint）领先两家、成果面+设计系统棘轮领先、传输面接近平齐；真正落后在协议信封/并行调度/压缩参数化/approval 交集/hooks/context_snapshot/虚拟滚动/testid 合同。模式借鉴零拷贝。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
-  "lastUpdated": "2026-10-14",
-  "documentCount": 337
+  "lastUpdated": "2026-10-15",
+  "documentCount": 342
 }
