@@ -34,6 +34,15 @@ status: active
 | UI-504 | 联邦镜像（双机段） | P2 人眼/双机；无环境则分档挂起 |
 | UI-457 | 表单过目（2026-10-01 遗留用户待办） | P2 人眼（或可脚本化则并 P1） |
 
+### §2 附录：P0 冻结清偿清单（2026-10-15 实跑冻结；18:15 二次复扫确认）
+
+- **冻结集合 12 条**（`ui:audit:check` PASS + 台账全量复扫；UI-487 复核已 verified 剔除）：
+  - P1 代行 CDP 走查 8 条：UI-466 / UI-467 / UI-468 / UI-469 / UI-470 / UI-471 / UI-481 / UI-482
+  - P2 人眼最小集 4 条：UI-501 / UI-503 / UI-457 / UI-504
+- **台账落点确认**：UI-466~471+481/482+457 为 `## UI-XXX:` 明细节（L4557~L4711 区段）；UI-501/503/504 为「最后更新」散文条目（L7~L17）；明细表 145 verified/1 not_applicable/4 cancelled，**表格行零 in_progress**——清偿翻转落明细节与散文条目状态字样。
+- **P0 环境实测（18:15 复核）**：整栈重启后 3000(vite 200)/3001(catalog=7 含 deseq2)/9222(CDP)/3005(网关) 四面全就绪；dev 库 0 tool_jobs / 0 artifact_revisions——UI-469 队位段、UI-470 artifact 面段、UI-471 隧道探活段、UI-482 断连段按 plan §6 如实分档，不硬翻。
+- **P1 走查姿势（实测校准三条）**：①petri-pack-bio 经扩展页 UI 一键安装（记录制，finally 卸载复原）后**杀 3001 PID 不会重生**（backend-proc-manager 无 auto-respawn）——插件注册须走整栈重启配方 `restart-dev-stack.sh`（~2-3min，vite 长活不重启）；②右栏 tab 在收起态须经标题栏「+」（aria-label=展开更多工具）菜单打开，直按 tab 词表按钮无效；③刮擦项目与临时 git 仓走 REST 播种、finally 清理。探针=`scripts/block184-p1-live.mjs`，证据=`acceptance/block-184/`。
+
 ## 3. 执行方案
 
 - **P0 栈与清点**：`npm run dev` 重拉（3000 Vite/3001 后端/9222 CDP；先杀 3001 PID 让 supervisor 带新码）→ `npm run ui:audit:check` + 台账复扫 → 冻结清偿集合清单（预估 12 条）写入本 plan §2 附录行。
@@ -65,3 +74,11 @@ status: active
 ## 7. 发令条件
 
 用户显式确认发令（建议口径：「按 plan 全按推荐执行，人眼最小集 4 条留我一次栈窗口过目」= 预授权整批 + 终审窗口一次性集中，沿用四批次预授权先例）。
+
+## 8. P1 代行批收口笔录（2026-10-15）
+
+- **结果**：`scripts/block184-p1-live.mjs` 第十一轮 **26/26 断言全绿 + 4 条 env 段如实分档**（`acceptance/block-184/block184-p1-live.json` allPass=true，截图 12 张）；P1 八条台账翻转：UI-466/467/468/469/470/481/482 → **verified（代行评估）**，UI-471（含 UI-468 加映）probe 端到端段无隧道环境**分档挂起**（plan §6 回退路径，不硬翻）。
+- **接管说明**：CodeBuddy 会话首/二轮后由主代理接管续跑（用户裁决「能停掉 你来进行吗」）；接管面=只杀其探针进程（42216/45312），dev 栈与未提交资产保留。
+- **抓真八处全部为探针侧缺陷，产品代码零改动（plan §5 零产品代码默认成立）**：①A 段起手态假设未安装→状态自适应；②Z 段卸载判据等确认弹层——dev 投影桥无 `uninstallPlan` 通道走退化直接卸载→改 `/api/packs/installed` API 权威核验；③finally `cdp` 作用域 ReferenceError 致清理链静默断裂；④E/G 段选择器加固（联邦弹层 toggle 反关/指挥中心双判据）；⑤Electron CDP `Target.createTarget` 页面级+浏览器级均 -32000 不支持→H 段改 9223 测试实例原地导航；⑥`clickByText` 全局文本匹配先命中 composer 快捷动作钮（「分析单细胞数据…」）致分析 tab 未开→`openRightTab` 限定 `#titlebar-tool-menu` 容器；⑦deseq2 卡定位按 `li.textContent` 误命中 deg-standardizer（描述合法提及「将 DESeq2…」）→改卡标题锚定；⑧tree 递归三重界（`TREE_RECURSIVE_MAX_DEPTH=3` root=0，500 窗先根层）致「截断提示」与「子目录可达」互斥→拆双刮擦工作区（小=消歧+demo，大=520 根文件触截断）。
+- **环境复原**：批末整栈重启使 pack 卸载的后端注销生效（catalog 注销核验见收尾门禁段）；pack 起手态=未安装（与 P0 冻结时一致）。
+- **余量→已处置**：P2 人眼最小集 4 条——UI-457 翻 **verified（代行评估）**（P1 截图等价人眼过目，全要素在场）；UI-501/503/504 按 plan §6 **分档挂起**（分别需真窗 spawn 视觉确认/artifact 数据/双机环境，不硬翻）。**冻结集合 12 条全闭环**（8 verified + 1 verified(P2代行) + 3 环境分档），台账 in_progress 存量仅剩环境依赖分档项。

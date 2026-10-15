@@ -1,0 +1,163 @@
+{
+  "name": "block184-p1",
+  "startedAt": "2026-10-15T14:02:34.121Z",
+  "finishedAt": "2026-10-15T14:03:48.489Z",
+  "assertions": [],
+  "allPass": true,
+  "results": [
+    {
+      "id": "UI481.card-visible",
+      "ok": true,
+      "detail": "domain-pack-petri-pack-bio visible=true installed=false（起手态）"
+    },
+    {
+      "id": "UI481.pack-toggle-visible",
+      "ok": true,
+      "detail": "{\"present\":true,\"text\":\"停用\"}"
+    },
+    {
+      "id": "UI481.toggle-disable-flip",
+      "ok": true,
+      "detail": "after 停用 click → \"启用\""
+    },
+    {
+      "id": "UI481.toggle-enable-restore",
+      "ok": true,
+      "detail": "after 启用 click → \"停用\""
+    },
+    {
+      "id": "ENV.backend-respawn-plugins",
+      "ok": true,
+      "detail": "catalog tools=7 sample=deg-standardizer,deseq2,expression-qc,go-kegg"
+    },
+    {
+      "id": "ENV.deseq2-registered",
+      "ok": true,
+      "detail": "deseq2 in catalog=true"
+    },
+    {
+      "id": "UI467.seed-project",
+      "ok": true,
+      "detail": "projectId=p_mv9lyz75_t6ic"
+    },
+    {
+      "id": "UI467.form-mounted",
+      "ok": true,
+      "detail": "「按以上参数运行」在场（tab=true 展开=deseq2-config）"
+    },
+    {
+      "id": "UI457.file-placeholder",
+      "ok": true,
+      "detail": "「<选择文件>」占位在场"
+    },
+    {
+      "id": "UI467.dropdown-path-disambiguation",
+      "ok": true,
+      "detail": "{\"count\":2,\"withSlash\":1,\"sample\":[\"counts.csv\",\"data/nested/counts_nested.csv\"]}"
+    },
+    {
+      "id": "UI457.param-defaults",
+      "ok": true,
+      "detail": "[{\"id\":\"\",\"value\":\"condition\"},{\"id\":\"\",\"value\":\"WT\"},{\"id\":\"\",\"value\":\"KO\"},{\"id\":\"\",\"value\":\"0.05\"},{\"id\":\"\",\"value\":\"1\"}]"
+    },
+    {
+      "id": "UI467.demo-oneclick",
+      "ok": true,
+      "detail": "clicked=true tree含demo-data=true UI状态行=true"
+    },
+    {
+      "id": "UI467.truncation-hint",
+      "ok": true,
+      "detail": "大工作区(520 根文件)「仅列出前 500 项」在场=true 展开=deseq2-config"
+    },
+    {
+      "id": "UI466.seed-project",
+      "ok": true,
+      "detail": "projectId=p_mv9lz8rl_01av"
+    },
+    {
+      "id": "UI466.file-list",
+      "ok": true,
+      "detail": "rvw-file-list/dock-tree=true"
+    },
+    {
+      "id": "UI466.summary-and-progress",
+      "ok": true,
+      "detail": "stats=true progress=\"0/2 已审\""
+    },
+    {
+      "id": "UI466.hunk-decision-advances",
+      "ok": true,
+      "detail": "\"0/2 已审\" → \"1/2 已审\""
+    },
+    {
+      "id": "UI469.jobs-wall-present",
+      "ok": true,
+      "detail": "指挥中心页在场（文本/结构双判据）"
+    },
+    {
+      "id": "UI469.honest-empty",
+      "ok": true,
+      "detail": "多任务俯瞰 · 只读投影 指挥中心 活跃 0 · 历史 0 · 5s 刷新 × 当前环境不支持独立窗管理（仅桌面版可用）；内容以只读视图展示。 结果存储：0 个作业目录 / 0.0MB（） 暂无作业记录——在任意项目里运行一个分析后，瓦片会出现在这里。 快捷键 Ctrl/Cmd+Shift+C 随时打开指挥中心。"
+    },
+    {
+      "id": "UI469.queue-position",
+      "ok": null,
+      "tier": "env",
+      "detail": "dev 库 0 tool_jobs——「排队中 #N」位次段无运行中 job 可分档（组件/契约级证据在册）"
+    },
+    {
+      "id": "UI470.result-tab-present",
+      "ok": true,
+      "detail": "结果 tab 打开；空态在场=true"
+    },
+    {
+      "id": "UI470.artifact-surfaces",
+      "ok": null,
+      "tier": "env",
+      "detail": "dev 库 0 artifact_revisions——canExport/钉住占位/对比空态面段分档（契约级 36/36 在册）"
+    },
+    {
+      "id": "UI468.mobile-sync-panel",
+      "ok": true,
+      "detail": "mobile-sync-panel=true"
+    },
+    {
+      "id": "UI468.tunnel-badge-honest",
+      "ok": true,
+      "detail": "{\"claimsPublic\":false,\"honest\":true}"
+    },
+    {
+      "id": "UI471.tunnel-probe",
+      "ok": null,
+      "tier": "env",
+      "detail": "无真实隧道环境——probe 三态端到端段分档（组件 12/12 + BLOCK-152 T 轨契约在册）"
+    },
+    {
+      "id": "UI482.projection-page-loads",
+      "ok": true,
+      "detail": "尚未配对 配对码无效或已过期，请在桌面端重新生成 配对码为一次性且 5 分钟内有效。"
+    },
+    {
+      "id": "UI482.connected-no-banner",
+      "ok": true,
+      "detail": "断开/重连 banner=false"
+    },
+    {
+      "id": "UI482.disconnect-banner",
+      "ok": null,
+      "tier": "env",
+      "detail": "断连横幅需中断传输链实测——连接态已验证，断连段按 plan §6 分档（组件契约在册）"
+    },
+    {
+      "id": "CLEANUP.pack-uninstalled",
+      "ok": true,
+      "detail": "UI 点击=true 弹层=true API 核验已卸载=true"
+    },
+    {
+      "id": "CLEANUP.restart-deferred",
+      "ok": true,
+      "detail": "卸载后重启由收尾批单独执行（catalog 注销核验在收尾笔录）"
+    }
+  ]
+}

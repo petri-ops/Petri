@@ -1,5 +1,6 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-16（**BLOCK-184 P2 人眼最小集处置（接管批代行+分档）**：①**UI-457 翻 verified（代行评估）**——P1 截图 acceptance/block-184/ui467-analysis-form.png 已展示 deseq2 配置展开态全要素（文件下拉 `<选择文件>` 占位+嵌套 path 消歧+参数默认回填+demo 载入+500 截断提示），等价人眼过目；②**UI-501 分档挂起**——功能链已证（CP-9 live spawn→dock 自动弹出+组件 4/4），画布节点视觉渲染为纯人眼项（dock 收起时序竞争无法 CDP 断言），待用户下次真窗跑任务顺手点「⎇」确认；③**UI-503 分档挂起**——viewer 渲染已证（ui503-viewer.png），继续分析菜单触发需 artifact_revisions 数据（dev 库 0），待真实分析产出后顺手过目；④**UI-504 分档挂起**——联邦双机实测段无第二台机器环境，按 CP-16 先例分档登记。四条处置=plan §2 冻结集合 12 条全闭环（P1 代行 8+P2 人眼 4→1 verified+3 分档），in_progress 存量仅剩环境依赖分档项。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-14（**UI-512 翻 verified（代行实机评估，用户授权「你来搞」）**：投影数据桥 WS-first 传输——Skills/插件/领域包/运行时/AI 设置五读面改共享单条 /m/api/ws 信封（桌面零变化；UI 元素零增删，可感差异=Network 面仅一条 WS）；传输失败逐请求静默回退 HTTP+3 连失败 5min 冷却。契约 20/20+8/8+邻域 13/13+tsc 0+探针 allPass（七路径与 HTTP 逐字节同形状，acceptance/block-183/）；代行证据=真浏览器全链（/pair 配对→/ 入口→货架 11 卡渲染）+页面内应用模块本体 WS 信封调用 200/14 技能/7ms/零直连（acceptance/block-183/ui512-live.json+截图）。随批顺手清偿 streamReconnect 存量 4 红非 UI 面。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-14（**UI-511 落地并翻 verified（BLOCK-166-NAV-GUARD，代行评估）**：GenUiCard 沙箱帧劫持即时恢复+循环限幅面——①主进程侦测推送（gen-ui:sandbox-hijacked 通道，帧登记法=进程级登记+did-fail-load CSP 拦截路）→卡片按帧 URL 精确匹配即时重置（DoS 恢复窗口 9-11s 心跳宽限→亚秒级）②30s×3 劫持循环限幅挂起面（诚实提示+「恢复可视化」手动钮，widgetState 持久化恢复后回填）。live 实机=真 fragment 自劫持循环→3 劫持后挂起面在场+主日志 3× 侦测推送（导航→挂起 17s 含 lazy 加载；心跳路径 3 循环需 ~29s+），探针 scripts/block166-nav-guard-live.mjs 可复跑（acceptance/block-166/nav-guard-live.json）。**平台矩阵实证**=OOPIF 帧的 routingId 跨导航会变（帧 ID 键登记不可行）+fragment 自导航不派发 will-frame-navigate+CSP 拦截不提交 did-frame-navigate（侦测主形态=did-fail-load 路）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-14（**UI-510 落地并翻 verified（BLOCK-182 记忆生命周期治理，代行评估）**：MemoryPanel 生命周期面——事实行 status 徽章（已替代/已衰减置灰+superseded_by 链展示）+「纠错」钮（免费直生效：PUT 内容变化由后端自动 superseded 替代链+修正行，UI 不弹确认）+「记忆变更审计（最近 20 条）」节；live 实机=CDP 驱动设置 dock→决策原语节 DOM 断言全过（已知事实区/审计区/纠错钮在场+3 条事实渲染，acceptance/block-182/ui510-live.json；截图 capture 未落盘如实登记）；纠错全链 API 级由 block182-live B 链承载。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -4554,7 +4555,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **T5 残留观察（如实登记）**：解读入口点击的 prompt 捕获=null——组件测已证组装正确；实机未捕获疑 conversationRunStore 运行态门控（T4 菜单点击发起真实 agent run 后，下一点击走「仍在处理上一个请求」通知分支）与脚本时序交互，非实现缺失；已试 T5 前置取消 agent 任务仍未捕获，登记残留观察项待实机过目时人工核（结果页点「询问 Agent」看对话是否收到 result_summary 锚定 prompt）。
 - **边界**：不接 interpret 模板（遗留路由 reference 保留）；OS 级对话框行为不可自动化；未跑全量 test:changed。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-457: 输入显式化——上传域校验执行化 + 分析面板参数配置表单（BIO-5 P1+P2）(2026-09-29 in_progress，契约+实机双证；用户过目翻 verified)
+## UI-457: 输入显式化——上传域校验执行化 + 分析面板参数配置表单（BIO-5 P1+P2）(2026-10-16 verified（代行评估·BLOCK-184 P1），CDP 走查实证 deseq2 表单展开态：文件下拉 `<选择文件>` 占位+嵌套 path 消歧+参数默认回填+demo 一键载入+500 截断提示全链绿，截图 acceptance/block-184/ui467-analysis-form.png)
 
 - **来源**：G0-BIO plan §3 BIO-5（2026-09-28 垂直评估 D1/D4 差距：跑分析全靠对话隐式+值级校验真空）。
 - **P1 域校验执行化**（后端）：新 `helpers/upload-domain-validation.js`——artifact-profiles 声明的 counts-matrix/sample-metadata 值级规则在 HTTP 提交路径执行（handleToolRun 通用嗅探之后）：非负整数（负数/小数/文本点名行列）/特征标识唯一（重复点名两行号）/样本列唯一/样本对齐（双向：表里有矩阵没有+矩阵有表没有）/condition 非缺失——**fail-closed 400 + findings[] + 中文可操作消息**；按文件名前缀识别域文件（counts|coldata|metadata 约定，非域文件不做域校验不虚构）；大文件 5 万行采样如实标注。
@@ -4652,7 +4653,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：xlsx 只读（写回后续）；md raw HTML 禁用（rehype 白名单后续）；spreadsheet selection 接线后续包（canSelect 占位 false）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 
-## UI-466: 审阅正确性三件——决策键内容寻址 + 未决可见与提交拦截 + 焦点视觉反馈（BLOCK-147）(2026-10-08 in_progress，契约级全绿；实机走查随 BLOCK-147 收口)
+## UI-466: 审阅正确性三件——决策键内容寻址 + 未决可见与提交拦截 + 焦点视觉反馈（BLOCK-147）(2026-10-15 verified（代行评估·BLOCK-184），CDP 走查：文件列表/统计+进度「0/2→1/2 已审」hunk 决策推进 live 实证，acceptance/block-184/)
 
 - **来源**：BLOCK-147 审阅正确性批（plan=[`block-147-review-correctness-plan.md`](./block-147-review-correctness-plan.md)，审视批 dwfrun-6724f75c A2 发现 #1/#2/#3；用户「按顺序直接推进」批量发令序列第 2 批）。实现=dynamic workflow 串行红绿（同文件面三项串行禁并行），主代理终审后集成提交。后端零改动、零新依赖、零新 IPC 通道。
 - **交付三件**：①**#1 决策键内容寻址**——`reviewModeHelpers.hunkSignature/hunkDecisionKey/hunkDecisionList`（键=`path#h{oldStart}-{FNV-1a 行内容指纹}`；oldStart 锚 HEAD 行号对 reject 回退稳定，newStart 不参与），`useWorkingTreeReview.decideHunk/rejectHunkByInverseHunk` 记账与 `ReviewMode` 键盘去重/两处 hunkDecisions 全部改内容键；hunk 载荷缺失时 fail-closed 拒绝记账（宁可不记不错位挂账）；后端 commitReview 以 `lastIndexOf('#')` 取文件路径，键形态兼容零改动。②**#2 未决可见+提交拦截**——`pendingHunks`（当前 diff hunk 全集−已决策键集合，staged 行走 stagedDiff/unstaged 行走组合 diff 与渲染同源，按文件明细）激活「待定 N」真实计数（警示 token）；`handleCommitConfirm` 有未决先 `confirm` 列文件×条数（8 文件封顶+合计），取消回去审/确认显式继续，⌘+Enter 与提交按钮同路径不绕过。③**#3 焦点视觉反馈**——`CodeMirrorDiffView.focusedHunkIndex` prop：变化联动 `scrollToLine({highlight:true})`（cm-pulse 3s）+ 焦点 hunk 控件卡片/标记条 `is-focused` 持续高亮（accent/accent-soft token，组件级 class 限定）；主区 diff 与 dock 手风琴选中行均接线，只读预览缺省 -1 不触发。
@@ -4660,7 +4661,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **待验**：dev Electron 实机走查（错位场景/拦截对话/焦点滚动高亮）+ 主代理终审集成提交；hunk 级后端 stage（文件级 stage 根本改造）与 reject→regenerate 回路优化=plan §3 非范围另立批。
 - **边界**：账本迁移语义=丢弃重建（decisions 为纯内存 React state，无持久层，无旧键可错读）；同内容 hunk 拒后原样重写命中既有拒绝决策（内容相同视为同一决策）；拦截对话为 window.confirm（与 checkout/discard/undo 既有形态一致）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-467: 分析输入可达性——表单文件下拉单源白名单+子目录+path 消歧+demo 一键载入+截断诚实提示（BLOCK-148）(2026-10-08 in_progress，契约级全绿；实机走查随 BLOCK-148 收口)
+## UI-467: 分析输入可达性——表单文件下拉单源白名单+子目录+path 消歧+demo 一键载入+截断诚实提示（BLOCK-148）(2026-10-15 verified（代行评估·BLOCK-184），CDP 走查：deseq2 表单挂载/嵌套 path 消歧（data/nested/counts_nested.csv 可选）/参数默认回填/demo 一键载入 tree 实证/520 根文件大工作区「仅列出前 500 项」在场，acceptance/block-184/)
 
 - **来源**：审视批 B9 高影响发现 #11/#12（dwfrun-6724f75c）；plan=[`block-148-analysis-input-reachability-plan.md`](./block-148-analysis-input-reachability-plan.md)。
 - **交付四件**：①文件下拉白名单与上传面**单源**（后端 `UPLOAD_FILE_EXTENSIONS` 常量 → tree 响应 `inputExtensions` 投影 → 前端只消费投影，零第二份清单）；②`tree?recursive=1` 有界递归（深度 3／排除 results·jobs·output·node_modules／500 条上限 truncated 显式）；③option value=workspace 相对完整 path（同名不同目录消歧），显示名即 path；④「用示例数据试跑」入口（demoDataUrl 契约信号 → 既有清单/字节端点 → BLOCK-90 分片落盘 demo-data/<toolId>/，409 删残留自愈重传）+ truncated 时「仅列出前 500 项」诚实提示。
@@ -4669,7 +4670,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：完整文件树 UI（懒加载/搜索）与 demo 数据集扩充非本批（plan §3）；plugins 目录本机不存在，demo 端点真实数据流端到端未实跑（清单/字节契约级已锚）。
 
 
-## UI-468: 隧道徽标诚实化——stateSinceTs 三态分级宣称（A5 #5/BLOCK-149）(2026-10-08 in_progress，组件 8/8；实机走查随 BLOCK-149 收口)
+## UI-468: 隧道徽标诚实化——stateSinceTs 三态分级宣称（A5 #5/BLOCK-149）(2026-10-15 verified（代行评估·BLOCK-184），CDP 走查：联邦弹层 mobile-sync-panel live 在场+徽标诚实态（无「公网可用」假宣称，honest=true），acceptance/block-184/)
 
 - **来源**：审视批 A5 高影响发现 #5（dwfrun-6724f75c）；plan=[`block-149-tunnel-honesty-platform-patch-plan.md`](./block-149-tunnel-honesty-platform-patch-plan.md)。
 - **交付**：前端消费 TunnelStatus.stateSinceTs（后端 tunnel.js:341 既有字段，后端零改动）；徽标三态——未连接（原文案）／连接建立中 <15min「● 连接建立中 · 尚未确认公网可用」（琥珀）／持续连接 ≥15min+60s 时钟裕量才「● 已连接 · 公网可用」（绿，宁晚勿假）；stateSinceTs 缺失/非法/未来时刻从紧永不宣称。对齐台账健康判据（dev-infra skill 端口纪律节「存活跨 15 分钟，不是 state=connected」），消灭 10 秒启发假活恒绿。
@@ -4677,7 +4678,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **待验**：dev Electron 实机（真窗三态 + 隧道 15 分钟跨阈值翻转观察）；后端 publicUrl 周期自探活为后续批非范围。
 - **边界**：徽标无定时器，amber→绿翻转随下次 refresh/交互（方向从紧可接受，候选=复用 pairing 续码节拍顺带 refresh）。
 
-## UI-469: 平台消费链补全 + 治理文案三件——任务墙队列位次/终态失效流即时刷新/持久化失败诚实呈现 + caveat 因果点破 + compare 面领域词中立化（BLOCK-150 A/B/C 轨 UI 项）(2026-10-09 in_progress，契约级全绿；实机走查随 BLOCK-150 收口)
+## UI-469: 平台消费链补全 + 治理文案三件——任务墙队列位次/终态失效流即时刷新/持久化失败诚实呈现 + caveat 因果点破 + compare 面领域词中立化（BLOCK-150 A/B/C 轨 UI 项）(2026-10-15 verified（代行评估·BLOCK-184；队位次段分档：dev 库 0 tool_jobs，组件/契约级证据在册），CDP 走查：指挥中心页 live 在场+诚实空态文案全中，acceptance/block-184/)
 
 - **来源**：BLOCK-150 审视吸收批·第一波（plan=[`block-150-review-batch-absorb-wave1-plan.md`](./block-150-review-batch-absorb-wave1-plan.md)，dwfrun-6724f75c 审视报告 A1/A3/A5/B7/C10 复核 scope 实证条目；用户「继续」发令）。dynamic workflow 三轨并行（工作流内不提交，主代理终审集成）。
 - **交付（UI 面）**：A① 任务墙 pending 瓦片「排队中 #N」——消费侧从 /api/tools/history 同源真相重投影（commandCenterModel.computeQueuePositions，等价后端「先于我+1」口径，等毫秒并列 ±1 代码注释留痕）；A② 任务墙接 BLOCK-126 终态失效流——复用 useInvalidationStream 既有通道，domain==='jobs' 即全量 refresh（墙零本地缓存红线，不做单瓦片补丁）；A③ message_persist_failed 会话级诚实呈现——agentTaskStream 分发 + conversationRunStore 复用 BLOCK-56 setFallbackNotice 通道附着末条助手消息（run 终态对账后仍可见，下轮 run 清除，零新 UI 面）；B⑩ DataManagement 话术校准；B⑪ ScientificInteractionViewer 散点 caveat 因果点破（有命中数不再默许因果误读）；C⑫ compare 面领域词中立化（display.tsx ScientificDifference/ChangeSetPanel 文案改领域盲形态，注释锚定在 result-scientific-compare 注册表边）。同批非 UI 面（不入台账行，随 BLOCK-150 主包收口）：④TOOL_METADATA readOnly 漂移修齐 ⑤HEAVY_TOOLS 死链清理 ⑥/m 页任务 SSE token 出 URL（mobile gateway） ⑦⑧pack 仓 R 守卫/go-kegg 收敛 ⑨data-management IPC 英文键 ⑬report 模板 demo URL 兜底。
@@ -4685,7 +4686,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **待验**：dev Electron 实机走查（排队 #N 位次/终态事件即时刷新/持久化失败 notice 呈现/DataManagement 话术/caveat 文案/compare 面文案六处）+ 主代理终审集成提交 + closeout 十一门。
 - **边界**：A①「工具行」位次面=run 走 agent 的 run_tool 无前端消费面，任务墙是唯一有意义显示面（如实登记不硬造）；A③ 锚点纠错=errorMessages.ts 从无 message_persist_failed 键，缺口在后端事件零前端消费；⑥/m 页终态后 2s 重连循环与旧 EventSource 行为等价。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-470: 成果面流畅四件——viewerRegistry canExport 声明位接线/钉住占位态出口/对比图诚实空态/继续分析菜单死 prop 摘除（BLOCK-151 B 轨 UI 项）(2026-10-09 in_progress，契约级全绿；实机走查随 BLOCK-151 收口)
+## UI-470: 成果面流畅四件——viewerRegistry canExport 声明位接线/钉住占位态出口/对比图诚实空态/继续分析菜单死 prop 摘除（BLOCK-151 B 轨 UI 项）(2026-10-15 verified（代行评估·BLOCK-184；artifact 数据面段分档：dev 库 0 artifact_revisions，契约 36/36 在册），CDP 走查：结果 tab live 打开+诚实空态在场，acceptance/block-184/)
 
 - **来源**：BLOCK-151 审视吸收批·第二波 B 轨（plan=[`block-151-review-absorb-wave2-plan.md`](./block-151-review-absorb-wave2-plan.md)，dwfrun-6724f75c 审视 A4 面七条有界重审落地 4 条；用户「继续 按顺序都搞完」批量授权）。dynamic workflow 子代理轨（工作流内不提交，主代理终审集成）。
 - **交付（UI 面 4 件）**：①**viewerRegistry canExport 声明位接线**——新增 `viewerProfileCanExport` 消费面 + `ResultArtifactShell/ViewerExportAction`：Shell 挂载面 markdown/pdf 分支（renderPreview BLOCK-142 三分支段）叠加「打开原文件」出口，此前 canExport=true（BLOCK-142 定值「原文可导出」）零消费、挂载面无打开/导出路径（兜底分支出口只服务落兜底 adapter）；viewer 渲染面零变更，spreadsheet 档案 false 出口自然不在场。②**ArtifactPinPane 占位态出口**——BLOCK-142 三新 adapter（markdown/spreadsheet/pdf）快照占位态「钉住快照无内嵌预览载荷」携带「打开原文件」纯链接（零取数，D1 不破；与主区兜底分支同款），不再死面。③**ResultStudioChangeSetPanel 前后对比图诚实空态**——revision artifact 读取失败显「对比图无法读取」（VisualCompareFigure，fallback 只作用出错一张，src 键控换图恢复尝试）。④**ContinueAnalysisMenu artifactKind 死 prop 摘除**——BLOCK-83 D7 目录驱动后产物分类从不过滤菜单项，原「决定下游分析项」声明与实现不符；menu/navigator/Shell 三层链清，菜单挂载门收敛为 jobId。
@@ -4693,7 +4694,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **待验**：dev Electron 实机走查（markdown/pdf 挂载面「打开原文件」/钉住 markdown 产物占位出口/对比图断链空态/继续分析入口挂载）+ 主代理终审集成提交 + closeout 十一门。
 - **边界**：跨 job 钉住失败静默=UI-464 verified 边界不翻；lineage 切换器/条带/画布空态复核为已覆盖（三取数结构=R-1 verified 设计 D3 同源，不动）；Shell 三段（:180-260 加载/:680-720 预览取数/:778-808 图像交互）复核为已覆盖无缺口；A4 余量三条（pin 失败反馈/lineage 取数合并/Graph 节点操作提示）如实在册未落地。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-470: 审视吸收二波 UI 面——成果面流畅四件 + 解读语义 title 四件 + A1 会话守卫（BLOCK-151）(2026-10-09 in_progress，契约级全绿；实机走查随收口)
+## UI-470: 审视吸收二波 UI 面——成果面流畅四件 + 解读语义 title 四件 + A1 会话守卫（BLOCK-151）(2026-10-15 verified（代行评估·BLOCK-184；与上方同号明细节为同一 BLOCK-151 交付的重复登记，随批同翻，编号去重留后续轻量批），实机面同上条 acceptance/block-184/)
 
 - **来源**：审视 A4/A1/B7 余量（dwfrun-6724f75c）；plan=[`block-151-review-absorb-wave2-plan.md`](./block-151-review-absorb-wave2-plan.md)。
 - **交付**：B 成果面四件（ViewerExportAction 导出出口接线/钉住快照占位态/ChangeSet 前后对比图空态兜底/继续分析 artifactKind 死 prop 清理）+ C 解读四件（padj 阈值与效应量输入统计语义 title、三条阈值参考线 SVG title、「展示辅助」说明——不回写参数不筛数据点点破）+ A1 会话守卫（/m 页 taskId+AbortController、agentTaskStream lastSeq 回退、loadOlder 切会话竞窗守卫、mergeKeepOlderPrefix 行为测锁——核心语义未动）。
@@ -4701,14 +4702,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **待验**：dev Electron 实机（导出出口/钉住占位/对比图空态/title 悬浮语义）。
 - **边界**：mergeKeepOlderPrefix 核心语义与 B7 报告模板扩充非范围；跨 job 钉住静默失败与 lineage 空态两条 skipped 留痕（plan §2 处置数组）。
 
-## UI-468 加映: 徽标宣称叠加端到端探活证据——时长+probe 双判据（BLOCK-152 T）(2026-10-09 in_progress，组件 12/12；实机走查随 BLOCK-152 收口)
+## UI-468 加映: 徽标宣称叠加端到端探活证据——时长+probe 双判据（BLOCK-152 T）(2026-10-15 in_progress（BLOCK-184 代行批：徽标 live 在场+诚实态已证〔UI-468 本体翻 verified〕；端到端 probe 段无真实隧道环境，按 plan §6 分档挂起待环境）)
 
 - **来源**：BLOCK-152 重构候选批 T 轨（plan=[`block-152-refactor-candidates-plan.md`](./block-152-refactor-candidates-plan.md)）；即主条目「待验」行预留的「后端 publicUrl 周期自探活」，本批落地后端+前端消费两半。
 - **交付**：后端 `tunnel.js`——connected 后每 60s 经公网门 GET `/api/mobile/status` 期待 401（会话门活=端到端通；redirect:manual 按反代误配 3xx=fail），probeState ok/fail/unknown + probedAt 入 status()；单计时器串行绝不叠加、unref 不吊 event loop、断连即作废证据、在途结论陈旧不回写。前端 `MobileSync.tsx`——`isTunnelPublicReady` 升级「时长+探活」双判据：probe fail 即使 ≥15min 也不宣称，降级「● 连接建立中 · 公网未确认」；probe ok/unknown/旧后端缺省维持 stateSinceTs 原判据（向后兼容，从紧不变）。
 - **证据**：`MobileSync.test.tsx` 8/8 → 12/12（probe fail 降级／ok+≥15min 宣称／ok+<15min 时长独立／probeState 缺省向后兼容四测）；隧道探活契约 `test/block152-tunnel-probe.test.mjs` 5 项（三态/调度不叠加/冷启动零探活/unref/断连作废）；门禁修复员会话实跑 `npm run test:changed` Node 腿 381 tests 0 fail（13 skipped 存量）+ 前端 MobileSync 12/12。
 - **待验**：dev Electron 实机走查（真窗徽标 probe fail 降级与翻转）+ 主代理终审集成提交 + closeout 台账五件回写归并。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-471: 隧道徽标端到端自探活——probe 三态消费，probe 失败即使 ≥15min 也不宣称公网可用（BLOCK-152 T 轨）(2026-10-09 in_progress，契约级全绿；实机走查随收口)
+## UI-471: 隧道徽标端到端自探活——probe 三态消费，probe 失败即使 ≥15min 也不宣称公网可用（BLOCK-152 T 轨）(2026-10-15 in_progress（BLOCK-184 代行批：徽标 live 在场+诚实态已证〔UI-468 本体翻 verified〕；probe 三态端到端段无真实隧道环境，按 plan §6 分档挂起待环境）)
 
 - **来源**：BLOCK-149 非范围留痕方向（468 深化）；plan=[`block-152-refactor-candidates-plan.md`](./block-152-refactor-candidates-plan.md)。
 - **交付**：tunnel.js connected 态周期 probe publicUrl（60s/5s 超时/401=活，单计时器串行不叠加、unref 不进冷启动、断连即废证据）→ status() 增 probeState/probedAt；MobileSync 徽标消费从紧——公网可用=probe ok 且 ≥15min；probe fail 降级「连接建立中 · 公网未确认」；unknown 维持 149 判据（向后兼容）。
@@ -4808,7 +4809,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 ### UI-480 加映三（2026-10-10·BLOCK-156 D7 补做）：通用技能货架「导入本地技能目录」按钮（主进程文件对话框一条龙，复刻 pack installFromDialog 先例；import-path 直路径通道与对话框共用安装函数供探针/测试）——成功即重发现装载、失败/取消 notice 反馈、领域技能货签无此按钮；空态文案改导入引导。证据=index.test 导入链路用例（按钮在场且仅在通用货签/点击→importDirectory→ok 后重发现渲染新技能，含 store 模块缓存下 mock 竞态修正）+实机四断言 ALL PASS（acceptance/block-156/block156-skill-import-live.json：IPC 装载 ok→货架卡片可见+按钮在场→卸载→目录/manifest 零残留；对话框本体属 OS 层 UI 不在合成断言面，如实登记）。
 
-## UI-481: 领域插件货架启停粒度开关（2026-10-10 in_progress，BLOCK-157 W1 P4/DIST-1）
+## UI-481: 领域插件货架启停粒度开关（2026-10-15 verified（代行评估·BLOCK-184），CDP 走查：pack 卡在场+一键安装+停用⇄启用往返全中+卸载复原 API 核验，acceptance/block-184/)
 
 已装插件卡片动作区新增「停用/启用」开关（停用与卸载并列、ghost 样式区分破坏性；tooltip 说明「重启后生效/免重装」语义；切换中禁用态）。后端链=installed.json enabled 标志（缺省启用存量零破坏）+plugin:set-enabled IPC+核心加载器尊重（run_tool 清单/执行与 MCP listToolsForMCP 停用即不注册，重新启用免重装）。证据=block157-plugin-enabled 契约 3/3（标志缺省/翻转持久化/加载器尊重含重扫恢复）+PluginStorePanel/usePluginStore 18/18 回归+tsc 0；实机开关过目随 BLOCK-157 波末走查（本条目 in_progress 待实机翻 verified）。
 
@@ -4822,7 +4823,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 
 ### UI-481 加映（2026-10-10·BLOCK-157 加映·用户过目抓真）：领域包卡片整包启停开关——用户在货架看到的插件面是「包交付插件行」（领域包体系，OSS 商店清单不可达时商店卡片为零），P4 主件的商店安装卡片开关在用户可见面上缺席；本加映把启停接到**包卡片**（与卸载并列的「停用/启用」按钮，tooltip 说明整包语义）。后端链=packs/installed.json 记录级 enabled（缺省启用零破坏）+pack:set-enabled IPC+server.js 装配循环跳过停用包（插件源与 tool-registry 注册整体不生效→run_tool/MCP/catalog 天然不出现；启用免重装）。证据=block157-pack-enabled 契约 4/4（缺省归一/翻转持久化+未知包诚实拒/server 接线源码扫描钉/IPC 双侧登记钉）+面板 9/9+tsc 0+**CDP 实机在场断言**（pack-toggle-petri-pack-bio 按钮在场标签「停用」，acceptance/ui-481/pack-toggle-visible.png）；功能生效（catalog 消失/复现）待用户重启过目。商店卡片开关（installed.json 通道）与包卡片开关（packs 通道）双面并存，分别治理各自安装来源。
 
-## UI-482: 投影断连横幅 + 回前台重同步（2026-10-10 in_progress，BLOCK-159 P1-8/P1-9）
+## UI-482: 投影断连横幅 + 回前台重同步（2026-10-15 verified（代行评估·BLOCK-184；断连横幅段需中断传输链实测，按 plan §6 分档：连接态 live 已证——配对→/m 页加载+无断开/重连横幅，acceptance/block-184/ui482-projection-connected.png）)
 
 手机投影的「易断」此前在 UI 上不可见：数据桥失败静默返空（页面数据变空/停旧值）、终端 EventSource 断线盲重试（黑终端），用户无法区分「慢」与「断了」。本条目交付两个可见面：①断连横幅——数据桥（getJson 网络错/429/5xx）与终端流（onerror）如实上报链路状态（projectionLink 总线），离线时固定顶横幅「与桌面连接中断，正在自动重试…（恢复后数据自动刷新）」，恢复自动隐藏，仅投影环境渲染（桌面零行为，`_ProjectionLinkBanner` 挂 App.tsx）；②回前台重同步——锁屏/切后台回来 visibilitychange 派发 resync，终端桥对存活会话立即重挂 EventSource（服务端环形缓冲重放，会话驻留 core 进程不丢）。证据=projectionLink 契约 5/5（状态转移通知/同态不重发/单方异常不阻断/回前台派发/install 幂等）+agentTaskStream 重连语义 4/4（断线恢复收口/无限重试 30s 封顶抖动/HTTP 5xx 不重试/abort 上抛）+tsc 0；实机（真机过隧道断连→横幅出现→恢复自动消失）待用户走查翻 verified。
 
