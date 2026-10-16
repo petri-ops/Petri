@@ -1,0 +1,22 @@
+{
+  "id": "golden-first-success",
+  "title": "TTFS 黄金路径：开应用→建项目→首个 Agent 任务成功→TTFS 可度量（BLOCK-187 程序③）",
+  "category": "golden-path",
+  "accessMode": "full",
+  "prompt": "我刚打开 Petri 并新建了项目，随便回我一句确认这次首任务成功即可。",
+  "fixtureFiles": {
+    "README.md": "# 黄金路径演示项目\n这是新用户首次进入时自动创建的项目工作区占位文件。\n"
+  },
+  "mockScript": [
+    {
+      "content": "首任务完成。你已成功创建项目并让 Agent 跑通了第一次任务——这就是黄金路径的终点（first_job_succeeded）。"
+    }
+  ],
+  "criteria": [
+    { "kind": "task_completed" },
+    { "kind": "funnel_event_present", "event": "app_started" },
+    { "kind": "funnel_event_present", "event": "project_created" },
+    { "kind": "funnel_event_present", "event": "first_job_succeeded" },
+    { "kind": "ttfs_computable" }
+  ]
+}

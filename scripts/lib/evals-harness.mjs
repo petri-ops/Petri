@@ -273,6 +273,32 @@ async function resolveProjectWorkspace(api, tmpDir, projectId) {
 }
 
 /**
+ * 读取隔离后端临时库的漏斗快照（BLOCK-187 黄金路径判据）：复用**已发布**的
+ * core/petri-server/helpers/funnel-log.js 原语（recentFunnelEvents/computeTTFS），
+ * 不重实现 SQL。父进程只读打开后端进程写的同一 petri.db（WAL 可见）。
+ * 失败/表缺→诚实返回空快照（判据据此红，不编造）。
+ */
+export async function readFunnelSnapshot(tmpDir) {
+  let db;
+  try {
+    const Database = require('better-sqlite3');
+    const funnelLog = require(path.join(ROOT_DIR, 'core', 'petri-server', 'helpers', 'funnel-log.js'));
+    db = new Database(path.join(tmpDir, 'petri.db'), { readonly: true });
+    db.pragma('busy_timeout = 5000');
+    funnelLog._setFunnelDb(db);
+    const events = await funnelLog.recentFunnelEvents({ limit: 200 });
+    const ttfs = await funnelLog.computeTTFS();
+    const counts = {};
+    for (const e of events || []) counts[e.event] = (counts[e.event] || 0) + 1;
+    return { ok: true, eventCounts: counts, ttfsMs: ttfs && Number.isFinite(ttfs.ttfsMs) ? ttfs.ttfsMs : null, events: events || [] };
+  } catch {
+    return { ok: false, eventCounts: {}, ttfsMs: null, events: [] };
+  } finally {
+    try { if (db) db.close(); } catch { /* 句柄延迟 */ }
+  }
+}
+
+/**
  * 执行一枚黄金任务：fixture 项目/会话播种 → 真实 agent 循环 → 事件收集 → 终态。
  * mockScript 由调用方预先 push 进 mock provider（provider=mock 时）。
  */
@@ -354,11 +380,13 @@ export async function runGoldenTask({ api, tmpDir, task }) {
   const needsWorkspacePath = criteriaAll.some((c) => c.kind === 'genui_fragment_resolves');
   const needsSubagents = criteriaAll.some((c) => c.kind === 'subagent_completed');
   const needsTerminal = criteriaAll.some((c) => c.kind === 'task_terminal_status');
+  const needsFunnel = criteriaAll.some((c) => c.kind === 'funnel_event_present' || c.kind === 'ttfs_computable');
   const workspacePath = needsWorkspacePath && projectId
     ? await resolveProjectWorkspace(api, tmpDir, projectId)
     : null;
   const subagentDoneCount = needsSubagents ? await pollSubagentDone(api, taskId_, conversationId) : 0;
   const terminalStatus = needsTerminal ? await fetchTerminalStatus(api, taskId_) : null;
+  const funnel = needsFunnel ? await readFunnelSnapshot(tmpDir) : { eventCounts: {}, ttfsMs: null };
   const criteriaResults = criteriaAll.map((c) => evaluateCriterion(c, {
     events,
     finalText,
@@ -368,6 +396,8 @@ export async function runGoldenTask({ api, tmpDir, task }) {
     workspacePath,
     subagentDoneCount,
     terminalStatus,
+    funnelEventCounts: funnel.eventCounts,
+    ttfsMs: funnel.ttfsMs,
   }));
   return {
     id: task.id,
@@ -389,7 +419,8 @@ function toolCallEvents(events) {
  * task_completed / final_answer_contains / tool_used / tool_not_used /
  * policy_denied / no_policy_denial / event_present / file_contains /
  * tool_succeeded / deny_after_success / subagent_completed / task_terminal_status /
- * genui_fragment_resolves（批次B 扩充，全确定性）
+ * genui_fragment_resolves（批次B 扩充，全确定性）/ funnel_event_present / ttfs_computable
+ * （BLOCK-187 黄金路径里程碑与 TTFS 判据，读父进程注入的 funnel ctx，仍纯函数）
  */
 export function evaluateCriterion(criterion, ctx) {
   const { events, finalText, completed, failedEvent, fileReader } = ctx;
@@ -498,6 +529,14 @@ export function evaluateCriterion(criterion, ctx) {
         try { containsOk = fs.readFileSync(outcome.path, 'utf8').includes(criterion.contains); } catch { containsOk = false; }
       }
       return result(repairedOk && containsOk, `解析命中 repaired=${outcome.repaired} contains=${containsOk}`);
+    }
+    case 'funnel_event_present': {
+      const count = (ctx.funnelEventCounts && ctx.funnelEventCounts[criterion.event]) || 0;
+      return result(count >= (criterion.minTimes || 1), `funnel_events「${criterion.event}」× ${count}（期望 ≥${criterion.minTimes || 1}）`);
+    }
+    case 'ttfs_computable': {
+      const t = ctx.ttfsMs;
+      return result(Number.isFinite(t) && t >= 0, `TTFS=${t === null || t === undefined ? 'null（app_started→first_job_succeeded 不成对，诚实不编造）' : `${t} ms`}`);
     }
     default:
       return result(false, `未知判据 kind：${criterion.kind}`);

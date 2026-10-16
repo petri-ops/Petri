@@ -43,14 +43,14 @@ status: active
 ## 4. 执行方案
 
 - **P0 勘察**：已完成（onboarding 缺位实况 + agent 黄金路径 7 步 + evals harness 复用面 + stale 施工图 + funnel 锚点）。
-- **P1 脚本化**：新增 `scripts/block187-golden-path-live.mjs`（复用 `scripts/lib/evals-harness.mjs`）定义并驱动黄金路径 golden task；契约单测覆盖步数枚举 + 每步无断点断言。
-- **P2 零断点审计**：核验 ≤7 步 UI 路径产品面；真断点最小修（涉前端带 UI-###），否则登记「零断点核验通过」。
-- **P3 TTFS 机械门禁**：evals harness 增 `funnel`/`ttfs` 判据 kind（复用 funnel-log 原语）；黄金路径脚本收口断言三里程碑落库 + TTFS 非 null。
+- **P1 脚本化**：黄金路径落地为**永久回归门**——给 `scripts/lib/evals-harness.mjs` 增 `funnel_event_present`/`ttfs_computable` 判据 kind（读父进程经 `readFunnelSnapshot` 注入的快照，复用**已发布** funnel-log 原语 `recentFunnelEvents`/`computeTTFS`，零重实现 SQL）+ 新增 `evals/suites/golden/first-success.json` golden task（`runGoldenTask` 已跑 project→conversation→agent→done，天然发 project_created/first_job_succeeded，后端 boot 发 app_started）；`npm run evals:run -- --suite=golden` 驱动，`evals:gate --suite=golden --update` 建 `evals/baselines/golden.json` 棘轮。**不新建 bespoke `scripts/block187-*.mjs`**（原计划如此，实作改判：evals 套件更耐久且修正 block186-p4-live 曾内联重实现 harness 的债）。契约单测覆盖两判据 kind（纯 ctx）。
+- **P2 零断点审计**：以 `frontend/src/pages/welcome.tsx` 共置 vitest 组件测为机械证据（项目选择/创建入口在场、composer 在场、sendGuard 无项目拦发送定性 by-design 非断点、有项目后可发送）；真断点最小修（涉前端带 UI-###），否则登记「零断点核验通过」。
+- **P3 TTFS 机械门禁**：golden task 的 `funnel_event_present`×3 + `ttfs_computable` 判据 = 阶段 1「TTFS 可度量」由 evals 套件机械证明（无人眼）；判据 kind 在 P1 一并实现。
 - **P4 施工图对账**：改写/supersede `docs/first-success-path.md` 为 agent 驱动黄金路径真相，保 tests/fixtures 引用不断链。
 - **P5 收口**：closeout 全链 + 五件套回写 → completed（阶段 1 出口判据闭合注记）。
 
 ## 5. 回退路径与并行隔离
 
 - 回退：黄金路径某步产品面若确断且需前端改，走 UI-### 微修随提交；若断点属 G1+/packaged 依赖，诚实分档挂起不硬翻。
-- 并行隔离：触碰面=`scripts/block187-*` + `scripts/lib/evals-harness.mjs`（增判据 kind）+ `evals/suites/golden/**` + 黄金路径相关前端最小修（如触发）+ `docs/first-success-path.md` + 新测试；当前唯一 active 包，无文件面交叠。
+- 并行隔离：触碰面=`scripts/lib/evals-harness.mjs`（增 funnel/ttfs 判据 kind + readFunnelSnapshot）+ `evals/suites/golden/**` + `evals/baselines/golden.json` + `test/evals-harness.test.mjs`（新判据单测）+ `frontend/src/pages/welcome*.test.ts(x)`（零断点组件测）+ 黄金路径相关前端最小修（如触发，带 UI-###）+ `docs/first-success-path.md`；当前唯一 active 包，无文件面交叠。
 - 环境纪律：走隔离后端（PETRI_DB_PATH/PETRI_LOCAL_DATA_DIR 临时目录 + bootstrapDb 应用 src/migrations），用户空间零残留、无人眼、不依赖 dev 栈。

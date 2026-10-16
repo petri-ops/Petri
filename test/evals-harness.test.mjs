@@ -57,6 +57,18 @@ test('event_present：事件/phase/requestId 前缀组合匹配', () => {
   assert.equal(evaluateCriterion({ kind: 'event_present', event: 'agent_status', phase: 'nope' }, ctx({ events })).passed, false);
 });
 
+test('funnel_event_present / ttfs_computable：黄金路径里程碑与 TTFS 判据（BLOCK-187，纯 ctx）', () => {
+  const funnelCtx = (o) => ctx({ funnelEventCounts: { app_started: 1, project_created: 1, first_job_succeeded: 1 }, ttfsMs: 407, ...o });
+  assert.equal(evaluateCriterion({ kind: 'funnel_event_present', event: 'app_started' }, funnelCtx()).passed, true);
+  assert.equal(evaluateCriterion({ kind: 'funnel_event_present', event: 'update_succeeded' }, funnelCtx()).passed, false);
+  assert.equal(evaluateCriterion({ kind: 'funnel_event_present', event: 'project_created', minTimes: 2 }, funnelCtx()).passed, false);
+  assert.equal(evaluateCriterion({ kind: 'funnel_event_present', event: 'x' }, ctx()).passed, false);
+  assert.equal(evaluateCriterion({ kind: 'ttfs_computable' }, funnelCtx()).passed, true);
+  assert.equal(evaluateCriterion({ kind: 'ttfs_computable' }, ctx({ ttfsMs: 0 })).passed, true);
+  assert.equal(evaluateCriterion({ kind: 'ttfs_computable' }, ctx({ ttfsMs: null })).passed, false);
+  assert.equal(evaluateCriterion({ kind: 'ttfs_computable' }, ctx()).passed, false);
+});
+
 test('file_contains：文件读取器在场/缺失两态', () => {
   const c = { kind: 'file_contains', path: 'derived/note.md', value: 'hello' };
   assert.equal(evaluateCriterion(c, ctx({ fileReader: () => 'hello world' })).passed, true);

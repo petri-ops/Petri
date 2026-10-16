@@ -1,0 +1,43 @@
+{
+  "suite": "golden",
+  "updatedAt": "2026-10-16T05:24:34.135Z",
+  "tasks": [
+    {
+      "id": "golden-first-success",
+      "passed": true,
+      "status": "completed",
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": true,
+          "detail": "任务正常收口"
+        },
+        {
+          "kind": "funnel_event_present",
+          "event": "app_started",
+          "passed": true,
+          "detail": "funnel_events「app_started」× 1（期望 ≥1）"
+        },
+        {
+          "kind": "funnel_event_present",
+          "event": "project_created",
+          "passed": true,
+          "detail": "funnel_events「project_created」× 1（期望 ≥1）"
+        },
+        {
+          "kind": "funnel_event_present",
+          "event": "first_job_succeeded",
+          "passed": true,
+          "detail": "funnel_events「first_job_succeeded」× 1（期望 ≥1）"
+        },
+        {
+          "kind": "ttfs_computable",
+          "passed": true,
+          "detail": "TTFS=407 ms"
+        }
+      ],
+      "finalText": "首任务完成。你已成功创建项目并让 Agent 跑通了第一次任务——这就是黄金路径的终点（first_job_succeeded）。",
+      "durationMs": 575
+    }
+  ]
+}
