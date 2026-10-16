@@ -53,3 +53,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-16T02:59:14.534Z -->
 最后更新：2026-10-12（**BLOCK-175-COMPETITIVENESS-WAVE5 立项发令 active（用户 /goal 整波授权连续行使；W4 completed 腾出槽位）**：plan=docs/block-175-competitiveness-wave5-plan.md（registry/README/roadmap 同步）；CP-14 选择总线跨 viewer 能力位接线（canSelect/canCompare 占位→实际能力）+CP-15 分屏可拖拽+renderer 对账；artifact-plane 切片 C/E 承接。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-16T04:40:22.073Z -->
+最后更新：2026-10-12（**BLOCK-176-COMPETITIVENESS-WAVE7 扩纲立项 planned（用户裁决「应该加到 petri 并且应该是作为主要的功能之一」+ AskUserQuestion「W7 先行（推荐）」=W7 优先于 W6、W6 顺延；W5 在制收口后顶队列头发令）**：总纲 §4 扩 W7「Agent Skill 知识面」三包——CP-20 SKILL.md 常驻双格式注册+声明式依赖（KNW-4 导入通道扩展不重建，roadmap 候选池③转正出籍）/CP-21 依赖自检与安装治理（preflight 探测+审批留痕对齐 guard-ack 链+Skills 页状态面）/CP-22 首批通用技能包迁移（Obsidian 九技能转写，CLI 族挂 requires.bins+install 配方）。plan=docs/block-176-competitiveness-wave7-plan.md（registry/README/roadmap/backlog 同步）。G0 开发期常态 · 不外推 packaged/Provider/GA。）

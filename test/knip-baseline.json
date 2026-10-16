@@ -6,7 +6,7 @@
     "types",
     "files"
   ],
-  "updatedAt": "2026-10-12",
+  "updatedAt": "2026-10-16",
   "keys": [
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::DEFAULT_PORT",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::TEST_INSTANCE_PORT",
@@ -63,7 +63,6 @@
     "exports::src/plugin-manager.js::uninstallRuntime",
     "exports::src/plugin-manager.js::unregisterContentPlugin",
     "exports::src/plugin-manager.js::validateManifest",
-    "exports::src/telemetry-funnel.js::FUNNEL_EVENTS",
     "exports::src/telemetry.js::reportEvent",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/_template.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/app-health.cjs",

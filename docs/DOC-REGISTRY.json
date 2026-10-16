@@ -6507,8 +6507,8 @@
       "capability": "observability",
       "path": "docs/block-186-funnel-ledger-plan.md",
       "kind": "work-package",
-      "status": "active",
-      "phase": "P0-LAUNCH",
+      "status": "completed",
+      "phase": "P5-CLOSED",
       "canonical": true,
       "truthDomain": "block-186-funnel-ledger-plan",
       "entrypoint": "docs/README.md",
@@ -6521,7 +6521,7 @@
         "ttfs-program",
         "local-auditability"
       ],
-      "notes": "2026-10-16 立项发令 active（用户授权自主推进+验收全自动化「我不希望人参与」）：本地漏斗事件台账批——TTFS 程序②。G0 定性变更：评估报告「遥测端点化」字面隐含远程端点属 G1+（AGENTS.md 禁 G0 启动），故按 G0 唯一合法形态落地=本地 SQLite 漏斗台账（仿 decision_log 零外发）。P1 迁移 014_funnel_events + helpers/funnel-log.js best-effort；P2 5 个 G0 可触发事件接线（app_started/project_created/first_job_succeeded@markAgentTaskDone/runtime_install/report_generated；update_succeeded=G1+ 诚实 N-A）；P3 TTFS 查询（first_job_succeeded−app_started）；P4 自动化实机（真实链断言落库+TTFS 可算，无人眼）。红线=不建远程端点/不动隐私门控/不引第二度量真相。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "2026-10-16 整包 completed（立项发令 active→P1-P5 单会话闭环；用户授权自主推进+验收全自动化「我不希望人参与」）：本地漏斗事件台账批——TTFS 程序②。G0 定性变更：评估报告「遥测端点化」字面隐含远程端点属 G1+（AGENTS.md 禁 G0 启动），故按 G0 唯一合法形态落地=本地 SQLite 漏斗台账（仿 decision_log 零外发）。交付=迁移 014_funnel_events + 共享白名单 core/packages/shared-telemetry（R3/R5 唯一合法跨进程共享层，src/telemetry-funnel.js 转发 re-export 单源）+ core 单一写入器 funnel-log.js best-effort + 4 接线（app_started@server.listen / project_created@api-data / first_job_succeeded@markAgentTaskDone / report_generated@final-report）。架构裁决：app_started 由后端 listen 钩子记录（R5 禁 src import core + 启动时序 bug，收敛单写入器使实机可纯后端无人眼跑）；runtime_install 纯桌面进程事件 G0 诚实 defer、update_succeeded G1+ N-A。P3 只读 CLI block186-ttfs.mjs（本地可审计）；P4 自动化实机 block186-p4-live.mjs 9/9 PASS，computeTTFS 对真实跨进程数据算出 408ms。契约单测 6/6；closeout 十三门全绿；knip 保留面下调 1（re-export 消 FUNNEL_EVENTS 死导出）。红线=不建远程端点/不动隐私门控/不引第二度量真相。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "DESKTOP-EVAL-20261015",
