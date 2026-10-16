@@ -45,7 +45,7 @@ interface UseWorkspaceOpenEffectsOptions {
     jobId: string,
     targetProjectId?: string | null,
     options?: { preserveWorkspaceMode?: boolean; workspaceMode?: WorkspaceMode }
-  ) => Promise<void>;
+  ) => Promise<boolean>;
   handleOpenWorkspaceFile: (file: ActiveWorkspaceFile) => void;
   openRightPanel: (tab: import('./rightPanelTabs').RightPanelMode) => void;
   navigate: NavigateFunction;
@@ -106,6 +106,10 @@ export function useWorkspaceOpenEffects(options: UseWorkspaceOpenEffectsOptions)
       void handleOpenResult(requestedJobId, projectId, {
         preserveWorkspaceMode: workspaceMode === 'chat' || workspaceMode === 'history',
         workspaceMode,
+      }).then((opened) => {
+        // BLOCK-185（Race A）：打开失败清一次性消费标记，让后续 jobs/activeJobId 变化时重试
+        // （冷启动后端未就绪场景已由 handleOpenResult 内部退避重试兜住，此为二道防线）。
+        if (!opened && autoOpenedJobRef.current === requestedJobId) autoOpenedJobRef.current = null;
       });
       return;
     }

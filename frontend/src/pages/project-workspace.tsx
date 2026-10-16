@@ -58,6 +58,7 @@ export type { RightPanelMode } from './project-workspace/rightPanelTabs';
 import { type RightPanelMode } from './project-workspace/rightPanelTabs';
 // BLOCK-92 Wave B-1 — 状态/派生/事件簇外迁（纯搬运零行为变化）。
 import { toCopilotHarnessSummary } from './project-workspace/copilotHarnessSummary';
+import { retryOnThrow } from './project-workspace/coldStartRetry';
 import { useWorkspaceFileTabs } from './project-workspace/useWorkspaceFileTabs';
 import { useRuntimeDemandBanner } from './project-workspace/useRuntimeDemandBanner';
 import { useWorkspaceTitleBar } from './project-workspace/useWorkspaceTitleBar';
@@ -756,29 +757,34 @@ export function ProjectWorkspace(): React.ReactElement {
     jobId: string,
     targetProjectId?: string | null,
     options?: { preserveWorkspaceMode?: boolean; workspaceMode?: WorkspaceMode },
-  ) => {
+  ): Promise<boolean> => {
     const targetMode = options?.workspaceMode ?? (options?.preserveWorkspaceMode ? 'chat' : 'result');
     const openRequestId = ++openResultRequestSequenceRef.current;
     const currentProjectId = projectId || null;
     const resolvedTargetProjectId = targetProjectId ?? currentProjectId;
     if (resolvedTargetProjectId && currentProjectId && resolvedTargetProjectId !== currentProjectId) {
       void navigate(`/project/${resolvedTargetProjectId}?mode=${targetMode}&job=${encodeURIComponent(jobId)}`);
-      return;
+      return true;
     }
     let nextJob = conversationJobs.find((job) => job.id === jobId)
       || jobs.find((job) => job.id === jobId)
       || null;
     let nextProjectId = resolvedTargetProjectId;
     if (!nextJob) {
-      try {
+      // BLOCK-185（冷启动深链 Race B）：冷启动窗口先于后端就绪，单发 status 查询
+      // 抛错曾致静默归零（nextJob 仍 null → 落 chat 模式）。改用退避重试原语：抛错
+      // （网络/后端未就绪）续跑，取回但 ok=false（job 真不存在/无权）即刻停不误重试，
+      // 请求序号被后续取代则中止。姿势复用 welcome.tsx:100-132（UI-373 同族复发类）。
+      const outcome = await retryOnThrow<ToolJob>(async () => {
         const token = getToken();
         const resp = await fetch(getApiPrefix() + '/tools/status/' + encodeURIComponent(jobId), {
           headers: token ? { Authorization: 'Bearer ' + token } : {},
         });
         const data = (await resp.json()) as { ok?: unknown; id?: string; toolId?: string; status?: unknown; createdAt?: string | number; completedAt?: string | number; error?: string; projectId?: string; conversationId?: string | null };
-        if (!canCommitJobOpen(openRequestId, openResultRequestSequenceRef.current)) return;
-        if (data && data.ok) {
-          nextJob = {
+        if (!(data && data.ok)) return { status: 'not-found' };
+        return {
+          status: 'resolved',
+          value: {
             id: String(data.id || jobId),
             tool_id: String(data.toolId || ''),
             status: normalizeToolStatus(data.status),
@@ -788,24 +794,28 @@ export function ProjectWorkspace(): React.ReactElement {
             name: data.toolId ? `${data.toolId} via agent` : undefined,
             project_id: data.projectId ? String(data.projectId) : (resolvedTargetProjectId || null),
             conversationId: data.conversationId == null ? null : String(data.conversationId),
-          };
-          nextProjectId = nextJob.project_id || nextProjectId;
-          if (nextProjectId && currentProjectId && nextProjectId !== currentProjectId) {
-        void navigate(`/project/${nextProjectId}?mode=${targetMode}&job=${encodeURIComponent(nextJob.id)}`);
-            return;
-          }
-          setJobs((prev) => (prev.some((j) => j.id === nextJob!.id) ? prev : [nextJob!, ...prev]));
+          },
+        };
+      }, {
+        delaysMs: [0, 1000, 2000, 4000],
+        shouldContinue: () => canCommitJobOpen(openRequestId, openResultRequestSequenceRef.current),
+      });
+      if (!canCommitJobOpen(openRequestId, openResultRequestSequenceRef.current)) return false;
+      if (outcome.status === 'resolved') {
+        nextJob = outcome.value;
+        nextProjectId = nextJob.project_id || nextProjectId;
+        if (nextProjectId && currentProjectId && nextProjectId !== currentProjectId) {
+          void navigate(`/project/${nextProjectId}?mode=${targetMode}&job=${encodeURIComponent(nextJob.id)}`);
+          return true;
         }
-      } catch {
-        /* keep the current panel state if the status lookup fails */
+        setJobs((prev) => (prev.some((j) => j.id === nextJob!.id) ? prev : [nextJob!, ...prev]));
       }
-      if (!canCommitJobOpen(openRequestId, openResultRequestSequenceRef.current)) return;
     }
     if (!nextJob) {
       bindActiveJob(null);
       setWorkspaceNotice('找不到这个结果，或当前项目无权访问它。');
       if (!options?.preserveWorkspaceMode) updateWorkspaceMode('chat', true, null);
-      return;
+      return false;
     }
     if (!nextJob.conversationId) {
       // BLOCK-127（BIO-3）：无会话归属的 job（HTTP/API/联邦直跑）按「项目结果」
@@ -817,7 +827,7 @@ export function ProjectWorkspace(): React.ReactElement {
       if (!options?.preserveWorkspaceMode) {
         updateWorkspaceMode('result', true, nextJob.id);
       }
-      return;
+      return true;
     }
     if (nextJob) {
       if (nextJob.conversationId !== activeConvId) {
@@ -830,6 +840,7 @@ export function ProjectWorkspace(): React.ReactElement {
         updateWorkspaceMode('result', true, nextJob.id);
       }
     }
+    return true;
   }, [activeConvId, bindActiveJob, conversationJobs, jobs, navigate, normalizeToolStatus, openRightPanel, projectId, setRightOpen, updateWorkspaceMode]);
   // BLOCK-92 Wave B-1 — 结果/文件打开事件 effects 簇外迁
   // （./project-workspace/useWorkspaceOpenEffects.ts：URL 请求参数自动打开、

@@ -101,7 +101,7 @@ export interface RightPanelContext {
   hasReopenableWorkspaceFile: boolean;
   /** UI-451 加映 v3（P2-7/P2-8）— 脏位图上抛（守卫/淘汰环/关窗共用同一真相；稳定引用）。 */
   handleWorkspaceFileDirtyMapChange: (dirtyMap: Record<string, boolean>) => void;
-  handleOpenResult: (jobId: string, projectId?: string | null) => void | Promise<void>;
+  handleOpenResult: (jobId: string, projectId?: string | null) => void | Promise<boolean>;
   handleOpenRightResults: () => void;
   handleOpenRightBrowser: () => void;
   handleOpenRightFiles: () => void;

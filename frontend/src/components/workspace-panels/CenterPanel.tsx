@@ -120,7 +120,7 @@ export interface CenterPanelContext {
   sideChatOpen: boolean;
   setSideChatOpen: (next: boolean | ((prev: boolean) => boolean)) => void;
   handleShowPlugins: () => void;
-  handleOpenResult: (jobId: string, projectId?: string | null) => void | Promise<void>;
+  handleOpenResult: (jobId: string, projectId?: string | null) => void | Promise<boolean>;
   handleAskAgent: (prompt: string) => void;
   handleOpenWorkspacePath: () => void | Promise<void>;
   onPendingArtifactConsumed: () => void;
