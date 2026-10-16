@@ -6524,6 +6524,28 @@
       "notes": "2026-10-16 整包 completed（立项发令 active→P1-P5 单会话闭环；用户授权自主推进+验收全自动化「我不希望人参与」）：本地漏斗事件台账批——TTFS 程序②。G0 定性变更：评估报告「遥测端点化」字面隐含远程端点属 G1+（AGENTS.md 禁 G0 启动），故按 G0 唯一合法形态落地=本地 SQLite 漏斗台账（仿 decision_log 零外发）。交付=迁移 014_funnel_events + 共享白名单 core/packages/shared-telemetry（R3/R5 唯一合法跨进程共享层，src/telemetry-funnel.js 转发 re-export 单源）+ core 单一写入器 funnel-log.js best-effort + 4 接线（app_started@server.listen / project_created@api-data / first_job_succeeded@markAgentTaskDone / report_generated@final-report）。架构裁决：app_started 由后端 listen 钩子记录（R5 禁 src import core + 启动时序 bug，收敛单写入器使实机可纯后端无人眼跑）；runtime_install 纯桌面进程事件 G0 诚实 defer、update_succeeded G1+ N-A。P3 只读 CLI block186-ttfs.mjs（本地可审计）；P4 自动化实机 block186-p4-live.mjs 9/9 PASS，computeTTFS 对真实跨进程数据算出 408ms。契约单测 6/6；closeout 十三门全绿；knip 保留面下调 1（re-export 消 FUNNEL_EVENTS 死导出）。红线=不建远程端点/不动隐私门控/不引第二度量真相。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
+      "id": "BLOCK-187-GOLDEN-PATH-ONBOARDING",
+      "capability": "ui-productization",
+      "path": "docs/block-187-golden-path-onboarding-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "phase": "P0-LAUNCH",
+      "canonical": true,
+      "truthDomain": "block-187-golden-path-onboarding-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-16",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "golden-path",
+        "onboarding",
+        "ttfs-program",
+        "evals-harness",
+        "zero-breakage",
+        "ttfs-measurement"
+      ],
+      "notes": "2026-10-16 立项发令 active（用户「按照推荐的进行下去」，承接「我不希望人参与」→ 验收全自动化）：黄金路径脚本化与零断点验收批——TTFS 程序③收官批（①深链=BLOCK-185 completed、②遥测=BLOCK-186 completed）。范围=以既有 evals harness（spawnIsolatedBackend+startMockProvider+runGoldenTask 已跑 project→conversation→agent 三 POST）为载体把 agent 驱动黄金路径（开应用→建项目→问 Agent→首任务成功→看结果 ≈7 步）脚本化为可机械重跑验收，断言「≤7 步零断点且 TTFS 可度量」=阶段 1 出口判据（消费 BLOCK-186 funnel_events+computeTTFS）。P1 脚本化 golden task+criteria；P2 零断点审计（welcome.tsx sendGuard 无项目拦发送定性 by-design 非断点，真断点最小修涉前端带 UI-###）；P3 evals harness 增 funnel/ttfs 判据 kind 断言三里程碑落库+TTFS 非 null；P4 supersede stale docs/first-success-path.md（指已删 tools.tsx 旧 DESeq2 tools-runner 路径）。红线=不建 onboarding 向导 UI（Reading B 需人眼评审+产品个性自检，另立 UI 包待发令）/不动 186 单写入器裁决（app_started 后端 listen，TTFS 口径=系统可用起算诚实标注）/不接 runtime_install+update_succeeded/report_generated 终端锚定 first_job_succeeded/不引第二路由或度量真相。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
       "id": "DESKTOP-EVAL-20261015",
       "path": "docs/Petri-Desktop-Evaluation-Report-2026-10-15.md",
       "kind": "audit",
