@@ -58,7 +58,7 @@ if (backend.ok) {
       continue;
     }
     if (mock && Array.isArray(task.mockScript)) mock.push(...task.mockScript);
-    const result = await runGoldenTask({ api, tmpDir, task });
+    const result = await runGoldenTask({ api, tmpDir, task, outbound: mock ? mock.captured : null });
     result.criteriaResults = result.criteriaResults || [];
     if (!result.skipped) {
       for (const c of result.criteriaResults) {

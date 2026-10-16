@@ -303,7 +303,7 @@ export async function readFunnelSnapshot(tmpDir) {
  * 执行一枚黄金任务：fixture 项目/会话播种 → 真实 agent 循环 → 事件收集 → 终态。
  * mockScript 由调用方预先 push 进 mock provider（provider=mock 时）。
  */
-export async function runGoldenTask({ api, tmpDir, task }) {
+export async function runGoldenTask({ api, tmpDir, task, outbound = null }) {
   const startedAt = Date.now();
   const project = await apiCall(api, 'POST', '/api/data/projects', { name: `evals-${task.id}` });
   const projectId = project.json?.project?.id || project.json?.data?.id || project.json?.data?.project?.id;
@@ -399,6 +399,8 @@ export async function runGoldenTask({ api, tmpDir, task }) {
     terminalStatus,
     funnelEventCounts: funnel.eventCounts,
     ttfsMs: funnel.ttfsMs,
+    outbound,
+    tmpRoot: tmpDir,
   }));
   return {
     id: task.id,
@@ -421,7 +423,8 @@ function toolCallEvents(events) {
  * policy_denied / no_policy_denial / event_present / file_contains /
  * tool_succeeded / deny_after_success / subagent_completed / task_terminal_status /
  * genui_fragment_resolves（批次B 扩充，全确定性）/ funnel_event_present / ttfs_computable
- * （BLOCK-187 黄金路径里程碑与 TTFS 判据，读父进程注入的 funnel ctx，仍纯函数）
+ * （BLOCK-187 黄金路径里程碑与 TTFS 判据，读父进程注入的 funnel ctx，仍纯函数）/ outbound_contains
+ * （BLOCK-189 出站归一化断言/哨兵防作弊，读 ctx.outbound=mock.captured，复用 normalizeContextString）
  */
 export function evaluateCriterion(criterion, ctx) {
   const { events, finalText, completed, failedEvent, fileReader } = ctx;
@@ -538,6 +541,17 @@ export function evaluateCriterion(criterion, ctx) {
     case 'ttfs_computable': {
       const t = ctx.ttfsMs;
       return result(Number.isFinite(t) && t >= 0, `TTFS=${t === null || t === undefined ? 'null（app_started→first_job_succeeded 不成对，诚实不编造）' : `${t} ms`}`);
+    }
+    case 'outbound_contains': {
+      // 防作弊第三腿（BLOCK-189）：不信任循环自报事件流，独立核验**归一化出站请求**确含指定值
+      // （per-run 哨兵）。伪造/误报事件但未真实发出请求 → 归一化出站不含哨兵 → 红。
+      // 复用 normalizeContextString（同一易变值清单，杜绝第二套归一化真相）。无 ctx.outbound → fail-closed 红。
+      const out = ctx.outbound;
+      if (!Array.isArray(out)) return result(false, '无 outbound 上下文（fail-closed：判据要求注入 mock.captured 出站记录）');
+      const blob = out.map((r) => normalizeContextString(JSON.stringify(r), ctx.tmpRoot)).join('\n');
+      const needle = String(criterion.value ?? '');
+      const hits = needle.length ? blob.split(needle).length - 1 : 0;
+      return result(hits >= (criterion.minTimes || 1), `归一化出站含「${needle.slice(0, 40)}」× ${hits}（期望 ≥${criterion.minTimes || 1}）`);
     }
     default:
       return result(false, `未知判据 kind：${criterion.kind}`);

@@ -2705,6 +2705,20 @@
       "classifiesScripts": false
     },
     {
+      "id": "block189-outbound-anticheat",
+      "note": "BLOCK-189 评测 v2 第二切片·outbound_contains 出站归一化断言 + 哨兵防作弊 + 禁 sleep 门：harness 新判据 kind outbound_contains（读 ctx.outbound=mock.captured，复用 normalizeContextString）+ runGoldenTask outbound 形参 + evals-run 注入 mock.captured。契约=test/block189-outbound-anticheat.test.mjs（三态/防作弊红绿对/归一锚定/禁 sleep 门扫 evaluateCriterion 不读时钟+套件 kind 白名单）。改 harness/evals-run/suites/本测试即触发。脚本分类仍归 block181（本规则 classifiesScripts:false）。",
+      "patterns": [
+        "scripts/lib/evals-harness.mjs",
+        "scripts/evals-run.mjs",
+        "evals/suites/**",
+        "test/block189-*.test.mjs"
+      ],
+      "tests": [
+        "test/block189-outbound-anticheat.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "ui-proxy-review-probe",
       "note": "UI 代行评估/构造探针（scripts/ui-proxy-review.mjs，UI-496~509 批引入；scripts/ui500-compaction-live.mjs，UI-500 压缩构造批）：CDP 驱动真界面+截图留证，实机走查证据工具非回归测试（同 block123-p0-probes 形态）；证据=acceptance/ui-proxy-review/ 与 acceptance/ui-500/。",
       "patterns": [

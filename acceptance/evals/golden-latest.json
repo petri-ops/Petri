@@ -2,7 +2,7 @@
   "suite": "golden",
   "provider": "mock",
   "measures": "harness",
-  "at": "2026-10-16T05:24:08.089Z",
+  "at": "2026-10-16T06:50:12.754Z",
   "tasks": [
     {
       "id": "golden-first-success",
@@ -13,6 +13,12 @@
           "kind": "task_completed",
           "passed": true,
           "detail": "任务正常收口"
+        },
+        {
+          "kind": "outbound_contains",
+          "value": "evals-golden-first-success",
+          "passed": true,
+          "detail": "归一化出站含「evals-golden-first-success」× 1（期望 ≥1）"
         },
         {
           "kind": "funnel_event_present",
@@ -35,11 +41,11 @@
         {
           "kind": "ttfs_computable",
           "passed": true,
-          "detail": "TTFS=407 ms"
+          "detail": "TTFS=435 ms"
         }
       ],
       "finalText": "首任务完成。你已成功创建项目并让 Agent 跑通了第一次任务——这就是黄金路径的终点（first_job_succeeded）。",
-      "durationMs": 575
+      "durationMs": 587
     }
   ],
   "pass": 1,
