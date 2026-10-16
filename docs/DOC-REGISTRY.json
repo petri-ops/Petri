@@ -6550,8 +6550,8 @@
       "capability": "evaluation",
       "path": "docs/block-188-eval-baseline-v2-context-snapshot-plan.md",
       "kind": "work-package",
-      "status": "active",
-      "phase": "P0-LAUNCH",
+      "status": "completed",
+      "phase": "P5-CLOSED",
       "canonical": true,
       "truthDomain": "block-188-eval-baseline-v2-context-snapshot-plan",
       "entrypoint": "docs/README.md",
@@ -6564,7 +6564,7 @@
         "evidence-self-attestation",
         "stage-2"
       ],
-      "notes": "2026-10-16 立项发令 active（用户 AskUserQuestion 选定「评测基线 v2（推荐·最自动化）」为阶段2 首包方向）：评测基线 v2 首切片·context_snapshot 棘轮。§5.1 阶段2「证据自证期」出口判据=catalog 五列+判据三件套(禁 sleep)+mock capture/replay 防作弊+context_snapshot 棘轮；§4.2 判词 context_snapshot=Petri 完全没有的 prompt 回归防线单项价值最高。本包=其中完全确定性无 provider 依赖无网络无模型的首切片：把 agent 出站请求组装形状（system prompt+工具 schema+上下文骨架，动态值九类归一化）指纹化+基线棘轮，prompt/工具 schema/上下文组装任何变更 diff 显形须显式 --update 重打。复用 evals harness 已 capture 出站请求（不建第二评测真相）。单源=core/petri-server/helpers/system-prompt.js + agent-tools/tool-defs/* + registry.js listTools + message-trimmer/token-estimator。先例 desktop-agent-prompt/block56-context-freshness/block93-role-prompt。红线=不做判据门控口径裁决（formal-admission 切片，报告明列架构裁决项须用户拍板）/不接 LLM-as-judge real 模式（独立切片）/动态值不入基线/G1+ 不外推。评测 v2 其余切片各自独立立项（见 plan reopen）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "2026-10-16 整包 completed（立项发令 active→P0-P4 单会话闭环；用户 AskUserQuestion 选定「评测基线 v2（推荐·最自动化）」为阶段2 首包方向；验收全自动化无人眼；closeout 十三门全绿）：评测基线 v2 首切片·context_snapshot 棘轮。§5.1 阶段2「证据自证期」出口判据=catalog 五列+判据三件套(禁 sleep)+mock capture/replay 防作弊+context_snapshot 棘轮；§4.2 判词 context_snapshot=Petri 完全没有的 prompt 回归防线单项价值最高。交付=evals-harness 增 normalizeContextString+buildContextSnapshot 纯函数（归一化清单**经验取自实测**——真实 golden 连跑两请求 token 对称差穷举出临时库根/工作区绝对路径尾/执行环境平台行/项目 id p_x_y/会话 id/UUID/时间戳/epoch，非猜测；system prompt+工具 schema 按名排序+role 骨架 → sha256 指纹）+ evals/snapshots/golden.json 逐套件基线（动态值已掩码·跨机可复现·53KB 契约）+ evals-run.mjs 收口链按套件比对漂移即 exit 非零（建立/重打基线仅 --update-snapshot，formal-admission 防退化）。实作发现修正：system prompt 随 accessMode 变非全局一致→基线逐套件（否则 smoke 假红，已实测 smoke↔golden 对照触发漂移红）。契约单测 test/block188-context-snapshot.test.mjs 7/7（确定性/易变折叠同指纹/prompt·工具名·参数 schema·role 骨架漂移各检出/排序无关）；test:changed base 范围 53pass/0fail。红线兑现=不做判据门控口径裁决（formal-admission 切片报告明列架构裁决须用户拍板，留后续）/不接 LLM-as-judge real 模式/动态值不入基线。评测 v2 其余切片（capture/replay 防作弊·判据三件套·catalog 五列·门控棘轮·real 模式）各自独立立项（plan reopen）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "DESKTOP-EVAL-20261015",

@@ -8,12 +8,12 @@ acceptance:
   - 门禁：docs:check/ui:audit:check（纯基建免 UI-###）/契约单测（快照确定性：两次跑同形状同指纹 + 动态值归一 + 漂移检出）/test:changed 全绿
   - 完成语义：context_snapshot 棘轮在册且可重跑绿；prompt/工具 schema/上下文组装变更会显形为棘轮红（用一条构造漂移自证）；零 provider 依赖、零人眼
 reopen: 评测 v2 后续切片各自独立立项——② mock capture/replay 哨兵防作弊 + 判据三件套（禁 sleep）扩充；③ catalog 五列化；④ formal admission 门控棘轮（**该切片含「判据门控口径」架构裁决，须用户拍板**）；⑤ LLM-as-judge real 模式；⑥ 竞争力 8 维复测（蓝图明定随包不单开）
-status: active
+status: completed
 ---
 
 # BLOCK-188 — 评测基线 v2 首切片·context_snapshot 棘轮（阶段2 证据自证）
 
-- 状态：`active`（2026-10-16 用户选定「评测基线 v2（推荐·最自动化）」为阶段2 首包方向）
+- 状态：`completed`（2026-10-16 用户选定「评测基线 v2（推荐·最自动化）」为阶段2 首包方向 → P0-P4 单会话闭环；验收全自动化无人眼；closeout 十三门全绿）
 - 定位：评估报告 §5.1 阶段2 出口判据 = `catalog 五列 + 判据三件套(禁 sleep) + mock capture/replay 防作弊 + context_snapshot 棘轮`（+ 竞争力 8 维复测随包）。本包交付其中**单项价值最高、且完全确定性无 provider 依赖**的 context_snapshot 棘轮；其余切片按单包串行纪律后续各自立项（见 frontmatter reopen）。
 
 ## 1. 立项自检（产品个性纪律问句）
