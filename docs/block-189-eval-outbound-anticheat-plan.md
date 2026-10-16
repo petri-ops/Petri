@@ -8,12 +8,12 @@ acceptance:
   - 门禁：docs:check/ui:audit:check（纯基建免 UI-###）/契约单测（outbound_contains 命中/未命中/fail-closed 三态 + 哨兵防作弊红绿对 + 禁 sleep 门）/evals:run golden+smoke 复跑绿不回归/test:changed 全绿
   - 完成语义：三件套第三腿（出站归一化断言）在册；哨兵防作弊可证伪（无出站即红）；禁 sleep 成机械门；不回归现有 17 判据与 golden/smoke 套件
 reopen: 评测 v2 后续切片各自独立立项——capture **两态的真实录制态**（record 真实 provider 响应入 fixture，需 provider 凭据，G0 real 面独立评估）；catalog 五列化；**formal-admission 门控棘轮（含「判据门控口径」架构裁决须用户拍板，本包不碰 PASS/FAIL 语义）**；LLM-as-judge real；竞争力 8 维复测随包
-status: active
+status: completed
 ---
 
 # BLOCK-189 — 出站归一化断言 + 哨兵防作弊 + 禁 sleep 门（评测 v2 第二切片）
 
-- 状态：`active`（2026-10-16 用户「行！继续」发令，为评测 v2 第二切片；承接「我不希望人参与」→ 全自动化）
+- 状态：`completed`（2026-10-16 用户「行！继续」发令 → P0-P4 单会话闭环；验收全自动化无人眼；closeout 十三门全绿）
 - 前序：BLOCK-187（黄金路径回归门）+ BLOCK-188（context_snapshot 棘轮）均 completed，同属 evals harness 演进线。
 
 ## 1. 立项自检（产品个性纪律问句）
