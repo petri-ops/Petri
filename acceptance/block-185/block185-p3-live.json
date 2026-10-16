@@ -1,0 +1,29 @@
+{
+  "name": "block185-p3",
+  "startedAt": "2026-10-16T02:54:52.437Z",
+  "finishedAt": "2026-10-16T02:55:03.205Z",
+  "assertions": [],
+  "allPass": true,
+  "results": [
+    {
+      "id": "SMOKE.projects-available",
+      "ok": true,
+      "detail": "projects=4 pid=p_mv9rojeu_o3t0"
+    },
+    {
+      "id": "SMOKE.no-crash-on-deeplink",
+      "ok": true,
+      "detail": "url=http://localhost:3000/project/p_mv9rojeu_o3t0"
+    },
+    {
+      "id": "SMOKE.deeplink-path-completes",
+      "ok": true,
+      "detail": "body~=工作台 新建任务 扩展 知识空间 项目 Doc.CAO 暂无对话 block166-diag SingleCell petri 联邦 设置 Doc.CAO 开始新的对话 在下方输入框中提问 解释项目结构 了解项目的文件组织与数据构成 快速开"
+    },
+    {
+      "id": "DEEPLINK.route-preserved-after-reload",
+      "ok": true,
+      "detail": "url=http://localhost:3000/project/p_mv9rojeu_o3t0"
+    }
+  ]
+}
