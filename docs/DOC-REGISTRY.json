@@ -6589,6 +6589,27 @@
       "notes": "2026-10-16 整包 completed（立项发令 active→P0-P4 单会话闭环；用户「行！继续」发令，评测 v2 第二切片；closeout 十三门全绿·验收全自动化无人眼）：出站请求归一化断言 + 哨兵防作弊 + 禁 sleep 门。§5.1 阶段2 四件套之「判据三件套(禁 sleep)+mock capture/replay 防作弊」两腿。P0 勘察=三件套缺**出站归一化断言**一条腿（现 17 判据 kind 覆盖事件谓词+文件产物，无 kind 读 mock.captured 出站记录=防作弊缺口，伪造事件可假绿）；无 sleep-断言但无机械门。交付=P1 新 kind outbound_contains（runGoldenTask 注入 mock.captured→ctx.outbound，复用 BLOCK-188 normalizeContextString 归一化不引第二套真相，无 outbound→fail-closed 红）；P2 per-run 哨兵（golden 项目名 evals-golden-first-success 天然进上下文）+红绿对测证「有事件无出站→红」=ZCode replay 断出站含哨兵防作弊在 mock 层落地；P3 禁 sleep 机械门（扫 suites+harness，PASS 条件不得依赖 wall-clock 睡眠）。红线=不碰判据门控口径/PASS-FAIL 晋升语义（formal-admission 架构裁决须用户拍板独立切片·本包只加 kind+门）/不做真实 provider 录制（capture record 侧需凭据 reopen）/不引第二归一化真相（复用 188）/不建第二 runner。**交付验证**=契约单测 block189 5/5（outbound_contains 三态/防作弊红绿对/归一锚定/禁 sleep 两门）+ evals:run golden 6/6 含 outbound_contains 绿 + smoke 9/9 不回归 + 邻域单测 32/32；test:changed base 范围 58pass/0fail；impact-map block189-outbound-anticheat 登记（classifiesScripts:false）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
+      "id": "BLOCK-190-EVALS-CATALOG",
+      "capability": "evaluation",
+      "path": "docs/block-190-evals-catalog-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "phase": "P0-LAUNCH",
+      "canonical": true,
+      "truthDomain": "block-190-evals-catalog-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-16",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "evals-v2",
+        "catalog",
+        "five-column",
+        "evidence-self-attestation",
+        "stage-2"
+      ],
+      "notes": "2026-10-16 立项发令 active（用户「冲·搞完评测 v2 剩余·各独立立项」）：评测基线 v2 第三切片·catalog 五列化（§5.1 阶段2 四件套之 catalog 五列；§4.1 ZCode 黄金任务 catalog 五列=ID/setup/action/assertion/evidence）。交付=deriveCatalogRow 纯函数（evals 任务 JSON→五列派生视图：setup←accessMode+fixture+preset/action←prompt+回合/assertion←criteria kind/evidence←被核验面）+ scripts/evals-catalog.mjs 生成 evals/CATALOG.md 五列索引（npm run evals:catalog）+ 契约测 test/block190-evals-catalog.test.mjs（每任务五列非空 + CATALOG.md 与重生成逐字节同步棘轮[新任务未入目录即红] + 无 volatile）。红线=additive 派生视图不改 13 任务 JSON 字段名/不动 runGoldenTask+gate 语义/不动门控（BLOCK-191 才碰含架构裁决）/无 volatile 入目录。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
       "id": "DESKTOP-EVAL-20261015",
       "path": "docs/Petri-Desktop-Evaluation-Report-2026-10-15.md",
       "kind": "audit",
