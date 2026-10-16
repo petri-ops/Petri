@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { recordFunnelEvent } = require('./funnel-log');
 
 const IMAGE_MIME = {
   '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
@@ -43,6 +44,8 @@ function materializeFinalReport({outputDir, generatedAt = new Date().toISOString
     : `${marker}\n${embedded.html}`;
   const fileName = 'final-report.html';
   fs.writeFileSync(path.join(outputDir, fileName), html, 'utf8');
+  // BLOCK-186：报告物化成功落本地漏斗台账（best-effort，不影响返回）。
+  recordFunnelEvent('report_generated');
   return {fileName, sourceName, generatedAt, embeddedAssets: embedded.embedded};
 }
 

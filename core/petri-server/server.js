@@ -28,6 +28,7 @@ const cacheManager = require('./cache-manager');
 const { db } = require('./db');
 const config = require('./config');
 const { logError } = require('./helpers/error-log');
+const { recordFunnelEvent } = require('./helpers/funnel-log');
 
 // A-009: pull the petri-server port fallback from env-coordinator instead of
 // duplicating the literal default here. setupDesktopEnv() in the Electron
@@ -357,6 +358,8 @@ app.listen(PORT, '127.0.0.1', () => {
   console.log(`🧬 Petri R Server running on port ${PORT}`);
   console.log(`   POST http://localhost:${PORT}/api/run`);
   console.log(`   GET  http://localhost:${PORT}/api/health`);
+  // BLOCK-186：后端就绪即本机 app_started 落本地漏斗台账（best-effort，永不阻塞监听）。
+  recordFunnelEvent('app_started');
 });
 
 // ── BLOCK-70：手机远程同步 mobile-gateway（additive，默认关闭）────────────

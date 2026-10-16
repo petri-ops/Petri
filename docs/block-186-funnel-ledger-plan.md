@@ -2,8 +2,8 @@
 capability: observability
 goal: BLOCK-186 = 本地漏斗事件台账批——TTFS 产品化程序（评估报告 §5.1 阶段 1 ②）第二批。把「遥测端点化」按 G0 纪律落地为**本地漏斗事件台账**（SQLite 表，仿 decision_log 先例，本机常开零外发），让 TTFS（首次成功时间）可度量，为 ③onboarding 提供自动化验收基线。用户授权「可以自动进行的那种…我不希望人参与」（2026-10-16，自主推进 + 验收全自动化）。
 acceptance:
-  - P1 本地台账：新增迁移 014_funnel_events.sql（表 funnel_events：event/ts/user_id/created_at）+ helpers/funnel-log.js best-effort 写入器（仿 decision-log.js：永不 throw、独立于远程 telemetry_enabled 开关、本机常开）+ 契约单测
-  - P2 业务点接线：6 漏斗事件接本地台账——app_started（main ready，复用现 reportEvent 调用点旁挂本地写）/project_created（data/projects POST）/first_job_succeeded（markAgentTaskDone）/runtime_install（运行时安装点）/report_generated（报告生成点）；update_succeeded 属 packaged 自动更新=G1+ 面，G0 dev 无触发点，诚实标 N-A 不硬接
+  - P1 本地台账：新增迁移 014_funnel_events.sql（表 funnel_events：at/event/user_id）+ 共享白名单 core/packages/shared-telemetry/funnel-events.js（R3/R5 唯一合法跨进程共享层，src/telemetry-funnel.js re-export 单源）+ core 单一写入器 helpers/funnel-log.js best-effort（仿 decision-log.js：永不 throw、独立于远程 telemetry_enabled 开关、本机常开）+ 契约单测
+  - P2 业务点接线：4 个 core 进程 G0 事件经单一 core 写入器落本地台账——app_started（server.listen 就绪钩子）/project_created（api-data POST /api/data/projects）/first_job_succeeded（agent-task-store markAgentTaskDone）/report_generated（final-report materializeFinalReport）；runtime_install（纯桌面进程事件、无 core 触发点、非 TTFS 所需）G0 诚实 defer，update_succeeded 属 packaged 自动更新=G1+ 面诚实标 N-A 不硬接
   - P3 TTFS 查询：只读端点/CLI 计算 first_job_succeeded.ts − app_started.ts（按 user/session 口径），供 ③onboarding 验收度量
   - 门禁：docs:check/ui:audit:check（若非纯后端则免）/tsc/test:changed 全绿 + 漏斗台账契约单测 + TTFS 计算单测 + 自动化实机（跑真实任务链断言 funnel_events 行落库 + TTFS 可算，acceptance/block-186/，无人眼）
   - 完成语义：6 事件中 G0 可触发者全部本地落账；TTFS 可从台账算出；零远程外发（端点占位维持 G1+ 不动）
@@ -25,12 +25,20 @@ status: active
 
 | 事件 | 接线点 | G0 可触发 |
 | --- | --- | --- |
-| app_started | `src/main.js:498` reportEvent 旁挂本地写 | ✅ |
-| project_created | `core/petri-server` data/projects POST 成功处 | ✅ |
-| first_job_succeeded | `agent-task-store.js:677` markAgentTaskDone | ✅（TTFS 关键） |
-| runtime_install | 运行时安装成功点 | ✅ |
-| report_generated | 报告生成成功点 | ✅ |
+| app_started | `core/petri-server/server.js` app.listen 钩子旁挂 `recordFunnelEvent('app_started')` | ✅ |
+| project_created | `core/petri-server/api-data.js` `POST /api/data/projects` 成功处 | ✅ |
+| first_job_succeeded | `core/petri-server/agent-task-store.js` `markAgentTaskDone`（每次成功记一行，computeTTFS 取最早） | ✅（TTFS 关键） |
+| report_generated | `core/petri-server/helpers/final-report.js` `materializeFinalReport` 成功处 | ✅ |
+| runtime_install | 运行时/包安装在**桌面进程**（`src/pack-lifecycle.js` 等），后端无触发点 | ❌ G0 诚实 defer（见 §3.5） |
 | update_succeeded | packaged 自动更新（G1+） | ❌ 诚实标 N-A |
+
+## 3.5 架构裁决（P1 实施期定稿，非可选）
+
+dependency-cruiser R3（core 禁 import src）+ R5（src 禁 import core/petri-server）与本包两条硬约束，逼出以下裁决（偏离原 §2 字面接线点，理由留痕）：
+
+1. **共享白名单落 `core/packages/shared-telemetry/funnel-events.js`**：漏斗事件清单被 Electron 主进程与后端进程共用，两侧互 import 被 R3/R5 禁；`core/packages/**` 是 R4 注释确认的「前后端共享层」，是唯一合法落点。`src/telemetry-funnel.js` 改为对该模块的**转发 re-export**（保持 `src/telemetry.js` 的 `require('./telemetry-funnel')` 入口不变），杜绝第二份清单。单测实证：两路径 `FUNNEL_EVENTS` 为同一数组引用。
+2. **`app_started` 由后端 `server.listen` 钩子记录，而非原 `src/main.js:498`**：R5 禁 src 直接调用 core 写入器；而 `src/main.js:498` 早于 `setupDesktopEnv`（PETRI_DB_PATH 尚未设）与 migration（funnel_events 表尚未建），在旁挂本地写会 best-effort 静默丢行。后端 `app.listen` 是「本机就绪即 app_started」的合法单进程锚点——**全台账收敛为 core 一个写入器**（零 src 写入器、无第二份 INSERT、无启动时序 bug），且使 P4 实机可纯后端跑（无人眼、无需 Electron）。
+3. **G0 实接事件 4 个（app_started/project_created/first_job_succeeded/report_generated），非原拟 5 个**：`runtime_install` 是纯桌面进程事件、无 core 触发点，且非 TTFS 所需；为它加 src 写入器=引入第二写入路径（违背裁决 2 的单写入器收敛）。诚实 defer 至「桌面进程漏斗台账写路径」这一独立小决策日后显式立项，不硬接、不造假。
 
 ## 3. 非范围（红线）
 
@@ -44,8 +52,8 @@ status: active
 
 - **P0 勘察**：已完成（遥测现状 + markDone 接线点 + 迁移序列 013→014）。
 - **P1 本地台账**：`src/migrations/014_funnel_events.sql` + `core/petri-server/helpers/funnel-log.js`（best-effort 永不 throw，仿 decision-log.js）+ 契约单测（写入/白名单/失败静默/独立于 telemetry_enabled）。
-- **P2 接线**：5 个 G0 可触发事件在业务成功点旁挂 `recordFunnelEvent(name)`；红绿先行（先测未落账红→接线绿）。
-- **P3 TTFS 查询**：只读计算 `first_job_succeeded.ts − app_started.ts`（端点或 CLI），单测覆盖正常/无首成功/多用户口径。
+- **P2 接线**：4 个 core 进程 G0 事件经单一 core 写入器 `recordFunnelEvent(name)` 在业务成功点旁挂（裁决 §3.5.2）；红绿先行由 P4 实机承载（未接线则 funnel_events 无行→探针红）。`runtime_install` G0 defer、`update_succeeded` G1+ N-A。
+- **P3 TTFS 查询**：`computeTTFS()`（exported 于 funnel-log）为查询原语，另交付只读 CLI `scripts/block186-ttfs.mjs`（`--db=<petri.db>` 读本机台账打印 TTFS + 最近事件，复用原语不重实现 SQL，服务「本地可审计」）。单测覆盖正常/无首成功→null/无 app_started→全 null。
 - **P4 自动化实机**：脚本跑真实链（建项目→跑 job 至成功）→ 断言 funnel_events 落 `project_created`+`first_job_succeeded` 行 + TTFS 可算，acceptance/block-186/。**无人眼**。
 - **P5 收口**：closeout 全链 + 五件套回写。
 

@@ -6,6 +6,7 @@
 const express = require('express');
 const db = require('./db');
 const { getPublicG0BaselineSummary } = require('../shared-backend/g0-baseline');
+const { recordFunnelEvent } = require('./helpers/funnel-log');
 
 const router = express.Router();
 
@@ -215,6 +216,8 @@ router.post('/projects', (req, res) => {
       p.user_id = ownerId;
     } catch {}
   }
+  // BLOCK-186：项目创建成功落本地漏斗台账（best-effort，不影响响应）。
+  recordFunnelEvent('project_created', { userId: ownerId });
   res.json({ status: 'ok', project: p });
 });
 

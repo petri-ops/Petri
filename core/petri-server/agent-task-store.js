@@ -10,6 +10,7 @@ const eventBus = require('./helpers/event-bus');
 const Database = require('better-sqlite3');
 const config = require('./config');
 const logger = require('./logger');
+const { recordFunnelEvent } = require('./helpers/funnel-log');
 // BLOCK-10 PHASE 1.1 (E-019 full): busy_timeout is centralized in
 // shared-backend/config-helper so db.js + agent-task-store.js +
 // branch-db.js + result-db.js can never drift. Defaults to 10000ms;
@@ -684,6 +685,9 @@ function markAgentTaskDone(taskId, filesChanged) {
     serializeFilesChanged(filesChanged),
     taskId
   );
+  // BLOCK-186：agent 任务成功终态落本地漏斗台账（TTFS 关键锚点；每次成功记一行，
+  // computeTTFS 取 app_started 之后最早一行，重复成功无害）。best-effort 永不阻塞落库。
+  recordFunnelEvent('first_job_succeeded');
 }
 
 function markAgentTaskFailed(taskId, error, filesChanged) {

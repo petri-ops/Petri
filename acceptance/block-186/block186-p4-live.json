@@ -1,0 +1,57 @@
+{
+  "ranAt": "2026-10-16T04:39:38.365Z",
+  "allPass": true,
+  "ttfsMs": 408,
+  "eventsSeen": [
+    "first_job_succeeded",
+    "project_created",
+    "app_started"
+  ],
+  "results": [
+    {
+      "id": "env.isolated-backend",
+      "ok": true,
+      "detail": "隔离后端 :51526 健康 / db=petri.db"
+    },
+    {
+      "id": "A.app_started-logged",
+      "ok": true,
+      "detail": "funnel_events app_started 行数=1"
+    },
+    {
+      "id": "B.project-created-api",
+      "ok": true,
+      "detail": "status=200 projectId=p_mvahaptk_xshj"
+    },
+    {
+      "id": "B.project_created-logged",
+      "ok": true,
+      "detail": "funnel_events project_created 行数=1"
+    },
+    {
+      "id": "C.task-started",
+      "ok": true,
+      "detail": "conversationId=conv_d7c6810d-5d9 taskId=5ae581b9-92d6-4f8e-8384-62374bf699eb"
+    },
+    {
+      "id": "C.task-reached-done",
+      "ok": true,
+      "detail": "events=9 providerCalls=1"
+    },
+    {
+      "id": "C.first_job_succeeded-logged",
+      "ok": true,
+      "detail": "funnel_events first_job_succeeded 行数=1"
+    },
+    {
+      "id": "D.computeTTFS-computable",
+      "ok": true,
+      "detail": "ttfsMs=408 appStartedAt=2026-10-16T04:39:37.440Z firstSuccessAt=2026-10-16T04:39:37.848Z"
+    },
+    {
+      "id": "D.recent-events-nonempty",
+      "ok": true,
+      "detail": "recent=first_job_succeeded,project_created,app_started"
+    }
+  ]
+}

@@ -179,6 +179,27 @@
       "scriptRole": "development-smoke"
     },
     {
+      "id": "block186-funnel-ledger",
+      "note": "BLOCK-186 本地漏斗事件台账（TTFS 程序②）：迁移 014_funnel_events + 共享白名单 core/packages/shared-telemetry（R3/R5 唯一合法跨进程共享层，src/telemetry-funnel.js re-export 单源）+ core 单写入器 helpers/funnel-log.js（best-effort，仿 decision-log）+ 4 接线点（server.listen app_started / api-data project_created / agent-task-store first_job_succeeded / final-report report_generated）。契约=test/block186-funnel-ledger.test.mjs；实机=scripts/block186-p4-live.mjs（隔离后端无人眼，不随 test:changed 自动跑）；查询 CLI=scripts/block186-ttfs.mjs。runtime_install（桌面进程事件）+ update_succeeded（G1+）G0 诚实未接。",
+      "patterns": [
+        "core/petri-server/helpers/funnel-log.js",
+        "core/packages/shared-telemetry/**",
+        "src/telemetry-funnel.js",
+        "src/migrations/014_funnel_events.sql",
+        "core/petri-server/server.js",
+        "core/petri-server/api-data.js",
+        "core/petri-server/agent-task-store.js",
+        "core/petri-server/helpers/final-report.js",
+        "test/block186-*.test.mjs",
+        "scripts/block186-*.mjs",
+        "acceptance/block-186/**"
+      ],
+      "tests": [
+        "test/block186-funnel-ledger.test.mjs"
+      ],
+      "classifiesScripts": true
+    },
+    {
       "id": "frontend-config",
       "patterns": [
         "frontend/package.json",
