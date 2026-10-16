@@ -15,6 +15,7 @@ const fs = require("fs");
 const path = require("path");
 const { BRAND } = require("./brand");
 const { zoomBy, zoomReset } = require("./_zoom.js");
+const { extractRestorableRoute, buildRestoreUrl, loadLastRoute, saveLastRoute } = require("./_main-window-state.js");
 
 /**
  * Create the main BrowserWindow with all event handlers attached.
@@ -207,17 +208,50 @@ async function createWindow({
   // production/normal launch loads the local static build.
   // BLOCK-100 P1 — 测试实例 URL 追加 `?test=1`：CDP /json/list 的 target
   // 判别标记（连接测试实例时按此过滤，防误连用户窗口——永久红线）。
+  // BLOCK-185 — 冷启动深链恢复（Electron 重启面）：非测试实例尝试恢复上次本地路由，
+  // 只存/恢复 SPA 相对路由（同源门见 _main-window-state.js）。测试实例不恢复不持久化，
+  // 保证 CDP 探针落在已知 base URL（永久红线，防探针被劫到残留深链）。
+  const mainWindowStatePath = () => {
+    try {
+      return path.join(require("electron").app.getPath("userData"), "main-window-route.json");
+    } catch {
+      return null;
+    }
+  };
+  const restoreUrl = (base) => {
+    if (IS_TEST_INSTANCE || !base) return null;
+    const sp = mainWindowStatePath();
+    if (!sp) return null;
+    return buildRestoreUrl(base, loadLastRoute(sp));
+  };
   if (isDevMode) {
-    mainWindow.loadURL(
-      IS_TEST_INSTANCE
-        ? `${spaServerUrl}${spaServerUrl.includes("?") ? "&" : "?"}test=1`
-        : spaServerUrl,
-    );
+    const restored = restoreUrl(spaServerUrl);
+    if (restored) {
+      mainWindow.loadURL(restored);
+    } else {
+      mainWindow.loadURL(
+        IS_TEST_INSTANCE
+          ? `${spaServerUrl}${spaServerUrl.includes("?") ? "&" : "?"}test=1`
+          : spaServerUrl,
+      );
+    }
   } else if (fs.existsSync(spaIndexPath) && spaServerUrl) {
-    mainWindow.loadURL(spaServerUrl);
+    mainWindow.loadURL(restoreUrl(spaServerUrl) || spaServerUrl);
   } else {
     // Fallback: load Vite dev server in dev mode
     mainWindow.loadURL(rendererDevUrl);
+  }
+
+  // BLOCK-185 — 关窗时持久化当前本地路由，供下次冷启动恢复（尽力而为，测试实例不写）。
+  if (!IS_TEST_INSTANCE) {
+    mainWindow.on("close", () => {
+      try {
+        const sp = mainWindowStatePath();
+        if (!sp) return;
+        const route = extractRestorableRoute(mainWindow.webContents.getURL(), spaServerUrl);
+        if (route) saveLastRoute(sp, route);
+      } catch { /* 持久化失败不阻塞关闭 */ }
+    });
   }
 
   // ── External Links → System Browser ───────────────────────────

@@ -546,6 +546,19 @@
       "classifiesScripts": false
     },
     {
+      "id": "block185-cold-start-deeplink",
+      "note": "BLOCK-185 冷启动深链修复：主窗最后路由持久化（同源白名单门）+ SPA 冷启动退避重试原语。改动即跑安全门纯函数单测（Node）+ 前端 coldStartRetry vitest（同目录）。",
+      "patterns": [
+        "src/main/_main-window-state.js",
+        "src/main/_window-create.js",
+        "test/block185-main-window-state.test.mjs"
+      ],
+      "tests": [
+        "test/block185-main-window-state.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "block48-computer-use-sidecar",
       "note": "BLOCK-48 电脑控制：Swift sidecar 源码与协议契约测试。改动即跑契约测试（前置构建：bash scripts/build-computer-use-sidecar.sh）。",
       "patterns": [
