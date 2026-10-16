@@ -79,4 +79,25 @@ function saveLastRoute(statePath, route) {
   }
 }
 
-module.exports = { extractRestorableRoute, buildRestoreUrl, loadLastRoute, saveLastRoute };
+/**
+ * 启动加载 URL 决策（纯函数，覆盖 _window-create.js 的恢复三分支，可单测）：
+ *  - 测试实例：永不恢复（护 CDP 探针落已知 base，永久红线），dev 模式追加 ?test=1；
+ *  - 非测试实例 + 有效存路由：拼当前 origin 恢复深链；
+ *  - 非测试实例 + 无/非法存路由：回落 base 根。
+ * @param {object} p
+ * @param {string} p.baseUrl          spaServerUrl
+ * @param {boolean} p.isTestInstance  PETRI_TEST_INSTANCE === "1"
+ * @param {string|null} p.savedRoute  loadLastRoute 读回值
+ * @returns {string} 要 loadURL 的绝对 URL
+ */
+function computeStartupLoadUrl({ baseUrl, isTestInstance, savedRoute }) {
+  if (isTestInstance) {
+    if (!baseUrl) return baseUrl;
+    return `${baseUrl}${baseUrl.includes("?") ? "&" : "?"}test=1`;
+  }
+  const restored = buildRestoreUrl(baseUrl, savedRoute);
+  if (restored) return restored;
+  return baseUrl;
+}
+
+module.exports = { extractRestorableRoute, buildRestoreUrl, loadLastRoute, saveLastRoute, computeStartupLoadUrl };

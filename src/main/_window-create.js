@@ -15,7 +15,7 @@ const fs = require("fs");
 const path = require("path");
 const { BRAND } = require("./brand");
 const { zoomBy, zoomReset } = require("./_zoom.js");
-const { extractRestorableRoute, buildRestoreUrl, loadLastRoute, saveLastRoute } = require("./_main-window-state.js");
+const { extractRestorableRoute, loadLastRoute, saveLastRoute, computeStartupLoadUrl } = require("./_main-window-state.js");
 
 /**
  * Create the main BrowserWindow with all event handlers attached.
@@ -218,25 +218,17 @@ async function createWindow({
       return null;
     }
   };
-  const restoreUrl = (base) => {
-    if (IS_TEST_INSTANCE || !base) return null;
+  const savedRoute = (() => {
+    if (IS_TEST_INSTANCE) return null; // 测试实例永不恢复（护探针红线）
     const sp = mainWindowStatePath();
-    if (!sp) return null;
-    return buildRestoreUrl(base, loadLastRoute(sp));
-  };
+    return sp ? loadLastRoute(sp) : null;
+  })();
+  const startupUrl = (base) =>
+    computeStartupLoadUrl({ baseUrl: base, isTestInstance: IS_TEST_INSTANCE, savedRoute });
   if (isDevMode) {
-    const restored = restoreUrl(spaServerUrl);
-    if (restored) {
-      mainWindow.loadURL(restored);
-    } else {
-      mainWindow.loadURL(
-        IS_TEST_INSTANCE
-          ? `${spaServerUrl}${spaServerUrl.includes("?") ? "&" : "?"}test=1`
-          : spaServerUrl,
-      );
-    }
+    mainWindow.loadURL(startupUrl(spaServerUrl));
   } else if (fs.existsSync(spaIndexPath) && spaServerUrl) {
-    mainWindow.loadURL(restoreUrl(spaServerUrl) || spaServerUrl);
+    mainWindow.loadURL(startupUrl(spaServerUrl));
   } else {
     // Fallback: load Vite dev server in dev mode
     mainWindow.loadURL(rendererDevUrl);
