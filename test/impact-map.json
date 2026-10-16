@@ -2692,6 +2692,19 @@
       "classifiesScripts": false
     },
     {
+      "id": "block188-context-snapshot",
+      "note": "BLOCK-188 评测基线 v2 首切片·context_snapshot 棘轮：normalizeContextString/buildContextSnapshot（scripts/lib/evals-harness.mjs 新纯函数，动态值归一化+组装形状指纹）+ evals/snapshots/<suite>.json 逐套件基线 + evals-run.mjs 收口链漂移红。契约=test/block188-context-snapshot.test.mjs（确定性/易变归一/漂移检出/工具排序）。改 harness 或快照基线或本测试即触发。脚本分类仍归 block181-evals-harness（本规则 classifiesScripts:false，不重复计入）。",
+      "patterns": [
+        "scripts/lib/evals-harness.mjs",
+        "evals/snapshots/**",
+        "test/block188-*.test.mjs"
+      ],
+      "tests": [
+        "test/block188-context-snapshot.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "ui-proxy-review-probe",
       "note": "UI 代行评估/构造探针（scripts/ui-proxy-review.mjs，UI-496~509 批引入；scripts/ui500-compaction-live.mjs，UI-500 压缩构造批）：CDP 驱动真界面+截图留证，实机走查证据工具非回归测试（同 block123-p0-probes 形态）；证据=acceptance/ui-proxy-review/ 与 acceptance/ui-500/。",
       "patterns": [

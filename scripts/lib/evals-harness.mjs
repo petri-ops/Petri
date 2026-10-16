@@ -16,6 +16,7 @@ import http from 'node:http';
 import net from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -112,7 +113,7 @@ export function startMockProvider() {
       req.on('end', async () => {
         let parsed = {};
         try { parsed = JSON.parse(body); } catch { /* 容忍 */ }
-        captured.push({ messages: parsed.messages || [] });
+        captured.push({ model: parsed.model ?? null, messages: parsed.messages || [], tools: parsed.tools || null });
         const bodyStr = JSON.stringify(parsed);
         let idx = queue.findIndex((t) => !t.whenIncludes || bodyStr.includes(t.whenIncludes));
         const turn = idx >= 0 ? queue.splice(idx, 1)[0] : { content: '[evals] mock 脚本耗尽（无匹配回合）', finish: 'stop' };
@@ -571,6 +572,51 @@ export function compareRunVsBaseline(run, baseline) {
     if (!(run.tasks || []).some((t) => t.id === id)) regressions.push(`${id}:task_missing`);
   }
   return { ok: regressions.length === 0, regressions, improvements, newTasks, skipped };
+}
+
+/**
+ * 归一化 agent 出站请求文本，抹除 run/machine 特定的易变 token（BLOCK-188 context_snapshot 棘轮）。
+ * 归一化类别来自**实测**（golden 套件连跑两请求 token 对称差枚举），非猜测——含：临时库根路径、
+ * 工作区绝对路径尾（projects\… 含项目目录随机后缀 + .petri/gen-ui/conv_…）、执行环境平台行
+ * （os.platform/release/arch，跨机差异）、项目 id(p_x_y)、会话 id(conv_…)、UUID、ISO 时间戳、epoch。
+ * 保留 system prompt 模板文案与工具 schema 真相（这些正是棘轮要守的回归面）。纯字符串函数。
+ */
+export function normalizeContextString(input, tmpRoot) {
+  let s = String(input ?? '');
+  if (tmpRoot) s = s.split(String(tmpRoot)).join('<TMP>');
+  return s
+    .replace(/projects[\\/][^"'\s]*/g, 'projects/<WORKSPACE>')
+    .replace(/当前执行环境[：:][^\n]*/g, '当前执行环境：<ENV>')
+    .replace(/\bp_[0-9a-z]{6,}_[0-9a-z]{3,}\b/g, '<PROJECT_ID>')
+    .replace(/conv_[0-9a-fA-F][0-9a-fA-F-]*/g, '<CONV_ID>')
+    .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, '<UUID>')
+    .replace(/\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(:\d{2})?(\.\d+)?Z?/g, '<DATETIME>')
+    .replace(/\b\d{10,13}\b/g, '<EPOCH>');
+}
+
+/**
+ * 从一枚 agent 出站请求（{model, messages, tools}）构建 context_snapshot 形状 + sha256 指纹。
+ * 工具按名排序、参数 schema 归一化；system 文本归一化；消息 role 骨架。同一逻辑组装→同指纹，
+ * prompt/工具 schema/上下文组装任一变更→指纹变（棘轮红）。纯函数，供 evals:run 与单测。
+ */
+export function buildContextSnapshot(req, { tmpRoot } = {}) {
+  const messages = Array.isArray(req && req.messages) ? req.messages : [];
+  const sys = messages.find((m) => m && m.role === 'system');
+  const sysText = sys && typeof sys.content === 'string' ? sys.content : JSON.stringify((sys && sys.content) ?? '');
+  const tools = (Array.isArray(req && req.tools) ? req.tools : [])
+    .map((t) => ({
+      name: (t && t.function && t.function.name) || (t && t.name) || '?',
+      schema: normalizeContextString(JSON.stringify((t && t.function && t.function.parameters) ?? (t && t.parameters) ?? null), tmpRoot),
+    }))
+    .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+  const snapshot = {
+    model: (req && req.model) ?? null,
+    system: normalizeContextString(sysText, tmpRoot),
+    skeleton: messages.map((m) => (m && m.role) || '?'),
+    tools,
+  };
+  snapshot.fingerprint = crypto.createHash('sha256').update(JSON.stringify(snapshot)).digest('hex');
+  return snapshot;
 }
 
 export function defaultTmpDir(prefix) {

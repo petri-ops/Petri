@@ -11,7 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  spawnIsolatedBackend, startMockProvider, runGoldenTask, defaultTmpDir,
+  spawnIsolatedBackend, startMockProvider, runGoldenTask, defaultTmpDir, buildContextSnapshot,
 } from './lib/evals-harness.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -47,6 +47,7 @@ const report = {
   tasks: [],
 };
 let passCount = 0;
+let snapshotDrift = false;
 
 if (backend.ok) {
   const api = backend.api;
@@ -72,6 +73,39 @@ if (backend.ok) {
   for (const task of tasks) report.tasks.push({ id: task.id, passed: false, skipped: false, criteriaResults: [], error: 'backend DOWN' });
 }
 
+// ── BLOCK-188 context_snapshot 棘轮（按套件）─────────────────────
+// 全局组装契约指纹（system prompt + 工具 schema + role 骨架；动态值归一化）。system prompt
+// 随 accessMode/上下文变，故基线**逐套件**（evals/snapshots/<suite>.json），golden=满权限规范组装。
+// prompt/工具 schema/上下文组装任一变更 → 漂移红；建立/重打基线仅走显式 --update-snapshot（防退化）。
+// 无基线且非 --update → 静默跳过（不为新套件自动 bootstrap 基线）。
+if (backend.ok && mock) {
+  const agentReq = mock.captured.find((c) => Array.isArray(c.tools) && c.tools.length > 0);
+  if (agentReq) {
+    const snap = buildContextSnapshot(agentReq, { tmpRoot: tmpDir });
+    const baselinePath = path.join(root, 'evals', 'snapshots', `${suiteName}.json`);
+    const updating = args.includes('--update-snapshot');
+    if (updating) {
+      fs.mkdirSync(path.dirname(baselinePath), { recursive: true });
+      fs.writeFileSync(baselinePath, `${JSON.stringify({ ...snap, updatedAt: new Date().toISOString() }, null, 2)}\n`);
+      console.log(`[context-snapshot] 重打基线 ${path.relative(root, baselinePath)} fp=${snap.fingerprint.slice(0, 16)}`);
+    } else if (fs.existsSync(baselinePath)) {
+      const baseline = JSON.parse(fs.readFileSync(baselinePath, 'utf8'));
+      if (baseline.fingerprint !== snap.fingerprint) {
+        snapshotDrift = true;
+        const why = [];
+        if (baseline.system !== snap.system) why.push('system prompt 文案变更');
+        const bTools = (baseline.tools || []).map((t) => `${t.name}#${t.schema}`).join('|');
+        const sTools = snap.tools.map((t) => `${t.name}#${t.schema}`).join('|');
+        if (bTools !== sTools) why.push('工具 schema 变更');
+        if ((baseline.skeleton || []).join(',') !== snap.skeleton.join(',')) why.push('上下文 role 骨架变更');
+        console.log(`[context-snapshot] ✖ 组装契约漂移 fp=${snap.fingerprint.slice(0, 16)} vs 基线 ${String(baseline.fingerprint).slice(0, 16)}｜${why.join('；') || '指纹不一致'}`);
+      } else {
+        console.log(`[context-snapshot] ✔ 组装契约一致 fp=${snap.fingerprint.slice(0, 16)}`);
+      }
+    }
+  }
+}
+
 report.pass = passCount;
 report.total = tasks.length;
 report.skipped = report.tasks.filter((t) => t.skipped).length;
@@ -87,4 +121,4 @@ fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
 const stamped = path.join(evidenceDir, `${suiteName}-${report.at.replace(/[:.]/g, '-')}.json`);
 fs.writeFileSync(stamped, JSON.stringify(report, null, 2));
 console.log(`\n=== evals run: ${passCount}/${tasks.length} PASS（skipped ${report.skipped}；报告 ${path.relative(root, reportPath)}；measures=${report.measures}）===`);
-process.exitCode = failures === 0 ? 0 : 1;
+process.exitCode = failures === 0 && !snapshotDrift ? 0 : 1;
