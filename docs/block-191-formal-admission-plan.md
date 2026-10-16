@@ -8,12 +8,12 @@ acceptance:
   - 门禁：docs:check/ui:audit:check（纯基建免 UI-###）/契约测/test:changed 全绿；evals:run golden+smoke 不回归
   - 完成语义：formal-admission 双齐+显式审计口径成机械门在册；晋升清单可重放；不改 13 任务字段名/PASS 语义/gate+runGoldenTask 行为
 reopen: 无；provider 依赖切片（真实 provider 录制态/LLM-as-judge real）需 PETRI_EVALS_PROVIDER_KEY，独立评估（本环境无凭据诚实 blocked）
-status: active
+status: completed
 ---
 
 # BLOCK-191 — 评测 v2 第四切片·formal-admission 门控棘轮（晋升=双齐+显式审计）
 
-- 状态：`active`（2026-10-16 用户 AskUserQuestion 选定门控口径「晋升=双齐+显式审计」→ 解锁发令）
+- 状态：`completed`（2026-10-16 用户拍板门控口径后发令 → P0-P4 单会话闭环；closeout 十三门全绿；零 provider 零人眼）
 
 ## 1. 立项自检
 证据自证=晋升不再靠人自觉，而由机械门守「凭据+manifest+fixture 双齐才入 real 基线，基线仅显式审计命令可写」。防「静默放宽基线=自欺」退化。

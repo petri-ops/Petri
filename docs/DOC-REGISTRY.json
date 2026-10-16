@@ -6614,15 +6614,15 @@
       "capability": "evaluation",
       "path": "docs/block-191-formal-admission-plan.md",
       "kind": "work-package",
-      "status": "active",
-      "phase": "P0-LAUNCH",
+      "status": "completed",
+      "phase": "P5-CLOSED",
       "canonical": true,
       "truthDomain": "block-191-formal-admission-plan",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-10-16",
       "archivePolicy": "retain_stable_path",
       "tags": ["evals-v2", "formal-admission", "promotion-gate", "evidence-self-attestation", "stage-2"],
-      "notes": "2026-10-16 立项发令 active（用户 AskUserQuestion 拍板门控口径「晋升=双齐+显式审计（推荐）」解锁评测 v2 第四切片·formal-admission 门控棘轮）。§4.1 ZCode smoke→real 晋升需 case manifest+fixture 双齐、baseline 更新只走显式审计命令。交付=scripts/lib/evals-admission.mjs deriveAdmissionManifest（现有任务字段派生 case manifest：covers←category+criteria kind 集·tier←套件·hasFixture←fixtureFiles 在场）+ evalAdmission（双齐判晋升 eligible）；scripts/evals-admission.mjs 晋升清单台账 + 双齐违规 exit 非零 + 基线仅显式审计源码门（断言 evals-gate/evals-run 写 baselines/snapshots 唯一路径在 --update/--update-snapshot 守卫内）；契约测 test/block191-formal-admission.test.mjs 四项。PASS 判定（全 criteria 过）与 gate/runGoldenTask 不改、不改 13 任务字段名、不跑真模型（provider 依赖切片 reopen·本环境无 PETRI_EVALS_PROVIDER_KEY 诚实 blocked）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "2026-10-16 整包 completed（立项发令 active→P0-P4 单会话闭环；用户 AskUserQuestion 拍板门控口径「晋升=双齐+显式审计（推荐）」解锁评测 v2 第四切片·formal-admission 门控棘轮；closeout 十三门全绿·零 provider 零人眼）。§4.1 ZCode smoke→real 晋升需 case manifest+fixture 双齐、baseline 更新只走显式审计命令。交付=scripts/lib/evals-admission.mjs deriveAdmissionManifest（现有任务字段派生 case manifest：covers←category+criteria kind 集·tier←套件·hasFixture←fixtureFiles 在场）+ evalAdmission（双齐判晋升 eligible）；scripts/evals-admission.mjs 晋升清单台账 + 双齐违规 exit 非零 + 基线仅显式审计源码门（断言 evals-gate/evals-run 写 baselines/snapshots 唯一路径在 --update/--update-snapshot 守卫内）；契约测 test/block191-formal-admission.test.mjs 四项。PASS 判定（全 criteria 过）与 gate/runGoldenTask 不改、不改 13 任务字段名、不跑真模型（provider 依赖切片 reopen·本环境无 PETRI_EVALS_PROVIDER_KEY 诚实 blocked）。**交付**=晋升台账 13/13 达准入 exit 0（门自证给分母非静默绿）+ 契约测 5/5（含 PASS 语义未被改动之断言）+ 显式审计源码门绿；**实作自纠**=首版误把 fixture 齐套到冒烟层致 8 例假红，按 §4.1「smoke→real 晋升」口径改为仅约束 real 层；2 枚无工作区输入的 real 用例显式声明 requiresFixture:false 防默默退化；test:changed base=e0d23975 范围 60pass/0fail。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "DESKTOP-EVAL-20261015",
