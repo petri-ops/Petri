@@ -9,12 +9,12 @@ acceptance:
   - 门禁：docs:check / ui:audit:check（若 P2 触及前端才需 UI-###，纯脚本免）/ golden-path 契约单测 + 自动化实机（隔离后端跑黄金路径断言 ≤7 步零断点 + TTFS 可算，acceptance/block-187/，无人眼）/ test:changed 全绿
   - 完成语义：黄金路径已脚本化且机械重跑绿；≤7 步零断点核验完成；TTFS 从台账机械算出（阶段 1 出口判据闭合）；onboarding 向导 UI 作为独立 UI 包显式 defer 待用户发令
 reopen: onboarding 向导式引导 UI（对标 ZCode 六步、需人眼设计评审 + 产品个性自检）→ 另立 UI 工作包，用户显式发令后启动
-status: active
+status: completed
 ---
 
 # BLOCK-187 — 黄金路径脚本化与零断点验收批（TTFS 程序 ③ 收官批）
 
-- 状态：`active`（2026-10-16 用户「按照推荐的进行下去」发令；承接「我不希望人参与」→ 验收全自动化）
+- 状态：`completed`（2026-10-16 用户「按照推荐的进行下去」发令 → P0-P5 单会话闭环；验收全自动化无人眼；closeout 十三门全绿）
 - 前序：①冷启动深链 = BLOCK-185 completed；②本地漏斗台账 = BLOCK-186 completed（本批消费其 funnel_events + computeTTFS）
 
 ## 1. 立项自检（产品个性纪律问句）
