@@ -12,6 +12,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   spawnIsolatedBackend, startMockProvider, runGoldenTask, defaultTmpDir, buildContextSnapshot,
+  sanitizeEvalTasksForStorage,
 } from './lib/evals-harness.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -32,11 +33,12 @@ const tmpDir = defaultTmpDir('petri-evals-');
 const mock = provider === 'mock' ? startMockProvider() : null;
 const mockPort = mock ? await mock.ready : null;
 if (mock) process.env.PETRI_EVALS_BASE_URL = `http://127.0.0.1:${mockPort}/v1`;
-if (provider === 'real' && !process.env.PETRI_EVALS_PROVIDER_KEY) {
-  console.log('[evals] provider=real 且未配置 PETRI_EVALS_PROVIDER_KEY——全部任务诚实 skip');
-}
 
-const backend = await spawnIsolatedBackend({ root, tmpDir });
+const backend = await spawnIsolatedBackend({ root, tmpDir, mode: provider });
+// BLOCK-192：real 凭据 env 缺省已由 harness 回落本机凭据库；仍拿不到才诚实 skip（附原因，不伪造真模型结果）。
+const realBlocked = provider === 'real' && !backend.provider.hasKey;
+if (realBlocked) console.log(`[evals] provider=real 凭据不可得（${backend.provider.skipReason || '未知原因'}）——全部任务诚实 skip`);
+else if (provider === 'real' && backend.provider.source === 'local-store') console.log(`[evals] provider=real 凭据来自本机凭据库（model=${backend.provider.model}）`);
 console.log(`[evals] suite=${suiteName} provider=${provider} tasks=${tasks.length} backend=${backend.ok ? 'up' : 'DOWN'} @${backend.port}`);
 
 const report = {
@@ -52,9 +54,10 @@ let snapshotDrift = false;
 if (backend.ok) {
   const api = backend.api;
   for (const task of tasks) {
-    if (provider === 'real' && !process.env.PETRI_EVALS_PROVIDER_KEY) {
-      report.tasks.push({ id: task.id, skipped: true, passed: false, reason: 'real provider 未配置凭据', criteriaResults: [] });
-      console.log(`SKIP ${task.id} — real provider 未配置凭据`);
+    if (realBlocked) {
+      const reason = `real 凭据不可得：${backend.provider.skipReason || '未知'}`;
+      report.tasks.push({ id: task.id, skipped: true, passed: false, reason, criteriaResults: [] });
+      console.log(`SKIP ${task.id} — ${reason}`);
       continue;
     }
     if (mock && Array.isArray(task.mockScript)) mock.push(...task.mockScript);
@@ -110,6 +113,8 @@ report.pass = passCount;
 report.total = tasks.length;
 report.skipped = report.tasks.filter((t) => t.skipped).length;
 const failures = report.tasks.filter((t) => !t.skipped && !t.passed).length;
+// 入库前脱敏：报告与基线不留模型原文（判据结论足够驱动棘轮，见 sanitizeEvalTasksForStorage 注释）
+report.tasks = sanitizeEvalTasksForStorage(report.tasks);
 await backend.cleanup();
 if (mock) await mock.close();
 try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch { /* Windows 句柄延迟 */ }

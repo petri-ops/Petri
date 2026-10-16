@@ -26,6 +26,81 @@ const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'
 
 export const AUTH = { 'Content-Type': 'application/json', Authorization: 'Bearer desktop-local' };
 
+/**
+ * real 模式凭据解析（BLOCK-192）。此前只认 PETRI_EVALS_PROVIDER_KEY env，而隔离后端跑在自己的
+ * 临时数据目录里、永远看不到桌面端凭据库 → 每次真模型评测都要手工注 key。本函数补两级解析：
+ *   ① env 显式给定 → 原样用（完全向后兼容，mock 模式行为零变更）；
+ *   ② 仅当 mode='real' 且 env 缺 key → 回落读本机数据目录的预设 + **凭据库单源读取器**
+ *      createCredentialStore（macOS Keychain / 其余 0600 文件，含其字段形状约定，故不自行解文件）。
+ * mode='mock' 绝不回落：真 key 不该被写进任何临时 ai-settings/凭据文件。
+ * 解析失败返回 { apiKey:null, skipReason }，由调用侧沿用「诚实 skip」语义，不伪造真模型结果。
+ */
+export const PROVIDER_DEFAULT_BASE_URL = {
+  deepseek: 'https://api.deepseek.com/v1',
+};
+
+export function parseActivePreset(settings) {
+  const list = (settings && Array.isArray(settings.chat_model_presets) && settings.chat_model_presets) || [];
+  const active = list.find((p) => p && p.id === (settings && settings.active_chat_model_id)) || list[0] || null;
+  if (!active) return null;
+  const provider = String(active.provider || '').toLowerCase();
+  return {
+    provider,
+    model: active.model ? String(active.model) : '',
+    baseUrl: active.baseUrl || PROVIDER_DEFAULT_BASE_URL[provider] || null,
+  };
+}
+
+export function resolveRealProviderSettings({ mode = 'real', env = process.env, readSettings = null, getCredential = null, settingsFound = true, triedDirs = [] } = {}) {
+  // env 的 baseUrl/model 属显式覆盖，**与 mode 无关都要透传**（mock 模式靠它指向本地 mock server）。
+  const envBaseUrl = env.PETRI_EVALS_BASE_URL || '';
+  const envModel = env.PETRI_EVALS_MODEL || '';
+  const explicit = env.PETRI_EVALS_PROVIDER_KEY;
+  if (explicit) {
+    return { source: 'env', apiKey: String(explicit), baseUrl: envBaseUrl, model: envModel, skipReason: null };
+  }
+  if (mode !== 'real') return { source: 'none', apiKey: null, baseUrl: envBaseUrl, model: envModel, skipReason: null };
+  if (typeof readSettings !== 'function' || typeof getCredential !== 'function') {
+    return { source: 'none', apiKey: null, baseUrl: envBaseUrl, model: envModel, skipReason: 'env 未给 key 且未提供本机凭据读取器' };
+  }
+  let preset = null;
+  try { preset = parseActivePreset(readSettings()); } catch { preset = null; }
+  if (!preset) return { source: 'none', apiKey: null, baseUrl: envBaseUrl, model: envModel, skipReason: settingsFound ? '本机无可用模型预设（ai-settings.json 缺 chat_model_presets）' : `未在本机找到 ai-settings.json（已试 ${triedDirs.length} 个候选数据目录）` };
+  if (!preset.baseUrl) return { source: 'none', apiKey: null, baseUrl: envBaseUrl, model: envModel || preset.model, skipReason: `provider ${preset.provider} 无 baseUrl 且缺省映射未登记` };
+  let key = '';
+  try { key = String(getCredential(preset.provider) || ''); } catch { key = ''; }
+  if (!key) return { source: 'none', apiKey: null, baseUrl: envBaseUrl, model: envModel || preset.model, skipReason: `凭据库无 ${preset.provider} key（桌面设置页填入后即可跑 real）` };
+  return { source: 'local-store', apiKey: key, baseUrl: envBaseUrl || preset.baseUrl, model: envModel || preset.model, skipReason: null };
+}
+
+/** 薄 IO 壳：解析本机数据目录 → 读预设 → 用凭据库单源读取器取 key。仅 real 模式被调用。 */
+export function localRealProviderSettings() {
+  const os = require('node:os');
+  const fsx = require('node:fs');
+  let localDirName = 'Petri-Local';
+  try {
+    localDirName = require(path.join(ROOT_DIR, 'src', 'main', 'brand.js')).BRAND.LOCAL_DIR_NAME || localDirName;
+  } catch { /* 取不到品牌目录名则用默认，仍会继续探测 */ }
+  const home = os.homedir();
+  // 镜像 src/main/env-coordinator 的规范：PETRI_LOCAL_DATA_DIR 优先，否则 <documents>/<LOCAL_DIR_NAME>。
+  // headless 无 app.getPath('documents')，故按平台派生 Documents（win/mac 均为 ~/Documents）。
+  const candidates = [
+    process.env.PETRI_LOCAL_DATA_DIR,
+    path.join(home, 'Documents', localDirName),
+    path.join(home, localDirName),
+  ].filter(Boolean);
+  for (const dir of candidates) {
+    const settingsPath = path.join(dir, 'ai-settings.json');
+    if (!fsx.existsSync(settingsPath)) continue;
+    try {
+      const { createCredentialStore } = require(path.join(ROOT_DIR, 'core', 'petri-server', 'helpers', 'credential-store.js'));
+      const store = createCredentialStore({ settingsDir: dir });
+      return { settings: JSON.parse(fsx.readFileSync(settingsPath, 'utf8')), settingsFound: true, getCredential: (p) => store.get(p), settingsDir: dir, lookedIn: candidates };
+    } catch { /* 该候选目录读取失败，继续下一个 */ }
+  }
+  return { settings: null, settingsFound: false, getCredential: () => '', settingsDir: null, lookedIn: candidates };
+}
+
 // ---------- 端口 ----------
 export function freePort() {
   return new Promise((resolve, reject) => {
@@ -49,20 +124,30 @@ function bootstrapDb(root, dbPath) {
   db.close();
 }
 
-export async function spawnIsolatedBackend({ root, tmpDir }) {
+export async function spawnIsolatedBackend({ root, tmpDir, mode = 'mock' }) {
   const port = await freePort();
   bootstrapDb(root, path.join(tmpDir, 'petri.db'));
   // provider 种子（credential_updates 文件路径——credential-store 迁移后的正道，
-  // 根治 block93 类 env 占位失活债）
+  // 根治 block93 类 env 占位失活债）。
+  // BLOCK-192：real 模式且 env 未给 key 时回落本机凭据库（单源读取器）；
+  // mock 模式**绝不回落**——真 key 不应被写进任何临时 ai-settings/凭据文件。
+  const local = mode === 'real' ? localRealProviderSettings() : null;
+  const resolved = resolveRealProviderSettings({
+    mode,
+    readSettings: local ? () => local.settings : null,
+    getCredential: local ? local.getCredential : null,
+    settingsFound: local ? local.settingsFound === true : false,
+    triedDirs: local ? (local.lookedIn || []) : [],
+  });
   fs.writeFileSync(path.join(tmpDir, 'ai-settings.json'), JSON.stringify({
     active_chat_model_id: 'evals-provider',
-    credential_updates: { 'openai-compatible': process.env.PETRI_EVALS_PROVIDER_KEY || 'evals-mock-key' },
+    credential_updates: { 'openai-compatible': resolved.apiKey || 'evals-mock-key' },
     chat_model_presets: [{
       id: 'evals-provider',
       label: 'Evals Provider',
       provider: 'openai-compatible',
-      model: process.env.PETRI_EVALS_MODEL || 'evals-model',
-      baseUrl: process.env.PETRI_EVALS_BASE_URL || `http://127.0.0.1:${port}/placeholder`,
+      model: resolved.model || 'evals-model',
+      baseUrl: resolved.baseUrl || `http://127.0.0.1:${port}/placeholder`,
       contextWindow: 32000,
     }],
   }, null, 2));
@@ -89,6 +174,14 @@ export async function spawnIsolatedBackend({ root, tmpDir }) {
     port,
     api,
     ok: up,
+    // 脱敏后的凭据解析结果（hasKey 供调用侧决定 skip；**绝不含 apiKey 明文**）
+    provider: {
+      source: resolved.source,
+      model: resolved.model || null,
+      baseUrl: resolved.baseUrl || null,
+      hasKey: Boolean(resolved.apiKey),
+      skipReason: resolved.skipReason || null,
+    },
     async cleanup() {
       try { backend.kill('SIGTERM'); } catch { /* already dead */ }
       await new Promise((r) => setTimeout(r, 600));
@@ -631,6 +724,15 @@ export function buildContextSnapshot(req, { tmpRoot } = {}) {
   };
   snapshot.fingerprint = crypto.createHash('sha256').update(JSON.stringify(snapshot)).digest('hex');
   return snapshot;
+}
+
+/**
+ * 持久化前脱敏（BLOCK-192）：evals 报告与基线是**入库**产物，只留判据结论，不留模型原文
+ * （项目隐私红线「LLM 原文不入仓」同 acceptance/block-119 注记）。
+ * compareRunVsBaseline 仅消费 id/passed/criteriaResults/skipped，故剥离 finalText 不影响棘轮。
+ */
+export function sanitizeEvalTasksForStorage(tasks) {
+  return (Array.isArray(tasks) ? tasks : []).map(({ finalText: _finalText, ...rest }) => rest);
 }
 
 export function defaultTmpDir(prefix) {

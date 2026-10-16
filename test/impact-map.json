@@ -2748,6 +2748,20 @@
       "classifiesScripts": true
     },
     {
+      "id": "block192-real-provider-credentials",
+      "note": "BLOCK-192 评测 v2 provider 切片·real 模式凭据自给 + 入库脱敏：harness resolveRealProviderSettings/parseActivePreset/localRealProviderSettings（env 优先→仅 real 模式回落本机凭据库，复用 createCredentialStore 单源；mock 绝不回落）+ sanitizeEvalTasksForStorage（报告/基线不留模型原文）。契约=test/block192-real-provider-credentials.test.mjs（8 项含 mock baseUrl 透传回归守卫）。脚本分类仍归 block181（本规则 classifiesScripts:false）。",
+      "patterns": [
+        "scripts/lib/evals-harness.mjs",
+        "scripts/evals-run.mjs",
+        "evals/baselines/**",
+        "test/block192-*.test.mjs"
+      ],
+      "tests": [
+        "test/block192-real-provider-credentials.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "ui-proxy-review-probe",
       "note": "UI 代行评估/构造探针（scripts/ui-proxy-review.mjs，UI-496~509 批引入；scripts/ui500-compaction-live.mjs，UI-500 压缩构造批）：CDP 驱动真界面+截图留证，实机走查证据工具非回归测试（同 block123-p0-probes 形态）；证据=acceptance/ui-proxy-review/ 与 acceptance/ui-500/。",
       "patterns": [

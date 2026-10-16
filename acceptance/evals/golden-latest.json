@@ -2,7 +2,7 @@
   "suite": "golden",
   "provider": "mock",
   "measures": "harness",
-  "at": "2026-10-16T06:50:12.754Z",
+  "at": "2026-10-16T10:14:27.624Z",
   "tasks": [
     {
       "id": "golden-first-success",
@@ -41,11 +41,10 @@
         {
           "kind": "ttfs_computable",
           "passed": true,
-          "detail": "TTFS=435 ms"
+          "detail": "TTFS=419 ms"
         }
       ],
-      "finalText": "首任务完成。你已成功创建项目并让 Agent 跑通了第一次任务——这就是黄金路径的终点（first_job_succeeded）。",
-      "durationMs": 587
+      "durationMs": 591
     }
   ],
   "pass": 1,
