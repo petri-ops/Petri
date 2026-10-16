@@ -2678,6 +2678,20 @@
       "classifiesScripts": true
     },
     {
+      "id": "block187-golden-path",
+      "note": "BLOCK-187 黄金路径脚本化与零断点验收批（TTFS 程序③）：黄金路径 UI 面零断点机械门（源码契约 test/block187-golden-path-ui-contract.test.mjs 守 welcome.tsx 冷启动 composer 常驻/guard 展开选择器/createProject 接线/SimpleChat 嵌入，防 UI-369→UI-373 死态复发；步数 ≤7 由 docs/first-success-path.md「当前产品黄金路径」节真值核）。里程碑+TTFS 端到端证明走 block181 evals golden 套件（另规则）。改 welcome.tsx 或本门测试或黄金路径施工图即触发。",
+      "patterns": [
+        "frontend/src/pages/welcome.tsx",
+        "frontend/src/pages/welcome.module.css",
+        "docs/first-success-path.md",
+        "test/block187-*.test.mjs"
+      ],
+      "tests": [
+        "test/block187-golden-path-ui-contract.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "ui-proxy-review-probe",
       "note": "UI 代行评估/构造探针（scripts/ui-proxy-review.mjs，UI-496~509 批引入；scripts/ui500-compaction-live.mjs，UI-500 压缩构造批）：CDP 驱动真界面+截图留证，实机走查证据工具非回归测试（同 block123-p0-probes 形态）；证据=acceptance/ui-proxy-review/ 与 acceptance/ui-500/。",
       "patterns": [

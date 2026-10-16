@@ -2,6 +2,22 @@
 
 > Status: maintained as the demo/golden-path regression contract because tests and fixtures reference it. It is not the current product roadmap.
 
+## 当前产品黄金路径（agent 驱动 · BLOCK-187 程序③ · 真相）
+
+新用户在**当前** Petri 桌面从「刚打开应用」到「首个 Agent 任务成功并看到结果」的路径。≤7 步、零断点，且 TTFS 从本机漏斗台账可度量（`funnel_events`：`app_started`→`project_created`→`first_job_succeeded`，`core/petri-server/helpers/funnel-log.js computeTTFS`）。机械验收=`evals/suites/golden/first-success.json`（`npm run evals:run -- --suite=golden`，永久棘轮 `evals/baselines/golden.json`）+ `test/block187-golden-path-ui-contract.test.mjs`（步数 ≤7 + `welcome.tsx` 零断点不变量）。落地页=`frontend/src/pages/welcome.tsx`。
+
+1. 打开 Petri 桌面 → 落地 `/`（`welcome.tsx`，**composer 常驻**：`chatMounted = backendReady`，非「先选项目才显输入框」）。
+2. 点「选择项目」展开选择器面板（无项目态直接发送被 `guardNoProjectSend()` 拦→展开选择器+提示，**非死态**，输入草稿保留随选中迁移）。
+3. 选「打开文件夹」→ 系统资源管理器原生对话框（`openFolderDialogOrFallback`；无桥环境回落应用内 `FolderPicker`）；或选 SSH 远程项目；或选中既有项目跳到第 5 步。
+4. 命名 + 确认创建 → `createFromFolder()` 调 `createProject`（`POST /api/data/projects` → 记 `project_created`）。同工作区去重：命中既有项目直接切换不重复建。
+5. 在 composer 输入首个任务并发送（或点快捷 chip 一键直发 starter prompt）→ 首发即建会话（`POST /api/ai/conversations` + `POST /api/ai/agent`）。
+6. Agent 跑通 → 任务 `done`（`markAgentTaskDone` → 记 `first_job_succeeded`）。
+7. 自动导航进项目工作区，经 SSE 回放/恢复无缝衔接并展示结果 → **TTFS = `first_job_succeeded − app_started` 可度量**。
+
+> 诚实边界：`app_started` 由后端 `server.listen` 记录（BLOCK-186 单写入器裁决），TTFS 口径=「系统可用起算」，不含 Electron 主进程冷启/窗口创建耗时。`report_generated` 仅 legacy tools-runner 路径触发，agent 黄金路径终端锚=`first_job_succeeded`。
+
+## 以下 = Legacy DESeq2 tools-runner 路径（历史，fixtures/`scripts/golden-path.mjs` 仍引用，非当前产品真相）
+
 The exact steps a brand-new Petri desktop user needs to take to go
 from "I just installed the app" to "I have a real analysis report".
 Designed to be smooth, deterministic, and zero-config.
