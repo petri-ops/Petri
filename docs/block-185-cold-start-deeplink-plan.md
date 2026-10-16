@@ -8,12 +8,12 @@ acceptance:
   - 门禁：docs:check/ui:audit:check/tsc/quality:lint/quality:types/test:changed 全绿 + 实机双场景断言；红绿先行（先写复现竞争的失败用例再修）
   - 完成语义：深链在「SPA 内导航 / 整页 reload / Electron 重启」三态均保持；last-url 恢复有白名单门；无新增第二路由真相
 reopen: 无
-status: active
+status: completed
 ---
 
 # BLOCK-185 — 冷启动深链修复批（TTFS 程序 ② 第一批）
 
-- 状态：`active`（2026-10-16 用户发令「按照你的推荐来 冲」= 批准 D1/D2/D3 推荐 + 整批预授权）
+- 状态：`completed`（2026-10-16 整包收口：P1 last-url 持久化 + P2 SPA 两竞争 + P3 live 冒烟全交付；closeout 十三门全绿；决策逻辑全进机械门〔coldStartRetry 6 测 + main-window-state 6 测〕+ CDP 冒烟 4/4）
 - 用户裁决原话：阶段 1 首包选「TTFS 产品化批」→ 范围切分选「拆三串行批，last-url 归入深链批」→ 立项骨架「按照你的推荐来 冲」
 - 来源：评估报告 [Petri-Desktop-Evaluation-Report-2026-10-15.md](./Petri-Desktop-Evaluation-Report-2026-10-15.md) §5.1 阶段 1 ②；冷启动深链归零竞争缺陷登记于 [pending-work-backlog.md](./pending-work-backlog.md) BIO-3/UI-455 行（SPA 内保持已 verified，冷启动重载归零=独立缺陷仍登记）
 - TTFS 程序拆批：本批=①深链修复；后续串行=②遥测端点化批、③onboarding 黄金路径批（各独立立项）
@@ -58,3 +58,12 @@ status: active
 - 回退：last-url 恢复异常 → 降级落 `/`（现状行为），不阻塞；退避重试超时 → 诚实空态不静默
 - 并行隔离：本批触碰面=`useWorkspaceOpenEffects.ts` + `project-workspace.tsx` + `src/main/_window-create.js` + 窗口状态 store + 新探针 + 台账；当前无其他 active 包，零交叠
 - 环境纪律：last-url 属主进程改动 → 实机前整栈重启（`restart-dev-stack.sh`，走 9223 测试实例）
+
+## 7. 收口笔录（2026-10-16）
+
+- **交付**：P1 last-url 持久化（`_main-window-state.js` 纯函数安全门 + `computeStartupLoadUrl` 三分支决策 + `_window-create.js` 接线，测试实例按设计禁用恢复护 CDP 探针）；P2 SPA 两竞争（Race B `handleOpenResult` 改用 `coldStartRetry.retryOnThrow` 退避原语、Race A 一次性消费失败清标记可重试，`handleOpenResult` 返回 `Promise<boolean>`，CenterPanel/RightPanel prop 类型随宽）。
+- **验证分层（诚实边界）**：决策逻辑全进机械门——`coldStartRetry.test.ts` 6 测（抛错续跑/ok=false 即停/序号取代中止/卸载中止）+ `block185-main-window-state.test.mjs` 6 测（路由抽取/开放重定向拒绝/fs 往返/启动三分支）；CDP live 冒烟 4/4（`block185-p3-live.mjs`，主进程 loadURL 不破坏启动 + 深链端到端不崩 + reload 路由保持，`acceptance/block-185/` allPass=true，2 截图）。**未 live 验证项如实登记**：last-url 真机重启恢复（测试实例按设计禁用，恢复决策由纯函数单测覆盖）+ 后端未就绪时序竞态（需 kill 后端在就绪窗口 reload 才能确定复现，由退避原语单测覆盖）——二者留作用户真窗 spot-check，不冒充 live 已验。
+- **复发缺陷转门禁**：冷启动 fetch 竞态系第三次（welcome.tsx UI-373/UI-369 同族），抽 `coldStartRetry.ts` 共享原语 + 单测，后续冷启动读路径可复用。
+- **台账**：UI-455 加映行补登（55bb305 走 feat(block-185) 轨无 UI-###，LEGACY 双集豁免对账）；impact-map 登记 `block185-cold-start-deeplink`（生产文件）+ `block185-deeplink-probe`（governance 探针）；code-size 基线随 project-workspace.tsx 合法增量（+11 行）重打。
+- **closeout 十三门全绿**（audit:compact/hygiene/docs/ui-audit/test:changed/code-size/arch-cycles/css-modules/secret/arch/lint/types/knip）。
+- **TTFS 程序余量**：本包=①深链修复；后续 ②遥测端点化批、③onboarding 黄金路径批各独立立项待用户裁决。

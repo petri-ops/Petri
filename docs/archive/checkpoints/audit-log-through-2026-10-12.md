@@ -50,3 +50,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-15T23:58:45.875Z -->
 最后更新：2026-10-12（**BLOCK-174-COMPETITIVENESS-WAVE4 整包 completed（三 CP 同日交付；w4-live 实机 3/3 PASS**，acceptance/block-174/w4-live.json：真实任务完成事件链+get-data 诚实拒绝+桥面在场；**十二门绿+test:changed 959 测 2 红=block93 凭据环境债存量归因〔bisect 双确认 pre-CP-8 基线同挂〕**）**：CP-13a accent 透传（GenUiCard 观察器扩 data-accent+guest data-petri-accent+theme.js 四档覆盖 CSS 对齐 custom.css）/CP-13b fragment 导出（gen-ui:export 会话归属校验+卡「导出」钮→saveTextFile 原生另存）/CP-11 getData 数据面只读绑定（归属校验+done+result_json+12KB 有界投影+prompt 数据源清单 ≤5）/CP-12 模板库四模板+visualize 模板优先节（skills:check PASS）。随波缺省裁决 3 项随 plan §9 波报复认。W5 待发令。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-16T02:59:14.534Z -->
+最后更新：2026-10-12（**BLOCK-175-COMPETITIVENESS-WAVE5 立项发令 active（用户 /goal 整波授权连续行使；W4 completed 腾出槽位）**：plan=docs/block-175-competitiveness-wave5-plan.md（registry/README/roadmap 同步）；CP-14 选择总线跨 viewer 能力位接线（canSelect/canCompare 占位→实际能力）+CP-15 分屏可拖拽+renderer 对账；artifact-plane 切片 C/E 承接。G0 开发期常态 · 不外推 packaged/Provider/GA。）

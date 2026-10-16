@@ -46,6 +46,10 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-10-16 BLOCK-185 冷启动深链修复（55bb305，feat(block-185) P2 SPA 两竞争+退避原语）：
+  // subject 走 BLOCK 轨无 UI-###；UI 面=project-workspace/useWorkspaceOpenEffects/CenterPanel/RightPanel
+  // 冷启动深链修复（归属 UI-455 打开链域），台账=UI-455 加映行由收口批补登对账。先例 1cae944/dcfc0c3；不重写共享历史。
+  '55bb3058fe077101cf619ff55180c811bad99a17',
   // 2026-10-16 UI-271 加映轻量批（ToolActivityDock 折叠态收入 composer 图标钮，用户实机反馈驱动）：
   // 6 个 fix(ui)/chore(ui) 提交 subject 无 UI-###；台账=UI-271 加映行（本批收口时补登）对账。
   // 先例 1cae944/dcfc0c3；不重写共享历史。
@@ -450,6 +454,9 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-10-16 BLOCK-185 冷启动深链修复（55bb305，feat(block-185) P2）：同提交漏台账同步；
+  // 台账=UI-455 加映行由收口批补登对账（subject 门经 LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）。
+  '55bb3058fe077101cf619ff55180c811bad99a17',
   // 2026-10-16 UI-271 加映轻量批：4 个 fix(ui) 提交（灰点仅活跃显示/zap/⎇ Unicode/去蓝点）同提交漏台账同步；
   // 台账=UI-271 加映行（收口批补登）统一对账（subject 门经 LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）。
   // 3e3ec750 首提交已同提交更台账，不在此集。先例 1cae944/dcfc0c3；不重写共享历史。

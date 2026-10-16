@@ -1,5 +1,9 @@
 # Petri Desktop Current Handoff
 
+最后更新：2026-10-16（**BLOCK-185-COLD-START-DEEPLINK 整包 completed（TTFS 程序拆三串行批第一批；closeout 十三门全绿）**）
+
+**恢复要点（换会话必读）**：①**无 active 工作包**（BLOCK-185 已翻 completed；TTFS 程序后续=②遥测端点化批、③onboarding 黄金路径批，各独立立项待用户裁决）。②BLOCK-185 实绩=冷启动深链修复：P1 last-url 持久化（`_main-window-state.js` 纯函数同源白名单门+`computeStartupLoadUrl` 三分支决策，测试实例按设计禁用恢复护 CDP 探针）+P2 SPA 两竞争（`handleOpenResult` 改用 `coldStartRetry.retryOnThrow` 退避原语，返回 `Promise<boolean>`）。决策逻辑全进机械门（coldStartRetry 6 测+main-window-state 6 测）+CDP 冒烟 4/4（acceptance/block-185/）。③**诚实边界**：last-url 真机重启恢复+后端未就绪时序竞态=单测覆盖+用户真窗 spot-check，未 live 已验如实登记；用户下次真窗 `npm run dev` 后重启 Electron 应回到上次深链路由（顺手可验）。④冷启动 fetch 竞态系第三次（welcome.tsx UI-373/UI-369 同族），已抽 `coldStartRetry.ts` 共享原语，后续冷启动读路径复用。⑤UI-455 加映补登（55bb305 走 feat(block-185) 轨 LEGACY 双集豁免）；impact-map 登记 block185 生产+探针规则；code-size 基线随 project-workspace.tsx 合法增量重打。⑥dev 栈现状：3000/3001/3005/9223 在听，9222 用户主窗已关闭（下次 `npm run dev` 自取）；pack 未安装+catalog count=0。⑦零产品码默认不适用（本包含产品代码：深链修复）；G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-16（**BLOCK-184-UI-REVIEW-CLEARING 整包 completed（P1+P2 全闭环；接管 CodeBuddy 在制续跑；closeout 十三门绿）**）
 
 **恢复要点（换会话必读）**：①**无 active 工作包**（BLOCK-184 已翻 completed；下一包从 pending-work-backlog 候选池选举待用户裁决）。②BLOCK-184 实绩=P1 代行探针 26/26+4 分档（acceptance/block-184/，探针 scripts/block184-p1-live.mjs 可复跑），台账翻转 UI-457/466/467/468/469/470/481/482→verified（代行评估），UI-471/501/503/504 环境受限分档挂起（不硬翻，plan §6）；接管抓真八处全为探针侧缺陷，产品代码零改动。③**仍留用户实机顺手过目三条**：UI-501 画布节点（跑 spawn 任务点 ⎇）/UI-503 继续分析菜单（需 artifact 数据）/UI-504 联邦双机（需第二台机）。④随包插入 UI-271 加映轻量批：ToolActivityDock 折叠态从右下浮条收入 composer 图标钮（⎇ Unicode 字符，用户实机反馈驱动），6 提交走 fix(ui) 轨无 UI-###，已登记 LEGACY 双集豁免+台账加映行对账。⑤dev 栈现状：3000 Vite/3001 后端/3005 网关/9223 测试实例在听，9222 用户主窗已随整栈重启关闭（用户下次 `npm run dev` 自取）；pack 未安装+catalog count=0（起手态复原）。⑥探针坑沉淀入 memory：Electron CDP createTarget 不支持(-32000)/文本钮容器作用域/tree 500 窗互斥/Vite HMR 结构移动需 Ctrl+R。⑦零产品码默认；G0 开发期常态 · 不外推 packaged/Provider/GA。
