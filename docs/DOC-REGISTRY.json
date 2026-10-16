@@ -6567,6 +6567,28 @@
       "notes": "2026-10-16 整包 completed（立项发令 active→P0-P4 单会话闭环；用户 AskUserQuestion 选定「评测基线 v2（推荐·最自动化）」为阶段2 首包方向；验收全自动化无人眼；closeout 十三门全绿）：评测基线 v2 首切片·context_snapshot 棘轮。§5.1 阶段2「证据自证期」出口判据=catalog 五列+判据三件套(禁 sleep)+mock capture/replay 防作弊+context_snapshot 棘轮；§4.2 判词 context_snapshot=Petri 完全没有的 prompt 回归防线单项价值最高。交付=evals-harness 增 normalizeContextString+buildContextSnapshot 纯函数（归一化清单**经验取自实测**——真实 golden 连跑两请求 token 对称差穷举出临时库根/工作区绝对路径尾/执行环境平台行/项目 id p_x_y/会话 id/UUID/时间戳/epoch，非猜测；system prompt+工具 schema 按名排序+role 骨架 → sha256 指纹）+ evals/snapshots/golden.json 逐套件基线（动态值已掩码·跨机可复现·53KB 契约）+ evals-run.mjs 收口链按套件比对漂移即 exit 非零（建立/重打基线仅 --update-snapshot，formal-admission 防退化）。实作发现修正：system prompt 随 accessMode 变非全局一致→基线逐套件（否则 smoke 假红，已实测 smoke↔golden 对照触发漂移红）。契约单测 test/block188-context-snapshot.test.mjs 7/7（确定性/易变折叠同指纹/prompt·工具名·参数 schema·role 骨架漂移各检出/排序无关）；test:changed base 范围 53pass/0fail。红线兑现=不做判据门控口径裁决（formal-admission 切片报告明列架构裁决须用户拍板，留后续）/不接 LLM-as-judge real 模式/动态值不入基线。评测 v2 其余切片（capture/replay 防作弊·判据三件套·catalog 五列·门控棘轮·real 模式）各自独立立项（plan reopen）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
+      "id": "BLOCK-189-EVAL-OUTBOUND-ANTICHEAT",
+      "capability": "evaluation",
+      "path": "docs/block-189-eval-outbound-anticheat-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "phase": "P0-LAUNCH",
+      "canonical": true,
+      "truthDomain": "block-189-eval-outbound-anticheat-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-16",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "evals-v2",
+        "anti-cheat",
+        "outbound-assertion",
+        "no-sleep-gate",
+        "evidence-self-attestation",
+        "stage-2"
+      ],
+      "notes": "2026-10-16 立项发令 active（用户「行！继续」发令，评测 v2 第二切片；承接「我不希望人参与」→ 全自动化）：出站请求归一化断言 + 哨兵防作弊 + 禁 sleep 门。§5.1 阶段2 四件套之「判据三件套(禁 sleep)+mock capture/replay 防作弊」两腿。P0 勘察=三件套缺**出站归一化断言**一条腿（现 17 判据 kind 覆盖事件谓词+文件产物，无 kind 读 mock.captured 出站记录=防作弊缺口，伪造事件可假绿）；无 sleep-断言但无机械门。交付=P1 新 kind outbound_contains（runGoldenTask 注入 mock.captured→ctx.outbound，复用 BLOCK-188 normalizeContextString 归一化不引第二套真相，无 outbound→fail-closed 红）；P2 per-run 哨兵（golden 项目名 evals-golden-first-success 天然进上下文）+红绿对测证「有事件无出站→红」=ZCode replay 断出站含哨兵防作弊在 mock 层落地；P3 禁 sleep 机械门（扫 suites+harness，PASS 条件不得依赖 wall-clock 睡眠）。红线=不碰判据门控口径/PASS-FAIL 晋升语义（formal-admission 架构裁决须用户拍板独立切片·本包只加 kind+门）/不做真实 provider 录制（capture record 侧需凭据 reopen）/不引第二归一化真相（复用 188）/不建第二 runner。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
       "id": "DESKTOP-EVAL-20261015",
       "path": "docs/Petri-Desktop-Evaluation-Report-2026-10-15.md",
       "kind": "audit",
