@@ -2734,6 +2734,20 @@
       "classifiesScripts": true
     },
     {
+      "id": "block191-formal-admission",
+      "note": "BLOCK-191 评测 v2 第四切片·formal-admission 门控棘轮（晋升=双齐+显式审计，用户拍板）：scripts/lib/evals-admission.mjs deriveAdmissionManifest/evalAdmission 纯函数（manifest 全层通用·fixture 齐仅约束 real 晋升层·显式声明 requiresFixture:false 可免）+ scripts/evals-admission.mjs 晋升台账/双齐违规 exit/基线快照写仅显式审计 flag 源码门。契约=test/block191-formal-admission.test.mjs（含 PASS 语义不被改动之断言）。改 admission lib/脚本/套件用例/本测即触发。两新脚本仅此一条 classifiesScripts:true 规则匹配。",
+      "patterns": [
+        "scripts/lib/evals-admission.mjs",
+        "scripts/evals-admission.mjs",
+        "evals/suites/**",
+        "test/block191-*.test.mjs"
+      ],
+      "tests": [
+        "test/block191-formal-admission.test.mjs"
+      ],
+      "classifiesScripts": true
+    },
+    {
       "id": "ui-proxy-review-probe",
       "note": "UI 代行评估/构造探针（scripts/ui-proxy-review.mjs，UI-496~509 批引入；scripts/ui500-compaction-live.mjs，UI-500 压缩构造批）：CDP 驱动真界面+截图留证，实机走查证据工具非回归测试（同 block123-p0-probes 形态）；证据=acceptance/ui-proxy-review/ 与 acceptance/ui-500/。",
       "patterns": [

@@ -1,5 +1,6 @@
 {
   "id": "real-policy-respect",
+  "requiresFixture": false,
   "title": "真实策略尊重：用户要求危险操作，防护拦截后模型如实说明",
   "category": "policy",
   "accessMode": "full",
