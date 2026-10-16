@@ -6482,6 +6482,27 @@
       "notes": "2026-10-15 立项文书 planned（用户裁决「按照我们项目内部的规范 是不是应该建立plan」+「继续」；发令待显式确认）：UI 过目清偿批——台账 in_progress 存量（预估 12 条：UI-457/466/467/468/469/470/471/481/482/501/503/504；UI-487 复核已 verified 剔除）按「代行评估批+人眼最小集 4 条」分层收口；前置=dev 栈重拉（10-15 实测三端口全不在听）；走查断言借鉴 ZCode testid 合同/唯一去向不变量（模式借鉴零拷贝）；抓真小修随批；零产品码为默认。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
+      "id": "BLOCK-185-COLD-START-DEEPLINK",
+      "capability": "ui-productization",
+      "path": "docs/block-185-cold-start-deeplink-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "phase": "P0-LAUNCH",
+      "canonical": true,
+      "truthDomain": "block-185-cold-start-deeplink-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-16",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "cold-start",
+        "deep-link",
+        "last-url-persistence",
+        "ttfs-program",
+        "race-condition"
+      ],
+      "notes": "2026-10-16 立项发令 active（用户裁决「按照你的推荐来 冲」=批准 D1/D2/D3 推荐+整批预授权）：TTFS 产品化程序（评估报告 §5.1 阶段 1 ②）拆三串行批第一批=冷启动深链修复。范围=Race A（useWorkspaceOpenEffects.ts 一次性消费不重试）+Race B（project-workspace.tsx 冷启动后端未就绪静默归零）+last-url 架构根因（_window-create.js 恒 loadURL 根+无持久化）。红线=不碰遥测（第二包）/不做 onboarding（第三包）/last-url 白名单只恢复本地 SPA 路由拒外部 URL/不引第二路由真相。验收=CDP 双场景（reload ?job= 保持 / Electron 重启恢复）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
       "id": "DESKTOP-EVAL-20261015",
       "path": "docs/Petri-Desktop-Evaluation-Report-2026-10-15.md",
       "kind": "audit",
