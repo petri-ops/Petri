@@ -6546,6 +6546,27 @@
       "notes": "2026-10-16 整包 completed（立项发令 active→P0-P5 单会话闭环；用户「按照推荐的进行下去」承接「我不希望人参与」→ 验收全自动化；closeout 十三门全绿）：黄金路径脚本化与零断点验收批——TTFS 程序③收官批（①深链=BLOCK-185 completed、②遥测=BLOCK-186 completed）。交付=①P1/P3 黄金路径落地为**永久回归门**：evals-harness 增 funnel_event_present/ttfs_computable 判据 kind（readFunnelSnapshot 复用已发布 funnel-log 原语 recentFunnelEvents/computeTTFS 零重实现 SQL，父进程只读读后端写的同一 petri.db）+ evals/suites/golden/first-success.json（runGoldenTask 已跑 project→conversation→agent→done 天然发三里程碑+后端 boot 发 app_started）；evals:run --suite=golden 5/5 PASS·TTFS 407ms（acceptance/evals/golden-latest.json）+ evals:gate --update 建 baselines/golden.json 棘轮②P2 零断点机械门（源码契约 test/block187-golden-path-ui-contract.test.mjs 6/6 守 welcome.tsx composer 常驻/guard 展开选择器/createProject 接线/SimpleChat 嵌入/步数 ≤7，防 UI-369→UI-373 死态复发族第三次转门）审计结论=UI 面零断点未触产品码故无 UI-###③P4 docs/first-success-path.md 顶部新增 agent 驱动黄金路径 ≤7 步真相节、旧 DESeq2 tools-runner 降为 legacy 段保留（fixtures/golden-path.mjs 引用不断链）。实作改判：不建 bespoke scripts/block187-*.mjs（evals 套件更耐久且修正 block186-p4-live 内联重实现 harness 债）。红线兑现=未建 onboarding 向导 UI（另立 UI 包待发令）/未动 186 单写入器裁决（TTFS 口径=系统可用起算诚实标注）/未接 runtime_install+update_succeeded/未引第二路由或度量真相。契约单测 evals-harness 14/14；closeout 期间 test:changed 干净树内为 0-change，已另以 --base=c57b9768 跑 BLOCK-187 全范围 52pass/0fail/2skip(real 无凭据诚实跳)。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
+      "id": "BLOCK-188-EVAL-V2-CONTEXT-SNAPSHOT",
+      "capability": "evaluation",
+      "path": "docs/block-188-eval-baseline-v2-context-snapshot-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "phase": "P0-LAUNCH",
+      "canonical": true,
+      "truthDomain": "block-188-eval-baseline-v2-context-snapshot-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-16",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "evals-v2",
+        "context-snapshot",
+        "prompt-regression-net",
+        "evidence-self-attestation",
+        "stage-2"
+      ],
+      "notes": "2026-10-16 立项发令 active（用户 AskUserQuestion 选定「评测基线 v2（推荐·最自动化）」为阶段2 首包方向）：评测基线 v2 首切片·context_snapshot 棘轮。§5.1 阶段2「证据自证期」出口判据=catalog 五列+判据三件套(禁 sleep)+mock capture/replay 防作弊+context_snapshot 棘轮；§4.2 判词 context_snapshot=Petri 完全没有的 prompt 回归防线单项价值最高。本包=其中完全确定性无 provider 依赖无网络无模型的首切片：把 agent 出站请求组装形状（system prompt+工具 schema+上下文骨架，动态值九类归一化）指纹化+基线棘轮，prompt/工具 schema/上下文组装任何变更 diff 显形须显式 --update 重打。复用 evals harness 已 capture 出站请求（不建第二评测真相）。单源=core/petri-server/helpers/system-prompt.js + agent-tools/tool-defs/* + registry.js listTools + message-trimmer/token-estimator。先例 desktop-agent-prompt/block56-context-freshness/block93-role-prompt。红线=不做判据门控口径裁决（formal-admission 切片，报告明列架构裁决项须用户拍板）/不接 LLM-as-judge real 模式（独立切片）/动态值不入基线/G1+ 不外推。评测 v2 其余切片各自独立立项（见 plan reopen）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
       "id": "DESKTOP-EVAL-20261015",
       "path": "docs/Petri-Desktop-Evaluation-Report-2026-10-15.md",
       "kind": "audit",
