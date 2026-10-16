@@ -7,7 +7,7 @@ acceptance:
   - P3 real 基线棘轮：`evals:gate --suite=real --update` 建 `evals/baselines/real.json`（此后 real 跑受回归棘轮守护），并经 BLOCK-191 formal-admission 双齐门核验准入
   - 门禁：docs:check/ui:audit:check（纯基建免 UI-###）/契约测（回落解析纯函数：env 优先·文件回落·无预设 skip·provider 映射·**不泄漏明文 key**）/real 套件复跑绿/test:changed 全绿
   - 完成语义：`npm run evals:run -- --suite=real --provider=real` 无需手工 env 即跑真模型并绿；real 有基线棘轮；key 明文全程不外泄
-reopen: capture/replay **真实录制态**（record 真模型响应入 fixture）显式 defer——本项目有「LLM 原文不入仓」隐私红线（acceptance/block-119 注记），把真模型响应提交进 `evals/` 与「原文只作本地运行产物」的既有纪律冲突，需单独裁决（本地 gitignored 录制目录 or 只入脱敏归一形状），不硬塞
+reopen: capture/replay **真实录制态**（record 真模型响应入 fixture）**不属隐私待裁决项，属普通工程权衡**——本包曾误称其撞「LLM 原文不入仓」红线，经复核该红线语境是 `llm-transcripts`=**用户真实对话语料**（故只存指针），与合成 eval 任务的模型响应无关；且 `evals/baselines/smoke.json` 长期存模型 `finalText` 即既有惯例。真正的取舍是**产物体积/抖动 vs 可重放确定性**，解法=录制时过密钥扫描 + 只录合成任务 + replay 必须仍过 BLOCK-189 `outbound_contains` 哨兵（防「罐头响应假绿」）。独立切片可直接立项实现，无需裁决
 status: completed
 ---
 
