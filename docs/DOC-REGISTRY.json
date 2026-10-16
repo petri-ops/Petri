@@ -6625,6 +6625,21 @@
       "notes": "2026-10-16 整包 completed（立项发令 active→P0-P4 单会话闭环；用户 AskUserQuestion 拍板门控口径「晋升=双齐+显式审计（推荐）」解锁评测 v2 第四切片·formal-admission 门控棘轮；closeout 十三门全绿·零 provider 零人眼）。§4.1 ZCode smoke→real 晋升需 case manifest+fixture 双齐、baseline 更新只走显式审计命令。交付=scripts/lib/evals-admission.mjs deriveAdmissionManifest（现有任务字段派生 case manifest：covers←category+criteria kind 集·tier←套件·hasFixture←fixtureFiles 在场）+ evalAdmission（双齐判晋升 eligible）；scripts/evals-admission.mjs 晋升清单台账 + 双齐违规 exit 非零 + 基线仅显式审计源码门（断言 evals-gate/evals-run 写 baselines/snapshots 唯一路径在 --update/--update-snapshot 守卫内）；契约测 test/block191-formal-admission.test.mjs 四项。PASS 判定（全 criteria 过）与 gate/runGoldenTask 不改、不改 13 任务字段名、不跑真模型（provider 依赖切片 reopen·本环境无 PETRI_EVALS_PROVIDER_KEY 诚实 blocked）。**交付**=晋升台账 13/13 达准入 exit 0（门自证给分母非静默绿）+ 契约测 5/5（含 PASS 语义未被改动之断言）+ 显式审计源码门绿；**实作自纠**=首版误把 fixture 齐套到冒烟层致 8 例假红，按 §4.1「smoke→real 晋升」口径改为仅约束 real 层；2 枚无工作区输入的 real 用例显式声明 requiresFixture:false 防默默退化；test:changed base=e0d23975 范围 60pass/0fail。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
+      "id": "BLOCK-192-EVALS-REAL-CREDENTIALS",
+      "capability": "evaluation",
+      "path": "docs/block-192-evals-real-credentials-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P5-CLOSED",
+      "canonical": true,
+      "truthDomain": "block-192-evals-real-credentials-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-16",
+      "archivePolicy": "retain_stable_path",
+      "tags": ["evals-v2", "real-provider", "credential-store", "privacy-redaction", "evidence-self-attestation", "stage-2"],
+      "notes": "2026-10-16 整包 completed（用户「上」发令；closeout 门禁全绿；零手工注入实机验收 real 套件 3/3 PASS·measures=model）：评测 v2 provider 切片·real 模式凭据自给 + 入库脱敏 + real 基线棘轮。**前置纠错**：本会话曾据「PETRI_EVALS_PROVIDER_KEY 未设」对外判 provider 切片 blocked，实为探针不健康误判——本机凭据库一直有 deepseek key（ai-credentials.json 值=纯字符串；macOS Keychain/其余 0600 文件，规范读法 createCredentialStore）；真实缺口是 harness 只认 env、隔离临时目录永看不到桌面凭据库。交付=resolveRealProviderSettings（env 显式优先完全向后兼容→仅 real 模式回落本机凭据库，复用 credential-store 单源读取器不自行解字段；provider→baseUrl 缺省表显式登记；失败给分类化 skipReason 沿用诚实 skip 不伪造）+ localRealProviderSettings（镜像 env-coordinator 规范：PETRI_LOCAL_DATA_DIR 优先否则 Documents/<BRAND.LOCAL_DIR_NAME>）+ mock 模式绝不回落（真 key 不入临时目录）+ 返回体只暴露 hasKey（apiKey 明文不入日志/证据，源码守卫断言）+ sanitizeEvalTasksForStorage（报告与基线剥离 finalText，守「LLM 原文不入仓」——自查发现我自建 real 基线含模型原文，与自引红线冲突故在持久化边界收口）+ evals/baselines/real.json 建立（real 套件自此受回归棘轮守护）。契约测 8/8；smoke/golden/real 三门棘轮各回归 0。**两处自纠留痕**：①首版 mock 丢 PETRI_EVALS_BASE_URL 致 golden ttfs 假红（改为 env 覆盖与 mode 无关透传）②回落首跑误报「缺预设」实为数据目录猜错（应在 Documents 下），修正并区分失败原因。**Glob 事故两次**：清理临时 stamp 的 rm 通配误删已入库历史证据（smoke-2026-*/real-2026-*），两次即时 git checkout 复原、零丢失。reopen=真模型响应 capture/replay 录制态（需先裁决脱敏形态）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
       "id": "DESKTOP-EVAL-20261015",
       "path": "docs/Petri-Desktop-Evaluation-Report-2026-10-15.md",
       "kind": "audit",

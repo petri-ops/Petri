@@ -8,12 +8,12 @@ acceptance:
   - 门禁：docs:check/ui:audit:check（纯基建免 UI-###）/契约测（回落解析纯函数：env 优先·文件回落·无预设 skip·provider 映射·**不泄漏明文 key**）/real 套件复跑绿/test:changed 全绿
   - 完成语义：`npm run evals:run -- --suite=real --provider=real` 无需手工 env 即跑真模型并绿；real 有基线棘轮；key 明文全程不外泄
 reopen: capture/replay **真实录制态**（record 真模型响应入 fixture）显式 defer——本项目有「LLM 原文不入仓」隐私红线（acceptance/block-119 注记），把真模型响应提交进 `evals/` 与「原文只作本地运行产物」的既有纪律冲突，需单独裁决（本地 gitignored 录制目录 or 只入脱敏归一形状），不硬塞
-status: active
+status: completed
 ---
 
-# BLOCK-192 — real 模式凭据自给 + real 基线棘轮（评测 v2 provider 切片）
+# BLOCK-192 — real 模式凭据自给 + 入库脱敏 + real 基线棘轮（评测 v2 provider 切片）
 
-- 状态：`active`（2026-10-16 用户「上」发令；前置纠错：provider 切片并非 blocked，实测 3/3 PASS）
+- 状态：`completed`（2026-10-16 用户「上」发令 → 单会话闭环；closeout 门禁全绿；**零手工注入实机验收 3/3 PASS·measures=model**）
 
 ## 1. 立项自检
 证据自证=「质量声明」要能一键在真模型上重放，而不是每次靠人手工塞 key；同时凭据只在内存/受保护存储里流动，绝不进日志与证据文件（本地可审计也要可审计得干净）。
