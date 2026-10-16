@@ -238,7 +238,8 @@
     "quality:baseline": "bash scripts/quality-baseline.sh",
     "audit:compact": "node scripts/audit-log-compact.mjs",
     "evals:run": "node scripts/evals-run.mjs",
-    "evals:gate": "node scripts/evals-gate.mjs"
+    "evals:gate": "node scripts/evals-gate.mjs",
+    "evals:catalog": "node scripts/evals-catalog.mjs"
   },
   "dependencies": {
     "@electron/notarize": "^2.5.0",

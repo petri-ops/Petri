@@ -2719,6 +2719,21 @@
       "classifiesScripts": false
     },
     {
+      "id": "block190-evals-catalog",
+      "note": "BLOCK-190 评测 v2 第三切片·catalog 五列化：scripts/lib/evals-catalog.mjs（deriveCatalogRow/renderCatalog 纯函数，任务 JSON→五列 ID/setup/action/assertion/evidence，零 volatile）+ scripts/evals-catalog.mjs（生成 evals/CATALOG.md，--check 同步棘轮）+ package.json evals:catalog。契约=test/block190-evals-catalog.test.mjs（五列非空/CATALOG 与套件逐字节同步/零 volatile）。两新脚本仅此一条 classifiesScripts:true 规则匹配（避免 test:changed exit 2）。",
+      "patterns": [
+        "scripts/lib/evals-catalog.mjs",
+        "scripts/evals-catalog.mjs",
+        "evals/CATALOG.md",
+        "evals/suites/**",
+        "test/block190-*.test.mjs"
+      ],
+      "tests": [
+        "test/block190-evals-catalog.test.mjs"
+      ],
+      "classifiesScripts": true
+    },
+    {
       "id": "ui-proxy-review-probe",
       "note": "UI 代行评估/构造探针（scripts/ui-proxy-review.mjs，UI-496~509 批引入；scripts/ui500-compaction-live.mjs，UI-500 压缩构造批）：CDP 驱动真界面+截图留证，实机走查证据工具非回归测试（同 block123-p0-probes 形态）；证据=acceptance/ui-proxy-review/ 与 acceptance/ui-500/。",
       "patterns": [
