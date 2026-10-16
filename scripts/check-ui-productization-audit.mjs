@@ -46,6 +46,14 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-10-16 UI-271 加映轻量批（ToolActivityDock 折叠态收入 composer 图标钮，用户实机反馈驱动）：
+  // 6 个 fix(ui)/chore(ui) 提交 subject 无 UI-###；台账=UI-271 加映行（本批收口时补登）对账。
+  // 先例 1cae944/dcfc0c3；不重写共享历史。
+  '3e3ec750933e02c4ae70669c5a58c6500b5d6d4e',
+  '70c67c99e514ca342b1dc29e9d6bc4b08113a1ca',
+  'd47cea0bd1398f2f89e815a1bbc9b9c407d92706',
+  '1aaefc292290580a591ab0c8b519ea80d9ad3556',
+  '23ef0d1c7638cbcc3872dff8ffc9808b7719e23c',
   // 2026-10-12 BLOCK-173 dcfc0c3 ArtifactPinPane hooks 顺序合规修复——feat/fix BLOCK 轨无 UI-###（UI-501 加映已补登）
   'dcfc0c3de4b7e193cc092642933ee70dfafb5930',
   // 2026-10-13 BLOCK-181 代行评估 1cae944 gen-ui fragment 路径修复（fix 轨无 UI-###；UI-502 修复本体，台账=UI-502 代行评估补登行已对账）
@@ -442,6 +450,13 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-10-16 UI-271 加映轻量批：4 个 fix(ui) 提交（灰点仅活跃显示/zap/⎇ Unicode/去蓝点）同提交漏台账同步；
+  // 台账=UI-271 加映行（收口批补登）统一对账（subject 门经 LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）。
+  // 3e3ec750 首提交已同提交更台账，不在此集。先例 1cae944/dcfc0c3；不重写共享历史。
+  '70c67c99e514ca342b1dc29e9d6bc4b08113a1ca',
+  'd47cea0bd1398f2f89e815a1bbc9b9c407d92706',
+  '1aaefc292290580a591ab0c8b519ea80d9ad3556',
+  '23ef0d1c7638cbcc3872dff8ffc9808b7719e23c',
   // 2026-10-12 BLOCK-173 CP-15 hooks 顺序合规修复（dcfc0c3）：同提交漏台账同步（ff64f30d 已补登）。
   'dcfc0c3de4b7e193cc092642933ee70dfafb5930',
   // 2026-10-13 BLOCK-181 代行评估（1cae944 gen-ui fragment 路径修复）：同提交漏台账同步；

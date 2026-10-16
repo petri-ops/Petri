@@ -8,12 +8,12 @@ acceptance:
   - P3 抓真修复：代行走查发现的真缺陷按 UI-496~509 代行批先例当场修复+复验（小修随批入台账；超范围的另立工作包，不扩 scope）
   - 门禁：docs:check/ui:audit:check/tsc/test:changed 全绿；台账翻转逐条留痕（in_progress→verified（代行评估）或 verified（用户过目），沿用 U-02/03/04 与 UI-496~509 先例口径）
 reopen: 双机环境不可用则 UI-504 分档挂起待环境；清偿过程中新增 in_progress 项入下一批
-status: active
+status: completed
 ---
 
 # BLOCK-184 — UI 过目清偿批（代行评估 + 人眼最小集）
 
-- 状态：`active`（2026-10-15 用户发令：「按 plan 全按推荐执行，人眼最小集 4 条留我一次栈窗口过目」=预授权整批+终审窗口一次性集中）
+- 状态：`completed`（2026-10-16 整包收口：P1 代行批 26/26+4 分档全绿、P2 人眼最小集 4 条处置完毕〔1 verified + 3 环境分档〕、closeout 十三门绿；接管 CodeBuddy 在制续跑，抓真八处全为探针侧缺陷产品码零改动；详见 §8 收口笔录）
 - 用户裁决原话：「按照我们项目内部的规范 是不是应该建立plan」+「继续」（2026-10-15，批准立项文书）+ 发令口径（2026-10-15，预授权整批执行）
 - 来源：2026-10-15 全方位评估（software-company 专家团架构/产品双线 + ZCode/Codex 参照精读），综合研判落 `/.workbuddy/memory/2026-10-15-expert-synthesis.md`（仓外工作记忆，不入 docs 治理）
 - 关联先例：UI-496~509 代行评估批（9c34d181）/U-02/03/04 代行口径/BLOCK-181 evals harness（走查探针基建）/BLOCK-183（HEAD=1e73233f，干净树）

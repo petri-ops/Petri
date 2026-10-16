@@ -1,8 +1,8 @@
 # Petri Desktop Current Handoff
 
-最后更新：2026-10-15（**BLOCK-184-UI-REVIEW-CLEARING 立项发令 active（用户发令「按 plan 全按推荐执行，人眼最小集 4 条留我一次栈窗口过目」=预授权整批+终审窗口一次性集中；评估研判批 11 文档已于 a6f1f76b 提交）**）
+最后更新：2026-10-16（**BLOCK-184-UI-REVIEW-CLEARING 整包 completed（P1+P2 全闭环；接管 CodeBuddy 在制续跑；closeout 十三门绿）**）
 
-**恢复要点（换会话必读）**：①**active 工作包=BLOCK-184 UI 过目清偿批**（plan=docs/block-184-ui-review-clearing-plan.md，status active）。②执行序列=P0 重拉 dev 栈+冻结 12 条清偿清单（UI-466/467/468/469/470/471/481/482/501/503/504/457）→ P1 代行 CDP 走查（证据包=截图+断言 JSON+可复跑探针，落 acceptance/block-184/）→ P2 人眼最小集 4 条（UI-501 画布挂载/UI-503 触发面/UI-457 表单/UI-504 双机分档）**留用户一次栈窗口集中过目** → P3 抓真小修随批 → 收口。③dev 栈 2026-10-15 实测 3000/3001/9222 全不在听，实机前须 `npm run dev`；后端 agent-ws.js 有改码——杀 3001 PID 让 supervisor 重生。④零产品码默认；G0 开发期常态 · 不外推 packaged/Provider/GA。
+**恢复要点（换会话必读）**：①**无 active 工作包**（BLOCK-184 已翻 completed；下一包从 pending-work-backlog 候选池选举待用户裁决）。②BLOCK-184 实绩=P1 代行探针 26/26+4 分档（acceptance/block-184/，探针 scripts/block184-p1-live.mjs 可复跑），台账翻转 UI-457/466/467/468/469/470/481/482→verified（代行评估），UI-471/501/503/504 环境受限分档挂起（不硬翻，plan §6）；接管抓真八处全为探针侧缺陷，产品代码零改动。③**仍留用户实机顺手过目三条**：UI-501 画布节点（跑 spawn 任务点 ⎇）/UI-503 继续分析菜单（需 artifact 数据）/UI-504 联邦双机（需第二台机）。④随包插入 UI-271 加映轻量批：ToolActivityDock 折叠态从右下浮条收入 composer 图标钮（⎇ Unicode 字符，用户实机反馈驱动），6 提交走 fix(ui) 轨无 UI-###，已登记 LEGACY 双集豁免+台账加映行对账。⑤dev 栈现状：3000 Vite/3001 后端/3005 网关/9223 测试实例在听，9222 用户主窗已随整栈重启关闭（用户下次 `npm run dev` 自取）；pack 未安装+catalog count=0（起手态复原）。⑥探针坑沉淀入 memory：Electron CDP createTarget 不支持(-32000)/文本钮容器作用域/tree 500 窗互斥/Vite HMR 结构移动需 Ctrl+R。⑦零产品码默认；G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-15（**评估研判批落档（用户裁决「蓝图说明白一点」+「后端 harness 与前端界面同类型比较…确定到每个细节点」）：三份reference 施工图 + 阶段视图已进canonical**
 
