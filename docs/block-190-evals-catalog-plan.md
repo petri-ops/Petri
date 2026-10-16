@@ -8,12 +8,12 @@ acceptance:
   - 门禁：docs:check/ui:audit:check（纯基建免 UI-###）/契约测/test:changed 全绿；evals:run golden+smoke 不回归
   - 完成语义：全部 evals 套件任务有标准五列目录；目录与任务源同步受棘轮守护；零字段重命名零 runner 改动
 reopen: 无（本切片自洽）；catalog 若后续接 formal-admission 门控棘轮（BLOCK-191）以其为晋升清单基座
-status: active
+status: completed
 ---
 
 # BLOCK-190 — 评测基线 v2 第三切片·catalog 五列化
 
-- 状态：`active`（2026-10-16 用户「冲·搞完评测 v2 剩余·各独立立项」发令）
+- 状态：`completed`（2026-10-16 用户「冲·搞完评测 v2 剩余·各独立立项」发令 → P0-P4 单会话闭环；全自动化无人眼；closeout 十三门全绿）
 - 前序：BLOCK-187（黄金路径门）/188（context_snapshot 棘轮）/189（outbound 防作弊）均 completed。
 
 ## 1. 立项自检
