@@ -20,3 +20,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-17T05:24:39.134Z -->
 | ✅ BLOCK-182 整包（2026-10-14，用户预授权四批次之 D；CP-6 结论承接，当日立项当日收口） | 2026-10-14 | **记忆生命周期治理 completed**：衰减（90 天 TTL 惰性+豁免）/纠错流（免费：superseded 替代链）/矛盾消解（等值合并刷新确认，修「反复提及仍衰减」缺陷）/全链审计（memory_audit+面板节）/MEMORY.md 写入审批门（policy memory 维度走 BLOCK-180 全链）。红绿 6/6+实机三链 PASS（block182-live）+UI-510 verified。抓真=迁移时点 user_facts 未建（列升级改挂运行时 ensure）+探针 mock env 须先于后端 spawn+档案提取抢回合（批次B 同款）。UI-500 批 impact-map 漏登记 ui500 探针同批补登。 | zcode |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-17T09:13:13.089Z -->
+| ✅ BLOCK-166-NAV-GUARD 整包（2026-10-14，用户预授权加开第五批；10-12 排期修 knownGap 落地，当日立项当日收口） | 2026-10-14 | **沙箱帧导航劫持收口 completed**：死码拆除（P3 params 签名失配+preventDefault 已证无效）+主进程侦测推送（进程登记法+did-fail-load(-30) 主可达路——OOPIF routingId 跨导航会变/fragment 自导航不派发 will，全参位实测定案）+GenUiCard 帧匹配即时重置（9-11s→亚秒）+30s×3 限幅挂起面（UI-511 verified）。组件 4/4+gen-ui 37/37+channels 5/5+tsc 0+实机探针 PASS（导航→挂起 17s vs 心跳 ~29s+）。**过程抓真**=曾发现文件混入非本会话调试行（fs.appendFileSync 顶替插桩行+fs 未导入致链路静默断裂，已移除；来源未明如实登记）。 | zcode |

@@ -10,12 +10,12 @@ acceptance:
   - P6 兼容与回退：旧落点文件**不迁移不改形状**，`config-service` 只是读写封装；对三族做"迁移前后逐键值相等"对账测；`npm run closeout` 十三门 + 五件套回写。
   - 完成语义：本包交付的是**地基 + 三族收编 + 三个缺陷清偿**，不宣称"全部 14 落点已统一"；剩余落点在 §4 点名留后续切片。
 reopen: B1b 切片（user-prefs/mcp-settings/skill-prefs 收编 + 四 data root 脑裂根治）、B2 切片（P1-2 MCP 逐工具策略、P1-3 记忆/压缩设置面）、P0-3 设置搜索与导出（其实现载体正是本包）；profile 只做到"命名覆盖层雏形"，多端同步待产品决策。
-status: active
+status: completed
 ---
 
 # BLOCK-199 — 配置 schema 层与统一配置服务（阶段 3 · B1 地基）
 
-- 状态：`active`（2026-10-17 主代理按队列头自决立项；用户授权原话「非常好 尽可能的推进更多的内容 不要问我所有工作决策你来定」，并指定本轮要开"跨度比较大的任务"）
+- 状态：`completed`（2026-10-17 当日立项当日收口·零人参与·closeout 十三门全绿；**地基 + 四族接线 + 三缺陷清偿 + 漂移门在册，14 落点收编 4 处 = 阶段 3 B1 交付，B1b 未做**）
 - Plan ID：`BLOCK-199-CONFIG-SCHEMA-SERVICE` · 专项分析：`docs/settings-capability-gap-analysis-2026-10-15.md` §6 **P1-1** / §7 阶段 B **B1**
 
 ## 0. P0 勘察结果（两路只读盘点 + 主代理逐条实码抽验；BLOCK-195 曾两次纠正子代理错路径，本次全部结论我都自己读到行号才写）
@@ -107,4 +107,26 @@ status: active
 - 门禁侧：`quality:arch` 无违例（1469 模块）、`quality:knip:check` 保留面零新增（地基不是死文件）；`test:changed --base=22acc389` 113 项 111pass/0fail/2skip。
 - 测绘副产物入册：`feature-flags`/`decision-config` **此前无任何 impact-map 规则覆盖**（改它们会 fail-closed 升级全量），已由 `block199-config-schema-service` 规则补上盲区。
 
-**未落（本包继续，勿当已完成）**：P3 写侧统一拒绝 + diagnostics 出口（目前只有读侧报告能力，尚无用户可见出口）；P4② `report-guard` 纳入 RUNTIME_POINTS；P4③ `ThemeProvider` 跨端写失败可观测；P5 漂移门全量（schema↔设置页↔IPC，现仅有 feature-flags 一族的双向对账）；P6 兼容对账收尾与 closeout 五件套。**注册表覆盖率当前=**4/4 族已实接**（14 落点中已收编 4 处，其余 10 处属 B1b 切片）**。
+**同日续推落到收口（此段原写「未落」，完成事实见 §8 表，不留陈旧断言）**：P3 写侧统一拒绝 + `config:doctor` 用户可见出口；P4② `report-guard` 收编进 `RUNTIME_POINTS` + 注册表；P4③ `ThemeProvider` 跨端写失败可见化（`prefsSync`，台账 UI-513 记 in_progress）；P5 漂移门四向对账全量；P6 兼容收尾 + closeout 十三门 + 五件套回写。
+
+**注册表覆盖率=4/4 族实接、14 落点中收编 4 处**；其余 10 处落点与 4 条 data root 脑裂根治属 **B1b（runlist W4）**，本包不得表述为「配置已统一」。
+
+
+## 8. 收口交付记录（2026-10-17 实跑，非叙述）
+
+| 项 | 交付 | 证据 |
+| --- | --- | --- |
+| 地基 | `core/packages/shared-config/config-schema.js`：4 族 13 键注册表 + 校验/优先级/未知键诊断/写侧守卫/env 遮蔽，**纯函数零 require 零第三方** | `test/block199-config-schema.test.mjs` 8/8（含 env 别名全仓真实性扫描与共享层纯度扫描） |
+| 拆前基线 | 三族既有胜负关系与形状冻结（**此后不许改测试**） | `test/block199-config-compat.test.mjs` 8/8 |
+| 四族接线 | feature-flags（首族）、decision-config 启用档、ai-settings generation、cost-cap 全改由 schema 提供形状与优先级 | 基线 8/8 + 消费者面 41/41 + generation/cost-cap 30/30 + `test:changed --base=8ef88029` 238 项 236pass/0fail |
+| 写侧守卫 + 出口 | `commitGuard`（未注册键/非法值/只读键拒绝，null 仍清键）；`generation-defaults` 写路径从「静默丢键」改 **400 + 结构化诊断**；`npm run config:doctor` 打印未知键/非法已存值/env 遮蔽 | `test/block199-write-guard.test.mjs` 6/6；本机实跑=0 未知键 0 非法值 0 遮蔽、两落点尚未创建（读不落盘） |
+| 缺陷① | `tool-router` 采纳阈值改调用时读运行时——**设置页热调真的改判定**；无 stored 覆盖时仍按校准 θ=0.8（数值未动） | `test/block199-threshold-runtime.test.mjs` 5/5（红→绿；含「改回 0.11 立即再生效」） |
+| 缺陷② | `report-guard` 收编进 `RUNTIME_POINTS` + 注册表：默认关与 env 0/1 语义一字未改，新增能力=设置页可显式开并落盘，env=0 仍一票否决 | `test/block199-report-guard-point.test.mjs` 4/4 |
+| 缺陷③ | `ThemeProvider` 跨端写失败可见化（`prefsSync` 状态 + 控制台留痕；本端仍立即生效不回滚，15s 拉取继续收敛服务端真相） | `frontend/src/themes/ThemeProvider.sync.test.tsx` 4/4 + 既有面 9/9；台账 **UI-513 in_progress**（提示文案尚未接，不标 verified） |
+| 漂移门 | 注册表族 ↔ 设置面承载 ↔ 写路由 4xx ↔ `RUNTIME_POINTS` 集合 四向对账 + envKey 同源 | `test/block199-config-drift.test.mjs` 5/5 |
+
+**漂移门落地当天就抓到一处真实漂移**：我把 `report-guard` 收进 `RUNTIME_POINTS` 却没在注册表登记——正是该门要堵的「注册表外隐藏开关」缺陷类，当场补登记。
+
+**门禁与例外留痕**：`npm run closeout` 十三门全绿。过程中三门各抓到我一处问题并各自修掉：①`quality:lint` 11 errors（测试里 act 套无 await 的 async 箭头 + 对 BodyInit 隐式字符串化）；②`quality:knip:check` 抓出 `PrefsSyncState` 是**无消费方的导出**→取消导出（等设置面真接上再导出），台账已记；③`ui:audit:check` 两次判 `frontend/src/themes/**` 属 UI 面→补 UI-513 台账行同行提交（**不编造 verified**，提示文案未接就记 in_progress）。**教训固化**：含反引号/正则的台账改动必须落盘脚本执行——本会话两次被 bash 吞掉反引号（一次 lint、一次台账文字）。
+
+**未做（不得被本包表述为已完成）**：其余 **10 处落点未收编**（`user-prefs`/`mcp-settings`/`skill-prefs`/主进程窗口态/**renderer localStorage 那一套**/SQLite `site_settings` 等）与 **4 条 data root 脑裂根治** = B1b；`config:doctor` 尚未接设置面提示；`ai-settings` 顶层未知键仍是「报告不拒」（拒它会破坏设置页整坨写入，须与 B1b 一并设计）；C-32（env=1 与注释相反）只登记未改。注册表覆盖率=**4/14 落点**。
