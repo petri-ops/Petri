@@ -509,6 +509,7 @@ export async function runGoldenTask({ api, tmpDir, task, outbound = null }) {
     status: completed ? 'completed' : (failedEvent ? 'failed' : 'timeout'),
     criteriaResults,
     finalText,
+    finalAnswerText: lastAnswerText(events),
     durationMs: Date.now() - startedAt,
   };
 }
@@ -516,6 +517,24 @@ export async function runGoldenTask({ api, tmpDir, task, outbound = null }) {
 // ---------- 判据评估器（纯函数，供单测） ----------
 function toolCallEvents(events) {
   return events.filter((e) => e.event === 'tool_call');
+}
+
+/**
+ * 终点答案（BLOCK-194）=最后一次 tool_call 事件之后的正文帧拼接；无工具轮则等于全拼接。
+ * 为什么要单独取这一段：把整轮运行的「我先看文件…现在改一下…」逐帧拼接当"答卷"去评契合度，
+ * 量到的是运行日志而不是答案（BLOCK-119 transcript 模式同样只取 stop 轮的回复=既有口径）。
+ * 既有 `finalText`（全拼接）语义不改，`final_answer_contains` 等判据不受影响。
+ */
+export function lastAnswerText(events) {
+  const list = Array.isArray(events) ? events : [];
+  let boundary = -1;
+  for (let i = list.length - 1; i >= 0; i -= 1) {
+    if (list[i] && list[i].event === 'tool_call') { boundary = i; break; }
+  }
+  return list.slice(boundary + 1)
+    .filter((e) => e.choices && e.choices[0] && e.choices[0].delta && typeof e.choices[0].delta.content === 'string')
+    .map((e) => e.choices[0].delta.content)
+    .join('');
 }
 
 /**
@@ -743,7 +762,8 @@ export function buildContextSnapshot(req, { tmpRoot } = {}) {
  * compareRunVsBaseline 仅消费 id/passed/criteriaResults/skipped，故剥离 finalText 不影响棘轮。
  */
 export function sanitizeEvalTasksForStorage(tasks) {
-  return (Array.isArray(tasks) ? tasks : []).map(({ finalText: _finalText, ...rest }) => rest);
+  // BLOCK-194 新增的 finalAnswerText 同属模型原文，入库面一并剥掉（漏一个键就是脱敏红线破口）。
+  return (Array.isArray(tasks) ? tasks : []).map(({ finalText: _finalText, finalAnswerText: _finalAnswerText, ...rest }) => rest);
 }
 
 export function defaultTmpDir(prefix) {

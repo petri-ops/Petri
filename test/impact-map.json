@@ -2775,6 +2775,19 @@
       "classifiesScripts": true
     },
     {
+      "id": "block194-evals-llm-judge",
+      "note": "BLOCK-194 评测 v2 第六切片·LLM-as-judge real 模式：scripts/lib/evals-judge.mjs（读数采集 judge 依赖注入 + 两层门〔测量有效性 invalid / 质量缺口 gaps〕+ VERDICT_RANK 严重度棘轮〔不比 fit 数值〕）+ evals-run --judge（仅 real 开放）+ evals-gate --judge 走 evals/judge-baselines/ 命名空间 + 供给单源抽取（lib/harness/judge-supply.mjs，BLOCK-119 CLI 与评测层共用同一条装载；分类归 block119）。契约=test/block194-evals-llm-judge.test.mjs（16 项，含 degraded 不得当绿、RETRY/ESCALATE 属缺口而非故障、终点答案测量定义、入库脱敏双键守卫）。新脚本 evals-judge 仅此一条 classifiesScripts:true 规则匹配；harness/run/gate/suites 分类仍归 block181。",
+      "patterns": [
+        "scripts/lib/evals-judge.mjs",
+        "evals/judge-baselines/**",
+        "test/block194-*.test.mjs"
+      ],
+      "tests": [
+        "test/block194-evals-llm-judge.test.mjs"
+      ],
+      "classifiesScripts": true
+    },
+    {
       "id": "ui-proxy-review-probe",
       "note": "UI 代行评估/构造探针（scripts/ui-proxy-review.mjs，UI-496~509 批引入；scripts/ui500-compaction-live.mjs，UI-500 压缩构造批）：CDP 驱动真界面+截图留证，实机走查证据工具非回归测试（同 block123-p0-probes 形态）；证据=acceptance/ui-proxy-review/ 与 acceptance/ui-500/。",
       "patterns": [
@@ -2891,7 +2904,8 @@
       ],
       "tests": [
         "test/block119-output-judge.test.mjs",
-        "test/block119-report-guard.test.mjs"
+        "test/block119-report-guard.test.mjs",
+        "test/block194-evals-llm-judge.test.mjs"
       ],
       "frontendRelated": false,
       "classifiesScripts": true,

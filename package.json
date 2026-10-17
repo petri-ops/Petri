@@ -241,6 +241,7 @@
     "evals:gate": "node scripts/evals-gate.mjs",
     "evals:record": "node scripts/evals-run.mjs --suite=real --provider=real --record",
     "evals:replay": "node scripts/evals-run.mjs --suite=real --provider=replay",
+    "evals:judge": "node scripts/evals-run.mjs --suite=real --provider=real --judge",
     "evals:catalog": "node scripts/evals-catalog.mjs",
     "evals:admission": "node scripts/evals-admission.mjs"
   },

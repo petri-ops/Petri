@@ -22,30 +22,24 @@ const root = path.resolve(here, '..');
 const require = createRequire(import.meta.url);
 const { judgeOutput, buildJudgeRequest } = require('./lib/harness/judge-core.mjs');
 const { probeStability } = require('./lib/harness/stability-core.mjs');
+const { resolveCloudJudgeOverrides, anchorJudgeDecisionDb } = require('./lib/harness/judge-supply.mjs');
 const decisionApi = require('../core/petri-server/helpers/decision-api.js');
 
 const SEPARATOR = String.fromCharCode(10);
 const TRANSCRIPT_DIR = path.join(root, '.petri-dev-user-data', 'data', 'llm-transcripts');
 
-/** 锚定决策台账 DB（BLOCK-118 加映 1 同款：裸 shell 下防 best-effort 记账静默丢失）。 */
+// 供给与台账锚定已抽为单源（BLOCK-194 评测层复用同一条装载，见 lib/harness/judge-supply.mjs）。
 function anchorDecisionDbPath() {
-  if (process.env.PETRI_DB_PATH) return;
-  const candidate = path.join(root, '.petri-dev-user-data', 'data', 'petri.db');
-  if (fs.existsSync(candidate)) process.env.PETRI_DB_PATH = candidate;
+  anchorJudgeDecisionDb({ root });
 }
 
 function cloudOverrides() {
-  const envFile = path.join(root, '.petri-dev-user-data', 'jev.env.bak-by-user-request');
-  let apiKey = null;
-  for (const line of fs.readFileSync(envFile, 'utf8').split(/\r?\n/)) {
-    const m = line.match(/^\s*TYPESAFE_API_KEY\s*=\s*(.+)\s*$/);
-    if (m) apiKey = m[1].replace(/^['"]|['"]$/g, '');
-  }
-  if (!apiKey) {
+  const resolved = resolveCloudJudgeOverrides({ root });
+  if (!resolved) {
     console.error('cloud 供给不可用：备份 env 无 TYPESAFE_API_KEY');
     process.exit(3);
   }
-  return { apiKey, baseUrl: 'https://api.typesafe.ai', model: 'jev-1.13.0' };
+  return resolved;
 }
 
 function readTranscriptTurn(file, wanted) {

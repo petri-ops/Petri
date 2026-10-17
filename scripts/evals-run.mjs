@@ -24,6 +24,7 @@ import {
   snapshotTranscriptCounts, readNewTranscriptRecords, projectTranscriptToOutbound, buildRecording,
   gateRecording, loadRecording, recordingPath, verifyRecordingForReplay, assertReplaySentinel,
 } from './lib/evals-recording.mjs';
+import { collectJudgeReading, judgeGate, assertJudgeTier } from './lib/evals-judge.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -42,6 +43,13 @@ if (!['mock', 'real', 'replay'].includes(provider)) {
 }
 if (record && provider !== 'real') {
   console.error('[evals] --record 仅对 --provider=real 有效（把脚本化回合写成「真实录制」=伪产物污染录制面）');
+  process.exit(2);
+}
+// BLOCK-194：质量判读只对真模型答卷开放（脚本回合/罐头回放没有质量可言）。
+const judgeEnabled = args.includes('--judge');
+const judgeTier = assertJudgeTier({ provider, judgeEnabled });
+if (!judgeTier.ok) {
+  console.error(`[evals] ${judgeTier.reason}`);
   process.exit(2);
 }
 // 产物 namespace：回放态与真模型态同 suite 目录，但**绝不共享报告/基线**。
@@ -80,6 +88,7 @@ const report = {
 let passCount = 0;
 let snapshotDrift = false;
 let recordFailures = 0;
+const judgeReadings = [];
 
 if (backend.ok) {
   const api = backend.api;
@@ -125,6 +134,15 @@ if (backend.ok) {
       for (const c of result.criteriaResults) {
         console.log(`  ${c.passed ? '✔' : '✖'} ${task.id} · ${c.kind}${c.detail ? ` — ${c.detail.slice(0, 90)}` : ''}`);
       }
+    }
+    // BLOCK-194：质量判读在收口后、sanitize 剥正文前完成——判词与被判正文都只存活于内存，
+    // 落报告的读数不含任何文本正文（沿用 BLOCK-192 入库脱敏纪律）。
+    // 被测文本=**终点答案**（最后一次 tool_call 之后的正文），不是全程独白拼接（口径同 BLOCK-119）。
+    if (judgeEnabled && !result.skipped) {
+      const reading = await collectJudgeReading({ task, finalText: result.finalAnswerText });
+      judgeReadings.push(reading);
+      const green = reading.verdict === 'PASS' && !reading.degraded && reading.measured;
+      console.log(`  [judge] ${green ? '✔' : '✖'} ${task.id} · ${reading.verdict}${reading.degraded ? '(degraded)' : ''} · fit=${reading.fit ?? '-'}${reading.fitStatus ? `/${reading.fitStatus}` : ''} · judge=${reading.model || 'null'}${reading.fitReplay ? ` · 邻域复核 k=${reading.fitReplay.k} median=${reading.fitReplay.median}` : ''}${reading.reason ? ` · ${String(reading.reason).slice(0, 60)}` : ''}`);
     }
     if (provider === 'real' && record) {
       const { records, unparsed } = harvest();
@@ -191,6 +209,16 @@ report.pass = passCount;
 report.total = tasks.length;
 report.skipped = report.tasks.filter((t) => t.skipped).length;
 const failures = report.tasks.filter((t) => !t.skipped && !t.passed).length;
+// BLOCK-194：质量读数两层——测量不成立（降级/无门控/零读数）才 exit 非零；
+// 落在非达标区（RETRY/ESCALATE）如实记为**质量缺口**并逐条打印，由读数棘轮守「不得后退」。
+let judgeGateResult = null;
+if (judgeEnabled) {
+  judgeGateResult = judgeGate(judgeReadings);
+  report.judge = { readings: judgeReadings, gate: judgeGateResult };
+  for (const r of judgeGateResult.invalid) console.log(`  [judge] ✖ 测量不成立 ${r.id} — ${r.why}`);
+  for (const g of judgeGateResult.gaps) console.log(`  [judge] ⚠ 质量缺口 ${g.id} — ${g.verdict}（fit=${g.fit ?? '-'}${g.fitStatus ? `/${g.fitStatus}` : ''}·判词提示 ${g.hintsCount} 条）`);
+  console.log(`[judge] 读数有效性：${judgeGateResult.ok ? 'OK' : 'FAIL'}（读数 ${judgeReadings.length}/${tasks.length}·不成立 ${judgeGateResult.invalid.length}·质量缺口 ${judgeGateResult.gaps.length}）`);
+}
 // 入库前脱敏：报告与基线不留模型原文（判据结论足够驱动棘轮，见 sanitizeEvalTasksForStorage 注释）
 report.tasks = sanitizeEvalTasksForStorage(report.tasks);
 await backend.cleanup();
@@ -203,5 +231,5 @@ const reportPath = explicitReport || path.join(evidenceDir, `${artifactName}-lat
 fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
 const stamped = path.join(evidenceDir, `${artifactName}-${report.at.replace(/[:.]/g, '-')}.json`);
 fs.writeFileSync(stamped, JSON.stringify(report, null, 2));
-console.log(`\n=== evals run: ${passCount}/${tasks.length} PASS（skipped ${report.skipped}；报告 ${path.relative(root, reportPath)}；measures=${report.measures}${recordFailures ? `；拒录 ${recordFailures}` : ''}）===`);
-process.exitCode = failures === 0 && !snapshotDrift && recordFailures === 0 ? 0 : 1;
+console.log(`\n=== evals run: ${passCount}/${tasks.length} PASS（skipped ${report.skipped}；报告 ${path.relative(root, reportPath)}；measures=${report.measures}${recordFailures ? `；拒录 ${recordFailures}` : ''}${judgeGateResult ? `；读数有效性 ${judgeGateResult.ok ? 'OK' : 'FAIL'}·质量缺口 ${judgeGateResult.gaps.length}` : ''}）===`);
+process.exitCode = failures === 0 && !snapshotDrift && recordFailures === 0 && (!judgeGateResult || judgeGateResult.ok) ? 0 : 1;

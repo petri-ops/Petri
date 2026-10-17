@@ -5,6 +5,11 @@
   "category": "sanity",
   "accessMode": "full",
   "prompt": "请在 derived/evals-sanity.md 写入一行「evals sanity ok」，完成后简短确认。",
+  "judge": {
+    "goals": [
+      "答复确认已把一行「evals sanity ok」写入 derived/evals-sanity.md"
+    ]
+  },
   "criteria": [
     {
       "kind": "task_completed"

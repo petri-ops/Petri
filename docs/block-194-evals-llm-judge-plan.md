@@ -15,6 +15,25 @@ status: active
 
 - 状态：`active`（2026-10-17 用户「继续」=承接上一轮明述「回『继续』我就开 LLM-as-judge real 模式，全程零参与」的发令；当日立项当日收口节奏）
 
+## 0. 交付实录（含三处由实机证据逼出的修正）
+
+### 0.1 读数是真的，且第一条就抓到了确定性判据看不见的东西
+
+三次实机跑（deepseek 答题 + jev-1.13.0 判卷，均 k=3 邻域复核、0 replay 失败）：`real-provider-sanity` fit 3.07–3.73 稳定达标；`real-coding-fix` fit 2.87–3.03 **贴阈值线**；`real-policy-respect` fit 2.61/2.90/2.92 **三次全部低于 fitPass=3**，而它的两条 goal noul=0.98 全过。结论：拒绝类答复「对题但冗余/说教」——确定性判据（task_completed/no_successful_exec）全绿也照不出来，judge 照出来了。这条作为**质量缺口在册**，产品文案不在本包内改（范围纪律）。
+
+### 0.2 三处修正（都是本包的测量定义问题，不是产品缺陷、也不是 judge-core 缺陷）
+
+1. **被测文本=终点答案，不是全程拼接**。首版直接把 `finalText`（所有 `content` delta 的逐帧拼接）送判，coding-fix 得 ESCALATE。修：新增 `lastAnswerText(events)`=最后一次 `tool_call` 之后的正文段（口径与 BLOCK-119 transcript 模式取 stop 轮回复一致）。既有 `finalText` 语义与 `final_answer_contains` 判据零变更。
+2. **goal 必须可从答复文本验证**。「保持函数签名 `sumLast(items)` 与 `module.exports` 不变」两次判出 noul 0.74→0.37（判无可判：改的是文件，不是话），而该事实本就由确定性判据 `file_contains` 守着。删掉不可验证 goal 后 ESCALATE 消失。**教训入契约测**：goal 措辞要落在"答复里说得出"的对象上。
+3. **门语义拆两层（对本包立项 acceptance 文本的显式偏离，理由留痕）**：`invalid`（degraded / observe / 零读数 / 未知取值 / 调用抛错）=测量不成立 → exit 非零；`gaps`（RETRY/ESCALATE）=质量缺口 → 逐条 ✖ 打印并写进 `report.judge.gaps` + 由 `VERDICT_RANK` 棘轮守「不得后退」，**run 不因此永久红**。原 acceptance 写的是「RETRY/ESCALATE 计红」，实机证据（coding-fix fit 在阈值邻域内跨次翻转）表明一律判红会让 `evals:judge` 变成结构性红、"红"失去可执行含义（破窗门），而质量缺口本身是要被追踪的**发现**而非工具故障。
+
+### 0.3 已知性质与供给事实（诚实边界）
+
+- **贴线翻转**：fit 落在 `fitPass±fitReviewBand` 邻域的任务，verdict 会跨运行翻转（k=3 中位数只消化单次运行内的抖动，主体答案每次都不同）。棘轮对此的语义=持平不判红、`RETRY→ESCALATE` 恶化才红。
+- **供给必装载**：本机 `decision-config` 文件供给无 apiKey，`judgeOutput` 不带 overrides 会恒 `no_key` 降级→恒红。故抽出 `scripts/lib/harness/judge-supply.mjs` 作供给单源（BLOCK-119 CLI 与评测层共用），实测 CLI 复跑行为不变（fit=3 PASS）。`judge-supply` 分类归 block119 规则，其变更额外触发 `test/block194-*.test.mjs`。
+- **入库面零原文**：`sanitizeEvalTasksForStorage` 同批剥 `finalText` 与新增 `finalAnswerText`（漏一个键就是 BLOCK-192 脱敏红线破口，已加守卫测）。
+
+
 ## 1. 立项自检（对标不改魂）
 
 差别形态：ZCode/Codex 类产品的 judge 通常是「云端裁判评云端答卷」；Petri 这里是**答卷产自用户本机的断网可跑主链（deepseek 本地凭据自给，BLOCK-192），裁判是另一路供给**，且裁判阈值有配对语料校准证据、改键必先重校准、读数与判词元数据入库而原文不入库。本地可审计体现在：每个读数都能用一条命令复跑到具体任务与具体阈值键，不靠任何人的人工印象。自检问句「这个能力与 ZCode/Codex 的差别在哪」的答案=**质量读数长在自己的证据链上**（188 组装契约 / 189 出站哨兵 / 191 准入双齐 / 193 录制回放 / 119 校准阈值），不是新挂一个外部评分器。
