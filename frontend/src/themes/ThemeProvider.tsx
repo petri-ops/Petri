@@ -31,6 +31,17 @@ function applyFontScale(scale: number): void {
   document.documentElement.style.setProperty('--petri-font-scale', String(scale));
 }
 
+/**
+ * BLOCK-199 P4③ — 跨端偏好同步的状态（原状是 `void fetch(...).catch(()=>{})`：本端已生效、
+ * 服务端可能没收到、用户与调用方一律看不见 ⇒ "另一个窗口读到旧值"无从归因）。
+ * 状态只增不改既有生效顺序：本地立即生效 + 15s 拉取回正（回滚到服务端真相）都保持原样。
+ */
+export interface PrefsSyncState {
+  state: 'ok' | 'pending' | 'failed';
+  error?: string;
+  at: number;
+}
+
 interface ThemeContextValue {
   preference: ThemePreference;
   resolvedTheme: ResolvedTheme;
@@ -41,6 +52,8 @@ interface ThemeContextValue {
   /** BLOCK-49 加映三 — 主题色（强调色维度，独立于明暗）。 */
   accent: AccentId;
   setAccent: (accent: AccentId) => void;
+  /** 服务端偏好同步状态（设置面据此提示"本机已生效但没存到服务端"）。 */
+  prefsSync: PrefsSyncState;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -106,10 +119,25 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
     }
   }, []);
 
+  const [prefsSync, setPrefsSync] = useState<PrefsSyncState>({ state: 'ok', at: 0 });
+
   const pushPrefs = useCallback((patch: Record<string, unknown>) => {
+    setPrefsSync({ state: 'pending', at: Date.now() });
+    const fail = (error: string) => {
+      setPrefsSync({ state: 'failed', error, at: Date.now() });
+      // 失败不回滚本端（本地先生效是既有体验契约），但必须可见：状态入 context + 控制台留痕。
+      console.warn(`[prefs] 服务端同步失败（本端已生效）：${error}`);
+    };
     try {
-      void fetch(prefsApi(), { method: 'PUT', headers: prefsHeaders(), body: JSON.stringify(patch) }).catch(() => {});
-    } catch { /* 同步失败不影响本端生效 */ }
+      void fetch(prefsApi(), { method: 'PUT', headers: prefsHeaders(), body: JSON.stringify(patch) })
+        .then((response) => {
+          if (response?.ok) { setPrefsSync({ state: 'ok', at: Date.now() }); return; }
+          fail(`HTTP ${response?.status ?? '?'}`);
+        })
+        .catch((err: unknown) => fail(err instanceof Error ? err.message : String(err)));
+    } catch (err) {
+      fail(err instanceof Error ? err.message : String(err));
+    }
   }, [prefsApi, prefsHeaders]);
 
   // 拉取服务端偏好：挂载时 + 每 15s + 回前台时（跨端应用）
@@ -231,8 +259,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
   }, [setPreference]);
 
   const value = useMemo(
-    () => ({ preference, resolvedTheme, setPreference, fontScale, setFontScale, accent, setAccent }),
-    [preference, resolvedTheme, setPreference, fontScale, setFontScale, accent, setAccent],
+    () => ({ preference, resolvedTheme, setPreference, fontScale, setFontScale, accent, setAccent, prefsSync }),
+    [preference, resolvedTheme, setPreference, fontScale, setFontScale, accent, setAccent, prefsSync],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

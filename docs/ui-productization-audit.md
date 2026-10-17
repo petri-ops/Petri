@@ -4950,3 +4950,10 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **验证**：契约=前端 20/20（新 WS-first 6+桥形状 14）+后端 data 信封 8/8+block162 邻域 13/13+tsc 0；实机=隔离网关探针七路径 data-res 与 HTTP 响应逐字节同形状+白名单 fail-closed+错 token 401（acceptance/block-183/data-ws-live.json）；本机 loopback 延迟与 HTTP 持平（隧道增益属 riders）。
 - **verified（代行）**：用户授权「你来搞」后代行实机评估——真浏览器全链（配对→投影→货架渲染）+页面内应用模块本体 WS 信封调用 200/7ms/零直连。随批登记两条 findings：①BackendStatusProvider 直连 runtime/status 轮询=桥外消费方（BLOCK-86 既有，非本包面）；②dev 下 /skills 深链落旧 dist（BLOCK-87 窄代理+dist 陈旧，dev 特有，生产不受影响）——详见 acceptance/block-183/ui512-live.json。
 - **随批**：copilotClient.streamReconnect.test.ts 存量 4 红顺手清偿（BLOCK-159 抖动+无硬上限语义未同步，干净树 bisect 坐实非本包面；固定随机+新语义重写 10/10）——测试文件非 UI surface，同提交留痕。
+
+## UI-513: 跨端偏好同步失败可见化（2026-10-17 in_progress，BLOCK-199）
+
+- **变化面**：主题/字号/强调色的服务端同步从 `void fetch(...).catch(()=>{})`（本端已生效、服务端可能没收到、另一个窗口读到旧值而用户毫无线索）改为把结果写进 context 状态 `prefsSync={state:'ok'|'pending'|'failed',error,at}` 并在控制台留痕；`ThemeProvider` 消费方零破坏（既有 `preference/fontScale/accent` 语义与生效顺序一字未动，本端仍立即生效、15s 拉取继续把本端收敛回服务端真相）。
+- **为什么不是纯逻辑改动**：可观测状态是给设置面用的（"本机已生效但没存到服务端"要能提示用户），属于设置面板的增量前置；**当前只到状态与留痕，提示文案尚未接入**，因此按台账纪律记 `in_progress` 不标 verified。
+- **验证**：前端契约测 `frontend/src/themes/ThemeProvider.sync.test.tsx` 4/4（成功回到 ok·网络异常 failed 且本端不回滚·HTTP 非 2xx 带状态码·失败后再次成功能翻回 ok 不留陈旧告警）+ 既有 `ThemeProvider.test.tsx` 同批 9/9；后端侧由 `test/block199-config-drift.test.mjs` 钉"声明 ui=settings 的族必须有真实承载文件"。
+- **待办（收口后下一批）**：设置面消费 `prefsSync`（失败横幅或就近提示）→ 9223 测试实例自动探针出图取证 → 再转 `verified`。
