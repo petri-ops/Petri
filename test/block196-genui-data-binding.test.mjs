@@ -18,8 +18,6 @@ import os from 'node:os';
 import path from 'node:path';
 import Module from 'node:module';
 import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
-
 const require = createRequire(import.meta.url);
 
 // ---- 环境准备（必须在 require 目标模块之前装好 electron/db 替身） ----------------
