@@ -87,7 +87,7 @@ const CONFIG_FAMILIES = Object.freeze({
  * 会放行 `Mod+Mod+K`，被该漂移测当场抓出——编解码器拒的串后端却收=垃圾能进盘。
  * 存储侧只可能是编解码器的规范化产物，按规范序收紧无副作用。
  */
-const KEYMAP_COMBO_RE = /^(?:Mod(?:\+Ctrl)?(?:\+Alt)?(?:\+Shift)?|Ctrl(?:\+Alt)?(?:\+Shift)?|Alt(?:\+Shift)?|Shift)\+(?:[A-Za-z0-9]|F(?:[1-9]|1[0-2])|Tab|Enter|Escape|Backspace|Delete|Home|End|PageUp|PageDown|Space|Up|Down|Left|Right|[,./\-;'=`\[\]\\])$/;
+const KEYMAP_COMBO_RE = /^(?:Mod(?:\+Ctrl)?(?:\+Alt)?(?:\+Shift)?|Ctrl(?:\+Alt)?(?:\+Shift)?|Alt(?:\+Shift)?|Shift)\+(?:[A-Za-z0-9]|F(?:[1-9]|1[0-2])|Tab|Enter|Escape|Backspace|Delete|Home|End|PageUp|PageDown|Space|Up|Down|Left|Right|[\][,./\-;'=`\\])$/;
 const KEYMAP_COMBO_PATTERN = KEYMAP_COMBO_RE.source;
 
 /**
