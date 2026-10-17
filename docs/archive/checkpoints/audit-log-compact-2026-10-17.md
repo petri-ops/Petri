@@ -8,3 +8,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-17T01:23:03.042Z -->
 | ✅ BLOCK-156 加映（2026-10-10·D7 补做当日闭环；完成校验器抓真 D7 推荐原文属「全按推荐」交付范围，自我缩圈不成立） | 2026-10-10 | **D7 第三方技能本地目录导入补交付**：①后端 installSkillFromDir/uninstallImportedSkill（skillManifestVersion 契约检查+装后回读护栏+built-in 冲突拒绝+覆盖更新）；②通道 skills:import-directory（主进程对话框一条龙，pack installFromDialog 先例）+import-path（探针直路径），三件套+五闸绿；③前端通用技能货架导入按钮（成功即重发现/取消静默/失败 notice）；④**存量缓存语义修正**（loadInstalledSkills 误跳自身缓存/discover 残留清理/SkillRegistry 一次性初始化去除——导入卸载即可见），消费者回归 26 项仅 block84 存量红；⑤验证=单测 4/4+前端导入链路用例（store 模块缓存 mock 竞态修正）+实机四断言 ALL PASS（IPC 装载→货架卡片可见→清场零残留，acceptance/block-156/block156-skill-import-live.json）；C-EXT-4 销号。G0 开发期常态 · 不外推 packaged/Provider/GA | BLOCK-156 / D7-COMPLETED |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-17T02:43:02.735Z -->
+| ✅ 闭合（2026-10-14 对账；修复=1cae9440 当日落地） | 2026-10-13 | **GenUI 卡 dev 双路径读取失败（UI-502 代行评估抓真，BLOCK-174 CP-13 域）销号**：真任务 fragment 写入成功但 GenUiCard 渲染 fallback「可视化文件不存在」——根因=prepareGenUi 对相对 filePath 按主进程 CWD realpath（永不命中）+模型截断会话 id 写路径。修=相对路径按 scopeRoot 解析+resolveFragmentPath basename 回退+截断目录自愈改名；单测 5/5+live 复验柱状卡真渲染（iframe=1 fallback 消失，截图 ui502-after-repair.png）。UI-502 翻 verified（代行评估）。 | zcode |
