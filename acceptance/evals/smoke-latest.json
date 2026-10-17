@@ -3,7 +3,7 @@
   "provider": "mock",
   "artifact": "smoke",
   "measures": "harness",
-  "at": "2026-10-17T02:53:00.389Z",
+  "at": "2026-10-17T03:06:18.349Z",
   "tasks": [
     {
       "id": "smoke-approval-chain",
@@ -20,7 +20,7 @@
           "guardKeyPrefix": "cmd:",
           "requireRequestId": true,
           "passed": true,
-          "detail": "policy 拦截在场（cmd:vssadmin req=apr_9014fe62452494e849）"
+          "detail": "policy 拦截在场（cmd:vssadmin req=apr_4c25f5f541b8b59dba）"
         },
         {
           "kind": "event_present",
@@ -40,7 +40,7 @@
           "kind": "deny_after_success",
           "tool": "workspace_exec",
           "passed": true,
-          "detail": "成功后再拦（新请求 apr_c46b874c97c1da049a）= 指纹已消耗"
+          "detail": "成功后再拦（新请求 apr_39130a9f4974b4753f）= 指纹已消耗"
         },
         {
           "kind": "final_answer_contains",
@@ -49,7 +49,7 @@
           "detail": "最终答复含「指纹消耗」"
         }
       ],
-      "durationMs": 3093
+      "durationMs": 3083
     },
     {
       "id": "smoke-continuation",
@@ -75,7 +75,7 @@
           "detail": "最终答复含「第二段」"
         }
       ],
-      "durationMs": 578
+      "durationMs": 561
     },
     {
       "id": "smoke-genui-fragment-path",
@@ -110,7 +110,7 @@
           "detail": "解析命中 repaired=true contains=true"
         }
       ],
-      "durationMs": 602
+      "durationMs": 600
     },
     {
       "id": "smoke-orchestration-spawn",
@@ -148,7 +148,7 @@
           "detail": "最终答复含「42」"
         }
       ],
-      "durationMs": 573
+      "durationMs": 580
     },
     {
       "id": "smoke-policy-guard",
@@ -164,7 +164,7 @@
           "kind": "policy_denied",
           "guardKeyPrefix": "cmd:",
           "passed": true,
-          "detail": "policy 拦截在场（cmd:format req=apr_0f780fc6ee6d83b941）"
+          "detail": "policy 拦截在场（cmd:format req=apr_7786c20958ca5cd5d8）"
         },
         {
           "kind": "final_answer_contains",
@@ -173,7 +173,7 @@
           "detail": "最终答复含「拦截」"
         }
       ],
-      "durationMs": 570
+      "durationMs": 569
     },
     {
       "id": "smoke-readonly-denial",
@@ -193,7 +193,7 @@
           "detail": "工具错误在场（execution_not_allowed）"
         }
       ],
-      "durationMs": 557
+      "durationMs": 579
     },
     {
       "id": "smoke-stop-chain",
@@ -219,7 +219,7 @@
           "detail": "tool_call workspace_exec 应缺席"
         }
       ],
-      "durationMs": 6155
+      "durationMs": 6163
     },
     {
       "id": "smoke-text-repair",
@@ -251,7 +251,7 @@
           "detail": "最终答复含「intro」"
         }
       ],
-      "durationMs": 575
+      "durationMs": 586
     },
     {
       "id": "smoke-tool-chain-write",
@@ -283,7 +283,7 @@
           "detail": "最终答复含「note.md」"
         }
       ],
-      "durationMs": 547
+      "durationMs": 578
     }
   ],
   "pass": 9,
