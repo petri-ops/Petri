@@ -43,7 +43,14 @@ description: Use Petri development infrastructure when starting or resuming a se
 
 ## dev 栈上验证 UI 工作
 
-- 前置：dev Electron 以 `PETRI_DEV_ELECTRON_ARGS="--remote-debugging-port=9222"` 在跑（fnm Node 24）；后端代码变更后必须重启 dev Electron。
+- **无可见窗口纪律（2026-10-17 用户裁决「这种开发模式 就不要打开窗口了 目前打开窗口 占用屏幕」）**：
+  - **默认不打开任何可见窗口**。验证不再以 `npm run dev` 起主窗（主窗会占屏）；改用无窗口栈：
+    `PETRI_LOCAL_DATA_DIR=<repo>/.petri-dev-user-data/data PETRI_DB_PATH=<同目录>/petri.db`
+    + `npm --prefix core/petri-server start`（:3001）+ `cd frontend && npm run dev`（:3000），两者都不开窗。
+  - UI 腿只在**9223 测试实例**上跑（`bash scripts/start-test-instance.sh`，默认离屏 + macOS dock 隐藏；**禁 `--onscreen`**）；
+    **探针跑完立即 `kill` 9223 进程**，不把测试窗口留在屏幕上。
+  - 无法离屏的验证（原生对话框/OS 权限）按无人化阶梯降级并如实登记，不为取证开可见窗口。
+- 前置：后端代码变更后必须重启 backend（`lsof -ti :3001 | xargs kill` 后重起）；Vite 保持运行即可被 9223 页面复用。
 - 从 `dev-verify/flows/_template.cjs` 拷贝新建 flow，用 `dev-verify/lib.cjs` 原语组装断言（pollTargets / filterPageTargets+selectPageTarget / evalJs / screenshotPng / createRun），跑 `npm run verify -- <flow>`；清单 `npm run verify -- --list`。
 - 主窗判定按项目树+右栏探测，不信任 visibilityState（BLOCK-68 教训）；证据 JSON/PNG 落 `acceptance/`，断言不可编造。
 
