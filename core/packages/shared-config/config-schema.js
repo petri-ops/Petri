@@ -117,6 +117,12 @@ const CONFIG_KEYS = Object.freeze([
     mutable: true, ui: 'settings',
   },
   {
+    // BLOCK-199 P4② 收编的接点（此前是 RUNTIME_POINTS 外的隐藏开关）；默认关=零出站零行为变化
+    key: 'point.report-guard.enabled', family: 'decision-points', path: 'report-guard.enabled',
+    type: 'boolean', envKeys: ['PETRI_JEV_REPORT_GUARD'], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
     // 阈值数值本身受校准门约束：可改（设置页热调）但"改默认值"须先重校准 → mutable=true + 证据在注册表
     key: 'point.*.threshold', family: 'decision-points', path: '<point>.threshold',
     type: 'number', domain: { min: 0, max: 1 }, envKeys: [], aliases: [],
