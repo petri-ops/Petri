@@ -6938,7 +6938,7 @@
       "path": "docs/block-203-stage-3-b1b-config-landing-consolidation-plan.md",
       "kind": "work-package",
       "status": "active",
-      "phase": "P0-LAUNCH",
+      "phase": "W4A-CLOSED",
       "canonical": true,
       "truthDomain": "block-203-stage-3-b1b-config-landing-consolidation-plan",
       "entrypoint": "docs/README.md",
@@ -6958,7 +6958,7 @@
         "stage-3-b1b",
         "block-203"
       ],
-      "notes": "2026-10-17 立项发令 active（runlist W4 拆片执行：W4a=纯文件落点收编，W4b=SQLite/data root 搬迁；用户常驻授权按 W0→W8 连打，属主代理可自决）。P0 实码两处口径更正：①落点=10 处不是 11（14−4，runlist W4 行与 BLOCK-199 §5 同批更正）②BLOCK-199 plan §P2 声明的 core/petri-server/config/config-service.js 不存在，真实形态=各族 helper 直接 require schema 函数（9 处实证），故 W4a 不新建 service 层。范围=user-prefs/skills-prefs/agent-rules/mcp-servers 四文件族收编 + ai-settings 顶层 unknown-key 白名单过滤（不 400，D-W4a-3 留痕）+ renderer localStorage 降为纯缓存并漂移钉住 + D-2 rider（models 导出默认脱敏）。红线=不迁磁盘形状/不改文件名键名/不动 data root/凭据不合并/不改既有语义数值。"
+      "notes": "2026-10-17 立项发令 active（runlist W4 拆片执行：W4a=纯文件落点收编，W4b=SQLite/data root 搬迁；用户常驻授权按 W0→W8 连打，属主代理可自决）。P0 实码两处口径更正：①落点=10 处不是 11（14−4，runlist W4 行与 BLOCK-199 §5 同批更正）②BLOCK-199 plan §P2 声明的 core/petri-server/config/config-service.js 不存在，真实形态=各族 helper 直接 require schema 函数（9 处实证），故 W4a 不新建 service 层。范围=user-prefs/skills-prefs/agent-rules/mcp-servers 四文件族收编 + ai-settings 顶层 unknown-key 白名单过滤（不 400，D-W4a-3 留痕）+ renderer localStorage 降为纯缓存并漂移钉住 + D-2 rider（models 导出默认脱敏）。红线=不迁磁盘形状/不改文件名键名/不动 data root/凭据不合并/不改既有语义数值。 | W4a 收口 2026-10-18：P1–P8 八片全落地（user-prefs/skills-prefs/agent-rules/mcp-servers 四族收编 + ai-settings 顶层白名单 + localStorage 降纯缓存 + models 导出默认脱敏），注册表 12 族/60 键；closeout 十三门全绿（当场修 accents↔prefCache 新环 + 补 UI-521/522 台账）。覆盖率按实码=8/14（7/7 文件族 + localStorage），剩 6 处 SQLite/主进程态 = W4b；不得称「配置已统一」。"
     }
   ],
   "lastUpdated": "2026-10-17",

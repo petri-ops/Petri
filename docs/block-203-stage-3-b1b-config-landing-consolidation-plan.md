@@ -187,5 +187,7 @@ node --test --test-force-exit --test-timeout=120000 \
 - ✅ **P8（2026-10-18 落地）D-2 rider：models 渠道导出默认脱敏**：`model-endpoint-transfer.ts` 增 `maskApiKey`（只留后四位；≤4 位一律 `***`）并在**构建器内部**打码——只有显式 `{masked:false}` 才出明文，调用方忘了传就是安全的（把 D-2 变成默认安全，而不是靠纪律）。`useEndpointProfilesEditor` 改为两次确认：第一次问"导出渠道配置"，第二次才问"是否带明文（跨机迁移用）"，取消=脱敏。**文件名、JSON 信封格式、CSV 列顺序与其余列零改动**（`apiKey` 字段仍在，值变成 `***后四位`）。
   - 契约变更留痕：`model-endpoint-transfer.test.ts` 里旧用例「调用方传了 key 就出明文」被有意改写（"这条断言就是旧契约的墓碑"），并补 4 条新用例（默认脱敏/显式明文/CSV 列形状不变/`maskApiKey` 边界）。
   - 证据：前端 `model-endpoint-transfer` **8/8**；`quality:types` 0、`quality:knip:check` PASS、`quality:secret` PASS（fail-closed 面复跑）、lint 0 error。
-- ⬜ **W4a 收口**：closeout 门禁 + 五件套回写（本片 P1–P8 全落地；W4b 仍待独立窗口）
+- ✅ **W4a 收口（2026-10-18）**：`npm run closeout` **十三门全绿**（审计自稳/卫生/文档/UI 台账/影响范围/代码体积/架构环/CSS Modules/密钥/架构/lint/types/knip）。Hygiene 与 UI 台账各抓到真实问题并当场修：①收口链首跑撞 `accents.ts → prefCache.ts` **新环**（词汇表住在渲染侧、缓存侧却引用它）→ `AccentId`/`ACCENT_VALUES` 下沉 `prefCache`，方向变单向，14 存量环在册无新环；②P7/P8 两笔 UI 提交漏台账 → 补 **UI-521/UI-522**（均记 `in_progress`，无实机腿）并重切提交使每笔自带台账同步。
+  - **覆盖率按实码重算（取代 §6 的估算）**：14 处 = 1 `site_settings` + 3 整坨 JSON 列 + **7 文件族** + 2 主进程窗口/路由态 + 1 renderer localStorage。W4a 后：**7/7 文件族全部收编 + localStorage 1/1** ⇒ **8/14**；剩 **6 处**（`site_settings`、`runtime_json`、`state_json`、`users.permissions`、主进程两处）= W4b。**不得表述为「配置已统一」。**
+  - **W4b 待办（独立窗口）**：SQLite 四落点 + 主进程窗口/路由态搬迁 + 4 条 data root 回落链合一（`user-prefs` 认 `LOCAL_DATA_DIR`／`mcp-settings` 不认 `USER_DATA_DIR`／`agent-rules` 两者都认／`skill-prefs` 只认 `USER_DATA_DIR`），需要备份/回退路径。
 - 🔎 **P4 开工前提示（来自 P3 的形状经验）**：`agent-rules` 是**数组**（`rules[]`），比 skills-prefs 的两个 map 更难套用点路径——若继续用"绝对点路径 + 手工遍历"，会退化成为每个落点各写一份遍历器（正是 W4 要清的东西）。P4 应先定"集合形状"的单一实现（`items` 声明 + 通用遍历/诊断），再让 `agent-rules` 与 `mcp-servers` 共用它；否则 P5 会再抄一遍。
