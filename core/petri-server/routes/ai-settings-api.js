@@ -77,6 +77,28 @@ function registerAiSettingsRoutes(app) {
     }
   });
 
+  // BLOCK-200 P2 — 推理档位（默认档/Anthropic 预算/逐协议映射）读写面。
+  // 与 generation-defaults 同一文件同一写入者，故挂在本模块而非另起 route 文件。
+  app.get('/api/ai/reasoning-defaults', (req, res) => {
+    try {
+      return res.json({ status: 'ok', reasoning: require('../helpers/reasoning-config').getReasoningSnapshot() });
+    } catch (e) {
+      return res.status(500).json({ status: 'error', error: e.message });
+    }
+  });
+
+  app.put('/api/ai/reasoning-defaults', express.json({ limit: '8kb' }), (req, res) => {
+    try {
+      const snapshot = require('../helpers/reasoning-config').saveReasoning(req.body || {});
+      return res.json({ status: 'ok', reasoning: snapshot });
+    } catch (e) {
+      if (e && e.code === 'config_value_rejected') {
+        return res.status(400).json({ status: 'error', error: e.code, diagnostics: e.diagnostics || [] });
+      }
+      return res.status(500).json({ status: 'error', error: e.message });
+    }
+  });
+
   app.post('/api/ai/settings/test', express.json(), async (req, res) => {
     const { provider, profile, apiKey } = req.body || {};
     if (!provider && !profile) {

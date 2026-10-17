@@ -34,17 +34,49 @@
 
 'use strict';
 
-/** 中性档位集合（UI 与后端共用词表）。 */
-const THINKING_LEVELS = Object.freeze(['off', 'standard', 'high']);
-
-/** 默认档位：标准 = 不发参数（零行为变化，D1 裁决）。 */
-const DEFAULT_THINKING_LEVEL = 'standard';
-
-/** Anthropic 思考预算（high 档）；Anthropic 要求 budget_tokens ≥ 1024。 */
-const ANTHROPIC_HIGH_BUDGET_TOKENS = 16000;
+const {
+  THINKING_LEVELS,
+  DEFAULT_THINKING_LEVEL,
+  ANTHROPIC_HIGH_BUDGET_TOKENS,
+  DEFAULT_MAPPING,
+  expandToken,
+  mergeMapping,
+} = require('../../packages/shared-config/reasoning-defaults.js');
 
 /**
- * 归一化外部传入的档位：非法/缺失 → null（调用方据此不发参）。
+ * 运行时覆盖层（由 `core/petri-server/helpers/reasoning-config.js` 在读到设置后注入）。
+ * 依赖反转沿用 `core/packages/shared-copilot/api-inject.ts` 的先例：**下层不反向 require 上层**，
+ * 由上层把值送进来。未注入时逐字等于迁移前的硬编码（`test/block200-thinking-baseline.test.mjs` 冻结）。
+ */
+let _overrides = { defaultLevel: DEFAULT_THINKING_LEVEL, budgetTokens: ANTHROPIC_HIGH_BUDGET_TOKENS, mapping: DEFAULT_MAPPING };
+
+/**
+ * 注入并生效覆盖层（上层调用侧合并文件覆盖后传入）。
+ * 非法/缺省项一律回落默认——不因设置面写坏而改变出站行为。
+ */
+function applyThinkingOverrides(next) {
+  _overrides = {
+    defaultLevel: THINKING_LEVELS.includes(next && next.defaultLevel) ? next.defaultLevel : DEFAULT_THINKING_LEVEL,
+    budgetTokens: Number.isFinite(next && next.anthropicHighBudgetTokens) && next.anthropicHighBudgetTokens >= 1024
+      ? Math.floor(next.anthropicHighBudgetTokens)
+      : ANTHROPIC_HIGH_BUDGET_TOKENS,
+    mapping: mergeMapping(next && next.mapping),
+  };
+  return _overrides;
+}
+
+function getThinkingOverrides() {
+  return _overrides;
+}
+
+/** 测试/复位用：清掉覆盖层回到出厂默认。 */
+function resetThinkingOverrides() {
+  _overrides = { defaultLevel: DEFAULT_THINKING_LEVEL, budgetTokens: ANTHROPIC_HIGH_BUDGET_TOKENS, mapping: DEFAULT_MAPPING };
+  return _overrides;
+}
+
+/**
+ * 归一化外部传入的档位：非法/缺失 → null（调用方据此走配置默认档）。
  * @param {unknown} value
  * @returns {'off'|'standard'|'high'|null}
  */
@@ -58,31 +90,21 @@ function normalizeThinkingLevel(value) {
  * 中性档位 → 上游请求参数（单一映射点）。
  *
  * @param {object} input
- * @param {unknown} input.level        中性档位（off/standard/high）
- * @param {string} [input.protocol]    profile.protocol（openai-compatible | anthropic-messages | dashscope-native）
+ * @param {unknown} [input.level]        中性档位（off/standard/high）；缺省时取配置的默认档
+ * @param {string} [input.protocol]      profile.protocol（openai-compatible | anthropic-messages | dashscope-native）
  * @param {string[]} [input.capabilities] profile.capabilities（须含 'reasoning' 才发参）
  * @returns {Record<string, unknown>}  待合并进请求体的参数；{} = 不发任何参数
  */
 function thinkingParamsFor({ level, protocol, capabilities } = {}) {
-  const normalized = normalizeThinkingLevel(level);
-  // 未指定或标准档 → 不发参数（默认行为零变化）
-  if (!normalized || normalized === DEFAULT_THINKING_LEVEL) return {};
+  // 未指定档位 → 用设置面配置的默认档（出厂=standard=什么都不发，零行为变化）
+  const normalized = normalizeThinkingLevel(level) || _overrides.defaultLevel;
+  // 标准档 → 不发参数（默认行为零变化，BLOCK-81 D1 裁决）
+  if (!normalized || normalized === 'standard') return {};
   // 能力门控：未声明 reasoning 的渠道一律不发（避免给不支持的上游发未知参数）
   if (!Array.isArray(capabilities) || !capabilities.includes('reasoning')) return {};
-
-  switch (protocol) {
-    case 'openai-compatible':
-      return { reasoning_effort: normalized === 'high' ? 'high' : 'minimal' };
-    case 'anthropic-messages':
-      return normalized === 'high'
-        ? { thinking: { type: 'enabled', budget_tokens: ANTHROPIC_HIGH_BUDGET_TOKENS } }
-        : { thinking: { type: 'disabled' } };
-    case 'dashscope-native':
-      return { enable_thinking: normalized === 'high' };
-    default:
-      // 未知协议：诚实不发参（宁可不支持，也不猜参数名）
-      return {};
-  }
+  const tiers = _overrides.mapping[protocol];
+  if (!tiers) return {}; // 未知协议：诚实不发参（宁可不支持，也不猜参数名）
+  return expandToken(tiers[normalized], { budgetTokens: _overrides.budgetTokens });
 }
 
 /**
@@ -120,5 +142,8 @@ module.exports = {
   ANTHROPIC_HIGH_BUDGET_TOKENS,
   normalizeThinkingLevel,
   thinkingParamsFor,
+  applyThinkingOverrides,
+  getThinkingOverrides,
+  resetThinkingOverrides,
   isUnknownParameterError,
 };

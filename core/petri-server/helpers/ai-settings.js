@@ -375,6 +375,23 @@ function saveGenerationDefaults(partial) {
   return getGenerationDefaults();
 }
 
+/**
+ * 推理档位段（BLOCK-200 P2）。**写盘原语留在本模块**——`ai-settings.json` 的写入者只能有一个
+ * （generation 与 reasoning 同文件，另起一个 read-modify-write 就是并发覆盖通道）。
+ * 形状/取值校验不在这里做（那是 `helpers/reasoning-config.js` 过 shared-config 注册表的事），
+ * 本函数只负责"把已批准的段落到盘上并刷新缓存"。
+ */
+function saveReasoningSection(section) {
+  const stored = getAiSettings() || {};
+  const next = { ...stored, reasoning: section && typeof section === 'object' ? section : {} };
+  _ensureDir();
+  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(next, null, 2));
+  fs.chmodSync(SETTINGS_FILE, 0o600);
+  _cache = next;
+  _cacheSignature = _settingsFileSignature();
+  return next.reasoning;
+}
+
 module.exports = {
   getAiSettings,
   getApiKey,
@@ -388,6 +405,7 @@ module.exports = {
   normalizeAiSettings,
   getGenerationDefaults,
   saveGenerationDefaults,
+  saveReasoningSection,
   resolveChatModelCredential,
   _extractCredentialUpdates,
   credentialStore,

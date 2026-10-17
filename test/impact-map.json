@@ -3784,6 +3784,47 @@
       "frontendRelated": true,
       "classifiesScripts": true,
       "scriptRole": "governance"
+    },
+    {
+      "id": "block200-settings-quickwins",
+      "note": "BLOCK-200 阶段 A 速赢 I：键位单源与派发（keymap 族）+ 推理档位可编辑（reasoning 族）。覆盖=shared-config 的 keymap/reasoning 两族声明与 reasoning-defaults 映射表、后端读写面（helpers/keymap.js、helpers/reasoning-config.js、routes/keymap.js、ai-settings-api 的 reasoning-defaults 路由、chat.js 的默认档解析）、映射点 thinking-level.js、前端命令源与派发器（lib/appKeymap*、App.tsx、CommandPalette、useAppCommands、useWorkspacePanelShortcuts、SimpleChat 档位循环、thinkingLevel 词表单源）。",
+      "patterns": [
+        "core/petri-server/helpers/keymap.js",
+        "core/petri-server/helpers/reasoning-config.js",
+        "core/petri-server/routes/keymap.js",
+        "core/petri-server/routes/ai-settings-api.js",
+        "core/petri-server/routes/ai-agent/chat.js",
+        "core/shared-backend/llm-providers/thinking-level.js",
+        "test/block200-*.test.mjs",
+        "frontend/src/lib/appKeymap.ts",
+        "frontend/src/lib/appKeymapContext.tsx",
+        "frontend/src/lib/appKeymap*.test.ts",
+        "frontend/src/lib/appKeymapContext.test.tsx",
+        "frontend/src/components/copilot/CommandPalette.tsx",
+        "frontend/src/components/copilot/useAppCommands.ts",
+        "frontend/src/components/copilot/thinkingLevel.ts",
+        "frontend/src/components/copilot/thinkingLevel.drift.test.ts",
+        "frontend/src/components/copilot/conversationRunStore.ts",
+        "frontend/src/components/copilot/copilotClient/types.ts",
+        "frontend/src/components/copilot/SimpleChat/hooks/useChatStream.ts",
+        "frontend/src/App.tsx"
+      ],
+      "tests": [
+        "test/block200-keymap-store.test.mjs",
+        "test/block200-reasoning-config.test.mjs",
+        "test/block200-thinking-baseline.test.mjs",
+        "test/thinking-level.test.mjs",
+        "test/thinking-level-injection.test.mjs",
+        "test/block199-config-schema.test.mjs",
+        "test/block199-config-compat.test.mjs",
+        "frontend/src/lib/appKeymap.test.ts",
+        "frontend/src/lib/appKeymap.drift.test.ts",
+        "frontend/src/lib/appKeymapContext.test.tsx",
+        "frontend/src/components/copilot/thinkingLevel.drift.test.ts",
+        "frontend/src/hooks/useWorkspacePanelShortcuts.test.tsx"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": false
     }
   ]
 }

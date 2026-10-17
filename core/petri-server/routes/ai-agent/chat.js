@@ -19,6 +19,7 @@ const express = require('express');
 
 // BLOCK-81 P1 — 思考档位归一（中性档位词表与映射内核同源）
 const { normalizeThinkingLevel } = require('../../../shared-backend/llm-providers/thinking-level');
+const reasoningConfig = require('../../helpers/reasoning-config');
 const dbMod = require('../../db');
 const convSync = require('../../helpers/conversations');
 const {
@@ -55,7 +56,11 @@ module.exports = {
     app.post('/api/ai/agent', express.json({ limit: '256kb' }), async (req, res) => {
       const { messages, context, modelPresetId, modelName: requestedModelName, thinkingLevel: rawThinkingLevel } = req.body || {};
       // BLOCK-81 P1 — 中性档位归一（非法/缺失＝null＝standard＝不发任何思考参数）
-      const thinkingLevel = normalizeThinkingLevel(rawThinkingLevel);
+      // BLOCK-200 P2 — 请求未带档位时用**设置面配置的默认档**（出厂=standard=不发参数，
+      // 零行为变化）；同一次解析同时覆盖层注入映射点，使任务参数留痕(:289)与 agent loop(:351)
+      // 拿到的是同一个档位值（此前该链路有过「composer 显示高、请求体发 standard」的分离缺陷）。
+      const reasoningRuntime = reasoningConfig.getReasoningRuntime();
+      const thinkingLevel = normalizeThinkingLevel(rawThinkingLevel) || reasoningRuntime.defaultLevel;
       let explicitConvId = req.body && req.body.conversationId;
 
       if (!Array.isArray(messages) || messages.length === 0) {
