@@ -11,3 +11,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-17T02:43:02.735Z -->
 | ✅ 闭合（2026-10-14 对账；修复=1cae9440 当日落地） | 2026-10-13 | **GenUI 卡 dev 双路径读取失败（UI-502 代行评估抓真，BLOCK-174 CP-13 域）销号**：真任务 fragment 写入成功但 GenUiCard 渲染 fallback「可视化文件不存在」——根因=prepareGenUi 对相对 filePath 按主进程 CWD realpath（永不命中）+模型截断会话 id 写路径。修=相对路径按 scopeRoot 解析+resolveFragmentPath basename 回退+截断目录自愈改名；单测 5/5+live 复验柱状卡真渲染（iframe=1 fallback 消失，截图 ui502-after-repair.png）。UI-502 翻 verified（代行评估）。 | zcode |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-17T03:45:30.213Z -->
+| ✅ 批次B（2026-10-14，BLOCK-181 加映；用户预授权四批次最高优先主线） | 2026-10-14 | **评测扩题 smoke 5→9 全进 gate 基线**：审批卡全链（requestId 决策→放行一次→指纹消耗后重发再拦）/编排链（spawn→子任务 done→父收口）/GenUI 路径自愈（直调生产 resolveFragmentPath）/Stop 链（运行中取消→agent_cancelled→终态 cancelled）。新判据 5 种（tool_succeeded/deny_after_success/subagent_completed/task_terminal_status/genui_fragment_resolves）+mock whenIncludes/delayMs+approvals/cancelAfterMs 运行中钩子。抓真三条=mock 拆帧跨帧断言空转/父子与档案提取抢回合（sink 置队首+父先子后）/子任务终态双列实测。单测 13/13+套件 9/9+gate 0 回归+test:changed 45/0；impact-map 补登 ui-proxy-review-probe 规则（上批入库漏登记）。 | zcode |
