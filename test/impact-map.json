@@ -3192,7 +3192,7 @@
         "frontend/src/components/result-studio/RevisionCodeView.test.tsx",
         "frontend/src/components/result-studio/ScientificInteractionViewer.test.tsx",
         "frontend/src/components/workspace-panels/ResultArtifactShell/useArtifactInteractionSelection.selectionBus.test.tsx",
-        "src/components/workspace-panels/ArtifactPinPane.ratio.test.tsx"
+        "frontend/src/components/workspace-panels/ArtifactPinPane.ratio.test.tsx"
       ],
       "frontendRelated": true,
       "classifiesScripts": false
