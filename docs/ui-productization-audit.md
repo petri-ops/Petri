@@ -5019,3 +5019,8 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **诚实边界**：**无实机腿**——本条只改变"缓存从哪读、谁校验"，不改任何可见交互与布局；故记 `in_progress` 而不是 `verified`。跨层一致性由 `prefCache.drift.test.ts` 承担（生产代码不 import `core/**`）。
 - **验证**：`prefCache.drift.test.ts` 6/6（键名冻结·枚举与注册表逐项相等·钳位边界一致·ThemeProvider 无 localStorage 直连·prefCache 无 core 引用）+ `ThemeProvider` 5/5 + `ThemeProvider.sync` 4/4（既有行为零变化）+ `quality:types` 0。
 
+## UI-522: 模型渠道导出默认脱敏（2026-10-18 in_progress，BLOCK-203 W4a P8 / D-2 rider）
+
+- **变化面**：设置页「模型接口」的渠道导出从"确认一次即写明文 Key"改为**默认脱敏**（只留后四位）+ 二次确认才出明文；打码在导出构建器内部完成，调用方不传 `masked:false` 就是脱敏。文件名、JSON 信封与 CSV 列顺序/其余列零改动。
+- **诚实边界**：**无实机腿**（导出只走浏览器下载/原生另存，未在 9223 上点导出）→ 记 `in_progress`；该路径不经 `config-transfer` 排除清单，故脱敏必须由构建器保证而不是靠调用方纪律。
+- **验证**：`model-endpoint-transfer` 8/8（默认脱敏·显式明文·CSV 列形状不变·`maskApiKey` 边界）；`quality:secret` PASS（fail-closed 复跑）；`quality:knip:check` PASS。

@@ -378,21 +378,30 @@ export function useEndpointProfilesEditor(): {
 
   async function exportEndpoints(format: 'json' | 'csv') {
     if (!getBridge('aiSettings')?.getCredential) return;
-    if (!window.confirm('导出文件将包含 API Key 明文。请仅保存到安全位置，确定继续吗？')) return;
+    // BLOCK-203 W4a P8（D-2 rider）—— 默认脱敏：旧行为是"确认一次即写明文 Key"。
+    // 现在第一步只确认"要导出渠道配置"，第二步才问"是否带明文（跨机迁移用）"。
+    if (!window.confirm('导出渠道配置？API Key 默认脱敏（只保留后四位），文件名与格式不变。')) return;
+    const includeSecrets = window.confirm(
+      '是否同时导出明文 API Key？\n\n仅在你需要把渠道迁移到另一台机器时选"确定"；\n选"取消"则导出脱敏版本（推荐）。',
+    );
     const apiKeys: Record<string, string> = {};
     await Promise.all(userModelProfiles.map(async (profile) => {
       const value = await readCredential(credentialId(profile));
+      // 打码在构建器内部完成（默认脱敏），这里只决定要不要明文
       if (value) apiKeys[profile.id] = value;
     }));
+    const options = { masked: !includeSecrets };
     const content = format === 'json'
-      ? exportEndpointProfilesJson(userModelProfiles, apiKeys)
-      : exportEndpointProfilesCsv(userModelProfiles, apiKeys);
+      ? exportEndpointProfilesJson(userModelProfiles, apiKeys, options)
+      : exportEndpointProfilesCsv(userModelProfiles, apiKeys, options);
     downloadEndpointFile(
       `petri-api-endpoints.${format}`,
       content,
-      format === 'json' ? 'application/json;charset=utf-8' : 'text/csv;charset=utf-8'
+      format === 'json' ? 'application/json;charset=utf-8' : 'text/csv;charset=utf-8',
     );
-    setEndpointTransferMessage(`已导出 ${userModelProfiles.length} 个渠道（含 ${Object.keys(apiKeys).length} 个 Key）`);
+    setEndpointTransferMessage(
+      `已导出 ${userModelProfiles.length} 个渠道（${Object.keys(apiKeys).length} 个 Key，${includeSecrets ? '明文' : '已脱敏'}）`,
+    );
   }
 
   async function importEndpoints(file: File) {

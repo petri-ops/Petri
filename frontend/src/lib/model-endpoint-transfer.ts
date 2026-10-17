@@ -76,23 +76,66 @@ function endpointProfilesForTransfer(
   })).filter((profile) => profile.baseUrl && profile.defaultModel);
 }
 
-export function exportEndpointProfilesJson(profiles: ChatModelPreset[], apiKeys: Record<string, string> = {}): string {
+/**
+ * BLOCK-203 W4a P8（runlist D-2 rider）— 凭据脱敏。
+ *
+ * 默认导出**不再带明文 Key**：只保留后四位，让用户能核对"哪个渠道配了 Key"，
+ * 又不足以复用。要迁移到另一台机器必须显式二次确认（见 useEndpointProfilesEditor）。
+ */
+export function maskApiKey(key: string): string {
+  const trimmed = String(key || '').trim();
+  if (!trimmed) return '';
+  if (trimmed.length <= 4) return '***';
+  return `***${trimmed.slice(-4)}`;
+}
+
+interface EndpointExportOptions {
+  /** true = 脱敏（默认）；false = 明文（用户显式二次确认后的跨机迁移路径）。 */
+  masked?: boolean;
+}
+
+/**
+ * 脱敏在**构建器内部**完成，而不是靠调用方先打码：
+ * 只要调用方忘了传 masked:false，出来的就是脱敏值——把 D-2 变成默认安全而不是纪律。
+ */
+function keysForExport(apiKeys: Record<string, string>, options: EndpointExportOptions): Record<string, string> {
+  if (options.masked === false) return apiKeys;
+  return Object.fromEntries(Object.entries(apiKeys).map(([id, key]) => [id, maskApiKey(key)]));
+}
+
+function exportNote(apiKeys: Record<string, string>, options: EndpointExportOptions): string {
+  if (!Object.keys(apiKeys).length) return 'API keys were not available for this export.';
+  if (options.masked !== false) {
+    return 'API keys are masked (last 4 characters only). Plaintext export requires an explicit confirmation.';
+  }
+  return 'API keys were included because the user explicitly requested a credential export.';
+}
+
+export function exportEndpointProfilesJson(
+  profiles: ChatModelPreset[],
+  apiKeys: Record<string, string> = {},
+  options: EndpointExportOptions = {},
+): string {
   return JSON.stringify({
     format: 'petri-api-endpoints',
     version: 1,
     exportedAt: new Date().toISOString(),
-    note: Object.keys(apiKeys).length
-      ? 'API keys were included because the user explicitly requested a credential export.'
-      : 'API keys were not available for this export.',
-    profiles: endpointProfilesForTransfer(profiles, apiKeys),
+    note: exportNote(apiKeys, options),
+    profiles: endpointProfilesForTransfer(profiles, keysForExport(apiKeys, options)),
   }, null, 2);
 }
 
-export function exportEndpointProfilesCsv(profiles: ChatModelPreset[], apiKeys: Record<string, string> = {}): string {
+export function exportEndpointProfilesCsv(
+  profiles: ChatModelPreset[],
+  apiKeys: Record<string, string> = {},
+  options: EndpointExportOptions = {},
+): string {
   const headers = [...CSV_HEADERS, 'apiKey'];
-  const rows = endpointProfilesForTransfer(profiles, apiKeys).map((profile) =>
+  const rows = endpointProfilesForTransfer(profiles, keysForExport(apiKeys, options)).map((profile) =>
     headers.map((header) => csvEscape(profile[header as keyof EndpointTransferProfile])).join(',')
   );
+  // CSV 表头不变（下游解析器依赖列顺序）；脱敏与否体现在值上，CSV 没有 note 字段
+  void options;
   return `\uFEFF${headers.join(',')}\n${rows.join('\n')}\n`;
 }
 
