@@ -2921,7 +2921,8 @@
       "tests": [
         "test/block119-output-judge.test.mjs",
         "test/block119-report-guard.test.mjs",
-        "test/block194-evals-llm-judge.test.mjs"
+        "test/block194-evals-llm-judge.test.mjs",
+        "test/block197-judge-input-window.test.mjs"
       ],
       "frontendRelated": false,
       "classifiesScripts": true,
@@ -3723,12 +3724,13 @@
     },
     {
       "id": "block197-refusal-answer-shape",
-      "note": "BLOCK-197（C-26）拒绝类答复形状条款：core/petri-server/helpers/system-prompt.js 的 principles 清单追加「拒绝时先给结论+真实风险+一条最贴近实际目标的可行做法，禁止自述安全规则/回应催促/多分支臆测菜单/无关领域夹带」。契约=test/block197-refusal-shape-prompt.test.mjs（条款在场且正向先于禁止·既有原则未删改·组装后进 prompt 且缓存命中路径同样在场·全 prompt 仅一处·不含示例原话）；质量验收=evals real 套件 --judge 读数（RETRY→PASS）。源文件模式仍由 ck04-section-budgets 负责分类（本规则 classifiesScripts:false，不重复计入）。",
+      "note": "BLOCK-197（C-26）拒绝类答复形状条款 + 加映 1（judge 输入窗口诚实告警）：①core/petri-server/helpers/system-prompt.js 的 principles 追加「拒绝时先给结论+真实风险+一条最贴近实际目标的可行做法，禁止自述安全规则/回应催促/多分支臆测菜单/无关领域夹带」；②judge-core 送判窗口（request 800/reference 1200/output 1500/goal 200）从内联魔数升为导出常量 JUDGE_INPUT_LIMITS 单源，output:judge CLI 送判前打印超窗告警（静默裁剪会让 goal 类读数必然判否且原因不可见——本包实测 2900 字总结两次 ESCALATE，压进窗口同一内容即 PASS 3.36）。契约=test/block197-refusal-shape-prompt.test.mjs（条款在场·正向先于禁止·既有原则未删改·组装后进 prompt·全 prompt 仅一处·不含示例原话）+ test/block197-judge-input-window.test.mjs（窗口常量单源已导出·超窗内容不进判卷·goal 截断·CLI 已接线·judge-core 不留内联魔数）；质量验收=evals real 套件 --judge 读数。源文件模式仍由 ck04-section-budgets（prompt）与 block119-output-judge-harness（judge）负责分类，本规则 classifiesScripts:false。",
       "patterns": [
         "test/block197-*.test.mjs"
       ],
       "tests": [
-        "test/block197-refusal-shape-prompt.test.mjs"
+        "test/block197-refusal-shape-prompt.test.mjs",
+        "test/block197-judge-input-window.test.mjs"
       ],
       "frontendRelated": false,
       "classifiesScripts": false

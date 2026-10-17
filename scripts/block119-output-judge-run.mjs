@@ -20,7 +20,7 @@ import { createRequire } from 'node:module';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
 const require = createRequire(import.meta.url);
-const { judgeOutput, buildJudgeRequest } = require('./lib/harness/judge-core.mjs');
+const { judgeOutput, buildJudgeRequest, JUDGE_INPUT_LIMITS } = require('./lib/harness/judge-core.mjs');
 const { probeStability } = require('./lib/harness/stability-core.mjs');
 const { resolveCloudJudgeOverrides, anchorJudgeDecisionDb } = require('./lib/harness/judge-supply.mjs');
 const decisionApi = require('../core/petri-server/helpers/decision-api.js');
@@ -89,6 +89,16 @@ async function main() {
   }
 
   anchorDecisionDbPath();
+  // BLOCK-197 加映：judge 只吃窗口内前段，超出部分**静默裁剪**。不告警就会出现"目标未达成"
+  // 这类无法归因的读数（本包实测：2900 字交付总结两次 ESCALATE，压进窗口同一内容即 PASS）。
+  const clip = [];
+  if (output.length > JUDGE_INPUT_LIMITS.output) clip.push(`待评输出 ${output.length} > 窗口 ${JUDGE_INPUT_LIMITS.output}`);
+  if (request.length > JUDGE_INPUT_LIMITS.request) clip.push(`请求 ${request.length} > 窗口 ${JUDGE_INPUT_LIMITS.request}`);
+  if (reference && reference.length > JUDGE_INPUT_LIMITS.reference) clip.push(`参考材料 ${reference.length} > 窗口 ${JUDGE_INPUT_LIMITS.reference}`);
+  if (clip.length) {
+    console.log(`⚠ 送判内容超出 judge 输入窗口，读数只覆盖窗口内前段：${clip.join('；')}。请缩短送判文本或分段送判，否则目标类判读必然失真。`);
+    meta.clip = clip;
+  }
   const overrides = cloudOverrides();
   const r = await judgeOutput({ output, request, reference, goals, overrides });
 

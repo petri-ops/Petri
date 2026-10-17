@@ -27,12 +27,16 @@ const FIT_RUBRIC = [
   '4 完全契合：精确对题、覆盖请求全部意图、无编造无冗余',
 ];
 
+/** 送判输入窗口（单源常量）。BLOCK-197 教训：窗口内联成魔数且**静默裁剪**，长文本
+ *  只有前段进判卷，目标类读数会因此判否而原因不可见——调用方必须能拿到这组数自证完整性。 */
+const JUDGE_INPUT_LIMITS = Object.freeze({ request: 800, reference: 1200, output: 1500, goal: 200 });
+
 /** 请求组装（单源：校准与运行时同形）。 */
 function buildJudgeRequest({ output, request, reference = '', goals = [] }) {
   const state = [
-    `【请求】${String(request).slice(0, 800)}`,
-    reference ? `【参考材料（判忠实性的唯一依据）】${String(reference).slice(0, 1200)}` : '',
-    `【待评输出】${String(output).slice(0, 1500)}`,
+    `【请求】${String(request).slice(0, JUDGE_INPUT_LIMITS.request)}`,
+    reference ? `【参考材料（判忠实性的唯一依据）】${String(reference).slice(0, JUDGE_INPUT_LIMITS.reference)}` : '',
+    `【待评输出】${String(output).slice(0, JUDGE_INPUT_LIMITS.output)}`,
   ].filter(Boolean).join('\n\n');
   const questions = {
     fit: {
@@ -50,7 +54,7 @@ function buildJudgeRequest({ output, request, reference = '', goals = [] }) {
   goals.forEach((goal, i) => {
     questions[`goal_${i}`] = {
       type: 'noul',
-      instructions: `目标 ${i + 1} 是否已达成：「${String(goal).slice(0, 200)}」？以【待评输出】可核对的内容为准，宣称达成但无内容支撑按否。`,
+      instructions: `目标 ${i + 1} 是否已达成：「${String(goal).slice(0, JUDGE_INPUT_LIMITS.goal)}」？以【待评输出】可核对的内容为准，宣称达成但无内容支撑按否。`,
     };
   });
   return { state, questions };
@@ -214,6 +218,7 @@ async function judgeOutput({ output, request, reference = '', goals = [], overri
 
 module.exports = {
   FIT_RUBRIC,
+  JUDGE_INPUT_LIMITS,
   buildJudgeRequest,
   parseDimensionStatuses,
   aggregateVerdict,

@@ -9,6 +9,7 @@ const require = createRequire(import.meta.url);
 const core = require('../../../core/petri-server/helpers/judge-core.js');
 
 export const FIT_RUBRIC = core.FIT_RUBRIC;
+export const JUDGE_INPUT_LIMITS = core.JUDGE_INPUT_LIMITS;
 export const buildJudgeRequest = core.buildJudgeRequest;
 export const parseDimensionStatuses = core.parseDimensionStatuses;
 export const aggregateVerdict = core.aggregateVerdict;
