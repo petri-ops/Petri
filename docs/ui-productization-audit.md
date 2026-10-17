@@ -4959,20 +4959,21 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **随批**：`prefsSync` 的类型刻意**不占导出面**（无消费方的导出即死代码，`quality:knip:check` 棘轮新增即红；等设置面真的接上再导出）。
 - **待办（收口后下一批）**：设置面消费 `prefsSync`（失败横幅或就近提示）→ 9223 测试实例自动探针出图取证 → 再转 `verified`。
 
-## UI-514: 应用级命令键位单源与派发（2026-10-17 in_progress，BLOCK-200）
+## UI-514: 应用级命令键位单源与派发（2026-10-17 in_progress→**verified（同日 9223 测试实例自动探针 17/17 allPass：REST 写侧 400+未知命令 id 拒+拒写无痕+解绑、DOM 徽章等于注册表值、派发腿 D4 实测「改绑后旧 Ctrl+N 不触发、新 Ctrl+Shift+7 真导航到 /」；证据 `acceptance/block-200/block200-settings-live-live.json` + `ui514-keymap-section.png`；flow=`.agents/skills/petri-dev-infra/dev-verify/flows/block200-settings-live.cjs`）**，BLOCK-200）
 
 - **变化面**：命令面板的快捷键徽章与「快捷键」小节不再是硬编码文本，而由键位注册表派生；`palette.toggle`（原 `e.key==='k'` 写死）、`nav-*`（原本**根本没有派发器**）、指挥中心独立窗（原 App 根写死 Ctrl/Cmd+Shift+C）三处改读同一份生效键位；工作区面板 `Mod+\`` / `Mod+Shift+B` 与思考档位 `Mod+T` 的组合串也从注册表取（局部门条件留在组件内）。
 - **为什么需要实码纠正**：`useAppCommands.ts:71` 的 `nav-home` 自挂 `⌘N` 徽章、`CommandPalette.tsx:66` 另列 `⌘N 新建对话` 与 `⌘/ 显示帮助`，而全仓 grep 无任何 Cmd+N / Cmd+/ 处理器（`onShowHelp` 是从未被使用的死 prop）——**面板一直在向用户承诺不存在的快捷键**。本批起徽章只可能来自真实生效的键位，解绑的命令不出现在列表里；两条虚假条目随批消失。
 - **验证**：`frontend/src/lib/appKeymap.test.ts` 9/9（语法规范化·裸键一律拒·畸形串拒·往返恒等·事件↔匹配互逆·覆盖/解绑/坏值回落·默认集合零冲突·显示双平台形态）；`appKeymap.drift.test.ts` 5/5（命令 id 集合与注册表**双向相等**·默认值全部过后端写侧守卫·规范化产物必过守卫·两侧拒绝集合一致）；`appKeymapContext.test.tsx` 6/6（**改了键位派发跟着变**：按新组合触发、按旧默认不触发·写成功·写 400+diagnostics 显式 failed 并回滚·网络异常可见·无 Provider 回落默认不崩·冲突点名双方）；`useWorkspacePanelShortcuts.test.tsx` 3/3（按平台如实分档：Win 上 Cmd 不触发、mac 形态 Cmd 触发）；后端 `test/block200-keymap-store.test.mjs` 8/8；邻域回归 `TitleBar`/`ResultAgentComposer`/`RightFileTree.shortcuts`/`WorkspaceFilePreview` 50/50 未受扰。
 - **随批（测量面自纠）**：键位语法守卫正则初版 `(?:Mod|Ctrl|Alt|Shift)\+)+` 放行 `Mod+Mod+K`，被漂移测当场抓出（编解码器拒的串后端却收=垃圾能进盘）→ 收紧为规范序且不重复；`Mod` 语义定为「macOS=Cmd / 其余=Ctrl」，与旧实现"`ctrlKey||metaKey` 一视同仁"是有意的行为收敛，旧测里在 win32 灌 metaKey 的写法随之按平台如实改写（断言比原来更强）。
-- **待办（本批未完）**：键位设置分区（录制/冲突高亮/恢复默认/写失败可见横幅）尚未接入 → 9223 测试实例自动探针出图 → 再转 `verified`。
+- **实机腿（已销号 2026-10-17）**：9223 自动探针出图与断言 JSON 已落 `acceptance/block-200/`，本条转 `verified`。探针自身首跑有一处**假红**已修：`location.href=` 异步导航只轮询 `readyState` 会在上一轮的旧文档上返回 true，改为 URL+选择器双判据（不是改产品迁就探测）。
 - **同批后续（2026-10-17 本日）**：分区已接入设置页「快捷键」节（`DesktopSettingsPanel/sections/KeymapPanel.tsx`，UI-515 同批），本条待办只剩 9223 自动探针出图取证。
 
-## UI-515: 快捷键与推理档位设置面（2026-10-17 in_progress，BLOCK-200）
+## UI-515: 快捷键与推理档位设置面（2026-10-17 in_progress→**verified（同日 9223 自动探针：D2 键位节渲染 10 行且组合串取自注册表、D3 改盘上值后徽章跟着变、D5 档位节 3 档下拉+预算 16000+映射表 4 行在册；证据 `acceptance/block-200/ui515-reasoning-section.png`，同批 `ui514-keymap-section.png`，17/17 allPass）**，BLOCK-200）
 
 - **变化面**：设置页新增两节——「快捷键」（逐命令显示生效组合串、点「改键」捕获下一次 keydown 写入、解绑、恢复默认、冲突横幅点名共用同一组合的命令、写失败横幅）与「推理档位」（默认档位、Anthropic 高档预算、逐协议×逐档位映射表，出厂值与生效值并列，400 拒绝逐条 diagnostics 显示）。分区登记 `DesktopSettingsPanel/types.ts`（`SettingsSection` 联合与导航表同时补，两处不等则 `quality:types` 红）。
 - **同源保证（这条是本节的立项理由）**：面板显示的组合串**就是派发器读的那个值**（`useKeymapSafe().bindings`），不再存在"另一份显示清单"；档位面的合法令牌由后端 `reasoning-defaults.allowedTokens(protocol)` 下发，前端只能从允许集合里选，跨协议写法（给 openai 配 `thinking:enabled`）在写侧就被拒。漂移门 `UI_CARRIERS` 加了这两族，**加入前先红后绿实证**（红态存 `acceptance/block-200/drift-gate-red-2026-10-17.txt`）。
 - **验证**：`KeymapPanel.test.tsx` 6/6（默认渲染=命令源值·覆盖显示·录制写回并即时反映·裸键拒且**不发写请求**·冲突点名双方·400 失败横幅含诊断文本）；`ReasoningDefaultsPanel.test.tsx` 5/5（生效/出厂并列·未改动不得点保存·只提交改动项·选回出厂值等价 null 清键·400 diagnostics 逐条点名且不被洗成"已保存"·预算空串拦在客户端不发写）；`thinkingLevel.drift.test.ts` 3/3 含**源码扫描**：前端除 `thinkingLevel.ts` 外不得再出现第二份三档字面量（本次抓到并删除 `conversationRunStore.ts`/`copilotClient/types.ts`/`useChatStream.ts` 三处副本，注释误报已用剥注释修正——扫描器先剥注释再判，否则合理注释会假红）；`appKeymap*.test.ts(x)` 17/17 + 后端 `block200-reasoning-config` 9/9 与 `block200-keymap-store` 8/8。
 - **随批（样式纪律）**：新样式仅 `SettingsQuickwins.module.css` 一个文件、两节共用，色值/间距/字号全部走 `--petri-*` 变量；`--petri-bg-primary` 在本仓**不存在**（写第一版时用了它，靠 `grep custom.css` 核对后换成 `--petri-bg-base`），`theme-token-contract.test.ts` 绿。
-- **待办**：9223 测试实例自动探针出两节截图与断言 JSON 取证 → 转 `verified`。录制交互的真机手感（输入法/键盘布局下的 `e.key`）在探针腿补验，本轮不宣称已验。
+- **实机腿（已销号 2026-10-17）**：9223 自动探针两节均出图取断言（`ui514-keymap-section.png` / `ui515-reasoning-section.png`，`block200-settings-live-live.json` 17/17 allPass），本条转 `verified`。边界留在计划 §4 不藏：录制交互里 Shift 移位标点无法还原 `e.key` 的组合，纯函数层是**如实拒绑**而非错绑成别的键，探针不假装覆盖这一格。
+
 
