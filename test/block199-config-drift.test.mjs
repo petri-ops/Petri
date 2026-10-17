@@ -33,6 +33,9 @@ const UI_CARRIERS = {
   // BLOCK-202 W3 两族
   network: { file: 'frontend/src/components/desktop/DesktopSettingsPanel/sections/NetworkProxyPanel.tsx', must: ['/network'] },
   runtime: { file: 'frontend/src/components/desktop/DesktopSettingsPanel/sections/RuntimePolicyPanel.tsx', must: ['/runtime-policy'] },
+  // BLOCK-203 W4a 首族：外观偏好的真值是服务端 user-prefs.json，承载面是 ThemeProvider 的多端同步链
+  // （不是设置面板里的某个 fetch）——故 must 钉它实际打的端点，而不是钉一个"看起来像设置页"的文件。
+  'user-prefs': { file: 'frontend/src/themes/ThemeProvider.tsx', must: ['/user/prefs'] },
 };
 
 /** 族 → 后端写路由（必须能把拒绝翻译成 4xx，而不是冒 500 或静默）。 */
@@ -45,6 +48,7 @@ const WRITE_ROUTES = {
   reasoning: 'core/petri-server/routes/ai-settings-api.js',
   network: 'core/petri-server/routes/runtime-config.js',
   runtime: 'core/petri-server/routes/runtime-config.js',
+  'user-prefs': 'core/petri-server/routes/user-prefs.js',
 };
 
 test('注册表自洽：每个键有族、每个族有键（不留空壳族或孤儿键）', () => {

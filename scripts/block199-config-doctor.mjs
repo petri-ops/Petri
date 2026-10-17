@@ -19,6 +19,9 @@ import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const schema = require('../core/packages/shared-config/config-schema.js');
+// BLOCK-203 W4a：外观落点的**真实**回落链由 helper 给出——doctor 不得自己再猜一遍
+// （自猜就是第五份 data root 知识；这条链本身的合一属 W4b）。
+const userPrefs = require('../core/petri-server/helpers/user-prefs.js');
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 /** 三族的落点文件与其在文件内的"键袋"位置（形状照现状读，不假设统一）。 */
@@ -32,6 +35,8 @@ function storeTargets(env = process.env) {
     // BLOCK-200 两族：键位是平面 map（命令 id→组合串），档位含 `mapping.<protocol>.<tier>` 嵌套
     { family: 'keymap', file: path.join(localData, 'keymap.json'), bag: 'bindings' },
     { family: 'reasoning', file: path.join(localData, 'ai-settings.json'), bag: 'reasoning', flatten: true },
+    // BLOCK-203 W4a 首族：外观三键是**文件根标量**（无 bag），路径直接问落点 helper
+    { family: 'user-prefs', file: path.join(userPrefs.resolveDataDir(), 'user-prefs.json'), bag: null, scalarKeys: ['theme', 'fontScale', 'accent'] },
   ];
 }
 

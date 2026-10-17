@@ -88,6 +88,15 @@ const CONFIG_FAMILIES = Object.freeze({
     precedence: ['env', 'file', 'default'],
     envTruth: 'numeric',
   },
+  // —— BLOCK-203 W4a P1（runlist W4a 的第一个真实消费者：BLOCK-86 的多端偏好落点）——
+  // 外观三键此前由 `routes/user-prefs.js` 自写 sanitize（枚举集合 + fontScale 钳位）——
+  // 那是第 N 份同构校验，也是"设置改了不生效"病根的同族。**无 env 层**：外观没有部署面需求，
+  // 加 env 会造出"设置页显示 A、实际按 B"的第三种真相（与 keymap 同一理由）。
+  'user-prefs': {
+    store: 'file:user-prefs.json',
+    precedence: ['file', 'default'],
+    envTruth: null,
+  },
 });
 
 /**
@@ -273,6 +282,26 @@ const CONFIG_KEYS = Object.freeze([
     // 审批/策略层照常生效；空串=不屏蔽。
     key: 'runtime.toolDeny', family: 'runtime', path: 'toolDeny',
     type: 'string', domain: { pattern: '^[a-z0-9_,\\s]*$' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  // —— 外观偏好（BLOCK-203 W4a P1；原 `routes/user-prefs.js:16-44` 自写 sanitize）——
+  // 域值必须与前端 `themes/accents.ts` 的 AccentId 集合、`ThemeProvider.tsx` 的 THEME 集合一字不差
+  // （历史上"曾漏 blue"就是两份集合各自维护的后果；现由 `test/block203-user-prefs.test.mjs` 双向钉）。
+  // **fontScale 的现状语义是"钳位"不是"拒绝"**（5 → 1.4）：钳位由 helper 在送校验**前**完成，
+  // 这里的域只声明边界。改成拒绝会把既有客户端的越界值从"被夹住"变成"写失败"（行为回归）。
+  {
+    key: 'userPrefs.theme', family: 'user-prefs', path: 'theme',
+    type: 'string', domain: { oneOf: ['system', 'light', 'dark'] }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
+    key: 'userPrefs.fontScale', family: 'user-prefs', path: 'fontScale',
+    type: 'number', domain: { min: 0.8, max: 1.4 }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
+    key: 'userPrefs.accent', family: 'user-prefs', path: 'accent',
+    type: 'string', domain: { oneOf: ['teal', 'blue', 'violet', 'rose', 'amber'] }, envKeys: [], aliases: [],
     mutable: true, ui: 'settings',
   },
 ]);

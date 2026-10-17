@@ -5,10 +5,11 @@
  *
  * 三条纪律（与 BLOCK-199/200 同源，不新立第二套）：
  *  ① **不做第二实现**：每个族的读/写都委派给既有的单源 helper（feature-flags / decision-config /
- *     ai-settings / keymap / reasoning-config），本模块只负责「打包 / 校验 / 分批应用」。
- *  ② **凭据永不进导出**（runlist D-2）：本模块的族集合只含注册表 6 族，凭据、模型渠道 profiles、
- *     外观 prefs 等未注册落点显式列入 `CONFIG_TRANSFER_EXCLUDES` 并随导出信封一起回传，
- *     让「漏了什么」对用户可见，而不是静默缺。
+ *     ai-settings / keymap / reasoning-config / network-config / runtime-policy / user-prefs），
+ *     本模块只负责「打包 / 校验 / 分批应用」。
+ *  ② **凭据永不进导出**（runlist D-2）：族集合 == shared-config 注册表族集合（BLOCK-203 起含
+ *     `user-prefs` 外观三键），凭据、模型渠道 profiles 等仍不带入注册表的落点显式列入
+ *     `CONFIG_TRANSFER_EXCLUDES` 并随导出信封一起回传，让「漏了什么」对用户可见，而不是静默缺。
  *  ③ **导出的是用户覆盖层，不是生效值**：env 覆盖与代码默认值都不落进导出文件——
  *     导出后再导入必须幂等，且不会把「今天的默认值」冻结成「用户的选择」。
  *
@@ -26,6 +27,7 @@ const keymap = require('./keymap');
 const reasoningConfig = require('./reasoning-config');
 const network = require('./network-config');
 const runtimePolicy = require('./runtime-policy');
+const userPrefs = require('./user-prefs');
 
 const CONFIG_TRANSFER_FORMAT = 'petri-config';
 const CONFIG_TRANSFER_VERSION = 1;
@@ -41,13 +43,14 @@ const CONFIG_TRANSFER_FAMILIES = Object.freeze([
   // BLOCK-202 W3
   'network',
   'runtime',
+  // BLOCK-203 W4a（runlist W4a 首族：BLOCK-86 的外观偏好落点收编）
+  'user-prefs',
 ]);
 
 /** 显式排除清单：随信封回传，防止「以为备份了全部设置」。 */
 const CONFIG_TRANSFER_EXCLUDES = Object.freeze([
   { what: 'credentials', reason: 'API Key 等凭据永不进导出（D-2）；请在设置页逐项确认后单独迁移' },
   { what: 'model-profiles', reason: '模型渠道 profiles 未进 shared-config 注册表，属 runlist W4（B1b）' },
-  { what: 'appearance-and-user-prefs', reason: '外观/用户偏好仍走 user-prefs 落点，未进注册表，属 W4' },
   { what: 'compute-and-paths', reason: '计算位置与数据目录属 W4 的 data root 收敛范围' },
 ]);
 
@@ -108,6 +111,7 @@ function readFamilyOverrides() {
     reasoning: pickReasoningSection(ai.reasoning),
     network: { ...network.readStore() },
     runtime: { ...runtimePolicy.readStore() },
+    'user-prefs': { ...userPrefs.readPrefs() },
   };
 }
 
@@ -201,6 +205,12 @@ function validateFamily(family, body) {
   if (family === 'network' || family === 'runtime') {
     return schema.commitGuard(family, body, lookup).diagnostics;
   }
+  if (family === 'user-prefs') {
+    // **导入比落点写更严，这是刻意的**：落点侧对越界 fontScale 是钳位（BLOCK-86 既有语义，不改），
+    // 而导入是整批事务——"夹住后再落盘"会让"导出→手改坏→导入"静默变成另一个值，
+    // 破坏 BLOCK-201 的往返幂等验收。故导入走 commitGuard 全量拒（越界=out-of-range 诊断）。
+    return schema.commitGuard(family, body, lookup).diagnostics;
+  }
   return [diagnostic(family, '', 'unknown-family', `未登记的配置族 ${family}`)];
 }
 
@@ -275,6 +285,14 @@ const WRITERS = {
   runtime(body) {
     runtimePolicy.saveRuntimePolicy(body);
   },
+  'user-prefs'(body) {
+    const result = userPrefs.writePrefs(null, body);
+    if (!result.ok) {
+      const error = new Error('user-prefs 写入被拒');
+      error.diagnostics = result.diagnostics;
+      throw error;
+    }
+  },
 };
 
 /**
@@ -312,6 +330,7 @@ const RESETTERS = {
   reasoning() { aiSettings.saveReasoningSection({}); },
   network() { network.writeStore({}); },
   runtime() { runtimePolicy.writeStore({}); },
+  'user-prefs'() { userPrefs.resetPrefs(); },
 };
 
 /**

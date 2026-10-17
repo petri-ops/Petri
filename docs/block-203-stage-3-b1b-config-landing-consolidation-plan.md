@@ -150,3 +150,11 @@ node --test --test-force-exit --test-timeout=120000 \
 - **D-W4a-3**：`ai-settings` 顶层 unknown-key 走**过滤 + 诊断**而非 400。理由：设置页整坨写入会把 GET 回来的未知键原样回传，400 会让"有历史脏键的用户保存不了任何设置"（回归风险），而过滤+诊断同样达成"磁盘不再长出未知键"的目标；**这是对 W0「写不进」规则的显式例外**，在此留痕并在 `config:doctor` 里可见。
 - **D-W4a-4**：D-2 rider 取"默认脱敏 + 明文需二次确认"，**不删除**含明文导出的能力（用户可能需要迁移渠道到别的机器）。理由：默认值取最保守档（D-1），但删能力属于功能收缩，需要单独裁决。
 - **D-W4a-5**：renderer 缓存键名用漂移测钉住，**不让前端 import `core/**`**（生产代码跨层引用会被 `quality:arch` 拦，且前端已有 `appKeymap.drift.test.ts` 只让测试跨层的先例）。
+
+## 9. 进度（执行中回写）
+
+- ✅ **P1+P2（2026-10-17 同批落地）**：schema 加 `user-prefs` 族（theme/fontScale/accent，注册表 8 族/35 键 → **9 族/38 键**）；`routes/user-prefs.js` 的自写 `sanitize` 下沉为 `helpers/user-prefs.js`（store 单源，形状读注册表）；写侧**未知键 400 + 整批不落盘**，已注册键的非法值仍是 BLOCK-86 的消毒语义（钳位/丢键，诊断 additive 回传）；`config-transfer` 族集合扩该族（导出/导入/按区重置 + 从排除清单移除 `appearance-and-user-prefs`）；`config:doctor` 纳入该落点（路径问 helper，不自猜第五条回落链）。
+  - 顺带实测到 W4b 的必要性：doctor 在无 `PETRI_LOCAL_DATA_DIR` 时真实打出 `feature-flags/... → ~/Documents/Petri-Local` 而 `user-prefs → ./data`——**同一个「配置目录」当场分成两个**，这正是 W4b 要合的 4 条链。
+  - 证据：`test/block203-user-prefs.test.mjs` 8/8（路径不变/消毒语义冻结/未知键 400 且文件逐字节不变/读侧宽容/重置只清覆盖层/枚举域与前端同源/导入更严）+ 邻域 `block201-config-transfer` 9/9、`user-prefs`（BLOCK-86）1/1、`block201-settings-baseline` 4/4、`block199-config-drift` 6/6；`quality:knip:check` PASS、`quality:types` 0、lint 0 error。
+  - 基线变更留因：`block201-settings-baseline` 的 8 族/35 键按新增族显式上调为 9/38（测试内写明理由）；`block201-config-transfer` 的「排除清单 ≥4 条」改为**断类别不断条数**（外观移出排除清单后条数 4→3，计数断言会惩罚正当改善——BLOCK-196 撞过的同型毛病）。
+- ⬜ P3 `skills-prefs` · ⬜ P4 `agent-rules`（含集合形状进 schema）· ⬜ P5 `mcp-servers` · ⬜ P6 `ai-settings` 顶层 · ⬜ P7 localStorage 并入 · ⬜ P8 D-2 rider

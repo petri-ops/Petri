@@ -41,13 +41,20 @@ test.beforeEach(() => {
   fs.rmSync(path.join(sandbox, 'runtime-policy.json'), { force: true });
 });
 
-test('导出信封：版本化 + 八族齐 + 显式排除清单（不漏族也不假装全覆盖）', () => {
+test('导出信封：版本化 + 族齐 + 显式排除清单（不漏族也不假装全覆盖）', () => {
   const envelope = transfer.exportConfig({ env: {} });
   assert.equal(envelope.format, 'petri-config');
   assert.equal(envelope.version, 1);
   assert.deepEqual(Object.keys(envelope.families).sort(), [...transfer.CONFIG_TRANSFER_FAMILIES].sort());
-  assert.ok(Array.isArray(envelope.excludes) && envelope.excludes.length >= 4);
-  assert.ok(envelope.excludes.some((row) => row.what === 'credentials'));
+  // 断"排除了哪些类别"而不是"排除了几条"：BLOCK-203 把外观从排除清单移进注册表后条数由 4 变 3，
+  // 计数断言会惩罚正当改善（与 BLOCK-196 撞过的镜像毛病同型）。留下的三类必须仍在册。
+  assert.ok(Array.isArray(envelope.excludes));
+  for (const what of ['credentials', 'model-profiles', 'compute-and-paths']) {
+    assert.ok(envelope.excludes.some((row) => row.what === what), `排除清单漏了 ${what}`);
+  }
+  // 外观已进注册表 ⇒ 必须真的出现在导出里，且不得同时挂在排除清单（两边都挂=用户看不懂到底备份了没）
+  assert.ok(Object.prototype.hasOwnProperty.call(envelope.families, 'user-prefs'), '外观已进注册表却没出现在导出里');
+  assert.ok(!envelope.excludes.some((row) => row.what === 'appearance-and-user-prefs'), '外观已收编，排除清单不得再挂着它');
   assert.ok(Array.isArray(envelope.envShadowed));
 });
 
