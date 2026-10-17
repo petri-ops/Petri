@@ -9,29 +9,45 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ThemeProvider, useTheme } from './ThemeProvider';
 
+type FetchMock = { mock: { calls: [string, RequestInit | undefined][] } };
+
 function wrapper({ children }: { children: React.ReactNode }) {
   return <ThemeProvider>{children}</ThemeProvider>;
 }
 
-function mockEnv(fetchImpl: () => Promise<Response>) {
-  vi.stubGlobal('matchMedia', vi.fn(() => ({
-    matches: false,
-    media: '(prefers-color-scheme: dark)',
-    onchange: null,
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })));
-  vi.stubGlobal('fetch', vi.fn(fetchImpl));
+const matchMediaStub = () => vi.fn(() => ({
+  matches: false,
+  media: '(prefers-color-scheme: dark)',
+  onchange: null,
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
+  addListener: vi.fn(),
+  removeListener: vi.fn(),
+  dispatchEvent: vi.fn(),
+}));
+
+function stubFetch(handler: () => Promise<Response>) {
+  vi.stubGlobal('matchMedia', matchMediaStub());
+  vi.stubGlobal('fetch', vi.fn(handler));
 }
 
-/** 冲刷 promise 微任务 + 状态落定（fetch 的 then/catch 里 setState）。 */
+/** 在 act 内触发一次变更并让微任务落定（fetch 的 then/catch 里 setState）。 */
+async function applyChange(change: () => void) {
+  await act(async () => {
+    change();
+    await Promise.resolve();
+  });
+}
+
+/** 冲刷 promise 微任务（fetch 的 then/catch 里 setState）。 */
 async function flush() {
-  await act(async () => { await Promise.resolve(); await Promise.resolve(); });
+  await act(async () => {
+    await Promise.resolve();
+    await Promise.resolve();
+  });
 }
 
+const okResponse = () => Promise.resolve({ ok: true, status: 200 } as Response);
 const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
 beforeEach(() => {
@@ -45,27 +61,27 @@ afterEach(() => {
 });
 
 describe('ThemeProvider 跨端同步可观测性', () => {
-  it('同步成功：prefsSync 回到 ok，且确实发出了 PUT', async () => {
-    mockEnv(async () => ({ ok: true, status: 200 } as Response));
+  it('同步成功：prefsSync 回到 ok，且确实发出了 PUT（带偏好载荷）', async () => {
+    stubFetch(okResponse);
     const { result } = renderHook(() => useTheme(), { wrapper });
     expect(result.current.prefsSync.state).toBe('ok');
 
-    await act(async () => { result.current.setPreference('dark'); });
+    await applyChange(() => { result.current.setPreference('dark'); });
     expect(fetch).toHaveBeenCalled();
     // 挂载时会先 GET 拉服务端偏好，PUT 是随后的那一次
-    const putCall = (fetch as Mock).mock.calls.find(([, init]) => (init as RequestInit | undefined)?.method === 'PUT');
-    expect(putCall, '未见 PUT 调用').toBeTruthy();
-    expect(JSON.parse(String(putCall![1] ? (putCall![1] as RequestInit).body : ''))).toEqual({ theme: 'dark' });
+    const putCall = (fetch as unknown as FetchMock).mock.calls.find(([, init]) => init?.method === 'PUT');
+    expect(putCall).toBeTruthy();
+    expect(JSON.parse((putCall?.[1]?.body as string) ?? '')).toEqual({ theme: 'dark' });
     await flush();
     expect(result.current.prefsSync.state).toBe('ok');
     expect(warnSpy).not.toHaveBeenCalled();
   });
 
   it('网络异常：进入 failed + 留痕，但本端偏好不回滚', async () => {
-    mockEnv(async () => { throw new TypeError('Failed to fetch'); });
+    stubFetch(() => Promise.reject(new TypeError('Failed to fetch')));
     const { result } = renderHook(() => useTheme(), { wrapper });
 
-    await act(async () => { result.current.setPreference('dark'); });
+    await applyChange(() => { result.current.setPreference('dark'); });
     await flush();
 
     expect(result.current.prefsSync.state).toBe('failed');
@@ -77,10 +93,10 @@ describe('ThemeProvider 跨端同步可观测性', () => {
   });
 
   it('HTTP 非 2xx：同样进入 failed 并带状态码（服务端拒绝不是"成功"）', async () => {
-    mockEnv(async () => ({ ok: false, status: 503 } as Response));
+    stubFetch(() => Promise.resolve({ ok: false, status: 503 } as Response));
     const { result } = renderHook(() => useTheme(), { wrapper });
 
-    await act(async () => { result.current.setFontScale(1.2); });
+    await applyChange(() => { result.current.setFontScale(1.2); });
     await flush();
 
     expect(result.current.prefsSync.state).toBe('failed');
@@ -89,20 +105,18 @@ describe('ThemeProvider 跨端同步可观测性', () => {
   });
 
   it('后续同步成功会把状态从 failed 翻回 ok（不留陈旧告警）', async () => {
-    let respond = async () => { throw new TypeError('offline'); };
-    mockEnv(() => respond());
+    let offline = true;
+    stubFetch(() => (offline ? Promise.reject(new TypeError('offline')) : okResponse()));
     const { result } = renderHook(() => useTheme(), { wrapper });
 
-    await act(async () => { result.current.setPreference('light'); });
+    await applyChange(() => { result.current.setPreference('light'); });
     await flush();
     expect(result.current.prefsSync.state).toBe('failed');
 
-    respond = async () => ({ ok: true, status: 200 } as Response);
-    await act(async () => { result.current.setPreference('dark'); });
+    offline = false;
+    await applyChange(() => { result.current.setPreference('dark'); });
     await flush();
     expect(result.current.prefsSync.state).toBe('ok');
     expect(result.current.prefsSync.error).toBeUndefined();
   });
 });
-
-type Mock = { mock: { calls: unknown[][] } };
