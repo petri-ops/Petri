@@ -93,3 +93,16 @@ status: active
 | 收口 | `test:changed` + `npm run closeout` 十三门 + 五件套 | AUDIT-LOG 收口行 |
 
 **如实登记条款**：包完成时若三族之外的落点仍未收编，写明"地基已交付、覆盖率=3/14 族"，不得表述为"配置已统一"。
+
+## 7. 进度（2026-10-17 本轮落地的切片，剩余点名不藏）
+
+**已落**：
+- P0 测绘：§0（14 落点／4 root／6 回落链／零校验依赖／三份可抽用的既有 schema 子集）+ §0.2.1 第四条矛盾登记转 C-32。
+- 拆前基线：`test/block199-config-compat.test.mjs` 8/8 绿（**冻结文件**——重构后它红了就是改了用户可感行为，回退实现而不是改测试）。
+- P1 地基：`core/packages/shared-config/config-schema.js`（纯函数零 require 零第三方；只声明形状，阈值数值与证据仍在 `decision-thresholds` 不复制）+ `test/block199-config-schema.test.mjs` 8/8（含 env 别名真实性全仓扫描、共享层纯度与零依赖核验）。
+- P2 首族接线：`feature-flags` 的优先级与 env 三态解析改由 schema 单源提供（默认值与标签留本模块，属行为数值非形状）；双向漂移对账进契约测；连既有 `feature-flags.test.mjs` 合计 **26/26 绿** ⇒ 接线未改行为。
+- P4① 缺陷清偿（红→绿）：`tool-router.js` 采纳阈值从模块加载冻结改为调用时读运行时；`test/block199-threshold-runtime.test.mjs` 5/5 含"改回 0.11 立即再生效"与"无 stored 覆盖时仍按 θ=0.8 判"（校准数值未动）。
+- 门禁侧：`quality:arch` 无违例（1469 模块）、`quality:knip:check` 保留面零新增（地基不是死文件）；`test:changed --base=22acc389` 113 项 111pass/0fail/2skip。
+- 测绘副产物入册：`feature-flags`/`decision-config` **此前无任何 impact-map 规则覆盖**（改它们会 fail-closed 升级全量），已由 `block199-config-schema-service` 规则补上盲区。
+
+**未落（本包继续，勿当已完成）**：P2 其余两族（decision-config 的 registry 层、ai-settings generation、cost-cap 改走 schema 解析）；P3 写侧统一拒绝 + diagnostics 出口（目前只有读侧报告能力，尚无用户可见出口）；P4② `report-guard` 纳入 RUNTIME_POINTS；P4③ `ThemeProvider` 跨端写失败可观测；P5 漂移门全量（schema↔设置页↔IPC，现仅有 feature-flags 一族的双向对账）；P6 兼容对账收尾与 closeout 五件套。**注册表覆盖率当前=1 族实接 / 4 族声明**。
