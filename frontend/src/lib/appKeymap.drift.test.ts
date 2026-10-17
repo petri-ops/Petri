@@ -4,12 +4,21 @@
 // 两处必须各持一份字面量时，用测钉住等价，而不是让运行时互相 require。
 import { describe, it, expect } from 'vitest';
 // CJS 单源语法/注册表，只在测试里跨语言对账（生产构建不引 CJS，故不为它手写 .d.ts）。
-// @ts-expect-error 无声明文件；vitest 走 CJS 互操作可用，类型面在本文件内局部断言即可
-import { KEYMAP_COMBO_RE, CONFIG_KEYS, findEntryByPath, validateValue } from '../../../core/packages/shared-config/config-schema.js';
+// @ts-expect-error 无声明文件；vitest 走 CJS 互操作可用
+import * as rawSchema from '../../../core/packages/shared-config/config-schema.js';
+
+// 在测试边界显式收窄（不是绕过检查）：无 .d.ts 的 CJS 模块不这样收窄会整文件落在 error-typed 上
+interface RegistryEntry { key: string; family: string; path: string; domain?: { pattern?: string } }
+const { KEYMAP_COMBO_RE, CONFIG_KEYS, findEntryByPath, validateValue } = rawSchema as unknown as {
+  KEYMAP_COMBO_RE: RegExp;
+  CONFIG_KEYS: RegistryEntry[];
+  findEntryByPath: (family: string, path: string) => RegistryEntry | null;
+  validateValue: (entry: RegistryEntry | null | undefined, raw: unknown) => { ok: boolean; code?: string; message?: string };
+};
 import { KEYMAP_COMMANDS, normalizeCombo, parseCombo } from './appKeymap';
 
-const registryKeymapIds = CONFIG_KEYS.filter((entry: { family: string }) => entry.family === 'keymap').map((entry: { path: string }) => entry.path);
-const sampleEntry = CONFIG_KEYS.find((entry: { key: string }) => entry.key === 'keymap.palette.toggle');
+const registryKeymapIds = CONFIG_KEYS.filter((entry) => entry.family === 'keymap').map((entry) => entry.path);
+const sampleEntry = CONFIG_KEYS.find((entry) => entry.key === 'keymap.palette.toggle');
 
 describe('键位命令源 ↔ 注册表集合对账', () => {
   it('两侧命令 id 集合**完全相等**（少一侧=漂移：注册表缺则垃圾能进盘，命令源缺则改了没人执行）', () => {
