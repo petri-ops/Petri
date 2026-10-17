@@ -17,3 +17,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-17T04:20:56.951Z -->
 | ✅ 批次C（2026-10-14，UI-500 翻 verified 代行评估） | 2026-10-14 | **自动压缩构造闭环**：探针 scripts/ui500-compaction-live.mjs（settings backup→apply→构造→finally 恢复哈希校验）；0.85 断路 API+UI 双证据（trimmed budget pct=100+context_compacted dropped=3+UI trimmed 帧 ×3+压缩后截图）。抓真=预算面读 model_profiles 单源（presets 单改不生效）+deepseek-flash 推理模型 maxTokens 过低被 reasoning 吃满正文空（下限 ≥8192）。CP-5 摘要 live 诚实边界（dropped<4 回退）由 smoke+单测覆盖。证据 acceptance/ui-500/。 | zcode |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-17T05:24:39.134Z -->
+| ✅ BLOCK-182 整包（2026-10-14，用户预授权四批次之 D；CP-6 结论承接，当日立项当日收口） | 2026-10-14 | **记忆生命周期治理 completed**：衰减（90 天 TTL 惰性+豁免）/纠错流（免费：superseded 替代链）/矛盾消解（等值合并刷新确认，修「反复提及仍衰减」缺陷）/全链审计（memory_audit+面板节）/MEMORY.md 写入审批门（policy memory 维度走 BLOCK-180 全链）。红绿 6/6+实机三链 PASS（block182-live）+UI-510 verified。抓真=迁移时点 user_facts 未建（列升级改挂运行时 ensure）+探针 mock env 须先于后端 spawn+档案提取抢回合（批次B 同款）。UI-500 批 impact-map 漏登记 ui500 探针同批补登。 | zcode |
