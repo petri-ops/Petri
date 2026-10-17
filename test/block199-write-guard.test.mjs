@@ -115,7 +115,14 @@ test('config:doctor：未知键只报告不删、非法已存值预警、env 遮
   const shadows = report.envShadowed.filter((s) => s.family === 'feature-flags');
   assert.equal(shadows.length, 1, 'env=1 盖住文件 false 必须报遮蔽');
   assert.equal(shadows[0].overrides, true);
-  assert.ok(!report.unknownKeys.some((d) => d.path === 'provider'), 'ai-settings 顶层非本族键不属本次诊断面（不得误报成错误）');
+  // BLOCK-203 W4a P6 语义变更（有意）：ai-settings 顶层未知键**要**点名——它会在下一次保存时
+  // 被白名单丢弃，藏起来等于让"保存一次少一个键"不可见。但归属必须是 `ai-settings-root`，
+  // 不能被误算成任何注册族的非法已存值（那是两件事：文件级垃圾 vs 族内值不合法）。
+  assert.ok(!report.invalidStoredValues.some((d) => d.path === 'provider'), 'ai-settings 顶层非本族键不得被误报成 generation 的非法已存值');
+  assert.ok(
+    report.unknownKeys.some((d) => d.family === 'ai-settings-root' && d.path === 'provider'),
+    `顶层未知键要点名（ai-settings-root）：${report.unknownKeys.map((d) => `${d.family}.${d.path}`).join(',')}`,
+  );
   assert.ok(report.summary.unknownKeys >= 1 && report.summary.invalidStoredValues >= 3);
 });
 

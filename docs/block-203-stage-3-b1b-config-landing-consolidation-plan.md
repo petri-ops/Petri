@@ -176,5 +176,10 @@ node --test --test-force-exit --test-timeout=120000 \
   - **D-2 的一个真实决定**：配置导出**主动剥离 `env`**，导入带 `env` 一律拒、并按 id 自动保留原 env。理由=env 里装的就是第三方 server 的 token，把密文搬进"可分享的导出文件"仍是把凭据带出边界；而"导出→导入"若因此清空 env，等于让用户重新配一遍所有 MCP 凭据——两头都不可接受，故取"剥离 + 保留"。
   - 抓真一处：`normalizeServerEntry` 首版漏了**必填关系**（形状校验只校验"出现了的字段"），`{id:'ok'}` 会静默生成 `command: undefined` 的条目；已由 `missing_command`/`invalid_id` 补回（回归测 `mcp-client-settings` 当场抓到）。
   - 证据：`test/block203-mcp-servers.test.mjs` 6/6 + 邻域 **165/165**（block203×4 + block160/163/177 + mcp-client-settings + user-prefs + block201/199/200/202）+ `config:doctor` 实跑 + knip PASS + arch 0 违规 + lint 0 error。
-- ⬜ P6 `ai-settings` 顶层 · ⬜ P7 localStorage 并入 · ⬜ P8 D-2 rider
+- ✅ **P6（2026-10-18 落地）`ai-settings` 顶层 unknown-key**：写侧从"整坨透传"改**白名单过滤**——未知顶层键不进盘、磁盘上已有的历史脏键在下一次写入时自愈、被丢弃的键以 `diagnostics` additive 回传（路由 `/api/ai/settings` 带出）。
+  - **D-W4a-7（本片新增裁定）**：顶层白名单**不进** shared-config 注册表。理由=该文件顶层混着凭据引用（`credential_status`）、模型 profile 快照与派生态；登记进注册表会顺手把它们变成"可导出/可重置的配置键"，越 D-2 红线。白名单**派生**自三处（`normalizeAiSettings({})` 的输出形状 ∪ 注册表里 `store: file:ai-settings.json#<root>` 的键袋 ∪ 显式 legacy 放行 `chat_provider`），不手写第二份清单。
+  - 顺带的安全收益：顶层裸 `apiKey` 这类历史明文键会在下次保存时被清掉（`getApiKey` 只读 credential store，文件里的裸键本来就是死重）。
+  - **契约变更留痕**：`test/block199-write-guard` 原断言"ai-settings 顶层非本族键不属诊断面"被有意改掉——现在它**要**被点名，但归属是 `ai-settings-root`（文件级垃圾），不得混进"族内值不合法"。
+  - 证据：`test/block203-ai-settings-root.test.mjs` 5/5 + 邻域 **170/170** + `config:doctor` 实跑（0 未知键/0 非法值）+ knip PASS + lint 0 error。
+- ⬜ P7 localStorage 并入 · ⬜ P8 D-2 rider
 - 🔎 **P4 开工前提示（来自 P3 的形状经验）**：`agent-rules` 是**数组**（`rules[]`），比 skills-prefs 的两个 map 更难套用点路径——若继续用"绝对点路径 + 手工遍历"，会退化成为每个落点各写一份遍历器（正是 W4 要清的东西）。P4 应先定"集合形状"的单一实现（`items` 声明 + 通用遍历/诊断），再让 `agent-rules` 与 `mcp-servers` 共用它；否则 P5 会再抄一遍。

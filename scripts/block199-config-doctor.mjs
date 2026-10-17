@@ -25,6 +25,7 @@ const userPrefs = require('../core/petri-server/helpers/user-prefs.js');
 const skillPrefs = require('../core/shared-backend/skill-prefs.js');
 const userRules = require('../core/petri-server/helpers/agent-user-rules.js');
 const mcpSettings = require('../core/petri-server/helpers/mcp-settings.js');
+const aiSettings = require('../core/petri-server/helpers/ai-settings.js');
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 /** 三族的落点文件与其在文件内的"键袋"位置（形状照现状读，不假设统一）。 */
@@ -110,6 +111,29 @@ export function buildReport({ readJson, env = process.env }) {
       }
     }
   }
+  // BLOCK-203 W4a P6 — `ai-settings.json` 顶层未知键（该文件不归属单一族：顶层混着凭据引用、
+  // 模型 profile 快照与派生态，故不进注册表，白名单在文件主人模块里，见 D-W4a-7）。
+  const aiSettingsFile = path.join(
+    env.PETRI_LOCAL_DATA_DIR || path.join(os.homedir(), 'Documents', 'Petri-Local'),
+    'ai-settings.json',
+  );
+  try {
+    const doc = readJson(aiSettingsFile);
+    if (doc && typeof doc === 'object' && !Array.isArray(doc)) {
+      for (const key of Object.keys(doc)) {
+        if (aiSettings.AI_SETTINGS_TOP_LEVEL_KEYS.has(key)) continue;
+        report.unknownKeys.push({
+          family: 'ai-settings-root',
+          file: aiSettingsFile,
+          where: '(file root)',
+          code: schema.DIAGNOSTIC_CODES.UNKNOWN_KEY,
+          path: key,
+          message: `未注册的顶层键 ${key}（报告不删；下一次保存时会被丢弃）`,
+        });
+      }
+    }
+  } catch { /* 文件缺失/不可读：由上面各族的 stores/unreadable 承担，不重复报 */ }
+
   report.summary = {
     storesScanned: report.stores.length,
     unknownKeys: report.unknownKeys.length,

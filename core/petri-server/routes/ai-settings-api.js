@@ -50,8 +50,9 @@ function registerAiSettingsRoutes(app) {
   app.post('/api/ai/settings', express.json(), (req, res) => {
     const incoming = req.body || {};
     const current = getAiSettings();
-    saveAiSettings({ ...current, ...incoming });
-    res.json({ status: 'ok' });
+    const saved = saveAiSettings({ ...current, ...incoming });
+    // BLOCK-203 W4a P6 — 被丢弃的未知顶层键要看得见（白名单过滤不静默）
+    res.json({ status: 'ok', ...(saved && saved.dropped && saved.dropped.length ? { diagnostics: saved.dropped } : {}) });
   });
 
   // 测试 API key 连通性

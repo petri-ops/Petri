@@ -22,7 +22,7 @@ const { normalizeModelConfig } = require('../../shared-backend/llm-providers/mod
 const { createCredentialStore, normalizeProvider } = require('./credential-store');
 // BLOCK-199 P2 — 生成参数形状（类型/区间/取整）取配置 schema 单源，数值语义不在这里复制。
 const {
-  findKeyEntry: findConfigKey, validateValue: validateConfigValue, commitGuard: commitGuardConfig,
+  CONFIG_FAMILIES, findKeyEntry: findConfigKey, validateValue: validateConfigValue, commitGuard: commitGuardConfig,
 } = require('../../packages/shared-config/config-schema.js');
 
 const GENERATION_FAMILY = 'generation';
@@ -131,6 +131,33 @@ function normalizeAiSettings(settings) {
   return next;
 }
 
+/**
+ * BLOCK-203 W4a P6 — `ai-settings.json` 顶层键白名单（"磁盘不再长出未知顶层键"）。
+ *
+ * 为什么**不放进** shared-config 注册表（D-W4a-7，留痕）：这个文件顶层同时装着凭据引用
+ * （`credential_status`）、模型 profile 快照与派生态（`model_config_diagnostics` 等）——
+ * 把它们的键路径登记进注册表，等于顺手把它们变成"可导出/可重置的配置键"，越 D-2 红线。
+ * 顶层白名单属于**文件主人的形状**，真相在产生它的 `normalizeAiSettings`。
+ *
+ * 派生方式（不手写第二份清单）：
+ *  · `normalizeAiSettings({})` 的键 = 该文件被规范化后的**权威输出形状**（随 normalize 自动更新）；
+ *  · 注册表里 `store: file:ai-settings.json#<root>` 的 root = 各配置族在该文件里的键袋
+ *    （generation / reasoning / costCapCny）。注册表加族时这里自动跟上。
+ */
+const AI_SETTINGS_REGISTRY_ROOTS = Object.values(CONFIG_FAMILIES)
+  .map((family) => /^file:ai-settings\.json#(.+)$/.exec(family.store || ''))
+  .filter(Boolean)
+  .map((match) => match[1]);
+// 历史/派生键显式放行：`chat_provider` 只作 `llm_provider` 缺省时的回落读（GET 会回传它，
+// 设置页整坨写回时不该被当成未知键丢掉）；它是派生值，留不留都不影响语义，但"保存一次就少一个键"
+// 会让用户在上游改动后突然失去回落路径。
+const AI_SETTINGS_LEGACY_TOP_LEVEL_KEYS = ['chat_provider'];
+const AI_SETTINGS_TOP_LEVEL_KEYS = new Set([
+  ...Object.keys(normalizeAiSettings({})),
+  ...AI_SETTINGS_REGISTRY_ROOTS,
+  ...AI_SETTINGS_LEGACY_TOP_LEVEL_KEYS,
+]);
+
 function _extractCredentialUpdates(input) {
   const settings = input && typeof input === 'object' ? { ...input } : {};
   const credentials = {};
@@ -235,6 +262,15 @@ function saveAiSettings(settings) {
     credentialStore.set(provider, secret);
   }
   const merged = { ...prev, ...extracted.settings };
+  // BLOCK-203 W4a P6 — 顶层白名单：写进去的未知键不进盘，磁盘上已有的未知键在下一次写入时自愈。
+  // 取"过滤 + 诊断"而不是 400（D-W4a-3）：设置页整坨写入会把 GET 回来的键原样回传，
+  // 400 会让"有历史脏键的用户保存不了任何设置"。
+  const droppedTopLevel = new Set();
+  for (const key of Object.keys(merged)) {
+    if (AI_SETTINGS_TOP_LEVEL_KEYS.has(key)) continue;
+    droppedTopLevel.add(key);
+    delete merged[key];
+  }
   // The Stage 1 UI still writes chat_model_presets. When it does not also send
   // model_profiles, rebuild profiles from those presets instead of retaining a
   // stale normalized snapshot from the previous read.
@@ -245,6 +281,11 @@ function saveAiSettings(settings) {
   fs.writeFileSync(SETTINGS_FILE, JSON.stringify(_cache, null, 2));
   fs.chmodSync(SETTINGS_FILE, 0o600);
   _cacheSignature = _settingsFileSignature();
+  return {
+    dropped: [...droppedTopLevel].map((key) => ({
+      code: 'unknown-key', family: 'ai-settings-root', path: key, message: `未注册的顶层键 ${key}（已丢弃，不写盘）`,
+    })),
+  };
 }
 
 /**
@@ -393,6 +434,7 @@ function saveReasoningSection(section) {
 }
 
 module.exports = {
+  AI_SETTINGS_TOP_LEVEL_KEYS,
   getAiSettings,
   getApiKey,
   getChatProviderName,
