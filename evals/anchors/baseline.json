@@ -1,0 +1,590 @@
+{
+  "schema": "petri-competitiveness-anchor-baseline/v1",
+  "updatedAt": "2026-10-17T02:29:07.542Z",
+  "tiers": "all",
+  "points": [
+    {
+      "id": "1.1-steer",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/agent-steering.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "1.1-resume",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block38-agent-task-resume.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "1.1-finalize",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block119-report-guard.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "1.1-false-success",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block146-agent-domain-validation.test.mjs",
+          "status": "pass"
+        },
+        {
+          "tier": "unit",
+          "path": "test/block114-failure-triage.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "1.1-compaction-summary",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block172-cp5-compact.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "1.1-prompt-layering",
+      "state": "unanchored",
+      "anchors": []
+    },
+    {
+      "id": "1.1-context-contract",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block188-context-snapshot.test.mjs",
+          "status": "pass"
+        },
+        {
+          "tier": "evals",
+          "path": "evals/snapshots/golden.json",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "2.2-hybrid-retrieval",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/knowledge-space.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "2.2-memory-lifecycle",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/memory-lifecycle.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "2.2-project-memory",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/project-memory-isolation.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "2.2-token-budget-real",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block163-token-budget.test.mjs",
+          "status": "pass"
+        },
+        {
+          "tier": "frontend",
+          "path": "frontend/src/components/copilot/ContextBudgetBar.test.tsx",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "2.2-ann-layering",
+      "state": "unanchored",
+      "anchors": []
+    },
+    {
+      "id": "2.2-retrieval-live",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "live",
+          "path": ".agents/skills/petri-dev-infra/dev-verify/flows/block99-knowledge-multispace.cjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "3.3-concurrency-config",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block173-w3-contracts.test.mjs",
+          "status": "pass"
+        },
+        {
+          "tier": "unit",
+          "path": "test/agent-concurrency.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "3.3-spawn-wait",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block49-spawn-agent-tools.test.mjs",
+          "status": "pass"
+        },
+        {
+          "tier": "unit",
+          "path": "test/block163-orchestration.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "3.3-tool-cancel",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block171-tool-cancel.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "3.3-dag-visible",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "frontend",
+          "path": "frontend/src/components/workspace-panels/OrchestrationGraph.test.tsx",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "3.3-roles-replan",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block93-agent-roles.test.mjs",
+          "status": "pass"
+        },
+        {
+          "tier": "unit",
+          "path": "test/block55-plan-mode.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "3.3-evals-orchestration",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "evals",
+          "path": "evals/suites/smoke/orchestration-spawn.json",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "3.3-recursive-tree",
+      "state": "unanchored",
+      "anchors": []
+    },
+    {
+      "id": "4.4-dynamic-guard",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block160-dynamic-guards.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "4.4-user-rules",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block160-user-rules.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "4.4-ack-card-ui",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "frontend",
+          "path": "frontend/src/components/copilot/SimpleChat/GuardAckCard.test.tsx",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "4.4-ack-consume",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block180-approval-resource.test.mjs",
+          "status": "pass"
+        },
+        {
+          "tier": "evals",
+          "path": "evals/suites/smoke/approval-chain.json",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "4.4-secret-at-rest",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block160-mcp-env-crypto.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "4.4-cost-breaker",
+      "state": "unanchored",
+      "anchors": []
+    },
+    {
+      "id": "4.4-worktree-safety",
+      "state": "unanchored",
+      "anchors": []
+    },
+    {
+      "id": "5.5-stop",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "frontend",
+          "path": "frontend/src/components/copilot/SimpleChat/hooks/useChatStream.test.ts",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "5.5-queue-visible",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "frontend",
+          "path": "frontend/src/components/copilot/SimpleChat/hooks/useChatStream.block178.test.tsx",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "5.5-cmdk",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "frontend",
+          "path": "frontend/src/components/copilot/useAppCommands.test.ts",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "5.5-timeline",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "frontend",
+          "path": "frontend/src/components/copilot/ConversationTimeline.test.tsx",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "5.5-multiwindow",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block59-window-manager.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "5.5-budget-ring-ui",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "frontend",
+          "path": "frontend/src/components/copilot/ContextBudgetBar.test.tsx",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "5.5-slash-execute",
+      "state": "unanchored",
+      "anchors": []
+    },
+    {
+      "id": "5.5-real-chromium-e2e",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "live",
+          "path": ".agents/skills/petri-dev-infra/dev-verify/flows/ui341-welcome-chat.cjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "6.6-sandbox-security",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block166-gen-ui-host.test.mjs",
+          "status": "pass"
+        },
+        {
+          "tier": "unit",
+          "path": "test/block166-gen-ui-guest-bridge.test.mjs",
+          "status": "pass"
+        },
+        {
+          "tier": "unit",
+          "path": "test/block166-gen-ui-external-link.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "6.6-path-selfheal",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block181-genui-path-repair.test.mjs",
+          "status": "pass"
+        },
+        {
+          "tier": "evals",
+          "path": "evals/suites/smoke/genui-fragment-path.json",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "6.6-theme-accent",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/gen-ui-theme-tokens.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "6.6-card-interactions",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "frontend",
+          "path": "frontend/src/components/copilot/gen-ui/GenUiCard.test.tsx",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "6.6-export",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block166-gen-ui-p2.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "6.6-data-binding",
+      "state": "unanchored",
+      "anchors": []
+    },
+    {
+      "id": "7.7-viewer-coverage",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "frontend",
+          "path": "frontend/src/components/result-studio/viewerRegistry.test.ts",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "7.7-lineage",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block127-lineage.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "7.7-selection-bus",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "frontend",
+          "path": "frontend/src/lib/selectionBus.test.ts",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "7.7-first-success-loop",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "evals",
+          "path": "evals/suites/golden/first-success.json",
+          "status": "pass"
+        },
+        {
+          "tier": "unit",
+          "path": "test/block186-funnel-ledger.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "7.7-result-loop-live",
+      "state": "unanchored",
+      "anchors": [
+        {
+          "tier": "live",
+          "path": ".agents/skills/petri-dev-infra/dev-verify/flows/block121-result-loop.cjs",
+          "status": "env"
+        }
+      ]
+    },
+    {
+      "id": "7.7-split-compare",
+      "state": "unanchored",
+      "anchors": []
+    },
+    {
+      "id": "8.8-data-bridge-ws",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block183-data-ws.test.mjs",
+          "status": "pass"
+        },
+        {
+          "tier": "frontend",
+          "path": "frontend/src/lib/projectionWsData.test.ts",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "8.8-ws-protocol",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block162-ws-server.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "8.8-federation-honest",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block164-federation-ux.test.mjs",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "8.8-real-model-regression",
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "evals",
+          "path": "evals/recordings/real",
+          "status": "pass"
+        }
+      ]
+    },
+    {
+      "id": "8.8-delegation-realtime",
+      "state": "unanchored",
+      "anchors": []
+    },
+    {
+      "id": "8.8-relay-topology",
+      "state": "unanchored",
+      "anchors": []
+    }
+  ]
+}

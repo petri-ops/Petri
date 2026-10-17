@@ -2788,6 +2788,21 @@
       "classifiesScripts": true
     },
     {
+      "id": "block195-competitiveness-anchors",
+      "note": "BLOCK-195 竞争力 8 维锚点化复测（阶段 2 出口收口批）：evals/anchors/competitiveness-8d.json 声明式清单（点位取自总纲 §1 判词 + §2 D1–D18，derivesFrom 可指回）+ scripts/lib/anchor-ratchet.mjs（定分公式与清单自检的唯一实现：无证据不给分、环境档不冒绿、锚点集合收缩=回归）+ scripts/block195-anchors.mjs 复跑器（unit/frontend/evals/live/probe 五层逐条跑·--check 棘轮·--update 显式审计·前置条件预检 fsExists/cdp）。契约=test/block195-anchors.test.mjs（10 项含幽灵锚点零容忍与反拟合守卫）。两条新脚本仅此一条 classifiesScripts:true 规则匹配；ContextBudgetBar.test.tsx 由 frontend-source 规则取测试。",
+      "patterns": [
+        "scripts/block195-anchors.mjs",
+        "scripts/lib/anchor-ratchet.mjs",
+        "evals/anchors/**",
+        "acceptance/block-195/**",
+        "test/block195-*.test.mjs"
+      ],
+      "tests": [
+        "test/block195-anchors.test.mjs"
+      ],
+      "classifiesScripts": true
+    },
+    {
       "id": "ui-proxy-review-probe",
       "note": "UI 代行评估/构造探针（scripts/ui-proxy-review.mjs，UI-496~509 批引入；scripts/ui500-compaction-live.mjs，UI-500 压缩构造批）：CDP 驱动真界面+截图留证，实机走查证据工具非回归测试（同 block123-p0-probes 形态）；证据=acceptance/ui-proxy-review/ 与 acceptance/ui-500/。",
       "patterns": [
