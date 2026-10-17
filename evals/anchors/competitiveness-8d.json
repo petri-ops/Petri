@@ -183,7 +183,7 @@
         },
         {
           "id": "2-ann-layering",
-          "claim": "D3 记忆分层与 ANN 索引质量基线",
+          "claim": "D3 记忆分层与 ANN 质量基线：**真缺失**——`memory-vectors.js:111-127` 是暴力全表 JS cosine（无 ANN 索引；BLOCK-94 已裁决不引入 sqlite-vec），全仓 `recall|MRR|nDCG` 零命中（无召回质量基线），分层只有事实雏形（`agent-runner.js:434-448` 项目记忆注入 + user-facts + chat-summary）。**保持无锚并转候选 C-30**",
           "derivesFrom": "§2 D3",
           "anchors": []
         },
@@ -486,7 +486,7 @@
         },
         {
           "id": "5-slash-execute",
-          "claim": "D15 斜杠即执行（chip v2 结构化）",
+          "claim": "D15 斜杠即执行：**部分实现**——UI 动作族（new/clear/model/export/compact）在 `SimpleChat.tsx:1306-1365` 确即执行，skill/template 条目仅注入文本模板（`slashSources.ts:8-9` 原文「结构化 chip 注入通道留 v2」）；离线不可锚（要真锚须把 executeSlashCommand 从 1664 行组件抽成可测单元=产品改动），**保持无锚并转候选 C-29**",
           "derivesFrom": "§2 D15",
           "anchors": []
         },
@@ -678,9 +678,15 @@
         },
         {
           "id": "7-split-compare",
-          "claim": "D18 canCompare→分屏对照与比例可调",
+          "claim": "D18 分屏对照与比例可调（clampRatio 20–80 + pointer 拖拽 + 键盘 ±5 + localStorage 持久化与坏值回落）**已落地并有测**；残余两点如实登记：`role=\"separator\"`+aria-value* 而非 slider（读屏不播报滑杆值），`viewerRegistry` 的 canCompare 未接进钉住入口（`ResultArtifactShell.tsx:1019` 只按 previewLoading 禁用）",
           "derivesFrom": "§2 D18 分屏固定 60/40",
-          "anchors": []
+          "anchors": [
+            {
+              "tier": "frontend",
+              "path": "frontend/src/components/workspace-panels/ArtifactPinPane.ratio.test.tsx",
+              "cmd": "npm run test:files --prefix frontend -- src/components/workspace-panels/ArtifactPinPane.ratio.test.tsx"
+            }
+          ]
         }
       ]
     },
@@ -756,7 +762,7 @@
         },
         {
           "id": "8-relay-topology",
-          "claim": ">2 节点中继拓扑",
+          "claim": ">2 节点中继拓扑：**真缺失**——`federation-peers.js:31-41,128-158` 是按 baseUrl 平铺 upsert 的点对点直连清单，委托=本端直接 POST 对端；全 `core/` grep `relay|多跳|nextHop|viaPeer|forwardDelegate|hop` 无实义命中，现存联邦测试全是 1 指挥席 + 1 对端拓扑。**保持无锚并转候选 C-31**",
           "derivesFrom": "§1 dim8 + D164 deferred 项",
           "anchors": []
         }
