@@ -13,7 +13,7 @@ acceptance:
   - P8 收尾：`config:doctor` 覆盖新族；BLOCK-199 四向漂移门扩到新族（族↔设置面↔写路由 4xx↔RUNTIME_POINTS，对无 HTTP 面的族登记例外并说明）；`config-transfer` 导出/导入/重置覆盖新增可导出族（凭据类与 renderer 缓存面排除并回传排除清单）；`impact-map` 登记；closeout 十三门 + 五件套回写。
   - 完成语义：W4a 完成 = **文件落点收编完成**（覆盖率口径见 §6），**不含** data root 统一——后者是 W4b，同一逻辑设置"主/后端指向同一文件"的跨进程回归测在 W4b 才成立。完成时**不得**表述为"配置已统一"。
 reopen: W4b 搬迁（SQLite 四落点 + 主进程窗口/路由态 + 4 条 data root 回落链合一）；`config:doctor` 接设置面内联提示；`ai-settings` 顶层键的 400 化（需先让设置页只回传已注册键）；`extraRenderers` 等未测绘的第七个文件族；W5 逐工具策略。
-status: active
+status: completed
 ---
 
 # BLOCK-203 · 阶段 3 B1b（W4a）：纯文件落点收编 + ai-settings 顶层语义 + localStorage 并入 + D-2 rider
