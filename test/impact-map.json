@@ -3897,7 +3897,7 @@
     },
     {
       "id": "block203-config-landing",
-      "note": "BLOCK-203 W4a 落点收编（P1+P2 user-prefs、P3 skills-prefs）：schema 加族与「代码侧字段」语义（owner:code 读不报只读噪音/写仍拒）；user-prefs 落点 helper 单源、未知键 400；skills-prefs 按点路径登记、读丢脏条目不连坐、IPC 写面 id 形状 fail-closed；config-transfer 两族扩入（导出/导入/按区重置），drift 门加 NON_HTTP_WRITE_FAMILIES 登记无 HTTP 写面族。",
+      "note": "BLOCK-203 W4a 落点收编（P1+P2 user-prefs、P3 skills-prefs）：schema 加族与「代码侧字段」语义（owner:code 读不报只读噪音/写仍拒）；user-prefs 落点 helper 单源、未知键 400；skills-prefs 按点路径登记、读丢脏条目不连坐、IPC 写面 id 形状 fail-closed；config-transfer 两族扩入（导出/导入/按区重置），drift 门加 NON_HTTP_WRITE_FAMILIES 登记无 HTTP 写面族。  P4：agent-rules 集合型落点收编——schema 加 <item> 精确寻址（findItemFieldEntry/itemFieldPaths）+ 通用 sanitizeItem/diagnoseItem（读写共用），agent-user-rules 改由注册表供形状（旧错误码保持，新增 rule_field_unknown），config-transfer/doctor 接入集合诊断。",
       "patterns": [
         "core/packages/shared-config/config-schema.js",
         "core/petri-server/helpers/user-prefs.js",
@@ -3908,7 +3908,9 @@
         "frontend/src/themes/ThemeProvider.tsx",
         "frontend/src/themes/accents.ts",
         "frontend/src/hooks/useSkillStore.ts",
-        "test/block203-*.test.mjs"
+        "test/block203-*.test.mjs",
+        "core/petri-server/helpers/agent-user-rules.js",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/AgentRulesPanel.tsx"
       ],
       "tests": [
         "test/block203-user-prefs.test.mjs",
@@ -3917,7 +3919,9 @@
         "test/block177-governance.test.mjs",
         "test/block201-settings-baseline.test.mjs",
         "test/block199-config-drift.test.mjs",
-        "test/block201-config-transfer.test.mjs"
+        "test/block201-config-transfer.test.mjs",
+        "test/block203-agent-rules.test.mjs",
+        "test/block160-user-rules.test.mjs"
       ],
       "classifiesScripts": false
     }

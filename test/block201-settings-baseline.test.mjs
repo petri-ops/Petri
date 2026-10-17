@@ -8,7 +8,7 @@
  * 三条事实：
  *  ① 设置面板分区清单 = 10 项（BLOCK-200 加了 keymap/reasoning 后从 8 变 10；
  *     `docs/stage-3-4-execution-runlist.md` 的「8 分区」口径已过时，本包按实况登记）；
- *  ② 配置注册表 = 9 族 / 38 键（BLOCK-199 四族 + BLOCK-200 两族 + BLOCK-202 两族 + BLOCK-203 一族）；
+ *  ② 配置注册表 = 11 族 / 51 键（BLOCK-199 四族 + BLOCK-200 两族 + BLOCK-202 两族 + BLOCK-203 三族）；
  *  ③ 导出/导入的族集合必须与注册表**逐族相等**（不得偷偷漏族或加未注册族）。
  */
 import assert from 'node:assert/strict';
@@ -36,7 +36,7 @@ test('设置分区清单冻结：10 个分区 id（搜索索引必须逐项覆�
   assert.equal(ids.length, 10, `分区数应为 10（实得 ${ids.length}）：${ids.join(', ')}`);
 });
 
-test('配置注册表冻结：10 族 / 43 键（BLOCK-203 加 user-prefs 3 键 + skills-prefs 5 键）', () => {
+test('配置注册表冻结：11 族 / 51 键（BLOCK-203 加 user-prefs/skills-prefs/agent-rules 三族）', () => {
   // 2026-10-17 两次显式上调（BLOCK-203 W4a）：
   //  P1+P2：8 族/35 键 → 9 族/38 键（user-prefs：theme/fontScale/accent）；
   //  P3   ：9 族/38 键 → 10 族/43 键（skills-prefs：version + disabled.<id>.{at,reason}
@@ -44,8 +44,9 @@ test('配置注册表冻结：10 族 / 43 键（BLOCK-203 加 user-prefs 3 键 +
   // 上调理由写在这里而不是只改数字；数字变化必须伴随 config-transfer 族集合与漂移门登记
   // （下一条断言 + drift 测守着）。skills-prefs 的写面是 IPC，故 drift 门按
   // NON_HTTP_WRITE_FAMILIES 登记而不是硬塞一个假的 400 路由。
-  assert.equal(Object.keys(schema.CONFIG_FAMILIES).length, 10);
-  assert.equal(schema.CONFIG_KEYS.length, 43);
+  //   P4   ：10 族/43 键 → 11 族/51 键（agent-rules：version + 7 个条目字段）。
+  assert.equal(Object.keys(schema.CONFIG_FAMILIES).length, 11);
+  assert.equal(schema.CONFIG_KEYS.length, 51);
 });
 
 test('导出/导入的族集合 == 注册表族集合（漏族/未注册族都算红）', () => {

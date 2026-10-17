@@ -38,6 +38,8 @@ const UI_CARRIERS = {
   'user-prefs': { file: 'frontend/src/themes/ThemeProvider.tsx', must: ['/user/prefs'] },
   // BLOCK-203 W4a P3：技能治理面的真承载是 Skills 页的 store hook（走 IPC 桥，不是 REST）
   'skills-prefs': { file: 'frontend/src/hooks/useSkillStore.ts', must: ["getBridge('skills')", 'setDisabled'] },
+  // BLOCK-203 W4a P4：用户 Agent 规则的承载面（设置页「常规」→ 规则面板）
+  'agent-rules': { file: 'frontend/src/components/desktop/DesktopSettingsPanel/sections/AgentRulesPanel.tsx', must: ['/ai/agent-rules'] },
 };
 
 /** 族 → 后端写路由（必须能把拒绝翻译成 4xx，而不是冒 500 或静默）。 */
@@ -51,6 +53,7 @@ const WRITE_ROUTES = {
   network: 'core/petri-server/routes/runtime-config.js',
   runtime: 'core/petri-server/routes/runtime-config.js',
   'user-prefs': 'core/petri-server/routes/user-prefs.js',
+  'agent-rules': 'core/petri-server/routes/ai-settings-api.js',
 };
 
 /**

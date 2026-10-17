@@ -29,6 +29,7 @@ const network = require('./network-config');
 const runtimePolicy = require('./runtime-policy');
 const userPrefs = require('./user-prefs');
 const skillPrefs = require('../../shared-backend/skill-prefs.js');
+const userRules = require('./agent-user-rules');
 
 const CONFIG_TRANSFER_FORMAT = 'petri-config';
 const CONFIG_TRANSFER_VERSION = 1;
@@ -48,6 +49,8 @@ const CONFIG_TRANSFER_FAMILIES = Object.freeze([
   'user-prefs',
   // BLOCK-203 W4a P3（BLOCK-177 的技能治理帐本；写入面是 IPC，不是 HTTP）
   'skills-prefs',
+  // BLOCK-203 W4a P4（BLOCK-160 ORC-1 的用户 Agent 规则；集合型落点）
+  'agent-rules',
 ]);
 
 /** 显式排除清单：随信封回传，防止「以为备份了全部设置」。 */
@@ -116,6 +119,7 @@ function readFamilyOverrides() {
     runtime: { ...runtimePolicy.readStore() },
     'user-prefs': { ...userPrefs.readPrefs() },
     'skills-prefs': { ...skillPrefs.loadPrefs() },
+    'agent-rules': { version: 1, rules: userRules.loadUserRules() },
   };
 }
 
@@ -208,6 +212,16 @@ function validateFamily(family, body) {
   }
   if (family === 'network' || family === 'runtime') {
     return schema.commitGuard(family, body, lookup).diagnostics;
+  }
+  if (family === 'agent-rules') {
+    // 集合型：逐条目走同一个 sanitizeItem（未知字段/非法枚举全拒）；导入不接受"部分条目合格"
+    if (!Array.isArray(body.rules)) return [diagnostic(family, 'rules', 'type-mismatch', 'agent-rules.rules 必须是数组')];
+    const diagnostics = [];
+    body.rules.forEach((rule, index) => {
+      const result = userRules.normalizeRule(rule);
+      for (const d of result.diagnostics) diagnostics.push({ ...d, path: `rules[${index}].${d.path}` });
+    });
+    return diagnostics;
   }
   if (family === 'skills-prefs') {
     // 该族有代码自写字段（version/at/sourceDir），不能走 commitGuard（会按只读键全拒）；
@@ -306,6 +320,15 @@ const WRITERS = {
     // 合并覆盖（导入不删文件里未出现的键）：合并与消毒都在落点模块里，transfer 不复制形状知识
     skillPrefs.importPrefs(body);
   },
+  'agent-rules'(body) {
+    // 整单替换（既有契约：PUT 即全量），规则合并语义不存在——first-match 顺序本身是用户数据
+    const result = userRules.saveUserRules(body.rules);
+    if (!result.ok) {
+      const error = new Error('agent-rules 写入被拒');
+      error.diagnostics = result.diagnostics || [];
+      throw error;
+    }
+  },
 };
 
 /**
@@ -346,6 +369,7 @@ const RESETTERS = {
   'user-prefs'() { userPrefs.resetPrefs(); },
   // 重置只清 disabled（用户治理覆盖层），保留 uninstalledSources（重装指针，不是"设置"）
   'skills-prefs'() { skillPrefs.resetPrefs(); },
+  'agent-rules'() { userRules.saveUserRules([]); },
 };
 
 /**

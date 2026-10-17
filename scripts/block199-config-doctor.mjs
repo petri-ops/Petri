@@ -23,6 +23,7 @@ const schema = require('../core/packages/shared-config/config-schema.js');
 // （自猜就是第五份 data root 知识；这条链本身的合一属 W4b）。
 const userPrefs = require('../core/petri-server/helpers/user-prefs.js');
 const skillPrefs = require('../core/shared-backend/skill-prefs.js');
+const userRules = require('../core/petri-server/helpers/agent-user-rules.js');
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 /** 三族的落点文件与其在文件内的"键袋"位置（形状照现状读，不假设统一）。 */
@@ -42,6 +43,8 @@ function storeTargets(env = process.env) {
     // 注册表按**文件根绝对路径**登记（`disabled.<id>.at` 这类），故这里整份摊平再诊断
     // （bag 相对路径会让 `<id>.at` 同时指两个袋子，读起来更糟）。
     { family: 'skills-prefs', file: skillPrefs.getPrefsFilePath(), flattenRoot: true },
+    // BLOCK-203 W4a P4：集合型落点的条目逐个诊断（`items` 选项把每条当作一组）
+    { family: 'agent-rules', file: userRules.rulesFile(userRules.dataDir()), items: 'rules' },
   ];
 }
 
@@ -67,6 +70,11 @@ export function buildReport({ readJson, env = process.env }) {
     if (target.flattenRoot) {
       groups.push({ bagName: '(file root)', obj: schema.flattenOneLevel(doc) });
     }
+    if (target.items && Array.isArray(doc[target.items])) {
+      doc[target.items].forEach((entry, index) => {
+        groups.push({ bagName: `${target.items}[${index}]`, obj: schema.flattenOneLevel(entry), itemScoped: target.family });
+      });
+    }
     if (target.scalarKeys) {
       const bag = {};
       for (const k of target.scalarKeys) if (k in doc) bag[k] = doc[k];
@@ -84,7 +92,9 @@ export function buildReport({ readJson, env = process.env }) {
     for (const group of groups) {
       const present = Object.fromEntries(Object.entries(group.obj).filter(([, v]) => v !== undefined));
       // 嵌套族先摊成注册表用的点路径，否则 `mapping` 整坨会被当成"未注册键"误报
-      const diags = schema.diagnoseObject(target.family, target.flatten ? schema.flattenOneLevel(present) : present, lookup);
+      const diags = group.itemScoped
+        ? schema.diagnoseItem(group.itemScoped, present)
+        : schema.diagnoseObject(target.family, target.flatten ? schema.flattenOneLevel(present) : present, lookup);
       for (const d of diags) {
         const item = { family: target.family, file: target.file, where: group.bagName, ...d };
         if (d.code === schema.DIAGNOSTIC_CODES.UNKNOWN_KEY) report.unknownKeys.push(item);

@@ -105,6 +105,14 @@ const CONFIG_FAMILIES = Object.freeze({
     precedence: ['file', 'default'],
     envTruth: null,
   },
+  // —— BLOCK-203 W4a P4：用户 Agent 规则（BLOCK-160 ORC-1 的 rules[]）——
+  // **集合型落点**：条目字段用 `<item>.` 前缀登记（数组没有稳定键，绝对点路径会逼每个落点
+  // 自带遍历器——W4 要清的正是这个）。读写两侧共用 `sanitizeItem`/`diagnoseItem`。
+  'agent-rules': {
+    store: 'file:agent-rules.json#rules',
+    precedence: ['file', 'default'],
+    envTruth: null,
+  },
 });
 
 /**
@@ -338,6 +346,42 @@ const CONFIG_KEYS = Object.freeze([
     key: 'skills.uninstalledSource.<id>.at', family: 'skills-prefs', path: 'uninstalledSources.<id>.at',
     type: 'string', envKeys: [], aliases: [], mutable: false, owner: 'code', ui: 'none',
   },
+  // —— 用户 Agent 规则（BLOCK-203 W4a P4；原 `helpers/agent-user-rules.js:63-80` 内联校验）——
+  // 条目字段路径以 `<item>.` 开头，`findItemFieldEntry` 按精确字符串寻址（不走占位段匹配，
+  // 避免"任意字段都能活"）。`scope` 目前只有 global（BLOCK-160 语义），保留但登记成枚举，
+  // 将来加项目级作用域时这里是唯一改动点。
+  {
+    key: 'agentRules.version', family: 'agent-rules', path: 'version',
+    type: 'number', envKeys: [], aliases: [], mutable: false, owner: 'code', ui: 'none',
+  },
+  {
+    key: 'agentRules.<item>.id', family: 'agent-rules', path: '<item>.id',
+    type: 'string', domain: { pattern: '\\S' }, envKeys: [], aliases: [], mutable: true, ui: 'settings',
+  },
+  {
+    key: 'agentRules.<item>.matcher.type', family: 'agent-rules', path: '<item>.matcher.type',
+    type: 'string', domain: { oneOf: ['path-glob', 'command-token'] }, envKeys: [], aliases: [], mutable: true, ui: 'settings',
+  },
+  {
+    key: 'agentRules.<item>.matcher.pattern', family: 'agent-rules', path: '<item>.matcher.pattern',
+    type: 'string', domain: { pattern: '\\S' }, envKeys: [], aliases: [], mutable: true, ui: 'settings',
+  },
+  {
+    key: 'agentRules.<item>.action', family: 'agent-rules', path: '<item>.action',
+    type: 'string', domain: { oneOf: ['deny', 'require-ack'] }, envKeys: [], aliases: [], mutable: true, ui: 'settings',
+  },
+  {
+    key: 'agentRules.<item>.scope', family: 'agent-rules', path: '<item>.scope',
+    type: 'string', domain: { oneOf: ['global'] }, envKeys: [], aliases: [], mutable: true, ui: 'settings',
+  },
+  {
+    key: 'agentRules.<item>.note', family: 'agent-rules', path: '<item>.note',
+    type: 'string', envKeys: [], aliases: [], mutable: true, ui: 'settings',
+  },
+  {
+    key: 'agentRules.<item>.createdAt', family: 'agent-rules', path: '<item>.createdAt',
+    type: 'string', envKeys: [], aliases: [], mutable: false, owner: 'code', ui: 'none',
+  },
 ]);
 
 const KEY_INDEX = new Map(CONFIG_KEYS.map((entry) => [entry.key, entry]));
@@ -368,6 +412,74 @@ function findEntryByPath(family, storagePath) {
   return null;
 }
 
+/**
+ * 集合条目的字段寻址（BLOCK-203 W4a P4）：按**精确字符串**匹配 `<item>.<field>`，
+ * 不走 `findEntryByPath` 的占位段匹配——占位段会让任意字段名都"注册"成功，
+ * 等于把写侧的未知字段拒绝能力空转（`keymap` 族当年就是为了这个才逐命令显式登记）。
+ */
+function findItemFieldEntry(family, fieldPath) {
+  const target = `<item>.${fieldPath}`;
+  return CONFIG_KEYS.find((entry) => entry.family === family && entry.path === target) || null;
+}
+
+/** 该族已登记的条目字段路径（不含 `<item>.` 前缀）。 */
+function itemFieldPaths(family) {
+  return CONFIG_KEYS
+    .filter((entry) => entry.family === family && entry.path.startsWith('<item>.'))
+    .map((entry) => entry.path.slice('<item>.'.length));
+}
+
+function setNested(target, dottedPath, value) {
+  const parts = dottedPath.split('.');
+  let cursor = target;
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (!cursor[parts[i]] || typeof cursor[parts[i]] !== 'object' || Array.isArray(cursor[parts[i]])) {
+      cursor[parts[i]] = {};
+    }
+    cursor = cursor[parts[i]];
+  }
+  cursor[parts[parts.length - 1]] = value;
+}
+
+/**
+ * 集合条目消毒（单一实现，读写两侧共用）：
+ *  · 只保留**已登记**的字段并重建嵌套形状（未知字段 → 诊断 + 不落盘）；
+ *  · 值按注册表校验（类型/枚举/正则/SQL 注入面之外的一切形状）；
+ *  · 读侧调用时只用 `.diagnostics`（宽容报告），写侧用 `.item`（重建后再落盘）。
+ * @returns {{item:object|null, diagnostics:Array}}
+ */
+function sanitizeItem(family, raw) {
+  const diagnostics = [];
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    return { item: null, diagnostics: [{ code: DIAGNOSTIC_CODES.TYPE_MISMATCH, path: '', family, message: '条目必须是对象' }] };
+  }
+  const flat = flattenOneLevel(raw);
+  const item = {};
+  for (const [field, value] of Object.entries(flat)) {
+    const entry = findItemFieldEntry(family, field);
+    if (!entry) {
+      diagnostics.push({ code: DIAGNOSTIC_CODES.UNKNOWN_KEY, path: field, family, message: `未注册的条目字段 ${field}（写侧拒绝，读侧忽略）` });
+      continue;
+    }
+    if (!entry.mutable && entry.owner !== 'code') {
+      diagnostics.push({ code: DIAGNOSTIC_CODES.READ_ONLY, path: field, family, message: `${entry.key} 属代码侧校准专属，用户不可写` });
+      continue;
+    }
+    const check = validateValue(entry, value);
+    if (!check.ok) {
+      diagnostics.push({ code: check.code, path: field, family, message: check.message });
+      continue;
+    }
+    setNested(item, field, check.normalized);
+  }
+  return { item, diagnostics };
+}
+
+/** 读侧条目诊断（同一实现的薄别名；doctor / 落点读侧用）。 */
+function diagnoseItem(family, raw) {
+  return sanitizeItem(family, raw).diagnostics;
+}
+
 /** 类型与数值域校验：返回归一化值或结构化诊断码（不抛错——抛不抛由调用侧语义决定）。 */
 function validateValue(entry, raw) {
   if (!entry) return { ok: false, code: DIAGNOSTIC_CODES.UNKNOWN_KEY, message: '未注册的键' };
@@ -386,6 +498,16 @@ function validateValue(entry, raw) {
     if (d.max != null && v > d.max) return { ok: false, code: DIAGNOSTIC_CODES.OUT_OF_RANGE, message: `${entry.key} 需 ≤ ${d.max}` };
     if (d.minExclusive != null && v <= d.minExclusive) return { ok: false, code: DIAGNOSTIC_CODES.OUT_OF_RANGE, message: `${entry.key} 需 > ${d.minExclusive}` };
     return { ok: true, normalized: v };
+  }
+  // `object`/`array` 是"原样通过"型：只做浅层容器判断，内容由各自落点按语义处理
+  // （mcp-servers 的 `args: string[]` 与 `env: Record<string,string>` 就是这类）。
+  if (entry.type === 'object') {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { ok: false, code: DIAGNOSTIC_CODES.TYPE_MISMATCH, message: `${entry.key} 需要对象` };
+    return { ok: true, normalized: raw };
+  }
+  if (entry.type === 'array') {
+    if (!Array.isArray(raw)) return { ok: false, code: DIAGNOSTIC_CODES.TYPE_MISMATCH, message: `${entry.key} 需要数组` };
+    return { ok: true, normalized: raw };
   }
   if (entry.type === 'string') {
     if (typeof raw !== 'string') return { ok: false, code: DIAGNOSTIC_CODES.TYPE_MISMATCH, message: `${entry.key} 需要 string` };
@@ -556,6 +678,10 @@ module.exports = {
   resolveEnvEntry,
   resolve,
   diagnoseObject,
+  diagnoseItem,
+  sanitizeItem,
+  findItemFieldEntry,
+  itemFieldPaths,
   flattenOneLevel,
   commitGuard,
   envShadowedKeys,

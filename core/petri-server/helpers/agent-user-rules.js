@@ -16,8 +16,42 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const schema = require('../../packages/shared-config/config-schema.js');
 
 const RULES_VERSION = 1;
+const FAMILY = 'agent-rules';
+
+/** 条目必填字段（形状/枚举真相在注册表；这里只表达"必填"这一关系）。 */
+const REQUIRED_FIELDS = ['id', 'matcher.type', 'matcher.pattern', 'action'];
+
+/**
+ * BLOCK-203 W4a P4：错误码保持 BLOCK-160 契约不变（前端与既有测试都认这几个码），
+ * 但判定来源改为注册表诊断 —— 一个校验器，两种出口（新诊断 + 旧错误码）。
+ */
+function legacyErrorFor(diagnostics) {
+  const has = (p) => diagnostics.some((d) => d.path === p);
+  if (has('id')) return 'rule_id_required';
+  if (has('matcher.type')) return 'rule_matcher_type_invalid';
+  if (has('matcher.pattern')) return 'rule_pattern_required';
+  if (has('action')) return 'rule_action_invalid';
+  if (diagnostics.some((d) => d.code === schema.DIAGNOSTIC_CODES.UNKNOWN_KEY)) return 'rule_field_unknown';
+  return 'rule_invalid';
+}
+
+/** 单条规则消毒 + 必填检查（读侧只用 item，写侧看 diagnostics）。 */
+function normalizeRule(raw) {
+  const { item, diagnostics } = schema.sanitizeItem(FAMILY, raw);
+  if (!item) {
+    return { item: null, diagnostics: diagnostics.length ? diagnostics : [{ code: 'type-mismatch', path: '', family: FAMILY, message: '规则必须是对象' }] };
+  }
+  for (const field of REQUIRED_FIELDS) {
+    const value = field.split('.').reduce((acc, key) => (acc && typeof acc === 'object' ? acc[key] : undefined), item);
+    if (value === undefined) {
+      diagnostics.push({ code: schema.DIAGNOSTIC_CODES.TYPE_MISMATCH, path: field, family: FAMILY, message: `缺少必填字段 ${field}` });
+    }
+  }
+  return { item, diagnostics };
+}
 const CACHE_TTL_MS = 3000;
 
 let _cache = { rules: [], loadedAt: 0, key: '' };
@@ -49,11 +83,13 @@ function loadUserRules() {
   try {
     const parsed = JSON.parse(fs.readFileSync(file, 'utf8'));
     if (parsed && Array.isArray(parsed.rules)) {
-      rules = parsed.rules.filter(
-        (r) => r && typeof r.id === 'string' && r.id
-          && r.matcher && typeof r.matcher.pattern === 'string'
-          && (r.action === 'deny' || r.action === 'require-ack')
-      );
+      // 读侧宽容，但**分级**：
+      //  · 未注册字段 = 忽略该字段，规则本身仍然有效（否则加个字段就把用户的规则弄失效）；
+      //  · 值非法/缺必填 = 丢该条（不让一条脏规则废掉整层拦截）。
+      rules = parsed.rules
+        .map((rule) => normalizeRule(rule))
+        .filter(({ item, diagnostics }) => item && !diagnostics.some((d) => d.code !== schema.DIAGNOSTIC_CODES.UNKNOWN_KEY))
+        .map(({ item }) => item);
     }
   } catch {
     rules = [];
@@ -65,36 +101,24 @@ function loadUserRules() {
 /** 保存规则（整单替换；CRUD 路由的持久化底座）。 */
 function saveUserRules(rules) {
   if (!Array.isArray(rules)) return { ok: false, error: 'rules_must_be_array' };
-  for (const r of rules) {
-    if (!r || typeof r.id !== 'string' || !r.id) return { ok: false, error: 'rule_id_required' };
-    if (!r.matcher || (r.matcher.type !== 'path-glob' && r.matcher.type !== 'command-token')) {
-      return { ok: false, error: 'rule_matcher_type_invalid' };
+  const normalized = [];
+  for (const raw of rules) {
+    const { item, diagnostics } = normalizeRule(raw);
+    if (!item || diagnostics.length > 0) {
+      // 未知字段同样是"写不进"：此前它们会被原样 JSON.stringify 进盘并永久存活
+      return { ok: false, error: legacyErrorFor(diagnostics), diagnostics };
     }
-    if (typeof r.matcher.pattern !== 'string' || !r.matcher.pattern.trim()) {
-      return { ok: false, error: 'rule_pattern_required' };
-    }
-    if (r.action !== 'deny' && r.action !== 'require-ack') {
-      return { ok: false, error: 'rule_action_invalid' };
-    }
+    normalized.push(item);
   }
   try {
     const file = rulesFile(dataDir());
     fs.mkdirSync(path.dirname(file), { recursive: true });
-    fs.writeFileSync(file, JSON.stringify({ version: RULES_VERSION, rules }, null, 2));
-    _cache = { rules: loadNormalized(rules), loadedAt: Date.now(), key: `${file}:${fs.statSync(file).mtimeMs}` };
-    return { ok: true, count: rules.length };
+    fs.writeFileSync(file, JSON.stringify({ version: RULES_VERSION, rules: normalized }, null, 2));
+    _cache = { rules: normalized, loadedAt: Date.now(), key: `${file}:${fs.statSync(file).mtimeMs}` };
+    return { ok: true, count: normalized.length };
   } catch (e) {
-    return { ok: false, error: e.message };
+    return { ok: false, error: e.message, diagnostics: [] };
   }
-}
-
-function loadNormalized(rules) {
-  // 保存后立即以同口径回填缓存（避免 mtime 粒度内读到旧值）
-  return rules.filter(
-    (r) => r && typeof r.id === 'string' && r.id
-      && r.matcher && typeof r.matcher.pattern === 'string'
-      && (r.action === 'deny' || r.action === 'require-ack')
-  );
 }
 
 /** 极简 glob（零依赖）：** 跨段、* 单段、? 单字符；大小写不敏感、路径分隔符归一。 */
@@ -177,7 +201,9 @@ function evaluateUserRules(name, args, rules) {
 }
 
 module.exports = {
+  dataDir,
   loadUserRules,
+  normalizeRule,
   saveUserRules,
   evaluateUserRules,
   rulesFile,
