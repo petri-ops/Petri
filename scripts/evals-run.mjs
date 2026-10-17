@@ -1,11 +1,17 @@
 #!/usr/bin/env node
 /**
- * scripts/evals-run.mjs — 黄金任务套件运行器（BLOCK-181）。
+ * scripts/evals-run.mjs — 黄金任务套件运行器（BLOCK-181；BLOCK-193 加录制/回放三态）。
  *
  * 用法：npm run evals:run -- --suite=smoke --provider=mock [--report=<path>]
  * - provider=mock：脚本化回合（任务定义 mockScript）——测 harness 与 loop 机制回归
- * - provider=real：真实 provider——测模型质量（无凭据任务诚实 skip）
- * 报告落 acceptance/evals/<suite>-latest.json（+时间戳副本）。
+ * - provider=real：真实 provider——测模型质量（无凭据任务诚实 skip）。BLOCK-193 起出站证据
+ *   由生产 io-transcript 台账投影，故 real 层也能跑 outbound_contains 哨兵；加 --record 时把
+ *   当次任务的转录收割为 evals/recordings/<suite>/<taskId>.json（入库双闸，不过即拒录）。
+ * - provider=replay：零 API、零凭据离线重放录制回合（投递仍走既有 startMockProvider 通道）。
+ *   measures=recorded-replay，诚实标注「测的是回放管道与判据评估，不冒充模型质量」；任务缺
+ *   outbound_contains 哨兵判据=直接红（罐头假绿闸）。
+ * 报告落 acceptance/evals/<suite>[-replay]-latest.json（+时间戳副本）——provider 入产物名，
+ * 防回放覆盖 real-latest 把真模型棘轮比到回放数上（假绿通道）。
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -14,42 +20,66 @@ import {
   spawnIsolatedBackend, startMockProvider, runGoldenTask, defaultTmpDir, buildContextSnapshot,
   sanitizeEvalTasksForStorage,
 } from './lib/evals-harness.mjs';
+import {
+  snapshotTranscriptCounts, readNewTranscriptRecords, projectTranscriptToOutbound, buildRecording,
+  gateRecording, loadRecording, recordingPath, verifyRecordingForReplay, assertReplaySentinel,
+} from './lib/evals-recording.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
-const suiteName = (args.find((a) => a.startsWith('--suite=')) || '--suite=smoke').split('=')[1];
-const provider = (args.find((a) => a.startsWith('--provider=')) || '--provider=mock').split('=')[1];
-const explicitReport = (args.find((a) => a.startsWith('--report=')) || '').split('=')[1];
+// 取最后一个匹配：命令行显式追加的参数覆盖 npm script 里的预置值（evals:record 等别名靠此可复盖）。
+const argValue = (prefix, fallback) => {
+  const hit = args.filter((a) => a.startsWith(`${prefix}=`)).pop();
+  return hit ? hit.split('=')[1] : fallback;
+};
+const suiteName = argValue('--suite', 'smoke');
+const provider = argValue('--provider', 'mock');
+const explicitReport = argValue('--report', '');
+const record = args.includes('--record');
+if (!['mock', 'real', 'replay'].includes(provider)) {
+  console.error(`[evals] 未知 --provider=${provider}（可用：mock | real | replay）`);
+  process.exit(2);
+}
+if (record && provider !== 'real') {
+  console.error('[evals] --record 仅对 --provider=real 有效（把脚本化回合写成「真实录制」=伪产物污染录制面）');
+  process.exit(2);
+}
+// 产物 namespace：回放态与真模型态同 suite 目录，但**绝不共享报告/基线**。
+const artifactName = provider === 'replay' ? `${suiteName}-replay` : suiteName;
 
 const suiteDir = path.join(root, 'evals', 'suites', suiteName);
 if (!fs.existsSync(suiteDir)) {
   console.error(`[evals] 套件不存在：evals/suites/${suiteName}`);
   process.exit(2);
 }
-const tasks = fs.readdirSync(suiteDir).filter((f) => f.endsWith('.json')).sort()
-  .map((f) => JSON.parse(fs.readFileSync(path.join(suiteDir, f), 'utf8')));
+const suiteFiles = fs.readdirSync(suiteDir).filter((f) => f.endsWith('.json')).sort();
+const tasks = suiteFiles.map((f) => JSON.parse(fs.readFileSync(path.join(suiteDir, f), 'utf8')));
+// 合成任务闸的凭据：任务 id → 仓库内套件文件（录制产物必须声明自己的出处）。
+const suiteFileOf = new Map(tasks.map((t, i) => [t.id, `evals/suites/${suiteName}/${suiteFiles[i]}`]));
 
 const tmpDir = defaultTmpDir('petri-evals-');
-const mock = provider === 'mock' ? startMockProvider() : null;
+const mock = provider === 'mock' || provider === 'replay' ? startMockProvider() : null;
 const mockPort = mock ? await mock.ready : null;
 if (mock) process.env.PETRI_EVALS_BASE_URL = `http://127.0.0.1:${mockPort}/v1`;
 
 const backend = await spawnIsolatedBackend({ root, tmpDir, mode: provider });
-// BLOCK-192：real 凭据 env 缺省已由 harness 回落本机凭据库；仍拿不到才诚实 skip（附原因，不伪造真模型结果）。
+// BLOCK-192：real 模式凭据 env 缺省已由 harness 回落本机凭据库；仍拿不到才诚实 skip（附原因，不伪造真模型结果）。
 const realBlocked = provider === 'real' && !backend.provider.hasKey;
 if (realBlocked) console.log(`[evals] provider=real 凭据不可得（${backend.provider.skipReason || '未知原因'}）——全部任务诚实 skip`);
 else if (provider === 'real' && backend.provider.source === 'local-store') console.log(`[evals] provider=real 凭据来自本机凭据库（model=${backend.provider.model}）`);
-console.log(`[evals] suite=${suiteName} provider=${provider} tasks=${tasks.length} backend=${backend.ok ? 'up' : 'DOWN'} @${backend.port}`);
+console.log(`[evals] suite=${suiteName} provider=${provider}${record ? ' +record' : ''} tasks=${tasks.length} backend=${backend.ok ? 'up' : 'DOWN'} @${backend.port}`);
 
 const report = {
   suite: suiteName,
   provider,
-  measures: provider === 'mock' ? 'harness' : 'model',
+  artifact: artifactName,
+  measures: provider === 'mock' ? 'harness' : (provider === 'replay' ? 'recorded-replay' : 'model'),
   at: new Date().toISOString(),
   tasks: [],
 };
 let passCount = 0;
 let snapshotDrift = false;
+let recordFailures = 0;
 
 if (backend.ok) {
   const api = backend.api;
@@ -60,12 +90,60 @@ if (backend.ok) {
       console.log(`SKIP ${task.id} — ${reason}`);
       continue;
     }
-    if (mock && Array.isArray(task.mockScript)) mock.push(...task.mockScript);
-    const result = await runGoldenTask({ api, tmpDir, task, outbound: mock ? mock.captured : null });
+    let replayGuard = null;
+    if (provider === 'replay') {
+      // 罐头假绿双闸：产物对账（同任务同 prompt）+ 哨兵判据在场；任一不过=红，不是 skip。
+      const recording = loadRecording(root, suiteName, task.id);
+      const verified = verifyRecordingForReplay({ ...task, suite: suiteName }, recording);
+      const sentinel = assertReplaySentinel(task);
+      if (!verified.ok || !sentinel.ok) {
+        replayGuard = [verified.ok ? null : verified.reason, sentinel.ok ? null : sentinel.reason].filter(Boolean).join('；');
+      } else {
+        mock.push(...recording.turns);
+      }
+    } else if (Array.isArray(task.mockScript)) {
+      mock.push(...task.mockScript);
+    }
+    // real：任务前后各取一次转录快照，行号差分即本任务归属（串行跑，故不需时钟也不需 convId 命名）。
+    const transcriptBefore = provider === 'real' ? snapshotTranscriptCounts(tmpDir) : null;
+    let harvestCache = null;
+    const harvest = () => {
+      if (!harvestCache) harvestCache = readNewTranscriptRecords(tmpDir, transcriptBefore);
+      return harvestCache;
+    };
+    const outbound = provider === 'real'
+      ? () => harvest().records.map(projectTranscriptToOutbound)
+      : (mock ? mock.captured : null);
+    const result = await runGoldenTask({ api, tmpDir, task, outbound });
+    if (replayGuard) {
+      result.passed = false;
+      result.replayGuard = replayGuard;
+      console.log(`  [replay] ✖ ${task.id} 回放闸：${replayGuard}`);
+    }
     result.criteriaResults = result.criteriaResults || [];
     if (!result.skipped) {
       for (const c of result.criteriaResults) {
         console.log(`  ${c.passed ? '✔' : '✖'} ${task.id} · ${c.kind}${c.detail ? ` — ${c.detail.slice(0, 90)}` : ''}`);
+      }
+    }
+    if (provider === 'real' && record) {
+      const { records, unparsed } = harvest();
+      const recording = buildRecording({
+        task,
+        suite: suiteName,
+        sourceSuiteFile: suiteFileOf.get(task.id) || '',
+        records,
+        provider: { name: backend.provider.source || null, model: backend.provider.model },
+      });
+      const gate = gateRecording({ recording, task, records });
+      if (!gate.ok) {
+        recordFailures += 1;
+        console.log(`  [record] ✖ ${task.id} 拒录：${gate.reasons.join(' / ')}${unparsed ? `（另有 ${unparsed} 行转录解析失败，如实计数）` : ''}`);
+      } else {
+        const file = recordingPath(root, suiteName, task.id);
+        fs.mkdirSync(path.dirname(file), { recursive: true });
+        fs.writeFileSync(file, `${JSON.stringify(recording, null, 2)}\n`);
+        console.log(`  [record] ✔ ${task.id} → ${path.relative(root, file)}（回合 ${recording.turnCount}/${recording.requestCount}·丢弃 ${recording.droppedCount}）`);
       }
     }
     report.tasks.push(result);
@@ -121,9 +199,9 @@ try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch { /* Windows 
 
 const evidenceDir = path.join(root, 'acceptance', 'evals');
 fs.mkdirSync(evidenceDir, { recursive: true });
-const reportPath = explicitReport || path.join(evidenceDir, `${suiteName}-latest.json`);
+const reportPath = explicitReport || path.join(evidenceDir, `${artifactName}-latest.json`);
 fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
-const stamped = path.join(evidenceDir, `${suiteName}-${report.at.replace(/[:.]/g, '-')}.json`);
+const stamped = path.join(evidenceDir, `${artifactName}-${report.at.replace(/[:.]/g, '-')}.json`);
 fs.writeFileSync(stamped, JSON.stringify(report, null, 2));
-console.log(`\n=== evals run: ${passCount}/${tasks.length} PASS（skipped ${report.skipped}；报告 ${path.relative(root, reportPath)}；measures=${report.measures}）===`);
-process.exitCode = failures === 0 && !snapshotDrift ? 0 : 1;
+console.log(`\n=== evals run: ${passCount}/${tasks.length} PASS（skipped ${report.skipped}；报告 ${path.relative(root, reportPath)}；measures=${report.measures}${recordFailures ? `；拒录 ${recordFailures}` : ''}）===`);
+process.exitCode = failures === 0 && !snapshotDrift && recordFailures === 0 ? 0 : 1;

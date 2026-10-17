@@ -10,6 +10,10 @@
       "kind": "task_completed"
     },
     {
+      "kind": "outbound_contains",
+      "value": "evals sanity ok"
+    },
+    {
       "kind": "tool_used",
       "name": "workspace_write"
     },

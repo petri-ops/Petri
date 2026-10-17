@@ -1,8 +1,9 @@
 {
   "suite": "golden",
   "provider": "mock",
+  "artifact": "golden",
   "measures": "harness",
-  "at": "2026-10-16T10:14:27.624Z",
+  "at": "2026-10-17T00:25:22.359Z",
   "tasks": [
     {
       "id": "golden-first-success",
@@ -41,10 +42,10 @@
         {
           "kind": "ttfs_computable",
           "passed": true,
-          "detail": "TTFS=419 ms"
+          "detail": "TTFS=411 ms"
         }
       ],
-      "durationMs": 591
+      "durationMs": 580
     }
   ],
   "pass": 1,

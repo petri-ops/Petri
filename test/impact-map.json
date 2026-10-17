@@ -2762,6 +2762,19 @@
       "classifiesScripts": false
     },
     {
+      "id": "block193-capture-replay",
+      "note": "BLOCK-193 评测 v2 第五切片·capture/replay 真实录制态：scripts/lib/evals-recording.mjs（**收割生产 io-transcript 台账**的行差分出归属 + 回合/出站投影 + 入库双闸〔secret-scan PATTERNS 单源密钥扫描 + 合成任务闸〕+ 回放对账与罐头假绿哨兵闸，纯函数+薄文件 IO，零采集面零第二实现）+ evals-run 三态（mock / real+--record / --provider=replay，real 的 ctx.outbound 由转录投影供并支持 thunk 惰性求值）+ evals-gate (suite,provider) 产物 namespace（回放报告与真模型基线绝不互覆盖）+ secret-scan 导出 SECRET_PATTERNS/scanTextForSecrets 并加 main 守卫。契约=test/block193-capture-replay.test.mjs（15 项，含「归一化 <ENV> 吞单行 JSON」缺陷守卫与罐头假绿反证）。新脚本仅此一条 classifiesScripts:true 规则匹配；harness/run/suites 分类仍归 block181。",
+      "patterns": [
+        "scripts/lib/evals-recording.mjs",
+        "evals/recordings/**",
+        "test/block193-*.test.mjs"
+      ],
+      "tests": [
+        "test/block193-capture-replay.test.mjs"
+      ],
+      "classifiesScripts": true
+    },
+    {
       "id": "ui-proxy-review-probe",
       "note": "UI 代行评估/构造探针（scripts/ui-proxy-review.mjs，UI-496~509 批引入；scripts/ui500-compaction-live.mjs，UI-500 压缩构造批）：CDP 驱动真界面+截图留证，实机走查证据工具非回归测试（同 block123-p0-probes 形态）；证据=acceptance/ui-proxy-review/ 与 acceptance/ui-500/。",
       "patterns": [

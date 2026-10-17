@@ -12,6 +12,10 @@
       "kind": "task_completed"
     },
     {
+      "kind": "outbound_contains",
+      "value": "sumLast"
+    },
+    {
       "kind": "file_contains",
       "path": "src/calc.js",
       "value": "i < items.length"

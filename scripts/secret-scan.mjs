@@ -19,8 +19,13 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-// 密钥模式集（模式名 → git grep -E 正则；与 Gitleaks 常用规则对齐的最小子集）
-const PATTERNS = {
+// 密钥模式集（模式名 → git grep -E 正则；与 Gitleaks 常用规则对齐的最小子集）。
+// BLOCK-193 起对外导出＝模式唯一真相：录制产物入库前的扫描复用同一份，禁止复制模式集。
+// 注：当前集合内无 ERE 专有构造，故同一正则可直接用于 JS RegExp 的字符串扫描。
+// 密钥模式集（模式名 → git grep -E 正则；与 Gitleaks 常用规则对齐的最小子集）。
+// BLOCK-193 起对外导出＝模式唯一真相：录制产物入库前的字符串扫描复用同一份，禁止复制模式集。
+// 当前集合内无 ERE 专有构造，故同一正则源串可直接用于 JS RegExp。
+export const SECRET_PATTERNS = {
   openai_like: 'sk-[a-zA-Z0-9]{20,}',
   github_pat_classic: 'ghp_[a-zA-Z0-9]{30,}',
   github_pat_fine: 'github_pat_[a-zA-Z0-9_]{20,}',
@@ -50,7 +55,7 @@ const FIXTURE_PREFIX_ALLOWLIST = ['acceptance/block-105/'];
 function scan() {
   const production = [];
   const fixture = [];
-  for (const [name, pattern] of Object.entries(PATTERNS)) {
+  for (const [name, pattern] of Object.entries(SECRET_PATTERNS)) {
     let out = '';
     try {
       out = execFileSync(
@@ -74,16 +79,36 @@ function scan() {
   return { production, fixture };
 }
 
-const { production, fixture } = scan();
-console.log(`[secret-scan] 生产面命中: ${production.length} | fixture 豁免命中: ${fixture.length}（白名单 ${FIXTURE_ALLOWLIST.size} 文件）`);
-for (const { file, pattern } of production) {
-  console.error(`  [LEAK?] ${file} — 模式 ${pattern}（内容已隐去，人工核验）`);
+/**
+ * 对任意字符串做同一模式集的密钥扫描（BLOCK-193 录制产物入库闸）。
+ * 返回命中的**模式名**列表，绝不返回命中内容——否则扫描器自身会变成密钥外泄通道。
+ * 语义与 CLI 侧 `git grep -lIE` 一致：大小写敏感、无豁免（产物面零容忍）。
+ */
+export function scanTextForSecrets(text) {
+  const src = String(text ?? '');
+  const hits = [];
+  for (const [name, pattern] of Object.entries(SECRET_PATTERNS)) {
+    if (new RegExp(pattern).test(src)) hits.push(name);
+  }
+  return hits;
 }
-for (const { file, pattern } of fixture) {
-  console.log(`  [fixture] ${file} — 模式 ${pattern}`);
+
+function main() {
+  const { production, fixture } = scan();
+  console.log(`[secret-scan] 生产面命中: ${production.length} | fixture 豁免命中: ${fixture.length}（白名单 ${FIXTURE_ALLOWLIST.size} 文件）`);
+  for (const { file, pattern } of production) {
+    console.error(`  [LEAK?] ${file} — 模式 ${pattern}（内容已隐去，人工核验）`);
+  }
+  for (const { file, pattern } of fixture) {
+    console.log(`  [fixture] ${file} — 模式 ${pattern}`);
+  }
+  if (production.length > 0) {
+    console.error(`[secret-scan] FAIL — 生产面存在疑似密钥，必须人工核验并处置（入库轮换/删除/豁免登记）。`);
+    process.exit(1);
+  }
+  console.log('[secret-scan] PASS');
 }
-if (production.length > 0) {
-  console.error(`[secret-scan] FAIL — 生产面存在疑似密钥，必须人工核验并处置（入库轮换/删除/豁免登记）。`);
-  process.exit(1);
-}
-console.log('[secret-scan] PASS');
+
+// 被 require/import 时只暴露模式集与扫描原语，不触发仓库扫描（BLOCK-193 复用面）。
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();
+

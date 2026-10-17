@@ -213,6 +213,11 @@ export function startMockProvider() {
         if (turn.delayMs) await new Promise((r) => setTimeout(r, turn.delayMs));
         res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache' });
         if (turn.toolCalls) {
+          // BLOCK-193 回放保真：真实回合常「正文 + 工具调用」同帧出现（转录里就是两样都有），
+          // 只投工具会丢正文 → 先补正文帧。既有手写脚本无 toolCalls+content 同帧用法，故零回归。
+          if (typeof turn.content === 'string' && turn.content) {
+            res.write(`data: ${JSON.stringify({ choices: [{ delta: { content: turn.content } }] })}\n\n`);
+          }
           const toolCalls = turn.toolCalls.map((tc, index) => ({
             index,
             id: `call_evals_${captured.length}_${index}`,
@@ -481,6 +486,9 @@ export async function runGoldenTask({ api, tmpDir, task, outbound = null }) {
   const subagentDoneCount = needsSubagents ? await pollSubagentDone(api, taskId_, conversationId) : 0;
   const terminalStatus = needsTerminal ? await fetchTerminalStatus(api, taskId_) : null;
   const funnel = needsFunnel ? await readFunnelSnapshot(tmpDir) : { eventCounts: {}, ttfsMs: null };
+  // BLOCK-193：outbound 可为 thunk——real 模式的出站证据要等任务跑完才能从生产 io-transcript
+  // 台账收割，而判据评估正发生在任务收口之后，故惰性求值即拿到当次任务的完整记录集。
+  const outboundEvidence = typeof outbound === 'function' ? outbound() : outbound;
   const criteriaResults = criteriaAll.map((c) => evaluateCriterion(c, {
     events,
     finalText,
@@ -492,7 +500,7 @@ export async function runGoldenTask({ api, tmpDir, task, outbound = null }) {
     terminalStatus,
     funnelEventCounts: funnel.eventCounts,
     ttfsMs: funnel.ttfsMs,
-    outbound,
+    outbound: outboundEvidence,
     tmpRoot: tmpDir,
   }));
   return {
@@ -641,7 +649,10 @@ export function evaluateCriterion(criterion, ctx) {
       // 复用 normalizeContextString（同一易变值清单，杜绝第二套归一化真相）。无 ctx.outbound → fail-closed 红。
       const out = ctx.outbound;
       if (!Array.isArray(out)) return result(false, '无 outbound 上下文（fail-closed：判据要求注入 mock.captured 出站记录）');
-      const blob = out.map((r) => normalizeContextString(JSON.stringify(r), ctx.tmpRoot)).join('\n');
+      // 先还原 JSON 里的转义换行再归一化：<ENV> 规则的语义是「折到该行行尾」，而 JSON.stringify 产物
+      // 是单行文本（换行以 \n 两字符存在），直接喂会让 [^\n]* 一路吞到整条 blob 末尾——BLOCK-193 实测
+      // 三条真模型用例的 outbound_contains 因此全部 ×0（假红）。还原后规则按设计停在真正的行尾。
+      const blob = out.map((r) => normalizeContextString(JSON.stringify(r).replace(/\\n/g, '\n'), ctx.tmpRoot)).join('\n');
       const needle = String(criterion.value ?? '');
       const hits = needle.length ? blob.split(needle).length - 1 : 0;
       return result(hits >= (criterion.minTimes || 1), `归一化出站含「${needle.slice(0, 40)}」× ${hits}（期望 ≥${criterion.minTimes || 1}）`);

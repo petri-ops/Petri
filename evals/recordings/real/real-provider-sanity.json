@@ -1,0 +1,44 @@
+{
+  "schema": "petri-evals-recording/v1",
+  "id": "real-provider-sanity",
+  "suite": "real",
+  "sourceSuiteFile": "evals/suites/real/provider-sanity.json",
+  "promptSha256": "3cc3c1e8350bea6aacdd3c859ab139171eea138f39cd33c1cd8242670798c086",
+  "provider": {
+    "name": "local-store",
+    "model": "deepseek-chat"
+  },
+  "recordedAt": "2026-10-17T00:26:07.201Z",
+  "requestCount": 2,
+  "turnCount": 2,
+  "droppedCount": 0,
+  "droppedReasons": [],
+  "outboundRoles": [
+    [
+      "system",
+      "user"
+    ],
+    [
+      "system",
+      "user",
+      "assistant",
+      "tool"
+    ]
+  ],
+  "turns": [
+    {
+      "toolCalls": [
+        {
+          "name": "workspace_write",
+          "arguments": "{\"path\": \"derived/evals-sanity.md\", \"content\": \"evals sanity ok\\n\"}"
+        }
+      ],
+      "finish": "tool_calls",
+      "content": "I'll write that file now."
+    },
+    {
+      "content": "已写入 [derived/evals-sanity.md](petri://workspace/p_mvbnohjo_gf8v/derived/evals-sanity.md)，内容为一行「evals sanity ok」（16 字节）。",
+      "finish": "stop"
+    }
+  ]
+}

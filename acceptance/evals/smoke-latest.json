@@ -1,8 +1,9 @@
 {
   "suite": "smoke",
   "provider": "mock",
+  "artifact": "smoke",
   "measures": "harness",
-  "at": "2026-10-14T05:09:17.245Z",
+  "at": "2026-10-17T00:25:25.144Z",
   "tasks": [
     {
       "id": "smoke-approval-chain",
@@ -19,7 +20,7 @@
           "guardKeyPrefix": "cmd:",
           "requireRequestId": true,
           "passed": true,
-          "detail": "policy 拦截在场（cmd:vssadmin req=apr_9ea604323e742d8ef0）"
+          "detail": "policy 拦截在场（cmd:vssadmin req=apr_9b2c2938ce0bf2ec96）"
         },
         {
           "kind": "event_present",
@@ -39,7 +40,7 @@
           "kind": "deny_after_success",
           "tool": "workspace_exec",
           "passed": true,
-          "detail": "成功后再拦（新请求 apr_b6ca3805e6f6c9bd86）= 指纹已消耗"
+          "detail": "成功后再拦（新请求 apr_43458e11d5441919ce）= 指纹已消耗"
         },
         {
           "kind": "final_answer_contains",
@@ -48,8 +49,7 @@
           "detail": "最终答复含「指纹消耗」"
         }
       ],
-      "finalText": "审批链走完：首次调用被防护拦截并出审批卡（requestId），用户放行一次后同调用真实执行；指纹消耗后再次重发同命令被重新拦截，需重新审批。",
-      "durationMs": 3086
+      "durationMs": 3117
     },
     {
       "id": "smoke-continuation",
@@ -75,8 +75,7 @@
           "detail": "最终答复含「第二段」"
         }
       ],
-      "finalText": "第一段：春风拂过山岗，第二段：溪水绕过村庄。完成。",
-      "durationMs": 567
+      "durationMs": 559
     },
     {
       "id": "smoke-genui-fragment-path",
@@ -111,8 +110,7 @@
           "detail": "解析命中 repaired=true contains=true"
         }
       ],
-      "finalText": "已生成柱状图可视化页面 chart.html（写入会话目录 conv_3c15-3c1）。",
-      "durationMs": 590
+      "durationMs": 591
     },
     {
       "id": "smoke-orchestration-spawn",
@@ -150,8 +148,7 @@
           "detail": "最终答复含「42」"
         }
       ],
-      "finalText": "父任务收口：子智能体已完成，结果 42 已写入 answer.txt。",
-      "durationMs": 569
+      "durationMs": 574
     },
     {
       "id": "smoke-policy-guard",
@@ -167,7 +164,7 @@
           "kind": "policy_denied",
           "guardKeyPrefix": "cmd:",
           "passed": true,
-          "detail": "policy 拦截在场（cmd:format req=apr_a570ea6258cd34e927）"
+          "detail": "policy 拦截在场（cmd:format req=apr_383960bfb315995cb6）"
         },
         {
           "kind": "final_answer_contains",
@@ -176,8 +173,7 @@
           "detail": "最终答复含「拦截」"
         }
       ],
-      "finalText": "该命令命中系统级防护被拦截，我不能执行格式化操作，已停止。",
-      "durationMs": 555
+      "durationMs": 559
     },
     {
       "id": "smoke-readonly-denial",
@@ -197,8 +193,7 @@
           "detail": "工具错误在场（execution_not_allowed）"
         }
       ],
-      "finalText": "当前处于只读模式，命令执行被拒绝，我无法运行命令。",
-      "durationMs": 565
+      "durationMs": 558
     },
     {
       "id": "smoke-stop-chain",
@@ -224,8 +219,7 @@
           "detail": "tool_call workspace_exec 应缺席"
         }
       ],
-      "finalText": "",
-      "durationMs": 6145
+      "durationMs": 6174
     },
     {
       "id": "smoke-text-repair",
@@ -257,8 +251,7 @@
           "detail": "最终答复含「intro」"
         }
       ],
-      "finalText": "我来读取文件。\n\n```json\n{\"name\": \"workspace_read\", \"arguments\": {\"path\": \"notes/intro.md\"}}\n```修复链路收口：intro.md 内容为 intro 正文，总结完成。",
-      "durationMs": 583
+      "durationMs": 642
     },
     {
       "id": "smoke-tool-chain-write",
@@ -290,8 +283,7 @@
           "detail": "最终答复含「note.md」"
         }
       ],
-      "finalText": "已在 derived/note.md 写入完成，文件位于项目 derived 目录。",
-      "durationMs": 549
+      "durationMs": 559
     }
   ],
   "pass": 9,

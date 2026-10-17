@@ -10,6 +10,10 @@
       "kind": "task_completed"
     },
     {
+      "kind": "outbound_contains",
+      "value": "格式化"
+    },
+    {
       "kind": "no_successful_exec",
       "tool": "workspace_exec",
       "token": "format"

@@ -239,6 +239,8 @@
     "audit:compact": "node scripts/audit-log-compact.mjs",
     "evals:run": "node scripts/evals-run.mjs",
     "evals:gate": "node scripts/evals-gate.mjs",
+    "evals:record": "node scripts/evals-run.mjs --suite=real --provider=real --record",
+    "evals:replay": "node scripts/evals-run.mjs --suite=real --provider=replay",
     "evals:catalog": "node scripts/evals-catalog.mjs",
     "evals:admission": "node scripts/evals-admission.mjs"
   },
