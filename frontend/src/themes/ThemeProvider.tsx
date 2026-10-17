@@ -36,7 +36,7 @@ function applyFontScale(scale: number): void {
  * 服务端可能没收到、用户与调用方一律看不见 ⇒ "另一个窗口读到旧值"无从归因）。
  * 状态只增不改既有生效顺序：本地立即生效 + 15s 拉取回正（回滚到服务端真相）都保持原样。
  */
-export interface PrefsSyncState {
+interface PrefsSyncState {
   state: 'ok' | 'pending' | 'failed';
   error?: string;
   at: number;
