@@ -67,7 +67,7 @@ status: completed
 **范围（三族垂直切片）**：`feature-flags` / `decision-config`+`decision-thresholds` / `ai-settings` 的 `generation`+`costCapCny` 子族。加 schema 单源、优先级模型单实现、unknown-key 诊断、P4 三缺陷、P5 漂移门。
 **非范围（红线）**：
 - **不合并** §0.3 清单里的东西（凭据/会话运行态/装配清单/每请求态）。
-- **不迁移磁盘形状、不改文件名、不改键名**（改名会破坏旧文件兼容＝本包验收条款明禁）。剩余 11 处落点留 B1b/B2，**不宣称全部统一**。
+- **不迁移磁盘形状、不改文件名、不改键名**（改名会破坏旧文件兼容＝本包验收条款明禁）。剩余 **10 处**落点留 B1b/B2，**不宣称全部统一**（原写「11 处」与 §12「14−4=10」自相矛盾，2026-10-17 由 BLOCK-203 P0 核对更正；B1b 已拆为 W4a/W4b 两片）。
 - **不改任何阈值数值、不改 judge 校准键与模型名**（BLOCK-119/194 红线；P4① 只改"读取时机"，默认值一字节不动）。
 - **零新依赖**（DEPENDENCY-CHANGE-CHECKLIST 默认答案=不；复用本仓已有三份手写 schema 子集的形态）。
 - 不做设置搜索/导出/按区重置（P0-3 是**下游挂件**，本包只交付其载体）。
@@ -78,7 +78,7 @@ status: completed
 ## 5. 落位与形状
 
 - `core/packages/shared-config/schema.js`：键注册表 + 纯函数 `validate`/`diagnose`/`resolveWithLayers`（**放这里的原因=架构规则**：R4 明写 `core/packages/**` 是前后端合法共享层，R5 禁 `src→core/petri-server`，注册表要被设置 UI、主进程、后端三方同源消费，只有这一层合规）。
-- `core/petri-server/config/config-service.js`：后端侧落点适配器（文件/SQLite/env 接线），既有 `feature-flags`/`decision-config`/`ai-settings` 的读取函数**内部改接**它，对外签名与返回形状零破坏。
+- ~~`core/petri-server/config/config-service.js`：后端侧落点适配器（文件/SQLite/env 接线），既有 `feature-flags`/`decision-config`/`ai-settings` 的读取函数**内部改接**它，对外签名与返回形状零破坏。~~ **实际交付形态（2026-10-17 BLOCK-203 P0 核对更正）**：该文件**从未创建**（`git ls-files` 零命中、目录不存在）；收编改由**各族 helper 直接 `require` schema 函数**实现（`ai-settings.js:26`、`config-transfer.js:21`、`cost-cap.js:19`、`decision-config.js:7`、`feature-flags.js:22`、`keymap.js:25`、`network-config.js:23`、`reasoning-config.js:23`、`runtime-policy.js:23` 共 9 处），对外签名与返回形状同样零破坏。**后续包不得假设存在该适配器**；W4a/W5/W6 沿用"族 helper + schema 函数"形态，不补建第二抽象。
 - 契约测：`test/block199-config-schema.test.mjs`（注册表形状/重复键/幽灵别名零容忍/优先级表驱动）、`test/block199-unknown-key.test.mjs`（读不炸写不进 + 结构化 diagnostics）、`test/block199-threshold-runtime.test.mjs`（P4①② 红→绿：改配置即改判定）、`test/block199-config-drift.test.mjs`（P5 漂移门源码扫描）。前端侧 `ThemeProvider` 失败可观测走前端测 + 实机腿（dev 栈可用则跑，不可用按环境档如实登记，沿用 BLOCK-184/195 先例）。
 
 ## 6. 验收门与证据位置

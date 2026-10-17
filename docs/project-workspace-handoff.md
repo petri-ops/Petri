@@ -2,9 +2,13 @@
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
 
+最后更新：2026-10-17（**BLOCK-203-STAGE-3-B1B-CONFIG-LANDING-CONSOLIDATION 立项发令 active（runlist W4 拆片：W4a 先做）**）
+
+**恢复要点（换会话必读·本段取代下方 BLOCK-202 段）**：**当前 active 工作包=BLOCK-203（W4a 片）**，plan=`docs/block-203-stage-3-b1b-config-landing-consolidation-plan.md`（registry `active` / `P0-LAUNCH`）。**下一步第一个动作=P1+P2 同一提交**（`quality:knip:check` 是"新增导出即红"棘轮，P1 的集合守卫函数若没有同批消费者会被判红）：`core/packages/shared-config/config-schema.js` 加 `user-prefs` 族（theme/fontScale/accent）+ 集合条目字段形状（`agent-rules`/`mcp-servers`），同时落 `test/block203-config-baseline.test.mjs` 冻结扩容后族/键集合（前 8 族 35 键一字不变）。**开工前必读的口径更正两条**：①W4 的落点是 **10 处**（14−4），runlist W4 行原写 11 与 BLOCK-199 §5 同错，本批已改，别再按 11 记账；②**`core/petri-server/config/config-service.js` 不存在**——BLOCK-199 plan §P2 写了它但从未落盘，真实收编形态是各族 helper 直接 `require` schema 函数（8 处），W4a 不新建 service 层。**W4a 范围**=四文件族（user-prefs/skills-prefs/agent-rules/mcp-servers）收编 + ai-settings 顶层白名单过滤（**过滤+诊断非 400**，否则有历史脏键的用户保存不了设置）+ renderer localStorage 降为纯缓存（键名漂移测钉住）+ D-2 rider（`useEndpointProfilesEditor.ts:381` 导出默认脱敏）。**红线**=不迁磁盘形状/不改文件名键名/**不动 data root 回落链**（那 4 条链的合一是 W4b，本片任何落点实际路径须与改前逐字节相同）/凭据不合并/不改既有语义数值（钳位边界、first-match、fail-soft、MAX_ARGS/MAX_SERVERS）。**W4b 范围**=SQLite `site_settings`+`runtime_json`+`state_json`+`users.permissions`+主进程窗口态+4 条 data root 合一（需备份/回退路径，单独窗口）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-17（**BLOCK-202-STAGE-A-QUICKWINS-3 整包 completed（阶段 A 速赢 III=runlist W3；当日立项当日收口·9223 探针 15/15 allPass）**）
 
-**恢复要点（换会话必读·本段取代下方 BLOCK-201 段）**：**无 active 工作包**，下一包=runlist **W4（阶段 3 B1b：其余 11 处落点收编 + 4 条 data root 脑裂根治）**，按 W0→W8 连打不需逐项发令。**BLOCK-202 交付**：`network` 族（代理四项，`applyNetworkEnv` 启动写入，NO_PROXY 强制回环，CA 缺失诊断，restartRequired）+ `runtime` 族（审批默认档位仅缺省兜底/并发 1-8/深度 1-3 env 优先/工具白黑名单曝光层）+ `/api/network`、`/api/runtime-policy` + 设置页两面板（compute/decisions 节）+ config-transfer 扩 8 族。**证据**=block202 11/11 + 前端 7/7 + 探针 15/15（acceptance/block-202/）。**边界**=代理热切换/SOCKS/认证/工具级策略不在本包；白黑名单不是安全边界。**dev 栈**=Vite:3000 + 后端:3001 在跑（无窗口），9223 已关（无可见窗口纪律）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+**恢复要点（换会话必读·本段取代下方 BLOCK-201 段）**：**无 active 工作包**，下一包=runlist **W4（阶段 3 B1b：其余 10 处落点收编 + 4 条 data root 脑裂根治；原写「11 处」为 BLOCK-199 §5 旧数，2026-10-17 更正）**，按 W0→W8 连打不需逐项发令。**BLOCK-202 交付**：`network` 族（代理四项，`applyNetworkEnv` 启动写入，NO_PROXY 强制回环，CA 缺失诊断，restartRequired）+ `runtime` 族（审批默认档位仅缺省兜底/并发 1-8/深度 1-3 env 优先/工具白黑名单曝光层）+ `/api/network`、`/api/runtime-policy` + 设置页两面板（compute/decisions 节）+ config-transfer 扩 8 族。**证据**=block202 11/11 + 前端 7/7 + 探针 15/15（acceptance/block-202/）。**边界**=代理热切换/SOCKS/认证/工具级策略不在本包；白黑名单不是安全边界。**dev 栈**=Vite:3000 + 后端:3001 在跑（无窗口），9223 已关（无可见窗口纪律）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-17（**BLOCK-201-SETTINGS-SEARCH-EXPORT 整包 completed（阶段 A 速赢 II=runlist W2；当日立项当日收口·9223 探针 18/18 allPass）**）
 
