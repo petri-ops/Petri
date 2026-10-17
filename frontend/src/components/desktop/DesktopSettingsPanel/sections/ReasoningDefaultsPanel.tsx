@@ -106,6 +106,11 @@ export function ReasoningDefaultsPanel(): React.ReactElement {
     || Object.keys(mapping).length > 0;
 
   return (
+    <section className="petri-settings-section" data-testid="reasoning-section">
+      <div className="petri-settings-section__heading">
+        <h3>推理档位</h3>
+        <p>思考档位的默认值、Anthropic 高档预算与逐协议参数映射；出厂值与生效值并列显示，非法写回被注册表拒。</p>
+      </div>
     <div className={styles.panel} data-testid="reasoning-defaults">
       <p className={styles.hint}>
         思考档位（关闭 / 标准 / 高）如何翻译成上游参数。默认档=请求未显式选档时使用哪一档；
@@ -191,6 +196,7 @@ export function ReasoningDefaultsPanel(): React.ReactElement {
         </div>
       )}
     </div>
+    </section>
   );
 }
 

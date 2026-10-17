@@ -513,8 +513,7 @@ export function SimpleChat({
   const chatVisionCapable = Array.isArray(activeModel?.capabilities)
     && activeModel.capabilities.includes('vision');
   // Ctrl+T 循环档位（对齐 ZCode 习惯）；未声明能力的渠道不响应。
-  // BLOCK-200 P1：组合串读键位注册表（`thinking.cycle`），**能力门与局部生效条件留在这里**——
-  // 键位是全局事实，「这条渠道有没有 reasoning」是局部语义（见 plan §1 分工）。
+  // BLOCK-200 P1：组合串读键位注册表（`thinking.cycle`），能力门与局部生效条件留在这里。
   const { bindings: keymapBindings } = useKeymapSafe();
   const thinkingCycleCombo = keymapBindings['thinking.cycle'];
   useEffect(() => {

@@ -42,7 +42,12 @@ export function KeymapPanel(): React.ReactElement {
   const resetOne = useCallback((id: string) => { void save({ [id]: null }); }, [save]);
 
   return (
-    <div className={styles.panel} data-testid="keymap-panel">
+    <section className="petri-settings-section" data-testid="keymap-section">
+      <div className="petri-settings-section__heading">
+        <h3>快捷键</h3>
+        <p>应用级命令的键位、冲突提示与恢复默认；就近语义快捷键（保存/提交/切签/Esc 类）仍由各自界面固定处理，不在本面改。</p>
+      </div>
+      <div className={styles.panel} data-testid="keymap-panel">
       <p className={styles.hint}>
         应用级命令的快捷键。`Mod` 在 macOS 是 ⌘、其余平台是 Ctrl。这里显示的组合串与真正派发的组合串
         是同一个值；未列出的就近快捷键（保存、提交、关闭标签、Esc 类）仍由各自界面固定处理，不在本面改。
@@ -93,6 +98,7 @@ export function KeymapPanel(): React.ReactElement {
           );
         })}
       </div>
-    </div>
+      </div>
+    </section>
   );
 }

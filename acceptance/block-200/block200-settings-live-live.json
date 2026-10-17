@@ -1,7 +1,7 @@
 {
   "name": "block200-settings-live",
-  "startedAt": "2026-10-17T10:31:49.074Z",
-  "finishedAt": "2026-10-17T10:31:53.108Z",
+  "startedAt": "2026-10-17T12:34:46.453Z",
+  "finishedAt": "2026-10-17T12:34:50.478Z",
   "assertions": [
     {
       "name": "R1_keymap_get_ok",

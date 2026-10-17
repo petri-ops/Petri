@@ -38,7 +38,6 @@ import { DecisionUsagePanel } from './DesktopSettingsPanel/sections/DecisionUsag
 import { AgentRulesPanel } from './DesktopSettingsPanel/sections/AgentRulesPanel';
 import { DecisionConfigPanel } from './DesktopSettingsPanel/sections/DecisionConfigPanel';
 import { GenerationDefaultsPanel } from './DesktopSettingsPanel/sections/GenerationDefaultsPanel';
-// BLOCK-200 阶段 A 速赢 I — 快捷键面与推理档位面
 import { KeymapPanel } from './DesktopSettingsPanel/sections/KeymapPanel';
 import { ReasoningDefaultsPanel } from './DesktopSettingsPanel/sections/ReasoningDefaultsPanel';
 import { GuardAckHistoryPanel } from '@/components/copilot/SimpleChat/GuardAckCard';
@@ -605,26 +604,8 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
           </section>
         )}
 
-        {/* BLOCK-200 阶段 A 速赢 I — 键位面（组合串与派发同源）与推理档位面（映射可编辑） */}
-        {activeSection === 'keymap' && (
-          <section className="petri-settings-section">
-            <div className="petri-settings-section__heading">
-              <h3>快捷键</h3>
-              <p>应用级命令的键位、冲突提示与恢复默认（就近语义快捷键仍在各自界面固定处理）。</p>
-            </div>
-            <KeymapPanel />
-          </section>
-        )}
-
-        {activeSection === 'reasoning' && (
-          <section className="petri-settings-section">
-            <div className="petri-settings-section__heading">
-              <h3>推理档位</h3>
-              <p>思考档位默认值、Anthropic 高档预算与逐协议参数映射（出厂值与生效值并列显示，非法写回被拒）。</p>
-            </div>
-            <ReasoningDefaultsPanel />
-          </section>
-        )}
+        {activeSection === 'keymap' && <KeymapPanel />}
+        {activeSection === 'reasoning' && <ReasoningDefaultsPanel />}
 
         {/* UI-366 — 原全局「后端」页（/backend，BLOCK-72/UI-320）并入本分区 */}
         {activeSection === 'diagnostics' && (

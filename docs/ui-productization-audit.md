@@ -4975,5 +4975,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **验证**：`KeymapPanel.test.tsx` 6/6（默认渲染=命令源值·覆盖显示·录制写回并即时反映·裸键拒且**不发写请求**·冲突点名双方·400 失败横幅含诊断文本）；`ReasoningDefaultsPanel.test.tsx` 5/5（生效/出厂并列·未改动不得点保存·只提交改动项·选回出厂值等价 null 清键·400 diagnostics 逐条点名且不被洗成"已保存"·预算空串拦在客户端不发写）；`thinkingLevel.drift.test.ts` 3/3 含**源码扫描**：前端除 `thinkingLevel.ts` 外不得再出现第二份三档字面量（本次抓到并删除 `conversationRunStore.ts`/`copilotClient/types.ts`/`useChatStream.ts` 三处副本，注释误报已用剥注释修正——扫描器先剥注释再判，否则合理注释会假红）；`appKeymap*.test.ts(x)` 17/17 + 后端 `block200-reasoning-config` 9/9 与 `block200-keymap-store` 8/8。
 - **随批（样式纪律）**：新样式仅 `SettingsQuickwins.module.css` 一个文件、两节共用，色值/间距/字号全部走 `--petri-*` 变量；`--petri-bg-primary` 在本仓**不存在**（写第一版时用了它，靠 `grep custom.css` 核对后换成 `--petri-bg-base`），`theme-token-contract.test.ts` 绿。
 - **实机腿（已销号 2026-10-17）**：9223 自动探针两节均出图取断言（`ui514-keymap-section.png` / `ui515-reasoning-section.png`，`block200-settings-live-live.json` 17/17 allPass），本条转 `verified`。边界留在计划 §4 不藏：录制交互里 Shift 移位标点无法还原 `e.key` 的组合，纯函数层是**如实拒绑**而非错绑成别的键，探针不假装覆盖这一格。
+- **随批（结构下沉，2026-10-17 同日）**：`gate:code-size` 抓到本包把 `petri-settings-section` 外壳与标题写在壳层，使 `DesktopSettingsPanel.tsx` 涨到 715 行、越过 700 硬预算。处置=**外壳下沉进 `KeymapPanel`/`ReasoningDefaultsPanel` 自带**（壳层只留两行分发 → 696 行回到预算内，不进"只出不进"白名单、不新增例外），并删净 `conversationRunStore.ts`/`SimpleChat.tsx` 里我加的冗余注释行；剩余 +1/+5/+5 属有意新增，按台账自带规则 `node scripts/code-size-ledger.mjs --write` **显式重打基线并同提交**。下沉后复验：panel 组件测 11/11、`tsc` 静默、9223 探针复跑 **17/17 allPass**（D2 行数与 D3 徽章同源、D4 派发跟随在结构移动后仍成立）。
+
 
 

@@ -5,8 +5,8 @@
       "path": "frontend/src/components/copilot/conversationRunStore.ts",
       "wave": "A",
       "module": "W-03",
-      "lines": 812,
-      "sha256": "6753b87e53b65bb5874d3b3df8811a4d8b14edbe4461f0abc2fd5821d4cc15aa"
+      "lines": 813,
+      "sha256": "e5679b6ae6cbde761369ff945307f9511ffa613fda5335cb802cd1eba89b9c18"
     },
     {
       "path": "frontend/src/components/copilot/copilotClient.ts",
@@ -19,8 +19,8 @@
       "path": "frontend/src/components/copilot/SimpleChat.tsx",
       "wave": "A",
       "module": "W-03",
-      "lines": 2112,
-      "sha256": "31f42ac60a40202f3702d63d5b745d371e09a27bbc82916a82d5ebf4d30c9d98"
+      "lines": 2117,
+      "sha256": "1dab210251bc608baea1d32cee058785b346addcb86956fbe911877763f35677"
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat/hooks/useThinkingLevel.ts",
@@ -61,8 +61,8 @@
       "path": "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
       "wave": "B",
       "module": "W-01",
-      "lines": 691,
-      "sha256": "32299efb65bf275f3984654effe62eb56c12b11d043adb19a270127caeae3998"
+      "lines": 696,
+      "sha256": "dbfc1a4646dda1a282722e239a9a04110d0fa8e5095352bf07030a702e81d201"
     },
     {
       "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
@@ -170,5 +170,5 @@
       "sha256": "6f08befd152ee1a707051d0131a521a85e2572a883a2c9e912bbd0994fa69e72"
     }
   ],
-  "total": 23499
+  "total": 23510
 }

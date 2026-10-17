@@ -1,6 +1,5 @@
 import { useCallback, useSyncExternalStore } from 'react';
 import type { CopilotContext } from '@/lib/copilotContext';
-// BLOCK-200 P2 — 档位词表单源：此前此处是内联三档字面量副本（第四份），收敛到 thinkingLevel.ts
 import type { ThinkingLevel } from './thinkingLevel';
 import { petriEvents, dispatchPetriEvent } from '@/lib/events';
 import {
