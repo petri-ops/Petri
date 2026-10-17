@@ -7,7 +7,7 @@ acceptance:
   - P3 real 基线棘轮：`evals:gate --suite=real --update` 建 `evals/baselines/real.json`（此后 real 跑受回归棘轮守护），并经 BLOCK-191 formal-admission 双齐门核验准入
   - 门禁：docs:check/ui:audit:check（纯基建免 UI-###）/契约测（回落解析纯函数：env 优先·文件回落·无预设 skip·provider 映射·**不泄漏明文 key**）/real 套件复跑绿/test:changed 全绿
   - 完成语义：`npm run evals:run -- --suite=real --provider=real` 无需手工 env 即跑真模型并绿；real 有基线棘轮；key 明文全程不外泄
-reopen: capture/replay **真实录制态**（record 真模型响应入 fixture）**不属隐私待裁决项，属普通工程权衡**——本包曾误称其撞「LLM 原文不入仓」红线，经复核该红线语境是 `llm-transcripts`=**用户真实对话语料**（故只存指针），与合成 eval 任务的模型响应无关；且 `evals/baselines/smoke.json` 长期存模型 `finalText` 即既有惯例。真正的取舍是**产物体积/抖动 vs 可重放确定性**，解法=录制时过密钥扫描 + 只录合成任务 + replay 必须仍过 BLOCK-189 `outbound_contains` 哨兵（防「罐头响应假绿」）。独立切片可直接立项实现，无需裁决
+reopen: capture/replay **真实录制态**（record 真模型响应入 fixture）**不属隐私待裁决项，属普通工程权衡**——本包曾误称其撞「LLM 原文不入仓」红线，经复核该红线语境是 `llm-transcripts`=**用户真实对话语料**（故只存指针），与合成 eval 任务的模型响应无关；且 `evals/baselines/smoke.json` 长期存模型 `finalText` 即既有惯例。真正的取舍是**产物体积/抖动 vs 可重放确定性**，解法=录制时过密钥扫描 + 只录合成任务 + replay 必须仍过 BLOCK-189 `outbound_contains` 哨兵（防「罐头响应假绿」）。独立切片可直接立项实现，无需裁决。**→ 已由 BLOCK-193 于 2026-10-17 交付**（收割生产 `io-transcript` 台账，非自建代理；`evals:record`/`evals:replay` 在册）
 status: completed
 ---
 
@@ -30,7 +30,7 @@ status: completed
 - **不伪造 real 结果**：解析不出凭据即沿用诚实 skip + 报告标因。
 - **不外泄 key 明文**：不进日志/证据/stdout；契约测断言输出零 key 子串。
 - **不改 mock 模式行为**：`--provider=mock` 路径与既有 32 项套件判据零变更（防回归）。
-- **不录真模型原文入仓**：capture record 侧见 reopen（隐私红线待裁决）。
+- **不录真模型原文入仓**：capture record 侧已由 **BLOCK-193 交付**（2026-10-17）——录制=收割生产 `io-transcript` 台账并投影语义回合，入库前过密钥扫描 + 合成任务闸；「隐私红线待裁决」的旧措辞已在 b061eb3a 撤回。
 - **G1+ 不外推**：不碰 packaged/Provider 商务面/公证。
 
 ## 4. 执行

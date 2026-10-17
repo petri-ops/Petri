@@ -1,4 +1,8 @@
 # Petri Desktop Current Handoff
+最后更新：2026-10-17（**BLOCK-193-EVALS-CAPTURE-REPLAY 整包 completed（评测 v2 第五切片·capture/replay 真实录制态；closeout 十三门全绿·实机录制 3/3 与离线回放 3/3 双 PASS）**）
+
+**恢复要点（换会话必读）**：**无 active 工作包**；评测 v2 六包在册（188 快照 / 189 防作弊与禁 sleep / 190 目录 / 191 门控 / 192 真模型凭据 / 193 录制回放）。**BLOCK-193 留给后续会话的三条硬事实**（勿再走弯路）：①模型 I/O 早已被生产记录器 `io-transcript`（BLOCK-37）留存——`model-gateway.js:267` 的 `chat()` 在流式与非流式统一 `_emitTranscript` 写 `<PETRI_LOCAL_DATA_DIR>/llm-transcripts/<convId>.jsonl`，评测要「录制」就**收割它**，不要新建代理或第二套 SSE 解析；②`evals:record`（真模型一次）→ `evals:replay`（零 API 零凭据、0.5-1.1s/题）已是 real 套件的离线回归通道，回放产物走 `real-replay` 命名空间，`measures=recorded-replay` 不得当成模型质量；③**踩出一条 BLOCK-189 归一化缺陷并已修**：把 `JSON.stringify` 的单行 blob 喂给按「折到行尾」设计的 `<ENV>` 规则会吞掉整条出站（真模型三例 `outbound_contains` 全 ×0 假红），修在 `outbound_contains` 的 blob 构造（还原转义换行），归一化本体与快照指纹零变更——**后续任何「归一化后子串断言」都不得再直接喂单行 JSON**。下一步候选=阶段2 剩余（LLM-as-judge real 模式·编排类录制需 conversation 血缘口径·竞争力 8 维复测随包不单开）或阶段3（配置 schema 统一服务），均需新发令。
+
 最后更新：2026-10-16（**BLOCK-193-EVALS-CAPTURE-REPLAY 立项发令 active（评测 v2 第五切片·capture/replay 真实录制态；用户「可以呀 按上面这个定案开建 BLOCK-193」**）
 
 **恢复要点（换会话必读）**：当前唯一 active=**BLOCK-193**（评测 v2 第五切片·capture/replay 真实录制态；定案三约束=写前过密钥扫描+只录合成任务+replay 仍须过 189 哨兵）。**关键勘察结论（接手勿再走弯路）**：①模型响应**并非零留存**——`core/shared-backend/llm-providers/io-transcript.js`（BLOCK-37）由 `model-gateway.js:267` 在流式/非流式统一 `_emitTranscript` 落 `<PETRI_LOCAL_DATA_DIR>/llm-transcripts/<convId>.jsonl`，evals 隔离后端写到 tmpDir 后被 `fs.rmSync` 丢弃，缺口只在「未入仓可重放」；②故**禁止**新写录制代理/第二套 SSE 解析（生产记录器影子副本），录制态=差分收割 + 投影 mock 回合（`startMockProvider` 投递机制已存在）；③replay 报告/基线必须走 `${suite}-replay` namespace，否则覆盖 real-latest 污染真模型棘轮。真模型调用只在 P3 录制发生一次。plan=docs/block-193-evals-capture-replay-plan.md。

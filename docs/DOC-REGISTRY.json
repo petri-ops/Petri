@@ -6644,15 +6644,15 @@
       "capability": "evaluation",
       "path": "docs/block-193-evals-capture-replay-plan.md",
       "kind": "work-package",
-      "status": "active",
-      "phase": "P0-LAUNCH",
+      "status": "completed",
+      "phase": "P5-CLOSED",
       "canonical": true,
       "truthDomain": "block-193-evals-capture-replay-plan",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-10-16",
       "archivePolicy": "retain_stable_path",
       "tags": ["evals-v2", "capture-replay", "io-transcript", "anti-fake-green", "evidence-self-attestation", "stage-2"],
-      "notes": "2026-10-16 立项发令 active（用户「可以呀 按上面这个定案开建 BLOCK-193」；定案三约束=写前过密钥扫描 + 只录合成任务 + replay 仍须过 BLOCK-189 outbound_contains 哨兵）：评测 v2 第五切片·capture/replay 真实录制态。**P0 实码勘察更正上游转述两处**：①「real 模型响应零留存」不成立——BLOCK-37 io-transcript 是生产级模型 I/O 记录器，model-gateway.js:267 chat() 流式与非流式两分支统一 _emitTranscript，落 <PETRI_LOCAL_DATA_DIR>/llm-transcripts/<conversationId>.jsonl（本机实文件已核 provider=deepseek），evals 隔离后端正好写到 tmpDir 而后被 fs.rmSync 销毁→真实缺口是「留存随临时目录销毁、未入仓可重放」；②「replay 需放宽 188 快照条件 if(backend.ok&&mock)」在本设计不成立（replay 复用 startMockProvider 故 mock 天然在场），但「报告/基线落点不分 provider 会互相覆盖」为真且是假绿通道，同批修。据此**不新建录制代理、不写第二套 SSE 解析**（会给生产记录器做影子副本，触治理红线），录制态=收割现成台账+投影可重放回合。交付=evals-recording.mjs 差分归属/投影纯函数 + 入库双闸（secret-scan PATTERNS 单源密钥扫描 + 合成任务闸：task.id 须在仓库套件且转录逐字含 prompt）+ replay 态 measures=recorded-replay 且缺 outbound_contains 即红 + real outbound 由转录投影供（顺带解锁 real 层出站自证）+ (suite,provider) 产物 namespace。红线=不冒充 model 质量/不改 PASS 语义/不撞 191 的 fixture 词汇（本包产物统一叫 recording）/不录 smoke-golden/零密钥零用户数据入仓。plan=docs/block-193-evals-capture-replay-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "2026-10-17 整包 completed（用户「可以呀 按上面这个定案开建 BLOCK-193」发令；closeout 十三门全绿；实机录制 real 3/3 PASS·measures=model → 离线零 API 回放 3/3 PASS·measures=recorded-replay·单任务 0.5-1.1s vs 真模型 3-15s）：评测 v2 第五切片·capture/replay 真实录制态。**P0 实码勘察更正上游（ZCode）转述两处并据此换骨架**：①「real 模型响应零留存」不成立——BLOCK-37 io-transcript 由 model-gateway.js:267 chat() 流式/非流式统一 _emitTranscript 落 <PETRI_LOCAL_DATA_DIR>/llm-transcripts/<convId>.jsonl（本机实文件 provider=deepseek 在场），evals 隔离后端写到 tmpDir 后被 fs.rmSync 销毁→真实缺口=「随临时目录销毁、未入仓可重放」；②「replay 需放宽 188 快照条件」不成立（replay 复用 startMockProvider→mock 天然在场），但「报告/基线落点不分 provider 互相覆盖」为真且是假绿通道。据此**不新建录制代理、不写第二套 SSE 解析**（生产记录器影子副本触「不得引入第二执行器/第二真相」红线）：零新增采集面、不改 real 网络拓扑、真 key 连临时目录都不必落。交付=scripts/lib/evals-recording.mjs（行数差分归属〔不靠时钟不靠 convId 命名〕+ 回合/出站投影〔缺响应与 error 记录不投影、绝不编造〕+ 入库双闸〔密钥扫描复用 secret-scan SECRET_PATTERNS 单源并加 main 守卫导出；合成任务闸核验产物 sourceSuiteFile 在 evals/suites/<suite>/ 且 prompt 哈希一致且转录出站逐字含仓库 prompt〕+ 回放对账与罐头假绿哨兵闸）+ evals-run 三态（mock/real+--record/replay；outbound 支持 thunk，因 real 出站须任务收口后才可收割）+ evals-gate (suite,provider) 产物 namespace（real-replay-latest.json 与 evals/baselines/real-replay.json，与 real.* 互不覆盖；未显式给 provider 时如实回显报告自身 provider）+ 投递保真（toolCalls 同帧保留正文，防回放丢 finalText 假红）+ real 三用例补 outbound_contains 哨兵（real 层自此也能出站自证）。**顺带修出 BLOCK-189 既有缺陷**：outbound_contains 把 JSON.stringify 的单行 blob 喂给按「折到行尾」设计的 <ENV> 归一化规则，于是一路吞掉整条出站→真模型三例哨兵全 ×0 假红；读侧还原转义换行修复（normalizeContextString 本体与快照 fp ed098adbc5d63943 零变更），固化缺陷守卫测（命中绿+易变 token 仍红）；如实登记弱点=该哨兵此前仅由旁路请求（会话标题生成）满足，修复后 agent 主请求亦计入=加强而非语义变更。契约测 15/15（含假绿反证：罐头回合+空出站必红）·邻域 58/58 零回归·test:changed base=9e16b7ca 94pass/0fail/2skip·smoke 9/9 golden 1/1 不回归·evals:gate real 与 real-replay 双回归 0·output:judge fit=3.05 PASS 落 decision_log。录制产物 evals/recordings/real/ 总计 10.2KB（体积一侧实测非问题）。非范围兑现=未建代理/未录 smoke-golden/未建 real 快照基线/未动 191 的 fixture 词汇（本包产物统一叫 recording）/未碰 G1+。reopen=LLM-as-judge real 模式·编排类多 agent 录制（需 conversation 血缘口径）·竞争力 8 维复测（蓝图明定随包不单开）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "DESKTOP-EVAL-20261015",
