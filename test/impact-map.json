@@ -2986,7 +2986,8 @@
         "test/ck04-section-budgets.test.mjs",
         "test/system-prompt-identity.test.mjs",
         "test/system-prompt-rejects.test.mjs",
-        "test/system-prompt-result-context.test.mjs"
+        "test/system-prompt-result-context.test.mjs",
+        "test/block197-refusal-shape-prompt.test.mjs"
       ],
       "frontendRelated": false,
       "classifiesScripts": false
@@ -3718,6 +3719,18 @@
       "tests": [
         "frontend/src/components/copilot/SimpleChat/hooks/useChatStream.block178.test.tsx"
       ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "block197-refusal-answer-shape",
+      "note": "BLOCK-197（C-26）拒绝类答复形状条款：core/petri-server/helpers/system-prompt.js 的 principles 清单追加「拒绝时先给结论+真实风险+一条最贴近实际目标的可行做法，禁止自述安全规则/回应催促/多分支臆测菜单/无关领域夹带」。契约=test/block197-refusal-shape-prompt.test.mjs（条款在场且正向先于禁止·既有原则未删改·组装后进 prompt 且缓存命中路径同样在场·全 prompt 仅一处·不含示例原话）；质量验收=evals real 套件 --judge 读数（RETRY→PASS）。源文件模式仍由 ck04-section-budgets 负责分类（本规则 classifiesScripts:false，不重复计入）。",
+      "patterns": [
+        "test/block197-*.test.mjs"
+      ],
+      "tests": [
+        "test/block197-refusal-shape-prompt.test.mjs"
+      ],
+      "frontendRelated": false,
       "classifiesScripts": false
     }
   ]
