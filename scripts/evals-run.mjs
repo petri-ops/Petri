@@ -88,6 +88,7 @@ const report = {
 let passCount = 0;
 let snapshotDrift = false;
 let recordFailures = 0;
+let recordedAny = false;
 const judgeReadings = [];
 
 if (backend.ok) {
@@ -162,6 +163,7 @@ if (backend.ok) {
         fs.mkdirSync(path.dirname(file), { recursive: true });
         fs.writeFileSync(file, `${JSON.stringify(recording, null, 2)}\n`);
         console.log(`  [record] ✔ ${task.id} → ${path.relative(root, file)}（回合 ${recording.turnCount}/${recording.requestCount}·丢弃 ${recording.droppedCount}）`);
+        recordedAny = true;
       }
     }
     report.tasks.push(result);
@@ -170,6 +172,13 @@ if (backend.ok) {
   }
 } else {
   for (const task of tasks) report.tasks.push({ id: task.id, passed: false, skipped: false, criteriaResults: [], error: 'backend DOWN' });
+}
+
+// BLOCK-197 教训入码：录制文件是**可重生成资产**，但 `evals/baselines/<suite>-replay.json` 与它成对。
+// 实跑踩过：`evals:record` 重录后 provider-sanity 的回合不再满足 tool_used/file_contains → replay 直接红。
+// 所以重录必须同批复验回放并按需显式提升 replay 基线，不能只信"录制成功"。
+if (recordedAny) {
+  console.log('\n[record] ⚠ 录制资产已刷新——同批复验回放：`npm run evals:replay && npm run evals:gate -- --suite=real --provider=replay`；不绿则 git 还原录制或显式提升 replay 基线。');
 }
 
 // ── BLOCK-188 context_snapshot 棘轮（按套件）─────────────────────
