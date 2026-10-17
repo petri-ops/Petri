@@ -49,6 +49,19 @@ status: completed
 
 §5.1 阶段 2 出口两条腿：①评测基线 v2 在册——BLOCK-188/189/190/191/192/193/194 七包已闭合；②8 维复评每维有实机/DOM 锚点——本包交付，53 点位全部带 `derivesFrom` 指回总纲，8 维每维至少有 DOM/evals/live 层锚（dim7 的 live 腿受本机环境限制记 `env`，其余层级仍给分）。**两条腿齐 → 阶段 2 出口达成**，阶段 3（配置 schema 统一服务）入口条件成立。门禁：契约测 10/10 · 新增 `ContextBudgetBar.test.tsx` 6/6 · `test:changed --base=f7ae1066` · `npm run closeout` 十三门全绿。
 
+## 0.3 加映 1（同日·BLOCK-196 触发）：D16 从"无锚"变"有锚且撞出安全缺陷"
+
+收口后继续按队列头推进时，准备给 dim6 的 `6-data-binding`（D16 卡片自取数）补锚——**实码核实该能力早已落地**（`src/ipc/gen-ui.js:244` CP-11 中继：窗主绑定 + 跨会话归属校验 + 12KB 有界投影，系统提示也广告了 `petri.getData(jobId)`），只是**自 BLOCK-174 起零机械断言**。补锚过程当场撞出真缺陷：
+
+> 归属校验用 `session.filePath.split('/')` 取 conversationId，而 `prepareGenUi` 走 realpath，**win32 上是反斜杠** → conversationId 恒 `null` → 旧代码 `if (sessionConversationId && ...)` 让跨会话分支**在 Windows 上整体空转**。红测实测：同窗内会话 A 的卡片可用 jobId 直接读到会话 B 的已完成任务（返回 `ok:true`）。
+
+修复（`src/ipc/gen-ui.js`）=分隔符按 `/[\\/]+/` 切；并把"算不出归属"从 fail-open 改成 **fail-closed**（`session_scope_unknown` 拒）——归属证明不了就不给读。契约测 `test/block196-genui-data-binding.test.mjs` 7 项：注册面在场 / 五道拒绝码 / 正常有界投影 / >12KB 截尾 / **三种路径形状（含原生反斜杠）跨会话一律拒** / 无 conv 段 fail-closed / 同会话不得反向变严。红绿实测：修前 `code=undefined`（=放行），修后 `cross_conversation`。
+
+**复测口径刷新（同环境 dev 栈+9223 测试实例）**：dim6 **4.2 → 5.0**（6/6 点位全绿），八维均值 **4.0 → 4.1**，无锚点位 **11 → 10**（D16 出列）；`evals/anchors/baseline.json` 已按 `--update` 显式提升，`--check` 全层级复跑对账通过、零 anchored-red。**本包 §0 的原表按快照保留不改写**（它是 2026-10-17 那次真实测量的记录），新数以本节为准。
+
+教训（已进记忆与台账）：**"无锚点位"有两种——能力真缺失，或有实现无断言**。清单只说后者是证据缺口，不区分二者；补锚正是把它们分开的手段，而这次分开出来的是一个真安全洞。
+
+**加映自纠（本包自己的契约测被这次改善打红了）**：`test/block195-anchors.test.mjs` 有一条把「`6.6-data-binding` 等点位当前无锚」写死成断言。补锚转绿后它立刻红——**门禁惩罚了正当改善**，这正是我在 §0.1④ 里反对的同一类毛病的镜像面（那次是"删锚算改善"，这次是"补锚算违规"）。修法不是把 id 换个别的无锚点位（那只是把同一颗定时炸弹往后挪），而是**把断言拆成两层**：①口径层用纯函数（零锚/锚全 `env`/`skip` ⇒ `unanchored`，与清单当前状态无关）；②清单层只守集合完整性与诚实性（无锚点位必须存在且带 `derivesFrom`、点位集合相对棘轮基线不得缩水，**不写死具体 id**）。进度归 `--check` 棘轮管，门禁不冻结进度。25/25 复绿。
 
 ## 1. 为什么这是队列头（不是我又挑一个舒服的包）
 
