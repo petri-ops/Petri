@@ -13,7 +13,7 @@ function stubPlatform(value: string): void {
 
 afterEach(() => {
   cleanup();
-  for (const [key, descriptor] of originals) {
+  for (const [_key, descriptor] of originals) {
     if (descriptor) Object.defineProperty(window.navigator, 'platform', descriptor);
     else delete (window.navigator as unknown as Record<string, unknown>).platform;
   }
@@ -22,13 +22,13 @@ afterEach(() => {
 });
 
 function jsonResponse(payload: unknown, ok = true): Response {
-  return { ok, status: ok ? 200 : 400, json: async () => payload } as unknown as Response;
+  return { ok, status: ok ? 200 : 400, json: () => Promise.resolve(payload) } as unknown as Response;
 }
 
 function mount(getBindings: Record<string, string | null> = {}, onPut?: (body: unknown) => Response): void {
-  vi.stubGlobal('fetch', vi.fn(async (_input: unknown, init?: unknown) => {
+  vi.stubGlobal('fetch', vi.fn((_input: unknown, init?: unknown) => {
     if (init && (init as { method?: string }).method === 'PUT') {
-      const body = JSON.parse(String((init as { body: string }).body));
+      const body = JSON.parse(String((init as { body: string }).body)) as { bindings?: Record<string, string | null> };
       return onPut ? onPut(body) : jsonResponse({ status: 'ok', bindings: { ...getBindings, ...body.bindings } });
     }
     return jsonResponse({ status: 'ok', bindings: getBindings });
@@ -64,7 +64,7 @@ describe('KeymapPanel（UI-514）', () => {
   it('录制裸键被拒并给出理由，不发写请求（裸键会劫持输入框）', async () => {
     stubPlatform('Win32');
     const put = vi.fn();
-    vi.stubGlobal('fetch', vi.fn(async (input: unknown, init?: unknown) => {
+    vi.stubGlobal('fetch', vi.fn((input: unknown, init?: unknown) => {
       if (init && (init as { method?: string }).method === 'PUT') { put(); return jsonResponse({ status: 'ok', bindings: {} }); }
       return jsonResponse({ status: 'ok', bindings: {} });
     }));

@@ -17,7 +17,7 @@ afterEach(() => {
   cleanup();
   fires.length = 0;
   seen = null;
-  for (const [key, descriptor] of originals) {
+  for (const [_key, descriptor] of originals) {
     if (descriptor) Object.defineProperty(window.navigator, 'platform', descriptor);
     else delete (window.navigator as unknown as Record<string, unknown>).platform;
   }
@@ -30,19 +30,20 @@ const fires: string[] = [];
 
 function Probe(): React.ReactElement {
   const value = useKeymapSafe();
-  seen = value;
+  // 模块级"最近一次渲染值"只在 effect 里写（React Compiler 规则禁渲染期改外部变量）
+  React.useEffect(() => { seen = value; }, [value]);
   useAppKeymapDispatcher({ 'nav-home': () => { fires.push('nav-home'); } });
   return <div data-testid="sync-state">{value.sync.state}</div>;
 }
 
 function response(payload: unknown, ok = true): Response {
-  return { ok, status: ok ? 200 : 400, json: async () => payload } as unknown as Response;
+  return { ok, status: ok ? 200 : 400, json: () => Promise.resolve(payload) } as unknown as Response;
 }
 
 function stubFetch(onPut?: (body: unknown) => Response): typeof fetch {
-  const impl = vi.fn(async (input: unknown, init?: unknown) => {
+  const impl = vi.fn((input: unknown, init?: unknown) => {
     if (init && (init as { method?: string }).method === 'PUT') {
-      const body = JSON.parse(String((init as { body: string }).body)) as unknown;
+      const body = JSON.parse(String((init as { body: string }).body)) as { bindings?: Record<string, string | null> };
       return onPut ? onPut(body) : response({ status: 'ok', bindings: {} });
     }
     return response({ status: 'ok', bindings: {} });
@@ -54,7 +55,7 @@ function stubFetch(onPut?: (body: unknown) => Response): typeof fetch {
 describe('键位注册表运行时面（Provider + App 级派发器）', () => {
   it('盘上覆盖改变生效键位：按新组合触发，按旧默认组合不再触发', async () => {
     stubPlatform('Win32');
-    vi.stubGlobal('fetch', vi.fn(async () => response({ status: 'ok', bindings: { 'nav-home': 'Mod+Shift+N' } })));
+    vi.stubGlobal('fetch', vi.fn(() => response({ status: 'ok', bindings: { 'nav-home': 'Mod+Shift+N' } })));
     render(<KeymapProvider><Probe /></KeymapProvider>);
     await waitFor(() => expect(seen?.bindings['nav-home']).toBe('Mod+Shift+N'));
 
@@ -102,7 +103,7 @@ describe('键位注册表运行时面（Provider + App 级派发器）', () => {
 
   it('网络异常同样可见（failed + 错误文本），且仍不影响本端按键', async () => {
     stubPlatform('Win32');
-    vi.stubGlobal('fetch', vi.fn(async (_input: unknown, init?: unknown) => {
+    vi.stubGlobal('fetch', vi.fn((_input: unknown, init?: unknown) => {
       if (init && (init as { method?: string }).method === 'PUT') throw new Error('ECONNREFUSED');
       return response({ status: 'ok', bindings: {} });
     }));
@@ -122,7 +123,7 @@ describe('键位注册表运行时面（Provider + App 级派发器）', () => {
 
   it('冲突可见：两个命令挤同一组合时点名双方（不静默丢一个）', async () => {
     stubPlatform('Win32');
-    vi.stubGlobal('fetch', vi.fn(async () => response({ status: 'ok', bindings: { 'nav-home': 'Mod+K' } })));
+    vi.stubGlobal('fetch', vi.fn(() => response({ status: 'ok', bindings: { 'nav-home': 'Mod+K' } })));
     render(<KeymapProvider><Probe /></KeymapProvider>);
     await waitFor(() => {
       const conflict = (seen?.conflicts || []).find((row) => row.combo === 'Mod+K');

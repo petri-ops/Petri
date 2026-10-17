@@ -3,9 +3,18 @@
 import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
-// CJS 单源表，只在测试里跨语言对账（生产构建不引 CJS）
+// CJS 单源表，只在测试里跨语言对账（生产构建不引 CJS）。
 // @ts-expect-error 无声明文件；vitest 走 CJS 互操作可用
-import { THINKING_LEVELS, DEFAULT_THINKING_LEVEL, ANTHROPIC_HIGH_BUDGET_TOKENS, DEFAULT_MAPPING } from '../../../../core/packages/shared-config/reasoning-defaults.js';
+import * as rawReasoningDefaults from '../../../../core/packages/shared-config/reasoning-defaults.js';
+
+// 无 .d.ts 的 CJS 模块：在测试边界显式收窄类型，而不是让整文件落在 error-typed 上
+const { THINKING_LEVELS, DEFAULT_THINKING_LEVEL, ANTHROPIC_HIGH_BUDGET_TOKENS, DEFAULT_MAPPING } =
+  rawReasoningDefaults as unknown as {
+    THINKING_LEVELS: readonly string[];
+    DEFAULT_THINKING_LEVEL: string;
+    ANTHROPIC_HIGH_BUDGET_TOKENS: number;
+    DEFAULT_MAPPING: Record<string, Record<string, string>>;
+  };
 import { THINKING_LEVELS as FRONTEND_LEVELS, DEFAULT_THINKING_LEVEL as FRONTEND_DEFAULT } from './thinkingLevel';
 
 const COPILOT_ROOT = path.resolve(__dirname);

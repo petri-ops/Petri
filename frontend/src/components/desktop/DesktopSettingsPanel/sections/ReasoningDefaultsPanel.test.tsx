@@ -29,15 +29,15 @@ const SNAPSHOT = {
 };
 
 function jsonResponse(payload: unknown, ok = true): Response {
-  return { ok, status: ok ? 200 : 400, json: async () => payload } as unknown as Response;
+  return { ok, status: ok ? 200 : 400, json: () => Promise.resolve(payload) } as unknown as Response;
 }
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 function mount(onPut?: (body: unknown) => unknown): void {
-  vi.stubGlobal('fetch', vi.fn(async (_input: unknown, init?: unknown) => {
+  vi.stubGlobal('fetch', vi.fn((_input: unknown, init?: unknown) => {
     if (init && (init as { method?: string }).method === 'PUT') {
-      const body = JSON.parse(String((init as { body: string }).body));
+      const body = JSON.parse(String((init as { body: string }).body)) as { bindings?: Record<string, string | null> };
       return jsonResponse(onPut ? { status: 'ok', reasoning: onPut(body) } : { status: 'ok', reasoning: SNAPSHOT });
     }
     return jsonResponse({ status: 'ok', reasoning: SNAPSHOT });
@@ -49,10 +49,10 @@ describe('ReasoningDefaultsPanel（UI-515）', () => {
   it('显示生效值与出厂值，未改动时保存按钮不可用（不产生空写入）', async () => {
     mount();
     await waitFor(() => expect((screen.getByTestId('reasoning-mapping-table') as unknown as HTMLTableElement).rows.length).toBeGreaterThan(0));
-    const select = screen.getByTestId('reasoning-default-level') as HTMLSelectElement;
+    const select = screen.getByTestId('reasoning-default-level');
     expect(select.value).toBe('standard');
-    expect((screen.getByTestId('reasoning-anthropic-budget') as HTMLInputElement).value).toBe('16000');
-    expect((screen.getByTestId('reasoning-save') as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByTestId('reasoning-anthropic-budget')).value).toBe('16000');
+    expect((screen.getByTestId('reasoning-save')).disabled).toBe(true);
   });
 
   it('只提交改动项：改默认档时 PUT 体不含预算与映射', async () => {
@@ -84,7 +84,7 @@ describe('ReasoningDefaultsPanel（UI-515）', () => {
 
   it('写侧 400 时逐条 diagnostics 点名（不把拒绝洗成"已保存"）', async () => {
     // 用一个**客户端合法但服务端注册表拒**的输入（改默认档），才能验到拒答渲染路径
-    vi.stubGlobal('fetch', vi.fn(async (_input: unknown, init?: unknown) => {
+    vi.stubGlobal('fetch', vi.fn((_input: unknown, init?: unknown) => {
       if (init && (init as { method?: string }).method === 'PUT') {
         return jsonResponse({
           status: 'error',
@@ -104,7 +104,7 @@ describe('ReasoningDefaultsPanel（UI-515）', () => {
   });
 
   it('预算留空（number 输入对非法键入给空串）时前端拦住且不发写入', async () => {
-    const fetchMock = vi.fn(async () => jsonResponse({ status: 'ok', reasoning: SNAPSHOT }));
+    const fetchMock = vi.fn(() => jsonResponse({ status: 'ok', reasoning: SNAPSHOT }));
     vi.stubGlobal('fetch', fetchMock);
     render(<ReasoningDefaultsPanel />);
     await waitFor(() => expect(screen.getByTestId('reasoning-anthropic-budget')).toBeTruthy());
