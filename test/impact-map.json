@@ -1860,7 +1860,8 @@
         "test/block49-phase2-tools.test.mjs",
         "test/block49-addendum-terminal.test.mjs",
         "test/agent-tool-policy.test.mjs",
-        "test/agent-tool-registry.test.mjs"
+        "test/agent-tool-registry.test.mjs",
+        "test/block198-spawn-depth.test.mjs"
       ],
       "frontendRelated": true,
       "classifiesScripts": true,
@@ -2988,7 +2989,8 @@
         "test/system-prompt-identity.test.mjs",
         "test/system-prompt-rejects.test.mjs",
         "test/system-prompt-result-context.test.mjs",
-        "test/block197-refusal-shape-prompt.test.mjs"
+        "test/block197-refusal-shape-prompt.test.mjs",
+        "test/block198-prompt-layering.test.mjs"
       ],
       "frontendRelated": false,
       "classifiesScripts": false
@@ -3189,7 +3191,8 @@
         "frontend/src/components/result-studio/ResultStudioChangeSetPanel.test.tsx",
         "frontend/src/components/result-studio/RevisionCodeView.test.tsx",
         "frontend/src/components/result-studio/ScientificInteractionViewer.test.tsx",
-        "frontend/src/components/workspace-panels/ResultArtifactShell/useArtifactInteractionSelection.selectionBus.test.tsx"
+        "frontend/src/components/workspace-panels/ResultArtifactShell/useArtifactInteractionSelection.selectionBus.test.tsx",
+        "src/components/workspace-panels/ArtifactPinPane.ratio.test.tsx"
       ],
       "frontendRelated": true,
       "classifiesScripts": false
@@ -3731,6 +3734,21 @@
       "tests": [
         "test/block197-refusal-shape-prompt.test.mjs",
         "test/block197-judge-input-window.test.mjs"
+      ],
+      "frontendRelated": false,
+      "classifiesScripts": false
+    },
+    {
+      "id": "block198-unanchored-anchors",
+      "note": "BLOCK-198 竞争力无锚点位清偿批（有实现无断言普查）：evals/anchors/competitiveness-8d.json 挂 6 条新机械锚 + 4 处 claim 按实码更正（成本上限=提示级诚实收尾非硬中止；委托 SSE 镜像叠加在 5s 轮询之上未替代轮询；分屏比例已落地但 canCompare 未接进钉住入口且分隔件非 slider 角色；斜杠即执行/ANN 质量基线/多跳中继判为真缺口保持无锚转候选 C-29/C-30/C-31）。新增测=test/block198-prompt-layering.test.mjs（静态前缀跨 context 恒定+缓存命中/失效计量）+ test/block198-spawn-depth.test.mjs（有界派生判定链四条分支，全在派发前返回·零模型调用）+ frontend ArtifactPinPane.ratio.test.tsx（clamp/键盘步长/持久化恢复/坏值回落）。复跑与定分口径单源仍在 block195-competitiveness-anchors。",
+      "patterns": [
+        "test/block198-*.test.mjs",
+        "evals/anchors/competitiveness-8d.json"
+      ],
+      "tests": [
+        "test/block198-prompt-layering.test.mjs",
+        "test/block198-spawn-depth.test.mjs",
+        "test/block195-anchors.test.mjs"
       ],
       "frontendRelated": false,
       "classifiesScripts": false
