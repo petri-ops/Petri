@@ -24,6 +24,7 @@ const schema = require('../core/packages/shared-config/config-schema.js');
 const userPrefs = require('../core/petri-server/helpers/user-prefs.js');
 const skillPrefs = require('../core/shared-backend/skill-prefs.js');
 const userRules = require('../core/petri-server/helpers/agent-user-rules.js');
+const mcpSettings = require('../core/petri-server/helpers/mcp-settings.js');
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 /** 三族的落点文件与其在文件内的"键袋"位置（形状照现状读，不假设统一）。 */
@@ -45,6 +46,8 @@ function storeTargets(env = process.env) {
     { family: 'skills-prefs', file: skillPrefs.getPrefsFilePath(), flattenRoot: true },
     // BLOCK-203 W4a P4：集合型落点的条目逐个诊断（`items` 选项把每条当作一组）
     { family: 'agent-rules', file: userRules.rulesFile(userRules.dataDir()), items: 'rules' },
+    // 落盘 env 是密文（enc:v1:…）：`env` 按 object 类型整体透传，不会被误判成未知字段
+    { family: 'mcp-servers', file: mcpSettings.SETTINGS_FILE, items: 'servers' },
   ];
 }
 
@@ -71,8 +74,10 @@ export function buildReport({ readJson, env = process.env }) {
       groups.push({ bagName: '(file root)', obj: schema.flattenOneLevel(doc) });
     }
     if (target.items && Array.isArray(doc[target.items])) {
+      // 条目直接交给 diagnoseItem：它按注册字段走「顶层 + 一层嵌套」，动态容器（env）整体透传，
+      // 不能再先 flattenOneLevel——那会把 `env.TOKEN` 摊成未知字段（假警报）。
       doc[target.items].forEach((entry, index) => {
-        groups.push({ bagName: `${target.items}[${index}]`, obj: schema.flattenOneLevel(entry), itemScoped: target.family });
+        groups.push({ bagName: `${target.items}[${index}]`, obj: entry, itemScoped: target.family });
       });
     }
     if (target.scalarKeys) {

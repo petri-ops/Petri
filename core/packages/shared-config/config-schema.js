@@ -113,6 +113,15 @@ const CONFIG_FAMILIES = Object.freeze({
     precedence: ['file', 'default'],
     envTruth: null,
   },
+  // —— BLOCK-203 W4a P5：第三方 MCP server 清单（BLOCK-156/163 的 servers[]）——
+  // `maxItems` 是**集合级**上限（不是条目字段）：条目数上限属于"这份清单"的性质，
+  // 塞进任何单条字段里都表达不了。条目级上限（args 条数）走字段 domain.maxItems。
+  'mcp-servers': {
+    store: 'file:mcp-servers.json#servers',
+    precedence: ['file', 'default'],
+    envTruth: null,
+    maxItems: 50,
+  },
 });
 
 /**
@@ -382,6 +391,47 @@ const CONFIG_KEYS = Object.freeze([
     key: 'agentRules.<item>.createdAt', family: 'agent-rules', path: '<item>.createdAt',
     type: 'string', envKeys: [], aliases: [], mutable: false, owner: 'code', ui: 'none',
   },
+  // —— 第三方 MCP server 清单（BLOCK-203 W4a P5；原 `helpers/mcp-settings.js:36-59` 内联校验）——
+  // `env` 是**对象透传**：键名由用户决定（动态命名空间），值落盘前经 `mcp-env-crypto` 加密；
+  // 导出**不含 env**（凭据不随配置迁移，D-2），故这里只声明容器形状、不逐个 env 键登记。
+  {
+    key: 'mcpServers.version', family: 'mcp-servers', path: 'version',
+    type: 'number', envKeys: [], aliases: [], mutable: false, owner: 'code', ui: 'none',
+  },
+  {
+    key: 'mcpServers.savedAt', family: 'mcp-servers', path: 'savedAt',
+    type: 'string', envKeys: [], aliases: [], mutable: false, owner: 'code', ui: 'none',
+  },
+  {
+    key: 'mcpServers.<item>.id', family: 'mcp-servers', path: '<item>.id',
+    // 空白与斜杠会破坏 id 作为键/路径段的可用性（同类约束见 skills-prefs 的 SKILL_ID_RE）
+    type: 'string', domain: { pattern: '^[^\\s/\\\\]+$' }, envKeys: [], aliases: [], mutable: true, ui: 'settings',
+  },
+  {
+    key: 'mcpServers.<item>.command', family: 'mcp-servers', path: '<item>.command',
+    type: 'string', domain: { pattern: '\\S' }, envKeys: [], aliases: [], mutable: true, ui: 'settings',
+  },
+  {
+    key: 'mcpServers.<item>.args', family: 'mcp-servers', path: '<item>.args',
+    type: 'array', domain: { maxItems: 64 }, envKeys: [], aliases: [], mutable: true, ui: 'settings',
+  },
+  {
+    key: 'mcpServers.<item>.env', family: 'mcp-servers', path: '<item>.env',
+    type: 'object', envKeys: [], aliases: [], mutable: true, ui: 'settings',
+  },
+  {
+    key: 'mcpServers.<item>.autoConnect', family: 'mcp-servers', path: '<item>.autoConnect',
+    type: 'boolean', envKeys: [], aliases: [], mutable: true, ui: 'settings',
+  },
+  {
+    key: 'mcpServers.<item>.transport', family: 'mcp-servers', path: '<item>.transport',
+    type: 'string', domain: { oneOf: ['stdio', 'http'] }, envKeys: [], aliases: [], mutable: true, ui: 'settings',
+  },
+  {
+    key: 'mcpServers.<item>.url', family: 'mcp-servers', path: '<item>.url',
+    // 只有 transport=http 时才有意义；"http 必带 url"是**条目级**关系，由落点语义校验（域表达不了）
+    type: 'string', domain: { pattern: '^https?://\\S*$' }, envKeys: [], aliases: [], mutable: true, ui: 'settings',
+  },
 ]);
 
 const KEY_INDEX = new Map(CONFIG_KEYS.map((entry) => [entry.key, entry]));
@@ -448,29 +498,49 @@ function setNested(target, dottedPath, value) {
  *  · 读侧调用时只用 `.diagnostics`（宽容报告），写侧用 `.item`（重建后再落盘）。
  * @returns {{item:object|null, diagnostics:Array}}
  */
+/** 诊断 + 归一化单个字段（条目内部用）；返回是否写入。 */
+function applyItemField(family, field, value, target, diagnostics) {
+  const entry = findItemFieldEntry(family, field);
+  if (!entry) {
+    diagnostics.push({ code: DIAGNOSTIC_CODES.UNKNOWN_KEY, path: field, family, message: `未注册的条目字段 ${field}（写侧拒绝，读侧忽略）` });
+    return false;
+  }
+  if (!entry.mutable && entry.owner !== 'code') {
+    diagnostics.push({ code: DIAGNOSTIC_CODES.READ_ONLY, path: field, family, message: `${entry.key} 属代码侧校准专属，用户不可写` });
+    return false;
+  }
+  const check = validateValue(entry, value);
+  if (!check.ok) {
+    diagnostics.push({ code: check.code, path: field, family, message: check.message });
+    return false;
+  }
+  setNested(target, field, check.normalized);
+  return true;
+}
+
 function sanitizeItem(family, raw) {
   const diagnostics = [];
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
     return { item: null, diagnostics: [{ code: DIAGNOSTIC_CODES.TYPE_MISMATCH, path: '', family, message: '条目必须是对象' }] };
   }
-  const flat = flattenOneLevel(raw);
+  const paths = itemFieldPaths(family);
+  const topLevel = new Set(paths.filter((p) => !p.includes('.')));
+  const containers = new Set(paths.filter((p) => p.includes('.')).map((p) => p.split('.')[0]));
   const item = {};
-  for (const [field, value] of Object.entries(flat)) {
-    const entry = findItemFieldEntry(family, field);
-    if (!entry) {
-      diagnostics.push({ code: DIAGNOSTIC_CODES.UNKNOWN_KEY, path: field, family, message: `未注册的条目字段 ${field}（写侧拒绝，读侧忽略）` });
+  for (const [key, value] of Object.entries(raw)) {
+    if (topLevel.has(key)) {
+      // 顶层字段：动态容器（`env`）按 object 类型整体透传，不做逐键登记
+      applyItemField(family, key, value, item, diagnostics);
       continue;
     }
-    if (!entry.mutable && entry.owner !== 'code') {
-      diagnostics.push({ code: DIAGNOSTIC_CODES.READ_ONLY, path: field, family, message: `${entry.key} 属代码侧校准专属，用户不可写` });
+    if (containers.has(key) && value && typeof value === 'object' && !Array.isArray(value)) {
+      // 一层嵌套（`matcher.pattern`）：逐子键精确寻址，未登记的子键照样报未知
+      for (const [inner, innerValue] of Object.entries(value)) {
+        applyItemField(family, `${key}.${inner}`, innerValue, item, diagnostics);
+      }
       continue;
     }
-    const check = validateValue(entry, value);
-    if (!check.ok) {
-      diagnostics.push({ code: check.code, path: field, family, message: check.message });
-      continue;
-    }
-    setNested(item, field, check.normalized);
+    diagnostics.push({ code: DIAGNOSTIC_CODES.UNKNOWN_KEY, path: key, family, message: `未注册的条目字段 ${key}（写侧拒绝，读侧忽略）` });
   }
   return { item, diagnostics };
 }
@@ -507,6 +577,10 @@ function validateValue(entry, raw) {
   }
   if (entry.type === 'array') {
     if (!Array.isArray(raw)) return { ok: false, code: DIAGNOSTIC_CODES.TYPE_MISMATCH, message: `${entry.key} 需要数组` };
+    const maxItems = entry.domain && entry.domain.maxItems;
+    if (maxItems != null && raw.length > maxItems) {
+      return { ok: false, code: DIAGNOSTIC_CODES.OUT_OF_RANGE, message: `${entry.key} 最多 ${maxItems} 项（实得 ${raw.length}）` };
+    }
     return { ok: true, normalized: raw };
   }
   if (entry.type === 'string') {

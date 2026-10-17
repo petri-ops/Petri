@@ -172,5 +172,9 @@ node --test --test-force-exit --test-timeout=120000 \
   - **落点**：`agent-rules` 族 8 键（`version` + 7 个条目字段）进注册表；`agent-user-rules.js` 的内联校验删除，改由 `normalizeRule` = `sanitizeItem` + 必填检查；**BLOCK-160 错误码逐字保持**（`rule_id_required`/`rule_matcher_type_invalid`/`rule_pattern_required`/`rule_action_invalid`），新增只有 `rule_field_unknown`（此前未知字段被原样写进盘并永久存活）。
   - **读侧宽容分级**（这条是当场测出来的）：未知**字段** = 忽略该字段、规则仍有效；值非法/缺必填 = 丢该条。一开始我把两者混成"有诊断就丢条"，测试立刻抓到——那等于给规则加个字段就让用户整条拦截失效。
   - 证据：`test/block203-agent-rules.test.mjs` 7/7 + 邻域 **118/118**（block203×3 + block160 用户规则 + block177 + user-prefs + block201/199/200/202）+ `config:doctor` 实跑 + knip PASS + lint 0 error；注册表 **11 族 / 51 键**（基线第三次显式上调，留因在测试内）。
-- ⬜ P5 `mcp-servers` · ⬜ P6 `ai-settings` 顶层 · ⬜ P7 localStorage 并入 · ⬜ P8 D-2 rider
+- ✅ **P5（2026-10-18 落地）`mcp-servers` 收编**：复用 P4 的集合实现（条目字段 `<item>.` 精确寻址、`sanitizeItem` 共用），`mcp-servers` 9 键进注册表（**12 族 / 60 键**）；上限收成**单源**——条目数=族声明 `maxItems:50`，`args` 条数=字段 `domain.maxItems:64`（不再有 `MAX_SERVERS`/`MAX_ARGS` 两份常量）；`env` 是动态命名空间，按 `object` **整体透传**（密文落盘/明文读回，不被拆成未知字段）。既有错误码逐字保持（`invalid_id`/`missing_command`/`http_url_required`/`too_many_args`/`too_many_servers`/`duplicate_id`），新增只有 `unknown_field`。
+  - **D-2 的一个真实决定**：配置导出**主动剥离 `env`**，导入带 `env` 一律拒、并按 id 自动保留原 env。理由=env 里装的就是第三方 server 的 token，把密文搬进"可分享的导出文件"仍是把凭据带出边界；而"导出→导入"若因此清空 env，等于让用户重新配一遍所有 MCP 凭据——两头都不可接受，故取"剥离 + 保留"。
+  - 抓真一处：`normalizeServerEntry` 首版漏了**必填关系**（形状校验只校验"出现了的字段"），`{id:'ok'}` 会静默生成 `command: undefined` 的条目；已由 `missing_command`/`invalid_id` 补回（回归测 `mcp-client-settings` 当场抓到）。
+  - 证据：`test/block203-mcp-servers.test.mjs` 6/6 + 邻域 **165/165**（block203×4 + block160/163/177 + mcp-client-settings + user-prefs + block201/199/200/202）+ `config:doctor` 实跑 + knip PASS + arch 0 违规 + lint 0 error。
+- ⬜ P6 `ai-settings` 顶层 · ⬜ P7 localStorage 并入 · ⬜ P8 D-2 rider
 - 🔎 **P4 开工前提示（来自 P3 的形状经验）**：`agent-rules` 是**数组**（`rules[]`），比 skills-prefs 的两个 map 更难套用点路径——若继续用"绝对点路径 + 手工遍历"，会退化成为每个落点各写一份遍历器（正是 W4 要清的东西）。P4 应先定"集合形状"的单一实现（`items` 声明 + 通用遍历/诊断），再让 `agent-rules` 与 `mcp-servers` 共用它；否则 P5 会再抄一遍。

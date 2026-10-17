@@ -30,6 +30,7 @@ const runtimePolicy = require('./runtime-policy');
 const userPrefs = require('./user-prefs');
 const skillPrefs = require('../../shared-backend/skill-prefs.js');
 const userRules = require('./agent-user-rules');
+const mcpSettings = require('./mcp-settings');
 
 const CONFIG_TRANSFER_FORMAT = 'petri-config';
 const CONFIG_TRANSFER_VERSION = 1;
@@ -51,6 +52,8 @@ const CONFIG_TRANSFER_FAMILIES = Object.freeze([
   'skills-prefs',
   // BLOCK-203 W4a P4（BLOCK-160 ORC-1 的用户 Agent 规则；集合型落点）
   'agent-rules',
+  // BLOCK-203 W4a P5（BLOCK-156/163 的第三方 MCP server 清单；**导出剥离 env**，D-2）
+  'mcp-servers',
 ]);
 
 /** 显式排除清单：随信封回传，防止「以为备份了全部设置」。 */
@@ -120,6 +123,7 @@ function readFamilyOverrides() {
     'user-prefs': { ...userPrefs.readPrefs() },
     'skills-prefs': { ...skillPrefs.loadPrefs() },
     'agent-rules': { version: 1, rules: userRules.loadUserRules() },
+    'mcp-servers': { version: 1, servers: mcpSettings.listMcpServersForExport() },
   };
 }
 
@@ -212,6 +216,31 @@ function validateFamily(family, body) {
   }
   if (family === 'network' || family === 'runtime') {
     return schema.commitGuard(family, body, lookup).diagnostics;
+  }
+  if (family === 'mcp-servers') {
+    if (!Array.isArray(body.servers)) return [diagnostic(family, 'servers', 'type-mismatch', 'mcp-servers.servers 必须是数组')];
+    if (body.servers.length > mcpSettings.MAX_SERVERS) {
+      return [diagnostic(family, 'servers', 'out-of-range', `最多 ${mcpSettings.MAX_SERVERS} 个 server（实得 ${body.servers.length}）`)];
+    }
+    const diagnostics = [];
+    const seen = new Set();
+    body.servers.forEach((entry, index) => {
+      // 导入**不接受 env**：导出已剥离（D-2），带 env 的导入会把凭据以明文塞进配置迁移链
+      if (entry && typeof entry === 'object' && entry.env !== undefined) {
+        diagnostics.push(diagnostic(family, `servers[${index}].env`, 'not-allowed', 'MCP env 是凭据，不随配置导入/导出（按 id 自动保留原值）'));
+      }
+      const { server, error } = mcpSettings.normalizeServerEntry(entry);
+      if (error) {
+        diagnostics.push(diagnostic(family, `servers[${index}]`, 'not-allowed', `${error}`));
+        return;
+      }
+      if (seen.has(server.id)) {
+        diagnostics.push(diagnostic(family, `servers[${index}].id`, 'not-allowed', `重复的 server id：${server.id}`));
+        return;
+      }
+      seen.add(server.id);
+    });
+    return diagnostics;
   }
   if (family === 'agent-rules') {
     // 集合型：逐条目走同一个 sanitizeItem（未知字段/非法枚举全拒）；导入不接受"部分条目合格"
@@ -320,6 +349,17 @@ const WRITERS = {
     // 合并覆盖（导入不删文件里未出现的键）：合并与消毒都在落点模块里，transfer 不复制形状知识
     skillPrefs.importPrefs(body);
   },
+  'mcp-servers'(body) {
+    // 按 id 保留原 env（导出已剥离它）——否则"导出→导入"会静默清空所有 MCP 凭据
+    const existing = new Map(mcpSettings.listMcpServers().map((s) => [s.id, s.env]));
+    const next = body.servers.map((server) => ({ ...server, env: existing.get(server.id) || {} }));
+    const saved = mcpSettings.saveMcpServers(next);
+    if (saved.error) {
+      const error = new Error('mcp-servers 写入被拒');
+      error.diagnostics = [diagnostic('mcp-servers', '', 'write-failed', saved.error)];
+      throw error;
+    }
+  },
   'agent-rules'(body) {
     // 整单替换（既有契约：PUT 即全量），规则合并语义不存在——first-match 顺序本身是用户数据
     const result = userRules.saveUserRules(body.rules);
@@ -370,6 +410,7 @@ const RESETTERS = {
   // 重置只清 disabled（用户治理覆盖层），保留 uninstalledSources（重装指针，不是"设置"）
   'skills-prefs'() { skillPrefs.resetPrefs(); },
   'agent-rules'() { userRules.saveUserRules([]); },
+  'mcp-servers'() { mcpSettings.saveMcpServers([]); },
 };
 
 /**

@@ -20,7 +20,9 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SCHEMA_PATH = path.join(ROOT, 'core', 'packages', 'shared-config', 'config-schema.js');
 const schema = require(SCHEMA_PATH);
 
-const KNOWN_TYPES = new Set(['boolean', 'number', 'string', 'object']);
+// 'object' 自 BLOCK-199 就在类型注释里声明，但 validateValue 直到 BLOCK-203 W4a P5 才真正实现；
+// 'array' 是 P5 为集合条目（mcp-servers.args）新增的"原样通过"型（只做浅层容器判断）。
+const KNOWN_TYPES = new Set(['boolean', 'number', 'string', 'object', 'array']);
 
 /** 收集全仓源码文本（只扫 js/ts/tsx/mjs，跳过 node_modules 与构建产物）用于别名真实性核验。 */
 function collectSources() {

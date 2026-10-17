@@ -40,6 +40,9 @@ const UI_CARRIERS = {
   'skills-prefs': { file: 'frontend/src/hooks/useSkillStore.ts', must: ["getBridge('skills')", 'setDisabled'] },
   // BLOCK-203 W4a P4：用户 Agent 规则的承载面（设置页「常规」→ 规则面板）
   'agent-rules': { file: 'frontend/src/components/desktop/DesktopSettingsPanel/sections/AgentRulesPanel.tsx', must: ['/ai/agent-rules'] },
+  // BLOCK-203 W4a P5：MCP 服务货架（扩展中心 → MCP 服务）。数据面在 hook 里（面板只做呈现），
+  // 故钉 hook 而不是钉面板——钉面板会变成"文件里出现 mcp 字样"就算过，那种门守不住任何东西。
+  'mcp-servers': { file: 'frontend/src/hooks/useMcpServers.ts', must: ['/mcp/servers'] },
 };
 
 /** 族 → 后端写路由（必须能把拒绝翻译成 4xx，而不是冒 500 或静默）。 */
@@ -54,6 +57,7 @@ const WRITE_ROUTES = {
   runtime: 'core/petri-server/routes/runtime-config.js',
   'user-prefs': 'core/petri-server/routes/user-prefs.js',
   'agent-rules': 'core/petri-server/routes/ai-settings-api.js',
+  'mcp-servers': 'core/petri-server/routes/mcp-client.js',
 };
 
 /**
