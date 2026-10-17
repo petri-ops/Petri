@@ -14,9 +14,9 @@
  */
 
 const fs = require('fs');
-const os = require('os');
 const path = require('path');
 const schema = require('../../packages/shared-config/config-schema.js');
+const dataPaths = require('../../shared-backend/data-paths.js');
 
 const RULES_VERSION = 1;
 const FAMILY = 'agent-rules';
@@ -60,10 +60,9 @@ function rulesFile(dataDir) {
   return path.join(dataDir, 'agent-rules.json');
 }
 
+/** BLOCK-203 W4b P1 — 目录由 `shared-backend/data-paths` 统一解析（原为手写第三条链）。 */
 function dataDir() {
-  return process.env.PETRI_LOCAL_DATA_DIR
-    || process.env.PETRI_USER_DATA_DIR
-    || path.join(os.homedir(), 'Documents', 'Petri-Local');
+  return dataPaths.resolveDataDir();
 }
 
 /** 读取规则（mtime 键缓存 + fail-soft）。 */

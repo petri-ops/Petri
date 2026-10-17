@@ -3897,7 +3897,7 @@
     },
     {
       "id": "block203-config-landing",
-      "note": "BLOCK-203 W4a 落点收编（P1+P2 user-prefs、P3 skills-prefs）：schema 加族与「代码侧字段」语义（owner:code 读不报只读噪音/写仍拒）；user-prefs 落点 helper 单源、未知键 400；skills-prefs 按点路径登记、读丢脏条目不连坐、IPC 写面 id 形状 fail-closed；config-transfer 两族扩入（导出/导入/按区重置），drift 门加 NON_HTTP_WRITE_FAMILIES 登记无 HTTP 写面族。  P4：agent-rules 集合型落点收编——schema 加 <item> 精确寻址（findItemFieldEntry/itemFieldPaths）+ 通用 sanitizeItem/diagnoseItem（读写共用），agent-user-rules 改由注册表供形状（旧错误码保持，新增 rule_field_unknown），config-transfer/doctor 接入集合诊断。  P5：mcp-servers 集合型落点收编——族级 maxItems（条目数）+ 字段 domain.maxItems（args）；env 按 object 整体透传（密文落盘/明文读回），导出剥离 env、导入按 id 保留（D-2）。  P6：ai-settings 顶层白名单（派生自 normalize 输出 ∪ 注册表 store root ∪ 显式 legacy）——未知顶层键不写盘并自愈、诊断回传（D-W4a-3 不 400）；doctor 以 ai-settings-root 点名。  P7：外观缓存的键名/枚举/钳位边界收到 frontend/src/themes/prefCache.ts，ThemeProvider 不再直接摸 localStorage（漂移测与注册表 user-prefs 族双向对账；生产代码仍不 import core/**）。  P8（D-2 rider）：models 渠道导出默认脱敏（构建器内部打码，masked:false 才出明文），文件名校验/CSV 列形状不变。",
+      "note": "BLOCK-203 W4a 落点收编（P1+P2 user-prefs、P3 skills-prefs）：schema 加族与「代码侧字段」语义（owner:code 读不报只读噪音/写仍拒）；user-prefs 落点 helper 单源、未知键 400；skills-prefs 按点路径登记、读丢脏条目不连坐、IPC 写面 id 形状 fail-closed；config-transfer 两族扩入（导出/导入/按区重置），drift 门加 NON_HTTP_WRITE_FAMILIES 登记无 HTTP 写面族。  P4：agent-rules 集合型落点收编——schema 加 <item> 精确寻址（findItemFieldEntry/itemFieldPaths）+ 通用 sanitizeItem/diagnoseItem（读写共用），agent-user-rules 改由注册表供形状（旧错误码保持，新增 rule_field_unknown），config-transfer/doctor 接入集合诊断。  P5：mcp-servers 集合型落点收编——族级 maxItems（条目数）+ 字段 domain.maxItems（args）；env 按 object 整体透传（密文落盘/明文读回），导出剥离 env、导入按 id 保留（D-2）。  P6：ai-settings 顶层白名单（派生自 normalize 输出 ∪ 注册表 store root ∪ 显式 legacy）——未知顶层键不写盘并自愈、诊断回传（D-W4a-3 不 400）；doctor 以 ai-settings-root 点名。  P7：外观缓存的键名/枚举/钳位边界收到 frontend/src/themes/prefCache.ts，ThemeProvider 不再直接摸 localStorage（漂移测与注册表 user-prefs 族双向对账；生产代码仍不 import core/**）。  P8（D-2 rider）：models 渠道导出默认脱敏（构建器内部打码，masked:false 才出明文），文件名校验/CSV 列形状不变。  W4b P0/P1：落点总账（14 处逐条归属，运行时态/授权不进注册表）+ 目录单源 shared-backend/data-paths（两个有名字的根，四只手写链消失，user-prefs 旧位置只读兼容）。",
       "patterns": [
         "core/packages/shared-config/config-schema.js",
         "core/petri-server/helpers/user-prefs.js",
@@ -3919,7 +3919,10 @@
         "frontend/src/themes/prefCache.ts",
         "frontend/src/themes/prefCache.drift.test.ts",
         "frontend/src/lib/model-endpoint-transfer.ts",
-        "frontend/src/components/desktop/DesktopSettingsPanel/useEndpointProfilesEditor.ts"
+        "frontend/src/components/desktop/DesktopSettingsPanel/useEndpointProfilesEditor.ts",
+        "core/shared-backend/data-paths.js",
+        "test/block203-landing-registry.test.mjs",
+        "test/block203-data-root.test.mjs"
       ],
       "tests": [
         "test/block203-user-prefs.test.mjs",
@@ -3938,7 +3941,9 @@
         "test/block203-ai-settings-root.test.mjs",
         "test/block199-write-guard.test.mjs",
         "frontend/src/themes/ThemeProvider.test.tsx",
-        "frontend/src/lib/model-endpoint-transfer.test.ts"
+        "frontend/src/lib/model-endpoint-transfer.test.ts",
+        "test/block203-landing-registry.test.mjs",
+        "test/block203-data-root.test.mjs"
       ],
       "classifiesScripts": false
     }

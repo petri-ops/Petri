@@ -191,3 +191,42 @@ node --test --test-force-exit --test-timeout=120000 \
   - **覆盖率按实码重算（取代 §6 的估算）**：14 处 = 1 `site_settings` + 3 整坨 JSON 列 + **7 文件族** + 2 主进程窗口/路由态 + 1 renderer localStorage。W4a 后：**7/7 文件族全部收编 + localStorage 1/1** ⇒ **8/14**；剩 **6 处**（`site_settings`、`runtime_json`、`state_json`、`users.permissions`、主进程两处）= W4b。**不得表述为「配置已统一」。**
   - **W4b 待办（独立窗口）**：SQLite 四落点 + 主进程窗口/路由态搬迁 + 4 条 data root 回落链合一（`user-prefs` 认 `LOCAL_DATA_DIR`／`mcp-settings` 不认 `USER_DATA_DIR`／`agent-rules` 两者都认／`skill-prefs` 只认 `USER_DATA_DIR`），需要备份/回退路径。
 - 🔎 **P4 开工前提示（来自 P3 的形状经验）**：`agent-rules` 是**数组**（`rules[]`），比 skills-prefs 的两个 map 更难套用点路径——若继续用"绝对点路径 + 手工遍历"，会退化成为每个落点各写一份遍历器（正是 W4 要清的东西）。P4 应先定"集合形状"的单一实现（`items` 声明 + 通用遍历/诊断），再让 `agent-rules` 与 `mcp-servers` 共用它；否则 P5 会再抄一遍。
+
+## 10. W4b（2026-10-18 落地）：落点总账 + 目录单源
+
+### 10.1 结论先行：14 处落点**全部有归属**，其中 7 处不该进配置注册表
+
+P0 逐条核对后得到一个比"把 SQLite 四落点搬进注册表"更重要的结论：**那 4 处 SQLite 里没有一处是真配置**。硬搬会做出三种错误：
+①把 Gen UI 组件留存状态当配置导出；②把 `users.permissions`（授权数据）做成"可导出可重置"；③把执行目标的运行时覆盖当成全局设置。
+
+| 落点 | 归属 | 理由 |
+| --- | --- | --- |
+| 7 个文件族（feature-flags / decision-config / ai-settings / user-prefs / skills-prefs / agent-rules / mcp-servers） | ✅ 注册表 | W4a 已全部收编（ai-settings 一处承载 generation/cost-cap/reasoning 三族） |
+| `site_settings` | 运行时态 | 站级 KV（如 `guest_permissions`），与授权/站点运行态绑定 |
+| `execution_targets.runtime_json` | 运行时态 | 每个执行目标的覆盖，行绑定数据 |
+| `gen_ui_widget_state.state_json` | 运行时态 | 组件留存状态，不是配置 |
+| `users.permissions` | **授权数据** | 做成可导出配置=越安全边界 |
+| `window-manager-state` / 主进程路由态 | 运行时态 | 窗口位置与 last-url：不可迁移的机器态 |
+| renderer `localStorage` | 缓存 | 真值在 `user-prefs.json`（P7 已钉） |
+
+机械承载：`test/block203-landing-registry.test.mjs` 3/3——①总账冻结（**BLOCK-199 的 14 处 + W1–W3 新增 3 族 = 17 条**，新增族不得抵数）；②注册表每个族都能映射回落点；③标为运行时态/授权的落点**不得**出现在注册表里。
+
+### 10.2 目录单源：两个有名字的根，四只手写链消失
+
+新增 `core/shared-backend/data-paths.js`：
+- `resolveDataDir()` = `PETRI_LOCAL_DATA_DIR` → `LOCAL_DATA_DIR` → `PETRI_USER_DATA_DIR` → `~/Documents/Petri-Local`；
+- `resolveUserStateDir()` = `PETRI_USER_DATA_DIR` → `~/.petri`；
+- `legacyDataDirs()` = 历史落点（仅当两个数据面 env 都没设时返回 `cwd/data`）。
+
+四个模块改接（`user-prefs` / `mcp-settings` / `agent-user-rules` / `skill-prefs`），**路径语义除一处外全部不变**：唯一变的是 `user-prefs` 在"两个 env 都没设"时的兜底（`cwd/data` → `~/Documents/Petri-Local`），并配**只读兼容**（旧位置照读、不迁、不删）。
+两个根**没有硬合成一个**：`skill-prefs` 住在用户态根（`PETRI_USER_DATA_DIR`/`~/.petri`），要把它搬进 Documents 属于用户数据迁移，须单独裁决——本片只统一"怎么算"，不擅自改"算到哪"。
+
+**抓真两处**：①首版把 legacy 兜底无条件启用，隔离实例（测试/多用户）会读到别人的 `cwd/data`，且我的测试真的写脏了 `~/Documents/Petri-Local/user-prefs.json`（已删、已改成显式注入候选目录的只读测）；②`mcp-settings` 的目录原本是**模块加载时冻结**的第五条链，惰性化后同一进程内 env 变化才可见一致位置。
+
+证据：`test/block203-data-root.test.mjs` 6/6 + 邻域 **178/178** + knip PASS + arch 0 违规 + lint 0 error。
+
+### 10.3 覆盖率最终口径
+
+- **落点**：14/14 有归属（7 配置 + 7 非配置，非配置逐条有理由）；W1–W3 的 3 个新增文件族不计入 14。
+- **配置面**：7/7 文件族全收编（+3 新增族）。
+- 因此**不再有"剩余 N 处落点未收编"这个尾巴**；W4b 不做 SQLite 搬迁，是**裁定**不是欠账（改判需重新开片并说明安全边界）。

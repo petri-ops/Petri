@@ -15,13 +15,25 @@
 
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
 const schema = require('../../packages/shared-config/config-schema.js');
+const dataPaths = require('../../shared-backend/data-paths.js');
 // BLOCK-160 W2 P4（CAP-2）— env 落盘加密（磁盘密文/内存明文；存量明文迁移）
 const envCrypto = require('./mcp-env-crypto');
 
-const SETTINGS_DIR = process.env.PETRI_LOCAL_DATA_DIR ||
-  path.join(os.homedir(), 'Documents', 'Petri-Local');
+/**
+ * BLOCK-203 W4b P1 — 目录改由 `shared-backend/data-paths` 统一解析。
+ * 原实现是模块加载时冻结的第五条链（还不认 `LOCAL_DATA_DIR` / `PETRI_USER_DATA_DIR`）；
+ * 改成**惰性**解析后，同一进程内 env 变化（测试/诊断）也能看到一致位置。
+ * `SETTINGS_FILE` 保留为**加载时快照**（既有测试与 doctor 的引用面）；内部读写一律走 `settingsFile()`
+ * （惰性），两者在"env 在 require 之前设定"的常规路径上相等。
+ */
+function settingsDir() {
+  return dataPaths.resolveDataDir();
+}
+function settingsFile() {
+  return path.join(settingsDir(), 'mcp-servers.json');
+}
+const SETTINGS_DIR = settingsDir();
 const SETTINGS_FILE = path.join(SETTINGS_DIR, 'mcp-servers.json');
 
 /**
@@ -103,7 +115,7 @@ function normalizeServerEntry(entry) {
 /** 读取全部 server 配置（文件缺失/损坏=空清单，不抛）。 */
 function listMcpServers() {
   try {
-    const raw = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+    const raw = JSON.parse(fs.readFileSync(settingsFile(), 'utf8'));
     const servers = Array.isArray(raw.servers) ? raw.servers : [];
     const seen = new Set();
     const out = [];
@@ -157,7 +169,7 @@ function saveMcpServers(servers) {
     ),
   }));
   const payload = { version: 1, savedAt: new Date().toISOString(), servers: persisted };
-  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(payload, null, 2) + '\n', 'utf8');
+  fs.writeFileSync(settingsFile(), JSON.stringify(payload, null, 2) + '\n', 'utf8');
   return { servers: normalized };
 }
 
@@ -191,6 +203,7 @@ function _resetForTests() {
 
 module.exports = {
   SETTINGS_FILE,
+  settingsFile,
   MAX_SERVERS,
   MAX_ARGS,
   listMcpServers,

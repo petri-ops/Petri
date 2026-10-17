@@ -30,6 +30,7 @@
 const fs = require('fs');
 const path = require('path');
 const schema = require('../packages/shared-config/config-schema.js');
+const dataPaths = require('./data-paths.js');
 
 const PREFS_VERSION = 1;
 const FAMILY = 'skills-prefs';
@@ -41,10 +42,13 @@ const SKILL_ID_RE = /^[A-Za-z0-9_-]+$/;
 
 const lookup = (family, storagePath) => schema.findEntryByPath(family, storagePath);
 
+/**
+ * BLOCK-203 W4b P1 — 用户态根走 `shared-backend/data-paths` 的 `resolveUserStateDir()`。
+ * **路径语义不变**（PETRI_USER_DATA_DIR → ~/.petri）：这是"用户态"根，不是应用数据根；
+ * 把技能账本搬进 Documents 属于用户数据迁移，须单独裁决（plan §10 落点表已登记归属）。
+ */
 function getUserDataBaseDir() {
-  if (process.env.PETRI_USER_DATA_DIR) return process.env.PETRI_USER_DATA_DIR;
-  const os = require('os');
-  return path.join(os.homedir(), '.petri');
+  return dataPaths.resolveUserStateDir();
 }
 
 function getPrefsFilePath() {

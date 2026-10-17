@@ -22,6 +22,7 @@
 const fs = require('fs');
 const path = require('node:path');
 const schema = require('../../packages/shared-config/config-schema.js');
+const dataPaths = require('../../shared-backend/data-paths.js');
 
 const FAMILY = 'user-prefs';
 const FILENAME = 'user-prefs.json';
@@ -44,11 +45,18 @@ function prefsFile(dataDir) {
   return path.join(dataDir, FILENAME);
 }
 
-/** 落点目录：与改前逐字相同（W4b 才动）。 */
+/**
+ * 落点目录：BLOCK-203 W4b P1 起由 `shared-backend/data-paths` 统一解析
+ * （此前是本模块手写的第四条链，两个 env 都没设时会落到 `cwd/data`）。
+ * 行为变更只有这一处，且用 `legacyDirs()` 做只读兼容：旧文件照读、不迁、不删。
+ */
 function resolveDataDir() {
-  return process.env.PETRI_LOCAL_DATA_DIR
-    || process.env.LOCAL_DATA_DIR
-    || path.join(process.cwd(), 'data');
+  return dataPaths.resolveDataDir();
+}
+
+/** 历史落点目录（只读兼容；不删旧文件）。 */
+function legacyDirs() {
+  return dataPaths.legacyDataDirs();
 }
 
 function clampFontScale(raw) {
@@ -90,13 +98,21 @@ function persist(dataDir, prefs) {
  * 读偏好 + 诊断（读侧只报告不拒：旧文件里的未知键不得炸启动）。
  * @returns {{prefs:object, diagnostics:Array}}
  */
-function readPrefsWithDiagnostics(dataDir) {
+function readPrefsWithDiagnostics(dataDir, legacyOverride) {
   const dir = dataDir || resolveDataDir();
   let parsed = null;
   try {
     parsed = JSON.parse(fs.readFileSync(prefsFile(dir), 'utf8'));
   } catch {
-    return { prefs: {}, diagnostics: [] };
+    // 历史落点只读兼容（BLOCK-203 W4b P1）：新位置没文件时回落到旧目录读，不迁不改。
+    // **只在调用方没显式指定目录时**——否则隔离实例（测试/多用户）会读到别人的 cwd/data。
+    for (const legacy of legacyOverride || (dataDir ? [] : legacyDirs())) {
+      try {
+        parsed = JSON.parse(fs.readFileSync(prefsFile(legacy), 'utf8'));
+        break;
+      } catch { /* 继续找下一个 */ }
+    }
+    if (!parsed) return { prefs: {}, diagnostics: [] };
   }
   if (!isPlainObject(parsed)) return { prefs: {}, diagnostics: [] };
   const prefs = {};
@@ -180,6 +196,7 @@ function resetPrefs(dataDir) {
 
 module.exports = {
   resolveDataDir,
+  legacyDirs,
   readPrefs,
   readPrefsWithDiagnostics,
   writePrefs,

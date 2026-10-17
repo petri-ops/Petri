@@ -161,7 +161,11 @@ test('BLOCK-203 P2 — 域值单源：注册表枚举 == 前端 accents.ts 的 A
   const accentsSrc = read('frontend/src/themes/accents.ts');
   const ids = [...accentsSrc.matchAll(/\{ id: '([a-z]+)', label:/g)].map((m) => m[1]);
   assert.deepEqual(ids, [...entry.domain.oneOf], `accents.ts 与注册表的强调色集合不一致：${ids.join(',')}`);
-  const accentType = (accentsSrc.match(/export type AccentId = ([^;]+);/) || [])[1] || '';
+  // 词汇表所在处：BLOCK-203 P7 收口时把 `AccentId` 从 accents 下沉到 prefCache（拆 accents↔prefCache 环），
+  // accents 只保留选项表与 DOM 应用；联合类型断言因此改读 prefCache。
+  const prefCacheSrc = read('frontend/src/themes/prefCache.ts');
+  const accentType = (prefCacheSrc.match(/export type AccentId = ([^;]+);/) || [])[1] || '';
+  assert.ok(accentType, 'prefCache 里找不到 AccentId 联合类型（词汇表必须有一处真相）');
   for (const id of ids) assert.ok(accentType.includes(`'${id}'`), `AccentId 联合类型漏了 ${id}`);
 });
 
