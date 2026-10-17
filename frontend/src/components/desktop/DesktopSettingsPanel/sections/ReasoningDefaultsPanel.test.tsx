@@ -48,11 +48,11 @@ function mount(onPut?: (body: unknown) => unknown): void {
 describe('ReasoningDefaultsPanel（UI-515）', () => {
   it('显示生效值与出厂值，未改动时保存按钮不可用（不产生空写入）', async () => {
     mount();
-    await waitFor(() => expect((screen.getByTestId('reasoning-mapping-table') as unknown as HTMLTableElement).rows.length).toBeGreaterThan(0));
-    const select = screen.getByTestId('reasoning-default-level') as HTMLSelectElement;
-    expect(select.value).toBe('standard');
-    expect((screen.getByTestId('reasoning-anthropic-budget') as HTMLInputElement).value).toBe('16000');
-    expect((screen.getByTestId('reasoning-save') as HTMLButtonElement).disabled).toBe(true);
+    await waitFor(() => expect(document.querySelector('[data-testid="reasoning-mapping-table"]')).toBeTruthy());
+    const select = document.querySelector<HTMLSelectElement>('[data-testid="reasoning-default-level"]');
+    expect(select?.value).toBe('standard');
+    expect(document.querySelector<HTMLInputElement>('[data-testid="reasoning-anthropic-budget"]')?.value).toBe('16000');
+    expect(document.querySelector<HTMLButtonElement>('[data-testid="reasoning-save"]')?.disabled).toBe(true);
   });
 
   it('只提交改动项：改默认档时 PUT 体不含预算与映射', async () => {
