@@ -10,7 +10,7 @@
 
 .hint {
   margin: 0;
-  font-size: var(--petri-font-size-sm);
+  font-size: var(--petri-font-size-body);
   line-height: 1.55;
   color: var(--petri-text-tertiary);
 }
@@ -20,7 +20,7 @@
   border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-subtle);
-  font-size: var(--petri-font-size-sm);
+  font-size: var(--petri-font-size-body);
 }
 
 .banner[data-tone='failed'] {
@@ -60,7 +60,7 @@
 }
 
 .rowDesc {
-  font-size: var(--petri-font-size-sm);
+  font-size: var(--petri-font-size-body);
   color: var(--petri-text-tertiary);
 }
 
@@ -79,7 +79,7 @@
   background: var(--petri-bg-base);
   color: var(--petri-text);
   font-family: var(--petri-font-mono, monospace);
-  font-size: var(--petri-font-size-sm);
+  font-size: var(--petri-font-size-body);
   text-align: center;
 }
 
@@ -105,13 +105,13 @@
   border-radius: var(--petri-radius-sm);
   background: var(--petri-bg-base);
   color: var(--petri-text);
-  font-size: var(--petri-font-size-sm);
+  font-size: var(--petri-font-size-body);
 }
 
 .mappingTable {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--petri-font-size-sm);
+  font-size: var(--petri-font-size-body);
 }
 
 .mappingTable th,

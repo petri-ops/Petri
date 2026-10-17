@@ -194,7 +194,8 @@
 
 .glyph {
   display: block;
-  font-size: 16px;
+  /* 图标尺寸走 16px 档 token（原裸 px 字号=宪章 W3 清零后的零容忍项） */
+  font-size: var(--petri-font-size-lg);
   line-height: 1;
 }
 

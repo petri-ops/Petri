@@ -1,0 +1,93 @@
+{
+  "name": "block200-settings-live",
+  "startedAt": "2026-10-17T10:31:49.074Z",
+  "finishedAt": "2026-10-17T10:31:53.108Z",
+  "assertions": [
+    {
+      "name": "R1_keymap_get_ok",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "R2_keymap_put_valid_200",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"bindings\":{\"nav-projects\":\"Mod+Alt+P\"},\"diagnostics\":[]}"
+    },
+    {
+      "name": "R3_keymap_persisted_readback",
+      "pass": true,
+      "detail": "{\"nav-projects\":\"Mod+Alt+P\"}"
+    },
+    {
+      "name": "R4_keymap_illegal_combo_400_with_diagnostics",
+      "pass": true,
+      "detail": "status=400 diag=[{\"code\":\"not-allowed\",\"family\":\"keymap\",\"path\":\"nav-home\",\"message\":\"keymap.nav-home 语法不符（^(?:Mod(?:\\\\+Ctrl)?(?:\\\\+Alt)?(?:\\\\+Shift)?|Ctrl(?:\\\\+Alt)?(?:\\\\+Shif"
+    },
+    {
+      "name": "R5_keymap_unknown_command_400",
+      "pass": true,
+      "detail": "status=400 diag=[{\"code\":\"unknown-key\",\"family\":\"keymap\",\"path\":\"nav-typo\",\"message\":\"未注册的配置键 nav-typo，拒绝写入（不再静默存活）\"}]"
+    },
+    {
+      "name": "R6_rejected_writes_left_no_trace",
+      "pass": true,
+      "detail": "{\"nav-projects\":\"Mod+Alt+P\"}"
+    },
+    {
+      "name": "R7_unbind_clears_store",
+      "pass": true,
+      "detail": "{}"
+    },
+    {
+      "name": "R8_reasoning_snapshot_in_registers",
+      "pass": true,
+      "detail": "levels=[\"off\",\"standard\",\"high\"] protocols=openai-compatible,anthropic-messages,dashscope-native"
+    },
+    {
+      "name": "R9_reasoning_default_level_persists",
+      "pass": true,
+      "detail": "{\"defaultLevel\":\"high\",\"anthropicHighBudgetTokens\":16000}"
+    },
+    {
+      "name": "R10_cross_protocol_token_400",
+      "pass": true,
+      "detail": "status=400 diag=[{\"code\":\"not-allowed\",\"family\":\"reasoning\",\"path\":\"mapping.openai-compatible.high\",\"message\":\"openai-compatible 不接受 thinking:enabled（允许 none/reasoning_effort:minimal/reasoning_eff"
+    },
+    {
+      "name": "R11_budget_editable",
+      "pass": true,
+      "detail": "{\"defaultLevel\":\"high\",\"anthropicHighBudgetTokens\":24000}"
+    },
+    {
+      "name": "R12_restore_factory",
+      "pass": true,
+      "detail": "{\"defaultLevel\":\"standard\",\"anthropicHighBudgetTokens\":16000}"
+    },
+    {
+      "name": "D1_keymap_section_reachable",
+      "pass": true,
+      "detail": "nav /settings?section=keymap"
+    },
+    {
+      "name": "D2_keymap_rows_from_registry",
+      "pass": true,
+      "detail": "{\"rows\":10,\"combos\":\"palette.toggle=Ctrl+K | nav-home=Ctrl+N | nav-projects=Ctrl+Shift+P | nav-knowledge=Ctrl+Shift+K | nav-review=Ctrl+Shift+R | nav-settings=Ctrl+Shift+S | command-center.popOut=Ctrl+Shift+C | workspace.toggleTerminal=Ctrl+` | workspace.toggleRight=Ctrl+Shift+B | thinking.cycle=Ctr"
+    },
+    {
+      "name": "D3_badge_follows_stored_binding",
+      "pass": true,
+      "detail": "badge=Ctrl+Shift+7"
+    },
+    {
+      "name": "D4_dispatch_follows_rebind",
+      "pass": true,
+      "detail": "{\"before\":\"/settings\",\"afterOld\":\"/settings\",\"afterNew\":\"/\"}"
+    },
+    {
+      "name": "D5_reasoning_section_renders",
+      "pass": true,
+      "detail": "{\"levelOptions\":3,\"levelValue\":\"standard\",\"budget\":\"16000\",\"tableRows\":4}"
+    }
+  ],
+  "allPass": true
+}
