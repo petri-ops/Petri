@@ -94,9 +94,15 @@
         },
         {
           "id": "1-prompt-layering",
-          "claim": "D2 系统提示 cache 友好分层（静态前缀+动态尾）",
+          "claim": "D2 系统提示 cache 友好分层（静态前缀跨 context 逐字节恒定 + 动态段只追加其后 + 模板缓存命中/失效计量真实发生）",
           "derivesFrom": "§2 D2",
-          "anchors": []
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block198-prompt-layering.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block198-prompt-layering.test.mjs"
+            }
+          ]
         },
         {
           "id": "1-context-contract",
@@ -293,9 +299,15 @@
         },
         {
           "id": "3-recursive-tree",
-          "claim": "D5 递归多级派生（子生孙）实跑链",
+          "claim": "D5 有界多级派生判定链（maxDepth=1 维持子不可再生子；放开到 3 时 1 代子可再生孙；父链代数实算越界 spawn_depth_exceeded）——端到端实跑派发链未锚、留观测",
           "derivesFrom": "§2 D5 行业形态「递归树」",
-          "anchors": []
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block198-spawn-depth.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block198-spawn-depth.test.mjs"
+            }
+          ]
         }
       ]
     },
@@ -371,15 +383,27 @@
         },
         {
           "id": "4-cost-breaker",
-          "claim": "D11 成本硬熔断",
+          "claim": "D11 成本上限触发诚实收尾（cost_cap_exceeded 事件 + 停止调用工具的 system 指令；**提示级非强制中止**，硬 break 未实现→候选）",
           "derivesFrom": "§2 D11",
-          "anchors": []
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block176-w6-contract.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block176-w6-contract.test.mjs"
+            }
+          ]
         },
         {
           "id": "4-worktree-safety",
-          "claim": "D10 工作树安全网快照原语",
+          "claim": "D10 工作树安全网快照原语（workspace-checkpoint：临时索引 read-tree/write-tree/commit-tree 零副作用、捕获未跟踪文件 + 回滚）",
           "derivesFrom": "§2 D10",
-          "anchors": []
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block176-checkpoint.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block176-checkpoint.test.mjs"
+            }
+          ]
         }
       ]
     },
@@ -720,9 +744,15 @@
         },
         {
           "id": "8-delegation-realtime",
-          "claim": "CP-16 委托进度事件流回传（替代 5s 轮询）",
+          "claim": "CP-16 委托进度事件流回传（mirrorPeerTaskEvents 订对端 SSE 镜像写本地 task_events，**叠加在 5s 轮询之上=轮询兜底未替代**）",
           "derivesFrom": "§1 dim8 判词「委托 5s 轮询黑盒」",
-          "anchors": []
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block176-w6-contract.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block176-w6-contract.test.mjs"
+            }
+          ]
         },
         {
           "id": "8-relay-topology",
