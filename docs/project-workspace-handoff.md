@@ -1,4 +1,7 @@
 # Petri Desktop Current Handoff
+最后更新：2026-10-16（**BLOCK-193-EVALS-CAPTURE-REPLAY 立项发令 active（评测 v2 第五切片·capture/replay 真实录制态；用户「可以呀 按上面这个定案开建 BLOCK-193」**）
+
+**恢复要点（换会话必读）**：当前唯一 active=**BLOCK-193**（评测 v2 第五切片·capture/replay 真实录制态；定案三约束=写前过密钥扫描+只录合成任务+replay 仍须过 189 哨兵）。**关键勘察结论（接手勿再走弯路）**：①模型响应**并非零留存**——`core/shared-backend/llm-providers/io-transcript.js`（BLOCK-37）由 `model-gateway.js:267` 在流式/非流式统一 `_emitTranscript` 落 `<PETRI_LOCAL_DATA_DIR>/llm-transcripts/<convId>.jsonl`，evals 隔离后端写到 tmpDir 后被 `fs.rmSync` 丢弃，缺口只在「未入仓可重放」；②故**禁止**新写录制代理/第二套 SSE 解析（生产记录器影子副本），录制态=差分收割 + 投影 mock 回合（`startMockProvider` 投递机制已存在）；③replay 报告/基线必须走 `${suite}-replay` namespace，否则覆盖 real-latest 污染真模型棘轮。真模型调用只在 P3 录制发生一次。plan=docs/block-193-evals-capture-replay-plan.md。
 
 最后更新：2026-10-16（**BLOCK-192-EVALS-REAL-CREDENTIALS 整包 completed（评测 v2 provider 切片；closeout 门禁全绿·零手工注入实机验收）**）
 

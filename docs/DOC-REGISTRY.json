@@ -6640,6 +6640,21 @@
       "notes": "2026-10-16 整包 completed（用户「上」发令；closeout 门禁全绿；零手工注入实机验收 real 套件 3/3 PASS·measures=model）：评测 v2 provider 切片·real 模式凭据自给 + 入库脱敏 + real 基线棘轮。**前置纠错**：本会话曾据「PETRI_EVALS_PROVIDER_KEY 未设」对外判 provider 切片 blocked，实为探针不健康误判——本机凭据库一直有 deepseek key（ai-credentials.json 值=纯字符串；macOS Keychain/其余 0600 文件，规范读法 createCredentialStore）；真实缺口是 harness 只认 env、隔离临时目录永看不到桌面凭据库。交付=resolveRealProviderSettings（env 显式优先完全向后兼容→仅 real 模式回落本机凭据库，复用 credential-store 单源读取器不自行解字段；provider→baseUrl 缺省表显式登记；失败给分类化 skipReason 沿用诚实 skip 不伪造）+ localRealProviderSettings（镜像 env-coordinator 规范：PETRI_LOCAL_DATA_DIR 优先否则 Documents/<BRAND.LOCAL_DIR_NAME>）+ mock 模式绝不回落（真 key 不入临时目录）+ 返回体只暴露 hasKey（apiKey 明文不入日志/证据，源码守卫断言）+ sanitizeEvalTasksForStorage（报告与基线剥离 finalText，守「LLM 原文不入仓」——自查发现我自建 real 基线含模型原文，与自引红线冲突故在持久化边界收口）+ evals/baselines/real.json 建立（real 套件自此受回归棘轮守护）。契约测 8/8；smoke/golden/real 三门棘轮各回归 0。**两处自纠留痕**：①首版 mock 丢 PETRI_EVALS_BASE_URL 致 golden ttfs 假红（改为 env 覆盖与 mode 无关透传）②回落首跑误报「缺预设」实为数据目录猜错（应在 Documents 下），修正并区分失败原因。**Glob 事故两次**：清理临时 stamp 的 rm 通配误删已入库历史证据（smoke-2026-*/real-2026-*），两次即时 git checkout 复原、零丢失。reopen=真模型响应 capture/replay 录制态（需先裁决脱敏形态）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
+      "id": "BLOCK-193-EVALS-CAPTURE-REPLAY",
+      "capability": "evaluation",
+      "path": "docs/block-193-evals-capture-replay-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "phase": "P0-LAUNCH",
+      "canonical": true,
+      "truthDomain": "block-193-evals-capture-replay-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-16",
+      "archivePolicy": "retain_stable_path",
+      "tags": ["evals-v2", "capture-replay", "io-transcript", "anti-fake-green", "evidence-self-attestation", "stage-2"],
+      "notes": "2026-10-16 立项发令 active（用户「可以呀 按上面这个定案开建 BLOCK-193」；定案三约束=写前过密钥扫描 + 只录合成任务 + replay 仍须过 BLOCK-189 outbound_contains 哨兵）：评测 v2 第五切片·capture/replay 真实录制态。**P0 实码勘察更正上游转述两处**：①「real 模型响应零留存」不成立——BLOCK-37 io-transcript 是生产级模型 I/O 记录器，model-gateway.js:267 chat() 流式与非流式两分支统一 _emitTranscript，落 <PETRI_LOCAL_DATA_DIR>/llm-transcripts/<conversationId>.jsonl（本机实文件已核 provider=deepseek），evals 隔离后端正好写到 tmpDir 而后被 fs.rmSync 销毁→真实缺口是「留存随临时目录销毁、未入仓可重放」；②「replay 需放宽 188 快照条件 if(backend.ok&&mock)」在本设计不成立（replay 复用 startMockProvider 故 mock 天然在场），但「报告/基线落点不分 provider 会互相覆盖」为真且是假绿通道，同批修。据此**不新建录制代理、不写第二套 SSE 解析**（会给生产记录器做影子副本，触治理红线），录制态=收割现成台账+投影可重放回合。交付=evals-recording.mjs 差分归属/投影纯函数 + 入库双闸（secret-scan PATTERNS 单源密钥扫描 + 合成任务闸：task.id 须在仓库套件且转录逐字含 prompt）+ replay 态 measures=recorded-replay 且缺 outbound_contains 即红 + real outbound 由转录投影供（顺带解锁 real 层出站自证）+ (suite,provider) 产物 namespace。红线=不冒充 model 质量/不改 PASS 语义/不撞 191 的 fixture 词汇（本包产物统一叫 recording）/不录 smoke-golden/零密钥零用户数据入仓。plan=docs/block-193-evals-capture-replay-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
       "id": "DESKTOP-EVAL-20261015",
       "path": "docs/Petri-Desktop-Evaluation-Report-2026-10-15.md",
       "kind": "audit",
