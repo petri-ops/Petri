@@ -38,9 +38,9 @@ const WAIT_DEFAULT_TIMEOUT_MS = 300000;
 // BLOCK-173 CP-8 — 上限用户可配：env PETRI_SPAWN_CONCURRENCY_LIMIT（1-8 钳制，
 // 缺省 3=既有保守值）。解析函数化（测试契约直测）；语义仍是软指引非硬拒。
 function resolveSpawnConcurrencyLimit() {
-  const raw = Number(process.env.PETRI_SPAWN_CONCURRENCY_LIMIT);
-  if (!Number.isFinite(raw)) return 3;
-  return Math.max(1, Math.min(8, Math.floor(raw)));
+  // BLOCK-202 W3 — 先读设置面策略（文件），env PETRI_SPAWN_CONCURRENCY_LIMIT 仍优先；
+  // 两者都没有时回落历史默认 3。钳制 1-8 与语义（软指引非硬拒）不变。
+  return require('../helpers/runtime-policy').getSpawnConcurrency();
 }
 
 // BLOCK-173 CP-8 — 派生深度受控放开：env PETRI_SPAWN_MAX_DEPTH（≥1，缺省 1=
@@ -48,9 +48,8 @@ function resolveSpawnConcurrencyLimit() {
 // 子 agent（作为父）可再派孙代。放开语义：父链校验从「父必须 primary」放宽为
 // 「父为 primary 或（子且当前代数 < maxDepth-1）」。
 function resolveSpawnMaxDepth() {
-  const raw = Number(process.env.PETRI_SPAWN_MAX_DEPTH);
-  if (!Number.isFinite(raw) || raw < 1) return 1;
-  return Math.min(3, Math.floor(raw));
+  // BLOCK-202 W3 — 同上：设置面可配，env 优先，缺省 1（=子不可再生子的既有行为）。
+  return require('../helpers/runtime-policy').getSpawnMaxDepth();
 }
 const WAIT_MIN_TIMEOUT_MS = 1000;
 const WAIT_MAX_TIMEOUT_MS = 600000;

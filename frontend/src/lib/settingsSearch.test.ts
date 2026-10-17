@@ -62,7 +62,7 @@ describe('settingsFamilies', () => {
   });
 
   it('映射里的族全部是已知注册表族（与 CONFIG_TRANSFER_FAMILIES 对齐）', () => {
-    const known = new Set(['feature-flags', 'decision-points', 'generation', 'cost-cap', 'keymap', 'reasoning']);
+    const known = new Set(['feature-flags', 'decision-points', 'generation', 'cost-cap', 'keymap', 'reasoning', 'network', 'runtime']);
     for (const families of Object.values(SETTINGS_SECTION_FAMILIES)) {
       for (const family of families) expect(known.has(family)).toBe(true);
     }

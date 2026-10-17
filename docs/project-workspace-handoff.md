@@ -2,6 +2,10 @@
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
 
+最后更新：2026-10-17（**BLOCK-202-STAGE-A-QUICKWINS-3 整包 completed（阶段 A 速赢 III=runlist W3；当日立项当日收口·9223 探针 15/15 allPass）**）
+
+**恢复要点（换会话必读·本段取代下方 BLOCK-201 段）**：**无 active 工作包**，下一包=runlist **W4（阶段 3 B1b：其余 11 处落点收编 + 4 条 data root 脑裂根治）**，按 W0→W8 连打不需逐项发令。**BLOCK-202 交付**：`network` 族（代理四项，`applyNetworkEnv` 启动写入，NO_PROXY 强制回环，CA 缺失诊断，restartRequired）+ `runtime` 族（审批默认档位仅缺省兜底/并发 1-8/深度 1-3 env 优先/工具白黑名单曝光层）+ `/api/network`、`/api/runtime-policy` + 设置页两面板（compute/decisions 节）+ config-transfer 扩 8 族。**证据**=block202 11/11 + 前端 7/7 + 探针 15/15（acceptance/block-202/）。**边界**=代理热切换/SOCKS/认证/工具级策略不在本包；白黑名单不是安全边界。**dev 栈**=Vite:3000 + 后端:3001 在跑（无窗口），9223 已关（无可见窗口纪律）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-17（**BLOCK-201-SETTINGS-SEARCH-EXPORT 整包 completed（阶段 A 速赢 II=runlist W2；当日立项当日收口·9223 探针 18/18 allPass）**）
 
 **恢复要点（换会话必读·本段取代下方 BLOCK-200 收口段）**：**无 active 工作包**，下一包=runlist **W3（阶段 A 速赢 III：P0-4 代理设置 + P0-2 全局审批档位选择器/工具白黑名单/并发深度暴露）**，用户已授权按 W0→W8 连打不需逐项发令。**BLOCK-201 交付**：`helpers/config-transfer.js` + `routes/config-transfer.js`（GET /api/config/export、POST import/reset）+ 前端 `settingsSearch`（**10 分区**索引）/`settingsFamilies`/`SettingsToolbar`/`ConfigTransferPanel`/`useSettingsTransferState`/`SettingsNav`/`MaintenanceSection`；导出=用户覆盖层（6 族，不含凭据/env/默认值，排除清单回传）、导入=先校验后落盘且往返幂等、重置=只清覆盖层且仅 5 个注册表分区有入口。**实机抓真**=R2 断言误判说明文字（修断言）+ R7 cost-cap `0`/`null` 不幂等（修导出归一）；**code-size**=面板 750→676（拆三件，未抬基线）。UI-516/517/518 均 `verified`（`acceptance/block-201/`：18/18 + 两张截图）。**未接管**=既有 models 导出明文 Key 与 D-2 冲突只登记不改。**覆盖率口径=6/14 落点**，不得称「配置已统一」。plan=docs/block-201-settings-search-export-plan.md §7。**dev 栈（无窗口纪律，2026-10-17 用户裁决「这种开发模式 就不要打开窗口了」）**：手工拉起 Vite:3000 + 后端:3001（`PETRI_LOCAL_DATA_DIR=.petri-dev-user-data/data`），**不开任何可见窗口**；UI 腿只在 9223 离屏测试实例上跑且跑完即杀（`bash scripts/start-test-instance.sh` 默认离屏 + dock 隐藏，禁 `--onscreen`）。纪律已写入 `$petri-dev-infra` SKILL「dev 栈上验证 UI 工作」节。G0 开发期常态 · 不外推 packaged/Provider/GA。

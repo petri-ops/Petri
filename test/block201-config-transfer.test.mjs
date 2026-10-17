@@ -37,9 +37,11 @@ test.beforeEach(() => {
   fs.rmSync(path.join(sandbox, 'keymap.json'), { force: true });
   fs.rmSync(path.join(sandbox, 'decision-config.json'), { force: true });
   fs.rmSync(path.join(sandbox, 'ai-settings.json'), { force: true });
+  fs.rmSync(path.join(sandbox, 'network.json'), { force: true });
+  fs.rmSync(path.join(sandbox, 'runtime-policy.json'), { force: true });
 });
 
-test('导出信封：版本化 + 六族齐 + 显式排除清单（不漏族也不假装全覆盖）', () => {
+test('导出信封：版本化 + 八族齐 + 显式排除清单（不漏族也不假装全覆盖）', () => {
   const envelope = transfer.exportConfig({ env: {} });
   assert.equal(envelope.format, 'petri-config');
   assert.equal(envelope.version, 1);

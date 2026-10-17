@@ -73,6 +73,21 @@ const CONFIG_FAMILIES = Object.freeze({
     precedence: ['file', 'default'],
     envTruth: null,
   },
+  // —— BLOCK-202 两族（阶段 A 速赢 III：网络代理 / 审批与编排）——
+  // network：代理与自签 CA。**这是"往 env 里写"的源头**（applyNetworkEnv），不是 env 消费者，
+  // 故无 env 层；noProxy 生效时强制并入 localhost/127.0.0.1（本地回环永不走代理）。
+  'network': {
+    store: 'file:network.json',
+    precedence: ['file', 'default'],
+    envTruth: null,
+  },
+  // runtime：全局审批默认档位 + 派生并发/深度 + 工具曝光黑名单。
+  // 并发/深度保留 env 覆盖（PETRI_SPAWN_* 是既有部署面，env 优先），审批默认为纯文件。
+  'runtime': {
+    store: 'file:runtime-policy.json',
+    precedence: ['env', 'file', 'default'],
+    envTruth: 'numeric',
+  },
 });
 
 /**
@@ -205,6 +220,60 @@ const CONFIG_KEYS = Object.freeze([
     path: 'mapping.<protocol>.<tier>',
     type: 'string', domain: { pattern: '^(?:none|(?:reasoning_effort|enable_thinking|thinking):[a-zA-Z0-9]+)$' },
     envKeys: [], aliases: [], mutable: true, ui: 'settings',
+  },
+  // —— BLOCK-202 network：代理与自签 CA（空串=不使用；凭据/密码不进本族）——
+  {
+    key: 'network.httpProxy', family: 'network', path: 'httpProxy',
+    type: 'string', domain: { pattern: '^(?:https?://[^\\s]+)?$' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
+    key: 'network.httpsProxy', family: 'network', path: 'httpsProxy',
+    type: 'string', domain: { pattern: '^(?:https?://[^\\s]+)?$' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
+    // 逗号分隔的 NO_PROXY 追加项；生效时还会强制并入 localhost/127.0.0.1（本地回环不走代理）
+    key: 'network.noProxy', family: 'network', path: 'noProxy',
+    type: 'string', domain: { pattern: '^[^\\s]*$' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
+    // 自签 CA 文件路径（PEM）。只存路径不存证书内容；文件不存在时 apply 阶段给诊断且不设 env。
+    key: 'network.caFile', family: 'network', path: 'caFile',
+    type: 'string', domain: { pattern: '^[^\\s]*$' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  // —— BLOCK-202 runtime：审批默认档位 / 派生并发与深度 / 工具曝光黑名单 ——
+  {
+    // 全局默认档位：仅当请求上下文没给 accessMode 时生效（显式传值永远优先，四档语义零改动）
+    key: 'runtime.approvalDefaultMode', family: 'runtime', path: 'approvalDefaultMode',
+    type: 'string', domain: { oneOf: ['read', 'plan', 'workspace-write', 'full'] }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
+    // 与 PETRI_SPAWN_CONCURRENCY_LIMIT 同域（1-8）；env 存在时 env 优先（既有部署面）
+    key: 'runtime.spawnConcurrency', family: 'runtime', path: 'spawnConcurrency',
+    type: 'number', domain: { min: 1, max: 8, integer: 'floor' },
+    envKeys: ['PETRI_SPAWN_CONCURRENCY_LIMIT'], aliases: [], mutable: true, ui: 'settings',
+  },
+  {
+    key: 'runtime.spawnMaxDepth', family: 'runtime', path: 'spawnMaxDepth',
+    type: 'number', domain: { min: 1, max: 3, integer: 'floor' },
+    envKeys: ['PETRI_SPAWN_MAX_DEPTH'], aliases: [], mutable: true, ui: 'settings',
+  },
+  {
+    // 逗号分隔的工具名白名单：非空时模型只看到这些工具（仍受黑名单二次收窄与策略/审批约束）。
+    key: 'runtime.toolAllow', family: 'runtime', path: 'toolAllow',
+    type: 'string', domain: { pattern: '^[a-z0-9_,\\s]*$' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
+    // 逗号分隔的工具名黑名单：只影响"模型可见的工具面"（曝光层），不是安全边界——
+    // 审批/策略层照常生效；空串=不屏蔽。
+    key: 'runtime.toolDeny', family: 'runtime', path: 'toolDeny',
+    type: 'string', domain: { pattern: '^[a-z0-9_,\\s]*$' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
   },
 ]);
 

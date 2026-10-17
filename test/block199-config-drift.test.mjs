@@ -30,6 +30,9 @@ const UI_CARRIERS = {
   // BLOCK-200 两族：键位面真消费注册表 hook（不是自己抄一份显示文本），档位面真打 REST 端点
   keymap: { file: 'frontend/src/components/desktop/DesktopSettingsPanel/sections/KeymapPanel.tsx', must: ['useKeymapSafe'] },
   reasoning: { file: 'frontend/src/components/desktop/DesktopSettingsPanel/sections/ReasoningDefaultsPanel.tsx', must: ['/ai/reasoning-defaults'] },
+  // BLOCK-202 W3 两族
+  network: { file: 'frontend/src/components/desktop/DesktopSettingsPanel/sections/NetworkProxyPanel.tsx', must: ['/network'] },
+  runtime: { file: 'frontend/src/components/desktop/DesktopSettingsPanel/sections/RuntimePolicyPanel.tsx', must: ['/runtime-policy'] },
 };
 
 /** 族 → 后端写路由（必须能把拒绝翻译成 4xx，而不是冒 500 或静默）。 */
@@ -40,6 +43,8 @@ const WRITE_ROUTES = {
   'cost-cap': 'core/petri-server/routes/ai-settings-api.js',
   keymap: 'core/petri-server/routes/keymap.js',
   reasoning: 'core/petri-server/routes/ai-settings-api.js',
+  network: 'core/petri-server/routes/runtime-config.js',
+  runtime: 'core/petri-server/routes/runtime-config.js',
 };
 
 test('注册表自洽：每个键有族、每个族有键（不留空壳族或孤儿键）', () => {

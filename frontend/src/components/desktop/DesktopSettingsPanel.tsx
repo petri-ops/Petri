@@ -10,7 +10,10 @@ import { ThemeControl } from './ThemeControl';
 import { useTheme, FONT_SCALE_MIN, FONT_SCALE_MAX } from '@/themes/ThemeProvider';
 import { AccentControl } from './AccentControl';
 import { SettingsNav } from './DesktopSettingsPanel/SettingsNav';
+import { NetworkProxyPanel } from './DesktopSettingsPanel/sections/NetworkProxyPanel';
+import { RuntimePolicyPanel } from './DesktopSettingsPanel/sections/RuntimePolicyPanel';
 import { MaintenanceSection } from './DesktopSettingsPanel/MaintenanceSection';
+import { UsageSection } from './DesktopSettingsPanel/UsageSection';
 import { useSettingsTransferState } from './DesktopSettingsPanel/useSettingsTransferState';
 import { SettingsToolbar } from './DesktopSettingsPanel/SettingsToolbar';
 import {
@@ -32,12 +35,9 @@ import backStyles from '@/pages/global-page.module.css';
 import { Props, SettingsSection, SETTINGS_SECTIONS } from './DesktopSettingsPanel/types';
 // BLOCK-92 Wave B-4 — API Endpoint 编辑器状态簇外迁（渠道/角色/凭据/连通性/导入导出）。
 import { useEndpointProfilesEditor } from './DesktopSettingsPanel/useEndpointProfilesEditor';
-import { UsageResourcePanel } from './DesktopSettingsPanel/sections/UsageResourcePanel';
 // BLOCK-163 W3 P9（MDL-4）— 按模型成本/用量面板（usage-mine models 聚合）
-import { UsageCostPanel } from './DesktopSettingsPanel/sections/UsageCostPanel';
 // BLOCK-163 W3 P10（KNW-5）— 记忆治理面板（facts 单条遗忘+摘要清除）
 import { MemoryPanel } from './DesktopSettingsPanel/sections/MemoryPanel';
-import { DecisionUsagePanel } from './DesktopSettingsPanel/sections/DecisionUsagePanel';
 // BLOCK-160 W2 P2（ORC-1）— Agent 用户规则面板（rules.json CRUD 读面）
 import { AgentRulesPanel } from './DesktopSettingsPanel/sections/AgentRulesPanel';
 import { DecisionConfigPanel } from './DesktopSettingsPanel/sections/DecisionConfigPanel';
@@ -575,24 +575,16 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
 
         <hr className="petri-section-divider" />
 
+        {/* BLOCK-202 W3 — 网络代理与自签 CA（保存后需重启后端生效） */}
+        <NetworkProxyPanel />
+        <hr className="petri-section-divider" />
+
         <TrashManagement />
 
           </section>
         )}
 
-        {activeSection === 'usage' && (
-          <section className="petri-settings-section">
-            <div className="petri-settings-section__heading">
-              <h3>用量与资源</h3>
-              <p>查看模型成本、缓存命中和当前机器容量，不保存原始数据或密钥。</p>
-            </div>
-            <UsageResourcePanel />
-            {/* BLOCK-163 W3 P9（MDL-4）— 按模型成本/用量面板（usage-mine models 聚合） */}
-            <UsageCostPanel key={`usage-cost-${settingsVersion}`} />
-            {/* BLOCK-116 W2 — 决策原语观测面（decision_log 聚合，additive） */}
-            <DecisionUsagePanel />
-          </section>
-        )}
+        {activeSection === 'usage' && <UsageSection versionKey={settingsVersion} />}
 
         {/* BLOCK-160 W2 P2（ORC-1）— Agent 用户规则节（与决策观测节相邻） */}
         {activeSection === 'decisions' && (
@@ -616,6 +608,8 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
               <p>各智能决策接点的启用与阈值（校准默认预填，可调整并自动保存；每次调用记录实际生效阈值）。</p>
             </div>
             <DecisionConfigPanel key={`decision-config-${settingsVersion}`} />
+            {/* BLOCK-202 W3 — 全局审批默认档位 + 并发/深度 + 工具曝光黑名单 */}
+            <RuntimePolicyPanel key={`runtime-policy-${settingsVersion}`} />
             {/* BLOCK-171 CP-2 — 审批记录（guard_ack 事件复审；治理可见化） */}
             <GuardAckHistoryPanel />
           </section>

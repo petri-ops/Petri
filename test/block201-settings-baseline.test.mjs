@@ -8,7 +8,7 @@
  * 三条事实：
  *  ① 设置面板分区清单 = 10 项（BLOCK-200 加了 keymap/reasoning 后从 8 变 10；
  *     `docs/stage-3-4-execution-runlist.md` 的「8 分区」口径已过时，本包按实况登记）；
- *  ② 配置注册表 = 6 族 / 26 键（BLOCK-199 四族 + BLOCK-200 两族）；
+ *  ② 配置注册表 = 8 族 / 35 键（BLOCK-199 四族 + BLOCK-200 两族 + BLOCK-202 两族）；
  *  ③ 导出/导入的族集合必须与注册表**逐族相等**（不得偷偷漏族或加未注册族）。
  */
 import assert from 'node:assert/strict';
@@ -36,9 +36,9 @@ test('设置分区清单冻结：10 个分区 id（搜索索引必须逐项覆�
   assert.equal(ids.length, 10, `分区数应为 10（实得 ${ids.length}）：${ids.join(', ')}`);
 });
 
-test('配置注册表冻结：6 族 / 26 键', () => {
-  assert.equal(Object.keys(schema.CONFIG_FAMILIES).length, 6);
-  assert.equal(schema.CONFIG_KEYS.length, 26);
+test('配置注册表冻结：8 族 / 35 键（BLOCK-202 加 network/runtime 两族）', () => {
+  assert.equal(Object.keys(schema.CONFIG_FAMILIES).length, 8);
+  assert.equal(schema.CONFIG_KEYS.length, 35);
 });
 
 test('导出/导入的族集合 == 注册表族集合（漏族/未注册族都算红）', () => {

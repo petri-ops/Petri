@@ -11,8 +11,9 @@ import type { SettingsSectionId } from './settingsSearch';
 
 /** 分区 → 可重置的注册表族（顺序即写入顺序，v1 无依赖）。 */
 export const SETTINGS_SECTION_FAMILIES: Partial<Record<SettingsSectionId, string[]>> = {
+  compute: ['network'],
   usage: ['cost-cap'],
-  decisions: ['decision-points'],
+  decisions: ['decision-points', 'runtime'],
   keymap: ['keymap'],
   reasoning: ['reasoning'],
   experimental: ['feature-flags'],

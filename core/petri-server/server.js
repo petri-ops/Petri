@@ -30,6 +30,14 @@ const config = require('./config');
 const { logError } = require('./helpers/error-log');
 const { recordFunnelEvent } = require('./helpers/funnel-log');
 
+// BLOCK-202 W3 — 网络代理与自签 CA：把持久化配置写入进程 env（Node 只在启动时读取
+// NODE_USE_ENV_PROXY / HTTP(S)_PROXY / NODE_EXTRA_CA_CERTS），故必须在任何出站前执行一次。
+try {
+  require('./helpers/network-config').applyNetworkEnv();
+} catch (e) {
+  console.warn('[block202] network env apply skipped:', e && e.message);
+}
+
 // A-009: pull the petri-server port fallback from env-coordinator instead of
 // duplicating the literal default here. setupDesktopEnv() in the Electron
 // main process always overwrites R_SERVER_PORT before this module is

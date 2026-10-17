@@ -3859,6 +3859,39 @@
         "frontend/src/components/desktop/DesktopSettingsPanel/SettingsToolbar.test.tsx",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/ConfigTransferPanel.test.tsx"
       ]
+    },
+    {
+      "id": "block202-network-runtime",
+      "note": "BLOCK-202 W3 代理设置 + 全局审批档位/并发深度/工具曝光：network/runtime 两族 schema、后端 helper 与 REST、server 启动 apply、agent-runner 默认档位与曝光过滤、spawn 上限改配置源、设置面板两节。",
+      "patterns": [
+        "core/packages/shared-config/config-schema.js",
+        "core/petri-server/helpers/network-config.js",
+        "core/petri-server/helpers/runtime-policy.js",
+        "core/petri-server/routes/runtime-config.js",
+        "core/petri-server/server.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/agent-tools/spawn-agent-tools.js",
+        "core/petri-server/helpers/config-transfer.js",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/NetworkProxyPanel.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/NetworkProxyPanel.test.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/RuntimePolicyPanel.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/RuntimePolicyPanel.test.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
+        "frontend/src/lib/settingsFamilies.ts",
+        "test/block202-*.test.mjs",
+        "acceptance/block-202/**"
+      ],
+      "tests": [
+        "test/block202-network-runtime.test.mjs",
+        "test/block201-config-transfer.test.mjs",
+        "test/block201-settings-baseline.test.mjs",
+        "test/block199-config-drift.test.mjs",
+        "test/block199-config-compat.test.mjs",
+        "test/spawn-agent-tools.test.mjs",
+        "frontend/src/lib/settingsSearch.test.ts",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/NetworkProxyPanel.test.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/RuntimePolicyPanel.test.tsx"
+      ]
     }
   ]
 }

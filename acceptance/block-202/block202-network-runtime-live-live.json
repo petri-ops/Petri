@@ -1,0 +1,83 @@
+{
+  "name": "block202-network-runtime-live",
+  "startedAt": "2026-10-17T14:49:12.398Z",
+  "finishedAt": "2026-10-17T14:49:13.621Z",
+  "assertions": [
+    {
+      "name": "R1_network_defaults",
+      "pass": true,
+      "detail": "{\"httpProxy\":\"\",\"httpsProxy\":\"\",\"noProxy\":\"\",\"caFile\":\"\"}"
+    },
+    {
+      "name": "R2_loopback_exemption_present",
+      "pass": true,
+      "detail": "localhost,127.0.0.1,::1"
+    },
+    {
+      "name": "R3_network_save_marks_restart_required",
+      "pass": true,
+      "detail": "{\"restart\":true,\"conf\":{\"httpProxy\":\"http://127.0.0.1:7890\",\"httpsProxy\":\"\",\"noProxy\":\".corp.example\",\"caFile\":\"\"}}"
+    },
+    {
+      "name": "R4_network_invalid_400",
+      "pass": true,
+      "detail": "status=400"
+    },
+    {
+      "name": "R5_network_unknown_key_400",
+      "pass": true,
+      "detail": "status=400"
+    },
+    {
+      "name": "R6_runtime_defaults",
+      "pass": true,
+      "detail": "{\"approvalDefaultMode\":\"full\",\"spawnConcurrency\":3,\"spawnMaxDepth\":1}"
+    },
+    {
+      "name": "R7_runtime_save_applied",
+      "pass": true,
+      "detail": "{\"configured\":{\"approvalDefaultMode\":\"read\",\"spawnConcurrency\":4,\"spawnMaxDepth\":1,\"toolDeny\":\"workspace_exec\"},\"effective\":{\"approvalDefaultMode\":\"read\",\"spawnConcurrency\":4,\"spawnMaxDepth\":1},\"modes\":[\"read\",\"plan\",\"workspace-write\",\"full\"],\"envShadowed\":[]}"
+    },
+    {
+      "name": "R8_runtime_invalid_mode_400",
+      "pass": true,
+      "detail": "status=400"
+    },
+    {
+      "name": "R9_runtime_out_of_range_400",
+      "pass": true,
+      "detail": "status=400"
+    },
+    {
+      "name": "D1_network_panel_in_compute",
+      "pass": true,
+      "detail": "compute 节应有代理面板"
+    },
+    {
+      "name": "D2_network_fields_present",
+      "pass": true,
+      "detail": "{\"fields\":4,\"text\":\"网络代理与自签 CA\\n\\n企业代理或自签证书场景使用。保存后需重启后端生效；本地回环 （localhost / 127.0.0.1 / ::1）始终绕过代理，网关与隧道自检不受影响。\\n\\n配置已改变但尚未生效：请重启后端（设置页不会谎称已生效）。\\nHTTP 代理\\nHTTPS 代理\\nNO_PROXY 追加项\\n生效值（含强制回\"}"
+    },
+    {
+      "name": "D3_runtime_panel_in_decisions",
+      "pass": true,
+      "detail": "decisions 节应有审批与编排面板"
+    },
+    {
+      "name": "D4_runtime_panel_values",
+      "pass": true,
+      "detail": "{\"options\":4,\"value\":\"read\",\"concurrency\":\"4\",\"depth\":\"1\",\"deny\":\"workspace_exec\",\"effective\":\"生效：read · 并发 4 · 深度 1\"}"
+    },
+    {
+      "name": "R10_reset_restores_defaults",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"reset\":[\"network\",\"runtime\"],\"diagnostics\":[]}"
+    },
+    {
+      "name": "R11_reset_verified",
+      "pass": true,
+      "detail": "{\"net\":{\"httpProxy\":\"\",\"httpsProxy\":\"\",\"noProxy\":\"\",\"caFile\":\"\"},\"rt\":{\"approvalDefaultMode\":\"full\",\"spawnConcurrency\":3,\"spawnMaxDepth\":1}}"
+    }
+  ],
+  "allPass": true
+}

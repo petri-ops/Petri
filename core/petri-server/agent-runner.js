@@ -754,6 +754,14 @@ async function runAgentLoop({
     }
   }
 
+  // BLOCK-202 W3 — 工具曝光黑名单（设置面 runtime.toolDeny）：只摘掉模型可见列表中的项，
+  // 不是安全边界（policy/审批层照常生效）；放在路由收窄之后，避免被路由结果覆盖。
+  try {
+    effectiveTools = require('./helpers/runtime-policy').filterToolDefs(effectiveTools);
+  } catch (e) {
+    try { console.warn('[block202] tool deny filter skipped:', e && e.message); } catch {}
+  }
+
   // Build tool context
   const toolCtx = {
     userId,
@@ -766,9 +774,11 @@ async function runAgentLoop({
     ...projectResultStudioToolContext(context),
     // BLOCK-56 P2 + UI-303 — 'workspace-write' 中间档与 'plan' 第四档透传
     // （additive：未知值维持塌缩 full；'plan' 绝不可塌缩 full）
-    accessMode: context && (context.accessMode === 'read' || context.accessMode === 'workspace-write' || context.accessMode === 'plan')
+    // BLOCK-202 W3 — 上下文没给有效档位时用设置面全局默认（默认仍是 'full'，显式传值永远优先；
+    // 四档判定与审批资源链一字未改）。
+    accessMode: context && (context.accessMode === 'read' || context.accessMode === 'workspace-write' || context.accessMode === 'plan' || context.accessMode === 'full')
       ? context.accessMode
-      : 'full',
+      : require('./helpers/runtime-policy').getDefaultApprovalMode(),
     // UI-303 — Spec 门计划模式透传（此前 agent 循环路径缺失，见上方 planModeActive 注入）
     planMode: (context && context.planMode === true) || (context && context.accessMode === 'plan'),
     allowExecution: executionPolicy.allowExecution,

@@ -56,7 +56,7 @@ module.exports = {
     const exp0 = await rest('GET', '/config/export');
     assert('R1_export_envelope_ok',
       exp0.ok && exp0.data?.config?.format === 'petri-config' && exp0.data.config.version === 1
-      && Object.keys(exp0.data.config.families || {}).length === 6,
+      && Object.keys(exp0.data.config.families || {}).length === 8,
       `status=${exp0.status} keys=${Object.keys(exp0.data?.config?.families || {}).join(',')}`);
 
     // 只查 families 载荷：信封的 excludes 文本里本来就会出现 "credentials/API Key" 字样

@@ -24,6 +24,8 @@ const decisions = require('./decision-config');
 const aiSettings = require('./ai-settings');
 const keymap = require('./keymap');
 const reasoningConfig = require('./reasoning-config');
+const network = require('./network-config');
+const runtimePolicy = require('./runtime-policy');
 
 const CONFIG_TRANSFER_FORMAT = 'petri-config';
 const CONFIG_TRANSFER_VERSION = 1;
@@ -36,6 +38,9 @@ const CONFIG_TRANSFER_FAMILIES = Object.freeze([
   'cost-cap',
   'keymap',
   'reasoning',
+  // BLOCK-202 W3
+  'network',
+  'runtime',
 ]);
 
 /** 显式排除清单：随信封回传，防止「以为备份了全部设置」。 */
@@ -101,6 +106,8 @@ function readFamilyOverrides() {
     'cost-cap': { costCapCny: typeof ai.costCapCny === 'number' && ai.costCapCny > 0 ? ai.costCapCny : null },
     keymap: { bindings: keymap.readStore() },
     reasoning: pickReasoningSection(ai.reasoning),
+    network: { ...network.readStore() },
+    runtime: { ...runtimePolicy.readStore() },
   };
 }
 
@@ -111,6 +118,8 @@ function collectEnvShadowed(families, env) {
     ['decision-points', flattenDecisionPoints(families['decision-points'].points)],
     ['generation', families.generation],
     ['cost-cap', families['cost-cap']],
+    // runtime 的并发/深度有 env 覆盖层（PETRI_SPAWN_*），必须把遮蔽点名
+    ['runtime', families.runtime],
   ];
   const out = [];
   for (const [family, obj] of pairs) {
@@ -189,6 +198,9 @@ function validateFamily(family, body) {
   if (family === 'reasoning') {
     return reasoningConfig.validateReasoningPatch(body);
   }
+  if (family === 'network' || family === 'runtime') {
+    return schema.commitGuard(family, body, lookup).diagnostics;
+  }
   return [diagnostic(family, '', 'unknown-family', `未登记的配置族 ${family}`)];
 }
 
@@ -257,6 +269,12 @@ const WRITERS = {
   reasoning(body) {
     reasoningConfig.saveReasoning(body);
   },
+  network(body) {
+    network.saveNetworkConfig(body);
+  },
+  runtime(body) {
+    runtimePolicy.saveRuntimePolicy(body);
+  },
 };
 
 /**
@@ -292,6 +310,8 @@ const RESETTERS = {
   },
   keymap() { keymap.writeStore({}); },
   reasoning() { aiSettings.saveReasoningSection({}); },
+  network() { network.writeStore({}); },
+  runtime() { runtimePolicy.writeStore({}); },
 };
 
 /**

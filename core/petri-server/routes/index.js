@@ -40,6 +40,8 @@ module.exports = async function registerRoutes(app) {
     ['Keymap', () => require('./keymap')(app)],
     // BLOCK-201 W2：设置全景导出/导入/按区重置（只覆盖注册表 6 族；凭据永不进导出）
     ['Config transfer', () => require('./config-transfer')(app)],
+    // BLOCK-202 W3：网络代理与运行时策略（代理需重启生效；审批默认档位/并发深度/工具曝光）
+    ['Runtime config', () => require('./runtime-config')(app)],
     // Must precede Harness: harness.js retains the legacy
     // GET /api/loop/:loopRunId catch-all, which would otherwise swallow
     // /runs, /session-summary, /iterations, /recovery, etc.
