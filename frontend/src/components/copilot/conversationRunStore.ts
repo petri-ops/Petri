@@ -1,5 +1,7 @@
 import { useCallback, useSyncExternalStore } from 'react';
 import type { CopilotContext } from '@/lib/copilotContext';
+// BLOCK-200 P2 — 档位词表单源：此前此处是内联三档字面量副本（第四份），收敛到 thinkingLevel.ts
+import type { ThinkingLevel } from './thinkingLevel';
 import { petriEvents, dispatchPetriEvent } from '@/lib/events';
 import {
   cancelAgentTask,
@@ -107,7 +109,7 @@ interface StartConversationRunOptions {
    */
   resumeOfTaskId?: string;
   /** BLOCK-81 P1 — 思考档位（缺省不发参；P2 起由 composer 档位控件提供） */
-  thinkingLevel?: 'off' | 'standard' | 'high';
+  thinkingLevel?: ThinkingLevel;
 }
 
 const runs = new Map<string, ConversationRunSnapshot>();

@@ -30,6 +30,7 @@
 
 import {
   migrateThinkingLevel,
+  type ThinkingLevel,
 } from '../../thinkingLevel';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
@@ -131,7 +132,7 @@ export interface UseChatStreamArgs {
   // SWR-backed conversation creator
   createConversationForRun: (title?: string) => Promise<{ id: string } | null>;
   /** BLOCK-81 P2 — 会话级思考档位（缺省/standard＝不发任何上游思考参数） */
-  thinkingLevel?: 'off' | 'standard' | 'high';
+  thinkingLevel?: ThinkingLevel;
   /** CK-01（C-06）— 运行中发送自动 steer 的回执回调：ok=true 已入队（depth=排队深度），
    *  ok=false 转向失败（error=原因，调用方应保留输入）。缺省=静默（回归原行为）。 */
   onSteer?: (info: { ok: boolean; text: string; depth?: number; error?: string }) => void;

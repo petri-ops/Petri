@@ -21,6 +21,9 @@ export type SettingsSection =
   | 'usage'
   // BLOCK-116 P4 — 决策原语配置节（配置+观测相邻）
   | 'decisions'
+  // BLOCK-200 阶段 A 速赢 I — 键位面与推理档位面
+  | 'keymap'
+  | 'reasoning'
   | 'diagnostics'
   | 'experimental'
   | 'maintenance';
@@ -37,6 +40,9 @@ export const SETTINGS_SECTIONS: Array<{
   { id: 'usage', label: '用量与资源', description: '成本、缓存与机器状态', icon: 'cpu' },
   // BLOCK-116 P4 — 决策原语配置（紧邻观测节：配置+观测同位）
   { id: 'decisions', label: '决策原语', description: '各智能决策接点的启用与阈值', icon: 'brain' },
+  // BLOCK-200 阶段 A 速赢 I — 键位面与推理档位面（两者都落 shared-config 注册表族）
+  { id: 'keymap', label: '快捷键', description: '应用级命令的键位、冲突与恢复默认', icon: 'settings' },
+  { id: 'reasoning', label: '推理档位', description: '思考档位的默认值与逐协议参数映射', icon: 'brain' },
   // UI-366 — 原全局「后端」页（/backend，BLOCK-72/UI-320）并入本分区：
   // 进程快照 / R·Python 运行时状态 / 日志，设备级诊断不绑项目。
   { id: 'diagnostics', label: '运行时与诊断', description: '本地服务、R/Python 运行时与日志', icon: 'cpu' },
