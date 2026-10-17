@@ -47,7 +47,7 @@
 - [x] W0-b P1 地基 `core/packages/shared-config/config-schema.js` + 契约测 8/8
 - [x] W0-c P2 首族接线 feature-flags（26/26 含既有测）
 - [x] W0-d P4① tool-route 阈值运行时化（红→绿 5/5）
-- [ ] W0-e P2b 剩余三族（decision-config / generation / cost-cap）
+- [x] W0-e P2b 剩余三族接线完成（decision-config 启用档 + generation + cost-cap；四族声明 4/4 实接，基线与消费者面共 116 项 0 fail）
 - [ ] W0-f P3 写侧统一拒绝 + diagnostics 出口
 - [ ] W0-g P4② report-guard 入 RUNTIME_POINTS
 - [ ] W0-h P4③ ThemeProvider 跨端写失败可观测
