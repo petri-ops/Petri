@@ -21,8 +21,23 @@ const { getPointRuntime } = require('./decision-config');
 // D-3（P0 校准证据 acceptance/block-113/calibration.json；调整阈值必须先重校准）。
 const TOOL_ROUTE_THRESHOLD = thresholdForPoint('tool-route');
 
-/** D-1 九域 + 弃权类目（choice criteria；描述与 tool-defs 物理域一一对应）。 */
-const TOOL_FAMILIES = {
+/**
+ * BLOCK-199 P4① — 采纳阈值改在**调用时**读运行时配置。
+ * 原状：模块加载即冻结 TOOL_ROUTE_THRESHOLD，设置页热调 threshold 落盘成功、回显正确而判定值
+ * 永不变（同族 intent-router.js:81 早已是 `runtime.threshold ?? CONST`，两种口径并存）。
+ * 边界：注册表校准默认数值一个字节不动（无 stored 覆盖时仍返回 TOOL_ROUTE_THRESHOLD），
+ * 读取失败也回落它——本修复只改「什么时候读」，不改「读到什么」。
+ */
+function currentRouteThreshold() {
+  try {
+    const runtime = getPointRuntime('tool-route');
+    return runtime && typeof runtime.threshold === 'number' ? runtime.threshold : TOOL_ROUTE_THRESHOLD;
+  } catch {
+    return TOOL_ROUTE_THRESHOLD;
+  }
+}
+
+/** D-1 九域 + 弃权类目（choice criteria；描述与 tool-defs 物理域一一对应）。 */const TOOL_FAMILIES = {
   workspace: '项目工作区内的文件读写、搜索、代码编写与脚本执行、数据分析作业',
   knowledge: '知识空间与文档库的检索和管理（搜索、上传、移动、建空间、重建索引）',
   'result-studio': '结果库/结果图表/修订版本/changeset 的操作（打开、对比、采纳、回滚、重跑、生成方法学）',
@@ -87,13 +102,14 @@ async function resolveToolRoute(message, overrides = {}) {
     return { route: false, reason: 'guard_disabled' };
   }
   const { state, questions } = buildToolRouteDecisionRequest(message);
-  const outcome = await askDecision({ state, questions, overrides, meta: { point: 'tool-route', threshold: TOOL_ROUTE_THRESHOLD } });
+  const threshold = currentRouteThreshold();
+  const outcome = await askDecision({ state, questions, overrides, meta: { point: 'tool-route', threshold } });
   if (!outcome.ok) return { route: false, reason: outcome.reason };
   const answer = outcome.answers.family;
   if (answer.choice === 'all') {
     return { route: false, reason: 'family_all', family: 'all', confidence: answer.confidence };
   }
-  if (answer.confidence < TOOL_ROUTE_THRESHOLD) {
+  if (answer.confidence < threshold) {
     return { route: false, reason: 'below_threshold', family: answer.choice, confidence: answer.confidence };
   }
   // unknown_family 防御由 narrowToolDefsByFamily 的缺映射回退承接（此处无域映射可查）

@@ -312,7 +312,8 @@
       "tests": [
         "test/ai-settings-credential.test.mjs",
         "test/result-studio-agent-binding.test.mjs",
-        "test/system-prompt-result-context.test.mjs"
+        "test/system-prompt-result-context.test.mjs",
+        "test/block199-config-compat.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -2571,7 +2572,8 @@
         ".agents/skills/petri-dev-infra/dev-verify/flows/block113-toolroute-live.cjs"
       ],
       "tests": [
-        "test/block112-intent-routing.test.mjs"
+        "test/block112-intent-routing.test.mjs",
+        "test/block199-threshold-runtime.test.mjs"
       ],
       "frontendRelated": false,
       "classifiesScripts": true,
@@ -3749,6 +3751,27 @@
         "test/block198-prompt-layering.test.mjs",
         "test/block198-spawn-depth.test.mjs",
         "test/block195-anchors.test.mjs"
+      ],
+      "frontendRelated": false,
+      "classifiesScripts": false
+    },
+    {
+      "id": "block199-config-schema-service",
+      "note": "BLOCK-199 阶段 3 首包·配置 schema 层与统一配置服务（P1-1）。地基=core/packages/shared-config/config-schema.js（键注册表 + 校验 + 逐族 precedence + 未知键\"读不炸写不进\"单源 + 共享层零 require 零依赖）；落位由架构规则决定（R4 明写 core/packages 是前后端合法共享层、R5 禁 src→core/petri-server）。契约=test/block199-config-schema.test.mjs（键唯一/族存在/字段齐/env 别名真实性扫描/优先级逐族照现状/env 三态解析/值校验与归一化/未知键诊断/共享层纯度与零校验依赖）+ 拆前行为基线 test/block199-config-compat.test.mjs（三族胜负关系与形状冻结，重构后一字不许动）+ 生效性测 test/block199-threshold-runtime.test.mjs（tool-route 阈值改运行时读，改配置即改判定，且无 stored 覆盖时行为零变化）。 另：P0 测绘发现 feature-flags/decision-config 此前**无任何 impact-map 规则覆盖**（改它们会 fail-closed 升级全量），本规则同时补上这条盲区。",
+      "patterns": [
+        "core/packages/shared-config/**",
+        "core/petri-server/helpers/feature-flags.js",
+        "core/petri-server/helpers/decision-config.js",
+        "core/petri-server/helpers/decision-thresholds.js",
+        "core/petri-server/helpers/ai-settings.js",
+        "core/petri-server/helpers/cost-cap.js",
+        "core/petri-server/helpers/tool-router.js",
+        "test/block199-*.test.mjs"
+      ],
+      "tests": [
+        "test/block199-config-schema.test.mjs",
+        "test/block199-config-compat.test.mjs",
+        "test/block199-threshold-runtime.test.mjs"
       ],
       "frontendRelated": false,
       "classifiesScripts": false

@@ -17,6 +17,11 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+// BLOCK-199 P2 — 优先级与 env 三态解析接配置 schema 单源（默认值与标签仍留在本模块：
+// 它们是行为数值与本族元数据，不是形状；形状由 shared-config 声明，两处由契约测对账防漂移）。
+const { resolve: resolveConfigLayers, resolveEnvEntry } = require('../../packages/shared-config/config-schema.js');
+
+const FLAG_FAMILY = 'feature-flags';
 
 const STORE_FILENAME = 'feature-flags.json';
 
@@ -79,12 +84,14 @@ function writeStore(flags) {
 function resolveFlag(key, env = process.env) {
   const meta = FLAG_META[key];
   if (!meta) throw new Error(`feature_flag_unknown:${key}`);
-  const raw = (env && env[meta.env]) || '';
-  if (raw === '1' || raw === 'true') return true;
-  if (raw === '0' || raw === 'false') return false;
+  const envHit = resolveEnvEntry(FLAG_FAMILY, env && env[meta.env]);
   const stored = readStore()[key];
-  if (typeof stored === 'boolean') return stored;
-  return FLAG_DEFAULTS[key];
+  const picked = resolveConfigLayers(FLAG_FAMILY, {
+    env: envHit ? envHit.value : null,
+    file: typeof stored === 'boolean' ? stored : null,
+    defaults: FLAG_DEFAULTS[key],
+  });
+  return picked.value;
 }
 
 /** 全量快照（设置页投影用）：key → { enabled, envOverride, default } */
@@ -93,8 +100,8 @@ function getFlagsSnapshot(env = process.env) {
   const flags = {};
   for (const key of Object.keys(FLAG_DEFAULTS)) {
     const meta = FLAG_META[key];
-    const raw = (env && env[meta.env]) || '';
-    const envOverride = raw === '1' || raw === 'true' ? true : raw === '0' || raw === 'false' ? false : null;
+    const envHit = resolveEnvEntry(FLAG_FAMILY, env && env[meta.env]);
+    const envOverride = envHit ? envHit.value : null;
     const stored = typeof store[key] === 'boolean' ? store[key] : null;
     const enabled = envOverride != null ? envOverride : stored != null ? stored : FLAG_DEFAULTS[key];
     flags[key] = {
