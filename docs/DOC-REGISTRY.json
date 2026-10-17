@@ -6727,6 +6727,27 @@
       "notes": "2026-10-17 立项发令 active（竞争力无锚点位清偿批·有实现无断言普查；用户「非常好 尽可能的推进更多的内容 不要问我所有工作决策你来定」=工作决策全下放，主代理按队列头自决）：BLOCK-195 收口后清单仍有 10 个 unanchored 点位压低定分，1 个属环境档（R 运行面），其余 9 个零机械锚。BLOCK-196 已证明这批里藏着**有实现无断言**（D16 自 BLOCK-174 落地却零断言，补锚当场撞出 win32 跨会话安全缺陷），本包把这条例外变成常规工序：零 API、离线可复跑、每点位结论必须落到 path:line 或未找到。**P0 普查已完成并经主代理逐条实码抽验**（子代理结论先复核再写入，BLOCK-195 曾两次纠正子代理错路径）：三分类=①可直接挂现存锚转绿 4-cost-breaker/4-worktree-safety/8-delegation-realtime ②需补断言 1-prompt-layering/3-recursive-tree/7-split-compare ③**如实保持无锚** 2-ann-layering（memory-vectors.js:111-127 是暴力全表 JS cosine 无 ANN，且 block-94 已裁决不引入 sqlite-vec；全仓 recall/MRR/nDCG 零命中）/8-relay-topology（federation-peers.js 只有按 baseUrl 平铺的点对点直连，全 core grep relay/多跳/nextHop/viaPeer/hop 无实义命中）/5-slash-execute（SimpleChat.tsx:1362-1380 skill/template 只注入文本模板，slashSources.ts:8-9 原文写明结构化 chip 通道留 v2；要锚得先把 executeSlashCommand 从 1664 行文件抽成可测单元=产品改动，越红线）。**两处判词与实码不符必须更正后再记分**：cost-cap 超限走 loop-orchestrator.js:685-698 的诚实收尾 system 提示（无 break/return）不是硬中止；mirrorPeerTaskEvents（federation-tools.js:95-130）是在 5s 轮询**前叠加**不是替代轮询。诚实性条款=把相邻断言当该行为的锚属错位记分，比不给分更有害，故 slash-execute 不挂 slashSources.test.ts。候选锚测离线复跑 15/15 绿（block176-w6-contract + block176-checkpoint + block173-w3-contracts）。非范围红线=不改任何产品实现与判据语义·不为转绿放宽 --check 或环境等价规则·环境档不冒充绿·不碰 G1+。plan=docs/block-198-unanchored-points-clearing-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。 2026-10-17 整包 completed（当日立项当日收口·零人参与·closeout 十三门）：9 个零锚点位逐点实码普查后按三分类处置完。**6 点位转绿**=①挂现存真断言 3 个（cost-breaker→helpers/cost-cap.js+loop-orchestrator.js:685-698+test/block176-w6-contract.test.mjs；worktree-safety→core/shared-backend/workspace-checkpoint.js:50-106+test/block176-checkpoint.test.mjs；delegation-realtime→federation-tools.js:95-130 mirrorPeerTaskEvents+同测）②新写断言 3 个（test/block198-prompt-layering.test.mjs 4/4 断静态前缀跨 context 逐字节恒定+缓存命中/失效计量+base 段长度与预算计量同源；test/block198-spawn-depth.test.mjs 5/5 断有界派生判定链四条真分支，全部在派发前返回故零模型调用、不启动子 agent；frontend ArtifactPinPane.ratio.test.tsx 5/5 断键盘 ±5/栅格同步/钳 20–80/持久化恢复/坏值回落，另册新增不动 BLOCK-140 冻结契约）。**复跑定分**（带 dev 栈+9223 测试实例，132s）：dim1 5.0/dim3 5.0/dim4 5.0/dim7 4.2/dim8 4.2，八维均值 **4.1→4.6**，机械锚 56→**62**，零锚点位 10→**4**，**anchored-red 0**；baseline.json 显式 --update 提升后 --check 全层级对账通过。**四处 claim 按实码更正（不更正=在没交付的地方得分）**：成本上限是提示级诚实收尾（循环无 break/return）不是硬中止；委托事件流叠加在 5s 轮询之上、轮询兜底未替代；分屏比例可调早已落地（原判词「分屏固定 60/40」失效）但 canCompare 未接进钉住入口且分隔件用 role=separator+aria-value* 而非 slider；递归派生断的是判定链、端到端实跑派发链未锚。**三处真缺口保持无锚并转候选**（C-29 斜杠即执行结构化 chip / C-30 ANN 记忆分层与召回质量基线 / C-31 >2 节点中继拓扑），未为转绿造锚。**自纠两处**：spawn 测首跑红因未 await 异步工具（断到 Promise 对象），先用一次性调试脚本证实行为再修测；批量正则改源码造出语法错，教训=源码逐处 Edit。flow 复跑覆写的他包证据（acceptance/ui-341、block-99）跑完即还原。门禁=新测 4/4+5/5+5/5·清单契约测 10/10·test:changed·closeout 十三门·docs:check。plan=docs/block-198-unanchored-points-clearing-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
+      "id": "BLOCK-199-CONFIG-SCHEMA-SERVICE",
+      "capability": "config-schema-service",
+      "path": "docs/block-199-config-schema-service-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "phase": "P0-LAUNCH",
+      "canonical": true,
+      "truthDomain": "block-199-config-schema-service-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-17",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "settings",
+        "config-schema",
+        "stage-3",
+        "structural-foundation",
+        "drift-gate"
+      ],
+      "notes": "2026-10-17 立项发令 active（阶段 3 结构地基首包 P1-1 配置 schema 层与统一配置服务；用户「非常好 尽可能的推进更多的内容 不要问我所有工作决策你来定」并指定本轮开\"跨度比较大的任务\"）：专项分析 §7 阶段 B 明写先地基再挂件（P1-1→P1-2 MCP 逐工具→P1-3 记忆压缩），且 P1-1 是 P0-3 设置搜索/导出的实现载体。**P0 测绘（两路只读盘点 + 主代理逐条实码抽验行号）**=14 处持久化落点（唯一行式 KV 表 site_settings@db/schema.js:303 + 三个整坨 JSON 列 + 七个 JSON 文件族 + 主进程窗口态）、4 条互不相同 data root 解析链（system-prompt.js:274-276 注释自认 BLOCK-85 脑裂家族）、**六份各自手写的 env>文件>默认 回落链**、~110 环境变量且 core/petri-server/.env.example 已失效（仍列 DEEPSEEK_API_KEY 而 ai-settings.js:196-199 已禁 env 兜底）、**零校验类依赖**（root 24/core 7 无 zod/ajv/joi，frontend 仅编辑器 lang-json）⇒ 新依赖默认拒、必须零依赖手写，但本仓已有三份互不复用手写 JSON-Schema 子集（mcp/_validate-tool-args.js:44-176 含 additionalProperties:false、shared-backend/skill-schema.js、scripts/lib/gate-report-schema.mjs:100-177）可抽骨架不造第四套；未知键现状=读侧静默跳过、写侧却 throw、ai-settings 整坨透传永久存活，不存在\"写了不存在的键会被发现\"的机制。**三个已核实真缺陷（本包清偿）**：①tool-router.js:22 模块加载即 thresholdForPoint 冻结、:90/:96 全程用常量，而同族 intent-router.js:81 用 runtime.threshold ?? CONST ⇒ 设置页改阈值落盘回显都对、判定值永不变；②report-guard.js:21 只认 PETRI_JEV_REPORT_GUARD===1 且该键不在 RUNTIME_POINTS（实测仅 5 键）⇒ 隐藏开关、不可持久化、语义与他点相反；③ThemeProvider.tsx:111 用 void fetch().catch(()=>{}) 推服务端 ⇒ 跨端旧值静默。**判定=scoped refactor**（三条信号全命中：同一处第六份同构实现、需要既有概念第二个变体、补丁须绕过已有知识），按 BLOCK-92 先例拆前基线拆后对账（compat 逐键值相等测先写先绿再动实现）。切片范围=feature-flags / decision-config+thresholds / ai-settings 的 generation+costCap 三族 + schema 单源 + 优先级单实现 + unknown-key 诊断 + 漂移门（沿用 src/ipc/channels.js 与 test/ipc-channels-registry.test.mjs 双向守护先例，decision-thresholds 每键绑 evidence 是 schema-证据绑定本仓先例）。落位 core/packages/shared-config/**（架构规则决定：R4 明写 core/packages 是前后端合法共享层、R5 禁 src→core/petri-server，注册表须被 UI/主进程/后端同源消费）。非范围红线=不合并凭据（ai-settings.js:11 密钥永不入明文快照，合并即安全回归）/会话运行态/装配清单/accessMode 每请求态；不迁移磁盘形状、不改键名；**不改任何阈值数值与 judge 校准键**（P4① 只改读取时机）；剩余 11 落点留 B1b/B2 且完成时须写明覆盖率 3/14 不得表述为\"配置已统一\"；不做设置搜索导出（下游挂件）/profile 同步/i18n/hooks；G0 开发期常态 · 不外推 packaged/Provider/GA。plan=docs/block-199-config-schema-service-plan.md。"
+    },
+    {
       "id": "DESKTOP-EVAL-20261015",
       "path": "docs/Petri-Desktop-Evaluation-Report-2026-10-15.md",
       "kind": "audit",
