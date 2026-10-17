@@ -54,7 +54,8 @@
         "test/gen-ui-theme-tokens.test.mjs",
         "test/block166-gen-ui-external-link.test.mjs",
         "test/block166-gen-ui-p2.test.mjs",
-        "test/block166-gen-ui-p3-pentest.test.mjs"
+        "test/block166-gen-ui-p3-pentest.test.mjs",
+        "test/block196-genui-data-binding.test.mjs"
       ],
       "commands": [
         "docs-check"

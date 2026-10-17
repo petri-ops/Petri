@@ -250,14 +250,21 @@ function setupGenUiIpc() {
     const jobId = String((payload && payload.jobId) || '').trim();
     if (!jobId) return { ok: false, code: 'invalid_arguments', message: 'jobId 不能为空' };
     try {
-      const segments = session.filePath.split('/');
+      // 路径分隔符必须两种都切：prepareGenUi 的 filePath 走 realpath，win32 上是反斜杠，
+      // 只切 '/' 会让 conversationId 恒 null → 下面的跨会话校验整体空转（BLOCK-196 补锚时撞出）。
+      const segments = String(session.filePath).split(/[\\/]+/);
       const sessionConversationId = segments.find((segment) => segment.indexOf('conv_') === 0 || segment.indexOf('conv-') === 0) || null;
       const adb = require('../db').getAsyncDatabase();
       const job = await adb.prepare(
         'SELECT id, user_id, conversation_id, tool_id, status, result_json FROM tool_jobs WHERE id = ?'
       ).get(jobId);
       if (!job) return { ok: false, code: 'job_not_found', message: '数据源任务不存在' };
-      if (sessionConversationId && job.conversation_id && job.conversation_id !== sessionConversationId) {
+      if (!sessionConversationId) {
+        // 会话文件路径按 <ws>/.petri/gen-ui/<conversationId>/<file> 登记，取不到 conv 段=形状异常。
+        // 归属校验不许 fail-open：算不出"属于哪个会话"就等于没法证明"这个 job 属于它"。
+        return { ok: false, code: 'session_scope_unknown', message: '无法确定会话归属，拒绝取数' };
+      }
+      if (job.conversation_id && job.conversation_id !== sessionConversationId) {
         return { ok: false, code: 'cross_conversation', message: '数据源任务不属于本会话' };
       }
       if (job.status !== 'done' || !job.result_json) {
