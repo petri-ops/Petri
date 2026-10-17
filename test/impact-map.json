@@ -3887,10 +3887,12 @@
         "test/block201-settings-baseline.test.mjs",
         "test/block199-config-drift.test.mjs",
         "test/block199-config-compat.test.mjs",
-        "test/spawn-agent-tools.test.mjs",
         "frontend/src/lib/settingsSearch.test.ts",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/NetworkProxyPanel.test.tsx",
-        "frontend/src/components/desktop/DesktopSettingsPanel/sections/RuntimePolicyPanel.test.tsx"
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/RuntimePolicyPanel.test.tsx",
+        "test/block49-spawn-agent-tools.test.mjs",
+        "test/block198-spawn-depth.test.mjs",
+        "test/agent-tool-policy.test.mjs"
       ]
     }
   ]

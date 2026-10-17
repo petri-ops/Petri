@@ -29,3 +29,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-17T14:11:53.415Z -->
 | ✅ BLOCK-183 整包（2026-10-14，用户裁决「行 你启动我来测试看看」，当日立项当日收口；CP-19 收官=总纲 19 包全闭环） | 2026-10-14 | **数据桥 WS 化 completed**：P0 /m/api/ws `data` 信封（七路径白名单 fail-closed+并发上限+超时；loopback 自调既有路由=形状单一真相）+P1 projectionWsData 单连接 WS-first+3 连失败 5min 冷却回退 HTTP；写面/POST/agent 流/终端流零触碰。红绿 8+6+邻域 13/13+tsc 0+test:changed 全绿+探针 allPass（七路径与 HTTP 逐字节同形状，acceptance/block-183/）。抓真=connectOnce 执行器自引用守卫恒假（settled 重构）+存量 streamReconnect 4 红顺手清偿（BLOCK-159 语义未同步，bisect 坐实；固定随机+新语义重写 10/10）。真机过隧道属 riders。 | zcode |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-17T14:51:08.028Z -->
+| ✅ 评估研判批（2026-10-15，用户三轮裁决「全方位审理核对」→「蓝图说明白一点」+「后端 harness 与前端界面同类型比较…确定到每个细节点」） | 2026-10-15 | **三份 reference 施工图 + 阶段视图落档 canonical（无 active 工作包）**：评估报告（11 棱镜评分卡/§5 五阶段队列与出口判据/§0 七级追踪链/§5.3 注记制=进度真值）+ 设置差距分析（三方设置全量+矩阵+三阶段）+ 全层对标蓝图（后端 harness 12 层 + 前端界面 12 层逐层三方对照 + 学/借/不做/自强化四类筛子）；BLOCK-184 立项文书 planned（等发令）；队列新增 1z+2a~2e 六行；DOC-REGISTRY 342 + README 209-212；docs/hygiene 双 PASS；三反转发现=loop 工程四件套/成果面/设计棘轮领先两家 | zcode |
