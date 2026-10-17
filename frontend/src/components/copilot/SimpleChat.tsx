@@ -151,6 +151,8 @@ import { Icon } from '@/components/icons/Icon';
 // 需要稳定引用；`?? []` 每次新建会击穿 memo）。
 const EMPTY_ROW_SEGMENTS: ConversationSegment[] = [];
 import { getBridge } from '@/lib/desktopBridge';
+import { matchesCombo } from '@/lib/appKeymap';
+import { useKeymapSafe } from '@/lib/appKeymapContext';
 import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 import { INITIAL_NAV_STATE, stepHistoryNavigation } from './chatHistoryNav';
 import {
@@ -510,12 +512,16 @@ export function SimpleChat({
   // （vision_configured || 渠道视觉能力）单源在 attachments.ts 的 imageInputAllowed。
   const chatVisionCapable = Array.isArray(activeModel?.capabilities)
     && activeModel.capabilities.includes('vision');
-  // Ctrl+T 循环档位（对齐 ZCode 习惯）；未声明能力的渠道不响应
+  // Ctrl+T 循环档位（对齐 ZCode 习惯）；未声明能力的渠道不响应。
+  // BLOCK-200 P1：组合串读键位注册表（`thinking.cycle`），**能力门与局部生效条件留在这里**——
+  // 键位是全局事实，「这条渠道有没有 reasoning」是局部语义（见 plan §1 分工）。
+  const { bindings: keymapBindings } = useKeymapSafe();
+  const thinkingCycleCombo = keymapBindings['thinking.cycle'];
   useEffect(() => {
     if (!reasoningSupported) return undefined;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
-      if (e.key.toLowerCase() !== 't') return;
+      if (e.repeat) return;
+      if (!matchesCombo(thinkingCycleCombo, e)) return;
       e.preventDefault();
       setThinkingLevel((current) => {
         const next = nextThinkingLevel(current);
@@ -525,7 +531,7 @@ export function SimpleChat({
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [reasoningSupported, projectId, conversationId]);
+  }, [reasoningSupported, projectId, conversationId, thinkingCycleCombo]);
 
   // UI-305 P0.2 — summary retry 状态簇（原 297-303 的 5 个 useState +
   // retrySummary useCallback + UX1H 冷却 tick effect）整簇抽入 useSummaryRetry，

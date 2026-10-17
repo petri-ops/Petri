@@ -6,6 +6,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import type { IconName } from '@/components/icons/Icon';
 import { formatRelativeTime } from '@/lib/format';
+import { KEYMAP_COMMANDS, formatCombo, matchesCombo } from '@/lib/appKeymap';
+import { useKeymapSafe } from '@/lib/appKeymapContext';
 import type { ConversationSummary } from '@/components/copilot/copilotConversationsClient';
 
 // ---- Types ----
@@ -58,16 +60,9 @@ export interface UseCommandPaletteOptions {
 }
 
 // ---- Shortcuts section ----
-interface ShortcutItem {
-  keys: string;
-  label: string;
-}
-
-const SHORTCUTS: ShortcutItem[] = [
-  { keys: '⌘K', label: '命令面板' },
-  { keys: '⌘N', label: '新建对话' },
-  { keys: '⌘/', label: '显示帮助' },
-];
+// 此前的 `SHORTCUTS` 是一份**硬编码显示清单**（⌘K/⌘N/⌘/），其中 ⌘N 与 ⌘/ 全仓没有对应
+// 处理器（`onShowHelp` 还是个从未被使用的死 prop）——面板向用户承诺了两个不存在的快捷键。
+// BLOCK-200 P1 起本节由键位注册表派生：**显示的事实与派发的事实同源**，解绑的命令不出现在表里。
 
 // ---- Main component ----
 
@@ -98,6 +93,7 @@ export function CommandPalette({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const { bindings } = useKeymapSafe();
 
   // Reset state when opening
   useEffect(() => {
@@ -171,28 +167,28 @@ export function CommandPalette({
           label: cmd.label,
           description: cmd.description,
           icon: cmd.icon,
-          shortcut: cmd.shortcut,
+          // 徽章读**生效键位**（与派发同源）；非可绑定命令仍可用调用方给的文本
+          shortcut: formatCombo(bindings[cmd.id]) || cmd.shortcut,
           action: cmd.action,
         });
       });
     }
 
-    // Shortcuts section (only when no query)
+    // Shortcuts section (only when no query)——由键位注册表派生，不再抄一份显示清单
     if (!q && items.length > 0) {
-      items.push({ type: 'header', label: '快捷键' });
-      SHORTCUTS.forEach((s) => {
-        items.push({
-          type: 'shortcut',
-          id: s.keys,
-          label: s.label,
-          icon: 'key',
-          shortcut: s.keys,
+      const rows = KEYMAP_COMMANDS
+        .map((command) => ({ id: command.id, label: command.label, keys: formatCombo(bindings[command.id]) }))
+        .filter((row) => row.keys);
+      if (rows.length > 0) {
+        items.push({ type: 'header', label: '快捷键' });
+        rows.forEach((row) => {
+          items.push({ type: 'shortcut', id: row.id, label: row.label, icon: 'key', shortcut: row.keys });
         });
-      });
+      }
     }
 
     return items;
-  }, [query, commands, recentConversations, maxRecent, onSelectConversation]);
+  }, [query, commands, recentConversations, maxRecent, onSelectConversation, bindings]);
 
   // Reset selection when items change
   useEffect(() => {
@@ -379,17 +375,22 @@ export function useCommandPalette(): UseCommandPaletteReturn {
   const close = useCallback(() => setIsOpen(false), []);
   const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
 
-  // Global Cmd+K handler
+  // 面板开合键读**键位注册表**（此前此处写死 `e.key === 'k'`，与徽章文本是两份真相：
+  // 用户在设置页改了键，这里不会跟着变）。BLOCK-200 P1。
+  const { bindings } = useKeymapSafe();
+  const toggleCombo = bindings['palette.toggle'];
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      if (e.repeat) return; // 长按连发不该反复开合
+      if (matchesCombo(toggleCombo, e)) {
         e.preventDefault();
         toggle();
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [toggle]);
+  }, [toggle, toggleCombo]);
 
   return { isOpen, open, close, toggle };
 }

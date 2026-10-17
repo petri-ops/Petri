@@ -36,6 +36,8 @@ module.exports = async function registerRoutes(app) {
     ['SSH projects', () => require('./ssh-projects')(app)],
     ['Knowledge', () => require('./knowledge')(app)],
     ['Feature flags', () => require('./feature-flags')(app)],
+    // BLOCK-200 P0-1：键位读写面（写侧过 shared-config 注册表守卫，拒则 400+diagnostics）
+    ['Keymap', () => require('./keymap')(app)],
     // Must precede Harness: harness.js retains the legacy
     // GET /api/loop/:loopRunId catch-all, which would otherwise swallow
     // /runs, /session-summary, /iterations, /recovery, etc.

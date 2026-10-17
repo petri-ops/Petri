@@ -1,0 +1,44 @@
+✔ 注册表自洽：每个键有族、每个族有键（不留空壳族或孤儿键） (0.5137ms)
+✖ 声明 ui=settings 的族必须有真实设置面承载（防"注册表说有面，其实没有"） (1.6251ms)
+✔ 每族写路径都能拒绝非法输入（4xx），而不是静默或冒 500 (0.5946ms)
+✔ RUNTIME_POINTS 与注册表接点集合双向相等（report-guard 那类隐藏开关不得复发） (0.4141ms)
+✔ 接点 envKey 两处同源（注册表别名不能与代码实际读取的变量漂移） (0.407ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 4
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 84.9626
+
+✖ failing tests:
+
+test at test\block199-config-drift.test.mjs:48:1
+✖ 声明 ui=settings 的族必须有真实设置面承载（防"注册表说有面，其实没有"） (1.6251ms)
+  AssertionError [ERR_ASSERTION]: UI_CARRIERS 与注册表族集合失配
+  + actual - expected
+  
+    [
+      'cost-cap',
+      'decision-points',
+      'feature-flags',
+      'generation',
+  +   'keymap',
+  +   'reasoning'
+    ]
+  
+      at TestContext.<anonymous> (file:///D:/1.WorkDir/petri/test/block199-config-drift.test.mjs:56:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ 'cost-cap', 'decision-points', 'feature-flags', 'generation', 'keymap', 'reasoning' ],
+    expected: [ 'cost-cap', 'decision-points', 'feature-flags', 'generation' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

@@ -4958,3 +4958,11 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **验证**：前端契约测 `frontend/src/themes/ThemeProvider.sync.test.tsx` 4/4（成功回到 ok·网络异常 failed 且本端不回滚·HTTP 非 2xx 带状态码·失败后再次成功能翻回 ok 不留陈旧告警）+ 既有 `ThemeProvider.test.tsx` 同批 9/9；后端侧由 `test/block199-config-drift.test.mjs` 钉"声明 ui=settings 的族必须有真实承载文件"。
 - **随批**：`prefsSync` 的类型刻意**不占导出面**（无消费方的导出即死代码，`quality:knip:check` 棘轮新增即红；等设置面真的接上再导出）。
 - **待办（收口后下一批）**：设置面消费 `prefsSync`（失败横幅或就近提示）→ 9223 测试实例自动探针出图取证 → 再转 `verified`。
+
+## UI-514: 应用级命令键位单源与派发（2026-10-17 in_progress，BLOCK-200）
+
+- **变化面**：命令面板的快捷键徽章与「快捷键」小节不再是硬编码文本，而由键位注册表派生；`palette.toggle`（原 `e.key==='k'` 写死）、`nav-*`（原本**根本没有派发器**）、指挥中心独立窗（原 App 根写死 Ctrl/Cmd+Shift+C）三处改读同一份生效键位；工作区面板 `Mod+\`` / `Mod+Shift+B` 与思考档位 `Mod+T` 的组合串也从注册表取（局部门条件留在组件内）。
+- **为什么需要实码纠正**：`useAppCommands.ts:71` 的 `nav-home` 自挂 `⌘N` 徽章、`CommandPalette.tsx:66` 另列 `⌘N 新建对话` 与 `⌘/ 显示帮助`，而全仓 grep 无任何 Cmd+N / Cmd+/ 处理器（`onShowHelp` 是从未被使用的死 prop）——**面板一直在向用户承诺不存在的快捷键**。本批起徽章只可能来自真实生效的键位，解绑的命令不出现在列表里；两条虚假条目随批消失。
+- **验证**：`frontend/src/lib/appKeymap.test.ts` 9/9（语法规范化·裸键一律拒·畸形串拒·往返恒等·事件↔匹配互逆·覆盖/解绑/坏值回落·默认集合零冲突·显示双平台形态）；`appKeymap.drift.test.ts` 5/5（命令 id 集合与注册表**双向相等**·默认值全部过后端写侧守卫·规范化产物必过守卫·两侧拒绝集合一致）；`appKeymapContext.test.tsx` 6/6（**改了键位派发跟着变**：按新组合触发、按旧默认不触发·写成功·写 400+diagnostics 显式 failed 并回滚·网络异常可见·无 Provider 回落默认不崩·冲突点名双方）；`useWorkspacePanelShortcuts.test.tsx` 3/3（按平台如实分档：Win 上 Cmd 不触发、mac 形态 Cmd 触发）；后端 `test/block200-keymap-store.test.mjs` 8/8；邻域回归 `TitleBar`/`ResultAgentComposer`/`RightFileTree.shortcuts`/`WorkspaceFilePreview` 50/50 未受扰。
+- **随批（测量面自纠）**：键位语法守卫正则初版 `(?:Mod|Ctrl|Alt|Shift)\+)+` 放行 `Mod+Mod+K`，被漂移测当场抓出（编解码器拒的串后端却收=垃圾能进盘）→ 收紧为规范序且不重复；`Mod` 语义定为「macOS=Cmd / 其余=Ctrl」，与旧实现"`ctrlKey||metaKey` 一视同仁"是有意的行为收敛，旧测里在 win32 灌 metaKey 的写法随之按平台如实改写（断言比原来更强）。
+- **待办（本批未完）**：键位设置分区（录制/冲突高亮/恢复默认/写失败可见横幅）尚未接入 → 9223 测试实例自动探针出图 → 再转 `verified`。

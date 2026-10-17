@@ -59,7 +59,36 @@ const CONFIG_FAMILIES = Object.freeze({
     precedence: ['env', 'file'],
     envTruth: 'numeric',
   },
+  // —— BLOCK-200 两族（地基的第一个真实新消费者）——
+  // keymap：键位是渲染进程事实（离开 KeyboardEvent 组合串无意义），故**无 env 层**——
+  // env 覆盖键位会造出"设置页显示 A、实际按 B"的第三种真相；文件即唯一用户覆盖层。
+  'keymap': {
+    store: 'file:keymap.json#bindings',
+    precedence: ['file', 'default'],
+    envTruth: null,
+  },
+  // reasoning：档位默认值与协议映射（此前硬编码在 thinking-level.js 的 switch 里）。
+  'reasoning': {
+    store: 'file:ai-settings.json#reasoning',
+    precedence: ['file', 'default'],
+    envTruth: null,
+  },
 });
+
+/**
+ * 键位组合串语法（`Mod+K` / `Mod+Shift+B` / `Ctrl+Tab`）。
+ * `Mod`=Mac 用 Cmd、其他平台用 Ctrl（跨平台键位的唯一可移植写法）。
+ * **强制至少一个修饰键**：裸键绑定会在输入框里劫持打字，属不可接受默认（D-1 敏感项最保守）。
+ * 语法的**权威实现是 `frontend/src/lib/appKeymap.ts` 的编解码器**（它才需要解析事件）；
+ * 本表正则只是写侧的边界守卫，二者由 `frontend/src/lib/appKeymap.drift.test.ts` 对账
+ * （串行化产物必须过本正则 + 编解码器拒的畸形串本正则也必须拒），沿用
+ * `src/ipc/channels.js` ↔ `preload.js` 字面量副本 + 双向守护测的本仓先例。
+ * **修饰键必须按规范序且不重复**（Mod→Ctrl→Alt→Shift）：早前写成 `(?:Mod|Ctrl|Alt|Shift)\+)+`
+ * 会放行 `Mod+Mod+K`，被该漂移测当场抓出——编解码器拒的串后端却收=垃圾能进盘。
+ * 存储侧只可能是编解码器的规范化产物，按规范序收紧无副作用。
+ */
+const KEYMAP_COMBO_RE = /^(?:Mod(?:\+Ctrl)?(?:\+Alt)?(?:\+Shift)?|Ctrl(?:\+Alt)?(?:\+Shift)?|Alt(?:\+Shift)?|Shift)\+(?:[A-Za-z0-9]|F(?:[1-9]|1[0-2])|Tab|Enter|Escape|Backspace|Delete|Home|End|PageUp|PageDown|Space|Up|Down|Left|Right|[,./\-;'=`\[\]\\])$/;
+const KEYMAP_COMBO_PATTERN = KEYMAP_COMBO_RE.source;
 
 /**
  * 键注册表。字段：
@@ -145,6 +174,38 @@ const CONFIG_KEYS = Object.freeze([
     type: 'number', domain: { minExclusive: 0, round: 2 }, envKeys: ['PETRI_TASK_COST_CAP_CNY'],
     aliases: [], mutable: true, ui: 'settings', dropInvalid: 'to-null',
   },
+  // —— 键位（BLOCK-200 P0-1；一个应用级命令一条，值为规范化组合串）——
+  // **逐命令显式登记而不用 `<command>` 占位**：占位形会让 `nav-typo` 这类未知命令 id 静默进盘
+  // （写侧「未知键拒绝」这条地基能力对键位族就空转了）。命令 id 的真相在前端命令源
+  // （`frontend/src/lib/appKeymap.ts` 的 `KEYMAP_COMMANDS`），两侧集合等价由
+  // `appKeymap.drift.test.ts` 双向钉——与 `src/ipc/channels.js` ↔ `preload.js` 同一先例。
+  ...['palette.toggle', 'nav-home', 'nav-projects', 'nav-knowledge', 'nav-review', 'nav-settings',
+    'command-center.popOut', 'workspace.toggleTerminal', 'workspace.toggleRight', 'thinking.cycle',
+  ].map((id) => ({
+    key: `keymap.${id}`, family: 'keymap', path: id,
+    type: 'string', domain: { pattern: KEYMAP_COMBO_PATTERN }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  })),
+  // —— 推理档位（BLOCK-200 P0-5；此前硬编码在 thinking-level.js:38/41/44/73-85）——
+  {
+    key: 'reasoning.defaultLevel', family: 'reasoning', path: 'defaultLevel',
+    type: 'string', domain: { oneOf: ['off', 'standard', 'high'] }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
+    // Anthropic 要求 budget_tokens ≥1024 且 < max_tokens；上限取模型侧已知最大窗口，防"设了发不出去"
+    key: 'reasoning.anthropicHighBudgetTokens', family: 'reasoning', path: 'anthropicHighBudgetTokens',
+    type: 'number', domain: { min: 1024, max: 128000, integer: 'floor' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
+    // 中性档位→上游实参的映射。值词表按协议不同，**合法集合的真相在 reasoning-defaults.js**
+    // （本表只声明形状，与"阈值数值受校准门约束"同一分工），写侧由 helper 逐协议校验。
+    key: 'reasoning.mapping.<protocol>.<tier>', family: 'reasoning',
+    path: 'mapping.<protocol>.<tier>',
+    type: 'string', domain: { pattern: '^(?:none|(?:reasoning_effort|enable_thinking|thinking):[a-zA-Z0-9]+)$' },
+    envKeys: [], aliases: [], mutable: true, ui: 'settings',
+  },
 ]);
 
 const KEY_INDEX = new Map(CONFIG_KEYS.map((entry) => [entry.key, entry]));
@@ -153,12 +214,24 @@ function findKeyEntry(key) {
   return KEY_INDEX.get(key) || null;
 }
 
-/** 按族+族内存储路径查键声明（`point.<id>.threshold` 这类通配项参与匹配）。 */
+/** 按族+族内存储路径查键声明（`<x>` 占位段参与匹配，段数必须一致）。 */
 function findEntryByPath(family, storagePath) {
+  const actual = String(storagePath || '').split('.');
   for (const entry of CONFIG_KEYS) {
     if (entry.family !== family) continue;
     if (entry.path === storagePath) return entry;
-    if (entry.path.includes('<point>') && storagePath.endsWith(entry.path.slice(entry.path.lastIndexOf('.') + 1))) return entry;
+    const pattern = entry.path.split('.');
+    if (pattern.length !== actual.length) continue;
+    let matched = true;
+    for (let i = 0; i < pattern.length; i++) {
+      // 占位段（`<point>`/`<command>`/`<protocol>`/`<tier>`）匹配任意非空实际段
+      if (pattern[i].startsWith('<') && pattern[i].endsWith('>')) {
+        if (actual[i] === '') { matched = false; break; }
+        continue;
+      }
+      if (pattern[i] !== actual[i]) { matched = false; break; }
+    }
+    if (matched) return entry;
   }
   return null;
 }
@@ -187,6 +260,11 @@ function validateValue(entry, raw) {
     if (entry.domain && Array.isArray(entry.domain.oneOf) && !entry.domain.oneOf.includes(raw)) {
       return { ok: false, code: DIAGNOSTIC_CODES.NOT_ALLOWED, message: `${entry.key} 只接受 ${entry.domain.oneOf.join('/')}` };
     }
+    // pattern 是**写侧边界守卫**（语法权威在别处的编解码器，两由漂移测对账）；此处不建全局 RegExp
+    // 以免 `lastIndex` 状态污染，且域外串一律 NOT_ALLOWED 而非静默丢。
+    if (entry.domain && typeof entry.domain.pattern === 'string' && !new RegExp(entry.domain.pattern).test(raw)) {
+      return { ok: false, code: DIAGNOSTIC_CODES.NOT_ALLOWED, message: `${entry.key} 语法不符（${entry.domain.pattern}）` };
+    }
     return { ok: true, normalized: raw };
   }
   return { ok: false, code: DIAGNOSTIC_CODES.TYPE_MISMATCH, message: `${entry.key} 声明了未知类型 ${entry.type}` };
@@ -198,7 +276,11 @@ function validateValue(entry, raw) {
  */
 function resolveEnvEntry(family, rawEnv) {
   if (rawEnv == null || rawEnv === '') return null;
-  const truth = (CONFIG_FAMILIES[family] || {}).envTruth;
+  const spec = CONFIG_FAMILIES[family] || {};
+  const truth = spec.envTruth;
+  // 无 env 层的族（keymap/reasoning）不接受环境变量干预：否则 '1' 会被下面解释成布尔真值，
+  // 造出"设置页显示 A、实际按 B"的第三种真相。
+  if (!(spec.precedence || []).includes('env')) return null;
   if (truth === 'numeric') {
     const n = Number(rawEnv);
     return Number.isFinite(n) ? { layer: 'env', value: n } : null;
@@ -304,6 +386,8 @@ module.exports = {
   CONFIG_FAMILIES,
   CONFIG_KEYS,
   DIAGNOSTIC_CODES,
+  KEYMAP_COMBO_PATTERN,
+  KEYMAP_COMBO_RE,
   findKeyEntry,
   findEntryByPath,
   validateValue,

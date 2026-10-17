@@ -2,6 +2,7 @@
 // 路由出口 + 首次启动引导
 
 import React, { useEffect, lazy, Suspense } from 'react';
+
 // BLOCK-22 P4.6: DEV ONLY — manual file-open testing entry via window.__petriDispatchOpenFile
 // Production build: React.lazy + NODE_ENV=production → tree-shakeable, zero runtime cost
 const PetriOpenFileDevBridge = lazy(() =>
@@ -19,6 +20,8 @@ import { BackendStatusProvider } from '@/components/backend/BackendStatusProvide
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { getBridge } from '@/lib/desktopBridge';
 import { CommandPalette, useCommandPalette } from '@/components/copilot/CommandPalette';
+// BLOCK-200 P1 — 键位注册表运行时面（Provider + App 级派发器）
+import { KeymapProvider, useAppKeymapDispatcher } from '@/lib/appKeymapContext';
 import { useAppCommands } from '@/components/copilot/useAppCommands';
 import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
 // BLOCK-42 — pending-scroll 全局 Provider（见 AppShell 内注释）
@@ -84,6 +87,22 @@ function AppShell(): React.ReactElement {
     navigate: navigateForPalette,
     currentProjectId,
   });
+  // BLOCK-200 P1 — App 级键位派发器：读键位注册表执行命令源里的 nav-* 动作，
+  // 以及指挥中心独立窗（原 App 根里写死 Ctrl/Cmd+Shift+C 的那处Effect已收编到这里）。
+  // 挂在这里而非根组件：命令源在此、且弹出窗（/window/*）不挂本壳，路由门语义与迁移前一致。
+  const keymapActions = React.useMemo<Record<string, () => void>>(() => {
+    const actions: Record<string, () => void> = {};
+    for (const command of commands) {
+      if (command.id.startsWith('nav-') && typeof command.action === 'function') {
+        actions[command.id] = command.action;
+      }
+    }
+    actions['command-center.popOut'] = () => {
+      void getBridge('windowManager')?.popOut('command-center');
+    };
+    return actions;
+  }, [commands]);
+  useAppKeymapDispatcher(keymapActions);
   const panels = useWorkspacePanelsContext();
   // (/project/:id/results) 与其余路由维持原状。归一化尾斜杠后取 :id 后的子段判定。
   // BLOCK-62 P0 — 列体化壳：仅 ProjectWorkspace 路由（/project/:id/*）走「列容器
@@ -219,19 +238,9 @@ export default function App(): React.ReactElement {
     document.body.style.boxSizing = 'border-box';
   }, []);
 
-  // BLOCK-64 P2-d — 指挥中心快捷键入口（Ctrl/Cmd+Shift+C）。仅主窗生效；
-  // popOut 语义 = 单例窗已开即聚焦（同内容禁双开契约），重复按无害。
-  useEffect(() => {
-    if (isWindowSurface) return undefined;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (!(e.ctrlKey || e.metaKey) || !e.shiftKey) return;
-      if (e.key.toLowerCase() !== 'c') return;
-      e.preventDefault();
-      void getBridge('windowManager')?.popOut('command-center');
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isWindowSurface]);
+  // BLOCK-64 P2-d / BLOCK-200 P1 — 指挥中心快捷键入口改由**键位注册表**派发
+  // （此前此处写死 Ctrl/Cmd+Shift+C，用户改了设置页不会跟着变）。派发器已上收到
+  // AppShell（命令源在那里），弹出窗走上面的 WindowShell 分支提前返回，路由门语义不变。
 
   // BLOCK-59 P1 — 独立窗（弹出结果窗/终端窗/指挥中心）加载同一 SPA 的
   // /window/* 路由：只挂 WindowShell 级 chrome，不挂主窗 Provider 树
@@ -257,7 +266,10 @@ export default function App(): React.ReactElement {
       <ProjectionLinkBanner />
       <AppRailProvider>
         <WorkspacePanelsProvider>
-          <AppShell />
+          {/* BLOCK-200 P1 — 键位注册表：命令面板徽章、App 级派发器、工作区/档位快捷键同源 */}
+          <KeymapProvider>
+            <AppShell />
+          </KeymapProvider>
         </WorkspacePanelsProvider>
       </AppRailProvider>
     </BackendStatusProvider>

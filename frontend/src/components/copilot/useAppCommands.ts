@@ -67,8 +67,9 @@ export function useAppCommands({ enabled, navigate, currentProjectId: _currentPr
     const go = (id: string, label: string, description: string, icon: string, to: string, shortcut?: string) =>
       items.push({ id, label, description, icon, shortcut, category: 'command', action: () => navigate(to) });
 
-    // ① 导航（6）
-    go('nav-home', '欢迎页 · 新对话', '回到欢迎页并开始新对话', 'plus', '/', '⌘N');
+    // ① 导航（6）——键位徽章不写在这里：由 `appKeymap` 注册表派生（BLOCK-200 P1，
+    // 此前此处硬编码 '⌘N' 而全仓没有 Cmd+N 处理器，徽章是装饰）。
+    go('nav-home', '欢迎页 · 新对话', '回到欢迎页并开始新对话', 'plus', '/');
     go('nav-projects', '项目库', '全部分析项目', 'bar-chart', '/projects');
     go('nav-knowledge', '知识空间', '知识与资料台', 'message-circle', '/knowledge');
     go('nav-extensions', '扩展中心', '插件 / 技能 / MCP 货架', 'zap', '/extensions');
