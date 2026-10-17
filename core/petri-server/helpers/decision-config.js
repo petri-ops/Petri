@@ -30,6 +30,9 @@ const RUNTIME_POINTS = {
   // BLOCK-173 CP-10 — 转正：defaultOn=true（无 stored/env 配置时默认启用）。
   // env '0' 杀开关与设置页显式关仍最高优先。
   'tool-route': { label: '工具两跳预路由', enabledDefault: false, defaultOn: true, envKey: 'PETRI_JEV_TOOL_ROUTE' },
+  // BLOCK-199 P4② — report-guard 此前是注册表外的隐藏开关（只能靠 env 且设置页不可见不可持久化）。
+  // 纳入后语义不变：enabledDefault=false（默认零出站零行为变化），env 0/1 照旧，多出的能力是设置页可显式开并落盘。
+  'report-guard': { label: '子智能体汇报门（P2 试点）', enabledDefault: false, envKey: 'PETRI_JEV_REPORT_GUARD' },
 };
 
 function configPath() {

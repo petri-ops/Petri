@@ -16,8 +16,16 @@
 'use strict';
 
 const judgeCore = require('./judge-core');
+const decisionConfig = require('./decision-config');
 
 function isReportGuardEnabled() {
+  // BLOCK-199 P4② — 启用判定接配置中心（env 仍最高优先、默认关语义一字未改）：
+  // 原状只认 PETRI_JEV_REPORT_GUARD=1 ⇒ 设置页看不见也关不掉；现纳入 RUNTIME_POINTS。
+  if (process.env.PETRI_JEV_REPORT_GUARD === '0') return false;
+  try {
+    const runtime = decisionConfig.getPointRuntime('report-guard');
+    if (runtime) return runtime.enabled === true;
+  } catch { /* 配置面故障回退 env 判定（与门本身 fail-open 同向） */ }
   return process.env.PETRI_JEV_REPORT_GUARD === '1';
 }
 
