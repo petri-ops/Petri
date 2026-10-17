@@ -1,6 +1,6 @@
 {
   "schema": "petri-competitiveness-anchor-baseline/v1",
-  "updatedAt": "2026-10-17T03:28:16.696Z",
+  "updatedAt": "2026-10-17T05:09:42.711Z",
   "tiers": "all",
   "points": [
     {
@@ -65,8 +65,14 @@
     },
     {
       "id": "1.1-prompt-layering",
-      "state": "unanchored",
-      "anchors": []
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block198-prompt-layering.test.mjs",
+          "status": "pass"
+        }
+      ]
     },
     {
       "id": "1.1-context-contract",
@@ -232,8 +238,14 @@
     },
     {
       "id": "3.3-recursive-tree",
-      "state": "unanchored",
-      "anchors": []
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block198-spawn-depth.test.mjs",
+          "status": "pass"
+        }
+      ]
     },
     {
       "id": "4.4-dynamic-guard",
@@ -297,13 +309,25 @@
     },
     {
       "id": "4.4-cost-breaker",
-      "state": "unanchored",
-      "anchors": []
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block176-w6-contract.test.mjs",
+          "status": "pass"
+        }
+      ]
     },
     {
       "id": "4.4-worktree-safety",
-      "state": "unanchored",
-      "anchors": []
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block176-checkpoint.test.mjs",
+          "status": "pass"
+        }
+      ]
     },
     {
       "id": "5.5-stop",
@@ -530,8 +554,14 @@
     },
     {
       "id": "7.7-split-compare",
-      "state": "unanchored",
-      "anchors": []
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "frontend",
+          "path": "frontend/src/components/workspace-panels/ArtifactPinPane.ratio.test.tsx",
+          "status": "pass"
+        }
+      ]
     },
     {
       "id": "8.8-data-bridge-ws",
@@ -584,8 +614,14 @@
     },
     {
       "id": "8.8-delegation-realtime",
-      "state": "unanchored",
-      "anchors": []
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block176-w6-contract.test.mjs",
+          "status": "pass"
+        }
+      ]
     },
     {
       "id": "8.8-relay-topology",

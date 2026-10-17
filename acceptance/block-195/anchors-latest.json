@@ -1,8 +1,8 @@
 {
   "schema": "petri-competitiveness-anchors/v1",
   "scoring": "score = 5 × anchored_green 点位数 ÷ 点位数（保留一位小数）",
-  "at": "2026-10-17T03:28:16.696Z",
-  "elapsedMs": 128339,
+  "at": "2026-10-17T05:09:42.711Z",
+  "elapsedMs": 132395,
   "tiers": "all",
   "devStack": 9222,
   "dimensions": [
@@ -10,8 +10,8 @@
       "id": 1,
       "name": "推理循环韧性",
       "inferred20261012": 3.5,
-      "measured": 4.3,
-      "delta": 0.8,
+      "measured": 5,
+      "delta": 1.5,
       "points": [
         {
           "id": "1-steer",
@@ -107,12 +107,20 @@
         },
         {
           "id": "1-prompt-layering",
-          "claim": "D2 系统提示 cache 友好分层（静态前缀+动态尾）",
+          "claim": "D2 系统提示 cache 友好分层（静态前缀跨 context 逐字节恒定 + 动态段只追加其后 + 模板缓存命中/失效计量真实发生）",
           "derivesFrom": "§2 D2",
-          "anchors": [],
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block198-prompt-layering.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block198-prompt-layering.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
           "envBlockedCount": 0,
-          "state": "unanchored",
-          "note": "无机械锚"
+          "state": "anchored-green",
+          "note": null
         },
         {
           "id": "1-context-contract",
@@ -141,9 +149,9 @@
       ],
       "summary": {
         "total": 7,
-        "green": 6,
+        "green": 7,
         "red": 0,
-        "unanchored": 1
+        "unanchored": 0
       }
     },
     {
@@ -230,7 +238,7 @@
         },
         {
           "id": "2-ann-layering",
-          "claim": "D3 记忆分层与 ANN 索引质量基线",
+          "claim": "D3 记忆分层与 ANN 质量基线：**真缺失**——`memory-vectors.js:111-127` 是暴力全表 JS cosine（无 ANN 索引；BLOCK-94 已裁决不引入 sqlite-vec），全仓 `recall|MRR|nDCG` 零命中（无召回质量基线），分层只有事实雏形（`agent-runner.js:434-448` 项目记忆注入 + user-facts + chat-summary）。**保持无锚并转候选 C-30**",
           "derivesFrom": "§2 D3",
           "anchors": [],
           "envBlockedCount": 0,
@@ -266,8 +274,8 @@
       "id": 3,
       "name": "编排与多智能体",
       "inferred20261012": 2.5,
-      "measured": 4.3,
-      "delta": 1.8,
+      "measured": 5,
+      "delta": 2.5,
       "points": [
         {
           "id": "3-concurrency-config",
@@ -394,27 +402,35 @@
         },
         {
           "id": "3-recursive-tree",
-          "claim": "D5 递归多级派生（子生孙）实跑链",
+          "claim": "D5 有界多级派生判定链（maxDepth=1 维持子不可再生子；放开到 3 时 1 代子可再生孙；父链代数实算越界 spawn_depth_exceeded）——端到端实跑派发链未锚、留观测",
           "derivesFrom": "§2 D5 行业形态「递归树」",
-          "anchors": [],
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block198-spawn-depth.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block198-spawn-depth.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
           "envBlockedCount": 0,
-          "state": "unanchored",
-          "note": "无机械锚"
+          "state": "anchored-green",
+          "note": null
         }
       ],
       "summary": {
         "total": 7,
-        "green": 6,
+        "green": 7,
         "red": 0,
-        "unanchored": 1
+        "unanchored": 0
       }
     },
     {
       "id": 4,
       "name": "治理与信任",
       "inferred20261012": 3,
-      "measured": 3.6,
-      "delta": 0.6,
+      "measured": 5,
+      "delta": 2,
       "points": [
         {
           "id": "4-dynamic-guard",
@@ -510,28 +526,44 @@
         },
         {
           "id": "4-cost-breaker",
-          "claim": "D11 成本硬熔断",
+          "claim": "D11 成本上限触发诚实收尾（cost_cap_exceeded 事件 + 停止调用工具的 system 指令；**提示级非强制中止**，硬 break 未实现→候选）",
           "derivesFrom": "§2 D11",
-          "anchors": [],
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block176-w6-contract.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block176-w6-contract.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
           "envBlockedCount": 0,
-          "state": "unanchored",
-          "note": "无机械锚"
+          "state": "anchored-green",
+          "note": null
         },
         {
           "id": "4-worktree-safety",
-          "claim": "D10 工作树安全网快照原语",
+          "claim": "D10 工作树安全网快照原语（workspace-checkpoint：临时索引 read-tree/write-tree/commit-tree 零副作用、捕获未跟踪文件 + 回滚）",
           "derivesFrom": "§2 D10",
-          "anchors": [],
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block176-checkpoint.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block176-checkpoint.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
           "envBlockedCount": 0,
-          "state": "unanchored",
-          "note": "无机械锚"
+          "state": "anchored-green",
+          "note": null
         }
       ],
       "summary": {
         "total": 7,
-        "green": 5,
+        "green": 7,
         "red": 0,
-        "unanchored": 2
+        "unanchored": 0
       }
     },
     {
@@ -645,7 +677,7 @@
         },
         {
           "id": "5-slash-execute",
-          "claim": "D15 斜杠即执行（chip v2 结构化）",
+          "claim": "D15 斜杠即执行：**部分实现**——UI 动作族（new/clear/model/export/compact）在 `SimpleChat.tsx:1306-1365` 确即执行，skill/template 条目仅注入文本模板（`slashSources.ts:8-9` 原文「结构化 chip 注入通道留 v2」）；离线不可锚（要真锚须把 executeSlashCommand 从 1664 行组件抽成可测单元=产品改动），**保持无锚并转候选 C-29**",
           "derivesFrom": "§2 D15",
           "anchors": [],
           "envBlockedCount": 0,
@@ -819,8 +851,8 @@
       "id": 7,
       "name": "数据资产面",
       "inferred20261012": 3.5,
-      "measured": 3.3,
-      "delta": -0.2,
+      "measured": 4.2,
+      "delta": 0.7,
       "points": [
         {
           "id": "7-viewer-coverage",
@@ -916,27 +948,35 @@
         },
         {
           "id": "7-split-compare",
-          "claim": "D18 canCompare→分屏对照与比例可调",
+          "claim": "D18 分屏对照与比例可调（clampRatio 20–80 + pointer 拖拽 + 键盘 ±5 + localStorage 持久化与坏值回落）**已落地并有测**；残余两点如实登记：`role=\"separator\"`+aria-value* 而非 slider（读屏不播报滑杆值），`viewerRegistry` 的 canCompare 未接进钉住入口（`ResultArtifactShell.tsx:1019` 只按 previewLoading 禁用）",
           "derivesFrom": "§2 D18 分屏固定 60/40",
-          "anchors": [],
+          "anchors": [
+            {
+              "tier": "frontend",
+              "path": "frontend/src/components/workspace-panels/ArtifactPinPane.ratio.test.tsx",
+              "cmd": "npm run test:files --prefix frontend -- src/components/workspace-panels/ArtifactPinPane.ratio.test.tsx",
+              "status": "pass",
+              "tail": null
+            }
+          ],
           "envBlockedCount": 0,
-          "state": "unanchored",
-          "note": "无机械锚"
+          "state": "anchored-green",
+          "note": null
         }
       ],
       "summary": {
         "total": 6,
-        "green": 4,
+        "green": 5,
         "red": 0,
-        "unanchored": 2
+        "unanchored": 1
       }
     },
     {
       "id": 8,
       "name": "协作与多端",
       "inferred20261012": 3,
-      "measured": 3.3,
-      "delta": 0.3,
+      "measured": 4.2,
+      "delta": 1.2,
       "points": [
         {
           "id": "8-data-bridge-ws",
@@ -1015,16 +1055,24 @@
         },
         {
           "id": "8-delegation-realtime",
-          "claim": "CP-16 委托进度事件流回传（替代 5s 轮询）",
+          "claim": "CP-16 委托进度事件流回传（mirrorPeerTaskEvents 订对端 SSE 镜像写本地 task_events，**叠加在 5s 轮询之上=轮询兜底未替代**）",
           "derivesFrom": "§1 dim8 判词「委托 5s 轮询黑盒」",
-          "anchors": [],
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block176-w6-contract.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block176-w6-contract.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
           "envBlockedCount": 0,
-          "state": "unanchored",
-          "note": "无机械锚"
+          "state": "anchored-green",
+          "note": null
         },
         {
           "id": "8-relay-topology",
-          "claim": ">2 节点中继拓扑",
+          "claim": ">2 节点中继拓扑：**真缺失**——`federation-peers.js:31-41,128-158` 是按 baseUrl 平铺 upsert 的点对点直连清单，委托=本端直接 POST 对端；全 `core/` grep `relay|多跳|nextHop|viaPeer|forwardDelegate|hop` 无实义命中，现存联邦测试全是 1 指挥席 + 1 对端拓扑。**保持无锚并转候选 C-31**",
           "derivesFrom": "§1 dim8 + D164 deferred 项",
           "anchors": [],
           "envBlockedCount": 0,
@@ -1034,12 +1082,12 @@
       ],
       "summary": {
         "total": 6,
-        "green": 4,
+        "green": 5,
         "red": 0,
-        "unanchored": 2
+        "unanchored": 1
       }
     }
   ],
-  "average": 4.1,
+  "average": 4.6,
   "belowBar": []
 }
