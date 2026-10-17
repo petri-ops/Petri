@@ -22,6 +22,7 @@ const schema = require('../core/packages/shared-config/config-schema.js');
 // BLOCK-203 W4a：外观落点的**真实**回落链由 helper 给出——doctor 不得自己再猜一遍
 // （自猜就是第五份 data root 知识；这条链本身的合一属 W4b）。
 const userPrefs = require('../core/petri-server/helpers/user-prefs.js');
+const skillPrefs = require('../core/shared-backend/skill-prefs.js');
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 /** 三族的落点文件与其在文件内的"键袋"位置（形状照现状读，不假设统一）。 */
@@ -37,6 +38,10 @@ function storeTargets(env = process.env) {
     { family: 'reasoning', file: path.join(localData, 'ai-settings.json'), bag: 'reasoning', flatten: true },
     // BLOCK-203 W4a 首族：外观三键是**文件根标量**（无 bag），路径直接问落点 helper
     { family: 'user-prefs', file: path.join(userPrefs.resolveDataDir(), 'user-prefs.json'), bag: null, scalarKeys: ['theme', 'fontScale', 'accent'] },
+    // BLOCK-203 W4a P3：技能治理账本有两个语义不同的 key 袋（disabled / uninstalledSources），
+    // 注册表按**文件根绝对路径**登记（`disabled.<id>.at` 这类），故这里整份摊平再诊断
+    // （bag 相对路径会让 `<id>.at` 同时指两个袋子，读起来更糟）。
+    { family: 'skills-prefs', file: skillPrefs.getPrefsFilePath(), flattenRoot: true },
   ];
 }
 
@@ -59,6 +64,9 @@ export function buildReport({ readJson, env = process.env }) {
     report.stores.push({ family: target.family, file: target.file, present: !!doc });
     if (!doc || typeof doc !== 'object') continue;
     const groups = [];
+    if (target.flattenRoot) {
+      groups.push({ bagName: '(file root)', obj: schema.flattenOneLevel(doc) });
+    }
     if (target.scalarKeys) {
       const bag = {};
       for (const k of target.scalarKeys) if (k in doc) bag[k] = doc[k];

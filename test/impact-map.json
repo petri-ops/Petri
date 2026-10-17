@@ -3896,20 +3896,25 @@
       ]
     },
     {
-      "id": "block203-user-prefs",
-      "note": "BLOCK-203 W4a P2 user-prefs 收编：schema 加 user-prefs 族（theme/fontScale/accent）+ 落点 helper/route 改由注册表供形状（未知键 400，未知值仍消毒）+ config-transfer 族集合扩该族（导出/导入/按区重置）。前端 themes 面只读消费，无组件改动。",
+      "id": "block203-config-landing",
+      "note": "BLOCK-203 W4a 落点收编（P1+P2 user-prefs、P3 skills-prefs）：schema 加族与「代码侧字段」语义（owner:code 读不报只读噪音/写仍拒）；user-prefs 落点 helper 单源、未知键 400；skills-prefs 按点路径登记、读丢脏条目不连坐、IPC 写面 id 形状 fail-closed；config-transfer 两族扩入（导出/导入/按区重置），drift 门加 NON_HTTP_WRITE_FAMILIES 登记无 HTTP 写面族。",
       "patterns": [
         "core/packages/shared-config/config-schema.js",
         "core/petri-server/helpers/user-prefs.js",
         "core/petri-server/routes/user-prefs.js",
+        "core/shared-backend/skill-prefs.js",
         "core/petri-server/helpers/config-transfer.js",
+        "scripts/block199-config-doctor.mjs",
         "frontend/src/themes/ThemeProvider.tsx",
         "frontend/src/themes/accents.ts",
+        "frontend/src/hooks/useSkillStore.ts",
         "test/block203-*.test.mjs"
       ],
       "tests": [
         "test/block203-user-prefs.test.mjs",
+        "test/block203-skills-prefs.test.mjs",
         "test/user-prefs.test.mjs",
+        "test/block177-governance.test.mjs",
         "test/block201-settings-baseline.test.mjs",
         "test/block199-config-drift.test.mjs",
         "test/block201-config-transfer.test.mjs"

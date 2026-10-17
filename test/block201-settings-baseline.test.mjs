@@ -36,13 +36,16 @@ test('设置分区清单冻结：10 个分区 id（搜索索引必须逐项覆�
   assert.equal(ids.length, 10, `分区数应为 10（实得 ${ids.length}）：${ids.join(', ')}`);
 });
 
-test('配置注册表冻结：9 族 / 38 键（BLOCK-203 加 user-prefs 一族 3 键：theme/fontScale/accent）', () => {
-  // 2026-10-17 显式上调（BLOCK-203 W4a P1）：BLOCK-202 时为 8 族 / 35 键。
-  // 上调理由写在这里而不是只改数字：新增的是 runlist W4a 的 user-prefs 族，
-  // 键域逐字等于 BLOCK-86 的 sanitize 集合（theme/accent 枚举 + fontScale 0.8–1.4）。
-  // 这个数字变化必须伴随 config-transfer 族集合与漂移门登记（下一条断言 + drift 测守着）。
-  assert.equal(Object.keys(schema.CONFIG_FAMILIES).length, 9);
-  assert.equal(schema.CONFIG_KEYS.length, 38);
+test('配置注册表冻结：10 族 / 43 键（BLOCK-203 加 user-prefs 3 键 + skills-prefs 5 键）', () => {
+  // 2026-10-17 两次显式上调（BLOCK-203 W4a）：
+  //  P1+P2：8 族/35 键 → 9 族/38 键（user-prefs：theme/fontScale/accent）；
+  //  P3   ：9 族/38 键 → 10 族/43 键（skills-prefs：version + disabled.<id>.{at,reason}
+  //         + uninstalledSources.<id>.{sourceDir,at}）。
+  // 上调理由写在这里而不是只改数字；数字变化必须伴随 config-transfer 族集合与漂移门登记
+  // （下一条断言 + drift 测守着）。skills-prefs 的写面是 IPC，故 drift 门按
+  // NON_HTTP_WRITE_FAMILIES 登记而不是硬塞一个假的 400 路由。
+  assert.equal(Object.keys(schema.CONFIG_FAMILIES).length, 10);
+  assert.equal(schema.CONFIG_KEYS.length, 43);
 });
 
 test('导出/导入的族集合 == 注册表族集合（漏族/未注册族都算红）', () => {

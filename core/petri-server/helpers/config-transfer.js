@@ -28,6 +28,7 @@ const reasoningConfig = require('./reasoning-config');
 const network = require('./network-config');
 const runtimePolicy = require('./runtime-policy');
 const userPrefs = require('./user-prefs');
+const skillPrefs = require('../../shared-backend/skill-prefs.js');
 
 const CONFIG_TRANSFER_FORMAT = 'petri-config';
 const CONFIG_TRANSFER_VERSION = 1;
@@ -45,6 +46,8 @@ const CONFIG_TRANSFER_FAMILIES = Object.freeze([
   'runtime',
   // BLOCK-203 W4a（runlist W4a 首族：BLOCK-86 的外观偏好落点收编）
   'user-prefs',
+  // BLOCK-203 W4a P3（BLOCK-177 的技能治理帐本；写入面是 IPC，不是 HTTP）
+  'skills-prefs',
 ]);
 
 /** 显式排除清单：随信封回传，防止「以为备份了全部设置」。 */
@@ -112,6 +115,7 @@ function readFamilyOverrides() {
     network: { ...network.readStore() },
     runtime: { ...runtimePolicy.readStore() },
     'user-prefs': { ...userPrefs.readPrefs() },
+    'skills-prefs': { ...skillPrefs.loadPrefs() },
   };
 }
 
@@ -205,6 +209,11 @@ function validateFamily(family, body) {
   if (family === 'network' || family === 'runtime') {
     return schema.commitGuard(family, body, lookup).diagnostics;
   }
+  if (family === 'skills-prefs') {
+    // 该族有代码自写字段（version/at/sourceDir），不能走 commitGuard（会按只读键全拒）；
+    // 校验职责在落点模块的纯函数里（同一个 sanitize 逻辑供读写两侧复用）。
+    return skillPrefs.validatePrefs(body);
+  }
   if (family === 'user-prefs') {
     // **导入比落点写更严，这是刻意的**：落点侧对越界 fontScale 是钳位（BLOCK-86 既有语义，不改），
     // 而导入是整批事务——"夹住后再落盘"会让"导出→手改坏→导入"静默变成另一个值，
@@ -293,6 +302,10 @@ const WRITERS = {
       throw error;
     }
   },
+  'skills-prefs'(body) {
+    // 合并覆盖（导入不删文件里未出现的键）：合并与消毒都在落点模块里，transfer 不复制形状知识
+    skillPrefs.importPrefs(body);
+  },
 };
 
 /**
@@ -331,6 +344,8 @@ const RESETTERS = {
   network() { network.writeStore({}); },
   runtime() { runtimePolicy.writeStore({}); },
   'user-prefs'() { userPrefs.resetPrefs(); },
+  // 重置只清 disabled（用户治理覆盖层），保留 uninstalledSources（重装指针，不是"设置"）
+  'skills-prefs'() { skillPrefs.resetPrefs(); },
 };
 
 /**

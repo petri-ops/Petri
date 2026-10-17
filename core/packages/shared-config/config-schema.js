@@ -97,6 +97,14 @@ const CONFIG_FAMILIES = Object.freeze({
     precedence: ['file', 'default'],
     envTruth: null,
   },
+  // —— BLOCK-203 W4a P3：技能治理偏好（BLOCK-177 的 disabled / uninstalledSources 账本）——
+  // 写入面**不是 HTTP**（IPC `skills:set-disabled`），故漂移门的 400 规则对它不适用，
+  // 由 `NON_HTTP_WRITE_FAMILIES` 单独登记（见 test/block199-config-drift.test.mjs）。
+  'skills-prefs': {
+    store: 'file:skills-prefs.json',
+    precedence: ['file', 'default'],
+    envTruth: null,
+  },
 });
 
 /**
@@ -304,6 +312,32 @@ const CONFIG_KEYS = Object.freeze([
     type: 'string', domain: { oneOf: ['teal', 'blue', 'violet', 'rose', 'amber'] }, envKeys: [], aliases: [],
     mutable: true, ui: 'settings',
   },
+  // —— 技能治理账本（BLOCK-203 W4a P3；原 `shared-backend/skill-prefs.js` 无任何形状校验）——
+  // `disabled.<id>` 不是布尔映射而是对象 `{ at, reason? }`，`uninstalledSources.<id>` 并存
+  // `{ sourceDir, at }`。`findEntryByPath` 只寻址标量 ⇒ 按**点路径**逐字段登记，
+  // 读取侧用 `flattenOneLevel` 摊平后诊断。
+  // `owner:'code'` = 代码自写字段：读侧**不报 READ_ONLY**（否则每次 doctor 都是假警报），
+  // 写侧仍拒绝用户改（版本号/时间戳不许用户改，也不许为了消噪音把 mutable 改成 true）。
+  {
+    key: 'skills.version', family: 'skills-prefs', path: 'version',
+    type: 'number', envKeys: [], aliases: [], mutable: false, owner: 'code', ui: 'none',
+  },
+  {
+    key: 'skills.disabled.<id>.at', family: 'skills-prefs', path: 'disabled.<id>.at',
+    type: 'string', envKeys: [], aliases: [], mutable: false, owner: 'code', ui: 'none',
+  },
+  {
+    key: 'skills.disabled.<id>.reason', family: 'skills-prefs', path: 'disabled.<id>.reason',
+    type: 'string', envKeys: [], aliases: [], mutable: true, ui: 'none',
+  },
+  {
+    key: 'skills.uninstalledSource.<id>.sourceDir', family: 'skills-prefs', path: 'uninstalledSources.<id>.sourceDir',
+    type: 'string', envKeys: [], aliases: [], mutable: false, owner: 'code', ui: 'none',
+  },
+  {
+    key: 'skills.uninstalledSource.<id>.at', family: 'skills-prefs', path: 'uninstalledSources.<id>.at',
+    type: 'string', envKeys: [], aliases: [], mutable: false, owner: 'code', ui: 'none',
+  },
 ]);
 
 const KEY_INDEX = new Map(CONFIG_KEYS.map((entry) => [entry.key, entry]));
@@ -443,7 +477,12 @@ function diagnoseObject(family, obj, lookup) {
     for (const alias of entry.aliases || []) {
       if (alias === path) diagnostics.push({ code: DIAGNOSTIC_CODES.ALIAS_USED, path, family, message: `${path} 是 ${entry.key} 的历史别名` });
     }
-    if (!entry.mutable) diagnostics.push({ code: DIAGNOSTIC_CODES.READ_ONLY, path, family, message: `${entry.key} 由代码侧校准专属，用户不可写` });
+    // `owner:'code'` 的键是代码自写的事实（版本号/时间戳/来源目录）：读侧**不报** READ_ONLY，
+    // 否则每次读盘都把"正常状态"报成问题（doctor 会把它们归进"非法已存值"，天天假警报）。
+    // 写侧仍拒绝（见 commitGuard）——不报≠可改。
+    if (!entry.mutable && entry.owner !== 'code') {
+      diagnostics.push({ code: DIAGNOSTIC_CODES.READ_ONLY, path, family, message: `${entry.key} 由代码侧校准专属，用户不可写` });
+    }
     const check = validateValue(entry, value);
     if (!check.ok) diagnostics.push({ code: check.code, path, family, message: check.message });
   }
@@ -469,7 +508,8 @@ function commitGuard(family, patch, lookup, options = {}) {
       continue;
     }
     if (!entry.mutable) {
-      diagnostics.push({ code: DIAGNOSTIC_CODES.READ_ONLY, family, path, message: `${entry.key} 属代码侧校准专属，用户不可写` });
+      const why = entry.owner === 'code' ? '由代码自写（版本号/时间戳/来源），用户不可写' : '属代码侧校准专属，用户不可写';
+      diagnostics.push({ code: DIAGNOSTIC_CODES.READ_ONLY, family, path, message: `${entry.key} ${why}` });
       continue;
     }
     const check = validateValue(entry, value);

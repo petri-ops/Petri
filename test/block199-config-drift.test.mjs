@@ -36,6 +36,8 @@ const UI_CARRIERS = {
   // BLOCK-203 W4a 首族：外观偏好的真值是服务端 user-prefs.json，承载面是 ThemeProvider 的多端同步链
   // （不是设置面板里的某个 fetch）——故 must 钉它实际打的端点，而不是钉一个"看起来像设置页"的文件。
   'user-prefs': { file: 'frontend/src/themes/ThemeProvider.tsx', must: ['/user/prefs'] },
+  // BLOCK-203 W4a P3：技能治理面的真承载是 Skills 页的 store hook（走 IPC 桥，不是 REST）
+  'skills-prefs': { file: 'frontend/src/hooks/useSkillStore.ts', must: ["getBridge('skills')", 'setDisabled'] },
 };
 
 /** 族 → 后端写路由（必须能把拒绝翻译成 4xx，而不是冒 500 或静默）。 */
@@ -50,6 +52,36 @@ const WRITE_ROUTES = {
   runtime: 'core/petri-server/routes/runtime-config.js',
   'user-prefs': 'core/petri-server/routes/user-prefs.js',
 };
+
+/**
+ * 族 → **没有 HTTP 写面**时的写表面（IPC / SDK）。
+ *
+ * 为什么需要这张表：② 那条规则（"每族写路径必须能拒绝 400"）对 Electron IPC 族是**测不到的**，
+ * 而"不登记就跳过"等于让门对该族空转——比没有门更糟（BLOCK-195 的"幽灵锚点"就是这个形状）。
+ * 登记后改成三条更硬的断言：①它**确实没有** HTTP 写入口；②它的写表面有明确拒绝码；
+ * ③IPC 通道在 main 进程真的接上了。
+ */
+const NON_HTTP_WRITE_FAMILIES = {
+  'skills-prefs': {
+    surface: 'core/shared-backend/skill-prefs.js',
+    must: ['invalid_skill_id', 'skill_id_required'],
+    // 通道字面量的唯一注册表是 src/ipc/channels.js，main.js 通过常量接线（不重复字面量）
+    channelFile: 'src/ipc/channels.js',
+    channel: "'skills:set-disabled'",
+    handlerFile: 'src/main.js',
+    handler: 'CHANNELS.skills.setDisabled',
+  },
+};
+
+function walk(dir) {
+  const out = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...walk(full));
+    else if (entry.name.endsWith('.js')) out.push(full);
+  }
+  return out;
+}
 
 test('注册表自洽：每个键有族、每个族有键（不留空壳族或孤儿键）', () => {
   const families = new Set(Object.keys(schema.CONFIG_FAMILIES));
@@ -78,6 +110,35 @@ test('每族写路径都能拒绝非法输入（4xx），而不是静默或冒 5
   // generation 的拒绝必须走结构化码，不能把任意异常都当 400 吞掉
   const api = read(WRITE_ROUTES.generation);
   assert.match(api, /config_value_rejected/);
+});
+
+test('每族都有一条"会拒绝"的写路径：HTTP 或显式登记的非 HTTP 写面（不许空转）', () => {
+  const declared = [...new Set(schema.CONFIG_KEYS.map((e) => e.family))].sort();
+  for (const family of declared) {
+    const viaHttp = Object.prototype.hasOwnProperty.call(WRITE_ROUTES, family);
+    const viaOther = Object.prototype.hasOwnProperty.call(NON_HTTP_WRITE_FAMILIES, family);
+    assert.ok(!(viaHttp && viaOther), `${family} 同时登记了 HTTP 与非 HTTP 写面（分不清真相在哪）`);
+    assert.ok(viaHttp || viaOther, `${family} 既没有 HTTP 写路由也没进 NON_HTTP_WRITE_FAMILIES——"写路径能拒绝"这条门对它是空转`);
+  }
+});
+
+test('非 HTTP 写面的族：确实没有 HTTP 入口 + 写面有拒绝码 + IPC 通道已接线', () => {
+  const routeFiles = walk(path.join(ROOT, 'core/petri-server/routes'));
+  for (const [family, spec] of Object.entries(NON_HTTP_WRITE_FAMILIES)) {
+    const surface = read(spec.surface);
+    for (const needle of spec.must) assert.ok(surface.includes(needle), `${spec.surface} 缺拒绝码 ${needle}（该族写面无法说"不"）`);
+    assert.ok(read(spec.channelFile).includes(spec.channel), `${spec.channelFile} 未登记通道字面量 ${spec.channel}`);
+    assert.ok(read(spec.handlerFile).includes(spec.handler), `${spec.handlerFile} 未接线处理器 ${spec.handler}（通道登记了但没人接=死通道）`);
+    // 反向：routes/ 下不许出现该族的写入口（否则这张表就是骗人的，真相变成两份）
+    for (const needle of ['skill-prefs', 'setSkillDisabled']) {
+      const offenders = routeFiles.filter((file) => fs.readFileSync(file, 'utf8').includes(needle));
+      assert.deepEqual(
+        offenders.map((file) => path.relative(ROOT, file)),
+        [],
+        `${family} 声称"无 HTTP 写面"，但 routes/ 里出现了 ${needle}`,
+      );
+    }
+  }
 });
 
 test('RUNTIME_POINTS 与注册表接点集合双向相等（report-guard 那类隐藏开关不得复发）', () => {
