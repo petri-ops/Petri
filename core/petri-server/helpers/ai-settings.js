@@ -20,6 +20,8 @@ const path = require('path');
 const os = require('os');
 const { normalizeModelConfig } = require('../../shared-backend/llm-providers/model-profile');
 const { createCredentialStore, normalizeProvider } = require('./credential-store');
+// BLOCK-199 P2 — 生成参数形状（类型/区间/取整）取配置 schema 单源，数值语义不在这里复制。
+const { findKeyEntry: findConfigKey, validateValue: validateConfigValue } = require('../../packages/shared-config/config-schema.js');
 
 const SETTINGS_DIR = process.env.PETRI_LOCAL_DATA_DIR ||
   path.join(os.homedir(), 'Documents', 'Petri-Local');
@@ -311,20 +313,24 @@ async function listAvailableModels(provider, apiKey) {
  * BLOCK-172 CP-7 — 生成参数全局缺省（temperature/maxTokens）。
  * 来源优先级：env 覆盖 > ai-settings.json `generation` 键 > 缺省（loop 侧 0.4/16384）。
  * 诚实边界：仅收数值域合法值；maxTokens 下限 256 防误配物理截断。
+ * BLOCK-199 P2 — 形状（类型/区间/取整）改由 shared-config schema 单源声明；**胜负保持原样**：
+ * env 一旦"存在"就赢（哪怕值非法也直接丢键，不回落到文件），这条不是设计而是现状，
+ * 由拆前基线 test/block199-config-compat.test.mjs 冻结。
  */
+function _pickGenerationValue(entryKey, envVarName, fileValue) {
+  const entry = findConfigKey(entryKey);
+  const envRaw = process.env[envVarName];
+  if (envRaw == null) return validateConfigValue(entry, fileValue);
+  return validateConfigValue(entry, envRaw);
+}
+
 function _sanitizeGeneration(raw) {
   const source = raw && typeof raw === 'object' ? raw : {};
   const out = {};
-  const envTemp = process.env.PETRI_LLM_TEMPERATURE;
-  const envMax = process.env.PETRI_LLM_MAX_TOKENS;
-  const temperature = envTemp != null ? Number(envTemp) : Number(source.temperature);
-  if (Number.isFinite(temperature) && temperature >= 0 && temperature <= 2) {
-    out.temperature = temperature;
-  }
-  const maxTokens = envMax != null ? Number(envMax) : Number(source.maxTokens);
-  if (Number.isFinite(maxTokens) && maxTokens >= 256 && maxTokens <= 1_000_000) {
-    out.maxTokens = Math.floor(maxTokens);
-  }
+  const temperature = _pickGenerationValue('generation.temperature', 'PETRI_LLM_TEMPERATURE', source.temperature);
+  if (temperature.ok) out.temperature = temperature.normalized;
+  const maxTokens = _pickGenerationValue('generation.maxTokens', 'PETRI_LLM_MAX_TOKENS', source.maxTokens);
+  if (maxTokens.ok) out.maxTokens = maxTokens.normalized;
   return out;
 }
 
