@@ -1,31 +1,38 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 
-export type ThemePreference = 'system' | 'light' | 'dark';
-export type ResolvedTheme = 'light' | 'dark';
-// BLOCK-61：新 key 命名空间 petri-*；历史 key 读兼容（偏好零丢失），写入只落新 key。
-const THEME_STORAGE_KEY = 'petri-theme';
-const LEGACY_THEME_KEYS = ['petri-theme', 'theme'] as const;
-const THEME_CHANGE_EVENT = 'petri:theme-change';
+/**
+ * BLOCK-203 W4a P7 — 主题/字号/强调色的 localStorage 读写、键名与枚举域统一由 `prefCache` 供应。
+ * 真值是服务端 `user-prefs.json`（注册表 `user-prefs` 族）；localStorage 只是**启动缓存**：
+ * 先前打开就能用正确外观，随后由服务端值收敛。键名/枚举/钳位边界与注册表的一致性
+ * 由 `prefCache.drift.test.ts` 双向钉住（前端生产代码不 import `core/**`）。
+ */
+import {
+  ACCENT_STORAGE_KEY,
+  FONT_SCALE_STORAGE_KEY,
+  FONT_SCALE_MAX,
+  FONT_SCALE_MIN,
+  LEGACY_THEME_KEYS,
+  clampFontScale,
+  THEME_STORAGE_KEY,
+  readCachedFontScale,
+  readCachedTheme,
+  writeCachedAccent,
+  writeCachedFontScale,
+  writeCachedTheme,
+  type ThemePreference,
+} from './prefCache';
 
-// BLOCK-49 加映三 — 界面字号：root 字号缩放系数（默认 1 = 14px 正文基准）。
-// 注入 --petri-font-scale 到 html.style，全部字号 token 走 calc() 跟随缩放。
-const FONT_SCALE_STORAGE_KEY = 'petri-font-scale';
-export const FONT_SCALE_MIN = 0.8;
-export const FONT_SCALE_MAX = 1.4;
+export type { ThemePreference } from './prefCache';
+export { FONT_SCALE_MIN, FONT_SCALE_MAX };
+export type ResolvedTheme = 'light' | 'dark';
+const THEME_CHANGE_EVENT = 'petri:theme-change';
 const FONT_CHANGE_EVENT = 'petri:font-scale-change';
-import { applyAccent, readAccent, ACCENT_STORAGE_KEY, type AccentId } from './accents';
+import { applyAccent, readAccent, type AccentId } from './accents';
 export { type AccentId } from './accents';
 
-function readFontScale(): number {
-  try {
-    const raw = Number(localStorage.getItem(FONT_SCALE_STORAGE_KEY));
-    if (Number.isFinite(raw) && raw >= FONT_SCALE_MIN && raw <= FONT_SCALE_MAX) return raw;
-  } catch {
-    /* storage unavailable */
-  }
-  return 1;
-}
+const readFontScale = readCachedFontScale;
+const readPreference = readCachedTheme;
 
 function applyFontScale(scale: number): void {
   document.documentElement.style.setProperty('--petri-font-scale', String(scale));
@@ -58,27 +65,6 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-function readPreference(): ThemePreference {
-  try {
-    const saved =
-      localStorage.getItem(THEME_STORAGE_KEY) ||
-      LEGACY_THEME_KEYS.map((key) => localStorage.getItem(key)).find((v) => v != null);
-    if (saved === 'light' || saved === 'dark' || saved === 'system') {
-      // BLOCK-61 读到即迁移：历史 key 偏好落新 key 并清除旧 key
-      try {
-        if (localStorage.getItem(THEME_STORAGE_KEY) == null) localStorage.setItem(THEME_STORAGE_KEY, saved);
-        for (const key of LEGACY_THEME_KEYS) localStorage.removeItem(key);
-      } catch {
-        /* 迁移写失败不影响读取 */
-      }
-      return saved;
-    }
-  } catch {
-    // Storage can be unavailable in hardened renderer contexts.
-  }
-  return 'system';
-}
-
 function systemTheme(): ResolvedTheme {
   return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
@@ -106,16 +92,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
   const applyRemotePrefs = useCallback((prefs: { theme?: string; fontScale?: number; accent?: string }) => {
     if (prefs.theme === 'light' || prefs.theme === 'dark' || prefs.theme === 'system') {
       setPreferenceState(prefs.theme);
-      try { localStorage.setItem(THEME_STORAGE_KEY, prefs.theme); } catch { /* 保留内存 */ }
+      writeCachedTheme(prefs.theme);
     }
     if (typeof prefs.fontScale === 'number') {
-      const clamped = Math.min(FONT_SCALE_MAX, Math.max(FONT_SCALE_MIN, prefs.fontScale));
+      const clamped = clampFontScale(prefs.fontScale);
       setFontScaleState(clamped);
-      try { localStorage.setItem(FONT_SCALE_STORAGE_KEY, String(clamped)); } catch { /* 保留内存 */ }
+      writeCachedFontScale(clamped);
     }
     if (typeof prefs.accent === 'string' && prefs.accent) {
       setAccentState(prefs.accent as AccentId);
-      try { localStorage.setItem(ACCENT_STORAGE_KEY, prefs.accent); } catch { /* 保留内存 */ }
+      writeCachedAccent(prefs.accent as AccentId);
     }
   }, []);
 
@@ -168,28 +154,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
 
   const setPreference = useCallback((next: ThemePreference) => {
     setPreferenceState(next);
-    try {
-      localStorage.setItem(THEME_STORAGE_KEY, next);
-    } catch {
-      // Keep the in-memory preference when persistence is unavailable.
-    }
+    // Keep the in-memory preference when persistence is unavailable.
+    writeCachedTheme(next);
     pushPrefs({ theme: next });
   }, [pushPrefs]);
 
   const setAccent = useCallback((next: AccentId) => {
     setAccentState(next);
-    try { localStorage.setItem(ACCENT_STORAGE_KEY, next); } catch { /* 保留内存 */ }
+    writeCachedAccent(next);
     pushPrefs({ accent: next });
   }, [pushPrefs]);
 
   const setFontScale = useCallback((scale: number) => {
-    const clamped = Math.min(FONT_SCALE_MAX, Math.max(FONT_SCALE_MIN, scale));
+    const clamped = clampFontScale(scale);
     setFontScaleState(clamped);
-    try {
-      localStorage.setItem(FONT_SCALE_STORAGE_KEY, String(clamped));
-    } catch {
-      /* 保留内存偏好 */
-    }
+    /* 保留内存偏好：写失败不影响本端生效 */
+    writeCachedFontScale(clamped);
     pushPrefs({ fontScale: clamped });
   }, [pushPrefs]);
 

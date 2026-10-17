@@ -5012,3 +5012,10 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **变化面**：「决策原语」节新增审批与编排面板——四档默认档位、子智能体并发（1-8）、派生深度（1-3）、工具曝光白/黑名单；显示生效值与 env 遮蔽横幅（PETRI_SPAWN_* 存在时点明「设置页改它不会生效」）。
 - **诚实边界**：档位只是默认值（对话里显式选择优先）；白/黑名单只影响模型可见工具面，不是安全边界；四档判定与 BLOCK-180 审批资源链一字未改。
 - **验证**：`block202` 11/11（默认/越界拒绝/优先级/钳制/曝光过滤）+ 面板 4/4（含并发越界客户端拦截、env 遮蔽可见、保存提示下一轮生效）；**9223 离屏探针 15/15**（D3/D4 四档选择与生效值；R6-R9 默认/写入/非法 400），证据 `acceptance/block-202/`（`ui520-runtime-policy.png`）。
+
+## UI-521: 外观偏好缓存单源（2026-10-18 in_progress，BLOCK-203 W4a P7）
+
+- **变化面**：主题/字号/强调色的 localStorage 键名、枚举与钳位边界收成 `frontend/src/themes/prefCache.ts` 一处；`ThemeProvider` 不再直接读写 localStorage，`accents.readAccent` 委托 `readCachedAccent`。真值仍是服务端 `user-prefs.json`（注册表 `user-prefs` 族），localStorage 只保证首屏不闪默认值。
+- **诚实边界**：**无实机腿**——本条只改变"缓存从哪读、谁校验"，不改任何可见交互与布局；故记 `in_progress` 而不是 `verified`。跨层一致性由 `prefCache.drift.test.ts` 承担（生产代码不 import `core/**`）。
+- **验证**：`prefCache.drift.test.ts` 6/6（键名冻结·枚举与注册表逐项相等·钳位边界一致·ThemeProvider 无 localStorage 直连·prefCache 无 core 引用）+ `ThemeProvider` 5/5 + `ThemeProvider.sync` 4/4（既有行为零变化）+ `quality:types` 0。
+

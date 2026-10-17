@@ -181,5 +181,11 @@ node --test --test-force-exit --test-timeout=120000 \
   - 顺带的安全收益：顶层裸 `apiKey` 这类历史明文键会在下次保存时被清掉（`getApiKey` 只读 credential store，文件里的裸键本来就是死重）。
   - **契约变更留痕**：`test/block199-write-guard` 原断言"ai-settings 顶层非本族键不属诊断面"被有意改掉——现在它**要**被点名，但归属是 `ai-settings-root`（文件级垃圾），不得混进"族内值不合法"。
   - 证据：`test/block203-ai-settings-root.test.mjs` 5/5 + 邻域 **170/170** + `config:doctor` 实跑（0 未知键/0 非法值）+ knip PASS + lint 0 error。
-- ⬜ P7 localStorage 并入 · ⬜ P8 D-2 rider
+- ✅ **P7（2026-10-18 落地）renderer `localStorage` 降为纯启动缓存**：新增 `frontend/src/themes/prefCache.ts` 持有**唯一一份**缓存键名（`petri-theme`/`petri-font-scale`/`petri-accent`）、枚举（主题三值/强调色五色）、钳位边界（0.8–1.4）与读写函数；`ThemeProvider` 不再出现任何 `localStorage.getItem/setItem/removeItem`（漂移测静态断言），内联钳位改 `clampFontScale`；`accents.ts` 的 `readAccent` 委托 `readCachedAccent`，删掉自己那份 `VALID_IDS` 判定。
+  - **跨层方式**：生产代码**不** import `core/**`（`quality:arch` R5 会拦），一致性由 `prefCache.drift.test.ts`（6 例）承担——缓存键名冻结、枚举/范围与 `user-prefs` 族逐项相等、`prefCache` 不得 import core、`ThemeProvider` 不得直接摸 localStorage。沿用 `appKeymap.drift.test.ts` 先例（含 `@ts-expect-error` + 显式收窄的写法）。
+  - 证据：前端 `prefCache.drift` 6/6 + `ThemeProvider` 5/5 + `ThemeProvider.sync` 4/4（**既有行为零变化**）；`quality:types` 0、`quality:knip:check` PASS、`quality:arch` 0 违规、lint 0 error。
+- ✅ **P8（2026-10-18 落地）D-2 rider：models 渠道导出默认脱敏**：`model-endpoint-transfer.ts` 增 `maskApiKey`（只留后四位；≤4 位一律 `***`）并在**构建器内部**打码——只有显式 `{masked:false}` 才出明文，调用方忘了传就是安全的（把 D-2 变成默认安全，而不是靠纪律）。`useEndpointProfilesEditor` 改为两次确认：第一次问"导出渠道配置"，第二次才问"是否带明文（跨机迁移用）"，取消=脱敏。**文件名、JSON 信封格式、CSV 列顺序与其余列零改动**（`apiKey` 字段仍在，值变成 `***后四位`）。
+  - 契约变更留痕：`model-endpoint-transfer.test.ts` 里旧用例「调用方传了 key 就出明文」被有意改写（"这条断言就是旧契约的墓碑"），并补 4 条新用例（默认脱敏/显式明文/CSV 列形状不变/`maskApiKey` 边界）。
+  - 证据：前端 `model-endpoint-transfer` **8/8**；`quality:types` 0、`quality:knip:check` PASS、`quality:secret` PASS（fail-closed 面复跑）、lint 0 error。
+- ⬜ **W4a 收口**：closeout 门禁 + 五件套回写（本片 P1–P8 全落地；W4b 仍待独立窗口）
 - 🔎 **P4 开工前提示（来自 P3 的形状经验）**：`agent-rules` 是**数组**（`rules[]`），比 skills-prefs 的两个 map 更难套用点路径——若继续用"绝对点路径 + 手工遍历"，会退化成为每个落点各写一份遍历器（正是 W4 要清的东西）。P4 应先定"集合形状"的单一实现（`items` 声明 + 通用遍历/诊断），再让 `agent-rules` 与 `mcp-servers` 共用它；否则 P5 会再抄一遍。

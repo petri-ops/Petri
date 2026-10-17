@@ -7,6 +7,8 @@
 // accent token（light/dark 双套），其余 token 不动。
 // ============================================================
 
+import { readCachedAccent } from './prefCache';
+
 export type AccentId = 'teal' | 'blue' | 'violet' | 'rose' | 'amber';
 
 export interface AccentOption {
@@ -24,15 +26,10 @@ export const ACCENT_OPTIONS: ReadonlyArray<AccentOption & { id: AccentId }> = [
   { id: 'amber', label: '琥珀', swatch: '#d97706' },
 ];
 
-export const ACCENT_STORAGE_KEY = 'petri-accent';
-const VALID_IDS = new Set(ACCENT_OPTIONS.map((o) => o.id as string));
-
+// BLOCK-203 W4a P7 — 缓存键、枚举与读取全部迁到 `prefCache`（真值在服务端 user-prefs.json）；
+// 本文件只保留"当前实现认哪个 id"的选项表与 DOM 应用逻辑。
 export function readAccent(): AccentId {
-  try {
-    const saved = localStorage.getItem(ACCENT_STORAGE_KEY);
-    if (saved && VALID_IDS.has(saved)) return saved as AccentId;
-  } catch { /* storage unavailable */ }
-  return 'teal';
+  return readCachedAccent();
 }
 
 export function applyAccent(accent: AccentId): void {
