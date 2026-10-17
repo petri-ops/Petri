@@ -37,7 +37,7 @@ describe('键位命令源 ↔ 注册表集合对账', () => {
 describe('键位语法跨端对账', () => {
   it('注册表确实声明了 keymap 族且写侧守卫就是那条正则（不是另造一份）', () => {
     expect(sampleEntry, 'keymap.palette.toggle 必须在注册表里').toBeTruthy();
-    expect(sampleEntry.domain.pattern).toBe(KEYMAP_COMBO_RE.source);
+    expect(sampleEntry?.domain?.pattern).toBe(KEYMAP_COMBO_RE.source);
   });
 
   it('每个出厂默认键位都能过后端写侧守卫（默认值不得是后端会拒的值）', () => {
