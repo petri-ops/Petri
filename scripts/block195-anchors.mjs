@@ -48,7 +48,7 @@ async function devStackEndpoint() {
 
 function runCmd(cmd, timeoutMs) {
   try {
-    const out = execSync(cmd, { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: timeoutMs, killSignal: 'SIGKILL', maxBuffer: 32 * 1024 * 1024 });
+    execSync(cmd, { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: timeoutMs, killSignal: 'SIGKILL', maxBuffer: 32 * 1024 * 1024 });
     return { status: 'pass', tail: '' };
   } catch (err) {
     const blob = `${err.stdout || ''}${err.stderr || ''}${err.message || ''}`.replace(/\s+/g, ' ');
