@@ -3758,7 +3758,7 @@
     },
     {
       "id": "block199-config-schema-service",
-      "note": "BLOCK-199 阶段 3 首包·配置 schema 层与统一配置服务（P1-1）。地基=core/packages/shared-config/config-schema.js（键注册表 + 校验 + 逐族 precedence + 未知键\"读不炸写不进\"单源 + 共享层零 require 零依赖）；落位由架构规则决定（R4 明写 core/packages 是前后端合法共享层、R5 禁 src→core/petri-server）。契约=test/block199-config-schema.test.mjs（键唯一/族存在/字段齐/env 别名真实性扫描/优先级逐族照现状/env 三态解析/值校验与归一化/未知键诊断/共享层纯度与零校验依赖）+ 拆前行为基线 test/block199-config-compat.test.mjs（三族胜负关系与形状冻结，重构后一字不许动）+ 生效性测 test/block199-threshold-runtime.test.mjs（tool-route 阈值改运行时读，改配置即改判定，且无 stored 覆盖时行为零变化）。 另：P0 测绘发现 feature-flags/decision-config 此前**无任何 impact-map 规则覆盖**（改它们会 fail-closed 升级全量），本规则同时补上这条盲区。 P3 追加=写侧守卫 commitGuard（未注册键/非法值/只读键一律拒绝并回结构化诊断，null 仍为清键）+ envShadowedKeys（算出\"设置页的值正被环境变量盖住\"并区分是否真改动生效值）+ `npm run config:doctor` 诊断出口（读不炸写不进遮蔽可见三件一起，测在 test/block199-write-guard.test.mjs 6/6，含 Windows 路径拼接陷阱：夹具须用 path.join 不能写死正斜杠）。 P4② 追加=report-guard 从注册表外隐藏开关收编进 RUNTIME_POINTS（默认关与 env 0/1 语义一字未改，新增能力=设置页可显式开并落盘），测在 test/block199-report-guard-point.test.mjs。",
+      "note": "BLOCK-199 阶段 3 首包·配置 schema 层与统一配置服务（P1-1）。地基=core/packages/shared-config/config-schema.js（键注册表 + 校验 + 逐族 precedence + 未知键\"读不炸写不进\"单源 + 共享层零 require 零依赖）；落位由架构规则决定（R4 明写 core/packages 是前后端合法共享层、R5 禁 src→core/petri-server）。契约=test/block199-config-schema.test.mjs（键唯一/族存在/字段齐/env 别名真实性扫描/优先级逐族照现状/env 三态解析/值校验与归一化/未知键诊断/共享层纯度与零校验依赖）+ 拆前行为基线 test/block199-config-compat.test.mjs（三族胜负关系与形状冻结，重构后一字不许动）+ 生效性测 test/block199-threshold-runtime.test.mjs（tool-route 阈值改运行时读，改配置即改判定，且无 stored 覆盖时行为零变化）。 另：P0 测绘发现 feature-flags/decision-config 此前**无任何 impact-map 规则覆盖**（改它们会 fail-closed 升级全量），本规则同时补上这条盲区。 P3 追加=写侧守卫 commitGuard（未注册键/非法值/只读键一律拒绝并回结构化诊断，null 仍为清键）+ envShadowedKeys（算出\"设置页的值正被环境变量盖住\"并区分是否真改动生效值）+ `npm run config:doctor` 诊断出口（读不炸写不进遮蔽可见三件一起，测在 test/block199-write-guard.test.mjs 6/6，含 Windows 路径拼接陷阱：夹具须用 path.join 不能写死正斜杠）。 P4② 追加=report-guard 从注册表外隐藏开关收编进 RUNTIME_POINTS（默认关与 env 0/1 语义一字未改，新增能力=设置页可显式开并落盘），测在 test/block199-report-guard-point.test.mjs。 P4③ 追加=ThemeProvider 跨端写失败可见化（prefsSync 状态 + 控制台留痕；本端仍立即生效不回滚，15s 拉取继续收敛到服务端真相），测在 frontend/src/themes/ThemeProvider.sync.test.tsx 4 项。 P5 漂移门=注册表族↔设置面承载↔写路由 4xx↔RUNTIME_POINTS 集合四向对账（含 envKey 同源），已在落地当天抓到一次真实漂移（report-guard 进了 RUNTIME_POINTS 却没进注册表）。",
       "patterns": [
         "core/packages/shared-config/**",
         "core/petri-server/helpers/feature-flags.js",
@@ -3769,17 +3769,21 @@
         "core/petri-server/helpers/tool-router.js",
         "test/block199-*.test.mjs",
         "scripts/block199-config-doctor.mjs",
-        "core/petri-server/helpers/report-guard.js"
+        "core/petri-server/helpers/report-guard.js",
+        "frontend/src/themes/ThemeProvider.tsx"
       ],
       "tests": [
         "test/block199-config-schema.test.mjs",
         "test/block199-config-compat.test.mjs",
         "test/block199-threshold-runtime.test.mjs",
         "test/block199-write-guard.test.mjs",
-        "test/block199-report-guard-point.test.mjs"
+        "test/block199-report-guard-point.test.mjs",
+        "frontend/src/themes/ThemeProvider.sync.test.tsx",
+        "test/block199-config-drift.test.mjs"
       ],
-      "frontendRelated": false,
-      "classifiesScripts": false
+      "frontendRelated": true,
+      "classifiesScripts": true,
+      "scriptRole": "governance"
     }
   ]
 }
