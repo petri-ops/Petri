@@ -8,7 +8,7 @@ acceptance:
   - P4 产物命名隔离：报告与基线按 **(suite, provider)** 分 namespace（现状 `acceptance/evals/<suite>-latest.json` 与 `evals/baselines/<suite>.json` 不分 provider，回放报告会覆盖 real-latest 并把真模型棘轮比到回放数上=**假绿通道**）；`evals-gate.mjs` 加同口径 `--provider`，且保持 191 的「基线写仅 `--update`」源码门不破。
   - 门禁：契约测 `test/block193-capture-replay.test.mjs`（差分归属/投影两态/缺 response 不编造/密钥闸拒写且不外泄/合成闸拒录/哨兵闸/**假绿反证**=罐头回合配空 outbound 必红）+ 实机录制一次（真模型，用户「验收一律选彻底那条」）+ `--provider=replay` 离线复跑绿 + `evals:gate --suite=real` 回归 0 + smoke/golden 零回归 + `test:changed --base=<192 收口提交>` + `npm run closeout` 十三门。
   - 完成语义：一条命令录制（真模型一次）→ 一条命令**零 API、零凭据**离线重放绿；录制产物零密钥、零用户数据、可人审；哨兵证明重放确实走过出站路径。
-reopen: LLM-as-judge real 模式（判词与 real 基线耦合，provider 依赖切片）；竞争力 8 维复测（蓝图明定随包不单开）；orchestration 类多 agent 任务的录制（转录归属需 conversation 血缘口径，本包只录 real 套件单 agent 形态）。
+reopen: LLM-as-judge real 模式（判词与 real 基线耦合，provider 依赖切片）**→ 已由 BLOCK-194 于 2026-10-17 交付**（读数棘轮 `evals/judge-baselines/real.json`·判词与正文均不入库，与本包脱敏纪律同向）；竞争力 8 维复测（蓝图明定随包不单开）；orchestration 类多 agent 任务的录制（转录归属需 conversation 血缘口径，本包只录 real 套件单 agent 形态）。
 status: completed
 ---
 

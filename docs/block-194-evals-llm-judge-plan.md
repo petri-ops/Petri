@@ -8,12 +8,13 @@ acceptance:
   - 门禁：契约测（离线注入 stub judge，零网络）+ 实机 `--provider=real --judge` 真跑读数与建线 + 报告零正文零密钥复核（`quality:secret`）+ smoke/golden/real/real-replay 四套既有门零回归 + `test:changed --base=<193 收口提交>` + `npm run closeout` 十三门。
   - 完成语义：real 套件在确定性判据（做完了）之外多一路**独立质量读数**（做得好不好），该读数 fail-closed（降级/无门控/低判词一律不绿）、有棘轮（质量滑坡即红）、零人工参与（判词由模型产，门由代码判）。
 reopen: judge 读数进 `evals/CATALOG.md` 第五列（BLOCK-190 形态扩展）；judge 与被评主体**同源**时的自偏好对照实验（需第二个本地 judge 供给，属 G1+ provider 矩阵面）；faithful 维度接入（需 reference 锚定语料，real 三任务当前无参考材料）。
-status: active
+status: completed
 ---
 
 # BLOCK-194 — LLM-as-judge real 模式（评测 v2 第六切片）
 
-- 状态：`active`（2026-10-17 用户「继续」=承接上一轮明述「回『继续』我就开 LLM-as-judge real 模式，全程零参与」的发令；当日立项当日收口节奏）
+- 状态：`completed`（2026-10-17 用户「继续」=承接上一轮明述「回『继续』我就开 LLM-as-judge real 模式，全程零参与」的发令；当日立项当日收口，closeout 十三门全绿×2）
+- **acceptance 修订（实机证据驱动，详见 §0.2③）**：原条款写「`RETRY`/`ESCALATE` 计红」，落地改为两层——`invalid`（degraded/observe/零读数/未知取值/调用抛错）=测量不成立才 exit 非零；`RETRY`/`ESCALATE`=质量缺口，逐条打印 + 写 `report.judge.gaps` + 由 `VERDICT_RANK` 棘轮守「不得后退」。偏离理由与本包发现一并留痕在 §0。
 
 ## 0. 交付实录（含三处由实机证据逼出的修正）
 
