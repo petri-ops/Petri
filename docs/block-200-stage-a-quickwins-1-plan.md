@@ -89,9 +89,18 @@ status: active
 
 ## 7. 进度（滚动，收口时以实跑事实为准）
 
-- [ ] P0 勘察（本 §0，已完成并经主代理实码抽验）
-- [ ] P1 键位单源与派发
-- [ ] P2 档位与映射可编辑
-- [ ] P3 设置面两分区与写侧出口
-- [ ] P4 漂移门扩族与 9223 实机腿
-- [ ] P5 五件套回写与 closeout
+**2026-10-17 上下文到边界时的实跑状态（未收口，`status: active`）**：
+
+- [x] P0 勘察（§0，主代理逐条实码抽验行号）
+- [x] P1 键位单源与派发（`e84cb0b5`）：`appKeymap.ts` 语法/冲突/解绑 + `appKeymapContext.tsx` Provider 与 App 级派发器 + `helpers/keymap.js`/`routes/keymap.js` 写侧守卫；`appKeymap.test.ts` 9/9、`appKeymap.drift.test.ts` 5/5、`appKeymapContext.test.tsx` 6/6、`block200-keymap-store.test.mjs` 8/8；三处虚假徽章（⌘N/⌘/ 无处理器）随批消失
+- [x] P2 档位映射可编辑（后端 `0e3f25e7`）：`reasoning-defaults.js` 表 + `thinking-level.js` 改查表并加注入式覆盖层（依赖反转沿用 `shared-copilot/api-inject.ts`）+ `helpers/reasoning-config.js` + `PUT /api/ai/reasoning-defaults`；**拆前基线 `block200-thinking-baseline.test.mjs` 5/5 先绿后改、改后 20/20 邻域对账一字未动**；出站腿 `block200-reasoning-config.test.mjs` 9/9（默认档/预算/映射三项改动均实测打到出站参数形状；跨协议错配与未知键整批拒）
+- [x] P3 设置面两分区（`fe6bfbef`）：「快捷键」「推理档位」节接入 `DesktopSettingsPanel`；`KeymapPanel.test.tsx` 6/6、`ReasoningDefaultsPanel.test.tsx` 5/5；`thinkingLevel.drift.test.ts` 3/3（含源码扫描，抓到并删净 `conversationRunStore`/`copilotClient types`/`useChatStream` 三处第二份三档字面量）
+- [~] P4 **部分完成**：BLOCK-199 四向漂移门已扩两族，**加入前先红后绿实证**（红态 `acceptance/block-200/drift-gate-red-2026-10-17.txt`）；`config:doctor` 已纳入两族（`2c6996b6`）。**未做=9223 测试实例自动探针出图取证** → 故 UI-514/UI-515 均记 `in_progress`，**本包不得宣称收口**
+- [ ] P5 五件套回写与 closeout 收口
+
+**下一会话的第一个动作（按此顺序，勿跳）**：
+1. 修两处 `theme-token-contract` 红（`npm run test:changed -- --base=9da95e13` 复跑即见）：
+   · `sections/SettingsQuickwins.module.css: 6 > ratchet 0`（小字号棘轮）——我在一个文件里用了 6 处 `var(--petri-font-size-sm)`；棘轮只许收缩，**处置=改回 body 档或删掉多余小字号声明**，不是抬基线；
+   · `components/copilot/ToolActivityDock.module.css: 1 > ratchet 0`（裸 px font-size）**不是我改的文件**（该路径最后一次提交 `d99f1415` 2026-10-16「删除 ToolActivityDock 死 CSS」）——先确认它是 main 上的既存红还是我的改动让扫描面变大，再决定归属，**不要顺手改他人资产**。
+2. 起 dev 栈 + 9223 测试实例，写自动探针取两节截图与断言 JSON 落 `acceptance/block-200/`，然后才把 UI-514/UI-515 转 `verified`。
+3. `npm run closeout` 十三门 + 五件套回写（README 230、registry `completed`、AUDIT-LOG 两行、roadmap/handoff、报告 §5.3 ③b、runlist W1 勾选）+ `output:judge` + `decision:session`；收口后按用户常驻纪律把 main 推到 origin（本轮已推过一次 `1e73233f..033072e5`，其后又落了 6 笔 BLOCK-200 提交未推）。

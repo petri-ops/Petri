@@ -3807,7 +3807,8 @@
         "frontend/src/components/copilot/conversationRunStore.ts",
         "frontend/src/components/copilot/copilotClient/types.ts",
         "frontend/src/components/copilot/SimpleChat/hooks/useChatStream.ts",
-        "frontend/src/App.tsx"
+        "frontend/src/App.tsx",
+        "acceptance/block-200/**"
       ],
       "tests": [
         "test/block200-keymap-store.test.mjs",
