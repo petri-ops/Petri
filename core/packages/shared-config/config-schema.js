@@ -240,6 +240,59 @@ function diagnoseObject(family, obj, lookup) {
   return diagnostics;
 }
 
+/**
+ * 写侧守卫（BLOCK-199 P3）：注册表内键的补丁必须**逐项可校验**——未知键/类型不符/越界/只读键
+ * 一律拒绝并回结构化诊断（"写不进"）。与读侧的宽松（`diagnoseObject` 只报告）配对成一条规则。
+ * `null` 值=清键（既有语义，透传不误拒）；未出现的键不校验不改写。
+ */
+function commitGuard(family, patch, lookup, options = {}) {
+  const diagnostics = [];
+  const normalized = {};
+  if (!patch || typeof patch !== 'object' || Array.isArray(patch)) {
+    return { ok: false, normalized, diagnostics: [{ code: DIAGNOSTIC_CODES.TYPE_MISMATCH, family, path: '', message: '写入补丁必须是对象' }] };
+  }
+  for (const [path, value] of Object.entries(patch)) {
+    if (value === null && !options.rejectNull) continue; // 清键语义：放行且不写值
+    const entry = lookup(family, path);
+    if (!entry) {
+      diagnostics.push({ code: DIAGNOSTIC_CODES.UNKNOWN_KEY, family, path, message: `未注册的配置键 ${path}，拒绝写入（不再静默存活）` });
+      continue;
+    }
+    if (!entry.mutable) {
+      diagnostics.push({ code: DIAGNOSTIC_CODES.READ_ONLY, family, path, message: `${entry.key} 属代码侧校准专属，用户不可写` });
+      continue;
+    }
+    const check = validateValue(entry, value);
+    if (!check.ok) {
+      diagnostics.push({ code: check.code, family, path, message: check.message });
+      continue;
+    }
+    normalized[path] = check.normalized;
+  }
+  return { ok: diagnostics.length === 0, normalized, diagnostics };
+}
+
+/**
+ * env 遮蔽可见化：列出"文件里写了值，但同时有 env 变量正在盖住它"的键——
+ * 这类遮蔽是"设置页改了却看不到效果"的根因（BLOCK-199 P0 缺陷族），必须可诊断而非静默。
+ */
+function envShadowedKeys(family, fileObj, env, lookup) {
+  const out = [];
+  if (!fileObj || typeof fileObj !== 'object') return out;
+  const spec = CONFIG_FAMILIES[family];
+  if (!spec || spec.precedence[0] !== 'env') return out;
+  for (const [path, value] of Object.entries(fileObj)) {
+    const entry = lookup(family, path);
+    if (!entry || !entry.envKeys || entry.envKeys.length === 0) continue;
+    const hit = entry.envKeys.find((k) => env && env[k] != null && env[k] !== '');
+    if (!hit) continue;
+    const envResolved = resolveEnvEntry(family, env[hit]);
+    if (!envResolved) continue; // env 值不被该族承认（例如非 1/0/true/false 字面量）→ 不构成遮蔽
+    out.push({ family, path, envKey: hit, envValue: env[hit], fileValue: value, overrides: envResolved.value !== value });
+  }
+  return out;
+}
+
 module.exports = {
   CONFIG_LAYERS,
   CONFIG_FAMILIES,
@@ -251,4 +304,6 @@ module.exports = {
   resolveEnvEntry,
   resolve,
   diagnoseObject,
+  commitGuard,
+  envShadowedKeys,
 };

@@ -69,6 +69,10 @@ function registerAiSettingsRoutes(app) {
       const generation = saveGenerationDefaults(req.body || {});
       return res.json({ status: 'ok', generation });
     } catch (e) {
+      // BLOCK-199 P3 — 写侧守卫拒绝是用户输入问题（400 + 结构化诊断），不是服务器故障。
+      if (e && e.code === 'config_value_rejected') {
+        return res.status(400).json({ status: 'error', error: e.code, diagnostics: e.diagnostics || [] });
+      }
       return res.status(500).json({ status: 'error', error: e.message });
     }
   });

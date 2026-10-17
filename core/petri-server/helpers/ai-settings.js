@@ -21,7 +21,13 @@ const os = require('os');
 const { normalizeModelConfig } = require('../../shared-backend/llm-providers/model-profile');
 const { createCredentialStore, normalizeProvider } = require('./credential-store');
 // BLOCK-199 P2 — 生成参数形状（类型/区间/取整）取配置 schema 单源，数值语义不在这里复制。
-const { findKeyEntry: findConfigKey, validateValue: validateConfigValue } = require('../../packages/shared-config/config-schema.js');
+const {
+  findKeyEntry: findConfigKey, validateValue: validateConfigValue, commitGuard: commitGuardConfig,
+} = require('../../packages/shared-config/config-schema.js');
+
+const GENERATION_FAMILY = 'generation';
+const _generationLookup = (family, path) => (family === GENERATION_FAMILY ? findConfigKey(`generation.${path}`) : null);
+const commitGuardGeneration = (patch) => commitGuardConfig(GENERATION_FAMILY, patch, _generationLookup);
 
 const SETTINGS_DIR = process.env.PETRI_LOCAL_DATA_DIR ||
   path.join(os.homedir(), 'Documents', 'Petri-Local');
@@ -340,14 +346,25 @@ function getGenerationDefaults() {
 }
 
 function saveGenerationDefaults(partial) {
-  const clean = _sanitizeGeneration(partial);
-  const stored = getAiSettings() || {};
-  const generation = { ...(stored.generation || {}), ...clean };
-  // 显式 null = 清键（回退 loop 内置缺省；部分更新语义的标准形态）
+  // BLOCK-199 P3 — 写侧统一守卫：只校验**提交来的值**（不再把 env 混进写路径的裁剪），
+  // 非法/未知键一律拒绝并带结构化诊断；`null` 仍是清键语义。
+  // 这是本包里唯一有意改变的既有行为：原先非法值被静默丢键（用户以为保存了），现在改 400。
+  const patch = {};
   for (const key of ['temperature', 'maxTokens']) {
-    if (partial && typeof partial === 'object' && Object.prototype.hasOwnProperty.call(partial, key) && partial[key] === null) {
-      delete generation[key];
-    }
+    if (partial && typeof partial === 'object' && Object.prototype.hasOwnProperty.call(partial, key)) patch[key] = partial[key];
+  }
+  const guard = commitGuardGeneration(patch);
+  if (!guard.ok) {
+    const err = new Error(`config_value_rejected: ${guard.diagnostics.map((d) => `${d.path}：${d.message}`).join('；')}`);
+    err.code = 'config_value_rejected';
+    err.diagnostics = guard.diagnostics;
+    throw err;
+  }
+  const stored = getAiSettings() || {};
+  const generation = { ...(stored.generation || {}) };
+  for (const key of Object.keys(patch)) {
+    if (patch[key] === null) delete generation[key];
+    else if (guard.normalized[key] !== undefined) generation[key] = guard.normalized[key];
   }
   const next = { ...stored, generation };
   _ensureDir();

@@ -237,6 +237,7 @@
     "quality:arch": "depcruise src core frontend/src --config .dependency-cruiser.cjs",
     "quality:baseline": "bash scripts/quality-baseline.sh",
     "audit:compact": "node scripts/audit-log-compact.mjs",
+    "config:doctor": "node scripts/block199-config-doctor.mjs",
     "evals:run": "node scripts/evals-run.mjs",
     "evals:gate": "node scripts/evals-gate.mjs",
     "evals:record": "node scripts/evals-run.mjs --suite=real --provider=real --record",
