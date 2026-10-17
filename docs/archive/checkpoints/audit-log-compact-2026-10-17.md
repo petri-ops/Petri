@@ -26,3 +26,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-17T13:12:08.039Z -->
 | ✅ 轻量对账批（2026-10-14，随 BLOCK-183 会话顺手清偿；用户裁决「行」批准推荐内含） | 2026-10-14 | **AUDIT-LOG 三条过期 🟡 行销号**：①project-workspace.tsx lint 5 error（09-28）——10-01 清偿批已豁免入库（:252 immutability+:960/1035/1136/1137 refs×4 抑制在基线，其后历次 closeout quality:lint 全绿）；②skills:check 红漂移 8 红（09-30）——BLOCK-145 D2 已修至 0 红（10-08 复跑 PASS）+W7 双格式 14 全绿；③BLOCK-166 knownGap 排队候选行（10-12）——NAV-GUARD 已收口（✅ 行在案）；BLOCK-128 三条行收敛为仅②（①③已随 BLOCK-141 清偿留注）。 | zcode |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-17T14:11:53.415Z -->
+| ✅ BLOCK-183 整包（2026-10-14，用户裁决「行 你启动我来测试看看」，当日立项当日收口；CP-19 收官=总纲 19 包全闭环） | 2026-10-14 | **数据桥 WS 化 completed**：P0 /m/api/ws `data` 信封（七路径白名单 fail-closed+并发上限+超时；loopback 自调既有路由=形状单一真相）+P1 projectionWsData 单连接 WS-first+3 连失败 5min 冷却回退 HTTP；写面/POST/agent 流/终端流零触碰。红绿 8+6+邻域 13/13+tsc 0+test:changed 全绿+探针 allPass（七路径与 HTTP 逐字节同形状，acceptance/block-183/）。抓真=connectOnce 执行器自引用守卫恒假（settled 重构）+存量 streamReconnect 4 红顺手清偿（BLOCK-159 语义未同步，bisect 坐实；固定随机+新语义重写 10/10）。真机过隧道属 riders。 | zcode |

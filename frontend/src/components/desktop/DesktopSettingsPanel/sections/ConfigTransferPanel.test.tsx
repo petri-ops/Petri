@@ -52,7 +52,7 @@ describe('ConfigTransferPanel', () => {
       applied: [],
       diagnostics: [{ family: 'generation', path: 'temperature', code: 'out-of-range', message: '需 ≤ 2' }],
     });
-    const file = { text: async () => JSON.stringify({ format: 'petri-config', version: 1, families: {} }) } as unknown as File;
+    const file = { text: () => Promise.resolve(JSON.stringify({ format: 'petri-config', version: 1, families: {} })) } as unknown as File;
     render(<ConfigTransferPanel />);
     fireEvent.change(screen.getByTestId('config-import-input'), { target: { files: [file] } });
     await waitFor(() => expect(screen.getByTestId('config-transfer-diagnostics').textContent).toContain('需 ≤ 2'));
@@ -62,7 +62,7 @@ describe('ConfigTransferPanel', () => {
   it('导入成功：提示合并覆盖语义并通知父层刷新', async () => {
     mockedImport.mockResolvedValue({ ok: true, applied: ['keymap'], diagnostics: [] });
     const onChanged = vi.fn();
-    const file = { text: async () => JSON.stringify({ format: 'petri-config', version: 1, families: { keymap: { bindings: {} } } }) } as unknown as File;
+    const file = { text: () => Promise.resolve(JSON.stringify({ format: 'petri-config', version: 1, families: { keymap: { bindings: {} } } })) } as unknown as File;
     render(<ConfigTransferPanel onChanged={onChanged} />);
     fireEvent.change(screen.getByTestId('config-import-input'), { target: { files: [file] } });
     await waitFor(() => expect(onChanged).toHaveBeenCalledTimes(1));
