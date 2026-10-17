@@ -29,6 +29,9 @@ function storeTargets(env = process.env) {
     { family: 'decision-points', file: env.PETRI_DECISION_CONFIG_PATH || path.join(localData, 'decision-config.json'), bag: 'points', perPoint: true },
     { family: 'generation', file: path.join(localData, 'ai-settings.json'), bag: 'generation' },
     { family: 'cost-cap', file: path.join(localData, 'ai-settings.json'), bag: null, scalarKeys: ['costCapCny'] },
+    // BLOCK-200 两族：键位是平面 map（命令 id→组合串），档位含 `mapping.<protocol>.<tier>` 嵌套
+    { family: 'keymap', file: path.join(localData, 'keymap.json'), bag: 'bindings' },
+    { family: 'reasoning', file: path.join(localData, 'ai-settings.json'), bag: 'reasoning', flatten: true },
   ];
 }
 
@@ -67,7 +70,8 @@ export function buildReport({ readJson, env = process.env }) {
     }
     for (const group of groups) {
       const present = Object.fromEntries(Object.entries(group.obj).filter(([, v]) => v !== undefined));
-      const diags = schema.diagnoseObject(target.family, present, lookup);
+      // 嵌套族先摊成注册表用的点路径，否则 `mapping` 整坨会被当成"未注册键"误报
+      const diags = schema.diagnoseObject(target.family, target.flatten ? schema.flattenOneLevel(present) : present, lookup);
       for (const d of diags) {
         const item = { family: target.family, file: target.file, where: group.bagName, ...d };
         if (d.code === schema.DIAGNOSTIC_CODES.UNKNOWN_KEY) report.unknownKeys.push(item);

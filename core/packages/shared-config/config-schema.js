@@ -306,6 +306,30 @@ function resolve(family, layers = {}) {
 }
 
 /**
+ * 一层嵌套对象的诊断：注册表按 `a.b.c` 路径声明，而有些族的存储形状天然嵌套
+ * （`reasoning.mapping.<protocol>.<tier>`）。摊平一层后再走 `diagnoseObject`，
+ * 这样诊断面不必为每个嵌套族另写一份读法（也不静默跳过嵌套键）。
+ */
+function flattenOneLevel(obj) {
+  const flat = {};
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return flat;
+  for (const [key, value] of Object.entries(obj)) {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      for (const [inner, leaf] of Object.entries(value)) {
+        if (leaf && typeof leaf === 'object' && !Array.isArray(leaf)) {
+          for (const [deepest, token] of Object.entries(leaf)) flat[`${key}.${inner}.${deepest}`] = token;
+        } else {
+          flat[`${key}.${inner}`] = leaf;
+        }
+      }
+      continue;
+    }
+    flat[key] = value;
+  }
+  return flat;
+}
+
+/**
  * 未知键/别名诊断：读侧只报告不拒（旧文件里有未知键不得炸启动），写侧据 ok=false 拒绝落盘。
  * @param {Array<{path:string}>|undefined} knownPaths 族内允许的存储路径（由适配器按实际形状给出）
  */
@@ -394,6 +418,7 @@ module.exports = {
   resolveEnvEntry,
   resolve,
   diagnoseObject,
+  flattenOneLevel,
   commitGuard,
   envShadowedKeys,
 };
