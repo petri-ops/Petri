@@ -23,3 +23,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-17T09:13:13.089Z -->
 | ✅ BLOCK-166-NAV-GUARD 整包（2026-10-14，用户预授权加开第五批；10-12 排期修 knownGap 落地，当日立项当日收口） | 2026-10-14 | **沙箱帧导航劫持收口 completed**：死码拆除（P3 params 签名失配+preventDefault 已证无效）+主进程侦测推送（进程登记法+did-fail-load(-30) 主可达路——OOPIF routingId 跨导航会变/fragment 自导航不派发 will，全参位实测定案）+GenUiCard 帧匹配即时重置（9-11s→亚秒）+30s×3 限幅挂起面（UI-511 verified）。组件 4/4+gen-ui 37/37+channels 5/5+tsc 0+实机探针 PASS（导航→挂起 17s vs 心跳 ~29s+）。**过程抓真**=曾发现文件混入非本会话调试行（fs.appendFileSync 顶替插桩行+fs 未导入致链路静默断裂，已移除；来源未明如实登记）。 | zcode |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-17T13:12:08.039Z -->
+| ✅ 轻量对账批（2026-10-14，随 BLOCK-183 会话顺手清偿；用户裁决「行」批准推荐内含） | 2026-10-14 | **AUDIT-LOG 三条过期 🟡 行销号**：①project-workspace.tsx lint 5 error（09-28）——10-01 清偿批已豁免入库（:252 immutability+:960/1035/1136/1137 refs×4 抑制在基线，其后历次 closeout quality:lint 全绿）；②skills:check 红漂移 8 红（09-30）——BLOCK-145 D2 已修至 0 红（10-08 复跑 PASS）+W7 双格式 14 全绿；③BLOCK-166 knownGap 排队候选行（10-12）——NAV-GUARD 已收口（✅ 行在案）；BLOCK-128 三条行收敛为仅②（①③已随 BLOCK-141 清偿留注）。 | zcode |

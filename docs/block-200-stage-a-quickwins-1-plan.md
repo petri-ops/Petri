@@ -9,7 +9,7 @@ acceptance:
   - P5 兼容与收尾：不动 BLOCK-199 冻结基线测；`validateValue` 只补 `domain.pattern` 一处通用能力，**不给地基加 map 类型**（不长第二套形状）；`impact-map` 为本包新增面补规则不留 fail-closed 盲区；`npm run closeout` 十三门 + 五件套回写。
   - 完成语义：交付的是**应用级命令键位可改 + 档位映射可编辑**，不宣称「全部快捷键可改」（12+ 处组件内就近绑定刻意不迁移，§4 点名）；UI 实机腿未过记 `in_progress` 不标 verified。
 reopen: 组件内绑定的分批收编（Cmd+S/Cmd+Enter 类需先有「焦点态门」表达，属键位系统 v2）、键位方案（profile）与多端同步、设置搜索/导出/按区重置=P0-3（runlist W2，载体是本包与 BLOCK-199）、Vim/Emacs 键位模式（未裁决）。
-status: active
+status: completed
 ---
 
 # BLOCK-200 · 阶段 A 速赢 I（P0-1 快捷键设置面 + P0-5 推理档位可编辑）
@@ -86,6 +86,21 @@ status: active
 ## 6. 证据位置
 
 `acceptance/block-200/`（探针截图与断言 JSON、派发与出站腿输出）；测试即证据，路径随收口写进 plan §7 与台账行。
+
+## 8. 收口交付记录（2026-10-17 实跑，非叙述）
+
+| 项 | 交付 | 证据 |
+| --- | --- | --- |
+| 键位单源 | `appKeymap.ts`（语法/规范化/冲突/解绑纯函数）+ `appKeymapContext.tsx`（Provider + App 级派发器）+ `helpers/keymap.js`/`routes/keymap.js`（写侧守卫） | 前端 26/26 + 后端 8/8 |
+| 三处虚假徽章清零 | `⌘N` 与 `⌘/` 两条无处理器的承诺随批消失；徽章只可能来自生效键位 | 派发腿 D4 实机 |
+| 档位可编辑 | `reasoning-defaults.js` 数据单源 + `thinking-level.js` 改查表（依赖反转注入）+ `helpers/reasoning-config.js` + REST 写面 | 拆前基线 5/5 冻结、改后邻域 20/20 一字未变；出站腿 9/9 |
+| 设置面两节 | 「快捷键」「推理档位」接入，section 外壳下沉进面板自带（壳层 696 行回预算内） | 组件测 11/11 + 9223 探针 |
+| 漂移门 | BLOCK-199 四向门扩两族，**加前先红后绿实证** | `acceptance/block-200/drift-gate-red-2026-10-17.txt` |
+| 实机腿 | 9223 自动探针 **17/17 allPass**：REST 写侧拒绝 + DOM 同源 + 真页面派发跟随 | `acceptance/block-200/block200-settings-live-live.json` + 两节截图 |
+| 诊断出口 | `config:doctor` 纳入两族（嵌套 mapping 经 flattenOneLevel 摊平后诊断） | 本机实跑 0 未知/0 非法/0 遮蔽 |
+| 门禁 | `npm run closeout` **十三门全绿**（过程中 code-size/lint/types/knip 各抓到我的真实问题，全部按真实修复而非放宽） | 本会话 |
+
+**如实边界**：组件内就近语义绑定（Escape 类 12 处、Cmd+S、Cmd+Enter、Ctrl+Tab、裸键聚焦、原生加速器）**刻意未迁移**，不得表述为「全部快捷键可改」；Shift 移位标点无法还原 `e.key` 的组合如实拒绑；UI-514/UI-515 已依实机证据翻 `verified`。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## 7. 进度（滚动，收口时以实跑事实为准）
 

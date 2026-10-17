@@ -2,6 +2,10 @@
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
 
+最后更新：2026-10-17（**BLOCK-200-STAGE-A-QUICKWINS-1 整包 completed（阶段 A 速赢 I=runlist W1）**）
+
+**恢复要点（换会话必读·本段取代上方 BLOCK-200 检查点段）**：**无 active 工作包**，下一包=runlist **W2（P0-3 设置搜索/导出/按区重置）**，用户已授权按 W0→W8 连打不需逐项发令。**BLOCK-200 交付**：键位单源与 App 级派发器（`keymap` 族，写侧拒未知命令 id）、档位默认值/预算/逐协议映射可编辑（`reasoning` 族，拆前基线冻结后 20/20 未变）、设置页「快捷键」「推理档位」两节、BLOCK-199 漂移门扩两族（先红后绿）、`config:doctor` 扩两族；**9223 探针 17/17 allPass**（`acceptance/block-200/`）。UI-514/UI-515 均 `verified`。**未做/边界**：12+ 处组件内就近语义绑定未迁移（不宣称全部快捷键可改）；B1b 的 10 落点与 data root 脑裂仍是 W4；BLOCK-199 的 C-32 仍只登记未改。plan=docs/block-200-stage-a-quickwins-1-plan.md §7/§8。**推送状态**：BLOCK-199 收口批已推（`1e73233f..033072e5`）；BLOCK-200 的提交尚未推，若用户发令按快进推 origin/main（不改写历史）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-17（**BLOCK-199-CONFIG-SCHEMA-SERVICE 整包 completed（阶段 3 结构地基首包 P1-1 配置 schema 层与统一配置服务）**）
 
 **恢复要点（换会话必读·本段取代上方 BLOCK-199 立项段的"active"状态）**：**当前唯一 active 工作包=BLOCK-200（阶段 A 速赢 I=runlist W1，未收口）**。**下一会话第一个动作**（顺序勿改，详见 `docs/block-200-stage-a-quickwins-1-plan.md` §7）：①修两处 `theme-token-contract` 棘轮红——`sections/SettingsQuickwins.module.css` 小字号 6 > ratchet 0（棘轮只许收缩，改回 body 档，不抬基线）、`components/copilot/ToolActivityDock.module.css` 裸 px font-size 1 > 0（**该文件非本包所改**，先定归属再动）；复跑命令 `npm run test:changed -- --base=9da95e13`。②9223 测试实例自动探针取「快捷键」「推理档位」两节截图与断言 JSON 落 `acceptance/block-200/`，然后才把 UI-514/UI-515 由 `in_progress` 转 `verified`。③`npm run closeout` + 五件套 + `output:judge` + `decision:session`，收口后推 main（本轮已推 `1e73233f..033072e5`，其后 BLOCK-200 的 6 笔尚未推）。
