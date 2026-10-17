@@ -57,7 +57,7 @@
 - [x] W1 BLOCK-200 阶段 A 速赢 I（completed 2026-10-17：键位单源与派发 + 档位映射可编辑 + 设置面两节 + 9223 探针 17/17 + closeout 十三门全绿；12+ 处就近语义绑定未迁移，如实不宣称全部可改）
 - [x] W2 BLOCK-201 阶段 A 速赢 II（completed 2026-10-17：设置搜索+分区过滤+按区重置+注册表 6 族全景导出/导入；9223 探针 18/18 allPass；**分区口径更正为 10**（BLOCK-200 后），本行原写「8 分区」已过时）
 - [x] W3 BLOCK-202 阶段 A 速赢 III（completed 2026-10-17：代理四项 + 审批默认档位 + 并发/深度可配 + 工具白/黑名单曝光层；9223 探针 15/15 allPass；config-transfer 扩 8 族）
-- [ ] W4a BLOCK-203 阶段 3 B1b 前半片（**active 2026-10-17**：P0 口径更正 + 拆片；实现未开始）
+- [x] W4a BLOCK-203 阶段 3 B1b 前半片（**completed 2026-10-18**：P1–P8 八片落地；四文件族收编 + ai-settings 顶层白名单 + localStorage 降纯缓存 + models 导出默认脱敏；注册表 12 族/60 键；closeout 十三门全绿；覆盖率按实码 **8/14**=7/7 文件族 + localStorage，剩 6 处属 W4b；收口自纠 accents↔prefCache 新环 + 补 UI-521/522 台账）
 - [ ] W4b BLOCK-203 阶段 3 B1b 后半片（SQLite 四落点 + data root 合一，未启动）
 - [ ] W5 … W8（未启动）
 
