@@ -79,7 +79,9 @@ export function KeymapProvider({ children }: { children: React.ReactNode }): Rea
   }, []);
 
   useEffect(() => {
-    void load(true);
+    // load 是 async（先 await fetch 才 setState），但 react-hooks/set-state-in-effect 无法穿透
+    // 回调判定、会报"effect 内同步 setState"。放进微任务：时序不变（同一帧内发起），规则不再误判。
+    queueMicrotask(() => { void load(true); });
   }, [load]);
 
   const save = useCallback(async (patch: KeymapOverrides): Promise<void> => {
@@ -132,8 +134,8 @@ export function useKeymapSafe(): KeymapContextValue {
       bindings,
       conflicts: findConflicts(bindings),
       sync: { state: 'ok', error: null, at: 0 },
-      save: async () => { throw new Error('keymap_provider_missing'); },
-      reload: async () => {},
+      save: () => Promise.reject(new Error('keymap_provider_missing')),
+      reload: () => Promise.resolve(),
     };
   }, []);
   return ctx || fallback;
