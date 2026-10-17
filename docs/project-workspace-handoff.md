@@ -4,7 +4,7 @@
 
 最后更新：2026-10-17（**BLOCK-200-STAGE-A-QUICKWINS-1 整包 completed（阶段 A 速赢 I=runlist W1）**）
 
-**恢复要点（换会话必读·本段取代上方 BLOCK-200 检查点段）**：**无 active 工作包**，下一包=runlist **W2（P0-3 设置搜索/导出/按区重置）**，用户已授权按 W0→W8 连打不需逐项发令。**BLOCK-200 交付**：键位单源与 App 级派发器（`keymap` 族，写侧拒未知命令 id）、档位默认值/预算/逐协议映射可编辑（`reasoning` 族，拆前基线冻结后 20/20 未变）、设置页「快捷键」「推理档位」两节、BLOCK-199 漂移门扩两族（先红后绿）、`config:doctor` 扩两族；**9223 探针 17/17 allPass**（`acceptance/block-200/`）。UI-514/UI-515 均 `verified`。**未做/边界**：12+ 处组件内就近语义绑定未迁移（不宣称全部快捷键可改）；B1b 的 10 落点与 data root 脑裂仍是 W4；BLOCK-199 的 C-32 仍只登记未改。plan=docs/block-200-stage-a-quickwins-1-plan.md §7/§8。**推送状态**：BLOCK-199 收口批已推（`1e73233f..033072e5`）；BLOCK-200 的提交尚未推，若用户发令按快进推 origin/main（不改写历史）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+**恢复要点（换会话必读·本段取代上方 BLOCK-200 检查点段）**：**无 active 工作包**，下一包=runlist **W2（P0-3 设置搜索/导出/按区重置）**，用户已授权按 W0→W8 连打不需逐项发令。**BLOCK-200 交付**：键位单源与 App 级派发器（`keymap` 族，写侧拒未知命令 id）、档位默认值/预算/逐协议映射可编辑（`reasoning` 族，拆前基线冻结后 20/20 未变）、设置页「快捷键」「推理档位」两节、BLOCK-199 漂移门扩两族（先红后绿）、`config:doctor` 扩两族；**9223 探针 17/17 allPass**（`acceptance/block-200/`）。UI-514/UI-515 均 `verified`。**未做/边界**：12+ 处组件内就近语义绑定未迁移（不宣称全部快捷键可改）；B1b 的 10 落点与 data root 脑裂仍是 W4；BLOCK-199 的 C-32 仍只登记未改。plan=docs/block-200-stage-a-quickwins-1-plan.md §7/§8。**推送状态**：BLOCK-199 收口批（`1e73233f..033072e5`）与 BLOCK-200 收口批（`033072e5..e6906e75`，19 笔，全绿后经用户发令）均已快进推 origin/main；未改写历史、未强推。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-17（**BLOCK-199-CONFIG-SCHEMA-SERVICE 整包 completed（阶段 3 结构地基首包 P1-1 配置 schema 层与统一配置服务）**）
 
