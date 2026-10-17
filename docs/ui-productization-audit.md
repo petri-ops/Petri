@@ -4980,23 +4980,23 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 
 
 
-## UI-516: 设置分区搜索与过滤（2026-10-17 in_progress，BLOCK-201 W2）
+## UI-516: 设置分区搜索与过滤（2026-10-17 in_progress→**verified（同日 9223 自动探针：D2 全量 10 分区、D3 输入「快捷键」命中 1/10 且导航只剩 1 项、D4 无匹配显式空态、D5 清空恢复 10 项；证据 `acceptance/block-201/`，18/18 allPass）**，BLOCK-201 W2）
 
 - **变化面**：设置面板顶部新增搜索条（`SettingsToolbar`），输入即按「分区名 / 描述 / 同义词」过滤左侧导航并显示「命中 N / 10」；无命中给可行动空态（提示换词或清空），不假装有结果；清空恢复全部分区。
 - **同源保证**：搜索索引 `frontend/src/lib/settingsSearch.ts` 的 id/label/description 与 `DesktopSettingsPanel/types.ts` 的 `SETTINGS_SECTIONS` **逐项相等**，由 `settingsSearch.test.ts` 与 `test/block201-settings-baseline.test.mjs` 双向钉——新增分区忘了补索引会红。
 - **验证**：`settingsSearch.test.ts` 8/8（索引↔分区逐项相等·空查询全量·名/描述/同义词命中·大小写不敏感·多词 AND·名称命中优先·无匹配空数组）；`SettingsToolbar.test.tsx` 3/3（输入回调·计数态·重置按钮仅在可用时出现）。
-- **待办**：9223 测试实例自动探针出图（输入命中/空态/清空）→ 转 `verified`。
+- **实机腿（已销号 2026-10-17）**：9223 自动探针 18/18 allPass，截图 `ui516-settings-search.png`；本条转 `verified`。
 
-## UI-517: 按区恢复默认（2026-10-17 in_progress，BLOCK-201 W2）
+## UI-517: 按区恢复默认（2026-10-17 in_progress→**verified（同日 9223 自动探针：D8 快捷键节出现「恢复「快捷键」默认」、D9 general 节不出现假按钮 + REST R9 重置后导出回落空覆盖；证据 `acceptance/block-201/`，18/18 allPass）**，BLOCK-201 W2）
 
 - **变化面**：当前分区确有注册表承载时（usage/decisions/keymap/reasoning/experimental 五个），工具栏出现「恢复『X』默认」；点击二次确认后只清该区覆盖层回落代码默认，**不动对话/项目/结果/凭据**；成功后提示并重挂载分区面板刷新。
 - **诚实边界**：general/models/compute/diagnostics/maintenance **不显示**重置按钮（这些区的设置未进注册表，属 W4）——不把没做的能力装饰成已提供。
 - **验证**：`test/block201-config-transfer.test.mjs` 的 reset 用例（只清覆盖层·回落默认·拒绝未知族/空清单）；`settingsFamilies` 映射测试（只登记已知族）。
-- **待办**：9223 探针（重置前/后对比 + 无害断言）→ 转 `verified`。
+- **实机腿（已销号 2026-10-17）**：9223 探针 D8/D9 + REST R8/R9 全过；本条转 `verified`。边界：重置不写审计台账（与既有设置写面一致，plan §4.3 已登记）。
 
-## UI-518: 设置全景导出 / 导入（2026-10-17 in_progress，BLOCK-201 W2）
+## UI-518: 设置全景导出 / 导入（2026-10-17 in_progress→**verified（同日 9223 自动探针：D6/D7 维护节面板与导出/导入钮在位、R1-R7 导出信封 6 族/无凭据/非法导入零写入/往返幂等、R8-R9 重置拒绝与回落；证据 `acceptance/block-201/`，18/18 allPass）**，BLOCK-201 W2）
 
 - **变化面**：「隐私与维护」节新增「配置备份」：导出注册表 6 族为版本化 JSON（桌面走原生另存、浏览器退化下载）；导入文件先由后端全量校验，通过才落盘，失败逐条显示 diagnostics；导出提示明确「不含凭据」，env 遮蔽项在导出后点名（导进去也不会生效）。
 - **诚实边界**：只覆盖 shared-config 6 族；模型渠道/凭据/外观/计算路径**不在导出里**（排除清单随信封回传）；导入是**合并覆盖**（不删除文件里未出现的键），不是整机恢复；既有 models 导出明文 Key 的行为本包不接管（已登记冲突）。
 - **验证**：`test/block201-config-transfer.test.mjs` 9/9（信封·无凭据泄漏·往返幂等·未知键/族/版本零写入·非法值·reset·env 遮蔽）；`ConfigTransferPanel.test.tsx` 5/5（导出另存·失败诊断·导入拒绝/成功/父层刷新·遮蔽提示）。
-- **待办**：9223 探针（导出文件形状 + 导入往返）→ 转 `verified`。
+- **实机腿（已销号 2026-10-17）**：9223 自动探针 18/18（含 R7 往返幂等——该腿当场抓到 cost-cap `0` 与 `null` 的导出不幂等，已修为统一归一 null 并复跑转绿）；截图 `ui518-config-transfer.png`；本条转 `verified`。

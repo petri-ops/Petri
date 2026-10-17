@@ -4,16 +4,15 @@
  * 内容与原 DesktopSettingsModal 相同，但渲染为浮动面板而非全屏遮罩模态。
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { ThemeControl } from './ThemeControl';
 import { useTheme, FONT_SCALE_MIN, FONT_SCALE_MAX } from '@/themes/ThemeProvider';
 import { AccentControl } from './AccentControl';
-import { filterSettingsSections } from '@/lib/settingsSearch';
-import { resetFamiliesFor } from '@/lib/settingsFamilies';
-import { resetConfigFamilies } from '@/lib/configTransfer';
+import { SettingsNav } from './DesktopSettingsPanel/SettingsNav';
+import { MaintenanceSection } from './DesktopSettingsPanel/MaintenanceSection';
+import { useSettingsTransferState } from './DesktopSettingsPanel/useSettingsTransferState';
 import { SettingsToolbar } from './DesktopSettingsPanel/SettingsToolbar';
-import { ConfigTransferPanel } from './DesktopSettingsPanel/sections/ConfigTransferPanel';
 import {
   endpointBaseUrl,
   isChatSelectableProfile,
@@ -46,8 +45,6 @@ import { GenerationDefaultsPanel } from './DesktopSettingsPanel/sections/Generat
 import { KeymapPanel } from './DesktopSettingsPanel/sections/KeymapPanel';
 import { ReasoningDefaultsPanel } from './DesktopSettingsPanel/sections/ReasoningDefaultsPanel';
 import { GuardAckHistoryPanel } from '@/components/copilot/SimpleChat/GuardAckCard';
-import { UpdateChecker } from './DesktopSettingsPanel/sections/UpdateChecker';
-import { ExportDiagnostic } from './DesktopSettingsPanel/sections/ExportDiagnostic';
 import { DataManagement } from './DesktopSettingsPanel/sections/DataManagement';
 import { RemoteTargets } from './DesktopSettingsPanel/sections/RemoteTargets';
 import { TrashManagement } from './DesktopSettingsPanel/sections/TrashManagement';
@@ -61,14 +58,19 @@ import { credentialId } from './DesktopSettingsPanel/model-types';
 export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.ReactElement {
   // BLOCK-171 CP-3 — 深链初始节（?section= 经设置页透传；非法值由类型域外校验兜底 general）
   const [activeSection, setActiveSection] = useState<SettingsSection>(initialSection ?? 'general');
-  // BLOCK-201 W2 — 设置搜索（分区级过滤）与按区重置
-  const [settingsQuery, setSettingsQuery] = useState('');
-  const [resetBusy, setResetBusy] = useState(false);
-  const [settingsNotice, setSettingsNotice] = useState<string | null>(null);
-  // 重置/导入后置增：各分区面板按 key 重挂载，重新拉取生效值（否则展示的还是旧快照）
-  const [settingsVersion, setSettingsVersion] = useState(0);
-  const visibleSectionIds = useMemo(() => new Set(filterSettingsSections(settingsQuery)), [settingsQuery]);
-  const resetFamilies = resetFamiliesFor(activeSection);
+  const activeSectionMeta = SETTINGS_SECTIONS.find((item) => item.id === activeSection) || SETTINGS_SECTIONS[0];
+  // BLOCK-201 W2 — 搜索/分区过滤/按区重置（状态机外置：面板已贴 code-size 预算，见钩子注释）
+  const {
+    query: settingsQuery,
+    setQuery: setSettingsQuery,
+    visibleSectionIds,
+    resetFamilies,
+    resetBusy,
+    notice: settingsNotice,
+    settingsVersion,
+    bumpVersion,
+    resetActiveSection,
+  } = useSettingsTransferState({ activeSection, activeLabel: activeSectionMeta.label });
   const backendStatus = useBackendStatus();
   const { preference: themePreference, fontScale, setFontScale } = useTheme();
   // BLOCK-92 Wave B-4 — API Endpoint 编辑器状态簇外迁
@@ -135,29 +137,8 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
     }
   }
 
-  const activeSectionMeta = SETTINGS_SECTIONS.find((item) => item.id === activeSection) || SETTINGS_SECTIONS[0];
   const showAiSave = activeSection === 'models';
 
-  // BLOCK-201 W2 — 按区重置：只清该区注册表族的覆盖层（回落代码默认）。
-  // 二次确认 + 明确文案：不动对话/项目/结果/凭据，避免被理解成"清空设置"。
-  const handleResetSection = useCallback(async (): Promise<void> => {
-    if (resetFamilies.length === 0) return;
-    const confirmed = window.confirm(
-      `恢复「${activeSectionMeta.label}」的默认设置？\n\n` +
-      `只清除本区已保存的覆盖值（回落代码默认），不会改动对话、项目、结果与凭据。`,
-    );
-    if (!confirmed) return;
-    setResetBusy(true);
-    setSettingsNotice(null);
-    const result = await resetConfigFamilies(resetFamilies);
-    setResetBusy(false);
-    if (result.ok) {
-      setSettingsNotice(`已恢复默认：${result.applied.join('、')}（面板已刷新）`);
-      setSettingsVersion((version) => version + 1);
-    } else {
-      setSettingsNotice(`恢复失败：${result.diagnostics.map((row) => row.message || row.code).join('；')}`);
-    }
-  }, [activeSectionMeta.label, resetFamilies]);
   const agentPrimaryProfileId = roleBindings.agent || roleBindings.chat;
   const agentFallbackProfileIds = fallbackBindings.agent || [];
   const agentFallbackCandidates = modelProfiles.filter((profile) =>
@@ -192,11 +173,11 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
 
       <SettingsToolbar
         query={settingsQuery}
-        onQueryChange={(next) => { setSettingsQuery(next); setSettingsNotice(null); }}
+        onQueryChange={setSettingsQuery}
         resultCount={visibleSectionIds.size}
         totalCount={SETTINGS_SECTIONS.length}
         resetLabel={resetFamilies.length > 0 ? `恢复「${activeSectionMeta.label}」默认` : undefined}
-        onReset={resetFamilies.length > 0 ? () => void handleResetSection() : undefined}
+        onReset={resetFamilies.length > 0 ? () => void resetActiveSection() : undefined}
         busy={resetBusy}
       />
       {settingsNotice && (
@@ -204,27 +185,11 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
       )}
 
       <div className="petri-settings-layout">
-        <nav className="petri-settings-nav" aria-label="设置分类">
-          {SETTINGS_SECTIONS.filter((item) => visibleSectionIds.has(item.id)).map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={`petri-settings-nav__item${activeSection === item.id ? ' active' : ''}`}
-              onClick={() => setActiveSection(item.id)}
-            >
-              <Icon name={item.icon} size={15} />
-              <span>
-                <strong>{item.label}</strong>
-                <small>{item.description}</small>
-              </span>
-            </button>
-          ))}
-          {visibleSectionIds.size === 0 && (
-            <p className="petri-field__hint" data-testid="settings-search-empty">
-              没有匹配的分区。试试「快捷键」「成本」「模型」或清空搜索。
-            </p>
-          )}
-        </nav>
+        <SettingsNav
+          visibleSectionIds={visibleSectionIds}
+          activeSection={activeSection}
+          onSelect={setActiveSection}
+        />
 
         <div className="petri-desktop-panel__body petri-settings-content">
         {activeSection === 'general' && (
@@ -671,50 +636,11 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
         )}
 
         {activeSection === 'maintenance' && (
-          <section className="petri-settings-section">
-            <div className="petri-settings-section__heading">
-              <h3>隐私与维护</h3>
-              <p>控制匿名错误反馈，并处理诊断和应用更新。</p>
-            </div>
-        {/* M2-3：可选错误遥测开关（默认关闭，用户主动开启） */}
-        <div className="petri-field">
-          <label className="petri-field__label">开启错误反馈</label>
-          <div className="petri-toggle-row">
-            <input
-              type="checkbox"
-              id="petri-telemetry-toggle"
-              className="petri-toggle"
-              checked={telemetryEnabled}
-              onChange={(e) => void handleToggleTelemetry(e.target.checked)}
-            />
-            <label htmlFor="petri-telemetry-toggle" className="petri-toggle-label">
-              {telemetryEnabled ? '已开启' : '已关闭'}
-            </label>
-          </div>
-          <p className="petri-field__hint">
-            开启后，分析出错时仅上报错误分类与应用版本（不含任何用户数据、文件路径或文件名），
-            用于改进工具稳定性。可随时关闭。
-          </p>
-        </div>
-        <div className="petri-maintenance-actions">
-          <div className="petri-maintenance-row">
-            <div>
-              <strong>应用更新</strong>
-              <p>检查并下载适用于当前 Mac 的安装包。</p>
-            </div>
-            <UpdateChecker />
-          </div>
-          <div className="petri-maintenance-row">
-            <div>
-              <strong>诊断日志</strong>
-              <p>导出用于排查问题的本地诊断信息。</p>
-            </div>
-            <ExportDiagnostic />
-          </div>
-        </div>
-        {/* BLOCK-201 W2 — 设置全景导出/导入（注册表 6 族；凭据与未注册落点显式排除） */}
-        <ConfigTransferPanel onChanged={() => setSettingsVersion((version) => version + 1)} />
-          </section>
+          <MaintenanceSection
+            telemetryEnabled={telemetryEnabled}
+            onToggleTelemetry={(next) => void handleToggleTelemetry(next)}
+            onConfigChanged={bumpVersion}
+          />
         )}
 
         {activeSection === 'experimental' && (

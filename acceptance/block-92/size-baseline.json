@@ -61,8 +61,8 @@
       "path": "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
       "wave": "B",
       "module": "W-01",
-      "lines": 696,
-      "sha256": "dbfc1a4646dda1a282722e239a9a04110d0fa8e5095352bf07030a702e81d201"
+      "lines": 676,
+      "sha256": "f05de77e5ba226fb15f897b846ccb1692d8d3a22db9e8f31d4c85ea4f20a8776"
     },
     {
       "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
@@ -170,5 +170,5 @@
       "sha256": "6f08befd152ee1a707051d0131a521a85e2572a883a2c9e912bbd0994fa69e72"
     }
   ],
-  "total": 23510
+  "total": 23490
 }

@@ -2,9 +2,9 @@
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
 
-最后更新：2026-10-17（**BLOCK-201-SETTINGS-SEARCH-EXPORT 立项发令 active（阶段 A 速赢 II=runlist W2；用户「开 W2」）**）
+最后更新：2026-10-17（**BLOCK-201-SETTINGS-SEARCH-EXPORT 整包 completed（阶段 A 速赢 II=runlist W2；当日立项当日收口·9223 探针 18/18 allPass）**）
 
-**恢复要点（换会话必读·本段取代下方 BLOCK-200 收口段）**：**当前 active 工作包=BLOCK-201**，范围=设置搜索/分区过滤/按区重置/注册表 6 族全景导出导入；plan=`docs/block-201-settings-search-export-plan.md`。**已落地**：后端 `helpers/config-transfer.js`（导出覆盖层/全量校验/分批应用，读写委派既有 helper）+ `routes/config-transfer.js`（GET export / POST import / POST reset）+ `decision-config.clearPointOverrides` + `reasoning-config.validateReasoningPatch`（与 saveReasoning 同一摊平）；前端 `lib/settingsSearch`（10 分区索引）/`lib/settingsFamilies`（5 个可重置分区）/`lib/configTransfer`/`SettingsToolbar`/`ConfigTransferPanel` + 面板挂载。**待做**：9223 实机腿（搜索/重置/导出往返/导入幂等）+ UI-516/517/518 台账 + closeout 十三门与五件套回写。**口径**：分区实为 10（runlist「8 分区」过时）；导出/导入只覆盖注册表 6 族，模型渠道/凭据/外观/计算路径属 W4。G0 开发期常态 · 不外推 packaged/Provider/GA。
+**恢复要点（换会话必读·本段取代下方 BLOCK-200 收口段）**：**无 active 工作包**，下一包=runlist **W3（阶段 A 速赢 III：P0-4 代理设置 + P0-2 全局审批档位选择器/工具白黑名单/并发深度暴露）**，用户已授权按 W0→W8 连打不需逐项发令。**BLOCK-201 交付**：`helpers/config-transfer.js` + `routes/config-transfer.js`（GET /api/config/export、POST import/reset）+ 前端 `settingsSearch`（**10 分区**索引）/`settingsFamilies`/`SettingsToolbar`/`ConfigTransferPanel`/`useSettingsTransferState`/`SettingsNav`/`MaintenanceSection`；导出=用户覆盖层（6 族，不含凭据/env/默认值，排除清单回传）、导入=先校验后落盘且往返幂等、重置=只清覆盖层且仅 5 个注册表分区有入口。**实机抓真**=R2 断言误判说明文字（修断言）+ R7 cost-cap `0`/`null` 不幂等（修导出归一）；**code-size**=面板 750→676（拆三件，未抬基线）。UI-516/517/518 均 `verified`（`acceptance/block-201/`：18/18 + 两张截图）。**未接管**=既有 models 导出明文 Key 与 D-2 冲突只登记不改。**覆盖率口径=6/14 落点**，不得称「配置已统一」。plan=docs/block-201-settings-search-export-plan.md §7。**dev 栈**：本会话手工拉起 Vite:3000 + 后端:3001（`PETRI_LOCAL_DATA_DIR=.petri-dev-user-data/data`）+ 9223 测试实例；Electron 主窗未起（`npm run dev` 报 15s 超时，主窗未验证）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-17（**BLOCK-200-STAGE-A-QUICKWINS-1 整包 completed（阶段 A 速赢 I=runlist W1）**）
 

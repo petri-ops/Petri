@@ -59,10 +59,12 @@ module.exports = {
       && Object.keys(exp0.data.config.families || {}).length === 6,
       `status=${exp0.status} keys=${Object.keys(exp0.data?.config?.families || {}).join(',')}`);
 
-    const serialized = JSON.stringify(exp0.data?.config || {});
+    // 只查 families 载荷：信封的 excludes 文本里本来就会出现 "credentials/API Key" 字样
+    // 做说明，拿整封信封做正则会把「说明」误判成「泄漏」（首跑即此假红）。
+    const payload = JSON.stringify(exp0.data?.config?.families || {});
     assert('R2_export_has_no_credentials',
-      !/apiKey|credential|sk-[A-Za-z0-9]/.test(serialized),
-      serialized.slice(0, 200));
+      !/apiKey|credential|secret|sk-[A-Za-z0-9]{8,}/i.test(payload),
+      payload.slice(0, 200));
 
     const beforeGen = await rest('GET', '/ai/generation-defaults');
     const beforeTemp = beforeGen.data?.generation?.temperature;

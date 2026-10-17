@@ -96,7 +96,9 @@ function readFamilyOverrides() {
     'feature-flags': { flags: flags.readStore() },
     'decision-points': { points: decisionPoints },
     generation: { ...generation },
-    'cost-cap': { costCapCny: typeof ai.costCapCny === 'number' ? ai.costCapCny : null },
+    // 0/未设置都表示「无熔断」：导出统一归一为 null，否则「导出 → 导入（0）→ 再导出」不幂等
+    // （这是 9223 实机腿 R7 当场抓到的漂移，单测只覆盖了已设值的路径）。
+    'cost-cap': { costCapCny: typeof ai.costCapCny === 'number' && ai.costCapCny > 0 ? ai.costCapCny : null },
     keymap: { bindings: keymap.readStore() },
     reasoning: pickReasoningSection(ai.reasoning),
   };

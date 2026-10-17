@@ -1,0 +1,98 @@
+{
+  "name": "block201-settings-live",
+  "startedAt": "2026-10-17T14:11:10.543Z",
+  "finishedAt": "2026-10-17T14:11:13.562Z",
+  "assertions": [
+    {
+      "name": "R1_export_envelope_ok",
+      "pass": true,
+      "detail": "status=200 keys=feature-flags,decision-points,generation,cost-cap,keymap,reasoning"
+    },
+    {
+      "name": "R2_export_has_no_credentials",
+      "pass": true,
+      "detail": "{\"feature-flags\":{\"flags\":{}},\"decision-points\":{\"points\":{}},\"generation\":{},\"cost-cap\":{\"costCapCny\":null},\"keymap\":{\"bindings\":{}},\"reasoning\":{}}"
+    },
+    {
+      "name": "R3_import_invalid_400_with_diagnostics",
+      "pass": true,
+      "detail": "status=400 diag=[{\"code\":\"out-of-range\",\"family\":\"generation\",\"path\":\"temperature\",\"message\":\"generation.temperature 需 ≤ 2\"},{\"code\":\"unknown-key\",\"family\":\"generation\",\"path\":\"nope\",\"message\":\"未注册的配置键 nope，拒绝写入（不再静默"
+    },
+    {
+      "name": "R4_rejected_import_wrote_nothing",
+      "pass": true,
+      "detail": "before=undefined after=undefined"
+    },
+    {
+      "name": "R5_valid_import_applied",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"applied\":[\"generation\"],\"diagnostics\":[]}"
+    },
+    {
+      "name": "R6_import_reflected_in_export",
+      "pass": true,
+      "detail": "{\"temperature\":0.55}"
+    },
+    {
+      "name": "R7_import_roundtrip_idempotent",
+      "pass": true,
+      "detail": "replay={\"status\":\"ok\",\"applied\":[\"feature-flags\",\"decision-points\",\"generation\",\"cost-cap\",\"keymap\",\"reasoning\"],\"diagnostics\":[]}"
+    },
+    {
+      "name": "R8_reset_unknown_family_400",
+      "pass": true,
+      "detail": "status=400"
+    },
+    {
+      "name": "R9_reset_falls_back_to_default",
+      "pass": true,
+      "detail": "{}"
+    },
+    {
+      "name": "D1_settings_toolbar_rendered",
+      "pass": true,
+      "detail": "nav /settings → toolbar"
+    },
+    {
+      "name": "D2_all_sections_listed",
+      "pass": true,
+      "detail": "{\"navItems\":10,\"count\":\"10 个分区\"}"
+    },
+    {
+      "name": "D3_search_filters_navigation",
+      "pass": true,
+      "detail": "{\"hit\":{\"navItems\":1,\"count\":\"命中 1 / 10\"},\"empty\":{\"navItems\":0,\"emptyState\":true},\"cleared\":10}"
+    },
+    {
+      "name": "D4_no_match_explicit_empty_state",
+      "pass": true,
+      "detail": "{\"navItems\":0,\"emptyState\":true}"
+    },
+    {
+      "name": "D5_clear_restores_all_sections",
+      "pass": true,
+      "detail": "cleared=10"
+    },
+    {
+      "name": "D6_config_transfer_panel_in_maintenance",
+      "pass": true,
+      "detail": "maintenance 节应有配置备份面板"
+    },
+    {
+      "name": "D7_transfer_actions_present",
+      "pass": true,
+      "detail": "{\"text\":\"配置备份（导出 / 导入）\\n\\n导出注册表 6 族（功能开关、决策接点、生成参数、成本上限、键位、推理档位）。不含 API Key、模型渠道与外观偏好——排除清单随文件一起写出，便于核对。 导入为合并覆盖：只写文件里出现的键，不会删除未出现的键。\\n\\n导出配置\\n导入配置\",\"hasExport\":true,\"hasImport\":true,\"input\":true}"
+    },
+    {
+      "name": "D8_reset_entry_only_on_registry_section",
+      "pass": true,
+      "detail": "{\"present\":true,\"label\":\"恢复「快捷键」默认\"}"
+    },
+    {
+      "name": "D9_no_fake_reset_on_unregistered_section",
+      "pass": true,
+      "detail": "general reset present=false"
+    }
+  ],
+  "allPass": true
+}

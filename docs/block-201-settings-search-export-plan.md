@@ -10,7 +10,7 @@ acceptance:
   - P5 兼容与收尾：不动 BLOCK-199 冻结基线（`test/block199-config-compat.test.mjs`）与 BLOCK-200 三份基线；不改任何既有默认值与写路由语义；reset 只写空覆盖层（不经 `readDoc()` 的 seedDoc，避免把默认当覆盖冻结）；closeout 十三门 + 五件套回写。
   - 完成语义：交付的是「注册表 6 族的搜索/备份/重置」，**不宣称「全部设置可导出」**（models 凭据/渠道、外观偏好、计算路径未进注册表，属 W4）；UI 实机腿未过则记 `in_progress`，不标 verified。
 reopen: models/外观/计算路径等未注册落点的导出（W4/B1b 收编后并入本 transit）；设置项级搜索与深链（字段级索引）；导入的「整机恢复」语义（当前刻意只做合并覆盖）；导出格式版本 v2（新增族时需要迁移策略）。
-status: active
+status: completed
 ---
 
 # BLOCK-201 · 阶段 A 速赢 II（设置搜索 / 分区过滤 / 按区重置 / 全景导出导入）
@@ -93,3 +93,13 @@ status: active
 - [ ] UI 台账三条状态与实际证据一致（无实机腿不标 verified）
 - [ ] impact-map 新面已登记（本包已加 `block201-settings-transfer`）
 - [ ] 已知边界四条写进收口笔录，不粉饰
+
+## 7. 收口笔录（2026-10-17，当日立项当日收口）
+
+- **验证**：`test/block201-settings-baseline.test.mjs` 4/4 + `test/block201-config-transfer.test.mjs` 9/9 + `test/block199-config-drift.test.mjs` 6/6（含新增 transfer↔注册表集合），前端 vitest 16/16；**9223 实机探针 18/18 allPass**（`acceptance/block-201/block201-settings-live-live.json` + 两张截图），closeout 门禁全绿。
+- **实机腿抓真两处（都已修，不是改探针迁就）**：① 探针 R2 首跑把信封 `excludes` 里的说明文字（"credentials / API Key"）误判成泄漏——修的是**断言范围**（只查 families 载荷），不是放宽标准；② R7 往返幂等失败暴露真缺陷——cost-cap 的 `0`（无熔断）导出为 `0`、导入后写回 `0`、再导出仍是 `0` 而首次导出是 `null`，**不幂等**；修法是导出统一归一（`>0` 才带值，否则 `null`），并复跑转绿。
+- **code-size 抓真**：新增搜索/重置/备份把 `DesktopSettingsPanel.tsx` 顶到 750 行（基线 696 / 预算 700）。处置=**拆**（`useSettingsTransferState` 状态机 + `SettingsNav` 导航 + `MaintenanceSection` 整节下沉 → 676 行），并按台账纪律 `--write` 重打指纹基线，未申请例外、未抬基线。
+- **覆盖率诚实口径**：导出/导入/重置覆盖注册表 **6 族 / 26 键**（4/14 → 6/14 落点），其余 8 处与 data root 脑裂仍属 W4；**不得表述为「配置已统一」**。
+- **未接管项**：既有 models 导出（`useEndpointProfilesEditor.ts:381`）确认后仍写明文 Key，与 runlist D-2 冲突，本包只登记不改（§4.2），待后续小批裁决。
+- **口径更正**：分区实为 **10**（BLOCK-200 后），runlist W2 行「8 分区」已过时，已在 runlist 注记。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

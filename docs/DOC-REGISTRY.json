@@ -6892,8 +6892,8 @@
       "capability": "settings-search-export-reset",
       "path": "docs/block-201-settings-search-export-plan.md",
       "kind": "work-package",
-      "status": "active",
-      "phase": "P0-P3-IMPLEMENTED",
+      "status": "completed",
+      "phase": "P5-CLOSED",
       "canonical": true,
       "truthDomain": "block-201-settings-search-export-plan",
       "entrypoint": "docs/README.md",
@@ -6907,7 +6907,7 @@
         "stage-a-quickwin",
         "block-201"
       ],
-      "notes": "2026-10-17 立项发令 active（阶段 A 速赢 II=runlist W2；用户「开 W2」）：设置搜索+分区过滤+按区重置+注册表 6 族全景导出/导入。拆分=helpers/config-transfer（打包/校验/分批应用，读写委派既有 helper 零第二实现）+ routes/config-transfer（export/import/reset，拒绝 400+diagnostics）+ 前端 settingsSearch/settingsFamilies/configTransfer/SettingsToolbar/ConfigTransferPanel。诚实边界=只覆盖 shared-config 6 族（models 凭据/外观/计算路径属 W4）；既有 models 导出明文 Key 与 D-2 冲突登记不改；runlist「8 分区」口径更正为 10。"
+      "notes": "2026-10-17 立项发令 active（阶段 A 速赢 II=runlist W2；用户「开 W2」）：设置搜索+分区过滤+按区重置+注册表 6 族全景导出/导入。拆分=helpers/config-transfer（打包/校验/分批应用，读写委派既有 helper 零第二实现）+ routes/config-transfer（export/import/reset，拒绝 400+diagnostics）+ 前端 settingsSearch/settingsFamilies/configTransfer/SettingsToolbar/ConfigTransferPanel。诚实边界=只覆盖 shared-config 6 族（models 凭据/外观/计算路径属 W4）；既有 models 导出明文 Key 与 D-2 冲突登记不改；runlist「8 分区」口径更正为 10。 收口 2026-10-17：block201 基线 4/4 + transfer 契约 9/9 + drift 6/6 + 前端 16/16 + 9223 探针 18/18 allPass（acceptance/block-201/）+ closeout 门禁全绿；实机抓真 cost-cap 导出不幂等已修；code-size 750→676（拆三件，未抬基线）。"
     }
   ],
   "lastUpdated": "2026-10-17",
