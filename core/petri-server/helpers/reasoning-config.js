@@ -133,19 +133,13 @@ function guardProtocolTokens(patch) {
 }
 
 /**
- * 写侧：接受 `{ defaultLevel?, anthropicHighBudgetTokens?, mapping?: {protocol:{tier:token|null}} }`。
- * 任一校验不过 → 抛 `config_value_rejected`（带 diagnostics），**整批不落盘**。
+ * 把补丁摊成注册表路径（`mapping` 容器 → `mapping.<protocol>.<tier>`）。
+ * BLOCK-201 从 `saveReasoning` 抽出，供导入校验复用（**同一份摊平逻辑，不建第二套**）。
  */
-function saveReasoning(patch) {
-  if (!patch || typeof patch !== 'object' || Array.isArray(patch)) {
-    const err = new Error('config_value_rejected');
-    err.code = 'config_value_rejected';
-    err.diagnostics = [{ code: 'type-mismatch', family: FAMILY, path: '', message: '写入补丁必须是对象' }];
-    throw err;
-  }
+function flattenReasoningPatch(patch) {
+  const flat = {};
   // 顶层键**全量交给注册表判**（不是只挑已知键）：只挑已知键就等于把未知键静默丢掉，
   // 那正是 BLOCK-199 立项要消灭的行为。`mapping` 是容器，摊成逐协议/逐档位路径后再判。
-  const flat = {};
   for (const [key, value] of Object.entries(patch)) {
     if (key === 'mapping') {
       if (value && (typeof value !== 'object' || Array.isArray(value))) {
@@ -157,6 +151,34 @@ function saveReasoning(patch) {
     }
     flat[key] = value;
   }
+  return flat;
+}
+
+/**
+ * 只校验不落盘（BLOCK-201 导入前的全量预检用）：返回诊断数组，空=通过。
+ * 与 `saveReasoning` 共用同一摊平与同一守卫，保证「预检通过」与「写入通过」语义一致。
+ */
+function validateReasoningPatch(patch) {
+  if (!patch || typeof patch !== 'object' || Array.isArray(patch)) {
+    return [{ code: 'type-mismatch', family: FAMILY, path: '', message: '写入补丁必须是对象' }];
+  }
+  const flat = flattenReasoningPatch(patch);
+  const guard = commitGuard(FAMILY, flat, lookup);
+  return [...guard.diagnostics, ...guardProtocolTokens(flat)];
+}
+
+/**
+ * 写侧：接受 `{ defaultLevel?, anthropicHighBudgetTokens?, mapping?: {protocol:{tier:token|null}} }`。
+ * 任一校验不过 → 抛 `config_value_rejected`（带 diagnostics），**整批不落盘**。
+ */
+function saveReasoning(patch) {
+  if (!patch || typeof patch !== 'object' || Array.isArray(patch)) {
+    const err = new Error('config_value_rejected');
+    err.code = 'config_value_rejected';
+    err.diagnostics = [{ code: 'type-mismatch', family: FAMILY, path: '', message: '写入补丁必须是对象' }];
+    throw err;
+  }
+  const flat = flattenReasoningPatch(patch);
 
   const guard = commitGuard(FAMILY, flat, lookup);
   const diagnostics = [...guard.diagnostics, ...guardProtocolTokens(flat)];
@@ -210,6 +232,7 @@ module.exports = {
   getReasoningRuntime,
   getReasoningSnapshot,
   saveReasoning,
+  validateReasoningPatch,
   diagnoseStoredReasoning,
   effectiveReasoning,
 };

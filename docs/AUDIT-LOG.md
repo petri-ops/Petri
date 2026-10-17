@@ -17,6 +17,7 @@
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
+| 🔵 | 2026-10-17 | **BLOCK-201-SETTINGS-SEARCH-EXPORT 立项发令 active（阶段 A 速赢 II=runlist W2；用户「开 W2」）**：设置搜索/分区过滤/按区重置/注册表 6 族全景导出导入。后端 config-transfer（覆盖层导出+全量校验+分批应用，读写委派既有 helper）+ export/import/reset 三路由；前端 settingsSearch（**10 分区**，runlist 「8 分区」口径更正）/settingsFamilies/SettingsToolbar/ConfigTransferPanel。红线=凭据永不进导出（D-2）/导入先校验后落盘零写入/重置只清覆盖层不动用户数据/既有 models 明文导出只登记不接管。plan=docs/block-201-settings-search-export-plan.md | BLOCK-201 / W2-LAUNCH |
 | ✅ | 2026-10-12 | BLOCK-176 W6 整包 completed（十三门 PASS；w6-live 8/8 分档）：CP-16 镜像（契约抓真修 require 误路径死缺陷）/CP-17 checkpoint 安全网（shared-backend 同源+IPC+ReviewMode 入口）/CP-18 成本熔断（loop 执行面+用量节设置面）/CP-19 deferred。plan §4 波报；UI-505 随批。 | zcode |
 | --- | --- | --- | --- |
 | ✅ | 2026-10-13 | BLOCK-178 对话投递一等化 completed（live 14/14 真实 steer 链）：Send/Stop 并存+投递模式显式化+编辑重发+队列一等化+持久化+桌面通知；契约抓真 updater 回读缺陷。UI-508。 | zcode |

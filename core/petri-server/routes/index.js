@@ -38,6 +38,8 @@ module.exports = async function registerRoutes(app) {
     ['Feature flags', () => require('./feature-flags')(app)],
     // BLOCK-200 P0-1：键位读写面（写侧过 shared-config 注册表守卫，拒则 400+diagnostics）
     ['Keymap', () => require('./keymap')(app)],
+    // BLOCK-201 W2：设置全景导出/导入/按区重置（只覆盖注册表 6 族；凭据永不进导出）
+    ['Config transfer', () => require('./config-transfer')(app)],
     // Must precede Harness: harness.js retains the legacy
     // GET /api/loop/:loopRunId catch-all, which would otherwise swallow
     // /runs, /session-summary, /iterations, /recovery, etc.

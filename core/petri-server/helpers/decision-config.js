@@ -248,4 +248,26 @@ function getProviderMasked() {
   return { baseUrl: p.baseUrl, model: p.model, hasKey: Boolean(p.apiKey) };
 }
 
-module.exports = { RUNTIME_POINTS, getPointRuntime, getAllPointConfigs, setPointConfig, configPath, getProvider, setProvider, getProviderMasked };
+/**
+ * BLOCK-201 — 清空接点覆盖层（按区重置用）：只清 `points`，不动 `provider`。
+ * 刻意不经过 `readDoc()`：文件缺失时它会返回 seedDoc（含默认值），拿种子回写等于把默认
+ * 当成用户覆盖冻结进盘；这里直接写空覆盖层，读侧自然回落注册表默认。
+ */
+function clearPointOverrides() {
+  const doc = { version: 1, points: {} };
+  fs.mkdirSync(path.dirname(configPath()), { recursive: true });
+  fs.writeFileSync(configPath(), JSON.stringify(doc, null, 2) + NEWLINE, 'utf8');
+  return {};
+}
+
+module.exports = {
+  RUNTIME_POINTS,
+  getPointRuntime,
+  getAllPointConfigs,
+  setPointConfig,
+  clearPointOverrides,
+  configPath,
+  getProvider,
+  setProvider,
+  getProviderMasked,
+};

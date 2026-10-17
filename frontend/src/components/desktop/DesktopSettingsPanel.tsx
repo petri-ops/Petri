@@ -4,11 +4,16 @@
  * 内容与原 DesktopSettingsModal 相同，但渲染为浮动面板而非全屏遮罩模态。
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { ThemeControl } from './ThemeControl';
 import { useTheme, FONT_SCALE_MIN, FONT_SCALE_MAX } from '@/themes/ThemeProvider';
 import { AccentControl } from './AccentControl';
+import { filterSettingsSections } from '@/lib/settingsSearch';
+import { resetFamiliesFor } from '@/lib/settingsFamilies';
+import { resetConfigFamilies } from '@/lib/configTransfer';
+import { SettingsToolbar } from './DesktopSettingsPanel/SettingsToolbar';
+import { ConfigTransferPanel } from './DesktopSettingsPanel/sections/ConfigTransferPanel';
 import {
   endpointBaseUrl,
   isChatSelectableProfile,
@@ -56,6 +61,14 @@ import { credentialId } from './DesktopSettingsPanel/model-types';
 export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.ReactElement {
   // BLOCK-171 CP-3 — 深链初始节（?section= 经设置页透传；非法值由类型域外校验兜底 general）
   const [activeSection, setActiveSection] = useState<SettingsSection>(initialSection ?? 'general');
+  // BLOCK-201 W2 — 设置搜索（分区级过滤）与按区重置
+  const [settingsQuery, setSettingsQuery] = useState('');
+  const [resetBusy, setResetBusy] = useState(false);
+  const [settingsNotice, setSettingsNotice] = useState<string | null>(null);
+  // 重置/导入后置增：各分区面板按 key 重挂载，重新拉取生效值（否则展示的还是旧快照）
+  const [settingsVersion, setSettingsVersion] = useState(0);
+  const visibleSectionIds = useMemo(() => new Set(filterSettingsSections(settingsQuery)), [settingsQuery]);
+  const resetFamilies = resetFamiliesFor(activeSection);
   const backendStatus = useBackendStatus();
   const { preference: themePreference, fontScale, setFontScale } = useTheme();
   // BLOCK-92 Wave B-4 — API Endpoint 编辑器状态簇外迁
@@ -124,6 +137,27 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
 
   const activeSectionMeta = SETTINGS_SECTIONS.find((item) => item.id === activeSection) || SETTINGS_SECTIONS[0];
   const showAiSave = activeSection === 'models';
+
+  // BLOCK-201 W2 — 按区重置：只清该区注册表族的覆盖层（回落代码默认）。
+  // 二次确认 + 明确文案：不动对话/项目/结果/凭据，避免被理解成"清空设置"。
+  const handleResetSection = useCallback(async (): Promise<void> => {
+    if (resetFamilies.length === 0) return;
+    const confirmed = window.confirm(
+      `恢复「${activeSectionMeta.label}」的默认设置？\n\n` +
+      `只清除本区已保存的覆盖值（回落代码默认），不会改动对话、项目、结果与凭据。`,
+    );
+    if (!confirmed) return;
+    setResetBusy(true);
+    setSettingsNotice(null);
+    const result = await resetConfigFamilies(resetFamilies);
+    setResetBusy(false);
+    if (result.ok) {
+      setSettingsNotice(`已恢复默认：${result.applied.join('、')}（面板已刷新）`);
+      setSettingsVersion((version) => version + 1);
+    } else {
+      setSettingsNotice(`恢复失败：${result.diagnostics.map((row) => row.message || row.code).join('；')}`);
+    }
+  }, [activeSectionMeta.label, resetFamilies]);
   const agentPrimaryProfileId = roleBindings.agent || roleBindings.chat;
   const agentFallbackProfileIds = fallbackBindings.agent || [];
   const agentFallbackCandidates = modelProfiles.filter((profile) =>
@@ -156,9 +190,22 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
         </div>
       </div>
 
+      <SettingsToolbar
+        query={settingsQuery}
+        onQueryChange={(next) => { setSettingsQuery(next); setSettingsNotice(null); }}
+        resultCount={visibleSectionIds.size}
+        totalCount={SETTINGS_SECTIONS.length}
+        resetLabel={resetFamilies.length > 0 ? `恢复「${activeSectionMeta.label}」默认` : undefined}
+        onReset={resetFamilies.length > 0 ? () => void handleResetSection() : undefined}
+        busy={resetBusy}
+      />
+      {settingsNotice && (
+        <p className="petri-field__hint" data-testid="settings-reset-notice" role="status">{settingsNotice}</p>
+      )}
+
       <div className="petri-settings-layout">
         <nav className="petri-settings-nav" aria-label="设置分类">
-          {SETTINGS_SECTIONS.map((item) => (
+          {SETTINGS_SECTIONS.filter((item) => visibleSectionIds.has(item.id)).map((item) => (
             <button
               key={item.id}
               type="button"
@@ -172,6 +219,11 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
               </span>
             </button>
           ))}
+          {visibleSectionIds.size === 0 && (
+            <p className="petri-field__hint" data-testid="settings-search-empty">
+              没有匹配的分区。试试「快捷键」「成本」「模型」或清空搜索。
+            </p>
+          )}
         </nav>
 
         <div className="petri-desktop-panel__body petri-settings-content">
@@ -571,7 +623,7 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
             </div>
             <UsageResourcePanel />
             {/* BLOCK-163 W3 P9（MDL-4）— 按模型成本/用量面板（usage-mine models 聚合） */}
-            <UsageCostPanel />
+            <UsageCostPanel key={`usage-cost-${settingsVersion}`} />
             {/* BLOCK-116 W2 — 决策原语观测面（decision_log 聚合，additive） */}
             <DecisionUsagePanel />
           </section>
@@ -598,14 +650,14 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
               <h3>决策原语</h3>
               <p>各智能决策接点的启用与阈值（校准默认预填，可调整并自动保存；每次调用记录实际生效阈值）。</p>
             </div>
-            <DecisionConfigPanel />
+            <DecisionConfigPanel key={`decision-config-${settingsVersion}`} />
             {/* BLOCK-171 CP-2 — 审批记录（guard_ack 事件复审；治理可见化） */}
             <GuardAckHistoryPanel />
           </section>
         )}
 
-        {activeSection === 'keymap' && <KeymapPanel />}
-        {activeSection === 'reasoning' && <ReasoningDefaultsPanel />}
+        {activeSection === 'keymap' && <KeymapPanel key={`keymap-${settingsVersion}`} />}
+        {activeSection === 'reasoning' && <ReasoningDefaultsPanel key={`reasoning-${settingsVersion}`} />}
 
         {/* UI-366 — 原全局「后端」页（/backend，BLOCK-72/UI-320）并入本分区 */}
         {activeSection === 'diagnostics' && (
@@ -660,6 +712,8 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
             <ExportDiagnostic />
           </div>
         </div>
+        {/* BLOCK-201 W2 — 设置全景导出/导入（注册表 6 族；凭据与未注册落点显式排除） */}
+        <ConfigTransferPanel onChanged={() => setSettingsVersion((version) => version + 1)} />
           </section>
         )}
 
@@ -669,7 +723,7 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
               <h3>实验特性</h3>
               <p>长会话与长任务开关已实机验证并默认开启（2026-09-18 裁决）；其余实验开关默认关闭，打开前请确认你的使用场景。</p>
             </div>
-            <ExperimentalFeaturesSection bridge={window.petriAgentFlags?.agentWorkbenchFlags} />
+            <ExperimentalFeaturesSection key={`experimental-${settingsVersion}`} bridge={window.petriAgentFlags?.agentWorkbenchFlags} />
           </section>
         )}
         </div>

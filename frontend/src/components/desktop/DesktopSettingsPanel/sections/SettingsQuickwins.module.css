@@ -132,3 +132,58 @@
   gap: var(--petri-space-3);
   flex-wrap: wrap;
 }
+
+/* BLOCK-201 W2 — 设置搜索/导入导出工具栏（token 全部取自主题变量，零裸色值） */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-3);
+  flex-wrap: wrap;
+  padding: var(--petri-space-3) var(--petri-space-4);
+  border-bottom: 1px solid var(--petri-border-card);
+}
+
+.searchInput {
+  flex: 1 1 220px;
+  min-width: 160px;
+  padding: var(--petri-space-2) var(--petri-space-3);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-bg-base);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body);
+}
+
+.toolbarMeta {
+  font-size: var(--petri-font-size-body);
+  color: var(--petri-text-tertiary);
+  white-space: nowrap;
+}
+
+.emptyState {
+  padding: var(--petri-space-6);
+  text-align: center;
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-body);
+}
+
+.diagnostics {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-2);
+  padding: var(--petri-space-3) var(--petri-space-4);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-lg);
+  background: var(--petri-bg-subtle);
+}
+
+.diagnosticRow {
+  font-size: var(--petri-font-size-body);
+  color: var(--petri-text-secondary);
+}
+
+.hiddenInput {
+  display: none;
+}
+

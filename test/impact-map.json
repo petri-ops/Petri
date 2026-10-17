@@ -3826,6 +3826,39 @@
       ],
       "frontendRelated": true,
       "classifiesScripts": false
+    },
+    {
+      "id": "block201-settings-transfer",
+      "note": "BLOCK-201 W2 设置搜索/分区过滤/按区重置/全景导出导入：注册表 6 族的导出/导入/重置（helpers/config-transfer.js + routes/config-transfer.js）、设置面板搜索与工具栏、配置备份面板。",
+      "patterns": [
+        "core/petri-server/helpers/config-transfer.js",
+        "core/petri-server/routes/config-transfer.js",
+        "core/petri-server/helpers/decision-config.js",
+        "core/petri-server/helpers/reasoning-config.js",
+        "frontend/src/lib/settingsSearch.ts",
+        "frontend/src/lib/settingsSearch.test.ts",
+        "frontend/src/lib/settingsFamilies.ts",
+        "frontend/src/lib/configTransfer.ts",
+        "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/SettingsToolbar.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/SettingsToolbar.test.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/ConfigTransferPanel.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/ConfigTransferPanel.test.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/types.ts",
+        "test/block201-*.test.mjs",
+        "acceptance/block-201/**"
+      ],
+      "tests": [
+        "test/block201-config-transfer.test.mjs",
+        "test/block201-settings-baseline.test.mjs",
+        "test/block199-config-drift.test.mjs",
+        "test/block199-config-compat.test.mjs",
+        "test/block200-keymap-store.test.mjs",
+        "test/block200-reasoning-config.test.mjs",
+        "frontend/src/lib/settingsSearch.test.ts",
+        "frontend/src/components/desktop/DesktopSettingsPanel/SettingsToolbar.test.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/ConfigTransferPanel.test.tsx"
+      ]
     }
   ]
 }

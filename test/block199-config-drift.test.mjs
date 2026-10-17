@@ -97,3 +97,17 @@ test('接点 envKey 两处同源（注册表别名不能与代码实际读取的
     assert.equal(entry.envKeys[0], envKey, `${point} 的 envKey 两处不一致（注册表 ${entry.envKeys[0]} vs 代码 ${envKey}）`);
   }
 });
+
+test('BLOCK-201 — 设置全景导出/导入的族集合与注册表逐族相等（漏族/未注册族都红）', () => {
+  const transfer = require(path.join(ROOT, 'core/petri-server/helpers/config-transfer.js'));
+  assert.deepEqual(
+    [...transfer.CONFIG_TRANSFER_FAMILIES].sort(),
+    Object.keys(schema.CONFIG_FAMILIES).sort(),
+    'TRANSLATE: 导出/导入覆盖面必须等于注册表族集合——新增族忘了接 transfer，用户备份就会静默漏掉它',
+  );
+  // 每个族都必须能找到写出口名字（WRITERS/RESETTERS 两张表都按族名分派，不得有空壳族）
+  const src = read('core/petri-server/helpers/config-transfer.js');
+  for (const family of transfer.CONFIG_TRANSFER_FAMILIES) {
+    assert.ok(src.includes(`'${family}'`), `config-transfer 里找不到族 ${family} 的分派入口`);
+  }
+});

@@ -2,6 +2,10 @@
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
 
+最后更新：2026-10-17（**BLOCK-201-SETTINGS-SEARCH-EXPORT 立项发令 active（阶段 A 速赢 II=runlist W2；用户「开 W2」）**）
+
+**恢复要点（换会话必读·本段取代下方 BLOCK-200 收口段）**：**当前 active 工作包=BLOCK-201**，范围=设置搜索/分区过滤/按区重置/注册表 6 族全景导出导入；plan=`docs/block-201-settings-search-export-plan.md`。**已落地**：后端 `helpers/config-transfer.js`（导出覆盖层/全量校验/分批应用，读写委派既有 helper）+ `routes/config-transfer.js`（GET export / POST import / POST reset）+ `decision-config.clearPointOverrides` + `reasoning-config.validateReasoningPatch`（与 saveReasoning 同一摊平）；前端 `lib/settingsSearch`（10 分区索引）/`lib/settingsFamilies`（5 个可重置分区）/`lib/configTransfer`/`SettingsToolbar`/`ConfigTransferPanel` + 面板挂载。**待做**：9223 实机腿（搜索/重置/导出往返/导入幂等）+ UI-516/517/518 台账 + closeout 十三门与五件套回写。**口径**：分区实为 10（runlist「8 分区」过时）；导出/导入只覆盖注册表 6 族，模型渠道/凭据/外观/计算路径属 W4。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-17（**BLOCK-200-STAGE-A-QUICKWINS-1 整包 completed（阶段 A 速赢 I=runlist W1）**）
 
 **恢复要点（换会话必读·本段取代上方 BLOCK-200 检查点段）**：**无 active 工作包**，下一包=runlist **W2（P0-3 设置搜索/导出/按区重置）**，用户已授权按 W0→W8 连打不需逐项发令。**BLOCK-200 交付**：键位单源与 App 级派发器（`keymap` 族，写侧拒未知命令 id）、档位默认值/预算/逐协议映射可编辑（`reasoning` 族，拆前基线冻结后 20/20 未变）、设置页「快捷键」「推理档位」两节、BLOCK-199 漂移门扩两族（先红后绿）、`config:doctor` 扩两族；**9223 探针 17/17 allPass**（`acceptance/block-200/`）。UI-514/UI-515 均 `verified`。**未做/边界**：12+ 处组件内就近语义绑定未迁移（不宣称全部快捷键可改）；B1b 的 10 落点与 data root 脑裂仍是 W4；BLOCK-199 的 C-32 仍只登记未改。plan=docs/block-200-stage-a-quickwins-1-plan.md §7/§8。**推送状态**：BLOCK-199 收口批（`1e73233f..033072e5`）与 BLOCK-200 收口批（`033072e5..e6906e75`，19 笔，全绿后经用户发令）均已快进推 origin/main；未改写历史、未强推。G0 开发期常态 · 不外推 packaged/Provider/GA。
