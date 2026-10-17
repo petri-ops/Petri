@@ -34,7 +34,7 @@ status: completed
 
 结论两句话：**静态推断系统性低估**（CP-19 十九包收官后 dim2/3/5 各 +1.4~+1.8，因为那些能力已落地而卡没更新）；**唯一往下走的 dim7 不是产品退步**，而是证据缺口——它的实机腿需要 R 运行面（本机未装，记 `env` 不记绿）与 D18 分屏对照（无锚），按「无证据不给分」自然压低。
 
-## 0.1 六处自纠（都是我这侧的探针/机制问题，逐条留痕）
+## 0.1 七处自纠（都是我这侧的探针/机制问题，逐条留痕）
 
 1. **规范调用姿势**：清单初版用裸 `node --test`，而本仓库规范（`test:all`）带 `--test-force-exit --test-timeout=120000`；`block166-gen-ui-guest-bridge.test.mjs` 断言全过但进程不退出 → 被我 180s 超时误判成红。修=清单命令统一加规范旗。
 2. **live 前置写反**：`ui341-welcome-chat` 我按「主实例 9222」写前置，而 dev-verify 的永久红线是**探针禁导航用户主窗**，该腿要 9223 测试实例。起 `scripts/start-test-instance.sh` 后该腿真绿（dim5 4.4 里有它一份）。
@@ -42,6 +42,7 @@ status: completed
 4. **自己撞出的机制漏洞**：`POINT_RANK` 里 `red(0) < unanchored(1)`，意味着**把红点位的锚删掉就记成"改善"**——删锚比修产品便宜。补「同点位锚点集合收缩=回归」并加契约测堵死。
 5. **复跑会覆写他包证据**：dev-verify flow 的证据落点在 `acceptance/ui-341/`、`acceptance/block-99/`（属 UI-341/BLOCK-99 的验收资产）。本包每次跑完 `git checkout` 还原它们，自己的测量证据只留在 `acceptance/block-195/`。
 6. **`--check` 半层级护栏**：带 `--tier=` 过滤的对账会让被过滤的锚"看起来被移除"而造出假回归 → 直接拒（fail-closed），对账必须跑全层级。
+7. **提交类型选错触发 UI 门禁**：纯测试文件落在 `frontend/src/components/` 下即被 `isUiSurface` 判为 UI 面，要求同提交同步 `ui-productization-audit.md` + 提交信息带 `UI-###`；而门禁对 `test(...)`/`chore(...)` 主题本就豁免。**正确形态=把纯测试新增单独提成 `test(block-195): …` 一笔**，不是往台账里编一条不存在的 UI 增量、也不是往 `LEGACY_*_EXEMPTIONS` 白名单塞污染项。处置=对**自己那两笔未推送提交**做 `git reset --soft` 重切分（`test/feat/chore` 三笔，文件内容一字未动，旧哈希留 reflog 兜底）。
 
 ## 0.2 阶段 2 出口判据对账（本包的收口意义）
 
