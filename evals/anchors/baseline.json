@@ -1,6 +1,6 @@
 {
   "schema": "petri-competitiveness-anchor-baseline/v1",
-  "updatedAt": "2026-10-17T02:29:07.542Z",
+  "updatedAt": "2026-10-17T03:28:16.696Z",
   "tiers": "all",
   "points": [
     {
@@ -459,8 +459,14 @@
     },
     {
       "id": "6.6-data-binding",
-      "state": "unanchored",
-      "anchors": []
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "test/block196-genui-data-binding.test.mjs",
+          "status": "pass"
+        }
+      ]
     },
     {
       "id": "7.7-viewer-coverage",

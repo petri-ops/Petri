@@ -1,0 +1,1045 @@
+{
+  "schema": "petri-competitiveness-anchors/v1",
+  "scoring": "score = 5 × anchored_green 点位数 ÷ 点位数（保留一位小数）",
+  "at": "2026-10-17T03:28:16.696Z",
+  "elapsedMs": 128339,
+  "tiers": "all",
+  "devStack": 9222,
+  "dimensions": [
+    {
+      "id": 1,
+      "name": "推理循环韧性",
+      "inferred20261012": 3.5,
+      "measured": 4.3,
+      "delta": 0.8,
+      "points": [
+        {
+          "id": "1-steer",
+          "claim": "运行中 steer 注入与队列上限 fail-closed",
+          "derivesFrom": "§1 dim1 判词「steer 在」",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/agent-steering.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/agent-steering.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "1-resume",
+          "claim": "中断续跑与 resume 溯源链",
+          "derivesFrom": "§1 dim1 判词「resume 在」",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block38-agent-task-resume.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block38-agent-task-resume.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "1-finalize",
+          "claim": "收口汇报门（假成功/漏报拦截）",
+          "derivesFrom": "§1 dim1 判词「finalization 在」",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block119-report-guard.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block119-report-guard.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "1-false-success",
+          "claim": "假成功诊断与失败归因分层",
+          "derivesFrom": "§1 dim1 判词「假成功诊断」",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block146-agent-domain-validation.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block146-agent-domain-validation.test.mjs",
+              "status": "pass",
+              "tail": null
+            },
+            {
+              "tier": "unit",
+              "path": "test/block114-failure-triage.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block114-failure-triage.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "1-compaction-summary",
+          "claim": "D1 loop 压缩为摘要式留证（非丢弃式）",
+          "derivesFrom": "§2 D1",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block172-cp5-compact.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block172-cp5-compact.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "1-prompt-layering",
+          "claim": "D2 系统提示 cache 友好分层（静态前缀+动态尾）",
+          "derivesFrom": "§2 D2",
+          "anchors": [],
+          "envBlockedCount": 0,
+          "state": "unanchored",
+          "note": "无机械锚"
+        },
+        {
+          "id": "1-context-contract",
+          "claim": "出站组装契约不漂移（prompt/工具 schema 棘轮）",
+          "derivesFrom": "§1 dim1 判词 + BLOCK-188 自证面",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block188-context-snapshot.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block188-context-snapshot.test.mjs",
+              "status": "pass",
+              "tail": null
+            },
+            {
+              "tier": "evals",
+              "path": "evals/snapshots/golden.json",
+              "cmd": "npm run evals:run -- --suite=golden --provider=mock",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        }
+      ],
+      "summary": {
+        "total": 7,
+        "green": 6,
+        "red": 0,
+        "unanchored": 1
+      }
+    },
+    {
+      "id": 2,
+      "name": "上下文与记忆",
+      "inferred20261012": 2.5,
+      "measured": 4.2,
+      "delta": 1.7,
+      "points": [
+        {
+          "id": "2-hybrid-retrieval",
+          "claim": "向量+FTS5+RRF 混合检索优于单通道",
+          "derivesFrom": "§1 dim2 判词「混合检索超配」",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/knowledge-space.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/knowledge-space.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "2-memory-lifecycle",
+          "claim": "记忆生命周期（衰减/替代链/矛盾消解/审批门）",
+          "derivesFrom": "§1 dim2 判词 + BLOCK-182",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/memory-lifecycle.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/memory-lifecycle.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "2-project-memory",
+          "claim": "项目记忆隔离与迁移",
+          "derivesFrom": "§2 D3 自有形态方向",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/project-memory-isolation.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/project-memory-isolation.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "2-token-budget-real",
+          "claim": "D4 预算环投影真实数值（前端渲染层）",
+          "derivesFrom": "§2 D4",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block163-token-budget.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block163-token-budget.test.mjs",
+              "status": "pass",
+              "tail": null
+            },
+            {
+              "tier": "frontend",
+              "path": "frontend/src/components/copilot/ContextBudgetBar.test.tsx",
+              "cmd": "npm run test:files --prefix frontend -- src/components/copilot/SimpleChat/hooks/useChatStream.test.ts src/components/copilot/SimpleChat/hooks/useChatStream.block178.test.tsx src/components/copilot/ContextBudgetBar.test.tsx",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "2-ann-layering",
+          "claim": "D3 记忆分层与 ANN 索引质量基线",
+          "derivesFrom": "§2 D3",
+          "anchors": [],
+          "envBlockedCount": 0,
+          "state": "unanchored",
+          "note": "无机械锚"
+        },
+        {
+          "id": "2-retrieval-live",
+          "claim": "知识空间真轮次检索实机链",
+          "derivesFrom": "§1 dim2 + BLOCK-94/99 实机腿",
+          "anchors": [
+            {
+              "tier": "live",
+              "path": ".agents/skills/petri-dev-infra/dev-verify/flows/block99-knowledge-multispace.cjs",
+              "cmd": "npm run verify -- block99-knowledge-multispace",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        }
+      ],
+      "summary": {
+        "total": 6,
+        "green": 5,
+        "red": 0,
+        "unanchored": 1
+      }
+    },
+    {
+      "id": 3,
+      "name": "编排与多智能体",
+      "inferred20261012": 2.5,
+      "measured": 4.3,
+      "delta": 1.8,
+      "points": [
+        {
+          "id": "3-concurrency-config",
+          "claim": "D5 并发上限与派生深度可配且钳制",
+          "derivesFrom": "§2 D5",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block173-w3-contracts.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block173-w3-contracts.test.mjs",
+              "status": "pass",
+              "tail": null
+            },
+            {
+              "tier": "unit",
+              "path": "test/agent-concurrency.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/agent-concurrency.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "3-spawn-wait",
+          "claim": "spawn/wait 工具契约与父取消级联",
+          "derivesFrom": "§1 dim3 判词「协作三件套」",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block49-spawn-agent-tools.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block49-spawn-agent-tools.test.mjs",
+              "status": "pass",
+              "tail": null
+            },
+            {
+              "tier": "unit",
+              "path": "test/block163-orchestration.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block163-orchestration.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "3-tool-cancel",
+          "claim": "D6 工具执行可取消（AbortSignal 贯通）",
+          "derivesFrom": "§2 D6",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block171-tool-cancel.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block171-tool-cancel.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "3-dag-visible",
+          "claim": "D7 编排可视化 DAG 投影",
+          "derivesFrom": "§2 D7",
+          "anchors": [
+            {
+              "tier": "frontend",
+              "path": "frontend/src/components/workspace-panels/OrchestrationGraph.test.tsx",
+              "cmd": "npm run test:files --prefix frontend -- src/components/result-studio/viewerRegistry.test.ts src/lib/selectionBus.test.ts src/components/workspace-panels/OrchestrationGraph.test.tsx",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "3-roles-replan",
+          "claim": "角色谱与 replan/plan 模式",
+          "derivesFrom": "§1 dim3 判词「Spec/replan/角色」",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block93-agent-roles.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block93-agent-roles.test.mjs",
+              "status": "pass",
+              "tail": null
+            },
+            {
+              "tier": "unit",
+              "path": "test/block55-plan-mode.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block55-plan-mode.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "3-evals-orchestration",
+          "claim": "编排链与 Stop 链端到端评测腿",
+          "derivesFrom": "BLOCK-181 批次B 扩题",
+          "anchors": [
+            {
+              "tier": "evals",
+              "path": "evals/suites/smoke/orchestration-spawn.json",
+              "cmd": "npm run evals:run -- --suite=smoke --provider=mock",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "3-recursive-tree",
+          "claim": "D5 递归多级派生（子生孙）实跑链",
+          "derivesFrom": "§2 D5 行业形态「递归树」",
+          "anchors": [],
+          "envBlockedCount": 0,
+          "state": "unanchored",
+          "note": "无机械锚"
+        }
+      ],
+      "summary": {
+        "total": 7,
+        "green": 6,
+        "red": 0,
+        "unanchored": 1
+      }
+    },
+    {
+      "id": 4,
+      "name": "治理与信任",
+      "inferred20261012": 3,
+      "measured": 3.6,
+      "delta": 0.6,
+      "points": [
+        {
+          "id": "4-dynamic-guard",
+          "claim": "动态审批命中→拦、ack 后放行、非变更零扰动",
+          "derivesFrom": "§1 dim4 判词「四档×动态判定」",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block160-dynamic-guards.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block160-dynamic-guards.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "4-user-rules",
+          "claim": "用户规则 first-match/deny-require-ack/fail-soft",
+          "derivesFrom": "§1 dim4 判词「用户规则」",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block160-user-rules.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block160-user-rules.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "4-ack-card-ui",
+          "claim": "D9 确认弹卡渲染与 once/always 派发",
+          "derivesFrom": "§2 D9",
+          "anchors": [
+            {
+              "tier": "frontend",
+              "path": "frontend/src/components/copilot/SimpleChat/GuardAckCard.test.tsx",
+              "cmd": "npm run test:files --prefix frontend -- src/components/copilot/SimpleChat/GuardAckCard.test.tsx",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "4-ack-consume",
+          "claim": "放行一次=指纹消耗，重发再拦",
+          "derivesFrom": "§1 dim4 治理透明",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block180-approval-resource.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block180-approval-resource.test.mjs",
+              "status": "pass",
+              "tail": null
+            },
+            {
+              "tier": "evals",
+              "path": "evals/suites/smoke/approval-chain.json",
+              "cmd": "npm run evals:run -- --suite=smoke --provider=mock",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "4-secret-at-rest",
+          "claim": "凭据密文落盘零明文与丢失降级",
+          "derivesFrom": "§1 dim4 判词「密文」",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block160-mcp-env-crypto.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block160-mcp-env-crypto.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "4-cost-breaker",
+          "claim": "D11 成本硬熔断",
+          "derivesFrom": "§2 D11",
+          "anchors": [],
+          "envBlockedCount": 0,
+          "state": "unanchored",
+          "note": "无机械锚"
+        },
+        {
+          "id": "4-worktree-safety",
+          "claim": "D10 工作树安全网快照原语",
+          "derivesFrom": "§2 D10",
+          "anchors": [],
+          "envBlockedCount": 0,
+          "state": "unanchored",
+          "note": "无机械锚"
+        }
+      ],
+      "summary": {
+        "total": 7,
+        "green": 5,
+        "red": 0,
+        "unanchored": 2
+      }
+    },
+    {
+      "id": 5,
+      "name": "呈现与交互",
+      "inferred20261012": 3,
+      "measured": 4.4,
+      "delta": 1.4,
+      "points": [
+        {
+          "id": "5-stop",
+          "claim": "D12 主聊天 Stop 与级联取消",
+          "derivesFrom": "§2 D12",
+          "anchors": [
+            {
+              "tier": "frontend",
+              "path": "frontend/src/components/copilot/SimpleChat/hooks/useChatStream.test.ts",
+              "cmd": "npm run test:files --prefix frontend -- src/components/copilot/SimpleChat/hooks/useChatStream.test.ts src/components/copilot/SimpleChat/hooks/useChatStream.block178.test.tsx src/components/copilot/ContextBudgetBar.test.tsx",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "5-queue-visible",
+          "claim": "D14 排队可见可撤可插队",
+          "derivesFrom": "§2 D14",
+          "anchors": [
+            {
+              "tier": "frontend",
+              "path": "frontend/src/components/copilot/SimpleChat/hooks/useChatStream.block178.test.tsx",
+              "cmd": "npm run test:files --prefix frontend -- src/components/copilot/SimpleChat/hooks/useChatStream.test.ts src/components/copilot/SimpleChat/hooks/useChatStream.block178.test.tsx src/components/copilot/ContextBudgetBar.test.tsx",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "5-cmdk",
+          "claim": "D13 Cmd+K 命令面板三源与深链",
+          "derivesFrom": "§2 D13",
+          "anchors": [
+            {
+              "tier": "frontend",
+              "path": "frontend/src/components/copilot/useAppCommands.test.ts",
+              "cmd": "npm run test:files --prefix frontend -- src/components/copilot/gen-ui/GenUiCard.test.tsx src/components/copilot/gen-ui/references.test.ts src/components/copilot/useAppCommands.test.ts",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "5-timeline",
+          "claim": "对话时间线折叠与思考节点",
+          "derivesFrom": "§1 dim5 判词「时间线超配」",
+          "anchors": [
+            {
+              "tier": "frontend",
+              "path": "frontend/src/components/copilot/ConversationTimeline.test.tsx",
+              "cmd": "npm run test:files --prefix frontend -- src/components/copilot/ConversationTimeline.test.tsx",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "5-multiwindow",
+          "claim": "多窗口状态机转移",
+          "derivesFrom": "§1 dim5 判词「多窗口」",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block59-window-manager.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block59-window-manager.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "5-budget-ring-ui",
+          "claim": "预算环待机 0% 空环与真实分布渲染",
+          "derivesFrom": "§2 D4 UI 面",
+          "anchors": [
+            {
+              "tier": "frontend",
+              "path": "frontend/src/components/copilot/ContextBudgetBar.test.tsx",
+              "cmd": "npm run test:files --prefix frontend -- src/components/copilot/SimpleChat/hooks/useChatStream.test.ts src/components/copilot/SimpleChat/hooks/useChatStream.block178.test.tsx src/components/copilot/ContextBudgetBar.test.tsx",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "5-slash-execute",
+          "claim": "D15 斜杠即执行（chip v2 结构化）",
+          "derivesFrom": "§2 D15",
+          "anchors": [],
+          "envBlockedCount": 0,
+          "state": "unanchored",
+          "note": "无机械锚"
+        },
+        {
+          "id": "5-real-chromium-e2e",
+          "claim": "真 Chromium 首问建会话→SSE 续聊端到端（欢迎页驱动主窗）",
+          "derivesFrom": "§1 dim5 判词实机腿 + UI-341",
+          "anchors": [
+            {
+              "tier": "live",
+              "path": ".agents/skills/petri-dev-infra/dev-verify/flows/ui341-welcome-chat.cjs",
+              "cmd": "npm run verify -- ui341-welcome-chat",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        }
+      ],
+      "summary": {
+        "total": 8,
+        "green": 7,
+        "red": 0,
+        "unanchored": 1
+      }
+    },
+    {
+      "id": 6,
+      "name": "表达面（Gen UI）",
+      "inferred20261012": 3.5,
+      "measured": 5,
+      "delta": 1.5,
+      "points": [
+        {
+          "id": "6-sandbox-security",
+          "claim": "沙箱 CSP/宿主桥/外链与主题事件防伪",
+          "derivesFrom": "§1 dim6 判词「沙箱完整」",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block166-gen-ui-host.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block166-gen-ui-host.test.mjs",
+              "status": "pass",
+              "tail": null
+            },
+            {
+              "tier": "unit",
+              "path": "test/block166-gen-ui-guest-bridge.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block166-gen-ui-guest-bridge.test.mjs",
+              "status": "pass",
+              "tail": null
+            },
+            {
+              "tier": "unit",
+              "path": "test/block166-gen-ui-external-link.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block166-gen-ui-external-link.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "6-path-selfheal",
+          "claim": "片段路径自愈与截断目录回退",
+          "derivesFrom": "§1 dim6 判词「自愈」",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block181-genui-path-repair.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block181-genui-path-repair.test.mjs",
+              "status": "pass",
+              "tail": null
+            },
+            {
+              "tier": "evals",
+              "path": "evals/suites/smoke/genui-fragment-path.json",
+              "cmd": "npm run evals:run -- --suite=smoke --provider=mock",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "6-theme-accent",
+          "claim": "D17 accent 主题透传与 token 单源",
+          "derivesFrom": "§2 D17",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/gen-ui-theme-tokens.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/gen-ui-theme-tokens.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "6-card-interactions",
+          "claim": "放大/复制/导航劫持即时重置/限幅挂起",
+          "derivesFrom": "§1 dim6 判词「放大+复制」",
+          "anchors": [
+            {
+              "tier": "frontend",
+              "path": "frontend/src/components/copilot/gen-ui/GenUiCard.test.tsx",
+              "cmd": "npm run test:files --prefix frontend -- src/components/copilot/gen-ui/GenUiCard.test.tsx src/components/copilot/gen-ui/references.test.ts src/components/copilot/useAppCommands.test.ts",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "6-export",
+          "claim": "D17 导出形态（自包含零外链）",
+          "derivesFrom": "§2 D17 导出弱",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block166-gen-ui-p2.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block166-gen-ui-p2.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "6-data-binding",
+          "claim": "D16 卡片自取数数据绑定（petri.getData 中继：窗主绑定 + 跨会话拒 + 有界投影）",
+          "derivesFrom": "§2 D16",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block196-genui-data-binding.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block196-genui-data-binding.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        }
+      ],
+      "summary": {
+        "total": 6,
+        "green": 6,
+        "red": 0,
+        "unanchored": 0
+      }
+    },
+    {
+      "id": 7,
+      "name": "数据资产面",
+      "inferred20261012": 3.5,
+      "measured": 3.3,
+      "delta": -0.2,
+      "points": [
+        {
+          "id": "7-viewer-coverage",
+          "claim": "viewer 类型覆盖与能力位接线",
+          "derivesFrom": "§1 dim7 判词「viewer 9 类」+ §2 D18",
+          "anchors": [
+            {
+              "tier": "frontend",
+              "path": "frontend/src/components/result-studio/viewerRegistry.test.ts",
+              "cmd": "npm run test:files --prefix frontend -- src/components/result-studio/viewerRegistry.test.ts src/lib/selectionBus.test.ts src/components/workspace-panels/OrchestrationGraph.test.tsx",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "7-lineage",
+          "claim": "血缘 DAG 投影与环/缺图诚实态",
+          "derivesFrom": "§1 dim7 判词「血缘 DAG」",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block127-lineage.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block127-lineage.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "7-selection-bus",
+          "claim": "选择总线单真相与 Agent 投影",
+          "derivesFrom": "§1 dim7 判词「选择总线」+ §2 D18",
+          "anchors": [
+            {
+              "tier": "frontend",
+              "path": "frontend/src/lib/selectionBus.test.ts",
+              "cmd": "npm run test:files --prefix frontend -- src/components/result-studio/viewerRegistry.test.ts src/lib/selectionBus.test.ts src/components/workspace-panels/OrchestrationGraph.test.tsx",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "7-first-success-loop",
+          "claim": "端到端成果回路（项目→任务→收口→报告）与 TTFS 可度量",
+          "derivesFrom": "TTFS 程序 ①②③ + BLOCK-187 黄金路径",
+          "anchors": [
+            {
+              "tier": "evals",
+              "path": "evals/suites/golden/first-success.json",
+              "cmd": "npm run evals:run -- --suite=golden --provider=mock",
+              "status": "pass",
+              "tail": null
+            },
+            {
+              "tier": "unit",
+              "path": "test/block186-funnel-ledger.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block186-funnel-ledger.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "7-result-loop-live",
+          "claim": "Result Studio 成果回路实机腿",
+          "derivesFrom": "§1 dim7 + RS flow 在册",
+          "anchors": [
+            {
+              "tier": "live",
+              "path": ".agents/skills/petri-dev-infra/dev-verify/flows/block121-result-loop.cjs",
+              "cmd": "npm run verify -- block121-result-loop",
+              "status": "env",
+              "tail": "前置缺失：.petri-dev-user-data/data/runtimes/R（该 flow 需 R 运行面与 deseq2 工具目录在场，否则 A0b/A1/A2g 必失）"
+            }
+          ],
+          "envBlockedCount": 1,
+          "state": "unanchored",
+          "note": "锚点全部环境不可用（无证据不给分）"
+        },
+        {
+          "id": "7-split-compare",
+          "claim": "D18 canCompare→分屏对照与比例可调",
+          "derivesFrom": "§2 D18 分屏固定 60/40",
+          "anchors": [],
+          "envBlockedCount": 0,
+          "state": "unanchored",
+          "note": "无机械锚"
+        }
+      ],
+      "summary": {
+        "total": 6,
+        "green": 4,
+        "red": 0,
+        "unanchored": 2
+      }
+    },
+    {
+      "id": 8,
+      "name": "协作与多端",
+      "inferred20261012": 3,
+      "measured": 3.3,
+      "delta": 0.3,
+      "points": [
+        {
+          "id": "8-data-bridge-ws",
+          "claim": "数据桥 WS 白名单读面与 HTTP 回退",
+          "derivesFrom": "BLOCK-183 CP-19 收官",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block183-data-ws.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block183-data-ws.test.mjs",
+              "status": "pass",
+              "tail": null
+            },
+            {
+              "tier": "frontend",
+              "path": "frontend/src/lib/projectionWsData.test.ts",
+              "cmd": "npm run test:files --prefix frontend -- src/lib/projectionWsData.test.ts",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "8-ws-protocol",
+          "claim": "自写 WS 服务器协议与心跳/慢消费者",
+          "derivesFrom": "§1 dim8 自有形态",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block162-ws-server.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block162-ws-server.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "8-federation-honest",
+          "claim": "联邦空节点诚实态与委托历史聚合",
+          "derivesFrom": "§1 dim8 判词「联邦独有」",
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block164-federation-ux.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block164-federation-ux.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "8-real-model-regression",
+          "claim": "真模型形态离线回归（录制回放零 API）",
+          "derivesFrom": "BLOCK-193 录制态",
+          "anchors": [
+            {
+              "tier": "evals",
+              "path": "evals/recordings/real",
+              "cmd": "npm run evals:run -- --suite=real --provider=replay",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
+        },
+        {
+          "id": "8-delegation-realtime",
+          "claim": "CP-16 委托进度事件流回传（替代 5s 轮询）",
+          "derivesFrom": "§1 dim8 判词「委托 5s 轮询黑盒」",
+          "anchors": [],
+          "envBlockedCount": 0,
+          "state": "unanchored",
+          "note": "无机械锚"
+        },
+        {
+          "id": "8-relay-topology",
+          "claim": ">2 节点中继拓扑",
+          "derivesFrom": "§1 dim8 + D164 deferred 项",
+          "anchors": [],
+          "envBlockedCount": 0,
+          "state": "unanchored",
+          "note": "无机械锚"
+        }
+      ],
+      "summary": {
+        "total": 6,
+        "green": 4,
+        "red": 0,
+        "unanchored": 2
+      }
+    }
+  ],
+  "average": 4.1,
+  "belowBar": []
+}

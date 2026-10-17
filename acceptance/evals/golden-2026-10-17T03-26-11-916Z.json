@@ -1,0 +1,54 @@
+{
+  "suite": "golden",
+  "provider": "mock",
+  "artifact": "golden",
+  "measures": "harness",
+  "at": "2026-10-17T03:26:11.916Z",
+  "tasks": [
+    {
+      "id": "golden-first-success",
+      "passed": true,
+      "status": "completed",
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": true,
+          "detail": "任务正常收口"
+        },
+        {
+          "kind": "outbound_contains",
+          "value": "evals-golden-first-success",
+          "passed": true,
+          "detail": "归一化出站含「evals-golden-first-success」× 1（期望 ≥1）"
+        },
+        {
+          "kind": "funnel_event_present",
+          "event": "app_started",
+          "passed": true,
+          "detail": "funnel_events「app_started」× 1（期望 ≥1）"
+        },
+        {
+          "kind": "funnel_event_present",
+          "event": "project_created",
+          "passed": true,
+          "detail": "funnel_events「project_created」× 1（期望 ≥1）"
+        },
+        {
+          "kind": "funnel_event_present",
+          "event": "first_job_succeeded",
+          "passed": true,
+          "detail": "funnel_events「first_job_succeeded」× 1（期望 ≥1）"
+        },
+        {
+          "kind": "ttfs_computable",
+          "passed": true,
+          "detail": "TTFS=409 ms"
+        }
+      ],
+      "durationMs": 566
+    }
+  ],
+  "pass": 1,
+  "total": 1,
+  "skipped": 0
+}

@@ -566,9 +566,15 @@
         },
         {
           "id": "6-data-binding",
-          "claim": "D16 卡片自取数数据绑定",
+          "claim": "D16 卡片自取数数据绑定（petri.getData 中继：窗主绑定 + 跨会话拒 + 有界投影）",
           "derivesFrom": "§2 D16",
-          "anchors": []
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block196-genui-data-binding.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block196-genui-data-binding.test.mjs"
+            }
+          ]
         }
       ]
     },

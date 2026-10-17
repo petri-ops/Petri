@@ -1,8 +1,8 @@
 {
   "schema": "petri-competitiveness-anchors/v1",
   "scoring": "score = 5 × anchored_green 点位数 ÷ 点位数（保留一位小数）",
-  "at": "2026-10-17T02:29:07.542Z",
-  "elapsedMs": 128255,
+  "at": "2026-10-17T03:28:16.696Z",
+  "elapsedMs": 128339,
   "tiers": "all",
   "devStack": 9222,
   "dimensions": [
@@ -26,6 +26,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -42,6 +43,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -58,6 +60,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -81,6 +84,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -97,6 +101,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -105,6 +110,7 @@
           "claim": "D2 系统提示 cache 友好分层（静态前缀+动态尾）",
           "derivesFrom": "§2 D2",
           "anchors": [],
+          "envBlockedCount": 0,
           "state": "unanchored",
           "note": "无机械锚"
         },
@@ -128,6 +134,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         }
@@ -159,6 +166,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -175,6 +183,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -191,6 +200,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -214,6 +224,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -222,6 +233,7 @@
           "claim": "D3 记忆分层与 ANN 索引质量基线",
           "derivesFrom": "§2 D3",
           "anchors": [],
+          "envBlockedCount": 0,
           "state": "unanchored",
           "note": "无机械锚"
         },
@@ -238,6 +250,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         }
@@ -276,6 +289,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -299,6 +313,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -315,6 +330,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -331,6 +347,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -354,6 +371,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -370,6 +388,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -378,6 +397,7 @@
           "claim": "D5 递归多级派生（子生孙）实跑链",
           "derivesFrom": "§2 D5 行业形态「递归树」",
           "anchors": [],
+          "envBlockedCount": 0,
           "state": "unanchored",
           "note": "无机械锚"
         }
@@ -409,6 +429,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -425,6 +446,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -441,6 +463,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -464,6 +487,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -480,6 +504,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -488,6 +513,7 @@
           "claim": "D11 成本硬熔断",
           "derivesFrom": "§2 D11",
           "anchors": [],
+          "envBlockedCount": 0,
           "state": "unanchored",
           "note": "无机械锚"
         },
@@ -496,6 +522,7 @@
           "claim": "D10 工作树安全网快照原语",
           "derivesFrom": "§2 D10",
           "anchors": [],
+          "envBlockedCount": 0,
           "state": "unanchored",
           "note": "无机械锚"
         }
@@ -527,6 +554,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -543,6 +571,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -559,6 +588,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -575,6 +605,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -591,6 +622,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -607,6 +639,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -615,6 +648,7 @@
           "claim": "D15 斜杠即执行（chip v2 结构化）",
           "derivesFrom": "§2 D15",
           "anchors": [],
+          "envBlockedCount": 0,
           "state": "unanchored",
           "note": "无机械锚"
         },
@@ -631,6 +665,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         }
@@ -646,8 +681,8 @@
       "id": 6,
       "name": "表达面（Gen UI）",
       "inferred20261012": 3.5,
-      "measured": 4.2,
-      "delta": 0.7,
+      "measured": 5,
+      "delta": 1.5,
       "points": [
         {
           "id": "6-sandbox-security",
@@ -676,6 +711,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -699,6 +735,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -715,6 +752,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -731,6 +769,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -747,23 +786,33 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
         {
           "id": "6-data-binding",
-          "claim": "D16 卡片自取数数据绑定",
+          "claim": "D16 卡片自取数数据绑定（petri.getData 中继：窗主绑定 + 跨会话拒 + 有界投影）",
           "derivesFrom": "§2 D16",
-          "anchors": [],
-          "state": "unanchored",
-          "note": "无机械锚"
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "test/block196-genui-data-binding.test.mjs",
+              "cmd": "node --test --test-force-exit --test-timeout=120000 test/block196-genui-data-binding.test.mjs",
+              "status": "pass",
+              "tail": null
+            }
+          ],
+          "envBlockedCount": 0,
+          "state": "anchored-green",
+          "note": null
         }
       ],
       "summary": {
         "total": 6,
-        "green": 5,
+        "green": 6,
         "red": 0,
-        "unanchored": 1
+        "unanchored": 0
       }
     },
     {
@@ -786,6 +835,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -802,6 +852,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -818,6 +869,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -841,6 +893,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -857,6 +910,7 @@
               "tail": "前置缺失：.petri-dev-user-data/data/runtimes/R（该 flow 需 R 运行面与 deseq2 工具目录在场，否则 A0b/A1/A2g 必失）"
             }
           ],
+          "envBlockedCount": 1,
           "state": "unanchored",
           "note": "锚点全部环境不可用（无证据不给分）"
         },
@@ -865,6 +919,7 @@
           "claim": "D18 canCompare→分屏对照与比例可调",
           "derivesFrom": "§2 D18 分屏固定 60/40",
           "anchors": [],
+          "envBlockedCount": 0,
           "state": "unanchored",
           "note": "无机械锚"
         }
@@ -903,6 +958,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -919,6 +975,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -935,6 +992,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -951,6 +1009,7 @@
               "tail": null
             }
           ],
+          "envBlockedCount": 0,
           "state": "anchored-green",
           "note": null
         },
@@ -959,6 +1018,7 @@
           "claim": "CP-16 委托进度事件流回传（替代 5s 轮询）",
           "derivesFrom": "§1 dim8 判词「委托 5s 轮询黑盒」",
           "anchors": [],
+          "envBlockedCount": 0,
           "state": "unanchored",
           "note": "无机械锚"
         },
@@ -967,6 +1027,7 @@
           "claim": ">2 节点中继拓扑",
           "derivesFrom": "§1 dim8 + D164 deferred 项",
           "anchors": [],
+          "envBlockedCount": 0,
           "state": "unanchored",
           "note": "无机械锚"
         }
@@ -979,6 +1040,6 @@
       }
     }
   ],
-  "average": 4,
+  "average": 4.1,
   "belowBar": []
 }
