@@ -85,13 +85,21 @@ test('棘轮序与对账：绿退到无锚也算后退（堵死删锚点洗白�
   assert.equal(compareAnchorBaseline([{ id: '1.a', state: 'anchored-green' }, { id: '1.b', state: 'anchored-red' }, { id: '1.c', state: 'anchored-green' }], base).ok, true);
 });
 
-test('清单里若存在无锚点位，必须在报告面上可见（不允许悄悄少给点位）', () => {
-  const unanchored = list.dimensions.flatMap((d) => d.points.filter((p) => !p.anchors || p.anchors.length === 0).map((p) => `${d.id}.${p.id}`));
-  assert.ok(unanchored.length > 0, '全有点位锚点反而可疑：本包要求把未实现能力如实列为无锚');
-  for (const known of ['1.1-prompt-layering', '2.2-ann-layering', '6.6-data-binding', '4.4-cost-breaker']) {
-    const [dim, pid] = known.split('.');
-    assert.ok(unanchored.includes(known) || list.dimensions.find((d) => String(d.id) === dim).points.some((p) => p.id === pid && (!p.anchors || !p.anchors.length)), `${known} 应为无锚点位`);
-  }
+test('无锚点位不得被藏：口径层给 unanchored，清单层如实留缺口（补锚转绿是改善，删点位是作弊）', () => {
+  // ① 口径层（纯函数·与清单当前状态无关）：零锚 / 锚全环境不可用 → unanchored（计分母不计分子）
+  assert.equal(derivePointState([]).state, 'unanchored');
+  assert.equal(derivePointState([{ tier: 'live', status: 'env' }]).state, 'unanchored', '环境不可用不得冒绿也不得判红');
+  assert.equal(derivePointState([{ tier: 'unit', status: 'skip' }]).state, 'unanchored', 'skip 不是证据');
+  // ② 清单层：真实证据缺口必须仍以无锚点位形式在场（全绿反而可疑——那是"点位被删了"的形状）
+  const unanchored = list.dimensions.flatMap((d) => d.points.filter((p) => !p.anchors || p.anchors.length === 0));
+  assert.ok(unanchored.length > 0, '全有点位锚点反而可疑：未实现能力须如实列为无锚，不得靠删点位凑满分');
+  for (const p of unanchored) assert.ok(p.derivesFrom, `无锚点位 ${p.id} 必须指回外部标尺（防自造点位再"无锚"刷分母）`);
+  // ③ 点位集合相对棘轮基线不得缩水（**不写死具体 id**：BLOCK-196 给 6.6-data-binding 补锚转绿就是正当改善，
+  //    把"当前无锚"冻进门禁等于惩罚补锚；门禁只守口径与集合完整性，进度归棘轮 --check）
+  const baseline = JSON.parse(fs.readFileSync(path.join(ROOT, 'evals', 'anchors', 'baseline.json'), 'utf8'));
+  const now = new Set(list.dimensions.flatMap((d) => d.points.map((p) => `${d.id}.${p.id}`)));
+  const gone = baseline.points.map((p) => p.id).filter((id) => !now.has(id));
+  assert.deepEqual(gone, [], `点位从清单消失：${gone.join(', ')}`);
 });
 
 test('前置条件预检：文件面缺失给因，cdp 面交上层异步判（不在此猜）', () => {
