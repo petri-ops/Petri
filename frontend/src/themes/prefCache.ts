@@ -11,7 +11,12 @@
  * **生产代码不允许 import `core/**`**（`quality:arch` 会拦），故漂移测是唯一跨层通道
  * （先例：`appKeymap.drift.test.ts`）。
  */
-import type { AccentId } from './accents';
+/**
+ * 强调色/主题的**词汇表**放在这里（而不是 accents.ts）：accents 是"怎么渲染"，
+ * 这里是"允许哪些值"。放在渲染侧会造出 `accents ↔ prefCache` 的循环依赖
+ * （`gate:arch-cycles` 当场拦下）。
+ */
+export type AccentId = 'teal' | 'blue' | 'violet' | 'rose' | 'amber';
 
 export const THEME_STORAGE_KEY = 'petri-theme';
 export const FONT_SCALE_STORAGE_KEY = 'petri-font-scale';

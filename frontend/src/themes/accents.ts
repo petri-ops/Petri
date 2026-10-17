@@ -7,9 +7,9 @@
 // accent token（light/dark 双套），其余 token 不动。
 // ============================================================
 
-import { readCachedAccent } from './prefCache';
+import { readCachedAccent, type AccentId } from './prefCache';
 
-export type AccentId = 'teal' | 'blue' | 'violet' | 'rose' | 'amber';
+export type { AccentId };
 
 export interface AccentOption {
   id: AccentId;

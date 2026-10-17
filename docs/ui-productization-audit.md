@@ -5017,6 +5017,8 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 
 - **变化面**：主题/字号/强调色的 localStorage 键名、枚举与钳位边界收成 `frontend/src/themes/prefCache.ts` 一处；`ThemeProvider` 不再直接读写 localStorage，`accents.readAccent` 委托 `readCachedAccent`。真值仍是服务端 `user-prefs.json`（注册表 `user-prefs` 族），localStorage 只保证首屏不闪默认值。
 - **诚实边界**：**无实机腿**——本条只改变"缓存从哪读、谁校验"，不改任何可见交互与布局；故记 `in_progress` 而不是 `verified`。跨层一致性由 `prefCache.drift.test.ts` 承担（生产代码不 import `core/**`）。
+- **收口自纠**：`gate:arch-cycles` 当场抓到 `accents.ts -> prefCache.ts` 新环（词汇表住在渲染侧、缓存侧却要引用它）——
+  `AccentId`/`ACCENT_VALUES` 下沉到 `prefCache`，`accents` 改为 re-export + 只留选项表与 DOM 应用，方向变成单向。
 - **验证**：`prefCache.drift.test.ts` 6/6（键名冻结·枚举与注册表逐项相等·钳位边界一致·ThemeProvider 无 localStorage 直连·prefCache 无 core 引用）+ `ThemeProvider` 5/5 + `ThemeProvider.sync` 4/4（既有行为零变化）+ `quality:types` 0。
 
 ## UI-522: 模型渠道导出默认脱敏（2026-10-18 in_progress，BLOCK-203 W4a P8 / D-2 rider）
