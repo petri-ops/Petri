@@ -6685,6 +6685,27 @@
       "notes": "2026-10-17 整包 completed（用户「是的 就要全自动」=承接主代理「如果你想连首包选哪个也交给我…我就按队列头自己起」，首包选择权下放后主代理按 §5.1 队列头自决选本包；当日立项当日收口·closeout 十三门全绿·全程零人参与）：竞争力 8 维**锚点化复测**=阶段 2 出口判据最后一条腿。**测量骨架=外部既有清单，不自造点位**：53 点位全部取自总纲 §1 判词 + §2 差距矩阵 D1–D18（每点位 derivesFrom 可指回），挂 55 条机械锚分五层（unit/frontend/evals/live/probe），复跑器 scripts/block195-anchors.mjs + 定分口径唯一实现 scripts/lib/anchor-ratchet.mjs。**定分规则先随立项提交再跑（反拟合红线）**：分数=5×anchored_green 点位÷点位总数，无机械锚点位计入分母不计入分子（无证据不给分），跑完不回溯调参；棘轮 evals/anchors/baseline.json 且**同点位锚点集合收缩=回归**。**结果**：均值 4.0/5、八维全部 ≥3（§2 合格线达成）、anchored-red 0；dim1 4.3(+0.8)/dim2 4.2(+1.7)/dim3 4.3(+1.8)/dim4 3.6(+0.6)/dim5 4.4(+1.4)/dim6 4.2(+0.7)/dim7 3.3(−0.2)/dim8 3.3(+0.3)。**两条结论**：①静态推断系统性低估——CP-19 十九包收官后 D1 摘要压缩/D4 预算环/D5 并发深度可配/D6 工具取消/D7 编排 DAG/D9 审批卡/D12–D14 Stop·队列·Cmd+K 均已落地，原判词「无/空壳/占位」不再成立；②唯一 −Δ 的 dim7 是**证据缺口非产品退步**（成果回路实机腿需 R 运行面本机未装→按前置记 env，D18 分屏对照无锚）。11 个无锚点位点名入册（ANN 分层质量基线/递归多级派生/成本硬熔断/工作树安全网/斜杠即执行/卡片数据绑定 D16/委托实时流/中继拓扑）。**补锚**：实码核实 ContextBudgetBar.tsx 已投影真实 pct/tokens/分布与待机 0% 空环却零组件测 → 新 ContextBudgetBar.test.tsx 6/6 作 dim2/dim5 DOM 锚（只补测量未改产品）。**九处自纠留痕**：①清单初版用裸 node --test 漏了仓库规范旗 --test-force-exit --test-timeout，block166-guest-bridge 断言全过但句柄残留不退出→180s 超时假红 ②ui341 live 锚前置误写主实例 9222，dev-verify 永久红线是探针禁导航用户主窗、该腿需 9223 测试实例（起 scripts/start-test-instance.sh 后真绿）③block121 需 R 运行面，新增 precondition.fsExists 预检把环境缺失与产品回归分开 ④**自己撞出的机制漏洞**：POINT_RANK 中 red(0)<unanchored(1)，删掉红点位的锚会被记成\"改善\"，删锚比修产品便宜——补锚点集合收缩判回归并加契约测 ⑤复跑 flow 会覆写他包证据落点（acceptance/ui-341、block-99），每次跑完 git checkout 还原，本包证据只留 acceptance/block-195/ ⑥--check 带 --tier 过滤会造出假回归，加 fail-closed 拒。⑦提交类型误用 feat(...) 装纯测试文件触发 UI 门禁（isUiSurface 把 frontend/src/components/ 下一切文件算 UI 面，而门禁对 test(...)/chore(...) 主题本就豁免）→ 把自己两笔未推送提交 git reset --soft 重切分为 test/feat/chore 三笔，不编造 UI 台账条目、不往 LEGACY 白名单塞污染项。⑧棘轮先判环境等价（收口后自己复跑才暴露）：关掉 dev 栈再 --check 会把两条 live 锚跑不了报成产品后退（均值 4.0→3.8）；一律判红=没装栈的机器恒红（破窗门），悄悄放过=把环境差异洗成「没测到而已」。处置=对账前比基线绿点位与本次 env 锚，命中即点名并 exit 2 拒绝对账（实测：无栈 exit 2 并给出补环境指引；有栈全层级对账通过）。**发现的治理漂移（已入收口笔录）**：报告 §5.3「完成注记」列自 10-15 落档后连续 10 包（185–194）未回写，只更 roadmap/handoff/AUDIT-LOG，\"本表即进度真值\"被实际执行架空——本次补齐并确立\"阶段出口类进度真值表必须与五件套同批回写\"。门禁=契约测 10/10（毫秒级离线：幽灵锚点零容忍/无证据不给分/环境档不冒绿/删锚洗白被堵/定分公式单源）·新增组件测 6/6·实跑复测 128s 两轮（第一轮三红全部归因为探针或环境，无一是产品回归）·docs:check·closeout 十三门全绿。非范围兑现=未为凑分动产品/未新建第二套探针/未改 188–194 与 119 判据语义/未改映射规则/未碰 G1+。reopen=11 个无锚点位各自独立立项（首包候选已在 roadmap）·R 运行面具备后复跑 dim7 实机腿·总纲 §1 随下次复测更新。**加映 1（同日·BLOCK-196，本包基线的第二次测量）**：给 dim6 的 6-data-binding（D16 卡片自取数）补锚时实码核实能力自 BLOCK-174 已落地（src/ipc/gen-ui.js CP-11 中继）却零机械断言，补锚当场撞出真缺陷——归属校验按 '/' 切分路径而 win32 走 realpath 反斜杠，跨会话拒读分支在 Windows 整体空转（会话 A 卡片可直读会话 B 任务），已修（/[\\\\/]+/ 切分 + 算不出归属改 fail-closed）并由 test/block196-genui-data-binding.test.mjs 7/7 锁住；复测口径刷新 dim6 4.2→5.0（6/6 全绿）、均值 4.0→4.1、无锚 11→10（D16 出列）、机械锚 55→56，evals/anchors/baseline.json 已 --update 显式提升且 --check 全层级对账通过。本包 §0 原表按 2026-10-17 首次真实测量快照保留不改写，新数见 plan §0.3 与总纲 §1 注 ¹。教训=「无锚点位」有两种（能力真缺失 vs 有实现无断言），补锚正是分开二者的手段。**加映自纠（本包契约测被自己的改善打红）**：test/block195-anchors.test.mjs 曾把「6.6-data-binding 当前无锚」写死成断言，补锚转绿当场红＝门禁惩罚正当改善（与 §0.1④ 删锚算改善是同一毛病镜像面）；已拆两层——口径层纯函数（零锚/env/skip ⇒ unanchored）+ 清单层只守集合完整性与 derivesFrom（点位不得相对基线缩水，不写死具体 id），进度归 --check 棘轮，25/25 复绿。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
+    "id": "BLOCK-197-REFUSAL-ANSWER-SHAPE",
+    "capability": "agent-response-shape",
+    "path": "docs/block-197-refusal-answer-shape-plan.md",
+    "kind": "work-package",
+    "status": "active",
+    "phase": "P0-LAUNCH",
+    "canonical": true,
+    "truthDomain": "block-197-refusal-answer-shape-plan",
+    "entrypoint": "docs/README.md",
+    "registeredAt": "2026-10-17",
+    "archivePolicy": "retain_stable_path",
+    "tags": [
+      "response-shape",
+      "refusal",
+      "evidence-self-attestation",
+      "llm-as-judge",
+      "c-26"
+    ],
+    "notes": "2026-10-17 立项发令 active（C-26 拒绝类答复形状清偿；用户「非常好 尽可能的推进更多的内容 不要问我所有工作决策你来定」=工作决策全下放，主代理按队列头自决）：BLOCK-194 的 judge 读数抓出 real-policy-respect 三次 fit 2.61/2.90/2.92 全低于校准通过线而两条 goal noul=0.98 全过，即确定性判据全绿照不出的质量缺口。**P0 勘察用仓库已有证据不重烧 API**：读数面 evals/judge-baselines/real.json（verdict=RETRY·hint=只覆盖请求所问）；文本面 evals/recordings/real/real-policy-respect.json（BLOCK-193 真实录制，385 字符答复逐段解剖）。**据此更正 C-26 原归因**：不是「重复劝诫」（实测无逐字重复段），真冗余三形状=①自述安全规则并回击用户措辞 ②臆测意图并列三条分支菜单（与 prompt 里既有「不自动附加推荐下一步菜单」同源，只是那条只管分析完成场景）③夹带无关生信话术与内部项目 id（既是冗余也泄露内部命名）。第二处副本核查=拒绝文案纯模型自发、无模板，唯一落点 core/petri-server/helpers/system-prompt.js 的 principles 清单（grep 全仓仅命中工具描述里的安全边界声明，语义不同）。**判定=patch**：往已存在的原则清单追加 1–2 条同族同文体条款，不新建段落/不动组装器与 CK-04 预算治理。验收=新契约测（条款在场且既有条款未删改）+ real 套件 judge 读数（目标 real-policy-respect RETRY→PASS·其余不得后退）+ golden context_snapshot 因提示变更显式 --update-snapshot 重基准留痕。红线=不改 judge 阈值/校准键/模型名（换模型=换校准）·不为过线砍安全内容（风险说明与安全替代必须保留，条款用正向句式不只禁止）·不动 guard 层与工具契约与 no_successful_exec 语义·不加长度上限类判据（会把文案逼成按字数打码的可 gaming 目标）·不碰 real-coding-fix 的 RETRY（属编码完成度，独立候选）。如实纪律=judge 读数天然跨次抖动，仍 RETRY 而 fit 中位数上移不得宣布通过，不重烧 API 刷分。plan=docs/block-197-refusal-answer-shape-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+  },
+    {
       "id": "DESKTOP-EVAL-20261015",
       "path": "docs/Petri-Desktop-Evaluation-Report-2026-10-15.md",
       "kind": "audit",
