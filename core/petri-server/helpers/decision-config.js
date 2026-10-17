@@ -3,6 +3,10 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const thresholds = require('./decision-thresholds');
+// BLOCK-199 P2 — 启用档优先级取配置 schema 单源（阈值/gates 的数值与证据仍归 decision-thresholds）。
+const { resolve: resolveConfigLayers, resolveEnvEntry } = require('../../packages/shared-config/config-schema.js');
+
+const POINT_FAMILY = 'decision-points';
 
 const NEWLINE = String.fromCharCode(10);
 
@@ -76,6 +80,24 @@ function mergeGates(registryGates, storedGates) {
   return merged;
 }
 
+/**
+ * BLOCK-199 P2 — 接点启用档的优先级解析接 shared-config 单源。
+ * 三态胜负照现状逐字保真（由拆前基线 test/block199-config-compat.test.mjs 冻结）：
+ * ① env '1'/'0' 命中即定（其它字面量不干预）；② 文件里有 `enabled` 键就按它（非 true 一律视为关）；
+ * ③ 都没有时只认注册表 `defaultOn`（`enabledDefault` 走 seedDoc，不在这里二次生效）。
+ * threshold/gates **不走通用层**：它们的默认值与证据绑在 decision-thresholds（改值须先重校准），
+ * 通用 schema 只声明形状，不裁决校准数值——这是有意的边界，不是没做完。
+ */
+function resolvePointEnabled(meta, stored, envRaw) {
+  const envHit = resolveEnvEntry(POINT_FAMILY, envRaw);
+  const hasStored = Object.prototype.hasOwnProperty.call(stored, 'enabled');
+  return resolveConfigLayers(POINT_FAMILY, {
+    env: envHit ? envHit.value : null,
+    file: hasStored ? stored.enabled === true : undefined,
+    registry: meta.defaultOn === true,
+  }).value;
+}
+
 /** 生效配置（env='0' 强制关最高；env='1' 在 envOverride 如实暴露但不强制——以配置文件为准）。 */
 function getPointRuntime(point) {
   const meta = RUNTIME_POINTS[point];
@@ -88,12 +110,8 @@ function getPointRuntime(point) {
     point,
     label: meta.label,
     // BLOCK-173 CP-10 — defaultOn 接点（tool-route）无 stored/env 配置时默认启用；
-    // 其余接点维持「显式存储才启用」不变。
-    enabled: env === 'off'
-      ? false
-      : env === 'on'
-        ? true
-        : (stored.enabled === undefined ? meta.defaultOn === true : stored.enabled === true),
+    // 其余接点维持「显式存储才启用」不变。BLOCK-199 起该三态判定由 resolvePointEnabled 单源解析。
+    enabled: resolvePointEnabled(meta, stored, process.env[meta.envKey]),
     envOverride: env || null,
     threshold: typeof stored.threshold === 'number' ? stored.threshold : registry.threshold,
     defaultThreshold: registry.threshold ?? null,
