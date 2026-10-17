@@ -6,7 +6,7 @@
     "types",
     "files"
   ],
-  "updatedAt": "2026-10-16",
+  "updatedAt": "2026-10-17",
   "keys": [
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::DEFAULT_PORT",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::TEST_INSTANCE_PORT",
@@ -90,6 +90,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block156-extensions-hub.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block156-mcp-client.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block156-skill-import.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/block200-settings-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block83-tool-catalog.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block94-knowledge.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block96-ssh-channel.cjs",

@@ -36,7 +36,7 @@ export interface ParsedCombo {
   key: string;
 }
 
-export type BindableScope = 'app' | 'local';
+type BindableScope = 'app' | 'local';
 
 export interface KeymapCommand {
   /** 稳定 id：应用级命令取 `useAppCommands` 的命令 id，其余取 `域.动作`。 */
@@ -70,8 +70,6 @@ export const KEYMAP_COMMANDS: readonly KeymapCommand[] = Object.freeze([
   { id: 'workspace.toggleRight', label: '右侧栏', defaultCombo: 'Mod+Shift+B', scope: 'local', description: '开合工作区右侧栏' },
   { id: 'thinking.cycle', label: '思考档位循环', defaultCombo: 'Mod+T', scope: 'local', description: '在 off/standard/high 间循环（仅声明 reasoning 能力的渠道生效）' },
 ]);
-
-const COMMAND_INDEX = new Map(KEYMAP_COMMANDS.map((command) => [command.id, command]));
 
 function isModifierName(value: string): value is ModifierName {
   return (MODIFIER_ORDER as readonly string[]).includes(value);
@@ -166,7 +164,7 @@ export function matchesCombo(combo: string | null, event: KeyboardEvent): boolea
   return event.key === eventKeyOf(parsed.key) || storedKeyFromEventKey(event.key) === parsed.key;
 }
 
-export type KeymapOverrides = Record<string, string | null>;
+type KeymapOverrides = Record<string, string | null>;
 
 /** 生效键位：用户覆盖优先，`null`/空串=解绑该命令；未覆盖取默认。 */
 export function resolveKeymap(overrides: KeymapOverrides | null | undefined): Record<string, string | null> {
@@ -201,10 +199,6 @@ export function findConflicts(bindings: Record<string, string | null>): KeymapCo
     .filter(([, ids]) => ids.length > 1)
     .map(([combo, ids]) => ({ combo, commandIds: ids }))
     .sort((a, b) => a.combo.localeCompare(b.combo));
-}
-
-export function findCommand(id: string): KeymapCommand | null {
-  return COMMAND_INDEX.get(id) || null;
 }
 
 /** 显示文本：`Mod+Shift+B` → macOS `⌘⇧B` / 其他 `Ctrl+Shift+B`（徽章与派发同源）。 */

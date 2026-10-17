@@ -19,9 +19,9 @@ import {
   type KeymapConflict,
 } from './appKeymap';
 
-export type KeymapOverrides = Record<string, string | null>;
+type KeymapOverrides = Record<string, string | null>;
 
-export interface KeymapSyncState {
+interface KeymapSyncState {
   state: 'ok' | 'pending' | 'failed';
   error: string | null;
   at: number;
