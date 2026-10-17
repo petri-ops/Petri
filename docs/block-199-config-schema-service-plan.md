@@ -38,7 +38,15 @@ status: active
 2. **`report-guard` 是注册表外的隐藏开关**：`core/petri-server/helpers/report-guard.js:21` 只认 `process.env.PETRI_JEV_REPORT_GUARD === '1'`；实测 `RUNTIME_POINTS` 仅 `topic-shift,knowledge-guard,marker-celltype,intent-route,tool-route` 五键 ⇒ 设置页不可见、不可持久化，且语义与他点相反（他点 env '0' 是杀开关，这里必须 ='1' 才开）。
 3. **theme 跨端写失败静默**：`frontend/src/themes/ThemeProvider.tsx:111` 用 `void fetch(...).catch(()=>{})` 推服务端 ⇒ 本地已生效、服务端可能没收到、另一个实例读到旧值，用户无任何线索。
 
-### 0.3 不该合并的东西（防止把"统一"做成"一锅烩"）
+### 0.2.1 第四条已核实矛盾（**本包只登记不改**，转候选 C-32）
+
+`decision-config.js` 文件头注释明写「env='1' **不在运行时强制开**（避免 UI 关不掉）——envOverride 字段如实暴露给 UI 提示」，但 `getPointRuntime` 的实现是 `enabled: env === 'off' ? false : env === '1'→'on' ? true : …`。实测（`test/block199-config-compat.test.mjs` 第六条已把它作为**现状**钉住）：文件里 `{knowledge-guard:{enabled:false}}` + `PETRI_JEV_KNOWLEDGE_GUARD=1` ⇒ `enabled=true`。后果是治理语义反了：**用户在设置页显式关掉某个守卫，只要环境里残留 `PETRI_JEV_*=1` 它就又开了**，UI 只能显示 `envOverride:'on'` 却关不动。
+
+不改的理由不是回避，而是本包 §4 已自我约束「不改变任何族的现有胜负关系」，且拆前基线必须能钉住现状——改了它等于同时改动验收锚与被验收物。处置：compat 测先把现状钉成基线（已完成），矛盾转候选 **C-32**（含"env=1 降级为首载种子、env=0 保留杀开关"的修法与所需回归面），由独立包在漂移门就绪后再动。
+
+
+
+### 0.3 不该合并的东西（防止把「统一」做成「一锅烩」）
 
 凭据存储（`credential-store.js`，`ai-settings.js:11` 明写密钥永不入明文快照——合并即安全回归）· `gen_ui_widget_state`/`last_probe_json`（会话运行态）· `plugins/installed.json`·`packs/installed.json`·`federation/{peers,grants}.json`（装配与授权清单，不是键值配置）· `accessMode` 每请求态（`agent-execution-policy.js:13-19`，UI 是权威、不落盘正是设计）。本包**只收编"用户可改行为参数"这一族**。
 
