@@ -157,7 +157,7 @@ for (const d of list.dimensions) {
       else status = slot.result.status;
       anchors.push({ tier: a.tier, path: a.path, cmd, status, tail: pre || slot?.result?.tail || null });
     }
-    points.push({ id: p.id, claim: p.claim, derivesFrom: p.derivesFrom, anchors, ...derivePointState(anchors) });
+    points.push({ id: p.id, claim: p.claim, derivesFrom: p.derivesFrom, anchors, envBlockedCount: anchors.filter((a) => a.status === 'env').length, ...derivePointState(anchors) });
   }
   const green = points.filter((x) => x.state === 'anchored-green').length;
   const red = points.filter((x) => x.state === 'anchored-red').length;
@@ -214,14 +214,27 @@ if (checkOnly || update) {
     process.exitCode = 2;
   } else {
     const flat = dimReports.flatMap((d) => d.points.map((p) => ({ id: `${d.id}.${p.id}`, state: p.state, anchorPaths: p.anchors.map((a) => a.path) })));
-    const verdict = compareAnchorBaseline(flat, baseline);
-    for (const r of verdict.regressions) console.log(`  ✖ 棘轮回归：${r}`);
-    for (const i of verdict.improvements) console.log(`  ↑ 棘轮改善：${i}`);
-    if (!verdict.ok) {
-      console.error(`[anchors] FAIL — ${verdict.regressions.length} 处相对基线后退`);
-      process.exitCode = 1;
+    // **环境等价性先判**：基线里靠 live/probe 锚拿到的绿，本次因前置未满足跑不了——
+    // 这既不是"通过"也不是"产品后退"，对账必须拒绝（否则 --check 在没有 dev 栈的机器上恒红，
+    // 破窗门；也不能悄悄降级成 unanchored 蒙过去，那等于把环境差异洗成"没测到而已"）。
+    const baseState = new Map((baseline.points || []).map((p) => [p.id, p.state]));
+    const envGap = dimReports
+      .flatMap((d) => d.points.map((p) => ({ id: `${d.id}.${p.id}`, state: p.state, env: p.envBlockedCount })))
+      .filter((c) => c.env > 0 && c.state !== 'anchored-green' && baseState.get(c.id) === 'anchored-green');
+    if (envGap.length) {
+      for (const g of envGap) console.log(`  ⚠ 环境不等价：${g.id} 基线为绿需 live/probe 锚，本次前置未满足`);
+      console.error('[anchors] 拒绝对账——请先补齐环境（dev 主实例 9222 / `bash scripts/start-test-instance.sh` 起 9223 测试实例 / R 运行面），再跑全层级 `--check`。');
+      process.exitCode = 2;
     } else {
-      console.log(`[anchors] 棘轮对账通过（基线点位 ${baseline.points.length}·无后退·改善 ${verdict.improvements.length}）`);
+      const verdict = compareAnchorBaseline(flat, baseline);
+      for (const r of verdict.regressions) console.log(`  ✖ 棘轮回归：${r}`);
+      for (const i of verdict.improvements) console.log(`  ↑ 棘轮改善：${i}`);
+      if (!verdict.ok) {
+        console.error(`[anchors] FAIL — ${verdict.regressions.length} 处相对基线后退`);
+        process.exitCode = 1;
+      } else {
+        console.log(`[anchors] 棘轮对账通过（基线点位 ${baseline.points.length}·无后退·改善 ${verdict.improvements.length}）`);
+      }
     }
   }
 }
