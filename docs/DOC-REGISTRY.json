@@ -7074,8 +7074,31 @@
         "block-208"
       ],
       "notes": "2026-10-18 立项发令 active（runlist W7c，范围收窄；用户「可以的 按照你的建议来 冲完W7c」）：只做动效用户开关（system/full/reduced）——user-prefs 加 motion（接线）+ density（仅登记不接线）；prefCache 加 petri-motion；ThemeProvider 写 html data-motion；CSS 用 [data-motion=reduced] 与 prefers-reduced-motion 双降级；设置页常规节三档。预览专项/密度接线/对比度/通知/性能进 reopen。红线=不新增颜色 token、不改现有 token 值。 | 收口 2026-10-18：motion 开关端到端（user-prefs.motion 接线 + density 仅登记 ⇒ 16 族/86 键；prefCache petri-motion；ThemeProvider data-motion；CSS 复用既有 reduced-motion 块两条通道 + full 覆盖系统；设置页三档 MotionControl）。closeout 十三门 PASS；theme-token-contract 17/17。**证据缺口**：9223 实机腿未跑（UI-525 in_progress，不以 verified 表述）；预览专项/密度接线/对比度/通知/性能进 reopen。"
+    },
+    {
+      "id": "BLOCK-209-EXTERNAL-AGENT-IMPORT",
+      "capability": "external-agent-import",
+      "path": "docs/block-209-external-agent-import-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "phase": "P0-LAUNCH",
+      "canonical": true,
+      "truthDomain": "block-209-external-agent-import-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-18",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "import",
+        "codex",
+        "zcode",
+        "mapping",
+        "d-2",
+        "stage-4",
+        "block-209"
+      ],
+      "notes": "2026-10-18 立项发令 active（runlist W7d；用户「行！ 开整 下一包W7d」）：只做只读解析 + 映射预览（Codex TOML 子集 / ZCode JSON），输出 patch/credentialsDetected/unsupported/notes/diagnostics；**零写入零网络**；凭据一律拒绝自动导入（D-2）；patch 的每个键必须与 shared-config 真实键路径对账；一键应用属 reopen。"
     }
   ],
   "lastUpdated": "2026-10-17",
-  "documentCount": 366
+  "documentCount": 367
 }

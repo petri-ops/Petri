@@ -4072,6 +4072,20 @@
         "test/block201-config-transfer.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block209-external-agent-import",
+      "note": "BLOCK-209（W7d）：外部 Agent 配置只读解析 + 映射预览（Codex TOML 子集 / ZCode JSON），输出 patch/credentialsDetected/unsupported/notes/diagnostics；零写入零网络；凭据拒绝（D-2）；patch 键与注册表对账。",
+      "patterns": [
+        "core/shared-backend/external-agent-import.js",
+        "core/petri-server/routes/external-import.js",
+        "core/petri-server/routes/index.js",
+        "test/block209-*.test.mjs"
+      ],
+      "tests": [
+        "test/block209-external-agent-import.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

@@ -74,6 +74,8 @@ module.exports = async function registerRoutes(app) {
     ['Subagent profiles', () => require('./subagent-profiles').registerSubagentProfileRoutes(app)],
     // BLOCK-207（W7b）：项目信任级读写面（accessMode 天花板 + 审计）
     ['Trust policy', () => require('./trust-policy').registerTrustPolicyRoutes(app)],
+    // BLOCK-209（W7d）：外部 Agent 配置导入预览（只读、零写入）
+    ['External agent import', () => require('./external-import').registerExternalImportRoutes(app)],
   ];
 
   for (const [name, fn] of routes) {

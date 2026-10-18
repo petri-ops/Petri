@@ -6,7 +6,7 @@
 
 最后更新：2026-10-17（**BLOCK-203-STAGE-3-B1B-CONFIG-LANDING-CONSOLIDATION 立项发令 active（runlist W4 拆片：W4a 先做）**）
 
-**恢复要点（换会话必读·本段取代下方 BLOCK-208 段）**：**无 active 工作包**；**下一包=W7d**（BLOCK-209：外部 Agent 配置导入 Codex/ZCode → Petri，只读解析不拷实现，导入含凭据走 D-2）。**刚收口=BLOCK-208（W7c 收窄版）**：动效开关（16 族/86 键；motion 接线、density 仅登记；CSS 复用既有 reduced-motion 块）。**证据缺口（别忘）**：UI-525 的 **9223 实机腿未跑**（三档 computedStyle 对比），台账记 `in_progress`——补跑后按实机结果翻 `verified`。预览专项/密度接线/对比度/通知/性能仍在 reopen。**注意**：main 上存在另一会话的提交（`7bf008b9 feat(ui-523)`），改文件前先 `git log` 看一眼。
+**恢复要点（换会话必读·本段取代下方 BLOCK-209 段）**：**当前 active 工作包=BLOCK-209（W7d）**，plan=`docs/block-209-external-agent-import-plan.md`（registry `active` / `P0-LAUNCH`）。**下一步第一个动作=P1+P2**：`shared-backend/external-agent-import.js`（零依赖 TOML 子集 + JSON 解析 + 映射），然后 P3 路由 `POST /api/import/external-agent`（**只预览**）。**红线**：零写入零网络；凭据一律拒绝自动导入（D-2）；patch 每个键必须与 `shared-config` 真实键路径对账；不拷贝外部实现、零新依赖。**未做的证据**：UI-525（W7c 动效开关）的 9223 实机腿仍未跑，台账 `in_progress`。**注意**：main 上存在另一会话的提交（`7bf008b9 feat(ui-523)`），改文件前先 `git log` 看一眼。
 
 最后更新：2026-10-17（**BLOCK-202-STAGE-A-QUICKWINS-3 整包 completed（阶段 A 速赢 III=runlist W3；当日立项当日收口·9223 探针 15/15 allPass）**）
 
