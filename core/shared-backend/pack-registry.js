@@ -139,7 +139,15 @@ function discoverAvailablePacks({ projectRoot, extraDirs = [] } = {}) {
   if (projectRoot) {
     candidates.push(path.resolve(projectRoot, '..', 'petri-pack-bio'));
   }
-  for (const dir of extraDirs) candidates.push(path.resolve(dir));
+  // BLOCK-213/C-33 — 外部领域包显式指路：`PETRI_PACK_DIRS`（path.delimiter 分隔，可多个）。
+  // 起因：docs 里 skills:check 的 5 红=pack 仓未检出（fail-closed by design），但把 pack 放在
+  // 别处的机器只能靠"拷到 ../petri-pack-bio"绕过——那是靠位置约定而不是配置。加这个 env
+  // 后：pack 在哪都能被承认，判据不变（仍 validatePackDir 全量校验）。
+  const envDirs = String(process.env.PETRI_PACK_DIRS || '')
+    .split(path.delimiter)
+    .map((item) => item.trim())
+    .filter(Boolean);
+  for (const dir of [...envDirs, ...extraDirs]) candidates.push(path.resolve(dir));
   const seen = new Set();
   const available = [];
   for (const dir of candidates) {

@@ -1,4 +1,5 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-10-18（**C-33 实码核定：skills:check 5 红=外部 pack 未检出（fail-closed），不是 manifest 缺陷**）：补 `PETRI_PACK_DIRS` 让 pack 放在任何位置都能被承认（判据仍走 validatePackDir 全量校验）；`skills:check` 保持**报告级**不升阻塞（升了会让无 pack 机器无法收口）。复检=`PETRI_PACK_DIRS=/path/to/petri-pack-bio npm run skills:check`。**不写插件 stub**：那等于假装能跑 R。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-213 completed（十三门 PASS）：功能发现率**）：四数字实测=面板 24 / 设置节 10·10 / 快捷键同名 5·10（局部键位不该进面板）/ 空态 2·2（两页 N/A 有据）；落地=设置深链全覆盖 + 扩展两 tab + 外观动效 6 条 + useThemeOptional + 两页空态引导。证据=5/5 棘轮 + 19/19 + 9223 快照。未做=语义搜索/遥测埋点（G1+）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**测试实例改无窗口 + BLOCK-213 立项**）：测试实例此前「离屏」被 macOS 夹回可见区（实测 x=221）→ 改 `show:false` + `backgroundThrottling:false`，实测 screenX=-1380 / document.hidden=false / 截图完整，**屏幕不再出现 TEST 窗**。同轮立项 **BLOCK-213 功能发现率**（命令面板/快捷键标注/空态引导，只补入口不造能力）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**UI-527 实机腿补齐 → verified（dev Electron 边界内）**）：重启 dev 栈后 `/api/skills/preflight` 三族返回 `missing_deps`+`missingPlugins`，9223 货架截图三卡「缺依赖」（对照重启前「依赖可用」）；flow `ui526-527-badges` 2/2。UI-526 仍 in_progress（测试实例无产物，看不到真值徽标）。G0 开发期常态 · 不外推 packaged/Provider/GA。
