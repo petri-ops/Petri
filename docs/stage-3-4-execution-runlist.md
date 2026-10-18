@@ -67,6 +67,7 @@
 - [x] W7d BLOCK-209 外部 Agent 配置导入（**completed 2026-10-18**：Codex TOML 子集 / ZCode JSON 只读解析 + 映射预览；零写入零网络；凭据 D-2 双查拒入；patch 与注册表对账；一键应用属 reopen）
 - [x] W7e BLOCK-210 数据目录可配 + 留存/归档（**completed 2026-10-18**：17 族/89 键；留存默认零删除、apply 默认 dryRun、删除须 allowDelete、审计落盘；迁移计划器只读（备份/回退/阻塞项）；真实搬迁与清理 reopen）
 - [x] **BLOCK-212 提示词缓存前缀优化**（**completed 2026-10-18**：动态上下文搬消息尾部 + Anthropic cache_control 断点 + 基线增静态前缀规模；13 门 PASS；局限=215 tokens<1024 ⇒ Claude 空操作，真实命中率需 G1+）
+- [ ] **BLOCK-213 功能发现率**（**active 2026-10-18**，用户发令「开」；与 W8 余项并行，W8 余项=需用户裁决/需第二台机器）
 - [ ] W8 BLOCK-211 收尾族（**部分完成 2026-10-18**：C-32 env 语义清偿 completed；余项在册：lint 净收缩/双机 riders/休眠插件裁决/RS 徽标语义/C-27 成对实验/C-30·C-31 立项或销号；新登记 🟡 block110-p1 5 例 HEAD 红待 triage）
 
 ## 4. 已知未达成事实（防止后续会话误读为已完成）
