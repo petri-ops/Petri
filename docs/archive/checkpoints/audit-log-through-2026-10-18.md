@@ -46,3 +46,9 @@
 <!-- audit-log-compact.mjs 追加 @ 2026-10-18T03:26:52.176Z -->
 最后更新：2026-10-18（**BLOCK-210（W7e）completed（closeout 十三门 PASS）**）：留存/归档（默认零删除、apply 默认 dryRun、删除须 allowDelete、审计落盘）+ 迁移**计划器**（只读：步骤/备份/回退/阻塞项）；注册表 17 族/89 键；**真实搬迁与清理未执行**（reopen）。plan=docs/block-210-data-dir-retention-plan.md。无 active 工作包，下一包=W8 收尾族。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-210-DATA-DIR-RETENTION 立项发起 active（runlist W7e）**）：留存/归档策略（默认零删除、apply 默认 dryRun）+ 迁移计划器/预览（只读不执行；真实搬迁属 reopen）；目录解析只走 `data-paths` 单源。plan=docs/block-210-data-dir-retention-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-18T03:51:16.994Z -->
+最后更新：2026-10-18（**W8 第五批：候选收尾裁定**）：C-27 **deferred（G0 边界：需真实 Provider 成对送判，不得 mock 冒充）**；C-30 **销号**（不引 sqlite-vec、无可测缺口，重开=向量 >5 万或 P95 >250ms）；C-31 **销号**（点对点现形态；造锚=幽灵锚点，重开=真实 3+ 节点需求）。休眠插件=待用户裁决；双机 riders=deferred（需机器）。W8 可自决项已清完，**不宣称 W8 完成**。G0 开发期常态 · 不外推 packaged/Provider/GA。
+最后更新：2026-10-18（**W8 第四批：RS 真值徽标语义诚实化（UI-526）**）：`valid` 属产物级核验，旧文案「可信结果」过度声称 ⇒ 「已核验（未篡改）」+ `detail`（title/aria-label）点明"不代表科学结论正确、也不代表 RS 整体已验证"；三态同步补范围。证据=resultSurface 18/18 + tsc 0 + token 17/17；closeout 十三门 PASS。W8 余项：双机 riders（需机器）/休眠插件裁决（需用户）/C-27/C-30·C-31。G0 开发期常态 · 不外推 packaged/Provider/GA。
+最后更新：2026-10-18（**W8 第二批：lint 基线净收缩 326→318（−8）**）：以整文件清零方式消掉 `frontend/src/lib/chat-file-references.test.ts` 的 8 条 require-await（同步 mock + `as unknown as Response`），`--prune-suppressions` 清陈旧键；`quality:lint` 0 errors / 该文件 vitest 25/25 / tsc 0。**自纠**：整文件替换误伤 `it(..., async () => {`，已还原并改定向替换。W8 余项在册。G0 开发期常态 · 不外推 packaged/Provider/GA。
+最后更新：2026-10-18（**BLOCK-211（W8 首批）completed：C-32 清偿（closeout 十三门 PASS）**）：`env='1'` 从运行时强制开降级为**首载种子**（`env='0'` 仍杀开关）——设置页关掉的守卫不再被残留 env 重新打开；`envShadowedKeys` 不再把 seed 报成遮蔽；compat 基线同批显式改写留因。**新登记 🟡**：`block110-p1-topic-shift` 5 例在 HEAD 上就红（stash A/B 证明与本批无关）。W8 其余项仍在册。G0 开发期常态 · 不外推 packaged/Provider/GA。

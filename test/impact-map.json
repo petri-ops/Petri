@@ -4169,12 +4169,14 @@
         "frontend/src/pages/welcome.tsx",
         "frontend/src/pages/extensions/index.tsx",
         "scripts/block213-discoverability.mjs",
-        "test/block213-*.test.mjs"
+        "test/block213-*.test.mjs",
+        "acceptance/block-213/**",
+        "acceptance/ui-526-527/**"
       ],
       "tests": [
         "test/block213-discoverability.test.mjs"
       ],
-      "classifiesScripts": false
+      "classifiesScripts": true
     }
   ]
 }
