@@ -103,6 +103,12 @@ async function createWindow({
     height: 1000,
     // 测试实例覆盖（x/y + 1280x800）必须排在默认尺寸之后——对象字面量后键胜出
     ...(IS_TEST_INSTANCE ? { ...testWindowBounds, ...testWindowSize } : {}),
+    // BLOCK-213 前置修复（2026-10-18 用户反馈「不要 TEST 有窗口的状态」）：
+    // macOS 会把越界坐标的窗口**夹回可见区**（实测请求 x≈-1400 时落在 x=221），
+    // 于是"离屏"变成"屏幕上多一个 TEST 窗"。测试实例改为**根本不 show**：
+    // 配合 backgroundThrottling:false，隐藏窗口仍持续渲染（rAF 不被节流），
+    // CDP 的 Page.captureScreenshot 照常出图——验收面不变，屏幕干净。
+    ...(IS_TEST_INSTANCE ? { show: false } : {}),
     minWidth: 720,
     minHeight: 520,
     title: IS_TEST_INSTANCE ? `[TEST] ${BRAND.APP_NAME}` : BRAND.APP_NAME, // BLOCK-61：品牌单一事实源；[TEST] 前缀=BLOCK-100 窗口级标记
@@ -132,6 +138,8 @@ async function createWindow({
       // UI-400-1 — 启用 Chromium PDF 查看器插件：文件预览的 <object type="application/pdf">
       // 此前因插件禁用渲染空白（用户报告「文件中 PDF 不能预览查看」）。
       plugins: true,
+      // 测试实例隐藏窗口仍要渲染：后台节流会冻结 rAF（离屏探针会拍到旧帧）
+      ...(IS_TEST_INSTANCE ? { backgroundThrottling: false } : {}),
       // BLOCK-100 — 测试实例身份注入：preload 读 argv 暴露 __testInstance，
       // 前端悬浮「测试实例」徽标据此点亮（=== true 严格判定防投影 shim 误判）。
       // UI-421 — 管理模式快捷键同步透传，徽标文案显示真实生效组合键。默认
