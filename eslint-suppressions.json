@@ -569,11 +569,6 @@
       "count": 8
     }
   },
-  "frontend/src/lib/chat-file-references.test.ts": {
-    "@typescript-eslint/require-await": {
-      "count": 8
-    }
-  },
   "frontend/src/lib/project-store.test.ts": {
     "@typescript-eslint/require-await": {
       "count": 2

@@ -6,7 +6,7 @@
 
 最后更新：2026-10-17（**BLOCK-203-STAGE-3-B1B-CONFIG-LANDING-CONSOLIDATION 立项发令 active（runlist W4 拆片：W4a 先做）**）
 
-**恢复要点（换会话必读·本段取代下方 BLOCK-211 段）**：**无 active 工作包**；**W8 剩余项按这个小批方式逐项推**（每项独立验收/提交）：①**先 triage 新登记的 🟡**：`test/block110-p1-topic-shift.test.mjs` 5 例在 HEAD 上就红（noul 三区间/降级/杀开关，全断 `callModelTask` 调用数），stash A/B 已证与本批改动无关——先判是产品回归还是测试环境依赖；②lint 基线净收缩（2153→≤2145，动棘轮须逐批）；③休眠插件激活裁决（**需用户裁决**）；④RS 徽标语义诚实化（UI + 台账）；⑤C-27 成对实验；⑥C-30/C-31 立项或销号；⑦双机 riders+BK-08（需第二台机器）。**刚收口=BLOCK-211（C-32）**：`env='1'` 降级为首载种子、`envShadowedKeys` 不报 seed、compat 基线显式改写。**注意**：main 上存在另一会话的提交（`7bf008b9 feat(ui-523)`），改文件前先 `git log` 看一眼。
+**恢复要点（换会话必读·本段取代下方 BLOCK-211 段）**：**无 active 工作包**；**W8 剩余项按这个小批方式逐项推**（每项独立验收/提交）：①**先 triage 新登记的 🟡**：`test/block110-p1-topic-shift.test.mjs` 5 例在 HEAD 上就红（noul 三区间/降级/杀开关，全断 `callModelTask` 调用数），stash A/B 已证与本批改动无关——先判是产品回归还是测试环境依赖；②~~lint 基线净收缩~~ → **已做第一批（326→318，−8；纯测试文件清零）**，后续可继续按"整文件清零"推进；③休眠插件激活裁决（**需用户裁决**）；④RS 徽标语义诚实化（UI + 台账）；⑤C-27 成对实验；⑥C-30/C-31 立项或销号；⑦双机 riders+BK-08（需第二台机器）。**刚收口=BLOCK-211（C-32）**：`env='1'` 降级为首载种子、`envShadowedKeys` 不报 seed、compat 基线显式改写。**注意**：main 上存在另一会话的提交（`7bf008b9 feat(ui-523)`），改文件前先 `git log` 看一眼。
 
 最后更新：2026-10-17（**BLOCK-202-STAGE-A-QUICKWINS-3 整包 completed（阶段 A 速赢 III=runlist W3；当日立项当日收口·9223 探针 15/15 allPass）**）
 

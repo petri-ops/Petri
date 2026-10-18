@@ -211,11 +211,11 @@ describe('chat-file-references: candidate extraction', () => {
 
 describe('chat-file-references: resolveFileReferences', () => {
   it('caches by (projectId, activeJobId, reference) and reuses the same promise', async () => {
-    const fetchMock = vi.fn(async () =>
+    const fetchMock = vi.fn(() =>
       ({
         ok: true,
         status: 200,
-        json: async () =>
+        json: () =>
           ({
             ok: true,
             results: [
@@ -229,7 +229,7 @@ describe('chat-file-references: resolveFileReferences', () => {
               },
             ],
           }) satisfies ResolveResponse,
-      } as Response),
+      } as unknown as Response),
     );
     vi.stubGlobal('fetch', fetchMock);
 
@@ -243,11 +243,11 @@ describe('chat-file-references: resolveFileReferences', () => {
   });
 
   it('normalizes the server artifact name field for rendering and clicks', async () => {
-    const fetchMock = vi.fn(async () =>
+    const fetchMock = vi.fn(() =>
       ({
         ok: true,
         status: 200,
-        json: async () =>
+        json: () =>
           ({
             ok: true,
             results: [{
@@ -260,7 +260,7 @@ describe('chat-file-references: resolveFileReferences', () => {
               },
             }],
           }) as ResolveResponse,
-      } as Response),
+      } as unknown as Response),
     );
     vi.stubGlobal('fetch', fetchMock);
 
@@ -274,12 +274,12 @@ describe('chat-file-references: resolveFileReferences', () => {
   });
 
   it('returns null entries when the server resolves none of the references', async () => {
-    const fetchMock = vi.fn(async () =>
+    const fetchMock = vi.fn(() =>
       ({
         ok: true,
         status: 200,
-        json: async () => ({ ok: true, results: [] }) satisfies ResolveResponse,
-      } as Response),
+        json: () => ({ ok: true, results: [] }) satisfies ResolveResponse,
+      } as unknown as Response),
     );
     vi.stubGlobal('fetch', fetchMock);
     const out = await resolveFileReferences(context, ['missing.csv']);
@@ -297,11 +297,11 @@ describe('chat-file-references: resolveFileReferences', () => {
 
 describe('chat-file-references: synthetic URI round-trip', () => {
   it('produces a stable petri://artifact URI from an artifact resolution', async () => {
-    const fetchMock = vi.fn(async () =>
+    const fetchMock = vi.fn(() =>
       ({
         ok: true,
         status: 200,
-        json: async () =>
+        json: () =>
           ({
             ok: true,
             results: [
@@ -315,7 +315,7 @@ describe('chat-file-references: synthetic URI round-trip', () => {
               },
             ],
           }) satisfies ResolveResponse,
-      } as Response),
+      } as unknown as Response),
     );
     vi.stubGlobal('fetch', fetchMock);
     const out = await resolveFileReferences(context, ['job-1/deg.csv']);

@@ -65,3 +65,10 @@ status: completed
 ① 在**任何 require 之前**固定 `PETRI_LOCAL_DATA_DIR` 与 `PETRI_DB_PATH`；
 ② 用 `conversations` 自己的建表路径初始化（而不是只跑 `src/migrations`）；
 ③ 断言里不要依赖"malformed 被吞成 null"这种形态。修完应 6/6。
+
+## 5. 第二批：lint 基线净收缩（2026-10-18）
+
+- **做法**：挑一个"纯测试、全同规则、可整文件清零"的目标——`frontend/src/lib/chat-file-references.test.ts`（8 条 `@typescript-eslint/require-await`）。把 `vi.fn(async () => …)` 与 `json: async () => …` 改成同步 mock（**`it(..., async () => {` 保留**，因为函数体里真有 await），并把 4 处 `as Response` 改为 `as unknown as Response`（同步 mock 不再结构上像 Promise）。
+- **净收缩**：`eslint-suppressions.json` **326 → 318（−8）**，文件数 135 → 134（该文件条目整块消失）；`npx eslint . --prune-suppressions` 清掉陈旧键，`quality:lint` **0 errors**。
+- **验证**：该测试文件 `vitest` **25/25**、`tsc --noEmit` 0。
+- **自纠一次**：首版用整文件 `s.replace('async () =>', '() =>')` 把 `it(..., async () => {` 也改了，导致 `await` 出现在非 async 函数里（tsc TS1308 + 测试 0 执行）→ `git checkout` 还原后改成**只替换两种 mock 形态**的定向改法。
