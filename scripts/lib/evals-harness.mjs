@@ -720,7 +720,19 @@ export function compareRunVsBaseline(run, baseline) {
  */
 export function normalizeContextString(input, tmpRoot) {
   let s = String(input ?? '');
-  if (tmpRoot) s = s.split(String(tmpRoot)).join('<TMP>');
+  if (tmpRoot) {
+    // BLOCK-206 归因修正（2026-10-18）：tmp 根替换后，紧跟 `<TMP>` 的**路径分隔符**必须统一。
+    // 否则同一份组装在 Windows（`<TMP>\projects\…`）与 POSIX（`<TMP>/projects/…`）下指纹不同——
+    // 实测 golden 基线（`9bb90c14`，Windows 录制）在 macOS 上恒红，而 prompt 文案一字未变。
+    // 这是「环境差异被记成产品后退」的教科书案例（BLOCK-195 教训）：棘轮必须平台无关。
+    const roots = new Set([
+      String(tmpRoot),
+      String(tmpRoot).replace(/\\/g, '/'),
+      String(tmpRoot).replace(/\//g, '\\'),
+    ]);
+    for (const root of roots) if (root) s = s.split(root).join('<TMP>');
+    s = s.replace(/<TMP>[\\/]+/g, '<TMP>/');
+  }
   return s
     .replace(/projects[\\/][^"'\s]*/g, 'projects/<WORKSPACE>')
     .replace(/当前执行环境[：:][^\n]*/g, '当前执行环境：<ENV>')

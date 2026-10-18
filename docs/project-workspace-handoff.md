@@ -6,7 +6,7 @@
 
 最后更新：2026-10-17（**BLOCK-203-STAGE-3-B1B-CONFIG-LANDING-CONSOLIDATION 立项发令 active（runlist W4 拆片：W4a 先做）**）
 
-**恢复要点（换会话必读·本段取代下方 BLOCK-206 段）**：**无 active 工作包**。**下一步有三个候选，按优先级**：①**先归因 `context_snapshot` golden 指纹漂移**（`dfc9be7b…` vs 基线 `9bb90c14…`，原因行=system prompt 文案变更；已证与 W7a 无关；W6 的"指纹未变"结论已作废）——逐个 BLOCK-197 之后落过 prompt/工具 schema 的包二分，归因清楚后才允许 `--update-snapshot` 重基准；②W7b（项目/工作区信任级别 + 命名权限档）；③W7c/W7d/W7e。**刚收口=BLOCK-206（W7a）**：`subagent-profile` 族（15 族/81 键；并发只能 min 收紧、reportGuard 仅 inherit）；`spawn_agent` 可选 profile（未传=零行为变化）；C-29 斜杠判定抽成 `classifySlashCommand` + D15 unit 锚。**注意**：main 上存在另一会话的提交（`7bf008b9 feat(ui-523)`），改文件前先 `git log` 看一眼。
+**恢复要点（换会话必读·本段取代下方 BLOCK-206 段）**：**无 active 工作包**；**下一包=W7b**（BLOCK-207：项目/工作区信任级别 + 命名权限档；默认=现状最保守、敏感项留审计，依赖已就位的 `subagent-profile`/`runtime` 两族）。**已解决=context_snapshot 漂移**：真因是归一化保留 OS 路径分隔符（Windows 录的基线在 macOS 恒红），已统一 `<TMP>/` + 平台无关单测 + 显式重基准 `dfc9be7b`；**W6 的"指纹未变"结论作废**（当时用单测代替 fp 对比）。**注意**：main 上存在另一会话的提交（`7bf008b9 feat(ui-523)`），改文件前先 `git log` 看一眼。
 
 最后更新：2026-10-17（**BLOCK-202-STAGE-A-QUICKWINS-3 整包 completed（阶段 A 速赢 III=runlist W3；当日立项当日收口·9223 探针 15/15 allPass）**）
 

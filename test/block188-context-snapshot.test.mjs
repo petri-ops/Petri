@@ -85,3 +85,18 @@ test('normalizeContextString 逐类抹除易变值', () => {
   assert.match(normalizeContextString('见 2026-10-16T12:00:00.000Z 起', TMP_A), /<DATETIME>/);
   assert.match(normalizeContextString(`${TMP_A}/projects`, TMP_A), /<TMP>/);
 });
+
+test('平台无关：Windows 与 POSIX 的 tmp 根必须归一成同一指纹（2026-10-18 归因修正）', () => {
+  // 实测教训：golden 基线曾在 Windows 录制（`<TMP>\projects\…`），在 macOS 上恒红而 prompt 文案一字未变。
+  // 棘轮必须平台无关——否则"环境差异"会被记成"产品后退"（BLOCK-195 教训）。
+  const win = buildContextSnapshot(
+    { model: 'm', messages: [{ role: 'system', content: '根 C:\\tmp\\x\\projects\\p1' }, { role: 'user', content: 'hi' }], tools: [] },
+    { tmpRoot: 'C:\\tmp\\x' },
+  );
+  const posix = buildContextSnapshot(
+    { model: 'm', messages: [{ role: 'system', content: '根 /tmp/x/projects/p1' }, { role: 'user', content: 'hi' }], tools: [] },
+    { tmpRoot: '/tmp/x' },
+  );
+  assert.equal(win.system, posix.system, 'tmp 根后的分隔符必须统一');
+  assert.equal(win.fingerprint, posix.fingerprint, 'Windows/POSIX 必须得到同一指纹');
+});

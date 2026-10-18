@@ -44,4 +44,5 @@ status: completed
 ## 3. 遗留与更正（如实登记）
 
 - ~~closeout 十三门未跑~~ → **已跑并 PASS**（2026-10-18；含 code-size 棘轮当场抓到 SimpleChat +2 行，删冗余注释回 2142 并重打指纹，未抬基线）。
-- **评测基线漂移（重要）**：`context_snapshot` golden 指纹 `dfc9be7b986a1c17` vs 基线 `9bb90c149e001115`，原因行=「system prompt 文案变更」；**已用 stash 验证与 W7a 无关**（W7a 改动移除后同样漂移）。**W6 收口时我写的"指纹未变"因此不成立**——当时用的是单测（只验归一化机制），不是 golden fp 对比。已在 AUDIT-LOG 立 🟡 条目待归因，**未**重基准（归因清楚前不得 `--update-snapshot`）。
+- ~~评测基线漂移待归因~~ → **已归因并修复（2026-10-18）**：真因**不是** prompt 文案，而是 `normalizeContextString` 把 tmp 根换成 `<TMP>` 后**保留了 OS 路径分隔符**——golden 基线（`9bb90c14`）是在 Windows 录的（`<TMP>\\projects\\…`），macOS 跑出来是 `<TMP>/projects/…`，于是**恒红**。处置：归一化时把紧跟 `<TMP>` 的分隔符统一成 `/`（新增单测钉"Windows 与 POSIX 同指纹"），随后**显式重基准**到 `dfc9be7b986a1c17`（macOS 值，即规范化后的平台无关值），复跑 `✔ 组装契约一致`。
+  - 两次口径更正都要记住：①W6 收口时我写的"指纹未变"**不成立**（当时用的是单测，只验归一化机制，不是 golden fp 对比）；②W7a 初判里引用的"原因行=system prompt 文案变更"只是 harness 的**启发式提示语**，不是真因。
