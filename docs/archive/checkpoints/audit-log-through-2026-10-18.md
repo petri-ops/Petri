@@ -59,3 +59,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-18T07:27:09.699Z -->
 最后更新：2026-10-18（**W8 第七批：`skills:check` 报告级纳入收口**）：`closeout-gates.mjs` 增 `--report`（非阻塞、不改进程退出码），`closeout` 已挂 `--report skills:check` ⇒ 每次收口打印红条数；未升阻塞（补齐 `built-in-plugins/` 属 C-33 裁决）。顺修：改脚本误删 `repoGate`（ReferenceError）已恢复并冒烟验证。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-18T10:56:13.485Z -->
+最后更新：2026-10-18（**BLOCK-212 立项发令 active：提示词缓存前缀优化**）：两处成本泄漏已读码定位——动态上下文在 system 头部（每轮变⇒前缀全废）、Anthropic 无 cache_control（system 单字符串⇒全价）。方案=动态段搬尾部（不落历史）+ anthropic block 断点 + 基线加静态前缀 token；不声称真实命中率提升（需 G1+ 调用）。plan=docs/block-212-prompt-cache-prefix-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。

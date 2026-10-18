@@ -54,7 +54,7 @@ const forceCleanElectron =
   process.argv.includes('--force-clean-electron') || process.env.PETRI_FORCE_CLEAN_ELECTRON === '1';
 
 function spawnChild(command, args, options = {}) {
-  const { shutdownOnExit = 'error', ...spawnOptions } = options;
+  const { shutdownOnExit = 'error', exitHint = '', ...spawnOptions } = options;
   const child = spawn(command, args, {
     stdio: 'inherit',
     // npm.cmd / npx.cmd need cmd.exe on Windows. POSIX launches directly so
@@ -67,6 +67,12 @@ function spawnChild(command, args, options = {}) {
   child.on('exit', (code, signal) => {
     children.delete(child);
     if (shuttingDown) return;
+    // C-35：子进程非零退出时，先把可读诊断打出来再收栈——否则 Electron 在创建
+    // 窗口前就崩（例如本机安全软件拦了 Chromium 沙箱），用户只看到命令结束、
+    // 没有窗口也没有任何错误信息。
+    if (exitHint && code) {
+      console.error(exitHint.replace('{code}', String(code)));
+    }
     if (shutdownOnExit === 'always') {
       shutdown(code || 0);
     } else if (signal !== 'SIGTERM' && code !== 0) {
@@ -516,6 +522,13 @@ async function main() {
       spawnChild(npxCmd, ['electron', '.', '--dev', ...extraElectronArgs], {
         shutdownOnExit: 'always',
         env: electronEnv,
+        // C-35 — Electron 在 window 创建前崩掉时给出可执行诊断（而不是静默收栈）。
+        exitHint:
+          `[dev] Electron exited with code {code} before showing a window.\n` +
+          '[dev] On Windows this is usually a local security product blocking the Chromium\n' +
+          '[dev] sandbox (e.g. 360安全卫士 / 火绒), not an app bug.\n' +
+          '[dev] Check:  npx electron --version      (if that also dies, the sandbox is blocked)\n' +
+          '[dev] Temp:   PETRI_DEV_ELECTRON_ARGS="--no-sandbox" npm run dev   （降级：渲染进程失去沙箱）',
       });
   }
 }

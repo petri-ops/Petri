@@ -117,6 +117,26 @@ if [ -n "${PETRI_SESSION_COMPACTION}" ]; then echo "block95: env override PETRI_
 #    Start-Process 从当前 shell 继承环境，故此处显式清掉（PowerShell -Environment 不可用，改用 Remove-Item Env:）。
 if [ -n "${ELECTRON_RUN_AS_NODE:-}" ]; then unset ELECTRON_RUN_AS_NODE; echo "stripped leaked ELECTRON_RUN_AS_NODE from env"; fi
 
+# 9) Windows 环境常见「同名不同大小写」的变量（NO_PROXY 与 no_proxy、HTTP_PROXY 与
+#    http_proxy…）。PowerShell 5.1 的 Start-Process 重建子进程环境时用大小写敏感
+#    字典，撞上重复键直接抛 "Item has already been added" → Electron 根本没被拉起，
+#    脚本照旧轮询到 TIMEOUT（2026-10-18 实测：宿主 shell 注入小写副本时必现）。
+#    拉起子进程前把重复项收敛成大写那份；只有小写存在的环境原样保留。
+dedupe_env_case() {
+  local name upper dropped=""
+  for name in $(compgen -v | tr '[:upper:]' '[:lower:]' | sort -u); do
+    case "$name" in *[!a-z0-9_]*) continue ;; esac
+    upper=$(printf '%s' "$name" | tr '[:lower:]' '[:upper:]')
+    [ "$name" = "$upper" ] && continue
+    if [ -n "${!name+set}" ] && [ -n "${!upper+set}" ]; then
+      unset "$name" 2>/dev/null || true
+      dropped="$dropped $name"
+    fi
+  done
+  if [ -n "$dropped" ]; then echo "env-dedupe: dropped lower-case duplicates:${dropped}"; fi
+}
+dedupe_env_case
+
 # BLOCK-155 收官沉淀（2026-10-09 实案，同类第二次）——vite(:3000) 保障前置：
 # 缺席时自动拉起并等就绪，**之后才启 Electron**（避免主窗在 vite 起来前加载落进
 # chrome 错误页——错误页 location.reload 无效，只能显式重导航）。
@@ -134,7 +154,15 @@ if [ "${vite_code}" != "200" ]; then
     echo "ABORT: vite(:3000) 未能就绪: 继续启动只会得到黑屏窗口(见文件头黑屏纪律), 先修前端栈"; exit 4
   fi
 fi
-powershell -NoProfile -Command "Remove-Item Env:ELECTRON_RUN_AS_NODE -ErrorAction SilentlyContinue; Start-Process -FilePath '$NODE_EXE' -ArgumentList 'node_modules\\electron\\cli.js','.','--dev','--remote-debugging-port=${CDP_PORT}' -WorkingDirectory '$WROOT' -WindowStyle Minimized -RedirectStandardOutput '$WROOT\\.dev-stack-live.log' -RedirectStandardError '$WROOT\\.dev-stack-err.log'"
+# PETRI_DEV_ELECTRON_ARGS 透传（与 scripts/dev-electron.js 同名旋钮）：本机安全软件
+# 拦截 Chromium 沙箱时，Electron 会在创建 window 前即崩（0x80000003），此时
+# `PETRI_DEV_ELECTRON_ARGS="--no-sandbox" bash scripts/restart-dev-stack.sh` 仍能起栈
+# （临时降级：渲染进程失去沙箱，只作排障/取证用）。见 docs/AUDIT-LOG.md C-35。
+PS_ELECTRON_ARGS="'node_modules\\electron\\cli.js','.','--dev','--remote-debugging-port=${CDP_PORT}'"
+for extra_arg in ${PETRI_DEV_ELECTRON_ARGS:-}; do
+  PS_ELECTRON_ARGS="${PS_ELECTRON_ARGS},'${extra_arg}'"
+done
+powershell -NoProfile -Command "Remove-Item Env:ELECTRON_RUN_AS_NODE -ErrorAction SilentlyContinue; Start-Process -FilePath '$NODE_EXE' -ArgumentList ${PS_ELECTRON_ARGS} -WorkingDirectory '$WROOT' -WindowStyle Minimized -RedirectStandardOutput '$WROOT\\.dev-stack-live.log' -RedirectStandardError '$WROOT\\.dev-stack-err.log'"
 echo "start dispatched"
 
 for i in $(seq 1 36); do
@@ -155,4 +183,7 @@ for i in $(seq 1 36); do
   fi
 done
 echo TIMEOUT
+echo "hint: 先看 $WROOT/.dev-stack-err.log 与 .dev-stack-live.log。若 Electron 在创建窗口前就崩"
+echo "      （0x80000003 / Chromium CHECK），多半是本机安全软件拦了 Chromium 沙箱："
+echo "      先确认 'npx electron --version' 是否也崩；是则临时 PETRI_DEV_ELECTRON_ARGS=\"--no-sandbox\" 重跑本脚本（降级）。"
 exit 1
