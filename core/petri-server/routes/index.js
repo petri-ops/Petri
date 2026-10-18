@@ -76,6 +76,8 @@ module.exports = async function registerRoutes(app) {
     ['Trust policy', () => require('./trust-policy').registerTrustPolicyRoutes(app)],
     // BLOCK-209（W7d）：外部 Agent 配置导入预览（只读、零写入）
     ['External agent import', () => require('./external-import').registerExternalImportRoutes(app)],
+    // BLOCK-210（W7e）：留存/归档配置 + 迁移计划预览（不执行搬迁）
+    ['Data retention', () => require('./data-retention').registerDataRetentionRoutes(app)],
   ];
 
   for (const [name, fn] of routes) {

@@ -151,6 +151,13 @@ const CONFIG_FAMILIES = Object.freeze({
     precedence: ['file', 'default'],
     envTruth: null,
   },
+  // —— BLOCK-210（runlist W7e）：历史留存/归档 ——
+  // 默认全 0/空 = **不删、不移**（零行为变化）；删除只可能在显式 allowDelete 且 dryRun=false 时发生。
+  'data-retention': {
+    store: 'file:data-retention.json',
+    precedence: ['file', 'default'],
+    envTruth: null,
+  },
 });
 
 /**
@@ -589,6 +596,22 @@ const CONFIG_KEYS = Object.freeze([
   {
     key: 'trustPolicy.<item>.level', family: 'trust-policy', path: '<item>.level',
     type: 'string', domain: { oneOf: ['inherit', 'trusted', 'untrusted'] }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  // —— 历史留存/归档（BLOCK-210 / W7e）——
+  {
+    key: 'retention.historyDays', family: 'data-retention', path: 'historyDays',
+    type: 'number', domain: { min: 0, max: 3650, integer: 'floor' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    // 空串 = 不归档（只在显式设置后才有归档动作）
+    key: 'retention.archiveDir', family: 'data-retention', path: 'archiveDir',
+    type: 'string', envKeys: [], aliases: [], mutable: true, ui: 'none',
+  },
+  {
+    key: 'retention.maxBytesPerDir', family: 'data-retention', path: 'maxBytesPerDir',
+    type: 'number', domain: { min: 0, max: 1e12, integer: 'floor' }, envKeys: [], aliases: [],
     mutable: true, ui: 'none',
   },
   {

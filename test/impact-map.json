@@ -4086,6 +4086,26 @@
         "test/block209-external-agent-import.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block210-data-retention",
+      "note": "BLOCK-210（W7e）：data-retention 族（historyDays/archiveDir/maxBytesPerDir，默认零删除）+ helpers/data-retention（纯函数规划、apply 默认 dryRun、allowDelete 才删、审计）+ helpers/data-dir-migration（只读计划器：步骤/备份/回退/阻塞项）+ routes/data-retention（400 守卫、迁移只出计划）+ transfer/doctor/NO_UI 接入。",
+      "patterns": [
+        "core/packages/shared-config/config-schema.js",
+        "core/petri-server/helpers/data-retention.js",
+        "core/petri-server/helpers/data-dir-migration.js",
+        "core/petri-server/routes/data-retention.js",
+        "core/petri-server/routes/index.js",
+        "core/petri-server/helpers/config-transfer.js",
+        "test/block210-*.test.mjs"
+      ],
+      "tests": [
+        "test/block210-data-retention.test.mjs",
+        "test/block199-config-drift.test.mjs",
+        "test/block201-settings-baseline.test.mjs",
+        "test/block201-config-transfer.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

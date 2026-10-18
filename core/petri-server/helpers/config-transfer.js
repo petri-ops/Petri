@@ -35,6 +35,7 @@ const toolPolicy = require('./mcp-tool-policy');
 const memoryPolicy = require('./memory-policy');
 const subagentProfile = require('./subagent-profile');
 const trustPolicy = require('./trust-policy');
+const retention = require('./data-retention');
 
 const CONFIG_TRANSFER_FORMAT = 'petri-config';
 const CONFIG_TRANSFER_VERSION = 1;
@@ -65,6 +66,7 @@ const CONFIG_TRANSFER_FAMILIES = Object.freeze([
   'memory-policy',
   'subagent-profile',
   'trust-policy',
+  'data-retention',
 ]);
 
 /** 显式排除清单：随信封回传，防止「以为备份了全部设置」。 */
@@ -139,6 +141,7 @@ function readFamilyOverrides() {
     'memory-policy': { ...memoryPolicy.readStored().values },
     'subagent-profile': subagentProfile.readStore(),
     'trust-policy': trustPolicy.readStore(),
+    'data-retention': retention.readStore(),
   };
 }
 
@@ -231,6 +234,9 @@ function validateFamily(family, body) {
   }
   if (family === 'network' || family === 'runtime') {
     return schema.commitGuard(family, body, lookup).diagnostics;
+  }
+  if (family === 'data-retention') {
+    return retention.validatePatch(body).map((d) => ({ ...d, family }));
   }
   if (family === 'trust-policy') {
     return trustPolicy.validateStore(body).map((d) => ({ ...d, family }));
@@ -395,6 +401,14 @@ const WRITERS = {
     // 合并覆盖（导入不删文件里未出现的键）：合并与消毒都在落点模块里，transfer 不复制形状知识
     skillPrefs.importPrefs(body);
   },
+  'data-retention'(body) {
+    const saved = retention.writeStore(body, { actor: 'import' });
+    if (!saved.ok) {
+      const error = new Error('data-retention 写入被拒');
+      error.diagnostics = saved.diagnostics;
+      throw error;
+    }
+  },
   'trust-policy'(body) {
     // 导入也可能改信任级：同样落审计（actor='import'），避免"从文件导入"绕过留痕
     const saved = trustPolicy.writeStore(body, { actor: 'import' });
@@ -497,6 +511,7 @@ const RESETTERS = {
   'memory-policy'() { memoryPolicy.resetMemoryPolicy(); },
   'subagent-profile'() { subagentProfile.resetProfiles(); },
   'trust-policy'() { trustPolicy.writeStore({ defaultLevel: trustPolicy.DEFAULT_LEVEL, projects: [] }, { actor: 'reset' }); },
+  'data-retention'() { retention.resetRetention(); },
 };
 
 /**

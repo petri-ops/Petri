@@ -36,7 +36,7 @@ test('设置分区清单冻结：10 个分区 id（搜索索引必须逐项覆�
   assert.equal(ids.length, 10, `分区数应为 10（实得 ${ids.length}）：${ids.join(', ')}`);
 });
 
-test('配置注册表冻结：16 族 / 86 键（BLOCK-208 给 user-prefs 加 motion/density 两键）', () => {
+test('配置注册表冻结：17 族 / 89 键（BLOCK-210 加 data-retention 一族 3 键）', () => {
   // 2026-10-17 两次显式上调（BLOCK-203 W4a）：
   //  P1+P2：8 族/35 键 → 9 族/38 键（user-prefs：theme/fontScale/accent）；
   //  P3   ：9 族/38 键 → 10 族/43 键（skills-prefs：version + disabled.<id>.{at,reason}
@@ -52,9 +52,10 @@ test('配置注册表冻结：16 族 / 86 键（BLOCK-208 给 user-prefs 加 mot
   //   BLOCK-205（W6）：13 族/65 键 → 14 族/75 键（memory-policy：9 可写标量 + 嵌入模型只读）。
   //   BLOCK-206（W7a）：14 族/75 键 → 15 族/81 键（subagent-profile：default + 5 条目字段）。
   //   BLOCK-207（W7b）：15 族/81 键 → 16 族/84 键（trust-policy：defaultLevel + project/level）。
-  assert.equal(Object.keys(schema.CONFIG_FAMILIES).length, 16);
+  assert.equal(Object.keys(schema.CONFIG_FAMILIES).length, 17);
   //   BLOCK-208（W7c）：84 → 86 键（user-prefs + motion 接线 / density 仅登记）。
-  assert.equal(schema.CONFIG_KEYS.length, 86);
+  //   BLOCK-210（W7e）：86 → 89 键（data-retention：historyDays/archiveDir/maxBytesPerDir）。
+  assert.equal(schema.CONFIG_KEYS.length, 89);
 });
 
 test('导出/导入的族集合 == 注册表族集合（漏族/未注册族都算红）', () => {

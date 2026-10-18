@@ -29,6 +29,7 @@ const toolPolicy = require('../core/petri-server/helpers/mcp-tool-policy.js');
 const memoryPolicy = require('../core/petri-server/helpers/memory-policy.js');
 const subagentProfile = require('../core/petri-server/helpers/subagent-profile.js');
 const trustPolicy = require('../core/petri-server/helpers/trust-policy.js');
+const retention = require('../core/petri-server/helpers/data-retention.js');
 const aiSettings = require('../core/petri-server/helpers/ai-settings.js');
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -59,6 +60,7 @@ function storeTargets(env = process.env) {
     { family: 'memory-policy', file: memoryPolicy.policyFilePath(), bag: null, scalarKeys: [...memoryPolicy.KEYS] },
     { family: 'subagent-profile', file: subagentProfile.profileFilePath(), items: 'profiles', scalarKeys: ['default'] },
     { family: 'trust-policy', file: trustPolicy.policyFilePath(), items: 'projects', scalarKeys: ['defaultLevel'] },
+    { family: 'data-retention', file: retention.configFilePath(), bag: null, scalarKeys: [...retention.KEYS] },
   ];
 }
 

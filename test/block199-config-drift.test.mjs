@@ -58,6 +58,7 @@ const NO_UI_FAMILIES = {
   'memory-policy': 'W6 v1 只做策略面与生效接线（API 写面 + 压缩/检索/生命周期生效）；设置页属性后续批次',
   'subagent-profile': 'W7a v1 只做声明式派发缺省（API 写面 + spawn 解析）；profile 表格 UI 属后续批次',
   'trust-policy': 'W7b v1 只做信任级与 accessMode 天花板（API 写面 + 审计）；项目信任 UI 属后续批次',
+  'data-retention': 'W7e v1 只做留存配置与迁移计划预览（API 写面）；留存 UI 与迁移执行属后续批次/reopen',
 };
 
 /** 族 → 后端写路由（必须能把拒绝翻译成 4xx，而不是冒 500 或静默）。 */
@@ -77,6 +78,7 @@ const WRITE_ROUTES = {
   'memory-policy': 'core/petri-server/routes/ai-memory.js',
   'subagent-profile': 'core/petri-server/routes/subagent-profiles.js',
   'trust-policy': 'core/petri-server/routes/trust-policy.js',
+  'data-retention': 'core/petri-server/routes/data-retention.js',
 };
 
 /**

@@ -30,3 +30,13 @@ W4b 已经把**目录解析**收成 `shared-backend/data-paths.js` 单源（两�
 - 默认**不删、不移**任何文件；`applyRetention` 默认 `dryRun:true`。
 - 目录解析只许走 `data-paths`（W4b 单源），**不得**在留存/迁移模块里再写 env 回落链。
 - 迁移计划器**只读**：不 mkdir、不 rename、不复制；无法判定的阻塞项如实列出。
+
+## 3. 落地记录（2026-10-18）
+
+- **P1**：`data-retention` 族（`historyDays` 0–3650 / `archiveDir` / `maxBytesPerDir` 0–1e12）⇒ 注册表 **17 族 / 89 键**；三项全 `ui:'none'`。
+- **P2**：`helpers/data-retention.js`——`planRetention` **纯函数**（过期→archive 或 expired；容量按最新优先保留）；`applyRetention` 默认 `dryRun:true`，且**删除必须 `allowDelete:true`**；配置变更与执行均追加 `retention-audit.jsonl`。
+- **P3**：`helpers/data-dir-migration.js`——`planMigration` **只读**（不 mkdir/不复制）：给出 6 步流程、备份路径 `.bak-<时间戳>`、回退命令，并如实列阻塞项（源缺失 / 目标非空 / 同目录 / 相对路径 / 检测到 `petri.db-wal` ⇒ 数据库疑似仍在跑 / 跨卷需分阶段）。
+- **P4**：`GET/PUT /api/data/retention`（400 + diagnostics）+ `POST /api/data/migration/plan`（缺参 400；正常返回 `executed:false`）。
+- **P5**：`config-transfer`/`config:doctor`/漂移门 `NO_UI_FAMILIES` 接入；closeout 十三门 PASS。
+- 证据：`test/block210-data-retention.test.mjs` **8/8** + 漂移/基线/transfer 21/21。
+- **诚实边界**：真实搬迁与真实清理**未实现执行**——`planMigration` 只出计划，`applyRetention` 只产出动作清单（v1 落点在"可配置 + 可预演"，执行属 reopen，须一次性窗口 + 备份演练）。
