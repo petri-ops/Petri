@@ -7012,8 +7012,8 @@
       "capability": "subagent-profile-declarative",
       "path": "docs/block-206-subagent-profile-slash-plan.md",
       "kind": "work-package",
-      "status": "active",
-      "phase": "P0-LAUNCH",
+      "status": "completed",
+      "phase": "P5-CLOSED",
       "canonical": true,
       "truthDomain": "block-206-subagent-profile-slash-plan",
       "entrypoint": "docs/README.md",
@@ -7029,7 +7029,7 @@
         "stage-4",
         "block-206"
       ],
-      "notes": "2026-10-18 立项发令 active（runlist W7a；用户「行！ 搞完 W7a」）。两腿：①子智能体 profile 声明式配置（name/role/model/concurrency/reportGuard，concurrency 域必须与 runtime 族逐字相等且只能收紧，reportGuard 仅 inherit）②C-29 把 SimpleChat 的 executeSlashCommand 抽成可测单元并给 D15 挂真锚。红线=profile 不是第二套权限系统、未传 profile 零行为变化、未知 profile/字段 fail-closed。"
+      "notes": "2026-10-18 立项发令 active（runlist W7a；用户「行！ 搞完 W7a」）。两腿：①子智能体 profile 声明式配置（name/role/model/concurrency/reportGuard，concurrency 域必须与 runtime 族逐字相等且只能收紧，reportGuard 仅 inherit）②C-29 把 SimpleChat 的 executeSlashCommand 抽成可测单元并给 D15 挂真锚。红线=profile 不是第二套权限系统、未传 profile 零行为变化、未知 profile/字段 fail-closed。 | 收口 2026-10-18：注册表 15 族/81 键；profile 并发域与 runtime 逐字对账且 min 收紧（纯函数单测）；spawn_agent 可选 profile（未传=零行为变化）、reportGuard 仅 inherit；写面 400；C-29 斜杠判定抽成 classifySlashCommand 并给 D15 挂 unit 锚（棘轮已 --update）；closeout 十三门 PASS。遗留：context_snapshot golden 指纹漂移（dfc9be7b vs 9bb90c14，与 W7a 无关，待归因；未重基准）。"
     }
   ],
   "lastUpdated": "2026-10-17",

@@ -11,7 +11,7 @@ acceptance:
   - P5b 收尾：`config-transfer`/`config:doctor`/漂移门 `NO_UI_FAMILIES` 接入；closeout 十三门。
   - 完成语义：**profile 是"派发缺省值的声明"，不是第二套权限系统**——不动 policy/审批/四档判定；结构化 chip（`slashSources.ts` 里登记的 v2）不在本包范围。
 reopen: 结构化 chip 注入通道（slashSources v2）；逐子任务 reportGuard 覆盖（需改 report-guard 契约）；profile 的 UI；按 profile 的工具子集（等 W7b 信任级别落地后再做，避免与权限系统重叠）。
-status: active
+status: completed
 ---
 
 # BLOCK-206 · 阶段 4 C-1：子智能体 profile + 斜杠即执行抽单元
@@ -41,7 +41,7 @@ status: active
 - **P5（C-29）**：`executeSlashCommand` 的判定抽成 `SimpleChat/slashExecute.ts:classifySlashCommand`（组件只执行副作用），新测 3/3；`evals/anchors/competitiveness-8d.json` 的 `5-slash-execute` 改写 claim 并挂 **unit 锚**，`block195-anchors --update` 已提升基线。
 - **证据**：block206 5/5 + 漂移/基线/transfer 26/26 + slash 3/3；lint/tsc 待跑（见下"未完成"）。
 
-## 3. 未完成（如实登记，不得表述为已收口）
+## 3. 遗留与更正（如实登记）
 
-- **closeout 十三门未跑**（本会话预算用尽）：代码与单测绿，但**收口未完成**。
+- ~~closeout 十三门未跑~~ → **已跑并 PASS**（2026-10-18；含 code-size 棘轮当场抓到 SimpleChat +2 行，删冗余注释回 2142 并重打指纹，未抬基线）。
 - **评测基线漂移（重要）**：`context_snapshot` golden 指纹 `dfc9be7b986a1c17` vs 基线 `9bb90c149e001115`，原因行=「system prompt 文案变更」；**已用 stash 验证与 W7a 无关**（W7a 改动移除后同样漂移）。**W6 收口时我写的"指纹未变"因此不成立**——当时用的是单测（只验归一化机制），不是 golden fp 对比。已在 AUDIT-LOG 立 🟡 条目待归因，**未**重基准（归因清楚前不得 `--update-snapshot`）。
