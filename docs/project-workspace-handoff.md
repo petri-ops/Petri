@@ -4,7 +4,7 @@
 
 最后更新：2026-10-17（**BLOCK-203-STAGE-3-B1B-CONFIG-LANDING-CONSOLIDATION 立项发令 active（runlist W4 拆片：W4a 先做）**）
 
-**恢复要点（换会话必读·本段取代下方 BLOCK-203 段）**：**当前 active 工作包=BLOCK-204（W5：MCP 逐工具策略面）**，plan=`docs/block-204-mcp-tool-policy-plan.md`（registry `active` / `P0-LAUNCH`）。用户发令「行！搞完W5」。**下一步第一个动作=P1+P2 同提交**：schema 加 `mcp-tool-policy` 族（`projectionLimit` + `<item>.{tool,enabled,timeoutMs,contractMode}`）+ `helpers/mcp-tool-policy.js` 落点（`mcp-tool-policy.json`，读宽容/写消毒/policyFor/projectionLimit），随后 P3 四处执行接线（投影过滤/上限来源/合同覆盖/超时透传）。**红线**：不改四档判定实现、不改 `readOnlyHint` 默认推导、unknown-tool 只拒该条不整份拒绝。**W5 无设置页**（v1 只做策略面+执行接线）⇒ 漂移门要按 `NO_UI_FAMILIES` 显式登记，不许靠"不登记让它空转"。
+**恢复要点（换会话必读·本段取代下方 BLOCK-203 段）**：**无 active 工作包**；**下一包=runlist W6**（记忆与压缩设置面：压缩阈值/策略、记忆提取模型与上限、作用域；验收要**与评测基线对齐**——压缩阈值影响 evals 判据，快照 fp 变更须显式重基准留痕，BLOCK-188/199 先例）。**刚收口=BLOCK-204（W5）**：MCP 逐工具策略面——投影上限/超时/合同模式三件可配（未配置=零行为变化，基线 4/4 冻结），`mcp-tool-policy` 族（注册表 13 族/65 键）+ `GET/PUT /api/mcp/tool-policy`（unknown-tool 400 只拒该条），transfer/doctor 已接入；漂移门新增 `NO_UI_FAMILIES`（v1 无设置页=显式登记）。**未做**：逐工具设置页（表格 UI + 9223 实机腿）留 W5b/设置面批次——别把 API 当"已提供界面"。
 
 最后更新：2026-10-17（**BLOCK-202-STAGE-A-QUICKWINS-3 整包 completed（阶段 A 速赢 III=runlist W3；当日立项当日收口·9223 探针 15/15 allPass）**）
 

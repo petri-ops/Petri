@@ -10,7 +10,7 @@ acceptance:
   - P5 收尾：`config-transfer` 扩族（导出/导入/按区重置）；`config:doctor` 纳入（`items: 'tools'`）；漂移门登记该族**没有设置面**（v1 只做策略面与执行接线）——用显式的 `NO_UI_FAMILIES` 表而不是"不登记让它空转"。
   - 完成语义：本包交付「策略能配 + 执行真的照做」；不交付逐工具设置页（W5b/设置面批次）、不做 server 级熔断、不改四档判定的既有实现。
 reopen: 逐工具策略设置页（tabular UI + 9223 实机腿）；按 server 的默认策略继承；超时/重试的策略化（现在只有 timeout）；`mcp_*` 投影名的稳定性（server 改名会导致策略失配——需要 id 映射表时另开）。
-status: active
+status: completed
 ---
 
 # BLOCK-204 · 阶段 3 B2 之一：MCP 逐工具策略面
