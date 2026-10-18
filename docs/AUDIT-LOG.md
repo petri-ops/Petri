@@ -1,4 +1,5 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-10-18（**W8 第七批：`skills:check` 报告级纳入收口**）：`closeout-gates.mjs` 增 `--report`（非阻塞、不改进程退出码），`closeout` 已挂 `--report skills:check` ⇒ 每次收口打印红条数；未升阻塞（补齐 `built-in-plugins/` 属 C-33 裁决）。顺修：改脚本误删 `repoGate`（ReferenceError）已恢复并冒烟验证。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**W8 第六批：技能货架依赖徽标纳入插件硬依赖（UI-527）**）：`preflight` 纳入 `plugins.required`（`hasPlugin` 注入 + `missingPlugins`，缺插件不算 installable），路由用 `plugin-loader` 单一真相；卡片对有插件硬依赖的技能也显示徽标。证据=4/4 + 前端 10/10 + tsc 0；closeout PASS。`skills:check` 5 红仍在（是否补插件包/升阻塞门禁属 C-33 裁决）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**W8 第六批：休眠插件激活转为裁决包 C-33（需用户选 A/B/C），不代裁**）：实码核对——`resources/skills/manifest.json` 仅 14 条、**无 status/依赖/验证时间字段**，全仓无"休眠插件"机械登记（grep 仅两处注释）；评估报告的「休眠插件+demo 错位」是产品观感判词。三选一：A 现状+如实标注 / **B 激活零重依赖一族+其余标未适配（建议）** / C 全量激活（G0 无验证条件）。本批未改任何插件/技能代码，只留证与选项。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**W8 第五批：候选收尾裁定**）：C-27 **deferred（G0 边界：需真实 Provider 成对送判，不得 mock 冒充）**；C-30 **销号**（不引 sqlite-vec、无可测缺口，重开=向量 >5 万或 P95 >250ms）；C-31 **销号**（点对点现形态；造锚=幽灵锚点，重开=真实 3+ 节点需求）。休眠插件=待用户裁决；双机 riders=deferred（需机器）。W8 可自决项已清完，**不宣称 W8 完成**。G0 开发期常态 · 不外推 packaged/Provider/GA。
