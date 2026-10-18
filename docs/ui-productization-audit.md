@@ -5059,3 +5059,10 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **为什么**：`truthStatus='valid'` 是**产物级**核验结论，旧文案把它升格成"结果可信"的全局判断——这是语义过度声称，和 G0 期"RS 徽标不许冒充资格"的纪律冲突。
 - **诚实边界**：**无实机腿**（纯文案 + 可访问性属性变更，无布局改动）→ 记 `in_progress`；未做 9223 截图证据。
 - **验证**：`resultSurface.test.ts` **18/18**（含新断言 `detail` 含"不代表 Result Studio 整体已验证"）；`tsc --noEmit` 0；`theme-token-contract` 17/17（无样式变更）。
+
+## UI-527: 技能货架依赖徽标纳入插件硬依赖（2026-10-18 in_progress，BLOCK-211 / W8 · C-33 代码侧）
+
+- **变化面**：`/api/skills/preflight` 现在把 `plugins.required` 算进依赖三态（此前只看 `dependencies.requiresBins`），探测面用 `plugin-loader` 单一真相（`getPlugin`/`isPluginInstalled`，与 `/api/plugins/installed` 同源）；技能卡片对"依赖是插件而不是二进制"的技能也显示徽标，title 如实列出「缺插件包：…」。
+- **修的是真实缺陷**：`deg-analysis-standard` / `sc-analysis-standard` 的 5 个 `plugins.required` 在本仓解析不到（`resources/built-in-plugins/` 不存在），旧 preflight 恒报 `available` ⇒ 卡片显示"依赖可用"，正是「货架可见不可用」。
+- **诚实边界**：缺插件**不标 installable**（插件没有自动安装配方），只标 `missing_deps`；**无实机腿** → `in_progress`，未做 9223 截图；插件包本身是否补齐仍需 C-33 裁决。
+- **验证**：`block211-skill-deps-plugins` **4/4**（含"不传 hasPlugin 保持既有语义"——不给既有调用方制造假红）+ `tsc` 0。

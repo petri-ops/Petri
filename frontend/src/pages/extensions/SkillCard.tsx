@@ -12,6 +12,8 @@ import styles from './styles.module.css';
 interface SkillDepsState {
   status: 'available' | 'installable' | 'missing_deps' | 'blocked_platform';
   missingBins: string[];
+  /** BLOCK-211（W8 · C-33）：插件硬依赖缺失清单（preflight 已纳入 plugins.required）。 */
+  missingPlugins?: string[];
   install?: string | null;
 }
 
@@ -49,7 +51,9 @@ export function SkillCard({
 }: SkillCardProps): React.ReactElement {
   // 声明了 requires.bins 的技能才显示依赖徽章（数据面 preflight 未达时如实不显示状态色）
   const declaredBins = (skill as Skill & { dependencies?: { requiresBins?: string[] } | null }).dependencies?.requiresBins ?? [];
-  const showDeps = Array.isArray(declaredBins) && declaredBins.length > 0 && !!deps;
+  // 插件硬依赖同样算"声明了依赖"：否则生物信息学两族永远不显示徽章（正是"货架可见不可用"）
+  const declaredPlugins = Array.isArray(skill.plugins?.required) ? skill.plugins.required : [];
+  const showDeps = (declaredBins.length > 0 || declaredPlugins.length > 0) && !!deps;
   const handleViewDetail = useCallback(() => {
     onViewDetail(skill);
   }, [skill, onViewDetail]);
@@ -96,7 +100,14 @@ export function SkillCard({
         {showDeps && deps && (
           <span
             className={styles.pluginCount}
-            title={deps.status !== 'available' && deps.missingBins.length > 0 ? `缺二进制：${deps.missingBins.join(', ')}${deps.install ? `（安装：${deps.install}）` : ''}` : undefined}
+            title={
+              deps.status !== 'available' && (deps.missingBins.length > 0 || (deps.missingPlugins?.length ?? 0) > 0)
+                ? [
+                  deps.missingBins.length > 0 ? `缺二进制：${deps.missingBins.join(', ')}${deps.install ? `（安装：${deps.install}）` : ''}` : '',
+                  (deps.missingPlugins?.length ?? 0) > 0 ? `缺插件包：${deps.missingPlugins?.join(', ')}` : '',
+                ].filter(Boolean).join('；')
+                : undefined
+            }
             data-testid={`skill-deps-${skill.id}`}
           >
             <Icon name="puzzle" size={12} />

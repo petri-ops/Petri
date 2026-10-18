@@ -133,3 +133,11 @@ status: completed
 - **注意口径**：这不是本批引入的——`skills:check` **不在 closeout 十三门里**（十三门=audit:compact/hygiene/docs/ui-audit/test:changed/code-size/arch-cycles/css-modules/secret/arch/lint/types/knip），所以它可以长期红而不挡收口。AUDIT-LOG 2026-10-01 已登记过 6→8 红的存量（归 BIO-D2 裁决）。
 - **对 A/B/C 的影响**：B 方案"把零重依赖一族标可用、其余标未适配"**必须先让 manifest 的依赖声明与真实可用性对齐**；否则"未适配"标签的依据本身就是一条红门禁。C 方案更需要先补 `built-in-plugins`。
 - **处置**（仍属 C-33 裁决范围）：建议把 `skills:check` 纳入 closeout 门禁的**报告级**（不阻塞、但每次收口必须打印红数），避免它继续"红着走"。是否升为阻塞门禁，与 A/B/C 一起裁。
+
+## 11. 第六批落地（C-33 代码侧，2026-10-18）
+
+- **preflight 纳入插件硬依赖**：`checkSkillDeps` 增 `hasPlugin` 探测面，`missingPlugins` 与 `missingBins` 并列；**缺插件不算 installable**（配方只装二进制）。默认 `hasPlugin=()=>true` 保持既有调用方语义不变（不制造假红）。
+- **探测面单一真相**：`projection-data.js` 的 preflight 路由用 `plugin-loader.getPlugin/isPluginInstalled`（与 `/api/plugins/installed` 同源），探测失败=未检出（不虚报可用）。
+- **货架如实**：`SkillCard` 对"有插件硬依赖"的技能也显示依赖徽标（此前只有 `requires.bins` 才显示），title 列出「缺插件包：…」。
+- 证据：`block211-skill-deps-plugins` **4/4** + `tsc` 0；台账 **UI-527 `in_progress`**（无实机腿）。
+- **仍未做（属 C-33 产品裁决）**：`resources/built-in-plugins/` 是否补齐、`skills:check` 是否升为阻塞门禁——本轮只把"货架不说谎"这一半做实。

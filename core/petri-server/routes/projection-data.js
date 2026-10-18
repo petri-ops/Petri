@@ -60,7 +60,17 @@ module.exports = function registerProjectionDataRoutes(app) {
       const { createDefaultSDK } = require('../../shared-backend/skills-sdk.js');
       const sdk = createDefaultSDK();
       const preflight = require('../../shared-backend/skill-preflight.js');
-      const results = preflight.preflightAll(sdk.listSkills());
+      const loader = require('../plugin-loader');
+      // BLOCK-211（W8 · C-33）：插件依赖用 plugin-loader 的单一真相做探测，
+      // 与 /api/plugins/installed 同源（不在路由里另写"插件是否存在"的判断）。
+      const hasPlugin = (pluginId) => {
+        try {
+          return Boolean(loader.getPlugin(pluginId)) || Boolean(loader.isPluginInstalled(pluginId));
+        } catch {
+          return false; // 探测失败=未检出（不虚报可用）
+        }
+      };
+      const results = preflight.preflightAll(sdk.listSkills(), { hasPlugin });
       res.json({ ok: true, platform: process.platform, results });
     } catch (error) {
       res.status(500).json({ ok: false, error: 'skills_preflight_failed', message: error.message });

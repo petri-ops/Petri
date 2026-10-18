@@ -24,21 +24,30 @@ const { spawnSync } = require('node:child_process');
 function checkSkillDeps(skill, opts = {}) {
   const platform = opts.platform || process.platform;
   const hasBin = typeof opts.hasBin === 'function' ? opts.hasBin : () => true;
+  // BLOCK-211（W8 · C-33）：`plugins.required` 是**硬依赖**，此前被 preflight 完全忽略——
+  // 于是"依赖是插件而不是二进制"的技能（生物信息学两族）恒报 available，货架显示"依赖可用"
+  // 但实际缺 5 个插件包，正是「货架可见不可用」。默认 `() => true` 保持纯函数既有语义
+  // （不传探测面的调用方行为不变），真实探测由路由层注入。
+  const hasPlugin = typeof opts.hasPlugin === 'function' ? opts.hasPlugin : () => true;
   const deps = (skill && skill.dependencies) || {};
   const requiresBins = Array.isArray(deps.requiresBins) ? deps.requiresBins : [];
+  const requiresPlugins = Array.isArray(skill && skill.plugins && skill.plugins.required) ? skill.plugins.required : [];
   const declaredOs = Array.isArray(deps.os) ? deps.os : null;
 
   if (declaredOs && !declaredOs.includes(platform)) {
-    return { status: 'blocked_platform', platformOk: false, missingBins: [], declaredOs, install: deps.install || null };
+    return { status: 'blocked_platform', platformOk: false, missingBins: [], missingPlugins: [], declaredOs, install: deps.install || null };
   }
   const missingBins = requiresBins.filter((bin) => !hasBin(bin));
-  if (missingBins.length === 0) {
-    return { status: 'available', platformOk: true, missingBins: [], declaredOs, install: deps.install || null };
+  const missingPlugins = requiresPlugins.filter((pluginId) => !hasPlugin(pluginId));
+  if (missingBins.length === 0 && missingPlugins.length === 0) {
+    return { status: 'available', platformOk: true, missingBins: [], missingPlugins: [], declaredOs, install: deps.install || null };
   }
   return {
-    status: deps.install ? 'installable' : 'missing_deps',
+    // 插件包**没有**自动安装配方：缺插件只能算缺依赖，不能标"可安装"
+    status: missingBins.length > 0 && deps.install ? 'installable' : 'missing_deps',
     platformOk: true,
     missingBins,
+    missingPlugins,
     declaredOs,
     install: deps.install || null,
   };

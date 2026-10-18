@@ -4124,6 +4124,21 @@
         "test/block199-config-drift.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block211-skill-deps-plugins",
+      "note": "BLOCK-211 W8 第六批（C-33 代码侧）：preflight 纳入 plugins.required（hasPlugin 注入，默认可用保持既有语义）；投影路由用 plugin-loader 单一真相探测；技能卡片对插件硬依赖显示徽标并列出缺失清单。",
+      "patterns": [
+        "core/shared-backend/skill-preflight.js",
+        "core/petri-server/routes/projection-data.js",
+        "frontend/src/pages/extensions/SkillCard.tsx",
+        "test/block211-skill-deps-plugins.test.mjs"
+      ],
+      "tests": [
+        "test/block211-skill-deps-plugins.test.mjs",
+        "test/block176-w7-contracts.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }
