@@ -7097,8 +7097,30 @@
         "block-209"
       ],
       "notes": "2026-10-18 立项发令 active（runlist W7d；用户「行！ 开整 下一包W7d」）：只做只读解析 + 映射预览（Codex TOML 子集 / ZCode JSON），输出 patch/credentialsDetected/unsupported/notes/diagnostics；**零写入零网络**；凭据一律拒绝自动导入（D-2）；patch 的每个键必须与 shared-config 真实键路径对账；一键应用属 reopen。 | 收口 2026-10-18：只读解析 + 映射预览（Codex TOML 子集 / ZCode JSON）→ patch/credentialsDetected/unsupported/notes/diagnostics；零写入零网络（响应 dryRun/wrote:false）；凭据键名+值形态双查、绝不进 patch（D-2）；patch 键与注册表对账；零新依赖、无外部源码。closeout 十三门 PASS。**预览不是导入**：一键应用（逐键确认+回滚+审计）属 reopen。"
+    },
+    {
+      "id": "BLOCK-210-DATA-DIR-RETENTION",
+      "capability": "data-dir-retention",
+      "path": "docs/block-210-data-dir-retention-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "phase": "P0-LAUNCH",
+      "canonical": true,
+      "truthDomain": "block-210-data-dir-retention-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-18",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "data-dir",
+        "retention",
+        "archive",
+        "migration-plan",
+        "stage-4",
+        "block-210"
+      ],
+      "notes": "2026-10-18 立项发令 active（runlist W7e；用户「继续」）：留存/归档策略（historyDays/archiveDir/maxBytesPerDir，默认零删除）接线生效；数据目录迁移只交付**计划器+预览**（备份路径/步骤/回退/阻塞项，只读不执行）——真实搬迁需一次性窗口与备份演练，属 reopen。红线=默认不删不移、目录解析只走 data-paths 单源。"
     }
   ],
   "lastUpdated": "2026-10-17",
-  "documentCount": 367
+  "documentCount": 368
 }
