@@ -41,3 +41,27 @@ status: completed
 - **基线显式改写**：`test/block199-config-compat.test.mjs` 里"env=1 强制开"的钉法在同一提交改写为"seed 语义"，并留因（修的是"设置页关不掉"的治理缺陷，不是放宽判据）。
 - 证据：`test/block211-c32-env-seed.test.mjs` **4/4**（真相表 / envOverride 保留 / seed 不报遮蔽 / 族标记）+ 邻域 **150/150**（112/113/116/119/173/199/200/202 + 新测）。
 - **发现一笔在册旧账（未修，非本批引入）**：`test/block110-p1-topic-shift.test.mjs` 有 **5 例在 HEAD 上就红**（noul 三区间 / 降级 / 杀开关，全部断 `callModelTask` 调用数）。A/B 验证：`git stash` 掉本批改动后同样 5 红 ⇒ 与本批无关，需独立 triage。
+
+## 4. 🟡 triage 记录：`block110-p1-topic-shift` 5 例 HEAD 红（2026-10-18）
+
+**结论：与本批无关，且不是产品回归——是测试夹具的隔离缺陷。**
+
+证据链：
+1. **A/B**：`git stash` 掉 C-32 改动后同一文件仍 5 红（1 pass / 5 fail），恢复后同样 5 红 ⇒ 与 C-32 无关。
+2. **失败形态**：5 例全部断"应当走到大模型路径"（`callModelTaskCalls.length === 1` 实得 0），日志里伴随
+   `[topic-shift] failed: database disk image is malformed`——即查询抛错后被 `_maybeDetectTopicShift` 的
+   try/catch 吞掉，函数返回 null。
+3. **排除产品 DB**：仓库里 `core/petri-server/petri.db` 的 `PRAGMA integrity_check` = **ok**（335KB 遗留件本身没坏）。
+4. **排除"路径本身不可用"**：按测试同样的方式自举（14 个 `src/migrations/*.sql` → `PETRI_DB_PATH` 指向临时文件）
+   后，独立脚本 require `conversations` 并调用 `_maybeDetectTopicShift` **不抛 malformed**（返回 null，属门禁/依赖差异），
+   说明报错只在**测试夹具（mock 注入 + 自举顺序）**这套组合下出现。
+
+判断：`core/petri-server/db/connection.js` 的 `DB_PATH = process.env.PETRI_DB_PATH || <core>/petri.db` 是**模块加载时**求值；
+测试在 `installMocks()` / require 链里可能先摸到连接，而自举只跑了 `src/migrations`（桌面侧），后端表由
+`helpers/conversations.js` 自带 `CREATE TABLE IF NOT EXISTS` 创建——**自举范围与连接绑定两者都在夹具侧**，
+不是 `conversations`/`decision-config` 的行为问题。
+
+处置建议（单独小批，不混进 C-32）：修夹具而不是修产品——
+① 在**任何 require 之前**固定 `PETRI_LOCAL_DATA_DIR` 与 `PETRI_DB_PATH`；
+② 用 `conversations` 自己的建表路径初始化（而不是只跑 `src/migrations`）；
+③ 断言里不要依赖"malformed 被吞成 null"这种形态。修完应 6/6。
