@@ -10,6 +10,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { subscribeAgentTask } from './agentTaskStream';
+import { dispatchPetriEvent } from '@/lib/events';
 
 vi.mock('./apiBase', () => ({
   emitAgentTaskDone: vi.fn(),
@@ -18,7 +19,7 @@ vi.mock('./apiBase', () => ({
 }));
 
 vi.mock('@/lib/events', () => ({
-  petriEvents: { tokenBudget: 'tokenBudget' },
+  petriEvents: { tokenBudget: 'tokenBudget', runUsage: 'runUsage' },
   dispatchPetriEvent: vi.fn(),
 }));
 
@@ -104,9 +105,33 @@ describe('agentTaskStream WS-first（投影环境）', () => {
     expect(ws.url).toContain('/m/api/ws');
     expect(JSON.parse(ws.sent[0])).toMatchObject({ t: 'sub', taskId: 'task-ws', afterSeq: 0 });
     ws.serverSend({ t: 'ev', taskId: 'task-ws', seq: 3, eventType: 'iter', payload: { event: 'iter', n: 7 } });
+    // UI-523 — WS 传输同样解析 usage 事件并派发 petri:run-usage（双传输一条解析器）
+    ws.serverSend({
+      t: 'ev',
+      taskId: 'task-ws',
+      seq: 4,
+      eventType: 'usage',
+      payload: {
+        event: 'usage',
+        conversationId: 'conv_ws',
+        iteration: 2,
+        attempt: 1,
+        model: 'deepseek-chat',
+        promptTokens: 100,
+        completionTokens: 32,
+        cacheReadTokens: 80,
+        cacheCreationTokens: 0,
+        durationMs: 2000,
+        at: '2026-10-18T00:00:00.000Z',
+      },
+    });
     ws.serverSend({ t: 'done', taskId: 'task-ws', status: 'done', filesChanged: [{ path: 'a', status: 'M' }] });
     await pending;
     expect(iters).toEqual([7]);
+    expect(vi.mocked(dispatchPetriEvent)).toHaveBeenCalledWith(
+      'runUsage',
+      expect.objectContaining({ conversationId: 'conv_ws', completionTokens: 32, cacheReadTokens: 80, durationMs: 2000 }),
+    );
     expect(done).toBe(1);
     expect(fetchMock).not.toHaveBeenCalled();
   });

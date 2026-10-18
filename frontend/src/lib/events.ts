@@ -73,6 +73,12 @@ export const petriEvents = {
   tokenBudget: 'petri:token-budget',
 
   /**
+   * UI-523 — 每次模型调用结束发一条实测用量（loop 侧 additive 事件）。
+   * composer 运行计量条消费：只读展示「最近一次调用」的输出速率，不做累计。
+   */
+  runUsage: 'petri:run-usage',
+
+  /**
    * BLOCK-28.7: 请求打开审阅并选中指定文件（聊天区改动卡片点击行触发）。
    * ProjectWorkspace 监听后 openRightPanel('review')；
    * useWorkingTreeReview 监听后 setSelectedFilePath。
@@ -197,6 +203,24 @@ export interface TokenBudgetDetail {
 // Typed helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * UI-523 — 单次模型调用实测用量（后端 helpers/run-usage.buildRunUsageEvent 产出）。
+ * 口径：token 与 ai_usage 落库同源；`durationMs` 为端到端耗时（含网络/prefill），
+ * 速率 = completionTokens ÷ durationMs，界面不得称「解码速度」（BLOCK-79）。
+ */
+export interface RunUsageDetail {
+  conversationId: string | null;
+  iteration: number;
+  attempt: number;
+  model: string | null;
+  promptTokens: number;
+  completionTokens: number;
+  cacheReadTokens: number;
+  cacheCreationTokens: number;
+  durationMs: number;
+  at: string;
+}
+
 export type PetriEventName = (typeof petriEvents)[keyof typeof petriEvents];
 
 export interface CopilotAskDetail {
@@ -292,6 +316,7 @@ export type PetriEventMap = {
   [petriEvents.conversationForked]: ConversationForkedDetail;
   [petriEvents.agentTaskDone]: AgentTaskDoneDetail;
   [petriEvents.tokenBudget]: TokenBudgetDetail;
+  [petriEvents.runUsage]: RunUsageDetail;
   [petriEvents.reviewOpenFile]: ReviewOpenFileDetail;
   [petriEvents.agentBackgroundProcess]: AgentBackgroundProcessDetail;
   [petriEvents.agentOpenInRail]: AgentOpenInRailDetail;

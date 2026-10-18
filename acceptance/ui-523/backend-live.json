@@ -1,0 +1,78 @@
+{
+  "gate": "UI-523 composer run-stats backend live",
+  "provider": "mock-openai-compatible (local loopback; 非真实 Provider — G0 开发期如实标注)",
+  "at": "2026-10-18T00:27:49.535Z",
+  "allPass": true,
+  "legs": [
+    {
+      "name": "B0 隔离后端就绪",
+      "ok": true,
+      "detail": ":59237"
+    },
+    {
+      "name": "B1 会话创建",
+      "ok": true,
+      "detail": "conv_63ec8c96-26c"
+    },
+    {
+      "name": "B2 agent 任务派发",
+      "ok": true,
+      "detail": "task=f1791a89-c631-4f22-af1a-ddb40f6feb2f"
+    },
+    {
+      "name": "B3 usage 事件到达",
+      "ok": true,
+      "detail": "iteration=1"
+    },
+    {
+      "name": "B4 usage 归属本会话",
+      "ok": true,
+      "detail": "conv_63ec8c96-26c"
+    },
+    {
+      "name": "B5 usage token 与 mock 一致",
+      "ok": true,
+      "detail": "1200/80"
+    },
+    {
+      "name": "B6 cache 字段未断链",
+      "ok": true,
+      "detail": "cacheRead=1000"
+    },
+    {
+      "name": "B7 耗时实测（tok/s 可算）",
+      "ok": true,
+      "detail": "132ms"
+    },
+    {
+      "name": "B8 聚合路由 200 + calls>=1",
+      "ok": true,
+      "detail": "status=200 calls=1"
+    },
+    {
+      "name": "B9 聚合 token 覆盖本次调用",
+      "ok": true,
+      "detail": "in=1200 out=80"
+    },
+    {
+      "name": "B10 缓存命中率口径自洽",
+      "ok": true,
+      "detail": "hit=0.8333333333333334"
+    },
+    {
+      "name": "B11 tokensPerSecond 可算",
+      "ok": true,
+      "detail": "620.2"
+    },
+    {
+      "name": "B12 未知会话返回全 0（不 404）",
+      "ok": true,
+      "detail": "status=200 calls=0"
+    },
+    {
+      "name": "B13 缺 conversationId 返回 400",
+      "ok": true,
+      "detail": "status=400"
+    }
+  ]
+}

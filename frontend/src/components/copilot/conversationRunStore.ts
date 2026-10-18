@@ -239,6 +239,7 @@ export function startConversationRun(options: StartConversationRunOptions): bool
     toolActivities: [],
     reasoningByIteration: {},
     pendingApproval: null,
+    iteration: 1,
     startedAt,
     taskId: options.resumeTaskId ?? undefined,
     resumeOfTaskId: options.resumeOfTaskId,
@@ -376,6 +377,8 @@ export function startConversationRun(options: StartConversationRunOptions): bool
       assistantAcc = '';
       replaceRun(conversationId, (current) => ({
         ...current,
+        // UI-523 — 迭代序号进快照：计量条「本次 N 轮」唯一来源
+        iteration: currentIter,
         assistantContent: '',
         assistantPending: true,
         statusMessage: undefined,

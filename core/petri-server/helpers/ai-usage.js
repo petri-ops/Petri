@@ -103,6 +103,55 @@ function summarizeAiUsage({ userId = null, conversationId = null, since = null }
 }
 
 /**
+ * UI-523 — 会话级用量聚合（composer 运行计量条消费；只读投影，零新账本）。
+ *
+ * 与 `summarizeAiUsage` 同表同口径，额外给出 `latencyMs` / `tokensPerSecond`：
+ * - `tokensPerSecond = SUM(completion_tokens) ÷ (SUM(latency_ms)/1000)`，端到端平均
+ *   输出速率（含网络/首 token 前 prefill），BLOCK-79 口径；界面不得称「解码速度」。
+ * - `latencyMs = 0`（无调用或旧行无耗时）时 `tokensPerSecond = null` ⇒ 前端显示
+ *   「不可算」，不是 0。
+ * - `user_id` 与 `conversation_id` 双过滤即所有权边界：他人会话自然查到全 0，
+ *   不 404（不泄漏会话是否存在）。
+ *
+ * 不改 `summarizeAiUsage` 契约：成本熔断（BLOCK-176 CP-18）消费方零影响。
+ */
+function summarizeConversationUsage({ conversationId = null, userId = null } = {}) {
+  const empty = {
+    calls: 0, inputTokens: 0, outputTokens: 0, cacheReadTokens: 0,
+    cacheHitRate: 0, latencyMs: 0, tokensPerSecond: null,
+  };
+  if (!conversationId) return empty;
+  const clauses = ['conversation_id = ?'];
+  const params = [conversationId];
+  if (userId) { clauses.push('user_id = ?'); params.push(userId); }
+  try {
+    const row = sqlite.prepare(`SELECT COUNT(*) AS calls,
+      COALESCE(SUM(prompt_tokens),0) AS inputTokens,
+      COALESCE(SUM(completion_tokens),0) AS outputTokens,
+      COALESCE(SUM(cache_read_tokens),0) AS cacheReadTokens,
+      COALESCE(SUM(latency_ms),0) AS latencyMs
+      FROM ai_usage WHERE ${clauses.join(' AND ')}`).get(...params);
+    if (!row) return empty;
+    const inputTokens = Number(row.inputTokens) || 0;
+    const outputTokens = Number(row.outputTokens) || 0;
+    const cacheReadTokens = Number(row.cacheReadTokens) || 0;
+    const latencyMs = Number(row.latencyMs) || 0;
+    return {
+      calls: Number(row.calls) || 0,
+      inputTokens,
+      outputTokens,
+      cacheReadTokens,
+      cacheHitRate: inputTokens > 0 ? cacheReadTokens / inputTokens : 0,
+      latencyMs,
+      tokensPerSecond: latencyMs > 0 ? Math.round((outputTokens / (latencyMs / 1000)) * 10) / 10 : null,
+    };
+  } catch (e) {
+    console.warn('[ai-usage] summarizeConversationUsage failed:', e && e.message);
+    return empty;
+  }
+}
+
+/**
  * BLOCK-78 P2-② — 项目级用量聚合（读面；不改 summarizeAiUsage 契约）。
  * ai_usage 经 conversation_id JOIN copilot_conversations.project_id 归因到
  * 项目；conversation_id 为空的行（无会话上下文调用）不计入项目口径。
@@ -201,6 +250,7 @@ module.exports = {
   summarizeAiUsage,
   summarizeProjectUsage,
   summarizeProviderUsage,
+  summarizeConversationUsage,
   estimateCostCNY,
   AI_PRICING,
 };

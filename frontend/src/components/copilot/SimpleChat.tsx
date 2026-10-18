@@ -199,6 +199,10 @@ import {
 import { PlanApprovalCard } from './SimpleChat/PlanApprovalCard';
 import { composerPlaceholder } from './SimpleChat/ComposerYield';
 import { ContextBudgetButton } from './ContextBudgetBar';
+// UI-523 — composer 运行计量条（卡片下方读数；环组件搬进条内，单一实例）
+import { RunStatsBar } from './RunStatsBar';
+import { useRunUsage } from './SimpleChat/hooks/useRunUsage';
+import { useConversationUsage } from './SimpleChat/hooks/useConversationUsage';
 
 // SimpleMessage + restoreSimpleMessage + AgentProgressUpdate + restoreProgressUpdates + MessageMeta moved to
 // ./SimpleChat/{types,helpers}.ts (BLOCK-9.2 PHASE 4).
@@ -1181,6 +1185,13 @@ export function SimpleChat({
   });
   const tokenBudget = useTokenBudgetState();
 
+  // UI-523 — composer 运行计量条数据：最近一次调用实测（事件）+ 本会话累计（只读聚合）。
+  // 运行结束（status 变化）强制刷一次会话累计；运行中由事件 2s 节流刷新。
+  const runUsage = useRunUsage(conversationId);
+  const conversationUsage = useConversationUsage(conversationId, activeRun?.status ?? null);
+  const runSteps = activeRun ? activeRun.toolActivities.length : null;
+  const runRounds = activeRun ? (activeRun.iteration ?? activeRun.loop?.iterations.length ?? null) : null;
+
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // Handle slash command navigation
     if (slashOpen) {
@@ -1908,9 +1919,8 @@ export function SimpleChat({
                     （订阅 projectWorkspaceChanged），模型 I/O 迁右栏 tab；不预留空壳 */}
                 {/* UI-268 改造：后台进程指示器从独立浮条收入 composer 工具栏（图标+状态点，点击展开浮层） */}
                 <ToolActivityDock conversationId={conversationId} projectId={projectId} />
-                {/* BLOCK-20: live context-budget ring — UI-301 加映：移到供应商左侧；
-                    UI-448 加映 v3 — slimComposer 悬挂面不渲染 */}
-                {!slimComposer && <ContextBudgetButton budget={tokenBudget} activeContextWindow={undefined} />}
+                {/* UI-523 — 上下文预算环搬进卡片下方计量条右端（同一组件实例；
+                    UI-448 加映 v3 — slimComposer 悬挂面整条不渲染）。 */}
                 <div className="sc-model-picker-pair">
                   <div className="sc-model-picker sc-model-picker-footer">
                     <button
@@ -2087,6 +2097,21 @@ export function SimpleChat({
               </div>
             </div>
           </div>
+          {/* UI-523 — 输入卡片下方运行计量条（本次/会话/上下文三段）。
+              slimComposer 悬挂面整条不渲染（UI-448 加映 v3 既有纪律）。 */}
+          {!slimComposer && (
+            <RunStatsBar
+              rounds={runRounds}
+              steps={runSteps}
+              runUsage={runUsage}
+              conversationUsage={conversationUsage}
+              contextPct={tokenBudget ? tokenBudget.pct : null}
+              contextSlot={<ContextBudgetButton budget={tokenBudget} activeContextWindow={undefined} />}
+              narrow={composerNarrow}
+              running={Boolean(streaming)}
+              conversationId={conversationId}
+            />
+          )}
         </div>
       </div>
       </div>

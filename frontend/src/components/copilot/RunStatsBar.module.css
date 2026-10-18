@@ -1,0 +1,52 @@
+/* UI-523 — composer 运行计量条（卡片下方、页面底色上）。
+   层级：条本体不设底色（与截图一致），只用文字层级 + 分隔线；
+   token 阶梯：文字 tertiary / 范围标签 muted / 速率 secondary（运行中 accent）。 */
+.strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: min(100%, var(--sc-composer-width, 720px));
+  margin: 5px auto 0;
+  padding: 0 6px 2px;
+  min-height: 20px;
+  font-size: var(--petri-font-size-xs);
+  line-height: 1.5;
+  color: var(--petri-text-tertiary);
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+
+.group {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.scope {
+  color: var(--petri-text-muted);
+}
+
+.dot {
+  color: var(--petri-text-muted);
+  opacity: 0.6;
+}
+
+.divider {
+  flex: 0 0 auto;
+  width: 1px;
+  height: 10px;
+  background: var(--petri-border);
+}
+
+.rate {
+  color: var(--petri-text-secondary);
+}
+
+@media (max-width: 640px) {
+  .strip {
+    gap: 6px;
+  }
+}

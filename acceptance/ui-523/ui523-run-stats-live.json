@@ -1,0 +1,58 @@
+{
+  "name": "ui523-run-stats",
+  "startedAt": "2026-10-18T00:43:22.512Z",
+  "finishedAt": "2026-10-18T00:43:28.389Z",
+  "assertions": [
+    {
+      "name": "D_meta_model_boundary",
+      "pass": true,
+      "detail": "activeModel=ui523-mock · provider=mock（非真实 Provider，代码链证据）"
+    },
+    {
+      "name": "D0a_strip_present",
+      "pass": true,
+      "detail": "run-stats-bar=true"
+    },
+    {
+      "name": "D0b_empty_state_honest",
+      "pass": true,
+      "detail": "total=— tok cache=缓存命中 — context=0%"
+    },
+    {
+      "name": "D1_ring_single_after_move",
+      "pass": true,
+      "detail": "环实例（composer 区）=1 工具栏内=-1"
+    },
+    {
+      "name": "D2_live_usage_reading",
+      "pass": true,
+      "detail": "run=本次1 轮·0 步·635 tok/s rate=635 tok/s"
+    },
+    {
+      "name": "D3_conversation_totals",
+      "pass": true,
+      "detail": "total=1K tok cache=缓存命中 83%"
+    },
+    {
+      "name": "D3b_last_run_memory",
+      "pass": true,
+      "detail": "run=本次1 轮·0 步·635 tok/s"
+    },
+    {
+      "name": "D4_context_pct",
+      "pass": true,
+      "detail": "context=18%"
+    },
+    {
+      "name": "D5_no_fake_zero_rate",
+      "pass": true,
+      "detail": "rate=635 tok/s（未测量时必须为 — 而不是 0）"
+    },
+    {
+      "name": "D6_cleanup_restored",
+      "pass": true,
+      "detail": "conv=true project=true restored=true"
+    }
+  ],
+  "allPass": true
+}

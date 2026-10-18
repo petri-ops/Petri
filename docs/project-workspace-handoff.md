@@ -2,6 +2,8 @@
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
 
+最后更新：2026-10-18（**UI-523 composer 运行计量条 completed（UI 轨插包：BLOCK-205 收口后、W7a 之前；9223 实机腿 9/9 + 隔离后端腿 14/14）**：输入卡片下方三段读数「本次 轮/步/tok/s · 会话 tok/缓存命中 · 上下文%」+ 预算环搬入条内；两条 additive 后端（loop `usage` 事件 + `GET /api/ai/usage-conversation`）。**active 工作包仍为无，下一包=W7a 不变**（本包不占 runlist 序号）；台账=`docs/ui-productization-audit.md` §UI-523。实机链用本地 mock provider（本机无真实凭据，证据标注 provider=mock）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-10-17（**BLOCK-203-STAGE-3-B1B-CONFIG-LANDING-CONSOLIDATION 立项发令 active（runlist W4 拆片：W4a 先做）**）
 
 **恢复要点（换会话必读·本段取代下方 BLOCK-205 段）**：**无 active 工作包**；**下一包=runlist W7a**（BLOCK-206：子智能体 profile 声明式配置面 + C-29 斜杠即执行抽单元与结构化 chip 同波并入）。**刚收口=BLOCK-205（W6）**：压缩/记忆九参数进 `memory-policy` 族（注册表 14 族/75 键），默认值逐字等于原常量；`effectiveSnapshot()` 给出生效值+来源；嵌入模型只读；写面 `GET/PUT /api/ai/memory-policy`。**评测基线未动**：`context_snapshot` 7/7 指纹未变 + smoke 回归 0（这是"没把测量当装饰"的证据，别省略）。**未做**：记忆/压缩设置页（W6b）、提取模型真正可换（需维度迁移+重嵌入）。

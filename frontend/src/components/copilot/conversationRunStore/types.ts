@@ -66,6 +66,11 @@ export interface ConversationRunSnapshot {
   resultContextToken?: string;
   toolActivities: ToolActivityItem[];
   pendingApproval: ConversationPendingApproval | null;
+  /**
+   * UI-523 — 本次运行的模型迭代序号（后端 `iter` 事件，1 起）。
+   * 只在快照里读，不据此推导任务完成；计量条「N 轮」的直接来源。
+   */
+  iteration?: number;
   processingDurationMs?: number;
   startedAt: number;
   completedAt?: number;

@@ -47,6 +47,8 @@ const {
 const { resolveCostCapCny, isCostCapExceeded } = require('./helpers/cost-cap');
 const { getAiSettings } = require('./helpers/ai-settings');
 const { summarizeAiUsage } = require('./helpers/ai-usage');
+// UI-523 — 每次模型调用的实测用量事件（composer 计量条数据源；纯函数构造）
+const { buildRunUsageEvent } = require('./helpers/run-usage');
 // BLOCK-179 — 正文工具块修复提升（扫描+fail-closed 决策；keep 零行为变化）
 const { scanPlainTextToolCalls } = require('./helpers/tool-call-repair');
 const {
@@ -240,6 +242,24 @@ async function runLoop({
   // ---------- Event emitter proxy ----------
   const _emit = (obj) => {
     emitAssistant(obj);
+  };
+
+  // UI-523 — 单次调用用量外发（additive：旧客户端不认识 `usage` 事件，天然 no-op）。
+  // 数据源=provider 返回值里的 usage（与 ai_usage 落库同源），不是第二套计量。
+  // usage 缺失/全 0 时 buildRunUsageEvent 返回 null ⇒ 不发事件（前端显示 `—`）。
+  const _emitCallUsage = (upJson, meta) => {
+    try {
+      const payload = buildRunUsageEvent(upJson && upJson.usage, {
+        conversationId: _activeConv && _activeConv.id,
+        iteration: meta && meta.iteration,
+        attempt: meta && meta.attempt,
+        model: modelName,
+        durationMs: meta && meta.durationMs,
+      });
+      if (payload) _emit(payload);
+    } catch {
+      /* 观测面故障不阻塞主流程 */
+    }
   };
 
   // ---------- Helper functions (mirror from agent-runner) ----------
@@ -855,6 +875,9 @@ ${compactSummaryText}`,
       for (let attempt = 1; attempt <= attemptLimit && !aborted(); attempt++) {
         streamedText = '';
         const protocolRecoveryAttempt = finalizing && attempt > 1;
+        // UI-523 — 端到端耗时实测（含网络与首 token 前 prefill），与
+        // ai_usage.latency_ms 同口径；用于 tok/s 与「最近一次调用」读数。
+        const callStartedAt = Date.now();
         // BLOCK-109 P1 — 网络瞬断重试包裹（finalizing 走既有 attempt 循环不叠加）
         upJson = await callProviderWithNetworkRetry(
           () => callChatProvider(
@@ -930,6 +953,9 @@ ${compactSummaryText}`,
         if (upJson && upJson.modelRouting && upJson.modelRouting.fallbackFrom) {
           modelFallbackOccurred = true;
         }
+        // UI-523 — 每次调用结束发一条实测 usage（失败返回通常无 usage，构造器跳过）。
+        // 观测事件，additive：不进请求体、不改控制流。
+        _emitCallUsage(upJson, { iteration: iter + 1, attempt, durationMs: Date.now() - callStartedAt });
         if (!finalizing) break;
         finalizationAttempts = Math.max(finalizationAttempts, attempt);
         const assessment = assessFinalizationResult(upJson, streamedText);

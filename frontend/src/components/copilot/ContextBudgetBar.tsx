@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+// UI-523 — 数字格式单一源（与 composer 计量条共用；K/M/B 阶梯与既有输出逐字一致）
+import { formatTokens } from './formatCount';
 
 export interface TokenBudget {
   contextWindow: number;
@@ -27,12 +29,6 @@ function barColor(pct: number): string {
   if (pct < 60) return '#22c55e';
   if (pct < 80) return '#f59e0b';
   return '#ef4444';
-}
-
-function formatTokens(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`;
-  if (n >= 1000) return `${Math.round(n / 1000)}K`;
-  return String(n);
 }
 
 const RING_SIZE = 18;
@@ -190,7 +186,7 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
               <div style={{ display: 'flex', justifyContent: 'space-between', color: '#8b5cf6' }}>
                 <span>知识空间</span>
                 <span style={{ fontFamily: 'monospace', color: 'var(--petri-text)' }}>
-                  {formatTokens(displayBudget!.knowledgeTokens!)}
+                  {formatTokens(displayBudget?.knowledgeTokens ?? 0)}
                 </span>
               </div>
             )}

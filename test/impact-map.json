@@ -3994,6 +3994,38 @@
         "test/block98-microcompact.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "ui523-run-stats",
+      "note": "UI-523 composer 运行计量条：loop 每次调用发 additive usage 事件（helpers/run-usage 纯函数构造）、ai-usage 会话级只读聚合 + GET /api/ai/usage-conversation、前端事件管道（events/agentTaskStream）、两个 hook（useRunUsage 会话过滤 / useConversationUsage 节流+失败保留旧值）、RunStatsBar 展示（五读数、不可算显「—」、窄态降级）、预算环搬入条内、run 快照 iteration 字段。",
+      "patterns": [
+        "core/petri-server/helpers/run-usage.js",
+        "core/petri-server/loop-orchestrator.js",
+        "core/petri-server/helpers/ai-usage.js",
+        "core/petri-server/routes/ai-misc.js",
+        "frontend/src/lib/events.ts",
+        "frontend/src/components/copilot/RunStatsBar.tsx",
+        "frontend/src/components/copilot/RunStatsBar.module.css",
+        "frontend/src/components/copilot/RunStatsBar.test.tsx",
+        "frontend/src/components/copilot/formatCount.ts",
+        "frontend/src/components/copilot/ContextBudgetBar.tsx",
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "frontend/src/components/copilot/SimpleChat/hooks/useRunUsage.ts",
+        "frontend/src/components/copilot/SimpleChat/hooks/useConversationUsage.ts",
+        "frontend/src/components/copilot/conversationRunStore.ts",
+        "frontend/src/components/copilot/conversationRunStore/types.ts",
+        "frontend/src/components/copilot/copilotClient/agentTaskStream.ts",
+        "frontend/src/components/copilot/copilotClient/agentTaskStream.ws.test.ts",
+        "test/ui523-*.test.mjs",
+        "acceptance/ui-523/**",
+        "scripts/ui523-*",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui523-run-stats.cjs"
+      ],
+      "tests": [
+        "test/ui523-conversation-usage.test.mjs",
+        "test/ui523-usage-event.test.mjs"
+      ],
+      "classifiesScripts": true
     }
   ]
 }

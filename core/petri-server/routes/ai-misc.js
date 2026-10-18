@@ -91,6 +91,19 @@ module.exports = function mountMisc(app) {
     } catch (e) { res.status(500).json({status:'error', error: e.message}); }
   });
 
+  // UI-523 — 会话级用量聚合（composer 运行计量条消费；只读投影，零新账本）。
+  // 所有权=user_id + conversation_id 双过滤：他人会话查到全 0，不 404（不泄漏存在性）。
+  app.get('/api/ai/usage-conversation', async (req, res) => {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({status:'error', error:'未授权'});
+    const conversationId = String((req.query && req.query.conversationId) || '').trim();
+    if (!conversationId) return res.status(400).json({status:'error', error:'conversationId 不能为空'});
+    try {
+      const usage = require('../helpers/ai-usage').summarizeConversationUsage({ conversationId, userId });
+      res.json({status:'ok', conversationId, ...usage});
+    } catch (e) { res.status(500).json({status:'error', error: e.message}); }
+  });
+
   app.get('/api/ai/site-snapshot', (req, res) => {
     const userId = req.user && req.user.id;
     if (!userId) return res.status(401).json({status:'error', error:'未授权'});

@@ -4,7 +4,7 @@
 // ============================================================
 
 import { petriEvents, dispatchPetriEvent } from '@/lib/events';
-import type { TokenBudgetDetail } from '@/lib/events';
+import type { RunUsageDetail, TokenBudgetDetail } from '@/lib/events';
 import { isProjectionEnv } from '@/lib/projectionDataBridges';
 import { emitAgentTaskDone, getApiPrefix, getAuthHeader } from './apiBase';
 import {
@@ -599,6 +599,24 @@ function _dispatchSseEvent(obj: AgentSseEvent, opts: StreamChatOptions): void {
       knowledgeTokens: typeof obj.knowledgeTokens === 'number' ? obj.knowledgeTokens : 0,
     };
     dispatchPetriEvent(petriEvents.tokenBudget, detail);
+    return;
+  }
+  // UI-523 — 单次调用实测用量（loop 侧 additive 事件；composer 计量条消费）。
+  // 与 token_budget 同一条分发通道：未知字段/未知事件对旧消费方仍是 no-op。
+  if (obj.event === 'usage') {
+    const detail: RunUsageDetail = {
+      conversationId: typeof obj.conversationId === 'string' ? obj.conversationId : null,
+      iteration: typeof obj.iteration === 'number' ? obj.iteration : 0,
+      attempt: typeof obj.attempt === 'number' ? obj.attempt : 1,
+      model: typeof obj.model === 'string' ? obj.model : null,
+      promptTokens: typeof obj.promptTokens === 'number' ? obj.promptTokens : 0,
+      completionTokens: typeof obj.completionTokens === 'number' ? obj.completionTokens : 0,
+      cacheReadTokens: typeof obj.cacheReadTokens === 'number' ? obj.cacheReadTokens : 0,
+      cacheCreationTokens: typeof obj.cacheCreationTokens === 'number' ? obj.cacheCreationTokens : 0,
+      durationMs: typeof obj.durationMs === 'number' ? obj.durationMs : 0,
+      at: typeof obj.at === 'string' ? obj.at : new Date().toISOString(),
+    };
+    dispatchPetriEvent(petriEvents.runUsage, detail);
     return;
   }
   const delta = obj?.choices?.[0]?.delta?.content;

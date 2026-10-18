@@ -368,6 +368,7 @@ describe('theme token contract', () => {
       'components/result-studio/RevisionCodeView.module.css': 4,
       'pages/welcome.module.css': 4,
       'components/copilot/LlmTranscriptViewer.css': 3,
+      'components/copilot/RunStatsBar.module.css': 1, // UI-523 计量条元信息读数（本次/会话/上下文=合法徽标域）
       'components/window/rail-page.module.css': 3,
       'components/copilot/gen-ui/GenUiCard.module.css': 2,
       'components/copilot/ResultCard.module.css': 2,
