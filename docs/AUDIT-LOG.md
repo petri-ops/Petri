@@ -20,6 +20,7 @@
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
+| 🟡 | 2026-10-18 | **`npm run skills:check` 实测 5 红（存量，非本批引入）**：`deg-analysis-standard` 的 3 个与 `sc-analysis-standard` 的 2 个 `plugins.required` 在 `resources/built-in-plugins/`（本仓不存在）与 pack 插件源里都找不到。**它不在 closeout 十三门内**，所以能长期红而不挡收口——这正是 C-33「货架可见不可用」的代码侧证据。处置=并入 C-33 裁决（A/B/C）；建议先把 `skills:check` 以**报告级**纳入收口（打印红数、不阻塞），升阻塞门禁与否随裁决。plan=docs/block-211-tail-ledger-plan.md §10 | AUDIT / C-33 关联 |
 | ✅ | 2026-10-18 | **BLOCK-211（W8 首批）completed**：C-32 env=1 降级为种子（13 门 PASS）；新登记 🟡 block110-p1 5 例 HEAD 红（与本批无关，待 triage）；W8 其余项在册 | BLOCK-211 / P5-CLOSED |
 | ✅ | 2026-10-18 | **BLOCK-210（W7e）completed（十三门 PASS）**：留存/归档默认零删除 + apply 默认 dryRun + 删除须 allowDelete；迁移计划器只读（备份/回退/阻塞项）；真实搬迁与清理 reopen。下一包=W8 | BLOCK-210 / P5-CLOSED |
 | 🔵 | 2026-10-18 | **BLOCK-210（W7e）立项**：留存/归档（默认零删除）+ 迁移计划器（只读）；真实搬迁 reopen。plan=docs/block-210-data-dir-retention-plan.md | BLOCK-210 / P0-LAUNCH |

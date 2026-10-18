@@ -119,3 +119,17 @@ status: completed
 **我的建议：B**。理由：A 只解决"说谎"，B 才解决"可见不可用"；C 在没有 packaged/第二台机器证据时会把 G0 的证据等级问题放大成产品质量问题。但**选哪个是你的裁决**，选完我按它立一个小包（范围 1-2 轮）。
 
 **边界**：本批未改任何插件/技能代码，也未改 manifest——只留证与选项。
+
+## 10. 第六批证据补充：`skills:check` 实测 5 红（2026-10-18）
+
+按方案 B 的前提核对时跑了 `npm run skills:check`，**它现在是红的**（5 条），且正好印证 C-33 的"货架可见不可用"：
+
+```
+❌ skills/deg-analysis-standard: plugins.required 引用插件 "expression-qc" / "deseq2" / "volcano-plot" 在 built-in-plugins/pack 插件源中不存在
+❌ skills/sc-analysis-standard: plugins.required 引用插件 "scanpy-advanced" / "seurat-standard" 同上
+```
+
+- **事实**：`resources/built-in-plugins/` 目录在本仓**不存在**；两个生物信息学标准 skill 声明的 5 个硬依赖插件因此全部解析不到。
+- **注意口径**：这不是本批引入的——`skills:check` **不在 closeout 十三门里**（十三门=audit:compact/hygiene/docs/ui-audit/test:changed/code-size/arch-cycles/css-modules/secret/arch/lint/types/knip），所以它可以长期红而不挡收口。AUDIT-LOG 2026-10-01 已登记过 6→8 红的存量（归 BIO-D2 裁决）。
+- **对 A/B/C 的影响**：B 方案"把零重依赖一族标可用、其余标未适配"**必须先让 manifest 的依赖声明与真实可用性对齐**；否则"未适配"标签的依据本身就是一条红门禁。C 方案更需要先补 `built-in-plugins`。
+- **处置**（仍属 C-33 裁决范围）：建议把 `skills:check` 纳入 closeout 门禁的**报告级**（不阻塞、但每次收口必须打印红数），避免它继续"红着走"。是否升为阻塞门禁，与 A/B/C 一起裁。
