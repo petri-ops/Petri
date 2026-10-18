@@ -270,6 +270,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
+/**
+ * BLOCK-213 — 可选读取主题上下文（无 Provider 时返回 null，不抛）。
+ *
+ * 命令面板等"可能脱离 Provider 被单测直接调用"的钩子用它构建外观类命令；
+ * `useTheme` 保持严格（缺 Provider 必须炸，那是真 bug）。
+ */
+export function useThemeOptional(): ThemeContextValue | null {
+  return useContext(ThemeContext);
+}
+
 export function useTheme(): ThemeContextValue {
   const value = useContext(ThemeContext);
   if (!value) throw new Error('useTheme must be used inside ThemeProvider');

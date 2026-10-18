@@ -1,0 +1,49 @@
+{
+  "generatedAt": "2026-10-18T03:49:44.720Z",
+  "paletteCommands": 24,
+  "paletteStaticIds": [
+    "nav-home",
+    "nav-projects",
+    "nav-knowledge",
+    "nav-extensions",
+    "nav-review",
+    "nav-settings",
+    "nav-extensions-plugins",
+    "nav-extensions-mcp",
+    "view-theme-system",
+    "view-theme-light",
+    "view-theme-dark",
+    "view-motion-system",
+    "view-motion-full",
+    "view-motion-reduced",
+    "settings:general",
+    "settings:models",
+    "settings:compute",
+    "settings:usage",
+    "settings:decisions",
+    "settings:keymap",
+    "settings:reasoning",
+    "settings:diagnostics",
+    "settings:experimental",
+    "settings:maintenance"
+  ],
+  "dynamicSources": [
+    "projects(≤3)",
+    "skills(top4)",
+    "recentConversations(≤5)"
+  ],
+  "settingsSections": 10,
+  "settingsCovered": 10,
+  "keymapEntries": 10,
+  "shortcutCovered": 5,
+  "emptyGuidePages": 2,
+  "emptyGuideTargets": 2,
+  "emptyGuideNotApplicable": [
+    "pages/knowledge/index.tsx（无空态：设备级空间恒在）",
+    "pages/project-workspace.tsx（无空态：无项目时回欢迎页）"
+  ],
+  "emptyGuideCoveredList": [
+    "pages/welcome.tsx",
+    "pages/extensions/index.tsx"
+  ]
+}

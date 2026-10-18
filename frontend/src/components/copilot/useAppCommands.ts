@@ -16,6 +16,7 @@ import { listConversations } from './copilotConversationsClient';
 import { listProjects } from '@/lib/project-store';
 import { fetchSlashEntries } from './SimpleChat/slashSources';
 import { SETTINGS_SECTIONS } from '@/components/desktop/DesktopSettingsPanel/types';
+import { useThemeOptional } from '@/themes/ThemeProvider';
 
 export interface UseAppCommandsOptions {
   /** 面板打开时才拉取数据（AppShell 传 isOpen）。 */
@@ -62,10 +63,16 @@ export function useAppCommands({ enabled, navigate, currentProjectId: _currentPr
     };
   }, [enabled]);
 
+  // BLOCK-213 — 可选主题上下文：命令面板要能"发现"外观与动效（W7c 新能力），
+  // 但本钩子会被单测脱离 Provider 直接调用，故用可选读取而不是 useTheme。
+  const theme = useThemeOptional();
+
   const commands = useMemo<CommandItem[]>(() => {
     const items: CommandItem[] = [];
     const go = (id: string, label: string, description: string, icon: string, to: string, shortcut?: string) =>
       items.push({ id, label, description, icon, shortcut, category: 'command', action: () => navigate(to) });
+    const doIt = (id: string, label: string, description: string, icon: string, action: () => void) =>
+      items.push({ id, label, description, icon, category: 'command', action });
 
     // ① 导航（6）——键位徽章不写在这里：由 `appKeymap` 注册表派生（BLOCK-200 P1，
     // 此前此处硬编码 '⌘N' 而全仓没有 Cmd+N 处理器，徽章是装饰）。
@@ -100,28 +107,35 @@ export function useAppCommands({ enabled, navigate, currentProjectId: _currentPr
       });
     }
 
-    // ⑤ 设置深链（节直达，?section= 由设置页消费）
-    const deepLinks: Array<[string, string]> = [
-      ['models', '模型接口'],
-      ['usage', '用量与资源'],
-      ['decisions', '决策原语'],
-      ['diagnostics', '运行时与诊断'],
-      ['maintenance', '隐私与维护'],
-    ];
-    for (const [sectionId, label] of deepLinks) {
-      const meta = SETTINGS_SECTIONS.find((item) => item.id === sectionId);
+    // ⑤ 扩展中心货架 tab（此前只能进默认 tab，插件/MCP 两架在面板里不可达）
+    go('nav-extensions-plugins', '扩展 · 领域插件', '领域插件货架', 'zap', '/extensions?tab=domain-plugins');
+    go('nav-extensions-mcp', '扩展 · MCP 服务', 'MCP 服务货架', 'zap', '/extensions?tab=mcp');
+
+    // ⑥ 设置深链（BLOCK-213：改为**覆盖全部节**——此前只写死 5 个，keymap/reasoning/
+    // experimental 等节在面板里根本找不到，正是"发现率"缺口）
+    for (const section of SETTINGS_SECTIONS) {
       items.push({
-        id: `settings:${sectionId}`,
-        label: `设置 · ${label}`,
-        description: meta?.description || '打开设置页',
+        id: `settings:${section.id}`,
+        label: `设置 · ${section.label}`,
+        description: section.description || '打开设置页',
         icon: 'settings',
         category: 'command',
-        action: () => navigate(`/settings?section=${sectionId}`),
+        action: () => navigate(`/settings?section=${section.id}`),
       });
     }
 
+    // ⑦ 外观与动效（BLOCK-208/W7c 的能力要靠面板才"被发现"；无 Provider 时跳过）
+    if (theme) {
+      doIt('view-theme-system', '外观 · 跟随系统', '明暗跟随系统', 'settings', () => theme.setPreference('system'));
+      doIt('view-theme-light', '外观 · 日间', '固定使用日间模式', 'settings', () => theme.setPreference('light'));
+      doIt('view-theme-dark', '外观 · 夜间', '固定使用夜间模式', 'settings', () => theme.setPreference('dark'));
+      doIt('view-motion-system', '动效 · 跟随系统', '动效跟随系统「减弱动态效果」', 'settings', () => theme.setMotion('system'));
+      doIt('view-motion-full', '动效 · 完整', '显式要求完整动效（可覆盖系统设置）', 'settings', () => theme.setMotion('full'));
+      doIt('view-motion-reduced', '动效 · 精简', '关闭本应用界面的过渡与动画', 'settings', () => theme.setMotion('reduced'));
+    }
+
     return items;
-  }, [navigate, projects, skills]);
+  }, [navigate, projects, skills, theme]);
 
   const selectConversation = (conversation: ConversationSummary) => {
     if (!conversation.project_id) return; // 无归属会话不跳转（诚实降级为无动作）

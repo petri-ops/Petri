@@ -242,7 +242,7 @@ function SkillShelfPane({ shelfId }: { shelfId: 'domain-skills' | 'general-skill
           <div className={skillStyles.emptyIcon}>
             <Icon name="search" size={24} />
           </div>
-          <h3 className={skillStyles.emptyTitle}>暂无匹配的{shelfLabel}</h3>
+          <h3 className={skillStyles.emptyTitle} data-testid="empty-guide">暂无匹配的{shelfLabel}</h3>
           <p className={skillStyles.emptyText}>
             {shelfId === 'general-skills'
               ? '还没有通用技能——点上方「导入本地技能目录」接入第一个（含 skill.json 的目录）'

@@ -381,7 +381,10 @@ export default function Welcome(): React.ReactElement {
           历史后退（Alt+←/鼠标侧键）仍可用，选项目/打开文件夹即离开本页。 */}
       <div className={styles.welcomeInner}>
         <h1 className={styles.greeting}>{greeting()}</h1>
-        <p className={styles.welcomeSub}>选择项目，直接开始你的分析任务。</p>
+        {/* BLOCK-213 P3 — 首用引导：一句话说清"这里能做什么"+两个入口（选择项目 / ⌘K 命令面板） */}
+        <p className={styles.welcomeSub} data-testid="empty-guide">
+          选择项目后直接提问即可开始分析；也可以按 ⌘K 打开命令面板，搜索项目、技能与设置。
+        </p>
 
         <div className={styles.composerCard}>
           <div className={styles.composerTopRow}>

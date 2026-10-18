@@ -5067,3 +5067,10 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **诚实边界**：缺插件**不标 installable**（插件没有自动安装配方），只标 `missing_deps`；插件包本身是否补齐仍需 C-33 裁决。
 - **验证（代码）**：`block211-skill-deps-plugins` **4/4**（含"不传 hasPlugin 保持既有语义"——不给既有调用方制造假红）+ `tsc` 0。
 - **实机腿（2026-10-18 已补）**：重启 dev 栈（后端 preflight 才吃到新代码）后，`/api/skills/preflight` 对三族返回 `status=missing_deps` + `missingPlugins`（`acceptance/ui-526-527/preflight-after.json`）；9223 测试实例货架截图 `acceptance/ui-526-527/ui527-skills-shelf.png` 显示三张卡片均为「**缺依赖**」。**对照**：同栈重启前截图显示「依赖可用」——同一页面、同一数据，仅后端代码新旧之差，`dev-verify` flow `ui526-527-badges` **2/2** 通过（证据 `acceptance/ui-526-527/ui526-527-badges-live.json`）。
+
+## UI-528: 命令面板发现率扩展 + 空态引导（2026-10-18 verified（dev Electron 边界内），BLOCK-213）
+
+- **变化面**：命令面板静态命令 **24** 条——设置深链从写死 5 节改为**覆盖全部 10 节**（keymap/reasoning/experimental 等此前不可达）、新增扩展中心两个货架 tab（领域插件 / MCP 服务）、新增**外观 3 条 + 动效 3 条**（`view-theme-*`/`view-motion-*`，让 W7c 的新能力可被搜索到）；`useThemeOptional()` 新增（无 Provider 时返回 null，不抛）——本钩子被单测脱离 Provider 直接调用。
+- **空态引导**：欢迎页与扩展空货架各加 `data-testid="empty-guide"` + 一句"这里能做什么"（欢迎页文案点名 ⌘K）；knowledge / project-workspace **无空态**，如实记 N/A 而不是硬塞文案凑指标。
+- **实机腿**：9223 无窗口测试实例（`show:false`）快照 `acceptance/block-213/palette.png`（面板开、⌘ 徽章可见、技能段可见）；DOM 断言 `设置 · 快捷键` / `动效 · 精简` / `外观 · 夜间` 均命中；欢迎页 `empty-guide` 文案读回一致。
+- **验证**：`block213-discoverability` **5/5**（四数字棘轮 / id 唯一 / 设置节全覆盖 / 外观动效命令存在 / 空态 N/A 有据）+ welcome/extensions 前端 **19/19**。

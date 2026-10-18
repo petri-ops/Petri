@@ -4159,6 +4159,22 @@
         "test/block93-role-prompt.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block213-discoverability",
+      "note": "BLOCK-213：命令面板覆盖全部设置节 + 扩展 tab + 外观/动效命令；useThemeOptional；欢迎/扩展空态引导；scripts/block213-discoverability.mjs 四数字基线 + 棘轮测试。",
+      "patterns": [
+        "frontend/src/components/copilot/useAppCommands.ts",
+        "frontend/src/themes/ThemeProvider.tsx",
+        "frontend/src/pages/welcome.tsx",
+        "frontend/src/pages/extensions/index.tsx",
+        "scripts/block213-discoverability.mjs",
+        "test/block213-*.test.mjs"
+      ],
+      "tests": [
+        "test/block213-discoverability.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }
