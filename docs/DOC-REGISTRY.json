@@ -7169,8 +7169,8 @@
       "capability": "feature-discoverability",
       "path": "docs/block-213-feature-discoverability-plan.md",
       "kind": "work-package",
-      "status": "active",
-      "phase": "P0-LAUNCH",
+      "status": "completed",
+      "phase": "P5-CLOSED",
       "canonical": true,
       "truthDomain": "block-213-feature-discoverability-plan",
       "entrypoint": "docs/README.md",
@@ -7183,7 +7183,7 @@
         "empty-state",
         "block-213"
       ],
-      "notes": "2026-10-18 立项发令 active（用户「开」）：只补「发现入口」不造能力——命令面板覆盖率/快捷键标注覆盖/四页空态引导，P0 先量四个数字再补；覆盖率写成棘轮（单调不回退）；未接入动作列清单不偷删。"
+      "notes": "2026-10-18 立项发令 active（用户「开」）：只补「发现入口」不造能力——命令面板覆盖率/快捷键标注覆盖/四页空态引导，P0 先量四个数字再补；覆盖率写成棘轮（单调不回退）；未接入动作列清单不偷删。 | 收口 2026-10-18：P0 实测四数字（命令面板 24 / 设置节 10·10 / 快捷键同名 5·10（未命中 5 条为 workspace 局部键位，面板不该接管）/ 空态 2·2 另两页 N/A 有据）；设置深链改全覆盖 + 扩展两 tab + 外观动效 6 条；useThemeOptional；欢迎/扩展空态引导；block213 5/5 棘轮 + 前端 19/19 + 9223 快照；closeout 十三门 PASS。未做=语义搜索/遥测埋点（reopen）。"
     }
   ],
   "lastUpdated": "2026-10-17",

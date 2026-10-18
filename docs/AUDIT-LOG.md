@@ -1,4 +1,5 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-10-18（**BLOCK-213 completed（十三门 PASS）：功能发现率**）：四数字实测=面板 24 / 设置节 10·10 / 快捷键同名 5·10（局部键位不该进面板）/ 空态 2·2（两页 N/A 有据）；落地=设置深链全覆盖 + 扩展两 tab + 外观动效 6 条 + useThemeOptional + 两页空态引导。证据=5/5 棘轮 + 19/19 + 9223 快照。未做=语义搜索/遥测埋点（G1+）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**测试实例改无窗口 + BLOCK-213 立项**）：测试实例此前「离屏」被 macOS 夹回可见区（实测 x=221）→ 改 `show:false` + `backgroundThrottling:false`，实测 screenX=-1380 / document.hidden=false / 截图完整，**屏幕不再出现 TEST 窗**。同轮立项 **BLOCK-213 功能发现率**（命令面板/快捷键标注/空态引导，只补入口不造能力）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**UI-527 实机腿补齐 → verified（dev Electron 边界内）**）：重启 dev 栈后 `/api/skills/preflight` 三族返回 `missing_deps`+`missingPlugins`，9223 货架截图三卡「缺依赖」（对照重启前「依赖可用」）；flow `ui526-527-badges` 2/2。UI-526 仍 in_progress（测试实例无产物，看不到真值徽标）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-212 reopen 设计落账 = C-34**）：Claude 侧要吃到缓存须"够大且稳"——会话级固定工具集 + 断点打最后一个 tool + ≥1024 才打点；验收需真实调用（连续 ≥3 轮命中增长），**先决条件=G1+ 预算**，风险=固定工具集掉路由精度（须 evals 先证）。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -17,6 +18,7 @@
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
+| ✅ | 2026-10-18 | **BLOCK-213 completed**：发现率四数字实测并立棘轮（24 / 10·10 / 5·10 / 2·2）；面板接外观动效与全部设置节；两页空态引导 | BLOCK-213 / P5-CLOSED |
 | 🔵 | 2026-10-18 | **BLOCK-213 立项**（功能发现率）+ 测试实例改无窗口（show:false，实测 screenX=-1380） | BLOCK-213 / P0-LAUNCH |
 | 🟡 | 2026-10-18 | **C-34（BLOCK-212 reopen）**：Claude 缓存断点方案成文——会话级固定工具集 + tools 末项断点 + ≥1024 才打点；验收需真实调用、风险=路由精度，**先决=G1+ 预算** | BLOCK-212 / reopen |
 | ✅ | 2026-10-18 | **BLOCK-212 completed**：动态上下文搬尾部（前缀逐轮可复用）+ Anthropic cache_control 断点 + 基线增静态前缀 token；局限=215 tokens<1024 ⇒ Claude 空操作，真实命中率需 G1+ | BLOCK-212 / P4-CLOSED |

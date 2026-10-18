@@ -10,7 +10,7 @@ acceptance:
   - P5 收尾：closeout 十三门；UI-### 台账；`docs:check`。
   - 完成语义：**覆盖率是量出来的**，不是"我觉得加够了"；未接的动作如实列成"不在面板"的清单，不偷偷删。
 reopen: 命令面板语义搜索（按意图匹配而非标题）；发现率埋点（需要遥测，G1+ 才有）；移动端/窄窗导航改版。
-status: active
+status: completed
 ---
 
 # BLOCK-213 · 功能发现率
