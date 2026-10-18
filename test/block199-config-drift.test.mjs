@@ -56,6 +56,7 @@ const UI_CARRIERS = {
 const NO_UI_FAMILIES = {
   'mcp-tool-policy': 'W5 v1 只做策略面与执行接线（API 写面 + 投影/超时/合同生效）；逐工具表格 UI 属后续设置面批次',
   'memory-policy': 'W6 v1 只做策略面与生效接线（API 写面 + 压缩/检索/生命周期生效）；设置页属性后续批次',
+  'subagent-profile': 'W7a v1 只做声明式派发缺省（API 写面 + spawn 解析）；profile 表格 UI 属后续批次',
 };
 
 /** 族 → 后端写路由（必须能把拒绝翻译成 4xx，而不是冒 500 或静默）。 */
@@ -73,6 +74,7 @@ const WRITE_ROUTES = {
   'mcp-servers': 'core/petri-server/routes/mcp-client.js',
   'mcp-tool-policy': 'core/petri-server/routes/mcp-client.js',
   'memory-policy': 'core/petri-server/routes/ai-memory.js',
+  'subagent-profile': 'core/petri-server/routes/subagent-profiles.js',
 };
 
 /**

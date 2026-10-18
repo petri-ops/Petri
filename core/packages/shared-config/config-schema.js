@@ -137,6 +137,13 @@ const CONFIG_FAMILIES = Object.freeze({
     precedence: ['file', 'default'],
     envTruth: null,
   },
+  // —— BLOCK-206（runlist W7a）：子智能体 profile（派发缺省值的声明）——
+  // **不是权限系统**：不动 policy/审批/四档；profile 的并发只能"收紧" runtime 族的上限。
+  'subagent-profile': {
+    store: 'file:subagent-profiles.json#profiles',
+    precedence: ['file', 'default'],
+    envTruth: null,
+  },
 });
 
 /**
@@ -516,6 +523,36 @@ const CONFIG_KEYS = Object.freeze([
     key: 'memoryPolicy.decayBatchLimit', family: 'memory-policy', path: 'decayBatchLimit',
     type: 'number', domain: { min: 1, max: 2000, integer: 'floor' }, envKeys: [], aliases: [],
     mutable: true, ui: 'none',
+  },
+  // —— 子智能体 profile（BLOCK-206 / W7a）——
+  // `concurrency` 的 domain 必须与 `runtime.spawnConcurrency` **逐字相等**（block206 测对账）：
+  // profile 只提供"更严的缺省"，不许出现第二套并发上限数字。
+  {
+    key: 'subagentProfile.default', family: 'subagent-profile', path: 'default',
+    type: 'string', envKeys: [], aliases: [], mutable: true, ui: 'none',
+  },
+  {
+    key: 'subagentProfile.<item>.name', family: 'subagent-profile', path: '<item>.name',
+    type: 'string', domain: { pattern: '^[a-z0-9][a-z0-9-]*$' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    key: 'subagentProfile.<item>.role', family: 'subagent-profile', path: '<item>.role',
+    type: 'string', domain: { pattern: '\\S' }, envKeys: [], aliases: [], mutable: true, ui: 'none',
+  },
+  {
+    key: 'subagentProfile.<item>.model', family: 'subagent-profile', path: '<item>.model',
+    type: 'string', domain: { pattern: '\\S' }, envKeys: [], aliases: [], mutable: true, ui: 'none',
+  },
+  {
+    key: 'subagentProfile.<item>.concurrency', family: 'subagent-profile', path: '<item>.concurrency',
+    type: 'number', domain: { min: 1, max: 8, integer: 'floor' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    // 只收 inherit：汇报门是全局接点（report-guard.js），逐子任务覆盖会改其契约 ⇒ 属 reopen
+    key: 'subagentProfile.<item>.reportGuard', family: 'subagent-profile', path: '<item>.reportGuard',
+    type: 'string', domain: { oneOf: ['inherit'] }, envKeys: [], aliases: [], mutable: true, ui: 'none',
   },
   {
     // 只登记不可写：模型 id 与向量维度（EMBEDDING_DIM=1024）绑定，单方面换模型会让已存向量全部失效。

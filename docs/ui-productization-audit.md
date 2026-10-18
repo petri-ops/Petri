@@ -5039,3 +5039,10 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **P6 源绑定**：`test/g0-rs-p6-product-acceptance.test.mjs` 要求 worktree==HEAD；本包改动在**提交后 13/13 绿**（提交前会以 `p6_current_source_tree_not_exact` 报脏树，属该测试设计，不是需重打）。邻域 `test/loop-fixtures.test.mjs` 另有外部 `petri-pack-bio` 缺失的环境红（与 UI-523 无关，AUDIT-LOG 🟡 已登记）。
 - **实机腿**：`npm run verify -- ui523-run-stats` **10/10**（9223 离屏实例 + `scripts/ui523-ui-live.mjs` 一键 mock 化与还原：空态 `— tok`/`0%`、环唯一、运行中 `1 轮 · 0 步 · N tok/s`、会话 `1K tok · 缓存命中 83%`、上下文 18%、结束后保留最近一次读数、清理还原）；证据 `acceptance/ui-523/ui523-run-stats-live.json` + `ui523-run-stats-running.png` / `ui523-run-stats-totals.png`。
 
+
+## UI-524: 斜杠命令判定层抽离（2026-10-18 in_progress，BLOCK-206 / C-29）
+
+- **变化面**：`SimpleChat.tsx` 中 `executeSlashCommand` 的"命令 → 动作类别"判定抽成 `SimpleChat/slashExecute.ts:classifySlashCommand`（纯函数），组件 `switch` 改为按动作类别执行；UI 行为与文案零变化（仍只支持 new/clear/model/export/compact/help + `skill:`/`template:` 模板注入）。
+- **为什么**：判定混在 1664 行组件里 ⇒ 离线不可断言，竞争力清单 D15「斜杠即执行」只能记"无锚"。抽离后 `slashExecute.test.ts` 3/3 成为该点的**机械锚**（已挂进 `evals/anchors/competitiveness-8d.json` 并提升棘轮基线）。
+- **诚实边界**：**无实机腿**（本改动是纯判定抽离，零可见行为变化）→ 记 `in_progress`；结构化 chip 注入通道仍属 `slashSources` 里登记的 v2，不在本包。
+- **验证**：`slashExecute.test.ts` 3/3（五动作 + 模板族 + 未知命令收起）；`tsc --noEmit` 0。

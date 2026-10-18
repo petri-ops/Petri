@@ -45,6 +45,7 @@ import {
 // BLOCK-160 W2 P3（KNW-3）— 斜杠菜单动态数据源（产品 Skills + run_tool 模板；
 // 选中注入执行意图文本模板，v1 不跳页不自动执行）
 import { fetchSlashEntries, filterSlashEntries, slashIntentTemplate, type SlashEntry } from './SimpleChat/slashSources';
+import { classifySlashCommand } from './SimpleChat/slashExecute';
 import {
   useDomainExamplePrompts,
   ExamplePrompts,
@@ -1320,18 +1321,19 @@ export function SimpleChat({
 
   // Slash command handler
   const executeSlashCommand = useCallback((commandId: string) => {
-    switch (commandId) {
-      case 'new':
+    // BLOCK-206 / C-29 — 判定抽到 slashExecute.ts（纯函数、可离线断言）；这里只执行副作用
+    switch (classifySlashCommand(commandId)) {
+      case 'new-conversation':
         void newConversation();
         break;
-      case 'clear':
+      case 'clear-conversation':
         setMessages([]);
         clearConversationDraft(projectId, conversationId);
         break;
-      case 'model':
+      case 'toggle-model-menu':
         setModelMenuOpen((current) => current ? null : 'model');
         break;
-      case 'export': {
+      case 'export-markdown': {
         const markdown = displayMessages
           .map((m) => `### ${m.role === 'user' ? '用户' : 'AI'}\n\n${m.content}\n`)
           .join('\n---\n\n');
@@ -1344,7 +1346,7 @@ export function SimpleChat({
         URL.revokeObjectURL(url);
         break;
       }
-      case 'compact': {
+      case 'compact-context': {
         // BLOCK-172 CP-7 — /compact 手动压缩（后端 BLOCK-95 B2 端点；同步等摘要）。
         if (!conversationId) {
           setSteerNotice('压缩上下文：当前无会话');
@@ -1376,7 +1378,7 @@ export function SimpleChat({
         })();
         break;
       }
-      case 'help':
+      case 'dismiss-slash':
         setSlashQuery('');
         break;
     }

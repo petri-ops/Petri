@@ -486,9 +486,15 @@
         },
         {
           "id": "5-slash-execute",
-          "claim": "D15 斜杠即执行：**部分实现**——UI 动作族（new/clear/model/export/compact）在 `SimpleChat.tsx:1306-1365` 确即执行，skill/template 条目仅注入文本模板（`slashSources.ts:8-9` 原文「结构化 chip 注入通道留 v2」）；离线不可锚（要真锚须把 executeSlashCommand 从 1664 行组件抽成可测单元=产品改动），**保持无锚并转候选 C-29**",
+          "claim": "D15 斜杠即执行：**已实现（判定层可离线锚定）**——UI 动作族（new/clear/model/export/compact）与 skill:/template: 模板注入族的判定抽成 `SimpleChat/slashExecute.ts:classifySlashCommand`（纯函数），组件只执行副作用；结构化 chip 注入通道仍是 slashSources 登记的 v2（不在本包）",
           "derivesFrom": "§2 D15",
-          "anchors": []
+          "anchors": [
+            {
+              "tier": "unit",
+              "path": "frontend/src/components/copilot/SimpleChat/slashExecute.test.ts",
+              "cmd": "cd frontend && npm test -- --run src/components/copilot/SimpleChat/slashExecute.test.ts"
+            }
+          ]
         },
         {
           "id": "5-real-chromium-e2e",

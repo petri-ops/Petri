@@ -4026,6 +4026,31 @@
         "test/ui523-usage-event.test.mjs"
       ],
       "classifiesScripts": true
+    },
+    {
+      "id": "block206-subagent-profile",
+      "note": "BLOCK-206（W7a）：schema 族 subagent-profile（default + name/role/model/concurrency/reportGuard，concurrency 域与 runtime 族逐字对账且只能 min 收紧）、helpers/subagent-profile 落点、spawn_agent 可选 profile 解析、routes/subagent-profiles（400）、transfer/doctor/NO_UI 门；C-29 把斜杠判定抽成 SimpleChat/slashExecute.ts 并给 D15 挂 unit 锚。",
+      "patterns": [
+        "core/packages/shared-config/config-schema.js",
+        "core/petri-server/helpers/subagent-profile.js",
+        "core/petri-server/agent-tools/spawn-agent-tools.js",
+        "core/petri-server/routes/subagent-profiles.js",
+        "core/petri-server/routes/index.js",
+        "core/petri-server/helpers/config-transfer.js",
+        "frontend/src/components/copilot/SimpleChat/slashExecute.ts",
+        "frontend/src/components/copilot/SimpleChat/slashExecute.test.ts",
+        "test/block206-*.test.mjs"
+      ],
+      "tests": [
+        "test/block206-subagent-profile.test.mjs",
+        "test/block199-config-drift.test.mjs",
+        "test/block201-settings-baseline.test.mjs",
+        "test/block201-config-transfer.test.mjs",
+        "frontend/src/components/copilot/SimpleChat/slashExecute.test.ts"
+      ],
+      "classifiesFrontend": true,
+      "frontendRelated": true,
+      "classifiesScripts": false
     }
   ]
 }

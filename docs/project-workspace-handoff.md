@@ -6,7 +6,7 @@
 
 最后更新：2026-10-17（**BLOCK-203-STAGE-3-B1B-CONFIG-LANDING-CONSOLIDATION 立项发令 active（runlist W4 拆片：W4a 先做）**）
 
-**恢复要点（换会话必读·本段取代下方 BLOCK-205 段）**：**无 active 工作包**；**下一包=runlist W7a**（BLOCK-206：子智能体 profile 声明式配置面 + C-29 斜杠即执行抽单元与结构化 chip 同波并入）。**刚收口=BLOCK-205（W6）**：压缩/记忆九参数进 `memory-policy` 族（注册表 14 族/75 键），默认值逐字等于原常量；`effectiveSnapshot()` 给出生效值+来源；嵌入模型只读；写面 `GET/PUT /api/ai/memory-policy`。**评测基线未动**：`context_snapshot` 7/7 指纹未变 + smoke 回归 0（这是"没把测量当装饰"的证据，别省略）。**未做**：记忆/压缩设置页（W6b）、提取模型真正可换（需维度迁移+重嵌入）。
+**恢复要点（换会话必读·本段取代下方 BLOCK-206 段）**：**当前 active 工作包=BLOCK-206（W7a）**，plan=`docs/block-206-subagent-profile-slash-plan.md`（registry `active` / `P0-LAUNCH`）。**下一步第一个动作=P1+P2**：schema 加 `subagent-profile` 族（default + `<item>.{name,role,model,concurrency,reportGuard}`，concurrency domain 必须与 `runtime.spawnConcurrency` 逐字相等）+ `helpers/subagent-profile.js`（走 `data-paths`）。**红线**：profile 不是第二套权限系统（不动 policy/审批/四档）；未传 profile = 零行为变化；未知 profile 与未知字段 fail-closed；`reportGuard` 只收 `inherit`（逐子任务覆盖要改 report-guard 契约=reopen）。第二腿 C-29 抽 `executeSlashCommand` 后要给 `evals/anchors/competitiveness-8d.json` 的 `5-slash-execute` 挂 unit 锚并 `--update` 棘轮留痕。
 
 最后更新：2026-10-17（**BLOCK-202-STAGE-A-QUICKWINS-3 整包 completed（阶段 A 速赢 III=runlist W3；当日立项当日收口·9223 探针 15/15 allPass）**）
 

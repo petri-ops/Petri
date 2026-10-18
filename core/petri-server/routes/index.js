@@ -70,6 +70,8 @@ module.exports = async function registerRoutes(app) {
       require('./mcp-client').registerMcpClientRoutes(app);
       void require('../mcp/client-manager').autoConnectConfigured().catch(() => {});
     }],
+    // BLOCK-206（W7a）：子智能体 profile 读写面（声明式派发缺省）
+    ['Subagent profiles', () => require('./subagent-profiles').registerSubagentProfileRoutes(app)],
   ];
 
   for (const [name, fn] of routes) {

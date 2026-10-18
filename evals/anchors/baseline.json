@@ -1,6 +1,6 @@
 {
   "schema": "petri-competitiveness-anchor-baseline/v1",
-  "updatedAt": "2026-10-17T05:09:42.711Z",
+  "updatedAt": "2026-10-18T00:56:56.125Z",
   "tiers": "all",
   "points": [
     {
@@ -76,7 +76,7 @@
     },
     {
       "id": "1.1-context-contract",
-      "state": "anchored-green",
+      "state": "anchored-red",
       "anchors": [
         {
           "tier": "unit",
@@ -86,7 +86,7 @@
         {
           "tier": "evals",
           "path": "evals/snapshots/golden.json",
-          "status": "pass"
+          "status": "fail"
         }
       ]
     },
@@ -146,12 +146,12 @@
     },
     {
       "id": "2.2-retrieval-live",
-      "state": "anchored-green",
+      "state": "unanchored",
       "anchors": [
         {
           "tier": "live",
           "path": ".agents/skills/petri-dev-infra/dev-verify/flows/block99-knowledge-multispace.cjs",
-          "status": "pass"
+          "status": "env"
         }
       ]
     },
@@ -227,12 +227,12 @@
     },
     {
       "id": "3.3-evals-orchestration",
-      "state": "anchored-green",
+      "state": "anchored-red",
       "anchors": [
         {
           "tier": "evals",
           "path": "evals/suites/smoke/orchestration-spawn.json",
-          "status": "pass"
+          "status": "fail"
         }
       ]
     },
@@ -282,7 +282,7 @@
     },
     {
       "id": "4.4-ack-consume",
-      "state": "anchored-green",
+      "state": "anchored-red",
       "anchors": [
         {
           "tier": "unit",
@@ -292,7 +292,7 @@
         {
           "tier": "evals",
           "path": "evals/suites/smoke/approval-chain.json",
-          "status": "pass"
+          "status": "fail"
         }
       ]
     },
@@ -397,17 +397,23 @@
     },
     {
       "id": "5.5-slash-execute",
-      "state": "unanchored",
-      "anchors": []
+      "state": "anchored-green",
+      "anchors": [
+        {
+          "tier": "unit",
+          "path": "frontend/src/components/copilot/SimpleChat/slashExecute.test.ts",
+          "status": "pass"
+        }
+      ]
     },
     {
       "id": "5.5-real-chromium-e2e",
-      "state": "anchored-green",
+      "state": "unanchored",
       "anchors": [
         {
           "tier": "live",
           "path": ".agents/skills/petri-dev-infra/dev-verify/flows/ui341-welcome-chat.cjs",
-          "status": "pass"
+          "status": "env"
         }
       ]
     },
@@ -434,7 +440,7 @@
     },
     {
       "id": "6.6-path-selfheal",
-      "state": "anchored-green",
+      "state": "anchored-red",
       "anchors": [
         {
           "tier": "unit",
@@ -444,7 +450,7 @@
         {
           "tier": "evals",
           "path": "evals/suites/smoke/genui-fragment-path.json",
-          "status": "pass"
+          "status": "fail"
         }
       ]
     },
@@ -527,12 +533,12 @@
     },
     {
       "id": "7.7-first-success-loop",
-      "state": "anchored-green",
+      "state": "anchored-red",
       "anchors": [
         {
           "tier": "evals",
           "path": "evals/suites/golden/first-success.json",
-          "status": "pass"
+          "status": "fail"
         },
         {
           "tier": "unit",

@@ -19,6 +19,7 @@
 
 const agentTaskStore = require('../agent-task-store');
 const agentRoles = require('./agent-roles');
+const subagentProfiles = require('../helpers/subagent-profile');
 const {
   getAiSettings,
   getChatModelPreset,
@@ -37,6 +38,8 @@ const WAIT_DEFAULT_TIMEOUT_MS = 300000;
 // BLOCK-109 P2 — 单父任务同时活跃子智能体上限（软：超出即软指引，非硬拒）。
 // BLOCK-173 CP-8 — 上限用户可配：env PETRI_SPAWN_CONCURRENCY_LIMIT（1-8 钳制，
 // 缺省 3=既有保守值）。解析函数化（测试契约直测）；语义仍是软指引非硬拒。
+const effectiveSpawnConcurrency = subagentProfiles.effectiveSpawnConcurrency;
+
 function resolveSpawnConcurrencyLimit() {
   // BLOCK-202 W3 — 先读设置面策略（文件），env PETRI_SPAWN_CONCURRENCY_LIMIT 仍优先；
   // 两者都没有时回落历史默认 3。钳制 1-8 与语义（软指引非硬拒）不变。
@@ -255,12 +258,23 @@ async function spawn_agent(args, ctx) {
     return fail('parent_not_running', '父任务已结束，不能再派生子 agent。');
   }
 
+  // BLOCK-206（W7a）— 声明式 profile：派发缺省值的来源（不是权限系统）。
+  // 放在并发检查之前，因为 profile 的 concurrency 只能**收紧**本次派发的软上限。
+  let profile = null;
+  if (args && args.profile !== undefined && args.profile !== null && args.profile !== '') {
+    const resolvedProfile = subagentProfiles.resolveProfile(args.profile);
+    if (!resolvedProfile.ok) return fail('invalid_arguments', resolvedProfile.message);
+    profile = resolvedProfile.profile;
+  }
+
   // BLOCK-109 P2 — 派发并行度软上限：活跃子任务 ≥ 上限时软指引而非硬拒。
   // 并发子 agent 过多 = 并发模型连接过多 = 上游瞬断（ECONNRESET）概率上升
   // （2026-09-21 用户实测 4 并行派发后主/子双双 ECONNRESET）；同时保持模型
   // 控制权——wait_agent 腾位后可再派。
   const runningChildren = agentTaskStore.getRunningChildAgentTasks(parentTaskId) || [];
-  const spawnConcurrencyLimit = resolveSpawnConcurrencyLimit();
+  const runtimeConcurrencyLimit = resolveSpawnConcurrencyLimit();
+  // profile 只能收紧（min），永不放宽——安全方向单向（纯函数，契约测直打）
+  const spawnConcurrencyLimit = effectiveSpawnConcurrency(runtimeConcurrencyLimit, profile);
   if (runningChildren.length >= spawnConcurrencyLimit) {
     const activeList = runningChildren
       .map((t) => String(t.taskId || '').slice(0, 8))
@@ -279,12 +293,15 @@ async function spawn_agent(args, ctx) {
   const context = { ...parentContext };
   if (ctx.accessMode && !context.accessMode) context.accessMode = ctx.accessMode;
 
-  const model = resolveSpawnModelSettings({ explicitModel: args && args.model, parentParams });
+  const model = resolveSpawnModelSettings({
+    explicitModel: (args && args.model) || (profile && profile.model),
+    parentParams,
+  });
   if (model.error) return fail('invalid_arguments', model.error);
 
   // BLOCK-93 P1 — 角色专职化：role 可选参数（注册表校验，未知 fail-closed；
   // 未传＝通用缺省，零行为变化）。
-  const roleCheck = agentRoles.resolveRoleOrError(args && args.role);
+  const roleCheck = agentRoles.resolveRoleOrError((args && args.role) || (profile && profile.role));
   if (!roleCheck.ok) return roleCheck.fail;
 
   // 加映 3 — goals 可选声明：落 params（汇报门逐目标核对）+ 子任务书判据段
@@ -305,6 +322,7 @@ async function spawn_agent(args, ctx) {
     userContent,
     model,
     role: roleCheck.role,
+    profile: profile ? profile.name : null,
     goals: goalCheck.goals,
     todoRefs: refsCheck.refs,
     spawnSource: 'tool:spawn_agent',
