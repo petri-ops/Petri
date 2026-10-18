@@ -30,3 +30,7 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-18T02:16:46.925Z -->
 最后更新：2026-10-18（**🟡 context_snapshot 漂移已归因并修复：不是 prompt 文案，是路径分隔符**）：`normalizeContextString` 把 tmp 根换成 `<TMP>` 后保留了 OS 分隔符 ⇒ Windows 录的基线（`<TMP>\projects\…`）在 macOS 上恒红。处置=归一化统一 `<TMP>/`（新增"Windows 与 POSIX 同指纹"单测），显式重基准到 `dfc9be7b986a1c17` 并复跑 `✔ 一致`。**两处口径更正**：W6 的"指纹未变"不成立（用单测代替 fp 对比）；W7a 初判引用的"system prompt 文案变更"只是 harness 启发式提示语，非真因。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-18T02:36:17.650Z -->
+最后更新：2026-10-18（**BLOCK-207（W7b）completed（closeout 十三门 PASS）**）：项目信任级 inherit/trusted/untrusted（16 族/84 键），`applyTrustCeiling` 只能收紧（untrusted 下写/执行→read，read/plan 原样），默认 inherit 零行为变化；接 agent-runner accessMode 构造点、信任层故障 fail-open；变更/导入/重置均落 `trust-audit.jsonl`。plan=docs/block-207-project-trust-policy-plan.md。无 active 工作包，下一包=W7c。G0 开发期常态 · 不外推 packaged/Provider/GA。
+最后更新：2026-10-18（**BLOCK-207-PROJECT-TRUST-POLICY 立项发令 active（runlist W7b）**）：项目信任级 inherit/trusted/untrusted，在 accessMode 构造点做只能收紧的天花板（untrusted ⇒ 禁止写/执行）；信任变更写追加式审计；默认 inherit=零行为变化。plan=docs/block-207-project-trust-policy-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
