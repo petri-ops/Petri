@@ -544,9 +544,31 @@ function buildSystemPrompt(context, runtimeIdentity = {}) {
   return buildSystemPromptSections(context, runtimeIdentity).prompt;
 }
 
+/**
+ * BLOCK-212 — 把 system prompt 拆成**静态前缀**与**动态上下文**两段。
+ *
+ * 为什么需要：所有 Provider 的 prompt cache 都是**前缀缓存**。原先把项目数据集/分析历史/
+ * Harness 摘要等每轮可能变的段放在 system（消息链第一条）⇒ 一变就把**整段历史**的复用
+ * 作废。拆开后传输层把静态前缀留在 system、动态段挪到消息末尾，历史保持 append-only 的
+ * 干净前缀，逐轮可复用。
+ *
+ * 静态段包含 `baseRole + 运行时身份 + principles`（身份在单次运行内恒定）；
+ * 动态段=其余全部（页面提示、项目/结果摘要、拒绝记录、文件引用提示…）。
+ */
+function buildSystemPromptParts(context, runtimeIdentity = {}) {
+  const { prompt, sections } = buildSystemPromptSections(context, runtimeIdentity);
+  const baseChars = sections.reduce((n, sec) => (sec.name === 'base' ? sec.chars : n), 0);
+  return {
+    staticPrefix: prompt.slice(0, baseChars),
+    dynamicContext: prompt.slice(baseChars),
+    sections,
+  };
+}
+
 module.exports = {
   buildSystemPrompt,
   buildSystemPromptSections,
+  buildSystemPromptParts,
   SECTION_CHAR_BUDGETS,
   localizeToolResult,
   renderFileReferenceHints,

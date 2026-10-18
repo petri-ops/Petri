@@ -11,6 +11,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const Database = require(path.join(__dirname, '..', 'core', 'petri-server', 'node_modules', 'better-sqlite3'));
+// BLOCK-212 — 静态前缀规模是"可复用上限"的直接指标：它必须与每轮 context 无关。
+const systemPrompt = require(path.join(__dirname, '..', 'core', 'petri-server', 'helpers', 'system-prompt.js'));
 
 const DB_FILE = process.env.PETRI_DB_PATH || path.join(__dirname, '..', '.petri-dev-user-data', 'data', 'petri.db');
 const EVIDENCE_DIR = path.join(__dirname, '..', 'acceptance', 'block-95');
@@ -41,11 +43,33 @@ const brokenLinkCandidates = groups.filter(
   (g) => g.cacheReadTokens === 0 && CACHE_CAPABLE.test(g.model || '') && /agent_iter|chat/.test(g.kind)
 );
 
+// BLOCK-212 — 静态前缀 vs 动态段体量（无 context 时的静态头才是"永远可复用"的部分）
+const prefixProbe = (() => {
+  try {
+    const parts = systemPrompt.buildSystemPromptParts(null, {});
+    return {
+      staticPrefixChars: parts.staticPrefix.length,
+      staticPrefixTokensApprox: Math.ceil(parts.staticPrefix.length / 3),
+      note: '静态前缀=baseRole+运行时身份+principles；动态段（项目/结果/Harness 摘要）已移到消息末尾',
+    };
+  } catch (error) {
+    return { error: String(error && error.message ? error.message : error) };
+  }
+})();
+
+// BLOCK-212 — 命中率阈值：低于此值视为"前缀在漏"，只报告不阻断
+const HIT_RATE_THRESHOLD = Number(process.env.PETRI_CACHE_HIT_THRESHOLD || 0.3);
+
 const report = {
   generatedAt: new Date().toISOString(),
   db: DB_FILE,
   note: 'BLOCK-95 B3 度量先行：prompt cache 基线。B1 后端拼装 + B2 compaction 落地后，前缀稳定性（工具定义→系统提示→对话）是 cache 命中的前提；本报告为翻默认裁决的对账底稿。',
-  overall: { calls: total.calls, promptTokens: total.promptTokens, cacheReadTokens: total.cacheReadTokens, cacheHitRate: overallHitRate },
+  overall: {
+    calls: total.calls, promptTokens: total.promptTokens, cacheReadTokens: total.cacheReadTokens, cacheHitRate: overallHitRate,
+    // BLOCK-212：命中率是否低于阈值（prefix 稳定性是否真的起作用）
+    belowThreshold: overallHitRate < HIT_RATE_THRESHOLD, hitRateThreshold: HIT_RATE_THRESHOLD,
+  },
+  staticPrefix: prefixProbe,
   groups,
   brokenLinkCandidates: brokenLinkCandidates.map((g) => ({ provider: g.provider, model: g.model, kind: g.kind, calls: g.calls, promptTokens: g.promptTokens, suspicion: 'cache-capable model but cache_read_tokens===0' })),
 };
@@ -57,5 +81,9 @@ console.log('[block95-b3] overall hit rate =', (overallHitRate * 100).toFixed(2)
   `(${total.cacheReadTokens}/${total.promptTokens} tokens over ${total.calls} calls)`);
 if (brokenLinkCandidates.length > 0) {
   console.log('[block95-b3] ⚠ cache 断链候选（cache-capable 但落库恒 0）:', brokenLinkCandidates.length, '组');
+}
+console.log('[block212] 静态前缀 =', prefixProbe.staticPrefixChars, 'chars ≈', prefixProbe.staticPrefixTokensApprox, 'tokens（每轮可复用上限）');
+if (total.promptTokens > 0 && overallHitRate < HIT_RATE_THRESHOLD) {
+  console.log('[block212] ⚠ 命中率', (overallHitRate * 100).toFixed(2) + '% < 阈值', (HIT_RATE_THRESHOLD * 100) + '% —— 前缀可能在漏（或本库样本含大量非缓存渠道）');
 }
 console.log('report →', out);

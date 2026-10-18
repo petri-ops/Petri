@@ -98,7 +98,8 @@ test('Anthropic provider converts Gateway chat request and response', async () =
     assert.equal(received.path, '/v1/messages');
     assert.equal(received.headers['x-api-key'], 'secret');
     assert.equal(received.headers['anthropic-version'], '2023-06-01');
-    assert.equal(received.body.system, 'system');
+    // BLOCK-212 — Anthropic system 改为 block 数组：静态段带 cache_control 断点
+    assert.deepEqual(received.body.system, [{ type: 'text', text: 'system', cache_control: { type: 'ephemeral' } }]);
     assert.equal(received.body.tools[0].name, 'lookup');
     assert.equal(result.choices[0].message.tool_calls[0].function.name, 'lookup');
     assert.equal(result.choices[0].finish_reason, 'tool_calls');

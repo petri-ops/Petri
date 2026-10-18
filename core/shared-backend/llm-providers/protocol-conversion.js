@@ -90,7 +90,20 @@ function openAIToAnthropicRequest(body) {
     max_tokens: body.max_tokens || 4096,
     stream: body.stream === true,
   };
-  if (systemParts.length) result.system = systemParts.join('\n');
+  if (systemParts.length) {
+    // BLOCK-212 — Anthropic 的 prompt cache **必须显式打断点**（不标=全价）。
+    // 约定：调用方把静态前缀放在第一条 system、动态上下文放最后一条 system（见
+    // helpers/prompt-assembly）。这里给**第一条**（静态段）打 ephemeral 断点，
+    // 动态段不打——否则每轮都会写一份新缓存，反而更贵。
+    if (systemParts.length === 1) {
+      result.system = [{ type: 'text', text: systemParts[0], cache_control: { type: 'ephemeral' } }];
+    } else {
+      result.system = [
+        { type: 'text', text: systemParts[0], cache_control: { type: 'ephemeral' } },
+        ...systemParts.slice(1).map((text) => ({ type: 'text', text })),
+      ];
+    }
+  }
   if (body.temperature !== undefined) result.temperature = body.temperature;
   if (body.top_p !== undefined) result.top_p = body.top_p;
   if (body.stop !== undefined) result.stop_sequences = Array.isArray(body.stop) ? body.stop : [body.stop];

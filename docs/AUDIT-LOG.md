@@ -1,4 +1,5 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-10-18（**BLOCK-212 立项发令 active：提示词缓存前缀优化**）：两处成本泄漏已读码定位——动态上下文在 system 头部（每轮变⇒前缀全废）、Anthropic 无 cache_control（system 单字符串⇒全价）。方案=动态段搬尾部（不落历史）+ anthropic block 断点 + 基线加静态前缀 token；不声称真实命中率提升（需 G1+ 调用）。plan=docs/block-212-prompt-cache-prefix-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**W8 第七批：`skills:check` 报告级纳入收口**）：`closeout-gates.mjs` 增 `--report`（非阻塞、不改进程退出码），`closeout` 已挂 `--report skills:check` ⇒ 每次收口打印红条数；未升阻塞（补齐 `built-in-plugins/` 属 C-33 裁决）。顺修：改脚本误删 `repoGate`（ReferenceError）已恢复并冒烟验证。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**W8 第六批：技能货架依赖徽标纳入插件硬依赖（UI-527）**）：`preflight` 纳入 `plugins.required`（`hasPlugin` 注入 + `missingPlugins`，缺插件不算 installable），路由用 `plugin-loader` 单一真相；卡片对有插件硬依赖的技能也显示徽标。证据=4/4 + 前端 10/10 + tsc 0；closeout PASS。`skills:check` 5 红仍在（是否补插件包/升阻塞门禁属 C-33 裁决）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**W8 第六批：休眠插件激活转为裁决包 C-33（需用户选 A/B/C），不代裁**）：实码核对——`resources/skills/manifest.json` 仅 14 条、**无 status/依赖/验证时间字段**，全仓无"休眠插件"机械登记（grep 仅两处注释）；评估报告的「休眠插件+demo 错位」是产品观感判词。三选一：A 现状+如实标注 / **B 激活零重依赖一族+其余标未适配（建议）** / C 全量激活（G0 无验证条件）。本批未改任何插件/技能代码，只留证与选项。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -18,6 +19,7 @@
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
+| 🔵 | 2026-10-18 | **BLOCK-212 立项**：动态上下文搬尾部（前缀稳定）+ Anthropic cache_control 断点 + 基线加静态前缀 token；真实命中率属 G1+。plan=docs/block-212-prompt-cache-prefix-plan.md | BLOCK-212 / P0-LAUNCH |
 | 🟡 | 2026-10-18 | **`npm run skills:check` 实测 5 红（存量，非本批引入）**：`deg-analysis-standard` 的 3 个与 `sc-analysis-standard` 的 2 个 `plugins.required` 在 `resources/built-in-plugins/`（本仓不存在）与 pack 插件源里都找不到。**它不在 closeout 十三门内**，所以能长期红而不挡收口——这正是 C-33「货架可见不可用」的代码侧证据。处置=并入 C-33 裁决（A/B/C）；建议先把 `skills:check` 以**报告级**纳入收口（打印红数、不阻塞），升阻塞门禁与否随裁决。plan=docs/block-211-tail-ledger-plan.md §10 | AUDIT / C-33 关联 |
 | ✅ | 2026-10-18 | **BLOCK-211（W8 首批）completed**：C-32 env=1 降级为种子（13 门 PASS）；新登记 🟡 block110-p1 5 例 HEAD 红（与本批无关，待 triage）；W8 其余项在册 | BLOCK-211 / P5-CLOSED |
 | ✅ | 2026-10-18 | **BLOCK-210（W7e）completed（十三门 PASS）**：留存/归档默认零删除 + apply 默认 dryRun + 删除须 allowDelete；迁移计划器只读（备份/回退/阻塞项）；真实搬迁与清理 reopen。下一包=W8 | BLOCK-210 / P5-CLOSED |

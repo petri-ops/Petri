@@ -16,7 +16,7 @@
 
 const { estimateRequestTokens } = require('./helpers/token-estimator');
 const { getAiSettings, getGenerationDefaults } = require('./helpers/ai-settings');
-const { buildSystemPrompt, loadWorkingTreeRejectEntries, resolveWorkingTreeRejectRoot } = require('./helpers/system-prompt');
+const { buildSystemPromptParts, loadWorkingTreeRejectEntries, resolveWorkingTreeRejectRoot } = require('./helpers/system-prompt');
 const { appendDesktopAgentInstructions } = require('./helpers/desktop-agent-prompt');
 // BLOCK-157 W1 P2（KNW-2）— 技能索引常驻注入（渐进披露闭环）
 const { buildSkillsIndexBlock, tool_skill_discover } = require('./agent-tools/skill-tools');
@@ -348,11 +348,15 @@ async function runAgentLoop({
   _emit({ event: 'run_started', taskId, kind: kind || null, at: new Date().toISOString() });
 
   // ---------- System prompt building (from ai-agent.js L142-319) ----------
-  let systemPrompt = buildSystemPrompt(ctxForPrompt, {
+  const promptParts = buildSystemPromptParts(ctxForPrompt, {
     provider: providerName,
     providerLabel,
     model: modelName,
   });
+  let systemPrompt = promptParts.staticPrefix + promptParts.dynamicContext;
+  // BLOCK-212 — 静态前缀长度：后续追加（知识注入/桌面指令/驻留交接）都是**后缀**，
+  // 因此这里记下的长度在函数尾部仍然指向"静态头结束处"。
+  const staticPrefixChars = promptParts.staticPrefix.length;
 
   // BLOCK-166 P0 — Gen UI 可视化输出根（仅 workspace 绑定会话注入；未绑定=能力诚实缺席）
   try {
@@ -746,7 +750,15 @@ async function runAgentLoop({
   } catch (e) {
     console.warn('[agent-runner] resident handover inject failed:', e && e.message);
   }
-  const fullMessages = [{ role: 'system', content: systemPrompt }, ...messages];
+  // BLOCK-212 — **前缀稳定**：system 只放静态前缀；动态上下文（每轮可能变）挪到消息末尾。
+  // 这样历史保持 append-only 的干净前缀，下一轮可整段复用缓存；动态段不落历史，不会污染下一轮。
+  const staticPrefix = systemPrompt.slice(0, staticPrefixChars);
+  const dynamicContext = systemPrompt.slice(staticPrefixChars);
+  const fullMessages = require('./helpers/prompt-assembly').assembleMessages({
+    staticPrefix,
+    dynamicContext,
+    messages,
+  });
   // BLOCK-99 G4 — 会话台工具子集（context.toolSubset === 'knowledge-console' 时只下发
   // knowledge 白名单；其余值维持全量）。policy 层照常全量生效，此处是最外层收窄。
   const tools = resolveToolDefsForContext(context, getToolDefs());

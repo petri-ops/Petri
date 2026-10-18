@@ -66,6 +66,7 @@
 - [x] W7c BLOCK-208 外观扩展（**completed 2026-10-18；范围收窄为动效开关**：16 族/86 键、复用既有 reduced-motion 块、设置页三档；UI-525 因 9223 实机腿未跑记 in_progress；预览/密度/对比度/通知/性能进 reopen）
 - [x] W7d BLOCK-209 外部 Agent 配置导入（**completed 2026-10-18**：Codex TOML 子集 / ZCode JSON 只读解析 + 映射预览；零写入零网络；凭据 D-2 双查拒入；patch 与注册表对账；一键应用属 reopen）
 - [x] W7e BLOCK-210 数据目录可配 + 留存/归档（**completed 2026-10-18**：17 族/89 键；留存默认零删除、apply 默认 dryRun、删除须 allowDelete、审计落盘；迁移计划器只读（备份/回退/阻塞项）；真实搬迁与清理 reopen）
+- [ ] **BLOCK-212 提示词缓存前缀优化**（**active 2026-10-18**，用户发令「立BLOCK-212开整」；W8 未完成期间的并行立项已获用户授权，不改变单工作包串行纪律）
 - [ ] W8 BLOCK-211 收尾族（**部分完成 2026-10-18**：C-32 env 语义清偿 completed；余项在册：lint 净收缩/双机 riders/休眠插件裁决/RS 徽标语义/C-27 成对实验/C-30·C-31 立项或销号；新登记 🟡 block110-p1 5 例 HEAD 红待 triage）
 
 ## 4. 已知未达成事实（防止后续会话误读为已完成）

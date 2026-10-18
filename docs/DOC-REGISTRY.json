@@ -7141,8 +7141,30 @@
         "block-211"
       ],
       "notes": "2026-10-18 立项发令 active（runlist W8 收尾族首批；用户「好 棒 满意 继续后面的工作」）：本批只做 C-32——env='1' 从运行时强制开降级为首载种子（env='0' 仍是杀开关），修 envShadowedKeys 对 seed 的误报；同一提交显式改写 block199-config-compat 里钉 old 行为的那条。其余 W8 项逐项另立小批（裁决/双机/成对实验）。 | 首批收口 2026-10-18：C-32 清偿——env='1' 降级为首载种子（env='0' 仍杀开关），envShadowedKeys 对 seed 不再报遮蔽，compat 基线显式改写留因；block211 4/4 + 邻域 150/150；closeout 十三门 PASS。**W8 其余项仍在册未清**（lint 收缩/双机 riders/休眠插件裁决/RS 徽标/C-27/C-30·C-31），不得因本包收口宣称 W8 完成。新登记：block110-p1 有 5 例在 HEAD 上就红（与本批无关，需独立 triage）。"
+    },
+    {
+      "id": "BLOCK-212-PROMPT-CACHE-PREFIX",
+      "capability": "prompt-cache-prefix",
+      "path": "docs/block-212-prompt-cache-prefix-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "phase": "P0-LAUNCH",
+      "canonical": true,
+      "truthDomain": "block-212-prompt-cache-prefix-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-18",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "prompt-cache",
+        "prefix",
+        "cost",
+        "anthropic",
+        "cache-control",
+        "block-212"
+      ],
+      "notes": "2026-10-18 立项发令 active（用户「可以 立BLOCK-212开整」）：动态上下文从 system 头部搬到消息尾部（前缀逐字节稳定、注入不落历史），Anthropic 分支 system 改 block 数组 + 静态段 cache_control:ephemeral；基线脚本加静态前缀 token 与命中率阈值。不声称真实命中率提升（需 G1+ Provider 调用）。"
     }
   ],
   "lastUpdated": "2026-10-17",
-  "documentCount": 369
+  "documentCount": 370
 }

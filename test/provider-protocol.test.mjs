@@ -32,7 +32,8 @@ test('OpenAI request converts system, tools, tool calls, and tool results to Ant
     tools: [{ type: 'function', function: { name: 'lookup', parameters: { type: 'object' } } }],
     tool_choice: 'auto',
   });
-  assert.equal(converted.system, 'system');
+  // BLOCK-212 — 单条 system 也以 block 数组发出（带 ephemeral 断点）
+  assert.deepEqual(converted.system, [{ type: 'text', text: 'system', cache_control: { type: 'ephemeral' } }]);
   assert.equal(converted.messages[1].content[0].type, 'text');
   assert.equal(converted.messages[1].content[1].type, 'tool_use');
   assert.deepEqual(converted.messages[1].content[1].input, { id: 1 });

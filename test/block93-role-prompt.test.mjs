@@ -51,7 +51,8 @@ const server = http.createServer((req, res) => {
     try {
       const parsed = JSON.parse(body);
       captured.push({
-        system: String(parsed.messages?.find((m) => m.role === 'system')?.content || ''),
+        // BLOCK-212 — 传输层把 system 拆成「静态前缀 + 动态尾块」，断言须覆盖**全部** system 消息
+        system: (parsed.messages || []).filter((m) => m.role === 'system').map((m) => String(m.content || '')).join('\n'),
         model: parsed.model,
       });
     } catch {}

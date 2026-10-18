@@ -4139,6 +4139,26 @@
         "test/block176-w7-contracts.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block212-prompt-prefix",
+      "note": "BLOCK-212：system prompt 拆静态前缀/动态上下文，动态段搬到消息末尾（helpers/prompt-assembly），anthropic system 改 block 数组 + 静态段 cache_control:ephemeral，基线脚本加静态前缀规模与命中率阈值。",
+      "patterns": [
+        "core/petri-server/helpers/system-prompt.js",
+        "core/petri-server/helpers/prompt-assembly.js",
+        "core/petri-server/agent-runner.js",
+        "core/shared-backend/llm-providers/protocol-conversion.js",
+        "scripts/block95-b3-cache-baseline.cjs",
+        "test/block212-*.test.mjs"
+      ],
+      "tests": [
+        "test/block212-prompt-prefix.test.mjs",
+        "test/block198-prompt-layering.test.mjs",
+        "test/anthropic-provider.test.mjs",
+        "test/provider-protocol.test.mjs",
+        "test/block93-role-prompt.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }
