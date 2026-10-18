@@ -1,4 +1,5 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-10-18（**BLOCK-209（W7d）completed（closeout 十三门 PASS）**）：外部 Agent 配置只读解析 + 映射预览（Codex TOML 子集 / ZCode JSON），零写入零网络、凭据 D-2 双查拒入 patch、patch 与注册表对账、零新依赖；**预览不是导入**（一键应用属 reopen）。plan=docs/block-209-external-agent-import-plan.md。无 active 工作包，下一包=W7e。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-209-EXTERNAL-AGENT-IMPORT 立项发令 active（runlist W7d）**）：只读解析 + 映射预览，零写入零网络；凭据拒绝自动导入（D-2）；patch 与注册表对账；一键应用进 reopen。plan=docs/block-209-external-agent-import-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-208（W7c 收窄版）completed（closeout 十三门 PASS）**）：动效用户开关端到端（`user-prefs.motion` 接线 + `density` 仅登记 ⇒ 16 族/86 键；`prefCache` `petri-motion`；`data-motion` + 复用既有 reduced-motion 块两通道；设置页三档）。`theme-token-contract` 17/17——**motion 棘轮当场抓到**"字面量 transition 时长 + 与既有块重复实现"，已改为复用 `var(--petri-duration-fast)`。**证据缺口**：9223 实机腿未跑 ⇒ UI-525 `in_progress`。下一包=W7d。plan=docs/block-208-appearance-motion-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-208-APPEARANCE-MOTION 立项发令 active（W7c 收窄版：只做动效开关）**）：`user-prefs` 加 motion（接线）+ density（仅登记）；CSS 双降级（data-motion/prefers-reduced-motion），只改时长与行为、不新增颜色 token；设置页常规节三档。预览专项/密度接线/对比度/通知/性能进 reopen。plan=docs/block-208-appearance-motion-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -7,8 +8,6 @@
 最后更新：2026-10-18（**🟡 context_snapshot 漂移已归因并修复：不是 prompt 文案，是路径分隔符**）：`normalizeContextString` 把 tmp 根换成 `<TMP>` 后保留了 OS 分隔符 ⇒ Windows 录的基线（`<TMP>\projects\…`）在 macOS 上恒红。处置=归一化统一 `<TMP>/`（新增"Windows 与 POSIX 同指纹"单测），显式重基准到 `dfc9be7b986a1c17` 并复跑 `✔ 一致`。**两处口径更正**：W6 的"指纹未变"不成立（用单测代替 fp 对比）；W7a 初判引用的"system prompt 文案变更"只是 harness 启发式提示语，非真因。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-206（W7a）completed；closeout 十三门 PASS**）：profile 声明式配置（15 族/81 键，并发 min 收紧、reportGuard 仅 inherit）+ C-29 斜杠判定抽离并挂 D15 unit 锚。code-size 当场抓真（SimpleChat +2 行 → 删冗余注释回 2142）。**仍挂 🟡**：`context_snapshot` golden 指纹漂移待归因（W6 的"指纹未变"已作废），未重基准。plan=docs/block-206-subagent-profile-slash-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-206（W7a）代码落地，但 closeout 未跑**；同时**更正 W6 的"评测基线未变"结论**）：`context_snapshot` golden 指纹 **dfc9be7b… vs 基线 9bb90c14…**，原因行=「system prompt 文案变更」；用 `git stash` 移除 W7a 改动后同样漂移 ⇒ **与 W7a 无关**。W6 收口时我用的是单测（只验归一化机制）而非 golden fp 对比，故"指纹未变"不成立，改记 🟡 待归因；**未重基准**（归因前不得 `--update-snapshot`）。另发现：main 上存在另一会话的提交（`7bf008b9 feat(ui-523)`），W7a 工作叠在其上。G0 开发期常态 · 不外推 packaged/Provider/GA。
-最后更新：2026-10-18（**BLOCK-206-SUBAGENT-PROFILE-SLASH 立项发令 active（runlist W7a）**）：①子智能体 profile 声明式配置（concurrency 与 runtime 族逐字对账、只能收紧；reportGuard 仅 inherit）②C-29 斜杠即执行抽单元并给 D15 挂真锚。红线=profile 不是权限系统、未传 profile 零行为变化。plan=docs/block-206-subagent-profile-slash-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
-最后更新：2026-10-18（**UI-523 composer 运行计量条 completed（UI 轨；9223 实机腿 10/10 + 隔离后端腿 14/14）**）：输入卡片下方三段读数「本次 轮/步/tok/s · 会话 tok/缓存命中 · 上下文%」；后端两条 additive（loop 每次调用 `usage` 事件 + `GET /api/ai/usage-conversation` 会话聚合，数字全部来自本地 `ai_usage`）；预算环从工具栏搬进条内（同一实例）。不可算一律 `—`；tok/s=最近一次调用端到端平均输出速率（非解码速度）。本机无真实 Provider 凭据 ⇒ 实机链用本地 OpenAI 兼容 mock provider，证据标注 `provider=mock`。台账=`docs/ui-productization-audit.md` §UI-523。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 > 本文件只保存需要主 Agent 看见的活跃广播与最近处理记录。
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-10-11.md) · [through-2026-09-19](./archive/checkpoints/audit-log-through-2026-09-19.md) · [through-2026-09-17](./archive/checkpoints/audit-log-through-2026-09-17.md) · [through-2026-09-16](./archive/checkpoints/audit-log-through-2026-09-16.md) · 上一档：[through-2026-09-13](./archive/checkpoints/audit-log-through-2026-09-13.md) · [through-2026-09-12](./archive/checkpoints/audit-log-through-2026-09-12.md)（更早前史：[through-2026-07-26](./archive/checkpoints/audit-log-through-2026-07-26.md)、[2026-08-pre18](./archive/audit-log-2026-08-pre18.md)）。
@@ -19,6 +18,7 @@
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
+| ✅ | 2026-10-18 | **BLOCK-209（W7d）completed（十三门 PASS）**：外部配置只读预览（零写入/零网络/凭据拒绝/键对账）；预览不是导入（应用属 reopen）。下一包=W7e | BLOCK-209 / P5-CLOSED |
 | 🔵 | 2026-10-18 | **BLOCK-209（W7d）立项**：Codex/ZCode 配置只读解析 + 映射预览（零写入/零网络/凭据拒绝/D-2 对账）。plan=docs/block-209-external-agent-import-plan.md | BLOCK-209 / P0-LAUNCH |
 | ✅ | 2026-10-18 | **BLOCK-208（W7c 收窄）completed（十三门 PASS）**：动效开关（16 族/86 键）+ 复用既有 reduced-motion 块；UI-525 因 9223 实机腿未跑记 `in_progress`；预览/密度/对比度/通知/性能进 reopen。下一包=W7d | BLOCK-208 / P5-CLOSED |
 | 🔵 | 2026-10-18 | **BLOCK-208（W7c 收窄）立项**：动效开关（system/full/reduced）+ 双降级 CSS + 设置页三档；density 仅登记。plan=docs/block-208-appearance-motion-plan.md | BLOCK-208 / P0-LAUNCH |

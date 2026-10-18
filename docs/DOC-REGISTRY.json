@@ -7080,8 +7080,8 @@
       "capability": "external-agent-import",
       "path": "docs/block-209-external-agent-import-plan.md",
       "kind": "work-package",
-      "status": "active",
-      "phase": "P0-LAUNCH",
+      "status": "completed",
+      "phase": "P5-CLOSED",
       "canonical": true,
       "truthDomain": "block-209-external-agent-import-plan",
       "entrypoint": "docs/README.md",
@@ -7096,7 +7096,7 @@
         "stage-4",
         "block-209"
       ],
-      "notes": "2026-10-18 立项发令 active（runlist W7d；用户「行！ 开整 下一包W7d」）：只做只读解析 + 映射预览（Codex TOML 子集 / ZCode JSON），输出 patch/credentialsDetected/unsupported/notes/diagnostics；**零写入零网络**；凭据一律拒绝自动导入（D-2）；patch 的每个键必须与 shared-config 真实键路径对账；一键应用属 reopen。"
+      "notes": "2026-10-18 立项发令 active（runlist W7d；用户「行！ 开整 下一包W7d」）：只做只读解析 + 映射预览（Codex TOML 子集 / ZCode JSON），输出 patch/credentialsDetected/unsupported/notes/diagnostics；**零写入零网络**；凭据一律拒绝自动导入（D-2）；patch 的每个键必须与 shared-config 真实键路径对账；一键应用属 reopen。 | 收口 2026-10-18：只读解析 + 映射预览（Codex TOML 子集 / ZCode JSON）→ patch/credentialsDetected/unsupported/notes/diagnostics；零写入零网络（响应 dryRun/wrote:false）；凭据键名+值形态双查、绝不进 patch（D-2）；patch 键与注册表对账；零新依赖、无外部源码。closeout 十三门 PASS。**预览不是导入**：一键应用（逐键确认+回滚+审计）属 reopen。"
     }
   ],
   "lastUpdated": "2026-10-17",

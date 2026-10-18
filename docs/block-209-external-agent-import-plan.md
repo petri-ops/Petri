@@ -10,7 +10,7 @@ acceptance:
   - P5 收尾：closeout 十三门；文件规模与 impact-map 登记。
   - 完成语义：**预览不是导入**——交付说明必须写清"本包不写任何设置"。真正的应用（含逐键确认与回滚）属 reopen。
 reopen: 一键应用（逐键确认 + 回滚 + 审计）；Codex 九层优先级与 profile 语义的等价合并；ZCode 全量约 150 项映射；外部配置里的 MCP server 清单导入；凭据迁移（必须走显式确认 + 凭据库）。
-status: active
+status: completed
 ---
 
 # BLOCK-209 · 阶段 4 C-4：外部 Agent 配置导入（只读解析 + 映射预览）

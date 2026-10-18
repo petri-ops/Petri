@@ -6,7 +6,7 @@
 
 最后更新：2026-10-17（**BLOCK-203-STAGE-3-B1B-CONFIG-LANDING-CONSOLIDATION 立项发令 active（runlist W4 拆片：W4a 先做）**）
 
-**恢复要点（换会话必读·本段取代下方 BLOCK-209 段）**：**当前 active 工作包=BLOCK-209（W7d）**，plan=`docs/block-209-external-agent-import-plan.md`（registry `active` / `P0-LAUNCH`）。**下一步第一个动作=P1+P2**：`shared-backend/external-agent-import.js`（零依赖 TOML 子集 + JSON 解析 + 映射），然后 P3 路由 `POST /api/import/external-agent`（**只预览**）。**红线**：零写入零网络；凭据一律拒绝自动导入（D-2）；patch 每个键必须与 `shared-config` 真实键路径对账；不拷贝外部实现、零新依赖。**未做的证据**：UI-525（W7c 动效开关）的 9223 实机腿仍未跑，台账 `in_progress`。**注意**：main 上存在另一会话的提交（`7bf008b9 feat(ui-523)`），改文件前先 `git log` 看一眼。
+**恢复要点（换会话必读·本段取代下方 BLOCK-209 段）**：**无 active 工作包**；**下一包=W7e**（BLOCK-210：数据目录可配 + 历史留存/自动归档策略；注意 W4b 的 `shared-backend/data-paths.js` 已是目录单源，W7e 要在它之上做"可配置 + 迁移 + 备份/回退"，**不得**再手写第二套回落链）。**刚收口=BLOCK-209（W7d）**：外部 Agent 配置只读解析 + 映射预览（零写入/零网络；凭据 D-2 双查；patch 与注册表对账）；**预览不是导入**，一键应用属 reopen。**仍未补的证据**：UI-525（W7c 动效）9223 实机腿未跑，台账 `in_progress`。**注意**：main 上存在另一会话的提交（`7bf008b9 feat(ui-523)`），改文件前先 `git log` 看一眼。
 
 最后更新：2026-10-17（**BLOCK-202-STAGE-A-QUICKWINS-3 整包 completed（阶段 A 速赢 III=runlist W3；当日立项当日收口·9223 探针 15/15 allPass）**）
 
