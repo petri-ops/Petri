@@ -17,17 +17,25 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
 const require = createRequire(import.meta.url);
 
-// 内存 DB 自举（conversations.js 顶层建表）
+// 隔离数据根 + DB 自举（BLOCK-211 夹具修复）
+// 关键：**在 require 任何后端模块之前**固定 PETRI_LOCAL_DATA_DIR 与 PETRI_DB_PATH。
+// `db/connection.js` 的 DB_PATH 是模块加载时求值的；而且后端表由 `db/schema` 在连接时创建，
+// 这里不再自己开第二条连接跑 `src/migrations`（桌面侧迁移与后端 schema 是两套，跨句柄
+// 写同一文件会让首个查询撞 `database disk image is malformed`——triage 见 block-211 plan §4）。
 {
-  const Database = require('better-sqlite3');
   const tempDbDir = fssync.mkdtempSync(path.join(os.tmpdir(), 'petri-b110-p1-'));
-  const db = new Database(path.join(tempDbDir, 'petri.db'));
+  // ① env 先行：db/connection 的 DB_PATH 是模块加载时求值的
+  process.env.PETRI_LOCAL_DATA_DIR = tempDbDir;
+  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
+  // ② 建表：db.js 在**加载时**就预编译 `projects` 等语句，所以 schema 必须先于 require 存在。
+  //    桌面侧 migrations 提供这些表；后端 schema 会在此基础上补自己的表（initSchema 幂等）。
+  const Database = require('better-sqlite3');
+  const boot = new Database(process.env.PETRI_DB_PATH);
   const migrationsDir = path.join(root, 'src', 'migrations');
   for (const file of fssync.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort()) {
-    db.exec(fssync.readFileSync(path.join(migrationsDir, file), 'utf8'));
+    boot.exec(fssync.readFileSync(path.join(migrationsDir, file), 'utf8'));
   }
-  db.close();
-  process.env.PETRI_DB_PATH = path.join(tempDbDir, 'petri.db');
+  boot.close();
   process.on('exit', () => {
     try { fssync.rmSync(tempDbDir, { recursive: true, force: true }); } catch { /* 句柄延迟释放 */ }
   });
@@ -69,7 +77,9 @@ const conv = require(path.join(root, 'core', 'petri-server', 'helpers', 'convers
 
 const USER = 'u-p1';
 function seedConversation(messageCount = 10) {
-  const db = require('better-sqlite3')(process.env.PETRI_DB_PATH);
+  // 用**同一条连接**（后端自己那条）写种子数据：不再开第二句柄，避免跨句柄 WAL 竞态
+  const dbMod = require(path.join(root, 'core', 'petri-server', 'db.js'));
+  const db = dbMod.getDatabase();
   const convId = 'conv-p1-' + Math.random().toString(36).slice(2, 8);
   db.prepare(`INSERT INTO copilot_conversations (id, user_id, title, status, message_count, created_at, updated_at)
     VALUES (?, ?, 'P1 测试', 'active', ?, ?, ?)`)
@@ -78,7 +88,6 @@ function seedConversation(messageCount = 10) {
   for (let i = 0; i < messageCount; i++) {
     ins.run('m-' + convId + '-' + i, convId, i % 2 ? 'assistant' : 'user', '历史消息 ' + i, new Date(Date.now() - 600000 + i * 1000).toISOString());
   }
-  db.close();
   return convId;
 }
 

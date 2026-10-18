@@ -72,3 +72,10 @@ status: completed
 - **净收缩**：`eslint-suppressions.json` **326 → 318（−8）**，文件数 135 → 134（该文件条目整块消失）；`npx eslint . --prune-suppressions` 清掉陈旧键，`quality:lint` **0 errors**。
 - **验证**：该测试文件 `vitest` **25/25**、`tsc --noEmit` 0。
 - **自纠一次**：首版用整文件 `s.replace('async () =>', '() =>')` 把 `it(..., async () => {` 也改了，导致 `await` 出现在非 async 函数里（tsc TS1308 + 测试 0 执行）→ `git checkout` 还原后改成**只替换两种 mock 形态**的定向改法。
+
+## 6. 🟡 → ✅ `block110-p1` 夹具修复完成（2026-10-18）
+
+- **真因（在 §4 的假设上收敛）**：`seedConversation` 每次都开**第二条** `better-sqlite3` 句柄往同一个 WAL 库里写、写完就 `close()`，而后端那条长连接仍在用；首个查询因此撞 `database disk image is malformed`（被 `_maybeDetectTopicShift` 的 catch 吞成 null）。另有第二个约束：`db.js` **加载时**就预编译 `projects` 等语句，所以 schema 必须先于 require 存在。
+- **修法（三步，全在夹具侧）**：①**env 先行**——`PETRI_LOCAL_DATA_DIR` + `PETRI_DB_PATH` 在任何后端 require 之前固定；②建表仍走 `src/migrations`（`db.js` 预编译需要），但**只开这一条引导句柄、用完即关**；③`seedConversation` 改用后端自己的连接（`dbMod.getDatabase()`）写种子，**不再开第二句柄**。
+- **结果**：`block110-p1-topic-shift` **6/6 绿**（此前 1/5）；产品代码零改动（临时加的 error.stack 探针已还原）。
+- 口径更正：§4 里"需要单独小批"的结论保留（它确实是独立问题），但修复本身在本批内完成——因为**改的是夹具不是产品**，不会污染 C-32 的验收面。
