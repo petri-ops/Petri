@@ -16,13 +16,15 @@
  */
 
 const COMPACTION_ENV = 'PETRI_SESSION_COMPACTION';
-// 触发阈值：历史 token 估算超过该值且消息数超过 MIN_MESSAGES 时折叠旧 turns
-const COMPACTION_TRIGGER_TOKENS = 12000;
-const MIN_MESSAGES = 24;
+// 触发阈值：历史 token 估算超过该值且消息数超过 minMessages 时折叠旧 turns。
+// BLOCK-205（W6）— 这四个数改由 `helpers/memory-policy` 供（注册表 `memory-policy` 族）；
+// 常量保留为**基线冻结值**的声明处引用，不再参与运行时判定（避免两处真值）。
+const memoryPolicy = require('./memory-policy');
+const COMPACTION_TRIGGER_TOKENS = memoryPolicy.DEFAULTS.compactionTriggerTokens;
+const MIN_MESSAGES = memoryPolicy.DEFAULTS.compactionMinMessages;
 // 保留原样的最近消息数（rolling 窗口）
-const KEEP_RECENT = 12;
+const KEEP_RECENT = memoryPolicy.DEFAULTS.compactionKeepRecent;
 // 摘要输入预算（超长源按行裁剪，摘要 LLM 调用自身的上限保护）
-const SUMMARY_SOURCE_CHAR_BUDGET = 60000;
 
 function isSessionCompactionEnabled(env) {
   // BLOCK-95 B2 灰度收编：解析权在 feature-flags（env 强制 > 设置页持久化 > 默认开）
@@ -70,15 +72,16 @@ function applyCompactionView(assembled, compaction, opts = {}) {
  * 计算折叠计划：返回 {should, coveredRows, keepRows, sourceTokens}。
  */
 function planCompaction(rows, countMessages, opts = {}) {
-  if (!Array.isArray(rows) || rows.length <= KEEP_RECENT) return { should: false };
+  const settings = memoryPolicy.compactionSettings();
+  if (!Array.isArray(rows) || rows.length <= settings.keepRecent) return { should: false };
   const { countMessages: count } = require('./token-estimator');
   const est = countMessages || count;
   const sourceTokens = est(rows.map((r) => ({ role: r.role, content: String(r.content || '') })));
   // BLOCK-98 M2 — resilience 模式阈值由 planThreshold 公式给出（经 opts.threshold
   // 传入），否则维持 B2 固定 12K（legacy 逐字节兼容）。
-  const threshold = Number(opts && opts.threshold) || COMPACTION_TRIGGER_TOKENS;
-  if (sourceTokens < threshold || rows.length < MIN_MESSAGES) return { should: false, sourceTokens };
-  const splitAt = rows.length - KEEP_RECENT;
+  const threshold = Number(opts && opts.threshold) || settings.triggerTokens;
+  if (sourceTokens < threshold || rows.length < settings.minMessages) return { should: false, sourceTokens };
+  const splitAt = rows.length - settings.keepRecent;
   return {
     should: true,
     sourceTokens,
@@ -108,10 +111,12 @@ async function compactConversationNow({ userId, conversationId, sqlite, telemetr
   if (!plan.should) return { ok: false, reason: plan.sourceTokens != null ? 'below_threshold' : 'too_few_messages' };
 
   // 摘要源（含角色与时间线；超预算时从头部裁剪，保留最近语境）
+  // BLOCK-205（W6）— 预算来自策略（默认 60000，与接线前逐字相同）
+  const settings = memoryPolicy.compactionSettings();
   let lines = plan.coveredRows.map((m) => `${m.role === 'user' ? '用户' : 'AI'}: ${String(m.content || '')}`);
   let joined = lines.join('\n\n');
-  if (joined.length > SUMMARY_SOURCE_CHAR_BUDGET) {
-    joined = joined.slice(joined.length - SUMMARY_SOURCE_CHAR_BUDGET);
+  if (joined.length > settings.summaryBudgetChars) {
+    joined = joined.slice(joined.length - settings.summaryBudgetChars);
   }
 
   const existing = getCompactionSync(sqlite, conversationId);

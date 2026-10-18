@@ -61,10 +61,12 @@ try {
 
 const EMBEDDING_DIM = 1024;
 const EMBEDDING_MODEL = 'text-embedding-v3';
-const RETRIEVE_TOPK = 3;
-const RETRIEVE_THRESHOLD = 0.55;
-const RETRIEVE_MAX_CHARS = 1500;
-const MAX_CONTENT_LEN = 1500;
+// BLOCK-205（W6）— 检索/上限参数改由 `helpers/memory-policy` 供（默认值逐字等于原常量）。
+const memoryPolicy = require('./memory-policy');
+const RETRIEVE_TOPK = memoryPolicy.DEFAULTS.memoryTopK;
+const RETRIEVE_THRESHOLD = memoryPolicy.DEFAULTS.memoryThreshold;
+const RETRIEVE_MAX_CHARS = memoryPolicy.DEFAULTS.memoryMaxChars;
+const MAX_CONTENT_LEN = memoryPolicy.DEFAULTS.memoryMaxChars;
 const TURN_MIN_CHARS = 30;
 
 /** Compatibility name; resolves the configured embedding role through the Gateway. */
@@ -72,7 +74,7 @@ async function dashscopeEmbed(texts, _telemetry) {
   if (!Array.isArray(texts) || texts.length === 0) return [];
   const { modelGateway } = require('./model-gateway');
   const result = await modelGateway.embed({
-    texts: texts.map((text) => (text || '').slice(0, MAX_CONTENT_LEN)),
+    texts: texts.map((text) => (text || '').slice(0, memoryPolicy.memorySettings().maxChars)),
     telemetry: _telemetry || {},
   });
   return Array.isArray(result) ? result : null;
@@ -108,7 +110,10 @@ function cosineSim(a, b) {
 }
 
 /** Retrieve top-K most similar memory entries for a user against a query vector. */
-function retrieveMemories(userId, queryVec, k = RETRIEVE_TOPK, threshold = RETRIEVE_THRESHOLD, projectId = null) {
+function retrieveMemories(userId, queryVec, k, threshold, projectId = null) {
+  const settings = memoryPolicy.memorySettings();
+  const topK = k === undefined ? settings.topK : k;
+  const minScore = threshold === undefined ? settings.threshold : threshold;
   if (!userId || !queryVec) return [];
   const rows = projectId
     ? sqlite.prepare('SELECT id, kind, ref_id, page, page_title, content, embedding, ts FROM memory_vectors WHERE user_id = ? AND project_id = ?').all(userId, String(projectId))
@@ -121,8 +126,8 @@ function retrieveMemories(userId, queryVec, k = RETRIEVE_TOPK, threshold = RETRI
   });
   scored.sort((a, b) => b.sim - a.sim);
   return scored
-    .filter(s => s.sim >= threshold)
-    .slice(0, k)
+    .filter(s => s.sim >= minScore)
+    .slice(0, topK)
     .map(s => ({sim: s.sim, ...s.row, embedding: undefined}));
 }
 
@@ -140,7 +145,8 @@ function buildRetrievalBlock(hits) {
     const score = '相关度' + Math.round(h.sim * 100) + '%';
     const head = '\n— ' + kindLabel + (when ? ' (' + when + ')' : '') + (where ? ' · ' + where : '') + ' [' + score + ']\n';
     const body = h.content.slice(0, 500);
-    if (used + head.length + body.length > RETRIEVE_MAX_CHARS) break;
+    // BLOCK-205（W6）— 召回块字符上限也走策略（原 RETRIEVE_MAX_CHARS 常量）
+    if (used + head.length + body.length > memoryPolicy.memorySettings().maxChars) break;
     out += head + body;
     used += head.length + body.length;
   }

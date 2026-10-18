@@ -5,6 +5,7 @@
  * Uses the Promise facade over desktop SQLite for consistent async handlers.
  */
 const express = require('express');
+const memoryPolicy = require('../helpers/memory-policy');
 const dbMod = require('../db');
 const adb = dbMod.getAsyncDatabase();
 const sqlite = dbMod.getDatabase();
@@ -259,5 +260,27 @@ module.exports = function mountMemory(app) {
     try { removed += (await adb.prepare('DELETE FROM project_chat_summaries WHERE user_id=? AND project_id=?').run(userId, scope.key)).changes; } catch {}
     try { removed += (await adb.prepare(`DELETE FROM memory_vectors WHERE user_id=? AND ${scope.clause}`).run(userId, ...scope.values)).changes; } catch {}
     res.json({status:'ok', removed});
+  });
+
+  // BLOCK-205（W6）— 记忆与压缩策略面（v1 无设置页，API 为唯一写面；漂移门按 NO_UI_FAMILIES 登记）
+  app.get('/api/ai/memory-policy', (_req, res) => {
+    const snapshot = memoryPolicy.effectiveSnapshot();
+    res.json({
+      status: 'ok',
+      path: snapshot.path,
+      values: snapshot.values,
+      sources: snapshot.sources,
+      defaults: { ...memoryPolicy.DEFAULTS },
+      readonlyKeys: ['embeddingModel'],
+    });
+  });
+
+  app.put('/api/ai/memory-policy', express.json(), (req, res) => {
+    const result = memoryPolicy.writeStore(req.body || {});
+    if (!result.ok) {
+      return res.status(400).json({ status: 'error', error: 'memory_policy_rejected', diagnostics: result.diagnostics });
+    }
+    const snapshot = memoryPolicy.effectiveSnapshot();
+    return res.json({ status: 'ok', values: snapshot.values, sources: snapshot.sources });
   });
 };

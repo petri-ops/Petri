@@ -130,6 +130,13 @@ const CONFIG_FAMILIES = Object.freeze({
     precedence: ['file', 'default'],
     envTruth: null,
   },
+  // —— BLOCK-205（runlist W6）：记忆与压缩策略 ——
+  // 全是文件根标量（无嵌套袋）；提取/嵌入模型只登记不可写（改模型=换向量维度=重嵌入）。
+  'memory-policy': {
+    store: 'file:memory-policy.json',
+    precedence: ['file', 'default'],
+    envTruth: null,
+  },
 });
 
 /**
@@ -461,6 +468,60 @@ const CONFIG_KEYS = Object.freeze([
     key: 'mcpPolicy.<item>.contractMode', family: 'mcp-tool-policy', path: '<item>.contractMode',
     type: 'string', domain: { oneOf: ['auto', 'read-only', 'mutating'] }, envKeys: [], aliases: [],
     mutable: true, ui: 'none',
+  },
+  // —— 记忆与压缩策略（BLOCK-205 / W6）——
+  // `ui:'none'`：v1 无设置页（`NO_UI_FAMILIES` 显式登记）。域只声明边界；默认值在
+  // `helpers/memory-policy.js` 的 `DEFAULTS`（逐字等于接线前的模块常量，基线测冻结）。
+  {
+    key: 'memoryPolicy.compactionTriggerTokens', family: 'memory-policy', path: 'compactionTriggerTokens',
+    type: 'number', domain: { min: 2000, max: 200000, integer: 'floor' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    key: 'memoryPolicy.compactionMinMessages', family: 'memory-policy', path: 'compactionMinMessages',
+    type: 'number', domain: { min: 4, max: 500, integer: 'floor' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    key: 'memoryPolicy.compactionKeepRecent', family: 'memory-policy', path: 'compactionKeepRecent',
+    type: 'number', domain: { min: 2, max: 200, integer: 'floor' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    key: 'memoryPolicy.compactionSummaryBudgetChars', family: 'memory-policy', path: 'compactionSummaryBudgetChars',
+    type: 'number', domain: { min: 5000, max: 500000, integer: 'floor' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    key: 'memoryPolicy.memoryTopK', family: 'memory-policy', path: 'memoryTopK',
+    type: 'number', domain: { min: 1, max: 20, integer: 'floor' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    key: 'memoryPolicy.memoryThreshold', family: 'memory-policy', path: 'memoryThreshold',
+    type: 'number', domain: { min: 0, max: 1 }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    key: 'memoryPolicy.memoryMaxChars', family: 'memory-policy', path: 'memoryMaxChars',
+    type: 'number', domain: { min: 100, max: 10000, integer: 'floor' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    key: 'memoryPolicy.autoFactTtlDays', family: 'memory-policy', path: 'autoFactTtlDays',
+    type: 'number', domain: { min: 1, max: 3650, integer: 'floor' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    key: 'memoryPolicy.decayBatchLimit', family: 'memory-policy', path: 'decayBatchLimit',
+    type: 'number', domain: { min: 1, max: 2000, integer: 'floor' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    // 只登记不可写：模型 id 与向量维度（EMBEDDING_DIM=1024）绑定，单方面换模型会让已存向量全部失效。
+    key: 'memoryPolicy.embeddingModel', family: 'memory-policy', path: 'embeddingModel',
+    type: 'string', domain: { oneOf: ['text-embedding-v3'] }, envKeys: [], aliases: [],
+    mutable: false, owner: 'code', ui: 'none',
   },
   {
     key: 'mcpServers.<item>.url', family: 'mcp-servers', path: '<item>.url',

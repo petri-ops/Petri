@@ -3969,6 +3969,30 @@
         "test/block203-landing-registry.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block205-memory-policy",
+      "note": "BLOCK-205（W6）记忆与压缩策略：schema 族 memory-policy（9 可写标量 + 嵌入模型只读）、helpers/memory-policy 落点、conversation-compaction/memory-vectors/memory-lifecycle 九处接线（默认值逐字等于原常量）、GET/PUT /api/ai/memory-policy（400+diagnostics）、config-transfer/doctor/漂移门接入。",
+      "patterns": [
+        "core/packages/shared-config/config-schema.js",
+        "core/petri-server/helpers/memory-policy.js",
+        "core/petri-server/helpers/conversation-compaction.js",
+        "core/petri-server/helpers/memory-vectors.js",
+        "core/petri-server/helpers/memory-lifecycle.js",
+        "core/petri-server/routes/ai-memory.js",
+        "core/petri-server/helpers/config-transfer.js",
+        "test/block205-*.test.mjs"
+      ],
+      "tests": [
+        "test/block205-memory-policy.test.mjs",
+        "test/block95-b2-compaction.test.mjs",
+        "test/block98-context-management.test.mjs",
+        "test/block188-context-snapshot.test.mjs",
+        "test/block201-settings-baseline.test.mjs",
+        "test/block199-config-drift.test.mjs",
+        "test/block201-config-transfer.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

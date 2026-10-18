@@ -14,8 +14,11 @@
 const crypto = require('crypto');
 
 // 衰减参数（reopen 条件：真实使用节奏重校准，plan §reopen）。
-const AUTO_FACT_TTL_MS = 90 * 24 * 60 * 60 * 1000; // 90 天未确认的 auto 事实转 decayed
-const DECAY_BATCH_LIMIT = 200; // 单次惰性扫描上限（读路径顺手扫，不占页）
+// BLOCK-205（W6）— TTL 与批次上限改由 `helpers/memory-policy` 供
+// （默认值与接线前逐字相同：90 天 / 200；这里是声明处引用，不参与运行时判定）。
+const memoryPolicy = require('./memory-policy');
+const AUTO_FACT_TTL_MS = memoryPolicy.DEFAULTS.autoFactTtlDays * 24 * 60 * 60 * 1000;
+const DECAY_BATCH_LIMIT = memoryPolicy.DEFAULTS.decayBatchLimit;
 
 const AUDIT_ACTIONS = new Set(['extract_write', 'merge', 'correction', 'supersede', 'decay', 'clear']);
 const AUDIT_ACTORS = new Set(['system', 'user', 'model']);
@@ -78,11 +81,11 @@ function lazyDecayFacts(sqlite, userId, { now = Date.now() } = {}) {
      WHERE user_id = ? AND status = 'active' AND pinned = 0 AND source = 'auto'
        AND (last_confirmed_at IS NULL OR last_confirmed_at < ?)
      ORDER BY updated_at ASC LIMIT ?`
-  ).all(String(userId || ''), nowIso(), DECAY_BATCH_LIMIT);
+  ).all(String(userId || ''), nowIso(), memoryPolicy.lifecycleSettings().decayBatchLimit);
   let decayed = 0;
   for (const row of rows) {
     const anchor = Date.parse(row.updated_at || '') || 0;
-    if (now - anchor < AUTO_FACT_TTL_MS) continue; // 未到 TTL（updated_at 为锚，last_confirmed 存在时上面 WHERE 已筛）
+    if (now - anchor < memoryPolicy.lifecycleSettings().autoFactTtlMs) continue; // 未到 TTL（updated_at 为锚，last_confirmed 存在时上面 WHERE 已筛）
     sqlite.prepare("UPDATE user_facts SET status = 'decayed' WHERE id = ? AND status = 'active'").run(row.id);
     appendAudit(sqlite, { userId, actor: 'system', action: 'decay', factId: row.id, detail: { updatedAt: row.updated_at } });
     decayed += 1;

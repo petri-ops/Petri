@@ -60,7 +60,8 @@
 - [x] W4a BLOCK-203 阶段 3 B1b 前半片（**completed 2026-10-18**：P1–P8 八片落地；四文件族收编 + ai-settings 顶层白名单 + localStorage 降纯缓存 + models 导出默认脱敏；注册表 12 族/60 键；closeout 十三门全绿；覆盖率按实码 **8/14**=7/7 文件族 + localStorage，剩 6 处属 W4b；收口自纠 accents↔prefCache 新环 + 补 UI-521/522 台账）
 - [x] W4b BLOCK-203 阶段 3 B1b 后半片（**completed 2026-10-18**：落点总账把 14 处逐条归属——7 配置全收编、7 非配置逐条有理由；**SQLite 四落点不搬是裁定**（均属运行时态/授权数据）；目录单源 `shared-backend/data-paths`（两个有名字的根，四只手工链消失）；closeout 十三门全绿）
 - [x] W5 BLOCK-204 MCP 逐工具策略面（**completed 2026-10-18**：投影上限/逐工具超时/合同模式三件可配且"未配置=零行为变化"；`mcp-tool-policy` 族 13 族/65 键；`GET/PUT /api/mcp/tool-policy` unknown-tool 400 只拒该条；transfer/doctor 接入；漂移门 `NO_UI_FAMILIES`。未做=逐工具设置页（W5b））
-- [ ] W6 … W8（未启动）
+- [ ] W6 BLOCK-205 记忆与压缩策略面（**active 2026-10-18**：compaction×4 + 记忆检索×3 + 生命周期×2 可配；默认值=现状；含评测基线对齐）
+- [ ] W7 … W8（未启动）
 
 ## 4. 已知未达成事实（防止后续会话误读为已完成）
 

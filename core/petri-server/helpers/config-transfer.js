@@ -32,6 +32,7 @@ const skillPrefs = require('../../shared-backend/skill-prefs.js');
 const userRules = require('./agent-user-rules');
 const mcpSettings = require('./mcp-settings');
 const toolPolicy = require('./mcp-tool-policy');
+const memoryPolicy = require('./memory-policy');
 
 const CONFIG_TRANSFER_FORMAT = 'petri-config';
 const CONFIG_TRANSFER_VERSION = 1;
@@ -58,6 +59,8 @@ const CONFIG_TRANSFER_FAMILIES = Object.freeze([
   // BLOCK-204（W5）逐工具策略：导出/导入形状校验，**不做 unknown-tool 判定**
   // （备份可能来自另一台机器/另一批已连接 server；名字合法性由运行时写面把关）
   'mcp-tool-policy',
+  // BLOCK-205（W6）记忆与压缩策略：只导出用户真正写过的键（覆盖层语义，不含默认值）
+  'memory-policy',
 ]);
 
 /** 显式排除清单：随信封回传，防止「以为备份了全部设置」。 */
@@ -129,6 +132,7 @@ function readFamilyOverrides() {
     'agent-rules': { version: 1, rules: userRules.loadUserRules() },
     'mcp-servers': { version: 1, servers: mcpSettings.listMcpServersForExport() },
     'mcp-tool-policy': toolPolicy.readStore(),
+    'memory-policy': { ...memoryPolicy.readStored().values },
   };
 }
 
@@ -221,6 +225,10 @@ function validateFamily(family, body) {
   }
   if (family === 'network' || family === 'runtime') {
     return schema.commitGuard(family, body, lookup).diagnostics;
+  }
+  if (family === 'memory-policy') {
+    // 复用落点的纯校验（未知键/越界/只读键同一份规则），导入不接受部分合法
+    return memoryPolicy.validatePatch(body).map((d) => ({ ...d, family }));
   }
   if (family === 'mcp-tool-policy') {
     const limitEntry = schema.findKeyEntry('mcpPolicy.projectionLimit');
@@ -375,6 +383,14 @@ const WRITERS = {
     // 合并覆盖（导入不删文件里未出现的键）：合并与消毒都在落点模块里，transfer 不复制形状知识
     skillPrefs.importPrefs(body);
   },
+  'memory-policy'(body) {
+    const saved = memoryPolicy.writeStore(body);
+    if (!saved.ok) {
+      const error = new Error('memory-policy 写入被拒');
+      error.diagnostics = saved.diagnostics;
+      throw error;
+    }
+  },
   'mcp-tool-policy'(body) {
     const saved = toolPolicy.writeStore({
       projectionLimit: body.projectionLimit,
@@ -449,6 +465,7 @@ const RESETTERS = {
   'agent-rules'() { userRules.saveUserRules([]); },
   'mcp-servers'() { mcpSettings.saveMcpServers([]); },
   'mcp-tool-policy'() { toolPolicy.resetToolPolicies(); },
+  'memory-policy'() { memoryPolicy.resetMemoryPolicy(); },
 };
 
 /**

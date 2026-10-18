@@ -4,7 +4,7 @@
 
 最后更新：2026-10-17（**BLOCK-203-STAGE-3-B1B-CONFIG-LANDING-CONSOLIDATION 立项发令 active（runlist W4 拆片：W4a 先做）**）
 
-**恢复要点（换会话必读·本段取代下方 BLOCK-203 段）**：**无 active 工作包**；**下一包=runlist W6**（记忆与压缩设置面：压缩阈值/策略、记忆提取模型与上限、作用域；验收要**与评测基线对齐**——压缩阈值影响 evals 判据，快照 fp 变更须显式重基准留痕，BLOCK-188/199 先例）。**刚收口=BLOCK-204（W5）**：MCP 逐工具策略面——投影上限/超时/合同模式三件可配（未配置=零行为变化，基线 4/4 冻结），`mcp-tool-policy` 族（注册表 13 族/65 键）+ `GET/PUT /api/mcp/tool-policy`（unknown-tool 400 只拒该条），transfer/doctor 已接入；漂移门新增 `NO_UI_FAMILIES`（v1 无设置页=显式登记）。**未做**：逐工具设置页（表格 UI + 9223 实机腿）留 W5b/设置面批次——别把 API 当"已提供界面"。
+**恢复要点（换会话必读·本段取代下方 BLOCK-204 段）**：**当前 active 工作包=BLOCK-205（W6：记忆与压缩策略面）**，plan=`docs/block-205-memory-compaction-policy-plan.md`（registry `active` / `P0-LAUNCH`）。**下一步第一个动作=P1+P2**：schema 加 `memory-policy` 族（9 可写标量 + 嵌入模型只读）+ `helpers/memory-policy.js`，随后 P3 九处接线（compaction 4 / memory-vectors 3 / memory-lifecycle 2）。**红线**：默认值必须逐字等于现有常量（12000/24/12/60000/3/0.55/1500/90/200）；不改阈值语义；嵌入模型只登记不可写（改模型=换维度=重嵌入）。**P5 硬条款**：跑 context_snapshot 棘轮 + smoke/golden，指纹变了必须显式 `--update` 重基准并在 AUDIT-LOG 留因，没变就写"未变"——不许略过。
 
 最后更新：2026-10-17（**BLOCK-202-STAGE-A-QUICKWINS-3 整包 completed（阶段 A 速赢 III=runlist W3；当日立项当日收口·9223 探针 15/15 allPass）**）
 

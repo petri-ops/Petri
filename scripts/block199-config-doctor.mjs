@@ -26,6 +26,7 @@ const skillPrefs = require('../core/shared-backend/skill-prefs.js');
 const userRules = require('../core/petri-server/helpers/agent-user-rules.js');
 const mcpSettings = require('../core/petri-server/helpers/mcp-settings.js');
 const toolPolicy = require('../core/petri-server/helpers/mcp-tool-policy.js');
+const memoryPolicy = require('../core/petri-server/helpers/memory-policy.js');
 const aiSettings = require('../core/petri-server/helpers/ai-settings.js');
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -52,6 +53,8 @@ function storeTargets(env = process.env) {
     { family: 'mcp-servers', file: mcpSettings.SETTINGS_FILE, items: 'servers' },
     // BLOCK-204（W5）：标量 projectionLimit + 逐工具条目（items 走同一 diagnoseItem）
     { family: 'mcp-tool-policy', file: toolPolicy.policyFilePath(), items: 'tools', scalarKeys: ['projectionLimit'] },
+    // BLOCK-205（W6）：全部是文件根标量
+    { family: 'memory-policy', file: memoryPolicy.policyFilePath(), bag: null, scalarKeys: [...memoryPolicy.KEYS] },
   ];
 }
 
