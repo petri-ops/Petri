@@ -3986,11 +3986,12 @@
       "tests": [
         "test/block205-memory-policy.test.mjs",
         "test/block95-b2-compaction.test.mjs",
-        "test/block98-context-management.test.mjs",
         "test/block188-context-snapshot.test.mjs",
         "test/block201-settings-baseline.test.mjs",
         "test/block199-config-drift.test.mjs",
-        "test/block201-config-transfer.test.mjs"
+        "test/block201-config-transfer.test.mjs",
+        "test/block98-compaction-upgrade.test.mjs",
+        "test/block98-microcompact.test.mjs"
       ],
       "classifiesScripts": false
     }
