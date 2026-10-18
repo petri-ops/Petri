@@ -28,6 +28,7 @@ const mcpSettings = require('../core/petri-server/helpers/mcp-settings.js');
 const toolPolicy = require('../core/petri-server/helpers/mcp-tool-policy.js');
 const memoryPolicy = require('../core/petri-server/helpers/memory-policy.js');
 const subagentProfile = require('../core/petri-server/helpers/subagent-profile.js');
+const trustPolicy = require('../core/petri-server/helpers/trust-policy.js');
 const aiSettings = require('../core/petri-server/helpers/ai-settings.js');
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -57,6 +58,7 @@ function storeTargets(env = process.env) {
     // BLOCK-205（W6）：全部是文件根标量
     { family: 'memory-policy', file: memoryPolicy.policyFilePath(), bag: null, scalarKeys: [...memoryPolicy.KEYS] },
     { family: 'subagent-profile', file: subagentProfile.profileFilePath(), items: 'profiles', scalarKeys: ['default'] },
+    { family: 'trust-policy', file: trustPolicy.policyFilePath(), items: 'projects', scalarKeys: ['defaultLevel'] },
   ];
 }
 

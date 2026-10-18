@@ -257,6 +257,25 @@ function buildLoopObservationEvidence(input) {
  *
  * PHASE 3.1: Function signature 100% unchanged.
  */
+
+/**
+ * BLOCK-207（W7b）— 项目信任级天花板：请求档位 → 按项目信任级**只收紧**后的档位。
+ * 边界：四档判定/审批/用户规则一字不动；这里只可能在进入判定前把写/执行降为 read。
+ */
+function _applyProjectTrustCeiling(context) {
+  const explicit = context && (context.accessMode === 'read' || context.accessMode === 'workspace-write' || context.accessMode === 'plan' || context.accessMode === 'full')
+    ? context.accessMode
+    : require('./helpers/runtime-policy').getDefaultApprovalMode();
+  try {
+    const trust = require('./helpers/trust-policy');
+    const level = trust.levelForProject(context && context.projectId);
+    return trust.applyTrustCeiling(explicit, level);
+  } catch {
+    // 信任层故障不得改变既有行为（fail-open 到原档位）：它是收紧器，不是判定器
+    return explicit;
+  }
+}
+
 async function runAgentLoop({
   messages,
   context,
@@ -776,9 +795,7 @@ async function runAgentLoop({
     // （additive：未知值维持塌缩 full；'plan' 绝不可塌缩 full）
     // BLOCK-202 W3 — 上下文没给有效档位时用设置面全局默认（默认仍是 'full'，显式传值永远优先；
     // 四档判定与审批资源链一字未改）。
-    accessMode: context && (context.accessMode === 'read' || context.accessMode === 'workspace-write' || context.accessMode === 'plan' || context.accessMode === 'full')
-      ? context.accessMode
-      : require('./helpers/runtime-policy').getDefaultApprovalMode(),
+    accessMode: _applyProjectTrustCeiling(context),
     // UI-303 — Spec 门计划模式透传（此前 agent 循环路径缺失，见上方 planModeActive 注入）
     planMode: (context && context.planMode === true) || (context && context.accessMode === 'plan'),
     allowExecution: executionPolicy.allowExecution,

@@ -34,6 +34,7 @@ const mcpSettings = require('./mcp-settings');
 const toolPolicy = require('./mcp-tool-policy');
 const memoryPolicy = require('./memory-policy');
 const subagentProfile = require('./subagent-profile');
+const trustPolicy = require('./trust-policy');
 
 const CONFIG_TRANSFER_FORMAT = 'petri-config';
 const CONFIG_TRANSFER_VERSION = 1;
@@ -63,6 +64,7 @@ const CONFIG_TRANSFER_FAMILIES = Object.freeze([
   // BLOCK-205（W6）记忆与压缩策略：只导出用户真正写过的键（覆盖层语义，不含默认值）
   'memory-policy',
   'subagent-profile',
+  'trust-policy',
 ]);
 
 /** 显式排除清单：随信封回传，防止「以为备份了全部设置」。 */
@@ -136,6 +138,7 @@ function readFamilyOverrides() {
     'mcp-tool-policy': toolPolicy.readStore(),
     'memory-policy': { ...memoryPolicy.readStored().values },
     'subagent-profile': subagentProfile.readStore(),
+    'trust-policy': trustPolicy.readStore(),
   };
 }
 
@@ -228,6 +231,9 @@ function validateFamily(family, body) {
   }
   if (family === 'network' || family === 'runtime') {
     return schema.commitGuard(family, body, lookup).diagnostics;
+  }
+  if (family === 'trust-policy') {
+    return trustPolicy.validateStore(body).map((d) => ({ ...d, family }));
   }
   if (family === 'subagent-profile') {
     return subagentProfile.validateStore(body).map((d) => ({ ...d, family }));
@@ -389,6 +395,15 @@ const WRITERS = {
     // 合并覆盖（导入不删文件里未出现的键）：合并与消毒都在落点模块里，transfer 不复制形状知识
     skillPrefs.importPrefs(body);
   },
+  'trust-policy'(body) {
+    // 导入也可能改信任级：同样落审计（actor='import'），避免"从文件导入"绕过留痕
+    const saved = trustPolicy.writeStore(body, { actor: 'import' });
+    if (!saved.ok) {
+      const error = new Error('trust-policy 写入被拒');
+      error.diagnostics = saved.diagnostics;
+      throw error;
+    }
+  },
   'subagent-profile'(body) {
     const saved = subagentProfile.writeStore(body);
     if (!saved.ok) {
@@ -481,6 +496,7 @@ const RESETTERS = {
   'mcp-tool-policy'() { toolPolicy.resetToolPolicies(); },
   'memory-policy'() { memoryPolicy.resetMemoryPolicy(); },
   'subagent-profile'() { subagentProfile.resetProfiles(); },
+  'trust-policy'() { trustPolicy.writeStore({ defaultLevel: trustPolicy.DEFAULT_LEVEL, projects: [] }, { actor: 'reset' }); },
 };
 
 /**

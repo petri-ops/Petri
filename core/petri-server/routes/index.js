@@ -72,6 +72,8 @@ module.exports = async function registerRoutes(app) {
     }],
     // BLOCK-206（W7a）：子智能体 profile 读写面（声明式派发缺省）
     ['Subagent profiles', () => require('./subagent-profiles').registerSubagentProfileRoutes(app)],
+    // BLOCK-207（W7b）：项目信任级读写面（accessMode 天花板 + 审计）
+    ['Trust policy', () => require('./trust-policy').registerTrustPolicyRoutes(app)],
   ];
 
   for (const [name, fn] of routes) {

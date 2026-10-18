@@ -62,7 +62,8 @@
 - [x] W5 BLOCK-204 MCP 逐工具策略面（**completed 2026-10-18**：投影上限/逐工具超时/合同模式三件可配且"未配置=零行为变化"；`mcp-tool-policy` 族 13 族/65 键；`GET/PUT /api/mcp/tool-policy` unknown-tool 400 只拒该条；transfer/doctor 接入；漂移门 `NO_UI_FAMILIES`。未做=逐工具设置页（W5b））
 - [x] W6 BLOCK-205 记忆与压缩策略面（**completed 2026-10-18**：九参数进 `memory-policy`（14 族/75 键，默认=现状）；`effectiveSnapshot` 生效值出口；嵌入模型只读；**评测基线未变**（context_snapshot 7/7 + smoke 0）；未做=设置页）
 - [x] W7a BLOCK-206 子智能体 profile + C-29 斜杠抽单元（**completed 2026-10-18**：15 族/81 键；并发 min 收紧、reportGuard 仅 inherit；classifySlashCommand + D15 unit 锚；code-size 抓真回 2142；十三门 PASS。遗留=context_snapshot 漂移待归因）
-- [ ] W7b … W8（未启动）
+- [ ] W7b BLOCK-207 项目/工作区信任级别（**active 2026-10-18**：inherit/trusted/untrusted + accessMode 天花板 + 审计）
+- [ ] W7c … W8（未启动）
 
 ## 4. 已知未达成事实（防止后续会话误读为已完成）
 

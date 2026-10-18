@@ -4051,6 +4051,27 @@
       "classifiesFrontend": true,
       "frontendRelated": true,
       "classifiesScripts": false
+    },
+    {
+      "id": "block207-trust-policy",
+      "note": "BLOCK-207（W7b）：schema 族 trust-policy（defaultLevel + project/level）、helpers/trust-policy 落点（只收紧天花板 + 追加式审计）、agent-runner accessMode 构造点接天花板、routes/trust-policy（400）、transfer/doctor/NO_UI 接入。",
+      "patterns": [
+        "core/packages/shared-config/config-schema.js",
+        "core/petri-server/helpers/trust-policy.js",
+        "core/petri-server/routes/trust-policy.js",
+        "core/petri-server/routes/index.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/helpers/config-transfer.js",
+        "test/block207-*.test.mjs"
+      ],
+      "tests": [
+        "test/block207-trust-policy.test.mjs",
+        "test/block202-network-runtime.test.mjs",
+        "test/block199-config-drift.test.mjs",
+        "test/block201-settings-baseline.test.mjs",
+        "test/block201-config-transfer.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

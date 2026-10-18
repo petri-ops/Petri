@@ -144,6 +144,13 @@ const CONFIG_FAMILIES = Object.freeze({
     precedence: ['file', 'default'],
     envTruth: null,
   },
+  // —— BLOCK-207（runlist W7b）：项目信任级 ——
+  // 只做"进入四档判定前的天花板"，**不是第二套权限系统**（判定/审批/用户规则一字不动）。
+  'trust-policy': {
+    store: 'file:trust-policy.json#projects',
+    precedence: ['file', 'default'],
+    envTruth: null,
+  },
 });
 
 /**
@@ -553,6 +560,23 @@ const CONFIG_KEYS = Object.freeze([
     // 只收 inherit：汇报门是全局接点（report-guard.js），逐子任务覆盖会改其契约 ⇒ 属 reopen
     key: 'subagentProfile.<item>.reportGuard', family: 'subagent-profile', path: '<item>.reportGuard',
     type: 'string', domain: { oneOf: ['inherit'] }, envKeys: [], aliases: [], mutable: true, ui: 'none',
+  },
+  // —— 项目信任级（BLOCK-207 / W7b）——
+  // `defaultLevel` 默认 `inherit` = 零行为变化：**不配置就不干预任何项目**。"最保守"在这里的
+  // 正确形态是"默认不动"，不是"上线即把所有项目降级"（那会把存量用户的任务直接打断）。
+  {
+    key: 'trustPolicy.defaultLevel', family: 'trust-policy', path: 'defaultLevel',
+    type: 'string', domain: { oneOf: ['inherit', 'trusted', 'untrusted'] }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    key: 'trustPolicy.<item>.project', family: 'trust-policy', path: '<item>.project',
+    type: 'string', domain: { pattern: '\\S' }, envKeys: [], aliases: [], mutable: true, ui: 'none',
+  },
+  {
+    key: 'trustPolicy.<item>.level', family: 'trust-policy', path: '<item>.level',
+    type: 'string', domain: { oneOf: ['inherit', 'trusted', 'untrusted'] }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
   },
   {
     // 只登记不可写：模型 id 与向量维度（EMBEDDING_DIM=1024）绑定，单方面换模型会让已存向量全部失效。

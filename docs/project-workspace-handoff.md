@@ -6,7 +6,7 @@
 
 最后更新：2026-10-17（**BLOCK-203-STAGE-3-B1B-CONFIG-LANDING-CONSOLIDATION 立项发令 active（runlist W4 拆片：W4a 先做）**）
 
-**恢复要点（换会话必读·本段取代下方 BLOCK-206 段）**：**无 active 工作包**；**下一包=W7b**（BLOCK-207：项目/工作区信任级别 + 命名权限档；默认=现状最保守、敏感项留审计，依赖已就位的 `subagent-profile`/`runtime` 两族）。**已解决=context_snapshot 漂移**：真因是归一化保留 OS 路径分隔符（Windows 录的基线在 macOS 恒红），已统一 `<TMP>/` + 平台无关单测 + 显式重基准 `dfc9be7b`；**W6 的"指纹未变"结论作废**（当时用单测代替 fp 对比）。**注意**：main 上存在另一会话的提交（`7bf008b9 feat(ui-523)`），改文件前先 `git log` 看一眼。
+**恢复要点（换会话必读·本段取代下方 BLOCK-206 段）**：**当前 active 工作包=BLOCK-207（W7b）**，plan=`docs/block-207-project-trust-policy-plan.md`（registry `active` / `P0-LAUNCH`）。**下一步第一个动作=P1+P2**：schema 加 `trust-policy` 族（`defaultLevel` + `<item>.{project,level}`）+ `helpers/trust-policy.js`（落点走 `data-paths`，`applyTrustCeiling` 纯函数，信任变更追加 `trust-audit.jsonl`）。**红线**：默认 `inherit`=零行为变化；`applyTrustCeiling` **只能收紧**（untrusted: read→read、plan→plan、workspace-write/full→read）；不动四档判定/审批/用户规则；不做自定义权限组合（reopen）。
 
 最后更新：2026-10-17（**BLOCK-202-STAGE-A-QUICKWINS-3 整包 completed（阶段 A 速赢 III=runlist W3；当日立项当日收口·9223 探针 15/15 allPass）**）
 
