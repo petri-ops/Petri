@@ -59,6 +59,8 @@ export function completeResultSurfaceMeasure(input: {
 
 export interface ResultTruthProjection {
   tone: ResultTruthTone;
+  /** BLOCK-211：核验范围说明（徽标 hover/辅助技术可读，避免"可信结果"式过度声称）。 */
+  detail?: string;
   label: string;
 }
 
@@ -157,6 +159,14 @@ export function chooseResultSectionLandingName(
   return artifacts.find((artifact) => artifact.preview !== false)?.name || artifacts[0]?.name || '';
 }
 
+/**
+ * 真值徽标（BLOCK-211 W8 · RS 徽标语义诚实化）。
+ *
+ * 旧文案 `valid → 「可信结果」` 是**过度声称**：`valid` 只表示产物通过了完整性与来源一致性核对
+ * （artifact-truth），既不等于科学结论正确，也不等于 Result Studio 整体已验证——
+ * 后者长期是 `implemented_unverified / experimental`（P7 deferred）。徽标必须只说它知道的事：
+ * 「已核验（未篡改）」+ `detail` 里点明核验范围。
+ */
 export function describeTruthStatus(
   truthStatus: string | null | undefined,
   jobStatus: string | null | undefined,
@@ -164,10 +174,20 @@ export function describeTruthStatus(
   if (jobStatus === 'running' || jobStatus === 'pending') {
     return { tone: 'running', label: jobStatus === 'running' ? '正在生成' : '等待运行' };
   }
-  if (truthStatus === 'valid') return { tone: 'valid', label: '可信结果' };
-  if (truthStatus === 'degraded') return { tone: 'degraded', label: '需要复核' };
-  if (truthStatus === 'blocked' || jobStatus === 'failed') return { tone: 'blocked', label: '结果已阻断' };
-  return { tone: 'unknown', label: '尚未核验' };
+  if (truthStatus === 'valid') {
+    return {
+      tone: 'valid',
+      label: '已核验（未篡改）',
+      detail: '核验范围=产物的完整性与来源一致性（artifact-truth）；不代表科学结论正确，也不代表 Result Studio 整体已验证（当前仍为实验性 / 未整体验证）。',
+    };
+  }
+  if (truthStatus === 'degraded') {
+    return { tone: 'degraded', label: '需要复核', detail: '产物核验未通过或有降级项：请对照来源与证据人工复核。' };
+  }
+  if (truthStatus === 'blocked' || jobStatus === 'failed') {
+    return { tone: 'blocked', label: '结果已阻断', detail: '产物被真值门阻断（不可作为结论使用），请查看诊断。' };
+  }
+  return { tone: 'unknown', label: '尚未核验', detail: '尚未做过真值核验：当前内容属未验证状态，不要当成可信结论。' };
 }
 
 /**

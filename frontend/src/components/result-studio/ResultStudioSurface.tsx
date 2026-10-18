@@ -109,7 +109,7 @@ export function ResultStudioContextBar({
       <div className={styles.contextIdentity}>
         <div className={styles.titleRow}>
           <h2>{title}</h2>
-          <span className={styles.truthBadge} data-tone={trust.tone}>{trust.label}</span>
+          <span className={styles.truthBadge} data-tone={trust.tone} title={trust.detail} aria-label={trust.detail ? `${trust.label}：${trust.detail}` : trust.label}>{trust.label}</span>
           {availabilityStatus === 'unavailable' && (
             <span className={styles.availabilityBadge}>文件不可用</span>
           )}
@@ -228,7 +228,7 @@ export function ResultStudioInspector({
       <div className={styles.inspectorHeader}>
         <span>当前结果</span>
         <strong>{title}</strong>
-        <span className={styles.truthBadge} data-tone={trust.tone}>{trust.label}</span>
+        <span className={styles.truthBadge} data-tone={trust.tone} title={trust.detail} aria-label={trust.detail ? `${trust.label}：${trust.detail}` : trust.label}>{trust.label}</span>
         {artifact.availabilityStatus === 'unavailable' && (
           <span className={styles.availabilityBadge}>文件不可用</span>
         )}

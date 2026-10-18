@@ -5052,3 +5052,10 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **变化面**：设置页「常规」节新增「动效」三档（跟随系统 / 完整动效 / 精简）；`<html data-motion>` 由 ThemeProvider 注入，CSS 与既有 `prefers-reduced-motion` 兜底**共用同一份降级声明**（`global.css`，只改时长/行为，不新增颜色 token）；偏真值走既有 `/api/user/prefs`（与其它外观偏好同一条链），localStorage 只是启动缓存。
 - **实机腿（已补 2026-10-18）**：dev Electron 可见窗口（`env -u ELECTRON_RUN_AS_NODE npm run dev`，userData=`.petri-dev-user-data`）由用户过目确认满意；三档在设置页「常规 → 动效」可切、`<html data-motion>` 随之生效。边界仍在：本开关只覆盖本仓 CSS 定义的过渡/动画，第三方与内联动画不在覆盖范围；未做 computedStyle 数值对比（视觉确认已足够判定"降级是否可感"）。
 - **验证**：`motion.test.tsx` 3/3（默认 system / 缓存 reduced 首屏生效 / 非法值回落 + 切换写回缓存）；`prefCache.drift` 7/7（motion 枚举与注册表逐项相等）；`theme-token-contract` 17/17（**过程中 motion 棘轮当场抓到字面量 transition 时长**，改为复用既有 `var(--petri-duration-fast)` 与既有块，避免第二份实现）。
+
+## UI-526: Result Studio 真值徽标语义诚实化（2026-10-18 in_progress，BLOCK-211 / W8）
+
+- **变化面**：结果头部的真值徽标从「**可信结果**」改为「**已核验（未篡改）**」，并新增 `detail` 说明（`title` + `aria-label` 可读）：核验范围=产物完整性与来源一致性（artifact-truth），**不代表科学结论正确，也不代表 Result Studio 整体已验证**（长期 `implemented_unverified / experimental`，P7 deferred）。其余三态文案同步补范围说明（未核验/需复核/已阻断）。
+- **为什么**：`truthStatus='valid'` 是**产物级**核验结论，旧文案把它升格成"结果可信"的全局判断——这是语义过度声称，和 G0 期"RS 徽标不许冒充资格"的纪律冲突。
+- **诚实边界**：**无实机腿**（纯文案 + 可访问性属性变更，无布局改动）→ 记 `in_progress`；未做 9223 截图证据。
+- **验证**：`resultSurface.test.ts` **18/18**（含新断言 `detail` 含"不代表 Result Studio 整体已验证"）；`tsc --noEmit` 0；`theme-token-contract` 17/17（无样式变更）。

@@ -79,3 +79,9 @@ status: completed
 - **修法（三步，全在夹具侧）**：①**env 先行**——`PETRI_LOCAL_DATA_DIR` + `PETRI_DB_PATH` 在任何后端 require 之前固定；②建表仍走 `src/migrations`（`db.js` 预编译需要），但**只开这一条引导句柄、用完即关**；③`seedConversation` 改用后端自己的连接（`dbMod.getDatabase()`）写种子，**不再开第二句柄**。
 - **结果**：`block110-p1-topic-shift` **6/6 绿**（此前 1/5）；产品代码零改动（临时加的 error.stack 探针已还原）。
 - 口径更正：§4 里"需要单独小批"的结论保留（它确实是独立问题），但修复本身在本批内完成——因为**改的是夹具不是产品**，不会污染 C-32 的验收面。
+
+## 7. 第四批：RS 徽标语义诚实化（2026-10-18）
+
+- **改什么**：`resultSurface.describeTruthStatus` 的 `valid` 文案从「可信结果」→「**已核验（未篡改）**」，并新增 `detail`（渲染为徽标 `title`/`aria-label`）：明确"核验范围=产物完整性与来源一致性，**不代表科学结论正确，也不代表 Result Studio 整体已验证**（仍 `implemented_unverified / experimental`，P7 deferred）"。另三态（尚未核验/需要复核/结果已阻断）同样补范围说明。
+- **为什么这是诚实化而不是改词**：`valid` 是**产物级**结论（artifact-truth），旧文案把它升格成"结果可信"的全局判断——正好违背 G0 期"RS 徽标不许冒充资格"的纪律。
+- 证据：`resultSurface.test.ts` **18/18**（新断言 `detail` 含"不代表 Result Studio 整体已验证"）+ `tsc` 0 + `theme-token-contract` 17/17（无样式变更）；台账 **UI-526 `in_progress`**（纯文案/可访问性变更，无实机腿）。

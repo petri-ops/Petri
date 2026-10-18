@@ -89,9 +89,12 @@ describe('G0-RS-P1 result surface projection', () => {
   });
 
   it('projects trust, revision and selection without inventing missing facts', () => {
-    expect(describeTruthStatus('valid', 'done')).toEqual({ tone: 'valid', label: '可信结果' });
-    expect(describeTruthStatus(null, 'done')).toEqual({ tone: 'unknown', label: '尚未核验' });
-    expect(describeTruthStatus('blocked', 'done')).toEqual({ tone: 'blocked', label: '结果已阻断' });
+    // BLOCK-211 W8：`valid` 只代表产物完整性与来源一致性已核验，不等于科学结论可信、也不等于 RS 整体已验证
+  expect(describeTruthStatus('valid', 'done')).toMatchObject({ tone: 'valid', label: '已核验（未篡改）' });
+  expect(describeTruthStatus('valid', 'done').detail).toContain('不代表 Result Studio 整体已验证');
+    expect(describeTruthStatus(null, 'done')).toMatchObject({ tone: 'unknown', label: '尚未核验' });
+    expect(describeTruthStatus(null, 'done').detail).toContain('未验证状态');
+    expect(describeTruthStatus('blocked', 'done')).toMatchObject({ tone: 'blocked', label: '结果已阻断' });
     // The ordinal is the version. This assertion used to pin the opposite —
     // shortRevisionLabel('revision-abcdef12...') === '版本 abcdef12' — inside a
     // test named for not inventing missing facts, while presenting an id
