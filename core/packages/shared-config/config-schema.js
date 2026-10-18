@@ -48,6 +48,9 @@ const CONFIG_FAMILIES = Object.freeze({
     store: 'file:decision-config.json#points',
     precedence: ['env', 'file', 'registry'],
     envTruth: 'one-zero',
+    // BLOCK-211（C-32）：本族 env 有两义——'0' 是杀开关（真遮蔽），'1' 只是**首载种子**
+    // （文件有值时不参与胜负）。shadow 判定要据此区分，否则 doctor 会把不生效的 env 报成遮蔽。
+    envOneIsSeed: true,
   },
   'generation': {
     store: 'file:ai-settings.json#generation',
@@ -927,6 +930,8 @@ function envShadowedKeys(family, fileObj, env, lookup) {
     if (!hit) continue;
     const envResolved = resolveEnvEntry(family, env[hit]);
     if (!envResolved) continue; // env 值不被该族承认（例如非 1/0/true/false 字面量）→ 不构成遮蔽
+    // BLOCK-211（C-32）：env='1' 在本族只是首载种子——文件有值时它不参与胜负，报"遮蔽"就是假警报
+    if (spec.envOneIsSeed && envResolved.value === true) continue;
     out.push({ family, path, envKey: hit, envValue: env[hit], fileValue: value, overrides: envResolved.value !== value });
   }
   return out;

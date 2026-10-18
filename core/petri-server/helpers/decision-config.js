@@ -15,9 +15,10 @@ const NEWLINE = String.fromCharCode(10);
  *
  * 契约（plan §P4）：
  *  - 五个运行时接点：enabled/threshold 可经配置文件调整；校准默认来自 decision-thresholds。
- *  - 优先级：env='0' 强制关（杀开关，最高，永不违逆）；其余以配置文件为准（首载=种子值，
- *    从 env='1' 沿用现状）；env='1' 不在运行时强制开（避免 UI 关不掉）——envOverride 字段
- *    如实暴露给 UI 提示。
+ *  - 优先级（BLOCK-211 C-32 清偿后，与实现一致）：`env='0'` 强制关（杀开关，最高，永不违逆）
+ *    > 文件 `enabled` > **`env='1'` 仅作首载种子**（文件没有该键时才生效）> 注册表默认。
+ *    也就是说 **设置页显式关掉的接点，不会被残留的 `PETRI_JEV_*=1` 重新打开**——
+ *    此前实现是 `env 优先`，与这段注释相反（C-32），现已按注释语义修正。
  *  - 读不落盘（缺文件返回内存种子）；只有 setPointConfig 落盘——测试/只读路径零副作用。
  *  - 只覆盖五个运行时接点；failure-triage/test-suggest 为 CLI 工具不参与。
  */
@@ -91,14 +92,25 @@ function mergeGates(registryGates, storedGates) {
  * threshold/gates **不走通用层**：它们的默认值与证据绑在 decision-thresholds（改值须先重校准），
  * 通用 schema 只声明形状，不裁决校准数值——这是有意的边界，不是没做完。
  */
+/**
+ * 接点启用解析（BLOCK-211 C-32）：`env='0'` 杀开关 > 文件 > `env='1'` 种子 > 注册表默认。
+ *
+ * 为什么不能直接用通用的 `resolveConfigLayers`：通用模型只有 env/file/default 三层，
+ * 而这里 `env` 有两种语义（kill / seed）。硬塞进去就得给 schema 加层类型，代价是
+ * 让所有族都背上一个只有本族用得到的形状——所以在**本族**显式表达，并由
+ * `test/block211-c32-env-seed.test.mjs` 的真相表钉住。
+ */
 function resolvePointEnabled(meta, stored, envRaw) {
   const envHit = resolveEnvEntry(POINT_FAMILY, envRaw);
   const hasStored = Object.prototype.hasOwnProperty.call(stored, 'enabled');
-  return resolveConfigLayers(POINT_FAMILY, {
-    env: envHit ? envHit.value : null,
-    file: hasStored ? stored.enabled === true : undefined,
-    registry: meta.defaultOn === true,
-  }).value;
+  // ① 杀开关：env='0' 永不违逆
+  if (envHit && envHit.value === false) return false;
+  // ② 文件（用户显式选择）优先于种子
+  if (hasStored) return stored.enabled === true;
+  // ③ env='1' 仅作首载种子
+  if (envHit && envHit.value === true) return true;
+  // ④ 注册表默认
+  return resolveConfigLayers(POINT_FAMILY, { registry: meta.defaultOn === true }).value;
 }
 
 /** 生效配置（env='0' 强制关最高；env='1' 在 envOverride 如实暴露但不强制——以配置文件为准）。 */

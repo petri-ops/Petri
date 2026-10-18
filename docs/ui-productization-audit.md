@@ -5047,8 +5047,8 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **诚实边界**：**无实机腿**（本改动是纯判定抽离，零可见行为变化）→ 记 `in_progress`；结构化 chip 注入通道仍属 `slashSources` 里登记的 v2，不在本包。
 - **验证**：`slashExecute.test.ts` 3/3（五动作 + 模板族 + 未知命令收起）；`tsc --noEmit` 0。
 
-## UI-525: 动效用户开关（2026-10-18 in_progress，BLOCK-208 / W7c）
+## UI-525: 动效用户开关（2026-10-18 **verified（用户实机过目确认「好 棒 满意」；dev Electron 可见窗口，三档切换与 `<html data-motion>` 生效）**，BLOCK-208 / W7c）
 
 - **变化面**：设置页「常规」节新增「动效」三档（跟随系统 / 完整动效 / 精简）；`<html data-motion>` 由 ThemeProvider 注入，CSS 与既有 `prefers-reduced-motion` 兜底**共用同一份降级声明**（`global.css`，只改时长/行为，不新增颜色 token）；偏真值走既有 `/api/user/prefs`（与其它外观偏好同一条链），localStorage 只是启动缓存。
-- **诚实边界**：**无实机腿** → 记 `in_progress`（未做 9223 三档切换的 computedStyle 对比）；本开关只覆盖本仓 CSS 定义的过渡/动画，第三方与内联动画不在覆盖范围。
+- **实机腿（已补 2026-10-18）**：dev Electron 可见窗口（`env -u ELECTRON_RUN_AS_NODE npm run dev`，userData=`.petri-dev-user-data`）由用户过目确认满意；三档在设置页「常规 → 动效」可切、`<html data-motion>` 随之生效。边界仍在：本开关只覆盖本仓 CSS 定义的过渡/动画，第三方与内联动画不在覆盖范围；未做 computedStyle 数值对比（视觉确认已足够判定"降级是否可感"）。
 - **验证**：`motion.test.tsx` 3/3（默认 system / 缓存 reduced 首屏生效 / 非法值回落 + 切换写回缓存）；`prefCache.drift` 7/7（motion 枚举与注册表逐项相等）；`theme-token-contract` 17/17（**过程中 motion 棘轮当场抓到字面量 transition 时长**，改为复用既有 `var(--petri-duration-fast)` 与既有块，避免第二份实现）。

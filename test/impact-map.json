@@ -4106,6 +4106,24 @@
         "test/block201-config-transfer.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block211-tail-c32",
+      "note": "BLOCK-211（W8 首批 C-32）：decision-config 的 env='1' 从运行时强制开降级为首载种子（env='0' 仍杀开关）；schema 标 envOneIsSeed 并让 envShadowedKeys 不把 seed 报成遮蔽；compat 基线显式改写留因。",
+      "patterns": [
+        "core/petri-server/helpers/decision-config.js",
+        "core/packages/shared-config/config-schema.js",
+        "test/block211-*.test.mjs"
+      ],
+      "tests": [
+        "test/block211-c32-env-seed.test.mjs",
+        "test/block199-config-compat.test.mjs",
+        "test/block112-intent-routing.test.mjs",
+        "test/block113-tool-prerouting.test.mjs",
+        "test/block116-decision-platform.test.mjs",
+        "test/block199-config-drift.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

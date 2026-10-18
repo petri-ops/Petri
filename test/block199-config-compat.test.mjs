@@ -11,9 +11,10 @@
  *  · ai-settings generation（helpers/ai-settings.js:315-329）：env 数值 > 文件 `generation` > 不返回该键
  *    （loop 内置 0.4/16384 是隐式缺省，不出现在返回体）；temperature 0..2、maxTokens ≥256 且取整，非法即丢键。
  *  · cost-cap（helpers/cost-cap.js:20-26）：env > 文件 > null；上限必须 >0 且两位小数取整。
- *  · decision-config（helpers/decision-config.js:80-105）：env '0' 杀开关最高；**env '1' 实际强制开**
- *    （与同文件头部注释「不在运行时强制开」相反——该矛盾本包只登记不改，见 plan §0.2 与候选 C-32）；
- *    其余以文件为准，`tool-route` 独享 defaultOn；threshold 已存值赢注册表、gates 只做注册表既有键的部分覆盖。
+ *  · decision-config（helpers/decision-config.js）：**BLOCK-211（C-32）已按注释语义修正**——
+ *    env '0' 杀开关最高 > 文件 > **env '1' 仅作首载种子** > 注册表默认。此前是「env '1' 运行时强制开」，
+ *    与文件头注释相反；本基线在同一提交里随 C-32 一起显式改写（留因：修的是"设置页关不掉"的治理缺陷，
+ *    不是放宽判据）。`tool-route` 独享 defaultOn；threshold 已存值赢注册表、gates 只做既有键部分覆盖。
  */
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -109,15 +110,21 @@ test('ai-settings generation：env 覆盖文件、数值域外丢键、maxTokens
 
 );
 
-test('decision-config：env 0 杀开关最高；env 1 现状强制开（与注释相反，本包只登记不改）', () => {
+test('decision-config：env 0 杀开关最高；env 1 只作首载种子（C-32 修正后语义）', () => {
   fs.writeFileSync(decisionFile, JSON.stringify({ version: 1, points: { 'knowledge-guard': { enabled: false }, 'tool-route': { enabled: false } } }));
   process.env.PETRI_JEV_KNOWLEDGE_GUARD = '1';
   try {
     const dc = require(path.join(ROOT, 'core/petri-server/helpers/decision-config.js'));
-    assert.equal(dc.getPointRuntime('knowledge-guard').enabled, true, '现状：env=1 盖过设置页显式关（C-32 登记项）');
-    assert.equal(dc.getPointRuntime('knowledge-guard').envOverride, 'on');
+    // C-32 修正：文件有值 ⇒ env=1 不再盖过设置页；这正是"我关掉了但它还开着"的根治点
+    assert.equal(dc.getPointRuntime('knowledge-guard').enabled, false, 'env=1 是种子，不覆盖文件里的显式关');
+    assert.equal(dc.getPointRuntime('knowledge-guard').envOverride, 'on', 'envOverride 仍如实暴露给 UI 提示');
     process.env.PETRI_JEV_KNOWLEDGE_GUARD = '0';
     assert.equal(dc.getPointRuntime('knowledge-guard').enabled, false, 'env=0 杀开关任何情况下最高');
+    delete process.env.PETRI_JEV_KNOWLEDGE_GUARD;
+    // 文件里没有该键时，env=1 仍能作为"默认开"的种子生效（dev 脚本用法不破）
+    fs.rmSync(decisionFile, { force: true });
+    process.env.PETRI_JEV_KNOWLEDGE_GUARD = '1';
+    assert.equal(dc.getPointRuntime('knowledge-guard').enabled, true, '无文件配置时 env=1 作种子生效');
   } finally {
     delete process.env.PETRI_JEV_KNOWLEDGE_GUARD;
   }

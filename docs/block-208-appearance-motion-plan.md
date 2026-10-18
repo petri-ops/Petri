@@ -42,7 +42,8 @@ status: completed
 - **P6 证据**：`motion.test.tsx` 3/3 + `prefCache.drift` 7/7 + `theme-token-contract` 17/17；**9223 实机腿未跑**（见 §3）。
 - **抓真两处**：①首版把降级规则写进 `custom.css`，与 `global.css` 既有块**重复实现**，且 motion 棘轮当场抓到字面量 `transition-duration: 0.001ms` → 改为复用既有块与 `var(--petri-duration-fast)`；②面板加控制后 code-size 671 > 基线 670 → 删空行回 670 并重打指纹（未抬基线）。
 
-## 3. 未完成（如实登记）
+## 3. 实机腿补记（2026-10-18）
 
-- **9223 实机腿未跑**：三档切换后的 `getComputedStyle` 动画/过渡时长对比未取证 ⇒ UI-525 记 `in_progress`，本包**不以 verified 表述**。
+- **实机腿已补**：dev Electron 可见窗口起栈（`env -u ELECTRON_RUN_AS_NODE npm run dev`——本机 shell 继承了 `ELECTRON_RUN_AS_NODE=1`，不 unset 会让 Electron 当 Node 跑、`app` 为 undefined）；用户在「设置 → 常规 → 动效」过目三档并确认满意 ⇒ **UI-525 转 `verified`**。
+- 未做项保留：`getComputedStyle` 数值对比（视觉确认已足以判定"降级可感"）；本开关只覆盖本仓 CSS 过渡/动画。
 - 预览专项 / 密度接线 / 对比度档 / 通知 / 性能：进 reopen（见 front-matter）。
