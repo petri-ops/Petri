@@ -6989,8 +6989,8 @@
       "capability": "memory-compaction-policy",
       "path": "docs/block-205-memory-compaction-policy-plan.md",
       "kind": "work-package",
-      "status": "active",
-      "phase": "P0-LAUNCH",
+      "status": "completed",
+      "phase": "P5-CLOSED",
       "canonical": true,
       "truthDomain": "block-205-memory-compaction-policy-plan",
       "entrypoint": "docs/README.md",
@@ -7005,7 +7005,7 @@
         "stage-3-b2",
         "block-205"
       ],
-      "notes": "2026-10-18 立项发令 active（runlist W6；用户「行的 冲」）。P0 实码：compaction 四常量（12000/24/12/60000）、记忆三参数（3/0.55/1500）+ 单条上限 1500、TTL 90 天/批次 200、嵌入模型 text-embedding-v3 全部硬编码且无生效值出口。范围=schema 族 memory-policy + helper 落点 + compaction/memory-vectors/memory-lifecycle 九处接线 + GET/PUT /api/ai/memory-policy + transfer/doctor/漂移门；与评测基线对齐（context_snapshot 指纹不变则如实记录，变则显式重基准）。红线=默认值逐字等于常量、不改阈值语义、嵌入模型只登记不可写。"
+      "notes": "2026-10-18 立项发令 active（runlist W6；用户「行的 冲」）。P0 实码：compaction 四常量（12000/24/12/60000）、记忆三参数（3/0.55/1500）+ 单条上限 1500、TTL 90 天/批次 200、嵌入模型 text-embedding-v3 全部硬编码且无生效值出口。范围=schema 族 memory-policy + helper 落点 + compaction/memory-vectors/memory-lifecycle 九处接线 + GET/PUT /api/ai/memory-policy + transfer/doctor/漂移门；与评测基线对齐（context_snapshot 指纹不变则如实记录，变则显式重基准）。红线=默认值逐字等于常量、不改阈值语义、嵌入模型只登记不可写。 | 收口 2026-10-18：注册表 14 族/75 键；compaction 4 + 检索 3 + 生命周期 2 全部可配且默认值逐字等于原常量（未配置=零行为变化，基线冻结）；嵌入模型只读；写面 400 三分类；transfer/doctor/NO_UI_FAMILIES 接入。**评测基线对齐：context_snapshot 7/7 指纹未变 + evals:gate smoke 回归 0（无需重基准，如实记录）**。closeout 十三门全绿。"
     }
   ],
   "lastUpdated": "2026-10-17",

@@ -10,7 +10,7 @@ acceptance:
   - P5 收尾：`config-transfer`/`config:doctor`/漂移门三件套；**与评测基线对齐**——跑 `context_snapshot` 棘轮与 smoke/golden，若指纹变化必须显式 `--update` 重基准并在日志里留因；不变则如实记录"未变"。
   - 完成语义：参数可配 + 生效可观测（快照接口回显"生效值 vs 默认值"）；不交付设置页；不改压缩算法本身（阈值语义、KEEP 语义、衰减规则一字不动）。
 reopen: 记忆/压缩设置页（表格 UI + 9223 实机腿）；提取模型的真正可换（需要向量维度迁移与重嵌入）；按项目/会话覆盖策略；压缩摘要 prompt 的可配置化。
-status: active
+status: completed
 ---
 
 # BLOCK-205 · 阶段 3 B2 之二：记忆与压缩策略面
