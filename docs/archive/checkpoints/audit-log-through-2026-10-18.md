@@ -27,3 +27,6 @@
 <!-- audit-log-compact.mjs 追加 @ 2026-10-18T02:09:33.941Z -->
 最后更新：2026-10-18（**BLOCK-206（W7a）completed；closeout 十三门 PASS**）：profile 声明式配置（15 族/81 键，并发 min 收紧、reportGuard 仅 inherit）+ C-29 斜杠判定抽离并挂 D15 unit 锚。code-size 当场抓真（SimpleChat +2 行 → 删冗余注释回 2142）。**仍挂 🟡**：`context_snapshot` golden 指纹漂移待归因（W6 的"指纹未变"已作废），未重基准。plan=docs/block-206-subagent-profile-slash-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-206（W7a）代码落地，但 closeout 未跑**；同时**更正 W6 的"评测基线未变"结论**）：`context_snapshot` golden 指纹 **dfc9be7b… vs 基线 9bb90c14…**，原因行=「system prompt 文案变更」；用 `git stash` 移除 W7a 改动后同样漂移 ⇒ **与 W7a 无关**。W6 收口时我用的是单测（只验归一化机制）而非 golden fp 对比，故"指纹未变"不成立，改记 🟡 待归因；**未重基准**（归因前不得 `--update-snapshot`）。另发现：main 上存在另一会话的提交（`7bf008b9 feat(ui-523)`），W7a 工作叠在其上。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-18T02:16:46.925Z -->
+最后更新：2026-10-18（**🟡 context_snapshot 漂移已归因并修复：不是 prompt 文案，是路径分隔符**）：`normalizeContextString` 把 tmp 根换成 `<TMP>` 后保留了 OS 分隔符 ⇒ Windows 录的基线（`<TMP>\projects\…`）在 macOS 上恒红。处置=归一化统一 `<TMP>/`（新增"Windows 与 POSIX 同指纹"单测），显式重基准到 `dfc9be7b986a1c17` 并复跑 `✔ 一致`。**两处口径更正**：W6 的"指纹未变"不成立（用单测代替 fp 对比）；W7a 初判引用的"system prompt 文案变更"只是 harness 启发式提示语，非真因。G0 开发期常态 · 不外推 packaged/Provider/GA。

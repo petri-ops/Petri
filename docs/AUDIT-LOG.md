@@ -1,4 +1,5 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-10-18（**BLOCK-211（W8 首批）completed：C-32 清偿（closeout 十三门 PASS）**）：`env='1'` 从运行时强制开降级为**首载种子**（`env='0'` 仍杀开关）——设置页关掉的守卫不再被残留 env 重新打开；`envShadowedKeys` 不再把 seed 报成遮蔽；compat 基线同批显式改写留因。**新登记 🟡**：`block110-p1-topic-shift` 5 例在 HEAD 上就红（stash A/B 证明与本批无关）。W8 其余项仍在册。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-210（W7e）completed（closeout 十三门 PASS）**）：留存/归档（默认零删除、apply 默认 dryRun、删除须 allowDelete、审计落盘）+ 迁移**计划器**（只读：步骤/备份/回退/阻塞项）；注册表 17 族/89 键；**真实搬迁与清理未执行**（reopen）。plan=docs/block-210-data-dir-retention-plan.md。无 active 工作包，下一包=W8 收尾族。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-210-DATA-DIR-RETENTION 立项发起 active（runlist W7e）**）：留存/归档策略（默认零删除、apply 默认 dryRun）+ 迁移计划器/预览（只读不执行；真实搬迁属 reopen）；目录解析只走 `data-paths` 单源。plan=docs/block-210-data-dir-retention-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-209（W7d）completed（closeout 十三门 PASS）**）：外部 Agent 配置只读解析 + 映射预览（Codex TOML 子集 / ZCode JSON），零写入零网络、凭据 D-2 双查拒入 patch、patch 与注册表对账、零新依赖；**预览不是导入**（一键应用属 reopen）。plan=docs/block-209-external-agent-import-plan.md。无 active 工作包，下一包=W7e。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -7,7 +8,6 @@
 最后更新：2026-10-18（**BLOCK-208-APPEARANCE-MOTION 立项发令 active（W7c 收窄版：只做动效开关）**）：`user-prefs` 加 motion（接线）+ density（仅登记）；CSS 双降级（data-motion/prefers-reduced-motion），只改时长与行为、不新增颜色 token；设置页常规节三档。预览专项/密度接线/对比度/通知/性能进 reopen。plan=docs/block-208-appearance-motion-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-207（W7b）completed（closeout 十三门 PASS）**）：项目信任级 inherit/trusted/untrusted（16 族/84 键），`applyTrustCeiling` 只能收紧（untrusted 下写/执行→read，read/plan 原样），默认 inherit 零行为变化；接 agent-runner accessMode 构造点、信任层故障 fail-open；变更/导入/重置均落 `trust-audit.jsonl`。plan=docs/block-207-project-trust-policy-plan.md。无 active 工作包，下一包=W7c。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-207-PROJECT-TRUST-POLICY 立项发令 active（runlist W7b）**）：项目信任级 inherit/trusted/untrusted，在 accessMode 构造点做只能收紧的天花板（untrusted ⇒ 禁止写/执行）；信任变更写追加式审计；默认 inherit=零行为变化。plan=docs/block-207-project-trust-policy-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
-最后更新：2026-10-18（**🟡 context_snapshot 漂移已归因并修复：不是 prompt 文案，是路径分隔符**）：`normalizeContextString` 把 tmp 根换成 `<TMP>` 后保留了 OS 分隔符 ⇒ Windows 录的基线（`<TMP>\projects\…`）在 macOS 上恒红。处置=归一化统一 `<TMP>/`（新增"Windows 与 POSIX 同指纹"单测），显式重基准到 `dfc9be7b986a1c17` 并复跑 `✔ 一致`。**两处口径更正**：W6 的"指纹未变"不成立（用单测代替 fp 对比）；W7a 初判引用的"system prompt 文案变更"只是 harness 启发式提示语，非真因。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 > 本文件只保存需要主 Agent 看见的活跃广播与最近处理记录。
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-10-11.md) · [through-2026-09-19](./archive/checkpoints/audit-log-through-2026-09-19.md) · [through-2026-09-17](./archive/checkpoints/audit-log-through-2026-09-17.md) · [through-2026-09-16](./archive/checkpoints/audit-log-through-2026-09-16.md) · 上一档：[through-2026-09-13](./archive/checkpoints/audit-log-through-2026-09-13.md) · [through-2026-09-12](./archive/checkpoints/audit-log-through-2026-09-12.md)（更早前史：[through-2026-07-26](./archive/checkpoints/audit-log-through-2026-07-26.md)、[2026-08-pre18](./archive/audit-log-2026-08-pre18.md)）。
@@ -18,6 +18,7 @@
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
+| ✅ | 2026-10-18 | **BLOCK-211（W8 首批）completed**：C-32 env=1 降级为种子（13 门 PASS）；新登记 🟡 block110-p1 5 例 HEAD 红（与本批无关，待 triage）；W8 其余项在册 | BLOCK-211 / P5-CLOSED |
 | ✅ | 2026-10-18 | **BLOCK-210（W7e）completed（十三门 PASS）**：留存/归档默认零删除 + apply 默认 dryRun + 删除须 allowDelete；迁移计划器只读（备份/回退/阻塞项）；真实搬迁与清理 reopen。下一包=W8 | BLOCK-210 / P5-CLOSED |
 | 🔵 | 2026-10-18 | **BLOCK-210（W7e）立项**：留存/归档（默认零删除）+ 迁移计划器（只读）；真实搬迁 reopen。plan=docs/block-210-data-dir-retention-plan.md | BLOCK-210 / P0-LAUNCH |
 | ✅ | 2026-10-18 | **BLOCK-209（W7d）completed（十三门 PASS）**：外部配置只读预览（零写入/零网络/凭据拒绝/键对账）；预览不是导入（应用属 reopen）。下一包=W7e | BLOCK-209 / P5-CLOSED |
