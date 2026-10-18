@@ -9,7 +9,7 @@ acceptance:
   - P4 收尾：closeout 十三门；台账（如有 UI 变化则 UI-###）；`docs:check` 通过。
   - 完成语义：**能证明"前缀稳定性提升了"，但不声称"真实 API 命中率提升 X%"**——真实命中率需要 Provider 真实调用，属 G1+；本包只做离线可证的形状与稳定性。
 reopen: 真实 Provider 命中率 A/B（需 G1+ 调用预算）；DeepSeek 磁盘缓存 TTL 适配；tools schema 序列化字节稳定性断言；跨会话（多轮 compaction 后）前缀桥接。
-status: active
+status: completed
 ---
 
 # BLOCK-212 · 提示词缓存前缀优化

@@ -1,4 +1,5 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-10-18（**BLOCK-212 completed（十三门 PASS）：提示词缓存前缀优化**）：动态上下文搬消息尾部（尾块不落历史），Anthropic system 改 block + 静态段 cache_control；基线增静态前缀规模与命中率阈值。证据=7/7 + 邻域 52/52。**局限**：静态前缀 215 tokens < Anthropic 1024 最小可缓存 ⇒ Claude 断点当前空操作；真实命中率需 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-212 立项发令 active：提示词缓存前缀优化**）：两处成本泄漏已读码定位——动态上下文在 system 头部（每轮变⇒前缀全废）、Anthropic 无 cache_control（system 单字符串⇒全价）。方案=动态段搬尾部（不落历史）+ anthropic block 断点 + 基线加静态前缀 token；不声称真实命中率提升（需 G1+ 调用）。plan=docs/block-212-prompt-cache-prefix-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**W8 第七批：`skills:check` 报告级纳入收口**）：`closeout-gates.mjs` 增 `--report`（非阻塞、不改进程退出码），`closeout` 已挂 `--report skills:check` ⇒ 每次收口打印红条数；未升阻塞（补齐 `built-in-plugins/` 属 C-33 裁决）。顺修：改脚本误删 `repoGate`（ReferenceError）已恢复并冒烟验证。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**W8 第六批：技能货架依赖徽标纳入插件硬依赖（UI-527）**）：`preflight` 纳入 `plugins.required`（`hasPlugin` 注入 + `missingPlugins`，缺插件不算 installable），路由用 `plugin-loader` 单一真相；卡片对有插件硬依赖的技能也显示徽标。证据=4/4 + 前端 10/10 + tsc 0；closeout PASS。`skills:check` 5 红仍在（是否补插件包/升阻塞门禁属 C-33 裁决）。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -7,8 +8,6 @@
 最后更新：2026-10-18（**W8 第四批：RS 真值徽标语义诚实化（UI-526）**）：`valid` 属产物级核验，旧文案「可信结果」过度声称 ⇒ 「已核验（未篡改）」+ `detail`（title/aria-label）点明"不代表科学结论正确、也不代表 RS 整体已验证"；三态同步补范围。证据=resultSurface 18/18 + tsc 0 + token 17/17；closeout 十三门 PASS。W8 余项：双机 riders（需机器）/休眠插件裁决（需用户）/C-27/C-30·C-31。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**W8 第二批：lint 基线净收缩 326→318（−8）**）：以整文件清零方式消掉 `frontend/src/lib/chat-file-references.test.ts` 的 8 条 require-await（同步 mock + `as unknown as Response`），`--prune-suppressions` 清陈旧键；`quality:lint` 0 errors / 该文件 vitest 25/25 / tsc 0。**自纠**：整文件替换误伤 `it(..., async () => {`，已还原并改定向替换。W8 余项在册。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-211（W8 首批）completed：C-32 清偿（closeout 十三门 PASS）**）：`env='1'` 从运行时强制开降级为**首载种子**（`env='0'` 仍杀开关）——设置页关掉的守卫不再被残留 env 重新打开；`envShadowedKeys` 不再把 seed 报成遮蔽；compat 基线同批显式改写留因。**新登记 🟡**：`block110-p1-topic-shift` 5 例在 HEAD 上就红（stash A/B 证明与本批无关）。W8 其余项仍在册。G0 开发期常态 · 不外推 packaged/Provider/GA。
-最后更新：2026-10-18（**BLOCK-210（W7e）completed（closeout 十三门 PASS）**）：留存/归档（默认零删除、apply 默认 dryRun、删除须 allowDelete、审计落盘）+ 迁移**计划器**（只读：步骤/备份/回退/阻塞项）；注册表 17 族/89 键；**真实搬迁与清理未执行**（reopen）。plan=docs/block-210-data-dir-retention-plan.md。无 active 工作包，下一包=W8 收尾族。G0 开发期常态 · 不外推 packaged/Provider/GA。
-最后更新：2026-10-18（**BLOCK-210-DATA-DIR-RETENTION 立项发起 active（runlist W7e）**）：留存/归档策略（默认零删除、apply 默认 dryRun）+ 迁移计划器/预览（只读不执行；真实搬迁属 reopen）；目录解析只走 `data-paths` 单源。plan=docs/block-210-data-dir-retention-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 > 本文件只保存需要主 Agent 看见的活跃广播与最近处理记录。
 > 每次会话先读本文件；只有追溯问题来源时才读取[完整历史归档](./archive/checkpoints/audit-log-through-2026-10-11.md) · [through-2026-09-19](./archive/checkpoints/audit-log-through-2026-09-19.md) · [through-2026-09-17](./archive/checkpoints/audit-log-through-2026-09-17.md) · [through-2026-09-16](./archive/checkpoints/audit-log-through-2026-09-16.md) · 上一档：[through-2026-09-13](./archive/checkpoints/audit-log-through-2026-09-13.md) · [through-2026-09-12](./archive/checkpoints/audit-log-through-2026-09-12.md)（更早前史：[through-2026-07-26](./archive/checkpoints/audit-log-through-2026-07-26.md)、[2026-08-pre18](./archive/audit-log-2026-08-pre18.md)）。
@@ -19,6 +18,7 @@
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
+| ✅ | 2026-10-18 | **BLOCK-212 completed**：动态上下文搬尾部（前缀逐轮可复用）+ Anthropic cache_control 断点 + 基线增静态前缀 token；局限=215 tokens<1024 ⇒ Claude 空操作，真实命中率需 G1+ | BLOCK-212 / P4-CLOSED |
 | 🔵 | 2026-10-18 | **BLOCK-212 立项**：动态上下文搬尾部（前缀稳定）+ Anthropic cache_control 断点 + 基线加静态前缀 token；真实命中率属 G1+。plan=docs/block-212-prompt-cache-prefix-plan.md | BLOCK-212 / P0-LAUNCH |
 | 🟡 | 2026-10-18 | **`npm run skills:check` 实测 5 红（存量，非本批引入）**：`deg-analysis-standard` 的 3 个与 `sc-analysis-standard` 的 2 个 `plugins.required` 在 `resources/built-in-plugins/`（本仓不存在）与 pack 插件源里都找不到。**它不在 closeout 十三门内**，所以能长期红而不挡收口——这正是 C-33「货架可见不可用」的代码侧证据。处置=并入 C-33 裁决（A/B/C）；建议先把 `skills:check` 以**报告级**纳入收口（打印红数、不阻塞），升阻塞门禁与否随裁决。plan=docs/block-211-tail-ledger-plan.md §10 | AUDIT / C-33 关联 |
 | ✅ | 2026-10-18 | **BLOCK-211（W8 首批）completed**：C-32 env=1 降级为种子（13 门 PASS）；新登记 🟡 block110-p1 5 例 HEAD 红（与本批无关，待 triage）；W8 其余项在册 | BLOCK-211 / P5-CLOSED |

@@ -42,3 +42,7 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-18T03:02:44.118Z -->
 最后更新：2026-10-18（**BLOCK-209（W7d）completed（closeout 十三门 PASS）**）：外部 Agent 配置只读解析 + 映射预览（Codex TOML 子集 / ZCode JSON），零写入零网络、凭据 D-2 双查拒入 patch、patch 与注册表对账、零新依赖；**预览不是导入**（一键应用属 reopen）。plan=docs/block-209-external-agent-import-plan.md。无 active 工作包，下一包=W7e。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-18T03:26:52.176Z -->
+最后更新：2026-10-18（**BLOCK-210（W7e）completed（closeout 十三门 PASS）**）：留存/归档（默认零删除、apply 默认 dryRun、删除须 allowDelete、审计落盘）+ 迁移**计划器**（只读：步骤/备份/回退/阻塞项）；注册表 17 族/89 键；**真实搬迁与清理未执行**（reopen）。plan=docs/block-210-data-dir-retention-plan.md。无 active 工作包，下一包=W8 收尾族。G0 开发期常态 · 不外推 packaged/Provider/GA。
+最后更新：2026-10-18（**BLOCK-210-DATA-DIR-RETENTION 立项发起 active（runlist W7e）**）：留存/归档策略（默认零删除、apply 默认 dryRun）+ 迁移计划器/预览（只读不执行；真实搬迁属 reopen）；目录解析只走 `data-paths` 单源。plan=docs/block-210-data-dir-retention-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
