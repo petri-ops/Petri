@@ -151,15 +151,19 @@ async function disconnectServer(id) {
 }
 
 /** 调用某 server 的工具（P3 投影 handler 的执行通道）。 */
-async function callServerTool(id, toolName, args = {}) {
+async function callServerTool(id, toolName, args = {}, options = {}) {
   const sess = _sessions.get(id);
   if (!sess || sess.status !== 'connected' || !sess.client) {
     return { ok: false, error: 'server_not_connected' };
   }
+  // BLOCK-204（W5）— 逐工具超时（不传=既有 60s 常量，行为不变）
+  const timeoutMs = Number.isFinite(options.timeoutMs) && options.timeoutMs > 0
+    ? options.timeoutMs
+    : CALL_TOOL_TIMEOUT_MS;
   try {
     const result = await _withTimeout(
       sess.client.callTool({ name: toolName, arguments: args ?? {} }),
-      CALL_TOOL_TIMEOUT_MS,
+      timeoutMs,
       'call_tool',
     );
     return { ok: true, result };

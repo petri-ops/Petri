@@ -31,6 +31,7 @@ const userPrefs = require('./user-prefs');
 const skillPrefs = require('../../shared-backend/skill-prefs.js');
 const userRules = require('./agent-user-rules');
 const mcpSettings = require('./mcp-settings');
+const toolPolicy = require('./mcp-tool-policy');
 
 const CONFIG_TRANSFER_FORMAT = 'petri-config';
 const CONFIG_TRANSFER_VERSION = 1;
@@ -54,6 +55,9 @@ const CONFIG_TRANSFER_FAMILIES = Object.freeze([
   'agent-rules',
   // BLOCK-203 W4a P5（BLOCK-156/163 的第三方 MCP server 清单；**导出剥离 env**，D-2）
   'mcp-servers',
+  // BLOCK-204（W5）逐工具策略：导出/导入形状校验，**不做 unknown-tool 判定**
+  // （备份可能来自另一台机器/另一批已连接 server；名字合法性由运行时写面把关）
+  'mcp-tool-policy',
 ]);
 
 /** 显式排除清单：随信封回传，防止「以为备份了全部设置」。 */
@@ -124,6 +128,7 @@ function readFamilyOverrides() {
     'skills-prefs': { ...skillPrefs.loadPrefs() },
     'agent-rules': { version: 1, rules: userRules.loadUserRules() },
     'mcp-servers': { version: 1, servers: mcpSettings.listMcpServersForExport() },
+    'mcp-tool-policy': toolPolicy.readStore(),
   };
 }
 
@@ -216,6 +221,27 @@ function validateFamily(family, body) {
   }
   if (family === 'network' || family === 'runtime') {
     return schema.commitGuard(family, body, lookup).diagnostics;
+  }
+  if (family === 'mcp-tool-policy') {
+    const limitEntry = schema.findKeyEntry('mcpPolicy.projectionLimit');
+    const diagnostics = [];
+    if (body.projectionLimit !== undefined) {
+      const check = schema.validateValue(limitEntry, body.projectionLimit);
+      if (!check.ok) diagnostics.push(diagnostic(family, 'projectionLimit', check.code, check.message));
+    }
+    if (!Array.isArray(body.tools)) {
+      diagnostics.push(diagnostic(family, 'tools', 'type-mismatch', 'mcp-tool-policy.tools 必须是数组'));
+      return diagnostics;
+    }
+    body.tools.forEach((entry, index) => {
+      const { item, diagnostics: entryDiagnostics } = schema.sanitizeItem(family, entry);
+      if (!item || !item.tool) {
+        diagnostics.push(diagnostic(family, `tools[${index}]`, 'type-mismatch', '每条策略必须带 tool 字段'));
+        return;
+      }
+      for (const d of entryDiagnostics) diagnostics.push({ ...d, path: `tools[${index}].${d.path}` });
+    });
+    return diagnostics;
   }
   if (family === 'mcp-servers') {
     if (!Array.isArray(body.servers)) return [diagnostic(family, 'servers', 'type-mismatch', 'mcp-servers.servers 必须是数组')];
@@ -349,6 +375,17 @@ const WRITERS = {
     // 合并覆盖（导入不删文件里未出现的键）：合并与消毒都在落点模块里，transfer 不复制形状知识
     skillPrefs.importPrefs(body);
   },
+  'mcp-tool-policy'(body) {
+    const saved = toolPolicy.writeStore({
+      projectionLimit: body.projectionLimit,
+      tools: body.tools,
+    });
+    if (!saved.ok) {
+      const error = new Error('mcp-tool-policy 写入被拒');
+      error.diagnostics = saved.diagnostics;
+      throw error;
+    }
+  },
   'mcp-servers'(body) {
     // 按 id 保留原 env（导出已剥离它）——否则"导出→导入"会静默清空所有 MCP 凭据
     const existing = new Map(mcpSettings.listMcpServers().map((s) => [s.id, s.env]));
@@ -411,6 +448,7 @@ const RESETTERS = {
   'skills-prefs'() { skillPrefs.resetPrefs(); },
   'agent-rules'() { userRules.saveUserRules([]); },
   'mcp-servers'() { mcpSettings.saveMcpServers([]); },
+  'mcp-tool-policy'() { toolPolicy.resetToolPolicies(); },
 };
 
 /**

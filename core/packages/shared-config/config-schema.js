@@ -122,6 +122,14 @@ const CONFIG_FAMILIES = Object.freeze({
     envTruth: null,
     maxItems: 50,
   },
+  // —— BLOCK-204（runlist W5）：MCP 逐工具策略 ——
+  // 与 `mcp-servers`（连什么）分开：这里是"连上之后，每个工具怎么对待"（启用/超时/合同模式）。
+  // `projectionLimit` 是标量（投影上限），`<item>.*` 是逐工具条目（集合形状复用 P4 实现）。
+  'mcp-tool-policy': {
+    store: 'file:mcp-tool-policy.json#tools',
+    precedence: ['file', 'default'],
+    envTruth: null,
+  },
 });
 
 /**
@@ -426,6 +434,33 @@ const CONFIG_KEYS = Object.freeze([
   {
     key: 'mcpServers.<item>.transport', family: 'mcp-servers', path: '<item>.transport',
     type: 'string', domain: { oneOf: ['stdio', 'http'] }, envKeys: [], aliases: [], mutable: true, ui: 'settings',
+  },
+  // —— MCP 逐工具策略（BLOCK-204 / W5）——
+  // `ui: 'none'`：v1 不提供逐工具设置页（plan §2 已声明）；漂移门按 `NO_UI_FAMILIES` 显式登记，
+  // 不是"漏了挂面"。`contractMode` 只覆盖喂给既有四档判定的合同输入，不改判定实现。
+  {
+    key: 'mcpPolicy.projectionLimit', family: 'mcp-tool-policy', path: 'projectionLimit',
+    type: 'number', domain: { min: 1, max: 200, integer: 'floor' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    key: 'mcpPolicy.<item>.tool', family: 'mcp-tool-policy', path: '<item>.tool',
+    type: 'string', domain: { pattern: '^mcp_[A-Za-z0-9_-]+$' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    key: 'mcpPolicy.<item>.enabled', family: 'mcp-tool-policy', path: '<item>.enabled',
+    type: 'boolean', envKeys: [], aliases: [], mutable: true, ui: 'none',
+  },
+  {
+    key: 'mcpPolicy.<item>.timeoutMs', family: 'mcp-tool-policy', path: '<item>.timeoutMs',
+    type: 'number', domain: { min: 1000, max: 600000, integer: 'floor' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    key: 'mcpPolicy.<item>.contractMode', family: 'mcp-tool-policy', path: '<item>.contractMode',
+    type: 'string', domain: { oneOf: ['auto', 'read-only', 'mutating'] }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
   },
   {
     key: 'mcpServers.<item>.url', family: 'mcp-servers', path: '<item>.url',

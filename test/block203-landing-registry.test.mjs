@@ -46,12 +46,13 @@ const LANDING_POINTS = Object.freeze([
   { id: 'keymap', core14: false, kind: 'file', families: ['keymap'], note: '应用级键位（BLOCK-200 新增）' },
   { id: 'network', core14: false, kind: 'file', families: ['network'], note: '代理与自签 CA（BLOCK-202 新增）' },
   { id: 'runtime-policy', core14: false, kind: 'file', families: ['runtime'], note: '审批默认档位/并发深度/工具曝光（BLOCK-202 新增）' },
+  { id: 'mcp-tool-policy', core14: false, kind: 'file', families: ['mcp-tool-policy'], note: 'MCP 逐工具策略（BLOCK-204 / W5 新增，无设置面）' },
 ]);
 
-test('BLOCK-203 W4b P0 — 落点总账：BLOCK-199 的 14 处 + W1–W3 的 3 处新增，每处有归属与理由', () => {
+test('BLOCK-203 W4b P0 — 落点总账：BLOCK-199 的 14 处 + 后续新增 4 族，每处有归属与理由', () => {
   const core14 = LANDING_POINTS.filter((point) => point.core14);
   assert.equal(core14.length, 14, `BLOCK-199 的落点必须是 14 处（实得 ${core14.length}）——新增族不得拿来抵数`);
-  assert.equal(LANDING_POINTS.length, 17, `当前全集应为 14 + 3（实得 ${LANDING_POINTS.length}）`);
+  assert.equal(LANDING_POINTS.length, 18, `当前全集应为 14 + 4（W1–W3 三族 + W5 一族；实得 ${LANDING_POINTS.length}）`);
   const ids = LANDING_POINTS.map((p) => p.id);
   assert.equal(new Set(ids).size, ids.length, `落点 id 重复：${ids.join(',')}`);
   for (const point of LANDING_POINTS) {

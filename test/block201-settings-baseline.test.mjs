@@ -8,7 +8,7 @@
  * 三条事实：
  *  ① 设置面板分区清单 = 10 项（BLOCK-200 加了 keymap/reasoning 后从 8 变 10；
  *     `docs/stage-3-4-execution-runlist.md` 的「8 分区」口径已过时，本包按实况登记）；
- *  ② 配置注册表 = 12 族 / 60 键（BLOCK-199 四族 + BLOCK-200 两族 + BLOCK-202 两族 + BLOCK-203 四族）；
+ *  ② 配置注册表 = 13 族 / 65 键（BLOCK-199 四族 + BLOCK-200 两族 + BLOCK-202 两族 + BLOCK-203 四族 + BLOCK-204 一族）；
  *  ③ 导出/导入的族集合必须与注册表**逐族相等**（不得偷偷漏族或加未注册族）。
  */
 import assert from 'node:assert/strict';
@@ -36,7 +36,7 @@ test('设置分区清单冻结：10 个分区 id（搜索索引必须逐项覆�
   assert.equal(ids.length, 10, `分区数应为 10（实得 ${ids.length}）：${ids.join(', ')}`);
 });
 
-test('配置注册表冻结：12 族 / 60 键（BLOCK-203 加 user-prefs/skills-prefs/agent-rules/mcp-servers 四族）', () => {
+test('配置注册表冻结：13 族 / 65 键（BLOCK-204 加 mcp-tool-policy 一族 5 键）', () => {
   // 2026-10-17 两次显式上调（BLOCK-203 W4a）：
   //  P1+P2：8 族/35 键 → 9 族/38 键（user-prefs：theme/fontScale/accent）；
   //  P3   ：9 族/38 键 → 10 族/43 键（skills-prefs：version + disabled.<id>.{at,reason}
@@ -47,8 +47,10 @@ test('配置注册表冻结：12 族 / 60 键（BLOCK-203 加 user-prefs/skills-
   //   P4   ：10 族/43 键 → 11 族/51 键（agent-rules：version + 7 个条目字段）。
   //   P5   ：11 族/51 键 → 12 族/60 键（mcp-servers：version/savedAt + 7 个条目字段；
   //          条目数上限走族级 maxItems，args 条数上限走字段 domain.maxItems）。
-  assert.equal(Object.keys(schema.CONFIG_FAMILIES).length, 12);
-  assert.equal(schema.CONFIG_KEYS.length, 60);
+  //   BLOCK-204（W5）：12 族/60 键 → 13 族/65 键（mcp-tool-policy：projectionLimit
+  //   + 逐工具 tool/enabled/timeoutMs/contractMode）。
+  assert.equal(Object.keys(schema.CONFIG_FAMILIES).length, 13);
+  assert.equal(schema.CONFIG_KEYS.length, 65);
 });
 
 test('导出/导入的族集合 == 注册表族集合（漏族/未注册族都算红）', () => {

@@ -59,7 +59,8 @@
 - [x] W3 BLOCK-202 阶段 A 速赢 III（completed 2026-10-17：代理四项 + 审批默认档位 + 并发/深度可配 + 工具白/黑名单曝光层；9223 探针 15/15 allPass；config-transfer 扩 8 族）
 - [x] W4a BLOCK-203 阶段 3 B1b 前半片（**completed 2026-10-18**：P1–P8 八片落地；四文件族收编 + ai-settings 顶层白名单 + localStorage 降纯缓存 + models 导出默认脱敏；注册表 12 族/60 键；closeout 十三门全绿；覆盖率按实码 **8/14**=7/7 文件族 + localStorage，剩 6 处属 W4b；收口自纠 accents↔prefCache 新环 + 补 UI-521/522 台账）
 - [x] W4b BLOCK-203 阶段 3 B1b 后半片（**completed 2026-10-18**：落点总账把 14 处逐条归属——7 配置全收编、7 非配置逐条有理由；**SQLite 四落点不搬是裁定**（均属运行时态/授权数据）；目录单源 `shared-backend/data-paths`（两个有名字的根，四只手工链消失）；closeout 十三门全绿）
-- [ ] W5 … W8（未启动）
+- [ ] W5 BLOCK-204 MCP 逐工具策略面（**active 2026-10-18**：投影上限/超时/合同模式可配 + unknown-tool 400）
+- [ ] W6 … W8（未启动）
 
 ## 4. 已知未达成事实（防止后续会话误读为已完成）
 

@@ -3946,6 +3946,29 @@
         "test/block203-data-root.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block204-mcp-tool-policy",
+      "note": "BLOCK-204（W5）MCP 逐工具策略：schema 族 mcp-tool-policy（projectionLimit + 逐工具 tool/enabled/timeoutMs/contractMode）、helpers/mcp-tool-policy 落点（读宽容/写消毒/unknown-tool 只拒该条）、投影过滤与上限来源、合同覆盖、逐工具超时透传、GET/PUT /api/mcp/tool-policy（400+diagnostics）、config-transfer/doctor 接入、漂移门 NO_UI_FAMILIES 登记。",
+      "patterns": [
+        "core/packages/shared-config/config-schema.js",
+        "core/petri-server/helpers/mcp-tool-policy.js",
+        "core/petri-server/agent-tools/mcp-projection.js",
+        "core/petri-server/mcp/client-manager.js",
+        "core/petri-server/routes/mcp-client.js",
+        "core/petri-server/helpers/config-transfer.js",
+        "test/block204-*.test.mjs"
+      ],
+      "tests": [
+        "test/block204-mcp-tool-policy.test.mjs",
+        "test/block204-mcp-tool-policy-baseline.test.mjs",
+        "test/mcp-client-settings.test.mjs",
+        "test/block201-settings-baseline.test.mjs",
+        "test/block199-config-drift.test.mjs",
+        "test/block201-config-transfer.test.mjs",
+        "test/block203-landing-registry.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

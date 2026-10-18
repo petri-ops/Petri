@@ -11,6 +11,8 @@
  *   POST   /api/mcp/servers/:id/connect    连接
  *   POST   /api/mcp/servers/:id/disconnect 断开
  *   GET    /api/mcp/servers/:id/tools     已连接 server 的工具清单
+ *   GET    /api/mcp/tool-policy           逐工具策略 + 生效投影上限（BLOCK-204 / W5）
+ *   PUT    /api/mcp/tool-policy           写策略（400 + diagnostics；unknown-tool 只拒该条以外的整批）
  */
 
 'use strict';
@@ -18,6 +20,8 @@
 const express = require('express');
 const settings = require('../helpers/mcp-settings');
 const manager = require('../mcp/client-manager');
+const toolPolicy = require('../helpers/mcp-tool-policy');
+const projection = require('../agent-tools/mcp-projection');
 
 function registerMcpClientRoutes(app) {
   app.get('/api/mcp/servers', (_req, res) => {
@@ -69,6 +73,36 @@ function registerMcpClientRoutes(app) {
       return;
     }
     res.json({ status: 'ok', id });
+  });
+
+  // BLOCK-204（W5）— 逐工具策略面（v1 无设置页，API 为唯一写面；漂移门按 NO_UI_FAMILIES 登记）
+  app.get('/api/mcp/tool-policy', (_req, res) => {
+    const store = toolPolicy.readStore();
+    res.json({
+      status: 'ok',
+      projectionLimit: toolPolicy.projectionLimit(store),
+      defaultProjectionLimit: toolPolicy.DEFAULT_PROJECTION_LIMIT,
+      defaults: { ...toolPolicy.DEFAULTS },
+      policies: store.tools,
+      projectedTools: projection.projectedToolNames(),
+    });
+  });
+
+  app.put('/api/mcp/tool-policy', express.json(), (req, res) => {
+    const patch = req.body || {};
+    // unknown-tool 判定需要"当前投影"作为已知集合；已有策略条目也算已知（离线仍可改/删）
+    const known = projection.projectedToolNames();
+    const checked = toolPolicy.validatePatch(patch, known);
+    if (!checked.ok) {
+      res.status(400).json({ status: 'error', error: 'tool_policy_rejected', diagnostics: checked.diagnostics });
+      return;
+    }
+    const saved = toolPolicy.writeStore(checked.nextStore);
+    if (!saved.ok) {
+      res.status(400).json({ status: 'error', error: 'tool_policy_rejected', diagnostics: saved.diagnostics });
+      return;
+    }
+    res.json({ status: 'ok', ...saved.store });
   });
 
   app.get('/api/mcp/servers/:id/tools', (req, res) => {

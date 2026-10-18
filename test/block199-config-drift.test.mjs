@@ -45,6 +45,18 @@ const UI_CARRIERS = {
   'mcp-servers': { file: 'frontend/src/hooks/useMcpServers.ts', must: ['/mcp/servers'] },
 };
 
+/**
+ * 族 → **有意不提供设置面**的理由（BLOCK-204 起）。
+ *
+ * 为什么需要这张表：UI 承载断言原本要求"注册表族集合 == UI_CARRIERS 键集合"，于是
+ * "没有设置面的族"只能靠**不登记**混过去——那和没有门一样（同样的毛病在 NON_HTTP_WRITE_FAMILIES
+ * 上已经修过一次）。登记后改成两条更硬的断言：①该族所有键必须 `ui:'none'`（不许嘴上说没面、
+ * 却在注册表里声明有面）；②必须写清理由（表本身是给人看的，理由缺失=没人知道为什么没做）。
+ */
+const NO_UI_FAMILIES = {
+  'mcp-tool-policy': 'W5 v1 只做策略面与执行接线（API 写面 + 投影/超时/合同生效）；逐工具表格 UI 属后续设置面批次',
+};
+
 /** 族 → 后端写路由（必须能把拒绝翻译成 4xx，而不是冒 500 或静默）。 */
 const WRITE_ROUTES = {
   'feature-flags': 'core/petri-server/routes/feature-flags.js',
@@ -58,6 +70,7 @@ const WRITE_ROUTES = {
   'user-prefs': 'core/petri-server/routes/user-prefs.js',
   'agent-rules': 'core/petri-server/routes/ai-settings-api.js',
   'mcp-servers': 'core/petri-server/routes/mcp-client.js',
+  'mcp-tool-policy': 'core/petri-server/routes/mcp-client.js',
 };
 
 /**
@@ -99,6 +112,13 @@ test('注册表自洽：每个键有族、每个族有键（不留空壳族或�
 });
 
 test('声明 ui=settings 的族必须有真实设置面承载（防"注册表说有面，其实没有"）', () => {
+  // 有意无设置面的族：必须 ui:'none' 且写了理由
+  for (const [family, reason] of Object.entries(NO_UI_FAMILIES)) {
+    assert.ok(reason && reason.length > 10, `${family} 进 NO_UI_FAMILIES 必须写清理由`);
+    const keys = schema.CONFIG_KEYS.filter((e) => e.family === family);
+    assert.ok(keys.length > 0, `${family} 在注册表里不存在`);
+    for (const entry of keys) assert.equal(entry.ui, 'none', `${family} 声明无设置面，键 ${entry.key} 却标了 ui:'settings'`);
+  }
   for (const [family, carrier] of Object.entries(UI_CARRIERS)) {
     if (!schema.CONFIG_KEYS.some((e) => e.family === family && e.ui === 'settings')) continue;
     assert.ok(fs.existsSync(path.join(ROOT, carrier.file)), `${family} 的承载文件不存在：${carrier.file}`);
@@ -106,7 +126,11 @@ test('声明 ui=settings 的族必须有真实设置面承载（防"注册表说
     for (const needle of carrier.must) assert.ok(src.includes(needle), `${carrier.file} 未引用 ${needle}（${family} 面无数据来源）`);
   }
   const declared = new Set(schema.CONFIG_KEYS.map((e) => e.family));
-  assert.deepEqual([...declared].sort(), Object.keys(UI_CARRIERS).sort(), 'UI_CARRIERS 与注册表族集合失配');
+  assert.deepEqual(
+    [...declared].sort(),
+    [...Object.keys(UI_CARRIERS), ...Object.keys(NO_UI_FAMILIES)].sort(),
+    'UI_CARRIERS ∪ NO_UI_FAMILIES 必须覆盖注册表族集合（既不能漏登记，也不能两边都登记）',
+  );
 });
 
 test('每族写路径都能拒绝非法输入（4xx），而不是静默或冒 500', () => {
