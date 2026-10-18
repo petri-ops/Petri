@@ -1,4 +1,5 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-10-18（**BLOCK-212 reopen 设计落账 = C-34**）：Claude 侧要吃到缓存须"够大且稳"——会话级固定工具集 + 断点打最后一个 tool + ≥1024 才打点；验收需真实调用（连续 ≥3 轮命中增长），**先决条件=G1+ 预算**，风险=固定工具集掉路由精度（须 evals 先证）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-212 completed（十三门 PASS）：提示词缓存前缀优化**）：动态上下文搬消息尾部（尾块不落历史），Anthropic system 改 block + 静态段 cache_control；基线增静态前缀规模与命中率阈值。证据=7/7 + 邻域 52/52。**局限**：静态前缀 215 tokens < Anthropic 1024 最小可缓存 ⇒ Claude 断点当前空操作；真实命中率需 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-212 立项发令 active：提示词缓存前缀优化**）：两处成本泄漏已读码定位——动态上下文在 system 头部（每轮变⇒前缀全废）、Anthropic 无 cache_control（system 单字符串⇒全价）。方案=动态段搬尾部（不落历史）+ anthropic block 断点 + 基线加静态前缀 token；不声称真实命中率提升（需 G1+ 调用）。plan=docs/block-212-prompt-cache-prefix-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**W8 第七批：`skills:check` 报告级纳入收口**）：`closeout-gates.mjs` 增 `--report`（非阻塞、不改进程退出码），`closeout` 已挂 `--report skills:check` ⇒ 每次收口打印红条数；未升阻塞（补齐 `built-in-plugins/` 属 C-33 裁决）。顺修：改脚本误删 `repoGate`（ReferenceError）已恢复并冒烟验证。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -18,6 +19,7 @@
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
+| 🟡 | 2026-10-18 | **C-34（BLOCK-212 reopen）**：Claude 缓存断点方案成文——会话级固定工具集 + tools 末项断点 + ≥1024 才打点；验收需真实调用、风险=路由精度，**先决=G1+ 预算** | BLOCK-212 / reopen |
 | ✅ | 2026-10-18 | **BLOCK-212 completed**：动态上下文搬尾部（前缀逐轮可复用）+ Anthropic cache_control 断点 + 基线增静态前缀 token；局限=215 tokens<1024 ⇒ Claude 空操作，真实命中率需 G1+ | BLOCK-212 / P4-CLOSED |
 | 🔵 | 2026-10-18 | **BLOCK-212 立项**：动态上下文搬尾部（前缀稳定）+ Anthropic cache_control 断点 + 基线加静态前缀 token；真实命中率属 G1+。plan=docs/block-212-prompt-cache-prefix-plan.md | BLOCK-212 / P0-LAUNCH |
 | 🟡 | 2026-10-18 | **`npm run skills:check` 实测 5 红（存量，非本批引入）**：`deg-analysis-standard` 的 3 个与 `sc-analysis-standard` 的 2 个 `plugins.required` 在 `resources/built-in-plugins/`（本仓不存在）与 pack 插件源里都找不到。**它不在 closeout 十三门内**，所以能长期红而不挡收口——这正是 C-33「货架可见不可用」的代码侧证据。处置=并入 C-33 裁决（A/B/C）；建议先把 `skills:check` 以**报告级**纳入收口（打印红数、不阻塞），升阻塞门禁与否随裁决。plan=docs/block-211-tail-ledger-plan.md §10 | AUDIT / C-33 关联 |

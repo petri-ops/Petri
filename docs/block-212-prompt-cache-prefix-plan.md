@@ -51,3 +51,22 @@ status: completed
 
 - **静态前缀 215 tokens < Anthropic 最小可缓存长度（1024）** ⇒ 当前 `cache_control` 在 Claude 上**是空操作**（Anthropic 会忽略断点）。真正的杠杆在本包 P1：DeepSeek/OpenAI 走**自动前缀缓存**，前缀稳定即刻生效。要让 Claude 吃到，得把断点打在**最后一个 tool 定义**上（工具 schema 体量大），但那要求 tools 跨轮稳定——列入 reopen。
 - **不声称真实命中率提升**：本机 83.33% 是 dev 库既有样本（含 mock 渠道），不是本包前后对比；真实 A/B 需 Provider 真实调用（G1+）。本包能证的只有「前缀字节稳定性 + 尾块布局 + 断点形状」。
+
+## 5. Reopen 设计：Claude 侧"够大且稳"的前缀（C-34，需 G1+ 真实调用验证）
+
+**为什么现在不做**：Claude 的最小可缓存长度是 1024 tokens（Haiku 3.5 为 2048），低于门槛时 `cache_control` **静默忽略**；且写缓存按 1.25× 计费、默认 TTL 5 分钟。没有真实调用就看不出命中，做了也只能证明"形状对"，**不能证明省钱**。按 G0 纪律不外推 Provider，故只留设计与验收判据。
+
+**设计（A 方案）**：
+
+1. **会话级固定工具集**：把 `resolveToolDefsForContext` 的三个收窄点（context 子集 / JEV tool-route / runtime policy）从"每轮计算"改为**会话首轮计算并缓存**，同一 conversation 内工具集字节稳定；换会话/换 accessMode 才重算（并在事件里留痕，便于归因）。
+2. **断点打在最后一个 tool**：`protocol-conversion` 对 anthropic 的 tools 数组末项加 `cache_control:{type:'ephemeral'}`（Anthropic 缓存顺序 tools→system→messages，打在末项即把 **tools+system** 一起纳入前缀）。最多 4 个断点，第二个可打在静态 system 末。
+3. **稳定前缀规模校验**：工具 schema + 静态 system 的估算 token 必须 **≥1024** 才打点，否则不打（避免"写了缓存却读不到"的净亏）。该判断在发请求前算，结果进 `meta.cachePlan` 供审计。
+
+**验收判据（需真实 Claude 调用）**：
+
+- 同一 conversation 连续 ≥3 轮，`ai_usage.cache_read_tokens > 0` 且逐轮增长；
+- `cache_creation_tokens` 只在第 1 轮（或工具集变化轮）出现，**不得每轮都写**；
+- 对照组（关掉断点）同会话命中率为 0；
+- 反例守卫：工具集变化的那一轮必须出现一次新的 cache_creation，且不得静默回退成"每轮全价"。
+
+**风险**：会话级固定工具集会让"按 turn 收窄"的路由精度失效——需先用 evals 判据（工具选择准确率）验证不掉分，再谈省成本。**不先用判据验证就固定工具集 = 用正确性换成本**，这是本方案最该防的地方。
