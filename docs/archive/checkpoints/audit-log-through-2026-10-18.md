@@ -9,3 +9,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-18T01:02:28.453Z -->
 最后更新：2026-10-18（**BLOCK-203 整包 completed（W4a + W4b；closeout 十三门全绿 ×2）**）：**落点账清完**——14 处逐条归属：7 配置全收编（注册表 12 族/60 键）、7 非配置逐条有理由（SQLite 四落点均属运行时态/授权数据，**不搬是裁定**：硬搬会把 Gen UI 留存状态与 `users.permissions` 做成"可导出可重置"）。目录单源 `shared-backend/data-paths`（两个有名字的根；四只手工链消失；`user-prefs` 旧 `cwd/data` 只读兼容）。机械门 `block203-landing-registry` 3/3（新增族不得抵 14 的账、运行时态/授权不得进注册表）。**收口抓真三处**：`accents↔prefCache` 新环、P7/P8 漏 UI 台账（UI-521/522 in_progress）、legacy 兜底无条件启用会读他实例 `cwd/data`（本机 `~/Documents/Petri-Local/user-prefs.json` 曾被测试写脏，已删并改只读测）。plan=docs/block-203-stage-3-b1b-config-landing-consolidation-plan.md §10。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-18T01:06:57.944Z -->
+最后更新：2026-10-18（**BLOCK-204-MCP-TOOL-POLICY 立项发令 active（runlist W5：MCP 逐工具策略面）**）：P0 实码三处不可配——投影上限 `MAX_PROJECTED_TOOLS=40`、`callServerTool` 超时 60s 常量、合同只由 `readOnlyHint` 推导，启停粒度只有 server 级。范围=schema 族 `mcp-tool-policy` + helper + 投影/上限/合同/超时四处接线 + `GET/PUT /api/mcp/tool-policy`（unknown-tool 400）+ transfer/doctor/漂移门。红线=不改四档判定、不改 readOnlyHint 默认推导、unknown-tool 只拒该条。plan=docs/block-204-mcp-tool-policy-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
