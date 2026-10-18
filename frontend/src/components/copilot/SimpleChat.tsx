@@ -1319,9 +1319,7 @@ export function SimpleChat({
     setQueuedPrompts([]);
   }, [onConversationChange]);
 
-  // Slash command handler
   const executeSlashCommand = useCallback((commandId: string) => {
-    // BLOCK-206 / C-29 — 判定抽到 slashExecute.ts（纯函数、可离线断言）；这里只执行副作用
     switch (classifySlashCommand(commandId)) {
       case 'new-conversation':
         void newConversation();
