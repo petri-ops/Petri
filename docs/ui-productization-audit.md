@@ -5057,12 +5057,13 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 
 - **变化面**：结果头部的真值徽标从「**可信结果**」改为「**已核验（未篡改）**」，并新增 `detail` 说明（`title` + `aria-label` 可读）：核验范围=产物完整性与来源一致性（artifact-truth），**不代表科学结论正确，也不代表 Result Studio 整体已验证**（长期 `implemented_unverified / experimental`，P7 deferred）。其余三态文案同步补范围说明（未核验/需复核/已阻断）。
 - **为什么**：`truthStatus='valid'` 是**产物级**核验结论，旧文案把它升格成"结果可信"的全局判断——这是语义过度声称，和 G0 期"RS 徽标不许冒充资格"的纪律冲突。
-- **诚实边界**：**无实机腿**（纯文案 + 可访问性属性变更，无布局改动）→ 记 `in_progress`；未做 9223 截图证据。
+- **诚实边界**：**实机腿未覆盖**——需要「已有产物」的结果页才能看到真值徽标；本轮 9223 探测时测试实例无项目/产物（`acceptance/ui-526-527/project-workspace.png` 是空态），故记 `in_progress`。文案与 `detail` 形状由单测钉住；等有产物再看一眼即可翻 verified。
 - **验证**：`resultSurface.test.ts` **18/18**（含新断言 `detail` 含"不代表 Result Studio 整体已验证"）；`tsc --noEmit` 0；`theme-token-contract` 17/17（无样式变更）。
 
-## UI-527: 技能货架依赖徽标纳入插件硬依赖（2026-10-18 in_progress，BLOCK-211 / W8 · C-33 代码侧）
+## UI-527: 技能货架依赖徽标纳入插件硬依赖（2026-10-18 **verified（dev Electron 边界内）**，BLOCK-211 / W8 · C-33 代码侧）
 
 - **变化面**：`/api/skills/preflight` 现在把 `plugins.required` 算进依赖三态（此前只看 `dependencies.requiresBins`），探测面用 `plugin-loader` 单一真相（`getPlugin`/`isPluginInstalled`，与 `/api/plugins/installed` 同源）；技能卡片对"依赖是插件而不是二进制"的技能也显示徽标，title 如实列出「缺插件包：…」。
 - **修的是真实缺陷**：`deg-analysis-standard` / `sc-analysis-standard` 的 5 个 `plugins.required` 在本仓解析不到（`resources/built-in-plugins/` 不存在），旧 preflight 恒报 `available` ⇒ 卡片显示"依赖可用"，正是「货架可见不可用」。
-- **诚实边界**：缺插件**不标 installable**（插件没有自动安装配方），只标 `missing_deps`；**无实机腿** → `in_progress`，未做 9223 截图；插件包本身是否补齐仍需 C-33 裁决。
-- **验证**：`block211-skill-deps-plugins` **4/4**（含"不传 hasPlugin 保持既有语义"——不给既有调用方制造假红）+ `tsc` 0。
+- **诚实边界**：缺插件**不标 installable**（插件没有自动安装配方），只标 `missing_deps`；插件包本身是否补齐仍需 C-33 裁决。
+- **验证（代码）**：`block211-skill-deps-plugins` **4/4**（含"不传 hasPlugin 保持既有语义"——不给既有调用方制造假红）+ `tsc` 0。
+- **实机腿（2026-10-18 已补）**：重启 dev 栈（后端 preflight 才吃到新代码）后，`/api/skills/preflight` 对三族返回 `status=missing_deps` + `missingPlugins`（`acceptance/ui-526-527/preflight-after.json`）；9223 测试实例货架截图 `acceptance/ui-526-527/ui527-skills-shelf.png` 显示三张卡片均为「**缺依赖**」。**对照**：同栈重启前截图显示「依赖可用」——同一页面、同一数据，仅后端代码新旧之差，`dev-verify` flow `ui526-527-badges` **2/2** 通过（证据 `acceptance/ui-526-527/ui526-527-badges-live.json`）。

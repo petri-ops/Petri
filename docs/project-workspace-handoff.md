@@ -6,7 +6,7 @@
 
 最后更新：2026-10-17（**BLOCK-203-STAGE-3-B1B-CONFIG-LANDING-CONSOLIDATION 立项发令 active（runlist W4 拆片：W4a 先做）**）
 
-**恢复要点（换会话必读·本段取代下方 BLOCK-212 段）**：**无 active 工作包**；**刚收口=BLOCK-212（提示词缓存前缀优化）**——动态上下文搬消息尾部、Anthropic block 断点、基线增静态前缀规模；局限=静态前缀 215 tokens < Anthropic 1024 ⇒ Claude 空操作（真杠杆是 DeepSeek/OpenAI 自动缓存）。**W8 余项仍未清**：C-33 产品裁决（补不补 `resources/built-in-plugins/`、`skills:check` 是否升阻塞）、双机 riders+BK-08（需第二台机器）。**C-34**（BLOCK-212 reopen）=Claude 缓存断点方案已成文（会话级固定工具集 + tools 末项断点 + ≥1024 才打点），**先决=G1+ 真实调用**。**注意**：main 上存在另一会话的提交（`7bf008b9 feat(ui-523)`），改文件前先 `git log` 看一眼。
+**恢复要点（换会话必读·本段取代下方 BLOCK-212 段）**：**无 active 工作包**；**刚收口=BLOCK-212（提示词缓存前缀优化）**——动态上下文搬消息尾部、Anthropic block 断点、基线增静态前缀规模；局限=静态前缀 215 tokens < Anthropic 1024 ⇒ Claude 空操作（真杠杆是 DeepSeek/OpenAI 自动缓存）。**W8 余项仍未清**：C-33 产品裁决（补不补 `resources/built-in-plugins/`、`skills:check` 是否升阻塞）、双机 riders+BK-08（需第二台机器）。**C-34**（BLOCK-212 reopen）=Claude 缓存断点方案已成文（会话级固定工具集 + tools 末项断点 + ≥1024 才打点），**先决=G1+ 真实调用**。**实机腿**：UI-527 已 verified（dev 栈重启后 9223 截图「缺依赖」+ preflight JSON，证据 `acceptance/ui-526-527/`）；**UI-526 仍 in_progress**（需有产物的结果页；空态已留证）。dev 栈与测试实例 9223 当前在跑。**注意**：main 上存在另一会话的提交（`7bf008b9 feat(ui-523)`），改文件前先 `git log` 看一眼。
 
 最后更新：2026-10-17（**BLOCK-202-STAGE-A-QUICKWINS-3 整包 completed（阶段 A 速赢 III=runlist W3；当日立项当日收口·9223 探针 15/15 allPass）**）
 

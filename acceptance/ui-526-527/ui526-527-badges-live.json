@@ -1,0 +1,18 @@
+{
+  "name": "ui526-527-badges",
+  "startedAt": "2026-10-18T03:42:32.668Z",
+  "finishedAt": "2026-10-18T03:42:36.530Z",
+  "assertions": [
+    {
+      "name": "UI-527 货架出现\"缺依赖\"类徽标（插件缺失不再标可用）",
+      "pass": true,
+      "detail": "[object Object]"
+    },
+    {
+      "name": "UI-527 截图已落盘",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "allPass": true
+}

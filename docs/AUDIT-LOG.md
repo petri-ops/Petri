@@ -1,4 +1,5 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-10-18（**UI-527 实机腿补齐 → verified（dev Electron 边界内）**）：重启 dev 栈后 `/api/skills/preflight` 三族返回 `missing_deps`+`missingPlugins`，9223 货架截图三卡「缺依赖」（对照重启前「依赖可用」）；flow `ui526-527-badges` 2/2。UI-526 仍 in_progress（测试实例无产物，看不到真值徽标）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-212 reopen 设计落账 = C-34**）：Claude 侧要吃到缓存须"够大且稳"——会话级固定工具集 + 断点打最后一个 tool + ≥1024 才打点；验收需真实调用（连续 ≥3 轮命中增长），**先决条件=G1+ 预算**，风险=固定工具集掉路由精度（须 evals 先证）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-212 completed（十三门 PASS）：提示词缓存前缀优化**）：动态上下文搬消息尾部（尾块不落历史），Anthropic system 改 block + 静态段 cache_control；基线增静态前缀规模与命中率阈值。证据=7/7 + 邻域 52/52。**局限**：静态前缀 215 tokens < Anthropic 1024 最小可缓存 ⇒ Claude 断点当前空操作；真实命中率需 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-212 立项发令 active：提示词缓存前缀优化**）：两处成本泄漏已读码定位——动态上下文在 system 头部（每轮变⇒前缀全废）、Anthropic 无 cache_control（system 单字符串⇒全价）。方案=动态段搬尾部（不落历史）+ anthropic block 断点 + 基线加静态前缀 token；不声称真实命中率提升（需 G1+ 调用）。plan=docs/block-212-prompt-cache-prefix-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。

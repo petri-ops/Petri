@@ -1,0 +1,26 @@
+{
+  "platform": "darwin",
+  "results": {
+    "deg-analysis-standard": {
+      "status": "missing_deps",
+      "missingPlugins": [
+        "expression-qc",
+        "deseq2",
+        "volcano-plot"
+      ]
+    },
+    "go-enrichment-analysis": {
+      "status": "missing_deps",
+      "missingPlugins": [
+        "clusterProfiler"
+      ]
+    },
+    "sc-analysis-standard": {
+      "status": "missing_deps",
+      "missingPlugins": [
+        "scanpy-advanced",
+        "seurat-standard"
+      ]
+    }
+  }
+}
