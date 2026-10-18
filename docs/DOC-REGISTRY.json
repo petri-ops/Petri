@@ -7058,8 +7058,8 @@
       "capability": "appearance-motion-toggle",
       "path": "docs/block-208-appearance-motion-plan.md",
       "kind": "work-package",
-      "status": "active",
-      "phase": "P0-LAUNCH",
+      "status": "completed",
+      "phase": "P5-CLOSED",
       "canonical": true,
       "truthDomain": "block-208-appearance-motion-plan",
       "entrypoint": "docs/README.md",
@@ -7073,7 +7073,7 @@
         "stage-4",
         "block-208"
       ],
-      "notes": "2026-10-18 立项发令 active（runlist W7c，范围收窄；用户「可以的 按照你的建议来 冲完W7c」）：只做动效用户开关（system/full/reduced）——user-prefs 加 motion（接线）+ density（仅登记不接线）；prefCache 加 petri-motion；ThemeProvider 写 html data-motion；CSS 用 [data-motion=reduced] 与 prefers-reduced-motion 双降级；设置页常规节三档。预览专项/密度接线/对比度/通知/性能进 reopen。红线=不新增颜色 token、不改现有 token 值。"
+      "notes": "2026-10-18 立项发令 active（runlist W7c，范围收窄；用户「可以的 按照你的建议来 冲完W7c」）：只做动效用户开关（system/full/reduced）——user-prefs 加 motion（接线）+ density（仅登记不接线）；prefCache 加 petri-motion；ThemeProvider 写 html data-motion；CSS 用 [data-motion=reduced] 与 prefers-reduced-motion 双降级；设置页常规节三档。预览专项/密度接线/对比度/通知/性能进 reopen。红线=不新增颜色 token、不改现有 token 值。 | 收口 2026-10-18：motion 开关端到端（user-prefs.motion 接线 + density 仅登记 ⇒ 16 族/86 键；prefCache petri-motion；ThemeProvider data-motion；CSS 复用既有 reduced-motion 块两条通道 + full 覆盖系统；设置页三档 MotionControl）。closeout 十三门 PASS；theme-token-contract 17/17。**证据缺口**：9223 实机腿未跑（UI-525 in_progress，不以 verified 表述）；预览专项/密度接线/对比度/通知/性能进 reopen。"
     }
   ],
   "lastUpdated": "2026-10-17",

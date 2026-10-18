@@ -63,7 +63,7 @@
 - [x] W6 BLOCK-205 记忆与压缩策略面（**completed 2026-10-18**：九参数进 `memory-policy`（14 族/75 键，默认=现状）；`effectiveSnapshot` 生效值出口；嵌入模型只读；**评测基线未变**（context_snapshot 7/7 + smoke 0）；未做=设置页）
 - [x] W7a BLOCK-206 子智能体 profile + C-29 斜杠抽单元（**completed 2026-10-18**：15 族/81 键；并发 min 收紧、reportGuard 仅 inherit；classifySlashCommand + D15 unit 锚；code-size 抓真回 2142；十三门 PASS。遗留=context_snapshot 漂移待归因）
 - [x] W7b BLOCK-207 项目/工作区信任级别（**completed 2026-10-18**：16 族/84 键；天花板只收紧、默认 inherit 零变化、故障 fail-open；trust-audit.jsonl 留痕；抓真缺 level 半条。十三门 PASS）
-- [ ] W7c BLOCK-208 外观扩展（**active 2026-10-18；范围收窄为动效开关**；预览/密度/对比度/通知/性能进 reopen）
+- [x] W7c BLOCK-208 外观扩展（**completed 2026-10-18；范围收窄为动效开关**：16 族/86 键、复用既有 reduced-motion 块、设置页三档；UI-525 因 9223 实机腿未跑记 in_progress；预览/密度/对比度/通知/性能进 reopen）
 - [ ] W7d … W8（未启动）
 
 ## 4. 已知未达成事实（防止后续会话误读为已完成）

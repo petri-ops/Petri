@@ -11,7 +11,7 @@ acceptance:
   - P6 证据：`motion.test.tsx`（三档 → `<html data-motion>` + 非法值回落 system）+ `prefCache.drift` 扩展 + token 契约测绿；**9223 实机腿**：三档切换后 `getComputedStyle` 的 animation/transition 时长对比（reduced 命中降级规则）。UI 台账按实机结果记 `verified`；实机腿未跑则记 `in_progress` 并如实说明。
   - 完成语义：动效开关**可配且真的生效**；不承诺"全站所有动效都被这一个开关管住"——第三方/内联动画不在覆盖范围，验收只针对本仓 CSS 定义的过渡与动画。
 reopen: 预览专项（代码预览面 + 截图证据批）；密度档接线（token 级间距体系）；对比度档；通知偏好；性能（降级渲染开关）；动效开关对第三方动画的覆盖。
-status: active
+status: completed
 ---
 
 # BLOCK-208 · 阶段 4 C-3（收窄）：动效用户开关

@@ -15,3 +15,7 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-18T01:16:03.864Z -->
 最后更新：2026-10-18（**BLOCK-204-MCP-TOOL-POLICY 整包 completed（runlist W5；closeout 十三门全绿）**）：MCP 逐工具策略面——上限/超时/合同模式三件可配且"未配置=零行为变化"（基线 4/4 冻结 DEFAULTS=启用/60s/auto、上限 40、CAP-1 派生）；`mcp-tool-policy` 族（13 族/65 键）+ `GET/PUT /api/mcp/tool-policy`（unknown-tool 400 只拒该条、离线可改既有条目）；transfer/doctor 接入；漂移门新增 `NO_UI_FAMILIES`（无设置页=显式登记，不空转）。**抓真**：`writeStore` 把"未传 projectionLimit"判非法（`Number(undefined)=NaN`）→ partial 写入整批被拒。未做=逐工具设置页（W5b）。**无 active 工作包**，下一包=W6。plan=docs/block-204-mcp-tool-policy-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-18T01:22:49.062Z -->
+最后更新：2026-10-18（**BLOCK-205-MEMORY-COMPACTION-POLICY 整包 completed（runlist W6；closeout 十三门全绿）**）：compaction×4 + 检索×3 + 生命周期×2 进注册表 **14 族/75 键**，默认值逐字等于原常量（未配置=零行为变化）；`effectiveSnapshot()` 给生效值+来源；嵌入模型只读；写面 400 三分类；transfer/doctor/NO_UI_FAMILIES 接入。**评测基线对齐**：`context_snapshot` 7/7 指纹未变 + `evals:gate` smoke 回归 0 ⇒ 不重基准、如实记"未变"。抓真两处（作用域 ReferenceError / 未使用常量）。无 active 工作包，下一包=W7a。plan=docs/block-205-memory-compaction-policy-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
+最后更新：2026-10-18（**BLOCK-205-MEMORY-COMPACTION-POLICY 立项发令 active（runlist W6）**）：compaction 四常量 + 记忆检索三参数 + 生命周期两项（TTL/批次）全部硬编码、无生效值出口；收进 `memory-policy` 族，默认值逐字等于常量（未配置=零行为变化，基线先冻结）；嵌入模型只读登记（改模型=换维度=重嵌入）。**与评测基线对齐**为硬条款（context_snapshot 指纹变则显式重基准留因）。plan=docs/block-205-memory-compaction-policy-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
