@@ -196,10 +196,23 @@ ol {
  * onboarding 等未单独处理的动效，满足 WCAG 2.3.3（动画敏感用户）。
  * 各组件已有的局部 reduced-motion 规则仍保留，与此处叠加无害。
  * ──────────────────────────────────────────────────────────── */
+/* BLOCK-208（W7c）— 用户显式选「精简」时走同一套降级（不再另写一份规则：
+   系统媒体查询与用户开关共用这份声明，避免"两条真相"）。 */
+html[data-motion='reduced'] *,
+html[data-motion='reduced'] *::before,
+html[data-motion='reduced'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: var(--petri-duration-fast) !important;
+  transition-delay: 0ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* 用户显式选「完整」⇒ 允许覆盖系统的 prefers-reduced-motion（:not 让媒体查询让位）。 */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  html:not([data-motion='full']) *,
+  html:not([data-motion='full']) *::before,
+  html:not([data-motion='full']) *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: var(--petri-duration-fast) !important;
@@ -216,6 +229,11 @@ ol {
     transition-duration: var(--petri-duration-base) !important;
     transition-delay: 0ms !important;
   }
+}
+
+html[data-motion='reduced'] [data-petri-motion='functional'] {
+  transition-duration: var(--petri-duration-base) !important;
+  transition-delay: 0ms !important;
 }
 
 /* BLOCK-167 W0（宪章·渲染细节基线）：全局选中色唯一来源——accent 派生、明暗自适应。

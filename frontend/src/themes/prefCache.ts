@@ -21,6 +21,8 @@ export type AccentId = 'teal' | 'blue' | 'violet' | 'rose' | 'amber';
 export const THEME_STORAGE_KEY = 'petri-theme';
 export const FONT_SCALE_STORAGE_KEY = 'petri-font-scale';
 export const ACCENT_STORAGE_KEY = 'petri-accent';
+/** BLOCK-208（W7c）— 动效开关缓存键（真值同 `user-prefs.motion`）。 */
+export const MOTION_STORAGE_KEY = 'petri-motion';
 
 /** BLOCK-61：历史 key 读兼容（偏好零丢失），写入只落新 key，读到即迁移。 */
 export const LEGACY_THEME_KEYS = ['petri-theme', 'theme'] as const;
@@ -28,6 +30,10 @@ export const LEGACY_THEME_KEYS = ['petri-theme', 'theme'] as const;
 export type ThemePreference = 'system' | 'light' | 'dark';
 export const THEME_VALUES: ReadonlyArray<ThemePreference> = ['system', 'light', 'dark'];
 export const ACCENT_VALUES: ReadonlyArray<AccentId> = ['teal', 'blue', 'violet', 'rose', 'amber'];
+
+/** 动效模式：system=跟随系统 prefers-reduced-motion（默认）。 */
+export type MotionMode = 'system' | 'full' | 'reduced';
+export const MOTION_VALUES: ReadonlyArray<MotionMode> = ['system', 'full', 'reduced'];
 
 /** 与注册表 `userPrefs.fontScale` 的 domain 一致（漂移测兜底）。 */
 export const FONT_SCALE_MIN = 0.8;
@@ -39,6 +45,10 @@ export function isThemePreference(value: unknown): value is ThemePreference {
 
 export function isAccentId(value: unknown): value is AccentId {
   return typeof value === 'string' && (ACCENT_VALUES as ReadonlyArray<string>).includes(value);
+}
+
+export function isMotionMode(value: unknown): value is MotionMode {
+  return typeof value === 'string' && (MOTION_VALUES as ReadonlyArray<string>).includes(value);
 }
 
 export function clampFontScale(value: number): number {
@@ -87,6 +97,17 @@ export function readCachedAccent(): AccentId {
   return 'teal';
 }
 
+/** 读取动效模式缓存（非法/不可用 ⇒ system，零行为变化）。 */
+export function readCachedMotion(): MotionMode {
+  try {
+    const saved = localStorage.getItem(MOTION_STORAGE_KEY);
+    if (isMotionMode(saved)) return saved;
+  } catch {
+    /* storage unavailable */
+  }
+  return 'system';
+}
+
 /** 写缓存：失败只忽略（本端内存仍生效；服务端同步另有一条链）。 */
 export function writeCachedTheme(value: ThemePreference): void {
   try {
@@ -99,6 +120,14 @@ export function writeCachedTheme(value: ThemePreference): void {
 export function writeCachedFontScale(value: number): void {
   try {
     localStorage.setItem(FONT_SCALE_STORAGE_KEY, String(value));
+  } catch {
+    /* 保留内存偏好 */
+  }
+}
+
+export function writeCachedMotion(value: MotionMode): void {
+  try {
+    localStorage.setItem(MOTION_STORAGE_KEY, value);
   } catch {
     /* 保留内存偏好 */
   }

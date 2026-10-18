@@ -358,6 +358,19 @@ const CONFIG_KEYS = Object.freeze([
     type: 'string', domain: { oneOf: ['teal', 'blue', 'violet', 'rose', 'amber'] }, envKeys: [], aliases: [],
     mutable: true, ui: 'settings',
   },
+  {
+    // BLOCK-208（W7c 收窄）：动效开关。system=跟随 prefers-reduced-motion（默认，零行为变化）
+    key: 'userPrefs.motion', family: 'user-prefs', path: 'motion',
+    type: 'string', domain: { oneOf: ['system', 'full', 'reduced'] }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
+    // BLOCK-208：密度**只登记不接线**（会牵动全站间距 token，属单独立项）；先让键可寻址，
+    // 免得下次接线时要再改一次 schema 形状。
+    key: 'userPrefs.density', family: 'user-prefs', path: 'density',
+    type: 'string', domain: { oneOf: ['comfortable', 'compact'] }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
   // —— 技能治理账本（BLOCK-203 W4a P3；原 `shared-backend/skill-prefs.js` 无任何形状校验）——
   // `disabled.<id>` 不是布尔映射而是对象 `{ at, reason? }`，`uninstalledSources.<id>` 并存
   // `{ sourceDir, at }`。`findEntryByPath` 只寻址标量 ⇒ 按**点路径**逐字段登记，

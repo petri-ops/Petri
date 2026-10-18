@@ -1,4 +1,5 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-10-18（**BLOCK-208-APPEARANCE-MOTION 立项发令 active（W7c 收窄版：只做动效开关）**）：`user-prefs` 加 motion（接线）+ density（仅登记）；CSS 双降级（data-motion/prefers-reduced-motion），只改时长与行为、不新增颜色 token；设置页常规节三档。预览专项/密度接线/对比度/通知/性能进 reopen。plan=docs/block-208-appearance-motion-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-207（W7b）completed（closeout 十三门 PASS）**）：项目信任级 inherit/trusted/untrusted（16 族/84 键），`applyTrustCeiling` 只能收紧（untrusted 下写/执行→read，read/plan 原样），默认 inherit 零行为变化；接 agent-runner accessMode 构造点、信任层故障 fail-open；变更/导入/重置均落 `trust-audit.jsonl`。plan=docs/block-207-project-trust-policy-plan.md。无 active 工作包，下一包=W7c。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-207-PROJECT-TRUST-POLICY 立项发令 active（runlist W7b）**）：项目信任级 inherit/trusted/untrusted，在 accessMode 构造点做只能收紧的天花板（untrusted ⇒ 禁止写/执行）；信任变更写追加式审计；默认 inherit=零行为变化。plan=docs/block-207-project-trust-policy-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**🟡 context_snapshot 漂移已归因并修复：不是 prompt 文案，是路径分隔符**）：`normalizeContextString` 把 tmp 根换成 `<TMP>` 后保留了 OS 分隔符 ⇒ Windows 录的基线（`<TMP>\projects\…`）在 macOS 上恒红。处置=归一化统一 `<TMP>/`（新增"Windows 与 POSIX 同指纹"单测），显式重基准到 `dfc9be7b986a1c17` 并复跑 `✔ 一致`。**两处口径更正**：W6 的"指纹未变"不成立（用单测代替 fp 对比）；W7a 初判引用的"system prompt 文案变更"只是 harness 启发式提示语，非真因。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -18,6 +19,7 @@
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
+| 🔵 | 2026-10-18 | **BLOCK-208（W7c 收窄）立项**：动效开关（system/full/reduced）+ 双降级 CSS + 设置页三档；density 仅登记。plan=docs/block-208-appearance-motion-plan.md | BLOCK-208 / P0-LAUNCH |
 | ✅ | 2026-10-18 | **BLOCK-207（W7b）completed（十三门 PASS）**：信任级天花板（只收紧、默认 inherit 零变化、故障 fail-open）+ trust 审计；抓真缺 level 半条。下一包=W7c | BLOCK-207 / P5-CLOSED |
 | 🔵 | 2026-10-18 | **BLOCK-207（W7b）立项**：项目信任级 + accessMode 天花板（只收紧）+ trust 审计；默认 inherit 零变化。plan=docs/block-207-project-trust-policy-plan.md | BLOCK-207 / P0-LAUNCH |
 | ✅ | 2026-10-18 | **BLOCK-206（W7a）completed（十三门 PASS）**：profile 声明式（15 族/81 键，并发 min 收紧、reportGuard 仅 inherit）；C-29 斜杠判定抽离 + D15 unit 锚；code-size 抓真并回 2142。遗留=context_snapshot 漂移待归因（🟡） | BLOCK-206 / P5-CLOSED |

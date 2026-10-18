@@ -6,7 +6,7 @@
 
 最后更新：2026-10-17（**BLOCK-203-STAGE-3-B1B-CONFIG-LANDING-CONSOLIDATION 立项发令 active（runlist W4 拆片：W4a 先做）**）
 
-**恢复要点（换会话必读·本段取代下方 BLOCK-207 段）**：**无 active 工作包**；**下一包=W7c**（BLOCK-208：外观扩展——预览/通知/动效/密度/性能；受 design charter 棘轮约束、须证据批，先读 `.agents/skills/petri-css-theme`）。**刚收口=BLOCK-207（W7b）**：项目信任级（16 族/84 键；`applyTrustCeiling` 只收紧、默认 inherit 零变化、故障 fail-open）+ `trust-audit.jsonl`。**注意**：main 上存在另一会话的提交（`7bf008b9 feat(ui-523)`），改文件前先 `git log` 看一眼。
+**恢复要点（换会话必读·本段取代下方 BLOCK-208 段）**：**当前 active 工作包=BLOCK-208（W7c 收窄版：动效开关）**，plan=`docs/block-208-appearance-motion-plan.md`（registry `active` / `P0-LAUNCH`）。**下一步第一个动作=P1+P2**：`user-prefs` 加 `motion`（接线）+ `density`（仅登记）；`prefCache` 加 `petri-motion`。**红线（design charter）**：不新增颜色 token、不改现有 token 值，只改时长/行为；`theme-token-contract.test.ts` 与 `prefCache.drift.test.ts` 必须绿。**范围收窄已留痕**：预览专项/密度接线/对比度/通知/性能进 reopen，runlist 标题五项不是范围承诺。
 
 最后更新：2026-10-17（**BLOCK-202-STAGE-A-QUICKWINS-3 整包 completed（阶段 A 速赢 III=runlist W3；当日立项当日收口·9223 探针 15/15 allPass）**）
 

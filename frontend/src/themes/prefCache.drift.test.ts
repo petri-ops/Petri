@@ -29,6 +29,9 @@ import {
   clampFontScale,
   isAccentId,
   isThemePreference,
+  isMotionMode,
+  MOTION_STORAGE_KEY,
+  MOTION_VALUES,
 } from './prefCache';
 
 const schema = rawSchema as {
@@ -50,6 +53,14 @@ describe('prefCache ↔ user-prefs 注册表', () => {
     const accent = schema.findKeyEntry('userPrefs.accent');
     expect([...THEME_VALUES]).toEqual(theme?.domain?.oneOf);
     expect([...ACCENT_VALUES]).toEqual(accent?.domain?.oneOf);
+  });
+
+  it('动效枚举与服务端注册表逐项相等（BLOCK-208）', () => {
+    const motion = schema.findKeyEntry('userPrefs.motion');
+    expect([...MOTION_VALUES]).toEqual(motion?.domain?.oneOf);
+    expect(MOTION_STORAGE_KEY).toBe('petri-motion');
+    expect(isMotionMode('reduced')).toBe(true);
+    expect(isMotionMode('sometimes')).toBe(false);
   });
 
   it('字号钳位边界与服务端注册表相同', () => {

@@ -16,10 +16,13 @@ import {
   clampFontScale,
   THEME_STORAGE_KEY,
   readCachedFontScale,
+  readCachedMotion,
   readCachedTheme,
   writeCachedAccent,
   writeCachedFontScale,
   writeCachedTheme,
+  writeCachedMotion,
+  type MotionMode,
   type ThemePreference,
 } from './prefCache';
 
@@ -59,6 +62,9 @@ interface ThemeContextValue {
   /** BLOCK-49 加映三 — 主题色（强调色维度，独立于明暗）。 */
   accent: AccentId;
   setAccent: (accent: AccentId) => void;
+  /** BLOCK-208 — 动效开关（system=跟随系统 prefers-reduced-motion）。 */
+  motion: MotionMode;
+  setMotion: (mode: MotionMode) => void;
   /** 服务端偏好同步状态（设置面据此提示"本机已生效但没存到服务端"）。 */
   prefsSync: PrefsSyncState;
 }
@@ -75,6 +81,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
   const resolvedTheme = preference === 'system' ? systemResolvedTheme : preference;
   const [fontScale, setFontScaleState] = useState<number>(readFontScale);
   const [accent, setAccentState] = useState<AccentId>(readAccent);
+  const [motion, setMotionState] = useState<MotionMode>(readCachedMotion);
 
   // BLOCK-86 L1 — 多端偏好同步：服务端 /api/user/prefs 为权威源，
   // localStorage 仅作启动缓存。任何端修改，其余端（桌面/手机投影）
@@ -89,7 +96,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
     return headers;
   }, []);
 
-  const applyRemotePrefs = useCallback((prefs: { theme?: string; fontScale?: number; accent?: string }) => {
+  const applyRemotePrefs = useCallback((prefs: { theme?: string; fontScale?: number; accent?: string; motion?: string }) => {
     if (prefs.theme === 'light' || prefs.theme === 'dark' || prefs.theme === 'system') {
       setPreferenceState(prefs.theme);
       writeCachedTheme(prefs.theme);
@@ -102,6 +109,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
     if (typeof prefs.accent === 'string' && prefs.accent) {
       setAccentState(prefs.accent as AccentId);
       writeCachedAccent(prefs.accent as AccentId);
+    }
+    // BLOCK-208 — 动效偏好跨端应用（与其它外观偏好同一条链）
+    if (typeof prefs.motion === 'string' && ['system', 'full', 'reduced'].includes(prefs.motion)) {
+      setMotionState(prefs.motion as MotionMode);
+      writeCachedMotion(prefs.motion as MotionMode);
     }
   }, []);
 
@@ -159,6 +171,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
     pushPrefs({ theme: next });
   }, [pushPrefs]);
 
+  const setMotion = useCallback((next: MotionMode) => {
+    setMotionState(next);
+    writeCachedMotion(next);
+    pushPrefs({ motion: next });
+  }, [pushPrefs]);
+
   const setAccent = useCallback((next: AccentId) => {
     setAccentState(next);
     writeCachedAccent(next);
@@ -193,6 +211,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
   useEffect(() => {
     applyFontScale(fontScale);
   }, [fontScale]);
+
+  // BLOCK-208（W7c）— 动效开关：`data-motion` 交给 CSS（reduced 降级时长/行为；
+  // system 由 `prefers-reduced-motion` 媒体查询负责，JS 不去猜系统设置）。
+  useEffect(() => {
+    document.documentElement.setAttribute('data-motion', motion);
+  }, [motion]);
 
   // BLOCK-49 加映三 — 主题色注入（data-accent；teal 默认不设属性）
   useEffect(() => {
@@ -239,8 +263,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
   }, [setPreference]);
 
   const value = useMemo(
-    () => ({ preference, resolvedTheme, setPreference, fontScale, setFontScale, accent, setAccent, prefsSync }),
-    [preference, resolvedTheme, setPreference, fontScale, setFontScale, accent, setAccent, prefsSync],
+    () => ({ preference, resolvedTheme, setPreference, fontScale, setFontScale, accent, setAccent, motion, setMotion, prefsSync }),
+    [preference, resolvedTheme, setPreference, fontScale, setFontScale, accent, setAccent, motion, setMotion, prefsSync],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

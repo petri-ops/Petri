@@ -62,7 +62,7 @@
       "wave": "B",
       "module": "W-01",
       "lines": 670,
-      "sha256": "d866b6a1f9ac8dc95e92f2133e35e0c82e1ab1d16384ac9bacc1744d151a998c"
+      "sha256": "0a0f8c7dbe5947bb5dde9212640f4cfbcca0dbeccf61f4cd7aca9bc08b625673"
     },
     {
       "path": "frontend/src/components/desktop/PluginStorePanel.tsx",

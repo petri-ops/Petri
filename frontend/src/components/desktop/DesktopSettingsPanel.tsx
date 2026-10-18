@@ -10,6 +10,7 @@ import { ThemeControl } from './ThemeControl';
 import { useTheme, FONT_SCALE_MIN, FONT_SCALE_MAX } from '@/themes/ThemeProvider';
 import { AccentControl } from './AccentControl';
 import { SettingsNav } from './DesktopSettingsPanel/SettingsNav';
+import { MotionControl } from './DesktopSettingsPanel/sections/MotionControl';
 import { NetworkProxyPanel } from './DesktopSettingsPanel/sections/NetworkProxyPanel';
 import { RuntimePolicyPanel } from './DesktopSettingsPanel/sections/RuntimePolicyPanel';
 import { MaintenanceSection } from './DesktopSettingsPanel/MaintenanceSection';
@@ -190,7 +191,6 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
           activeSection={activeSection}
           onSelect={setActiveSection}
         />
-
         <div className="petri-desktop-panel__body petri-settings-content">
         {activeSection === 'general' && (
           <section className="petri-settings-section">
@@ -238,7 +238,7 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
           <AccentControl />
           <p className="petri-field__hint">更换应用的强调配色（按钮、链接、高亮等），明暗主题与布局不受影响。</p>
         </div>
-
+        <MotionControl />
           </section>
         )}
 
