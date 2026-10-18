@@ -141,3 +141,11 @@ status: completed
 - **货架如实**：`SkillCard` 对"有插件硬依赖"的技能也显示依赖徽标（此前只有 `requires.bins` 才显示），title 列出「缺插件包：…」。
 - 证据：`block211-skill-deps-plugins` **4/4** + `tsc` 0；台账 **UI-527 `in_progress`**（无实机腿）。
 - **仍未做（属 C-33 产品裁决）**：`resources/built-in-plugins/` 是否补齐、`skills:check` 是否升为阻塞门禁——本轮只把"货架不说谎"这一半做实。
+
+## 12. 第七批：`skills:check` 以**报告级**纳入收口（2026-10-18）
+
+- **做法**：`closeout-gates.mjs` 新增 `--report <npm-script>`（可重复）——所有阻塞门禁跑完后执行，**不改变退出码**，摘要里打印 `✅/⚠️` 与红条数；`package.json` 的 `closeout` 已挂 `--report skills:check`。
+- **效果**：`npm run closeout` 现在会打印 `⚠️ npm run skills:check — 红（exit 1，5 条）`，其余门禁照常 PASS。**"红着走"变成"每次收口都被看见"**。
+- **为什么不是直接升阻塞**：`skills:check` 的红来自 `resources/built-in-plugins/` 在本仓不存在——补齐插件包是**资产/产品裁决**（C-33），先把它变阻塞会让所有收口卡在一个不该由工程侧单方面决定的前置上。
+- **顺手修**：改脚本时误删了 `repoGate` 辅助函数（`ReferenceError`），已恢复并用 `--report skills:check` 冒烟验证（报告行出现、CLOSEOUT 仍 PASS）。
+- 未做：把红数写进 AUDIT-LOG 自动对账（当前是人工登记）；`--report` 的单元测试（脚本本身无测试面，靠冒烟）。

@@ -15,6 +15,10 @@
  *   4. tests     test:changed（impact-map 影响范围定向测试）
  *
  * 额外门禁（当前工作包专项门禁等）：`--gate <npm-script>` 可重复，追加在固定门禁之后
+ *
+ * **报告级门禁**：`--report <npm-script>` 可重复——所有阻塞门禁跑完后执行，**不改变退出码**，
+ * 只把结果（退出码 + 失败行数）打印进摘要。用途=「红着走」的存量门禁（如 skills:check 的
+ * 5 红插件依赖）至少每次收口都被看见，而不是长期没人知道它红了。
  * 经 `npm run <name>` 执行。`--no-tests` 可跳过 test:changed（仅限纯文档改动等场景，
  * 跳过后摘要中如实标注 skipped，不算 PASS）。
  *
@@ -41,23 +45,24 @@ const NPM = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
 function parseArgs(argv) {
   const gates = [];
+  const reports = [];
   const skips = new Set();
   let noTests = false;
-  for (const arg of argv) {
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i];
     if (arg === '--no-tests') noTests = true;
     else if (arg.startsWith('--skip=')) arg.slice(7).split(',').forEach((s) => skips.add(s.trim()));
-    else if (arg === '--gate') gates.push(null); // 占位，取下一个参数
-    else if (gates.includes(null)) gates[gates.indexOf(null)] = arg;
-    else {
+    else if (arg === '--gate' || arg === '--report') {
+      const name = argv[i + 1];
+      if (!name || name.startsWith('--')) { console.error(`${arg} 后必须跟 npm 脚本名`); process.exit(2); }
+      (arg === '--gate' ? gates : reports).push(name);
+      i += 1;
+    } else {
       console.error(`未知参数: ${arg}`);
       process.exit(2);
     }
   }
-  if (gates.includes(null)) {
-    console.error('--gate 后必须跟 npm 脚本名');
-    process.exit(2);
-  }
-  return { gates, skips, noTests };
+  return { gates, reports, skips, noTests };
 }
 
 function repoGate(id, title, relScript, args) {
@@ -84,7 +89,7 @@ function plan(skips, noTests, extraGates) {
 }
 
 function main() {
-  const { gates: extraGates, skips, noTests } = parseArgs(process.argv.slice(2));
+  const { gates: extraGates, reports, skips, noTests } = parseArgs(process.argv.slice(2));
   const list = plan(skips, noTests, extraGates);
 
   console.log(`== 收口门禁聚合（${list.length} 项，fail-fast）==`);
@@ -122,6 +127,18 @@ function main() {
     console.log('修复或如实登记例外后再收口；不得把未跑/失败的门禁表述为通过。');
     process.exit(1);
   }
+  // 报告级门禁（BLOCK-211 W8）：红着走的存量门禁每次收口都必须被看见，但不阻塞。
+  if (reports.length > 0) {
+    console.log('\n== 报告级门禁（非阻塞，不改变退出码）==');
+    for (const name of reports) {
+      const rr = spawnSync(NPM, ['run', name], { cwd: ROOT, encoding: 'utf8', shell: NPM === 'npm.cmd' });
+      const text = `${rr.stdout || ''}\n${rr.stderr || ''}`;
+      const reds = (text.match(/❌/g) || []).length;
+      const status = rr.status === 0 ? 'OK' : `红（exit ${rr.status ?? 'signal'}，${reds} 条）`;
+      console.log(`  ${rr.status === 0 ? '✅' : '⚠️ '} npm run ${name} — ${status}`);
+    }
+  }
+
   const notRun = list.length - results.length;
   if (notRun > 0) {
     console.log(`\n（fail-fast：${notRun} 项后续门禁未执行，如实留痕）`);

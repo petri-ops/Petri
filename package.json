@@ -168,7 +168,7 @@
     "gate:code-size": "node scripts/code-size-ledger.mjs --check",
     "gate:arch-cycles": "node scripts/arch-cycles-gate.mjs --check",
     "gate:css-modules": "node scripts/css-modules-ratchet.mjs --check",
-    "closeout": "node .agents/skills/petri-dev-infra/scripts/closeout-gates.mjs --gate gate:code-size --gate gate:arch-cycles --gate gate:css-modules --gate quality:secret --gate quality:arch --gate quality:lint --gate quality:types --gate quality:knip:check",
+    "closeout": "node .agents/skills/petri-dev-infra/scripts/closeout-gates.mjs --gate gate:code-size --gate gate:arch-cycles --gate gate:css-modules --gate quality:secret --gate quality:arch --gate quality:lint --gate quality:types --gate quality:knip:check --report skills:check",
     "verify": "node .agents/skills/petri-dev-infra/dev-verify/run.cjs",
     "skills:check": "node scripts/skill-scaffold.mjs --check",
     "skills:scaffold": "node scripts/skill-scaffold.mjs",

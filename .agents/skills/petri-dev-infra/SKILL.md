@@ -35,7 +35,8 @@ description: Use Petri development infrastructure when starting or resuming a se
 
 ## 宣称收口之前
 
-- 跑 `npm run closeout`（九门 fail-fast：hygiene → docs:check → ui:audit:check → test:changed → gate:code-size → quality:secret → quality:arch → quality:lint → quality:types；BLOCK-105 起四门 quality 门禁入链）；当前工作包另有专项门禁时用 `--gate <npm-script>` 追加。
+- 跑 `npm run closeout`（十三门 fail-fast：audit:compact → hygiene → docs:check → ui:audit:check → test:changed → gate:code-size → gate:arch-cycles → gate:css-modules → quality:secret → quality:arch → quality:lint → quality:types → quality:knip:check）；当前工作包另有专项门禁时用 `--gate <npm-script>` 追加。
+- **报告级门禁**（BLOCK-211 起）：`--report <npm-script>` 可重复，所有阻塞门禁跑完**之后**执行，只把结果打进口径摘要、**不改变退出码**。用途=`skills:check` 这类"已知红且不在阻塞链"的存量门禁至少每次收口都被看见（`npm run closeout` 已挂 `--report skills:check`）；它不替代阻塞门禁——红数要不要升阻塞是治理裁决。）
 - 门禁全绿是收口的必要条件不是充分条件：canonical 回写（work package / roadmap / handoff / AUDIT-LOG / ui-audit 台账）仍按治理纪律单独完成。
 - 属于其他线/并行包的红旗如实登记归属，不得表述为本包通过。
 - **P6 产品验收证据重打期间仓库必须完全静默**（2026-09-20 实测白跑一轮 8 分钟）：`npm run g0:result-studio:p6:update` 在写盘前断言 `sourceCommitMatchesSourceHashes && sourceBindingStableDuringCapture`（`scripts/g0-rs-p6-product-acceptance.mjs:554-565`），实采开始与写盘之间 **HEAD 一旦前进（哪怕只提交 docs）即 `p6_evidence_source_binding_not_current`**，且该红出现在预检全绿之后，极易误读为产品缺陷。姿势：启动前 `git status --porcelain` 为空、期间只做只读核对与仓库外（`/tmp`、memory 目录）写入。另记：同一不变量还捆绑 `recomputed.passed`，所以 **live 检查抖动会以 `p6_evidence_checks_not_recomputed` 现形**（本轮实测：第二轮失败、`--live --verbose` 不写盘复跑 10/10 PASS、第三轮写盘成功）——先按 flaky 分流复跑取证，再怀疑源码。
