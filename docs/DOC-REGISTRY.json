@@ -7036,8 +7036,8 @@
       "capability": "project-trust-policy",
       "path": "docs/block-207-project-trust-policy-plan.md",
       "kind": "work-package",
-      "status": "active",
-      "phase": "P0-LAUNCH",
+      "status": "completed",
+      "phase": "P5-CLOSED",
       "canonical": true,
       "truthDomain": "block-207-project-trust-policy-plan",
       "entrypoint": "docs/README.md",
@@ -7051,7 +7051,7 @@
         "stage-4",
         "block-207"
       ],
-      "notes": "2026-10-18 立项发令 active（runlist W7b；用户「行 冲完 W7b」）：项目信任级 inherit/trusted/untrusted，在 agent-runner 的 accessMode 构造点做只能收紧的天花板（untrusted ⇒ 禁止写/执行），信任变更写追加式审计；默认 inherit=零行为变化。红线=不做第二套权限系统、不动四档判定/审批/用户规则。"
+      "notes": "2026-10-18 立项发令 active（runlist W7b；用户「行 冲完 W7b」）：项目信任级 inherit/trusted/untrusted，在 agent-runner 的 accessMode 构造点做只能收紧的天花板（untrusted ⇒ 禁止写/执行），信任变更写追加式审计；默认 inherit=零行为变化。红线=不做第二套权限系统、不动四档判定/审批/用户规则。 | 收口 2026-10-18：trust-policy 族（16 族/84 键）；applyTrustCeiling 只收紧（untrusted 下写/执行→read，read/plan 原样），默认 inherit=零行为变化；接 agent-runner accessMode 构造点且信任层故障 fail-open；变更/导入/重置均落 trust-audit.jsonl；写面 400；closeout 十三门 PASS。"
     }
   ],
   "lastUpdated": "2026-10-17",

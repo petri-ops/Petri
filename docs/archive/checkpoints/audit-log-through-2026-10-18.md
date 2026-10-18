@@ -12,3 +12,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-18T01:06:57.944Z -->
 最后更新：2026-10-18（**BLOCK-204-MCP-TOOL-POLICY 立项发令 active（runlist W5：MCP 逐工具策略面）**）：P0 实码三处不可配——投影上限 `MAX_PROJECTED_TOOLS=40`、`callServerTool` 超时 60s 常量、合同只由 `readOnlyHint` 推导，启停粒度只有 server 级。范围=schema 族 `mcp-tool-policy` + helper + 投影/上限/合同/超时四处接线 + `GET/PUT /api/mcp/tool-policy`（unknown-tool 400）+ transfer/doctor/漂移门。红线=不改四档判定、不改 readOnlyHint 默认推导、unknown-tool 只拒该条。plan=docs/block-204-mcp-tool-policy-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-18T01:16:03.864Z -->
+最后更新：2026-10-18（**BLOCK-204-MCP-TOOL-POLICY 整包 completed（runlist W5；closeout 十三门全绿）**）：MCP 逐工具策略面——上限/超时/合同模式三件可配且"未配置=零行为变化"（基线 4/4 冻结 DEFAULTS=启用/60s/auto、上限 40、CAP-1 派生）；`mcp-tool-policy` 族（13 族/65 键）+ `GET/PUT /api/mcp/tool-policy`（unknown-tool 400 只拒该条、离线可改既有条目）；transfer/doctor 接入；漂移门新增 `NO_UI_FAMILIES`（无设置页=显式登记，不空转）。**抓真**：`writeStore` 把"未传 projectionLimit"判非法（`Number(undefined)=NaN`）→ partial 写入整批被拒。未做=逐工具设置页（W5b）。**无 active 工作包**，下一包=W6。plan=docs/block-204-mcp-tool-policy-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。

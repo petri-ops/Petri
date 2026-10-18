@@ -10,7 +10,7 @@ acceptance:
   - P5 收尾：`config-transfer`/`config:doctor`/漂移门 `NO_UI_FAMILIES` 接入；closeout 十三门。
   - 完成语义：**不做第二套权限系统**——四档判定、审批链、用户规则层一字不动；信任只是"在进入判定前把请求档位压到天花板以下"。命名权限档 v1 = 三个信任级（inherit/trusted/untrusted），不做任意组合的自定义档。
 reopen: 项目级自定义权限组合（accessMode + 工具白黑名单命名档）；信任级别的 UI；跨设备信任同步；按目录（而非项目 id）的匹配规则。
-status: active
+status: completed
 ---
 
 # BLOCK-207 · 阶段 4 C-2：项目/工作区信任级别
@@ -32,3 +32,12 @@ status: active
 - **默认 inherit**：不配置 = 零行为变化（"最保守"的落地方式不是默认降级所有人）。
 - **只能收紧**：`applyTrustCeiling` 永不返回比请求更宽的档位（单测钉死矩阵）。
 - **不动四档判定/审批/用户规则**；不新增依赖；不碰 G1+。
+
+## 3. 落地记录（2026-10-18）
+
+- **P1+P2**：schema 加 `trust-policy` 族（`defaultLevel` + `project`/`level`）⇒ 注册表 **16 族 / 84 键**；`helpers/trust-policy.js`（`trust-policy.json` 走 `data-paths`；`applyTrustCeiling` 纯函数；变更追加 `trust-audit.jsonl`）。
+- **P3**：接在 `agent-runner` 的 `accessMode` 构造点（`_applyProjectTrustCeiling`）；**只能收紧**（untrusted: `workspace-write`/`full` → `read`，`read`/`plan` 原样）；信任层故障 **fail-open 回原档位**（它是收紧器不是判定器）。
+- **P4**：`GET/PUT /api/trust/policy`（400 + diagnostics）；导入与重置也走同一写函数 ⇒ **actor 分别记 `import` / `reset`**，不留"从文件导入就绕过留痕"的后门。
+- **P5**：`config-transfer`/`config:doctor`/漂移门 `NO_UI_FAMILIES` 接入；closeout 十三门 PASS。
+- **抓真一处**：`sanitizeItem` 只校验"出现了的字段"，于是 `{project}` 缺 `level` 的半条会被读侧留下 → `levelForProject` 返回 `undefined`。改为读侧要求 `project`+`level` 齐全、写侧对缺 `level` 明确报错（回归测当场抓到）。
+- 证据：`test/block207-trust-policy.test.mjs` 6/6（矩阵/默认零变化/优先级/守卫/审计/读宽容）+ 漂移/基线/transfer 21/21 + knip PASS + lint 0 error。

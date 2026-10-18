@@ -6,7 +6,7 @@
 
 最后更新：2026-10-17（**BLOCK-203-STAGE-3-B1B-CONFIG-LANDING-CONSOLIDATION 立项发令 active（runlist W4 拆片：W4a 先做）**）
 
-**恢复要点（换会话必读·本段取代下方 BLOCK-206 段）**：**当前 active 工作包=BLOCK-207（W7b）**，plan=`docs/block-207-project-trust-policy-plan.md`（registry `active` / `P0-LAUNCH`）。**下一步第一个动作=P1+P2**：schema 加 `trust-policy` 族（`defaultLevel` + `<item>.{project,level}`）+ `helpers/trust-policy.js`（落点走 `data-paths`，`applyTrustCeiling` 纯函数，信任变更追加 `trust-audit.jsonl`）。**红线**：默认 `inherit`=零行为变化；`applyTrustCeiling` **只能收紧**（untrusted: read→read、plan→plan、workspace-write/full→read）；不动四档判定/审批/用户规则；不做自定义权限组合（reopen）。
+**恢复要点（换会话必读·本段取代下方 BLOCK-207 段）**：**无 active 工作包**；**下一包=W7c**（BLOCK-208：外观扩展——预览/通知/动效/密度/性能；受 design charter 棘轮约束、须证据批，先读 `.agents/skills/petri-css-theme`）。**刚收口=BLOCK-207（W7b）**：项目信任级（16 族/84 键；`applyTrustCeiling` 只收紧、默认 inherit 零变化、故障 fail-open）+ `trust-audit.jsonl`。**注意**：main 上存在另一会话的提交（`7bf008b9 feat(ui-523)`），改文件前先 `git log` 看一眼。
 
 最后更新：2026-10-17（**BLOCK-202-STAGE-A-QUICKWINS-3 整包 completed（阶段 A 速赢 III=runlist W3；当日立项当日收口·9223 探针 15/15 allPass）**）
 
