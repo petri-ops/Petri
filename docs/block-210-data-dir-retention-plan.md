@@ -10,7 +10,7 @@ acceptance:
   - P5 收尾：`config-transfer`/`config:doctor`/漂移门 `NO_UI_FAMILIES`；closeout 十三门。
   - 完成语义：**默认不动任何用户数据**；归档/删除只在显式开启且 dryRun=false 时发生；迁移**只出计划**，执行属 reopen。
 reopen: 真实数据目录迁移（一次性窗口 + 备份 + 回滚演练 + 迁移后自检）；定时任务接线（当前只提供手动 apply 入口）；按类型的留存策略（transcripts vs results vs uploads 分别配置）。
-status: active
+status: completed
 ---
 
 # BLOCK-210 · 阶段 4 C-5：数据目录可配 + 历史留存/归档

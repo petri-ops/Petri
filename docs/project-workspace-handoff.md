@@ -6,7 +6,7 @@
 
 最后更新：2026-10-17（**BLOCK-203-STAGE-3-B1B-CONFIG-LANDING-CONSOLIDATION 立项发令 active（runlist W4 拆片：W4a 先做）**）
 
-**恢复要点（换会话必读·本段取代下方 BLOCK-210 段）**：**当前 active 工作包=BLOCK-210（W7e）**，plan=`docs/block-210-data-dir-retention-plan.md`（registry `active` / `P0-LAUNCH`）。**下一步第一个动作=P1+P2**：schema 加 `data-retention` 族（historyDays/archiveDir/maxBytesPerDir）+ `helpers/data-retention.js`（`planRetention` 纯函数、`applyRetention` 默认 dryRun）+ `helpers/data-dir-migration.js`（只读计划器）。**红线**：默认不删不移；目录解析只走 W4b 的 `data-paths`（不得再写回落链）；迁移只出计划、不执行（reopen）。**仍未补的证据**：UI-525（W7c 动效）9223 实机腿。**注意**：main 上存在另一会话的提交（`7bf008b9 feat(ui-523)`），改文件前先 `git log` 看一眼。
+**恢复要点（换会话必读·本段取代下方 BLOCK-210 段）**：**无 active 工作包**；**下一包=W8 收尾族**（BLOCK-211：lint 基线净收缩 / 双机 riders+BK-08 销号 / 休眠插件激活裁决 / RS 徽标语义诚实化 / C-32 env='1' 语义清偿 / C-27 拒绝类 judge 口径 / C-30·C-31 立项或销号）。**W8 是 6 个独立小项**——建议逐项各自验收、不要混成一个大提交（每项都可能触不同门禁：lint 棘轮/C-32 需全查 dev 脚本 env=1 用法/C-27 需成对实验）。**刚收口=BLOCK-210（W7e）**：留存/归档（默认零删除；apply 默认 dryRun；删除须 allowDelete）+ 迁移计划器（只读，含备份/回退/阻塞项）；注册表 17 族/89 键。**仍未补的证据**：UI-525（W7c 动效）9223 实机腿未跑，台账 `in_progress`。**注意**：main 上存在另一会话的提交（`7bf008b9 feat(ui-523)`），改文件前先 `git log` 看一眼。
 
 最后更新：2026-10-17（**BLOCK-202-STAGE-A-QUICKWINS-3 整包 completed（阶段 A 速赢 III=runlist W3；当日立项当日收口·9223 探针 15/15 allPass）**）
 
