@@ -6,7 +6,7 @@
 
 最后更新：2026-10-17（**BLOCK-203-STAGE-3-B1B-CONFIG-LANDING-CONSOLIDATION 立项发令 active（runlist W4 拆片：W4a 先做）**）
 
-**恢复要点（换会话必读·本段取代下方 BLOCK-212 段）**：**无 active 工作包**；**刚收口=BLOCK-213（功能发现率）**——面板 24 条静态命令、设置节 10/10、快捷键同名 5/10（局部键位不进面板）、空态 2/2（另两页 N/A 有据）；四数字写成棘轮（`test/block213-discoverability.test.mjs`）。**C-33 已核定**：`skills:check` 5 红=外部 pack `petri-pack-bio` 未检出（fail-closed by design，BIO-D2），非 manifest 缺陷；已补 `PETRI_PACK_DIRS` 让 pack 位置可配，门禁保持报告级。**仍未清**：pack 仓检入（资产）、双机 riders+BK-08（第二台机器）、C-34（G1+ 真实调用）、UI-526（需有产物的结果页）。**测试实例已无窗口**（`show:false` + `backgroundThrottling:false`，实测 screenX=-1380）；dev 栈与 9223 在跑。**注意**：main 上存在另一会话的提交（`7bf008b9 feat(ui-523)`），改文件前先 `git log` 看一眼。
+**恢复要点（换会话必读·本段取代下方 BLOCK-212 段）**：**无 active 工作包**；**刚收口=BLOCK-213（功能发现率）**——面板 24 条静态命令、设置节 10/10、快捷键同名 5/10（局部键位不进面板）、空态 2/2（另两页 N/A 有据）；四数字写成棘轮（`test/block213-discoverability.test.mjs`）。**C-33 已核定**：`skills:check` 5 红=外部 pack `petri-pack-bio` 未检出（fail-closed by design，BIO-D2），非 manifest 缺陷；已补 `PETRI_PACK_DIRS` 让 pack 位置可配，门禁保持报告级。**仍未清（且已合并根因）**：`/api/tools/catalog` = `count:0` ⇒ 无工具 ⇒ 无 artifact ⇒ Result Studio 恒空态，UI-526 实机腿不可得；与 `skills:check` 5 红**同因**（`petri-pack-bio` 未检出）。**一次解决三件**：pack 检出 + `PETRI_PACK_DIRS` 指路。另两件独立：双机 riders+BK-08（第二台机器）、C-34（G1+ 真实调用）。**测试实例已无窗口**（`show:false` + `backgroundThrottling:false`，实测 screenX=-1380）；dev 栈与 9223 在跑。**注意**：main 上存在另一会话的提交（`7bf008b9 feat(ui-523)`），改文件前先 `git log` 看一眼。
 
 最后更新：2026-10-17（**BLOCK-202-STAGE-A-QUICKWINS-3 整包 completed（阶段 A 速赢 III=runlist W3；当日立项当日收口·9223 探针 15/15 allPass）**）
 

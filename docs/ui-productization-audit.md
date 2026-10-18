@@ -5057,7 +5057,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 
 - **变化面**：结果头部的真值徽标从「**可信结果**」改为「**已核验（未篡改）**」，并新增 `detail` 说明（`title` + `aria-label` 可读）：核验范围=产物完整性与来源一致性（artifact-truth），**不代表科学结论正确，也不代表 Result Studio 整体已验证**（长期 `implemented_unverified / experimental`，P7 deferred）。其余三态文案同步补范围说明（未核验/需复核/已阻断）。
 - **为什么**：`truthStatus='valid'` 是**产物级**核验结论，旧文案把它升格成"结果可信"的全局判断——这是语义过度声称，和 G0 期"RS 徽标不许冒充资格"的纪律冲突。
-- **诚实边界**：**实机腿未覆盖**——需要「已有产物」的结果页才能看到真值徽标；本轮 9223 探测时测试实例无项目/产物（`acceptance/ui-526-527/project-workspace.png` 是空态），故记 `in_progress`。文案与 `detail` 形状由单测钉住；等有产物再看一眼即可翻 verified。
+- **诚实边界（2026-10-18 复核定因）**：实机腿仍不可得，但根因已定——`GET /api/tools/catalog` 返回 **`count: 0`（无任何已安装插件）**（`acceptance/block-213/tools-catalog-empty.json`），没有工具就**产不出 artifact**，结果页就永远空态。这与 C-33 是**同一个根因**：领域插件包 `petri-pack-bio` 未检出 → 无工具 → 无产物。故 UI-526 记 `in_progress`，挂到「pack 到位后复看」的条件上；文案与 `detail` 形状由单测钉住。文案与 `detail` 形状由单测钉住；等有产物再看一眼即可翻 verified。
 - **验证**：`resultSurface.test.ts` **18/18**（含新断言 `detail` 含"不代表 Result Studio 整体已验证"）；`tsc --noEmit` 0；`theme-token-contract` 17/17（无样式变更）。
 
 ## UI-527: 技能货架依赖徽标纳入插件硬依赖（2026-10-18 **verified（dev Electron 边界内）**，BLOCK-211 / W8 · C-33 代码侧）

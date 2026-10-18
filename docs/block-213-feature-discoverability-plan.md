@@ -50,3 +50,9 @@ status: completed
 - **P3**：欢迎页 + 扩展空货架各加 `empty-guide` 标记与一句引导；两页 N/A 有书面理由。
 - **P4 证据**：`test/block213-discoverability.test.mjs` **5/5**（四数字棘轮、id 唯一、设置全覆盖、外观动效存在、N/A 有据）；9223 快照 `acceptance/block-213/palette.png`；DOM 断言命中三处。
 - **未做（如实）**：命令面板**语义搜索**（按意图而非标题）与发现率**埋点**（需遥测，G1+）——见 reopen。
+
+## 5. 收尾复核（2026-10-18「把能做的都做了」）
+
+- **C-33 定因**：`GET /api/tools/catalog` → `count: 0`（无已安装插件）⇒ **没有工具就产不出 artifact**，Result Studio 永远空态。这与 `skills:check` 5 红是**同一个根因**（`petri-pack-bio` 未检出），不是两件独立的事。
+- **UI-526 因此仍记 `in_progress`**（挂「pack 到位后复看」），文案形状由 `resultSurface.test.ts` 18/18 钉住；不冒充 verified。
+- **lint 收缩第二批未成**：本想把 `branchBridge.test.ts` 的 8 条 `require-await` 清零，实改后发现那 8 个 `it` 回调**体内确有 await**（改完 tsc TS1308），已 `git checkout` 还原；随后 `--prune-suppressions` 也确认这 8 条仍真实存在（318→318）。结论=**该文件不能靠「去 async」清掉**，要清得重构它内部的 mock 形态——收益不足，不硬做。

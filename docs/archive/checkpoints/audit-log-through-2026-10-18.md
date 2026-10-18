@@ -52,3 +52,10 @@
 最后更新：2026-10-18（**W8 第四批：RS 真值徽标语义诚实化（UI-526）**）：`valid` 属产物级核验，旧文案「可信结果」过度声称 ⇒ 「已核验（未篡改）」+ `detail`（title/aria-label）点明"不代表科学结论正确、也不代表 RS 整体已验证"；三态同步补范围。证据=resultSurface 18/18 + tsc 0 + token 17/17；closeout 十三门 PASS。W8 余项：双机 riders（需机器）/休眠插件裁决（需用户）/C-27/C-30·C-31。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**W8 第二批：lint 基线净收缩 326→318（−8）**）：以整文件清零方式消掉 `frontend/src/lib/chat-file-references.test.ts` 的 8 条 require-await（同步 mock + `as unknown as Response`），`--prune-suppressions` 清陈旧键；`quality:lint` 0 errors / 该文件 vitest 25/25 / tsc 0。**自纠**：整文件替换误伤 `it(..., async () => {`，已还原并改定向替换。W8 余项在册。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-211（W8 首批）completed：C-32 清偿（closeout 十三门 PASS）**）：`env='1'` 从运行时强制开降级为**首载种子**（`env='0'` 仍杀开关）——设置页关掉的守卫不再被残留 env 重新打开；`envShadowedKeys` 不再把 seed 报成遮蔽；compat 基线同批显式改写留因。**新登记 🟡**：`block110-p1-topic-shift` 5 例在 HEAD 上就红（stash A/B 证明与本批无关）。W8 其余项仍在册。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-18T05:33:34.556Z -->
+最后更新：2026-10-18（**W8 第六批：技能货架依赖徽标纳入插件硬依赖（UI-527）**）：`preflight` 纳入 `plugins.required`（`hasPlugin` 注入 + `missingPlugins`，缺插件不算 installable），路由用 `plugin-loader` 单一真相；卡片对有插件硬依赖的技能也显示徽标。证据=4/4 + 前端 10/10 + tsc 0；closeout PASS。`skills:check` 5 红仍在（是否补插件包/升阻塞门禁属 C-33 裁决）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+最后更新：2026-10-18（**W8 第六批：休眠插件激活转为裁决包 C-33（需用户选 A/B/C），不代裁**）：实码核对——`resources/skills/manifest.json` 仅 14 条、**无 status/依赖/验证时间字段**，全仓无"休眠插件"机械登记（grep 仅两处注释）；评估报告的「休眠插件+demo 错位」是产品观感判词。三选一：A 现状+如实标注 / **B 激活零重依赖一族+其余标未适配（建议）** / C 全量激活（G0 无验证条件）。本批未改任何插件/技能代码，只留证与选项。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-18T07:27:09.699Z -->
+最后更新：2026-10-18（**W8 第七批：`skills:check` 报告级纳入收口**）：`closeout-gates.mjs` 增 `--report`（非阻塞、不改进程退出码），`closeout` 已挂 `--report skills:check` ⇒ 每次收口打印红条数；未升阻塞（补齐 `built-in-plugins/` 属 C-33 裁决）。顺修：改脚本误删 `repoGate`（ReferenceError）已恢复并冒烟验证。G0 开发期常态 · 不外推 packaged/Provider/GA。
