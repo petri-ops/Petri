@@ -34,3 +34,8 @@
 <!-- audit-log-compact.mjs 追加 @ 2026-10-18T02:36:17.650Z -->
 最后更新：2026-10-18（**BLOCK-207（W7b）completed（closeout 十三门 PASS）**）：项目信任级 inherit/trusted/untrusted（16 族/84 键），`applyTrustCeiling` 只能收紧（untrusted 下写/执行→read，read/plan 原样），默认 inherit 零行为变化；接 agent-runner accessMode 构造点、信任层故障 fail-open；变更/导入/重置均落 `trust-audit.jsonl`。plan=docs/block-207-project-trust-policy-plan.md。无 active 工作包，下一包=W7c。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-18（**BLOCK-207-PROJECT-TRUST-POLICY 立项发令 active（runlist W7b）**）：项目信任级 inherit/trusted/untrusted，在 accessMode 构造点做只能收紧的天花板（untrusted ⇒ 禁止写/执行）；信任变更写追加式审计；默认 inherit=零行为变化。plan=docs/block-207-project-trust-policy-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-18T02:56:28.408Z -->
+最后更新：2026-10-18（**BLOCK-209-EXTERNAL-AGENT-IMPORT 立项发令 active（runlist W7d）**）：只读解析 + 映射预览，零写入零网络；凭据拒绝自动导入（D-2）；patch 与注册表对账；一键应用进 reopen。plan=docs/block-209-external-agent-import-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
+最后更新：2026-10-18（**BLOCK-208（W7c 收窄版）completed（closeout 十三门 PASS）**）：动效用户开关端到端（`user-prefs.motion` 接线 + `density` 仅登记 ⇒ 16 族/86 键；`prefCache` `petri-motion`；`data-motion` + 复用既有 reduced-motion 块两通道；设置页三档）。`theme-token-contract` 17/17——**motion 棘轮当场抓到**"字面量 transition 时长 + 与既有块重复实现"，已改为复用 `var(--petri-duration-fast)`。**证据缺口**：9223 实机腿未跑 ⇒ UI-525 `in_progress`。下一包=W7d。plan=docs/block-208-appearance-motion-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
+最后更新：2026-10-18（**BLOCK-208-APPEARANCE-MOTION 立项发令 active（W7c 收窄版：只做动效开关）**）：`user-prefs` 加 motion（接线）+ density（仅登记）；CSS 双降级（data-motion/prefers-reduced-motion），只改时长与行为、不新增颜色 token；设置页常规节三档。预览专项/密度接线/对比度/通知/性能进 reopen。plan=docs/block-208-appearance-motion-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
