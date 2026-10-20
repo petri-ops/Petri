@@ -227,7 +227,7 @@ module.exports = [
     "type": "function",
     "function": {
       "name": "verify_state",
-      "description": "VERIFY_STATE_v1 — 确认某个实体的当前状态符合预期。在执行写操作后调用此工具核实，避免在没有真实反馈时声称\"已完成\"。 例如：act(rename_project) 后 verify_state(kind=\"project\", id=<id>, expect={name:<新名>}); act(switch_result_tab) 后 verify_state(kind=\"context\", expect={page:\"single-cell-result\"})。",
+      "description": "VERIFY_STATE_v1 — 确认某个实体的当前状态符合预期。在执行写操作后调用此工具核实，避免在没有真实反馈时声称\"已完成\"。例如：act(rename_project) 后 verify_state(kind=\"project\", id=<id>, expect={name:<新名>})。",
       "parameters": {
         "type": "object",
         "properties": {

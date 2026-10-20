@@ -1,29 +1,26 @@
 /**
- * agent-tools/act-tools.js — Action execution system (page check, ack, dispatch)
+ * agent-tools/act-tools.js — Domain-neutral action execution + pack UI action dispatch.
+ *
+ * 核心只保留领域中性动作（rename_* / update_analysis_params / open_tool / ui_action）。
+ * 单细胞/FigCode 动作已随旧页面退役移除；领域动作由已安装 pack 的
+ * `provides.uiActions` 提供，执行时校验 action → pack view surface，再经 ack
+ * 交给前端 host 分发到 pack iframe。pack 缺失/停用 → unknown_ui_action（fail-closed）。
  */
 const dbMod = require('../db');
 const sqlite = dbMod.getDatabase();
-const {
-  actUpdateFigcodeEditor,
-  actSwitchResultTab,
-  actFocusCluster,
-  actHighlightGene,
-  actSelectCells,
-  actFilterTable,
-  actLabelCells,
-  actMergeDatasets,
-  actOpenReplot,
-  actUploadDataHint,
-  actOpenTool,
-  actOpenFigcodePlot,
-} = require('./plan-ui-tools');
 const { v4: uuidv4 } = require('uuid');
-// A-008: Pure utility functions extracted to break act-tools ↔ plan-ui-tools cycle
-const _core = require('./act-tool-core');
+const { listPackUiActions } = require('../helpers/pack-contributions');
 
-// --------------------------------------------------------------
-// ACT_TOOL_v1 — write operations (with audit + undo)
-// --------------------------------------------------------------
+const CORE_ACT_TYPES = Object.freeze([
+  'rename_project',
+  'rename_dataset',
+  'rename_analysis',
+  'update_analysis_params',
+  'open_tool',
+  'ui_action',
+]);
+const UI_ACTION_ACK_TIMEOUT_MS = 5000;
+const UI_ACTION_PAYLOAD_MAX_BYTES = 8 * 1024;
 
 function _log(line) {
   try {
@@ -35,10 +32,7 @@ function _log(line) {
 function isAgentPaused(userId) {
   const db = sqlite;
   try {
-    // Global kill-switch
-    const g = db
-      .prepare("SELECT value FROM copilot_global_settings WHERE key='agent_paused'")
-      .get();
+    const g = db.prepare("SELECT value FROM copilot_global_settings WHERE key='agent_paused'").get();
     if (g && g.value === '1') return true;
     const row = db.prepare('SELECT agent_paused FROM copilot_settings WHERE user_id=?').get(userId);
     return !!(row && row.agent_paused);
@@ -65,62 +59,6 @@ function recordAudit(userId, action, args, result) {
     _log('audit insert err: ' + e.message);
   }
   return undoToken;
-}
-
-// FILTER_AND_OR_v1 — single-cell filter expression evaluator (delegated to act-tool-core)
-
-// ACT_ACK_v1 — ACK + page-requirement checks for frontend-side acts
-const ACT_PAGE_REQUIREMENTS = {
-  switch_result_tab: ['single-cell-result'],
-  focus_cluster: ['single-cell-result'],
-  highlight_gene: ['single-cell-result'],
-  filter_table: ['single-cell-dataset', 'single-cell-result'],
-  select_cells: ['single-cell-dataset'],
-  label_cells: ['single-cell-dataset'],
-  open_replot: ['single-cell-result'],
-  merge_datasets: ['single-cell-project', 'single-cell-projects'],
-  upload_data_hint: ['single-cell-project', 'single-cell-projects'],
-  open_figcode_plot: '*',
-  open_tool: '*', // any page (will navigate to /tools if needed)         // any page (will navigate if needed)
-  update_figcode_editor: ['figcode'],
-};
-
-const ACT_PAGE_LABELS = {
-  'single-cell-projects': '单细胞项目列表页',
-  'single-cell-project': '单细胞项目页',
-  'single-cell-dataset': '单细胞数据集页',
-  'single-cell-result': '单细胞分析结果页',
-  figcode: 'FigCode 工具页',
-  docs: '教程页',
-  blog: '博客页',
-  home: '主页',
-};
-
-// FIGCODE_PAGE_RACE_FIX_v1 — delegated to act-tool-core
-
-function _checkActPage(actType, currentPage, ctx) {
-  const req = ACT_PAGE_REQUIREMENTS[actType];
-  if (!req || req === '*') return { ok: true };
-  if (Array.isArray(req)) {
-    if (req.includes(currentPage)) return { ok: true };
-    // FIGCODE_PAGE_RACE_FIX_v1: check implied page from earlier navigation in same turn
-    const implied = ctx ? _core._getImpliedPage(ctx) : null; // BLOCK-105 P2 — 原裸调用未定义符号（ESLint 首跑抓真），经 _core 引入
-    if (implied && req.includes(implied)) return { ok: true };
-    const expectedHuman = req.map((p) => ACT_PAGE_LABELS[p] || p).join(' 或 ');
-    return {
-      ok: false,
-      error: 'wrong_page',
-      expected: req,
-      actual: currentPage || '(unknown)',
-      message:
-        '此操作只能在【' +
-        expectedHuman +
-        '】使用，当前在【' +
-        (ACT_PAGE_LABELS[currentPage] || currentPage || '未知') +
-        '】。请先 emit navigate action 跳过去再调用此 act。',
-    };
-  }
-  return { ok: true };
 }
 
 // Pending ACKs registered by tool calls; cleared on /api/ai/act-ack/:token
@@ -151,13 +89,11 @@ function _ackActToken(token, info) {
 }
 
 function _generateAckToken() {
-  const { v4: uuidv4 } = require('uuid');
-  return 'ack_' + uuidv4().slice(0, 12);
+  const { v4 } = require('uuid');
+  return 'ack_' + v4().slice(0, 12);
 }
 
 async function tool_act(args, ctx) {
-  // FIGCODE_PAGE_RACE_FIX_v1: stamp turn timestamp for implied-page tracking
-  if (!ctx._turnTs) ctx._turnTs = String(Date.now());
   const userId = ctx.userId;
   if (!userId) throw new Error('未授权');
   if (isAgentPaused(userId)) {
@@ -179,50 +115,48 @@ async function tool_act(args, ctx) {
   } catch {}
 
   const type = args.type;
+  if (!CORE_ACT_TYPES.includes(type)) {
+    return {
+      error: 'unknown_act',
+      message: 'act type not allowed: ' + type,
+      available: CORE_ACT_TYPES.slice(),
+    };
+  }
+
   const dispatchers = {
     rename_project: actRenameProject,
     rename_dataset: actRenameDataset,
     rename_analysis: actRenameAnalysis,
     update_analysis_params: actUpdateAnalysisParams,
-    update_figcode_editor: actUpdateFigcodeEditor,
-    switch_result_tab: actSwitchResultTab,
-    focus_cluster: actFocusCluster,
-    highlight_gene: actHighlightGene,
-    select_cells: actSelectCells,
-    filter_table: actFilterTable,
-    label_cells: actLabelCells,
-    merge_datasets: actMergeDatasets,
-    open_replot: actOpenReplot,
-    upload_data_hint: actUploadDataHint,
-    open_figcode_plot: actOpenFigcodePlot,
     open_tool: actOpenTool,
+    ui_action: actUiAction,
   };
-  const fn = dispatchers[type];
-  if (!fn) return { error: 'unknown_act', message: 'act type not allowed: ' + type };
-  // ACT_ACK_v1: page-requirement check (only for frontend-side acts)
-  const currentPage = (ctx.context && ctx.context.page) || null;
-  const pageCheck = _checkActPage(type, currentPage, ctx);
-  if (!pageCheck.ok) {
-    return pageCheck;
-  }
 
   try {
-    const result = await fn(args, ctx);
+    const result = await dispatchers[type](args, ctx);
     if (result && !result.error) {
-      const undoToken = recordAudit(userId, type, args, result);
-      result.undoToken = undoToken;
-      result.undoableUntil = Date.now() + 5000;
-      // ACT_ACK_v1: for frontend-side acts, register ACK and wait briefly
-      const isFrontendSide = Object.prototype.hasOwnProperty.call(ACT_PAGE_REQUIREMENTS, type);
-      if (isFrontendSide) {
+      const auditArgs = type === 'ui_action'
+        ? { type, actionId: args.actionId, payloadBytes: result._payloadBytes || 0 }
+        : args;
+      const auditResult = type === 'ui_action'
+        ? {
+          ok: true,
+          uiAction: {
+            actionId: result.uiAction && result.uiAction.actionId,
+            surfaceId: result.uiAction && result.uiAction.surfaceId,
+            packId: result.uiAction && result.uiAction.packId,
+          },
+        }
+        : result;
+      result.undoToken = recordAudit(userId, type, auditArgs, auditResult);
+      if (type === 'ui_action') {
+        delete result._payloadBytes;
         const ackToken = _generateAckToken();
         result.ackToken = ackToken;
-        // Caller (chat handler) is responsible for actually waiting on this token after sending the SSE.
-        // We pre-register so the token is reserved.
-        const ackPromise = _registerActAck(ackToken, 800);
-        // Stash the promise on the result; the handler will await it before
-        // adding the final tool_message that the LLM sees.
-        result._ackPromise = ackPromise;
+        result.ackExpiresAt = Date.now() + UI_ACTION_ACK_TIMEOUT_MS;
+        result._ackPromise = _registerActAck(ackToken, UI_ACTION_ACK_TIMEOUT_MS);
+      } else {
+        result.undoableUntil = Date.now() + 5000;
       }
     }
     return result;
@@ -231,7 +165,7 @@ async function tool_act(args, ctx) {
   }
 }
 
-// ----- act implementations -----
+// ----- core action implementations -----
 
 async function actRenameProject(args, ctx) {
   const db = sqlite;
@@ -324,13 +258,70 @@ async function actUpdateAnalysisParams(args, ctx) {
   };
 }
 
+async function actOpenTool(args, _ctx) {
+  const toolId = typeof args.toolId === 'string' ? args.toolId.trim() : '';
+  if (!toolId) return { error: 'missing_toolId' };
+  return {
+    ok: true,
+    type: 'open_tool',
+    toolId,
+    message: '已请求打开工具 ' + toolId + '。',
+  };
+}
+
+async function actUiAction(args, _ctx) {
+  const actionId = typeof args.actionId === 'string' ? args.actionId.trim() : '';
+  if (!actionId) return { error: 'missing_actionId' };
+  const { actions, viewIds } = listPackUiActions();
+  const action = actions.find((item) => item.id === actionId);
+  if (!action) {
+    return {
+      error: 'unknown_ui_action',
+      message: '没有已安装领域包提供该 UI action：' + actionId,
+      available: actions
+        .filter((item) => item.surfaceId && viewIds.has(item.surfaceId))
+        .map((item) => item.id)
+        .slice(0, 50),
+    };
+  }
+  if (!action.surfaceId || !viewIds.has(action.surfaceId)) {
+    return {
+      error: 'ui_action_surface_unavailable',
+      message: '该 UI action 的目标视图不在当前已安装领域包中：' + actionId,
+    };
+  }
+  const payload = args.payload && typeof args.payload === 'object' && !Array.isArray(args.payload)
+    ? args.payload
+    : {};
+  const payloadBytes = Buffer.byteLength(JSON.stringify(payload), 'utf8');
+  if (payloadBytes > UI_ACTION_PAYLOAD_MAX_BYTES) {
+    return { error: 'ui_action_payload_too_large', message: 'UI action payload 超过 8KB 上限' };
+  }
+  return {
+    ok: true,
+    type: 'ui_action',
+    uiAction: {
+      actionId: action.id,
+      label: action.label,
+      surfaceId: action.surfaceId,
+      packId: action.packId,
+      payload,
+    },
+    _payloadBytes: payloadBytes,
+    message: '已派发 UI 动作「' + action.label + '」，等待前端确认。',
+  };
+}
+
 module.exports = {
-  ..._core,
+  CORE_ACT_TYPES,
+  UI_ACTION_ACK_TIMEOUT_MS,
   tool_act,
   actRenameProject,
   actRenameDataset,
   actRenameAnalysis,
   actUpdateAnalysisParams,
+  actOpenTool,
+  actUiAction,
   _ackActToken,
   _pendingActAcks,
   _registerActAck,

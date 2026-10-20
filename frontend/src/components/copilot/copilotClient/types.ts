@@ -68,18 +68,15 @@ export interface ToolResultEvent {
   actError?: string;
   analysisId?: string;
   taskId?: string;
-  /** scRNA UI controls */
-  scTab?: 'preview' | 'plots' | 'data' | 'params';
-  scCluster?: string;
-  scGene?: string;
-  scColumnFilters?: Record<string, string>;
-  scSubsetName?: string | null;
-  scLabelKey?: string;
-  scLabelValue?: string;
-  scDatasetIds?: string[];
-  scMergeName?: string | null;
-  scOpenReplotForAnalysis?: string;
-  scUploadHint?: boolean;
+  /** BLOCK-217 — pack ui_action 派发载荷（由 act(ui_action) 产生）。 */
+  uiAction?: {
+    actionId: string;
+    label?: string;
+    surfaceId?: string;
+    packId?: string;
+    payload?: Record<string, unknown>;
+  };
+  ackExpiresAt?: number;
   /** open_tool */
   toolId?: string;
   /** open_tool autofill — when LLM passes autofillFromJobId, frontend uses

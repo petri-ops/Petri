@@ -549,13 +549,11 @@ async function runAgentLoop({
     '\n- 用户说"继续/下一步"且 system prompt 里已有 active plan 时，找到第一个 pending 步骤推进。';
   systemPrompt += '\n\n=== Act 工具的反馈识别 ===';
   systemPrompt +=
-    '\n- 当 act 返回 error="wrong_page" 时：你不在能执行该操作的页面。请先 emit navigate action 跳到 expected[0]，下一轮重新调用此 act。';
-  systemPrompt +=
-    '\n- 当 act 返回 unhandled=true 时：操作已记录但前端没响应（可能 listener 在别的页面）。这种情况下不要骗用户"已跳转/已切换"——告诉用户具体没生效的原因，让他确认或换个方式。';
+    '\n- 当 act 返回 unhandled=true 时：操作已记录但前端没响应（目标视图未打开或领域包未响应）。这种情况下不要骗用户"已跳转/已切换"——告诉用户具体没生效的原因，让他确认或换个方式。';
   systemPrompt +=
     '\n- 切勿在没有真实工具反馈或工具返回 error/unhandled 时声称"已完成"。如果工具调用失败而你仍想给用户"已跳转"的体验，请显式 emit navigate action card。';
   systemPrompt +=
-    '\n- 重要写操作（rename_* / update_analysis_params / switch_result_tab 等）执行后，调用 verify_state(...) 复查实际状态。这是防止 AI 自欺欺人的兜底措施。';
+    '\n- 重要写操作（rename_* / update_analysis_params 等）执行后，调用 verify_state(...) 复查实际状态。这是防止 AI 自欺欺人的兜底措施。';
   systemPrompt +=
     '\n  例：act(rename_project) → verify_state(kind="project", id=<项目 id>, expect={name:<新名称>})';
   systemPrompt +=
@@ -564,8 +562,6 @@ async function runAgentLoop({
     '\n- 推进 plan 时不要硬冲多步——一步还没 done 就发下一步会失败。Plan 步骤大多有先后依赖关系。';
   systemPrompt +=
     '\n- 创建 plan(create) 时，把触发该计划的用户原话（一句话总结即可）作为 chatExcerpt 字段传入，方便用户日后回顾。';
-  systemPrompt +=
-    '\n- 当用户在 FigCode 页面要求修改代码时（例如"换成横向条形图"/"配色改成 Nature 风格"/"加 facet"等），不要让用户自己复制粘贴。直接调用 act(type="update_figcode_editor", code="<完整新代码>", autoRun=true)，前端会自动替换并运行。';
   // BLOCK-155 — 真·单通道 vision：read_image 指引整段条件化。实机两轮实测教训：
   // 旧指引与追加补丁句并存时模型行为不稳定（一轮直答、一轮仍重复调 read_image
   // 重复读图）。visionInline 时单条强指引取代旧句，消除竞争指令。
@@ -597,11 +593,6 @@ async function runAgentLoop({
   systemPrompt += '\n不要基于时间间隔主动发起复习。';
   systemPrompt += '\n不要主动发起复习或学习内容推荐。';
   systemPrompt += '\n同一会话最多触发 1-2 次复习提示，避免烦人。';
-  systemPrompt += '\n\n=== FigCode 绘图工具 ===';
-  systemPrompt +=
-    '\n- 用户想绘图，并且 FigCode 工具索引里有对应卡片时：直接调 act(type="open_figcode_plot", figcardId="<卡片 id>")，会自动跳转到 FigCode 页 + 打开该卡片的"在线绘图"编辑器。卡片 id 在 docs index 里以 /figcode#xxx 形式给出，xxx 就是 figcardId。';
-  systemPrompt +=
-    '\n- ⚠️ 任何 FigCode 卡片的"打开"操作都必须用 open_figcode_plot，绝对不要用 navigate 或 external_link 让用户去 figcode 主页再点一次。';
   systemPrompt += '\n\n=== Action Card 协议 vs Tool Calling 区分 ===';
   systemPrompt +=
     '\n- ⚠️ 重要：action card（用 ```action JSON```代码块发的）只支持 navigate / external_link。分析执行必须调用 run_tool。';
@@ -609,9 +600,6 @@ async function runAgentLoop({
     '\n- 其他所有写操作都通过 act 工具调用，不要再额外发一个 action card。';
   systemPrompt +=
     '\n- 你已经调了 act(...) 工具来执行操作时，绝对不要在最终回答里再写 ```action``` 代码块描述同一个操作。前端会因为不认识 type 而显示"当前页面不支持"错误。';
-  systemPrompt +=
-    '\n- 当你写 update_figcode_editor 的代码时，**不要**在代码里硬编码 width/height/dpi/base_size 这些参数 —— 用户的右侧面板设置会被前端自动注入到代码顶部。如果用户问"为什么我改 width 不生效"，告诉他们看右侧的尺寸面板。';
-  systemPrompt += '\n- 不要再用 navigate 把用户送到 FigCode 主页让他再点 Run 按钮。一步到位。';
   systemPrompt +=
     '\n- 提到工具产物（toolJobId / harness 摘要里的文件）或项目工作区文件时，渲染为 Markdown 链接：[产物.csv](petri://artifact/<toolJobId>/<产物名>) 或 [data.csv](petri://workspace/<projectId>/<relativePath>)。严禁出现 file:// 或 /Users/... 这类本地绝对路径。详见 system prompt 末尾【文件引用格式】。';
   systemPrompt += '\n- 科学源数据不可变：不得用 workspace_write/workspace_replace/workspace_exec 原地修改已有源数据文件来迎合插件。格式或标签修复必须写入 derived/ 或由转换插件生成新 Artifact，保留原文件和输入 hash，再把派生 Artifact 绑定给下游 Job。';

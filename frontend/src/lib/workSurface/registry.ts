@@ -63,6 +63,8 @@ export const CORE_WORK_SURFACES: readonly WorkSurfaceDescriptor[] = Object.freez
 
 export interface PackViewContribution {
   id?: unknown;
+  /** Backend-computed public id (`pack:<packId>:<viewId>`); this is the single source. */
+  publicId?: unknown;
   title?: unknown;
   entry?: unknown;
   singleton?: unknown;
@@ -72,6 +74,7 @@ export interface PackViewContribution {
 
 export interface PackResultSurfaceContribution {
   id?: unknown;
+  publicId?: unknown;
   title?: unknown;
   entry?: unknown;
   artifactTypes?: unknown;
@@ -81,6 +84,7 @@ export interface PackResultSurfaceContribution {
 
 export interface PackUiActionContribution {
   id?: unknown;
+  publicId?: unknown;
   label?: unknown;
   surfaceId?: unknown;
 }
@@ -152,7 +156,9 @@ export function mergeWorkSurfaceRegistry(
         diagnostics.push(diagnostic(packId, `views/${viewId}`, 'unsafe_entry'));
         continue;
       }
-      const id = `pack:${packId}:${viewId}`;
+      const id = typeof view.publicId === 'string' && view.publicId.startsWith('pack:')
+        ? view.publicId
+        : `pack:${packId}:${viewId}`;
       if (seenSurfaceIds.has(id)) {
         diagnostics.push(diagnostic(packId, `views/${viewId}`, 'duplicate_surface_id'));
         continue;
@@ -188,7 +194,9 @@ export function mergeWorkSurfaceRegistry(
         diagnostics.push(diagnostic(packId, `resultSurfaces/${resultId}`, 'unsafe_entry'));
         continue;
       }
-      const id = `pack:${packId}:result:${resultId}`;
+      const id = typeof result.publicId === 'string' && result.publicId.startsWith('pack:')
+        ? result.publicId
+        : `pack:${packId}:result:${resultId}`;
       if (seenSurfaceIds.has(id)) {
         diagnostics.push(diagnostic(packId, `resultSurfaces/${resultId}`, 'duplicate_surface_id'));
         continue;
@@ -219,7 +227,9 @@ export function mergeWorkSurfaceRegistry(
         diagnostics.push(diagnostic(packId, 'uiActions', 'missing_id_or_label'));
         continue;
       }
-      const id = `pack:${packId}:action:${actionId}`;
+      const id = typeof action.publicId === 'string' && action.publicId.startsWith('pack:')
+        ? action.publicId
+        : `pack:${packId}:action:${actionId}`;
       if (seenActionIds.has(id)) {
         diagnostics.push(diagnostic(packId, `uiActions/${actionId}`, 'duplicate_action_id'));
         continue;
@@ -231,7 +241,9 @@ export function mergeWorkSurfaceRegistry(
         source: 'pack',
         packId,
         surfaceId: typeof action.surfaceId === 'string' && action.surfaceId.trim()
-          ? `pack:${packId}:${action.surfaceId.trim()}`
+          ? (action.surfaceId.trim().startsWith('pack:')
+            ? action.surfaceId.trim()
+            : `pack:${packId}:${action.surfaceId.trim()}`)
           : undefined,
       });
       const surfaceId = uiActions[uiActions.length - 1].surfaceId;

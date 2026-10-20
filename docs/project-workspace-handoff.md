@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-20（**BLOCK-217 Q-DOMAIN P2-UI completed（closeout 十三门 + 9223 live 8/8）**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-217（Q-DOMAIN P2-UI）**：核心 `act` 去生信/FigCode（只保留 rename_project/dataset/analysis、update_analysis_params、open_tool、ui_action）；pack `uiActions` 动态描述 + 执行校验 + 前端 host 分发/ack；删除 sc*/figcode 遗留字段；block217 9/9 + block151 5/5 + 前端 8/8 + test:changed 213/213 + 9223 live 8/8；UI-531 verified。**下一步**：Q-DOMAIN **P2b Result Studio resultSurface**（使用 Q5 `resultSurfaceHost`；真实生信 actions 随其 pack 结果面提供）→ Q6 → P3 → P4；Q1/Q2b 可穿插。边界=真实生信动作未提供；live ack 用合成 token。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-20（**BLOCK-216 Q5 统一工作面 host completed（closeout 十三门 + 9223 live 19/19）**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-216（Q5 统一工作面 host）**：core+pack surface 注册表、稳定 tab 状态机/关闭策略/持久化、pack `views/resultSurfaces/uiActions` 贡献投影 + `petri-pack://` 独立 origin、生成文件/计划/证据面、文件管理器显示 IPC；block216 7/7 + 前端 Q5 46 项 + test:changed 266/266 + 9223 live 19/19；实机抓真多 tab 只显示×、OOPIF/文件空态 visibility 泄漏并修复。**下一步**：Q-DOMAIN **P2-UI actions**（使用 Q5 action registry + pack iframe 窄桥）→ **P2b Result Studio resultSurface**（使用 Q5 resultSurfaceHost）→ Q6 → P3 → P4；Q1/Q2b 可穿插。边界=E9 终端分屏 deferred、E1/E4/H3/H4/B3 部分。G0 开发期常态 · 不外推 packaged/Provider/GA。

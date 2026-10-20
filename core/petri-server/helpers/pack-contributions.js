@@ -85,6 +85,7 @@ function normalizeViews(packId, packRoot, provides, diagnostics) {
     seen.add(id);
     views.push({
       id,
+      publicId: `pack:${packId}:${id}`,
       title,
       entry: entry.replace(/\\/g, '/'),
       singleton: item.singleton !== false,
@@ -130,6 +131,7 @@ function normalizeResultSurfaces(packId, packRoot, provides, diagnostics) {
     seen.add(id);
     surfaces.push({
       id,
+      publicId: `pack:${packId}:result:${id}`,
       title: asSmallString(item.title, LIMITS.titleLength) || id,
       ...(typeof item.entry === 'string' ? { entry: item.entry.replace(/\\/g, '/') } : {}),
       artifactTypes,
@@ -162,12 +164,12 @@ function normalizeUiActions(packId, provides, diagnostics) {
       continue;
     }
     seen.add(id);
+    const surfaceId = normalizeId(item && item.surfaceId);
     actions.push({
       id,
+      publicId: `pack:${packId}:action:${id}`,
       label,
-      ...(typeof item.surfaceId === 'string' && normalizeId(item.surfaceId)
-        ? { surfaceId: normalizeId(item.surfaceId) }
-        : {}),
+      ...(surfaceId ? { surfaceId: `pack:${packId}:${surfaceId}` } : {}),
     });
   }
   return actions;
@@ -220,9 +222,35 @@ function loadPackContributions(options = {}) {
   return { packs, diagnostics };
 }
 
+/**
+ * 模型/act 执行面使用的扁平 UI action 清单（同一贡献投影，不另建缓存）。
+ * 只有带 publicId 的 action/view 可被公共 id 寻址。
+ */
+function listPackUiActions(options = {}) {
+  const { packs } = loadPackContributions(options);
+  const actions = [];
+  const viewIds = new Set();
+  for (const pack of packs) {
+    for (const view of pack.views || []) {
+      if (view.publicId) viewIds.add(view.publicId);
+    }
+    for (const action of pack.uiActions || []) {
+      if (!action.publicId) continue;
+      actions.push({
+        id: action.publicId,
+        label: action.label,
+        packId: pack.packId,
+        surfaceId: action.surfaceId || null,
+      });
+    }
+  }
+  return { actions, viewIds };
+}
+
 module.exports = {
   LIMITS,
   loadPackContributions,
+  listPackUiActions,
   resolvePackAssetPath,
   mimeForPackAsset,
 };

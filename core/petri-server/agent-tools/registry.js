@@ -11,6 +11,7 @@
 const { TOOL_DEFS } = require('./tool-defs');
 const { tool_query, tool_read_page, tool_search } = require('./query-tools');
 const { tool_act } = require('./act-tools');
+const { listPackUiActions } = require('../helpers/pack-contributions');
 const { tool_plan } = require('./plan-ui-tools');
 const { tool_todo_write } = require('./todo-tools');
 const { tool_decision_summary, tool_decision_recent } = require('./decision-tools');
@@ -460,7 +461,23 @@ function getProviderToolDefs() {
   } catch {
     projected = [];
   }
-  return TOOL_REGISTRY.map((entry) => projectProviderDefinition(entry.definition)).concat(projected);
+  const defs = TOOL_REGISTRY.map((entry) => projectProviderDefinition(entry.definition)).concat(projected);
+  // BLOCK-217 — 领域包 UI actions 动态追加到 act 描述：不新增工具、不改 enum；
+  // pack 缺失/停用 → 清单为空，模型看不到动作。执行侧仍会再次校验（fail-closed）。
+  try {
+    const { actions, viewIds } = listPackUiActions();
+    const usable = actions
+      .filter((action) => action.surfaceId && viewIds.has(action.surfaceId))
+      .slice(0, 40);
+    if (usable.length > 0) {
+      const actDef = defs.find((def) => def && def.function && def.function.name === 'act');
+      if (actDef) {
+        const list = usable.map((action) => `${action.id}（${action.label}）`).join('；');
+        actDef.function.description = `${actDef.function.description}\n已安装领域包 UI actions（用 type="ui_action", actionId 调用）：${list}`;
+      }
+    }
+  } catch { /* 贡献投影失败不阻断工具面 */ }
+  return defs;
 }
 
 function getToolEntry(name) {

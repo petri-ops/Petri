@@ -1,0 +1,48 @@
+{
+  "name": "block217-p2ui-actions",
+  "startedAt": "2026-10-20T08:21:28.047Z",
+  "finishedAt": "2026-10-20T08:21:51.845Z",
+  "assertions": [
+    {
+      "name": "workspace_ready",
+      "pass": true,
+      "detail": "project workspace did not mount"
+    },
+    {
+      "name": "right_rail_ready",
+      "pass": true,
+      "detail": "right rail not ready"
+    },
+    {
+      "name": "pack_action_visible_in_menu",
+      "pass": true,
+      "detail": "pack view menu item missing (contributions not loaded)"
+    },
+    {
+      "name": "pack_view_mounted",
+      "pass": true,
+      "detail": "pack view not ready"
+    },
+    {
+      "name": "ui_action_request_dispatched",
+      "pass": true,
+      "detail": "dispatch failed"
+    },
+    {
+      "name": "host_roundtrip_result",
+      "pass": true,
+      "detail": "pack iframe did not return an action result"
+    },
+    {
+      "name": "host_roundtrip_action_id",
+      "pass": true,
+      "detail": "pack:p217fixture:action:ping"
+    },
+    {
+      "name": "cleanup_completed",
+      "pass": true,
+      "detail": "project p_mvgezeri_j6d5 / fixture removed"
+    }
+  ],
+  "allPass": true
+}

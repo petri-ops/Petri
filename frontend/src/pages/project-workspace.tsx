@@ -30,7 +30,7 @@ import {
 
 import { deriveSummaryVisibility, useWorkspaceLayout } from '@/hooks/useWorkspaceLayout';
 import { useWorkspacePanelShortcuts } from '@/hooks/useWorkspacePanelShortcuts';
-import { useWorkSurfaceTabs } from '@/hooks/useWorkSurfaceTabs';
+import { useWorkSurfaceTabs } from '@/hooks/useWorkSurfaceTabs'; import { useUiActionHost } from '@/hooks/useUiActionHost'; // BLOCK-217
 import { segmentToMode, modeToSegment, type WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import { useHarnessWorkflowStatus } from '@/hooks/useHarnessWorkflowStatus';
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
@@ -359,7 +359,7 @@ export function ProjectWorkspace(): React.ReactElement {
   const openRightPanel = useCallback((tab: string) => {
     openSurface(tab);
     setRightOpen(true);
-  }, [openSurface, setRightOpen]);
+  }, [openSurface, setRightOpen]); useUiActionHost({ uiActions: workSurfaceUiActions, openRightPanel, descriptorFor: descriptorForSurface });
   // BLOCK-28.7 — 聊天区改动卡片点击：打开审阅 tab（文件选中由 useWorkingTreeReview 监听）
   useEffect(() => {
     return subscribePetriEvent(petriEvents.reviewOpenFile, () => {

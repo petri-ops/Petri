@@ -311,11 +311,11 @@ status: planned
 | L5 | 插件宿主契约 | plugin host（utility process + WebContentsView）+ 离线内容寻址插件包 | `plugin-loader`/`pack-registry` 有领域包；无通用 UI host API | 🔴 | manifest + host API + sandbox | Q0.5/Q5 |
 | L6 | 插件权限/生命周期/审计 | 深链安装显示来源/哈希/风险；插件离线包 | pack 权限词表 + MCP 信任位存在，未统一生命周期/审计 | 🟡 | 默认拒绝 + 可授权 + 审计 | Q8 |
 | L7 | 生成式媒体 | ImageSearch/ImageGen/VideoGen/VideoGenRetrieve | 只有 `read_image`（读图）；无图像/视频搜索与生成 | ⛔ | 不纳入 G0；重开=用户明确需求 + Provider 预算 | — |
-| L8 | 垂直领域完全插件化 | Qoder 以插件/扩展承载领域能力 | 执行层在 pack；skills/prompt/UI/result/data model 仍在核心 | 🔴 | 核心零领域硬编码；领域能力随包交付；结果页仍生信专属 | Q-DOMAIN P1–P4 |
+| L8 | 垂直领域完全插件化 | Qoder 以插件/扩展承载领域能力 | 执行层在 pack；skills/prompt 已去核；**P2-UI action 契约已通**（核心 act 去域 + pack uiActions host）；result/data model 仍在核心 | 🟡 | 核心零领域硬编码；领域能力随包交付；结果页仍生信专属 | Q-DOMAIN P2b/P3/P4 |
 
 > **工具宇宙映射（2026-10-20 抽查）**：Qoder 41 工具中，Monitor/TaskStop/BashInput/BashOutput/BashResize/TaskCreate/TaskGet/TaskUpdate/TaskList/UpdateTopic/CompleteTask 已有 process/terminal/todo/plan 等价物，不单列矩阵行；CodebaseInvestigator 记 F9（待核）；ImageSearch/ImageGen/VideoGen/VideoGenRetrieve 记 L7（⛔）；AskUserQuestion/NotebookEdit 记 C19/E12（待补）。
 
-**矩阵统计（2026-10-20 Q5 收口后，机械计数）**：✅ 26 · 🟡 46 · 🔴 23 · ⛔ 7 = **102 点**（E2/E3 → ✅；E1 🔴→🟡 部分交付）。Q1–Q9 需要处理的主要是 24 个 🔴 与 47 个 🟡 中真正影响体验的部分；⛔ 不进入波次。**口径已同步**：DOC-REGISTRY 注记与 §12 更新记录统一为 102/24/47/24/7。
+**矩阵统计（2026-10-20 P2-UI 收口后，机械计数）**：✅ 26 · 🟡 47 · 🔴 22 · ⛔ 7 = **102 点**（E2/E3 → ✅；E1 🔴→🟡 部分交付；L8 🔴→🟡 部分交付）。Q1–Q9 需要处理的主要是 24 个 🔴 与 47 个 🟡 中真正影响体验的部分；⛔ 不进入波次。**口径已同步**：DOC-REGISTRY 注记与 §12 更新记录统一为 102/24/47/24/7。
 
 ## 6. 多波次计划（Q0–Q9）
 
@@ -433,7 +433,7 @@ status: planned
 
 **目标**：把生信垂直从“执行层在 pack、知识/交互/结果/数据层仍在核心”的混合形态，逐步收敛为“**核心零生信硬编码 + 生信 pack 自包含**”。**结果页是生信专属产品面，不做通用化**；完全插件化不等于把 Result Studio 变成通用文件浏览器。
 
-> 2026-10-20：**P1 已立项 [BLOCK-214](./block-214-qdomain-p1-pack-skills-plan.md)（completed）**——3 个生信 skill 迁入 pack + `provides.skills` + skill-registry 发现/卸载；**P2a prompt（[BLOCK-215](./block-215-qdomain-p2a-prompt-decoring-plan.md)，completed）**——核心 prompt 去生信化 + pack `promptFragments`；**Q5 host（[BLOCK-216](./block-216-q5-work-surface-host-plan.md)，completed）**——surface 注册表/tab 状态机/pack 贡献投影/`petri-pack://`/生成文件·计划·证据面；**P2-UI actions（Q5 host 已就绪，下一包）**；P2b Result Surface 仍 planned（使用 Q5 `resultSurfaceHost`）。
+> 2026-10-20：**P1 已立项 [BLOCK-214](./block-214-qdomain-p1-pack-skills-plan.md)（completed）**——3 个生信 skill 迁入 pack + `provides.skills` + skill-registry 发现/卸载；**P2a prompt（[BLOCK-215](./block-215-qdomain-p2a-prompt-decoring-plan.md)，completed）**——核心 prompt 去生信化 + pack `promptFragments`；**Q5 host（[BLOCK-216](./block-216-q5-work-surface-host-plan.md)，completed）**——surface 注册表/tab 状态机/pack 贡献投影/`petri-pack://`/生成文件·计划·证据面；**P2-UI actions（[BLOCK-217](./block-217-qdomain-p2ui-actions-plan.md)，completed）**——核心 act 去域 + pack `uiActions` 动态描述/执行校验/前端 host ack；**下一包=P2b Result Surface**（使用 Q5 `resultSurfaceHost`，真实生信动作随其结果面提供）。
 
 **现状（2026-10-20 只读核对）**
 - ✅ 已在 pack：7 个分析插件 + dormant、scripts、demo-data、confirmationHooks、artifactTypes。
@@ -442,7 +442,7 @@ status: planned
 
 **切片**
 1. **P1 Skills（1–2 周）**：pack `provides.skills` + `skills/`；skill-registry 发现已安装 pack、卸载即隐藏；3 个生信 skill 移出 `resources/skills`；`skills:check` 在 pack 在位时仍 14/14、缺失时只剩通用 skills。
-2. **P2 Prompt + UI actions（1–2 周）**：核心 prompt 去生信化；pack 提供 promptFragments；`act`/`run_tool` 通用化，pack 提供 UI action 描述；核心不留单细胞动作/标签。
+2. **P2 Prompt + UI actions（1–2 周）**：**P2a prompt（BLOCK-215，completed）**核心 prompt 去生信化 + pack promptFragments；**P2-UI actions（BLOCK-217，completed）**核心 `act` 去域（只留 6 个中性动作）+ pack `uiActions` 动态描述/执行校验/前端 host 分发 ack；核心不留单细胞动作/标签。真实生信动作随 P2b pack 结果面提供。
 3. **P2b Result Surface（1–2 周）**：Result Studio 生信结果面改为 pack `resultSurfaces`；核心只保留 artifact/truth/evidence/repository/lineage/compare 原语与 tab/viewer/annotation host；**结果页保持生信专属 UX**（volcano/heatmap/DEG/table/lineage/单细胞），不是通用文件浏览器。依赖 Q0.5 `resultSurfaces` 契约；物理下沉需 Q5/L5 的 view plugin host；host 未就绪时只允许“核心域模块 + pack 在位门控”的过渡态，并标注 `transitional`，不得通用化。
 4. **P3 Methods / 学习 / legacy registry（1–2 周）**：`methods-export.js`、`learning.js`、`result-*-tools`、`artifact-profiles.js`、`agent-workflow.js` 生信内容下沉；删除 `core/shared-backend/tool-registry.js` 内联工具，保持单一注册源。
 5. **P4 数据模型 / 权限（2–4 周，独立结构包）**：`modality` 默认 `general`，pack 声明扩展值；单细胞权限分支改通用资源权限；迁移/兼容层；现有项目、Result Studio、导出、联邦过基线。
@@ -683,7 +683,7 @@ Q-DOMAIN（垂直去核化，跨波次）
 - **母纲**：`AGENT-COMPETITIVENESS-PROGRAM`（方向）；本文件是 Qoder 样本的增量，不重开 CP-1–CP-22。
 - **建议首波**：**Q0.5（插件 ADR，0.5–1 天）+ Q-DOMAIN P1（skills 去核，1–2 周）**——先把 host 契约和生信 skills 落进 pack，再按 Q1（信任与审批）→ Q2b（联网检索）→ Q5（工作面 host）→ Q-DOMAIN P2b（生信 Result Surface）→ Q6 推进；Q-DOMAIN P2/P3 可穿插，P4 最后。
 - **发令方式**：Q-DOMAIN P1 可独立立项为 BLOCK（P0 ADR / P1 实现）；Q1/Q2b 各自独立发令；**结果页 P2b 不得早于 Q5 host，Q6 不得早于 P2b**。
-- **当前状态**：本文件为 planned（方向母纲）；**Q5 已由 BLOCK-216 收口（completed）**，host 契约与挂载点已就绪。按用户 2026-10-20 裁决的顺序，下一包=**Q-DOMAIN P2-UI actions**（依赖 Q5 host），随后 **P2b Result Studio resultSurface** → Q6 → P3 → P4；Q1/Q2b 可穿插。G0 开发期常态 · 不外推 packaged/Provider/GA。
+- **当前状态**：本文件为 planned（方向母纲）；**Q5 已由 BLOCK-216 收口（completed）**，**P2-UI actions 已由 BLOCK-217 收口（completed）**。按用户 2026-10-20 裁决的顺序，下一包=**Q-DOMAIN P2b Result Studio resultSurface**（使用 Q5 `resultSurfaceHost`；真实生信 UI actions 随其 pack 结果面提供）→ Q6 → P3 → P4；Q1/Q2b 可穿插。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## 12. 附：Q-MATRIX 更新记录
 
@@ -693,3 +693,4 @@ Q-DOMAIN（垂直去核化，跨波次）
 | 2026-10-20 | Q0.5/Q2b | 增补插件架构 B 口径（§2.5）、L 组矩阵 L1–L7（联网搜索/抓取、浏览器、电脑控制、插件宿主/权限、生成式媒体 ⛔）、C19/E12/B6/F9 补漏、Q2b DeepSeek Search/Fetch provider 合同与安全红线；矩阵 **89→100**（✅24 / 🟡46 / 🔴23 / ⛔7） | 本文件 §2.5/§5-L/§6-Q2b；DeepSeek 官方 Search/Fetch 指南 + Qoder 反编译树 + Petri 实码 |
 | 2026-10-20 | Q-DOMAIN/E13/L8 | 用户强调结果页必须生信专属：新增 E13 Result Studio 生信结果面 + L8 垂直领域完全插件化；Q-DOMAIN P1–P4（P2b resultSurface，结果页保持生信 UX，核心只做 artifact/truth host）；矩阵 **100→102**（✅24 / 🟡47 / 🔴24 / ⛔7） | 本文件 §3-15/§6-Q-DOMAIN；Result Studio 实码 + domain-neutrality baseline 135/326/49 |
 | 2026-10-20 | Q5 | BLOCK-216 收口：E2/E3 → ✅；E1 🔴→🟡（右轨统一，工作区模式/终端/侧聊仍各宿主）；矩阵 **✅26 / 🟡46 / 🔴23 / ⛔7 = 102**；E9 明确 deferred | `docs/block-216-q5-work-surface-host-plan.md` §7 + `acceptance/block-216/`（9223 live 19/19） |
+| 2026-10-20 | Q-DOMAIN P2-UI | BLOCK-217 收口：L8 🔴→🟡（act 去域 + pack uiActions host；result/data model 仍核心）；矩阵 **✅26 / 🟡47 / 🔴22 / ⛔7 = 102** | `docs/block-217-qdomain-p2ui-actions-plan.md` §6 + `acceptance/block-217/`（9223 live 8/8） |

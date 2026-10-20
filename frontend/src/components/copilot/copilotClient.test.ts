@@ -88,13 +88,39 @@ describe('copilot SSE tool event projection', () => {
       event: 'tool_result',
       name: 'act',
       summary: 'ok',
-      actType: 'switch_result_tab',
+      actType: 'rename_project',
     })).toMatchObject({
       name: 'act',
       summary: 'ok',
-      actType: 'switch_result_tab',
+      actType: 'rename_project',
       toolResult: undefined,
     });
+  });
+
+  it('parses pack ui_action routing fields without legacy scRNA fields', () => {
+    const parsed = parseToolResultEvent({
+      event: 'tool_result',
+      name: 'act',
+      summary: 'ok',
+      actType: 'ui_action',
+      ackToken: 'ack_1',
+      ackExpiresAt: 1234,
+      uiAction: {
+        actionId: 'pack:bio:action:focus',
+        label: '聚焦',
+        surfaceId: 'pack:bio:lab',
+        packId: 'bio',
+        payload: { cluster: '5' },
+      },
+    });
+    expect(parsed.ackExpiresAt).toBe(1234);
+    expect(parsed.uiAction).toMatchObject({
+      actionId: 'pack:bio:action:focus',
+      surfaceId: 'pack:bio:lab',
+      packId: 'bio',
+      payload: { cluster: '5' },
+    });
+    expect(parsed).not.toHaveProperty('scTab');
   });
 
   it('projects RS5 result edit progress without exposing unbounded payloads', () => {

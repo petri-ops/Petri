@@ -98,7 +98,7 @@ module.exports = [
     "type": "function",
     "function": {
       "name": "act",
-      "description": "ACT_TOOL_v1 — 在用户的 Petri 账户上执行写操作。受白名单限制（下方 type 枚举即全部支持的操作，共 16 种，无隐藏动作），所有操作都会被审计记录。其中仅重命名与参数修改支持 30 秒内撤销，其余操作不支持撤销。type 分两类：①数据库写操作（直接生效、可撤销）——rename_project / rename_dataset / rename_analysis（重命名）、update_analysis_params（合并修改分析参数，不会自动重跑）；②界面引导操作（驱动页面跳转或弹窗，多数需用户在界面上确认提交）——update_figcode_editor（重写绘图代码，默认自动运行）、switch_result_tab（切换结果页 tab）、focus_cluster（聚焦 cluster）、highlight_gene（按基因着色）、select_cells（按条件选中细胞，可存子集）、filter_table（筛选表格行）、label_cells（打开细胞标注对话框）、merge_datasets（打开数据集合并对话框）、open_replot（打开在线重绘）、upload_data_hint（定位到上传入口，不代用户上传）、open_figcode_plot（打开绘图卡片在线绘制）、open_tool（打开工具页）。部分界面引导操作要求当前已在对应页面，不满足时返回 wrong_page 并提示先导航。不允许：删除、跨用户操作、代用户上传数据。删除请让用户自己在 UI 中操作。",
+      "description": "ACT_TOOL_v2 — 执行领域中性动作。type 枚举=核心动作：rename_project / rename_dataset / rename_analysis / update_analysis_params（仅重命名/参数修改可撤销，30 秒内撤销；其余动作不支持撤销）/ open_tool（打开工具）；ui_action（把已安装领域包提供的 UI 动作派发到 pack 视图，actionId 由领域包提供）。已安装领域包的 UI action 会追加在描述末尾；pack 缺失/停用时对应 action 消失。所有操作都会审计；不允许删除、跨用户操作或代用户上传。",
       "parameters": {
         "type": "object",
         "properties": {
@@ -109,43 +109,22 @@ module.exports = [
               "rename_dataset",
               "rename_analysis",
               "update_analysis_params",
-              "update_figcode_editor",
-              "switch_result_tab",
-              "focus_cluster",
-              "highlight_gene",
-              "select_cells",
-              "filter_table",
-              "label_cells",
-              "merge_datasets",
-              "open_replot",
-              "upload_data_hint",
-              "open_figcode_plot",
-              "open_tool"
+              "open_tool",
+              "ui_action"
             ],
             "description": "操作类型"
-          },
-          "datasetId": {
-            "type": "string",
-            "description": "rename_dataset 等数据集操作使用"
-          },
-          "analysisId": {
-            "type": "string",
-            "description": "rename_analysis / update_params 使用"
           },
           "projectId": {
             "type": "string",
             "description": "rename_project 用"
           },
-          "cluster": {
-            "type": [
-              "string",
-              "number"
-            ],
-            "description": "focus_cluster 使用的 cluster"
-          },
-          "name": {
+          "datasetId": {
             "type": "string",
-            "description": "可选：分析或资源的新名称"
+            "description": "rename_dataset 用"
+          },
+          "analysisId": {
+            "type": "string",
+            "description": "rename_analysis / update_analysis_params 用"
           },
           "newName": {
             "type": "string",
@@ -153,64 +132,19 @@ module.exports = [
           },
           "params": {
             "type": "object",
-            "description": "具体参数对象，例如 {minCells:3, resolution:0.5}"
-          },
-          "code": {
-            "type": "string",
-            "description": "update_figcode_editor 用：完整的新 R 代码（要替换编辑器中的内容）"
-          },
-          "autoRun": {
-            "type": "boolean",
-            "description": "update_figcode_editor 用：是否替换后自动运行（默认 true）"
-          },
-          "tab": {
-            "type": "string",
-            "enum": [
-              "preview",
-              "plots",
-              "data",
-              "params"
-            ],
-            "description": "switch_result_tab 用：跳转到哪个 tab"
-          },
-          "gene": {
-            "type": "string",
-            "description": "highlight_gene 用：基因符号（如 CD3E、IL7R）"
-          },
-          "columnFilters": {
-            "type": "object",
-            "description": "filter_table / select_cells 用：{列名: 筛选值} 的对象。多列做 AND，单列内用逗号或冒号分隔做 OR 匹配。例如 {\"seurat_clusters\":\"5\", \"nFeature_RNA\":\">1000\"}"
-          },
-          "subsetName": {
-            "type": "string",
-            "description": "select_cells 用：可选的 subset 名"
-          },
-          "labelKey": {
-            "type": "string",
-            "description": "label_cells 用：标签的 key（如 \"cell_type\"）"
-          },
-          "labelValue": {
-            "type": "string",
-            "description": "label_cells 用：标签的值（如 \"NK cell\"）"
-          },
-          "datasetIds": {
-            "type": "array",
-            "description": "merge_datasets 用：要合并的 dataset id 数组",
-            "items": {
-              "type": "string"
-            }
-          },
-          "mergeName": {
-            "type": "string",
-            "description": "merge_datasets 用：合并后的新数据集名"
-          },
-          "figcardId": {
-            "type": "string",
-            "description": "open_figcode_plot 用：FigCode 卡片 id（如 volcano、heatmap）"
+            "description": "update_analysis_params 用：要合并的参数对象"
           },
           "toolId": {
             "type": "string",
-            "description": "open_tool 用：工具 id（如 deseq2、enrichment、km-survival）"
+            "description": "open_tool 用：工具 id"
+          },
+          "actionId": {
+            "type": "string",
+            "description": "ui_action 用：已安装领域包提供的 action id（见描述末尾的已安装 action 清单）"
+          },
+          "payload": {
+            "type": "object",
+            "description": "ui_action 用：传给 pack 视图的 JSON 载荷（≤8KB）"
           }
         },
         "required": [

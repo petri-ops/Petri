@@ -40,11 +40,14 @@ export function PackSurfaceFrame({
 }): React.ReactElement {
   const theme = useThemeOptional();
   const iframeRef = React.useRef<HTMLIFrameElement | null>(null);
+  const readyRef = React.useRef(false);
+  const queuedActionsRef = React.useRef<WorkSurfaceUiActionDetail[]>([]);
   const [state, setState] = React.useState<'loading' | 'ready' | 'error' | 'unsupported'>(
     typeof window !== 'undefined' && window.petriDesktop ? 'loading' : 'unsupported'
   );
   const [error, setError] = React.useState('');
   const [retryKey, setRetryKey] = React.useState(0);
+  const [lastActionResult, setLastActionResult] = React.useState<{ actionId: string; ok: boolean } | null>(null);
   const url = packSurfaceUrl(descriptor);
   const origin = descriptor.packId ? packOrigin(descriptor.packId) : '';
   const surfaceActions = React.useMemo(
@@ -68,37 +71,60 @@ export function PackSurfaceFrame({
     }, origin);
   }, [artifactContext, conversationId, descriptor.id, descriptor.packId, origin, projectId, surfaceActions, theme?.resolvedTheme, url]);
 
+  const postAction = React.useCallback((detail: WorkSurfaceUiActionDetail) => {
+    const action = surfaceActions.find((candidate) => candidate.id === detail.actionId);
+    if (!action) return;
+    const target = iframeRef.current?.contentWindow;
+    if (!readyRef.current || !target || !origin) {
+      queuedActionsRef.current.push(detail);
+      return;
+    }
+    target.postMessage({
+      type: 'petri:ui-action',
+      actionId: action.id,
+      requestId: detail.requestId ?? null,
+      payload: detail.payload ?? {},
+    }, origin);
+  }, [origin, surfaceActions]);
+
+  const markReady = React.useCallback(() => {
+    readyRef.current = true;
+    setState('ready');
+    sendContext();
+    const queued = queuedActionsRef.current;
+    queuedActionsRef.current = [];
+    for (const detail of queued) postAction(detail);
+  }, [postAction, sendContext]);
+
   React.useEffect(() => {
     const onAction = (event: Event) => {
       const detail = (event as CustomEvent<WorkSurfaceUiActionDetail>).detail;
       if (!detail?.actionId) return;
-      const action = surfaceActions.find((candidate) => candidate.id === detail.actionId);
-      if (!action || !iframeRef.current?.contentWindow || !origin) return;
-      iframeRef.current.contentWindow.postMessage({
-        type: 'petri:ui-action',
-        actionId: action.id,
-        payload: detail.payload ?? {},
-      }, origin);
+      if (!surfaceActions.some((candidate) => candidate.id === detail.actionId)) return;
+      postAction(detail);
     };
     window.addEventListener(WORK_SURFACE_UI_ACTION_EVENT, onAction);
     return () => window.removeEventListener(WORK_SURFACE_UI_ACTION_EVENT, onAction);
-  }, [origin, surfaceActions]);
+  }, [postAction, surfaceActions]);
 
   React.useEffect(() => {
     const onMessage = (event: MessageEvent) => {
       if (!origin || event.origin !== origin) return;
-      const data = event.data as { type?: unknown; actionId?: unknown; ok?: unknown; message?: unknown } | null;
+      const data = event.data as {
+        type?: unknown; actionId?: unknown; requestId?: unknown; ok?: unknown; message?: unknown;
+      } | null;
       if (!data || typeof data.type !== 'string') return;
       if (data.type === 'petri:ready') {
-        setState('ready');
-        sendContext();
+        markReady();
         return;
       }
       if (data.type === 'petri:ui-action-result') {
         const actionId = typeof data.actionId === 'string' ? data.actionId : '';
         if (!actionId || !surfaceActions.some((action) => action.id === actionId)) return;
+        setLastActionResult({ actionId, ok: data.ok === true });
         dispatchWorkSurfaceUiActionResult({
           actionId,
+          ...(typeof data.requestId === 'string' ? { requestId: data.requestId } : {}),
           ok: data.ok === true,
           ...(typeof data.message === 'string' ? { message: data.message.slice(0, 500) } : {}),
         });
@@ -106,7 +132,7 @@ export function PackSurfaceFrame({
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [origin, sendContext, surfaceActions]);
+  }, [markReady, origin, surfaceActions]);
 
   if (!url) {
     return (
@@ -127,7 +153,13 @@ export function PackSurfaceFrame({
   }
 
   return (
-    <div className={styles.frameHost} data-testid="pack-surface-frame" data-surface-state={state}>
+    <div
+      className={styles.frameHost}
+      data-testid="pack-surface-frame"
+      data-surface-state={state}
+      data-last-action-id={lastActionResult?.actionId}
+      data-last-action-ok={lastActionResult ? String(lastActionResult.ok) : undefined}
+    >
       {state === 'loading' && <p className={styles.frameLoading}>正在加载「{descriptor.title}」…</p>}
       {state === 'error' && (
         <div className={styles.frameState} role="alert">
@@ -136,6 +168,7 @@ export function PackSurfaceFrame({
           <button type="button" className="petri-btn petri-btn--ghost petri-btn--sm" onClick={() => {
             setError('');
             setState('loading');
+            readyRef.current = false;
             setRetryKey((value) => value + 1);
           }}>重试</button>
         </div>
@@ -150,10 +183,7 @@ export function PackSurfaceFrame({
         referrerPolicy="no-referrer"
         data-hidden={state === 'error' ? 'true' : undefined}
         onLoad={() => {
-          if (state !== 'error') {
-            setState('ready');
-            sendContext();
-          }
+          if (state !== 'error') markReady();
         }}
         onError={() => {
           setState('error');

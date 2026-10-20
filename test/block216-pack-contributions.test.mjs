@@ -72,8 +72,12 @@ test('BLOCK-216 contributions: installed pack projects views/result surfaces/act
     assert.equal(result.packs.length, 1);
     assert.equal(result.packs[0].packId, 'pack_fixture');
     assert.deepEqual(result.packs[0].views.map((view) => view.id), ['lab']);
+    assert.equal(result.packs[0].views[0].publicId, 'pack:pack_fixture:lab');
     assert.deepEqual(result.packs[0].resultSurfaces.map((surface) => surface.id), ['result']);
+    assert.equal(result.packs[0].resultSurfaces[0].publicId, 'pack:pack_fixture:result:result');
     assert.deepEqual(result.packs[0].uiActions.map((action) => action.id), ['focus']);
+    assert.equal(result.packs[0].uiActions[0].publicId, 'pack:pack_fixture:action:focus');
+    assert.equal(result.packs[0].uiActions[0].surfaceId, 'pack:pack_fixture:lab');
     assert.equal(result.packs[0].packRoot, undefined, 'packRoot must never leak to the renderer');
   } finally {
     fs.rmSync(root, { recursive: true, force: true });

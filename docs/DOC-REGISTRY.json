@@ -7269,9 +7269,30 @@
         "q5",
         "G0"
       ],
-      "notes": "2026-10-20 立项 active（用户「我点头」批准 Q5 作为波次开发第一包与 P2-UI/P2b 前置 host）：统一 core+pack surface 注册表、稳定 tab 身份/单例/序号/关闭策略/持久化；pack views/resultSurfaces/uiActions 只读贡献投影 + petri-pack:// 独立 origin 窄桥；生成文件/计划/证据面；结果面 host 解析但保留核心 transitional 面（P2b 再物理迁移）。**completed（2026-10-20，closeout 十三门 PASS）**：block216 7/7 + 前端 Q5 46 项 + test:changed 247/247 + 9223 live 19/19；实机抓真两处（多 tab 只显示×、OOPIF/文件空态 visibility 泄漏）已修。边界=E9 终端分屏 deferred、P2-UI/P2b 未做、E1/E4/H3/H4/B3 部分。"
+      "notes": "2026-10-20 立项 active（用户「我点头」批准 Q5 作为波次开发第一包与 P2-UI/P2b 前置 host）：统一 core+pack surface 注册表、稳定 tab 身份/单例/序号/关闭策略/持久化；pack views/resultSurfaces/uiActions 只读贡献投影 + petri-pack:// 独立 origin 窄桥；生成文件/计划/证据面；结果面 host 解析但保留核心 transitional 面（P2b 再物理迁移）。**completed（2026-10-20，closeout 十三门 PASS）**：block216 7/7 + 前端 Q5 46 项 + test:changed 266/266 + 9223 live 19/19；实机抓真两处（多 tab 只显示×、OOPIF/文件空态 visibility 泄漏）已修。边界=E9 终端分屏 deferred、P2-UI/P2b 未做、E1/E4/H3/H4/B3 部分。"
+    },
+    {
+      "id": "BLOCK-217-QDOMAIN-P2UI-ACTIONS",
+      "capability": "qdomain-p2ui-actions",
+      "path": "docs/block-217-qdomain-p2ui-actions-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P5-CLOSED",
+      "canonical": true,
+      "truthDomain": "qdomain-p2ui-actions",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-20",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "domain-pack",
+        "ui-actions",
+        "act-tool",
+        "q-domain",
+        "G0"
+      ],
+      "notes": "2026-10-20 立项 active（用户「行！ 按照你的建议来」=按 Q5 → P2-UI actions → P2b 推进）：核心 act 只保留 6 个领域中性动作；删除 12 个单细胞/FigCode 动作与页面标签；pack uiActions 动态描述 + ui_action 执行校验 + 前端 host 分发/ack；旧页面已退役，生信真实动作随 P2b pack 结果面提供。**completed（2026-10-20，closeout 十三门 PASS）**：block217 9/9 + block151 5/5 + 前端 8/8 + test:changed 213/213 + 9223 live 8/8；domain-neutrality 下调 15 处；UI-531 verified（dev Electron 边界内）。"
     }
   ],
   "lastUpdated": "2026-10-20",
-  "documentCount": 375
+  "documentCount": 376
 }

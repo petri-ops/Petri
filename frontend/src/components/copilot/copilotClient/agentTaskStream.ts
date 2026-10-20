@@ -13,7 +13,7 @@ import {
   parseToolOutputEvent,
   parseToolResultEvent,
 } from './parse';
-import type { AgentTaskTodoItem, KnowledgeCitation, StreamChatOptions } from './types';
+import type { AgentTaskTodoItem, KnowledgeCitation, StreamChatOptions, ToolResultEvent } from './types';
 
 /**
  * BLOCK-39: 订阅断线信号（typed）。仅三类来源：fetch 网络 reject（后端不可达）、
@@ -374,6 +374,21 @@ function parseTaskTodoEvent(obj: AgentSseEvent): AgentTaskTodoItem[] {
   return items;
 }
 
+export function maybeDispatchUiAction(event: ToolResultEvent): void {
+  if (event.name !== 'act' || !event.ackToken) return;
+  const action = event.uiAction;
+  if (!action || typeof action.actionId !== 'string' || !action.actionId) return;
+  if (typeof event.ackExpiresAt === 'number' && Date.now() > event.ackExpiresAt) return;
+  dispatchPetriEvent(petriEvents.uiActionRequest, {
+    actionId: action.actionId,
+    ...(typeof action.surfaceId === 'string' ? { surfaceId: action.surfaceId } : {}),
+    ...(typeof action.packId === 'string' ? { packId: action.packId } : {}),
+    ackToken: event.ackToken,
+    ...(typeof event.ackExpiresAt === 'number' ? { ackExpiresAt: event.ackExpiresAt } : {}),
+    ...(action.payload && typeof action.payload === 'object' ? { payload: action.payload } : {}),
+  });
+}
+
 /** 处理单个 SSE 事件对象（原 streamChat 的解析逻辑，task/legacy 共用） */
 function _handleSseEvent(obj: AgentSseEvent, opts: StreamChatOptions): void {
   // UI-AGENTWB-###: SSE dispatch used to inline helpers (e.g.
@@ -531,7 +546,10 @@ function _dispatchSseEvent(obj: AgentSseEvent, opts: StreamChatOptions): void {
     return;
   }
   if (obj.event === 'tool_result') {
-    onToolResult?.(parseToolResultEvent(obj));
+    const toolResultEvent = parseToolResultEvent(obj);
+    onToolResult?.(toolResultEvent);
+    // BLOCK-217 — act(ui_action) 专播：只派发未过期动作，历史回放不重复触发。
+    maybeDispatchUiAction(toolResultEvent);
     return;
   }
   if (obj.event === 'input_queued') {

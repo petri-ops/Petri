@@ -4286,6 +4286,45 @@
         "frontend/src/pages/project-workspace/RightFileTree.shortcuts.test.tsx"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block217-qdomain-p2ui-actions",
+      "note": "BLOCK-217 Q-DOMAIN P2-UI — 核心 act 去生信/FigCode；pack uiActions 动态描述 + ui_action 执行校验 + 前端 host 分发/ack；删除 sc*/figcode 遗留字段。",
+      "patterns": [
+        "core/petri-server/agent-tools/act-tools.js",
+        "core/petri-server/agent-tools/plan-ui-tools.js",
+        "core/petri-server/agent-tools/tool-events.js",
+        "core/petri-server/agent-tools/registry.js",
+        "core/petri-server/agent-tools/tool-defs/browser.js",
+        "core/petri-server/agent-tools/tool-defs/session.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/helpers/system-prompt.js",
+        "core/petri-server/helpers/pack-contributions.js",
+        "frontend/src/lib/events.ts",
+        "frontend/src/components/copilot/copilotClient/agentTaskStream.ts",
+        "frontend/src/components/copilot/copilotClient/types.ts",
+        "frontend/src/components/copilot/copilotClient/parse.ts",
+        "frontend/src/hooks/useUiActionHost.ts",
+        "frontend/src/components/work-surface/PackSurfaceFrame.tsx",
+        "frontend/src/pages/project-workspace.tsx",
+        "frontend/src/lib/workSurface/registry.ts",
+        "frontend/src/lib/workSurface/uiActionBus.ts",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block217-p2ui-actions.cjs",
+        "test/block217-*.test.mjs",
+        "acceptance/block-217/**"
+      ],
+      "tests": [
+        "test/block217-act-ui-actions.test.mjs",
+        "test/block151-act-enum-description.test.mjs",
+        "test/agent-tool-registry.test.mjs",
+        "frontend/src/hooks/useUiActionHost.test.tsx",
+        "frontend/src/components/copilot/copilotClient/agentTaskStream.uiAction.test.ts",
+        "frontend/src/components/copilot/copilotClient.test.ts",
+        "frontend/src/components/work-surface/PackSurfaceFrame.test.ts",
+        "frontend/src/lib/workSurface/registry.test.ts",
+        "frontend/src/hooks/useWorkSurfaceTabs.test.tsx"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

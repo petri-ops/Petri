@@ -117,28 +117,10 @@ function buildToolResultEvent(envelope, args = {}, options = {}) {
     if (result.analysisId) evt.analysisId = result.analysisId;
     if (result.taskId) evt.taskId = result.taskId;
     if (result.ackToken) evt.ackToken = result.ackToken;
-    if (result.type === 'update_figcode_editor' && result.code) {
-      evt.figcodeCode = result.code;
-      evt.figcodeAutoRun = result.autoRun !== false;
+    if (result.ackExpiresAt) evt.ackExpiresAt = result.ackExpiresAt;
+    if (result.type === 'ui_action' && result.uiAction) {
+      evt.uiAction = redactSensitiveValue(result.uiAction);
     }
-    if (result.type === 'switch_result_tab') evt.scTab = result.tab;
-    if (result.type === 'focus_cluster') evt.scCluster = result.cluster;
-    if (result.type === 'highlight_gene') evt.scGene = result.gene;
-    if (['select_cells', 'filter_table', 'label_cells'].includes(result.type) && result.columnFilters) {
-      evt.scColumnFilters = result.columnFilters;
-    }
-    if (result.type === 'select_cells') evt.scSubsetName = result.subsetName || null;
-    if (result.type === 'label_cells') {
-      evt.scLabelKey = result.labelKey;
-      evt.scLabelValue = result.labelValue;
-    }
-    if (result.type === 'merge_datasets') {
-      evt.scDatasetIds = result.datasetIds;
-      evt.scMergeName = result.mergeName || null;
-    }
-    if (result.type === 'open_replot') evt.scOpenReplotForAnalysis = result.analysisId;
-    if (result.type === 'upload_data_hint') evt.scUploadHint = true;
-    if (result.type === 'open_figcode_plot') evt.figcardId = result.figcardId;
     if (result.type === 'open_tool' && result.toolId) evt.toolId = result.toolId;
   }
 
