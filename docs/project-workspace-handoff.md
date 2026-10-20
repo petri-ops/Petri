@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-20（**BLOCK-222 Q9 垂直切片 completed**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-222（Q9 垂直切片）**：新增 `components/shell/SegmentBoundary`（段落级错误边界：`data-segment`/`data-segment-crashed` 标注、`resetKey` 变化自动清错、重试、复制诊断含失败态、上报器抛错被内层 catch 吞掉），挂载两处——结果面预览 body（`ResultArtifactShell`，resetKey=artifactId+预览可用性）与工作区文件预览（`WorkspaceFilePreview`，resetKey=previewUrl/路径）。证据=SegmentBoundary 5/5 + 邻域前端 24 文件 170 项全绿 + theme 17/17 + types 0 + closeout 十三门。reopen=轮次/工具卡/应用级边界、错误落盘、通知/托盘/退出摘要/模型选择器/电脑控制。**下一包**=Q9 续项或 P4 data model。**收口 PATH** 需同时含 `D:\Program Files\Git\usr\bin`（GNU tar）与 `...\Git\bin`（bash）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-20（**BLOCK-221 Q8 垂直切片 completed**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-221（Q8 垂直切片）**：①凭据脱敏——`GET /api/mcp/servers` 不再下发解密后的 env 明文（改 `envKeys`/`envCount`；写入侧不变、连接仍用进程内明文）；②`helpers/mcp-server-policy.js` + `mcp-server-policy.json`（逐 server `{trust:'ask'|'allow', allow[], block[]}`，读侧 fail-closed，写侧 404/400 + diagnostics）；③投影求值 block 优先 → allow 白名单 → 默认全允许；④`GET/PUT /api/mcp/servers/:id/policy`、清单 `policy` 摘要（含 projectedToolCount）；⑤前端 `McpServerRow` 改 `envKeys/envCount/policy?`。证据=block221 9/9 + MCP 邻域 40/40 + 前端 extensions/hooks 19 文件 145 项全绿。reopen=trust 降档接审批（必须随 Q1）/OAuth/懒加载/深链安装/四 hint/货架 UI 操作面。**下一包**=Q9（外壳可靠性）→ P4。**收口仍需 PATH 前置 Git Bash**（本机 `bash`→WSL launcher）。G0 开发期常态 · 不外推 packaged/Provider/GA。

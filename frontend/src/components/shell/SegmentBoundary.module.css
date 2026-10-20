@@ -1,0 +1,47 @@
+/* BLOCK-222 Q9 — 段落级兜底卡。刻意比路由级更轻：只占该段空间，不接管整页。 */
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-2);
+  margin: var(--petri-space-3);
+  padding: var(--petri-space-4);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-surface-2);
+}
+
+.title {
+  color: var(--petri-text);
+  font-weight: 600;
+}
+
+.message {
+  color: var(--petri-text-secondary);
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+.detail {
+  max-height: 160px;
+  margin: 0;
+  padding: var(--petri-space-2);
+  overflow: auto;
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-surface-alt);
+  color: var(--petri-text-tertiary);
+  font-size: 0.85em;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--petri-space-2);
+}
+
+.hint {
+  color: var(--petri-text-tertiary);
+  font-size: 0.85em;
+}

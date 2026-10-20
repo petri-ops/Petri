@@ -51,6 +51,7 @@ import { ArtifactPinPane, type ArtifactPinSnapshot } from './ArtifactPinPane';
 // BLOCK-140 P1 — 跨 job 钉住：血缘节点「钉住」→ 按既有打开链同源数据源构建快照
 import { fetchCrossJobPinSnapshot } from './crossJobPinSnapshot';
 // BLOCK-142 切片 E — md/xlsx/pdf 三 viewer（注册表 spreadsheet/markdown/pdf adapter 的挂载面）
+import { SegmentBoundary } from '@/components/shell/SegmentBoundary';
 import { MarkdownResultViewer } from './MarkdownResultViewer';
 import { SpreadsheetResultViewer } from './SpreadsheetResultViewer';
 // BLOCK-219 Q6 — 批注接线（身份推导/两个宿主/不可批注提示）外置，见同目录 resultAnnotation.tsx
@@ -742,12 +743,7 @@ export function ResultArtifactShell({
   }, [activeIsPreviewText, previewAvailabilityKey, previewRetryVersion, selectedArtifact, selectedArtifactName, selectedArtifactUrl]);
 
   // BLOCK-219 Q6 — 批注身份：权威坐标 (artifactId, revisionId)；缺 artifactId 即不可批注。
-  const annotationProps = buildResultAnnotationProps({
-    projectId: project.id,
-    revision: viewedRevision,
-    jobId: job?.id ?? null,
-    artifactName: selectedArtifactLabel || selectedArtifactName || null,
-  });
+  const annotationProps = buildResultAnnotationProps({ projectId: project.id, revision: viewedRevision, jobId: job?.id ?? null, artifactName: selectedArtifactLabel || selectedArtifactName || null });
 
   const retryCurrentPreview = () => {
     setPreviewAvailability({ key: previewAvailabilityKey, status: 'checking', reason: null });
@@ -1243,7 +1239,10 @@ export function ResultArtifactShell({
       {mode === 'result' && (
       viewedRevision && !viewedRevision.isCurrent ? (
         <section className={styles.resultReportSection} data-viewing="historical-revision">
-          <div className={styles.resultSidebarPreviewBody} ref={previewBodyRef}>{renderPreview()}</div>
+          {/* BLOCK-222 Q9 — 预览段独立兜底：异形产物数据不该带走整个结果面 */}
+        <div className={styles.resultSidebarPreviewBody} ref={previewBodyRef}>
+          <SegmentBoundary segment="result-preview" resetKey={`${viewedRevision?.artifactId || selectedArtifact?.name || ''}:${previewAvailabilityKey}`}>{renderPreview()}</SegmentBoundary>
+        </div>
         </section>
       ) : (
       <section className={styles.resultReportSection}>

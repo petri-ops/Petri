@@ -5,6 +5,8 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
+最后更新：2026-10-20（**BLOCK-222 Q9 垂直切片 completed**（用户「可以的 冲 按顺序推进」）：段落级错误边界 SegmentBoundary + 结果面预览段/工作区预览段独立兜底；5/5 + 邻域前端 24 文件 170 项 + theme 17/17 + types 0。reopen=轮次/工具卡/应用级边界、错误落盘、通知/托盘/退出摘要/模型选择器/电脑控制。plan=docs/block-222-q9-segment-boundary-plan.md §5。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-10-20（**BLOCK-221 Q8 垂直切片 completed**（用户裁决「Q8 扩展治理」）：MCP 服务级治理——凭据脱敏（`envKeys`/`envCount`，修掉状态面下发解密 env 明文）+ `mcp-server-policy.json`（trust/allow/block）+ 投影 block 优先/allow 白名单 + 策略读写路由 + 清单摘要；block221 9/9 + MCP 邻域 40/40 + 前端 145 项全绿。reopen=trust 降档接审批（随 Q1）/OAuth/懒加载/深链安装/四 hint/货架 UI。plan=docs/block-221-q8-mcp-governance-plan.md §5。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-10-20（**BLOCK-220 Q-DOMAIN P3 垂直切片立项 active（P0-LAUNCH）**（用户「直接开 P3 可以直接推进」）：删除化石 `core/shared-backend/tool-registry.js`（10 个内联生信工具/零消费；单一注册源=pack 驱动）+ pack `provides.methods`（citations/toolLabels 纯数据）+ `pack-methods.js` 只读有界装载器 + `methods-export.js` 接线与诚实降级；域中性基线 109 键/261 处/45 文件，本片只下调。reopen=`_pythonEquivalent` 脚本模板/`artifact-profiles`/`agent-workflow`/`learning`/`result-*-tools`。plan=docs/block-220-qdomain-p3-methods-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -107,6 +109,7 @@
 
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
+| 0 | BLOCK-222 / Q9 | **段落级错误边界（completed，垂直切片）**：`SegmentBoundary`（`data-segment` 标注 / `resetKey` 自动恢复 / 重试 / 复制诊断含失败态 / 上报器抛错不反噬）+ 结果面预览段 + 工作区文件预览段独立兜底；崩溃不扩散到页面骨架。非范围=轮次/工具卡/应用级边界、错误落盘、通知/托盘/退出摘要/模型选择器/电脑控制 | `docs/block-222-q9-segment-boundary-plan.md` §5 + `docs/qoder-essence-absorption-plan.md` §6-Q9 | **completed（5/5；邻域 170 项）** |
 | 0 | BLOCK-221 / Q8 | **MCP 服务级治理（completed，垂直切片）**：凭据脱敏（状态面只出 `envKeys`/`envCount`，修掉解密 env 明文下发）+ `mcp-server-policy.json`（逐 server `trust/allow/block`，读侧 fail-closed、写侧 404/400）+ 投影 block 优先/allow 白名单 + `GET/PUT /api/mcp/servers/:id/policy` + 清单 `policy` 摘要。非范围=trust 降档接审批（随 Q1）/OAuth/懒加载/深链安装/四 hint/货架 UI 操作面 | `docs/block-221-q8-mcp-governance-plan.md` §5 + `docs/qoder-essence-absorption-plan.md` §6-Q8 | **completed（block221 9/9；MCP 邻域 40/40）** |
 | 0 | BLOCK-220 / Q-DOMAIN P3 | **methods 契约下沉 + 遗留注册表清除（completed，垂直切片）**：删化石 `core/shared-backend/tool-registry.js`（10 个内联生信工具/零消费；单一注册源=pack `registry/tool-registry.json` 驱动的 `petri-server/tool-registry.js`）+ pack 新契约 `provides.methods`（`methods/citations.json`/`methods/tool-labels.json`）+ `pack-methods.js` 只读有界装载器 + `methods-export.js` 接线与无 pack 无引文的诚实降级。非范围=`_pythonEquivalent` 脚本模板/`artifact-profiles`/`agent-workflow`/`learning`/`result-*-tools` | `docs/block-220-qdomain-p3-methods-plan.md` §8 + `docs/qoder-essence-absorption-plan.md` §Q-DOMAIN | **completed（block220 13/13；域中性 261→208；pack 0.2.0）** |
 | 0 | BLOCK-219 / Q6 | **产物批注 host（completed，垂直切片）**：`result_annotations` 旁路元数据（归一化 0..1 坐标/页号/评论；单 scope ≤200；项目隔离）+ `015_*.sql` 单源迁移；PDF 页定位盒 + 图像批注层（结果面 + 工作区预览）；「加入任务」经 `copilotAsk` 结构化引用；批注不写原始产物。block219 12/12 + 前端 42/42 + test:changed Node 744 项 0 红/前端 30 文件全绿 + `acceptance/block-219/`（13/13）；UI-533 verified。边界=六种图形工具/文本批注与速记板/Office/pack iframe 面批注 reopen | `docs/block-219-q6-annotation-host-plan.md` §6 + `docs/qoder-essence-absorption-plan.md` §6-Q6 | **completed（closeout 十三门 PASS）** |

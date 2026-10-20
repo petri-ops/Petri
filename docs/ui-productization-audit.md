@@ -5124,3 +5124,10 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **为什么这样设计（自有形态）**：治理状态必须**可见且可解释**——服务清单直接给出该 server 的允许/阻断计数与生效投影工具数，而不是让用户去读 JSON；凭据只以键名示人，值永不出进程（落盘仍是密文）。本轮只做数据面：`trust` 位**不改审批默认**，降档要与 Q1 审批事件契约一起做，避免绕开 D4 治理。
 - **验证（代码）**：`block221-mcp-server-policy` **9/9**（默认全允许 / block 优先 / allow 白名单 / 写侧 fail-closed / 坏 store 降级 / **状态行序列化不含明文 token** / 投影裁剪 3→1 / 摘要一致）；MCP 邻域 `mcp-client-manager`、`mcp-projection`、`mcp-client-settings`、`block160/163/203/204` 共 **40/40**；前端 `pages/extensions` + `hooks` **19 文件 / 145 项全绿**；`quality:types` 0。
 - **未做（reopen）**：货架上的信任/阻断**操作**入口（本轮无 UI 控件，故未做实机腿、不标记 verified）；OAuth、懒加载、深链安装安全面、三 hint 进策略。
+
+## UI-535: 段落级错误兜底（2026-10-20 **in_progress（代码+组件测试完成，未做实机腿）**，BLOCK-222 / Q9 垂直切片）
+
+- **变化面**：结果面预览与工作区文件预览各自被 `SegmentBoundary` 包住——某一段渲染异常时只有那一段变成可恢复卡片（标题 + 原因 + 重试 + 复制诊断），页面骨架、结论区、truth 面、上下文条照常可用；卡片带 `data-segment` 标注，实机走查能直接定位段落。
+- **为什么这样设计（自有形态）**：兜底粒度对齐真实失败面——插件产出的异形数据崩的是**预览**，不是整个结果页；把整页换成错误卡等于用一次渲染异常抹掉用户全部上下文。`resetKey` 让「换个产物/文件」自动脱离错误态，避免用户对着旧错误反复点重试。
+- **验证（代码）**：`SegmentBoundary.test.tsx` **5/5**（直通 / 只接管该段并标注 / 重试恢复 / resetKey 自动清错 / 上报器抛错不反噬）；邻域 `components/shell`+`workspace-panels`+`WorkspaceFilePreview` **24 文件 170 项**；`theme-token-contract` 17/17；`quality:types` 0。
+- **未做实机腿**：崩溃注入需要在 dev 栈注入异常组件，本轮未做 → 保持 `in_progress`，不宣称 verified。

@@ -22,6 +22,7 @@ import { Icon } from '@/components/icons/Icon';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 import { buildPreviewTable } from '@/lib/file-preview/buildPreviewTable';
 import { Lightbox } from '@/components/ui/Lightbox';
+import { SegmentBoundary } from '@/components/shell/SegmentBoundary';
 import { codeLanguageForFile } from '@/components/ui/CodeHighlight';
 import type { EditorApi } from '@/components/editor/CodeMirror/types';
 import { WorkspaceFilePreviewBridge } from '@/components/editor';
@@ -322,6 +323,13 @@ export function WorkspaceFilePreview({
   }
 
   return (
+    // BLOCK-222 Q9 — 预览段独立兜底：单个文件解析出异形数据不该让整块工作区白掉
+    <SegmentBoundary
+      segment="workspace-preview"
+      resetKey={previewUrl || file?.path || ''}
+      title="预览没能渲染出来"
+      description="文件仍在磁盘上，只是这一段预览出错。可以重试，或用系统应用打开。"
+    >
     <div className={styles.workspacePreview}>
       {openError && <div className={styles.workspacePreviewError}>{openError}</div>}
       <div className={styles.workspacePreviewBody} ref={previewBodyRef} onKeyDown={handlePreviewKeyDown}>
@@ -550,5 +558,6 @@ export function WorkspaceFilePreview({
       )}
       {lightboxSrc && <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
     </div>
+    </SegmentBoundary>
   );
 }

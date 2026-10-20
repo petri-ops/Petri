@@ -7375,6 +7375,27 @@
         "G0"
       ],
       "notes": "2026-10-20 立项（用户裁决「Q8 扩展治理」）：Q8 垂直切片——MCP 状态面凭据脱敏 + 服务级 allow/block 策略 store + 投影过滤 + 策略读写路由 + 清单摘要。**completed（2026-10-20）**：block221 9/9 + MCP 邻域 40/40 + 前端 extensions/hooks 145 项全绿；修真实缺陷=GET /api/mcp/servers 曾下发解密后的 env 明文。reopen=trust 降档接审批（随 Q1）/OAuth/懒加载/深链安装/四 hint/货架 UI 操作面。"
+    },
+    {
+      "id": "BLOCK-222-Q9-SEGMENT-BOUNDARY",
+      "capability": "q9-shell-reliability",
+      "path": "docs/block-222-q9-segment-boundary-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P5-CLOSED",
+      "canonical": true,
+      "truthDomain": "q9-shell-reliability",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-20",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "reliability",
+        "error-boundary",
+        "q9",
+        "ui",
+        "G0"
+      ],
+      "notes": "2026-10-20 立项（用户「可以的 冲 按顺序推进」）：Q9 垂直切片——段落级错误边界（预览段独立兜底，含 resetKey 自动恢复/重试/复制诊断/data-segment 标注）。**completed（2026-10-20）**：SegmentBoundary 5/5 + 邻域前端 24 文件 170 项全绿 + theme 17/17 + types 0。reopen=轮次/工具卡/应用级边界、错误落盘、通知/托盘/退出摘要/模型选择器/电脑控制。"
     }
   ],
   "lastUpdated": "2026-10-20",
