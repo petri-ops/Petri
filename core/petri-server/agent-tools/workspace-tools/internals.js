@@ -329,9 +329,18 @@ function pruneBackgroundRecords() {
   }
 }
 
+/** BLOCK-223 — 退出摘要只读面：当前仍在运行的后台进程数（不含已退出记录）。 */
+function countRunningBackgroundProcesses() {
+  let running = 0;
+  for (const record of backgroundProcesses.values()) {
+    if (record && record.status === 'running') running += 1;
+  }
+  return running;
+}
 
 module.exports = {
   backgroundProcesses,
+  countRunningBackgroundProcesses,
   BACKGROUND_LOG_DIR,
   BACKGROUND_LOG_TAIL_DEFAULT,
   BACKGROUND_LOG_TAIL_MAX,

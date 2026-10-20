@@ -1,0 +1,88 @@
+{
+  "name": "block223-desktop-shell-live",
+  "startedAt": "2026-10-20T17:18:45.232Z",
+  "finishedAt": "2026-10-20T17:18:51.665Z",
+  "assertions": [
+    {
+      "name": "R1_activity_summary_shape",
+      "pass": true,
+      "detail": "{\"ok\":true,\"counts\":{\"toolJobsRunning\":0,\"toolJobsPending\":0,\"approvalsPending\":0,\"primaryTasks\":0,\"subagentTasks\":0,\"backgroundProcesses\":0},\"total\":0,\"fetchedAt\":\"2026-10-20T17:18:45.239Z\"}"
+    },
+    {
+      "name": "R2_activity_summary_six_sources",
+      "pass": true,
+      "detail": "toolJobsRunning,toolJobsPending,approvalsPending,primaryTasks,subagentTasks,backgroundProcesses"
+    },
+    {
+      "name": "R3_activity_summary_total_is_sum",
+      "pass": true,
+      "detail": "total=0"
+    },
+    {
+      "name": "D1_shell_status_defaults",
+      "pass": true,
+      "detail": "{\"ok\":true,\"closeToTray\":false,\"notifyOnTurnEnd\":true,\"trayActive\":false,\"notificationsSupported\":true,\"testInstance\":true}"
+    },
+    {
+      "name": "D2_summary_merges_terminal_sessions",
+      "pass": true,
+      "detail": "{\"toolJobsRunning\":0,\"toolJobsPending\":0,\"approvalsPending\":0,\"primaryTasks\":0,\"subagentTasks\":0,\"backgroundProcesses\":0,\"terminalSessions\":0}"
+    },
+    {
+      "name": "D3_tray_created_when_close_to_tray",
+      "pass": true,
+      "detail": "{\"setTray\":{\"ok\":true,\"changed\":true,\"prefs\":{\"closeToTray\":true,\"notifyOnTurnEnd\":true}},\"trayActive\":true}"
+    },
+    {
+      "name": "D4_notify_gate_honest",
+      "pass": true,
+      "detail": "{\"notify1\":{\"shown\":false,\"reason\":\"simulated_test_instance\",\"wouldShow\":true,\"title\":\"Petri · 本轮完成\"},\"supported\":true}"
+    },
+    {
+      "name": "D5_notify_deduped_within_3s",
+      "pass": true,
+      "detail": "{\"shown\":false,\"reason\":\"duplicate\"}"
+    },
+    {
+      "name": "D6_notify_pref_off",
+      "pass": true,
+      "detail": "{\"shown\":false,\"reason\":\"pref_off\"}"
+    },
+    {
+      "name": "D7_preview_dialog_visible",
+      "pass": true,
+      "detail": "{\"preview\":{\"ok\":true},\"dialog\":{\"rows\":2,\"preview\":true,\"title\":\"仍有正在进行的活动\"}}"
+    },
+    {
+      "name": "D8_preview_dialog_screenshot",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\petri\\acceptance\\block-223\\ui536-quit-summary.png"
+    },
+    {
+      "name": "D9_cancel_clears_dialog",
+      "pass": true,
+      "detail": "{\"clicked\":true,\"gone\":true}"
+    },
+    {
+      "name": "D9b_dark_dialog_uses_tokens",
+      "pass": true,
+      "detail": "{\"lightCardBg\":\"rgb(255, 255, 255)\",\"darkCardBg\":\"rgb(29, 41, 69)\"}"
+    },
+    {
+      "name": "D9c_dark_screenshot",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\petri\\acceptance\\block-223\\ui536-quit-summary-dark.png"
+    },
+    {
+      "name": "D10_hide_to_tray_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"trayActive\":true}"
+    },
+    {
+      "name": "D11_tray_destroyed_when_pref_off",
+      "pass": true,
+      "detail": "{\"ok\":true,\"closeToTray\":false,\"notifyOnTurnEnd\":true,\"trayActive\":false,\"notificationsSupported\":true,\"testInstance\":true}"
+    }
+  ],
+  "allPass": true
+}

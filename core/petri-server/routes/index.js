@@ -23,6 +23,8 @@ module.exports = async function registerRoutes(app) {
     // analytics、admin-ops、admin-compute、admin-users、observability。
     // G0-RS-P4R baseline capture; self-disables unless PETRI_PERF_PROBE=1.
     ['Perf probe', () => require('./perf-probe')(app)],
+    // BLOCK-223 — 退出摘要只读面（运行/排队 tool_jobs、pending 审批、运行中任务、后台进程）
+    ['App activity', () => require('./app-activity')(app)],
     ['AI conversations', () => require('./ai-conversations')(app)],
     ['AI memory', () => require('./ai-memory')(app)],
     ['AI admin', () => require('./ai-admin')(app)],

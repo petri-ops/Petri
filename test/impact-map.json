@@ -3,6 +3,47 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "block223-desktop-shell",
+      "note": "BLOCK-223 Q9 续项 — 系统通知 / 托盘最小化 / 退出摘要：activity-summary 只读端点、主进程桌面外壳（通知网关/托盘/退出协调器）、退出摘要弹窗与两项偏好（closeToTray/notifyOnTurnEnd）。",
+      "patterns": [
+        "core/petri-server/routes/app-activity.js",
+        "core/petri-server/routes/index.js",
+        "core/petri-server/helpers/approval-request-store.js",
+        "core/petri-server/agent-tools/workspace-tools/internals.js",
+        "core/petri-server/agent-task-store.js",
+        "src/main/desktop-shell.js",
+        "src/main/desktop-shell-model.js",
+        "src/main.js",
+        "src/main/_window-create.js",
+        "src/ipc/desktop-shell.js",
+        "src/ipc/channels.js",
+        "src/ipc/terminal.js",
+        "src/preload.js",
+        "core/packages/shared-config/config-schema.js",
+        "frontend/src/components/shell/**",
+        "frontend/src/hooks/useDesktopShell.ts",
+        "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/DesktopBehaviorPanel.tsx",
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "frontend/src/components/copilot/useTurnNotifications.ts",
+        "frontend/src/lib/desktopBridge.ts",
+        "frontend/src/App.tsx",
+        "test/block223-*.test.mjs",
+        "test/block201-settings-baseline.test.mjs",
+        "acceptance/block-223/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block223-*.cjs"
+      ],
+      "tests": [
+        "test/block223-desktop-shell-model.test.mjs",
+        "test/block223-activity-summary.test.mjs",
+        "test/ipc-channels-registry.test.mjs",
+        "test/block201-settings-baseline.test.mjs",
+        "frontend/src/components/shell/QuitSummaryDialog.test.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/DesktopBehaviorPanel.test.tsx"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "block219-q6-annotations",
       "note": "BLOCK-219 Q6 垂直切片 — 产物批注旁路存储（result_annotations）+ PDF 页/图像区域批注 + 加入任务；核心渲染面（结果面 PDF/图像、工作区文件预览）接线，Office/表格只给诚实原因。",
       "patterns": [

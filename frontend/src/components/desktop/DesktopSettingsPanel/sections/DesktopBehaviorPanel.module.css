@@ -1,0 +1,38 @@
+/* BLOCK-223 — 常规设置里的桌面行为两项。行内排版，不新增按钮形态。 */
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-3);
+  margin: var(--petri-space-2) 0;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--petri-space-3);
+  cursor: pointer;
+}
+
+.row input[type='checkbox'] {
+  margin-top: 2px;
+}
+
+.rowTitle {
+  display: block;
+  color: var(--petri-text);
+  font-size: 0.95em;
+}
+
+.rowHint {
+  display: block;
+  margin-top: 2px;
+  color: var(--petri-text-tertiary);
+  font-size: 0.85em;
+  line-height: 1.5;
+}
+
+.error {
+  margin: var(--petri-space-2) 0 0;
+  color: var(--petri-danger);
+  font-size: 0.88em;
+}

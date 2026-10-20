@@ -20,7 +20,17 @@ const CHANNELS = {
     test: 'ai-settings:test',
   },
   app: {
+    getActivitySummary: 'app:get-activity-summary',
+    getShellStatus: 'app:get-shell-status',
+    hideToTray: 'app:hide-to-tray',
+    notificationClicked: 'app:notification-clicked',
+    notify: 'app:notify',
+    previewQuitSummary: 'app:preview-quit-summary',
+    quitDecision: 'app:quit-decision',
+    quitRequested: 'app:quit-requested',
     relaunch: 'app:relaunch',
+    setShellPrefs: 'app:set-shell-prefs',
+    showMain: 'app:show-main',
     softRefresh: 'app:soft-refresh',
   },
   backend: {

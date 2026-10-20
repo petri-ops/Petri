@@ -725,6 +725,26 @@ function getRunningChildAgentTasks(parentTaskId) {
   })).filter((task) => task.params?.kind === 'subagent' && task.params?.parentTaskId === parentTaskId);
 }
 
+// BLOCK-223 — 退出摘要只读面：运行中的主任务与子代理计数。
+// 主/子分流按 params.kind（与 listInFlightPrimaryTasks 的 JSON 语义一致；
+// 解析失败按 primary 计，避免坏 params 静默漏计）。
+function countRunningAgentTasks(userId) {
+  const rows = stmts.listRunning.all();
+  let primary = 0;
+  let subagent = 0;
+  for (const row of rows) {
+    if (userId && row.user_id && row.user_id !== userId) continue;
+    let kind = 'primary';
+    try {
+      const params = JSON.parse(row.params || '{}');
+      if (params && params.kind === 'subagent') kind = 'subagent';
+    } catch {}
+    if (kind === 'subagent') subagent += 1;
+    else primary += 1;
+  }
+  return { primary, subagent };
+}
+
 // BLOCK-49: list_agents 数据源——当前任务派生的全部子 agent（含终态，按派生序）
 function listChildAgentTasks(parentTaskId) {
   if (!parentTaskId) return [];
@@ -977,6 +997,7 @@ module.exports = {
   coalesceTaskDeltas,
   listInFlightPrimaryTasks,
   getRunningChildAgentTasks,
+  countRunningAgentTasks,
   listChildAgentTasks,
   listRecentSubAgentTasks,
   markAgentTaskDone,

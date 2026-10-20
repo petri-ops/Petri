@@ -11,6 +11,7 @@ import { useTheme, FONT_SCALE_MIN, FONT_SCALE_MAX } from '@/themes/ThemeProvider
 import { AccentControl } from './AccentControl';
 import { SettingsNav } from './DesktopSettingsPanel/SettingsNav';
 import { MotionControl } from './DesktopSettingsPanel/sections/MotionControl';
+import { DesktopBehaviorPanel } from './DesktopSettingsPanel/sections/DesktopBehaviorPanel';
 import { NetworkProxyPanel } from './DesktopSettingsPanel/sections/NetworkProxyPanel';
 import { RuntimePolicyPanel } from './DesktopSettingsPanel/sections/RuntimePolicyPanel';
 import { MaintenanceSection } from './DesktopSettingsPanel/MaintenanceSection';
@@ -53,9 +54,7 @@ import { HarnessEnvironment } from './DesktopSettingsPanel/sections/HarnessEnvir
 // UI-366 — 原全局「后端」页诊断面板并入「运行时与诊断」分区
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
 import { TerminalPanel } from '@/pages/project-workspace';
-
 import { credentialId } from './DesktopSettingsPanel/model-types';
-
 export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.ReactElement {
   // BLOCK-171 CP-3 — 深链初始节（?section= 经设置页透传；非法值由类型域外校验兜底 general）
   const [activeSection, setActiveSection] = useState<SettingsSection>(initialSection ?? 'general');
@@ -239,6 +238,7 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
           <p className="petri-field__hint">更换应用的强调配色（按钮、链接、高亮等），明暗主题与布局不受影响。</p>
         </div>
         <MotionControl />
+        <DesktopBehaviorPanel />
           </section>
         )}
 

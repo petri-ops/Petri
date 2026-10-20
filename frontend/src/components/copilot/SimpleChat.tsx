@@ -24,9 +24,7 @@
 // Pure code organization change; 0 behavior difference. All public exports
 // re-exported from main file to keep `import { ... } from '@/components/copilot/SimpleChat'` working.
 // ============================================================
-
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-
 // ── BLOCK-9.2 PHASE 4: types + helpers + attachments re-exports for backward compat ──
 import {
   SLASH_COMMANDS,
@@ -152,6 +150,7 @@ import { Icon } from '@/components/icons/Icon';
 // 需要稳定引用；`?? []` 每次新建会击穿 memo）。
 const EMPTY_ROW_SEGMENTS: ConversationSegment[] = [];
 import { getBridge } from '@/lib/desktopBridge';
+import { useTurnNotifications } from './useTurnNotifications';
 import { matchesCombo } from '@/lib/appKeymap';
 import { useKeymapSafe } from '@/lib/appKeymapContext';
 import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
@@ -444,6 +443,7 @@ export function SimpleChat({
   }, [subTasksForAutoOpen]);
   const durableLoop = useDurableConversationLoop(projectId, conversationId, activeRun?.loop);
   const pendingApproval = activeRun?.pendingApproval || null;
+  useTurnNotifications(conversationId, activeRun?.status ?? null, pendingApproval);
 
   // Plan 1.6 §4.2 — read Copilot context from React Context, not the
   // module-scope singleton. Captured into a ref so the latest value is

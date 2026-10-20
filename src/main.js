@@ -46,6 +46,8 @@ const { parseAgentWorkbenchFlags, setupAgentWorkbenchFlagsIpc } = require("./ipc
 const { resolveResource, resolveCore, reserveAvailablePort, isDevMode, rendererDevUrl, NODE_BIN, PROJECT_ROOT } = require("./main/core-utils.js");
 const { setupCsp } = require("./main/csp-config.js");
 const { _resolveSkillsIpcWindow } = require("./ipc/skills-window.js");
+// BLOCK-223 — 退出摘要的终端会话语义（只读计数；模块加载无副作用）
+const { getActiveTerminalSessionCount } = require("./ipc/terminal");
 
 // SUB-15.1 PHASE 2 imports — medium-risk functions extracted to src/main/_*.js
 const { _getSkillsSDK, _publishSkillProgress, _stopSkillsProgressPollerIfIdle, _startSkillsProgressPoller } = require("./main/_skills-runtime.js");
@@ -178,6 +180,19 @@ if (!hasSingleInstanceLock) {
 
 // createWindow extracted to src/main/_window-create.js (SUB-15.1 PHASE 3)
 // createWindow remains as the async entry point, delegating to the extracted module.
+
+// ── BLOCK-223 桌面外壳（通知 / 托盘 / 退出摘要）────────────────────
+// 退出守卫必须**先于**下方既有 before-quit 消费者注册：否则 preventDefault 之前
+// 后端 supervisor / 终端会话已经被关掉，用户点「取消」也回不到运行态。
+const { createDesktopShell } = require("./main/desktop-shell");
+const desktopShell = createDesktopShell({
+  app,
+  getMainWindow,
+  isTestInstance: IS_TEST_INSTANCE,
+  getTerminalSessionCount: getActiveTerminalSessionCount,
+  resolveResource,
+});
+desktopShell.installQuitGuard();
 
 // setupWindowIpc moved to src/main/_window-ipc.js (SUB-15.1 PHASE 2)
 
@@ -700,6 +715,10 @@ async function main() {
   // 6. CSP 加固——禁用 unsafe-eval，限制资源来源到 self + localhost（后端/SSE/dev server）
   setupCsp({ isDevMode });
 
+  // 6.5 BLOCK-223 — 桌面外壳 IPC 必须在建窗前注册：渲染进程首帧就会推偏好镜像。
+  const { setupDesktopShellIpc } = require("./ipc/desktop-shell");
+  setupDesktopShellIpc({ desktopShell, isTestInstance: IS_TEST_INSTANCE });
+
   // 7. 创建窗口
   // createWindow extracted to src/main/_window-create.js (SUB-15.1 PHASE 3)
   await createWindow({
@@ -726,6 +745,10 @@ async function main() {
     getSpaBaseUrl: () => windowManagerSpaBaseUrl,
     resolveResource,
   });
+
+  // 9. BLOCK-223 — 主窗关窗守卫（closeToTray / 退出摘要）；IPC 已在建窗前注册
+  desktopShell.attachMainWindow(getMainWindow());
+  app.once("will-quit", () => desktopShell.dispose());
 }
 
 // Dev-only: enable Chrome DevTools remote debugging on port 9222 so the main

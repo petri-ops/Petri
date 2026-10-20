@@ -36,7 +36,7 @@ test('设置分区清单冻结：10 个分区 id（搜索索引必须逐项覆�
   assert.equal(ids.length, 10, `分区数应为 10（实得 ${ids.length}）：${ids.join(', ')}`);
 });
 
-test('配置注册表冻结：17 族 / 89 键（BLOCK-210 加 data-retention 一族 3 键）', () => {
+test('配置注册表冻结：17 族 / 91 键（BLOCK-210 加 data-retention 一族 3 键；BLOCK-223 加 user-prefs 2 键）', () => {
   // 2026-10-17 两次显式上调（BLOCK-203 W4a）：
   //  P1+P2：8 族/35 键 → 9 族/38 键（user-prefs：theme/fontScale/accent）；
   //  P3   ：9 族/38 键 → 10 族/43 键（skills-prefs：version + disabled.<id>.{at,reason}
@@ -55,7 +55,9 @@ test('配置注册表冻结：17 族 / 89 键（BLOCK-210 加 data-retention 一
   assert.equal(Object.keys(schema.CONFIG_FAMILIES).length, 17);
   //   BLOCK-208（W7c）：84 → 86 键（user-prefs + motion 接线 / density 仅登记）。
   //   BLOCK-210（W7e）：86 → 89 键（data-retention：historyDays/archiveDir/maxBytesPerDir）。
-  assert.equal(schema.CONFIG_KEYS.length, 89);
+  //   BLOCK-223（Q9 续项）：89 → 91 键（user-prefs + notifyOnTurnEnd / closeToTray，
+  //     默认值语义=通知开、关窗即退出，主进程只持渲染进程推送的镜像）。
+  assert.equal(schema.CONFIG_KEYS.length, 91);
 });
 
 test('导出/导入的族集合 == 注册表族集合（漏族/未注册族都算红）', () => {

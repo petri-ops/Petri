@@ -7396,8 +7396,31 @@
         "G0"
       ],
       "notes": "2026-10-20 立项（用户「可以的 冲 按顺序推进」）：Q9 垂直切片——段落级错误边界（预览段独立兜底，含 resetKey 自动恢复/重试/复制诊断/data-segment 标注）。**completed（2026-10-20）**：SegmentBoundary 5/5 + 邻域前端 24 文件 170 项全绿 + theme 17/17 + types 0。reopen=轮次/工具卡/应用级边界、错误落盘、通知/托盘/退出摘要/模型选择器/电脑控制。"
+    },
+    {
+      "id": "BLOCK-223-Q9-DESKTOP-SHELL",
+      "capability": "q9-desktop-shell",
+      "path": "docs/block-223-q9-desktop-shell-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P5-CLOSED",
+      "canonical": true,
+      "truthDomain": "q9-desktop-shell",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-21",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "reliability",
+        "notification",
+        "tray",
+        "quit-summary",
+        "q9",
+        "desktop-shell",
+        "G0"
+      ],
+      "notes": "2026-10-21 立项（用户「按照你的建议来，冲」）：Q9 续项垂直切片——系统通知（回合完成/失败/等待审批）+ 托盘最小化（closeToTray）+ 退出摘要（活动计数 → 取消/最小化到托盘/停止并退出）。**completed（2026-10-21）**：activity-summary 3/3 + shell 纯逻辑 6/6 + 前端 6/6 + 9223 离屏 live 16/16（亮/暗截图）+ closeout 十三门 PASS；配置注册表 89→91 键；SimpleChat/DesktopSettingsPanel 未抬棘轮（逻辑抽 hook/面板）。reopen=模型选择器深度、电脑控制 sidecar、崩溃同意、首启揭示、通知中心/免打扰、摘要逐项操作。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
-  "lastUpdated": "2026-10-20",
-  "documentCount": 378
+  "lastUpdated": "2026-10-21",
+  "documentCount": 379
 }

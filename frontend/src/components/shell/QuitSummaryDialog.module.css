@@ -1,0 +1,87 @@
+/* BLOCK-223 — 退出摘要弹窗。层级：浮层(elevated) + 页底板，与命令面板同档。 */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--petri-space-5);
+  background: var(--petri-overlay);
+  backdrop-filter: blur(2px);
+}
+
+.card {
+  width: min(440px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-3);
+  padding: var(--petri-space-5);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-lg);
+  background: var(--petri-surface-raised);
+  box-shadow: 0 18px 48px color-mix(in srgb, var(--petri-bg-canvas) 60%, transparent);
+}
+
+.title {
+  margin: 0;
+  color: var(--petri-text);
+  font-size: 1.05em;
+  font-weight: 600;
+}
+
+.lead {
+  margin: 0;
+  color: var(--petri-text-secondary);
+  font-size: 0.9em;
+  line-height: 1.55;
+}
+
+.rows {
+  margin: 0;
+  padding: var(--petri-space-2) var(--petri-space-3);
+  list-style: none;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-surface-2);
+}
+
+.row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--petri-space-3);
+  padding: var(--petri-space-1) 0;
+}
+
+.rowLabel {
+  color: var(--petri-text-secondary);
+  font-size: 0.9em;
+}
+
+.rowValue {
+  color: var(--petri-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.note {
+  margin: 0;
+  color: var(--petri-text-tertiary);
+  font-size: 0.85em;
+}
+
+.error {
+  margin: 0;
+  padding: var(--petri-space-2) var(--petri-space-3);
+  border-radius: var(--petri-radius-sm);
+  border: 1px solid color-mix(in srgb, var(--petri-danger) 40%, transparent);
+  color: var(--petri-danger);
+  font-size: 0.88em;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--petri-space-2);
+}

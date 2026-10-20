@@ -170,6 +170,21 @@ function releaseApprovalRequests(taskId) {
   if (taskId) stores.delete(taskId);
 }
 
+/**
+ * BLOCK-223 — 全局 pending 计数（退出摘要只读面）。
+ * 先按当前时刻 sweep 各任务 store（TTL 惰性过期语义不靠定时器），再数 pending。
+ */
+function countPendingApprovals(now = Date.now()) {
+  let pending = 0;
+  for (const store of stores.values()) {
+    sweepStore(store, now);
+    for (const request of store.requests.values()) {
+      if (request.status === 'pending') pending += 1;
+    }
+  }
+  return pending;
+}
+
 module.exports = {
   DEFAULT_TTL_MS,
   callFingerprint,
@@ -183,4 +198,5 @@ module.exports = {
   approveFingerprint,
   consumeFingerprint,
   releaseApprovalRequests,
+  countPendingApprovals,
 };

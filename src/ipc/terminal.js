@@ -46,6 +46,18 @@ function resolveCore(..._parts) {
 const MAX_TERMINAL_TABS = 4;
 const DEFAULT_SESSION_ID = "default";
 
+// BLOCK-223 — 退出摘要只读面：主进程持有的终端会话数。
+// setup 时把闭包内 Map 的读取器挂上来；未 setup（测试/极早启动）恒 0。
+let activeSessionCountProvider = null;
+
+function getActiveTerminalSessionCount() {
+  try {
+    return activeSessionCountProvider ? Number(activeSessionCountProvider()) || 0 : 0;
+  } catch {
+    return 0;
+  }
+}
+
 /** 旧调用（不传 sessionId / 传非字符串）归一到 default tab。 */
 function normalizeSessionId(value) {
   if (typeof value === "string" && value.trim()) return value.trim().slice(0, 64);
@@ -55,6 +67,7 @@ function normalizeSessionId(value) {
 function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {}) {
   // sessionId → { proc, disposeData, disposeExit, cwd, pid }
   const sessions = new Map();
+  activeSessionCountProvider = () => sessions.size;
 
   const sendTerminalEvent = (channel, payload) => {
     if (mainWindow && !mainWindow.isDestroyed()) {
@@ -351,4 +364,4 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
   });
 }
 
-module.exports = { setupTerminalIpc };
+module.exports = { setupTerminalIpc, getActiveTerminalSessionCount };

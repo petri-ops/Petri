@@ -148,6 +148,56 @@ declare global {
       /** 应用级控制 —— 装完运行时后需整体重启（PETRI_R_HOME 在 main 启动时固化）。 */
       app: {
         relaunch: () => Promise<{ ok: boolean; error?: string }>;
+        /** BLOCK-223 — 退出摘要只读计数（主进程把终端会话数合并进来）。 */
+        getActivitySummary: () => Promise<{
+          ok: boolean;
+          counts: Record<string, number>;
+          total: number;
+          fetchedAt: string | null;
+          degraded: boolean;
+        }>;
+        getShellStatus: () => Promise<{
+          ok: boolean;
+          closeToTray: boolean;
+          notifyOnTurnEnd: boolean;
+          trayActive: boolean;
+          notificationsSupported: boolean;
+          testInstance: boolean;
+        }>;
+        setShellPrefs: (prefs: {
+          closeToTray?: boolean;
+          notifyOnTurnEnd?: boolean;
+        }) => Promise<{
+          ok: boolean;
+          changed?: boolean;
+          prefs?: { closeToTray: boolean; notifyOnTurnEnd: boolean };
+        }>;
+        notify: (payload: {
+          kind: 'turn_completed' | 'turn_failed' | 'approval_required';
+          conversationId?: string;
+          label?: string;
+          toolName?: string;
+          dedupeKey?: string;
+        }) => Promise<{ shown: boolean; reason?: string; wouldShow?: boolean }>;
+        respondQuitDecision: (
+          action: 'cancel' | 'tray' | 'quit'
+        ) => Promise<{ ok: boolean; action?: string; reason?: string; preview?: boolean }>;
+        onQuitRequested: (
+          callback: (payload: {
+            counts: Record<string, number>;
+            total: number;
+            rows: Array<{ key: string; label: string; value: number }>;
+            reason?: string;
+            preview?: boolean;
+            trayAvailable?: boolean;
+          }) => void
+        ) => () => void;
+        onNotificationClicked: (
+          callback: (payload: { kind?: string; conversationId?: string | null }) => void
+        ) => () => void;
+        previewQuitSummary: () => Promise<{ ok: boolean; reason?: string }>;
+        hideToTray: () => Promise<{ ok: boolean; reason?: string }>;
+        showMain: () => Promise<{ ok: boolean; reason?: string }>;
       };
       aiSettings: {
         get: () => Promise<Record<string, unknown>>;

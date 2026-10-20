@@ -207,6 +207,27 @@ const desktopBridgeSurface = {
   // 只重启 petri-server 不够，必须重新解析 runtime 路径）
   app: {
     relaunch: () => ipcRenderer.invoke('app:relaunch'),
+    // BLOCK-223 — 桌面外壳（通知 / 托盘 / 退出摘要）
+    getActivitySummary: () => ipcRenderer.invoke('app:get-activity-summary'),
+    getShellStatus: () => ipcRenderer.invoke('app:get-shell-status'),
+    setShellPrefs: (prefs) => ipcRenderer.invoke('app:set-shell-prefs', prefs),
+    notify: (payload) => ipcRenderer.invoke('app:notify', payload),
+    respondQuitDecision: (action) => ipcRenderer.invoke('app:quit-decision', action),
+    onQuitRequested: (callback) => {
+      if (typeof callback !== 'function') return () => {};
+      const listener = (_event, payload) => callback(payload);
+      ipcRenderer.on('app:quit-requested', listener);
+      return () => ipcRenderer.removeListener('app:quit-requested', listener);
+    },
+    onNotificationClicked: (callback) => {
+      if (typeof callback !== 'function') return () => {};
+      const listener = (_event, payload) => callback(payload);
+      ipcRenderer.on('app:notification-clicked', listener);
+      return () => ipcRenderer.removeListener('app:notification-clicked', listener);
+    },
+    previewQuitSummary: () => ipcRenderer.invoke('app:preview-quit-summary'),
+    hideToTray: () => ipcRenderer.invoke('app:hide-to-tray'),
+    showMain: () => ipcRenderer.invoke('app:show-main'),
   },
 
   // AI 设置

@@ -381,6 +381,16 @@ const CONFIG_KEYS = Object.freeze([
     type: 'string', domain: { oneOf: ['comfortable', 'compact'] }, envKeys: [], aliases: [],
     mutable: true, ui: 'none',
   },
+  {
+    // BLOCK-223 — 桌面行为：回合结束系统通知（默认开；窗口聚焦时主进程抑制，偏好只读这里）。
+    key: 'userPrefs.notifyOnTurnEnd', family: 'user-prefs', path: 'notifyOnTurnEnd',
+    type: 'boolean', envKeys: [], aliases: [], mutable: true, ui: 'settings',
+  },
+  {
+    // BLOCK-223 — 桌面行为：关窗最小化到托盘（默认关 = 既有「关窗即退出」契约不变）。
+    key: 'userPrefs.closeToTray', family: 'user-prefs', path: 'closeToTray',
+    type: 'boolean', envKeys: [], aliases: [], mutable: true, ui: 'settings',
+  },
   // —— 技能治理账本（BLOCK-203 W4a P3；原 `shared-backend/skill-prefs.js` 无任何形状校验）——
   // `disabled.<id>` 不是布尔映射而是对象 `{ at, reason? }`，`uninstalledSources.<id>` 并存
   // `{ sourceDir, at }`。`findEntryByPath` 只寻址标量 ⇒ 按**点路径**逐字段登记，
