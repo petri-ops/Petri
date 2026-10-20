@@ -1,0 +1,5 @@
+
+> petri-desktop@0.0.1-rc.7 skills:check
+> node scripts/skill-scaffold.mjs --check
+
+== 产品 Skill 校验: PASS（14 个内置 Skill：5 skill.json + 9 SKILL.md）==

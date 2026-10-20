@@ -1,6 +1,9 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-20（**W8 收尾第二轮（BLOCK-211 第八批）：领域包到位复看 → C-33 销号；W8 自决项全部完成**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-211 第八批（未新增 BLOCK 编号，复用 W8 plan）**：①兄弟仓 `D:\1.WorkDir\petri-pack-bio` 已检出 ⇒ `npm run skills:check` **14/14 PASS**（此前 5 红消失）、后端以 `PETRI_PLUGINS_DIR=<pack>/plugins` 启动后 `GET /api/tools/catalog` **count=7**、`preflight` 三态如实（deg=available；sc/go=missing_deps 且缺失清单逐项可读）；②`PETRI_PACK_DIRS` 补 **5/5** 契约测 `test/block211-pack-dirs.test.mjs`；③UI-527 pack-present 复探 **2/2**（三卡真实三态，证据 `acceptance/block-211/`）；④**UI-526 根因更正为 R 运行时未安装**（`GET /api/runtime/status` → `r.installed=false`，Python 可用），pack 内插件全为 R ⇒ 仍无产物 ⇒ 保持 `in_progress`，重开=安装 `petri-r-runtime` 后跑 demo 分析；⑤W8 仍非工程可自决=双机 riders/BK-08（需第二台机器，deferred）与 i18n（D-04 用户裁决 deferred）⇒ **不宣称阶段 4 出口完全达成**；lint 318 suppressions / 1824 warnings 已达原目标。**下一步第一个动作**（若继续 G0）：R 运行时安装（`petri-r-runtime`）→ 解锁 UI-526 与竞争力 `7-result-loop-live` 环境档；不擅自下载/安装 657MB 运行时，需用户授权或专用窗口。**dev 栈**：本批用无窗口后端 :3001 + Vite :3000 做 API/UI 探针，9223 已在探针后杀掉；会话结束前后端/Vite 亦会清理。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-18（**UI-523 composer 运行计量条 completed（UI 轨插包：BLOCK-205 收口后、W7a 之前；9223 实机腿 9/9 + 隔离后端腿 14/14）**：输入卡片下方三段读数「本次 轮/步/tok/s · 会话 tok/缓存命中 · 上下文%」+ 预算环搬入条内；两条 additive 后端（loop `usage` 事件 + `GET /api/ai/usage-conversation`）。**active 工作包仍为无，下一包=W7a 不变**（本包不占 runlist 序号）；台账=`docs/ui-productization-audit.md` §UI-523。实机链用本地 mock provider（本机无真实凭据，证据标注 provider=mock）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

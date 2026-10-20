@@ -68,11 +68,12 @@
 - [x] W7e BLOCK-210 数据目录可配 + 留存/归档（**completed 2026-10-18**：17 族/89 键；留存默认零删除、apply 默认 dryRun、删除须 allowDelete、审计落盘；迁移计划器只读（备份/回退/阻塞项）；真实搬迁与清理 reopen）
 - [x] **BLOCK-212 提示词缓存前缀优化**（**completed 2026-10-18**：动态上下文搬消息尾部 + Anthropic cache_control 断点 + 基线增静态前缀规模；13 门 PASS；局限=215 tokens<1024 ⇒ Claude 空操作，真实命中率需 G1+）
 - [x] **BLOCK-213 功能发现率**（**completed 2026-10-18**：面板 24 / 设置节 10·10 / 快捷键同名 5·10 / 空态 2·2 棘轮；13 门 PASS）
-- [ ] W8 BLOCK-211 收尾族（**部分完成 2026-10-18**：C-32 env 语义清偿 completed；余项在册：lint 净收缩/双机 riders/休眠插件裁决/RS 徽标语义/C-27 成对实验/C-30·C-31 立项或销号；新登记 🟡 block110-p1 5 例 HEAD 红待 triage）
+- [x] W8 BLOCK-211 收尾族（**自决项全部完成 2026-10-20**：C-32 env 语义 / lint 净收缩（318 suppressions·1824 warnings，目标已达成）/ block110-p1 夹具 / RS 徽标 / C-27 G0 边界 deferred / C-30·C-31 销号 / **C-33 复看销号（pack 到位后 skills:check 14/14 PASS、tools/catalog=7、preflight 三态如实）** / UI-527 pack-present 复探 2/2 / UI-526 根因更正为 R 运行时缺失保持 in_progress。**仍非工程可自决**：双机 riders+BK-08（需第二台机器，deferred）；i18n（D-04 用户裁决 deferred）。不宣称阶段 4 出口完全达成）
 
 ## 4. 已知未达成事实（防止后续会话误读为已完成）
 
 - BLOCK-197：产品形状已改（拒绝答复 385→143 字符），**judge 数值门仍 RETRY 未过线**；归因转 C-27（fit 量表对拒绝类答复的结构性天花板，需成对实验证实）。
 - BLOCK-199 = **completed 2026-10-17**：四族声明 4/4 实接；14 落点中收编 **4 处**，其余 10 处 + 4 条 data root 脑裂 = W4a/W4b（B1b）未做，**不得表述为「配置已统一」**。
 - 竞争力清单残余：**4 个无锚点位**（3 真缺口 C-29/C-30/C-31 + 1 环境档 R 运行面），均值 4.6、零 anchored-red。
+- **领域包与运行时（2026-10-20 复看）**：兄弟仓 `petri-pack-bio` 已检出，`skills:check` **PASS 14/14**、`tools/catalog=7`、UI-527 货架三态如实；但 `r.installed=false`（R 运行时未安装），pack 内插件全为 R ⇒ **UI-526 与 `7-result-loop-live` 仍不可得**。重开=安装 `petri-r-runtime` 后跑 demo 分析。
 - `output:judge` 在长文本上受 1500 字符窗口限制（已加超窗告警）；BLOCK-198 收口自证两次 timeout 降级，读数未获得。

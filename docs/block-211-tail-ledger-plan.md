@@ -6,8 +6,9 @@ acceptance:
   - P1 C-32 清偿：`decision-config.getPointRuntime` 生效顺序=`env='0'`（杀）> 文件 > `env='1'`（种子）> 注册表默认；`shared-config` 标注 `envOneIsSeed` 并让 `envShadowedKeys` 对 seed 不报"遮蔽生效值"。
   - P2 回归面：设置页读写、`/api/ai/agent/decisions` 端点、dev 脚本里靠 `env=1` 开接点的用法（`test:suggest`/`doc:suggest` 等）全部核过——seed 语义下"没有文件配置时 env=1 仍能开"，"有文件配置时以文件为准"。
   - 其余 W8 项（lint 基线净收缩 / 双机 riders+BK-08 / 休眠插件激活裁决 / RS 徽标语义 / C-27 拒绝类 judge 口径 / C-30·C-31 销号）**逐项另立小批**：需要裁决的（休眠插件）、需要第二台机器的（双机 riders）、需要成对实验的（C-27）不在本批强行收口。
-  - 完成语义：本批只交付 C-32；W8 其余项保持"在册未清"，不得因为本包收口就宣称 W8 完成。
-reopen: lint 基线净收缩；双机 riders 与 BK-08 销号（需第二台机器/实机）；休眠插件激活裁决（需用户裁决）；RS 徽标语义诚实化（UI + 台账）；C-27 成对实验；C-30/C-31 立项或销号。
+  - **领域包到位复看（2026-10-20 第八批）**：兄弟仓 `petri-pack-bio` 检出后 `skills:check` 14/14 PASS、tools/catalog=7、preflight 三态如实；`PETRI_PACK_DIRS` 补 5/5 契约测；UI-527 pack-present 复探 2/2；UI-526 根因更正为 R 运行时未安装（`r.installed=false`）仍保持 `in_progress`——**不得以 pack 到位冒充产物到位**。
+  - 完成语义：首批只交付 C-32；第八批（2026-10-20）交付领域包复看与 W8 自决项收口（§13）；W8 的双机 riders/BK-08 与 i18n 仍 deferred，不得因为本包收口就宣称 W8 全清或阶段 4 出口完全达成。
+reopen: 双机 riders 与 BK-08 销号（需第二台机器/实机）；UI-526 实机腿（需 R 运行时 petri-r-runtime 安装后跑一次 demo 分析）；i18n 决策（D-04 用户裁决，不并入）；lint 进一步净收缩（可选，当前 318 suppressions / 1824 warnings 已低于原目标）。C-27 仍为 G0 边界 deferred；C-30/C-31 已销号；C-33 已于 2026-10-20 复看销号。
 status: completed
 ---
 
@@ -149,3 +150,34 @@ status: completed
 - **为什么不是直接升阻塞**：`skills:check` 的红来自 `resources/built-in-plugins/` 在本仓不存在——补齐插件包是**资产/产品裁决**（C-33），先把它变阻塞会让所有收口卡在一个不该由工程侧单方面决定的前置上。
 - **顺手修**：改脚本时误删了 `repoGate` 辅助函数（`ReferenceError`），已恢复并用 `--report skills:check` 冒烟验证（报告行出现、CLOSEOUT 仍 PASS）。
 - 未做：把红数写进 AUDIT-LOG 自动对账（当前是人工登记）；`--report` 的单元测试（脚本本身无测试面，靠冒烟）。
+
+## 13. 第八批：领域包到位后的复看与 W8 收口（2026-10-20）
+
+**触发**：本机 `D:\1.WorkDir\petri-pack-bio` 已检出（W8 首批时记为未检出），C-33 的重开条件「拿到 pack 仓后复跑」满足。用户 2026-10-20「查看远程库有没有更新，保持双端一致。启动进入下一个阶段工作」=下一轮启动授权。
+
+### 13.1 同日实测（pack 到位）
+
+- 兄弟仓发现命中（`discoverAvailablePacks({ projectRoot })`）；`npm run skills:check` **PASS（14 个内置 Skill）**，此前 5 红消失 ⇒ C-33 根因确认为 pack 未检出，不是 manifest 缺陷。
+- 后端以 `PETRI_PLUGINS_DIR=<pack>/plugins` + `PETRI_PACK_DIRS=<pack>` 启动：`GET /api/tools/catalog` **count=7**（deseq2 / deg-standardizer / expression-qc / go-kegg / gsea / sample-metadata-validator / volcano-plot）；`GET /api/skills/preflight` 中 `deg-analysis-standard=available`，`sc-analysis-standard` 与 `go-enrichment-analysis=missing_deps` 且 `missingPlugins` 如实为 scanpy-advanced / seurat-standard 与 clusterProfiler。
+- 证据：`acceptance/block-211/pack-unlock-live.json`（4/4）、`preflight-pack-present.json`、`skills-check.txt`、`runtime-status.json`。
+- **契约补测**：`PETRI_PACK_DIRS` 此前零机械断言 → `test/block211-pack-dirs.test.mjs` **5/5**（多目录 path.delimiter / 无效目录跳过不抛 / 非法包仍拒 / 与兄弟包+extraDirs 合并去重 / 未设 env 时回旧行为）。`impact-map` 的 `block211-tail-c32` 规则同步登记脚本与 acceptance 目录。
+
+### 13.2 台账复看结论
+
+| 项 | 结论 |
+| --- | --- |
+| **C-33** | **销号**：重开条件已满足并复跑；`skills:check` 保持**报告级**（没有 pack 的机器不应无法收口），本机现为 PASS；本仓只做"承认位置 + 货架如实"，不写插件 stub。A/B/C 的"激活范围"裁决随之失效（插件包是外部资产，不在本仓硬造）。 |
+| **UI-527** | 维持 `verified` 并补 pack-present 证据：9223 复探 **2/2**；截图 `acceptance/block-211/ui527-skills-shelf-pack-present.png` 显示三卡真实三态（标准差异表达=依赖可用；GO 富集/标准单细胞=缺依赖）。 |
+| **UI-526** | 根因从「pack 缺失」更正为「**R 运行时未安装**」：`GET /api/runtime/status` 实测 `r.installed=false`（Python 可用），pack 内插件全为 R ⇒ 无 R 就无产物。保持 `in_progress`；重开=R 运行时安装后跑一次 demo 分析并看结果页徽标。 |
+| **lint 净收缩** | 当前 `eslint-suppressions.json` **318** 条、warnings **1824**（原目标 2153→≤2145 已满足）；本批不再强行降债。 |
+| **休眠插件激活** | 随 C-33 复看关闭：pack 到位后货架按真实依赖显示三态，不再需要"激活裁决"；休眠项仍休眠但不再冒充可用。 |
+| **双机 riders + BK-08** | 维持 **deferred**（需第二台机器/签名机），重开=有第二台设备时按 BLOCK-105/198 riders 清单复跑。 |
+| **C-27** | 维持 **deferred（G0 边界）**：需真实 Provider 成对送判，G0 不外推。 |
+| **C-30 / C-31** | 已销号（§8），本批复核无新证据，不重开。 |
+| **i18n** | D-04 用户裁决 deferred，不并入；不属于本仓工程可自决范围。 |
+
+### 13.3 W8 / 阶段 4 出口口径（不越权宣称）
+
+- **W8 可自决范围=完成**：C-32、lint、RS 徽标、C-33 复看、C-27/C-30/C-31 裁定、UI-526/527 复看全部有结论或证据。
+- **仍非工程可自决的两项**：双机 riders/BK-08（环境依赖 deferred）与 i18n（用户裁决 deferred）。因此 runlist W8 勾选为"自决项完成 + 两项 deferred"，**不宣称阶段 4 出口完全达成**；不外推 packaged/Provider/GA。
+- 下一步（若继续 G0 开发）：R 运行时安装是解锁 `7-result-loop-live` 环境档、UI-526 与 dim7 的唯一前提；本批不擅自下载/安装 657MB 运行时，留待用户授权或专用环境窗口。

@@ -5057,7 +5057,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 
 - **变化面**：结果头部的真值徽标从「**可信结果**」改为「**已核验（未篡改）**」，并新增 `detail` 说明（`title` + `aria-label` 可读）：核验范围=产物完整性与来源一致性（artifact-truth），**不代表科学结论正确，也不代表 Result Studio 整体已验证**（长期 `implemented_unverified / experimental`，P7 deferred）。其余三态文案同步补范围说明（未核验/需复核/已阻断）。
 - **为什么**：`truthStatus='valid'` 是**产物级**核验结论，旧文案把它升格成"结果可信"的全局判断——这是语义过度声称，和 G0 期"RS 徽标不许冒充资格"的纪律冲突。
-- **诚实边界（2026-10-18 复核定因）**：实机腿仍不可得，但根因已定——`GET /api/tools/catalog` 返回 **`count: 0`（无任何已安装插件）**（`acceptance/block-213/tools-catalog-empty.json`），没有工具就**产不出 artifact**，结果页就永远空态。这与 C-33 是**同一个根因**：领域插件包 `petri-pack-bio` 未检出 → 无工具 → 无产物。故 UI-526 记 `in_progress`，挂到「pack 到位后复看」的条件上；文案与 `detail` 形状由单测钉住。文案与 `detail` 形状由单测钉住；等有产物再看一眼即可翻 verified。
+- **诚实边界（2026-10-20 根因更正）**：pack 已到位（兄弟仓 `petri-pack-bio` 检出，`tools/catalog=7`、`skills:check` 14/14 PASS），但**R 运行时未安装**——`GET /api/runtime/status` 实测 `r.installed=false`（Python 可用），而 pack 内 7 个分析插件全为 R ⇒ 没有 R 就产不出任何 artifact，结果页仍为空态。故保持 `in_progress`；重开条件=安装 `petri-r-runtime` 后跑一次 demo 分析并看结果页徽标。证据：`acceptance/block-211/pack-unlock-live.json`、`runtime-status.json`。**不得以 pack 到位冒充产物到位。**
 - **验证**：`resultSurface.test.ts` **18/18**（含新断言 `detail` 含"不代表 Result Studio 整体已验证"）；`tsc --noEmit` 0；`theme-token-contract` 17/17（无样式变更）。
 
 ## UI-527: 技能货架依赖徽标纳入插件硬依赖（2026-10-18 **verified（dev Electron 边界内）**，BLOCK-211 / W8 · C-33 代码侧）
@@ -5067,6 +5067,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **诚实边界**：缺插件**不标 installable**（插件没有自动安装配方），只标 `missing_deps`；插件包本身是否补齐仍需 C-33 裁决。
 - **验证（代码）**：`block211-skill-deps-plugins` **4/4**（含"不传 hasPlugin 保持既有语义"——不给既有调用方制造假红）+ `tsc` 0。
 - **实机腿（2026-10-18 已补）**：重启 dev 栈（后端 preflight 才吃到新代码）后，`/api/skills/preflight` 对三族返回 `status=missing_deps` + `missingPlugins`（`acceptance/ui-526-527/preflight-after.json`）；9223 测试实例货架截图 `acceptance/ui-526-527/ui527-skills-shelf.png` 显示三张卡片均为「**缺依赖**」。**对照**：同栈重启前截图显示「依赖可用」——同一页面、同一数据，仅后端代码新旧之差，`dev-verify` flow `ui526-527-badges` **2/2** 通过（证据 `acceptance/ui-526-527/ui526-527-badges-live.json`）。
+- **pack 到位复看（2026-10-20）**：兄弟仓 `petri-pack-bio` 检出后 9223 复探 **2/2**；截图 `acceptance/block-211/ui527-skills-shelf-pack-present.png` 显示三卡真实三态——标准差异表达=**依赖可用**（deg 的 3 个插件硬依赖已解析），GO 富集/标准单细胞=**缺依赖**（clusterProfiler / scanpy-advanced·seurat-standard 仍休眠）。同一货架既能在 pack 缺失时全标缺依赖，也能在 pack 到位时按真实依赖逐卡区分，`verified` 维持。
 
 ## UI-528: 命令面板发现率扩展 + 空态引导（2026-10-18 verified（dev Electron 边界内），BLOCK-213）
 

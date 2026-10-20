@@ -1,0 +1,128 @@
+{
+  "generatedAt": "2026-10-20T01:52:47.024Z",
+  "base": "http://127.0.0.1:3001",
+  "pack": {
+    "packId": "petri-pack-bio",
+    "name": "格物 · 生信分析包",
+    "nameEn": "Petri Bioinformatics Analysis Pack",
+    "version": "0.1.1",
+    "description": "格物桌面的生信垂直领域包：分析插件、R/Python 分析脚本、演示数据、科学校验与确认钩子、R 运行时档案。安装后生信能力出现在工作台分析入口与插件商店；卸载即回到纯通用 agent 工作台。",
+    "provides": {
+      "plugins": "plugins/",
+      "scripts": "scripts/",
+      "demoData": "demo-data/",
+      "languages": [
+        "r",
+        "python"
+      ],
+      "confirmationHooks": [
+        "scientific-task-confirmation"
+      ],
+      "artifactTypes": [
+        "plot",
+        "table",
+        "report"
+      ]
+    },
+    "requiresRuntimes": [
+      {
+        "pluginId": "petri-r-runtime",
+        "version": ">=1.0.0"
+      },
+      {
+        "pluginId": "petri-py-runtime",
+        "version": ">=1.0.0"
+      }
+    ],
+    "packRoot": "D:\\1.WorkDir\\petri-pack-bio"
+  },
+  "catalog": {
+    "count": 7,
+    "ids": [
+      "deg-standardizer",
+      "deseq2",
+      "expression-qc",
+      "go-kegg",
+      "gsea",
+      "sample-metadata-validator",
+      "volcano-plot"
+    ]
+  },
+  "preflight": {
+    "degAnalysisStandard": {
+      "status": "available",
+      "platformOk": true,
+      "missingBins": [],
+      "missingPlugins": [],
+      "declaredOs": null,
+      "install": null
+    },
+    "scAnalysisStandard": {
+      "status": "missing_deps",
+      "platformOk": true,
+      "missingBins": [],
+      "missingPlugins": [
+        "scanpy-advanced",
+        "seurat-standard"
+      ],
+      "declaredOs": null,
+      "install": null
+    }
+  },
+  "checks": [
+    {
+      "name": "pack_discovered_and_validated",
+      "pass": true,
+      "detail": {
+        "packId": "petri-pack-bio",
+        "version": "0.1.1",
+        "packRoot": "D:\\1.WorkDir\\petri-pack-bio"
+      }
+    },
+    {
+      "name": "tools_catalog_non_empty",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "count": 7,
+        "ids": [
+          "deg-standardizer",
+          "deseq2",
+          "expression-qc",
+          "go-kegg",
+          "gsea",
+          "sample-metadata-validator",
+          "volcano-plot"
+        ]
+      }
+    },
+    {
+      "name": "deg_analysis_plugin_deps_available",
+      "pass": true,
+      "detail": {
+        "status": "available",
+        "platformOk": true,
+        "missingBins": [],
+        "missingPlugins": [],
+        "declaredOs": null,
+        "install": null
+      }
+    },
+    {
+      "name": "genuinely_missing_plugins_still_reported",
+      "pass": true,
+      "detail": {
+        "status": "missing_deps",
+        "platformOk": true,
+        "missingBins": [],
+        "missingPlugins": [
+          "scanpy-advanced",
+          "seurat-standard"
+        ],
+        "declaredOs": null,
+        "install": null
+      }
+    }
+  ],
+  "allPass": true
+}
