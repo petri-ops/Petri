@@ -5,6 +5,8 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
+最后更新：2026-10-20（**BLOCK-220 Q-DOMAIN P3 垂直切片立项 active（P0-LAUNCH）**（用户「直接开 P3 可以直接推进」）：删除化石 `core/shared-backend/tool-registry.js`（10 个内联生信工具/零消费；单一注册源=pack 驱动）+ pack `provides.methods`（citations/toolLabels 纯数据）+ `pack-methods.js` 只读有界装载器 + `methods-export.js` 接线与诚实降级；域中性基线 109 键/261 处/45 文件，本片只下调。reopen=`_pythonEquivalent` 脚本模板/`artifact-profiles`/`agent-workflow`/`learning`/`result-*-tools`。plan=docs/block-220-qdomain-p3-methods-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-10-15（**BLOCK-184 立项发令 active（用户发令「按 plan 全按推荐执行，人眼最小集 4 条留我一次栈窗口过目」=预授权整批+终审窗口一次性集中；评估研判批 11 文档已提交 a6f1f76b）**）：1z 翻 active——P0 重拉 dev 栈+冻结 12 条清偿清单 → P1 代行 CDP 走查 → P2 人眼最小集 4 条一次栈窗口过目 → P3 抓真小修 → 收口。2a~2e 维持候选待本包收口后逐项裁决。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-10-15（**评估研判批：队列新增 1z + 2a-2e 六行（规划登记，非发令）**：1z=UI 过目清偿/BLOCK-184（planned，发令待用户确认）→ 2a=设置序列阶段 A 速赢四合一（快捷键面/搜索重置导出/代理/推理档位）→ 2b=评测基线 v2（含双后端 attach 前置）→ 2c=harness 地基三件（事件信封+目录/工具并行调度与暴露面/存储能力协商）→ 2d=设置阶段 B 结构 → 2e=设置阶段 C 治理；依据=评估报告 §5.1 五阶段队列 + 设置差距分析 §7 + 全层对标蓝图 §5；⛔ hooks 产品化与 i18n 待裁决不并入。DOC-REGISTRY 342+README 209-212。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -103,6 +105,7 @@
 
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
+| 0 | BLOCK-220 / Q-DOMAIN P3 | **methods 契约下沉 + 遗留注册表清除（completed，垂直切片）**：删化石 `core/shared-backend/tool-registry.js`（10 个内联生信工具/零消费；单一注册源=pack `registry/tool-registry.json` 驱动的 `petri-server/tool-registry.js`）+ pack 新契约 `provides.methods`（`methods/citations.json`/`methods/tool-labels.json`）+ `pack-methods.js` 只读有界装载器 + `methods-export.js` 接线与无 pack 无引文的诚实降级。非范围=`_pythonEquivalent` 脚本模板/`artifact-profiles`/`agent-workflow`/`learning`/`result-*-tools` | `docs/block-220-qdomain-p3-methods-plan.md` §8 + `docs/qoder-essence-absorption-plan.md` §Q-DOMAIN | **completed（block220 13/13；域中性 261→208；pack 0.2.0）** |
 | 0 | BLOCK-219 / Q6 | **产物批注 host（completed，垂直切片）**：`result_annotations` 旁路元数据（归一化 0..1 坐标/页号/评论；单 scope ≤200；项目隔离）+ `015_*.sql` 单源迁移；PDF 页定位盒 + 图像批注层（结果面 + 工作区预览）；「加入任务」经 `copilotAsk` 结构化引用；批注不写原始产物。block219 12/12 + 前端 42/42 + test:changed Node 744 项 0 红/前端 30 文件全绿 + `acceptance/block-219/`（13/13）；UI-533 verified。边界=六种图形工具/文本批注与速记板/Office/pack iframe 面批注 reopen | `docs/block-219-q6-annotation-host-plan.md` §6 + `docs/qoder-essence-absorption-plan.md` §6-Q6 | **completed（closeout 十三门 PASS）** |
 | 0a | BLOCK-218 / P2b | **生信主结果面 pack 化（completed，垂直切片）**：result mode 主 body 由 pack `resultSurfaces` iframe 提供；核心保留 context bar/composer 与 code/compare/history 过渡面；只读有界数据桥；pack 缺失/不匹配 core-transitional；packResultData 5/5 + resultSurfaceHost 5/5 + CenterPanel 2/2 + pack 页面契约 2/2 + test:changed 191/191 前端；UI-532 in_progress（无真实 job live） | `docs/block-218-qdomain-p2b-result-surface-plan.md` §6 | **completed（closeout 十三门 PASS）** |
 | 0a | BLOCK-217 / P2-UI | **act 去域 + pack UI actions host（completed，2026-10-20）**：核心只留 rename/update/open_tool/ui_action；删除 12 个单细胞/FigCode 动作与页面标签；pack `uiActions` 动态描述 + 执行校验 + 前端 host 分发/ack；block217 9/9 + block151 5/5 + 前端 8/8 + test:changed 213/213 + 9223 live 8/8；UI-531 verified。真实生信动作随 P2b 提供 | `docs/block-217-qdomain-p2ui-actions-plan.md` §6 | **completed（closeout 十三门 PASS）** |

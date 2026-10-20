@@ -24,52 +24,11 @@ function TEMP_DIR() {
 // GENERATE_METHODS_v1 — collect analyses + plan + render Methods
 // ============================================================
 
-// Standard tool / package citations. Keep up-to-date as platform evolves.
-const _METHODS_CITATIONS = {
-  scrna_standard: [
-    'Seurat v5 (Hao et al., 2024, Nat Biotechnol)',
-    'scanpy v1.10 (Wolf et al., 2018, Genome Biol) for QC and dimensionality reduction',
-    'UMAP (McInnes et al., 2018) for low-dimensional visualization',
-    'Leiden algorithm (Traag et al., 2019, Sci Rep) for clustering',
-  ],
-  recluster: ['Seurat::FindSubCluster', 'Leiden algorithm'],
-  deg: [
-    'Seurat::FindMarkers using Wilcoxon rank-sum test',
-    'MAST (Finak et al., 2015, Genome Biol) for hurdle modeling',
-  ],
-  enrichment: [
-    'clusterProfiler v4 (Wu et al., 2021, Innovation) for GO/KEGG over-representation analysis',
-  ],
-  cell_annotation: [
-    'Seurat::FindAllMarkers + manual annotation against PanglaoDB and CellMarker 2.0',
-  ],
-  scrna_integration: ['Harmony (Korsunsky et al., 2019, Nat Methods) for batch correction'],
-  trajectory: [
-    'Monocle3 (Cao et al., 2019, Nature) or scVelo (Bergen et al., 2020, Nat Biotechnol) for pseudotime',
-  ],
-  communication: [
-    'CellChat v2 (Jin et al., 2024, Nat Protoc) for cell-cell communication inference',
-  ],
-  // W1-8 (2026-05-28): 空间组学引用块
-  spatial_standard: [
-    "Squidpy v1.4 (Palla et al., 2022, Nat Methods) for spatial graph and Moran's I",
-    'scanpy v1.10 (Wolf et al., 2018, Genome Biol) for normalization, PCA, Leiden clustering',
-    'SpatialData (Marconato et al., 2024, Nat Methods) for OME-NGFF data containers',
-  ],
-  spatial_recluster: ['Squidpy / scanpy with adjusted Leiden resolution on spot subset'],
-  spatial_svg: [
-    "Squidpy::sq.gr.spatial_autocorr with Moran's I and Geary's C",
-    'Sepal (Andersson & Lundeberg, 2021, Bioinformatics) for diffusion-based SVG detection',
-  ],
-  spatial_deconv: [
-    'cell2location (Kleshchevnikov et al., 2022, Nat Biotechnol) for negative-binomial deconvolution',
-    'Tangram (Biancalani et al., 2021, Nat Methods) for sc-to-spatial mapping (alternative)',
-  ],
-  spatial_lr: [
-    'LIANA-py (Dimitrov et al., 2022, Nat Commun) with spatial-aware mode',
-    'Squidpy::sq.gr.ligrec for permutation-based ligand-receptor enrichment',
-  ],
-};
+// BLOCK-220 — 标准工具引用与工具标签是领域数据，随已安装领域包的
+// provides.methods 提供（pack-methods.js）。核心不再内联分析类型→引用表；
+// 包缺失/停用 → 无引用块、无标签（诚实降级，不伪造引文）。
+const packMethods = require('./pack-methods');
+
 
 function _gatherAnalysisContextForMethods(userId, opts) {
   const dbMod = require('../db');
@@ -184,11 +143,12 @@ async function _renderMethodsParagraph(ctx, { language }) {
         (d.n_cells ? ' (' + d.n_cells + ' cells × ' + (d.n_genes || '?') + ' genes)' : '')
     )
     .join('\n');
+  // BLOCK-220 — 引用块来自已安装领域包；无 pack 命中 → 整段不出现（不留空括号）
+  const packMethodData = packMethods.loadPackMethods();
   const analysisBlock = ctx.analyses
     .map((a, i) => {
-      const cite = _METHODS_CITATIONS[a.type]
-        ? '  • Standard tools: ' + _METHODS_CITATIONS[a.type].join('; ')
-        : '';
+      const citations = packMethods.getCitations(a.type, packMethodData);
+      const cite = citations.length > 0 ? '  • Standard tools: ' + citations.join('; ') : '';
       return (
         i +
         1 +
@@ -659,31 +619,16 @@ function _cleanRScriptForExport(rawScript, _opts) {
 
 /** Build an academic header for any script. */
 function _scriptHeader({ analysis, dataset, language, generatedAt, username }) {
-  const tools =
-    {
-      scrna_standard: 'Seurat v5 / scanpy v1.10',
-      recluster: 'Seurat::FindSubCluster',
-      deg: 'Seurat::FindMarkers (Wilcoxon)',
-      enrichment: 'clusterProfiler v4 (GO + KEGG)',
-      cell_annotation: 'Seurat + manual annotation (PanglaoDB / CellMarker 2.0)',
-      scrna_integration: 'Harmony',
-      trajectory: 'Monocle3',
-      communication: 'CellChat v2',
-      // W1-8: spatial labels
-      spatial_standard: 'scanpy v1.10 + Squidpy v1.4 (Visium pipeline)',
-      spatial_recluster: 'scanpy + Squidpy (sub-cluster Leiden)',
-      spatial_svg: "Squidpy::spatial_autocorr (Moran's I + Geary's C) + Sepal",
-      spatial_deconv: 'cell2location / Tangram',
-      spatial_lr: 'LIANA-py (spatial-aware) / Squidpy::ligrec',
-    }[analysis.type] || analysis.type;
+  // BLOCK-220 — 工具标签由领域包提供（provides.methods.toolLabels）；缺省只写类型名
+  const toolLabel = packMethods.getToolLabel(analysis.type);
 
   if (language === 'python') {
     return [
       '# ============================================================',
-      '# Petri reproducible analysis script (Python / scanpy)',
+      '# Petri reproducible analysis script (Python)',
       '# ============================================================',
       '# Analysis : ' + (analysis.name || analysis.type),
-      '# Type     : ' + analysis.type + ' — ' + tools,
+      '# Type     : ' + analysis.type + (toolLabel ? ' — ' + toolLabel : ''),
       '# Dataset  : ' + ((dataset && dataset.name) || '?'),
       '# Cells x Genes : ' +
         (dataset && dataset.n_cells != null ? dataset.n_cells : '?') +
@@ -700,10 +645,10 @@ function _scriptHeader({ analysis, dataset, language, generatedAt, username }) {
   }
   return [
     '# ============================================================',
-    '# Petri reproducible analysis script (R / Seurat)',
+    '# Petri reproducible analysis script (R)',
     '# ============================================================',
     '# Analysis : ' + (analysis.name || analysis.type),
-    '# Type     : ' + analysis.type + ' — ' + tools,
+    '# Type     : ' + analysis.type + (toolLabel ? ' — ' + toolLabel : ''),
     '# Dataset  : ' + ((dataset && dataset.name) || '?'),
     '# Cells x Genes : ' +
       (dataset && dataset.n_cells != null ? dataset.n_cells : '?') +
@@ -962,5 +907,4 @@ module.exports = {
   _cleanRScriptForExport,
   _scriptHeader,
   _pythonEquivalent,
-  _METHODS_CITATIONS,
 };

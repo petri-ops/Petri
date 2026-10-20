@@ -71,8 +71,8 @@ module.exports = {
   // config-helper 也暴露（执行器/storage 内部改读它，Step 2）
   configHelper,
   aiUsageHelper,
-  // Phase 2: Tool Registry (Gateway 数据源)
-  toolRegistry: require('./tool-registry'),
+  // BLOCK-220 — 旧 `tool-registry.js`（内联 10 个生信工具、零消费）已删除：
+  // 工具注册唯一源 = `core/petri-server/tool-registry.js`（pack `registry/tool-registry.json` 驱动）。
   // Phase 1: Skill Registry (Skills 层注册与发现)
   skillRegistry: require('./skill-registry'),
 };

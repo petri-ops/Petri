@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-20（**BLOCK-220 Q-DOMAIN P3 垂直切片 completed**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-220（P3 垂直切片）**：①删化石 `core/shared-backend/tool-registry.js`（458 行/10 个内联生信工具/零消费）+ barrel 字段，工具注册唯一源=`core/petri-server/tool-registry.js`（pack `registry/tool-registry.json` 驱动）；②pack 新契约 `provides.methods`（`methods/citations.json`+`methods/tool-labels.json`，**纯数据不执行 pack 代码**；pack 0.1.1→0.2.0）；③`core/petri-server/helpers/pack-methods.js` 只读有界装载器（≤256KB/类型≤200/条目≤40/单条≤400 字符、packRoot 内路径、坏形状 fail-closed、多包稳定覆盖留 warning）；④`methods-export.js` 删 `_METHODS_CITATIONS`/`tools` 表改读 pack + 无 pack 无引文。证据=block220 13/13 + 真实 pack 根集成 13 类型/13 标签/0 warning + 域中性基线 261→208 处 + test:changed Node 315 项 0 红。reopen=`_pythonEquivalent` 脚本模板（余 24 处域词主力）/`artifact-profiles`/`agent-workflow`/`learning`/`result-*-tools`。**下一包**=Q-DOMAIN P4 data model（母纲要求最后）或 Q1/Q2b 穿插。**收口仍需 PATH 前置 Git Bash**（本机 `bash`→WSL launcher）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-20（**BLOCK-219 Q6 批注 host completed（closeout 十三门 PASS；9223 live 13/13）**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-219（Q6 垂直切片）**：`result_annotations` 旁路元数据（归一化 0..1 坐标/页号/评论；单 scope ≤200；项目隔离；`015_*.sql` 单源迁移）+ PDF 页定位盒（portal 覆盖层）与图像批注层（结果面 + 工作区预览）+「加入任务」经 `petri:copilot-ask` 结构化引用；批注不写原始产物（实机验证哈希前后一致）；UI-533 verified（dev Electron 边界内，`acceptance/block-219/` 13/13）。边界=六种图形工具/撤销重做、文本批注与速记板（Q2 未做）、Office 批注、pack iframe 面批注 reopen。`test:changed` 需 PATH 前置 Git Bash（本机 `bash` 默认解析到 WSL launcher，会让 block67/89 fs 测试误红）。**下一包**=Q-DOMAIN P3（methods/learning/legacy registry）→ P4；Q1/Q2b 可穿插。G0 开发期常态 · 不外推 packaged/Provider/GA。

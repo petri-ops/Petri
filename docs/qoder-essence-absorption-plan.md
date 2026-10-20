@@ -445,6 +445,7 @@ status: planned
 2. **P2 Prompt + UI actions（1–2 周）**：**P2a prompt（BLOCK-215，completed）**核心 prompt 去生信化 + pack promptFragments；**P2-UI actions（BLOCK-217，completed）**核心 `act` 去域（只留 6 个中性动作）+ pack `uiActions` 动态描述/执行校验/前端 host 分发 ack；核心不留单细胞动作/标签。真实生信动作随 P2b pack 结果面提供。
 3. **P2b Result Surface（1–2 周）**：**垂直切片（BLOCK-218，completed）**——result mode 主 body 由 pack `resultSurfaces` 渲染（图/表/文本/report 源码），核心保留 context bar/composer 与 code/compare/history 过渡面，只读有界数据桥；**剩余 reopen**——lineage/compare/history/selection/revisions/annotations/methods/export 全量迁 pack。依赖 Q0.5 `resultSurfaces` 契约与 Q5 host；**结果页保持生信专属 UX**，不得通用化。
 4. **P3 Methods / 学习 / legacy registry（1–2 周）**：`methods-export.js`、`learning.js`、`result-*-tools`、`artifact-profiles.js`、`agent-workflow.js` 生信内容下沉；删除 `core/shared-backend/tool-registry.js` 内联工具，保持单一注册源。
+   > 2026-10-20：**垂直切片已立项并收口 [BLOCK-220](./block-220-qdomain-p3-methods-plan.md)（completed）**——化石注册表删除（单一注册源）+ methods 引用/工具标签下沉 pack `provides.methods`（pack 0.2.0），域中性 261→208 处。**reopen**：`_pythonEquivalent` 脚本模板（余 24 处主力）、`artifact-profiles`、`agent-workflow`、`learning`、`result-*-tools`。
 5. **P4 数据模型 / 权限（2–4 周，独立结构包）**：`modality` 默认 `general`，pack 声明扩展值；单细胞权限分支改通用资源权限；迁移/兼容层；现有项目、Result Studio、导出、联邦过基线。
 
 **验收**
@@ -685,7 +686,7 @@ Q-DOMAIN（垂直去核化，跨波次）
 - **母纲**：`AGENT-COMPETITIVENESS-PROGRAM`（方向）；本文件是 Qoder 样本的增量，不重开 CP-1–CP-22。
 - **建议首波**：**Q0.5（插件 ADR，0.5–1 天）+ Q-DOMAIN P1（skills 去核，1–2 周）**——先把 host 契约和生信 skills 落进 pack，再按 Q1（信任与审批）→ Q2b（联网检索）→ Q5（工作面 host）→ Q-DOMAIN P2b（生信 Result Surface）→ Q6 推进；Q-DOMAIN P2/P3 可穿插，P4 最后。
 - **发令方式**：Q-DOMAIN P1 可独立立项为 BLOCK（P0 ADR / P1 实现）；Q1/Q2b 各自独立发令；**结果页 P2b 不得早于 Q5 host，Q6 不得早于 P2b**。
-- **当前状态**：本文件为 planned（方向母纲）；**Q5（BLOCK-216）、P2-UI（BLOCK-217）、P2b 垂直切片（BLOCK-218）、Q6 批注垂直切片（BLOCK-219）均已收口（completed）**。按用户 2026-10-20 裁决的顺序，下一包=**Q-DOMAIN P3（methods/learning/legacy registry）** → P4 data model；Q1/Q2b 可穿插。Q6 余项（六种图形工具/文本批注与速记板/Office/pack 面批注）与 P2b 全量高级 tab 迁移、真实 job 实机腿为 reopen。G0 开发期常态 · 不外推 packaged/Provider/GA。
+- **当前状态**：本文件为 planned（方向母纲）；**Q5（BLOCK-216）、P2-UI（BLOCK-217）、P2b 垂直切片（BLOCK-218）、Q6 批注垂直切片（BLOCK-219）、P3 垂直切片（BLOCK-220）均已收口（completed）**。按用户 2026-10-20 裁决的顺序，下一包=**Q-DOMAIN P4 data model（母纲要求最后）**，或 Q1/Q2b 按产品优先级穿插。P3 余项（`_pythonEquivalent` 脚本模板/`artifact-profiles`/`agent-workflow`/`learning`/`result-*-tools`）、Q6 余项（六种图形工具/文本批注与速记板/Office/pack 面批注）与 P2b 全量高级 tab 迁移、真实 job 实机腿为 reopen。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## 12. 附：Q-MATRIX 更新记录
 
@@ -697,4 +698,5 @@ Q-DOMAIN（垂直去核化，跨波次）
 | 2026-10-20 | Q5 | BLOCK-216 收口：E2/E3 → ✅；E1 🔴→🟡（右轨统一，工作区模式/终端/侧聊仍各宿主）；矩阵 **✅26 / 🟡46 / 🔴23 / ⛔7 = 102**；E9 明确 deferred | `docs/block-216-q5-work-surface-host-plan.md` §7 + `acceptance/block-216/`（9223 live 19/19） |
 | 2026-10-20 | Q-DOMAIN P2-UI | BLOCK-217 收口：L8 🔴→🟡（act 去域 + pack uiActions host；result/data model 仍核心）；矩阵 **✅26 / 🟡47 / 🔴22 / ⛔7 = 102** | `docs/block-217-qdomain-p2ui-actions-plan.md` §6 + `acceptance/block-217/`（9223 live 8/8） |
 | 2026-10-20 | Q-DOMAIN P2b | BLOCK-218 垂直切片收口：E13/L8 更新（result mode 主 body 由 pack resultSurface 渲染；高级 tab 核心过渡）；矩阵不变 **✅26 / 🟡47 / 🔴22 / ⛔7**；真实 job live rider | `docs/block-218-qdomain-p2b-result-surface-plan.md` §6 |
+| 2026-10-20 | Q-DOMAIN P3 | BLOCK-220 垂直切片收口：legacy 化石注册表删除（单一注册源）+ methods 引用/工具标签下沉 pack `provides.methods`；域中性基线 **261→208 处**（tool-registry 31 归零、methods-export 62→24）；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——L8 仍 🟡（data model 与脚本模板未下沉） | `docs/block-220-qdomain-p3-methods-plan.md` §8 |
 | 2026-10-20 | Q6 | BLOCK-219 垂直切片收口：E5/C12 部分落地（PDF/图像**矩形**批注 + 加入任务；批次外=椭圆/箭头/画笔/文字/马赛克、文本选中批注、速记板 C13 随 Q2、PPTX/DOCX、pack 面）；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——E5 仍 🟡（PPTX/DOCX 未覆盖），C12 仍 🟡（无速记/批注进侧聊） | `docs/block-219-q6-annotation-host-plan.md` §6 + `acceptance/block-219/`（13/13） |

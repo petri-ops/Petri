@@ -7333,6 +7333,27 @@
         "G0"
       ],
       "notes": "2026-10-20 立项 active（用户「继续」）：Q6 垂直切片——通用 annotation host（旁路元数据 + 归一化坐标 + 有界）+ PDF 页/图像区域批注 + 「加入任务」经 copilotAsk。**completed（2026-10-20，closeout 十三门 PASS；9223 live 13/13）**：block219 12/12 + 前端 42/42 + test:changed Node 744 项 0 红/前端 30 文件全绿 + acceptance/block-219/（13/13，SVG/PDF 哈希前后一致）；UI-533 verified（dev Electron 边界内）。边界=六种图形工具/文本批注与速记板/Office/pack iframe 面批注 reopen。"
+    },
+    {
+      "id": "BLOCK-220-QDOMAIN-P3-METHODS",
+      "capability": "qdomain-p3-methods",
+      "path": "docs/block-220-qdomain-p3-methods-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P5-CLOSED",
+      "canonical": true,
+      "truthDomain": "qdomain-p3-methods",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-20",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "q-domain",
+        "methods",
+        "pack",
+        "domain-neutrality",
+        "G0"
+      ],
+      "notes": "2026-10-20 立项 active（用户「直接开 P3 可以直接推进」）：P3 垂直切片——删除化石 core/shared-backend/tool-registry.js（10 个内联生信工具、零消费）+ pack 契约 provides.methods（citations/tool-labels）+ pack-methods 只读有界装载器 + methods-export 接线与诚实降级。**completed（2026-10-20）**：block220 13/13 + 真实 pack 根静态集成 13 类型/13 标签 0 warning + 域中性基线 109/261/45 → 104/208/44（tool-registry 归零）+ test:changed Node 315 项 0 红 + knip/docs 绿。reopen=_pythonEquivalent 脚本模板/artifact-profiles/agent-workflow/learning/result-*-tools。"
     }
   ],
   "lastUpdated": "2026-10-20",

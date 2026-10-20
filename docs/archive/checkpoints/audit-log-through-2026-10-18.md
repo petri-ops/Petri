@@ -83,3 +83,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-20T11:52:39.787Z -->
 最后更新：2026-10-18（**根因合并：无插件 ⇒ 无工具 ⇒ 无产物**）：`GET /api/tools/catalog` 实测 `count:0`，因此 Result Studio 恒空态（UI-526 实机腿不可得），与 `skills:check` 5 红同因（`petri-pack-bio` 未检出）。UI-526 保持 `in_progress` 并挂「pack 到位后复看」；lint 第二批尝试失败并已还原（该文件 8 条 require-await 的 `it` 回调体内确有 await，318→318 无变化）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-20T12:42:59.920Z -->
+最后更新：2026-10-18（**C-35 本机 Chromium 沙箱崩溃=目录对象级判定，已修复**）：`electron.exe` 带沙箱启动必崩 `0x80000003`（Chromium CHECK→int3），只有 `--no-sandbox` 能起；逐项排除版本（v30.5.1 同样崩）/二进制损坏（与官方 zip SHA256 一致）/环境变量/TEMP/CWD/userData/启动上下文/**路径字符串/文件名/ACL（SDDL、owner 逐字符相同）/目录名/内容**——决定性对照=同内容复制到别处或改名均正常、旧目录对象改名后仍崩、把新对象换进同一路径即恢复 ⇒ 判定绑在**目录对象**（安全 agent 的对象级缓存）。处置=替换 `node_modules/electron/dist`（内容逐字节相同），复验无 `--no-sandbox` 起窗且 renderer 确认 sandboxed。防复发=把工程目录加进 360/火绒信任区；复发处置=`rm -rf node_modules/electron && npm install`。同批修 `restart-dev-stack.sh`（Start-Process 大小写重复键 `NO_PROXY`/`no_proxy` + `PETRI_DEV_ELECTRON_ARGS` 透传）与 `dev-electron.js` 启动失败诊断。G0 开发期常态 · 不外推 packaged/Provider/GA。
