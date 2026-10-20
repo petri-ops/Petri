@@ -21,6 +21,8 @@ export interface WorkSurfaceDescriptor {
   emptyState?: string;
   /** pack-result only: artifact kinds this surface claims. */
   artifactTypes?: string[];
+  /** pack-result only: result modes this surface claims (default ['result']). */
+  modes?: string[];
   /** pack-result only: higher wins when multiple surfaces match. */
   priority?: number;
   capabilities?: Record<string, unknown>;

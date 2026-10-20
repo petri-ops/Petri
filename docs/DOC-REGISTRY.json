@@ -7291,8 +7291,29 @@
         "G0"
       ],
       "notes": "2026-10-20 立项 active（用户「行！ 按照你的建议来」=按 Q5 → P2-UI actions → P2b 推进）：核心 act 只保留 6 个领域中性动作；删除 12 个单细胞/FigCode 动作与页面标签；pack uiActions 动态描述 + ui_action 执行校验 + 前端 host 分发/ack；旧页面已退役，生信真实动作随 P2b pack 结果面提供。**completed（2026-10-20，closeout 十三门 PASS）**：block217 9/9 + block151 5/5 + 前端 8/8 + test:changed 213/213 + 9223 live 8/8；domain-neutrality 下调 15 处；UI-531 verified（dev Electron 边界内）。"
+    },
+    {
+      "id": "BLOCK-218-QDOMAIN-P2B-RESULT-SURFACE",
+      "capability": "qdomain-p2b-result-surface",
+      "path": "docs/block-218-qdomain-p2b-result-surface-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P5-CLOSED",
+      "canonical": true,
+      "truthDomain": "qdomain-p2b-result-surface",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-20",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "domain-pack",
+        "result-surface",
+        "result-studio",
+        "q-domain",
+        "G0"
+      ],
+      "notes": "2026-10-20 立项 active（用户「好的 按照你的建议推进，搞定他」）：P2b 垂直切片——result mode 主 body 由 pack resultSurfaces iframe 提供（图/表/文本/报告源码 + truth/revision），核心保留 context bar/composer 与 code/compare/history 过渡面；只读有界数据桥；pack 缺失/不匹配标注 core-transitional。**completed（2026-10-20，closeout 十三门 PASS）**：packResultData 5/5 + resultSurfaceHost 5/5 + CenterPanel 路由 2/2 + pack 页面契约 2/2 + test:changed 191/191 前端；UI-532 in_progress（dev DB tool_jobs=0，无真实结果 job 实机腿）。边界=高级 tab 仍核心过渡、真实 job live rider。"
     }
   ],
   "lastUpdated": "2026-10-20",
-  "documentCount": 376
+  "documentCount": 377
 }

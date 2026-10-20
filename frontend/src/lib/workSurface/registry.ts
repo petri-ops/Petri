@@ -78,9 +78,12 @@ export interface PackResultSurfaceContribution {
   title?: unknown;
   entry?: unknown;
   artifactTypes?: unknown;
+  modes?: unknown;
   priority?: unknown;
   emptyState?: unknown;
 }
+
+const RESULT_SURFACE_MODES = new Set(['result', 'code', 'compare', 'history']);
 
 export interface PackUiActionContribution {
   id?: unknown;
@@ -201,6 +204,10 @@ export function mergeWorkSurfaceRegistry(
         diagnostics.push(diagnostic(packId, `resultSurfaces/${resultId}`, 'duplicate_surface_id'));
         continue;
       }
+      const rawModes = Array.isArray(result.modes)
+        ? result.modes.filter((mode): mode is string => typeof mode === 'string' && RESULT_SURFACE_MODES.has(mode))
+        : [];
+      const modes = rawModes.length > 0 ? [...new Set(rawModes)] : ['result'];
       seenSurfaceIds.add(id);
       surfaces.push({
         id,
@@ -216,6 +223,7 @@ export function mergeWorkSurfaceRegistry(
         entry: typeof result.entry === 'string' ? result.entry.replace(/\\/g, '/') : undefined,
         emptyState: typeof result.emptyState === 'string' ? result.emptyState : undefined,
         artifactTypes: types,
+        modes,
         priority: typeof result.priority === 'number' && Number.isFinite(result.priority) ? result.priority : 0,
       });
     }

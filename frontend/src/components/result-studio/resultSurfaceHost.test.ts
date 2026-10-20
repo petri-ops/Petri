@@ -41,4 +41,10 @@ describe('result surface host (Q5)', () => {
   it('keeps the core transitional surface when no artifact is selected', () => {
     expect(resolveResultSurfaceHost([PACK_RESULT], null).source).toBe('core-transitional');
   });
+
+  it('respects result surface modes; code/compare/history stay core-transitional', () => {
+    expect(resolveResultSurfaceHost([PACK_RESULT], { type: 'plot' }, 'result').source).toBe('pack');
+    expect(resolveResultSurfaceHost([PACK_RESULT], { type: 'plot' }, 'code').source).toBe('core-transitional');
+    expect(resolveResultSurfaceHost([PACK_RESULT], { type: 'plot' }, 'history').source).toBe('core-transitional');
+  });
 });

@@ -5099,3 +5099,10 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **为什么这样设计**：旧单细胞页面已退役，动作是死代码；把真实生信动作硬塞进 pack 描述而没有 pack UI 等于伪造可用性。本包先把核心去域、动态契约与 host 往返打通，真实单细胞动作随 P2b 的 pack 结果面一起提供。
 - **验证（代码）**：`block217-act-ui-actions` **9/9**（enum/动态描述/停用/未知/缺失 surface/合法 ack/payload 上限/旧动作拒绝/tool_result 投影）；`block151-act-enum-description` **5/5**；`agent-tool-registry` 邻域全绿；前端 host/stream/parse **8/8**；`quality:types` 0、`quality:lint` 0 errors、`domain-neutrality` 基线下调 15 处。
 - **实机腿（2026-10-20，9223 无窗口测试实例）**：`npm run verify -- block217-p2ui-actions` **8/8**——fixture pack 的 action 出现在「+」菜单；`uiActionRequest` 自动打开 pack view；iframe 收到 action 并回传结果；host 标记 `data-last-action-ok=true`。证据 `acceptance/block-217/block217-p2ui-actions-live.json` + `block217-ui-action-roundtrip.png`。**诚实边界**：live 使用合成 ackToken（不伪造后端成功），act→ack 成功链由隔离测试覆盖；生信真实动作未提供（P2b）。
+
+## UI-532: 生信主结果面 pack resultSurface（2026-10-20 **in_progress（无真实 tool_jobs 实机腿）**，BLOCK-218 / Q-DOMAIN P2b 垂直切片）
+
+- **变化面**：`result` 模式下主结果 body 可由已安装 pack 的 `resultSurfaces` iframe 渲染——pack `ui/result.html` 接收 host 的 artifact truth/revision 上下文与只读 resultData（图→dataURL、表→前 200×50 行、文本/markdown/json/report 源码→有界文本、binary→诚实降级），按生信语义给出产物标签与可信状态；核心仅保留 context bar/composer 与 code/compare/history 过渡面。pack 缺失/无匹配/非 result mode → 现有核心结果面，`data-result-surface-source="core-transitional"`。
+- **为什么这样设计（自有形态）**：pack iframe 独立 origin 且 CSP 禁网络，不能自取 artifact；host 只做一次有界只读投影，不建第二套 artifact/truth。高级 tab（lineage/compare/history/selection/revisions）仍由核心 Renderer 提供，明确标注过渡，不把 Result Studio 压成通用文件浏览器。
+- **验证（代码）**：`packResultData` 5/5（图/表/文本/report/binary/HTTP/缺 URL/上限）；`resultSurfaceHost` modes 5/5；CenterPanel pack/core 路由 2/2；`block218-pack-result-surface` 2/2（pack.json resultSurfaces + 页面只消费 host context、不联网、不 fetch）；`quality:types` 0、`quality:lint` 0 errors。
+- **诚实边界**：dev DB `tool_jobs=0`，无法打开真实结果 job 跑 9223 结果页实机腿；本轮只证 host 选择、数据桥与 pack 页面契约，**不表述为真实结果页已 verified**。pack 页面的图/表渲染在独立 pack 仓交付，待真实 job 或 fixture job 出现后补实机。

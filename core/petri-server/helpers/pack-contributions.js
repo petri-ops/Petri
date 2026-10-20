@@ -31,8 +31,11 @@ const LIMITS = Object.freeze({
   titleLength: 120,
   entryLength: 300,
   artifactTypes: 32,
+  modes: 4,
   emptyStateLength: 500,
 });
+
+const RESULT_SURFACE_MODES = new Set(['result', 'code', 'compare', 'history']);
 
 const ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/;
 
@@ -128,6 +131,12 @@ function normalizeResultSurfaces(packId, packRoot, provides, diagnostics) {
         continue;
       }
     }
+    const rawModes = Array.isArray(item.modes)
+      ? item.modes
+        .slice(0, LIMITS.modes)
+        .filter((mode) => typeof mode === 'string' && RESULT_SURFACE_MODES.has(mode))
+      : [];
+    const modes = rawModes.length > 0 ? [...new Set(rawModes)] : ['result'];
     seen.add(id);
     surfaces.push({
       id,
@@ -135,6 +144,7 @@ function normalizeResultSurfaces(packId, packRoot, provides, diagnostics) {
       title: asSmallString(item.title, LIMITS.titleLength) || id,
       ...(typeof item.entry === 'string' ? { entry: item.entry.replace(/\\/g, '/') } : {}),
       artifactTypes,
+      modes,
       priority: Number.isFinite(item.priority) ? item.priority : 0,
       ...(typeof item.emptyState === 'string'
         ? { emptyState: item.emptyState.slice(0, LIMITS.emptyStateLength) }

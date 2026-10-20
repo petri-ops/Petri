@@ -41,6 +41,7 @@ import { SideChatDock } from '@/components/workspace-panels/SideChatDock';
 import { resolveResultSurfaceHost } from '@/components/result-studio/resultSurfaceHost';
 import { PackSurfaceFrame } from '@/components/work-surface/PackSurfaceFrame';
 import type { WorkSurfaceDescriptor } from '@/lib/workSurface/types';
+import { usePackResultData } from '@/lib/workSurface/packResultData';
 // UI-448 加映 v25 — 浮卡左缘拖宽把手 + 偏好持久化（摘要浮卡与会话浮面共用）
 import {
   FloatCardResizeHandle,
@@ -167,7 +168,8 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
     ctx.resultContext?.status === 'ready' ? ctx.resultContext.contextToken : null,
   );
   const resultMode = workspaceMode === 'result' || workspaceMode === 'code' || workspaceMode === 'compare' || workspaceMode === 'history';
-  const resultSurfaceHost = resolveResultSurfaceHost(ctx.packResultSurfaces ?? [], ctx.activeArtifact);
+  const resultSurfaceHost = resolveResultSurfaceHost(ctx.packResultSurfaces ?? [], ctx.activeArtifact, workspaceMode);
+  const packResultData = usePackResultData(resultSurfaceHost.source === 'pack' ? ctx.activeArtifact : null);
   const truthStatus = typeof ctx.activeArtifact?.truthStatus === 'string'
     ? ctx.activeArtifact.truthStatus
     : typeof ctx.activeWorkflow?.artifactTruth?.status === 'string'
@@ -314,6 +316,7 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
                       truthStatus: ctx.activeArtifact?.truthStatus ?? null,
                       url: ctx.activeArtifact?.url ?? null,
                     }}
+                    resultData={packResultData.data}
                   />
                 </div>
               ) : (

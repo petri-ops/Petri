@@ -2,6 +2,7 @@ import React from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { useThemeOptional } from '@/themes/ThemeProvider';
 import type { PackUiActionDescriptor, WorkSurfaceDescriptor } from '@/lib/workSurface/types';
+import type { PackResultData } from '@/lib/workSurface/packResultData';
 import {
   actionsForSurface,
   dispatchWorkSurfaceUiActionResult,
@@ -31,12 +32,14 @@ export function PackSurfaceFrame({
   conversationId,
   uiActions = [],
   artifactContext = null,
+  resultData = null,
 }: {
   descriptor: WorkSurfaceDescriptor;
   projectId?: string | null;
   conversationId?: string | null;
   uiActions?: readonly PackUiActionDescriptor[];
   artifactContext?: Record<string, unknown> | null;
+  resultData?: PackResultData | null;
 }): React.ReactElement {
   const theme = useThemeOptional();
   const iframeRef = React.useRef<HTMLIFrameElement | null>(null);
@@ -67,9 +70,10 @@ export function PackSurfaceFrame({
         theme: theme?.resolvedTheme ?? null,
         actions: surfaceActions.map((action) => action.id),
         artifact: artifactContext,
+        resultData,
       },
     }, origin);
-  }, [artifactContext, conversationId, descriptor.id, descriptor.packId, origin, projectId, surfaceActions, theme?.resolvedTheme, url]);
+  }, [artifactContext, conversationId, descriptor.id, descriptor.packId, origin, projectId, resultData, surfaceActions, theme?.resolvedTheme, url]);
 
   const postAction = React.useCallback((detail: WorkSurfaceUiActionDetail) => {
     const action = surfaceActions.find((candidate) => candidate.id === detail.actionId);
@@ -95,6 +99,11 @@ export function PackSurfaceFrame({
     queuedActionsRef.current = [];
     for (const detail of queued) postAction(detail);
   }, [postAction, sendContext]);
+
+  // Result data arrives asynchronously after first ready; push updated context.
+  React.useEffect(() => {
+    if (readyRef.current) sendContext();
+  }, [sendContext]);
 
   React.useEffect(() => {
     const onAction = (event: Event) => {
@@ -159,6 +168,7 @@ export function PackSurfaceFrame({
       data-surface-state={state}
       data-last-action-id={lastActionResult?.actionId}
       data-last-action-ok={lastActionResult ? String(lastActionResult.ok) : undefined}
+      data-result-data-status={resultData?.status}
     >
       {state === 'loading' && <p className={styles.frameLoading}>正在加载「{descriptor.title}」…</p>}
       {state === 'error' && (

@@ -4325,6 +4325,32 @@
         "frontend/src/hooks/useWorkSurfaceTabs.test.tsx"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block218-qdomain-p2b-result-surface",
+      "note": "BLOCK-218 Q-DOMAIN P2b 垂直切片 — result mode 主 body 由 pack resultSurfaces 渲染；只读有界数据桥；core context bar/composer 与 code/compare/history 过渡面保留。",
+      "patterns": [
+        "frontend/src/lib/workSurface/packResultData.ts",
+        "frontend/src/lib/workSurface/types.ts",
+        "frontend/src/lib/workSurface/registry.ts",
+        "frontend/src/components/work-surface/PackSurfaceFrame.tsx",
+        "frontend/src/components/workspace-panels/CenterPanel.tsx",
+        "frontend/src/components/workspace-panels/CenterPanel.test.tsx",
+        "frontend/src/components/result-studio/resultSurfaceHost.ts",
+        "frontend/src/components/result-studio/resultSurfaceHost.test.ts",
+        "core/petri-server/helpers/pack-contributions.js",
+        "test/block218-*.test.mjs",
+        "acceptance/block-218/**"
+      ],
+      "tests": [
+        "frontend/src/lib/workSurface/packResultData.test.ts",
+        "frontend/src/components/workspace-panels/CenterPanel.test.tsx",
+        "frontend/src/components/result-studio/resultSurfaceHost.test.ts",
+        "frontend/src/lib/workSurface/registry.test.ts",
+        "test/block216-pack-contributions.test.mjs",
+        "test/block218-pack-result-surface.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

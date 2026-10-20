@@ -15,11 +15,13 @@ export interface ResultSurfaceHostResolution {
  */
 export function resolveResultSurfaceHost(
   surfaces: readonly WorkSurfaceDescriptor[],
-  artifact: Pick<ActiveArtifact, 'type' | 'semanticKind'> | null
+  artifact: Pick<ActiveArtifact, 'type' | 'semanticKind'> | null,
+  mode: string = 'result'
 ): ResultSurfaceHostResolution {
   const artifactKinds = [artifact?.semanticKind, artifact?.type]
     .filter((kind): kind is string => typeof kind === 'string' && kind.length > 0);
-  const descriptor = resolveResultSurface({ surfaces: [...surfaces] }, { artifactKinds });
+  const candidates = surfaces.filter((surface) => (surface.modes ?? ['result']).includes(mode));
+  const descriptor = resolveResultSurface({ surfaces: candidates }, { artifactKinds });
   return descriptor
     ? { source: 'pack', descriptor, artifactKinds }
     : { source: 'core-transitional', artifactKinds };

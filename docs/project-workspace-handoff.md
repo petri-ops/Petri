@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-20（**BLOCK-218 Q-DOMAIN P2b 垂直切片 completed（closeout 十三门 PASS）**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-218（P2b 垂直切片）**：result mode 主 body 由 pack `resultSurfaces` iframe 提供（图/表/文本/report 源码 + truth/revision），核心保留 context bar/composer 与 code/compare/history 过渡面；只读有界数据桥；pack 缺失/不匹配 core-transitional；packResultData 5/5 + resultSurfaceHost 5/5 + CenterPanel 2/2 + pack 页面契约 2/2 + test:changed 191/191 前端。**下一步**：Q6 批注 → P3 methods/learning/legacy registry → P4 data model；Q1/Q2b 可穿插。rider=真实 tool_jobs 结果页实机腿（dev DB 0 条，UI-532 in_progress）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-20（**BLOCK-217 Q-DOMAIN P2-UI completed（closeout 十三门 + 9223 live 8/8）**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-217（Q-DOMAIN P2-UI）**：核心 `act` 去生信/FigCode（只保留 rename_project/dataset/analysis、update_analysis_params、open_tool、ui_action）；pack `uiActions` 动态描述 + 执行校验 + 前端 host 分发/ack；删除 sc*/figcode 遗留字段；block217 9/9 + block151 5/5 + 前端 8/8 + test:changed 213/213 + 9223 live 8/8；UI-531 verified。**下一步**：Q-DOMAIN **P2b Result Studio resultSurface**（使用 Q5 `resultSurfaceHost`；真实生信 actions 随其 pack 结果面提供）→ Q6 → P3 → P4；Q1/Q2b 可穿插。边界=真实生信动作未提供；live ack 用合成 token。G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -71,7 +71,7 @@ function context(mode: CenterPanelContext['workspaceMode']): CenterPanelContext 
     resultAgentDraft: '',
     activeJobId: 'job-1', pendingArtifactName: null, recentJobs: [], liveJobsPreview: [],
     jobStats: { running: 0, failed: 0, done: 1, pending: 0 }, backendStatus: {} as CenterPanelContext['backendStatus'],
-    jobs: [], datasets: [],
+    jobs: [], datasets: [], packResultSurfaces: [],
     updateWorkspaceMode: vi.fn(), openRightPanel: vi.fn(), switchToProject: vi.fn(), navigate: vi.fn(),
     setActiveConvId: vi.fn(), setActiveJobId: vi.fn(), setActiveArtifact: vi.fn(), setBottomTerminalOpen: vi.fn(),
     setResultAgentDraft: vi.fn(), onResultEditSubmit: vi.fn(),
@@ -157,6 +157,51 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     expect(document.querySelector('[class*="workspaceSummaryFloat"]')).toBeNull();
   });
 
+
+  it('routes result mode to a matching pack result surface (BLOCK-218)', () => {
+    const ctx = context('result');
+    ctx.packResultSurfaces = [{
+      id: 'pack:bio:result:bio-result',
+      kind: 'pack-result',
+      title: '生信结果',
+      icon: 'bar-chart',
+      source: 'pack',
+      packId: 'bio',
+      singleton: true,
+      closeable: true,
+      persist: false,
+      order: 0,
+      artifactTypes: ['table'],
+      modes: ['result'],
+      entry: 'ui/result.html',
+    }];
+    render(<CenterPanel ctx={ctx} refs={refs} />);
+    expect(screen.getByTestId('pack-surface-unsupported')).toBeTruthy();
+    expect(screen.queryByTestId('central-result-view')).toBeNull();
+  });
+
+  it('keeps core result for code mode even when a pack result surface matches (BLOCK-218)', () => {
+    const ctx = context('code');
+    ctx.packResultSurfaces = [{
+      id: 'pack:bio:result:bio-result',
+      kind: 'pack-result',
+      title: '生信结果',
+      icon: 'bar-chart',
+      source: 'pack',
+      packId: 'bio',
+      singleton: true,
+      closeable: true,
+      persist: false,
+      order: 0,
+      artifactTypes: ['table'],
+      modes: ['result'],
+      entry: 'ui/result.html',
+    }];
+    render(<CenterPanel ctx={ctx} refs={refs} />);
+    expect(screen.getByTestId('central-result-view')).toBeTruthy();
+    expect(screen.queryByTestId('pack-surface-unsupported')).toBeNull();
+  });
+
   // UI-448 加映 v23 — 会话浮面纯悬浮（用户双图对比裁决：摘要点击就悬浮，
   // 会话却把消息框向左推）——让位机制整体退役，开合态消息列恒全宽。
   it('never yields the conversation column for the side chat float (UI-448 加映 v23 纯悬浮)', () => {
@@ -180,6 +225,51 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     const ctx = context('chat');
     render(<CenterPanel ctx={ctx} refs={refs} />);
     expect(document.querySelector('[class*="workspaceSessionLayoutSideChatOpen"]')).toBeNull();
+  });
+
+
+  it('routes result mode to a matching pack result surface (BLOCK-218)', () => {
+    const ctx = context('result');
+    ctx.packResultSurfaces = [{
+      id: 'pack:bio:result:bio-result',
+      kind: 'pack-result',
+      title: '生信结果',
+      icon: 'bar-chart',
+      source: 'pack',
+      packId: 'bio',
+      singleton: true,
+      closeable: true,
+      persist: false,
+      order: 0,
+      artifactTypes: ['table'],
+      modes: ['result'],
+      entry: 'ui/result.html',
+    }];
+    render(<CenterPanel ctx={ctx} refs={refs} />);
+    expect(screen.getByTestId('pack-surface-unsupported')).toBeTruthy();
+    expect(screen.queryByTestId('central-result-view')).toBeNull();
+  });
+
+  it('keeps core result for code mode even when a pack result surface matches (BLOCK-218)', () => {
+    const ctx = context('code');
+    ctx.packResultSurfaces = [{
+      id: 'pack:bio:result:bio-result',
+      kind: 'pack-result',
+      title: '生信结果',
+      icon: 'bar-chart',
+      source: 'pack',
+      packId: 'bio',
+      singleton: true,
+      closeable: true,
+      persist: false,
+      order: 0,
+      artifactTypes: ['table'],
+      modes: ['result'],
+      entry: 'ui/result.html',
+    }];
+    render(<CenterPanel ctx={ctx} refs={refs} />);
+    expect(screen.getByTestId('central-result-view')).toBeTruthy();
+    expect(screen.queryByTestId('pack-surface-unsupported')).toBeNull();
   });
 
   // UI-448 加映 v23 — 让位退役后的恒定不变式：摘要钉住列形态同样不推挤
