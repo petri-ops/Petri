@@ -68,3 +68,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-20T03:51:13.881Z -->
 最后更新：2026-10-18（**BLOCK-212 reopen 设计落账 = C-34**）：Claude 侧要吃到缓存须"够大且稳"——会话级固定工具集 + 断点打最后一个 tool + ≥1024 才打点；验收需真实调用（连续 ≥3 轮命中增长），**先决条件=G1+ 预算**，风险=固定工具集掉路由精度（须 evals 先证）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-20T04:48:12.988Z -->
+最后更新：2026-10-18（**UI-527 实机腿补齐 → verified（dev Electron 边界内）**）：重启 dev 栈后 `/api/skills/preflight` 三族返回 `missing_deps`+`missingPlugins`，9223 货架截图三卡「缺依赖」（对照重启前「依赖可用」）；flow `ui526-527-badges` 2/2。UI-526 仍 in_progress（测试实例无产物，看不到真值徽标）。G0 开发期常态 · 不外推 packaged/Provider/GA。

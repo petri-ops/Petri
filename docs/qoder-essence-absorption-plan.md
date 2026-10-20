@@ -433,7 +433,7 @@ status: planned
 
 **目标**：把生信垂直从“执行层在 pack、知识/交互/结果/数据层仍在核心”的混合形态，逐步收敛为“**核心零生信硬编码 + 生信 pack 自包含**”。**结果页是生信专属产品面，不做通用化**；完全插件化不等于把 Result Studio 变成通用文件浏览器。
 
-> 2026-10-20：**P1 已立项 [BLOCK-214](./block-214-qdomain-p1-pack-skills-plan.md)（active）**——3 个生信 skill 迁入 pack + `provides.skills` + skill-registry 发现/卸载；P2/P2b/P4 仍 planned。
+> 2026-10-20：**P1 已立项 [BLOCK-214](./block-214-qdomain-p1-pack-skills-plan.md)（completed）**——3 个生信 skill 迁入 pack + `provides.skills` + skill-registry 发现/卸载；**P2a prompt（[BLOCK-215](./block-215-qdomain-p2a-prompt-decoring-plan.md)，completed）**——核心 prompt 去生信化 + pack `promptFragments`；**P2-UI actions（需 Q5 host，planned）**；P2b Result Surface 仍 planned。
 
 **现状（2026-10-20 只读核对）**
 - ✅ 已在 pack：7 个分析插件 + dormant、scripts、demo-data、confirmationHooks、artifactTypes。

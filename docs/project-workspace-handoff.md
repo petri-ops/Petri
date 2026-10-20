@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-20（**BLOCK-215 Q-DOMAIN P2a completed（closeout 十三门 PASS）：核心 Prompt 去生信化**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-215（Q-DOMAIN P2a）**：核心 `agent-runner.js`/`system-prompt.js` 去 DESeq2/Seurat/单细胞/FigCode 生信示例/结果页单细胞控制；新增 `pack-prompt-fragments`（已安装/启用 pack 的 `promptFragments/` 注入，缺失/停用零注入）；block215 3/3、prompt 邻域 52/52、domain-neutrality 改善 13 处后下调基线、golden context_snapshot `dfc9be7b…→6f891fe…` 显式重打并复跑一致、evals:gate smoke 回归 0；closeout 十三门 PASS。**下一步**：Q-DOMAIN **P2-UI actions**（需 Q5 host）→ **Q5 host → P2b Result Studio resultSurface** → Q6 → P3 → P4；Q1/Q2b 可穿插，均 planned。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-20（**BLOCK-214 Q-DOMAIN P1 completed（closeout 十三门 PASS）：生信 Skills 去核**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-214（Q-DOMAIN P1）**：3 个生信 skill 从 `resources/skills` 迁入 `D:\1.WorkDir\petri-pack-bio\skills`；核心 built-in 11；pack `provides.skills`；`skill-registry.loadPackSkills()` 从已安装/启用 pack 发现（source=pack，内置>pack>已安装，卸载/停用清理）；`skills:check` 11+3 PASS；`test/block214-pack-skills.test.mjs` 5/5；邻域 32/32；产品路径 registry 14（3 pack）→ 卸载 11；9223 双态 4/4·2/2；UI-529 verified（dev Electron 边界内）；closeout 十三门 PASS。**下一步**：Q-DOMAIN **P2 prompt/UI actions** → **P5/Q5 host → P2b Result Studio 生信 resultSurface** → Q6 → P3 → P4 data model；均为 planned，需用户发令。**dev packs** 已恢复 `[]`；pack 仓 `skills/` + `provides.skills` 已本地提交。G0 开发期常态 · 不外推 packaged/Provider/GA。

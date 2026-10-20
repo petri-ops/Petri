@@ -7229,8 +7229,27 @@
         "G0"
       ],
       "notes": "2026-10-20 立项 active（用户「按照建议来」）：Q-DOMAIN P1——3 个生信 skill 迁入 petri-pack-bio/skills；pack.json provides.skills；skill-registry loadPackSkills（source=pack，built-in>pack>installed，卸载/停用清理）；skills:check 11+3；UI source=pack 标签。**completed（2026-10-20，closeout 十三门 PASS）**：block214 5/5 + 邻域 32/32 + 产品路径 14/11 + 9223 双态 4/4·2/2；UI-529 verified。非范围=prompt/UI/result surface/data model（P2/P2b/P4）。"
+    },
+    {
+      "id": "BLOCK-215-QDOMAIN-P2A-PROMPT-DECORING",
+      "capability": "qdomain-prompt-decoring",
+      "path": "docs/block-215-qdomain-p2a-prompt-decoring-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "qdomain-prompt-decoring",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-20",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "domain-pack",
+        "prompt",
+        "q-domain",
+        "G0"
+      ],
+      "notes": "2026-10-20 立项 active（用户「开 搞完这个 之后进入波次开发」）：Q-DOMAIN P2a——核心 prompt 去生信化；pack promptFragments 注入；pack 缺失/停用零注入；golden context_snapshot 显式重打；domain-neutrality baseline 下调。**completed（2026-10-20，closeout 十三门 PASS）**：block215 3/3 + prompt 邻域 52/52 + domain 改善 13 处 + golden 1/1 + evals:gate 回归 0。非范围=P2-UI actions（需 Q5 host）/P2b resultSurface/P4 data model。"
     }
   ],
   "lastUpdated": "2026-10-20",
-  "documentCount": 373
+  "documentCount": 374
 }
