@@ -65,3 +65,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-20T02:04:57.787Z -->
 最后更新：2026-10-18（**BLOCK-212 completed（十三门 PASS）：提示词缓存前缀优化**）：动态上下文搬消息尾部（尾块不落历史），Anthropic system 改 block + 静态段 cache_control；基线增静态前缀规模与命中率阈值。证据=7/7 + 邻域 52/52。**局限**：静态前缀 215 tokens < Anthropic 1024 最小可缓存 ⇒ Claude 断点当前空操作；真实命中率需 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-20T03:51:13.881Z -->
+最后更新：2026-10-18（**BLOCK-212 reopen 设计落账 = C-34**）：Claude 侧要吃到缓存须"够大且稳"——会话级固定工具集 + 断点打最后一个 tool + ≥1024 才打点；验收需真实调用（连续 ≥3 轮命中增长），**先决条件=G1+ 预算**，风险=固定工具集掉路由精度（须 evals 先证）。G0 开发期常态 · 不外推 packaged/Provider/GA。

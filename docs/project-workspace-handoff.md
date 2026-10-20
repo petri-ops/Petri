@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-20（**BLOCK-214 Q-DOMAIN P1 completed（closeout 十三门 PASS）：生信 Skills 去核**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-214（Q-DOMAIN P1）**：3 个生信 skill 从 `resources/skills` 迁入 `D:\1.WorkDir\petri-pack-bio\skills`；核心 built-in 11；pack `provides.skills`；`skill-registry.loadPackSkills()` 从已安装/启用 pack 发现（source=pack，内置>pack>已安装，卸载/停用清理）；`skills:check` 11+3 PASS；`test/block214-pack-skills.test.mjs` 5/5；邻域 32/32；产品路径 registry 14（3 pack）→ 卸载 11；9223 双态 4/4·2/2；UI-529 verified（dev Electron 边界内）；closeout 十三门 PASS。**下一步**：Q-DOMAIN **P2 prompt/UI actions** → **P5/Q5 host → P2b Result Studio 生信 resultSurface** → Q6 → P3 → P4 data model；均为 planned，需用户发令。**dev packs** 已恢复 `[]`；pack 仓 `skills/` + `provides.skills` 已本地提交。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-20（**W8 收尾第二轮（BLOCK-211 第八批）：领域包到位复看 → C-33 销号；W8 自决项全部完成**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-211 第八批（未新增 BLOCK 编号，复用 W8 plan）**：①兄弟仓 `D:\1.WorkDir\petri-pack-bio` 已检出 ⇒ `npm run skills:check` **14/14 PASS**（此前 5 红消失）、后端以 `PETRI_PLUGINS_DIR=<pack>/plugins` 启动后 `GET /api/tools/catalog` **count=7**、`preflight` 三态如实（deg=available；sc/go=missing_deps 且缺失清单逐项可读）；②`PETRI_PACK_DIRS` 补 **5/5** 契约测 `test/block211-pack-dirs.test.mjs`；③UI-527 pack-present 复探 **2/2**（三卡真实三态，证据 `acceptance/block-211/`）；④**UI-526 根因更正为 R 运行时未安装**（`GET /api/runtime/status` → `r.installed=false`，Python 可用），pack 内插件全为 R ⇒ 仍无产物 ⇒ 保持 `in_progress`，重开=安装 `petri-r-runtime` 后跑 demo 分析；⑤W8 仍非工程可自决=双机 riders/BK-08（需第二台机器，deferred）与 i18n（D-04 用户裁决 deferred）⇒ **不宣称阶段 4 出口完全达成**；lint 318 suppressions / 1824 warnings 已达原目标。**下一步第一个动作**（若继续 G0）：R 运行时安装（`petri-r-runtime`）→ 解锁 UI-526 与竞争力 `7-result-loop-live` 环境档；不擅自下载/安装 657MB 运行时，需用户授权或专用窗口。**dev 栈**：本批用无窗口后端 :3001 + Vite :3000 做 API/UI 探针，9223 已在探针后杀掉；会话结束前后端/Vite 亦会清理。G0 开发期常态 · 不外推 packaged/Provider/GA。

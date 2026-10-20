@@ -103,6 +103,7 @@
 
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
+| -2 | BLOCK-214 / Q-DOMAIN P1 | **领域包 Skills 贡献与生信 Skills 去核（completed）**：3 个生信 skill 迁入 `petri-pack-bio/skills`；pack `provides.skills`；skill-registry `loadPackSkills()`（source=pack，built-in>pack>installed，卸载/停用清理）；核心 built-in 11；`skills:check` 11+3；UI source=pack 标签；9223 双态 4/4·2/2。P2/P2b/P4 仍 planned | `docs/block-214-qdomain-p1-pack-skills-plan.md` + `docs/qoder-essence-absorption-plan.md` §6-Q-DOMAIN | **completed（2026-10-20，closeout 十三门 PASS）** |
 | -1 | W8 / BLOCK-211 | **收尾族（第十三包，队列头已清）**：C-32 env seed / lint 净收缩 / block110-p1 夹具 / RS 徽标语义 / C-27·C-30·C-31 裁定 / **C-33 领域包与技能依赖复看** / UI-526·527 复看；**2026-10-20**：pack 到位后 `skills:check` 14/14 PASS、`tools/catalog=7`、preflight 三态如实、`PETRI_PACK_DIRS` 5/5 契约测、UI-527 pack-present 2/2；UI-526 根因更正为 R 运行时未安装 | `docs/stage-3-4-execution-runlist.md` §3 + `docs/block-211-tail-ledger-plan.md` §13 | **completed（2026-10-20，可自决项全完；双机 riders/BK-08 与 i18n 仍 deferred）** |
 | 0 | W7 / BLOCK-176 | **Agent Skill 知识面（planned，队列最前）**：CP-20 SKILL.md 常驻双格式注册+声明式依赖（KNW-4 通道扩展，候选池③转正）→CP-21 依赖自检与安装治理（preflight+审批留痕+Skills 页状态面）→CP-22 首批通用技能包迁移（Obsidian 九技能转写） | 总纲 §4-W7 + docs/block-176-competitiveness-wave7-plan.md | **planned**（W5 在制收口后发令；W6 顺延） |
 | 1 | BIO-1 / UI-452 | **结果信息密度包 verified**（2026-09-29 六面实机 9/10：tooltip 全数值/搜索 25 命中/阈值线/组合筛选 25/25/Lightbox 全链/深链保持——ui452-density-live 双路联合走查；T6b demo 数据边界非缺陷；前置=pack 5036e86 goldenFixture 重锚恢复 RS3 交互投影） | G0-BIO plan §3 BIO-1 | **verified** |

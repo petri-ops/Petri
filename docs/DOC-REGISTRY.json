@@ -7184,8 +7184,53 @@
         "block-213"
       ],
       "notes": "2026-10-18 立项发令 active（用户「开」）：只补「发现入口」不造能力——命令面板覆盖率/快捷键标注覆盖/四页空态引导，P0 先量四个数字再补；覆盖率写成棘轮（单调不回退）；未接入动作列清单不偷删。 | 收口 2026-10-18：P0 实测四数字（命令面板 24 / 设置节 10·10 / 快捷键同名 5·10（未命中 5 条为 workspace 局部键位，面板不该接管）/ 空态 2·2 另两页 N/A 有据）；设置深链改全覆盖 + 扩展两 tab + 外观动效 6 条；useThemeOptional；欢迎/扩展空态引导；block213 5/5 棘轮 + 前端 19/19 + 9223 快照；closeout 十三门 PASS。未做=语义搜索/遥测埋点（reopen）。"
+    },
+    {
+      "id": "QODER-ESSENCE-ABSORPTION",
+      "capability": "qoder-essence-absorption",
+      "path": "docs/qoder-essence-absorption-plan.md",
+      "kind": "vision",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "qoder-essence-absorption",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-20",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "qoder",
+        "benchmark",
+        "ui-ux",
+        "approval",
+        "context-assembly",
+        "multi-agent",
+        "workspace-tabs",
+        "automation",
+        "mcp",
+        "G0"
+      ],
+      "notes": "2026-10-20 用户裁决「能做的当然都要做，做个巨无霸计划，地毯式对比确认更新的点。并建立多波次详细升级计划，记住不是要复刻形式，是要汲取精华完善内容和优化使用体验」：以 Qoder 0.4.8 反编译产物为样本，Q-MATRIX 102 点（✅24/🟡47/🔴24/⛔7）+ Q0–Q9 十波 + Q2b/Q4b/Q-DOMAIN 子波；新增 L 组（联网搜索/抓取、浏览器、电脑控制、插件宿主/权限、生成式媒体 ⛔、垂直领域完全插件化）、Q0.5 插件架构 ADR（B：边缘插件化、内核不插件化）、Q2b 联网检索（DeepSeek Search/Fetch 首 provider、默认关、出站审计）、**Q-DOMAIN 垂直去核化 P1–P4（P2b 生信 Result Surface；E13 结果面 + L8 完全插件化；结果页保持生信专属，核心只做 artifact/truth host）**；C19 AskUserQuestion/E12 NotebookEdit/B6 Goal 工具/F9 CodebaseInvestigator 已补入矩阵；**Qoder 专属外部接口（webSearch/imageSearch、browser-use SDK、云模型/账号/市场/更新/签名等）一律不复刻；联网走 DeepSeek/本地 provider**；只借行为合同不搬代码；不重开 AGENT-COMPETITIVENESS-PROGRAM 已完成 CP 项；hooks/i18n/worktree 维持阶段禁区。planned=方向落档未发令波次；单工作包串行不变。"
+    },
+    {
+      "id": "BLOCK-214-QDOMAIN-P1-PACK-SKILLS",
+      "capability": "qdomain-pack-skills",
+      "path": "docs/block-214-qdomain-p1-pack-skills-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "qdomain-pack-skills",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-20",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "domain-pack",
+        "skills",
+        "pack-contract",
+        "q-domain",
+        "G0"
+      ],
+      "notes": "2026-10-20 立项 active（用户「按照建议来」）：Q-DOMAIN P1——3 个生信 skill 迁入 petri-pack-bio/skills；pack.json provides.skills；skill-registry loadPackSkills（source=pack，built-in>pack>installed，卸载/停用清理）；skills:check 11+3；UI source=pack 标签。**completed（2026-10-20，closeout 十三门 PASS）**：block214 5/5 + 邻域 32/32 + 产品路径 14/11 + 9223 双态 4/4·2/2；UI-529 verified。非范围=prompt/UI/result surface/data model（P2/P2b/P4）。"
     }
   ],
-  "lastUpdated": "2026-10-17",
-  "documentCount": 371
+  "lastUpdated": "2026-10-20",
+  "documentCount": 373
 }
