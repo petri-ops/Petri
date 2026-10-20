@@ -5117,3 +5117,10 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **为什么这样设计（自有形态）**：pack iframe 独立 origin 且 CSP 禁网络，不能自取 artifact；host 只做一次有界只读投影，不建第二套 artifact/truth。高级 tab（lineage/compare/history/selection/revisions）仍由核心 Renderer 提供，明确标注过渡，不把 Result Studio 压成通用文件浏览器。
 - **验证（代码）**：`packResultData` 5/5（图/表/文本/report/binary/HTTP/缺 URL/上限）；`resultSurfaceHost` modes 5/5；CenterPanel pack/core 路由 2/2；`block218-pack-result-surface` 2/2（pack.json resultSurfaces + 页面只消费 host context、不联网、不 fetch）；`quality:types` 0、`quality:lint` 0 errors。
 - **诚实边界**：dev DB `tool_jobs=0`，无法打开真实结果 job 跑 9223 结果页实机腿；本轮只证 host 选择、数据桥与 pack 页面契约，**不表述为真实结果页已 verified**。pack 页面的图/表渲染在独立 pack 仓交付，待真实 job 或 fixture job 出现后补实机。
+
+## UI-534: MCP 服务货架治理状态（2026-10-20 **in_progress（契约/类型完成，未做实机腿）**，BLOCK-221 / Q8 垂直切片）
+
+- **变化面**：MCP 服务货架的数据行形状改型——不再携带 `env` 值（第三方 token），只带 `envKeys`/`envCount`；新增只读 `policy` 摘要（trust / allowCount / blockCount / allow / block / projectedToolCount），为后续「这台 server 我信多少、禁了哪几个工具」的操作面留出数据。
+- **为什么这样设计（自有形态）**：治理状态必须**可见且可解释**——服务清单直接给出该 server 的允许/阻断计数与生效投影工具数，而不是让用户去读 JSON；凭据只以键名示人，值永不出进程（落盘仍是密文）。本轮只做数据面：`trust` 位**不改审批默认**，降档要与 Q1 审批事件契约一起做，避免绕开 D4 治理。
+- **验证（代码）**：`block221-mcp-server-policy` **9/9**（默认全允许 / block 优先 / allow 白名单 / 写侧 fail-closed / 坏 store 降级 / **状态行序列化不含明文 token** / 投影裁剪 3→1 / 摘要一致）；MCP 邻域 `mcp-client-manager`、`mcp-projection`、`mcp-client-settings`、`block160/163/203/204` 共 **40/40**；前端 `pages/extensions` + `hooks` **19 文件 / 145 项全绿**；`quality:types` 0。
+- **未做（reopen）**：货架上的信任/阻断**操作**入口（本轮无 UI 控件，故未做实机腿、不标记 verified）；OAuth、懒加载、深链安装安全面、三 hint 进策略。

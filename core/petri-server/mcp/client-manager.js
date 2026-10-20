@@ -184,8 +184,13 @@ function getStatuses() {
   const configured = settings.listMcpServers();
   const rows = configured.map((cfg) => {
     const sess = _sessions.get(cfg.id);
+    // BLOCK-221（Q8）— 凭据脱敏：env 值是第三方 server 的 token（落盘密文、读侧已还原明文），
+    // 绝不随状态面出 HTTP。只透键名与数量，够前端解释「这台配了 2 个环境变量」。
+    const { env, ...rest } = cfg;
     return {
-      ...cfg,
+      ...rest,
+      envKeys: env ? Object.keys(env).sort() : [],
+      envCount: env ? Object.keys(env).length : 0,
       status: sess ? sess.status : 'disconnected',
       error: sess ? sess.error : null,
       toolCount: sess ? sess.tools.length : 0,

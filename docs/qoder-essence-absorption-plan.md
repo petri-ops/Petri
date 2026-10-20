@@ -578,6 +578,8 @@ status: planned
 
 ### Q8 — MCP 与扩展治理（约 1 周）
 
+> 2026-10-20：**垂直切片已立项并收口 [BLOCK-221](./block-221-q8-mcp-governance-plan.md)（completed）**——MCP 状态面凭据脱敏（修掉解密 env 明文下发）+ 服务级 `{trust, allow, block}` 策略与投影过滤 + 策略读写路由 + 清单摘要。**reopen**：trust 降档接审批层（随 Q1）、OAuth per-server authenticate、大目录懒加载、深链安装安全面（SHA-256/大小/风险）、destructive/openWorld/idempotent 三 hint 进策略、技能自进化建议、货架 UI 操作面。
+
 **目标**：把 MCP 从「能用」升级为「默认不信任、可授权、可解释」；补齐扩展安装安全面。
 
 **范围**
@@ -686,7 +688,7 @@ Q-DOMAIN（垂直去核化，跨波次）
 - **母纲**：`AGENT-COMPETITIVENESS-PROGRAM`（方向）；本文件是 Qoder 样本的增量，不重开 CP-1–CP-22。
 - **建议首波**：**Q0.5（插件 ADR，0.5–1 天）+ Q-DOMAIN P1（skills 去核，1–2 周）**——先把 host 契约和生信 skills 落进 pack，再按 Q1（信任与审批）→ Q2b（联网检索）→ Q5（工作面 host）→ Q-DOMAIN P2b（生信 Result Surface）→ Q6 推进；Q-DOMAIN P2/P3 可穿插，P4 最后。
 - **发令方式**：Q-DOMAIN P1 可独立立项为 BLOCK（P0 ADR / P1 实现）；Q1/Q2b 各自独立发令；**结果页 P2b 不得早于 Q5 host，Q6 不得早于 P2b**。
-- **当前状态**：本文件为 planned（方向母纲）；**Q5（BLOCK-216）、P2-UI（BLOCK-217）、P2b 垂直切片（BLOCK-218）、Q6 批注垂直切片（BLOCK-219）、P3 垂直切片（BLOCK-220）均已收口（completed）**。按用户 2026-10-20 裁决的顺序，下一包=**Q-DOMAIN P4 data model（母纲要求最后）**，或 Q1/Q2b 按产品优先级穿插。P3 余项（`_pythonEquivalent` 脚本模板/`artifact-profiles`/`agent-workflow`/`learning`/`result-*-tools`）、Q6 余项（六种图形工具/文本批注与速记板/Office/pack 面批注）与 P2b 全量高级 tab 迁移、真实 job 实机腿为 reopen。G0 开发期常态 · 不外推 packaged/Provider/GA。
+- **当前状态**：本文件为 planned（方向母纲）；**Q5（BLOCK-216）、P2-UI（BLOCK-217）、P2b 垂直切片（BLOCK-218）、Q6 批注垂直切片（BLOCK-219）、P3 垂直切片（BLOCK-220）、Q8 治理垂直切片（BLOCK-221）均已收口（completed）**。按用户 2026-10-20 裁决的顺序，下一包=**Q9（外壳可靠性与打磨）→ Q-DOMAIN P4 data model（母纲要求最后）**。P3 余项（`_pythonEquivalent` 脚本模板/`artifact-profiles`/`agent-workflow`/`learning`/`result-*-tools`）、Q6 余项（六种图形工具/文本批注与速记板/Office/pack 面批注）与 P2b 全量高级 tab 迁移、真实 job 实机腿为 reopen。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## 12. 附：Q-MATRIX 更新记录
 
@@ -698,5 +700,6 @@ Q-DOMAIN（垂直去核化，跨波次）
 | 2026-10-20 | Q5 | BLOCK-216 收口：E2/E3 → ✅；E1 🔴→🟡（右轨统一，工作区模式/终端/侧聊仍各宿主）；矩阵 **✅26 / 🟡46 / 🔴23 / ⛔7 = 102**；E9 明确 deferred | `docs/block-216-q5-work-surface-host-plan.md` §7 + `acceptance/block-216/`（9223 live 19/19） |
 | 2026-10-20 | Q-DOMAIN P2-UI | BLOCK-217 收口：L8 🔴→🟡（act 去域 + pack uiActions host；result/data model 仍核心）；矩阵 **✅26 / 🟡47 / 🔴22 / ⛔7 = 102** | `docs/block-217-qdomain-p2ui-actions-plan.md` §6 + `acceptance/block-217/`（9223 live 8/8） |
 | 2026-10-20 | Q-DOMAIN P2b | BLOCK-218 垂直切片收口：E13/L8 更新（result mode 主 body 由 pack resultSurface 渲染；高级 tab 核心过渡）；矩阵不变 **✅26 / 🟡47 / 🔴22 / ⛔7**；真实 job live rider | `docs/block-218-qdomain-p2b-result-surface-plan.md` §6 |
+| 2026-10-20 | Q8 | BLOCK-221 垂直切片收口：MCP 凭据脱敏 + 服务级 allow/block + 投影过滤 + 策略路由；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——J3/J4 部分落地（无 OAuth、无深链安装、trust 未接审批） | `docs/block-221-q8-mcp-governance-plan.md` §5 |
 | 2026-10-20 | Q-DOMAIN P3 | BLOCK-220 垂直切片收口：legacy 化石注册表删除（单一注册源）+ methods 引用/工具标签下沉 pack `provides.methods`；域中性基线 **261→208 处**（tool-registry 31 归零、methods-export 62→24）；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——L8 仍 🟡（data model 与脚本模板未下沉） | `docs/block-220-qdomain-p3-methods-plan.md` §8 |
 | 2026-10-20 | Q6 | BLOCK-219 垂直切片收口：E5/C12 部分落地（PDF/图像**矩形**批注 + 加入任务；批次外=椭圆/箭头/画笔/文字/马赛克、文本选中批注、速记板 C13 随 Q2、PPTX/DOCX、pack 面）；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——E5 仍 🟡（PPTX/DOCX 未覆盖），C12 仍 🟡（无速记/批注进侧聊） | `docs/block-219-q6-annotation-host-plan.md` §6 + `acceptance/block-219/`（13/13） |

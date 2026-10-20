@@ -11,17 +11,31 @@ import { getApiPrefix } from '@/lib/env';
 
 export type McpServerStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
 
-/** 后端 getStatuses() 行形状（配置 ∪ 运行态）。 */
+/**
+ * 后端 getStatuses() 行形状（配置 ∪ 运行态）。
+ *
+ * BLOCK-221（Q8）— env **值不再下发**（第三方 token），只留键名与数量；
+ * `policy` 是服务级治理摘要（信任位 / 允许 / 阻断 / 生效投影数）。
+ */
 export interface McpServerRow {
   id: string;
   command: string;
   args: string[];
-  env: Record<string, string>;
+  envKeys: string[];
+  envCount: number;
   autoConnect: boolean;
   status: McpServerStatus;
   error: string | null;
   toolCount: number;
   connectedAt: number | null;
+  policy?: {
+    trust: 'ask' | 'allow';
+    allowCount: number;
+    blockCount: number;
+    allow: string[];
+    block: string[];
+    projectedToolCount: number;
+  };
 }
 
 export interface McpServerDraft {

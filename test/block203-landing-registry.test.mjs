@@ -47,12 +47,20 @@ const LANDING_POINTS = Object.freeze([
   { id: 'network', core14: false, kind: 'file', families: ['network'], note: '代理与自签 CA（BLOCK-202 新增）' },
   { id: 'runtime-policy', core14: false, kind: 'file', families: ['runtime'], note: '审批默认档位/并发深度/工具曝光（BLOCK-202 新增）' },
   { id: 'mcp-tool-policy', core14: false, kind: 'file', families: ['mcp-tool-policy'], note: 'MCP 逐工具策略（BLOCK-204 / W5 新增，无设置面）' },
+  // BLOCK-221（Q8）刻意**不**把 MCP 服务级治理策略做成注册表族：信任位与允许/阻断属于
+  // 安全决策，跟着「设置全景导出」走会在别的机器上还原出别人的信任判断（导出即越权）。
+  { id: 'mcp-server-policy', core14: false, kind: 'file', families: [], disposition: 'runtime-state', note: 'MCP 服务级治理策略（trust/allow/block）：安全决策，读侧 fail-closed，刻意不进配置导出' },
+  // —— W6/W7 后续新增族（此前只进注册表、漏登记本总账；2026-10-20 随 BLOCK-221 补齐）——
+  { id: 'data-retention', core14: false, kind: 'file', families: ['data-retention'], note: '数据保留策略（BLOCK-205 邻域新增，无设置面）' },
+  { id: 'memory-policy', core14: false, kind: 'file', families: ['memory-policy'], note: '记忆与压缩策略（BLOCK-205 / W6 新增，无设置面）' },
+  { id: 'subagent-profile', core14: false, kind: 'file', families: ['subagent-profile'], note: '子智能体 profile 声明（BLOCK-206 / W7a 新增，只收紧不放松）' },
+  { id: 'trust-policy', core14: false, kind: 'file', families: ['trust-policy'], note: '项目级信任策略（BLOCK-207 邻域新增，无设置面）' },
 ]);
 
 test('BLOCK-203 W4b P0 — 落点总账：BLOCK-199 的 14 处 + 后续新增 4 族，每处有归属与理由', () => {
   const core14 = LANDING_POINTS.filter((point) => point.core14);
   assert.equal(core14.length, 14, `BLOCK-199 的落点必须是 14 处（实得 ${core14.length}）——新增族不得拿来抵数`);
-  assert.equal(LANDING_POINTS.length, 18, `当前全集应为 14 + 4（W1–W3 三族 + W5 一族；实得 ${LANDING_POINTS.length}）`);
+  assert.equal(LANDING_POINTS.length, 23, `当前全集应为 14 + 9（W1–W3 三族 + W5 一族 + Q8 一族 + W6/W7 四族；实得 ${LANDING_POINTS.length}）`);
   const ids = LANDING_POINTS.map((p) => p.id);
   assert.equal(new Set(ids).size, ids.length, `落点 id 重复：${ids.join(',')}`);
   for (const point of LANDING_POINTS) {

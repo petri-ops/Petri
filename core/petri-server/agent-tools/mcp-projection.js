@@ -21,6 +21,7 @@
 
 const manager = require('../mcp/client-manager');
 const toolPolicy = require('../helpers/mcp-tool-policy');
+const serverPolicy = require('../helpers/mcp-server-policy');
 
 /**
  * BLOCK-204（W5）— 投影上限现为**可配**（`mcp-tool-policy` 族的 `projectionLimit`）。
@@ -96,6 +97,7 @@ function _buildProjection() {
   const rows = [];
   const seen = new Set();
   const store = toolPolicy.readStore();
+  const serverStore = serverPolicy.readStore();
   const limit = toolPolicy.projectionLimit(store);
   for (const row of manager.getStatuses()) {
     if (row.status !== 'connected') continue;
@@ -109,11 +111,22 @@ function _buildProjection() {
       // BLOCK-204（W5）— 逐工具停用：不投影 ⇒ 模型工具面里根本看不到它
       const policy = toolPolicy.policyFor(name, store);
       if (!policy.enabled) continue;
+      // BLOCK-221（Q8）— 服务级 allow/block：block 优先、allow 非空即白名单
+      if (!serverPolicy.evaluateTool(row.id, tool.name, serverStore).allowed) continue;
       rows.push({ name, serverId: row.id, toolName: tool.name, tool, policy });
       if (rows.length >= limit) return rows;
     }
   }
   return rows;
+}
+
+/** BLOCK-221 — 每个 server 的**生效**投影工具数（治理可见面用，不含限流截断后的猜测）。 */
+function projectedCountByServer() {
+  const counts = {};
+  for (const row of _buildProjection()) {
+    counts[row.serverId] = (counts[row.serverId] || 0) + 1;
+  }
+  return counts;
 }
 
 /** 投影为 provider 工具 defs（getProviderToolDefs 追加层）。 */
@@ -193,5 +206,6 @@ module.exports = {
   projectMcpToolDefs,
   getMcpToolEntry,
   projectedToolCount,
+  projectedCountByServer,
   mcpToolContract,
 };

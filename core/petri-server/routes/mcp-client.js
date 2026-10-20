@@ -21,11 +21,56 @@ const express = require('express');
 const settings = require('../helpers/mcp-settings');
 const manager = require('../mcp/client-manager');
 const toolPolicy = require('../helpers/mcp-tool-policy');
+const serverPolicy = require('../helpers/mcp-server-policy');
 const projection = require('../agent-tools/mcp-projection');
 
 function registerMcpClientRoutes(app) {
   app.get('/api/mcp/servers', (_req, res) => {
-    res.json({ status: 'ok', servers: manager.getStatuses() });
+    // BLOCK-221（Q8）— 每行附服务级策略摘要：治理状态要可见（env 已由 manager 脱敏）
+    const store = serverPolicy.readStore();
+    const projCounts = projection.projectedCountByServer();
+    const servers = manager.getStatuses().map((row) => ({
+      ...row,
+      policy: { ...serverPolicy.summaryFor(row.id, store), projectedToolCount: projCounts[row.id] || 0 },
+    }));
+    res.json({ status: 'ok', servers });
+  });
+
+  // BLOCK-221（Q8）— 服务级策略读写面（信任位/允许/阻断；本轮不改变审批默认）
+  app.get('/api/mcp/servers/:id/policy', (req, res) => {
+    const id = String(req.params.id || '');
+    const known = new Set(settings.listMcpServers().map((s) => s.id));
+    if (!known.has(id)) {
+      res.status(404).json({ status: 'error', error: 'server_not_found' });
+      return;
+    }
+    res.json({ status: 'ok', serverId: id, policy: serverPolicy.policyForServer(id) });
+  });
+
+  app.put('/api/mcp/servers/:id/policy', express.json(), (req, res) => {
+    const id = String(req.params.id || '');
+    const knownIds = new Set(settings.listMcpServers().map((s) => s.id));
+    const tools = manager.listServerTools(id);
+    const checked = serverPolicy.validatePatch(id, req.body || {}, {
+      knownServerIds: knownIds,
+      connectedTools: tools.ok ? tools.tools.map((t) => t && t.name).filter(Boolean) : null,
+    });
+    if (!checked.ok) {
+      const status = checked.error === 'server_not_found' ? 404 : 400;
+      res.status(status).json({ status: 'error', error: checked.error, diagnostics: checked.diagnostics });
+      return;
+    }
+    const saved = serverPolicy.writeStore(checked.nextStore);
+    if (!saved.ok) {
+      res.status(400).json({ status: 'error', error: 'policy_rejected', diagnostics: [saved] });
+      return;
+    }
+    res.json({
+      status: 'ok',
+      serverId: id,
+      policy: checked.policy,
+      diagnostics: checked.diagnostics,
+    });
   });
 
   app.post('/api/mcp/servers', express.json(), (req, res) => {

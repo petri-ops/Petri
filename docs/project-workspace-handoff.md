@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-20（**BLOCK-221 Q8 垂直切片 completed**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-221（Q8 垂直切片）**：①凭据脱敏——`GET /api/mcp/servers` 不再下发解密后的 env 明文（改 `envKeys`/`envCount`；写入侧不变、连接仍用进程内明文）；②`helpers/mcp-server-policy.js` + `mcp-server-policy.json`（逐 server `{trust:'ask'|'allow', allow[], block[]}`，读侧 fail-closed，写侧 404/400 + diagnostics）；③投影求值 block 优先 → allow 白名单 → 默认全允许；④`GET/PUT /api/mcp/servers/:id/policy`、清单 `policy` 摘要（含 projectedToolCount）；⑤前端 `McpServerRow` 改 `envKeys/envCount/policy?`。证据=block221 9/9 + MCP 邻域 40/40 + 前端 extensions/hooks 19 文件 145 项全绿。reopen=trust 降档接审批（必须随 Q1）/OAuth/懒加载/深链安装/四 hint/货架 UI 操作面。**下一包**=Q9（外壳可靠性）→ P4。**收口仍需 PATH 前置 Git Bash**（本机 `bash`→WSL launcher）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-20（**BLOCK-220 Q-DOMAIN P3 垂直切片 completed**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-220（P3 垂直切片）**：①删化石 `core/shared-backend/tool-registry.js`（458 行/10 个内联生信工具/零消费）+ barrel 字段，工具注册唯一源=`core/petri-server/tool-registry.js`（pack `registry/tool-registry.json` 驱动）；②pack 新契约 `provides.methods`（`methods/citations.json`+`methods/tool-labels.json`，**纯数据不执行 pack 代码**；pack 0.1.1→0.2.0）；③`core/petri-server/helpers/pack-methods.js` 只读有界装载器（≤256KB/类型≤200/条目≤40/单条≤400 字符、packRoot 内路径、坏形状 fail-closed、多包稳定覆盖留 warning）；④`methods-export.js` 删 `_METHODS_CITATIONS`/`tools` 表改读 pack + 无 pack 无引文。证据=block220 13/13 + 真实 pack 根集成 13 类型/13 标签/0 warning + 域中性基线 261→208 处 + test:changed Node 315 项 0 红。reopen=`_pythonEquivalent` 脚本模板（余 24 处域词主力）/`artifact-profiles`/`agent-workflow`/`learning`/`result-*-tools`。**下一包**=Q-DOMAIN P4 data model（母纲要求最后）或 Q1/Q2b 穿插。**收口仍需 PATH 前置 Git Bash**（本机 `bash`→WSL launcher）。G0 开发期常态 · 不外推 packaged/Provider/GA。

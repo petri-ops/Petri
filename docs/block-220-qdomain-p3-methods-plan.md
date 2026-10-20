@@ -8,7 +8,7 @@ acceptance:
   - 装载器 core/petri-server/helpers/pack-methods.js：只读、有界（文件 ≤256KB、类型 ≤200、单类型条目 ≤40、单条 ≤400 字符），形状错误 fail-closed 忽略坏包。
   - 域中性基线机械下调（只减不增）：	ool-registry.js 31 处归零 + methods 文件相应下调；	est/domain-neutrality.test.mjs 绿。
   - 单元测试：契约校验/缺失回退/停用回退/越界截断/坏 JSON 忽略；	est:changed 定向绿 + closeout 十三门 PASS。
-reopen: _pythonEquivalent 脚本模板下沉（占位符/条件语义）；rtifact-profiles.js 扩展化（P4 邻域）；gent-workflow.js 工作流模板；learning.js 教学工具领域语义（等 Q2）；esult-*-tools 领域默认值；LLM 人格文案改为 pack 可注入自由 prompt（防注入面扩大，不做）。
+reopen: `_pythonEquivalent` 脚本模板下沉（占位符/条件语义）；`artifact-profiles.js` 扩展化（P4 邻域）；`agent-workflow.js` 工作流模板；`learning.js` 教学工具领域语义（等 Q2）；`result-*-tools` 领域默认值；LLM 人格文案改为 pack 可注入自由 prompt（防注入面扩大，不做）。
 status: completed
 ---
 

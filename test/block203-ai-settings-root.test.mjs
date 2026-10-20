@@ -19,7 +19,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -29,7 +29,8 @@ process.env.PETRI_LOCAL_DATA_DIR = tmpDir;
 
 const aiSettings = require(path.join(ROOT, 'core/petri-server/helpers/ai-settings.js'));
 const schema = require(path.join(ROOT, 'core/packages/shared-config/config-schema.js'));
-const { buildReport } = await import(path.join(ROOT, 'scripts/block199-config-doctor.mjs'));
+// Windows 上动态 import 只接受 file: URL（绝对路径会被读成 `d:` 协议而报错）
+const { buildReport } = await import(pathToFileURL(path.join(ROOT, 'scripts/block199-config-doctor.mjs')).href);
 
 const FILE = path.join(tmpDir, 'ai-settings.json');
 const readFile = () => JSON.parse(fs.readFileSync(FILE, 'utf8'));
