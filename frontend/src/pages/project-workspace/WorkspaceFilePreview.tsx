@@ -36,9 +36,13 @@ import {
 import styles from '../project-workspace.module.css';
 import type { ActiveWorkspaceFile } from './types';
 import { BinaryPreviewCard } from './BinaryPreviewCard';
-import { WorkspacePdfPreview } from './WorkspacePdfPreview';
 import { OfficePreviewPane } from './OfficePreviewPane';
 import { isCsvFile, isPdfFile, isHtmlFile, isJsonFile, withReportTheme, detectOfficeKind } from './helpers';
+// BLOCK-219 Q6 — 工作区文件批注（PDF/图像）；进对话仍走唯一通道 copilotAsk
+import { AnnotatableImagePane } from '@/components/annotations/AnnotatableImagePane';
+import { AnnotatablePdfPane } from '@/components/annotations/AnnotatablePdfPane';
+import { dispatchPetriEvent, petriEvents } from '@/lib/events';
+import type { AnnotationScope, AnnotationTaskTarget } from '@/lib/annotations';
 
 // UI-400-6 — Markdown 目录解析：1-3 级 ATX 标题，跳过 ```/~~~ 围栏内伪标题。
 function parseMdHeadings(text: string): Array<{ level: 1 | 2 | 3; text: string }> {
@@ -111,6 +115,20 @@ export function WorkspaceFilePreview({
     const separator = file.url.includes('?') ? '&' : '?';
     return `${file.url}${separator}workspaceRevision=${refreshVersion}`;
   }, [file?.url, refreshVersion]);
+
+  // BLOCK-219 Q6 — 工作区文件批注身份 = 项目 + 相对路径（无 revision 概念，如实不伪造）。
+  const annotationScope: AnnotationScope | null = projectId && file?.path
+    ? { projectId, surface: 'workspace-file', filePath: file.path }
+    : null;
+  const annotationTarget: AnnotationTaskTarget = {
+    surface: 'workspace-file',
+    filePath: file?.path ?? null,
+    artifactName: file?.name ?? null,
+  };
+  const handleAnnotationAddToTask = useCallback((prompt: string) => {
+    if (!prompt) return;
+    dispatchPetriEvent(petriEvents.copilotAsk, { prompt });
+  }, []);
 
   // BLOCK-52 P2 头部「引用到对话」按钮已随 BLOCK-74 用户裁决退役（图片引用行删除）。
 
@@ -330,20 +348,36 @@ export function WorkspaceFilePreview({
           <p className={styles.panelEmpty}>解析 {file.name} 的内容…</p>
         )}
         {officeStatus === 'ready' && officePreview && !officePreview.fallback && (
-          <OfficePreviewPane preview={officePreview} onAssetOpen={setLightboxSrc} />
+          <>
+            <OfficePreviewPane preview={officePreview} onAssetOpen={setLightboxSrc} />
+            {/* BLOCK-219 Q6 — Office 文档无文本层可锚定：说明原因，不放死按钮 */}
+            <p className={styles.resultAnnotationUnavailable} data-testid="annotation-unavailable-hint">
+              文档格式（docx/pptx）暂不支持批注：批注只支持 PDF 与图像文件。
+            </p>
+          </>
         )}
         {status === 'ready' && fallbackKind === 'image' && (
-          <>
-            {/* BLOCK-74 — 图片头部「引用到对话」行随用户裁决移除 */}
-            <button className={styles.workspaceImageButton} onClick={() => setLightboxSrc(previewUrl)}>
-              <img src={previewUrl} alt={file.name} className={styles.workspaceImagePreview} />
-            </button>
-          </>
+          /* BLOCK-74 — 图片头部「引用到对话」行随用户裁决移除；BLOCK-219 Q6 加批注宿主 */
+          <AnnotatableImagePane
+            src={previewUrl}
+            alt={file.name}
+            onOpenImage={() => setLightboxSrc(previewUrl)}
+            scope={annotationScope}
+            target={annotationTarget}
+            onAddToTask={handleAnnotationAddToTask}
+          />
         )}
         {status === 'ready' && fallbackKind === 'pdf' && (
           /* UI-400-1 — Electron 内置 PDF 查看器结构性损坏（chrome://resources 被扩展
-             CSP 拦截），改 pdfjs-dist 本地渲染；依赖只经由 WorkspacePdfPreview 一层 */
-          <WorkspacePdfPreview url={previewUrl} name={file.name} />
+             CSP 拦截），改 pdfjs-dist 本地渲染；依赖只经由 WorkspacePdfPreview 一层
+             BLOCK-219 Q6 — 逐页批注层经 AnnotatablePdfPane 注入 */
+          <AnnotatablePdfPane
+            url={previewUrl}
+            name={file.name}
+            scope={annotationScope}
+            target={annotationTarget}
+            onAddToTask={handleAnnotationAddToTask}
+          />
         )}
         {status === 'ready' && fallbackKind === 'html' && (
           <iframe

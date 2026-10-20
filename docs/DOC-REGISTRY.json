@@ -7312,8 +7312,29 @@
         "G0"
       ],
       "notes": "2026-10-20 立项 active（用户「好的 按照你的建议推进，搞定他」）：P2b 垂直切片——result mode 主 body 由 pack resultSurfaces iframe 提供（图/表/文本/报告源码 + truth/revision），核心保留 context bar/composer 与 code/compare/history 过渡面；只读有界数据桥；pack 缺失/不匹配标注 core-transitional。**completed（2026-10-20，closeout 十三门 PASS）**：packResultData 5/5 + resultSurfaceHost 5/5 + CenterPanel 路由 2/2 + pack 页面契约 2/2 + test:changed 191/191 前端；UI-532 in_progress（dev DB tool_jobs=0，无真实结果 job 实机腿）。边界=高级 tab 仍核心过渡、真实 job live rider。"
+    },
+    {
+      "id": "BLOCK-219-Q6-ANNOTATION-HOST",
+      "capability": "q6-annotation-host",
+      "path": "docs/block-219-q6-annotation-host-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P5-CLOSED",
+      "canonical": true,
+      "truthDomain": "q6-annotation-host",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-20",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "annotation",
+        "result-studio",
+        "learning-loop",
+        "q6",
+        "G0"
+      ],
+      "notes": "2026-10-20 立项 active（用户「继续」）：Q6 垂直切片——通用 annotation host（旁路元数据 + 归一化坐标 + 有界）+ PDF 页/图像区域批注 + 「加入任务」经 copilotAsk。**completed（2026-10-20，closeout 十三门 PASS；9223 live 13/13）**：block219 12/12 + 前端 42/42 + test:changed Node 744 项 0 红/前端 30 文件全绿 + acceptance/block-219/（13/13，SVG/PDF 哈希前后一致）；UI-533 verified（dev Electron 边界内）。边界=六种图形工具/文本批注与速记板/Office/pack iframe 面批注 reopen。"
     }
   ],
   "lastUpdated": "2026-10-20",
-  "documentCount": 377
+  "documentCount": 378
 }

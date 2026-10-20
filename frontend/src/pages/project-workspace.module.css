@@ -7270,6 +7270,21 @@ body:global(.petri-resizing-columns) * {
   box-shadow: var(--petri-shadow-menu);
 }
 
+/* BLOCK-219 Q6 — 每页定位盒子：批注覆盖层的 inset:0 参照系（尺寸=canvas）。 */
+.workspacePdfPageBox {
+  position: relative;
+  display: block;
+  max-width: 100%;
+  line-height: 0;
+}
+
+/* BLOCK-219 Q6 — 不支持批注的产物格式：只说明原因，不放置死入口。 */
+.resultAnnotationUnavailable {
+  margin: var(--petri-space-2) 0 0;
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-sm);
+}
+
 /* BLOCK-88 P2（D3）— 联邦委托会话标记（左栏「联邦委托」查看面） */
 .fedConvBadge {
   flex: none;

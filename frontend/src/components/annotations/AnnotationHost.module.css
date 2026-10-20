@@ -1,0 +1,37 @@
+/* BLOCK-219 Q6 — 批注宿主（图像/PDF 共用）。 */
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  gap: var(--petri-space-1);
+}
+
+.canvas {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  line-height: 0;
+}
+
+.imageTrigger {
+  display: block;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+  line-height: 0;
+}
+
+.imageTrigger:disabled {
+  cursor: default;
+}
+
+.image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--petri-radius-sm);
+}

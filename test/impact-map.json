@@ -3,6 +3,41 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "block219-q6-annotations",
+      "note": "BLOCK-219 Q6 垂直切片 — 产物批注旁路存储（result_annotations）+ PDF 页/图像区域批注 + 加入任务；核心渲染面（结果面 PDF/图像、工作区文件预览）接线，Office/表格只给诚实原因。",
+      "patterns": [
+        "core/shared-backend/result-annotation-schema.js",
+        "core/shared-backend/result-annotation-contracts.js",
+        "core/shared-backend/result-annotation-store.js",
+        "core/petri-server/routes/result-studio/annotations.js",
+        "core/petri-server/routes/result-studio/index.js",
+        "src/migrations/015_result_annotations.sql",
+        "frontend/src/lib/annotations.ts",
+        "frontend/src/lib/annotation-client.ts",
+        "frontend/src/hooks/useArtifactAnnotations.ts",
+        "frontend/src/components/annotations/**",
+        "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
+        "frontend/src/components/workspace-panels/PdfResultViewer.tsx",
+        "frontend/src/pages/project-workspace/WorkspaceFilePreview.tsx",
+        "frontend/src/pages/project-workspace/WorkspacePdfPreview.tsx",
+        "frontend/src/pages/project-workspace.module.css",
+        "test/block219-*.test.mjs",
+        "acceptance/block-219/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block219-*.cjs"
+      ],
+      "tests": [
+        "test/block219-result-annotations.test.mjs",
+        "frontend/src/lib/annotations.test.ts",
+        "frontend/src/lib/annotation-client.test.ts",
+        "frontend/src/components/annotations/AnnotationOverlay.test.tsx",
+        "frontend/src/components/annotations/AnnotationBar.test.tsx",
+        "frontend/src/components/annotations/AnnotatableImagePane.test.tsx",
+        "frontend/src/pages/project-workspace/WorkspacePdfPreview.test.tsx",
+        "frontend/src/pages/project-workspace/WorkspaceFilePreview.test.tsx"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "block166-gen-ui",
       "note": "BLOCK-166 Gen UI 沙箱：前端解析器/卡片/followUp 判定/渗透对抗走 vitest（references/followUp/GenUiCard/pentest 测试），主进程宿主与 guest 桥/主题映射/外链白名单/持久化往返/导出/渗透静态面走 node:test（host/bridge/theme/external-link/p2/p3-pentest 测试），后端 REST 路由 gen-ui.js 纯函数同测；IPC 双向守卫由 ipc-channels-registry 自动覆盖。",
       "patterns": [

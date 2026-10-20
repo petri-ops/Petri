@@ -536,6 +536,8 @@ status: planned
 
 ### Q6 — 产物批注与学习闭环（约 1–2 周）
 
+> 2026-10-20：**垂直切片已立项并收口 [BLOCK-219](./block-219-q6-annotation-host-plan.md)（completed）**——核心 annotation host（`result_annotations` 旁路元数据 + 归一化 0..1 坐标 + 有界/项目隔离）+ PDF 页与图像区域批注（结果面/工作区预览）+「加入任务」经 `petri:copilot-ask`；实机 13/13，批注不写原始产物。**未做（reopen）**：椭圆/箭头/画笔/文字/马赛克与撤销重做、文本选中批注与速记板（C13 随 Q2）、PPTX/DOCX/XLSX、pack iframe 面批注（需窄桥契约）、Agent 侧批注读取工具。
+
 **目标**：让「读产物 → 批注 → 追问/继续分析」成为闭环，服务 Petri 的学习/科研场景。
 
 **范围**
@@ -683,7 +685,7 @@ Q-DOMAIN（垂直去核化，跨波次）
 - **母纲**：`AGENT-COMPETITIVENESS-PROGRAM`（方向）；本文件是 Qoder 样本的增量，不重开 CP-1–CP-22。
 - **建议首波**：**Q0.5（插件 ADR，0.5–1 天）+ Q-DOMAIN P1（skills 去核，1–2 周）**——先把 host 契约和生信 skills 落进 pack，再按 Q1（信任与审批）→ Q2b（联网检索）→ Q5（工作面 host）→ Q-DOMAIN P2b（生信 Result Surface）→ Q6 推进；Q-DOMAIN P2/P3 可穿插，P4 最后。
 - **发令方式**：Q-DOMAIN P1 可独立立项为 BLOCK（P0 ADR / P1 实现）；Q1/Q2b 各自独立发令；**结果页 P2b 不得早于 Q5 host，Q6 不得早于 P2b**。
-- **当前状态**：本文件为 planned（方向母纲）；**Q5（BLOCK-216）、P2-UI（BLOCK-217）、P2b 垂直切片（BLOCK-218）均已收口（completed）**。按用户 2026-10-20 裁决的顺序，下一包=**Q6（产物批注/学习闭环）** → P3 → P4；Q1/Q2b 可穿插。P2b 全量高级 tab 迁移与真实 job 实机腿为 reopen。G0 开发期常态 · 不外推 packaged/Provider/GA。
+- **当前状态**：本文件为 planned（方向母纲）；**Q5（BLOCK-216）、P2-UI（BLOCK-217）、P2b 垂直切片（BLOCK-218）、Q6 批注垂直切片（BLOCK-219）均已收口（completed）**。按用户 2026-10-20 裁决的顺序，下一包=**Q-DOMAIN P3（methods/learning/legacy registry）** → P4 data model；Q1/Q2b 可穿插。Q6 余项（六种图形工具/文本批注与速记板/Office/pack 面批注）与 P2b 全量高级 tab 迁移、真实 job 实机腿为 reopen。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## 12. 附：Q-MATRIX 更新记录
 
@@ -695,3 +697,4 @@ Q-DOMAIN（垂直去核化，跨波次）
 | 2026-10-20 | Q5 | BLOCK-216 收口：E2/E3 → ✅；E1 🔴→🟡（右轨统一，工作区模式/终端/侧聊仍各宿主）；矩阵 **✅26 / 🟡46 / 🔴23 / ⛔7 = 102**；E9 明确 deferred | `docs/block-216-q5-work-surface-host-plan.md` §7 + `acceptance/block-216/`（9223 live 19/19） |
 | 2026-10-20 | Q-DOMAIN P2-UI | BLOCK-217 收口：L8 🔴→🟡（act 去域 + pack uiActions host；result/data model 仍核心）；矩阵 **✅26 / 🟡47 / 🔴22 / ⛔7 = 102** | `docs/block-217-qdomain-p2ui-actions-plan.md` §6 + `acceptance/block-217/`（9223 live 8/8） |
 | 2026-10-20 | Q-DOMAIN P2b | BLOCK-218 垂直切片收口：E13/L8 更新（result mode 主 body 由 pack resultSurface 渲染；高级 tab 核心过渡）；矩阵不变 **✅26 / 🟡47 / 🔴22 / ⛔7**；真实 job live rider | `docs/block-218-qdomain-p2b-result-surface-plan.md` §6 |
+| 2026-10-20 | Q6 | BLOCK-219 垂直切片收口：E5/C12 部分落地（PDF/图像**矩形**批注 + 加入任务；批次外=椭圆/箭头/画笔/文字/马赛克、文本选中批注、速记板 C13 随 Q2、PPTX/DOCX、pack 面）；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——E5 仍 🟡（PPTX/DOCX 未覆盖），C12 仍 🟡（无速记/批注进侧聊） | `docs/block-219-q6-annotation-host-plan.md` §6 + `acceptance/block-219/`（13/13） |

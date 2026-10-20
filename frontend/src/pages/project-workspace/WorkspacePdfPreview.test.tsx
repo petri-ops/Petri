@@ -45,4 +45,23 @@ describe('WorkspacePdfPreview (UI-400-1 pdfjs 渲染)', () => {
     const { getByTestId } = render(<WorkspacePdfPreview url="http://mock/bad.pdf" name="坏.pdf" />);
     await waitFor(() => expect(getByTestId('pdf-preview').textContent).toContain('PDF 渲染失败'));
   });
+
+  // BLOCK-219 Q6：逐页定位盒子 + 注入的批注覆盖层（portal 挂进页盒子）
+  it('每页套一层 data-page 定位盒子，并按页挂载覆盖层', async () => {
+    const { container, getByTestId } = render(
+      <WorkspacePdfPreview
+        url="http://mock/annotated.pdf"
+        name="带批注.pdf"
+        renderPageOverlay={(page) => <span data-testid={`page-overlay-${page}`}>第 {page} 页批注层</span>}
+      />,
+    );
+    await waitFor(() => expect(container.querySelectorAll('canvas').length).toBe(2));
+    const boxes = Array.from(container.querySelectorAll('[data-page]'));
+    expect(boxes.map((node) => (node as HTMLElement).dataset.page)).toEqual(['1', '2']);
+    await waitFor(() => expect(getByTestId('page-overlay-1')).toBeTruthy());
+    expect(getByTestId('page-overlay-2')).toBeTruthy();
+    // 覆盖层必须在自己的页盒子内（坐标参照系不能串页）
+    expect(boxes[0].contains(getByTestId('page-overlay-1'))).toBe(true);
+    expect(boxes[1].contains(getByTestId('page-overlay-1'))).toBe(false);
+  });
 });

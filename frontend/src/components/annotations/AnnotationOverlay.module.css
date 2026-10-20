@@ -1,0 +1,85 @@
+/* BLOCK-219 Q6 — 批注覆盖层。颜色一律走 --petri-* 语义 token（禁裸色值/slate）。 */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* 绘制模式才接收指针：平时不抢底层查看器（灯箱按钮、PDF 滚动）的交互。 */
+.drawing {
+  pointer-events: auto;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.box {
+  position: absolute;
+  display: block;
+  padding: 0;
+  border: 2px solid var(--petri-warning);
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-accent-bg);
+  box-shadow: var(--petri-shadow-float);
+  pointer-events: auto;
+  cursor: pointer;
+  font: inherit;
+}
+
+.box:hover {
+  background: var(--petri-accent-soft);
+}
+
+.box[data-color='amber'] {
+  border-color: var(--petri-warning);
+  background: var(--petri-warning-bg);
+}
+
+.box[data-color='sky'] {
+  border-color: var(--petri-info);
+  background: var(--petri-accent-bg);
+}
+
+.box[data-color='rose'] {
+  border-color: var(--petri-danger);
+  background: var(--petri-danger-bg);
+}
+
+.badge {
+  position: absolute;
+  top: -10px;
+  left: -2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--petri-radius-pill, 999px);
+  background: var(--petri-bg-elevated);
+  color: var(--petri-text);
+  font-family: var(--petri-font-mono);
+  font-size: 0.75em;
+  line-height: 16px;
+  text-align: center;
+}
+
+.draft {
+  position: absolute;
+  border: 1px dashed var(--petri-warning);
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-accent-bg);
+  pointer-events: none;
+}
+
+.draft[data-color='amber'] {
+  border-color: var(--petri-warning);
+  background: var(--petri-warning-bg);
+}
+
+.draft[data-color='sky'] {
+  border-color: var(--petri-info);
+}
+
+.draft[data-color='rose'] {
+  border-color: var(--petri-danger);
+  background: var(--petri-danger-bg);
+}

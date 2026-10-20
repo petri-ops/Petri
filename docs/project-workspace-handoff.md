@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-20（**BLOCK-219 Q6 批注 host completed（closeout 十三门 PASS；9223 live 13/13）**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-219（Q6 垂直切片）**：`result_annotations` 旁路元数据（归一化 0..1 坐标/页号/评论；单 scope ≤200；项目隔离；`015_*.sql` 单源迁移）+ PDF 页定位盒（portal 覆盖层）与图像批注层（结果面 + 工作区预览）+「加入任务」经 `petri:copilot-ask` 结构化引用；批注不写原始产物（实机验证哈希前后一致）；UI-533 verified（dev Electron 边界内，`acceptance/block-219/` 13/13）。边界=六种图形工具/撤销重做、文本批注与速记板（Q2 未做）、Office 批注、pack iframe 面批注 reopen。`test:changed` 需 PATH 前置 Git Bash（本机 `bash` 默认解析到 WSL launcher，会让 block67/89 fs 测试误红）。**下一包**=Q-DOMAIN P3（methods/learning/legacy registry）→ P4；Q1/Q2b 可穿插。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-20（**BLOCK-218 Q-DOMAIN P2b 垂直切片 completed（closeout 十三门 PASS）**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-218（P2b 垂直切片）**：result mode 主 body 由 pack `resultSurfaces` iframe 提供（图/表/文本/report 源码 + truth/revision），核心保留 context bar/composer 与 code/compare/history 过渡面；只读有界数据桥；pack 缺失/不匹配 core-transitional；packResultData 5/5 + resultSurfaceHost 5/5 + CenterPanel 2/2 + pack 页面契约 2/2 + test:changed 191/191 前端。**下一步**：Q6 批注 → P3 methods/learning/legacy registry → P4 data model；Q1/Q2b 可穿插。rider=真实 tool_jobs 结果页实机腿（dev DB 0 条，UI-532 in_progress）。G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -140,6 +140,8 @@ module.exports = {
       repo, baselineWork, databasePath,
     });
     require('./selection').register(app, { repo });
+    // BLOCK-219 Q6 — 产物批注旁路端点（不依赖 repo()：只读写 result_annotations）。
+    require('./annotations').register(app, { ensureSchema: false });
     require('./context').register(app, { repo });
     require('./changesets').register(app, { repo, projectContext, changeSetContext });
     require('./revisions').register(app, { repo, projectContext, replayService });

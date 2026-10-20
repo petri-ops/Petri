@@ -53,7 +53,13 @@ import { fetchCrossJobPinSnapshot } from './crossJobPinSnapshot';
 // BLOCK-142 切片 E — md/xlsx/pdf 三 viewer（注册表 spreadsheet/markdown/pdf adapter 的挂载面）
 import { MarkdownResultViewer } from './MarkdownResultViewer';
 import { SpreadsheetResultViewer } from './SpreadsheetResultViewer';
-import { PdfResultViewer } from './PdfResultViewer';
+// BLOCK-219 Q6 — 批注接线（身份推导/两个宿主/不可批注提示）外置，见同目录 resultAnnotation.tsx
+import {
+  AnnotatedResultPdf,
+  AnnotationUnavailableNote,
+  ResultImagePreview,
+  buildResultAnnotationProps,
+} from './ResultArtifactShell/resultAnnotation';
 // BLOCK-175 CP-14 — 只读文本族选择总线接线（canSelect 位消费面）
 import { viewerProfileCanSelect } from '@/components/result-studio/viewerRegistry';
 import { useArtifactTextSelection } from './ResultArtifactShell/useArtifactTextSelection';
@@ -735,22 +741,13 @@ export function ResultArtifactShell({
     };
   }, [activeIsPreviewText, previewAvailabilityKey, previewRetryVersion, selectedArtifact, selectedArtifactName, selectedArtifactUrl]);
 
-  // BLOCK-52 P2（图片/结果图引用）：把当前结果图 + artifact 血统派发给 SimpleChat composer。
-  const handleQuoteArtifactImage = () => {
-    if (!selectedArtifactUrl) return;
-    dispatchPetriEvent(petriEvents.imageQuote, {
-      projectId: project.id,
-      kind: 'result-artifact',
-      name: selectedArtifactName,
-      url: selectedArtifactUrl,
-      artifact: {
-        toolJobId: viewedRevision?.toolJobId || job?.id || '',
-        revisionId: viewedRevision?.revisionId,
-        artifactId: viewedRevision?.artifactId,
-        revisionOrdinal: viewedRevision?.revisionOrdinal,
-      },
-    });
-  };
+  // BLOCK-219 Q6 — 批注身份：权威坐标 (artifactId, revisionId)；缺 artifactId 即不可批注。
+  const annotationProps = buildResultAnnotationProps({
+    projectId: project.id,
+    revision: viewedRevision,
+    jobId: job?.id ?? null,
+    artifactName: selectedArtifactLabel || selectedArtifactName || null,
+  });
 
   const retryCurrentPreview = () => {
     setPreviewAvailability({ key: previewAvailabilityKey, status: 'checking', reason: null });
@@ -804,40 +801,27 @@ export function ResultArtifactShell({
     }
     if (viewerAdapter === 'image' && selectedArtifactUrl) {
       return (
-        <div className={styles.resultPreviewImageColumn}>
-          <div className={styles.workspaceMarkdownDiffActions}>
-            {/* BLOCK-52 P2（图片/结果图引用）：把当前结果图引用到对话 composer */}
-            <button
-              type="button"
-              className="petri-btn petri-btn--ghost petri-btn--sm"
-              onClick={handleQuoteArtifactImage}
-              title="把这张结果图引用到对话"
-            >
-              引用到对话
-            </button>
-          </div>
-          <div className={styles.resultPreviewImageCanvas}>
-            <button
-              type="button"
-              className={styles.resultPreviewImageButton}
-              onClick={() => setLightboxSrc(selectedArtifactUrl)}
-            >
-              <img
-                key={`${previewAvailabilityKey}:${previewRetryVersion}`}
-                src={selectedArtifactUrl}
-                alt={selectedArtifactLabel || selectedArtifact.name}
-                className={styles.resultPreviewImage}
-                onLoad={() => {
-                  setPreviewAvailability({ key: previewAvailabilityKey, status: 'available', reason: null });
-                }}
-                onError={() => {
-                  const reason = '结果记录仍在，但当前产物文件不可读取。';
-                  setPreviewAvailability({ key: previewAvailabilityKey, status: 'unavailable', reason });
-                }}
-              />
-            </button>
-          </div>
-        </div>
+        <ResultImagePreview
+          key={`${previewAvailabilityKey}:${previewRetryVersion}`}
+          url={selectedArtifactUrl}
+          alt={selectedArtifactLabel || selectedArtifact.name}
+          name={selectedArtifactName}
+          projectId={project.id}
+          artifact={{
+            toolJobId: viewedRevision?.toolJobId || job?.id || '',
+            revisionId: viewedRevision?.revisionId,
+            artifactId: viewedRevision?.artifactId,
+            revisionOrdinal: viewedRevision?.revisionOrdinal,
+          }}
+          conversationId={conversationId ?? null}
+          onAddToTask={onAskAgent}
+          onLightbox={() => setLightboxSrc(selectedArtifactUrl)}
+          onImageLoad={() => setPreviewAvailability({ key: previewAvailabilityKey, status: 'available', reason: null })}
+          onImageError={() => setPreviewAvailability({
+            key: previewAvailabilityKey, status: 'unavailable', reason: '结果记录仍在，但当前产物文件不可读取。',
+          })}
+          {...annotationProps}
+        />
       );
     }
     // BLOCK-142 切片 E — markdown/spreadsheet/pdf 三分支：组件自取数（产物 URL 同
@@ -858,19 +842,26 @@ export function ResultArtifactShell({
     }
     if (viewerAdapter === 'spreadsheet' && selectedArtifactUrl) {
       return (
-        <SpreadsheetResultViewer
-          url={selectedArtifactUrl}
-          name={selectedArtifactLabel || selectedArtifact.name}
-        />
+        <>
+          <SpreadsheetResultViewer
+            url={selectedArtifactUrl}
+            name={selectedArtifactLabel || selectedArtifact.name}
+          />
+          {/* BLOCK-219 Q6 — 表格类产物无文本层可锚定；如实说明而不是给死按钮 */}
+          <AnnotationUnavailableNote />
+        </>
       );
     }
     if (viewerAdapter === 'pdf' && selectedArtifactUrl) {
       return (
         <>
           <ViewerExportAction adapter={viewerAdapter} url={selectedArtifactUrl} />
-          <PdfResultViewer
+          <AnnotatedResultPdf
             url={selectedArtifactUrl}
             name={selectedArtifactLabel || selectedArtifact.name}
+            conversationId={conversationId ?? null}
+            onAddToTask={onAskAgent}
+            {...annotationProps}
           />
         </>
       );
@@ -920,6 +911,7 @@ export function ResultArtifactShell({
         {selectedArtifactUrl && (
           <a href={selectedArtifactUrl} target="_blank" rel="noreferrer">打开或下载原文件</a>
         )}
+        <AnnotationUnavailableNote />
       </div>
     );
   };

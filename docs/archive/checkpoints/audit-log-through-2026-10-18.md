@@ -80,3 +80,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-20T09:28:37.348Z -->
 最后更新：2026-10-18（**C-33 实码核定：skills:check 5 红=外部 pack 未检出（fail-closed），不是 manifest 缺陷**）：补 `PETRI_PACK_DIRS` 让 pack 放在任何位置都能被承认（判据仍走 validatePackDir 全量校验）；`skills:check` 保持**报告级**不升阻塞（升了会让无 pack 机器无法收口）。复检=`PETRI_PACK_DIRS=/path/to/petri-pack-bio npm run skills:check`。**不写插件 stub**：那等于假装能跑 R。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-20T11:52:39.787Z -->
+最后更新：2026-10-18（**根因合并：无插件 ⇒ 无工具 ⇒ 无产物**）：`GET /api/tools/catalog` 实测 `count:0`，因此 Result Studio 恒空态（UI-526 实机腿不可得），与 `skills:check` 5 红同因（`petri-pack-bio` 未检出）。UI-526 保持 `in_progress` 并挂「pack 到位后复看」；lint 第二批尝试失败并已还原（该文件 8 条 require-await 的 `it` 回调体内确有 await，318→318 无变化）。G0 开发期常态 · 不外推 packaged/Provider/GA。

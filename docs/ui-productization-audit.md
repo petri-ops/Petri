@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-20（**UI-533 产物批注 host + 加入任务 verified（dev Electron 边界内；9223 live 13/13）**：PDF 页/图像拖拽批注（归一化坐标 0..1）+ 评论 + 列表删除 + 颜色三档 + 「加入任务」结构化引用；`result_annotations` 旁路元数据（永不写原始产物，单 scope ≤200 条，项目隔离）；结果面与工作区预览共用同一宿主；Office/表格与 pack 渲染面如实显示不支持原因。证据 `acceptance/block-219/`（flow 13/13 + SVG/PDF 哈希前后一致）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-18（**UI-523 composer 运行计量条 verified（UI 轨；9223 离屏实机腿 10/10 + 隔离后端腿 14/14）**：输入卡片下方三段读数「本次 轮/步/tok/s · 会话 tok/缓存命中 · 上下文%」，预算环从工具栏搬进条内（同一实例）；后端两条 additive（loop 每次调用 `usage` 事件 + `GET /api/ai/usage-conversation` 会话聚合），数字全部来自本地 `ai_usage`，不可算一律 `—`。本机无真实 Provider 凭据 ⇒ 实机链用本地 OpenAI 兼容 mock provider，证据标注 `provider=mock`。详情见 `## UI-523`。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-10-16（**UI-455 加映（BLOCK-185 冷启动深链修复批·阶段 1 TTFS 程序第一批）**：补全 UI-455 打开链的「冷启动完整重载归零竞争」残留缺陷（backlog BIO-3/UI-455 行独立登记项）——①SPA 两竞争：Race A（useWorkspaceOpenEffects 一次性消费不重试）改打开失败清标记可重试、Race B（project-workspace handleOpenResult 冷启动后端未就绪 status 查询抛错致静默归零）改用退避重试原语 coldStartRetry（抛错续跑/ok=false 即停/序号被取代中止）；②Electron 重启面 last-url 持久化（_main-window-state.js 只存 SPA 相对路由，同源白名单门拒外部 URL/端口漂移免疫，测试实例按设计禁用恢复护 CDP 探针）。验收=coldStartRetry 6 测+main-window-state 6 测（决策逻辑全进机械门）+ CDP live 冒烟 4/4（主进程 loadURL 不破坏启动/深链端到端不崩/reload 路由保持，acceptance/block-185/）。真机重启恢复+后端未就绪时序竞态如实标注为单测覆盖+用户真窗 spot-check，不冒充 live 已验。实现提交 55bb305 走 feat(block-185) 轨无 UI-###（本加映行补登对账，先例 1cae944/dcfc0c3）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -5099,6 +5101,15 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **为什么这样设计**：旧单细胞页面已退役，动作是死代码；把真实生信动作硬塞进 pack 描述而没有 pack UI 等于伪造可用性。本包先把核心去域、动态契约与 host 往返打通，真实单细胞动作随 P2b 的 pack 结果面一起提供。
 - **验证（代码）**：`block217-act-ui-actions` **9/9**（enum/动态描述/停用/未知/缺失 surface/合法 ack/payload 上限/旧动作拒绝/tool_result 投影）；`block151-act-enum-description` **5/5**；`agent-tool-registry` 邻域全绿；前端 host/stream/parse **8/8**；`quality:types` 0、`quality:lint` 0 errors、`domain-neutrality` 基线下调 15 处。
 - **实机腿（2026-10-20，9223 无窗口测试实例）**：`npm run verify -- block217-p2ui-actions` **8/8**——fixture pack 的 action 出现在「+」菜单；`uiActionRequest` 自动打开 pack view；iframe 收到 action 并回传结果；host 标记 `data-last-action-ok=true`。证据 `acceptance/block-217/block217-p2ui-actions-live.json` + `block217-ui-action-roundtrip.png`。**诚实边界**：live 使用合成 ackToken（不伪造后端成功），act→ack 成功链由隔离测试覆盖；生信真实动作未提供（P2b）。
+
+## UI-533: 产物批注 host + 加入任务（2026-10-20 **verified（dev Electron 边界内；9223 live 13/13）**，BLOCK-219 / Q6 垂直切片）
+
+- **变化面**：PDF 页与图像产物出现批注条——拖拽画矩形（归一化坐标）、写评论、列表删除、颜色三档，可「加入任务」把结构化引用（产物身份 / 页 / 百分比坐标 / 评论 + 「原始产物未被修改」声明）经 `petri:copilot-ask` 投递给 Agent。核心渲染面接入：结果面 PDF/图像、工作区文件预览 PDF/图像。
+- **为什么这样设计（自有形态）**：批注是**旁路元数据**（`result_annotations` 表），永不写回原始产物；坐标一律 0..1 相对量，缩放/DPI 变化可复现；服务端二次校验 + 单 scope 200 条上限 + 项目隔离，批注失败如实回到条上而不是静默丢弃。核心零生信语义，pack 渲染面（plot/table/report iframe）本轮不接批注。
+- **验证（代码）**：后端 `block219-result-annotations` **12/12**（迁移单源/坐标钳制/路径安全/scope 隔离/上限 409/删除 404）；前端 `annotations` 11/11 + `annotation-client` 7/7 + `AnnotationOverlay` 5/5 + `AnnotationBar` 6/6 + `AnnotatableImagePane` 2/2 + `WorkspacePdfPreview` 3/3；邻域 `WorkspaceFilePreview` 8/8 + RightFileTree 7/7；`quality:types` 0。
+- **验证（实机腿 · 2026-10-20 · 9223 离屏实例）**：dev-verify flow `block219-annotations-loop` **13/13 allPass**——工作区 SVG 预览拖拽 → 保存（REST 侧 `page=null`、`rect=[0.2,0.2,0.4,0.35]`）→ 加入任务 prompt 含产物名/坐标/评论/旁路声明；PDF 单页逐页覆盖层 → 批注落 `page=1`；SVG/PDF 写入前后 SHA 一致（原始产物零写入）；临时项目清理 + 页面还原。证据 `acceptance/block-219/`。
+- **诚实边界**：①「加入任务」沿用既有单一通道语义（立即 send，与「继续分析」一致），实机 flow 用页内探针拦截 payload 取证、不触发真实模型轮次；②六种图形工具（椭圆/箭头/画笔/文字/马赛克）与撤销重做未做，本轮只有矩形 + 删除；③文本选中批注与速记板随 Q2（未立项）reopen；④PPTX/DOCX/XLSX 无文本层可锚定，只显示「暂不支持批注」原因；⑤生信 pack 在位时 plot/table/report 由 pack iframe 渲染，核心覆盖层够不到，pack 侧批注需经窄桥契约另行提供。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## UI-532: 生信主结果面 pack resultSurface（2026-10-20 **in_progress（无真实 tool_jobs 实机腿）**，BLOCK-218 / Q-DOMAIN P2b 垂直切片）
 

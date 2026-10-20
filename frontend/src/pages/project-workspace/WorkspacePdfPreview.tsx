@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import styles from '../project-workspace.module.css';
 
 /**
@@ -8,22 +9,35 @@ import styles from '../project-workspace.module.css';
  * CSP 拦截（script-src 'self'），<object>/<iframe> 永远空白（插件/沙箱/遮挡均排查过，
  * 结构性损坏）。pdfjs 是唯一可本地渲染的路径；动态 import 仅点开 PDF 时加载。
  * 依赖边界：pdfjs-dist 只在本文件出现，移除/替换只动这里（退出成本一层 wrapper）。
+ *
+ * BLOCK-219 Q6：每页 canvas 外面套一层 `data-page` 的定位盒子，供批注覆盖层挂载。
+ * 覆盖层不是本组件的状态：它由 `renderPageOverlay(page)` 注入，经 portal 挂进页盒子
+ * ——批注坐标因此天然是"页内相对"，不需要知道整页的滚动位置或缩放比例。
+ * 缺省不传 overlay 时 DOM 结构多一层透明盒子，视觉与交互与既往一致。
  */
 
 type PdfDoc = import('pdfjs-dist').PDFDocumentProxy;
 
-export function WorkspacePdfPreview({ url, name }: { url: string; name: string }): React.ReactElement {
+export interface WorkspacePdfPreviewProps {
+  url: string;
+  name: string;
+  /** 逐页渲染覆盖层（批注）；返回 null/undefined 即不挂载。 */
+  renderPageOverlay?: (page: number) => React.ReactNode;
+}
+
+export function WorkspacePdfPreview({ url, name, renderPageOverlay }: WorkspacePdfPreviewProps): React.ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [numPages, setNumPages] = useState(0);
   const [renderedPages, setRenderedPages] = useState(0);
   const [error, setError] = useState('');
+  const [pageBoxes, setPageBoxes] = useState<Array<{ page: number; node: HTMLDivElement }>>([]);
 
   useEffect(() => {
     let cancelled = false;
     const container = containerRef.current;
     if (!container || !url) return;
-    const canvases: HTMLCanvasElement[] = [];
+    const wrappers: HTMLDivElement[] = [];
 
     void (async () => {
       let doc: PdfDoc | null = null;
@@ -52,8 +66,13 @@ export function WorkspacePdfPreview({ url, name }: { url: string; name: string }
           if (!ctx) throw new Error('canvas 2d context unavailable');
           await page.render({ canvasContext: ctx, viewport }).promise;
           if (cancelled) return;
-          container.appendChild(canvas);
-          canvases.push(canvas);
+          const wrapper = document.createElement('div');
+          wrapper.className = styles.workspacePdfPageBox;
+          wrapper.dataset.page = String(n);
+          wrapper.appendChild(canvas);
+          container.appendChild(wrapper);
+          wrappers.push(wrapper);
+          setPageBoxes((current) => [...current, { page: n, node: wrapper }]);
           setRenderedPages(n);
         }
       } catch (e) {
@@ -68,7 +87,8 @@ export function WorkspacePdfPreview({ url, name }: { url: string; name: string }
 
     return () => {
       cancelled = true;
-      canvases.forEach((canvas) => canvas.remove());
+      setPageBoxes([]);
+      wrappers.forEach((wrapper) => wrapper.remove());
     };
   }, [url]);
 
@@ -82,6 +102,9 @@ export function WorkspacePdfPreview({ url, name }: { url: string; name: string }
         </div>
       )}
       <div ref={containerRef} className={styles.workspacePdfPages} />
+      {renderPageOverlay
+        ? pageBoxes.map(({ page, node }) => createPortal(renderPageOverlay(page), node, `page-overlay-${page}`))
+        : null}
     </div>
   );
 }

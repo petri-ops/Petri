@@ -1,0 +1,73 @@
+{
+  "name": "block219-annotations-loop",
+  "startedAt": "2026-10-20T12:18:59.995Z",
+  "finishedAt": "2026-10-20T12:19:12.192Z",
+  "assertions": [
+    {
+      "name": "A0a_backend_rest_healthy",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "A0b_app_page_ready",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "A0c_temp_project_created",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mvgngwan_oy79\",\"workspacePath\":\"D:\\\\1.WorkDir\\\\petri\\\\.petri-dev-user-data\\\\data\\\\projects\\\\block219---1792498740842-mvgngwan\"}"
+    },
+    {
+      "name": "A1_fixtures_written",
+      "pass": true,
+      "detail": "svg=342B pdf=594B"
+    },
+    {
+      "name": "A2_files_panel_ready",
+      "pass": true,
+      "detail": "文件 tab + annot/ 目录 + volcano.svg 行在场"
+    },
+    {
+      "name": "A3_image_preview_annotatable",
+      "pass": true,
+      "detail": "data-annotatable=true"
+    },
+    {
+      "name": "A4_image_rect_drawn",
+      "pass": true,
+      "detail": "drawn:{\"w\":120.00617218017578,\"h\":79.99383544921875}"
+    },
+    {
+      "name": "A5_image_annotation_saved",
+      "pass": true,
+      "detail": "{\"page\":null,\"rect\":[0.2,0.2,0.4,0.35],\"comment\":\"圆圈左下区域的点需要复核\"}"
+    },
+    {
+      "name": "A6_add_to_task_prompt",
+      "pass": true,
+      "detail": "请查看工作区文件「volcano.svg」中的 1 条批注并给出结论或下一步：\n1. 文件区域 (20%, 20%, 40%×35%)：圆圈左下区域的点需要复核\n坐标是相对页/图的百分比区域。批注只存在于旁路元数据中，原始产物文件未被修改；如需重新定位请以坐标为准，不要假设文件已被编辑。"
+    },
+    {
+      "name": "A7_pdf_preview_paged",
+      "pass": true,
+      "detail": "pages=1"
+    },
+    {
+      "name": "A8_pdf_annotation_page_scope",
+      "pass": true,
+      "detail": "{\"page\":1,\"rect\":[0.2,0.2,0.4,0.35]}"
+    },
+    {
+      "name": "A9_artifacts_untouched",
+      "pass": true,
+      "detail": "SVG/PDF 哈希与写入时一致（批注只在旁路表）"
+    },
+    {
+      "name": "A99_cleanup_restored",
+      "pass": true,
+      "detail": "临时项目删除 + 夹具清理 + 页面还原"
+    }
+  ],
+  "allPass": true
+}
