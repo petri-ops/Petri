@@ -1,0 +1,28 @@
+{
+  "name": "block214-pack-skills",
+  "startedAt": "2026-10-20T03:43:05.907Z",
+  "finishedAt": "2026-10-20T03:43:11.255Z",
+  "assertions": [
+    {
+      "name": "pack 在位：货架出现「领域包」来源标签",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "pack 在位：货架出现「标准差异表达分析」",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "pack 在位：货架出现「GO 富集分析」",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "pack 在位：货架出现「标准单细胞分析」",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "allPass": true
+}

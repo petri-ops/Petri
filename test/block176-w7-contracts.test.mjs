@@ -88,7 +88,7 @@ test('CP-20 双格式装载：skill.json 优先；仅 SKILL.md 时直装载（_f
   }
 });
 
-test('CP-20 loadBuiltInSkills：真实仓发现 14 技能（5 json + 9 skill-md）且 CP-22 九件在册', () => {
+test('CP-20 loadBuiltInSkills：真实仓发现 11 技能（2 json + 9 skill-md）且 CP-22 九件在册', () => {
   const builtIn = loadBuiltInSkills();
   const ids = new Set(builtIn.map((s) => s.id));
   const expected9 = ['obsidian-markdown', 'mermaid-visualizer', 'excalidraw-diagram', 'json-canvas',
@@ -96,7 +96,7 @@ test('CP-20 loadBuiltInSkills：真实仓发现 14 技能（5 json + 9 skill-md�
   for (const id of expected9) assert.ok(ids.has(id), `缺 CP-22 技能: ${id}`);
   const mdEntries = builtIn.filter((s) => s._format === 'skill-md');
   assert.ok(mdEntries.length >= 9, `skill-md 装载数应 ≥9，实际 ${mdEntries.length}`);
-  assert.ok(builtIn.length >= 14, `总内置应 ≥14（5 json + 9 md），实际 ${builtIn.length}`);
+  assert.ok(builtIn.length >= 11, `总内置应 ≥11（2 json + 9 md），实际 ${builtIn.length}`);
   const defuddle = builtIn.find((s) => s.id === 'defuddle');
   assert.deepEqual(defuddle.dependencies.requiresBins, ['defuddle']);
   assert.match(defuddle.dependencies.install, /npm install -g defuddle-cli/);
@@ -152,5 +152,5 @@ test('CP-22 loadSkillMdEntry 导出与 discover 集成（注册表即真实数�
   const registry = new SkillRegistry();
   const all = registry.discover();
   assert.ok(all.some((s) => s.id === 'knap' && s._format === 'skill-md'));
-  assert.ok(all.some((s) => s.id === 'deg-analysis-standard' && s._format === 'skill-json'));
+  assert.ok(all.some((s) => s.id === 'visualize' && s._format === 'skill-json'));
 });

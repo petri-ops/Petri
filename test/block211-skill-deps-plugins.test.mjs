@@ -7,9 +7,11 @@
  *
  * 本测钉：①插件缺失 ⇒ 不得 available；②插件缺失不标 installable（插件没有自动安装配方）；
  * ③不传 hasPlugin 时保持既有纯函数语义（默认视为可用，不给既有调用方制造假红）；
- * ④内置注册表里两族的 plugins.required 确实非空（数据面不减配）。
+ * ④领域包注册表里两族的 plugins.required 确实非空（数据面不减配；BLOCK-214 后
+ *   两族已从 core built-in 迁入 petri-pack-bio/skills）。
  */
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
 import { createRequire } from 'node:module';
@@ -18,6 +20,9 @@ import { fileURLToPath } from 'node:url';
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const preflight = require(path.join(ROOT, 'core/shared-backend/skill-preflight.js'));
+const { discoverAvailablePacks } = require(path.join(ROOT, 'core/shared-backend/pack-registry.js'));
+
+const bioPack = discoverAvailablePacks({ projectRoot: ROOT }).find((pack) => pack.packId === 'petri-pack-bio') || null;
 
 const skillWithPlugins = (required) => ({ id: 'deg-x', dependencies: {}, plugins: { required, optional: [] } });
 
@@ -54,11 +59,13 @@ test('C-33 — preflightAll 透传 hasPlugin，逐技能给出缺失插件', () 
   assert.equal(out.plain.status, 'available');
 });
 
-test('C-33 — 内置注册表：两族生物信息 skill 的 plugins.required 非空（数据面不减配）', () => {
-  const sdk = require(path.join(ROOT, 'core/shared-backend/skills-sdk.js'));
-  const list = sdk.createDefaultSDK().listSkills();
-  const deg = list.find((s) => s.id === 'deg-analysis-standard');
-  const sc = list.find((s) => s.id === 'sc-analysis-standard');
-  assert.ok(deg && deg.plugins.required.length >= 3, 'deg 至少 3 个插件硬依赖');
-  assert.ok(sc && sc.plugins.required.length >= 2, 'sc 至少 2 个插件硬依赖');
+test('C-33 — 领域包注册表：两族生信 skill 的 plugins.required 非空（数据面不减配）', { skip: !bioPack && 'sibling bio pack absent' }, () => {
+  const skillsRoot = path.join(bioPack.packRoot, 'skills');
+  const manifest = JSON.parse(fs.readFileSync(path.join(skillsRoot, 'manifest.json'), 'utf8'));
+  const deg = JSON.parse(fs.readFileSync(path.join(skillsRoot, 'deg-analysis-standard', 'skill.json'), 'utf8'));
+  const sc = JSON.parse(fs.readFileSync(path.join(skillsRoot, 'sc-analysis-standard', 'skill.json'), 'utf8'));
+  assert.ok(manifest.skills['deg-analysis-standard'], 'deg 未登记进 pack skills manifest');
+  assert.ok(manifest.skills['sc-analysis-standard'], 'sc 未登记进 pack skills manifest');
+  assert.ok(deg.plugins.required.length >= 3, 'deg 至少 3 个插件硬依赖');
+  assert.ok(sc.plugins.required.length >= 2, 'sc 至少 2 个插件硬依赖');
 });

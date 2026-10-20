@@ -139,7 +139,7 @@ export function SkillDetail({
     importedAt?: string | null;
   } | null>(null);
 
-  const isGovernable = Boolean(governance);
+  const isGovernable = Boolean(governance) && skill.source !== 'pack';
   const isBuiltin = skill.source === 'built-in';
 
   // BLOCK-177 — 切技能时重置治理态（React 官方 render 期调整模式；避免 effect 内同步 setState）

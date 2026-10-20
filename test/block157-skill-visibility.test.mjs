@@ -72,9 +72,9 @@ test('BLOCK-157 KNW-1 discover：真实内置技能可发现（coding-playbook �
   // 列表行不带 prompts 正文（渐进披露：正文走 skill_get）
   for (const row of result.skills) assert.ok(!('prompts' in row), 'discover 行不得携带 prompts 正文');
 
-  const filtered = await registry.getToolHandler('skill_discover')({ search: 'enrichment' });
+  const filtered = await registry.getToolHandler('skill_discover')({ search: 'visualize' });
   assert.equal(filtered.ok, true);
-  assert.ok(filtered.skills.some((s) => s.id === 'go-enrichment-analysis'), 'search=enrichment 应命中 go-enrichment-analysis');
+  assert.ok(filtered.skills.some((s) => s.id === 'visualize'), 'search=visualize 应命中 visualize');
 });
 
 test('BLOCK-157 KNW-1 get：完整手册可读（含 prompts）+ 未知 id 诚实报错', async () => {

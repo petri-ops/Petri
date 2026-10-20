@@ -4182,6 +4182,28 @@
         "test/block213-discoverability.test.mjs"
       ],
       "classifiesScripts": true
+    },
+    {
+      "id": "block214-qdomain-pack-skills",
+      "note": "BLOCK-214（Q-DOMAIN P1）：领域包 skills 贡献（pack.json provides.skills + pack skills/ + skill-registry 发现/卸载/停用）；核心 built-in 去 3 个生信 skill；skills:check 同时校验 pack skills；UI source=pack 标签。",
+      "patterns": [
+        "core/shared-backend/skill-registry.js",
+        "core/shared-backend/pack-registry.js",
+        "scripts/skill-scaffold.mjs",
+        "resources/skills/**",
+        "frontend/src/hooks/useSkillStore/**",
+        "frontend/src/pages/extensions/**",
+        "frontend/src/lib/electron.d.ts",
+        "test/block214-*.test.mjs",
+        "acceptance/block-214/**"
+      ],
+      "tests": [
+        "test/block214-pack-skills.test.mjs",
+        "test/block211-skill-deps-plugins.test.mjs",
+        "test/block211-pack-dirs.test.mjs",
+        "test/pack-registry.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

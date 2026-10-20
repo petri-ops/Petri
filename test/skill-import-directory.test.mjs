@@ -78,7 +78,7 @@ test('D7 缺 skill.json / 坏 manifest → fail-closed 拒绝且零写入', () =
 });
 
 test('D7 built-in id 冲突拒绝（导入不得静默不可见）', () => {
-  const dir = makeSkillDir('deg-analysis-standard', '9.9.9');
+  const dir = makeSkillDir('coding-playbook', '9.9.9');
   const conflict = registry.installSkillFromDir(dir);
   assert.equal(conflict.ok, false);
   assert.equal(conflict.error, 'skill_id_conflicts_builtin');

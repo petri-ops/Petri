@@ -5075,3 +5075,10 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **空态引导**：欢迎页与扩展空货架各加 `data-testid="empty-guide"` + 一句"这里能做什么"（欢迎页文案点名 ⌘K）；knowledge / project-workspace **无空态**，如实记 N/A 而不是硬塞文案凑指标。
 - **实机腿**：9223 无窗口测试实例（`show:false`）快照 `acceptance/block-213/palette.png`（面板开、⌘ 徽章可见、技能段可见）；DOM 断言 `设置 · 快捷键` / `动效 · 精简` / `外观 · 夜间` 均命中；欢迎页 `empty-guide` 文案读回一致。
 - **验证**：`block213-discoverability` **5/5**（四数字棘轮 / id 唯一 / 设置节全覆盖 / 外观动效命令存在 / 空态 N/A 有据）+ welcome/extensions 前端 **19/19**。
+
+## UI-529: 领域包 Skill 来源标签与治理边界（2026-10-20 **verified（dev Electron 边界内）**，BLOCK-214 / Q-DOMAIN P1）
+
+- **变化面**：`SkillSource` 增 `pack`；技能卡片来源标签「领域包」；pack skill 不进入单 skill 治理面（禁用/卸载/重装由 pack 安装/卸载管理），避免把领域包 skill 当用户导入 skill 卸载。
+- **诚实边界**：pack skill 的安装/卸载主体是领域包生命周期；本条目只覆盖货架来源标签与治理边界，不宣称 pack 安装 UI 已完成。
+- **验证（代码）**：`block214-pack-skills` **5/5**（pack 发现/卸载/停用/无 skills/核心去生信）+ 邻域 **32/32** + `skills:check` **11+3 PASS** + `tsc` 0。
+- **实机腿（2026-10-20，9223）**：dev-verify flow `block214-pack-skills`；pack 在位 **4/4**（来源标签「领域包」+ 标准差异表达/GO 富集/标准单细胞三卡在场，截图 `acceptance/block-214/ui-pack-skills-installed.png`）；卸载后 **2/2**（三卡消失 + 领域技能空态，截图 `acceptance/block-214/ui-pack-skills-absent.png`）；证据 JSON `block214-pack-skills-installed.json` / `block214-pack-skills-absent.json`。**对照**：同一 9223 实例，仅 pack 安装态变化。

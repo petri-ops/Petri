@@ -34,11 +34,13 @@ const DEPS_STATUS_LABELS: Record<SkillDepsState['status'], string> = {
 
 const SOURCE_LABELS: Record<string, string> = {
   'built-in': '内置',
+  'pack': '领域包',
   'installed': '已安装',
 };
 
 const SOURCE_COLORS: Record<string, string> = {
   'built-in': 'sourceBuiltin',
+  'pack': 'sourceInstalled',
   'installed': 'sourceInstalled',
 };
 

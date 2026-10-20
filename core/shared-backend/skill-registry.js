@@ -2,7 +2,7 @@
  * shared-backend/skill-registry.js — Skills 注册与发现机制
  *
  * 实现四层架构中的 Layer 4: Skills 层的注册与发现能力。
- * 支持两来源发现：built-in(10) / installed(20)
+ * 支持三来源发现：built-in(10) / pack(15) / installed(20)
  *
  * 设计依据：
  * - docs/skills-architecture.md — 四层架构设计
@@ -12,13 +12,17 @@
 
 const fs = require('fs');
 const path = require('path');
+const packRegistry = require('./pack-registry');
+const { resolveDataDir } = require('./data-paths');
 
 // ── 常量定义 ────────────────────────────────────────────────────────────────
 
 /** Skill 来源优先级（数值越小优先级越高）。
- * BLOCK-156 D7 — marketplace 残迹清除（无加载代码的死值）；远程技能市场转候选池 C-EXT-2。 */
+ * BLOCK-156 D7 — marketplace 残迹清除（无加载代码的死值）；远程技能市场转候选池 C-EXT-2。
+ * BLOCK-214 — domain pack skills：source='pack'，介于 built-in 与 installed 之间。 */
 const SOURCE_PRIORITY = {
   'built-in': 10,
+  'pack': 15,
   'installed': 20,
 };
 
@@ -517,6 +521,36 @@ function loadInstalledSkills() {
 }
 
 /**
+ * BLOCK-214 — 加载已安装领域包贡献的 Skills。
+ * 来源 = <dataDir>/packs/installed.json（enabled !== false），技能目录 = <packRoot>/skills。
+ * 包缺失/未安装/停用 → 不返回任何 pack skill；卸载即从 registry 消失。
+ * @returns {SkillEntry[]}
+ */
+function loadPackSkills() {
+  const skills = [];
+  let packs = [];
+  try {
+    packs = packRegistry.readInstalledPacks(resolveDataDir());
+  } catch {
+    return skills;
+  }
+  for (const pack of packs) {
+    if (!pack || pack.enabled === false || !pack.packRoot) continue;
+    const skillsRoot = path.join(pack.packRoot, 'skills');
+    if (!fs.existsSync(skillsRoot)) continue;
+    const manifest = readJson(path.join(skillsRoot, 'manifest.json'));
+    const ids = manifest && manifest.skills
+      ? Object.keys(manifest.skills)
+      : scanSkillDirs(skillsRoot).map((dir) => path.basename(dir));
+    for (const id of ids) {
+      const skill = loadSkillFromDir(path.join(skillsRoot, id), 'pack');
+      if (skill) skills.push(skill);
+    }
+  }
+  return skills;
+}
+
+/**
  * 发现并加载所有可用 Skills
  * @returns {SkillEntry[]}
  */
@@ -544,6 +578,23 @@ function discoverSkills() {
   //（卸载/覆盖降级后 discover 不再返回旧条目；built-in 与手动 register 不受影响）
   for (const id of Array.from(_sourceMap.keys())) {
     if (_sourceMap.get(id) === 'installed' && !installedIds.has(id)) {
+      _sourceMap.delete(id);
+      _registry.delete(id);
+    }
+  }
+
+  // 3. 已安装领域包 Skills（BLOCK-214）：built-in/installed 优先，pack 不覆盖同名
+  const packSkills = loadPackSkills();
+  const packIds = new Set(packSkills.map((skill) => skill.id));
+  for (const skill of packSkills) {
+    const existingSource = _sourceMap.get(skill.id);
+    if (existingSource && existingSource !== 'pack') continue;
+    skills.push(skill);
+    _registry.set(skill.id, skill);
+    _sourceMap.set(skill.id, 'pack');
+  }
+  for (const id of Array.from(_sourceMap.keys())) {
+    if (_sourceMap.get(id) === 'pack' && !packIds.has(id)) {
       _sourceMap.delete(id);
       _registry.delete(id);
     }
@@ -819,6 +870,7 @@ module.exports = {
   loadSkillFromDir,
   loadBuiltInSkills,
   loadInstalledSkills,
+  loadPackSkills,
   installSkillFromDir,
   uninstallImportedSkill,
   loadSkillMdEntry,

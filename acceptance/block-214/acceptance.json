@@ -1,0 +1,39 @@
+{
+  "block": "BLOCK-214-QDOMAIN-P1-PACK-SKILLS",
+  "generatedAt": "2026-10-20",
+  "unit": {
+    "block214PackSkills": "5/5",
+    "neighborhood": "32/32"
+  },
+  "closeout": "PASS (13/13 gates + skills:check report-level OK)",
+  "skillsCheck": "PASS (11 built-in + 3 pack)",
+  "registry": {
+    "packInstalled": {
+      "count": 14,
+      "packSkills": [
+        "deg-analysis-standard",
+        "go-enrichment-analysis",
+        "sc-analysis-standard"
+      ]
+    },
+    "packUninstalled": {
+      "count": 11,
+      "packSkills": []
+    },
+    "note": "同一后端进程内仅改变 packs/installed.json；discoverSkills 每次重新发现，无需重启。"
+  },
+  "ui": {
+    "flow": "block214-pack-skills",
+    "instance": "9223 (dev Electron)",
+    "packInstalled": "4/4",
+    "packUninstalled": "2/2",
+    "screenshots": [
+      "acceptance/block-214/ui-pack-skills-installed.png",
+      "acceptance/block-214/ui-pack-skills-absent.png"
+    ]
+  },
+  "environment": {
+    "pack": "D:/1.WorkDir/petri-pack-bio",
+    "devDataPacksAfterVerification": "[] (restored to original uninstalled state)"
+  }
+}

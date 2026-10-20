@@ -233,7 +233,7 @@ declare global {
             version: string;
             description: string;
             category: string;
-            source: 'built-in' | 'installed';
+            source: 'built-in' | 'pack' | 'installed';
             tags: string[];
             capabilities?: string[];
             parameters: {

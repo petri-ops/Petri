@@ -1,0 +1,18 @@
+{
+  "name": "block214-pack-skills",
+  "startedAt": "2026-10-20T03:43:12.030Z",
+  "finishedAt": "2026-10-20T03:43:17.424Z",
+  "assertions": [
+    {
+      "name": "pack 缺失/卸载：货架不再出现三个生信 skill",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "pack 缺失/卸载：领域技能货架为空态",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "allPass": true
+}

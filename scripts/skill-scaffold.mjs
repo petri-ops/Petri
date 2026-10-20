@@ -65,6 +65,80 @@ function collectPluginRoots() {
   return roots;
 }
 
+/**
+ * 校验单个 Skill 目录（核心 built-in 与领域包共用同一套判据）。
+ * BLOCK-214 — pack skills 与 core skills 同源校验，避免第二套规则。
+ */
+function checkSkillDir(skillDir, dir, label, registered, pluginRoots, source, problems) {
+  const hasSkillJson = fs.existsSync(path.join(skillDir, 'skill.json'));
+  const hasSkillMd = fs.existsSync(path.join(skillDir, 'SKILL.md'));
+
+  // BLOCK-176 W7 CP-20 — 双格式：skill.json（既有契约）或 SKILL.md（frontmatter
+  // name/description 必填 + os/requires.bins/install 依赖字段结构校验）。
+  if (!hasSkillJson && !hasSkillMd) {
+    problems.push(`${label}: skill.json 与 SKILL.md 均缺失`);
+    return;
+  }
+
+  let skill = null;
+  let format = null;
+  if (hasSkillJson) {
+    skill = readJson(path.join(skillDir, 'skill.json'));
+    if (!skill) {
+      problems.push(`${label}: skill.json JSON 非法`);
+      return;
+    }
+    if (skill.id !== dir) problems.push(`${label}: skill.json id "${skill.id}" 与目录名不一致`);
+    format = 'skill-json';
+  } else {
+    skill = loadSkillMdEntry(skillDir, source);
+    if (!skill) {
+      problems.push(`${label}: SKILL.md 解析失败（front-matter 结构）`);
+      return;
+    }
+    format = 'skill-md';
+  }
+
+  const v = validateSkillManifest({ ...skill, skillManifestVersion: skill.skillManifestVersion ?? (format === 'skill-json' ? skill.skillManifestVersion : 1) });
+  if (!v.ok) for (const e of v.errors) problems.push(`${label}: ${e}`);
+
+  // 依赖字段结构（skill.json 走 dependencies 字段；SKILL.md 已经 loadSkillMdEntry 归一）
+  if (format === 'skill-json' && skill.dependencies !== undefined) {
+    const deps = normalizeDependencies(skill.dependencies);
+    if (deps.invalid.length) problems.push(`${label}: dependencies.os 含非法平台 token: ${deps.invalid.join(', ')}`);
+  }
+
+  if (format === 'skill-json' && !fs.existsSync(path.join(skillDir, 'README.md'))) problems.push(`${label}: 缺 README.md`);
+
+  for (const [key, rel] of Object.entries((format === 'skill-json' && skill.prompts) || {})) {
+    if (typeof rel !== 'string') continue;
+    if (!fs.existsSync(path.join(skillDir, rel))) problems.push(`${label}: prompts.${key} 指向不存在的文件 ${rel}`);
+  }
+
+  // required = 硬依赖，必须是真实存在的插件（desktop 内置或 pack 仓 plugins*，见
+  // collectPluginRoots 的 BIO-D2 重锚注记）；optional 允许 R 包能力名（如 enrichplot），不查存在性
+  for (const pluginId of skill.plugins?.required || []) {
+    if (!/^[a-z0-9][a-z0-9-]*$/.test(pluginId)) continue;
+    const found = pluginRoots.some((rootDir) =>
+      fs.existsSync(path.join(rootDir, pluginId, 'tool-definition.json')));
+    if (!found) {
+      problems.push(`${label}: plugins.required 引用插件 "${pluginId}" 在 built-in-plugins/pack 插件源中不存在`);
+    }
+  }
+
+  if (!registered) {
+    problems.push(`${label}: 未登记进 manifest.json`);
+  } else {
+    if (registered.version && skill.version && registered.version !== skill.version) {
+      problems.push(`${label}: manifest version ${registered.version} ≠ ${format} version ${skill.version}`);
+    }
+    // 双格式登记自检：SKILL.md 目录应在 manifest 标注 format（防误当 skill.json 目录）
+    if (format === 'skill-md' && registered.format && registered.format !== 'skill-md') {
+      problems.push(`${label}: manifest format "${registered.format}" 与实际 SKILL.md 格式不符`);
+    }
+  }
+}
+
 function checkAll() {
   const problems = [];
   if (!fs.existsSync(SKILLS_DIR)) {
@@ -78,82 +152,42 @@ function checkAll() {
   const pluginRoots = collectPluginRoots();
 
   for (const dir of dirs) {
-    const skillDir = path.join(SKILLS_DIR, dir);
-    const label = `skills/${dir}`;
-
-    const hasSkillJson = fs.existsSync(path.join(skillDir, 'skill.json'));
-    const hasSkillMd = fs.existsSync(path.join(skillDir, 'SKILL.md'));
-
-    // BLOCK-176 W7 CP-20 — 双格式：skill.json（既有契约）或 SKILL.md（frontmatter
-    // name/description 必填 + os/requires.bins/install 依赖字段结构校验）。
-    if (!hasSkillJson && !hasSkillMd) {
-      problems.push(`${label}: skill.json 与 SKILL.md 均缺失`);
-      continue;
-    }
-
-    let skill = null;
-    let format = null;
-    if (hasSkillJson) {
-      skill = readJson(path.join(skillDir, 'skill.json'));
-      if (!skill) {
-        problems.push(`${label}: skill.json JSON 非法`);
-        continue;
-      }
-      if (skill.id !== dir) problems.push(`${label}: skill.json id "${skill.id}" 与目录名不一致`);
-      format = 'skill-json';
-    } else {
-      skill = loadSkillMdEntry(skillDir, 'built-in');
-      if (!skill) {
-        problems.push(`${label}: SKILL.md 解析失败（front-matter 结构）`);
-        continue;
-      }
-      format = 'skill-md';
-    }
-
-    const v = validateSkillManifest({ ...skill, skillManifestVersion: skill.skillManifestVersion ?? (format === 'skill-json' ? skill.skillManifestVersion : 1) });
-    if (!v.ok) for (const e of v.errors) problems.push(`${label}: ${e}`);
-
-    // 依赖字段结构（skill.json 走 dependencies 字段；SKILL.md 已经 loadSkillMdEntry 归一）
-    if (format === 'skill-json' && skill.dependencies !== undefined) {
-      const deps = normalizeDependencies(skill.dependencies);
-      if (deps.invalid.length) problems.push(`${label}: dependencies.os 含非法平台 token: ${deps.invalid.join(', ')}`);
-    }
-
-    if (format === 'skill-json' && !fs.existsSync(path.join(skillDir, 'README.md'))) problems.push(`${label}: 缺 README.md`);
-
-    for (const [key, rel] of Object.entries((format === 'skill-json' && skill.prompts) || {})) {
-      if (typeof rel !== 'string') continue;
-      if (!fs.existsSync(path.join(skillDir, rel))) problems.push(`${label}: prompts.${key} 指向不存在的文件 ${rel}`);
-    }
-
-    // required = 硬依赖，必须是真实存在的插件（desktop 内置或 pack 仓 plugins*，见
-    // collectPluginRoots 的 BIO-D2 重锚注记）；optional 允许 R 包能力名（如 enrichplot），不查存在性
-    for (const pluginId of skill.plugins?.required || []) {
-      if (!/^[a-z0-9][a-z0-9-]*$/.test(pluginId)) continue;
-      const found = pluginRoots.some((rootDir) =>
-        fs.existsSync(path.join(rootDir, pluginId, 'tool-definition.json')));
-      if (!found) {
-        problems.push(`${label}: plugins.required 引用插件 "${pluginId}" 在 built-in-plugins/pack 插件源中不存在`);
-      }
-    }
-
-    const registered = topLevelManifest?.skills?.[dir];
-    if (!registered) {
-      problems.push(`${label}: 未登记进顶层 manifest.json`);
-    } else {
-      if (registered.version && skill.version && registered.version !== skill.version) {
-        problems.push(`${label}: 顶层 manifest version ${registered.version} ≠ ${format} version ${skill.version}`);
-      }
-      // 双格式登记自检：SKILL.md 目录应在顶层 manifest 标注 format（防误当 skill.json 目录）
-      if (format === 'skill-md' && registered.format && registered.format !== 'skill-md') {
-        problems.push(`${label}: 顶层 manifest format "${registered.format}" 与实际 SKILL.md 格式不符`);
-      }
-    }
+    checkSkillDir(
+      path.join(SKILLS_DIR, dir), dir, `skills/${dir}`,
+      topLevelManifest?.skills?.[dir], pluginRoots, 'built-in', problems,
+    );
   }
 
   // 反向核对：顶层 manifest 里的 id 必须有对应目录
   for (const id of Object.keys(topLevelManifest?.skills || {})) {
     if (!dirs.includes(id)) problems.push(`顶层 manifest.json: skill "${id}" 无对应目录`);
+  }
+
+  // BLOCK-214 — 领域包 Skills：与核心同一套校验；pack 未检出则跳过（不制造假红）
+  let packSkillCount = 0;
+  const { discoverAvailablePacks } = require(
+    path.join(ROOT, 'core', 'shared-backend', 'pack-registry.js'),
+  );
+  for (const pack of discoverAvailablePacks({ projectRoot: ROOT })) {
+    const packSkillsRoot = path.join(pack.packRoot, 'skills');
+    if (!fs.existsSync(packSkillsRoot)) continue;
+    const packManifest = readJson(path.join(packSkillsRoot, 'manifest.json'));
+    if (!packManifest?.skills) {
+      problems.push(`pack:${pack.packId}: skills/manifest.json 缺失或无 skills 字段`);
+      continue;
+    }
+    const packDirs = fs.readdirSync(packSkillsRoot, { withFileTypes: true })
+      .filter((e) => e.isDirectory()).map((e) => e.name).sort();
+    for (const dir of packDirs) {
+      checkSkillDir(
+        path.join(packSkillsRoot, dir), dir, `pack:${pack.packId}/skills/${dir}`,
+        packManifest.skills[dir], pluginRoots, 'pack', problems,
+      );
+      packSkillCount += 1;
+    }
+    for (const id of Object.keys(packManifest.skills)) {
+      if (!packDirs.includes(id)) problems.push(`pack:${pack.packId}/skills/manifest.json: skill "${id}" 无对应目录`);
+    }
   }
 
   if (problems.length) {
@@ -162,7 +196,8 @@ function checkAll() {
     process.exit(1);
   }
   const mdCount = dirs.filter((d) => !fs.existsSync(path.join(SKILLS_DIR, d, 'skill.json')) && fs.existsSync(path.join(SKILLS_DIR, d, 'SKILL.md'))).length;
-  console.log(`== 产品 Skill 校验: PASS（${dirs.length} 个内置 Skill：${dirs.length - mdCount} skill.json + ${mdCount} SKILL.md）==`);
+  const packPart = packSkillCount ? ` + ${packSkillCount} 个领域包 Skill` : '';
+  console.log(`== 产品 Skill 校验: PASS（${dirs.length} 个内置 Skill：${dirs.length - mdCount} skill.json + ${mdCount} SKILL.md${packPart}）==`);
 }
 
 function scaffold(args) {
