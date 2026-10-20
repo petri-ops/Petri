@@ -113,7 +113,7 @@ completed 需：P1 删除 + P2 契约/装载器/接线 + P3 测试 + P4 pack 落
 - **新契约 `provides.methods`**：`{ citations, toolLabels }` 两个 packRoot 内相对路径；数据面纯 JSON，不执行 pack 代码。
 - **装载器** `core/petri-server/helpers/pack-methods.js`：只读已安装且启用的包；`pack.json` 单文件 ≤256KB、类型 ≤200、单类型条目 ≤40、单条 ≤400 字符；路径必须落在 packRoot 内；坏 JSON/形状错误 fail-closed 只丢该包该面；同类型多包按 packId 序稳定覆盖并留 warning。
 - **methods 接线**：删除 `_METHODS_CITATIONS` 表（13 类型）与 `_scriptHeader` 的 `tools` 映射（13 类型）；引用块改 `getCitations(a.type)`（空则整段不出现，不留空括号）；脚本头改 `getToolLabel()`（无标签只写类型名），并把 `(Python / scanpy)` / `(R / Seurat)` 收敛为 `(Python)` / `(R)`。
-- **pack 仓**：`petri-pack-bio` 新增 `methods/citations.json`（13 类型，1:1 迁移）+ `methods/tool-labels.json`（13 类型）+ `pack.json` `provides.methods`；版本 `0.1.1 → 0.2.0`。
+- **pack 仓**：`petri-pack-bio` 新增 `methods/citations.json`（13 类型，1:1 迁移）+ `methods/tool-labels.json`（13 类型）+ `pack.json` `provides.methods`；版本 `0.1.1 → 0.2.0`；pack 仓提交 `ea1da46`（main）。
 
 ### 8.2 验证
 
