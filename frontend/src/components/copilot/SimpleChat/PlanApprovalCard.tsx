@@ -21,9 +21,11 @@ interface PlanApprovalCardProps {
   busy?: boolean;
   onApprove: (action: PlanApprovalAction) => void;
   onDismiss: () => void;
+  /** BLOCK-216 Q5 — 在右栏计划面中查看（保留批准动作不变）。 */
+  onOpenInTab?: (planId: string) => void;
 }
 
-export function PlanApprovalCard({ plan, busy = false, onApprove, onDismiss }: PlanApprovalCardProps) {
+export function PlanApprovalCard({ plan, busy = false, onApprove, onDismiss, onOpenInTab }: PlanApprovalCardProps) {
   const [specExpanded, setSpecExpanded] = useState(true);
   const steps = plan.steps || [];
   const subagentCount = useMemo(
@@ -79,6 +81,16 @@ export function PlanApprovalCard({ plan, busy = false, onApprove, onDismiss }: P
         </div>
       ) : null}
       <div className="sc-plan-approval-actions">
+        {onOpenInTab ? (
+          <button
+            type="button"
+            className="sc-plan-approval-btn"
+            onClick={() => onOpenInTab(plan.id)}
+            title="在右栏计划面中查看版本、步骤与正文"
+          >
+            在计划面查看
+          </button>
+        ) : null}
         <button
           type="button"
           className="sc-plan-approval-btn sc-plan-approval-btn-primary"

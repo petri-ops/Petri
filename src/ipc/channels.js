@@ -57,6 +57,7 @@ const CHANNELS = {
     openDialog: 'file:open-dialog',
     openPath: 'file:open-path',
     openWorkspaceFile: 'file:open-workspace-file',
+    showInFolder: 'file:show-in-folder',
     downloadFromUrl: 'file:download-from-url',
     // UI-453 加映二 — OS 拖出导出：webContents.startDrag（真文件拖拽）
     startFileDrag: 'file:start-drag',

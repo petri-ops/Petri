@@ -4229,6 +4229,63 @@
         "test/block197-refusal-shape-prompt.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block216-q5-work-surface-host",
+      "note": "BLOCK-216 Q5 — 统一工作面 host：work surface 纯模型/注册表 + 右栏/title bar 接线 + pack contributions 投影与 petri-pack:// 独立 origin + 生成文件/计划/证据面 + 文件管理器显示 IPC。",
+      "patterns": [
+        "frontend/src/lib/workSurface/**",
+        "frontend/src/components/work-surface/**",
+        "frontend/src/hooks/useWorkSurfaceTabs.ts",
+        "frontend/src/components/result-studio/resultSurfaceHost.ts",
+        "frontend/src/components/result-studio/resultSurfaceHost.test.ts",
+        "frontend/src/pages/project-workspace/rightPanelTabs.ts",
+        "frontend/src/pages/project-workspace/useWorkspaceTitleBar.ts",
+        "frontend/src/pages/project-workspace.tsx",
+        "frontend/src/pages/project-workspace/RightFileTree.tsx",
+        "frontend/src/components/workspace-panels/RightPanel.tsx",
+        "frontend/src/components/workspace-panels/CenterPanel.tsx",
+        "frontend/src/components/desktop/titlebar/TitleBarRightZone.tsx",
+        "frontend/src/components/desktop/WorkspacePanelsContext.tsx",
+        "frontend/src/hooks/useWorkspacePanels.ts",
+        "frontend/src/lib/events.ts",
+        "frontend/src/components/copilot/planApprovals.ts",
+        "frontend/src/components/copilot/SimpleChat/PlanApprovalCard.tsx",
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "frontend/src/components/copilot/conversationChangesStore.ts",
+        "frontend/src/components/result-studio/ResultStudioSurface.test.tsx",
+        "core/packages/shared-pack-assets/**",
+        "core/petri-server/helpers/pack-contributions.js",
+        "core/petri-server/routes/projection-data.js",
+        "src/main/pack-ui/**",
+        "src/main.js",
+        "src/main/csp-config.js",
+        "src/ipc/file-dialog.js",
+        "src/ipc/channels.js",
+        "src/preload.js",
+        "frontend/src/lib/electron.d.ts",
+        "test/block216-*.test.mjs",
+        "acceptance/block-216/**"
+      ],
+      "tests": [
+        "test/block216-pack-contributions.test.mjs",
+        "frontend/src/lib/workSurface/model.test.ts",
+        "frontend/src/lib/workSurface/registry.test.ts",
+        "frontend/src/lib/workSurface/generatedFileSource.test.ts",
+        "frontend/src/hooks/useWorkSurfaceTabs.test.tsx",
+        "frontend/src/components/work-surface/PackSurfaceFrame.test.ts",
+        "frontend/src/components/work-surface/GeneratedFilesSurface.test.tsx",
+        "frontend/src/components/work-surface/PlanSurface.test.tsx",
+        "frontend/src/components/work-surface/EvidenceSurface.test.tsx",
+        "frontend/src/components/result-studio/resultSurfaceHost.test.ts",
+        "frontend/src/components/workspace-panels/RightPanel.test.tsx",
+        "frontend/src/components/workspace-panels/CenterPanel.test.tsx",
+        "frontend/src/components/desktop/TitleBar.test.tsx",
+        "frontend/src/pages/project-workspace/fileOps.test.tsx",
+        "frontend/src/pages/project-workspace/WorkspaceFileTabStrip.test.tsx",
+        "frontend/src/pages/project-workspace/RightFileTree.shortcuts.test.tsx"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

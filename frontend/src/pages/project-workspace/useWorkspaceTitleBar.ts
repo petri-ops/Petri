@@ -2,7 +2,9 @@ import { useEffect, useMemo } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { petriEvents, dispatchPetriEvent } from '@/lib/events';
-import { RIGHT_PANEL_ITEMS, type RightPanelMode } from './rightPanelTabs';
+import type { RightPanelMode } from './rightPanelTabs';
+import type { WorkSurfaceDescriptor, WorkSurfaceTab } from '@/lib/workSurface/types';
+import { isTabSurface } from '@/lib/workSurface/registry';
 // UI-446 — 审阅 tab 未读圆点数据源（当前会话工作区改动索引）
 import { useConversationUnreviewedCount, useConversationShortstat } from '@/components/copilot/conversationChangesStore';
 
@@ -21,9 +23,12 @@ interface UseWorkspaceTitleBarOptions {
   /** UI-449（C-16）— shortstat 取数需要项目根（badge ±行数权威源）。 */
   projectId?: string;
   titleBarTitle: string;
-  rightTab: RightPanelMode;
+  rightTab: string;
   rightToolMenuOpen: boolean;
-  openRightTabs: RightPanelMode[];
+  /** Ordered tab records (core + pack) — labels/identity come from here. */
+  tabs: WorkSurfaceTab[];
+  /** Registry-declared tab surfaces (excludes result surfaces). */
+  surfaces: WorkSurfaceDescriptor[];
   activeJobId: string | null;
   conversationJobs: Array<{ id: string; status?: string; name?: string; tool_id?: string; created_at: number | string }>;
   browserCanGoBack: boolean;
@@ -36,6 +41,9 @@ interface UseWorkspaceTitleBarOptions {
   handleSelectTitleBarResult: (jobId: string) => void;
   openRightPanel: (tab: RightPanelMode) => void;
   closeRightPanelTab: (tab: RightPanelMode) => void;
+  closeOtherTabs?: (tabId: string) => void;
+  closeTabsToRight?: (tabId: string) => void;
+  closeAllTabs?: () => void;
   setRightOpen: (open: boolean) => void;
   setRightTab: (tab: RightPanelMode) => void;
   setRightToolMenuOpen: Dispatch<SetStateAction<boolean>>;
@@ -49,7 +57,8 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
     titleBarTitle,
     rightTab,
     rightToolMenuOpen,
-    openRightTabs,
+    tabs,
+    surfaces,
     activeJobId,
     conversationJobs,
     browserCanGoBack,
@@ -61,6 +70,9 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
     handleSelectTitleBarResult,
     openRightPanel,
     closeRightPanelTab,
+    closeOtherTabs,
+    closeTabsToRight,
+    closeAllTabs,
     setRightOpen,
     setRightTab,
     setRightToolMenuOpen,
@@ -73,23 +85,27 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
 
   const titleBarTabs = useMemo(
     () =>
-      openRightTabs
-        .filter((tab) => tab !== 'home')
+      tabs
+        .filter((tab) => tab.surfaceId !== 'home')
         .map((tab) => {
-          const item = RIGHT_PANEL_ITEMS.find((candidate) => candidate.id === tab);
+          const descriptor = surfaces.find((candidate) => candidate.id === tab.surfaceId);
           return {
-            id: tab,
-            label: item?.label || tab,
-            icon: item?.icon || 'folder',
-            closable: true,
-            reviewCount: tab === 'review' ? reviewCount : undefined,
+            id: tab.id,
+            label: tab.title || descriptor?.title || tab.surfaceId,
+            icon: descriptor?.icon || 'folder',
+            closable: descriptor?.closeable !== false,
+            reviewCount: tab.surfaceId === 'review' ? reviewCount : undefined,
             reviewStat:
-              tab === 'review' && reviewStat
+              tab.surfaceId === 'review' && reviewStat
                 ? { added: reviewStat.tracked.added, removed: reviewStat.tracked.removed }
                 : undefined,
           };
         }),
-    [openRightTabs, reviewCount, reviewStat]
+    [tabs, surfaces, reviewCount, reviewStat]
+  );
+  const toolSurfaceItems = useMemo(
+    () => surfaces.filter((surface) => surface.id !== 'home' && isTabSurface(surface)),
+    [surfaces]
   );
   const titleBarResultItems = useMemo(() => conversationJobs.map((job) => {
     const status = job.status === 'done'
@@ -129,21 +145,24 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
         setRightOpen(true);
       },
       onCloseTab: (tabId) => closeRightPanelTab(tabId as RightPanelMode),
+      onCloseOtherTabs: closeOtherTabs ? (tabId) => closeOtherTabs(tabId) : null,
+      onCloseTabsToRight: closeTabsToRight ? (tabId) => closeTabsToRight(tabId) : null,
+      onCloseAllTabs: closeAllTabs ? () => closeAllTabs() : null,
       onMoreAction: () => setRightToolMenuOpen((value) => !value),
       toolMenuOpen: rightToolMenuOpen,
-      toolMenuItems: RIGHT_PANEL_ITEMS.map((item) => ({
-        id: item.id,
-        label: item.label,
-        icon: item.icon,
-        isOpen: openRightTabs.includes(item.id),
+      toolMenuItems: toolSurfaceItems.map((surface) => ({
+        id: surface.id,
+        label: surface.title,
+        icon: surface.icon,
+        isOpen: tabs.some((tab) => tab.surfaceId === surface.id),
       })),
-      onSelectToolItem: (tabId) => {
-        if (tabId === 'results') {
+      onSelectToolItem: (surfaceId) => {
+        if (surfaceId === 'results') {
           handleOpenRightResults();
           setRightToolMenuOpen(false);
           return;
         }
-        openRightPanel(tabId as RightPanelMode);
+        openRightPanel(surfaceId as RightPanelMode);
         setRightToolMenuOpen(false);
       },
       resultItems: titleBarResultItems,
@@ -169,6 +188,9 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
       reviewStat: null,
         onSelectTab: null,
         onCloseTab: null,
+        onCloseOtherTabs: null,
+        onCloseTabsToRight: null,
+        onCloseAllTabs: null,
         onMoreAction: null,
         toolMenuOpen: false,
         toolMenuItems: [],
@@ -185,10 +207,15 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
   }, [
     activeJobId,
     closeRightPanelTab,
+    closeOtherTabs,
+    closeTabsToRight,
+    closeAllTabs,
     browserCanGoBack,
     browserCanGoForward,
     openRightPanel,
-    openRightTabs,
+    tabs,
+    surfaces,
+    toolSurfaceItems,
     projectName,
     titleBarTitle,
     rightTab,

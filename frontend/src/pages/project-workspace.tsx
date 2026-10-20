@@ -30,7 +30,7 @@ import {
 
 import { deriveSummaryVisibility, useWorkspaceLayout } from '@/hooks/useWorkspaceLayout';
 import { useWorkspacePanelShortcuts } from '@/hooks/useWorkspacePanelShortcuts';
-import { useRightPanelTabs } from '@/hooks/useRightPanelTabs';
+import { useWorkSurfaceTabs } from '@/hooks/useWorkSurfaceTabs';
 import { segmentToMode, modeToSegment, type WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import { useHarnessWorkflowStatus } from '@/hooks/useHarnessWorkflowStatus';
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
@@ -55,7 +55,6 @@ export type { ActiveWorkspaceFile } from './project-workspace/types';
 export type { ActiveArtifact, JobStats } from '@/components/workspace-panels/ResultView';
 // BLOCK-92 Wave B-1 — 右栏 tab 词表/常量外迁 ./project-workspace/rightPanelTabs.ts（原路径 re-export 兼容）。
 export type { RightPanelMode } from './project-workspace/rightPanelTabs';
-import { type RightPanelMode } from './project-workspace/rightPanelTabs';
 // BLOCK-92 Wave B-1 — 状态/派生/事件簇外迁（纯搬运零行为变化）。
 import { toCopilotHarnessSummary } from './project-workspace/copilotHarnessSummary';
 import { retryOnThrow } from './project-workspace/coldStartRetry';
@@ -226,19 +225,9 @@ export function ProjectWorkspace(): React.ReactElement {
   //（原实现两侧栏一起关掉，导致「打开某页面左栏消失像全屏盖住导航」）。
   // UI-479（2026-10-09）另立宽度触发自动收起（useResponsivePanelCollapse，
   // 带还原/迟滞/手动优先）；路由模式仍不触碰侧栏，本注释语义维持。
-  const {
-    rightTab,
-    setRightTab,
-    openRightTabs,
-    setOpenRightTabs,
-    rightToolMenuOpen,
-    setRightToolMenuOpen,
-    browserUrl,
-    setBrowserUrl,
-    closeRightPanelTab: closeRightPanelTabRaw,
-    // openRightPanel is NOT returned — it lives in project-workspace
-    // with compactLayout awareness (setLeftOpen).
-  } = useRightPanelTabs();
+  const workSurface = useWorkSurfaceTabs(projectId);
+  const { rightTab, setRightTab, openRightTabs, tabs: surfaceTabs, surfaces: workSurfaces, resultSurfaces: workResultSurfaces, uiActions: workSurfaceUiActions, rightToolMenuOpen, setRightToolMenuOpen, browserUrl, setBrowserUrl } = workSurface;
+  const { closeRightPanelTab: closeRightPanelTabRaw, closeOtherTabs: closeOtherSurfaceTabs, closeTabsToRight: closeSurfaceTabsToRight, closeAllTabs: closeAllSurfaceTabs, openRightPanel: openSurface, descriptorFor: descriptorForSurface } = workSurface;
   // UI-451 加映 v2 (P1-2) / v3 (P2-7/P2-8) — 脏位图单一真相：右栏 files tab 关闭守卫、
   // 软上限淘汰环（经 hook options）、整窗关闭守卫三处共用（RightFileTree 上抛）。
   const workspaceFileDirtyMapRef = React.useRef<Record<string, boolean>>({});
@@ -251,7 +240,7 @@ export function ProjectWorkspace(): React.ReactElement {
   const handleWorkspaceFileDirtyMapChange = React.useCallback((dirtyMap: Record<string, boolean>) => {
     workspaceFileDirtyMapRef.current = dirtyMap;
   }, []);
-  const closeRightPanelTab = React.useCallback((tab: RightPanelMode) => {
+  const closeRightPanelTab = React.useCallback((tab: string) => {
     if (tab === 'files') {
       const dirtyCount = workspaceFileDirtyCount();
       if (dirtyCount > 0) {
@@ -367,17 +356,17 @@ export function ProjectWorkspace(): React.ReactElement {
   }, [leftOpen, rightOpen, searchParams, navigate, projectId, workspaceMode]);
   // openRightPanel: 打开右栏 tab。UI-341 加映二（用户裁决）——不再因 compact
   // 顺手收起左栏：侧栏只由用户主动点击改变。
-  const openRightPanel = useCallback((tab: RightPanelMode) => {
-    setOpenRightTabs((current) => current.includes(tab) ? current : [...current, tab]);
-    setRightTab(tab);
+  const openRightPanel = useCallback((tab: string) => {
+    openSurface(tab);
     setRightOpen(true);
-  }, []);
+  }, [openSurface, setRightOpen]);
   // BLOCK-28.7 — 聊天区改动卡片点击：打开审阅 tab（文件选中由 useWorkingTreeReview 监听）
   useEffect(() => {
     return subscribePetriEvent(petriEvents.reviewOpenFile, () => {
       openRightPanel('review');
     });
   }, [openRightPanel]);
+  useEffect(() => subscribePetriEvent(petriEvents.planSurfaceOpen, () => openRightPanel('plan')), [openRightPanel]);
   // UI-446 — 激活审阅 tab 即视为已读当前会话改动（tab 圆点熄灭；新改动重新点亮）
   useEffect(() => {
     if (rightTab === 'review' && activeConvId) {
@@ -516,7 +505,7 @@ export function ProjectWorkspace(): React.ReactElement {
     titleBarTitle,
     rightTab,
     rightToolMenuOpen,
-    openRightTabs,
+    tabs: surfaceTabs, surfaces: workSurfaces,
     activeJobId,
     conversationJobs,
     browserCanGoBack,
@@ -528,6 +517,7 @@ export function ProjectWorkspace(): React.ReactElement {
     handleSelectTitleBarResult,
     openRightPanel,
     closeRightPanelTab,
+    closeOtherTabs: closeOtherSurfaceTabs, closeTabsToRight: closeSurfaceTabsToRight, closeAllTabs: closeAllSurfaceTabs,
     setRightOpen,
     setRightTab,
     setRightToolMenuOpen,
@@ -990,6 +980,7 @@ export function ProjectWorkspace(): React.ReactElement {
     backendStatus,
     jobs,
     datasets,
+    packResultSurfaces: workResultSurfaces,
     updateWorkspaceMode,
     openRightPanel,
     switchToProject,
@@ -1046,6 +1037,9 @@ export function ProjectWorkspace(): React.ReactElement {
     setRightToolMenuOpen,
     openRightPanel,
     closeRightPanelTab,
+    closeOtherTabs: closeOtherSurfaceTabs, closeTabsToRight: closeSurfaceTabsToRight, closeAllTabs: closeAllSurfaceTabs,
+    descriptorForTab: (tabId: string) => descriptorForSurface(surfaceTabs.find((candidate) => candidate.id === tabId)?.surfaceId ?? tabId),
+    uiActions: workSurfaceUiActions,
     activeJob,
     activeWorkflow,
     onWorkflowChanged: () => setWorkflowRefreshKey((value) => value + 1),

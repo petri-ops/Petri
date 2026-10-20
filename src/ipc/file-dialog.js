@@ -358,29 +358,49 @@ function setupFileDialogIpc({ mainWindow } = {}) {
     }
   });
 
+  function resolveWorkspaceFile(workspacePath, relativePath) {
+    if (
+      typeof workspacePath !== "string" ||
+      typeof relativePath !== "string" ||
+      !workspacePath ||
+      !relativePath ||
+      path.isAbsolute(relativePath)
+    ) {
+      return { ok: false, error: "invalid workspace file path" };
+    }
+    const realRoot = fs.realpathSync(workspacePath);
+    const realTarget = fs.realpathSync(path.resolve(realRoot, relativePath));
+    if (realTarget !== realRoot && !realTarget.startsWith(realRoot + path.sep)) {
+      return { ok: false, error: "file is outside the project workspace" };
+    }
+    if (!fs.statSync(realTarget).isFile()) {
+      return { ok: false, error: "target is not a file" };
+    }
+    return { ok: true, realTarget };
+  }
+
   ipcMain.handle(CHANNELS.file.openWorkspaceFile, async (_event, workspacePath, relativePath) => {
     try {
-      if (
-        typeof workspacePath !== "string" ||
-        typeof relativePath !== "string" ||
-        !workspacePath ||
-        !relativePath ||
-        path.isAbsolute(relativePath)
-      ) {
-        return { ok: false, error: "invalid workspace file path" };
-      }
-      const realRoot = fs.realpathSync(workspacePath);
-      const realTarget = fs.realpathSync(path.resolve(realRoot, relativePath));
-      if (realTarget !== realRoot && !realTarget.startsWith(realRoot + path.sep)) {
-        return { ok: false, error: "file is outside the project workspace" };
-      }
-      if (!fs.statSync(realTarget).isFile()) {
-        return { ok: false, error: "target is not a file" };
-      }
-      const error = await shell.openPath(realTarget);
+      const resolved = resolveWorkspaceFile(workspacePath, relativePath);
+      if (!resolved.ok) return resolved;
+      const error = await shell.openPath(resolved.realTarget);
       return error ? { ok: false, error } : { ok: true };
     } catch (e) {
       console.error("[desktop] open workspace file failed:", e.message);
+      return { ok: false, error: e.message };
+    }
+  });
+
+  // BLOCK-216 Q5 — 文件预览动作：在系统文件管理器中定位（与 openWorkspaceFile
+  // 共用同一 realpath + workspace 边界；不传路径给 shell 之外的任何面）。
+  ipcMain.handle(CHANNELS.file.showInFolder, async (_event, workspacePath, relativePath) => {
+    try {
+      const resolved = resolveWorkspaceFile(workspacePath, relativePath);
+      if (!resolved.ok) return resolved;
+      shell.showItemInFolder(resolved.realTarget);
+      return { ok: true };
+    } catch (e) {
+      console.error("[desktop] show workspace file in folder failed:", e.message);
       return { ok: false, error: e.message };
     }
   });

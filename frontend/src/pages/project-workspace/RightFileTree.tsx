@@ -818,6 +818,34 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
           <button
             type="button"
             className={styles.workspaceTreeToggle}
+            onClick={() => {
+              if (!project.workspacePath) {
+                setOpenError('当前项目没有本地工作区路径');
+                return;
+              }
+              const filesBridge = getBridge('files');
+              if (!filesBridge?.showInFolder) {
+                setOpenError('桌面文件定位能力不可用');
+                return;
+              }
+              setOpenError('');
+              void filesBridge.showInFolder(project.workspacePath, activeFile.path).then((result) => {
+                if (!result.ok) setOpenError(result.error || '无法在文件管理器中显示该文件');
+              }).catch((error: Error) => {
+                setOpenError(error.message || '无法在文件管理器中显示该文件');
+              });
+            }}
+            title="在文件管理器中显示"
+            aria-label="在文件管理器中显示"
+            data-testid="file-show-in-folder"
+          >
+            <Icon name="folder" size={13} />
+          </button>
+        )}
+        {activeFile && (
+          <button
+            type="button"
+            className={styles.workspaceTreeToggle}
             onClick={() => requestCloseFiles([activeFile.path])}
             title="关闭当前文件"
             aria-label="关闭当前文件"
@@ -848,7 +876,9 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
             )}
             <div className={styles.workspaceFilePreviewStack} data-testid="file-preview-stack">
               {openFiles.length === 0 && (
-                <div className={`${styles.workspaceFilePreviewKeepAlive} ${styles.workspaceFilePreviewKeepAliveActive}`}>
+                // BLOCK-216 Q5 — 非激活 tab 不得强制 visibility:visible（子级会覆盖
+                // 父级 rightPanelTabContent 的 hidden，切走后空态仍盖在新 surface 上）。
+                <div className={`${styles.workspaceFilePreviewKeepAlive} ${active ? styles.workspaceFilePreviewKeepAliveActive : ''}`}>
                   <WorkspaceFilePreview
                     file={null}
                     refreshVersion={0}
@@ -861,7 +891,7 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
                 </div>
               )}
               {openFiles.map((file) => {
-                const isActive = file.path === activeFile?.path;
+                const isActive = active && file.path === activeFile?.path;
                 return (
                   <div
                     key={file.tabId ?? file.path}

@@ -693,6 +693,10 @@ async function main() {
   setupGenUiProtocol();
   setupGenUiIpc();
 
+  // BLOCK-216 Q5 — 领域包视图独立 origin 宿主（petri-pack://<packId>）
+  const { setupPackProtocol } = require("./main/pack-ui/scheme");
+  setupPackProtocol();
+
   // 6. CSP 加固——禁用 unsafe-eval，限制资源来源到 self + localhost（后端/SSE/dev server）
   setupCsp({ isDevMode });
 
@@ -738,6 +742,10 @@ if (process.argv.includes("--dev") && !app.commandLine.hasSwitch("remote-debuggi
 // BLOCK-166 — Gen UI 沙箱 scheme：privileged 注册必须在 app ready 前完成。
 const { registerGenUiSchemePrivileges } = require("./main/gen-ui/scheme");
 registerGenUiSchemePrivileges();
+
+// BLOCK-216 Q5 — 领域包视图 scheme（独立 origin，privileged 注册须在 ready 前）。
+const { registerPackSchemePrivileges } = require("./main/pack-ui/scheme");
+registerPackSchemePrivileges();
 
 app.whenReady().then(main);
 

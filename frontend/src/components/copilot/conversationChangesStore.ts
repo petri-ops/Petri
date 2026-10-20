@@ -188,6 +188,17 @@ export function getConversationUnreviewedCount(
   );
 }
 
+/** BLOCK-216 Q5 — 当前会话改动清单（生成文件面数据源）。 */
+export function useConversationFileChanges(
+  conversationId: string | undefined | null
+): ConversationFileChange[] {
+  useSyncExternalStore(
+    subscribeConversationChanges,
+    () => getConversationFileChanges(conversationId)
+  );
+  return getConversationFileChanges(conversationId);
+}
+
 /** 当前会话未审文件数（右栏审阅 tab 计数徽章数据源）。 */
 export function useConversationUnreviewedCount(
   conversationId: string | undefined | null

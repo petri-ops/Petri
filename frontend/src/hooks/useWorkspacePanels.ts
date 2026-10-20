@@ -42,6 +42,9 @@ export interface TitleBarState {
   reviewStat?: { added: number; removed: number } | null;
   onSelectTab: ((id: string) => void) | null;
   onCloseTab: ((id: string) => void) | null;
+  onCloseOtherTabs?: ((id: string) => void) | null;
+  onCloseTabsToRight?: ((id: string) => void) | null;
+  onCloseAllTabs?: (() => void) | null;
   onMoreAction: (() => void) | null;
   toolMenuOpen: boolean;
   toolMenuItems: TitleBarToolItem[];
@@ -85,6 +88,9 @@ const DEFAULT_TITLE_BAR: TitleBarState = {
   reviewStat: null,
   onSelectTab: null,
   onCloseTab: null,
+  onCloseOtherTabs: null,
+  onCloseTabsToRight: null,
+  onCloseAllTabs: null,
   onMoreAction: null,
   toolMenuOpen: false,
   toolMenuItems: [],
@@ -106,6 +112,9 @@ function titleBarDataEqual(a: TitleBarState, b: TitleBarState): boolean {
     a.activeResultId === b.activeResultId &&
     a.canGoBack === b.canGoBack &&
     a.canGoForward === b.canGoForward &&
+    a.onCloseOtherTabs === b.onCloseOtherTabs &&
+    a.onCloseTabsToRight === b.onCloseTabsToRight &&
+    a.onCloseAllTabs === b.onCloseAllTabs &&
     JSON.stringify(a.tabs) === JSON.stringify(b.tabs) &&
     a.reviewCount === b.reviewCount &&
     JSON.stringify(a.reviewStat ?? null) === JSON.stringify(b.reviewStat ?? null) &&

@@ -45,6 +45,9 @@ export const petriEvents = {
    */
   copilotAsk: 'petri:copilot-ask',
 
+  /** BLOCK-216 Q5 — 从计划卡打开计划面（payload: { planId }）。 */
+  planSurfaceOpen: 'petri:plan-surface-open',
+
   /**
    * UI-417 — 侧边聊天悬挂化：请求展开悬挂聊天面（原右栏 chat tab 入口收编——
    * home 空态卡「打开聊天」/分析完成跳转等）。SideChatDock 订阅后滑出 overlay；
@@ -247,6 +250,11 @@ export interface CopilotAskDetail {
   };
 }
 
+/** BLOCK-216 Q5 — 计划卡打开计划面。 */
+interface PlanSurfaceOpenDetail {
+  planId: string;
+}
+
 export interface ProjectOpenResultDetail {
   toolJobId: string;
   projectId?: string | null;
@@ -310,6 +318,7 @@ export type PetriEventMap = {
   [petriEvents.projectOpenWorkspaceFile]: ProjectOpenWorkspaceFileDetail;
   [petriEvents.projectWorkspaceChanged]: ProjectWorkspaceChangedDetail;
   [petriEvents.copilotAsk]: CopilotAskDetail;
+  [petriEvents.planSurfaceOpen]: PlanSurfaceOpenDetail;
   [petriEvents.sideChatOpen]: undefined;
   [petriEvents.browserBack]: undefined;
   [petriEvents.browserForward]: undefined;

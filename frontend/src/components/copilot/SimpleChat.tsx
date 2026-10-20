@@ -1530,7 +1530,7 @@ export function SimpleChat({
             plan={pendingPlan}
             busy={planCardBusy}
             onApprove={(action) => void handlePlanApprove(action)}
-            onDismiss={() => setPendingPlan(null)}
+            onDismiss={() => setPendingPlan(null)} onOpenInTab={(planId) => dispatchPetriEvent(petriEvents.planSurfaceOpen, { planId })}
           />
         )}
         {pendingRevision && !pendingPlan && (

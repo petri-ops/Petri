@@ -3183,6 +3183,12 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   pointer-events: auto;
 }
 
+/* BLOCK-216 Q5 — pack 视图是 OOPIF，父层 visibility:hidden 在 Chromium 下仍可能
+   继续合成（实机抓真：切走后黑底 iframe 盖住新 surface）。非激活时直接 display:none。 */
+.rightPanelTabContentPack:not(.rightPanelTabContentActive) {
+  display: none;
+}
+
 .rightPanelBrowserTab {
   overflow: hidden;
   display: flex;

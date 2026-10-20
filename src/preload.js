@@ -282,6 +282,9 @@ const desktopBridgeSurface = {
     openPath: (targetPath) => ipcRenderer.invoke('file:open-path', targetPath),
     openWorkspaceFile: (workspacePath, relativePath) =>
       ipcRenderer.invoke('file:open-workspace-file', workspacePath, relativePath),
+    // BLOCK-216 Q5 — 文件预览动作：在系统文件管理器中显示（同一 workspace 边界）
+    showInFolder: (workspacePath, relativePath) =>
+      ipcRenderer.invoke('file:show-in-folder', workspacePath, relativePath),
     // UI-400-2 — 导出/下载：主进程保存对话框 + 受限本机来源流式写盘
     downloadFromUrl: (url, name) =>
       ipcRenderer.invoke('file:download-from-url', { url, name }),

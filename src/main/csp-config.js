@@ -10,6 +10,7 @@
 
 const { session, webContents } = require("electron");
 const { SCHEME: GEN_UI_SCHEME } = require("./gen-ui/scheme");
+const { SCHEME: PACK_UI_SCHEME } = require("./pack-ui/scheme");
 
 function setupCsp({ isDevMode }) {
   // BLOCK-166 P3（实机渗透实证，勿回退）：gen-ui 沙箱页自身导航在网络栈层阻断。
@@ -20,7 +21,12 @@ function setupCsp({ isDevMode }) {
   // 规格 §6.5「页面内导航一律阻断」。页内 #fragment 跳转走 scrollIntoView 不发请求。
   session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
     const url = String(details.url || "");
-    if (url.startsWith(`${GEN_UI_SCHEME}:`) || url.startsWith("blob:") || url.startsWith("data:")) {
+    if (
+      url.startsWith(`${GEN_UI_SCHEME}:`)
+      || url.startsWith(`${PACK_UI_SCHEME}:`)
+      || url.startsWith("blob:")
+      || url.startsWith("data:")
+    ) {
       callback({});
       return;
     }
@@ -41,9 +47,10 @@ function setupCsp({ isDevMode }) {
       if (typeof details.webContentsId === "number") {
         try {
           const wc = webContents.fromId(details.webContentsId);
-          if (wc && !wc.isDestroyed() && String(wc.getURL() || "").startsWith(`${GEN_UI_SCHEME}:`)) {
+          const wcUrl = wc && !wc.isDestroyed() ? String(wc.getURL() || "") : "";
+          if (wcUrl.startsWith(`${GEN_UI_SCHEME}:`) || wcUrl.startsWith(`${PACK_UI_SCHEME}:`)) {
             callback({ cancel: true });
-            console.log("[security] gen-ui 沙箱导航已阻断(webRequest):", url.slice(0, 80));
+            console.log("[security] 沙箱页导航已阻断(webRequest):", url.slice(0, 80));
             return;
           }
         } catch { /* webContents 已销毁则放行给其余策略 */ }
@@ -54,7 +61,10 @@ function setupCsp({ isDevMode }) {
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     // Gen UI 沙箱页自带 per-response CSP（csp.js 全禁面，规格 §6.1）：
     // 应用级 CSP 不得覆盖它；frame-src 对父页放行 petri-genui: 供 iframe 加载。
-    if (String(details.url || "").startsWith(`${GEN_UI_SCHEME}:`)) {
+    if (
+      String(details.url || "").startsWith(`${GEN_UI_SCHEME}:`)
+      || String(details.url || "").startsWith(`${PACK_UI_SCHEME}:`)
+    ) {
       callback({ responseHeaders: details.responseHeaders });
       return;
     }
@@ -73,7 +83,7 @@ function setupCsp({ isDevMode }) {
             "style-src 'self' 'unsafe-inline'; " +
             "img-src 'self' data: blob: http://localhost:* ; " +
             "connect-src 'self' " + localNet + "; " +
-            "frame-src 'self' " + localNet + " " + GEN_UI_SCHEME + ":; " +
+            "frame-src 'self' " + localNet + " " + GEN_UI_SCHEME + ": " + PACK_UI_SCHEME + ":; " +
             "font-src 'self' data: ; " +
             "worker-src 'self' blob: ; " +
             "object-src 'none';",

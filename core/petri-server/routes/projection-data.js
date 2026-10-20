@@ -153,6 +153,19 @@ module.exports = function registerProjectionDataRoutes(app) {
     }
   });
 
+  // BLOCK-216 Q5 — 工作面贡献投影（只读）：已安装/启用 pack 的
+  // views / resultSurfaces / uiActions。非法条目丢弃并回传 diagnostics，
+  // pack 停用/卸载即消失；不暴露 packRoot，不执行包内代码。
+  app.get('/api/packs/contributions', (_req, res) => {
+    try {
+      const { loadPackContributions } = require('../helpers/pack-contributions');
+      const result = loadPackContributions({ dataDir: resolveDataDir() });
+      res.json({ ok: true, packs: result.packs, diagnostics: result.diagnostics });
+    } catch (error) {
+      res.status(500).json({ ok: false, error: 'packs_contributions_failed', message: error.message });
+    }
+  });
+
   // 领域包可装发现（与桌面 pack:list-available 同一 pack-registry 逻辑 + 已装标记）
   app.get('/api/packs/available', (_req, res) => {
     try {

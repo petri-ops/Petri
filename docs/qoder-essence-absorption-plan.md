@@ -172,7 +172,7 @@ status: planned
 | --- | --- | --- | --- | --- | --- | --- |
 | B1 | 计划批准三选一 | 开始实现/调整/暂不实施 | `PlanApprovalCard` 批准/清上下文执行/继续计划 | ✅ | Petri 已对齐且更细 | — |
 | B2 | 计划反馈回路 | `requestChanges` 输入「告诉 Qoder 计划需要如何调整」 | 无 | 🔴 | 计划不是只读弹窗 | Q2 |
-| B3 | 计划版本/状态/复制/下载 | `specArtifact` 版本 tabs、pending/approved/accepted、copy/download | plan 工具落库；无独立计划 artifact 面 | 🟡 | 计划作为可追溯产物 | Q5 |
+| B3 | 计划版本/状态/复制/下载 | `specArtifact` 版本 tabs、pending/approved/accepted、copy/download | **Q5 已交付计划面**：会话计划列表 + 状态/步骤/spec + 复制/下载 `.md` + 加入对话；修订版本 tabs 未做 | 🟡 | 计划作为可追溯产物 | Q5 |
 | B4 | 目标模式 | active/completed/paused/blocked/usage/budget + elapsed | 无 | 🔴 | 长跑目标的状态机 | Q7 |
 | B5 | 目标用量/预算受限 | `usageLimited/budgetLimited` | 只有成本上限提示 | 🟡 | 目标级预算可见 | Q7 |
 | B6 | 目标工具契约 | GetGoal/CreateGoal/UpdateGoal 三件 | 只有 `spawn_agent` 的 goals 参数；无独立目标工具 | 🟡 | 目标可查询/可更新 | Q7 |
@@ -214,15 +214,15 @@ status: planned
 
 | # | 体验面 | Qoder 行为 | Petri 现状 | 判定 | 精华 | 波次 |
 | --- | --- | --- | --- | --- | --- | --- |
-| E1 | 统一工作面标签 | code/files/browser/changes/spec/terminal/evidence/agent/sidechat/plugin | 文件 tab + 多个面板；无统一 tab 模型 | 🔴 | 工作面稳定可寻 | Q5 |
-| E2 | 标签关闭菜单/单例/序号 | close others/right/all、single、ordinal | 文件 tab 有部分；未统一 | 🟡 | 标签生命周期一致 | Q5 |
-| E3 | 生成文件视图 | 当前工作区版本 vs 工具记录、空/错/无证据 | `conversationChangesStore` + 改动卡；无独立面 | 🟡 | AI 产物可追溯 | Q5 |
-| E4 | 文件预览动作 | 默认应用打开/文件管理器显示 | 编辑器/打开路径已有 | 🟡 | 系统级衔接 | Q5 |
+| E1 | 统一工作面标签 | code/files/browser/changes/spec/terminal/evidence/agent/sidechat/plugin | **Q5 已统一右轨**：files/browser/analyze/review/jobs/io/agent + generated/plan/evidence + pack views 共享 surface 注册表；工作区 URL 模式、底部终端、侧聊仍各宿主 | 🟡 | 工作面稳定可寻 | Q5 |
+| E2 | 标签关闭菜单/单例/序号 | close others/right/all、single、ordinal | **Q5 已交付**：统一 close/others/right/all、单例/序号模型、按项目持久化、tab 右键菜单；文件 tab 原有关闭策略保留 | ✅ | 标签生命周期一致 | Q5 |
+| E3 | 生成文件视图 | 当前工作区版本 vs 工具记录、空/错/无证据 | **Q5 已交付生成文件面**：会话改动 + 工作区版本/工具记录来源 + empty/loading/error/no-evidence 四态；工具记录无内容时如实说明 | ✅ | AI 产物可追溯 | Q5 |
+| E4 | 文件预览动作 | 默认应用打开/文件管理器显示 | 系统应用打开已有；**Q5 补 `file:show-in-folder` IPC**（未点验 OS 文件管理器实际行为） | 🟡 | 系统级衔接 | Q5 |
 | E5 | 文档产物批注 | PDF/PPTX/DOCX/XLSX/图片 → 批注加入任务 | PDF/xlsx viewer + 文本选择；无批注/PPTX/DOCX | 🟡 | 读-批-问闭环 | Q6 |
 | E6 | 内置浏览器 | 有 | `BrowserPanel` 已有 | ✅ | 不重建 | — |
 | E7 | 电脑使用画中画 | PiP 显示/隐藏/会话级隐藏 | computer 工具有；无 PiP | 🟡 | 自动化过程可见 | Q9 |
 | E8 | 终端多 tab/上限 | 有 | `BottomTerminal` 已有 | ✅ | 不重建 | — |
-| E9 | 终端分屏 | terminal split limit | 无 | 🟡 | 多命令并行 | Q5 |
+| E9 | 终端分屏 | terminal split limit | 无；**Q5 明确 deferred**（node-pty 会话/tab 生命周期耦合，成本不可控，不夹带） | 🟡 | 多命令并行 | Q5 reopen |
 | E10 | 审阅/历史/blame | per-turn patch + push | Petri 更深 | ✅ | 不借 | — |
 | E11 | 工作树 UI | Enter/Exit/恢复/清理 | G0 deferred | ⛔ | 阶段禁区 | — |
 | E12 | Notebook 单元格编辑 | NotebookEdit（cell 级读写/执行） | `.ipynb` 只能当文本编辑；无 cell 级工具 | 🟡 | 数据科学工作流一等公民 | Q5 |
@@ -259,8 +259,8 @@ status: planned
 | --- | --- | --- | --- | --- | --- | --- |
 | H1 | 知识空间/检索/引用 | knowledge center | Petri 更深 | ✅ | 不重建 | — |
 | H2 | 结果产物/血缘/分屏/查看器 | 无同等 | Result Studio 独有 | ✅ | 不重建 | — |
-| H3 | 证据/核验状态 | evidence tab / result status | artifact truth + UI-526 | 🟡 | 证据面统一 | Q3/Q5 |
-| H4 | 计划/规格 artifact 版本 | specArtifact | plan 落库；无独立面 | 🟡 | 计划可追溯 | Q5 |
+| H3 | 证据/核验状态 | evidence tab / result status | **Q5 已交付证据槽位 + 最小索引**（artifact truth/版本/可用性/相关工作面）；事件级轨迹由 Q3 扩展同一面 | 🟡 | 证据面统一 | Q3/Q5 |
+| H4 | 计划/规格 artifact 版本 | specArtifact | **Q5 已交付计划面基础**（状态/步骤/spec）；修订版本 tabs 未做 | 🟡 | 计划可追溯 | Q5 |
 
 ### I. 自动化与任务
 
@@ -315,7 +315,7 @@ status: planned
 
 > **工具宇宙映射（2026-10-20 抽查）**：Qoder 41 工具中，Monitor/TaskStop/BashInput/BashOutput/BashResize/TaskCreate/TaskGet/TaskUpdate/TaskList/UpdateTopic/CompleteTask 已有 process/terminal/todo/plan 等价物，不单列矩阵行；CodebaseInvestigator 记 F9（待核）；ImageSearch/ImageGen/VideoGen/VideoGenRetrieve 记 L7（⛔）；AskUserQuestion/NotebookEdit 记 C19/E12（待补）。
 
-**矩阵统计（2026-10-20 增补 L 组 + 补漏 + Q-DOMAIN 后，机械计数）**：✅ 24 · 🟡 47 · 🔴 24 · ⛔ 7 = **102 点**。Q1–Q9 需要处理的主要是 24 个 🔴 与 47 个 🟡 中真正影响体验的部分；⛔ 不进入波次。**口径已同步**：DOC-REGISTRY 注记与 §12 更新记录统一为 102/24/47/24/7。
+**矩阵统计（2026-10-20 Q5 收口后，机械计数）**：✅ 26 · 🟡 46 · 🔴 23 · ⛔ 7 = **102 点**（E2/E3 → ✅；E1 🔴→🟡 部分交付）。Q1–Q9 需要处理的主要是 24 个 🔴 与 47 个 🟡 中真正影响体验的部分；⛔ 不进入波次。**口径已同步**：DOC-REGISTRY 注记与 §12 更新记录统一为 102/24/47/24/7。
 
 ## 6. 多波次计划（Q0–Q9）
 
@@ -433,7 +433,7 @@ status: planned
 
 **目标**：把生信垂直从“执行层在 pack、知识/交互/结果/数据层仍在核心”的混合形态，逐步收敛为“**核心零生信硬编码 + 生信 pack 自包含**”。**结果页是生信专属产品面，不做通用化**；完全插件化不等于把 Result Studio 变成通用文件浏览器。
 
-> 2026-10-20：**P1 已立项 [BLOCK-214](./block-214-qdomain-p1-pack-skills-plan.md)（completed）**——3 个生信 skill 迁入 pack + `provides.skills` + skill-registry 发现/卸载；**P2a prompt（[BLOCK-215](./block-215-qdomain-p2a-prompt-decoring-plan.md)，completed）**——核心 prompt 去生信化 + pack `promptFragments`；**P2-UI actions（需 Q5 host，planned）**；P2b Result Surface 仍 planned。
+> 2026-10-20：**P1 已立项 [BLOCK-214](./block-214-qdomain-p1-pack-skills-plan.md)（completed）**——3 个生信 skill 迁入 pack + `provides.skills` + skill-registry 发现/卸载；**P2a prompt（[BLOCK-215](./block-215-qdomain-p2a-prompt-decoring-plan.md)，completed）**——核心 prompt 去生信化 + pack `promptFragments`；**Q5 host（[BLOCK-216](./block-216-q5-work-surface-host-plan.md)，completed）**——surface 注册表/tab 状态机/pack 贡献投影/`petri-pack://`/生成文件·计划·证据面；**P2-UI actions（Q5 host 已就绪，下一包）**；P2b Result Surface 仍 planned（使用 Q5 `resultSurfaceHost`）。
 
 **现状（2026-10-20 只读核对）**
 - ✅ 已在 pack：7 个分析插件 + dormant、scripts、demo-data、confirmationHooks、artifactTypes。
@@ -511,6 +511,8 @@ status: planned
 **风险**：这是新执行面，必须单独立项；不得与 Q4a 同包；脚本沙箱必须 fail-closed；先做最小可用，不做 Qoder 全量语法。
 
 ### Q5 — 统一工作面与生成文件（约 1–2 周）
+
+> **2026-10-20：BLOCK-216 已收口（completed，closeout 十三门 + 9223 live 19/19）**。交付=右轨 surface 注册表/tab 状态机/pack `views`·`resultSurfaces`·`uiActions` 贡献投影 + `petri-pack://` 独立 origin + 生成文件/计划/证据面 + 文件管理器显示 IPC。边界=终端分屏 E9 deferred；工作区 URL 模式/底部终端/侧聊维持现有宿主；P2b 生信结果面仍未物理迁移（host 已解析 pack resultSurfaces）。
 
 **目标**：把散落在面板/抽屉/浮层里的工作面收成稳定标签，并让 AI 生成文件可追溯。
 
@@ -681,7 +683,7 @@ Q-DOMAIN（垂直去核化，跨波次）
 - **母纲**：`AGENT-COMPETITIVENESS-PROGRAM`（方向）；本文件是 Qoder 样本的增量，不重开 CP-1–CP-22。
 - **建议首波**：**Q0.5（插件 ADR，0.5–1 天）+ Q-DOMAIN P1（skills 去核，1–2 周）**——先把 host 契约和生信 skills 落进 pack，再按 Q1（信任与审批）→ Q2b（联网检索）→ Q5（工作面 host）→ Q-DOMAIN P2b（生信 Result Surface）→ Q6 推进；Q-DOMAIN P2/P3 可穿插，P4 最后。
 - **发令方式**：Q-DOMAIN P1 可独立立项为 BLOCK（P0 ADR / P1 实现）；Q1/Q2b 各自独立发令；**结果页 P2b 不得早于 Q5 host，Q6 不得早于 P2b**。
-- **当前状态**：本文件为 planned；2026-10-20 增补 §2.5 插件架构 B、L 组矩阵（L1–L8）、C19/E12/B6/F9/E13 补漏、Q2b 联网检索与 **Q-DOMAIN 垂直去核化**（P1–P4，含 P2b 生信 Result Surface）；无 active 工作包；本次增补未改任何产品代码，QODER 计划仍是并行会话的未提交 WIP。
+- **当前状态**：本文件为 planned（方向母纲）；**Q5 已由 BLOCK-216 收口（completed）**，host 契约与挂载点已就绪。按用户 2026-10-20 裁决的顺序，下一包=**Q-DOMAIN P2-UI actions**（依赖 Q5 host），随后 **P2b Result Studio resultSurface** → Q6 → P3 → P4；Q1/Q2b 可穿插。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## 12. 附：Q-MATRIX 更新记录
 
@@ -690,3 +692,4 @@ Q-DOMAIN（垂直去核化，跨波次）
 | 2026-10-20 | Q0 | 初始 89 点矩阵落档；✅24 / 🟡40 / 🔴19 / ⛔6（机械计数） | 本文件 §5；Qoder 反编译树 + Petri UI 台账/组件核对 |
 | 2026-10-20 | Q0.5/Q2b | 增补插件架构 B 口径（§2.5）、L 组矩阵 L1–L7（联网搜索/抓取、浏览器、电脑控制、插件宿主/权限、生成式媒体 ⛔）、C19/E12/B6/F9 补漏、Q2b DeepSeek Search/Fetch provider 合同与安全红线；矩阵 **89→100**（✅24 / 🟡46 / 🔴23 / ⛔7） | 本文件 §2.5/§5-L/§6-Q2b；DeepSeek 官方 Search/Fetch 指南 + Qoder 反编译树 + Petri 实码 |
 | 2026-10-20 | Q-DOMAIN/E13/L8 | 用户强调结果页必须生信专属：新增 E13 Result Studio 生信结果面 + L8 垂直领域完全插件化；Q-DOMAIN P1–P4（P2b resultSurface，结果页保持生信 UX，核心只做 artifact/truth host）；矩阵 **100→102**（✅24 / 🟡47 / 🔴24 / ⛔7） | 本文件 §3-15/§6-Q-DOMAIN；Result Studio 实码 + domain-neutrality baseline 135/326/49 |
+| 2026-10-20 | Q5 | BLOCK-216 收口：E2/E3 → ✅；E1 🔴→🟡（右轨统一，工作区模式/终端/侧聊仍各宿主）；矩阵 **✅26 / 🟡46 / 🔴23 / ⛔7 = 102**；E9 明确 deferred | `docs/block-216-q5-work-surface-host-plan.md` §7 + `acceptance/block-216/`（9223 live 19/19） |

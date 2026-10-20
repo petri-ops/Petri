@@ -1,0 +1,103 @@
+{
+  "name": "block216-q5-work-surface",
+  "startedAt": "2026-10-20T06:47:49.834Z",
+  "finishedAt": "2026-10-20T06:48:26.133Z",
+  "assertions": [
+    {
+      "name": "workspace_ready",
+      "pass": true,
+      "detail": "project workspace did not mount"
+    },
+    {
+      "name": "right_rail_ready",
+      "pass": true,
+      "detail": "right rail toggle/menu not found"
+    },
+    {
+      "name": "core_and_pack_tabs_present",
+      "pass": true,
+      "detail": "文件\n×|文件|文件|生成文件\n×|生成文件|生成文件|计划\n×|计划|计划|证据\n×|证据|证据|审阅\n×|审阅|审阅|实验台\n×|实验台|实验台"
+    },
+    {
+      "name": "generated_files_honest_empty",
+      "pass": true,
+      "detail": "generated files surface not empty"
+    },
+    {
+      "name": "plan_honest_empty",
+      "pass": true,
+      "detail": "plan surface not empty"
+    },
+    {
+      "name": "evidence_honest_empty",
+      "pass": true,
+      "detail": "evidence surface not empty"
+    },
+    {
+      "name": "surface_activated_生成文件",
+      "pass": true,
+      "detail": "生成文件"
+    },
+    {
+      "name": "surface_activated_计划",
+      "pass": true,
+      "detail": "计划"
+    },
+    {
+      "name": "surface_activated_证据",
+      "pass": true,
+      "detail": "证据"
+    },
+    {
+      "name": "pack_iframe_mounted",
+      "pass": true,
+      "detail": "pack surface frame missing"
+    },
+    {
+      "name": "pack_iframe_isolated_origin",
+      "pass": true,
+      "detail": "petri-pack://q5fixture/ui/lab.html"
+    },
+    {
+      "name": "pack_iframe_ready",
+      "pass": true,
+      "detail": "pack iframe did not reach ready"
+    },
+    {
+      "name": "tabs_persisted",
+      "pass": true,
+      "detail": "{\"version\":1,\"tabs\":[{\"id\":\"files\",\"surfaceId\":\"files\"},{\"id\":\"generated\",\"surfaceId\":\"generated\"},{\"id\":\"plan\",\"surfaceId\":\"plan\"},{\"id\":\"evidence\",\"surfaceId\":\"evidence\"},{\"id\":\"review\",\"surfaceId\":\"review\"},{\"id\":\"pack:q5fixture:lab\",\"surfaceId\":\"pack:q5fixture:lab\"}],\"activeId\":\"pack:q5fixture:l"
+    },
+    {
+      "name": "workspace_restored_after_reload",
+      "pass": true,
+      "detail": "workspace did not reload"
+    },
+    {
+      "name": "tabs_restored_after_reload",
+      "pass": true,
+      "detail": "restored tabs not visible"
+    },
+    {
+      "name": "tab_context_menu_opened",
+      "pass": true,
+      "detail": "tab context menu missing"
+    },
+    {
+      "name": "close_others_clicked",
+      "pass": true,
+      "detail": "close others item missing"
+    },
+    {
+      "name": "close_others_keeps_only_target",
+      "pass": true,
+      "detail": "审阅\n×|审阅|审阅"
+    },
+    {
+      "name": "cleanup_completed",
+      "pass": true,
+      "detail": "project p_mvgbmzq0_kwqb / fixture removed"
+    }
+  ],
+  "allPass": true
+}

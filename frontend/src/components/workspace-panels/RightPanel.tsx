@@ -10,7 +10,6 @@ import {
 } from '@/components/result-studio/ResultEditPanel';
 import type { ResultStudioEditControls } from '@/lib/result-studio-interaction-client';
 import {
-  type RightPanelMode,
   type ActiveArtifact,
   type ActiveWorkspaceFile,
   EmptyResult,
@@ -28,6 +27,11 @@ import { ReviewMode } from '@/components/desktop/WorkingTreeReview/ReviewMode';
 import { LlmTranscriptViewer } from '@/components/copilot/LlmTranscriptViewer';
 // UI-385 — 子智能体实时详情面板（原独立专属窗迁入右栏）
 import { AgentRunPanel } from '@/components/workspace-panels/AgentRunPanel';
+import { GeneratedFilesSurface } from '@/components/work-surface/GeneratedFilesSurface';
+import { PlanSurface } from '@/components/work-surface/PlanSurface';
+import { EvidenceSurface } from '@/components/work-surface/EvidenceSurface';
+import { PackSurfaceFrame } from '@/components/work-surface/PackSurfaceFrame';
+import type { PackUiActionDescriptor, WorkSurfaceDescriptor } from '@/lib/workSurface/types';
 import styles from '@/pages/project-workspace.module.css';
 
 type DispatchSetter<T> = React.Dispatch<React.SetStateAction<T>>;
@@ -48,13 +52,19 @@ export interface RightPanelContext {
   onAgentRunSwitch?: (runId: string) => void;
 
   // Tab state
-  openRightTabs: RightPanelMode[];
-  rightTab: RightPanelMode;
+  openRightTabs: string[];
+  rightTab: string;
   rightToolMenuOpen: boolean;
-  setRightTab: (tab: RightPanelMode) => void;
+  setRightTab: (tab: string) => void;
   setRightToolMenuOpen: DispatchSetter<boolean>;
-  openRightPanel: (tab: RightPanelMode) => void;
-  closeRightPanelTab: (tab: RightPanelMode) => void;
+  openRightPanel: (tab: string) => void;
+  closeRightPanelTab: (tab: string) => void;
+  closeOtherTabs?: (tabId: string) => void;
+  closeTabsToRight?: (tabId: string) => void;
+  closeAllTabs?: () => void;
+  /** BLOCK-216 Q5 — pack/core descriptor for a (possibly numbered) tab id. */
+  descriptorForTab?: (tabId: string) => WorkSurfaceDescriptor | undefined;
+  uiActions?: PackUiActionDescriptor[];
 
   // Tab content data
   activeJob: ToolJob | null;
@@ -162,14 +172,17 @@ export function RightPanel({
         {ctx.columnHeader}
         <div className={styles.resultPanel}>
           <div className={styles.resultPanelBody}>
-            {ctx.openRightTabs.map((tab) => (
+            {ctx.openRightTabs.map((tab) => {
+              const surfaceDescriptor = ctx.descriptorForTab?.(tab);
+              const packTab = surfaceDescriptor?.kind === 'pack-view';
+              return (
               <div
                 key={tab}
                 className={`${styles.rightPanelTabContent} ${
                   ctx.rightTab === tab ? styles.rightPanelTabContentActive : ''
                 } ${tab === 'browser' ? styles.rightPanelBrowserTab : ''} ${
                   tab === 'review' ? styles.rightPanelReviewTab : ''
-                }`}
+                } ${packTab ? styles.rightPanelTabContentPack : ''}`}
               >
                 {tab === 'home' && (
                   <EmptyResult
@@ -276,10 +289,41 @@ export function RightPanel({
                     <div className={styles.panelEmpty}>尚未选择子智能体——在会话工具行或活动条中打开详情。</div>
                   )
                 )}
+                {/* BLOCK-216 Q5 — 生成文件 / 计划 / 证据 core surfaces */}
+                {tab === 'generated' && (
+                  <GeneratedFilesSurface
+                    project={ctx.project}
+                    conversationId={ctx.activeConvId}
+                    onOpenFile={ctx.handleOpenWorkspaceFile}
+                    onAskAgent={ctx.handleAskAgent}
+                  />
+                )}
+                {tab === 'plan' && (
+                  <PlanSurface conversationId={ctx.activeConvId} onAskAgent={ctx.handleAskAgent} />
+                )}
+                {tab === 'evidence' && (
+                  <EvidenceSurface
+                    activeJob={ctx.activeJob}
+                    activeWorkflow={ctx.activeWorkflow}
+                    activeArtifact={ctx.activeArtifact}
+                    onOpenResults={() => ctx.openRightPanel('results')}
+                    onOpenReview={() => ctx.openRightPanel('review')}
+                    onOpenPlan={() => ctx.openRightPanel('plan')}
+                  />
+                )}
+                {surfaceDescriptor?.kind === 'pack-view' && (
+                  <PackSurfaceFrame
+                    descriptor={surfaceDescriptor}
+                    projectId={ctx.projectId}
+                    conversationId={ctx.activeConvId}
+                    uiActions={ctx.uiActions}
+                  />
+                )}
                 {/* BLOCK-72 / UI-320 — 「知识空间」「后端」tab 已迁出右栏：设备级全局能力，
                     管理面在左栏工作台入口的 /knowledge 与 /backend 全局页；不预留空壳。 */}
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </aside>

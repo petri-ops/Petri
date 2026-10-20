@@ -35,22 +35,52 @@ export function TitleBarRightZone(): React.ReactElement {
     activeTabId,
     onSelectTab,
     onCloseTab,
+    onCloseOtherTabs,
+    onCloseTabsToRight,
+    onCloseAllTabs,
     onMoreAction,
     toolMenuOpen,
     toolMenuItems,
     onSelectToolItem,
   } = panels.titleBar;
+  // BLOCK-216 Q5 — tab 生命周期菜单（close / others / right / all）
+  const [tabMenu, setTabMenu] = React.useState<{ x: number; y: number; id: string; label: string } | null>(null);
+  const tabsRailRef = React.useRef<HTMLDivElement | null>(null);
+
+  // 多 surface 横向滚动后，激活项必须自动回到视野（新开 pack 视图不在首屏时尤其重要）。
+  React.useEffect(() => {
+    if (!activeTabId) return;
+    const rail = tabsRailRef.current;
+    if (!rail) return;
+    const escaped = typeof CSS !== 'undefined' && CSS.escape ? CSS.escape(activeTabId) : activeTabId;
+    const el = rail.querySelector(`[data-tab-id="${escaped}"]`);
+    el?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+  }, [activeTabId, tabs.length]);
+
+  React.useEffect(() => {
+    if (!tabMenu) return undefined;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setTabMenu(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [tabMenu]);
 
   return (
     <div className={`${styles.rightZone} ${!panels.rightOpen ? styles.rightZoneCollapsed : ''}`}>
       {panels.rightOpen && workspacePanelsAvailable && (
-        <div className={styles.tabsRail}>
+        <div className={styles.tabsRail} ref={tabsRailRef}>
           {tabs.map((tab) => {
             const active = tab.id === activeTabId;
             return (
               <div
                 key={tab.id}
+                data-tab-id={tab.id}
                 className={`${styles.tabPill} ${active ? styles.tabPillActive : ''}`}
+                onContextMenu={(event) => {
+                  event.preventDefault();
+                  setTabMenu({ x: event.clientX, y: event.clientY, id: tab.id, label: tab.label });
+                }}
               >
                 <button
                   type="button"
@@ -128,6 +158,60 @@ export function TitleBarRightZone(): React.ReactElement {
             )}
           </div>
         </div>
+      )}
+
+      {tabMenu && (
+        <>
+          <button
+            type="button"
+            className={styles.toolMenuOverlay}
+            onClick={() => setTabMenu(null)}
+            aria-label="关闭标签菜单"
+          />
+          <div
+            className={styles.toolMenu}
+            role="menu"
+            data-testid="work-surface-tab-menu"
+            style={{ position: 'fixed', left: tabMenu.x, top: tabMenu.y, zIndex: 60 }}
+          >
+            <button
+              type="button"
+              className={styles.toolMenuItem}
+              role="menuitem"
+              disabled={!onCloseTab}
+              onClick={() => { onCloseTab?.(tabMenu.id); setTabMenu(null); }}
+            >
+              关闭
+            </button>
+            <button
+              type="button"
+              className={styles.toolMenuItem}
+              role="menuitem"
+              disabled={!onCloseOtherTabs}
+              onClick={() => { onCloseOtherTabs?.(tabMenu.id); setTabMenu(null); }}
+            >
+              关闭其他
+            </button>
+            <button
+              type="button"
+              className={styles.toolMenuItem}
+              role="menuitem"
+              disabled={!onCloseTabsToRight}
+              onClick={() => { onCloseTabsToRight?.(tabMenu.id); setTabMenu(null); }}
+            >
+              关闭右侧
+            </button>
+            <button
+              type="button"
+              className={styles.toolMenuItem}
+              role="menuitem"
+              disabled={!onCloseAllTabs}
+              onClick={() => { onCloseAllTabs?.(); setTabMenu(null); }}
+            >
+              全部关闭
+            </button>
+          </div>
+        </>
       )}
 
       <div className={styles.windowTools}>

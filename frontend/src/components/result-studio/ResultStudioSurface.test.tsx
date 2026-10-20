@@ -140,7 +140,10 @@ describe('G0-RS-P1 Result Studio surface', () => {
       </>,
     );
 
-    expect(screen.getAllByText('可信结果')).toHaveLength(2);
+    // ContextBar 接收调用方传入的短标签；Inspector 走 describeTruthStatus 的
+    // 诚实长标签（BLOCK-211 bbcaafbe 语义化）。两者同一真值，但文案不同。
+    expect(screen.getAllByText('可信结果')).toHaveLength(1);
+    expect(screen.getAllByText('已核验（未篡改）')).toHaveLength(1);
     expect(screen.getAllByText('文件不可用')).toHaveLength(2);
     expect(screen.queryByText('打开原文件')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: /检查并恢复文件/ }));

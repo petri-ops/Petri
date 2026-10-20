@@ -1,0 +1,46 @@
+.frameHost {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  background: var(--petri-surface, transparent);
+}
+
+.frame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+}
+
+.frame[data-hidden='true'] {
+  visibility: hidden;
+  position: absolute;
+  inset: 0;
+}
+
+.frameLoading,
+.frameState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  color: var(--petri-text-muted);
+  font-size: var(--petri-font-size-body);
+  line-height: 1.6;
+  text-align: center;
+}
+
+.frameLoading {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.frameState p {
+  margin: 0;
+  max-width: 360px;
+}

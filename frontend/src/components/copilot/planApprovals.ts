@@ -9,6 +9,8 @@ export interface PlanListEntry extends PlanApprovalCardPlan {
   pending_revision_no?: number | null;
   total_steps?: number;
   done_steps?: number;
+  updated_at?: string;
+  created_at?: string;
 }
 
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
@@ -36,6 +38,19 @@ function mapPlanRow(row: PlanRowPayload): PlanListEntry {
     specMd: row.specMd ?? row.spec_md ?? null,
     steps: Array.isArray(row.steps) ? row.steps : [],
   };
+}
+
+/** BLOCK-216 Q5 — 计划面：当前会话全部计划（可选状态过滤）。 */
+export async function fetchPlansForConversation(
+  conversationId: string,
+  status?: string
+): Promise<PlanListEntry[]> {
+  const params = new URLSearchParams({ conversationId });
+  if (status) params.set('status', status);
+  const body = await requestJson<{ plans: PlanListEntry[] }>(
+    `${getApiPrefix()}/ai/plans?${params.toString()}`
+  );
+  return (Array.isArray(body.plans) ? body.plans : []).map(mapPlanRow);
 }
 
 /** 拉取当前会话的 draft 计划（批准卡数据源）。 */

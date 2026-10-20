@@ -71,3 +71,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-20T04:48:12.988Z -->
 最后更新：2026-10-18（**UI-527 实机腿补齐 → verified（dev Electron 边界内）**）：重启 dev 栈后 `/api/skills/preflight` 三族返回 `missing_deps`+`missingPlugins`，9223 货架截图三卡「缺依赖」（对照重启前「依赖可用」）；flow `ui526-527-badges` 2/2。UI-526 仍 in_progress（测试实例无产物，看不到真值徽标）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-20T06:52:36.686Z -->
+最后更新：2026-10-18（**测试实例改无窗口 + BLOCK-213 立项**）：测试实例此前「离屏」被 macOS 夹回可见区（实测 x=221）→ 改 `show:false` + `backgroundThrottling:false`，实测 screenX=-1380 / document.hidden=false / 截图完整，**屏幕不再出现 TEST 窗**。同轮立项 **BLOCK-213 功能发现率**（命令面板/快捷键标注/空态引导，只补入口不造能力）。G0 开发期常态 · 不外推 packaged/Provider/GA。

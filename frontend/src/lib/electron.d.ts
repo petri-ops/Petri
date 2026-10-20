@@ -362,6 +362,11 @@ declare global {
           workspacePath: string,
           relativePath: string
         ) => Promise<{ ok: boolean; error?: string }>;
+        /** BLOCK-216 Q5 — 在系统文件管理器中显示（同一 workspace 边界）。 */
+        showInFolder: (
+          workspacePath: string,
+          relativePath: string
+        ) => Promise<{ ok: boolean; error?: string }>;
         /** UI-400-2 — 导出/下载：主进程保存对话框 + 受限本机来源流式写盘。 */
         downloadFromUrl: (
           url: string,

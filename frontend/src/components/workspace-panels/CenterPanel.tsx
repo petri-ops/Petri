@@ -38,6 +38,9 @@ import {
 import { ScheduledWorkspacePanel } from '@/components/workspace-panels/ScheduledWorkspacePanel';
 import { ResultsLibrary } from '@/components/workspace-panels/ResultsLibrary';
 import { SideChatDock } from '@/components/workspace-panels/SideChatDock';
+import { resolveResultSurfaceHost } from '@/components/result-studio/resultSurfaceHost';
+import { PackSurfaceFrame } from '@/components/work-surface/PackSurfaceFrame';
+import type { WorkSurfaceDescriptor } from '@/lib/workSurface/types';
 // UI-448 加映 v25 — 浮卡左缘拖宽把手 + 偏好持久化（摘要浮卡与会话浮面共用）
 import {
   FloatCardResizeHandle,
@@ -101,6 +104,9 @@ export interface CenterPanelContext {
   jobs: ToolJob[];
   datasets: Dataset[];
 
+  /** BLOCK-216 Q5 — pack 贡献的结果面（无匹配时保留核心 transitional 面）。 */
+  packResultSurfaces: WorkSurfaceDescriptor[];
+
   // Handlers
   updateWorkspaceMode: (next: WorkspaceMode, replace?: boolean, jobId?: string | null) => void;
   openRightPanel: (tab: RightPanelMode) => void;
@@ -161,6 +167,7 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
     ctx.resultContext?.status === 'ready' ? ctx.resultContext.contextToken : null,
   );
   const resultMode = workspaceMode === 'result' || workspaceMode === 'code' || workspaceMode === 'compare' || workspaceMode === 'history';
+  const resultSurfaceHost = resolveResultSurfaceHost(ctx.packResultSurfaces ?? [], ctx.activeArtifact);
   const truthStatus = typeof ctx.activeArtifact?.truthStatus === 'string'
     ? ctx.activeArtifact.truthStatus
     : typeof ctx.activeWorkflow?.artifactTruth?.status === 'string'
@@ -291,6 +298,26 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
             )}
           >
             {ctx.activeJob ? (
+              resultSurfaceHost.descriptor ? (
+                <div data-result-surface-source="pack" style={{ display: 'contents' }}>
+                  <PackSurfaceFrame
+                    descriptor={resultSurfaceHost.descriptor}
+                    projectId={ctx.projectId}
+                    conversationId={ctx.activeConvId}
+                    artifactContext={{
+                      jobId: ctx.activeJob.id,
+                      toolId: ctx.activeJob.tool_id,
+                      name: ctx.activeArtifact?.name ?? null,
+                      type: ctx.activeArtifact?.type ?? null,
+                      semanticKind: ctx.activeArtifact?.semanticKind ?? null,
+                      revisionId: ctx.activeArtifact?.revisionId ?? null,
+                      truthStatus: ctx.activeArtifact?.truthStatus ?? null,
+                      url: ctx.activeArtifact?.url ?? null,
+                    }}
+                  />
+                </div>
+              ) : (
+              <div data-result-surface-source="core-transitional" style={{ display: 'contents' }}>
               <ResultView
                 project={ctx.project}
                 conversationId={ctx.activeConvId}
@@ -313,6 +340,8 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
                 mode={workspaceMode}
                 onModeChange={(mode, jobId) => ctx.updateWorkspaceMode(mode, true, jobId || ctx.activeJob?.id || null)}
               />
+              </div>
+              )
             ) : (
               <ResultsLibrary
                 projectId={ctx.projectId}
