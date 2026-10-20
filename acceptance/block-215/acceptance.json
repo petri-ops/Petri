@@ -1,0 +1,23 @@
+{
+  "block": "BLOCK-215-QDOMAIN-P2A-PROMPT-DECORING",
+  "generatedAt": "2026-10-20",
+  "unit": {
+    "block215PromptFragments": "3/3",
+    "promptNeighborhood": "52/52"
+  },
+  "domainNeutrality": {
+    "improvements": 13,
+    "baseline": "updated (ratchet down)"
+  },
+  "evals": {
+    "golden": "1/1 PASS",
+    "contextSnapshot": "dfc9be7b986a1c17 -> 6f891feccdf76eb1 (explicit rebaseline; rerun consistent)",
+    "gate": "smoke regression 0"
+  },
+  "closeout": "PASS (13/13 gates + skills:check report-level OK)",
+  "pack": {
+    "promptFragments": "D:/1.WorkDir/petri-pack-bio/promptFragments/domain-guidance.md",
+    "provides": "promptFragments/"
+  },
+  "notes": "核心 prompt 不再含生信指令；领域指令仅在已安装/启用 pack 时注入。pack 缺失/停用零注入。"
+}

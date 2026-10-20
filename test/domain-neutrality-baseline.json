@@ -21,23 +21,15 @@
     "组学"
   ],
   "hits": {
-    "core/petri-server/agent-runner.js::cellchat": 1,
-    "core/petri-server/agent-runner.js::deseq2": 7,
-    "core/petri-server/agent-runner.js::gsea": 2,
-    "core/petri-server/agent-runner.js::h5ad": 1,
-    "core/petri-server/agent-runner.js::km-survival": 1,
-    "core/petri-server/agent-runner.js::scvi": 2,
-    "core/petri-server/agent-runner.js::seurat": 2,
-    "core/petri-server/agent-runner.js::volcano": 1,
-    "core/petri-server/agent-runner.js::wgcna": 3,
-    "core/petri-server/agent-runner.js::单细胞": 3,
+    "core/packages/shared-copilot/actionBus.ts::single-cell": 2,
+    "core/packages/shared-copilot/actions.ts::scrna": 2,
+    "core/packages/shared-copilot/chat-file-references.ts::h5ad": 1,
     "core/petri-server/agent-tools/act-tools.js::single-cell": 16,
     "core/petri-server/agent-tools/act-tools.js::单细胞": 4,
     "core/petri-server/agent-tools/agent-loop-control.js::go-kegg": 1,
     "core/petri-server/agent-tools/agent-tool-policy.js::h5ad": 1,
     "core/petri-server/agent-tools/learning.js::cellchat": 1,
     "core/petri-server/agent-tools/learning.js::deseq2": 1,
-    "core/petri-server/agent-tools/learning.js::scvi": 1,
     "core/petri-server/agent-tools/learning.js::seurat": 1,
     "core/petri-server/agent-tools/learning.js::wgcna": 1,
     "core/petri-server/agent-tools/learning.js::组学": 1,
@@ -81,8 +73,6 @@
     "core/petri-server/helpers/permissions.js::单细胞": 1,
     "core/petri-server/helpers/permissions.js::空间组学": 1,
     "core/petri-server/helpers/permissions.js::组学": 2,
-    "core/petri-server/helpers/system-prompt.js::gsea": 1,
-    "core/petri-server/helpers/system-prompt.js::单细胞": 1,
     "core/petri-server/helpers/tools-assets.js::cellchat": 1,
     "core/petri-server/helpers/tools-assets.js::deseq2": 1,
     "core/petri-server/helpers/tools-assets.js::go-kegg": 1,
@@ -108,9 +98,6 @@
     "core/petri-server/helpers/user-facts.js::deseq2": 1,
     "core/petri-server/helpers/user-facts.js::single-cell": 1,
     "core/petri-server/routes/ai-legacy.js::scrna": 1,
-    "core/packages/shared-copilot/actionBus.ts::single-cell": 2,
-    "core/packages/shared-copilot/actions.ts::scrna": 2,
-    "core/packages/shared-copilot/chat-file-references.ts::h5ad": 1,
     "core/shared-backend/agent-workflow.js::deseq2": 3,
     "core/shared-backend/agent-workflow.js::go-kegg": 3,
     "core/shared-backend/agent-workflow.js::gsea": 4,
@@ -157,5 +144,5 @@
     "src/main/core-utils.js::seurat": 1,
     "src/main/core-utils.js::wgcna": 1
   },
-  "updatedAt": "2026-10-07"
+  "updatedAt": "2026-10-20"
 }

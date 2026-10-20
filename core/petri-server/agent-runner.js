@@ -18,6 +18,7 @@ const { estimateRequestTokens } = require('./helpers/token-estimator');
 const { getAiSettings, getGenerationDefaults } = require('./helpers/ai-settings');
 const { buildSystemPromptParts, loadWorkingTreeRejectEntries, resolveWorkingTreeRejectRoot } = require('./helpers/system-prompt');
 const { appendDesktopAgentInstructions } = require('./helpers/desktop-agent-prompt');
+const { renderPackPromptFragments } = require('./helpers/pack-prompt-fragments');
 // BLOCK-157 W1 P2（KNW-2）— 技能索引常驻注入（渐进披露闭环）
 const { buildSkillsIndexBlock, tool_skill_discover } = require('./agent-tools/skill-tools');
 const { renderPluginDemoPathsForPrompt } = require('./helpers/plugin-demo-prompt');
@@ -531,11 +532,11 @@ async function runAgentLoop({
   systemPrompt += '\n- 用户问"Petri 里有没有..."这种探索性问题 → 调用 search';
   systemPrompt += renderPluginDemoPathsForPrompt();
   systemPrompt +=
-    '\n- 用户想**跑分析/出图/出表**（如"帮我跑 DESeq2""画火山图""分析这个 count 矩阵""做差异分析"）→ 调用 run_tool。先用 run_tool(op="list") 看可用工具+参数契约，再 run_tool(op="run", toolId, params) 执行。file 参数传本地绝对路径。不要凭空判断运行时未装——先调 run_tool，执行报错再据错引导。';
+    '\n- 用户想跑分析/出图/出表 → 调用 run_tool。先用 run_tool(op="list") 看可用工具+参数契约，再 run_tool(op="run", toolId, params) 执行。file 参数传本地绝对路径。不要凭空判断运行时未装——先调 run_tool，执行报错再据错引导。';
   systemPrompt +=
     '\n- 用户提出多步骤标准分析时，先用 run_tool(op="plan", templateId, initialInputs) 获取 Agent 主导计划；不要一次性自动执行全部步骤。每一步 run 完先检查 tool_job/artifact truth，再用 run_tool(op="bind_artifact", workflowPlan, fromToolJobId, fromStepId, toStepId, inputId, artifactId) 把真实 verified artifact 绑定到下游，然后再决定是否继续。';
   systemPrompt +=
-    '\n- 自动化边界：完全访问模式下，deseq2/wgcna 等项目内可复现分析直接执行；读取结果并在不改变科学问题的前提下自动诊断、修参和重试，不要请求用户点击开始。只有不可逆外部影响、凭据/付费操作或缺少科学判断时才请求用户决定。';
+    '\n- 自动化边界：完全访问模式下，项目内可复现分析直接执行；读取结果并在不改变科学问题的前提下自动诊断、修参和重试，不要请求用户点击开始。只有不可逆外部影响、凭据/付费操作或缺少科学判断时才请求用户决定。';
   systemPrompt +=
     '\n- 分析现场卡住时（不确定某工具参数、忘了某流程怎么走、用户报错对应不上某个分析步骤）：主动调 read_page(url="/plugin/<id>/<slug>") 或 search(scope="plugins") 查已装内容插件的教程片段，再继续回答/推进。不要凭空猜参数。';
   systemPrompt += '\n- 工具调用后再判断下一步：可能继续调用，也可能直接回答用户';
@@ -596,42 +597,16 @@ async function runAgentLoop({
   systemPrompt += '\n不要基于时间间隔主动发起复习。';
   systemPrompt += '\n不要主动发起复习或学习内容推荐。';
   systemPrompt += '\n同一会话最多触发 1-2 次复习提示，避免烦人。';
-  systemPrompt += '\n\n=== 单细胞 UI 控制工具 ===';
-  systemPrompt += '\n在【数据集页】或【结果页】，使用以下 act 直接代替手动操作：';
-  systemPrompt +=
-    '\n- act(type="filter_table", columnFilters={"列名":"值",...}) 给数据表加列筛选（多列 AND）。';
-  systemPrompt +=
-    '\n- act(type="select_cells", datasetId="...", columnFilters={...}, subsetName="名字") 直接按 metadata 筛选并创建子集（一步到位，不需要用户再点保存）。注意 datasetId 必填。';
-  systemPrompt +=
-    '\n  - 单个 columnFilter 值的写法：纯字符串子串 / 比较 (">200" / "<5000" / ">=15" / "!=NK") / 区间 ("200-5000") / 单列内 OR ("naive,memory" 或 "naive OR memory") / 单列内 AND (">200 AND <5000")。多列之间是 AND。';
-  systemPrompt +=
-    '\n- act(type="label_cells", labelKey="cell_type", labelValue="NK cell", columnFilters?={...}) 给选中细胞打标签（弹确认）。';
-  systemPrompt += '\n- act(type="merge_datasets", datasetIds=[...], mergeName="...") 合并数据集。';
-  systemPrompt += '\n- act(type="open_replot", analysisId="...") 打开在线绘图（让用户写 R 代码画自定义图）。';
-  systemPrompt += '\n- act(type="upload_data_hint") 引导用户上传数据。';
-  systemPrompt += '\n\n=== 分析工具 (Tools) ===';
-  systemPrompt +=
-    '\n- act(type="open_tool", toolId="deseq2") 打开 DESeq2 差异分析工具的参数面板，用户可以上传数据开始分析。';
-  systemPrompt +=
-    '\n- 可用 toolId: deseq2(差异分析), enrichment(GO/KEGG富集), km-survival(KM生存), gsea(GSEA), bindea-immune(免疫浸润), wgcna(WGCNA), lasso-cox(LASSO Cox), seurat-standard(Seurat单细胞), maftools-mutation(突变分析), cellchat(细胞通讯), ml-feature-select(ML特征选择), ml-classifier(ML分类器), rsf-survival(随机生存森林), shap-explain(SHAP可解释性), consensus-cluster(一致性聚类), ml-scvi-annotate(scVI注释), mo-mofa(MOFA2因子分析), mo-snf(SNF网络融合)';
-  systemPrompt += '\n- 当用户在 /tools 页面想做某种分析时，用 open_tool 帮用户打开对应工具。';
-  systemPrompt +=
-    '\n- 当用户问"帮我跑差异分析"或"我要做DESeq2"时，调 act(type="open_tool", toolId="deseq2")。';
-  systemPrompt += '\n- 不根据某个已完成工具自动指定后续分析。';
   systemPrompt += '\n\n=== FigCode 绘图工具 ===';
   systemPrompt +=
-    '\n- 用户想绘图（火山图、热图、UMAP、KEGG 气泡图等），并且 FigCode 工具索引里有对应卡片时：直接调 act(type="open_figcode_plot", figcardId="<卡片 id>")，会自动跳转到 FigCode 页 + 打开该卡片的"在线绘图"编辑器。卡片 id 在 docs index 里以 /figcode#xxx 形式给出，xxx 就是 figcardId。';
-  systemPrompt +=
-    '\n- ⚠️ 不要给 external_link action 写 #/xxx 之类的 URL（那是单细胞内部 hash，不是站内路径）。';
+    '\n- 用户想绘图，并且 FigCode 工具索引里有对应卡片时：直接调 act(type="open_figcode_plot", figcardId="<卡片 id>")，会自动跳转到 FigCode 页 + 打开该卡片的"在线绘图"编辑器。卡片 id 在 docs index 里以 /figcode#xxx 形式给出，xxx 就是 figcardId。';
   systemPrompt +=
     '\n- ⚠️ 任何 FigCode 卡片的"打开"操作都必须用 open_figcode_plot，绝对不要用 navigate 或 external_link 让用户去 figcode 主页再点一次。';
-  systemPrompt +=
-    '\n- 常见 figcardId 示例：volcano（火山图）、heatmap（热图）、correlation-heatmap（相关性热图）、boxplot（箱线图）、ridge-plot（山脊图）等。准确的 id 在站点索引中查。';
   systemPrompt += '\n\n=== Action Card 协议 vs Tool Calling 区分 ===';
   systemPrompt +=
     '\n- ⚠️ 重要：action card（用 ```action JSON```代码块发的）只支持 navigate / external_link。分析执行必须调用 run_tool。';
   systemPrompt +=
-    '\n- 其他所有写操作（update_figcode_editor / switch_result_tab / focus_cluster / highlight_gene / select_cells / filter_table / label_cells / merge_datasets / open_replot / upload_data_hint / open_figcode_plot 等）都通过 act 工具调用，不要再额外发一个 action card。';
+    '\n- 其他所有写操作都通过 act 工具调用，不要再额外发一个 action card。';
   systemPrompt +=
     '\n- 你已经调了 act(...) 工具来执行操作时，绝对不要在最终回答里再写 ```action``` 代码块描述同一个操作。前端会因为不认识 type 而显示"当前页面不支持"错误。';
   systemPrompt +=
@@ -639,22 +614,22 @@ async function runAgentLoop({
   systemPrompt += '\n- 不要再用 navigate 把用户送到 FigCode 主页让他再点 Run 按钮。一步到位。';
   systemPrompt +=
     '\n- 提到工具产物（toolJobId / harness 摘要里的文件）或项目工作区文件时，渲染为 Markdown 链接：[产物.csv](petri://artifact/<toolJobId>/<产物名>) 或 [data.csv](petri://workspace/<projectId>/<relativePath>)。严禁出现 file:// 或 /Users/... 这类本地绝对路径。详见 system prompt 末尾【文件引用格式】。';
-  systemPrompt += '\n- 科学源数据不可变：不得用 workspace_write/workspace_replace/workspace_exec 原地修改已有 CSV/TSV/H5AD/RDS/测序文件来迎合插件。格式或标签修复必须写入 derived/ 或由转换插件生成新 Artifact，保留原文件和输入 hash，再把派生 Artifact 绑定给下游 Job。';
+  systemPrompt += '\n- 科学源数据不可变：不得用 workspace_write/workspace_replace/workspace_exec 原地修改已有源数据文件来迎合插件。格式或标签修复必须写入 derived/ 或由转换插件生成新 Artifact，保留原文件和输入 hash，再把派生 Artifact 绑定给下游 Job。';
   // BLOCK-172 CP-6 — 项目记忆写入通道告知（读侧=.petri/MEMORY.md 自动注入；
   // 写侧=既有 workspace_write，全部治理门继承：sha256 乐观锁/访问档位/审计）。
   systemPrompt += '\n- 项目长期记忆：需要跨会话记住的项目级事实（偏好/约定/环境特性/常用路径）写入 .petri/MEMORY.md（workspace_write，一条事实一行）。该文件会在后续会话自动注入你的系统提示；会话级临时信息不要写入。';
-  systemPrompt += '\n\n旧的【结果页】UI 控制：';
-  systemPrompt +=
-    '\n- act(type="switch_result_tab", tab="preview|plots|data|params") 切 tab；' +
-    'act(type="focus_cluster", cluster="3") 高亮某 cluster；' +
-    'act(type="highlight_gene", gene="CD3E") 按基因着色 UMAP。' +
-    '不要再让用户自己点 tab。';
 
   // Announce active conversation
   announceActiveConversation(_emit, _activeConv);
 
   // Append desktop agent instructions
   systemPrompt = appendDesktopAgentInstructions(systemPrompt);
+
+  // BLOCK-215 — 领域包 prompt fragments：仅已安装/启用的 pack 注入；核心不硬编码领域指令
+  const packPromptFragments = renderPackPromptFragments();
+  if (packPromptFragments) {
+    systemPrompt += '\n\n=== 领域包能力（来自已安装领域包） ===\n' + packPromptFragments;
+  }
 
   // Infer execution policy
   // BLOCK-31 P4 fix: 必须传 context —— S-003 设计中 ctx.accessMode 是唯一判定源，

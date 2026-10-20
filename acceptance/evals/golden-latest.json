@@ -3,7 +3,7 @@
   "provider": "mock",
   "artifact": "golden",
   "measures": "harness",
-  "at": "2026-10-18T01:06:43.955Z",
+  "at": "2026-10-20T04:46:42.239Z",
   "tasks": [
     {
       "id": "golden-first-success",
@@ -42,10 +42,10 @@
         {
           "kind": "ttfs_computable",
           "passed": true,
-          "detail": "TTFS=513 ms"
+          "detail": "TTFS=413 ms"
         }
       ],
-      "durationMs": 619
+      "durationMs": 573
     }
   ],
   "pass": 1,

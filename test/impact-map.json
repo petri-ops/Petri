@@ -4204,6 +4204,31 @@
         "test/pack-registry.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block215-qdomain-prompt-decoring",
+      "note": "BLOCK-215（Q-DOMAIN P2a）：核心 prompt 去生信化；已安装 pack 的 promptFragments 注入、缺失/停用零注入；golden context_snapshot 显式重打；domain-neutrality baseline 下调。",
+      "patterns": [
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/helpers/system-prompt.js",
+        "core/petri-server/helpers/pack-prompt-fragments.js",
+        "test/block215-*.test.mjs",
+        "acceptance/block-215/**",
+        "evals/snapshots/golden.json"
+      ],
+      "tests": [
+        "test/block215-pack-prompt-fragments.test.mjs",
+        "test/block198-prompt-layering.test.mjs",
+        "test/block212-prompt-prefix.test.mjs",
+        "test/block188-context-snapshot.test.mjs",
+        "test/block93-role-prompt.test.mjs",
+        "test/system-prompt-identity.test.mjs",
+        "test/system-prompt-rejects.test.mjs",
+        "test/system-prompt-result-context.test.mjs",
+        "test/desktop-agent-prompt.test.mjs",
+        "test/block197-refusal-shape-prompt.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }
