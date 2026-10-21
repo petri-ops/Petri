@@ -37,6 +37,27 @@ afterEach(() => {
 });
 
 describe('AnnotationOverlay', () => {
+  it('BLOCK-238 — 图形批注按 kind 渲染（ellipse / arrow，缺省 region）', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(BOX);
+    const { getAllByTestId } = render(
+      <AnnotationOverlay
+        annotations={[
+          annotation({ annotationId: 'k-region', kind: 'region' }),
+          annotation({ annotationId: 'k-ellipse', kind: 'ellipse' }),
+          annotation({ annotationId: 'k-arrow', kind: 'arrow' }),
+        ]}
+        page={null}
+        drawing={false}
+        color="amber"
+        onCommit={() => undefined}
+        label="批注层：图像"
+      />,
+    );
+
+    const kinds = getAllByTestId('annotation-box').map((el) => el.dataset.kind);
+    expect(kinds).toEqual(['region', 'ellipse', 'arrow']);
+  });
+
   it('只渲染当前页的批注，并按百分比定位', () => {
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(BOX);
     const { getAllByTestId, getByTestId } = render(

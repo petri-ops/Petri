@@ -83,3 +83,37 @@
   border-color: var(--petri-danger);
   background: var(--petri-danger-bg);
 }
+
+/* BLOCK-238 — 图形批注：椭圆 / 箭头（纯 CSS，几何=拖拽矩形，箭头沿对角线近似） */
+.box[data-kind='ellipse'] {
+  border-radius: 50%;
+}
+
+.box[data-kind='arrow'] {
+  border-color: transparent;
+  background: transparent;
+}
+
+.box[data-kind='arrow']::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top right,
+    transparent calc(50% - 1px),
+    var(--petri-warning) calc(50% - 1px),
+    var(--petri-warning) calc(50% + 1px),
+    transparent calc(50% + 1px)
+  );
+}
+
+.box[data-kind='arrow']::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-bottom: 7px solid var(--petri-warning);
+}

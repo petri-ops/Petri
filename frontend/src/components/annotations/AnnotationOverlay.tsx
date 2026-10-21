@@ -114,6 +114,7 @@ export function AnnotationOverlay({
           className={styles.box}
           data-annotation-id={annotation.annotationId}
           data-color={annotation.color}
+          data-kind={annotation.kind || 'region'}
           data-testid="annotation-box"
           style={rectToStyle(annotation.rect)}
           title={`${describeAnnotationAnchor(annotation)}：${annotation.comment}`}
