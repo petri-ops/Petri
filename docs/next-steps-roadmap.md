@@ -1,9 +1,11 @@
 # Petri Desktop — Current Next Steps
+最后更新：2026-10-21（**BLOCK-230 Q-DOMAIN P4 第一片 completed**）：modality 默认 `general`；pack `provides.modalities` 扩展值（归一/上限/非法 diagnostic，仅 modality 的包保留）；未知回落 general，存量 single-cell/spatial/bulk 不迁移。证据=Node 4/4 + REST 实机 6/6 + closeout。**不是完整 P4**：权限通用化/域中性归零/RS 保真/导出联邦基线仍 reopen。plan=`docs/block-230-qdomain-p4-modality-plan.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-21（**BLOCK-229 E7 电脑控制（Windows 边界内）completed**）：sidecar/axfixture 已构建；host status + 后端 `status/probe` 路由 + 设置面板（权限提示/测试连接）；控制动作仍走 `computer_*` + 完全访问 + ackToken。reopen=macOS 构建/权限、PiP、真实 click/type 端到端。之后 Q-DOMAIN P4 data model（母纲最后）。plan=`docs/block-229-e7-computer-use-plan.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**BLOCK-228 Q9 K2 崩溃同意/本地提示 completed**）：crashReporter 仅本地（不上传）+ session-health 异常退出检测 + dump 文件名清单 + `crashNotice`（默认 true）+ 横幅（打开目录/知道了）。证据=Node 7/7 + 前端 2/2 + 9223 离屏 live 5/5（亮/暗截图）+ theme/types/lint/code-size PASS。**下一步**：E7 电脑控制 sidecar（最重，独立立项）→ Q-DOMAIN P4 data model（母纲要求最后，结构性大包）。reopen 见 plan §7.3。plan=`docs/block-228-q9-crash-consent-plan.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-最后更新：2026-10-21（**BLOCK-227 Q9 K9 首启角色揭示 completed**）：标题栏铃铛+未读徽章+通知列表（回合终态/待审批留痕）；`userPrefs.quietHours`（空=关，跨午夜）只抑制系统 toast、应用内仍记录；面板向左展开避免右缘裁切。证据=前端 62/62 + Node 13/13 + 9223 离屏 live 11/11（亮/暗/设置截图）+ theme/types/code-size PASS。**下一步**：K9 首启揭示 → K2/E7 评估 → Q-DOMAIN P4 data model（母纲要求最后）。reopen 见 plan §7.3。plan=`docs/block-226-q9-notification-center-plan.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。
+最后更新：2026-10-21（**BLOCK-227 Q9 K9 首启角色揭示 completed**）：欢迎页一次性浮层三卡（分析数据/写代码/整理知识）+ 显式「开始使用」，`userPrefs.roleRevealSeen` 落盘；读取失败不展示。证据=前端 7/7 + 配置基线 4/4 + 9223 离屏 live 7/7（亮/暗截图）。**下一步**：K2 → E7 → P4。reopen=分步引导/数据导入/动画/重播。plan=`docs/block-227-q9-onboarding-role-reveal-plan.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**BLOCK-225 Q9 D4 Auto completed**）：按任务/附件每轮解析模型（有图→vision 绑定/能力；否则 agent 绑定/tools；回落当前），`userPrefs.autoModel` 默认 false；菜单开关+解析预览、composer「自动」；`ModelChip` 抽出，SimpleChat 保持 2142 行。证据=前端 33/33 + 配置基线 4/4 + 9223 离屏 live 8/8（亮/暗截图）+ types/theme/code-size PASS。**下一步**：Q9 通知中心/免打扰 → K9 首启揭示 → K2/E7 评估 → Q-DOMAIN P4 data model（母纲要求最后）。reopen 见 plan §7.3。plan=`docs/block-225-q9-auto-model-plan.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

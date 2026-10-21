@@ -6,6 +6,7 @@
 const express = require('express');
 const db = require('./db');
 const { getPublicG0BaselineSummary } = require('../shared-backend/g0-baseline');
+const { resolveProjectModality } = require('../shared-backend/project-modality');
 const { recordFunnelEvent } = require('./helpers/funnel-log');
 
 const router = express.Router();
@@ -199,9 +200,16 @@ router.post('/projects', (req, res) => {
   const { name, description, modality, workspacePath, workspaceKind, sshHost, remotePath } = req.body;
   const userId = req.user?.id;
   if (!name) return res.status(400).json({ status: 'error', error: '缺少 name' });
-  // Desktop projects may be workflow-neutral (`general`) or carry a domain hint.
-  const allowedModalities = ['general', 'single-cell', 'spatial', 'bulk'];
-  const m = modality && allowedModalities.includes(modality) ? modality : 'single-cell';
+  // Desktop projects may be workflow-neutral (`general`) or carry a domain hint;
+  // domain packs can extend the allowed set via pack.json provides.modalities.
+  let packModalities = [];
+  try {
+    const { loadPackContributions } = require('./helpers/pack-contributions');
+    packModalities = loadPackContributions().packs.flatMap((pack) => pack.modalities || []);
+  } catch {
+    packModalities = [];
+  }
+  const m = resolveProjectModality(modality, packModalities);
   const ownerId = userId && userId !== '__admin__' ? userId : null;
   let p;
   try {

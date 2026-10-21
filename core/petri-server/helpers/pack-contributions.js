@@ -22,6 +22,10 @@ const {
   resolvePackAssetPath,
   mimeForPackAsset,
 } = require('../../packages/shared-pack-assets');
+const {
+  MAX_EXTENSION_MODALITIES,
+  normalizeModalities,
+} = require('../../shared-backend/project-modality');
 
 const LIMITS = Object.freeze({
   views: 50,
@@ -33,6 +37,7 @@ const LIMITS = Object.freeze({
   artifactTypes: 32,
   modes: 4,
   emptyStateLength: 500,
+  modalities: MAX_EXTENSION_MODALITIES,
 });
 
 const RESULT_SURFACE_MODES = new Set(['result', 'code', 'compare', 'history']);
@@ -61,8 +66,16 @@ function readPackManifest(packRoot) {
   }
 }
 
-function normalizeViews(packId, packRoot, provides, diagnostics) {
-  const raw = Array.isArray(provides.views) ? provides.views.slice(0, LIMITS.views) : [];
+function normalizePackModalities(packId, provides, diagnostics) {
+  if (provides.modalities === undefined) return [];
+  if (!Array.isArray(provides.modalities)) {
+    diagnostics.push(diagnostic(packId, 'modalities', 'invalid_shape'));
+    return [];
+  }
+  return normalizeModalities(provides.modalities, LIMITS.modalities);
+}
+
+function normalizeViews(packId, packRoot, provides, diagnostics) {  const raw = Array.isArray(provides.views) ? provides.views.slice(0, LIMITS.views) : [];
   if (provides.views !== undefined && !Array.isArray(provides.views)) {
     diagnostics.push(diagnostic(packId, 'views', 'invalid_shape'));
     return [];
@@ -219,7 +232,8 @@ function loadPackContributions(options = {}) {
     const views = normalizeViews(packId, record.packRoot, provides, diagnostics);
     const resultSurfaces = normalizeResultSurfaces(packId, record.packRoot, provides, diagnostics);
     const uiActions = normalizeUiActions(packId, provides, diagnostics);
-    if (views.length === 0 && resultSurfaces.length === 0 && uiActions.length === 0) continue;
+    const modalities = normalizePackModalities(packId, provides, diagnostics);
+    if (views.length === 0 && resultSurfaces.length === 0 && uiActions.length === 0 && modalities.length === 0) continue;
     packs.push({
       packId,
       name: asSmallString(manifest.name, LIMITS.titleLength) || packId,
@@ -227,6 +241,7 @@ function loadPackContributions(options = {}) {
       views,
       resultSurfaces,
       uiActions,
+      modalities,
     });
   }
   return { packs, diagnostics };

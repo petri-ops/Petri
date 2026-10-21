@@ -3,6 +3,25 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "block230-qdomain-p4-modality",
+      "note": "BLOCK-230 Q-DOMAIN P4 切片 — modality 默认 general + pack provides.modalities + 校验；不迁移存量、不改权限。",
+      "patterns": [
+        "core/shared-backend/project-modality.js",
+        "core/petri-server/helpers/pack-contributions.js",
+        "core/petri-server/api-data.js",
+        "core/petri-server/db.js",
+        "test/block230-*.test.mjs",
+        "acceptance/block-230/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block230-*.cjs"
+      ],
+      "tests": [
+        "test/block230-project-modality.test.mjs",
+        "test/block216-pack-contributions.test.mjs",
+        "test/block218-pack-result-surface.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "block229-computer-use-status",
       "note": "BLOCK-229 E7 — Windows sidecar 构建 + 只读状态/probe 路由 + 设置页 ComputerUsePanel（不新增控制入口）。",
       "patterns": [

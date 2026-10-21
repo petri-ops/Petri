@@ -1,0 +1,38 @@
+{
+  "name": "block230-modality-live",
+  "startedAt": "2026-10-21T03:47:55.129Z",
+  "finishedAt": "2026-10-21T03:47:55.239Z",
+  "assertions": [
+    {
+      "name": "R1_create_default_ok",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mvhknh4x_1c7t\",\"name\":\"p4-default-1792554475130\",\"created_at\":\"2026-10-21T03:47:55.137Z\",\"updated_at\":\"2026-10-21T03:47:55.137Z\",\"description\":\"\",\"is_public\":0,\"user_id\":\"local-user\",\"modality\":\"general\",\"workspace_path\":\"D:\\\\1.WorkDir\\\\petri\\\\.petri-dev-user-data\\\\data\\\\projects\\\\p4-default-1792554475130-mvhknh4x\",\"workspace_kind\":\"local\",\"ssh_host\":null,\"remote_"
+    },
+    {
+      "name": "R2_default_is_general",
+      "pass": true,
+      "detail": "\"general\""
+    },
+    {
+      "name": "R3_create_explicit_ok",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mvhknh5l_p4ti\",\"name\":\"p4-single-1792554475130\",\"created_at\":\"2026-10-21T03:47:55.161Z\",\"updated_at\":\"2026-10-21T03:47:55.161Z\",\"description\":\"\",\"is_public\":0,\"user_id\":\"local-user\",\"modality\":\"single-cell\",\"workspace_path\":\"D:\\\\1.WorkDir\\\\petri\\\\.petri-dev-user-data\\\\data\\\\projects\\\\p4-single-1792554475130-mvhknh5l\",\"workspace_kind\":\"local\",\"ssh_host\":null,\"remot"
+    },
+    {
+      "name": "R4_explicit_preserved",
+      "pass": true,
+      "detail": "\"single-cell\""
+    },
+    {
+      "name": "R5_create_invalid_ok",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mvhknh61_kyi4\",\"name\":\"p4-invalid-1792554475130\",\"created_at\":\"2026-10-21T03:47:55.177Z\",\"updated_at\":\"2026-10-21T03:47:55.177Z\",\"description\":\"\",\"is_public\":0,\"user_id\":\"local-user\",\"modality\":\"general\",\"workspace_path\":\"D:\\\\1.WorkDir\\\\petri\\\\.petri-dev-user-data\\\\data\\\\projects\\\\p4-invalid-1792554475130-mvhknh61\",\"workspace_kind\":\"local\",\"ssh_host\":null,\"remote_"
+    },
+    {
+      "name": "R6_invalid_falls_back_general",
+      "pass": true,
+      "detail": "\"general\""
+    }
+  ],
+  "allPass": true
+}

@@ -5,6 +5,8 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
+最后更新：2026-10-21（**BLOCK-230 Q-DOMAIN P4 第一片 completed**（用户「只剩 E7 与 P4。搞定这俩」）：modality 默认 general + pack provides.modalities + 未知回落；不迁移存量/不改权限。证据=Node 4/4 + REST 实机 6/6 + closeout。reopen=权限通用化/域中性归零/RS 保真/导出联邦基线/dataModelExtensions。plan=docs/block-230-qdomain-p4-modality-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-10-21（**BLOCK-229 E7 电脑控制（Windows 边界内）completed**（用户「只剩 E7 与 P4。搞定这俩」）：sidecar/axfixture 构建 + host status + 后端 status/probe + 设置面板；控制动作仍走 computer_* + 完全访问 + ackToken。reopen=macOS 构建/权限、PiP、真实 click/type 端到端。之后 P4。plan=docs/block-229-e7-computer-use-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-10-21（**BLOCK-228 Q9 K2 崩溃同意/本地提示 completed**（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：crashReporter 仅本地（不上传）+ session-health 异常退出检测 + dump 文件名清单 + `crashNotice` 默认 true + 横幅（打开目录/知道了）。证据=Node 7/7 + 前端 2/2 + 9223 离屏 live 5/5 + theme/types/lint/code-size PASS。reopen=minidump 栈解析/上传/崩溃率/版本聚合。plan=docs/block-228-q9-crash-consent-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。）

@@ -1,7 +1,9 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
-最后更新：2026-10-21（**BLOCK-229 E7 电脑控制（Windows 边界内）completed**）
+最后更新：2026-10-21（**BLOCK-230 Q-DOMAIN P4 第一片 completed**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-230（P4 第一片）**：modality 默认 `general`；pack.json `provides.modalities` 扩展值（归一/上限/非法 diagnostic，仅 modality 的包保留）；未知回落 general，存量 single-cell/spatial/bulk 不迁移。证据=Node 4/4 + REST 实机 6/6 + closeout。**不是完整 P4**：权限通用化/域中性归零/RS 保真/导出联邦基线仍 reopen。plan=`docs/block-230-qdomain-p4-modality-plan.md` §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-229（E7 Windows 边界内 slice）**：用户级 .NET 8 SDK + sidecar/axfixture 构建成功；host 只读 status；后端 `GET /api/computer-use/status` / `POST /api/computer-use/probe`（未构建 503）；设置「决策与调度」节 `ComputerUsePanel`（状态/权限提示/测试连接）。控制动作仍走 `computer_*` + 完全访问 + ackToken。证据=路由 2/2 + 面板 2/2 + 9223 live 6/6（亮/暗截图）。**下一包**=Q-DOMAIN P4 data model（母纲最后）。reopen=macOS 构建/权限、PiP、真实 click/type 端到端。plan=`docs/block-229-e7-computer-use-plan.md` §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

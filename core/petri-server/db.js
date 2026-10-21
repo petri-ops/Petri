@@ -355,12 +355,12 @@ function createProject({ name, description, modality, workspacePath, workspaceKi
       error.code = invalid;
       throw error;
     }
-    stmts.insertProject.run(id, name, description || '', ts, ts, modality || 'single-cell', null, 'ssh', sshHost, remotePath);
+    stmts.insertProject.run(id, name, description || '', ts, ts, modality || 'general', null, 'ssh', sshHost, remotePath);
     return hydrateProject(stmts.getProject.get(id), { createdByCurrent: true, recordOpen: true });
   }
   const finalWorkspacePath = workspacePath || defaultProjectWorkspacePath({ id, name });
   ensureWorkspaceDir(finalWorkspacePath);
-  stmts.insertProject.run(id, name, description || '', ts, ts, modality || 'single-cell', finalWorkspacePath, 'local', null, null);
+  stmts.insertProject.run(id, name, description || '', ts, ts, modality || 'general', finalWorkspacePath, 'local', null, null);
   return hydrateProject(stmts.getProject.get(id), {
     createdByCurrent: true,
     recordOpen: true,

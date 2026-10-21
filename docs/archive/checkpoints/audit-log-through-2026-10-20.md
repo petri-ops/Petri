@@ -29,3 +29,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-21T03:28:05.965Z -->
 最后更新：2026-10-20（**BLOCK-221 Q8 垂直切片 completed**）：MCP 服务级治理——①**修真实缺陷**：`GET /api/mcp/servers` 曾把解密后的 env 明文（第三方 token）下发渲染进程，现只回 `envKeys`/`envCount`；②服务级策略 store `mcp-server-policy.json`（`{trust, allow, block}`，读侧 fail-closed、写侧 404/400 + diagnostics）；③投影求值 block 优先 → allow 白名单 → 默认全允许；④`GET/PUT /api/mcp/servers/:id/policy` + 清单 `policy` 摘要。证据=block221 9/9 + MCP 邻域 40/40 + 前端 extensions/hooks 145 项全绿。reopen=trust 降档接审批（随 Q1）/OAuth/懒加载/深链安装/四 hint/货架 UI 操作面。plan=docs/block-221-q8-mcp-governance-plan.md §5。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-21T03:50:47.777Z -->
+最后更新：2026-10-20（**BLOCK-222 Q9 垂直切片 completed**）：错误兜底粒度从「整页」降到「一段 UI」——新增 `SegmentBoundary`（`data-segment` 标注、`resetKey` 变化自动恢复、重试、复制诊断含失败态、上报器抛错不反噬），挂载结果面预览段与工作区文件预览段；插件产出的异形数据崩预览时，结论区/truth 面/上下文条仍可用。证据=SegmentBoundary 5/5 + 邻域前端 24 文件 170 项全绿 + theme 17/17 + types 0。reopen=轮次/工具卡/应用级边界、错误落盘、通知/托盘/退出摘要/模型选择器/电脑控制。plan=docs/block-222-q9-segment-boundary-plan.md §5。G0 开发期常态 · 不外推 packaged/Provider/GA。
