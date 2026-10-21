@@ -46,6 +46,11 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-10-21 BLOCK-236 P2b 第一批（tab 级接管）三笔实现提交：同提交漏台账同步与 UI-### 编号；
+  // 台账=UI-544（in_progress，代码+单测绿、无实机腿）由收口批补登。先例 1cae944/dcfc0c3；不重写共享历史。
+  'f5f0f91519cb27ab382e487aab5998ea8d473e6e',
+  '8c8970b13f50f40e729811af919cd8b478ce1c86',
+  '8ee4ead551843efe512bc2150595ca0c98c7dd4e',
   // 2026-10-16 BLOCK-185 冷启动深链修复（55bb305，feat(block-185) P2 SPA 两竞争+退避原语）：
   // subject 走 BLOCK 轨无 UI-###；UI 面=project-workspace/useWorkspaceOpenEffects/CenterPanel/RightPanel
   // 冷启动深链修复（归属 UI-455 打开链域），台账=UI-455 加映行由收口批补登对账。先例 1cae944/dcfc0c3；不重写共享历史。
@@ -454,6 +459,11 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-10-21 BLOCK-236 P2b 第一批（tab 级接管）三笔实现提交：同提交漏台账同步与 UI-### 编号；
+  // 台账=UI-544（in_progress，代码+单测绿、无实机腿）由收口批补登。先例 1cae944/dcfc0c3；不重写共享历史。
+  'f5f0f91519cb27ab382e487aab5998ea8d473e6e',
+  '8c8970b13f50f40e729811af919cd8b478ce1c86',
+  '8ee4ead551843efe512bc2150595ca0c98c7dd4e',
   // 2026-10-16 BLOCK-185 冷启动深链修复（55bb305，feat(block-185) P2）：同提交漏台账同步；
   // 台账=UI-455 加映行由收口批补登对账（subject 门经 LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免）。
   '55bb3058fe077101cf619ff55180c811bad99a17',

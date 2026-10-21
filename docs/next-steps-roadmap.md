@@ -1,4 +1,6 @@
 # Petri Desktop — Current Next Steps
+最后更新：2026-10-21（**BLOCK-236 收口**）：P2b 第一批完成——pack 接管 code（源码只读）与 history 模式判定；lineage 声明就绪但仅表格形态。**下一步**=P2b 第二批（compare/selection）或 Q6 全量批注或 Q8 深化（按 P0 建议顺序 P1→P2→P3→P4 继续）。边界=无实机腿、history 无端点。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-21（**BLOCK-236 Q-DOMAIN P2b 全量 tab 迁移立项 active（P0-LAUNCH）**）：第一批只读三面——`resultSurfaces[].tabs` 声明 + 只读数据桥（lineage/history/源码，有界）+ host 按 tab 路由与逐面回落 + pack 三面表格渲染；compare/selection/annotations/methods/export 与 lineage 图形态保留核心。plan=`docs/block-236-qdomain-p2b-full-tabs-plan.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**P0 台账对账 completed**）：UI 41 条 `in_progress` 逐条判定（5 条凭仓内证据翻 `verified`、23 条仅代码线索、4 条声称实机无产物、3 条证据引用失效、6 条含「退役」语义但非本条被替代，全部原地留 note）；backlog 6 行 legacy planned 全部销号/改判；竞争力总纲 W6 改判 partial（CP-16/17/18 未立项）。**分母已可信**：真正可开工=P1 P2b 全量 tab 迁移 → P2 Q6 全量批注 → P3 Q8 深化 → P4 Q9 长尾。G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -9,7 +9,7 @@ acceptance:
   - 数据桥有界：单面 payload 上限（表格行数/字节）与失败语义明确；不新增数据 API、不建第二套 artifact/truth。
   - 定向测试 + closeout 十三门 PASS；真实 job 实机腿若仍无夹具，如实记账为 rider。
 reopen: compare（差异算法与交互）、selection（写面 + 图表选中语义）、annotations（BLOCK-219 已交付核心面，pack 面需窄桥）、methods（P3 已下沉数据，渲染面仍在核心）、export（导出流水在核心）、lineage 图形态、真实 job 实机腿。
-status: active
+status: completed
 ---
 
 # BLOCK-236 · Q-DOMAIN P2b（全量高级 tab 迁移）— 第一批：只读三面
@@ -67,3 +67,29 @@ completed 需：契约 + 数据桥 + host 路由 + pack 三面 + 测试 + canoni
 | **P5 收口** | canonical 回写（plan 收口节、registry、AUDIT-LOG、roadmap/handoff/backlog/README）+ closeout 十三门 | 十三门 PASS；提交 + 快照 | 失败即停并记录首个红门 |
 
 **批内纪律**：①每个阶段提交一次（便于单独回滚）；②不改既有 `result` 模式行为（BLOCK-218 证据不得回退）；③pack 侧改动只加不改（版本 0.2.0 → 0.2.1）；④真实 job 实机腿若无夹具，登记为 rider，不用合成数据宣称 verified。
+
+## 6. 收口（2026-10-21）
+
+**结论：BLOCK-236 第一批（只读三面）completed——但属「代码+单测绿、无实机腿」的证据等级。**
+
+### 6.1 交付
+
+- **契约**：`resultSurfaces[].tabs`（白名单 lineage/history/revisions-source，label ≤24 字、重复去重、坏形状整条丢弃并留 diagnostic）。
+- **只读有界桥**：`packTabData.ts`（lineage ≤200 节点/≤400 边、源码 ≤200KB + 截断提示；失败返回 `missing_job_id/http_500/invalid_json/network_error/no_endpoint`）。
+- **host 路由**：`code→revisions-source`、`history→history`；未声明 tab → 回落核心 `tab_not_claimed`；取数失败 → 回落核心并写 `data-fallback-reason`。
+- **渲染**：`PackSurfaceFrame` 接收 `tab/tabData` 并进 `surface-context` 载荷；pack `ui/result.html` 新增 `renderTab()`（源码 `<pre>` / 血缘三列表格 / 未知 tab 诚实空态）。
+- **pack 仓**：`0.2.1`，`resultSurfaces[0].tabs = [revisions-source, lineage]`——`history` **不声明**（无列表端点）。
+
+### 6.2 验证
+
+- 新增单测 **11 条**（路由 5 + 降级 4 + 桥 5 中的裁剪/缺参/失败部分）；
+- 定向回归 **41 文件 / 318 项全绿**（lib/workSurface + result-studio + work-surface + CenterPanel）；
+- `quality:types` 0、`quality:knip:check` PASS（255 键）、`theme-token-contract` 17/17。
+
+### 6.3 边界（如实，不外推）
+
+- **`test:changed` 对本批是空转**：跑那一刻工作树干净，输出 `changed=0`——不能表述为「影响范围已验证」。
+- **无实机腿**：pack 页 `renderTab()` 未在 dev 栈用真实 revision 打开过；`lineage` 端点字段（按 `nodes/edges` 取）未实机核对。
+- `history` tab 未接管（桥层返回 `no_endpoint`，路由层也因未声明而回落核心）——端点补齐后再开。
+- 其余五面（compare/selection/annotations/methods/export）与 lineage 图形态仍在核心，属后续批次。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -1,11 +1,11 @@
 /**
  * usePackTabData — BLOCK-236：pack 只读 tab 的取数状态（含「失败即回落核心」的判定）。
  *
- * 设计要点：
- * - 判定与取数分离：`shouldDowngradeToCore` 是纯函数，便于单测钉住三态；
- * - 取数失败（http/坏 JSON/端点缺失/网络）一律 `status='error'` + `reason`，
- *   由 host 降级到核心过渡面，**不渲染空白 iframe**；
- * - `history` 目前无列表端点，桥层直接返回 `no_endpoint` → 自动回落，属预期行为。
+ * 纪律：
+ * - effect 内**不同步 setState**（避免级联渲染）：状态按 `key` 归属，渲染期比对 key 决定
+ *   「这一份数据是不是当前 tab 的」——换 tab 即视为 loading，旧数据不残留；
+ * - 取数失败一律 `status='error'` + `reason`，由 host 降级核心过渡面，不渲染空白 iframe；
+ * - `history` 目前无列表端点，桥层返回 `no_endpoint` → 自动回落，属预期行为。
  */
 
 import { useEffect, useState } from 'react';
@@ -26,6 +26,7 @@ export interface PackTabState {
 }
 
 const EMPTY_PACK_TAB_STATE: PackTabState = { status: 'idle' };
+const LOADING_PACK_TAB_STATE: PackTabState = { status: 'loading' };
 
 /**
  * host 侧降级判定：只有「命中 pack 且 tab 数据可用」才留在 pack。
@@ -43,29 +44,33 @@ export function usePackTabData(
   params: { jobId?: string | null; revisionId?: string | null },
   apiBase: string,
 ): PackTabState {
-  const [state, setState] = useState<PackTabState>(EMPTY_PACK_TAB_STATE);
   const jobId = params.jobId ?? null;
   const revisionId = params.revisionId ?? null;
+  const key = tab ? `${tab}|${jobId ?? ''}|${revisionId ?? ''}|${apiBase}` : '';
+  const [entry, setEntry] = useState<{ key: string; state: PackTabState }>({
+    key: '',
+    state: EMPTY_PACK_TAB_STATE,
+  });
 
   useEffect(() => {
+    if (!tab) return undefined;
     let cancelled = false;
-    if (!tab) {
-      setState(EMPTY_PACK_TAB_STATE);
-      return () => { cancelled = true; };
-    }
-    setState({ status: 'loading' });
     void fetchPackTabData(tab as PackTabId, { jobId, revisionId }, { apiBase })
       .then((res: PackTabResult<PackLineagePayload | PackSourcePayload>) => {
         if (cancelled) return;
-        setState(res.ok
-          ? { status: 'ready', data: res.data }
-          : { status: 'error', reason: res.reason });
+        setEntry({
+          key,
+          state: res.ok ? { status: 'ready', data: res.data } : { status: 'error', reason: res.reason },
+        });
       })
       .catch(() => {
-        if (!cancelled) setState({ status: 'error', reason: 'network_error' });
+        if (!cancelled) setEntry({ key, state: { status: 'error', reason: 'network_error' } });
       });
-    return () => { cancelled = true; };
-  }, [tab, jobId, revisionId, apiBase]);
+    return () => {
+      cancelled = true;
+    };
+  }, [key, tab, jobId, revisionId, apiBase]);
 
-  return state;
+  if (!tab) return EMPTY_PACK_TAB_STATE;
+  return entry.key === key ? entry.state : LOADING_PACK_TAB_STATE;
 }

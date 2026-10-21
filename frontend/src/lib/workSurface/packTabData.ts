@@ -60,7 +60,7 @@ async function readJson(
   url: string,
   deps: PackTabDeps,
 ): Promise<PackTabResult<unknown>> {
-  const fetchImpl = deps.fetchImpl ?? (globalThis.fetch as unknown as Fetcher);
+  const fetchImpl: Fetcher | undefined = deps.fetchImpl ?? globalThis.fetch;
   if (typeof fetchImpl !== 'function') return { ok: false, reason: 'fetch_unavailable' };
   try {
     const res = await fetchImpl(url);

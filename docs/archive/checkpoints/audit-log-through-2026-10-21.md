@@ -29,3 +29,7 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-21T11:26:42.478Z -->
 最后更新：2026-10-21（**BLOCK-231 进程层后台任务看门狗 completed**）：新增便携 `dev-task-runner`（run/wait/status）——日志 + `<id>.status.json`（pid/状态/退出码）落 `.petri-dev-user-data/task-runs/`；`task:wait` 124=超时、125=runner 丢失（未知≠成功）；`npm run state` 增加运行/失败任务对账；SKILL 改为「通知是加速器、exit.json 才是真相」。证据=契约测 4/4 + npm 脚本冒烟。G0 开发期常态。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-21T12:09:00.285Z -->
+最后更新：2026-10-21（**BLOCK-233 Q-DOMAIN P4-C S1 tool 元数据单一源 completed**）：删除 `tools-executor` 19 项标签表与 `result-files` CSV/大小白名单，改读 pack 注册表；pack 补 go-kegg/gsea + `csvValidation`/一列声明（0.2.1）；域中性 **201→179 处 / 100→85 键**。证据=红绿 5 红→14/14 + pack 死链守卫 1/1 + test:changed 460 pass/0 fail + closeout 十三门；唯一行为对齐=maftools 上限 100→200MB（随 pack 声明）。**下一片=S2 demo/artifact profiles**。plan=docs/block-233-qdomain-p4c-tool-metadata-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
+最后更新：2026-10-21（**BLOCK-232 Q-DOMAIN P4-B 权限通用化 completed**）：`single-cell`/`spatial` 专属 gate 收敛为通用 `data` 资源权限，两键保留 legacy 别名；`/api/run` = `tools|data`；零迁移、本地 admin 零变化。证据=红绿 7 红→11/11 + REST 实机 3/3（admin 404 非 403）+ test:changed 320 pass/0 fail + closeout 十三门。实机抓真=存量 `/api/auth/me` 500 已登记 🟡；**下一包=P4-C 域中性分片**。plan=docs/block-232-qdomain-p4b-permissions-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。

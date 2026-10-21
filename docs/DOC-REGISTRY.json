@@ -7658,8 +7658,8 @@
       "capability": "qdomain-p2b-full-tabs",
       "path": "docs/block-236-qdomain-p2b-full-tabs-plan.md",
       "kind": "work-package",
-      "status": "active",
-      "phase": "P0-LAUNCH",
+      "status": "completed",
+      "phase": "P5-CLOSED",
       "canonical": true,
       "truthDomain": "qdomain-p2b-full-tabs",
       "entrypoint": "docs/README.md",
@@ -7672,7 +7672,7 @@
         "tabs",
         "G0"
       ],
-      "notes": "2026-10-21 立项（用户「按顺序进入 P1」）：P2b 全量高级 tab 迁移第一批——resultSurfaces 增 tabs 声明 + 只读数据桥（lineage/history/revisions-source 有界）+ host 按 tab 路由 + pack 三面表格渲染；核心保留图形态/selection/annotations/methods/export/compare。"
+      "notes": "2026-10-21 立项（用户「按顺序进入 P1」）：P2b 全量高级 tab 迁移第一批——resultSurfaces.tabs 契约（白名单 lineage/history/revisions-source）+ 只读有界桥 packTabData + host 按 tab 路由与失败回落 + pack ui/result.html renderTab（0.2.1）。**completed（2026-10-21）**：11 条单测 + 定向回归 41 文件 318 项 + types 0 + knip PASS + theme 17/17。边界=test:changed 空转（树干净）、无实机腿、history 未接管（无列表端点）、其余五面与图形态 reopen。"
     }
   ],
   "lastUpdated": "2026-10-21",

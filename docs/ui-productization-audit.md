@@ -5256,3 +5256,10 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 | 保持（含「退役」语义但不 stale） | 6 | 正文里的「退役」指**本条目退役了别的能力**（如 UI-385 退役独立窗），不是本条被替代 → 同样只是缺实机证据 |
 
 **口径**：`verified` 只认**仓内可核产物**；本轮不重跑实机，故不把「代码完成 + 单测绿」升级为 verified（台账纪律：verified 需实机）。
+
+## UI-544: 结果面 tab 级接管（源码/血缘由领域包渲染）（2026-10-21 **in_progress（代码+单测绿，无实机腿）**，BLOCK-236 / Q-DOMAIN P2b）
+
+- **变化面**：结果面 `code` 模式由 pack 渲染只读源码视图、`history` 模式进入 tab 判定；命中失败/未声明时回落核心并标注 `data-fallback-reason`。pack 侧 `ui/result.html` 新增 `renderTab()`（源码 `<pre>`、血缘三列表格、未知 tab 诚实空态）。
+- **为什么这样设计（自有形态）**：迁移按「只读先、交互后」推进——先把数据可复现、无副作用的源码/血缘交给领域包，写面（选择/重放/回滚）留在核心治理面，避免把可信边界挪进包；回落原因写进 DOM，实机一眼能看出是「没声明」还是「取数失败」。
+- **验证（代码）**：路由/降级单测 11 条 + 定向回归 41 文件 318 项 + `quality:types` 0 + knip PASS（255 键）+ theme 17/17；pack 仓 `0.2.1`。
+- **未做实机腿**：dev 栈里没有带 revision 的 artifact 可打开，`renderTab()` 与 `lineage` 字段（按 `nodes/edges`）均未实机核对 → 保持 `in_progress`，不宣称 verified。

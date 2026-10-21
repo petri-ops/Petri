@@ -34,7 +34,8 @@ describe('packTabData（BLOCK-236）', () => {
     expect(res.ok).toBe(true);
     const data = res.data;
     expect(Array.isArray(data)).toBe(false);
-    const payload = data as { nodes: unknown[]; edges: unknown[]; truncated: boolean };
+    const payload = data;
+    if (!payload || !('nodes' in payload)) throw new Error('expected lineage payload');
     expect(payload.nodes).toHaveLength(PACK_TAB_LIMITS.lineageNodes);
     expect(payload.edges).toHaveLength(PACK_TAB_LIMITS.lineageEdges);
     expect(payload.truncated).toBe(true);
@@ -60,7 +61,8 @@ describe('packTabData（BLOCK-236）', () => {
     ]);
     const res = await fetchPackTabData('revisions-source', { revisionId: 'r1' }, { apiBase: BASE, fetchImpl: fetcher(routes).impl });
     expect(res.ok).toBe(true);
-    const payload = res.data as { text: string; truncated: boolean };
+    const payload = res.data;
+    if (!payload || !('text' in payload)) throw new Error('expected source payload');
     expect(payload.truncated).toBe(true);
     expect(payload.text.length).toBeGreaterThan(PACK_TAB_LIMITS.sourceChars);
     expect(payload.text).toContain('已截断');

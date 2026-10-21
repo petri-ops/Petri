@@ -217,16 +217,15 @@ export function mergeWorkSurfaceRegistry(
         if (!Array.isArray(result.tabs)) {
           diagnostics.push(diagnostic(packId, `resultSurfaces/${resultId}`, 'tabs_not_array'));
         } else {
-          for (const rawTab of result.tabs) {
-            const tabId = typeof rawTab?.id === 'string' ? rawTab.id.trim() : '';
+          for (const rawTab of result.tabs as unknown[]) {
+            const tab = (rawTab && typeof rawTab === 'object' ? rawTab : {}) as { id?: unknown; label?: unknown };
+            const tabId = typeof tab.id === 'string' ? tab.id.trim() : '';
             if (!RESULT_SURFACE_TABS.has(tabId)) {
               diagnostics.push(diagnostic(packId, `resultSurfaces/${resultId}`, 'tab_unknown_id'));
               continue;
             }
             if (tabs.some((t) => t.id === tabId)) continue;
-            const label = typeof rawTab?.label === 'string' && rawTab.label.trim()
-              ? rawTab.label.trim().slice(0, 24)
-              : tabId;
+            const label = typeof tab.label === 'string' && tab.label.trim() ? tab.label.trim().slice(0, 24) : tabId;
             tabs.push({ id: tabId, label });
           }
         }
