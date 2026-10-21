@@ -1,7 +1,9 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
-最后更新：2026-10-21（**BLOCK-230 Q-DOMAIN P4 第一片 completed**）
+最后更新：2026-10-21（**BLOCK-232 Q-DOMAIN P4-B 权限通用化 completed**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-232（P4-B 权限通用化）**：新增通用 `data` 资源权限，`single-cell`/`spatial` 保留为 legacy 别名（组内显式任一 true 即授予）；`/api/data/*` 写 gate 与 `POST /api/run`（`tools|data`）收敛；guest 同步/异步共用解析器；零迁移、本地 admin 零变化。证据=红绿 7 红→Node 11/11 + REST 实机 3/3（admin 404 非 403）+ test:changed 322 项 0 红 + closeout 十三门。**下一包=P4-C 域中性基线分片**（用户建议：先外围 tool/result，再 Result Studio 保真，每片下调基线）→ P4-D 导出/联邦基线 → dataModelExtensions 最后。实机抓真=存量 `/api/auth/me` standalone 500 已登记 AUDIT-LOG 🟡（前端零消费，不阻塞）。plan=`docs/block-232-qdomain-p4b-permissions-plan.md` §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-230（P4 第一片）**：modality 默认 `general`；pack.json `provides.modalities` 扩展值（归一/上限/非法 diagnostic，仅 modality 的包保留）；未知回落 general，存量 single-cell/spatial/bulk 不迁移。证据=Node 4/4 + REST 实机 6/6 + closeout。**不是完整 P4**：权限通用化/域中性归零/RS 保真/导出联邦基线仍 reopen。plan=`docs/block-230-qdomain-p4-modality-plan.md` §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

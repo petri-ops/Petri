@@ -6,7 +6,7 @@
  */
 
 const dbMod = require('../db');
-const { MODULE_KEYS, _DEFAULT_PERMS, normalizePermissionsForStore } = require('./permissions');
+const { MODULE_KEYS, normalizePermissionsForStore, resolveModulePermission } = require('./permissions');
 
 const SITE_KEY = 'guest_permissions';
 
@@ -17,6 +17,7 @@ const GUEST_DEFAULT_PERMS = {
   figcode: true,
   tools: false,
   skills: false,
+  data: false,
   'single-cell': false,
   spatial: false,
   copilot: false,
@@ -54,9 +55,7 @@ function effectiveGuestPermissions() {
   const overrides = _parseStored(raw);
   const out = {};
   for (const k of MODULE_KEYS) {
-    out[k] = Object.prototype.hasOwnProperty.call(overrides, k)
-      ? !!overrides[k]
-      : GUEST_DEFAULT_PERMS[k] === true;
+    out[k] = resolveModulePermission(overrides, k, GUEST_DEFAULT_PERMS);
   }
   _cache.perms = out;
   _cache.ts = Date.now();
@@ -93,9 +92,7 @@ async function effectiveGuestPermissionsAsync() {
   const overrides = _parseStored(raw);
   const out = {};
   for (const k of MODULE_KEYS) {
-    out[k] = Object.prototype.hasOwnProperty.call(overrides, k)
-      ? !!overrides[k]
-      : GUEST_DEFAULT_PERMS[k] === true;
+    out[k] = resolveModulePermission(overrides, k, GUEST_DEFAULT_PERMS);
   }
   return out;
 }

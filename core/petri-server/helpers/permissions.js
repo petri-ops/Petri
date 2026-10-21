@@ -6,9 +6,9 @@
  *
  * Modules (granularity 1 — module level):
  *   - docs        教程/文档（公开，默认开）
- *   - single-cell 单细胞云平台（默认开，有 quota/次数兜底）
- *   - tools       在线分析工具 + FigCode 在线绘图（默认开）
- *   - copilot     AI 组学实践（DeepSeek，烧钱 → 默认关，管理员手动开）
+ *   - data        通用项目数据面（读写/计算）；单细胞/空间等历史专用键为其 legacy 别名
+ *   - tools       在线分析工具 + FigCode 在线绘图
+ *   - copilot     AI 助手（烧钱 → 管理员手动开）
  *
  * Storage: users.permissions is a JSON string (or NULL = use defaults).
  *   e.g. {"copilot": true, "tools": false}
@@ -31,24 +31,31 @@ const MODULE_KEYS = [
   'figcode',
   'tools',
   'skills',
+  'data',
   'single-cell',
   'spatial',
   'copilot',
 ];
 
+// `data` is the generic data-plane permission; legacy domain keys stay valid
+// aliases so stored permission JSON needs no migration. Any explicit true in
+// the group grants `data`, mirroring the old OR gate.
+const DATA_MODULE_KEYS = ['data', 'single-cell', 'spatial'];
+
 // Default module access for users whose permissions column is NULL or omits a key.
-// Decision (2026-05-31, author): copilot 改为**默认开** —— 所有用户注册后即可用 AI 组学实践。
+// Decision (2026-05-31, author): copilot 改为**默认开** —— 所有用户注册后即可用 AI 助手。
 // 教程/博客/FigCode 仍对所有用户和游客完全公开（PUBLIC_MODULES）；
-// 工具/Skills/单细胞/空间组学 默认关，由管理员按用户（未来按等级）放开。
+// 工具/Skills/数据面 默认关，由管理员按用户（未来按等级）放开。
 const DEFAULT_PERMS = {
   docs: true, // 教程（公开）
   blog: true, // 博客（公开）
   figcode: true, // FigCode 绘图代码集（公开浏览/复制）
   tools: false, // 在线分析工具
   skills: false, // Skills 库
-  'single-cell': false, // 单细胞云平台
-  spatial: false, // 空间组学云平台
-  copilot: true, // AI 组学实践（默认开放给所有登录用户）
+  data: false, // 项目数据面（通用资源权限）
+  'single-cell': false, // legacy 别名 → data
+  spatial: false, // legacy 别名 → data
+  copilot: true, // AI 助手（默认开放给所有登录用户）
 };
 
 // User-facing 403 / guard messages per module.
@@ -58,9 +65,8 @@ const MODULE_MSG = {
   figcode: 'FigCode 暂未对你的账号开放，如需使用请联系管理员。',
   tools: '在线分析工具暂未对你的账号开放，如需使用请联系管理员。',
   skills: 'Skills 库暂未对你的账号开放，如需查看请联系管理员。',
-  'single-cell': '单细胞云平台暂未对你的账号开放，如需使用请联系管理员。',
-  spatial: '空间组学云平台暂未对你的账号开放，如需使用请联系管理员。',
-  copilot: 'AI 组学实践功能暂未对你的账号开放，如需使用请联系管理员。',
+  data: '项目数据功能暂未对你的账号开放，如需使用请联系管理员。',
+  copilot: 'AI 助手功能暂未对你的账号开放，如需使用请联系管理员。',
 };
 
 function _parsePerms(userRow) {
@@ -74,15 +80,30 @@ function _parsePerms(userRow) {
 }
 
 /**
+ * Resolve one module key against a parsed permission map.
+ * For `data`, the legacy domain keys act as aliases: any explicitly stored
+ * true in the group grants access; only when none is stored do defaults apply.
+ * Other keys keep the original per-key semantics (explicit wins, else default).
+ */
+function resolveModulePermission(perms, moduleKey, defaults = DEFAULT_PERMS) {
+  const has = (key) => Object.prototype.hasOwnProperty.call(perms, key);
+  if (moduleKey === 'data') {
+    const explicit = DATA_MODULE_KEYS.filter(has);
+    if (explicit.length > 0) return explicit.some((key) => !!perms[key]);
+    return DATA_MODULE_KEYS.some((key) => defaults[key] === true);
+  }
+  if (has(moduleKey)) return !!perms[moduleKey];
+  return defaults[moduleKey] === true;
+}
+
+/**
  * Does this user (DB row) have access to a module?
  * admin → always true. Otherwise: explicit permission wins, else DEFAULT_PERMS.
  */
 function can(userRow, moduleKey) {
   if (!userRow) return false;
   if (userRow.role === 'admin') return true;
-  const perms = _parsePerms(userRow);
-  if (Object.prototype.hasOwnProperty.call(perms, moduleKey)) return !!perms[moduleKey];
-  return DEFAULT_PERMS[moduleKey] === true;
+  return resolveModulePermission(_parsePerms(userRow), moduleKey, DEFAULT_PERMS);
 }
 
 /** Resolve the full effective permission map for a user row (for /auth/me + admin UI). */
@@ -168,12 +189,12 @@ function _enforce(moduleKeys, req, res, next) {
  *   - Backend can only gate API-backed operations. Static content modules
  *     (docs/blog/figcode/skills) have no server route to intercept — those are
  *     guarded on the frontend (nav hide + RouteGuard). This gate covers the
- *     cost-/data-sensitive API surface: copilot / tools / single-cell / spatial.
- *   - /api/data is the shared CRUD layer for BOTH single-cell and spatial
- *     (distinguished by project.modality), so it accepts either permission.
- *   - Spatial compute runs locally inside petri-server（BLOCK-30 P1 前在独立 py-server，/api/py/*）,
+ *     cost-/data-sensitive API surface: copilot / tools / data.
+ *   - /api/data is the shared data plane gated by the generic `data`
+ *     permission; legacy single-cell/spatial keys resolve into the same group.
+ *   - Domain compute runs locally inside petri-server（BLOCK-30 P1 前在独立 py-server，/api/py/*）,
  *     covered by this petri-server gate; add an equivalent check there when
- *     spatial task dispatch goes live (currently placeholder).
+ *     async task dispatch goes live (currently placeholder).
  */
 function moduleGate(req, res, next) {
   const p = req.path;
@@ -183,7 +204,7 @@ function moduleGate(req, res, next) {
     _enforce(moduleKeys, req, res, next);
   };
 
-  // --- copilot: all /api/ai/* except health + admin ---
+  // --- copilot: all /api/ai routes except health + admin ---
   if (p.startsWith('/api/ai')) {
     if (p === '/api/ai/health') return next();
     if (p.startsWith('/api/ai/admin')) return next();
@@ -196,16 +217,16 @@ function moduleGate(req, res, next) {
   }
 
   // --- raw R execution (/api/run): shared by FigCode 在线绘图 + r-playground +
-  //     single-cell replot. Although the FigCode *page* is public, actually
-  //     RUNNING R code is a compute cost → require a compute-capable module.
+  //     replots. Although the FigCode *page* is public, actually RUNNING R code
+  //     is a compute cost → require a compute-capable module (`data` included).
   //     (Guests / view-only users can browse + copy FigCode code, just not run.)
   if (m === 'POST' && p === '/api/run') {
-    return runGate(['tools', 'single-cell', 'spatial']);
+    return runGate(['tools', 'data']);
   }
 
-  // --- single-cell / spatial: shared data writes (projects/datasets/analyses/...) ---
+  // --- data plane: shared project/dataset/analysis writes (generic resource gate) ---
   if (p.startsWith('/api/data/') && (m === 'POST' || m === 'PUT' || m === 'DELETE')) {
-    return runGate(['single-cell', 'spatial']);
+    return runGate('data');
   }
 
   return next();
@@ -230,6 +251,7 @@ module.exports = {
   MODULE_KEYS,
   DEFAULT_PERMS,
   can,
+  resolveModulePermission,
   effectivePermissions,
   normalizePermissionsForStore,
   moduleGate,

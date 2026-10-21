@@ -7531,6 +7531,21 @@
       "archivePolicy": "retain_stable_path",
       "tags": ["q-domain", "data-model", "modality", "pack", "G0"],
       "notes": "2026-10-21 立项（用户「只剩 E7 与 P4。搞定这俩」）：P4 第一片——modality 默认 general + pack provides.modalities + 未知回落；不迁移存量、不改权限。**completed（2026-10-21）**：Node 4/4 + REST live 6/6 + closeout 十三门。reopen=权限通用化/域中性归零/RS 保真/导出联邦基线/dataModelExtensions。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-232-QDOMAIN-P4B-PERMISSIONS",
+      "capability": "qdomain-permissions",
+      "path": "docs/block-232-qdomain-p4b-permissions-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P5-CLOSED",
+      "canonical": true,
+      "truthDomain": "qdomain-permissions",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-21",
+      "archivePolicy": "retain_stable_path",
+      "tags": ["q-domain", "data-model", "security", "backend", "G0"],
+      "notes": "2026-10-21 立项（用户「推荐先开 P4-B；现在立项开做」）：P4-B 权限通用化——single-cell/spatial gate 收敛为通用 data 资源权限，保留 legacy 别名；零迁移、本地 admin 零变化。**completed（2026-10-21）**：Node 11/11 + REST live 3/3 + test:changed 320 pass / 0 fail + closeout 十三门。reopen=域中性归零/RS 保真/导出联邦/dataModelExtensions。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-10-21",

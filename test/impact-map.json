@@ -4617,6 +4617,22 @@
         "test/block218-pack-result-surface.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block232-qdomain-p4b-permissions",
+      "note": "BLOCK-232 Q-DOMAIN P4-B 权限通用化 — data 资源权限 + single-cell/spatial legacy 别名；/api/data 写与 /api/run gate 收敛；零迁移、本地 admin 零变化。",
+      "patterns": [
+        "core/petri-server/helpers/permissions.js",
+        "core/petri-server/helpers/guest-permissions.js",
+        "test/block232-*.test.mjs",
+        "acceptance/block-232/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block232-*.cjs"
+      ],
+      "tests": [
+        "test/block232-permissions-generalization.test.mjs",
+        "test/domain-neutrality.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

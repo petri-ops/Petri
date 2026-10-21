@@ -42,8 +42,6 @@
     "core/petri-server/agent-tools/tool-defs/session.js::deseq2": 3,
     "core/petri-server/agent-tools/tool-defs/session.js::volcano": 1,
     "core/petri-server/agent-tools/tool-defs/session.js::wgcna": 1,
-    "core/petri-server/api-data.js::single-cell": 2,
-    "core/petri-server/db.js::single-cell": 2,
     "core/petri-server/db/schema.js::single-cell": 2,
     "core/petri-server/helpers/guest-permissions.js::single-cell": 1,
     "core/petri-server/helpers/interpret.js::scrna": 1,
@@ -57,9 +55,6 @@
     "core/petri-server/helpers/methods-export.js::single-cell": 6,
     "core/petri-server/helpers/methods-export.js::单细胞": 1,
     "core/petri-server/helpers/permissions.js::single-cell": 3,
-    "core/petri-server/helpers/permissions.js::单细胞": 1,
-    "core/petri-server/helpers/permissions.js::空间组学": 1,
-    "core/petri-server/helpers/permissions.js::组学": 2,
     "core/petri-server/helpers/tools-assets.js::cellchat": 1,
     "core/petri-server/helpers/tools-assets.js::deseq2": 1,
     "core/petri-server/helpers/tools-assets.js::go-kegg": 1,
@@ -97,6 +92,7 @@
     "core/shared-backend/artifact-profiles.js::wgcna": 3,
     "core/shared-backend/capability-bundles.js::wgcna": 3,
     "core/shared-backend/executors/py-pool.js::scanpy": 3,
+    "core/shared-backend/project-modality.js::single-cell": 1,
     "core/shared-backend/result-replay-service/cohort-package.js::deseq2": 1,
     "core/shared-backend/result-replay-service/cohort-package.js::go-kegg": 2,
     "core/shared-backend/result-scientific-compare.js::volcano": 10,
@@ -126,5 +122,5 @@
     "src/main/core-utils.js::seurat": 1,
     "src/main/core-utils.js::wgcna": 1
   },
-  "updatedAt": "2026-10-20"
+  "updatedAt": "2026-10-21"
 }

@@ -1,0 +1,23 @@
+{
+  "name": "block232-permissions-live",
+  "startedAt": "2026-10-21T05:28:12.268Z",
+  "finishedAt": "2026-10-21T05:28:12.288Z",
+  "assertions": [
+    {
+      "name": "R1_backend_health",
+      "pass": true,
+      "detail": "{\"status\":200}"
+    },
+    {
+      "name": "R2_admin_bypasses_data_gate",
+      "pass": true,
+      "detail": "{\"status\":404,\"data\":null}"
+    },
+    {
+      "name": "R3_data_read_path_unchanged",
+      "pass": true,
+      "detail": "{\"status\":200}"
+    }
+  ],
+  "allPass": true
+}
