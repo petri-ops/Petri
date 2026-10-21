@@ -23,6 +23,11 @@ export interface WorkSurfaceDescriptor {
   artifactTypes?: string[];
   /** pack-result only: result modes this surface claims (default ['result']). */
   modes?: string[];
+  /**
+   * BLOCK-236 — pack-result only: 同一模式内由 pack 接管的只读 tab。
+   * 未声明 = 只接管模式主 body（BLOCK-218 行为）；白名单见 registry.ts。
+   */
+  tabs?: { id: string; label: string }[];
   /** pack-result only: higher wins when multiple surfaces match. */
   priority?: number;
   capabilities?: Record<string, unknown>;

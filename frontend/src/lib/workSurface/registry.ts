@@ -79,11 +79,14 @@ export interface PackResultSurfaceContribution {
   entry?: unknown;
   artifactTypes?: unknown;
   modes?: unknown;
+  tabs?: unknown;
   priority?: unknown;
   emptyState?: unknown;
 }
 
 const RESULT_SURFACE_MODES = new Set(['result', 'code', 'compare', 'history']);
+/** BLOCK-236 — pack 可接管的只读 tab 白名单（写/交互面一律留在核心）。 */
+const RESULT_SURFACE_TABS = new Set(['lineage', 'history', 'revisions-source']);
 
 export interface PackUiActionContribution {
   id?: unknown;
@@ -208,6 +211,26 @@ export function mergeWorkSurfaceRegistry(
         ? result.modes.filter((mode): mode is string => typeof mode === 'string' && RESULT_SURFACE_MODES.has(mode))
         : [];
       const modes = rawModes.length > 0 ? [...new Set(rawModes)] : ['result'];
+      // BLOCK-236 — tab 级接管：只认白名单，坏形状整条丢弃并留 diagnostic（不做半读）
+      const tabs: { id: string; label: string }[] = [];
+      if (result.tabs !== undefined) {
+        if (!Array.isArray(result.tabs)) {
+          diagnostics.push(diagnostic(packId, `resultSurfaces/${resultId}`, 'tabs_not_array'));
+        } else {
+          for (const rawTab of result.tabs) {
+            const tabId = typeof rawTab?.id === 'string' ? rawTab.id.trim() : '';
+            if (!RESULT_SURFACE_TABS.has(tabId)) {
+              diagnostics.push(diagnostic(packId, `resultSurfaces/${resultId}`, 'tab_unknown_id'));
+              continue;
+            }
+            if (tabs.some((t) => t.id === tabId)) continue;
+            const label = typeof rawTab?.label === 'string' && rawTab.label.trim()
+              ? rawTab.label.trim().slice(0, 24)
+              : tabId;
+            tabs.push({ id: tabId, label });
+          }
+        }
+      }
       seenSurfaceIds.add(id);
       surfaces.push({
         id,
@@ -224,6 +247,7 @@ export function mergeWorkSurfaceRegistry(
         emptyState: typeof result.emptyState === 'string' ? result.emptyState : undefined,
         artifactTypes: types,
         modes,
+        tabs,
         priority: typeof result.priority === 'number' && Number.isFinite(result.priority) ? result.priority : 0,
       });
     }
