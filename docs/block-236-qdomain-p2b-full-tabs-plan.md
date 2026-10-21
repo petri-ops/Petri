@@ -53,3 +53,17 @@ compare、selection、annotations（pack 面）、methods 渲染、export、line
 ## 4. 完成语义
 
 completed 需：契约 + 数据桥 + host 路由 + pack 三面 + 测试 + canonical 回写 + closeout 十三门。**明确声明这是 P2b 第一批**：只读三面已由 pack 渲染；其余五面与图形态仍在核心。
+
+## 5. 长任务批次编排（2026-10-21 用户「计划一个比较长的任务 大幅度推进」）
+
+本包按**单批连续推进**执行，每阶段自带出口断言，阶段间不等待人工发令（用户已预授权整批）；任一段出口不达标即停在该段并如实记账，不把未验证阶段表述为完成。
+
+| 阶段 | 内容 | 出口断言 | 失败处理 |
+| --- | --- | --- | --- |
+| **P1 契约+桥**（已完成） | `tabs` 声明白名单 + `packTabData` 有界只读桥 | `lib/workSurface` 29/29；types 0 | 已交付 |
+| **P2 host 路由** | `CenterPanel` 在「模式命中 + tab 命中」时渲染 `PackSurfaceFrame` 并传 tab payload；未命中回落核心并标 `data-result-surface-source` | 路由单测（命中/未命中/pack 数据失败回落三态）+ 邻域前端绿 | 回落路径优先保正确，宁可不接管 |
+| **P3 pack 三面** | pack `pack.json` 增 `tabs`；`ui/tabs.js` 渲染 lineage 表格 / 源码只读视图（history 暂不声明） | pack 页面契约测（tab 参数、payload 渲染、空态）+ `pack.json` JSON 合法 | 只声明已验证的两面 |
+| **P4 测试收口** | 契约/桥/路由/pack 四面测试补齐；`test:changed` 定向绿 | 定向测试 0 红；theme/knip/docs/ui-audit 绿 | 红即修，不带病收口 |
+| **P5 收口** | canonical 回写（plan 收口节、registry、AUDIT-LOG、roadmap/handoff/backlog/README）+ closeout 十三门 | 十三门 PASS；提交 + 快照 | 失败即停并记录首个红门 |
+
+**批内纪律**：①每个阶段提交一次（便于单独回滚）；②不改既有 `result` 模式行为（BLOCK-218 证据不得回退）；③pack 侧改动只加不改（版本 0.2.0 → 0.2.1）；④真实 job 实机腿若无夹具，登记为 rider，不用合成数据宣称 verified。
