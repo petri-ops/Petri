@@ -20,7 +20,7 @@
 const ANNOTATION_CONTRACT_VERSION = 1;
 
 const ANNOTATION_SURFACES = Object.freeze(['result-artifact', 'workspace-file']);
-const ANNOTATION_KINDS = Object.freeze(['region']);
+const ANNOTATION_KINDS = Object.freeze(['region', 'ellipse', 'arrow']);
 const ANNOTATION_COLORS = Object.freeze(['amber', 'sky', 'rose']);
 
 const MAX_ANNOTATION_COMMENT_CHARS = 2000;

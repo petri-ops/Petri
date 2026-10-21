@@ -338,3 +338,33 @@ test('DELETE /annotations/:id scopes the check to the owning project', () => {
   assert.equal(deleted.payload.deleted, true);
   assert.equal(store.get(saved.annotationId), null);
 });
+
+test('BLOCK-238 — 图形批注 kind 白名单：ellipse / arrow 被接受，未知 kind 仍拒绝', async () => {
+  const { ANNOTATION_KINDS, normalizeAnnotationInput } = require('../core/shared-backend/result-annotation-contracts.js');
+  assert.deepEqual([...ANNOTATION_KINDS], ['region', 'ellipse', 'arrow']);
+
+  for (const kind of ['ellipse', 'arrow']) {
+    const result = normalizeAnnotationInput({
+      projectId: 'p1',
+      surface: 'result-artifact',
+      artifactId: 'a1',
+      revisionId: 'r1',
+      kind,
+      rect: [0.1, 0.2, 0.3, 0.4],
+      comment: '形状批注',
+    });
+    assert.equal(result.ok, true, kind + ' 应被接受：' + JSON.stringify(result.errors || []));
+    assert.equal(result.annotation.kind, kind);
+  }
+
+  const bad = normalizeAnnotationInput({
+    projectId: 'p1',
+    surface: 'result-artifact',
+    artifactId: 'a1',
+    revisionId: 'r1',
+    kind: 'mosaic',
+    rect: [0.1, 0.2, 0.3, 0.4],
+  });
+  assert.equal(bad.ok, false);
+  assert.ok(bad.errors.some((e) => e.code === 'kind_invalid'));
+});
