@@ -151,6 +151,9 @@ Agent 等待后台任务（全量测试、构建、长脚本）时**禁止 sleep
 3. **sleep 盲等三宗罪**：定短了白醒一次还得再睡；定长了干等浪费时间；每轮 poll 都消耗上下文。凡 `sleep` 的对象是「agent 自己在等的任务」＝违规。
 4. **唯一合法 sleep**：被验证系统自身的时序要求——测试内 drain 宽限（block88-project-grants 先例）、重试退避、服务就绪窗口。判据：sleep 的是「被测对象的逻辑」＝合法，sleep 的是「agent 的不耐烦」＝违规。
 5. 多后台任务并行时按通知汇合；有顺序依赖的用阻塞等待串成显式链条，不靠「估个时间」。
+6. **进程层看门狗（BLOCK-231，默认入口）**：长任务用 `npm run task:run -- --label <名> --cmd "<shell 命令>"` 启动；`npm run task:wait -- --latest --timeout-ms N`（或 `--id <id>`）有界等待并**以退出码为准**：124=超时（任务仍可能在跑）、125=runner 丢失/状态不可读（未知，**不是成功**）；`npm run task:status [--json] [--fail-on-failed] [--prune-days N]` 对账。日志与 `<id>.status.json` 落 `.petri-dev-user-data/task-runs/`，**通知只是加速器，exit.json 才是真相**。
+7. **关键门禁一律前台跑**：`closeout` / `test:changed` 等判据不进后台；后台只用于构建/安装等可并行、非判据任务（构建也可用 task:run 记录退出码）。
+8. **绝不无界等待**：每个等待有 deadline；超时结论是「未知/未完成」，不得当作通过；会话恢复时 `npm run state` 会列出运行/失败任务。
 
 ## AUDIT-LOG 自动精简（用户裁决 2026-09-20「仅保留必要的内容」）
 

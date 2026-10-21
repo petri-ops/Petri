@@ -1,4 +1,6 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-10-21（**BLOCK-231 进程层后台任务看门狗 completed**）：新增便携 `dev-task-runner`（run/wait/status）——日志 + `<id>.status.json`（pid/状态/退出码）落 `.petri-dev-user-data/task-runs/`；`task:wait` 124=超时、125=runner 丢失（未知≠成功）；`npm run state` 增加运行/失败任务对账；SKILL 改为「通知是加速器、exit.json 才是真相」。证据=契约测 4/4 + npm 脚本冒烟。G0 开发期常态。
+
 最后更新：2026-10-21（**BLOCK-230 Q-DOMAIN P4 第一片 completed**）：modality 默认 `general`；pack `provides.modalities` 扩展值（归一/上限/非法 diagnostic，仅 modality 的包保留）；未知回落 general，存量不迁移。证据=Node 4/4 + REST 实机 6/6 + closeout。**不是完整 P4**：权限通用化/域中性归零/RS 保真/导出联邦基线仍 reopen。plan=docs/block-230-qdomain-p4-modality-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**BLOCK-229 E7 电脑控制（Windows 边界内）completed**）：.NET 8 SDK + sidecar/axfixture 构建成功；host 只读 status + 后端 `status/probe` + 设置面板（权限提示/测试连接）；控制动作仍走 `computer_*` + 完全访问 + ackToken。证据=路由 2/2 + 面板 2/2 + 9223 离屏 live 6/6（亮/暗截图）+ types/lint/theme/code-size PASS。reopen=macOS 构建/权限、PiP、真实 click/type 端到端。plan=docs/block-229-e7-computer-use-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -13,7 +15,6 @@
 
 最后更新：2026-10-21（**BLOCK-224 Q9 续项（D1+D2）completed**）：模型选择器深度——目录状态诚实（加载中/发现失败/缺密钥/已隐藏逐行可见）+ 每模型可见性/上下文/默认思考档；`useAiSettings` 消费 `credential_status` 并记录逐 profile 发现失败；菜单抽 `ModelMenu`、设置控件抽 `ModelSelectorControls`（SimpleChat 2136 / DesktopSettingsPanel 670，棘轮不增）。证据=前端 31/31 + 后端 3/3 + 9223 离屏 live 9/9 + lint 0 error/types 0。D4 Auto 留下一刀。plan=docs/block-224-q9-model-selector-depth-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-最后更新：2026-10-21（**BLOCK-223 Q9 续项垂直切片 completed**）：系统通知（回合完成/失败/等待审批；窗口聚焦抑制 + 3s 去重 + 点击聚焦）+ 托盘最小化（`closeToTray` 默认 false，关窗=隐藏）+ 退出摘要（后端 `GET /api/app/activity-summary` 五类计数 → 取消 / 最小化到托盘 / 停止并退出；守卫先于既有 `before-quit` 消费者注册）。证据=block223 9 项 + 前端 12 项 + 9223 离屏 live 16/16（亮/暗截图）+ closeout 十三门 PASS；注册表 89→91 键。reopen=模型选择器深度/电脑控制 sidecar/崩溃同意/首启揭示/通知中心/摘要逐项操作。plan=docs/block-223-q9-desktop-shell-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 
 
@@ -28,6 +29,7 @@
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
+| ✅ | 2026-10-21 | **BLOCK-231 进程层后台任务看门狗 completed**：`dev-task-runner` run/wait/status + exit.json + wait 超时 124/未知 125；`task:run`/`task:wait`/`task:status` 接线；`npm run state` 列出运行/失败任务；SKILL 更新为通知只是加速器。证据=test/dev-task-runner 4/4 + npm 冒烟。 | BLOCK-231 / tooling |
 | ✅ | 2026-10-21 | **BLOCK-230 Q-DOMAIN P4 第一片 completed**（用户「只剩 E7 与 P4。搞定这俩」）：项目 modality 默认 `general`；pack.json `provides.modalities` 扩展值（归一/去重/拒绝基础值与非法 id/≤20，仅 modality 的包保留）；未知回落 general，存量 single-cell/spatial/bulk 不迁移。证据=Node 4/4 + REST 实机 6/6 + closeout 十三门。非范围=权限通用化/域中性归零/RS 保真/导出联邦基线/dataModelExtensions。plan=docs/block-230-qdomain-p4-modality-plan.md §7 | BLOCK-230 / P5-CLOSED |
 | ✅ | 2026-10-21 | **BLOCK-229 E7 电脑控制（Windows 边界内）completed**（用户「只剩 E7 与 P4。搞定这俩」）：.NET 8 SDK + sidecar/axfixture 构建；host status + 后端 `status/probe`（未构建 503）+ 设置面板（权限提示/测试连接）；控制动作仍走 `computer_*` + 完全访问 + ackToken。证据=路由 2/2 + 面板 2/2 + 9223 离屏 live 6/6 + types/lint/theme/code-size PASS。非范围=macOS 构建/权限、PiP、真实 click/type 端到端。plan=docs/block-229-e7-computer-use-plan.md §7 | BLOCK-229 / P5-CLOSED |
 | ✅ | 2026-10-21 | **BLOCK-228 Q9 K2 崩溃同意/本地提示 completed**（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：crashReporter 仅本地（不上传）+ session-health 异常退出检测 + dump 文件名/大小/时间清单 + `userPrefs.crashNotice`（默认 true）+ 横幅（打开崩溃目录/知道了）。证据=Node 7/7 + 前端 2/2 + 9223 离屏 live 5/5 + closeout 十三门 PASS。**rider**=`src/ipc/gen-ui.js` 旧 `require('../db')` 改 REST `/api/tools/status/:id`（closeout 相对 require 门禁抓真）+ block196 契约测同步 fetch stub。非范围=minidump 栈解析/上传/崩溃率/版本聚合/自动诊断包。plan=docs/block-228-q9-crash-consent-plan.md §7 | BLOCK-228 / P5-CLOSED |

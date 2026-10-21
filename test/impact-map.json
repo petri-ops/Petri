@@ -3,6 +3,21 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "block231-dev-task-runner",
+      "note": "BLOCK-231 进程层后台任务看门狗：task:run/wait/status + exit.json + state 对账（不依赖 agent 通知）。",
+      "patterns": [
+        ".agents/skills/petri-dev-infra/scripts/dev-task-runner.cjs",
+        ".agents/skills/petri-dev-infra/scripts/workspace-state.mjs",
+        ".agents/skills/petri-dev-infra/SKILL.md",
+        "package.json",
+        "test/dev-task-runner.test.mjs"
+      ],
+      "tests": [
+        "test/dev-task-runner.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "block230-qdomain-p4-modality",
       "note": "BLOCK-230 Q-DOMAIN P4 切片 — modality 默认 general + pack provides.modalities + 校验；不迁移存量、不改权限。",
       "patterns": [

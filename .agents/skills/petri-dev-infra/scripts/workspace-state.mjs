@@ -142,6 +142,32 @@ function main() {
   gitState();
   auditLogState();
   registryState();
+  section('后台任务（dev-task-runner）');
+  try {
+    const runsDir = process.env.PETRI_TASK_RUNS_DIR || path.join(ROOT, '.petri-dev-user-data', 'task-runs');
+    const rows = fs.readdirSync(runsDir)
+      .filter((name) => name.endsWith('.status.json'))
+      .map((name) => {
+        try { return JSON.parse(fs.readFileSync(path.join(runsDir, name), 'utf8')); } catch { return null; }
+      })
+      .filter(Boolean)
+      .sort((a, b) => String(b.startedAt).localeCompare(String(a.startedAt)));
+    const open = rows.filter((row) => row.state !== 'ended' || row.exitCode !== 0);
+    if (rows.length === 0) {
+      console.log('无任务记录。');
+    } else {
+      console.log(`运行/失败 ${open.length} 条（共 ${rows.length}）——用 npm run task:wait -- --latest 或 --id <id> 收口`);
+      for (const row of open.slice(0, 8)) {
+        const detail = row.state === 'ended'
+          ? `exit=${row.exitCode}${row.signal ? ` signal=${row.signal}` : ''}`
+          : `running pid=${row.pid}`;
+        console.log(`  ${row.label}  ${row.id}  ${detail}  ${row.logPath || ''}`);
+      }
+    }
+  } catch {
+    console.log('无任务记录。');
+  }
+
   section('下一步提示');
   console.log('治理顺序：🔴/🟢 未决项先处理 → 核对 active 包与手头任务一致 → 开工。');
   console.log('常用：npm run closeout（收口门禁）· npm run hygiene:check（卫生检查）· npm run test:changed:list（影响范围预览）');
