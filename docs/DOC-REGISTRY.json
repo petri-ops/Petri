@@ -7652,6 +7652,27 @@
         "G0"
       ],
       "notes": "2026-10-21 立项（用户「可以的 冲 P4余项」）：P4-D dataModelExtensions additive 扩展契约 + 导出/联邦域中性基线；canonical SDC-0 profile 不可覆盖。**completed（2026-10-21）**：block235 6/6 + 导出/联邦基线 4/4 + test:changed 443 项 0 红 + closeout 十三门 + output:judge PASS；域中性保持 11 处 / 6 键 compat。"
+    },
+    {
+      "id": "BLOCK-236-QDOMAIN-P2B-FULL-TABS",
+      "capability": "qdomain-p2b-full-tabs",
+      "path": "docs/block-236-qdomain-p2b-full-tabs-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "phase": "P0-LAUNCH",
+      "canonical": true,
+      "truthDomain": "qdomain-p2b-full-tabs",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-21",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "q-domain",
+        "result-studio",
+        "pack",
+        "tabs",
+        "G0"
+      ],
+      "notes": "2026-10-21 立项（用户「按顺序进入 P1」）：P2b 全量高级 tab 迁移第一批——resultSurfaces 增 tabs 声明 + 只读数据桥（lineage/history/revisions-source 有界）+ host 按 tab 路由 + pack 三面表格渲染；核心保留图形态/selection/annotations/methods/export/compare。"
     }
   ],
   "lastUpdated": "2026-10-21",

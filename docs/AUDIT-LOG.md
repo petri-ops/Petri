@@ -1,4 +1,6 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-10-21（**BLOCK-236 Q-DOMAIN P2b 全量 tab 迁移立项 active（P0-LAUNCH）**）：第一批只读三面——`resultSurfaces[]` 增 `tabs` 声明（白名单 lineage/history/revisions-source）+ 只读数据桥（lineage ≤200 节点/≤400 边、history ≤100 条、源码 ≤200KB）+ `CenterPanel` 按 tab 路由（未命中一律回落核心过渡面并标注）+ pack 三面表格渲染。非范围=compare/selection/annotations/methods/export/lineage 图形态/真实 job 实机腿。plan=docs/block-236-qdomain-p2b-full-tabs-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-21（**P0 台账对账 completed**）：①UI 台账 41 条 `in_progress` 逐条给判定——5 条凭仓内证据翻 `verified`（block-61 brand-live 8 断言 / block-46 两张截图 / block-78 两卷 13+10 断言 / block-79 5 断言 / ui-481 截图），23 条只有代码与单测线索、4 条声称实机但无产物、3 条证据引用失效、6 条含「退役」语义但非本条被替代——**全部原地留 note，不越纪律升级**；②backlog 6 行 legacy planned 全部销号/改判（W7、PL-1 由包交付；BIO-2/3 由 UI 覆盖；BIO-4 已随 BLOCK-121/138 实机跑通）；③竞争力总纲 W6 改判 **partial**（CP-19 已交付，CP-16/17/18 未立项）。证据=`docs/ui-productization-audit.md` §P0 台账对账小结 + backlog 顶部对账行。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**BLOCK-235 P4-D completed；无 active 工作包**）：`dataModelExtensions` additive 扩展契约——pack 可新增 artifact 类型/字段，扩展先过 SDC-0 校验，canonical 6 profile 不可覆盖；导出/联邦域中性基线（general 会话导出、扩展 artifact 类型 manifest 保真、联邦 grants/文件透传）落地。证据=block235 6/6 + 基线 4/4 + test:changed 443 项 0 红 + closeout 十三门 + output:judge PASS；域中性保持 11 处 / 6 键 compat。**下一包需用户发令**。plan=docs/block-235-qdomain-p4d-datamodel-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -30,6 +32,7 @@
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
+| 🔵 | 2026-10-21 | **BLOCK-236 Q-DOMAIN P2b 全量 tab 迁移立项（active，P0-LAUNCH）**（用户「按顺序进入 P1」）：第一批只读三面——契约 `resultSurfaces[].tabs`（白名单 lineage/history/revisions-source）+ 只读有界数据桥 + host 按 tab 路由与逐面回落 + pack 三面表格渲染；核心保留 compare/selection/annotations/methods/export 与 lineage 图形态。plan=docs/block-236-qdomain-p2b-full-tabs-plan.md | BLOCK-236 / P0-LAUNCH |
 | ✅ | 2026-10-21 | **P0 台账对账 completed**（用户「开始吧 开 P0 搞定」）：UI 41 条 in_progress 逐条判定（5 verified / 23 仅代码线索 / 4 声称实机无产物 / 3 证据失效 / 6 含退役语义非被替代）+ backlog 6 行 legacy planned 销号改判 + 竞争力总纲 W6 改判 partial（CP-16/17/18 未立项）。口径=verified 只认仓内可核产物，本轮不重跑实机、不越纪律升级。证据=ui-productization-audit §P0 小结 | P0 / P5-CLOSED |
 | ✅ | 2026-10-21 | **BLOCK-233 Q-DOMAIN P4-C S1 tool 元数据单一源 completed**（用户「确认后，开冲 P4-C」）：删除 `tools-executor` 19 项标签 Map（22 行）改 `getToolDisplayName`；`result-files` 严格 CSV/一列/大小上限改读 pack 注册表；pack 补 go-kegg/gsea + `csvValidation`/`acceptsSingleColumnGeneList`（0.2.1）。证据=红绿 5 红→14/14 + pack 死链守卫 1/1 + test:changed 464 项 0 红 + closeout 十三门；域中性 201→179 处 / 100→85 键。唯一行为对齐=maftools 上传上限 100→200MB（随 pack 声明）。非范围=S2-S6 后续片。plan=docs/block-233-qdomain-p4c-tool-metadata-plan.md §7 | BLOCK-233 / P5-CLOSED |
 | 🟡 | 2026-10-21 | **`GET /api/auth/me` 在 standalone backend 恒 500（存量，非 BLOCK-232 引入）**：`server.js` 解构 raw better-sqlite3 handle 传给 `setupBootstrap`，`auth.js` 却按 helper 模块调用 `db.getUserById` → `is not a function`；前端零消费、本地 admin 不经此端点，故长期未暴露。发现于 BLOCK-232 实机腿（R2 原断言）。 | 处置=后续小修（传 db helper 模块或 auth 直接 require）；当前不阻塞 P4-B |

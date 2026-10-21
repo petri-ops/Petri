@@ -1,4 +1,6 @@
 # Petri Desktop — Current Next Steps
+最后更新：2026-10-21（**BLOCK-236 Q-DOMAIN P2b 全量 tab 迁移立项 active（P0-LAUNCH）**）：第一批只读三面——`resultSurfaces[].tabs` 声明 + 只读数据桥（lineage/history/源码，有界）+ host 按 tab 路由与逐面回落 + pack 三面表格渲染；compare/selection/annotations/methods/export 与 lineage 图形态保留核心。plan=`docs/block-236-qdomain-p2b-full-tabs-plan.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-21（**P0 台账对账 completed**）：UI 41 条 `in_progress` 逐条判定（5 条凭仓内证据翻 `verified`、23 条仅代码线索、4 条声称实机无产物、3 条证据引用失效、6 条含「退役」语义但非本条被替代，全部原地留 note）；backlog 6 行 legacy planned 全部销号/改判；竞争力总纲 W6 改判 partial（CP-16/17/18 未立项）。**分母已可信**：真正可开工=P1 P2b 全量 tab 迁移 → P2 Q6 全量批注 → P3 Q8 深化 → P4 Q9 长尾。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**BLOCK-235 P4-D completed；无 active 工作包**）：`dataModelExtensions` additive 扩展契约（pack 新增 artifact 类型/字段；canonical SDC-0 profile 不可覆盖；冲突/非法 fail-closed）+ 导出/联邦域中性基线（general 会话导出、扩展 artifact 类型 manifest 保真、联邦 grants/文件透传）。证据=block235 6/6 + 基线 4/4 + test:changed 443 项 0 红 + closeout 十三门 + output:judge PASS；域中性保持 11 处 / 6 键 compat。**P4 数据模型/权限轨道结构余项收口；下一包需用户发令**。plan=`docs/block-235-qdomain-p4d-datamodel-plan.md` §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
