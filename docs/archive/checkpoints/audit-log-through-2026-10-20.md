@@ -11,3 +11,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-20T17:23:09.713Z -->
 最后更新：2026-10-20（**BLOCK-215 Q-DOMAIN P2a completed（closeout 十三门 PASS）：核心 Prompt 去生信化**）：核心 `agent-runner.js`/`system-prompt.js` 移除 DESeq2/Seurat/单细胞/FigCode 生信示例/结果页单细胞控制；新增 `pack-prompt-fragments`，只从已安装/启用 pack 的 `promptFragments/` 注入，pack 缺失/停用零注入；block215 3/3、prompt 邻域 52/52、domain-neutrality 改善 13 处后下调基线、golden context_snapshot 显式重打 `dfc9be7b…→6f891fe…` 且复跑一致、evals:gate smoke 回归 0。P2-UI/P2b/P4 仍 planned。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-21T00:06:51.206Z -->
+最后更新：2026-10-20（**BLOCK-216 Q5 统一工作面 host completed（closeout 十三门 + 9223 live 19/19）**）：core+pack surface 注册表/稳定 tab 状态机/pack views·resultSurfaces·uiActions 贡献投影 + `petri-pack://` 独立 origin/生成文件·计划·证据面 + 文件管理器显示 IPC；block216 7/7 + 前端 Q5 46 项 + test:changed 266/266；实机抓真两处（多 tab 只显示×、OOPIF/文件空态 visibility 泄漏）已修。边界=终端分屏 E9 deferred、P2-UI/P2b 未做、E1/E4/H3/H4/B3 部分。G0 开发期常态 · 不外推 packaged/Provider/GA。

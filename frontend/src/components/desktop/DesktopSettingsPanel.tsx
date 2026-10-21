@@ -3,7 +3,6 @@
  *
  * 内容与原 DesktopSettingsModal 相同，但渲染为浮动面板而非全屏遮罩模态。
  */
-
 import React, { useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { ThemeControl } from './ThemeControl';
@@ -12,6 +11,7 @@ import { AccentControl } from './AccentControl';
 import { SettingsNav } from './DesktopSettingsPanel/SettingsNav';
 import { MotionControl } from './DesktopSettingsPanel/sections/MotionControl';
 import { DesktopBehaviorPanel } from './DesktopSettingsPanel/sections/DesktopBehaviorPanel';
+import { ModelSelectorControls } from './DesktopSettingsPanel/sections/ModelSelectorControls';
 import { NetworkProxyPanel } from './DesktopSettingsPanel/sections/NetworkProxyPanel';
 import { RuntimePolicyPanel } from './DesktopSettingsPanel/sections/RuntimePolicyPanel';
 import { MaintenanceSection } from './DesktopSettingsPanel/MaintenanceSection';
@@ -32,7 +32,6 @@ import { VisionRoleBinding, hasVisionCapability } from './DesktopSettingsPanel/V
 import { ExperimentalFeaturesSection } from '@/components/settings/ExperimentalFeaturesSection';
 // UI-393 — 返回按钮样式单一真源（与 Skills/知识空间页头同款 backBtn）
 import backStyles from '@/pages/global-page.module.css';
-
 // ── BLOCK-9.2 PHASE 1: types + helpers + section subcomponents ──
 import { Props, SettingsSection, SETTINGS_SECTIONS } from './DesktopSettingsPanel/types';
 // BLOCK-92 Wave B-4 — API Endpoint 编辑器状态簇外迁（渠道/角色/凭据/连通性/导入导出）。
@@ -449,6 +448,7 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
                         aria-label={`${profile.label || '自定义渠道'} 支持识图（视觉输入）`}
                       />
                     </label>
+                    <ModelSelectorControls profile={profile} onUpdate={updateProfile} />
                     <span className="petri-endpoint-field-label" aria-hidden="true">连通性</span>
                     <button
                       type="button"

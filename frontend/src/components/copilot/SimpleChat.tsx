@@ -150,6 +150,7 @@ import { Icon } from '@/components/icons/Icon';
 // 需要稳定引用；`?? []` 每次新建会击穿 memo）。
 const EMPTY_ROW_SEGMENTS: ConversationSegment[] = [];
 import { getBridge } from '@/lib/desktopBridge';
+import { ModelMenu } from './SimpleChat/ModelMenu';
 import { useTurnNotifications } from './useTurnNotifications';
 import { matchesCombo } from '@/lib/appKeymap';
 import { useKeymapSafe } from '@/lib/appKeymapContext';
@@ -476,6 +477,7 @@ export function SimpleChat({
     presets: modelPresets,
     activeId: activeModelId,
     activePreset: activeModel,
+    catalog: modelCatalog,
     setActive: setActiveModelId,
   } = useAiSettings();
 
@@ -499,9 +501,19 @@ export function SimpleChat({
     modelGroups,
     activeSupplierGroup,
     selectedSupplierGroup,
+    catalogSummary,
     preferredPresetForSupplier,
     selectModel,
-  } = useModelAccessMenus({ modelPresets, activeModelId, setActiveModelId, lockedAccessMode });
+  } = useModelAccessMenus({
+    modelPresets,
+    activeModelId,
+    setActiveModelId,
+    catalog: modelCatalog,
+    onModelSelected: (preset) => {
+      if (preset.defaultThinkingLevel) applyThinkingLevel(preset.defaultThinkingLevel);
+    },
+    lockedAccessMode,
+  });
 
   // BLOCK-92 Wave A-3 — 焦点管理簇外迁（挂载聚焦 + 窗口获焦/可打印击键兜底，
   // 仅 copilotAsk 拥有者执行；见 ./SimpleChat/hooks/useComposerFocus.ts）。
@@ -2029,38 +2041,20 @@ export function SimpleChat({
                     </>
                   )}
                   {modelMenuOpen && (
-                    <>
-                      <div className="sc-model-overlay" onClick={() => setModelMenuOpen(null)} />
-                      <div className="sc-model-menu">
-                        {modelMenuOpen === 'supplier' ? modelGroups.map((group) => (
-                          <button
-                            type="button"
-                            key={group.key}
-                            className={`sc-model-option ${group.key === selectedSupplierGroup?.key ? 'sc-model-option-active' : ''}`}
-                            onClick={() => {
-                              setModelSupplierKey(group.key);
-                              const preferred = preferredPresetForSupplier(group);
-                              if (preferred) void selectModel(preferred);
-                            }}
-                          >
-                            <span className="sc-model-option-title">{group.supplier}</span>
-                            <span className="sc-model-option-meta">{group.presets.length} 个模型</span>
-                          </button>
-                        )) : selectedSupplierGroup?.presets.map((preset) => (
-                          <button
-                            type="button"
-                            key={preset.id}
-                            className={`sc-model-option ${preset.id === activeModelId ? 'sc-model-option-active' : ''}`}
-                            onClick={() => void selectModel(preset)}
-                          >
-                            <span className="sc-model-option-title">{preset.model}</span>
-                            <span className="sc-model-option-meta">
-                              {preset.id === activeModelId ? '当前使用' : '点击切换'}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </>
+                    <ModelMenu
+                      mode={modelMenuOpen}
+                      groups={modelGroups}
+                      selectedGroup={selectedSupplierGroup}
+                      activeModelId={activeModelId}
+                      summary={catalogSummary}
+                      onClose={() => setModelMenuOpen(null)}
+                      onPickSupplier={(group) => {
+                        setModelSupplierKey(group.key);
+                        const preferred = preferredPresetForSupplier(group);
+                        if (preferred) void selectModel(preferred);
+                      }}
+                      onPickModel={(preset) => void selectModel(preset)}
+                    />
                   )}
                 </div>
                 {/* BLOCK-171 CP-1 — Stop 复出（推翻 BLOCK-28.8；hook 内接后端级联取消）。

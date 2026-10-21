@@ -6,7 +6,7 @@
     "types",
     "files"
   ],
-  "updatedAt": "2026-10-20",
+  "updatedAt": "2026-10-21",
   "keys": [
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::DEFAULT_PORT",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::TEST_INSTANCE_PORT",
@@ -98,6 +98,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block217-p2ui-actions.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block219-annotations-loop.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block223-desktop-shell-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/block224-model-selector-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block83-tool-catalog.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block94-knowledge.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block96-ssh-channel.cjs",
@@ -146,7 +147,6 @@
     "types::frontend/src/components/copilot/SimpleChat.tsx::SimpleChatHandle",
     "types::frontend/src/components/copilot/SimpleChat.tsx::SimpleMessage",
     "types::frontend/src/components/copilot/SimpleChat.tsx::SlashCommand",
-    "types::frontend/src/components/copilot/SimpleChat/hooks/useModelAccessMenus.ts::ChatModelGroup",
     "types::frontend/src/components/copilot/conversationRunStore.ts::ChildFinishedNotice",
     "types::frontend/src/components/copilot/conversationRunStore.ts::ConversationRunStatus",
     "types::frontend/src/components/copilot/conversationRunStore.ts::StartSubAgentTaskOptions",

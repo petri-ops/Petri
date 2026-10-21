@@ -19,8 +19,8 @@
       "path": "frontend/src/components/copilot/SimpleChat.tsx",
       "wave": "A",
       "module": "W-03",
-      "lines": 2142,
-      "sha256": "13c3242bdda091671429dad386bc72a664d7a419d4347e94842b3d753e32dfa2"
+      "lines": 2136,
+      "sha256": "b3440a1723834cf70756a73e7b3cd18da02b5ff07f3fe4f80c05f73872d618f4"
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat/hooks/useThinkingLevel.ts",
@@ -62,7 +62,7 @@
       "wave": "B",
       "module": "W-01",
       "lines": 670,
-      "sha256": "6bc86eb0fc71076c18bc1b0a42886eae3c07731bf1686a600370af7793cd2f5c"
+      "sha256": "505b33d04e52eff31cbafd9789c740a2c76610fe744177c5725c7f6645a5a729"
     },
     {
       "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
@@ -170,5 +170,5 @@
       "sha256": "6f08befd152ee1a707051d0131a521a85e2572a883a2c9e912bbd0994fa69e72"
     }
   ],
-  "total": 23497
+  "total": 23491
 }

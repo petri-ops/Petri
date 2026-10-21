@@ -602,6 +602,8 @@ status: planned
 ### Q9 — 外壳可靠性与打磨（约 1 周）
 
 > 2026-10-21：**Q9 续项垂直切片已立项并收口 [BLOCK-223](./block-223-q9-desktop-shell-plan.md)（completed）**——系统通知（回合完成/失败/待审批；聚焦抑制 + 3s 去重）+ 托盘最小化（`closeToTray` 默认关，关窗=隐藏）+ 退出摘要（活动计数 → 取消 / 最小化到托盘 / 停止并退出）。**reopen**：模型选择器深度（D1/D2/D4）、电脑控制 sidecar（E7/L4）、崩溃同意（K2）、首启揭示（K9）、通知中心/免打扰、摘要逐项操作。
+>
+> 2026-10-21：**模型选择器 D1+D2 已立项并收口 [BLOCK-224](./block-224-q9-model-selector-depth-plan.md)（completed）**——目录状态诚实（加载/发现失败/缺密钥/隐藏逐行可见）+ 每模型可见性/上下文/默认思考档；**reopen**：D4 Auto（按任务/附件自动选模）、低峰折扣、Workspace 权限、价格用量、发现缓存 TTL。
 
 **目标**：把「长跑、离开窗口、出错、首启」这些边缘体验补到第一梯队。
 
@@ -690,7 +692,7 @@ Q-DOMAIN（垂直去核化，跨波次）
 - **母纲**：`AGENT-COMPETITIVENESS-PROGRAM`（方向）；本文件是 Qoder 样本的增量，不重开 CP-1–CP-22。
 - **建议首波**：**Q0.5（插件 ADR，0.5–1 天）+ Q-DOMAIN P1（skills 去核，1–2 周）**——先把 host 契约和生信 skills 落进 pack，再按 Q1（信任与审批）→ Q2b（联网检索）→ Q5（工作面 host）→ Q-DOMAIN P2b（生信 Result Surface）→ Q6 推进；Q-DOMAIN P2/P3 可穿插，P4 最后。
 - **发令方式**：Q-DOMAIN P1 可独立立项为 BLOCK（P0 ADR / P1 实现）；Q1/Q2b 各自独立发令；**结果页 P2b 不得早于 Q5 host，Q6 不得早于 P2b**。
-- **当前状态**：本文件为 planned（方向母纲）；**Q5（BLOCK-216）、P2-UI（BLOCK-217）、P2b 垂直切片（BLOCK-218）、Q6 批注垂直切片（BLOCK-219）、P3 垂直切片（BLOCK-220）、Q8 治理垂直切片（BLOCK-221）、Q9 边界垂直切片（BLOCK-222）、Q9 续项垂直切片（BLOCK-223）均已收口（completed）**。按用户 2026-10-21 裁决「按照你的建议来，冲」，下一包=**Q9 余项（模型选择器深度 / 电脑控制 sidecar / 崩溃同意 / 首启揭示 / 通知中心）或 Q-DOMAIN P4 data model（母纲要求最后）**。P3 余项（`_pythonEquivalent` 脚本模板/`artifact-profiles`/`agent-workflow`/`learning`/`result-*-tools`）、Q6 余项（六种图形工具/文本批注与速记板/Office/pack 面批注）与 P2b 全量高级 tab 迁移、真实 job 实机腿为 reopen。G0 开发期常态 · 不外推 packaged/Provider/GA。
+- **当前状态**：本文件为 planned（方向母纲）；**Q5（BLOCK-216）、P2-UI（BLOCK-217）、P2b 垂直切片（BLOCK-218）、Q6 批注垂直切片（BLOCK-219）、P3 垂直切片（BLOCK-220）、Q8 治理垂直切片（BLOCK-221）、Q9 边界垂直切片（BLOCK-222）、Q9 续项垂直切片（BLOCK-223）、模型选择器 D1+D2（BLOCK-224）均已收口（completed）**。按用户 2026-10-21 裁决「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」，下一包=**Q9 D4 Auto → 通知中心/免打扰 → K9 首启揭示 → K2/E7 评估 → Q-DOMAIN P4 data model（母纲要求最后）**。P3 余项（`_pythonEquivalent` 脚本模板/`artifact-profiles`/`agent-workflow`/`learning`/`result-*-tools`）、Q6 余项（六种图形工具/文本批注与速记板/Office/pack 面批注）与 P2b 全量高级 tab 迁移、真实 job 实机腿为 reopen。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## 12. 附：Q-MATRIX 更新记录
 
@@ -704,6 +706,7 @@ Q-DOMAIN（垂直去核化，跨波次）
 | 2026-10-20 | Q-DOMAIN P2b | BLOCK-218 垂直切片收口：E13/L8 更新（result mode 主 body 由 pack resultSurface 渲染；高级 tab 核心过渡）；矩阵不变 **✅26 / 🟡47 / 🔴22 / ⛔7**；真实 job live rider | `docs/block-218-qdomain-p2b-result-surface-plan.md` §6 |
 | 2026-10-20 | Q9 | BLOCK-222 垂直切片收口：段落级错误边界（预览段）+ 可定位标注；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——K1/K2 部分落地（轮次/工具/应用级未做） | `docs/block-222-q9-segment-boundary-plan.md` §5 |
 | 2026-10-21 | Q9/K3/K4 | BLOCK-223 续项垂直切片收口：系统通知 + 托盘最小化 + 退出摘要（活动计数 → 取消/托盘/停止并退出）；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——K3/K4 部分落地（通知中心/免打扰、摘要逐项操作未做） | `docs/block-223-q9-desktop-shell-plan.md` §7 |
+| 2026-10-21 | Q9/D1/D2 | BLOCK-224 收口：模型目录状态诚实（加载/发现失败/缺密钥/隐藏逐行可见）+ 每模型可见性/上下文/默认思考档；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——D1/D2 部分落地（D4 Auto、低峰折扣、权限、价格未做） | `docs/block-224-q9-model-selector-depth-plan.md` §7 |
 | 2026-10-20 | Q8 | BLOCK-221 垂直切片收口：MCP 凭据脱敏 + 服务级 allow/block + 投影过滤 + 策略路由；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——J3/J4 部分落地（无 OAuth、无深链安装、trust 未接审批） | `docs/block-221-q8-mcp-governance-plan.md` §5 |
 | 2026-10-20 | Q-DOMAIN P3 | BLOCK-220 垂直切片收口：legacy 化石注册表删除（单一注册源）+ methods 引用/工具标签下沉 pack `provides.methods`；域中性基线 **261→208 处**（tool-registry 31 归零、methods-export 62→24）；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——L8 仍 🟡（data model 与脚本模板未下沉） | `docs/block-220-qdomain-p3-methods-plan.md` §8 |
 | 2026-10-20 | Q6 | BLOCK-219 垂直切片收口：E5/C12 部分落地（PDF/图像**矩形**批注 + 加入任务；批次外=椭圆/箭头/画笔/文字/马赛克、文本选中批注、速记板 C13 随 Q2、PPTX/DOCX、pack 面）；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——E5 仍 🟡（PPTX/DOCX 未覆盖），C12 仍 🟡（无速记/批注进侧聊） | `docs/block-219-q6-annotation-host-plan.md` §6 + `acceptance/block-219/`（13/13） |

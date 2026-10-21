@@ -1,0 +1,53 @@
+{
+  "name": "block224-model-selector-live",
+  "startedAt": "2026-10-21T00:06:27.911Z",
+  "finishedAt": "2026-10-21T00:06:36.833Z",
+  "assertions": [
+    {
+      "name": "R1_ai_settings_available",
+      "pass": true,
+      "detail": "[\"status\",\"settings\"]"
+    },
+    {
+      "name": "R2_profiles_and_credential_status",
+      "pass": true,
+      "detail": "{\"profiles\":6,\"credentials\":[\"deepseek\",\"dashscope\",\"model-1787541766966-openai-compatible\",\"model-1788504346152-openai-compatible\",\"model-1791680541331-openai-compatible\"]}"
+    },
+    {
+      "name": "R3_no_secret_material_in_settings",
+      "pass": true,
+      "detail": "settings 响应不得包含 API Key 明文"
+    },
+    {
+      "name": "D1_composer_model_button_present",
+      "pass": true,
+      "detail": "欢迎页 composer 应有模型按钮"
+    },
+    {
+      "name": "D2_model_menu_opens",
+      "pass": true,
+      "detail": "点击模型按钮应出现 model-menu"
+    },
+    {
+      "name": "D3_menu_state_settled",
+      "pass": true,
+      "detail": "{\"buttons\":2,\"disabled\":0,\"status\":\"1 个渠道的模型列表加载失败（已回退到默认模型）\",\"text\":\"1 个渠道的模型列表加载失败（已回退到默认模型）\\ndeepseek-flash\\n当前使用 · 1M 上下文\\ndeepseek-v4-pro\\n1M 上下文\"}"
+    },
+    {
+      "name": "D4_model_menu_screenshots",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\petri\\acceptance\\block-224\\ui537-model-menu-light.png | D:\\1.WorkDir\\petri\\acceptance\\block-224\\ui537-model-menu-dark.png"
+    },
+    {
+      "name": "D5_model_selector_controls_present",
+      "pass": true,
+      "detail": "{\"visible\":4,\"levels\":4}"
+    },
+    {
+      "name": "D6_settings_screenshot",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\petri\\acceptance\\block-224\\ui537-model-governance-settings.png"
+    }
+  ],
+  "allPass": true
+}

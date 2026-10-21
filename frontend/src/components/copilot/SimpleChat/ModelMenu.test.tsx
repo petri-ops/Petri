@@ -1,0 +1,104 @@
+import React from 'react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { ModelMenu } from './ModelMenu';
+import { buildModelGroups, EMPTY_MODEL_CATALOG } from '@/lib/model-catalog';
+import type { ChatModelPreset } from '@/hooks/useAiSettings';
+
+afterEach(cleanup);
+
+const presets: ChatModelPreset[] = [
+  { id: 'a1', label: 'DeepSeek', provider: 'anthropic', model: 'model-a', endpointProfileId: 'a', contextWindow: 128000 },
+  { id: 'a2', label: 'DeepSeek', provider: 'anthropic', model: 'model-b', endpointProfileId: 'a', defaultThinkingLevel: 'high' },
+];
+const groups = buildModelGroups(presets, EMPTY_MODEL_CATALOG);
+
+describe('ModelMenu', () => {
+  it('模型段渲染上下文/默认思考元信息，点击就绪行回调', () => {
+    const onPickModel = vi.fn();
+    render(
+      <ModelMenu
+        mode="model"
+        groups={groups}
+        selectedGroup={groups[0]}
+        activeModelId="a1"
+        summary={{ level: 'ok', text: '' }}
+        onClose={() => {}}
+        onPickSupplier={() => {}}
+        onPickModel={onPickModel}
+      />
+    );
+    expect(screen.getByTestId('model-menu')).not.toBeNull();
+    expect(screen.getByText('当前使用 · 128K 上下文')).not.toBeNull();
+    expect(screen.getByText('高思考')).not.toBeNull();
+    fireEvent.click(screen.getByText('model-b'));
+    expect(onPickModel).toHaveBeenCalledWith(presets[1]);
+  });
+
+  it('缺密钥行禁用并显示原因；供应商无可用模型时禁用', () => {
+    const lockedGroups = buildModelGroups(presets, {
+      ...EMPTY_MODEL_CATALOG,
+      credentialStatus: { anthropic: false },
+    });
+    const { rerender } = render(
+      <ModelMenu
+        mode="model"
+        groups={lockedGroups}
+        selectedGroup={lockedGroups[0]}
+        activeModelId="a1"
+        summary={{ level: 'ok', text: '' }}
+        onClose={() => {}}
+        onPickSupplier={() => {}}
+        onPickModel={() => {}}
+      />
+    );
+    const row = screen.getByText('model-a').closest('button') as HTMLButtonElement;
+    expect(row.disabled).toBe(true);
+    expect(screen.getAllByText('未配置密钥').length).toBe(2);
+
+    rerender(
+      <ModelMenu
+        mode="supplier"
+        groups={lockedGroups}
+        selectedGroup={lockedGroups[0]}
+        activeModelId="a1"
+        summary={{ level: 'ok', text: '' }}
+        onClose={() => {}}
+        onPickSupplier={() => {}}
+        onPickModel={() => {}}
+      />
+    );
+    const supplier = screen.getByText('DeepSeek').closest('button') as HTMLButtonElement;
+    expect(supplier.disabled).toBe(true);
+    expect(screen.getByText('无可用模型')).not.toBeNull();
+  });
+
+  it('加载中与零可用模型显示状态行', () => {
+    const { rerender } = render(
+      <ModelMenu
+        mode="supplier"
+        groups={[]}
+        selectedGroup={undefined}
+        activeModelId=""
+        summary={{ level: 'loading', text: '正在加载模型目录…' }}
+        onClose={() => {}}
+        onPickSupplier={() => {}}
+        onPickModel={() => {}}
+      />
+    );
+    expect(screen.getByTestId('model-menu-status').textContent).toContain('正在加载');
+    rerender(
+      <ModelMenu
+        mode="supplier"
+        groups={[]}
+        selectedGroup={undefined}
+        activeModelId=""
+        summary={{ level: 'empty', text: '没有可用模型，请先在设置中配置渠道' }}
+        onClose={() => {}}
+        onPickSupplier={() => {}}
+        onPickModel={() => {}}
+      />
+    );
+    expect(screen.getByTestId('model-menu-status').textContent).toContain('没有可用模型');
+  });
+});

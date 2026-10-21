@@ -12,18 +12,16 @@
 // 调用点须在本 hook 全部依赖（useAiSettings 解构）声明之后。
 // ============================================================
 import { useCallback, useRef, useState } from 'react';
+import type { ChatModelPreset } from '@/hooks/useAiSettings';
 import {
-  preferredModelPreset,
-  type ChatModelPreset,
-} from '@/hooks/useAiSettings';
-
-export interface ChatModelGroup {
-  key: string;
-  supplier: string;
-  defaultModel: string;
-  lastSelectedModel: string;
-  presets: ChatModelPreset[];
-}
+  buildModelGroups,
+  catalogSummary as summarizeCatalog,
+  groupSelectableRows,
+  preferredRowForGroup,
+  type CatalogSummary,
+  type ModelCatalogGroup,
+  type ModelCatalogState,
+} from '@/lib/model-catalog';
 
 export type AccessMode = 'full' | 'workspace-write' | 'plan' | 'read';
 
@@ -39,10 +37,11 @@ export interface ModelAccessMenusController {
   planMode: boolean;
   prePlanAccessModeRef: React.MutableRefObject<'full' | 'workspace-write' | 'read' | null>;
   accessModeLabel: string;
-  modelGroups: ChatModelGroup[];
-  activeSupplierGroup: ChatModelGroup | undefined;
-  selectedSupplierGroup: ChatModelGroup | undefined;
-  preferredPresetForSupplier: (group: ChatModelGroup) => ChatModelPreset | undefined;
+  modelGroups: ModelCatalogGroup[];
+  activeSupplierGroup: ModelCatalogGroup | undefined;
+  selectedSupplierGroup: ModelCatalogGroup | undefined;
+  catalogSummary: CatalogSummary;
+  preferredPresetForSupplier: (group: ModelCatalogGroup) => ChatModelPreset | undefined;
   selectModel: (preset: ChatModelPreset) => Promise<void>;
 }
 
@@ -50,11 +49,17 @@ export function useModelAccessMenus({
   modelPresets,
   activeModelId,
   setActiveModelId,
+  catalog,
+  onModelSelected,
   lockedAccessMode,
 }: {
   modelPresets: ChatModelPreset[];
   activeModelId: string;
   setActiveModelId: (id: string) => Promise<unknown>;
+  /** BLOCK-224 — 目录状态（加载/发现失败/凭据）；缺省空态=全部 ready。 */
+  catalog?: ModelCatalogState;
+  /** BLOCK-224 — 选中模型后的旁路回调（如应用该模型默认思考档）。 */
+  onModelSelected?: (preset: ChatModelPreset) => void;
   /**
    * UI-448 加映 v2 — 档位锁定（悬挂聊天面仅聊天）：初始档位即锁定值，
    * setAccessMode 失效（选择器改不动）。锁定档的工具放行口径由后端
@@ -87,43 +92,25 @@ export function useModelAccessMenus({
       : accessMode === 'plan'
         ? '计划模式'
         : '只读模式';
-  const modelGroups = modelPresets.reduce<ChatModelGroup[]>(
-    (groups, preset) => {
-      const supplier = preset.label || preset.provider;
-      const key = preset.endpointProfileId || preset.provider;
-      const existing = groups.find((group) => group.key === key);
-      if (existing) existing.presets.push(preset);
-      else groups.push({
-        key,
-        supplier,
-        defaultModel: preset.defaultModel || preset.model,
-        lastSelectedModel: preset.lastSelectedModel || preset.model,
-        presets: [preset],
-      });
-      return groups;
-    },
-    []
-  );
+  const modelGroups = buildModelGroups(modelPresets, catalog);
   const activeSupplierGroup = modelGroups.find((group) =>
-    group.presets.some((preset) => preset.id === activeModelId)
-  ) || modelGroups[0];
+    group.rows.some((row) => row.preset.id === activeModelId)
+  ) || modelGroups.find((group) => groupSelectableRows(group).length > 0) || modelGroups[0];
   const selectedSupplierGroup = modelGroups.find((group) => group.key === modelSupplierKey)
     || activeSupplierGroup;
-  const preferredPresetForSupplier = useCallback((group: ChatModelGroup) => {
-    return preferredModelPreset(
-      group.presets,
-      group.key === activeSupplierGroup?.key ? activeModelId : undefined,
-      group.lastSelectedModel,
-      group.defaultModel
-    );
-  }, [activeModelId, activeSupplierGroup?.key]);
+  const preferredPresetForSupplier = useCallback(
+    (group: ModelCatalogGroup) => preferredRowForGroup(group, activeModelId)?.preset,
+    [activeModelId]
+  );
+  const modelCatalogSummary = summarizeCatalog(catalog, modelGroups);
   const selectModel = useCallback(async (preset: ChatModelPreset) => {
     setModelMenuOpen(null);
     setModelSupplierKey(null);
     // Hook persists the new active id + llm_provider via electron
     // bridge (Plan 1.6 §4.5 — replaces the local get-then-save).
     await setActiveModelId(preset.id);
-  }, [setActiveModelId]);
+    if (preset.defaultThinkingLevel && onModelSelected) onModelSelected(preset);
+  }, [onModelSelected, setActiveModelId]);
 
   return {
     modelMenuOpen,
@@ -140,6 +127,7 @@ export function useModelAccessMenus({
     modelGroups,
     activeSupplierGroup,
     selectedSupplierGroup,
+    catalogSummary: modelCatalogSummary,
     preferredPresetForSupplier,
     selectModel,
   };

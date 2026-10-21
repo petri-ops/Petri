@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-21（**BLOCK-224 Q9 续项（D1+D2）completed**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-224（模型选择器深度：D1 目录状态诚实 + D2 每模型治理）**：①后端 profile 归一保留 `visible`/`defaultThinkingLevel`；②`useAiSettings` 消费 `credential_status` + 逐 profile 记录 `listModels` 失败，快照新增 `catalog`；③`lib/model-catalog.ts` 纯函数（可用性/隐藏过滤/摘要）；④菜单抽 `SimpleChat/ModelMenu`（禁用行+原因+上下文/思考+加载/空态），设置控件抽 `ModelSelectorControls`（可见/默认思考）；⑤选中模型按配置带入默认思考档。证据=前端 31/31 + 后端 3/3 + 9223 离屏 live 9/9（亮/暗/设置截图）+ lint 0 error/types 0/code-size PASS。**下一包**=Q9 D4 Auto（按任务/附件自动选模）→ 通知中心/免打扰 → K9 首启揭示 → K2/E7 评估 → Q-DOMAIN P4 data model（母纲要求最后）。plan=`docs/block-224-q9-model-selector-depth-plan.md` §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-21（**BLOCK-223 Q9 续项垂直切片 completed**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-223（Q9 续项垂直切片：系统通知 / 托盘最小化 / 退出摘要；用户裁决「按照你的建议来，冲」）**：①后端 `GET /api/app/activity-summary`（tool_jobs running/pending、pending 审批、运行中主任务/子代理、后台进程；主进程合并终端会话数）；②主进程 `desktop-shell.js`（通知网关：偏好/聚焦抑制/3s 去重/点击聚焦，测试实例返回 `simulated_test_instance` 不弹真实 toast；托盘：`closeToTray` 关窗=隐藏、菜单显示/退出；退出协调器：活动>0 先出摘要、0 直退、渲染不可用/5s 超时回原生对话框；守卫先于既有 `before-quit` 注册）；③前端 `DesktopShellProvider` + `QuitSummaryDialog`（取消 / 最小化到托盘 / 停止并退出；托盘失败弹窗内报错）+ `useTurnNotifications` + 常规设置两开关；④`userPrefs.notifyOnTurnEnd`（默认 true）/`closeToTray`（默认 false），注册表 89→91。证据=block223 9 项 + 前端 12 项 + 9223 离屏 live 16/16（亮/暗截图）+ closeout 十三门 PASS。**下一包**=Q9 余项（模型选择器深度 / 电脑控制 sidecar / 崩溃同意 / 首启揭示 / 通知中心）或 Q-DOMAIN P4 data model（母纲要求最后）。reopen 见 plan §7.3。plan=`docs/block-223-q9-desktop-shell-plan.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。

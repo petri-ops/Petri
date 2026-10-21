@@ -34,6 +34,7 @@ import {
   modelSupplierName,
   normalizeLegacyUserModelProfile,
 } from '@/lib/model-provider-options';
+import { EMPTY_MODEL_CATALOG, type ModelCatalogState } from '@/lib/model-catalog';
 
 // ChatModelPreset type — extracted here so SimpleChat and
 // DesktopSettingsPanel no longer each carry their own copy.
@@ -60,6 +61,10 @@ export interface ChatModelPreset {
    * it takes priority over the hard-coded model list / OpenRouter lookup.
    */
   contextWindow?: number;
+  /** BLOCK-224 — 是否出现在聊天模型选择器（缺省 true；false=仅保留配置/绑定）。 */
+  visible?: boolean;
+  /** BLOCK-224 — 切到该模型时带入的默认思考档（缺省=不覆盖当前档位）。 */
+  defaultThinkingLevel?: 'off' | 'standard' | 'high';
   /** Persisted Endpoint profile backing a transient provider/model choice. */
   endpointProfileId?: string;
 }
@@ -87,11 +92,13 @@ export function preferredModelPreset(
 interface AiSettingsSnapshot {
   presets: ChatModelPreset[];
   activeId: string;
+  catalog: ModelCatalogState;
 }
 
 let presetsCache: AiSettingsSnapshot = {
   presets: DEFAULT_CHAT_MODEL_PRESETS,
   activeId: DEFAULT_CHAT_MODEL_PRESETS[0].id,
+  catalog: EMPTY_MODEL_CATALOG,
 };
 let loaded = false;
 let inflight: Promise<AiSettingsSnapshot> | null = null;
@@ -107,9 +114,21 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
     return Promise.resolve(presetsCache);
   }
   if (inflight) return inflight;
+  if (!loaded) {
+    presetsCache = { ...presetsCache, catalog: { ...presetsCache.catalog, loading: true } };
+    notify();
+  }
   inflight = bridge
     .get()
     .then(async (raw) => {
+      const credentialStatus: Record<string, boolean> = {};
+      const rawCredentials = raw?.credential_status;
+      if (rawCredentials && typeof rawCredentials === 'object') {
+        for (const [provider, configured] of Object.entries(rawCredentials)) {
+          if (typeof configured === 'boolean') credentialStatus[provider] = configured;
+        }
+      }
+      const discoveryErrors: Record<string, string> = {};
       const profilePresets = Array.isArray(raw?.model_profiles)
         ? (raw.model_profiles as ChatModelPreset[])
             .map(normalizeLegacyUserModelProfile)
@@ -134,6 +153,9 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
               profile as unknown as Record<string, unknown>,
               ''
             );
+            if (!result.ok) {
+              discoveryErrors[profile.id] = unknownText(result.message) || '模型列表加载失败';
+            }
             const models = result.ok && Array.isArray(result.models) && result.models.length > 0
               ? result.models
               : [profile.model];
@@ -146,7 +168,8 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
               defaultModel: profile.defaultModel || profile.model,
               lastSelectedModel: profile.model,
             }));
-          } catch {
+          } catch (error) {
+            discoveryErrors[profile.id] = unknownText(error) || '模型列表加载失败';
             return [{
               ...profile,
               id: modelChoiceId(profile.id, profile.model),
@@ -169,6 +192,7 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
       presetsCache = {
         presets,
         activeId: presets.some((p) => p.id === activeId) ? activeId : presets[0].id,
+        catalog: { loading: false, discoveryErrors, credentialStatus },
       };
       loaded = true;
       inflight = null;
@@ -177,6 +201,8 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
     })
     .catch(() => {
       inflight = null;
+      presetsCache = { ...presetsCache, catalog: { ...presetsCache.catalog, loading: false } };
+      notify();
       return presetsCache;
     });
   return inflight;
@@ -194,7 +220,7 @@ function applyMutation(
     : defaultActive
     ? defaultActive(presets)
     : presets[0].id;
-  presetsCache = { presets, activeId };
+  presetsCache = { presets, activeId, catalog: presetsCache.catalog };
   loaded = true;
   notify();
   return presetsCache;
@@ -204,6 +230,8 @@ export interface UseAiSettingsResult {
   presets: ChatModelPreset[];
   activeId: string;
   activePreset: ChatModelPreset;
+  /** BLOCK-224 — 目录状态（加载中 / 逐 profile 发现失败 / 凭据状态）。 */
+  catalog: ModelCatalogState;
   loading: boolean;
   refresh: () => Promise<void>;
   /** Update the active model. Persists via the electron bridge
@@ -367,6 +395,7 @@ export function useAiSettings(): UseAiSettingsResult {
     presets: snapshot.presets,
     activeId: snapshot.activeId,
     activePreset,
+    catalog: snapshot.catalog,
     loading,
     refresh,
     setActive,
@@ -384,6 +413,7 @@ export function __resetAiSettingsCacheForTests(): void {
   presetsCache = {
     presets: DEFAULT_CHAT_MODEL_PRESETS,
     activeId: DEFAULT_CHAT_MODEL_PRESETS[0].id,
+    catalog: EMPTY_MODEL_CATALOG,
   };
   loaded = false;
   inflight = null;

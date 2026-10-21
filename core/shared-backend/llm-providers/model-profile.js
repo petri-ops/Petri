@@ -18,6 +18,8 @@ const MODEL_CAPABILITIES = Object.freeze([
   'reasoning',
 ]);
 
+const THINKING_LEVELS = Object.freeze(['off', 'standard', 'high']);
+
 const MODEL_ROLES = Object.freeze([
   'chat',
   'agent',
@@ -143,6 +145,11 @@ function normalizeModelProfile(input, index = 0) {
     ? Math.round(input.contextWindow)
     : undefined;
   if (contextWindow !== undefined) normalized.contextWindow = contextWindow;
+  // BLOCK-224 — 选择器治理：默认可见；thinking 默认档只接受已知三档（非法值丢弃）。
+  if (input.visible === false) normalized.visible = false;
+  if (THINKING_LEVELS.includes(input.defaultThinkingLevel)) {
+    normalized.defaultThinkingLevel = input.defaultThinkingLevel;
+  }
   return normalized;
 }
 

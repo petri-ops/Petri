@@ -7419,8 +7419,30 @@
         "G0"
       ],
       "notes": "2026-10-21 立项（用户「按照你的建议来，冲」）：Q9 续项垂直切片——系统通知（回合完成/失败/等待审批）+ 托盘最小化（closeToTray）+ 退出摘要（活动计数 → 取消/最小化到托盘/停止并退出）。**completed（2026-10-21）**：activity-summary 3/3 + shell 纯逻辑 6/6 + 前端 6/6 + 9223 离屏 live 16/16（亮/暗截图）+ closeout 十三门 PASS；配置注册表 89→91 键；SimpleChat/DesktopSettingsPanel 未抬棘轮（逻辑抽 hook/面板）。reopen=模型选择器深度、电脑控制 sidecar、崩溃同意、首启揭示、通知中心/免打扰、摘要逐项操作。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-224-Q9-MODEL-SELECTOR-DEPTH",
+      "capability": "q9-model-selector",
+      "path": "docs/block-224-q9-model-selector-depth-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P5-CLOSED",
+      "canonical": true,
+      "truthDomain": "q9-model-selector",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-21",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "model-selector",
+        "catalog",
+        "visibility",
+        "thinking-level",
+        "q9",
+        "G0"
+      ],
+      "notes": "2026-10-21 立项（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：Q9 续项 D1+D2——模型目录状态诚实（加载/发现失败/缺密钥/隐藏逐行可见）+ 每模型可见性/上下文/默认思考档；菜单与设置行抽组件（SimpleChat/DesktopSettingsPanel 行数只减不增）。**completed（2026-10-21）**：前端 31/31 + 后端 3/3 + 9223 离屏 live 9/9（亮/暗/设置截图）+ lint 0 error/types 0/code-size PASS。D4 Auto 留下一刀。reopen=D4/低峰折扣/权限/价格用量/缓存 TTL。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-10-21",
-  "documentCount": 379
+  "documentCount": 380
 }

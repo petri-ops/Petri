@@ -3,6 +3,34 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "block224-model-selector-depth",
+      "note": "BLOCK-224 Q9 D1+D2 — 模型目录状态诚实（加载/发现失败/缺密钥/隐藏）+ 每模型可见性/上下文/默认思考；菜单抽 ModelMenu、设置控件抽 ModelSelectorControls。",
+      "patterns": [
+        "core/shared-backend/llm-providers/model-profile.js",
+        "frontend/src/lib/model-catalog.ts",
+        "frontend/src/hooks/useAiSettings.ts",
+        "frontend/src/lib/model-provider-options.ts",
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "frontend/src/components/copilot/SimpleChat/**",
+        "frontend/src/components/copilot/simple-chat.css",
+        "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/ModelSelectorControls.tsx",
+        "test/block224-*.test.mjs",
+        "acceptance/block-224/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block224-*.cjs"
+      ],
+      "tests": [
+        "test/block224-model-profile-normalize.test.mjs",
+        "frontend/src/lib/model-catalog.test.ts",
+        "frontend/src/components/copilot/SimpleChat/ModelMenu.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/hooks/useModelAccessMenus.test.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/ModelSelectorControls.test.tsx",
+        "frontend/src/hooks/useAiSettings.test.ts",
+        "frontend/src/components/copilot/SimpleChat.test.tsx"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "block223-desktop-shell",
       "note": "BLOCK-223 Q9 续项 — 系统通知 / 托盘最小化 / 退出摘要：activity-summary 只读端点、主进程桌面外壳（通知网关/托盘/退出协调器）、退出摘要弹窗与两项偏好（closeToTray/notifyOnTurnEnd）。",
       "patterns": [
