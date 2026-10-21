@@ -33,6 +33,8 @@ export function PackSurfaceFrame({
   uiActions = [],
   artifactContext = null,
   resultData = null,
+  tab = null,
+  tabData = null,
 }: {
   descriptor: WorkSurfaceDescriptor;
   projectId?: string | null;
@@ -40,6 +42,10 @@ export function PackSurfaceFrame({
   uiActions?: readonly PackUiActionDescriptor[];
   artifactContext?: Record<string, unknown> | null;
   resultData?: PackResultData | null;
+  /** BLOCK-236 — 命中的只读 tab（pack 侧据此切换视图）。 */
+  tab?: string | null;
+  /** BLOCK-236 — 该 tab 的只读数据（有界，由 packTabData 提供）。 */
+  tabData?: unknown;
 }): React.ReactElement {
   const theme = useThemeOptional();
   const iframeRef = React.useRef<HTMLIFrameElement | null>(null);
@@ -71,6 +77,8 @@ export function PackSurfaceFrame({
         actions: surfaceActions.map((action) => action.id),
         artifact: artifactContext,
         resultData,
+        tab,
+        tabData,
       },
     }, origin);
   }, [artifactContext, conversationId, descriptor.id, descriptor.packId, origin, projectId, resultData, surfaceActions, theme?.resolvedTheme, url]);

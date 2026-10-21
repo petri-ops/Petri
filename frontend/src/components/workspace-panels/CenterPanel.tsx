@@ -326,6 +326,8 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
                       url: ctx.activeArtifact?.url ?? null,
                     }}
                     resultData={packResultData.data}
+                    tab={resultSurfaceHost.tab ?? null}
+                    tabData={packTabState.data ?? null}
                   />
                 </div>
               ) : (
