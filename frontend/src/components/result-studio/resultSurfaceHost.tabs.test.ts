@@ -20,7 +20,7 @@ function surface(overrides: Partial<WorkSurfaceDescriptor> = {}): WorkSurfaceDes
   };
 }
 
-const artifact: Pick<ActiveArtifact, 'type' | 'semanticKind'> = { type: 'table', semanticKind: 'matrix' };
+const artifact = { type: 'table', semanticKind: 'matrix' } as unknown as Pick<ActiveArtifact, 'type' | 'semanticKind'>;
 
 describe('resultSurfaceHost（BLOCK-236 tab 级接管）', () => {
   it('result 模式：只接管主 body，不带 tab', () => {

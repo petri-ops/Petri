@@ -17,7 +17,7 @@ import {
   type PackTabResult,
 } from './packTabData';
 
-export type PackTabStatus = 'idle' | 'loading' | 'ready' | 'error';
+type PackTabStatus = 'idle' | 'loading' | 'ready' | 'error';
 
 export interface PackTabState {
   status: PackTabStatus;
@@ -25,7 +25,7 @@ export interface PackTabState {
   data?: PackLineagePayload | PackSourcePayload;
 }
 
-export const EMPTY_PACK_TAB_STATE: PackTabState = { status: 'idle' };
+const EMPTY_PACK_TAB_STATE: PackTabState = { status: 'idle' };
 
 /**
  * host 侧降级判定：只有「命中 pack 且 tab 数据可用」才留在 pack。
