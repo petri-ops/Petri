@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-21（**P0 台账对账 completed**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=P0 台账对账**：UI 台账 41 条 `in_progress` 逐条判定并原地留 note（5 条翻 verified 附证据路径：block-61/brand-live、block-46 两截图、block-78 两卷、block-79/provider-live、ui-481 截图；23 条仅代码+单测线索；4 条声称实机无产物；3 条证据引用失效；6 条含「退役」语义但指本条退役了别的能力）；backlog 6 行 legacy planned 全部销号或改判；竞争力总纲 W6 改判 partial（CP-16/17/18 无承接包=未立项）。**含新发现**：CP-16/17/18 需用户裁决单独立项，不在 5 包分母内。**下一包**=P1 Q-DOMAIN P2b 全量高级 tab 迁移。**收口 PATH** 需同时含 Git `usr\bin`（GNU tar）与 `bin`（bash）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-21（**BLOCK-235 P4-D completed；无 active 工作包**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-235（P4-D dataModelExtensions + 导出/联邦基线）**：S1 pack `provides.dataModelExtensions` additive 扩展契约——bounded loader + SDC-0 校验，扩展可新增 artifact 类型/字段，canonical 6 profile 不可覆盖，冲突/非法 fail-closed；S2 导出/联邦域中性基线——general 会话导出、扩展 artifact 类型经 artifact/delivery manifest 保真、联邦 grants/文件透传不依赖生物 profile。证据=block235 6/6 + 基线 4/4 + test:changed 443 项 0 红 + closeout 十三门 + output:judge PASS；域中性保持 11 处 / 6 键 compat。**下一包需用户发令**；P4 数据模型/权限结构余项收口，UI-543 实机腿 reopen。plan=`docs/block-235-qdomain-p4d-datamodel-plan.md` §7。G0 开发期常态 · 不外推 packaged/Provider/GA。

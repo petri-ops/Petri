@@ -5516,7 +5516,7 @@
         "gen-ui",
         "local-sovereignty"
       ],
-      "notes": "2026-10-12 用户裁决三连落档（反克隆借形不改魂+agent 通用能力为主线核心+方案要更全面）：行业竞争力标尺取代 G0 内部天花板为新量尺——双口径评分卡（8 维）+差距矩阵 18 项（双路只读探查 60+ 锚点）+六波 19 候选包（CP-1~CP-19：W1 交互主权与信任可见化/W2 长程上下文与记忆/W3 编排多智能体/W4 Gen UI 双轨/W5 数据资产面接线/W6 协作与可靠性长尾）+总对账表 15 指标+依赖 DAG。蓝图 G1+ 残余三件（确认弹卡/chip v2/DAG 化）经用户裁决拉回 G0 由 CP-2/CP-3/CP-9 承载。planned=方向采纳未发令；排队序唯一在 pending-work-backlog，波次发令时入队列。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "2026-10-21 P0 台账对账：W1–W5/W7 completed（BLOCK-171~176）；W6 改判 partial——CP-19 由 BLOCK-183 交付，CP-16（联邦委托 v2）/CP-17（工作树安全网）/CP-18（成本硬熔断）在注册表无承接包=未立项，需用户裁决单独立项。总纲保持 planned（方向母纲）。"
     },
     {
       "id": "BLOCK-171-COMPETITIVENESS-WAVE1",
@@ -7208,7 +7208,7 @@
         "mcp",
         "G0"
       ],
-      "notes": "2026-10-20 用户裁决「能做的当然都要做，做个巨无霸计划，地毯式对比确认更新的点。并建立多波次详细升级计划，记住不是要复刻形式，是要汲取精华完善内容和优化使用体验」：以 Qoder 0.4.8 反编译产物为样本，Q-MATRIX 102 点（✅24/🟡47/🔴24/⛔7）+ Q0–Q9 十波 + Q2b/Q4b/Q-DOMAIN 子波；新增 L 组（联网搜索/抓取、浏览器、电脑控制、插件宿主/权限、生成式媒体 ⛔、垂直领域完全插件化）、Q0.5 插件架构 ADR（B：边缘插件化、内核不插件化）、Q2b 联网检索（DeepSeek Search/Fetch 首 provider、默认关、出站审计）、**Q-DOMAIN 垂直去核化 P1–P4（P2b 生信 Result Surface；E13 结果面 + L8 完全插件化；结果页保持生信专属，核心只做 artifact/truth host）**；C19 AskUserQuestion/E12 NotebookEdit/B6 Goal 工具/F9 CodebaseInvestigator 已补入矩阵；**Qoder 专属外部接口（webSearch/imageSearch、browser-use SDK、云模型/账号/市场/更新/签名等）一律不复刻；联网走 DeepSeek/本地 provider**；只借行为合同不搬代码；不重开 AGENT-COMPETITIVENESS-PROGRAM 已完成 CP 项；hooks/i18n/worktree 维持阶段禁区。planned=方向落档未发令波次；单工作包串行不变。"
+      "notes": "方向母纲（planned）；2026-10-21 P0 对账：Q5/P2-UI/P2b 切片/Q6 切片/P3 切片/Q8 切片/Q9 切片均已 completed；reopen 集中在 P2b 全量高级 tab 迁移（P1 候选）、Q6 全量批注（P2 候选）、Q8 深化（P3 候选）、Q9 分段边界扩展（P4 候选）。"
     },
     {
       "id": "BLOCK-214-QDOMAIN-P1-PACK-SKILLS",
@@ -7454,7 +7454,13 @@
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-10-21",
       "archivePolicy": "retain_stable_path",
-      "tags": ["model-selector", "auto", "routing", "q9", "G0"],
+      "tags": [
+        "model-selector",
+        "auto",
+        "routing",
+        "q9",
+        "G0"
+      ],
       "notes": "2026-10-21 立项（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：Q9 D4 Auto——按任务/附件在每轮发送前解析模型（有图→vision 绑定/能力；否则 agent 绑定/tools；回落当前），开关持久化 userPrefs.autoModel（默认 false）。**completed（2026-10-21）**：前端 33/33 + 配置基线 4/4 + 9223 离屏 live 8/8（亮/暗截图）+ types/theme/code-size PASS。reopen=复杂度分级/成本权重/审计落盘/自动档覆盖确认。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
@@ -7469,7 +7475,13 @@
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-10-21",
       "archivePolicy": "retain_stable_path",
-      "tags": ["notification", "inbox", "quiet-hours", "q9", "G0"],
+      "tags": [
+        "notification",
+        "inbox",
+        "quiet-hours",
+        "q9",
+        "G0"
+      ],
       "notes": "2026-10-21 立项（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：通知中心（标题栏铃铛/未读/列表/全部已读）+ 免打扰时段 userPrefs.quietHours（空=关，主进程返回 quiet_hours；应用内仍留痕）。**completed（2026-10-21）**：前端 62/62 + Node 13/13 + 9223 离屏 live 11/11（亮/暗/设置截图）+ theme/types/code-size PASS。reopen=点击跳转/系统历史/审批穿透/声音/类型开关/跨设备。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
@@ -7484,7 +7496,13 @@
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-10-21",
       "archivePolicy": "retain_stable_path",
-      "tags": ["onboarding", "first-run", "reveal", "q9", "G0"],
+      "tags": [
+        "onboarding",
+        "first-run",
+        "reveal",
+        "q9",
+        "G0"
+      ],
       "notes": "2026-10-21 立项（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：Q9 K9 首启角色揭示——userPrefs.roleRevealSeen（默认 false）；欢迎页一次性浮层三卡（分析数据/写代码/整理知识）+ 显式「开始使用」落盘；读取失败不展示。**completed（2026-10-21）**：前端 7/7 + 配置基线 4/4 + 9223 离屏 live 7/7（亮/暗截图）+ theme/types/lint/code-size PASS。reopen=分步引导/数据导入/动画/重播/插画。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
@@ -7499,7 +7517,13 @@
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-10-21",
       "archivePolicy": "retain_stable_path",
-      "tags": ["crash", "diagnostics", "local-only", "q9", "G0"],
+      "tags": [
+        "crash",
+        "diagnostics",
+        "local-only",
+        "q9",
+        "G0"
+      ],
       "notes": "2026-10-21 立项（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：Q9 K2 崩溃同意/本地提示——crashReporter 本地采集（不上传）+ session-health 异常退出检测 + dump 文件名清单 + crashNotice 偏好（默认 true）+ 横幅（打开目录/知道了）。**completed（2026-10-21）**：Node 7/7 + 前端 2/2 + 9223 离屏 live 5/5（亮/暗截图）+ theme/types/lint/code-size PASS；rider=gen-ui 数据面改 REST + block196 契约测同步。reopen=minidump 栈解析/上传/崩溃率/版本聚合/自动诊断包。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
@@ -7514,7 +7538,13 @@
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-10-21",
       "archivePolicy": "retain_stable_path",
-      "tags": ["computer-use", "sidecar", "windows", "q9", "G0"],
+      "tags": [
+        "computer-use",
+        "sidecar",
+        "windows",
+        "q9",
+        "G0"
+      ],
       "notes": "2026-10-21 立项（用户「只剩 E7 与 P4。搞定这俩」）：E7 Windows 边界内 slice——sidecar/axfixture 构建 + host status + 后端 status/probe 路由 + 设置 ComputerUsePanel；控制动作仍走 computer_* + 完全访问 + ackToken。**completed（2026-10-21）**：路由 2/2 + 面板 2/2 + 9223 离屏 live 6/6（亮/暗截图）+ types/lint/theme/code-size PASS。reopen=macOS 构建/权限、PiP、真实 click/type 端到端、签名/更新。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
@@ -7529,7 +7559,13 @@
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-10-21",
       "archivePolicy": "retain_stable_path",
-      "tags": ["q-domain", "data-model", "modality", "pack", "G0"],
+      "tags": [
+        "q-domain",
+        "data-model",
+        "modality",
+        "pack",
+        "G0"
+      ],
       "notes": "2026-10-21 立项（用户「只剩 E7 与 P4。搞定这俩」）：P4 第一片——modality 默认 general + pack provides.modalities + 未知回落；不迁移存量、不改权限。**completed（2026-10-21）**：Node 4/4 + REST live 6/6 + closeout 十三门。reopen=权限通用化/域中性归零/RS 保真/导出联邦基线/dataModelExtensions。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
@@ -7544,7 +7580,13 @@
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-10-21",
       "archivePolicy": "retain_stable_path",
-      "tags": ["q-domain", "data-model", "security", "backend", "G0"],
+      "tags": [
+        "q-domain",
+        "data-model",
+        "security",
+        "backend",
+        "G0"
+      ],
       "notes": "2026-10-21 立项（用户「推荐先开 P4-B；现在立项开做」）：P4-B 权限通用化——single-cell/spatial gate 收敛为通用 data 资源权限，保留 legacy 别名；零迁移、本地 admin 零变化。**completed（2026-10-21）**：Node 11/11 + REST live 3/3 + test:changed 320 pass / 0 fail + closeout 十三门。reopen=域中性归零/RS 保真/导出联邦/dataModelExtensions。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
@@ -7559,7 +7601,13 @@
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-10-21",
       "archivePolicy": "retain_stable_path",
-      "tags": ["q-domain", "data-model", "backend", "pack", "G0"],
+      "tags": [
+        "q-domain",
+        "data-model",
+        "backend",
+        "pack",
+        "G0"
+      ],
       "notes": "2026-10-21 立项（用户「确认后，开冲 P4-C」）：P4-C S1 tool 元数据单一源——删除 tools-executor 标签表与 result-files CSV/大小白名单，改读 pack 注册表；pack 补 go-kegg/gsea + csvValidation/一列声明，0.2.1。**completed（2026-10-21）**：Node 14/14 + pack 死链守卫 1/1 + test:changed 460 pass/0 fail + closeout 十三门；域中性 201→179。reopen=S2-S6 后续片。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
@@ -7574,7 +7622,13 @@
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-10-21",
       "archivePolicy": "retain_stable_path",
-      "tags": ["q-domain", "data-model", "backend", "pack", "G0"],
+      "tags": [
+        "q-domain",
+        "data-model",
+        "backend",
+        "pack",
+        "G0"
+      ],
       "notes": "2026-10-21 立项（用户「按照你的建议继续推进下去，最好能搞完 P4-C」）：P4-C 收尾 S2–S6 统一包。**S2 completed**：agent-workflow 模板下沉 pack（0.2.2）。**S3 completed**：demo assets（0.2.3）+ profile actors（0.2.4）。**S4 completed**：methods Python 模板/引文下沉（0.2.5）+ 占位符渲染；域中性 179→103；test:changed 426 项 0 红 + closeout 十三门。**S5 completed**：scientific profiles 下沉（0.2.6；103→48）。**S6 completed**：前端/桌面收敛 + compat 白名单 + examplePrompts（0.2.7；48→11 处 / 6 键），closeout 十三门 + output:judge PASS。**completed（2026-10-21）**。"
     },
     {
@@ -7589,7 +7643,14 @@
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-10-21",
       "archivePolicy": "retain_stable_path",
-      "tags": ["q-domain", "data-model", "pack", "export", "federation", "G0"],
+      "tags": [
+        "q-domain",
+        "data-model",
+        "pack",
+        "export",
+        "federation",
+        "G0"
+      ],
       "notes": "2026-10-21 立项（用户「可以的 冲 P4余项」）：P4-D dataModelExtensions additive 扩展契约 + 导出/联邦域中性基线；canonical SDC-0 profile 不可覆盖。**completed（2026-10-21）**：block235 6/6 + 导出/联邦基线 4/4 + test:changed 443 项 0 红 + closeout 十三门 + output:judge PASS；域中性保持 11 处 / 6 键 compat。"
     }
   ],

@@ -5,6 +5,8 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
+最后更新：2026-10-21（**P0 台账对账**：backlog 6 行 legacy planned 逐行裁决——W7/BLOCK-176 与 PL-1/BLOCK-128 已由对应包交付（completed），BIO-2 由 UI-454 覆盖、BIO-3 由 UI-456/458/460 覆盖、BIO-4 已随 BLOCK-121/138 实机跑通；**队列里不再有「未裁决 planned」的 legacy 行**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-10-21（**BLOCK-230 Q-DOMAIN P4 第一片 completed**（用户「只剩 E7 与 P4。搞定这俩」）：modality 默认 general + pack provides.modalities + 未知回落；不迁移存量/不改权限。证据=Node 4/4 + REST 实机 6/6 + closeout。reopen=权限通用化/域中性归零/RS 保真/导出联邦基线/dataModelExtensions。plan=docs/block-230-qdomain-p4-modality-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-10-21（**BLOCK-229 E7 电脑控制（Windows 边界内）completed**（用户「只剩 E7 与 P4。搞定这俩」）：sidecar/axfixture 构建 + host status + 后端 status/probe + 设置面板；控制动作仍走 computer_* + 完全访问 + ackToken。reopen=macOS 构建/权限、PiP、真实 click/type 端到端。之后 P4。plan=docs/block-229-e7-computer-use-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -135,7 +137,7 @@
 | -3 | BLOCK-215 / Q-DOMAIN P2a | **核心 Prompt 去生信化（completed）**：移除 DESeq2/Seurat/单细胞/FigCode 生信示例/结果页单细胞控制；pack `promptFragments` 注入（缺失/停用零注入）；golden context_snapshot 重打；domain-neutrality 改善 13 处；block215 3/3 + prompt 52/52 + evals 1/1 + gate 0。P2-UI/P2b/P4 仍 planned | `docs/block-215-qdomain-p2a-prompt-decoring-plan.md` + `docs/qoder-essence-absorption-plan.md` §6-Q-DOMAIN | **completed（2026-10-20，closeout 十三门 PASS）** |
 | -2 | BLOCK-214 / Q-DOMAIN P1 | **领域包 Skills 贡献与生信 Skills 去核（completed）**：3 个生信 skill 迁入 `petri-pack-bio/skills`；pack `provides.skills`；skill-registry `loadPackSkills()`（source=pack，built-in>pack>installed，卸载/停用清理）；核心 built-in 11；`skills:check` 11+3；UI source=pack 标签；9223 双态 4/4·2/2。P2/P2b/P4 仍 planned | `docs/block-214-qdomain-p1-pack-skills-plan.md` + `docs/qoder-essence-absorption-plan.md` §6-Q-DOMAIN | **completed（2026-10-20，closeout 十三门 PASS）** |
 | -1 | W8 / BLOCK-211 | **收尾族（第十三包，队列头已清）**：C-32 env seed / lint 净收缩 / block110-p1 夹具 / RS 徽标语义 / C-27·C-30·C-31 裁定 / **C-33 领域包与技能依赖复看** / UI-526·527 复看；**2026-10-20**：pack 到位后 `skills:check` 14/14 PASS、`tools/catalog=7`、preflight 三态如实、`PETRI_PACK_DIRS` 5/5 契约测、UI-527 pack-present 2/2；UI-526 根因更正为 R 运行时未安装 | `docs/stage-3-4-execution-runlist.md` §3 + `docs/block-211-tail-ledger-plan.md` §13 | **completed（2026-10-20，可自决项全完；双机 riders/BK-08 与 i18n 仍 deferred）** |
-| 0 | W7 / BLOCK-176 | **Agent Skill 知识面（planned，队列最前）**：CP-20 SKILL.md 常驻双格式注册+声明式依赖（KNW-4 通道扩展，候选池③转正）→CP-21 依赖自检与安装治理（preflight+审批留痕+Skills 页状态面）→CP-22 首批通用技能包迁移（Obsidian 九技能转写） | 总纲 §4-W7 + docs/block-176-competitiveness-wave7-plan.md | **planned**（W5 在制收口后发令；W6 顺延） |
+| 0 | W7 / BLOCK-176 | **Agent Skill 知识面（planned，队列最前）**：CP-20 SKILL.md 常驻双格式注册+声明式依赖（KNW-4 通道扩展，候选池③转正）→CP-21 依赖自检与安装治理（preflight+审批留痕+Skills 页状态面）→CP-22 首批通用技能包迁移（Obsidian 九技能转写） | 总纲 §4-W7 + docs/block-176-competitiveness-wave7-plan.md | **completed（已由 BLOCK-176 交付；本行 2026-10-21 P0 对账销号）** |
 | 1 | BIO-1 / UI-452 | **结果信息密度包 verified**（2026-09-29 六面实机 9/10：tooltip 全数值/搜索 25 命中/阈值线/组合筛选 25/25/Lightbox 全链/深链保持——ui452-density-live 双路联合走查；T6b demo 数据边界非缺陷；前置=pack 5036e86 goldenFixture 重锚恢复 RS3 交互投影） | G0-BIO plan §3 BIO-1 | **verified** |
 | 1b | BIO-2 / UI-454 | **交互上限与降级链**（散点 backing 250→600/热图解除前端自缚全量渲染/静态 CSV 本地分页 50 行页/日志端点项目目录兜底修 BLOCK-126 发现缺陷；组件级 32/32+Node 640/0——**实机生效待 dev 栈重启**，重启后复跑 perception-live 即见端点 run.log 兜底；mojibake 移 BIO-4、top-N 排序移 BIO-3 留痕） | G0-BIO plan §3 BIO-2；台账 UI-454 | in_progress（实机待栈重启） |
 | 1c | BIO-3 / UI-455（P0 首刀） | **打开链修复 verified**（2026-09-29 实机铁证：SPA 深链 URL 保持 /result?job= 不归零+HTTP job 结果页可达——ui452-density-live T1 PASS；冷启动完整重载的归零竞争=独立缺陷仍登记） | G0-BIO plan §3 BIO-3；台账 UI-455 | **verified** |
@@ -171,10 +173,10 @@
 | 2e | 设置序列·阶段 C 治理 | **子智能体 profile 声明式 / 项目信任级别+命名权限档 / 外观扩展（预览专项+动效开关）/ 外部 Agent 配置导入 / 数据目录可配+留存策略**；⛔ hooks 产品化（BLOCK-124 定性需改判）与 i18n（D-04）不并入 | 设置差距分析 §7 阶段 C + 全层对标蓝图 §2 治理/安全层 | 候选（待用户裁决） |
 | — | 蓝图 W2（汇总行） | **W2 全波 completed（2026-10-10 BLOCK-160，五种子+五断言 ALL PASS，acceptance/block-160/wave2-live.json；收口笔录 plan §7）**；W3=ORC-3 → ORC-4 → CAP-3（承接 C-EXT-1）→ MDL-1 → MDL-2 → DIST-3⇄CAP-5（共轨）→ DIST-5 → MDL-3 → MDL-4 → KNW-5 → KNW-6 → DIST-4 | 蓝图 §3 波次表+出口判据 | 候选（按波递进；波内零停顿条款在案） |
 | 2 | PL-2 / BLOCK-126 | **感知实时性 completed（含 2026-09-29 复验）**：终态 jobs 失效事件+运行期日志行缓冲；实机 allPass 6/6 两轮+端点兜底修复后复跑 6/6（source=run.log） | plan §5.1 + acceptance/block-126/ | completed |
-| 3 | BIO-2 | 交互上限与降级链：250 点 top-N 语义/静态 24 行分页/热图窗口/mojibake | G0-BIO plan §3 | planned |
-| 4 | BIO-3 | lineage 可视化 + 继续分析显式化（吸收 C-15 前半） | G0-BIO plan §3 | planned |
-| 5 | PL-1 | 执行语义统一（agent/MCP 300s 同步路径并入 tool_jobs 装置；**BIO-4 硬前提**） | G0-PLATFORM plan §3 | planned |
-| 6 | BIO-4 | bulk 主链解冻（吸收 C-15 后半；解冻范围 BIO-D1 待裁决） | G0-BIO plan §3 | planned |
+| 3 | BIO-2 | 交互上限与降级链：250 点 top-N 语义/静态 24 行分页/热图窗口/mojibake | G0-BIO plan §3 | **superseded（由 UI-454 覆盖；台账证据待补）** |
+| 4 | BIO-3 | lineage 可视化 + 继续分析显式化（吸收 C-15 前半） | G0-BIO plan §3 | **superseded（由 UI-456/UI-458/UI-460 覆盖）** |
+| 5 | PL-1 | 执行语义统一（agent/MCP 300s 同步路径并入 tool_jobs 装置；**BIO-4 硬前提**） | G0-PLATFORM plan §3 | **completed（由 BLOCK-128 交付；本行 2026-10-21 P0 对账销号）** |
+| 6 | BIO-4 | bulk 主链解冻（吸收 C-15 后半；解冻范围 BIO-D1 待裁决） | G0-BIO plan §3 | **completed（bulk 主链解冻已随 BLOCK-121/138 实机跑通）** |
 | 7+ | PL-3 / BIO-5 / BIO-6 / PL-4~6 穿插 / BIO-7 池 | 后续按交织序推进；PL-7 候选池性质 | 两 Goal plan §3/§4 | planned |
 | — | ⛔ CK-08 | **C-03：task_id 数据模型改造——重估收缩转观察**：动机仍实（45 万行 UUID 冗余 16.25MB/库 14%）但 30 天清扫有界+无用户感知收益+契约迁移风险大（7+29 文件）；**重开条件=清扫上限内实测 I/O 痛点或库体积成用户可感知问题** | 本批重估数据（AUDIT-LOG 晚五行） | 观察待证据 |
 | — | 👁 BK-02 | **汇报门 P2 试点观察期盘点**（持续观察，不占队列序）——采纳率/误拦率/延迟增量/fitReplay 触发率随真实轮次累计；观察窗开启中（dev 栈 PETRI_JEV_REPORT_GUARD=1） | BLOCK-119 收口遗留候选 | 观察（持续） |
