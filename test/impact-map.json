@@ -4652,6 +4652,27 @@
         "test/block131-domain-validation.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block234-qdomain-p4c-tail",
+      "note": "BLOCK-234 P4-C S2 — agent workflow 模板下沉 pack provides.agentWorkflowTemplates；bounded loader + 夹具；域中性 179→163。",
+      "patterns": [
+        "core/shared-backend/pack-workflow-templates.js",
+        "core/shared-backend/agent-workflow.js",
+        "test/block234-*.test.mjs",
+        "test/agent-workflow.test.mjs",
+        "test/fixtures/agent-workflow-templates.json",
+        "test/helpers/workflow-pack-fixture.mjs",
+        "acceptance/block-234/**"
+      ],
+      "tests": [
+        "test/block234-pack-workflow-templates.test.mjs",
+        "test/agent-workflow.test.mjs",
+        "test/agent-approval.test.mjs",
+        "test/agent-workflow-phase6.test.mjs",
+        "test/block138-f1-chain-pending-registration.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

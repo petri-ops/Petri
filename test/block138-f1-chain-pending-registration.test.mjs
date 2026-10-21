@@ -49,9 +49,11 @@ import { dirname, join, resolve, relative } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import { installWorkflowPackFixture } from './helpers/workflow-pack-fixture.mjs';
 
 const require = createRequire(import.meta.url);
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const workflowPack = installWorkflowPackFixture();
 
 // ---------------------------------------------------------------------------
 // 统一临时 DB 自举（BLOCK-49 惯例：PETRI_DB_PATH 须在 require db.js 前生效；
@@ -63,6 +65,7 @@ const { runMigrations } = require(join(REPO_ROOT, 'src', 'migration-runner'));
 await runMigrations(tempDbPath, join(REPO_ROOT, 'src', 'migrations'));
 process.env.PETRI_DB_PATH = tempDbPath;
 process.on('exit', () => {
+  workflowPack.cleanup();
   try { rmSync(tempDbRoot, { recursive: true, force: true }); } catch { /* 尽力清理 */ }
 });
 

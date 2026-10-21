@@ -1,5 +1,6 @@
 const AGENT_WORKFLOW_TEMPLATE_VERSION = 1;
 const { isRegisteredProfile } = require('./artifact-profiles');
+const { loadAgentWorkflowTemplates } = require('./pack-workflow-templates');
 
 // A-003 configure inject: harness-workflow-state is injected at bootstrap time,
 // not required at load time. This breaks the shared-backend → petri-server reverse require.
@@ -322,87 +323,9 @@ function runToolJobs(plan, getToolJobFn) {
 // End Phase 6 state machine.
 // ---------------------------------------------------------------------------
 
-const AGENT_WORKFLOW_TEMPLATES = [
-  {
-    id: 'bulk-rna-core',
-    title: 'Bulk RNA 标准分析',
-    description: 'DESeq2 差异分析 → DEG 标准化 → 火山图 + 功能富集。',
-    steps: [
-      { id: 'differential', toolCandidates: ['deseq2'], dependsOn: [] },
-      {
-        id: 'deg-standardization',
-        toolCandidates: ['deg-standardizer'],
-        dependsOn: ['differential'],
-        inputBindings: [
-          {
-            inputId: 'deg_results',
-            fromStepId: 'differential',
-            artifactType: 'table',
-            artifactProfile: 'petri.deg.v1',
-            description: 'DESeq2 deg_table.csv → canonical DEG artifact',
-          },
-        ],
-      },
-      {
-        id: 'volcano',
-        toolCandidates: ['volcano-plot'],
-        dependsOn: ['deg-standardization'],
-        inputBindings: [
-          {
-            inputId: 'deg_table',
-            fromStepId: 'deg-standardization',
-            artifactType: 'table',
-            artifactProfile: 'petri.deg.v1',
-            description: 'deg-standardizer deg_standardized.csv (canonical)',
-          },
-        ],
-      },
-      {
-        id: 'enrichment',
-        toolCandidates: ['go-kegg', 'gsea'],
-        dependsOn: ['deg-standardization'],
-        inputBindings: [
-          {
-            inputId: 'deg_table',
-            fromStepId: 'deg-standardization',
-            artifactType: 'table',
-            artifactProfile: 'petri.deg.v1',
-            description: 'deg-standardizer ranked_genes.csv (full ranked list for GSEA)',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'deg-result-refinement',
-    title: '差异结果二次分析',
-    description: '从已有 DEG artifact 生成火山图并开展功能富集。',
-    steps: [
-      { id: 'volcano', toolCandidates: ['volcano-plot'], dependsOn: [] },
-      { id: 'enrichment', toolCandidates: ['go-kegg', 'gsea'], dependsOn: [] },
-    ],
-  },
-  {
-    id: 'coexpression-network',
-    title: '共表达网络分析',
-    description: 'WGCNA 从表达矩阵构建共表达网络、识别模块并做模块-性状关联，再对模块基因做功能富集。',
-    steps: [
-      { id: 'coexpression', toolCandidates: ['wgcna'], dependsOn: [] },
-      {
-        id: 'enrichment',
-        toolCandidates: ['go-kegg', 'gsea'],
-        dependsOn: ['coexpression'],
-        inputBindings: [
-          { inputId: 'deg_table', fromStepId: 'coexpression', artifactType: 'table' },
-        ],
-      },
-    ],
-  },
-];
-
 function listAgentWorkflowTemplates(availableToolIds = []) {
   const available = new Set(availableToolIds);
-  return AGENT_WORKFLOW_TEMPLATES.map((template) => {
+  return loadAgentWorkflowTemplates().templates.map((template) => {
     const supported = template.steps.filter((step) =>
       step.toolCandidates.some((toolId) => available.has(toolId))
     ).length;
@@ -418,7 +341,7 @@ function listAgentWorkflowTemplates(availableToolIds = []) {
 }
 
 function createAgentWorkflowPlan({ templateId, availableToolIds = [], initialInputs = {} } = {}) {
-  const template = AGENT_WORKFLOW_TEMPLATES.find((item) => item.id === templateId);
+  const template = loadAgentWorkflowTemplates().templates.find((item) => item.id === templateId);
   if (!template) throw new Error(`unknown_workflow_template: ${templateId}`);
   const available = new Set(availableToolIds);
   const steps = template.steps.map((step) => {
@@ -520,7 +443,6 @@ function validateWorkflowPlanBindings(plan) {
 module.exports = {
   configure,
   AGENT_WORKFLOW_TEMPLATE_VERSION,
-  AGENT_WORKFLOW_TEMPLATES,
   STEP_STATUSES,
   listAgentWorkflowTemplates,
   createAgentWorkflowPlan,

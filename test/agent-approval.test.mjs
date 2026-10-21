@@ -6,6 +6,10 @@ import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
+import { installWorkflowPackFixture } from './helpers/workflow-pack-fixture.mjs';
+
+const workflowPack = installWorkflowPackFixture();
+process.on('exit', () => workflowPack.cleanup());
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const R_SERVER = resolve(__dirname, '..', 'core', 'petri-server');

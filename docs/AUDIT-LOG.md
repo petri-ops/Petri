@@ -1,4 +1,5 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-10-21（**BLOCK-234 P4-C S2 completed；包仍 active**）：agent-workflow 三条模板下沉 pack `provides.agentWorkflowTemplates`（0.2.2）+ bounded loader；`list/create` 改读 pack，包缺失=零模板。证据=block234 5/5 + agent-workflow 40/40 + 邻域 45/45 + test:changed 391 项 0 红 + closeout 十三门；域中性 **179→163 处 / 85→80 键**。**下一阶段=S3 demo assets + artifact profiles**。plan=docs/block-234-qdomain-p4c-tail-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-21（**BLOCK-233 Q-DOMAIN P4-C S1 tool 元数据单一源 completed**）：删除 `tools-executor` 19 项标签表与 `result-files` CSV/大小白名单，改读 pack 注册表；pack 补 go-kegg/gsea + `csvValidation`/一列声明（0.2.1）；域中性 **201→179 处 / 100→85 键**。证据=红绿 5 红→14/14 + pack 死链守卫 1/1 + test:changed 460 pass/0 fail + closeout 十三门；唯一行为对齐=maftools 上限 100→200MB（随 pack 声明）。**下一片=S2 demo/artifact profiles**。plan=docs/block-233-qdomain-p4c-tool-metadata-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-21（**BLOCK-232 Q-DOMAIN P4-B 权限通用化 completed**）：`single-cell`/`spatial` 专属 gate 收敛为通用 `data` 资源权限，两键保留 legacy 别名；`/api/run` = `tools|data`；零迁移、本地 admin 零变化。证据=红绿 7 红→11/11 + REST 实机 3/3（admin 404 非 403）+ test:changed 320 pass/0 fail + closeout 十三门。实机抓真=存量 `/api/auth/me` 500 已登记 🟡；**下一包=P4-C 域中性分片**。plan=docs/block-232-qdomain-p4b-permissions-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-21（**BLOCK-231 进程层后台任务看门狗 completed**）：新增便携 `dev-task-runner`（run/wait/status）——日志 + `<id>.status.json`（pid/状态/退出码）落 `.petri-dev-user-data/task-runs/`；`task:wait` 124=超时、125=runner 丢失（未知≠成功）；`npm run state` 增加运行/失败任务对账；SKILL 改为「通知是加速器、exit.json 才是真相」。证据=契约测 4/4 + npm 脚本冒烟。G0 开发期常态。
@@ -11,7 +12,6 @@
 
 最后更新：2026-10-21（**BLOCK-227 Q9 K9 首启角色揭示 completed**）：欢迎页一次性浮层三卡（分析数据/写代码/整理知识）+ 显式「开始使用」，`userPrefs.roleRevealSeen` 落盘；读取失败不展示。证据=前端 7/7 + 配置基线 4/4 + 9223 离屏 live 7/7（亮/暗截图）+ theme/types/lint/code-size PASS。reopen=分步引导/数据导入/动画/重播/插画。plan=docs/block-227-q9-onboarding-role-reveal-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-最后更新：2026-10-21（**BLOCK-226 Q9 通知中心/免打扰 completed**）：标题栏铃铛+未读徽章+通知列表（回合终态/待审批留痕）；`userPrefs.quietHours`（空=关，跨午夜）只抑制系统 toast、应用内仍记录；面板向左展开避免右缘裁切。证据=前端 62/62 + Node 13/13 + 9223 离屏 live 11/11 + theme/types/code-size PASS。reopen=点击跳转/系统历史/审批穿透/声音/类型开关。plan=docs/block-226-q9-notification-center-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 
 
@@ -29,6 +29,7 @@
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
+| 🔵 | 2026-10-21 | **BLOCK-234 P4-C 收尾（active；S2 completed）**：agent-workflow 三条领域工作流模板下沉 pack `provides.agentWorkflowTemplates`（0.2.2）+ `pack-workflow-templates.js` bounded loader（路径限 packRoot/坏形状 fail-closed/多包稳定合并）；`list/create` 改读 pack，包缺失=零模板；5 处模板消费测试统一接夹具。证据=block234 5/5 + agent-workflow 40/40 + 邻域 45/45 + test:changed 391 项 0 红 + closeout 十三门；域中性 179→163 处 / 85→80 键。**下一阶段=S3 demo assets + artifact profiles**（随后 S4 methods、S5 result/RS、S6 前端与兼容白名单）。plan=docs/block-234-qdomain-p4c-tail-plan.md §7 | BLOCK-234 / S2-COMPLETED |
 | ✅ | 2026-10-21 | **BLOCK-233 Q-DOMAIN P4-C S1 tool 元数据单一源 completed**（用户「确认后，开冲 P4-C」）：删除 `tools-executor` 19 项标签 Map（22 行）改 `getToolDisplayName`；`result-files` 严格 CSV/一列/大小上限改读 pack 注册表；pack 补 go-kegg/gsea + `csvValidation`/`acceptsSingleColumnGeneList`（0.2.1）。证据=红绿 5 红→14/14 + pack 死链守卫 1/1 + test:changed 464 项 0 红 + closeout 十三门；域中性 201→179 处 / 100→85 键。唯一行为对齐=maftools 上传上限 100→200MB（随 pack 声明）。非范围=S2-S6 后续片。plan=docs/block-233-qdomain-p4c-tool-metadata-plan.md §7 | BLOCK-233 / P5-CLOSED |
 | 🟡 | 2026-10-21 | **`GET /api/auth/me` 在 standalone backend 恒 500（存量，非 BLOCK-232 引入）**：`server.js` 解构 raw better-sqlite3 handle 传给 `setupBootstrap`，`auth.js` 却按 helper 模块调用 `db.getUserById` → `is not a function`；前端零消费、本地 admin 不经此端点，故长期未暴露。发现于 BLOCK-232 实机腿（R2 原断言）。 | 处置=后续小修（传 db helper 模块或 auth 直接 require）；当前不阻塞 P4-B |
 | ✅ | 2026-10-21 | **BLOCK-232 Q-DOMAIN P4-B 权限通用化 completed**（用户「推荐先开 P4-B；现在立项开做」）：新增通用 `data`，`single-cell`/`spatial` 保留 legacy 别名（组内显式任一 true 即授予）；`/api/data/*` 写 gate 与 `/api/run` 收敛；guest 同步/异步共用解析器；清 `_DEFAULT_PERMS` 死 import。零迁移、本地 admin 零变化。证据=Node 11/11（红绿 7 红先证）+ REST 实机 3/3 + test:changed 322 项 0 红 + closeout 十三门；域中性基线 5 减 1 增（增项=BLOCK-230 `BASE_MODALITIES` 兼容值漏登记）。非范围=P4-C 域中性归零/RS 保真/导出联邦/dataModelExtensions。plan=docs/block-232-qdomain-p4b-permissions-plan.md §7 | BLOCK-232 / P5-CLOSED |

@@ -1,11 +1,40 @@
 // vendor/petri-core/test/agent-workflow.mjs — Phase 6 agent workflow runtime tests
 // Unit tests for agent-workflow.js pure functions (no DB, no side effects).
 // Run: node --test vendor/petri-core/test/agent-workflow.mjs
-import { test } from 'node:test';
+import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+// BLOCK-234：工作流模板改由领域包提供。夹具 pack 保持本测试可移植
+// （不依赖兄弟 petri-pack-bio 仓）。
+const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-agent-workflow-pack-'));
+const packRoot = path.join(dataDir, 'fixture-pack');
+fs.mkdirSync(path.join(dataDir, 'packs'), { recursive: true });
+fs.mkdirSync(packRoot, { recursive: true });
+fs.writeFileSync(path.join(packRoot, 'pack.json'), JSON.stringify({
+  packId: 'fixture-pack',
+  provides: { agentWorkflowTemplates: 'workflow-templates.json' },
+}));
+fs.copyFileSync(
+  path.join(ROOT, 'test/fixtures/agent-workflow-templates.json'),
+  path.join(packRoot, 'workflow-templates.json'),
+);
+fs.writeFileSync(
+  path.join(dataDir, 'packs', 'installed.json'),
+  JSON.stringify([{ packId: 'fixture-pack', packRoot, enabled: true, version: '1.0.0' }]),
+);
+process.env.PETRI_LOCAL_DATA_DIR = dataDir;
+after(() => {
+  try { fs.rmSync(dataDir, { recursive: true, force: true }); } catch {}
+});
+
 const {
   STEP_STATUSES,
   createAgentWorkflowPlan,

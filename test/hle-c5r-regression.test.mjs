@@ -34,9 +34,11 @@ const SKIP_EXTERNAL_PACK = !existsSync(path.join(process.cwd(), '..', 'petri-pac
 const SKIP_EXTERNAL_GSEA = !existsSync(path.join(process.cwd(), '..', 'petri-pack-bio', 'plugins', 'gsea', 'tool-definition.json')) && '外部插件仓 petri-pack-bio 缺 plugins/gsea/tool-definition.json（BLOCK-86 用户裁决封存于 plugins.dormant/，本机 R 重依赖未装；gsea 已装环境照常执行，Mac 激活随 BIO-4 对账另行处理）';
 import os from 'node:os';
 import fs from 'node:fs';
+import { installWorkflowPackFixture } from './helpers/workflow-pack-fixture.mjs';
 
 const TMP_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-hle-c5r-'));
 process.env.PETRI_DB_PATH = path.join(TMP_DIR, 'test.db');
+const workflowPack = installWorkflowPackFixture();
 
 // ---------------------------------------------------------------------------
 // Import modules under test
@@ -72,6 +74,7 @@ const {
 // Cleanup
 // ---------------------------------------------------------------------------
 process.on('exit', () => {
+  workflowPack.cleanup();
   try { fs.rmSync(TMP_DIR, { recursive: true, force: true }); } catch {}
 });
 

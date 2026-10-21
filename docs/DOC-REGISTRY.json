@@ -7561,6 +7561,21 @@
       "archivePolicy": "retain_stable_path",
       "tags": ["q-domain", "data-model", "backend", "pack", "G0"],
       "notes": "2026-10-21 立项（用户「确认后，开冲 P4-C」）：P4-C S1 tool 元数据单一源——删除 tools-executor 标签表与 result-files CSV/大小白名单，改读 pack 注册表；pack 补 go-kegg/gsea + csvValidation/一列声明，0.2.1。**completed（2026-10-21）**：Node 14/14 + pack 死链守卫 1/1 + test:changed 460 pass/0 fail + closeout 十三门；域中性 201→179。reopen=S2-S6 后续片。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-234-QDOMAIN-P4C-TAIL",
+      "capability": "qdomain-p4c-tail",
+      "path": "docs/block-234-qdomain-p4c-tail-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "phase": "P0-LAUNCH",
+      "canonical": true,
+      "truthDomain": "qdomain-p4c-tail",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-21",
+      "archivePolicy": "retain_stable_path",
+      "tags": ["q-domain", "data-model", "backend", "pack", "G0"],
+      "notes": "2026-10-21 立项（用户「按照你的建议继续推进下去，最好能搞完 P4-C」）：P4-C 收尾 S2–S6 统一包。**S2 completed（2026-10-21）**：agent-workflow 模板下沉 pack provides.agentWorkflowTemplates（0.2.2）+ bounded loader；域中性 179→163；test:changed 380 pass/0 fail + closeout 十三门。S3-S6 open，包保持 active。"
     }
   ],
   "lastUpdated": "2026-10-21",

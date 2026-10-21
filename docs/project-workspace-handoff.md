@@ -1,7 +1,9 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
-最后更新：2026-10-21（**BLOCK-233 Q-DOMAIN P4-C S1 tool 元数据单一源 completed**）
+最后更新：2026-10-21（**BLOCK-234 P4-C S2 completed；包 active**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**active 工作包=BLOCK-234（P4-C 收尾 S2–S6）**。**刚完成=S2（agent-workflow 模板下沉 pack）**：三条模板移入 pack `provides.agentWorkflowTemplates`（0.2.2）+ `pack-workflow-templates.js` bounded loader；`list/create` 改读 pack，包缺失=零模板；5 处模板消费测试接统一夹具。证据=block234 5/5 + agent-workflow 40/40 + 邻域 45/45 + test:changed 391 项 0 红 + closeout 十三门；域中性 **179→163 处 / 85→80 键**。**下一阶段=S3**（demo assets + artifact profiles）→ S4 methods → S5 result/RS 保真 → S6 前端与兼容白名单；最终剩余量须为显式兼容白名单。plan=`docs/block-234-qdomain-p4c-tail-plan.md` §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-233（P4-C S1 tool 元数据单一源）**：`tools-executor` 删除 19 项标签表、`result-files` 严格 CSV/一列/大小上限改读 pack 注册表；pack 补 go-kegg/gsea + `csvValidation`/`acceptsSingleColumnGeneList`（0.2.1，兄弟仓独立提交）。证据=红绿 5 红→14/14 + pack 死链守卫 1/1 + test:changed 464 项 0 红 + closeout 十三门；域中性 **201→179 处 / 100→85 键**。**下一片=P4-C S2**（demo assets + artifact profiles 下沉 pack）→ S3 workflow/learning → S4 methods → S5 result/RS 保真 → S6 前端与兼容键。唯一行为对齐=maftools 上传上限 100→200MB（随 pack 声明）。plan=`docs/block-233-qdomain-p4c-tool-metadata-plan.md` §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

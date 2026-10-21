@@ -1,9 +1,13 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import test from 'node:test';
+import test, { after } from 'node:test';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import { installWorkflowPackFixture } from './helpers/workflow-pack-fixture.mjs';
+
+const workflowPack = installWorkflowPackFixture();
+after(() => workflowPack.cleanup());
 
 const require = createRequire(import.meta.url);
 const { bindVerifiedArtifact, createAgentWorkflowPlan, projectWorkflowPlan } = require(
