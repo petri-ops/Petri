@@ -110,8 +110,8 @@
       "path": "core/petri-server/helpers/tools-executor.js",
       "wave": "C",
       "module": "P-03",
-      "lines": 2101,
-      "sha256": "4bc2686e619d5cc25718beb5f308e3fcef722faa7c7ff51b3324882c22fe5ab7"
+      "lines": 2079,
+      "sha256": "56b4a6faba5ab10a43e030e9ce0c169e7e074d17a3f86e7fa4be154f944f2e2e"
     },
     {
       "path": "core/petri-server/db.js",
@@ -170,5 +170,5 @@
       "sha256": "6f08befd152ee1a707051d0131a521a85e2572a883a2c9e912bbd0994fa69e72"
     }
   ],
-  "total": 23497
+  "total": 23475
 }

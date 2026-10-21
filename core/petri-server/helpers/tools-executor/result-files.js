@@ -5,6 +5,11 @@ const path = require('path');
 const { isInternalArtifactName, isSafeFlatFilename } = require('../artifact-truth');
 const { createVerifiedFileSnapshot } = require('../verified-file-snapshot');
 const { parseStoredToolResult } = require('./tool-result-misc');
+const {
+  getToolSizeLimitMB,
+  listCsvValidationToolIds,
+  toolAcceptsSingleColumnGeneList,
+} = require('../../tool-registry');
 
 function declaredResultFilenames(result) {
   const names = new Set();
@@ -291,16 +296,7 @@ function writeUploadedFiles(jobDir, files) {
 function validateUploadedFiles(toolId, jobDir, files) {
   const resolvedFiles = resolveUploadedFiles(jobDir, files);
   if (!resolvedFiles.ok) return resolvedFiles.error;
-  const csvTools = [
-    'deseq2',
-    'go-kegg',
-    'gsea',
-    'km-survival',
-    'lasso-cox',
-    'bindea-immune',
-    'wgcna',
-    'complexheatmap',
-  ];
+  const csvTools = listCsvValidationToolIds();
 
   for (const { key, filePath } of resolvedFiles.entries) {
     if (!fs.existsSync(filePath)) continue;
@@ -323,9 +319,9 @@ function validateUploadedFiles(toolId, jobDir, files) {
       const firstLine = lines[0];
       const sep = firstLine.includes('\t') ? '\t' : ',';
       const headerCols = firstLine.split(sep).length;
-      // GO/KEGG explicitly accepts a one-column gene list (`gene` header);
-      // the other CSV tools require at least two columns.
-      const acceptsSingleColumnGeneList = toolId === 'go-kegg';
+      // Only tools that declare `acceptsSingleColumnGeneList` may use a
+      // one-column gene list; all other strict CSV tools need ≥2 columns.
+      const acceptsSingleColumnGeneList = toolAcceptsSingleColumnGeneList(toolId);
       if (headerCols < 2 && !acceptsSingleColumnGeneList) {
         return `文件 "${key}" 只检测到 1 列。请确认分隔符是逗号(CSV)或制表符(TSV)，不是分号或空格。`;
       }
@@ -336,12 +332,9 @@ function validateUploadedFiles(toolId, jobDir, files) {
     }
 
     const stat = fs.statSync(filePath);
-    if (
-      stat.size > 100 * 1024 * 1024 &&
-      toolId !== 'seurat-standard' &&
-      toolId !== 'cellchat'
-    ) {
-      return `文件 "${key}" 大小为 ${Math.round(stat.size / 1024 / 1024)}MB，超过推荐上限(100MB)。大文件可能导致分析超时。建议：筛选基因或样本后重试。`;
+    const sizeLimitMB = getToolSizeLimitMB(toolId);
+    if (stat.size > sizeLimitMB * 1024 * 1024) {
+      return `文件 "${key}" 大小为 ${Math.round(stat.size / 1024 / 1024)}MB，超过推荐上限(${sizeLimitMB}MB)。大文件可能导致分析超时。建议：筛选基因或样本后重试。`;
     }
   }
   return null;

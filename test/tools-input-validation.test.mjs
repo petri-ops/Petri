@@ -2,10 +2,37 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import test from 'node:test';
+import test, { after } from 'node:test';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
+
+// BLOCK-233：严格 CSV 校验集合改由领域包注册表声明驱动。
+// 夹具保证本测试不依赖兄弟 pack 仓；go-kegg/gsea 声明与真实 pack 一致。
+const registryDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-input-validation-registry-'));
+const registryFile = path.join(registryDir, 'registry.json');
+fs.writeFileSync(registryFile, JSON.stringify({
+  TOOLS: {
+    'go-kegg': {
+      displayName: 'GO/KEGG ORA',
+      csvInputs: ['genes'],
+      csvValidation: true,
+      acceptsSingleColumnGeneList: true,
+      sizeLimitMB: 100,
+    },
+    gsea: {
+      displayName: 'GSEA',
+      csvInputs: ['ranked_list'],
+      csvValidation: true,
+      sizeLimitMB: 100,
+    },
+  },
+}));
+process.env.PETRI_DOMAIN_TOOL_REGISTRY = registryFile;
+after(() => {
+  try { fs.rmSync(registryDir, { recursive: true, force: true }); } catch {}
+});
+
 const {
   resolveUploadedFiles,
   writeUploadedFiles,

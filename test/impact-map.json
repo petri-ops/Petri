@@ -4633,6 +4633,25 @@
         "test/domain-neutrality.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block233-qdomain-p4c-tool-metadata",
+      "note": "BLOCK-233 P4-C S1 — tool 元数据单一源：pack 注册表驱动显示名/严格 CSV/一列规则/大小上限；核心删除第二份清单。",
+      "patterns": [
+        "core/petri-server/tool-registry.js",
+        "core/petri-server/helpers/tools-executor.js",
+        "core/petri-server/helpers/tools-executor/result-files.js",
+        "test/block233-*.test.mjs",
+        "test/tools-input-validation.test.mjs",
+        "acceptance/block-233/**"
+      ],
+      "tests": [
+        "test/block233-tool-metadata-single-source.test.mjs",
+        "test/tools-input-validation.test.mjs",
+        "test/tool-registry-script-links.test.mjs",
+        "test/block131-domain-validation.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

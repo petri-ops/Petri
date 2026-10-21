@@ -10,7 +10,8 @@
  * （无领域包安装态），不内联任何领域工具。
  *
  * 领域包作者：导出 { TOOLS: { <id>: { displayName, script, lang, pluginOnly?, description,
- * csvInputs?, sizeLimitMB? } }, TOOL_ALIASES? } 形状的 JSON，并设置该环境变量指向它。
+ * csvInputs?, csvValidation?, acceptsSingleColumnGeneList?, sizeLimitMB? } }, TOOL_ALIASES? }
+ * 形状的 JSON，并设置该环境变量指向它。
  */
 
 const fs = require('fs');
@@ -75,6 +76,19 @@ function listCsvTools() {
     .map(([id]) => id);
 }
 
+/** Tools that opt into strict CSV/TSV header validation (declared by the pack). */
+function listCsvValidationToolIds() {
+  return Object.entries(TOOLS)
+    .filter(([_, cfg]) => cfg.csvValidation === true)
+    .map(([id]) => id);
+}
+
+/** Whether a tool declares that a one-column gene list is a valid CSV input. */
+function toolAcceptsSingleColumnGeneList(toolId) {
+  const cfg = getToolConfig(toolId);
+  return !!(cfg && cfg.acceptsSingleColumnGeneList === true);
+}
+
 /** Per-tool size limit in MB (defaults to 100). */
 function getToolSizeLimitMB(toolId) {
   const cfg = getToolConfig(toolId);
@@ -108,5 +122,7 @@ module.exports = {
   listToolIds,
   listTools,
   listCsvTools,
+  listCsvValidationToolIds,
+  toolAcceptsSingleColumnGeneList,
   getToolSizeLimitMB,
 };

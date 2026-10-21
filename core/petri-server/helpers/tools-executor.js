@@ -49,6 +49,7 @@ const {
   markUnownedStaleJobs,
   recoverStaleActiveJobs,
 } = require('../helpers/process-lifecycle');
+const { getToolDisplayName } = require('../tool-registry');
 // BLOCK-135（PL-3 二刀）：分析级重试策略——纯函数分类 + env 门（默认关闭），见 tool-retry-policy.js
 const {
   classifyToolJobFailure,
@@ -1978,35 +1979,12 @@ function createToolsExecutor({
       }
     }
 
-    // 静态白名单查表用 Map：get() 无计算成员访问面（security/detect-object-injection 干净），
-    // toolId 是请求侧输入，查不到时原样回退。
-    const toolNames = new Map([
-      ['deseq2', 'DESeq2'],
-      ['go-kegg', 'GO/KEGG ORA'],
-      ['km-survival', 'KM生存'],
-      ['gsea', 'GSEA'],
-      ['bindea-immune', '免疫浸润'],
-      ['wgcna', 'WGCNA'],
-      ['lasso-cox', 'LASSO Cox'],
-      ['seurat-standard', 'Seurat'],
-      ['complexheatmap', 'ComplexHeatmap'],
-      ['maftools-mutation', 'maftools'],
-      ['cellchat', 'CellChat'],
-      ['ml-feature-select', 'ML特征选择'],
-      ['ml-classifier', 'ML分类器'],
-      ['rsf-survival', 'RSF生存森林'],
-      ['shap-explain', 'SHAP'],
-      ['consensus-cluster', '一致性聚类'],
-      ['ml-scvi-annotate', 'scVI'],
-      ['mo-mofa', 'MOFA2'],
-      ['mo-snf', 'SNF'],
-    ]);
     const existCount = await db
       .prepare('SELECT COUNT(*) as cnt FROM tool_jobs WHERE user_id = ? AND tool_id = ?')
       .get(uid, toolId);
     const labelPrefix = isTest ? '🧪 ' : '';
     const jobName =
-      labelPrefix + (toolNames.get(toolId) || toolId) + ' #' + ((existCount ? existCount.cnt : 0) + 1);
+      labelPrefix + getToolDisplayName(toolId) + ' #' + ((existCount ? existCount.cnt : 0) + 1);
 
     await db
       .prepare(

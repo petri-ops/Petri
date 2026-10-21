@@ -1,7 +1,9 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
-最后更新：2026-10-21（**BLOCK-232 Q-DOMAIN P4-B 权限通用化 completed**）
+最后更新：2026-10-21（**BLOCK-233 Q-DOMAIN P4-C S1 tool 元数据单一源 completed**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-233（P4-C S1 tool 元数据单一源）**：`tools-executor` 删除 19 项标签表、`result-files` 严格 CSV/一列/大小上限改读 pack 注册表；pack 补 go-kegg/gsea + `csvValidation`/`acceptsSingleColumnGeneList`（0.2.1，兄弟仓独立提交）。证据=红绿 5 红→14/14 + pack 死链守卫 1/1 + test:changed 464 项 0 红 + closeout 十三门；域中性 **201→179 处 / 100→85 键**。**下一片=P4-C S2**（demo assets + artifact profiles 下沉 pack）→ S3 workflow/learning → S4 methods → S5 result/RS 保真 → S6 前端与兼容键。唯一行为对齐=maftools 上传上限 100→200MB（随 pack 声明）。plan=`docs/block-233-qdomain-p4c-tool-metadata-plan.md` §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-232（P4-B 权限通用化）**：新增通用 `data` 资源权限，`single-cell`/`spatial` 保留为 legacy 别名（组内显式任一 true 即授予）；`/api/data/*` 写 gate 与 `POST /api/run`（`tools|data`）收敛；guest 同步/异步共用解析器；零迁移、本地 admin 零变化。证据=红绿 7 红→Node 11/11 + REST 实机 3/3（admin 404 非 403）+ test:changed 322 项 0 红 + closeout 十三门。**下一包=P4-C 域中性基线分片**（用户建议：先外围 tool/result，再 Result Studio 保真，每片下调基线）→ P4-D 导出/联邦基线 → dataModelExtensions 最后。实机抓真=存量 `/api/auth/me` standalone 500 已登记 AUDIT-LOG 🟡（前端零消费，不阻塞）。plan=`docs/block-232-qdomain-p4b-permissions-plan.md` §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

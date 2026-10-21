@@ -7546,6 +7546,21 @@
       "archivePolicy": "retain_stable_path",
       "tags": ["q-domain", "data-model", "security", "backend", "G0"],
       "notes": "2026-10-21 立项（用户「推荐先开 P4-B；现在立项开做」）：P4-B 权限通用化——single-cell/spatial gate 收敛为通用 data 资源权限，保留 legacy 别名；零迁移、本地 admin 零变化。**completed（2026-10-21）**：Node 11/11 + REST live 3/3 + test:changed 320 pass / 0 fail + closeout 十三门。reopen=域中性归零/RS 保真/导出联邦/dataModelExtensions。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-233-QDOMAIN-P4C-TOOL-METADATA",
+      "capability": "qdomain-tool-metadata",
+      "path": "docs/block-233-qdomain-p4c-tool-metadata-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P5-CLOSED",
+      "canonical": true,
+      "truthDomain": "qdomain-tool-metadata",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-21",
+      "archivePolicy": "retain_stable_path",
+      "tags": ["q-domain", "data-model", "backend", "pack", "G0"],
+      "notes": "2026-10-21 立项（用户「确认后，开冲 P4-C」）：P4-C S1 tool 元数据单一源——删除 tools-executor 标签表与 result-files CSV/大小白名单，改读 pack 注册表；pack 补 go-kegg/gsea + csvValidation/一列声明，0.2.1。**completed（2026-10-21）**：Node 14/14 + pack 死链守卫 1/1 + test:changed 460 pass/0 fail + closeout 十三门；域中性 201→179。reopen=S2-S6 后续片。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-10-21",
