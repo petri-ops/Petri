@@ -42,6 +42,8 @@ import { resolveResultSurfaceHost } from '@/components/result-studio/resultSurfa
 import { PackSurfaceFrame } from '@/components/work-surface/PackSurfaceFrame';
 import type { WorkSurfaceDescriptor } from '@/lib/workSurface/types';
 import { usePackResultData } from '@/lib/workSurface/packResultData';
+import { shouldDowngradeToCore, usePackTabData } from '@/lib/workSurface/usePackTabData';
+import { getApiPrefix } from '@/lib/env';
 // UI-448 加映 v25 — 浮卡左缘拖宽把手 + 偏好持久化（摘要浮卡与会话浮面共用）
 import {
   FloatCardResizeHandle,
@@ -169,6 +171,13 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
   );
   const resultMode = workspaceMode === 'result' || workspaceMode === 'code' || workspaceMode === 'compare' || workspaceMode === 'history';
   const resultSurfaceHost = resolveResultSurfaceHost(ctx.packResultSurfaces ?? [], ctx.activeArtifact, workspaceMode);
+  // BLOCK-236 — tab 级接管：取数失败即回落核心（不渲染空白 iframe）
+  const packTabState = usePackTabData(
+    resultSurfaceHost.tab,
+    { jobId: ctx.activeJob?.id, revisionId: ctx.activeArtifact?.revisionId },
+    getApiPrefix(),
+  );
+  const downgradeToCore = shouldDowngradeToCore(resultSurfaceHost.tab, packTabState);
   const packResultData = usePackResultData(resultSurfaceHost.source === 'pack' ? ctx.activeArtifact : null);
   const truthStatus = typeof ctx.activeArtifact?.truthStatus === 'string'
     ? ctx.activeArtifact.truthStatus
@@ -300,8 +309,8 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
             )}
           >
             {ctx.activeJob ? (
-              resultSurfaceHost.descriptor ? (
-                <div data-result-surface-source="pack" style={{ display: 'contents' }}>
+              resultSurfaceHost.descriptor && !downgradeToCore ? (
+                <div data-result-surface-source="pack" data-pack-tab={resultSurfaceHost.tab} style={{ display: 'contents' }}>
                   <PackSurfaceFrame
                     descriptor={resultSurfaceHost.descriptor}
                     projectId={ctx.projectId}
@@ -320,7 +329,11 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
                   />
                 </div>
               ) : (
-              <div data-result-surface-source="core-transitional" style={{ display: 'contents' }}>
+              <div
+                data-result-surface-source="core-transitional"
+                data-fallback-reason={downgradeToCore ? packTabState.reason : resultSurfaceHost.reason}
+                style={{ display: 'contents' }}
+              >
               <ResultView
                 project={ctx.project}
                 conversationId={ctx.activeConvId}
