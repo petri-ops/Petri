@@ -5199,5 +5199,5 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 
 - **变化面**：欢迎页快捷 chip 改为领域中性文案；Composer 领域示例卡由已装领域包的 `provides.examplePrompts` 动态提供（前端不再内置领域卡）；workspace/result 的文件格式识别把 h5 家族收敛为 HDF5 容器标签（h5ad 走前缀匹配，行为保留）；Result Studio 比较摘要改按数据形状渲染；删除云平台 legacy 导航/页面类型。
 - **为什么这样设计（自有形态）**：领域示例与领域文案属于包资产，核心前端只保留通用兜底与渲染机制；格式识别用「h5 家族」而不是逐个领域后缀，既保留 h5ad 的可用性又不把领域词写回核心。无包时停留通用卡，符合本地可审计的诚实降级。
-- **验证（代码）**：前端 33/33（office/result-manifest/WorkspaceFileIcon/copilotContext/示例卡）；SimpleChat + 投影桥 23/23；Node block234 示例卡 3/3；`test:changed` Node 1227 pass/0 fail + 前端 267 pass/0 fail；types 0；lint 0 error；domain-neutrality 3/3（剩余 11 处为显式兼容白名单）。
+- **验证（代码）**：前端 33/33（office/result-manifest/WorkspaceFileIcon/copilotContext/示例卡）；SimpleChat + 投影桥 23/23；Node block234 示例卡 3/3；`test:changed` Node 1230 pass/0 fail + 前端 267 pass/0 fail；types 0；lint 0 error；domain-neutrality 3/3（剩余 11 处为显式兼容白名单）。
 - **未做（reopen）**：9223 离屏实机复核欢迎页/Composer 示例卡与 h5 家族预览标签；暗色/亮色截图证据。
