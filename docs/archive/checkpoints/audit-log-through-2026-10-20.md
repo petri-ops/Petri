@@ -14,3 +14,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-21T00:06:51.206Z -->
 最后更新：2026-10-20（**BLOCK-216 Q5 统一工作面 host completed（closeout 十三门 + 9223 live 19/19）**）：core+pack surface 注册表/稳定 tab 状态机/pack views·resultSurfaces·uiActions 贡献投影 + `petri-pack://` 独立 origin/生成文件·计划·证据面 + 文件管理器显示 IPC；block216 7/7 + 前端 Q5 46 项 + test:changed 266/266；实机抓真两处（多 tab 只显示×、OOPIF/文件空态 visibility 泄漏）已修。边界=终端分屏 E9 deferred、P2-UI/P2b 未做、E1/E4/H3/H4/B3 部分。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-21T00:53:02.691Z -->
+最后更新：2026-10-20（**BLOCK-217 Q-DOMAIN P2-UI completed（closeout 十三门 + 9223 live 8/8）**）：核心 act 去生信/FigCode（只保留 rename_project/dataset/analysis、update_analysis_params、open_tool、ui_action）；pack `uiActions` 动态描述 + 执行校验 + 前端 host 分发/ack；删除 sc*/figcode 遗留字段；domain-neutrality 下调 15 处。block217 9/9 + block151 5/5 + 前端 8/8 + test:changed 213/213 + 9223 live 8/8；UI-531 verified（dev Electron 边界内）。边界=真实生信动作随 P2b pack 结果面提供；live ack 用合成 token（ack 成功链由隔离测试覆盖）。G0 开发期常态 · 不外推 packaged/Provider/GA。

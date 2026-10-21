@@ -73,6 +73,28 @@ describe('ModelMenu', () => {
     expect(screen.getByText('无可用模型')).not.toBeNull();
   });
 
+  it('自动开关行显示解析预览并回调', () => {
+    const onToggleAuto = vi.fn();
+    render(
+      <ModelMenu
+        mode="model"
+        groups={groups}
+        selectedGroup={groups[0]}
+        activeModelId="a1"
+        summary={{ level: 'ok', text: '' }}
+        autoModel
+        autoPreview="model-a（工具调用能力）"
+        onToggleAuto={onToggleAuto}
+        onClose={() => {}}
+        onPickSupplier={() => {}}
+        onPickModel={() => {}}
+      />
+    );
+    expect(screen.getByTestId('model-menu-auto').textContent).toContain('开启 · model-a');
+    fireEvent.click(screen.getByTestId('model-menu-auto'));
+    expect(onToggleAuto).toHaveBeenCalledTimes(1);
+  });
+
   it('加载中与零可用模型显示状态行', () => {
     const { rerender } = render(
       <ModelMenu

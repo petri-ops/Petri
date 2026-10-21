@@ -151,6 +151,9 @@ import { Icon } from '@/components/icons/Icon';
 const EMPTY_ROW_SEGMENTS: ConversationSegment[] = [];
 import { getBridge } from '@/lib/desktopBridge';
 import { ModelMenu } from './SimpleChat/ModelMenu';
+import { ModelChip } from './SimpleChat/ModelChip';
+import { useAutoModelPreference } from '@/hooks/useAutoModelPreference';
+import { describeAutoDecision, resolveAutoPreset } from '@/lib/auto-model';
 import { useTurnNotifications } from './useTurnNotifications';
 import { matchesCombo } from '@/lib/appKeymap';
 import { useKeymapSafe } from '@/lib/appKeymapContext';
@@ -478,8 +481,19 @@ export function SimpleChat({
     activeId: activeModelId,
     activePreset: activeModel,
     catalog: modelCatalog,
+    roleBindings,
     setActive: setActiveModelId,
   } = useAiSettings();
+  // BLOCK-225 — D4 Auto：开关持久化；解析预览跟随当前附件。
+  const { autoModel, setAutoModel, error: autoModelError } = useAutoModelPreference();
+  const autoDecision = useMemo(() => resolveAutoPreset({
+    presets: modelPresets,
+    catalog: modelCatalog,
+    roleBindings,
+    hasImages: imageRefs.length > 0,
+    fallbackId: activeModelId,
+  }), [activeModelId, imageRefs.length, modelCatalog, modelPresets, roleBindings]);
+  const autoPreview = describeAutoDecision(autoDecision);
 
   // BLOCK-69 / UI-318 — 知识空间大脑开关（启用真相在 DB；无 key 禁用不假启用）
   const knowledgeSpace = useKnowledgeSpaceToggle();
@@ -876,6 +890,11 @@ export function SimpleChat({
     activeRun,
     activeModel,
     activeModelId,
+    autoModel,
+    modelPresets,
+    modelCatalog,
+    roleBindings,
+    hasImages: () => imageRefsRef.current.length > 0,
     accessMode,
     planMode,
     createConversationForRun,
@@ -1934,38 +1953,21 @@ export function SimpleChat({
                 {/* UI-523 — 上下文预算环搬进卡片下方计量条右端（同一组件实例；
                     UI-448 加映 v3 — slimComposer 悬挂面整条不渲染）。 */}
                 <div className="sc-model-picker-pair">
-                  <div className="sc-model-picker sc-model-picker-footer">
-                    <button
-                      type="button"
-                      className="sc-model-btn sc-model-provider-btn"
-                      onClick={() => {
-                        setModelSupplierKey(activeSupplierGroup?.key || null);
-                        setModelMenuOpen((current) => current === 'supplier' ? null : 'supplier');
-                      }}
-                      title={activeSupplierGroup?.supplier || activeModel?.label || '选择供应商'}
-                    >
-                      {composerNarrow
-                        ? <Icon name="cpu" size={14} />
-                        : <span>{activeSupplierGroup?.supplier || activeModel?.label || '供应商'}</span>}
-                      <Icon name="chevron-down" size={12} />
-                    </button>
-                  </div>
-                  <div className="sc-model-picker sc-model-picker-footer">
-                    <button
-                      type="button"
-                      className="sc-model-btn sc-model-name-btn"
-                      onClick={() => {
-                        setModelSupplierKey(selectedSupplierGroup?.key || null);
-                        setModelMenuOpen((current) => current === 'model' ? null : 'model');
-                      }}
-                      title={activeModel?.model || '选择会话模型'}
-                    >
-                      {composerNarrow
-                        ? <Icon name="zap" size={14} />
-                        : <span>{activeModel?.model || '选择模型'}</span>}
-                      <Icon name="chevron-down" size={12} />
-                    </button>
-                  </div>
+                <ModelChip
+                  supplier={activeSupplierGroup?.supplier || activeModel?.label || ''}
+                  modelName={activeModel?.model || ''}
+                  autoModel={autoModel}
+                  autoPreview={autoPreview}
+                  narrow={composerNarrow}
+                  onOpenSupplier={() => {
+                    setModelSupplierKey(activeSupplierGroup?.key || null);
+                    setModelMenuOpen((current) => current === 'supplier' ? null : 'supplier');
+                  }}
+                  onOpenModel={() => {
+                    setModelSupplierKey(selectedSupplierGroup?.key || null);
+                    setModelMenuOpen((current) => current === 'model' ? null : 'model');
+                  }}
+                />
                   {/* BLOCK-178 P0 — 投递模式显式切换（运行中提交的路由语义） */}
                   <div className="sc-model-picker sc-model-picker-footer">
                     <button
@@ -2047,6 +2049,10 @@ export function SimpleChat({
                       selectedGroup={selectedSupplierGroup}
                       activeModelId={activeModelId}
                       summary={catalogSummary}
+                      autoModel={autoModel}
+                      autoPreview={autoPreview}
+                      autoError={autoModelError}
+                      onToggleAuto={() => void setAutoModel(!autoModel)}
                       onClose={() => setModelMenuOpen(null)}
                       onPickSupplier={(group) => {
                         setModelSupplierKey(group.key);

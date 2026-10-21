@@ -93,12 +93,14 @@ interface AiSettingsSnapshot {
   presets: ChatModelPreset[];
   activeId: string;
   catalog: ModelCatalogState;
+  roleBindings: Record<string, string>;
 }
 
 let presetsCache: AiSettingsSnapshot = {
   presets: DEFAULT_CHAT_MODEL_PRESETS,
   activeId: DEFAULT_CHAT_MODEL_PRESETS[0].id,
   catalog: EMPTY_MODEL_CATALOG,
+  roleBindings: {},
 };
 let loaded = false;
 let inflight: Promise<AiSettingsSnapshot> | null = null;
@@ -129,6 +131,13 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
         }
       }
       const discoveryErrors: Record<string, string> = {};
+      const roleBindings: Record<string, string> = {};
+      const rawBindings = raw?.model_role_bindings;
+      if (rawBindings && typeof rawBindings === 'object') {
+        for (const [role, profileId] of Object.entries(rawBindings)) {
+          if (typeof profileId === 'string' && profileId) roleBindings[role] = profileId;
+        }
+      }
       const profilePresets = Array.isArray(raw?.model_profiles)
         ? (raw.model_profiles as ChatModelPreset[])
             .map(normalizeLegacyUserModelProfile)
@@ -193,6 +202,7 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
         presets,
         activeId: presets.some((p) => p.id === activeId) ? activeId : presets[0].id,
         catalog: { loading: false, discoveryErrors, credentialStatus },
+        roleBindings,
       };
       loaded = true;
       inflight = null;
@@ -220,7 +230,7 @@ function applyMutation(
     : defaultActive
     ? defaultActive(presets)
     : presets[0].id;
-  presetsCache = { presets, activeId, catalog: presetsCache.catalog };
+  presetsCache = { presets, activeId, catalog: presetsCache.catalog, roleBindings: presetsCache.roleBindings };
   loaded = true;
   notify();
   return presetsCache;
@@ -232,6 +242,8 @@ export interface UseAiSettingsResult {
   activePreset: ChatModelPreset;
   /** BLOCK-224 — 目录状态（加载中 / 逐 profile 发现失败 / 凭据状态）。 */
   catalog: ModelCatalogState;
+  /** BLOCK-225 — 角色绑定（agent/vision/... → profile id），用于 Auto 解析。 */
+  roleBindings: Record<string, string>;
   loading: boolean;
   refresh: () => Promise<void>;
   /** Update the active model. Persists via the electron bridge
@@ -396,6 +408,7 @@ export function useAiSettings(): UseAiSettingsResult {
     activeId: snapshot.activeId,
     activePreset,
     catalog: snapshot.catalog,
+    roleBindings: snapshot.roleBindings,
     loading,
     refresh,
     setActive,
@@ -414,6 +427,7 @@ export function __resetAiSettingsCacheForTests(): void {
     presets: DEFAULT_CHAT_MODEL_PRESETS,
     activeId: DEFAULT_CHAT_MODEL_PRESETS[0].id,
     catalog: EMPTY_MODEL_CATALOG,
+    roleBindings: {},
   };
   loaded = false;
   inflight = null;

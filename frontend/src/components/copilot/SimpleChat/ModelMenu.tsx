@@ -22,6 +22,10 @@ interface ModelMenuProps {
   selectedGroup: ModelCatalogGroup | undefined;
   activeModelId: string;
   summary: CatalogSummary;
+  autoModel?: boolean;
+  autoPreview?: string;
+  autoError?: string | null;
+  onToggleAuto?: () => void;
   onClose: () => void;
   onPickSupplier: (group: ModelCatalogGroup) => void;
   onPickModel: (preset: ChatModelPreset) => void;
@@ -44,6 +48,10 @@ export function ModelMenu({
   selectedGroup,
   activeModelId,
   summary,
+  autoModel = false,
+  autoPreview = '',
+  autoError = null,
+  onToggleAuto,
   onClose,
   onPickSupplier,
   onPickModel,
@@ -59,6 +67,25 @@ export function ModelMenu({
             data-testid="model-menu-status"
           >
             {summary.text}
+          </div>
+        )}
+        {onToggleAuto && (
+          <button
+            type="button"
+            className={`sc-model-option ${autoModel ? 'sc-model-option-active' : ''}`}
+            onClick={onToggleAuto}
+            data-testid="model-menu-auto"
+            title="开启后每轮按任务与附件解析模型（不改变手动选择）"
+          >
+            <span className="sc-model-option-title">自动（按任务选择）</span>
+            <span className="sc-model-option-meta">
+              {autoModel ? `开启 · ${autoPreview || '暂无可用模型'}` : '关闭'}
+            </span>
+          </button>
+        )}
+        {autoError && (
+          <div className="sc-model-menu-status sc-model-menu-status-degraded" role="alert">
+            {autoError}
           </div>
         )}
         {summary.level === 'empty' && groups.length === 0 ? null : mode === 'supplier' ? (

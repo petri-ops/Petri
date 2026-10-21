@@ -1,0 +1,48 @@
+{
+  "name": "block225-auto-model-live",
+  "startedAt": "2026-10-21T00:49:52.179Z",
+  "finishedAt": "2026-10-21T00:50:23.933Z",
+  "assertions": [
+    {
+      "name": "R1_prefs_reset_auto_off",
+      "pass": true,
+      "detail": "{\"theme\":\"dark\",\"autoModel\":false}"
+    },
+    {
+      "name": "D1_composer_model_chip_present",
+      "pass": true,
+      "detail": "欢迎页 composer 应有模型钮"
+    },
+    {
+      "name": "D2_auto_toggle_default_off",
+      "pass": true,
+      "detail": "自动（按任务选择）关闭"
+    },
+    {
+      "name": "D3_auto_enabled_with_preview",
+      "pass": true,
+      "detail": "{\"row\":\"自动（按任务选择）开启 · deepseek-flash（Agent 角色绑定）\",\"chip\":\"自动\",\"title\":\"自动：deepseek-flash（Agent 角色绑定）\"}"
+    },
+    {
+      "name": "D4_auto_screenshots",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\petri\\acceptance\\block-225\\ui538-auto-model-menu.png | D:\\1.WorkDir\\petri\\acceptance\\block-225\\ui538-auto-model-menu-dark.png"
+    },
+    {
+      "name": "D5_auto_persisted",
+      "pass": true,
+      "detail": "{\"theme\":\"dark\",\"autoModel\":true}"
+    },
+    {
+      "name": "D6_auto_disabled_restores_model",
+      "pass": true,
+      "detail": "{\"row\":\"自动（按任务选择）关闭\",\"chip\":\"deepseek-flash\"}"
+    },
+    {
+      "name": "D7_auto_cleared",
+      "pass": true,
+      "detail": "{\"theme\":\"dark\",\"autoModel\":false}"
+    }
+  ],
+  "allPass": true
+}

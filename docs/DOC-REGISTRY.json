@@ -7441,8 +7441,23 @@
         "G0"
       ],
       "notes": "2026-10-21 立项（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：Q9 续项 D1+D2——模型目录状态诚实（加载/发现失败/缺密钥/隐藏逐行可见）+ 每模型可见性/上下文/默认思考档；菜单与设置行抽组件（SimpleChat/DesktopSettingsPanel 行数只减不增）。**completed（2026-10-21）**：前端 31/31 + 后端 3/3 + 9223 离屏 live 9/9（亮/暗/设置截图）+ lint 0 error/types 0/code-size PASS。D4 Auto 留下一刀。reopen=D4/低峰折扣/权限/价格用量/缓存 TTL。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-225-Q9-AUTO-MODEL",
+      "capability": "q9-auto-model",
+      "path": "docs/block-225-q9-auto-model-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P5-CLOSED",
+      "canonical": true,
+      "truthDomain": "q9-auto-model",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-21",
+      "archivePolicy": "retain_stable_path",
+      "tags": ["model-selector", "auto", "routing", "q9", "G0"],
+      "notes": "2026-10-21 立项（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：Q9 D4 Auto——按任务/附件在每轮发送前解析模型（有图→vision 绑定/能力；否则 agent 绑定/tools；回落当前），开关持久化 userPrefs.autoModel（默认 false）。**completed（2026-10-21）**：前端 33/33 + 配置基线 4/4 + 9223 离屏 live 8/8（亮/暗截图）+ types/theme/code-size PASS。reopen=复杂度分级/成本权重/审计落盘/自动档覆盖确认。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-10-21",
-  "documentCount": 380
+  "documentCount": 381
 }

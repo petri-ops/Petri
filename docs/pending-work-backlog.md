@@ -5,6 +5,8 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
+最后更新：2026-10-21（**BLOCK-225 Q9 D4 Auto completed**（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：按任务/附件每轮解析模型（有图→vision 绑定/能力；否则 agent 绑定/tools；回落当前）；`userPrefs.autoModel` 默认 false；菜单开关+预览、composer「自动」；发送/子代理启动时解析，不写回 active 绑定。证据=前端 33/33 + 配置基线 4/4 + 9223 离屏 live 8/8 + types/theme/code-size PASS。reopen=复杂度分级/成本权重/审计落盘/覆盖确认。plan=docs/block-225-q9-auto-model-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-10-21（**BLOCK-224 Q9 续项（D1+D2）completed**（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：模型目录状态诚实（加载中/发现失败/缺密钥/已隐藏逐行可见）+ 每模型可见性/上下文/默认思考档；`useAiSettings` 消费 `credential_status` 与逐 profile 发现失败；菜单/设置控件抽组件（SimpleChat 2136 / DesktopSettingsPanel 670，棘轮不增）。证据=前端 31/31 + 后端 3/3 + 9223 离屏 live 9/9 + lint 0 error/types 0。D4 Auto 留下一刀，之后继续 Q9 余项 → P4。plan=docs/block-224-q9-model-selector-depth-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-10-21（**BLOCK-223 Q9 续项垂直切片 completed**（用户「按照你的建议来，冲」）：系统通知 + 托盘最小化 + 退出摘要——后端 `GET /api/app/activity-summary`（tool_jobs running/pending、pending 审批、运行中主任务/子代理、后台进程）+ 主进程退出守卫（活动 >0 先出摘要；0 直接退出；渲染不可用/超时原生对话框兜底）+ 前端摘要弹窗与两项设置（`closeToTray` 默认 false / `notifyOnTurnEnd` 默认 true）。证据=block223 9 项 + 前端 12 项 + 9223 离屏 live 16/16（亮/暗截图）+ closeout 十三门 PASS；注册表 89→91。reopen=模型选择器深度/电脑控制 sidecar/崩溃同意/首启揭示/通知中心/摘要逐项操作。plan=docs/block-223-q9-desktop-shell-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。）

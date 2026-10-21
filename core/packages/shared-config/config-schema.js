@@ -391,6 +391,11 @@ const CONFIG_KEYS = Object.freeze([
     key: 'userPrefs.closeToTray', family: 'user-prefs', path: 'closeToTray',
     type: 'boolean', envKeys: [], aliases: [], mutable: true, ui: 'settings',
   },
+  {
+    // BLOCK-225 — D4 自动选模型：每轮按任务/附件解析（默认关=零行为变化）。
+    key: 'userPrefs.autoModel', family: 'user-prefs', path: 'autoModel',
+    type: 'boolean', envKeys: [], aliases: [], mutable: true, ui: 'none',
+  },
   // —— 技能治理账本（BLOCK-203 W4a P3；原 `shared-backend/skill-prefs.js` 无任何形状校验）——
   // `disabled.<id>` 不是布尔映射而是对象 `{ at, reason? }`，`uninstalledSources.<id>` 并存
   // `{ sourceDir, at }`。`findEntryByPath` 只寻址标量 ⇒ 按**点路径**逐字段登记，

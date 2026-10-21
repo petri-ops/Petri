@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-21（**UI-538 D4 自动选模型 verified（dev Electron 边界内；9223 离屏 live 8/8）**，BLOCK-225 / Q9）：按任务/附件每轮解析（有图→识图绑定/能力；否则 Agent/工具；回落当前）；菜单「自动」开关+解析预览，composer 显示「自动」；偏好 `autoModel` 默认 false。证据 `acceptance/block-225/`（live 8/8 + 亮/暗截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-21（**UI-537 模型选择器深度 verified（dev Electron 边界内；9223 离屏 live 9/9）**，BLOCK-224 / Q9 续项）：模型菜单加载中/发现失败/缺密钥/已隐藏逐行可见；行内上下文与默认思考档；隐藏模型不进选择器；设置页「选择器可见 / 默认思考档」两控。证据 `acceptance/block-224/`（live 9/9 + 亮/暗/设置截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**UI-536 桌面外壳长跑体验 verified（dev Electron 边界内；9223 离屏 live 16/16）**，BLOCK-223 / Q9 续项垂直切片）：系统通知（回合完成/失败/等待审批；聚焦抑制 + 3s 去重）、托盘最小化（`closeToTray` 关窗=隐藏，菜单显示/退出）、退出摘要弹窗（运行/排队/待审批/任务/子代理/后台进程/终端计数 → 取消 / 最小化到托盘 / 停止并退出）。证据 `acceptance/block-223/`（live 16/16 + 亮/暗截图）。真实 OS toast 外观属系统层，测试实例按纪律不弹真实通知。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -5150,3 +5152,11 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **验证（代码）**：前端 31/31（model-catalog 8 + ModelMenu 3 + hook 2 + 设置控件 2 + useAiSettings 16）；后端 3/3（profile 归一）；`theme-token-contract` 17/17；`quality:types` 0；code-size PASS（SimpleChat 2136 / DesktopSettingsPanel 670，棘轮未抬）。
 - **实机腿（9223 离屏，9/9）**：`acceptance/block-224/`——菜单打开并落定（「1 个渠道的模型列表加载失败（已回退到默认模型）」+ 2 行带「1M 上下文」）、亮/暗截图、设置页 4 组可见/默认思考控件。
 - **未做（reopen）**：D4 Auto（按任务/附件自动选模）；低峰折扣/Workspace 权限/价格用量；发现结果缓存 TTL。
+
+## UI-538: D4 自动选模型（2026-10-21 **verified（dev Electron 边界内；9223 离屏 live 8/8）**，BLOCK-225 / Q9）
+
+- **变化面**：模型菜单新增「自动（按任务选择）」开关，显示开启状态与解析预览；composer 模型钮在自动档显示「自动」（title 带预览）。解析在每轮发送时进行：有图片→vision 角色绑定/视觉能力；无图片→agent 绑定/工具能力；都没有→回落当前模型；候选只取 BLOCK-224 可选行。
+- **为什么这样设计（自有形态）**：自动档必须**可解释、可关闭、不改手动选择**——预览直接写出「哪个模型、因为什么」，关掉即回到手动 active；解析不写回 `active_chat_model_id`，避免自动模式悄悄改配置。默认关闭=零行为变化。
+- **验证（代码）**：前端 33/33（auto-model 5 + 偏好 2 + 菜单 4 + SimpleChat 6 + useAiSettings 16）；配置基线 4/4（92 键）；types 0；theme 17/17；code-size PASS（SimpleChat 2142）。
+- **实机腿（9223 离屏，8/8）**：`acceptance/block-225/`——默认关闭 → 开启显示「deepseek-flash（Agent 角色绑定）」+ composer「自动」→ 偏好 true → 关闭恢复具体模型、偏好 false；亮/暗截图。
+- **未做（reopen）**：复杂度分级/成本权重、学习型 Auto、解析审计落盘、自动档下的显式覆盖确认。

@@ -3,6 +3,33 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "block225-auto-model",
+      "note": "BLOCK-225 Q9 D4 Auto — 按任务/附件每轮解析模型（角色绑定 > 能力位 > 回落）；userPrefs.autoModel；菜单开关+预览、composer 自动标签。",
+      "patterns": [
+        "frontend/src/lib/auto-model.ts",
+        "frontend/src/hooks/useAutoModelPreference.ts",
+        "frontend/src/components/copilot/SimpleChat/hooks/useChatStream.ts",
+        "frontend/src/components/copilot/SimpleChat/ModelChip.tsx",
+        "frontend/src/components/copilot/SimpleChat/ModelMenu.tsx",
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "frontend/src/hooks/useAiSettings.ts",
+        "core/packages/shared-config/config-schema.js",
+        "test/block225-*.test.mjs",
+        "test/block201-settings-baseline.test.mjs",
+        "acceptance/block-225/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block225-*.cjs"
+      ],
+      "tests": [
+        "frontend/src/lib/auto-model.test.ts",
+        "frontend/src/hooks/useAutoModelPreference.test.ts",
+        "frontend/src/components/copilot/SimpleChat/ModelMenu.test.tsx",
+        "frontend/src/components/copilot/SimpleChat.test.tsx",
+        "frontend/src/hooks/useAiSettings.test.ts",
+        "test/block201-settings-baseline.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "block224-model-selector-depth",
       "note": "BLOCK-224 Q9 D1+D2 — 模型目录状态诚实（加载/发现失败/缺密钥/隐藏）+ 每模型可见性/上下文/默认思考；菜单抽 ModelMenu、设置控件抽 ModelSelectorControls。",
       "patterns": [

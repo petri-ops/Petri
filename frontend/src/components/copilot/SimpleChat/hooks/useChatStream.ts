@@ -54,6 +54,7 @@ import {
 } from '@/components/copilot/conversationRunStore';
 import { type ChatMessage } from '@/components/copilot/copilotClient';
 import { getApiPrefix, getToken } from '@/lib/authClient';
+import { resolveAutoPreset } from '@/lib/auto-model';
 import { type SimpleMessage } from '../types';
 
 /** BLOCK-102 P2 — 排队追问带会话归属：drain 只消费当前会话的条目，
@@ -122,6 +123,13 @@ export interface UseChatStreamArgs {
   activeRun: ConversationRunSnapshot | null;
   activeModel: ChatModelPreset | undefined;
   activeModelId: string;
+  /** BLOCK-225 — D4 Auto：发送时按任务/附件解析模型（默认关=直接用 activeModel）。 */
+  autoModel?: boolean;
+  modelPresets?: ChatModelPreset[];
+  modelCatalog?: import('@/lib/model-catalog').ModelCatalogState;
+  roleBindings?: Record<string, string>;
+  /** BLOCK-225 — 当前输入是否带图片引用（决定 vision 优先）。 */
+  hasImages?: () => boolean;
   // UI-303 — 四档：'plan'（计划模式并入档位菜单，Spec 门）
   accessMode: 'full' | 'workspace-write' | 'plan' | 'read';
   /** BLOCK-55 P1 — 计划模式（Spec 门）：随所有 send 路径进入请求 context。UI-303 起由 accessMode='plan' 派生。 */
@@ -204,6 +212,11 @@ export function useChatStream({
   activeRun,
   activeModel,
   activeModelId,
+  autoModel,
+  modelPresets,
+  modelCatalog,
+  roleBindings,
+  hasImages,
   accessMode,
   planMode,
   executionTargetId,
@@ -223,6 +236,18 @@ export function useChatStream({
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
+
+  // BLOCK-225 — D4：每轮发送前解析实际模型（不写回 active 绑定）。
+  const resolveModelForSend = useCallback((withImages: boolean) => {
+    if (!autoModel) return activeModel;
+    return resolveAutoPreset({
+      presets: modelPresets || [],
+      catalog: modelCatalog,
+      roleBindings,
+      hasImages: withImages,
+      fallbackId: activeModelId,
+    })?.preset || activeModel;
+  }, [activeModel, activeModelId, autoModel, modelCatalog, modelPresets, roleBindings]);
 
   // 3. `send` — primary entry point. Creates a conversation if
   // needed, builds the upstream message history, and starts a
@@ -306,14 +331,15 @@ export function useChatStream({
         ? [{ role: 'user', content: trimmed }]
         : [...history, { role: 'user', content: trimmed }];
 
+      const sendModel = resolveModelForSend(hasImages ? hasImages() : false);
       const started = startConversationRun({
         conversationId: targetConversationId,
         projectId,
         userContent: trimmed,
         historyLastUserTs: [...messagesRef.current].reverse().find((message) => message.role === 'user')?.ts,
         messages: tagged,
-        modelPresetId: activeModel?.endpointProfileId || activeModelId,
-        modelName: activeModel?.model,
+        modelPresetId: sendModel?.endpointProfileId || sendModel?.id || activeModelId,
+        modelName: sendModel?.model,
         // BLOCK-81 P2 — 思考档位随本轮下发（后端按 profile 能力位门控后映射上游参数）
         thinkingLevel,
         context: {
@@ -456,14 +482,15 @@ export function useChatStream({
       .filter((m) => !m.error && !m.pending)
       .map((m) => ({ role: m.role, content: m.content }));
     tagged.push({ role: 'user', content: trimmed });
+    const childModel = resolveModelForSend(false);
     startSubAgentTask({
       conversationId,
       projectId,
       userContent: trimmed,
       messages: tagged,
       parentTaskId,
-      modelPresetId: activeModel?.endpointProfileId || activeModelId,
-      modelName: activeModel?.model,
+      modelPresetId: childModel?.endpointProfileId || childModel?.id || activeModelId,
+      modelName: childModel?.model,
       context: {
         ...copilotCtxRef.current,
         page: 'desktop-project',
