@@ -15,7 +15,7 @@
 
 type AnnotationSurface = 'result-artifact' | 'workspace-file';
 export type AnnotationColor = 'amber' | 'sky' | 'rose';
-type AnnotationKind = 'region';
+type AnnotationKind = 'region' | 'ellipse' | 'arrow';
 
 export const ANNOTATION_COLORS: readonly AnnotationColor[] = ['amber', 'sky', 'rose'];
 
