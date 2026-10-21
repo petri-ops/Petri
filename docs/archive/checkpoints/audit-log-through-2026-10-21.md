@@ -33,3 +33,6 @@
 <!-- audit-log-compact.mjs 追加 @ 2026-10-21T12:09:00.285Z -->
 最后更新：2026-10-21（**BLOCK-233 Q-DOMAIN P4-C S1 tool 元数据单一源 completed**）：删除 `tools-executor` 19 项标签表与 `result-files` CSV/大小白名单，改读 pack 注册表；pack 补 go-kegg/gsea + `csvValidation`/一列声明（0.2.1）；域中性 **201→179 处 / 100→85 键**。证据=红绿 5 红→14/14 + pack 死链守卫 1/1 + test:changed 460 pass/0 fail + closeout 十三门；唯一行为对齐=maftools 上限 100→200MB（随 pack 声明）。**下一片=S2 demo/artifact profiles**。plan=docs/block-233-qdomain-p4c-tool-metadata-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-21（**BLOCK-232 Q-DOMAIN P4-B 权限通用化 completed**）：`single-cell`/`spatial` 专属 gate 收敛为通用 `data` 资源权限，两键保留 legacy 别名；`/api/run` = `tools|data`；零迁移、本地 admin 零变化。证据=红绿 7 红→11/11 + REST 实机 3/3（admin 404 非 403）+ test:changed 320 pass/0 fail + closeout 十三门。实机抓真=存量 `/api/auth/me` 500 已登记 🟡；**下一包=P4-C 域中性分片**。plan=docs/block-232-qdomain-p4b-permissions-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-21T13:31:23.400Z -->
+最后更新：2026-10-21（**BLOCK-234 P4-C S4 completed；包仍 active**）：methods Python 等价模板（8 类）+ 报告引文（13 条）下沉 pack 0.2.5；核心改为有界装载 + 占位符渲染，无包诚实降级。证据=block234 4/4 + block220 13/13 + test:changed 426 项 0 红 + closeout 十三门；域中性 **143→103 处 / 68→60 键**。**下一阶段=S5 result/RS**。plan=docs/block-234-qdomain-p4c-tail-plan.md §9。G0 开发期常态 · 不外推 packaged/Provider/GA。

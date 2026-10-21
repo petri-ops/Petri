@@ -111,3 +111,22 @@ completed 需：契约 + 数据桥 + host 路由 + pack 三面 + 测试 + canoni
 3. selection 维持核心（除非另立窄桥契约并经治理裁决）。
 
 在上述前置完成前，第二批标记为 **blocked（前置缺口）**，不计入「代码未写」的欠账——这是设计缺口，不是工作量缺口。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 8. 第二批收口（2026-10-21）：compare 只读面
+
+### 8.1 交付
+
+- **前置不是新造的**：`conversationRunStore.resultEditProgress` 已带 `changeSetId`，`CenterPanel` 一直在消费 `activeResultProgress`——直接取末项 `changeSetId` 作为 compare 上下文（原判断「缺上下文」被实码推翻，如实改正）。
+- **桥**：`packTabData` 增 `compare` 分支 → `GET /api/result-studio/changesets/:id/compare`，payload 裁到 `{ files ≤200, truncated }`（path/status/added/removed）。
+- **路由**：`resultSurfaceHost` 加 `compare → compare`；registry 白名单同步。
+- **pack**（0.2.2）：`tabs` 增 `compare`，`ui/result.html` 增四列表格视图 + 截断提示 + 空态。
+
+### 8.2 范围裁决：selection **不迁**
+
+`POST/DELETE /selection`、`/selection/query`、`/selection/resolve` 全是写面。把它们搬进领域包等于把可信写边界挪出核心，与「核心保留治理面」相悖——**这是设计决定，不是欠账**。selection 维持核心。
+
+### 8.3 验证与边界
+
+- 类型 0 错；`lib/workSurface` + host **41 项全绿**（新增 3 条 compare 用例）。
+- **无实机腿**：compare 视图未在 dev 栈打开过，`changesets/:id/compare` 返回字段（按 `files[].path/status/added/removed` 取）未实机核对；UI-545 保持 `in_progress`。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

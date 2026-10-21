@@ -7672,7 +7672,7 @@
         "tabs",
         "G0"
       ],
-      "notes": "2026-10-21 立项（用户「按顺序进入 P1」）：P2b 全量高级 tab 迁移第一批——resultSurfaces.tabs 契约（白名单 lineage/history/revisions-source）+ 只读有界桥 packTabData + host 按 tab 路由与失败回落 + pack ui/result.html renderTab（0.2.1）。**completed（2026-10-21）**：11 条单测 + 定向回归 41 文件 318 项 + types 0 + knip PASS + theme 17/17。边界=test:changed 空转（树干净）、无实机腿、history 未接管（无列表端点）、其余五面与图形态 reopen。"
+      "notes": "2026-10-21 立项（用户「按顺序进入 P1」）：P2b 全量高级 tab 迁移第一批——resultSurfaces.tabs 契约（白名单 lineage/history/revisions-source）+ 只读有界桥 packTabData + host 按 tab 路由与失败回落 + pack ui/result.html renderTab（0.2.1）。**completed（2026-10-21）**：11 条单测 + 定向回归 41 文件 318 项 + types 0 + knip PASS + theme 17/17。边界=test:changed 空转（树干净）、无实机腿、history 未接管（无列表端点）、其余五面与图形态 reopen。 **第二批（2026-10-21）**：compare 只读面接管——changeSetId 取自 resultEditProgress（实码推翻「缺上下文」判断）+ 桥 compare 分支（files≤200）+ 路由 compare→compare + pack 0.2.2 比较视图。selection 明确不迁（写面属治理边界）。仍无实机腿（UI-545 in_progress）。"
     }
   ],
   "lastUpdated": "2026-10-21",

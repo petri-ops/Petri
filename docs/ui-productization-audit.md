@@ -5263,3 +5263,10 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **为什么这样设计（自有形态）**：迁移按「只读先、交互后」推进——先把数据可复现、无副作用的源码/血缘交给领域包，写面（选择/重放/回滚）留在核心治理面，避免把可信边界挪进包；回落原因写进 DOM，实机一眼能看出是「没声明」还是「取数失败」。
 - **验证（代码）**：路由/降级单测 11 条 + 定向回归 41 文件 318 项 + `quality:types` 0 + knip PASS（255 键）+ theme 17/17；pack 仓 `0.2.1`。
 - **未做实机腿**：dev 栈里没有带 revision 的 artifact 可打开，`renderTab()` 与 `lineage` 字段（按 `nodes/edges`）均未实机核对 → 保持 `in_progress`，不宣称 verified。
+
+## UI-545: 结果面 compare 由领域包渲染（2026-10-21 **in_progress（代码+单测绿，无实机腿）**，BLOCK-236 第二批）
+
+- **变化面**：结果面 `compare` 模式在领域包声明 `tabs: compare` 时由 pack 渲染四列差异表（文件/状态/新增/删除），带截断提示与「没有可比较差异」空态；未声明或取数失败回落核心并标 `data-fallback-reason`。
+- **为什么这样设计（自有形态）**：只读视图（差异表）可以外包给领域包，但**写面（selection 选择/查询/解析）留在核心**——那是治理边界，不随渲染一起搬。
+- **验证（代码）**：桥 compare 分支（裁剪/缺参/HTTP 失败）+ 路由 compare 命中，共 3 条新用例；`lib/workSurface`+host 41 项绿；`quality:types` 0。
+- **未做实机腿**：dev 栈未打开 compare 视图，`changesets/:id/compare` 字段未实机核对 → 保持 `in_progress`。

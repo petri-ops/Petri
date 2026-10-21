@@ -1,4 +1,6 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-10-21（**BLOCK-236 第二批收口**）：compare 只读面接管——`changeSetId` 取自 `resultEditProgress`（原「缺上下文」判断被实码推翻）+ 桥 compare 分支（files ≤200）+ 路由 `compare→compare` + pack `0.2.2` 四列比较视图。**selection 明确不迁**（写面=治理边界）。证据=类型 0 错 + `lib/workSurface`/host 41 项绿。边界=无实机腿、compare 字段未实机核对（UI-545 in_progress）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-21（**BLOCK-236 收口**）：P2b 全量 tab 迁移第一批——`resultSurfaces[].tabs` 契约 + 只读有界桥 + host 按 tab 路由与失败回落 + pack `renderTab`（0.2.1，lineage/revisions-source 两面，history 因无端点未声明）。证据=11 条单测 + 定向回归 41 文件 318 项 + types 0 + knip PASS + theme 17/17。**边界**：`test:changed` 对本批空转（树干净）、pack tab 页无实机腿、lineage 字段未实机核对。plan=docs/block-236-qdomain-p2b-full-tabs-plan.md §6。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**BLOCK-236 Q-DOMAIN P2b 全量 tab 迁移立项 active（P0-LAUNCH）**）：第一批只读三面——`resultSurfaces[]` 增 `tabs` 声明（白名单 lineage/history/revisions-source）+ 只读数据桥（lineage ≤200 节点/≤400 边、history ≤100 条、源码 ≤200KB）+ `CenterPanel` 按 tab 路由（未命中一律回落核心过渡面并标注）+ pack 三面表格渲染。非范围=compare/selection/annotations/methods/export/lineage 图形态/真实 job 实机腿。plan=docs/block-236-qdomain-p2b-full-tabs-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -9,7 +11,6 @@
 最后更新：2026-10-21（**BLOCK-235 Q-DOMAIN P4-D 立项 active**）：P4 余项收口——`dataModelExtensions` additive 扩展契约（pack 新增 artifact 类型/字段，canonical SDC-0 profile 不可覆盖）+ 导出/联邦域中性基线；域中性保持 11 处 / 6 键 compat。单工作包串行。plan=docs/block-235-qdomain-p4d-datamodel-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-21（**BLOCK-234 P4-C S6 completed；BLOCK-234 completed**）：前端/桌面 37 处领域词清零；剩余 11 处 / 6 键登记为显式兼容白名单（compat：permissions/guest/modality/schema/runtime-bundle/security-extension，每条带 category/owner/reason，门禁断言逐键一致）；pack 0.2.7 `provides.examplePrompts`；h5 家族前缀保留 h5ad 行为。证据=domain-neutrality 3/3 + block234 示例卡 3/3 + 前端 33/33 + test:changed 1238 项 0 红 + Jev 追加 67/67 + closeout 十三门 + output:judge PASS。域中性 **48→11 处 / 27→6 键**。**无 active 工作包；下一包需用户发令**。plan=docs/block-234-qdomain-p4c-tail-plan.md §11。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-21（**BLOCK-234 P4-C S5 completed；包仍 active**）：result/RS 科学语义下沉 pack `provides.scientificProfiles`（compare/rerun/cohort/planner/selection/heavy/interpret；pack 0.2.6）；核心只留有界引擎与不变量，无包诚实降级。证据=block234 6/6 + compare/rerun/replay/changeset/selection/approval/planner 定向全绿 + test:changed 1039 项 0 红 + Jev 追加 56/56 + closeout 十三门；域中性 **103→48 处 / 60→27 键**。**下一阶段=S6 前端/桌面 + 兼容白名单**。plan=docs/block-234-qdomain-p4c-tail-plan.md §10。G0 开发期常态 · 不外推 packaged/Provider/GA。
-最后更新：2026-10-21（**BLOCK-234 P4-C S4 completed；包仍 active**）：methods Python 等价模板（8 类）+ 报告引文（13 条）下沉 pack 0.2.5；核心改为有界装载 + 占位符渲染，无包诚实降级。证据=block234 4/4 + block220 13/13 + test:changed 426 项 0 红 + closeout 十三门；域中性 **143→103 处 / 68→60 键**。**下一阶段=S5 result/RS**。plan=docs/block-234-qdomain-p4c-tail-plan.md §9。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 
 

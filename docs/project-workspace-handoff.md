@@ -1,6 +1,8 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-21（**BLOCK-236 第二批收口**）：compare 只读面接管（changeSetId 实取自 resultEditProgress）；selection 不迁（写面）。**下一步**=Q6 全量批注或 Q8 深化。边界=无实机腿。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-21（**BLOCK-236 收口 completed**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-236（P2b 全量 tab 迁移第一批）**：`resultSurfaces[].tabs` 白名单契约 + `packTabData` 只读有界桥（lineage/源码）+ `resultSurfaceHost` tab 级判定（code→revisions-source / history→history，未声明即 `tab_not_claimed`）+ `CenterPanel` 消费与 `data-fallback-reason` + `PackSurfaceFrame` 传 `tab/tabData` + pack `0.2.1` `renderTab`。证据=11 单测 + 41 文件 318 项 + types 0 + knip PASS + theme 17/17。**边界**：test:changed 空转、无实机腿、history 无端点未接管、其余五面 reopen。**下一包**=P2b 第二批（compare/selection）或 Q6 全量批注。G0 开发期常态 · 不外推 packaged/Provider/GA。
