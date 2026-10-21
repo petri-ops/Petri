@@ -10,6 +10,7 @@
  */
 
 const crypto = require('crypto');
+const { loadArtifactProfileActors } = require('./pack-artifact-profile-actors');
 
 const ARTIFACT_PROFILE_REGISTRY_VERSION = 1;
 const PROFILE_KINDS = Object.freeze(['data', 'artifact', 'display']);
@@ -117,7 +118,6 @@ const ARTIFACT_PROFILES = {
       rule('counts_non_negative_integer', 'all measured values must be finite non-negative integers'),
       rule('sample_names_unique', 'sample column names must be unique'),
     ],
-    consumers: ['sample-metadata-validator', 'deseq2', 'expression-qc'],
   }),
 
   'petri.sample-metadata.v1': defineProfile({
@@ -152,8 +152,6 @@ const ARTIFACT_PROFILES = {
       rule('condition_levels_explicit', 'reference and treatment levels require an explicit scientific decision'),
       rule('sample_overlap_required', 'sample identifiers must overlap the bound measurement matrix'),
     ],
-    producers: ['sample-metadata-validator'],
-    consumers: ['deseq2', 'pca-explorer', 'wgcna'],
   }),
 
   'petri.expression-matrix.v1': defineProfile({
@@ -181,8 +179,6 @@ const ARTIFACT_PROFILES = {
       rule('normalization_declared', 'normalization method and scale must be declared'),
       rule('not_raw_counts', 'raw integer counts cannot be relabelled as normalized expression'),
     ],
-    producers: ['expression-qc'],
-    consumers: ['pca-explorer', 'gene-correlation', 'wgcna'],
   }),
 
   'petri.deg.v1': defineProfile({
@@ -221,9 +217,6 @@ const ARTIFACT_PROFILES = {
       Gene: 'gene',
     },
     identifierNamespaces: ['symbol', 'ensembl', 'entrez', 'custom_declared'],
-    producers: ['deg-standardizer'],
-    directProducers: ['deseq2'],
-    consumers: ['volcano-plot', 'go-kegg', 'gsea', 'pca-explorer'],
     validationRules: [
       rule('no_duplicate_genes', 'gene column must not contain duplicate entries'),
       rule('padj_not_all_na', 'padj cannot be entirely missing'),
@@ -259,8 +252,6 @@ const ARTIFACT_PROFILES = {
       log2FC: 'score',
     },
     identifierNamespaces: ['symbol', 'ensembl', 'entrez', 'custom_declared'],
-    producers: ['deg-standardizer', 'gene-correlation', 'wgcna'],
-    consumers: ['go-kegg', 'gsea'],
     validationRules: [
       rule('gene_ids_not_missing', 'gene identifiers cannot be missing'),
       rule('gene_ids_unique', 'gene identifiers must be unique after deterministic deduplication'),
@@ -305,8 +296,6 @@ const ARTIFACT_PROFILES = {
       Count: 'count',
     },
     identifierNamespaces: ['go', 'kegg', 'reactome', 'msigdb', 'custom_declared'],
-    producers: ['go-kegg', 'gsea'],
-    consumers: [],
     validationRules: [
       rule('term_ids_not_missing', 'term identifiers cannot be missing'),
       rule('term_ids_unique', 'term identifiers must be unique within database and direction'),
@@ -317,6 +306,21 @@ const ARTIFACT_PROFILES = {
     ],
   }),
 };
+
+// BLOCK-234 — producer/consumer lists are domain data owned by installed packs.
+// Profiles keep empty lists when no pack is installed (schema engine still works).
+try {
+  const { actors } = loadArtifactProfileActors();
+  for (const [profileId, actorSet] of Object.entries(actors)) {
+    const profile = ARTIFACT_PROFILES[profileId];
+    if (!profile) continue;
+    for (const field of ['producers', 'directProducers', 'consumers']) {
+      if (Array.isArray(actorSet[field])) profile[field] = actorSet[field].slice();
+    }
+  }
+} catch {
+  /* pack actors unavailable → keep empty lists */
+}
 
 deepFreeze(ARTIFACT_PROFILES);
 

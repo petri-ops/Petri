@@ -618,6 +618,10 @@
         "core/shared-backend/artifact-manifest.js",
         "core/shared-backend/artifact-profiles.js",
         "core/shared-backend/agent-workflow.js",
+        "core/shared-backend/artifact-profiles.js",
+        "core/shared-backend/pack-artifact-profile-actors.js",
+        "core/petri-server/helpers/tools-assets.js",
+        "core/petri-server/helpers/pack-demo-assets.js",
         "test/fixtures/harness-scientific-task/**"
       ],
       "tests": [
@@ -3387,6 +3391,10 @@
         "core/petri-server/agent-tools/result-context-tools.js",
         "core/petri-server/agent-tools/result-selection-tools.js",
         "test/block138-f1-chain-pending-registration.test.mjs",
+        "test/pl4a-tool-jobs-retention.test.mjs",
+        "test/pl4b-job-governance.test.mjs",
+        "test/g0-sdc0-profile-registry.test.mjs",
+        "test/g0-third-wave.test.mjs",
         "acceptance/block-138/**"
       ],
       "tests": [
@@ -4655,22 +4663,37 @@
     },
     {
       "id": "block234-qdomain-p4c-tail",
-      "note": "BLOCK-234 P4-C S2 — agent workflow 模板下沉 pack provides.agentWorkflowTemplates；bounded loader + 夹具；域中性 179→163。",
+      "note": "BLOCK-234 P4-C S2-S3 — workflow/demo/profile actors 下沉 pack；bounded loaders + 夹具；域中性 179→143。",
       "patterns": [
         "core/shared-backend/pack-workflow-templates.js",
         "core/shared-backend/agent-workflow.js",
+        "core/shared-backend/artifact-profiles.js",
+        "core/shared-backend/pack-artifact-profile-actors.js",
+        "core/petri-server/helpers/tools-assets.js",
+        "core/petri-server/helpers/pack-demo-assets.js",
         "test/block234-*.test.mjs",
         "test/agent-workflow.test.mjs",
         "test/fixtures/agent-workflow-templates.json",
         "test/helpers/workflow-pack-fixture.mjs",
+        "test/helpers/demo-pack-fixture.mjs",
+        "test/helpers/artifact-actors-pack-fixture.mjs",
+        "test/helpers/artifact-actors-fixture-auto.mjs",
+        "test/fixtures/demo-assets.json",
+        "test/fixtures/artifact-profile-actors.json",
         "acceptance/block-234/**"
       ],
       "tests": [
         "test/block234-pack-workflow-templates.test.mjs",
+        "test/block234-demo-assets.test.mjs",
+        "test/block234-profile-actors.test.mjs",
         "test/agent-workflow.test.mjs",
         "test/agent-approval.test.mjs",
         "test/agent-workflow-phase6.test.mjs",
-        "test/block138-f1-chain-pending-registration.test.mjs"
+        "test/block138-f1-chain-pending-registration.test.mjs",
+        "test/pl4a-tool-jobs-retention.test.mjs",
+        "test/pl4b-job-governance.test.mjs",
+        "test/g0-sdc0-profile-registry.test.mjs",
+        "test/g0-third-wave.test.mjs"
       ],
       "classifiesScripts": false
     }

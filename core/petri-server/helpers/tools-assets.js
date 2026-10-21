@@ -2,35 +2,13 @@ const fs = require('fs');
 const path = require('path');
 const {safeJoinUnder} = require('../../shared-backend/path-safe');
 const {sendThemedHtmlFile} = require('./report-theme');
+const {loadPublicDemoAssets} = require('./pack-demo-assets');
 
 // Published demo assets are immutable local job output directories. They must
-// remain visible even if the mutable tool_jobs table
-// is re-migrated, truncated, or no longer carries is_public flags.
-const PUBLIC_DEMO_ASSETS = Object.freeze({
-  'bindea-immune': 'job_bdd759f1fd7a46f1',
-  'cellchat': 'job_ead4e18425474378',
-  'complexheatmap': 'job_0f96125f0ce14383',
-  'consensus-cluster': 'job_37962f3e447042fc',
-  'deseq2': 'job_5c2047cb727e4d42',
-  'go-kegg': 'job_0b3ab56c34e14d54',
-  'gsea': 'job_03771538de544ada',
-  'km-survival': 'job_0bccfb3f75474997',
-  'lasso-cox': 'job_997f1ba968c643c8',
-  'maftools-mutation': 'job_c819c467e7444f0b',
-  'ml-classifier': 'job_e3ab53e47a2e477b',
-  'ml-feature-select': 'job_94049d598ea84196',
-  'mo-mofa': 'job_6f4ca958b32e49ce',
-  'mo-snf': 'job_604a169b32924e73',
-  'rsf-survival': 'job_9410db5b7eb6484d',
-  'seurat-standard': 'job_aed0a50d2d524ef9',
-  'shap-explain': 'job_96a2debf102c42e4',
-  'spatial-deconv': 'job_a9701b22bc144c34',
-  'spatial-lr': 'job_b53a8136d7584d5d',
-  'spatial-standard': 'job_1d8b2aff0ddd46cd',
-  'spatial-svg': 'job_bfa695b75eff4663',
-  'wgcna': 'job_06d7ea08cf4f4bb5',
-});
-
+// remain visible even if the mutable tool_jobs table is re-migrated, truncated,
+// or no longer carries is_public flags. The catalog is domain data owned by the
+// installed pack (`provides.demoAssets`), read at startup.
+const PUBLIC_DEMO_ASSETS = Object.freeze(loadPublicDemoAssets().assets);
 const PUBLIC_DEMO_JOB_IDS = new Set(Object.values(PUBLIC_DEMO_ASSETS));
 
 // safeJoinUnder is imported from shared-backend/path-safe above.

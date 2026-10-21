@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
+import './helpers/artifact-actors-fixture-auto.mjs';
 import profileRegistry from '../core/shared-backend/artifact-profiles.js';
 import workflow from '../core/shared-backend/agent-workflow.js';
 

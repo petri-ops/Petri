@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createRequire } from 'node:module';
+import './helpers/artifact-actors-fixture-auto.mjs';
 
 const require = createRequire(import.meta.url);
 const g0 = require('../core/shared-backend/g0-baseline');

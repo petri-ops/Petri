@@ -7,8 +7,11 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import express from 'express';
+import { installDemoPackFixture } from './helpers/demo-pack-fixture.mjs';
 
 const nodeRequire = createRequire(import.meta.url);
+const demoPack = installDemoPackFixture();
+process.on('exit', () => demoPack.cleanup());
 const Database = nodeRequire('../core/petri-server/node_modules/better-sqlite3');
 const { createToolsPlatformRoutes } = nodeRequire('../core/petri-server/routes/tools-platform.js');
 const { PUBLIC_DEMO_JOB_IDS } = nodeRequire('../core/petri-server/helpers/tools-assets.js');

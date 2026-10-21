@@ -1,0 +1,60 @@
+{
+  "petri.counts-matrix.v1": {
+    "consumers": [
+      "sample-metadata-validator",
+      "deseq2",
+      "expression-qc"
+    ]
+  },
+  "petri.sample-metadata.v1": {
+    "producers": [
+      "sample-metadata-validator"
+    ],
+    "consumers": [
+      "deseq2",
+      "pca-explorer",
+      "wgcna"
+    ]
+  },
+  "petri.expression-matrix.v1": {
+    "producers": [
+      "expression-qc"
+    ],
+    "consumers": [
+      "pca-explorer",
+      "gene-correlation",
+      "wgcna"
+    ]
+  },
+  "petri.deg.v1": {
+    "producers": [
+      "deg-standardizer"
+    ],
+    "directProducers": [
+      "deseq2"
+    ],
+    "consumers": [
+      "volcano-plot",
+      "go-kegg",
+      "gsea",
+      "pca-explorer"
+    ]
+  },
+  "petri.gene-list.v1": {
+    "producers": [
+      "deg-standardizer",
+      "gene-correlation",
+      "wgcna"
+    ],
+    "consumers": [
+      "go-kegg",
+      "gsea"
+    ]
+  },
+  "petri.enrichment-table.v1": {
+    "producers": [
+      "go-kegg",
+      "gsea"
+    ]
+  }
+}

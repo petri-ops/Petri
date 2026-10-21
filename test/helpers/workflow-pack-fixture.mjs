@@ -13,6 +13,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const TEMPLATE_FIXTURE = path.join(ROOT, 'test', 'fixtures', 'agent-workflow-templates.json');
+const ACTORS_FIXTURE = path.join(ROOT, 'test', 'fixtures', 'artifact-profile-actors.json');
 
 export function installWorkflowPackFixture() {
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-workflow-pack-'));
@@ -21,9 +22,13 @@ export function installWorkflowPackFixture() {
   fs.mkdirSync(packRoot, { recursive: true });
   fs.writeFileSync(path.join(packRoot, 'pack.json'), JSON.stringify({
     packId: 'fixture-pack',
-    provides: { agentWorkflowTemplates: 'workflow-templates.json' },
+    provides: {
+      agentWorkflowTemplates: 'workflow-templates.json',
+      artifactProfileActors: 'artifact-profile-actors.json',
+    },
   }));
   fs.copyFileSync(TEMPLATE_FIXTURE, path.join(packRoot, 'workflow-templates.json'));
+  fs.copyFileSync(ACTORS_FIXTURE, path.join(packRoot, 'artifact-profile-actors.json'));
   fs.writeFileSync(
     path.join(dataDir, 'packs', 'installed.json'),
     JSON.stringify([{ packId: 'fixture-pack', packRoot, enabled: true, version: '1.0.0' }]),

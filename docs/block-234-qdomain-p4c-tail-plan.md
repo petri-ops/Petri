@@ -85,3 +85,25 @@ BLOCK-234 只有在 S2–S6 全部收口（或剩余量经裁决为显式兼容�
 - 不执行 pack 代码；状态机/投影/血缘逻辑零改动。
 - 包缺失时工作流目录为空（诚实降级）；生态内的 pack 0.2.2 已在位。
 - 下一阶段=S3（demo assets + artifact profiles 下沉 pack）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 8. S3 收口（2026-10-21）
+
+**S3 completed；BLOCK-234 仍 active（S4–S6 open）。**
+
+### 8.1 交付
+
+- **S3a demo assets**：pack 0.2.3 `demo-assets.json` + `provides.demoAssets`（22 条公开 demo job 映射）；核心 `pack-demo-assets.js` bounded loader，`tools-assets.js` 启动时装配 `PUBLIC_DEMO_ASSETS/JOB_IDS`（API 不变）。
+- **S3b profile actors**：pack 0.2.4 `artifact-profile-actors.json` + `provides.artifactProfileActors`；核心 `pack-artifact-profile-actors.js` bounded loader，`artifact-profiles.js` 在 `deepFreeze` 前合并 6 个 profile 的 producers/directProducers/consumers；profile schema 引擎仍留核心。
+- 测试：`block234-demo-assets` 4/4、`block234-profile-actors` 4/4；`pl4a/pl4b` 接 demo 夹具、`g0-sdc0/g0-third-wave/hle/agent-workflow` 接 actor 夹具；workflow 夹具 pack 同时提供 actors。
+
+### 8.2 验证
+
+- 域中性：**163→143 处 / 80→68 键**（tools-assets 7 + artifact-profiles 13 归零），0 新增/0 恶化。
+- `test:changed`：**535 项 / 524 pass / 0 fail / 11 skip**。
+- `npm run closeout` **十三门 PASS**（report 级 `skills:check` OK）。
+
+### 8.3 边界
+
+- demo 映射与 actor 映射均为启动时读取；安装/停用包后需重启后端生效（与既有 pack 装配纪律一致）。
+- 包缺失时 actors 为空、demo 保护集合为空；profile schema 校验不依赖 actor 数据。
+- 下一阶段=S4（methods-export 模板/引文下沉 pack）。G0 开发期常态 · 不外推 packaged/Provider/GA。
