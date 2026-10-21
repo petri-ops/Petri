@@ -1,7 +1,9 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
-最后更新：2026-10-21（**BLOCK-225 Q9 D4 Auto completed**）
+最后更新：2026-10-21（**BLOCK-226 Q9 通知中心/免打扰 completed**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-226（通知中心 + 免打扰）**：①`userPrefs.quietHours`（空=关，跨午夜；注册表 93 键）+ 主进程 `quiet_hours` 门；②`lib/quiet-hours` + `lib/notification-center`（≤50 条、未读/已读/清空）；③`useTurnNotifications` 写中心（不受系统通知抑制影响）；④标题栏 `NotificationCenterBell`（铃铛/未读/列表/全部已读/清空；`.notificationMenu` 向左展开）；⑤设置页免打扰输入。证据=前端 62/62 + Node 13/13 + 9223 离屏 live 11/11（亮/暗/设置截图）+ theme/types/code-size PASS。**下一包**=K9 首启揭示 → K2/E7 评估 → Q-DOMAIN P4 data model（母纲要求最后）。plan=`docs/block-226-q9-notification-center-plan.md` §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-225（Q9 D4 Auto）**：①`userPrefs.autoModel`（默认 false，注册表 92 键）；②`lib/auto-model` 确定性解析（有图：vision 绑定 > vision 能力；无图：agent 绑定 > tools 能力；回落当前/首个；跳过缺密钥/隐藏）；③`useAiSettings` 暴露 roleBindings；④`useChatStream` 在发送与子代理启动时解析（不写回 active）；⑤菜单开关+预览、composer「自动」；`ModelChip` 抽出（SimpleChat 2142 行）。证据=前端 33/33 + 配置基线 4/4 + 9223 离屏 live 8/8（亮/暗截图）+ types/theme/code-size PASS。**下一包**=Q9 通知中心/免打扰 → K9 首启揭示 → K2/E7 评估 → Q-DOMAIN P4 data model（母纲要求最后）。plan=`docs/block-225-q9-auto-model-plan.md` §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

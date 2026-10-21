@@ -5,6 +5,7 @@ import { formatShortstatBadge } from '@/components/copilot/conversationChangesSt
 import { useWorkspacePanelsContext } from '../WorkspacePanelsContext';
 import styles from '../TitleBar.module.css';
 import { getIsMac, getIsProjection, parseWorkspaceRoute, WindowControls } from './shared';
+import { NotificationCenterBell } from './NotificationCenterBell';
 
 /**
  * BLOCK-62 P1a — TitleBar 右区片段（右栏标签 pills +「+」工具菜单 + 底部终端 /
@@ -215,6 +216,7 @@ export function TitleBarRightZone(): React.ReactElement {
       )}
 
       <div className={styles.windowTools}>
+        <NotificationCenterBell />
         {/* UI-361 — 指挥中心入口迁入壳层左栏底部（LeftSidebarFooter）：
             它是全局单例窗（跨项目/会话的全部作业俯瞰），不属于列级 chrome，
             原先在右栏 header 里视觉上像右栏的附属控件。快捷键 Ctrl/Cmd+Shift+C

@@ -447,7 +447,7 @@ export function SimpleChat({
   }, [subTasksForAutoOpen]);
   const durableLoop = useDurableConversationLoop(projectId, conversationId, activeRun?.loop);
   const pendingApproval = activeRun?.pendingApproval || null;
-  useTurnNotifications(conversationId, activeRun?.status ?? null, pendingApproval);
+  useTurnNotifications(conversationId, projectId, activeRun?.status ?? null, pendingApproval);
 
   // Plan 1.6 §4.2 — read Copilot context from React Context, not the
   // module-scope singleton. Captured into a ref so the latest value is

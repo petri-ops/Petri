@@ -166,6 +166,8 @@ function createDesktopShell({
       focused: alive ? win.isFocused() : false,
       visible: alive ? win.isVisible() : false,
       minimized: alive ? win.isMinimized() : false,
+      quietHours: prefs.quietHours,
+      nowDate: new Date(),
       key: (payload && (payload.dedupeKey || payload.conversationId || payload.label)) || '',
       lastKey: lastNotification.key,
       lastAt: lastNotification.at,

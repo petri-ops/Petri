@@ -7456,8 +7456,23 @@
       "archivePolicy": "retain_stable_path",
       "tags": ["model-selector", "auto", "routing", "q9", "G0"],
       "notes": "2026-10-21 立项（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：Q9 D4 Auto——按任务/附件在每轮发送前解析模型（有图→vision 绑定/能力；否则 agent 绑定/tools；回落当前），开关持久化 userPrefs.autoModel（默认 false）。**completed（2026-10-21）**：前端 33/33 + 配置基线 4/4 + 9223 离屏 live 8/8（亮/暗截图）+ types/theme/code-size PASS。reopen=复杂度分级/成本权重/审计落盘/自动档覆盖确认。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-226-Q9-NOTIFICATION-CENTER",
+      "capability": "q9-notification-center",
+      "path": "docs/block-226-q9-notification-center-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P5-CLOSED",
+      "canonical": true,
+      "truthDomain": "q9-notification-center",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-21",
+      "archivePolicy": "retain_stable_path",
+      "tags": ["notification", "inbox", "quiet-hours", "q9", "G0"],
+      "notes": "2026-10-21 立项（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：通知中心（标题栏铃铛/未读/列表/全部已读）+ 免打扰时段 userPrefs.quietHours（空=关，主进程返回 quiet_hours；应用内仍留痕）。**completed（2026-10-21）**：前端 62/62 + Node 13/13 + 9223 离屏 live 11/11（亮/暗/设置截图）+ theme/types/code-size PASS。reopen=点击跳转/系统历史/审批穿透/声音/类型开关/跨设备。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-10-21",
-  "documentCount": 381
+  "documentCount": 382
 }

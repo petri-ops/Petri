@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-21（**UI-539 通知中心 + 免打扰 verified（dev Electron 边界内；9223 离屏 live 11/11）**，BLOCK-226 / Q9）：标题栏铃铛+未读徽章+通知列表（回合终态/待审批）；`userPrefs.quietHours` 只抑制系统 toast、应用内仍留痕；面板向左展开避免右缘裁切。证据 `acceptance/block-226/`（live 11/11 + 亮/暗/设置截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-21（**UI-538 D4 自动选模型 verified（dev Electron 边界内；9223 离屏 live 8/8）**，BLOCK-225 / Q9）：按任务/附件每轮解析（有图→识图绑定/能力；否则 Agent/工具；回落当前）；菜单「自动」开关+解析预览，composer 显示「自动」；偏好 `autoModel` 默认 false。证据 `acceptance/block-225/`（live 8/8 + 亮/暗截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**UI-537 模型选择器深度 verified（dev Electron 边界内；9223 离屏 live 9/9）**，BLOCK-224 / Q9 续项）：模型菜单加载中/发现失败/缺密钥/已隐藏逐行可见；行内上下文与默认思考档；隐藏模型不进选择器；设置页「选择器可见 / 默认思考档」两控。证据 `acceptance/block-224/`（live 9/9 + 亮/暗/设置截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -5160,3 +5162,11 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **验证（代码）**：前端 33/33（auto-model 5 + 偏好 2 + 菜单 4 + SimpleChat 6 + useAiSettings 16）；配置基线 4/4（92 键）；types 0；theme 17/17；code-size PASS（SimpleChat 2142）。
 - **实机腿（9223 离屏，8/8）**：`acceptance/block-225/`——默认关闭 → 开启显示「deepseek-flash（Agent 角色绑定）」+ composer「自动」→ 偏好 true → 关闭恢复具体模型、偏好 false；亮/暗截图。
 - **未做（reopen）**：复杂度分级/成本权重、学习型 Auto、解析审计落盘、自动档下的显式覆盖确认。
+
+## UI-539: 通知中心 + 免打扰（2026-10-21 **verified（dev Electron 边界内；9223 离屏 live 11/11）**，BLOCK-226 / Q9）
+
+- **变化面**：标题栏新增铃铛（未读徽章）+ 通知弹层（类型/标题/正文/时间/未读点、全部已读、清空、空态）；回合完成/失败/待审批都写入本地通知中心（≤50 条，localStorage），不受系统通知偏好/聚焦/免打扰影响；设置页常规节新增免打扰时段（`HH:MM-HH:MM`，支持跨午夜，非法值就地报错），命中时只压系统 toast 并在主进程返回 `quiet_hours`。
+- **为什么这样设计（自有形态）**：系统 toast 是「打扰」，通知中心是「可回看」——窗口聚焦或免打扰时，事件不能凭消失换安静；应用内必须留痕。免打扰只作用于 OS 层，且默认关闭=零行为变化。
+- **验证（代码）**：前端 62/62（quiet-hours 5 + notification-center 5 + Bell 3 + DesktopBehaviorPanel 3 + QuitSummaryDialog 4 + SimpleChat 6 + TitleBarRightZone 7 + TitleBar 29）；Node 13/13（quiet 门 3 + 配置基线 4 + BLOCK-223 shell 6）；theme 17/17；types 0；code-size PASS。
+- **实机腿（9223 离屏，11/11）**：`acceptance/block-226/`——空态 → seed 两条后重载 2 行/2 未读/徽章 2 → 亮/暗截图 → 全部已读清零 → 全天免打扰窗口 `notify` 返回 `quiet_hours` → 设置页输入在场；面板向左展开（右缘不裁切）。
+- **未做（reopen）**：点击通知跳转会话、系统通知历史、仅审批穿透免打扰、声音、按类型开关、跨设备同步。

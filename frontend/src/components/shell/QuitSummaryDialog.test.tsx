@@ -59,15 +59,17 @@ describe('QuitSummaryDialog', () => {
 });
 
 describe('normalizeShellPrefs', () => {
-  it('缺省语义与注册表一致：closeToTray=false / notifyOnTurnEnd=true', () => {
-    expect(normalizeShellPrefs(null)).toEqual({ closeToTray: false, notifyOnTurnEnd: true });
-    expect(normalizeShellPrefs({ closeToTray: true, notifyOnTurnEnd: false })).toEqual({
+  it('缺省语义与注册表一致：closeToTray=false / notifyOnTurnEnd=true / quietHours 空', () => {
+    expect(normalizeShellPrefs(null)).toEqual({ closeToTray: false, notifyOnTurnEnd: true, quietHours: '' });
+    expect(normalizeShellPrefs({ closeToTray: true, notifyOnTurnEnd: false, quietHours: '22:00-08:00' })).toEqual({
       closeToTray: true,
       notifyOnTurnEnd: false,
+      quietHours: '22:00-08:00',
     });
-    expect(normalizeShellPrefs({ closeToTray: 'true', notifyOnTurnEnd: 0 })).toEqual({
+    expect(normalizeShellPrefs({ closeToTray: 'true', notifyOnTurnEnd: 0, quietHours: '25:00' })).toEqual({
       closeToTray: false,
       notifyOnTurnEnd: true,
+      quietHours: '',
     });
   });
 });

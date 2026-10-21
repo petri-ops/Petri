@@ -478,10 +478,15 @@
   width: 176px;
   padding: 5px;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
-  background: var(--petri-bg-elevated);
+  border-radius: var(--petri-radius-lg);;  background: var(--petri-bg-elevated);
   box-shadow: 0 14px 32px color-mix(in srgb, var(--petri-text) 18%, transparent);
   -webkit-app-region: no-drag;
+}
+
+/* BLOCK-226 — 通知中心固定在右缘铃铛旁，向左展开，避免被窗口右缘裁切。 */
+.notificationMenu {
+  left: auto;
+  right: 0;
 }
 
 .toolMenu > button {

@@ -26,16 +26,16 @@ const {
 } = require(path.join(ROOT, 'src/main/desktop-shell-model.js'));
 const { createDesktopShell } = require(path.join(ROOT, 'src/main/desktop-shell.js'));
 
-test('偏好默认值：closeToTray=false / notifyOnTurnEnd=true；布尔校验拒绝字符串', () => {
-  assert.deepEqual(parseShellPrefs(undefined), { closeToTray: false, notifyOnTurnEnd: true });
+test('偏好默认值：closeToTray=false / notifyOnTurnEnd=true / quietHours 空；布尔校验拒绝字符串', () => {
+  assert.deepEqual(parseShellPrefs(undefined), { closeToTray: false, notifyOnTurnEnd: true, quietHours: '' });
   assert.deepEqual(
     parseShellPrefs({ closeToTray: 'yes', notifyOnTurnEnd: 0 }),
-    { closeToTray: false, notifyOnTurnEnd: true },
+    { closeToTray: false, notifyOnTurnEnd: true, quietHours: '' },
     '非布尔不得被真值化',
   );
   assert.deepEqual(
     parseShellPrefs({ closeToTray: true, notifyOnTurnEnd: false, extra: 1 }),
-    { closeToTray: true, notifyOnTurnEnd: false },
+    { closeToTray: true, notifyOnTurnEnd: false, quietHours: '' },
     '未知键忽略',
   );
 });
@@ -147,7 +147,7 @@ test('控制器（无 Electron）：默认状态、偏好更新、通知降级�
   const updated = shell.updatePrefs({ closeToTray: true, notifyOnTurnEnd: false });
   assert.equal(updated.ok, true);
   assert.equal(updated.changed, true);
-  assert.deepEqual(updated.prefs, { closeToTray: true, notifyOnTurnEnd: false });
+  assert.deepEqual(updated.prefs, { closeToTray: true, notifyOnTurnEnd: false, quietHours: '' });
   assert.equal(shell.notify({ kind: 'turn_completed' }).reason, 'pref_off');
   shell.updatePrefs({ notifyOnTurnEnd: true });
   assert.equal(shell.notify({ kind: 'turn_completed' }).reason, 'unsupported');

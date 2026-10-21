@@ -17,3 +17,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-21T00:53:02.691Z -->
 最后更新：2026-10-20（**BLOCK-217 Q-DOMAIN P2-UI completed（closeout 十三门 + 9223 live 8/8）**）：核心 act 去生信/FigCode（只保留 rename_project/dataset/analysis、update_analysis_params、open_tool、ui_action）；pack `uiActions` 动态描述 + 执行校验 + 前端 host 分发/ack；删除 sc*/figcode 遗留字段；domain-neutrality 下调 15 处。block217 9/9 + block151 5/5 + 前端 8/8 + test:changed 213/213 + 9223 live 8/8；UI-531 verified（dev Electron 边界内）。边界=真实生信动作随 P2b pack 结果面提供；live ack 用合成 token（ack 成功链由隔离测试覆盖）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-21T01:24:12.723Z -->
+最后更新：2026-10-20（**BLOCK-218 Q-DOMAIN P2b 垂直切片 completed（closeout 十三门 PASS；真实 job live rider）**）：result mode 主 body 由 pack `resultSurfaces` iframe 渲染（图/表/文本/report 源码 + truth/revision），核心保留 context bar/composer 与 code/compare/history 过渡面；只读有界数据桥（4MB 图/2MB 文本/200×50 行）；pack 缺失/不匹配 core-transitional。packResultData 5/5 + resultSurfaceHost 5/5 + CenterPanel 2/2 + pack 页面契约 2/2 + test:changed 191/191 前端；UI-532 in_progress（dev DB tool_jobs=0，无真实结果 job 实机腿）。边界=高级 tab 仍核心过渡。G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -6,9 +6,10 @@
  * 非桌面宿主（投影 Web）没有 app 桥 → 整块隐藏（这两项只对桌面壳有意义）。
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './DesktopBehaviorPanel.module.css';
 import { useDesktopShellContext, type ShellPrefs } from '@/components/shell/DesktopShellProvider';
+import { validateQuietHoursInput } from '@/lib/quiet-hours';
 
 interface DesktopBehaviorPanelViewProps {
   prefs: ShellPrefs;
@@ -17,6 +18,20 @@ interface DesktopBehaviorPanelViewProps {
 }
 
 export function DesktopBehaviorPanelView({ prefs, syncError, onChange }: DesktopBehaviorPanelViewProps): React.ReactElement {
+  const [quietDraft, setQuietDraft] = useState(prefs.quietHours);
+  const [quietError, setQuietError] = useState<string | null>(null);
+  const [lastServerQuiet, setLastServerQuiet] = useState(prefs.quietHours);
+  if (prefs.quietHours !== lastServerQuiet) {
+    // 服务端偏好异步到达：渲染期同步草稿（不在 effect 里 setState）。
+    setLastServerQuiet(prefs.quietHours);
+    setQuietDraft(prefs.quietHours);
+  }
+  const handleQuietChange = (value: string) => {
+    setQuietDraft(value);
+    const error = validateQuietHoursInput(value);
+    setQuietError(error);
+    if (!error) onChange({ quietHours: value.trim() });
+  };
   return (
     <div className="petri-field" data-testid="desktop-behavior-panel">
       <label className="petri-field__label">桌面行为</label>
@@ -43,6 +58,21 @@ export function DesktopBehaviorPanelView({ prefs, syncError, onChange }: Desktop
             <span className={styles.rowHint}>关闭后后端与正在运行的工具继续执行；从托盘菜单可以真正退出。</span>
           </span>
         </label>
+      </div>
+      <div className={styles.quietRow}>
+        <label className={styles.rowTitle} htmlFor="quiet-hours-input">免打扰时段</label>
+        <input
+          id="quiet-hours-input"
+          type="text"
+          className="petri-input petri-input--sm"
+          value={quietDraft}
+          onChange={(event) => handleQuietChange(event.target.value)}
+          placeholder="22:00-08:00（留空关闭）"
+          aria-label="免打扰时段"
+          aria-invalid={quietError ? 'true' : 'false'}
+        />
+        <span className={styles.rowHint}>该时段内不弹系统通知，但应用内通知中心仍会记录。跨午夜请写成 22:00-08:00。</span>
+        {quietError && <span className={styles.error} role="alert">{quietError}</span>}
       </div>
       <p className="petri-field__hint">
         两项默认：通知开启、关闭即退出。退出时若仍有运行中的任务，会先显示活动摘要。

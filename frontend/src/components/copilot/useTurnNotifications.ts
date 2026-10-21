@@ -8,6 +8,7 @@
 
 import { useEffect, useRef } from 'react';
 import { getBridge } from '@/lib/desktopBridge';
+import { pushNotice } from '@/lib/notification-center';
 
 interface PendingApprovalLike {
   ackToken?: string;
@@ -16,6 +17,7 @@ interface PendingApprovalLike {
 
 export function useTurnNotifications(
   conversationId: string | null | undefined,
+  projectId: string | null | undefined,
   status: string | null | undefined,
   pendingApproval: PendingApprovalLike | null | undefined
 ): void {
@@ -27,13 +29,20 @@ export function useTurnNotifications(
     const prev = prevStatusRef.current;
     prevStatusRef.current = current;
     if (!conversationId || !current || current === 'running' || prev !== 'running') return;
+    pushNotice({
+      kind: current === 'error' ? 'turn_failed' : 'turn_completed',
+      title: current === 'error' ? '本轮失败' : '本轮完成',
+      body: current === 'error' ? '执行失败，可在应用内查看原因' : '对话已完成',
+      conversationId: conversationId || undefined,
+      projectId: projectId || undefined,
+    });
     const bridge = getBridge('app');
     if (!bridge?.notify) return;
     void bridge.notify({
       kind: current === 'error' ? 'turn_failed' : 'turn_completed',
       conversationId: conversationId || undefined,
     });
-  }, [conversationId, status]);
+  }, [conversationId, projectId, status]);
 
   const token = pendingApproval?.ackToken ?? null;
   const toolId = pendingApproval?.toolId;
@@ -41,6 +50,13 @@ export function useTurnNotifications(
     const prev = prevApprovalTokenRef.current;
     prevApprovalTokenRef.current = token;
     if (!conversationId || !token || token === prev) return;
+    pushNotice({
+      kind: 'approval_required',
+      title: '需要确认',
+      body: toolId ? `工具 ${toolId} 正在等待授权` : '有工具调用正在等待授权',
+      conversationId: conversationId || undefined,
+      projectId: projectId || undefined,
+    });
     const bridge = getBridge('app');
     if (!bridge?.notify) return;
     void bridge.notify({
@@ -49,5 +65,5 @@ export function useTurnNotifications(
       toolName: toolId || undefined,
       dedupeKey: token,
     });
-  }, [conversationId, token, toolId]);
+  }, [conversationId, projectId, token, toolId]);
 }

@@ -12,7 +12,10 @@
 const DEFAULT_PREFS = Object.freeze({
   closeToTray: false,
   notifyOnTurnEnd: true,
+  quietHours: '',
 });
+
+const QUIET_PATTERN = /^([01]\d|2[0-3]):([0-5]\d)-([01]\d|2[0-3]):([0-5]\d)$/;
 
 const NOTIFY_DEDUPE_MS = 3000;
 const NOTIFY_KINDS = Object.freeze({
@@ -54,8 +57,22 @@ function parseShellPrefs(input) {
   if (input && typeof input === 'object') {
     if (typeof input.closeToTray === 'boolean') out.closeToTray = input.closeToTray;
     if (typeof input.notifyOnTurnEnd === 'boolean') out.notifyOnTurnEnd = input.notifyOnTurnEnd;
+    if (typeof input.quietHours === 'string' && QUIET_PATTERN.test(input.quietHours.trim())) {
+      out.quietHours = input.quietHours.trim();
+    }
   }
   return out;
+}
+
+/** BLOCK-226 — 免打扰窗口（空/非法=关闭；支持跨午夜）。 */
+function isQuietTime(value, date = new Date()) {
+  const match = QUIET_PATTERN.exec(String(value || '').trim());
+  if (!match) return false;
+  const start = Number(match[1]) * 60 + Number(match[2]);
+  const end = Number(match[3]) * 60 + Number(match[4]);
+  if (start === end) return false;
+  const now = date.getHours() * 60 + date.getMinutes();
+  return start < end ? (now >= start && now < end) : (now >= start || now < end);
 }
 
 function sanitizeCount(value) {
@@ -102,6 +119,8 @@ function notificationDecision({
   focused,
   visible,
   minimized,
+  quietHours,
+  nowDate,
   key,
   lastKey,
   lastAt,
@@ -111,6 +130,9 @@ function notificationDecision({
   if (!enabled) return { show: false, reason: 'pref_off', key: null };
   if (!Object.prototype.hasOwnProperty.call(NOTIFY_KINDS, kind)) {
     return { show: false, reason: 'unsupported_kind', key: null };
+  }
+  if (isQuietTime(quietHours, nowDate || new Date(Number(now) || Date.now()))) {
+    return { show: false, reason: 'quiet_hours', key: null };
   }
   if (!supported) return { show: false, reason: 'unsupported', key: null };
   if (focused && visible && !minimized) return { show: false, reason: 'window_focused', key: null };

@@ -396,6 +396,13 @@ const CONFIG_KEYS = Object.freeze([
     key: 'userPrefs.autoModel', family: 'user-prefs', path: 'autoModel',
     type: 'boolean', envKeys: [], aliases: [], mutable: true, ui: 'none',
   },
+  {
+    // BLOCK-226 — 免打扰时段（空=关闭；HH:MM-HH:MM，支持跨午夜）。
+    key: 'userPrefs.quietHours', family: 'user-prefs', path: 'quietHours',
+    type: 'string',
+    domain: { pattern: '^(?:[01]\\d|2[0-3]):[0-5]\\d-(?:[01]\\d|2[0-3]):[0-5]\\d$|^$' },
+    envKeys: [], aliases: [], mutable: true, ui: 'settings',
+  },
   // —— 技能治理账本（BLOCK-203 W4a P3；原 `shared-backend/skill-prefs.js` 无任何形状校验）——
   // `disabled.<id>` 不是布尔映射而是对象 `{ at, reason? }`，`uninstalledSources.<id>` 并存
   // `{ sourceDir, at }`。`findEntryByPath` 只寻址标量 ⇒ 按**点路径**逐字段登记，

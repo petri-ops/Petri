@@ -36,3 +36,10 @@
   color: var(--petri-danger);
   font-size: 0.88em;
 }
+
+.quietRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-1);
+  margin: var(--petri-space-2) 0;
+}

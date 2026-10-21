@@ -10,7 +10,7 @@ describe('DesktopBehaviorPanelView', () => {
     const onChange = vi.fn();
     render(
       <DesktopBehaviorPanelView
-        prefs={{ closeToTray: false, notifyOnTurnEnd: true }}
+        prefs={{ closeToTray: false, notifyOnTurnEnd: true, quietHours: '' }}
         onChange={onChange}
       />
     );
@@ -28,11 +28,27 @@ describe('DesktopBehaviorPanelView', () => {
   it('同步失败可见（不假装已保存）', () => {
     render(
       <DesktopBehaviorPanelView
-        prefs={{ closeToTray: true, notifyOnTurnEnd: true }}
+        prefs={{ closeToTray: true, notifyOnTurnEnd: true, quietHours: '' }}
         syncError="本机已生效，但未能同步到服务端"
         onChange={() => {}}
       />
     );
     expect(screen.getByTestId('desktop-behavior-sync-error').textContent).toContain('未能同步');
+  });
+
+  it('免打扰：合法值写回，非法值就地报错且不写回', () => {
+    const onChange = vi.fn();
+    render(
+      <DesktopBehaviorPanelView
+        prefs={{ closeToTray: false, notifyOnTurnEnd: true, quietHours: '' }}
+        onChange={onChange}
+      />
+    );
+    const input = screen.getByLabelText('免打扰时段');
+    fireEvent.change(input, { target: { value: '22:00-08:00' } });
+    expect(onChange).toHaveBeenCalledWith({ quietHours: '22:00-08:00' });
+    fireEvent.change(input, { target: { value: '25:00-08:00' } });
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('alert').textContent).toContain('HH:MM-HH:MM');
   });
 });

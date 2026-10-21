@@ -13,24 +13,29 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { getBridge } from '@/lib/desktopBridge';
 import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
+import { normalizeQuietHours } from '@/lib/quiet-hours';
 import { QuitSummaryDialog, type QuitDecision, type QuitSummaryRequest } from './QuitSummaryDialog';
 
 export interface ShellPrefs {
   closeToTray: boolean;
   notifyOnTurnEnd: boolean;
+  /** BLOCK-226 — 免打扰时段（空=关闭；HH:MM-HH:MM，支持跨午夜）。 */
+  quietHours: string;
 }
 
 const DEFAULT_SHELL_PREFS: ShellPrefs = Object.freeze({
   closeToTray: false,
   notifyOnTurnEnd: true,
+  quietHours: '',
 });
 
-/** 服务端 prefs 对象 → 两项桌面偏好（缺省语义与注册表一致）。 */
+/** 服务端 prefs 对象 → 桌面偏好（缺省语义与注册表一致）。 */
 export function normalizeShellPrefs(raw: unknown): ShellPrefs {
   const source = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
   return {
     closeToTray: source.closeToTray === true,
     notifyOnTurnEnd: source.notifyOnTurnEnd !== false,
+    quietHours: normalizeQuietHours(source.quietHours),
   };
 }
 

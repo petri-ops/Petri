@@ -3,6 +3,40 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "block226-notification-center",
+      "note": "BLOCK-226 Q9 通知中心/免打扰 — 应用内通知留痕（铃铛/未读/列表）+ quietHours 只抑制系统 toast；设置页时段输入。",
+      "patterns": [
+        "frontend/src/lib/notification-center.ts",
+        "frontend/src/lib/quiet-hours.ts",
+        "frontend/src/components/copilot/useTurnNotifications.ts",
+        "frontend/src/components/desktop/titlebar/NotificationCenterBell.tsx",
+        "frontend/src/components/desktop/titlebar/TitleBarRightZone.tsx",
+        "frontend/src/components/desktop/TitleBar.module.css",
+        "frontend/src/components/icons/Icon.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/DesktopBehaviorPanel.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/DesktopBehaviorPanel.module.css",
+        "frontend/src/components/shell/DesktopShellProvider.tsx",
+        "src/main/desktop-shell-model.js",
+        "src/main/desktop-shell.js",
+        "core/packages/shared-config/config-schema.js",
+        "test/block226-*.test.mjs",
+        "test/block201-settings-baseline.test.mjs",
+        "acceptance/block-226/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block226-*.cjs"
+      ],
+      "tests": [
+        "frontend/src/lib/quiet-hours.test.ts",
+        "frontend/src/lib/notification-center.test.ts",
+        "frontend/src/components/desktop/titlebar/NotificationCenterBell.test.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/DesktopBehaviorPanel.test.tsx",
+        "frontend/src/components/shell/QuitSummaryDialog.test.tsx",
+        "test/block226-quiet-hours-gate.test.mjs",
+        "test/block201-settings-baseline.test.mjs",
+        "test/block223-desktop-shell-model.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "block225-auto-model",
       "note": "BLOCK-225 Q9 D4 Auto — 按任务/附件每轮解析模型（角色绑定 > 能力位 > 回落）；userPrefs.autoModel；菜单开关+预览、composer 自动标签。",
       "patterns": [
