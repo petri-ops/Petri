@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { resolveResultSurfaceHost } from './resultSurfaceHost';
 import type { WorkSurfaceDescriptor } from '@/lib/workSurface/types';
+import type { ActiveArtifact } from '@/components/workspace-panels/ResultView';
 
 function surface(overrides: Partial<WorkSurfaceDescriptor> = {}): WorkSurfaceDescriptor {
   return {
@@ -19,7 +20,7 @@ function surface(overrides: Partial<WorkSurfaceDescriptor> = {}): WorkSurfaceDes
   };
 }
 
-const artifact = { type: 'table', semanticKind: 'matrix' } as const;
+const artifact: Pick<ActiveArtifact, 'type' | 'semanticKind'> = { type: 'table', semanticKind: 'matrix' };
 
 describe('resultSurfaceHost（BLOCK-236 tab 级接管）', () => {
   it('result 模式：只接管主 body，不带 tab', () => {
