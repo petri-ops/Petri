@@ -84,6 +84,23 @@
   background: var(--petri-danger-bg);
 }
 
+.draft[data-kind='ellipse'] {
+  border-radius: 50%;
+}
+
+.draft[data-kind='arrow'] {
+  border-style: dashed;
+  background:
+    linear-gradient(
+      to top right,
+      transparent calc(50% - 1px),
+      var(--petri-warning) calc(50% - 1px),
+      var(--petri-warning) calc(50% + 1px),
+      transparent calc(50% + 1px)
+    ),
+    var(--petri-accent-bg);
+}
+
 /* BLOCK-238 — 图形批注：椭圆 / 箭头（纯 CSS，几何=拖拽矩形，箭头沿对角线近似） */
 .box[data-kind='ellipse'] {
   border-radius: 50%;

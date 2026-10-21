@@ -91,7 +91,7 @@ export async function createAnnotation(
   const body: Record<string, unknown> = {
     projectId: input.projectId,
     surface: input.surface,
-    kind: 'region',
+    kind: input.kind || 'region',
     rect: input.rect,
     comment: input.comment,
     color: input.color || 'amber',

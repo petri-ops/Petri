@@ -46,6 +46,7 @@ export function AnnotatablePdfPane({
             page={page}
             drawing={session.drawing}
             color={session.color}
+            kind={session.kind}
             onCommit={(rect) => session.beginRect(rect, page)}
             label={`批注层：第 ${page} 页`}
             testId={`annotation-overlay-p${page}`}

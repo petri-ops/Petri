@@ -3,6 +3,7 @@ import { useArtifactAnnotations } from '@/hooks/useArtifactAnnotations';
 import {
   buildAnnotationTaskPrompt,
   type AnnotationColor,
+  type AnnotationKind,
   type AnnotationScope,
   type AnnotationTaskTarget,
   type ArtifactAnnotation,
@@ -33,10 +34,12 @@ export interface AnnotationSession {
   limit: number;
   drawing: boolean;
   color: AnnotationColor;
+  kind: AnnotationKind;
   /** true = 已画好矩形，等待填写评论。 */
   pending: boolean;
   toggleDrawing: () => void;
   setColor: (color: AnnotationColor) => void;
+  setKind: (kind: AnnotationKind) => void;
   /** PDF 传页号，图像传 null；页号随批注一起落库。 */
   beginRect: (rect: [number, number, number, number], page?: number | null) => void;
   cancelPending: () => void;
@@ -60,6 +63,7 @@ export function useAnnotationSession(input: AnnotationSessionInput): AnnotationS
   });
   const [drawing, setDrawing] = useState(false);
   const [color, setColor] = useState<AnnotationColor>('amber');
+  const [kind, setKind] = useState<AnnotationKind>('region');
   // 待填矩形随「画它时的 scope 身份」一起存：切换产物后即便组件未重挂，
   // 也不会把旧坐标提交到新产物（提交时按身份复核，不靠 effect 清空）。
   const [pending, setPending] = useState<{
@@ -83,11 +87,11 @@ export function useAnnotationSession(input: AnnotationSessionInput): AnnotationS
       setPending(null);
       return false;
     }
-    const saved = await store.add({ rect: pending.rect, comment, color, page: pending.page });
+    const saved = await store.add({ rect: pending.rect, comment, color, kind, page: pending.page });
     if (!saved) return false;
     setPending(null);
     return true;
-  }, [color, identity, pending, store]);
+  }, [color, identity, kind, pending, store]);
 
   const remove = useCallback((annotationId: string) => {
     void store.remove(annotationId);
@@ -108,9 +112,11 @@ export function useAnnotationSession(input: AnnotationSessionInput): AnnotationS
     limit: store.limit,
     drawing,
     color,
+    kind,
     pending: pending !== null,
     toggleDrawing: () => setDrawing((value) => !value),
     setColor,
+    setKind,
     beginRect,
     cancelPending,
     submitComment,
@@ -122,6 +128,7 @@ export function useAnnotationSession(input: AnnotationSessionInput): AnnotationS
     cancelPending,
     color,
     drawing,
+    kind,
     pending,
     remove,
     store.annotations,

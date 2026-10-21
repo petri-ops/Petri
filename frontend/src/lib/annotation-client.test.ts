@@ -100,6 +100,21 @@ describe('createAnnotation', () => {
     expect(body.filePath).toBeUndefined();
   });
 
+  it('BLOCK-238 — 显式 kind 透传到载荷（图形批注）', async () => {
+    const calls = installFetch(() => jsonResponse({ annotation: { annotationId: 'ann_e' }, count: 1 }));
+
+    await createAnnotation({
+      projectId: 'p1',
+      surface: 'result-artifact',
+      artifactId: 'a1',
+      rect: [0.1, 0.1, 0.2, 0.2],
+      comment: '圈出离群点',
+      kind: 'ellipse',
+    });
+
+    expect(parseBody(calls[0][1]).kind).toBe('ellipse');
+  });
+
   it('工作区批注只带 filePath，不混入 artifact 身份', async () => {
     const calls = installFetch(() => jsonResponse({ annotation: { annotationId: 'ann_2' }, count: 1 }));
 

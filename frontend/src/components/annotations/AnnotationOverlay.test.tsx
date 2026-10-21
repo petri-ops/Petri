@@ -49,6 +49,7 @@ describe('AnnotationOverlay', () => {
         page={null}
         drawing={false}
         color="amber"
+        kind="region"
         onCommit={() => undefined}
         label="批注层：图像"
       />,
@@ -56,6 +57,39 @@ describe('AnnotationOverlay', () => {
 
     const kinds = getAllByTestId('annotation-box').map((el) => el.dataset.kind);
     expect(kinds).toEqual(['region', 'ellipse', 'arrow']);
+  });
+
+  it('BLOCK-238 — 绘制中的 draft 按所选形状预览', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(BOX);
+    const onCommit = vi.fn();
+    const { getByTestId, rerender } = render(
+      <AnnotationOverlay
+        annotations={[]}
+        page={null}
+        drawing
+        color="amber"
+        kind="ellipse"
+        onCommit={onCommit}
+        label="批注层：图像"
+      />,
+    );
+    const overlay = getByTestId('annotation-overlay');
+    fireEvent.pointerDown(overlay, { clientX: 20, clientY: 10 });
+    fireEvent.pointerMove(overlay, { clientX: 120, clientY: 60 });
+    expect(getByTestId('annotation-draft').dataset.kind).toBe('ellipse');
+
+    rerender(
+      <AnnotationOverlay
+        annotations={[]}
+        page={null}
+        drawing
+        color="amber"
+        kind="arrow"
+        onCommit={onCommit}
+        label="批注层：图像"
+      />,
+    );
+    expect(getByTestId('annotation-draft').dataset.kind).toBe('arrow');
   });
 
   it('只渲染当前页的批注，并按百分比定位', () => {
@@ -70,6 +104,7 @@ describe('AnnotationOverlay', () => {
         page={1}
         drawing={false}
         color="amber"
+        kind="region"
         onCommit={() => undefined}
         label="批注层：第 1 页"
       />,
@@ -91,6 +126,7 @@ describe('AnnotationOverlay', () => {
         page={null}
         drawing={false}
         color="amber"
+        kind="region"
         onCommit={onCommit}
         label="批注层"
       />,
@@ -111,6 +147,7 @@ describe('AnnotationOverlay', () => {
         page={2}
         drawing
         color="sky"
+        kind="region"
         onCommit={onCommit}
         label="批注层：第 2 页"
       />,
@@ -131,6 +168,7 @@ describe('AnnotationOverlay', () => {
         page={null}
         drawing
         color="amber"
+        kind="region"
         onCommit={onCommit}
         label="批注层"
       />,
@@ -150,6 +188,7 @@ describe('AnnotationOverlay', () => {
         page={null}
         drawing={false}
         color="rose"
+        kind="region"
         onCommit={() => undefined}
         onSelect={onSelect}
         label="批注层"

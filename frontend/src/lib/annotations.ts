@@ -15,9 +15,20 @@
 
 type AnnotationSurface = 'result-artifact' | 'workspace-file';
 export type AnnotationColor = 'amber' | 'sky' | 'rose';
-type AnnotationKind = 'region' | 'ellipse' | 'arrow';
+export type AnnotationKind = 'region' | 'ellipse' | 'arrow';
 
 export const ANNOTATION_COLORS: readonly AnnotationColor[] = ['amber', 'sky', 'rose'];
+export const ANNOTATION_KINDS: readonly AnnotationKind[] = ['region', 'ellipse', 'arrow'];
+
+export const ANNOTATION_KIND_LABELS: Record<AnnotationKind, string> = {
+  region: '矩形',
+  ellipse: '椭圆',
+  arrow: '箭头',
+};
+
+export function describeAnnotationKind(kind: AnnotationKind | null | undefined): string {
+  return ANNOTATION_KIND_LABELS[kind || 'region'];
+}
 
 /** 与后端 MAX_ANNOTATION_COMMENT_CHARS 同一数值（后端拒绝，前端 maxLength 提前挡）。 */
 export const MAX_ANNOTATION_COMMENT_CHARS = 2000;
@@ -61,6 +72,7 @@ export interface CreateAnnotationInput extends AnnotationScope {
   rect: [number, number, number, number];
   comment: string;
   color?: AnnotationColor;
+  kind?: AnnotationKind;
 }
 
 function clamp01(value: number): number {

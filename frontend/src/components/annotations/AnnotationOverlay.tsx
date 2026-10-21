@@ -5,6 +5,7 @@ import {
   pointToNormalized,
   rectToStyle,
   type AnnotationColor,
+  type AnnotationKind,
   type ArtifactAnnotation,
 } from '@/lib/annotations';
 import styles from './AnnotationOverlay.module.css';
@@ -27,6 +28,8 @@ export interface AnnotationOverlayProps {
   /** true = 捕获拖拽画新批注；false = 只渲染既有批注。 */
   drawing: boolean;
   color: AnnotationColor;
+  /** 当前绘制的形状（draft 预览；保存由会话层随批注一起提交）。 */
+  kind: AnnotationKind;
   onCommit: (rect: [number, number, number, number]) => void;
   onSelect?: (annotationId: string) => void;
   /** 无障碍标签（如「批注层：第 2 页」）。 */
@@ -46,6 +49,7 @@ export function AnnotationOverlay({
   page,
   drawing,
   color,
+  kind,
   onCommit,
   onSelect,
   label,
@@ -129,6 +133,7 @@ export function AnnotationOverlay({
           className={styles.draft}
           data-testid="annotation-draft"
           data-color={color}
+          data-kind={kind}
           style={rectToStyle(draft)}
         />
       )}

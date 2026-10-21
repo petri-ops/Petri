@@ -1,4 +1,6 @@
 # Petri Desktop — Current Next Steps
+最后更新：2026-10-21（**BLOCK-238 Q6 图形批注创建入口 completed；无 active 工作包**）：补登记先行三笔提交并补齐工具条三档形状 + kind 经 session/hook/REST 落库 + draft 预览（红绿 5 红→25/25、邻域 42/42、Node 13/13、types 0、closeout 十三门、output:judge PASS）；零迁移、旧调用回落 region。**UI-546 in_progress（无实机腿）**。**下一步**=Q8 深化或 Q9 长尾（需用户发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-21（**BLOCK-236 第二批收口**）：compare 只读面接管（changeSetId 实取自 resultEditProgress）；selection 不迁（写面）。**下一步**=Q6 全量批注或 Q8 深化。边界=无实机腿。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**BLOCK-236 收口**）：P2b 第一批完成——pack 接管 code（源码只读）与 history 模式判定；lineage 声明就绪但仅表格形态。**下一步**=P2b 第二批（compare/selection）或 Q6 全量批注或 Q8 深化（按 P0 建议顺序 P1→P2→P3→P4 继续）。边界=无实机腿、history 无端点。G0 开发期常态 · 不外推 packaged/Provider/GA。

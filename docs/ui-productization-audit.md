@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-21（**UI-546 图形批注创建入口落地（代码+组件测试绿，无实机腿）**，BLOCK-238 / Q6）：工具条绘制态形状三档（矩形/椭圆/箭头）+ kind 经 session/hook/REST 贯通 + draft 形状预览 + 列表形状标签；红绿 5 红→25/25 + 邻域 42/42 + Node 13/13 + types 0。实机腿未跑 → in_progress。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-21（**UI-542 电脑控制 sidecar 状态面 verified（dev Electron 边界内；9223 离屏 live 6/6）**，BLOCK-229 / E7）：设置「决策与调度」节显示平台/支持/已构建/运行中 + 权限提示 + 测试连接（真实 probe verbs）；未构建/失败如实报错。转 verified 需收口。G0 开发期常态 · 不外推 packaged/Provider/GA。：标题栏下方横幅（上次未正常结束时间 + 转储文件名 +「本地记录，未上传」+ 打开崩溃目录 + 知道了）；`crashNotice` 偏好可关；只读文件级证据，不解析栈。证据 `acceptance/block-228/`（live 5/5 + 亮/暗截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。：欢迎页一次性浮层三卡（分析数据/写代码/整理知识）+ 本地执行说明 + 显式「开始使用」；`roleRevealSeen` 落盘、已看过不再出现。证据 `acceptance/block-227/`（live 7/7 + 亮/暗截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。：标题栏铃铛+未读徽章+通知列表（回合终态/待审批）；`userPrefs.quietHours` 只抑制系统 toast、应用内仍留痕；面板向左展开避免右缘裁切。证据 `acceptance/block-226/`（live 11/11 + 亮/暗/设置截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**UI-538 D4 自动选模型 verified（dev Electron 边界内；9223 离屏 live 8/8）**，BLOCK-225 / Q9）：按任务/附件每轮解析（有图→识图绑定/能力；否则 Agent/工具；回落当前）；菜单「自动」开关+解析预览，composer 显示「自动」；偏好 `autoModel` 默认 false。证据 `acceptance/block-225/`（live 8/8 + 亮/暗截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -5270,3 +5272,11 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **为什么这样设计（自有形态）**：只读视图（差异表）可以外包给领域包，但**写面（selection 选择/查询/解析）留在核心**——那是治理边界，不随渲染一起搬。
 - **验证（代码）**：桥 compare 分支（裁剪/缺参/HTTP 失败）+ 路由 compare 命中，共 3 条新用例；`lib/workSurface`+host 41 项绿；`quality:types` 0。
 - **未做实机腿**：dev 栈未打开 compare 视图，`changesets/:id/compare` 字段未实机核对 → 保持 `in_progress`。
+
+## UI-546: 图形批注创建入口（ellipse / arrow）（2026-10-21 **in_progress（代码+组件测试绿，无实机腿）**，BLOCK-238 / Q6）
+
+- **变化面**：批注工具条绘制态新增形状三档（矩形/椭圆/箭头，`annotation-kind-<kind>`）；`kind` 从工具条经 `useAnnotationSession` → `useArtifactAnnotations` → REST 载荷落库；绘制中的 draft 实时按所选形状预览（`data-kind`），批注列表标出形状；已保存批注沿用既有 `data-kind` + CSS 渲染（椭圆/箭头形态由先行提交 `20be172d` 提供）。
+- **为什么这样设计（自有形态）**：形状是「批注意图」的一部分，不是新数据模型——沿用 BLOCK-219 的旁路元数据与归一化矩形，零迁移；箭头以拖拽矩形对角线近似，方向/角度限制如实留在 reopen，不用半成品几何冒充完整箭头工具。旧调用省略 `kind` 时回落 `region`，存量行为零变化。
+- **验证（代码）**：红绿证据=5 条失败（client 载荷写死 region / 工具条无形状选择 / 列表无形状 / draft 无 data-kind / 宿主端到端找不到形状档）→ 实现后定向 **25/25**；邻域 `annotations` + `resultAnnotation` + `WorkspacePdfPreview` + `WorkspaceFilePreview` + theme **42/42**；Node `block219-result-annotations` **13/13**；`quality:types` 0。
+- **先行提交对账**：渲染层提交 `20be172d` 先于立项且未带 UI-###——按不可变提交先例登记门禁豁免，本条即其台账对账（不重写共享历史）。
+- **未做实机腿**：dev 栈未打开带 PDF/图像产物的批注面，形状选择 → 保存 → 渲染未实机核对 → 保持 `in_progress`，不宣称 verified。

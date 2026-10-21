@@ -39,6 +39,33 @@
   color: var(--petri-text);
 }
 
+.kinds {
+  display: inline-flex;
+  gap: var(--petri-space-1);
+}
+
+.kind {
+  min-height: 24px;
+  padding: 0 var(--petri-space-2);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-sm);
+  background: transparent;
+  color: var(--petri-text-secondary);
+  cursor: pointer;
+  font: inherit;
+}
+
+.kind:hover {
+  background: var(--petri-hover);
+  color: var(--petri-text);
+}
+
+.kind[data-active='true'] {
+  border-color: var(--petri-accent-border);
+  background: var(--petri-accent-bg);
+  color: var(--petri-text);
+}
+
 .swatches {
   display: inline-flex;
   gap: var(--petri-space-1);
@@ -177,6 +204,14 @@
 
 .dot[data-color='rose'] {
   background: var(--petri-danger);
+}
+
+.kindTag {
+  flex: 0 0 auto;
+  padding: 0 4px;
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-hover);
+  color: var(--petri-text-tertiary);
 }
 
 .anchor {

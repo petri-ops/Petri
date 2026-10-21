@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import {
   ANNOTATION_COLORS,
+  ANNOTATION_KINDS,
+  ANNOTATION_KIND_LABELS,
   MAX_ANNOTATION_COMMENT_CHARS,
   describeAnnotationAnchor,
+  describeAnnotationKind,
   type AnnotationColor,
+  type AnnotationKind,
   type ArtifactAnnotation,
 } from '@/lib/annotations';
 import styles from './AnnotationBar.module.css';
@@ -25,6 +29,7 @@ export interface AnnotationBarProps {
   limit: number;
   drawing: boolean;
   color: AnnotationColor;
+  kind: AnnotationKind;
   /** false = 当前面不支持批注（只显示 cannotAnnotateReason）。 */
   canAnnotate: boolean;
   cannotAnnotateReason?: string;
@@ -32,6 +37,7 @@ export interface AnnotationBarProps {
   pendingRect: boolean;
   onToggleDrawing: () => void;
   onColorChange: (color: AnnotationColor) => void;
+  onKindChange: (kind: AnnotationKind) => void;
   onSubmitComment: (comment: string) => Promise<boolean>;
   onCancelPending: () => void;
   onRemove: (annotationId: string) => void;
@@ -51,11 +57,13 @@ export function AnnotationBar({
   limit,
   drawing,
   color,
+  kind,
   canAnnotate,
   cannotAnnotateReason,
   pendingRect,
   onToggleDrawing,
   onColorChange,
+  onKindChange,
   onSubmitComment,
   onCancelPending,
   onRemove,
@@ -97,6 +105,26 @@ export function AnnotationBar({
       </button>
 
       {drawing && (
+        <div className={styles.kinds} role="group" aria-label="批注形状">
+          {ANNOTATION_KINDS.map((candidate) => (
+            <button
+              key={candidate}
+              type="button"
+              className={styles.kind}
+              data-testid={`annotation-kind-${candidate}`}
+              data-kind={candidate}
+              data-active={candidate === kind ? 'true' : 'false'}
+              aria-label={`批注形状 ${ANNOTATION_KIND_LABELS[candidate]}`}
+              aria-pressed={candidate === kind}
+              onClick={() => onKindChange(candidate)}
+            >
+              {ANNOTATION_KIND_LABELS[candidate]}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {drawing && (
         <div className={styles.swatches} role="group" aria-label="批注颜色">
           {ANNOTATION_COLORS.map((candidate) => (
             <button
@@ -115,7 +143,13 @@ export function AnnotationBar({
       )}
 
       {drawing && !pendingRect && (
-        <span className={styles.hint} data-testid="annotation-hint">拖拽框选区域，松开后填写评论</span>
+        <span className={styles.hint} data-testid="annotation-hint">
+          {kind === 'arrow'
+            ? '拖拽框选箭头范围（沿矩形对角线绘制），松开后填写评论'
+            : kind === 'ellipse'
+              ? '拖拽框选椭圆范围，松开后填写评论'
+              : '拖拽框选区域，松开后填写评论'}
+        </span>
       )}
 
       {pendingRect && (
@@ -165,6 +199,7 @@ export function AnnotationBar({
             {annotations.map((annotation, index) => (
               <div className={styles.item} key={annotation.annotationId} data-testid="annotation-item">
                 <span className={styles.dot} data-color={annotation.color} aria-hidden="true" />
+                <span className={styles.kindTag}>{describeAnnotationKind(annotation.kind)}</span>
                 <span className={styles.anchor}>{describeAnnotationAnchor(annotation)}</span>
                 <span className={styles.comment} title={annotation.comment}>{annotation.comment}</span>
                 <button

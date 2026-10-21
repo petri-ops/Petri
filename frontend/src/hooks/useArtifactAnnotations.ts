@@ -7,6 +7,7 @@ import {
 } from '@/lib/annotation-client';
 import type {
   AnnotationColor,
+  AnnotationKind,
   AnnotationScope,
   ArtifactAnnotation,
 } from '@/lib/annotations';
@@ -34,6 +35,7 @@ export interface ArtifactAnnotationsState {
     rect: [number, number, number, number];
     comment: string;
     color?: AnnotationColor;
+    kind?: AnnotationKind;
     page?: number | null;
   }) => Promise<ArtifactAnnotation | null>;
   remove: (annotationId: string) => Promise<boolean>;
@@ -116,6 +118,7 @@ export function useArtifactAnnotations(input: {
     rect: [number, number, number, number];
     comment: string;
     color?: AnnotationColor;
+    kind?: AnnotationKind;
     page?: number | null;
   }): Promise<ArtifactAnnotation | null> => {
     if (!scope) return null;
@@ -127,6 +130,7 @@ export function useArtifactAnnotations(input: {
         rect: annotationInput.rect,
         comment: annotationInput.comment,
         color: annotationInput.color,
+        kind: annotationInput.kind,
         page: annotationInput.page ?? null,
       });
       setSnapshot((previous) => ({

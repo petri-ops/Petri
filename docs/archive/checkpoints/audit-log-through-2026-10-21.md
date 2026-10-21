@@ -36,3 +36,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-21T13:31:23.400Z -->
 最后更新：2026-10-21（**BLOCK-234 P4-C S4 completed；包仍 active**）：methods Python 等价模板（8 类）+ 报告引文（13 条）下沉 pack 0.2.5；核心改为有界装载 + 占位符渲染，无包诚实降级。证据=block234 4/4 + block220 13/13 + test:changed 426 项 0 红 + closeout 十三门；域中性 **143→103 处 / 68→60 键**。**下一阶段=S5 result/RS**。plan=docs/block-234-qdomain-p4c-tail-plan.md §9。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-21T15:43:42.904Z -->
+最后更新：2026-10-21（**BLOCK-234 P4-C S5 completed；包仍 active**）：result/RS 科学语义下沉 pack `provides.scientificProfiles`（compare/rerun/cohort/planner/selection/heavy/interpret；pack 0.2.6）；核心只留有界引擎与不变量，无包诚实降级。证据=block234 6/6 + compare/rerun/replay/changeset/selection/approval/planner 定向全绿 + test:changed 1039 项 0 红 + Jev 追加 56/56 + closeout 十三门；域中性 **103→48 处 / 60→27 键**。**下一阶段=S6 前端/桌面 + 兼容白名单**。plan=docs/block-234-qdomain-p4c-tail-plan.md §10。G0 开发期常态 · 不外推 packaged/Provider/GA。

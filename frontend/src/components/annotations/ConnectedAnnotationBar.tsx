@@ -27,11 +27,13 @@ export function ConnectedAnnotationBar({
       limit={session.limit}
       drawing={session.drawing}
       color={session.color}
+      kind={session.kind}
       canAnnotate={canAnnotate}
       cannotAnnotateReason={unavailableReason}
       pendingRect={session.pending}
       onToggleDrawing={session.toggleDrawing}
       onColorChange={session.setColor}
+      onKindChange={session.setKind}
       onSubmitComment={session.submitComment}
       onCancelPending={session.cancelPending}
       onRemove={session.remove}

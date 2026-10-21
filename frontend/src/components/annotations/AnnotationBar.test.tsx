@@ -37,10 +37,12 @@ function props(overrides: Partial<AnnotationBarProps> = {}): AnnotationBarProps 
     limit: 200,
     drawing: false,
     color: 'amber',
+    kind: 'region',
     canAnnotate: true,
     pendingRect: false,
     onToggleDrawing: vi.fn(),
     onColorChange: vi.fn(),
+    onKindChange: vi.fn(),
     onSubmitComment: vi.fn(() => Promise.resolve(true)),
     onCancelPending: vi.fn(),
     onRemove: vi.fn(),
@@ -77,6 +79,27 @@ describe('AnnotationBar', () => {
     );
     fireEvent.click(drawing.getByTestId('annotation-swatch-rose'));
     expect(onColorChange).toHaveBeenCalledWith('rose');
+  });
+
+  it('BLOCK-238 — 绘制态提供三种形状，选择回传 kind', () => {
+    const onKindChange = vi.fn();
+    const idle = render(<AnnotationBar {...props({ onKindChange })} />);
+    expect(idle.queryByTestId('annotation-kind-ellipse')).toBeNull();
+    idle.unmount();
+
+    const drawing = render(
+      <AnnotationBar {...props({ drawing: true, kind: 'region', onKindChange })} />,
+    );
+    expect(drawing.getByTestId('annotation-kind-region').dataset.active).toBe('true');
+    fireEvent.click(drawing.getByTestId('annotation-kind-arrow'));
+    expect(onKindChange).toHaveBeenCalledWith('arrow');
+  });
+
+  it('BLOCK-238 — 列表标出批注形状', () => {
+    const { getByTestId } = render(
+      <AnnotationBar {...props({ annotations: [annotation({ kind: 'ellipse' })], drawing: true })} />,
+    );
+    expect(getByTestId('annotation-item').textContent).toContain('椭圆');
   });
 
   it('待填评论时提交文本，空文本不能提交', async () => {

@@ -46,6 +46,10 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-10-21 BLOCK-238 图形批注渲染层提交（20be172d）：subject 走 BLOCK 轨无 UI-###；
+  // 台账=UI-546（图形批注创建入口，渲染+创建随 BLOCK-238 收口补登）由收口批补登对账。
+  // 先例 d8251196/f5f0f915；不重写共享历史。
+  '20be172d8e6bdd0edfbc28b31480b03cc921c4ab',
   // 2026-10-21 BLOCK-236 第二批（compare 只读面）实现提交：同提交未带 UI-### 与台账；
   // 台账=UI-545（in_progress，代码+单测绿、无实机腿）由收口批补登。先例 1cae944；不重写共享历史。
   'd825119641c84681e15582d5c1cdb666ab684779',
@@ -462,6 +466,10 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-10-21 BLOCK-238 图形批注渲染层提交（20be172d）：同提交未同步台账；
+  // 台账=UI-546（渲染层已在先行提交落地，创建入口随 BLOCK-238 补齐）由收口批补登对账。
+  // 先例 d8251196/f5f0f915；不重写共享历史。
+  '20be172d8e6bdd0edfbc28b31480b03cc921c4ab',
   // 2026-10-21 BLOCK-236 第二批（compare 只读面）实现提交：同提交未带 UI-### 与台账；
   // 台账=UI-545（in_progress，代码+单测绿、无实机腿）由收口批补登。先例 1cae944；不重写共享历史。
   'd825119641c84681e15582d5c1cdb666ab684779',
