@@ -1,4 +1,6 @@
 # Petri Desktop — Current Next Steps
+最后更新：2026-10-21（**BLOCK-229 E7 电脑控制（Windows 边界内）completed**）：sidecar/axfixture 已构建；host status + 后端 `status/probe` 路由 + 设置面板（权限提示/测试连接）；控制动作仍走 `computer_*` + 完全访问 + ackToken。reopen=macOS 构建/权限、PiP、真实 click/type 端到端。之后 Q-DOMAIN P4 data model（母纲最后）。plan=`docs/block-229-e7-computer-use-plan.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-21（**BLOCK-228 Q9 K2 崩溃同意/本地提示 completed**）：crashReporter 仅本地（不上传）+ session-health 异常退出检测 + dump 文件名清单 + `crashNotice`（默认 true）+ 横幅（打开目录/知道了）。证据=Node 7/7 + 前端 2/2 + 9223 离屏 live 5/5（亮/暗截图）+ theme/types/lint/code-size PASS。**下一步**：E7 电脑控制 sidecar（最重，独立立项）→ Q-DOMAIN P4 data model（母纲要求最后，结构性大包）。reopen 见 plan §7.3。plan=`docs/block-228-q9-crash-consent-plan.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**BLOCK-227 Q9 K9 首启角色揭示 completed**）：标题栏铃铛+未读徽章+通知列表（回合终态/待审批留痕）；`userPrefs.quietHours`（空=关，跨午夜）只抑制系统 toast、应用内仍记录；面板向左展开避免右缘裁切。证据=前端 62/62 + Node 13/13 + 9223 离屏 live 11/11（亮/暗/设置截图）+ theme/types/code-size PASS。**下一步**：K9 首启揭示 → K2/E7 评估 → Q-DOMAIN P4 data model（母纲要求最后）。reopen 见 plan §7.3。plan=`docs/block-226-q9-notification-center-plan.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -51,6 +51,19 @@ class ComputerUseHost {
     return !!this.proc && this.proc.exitCode === null && !this.proc.killed;
   }
 
+  /** BLOCK-229 — 只读状态面（不 spawn）：供设置页显示 sidecar 就绪度。 */
+  status() {
+    let built = false;
+    try { built = fs.existsSync(this.binaryPath); } catch {}
+    return {
+      platform: process.platform,
+      supported: process.platform === 'darwin' || process.platform === 'win32',
+      built,
+      running: this.isRunning(),
+      binaryPath: this.binaryPath,
+    };
+  }
+
   ensureRunning() {
     if (this.isRunning()) return;
     if (process.platform !== 'darwin' && process.platform !== 'win32') {

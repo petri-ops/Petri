@@ -1,6 +1,6 @@
 # Petri Desktop UI 产品化审计台账
 
-最后更新：2026-10-21（**UI-541 异常退出提示 verified（dev Electron 边界内；9223 离屏 live 5/5）**，BLOCK-228 / Q9）：标题栏下方横幅（上次未正常结束时间 + 转储文件名 +「本地记录，未上传」+ 打开崩溃目录 + 知道了）；`crashNotice` 偏好可关；只读文件级证据，不解析栈。证据 `acceptance/block-228/`（live 5/5 + 亮/暗截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。：欢迎页一次性浮层三卡（分析数据/写代码/整理知识）+ 本地执行说明 + 显式「开始使用」；`roleRevealSeen` 落盘、已看过不再出现。证据 `acceptance/block-227/`（live 7/7 + 亮/暗截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。：标题栏铃铛+未读徽章+通知列表（回合终态/待审批）；`userPrefs.quietHours` 只抑制系统 toast、应用内仍留痕；面板向左展开避免右缘裁切。证据 `acceptance/block-226/`（live 11/11 + 亮/暗/设置截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+最后更新：2026-10-21（**UI-542 电脑控制 sidecar 状态面 verified（dev Electron 边界内；9223 离屏 live 6/6）**，BLOCK-229 / E7）：设置「决策与调度」节显示平台/支持/已构建/运行中 + 权限提示 + 测试连接（真实 probe verbs）；未构建/失败如实报错。转 verified 需收口。G0 开发期常态 · 不外推 packaged/Provider/GA。：标题栏下方横幅（上次未正常结束时间 + 转储文件名 +「本地记录，未上传」+ 打开崩溃目录 + 知道了）；`crashNotice` 偏好可关；只读文件级证据，不解析栈。证据 `acceptance/block-228/`（live 5/5 + 亮/暗截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。：欢迎页一次性浮层三卡（分析数据/写代码/整理知识）+ 本地执行说明 + 显式「开始使用」；`roleRevealSeen` 落盘、已看过不再出现。证据 `acceptance/block-227/`（live 7/7 + 亮/暗截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。：标题栏铃铛+未读徽章+通知列表（回合终态/待审批）；`userPrefs.quietHours` 只抑制系统 toast、应用内仍留痕；面板向左展开避免右缘裁切。证据 `acceptance/block-226/`（live 11/11 + 亮/暗/设置截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**UI-538 D4 自动选模型 verified（dev Electron 边界内；9223 离屏 live 8/8）**，BLOCK-225 / Q9）：按任务/附件每轮解析（有图→识图绑定/能力；否则 Agent/工具；回落当前）；菜单「自动」开关+解析预览，composer 显示「自动」；偏好 `autoModel` 默认 false。证据 `acceptance/block-225/`（live 8/8 + 亮/暗截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
@@ -5186,3 +5186,11 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **验证（代码）**：Node 7/7（session-health 三态/重启行为/dump 清单/测试实例守卫）；前端 2/2（横幅/关闭/偏好关）；配置基线 4/4（95 键）；theme 17/17；types 0；lint 0 error；code-size PASS。
 - **实机腿（9223 离屏，5/5）**：`acceptance/block-228/`——模拟未正常退出 + probe 转储 → 横幅（时间/文件名/未上传）→ 亮/暗截图 → 知道了关闭 → 偏好关闭后不再显示。
 - **未做（reopen）**：minidump 栈解析、任何上传、崩溃率统计、版本聚合、自动诊断包。
+
+## UI-542: 电脑控制 sidecar 状态面（Windows 边界内）（2026-10-21 **verified（dev Electron 边界内；9223 离屏 live 6/6）**，BLOCK-229 / E7）
+
+- **变化面**：设置「决策与调度」节新增电脑控制面板——平台/支持/已构建/运行中状态、平台权限提示（Windows 无需系统权限；macOS 需屏幕录制+辅助功能）、「测试连接」真实 spawn sidecar 跑 probe 并显示 verbs；未构建/失败如实报错。
+- **为什么这样设计（自有形态）**：电脑控制最怕「看起来能用、实际没构建」。状态面把 sidecar 就绪度、权限边界与控制授权链（完全访问档 + ackToken）一次说清；测试连接是只读 probe，不做任何点击/输入。
+- **验证（代码）**：路由 2/2（built=false→503 sidecar_not_built + status 诚实）；面板 2/2（状态/verbs/失败）；types 0；lint 0 error；theme 17/17；code-size PASS。
+- **实机腿（9223 离屏，6/6）**：`acceptance/block-229/`——REST status built=true、真实 probe verbs（含 snapshot）、设置面板显示「已构建 是 · 运行中 是」、点击测试连接出 verbs、亮/暗截图。
+- **未做（reopen）**：macOS sidecar 构建与权限引导（需 Mac）、PiP 实时画面、真实 click/type 端到端（本会话桌面非交互，靶窗不可见）。

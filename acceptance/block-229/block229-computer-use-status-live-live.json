@@ -1,0 +1,38 @@
+{
+  "name": "block229-computer-use-status-live",
+  "startedAt": "2026-10-21T03:24:23.803Z",
+  "finishedAt": "2026-10-21T03:24:32.772Z",
+  "assertions": [
+    {
+      "name": "R1_status_built",
+      "pass": true,
+      "detail": "{\"ok\":true,\"platform\":\"win32\",\"supported\":true,\"built\":true,\"running\":true,\"binaryPath\":\"D:\\\\1.WorkDir\\\\petri\\\\sidecars\\\\computer-use-windows\\\\bin\\\\publish\\\\petri-computer-use-windows.exe\",\"permissionNote\":\"Windows 无需额外系统权限；控制类工具仍需完全访问档并通过确认 token。\"}"
+    },
+    {
+      "name": "R2_real_probe",
+      "pass": true,
+      "detail": "{\"ok\":true,\"probe\":{\"platform\":\"windows\",\"trusted\":true,\"hostElevated\":true,\"hints\":[],\"elevationBoundary\":\"none\",\"verbs\":[\"probe\",\"snapshot\",\"click\",\"type\",\"press\",\"scroll\",\"screenshot\",\"wait\",\"close\"]},\"permissionNote\":\"Windows 无需额外系统权限；控制类工具仍需完全访问档并通过确认 token。\"}"
+    },
+    {
+      "name": "D1_panel_present",
+      "pass": true,
+      "detail": "设置决策节应有电脑控制面板"
+    },
+    {
+      "name": "D2_status_built_in_ui",
+      "pass": true,
+      "detail": "平台 win32 · 支持 是 · 已构建 是 · 运行中 是"
+    },
+    {
+      "name": "D3_probe_verbs_in_ui",
+      "pass": true,
+      "detail": "probe 通过：probe / snapshot / click / type / press / scroll / screenshot / wait / close"
+    },
+    {
+      "name": "D4_screenshots",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\petri\\acceptance\\block-229\\ui542-computer-use-panel.png | D:\\1.WorkDir\\petri\\acceptance\\block-229\\ui542-computer-use-panel-dark.png"
+    }
+  ],
+  "allPass": true
+}

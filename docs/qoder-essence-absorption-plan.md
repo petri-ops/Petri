@@ -612,6 +612,8 @@ status: planned
 > 2026-10-21：**K9 首启角色揭示已立项并收口 [BLOCK-227](./block-227-q9-onboarding-role-reveal-plan.md)（completed）**——欢迎页一次性三卡 + 显式「开始使用」，`roleRevealSeen` 落盘；**reopen**：分步引导/数据导入/动画/重播/插画。
 >
 > 2026-10-21：**K2 崩溃同意/本地提示已立项并收口 [BLOCK-228](./block-228-q9-crash-consent-plan.md)（completed）**——crashReporter 仅本地、session-health 异常退出检测、dump 文件名清单、`crashNotice` 偏好与横幅；**reopen**：minidump 栈解析/上传/崩溃率/版本聚合/自动诊断包。
+>
+> 2026-10-21：**E7 电脑控制（Windows 边界内）已立项并收口 [BLOCK-229](./block-229-e7-computer-use-plan.md)（completed）**——sidecar/axfixture 构建、host status、后端 status/probe、设置面板；**reopen**：macOS 构建/权限、PiP、真实 click/type 端到端。
 
 **目标**：把「长跑、离开窗口、出错、首启」这些边缘体验补到第一梯队。
 
@@ -700,7 +702,7 @@ Q-DOMAIN（垂直去核化，跨波次）
 - **母纲**：`AGENT-COMPETITIVENESS-PROGRAM`（方向）；本文件是 Qoder 样本的增量，不重开 CP-1–CP-22。
 - **建议首波**：**Q0.5（插件 ADR，0.5–1 天）+ Q-DOMAIN P1（skills 去核，1–2 周）**——先把 host 契约和生信 skills 落进 pack，再按 Q1（信任与审批）→ Q2b（联网检索）→ Q5（工作面 host）→ Q-DOMAIN P2b（生信 Result Surface）→ Q6 推进；Q-DOMAIN P2/P3 可穿插，P4 最后。
 - **发令方式**：Q-DOMAIN P1 可独立立项为 BLOCK（P0 ADR / P1 实现）；Q1/Q2b 各自独立发令；**结果页 P2b 不得早于 Q5 host，Q6 不得早于 P2b**。
-- **当前状态**：本文件为 planned（方向母纲）；**Q5（BLOCK-216）、P2-UI（BLOCK-217）、P2b 垂直切片（BLOCK-218）、Q6 批注垂直切片（BLOCK-219）、P3 垂直切片（BLOCK-220）、Q8 治理垂直切片（BLOCK-221）、Q9 边界垂直切片（BLOCK-222）、Q9 续项垂直切片（BLOCK-223）、模型选择器 D1+D2（BLOCK-224）、D4 Auto（BLOCK-225）、通知中心/免打扰（BLOCK-226）、首启角色揭示（BLOCK-227）、崩溃同意/本地提示（BLOCK-228）均已收口（completed）**。按用户 2026-10-21 裁决「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」，下一包=**E7 电脑控制 sidecar（最重，独立立项）→ Q-DOMAIN P4 data model（母纲要求最后）**。P3 余项（`_pythonEquivalent` 脚本模板/`artifact-profiles`/`agent-workflow`/`learning`/`result-*-tools`）、Q6 余项（六种图形工具/文本批注与速记板/Office/pack 面批注）与 P2b 全量高级 tab 迁移、真实 job 实机腿为 reopen。G0 开发期常态 · 不外推 packaged/Provider/GA。
+- **当前状态**：本文件为 planned（方向母纲）；**Q5（BLOCK-216）、P2-UI（BLOCK-217）、P2b 垂直切片（BLOCK-218）、Q6 批注垂直切片（BLOCK-219）、P3 垂直切片（BLOCK-220）、Q8 治理垂直切片（BLOCK-221）、Q9 边界垂直切片（BLOCK-222）、Q9 续项垂直切片（BLOCK-223）、模型选择器 D1+D2（BLOCK-224）、D4 Auto（BLOCK-225）、通知中心/免打扰（BLOCK-226）、首启角色揭示（BLOCK-227）、崩溃同意/本地提示（BLOCK-228）、E7 电脑控制 Windows 切片（BLOCK-229）均已收口（completed）**。按用户 2026-10-21 裁决「只剩 E7 与 P4」，下一包=**Q-DOMAIN P4 data model（母纲要求最后；结构性大包）**。P3 余项（`_pythonEquivalent` 脚本模板/`artifact-profiles`/`agent-workflow`/`learning`/`result-*-tools`）、Q6 余项（六种图形工具/文本批注与速记板/Office/pack 面批注）、P2b 全量高级 tab 迁移、E7 的 macOS/PiP/端到端控制为 reopen。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## 12. 附：Q-MATRIX 更新记录
 
@@ -719,6 +721,7 @@ Q-DOMAIN（垂直去核化，跨波次）
 | 2026-10-21 | Q9/K4 | BLOCK-226 收口：通知中心（铃铛/未读/列表/全部已读）+ `quietHours` 只压系统 toast、应用内留痕；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——K4 进一步落地（点击跳转/系统历史/审批穿透/声音未做） | `docs/block-226-q9-notification-center-plan.md` §7 |
 | 2026-10-21 | Q9/K9 | BLOCK-227 收口：首启角色揭示（三卡 + 显式确认 + `roleRevealSeen` 落盘）；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——K9 部分落地（分步引导/数据导入未做） | `docs/block-227-q9-onboarding-role-reveal-plan.md` §7 |
 | 2026-10-21 | Q9/K2 | BLOCK-228 收口：本地崩溃记录（不上传）+ 异常退出横幅 + dump 文件名清单 + `crashNotice`；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——K2 部分落地（栈解析/上传未做） | `docs/block-228-q9-crash-consent-plan.md` §7 |
+| 2026-10-21 | Q9/E7 | BLOCK-229 收口：Windows sidecar 构建 + 状态/probe + 设置面板；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——E7 部分落地（macOS/PiP/端到端未做） | `docs/block-229-e7-computer-use-plan.md` §7 |
 | 2026-10-20 | Q8 | BLOCK-221 垂直切片收口：MCP 凭据脱敏 + 服务级 allow/block + 投影过滤 + 策略路由；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——J3/J4 部分落地（无 OAuth、无深链安装、trust 未接审批） | `docs/block-221-q8-mcp-governance-plan.md` §5 |
 | 2026-10-20 | Q-DOMAIN P3 | BLOCK-220 垂直切片收口：legacy 化石注册表删除（单一注册源）+ methods 引用/工具标签下沉 pack `provides.methods`；域中性基线 **261→208 处**（tool-registry 31 归零、methods-export 62→24）；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——L8 仍 🟡（data model 与脚本模板未下沉） | `docs/block-220-qdomain-p3-methods-plan.md` §8 |
 | 2026-10-20 | Q6 | BLOCK-219 垂直切片收口：E5/C12 部分落地（PDF/图像**矩形**批注 + 加入任务；批次外=椭圆/箭头/画笔/文字/马赛克、文本选中批注、速记板 C13 随 Q2、PPTX/DOCX、pack 面）；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——E5 仍 🟡（PPTX/DOCX 未覆盖），C12 仍 🟡（无速记/批注进侧聊） | `docs/block-219-q6-annotation-host-plan.md` §6 + `acceptance/block-219/`（13/13） |

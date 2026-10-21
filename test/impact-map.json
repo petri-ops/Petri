@@ -3,6 +3,26 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "block229-computer-use-status",
+      "note": "BLOCK-229 E7 — Windows sidecar 构建 + 只读状态/probe 路由 + 设置页 ComputerUsePanel（不新增控制入口）。",
+      "patterns": [
+        "core/petri-server/helpers/computer-use-host.js",
+        "core/petri-server/routes/computer-use.js",
+        "core/petri-server/routes/index.js",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/ComputerUsePanel.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/RuntimePolicyPanel.tsx",
+        "test/block229-*.test.mjs",
+        "acceptance/block-229/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block229-*.cjs"
+      ],
+      "tests": [
+        "test/block229-computer-use-status.test.mjs",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/ComputerUsePanel.test.tsx",
+        "test/block63-computer-host.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "block228-crash-notice",
       "note": "BLOCK-228 Q9 K2 — 本地崩溃记录（crashReporter 不上传/session-health/dump 文件名）+ 异常退出横幅 + crashNotice 偏好。",
       "patterns": [
