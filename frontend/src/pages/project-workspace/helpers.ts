@@ -73,18 +73,15 @@ export function detectOfficeKind(name?: string): OfficePreviewKind | null {
 }
 
 export function fallbackKindForExtension(ext: string): OfficePreviewKind {
-  switch (ext) {
+  const normalized = ext.toLowerCase();
+  if (normalized.startsWith('h5') || normalized === 'hdf5') return 'h5';
+  switch (normalized) {
     case 'rdata':
       return 'rdata';
     case 'rds':
       return 'rds';
-    case 'h5ad':
-      return 'h5ad';
     case 'loom':
       return 'loom';
-    case 'h5':
-    case 'hdf5':
-      return 'hdf5';
     case 'mtx':
       return 'mtx';
     case 'rtf':

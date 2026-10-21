@@ -1,9 +1,9 @@
 // ============================================================
 // Copilot action bus — decouples Copilot UI from app pages
 //
-// The single-cell app subscribes here; when Copilot fires an action card,
-// the app handles it (open modal, navigate, etc.) without Copilot needing
-// to import any page-specific code.
+// Host pages subscribe here; when Copilot fires an action card, the host
+// handles it (open modal, navigate, etc.) without Copilot needing to import
+// any page-specific code.
 // ============================================================
 
 import { errMsg } from './error';
@@ -26,7 +26,7 @@ export async function dispatchAction(action: CopilotAction): Promise<ActionResul
       // Sanity: AI sometimes gives '#/figcode' or 'petri.com/figcode' or other malformed URLs.
       // Try to normalize to either an absolute https URL or a leading-slash site path.
       if (url.startsWith('#/')) {
-        // Treat #/foo as /foo (likely AI confused single-cell hash routes with site paths)
+        // Treat #/foo as /foo (likely a hash route confused with a site path)
         url = url.replace(/^#\//, '/');
       } else if (url.startsWith('petri.com/') || url.startsWith('www.petri.com/')) {
         url = 'https://' + url;
@@ -65,18 +65,13 @@ export async function dispatchAction(action: CopilotAction): Promise<ActionResul
         }
         return { ok: true, message: '已跳转' };
       }
-      // Otherwise map to single-cell internal hash routes
+      // Otherwise map to the host app's internal hash routes
       let hash = '#/';
       if (target === 'dataset' && id) hash = `#/dataset/${id}`;
       else if (target === 'result' && id) hash = `#/result/${id}`;
       else if (target === 'project' && id) hash = `#/project/${id}`;
       else hash = '#/';
-      const path = window.location.pathname;
-      if (path.startsWith('/single-cell')) {
-        window.location.hash = hash;
-      } else {
-        window.location.href = '/single-cell/' + hash;
-      }
+      window.location.hash = hash;
       return { ok: true, message: '已跳转' };
     } catch (e: unknown) {
       return { ok: false, error: errMsg(e) || '跳转失败' };

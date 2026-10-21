@@ -14,8 +14,6 @@
 //   L128-130    resolveCore
 //   L139-171    resolveNodeBin
 //   L172        NODE_BIN
-//   L175-219    BASE_R_PACKAGES
-//   L220-229    BASE_PY_PACKAGES
 //   L245-265    reserveAvailablePort
 //
 // Low-risk: utility functions. All values are derived from
@@ -145,65 +143,6 @@ function resolveNodeBin() {
 
 const NODE_BIN = resolveNodeBin();
 
-// ── Base package sets ─────────────────────────────────────────────────────
-
-const BASE_R_PACKAGES = new Set([
-  "ggplot2",
-  "dplyr",
-  "tidyr",
-  "reshape2",
-  "data.table",
-  "pheatmap",
-  "ggrepel",
-  "RColorBrewer",
-  "patchwork",
-  "cowplot",
-  "plotly",
-  "igraph",
-  "ggraph",
-  "tidygraph",
-  "circlize",
-  "ComplexHeatmap",
-  "UpSetR",
-  "ggalluvial",
-  "treemap",
-  "networkD3",
-  "Seurat",
-  "SingleCellExperiment",
-  "MOFA2",
-  "CellChat",
-  "WGCNA",
-  "maftools",
-  "clusterProfiler",
-  "enrichplot",
-  "DOSE",
-  "org.Hs.eg.db",
-  "survival",
-  "survminer",
-  "rms",
-  "pROC",
-  "glmnet",
-  "caret",
-  "timeROC",
-  "PRROC",
-  "dcurves",
-  "scatterpie",
-  "Rtsne",
-  "STRINGdb",
-  "gganimate",
-]);
-
-const BASE_PY_PACKAGES = new Set([
-  "matplotlib",
-  "numpy",
-  "pandas",
-  "scanpy",
-  "anndata",
-  "scikit-learn",
-  "seaborn",
-  "scipy",
-]);
-
 // ── Port reservation ──────────────────────────────────────────────────────
 
 function reserveAvailablePort(preferredPort) {
@@ -242,9 +181,6 @@ module.exports = {
   // Node resolution
   resolveNodeBin,
   NODE_BIN,
-  // Package sets
-  BASE_R_PACKAGES,
-  BASE_PY_PACKAGES,
   // Port
   reserveAvailablePort,
 };

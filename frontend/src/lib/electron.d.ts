@@ -239,11 +239,13 @@ declare global {
           enabled?: boolean;
           requiresRuntimes?: Array<{ pluginId: string; version?: string }>;
           contents?: { pluginCount: number; plugins: Array<{ id: string; language: string | null; version: string | null }>; pluginIds: string[]; scriptCount: number; demoDataCount: number };
+          examples?: Array<{ icon: string; title: string; description: string; prompt: string }>;
         }>>;
         listAvailable: () => Promise<Array<{
           packId: string; name: string; nameEn?: string | null; version: string; description: string; packRoot: string; installed: boolean;
           requiresRuntimes?: Array<{ pluginId: string; version?: string }>;
           contents?: { pluginCount: number; plugins: Array<{ id: string; language: string | null; version: string | null }>; pluginIds: string[]; scriptCount: number; demoDataCount: number };
+          examples?: Array<{ icon: string; title: string; description: string; prompt: string }>;
         }>>;
         installFromDialog: () => Promise<{ ok: boolean; canceled?: boolean; pack?: { packId: string }; runtimes?: Array<{ pluginId: string; ok: boolean; skipped?: string; error?: string }>; requiresRestart?: boolean; error?: string }>;
         installPath: (packRoot: string) => Promise<{ ok: boolean; pack?: { packId: string }; runtimes?: Array<{ pluginId: string; ok: boolean; skipped?: string; error?: string }>; requiresRestart?: boolean; error?: string }>;

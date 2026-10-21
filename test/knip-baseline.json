@@ -22,8 +22,6 @@
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::screenshotPng",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::selectPageTarget",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::withInputShield",
-    "exports::src/main/core-utils.js::BASE_PY_PACKAGES",
-    "exports::src/main/core-utils.js::BASE_R_PACKAGES",
     "exports::src/main/core-utils.js::IS_DEV",
     "exports::src/main/core-utils.js::resolveCoreRoot",
     "exports::src/main/core-utils.js::resolveNodeBin",

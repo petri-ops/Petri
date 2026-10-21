@@ -244,6 +244,46 @@ function describePackContents(packRoot) {
   return result;
 }
 
+/**
+ * BLOCK-234 S6 — 包声明式示例卡（`provides.examplePrompts` 指向一个 JSON 数组）。
+ * 只读、有界、路径限 packRoot；坏形状/缺失如实返回 []，不阻断宿主渲染。
+ */
+const MAX_EXAMPLE_PROMPTS = 6;
+const MAX_EXAMPLE_TEXT = 600;
+
+function clippedString(value, limit) {
+  return typeof value === 'string' ? value.trim().slice(0, limit) : '';
+}
+
+function describePackExamplePrompts(packRoot) {
+  try {
+    const root = path.resolve(packRoot);
+    const manifest = JSON.parse(fs.readFileSync(path.join(root, 'pack.json'), 'utf-8'));
+    const relative = manifest && manifest.provides && manifest.provides.examplePrompts;
+    if (typeof relative !== 'string' || !relative.trim()) return [];
+    const resolved = path.resolve(root, relative.trim());
+    if (resolved !== root && !resolved.startsWith(root + path.sep)) return [];
+    const stat = fs.statSync(resolved);
+    if (!stat.isFile() || stat.size > 64 * 1024) return [];
+    const parsed = JSON.parse(fs.readFileSync(resolved, 'utf-8'));
+    if (!Array.isArray(parsed)) return [];
+    return parsed.slice(0, MAX_EXAMPLE_PROMPTS).flatMap((item) => {
+      if (!item || typeof item !== 'object') return [];
+      const title = clippedString(item.title, 120);
+      const prompt = clippedString(item.prompt, MAX_EXAMPLE_TEXT);
+      if (!title || !prompt) return [];
+      return [{
+        icon: clippedString(item.icon, 60) || 'zap',
+        title,
+        description: clippedString(item.description, 240),
+        prompt,
+      }];
+    });
+  } catch {
+    return [];
+  }
+}
+
 module.exports = {
   packsRecordFile,
   readInstalledPacks,
@@ -253,6 +293,7 @@ module.exports = {
   validatePackDir,
   discoverAvailablePacks,
   describePackContents,
+  describePackExamplePrompts,
   installPack,
   uninstallPack,
   computeRuntimeRemovalPlan,

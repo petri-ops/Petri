@@ -130,7 +130,7 @@ const ABSOLUTE_FILE_REFERENCE_RE =
   /(?:^|[\s(\[`])((?:\/[\p{L}\p{N}_. -]+)+\.[A-Za-z0-9][A-Za-z0-9.]*)(?=$|[\s,.，。 、;；:：!?！？)\]"'])/gu;
 const MARKDOWN_LINK_TARGET_RE = /\[[^\]\n]+\]\(([^()\s]+)\)/g;
 const FILE_EXTENSION_PATTERN =
-  '(?:html?|pdf|rtf|epub|docx?|docm|dotx?|xlsx?|xlsm|xlsb|xltx?|pptx?|pptm|ppsx?|potx?|odt|ods|odp|odg|pages|numbers|keynote|png|apng|jpe?g|svg|webp|gif|avif|bmp|ico|tiff?|heic|heif|csv|tsv|json|jsonl|md|markdown|rmd|qmd|rds|rda|rdata|h5ad|loom|h5|hdf5|mtx|txt|log|ya?ml|toml|ini|env|xml|zip|tar|tar\\.gz|tgz|gz|bz2|xz|js|jsx|mjs|cjs|ts|tsx|css|scss|less|vue|svelte|py|pyi|ipynb|r|rproj|sh|bash|zsh|fish|sql|java|kt|kts|go|rs|c|h|cc|cpp|hpp|cs|rb|php|swift|scala|pl|pm|lua|ex|exs|erl|hrl|fs|fsx|gradle|properties|lock|dockerfile|makefile|bed|bedgraph|bam|bai|sam|cram|vcf|bcf|gtf|gff|gff3|fasta|fa|fna|fastq|fq|nwk|newick)';
+  '(?:html?|pdf|rtf|epub|docx?|docm|dotx?|xlsx?|xlsm|xlsb|xltx?|pptx?|pptm|ppsx?|potx?|odt|ods|odp|odg|pages|numbers|keynote|png|apng|jpe?g|svg|webp|gif|avif|bmp|ico|tiff?|heic|heif|csv|tsv|json|jsonl|md|markdown|rmd|qmd|rds|rda|rdata|h5[a-z0-9]*|loom|hdf5|mtx|txt|log|ya?ml|toml|ini|env|xml|zip|tar|tar\\.gz|tgz|gz|bz2|xz|js|jsx|mjs|cjs|ts|tsx|css|scss|less|vue|svelte|py|pyi|ipynb|r|rproj|sh|bash|zsh|fish|sql|java|kt|kts|go|rs|c|h|cc|cpp|hpp|cs|rb|php|swift|scala|pl|pm|lua|ex|exs|erl|hrl|fs|fsx|gradle|properties|lock|dockerfile|makefile|bed|bedgraph|bam|bai|sam|cram|vcf|bcf|gtf|gff|gff3|fasta|fa|fna|fastq|fq|nwk|newick)';
 const ARTIFACT_FILENAME_RE = new RegExp(
   `([\\p{L}\\p{N}_.-]+\\.${FILE_EXTENSION_PATTERN})(?=$|[\\s,.，。 、;；:：!?！？)\\]"'])`,
   'giu',

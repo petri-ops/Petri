@@ -276,7 +276,7 @@ describe('Welcome（BLOCK-80 欢迎页 + UI-341 内嵌聊天模块 + UI-373 不�
     fireEvent.click(screen.getByText('差异分析'));
     expect(mockDispatchPetriEvent).toHaveBeenCalledWith(
       petriEvents.copilotAsk,
-      expect.objectContaining({ prompt: expect.stringContaining('DESeq2') })
+      expect.objectContaining({ prompt: expect.stringContaining('组间差异分析') })
     );
   });
 });

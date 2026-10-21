@@ -34,10 +34,19 @@ const ALLOWED_OPEN_EXTENSIONS = Object.freeze([
   // Documents & archives
   ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
   ".zip", ".tar", ".gz", ".bz2", ".xz", ".rar",
-  // Genomics / Petri domain
-  ".h5ad", ".loom", ".mtx", ".h5", ".rds", ".rdata",
+  // Data formats
+  ".loom", ".mtx", ".h5", ".rds", ".rdata",
   ".maf", ".vcf", ".bed", ".gtf", ".gff", ".fasta", ".fa", ".fastq", ".fq",
 ]);
+
+// HDF5-family data containers share the same prefix (e.g. .h5ad); allow the
+// family without enumerating every domain-specific suffix.
+const ALLOWED_OPEN_EXTENSION_PREFIXES = Object.freeze([".h5"]);
+
+function isAllowedOpenExtension(ext) {
+  return ALLOWED_OPEN_EXTENSIONS.includes(ext)
+    || ALLOWED_OPEN_EXTENSION_PREFIXES.some((prefix) => ext.startsWith(prefix));
+}
 
 function setupFileDialogIpc({ mainWindow } = {}) {
   ipcMain.handle(CHANNELS.file.saveDialog, async (event, defaultName) => {
@@ -186,10 +195,10 @@ function setupFileDialogIpc({ mainWindow } = {}) {
         return { ok: false, error: "path does not exist" };
       }
       const ext = path.extname(targetPath).toLowerCase();
-      if (ext && !ALLOWED_OPEN_EXTENSIONS.includes(ext)) {
+      if (ext && !isAllowedOpenExtension(ext)) {
         return {
           ok: false,
-          error: `file type '${ext}' is not allowed to be opened; supported types: ${ALLOWED_OPEN_EXTENSIONS.join(", ")}`,
+          error: `file type '${ext}' is not allowed to be opened; supported types: ${ALLOWED_OPEN_EXTENSIONS.join(", ")} (.h5* family also allowed)`,
         };
       }
       const error = await shell.openPath(targetPath);

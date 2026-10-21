@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-21（**BLOCK-234 P4-C S6 completed；BLOCK-234 completed；无 active 工作包**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-234（P4-C S2–S6）**：S6 前端/桌面 37 处领域词清零（welcome/copilot 上下文/文件格式/示例卡/shared-copilot/桌面包列表），剩余 11 处 / 6 键登记为显式 compat 白名单（permissions/guest/modality/schema/runtime-bundle/security-extension，每条带 category/owner/reason，门禁断言逐键一致）；pack 0.2.7 `provides.examplePrompts` + `example-prompts.json`；h5 家族前缀保留 h5ad 行为。证据=domain 3/3 + block234 示例卡 3/3 + 前端 267/267 + test:changed 1238 项 0 红 + closeout 十三门 + output:judge PASS；域中性 **48→11 处 / 27→6 键**（整包 179→11 / 85→6）。**下一包需用户发令**；P4 余项=导出/联邦基线、dataModelExtensions。UI-543 in_progress（未跑 9223 live）。plan=`docs/block-234-qdomain-p4c-tail-plan.md` §11。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-21（**BLOCK-234 P4-C S5 completed；包 active**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**active 工作包=BLOCK-234（P4-C 收尾 S2–S6）**。**刚完成=S5（result/RS 科学 profile 下沉 pack）**：pack 0.2.6 `scientific-profiles.json` + `provides.scientificProfiles`；compare 改 profile 驱动（行为等价），rerun/cohort 准入、planner 规则、selection 消费者、heavy 工具、interpret 标准类型全部读 pack；核心新 `pack-scientific-profiles.js` 有界接线，无包诚实降级。证据=block234 6/6 + 定向 compare/rerun/replay/changeset/selection/approval/planner 全绿 + test:changed 1039 项 0 红 + Jev 追加 56/56 + closeout 十三门；域中性 **103→48 处 / 60→27 键**。**下一阶段=S6**（前端/桌面 37 + 兼容 11 白名单裁决）。plan=`docs/block-234-qdomain-p4c-tail-plan.md` §10。G0 开发期常态 · 不外推 packaged/Provider/GA。

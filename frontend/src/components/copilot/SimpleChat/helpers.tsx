@@ -11,15 +11,15 @@ import React, { useEffect, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { getBridge } from '@/lib/desktopBridge';
 import { formatRelativeTime } from '@/lib/format';
-import type {
-  ExamplePromptsProps,
-  ExamplePrompt,
+import {
+  DEFAULT_EXAMPLE_PROMPTS,
+  type ExamplePrompt,
+  type ExamplePromptsProps,
 } from './types';
 
-// DEFAULT_EXAMPLE_PROMPTS canonical 定义在 ./types（通用三卡 + 领域注册表
-// DOMAIN_EXAMPLE_PROMPTS）；此处 re-export 仅为向后兼容旧内部导入路径。
+// DEFAULT_EXAMPLE_PROMPTS canonical 定义在 ./types（通用卡 + 包声明示例卡）；
+// 此处 re-export 仅为向后兼容旧内部导入路径。
 // 2026-09-18 曾在此文件与 types.ts 各存一份拷贝（双维护陷阱），已收编单源。
-import { DEFAULT_EXAMPLE_PROMPTS, DOMAIN_EXAMPLE_PROMPTS } from './types';
 
 /**
  * T83 — small header shown on every AI message: 模型名。
@@ -50,10 +50,35 @@ export function MessageTime({ ts }: { ts?: string }): React.ReactElement | null 
   return <span className="sc-msg-action-time">{time}</span>;
 }
 
+export function normalizePackExamplePrompts(packs: unknown): ExamplePrompt[] {
+  if (!Array.isArray(packs)) return [];
+  return packs
+    .flatMap((pack) => {
+      const examples = (pack as { examples?: unknown } | null)?.examples;
+      return Array.isArray(examples) ? (examples as unknown[]) : [];
+    })
+    .flatMap((item) => {
+      if (!item || typeof item !== 'object') return [];
+      const record = item as { icon?: unknown; title?: unknown; description?: unknown; prompt?: unknown };
+      const title = typeof record.title === 'string' ? record.title.trim() : '';
+      const prompt = typeof record.prompt === 'string' ? record.prompt.trim() : '';
+      if (!title || !prompt) return [];
+      return [{
+        icon: (typeof record.icon === 'string' && record.icon.trim()
+          ? record.icon.trim()
+          : 'zap') as ExamplePrompt['icon'],
+        title,
+        description: typeof record.description === 'string' ? record.description.trim() : '',
+        prompt,
+      }];
+    })
+    .slice(0, 6);
+}
+
 // 2026-09-18 历史残留清理 — 领域感知示例卡：默认渲染通用卡，后台查已装领域
-// 包（桌面 IPC packs.listInstalled / 投影 HTTP 桥同形）按 DOMAIN_EXAMPLE_PROMPTS
-// 注册表追加领域卡。桥缺失/查询失败一律停留在通用卡（无包不提领域，BLOCK-86
-// 哲学同款）；查询失败静默降级不弹错。
+// 包（桌面 IPC packs.listInstalled / 投影 HTTP 桥同形）读取包声明的示例卡。
+// 桥缺失/查询失败一律停留在通用卡（无包不提领域，BLOCK-86 哲学同款）；
+// 查询失败静默降级不弹错。
 export function useDomainExamplePrompts(): ExamplePrompt[] {
   const [prompts, setPrompts] = useState<ExamplePrompt[]>(DEFAULT_EXAMPLE_PROMPTS);
   useEffect(() => {
@@ -68,11 +93,9 @@ export function useDomainExamplePrompts(): ExamplePrompt[] {
         //（非裸数组），双形状兼容防信封误判成「无包」。
         const packs = Array.isArray(result)
           ? result
-          : (result as { packs?: Array<{ packId?: string }> } | null)?.packs;
-        if (!alive || !Array.isArray(packs)) return;
-        const extra = packs.flatMap(
-          (pack) => DOMAIN_EXAMPLE_PROMPTS[String((pack as { packId?: string }).packId || '')] || [],
-        );
+          : (result as { packs?: unknown } | null)?.packs;
+        if (!alive) return;
+        const extra = normalizePackExamplePrompts(packs);
         if (extra.length > 0) setPrompts([...DEFAULT_EXAMPLE_PROMPTS, ...extra]);
       } catch {
         // 桥缺失/查询失败 = 通用卡兜底，不打扰用户

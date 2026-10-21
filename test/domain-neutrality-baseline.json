@@ -1,6 +1,6 @@
 {
-  "_about": "BLOCK-83 D7 领域中性化棘轮基线：核心生产代码（core/ + frontend/src/ + src/，排除 test/migrations/插件目录）中领域关键词的现存残留。门禁 test/domain-neutrality.test.mjs 只拦新增与计数恶化；清理后请下调本文件（或运行 node scripts/d7-baseline.mjs --update）。",
-  "schemaVersion": 1,
+  "_about": "BLOCK-83 D7 领域中性化棘轮基线：核心生产代码（core/ + frontend/src/ + src/，排除 test/migrations/插件目录）中领域关键词的现存残留。门禁 test/domain-neutrality.test.mjs 只拦新增与计数恶化；清理后运行 node scripts/d7-baseline.mjs --update 下调。schemaVersion 2 起 hits 必须与 compat 显式兼容白名单逐键一致（BLOCK-234 S6 裁决）——白名单条目必须带 category/reason/owner，禁止用改词表充数。",
+  "schemaVersion": 2,
   "words": [
     "seurat",
     "deseq2",
@@ -21,33 +21,50 @@
     "组学"
   ],
   "hits": {
-    "core/packages/shared-copilot/actionBus.ts::single-cell": 2,
-    "core/packages/shared-copilot/actions.ts::scrna": 2,
-    "core/packages/shared-copilot/chat-file-references.ts::h5ad": 1,
     "core/petri-server/agent-tools/agent-tool-policy.js::h5ad": 1,
     "core/petri-server/db/schema.js::single-cell": 2,
     "core/petri-server/helpers/guest-permissions.js::single-cell": 1,
     "core/petri-server/helpers/permissions.js::single-cell": 3,
     "core/shared-backend/capability-bundles.js::wgcna": 3,
-    "core/shared-backend/project-modality.js::single-cell": 1,
-    "frontend/src/components/copilot/SimpleChat/types.ts::单细胞": 2,
-    "frontend/src/components/result-studio/ResultStudioChangeSetPanel/display.tsx::volcano": 1,
-    "frontend/src/components/workspace-panels/WorkspaceFileIcon.tsx::h5ad": 1,
-    "frontend/src/lib/copilotContext.ts::single-cell": 5,
-    "frontend/src/lib/office-file-preview.ts::h5ad": 7,
-    "frontend/src/lib/office-file-preview.ts::scanpy": 1,
-    "frontend/src/lib/office-file-preview.ts::单细胞": 2,
-    "frontend/src/lib/result-manifest.ts::h5ad": 1,
-    "frontend/src/pages/project-workspace.tsx::single-cell": 1,
-    "frontend/src/pages/project-workspace/helpers.ts::h5ad": 2,
-    "frontend/src/pages/welcome.tsx::deseq2": 1,
-    "frontend/src/pages/welcome.tsx::seurat": 1,
-    "frontend/src/pages/welcome.tsx::单细胞": 2,
-    "src/ipc/file-dialog.js::h5ad": 1,
-    "src/main/core-utils.js::cellchat": 1,
-    "src/main/core-utils.js::scanpy": 1,
-    "src/main/core-utils.js::seurat": 1,
-    "src/main/core-utils.js::wgcna": 1
+    "core/shared-backend/project-modality.js::single-cell": 1
   },
+  "compat": [
+    {
+      "key": "core/petri-server/agent-tools/agent-tool-policy.js::h5ad",
+      "category": "security-policy-extension",
+      "owner": "SEC / tool-policy",
+      "reason": "科学源扩展名白名单是安全策略边界，不随领域能力下沉；移除会改变文件策略。"
+    },
+    {
+      "key": "core/petri-server/db/schema.js::single-cell",
+      "category": "schema-backfill",
+      "owner": "D1 / schema",
+      "reason": "存量 projects.modality 回填兼容值；schema 迁移裁决不迁移，改动需独立迁移。"
+    },
+    {
+      "key": "core/petri-server/helpers/guest-permissions.js::single-cell",
+      "category": "legacy-permission-alias",
+      "owner": "BLOCK-232",
+      "reason": "guest 权限 legacy 别名，存量权限 JSON 零迁移兼容读取。"
+    },
+    {
+      "key": "core/petri-server/helpers/permissions.js::single-cell",
+      "category": "legacy-permission-alias",
+      "owner": "BLOCK-232",
+      "reason": "legacy 权限别名 + data 组 OR 解析；保留以零迁移兼容存量用户。"
+    },
+    {
+      "key": "core/shared-backend/capability-bundles.js::wgcna",
+      "category": "runtime-bundle-identity",
+      "owner": "runtime provisioning",
+      "reason": "运行时下载包 ID/URL/hash 契约；改名会使已发布运行时制品失配。"
+    },
+    {
+      "key": "core/shared-backend/project-modality.js::single-cell",
+      "category": "legacy-modality-value",
+      "owner": "BLOCK-230",
+      "reason": "存量项目 modality 基础兼容值；未知值回落 general，存量不迁移。"
+    }
+  ],
   "updatedAt": "2026-10-21"
 }

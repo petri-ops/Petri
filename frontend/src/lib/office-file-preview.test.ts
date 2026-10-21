@@ -17,13 +17,13 @@ describe('office-file-preview describe & opener', () => {
     expect(describeOfficeKind('numbers')).toContain('Numbers');
     expect(describeOfficeKind('keynote')).toContain('Keynote');
     expect(describeOfficeKind('rdata')).toContain('R');
-    expect(describeOfficeKind('h5ad')).toContain('AnnData');
+    expect(describeOfficeKind('h5')).toContain('HDF5');
   });
 
   it('suggests an opener per format', () => {
     expect(suggestedOpener('docx')).toContain('Word');
     expect(suggestedOpener('xlsx')).toContain('Excel');
-    expect(suggestedOpener('h5ad')).toContain('h5py');
+    expect(suggestedOpener('h5')).toContain('h5py');
     expect(suggestedOpener('rdata')).toContain('R');
   });
 });
@@ -51,7 +51,7 @@ describe('office-file-preview zip parsing', () => {
   it('maps all listed binary extensions to a friendly description', () => {
     const kinds = ['dataset.h5ad', 'matrix.loom', 'scan.h5', 'session.rdata', 'object.rds', 'genes.mtx'];
     for (const name of kinds) {
-      const mapped = name.endsWith('.h5ad') ? 'h5ad'
+      const mapped = name.endsWith('.h5ad') ? 'h5'
         : name.endsWith('.loom') ? 'loom'
         : name.endsWith('.h5') ? 'h5'
         : name.endsWith('.rdata') ? 'rdata'

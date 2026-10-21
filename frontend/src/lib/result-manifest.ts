@@ -89,7 +89,7 @@ export function classifyArtifact(artifact: ResultArtifactRecord): ResultArtifact
   if (type === 'plot' || /\.(png|jpg|jpeg|gif|svg|webp)$/i.test(name)) return 'plot';
   if (type === 'table' || /\.(csv|tsv|xls|xlsx)$/i.test(name)) return 'table';
   if (type === 'text' || /\.(txt|md|json|log)$/i.test(name)) return 'text';
-  if (/\.(rds|rda|rdata|h5ad|loom|h5|mtx|npz|zarr|feather|parquet)$/i.test(name)) return 'data';
+  if (/\.(rds|rda|rdata|h5[a-z0-9]*|loom|mtx|npz|zarr|feather|parquet)$/i.test(name)) return 'data';
   return 'file';
 }
 

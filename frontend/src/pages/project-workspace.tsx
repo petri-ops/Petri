@@ -711,7 +711,7 @@ export function ProjectWorkspace(): React.ReactElement {
           projectDatasets: datasets.map((d) => ({
             id: d.id,
             name: d.name,
-            type: d.nCells != null ? 'single-cell' : undefined,
+            type: d.nCells != null ? 'expression' : undefined,
             rows: d.nCells,
           })),
           projectJobs: jobs.map((j) => ({

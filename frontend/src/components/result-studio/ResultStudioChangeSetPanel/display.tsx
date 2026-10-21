@@ -190,7 +190,7 @@ export function ScientificDifference({ scientific }: { scientific: NonNullable<R
       {scientific.thresholds && <tr><td>阈值 (调整 p / |效应量|)</td><td>{scientific.thresholds.before.padjCutoff} / {scientific.thresholds.before.lfcCutoff} → {scientific.thresholds.after.padjCutoff} / {scientific.thresholds.after.lfcCutoff}</td></tr>}
     </tbody></table>;
   }
-  if (scientific.kind === 'volcano_classification' && scientific.classifications) {
+  if (scientific.classifications) {
     const { before, after, membership } = scientific.classifications;
     return <table className={styles.tableCompare}><tbody>
       <tr><td>显著分类</td><td>{before.significantCount} → {after.significantCount}</td></tr>

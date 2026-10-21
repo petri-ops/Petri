@@ -4,11 +4,7 @@
 // ============================================================
 
 export type CopilotPage =
-  | 'single-cell-projects'
-  | 'single-cell-project'
-  | 'single-cell-dataset'
-  | 'single-cell-result'
-  // W3-C: 空间组学云平台 4 页面（与 single-cell 同结构，命名对齐）
+  // W3-C: 空间组学云平台 4 页面
   | 'spatial-projects'
   | 'spatial-project'
   | 'spatial-dataset'
@@ -55,8 +51,8 @@ export interface CopilotContext {
   pageOutline?: string[];
   /** Heading currently in viewport (closest one above the fold) */
   visibleHeading?: string;
-  // W3-C: 当前云平台模块（决定 petri-server system-prompt 走 spatial / single-cell 分支）
-  currentModule?: 'single-cell' | 'spatial';
+  // 当前云平台模块（决定 petri-server system-prompt 的云平台分支）
+  currentModule?: 'spatial';
   // single-cell + spatial 共享字段（同结构）
   projectId?: string;
   datasetId?: string;

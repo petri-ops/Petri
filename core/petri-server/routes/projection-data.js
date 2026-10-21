@@ -146,7 +146,11 @@ module.exports = function registerProjectionDataRoutes(app) {
       const packs = packRegistry.readInstalledPacks(resolveDataDir());
       res.json({
         ok: true,
-        packs: packs.map((p) => ({ ...p, contents: enrichPackContents(packRegistry, p.packRoot) })),
+        packs: packs.map((p) => ({
+          ...p,
+          contents: enrichPackContents(packRegistry, p.packRoot),
+          examples: packRegistry.describePackExamplePrompts(p.packRoot),
+        })),
       });
     } catch (error) {
       res.status(500).json({ ok: false, error: 'packs_list_failed', message: error.message });
@@ -178,6 +182,7 @@ module.exports = function registerProjectionDataRoutes(app) {
           ...p,
           installed: installedIds.has(p.packId),
           contents: enrichPackContents(packRegistry, p.packRoot),
+          examples: packRegistry.describePackExamplePrompts(p.packRoot),
         })),
       });
     } catch (error) {

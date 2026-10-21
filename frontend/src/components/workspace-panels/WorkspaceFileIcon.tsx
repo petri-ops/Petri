@@ -48,7 +48,6 @@ const EXTENSION_PRESENTATIONS: Record<string, WorkspaceFilePresentation> = {
   feather: { kind: 'data', label: 'FTR' },
   rds: { kind: 'data', label: 'RDS' },
   h5: { kind: 'data', label: 'H5' },
-  h5ad: { kind: 'data', label: 'H5' },
   loom: { kind: 'data', label: 'LM' },
   json: { kind: 'config', label: '{}' },
   jsonl: { kind: 'config', label: '{}' },
@@ -97,6 +96,7 @@ export function getWorkspaceFilePresentation(
   if (type === 'dir') return { kind: 'folder', icon: 'folder' };
   const normalized = name.trim().toLowerCase();
   const extension = normalized.includes('.') ? normalized.split('.').pop() || '' : '';
+  if (extension.startsWith('h5') || extension === 'hdf5') return { kind: 'data', label: 'H5' };
   return EXTENSION_PRESENTATIONS[extension] || { kind: 'generic', icon: 'file' };
 }
 

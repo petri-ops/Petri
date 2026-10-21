@@ -6,8 +6,8 @@ acceptance:
   - S3-S6 按 §3 逐阶段推进，每阶段 0 新增/0 恶化，基线逐次下调。
   - 每阶段定向测试 + test:changed + closeout 十三门 PASS。
   - 最终剩余量只能是显式兼容白名单（permissions/modality/schema 等），不得以改扫描器词表充数。
-reopen: 兼容白名单的最小集与门禁表达方式，待 S6 收口时裁决。
-status: active
+reopen: 11 处 / 6 键显式兼容白名单（test/domain-neutrality-baseline.json `compat`，每条带 category/owner/reason）；UI-543 的 9223 离屏实机腿未跑。
+status: completed
 ---
 
 # BLOCK-234 · Q-DOMAIN P4-C 收尾（S2–S6）
@@ -172,3 +172,44 @@ Result Studio 保真核心（compare 的阈值/分类/排序语义）**不再硬
 - `agent-tool-policy.js` 的 `.h5ad` 科学源扩展与 `capability-bundles.js` 的 `r-wgcna` 运行时包 ID 未下沉：前者是安全策略，后者是带哈希的下载契约，转 S6 兼容白名单裁决。
 - 剩余 48 处 = **S6 前端/桌面 37 处**（office-file-preview/copilotContext/welcome/core-utils/shared-copilot/types/file-recognition）+ **兼容 11 处**（permissions/guest 4、modality 1、db schema 2、tool-policy 1、capability-bundles 3）。
 - 下一阶段=S6（前端领域文案/类型收敛 + 兼容白名单裁决）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 11. S6 收口（2026-10-21）
+
+**S6 completed；BLOCK-234 completed（P4-C 收尾 S2–S6 全部收口）。**
+
+### 11.1 兼容白名单裁决（reopen 落地）
+
+剩余 11 处 / 6 键全部登记为显式兼容白名单（`test/domain-neutrality-baseline.json`，schemaVersion 2 的 `compat` 数组），每条带 category/owner/reason：
+
+| key | category | owner | 不能零化的原因 |
+| --- | --- | --- | --- |
+| `agent-tool-policy.js::h5ad`（1） | security-policy-extension | SEC / tool-policy | 科学源扩展名白名单是安全策略边界，不随领域能力下沉 |
+| `db/schema.js::single-cell`（2） | schema-backfill | D1 / schema | 存量 `projects.modality` 回填兼容值；schema 迁移需独立裁决 |
+| `guest-permissions.js::single-cell`（1） | legacy-permission-alias | BLOCK-232 | guest 权限 legacy 别名，存量权限 JSON 零迁移兼容 |
+| `permissions.js::single-cell`（3） | legacy-permission-alias | BLOCK-232 | legacy 权限别名 + `data` 组 OR 解析；零迁移兼容存量用户 |
+| `capability-bundles.js::wgcna`（3） | runtime-bundle-identity | runtime provisioning | 运行时下载包 ID/URL/hash 契约；改名会使已发布运行时制品失配 |
+| `project-modality.js::single-cell`（1） | legacy-modality-value | BLOCK-230 | 存量项目 modality 基础兼容值；未知值回落 general，存量不迁移 |
+
+门禁 `test/domain-neutrality.test.mjs` 新增两条硬断言：
+1. 当前残留必须全部在 `compat` 中（未登记即红）；
+2. `compat` 键与基线 `hits` 逐键一致（清理后同步移除，防陈旧条目），且每条 category/reason/owner 非空。
+
+### 11.2 交付
+
+- **前端/桌面 37 处归零**：欢迎页 chip 领域中性；copilotContext 删除 single-cell 云页面/模块 legacy 类型；workspace/result 文件格式 h5 家族改前缀匹配（h5ad 行为保留）；Result Studio 比较摘要按数据形状渲染；shared-copilot action 类型放宽为 string、导航改通用 hash；桌面 file-dialog 用 `.h5*` 前缀保留 h5ad 打开能力；删除无人消费的 `BASE_R_PACKAGES/BASE_PY_PACKAGES`。
+- **pack 0.2.7**：`provides.examplePrompts` + `example-prompts.json`；`pack-registry.describePackExamplePrompts` 只读有界装载，桌面 `pack:list-installed` 与投影 `/api/packs/installed` 同步富化，前端 `normalizePackExamplePrompts` 动态追加；无包停留通用卡。
+- UI-543 已登记 `in_progress`（代码+组件测试完成，未跑 9223 live）。
+
+### 11.3 验证
+
+- 域中性：**48→11 处 / 27→6 键**（S6 清除 37 处、21 键），0 新增；剩余全部为显式兼容白名单。
+- 定向：domain-neutrality 3/3；block234 示例卡 3/3；前端 office/result-manifest/WorkspaceFileIcon/copilotContext/示例卡 33/33；SimpleChat + 投影桥 23/23；Jev 追加 conversationRunStore 50/50 + 历史/压缩 17/17。
+- `test:changed`：**1238 项 / 1230 pass / 0 fail / 8 skip** + 前端 267/267。
+- types 0；lint 0 error；arch 0 违规；knip 保留面 257→255；closeout **十三门 PASS**；`output:judge` PASS（fit 3.33，3 次 replay 稳定）。
+- 收口自纠：首次 closeout 在 `gate:code-size` 因 `project-workspace.tsx` 单行改动指纹漂移被拦，按台账规则 `--write` 显式重打（行数未变），复跑全绿。
+
+### 11.4 边界
+
+- UI-543 未跑 9223 离屏实机腿（欢迎页 chip / Composer 领域示例卡 / h5 家族预览标签的亮暗截图）；按台账保持 `in_progress`。
+- 兼容白名单 6 键为当前最小集；未来如迁移 permissions/modality/schema 或运行时包 ID，需单独裁决并同步收缩 `compat`。
+- BLOCK-234 收口后无 active 工作包；下一包需用户发令。G0 开发期常态 · 不外推 packaged/Provider/GA。

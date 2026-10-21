@@ -30,11 +30,17 @@ const BASELINE = path.join(ROOT, 'test/domain-neutrality-baseline.json');
   console.log('[d7] 新增/恶化: ' + regressions.length + ' | 减少: ' + improvements.length);
   for (const r of regressions.slice(0, 20)) console.log('  + ' + r.key + ' (' + r.baseline + ' → ' + r.count + ')');
   for (const i of improvements.slice(0, 20)) console.log('  - ' + i.key + ' (' + i.baseline + ' → ' + i.count + ')');
+  const compatKeys = new Set((Array.isArray(existing.compat) ? existing.compat : []).map((entry) => entry.key));
+  const unlisted = Object.keys(current).filter((key) => !compatKeys.has(key));
+  if (unlisted.length > 0) {
+    console.log('[d7] 新增键不在 compat 兼容白名单（门禁会红，需登记 category/reason/owner）: ' + unlisted.length);
+    for (const key of unlisted.slice(0, 20)) console.log('  ! ' + key);
+  }
 
   if (process.argv.includes('--update')) {
     const next = {
       ...existing,
-      schemaVersion: 1,
+      schemaVersion: 2,
       words: mod.DOMAIN_WORDS,
       hits: current,
       updatedAt: new Date().toISOString().slice(0, 10),

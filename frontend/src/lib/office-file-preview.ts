@@ -3,8 +3,8 @@
  *
  * Office Open XML (`.docx`, `.xlsx`, `.pptx`) and OpenDocument (`.odt`, `.ods`,
  * `.odp`) are zip containers. iWork (`.pages`, `.numbers`, `.keynote`) uses a
- * non-standard structure but is also a zip. Bioinformatics binary data
- * containers (`.RData`, `.rds`, `.h5ad`, `.loom`) are NOT zips; we surface them
+ * non-standard structure but is also a zip. Binary data containers
+ * (`.RData`, `.rds`, `.h5`, `.loom`) are NOT zips; we surface them
  * through a metadata card only.
  *
  * The renderer downloads the workspace file URL via the existing controlled
@@ -37,7 +37,6 @@ export type OfficePreviewKind =
   | 'epub'
   | 'rdata'
   | 'rds'
-  | 'h5ad'
   | 'loom'
   | 'h5'
   | 'hdf5'
@@ -92,6 +91,7 @@ async function fetchAsArrayBuffer(url: string, token: string): Promise<FetchedRe
 
 function detectKind(name: string): OfficePreviewKind {
   const ext = name.split('.').pop()?.toLowerCase() || '';
+  if (ext.startsWith('h5')) return 'h5';
   switch (ext) {
     case 'docx':
     case 'docm':
@@ -127,8 +127,6 @@ function detectKind(name: string): OfficePreviewKind {
       return 'rdata';
     case 'rds':
       return 'rds';
-    case 'h5ad':
-      return 'h5ad';
     case 'loom':
       return 'loom';
     case 'h5':
@@ -367,7 +365,6 @@ export async function loadOfficePreview(req: OfficePreviewRequest): Promise<Offi
   if (
     kind === 'rdata' ||
     kind === 'rds' ||
-    kind === 'h5ad' ||
     kind === 'loom' ||
     kind === 'h5' ||
     kind === 'hdf5' ||
@@ -506,13 +503,11 @@ export function describeOfficeKind(kind: OfficePreviewKind): string {
       return 'R 工作空间 (.RData)';
     case 'rds':
       return 'R 序列化对象 (.rds)';
-    case 'h5ad':
-      return 'AnnData (h5ad) 单细胞矩阵';
     case 'loom':
-      return 'Loom 单细胞矩阵';
+      return '矩阵数据容器 (Loom)';
     case 'h5':
     case 'hdf5':
-      return 'HDF5 数据集';
+      return 'HDF5 数据容器';
     case 'mtx':
       return 'Matrix Market 矩阵';
     default:
@@ -544,11 +539,10 @@ export function suggestedOpener(kind: OfficePreviewKind): string {
     case 'rdata':
     case 'rds':
       return 'R / RStudio';
-    case 'h5ad':
     case 'loom':
     case 'h5':
     case 'hdf5':
-      return 'h5py / Scanpy / hdfview';
+      return 'h5py / HDFView';
     case 'mtx':
       return 'scipy.io.mmread / MATLAB';
     default:

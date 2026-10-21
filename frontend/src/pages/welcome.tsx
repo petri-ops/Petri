@@ -38,9 +38,9 @@ import styles from './welcome.module.css';
  */
 
 const QUICK_CHIPS: Array<{ label: string; prompt: string }> = [
-  { label: '差异分析', prompt: '请用 DESeq2 对本项目 counts 数据做差异表达分析，并给出火山图与热图。' },
-  { label: '富集分析', prompt: '请对差异基因做 GO/KEGG 富集分析，输出气泡图与结果表。' },
-  { label: '单细胞聚类', prompt: '请用 Seurat 对单细胞数据做标准流程（QC→PCA→UMAP→聚类），并给出 marker 基因表。' },
+  { label: '差异分析', prompt: '请对本项目的数据做组间差异分析，并给出可视化与结果表。' },
+  { label: '富集分析', prompt: '请对差异结果做功能富集分析，输出图表与结果表。' },
+  { label: '聚类分析', prompt: '请对表达数据做标准聚类流程（QC→降维→聚类），并给出 marker 基因表。' },
   { label: '报告解读', prompt: '请解读项目内最新的分析结果，并生成一份简明报告。' },
 ];
 

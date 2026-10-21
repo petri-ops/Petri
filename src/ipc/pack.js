@@ -45,7 +45,11 @@ function registerPackIpc() {
     // 记录含 packRoot——即使包源稍后被删，卸载前也能展示模块清单
     return {
       ok: true,
-      packs: packs.map((p) => ({ ...p, contents: enrichContents(packRegistry, p.packRoot) })),
+      packs: packs.map((p) => ({
+        ...p,
+        contents: enrichContents(packRegistry, p.packRoot),
+        examples: packRegistry.describePackExamplePrompts(p.packRoot),
+      })),
     };
   });
 
@@ -60,6 +64,7 @@ function registerPackIpc() {
         ...p,
         installed: installedIds.has(p.packId),
         contents: enrichContents(packRegistry, p.packRoot),
+        examples: packRegistry.describePackExamplePrompts(p.packRoot),
       })),
     };
   });

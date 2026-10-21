@@ -37,6 +37,16 @@ test('BLOCK-83 D7 core production code has no NEW domain-word residue (ratchet)'
     '核心生产代码出现新的领域词残留——领域能力必须随领域包交付，不得进核心：\n  ' + detail,
   );
 
+  // BLOCK-234 S6：剩余残留必须全部登记为显式兼容白名单，不得静默保留。
+  const compat = Array.isArray(baseline.compat) ? baseline.compat : [];
+  const compatKeys = new Set(compat.map((entry) => entry.key));
+  const unlisted = Object.keys(current).filter((key) => !compatKeys.has(key));
+  assert.equal(
+    unlisted.length,
+    0,
+    '剩余领域残留必须登记为显式兼容白名单（key/category/reason/owner）：\n  ' + unlisted.join('\n  '),
+  );
+
   if (improvements.length > 0) {
     const lines = improvements.map((i) => `${i.key} (baseline ${i.baseline} → ${i.count})`).join('\n  ');
     console.log(
@@ -44,6 +54,24 @@ test('BLOCK-83 D7 core production code has no NEW domain-word residue (ratchet)'
       `\`node scripts/d7-baseline.mjs --update\` 下调基线以保持真相：\n  ` + lines,
     );
   }
+});
+
+test('BLOCK-234 S6 compat whitelist is explicit and exactly matches the baseline hits', () => {
+  const baseline = JSON.parse(fs.readFileSync(baselinePath, 'utf8'));
+  assert.equal(baseline.schemaVersion, 2, '兼容白名单需 schemaVersion 2');
+  assert.ok(Array.isArray(baseline.compat) && baseline.compat.length > 0, 'compat 白名单不能为空');
+  const keys = baseline.compat.map((entry) => entry.key);
+  assert.equal(new Set(keys).size, keys.length, 'compat 白名单键必须唯一');
+  for (const entry of baseline.compat) {
+    assert.ok(typeof entry.category === 'string' && entry.category.trim(), `缺少 category: ${entry.key}`);
+    assert.ok(typeof entry.reason === 'string' && entry.reason.trim(), `缺少 reason: ${entry.key}`);
+    assert.ok(typeof entry.owner === 'string' && entry.owner.trim(), `缺少 owner: ${entry.key}`);
+  }
+  assert.deepEqual(
+    [...keys].sort(),
+    Object.keys(baseline.hits).sort(),
+    'compat 白名单必须与基线 hits 逐键一致（清理后同步移除条目）',
+  );
 });
 
 test('BLOCK-83 D7 scanner is deterministic and scoped to core production code', () => {

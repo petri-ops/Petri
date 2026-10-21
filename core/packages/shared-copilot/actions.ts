@@ -12,14 +12,7 @@ export interface StartAnalysisAction {
   type: 'start_analysis';
   label: string;
   datasetId: string;
-  analysisType:
-    | 'scrna_standard'
-    | 'recluster'
-    | 'deg'
-    | 'enrichment'
-    | 'cell_annotation'
-    | 'scrna_integration'
-    | 'trajectory';
+  analysisType: string;
   params?: Record<string, unknown>;
   rationale?: string;
 }

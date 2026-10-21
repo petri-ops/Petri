@@ -45,7 +45,7 @@ describe('CopilotContextProvider', () => {
     const first = renderHook(
       () => {
         useSetCopilotContext({
-          page: 'single-cell-result',
+          page: 'spatial-result',
           projectId: 'p-A',
           datasetId: 'd-A',
           analysisId: 'a-A',
@@ -126,12 +126,12 @@ describe('CopilotContextProvider', () => {
     resetSingleton();
     const first = renderHook(
       () => {
-        useSetCopilotContext({ page: 'single-cell-dataset', datasetId: 'd-1' });
+        useSetCopilotContext({ page: 'spatial-dataset', datasetId: 'd-1' });
         return useCopilotContext();
       },
       { wrapper }
     );
-    expect(first.result.current.page).toBe('single-cell-dataset');
+    expect(first.result.current.page).toBe('spatial-dataset');
 
     first.unmount();
 

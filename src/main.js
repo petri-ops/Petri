@@ -130,9 +130,6 @@ process.stderr?.on?.("error", (err) => {
 // ── 解析用来跑后端子进程的 node 可执行文件 ──────────────────────
 // resolveNodeBin / NODE_BIN 已提取到 src/main/core-utils.js
 
-// ── 基础 Runtime 自带包集合 ─────────────────────────────────────
-// BASE_R_PACKAGES / BASE_PY_PACKAGES 已提取到 src/main/core-utils.js
-
 // ── 系统检测：开发模式下找系统安装的 R / Python ────────────────
 // _detectSystemR / _detectSystemPython / resolveRuntime were
 // moved to src/main/env-coordinator.js by BLOCK-9.1 PHASE 3.

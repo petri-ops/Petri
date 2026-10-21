@@ -618,6 +618,8 @@ status: planned
 > 2026-10-21：**P4 数据模型第一片已立项并收口 [BLOCK-230](./block-230-qdomain-p4-modality-plan.md)（completed）**——modality 默认 general + pack `provides.modalities` + 未知回落；**reopen**：权限通用化/域中性归零/RS 保真/导出联邦基线/dataModelExtensions。
 >
 > 2026-10-21：**P4-C S5 已收口 [BLOCK-234](./block-234-qdomain-p4c-tail-plan.md)（active）**——result/RS 科学语义（compare/rerun/cohort/planner/selection/heavy/interpret）下沉 pack `provides.scientificProfiles`（pack 0.2.6），核心只留有界引擎与不变量；域中性 **103→48 处**；剩余 S6 前端/桌面 + 兼容白名单。**P4 仍 open**：权限/域中性归零/RS 保真/导出联邦基线/dataModelExtensions（其中权限已于 BLOCK-232 收口）。
+>
+> 2026-10-21：**P4-C 收尾 [BLOCK-234](./block-234-qdomain-p4c-tail-plan.md) completed（S2–S6）**——S6 前端/桌面 37 处清零，剩余 11 处 / 6 键为显式兼容白名单（permissions/guest/modality/schema/runtime-bundle/security-extension，门禁逐键一致）；pack 0.2.7 `provides.examplePrompts`。域中性 **179→11 处 / 85→6 键**。**无 active 工作包**；P4 余项=导出/联邦基线、dataModelExtensions（需独立阶段发令）。
 
 **目标**：把「长跑、离开窗口、出错、首启」这些边缘体验补到第一梯队。
 
