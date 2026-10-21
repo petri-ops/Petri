@@ -1,6 +1,6 @@
 # Petri Desktop UI 产品化审计台账
 
-最后更新：2026-10-21（**UI-539 通知中心 + 免打扰 verified（dev Electron 边界内；9223 离屏 live 11/11）**，BLOCK-226 / Q9）：标题栏铃铛+未读徽章+通知列表（回合终态/待审批）；`userPrefs.quietHours` 只抑制系统 toast、应用内仍留痕；面板向左展开避免右缘裁切。证据 `acceptance/block-226/`（live 11/11 + 亮/暗/设置截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+最后更新：2026-10-21（**UI-540 首启角色揭示 verified（dev Electron 边界内；9223 离屏 live 7/7）**，BLOCK-227 / Q9）：欢迎页一次性浮层三卡（分析数据/写代码/整理知识）+ 本地执行说明 + 显式「开始使用」；`roleRevealSeen` 落盘、已看过不再出现。证据 `acceptance/block-227/`（live 7/7 + 亮/暗截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。：标题栏铃铛+未读徽章+通知列表（回合终态/待审批）；`userPrefs.quietHours` 只抑制系统 toast、应用内仍留痕；面板向左展开避免右缘裁切。证据 `acceptance/block-226/`（live 11/11 + 亮/暗/设置截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**UI-538 D4 自动选模型 verified（dev Electron 边界内；9223 离屏 live 8/8）**，BLOCK-225 / Q9）：按任务/附件每轮解析（有图→识图绑定/能力；否则 Agent/工具；回落当前）；菜单「自动」开关+解析预览，composer 显示「自动」；偏好 `autoModel` 默认 false。证据 `acceptance/block-225/`（live 8/8 + 亮/暗截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
@@ -5170,3 +5170,11 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **验证（代码）**：前端 62/62（quiet-hours 5 + notification-center 5 + Bell 3 + DesktopBehaviorPanel 3 + QuitSummaryDialog 4 + SimpleChat 6 + TitleBarRightZone 7 + TitleBar 29）；Node 13/13（quiet 门 3 + 配置基线 4 + BLOCK-223 shell 6）；theme 17/17；types 0；code-size PASS。
 - **实机腿（9223 离屏，11/11）**：`acceptance/block-226/`——空态 → seed 两条后重载 2 行/2 未读/徽章 2 → 亮/暗截图 → 全部已读清零 → 全天免打扰窗口 `notify` 返回 `quiet_hours` → 设置页输入在场；面板向左展开（右缘不裁切）。
 - **未做（reopen）**：点击通知跳转会话、系统通知历史、仅审批穿透免打扰、声音、按类型开关、跨设备同步。
+
+## UI-540: 首启角色揭示（2026-10-21 **verified（dev Electron 边界内；9223 离屏 live 7/7）**，BLOCK-227 / Q9）
+
+- **变化面**：首次启动时欢迎页出现一屏角色揭示——标题「你好，我是格物」+ 一句话定位 + 三张卡（分析数据 / 写代码 / 整理知识）+「本地执行、无厂商中继；工具调用与审批记录都可回看」；必须显式点「开始使用」才关闭并写回 `roleRevealSeen=true`，之后不再出现。
+- **为什么这样设计（自有形态）**：首启要回答的是「你是什么、能帮我做什么」——不是功能清单，也不是注册引导。三张卡直接对应通用 agent 的三类主场景，末尾用本地执行/可审阅建立信任心智；不提供点遮罩/Esc 误跳过，避免用户错过唯一次介绍。
+- **验证（代码）**：前端 7/7（偏好 4 + 组件 3）；配置基线 4/4（94 键）；theme 17/17；types 0；lint 0 error；code-size PASS。
+- **实机腿（9223 离屏，7/7）**：`acceptance/block-227/`——首启浮层三卡 → 亮/暗截图 → 显式确认关闭 → 偏好落盘 true → 刷新不再出现。
+- **未做（reopen）**：分步引导（选模型/装运行时）、数据导入、角色动画、设置内重播、语言/插画定制。

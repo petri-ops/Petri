@@ -403,6 +403,11 @@ const CONFIG_KEYS = Object.freeze([
     domain: { pattern: '^(?:[01]\\d|2[0-3]):[0-5]\\d-(?:[01]\\d|2[0-3]):[0-5]\\d$|^$' },
     envKeys: [], aliases: [], mutable: true, ui: 'settings',
   },
+  {
+    // BLOCK-227 — 首启角色揭示是否已看（默认 false=首次显示）。
+    key: 'userPrefs.roleRevealSeen', family: 'user-prefs', path: 'roleRevealSeen',
+    type: 'boolean', envKeys: [], aliases: [], mutable: true, ui: 'none',
+  },
   // —— 技能治理账本（BLOCK-203 W4a P3；原 `shared-backend/skill-prefs.js` 无任何形状校验）——
   // `disabled.<id>` 不是布尔映射而是对象 `{ at, reason? }`，`uninstalledSources.<id>` 并存
   // `{ sourceDir, at }`。`findEntryByPath` 只寻址标量 ⇒ 按**点路径**逐字段登记，

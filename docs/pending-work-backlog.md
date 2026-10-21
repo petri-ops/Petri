@@ -5,6 +5,8 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
+最后更新：2026-10-21（**BLOCK-227 Q9 K9 首启角色揭示 completed**（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：欢迎页一次性浮层三卡 + 显式「开始使用」，`userPrefs.roleRevealSeen` 默认 false 落盘；读取失败不展示。证据=前端 7/7 + 配置基线 4/4 + 9223 离屏 live 7/7 + theme/types/lint/code-size PASS。reopen=分步引导/数据导入/动画/重播。plan=docs/block-227-q9-onboarding-role-reveal-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-10-21（**BLOCK-226 Q9 通知中心/免打扰 completed**（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：标题栏铃铛+未读+通知列表（回合终态/待审批留痕）；`userPrefs.quietHours`（空=关，跨午夜）只抑制系统 toast、应用内仍记录；面板向左展开避免裁切。证据=前端 62/62 + Node 13/13 + 9223 离屏 live 11/11 + theme/types/code-size PASS。reopen=点击跳转/系统历史/审批穿透/声音/类型开关/跨设备。plan=docs/block-226-q9-notification-center-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-10-21（**BLOCK-225 Q9 D4 Auto completed**（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：按任务/附件每轮解析模型（有图→vision 绑定/能力；否则 agent 绑定/tools；回落当前）；`userPrefs.autoModel` 默认 false；菜单开关+预览、composer「自动」；发送/子代理启动时解析，不写回 active 绑定。证据=前端 33/33 + 配置基线 4/4 + 9223 离屏 live 8/8 + types/theme/code-size PASS。reopen=复杂度分级/成本权重/审计落盘/覆盖确认。plan=docs/block-225-q9-auto-model-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。）

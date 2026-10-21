@@ -1,4 +1,6 @@
 # Petri Desktop — Current Next Steps
+最后更新：2026-10-21（**BLOCK-227 Q9 K9 首启角色揭示 completed**）：欢迎页一次性浮层三卡（分析数据/写代码/整理知识）+ 显式「开始使用」，`userPrefs.roleRevealSeen` 落盘；读取失败不展示。证据=前端 7/7 + 配置基线 4/4 + 9223 离屏 live 7/7（亮/暗截图）。**下一步**：K2 崩溃同意/本地解析（评估）→ E7 电脑控制 sidecar（最重）→ Q-DOMAIN P4 data model（母纲要求最后）。reopen 见 plan §7.3。plan=`docs/block-227-q9-onboarding-role-reveal-plan.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-21（**BLOCK-226 Q9 通知中心/免打扰 completed**）：标题栏铃铛+未读徽章+通知列表（回合终态/待审批留痕）；`userPrefs.quietHours`（空=关，跨午夜）只抑制系统 toast、应用内仍记录；面板向左展开避免右缘裁切。证据=前端 62/62 + Node 13/13 + 9223 离屏 live 11/11（亮/暗/设置截图）+ theme/types/code-size PASS。**下一步**：K9 首启揭示 → K2/E7 评估 → Q-DOMAIN P4 data model（母纲要求最后）。reopen 见 plan §7.3。plan=`docs/block-226-q9-notification-center-plan.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**BLOCK-225 Q9 D4 Auto completed**）：按任务/附件每轮解析模型（有图→vision 绑定/能力；否则 agent 绑定/tools；回落当前），`userPrefs.autoModel` 默认 false；菜单开关+解析预览、composer「自动」；`ModelChip` 抽出，SimpleChat 保持 2142 行。证据=前端 33/33 + 配置基线 4/4 + 9223 离屏 live 8/8（亮/暗截图）+ types/theme/code-size PASS。**下一步**：Q9 通知中心/免打扰 → K9 首启揭示 → K2/E7 评估 → Q-DOMAIN P4 data model（母纲要求最后）。reopen 见 plan §7.3。plan=`docs/block-225-q9-auto-model-plan.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。

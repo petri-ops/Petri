@@ -1,0 +1,43 @@
+{
+  "name": "block227-role-reveal-live",
+  "startedAt": "2026-10-21T02:01:55.836Z",
+  "finishedAt": "2026-10-21T02:02:30.061Z",
+  "assertions": [
+    {
+      "name": "R1_prefs_reset_unseen",
+      "pass": true,
+      "detail": "{\"theme\":\"dark\",\"autoModel\":false,\"quietHours\":\"\",\"roleRevealSeen\":false}"
+    },
+    {
+      "name": "D1_role_reveal_visible",
+      "pass": true,
+      "detail": "你好，我是格物\n\n一个跑在你机器上的通用 agent。你可以把它当成会动手的搭档——说清目标，它来拆步骤、调工具、交付结果。\n\n分析数据\n拆解任务、运行本地工具，把结果整理成可追溯的产物。\n写代码\n读工作区、改文件、跑测试；每一步改动都可以审阅。\n整理知识\n把资料、笔记和历史分析收进知识空间，随时检索复用。\n\n本地执行、无厂商中继；工具调用与审批记录都可回看。\n\n开始使用"
+    },
+    {
+      "name": "D2_three_roles",
+      "pass": true,
+      "detail": "三张角色卡应全部在场"
+    },
+    {
+      "name": "D3_screenshots",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\petri\\acceptance\\block-227\\ui540-role-reveal.png | D:\\1.WorkDir\\petri\\acceptance\\block-227\\ui540-role-reveal-dark.png"
+    },
+    {
+      "name": "D4_dismiss_closes",
+      "pass": true,
+      "detail": "点击开始使用后浮层应消失"
+    },
+    {
+      "name": "D5_seen_persisted",
+      "pass": true,
+      "detail": "{\"theme\":\"dark\",\"autoModel\":false,\"quietHours\":\"\",\"roleRevealSeen\":true}"
+    },
+    {
+      "name": "D6_not_shown_after_reload",
+      "pass": true,
+      "detail": "已看过（true）刷新后不应再出现"
+    }
+  ],
+  "allPass": true
+}

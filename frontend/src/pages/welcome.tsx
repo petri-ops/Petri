@@ -6,6 +6,7 @@ import { connectSshHost, createProject, listProjects, listSshRemoteDirs, listSsh
 import type { Project } from '@/lib/project-types';
 import { branchApi } from '@/lib/branchBridge';
 import { FolderPicker } from '@/components/desktop/FolderPicker';
+import { FirstRunRoleReveal } from '@/components/desktop/FirstRunRoleReveal';
 import { dispatchPetriEvent, petriEvents } from '@/lib/events';
 import { SimpleChat } from '@/components/copilot/SimpleChat';
 import {
@@ -605,6 +606,7 @@ export default function Welcome(): React.ReactElement {
           ))}
         </div>
       </div>
+      <FirstRunRoleReveal />
     </div>
   );
 }

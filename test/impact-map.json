@@ -3,6 +3,27 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "block227-role-reveal",
+      "note": "BLOCK-227 Q9 K9 — 首启角色揭示（roleRevealSeen 偏好 + 欢迎页一次性浮层三卡 + 显式确认落盘）。",
+      "patterns": [
+        "frontend/src/hooks/useRoleRevealPreference.ts",
+        "frontend/src/components/desktop/FirstRunRoleReveal.tsx",
+        "frontend/src/components/desktop/FirstRunRoleReveal.module.css",
+        "frontend/src/pages/welcome.tsx",
+        "core/packages/shared-config/config-schema.js",
+        "test/block227-*.test.mjs",
+        "test/block201-settings-baseline.test.mjs",
+        "acceptance/block-227/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block227-*.cjs"
+      ],
+      "tests": [
+        "frontend/src/hooks/useRoleRevealPreference.test.ts",
+        "frontend/src/components/desktop/FirstRunRoleReveal.test.tsx",
+        "test/block201-settings-baseline.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "block226-notification-center",
       "note": "BLOCK-226 Q9 通知中心/免打扰 — 应用内通知留痕（铃铛/未读/列表）+ quietHours 只抑制系统 toast；设置页时段输入。",
       "patterns": [

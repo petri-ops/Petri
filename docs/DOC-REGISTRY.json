@@ -7471,8 +7471,23 @@
       "archivePolicy": "retain_stable_path",
       "tags": ["notification", "inbox", "quiet-hours", "q9", "G0"],
       "notes": "2026-10-21 立项（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：通知中心（标题栏铃铛/未读/列表/全部已读）+ 免打扰时段 userPrefs.quietHours（空=关，主进程返回 quiet_hours；应用内仍留痕）。**completed（2026-10-21）**：前端 62/62 + Node 13/13 + 9223 离屏 live 11/11（亮/暗/设置截图）+ theme/types/code-size PASS。reopen=点击跳转/系统历史/审批穿透/声音/类型开关/跨设备。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-227-Q9-ONBOARDING-ROLE-REVEAL",
+      "capability": "q9-onboarding-role-reveal",
+      "path": "docs/block-227-q9-onboarding-role-reveal-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P5-CLOSED",
+      "canonical": true,
+      "truthDomain": "q9-onboarding-role-reveal",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-21",
+      "archivePolicy": "retain_stable_path",
+      "tags": ["onboarding", "first-run", "reveal", "q9", "G0"],
+      "notes": "2026-10-21 立项（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：Q9 K9 首启角色揭示——userPrefs.roleRevealSeen（默认 false）；欢迎页一次性浮层三卡（分析数据/写代码/整理知识）+ 显式「开始使用」落盘；读取失败不展示。**completed（2026-10-21）**：前端 7/7 + 配置基线 4/4 + 9223 离屏 live 7/7（亮/暗截图）+ theme/types/lint/code-size PASS。reopen=分步引导/数据导入/动画/重播/插画。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-10-21",
-  "documentCount": 382
+  "documentCount": 383
 }
