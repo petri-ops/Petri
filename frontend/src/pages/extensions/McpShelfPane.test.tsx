@@ -16,9 +16,14 @@ interface DraftBody {
   command?: string;
   args?: string[];
   autoConnect?: boolean;
+  allow?: string[];
+  block?: string[];
 }
 
-function withServers(servers: unknown[]): FetchMock {
+function withServers(
+  servers: unknown[],
+  putPolicy?: (body: DraftBody) => Response,
+): FetchMock {
   const mock: FetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) =>
     Promise.resolve(new Response('ok', { status: 200 })).then((): Response => {
       const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
@@ -34,6 +39,15 @@ function withServers(servers: unknown[]): FetchMock {
           return new Response(JSON.stringify({ status: 'error', error: 'missing_command' }), { status: 400 });
         }
         return new Response(JSON.stringify({ status: 'ok', server: body }), { status: 200 });
+      }
+      if (/\/mcp\/servers\/[^/]+\/policy$/.test(url) && method === 'PUT') {
+        if (putPolicy) return putPolicy(body);
+        return new Response(JSON.stringify({
+          status: 'ok',
+          serverId: 'fixture',
+          policy: { trust: 'ask', allow: body.allow ?? [], block: body.block ?? [] },
+          diagnostics: [],
+        }), { status: 200 });
       }
       if (/\/mcp\/servers\/[^/]+\/connect$/.test(url)) {
         return new Response(JSON.stringify({ status: 'ok', toolCount: 3 }), { status: 200 });
@@ -107,6 +121,94 @@ describe('BLOCK-156 McpShelfPane', () => {
     const calls = (mock.mock.calls as Array<[string, RequestInit | undefined]>)
       .filter(([u, i]) => String(u).endsWith('/connect') && i?.method === 'POST');
     expect(calls.length).toBe(1);
+  });
+
+  it('UI-547 — 治理摘要与 trust 只读呈现（不造可编辑的假象）', async () => {
+    withServers([row({
+      id: 'gov',
+      status: 'connected',
+      toolCount: 5,
+      policy: {
+        trust: 'ask', allowCount: 1, blockCount: 1,
+        allow: ['read_file'], block: ['delete_file'], projectedToolCount: 3,
+      },
+    })]);
+    render(<McpShelfPane />);
+    await waitFor(() => expect(screen.getByTestId('mcp-policy-gov')).toBeTruthy());
+    expect(screen.getByTestId('mcp-policy-trust-gov').textContent).toContain('ask');
+    expect(screen.getByTestId('mcp-policy-metrics-gov').textContent).toContain('生效 3');
+    expect(screen.getByTestId<HTMLInputElement>('mcp-policy-allow-gov').value).toBe('read_file');
+    expect(screen.getByTestId<HTMLInputElement>('mcp-policy-block-gov').value).toBe('delete_file');
+    expect(screen.queryByTestId('mcp-policy-trust-select-gov')).toBeNull();
+  });
+
+  it('UI-547 — 保存白名单/阻断走 PUT policy 并提示成功', async () => {
+    const mock = withServers([row({
+      id: 'gov2',
+      status: 'connected',
+      toolCount: 5,
+      policy: {
+        trust: 'ask', allowCount: 1, blockCount: 1,
+        allow: ['read_file'], block: ['delete_file'], projectedToolCount: 3,
+      },
+    })]);
+    render(<McpShelfPane />);
+    await waitFor(() => expect(screen.getByTestId('mcp-policy-gov2')).toBeTruthy());
+    fireEvent.change(screen.getByTestId('mcp-policy-block-gov2'), {
+      target: { value: 'delete_file, drop_table' },
+    });
+    fireEvent.click(screen.getByTestId('mcp-policy-save-gov2'));
+    await waitFor(() => expect(screen.getByTestId('mcp-notice').textContent).toContain('已保存 gov2'));
+
+    const puts = (mock.mock.calls as Array<[string, RequestInit | undefined]>)
+      .filter(([u, i]) => /\/mcp\/servers\/gov2\/policy$/.test(String(u)) && i?.method === 'PUT');
+    expect(puts).toHaveLength(1);
+    const rawBody = puts[0][1]?.body;
+    const body = typeof rawBody === 'string' ? (JSON.parse(rawBody) as DraftBody) : {};
+    expect(body).toEqual({ allow: ['read_file'], block: ['delete_file', 'drop_table'] });
+  });
+
+  it('UI-547 — 非法工具名本地拦截，不发 PUT', async () => {
+    const mock = withServers([row({
+      id: 'gov3',
+      status: 'connected',
+      toolCount: 5,
+      policy: {
+        trust: 'ask', allowCount: 0, blockCount: 0,
+        allow: [], block: [], projectedToolCount: 5,
+      },
+    })]);
+    render(<McpShelfPane />);
+    await waitFor(() => expect(screen.getByTestId('mcp-policy-gov3')).toBeTruthy());
+    fireEvent.change(screen.getByTestId('mcp-policy-allow-gov3'), {
+      target: { value: 'read_file bad/name' },
+    });
+    fireEvent.click(screen.getByTestId('mcp-policy-save-gov3'));
+    await waitFor(() => expect(screen.getByTestId('mcp-policy-error-gov3').textContent).toContain('工具名不合法'));
+    const puts = (mock.mock.calls as Array<[string, RequestInit | undefined]>)
+      .filter(([, i]) => i?.method === 'PUT');
+    expect(puts).toHaveLength(0);
+  });
+
+  it('UI-547 — 后端 400 diagnostics 如实展示', async () => {
+    withServers([row({
+      id: 'gov4',
+      status: 'connected',
+      toolCount: 5,
+      policy: {
+        trust: 'ask', allowCount: 0, blockCount: 0,
+        allow: [], block: [], projectedToolCount: 5,
+      },
+    })], () => new Response(JSON.stringify({
+      status: 'error',
+      error: 'policy_rejected',
+      diagnostics: [{ code: 'block_invalid_name', value: 'x y' }],
+    }), { status: 400 }));
+    render(<McpShelfPane />);
+    await waitFor(() => expect(screen.getByTestId('mcp-policy-gov4')).toBeTruthy());
+    fireEvent.click(screen.getByTestId('mcp-policy-save-gov4'));
+    await waitFor(() => expect(screen.getByTestId('mcp-policy-diagnostics-gov4').textContent)
+      .toContain('block_invalid_name'));
   });
 
   it('添加流：合法表单提交 POST /mcp/servers（args 空白切分）', async () => {

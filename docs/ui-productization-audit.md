@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-22（**UI-547 MCP 货架工具治理 verified（dev Electron 边界内；9223 离屏 live 12/12）**，Q8 深化 / BLOCK-221 reopen）：allow/block 工具编辑 + 生效投影计数 + 后端 diagnostics；信任位只读（随 Q1）。证据=红绿 4 红→14/14 + MCP Node 33/33 + live 12/12 + 亮/暗截图。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-21（**UI-546 图形批注创建入口落地（代码+组件测试绿，无实机腿）**，BLOCK-238 / Q6）：工具条绘制态形状三档（矩形/椭圆/箭头）+ kind 经 session/hook/REST 贯通 + draft 形状预览 + 列表形状标签；红绿 5 红→25/25 + 邻域 42/42 + Node 13/13 + types 0。实机腿未跑 → in_progress。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**UI-542 电脑控制 sidecar 状态面 verified（dev Electron 边界内；9223 离屏 live 6/6）**，BLOCK-229 / E7）：设置「决策与调度」节显示平台/支持/已构建/运行中 + 权限提示 + 测试连接（真实 probe verbs）；未构建/失败如实报错。转 verified 需收口。G0 开发期常态 · 不外推 packaged/Provider/GA。：标题栏下方横幅（上次未正常结束时间 + 转储文件名 +「本地记录，未上传」+ 打开崩溃目录 + 知道了）；`crashNotice` 偏好可关；只读文件级证据，不解析栈。证据 `acceptance/block-228/`（live 5/5 + 亮/暗截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。：欢迎页一次性浮层三卡（分析数据/写代码/整理知识）+ 本地执行说明 + 显式「开始使用」；`roleRevealSeen` 落盘、已看过不再出现。证据 `acceptance/block-227/`（live 7/7 + 亮/暗截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。：标题栏铃铛+未读徽章+通知列表（回合终态/待审批）；`userPrefs.quietHours` 只抑制系统 toast、应用内仍留痕；面板向左展开避免右缘裁切。证据 `acceptance/block-226/`（live 11/11 + 亮/暗/设置截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -5280,3 +5282,12 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **验证（代码）**：红绿证据=5 条失败（client 载荷写死 region / 工具条无形状选择 / 列表无形状 / draft 无 data-kind / 宿主端到端找不到形状档）→ 实现后定向 **25/25**；邻域 `annotations` + `resultAnnotation` + `WorkspacePdfPreview` + `WorkspaceFilePreview` + theme **42/42**；Node `block219-result-annotations` **13/13**；`quality:types` 0。
 - **先行提交对账**：渲染层提交 `20be172d` 先于立项且未带 UI-###——按不可变提交先例登记门禁豁免，本条即其台账对账（不重写共享历史）。
 - **未做实机腿**：dev 栈未打开带 PDF/图像产物的批注面，形状选择 → 保存 → 渲染未实机核对 → 保持 `in_progress`，不宣称 verified。
+
+## UI-547: MCP 货架工具治理操作面（2026-10-22 **verified（dev Electron 边界内；9223 离屏 live 12/12）**，Q8 深化 / BLOCK-221 reopen）
+
+- **变化面**：MCP 服务卡片新增「工具治理」——白名单/阻断工具编辑（逗号/空格分隔）、生效/已连接/白名单/阻断计数、保存后即时回读投影数；信任位只读显示 `ask（默认）` / `allow（仅标记）`，并标注「审批默认不随信任位改变（接入待 Q1）」；后端 400 diagnostics 逐条显示。
+- **为什么这样设计（自有形态）**：只把真正生效的两种治理动作暴露成可操作面（白名单=只投影名单内工具，阻断=永远优先）；`trust` 在 Q1 审批契约落地前只做标记，不造「可编辑信任」的假象。写面继续走 BLOCK-221 的服务级策略文件与 `PUT /api/mcp/servers/:id/policy`，不新增第二套权限/审批通道；UI 只写策略，不改 server 配置。
+- **验证（代码）**：红绿 4 红→**14/14**（治理摘要与 trust 只读 / 保存载荷 / 非法名本地拦截 / 后端 diagnostics）+ MCP Node 邻域 **33/33** + theme **17/17** + `quality:types` 0。
+- **实机腿（9223 离屏，12/12）**：`acceptance/ui-547/`——fixture server 连接（2 工具，默认投影 2）→ 货架治理编辑器 → 阻断 `fixture_lookup_readonly` → 保存 → 投影 **2→1** + 策略落盘（`GET /policy` 含 block）→ 亮/暗截图；收尾重置策略并移除 fixture。
+- **Rider（收口期抓真）**：`test/agent-tool-policy.test.mjs` 仍假定 `sample-metrics` 在静态 HEAVY_TOOLS；BLOCK-234 S5 已改为 pack `provides.scientificProfiles`，测试未装 fixture pack → 自动执行断言红。修=测试装最小 pack（`installWorkflowPackFixture({ heavyTools })`）+ `agent-approval` 同源夹具；产品代码零改动。
+- **未做（reopen）**：trust 编辑（随 Q1）、OAuth per-server authenticate、大目录懒加载/按需 schema、深链安装安全面、`destructive/openWorld/idempotent` 三 hint 进策略；技能自进化建议不在本条。

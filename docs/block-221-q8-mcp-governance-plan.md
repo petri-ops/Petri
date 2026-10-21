@@ -80,4 +80,5 @@ completed 需：脱敏 + store + 过滤 + 路由 + 测试 + canonical 回写 + c
 
 - `trust` 位本轮**只落库与展示**，不改变 D4 审批默认：降档（allow=自动批准）必须与 Q1 审批事件契约一起做，避免绕过治理。
 - 未做：MCP OAuth per-server authenticate、大目录懒加载与 schema 按需、深链安装安全面（SHA-256/大小/风险提示）、`destructiveHint/openWorldHint/idempotentHint` 进策略（现仅 `readOnlyHint`）、技能自进化建议、服务货架 UI 的信任/阻断操作面（本轮只做数据面 + 只读摘要）。
+- **2026-10-22 追加**：服务货架 UI 操作面已由 **UI-547** 交付（`verified` dev Electron 边界内；allow/block 编辑 + 生效投影计数 + 400 diagnostics；trust 仍只读随 Q1）。OAuth/懒加载/深链/三 hint 仍 reopen。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。

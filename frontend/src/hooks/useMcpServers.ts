@@ -45,6 +45,57 @@ export interface McpServerDraft {
   env?: Record<string, string>;
 }
 
+/** UI-547 — 服务级策略写面（信任位本轮只读，不随 patch 下发）。 */
+export interface McpPolicyPatch {
+  allow?: string[];
+  block?: string[];
+}
+
+export interface McpPolicyDiagnostic {
+  code: string;
+  value?: string;
+  limit?: number;
+  got?: number;
+}
+
+export interface McpUpdatePolicyResult {
+  ok: boolean;
+  diagnostics: McpPolicyDiagnostic[];
+  error?: string;
+}
+
+function normalizeDiagnostics(value: unknown): McpPolicyDiagnostic[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === 'object')
+    .filter((item) => typeof item.code === 'string')
+    .map((item) => ({
+      code: String(item.code),
+      ...(typeof item.value === 'string' ? { value: item.value } : {}),
+      ...(typeof item.limit === 'number' ? { limit: item.limit } : {}),
+      ...(typeof item.got === 'number' ? { got: item.got } : {}),
+    }));
+}
+
+class McpApiError extends Error {
+  readonly status: number;
+  readonly code: string;
+  readonly diagnostics: McpPolicyDiagnostic[];
+
+  constructor(status: number, data: Record<string, unknown>) {
+    const diagnostics = normalizeDiagnostics(data.diagnostics);
+    const code = typeof data.error === 'string' && data.error ? data.error : `http_${status}`;
+    const detail = diagnostics
+      .map((item) => `${item.code}${item.value ? `（${item.value}）` : ''}`)
+      .join('；');
+    super(detail || errText(data.error, `HTTP ${status}`));
+    this.name = 'McpApiError';
+    this.status = status;
+    this.code = code;
+    this.diagnostics = diagnostics;
+  }
+}
+
 /** 任意错误面转可读文本（避免 unknown 直接 String 化成 [object Object]）。 */
 function errText(value: unknown, fallback: string): string {
   if (typeof value === 'string' && value.length > 0) return value;
@@ -68,7 +119,7 @@ async function apiJson(path: string, init?: RequestInit): Promise<Record<string,
     data = {};
   }
   if (!resp.ok) {
-    throw new Error(errText(data.error, `HTTP ${resp.status}`));
+    throw new McpApiError(resp.status, data);
   }
   return data;
 }
@@ -84,6 +135,7 @@ export function useMcpServers(): {
   removeServer: (id: string) => Promise<boolean>;
   connect: (id: string) => Promise<void>;
   disconnect: (id: string) => Promise<void>;
+  updatePolicy: (id: string, patch: McpPolicyPatch) => Promise<McpUpdatePolicyResult>;
 } {
   const [servers, setServers] = useState<McpServerRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -196,6 +248,29 @@ export function useMcpServers(): {
     [refresh],
   );
 
+  const updatePolicy = useCallback(
+    async (id: string, patch: McpPolicyPatch): Promise<McpUpdatePolicyResult> => {
+      try {
+        const data = await apiJson(`/mcp/servers/${encodeURIComponent(id)}/policy`, {
+          method: 'PUT',
+          body: JSON.stringify(patch),
+        });
+        const diagnostics = normalizeDiagnostics(data.diagnostics);
+        setNotice(diagnostics.length > 0
+          ? `已保存 ${id} 工具治理（${diagnostics.length} 条提示）`
+          : `已保存 ${id} 工具治理`);
+        await refresh();
+        return { ok: true, diagnostics };
+      } catch (e) {
+        const diagnostics = e instanceof McpApiError ? e.diagnostics : [];
+        const message = errText(e instanceof Error ? e.message : e, '保存失败');
+        setNotice(`保存失败：${message}`);
+        return { ok: false, diagnostics, error: message };
+      }
+    },
+    [refresh],
+  );
+
   return {
     servers,
     loading,
@@ -207,5 +282,6 @@ export function useMcpServers(): {
     removeServer,
     connect,
     disconnect,
+    updatePolicy,
   };
 }

@@ -1,9 +1,9 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
-最后更新：2026-10-21（**BLOCK-238 Q6 图形批注创建入口 completed；无 active 工作包**）
+最后更新：2026-10-22（**UI-547 MCP 货架工具治理 verified；无 active 工作包**）
 
-**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-238（Q6 图形批注创建入口）**：工具条绘制态三档形状（矩形/椭圆/箭头）+ `kind` 经 `useAnnotationSession`→`useArtifactAnnotations`→REST 落库 + draft 形状预览 + 列表形状标签；零迁移、旧调用回落 `region`。证据=红绿 5 红→25/25 + 邻域 42/42 + Node 13/13 + theme 17/17 + types 0 + closeout 十三门 + output:judge PASS（首轮 RETRY→收紧后 PASS）。**边界**：无实机腿，UI-546 `in_progress`；箭头为矩形对角线近似。**治理补票**：`edad85ea`/`20be172d`/`3d219d45` 先于立项，不改写；`20be172d` UI 门禁豁免台账=UI-546。**下一包需用户发令**（Q8 深化或 Q9 长尾）。plan=`docs/block-238-q6-graphic-annotation-entry-plan.md` §6。**收口 PATH** 需同时含 Git `usr\bin`（GNU tar）与 `bin`（bash）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=UI-547（Q8 深化，UI 轨）**：MCP 服务卡片新增「工具治理」——allow/block 编辑 + 生效/已连接/白名单/阻断计数 + 保存后投影数回读 + 后端 400 diagnostics；trust 只读并标注「审批默认不变（随 Q1）」。证据=红绿 4 红→14/14 + MCP Node 33/33 + theme 17/17 + types 0 + 9223 离屏 live **12/12**（`acceptance/ui-547/` 亮/暗截图；投影 2→1 + 策略落盘）。**下一包需用户发令**：Q8 余项（OAuth/懒加载/深链/三 hint）或 Q9 长尾；UI-544/545/546 实机腿仍欠。**收口 PATH** 需同时含 Git `usr\bin`（GNU tar）与 `bin`（bash）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**BLOCK-236 第二批收口**）：compare 只读面接管（changeSetId 实取自 resultEditProgress）；selection 不迁（写面）。**下一步**=Q6 全量批注或 Q8 深化。边界=无实机腿。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

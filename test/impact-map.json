@@ -3698,12 +3698,15 @@
         "test/fixtures/mcp-fixture-server.cjs",
         "scripts/block156-*.mjs",
         "acceptance/block-156/**",
+        "acceptance/ui-547/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui547-*.cjs",
         "core/shared-backend/skill-registry.js"
       ],
       "tests": [
         "test/mcp-client-settings.test.mjs",
         "test/mcp-client-manager.test.mjs",
         "test/mcp-projection.test.mjs",
+        "test/block221-mcp-server-policy.test.mjs",
         "frontend/src/lib/extensionShelves.test.ts",
         "frontend/src/pages/extensions/index.test.tsx",
         "frontend/src/pages/extensions/McpShelfPane.test.tsx",

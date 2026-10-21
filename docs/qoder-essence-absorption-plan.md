@@ -579,6 +579,8 @@ status: planned
 ### Q8 — MCP 与扩展治理（约 1 周）
 
 > 2026-10-20：**垂直切片已立项并收口 [BLOCK-221](./block-221-q8-mcp-governance-plan.md)（completed）**——MCP 状态面凭据脱敏（修掉解密 env 明文下发）+ 服务级 `{trust, allow, block}` 策略与投影过滤 + 策略读写路由 + 清单摘要。**reopen**：trust 降档接审批层（随 Q1）、OAuth per-server authenticate、大目录懒加载、深链安装安全面（SHA-256/大小/风险）、destructive/openWorld/idempotent 三 hint 进策略、技能自进化建议、货架 UI 操作面。
+>
+> 2026-10-22：**货架 UI 操作面已由 UI-547 交付（verified dev Electron；allow/block 编辑 + 生效投影计数 + 400 diagnostics）**；trust 仍只读（随 Q1）。**reopen 剩余**：trust 降档接审批（随 Q1）、OAuth、懒加载、深链安装、三 hint 进策略、技能自进化建议。
 
 **目标**：把 MCP 从「能用」升级为「默认不信任、可授权、可解释」；补齐扩展安装安全面。
 

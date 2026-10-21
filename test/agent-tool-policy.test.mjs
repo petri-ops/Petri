@@ -6,8 +6,13 @@ import fs from 'node:fs/promises';
 import fssync from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { installWorkflowPackFixture } from './helpers/workflow-pack-fixture.mjs';
 
 const require = createRequire(import.meta.url);
+// BLOCK-234 S5 起 heavyTools 是包策略（provides.scientificProfiles）；本测试
+// 需要 sample-metrics 被识别为重操作，装一个只声明它的最小 pack。
+const workflowPack = installWorkflowPackFixture({ heavyTools: ['sample-metrics'] });
+process.on('exit', () => workflowPack.cleanup());
 
 // BLOCK-49 加映清债 —— 统一临时 DB 自举（存量：单跑/全量缺 projects 表）
 //（PETRI_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）

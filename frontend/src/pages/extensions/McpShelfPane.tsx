@@ -9,6 +9,7 @@
 import React, { useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { useMcpServers, type McpServerStatus } from '@/hooks/useMcpServers';
+import { McpPolicyEditor } from './McpPolicyEditor';
 import styles from './extensions.module.css';
 import { EmptyState, LoadingBlock } from '../../components/ui/controls/Status';
 
@@ -27,7 +28,7 @@ function parseArgs(raw: string): string[] {
 export function McpShelfPane(): React.ReactElement {
   const {
     servers, loading, error, notice, busyId,
-    refresh, addServer, removeServer, connect, disconnect,
+    refresh, addServer, removeServer, connect, disconnect, updatePolicy,
   } = useMcpServers();
 
   const [formOpen, setFormOpen] = useState(false);
@@ -169,6 +170,10 @@ export function McpShelfPane(): React.ReactElement {
                 )}
                 {row.autoConnect && row.status === 'disconnected' && <span>启动时自动连接</span>}
               </div>
+              <McpPolicyEditor
+                server={row}
+                onSave={(patch) => updatePolicy(row.id, patch)}
+              />
               <div className={styles.mcpCardActions}>
                 {row.status === 'connected' || row.status === 'error' ? (
                   <button

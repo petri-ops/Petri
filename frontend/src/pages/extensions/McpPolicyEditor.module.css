@@ -1,0 +1,109 @@
+/* UI-547 — MCP 工具治理编辑器。颜色全部走 --petri-* token。 */
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-2);
+  padding-top: var(--petri-space-2);
+  border-top: 1px solid var(--petri-divider);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--petri-space-2);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-xs, 12px);
+  font-weight: 600;
+}
+
+.trust {
+  color: var(--petri-text-tertiary);
+  font-weight: 400;
+}
+
+.note {
+  margin: 0;
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs, 12px);
+}
+
+.metrics {
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xs, 12px);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs, 12px);
+}
+
+.input {
+  min-height: 28px;
+  padding: 0 var(--petri-space-2);
+  border: 1px solid var(--petri-border-input);
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-input-bg);
+  color: var(--petri-text);
+  font: inherit;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--petri-accent-border);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-2);
+}
+
+.save {
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-lg);
+  background: transparent;
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-xs, 12px);
+  cursor: pointer;
+}
+
+.save:hover:not(:disabled) {
+  background: var(--petri-hover);
+  color: var(--petri-text);
+}
+
+.save:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.hint {
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs, 12px);
+}
+
+.unavailable {
+  margin: 0;
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs, 12px);
+}
+
+.error {
+  margin: 0;
+  color: var(--petri-danger);
+  font-size: var(--petri-font-size-xs, 12px);
+}
+
+.diagnostics {
+  margin: 0;
+  padding-left: 16px;
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs, 12px);
+}

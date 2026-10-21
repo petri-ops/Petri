@@ -1,5 +1,5 @@
 # Petri Desktop — Current Next Steps
-最后更新：2026-10-21（**BLOCK-238 Q6 图形批注创建入口 completed；无 active 工作包**）：补登记先行三笔提交并补齐工具条三档形状 + kind 经 session/hook/REST 落库 + draft 预览（红绿 5 红→25/25、邻域 42/42、Node 13/13、types 0、closeout 十三门、output:judge PASS）；零迁移、旧调用回落 region。**UI-546 in_progress（无实机腿）**。**下一步**=Q8 深化或 Q9 长尾（需用户发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+最后更新：2026-10-22（**UI-547 MCP 货架工具治理 verified；无 active 工作包**）：allow/block 工具编辑 + 生效投影计数 + 后端 diagnostics；信任位只读（随 Q1）。证据=红绿 4 红→14/14 + MCP Node 33/33 + theme 17/17 + 9223 离屏 live 12/12（`acceptance/ui-547/` 亮/暗截图）。**下一步**=Q8 余项（OAuth/懒加载/深链/三 hint）或 Q9 长尾（需发令）；UI-544/545/546 实机腿仍欠。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**BLOCK-236 第二批收口**）：compare 只读面接管（changeSetId 实取自 resultEditProgress）；selection 不迁（写面）。**下一步**=Q6 全量批注或 Q8 深化。边界=无实机腿。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

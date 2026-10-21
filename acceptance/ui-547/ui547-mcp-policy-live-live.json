@@ -1,0 +1,68 @@
+{
+  "name": "ui547-mcp-policy-live",
+  "startedAt": "2026-10-21T16:23:03.147Z",
+  "finishedAt": "2026-10-21T16:23:09.638Z",
+  "assertions": [
+    {
+      "name": "R1_fixture_created",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"server\":{\"id\":\"ui547-fixture\",\"command\":\"node\",\"args\":[\"D:\\\\1.WorkDir\\\\petri\\\\test\\\\fixtures\\\\mcp-fixture-server.cjs\"],\"env\":{},\"autoConnect\":false,\"transport\":\"stdio\"}}"
+    },
+    {
+      "name": "R2_fixture_connected",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"id\":\"ui547-fixture\",\"toolCount\":2}"
+    },
+    {
+      "name": "R3_default_projection",
+      "pass": true,
+      "detail": "{\"id\":\"ui547-fixture\",\"command\":\"node\",\"args\":[\"D:\\\\1.WorkDir\\\\petri\\\\test\\\\fixtures\\\\mcp-fixture-server.cjs\"],\"autoConnect\":false,\"transport\":\"stdio\",\"envKeys\":[],\"envCount\":0,\"status\":\"connected\",\"error\":null,\"toolCount\":2,\"connectedAt\":1792599783253,\"lastErrorAt\":null,\"policy\":{\"trust\":\"ask\",\"allowCount\":0,\"blockCount\":0,\"allow\":[],\"block\":[],\"projectedToolCount\":2}}"
+    },
+    {
+      "name": "D1_policy_editor_present",
+      "pass": true,
+      "detail": "MCP 货架应出现工具治理编辑器"
+    },
+    {
+      "name": "D2_trust_readonly",
+      "pass": true,
+      "detail": "信任位 ask（默认）"
+    },
+    {
+      "name": "D3_initial_metrics",
+      "pass": true,
+      "detail": "生效 2 · 已连接 2 · 白名单 0 · 阻断 0"
+    },
+    {
+      "name": "D4_save_clicked",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "D5_saved_notice",
+      "pass": true,
+      "detail": "已保存 ui547-fixture 工具治理"
+    },
+    {
+      "name": "D6_projected_count_drops",
+      "pass": true,
+      "detail": "生效 1 · 已连接 2 · 白名单 0 · 阻断 1"
+    },
+    {
+      "name": "R3_policy_persisted",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"serverId\":\"ui547-fixture\",\"policy\":{\"trust\":\"ask\",\"allow\":[],\"block\":[\"fixture_lookup_readonly\"]}}"
+    },
+    {
+      "name": "D7_screenshots",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\petri\\acceptance\\ui-547\\ui547-mcp-policy-light.png | D:\\1.WorkDir\\petri\\acceptance\\ui-547\\ui547-mcp-policy-dark.png"
+    },
+    {
+      "name": "R4_fixture_removed",
+      "pass": true,
+      "detail": "null"
+    }
+  ],
+  "allPass": true
+}
