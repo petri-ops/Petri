@@ -93,3 +93,21 @@ completed 需：契约 + 数据桥 + host 路由 + pack 三面 + 测试 + canoni
 - `history` tab 未接管（桥层返回 `no_endpoint`，路由层也因未声明而回落核心）——端点补齐后再开。
 - 其余五面（compare/selection/annotations/methods/export）与 lineage 图形态仍在核心，属后续批次。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 7. 第二批 P0 勘察结论（2026-10-21）：compare/selection 当前不可接管
+
+用户「一次性搞完 P2b 第二批」后先做只读勘察，结论是**第二批在本轮不可执行**，依据三条实测：
+
+| 面 | 实测 | 结论 |
+| --- | --- | --- |
+| compare | 端点存在（`GET /api/result-studio/changesets/:changeSetId/compare`，`routes/result-studio/changesets.js`），但 `CenterPanel` 与 `ResultView` **都没有 `changeSetId` 上下文**（grep 零命中） | 路由层即使判给 pack，桥层也拿不到 changeSet → 必然回落，属「判了也白判」 |
+| selection | `POST/DELETE /selection`、`/selection/query`、`/selection/resolve` 全是写面 | 迁入 pack = 把可信写边界挪进领域包，与「核心保留治理面」相悖，**设计与纪律都不允许** |
+| lineage tab | 声明已在 pack（0.2.1），但 `CenterPanel` 没有 lineage 的 tab 入口（血缘在 `ResultStudioSurface`/`LineageStrip`） | 无 tab 宿主 → 无法在结果面触发，只能等 tab 宿主补齐 |
+
+**因此第二批需要的不是「迁移」，而是先补前置结构**：
+
+1. `CenterPanel` 引入 **changeSet 上下文**（activeChangeSetId）或把 compare 的入口从 changeset 面板抬到结果面；
+2. 结果面引入 **lineage tab 宿主**（或把血缘从 `LineageStrip` 提升为结果面一等 tab）；
+3. selection 维持核心（除非另立窄桥契约并经治理裁决）。
+
+在上述前置完成前，第二批标记为 **blocked（前置缺口）**，不计入「代码未写」的欠账——这是设计缺口，不是工作量缺口。G0 开发期常态 · 不外推 packaged/Provider/GA。
