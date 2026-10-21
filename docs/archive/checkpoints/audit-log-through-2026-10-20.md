@@ -23,3 +23,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-21T02:05:13.912Z -->
 最后更新：2026-10-20（**BLOCK-219 Q6 批注 host completed（closeout 十三门 PASS；9223 live 13/13）**）：通用 annotation host——`result_annotations` 旁路元数据（归一化 0..1 坐标/页号/作者/时间/评论；单 scope ≤200 条；项目隔离）+ PDF 页定位盒与图像批注层 + 「加入任务」经 `petri:copilot-ask` 单一通道；批注不写原始产物（实机哈希前后一致）。证据=`block219-result-annotations` 12/12 + 前端 42/42 + test:changed Node 744 项 0 红/前端 30 文件全绿 + `acceptance/block-219/`（13/13）；UI-533 verified（dev Electron 边界内）。边界=六种图形工具/文本批注与速记板/Office/pack iframe 面批注 reopen。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-21T02:51:56.288Z -->
+最后更新：2026-10-20（**BLOCK-220 Q-DOMAIN P3 垂直切片 completed**）：删除化石 `core/shared-backend/tool-registry.js`（458 行/10 个内联生信工具/零消费；单一注册源=pack `registry/tool-registry.json` 驱动的 `petri-server/tool-registry.js`）+ pack 新契约 `provides.methods`（`citations`/`toolLabels` 纯数据，pack 0.1.1→0.2.0）+ `pack-methods.js` 只读有界装载器 + `methods-export.js` 接线与诚实降级（无 pack 无引文）。证据=block220 13/13 + 真实 pack 根集成 13 类型/13 标签/0 warning + 域中性基线 261→208 处（`tool-registry.js` 归零）+ test:changed Node 315 项 0 红。reopen=`_pythonEquivalent` 脚本模板/`artifact-profiles`/`agent-workflow`/`learning`/`result-*-tools`。plan=docs/block-220-qdomain-p3-methods-plan.md §8。G0 开发期常态 · 不外推 packaged/Provider/GA。

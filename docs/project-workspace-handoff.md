@@ -1,9 +1,9 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
-最后更新：2026-10-21（**BLOCK-227 Q9 K9 首启角色揭示 completed**）
+最后更新：2026-10-21（**BLOCK-228 Q9 K2 崩溃同意/本地提示 completed**）
 
-**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-227（K9 首启角色揭示）**：`userPrefs.roleRevealSeen`（默认 false，注册表 94 键）+ 欢迎页一次性浮层（三卡：分析数据/写代码/整理知识 + 本地执行说明 + 显式「开始使用」）；读取失败不展示；已看过不渲染。证据=前端 7/7 + 配置基线 4/4 + 9223 离屏 live 7/7（亮/暗截图）。**下一包**=K2 崩溃同意/本地解析（评估）→ E7 电脑控制 sidecar（最重）→ Q-DOMAIN P4 data model（母纲要求最后）。plan=`docs/block-227-q9-onboarding-role-reveal-plan.md` §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-228（K2 崩溃同意/本地提示）**：crashReporter 仅本地（不上传）+ `session-health.json` 异常退出检测 + crashDumps 文件名/大小/时间清单（≤5）+ `userPrefs.crashNotice`（默认 true，注册表 95 键）+ `CrashNoticeBanner`（标题栏下方横幅：时间/转储文件名/本地未上传/打开崩溃目录/知道了）；测试实例守卫的 `diagnostic:crash-simulate`。证据=Node 7/7 + 前端 2/2 + 9223 离屏 live 5/5（亮/暗截图）。**下一包**=E7 电脑控制 sidecar（最重，独立立项）→ Q-DOMAIN P4 data model（母纲要求最后）。plan=`docs/block-228-q9-crash-consent-plan.md` §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-225（Q9 D4 Auto）**：①`userPrefs.autoModel`（默认 false，注册表 92 键）；②`lib/auto-model` 确定性解析（有图：vision 绑定 > vision 能力；无图：agent 绑定 > tools 能力；回落当前/首个；跳过缺密钥/隐藏）；③`useAiSettings` 暴露 roleBindings；④`useChatStream` 在发送与子代理启动时解析（不写回 active）；⑤菜单开关+预览、composer「自动」；`ModelChip` 抽出（SimpleChat 2142 行）。证据=前端 33/33 + 配置基线 4/4 + 9223 离屏 live 8/8（亮/暗截图）+ types/theme/code-size PASS。**下一包**=Q9 通知中心/免打扰 → K9 首启揭示 → K2/E7 评估 → Q-DOMAIN P4 data model（母纲要求最后）。plan=`docs/block-225-q9-auto-model-plan.md` §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

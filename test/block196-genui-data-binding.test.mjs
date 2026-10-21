@@ -49,12 +49,26 @@ const electronStub = new Proxy(
 );
 
 let currentJob;
-const dbStub = { getAsyncDatabase: () => ({ prepare: () => ({ get: async () => currentJob }) }) };
+// BLOCK-228 rider — 实现改走后端 REST /api/tools/status/:id（主进程不开库），
+// 测试替身从 db stub 同步换成 fetch stub（契约漂移：让测试追上契约）。
+const origFetch = globalThis.fetch;
+globalThis.fetch = async () => {
+  if (!currentJob) return new Response(JSON.stringify({ error: 'not_found' }), { status: 404 });
+  let result = currentJob.result_json;
+  try { result = JSON.parse(currentJob.result_json); } catch {}
+  return new Response(JSON.stringify({
+    ok: true,
+    id: currentJob.id,
+    toolId: currentJob.tool_id,
+    status: currentJob.status,
+    conversationId: currentJob.conversation_id || null,
+    result,
+  }), { status: 200 });
+};
 
 const origLoad = Module._load;
 Module._load = function patched(request, parent, isMain) {
   if (request === 'electron') return electronStub;
-  if (request === '../db' || request === './db' || request.endsWith('petri-server/db')) return dbStub;
   return origLoad.call(this, request, parent, isMain);
 };
 
@@ -138,4 +152,4 @@ test('同会话任务放行不受路径形状影响（修复不得反向变严�
   assert.equal(res.ok, true);
 });
 
-process.on('exit', () => { Module._load = origLoad; try { fs.rmSync(wsRoot, { recursive: true, force: true }); } catch { /* 句柄延迟 */ } });
+process.on('exit', () => { Module._load = origLoad; globalThis.fetch = origFetch; try { fs.rmSync(wsRoot, { recursive: true, force: true }); } catch { /* 句柄延迟 */ } });

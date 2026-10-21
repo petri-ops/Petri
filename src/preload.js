@@ -337,6 +337,9 @@ const desktopBridgeSurface = {
   // 诊断日志导出
   diagnostic: {
     export: (targetPath) => ipcRenderer.invoke('diagnostic:export', targetPath),
+    crashStatus: () => ipcRenderer.invoke('diagnostic:crash-status'),
+    crashOpenDumps: () => ipcRenderer.invoke('diagnostic:crash-open-dumps'),
+    crashSimulate: (payload) => ipcRenderer.invoke('diagnostic:crash-simulate', payload),
   },
 
   // M2-3：可选错误遥测（默认关闭，用户主动开启后才会上报）

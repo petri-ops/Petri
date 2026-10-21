@@ -16,6 +16,7 @@ import { AppRail } from '@/components/desktop/AppRail';
 import { AppRailProvider } from '@/components/desktop/AppRailContext';
 import { isProjectionMobile } from '@/components/desktop/titlebar/shared';
 import { ProjectionLinkBanner } from '@/components/desktop/_ProjectionLinkBanner';
+import { CrashNoticeBanner } from '@/components/desktop/CrashNoticeBanner';
 import { BackendStatusProvider } from '@/components/backend/BackendStatusProvider';
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { getBridge } from '@/lib/desktopBridge';
@@ -267,6 +268,7 @@ export default function App(): React.ReactElement {
       <BackendStatusProvider>
         {/* BLOCK-159 P1-9 / UI-482 — 投影断连横幅（仅投影环境渲染，桌面零行为） */}
         <ProjectionLinkBanner />
+        <CrashNoticeBanner />
         <AppRailProvider>
           <WorkspacePanelsProvider>
             {/* BLOCK-200 P1 — 键位注册表：命令面板徽章、App 级派发器、工作区/档位快捷键同源 */}

@@ -3,6 +3,32 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "block228-crash-notice",
+      "note": "BLOCK-228 Q9 K2 — 本地崩溃记录（crashReporter 不上传/session-health/dump 文件名）+ 异常退出横幅 + crashNotice 偏好。",
+      "patterns": [
+        "src/main/crash-guard.js",
+        "src/ipc/diagnostic.js",
+        "src/ipc/channels.js",
+        "src/preload.js",
+        "src/main.js",
+        "frontend/src/components/desktop/CrashNoticeBanner.tsx",
+        "frontend/src/App.tsx",
+        "frontend/src/lib/electron.d.ts",
+        "core/packages/shared-config/config-schema.js",
+        "test/block228-*.test.mjs",
+        "test/block201-settings-baseline.test.mjs",
+        "acceptance/block-228/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block228-*.cjs"
+      ],
+      "tests": [
+        "test/block228-crash-guard.test.mjs",
+        "test/block201-settings-baseline.test.mjs",
+        "test/ipc-channels-registry.test.mjs",
+        "frontend/src/components/desktop/CrashNoticeBanner.test.tsx"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "block227-role-reveal",
       "note": "BLOCK-227 Q9 K9 — 首启角色揭示（roleRevealSeen 偏好 + 欢迎页一次性浮层三卡 + 显式确认落盘）。",
       "patterns": [

@@ -33,6 +33,24 @@ async function resolveWorkspacePath(projectId) {
   return project && project.workspace_path ? project.workspace_path : null;
 }
 
+/** BLOCK-228 rider — job 数据面只读经后端 REST（主进程不进程内开 better-sqlite3）。 */
+async function resolveJobForData(jobId) {
+  const port = process.env.R_SERVER_PORT || '3001';
+  const url = `http://127.0.0.1:${port}/api/tools/status/${encodeURIComponent(jobId)}`;
+  const resp = await fetch(url, { headers: { Authorization: 'Bearer desktop-local' } });
+  if (resp.status === 404) return null;
+  if (!resp.ok) throw new Error(`backend status ${resp.status}`);
+  const data = await resp.json();
+  if (!data || data.ok !== true) return null;
+  return {
+    id: data.id,
+    toolId: data.toolId,
+    status: data.status,
+    conversationId: data.conversationId || null,
+    result: data.result,
+  };
+}
+
 /** 宿主聊天窗 origin（sender 帧地址推导；不可得时留空，guest 桥退化 source-only 校验）。 */
 function senderOrigin(event) {
   try {
@@ -254,28 +272,24 @@ function setupGenUiIpc() {
       // 只切 '/' 会让 conversationId 恒 null → 下面的跨会话校验整体空转（BLOCK-196 补锚时撞出）。
       const segments = String(session.filePath).split(/[\\/]+/);
       const sessionConversationId = segments.find((segment) => segment.indexOf('conv_') === 0 || segment.indexOf('conv-') === 0) || null;
-      const adb = require('../db').getAsyncDatabase();
-      const job = await adb.prepare(
-        'SELECT id, user_id, conversation_id, tool_id, status, result_json FROM tool_jobs WHERE id = ?'
-      ).get(jobId);
+      const job = await resolveJobForData(jobId);
       if (!job) return { ok: false, code: 'job_not_found', message: '数据源任务不存在' };
       if (!sessionConversationId) {
         // 会话文件路径按 <ws>/.petri/gen-ui/<conversationId>/<file> 登记，取不到 conv 段=形状异常。
         // 归属校验不许 fail-open：算不出"属于哪个会话"就等于没法证明"这个 job 属于它"。
         return { ok: false, code: 'session_scope_unknown', message: '无法确定会话归属，拒绝取数' };
       }
-      if (job.conversation_id && job.conversation_id !== sessionConversationId) {
+      if (job.conversationId && job.conversationId !== sessionConversationId) {
         return { ok: false, code: 'cross_conversation', message: '数据源任务不属于本会话' };
       }
-      if (job.status !== 'done' || !job.result_json) {
+      if (job.status !== 'done' || job.result == null) {
         return { ok: false, code: 'job_not_done', message: '任务尚未完成或无结果数据' };
       }
-      let result = null;
-      try { result = JSON.parse(job.result_json); } catch { result = String(job.result_json); }
       // 有界投影（超 12KB 标记 truncated 并截尾；与工具面投影上限同量级）
-      let data = { jobId: job.id, toolId: job.tool_id, status: job.status, result };
-      if (JSON.stringify(data).length > 12 * 1024) {
-        data = { jobId: job.id, toolId: job.tool_id, status: job.status, truncated: true, result: String(job.result_json).slice(0, 12 * 1024) };
+      let data = { jobId: job.id, toolId: job.toolId, status: job.status, result: job.result };
+      const serialized = JSON.stringify(data);
+      if (serialized.length > 12 * 1024) {
+        data = { jobId: job.id, toolId: job.toolId, status: job.status, truncated: true, result: serialized.slice(0, 12 * 1024) };
       }
       return { ok: true, data };
     } catch (error) {

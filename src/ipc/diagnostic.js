@@ -20,14 +20,13 @@ const fs = require("fs");
 const path = require("path");
 const { ipcMain, app, dialog } = require("electron");
 
-function setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs } = {}) {
+function setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs, crashGuard } = {}) {
   // BLOCK-10 S-004: assertTrustedSender helper, additive alongside BLOCK-3.
   const { createSenderGuard } = require("./_sender-guard");
   // BLOCK-10 S-007 / BLOCK-3 invariant: capture a live getter so the guard
   // tracks window replacement (app.on('activate') recreates mainWindow).
   const assertSender = createSenderGuard(typeof mainWindow === "function" ? mainWindow : () => mainWindow);
-  ipcMain.handle(CHANNELS.diagnostic.export, async (event, requestedTargetPath) => {
-    const deny = assertSender(event); if (deny) return deny;
+  ipcMain.handle(CHANNELS.diagnostic.export, async (event, requestedTargetPath) => {    const deny = assertSender(event); if (deny) return deny;
     try {
       const logDir = getLogDir();
       const { createWriteStream } = fs;
@@ -150,6 +149,20 @@ function setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs } = {}) {
       console.error("[diagnostic] export failed:", e.message);
       return { ok: false, error: e.message };
     }
+  });
+
+  // BLOCK-228 — 本地崩溃状态（只读）与打开转储目录；模拟通道仅测试实例可用。
+  ipcMain.handle(CHANNELS.diagnostic.crashStatus, (event) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return crashGuard?.getStatus?.() || { ok: false, error: "crash_guard_unavailable" };
+  });
+  ipcMain.handle(CHANNELS.diagnostic.crashOpenDumps, async (event) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return crashGuard?.openDumps?.() || { ok: false, error: "crash_guard_unavailable" };
+  });
+  ipcMain.handle(CHANNELS.diagnostic.crashSimulate, (event, payload) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return crashGuard?.simulateForTest?.(payload) || { ok: false, error: "crash_guard_unavailable" };
   });
 }
 

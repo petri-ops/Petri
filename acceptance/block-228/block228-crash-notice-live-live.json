@@ -1,0 +1,33 @@
+{
+  "name": "block228-crash-notice-live",
+  "startedAt": "2026-10-21T02:49:02.798Z",
+  "finishedAt": "2026-10-21T02:49:12.654Z",
+  "assertions": [
+    {
+      "name": "R1_simulate_status",
+      "pass": true,
+      "detail": "{\"ok\":true,\"status\":{\"ok\":true,\"uncleanExit\":true,\"previousStartedAt\":\"2026-10-21T01:00:00.000Z\",\"lastCleanExitAt\":null,\"dumps\":[{\"name\":\"probe-block228.dmp\",\"size\":2048,\"mtime\":\"2026-10-21T01:00:00.000Z\"}],\"crashDumpsDir\":\"D:/1.WorkDir/petri/.petri-test-user-data\\\\Crashpad\",\"simulated\":true}}"
+    },
+    {
+      "name": "D1_banner_visible",
+      "pass": true,
+      "detail": "上次运行未正常结束（2026/10/21 09:00:00）。本地记录，未上传。 转储：probe-block228.dmp\n打开崩溃目录\n知道了"
+    },
+    {
+      "name": "D2_screenshots",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\petri\\acceptance\\block-228\\ui541-crash-notice.png | D:\\1.WorkDir\\petri\\acceptance\\block-228\\ui541-crash-notice-dark.png"
+    },
+    {
+      "name": "D3_dismiss_closes",
+      "pass": true,
+      "detail": "知道了应关闭横幅"
+    },
+    {
+      "name": "D4_pref_off_hides_banner",
+      "pass": true,
+      "detail": "crashNotice=false 不应显示横幅"
+    }
+  ],
+  "allPass": true
+}

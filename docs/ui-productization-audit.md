@@ -1,6 +1,6 @@
 # Petri Desktop UI 产品化审计台账
 
-最后更新：2026-10-21（**UI-540 首启角色揭示 verified（dev Electron 边界内；9223 离屏 live 7/7）**，BLOCK-227 / Q9）：欢迎页一次性浮层三卡（分析数据/写代码/整理知识）+ 本地执行说明 + 显式「开始使用」；`roleRevealSeen` 落盘、已看过不再出现。证据 `acceptance/block-227/`（live 7/7 + 亮/暗截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。：标题栏铃铛+未读徽章+通知列表（回合终态/待审批）；`userPrefs.quietHours` 只抑制系统 toast、应用内仍留痕；面板向左展开避免右缘裁切。证据 `acceptance/block-226/`（live 11/11 + 亮/暗/设置截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+最后更新：2026-10-21（**UI-541 异常退出提示 verified（dev Electron 边界内；9223 离屏 live 5/5）**，BLOCK-228 / Q9）：标题栏下方横幅（上次未正常结束时间 + 转储文件名 +「本地记录，未上传」+ 打开崩溃目录 + 知道了）；`crashNotice` 偏好可关；只读文件级证据，不解析栈。证据 `acceptance/block-228/`（live 5/5 + 亮/暗截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。：欢迎页一次性浮层三卡（分析数据/写代码/整理知识）+ 本地执行说明 + 显式「开始使用」；`roleRevealSeen` 落盘、已看过不再出现。证据 `acceptance/block-227/`（live 7/7 + 亮/暗截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。：标题栏铃铛+未读徽章+通知列表（回合终态/待审批）；`userPrefs.quietHours` 只抑制系统 toast、应用内仍留痕；面板向左展开避免右缘裁切。证据 `acceptance/block-226/`（live 11/11 + 亮/暗/设置截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**UI-538 D4 自动选模型 verified（dev Electron 边界内；9223 离屏 live 8/8）**，BLOCK-225 / Q9）：按任务/附件每轮解析（有图→识图绑定/能力；否则 Agent/工具；回落当前）；菜单「自动」开关+解析预览，composer 显示「自动」；偏好 `autoModel` 默认 false。证据 `acceptance/block-225/`（live 8/8 + 亮/暗截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
@@ -5178,3 +5178,11 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **验证（代码）**：前端 7/7（偏好 4 + 组件 3）；配置基线 4/4（94 键）；theme 17/17；types 0；lint 0 error；code-size PASS。
 - **实机腿（9223 离屏，7/7）**：`acceptance/block-227/`——首启浮层三卡 → 亮/暗截图 → 显式确认关闭 → 偏好落盘 true → 刷新不再出现。
 - **未做（reopen）**：分步引导（选模型/装运行时）、数据导入、角色动画、设置内重播、语言/插画定制。
+
+## UI-541: 异常退出提示（崩溃同意/本地证据）（2026-10-21 **verified（dev Electron 边界内；9223 离屏 live 5/5）**，BLOCK-228 / Q9）
+
+- **变化面**：启动时若上次未干净退出，标题栏下方出现可关闭横幅——时间、转储文件名（若有）、「本地记录，未上传」，并提供「打开崩溃目录」「知道了」；`crashNotice` 偏好默认开、可关。
+- **为什么这样设计（自有形态）**：崩溃提示的价值是「可解释 + 可自证」——告诉用户上次异常结束与本地证据位置，同时明确不上传、不伪造栈；只有真正异常时才出现，干净退出不打扰。
+- **验证（代码）**：Node 7/7（session-health 三态/重启行为/dump 清单/测试实例守卫）；前端 2/2（横幅/关闭/偏好关）；配置基线 4/4（95 键）；theme 17/17；types 0；lint 0 error；code-size PASS。
+- **实机腿（9223 离屏，5/5）**：`acceptance/block-228/`——模拟未正常退出 + probe 转储 → 横幅（时间/文件名/未上传）→ 亮/暗截图 → 知道了关闭 → 偏好关闭后不再显示。
+- **未做（reopen）**：minidump 栈解析、任何上传、崩溃率统计、版本聚合、自动诊断包。

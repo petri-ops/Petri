@@ -26,6 +26,7 @@ const {
   session,
   Menu,
   globalShortcut,
+  crashReporter,
 } = require("electron");
 
 // UI-400-1 抓真（2026-09-17）——Windows 原生窗口遮挡追踪对无边框窗口（frame:false）
@@ -90,6 +91,12 @@ if (process.env.PETRI_ELECTRON_USER_DATA_DIR) {
 // 独立 userData 绕单实例锁与用户窗口共存；零 fork 后端、零 migration
 // （数据同源 :3001，主实例拥有 DB 生命周期）；窗口离屏可见 + `?test=1` 标记。
 const IS_TEST_INSTANCE = process.env.PETRI_TEST_INSTANCE === "1";
+
+// BLOCK-228 — 本地崩溃记录（不上传）：尽早启动 crashReporter，并在真正退出时标记干净退出。
+const { createCrashGuard } = require("./main/crash-guard");
+const crashGuard = createCrashGuard({ app, crashReporter, isTestInstance: IS_TEST_INSTANCE });
+crashGuard.start();
+app.once("will-quit", () => crashGuard.markCleanExit());
 
 // ── EPIPE / stdout 兜底 ─────────────────────────────────────
 // console.log 写 stdout 时若管道已关（子进程退出/重定向）会抛 EPIPE，
@@ -696,7 +703,7 @@ async function main() {
     readLogTail,
   });
   setupAutoUpdateIpc({ mainWindow });
-  setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs });
+  setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs, crashGuard });
   // BLOCK-67 加映（UI-326）— IP+密码 引导连接（装公钥 + 写 ssh config 别名）
   const { setupSshHostIpc } = require("./ipc/ssh-host");
   setupSshHostIpc();

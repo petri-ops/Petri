@@ -61,6 +61,9 @@ const CHANNELS = {
   },
   diagnostic: {
     export: 'diagnostic:export',
+    crashStatus: 'diagnostic:crash-status',
+    crashOpenDumps: 'diagnostic:crash-open-dumps',
+    crashSimulate: 'diagnostic:crash-simulate',
   },
   file: {
     listDirectory: 'file:list-directory',

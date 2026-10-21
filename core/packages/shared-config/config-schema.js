@@ -408,6 +408,11 @@ const CONFIG_KEYS = Object.freeze([
     key: 'userPrefs.roleRevealSeen', family: 'user-prefs', path: 'roleRevealSeen',
     type: 'boolean', envKeys: [], aliases: [], mutable: true, ui: 'none',
   },
+  {
+    // BLOCK-228 — 异常退出提示（本地 only；默认开，可关）。
+    key: 'userPrefs.crashNotice', family: 'user-prefs', path: 'crashNotice',
+    type: 'boolean', envKeys: [], aliases: [], mutable: true, ui: 'none',
+  },
   // —— 技能治理账本（BLOCK-203 W4a P3；原 `shared-backend/skill-prefs.js` 无任何形状校验）——
   // `disabled.<id>` 不是布尔映射而是对象 `{ at, reason? }`，`uninstalledSources.<id>` 并存
   // `{ sourceDir, at }`。`findEntryByPath` 只寻址标量 ⇒ 按**点路径**逐字段登记，

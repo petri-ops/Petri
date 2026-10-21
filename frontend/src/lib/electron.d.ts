@@ -442,6 +442,22 @@ declare global {
       };
       diagnostic: {
         export: (targetPath?: string) => Promise<{ ok: boolean; path?: string; error?: string }>;
+        crashStatus: () => Promise<{
+          ok: boolean;
+          uncleanExit?: boolean;
+          previousStartedAt?: string | null;
+          lastCleanExitAt?: string | null;
+          dumps?: Array<{ name: string; size: number; mtime: string }>;
+          crashDumpsDir?: string | null;
+          simulated?: boolean;
+          error?: string;
+        }>;
+        crashOpenDumps: () => Promise<{ ok: boolean; error?: string }>;
+        crashSimulate: (payload: {
+          uncleanExit?: boolean;
+          previousStartedAt?: string;
+          dumps?: Array<{ name: string; size: number; mtime: string }>;
+        }) => Promise<{ ok: boolean; reason?: string; status?: unknown }>;
       };
       // M2-3：可选错误遥测（默认关闭，用户主动开启后才会上报）
       // payload 仅含 category + errorSummary，不含用户数据/路径/文件名

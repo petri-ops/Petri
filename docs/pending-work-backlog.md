@@ -5,6 +5,8 @@
 > 纪律：逐项推进＝**单工作包串行**，一项收口后才启动下一项；每项启动照常过工作包立项检查单（用户裁决留痕、登记三件套）；状态只在本表与对应 canonical 间同步，不另立第二进度文档。
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
+最后更新：2026-10-21（**BLOCK-228 Q9 K2 崩溃同意/本地提示 completed**（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：crashReporter 仅本地（不上传）+ session-health 异常退出检测 + dump 文件名清单 + `crashNotice` 默认 true + 横幅（打开目录/知道了）。证据=Node 7/7 + 前端 2/2 + 9223 离屏 live 5/5 + theme/types/lint/code-size PASS。reopen=minidump 栈解析/上传/崩溃率/版本聚合。plan=docs/block-228-q9-crash-consent-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
 最后更新：2026-10-21（**BLOCK-227 Q9 K9 首启角色揭示 completed**（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：欢迎页一次性浮层三卡 + 显式「开始使用」，`userPrefs.roleRevealSeen` 默认 false 落盘；读取失败不展示。证据=前端 7/7 + 配置基线 4/4 + 9223 离屏 live 7/7 + theme/types/lint/code-size PASS。reopen=分步引导/数据导入/动画/重播。plan=docs/block-227-q9-onboarding-role-reveal-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-10-21（**BLOCK-226 Q9 通知中心/免打扰 completed**（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：标题栏铃铛+未读+通知列表（回合终态/待审批留痕）；`userPrefs.quietHours`（空=关，跨午夜）只抑制系统 toast、应用内仍记录；面板向左展开避免裁切。证据=前端 62/62 + Node 13/13 + 9223 离屏 live 11/11 + theme/types/code-size PASS。reopen=点击跳转/系统历史/审批穿透/声音/类型开关/跨设备。plan=docs/block-226-q9-notification-center-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。）

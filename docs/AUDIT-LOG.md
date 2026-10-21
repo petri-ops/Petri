@@ -1,4 +1,6 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-10-21（**BLOCK-228 Q9 K2 崩溃同意/本地提示 completed**）：crashReporter 仅本地（不上传）+ session-health 异常退出检测 + dump 文件名清单 + `crashNotice`（默认 true）+ 标题栏下方横幅（打开目录/知道了）。证据=Node 7/7 + 前端 2/2 + 9223 离屏 live 5/5（亮/暗截图）+ theme/types/lint/code-size PASS。reopen=minidump 栈解析/上传/崩溃率/版本聚合。plan=docs/block-228-q9-crash-consent-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-21（**BLOCK-227 Q9 K9 首启角色揭示 completed**）：欢迎页一次性浮层三卡（分析数据/写代码/整理知识）+ 显式「开始使用」，`userPrefs.roleRevealSeen` 落盘；读取失败不展示。证据=前端 7/7 + 配置基线 4/4 + 9223 离屏 live 7/7（亮/暗截图）+ theme/types/lint/code-size PASS。reopen=分步引导/数据导入/动画/重播/插画。plan=docs/block-227-q9-onboarding-role-reveal-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**BLOCK-226 Q9 通知中心/免打扰 completed**）：标题栏铃铛+未读徽章+通知列表（回合终态/待审批留痕）；`userPrefs.quietHours`（空=关，跨午夜）只抑制系统 toast、应用内仍记录；面板向左展开避免右缘裁切。证据=前端 62/62 + Node 13/13 + 9223 离屏 live 11/11 + theme/types/code-size PASS。reopen=点击跳转/系统历史/审批穿透/声音/类型开关。plan=docs/block-226-q9-notification-center-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -13,7 +15,6 @@
 
 最后更新：2026-10-20（**BLOCK-221 Q8 垂直切片 completed**）：MCP 服务级治理——①**修真实缺陷**：`GET /api/mcp/servers` 曾把解密后的 env 明文（第三方 token）下发渲染进程，现只回 `envKeys`/`envCount`；②服务级策略 store `mcp-server-policy.json`（`{trust, allow, block}`，读侧 fail-closed、写侧 404/400 + diagnostics）；③投影求值 block 优先 → allow 白名单 → 默认全允许；④`GET/PUT /api/mcp/servers/:id/policy` + 清单 `policy` 摘要。证据=block221 9/9 + MCP 邻域 40/40 + 前端 extensions/hooks 145 项全绿。reopen=trust 降档接审批（随 Q1）/OAuth/懒加载/深链安装/四 hint/货架 UI 操作面。plan=docs/block-221-q8-mcp-governance-plan.md §5。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-最后更新：2026-10-20（**BLOCK-220 Q-DOMAIN P3 垂直切片 completed**）：删除化石 `core/shared-backend/tool-registry.js`（458 行/10 个内联生信工具/零消费；单一注册源=pack `registry/tool-registry.json` 驱动的 `petri-server/tool-registry.js`）+ pack 新契约 `provides.methods`（`citations`/`toolLabels` 纯数据，pack 0.1.1→0.2.0）+ `pack-methods.js` 只读有界装载器 + `methods-export.js` 接线与诚实降级（无 pack 无引文）。证据=block220 13/13 + 真实 pack 根集成 13 类型/13 标签/0 warning + 域中性基线 261→208 处（`tool-registry.js` 归零）+ test:changed Node 315 项 0 红。reopen=`_pythonEquivalent` 脚本模板/`artifact-profiles`/`agent-workflow`/`learning`/`result-*-tools`。plan=docs/block-220-qdomain-p3-methods-plan.md §8。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 
 > 本文件只保存需要主 Agent 看见的活跃广播与最近处理记录。
@@ -25,6 +26,7 @@
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
+| ✅ | 2026-10-21 | **BLOCK-228 Q9 K2 崩溃同意/本地提示 completed**（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：crashReporter 仅本地（不上传）+ session-health 异常退出检测 + dump 文件名/大小/时间清单 + `userPrefs.crashNotice`（默认 true）+ 横幅（打开崩溃目录/知道了）。证据=Node 7/7 + 前端 2/2 + 9223 离屏 live 5/5 + closeout 十三门 PASS。**rider**=`src/ipc/gen-ui.js` 旧 `require('../db')` 改 REST `/api/tools/status/:id`（closeout 相对 require 门禁抓真）+ block196 契约测同步 fetch stub。非范围=minidump 栈解析/上传/崩溃率/版本聚合/自动诊断包。plan=docs/block-228-q9-crash-consent-plan.md §7 | BLOCK-228 / P5-CLOSED |
 | ✅ | 2026-10-21 | **BLOCK-227 Q9 K9 首启角色揭示 completed**（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：欢迎页一次性浮层三卡 + 显式「开始使用」，`userPrefs.roleRevealSeen`（默认 false）落盘；读取失败不展示。证据=前端 7/7 + 配置基线 4/4 + 9223 离屏 live 7/7 + theme/types/lint/code-size PASS。非范围=分步引导/数据导入/动画/重播。plan=docs/block-227-q9-onboarding-role-reveal-plan.md §7 | BLOCK-227 / P5-CLOSED |
 | ✅ | 2026-10-21 | **BLOCK-226 Q9 通知中心/免打扰 completed**（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：标题栏铃铛+未读徽章+通知列表（回合终态/待审批留痕）；`userPrefs.quietHours`（空=关，跨午夜）只抑制系统 toast、应用内仍记录；设置页输入；面板向左展开避免裁切。证据=前端 62/62 + Node 13/13 + 9223 离屏 live 11/11 + theme/types/code-size PASS。非范围=点击跳转/系统历史/审批穿透/声音/类型开关/跨设备。plan=docs/block-226-q9-notification-center-plan.md §7 | BLOCK-226 / P5-CLOSED |
 | ✅ | 2026-10-21 | **BLOCK-225 Q9 D4 Auto completed**（用户「Q9 余项和 Q-DOMAIN P4 data model 按顺序做完」）：按任务/附件每轮解析模型（有图→vision 绑定/能力；否则 agent 绑定/tools；回落当前）；`userPrefs.autoModel` 默认 false；菜单开关+解析预览、composer「自动」；发送/子代理启动时解析，不写回 active 绑定。证据=前端 33/33 + 配置基线 4/4 + 9223 离屏 live 8/8 + types/theme/code-size PASS。非范围=复杂度分级/成本权重/审计落盘/自动档覆盖确认。plan=docs/block-225-q9-auto-model-plan.md §7 | BLOCK-225 / P5-CLOSED |
