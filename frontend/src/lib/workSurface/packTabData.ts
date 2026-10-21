@@ -8,11 +8,12 @@
  * 故一律返回 `no_endpoint`，由 host 回落核心历史面——不拿 lineage 数据冒充历史。
  */
 
-export type PackTabId = 'lineage' | 'history' | 'revisions-source';
+export type PackTabId = 'lineage' | 'history' | 'revisions-source' | 'compare';
 
 export interface PackTabParams {
   jobId?: string | null;
   revisionId?: string | null;
+  changeSetId?: string | null;
 }
 
 export interface PackTabResult<T> {
@@ -27,6 +28,11 @@ export interface PackLineagePayload {
   truncated: boolean;
 }
 
+export interface PackComparePayload {
+  files: { path: string; status: string; added: number; removed: number }[];
+  truncated: boolean;
+}
+
 export interface PackSourcePayload {
   text: string;
   truncated: boolean;
@@ -35,6 +41,7 @@ export interface PackSourcePayload {
 export const PACK_TAB_LIMITS = Object.freeze({
   lineageNodes: 200,
   lineageEdges: 400,
+  compareFiles: 200,
   sourceChars: 200 * 1024,
 });
 
@@ -80,7 +87,7 @@ export async function fetchPackTabData(
   tab: PackTabId,
   params: PackTabParams,
   deps: PackTabDeps,
-): Promise<PackTabResult<PackLineagePayload | PackSourcePayload>> {
+): Promise<PackTabResult<PackLineagePayload | PackSourcePayload | PackComparePayload>> {
   const base = deps.apiBase.replace(/\/$/, '');
 
   if (tab === 'history') return { ok: false, reason: 'no_endpoint' };
@@ -105,6 +112,30 @@ export async function fetchPackTabData(
         edges: edges.slice(0, PACK_TAB_LIMITS.lineageEdges),
         truncated,
       },
+    };
+  }
+
+  // compare（BLOCK-236 第二批）：changeset 差异只读视图
+  if (tab === 'compare') {
+    const changeSetId = typeof params.changeSetId === 'string' ? params.changeSetId.trim() : '';
+    if (!changeSetId) return { ok: false, reason: 'missing_changeset_id' };
+    const res = await readJson(
+      `${base}/api/result-studio/changesets/${encodeURIComponent(changeSetId)}/compare`,
+      deps,
+    );
+    if (!res.ok) return res as PackTabResult<PackComparePayload>;
+    const raw = (res.data ?? {}) as { files?: unknown[] };
+    const files = asArray<{ path?: unknown; status?: unknown; added?: unknown; removed?: unknown }>(raw.files)
+      .filter((f) => f && typeof f.path === 'string')
+      .map((f) => ({
+        path: String(f.path).slice(0, 300),
+        status: typeof f.status === 'string' ? f.status : 'modified',
+        added: typeof f.added === 'number' ? f.added : 0,
+        removed: typeof f.removed === 'number' ? f.removed : 0,
+      }));
+    return {
+      ok: true,
+      data: { files: files.slice(0, PACK_TAB_LIMITS.compareFiles), truncated: files.length > PACK_TAB_LIMITS.compareFiles },
     };
   }
 

@@ -6,6 +6,7 @@ import type { ActiveArtifact } from '@/components/workspace-panels/ResultView';
 const MODE_TO_PACK_TAB: Record<string, string> = {
   code: 'revisions-source',
   history: 'history',
+  compare: 'compare',
 };
 
 export interface ResultSurfaceHostResolution {

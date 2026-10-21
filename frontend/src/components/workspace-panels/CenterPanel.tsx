@@ -174,7 +174,11 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
   // BLOCK-236 — tab 级接管：取数失败即回落核心（不渲染空白 iframe）
   const packTabState = usePackTabData(
     resultSurfaceHost.tab,
-    { jobId: ctx.activeJob?.id, revisionId: ctx.activeArtifact?.revisionId },
+    {
+      jobId: ctx.activeJob?.id,
+      revisionId: ctx.activeArtifact?.revisionId,
+      changeSetId: activeResultProgress[activeResultProgress.length - 1]?.changeSetId ?? null,
+    },
     getApiPrefix(),
   );
   const downgradeToCore = shouldDowngradeToCore(resultSurfaceHost.tab, packTabState);

@@ -86,7 +86,7 @@ export interface PackResultSurfaceContribution {
 
 const RESULT_SURFACE_MODES = new Set(['result', 'code', 'compare', 'history']);
 /** BLOCK-236 — pack 可接管的只读 tab 白名单（写/交互面一律留在核心）。 */
-const RESULT_SURFACE_TABS = new Set(['lineage', 'history', 'revisions-source']);
+const RESULT_SURFACE_TABS = new Set(['lineage', 'history', 'revisions-source', 'compare']);
 
 export interface PackUiActionContribution {
   id?: unknown;

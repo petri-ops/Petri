@@ -82,3 +82,29 @@ describe('packTabData（BLOCK-236）', () => {
       .toEqual({ ok: false, reason: 'invalid_json' });
   });
 });
+
+describe('packTabData.compare（BLOCK-236 第二批）', () => {
+  it('compare：按上限裁剪文件列表并标 truncated', async () => {
+    const files = Array.from({ length: PACK_TAB_LIMITS.compareFiles + 3 }, (_, i) => ({
+      path: `src/f${i}.ts`,
+      status: 'modified',
+      added: i,
+      removed: 0,
+    }));
+    const routes = new Map<string, Route>([
+      [`${BASE}api/result-studio/changesets/cs1/compare`, { body: JSON.stringify({ files }) }],
+    ]);
+    const res = await fetchPackTabData('compare', { changeSetId: 'cs1' }, { apiBase: BASE, fetchImpl: fetcher(routes).impl });
+    expect(res.ok).toBe(true);
+    if (!res.ok || !res.data || !('files' in res.data)) throw new Error('expected compare payload');
+    expect(res.data.files).toHaveLength(PACK_TAB_LIMITS.compareFiles);
+    expect(res.data.truncated).toBe(true);
+  });
+
+  it('compare：缺 changeSetId 直接拒绝（不发请求）', async () => {
+    const { impl, calls } = fetcher(new Map());
+    const res = await fetchPackTabData('compare', {}, { apiBase: BASE, fetchImpl: impl });
+    expect(res).toEqual({ ok: false, reason: 'missing_changeset_id' });
+    expect(calls).toHaveLength(0);
+  });
+});

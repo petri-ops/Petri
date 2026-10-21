@@ -44,6 +44,15 @@ describe('resultSurfaceHost（BLOCK-236 tab 级接管）', () => {
     expect(res.tab).toBeUndefined();
   });
 
+  it('compare 模式 + 包声明 compare：命 pack 并带 tab', () => {
+    const res = resolveResultSurfaceHost(
+      [surface({ modes: ['result', 'compare'], tabs: [{ id: 'compare', label: '比较' }] })],
+      artifact,
+      'compare',
+    );
+    expect(res).toMatchObject({ source: 'pack', tab: 'compare' });
+  });
+
   it('history 模式 + 包声明 history：命中（数据桥是否可用由桥层决定）', () => {
     const res = resolveResultSurfaceHost(
       [surface({ tabs: [{ id: 'history', label: '历史' }] })],

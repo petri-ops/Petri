@@ -13,6 +13,7 @@ import {
   fetchPackTabData,
   type PackLineagePayload,
   type PackSourcePayload,
+  type PackComparePayload,
   type PackTabId,
   type PackTabResult,
 } from './packTabData';
@@ -22,7 +23,7 @@ type PackTabStatus = 'idle' | 'loading' | 'ready' | 'error';
 export interface PackTabState {
   status: PackTabStatus;
   reason?: string;
-  data?: PackLineagePayload | PackSourcePayload;
+  data?: PackLineagePayload | PackSourcePayload | PackComparePayload;
 }
 
 const EMPTY_PACK_TAB_STATE: PackTabState = { status: 'idle' };
@@ -41,12 +42,13 @@ export function shouldDowngradeToCore(tab: string | undefined, state: PackTabSta
 
 export function usePackTabData(
   tab: string | undefined,
-  params: { jobId?: string | null; revisionId?: string | null },
+  params: { jobId?: string | null; revisionId?: string | null; changeSetId?: string | null },
   apiBase: string,
 ): PackTabState {
   const jobId = params.jobId ?? null;
   const revisionId = params.revisionId ?? null;
-  const key = tab ? `${tab}|${jobId ?? ''}|${revisionId ?? ''}|${apiBase}` : '';
+  const changeSetId = params.changeSetId ?? null;
+  const key = tab ? `${tab}|${jobId ?? ''}|${revisionId ?? ''}|${changeSetId ?? ''}|${apiBase}` : '';
   const [entry, setEntry] = useState<{ key: string; state: PackTabState }>({
     key: '',
     state: EMPTY_PACK_TAB_STATE,
@@ -55,8 +57,8 @@ export function usePackTabData(
   useEffect(() => {
     if (!tab) return undefined;
     let cancelled = false;
-    void fetchPackTabData(tab as PackTabId, { jobId, revisionId }, { apiBase })
-      .then((res: PackTabResult<PackLineagePayload | PackSourcePayload>) => {
+    void fetchPackTabData(tab as PackTabId, { jobId, revisionId, changeSetId }, { apiBase })
+      .then((res: PackTabResult<PackLineagePayload | PackSourcePayload | PackComparePayload>) => {
         if (cancelled) return;
         setEntry({
           key,
@@ -69,7 +71,7 @@ export function usePackTabData(
     return () => {
       cancelled = true;
     };
-  }, [key, tab, jobId, revisionId, apiBase]);
+  }, [key, tab, jobId, revisionId, changeSetId, apiBase]);
 
   if (!tab) return EMPTY_PACK_TAB_STATE;
   return entry.key === key ? entry.state : LOADING_PACK_TAB_STATE;
