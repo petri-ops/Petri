@@ -23,7 +23,7 @@ async function tool_query(args, ctx) {
       return {
         error: 'guest_no_account',
         message:
-          '你当前是未登录访客，没有 Petri 账号下的项目/数据集/分析记录。请说明：你是网站访客；若要保存项目、跑单细胞分析或同步学习进度，需要注册/登录。不要调用 query 查 projects/datasets/analyses。',
+          '你当前是未登录访客，没有 Petri 账号下的项目/数据集/分析记录。请说明：你是网站访客；若要保存项目、跑分析或同步学习进度，需要注册/登录。不要调用 query 查 projects/datasets/analyses。',
         items: [],
       };
     }

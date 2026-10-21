@@ -37,7 +37,7 @@ const BUILD_SUBJECT = path.join(RESOURCES, 'g0-build-subject.json');
 const USER_SETTINGS = path.join(homedir(), 'Documents/Petri-Local/ai-settings.json');
 const TASK_IDS = Object.freeze([
   'deg_selection_to_enrichment',
-  'volcano_ai_presentation_edit',
+  'classification_plot_ai_presentation_edit',
   'heatmap_manual_then_ai_edit',
   'scientific_threshold_recompute',
   'historical_alternative_compare',

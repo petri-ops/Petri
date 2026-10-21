@@ -20,6 +20,13 @@
 const { askDecision } = require('./decision-api');
 const { thresholdForPoint } = require('./decision-thresholds');
 const { getPointRuntime } = require('./decision-config');
+const { loadScientificProfiles } = require('../../shared-backend/pack-scientific-profiles');
+
+/** BLOCK-234 S5 — the standard-expression analysis-type vocabulary is pack data. */
+function isStandardAnalysisType(analysisType) {
+  const types = loadScientificProfiles().interpret?.standardAnalysisTypes || [];
+  return types.includes(analysisType);
+}
 
 // === 本地知识库：常见 marker 基因 → 细胞类型映射 ===
 // 数据来源：CellMarker 2.0 + PanglaoDB 高频条目精选
@@ -105,7 +112,7 @@ function deriveMarkerCandidates(markers) {
 /** 组装决策请求（P0 校准即用此形状，scripts/block111-p0-calibrate.mjs 引用本函数）。 */
 function buildMarkerDecisionRequest(markers, candidates) {
   const state =
-    `某单细胞 RNA-seq 数据中一个细胞簇的 top 高表达基因（marker）：${markers.join(', ')}\n\n` +
+    `某表达谱数据中一个簇的 top 高表达基因（marker）：${markers.join(', ')}\n\n` +
     `候选细胞类型（来自规则表预筛命中）：\n` +
     candidates.map((c, i) => `${i + 1}. ${c.type}（命中参考基因 ${c.matches}/${c.total}：${c.matched.join(', ')}）`).join('\n');
   const criteria = {};
@@ -166,7 +173,7 @@ async function callDeepSeekSimple(prompt, maxTokens = 800) {
       {
         role: 'system',
         content:
-          '你是一位资深生物信息学专家，擅长单细胞 RNA-seq 数据分析。请用简洁、准确、专业的中文回答，避免冗余。',
+          '你是一位资深数据分析专家，擅长高维表达数据分析。请用简洁、准确、专业的中文回答，避免冗余。',
       },
       { role: 'user', content: prompt },
     ],
@@ -179,9 +186,9 @@ async function callDeepSeekSimple(prompt, maxTokens = 800) {
 
 /** Build interpret prompt by analysis type. Returns null if type not supported. */
 function buildInterpretPrompt(analysisType, summary, extra = {}) {
-  if (analysisType === 'scrna_standard' || analysisType === 'recluster') {
+  if (isStandardAnalysisType(analysisType)) {
     const { nCells, nGenes, nClusters, species, resolution, nPcsUsed } = summary || {};
-    let prompt = '我刚完成一次单细胞 RNA-seq 标准分析，请用 200-300 字给出简明解读。\n\n';
+    let prompt = '我刚完成一次表达谱数据标准分析，请用 200-300 字给出简明解读。\n\n';
     prompt += '基本信息：\n';
     prompt += '- 物种：' + (species || '未知') + '\n';
     prompt += '- 细胞数：' + (nCells || '?') + '\n';
@@ -197,7 +204,7 @@ function buildInterpretPrompt(analysisType, summary, extra = {}) {
     }
     prompt += '\n请用简洁中文输出三部分：\n';
     prompt += '1. 数据质量评估（1-2 句）\n';
-    prompt += '2. 主要细胞类型推断（基于 markers）\n';
+    prompt += '2. 主要群体推断（基于 markers）\n';
     prompt += '3. 推荐的下一步分析（1-2 个具体建议）';
     return prompt;
   }
@@ -345,6 +352,7 @@ module.exports = {
   deriveMarkerCandidates,
   buildMarkerDecisionRequest,
   isMarkerGuardEnabled,
+  isStandardAnalysisType,
   lookupCellTypeWithConfidence,
   callDeepSeekSimple,
   buildInterpretPrompt,

@@ -616,6 +616,8 @@ status: planned
 > 2026-10-21：**E7 电脑控制（Windows 边界内）已立项并收口 [BLOCK-229](./block-229-e7-computer-use-plan.md)（completed）**——sidecar/axfixture 构建、host status、后端 status/probe、设置面板；**reopen**：macOS 构建/权限、PiP、真实 click/type 端到端。
 >
 > 2026-10-21：**P4 数据模型第一片已立项并收口 [BLOCK-230](./block-230-qdomain-p4-modality-plan.md)（completed）**——modality 默认 general + pack `provides.modalities` + 未知回落；**reopen**：权限通用化/域中性归零/RS 保真/导出联邦基线/dataModelExtensions。
+>
+> 2026-10-21：**P4-C S5 已收口 [BLOCK-234](./block-234-qdomain-p4c-tail-plan.md)（active）**——result/RS 科学语义（compare/rerun/cohort/planner/selection/heavy/interpret）下沉 pack `provides.scientificProfiles`（pack 0.2.6），核心只留有界引擎与不变量；域中性 **103→48 处**；剩余 S6 前端/桌面 + 兼容白名单。**P4 仍 open**：权限/域中性归零/RS 保真/导出联邦基线/dataModelExtensions（其中权限已于 BLOCK-232 收口）。
 
 **目标**：把「长跑、离开窗口、出错、首启」这些边缘体验补到第一梯队。
 

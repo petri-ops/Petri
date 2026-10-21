@@ -47,7 +47,7 @@ module.exports = [
     "type": "function",
     "function": {
       "name": "read_page",
-      "description": "读取已安装内容插件的教程片段。url 形如 /plugin/<pluginId>/<slug>（如 /plugin/deseq2-tutorial/quickstart）。当分析现场卡住、不确定某工具/流程怎么用时，先调 read_page 查对应插件教程片段再回答用户。",
+      "description": "读取已安装内容插件的教程片段。url 形如 /plugin/<pluginId>/<slug>。当分析现场卡住、不确定某工具/流程怎么用时，先调 read_page 查对应插件教程片段再回答用户。",
       "parameters": {
         "type": "object",
         "properties": {
@@ -171,7 +171,7 @@ module.exports = [
           },
           "fileName": {
             "type": "string",
-            "description": "可选（仅 toolJobId 模式）：指定读哪个图（如 volcano.png）。不传则读第一张 plot"
+            "description": "可选（仅 toolJobId 模式）：指定读哪个图（如 plot.png）。不传则读第一张 plot"
           },
           "question": {
             "type": "string",

@@ -129,3 +129,46 @@ BLOCK-234 只有在 S2–S6 全部收口（或剩余量经裁决为显式兼容�
 - 模板为纯数据，不执行 pack 代码；无包时 Python 等价与引文诚实降级。
 - 报告引文由 Markdown 文本渲染为 `<li>` 并转义，不再内联 HTML 片段。
 - 下一阶段=S5（result/RS 模块：compare/rerun/selection/interpret/cohort）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 10. S5 收口（2026-10-21）
+
+**S5 completed；BLOCK-234 仍 active（S6 open）。**
+
+### 10.1 契约裁决（S5 开片先定）
+
+Result Studio 保真核心（compare 的阈值/分类/排序语义）**不再硬编码在核心，也不降级为通用表比较**，改为
+「pack 提供声明式 scientific profile，核心保留有界引擎与不变量」：
+
+- 核心只实现 `threshold` / `status` / `ranked` 三种有界比较模式，以及稳定 ID、严格边界、`unavailable` 语义；
+- pack `provides.scientificProfiles` 声明 admitted artifact、列别名、分类词表、reason 码、rerun/cohort 准入、planner 规则、selection 消费者、heavy 工具与标准解读类型；
+- 无包 → `scientific_schema_not_declared_for_artifact` / 空 rerun/planner/selection/heavy，不猜测、不降级成近似统计。
+
+理由：核心泛化表比较会丢失 volcano 分类与 DEG 阈值边界语义，触碰 RS 保真红线；profile 化可在包在位时逐字节复现现有输出，并让「哪些 artifact 可比较」成为包的单一声明。
+
+### 10.2 交付
+
+- **pack 0.2.6**：新增 `scientific-profiles.json`（comparisons/rerun/cohort/selectionConsumers/planner/heavyTools/interpret）+ `provides.scientificProfiles`。
+- **`core/shared-backend/pack-scientific-profiles.js`**：只读有界接线（≤256KB、路径限 packRoot、分段 fail-closed、多包按 packId 稳定覆盖 + warning）。
+- **compare**：`result-scientific-compare.js` 改 profile 驱动（删除 volcano/DEG 领域字面量）；`result-compare-service.js` 以 profile 判定是否执行科学比较，删除四 artifact 硬编码。
+- **rerun/cohort**：`result-scientific-rerun.js` 导出 `loadRerunProfile()`；edit tool / changeset projections / cohort replay 的 root artifact、child tool、primary artifact、input id 全部改读 profile。
+- **planner**：`scientific-task-planner.js` 改有界规则求值（rolesAll/questionTypes/methodCategories/originalRequest/any），规则来自 pack。
+- **selection**：`result-selection-tools.js` 下游消费者注册表改 pack；新增消费者不再改核心执行链。
+- **learning**：`HEAVY_TOOLS` 改 pack `heavyTools`（保留 getter 作为治理审计面）。
+- **interpret**：标准分析类型词表改 pack `interpret.standardAnalysisTypes`；system/marker prompt 去领域词。
+- **文案**：tool-defs（run_tool/read_page/read image/generate_methods）、query/context-edit/user-facts 去示例词；py-pool 去掉 scanpy 预导入与专用数据集缓存。
+- **qualification**：`volcano_ai_presentation_edit` → `classification_plot_ai_presentation_edit`；历史 acceptance JSON 保持原样（仍按 historical/non-qualifying 分类）。
+
+### 10.3 验证
+
+- 域中性：**103→48 处 / 60→27 键**，0 新增/0 恶化（S5 清除 55 处、33 键）。
+- 定向：block234-scientific-profiles 6/6、compare 7/7、selection 15/15、approval 14/14、planner 4/4、replay 11/11、changeset 36/36、compare service 19/19、rerun 5/5；Jev 建议追加 56/56。
+- `test:changed`：**1039 项 / 1027 pass / 0 fail / 12 skip** + 前端 6 文件 26/26。
+- `npm run closeout` 十三门 PASS（report 级 `skills:check` OK）。
+- Jev 决策建议：`test:suggest` 建议的 6 个邻域测试已追加并全绿；`doc:suggest` 零台账建议（如实记录）。
+
+### 10.4 边界
+
+- 无包时 scientific compare/rerun/planner/selection/heavy/interpret 标准分支一律诚实降级，属「领域能力随包交付」，不是功能回退。
+- `agent-tool-policy.js` 的 `.h5ad` 科学源扩展与 `capability-bundles.js` 的 `r-wgcna` 运行时包 ID 未下沉：前者是安全策略，后者是带哈希的下载契约，转 S6 兼容白名单裁决。
+- 剩余 48 处 = **S6 前端/桌面 37 处**（office-file-preview/copilotContext/welcome/core-utils/shared-copilot/types/file-recognition）+ **兼容 11 处**（permissions/guest 4、modality 1、db schema 2、tool-policy 1、capability-bundles 3）。
+- 下一阶段=S6（前端领域文案/类型收敛 + 兼容白名单裁决）。G0 开发期常态 · 不外推 packaged/Provider/GA。

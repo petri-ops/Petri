@@ -8,6 +8,13 @@ import { createHash } from 'node:crypto';
 
 const require = createRequire(import.meta.url);
 
+// Pack-declared rerun admission (BLOCK-234 S5); injected so this leg does not
+// depend on an installed domain pack.
+const RERUN_PROFILE = {
+  rootArtifactId: 'deg_table',
+  directChildPrimaryArtifacts: { 'go-kegg': 'go_bp_results', 'volcano-plot': 'volcano' },
+};
+
 // BLOCK-49 加映清债 —— 统一临时 DB 自举（存量：单跑/全量缺 projects 表）
 //（PETRI_DB_PATH 须在 require db.js 前生效；与 agent-tool-registry.test 同一修法）
 {
@@ -253,6 +260,7 @@ test('P6 projects exact current GO and volcano children and rejects ambiguous di
       sourceRevision,
       repository: { listCurrentRevisions: () => revisions },
       getToolJob: (toolJobId) => jobs.get(toolJobId) || null,
+      rerunProfile: RERUN_PROFILE,
     })
   );
 

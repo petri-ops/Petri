@@ -13,6 +13,7 @@ const { buildAuthoritativeWorkflowGraph } = require('../../shared-backend/result
 const { bindProjectRepository } = require('../../shared-backend/git-repository-binding');
 const { verifyRevisionSourceMaterial } = require('../../shared-backend/result-revision-source');
 const { ensureChainRevisions } = require('../../shared-backend/result-changeset-service');
+const { loadScientificProfiles } = require('../../shared-backend/pack-scientific-profiles');
 
 const MAX_DOWNSTREAM_ENTITY_IDS = 20_000;
 const SAFE_SELECTION_ID = /^sel_[A-Za-z0-9_-]{1,160}$/;
@@ -313,11 +314,15 @@ async function tool_result_enrichment_from_revision(args, ctx, dependencies = {}
   if (!species || !geneIdType || !analysisType || padjCutoff == null || lfcCutoff == null) {
     return fail('enrichment_parameters_invalid', 'GO/KEGG 参数不在插件声明的允许范围内');
   }
+  const consumers = selectionConsumers(dependencies);
+  const consumer = Object.values(consumers).find((item) => item.deriveFromRevision);
+  if (!consumer) return fail('enrichment_consumer_missing', '未安装声明 revision 派生契约的领域包');
+  const derive = consumer.deriveFromRevision;
 
   const sqlite = dependencies.sqlite || dbMod.getDatabase();
   const repository = dependencies.repository || createResultStudioRepository(sqlite);
   const revision = repository.getRevision(revisionId);
-  if (!revision || revision.projectId !== projectId || revision.artifactId !== 'deg_table') {
+  if (!revision || revision.projectId !== projectId || revision.artifactId !== derive.sourceArtifactId) {
     return fail('deg_revision_not_found', '当前项目没有可用于富集的正式 DEG 表版本');
   }
   const currentRevision = repository.getCurrentRevision(revision.artifactFamilyId, projectId);
@@ -354,10 +359,12 @@ async function tool_result_enrichment_from_revision(args, ctx, dependencies = {}
     ? dependencies.getPluginManifest(sourceJob.tool_id || sourceJob.toolId)
     : pluginLoader.getPluginManifest(sourceJob.tool_id || sourceJob.toolId);
   const descriptor = sourcePlugin?.resultStudio;
-  const artifactDescriptor = descriptor?.artifacts?.filter((artifact) => artifact && artifact.id === 'deg_table') || [];
-  const mapping = descriptor?.interactionMappings?.filter((item) => item && item.artifactId === 'deg_table') || [];
-  if (!descriptor || !Array.isArray(descriptor.actions) || !descriptor.actions.includes('derive_enrichment_input')
-      || artifactDescriptor.length !== 1 || mapping.length !== 1 || mapping[0].idField !== 'gene') {
+  const artifactDescriptor = descriptor?.artifacts?.filter((artifact) => artifact && artifact.id === derive.sourceArtifactId) || [];
+  const mapping = descriptor?.interactionMappings?.filter((item) => item && item.artifactId === derive.sourceArtifactId) || [];
+  const requiredSourceActions = consumer.requiredSourceActions || [];
+  if (!descriptor || !Array.isArray(descriptor.actions)
+      || requiredSourceActions.some((actionId) => !descriptor.actions.includes(actionId))
+      || artifactDescriptor.length !== 1 || mapping.length !== 1 || mapping[0].idField !== derive.idField) {
     return fail('deg_enrichment_action_not_declared', '来源插件没有声明稳定 gene_id 的富集派生契约');
   }
   const sourceVerification = verifyImmutableRevision({
@@ -368,9 +375,10 @@ async function tool_result_enrichment_from_revision(args, ctx, dependencies = {}
   const runTool = dependencies.runTool || require('./learning').tool_run_tool;
   const executed = await runTool({
     op: 'run',
-    toolId: 'go-kegg',
+    toolId: consumer.toolId,
     params: {
-      deg_table: degPath,
+      [consumer.fileInput]: degPath,
+      ...consumer.defaultParams,
       species,
       gene_id_type: geneIdType,
       analysis_type: analysisType,
@@ -405,7 +413,7 @@ async function tool_result_enrichment_from_revision(args, ctx, dependencies = {}
     enrichmentAction: {
       sourceRevisionId: revision.revisionId,
       sourceArtifactId: revision.artifactId,
-      geneIdField: 'gene',
+      geneIdField: derive.idField,
       parameters: { species, geneIdType, analysisType, padjCutoff, lfcCutoff },
       executorTruth: 'run_tool → tool_job → artifact truth',
       workflowGraph: workflowGraph.ok
@@ -416,41 +424,28 @@ async function tool_result_enrichment_from_revision(args, ctx, dependencies = {}
   };
 }
 
-// BLOCK-143（BIO-3 P2）——selection 下游消费者注册表：action 门从 go_kegg 硬编码
-// 泛化为注册表（BIO-3 出口判据「selection 下游 ≥2 个工具」）。两个 gene-list 消费者
-// 共享同一条物化与 lineage 携带链（gene-list.csv + resultStudioInputLineage），
-// 仅 toolId/params 形状不同；新增消费者=注册表加一行，不改执行链。
-// gsea 运行时激活随 BIO-4 Mac 对账（本机 dormant：clusterProfiler 等 R 重依赖未装）。
-const SELECTION_DOWNSTREAM_CONSUMERS = {
-  go_kegg: {
-    toolId: 'go-kegg',
-    entityType: 'gene',
-    entityUnsupportedMessage: 'GO/KEGG 目前只接受 gene 选择',
-    buildParams: ({ geneFile, args }) => ({
-      deg_table: geneFile,
-      species: args?.species || 'human',
-      gene_id_type: args?.geneIdType || 'auto',
-      analysis_type: args?.analysisType || 'all',
-    }),
-  },
-  gsea: {
-    toolId: 'gsea',
-    entityType: 'gene',
-    entityUnsupportedMessage: 'GSEA 目前只接受 gene 选择',
-    buildParams: ({ geneFile, args }) => ({
-      deg_table: geneFile,
-      species: args?.species || 'human',
-      gene_id_type: args?.geneIdType || 'auto',
-      gene_set: args?.geneSet || 'all',
-      min_size: args?.minSize ?? 15,
-      max_size: args?.maxSize ?? 500,
-    }),
-  },
-};
+// BLOCK-234 S5 — selection downstream consumers are pack-declared policy:
+// action id → { toolId, entityType, fileInput, defaultParams, argMappings }.
+// Core keeps the shared materialization/lineage chain; adding a consumer is a
+// pack profile row, not a core edit.
+function selectionConsumers(dependencies = {}) {
+  if (dependencies.selectionConsumers) return dependencies.selectionConsumers;
+  return loadScientificProfiles().selectionConsumers;
+}
+
+function buildConsumerParams(consumer, { geneFile, args }) {
+  const params = { [consumer.fileInput]: geneFile, ...(consumer.defaultParams || {}) };
+  for (const [argKey, paramKey] of Object.entries(consumer.argMappings || {})) {
+    const value = args?.[argKey];
+    if (value !== undefined && value !== null && value !== '') params[paramKey] = value;
+  }
+  return params;
+}
 
 async function tool_result_selection_run(args, ctx, dependencies = {}) {
   const selectionId = String(args?.selectionId || '').trim();
-  const action = String(args?.action || 'go_kegg').trim();
+  const consumers = selectionConsumers(dependencies);
+  const action = String(args?.action || Object.keys(consumers)[0] || '').trim();
   const projectId = String(ctx?.projectId || '').trim();
   if (!ctx?.userId) return fail('unauthorized', '未授权');
   if (!selectionId || !projectId) return fail('selection_and_project_required', '需要 selectionId 和当前 projectId');
@@ -459,9 +454,9 @@ async function tool_result_selection_run(args, ctx, dependencies = {}) {
   // 泛化为注册表（BIO-3 出口判据「selection 下游 ≥2 个工具」）。两个 gene-list
   // 消费者共享同一条物化与 lineage 携带链（gene-list.csv + resultStudioInputLineage），
   // 仅 toolId/params 形状不同；新增消费者=注册表加一行，不改执行链。
-  const consumer = SELECTION_DOWNSTREAM_CONSUMERS[action];
+  const consumer = consumers[action];
   if (!consumer) {
-    return fail('selection_action_unsupported', `当前支持的下游动作：${Object.keys(SELECTION_DOWNSTREAM_CONSUMERS).join('、')}`);
+    return fail('selection_action_unsupported', `当前支持的下游动作：${Object.keys(consumers).join('、')}`);
   }
 
   const sqlite = dependencies.sqlite || dbMod.getDatabase();
@@ -470,7 +465,9 @@ async function tool_result_selection_run(args, ctx, dependencies = {}) {
   if (!selection) return fail('selection_not_found', '没有找到该 SelectionContext');
   if (selection.projectId !== projectId) return fail('selection_project_mismatch', '选择不属于当前项目');
   if (selection.displayState?.durable === false) return fail('selection_not_durable', '该选择没有稳定实体映射');
-  if (selection.entityType !== consumer.entityType) return fail('selection_entity_unsupported', consumer.entityUnsupportedMessage);
+  if (selection.entityType !== consumer.entityType) {
+    return fail('selection_entity_unsupported', `${consumer.label || consumer.toolId} 目前只接受 ${consumer.entityType} 选择`);
+  }
 
   const revision = selection.revisionId ? repository.getRevision(selection.revisionId) : null;
   if (!revision || revision.projectId !== projectId || revision.artifactId !== selection.artifactId) {
@@ -508,7 +505,9 @@ async function tool_result_selection_run(args, ctx, dependencies = {}) {
     item.id === revision.artifactId || item.filename === path.basename(revision.outputPath));
   const mapping = descriptor?.interactionMappings?.find((item) => item.artifactId === artifactDescriptor?.id);
   const idField = mapping?.idField || mapping?.rowIdField;
-  if (!idField || !Array.isArray(descriptor?.actions) || !descriptor.actions.includes('derive_enrichment_input')) {
+  const requiredSourceActions = consumer.requiredSourceActions || [];
+  if (!idField || !Array.isArray(descriptor?.actions)
+      || requiredSourceActions.some((actionId) => !descriptor.actions.includes(actionId))) {
     return fail('selection_action_not_declared', '来源插件没有声明稳定 gene 映射或富集派生动作');
   }
   const sourceVerification = verifyImmutableRevision({
@@ -663,7 +662,7 @@ async function tool_result_selection_run(args, ctx, dependencies = {}) {
   const executed = await runTool({
     op: 'run',
     toolId: consumer.toolId,
-    params: consumer.buildParams({ geneFile, args }),
+    params: buildConsumerParams(consumer, { geneFile, args }),
   }, { ...ctx, resultStudioInputLineage });
 
   // Once the real downstream Job is terminal, snapshot the graph projected

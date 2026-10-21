@@ -16,7 +16,7 @@ const { bindProjectRepository } = require('../../shared-backend/git-repository-b
 const { projectRevisionSource } = require('../../shared-backend/result-revision-source');
 const { buildAuthoritativeWorkflowGraph } = require('../../shared-backend/result-workflow-graph');
 const {
-  DEG_DIRECT_CHILD_PRIMARY_ARTIFACTS = Object.freeze({}),
+  loadRerunProfile,
 } = require('../../shared-backend/result-scientific-rerun');
 
 function scientificEditClass(editClass) {
@@ -99,7 +99,7 @@ function persistAuthoritativeWorkflowGraph(repository, graph) {
  * files, or lineage.  Unsupported shapes remain blocked until a later graph
  * executor can reproduce every edge without inference.
  */
-function projectDirectEnrichmentSubgraph({ graph, intent, sourceRevision, repository, getToolJob }) {
+function projectDirectEnrichmentSubgraph({ graph, intent, sourceRevision, repository, getToolJob, rerunProfile = null }) {
   const workflow = graph && graph.graph;
   if (!workflow || !intent || !sourceRevision || !repository || typeof getToolJob !== 'function') {
     return { ok: false, error: 'workflow_subgraph_context_missing', message: '权威工作流子图缺少必要的持久事实。' };
@@ -128,11 +128,15 @@ function projectDirectEnrichmentSubgraph({ graph, intent, sourceRevision, reposi
       },
     };
   }
-  if (sourceRevision.artifactId !== 'deg_table') {
-    return { ok: false, error: 'workflow_subgraph_unsupported', message: '当前只支持从正式 DEG 表向已准入的直接下游节点重跑。' };
+  const { rootArtifactId, directChildPrimaryArtifacts } = rerunProfile || loadRerunProfile();
+  if (!rootArtifactId || Object.keys(directChildPrimaryArtifacts).length === 0) {
+    return { ok: false, error: 'workflow_subgraph_unsupported', message: '未安装声明直接下游重跑契约的领域包。' };
   }
-  if (children.length > Object.keys(DEG_DIRECT_CHILD_PRIMARY_ARTIFACTS).length) {
-    return { ok: false, error: 'workflow_subgraph_unsupported', message: '受影响子图超出已准入的直接 DEG 下游集合。' };
+  if (sourceRevision.artifactId !== rootArtifactId) {
+    return { ok: false, error: 'workflow_subgraph_unsupported', message: '当前只支持从正式根 Artifact 向已准入的直接下游节点重跑。' };
+  }
+  if (children.length > Object.keys(directChildPrimaryArtifacts).length) {
+    return { ok: false, error: 'workflow_subgraph_unsupported', message: '受影响子图超出已准入的直接下游集合。' };
   }
   if (typeof repository.listCurrentRevisions !== 'function') {
     return { ok: false, error: 'workflow_subgraph_context_missing', message: '当前 Revision 真值不可用，不能投影下游重跑。' };
@@ -154,7 +158,7 @@ function projectDirectEnrichmentSubgraph({ graph, intent, sourceRevision, reposi
     const childNodes = (workflow.nodes || []).filter((node) => node && node.id === childNodeId);
     const childNode = childNodes.length === 1 ? childNodes[0] : null;
     const primaryArtifactId = childNode
-      ? DEG_DIRECT_CHILD_PRIMARY_ARTIFACTS[childNode.toolId]
+      ? directChildPrimaryArtifacts[childNode.toolId]
       : null;
     const childJob = childNode && getToolJob(childNode.toolJobId);
     const childJobToolId = String(childJob?.tool_id || childJob?.toolId || '');
@@ -178,7 +182,7 @@ function projectDirectEnrichmentSubgraph({ graph, intent, sourceRevision, reposi
       return { ok: false, error: 'workflow_subgraph_unsupported', message: '下游 Job 必须由唯一的直接 DEG Artifact 边驱动。' };
     }
     const edge = edges[0];
-    if (edge.kind !== 'artifact' || edge.inputId !== 'deg_table'
+    if (edge.kind !== 'artifact' || edge.inputId !== rootArtifactId
         || edge.selectionId != null || edge.selectionHash != null
         || edge.sourceToolJobId !== sourceRevision.toolJobId
         || edge.sourceRevisionId !== sourceRevision.revisionId
@@ -199,7 +203,7 @@ function projectDirectEnrichmentSubgraph({ graph, intent, sourceRevision, reposi
     projectedChildren.push({
       nodeId: childNode.id,
       toolId: childNode.toolId,
-      inputId: 'deg_table',
+      inputId: rootArtifactId,
       edgeKind: 'artifact',
       sourceToolJobId: sourceRevision.toolJobId,
       sourceRevisionId: sourceRevision.revisionId,

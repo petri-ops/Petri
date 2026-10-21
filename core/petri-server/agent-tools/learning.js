@@ -8,6 +8,7 @@ const { withSessionExecutionTarget } = require('../helpers/remote-execution/sess
 const { runTaskConfirmationHooks } = require('../../shared-backend/task-confirmation-hooks');
 const { createResultStudioRepository } = require('../../shared-backend/result-studio-repository');
 const { ensureChainRevisions } = require('../../shared-backend/result-changeset-service');
+const { loadScientificProfiles } = require('../../shared-backend/pack-scientific-profiles');
 const sqlite = dbMod.getDatabase();
 // SUGGEST_NEXT_STEPS_BRIDGE_v1 marker
 
@@ -198,7 +199,7 @@ async function tool_suggest_next_steps(args, ctx) {
       }
       if (prereqDomains.size >= 2) {
         score += 25;
-        reasons.push('跨领域：前置已跨组学学完');
+        reasons.push('跨领域：前置已跨领域学完');
       }
     }
     // Domain-saturation nudge — if user has saturated their dominant domain,
@@ -619,21 +620,11 @@ function _getRegistry() {
 
 // TOOL_JOB_APPROVAL_v1（阶段2 Task3）：重操作白名单 + 确认超时。
 // 命中白名单的 toolId，run_tool 跑前先落 tool_jobs 待批准，前端确认卡 ack 后才续跑。
-// 白名单标准：多步骤全流程 / 耗时较长 / 不可轻易重跑的工具。单图小工具（volcano-plot 等）不进。
-// BLOCK-150 ⑤ 死链清理：BLOCK-83 P4 生信包迁出核心后，ml-feature-select /
-// ml-classifier / rsf-survival / lasso-cox / consensus-cluster / ml-scvi-annotate /
-// mo-mofa / mo-snf / maftools-mutation 九个 id 已无载体（不在 petri-pack-bio
-// manifest），且 unknown_tool 检查先于 heavy 门（下方注册表校验在前）——死成员
-// 不可达，纯误导性条目，删除。守卫=test/agent-approval.test.mjs 死链锚（成员
-// 必须存在于 pack manifest ∪ 中性夹具 manifest）。
-const HEAVY_TOOLS = new Set([
-  // BLOCK-83 P4：中性夹具插件也走 heavy 确认门（核心机制测试的载体）。
-  'sample-metrics',
-  'deseq2',
-  'wgcna',
-  'seurat-standard',
-  'cellchat',
-]);
+// BLOCK-234 S5：白名单是领域包策略（provides.scientificProfiles → heavyTools）；
+// 无包 → 无重工具。单图小工具不进白名单。
+function heavyToolIds() {
+  return new Set(loadScientificProfiles().heavyTools);
+}
 const APPROVAL_TIMEOUT_MS = 5 * 60 * 1000; // 5 分钟内未确认自动取消
 
 function shouldAutoExecuteLocalAnalysis(ctx) {
@@ -955,7 +946,7 @@ async function tool_run_tool(args, ctx) {
       });
       const persistedToolId = scopedJob && (scopedJob.tool_id || scopedJob.toolId);
       const capabilityMatches = scopedJob
-        && HEAVY_TOOLS.has(persistedToolId)
+        && heavyToolIds().has(persistedToolId)
         && persistedToolId === toolId
         && (!scopedJob.ack_expires_at || Number(scopedJob.ack_expires_at) > Date.now())
         && sameJsonValue(scopedJob.params || {}, params);
@@ -1032,7 +1023,7 @@ async function tool_run_tool(args, ctx) {
     // scientific computation can run without a second UI confirmation; its
     // ToolResult/Job/Artifact facts remain fully audited. The legacy approval
     // path stays available for callers that do not carry this delegation.
-    if (HEAVY_TOOLS.has(toolId)) {
+    if (heavyToolIds().has(toolId)) {
       if (shouldAutoExecuteLocalAnalysis(ctx) && !args.ackToken) {
         const executed = registerChainPreviewAfterRun(await runToolExecutor(ctx)(toolId, params, userId, null, trustedProjectId(ctx), null, {
           conversationId: trustedConversationId(ctx),
@@ -1250,12 +1241,16 @@ async function _executeRunTool(toolId, params, userId, ackToken, projectId, scie
 module.exports = {
   tool_run_tool,
   shouldAutoExecuteLocalAnalysis,
-  // BLOCK-150 ⑤ — 治理审计面：死链守卫测试（agent-approval.test.mjs）据其校验
-  // 白名单成员真实性；非执行 API，勿在工具链消费。
-  HEAVY_TOOLS,
   tool_generate_methods,
   tool_suggest_next_steps,
   tool_verify_understanding,
   tool_suggest_review,
   tool_record_learning_signal,
 };
+
+// BLOCK-150 ⑤ — 治理审计面：死链守卫测试（agent-approval.test.mjs）据其校验
+// 白名单成员真实性；非执行 API，勿在工具链消费。BLOCK-234 S5 起为包策略快照。
+Object.defineProperty(module.exports, 'HEAVY_TOOLS', {
+  enumerable: true,
+  get: () => heavyToolIds(),
+});

@@ -6,7 +6,57 @@ import { join } from 'node:path';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { compareScientificTables } = require('../core/shared-backend/result-scientific-compare');
+const { compareScientificTables: compareWithProfiles } = require('../core/shared-backend/result-scientific-compare');
+
+// The admitted schemas are pack data (BLOCK-234 S5). Unit legs inject the
+// profile explicitly so they stay independent of the sibling pack checkout.
+const PROFILES = {
+  deg_table: {
+    artifactIds: ['deg_table'],
+    kind: 'differential_expression',
+    mode: 'threshold',
+    idColumns: ['gene', 'gene_id'],
+    effectColumns: ['log2FoldChange', 'log2FC'],
+    significanceColumns: ['padj', 'p_adjust'],
+    thresholdParameters: {
+      significance: ['padj_cutoff', 'padj_threshold'],
+      effect: ['lfc_cutoff', 'lfc_threshold'],
+    },
+    reasons: {
+      thresholdsUnavailable: 'scientific_thresholds_unavailable',
+      schemaInvalid: 'deg_schema_or_stable_gene_id_invalid',
+    },
+  },
+  classified_table: {
+    artifactIds: ['classified_table'],
+    kind: 'volcano_classification',
+    mode: 'status',
+    idColumns: ['gene', 'gene_id'],
+    statusColumns: ['sig'],
+    statuses: { positive: 'up', negative: 'down', neutral: 'ns' },
+    reasons: { schemaInvalid: 'volcano_schema_or_stable_gene_id_invalid' },
+  },
+  go_bp_results: {
+    artifactIds: ['go_bp_results', 'kegg_results'],
+    kind: 'functional_enrichment',
+    mode: 'ranked',
+    idColumns: ['ID', 'term_id'],
+    rankColumns: ['p.adjust', 'p_adjust', 'padj'],
+    directionColumns: ['direction', 'regulation'],
+    directionValues: ['up', 'down', 'mixed', 'unresolved', 'unavailable_without_signed_deg'],
+    unavailableDirectionValue: 'unavailable_without_signed_deg',
+    reasons: {
+      schemaInvalid: 'enrichment_schema_or_stable_term_id_invalid',
+      noDirectionColumn: 'enrichment_table_has_no_declared_direction_column',
+      directionUnavailable: 'enrichment_direction_unavailable_without_signed_deg',
+    },
+  },
+};
+PROFILES.kegg_results = PROFILES.go_bp_results;
+
+function compareScientificTables(input) {
+  return compareWithProfiles({ ...input, profiles: PROFILES });
+}
 
 function files(context, before, after) {
   const root = mkdtempSync(join(tmpdir(), 'petri-scientific-compare-'));

@@ -25,7 +25,7 @@ test('P7 producer requires two real Provider classes and all five task ids', () 
   const source = readFileSync(new URL('../scripts/g0-rs-p7-acceptance.mjs', import.meta.url), 'utf8');
   for (const task of [
     'deg_selection_to_enrichment',
-    'volcano_ai_presentation_edit',
+    'classification_plot_ai_presentation_edit',
     'heatmap_manual_then_ai_edit',
     'scientific_threshold_recompute',
     'historical_alternative_compare',

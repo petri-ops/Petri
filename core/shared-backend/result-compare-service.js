@@ -7,6 +7,7 @@ const { isPathContained } = require('./project-run-layout');
 const { stableStringify } = require('./canonical-json');
 const { buildResultEditCheckpoint } = require('./result-changeset-service');
 const { compareScientificTables } = require('./result-scientific-compare');
+const { loadScientificProfiles } = require('./pack-scientific-profiles');
 const { buildResultStudioTaskResourceSummary } = require('./result-studio-resource-summary');
 const { executeDurableRefTransaction } = require('./result-ref-transaction');
 const { removePrivatePathSync } = require('./result-studio-private-path');
@@ -276,6 +277,7 @@ function revisionParametersForComparison(revision, adapter, gitPathPrefix) {
 function compareResultChangeSet(input = {}, dependencies = {}) {
   const { repository, adapter } = dependencies;
   if (!repository || !adapter) throw new ResultCompareError('compare_dependencies_missing', 'Repository and Git adapter are required.');
+  const scientificProfiles = dependencies.scientificProfiles || loadScientificProfiles().comparisons;
   const changeSet = repository.getChangeSet(input.changeSetId);
   if (!changeSet || changeSet.projectId !== input.projectId) throw new ResultCompareError('change_set_not_found', 'ChangeSet was not found in the active project.');
   const revisions = repository.listRevisionsByChangeSet(changeSet.changeSetId);
@@ -325,6 +327,7 @@ function compareResultChangeSet(input = {}, dependencies = {}) {
       scientific: null,
     };
     if (kind === 'table' && parent) {
+      const scientificProfile = scientificProfiles[revision.artifactId] || null;
       try {
         const beforePath = resolveRevisionFile(input.workspaceRoot, parent);
         const afterPath = resolveRevisionFile(input.workspaceRoot, revision);
@@ -332,18 +335,19 @@ function compareResultChangeSet(input = {}, dependencies = {}) {
           beforePath,
           afterPath
         );
-        if (['deg_table', 'classified_table', 'go_bp_results', 'kegg_results'].includes(revision.artifactId)) {
+        if (scientificProfile) {
           entry.scientific = compareScientificTables({
             artifactId: revision.artifactId,
             beforePath,
             afterPath,
             beforeParameters: revisionParametersForComparison(parent, adapter, dependencies.gitPathPrefix),
             afterParameters: revisionParametersForComparison(revision, adapter, dependencies.gitPathPrefix),
+            profiles: scientificProfiles,
           });
         }
       } catch (error) {
         entry.table = { status: 'unavailable', reason: error.code || 'table_compare_failed' };
-        if (['deg_table', 'classified_table', 'go_bp_results', 'kegg_results'].includes(revision.artifactId)) {
+        if (scientificProfile) {
           entry.scientific = { status: 'unavailable', kind: 'unavailable', reason: error.code || 'scientific_compare_failed' };
         }
       }

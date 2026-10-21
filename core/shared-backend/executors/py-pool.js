@@ -1,7 +1,7 @@
 /**
  * Python Process Pool — warm embedded Python workers.
  *
- * Each worker is a persistent `python -u` session with scanpy/numpy/pandas
+ * Each worker is a persistent `python -u` session with numpy/pandas
  * pre-imported. Reads script paths from stdin.
  *
  * BLOCK-30 P1: salvaged from core/py-server/py-pool.js (git mv) when the
@@ -42,7 +42,6 @@ const PREIMPORT = [
   'import pandas as pd',
   'import matplotlib; matplotlib.use("Agg")',
   'import matplotlib.pyplot as plt',
-  'import scanpy as sc',
   'import json, os, sys',
 ];
 
@@ -139,7 +138,7 @@ for line in sys.stdin:
       // Report fatal early-stage failures (no __READY__ yet) so the main log
       // surfaces the actual Python error instead of repeating "exited (code=1)
       // restarting" indefinitely. Without this, an environment without
-      // numpy/scanpy crashes in <1s, drops stderr to /dev/null, and the user
+      // numpy/pandas crashes in <1s, drops stderr to /dev/null, and the user
       // sees only silent agent chat failures downstream.
       if (!this.ready) {
         logger.warn(`PyWorker ${this.id} startup stderr: ${text.trim()}`);
@@ -198,22 +197,12 @@ class PyPool {
 
   async execute(code, workDir) {
     const scriptPath = path.join(workDir, 'run.py');
-    const datasetCacheDir = path.join(_poolConfig().localDataDir, 'cache', 'datasets');
 
     const pyScript = `
 import os, sys, json
 os.chdir(${JSON.stringify(workDir)})
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-
-# 将 scanpy/squidpy 数据集缓存到本地 Petri 数据目录，避免每个会话重复下载。
-try:
-    import scanpy as _sc
-    _ds = ${JSON.stringify(datasetCacheDir)}
-    os.makedirs(_ds, exist_ok=True)
-    _sc.settings.datasetdir = _ds
-except Exception:
-    pass
 
 _plot_counter = [0]
 def _save_fig(fig=None):

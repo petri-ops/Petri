@@ -35,6 +35,32 @@ const req = createRequire(import.meta.url);
   // BLOCK-83 P4：registry 插件源指向中性夹具（sample-metrics 入 HEAVY_TOOLS，
   // dispatch 的 registeredTool 校验需要它可被发现）。
   process.env.PETRI_BUILT_IN_PLUGINS_DIR = pth.resolve(hereDir, 'fixtures', 'neutral-plugins');
+  // BLOCK-234 S5：重操作白名单改为包策略；为中性夹具安装一个只声明
+  // sample-metrics 的 profile pack，避免依赖同级生信包。
+  const packDataDir = fsx.mkdtempSync(pth.join(osx.tmpdir(), 'petri-sweep-pack-'));
+  const packRoot = pth.join(packDataDir, 'fixture-pack');
+  fsx.mkdirSync(pth.join(packDataDir, 'packs'), { recursive: true });
+  fsx.mkdirSync(packRoot, { recursive: true });
+  fsx.writeFileSync(pth.join(packRoot, 'pack.json'), JSON.stringify({
+    packId: 'fixture-pack',
+    provides: {
+      scientificProfiles: 'scientific-profiles.json',
+      agentWorkflowTemplates: 'workflow-templates.json',
+    },
+  }));
+  fsx.writeFileSync(pth.join(packRoot, 'scientific-profiles.json'), JSON.stringify({
+    version: 1,
+    heavyTools: ['sample-metrics'],
+  }));
+  fsx.copyFileSync(
+    pth.join(hereDir, 'fixtures', 'agent-workflow-templates.json'),
+    pth.join(packRoot, 'workflow-templates.json'),
+  );
+  fsx.writeFileSync(pth.join(packDataDir, 'packs', 'installed.json'), JSON.stringify([
+    { packId: 'fixture-pack', packRoot, enabled: true },
+  ]));
+  process.env.PETRI_LOCAL_DATA_DIR = packDataDir;
+  process.on('exit', () => { try { fsx.rmSync(packDataDir, { recursive: true, force: true }); } catch {} });
   process.on('exit', () => { try { fsx.rmSync(tempDbDir, { recursive: true, force: true }); } catch {} });
 }
 

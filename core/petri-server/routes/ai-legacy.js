@@ -10,6 +10,7 @@ const {
   lookupCellType,
   lookupCellTypeWithConfidence,
   isMarkerGuardEnabled,
+  isStandardAnalysisType,
   callDeepSeekSimple,
   buildInterpretPrompt,
 } = require('../helpers/interpret');
@@ -61,7 +62,7 @@ module.exports = function mountAiLegacy(app) {
     }
 
     if (!aiText) {
-      if (analysisType === 'scrna_standard' || analysisType === 'recluster') {
+      if (isStandardAnalysisType(analysisType)) {
         const {nCells, nGenes, nClusters} = summary;
         let fallback = '✓ 分析完成：' + (nCells || 0).toLocaleString() + ' 个细胞，' + (nGenes || 0).toLocaleString() + ' 个基因，识别出 ' + (nClusters || 0) + ' 个 cluster。';
         if (Object.keys(localResults).length > 0) {

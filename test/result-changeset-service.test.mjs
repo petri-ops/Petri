@@ -6,6 +6,13 @@ import { join } from 'node:path';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
+
+// Pack-declared rerun admission (BLOCK-234 S5); injected so these legs do not
+// depend on an installed domain pack.
+const RERUN_PROFILE = {
+  rootArtifactId: 'deg_table',
+  directChildPrimaryArtifacts: { 'go-kegg': 'go_bp_results', 'volcano-plot': 'volcano' },
+};
 const Database = require('better-sqlite3');
 const { bindProjectRepository } = require('../core/shared-backend/git-repository-binding');
 const { ensureResultStudioSchema } = require('../core/shared-backend/result-studio-schema');
@@ -1480,6 +1487,7 @@ test('P5/P6 reruns verified direct DEG → GO-BP and volcano subgraphs with cand
     },
   }, {
     repository: fx.repository, adapter: fx.adapter, authoritativeSubgraphTrusted: true, getToolJob: (id) => jobs.get(id) || null,
+    rerunProfile: RERUN_PROFILE,
     getResultStudioDescriptor: (toolId) => toolId === 'deseq2'
       ? deseqDescriptor()
       : toolId === 'go-kegg' ? goDescriptor() : null,
@@ -1576,6 +1584,7 @@ test('P5/P6 reruns verified direct DEG → GO-BP and volcano subgraphs with cand
     },
   }, {
     repository: fx.repository, adapter: fx.adapter, authoritativeSubgraphTrusted: true, getToolJob: (id) => jobs.get(id) || null,
+    rerunProfile: RERUN_PROFILE,
     getResultStudioDescriptor: (toolId) => toolId === 'deseq2'
       ? deseqDescriptor()
       : toolId === 'go-kegg' ? goDescriptor()

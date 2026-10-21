@@ -84,7 +84,7 @@ function contextView(envelope) {
   };
 }
 
-function bindCurrentSelectionAsVolcanoLabels(args, resolved, envelope) {
+function bindCurrentSelectionAsPlotLabels(args, resolved, envelope) {
   if (args?.useCurrentSelectionForLabels !== true) return { ok: true, patch: null };
   const selection = resolved?.persistedSelection;
   if (envelope?.artifact?.idField !== 'gene' || !selection
@@ -94,7 +94,7 @@ function bindCurrentSelectionAsVolcanoLabels(args, resolved, envelope) {
     return {
       ok: false,
       error: 'selection_label_binding_unavailable',
-      message: '当前选择不是这个正式基因结果的完整兼容选择，不能据此修改火山图标签。',
+      message: '当前选择不是这个正式基因结果的完整兼容选择，不能据此修改图标签。',
     };
   }
   const entityIds = [...new Set(selection.entityIds.map((value) => String(value || '').trim()).filter(Boolean))];
@@ -152,7 +152,7 @@ function createResultContextEditTools(options = {}) {
     // G0-RS-P4：手动控件与 AI 提议共用同一个归一化闸门。任何一方提出的参数
     // 都必须先通过受信 descriptor 的类型/范围/枚举校验，未声明参数一律拒绝。
     // 归一化在 planResultEdit 之前，因此两条来源进入的是同一条编辑链。
-    const selectionLabelBinding = bindCurrentSelectionAsVolcanoLabels(args, guarded.resolved, envelope);
+    const selectionLabelBinding = bindCurrentSelectionAsPlotLabels(args, guarded.resolved, envelope);
     if (!selectionLabelBinding.ok) {
       return { ok: false, status: 'blocked', error: selectionLabelBinding.error, message: selectionLabelBinding.message, context: contextView(envelope) };
     }

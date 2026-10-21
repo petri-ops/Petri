@@ -4,7 +4,13 @@
  * HRT-2: translate a normalized ScientificTaskSpec into bounded evidence and
  * method candidates. This module is deliberately side-effect free: it never
  * creates a tool_job and never executes a plugin.
+ *
+ * BLOCK-234 S5: which modules are recommended, and under which observed roles,
+ * is domain policy declared by the installed pack (`provides.scientificProfiles`
+ * → planner rules). Core only evaluates the bounded rule vocabulary.
  */
+
+const { loadScientificProfiles } = require('./pack-scientific-profiles');
 
 
 const STATUS = Object.freeze({
@@ -76,6 +82,25 @@ function candidateFor(manifest, reason, prerequisites, risk = []) {
   };
 }
 
+function conditionMatches(condition, context) {
+  if (!condition || typeof condition !== 'object') return false;
+  if (Array.isArray(condition.rolesAll) && condition.rolesAll.length > 0
+      && !condition.rolesAll.every((role) => context.roles.has(role))) return false;
+  if (Array.isArray(condition.questionTypes) && condition.questionTypes.length > 0
+      && !condition.questionTypes.includes(context.questionType)) return false;
+  if (Array.isArray(condition.methodCategories) && condition.methodCategories.length > 0
+      && !condition.methodCategories.includes(context.methodCategory)) return false;
+  if (condition.originalRequest === true && context.originalRequest !== true) return false;
+  return true;
+}
+
+function ruleMatches(when, context) {
+  if (!conditionMatches(when, context)) return false;
+  if (Array.isArray(when.any) && when.any.length > 0
+      && !when.any.some((group) => conditionMatches(group, context))) return false;
+  return true;
+}
+
 function evidenceFromIndex(index = {}) {
   return (Array.isArray(index.entries) ? index.entries : []).map((entry) => ({
     relativePath: entry.relativePath || null,
@@ -89,7 +114,7 @@ function evidenceFromIndex(index = {}) {
   }));
 }
 
-function planScientificTask({ taskSpec, evidence = [], plugins = [], runtime = null } = {}) {
+function planScientificTask({ taskSpec, evidence = [], plugins = [], runtime = null, plannerRules = null } = {}) {
   if (!taskSpec || typeof taskSpec !== 'object') throw new Error('taskSpec is required');
   const observed = evidence.map(normalizeEvidence);
   const mappedInputs = inputEvidence(taskSpec, observed);
@@ -137,7 +162,7 @@ function planScientificTask({ taskSpec, evidence = [], plugins = [], runtime = n
         coldataFile: metadata.relativePath,
         designColumn: contrastCol,
         ...(declaredFormula ? { designFormula: declaredFormula, designTerms: declaredTerms } : {}),
-        note: `DESeq2 coldata 来自 metadata 文件 '${metadata.relativePath}'，${declaredFormula ? `design 公式 '${declaredFormula}'（contrast 列 '${contrastCol}'，contrast_ref/contrast_treat 仍限两水平）` : `design 列 '${contrastCol}'`}。contrast_ref/contrast_treat 具体值必须来自 sample-metadata-validator 验证结果，禁止 Agent 自行推断。`,
+        note: `coldata 来自 metadata 文件 '${metadata.relativePath}'，${declaredFormula ? `design 公式 '${declaredFormula}'（contrast 列 '${contrastCol}'，contrast_ref/contrast_treat 仍限两水平）` : `design 列 '${contrastCol}'`}。contrast_ref/contrast_treat 具体值必须来自 sample-metadata-validator 验证结果，禁止 Agent 自行推断。`,
         requiredValidator: 'sample-metadata-validator',
       };
     }
@@ -150,18 +175,24 @@ function planScientificTask({ taskSpec, evidence = [], plugins = [], runtime = n
   }
 
   const candidates = [];
-  const add = (id, reason, prerequisites, risk) => {
-    const manifest = normalizedPlugins.find((item) => item.id === id);
-    if (manifest) candidates.push(candidateFor(manifest, reason, prerequisites, risk));
+  const rules = Array.isArray(plannerRules) ? plannerRules : loadScientificProfiles().plannerRules;
+  const roles = new Set(mappedInputs.map((item) => item.role).filter((role) => role && role !== 'unknown'));
+  const context = {
+    roles,
+    questionType: text(taskSpec.question?.questionType) || null,
+    methodCategory: text(taskSpec.method?.category) || null,
+    originalRequest: Boolean(text(taskSpec.originalRequest)),
   };
-  if (counts) add('sample-metadata-validator', '先验证 counts 与 metadata 的样本对齐、分组和重复数，避免把文件名当作实验设计。', ['counts', 'metadata', 'contrast'], ['分组列缺失时必须阻断']);
-  if (counts) add('expression-qc', 'counts 结构已被定位，先做有界质量检查，再决定是否进入差异分析。', ['counts'], ['QC 不会自动删除样本']);
-  if (counts && (taskSpec.question?.questionType === 'differential_expression' || taskSpec.method?.category === 'bulk RNA-seq' || taskSpec.originalRequest)) {
-    add('deseq2', '用户目标涉及处理组与对照组的差异，且 counts 是适合该模块的输入；正式运行前仍需确认 contrast。', ['validated_metadata', 'qc_summary', 'contrast'], ['结果显著性必须来自实际结果表，不能由规划器推断', 'contrast_ref/contrast_treat 来自 sample-metadata-validator，不来自 Agent 猜测']);
-  }
-  const downstream = normalizedPlugins.filter((item) => ['go-kegg', 'gsea', 'volcano-plot', 'pca-explorer'].includes(item.id));
-  for (const manifest of downstream) {
-    candidates.push(candidateFor(manifest, '作为差异结果或 QC artifact 的下游展示/功能解释模块，必须绑定已验证上游 Artifact。', ['verified_upstream_artifact'], ['不能直接消费聊天文本或未验证文件']));
+  const seen = new Set();
+  const ordered = rules
+    .map((rule, index) => ({ rule, index }))
+    .sort((left, right) => (left.rule.order - right.rule.order) || (left.index - right.index));
+  for (const { rule } of ordered) {
+    if (seen.has(rule.toolId) || !ruleMatches(rule.when, context)) continue;
+    const manifest = normalizedPlugins.find((item) => item.id === rule.toolId);
+    if (!manifest) continue;
+    seen.add(rule.toolId);
+    candidates.push(candidateFor(manifest, rule.rationale, rule.prerequisites, rule.risks));
   }
 
   let status = STATUS.READY;
@@ -187,12 +218,13 @@ function planScientificTask({ taskSpec, evidence = [], plugins = [], runtime = n
   };
 }
 
-function planScientificTaskFromIndex({ taskSpec, index, manifests = [], runtime = null } = {}) {
+function planScientificTaskFromIndex({ taskSpec, index, manifests = [], runtime = null, plannerRules = null } = {}) {
   return planScientificTask({
     taskSpec,
     evidence: evidenceFromIndex(index),
     plugins: manifests,
     runtime,
+    plannerRules,
   });
 }
 

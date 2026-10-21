@@ -285,6 +285,17 @@ const MULTI_FACTOR_EVIDENCE = [
   { relativePath: 'data/metadata.csv', sha256: 'b'.repeat(64), kind: 'csv', headers: ['sample', 'batch', 'condition'], rows: 6, columns: 3 },
 ];
 
+// Pack-declared planner rules (BLOCK-234 S5); injected so this leg does not
+// depend on an installed domain pack.
+const PLANNER_RULES = [{
+  toolId: 'deseq2',
+  when: { rolesAll: ['counts'], any: [{ questionTypes: ['differential_expression'] }] },
+  rationale: 'deg',
+  prerequisites: ['validated_metadata', 'qc_summary', 'contrast'],
+  risks: ['no inference'],
+  order: 30,
+}];
+
 // design 契约位置 = scientific-task-spec.js 既有词汇：groups + covariates
 function multiFactorSpec(overrides = {}) {
   return {
@@ -308,7 +319,12 @@ function multiFactorSpec(overrides = {}) {
 // ---------------------------------------------------------------------------
 
 test('D3① desktop 校验链：taskSpec.design 声明 covariates+groups 时 coldataBinding 必须携带 designFormula/designTerms，不得静默收窄为单列', (_t) => {
-  const result = planScientificTask({ taskSpec: multiFactorSpec(), evidence: MULTI_FACTOR_EVIDENCE, plugins: PLUGINS });
+  const result = planScientificTask({
+    taskSpec: multiFactorSpec(),
+    evidence: MULTI_FACTOR_EVIDENCE,
+    plugins: PLUGINS,
+    plannerRules: PLANNER_RULES,
+  });
   // 现状注记：计划整体 READY，design 意图被静默丢弃、coldataBinding 只绑关键词单列——误收窄发生得无声
   assert.equal(result.status, STATUS.READY);
   assert.equal(result.coldataBinding.designFormula, '~ batch + condition');

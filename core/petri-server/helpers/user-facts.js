@@ -303,7 +303,7 @@ async function extractFactsFromMessages(messages, existingFacts) {
     '你是用户档案抽取助手。从对话里提取关于用户的可复用事实，输出严格 JSON 数组。每条事实分类一个：' +
     'research_focus（研究方向，如"研究 PBMC 数据"）、preference（偏好，如"偏好 SCTransform"）、' +
     'entity（命名实体，如"cluster 5 = NK 细胞"）、task_state（任务进度，如"正在做 DEG 分析"）、' +
-    'learning_state（学习状态，如"已学完 single-cell module01-03"、"对 DESeq2 dispersion 还有点模糊"）、note（其他笔记）。\n\n' +
+    'learning_state（学习状态，如"已学完表达分析模块 01-03"、"对差异分析中的离散度还有点模糊"）、note（其他笔记）。\n\n' +
     '严格规则：\n' +
     '- 只抽取关于用户本人的、跨会话仍有用的事实\n' +
     '- 不要抽取临时性问答或一般性常识\n' +

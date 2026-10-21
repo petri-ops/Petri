@@ -14,3 +14,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-21T07:19:14.760Z -->
 最后更新：2026-10-21（**BLOCK-226 Q9 通知中心/免打扰 completed**）：标题栏铃铛+未读徽章+通知列表（回合终态/待审批留痕）；`userPrefs.quietHours`（空=关，跨午夜）只抑制系统 toast、应用内仍记录；面板向左展开避免右缘裁切。证据=前端 62/62 + Node 13/13 + 9223 离屏 live 11/11 + theme/types/code-size PASS。reopen=点击跳转/系统历史/审批穿透/声音/类型开关。plan=docs/block-226-q9-notification-center-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-21T08:50:30.659Z -->
+最后更新：2026-10-21（**BLOCK-227 Q9 K9 首启角色揭示 completed**）：欢迎页一次性浮层三卡（分析数据/写代码/整理知识）+ 显式「开始使用」，`userPrefs.roleRevealSeen` 落盘；读取失败不展示。证据=前端 7/7 + 配置基线 4/4 + 9223 离屏 live 7/7（亮/暗截图）+ theme/types/lint/code-size PASS。reopen=分步引导/数据导入/动画/重播/插画。plan=docs/block-227-q9-onboarding-role-reveal-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。

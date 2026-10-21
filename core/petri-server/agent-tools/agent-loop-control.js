@@ -88,7 +88,7 @@ function createResultEditCompletionGuard({ expectation, required = false, reques
           && result?.changeSet?.status === 'preview_ready') candidateCreated = true;
       if (name === 'result_enrichment_from_context'
           && result?.ok === true
-          && result?.toolId === 'go-kegg'
+          && typeof result?.toolId === 'string' && result.toolId.trim()
           && typeof result?.result?.toolJobId === 'string'
           && result.result.toolJobId.trim()) enrichmentJobStarted = true;
     },

@@ -4,13 +4,18 @@
  * G0-RS-P5 — bounded, schema-declared scientific comparison.
  *
  * This module never guesses a biological conclusion from an arbitrary CSV.
- * Only the formal artifact identities and schemas declared by the built-in
- * Result Studio contracts are interpreted.  Any missing schema, duplicate
- * stable identifier, malformed numeric value or oversized table becomes an
- * explicit `unavailable` result rather than a plausible-looking statistic.
+ * Only Artifact identities whose comparison profile is declared by an
+ * installed domain pack are interpreted. Any missing profile, duplicate stable
+ * identifier, malformed numeric value or oversized table becomes an explicit
+ * `unavailable` result rather than a plausible-looking statistic.
+ *
+ * BLOCK-234 S5: the admitted schemas and classification vocabularies are pack
+ * data (`provides.scientificProfiles`); this engine only implements the
+ * bounded modes `threshold`, `status` and `ranked`.
  */
 
 const fs = require('fs');
+const { loadScientificProfiles } = require('./pack-scientific-profiles');
 
 const SCIENTIFIC_COMPARE_VERSION = 1;
 const MAX_BYTES = 4 * 1024 * 1024;
@@ -71,6 +76,15 @@ function number(value) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function parameterNumber(params, aliases) {
+  for (const alias of aliases) {
+    const value = params?.[alias];
+    if (value == null) continue;
+    return number(value);
+  }
+  return null;
+}
+
 function stableRows(table, idColumn) {
   const rows = new Map();
   for (const row of table.rows) {
@@ -100,121 +114,122 @@ function setChanges(before, after) {
   };
 }
 
-function degThresholds(params) {
-  const padj = number(params?.padj_cutoff ?? params?.padj_threshold);
-  const lfc = number(params?.lfc_cutoff ?? params?.lfc_threshold);
+function schemaInvalidReason(profile) {
+  return profile.reasons?.schemaInvalid || 'scientific_schema_invalid';
+}
+
+function thresholdValues(params, profile) {
+  const padj = parameterNumber(params, profile.thresholdParameters.significance);
+  const lfc = parameterNumber(params, profile.thresholdParameters.effect);
   return padj != null && padj >= 0 && padj <= 1 && lfc != null && lfc >= 0
     ? { padjCutoff: padj, lfcCutoff: lfc }
     : null;
 }
 
-// BLOCK-150 ⑫: the gene/padj/lfc aliases below pin the admitted producer
-// schemas — domain knowledge deliberately lives at this registry edge only.
-// The compare rendering layer consuming these summaries stays domain-blind
-// (docs/artifact-plane-direction.md §2); do not leak the aliases into UI copy.
-function classifyDeg(table, thresholds) {
-  const geneColumn = findColumn(table.columns, ['gene', 'gene_id']);
-  const lfcColumn = findColumn(table.columns, ['log2FoldChange', 'log2FC']);
-  const padjColumn = findColumn(table.columns, ['padj', 'p_adjust']);
-  if (!geneColumn || !lfcColumn || !padjColumn) return null;
-  const rows = stableRows(table, geneColumn);
+function classifyThreshold(table, profile, thresholds) {
+  const idColumn = findColumn(table.columns, profile.idColumns);
+  const effectColumn = findColumn(table.columns, profile.effectColumns);
+  const significanceColumn = findColumn(table.columns, profile.significanceColumns);
+  if (!idColumn || !effectColumn || !significanceColumn) return null;
+  const rows = stableRows(table, idColumn);
   if (!rows) return null;
   const significant = new Set();
   let up = 0;
   let down = 0;
-  for (const [gene, row] of rows) {
-    const lfc = number(row[lfcColumn]);
-    const padj = number(row[padjColumn]);
-    if (lfc == null || padj == null || padj < 0 || padj > 1) return null;
-    // Match the admitted DESeq2/go-kegg producers exactly. Boundary values
-    // are not significant because both scripts use strict cutoffs.
-    if (padj < thresholds.padjCutoff && Math.abs(lfc) > thresholds.lfcCutoff) {
-      significant.add(gene);
-      if (lfc > 0) up += 1;
-      if (lfc < 0) down += 1;
+  for (const [id, row] of rows) {
+    const effect = number(row[effectColumn]);
+    const significance = number(row[significanceColumn]);
+    if (effect == null || significance == null || significance < 0 || significance > 1) return null;
+    // Match the admitted producers exactly: boundary values are not
+    // significant because their scripts use strict cutoffs.
+    if (significance < thresholds.padjCutoff && Math.abs(effect) > thresholds.lfcCutoff) {
+      significant.add(id);
+      if (effect > 0) up += 1;
+      if (effect < 0) down += 1;
     }
   }
   return { significant, summary: { significantCount: significant.size, upCount: up, downCount: down } };
 }
 
-function compareDeg(before, after, beforeParams, afterParams) {
-  const beforeThresholds = degThresholds(beforeParams);
-  const afterThresholds = degThresholds(afterParams);
-  if (!beforeThresholds || !afterThresholds) return unavailable('differential_expression', 'scientific_thresholds_unavailable');
-  const left = classifyDeg(before, beforeThresholds);
-  const right = classifyDeg(after, afterThresholds);
-  if (!left || !right) return unavailable('differential_expression', 'deg_schema_or_stable_gene_id_invalid');
+function compareThreshold(before, after, beforeParams, afterParams, profile) {
+  const beforeThresholds = thresholdValues(beforeParams, profile);
+  const afterThresholds = thresholdValues(afterParams, profile);
+  if (!beforeThresholds || !afterThresholds) {
+    return unavailable(profile.kind, profile.reasons?.thresholdsUnavailable || 'scientific_thresholds_unavailable');
+  }
+  const left = classifyThreshold(before, profile, beforeThresholds);
+  const right = classifyThreshold(after, profile, afterThresholds);
+  if (!left || !right) return unavailable(profile.kind, schemaInvalidReason(profile));
   return {
     scientificComparisonVersion: SCIENTIFIC_COMPARE_VERSION,
     status: 'available',
-    kind: 'differential_expression',
+    kind: profile.kind,
     thresholds: { before: beforeThresholds, after: afterThresholds },
     significantGenes: { before: left.summary, after: right.summary, membership: setChanges(left.significant, right.significant) },
   };
 }
 
-function classifyVolcano(table) {
-  const geneColumn = findColumn(table.columns, ['gene', 'gene_id']);
-  const statusColumn = findColumn(table.columns, ['sig']);
-  if (!geneColumn || !statusColumn) return null;
-  const rows = stableRows(table, geneColumn);
+function classifyStatus(table, profile) {
+  const idColumn = findColumn(table.columns, profile.idColumns);
+  const statusColumn = findColumn(table.columns, profile.statusColumns);
+  if (!idColumn || !statusColumn) return null;
+  const rows = stableRows(table, idColumn);
   if (!rows) return null;
   const significant = new Set();
   const summary = { upCount: 0, downCount: 0, nonSignificantCount: 0 };
-  for (const [gene, row] of rows) {
+  for (const [id, row] of rows) {
     const status = String(row[statusColumn] || '').trim().toLowerCase();
-    if (status === 'up') { summary.upCount += 1; significant.add(gene); }
-    else if (status === 'down') { summary.downCount += 1; significant.add(gene); }
-    else if (status === 'ns') summary.nonSignificantCount += 1;
+    if (status === profile.statuses.positive) { summary.upCount += 1; significant.add(id); }
+    else if (status === profile.statuses.negative) { summary.downCount += 1; significant.add(id); }
+    else if (status === profile.statuses.neutral) summary.nonSignificantCount += 1;
     else return null;
   }
   return { significant, summary: { ...summary, significantCount: significant.size } };
 }
 
-function compareVolcano(before, after) {
-  const left = classifyVolcano(before);
-  const right = classifyVolcano(after);
-  if (!left || !right) return unavailable('volcano_classification', 'volcano_schema_or_stable_gene_id_invalid');
+function compareStatus(before, after, profile) {
+  const left = classifyStatus(before, profile);
+  const right = classifyStatus(after, profile);
+  if (!left || !right) return unavailable(profile.kind, schemaInvalidReason(profile));
   return {
     scientificComparisonVersion: SCIENTIFIC_COMPARE_VERSION,
     status: 'available',
-    kind: 'volcano_classification',
+    kind: profile.kind,
     classifications: { before: left.summary, after: right.summary, membership: setChanges(left.significant, right.significant) },
   };
 }
 
-function rankTerms(table) {
-  const idColumn = findColumn(table.columns, ['ID', 'term_id']);
-  const adjustedColumn = findColumn(table.columns, ['p.adjust', 'p_adjust', 'padj']);
-  const directionColumn = findColumn(table.columns, ['direction', 'regulation']);
-  if (!idColumn || !adjustedColumn) return null;
+function rankTerms(table, profile) {
+  const idColumn = findColumn(table.columns, profile.idColumns);
+  const rankColumn = findColumn(table.columns, profile.rankColumns);
+  const directionColumn = profile.directionColumns ? findColumn(table.columns, profile.directionColumns) : null;
+  if (!idColumn || !rankColumn) return null;
   const rows = stableRows(table, idColumn);
   if (!rows) return null;
+  if (directionColumn && (!Array.isArray(profile.directionValues) || profile.directionValues.length === 0)) return null;
   const ranked = [];
   for (const [id, row] of rows) {
-    const adjusted = number(row[adjustedColumn]);
+    const adjusted = number(row[rankColumn]);
     if (adjusted == null || adjusted < 0 || adjusted > 1) return null;
     const direction = directionColumn ? String(row[directionColumn] || '').trim() : null;
-    if (directionColumn && !['up', 'down', 'mixed', 'unresolved', 'unavailable_without_signed_deg'].includes(direction)) {
-      return null;
-    }
+    if (directionColumn && !profile.directionValues.includes(direction)) return null;
     ranked.push({ id, adjusted, direction });
   }
   ranked.sort((left, right) => left.adjusted - right.adjusted || left.id.localeCompare(right.id));
   return {
     ranked,
     directionStatus: !directionColumn
-      ? { status: 'unavailable', reason: 'enrichment_table_has_no_declared_direction_column' }
-      : ranked.some((item) => item.direction === 'unavailable_without_signed_deg')
-        ? { status: 'unavailable', reason: 'enrichment_direction_unavailable_without_signed_deg' }
+      ? { status: 'unavailable', reason: profile.reasons?.noDirectionColumn || 'enrichment_direction_column_missing' }
+      : ranked.some((item) => item.direction === profile.unavailableDirectionValue)
+        ? { status: 'unavailable', reason: profile.reasons?.directionUnavailable || 'enrichment_direction_unavailable' }
         : { status: 'available' },
   };
 }
 
-function compareEnrichment(before, after) {
-  const leftResult = rankTerms(before);
-  const rightResult = rankTerms(after);
-  if (!leftResult || !rightResult) return unavailable('functional_enrichment', 'enrichment_schema_or_stable_term_id_invalid');
+function compareRanked(before, after, profile) {
+  const leftResult = rankTerms(before, profile);
+  const rightResult = rankTerms(after, profile);
+  if (!leftResult || !rightResult) return unavailable(profile.kind, schemaInvalidReason(profile));
   const left = leftResult.ranked;
   const right = rightResult.ranked;
   const leftIds = new Set(left.map((item) => item.id));
@@ -232,7 +247,7 @@ function compareEnrichment(before, after) {
   return {
     scientificComparisonVersion: SCIENTIFIC_COMPARE_VERSION,
     status: 'available',
-    kind: 'functional_enrichment',
+    kind: profile.kind,
     terms: {
       beforeCount: left.length,
       afterCount: right.length,
@@ -257,24 +272,26 @@ function compareEnrichment(before, after) {
   };
 }
 
-function compareScientificTables({ artifactId, beforePath, afterPath, beforeParameters = null, afterParameters = null } = {}) {
-  const type = artifactId === 'deg_table'
-    ? 'differential_expression'
-    : artifactId === 'classified_table'
-      ? 'volcano_classification'
-      : ['go_bp_results', 'kegg_results'].includes(artifactId)
-        ? 'functional_enrichment'
-        : 'unrecognized';
-  if (type === 'unrecognized') return unavailable(type, 'scientific_schema_not_declared_for_artifact');
+function compareScientificTables({
+  artifactId,
+  beforePath,
+  afterPath,
+  beforeParameters = null,
+  afterParameters = null,
+  profiles = null,
+} = {}) {
+  const comparisonProfiles = profiles || loadScientificProfiles().comparisons;
+  const profile = comparisonProfiles[artifactId];
+  if (!profile) return unavailable('unrecognized', 'scientific_schema_not_declared_for_artifact');
   let before;
   let after;
   try { before = readExactTable(beforePath); after = readExactTable(afterPath); }
-  catch { return unavailable(type, 'scientific_table_unreadable'); }
-  if (!before.ok) return unavailable(type, before.reason);
-  if (!after.ok) return unavailable(type, after.reason);
-  if (type === 'differential_expression') return compareDeg(before, after, beforeParameters, afterParameters);
-  if (type === 'volcano_classification') return compareVolcano(before, after);
-  return compareEnrichment(before, after);
+  catch { return unavailable(profile.kind, 'scientific_table_unreadable'); }
+  if (!before.ok) return unavailable(profile.kind, before.reason);
+  if (!after.ok) return unavailable(profile.kind, after.reason);
+  if (profile.mode === 'threshold') return compareThreshold(before, after, beforeParameters, afterParameters, profile);
+  if (profile.mode === 'status') return compareStatus(before, after, profile);
+  return compareRanked(before, after, profile);
 }
 
 module.exports = {

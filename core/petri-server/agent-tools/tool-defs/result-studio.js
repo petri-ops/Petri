@@ -9,7 +9,7 @@ module.exports = [
     "type": "function",
     "function": {
       "name": "generate_methods",
-      "description": "基于用户在 Petri 上执行过的分析自动生成论文 Methods 段落（学术风格，引用 Seurat / scanpy / Leiden / Harmony 等关键包及版本，报告 QC 阈值、分辨率等关键参数）。\n输入三选一：\n - analysisId：基于该分析及其父分析链生成；\n - planId：基于整个 plan 的所有步骤；\n - datasetId：基于该数据集的所有 done 分析。\n可选 language：zh / en / both（默认 zh）。\n用户说\"帮我写 Methods\" / \"导出方法部分\" / \"整理出方法学描述\"时使用。",
+      "description": "基于用户在 Petri 上执行过的分析自动生成论文 Methods 段落（学术风格，引用实际使用的关键包及版本，报告 QC 阈值、分辨率等关键参数）。\n输入三选一：\n - analysisId：基于该分析及其父分析链生成；\n - planId：基于整个 plan 的所有步骤；\n - datasetId：基于该数据集的所有 done 分析。\n可选 language：zh / en / both（默认 zh）。\n用户说\"帮我写 Methods\" / \"导出方法部分\" / \"整理出方法学描述\"时使用。",
       "parameters": {
         "type": "object",
         "properties": {

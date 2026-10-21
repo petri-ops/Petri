@@ -16,6 +16,7 @@ const {
   workflowGraphDigest,
 } = require('../result-workflow-graph');
 const { sha256 } = require('../result-changeset-service');
+const { loadScientificProfiles } = require('../pack-scientific-profiles');
 require('../result-revision-source');
 const {
   validateScientificReplayPackage,
@@ -381,7 +382,7 @@ function buildRevisionReplayProofs({ sourceRevisions, replayRevisions } = {}) {
   });
 }
 
-function projectReplayExecutionCohort({ sourceRevisions, selectedRevision, workflowGraph, getToolJob } = {}) {
+function projectReplayExecutionCohort({ sourceRevisions, selectedRevision, workflowGraph, getToolJob, cohortProfile = null } = {}) {
   if (!Array.isArray(sourceRevisions) || sourceRevisions.length === 0 || !selectedRevision
       || typeof getToolJob !== 'function') {
     fail('replay_source_cohort_missing', 'Replay source cohort is unavailable.');
@@ -467,25 +468,31 @@ function projectReplayExecutionCohort({ sourceRevisions, selectedRevision, workf
   if (workflowGraph.nodes.length !== 2 || workflowGraph.edges.length !== 1 || byJob.size !== 2) {
     fail('replay_workflow_graph_unsupported', 'Only one verified direct affected-subgraph edge can currently be replayed exactly.');
   }
+  const profile = cohortProfile || loadScientificProfiles().cohort;
+  if (!profile) {
+    fail('replay_workflow_profile_missing', 'No installed pack declares the supported scientific replay subgraph.');
+  }
+  const { rootArtifactId, rootToolId, childToolId, childArtifactId, childInputId } = profile;
   const edge = workflowGraph.edges[0];
   const childToolJobId = String(edge?.toNodeId || '').replace(/^job:/, '');
   const childNode = workflowGraph.nodes.find((node) => node.id === edge?.toNodeId);
   const rootRevisionMatches = sourceRevisions.filter((revision) => revision.revisionId === edge?.sourceRevisionId
     && revision.toolJobId === rootToolJobId && revision.artifactId === edge?.sourceArtifactId);
   const childRevisionMatches = sourceRevisions.filter((revision) => revision.toolJobId === childToolJobId
-    && revision.artifactId === 'go_bp_results');
-  if (edge?.fromNodeId !== rootNodeId || edge.kind !== 'artifact' || edge.inputId !== 'deg_table'
-      || edge.sourceToolJobId !== rootToolJobId || !childNode || childNode.toolId !== 'go-kegg'
+    && revision.artifactId === childArtifactId);
+  if (edge?.fromNodeId !== rootNodeId || edge.kind !== 'artifact' || edge.inputId !== childInputId
+      || edge.sourceArtifactId !== rootArtifactId
+      || edge.sourceToolJobId !== rootToolJobId || !childNode || childNode.toolId !== childToolId
       || rootRevisionMatches.length !== 1 || childRevisionMatches.length !== 1
       || !byJob.has(rootToolJobId) || !byJob.has(childToolJobId)) {
-    fail('replay_workflow_graph_unsupported', 'Persisted workflow graph is not the exact supported DEG to GO/KEGG subgraph.');
+    fail('replay_workflow_graph_unsupported', 'Persisted workflow graph is not the exact supported direct-child subgraph.');
   }
   const rootRevision = rootRevisionMatches[0];
   const childRevision = childRevisionMatches[0];
   if (groups[0].sourceToolJobId !== rootToolJobId || groups[1].sourceToolJobId !== childToolJobId) {
     fail('replay_workflow_graph_stale', 'Persisted workflow node order no longer follows the authoritative root.');
   }
-  if (!groups[0].toolId || groups[0].toolId !== 'deseq2' || groups[1].toolId !== 'go-kegg') {
+  if (!groups[0].toolId || groups[0].toolId !== rootToolId || groups[1].toolId !== childToolId) {
     fail('replay_workflow_tool_drift', 'Persisted workflow Jobs no longer match the supported affected subgraph.');
   }
   return {

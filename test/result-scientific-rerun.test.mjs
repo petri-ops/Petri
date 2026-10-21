@@ -4,7 +4,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const {
-  DEG_DIRECT_CHILD_PRIMARY_ARTIFACTS,
+  loadRerunProfile,
   propagateDegThresholds,
 } = require('../core/shared-backend/result-scientific-rerun');
 
@@ -12,12 +12,13 @@ function parameter(type = 'number', extra = {}) {
   return { type, ...extra };
 }
 
-test('P6 exposes only the admitted direct DEG child primary artifacts as a frozen mapping', () => {
-  assert.deepEqual(DEG_DIRECT_CHILD_PRIMARY_ARTIFACTS, {
-    'go-kegg': 'go_bp_results',
-    'volcano-plot': 'volcano',
+test('P6 rerun admission is pack-declared; no installed pack admits no child', () => {
+  const profile = loadRerunProfile();
+  assert.deepEqual(profile, {
+    rootArtifactId: null,
+    directChildPrimaryArtifacts: {},
   });
-  assert.equal(Object.isFrozen(DEG_DIRECT_CHILD_PRIMARY_ARTIFACTS), true);
+  assert.equal(Object.isFrozen(profile.directChildPrimaryArtifacts), true);
 });
 
 test('P5 propagates changed DEG thresholds into the exact GO/KEGG descriptor names', () => {

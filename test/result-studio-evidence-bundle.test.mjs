@@ -17,7 +17,7 @@ function ref(seed) {
   return evidence.stableHash({ seed });
 }
 
-function validFactPackage(taskId = 'volcano_ai_presentation_edit', seed = 'one') {
+function validFactPackage(taskId = 'classification_plot_ai_presentation_edit', seed = 'one') {
   const journeyId = `journey-${seed}`;
   const scopeDigest = ref(`scope-${seed}`);
   const contextRef = ref(`context-${seed}`);

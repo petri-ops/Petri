@@ -1,16 +1,32 @@
 'use strict';
 
+const { loadScientificProfiles } = require('./pack-scientific-profiles');
+
 const SCIENTIFIC_RERUN_VERSION = 1;
 
-const DEG_DIRECT_CHILD_PRIMARY_ARTIFACTS = Object.freeze({
-  'go-kegg': 'go_bp_results',
-  'volcano-plot': 'volcano',
+const EMPTY_RERUN_PROFILE = Object.freeze({
+  rootArtifactId: null,
+  directChildPrimaryArtifacts: Object.freeze({}),
 });
 
 const DEG_THRESHOLD_PARAMETER_ALIASES = Object.freeze({
   adjusted_p_value_cutoff: Object.freeze(['padj_cutoff', 'padj_threshold']),
   absolute_log2_fold_change_cutoff: Object.freeze(['lfc_cutoff', 'lfc_threshold', 'fc_threshold']),
 });
+
+/**
+ * BLOCK-234 S5 — which direct children may be replayed from which root
+ * Artifact is domain policy declared by the installed pack. No pack → no
+ * admitted child, so every rerun remains explicitly unsupported.
+ */
+function loadRerunProfile() {
+  const { rerun } = loadScientificProfiles();
+  if (!rerun) return EMPTY_RERUN_PROFILE;
+  return {
+    rootArtifactId: rerun.rootArtifactId,
+    directChildPrimaryArtifacts: Object.freeze({ ...rerun.directChildPrimaryArtifacts }),
+  };
+}
 
 function own(object, key) {
   return !!object && Object.prototype.hasOwnProperty.call(object, key);
@@ -92,7 +108,7 @@ function propagateDegThresholds({
 
 module.exports = {
   SCIENTIFIC_RERUN_VERSION,
-  DEG_DIRECT_CHILD_PRIMARY_ARTIFACTS,
   DEG_THRESHOLD_PARAMETER_ALIASES,
+  loadRerunProfile,
   propagateDegThresholds,
 };

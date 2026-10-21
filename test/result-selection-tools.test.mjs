@@ -82,6 +82,29 @@ function fixture(context, selectionOverrides = {}) {
         artifacts: [{ id: 'deg_table', filename: 'deg.csv', type: 'table' }],
         interactionMappings: [{ artifactId: 'deg_table', mode: 'table', entityType: 'gene', idField: 'gene' }],
       } }),
+      selectionConsumers: {
+        go_kegg: {
+          toolId: 'go-kegg',
+          label: 'GO/KEGG',
+          entityType: 'gene',
+          fileInput: 'deg_table',
+          defaultParams: { species: 'human', gene_id_type: 'auto', analysis_type: 'all' },
+          argMappings: { species: 'species', geneIdType: 'gene_id_type', analysisType: 'analysis_type' },
+          requiredSourceActions: ['derive_enrichment_input'],
+          deriveFromRevision: { sourceArtifactId: 'deg_table', idField: 'gene' },
+        },
+        gsea: {
+          toolId: 'gsea',
+          label: 'GSEA',
+          entityType: 'gene',
+          fileInput: 'deg_table',
+          defaultParams: { species: 'human', gene_id_type: 'auto', gene_set: 'all', min_size: 15, max_size: 500 },
+          argMappings: {
+            species: 'species', geneIdType: 'gene_id_type', geneSet: 'gene_set', minSize: 'min_size', maxSize: 'max_size',
+          },
+          requiredSourceActions: ['derive_enrichment_input'],
+        },
+      },
       verifyRevisionSourceMaterial: () => ({ reproduction: { inputDrift: [] } }),
       listProjectToolJobsForWorkflow: () => [],
       buildAuthoritativeWorkflowGraph: ({ projectId, sourceToolJobId, requiredToolJobIds }) => ({

@@ -8,7 +8,7 @@ const RESULT_STUDIO_PRODUCT_TRACE_VERSION = 3;
 
 const REQUIRED_TASKS = Object.freeze([
   'deg_selection_to_enrichment',
-  'volcano_ai_presentation_edit',
+  'classification_plot_ai_presentation_edit',
   'heatmap_manual_then_ai_edit',
   'scientific_threshold_recompute',
   'historical_alternative_compare',

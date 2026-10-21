@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-21（**BLOCK-234 P4-C S5 completed；包 active**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**active 工作包=BLOCK-234（P4-C 收尾 S2–S6）**。**刚完成=S5（result/RS 科学 profile 下沉 pack）**：pack 0.2.6 `scientific-profiles.json` + `provides.scientificProfiles`；compare 改 profile 驱动（行为等价），rerun/cohort 准入、planner 规则、selection 消费者、heavy 工具、interpret 标准类型全部读 pack；核心新 `pack-scientific-profiles.js` 有界接线，无包诚实降级。证据=block234 6/6 + 定向 compare/rerun/replay/changeset/selection/approval/planner 全绿 + test:changed 1039 项 0 红 + Jev 追加 56/56 + closeout 十三门；域中性 **103→48 处 / 60→27 键**。**下一阶段=S6**（前端/桌面 37 + 兼容 11 白名单裁决）。plan=`docs/block-234-qdomain-p4c-tail-plan.md` §10。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-21（**BLOCK-234 P4-C S4 completed；包 active**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**active 工作包=BLOCK-234（P4-C 收尾 S2–S6）**。**刚完成=S4（methods 模板/引文下沉 pack）**：pack 0.2.5 `methods/python-equivalents.json`（8 类模板 + 占位符）+ `methods/report-citations.json`（13 条）；`pack-methods.js` 新增有界装载/sanitize/getter，`methods-export.js` 改为模板渲染（无包诚实降级），报告引文由 pack 提供。证据=block234 4/4 + block220 13/13 + test:changed 426 项 0 红 + closeout 十三门；域中性 **143→103 处 / 68→60 键**。**下一阶段=S5 result/RS**（compare/rerun/selection/interpret/cohort）→ S6 前端与兼容白名单。plan=`docs/block-234-qdomain-p4c-tail-plan.md` §9。G0 开发期常态 · 不外推 packaged/Provider/GA。

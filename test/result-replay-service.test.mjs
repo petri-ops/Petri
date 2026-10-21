@@ -625,6 +625,13 @@ test('P5 multi-Job replay is rooted by the persisted DEG to GO graph even when t
     selectedRevision: revisions[2],
     workflowGraph: graph,
     getToolJob: (id) => jobs.get(id) || null,
+    cohortProfile: {
+      rootArtifactId: 'deg_table',
+      rootToolId: 'deseq2',
+      childToolId: 'go-kegg',
+      childArtifactId: 'go_bp_results',
+      childInputId: 'deg_table',
+    },
   });
   assert.equal(projected.rootRevision.revisionId, 'rev_deg');
   assert.deepEqual(projected.groups.map((group) => group.formalArtifactIds), [

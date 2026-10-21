@@ -12,6 +12,37 @@ const plugins = [
   { id: 'go-kegg', title: 'GO/KEGG 富集', category: 'bulk RNA-seq', version: '1.0.0', entryPoint: 'scripts/go-kegg.R', inputs: [{ id: 'deg_artifact' }] },
 ];
 
+// Pack-declared planner rules (BLOCK-234 S5); injected so this leg does not
+// depend on an installed domain pack.
+const PLANNER_RULES = [
+  { toolId: 'sample-metadata-validator', when: { rolesAll: ['counts'] }, rationale: 'metadata first', prerequisites: ['counts', 'metadata', 'contrast'], risks: ['grouping required'], order: 10 },
+  { toolId: 'expression-qc', when: { rolesAll: ['counts'] }, rationale: 'qc first', prerequisites: ['counts'], risks: ['no auto drop'], order: 20 },
+  {
+    toolId: 'deseq2',
+    when: {
+      rolesAll: ['counts'],
+      any: [
+        { questionTypes: ['differential_expression'] },
+        { methodCategories: ['bulk RNA-seq'] },
+        { originalRequest: true },
+      ],
+    },
+    rationale: 'deg',
+    prerequisites: ['validated_metadata', 'qc_summary', 'contrast'],
+    risks: ['no inference'],
+    order: 30,
+  },
+  { toolId: 'go-kegg', when: { rolesAll: ['counts'] }, rationale: 'downstream', prerequisites: ['verified_upstream_artifact'], risks: ['bind upstream'], order: 100 },
+];
+
+function plan(input) {
+  return planScientificTask({ ...input, plannerRules: PLANNER_RULES });
+}
+
+function planFromIndex(input) {
+  return planScientificTaskFromIndex({ ...input, plannerRules: PLANNER_RULES });
+}
+
 function spec(overrides = {}) {
   return {
     taskId: 'task_1', projectId: 'project_1', conversationId: 'conv_1',
@@ -32,7 +63,7 @@ const evidence = [
 ];
 
 test('HRT-2 produces evidence and candidates without creating a Job', () => {
-  const result = planScientificTask({ taskSpec: spec(), evidence, plugins });
+  const result = plan({ taskSpec: spec(), evidence, plugins });
   assert.equal(result.status, STATUS.READY);
   assert.equal(result.execution.createsToolJob, false);
   assert.equal(result.evidence[0].evidenceStatus, 'observed');
@@ -41,7 +72,7 @@ test('HRT-2 produces evidence and candidates without creating a Job', () => {
 });
 
 test('HRT-2 consumes the bounded harness index shape and preserves hashes', () => {
-  const result = planScientificTaskFromIndex({
+  const result = planFromIndex({
     taskSpec: spec(),
     index: {
       entries: [
@@ -57,7 +88,7 @@ test('HRT-2 consumes the bounded harness index shape and preserves hashes', () =
 });
 
 test('HRT-2 blocks ambiguous metadata even in trusted mode', () => {
-  const result = planScientificTask({
+  const result = plan({
     taskSpec: spec({ execution: { automationMode: 'trusted' } }),
     evidence: [evidence[0], { ...evidence[1], headers: ['sample', 'batch'] }],
     plugins,
@@ -68,7 +99,7 @@ test('HRT-2 blocks ambiguous metadata even in trusted mode', () => {
 });
 
 test('HRT-2 preserves missing-input and unresolved-decision evidence', () => {
-  const result = planScientificTask({
+  const result = plan({
     taskSpec: spec({ requiresUserDecision: [{ id: 'contrast', question: '哪一组是对照组？', required: true, status: 'unresolved' }] }),
     evidence: [evidence[0]],
     plugins,

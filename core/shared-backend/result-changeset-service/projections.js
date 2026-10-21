@@ -4,7 +4,7 @@ const fs = require('fs');
 const { stableStringify } = require('../canonical-json');
 const { verifyRevisionSourceMaterial } = require('../result-revision-source');
 const { validateResultStudioCandidate } = require('../result-plugin-validator');
-const { DEG_DIRECT_CHILD_PRIMARY_ARTIFACTS } = require('../result-scientific-rerun');
+const { loadRerunProfile } = require('../result-scientific-rerun');
 const { resolveExecutionInputPath, verifyExecutionProvenance } = require('../execution-provenance');
 const {
   ResultChangeSetError,
@@ -222,10 +222,14 @@ function resolveAuthoritativeDownstreamPlan({ input, dependencies, projectId, wo
     throw new ResultChangeSetError('authoritative_subgraph_invalid', 'Affected-subgraph projection no longer matches the trusted intent.');
   }
   if (subgraph.children.length === 0) return [];
-  if (sourceRevision.artifactId !== 'deg_table') {
-    throw new ResultChangeSetError('downstream_root_unsupported', 'Only a verified DEG table can currently drive an affected direct-child rerun.');
+  const { rootArtifactId, directChildPrimaryArtifacts } = dependencies.rerunProfile || loadRerunProfile();
+  if (!rootArtifactId || Object.keys(directChildPrimaryArtifacts).length === 0) {
+    throw new ResultChangeSetError('downstream_profile_missing', 'No installed pack declares an admitted direct-child rerun profile.');
   }
-  const maximumChildren = Object.keys(DEG_DIRECT_CHILD_PRIMARY_ARTIFACTS).length;
+  if (sourceRevision.artifactId !== rootArtifactId) {
+    throw new ResultChangeSetError('downstream_root_unsupported', 'Only the declared root Artifact can currently drive an affected direct-child rerun.');
+  }
+  const maximumChildren = Object.keys(directChildPrimaryArtifacts).length;
   if (subgraph.children.length > maximumChildren) {
     throw new ResultChangeSetError('downstream_subgraph_unsupported', 'The affected subgraph exceeds the admitted direct DEG child set.');
   }
@@ -243,8 +247,8 @@ function resolveAuthoritativeDownstreamPlan({ input, dependencies, projectId, wo
     String(left?.nodeId || '').localeCompare(String(right?.nodeId || ''))
   ));
   return children.map((childRef) => {
-    const expectedArtifactId = DEG_DIRECT_CHILD_PRIMARY_ARTIFACTS[childRef?.toolId];
-    if (!childRef || !expectedArtifactId || childRef.inputId !== 'deg_table'
+    const expectedArtifactId = directChildPrimaryArtifacts[childRef?.toolId];
+    if (!childRef || !expectedArtifactId || childRef.inputId !== rootArtifactId
         || childRef.edgeKind !== 'artifact' || childRef.sourceToolJobId !== sourceRevision.toolJobId
         || childRef.sourceRevisionId !== sourceRevision.revisionId
         || childRef.sourceArtifactId !== sourceRevision.artifactId

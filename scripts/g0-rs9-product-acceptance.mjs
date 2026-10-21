@@ -89,7 +89,7 @@ function buildReport() {
     privacy: 'repository_relative_refs_hashes_counts_statuses_and_bounded_invariants_only',
     tasks: [
       { id: 'deg_selection_to_enrichment', status: commands[0].passed && validProductionPlugins >= 4 ? 'passed' : 'blocked', evidenceRefs: ['selection-and-scientific-intent', 'productionPlugins'] },
-      { id: 'volcano_ai_presentation_edit', status: commands[1].passed && plugins.passed ? 'passed' : 'blocked', evidenceRefs: ['changeset-review-history', 'plugins', 'visual'] },
+      { id: 'classification_plot_ai_presentation_edit', status: commands[1].passed && plugins.passed ? 'passed' : 'blocked', evidenceRefs: ['changeset-review-history', 'plugins', 'visual'] },
       { id: 'heatmap_manual_then_ai_edit', status: commands[1].passed && plugins.passed ? 'passed' : 'blocked', evidenceRefs: ['changeset-review-history', 'plugins', 'visual'] },
       { id: 'scientific_threshold_recompute', status: commands[0].passed && providers.passed ? 'passed' : 'blocked', evidenceRefs: ['selection-and-scientific-intent', 'providers'] },
       { id: 'historical_alternative_compare', status: commands[1].passed && visual.passed ? 'passed' : 'blocked', evidenceRefs: ['changeset-review-history', 'visual'] },
