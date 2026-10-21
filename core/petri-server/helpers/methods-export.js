@@ -175,13 +175,13 @@ async function _renderMethodsParagraph(ctx, { language }) {
 
   const userPromptZh =
     '基于以下用户在 Petri 平台执行的分析，写一段适合论文 Methods 部分的描述。要求：' +
-    '1) 严格学术风格，不要营销用语；2) 引用关键软件包及版本（用括号标注，如 "Seurat v5 (Hao et al., 2024)"）；' +
+    '1) 严格学术风格，不要营销用语；2) 引用关键软件包及版本（用括号标注，如 "<package> v<version> (Author et al., year)"）；' +
     '3) 报告关键参数（cell QC 阈值、分辨率、降维维数等）；4) 句式紧凑，不堆砌；' +
     '5) 不要写 "我们使用 Petri 平台"——平台是工具，重点是底层方法；' +
     '6) 长度 120-220 字。直接输出段落，不带标题和引号。\n\n';
   const userPromptEn =
     "Based on the user's analysis pipeline below, write a Methods paragraph suitable for a manuscript. " +
-    'Strict academic style. Cite key packages with versions (e.g., "Seurat v5 (Hao et al., 2024)"). Report key parameters (QC thresholds, resolution, n_dims). ' +
+    'Strict academic style. Cite key packages with versions (e.g., "<package> v<version> (Author et al., year)"). Report key parameters (QC thresholds, resolution, n_dims). ' +
     'Do not mention the Petri platform — what matters is the underlying methods. 100-180 words. Output the paragraph only.\n\n';
   const dataBlock =
     (dsBlock ? '\nDataset(s):\n' + dsBlock : '') +
@@ -383,32 +383,22 @@ function _buildReportHtml({
     })
     .join('');
 
-  const citations = `
+  const reportCitations = packMethods.getReportCitations();
+  const citations = reportCitations.length > 0
+    ? `
     <h2>参考文献</h2>
     <ul class="citations">
-      <li>Hao Y, Stuart T, Kowalski MH, et al. (2024) Dictionary learning for integrative, multimodal and scalable single-cell analysis. <i>Nat Biotechnol</i> 42:293-304.</li>
-      <li>Wolf FA, Angerer P, Theis FJ. (2018) SCANPY: large-scale single-cell gene expression data analysis. <i>Genome Biol</i> 19:15.</li>
-      <li>McInnes L, Healy J, Melville J. (2018) UMAP: Uniform Manifold Approximation and Projection. <i>arXiv</i>:1802.03426.</li>
-      <li>Traag VA, Waltman L, van Eck NJ. (2019) From Louvain to Leiden: guaranteeing well-connected communities. <i>Sci Rep</i> 9:5233.</li>
-      <li>Korsunsky I, Millard N, Fan J, et al. (2019) Fast, sensitive and accurate integration of single-cell data with Harmony. <i>Nat Methods</i> 16:1289-1296.</li>
-      <li>Wu T, Hu E, Xu S, et al. (2021) clusterProfiler 4.0: A universal enrichment tool for interpreting omics data. <i>Innovation</i> 2:100141.</li>
-      <li>Cao J, Spielmann M, Qiu X, et al. (2019) The single-cell transcriptional landscape of mammalian organogenesis. <i>Nature</i> 566:496-502.</li>
-      <li>Jin S, Plikus MV, Nie Q. (2024) CellChat for systematic analysis of cell-cell communication from single-cell transcriptomics. <i>Nat Protoc</i> 20:180-219.</li>
-      <li>Palla G, Spitzer H, Klein M, et al. (2022) Squidpy: a scalable framework for spatial omics analysis. <i>Nat Methods</i> 19:171-178.</li>
-      <li>Marconato L, Palla G, Yamauchi KA, et al. (2024) SpatialData: an open and universal data framework for spatial omics. <i>Nat Methods</i> 22:58-62.</li>
-      <li>Kleshchevnikov V, Shmatko A, Dann E, et al. (2022) Cell2location maps fine-grained cell types in spatial transcriptomics. <i>Nat Biotechnol</i> 40:661-671.</li>
-      <li>Biancalani T, Scalia G, Buffoni L, et al. (2021) Deep learning and alignment of spatially resolved single-cell transcriptomes with Tangram. <i>Nat Methods</i> 18:1352-1362.</li>
-      <li>Dimitrov D, Türei D, Garrido-Rodriguez M, et al. (2022) Comparison of methods and resources for cell-cell communication inference. <i>Nat Commun</i> 13:3224.</li>
+      ${reportCitations.map((item) => `<li>${_escapeHtml(item)}</li>`).join('\n      ')}
     </ul>
-  `;
-
+  `
+    : '';
   return `<!DOCTYPE html><html lang="${language === 'en' ? 'en' : 'zh'}"><head>
     <meta charset="UTF-8" />
     <title>${_escapeHtml(title)} — Analysis Report</title>
     ${styles}
   </head><body>
     <div class="cover">
-      <div class="cover-title">单细胞分析报告</div>
+      <div class="cover-title">分析报告</div>
       <div class="cover-subtitle">${_escapeHtml(title)}</div>
       <div style="font-size:11pt;color:#6b7280;margin-top:30px">由 AI 分析助手根据项目记录生成</div>
       <div class="cover-meta">
@@ -663,234 +653,38 @@ function _scriptHeader({ analysis, dataset, language, generatedAt, username }) {
   ].join('\n');
 }
 
-/** Generate Python (scanpy) equivalent for known analysis types. */
+function _pythonPlaceholderValues(analysis) {
+  const p = (analysis && analysis.params) || {};
+  return {
+    MIN_CELLS: p.minCells || 3,
+    MIN_FEATURES: p.minFeatures || 200,
+    MAX_FEATURES: p.maxFeatures || 5000,
+    MAX_MT_PERCENT: p.maxMtPercent || 20,
+    N_PCS: p.nPCs || 20,
+    RESOLUTION: p.resolution || 0.5,
+    MT_PATTERN: p.species === 'human' ? 'MT-' : 'mt-',
+    GROUP1: p.group1 || 'GROUP_A',
+    GROUP2: p.group2 || 'GROUP_B',
+  };
+}
+
+function _renderPythonTemplate(lines, values) {
+  return lines.map((line) => line.replace(/\{\{([A-Z0-9_]+)\}\}/g, (_match, key) => (
+    Object.prototype.hasOwnProperty.call(values, key) ? String(values[key]) : ''
+  ))).join('\n');
+}
+
+/**
+ * Python equivalent is domain data from the installed pack
+ * (provides.methods.pythonEquivalents); no pack -> honest generic fallback.
+ */
 function _pythonEquivalent(analysis, _dataset) {
-  const type = analysis.type;
-  const p = analysis.params || {};
-
-  if (type === 'scrna_standard' || type === 'recluster') {
-    const minCells = p.minCells || 3;
-    const minFeatures = p.minFeatures || 200;
-    const maxFeatures = p.maxFeatures || 5000;
-    const maxMtPercent = p.maxMtPercent || 20;
-    const nPCs = p.nPCs || 20;
-    const resolution = p.resolution || 0.5;
-    const mtPattern = p.species === 'human' ? 'MT-' : 'mt-';
-    return [
-      'import scanpy as sc',
-      'import pandas as pd',
-      'import numpy as np',
-      'import matplotlib.pyplot as plt',
-      '',
-      'sc.settings.verbosity = 1',
-      'sc.settings.set_figure_params(dpi=150, facecolor="white")',
-      '',
-      '# ---- 1. Load data ----',
-      '# Replace this with your local matrix or .h5ad file.',
-      'adata = sc.read_csv("INPUT_MATRIX.csv")  # genes x cells; transpose if needed',
-      'if adata.shape[0] < adata.shape[1]:',
-      '    adata = adata.T  # ensure cells are rows',
-      '',
-      '# ---- 2. QC ----',
-      'adata.var["mt"] = adata.var_names.str.startswith("' + mtPattern + '")',
-      'sc.pp.calculate_qc_metrics(adata, qc_vars=["mt"], inplace=True, percent_top=None, log1p=False)',
-      'sc.pl.violin(adata, ["n_genes_by_counts", "total_counts", "pct_counts_mt"], jitter=0.4)',
-      '',
-      '# Filter',
-      'sc.pp.filter_cells(adata, min_genes=' + minFeatures + ')',
-      'sc.pp.filter_genes(adata, min_cells=' + minCells + ')',
-      'adata = adata[adata.obs.n_genes_by_counts < ' + maxFeatures + ', :]',
-      'adata = adata[adata.obs.pct_counts_mt < ' + maxMtPercent + ', :]',
-      '',
-      '# ---- 3. Normalize ----',
-      'sc.pp.normalize_total(adata, target_sum=1e4)',
-      'sc.pp.log1p(adata)',
-      '',
-      '# ---- 4. Variable genes ----',
-      'sc.pp.highly_variable_genes(adata, n_top_genes=2000)',
-      'adata = adata[:, adata.var.highly_variable]',
-      '',
-      '# ---- 5. Scale + PCA ----',
-      'sc.pp.scale(adata, max_value=10)',
-      'sc.tl.pca(adata, n_comps=' + nPCs + ')',
-      'sc.pl.pca_variance_ratio(adata, n_pcs=' + nPCs + ', log=True)',
-      '',
-      '# ---- 6. Neighbors + clustering ----',
-      'sc.pp.neighbors(adata, n_neighbors=15, n_pcs=' + nPCs + ')',
-      'sc.tl.leiden(adata, resolution=' + resolution + ')',
-      '',
-      '# ---- 7. UMAP ----',
-      'sc.tl.umap(adata)',
-      'sc.pl.umap(adata, color=["leiden"], legend_loc="on data")',
-      '',
-      '# ---- 8. Markers ----',
-      'sc.tl.rank_genes_groups(adata, "leiden", method="wilcoxon")',
-      'sc.pl.rank_genes_groups(adata, n_genes=10, sharey=False)',
-      'top5 = pd.DataFrame({grp: adata.uns["rank_genes_groups"]["names"][grp][:5] for grp in adata.obs["leiden"].unique()})',
-      'top5.to_csv("markers_top5.csv", index=False)',
-      '',
-      '# ---- 9. Save ----',
-      'adata.write_h5ad("result.h5ad")',
-      'print(f"Done. {adata.shape[0]} cells, {adata.shape[1]} genes, {adata.obs[\'leiden\'].nunique()} clusters")',
-      '',
-    ].join('\n');
-  }
-
-  if (type === 'deg') {
-    const group1 = p.group1 || 'GROUP_A';
-    const group2 = p.group2 || 'GROUP_B';
-    return [
-      'import scanpy as sc',
-      'import pandas as pd',
-      '',
-      '# Load preprocessed object',
-      'adata = sc.read_h5ad("result.h5ad")  # output of standard pipeline',
-      '',
-      '# DEG between two groups (Wilcoxon)',
-      'sc.tl.rank_genes_groups(adata, groupby="leiden", groups=["' +
-        group1 +
-        '"], reference="' +
-        group2 +
-        '", method="wilcoxon")',
-      'sc.pl.rank_genes_groups(adata, n_genes=20, sharey=False)',
-      '',
-      'deg = sc.get.rank_genes_groups_df(adata, group="' + group1 + '")',
-      'deg.to_csv("deg_results.csv", index=False)',
-      'print(f"Top markers: {deg.head().names.tolist()}")',
-      '',
-    ].join('\n');
-  }
-
-  if (type === 'enrichment') {
-    return [
-      'import gseapy as gp',
-      'import pandas as pd',
-      '',
-      '# DEG list (from prior analysis)',
-      'deg = pd.read_csv("deg_results.csv")',
-      'gene_list = deg[deg.pvals_adj < 0.05].names.tolist()',
-      '',
-      '# GO enrichment',
-      'enr_go = gp.enrichr(gene_list=gene_list, gene_sets=["GO_Biological_Process_2023"], organism="human")',
-      'enr_go.results.to_csv("go_enrichment.csv", index=False)',
-      '',
-      '# KEGG enrichment',
-      'enr_kegg = gp.enrichr(gene_list=gene_list, gene_sets=["KEGG_2021_Human"], organism="human")',
-      'enr_kegg.results.to_csv("kegg_enrichment.csv", index=False)',
-      '',
-      'print("Top GO:", enr_go.results.Term.head(5).tolist())',
-      'print("Top KEGG:", enr_kegg.results.Term.head(5).tolist())',
-      '',
-    ].join('\n');
-  }
-
-  if (type === 'cell_annotation') {
-    return [
-      'import scanpy as sc',
-      'import pandas as pd',
-      '',
-      'adata = sc.read_h5ad("result.h5ad")',
-      '',
-      '# Manual annotation against curated marker sets (PanglaoDB / CellMarker 2.0)',
-      'markers = {',
-      '    "T cells": ["CD3D", "CD3E", "CD3G"],',
-      '    "CD4+ T": ["CD4", "IL7R"],',
-      '    "CD8+ T": ["CD8A", "CD8B"],',
-      '    "B cells": ["CD79A", "CD79B", "MS4A1"],',
-      '    "NK": ["GNLY", "NKG7"],',
-      '    "Monocytes": ["CD14", "LYZ"],',
-      '    "DC": ["FCER1A", "CST3"],',
-      '}',
-      'sc.pl.dotplot(adata, markers, groupby="leiden", standard_scale="var")',
-      '',
-      '# Assign labels manually based on dotplot inspection',
-      'cluster_labels = {',
-      '    # "0": "CD4+ T",',
-      '    # "1": "Monocytes",',
-      '    # ... (fill in based on inspection)',
-      '}',
-      'adata.obs["cell_type"] = adata.obs["leiden"].map(cluster_labels)',
-      'sc.pl.umap(adata, color=["cell_type"])',
-      '',
-      'adata.write_h5ad("result_annotated.h5ad")',
-      '',
-    ].join('\n');
-  }
-
-  if (type === 'scrna_integration') {
-    return [
-      'import scanpy as sc',
-      'import scanpy.external as sce  # pip install harmonypy',
-      '',
-      '# Load combined dataset (each sample tagged in adata.obs["sample"])',
-      'adata = sc.read_h5ad("combined.h5ad")',
-      '',
-      '# Standard preprocessing',
-      'sc.pp.normalize_total(adata, target_sum=1e4)',
-      'sc.pp.log1p(adata)',
-      'sc.pp.highly_variable_genes(adata, n_top_genes=2000, batch_key="sample")',
-      'adata = adata[:, adata.var.highly_variable]',
-      'sc.pp.scale(adata)',
-      'sc.tl.pca(adata, n_comps=30)',
-      '',
-      '# Harmony integration',
-      'sce.pp.harmony_integrate(adata, key="sample")',
-      '',
-      '# Re-cluster on Harmony embedding',
-      'sc.pp.neighbors(adata, n_pcs=30, use_rep="X_pca_harmony")',
-      'sc.tl.leiden(adata, resolution=0.5)',
-      'sc.tl.umap(adata)',
-      'sc.pl.umap(adata, color=["sample", "leiden"], wspace=0.4)',
-      '',
-      'adata.write_h5ad("integrated.h5ad")',
-      '',
-    ].join('\n');
-  }
-
-  if (type === 'trajectory') {
-    return [
-      'import scanpy as sc',
-      '# Pseudotime is best done with palantir or scVelo in Python.',
-      '# For Monocle3-equivalent results, the recommended Python tool is PAGA + diffmap:',
-      '',
-      'adata = sc.read_h5ad("result.h5ad")',
-      '',
-      'sc.tl.diffmap(adata)',
-      'sc.tl.paga(adata, groups="leiden")',
-      'sc.pl.paga(adata, plot=True)',
-      'sc.tl.umap(adata, init_pos="paga")',
-      '',
-      '# Assign root cell (highest expression of stem marker)',
-      'root = (adata.obs.leiden == "0").idxmax()  # adjust manually',
-      'adata.uns["iroot"] = adata.obs_names.get_loc(root)',
-      'sc.tl.dpt(adata)',
-      '',
-      'sc.pl.umap(adata, color=["dpt_pseudotime", "leiden"])',
-      '',
-    ].join('\n');
-  }
-
-  if (type === 'communication') {
-    return [
-      '# Cell-cell communication in Python: use CellChat (R) directly via reticulate, or:',
-      '# - cellphonedb (https://github.com/ventolab/CellphoneDB)',
-      '# - LIANA (https://github.com/saezlab/liana-py)',
-      '',
-      'import liana as li',
-      'import scanpy as sc',
-      '',
-      'adata = sc.read_h5ad("result_annotated.h5ad")',
-      '',
-      'li.mt.rank_aggregate(adata, groupby="cell_type", resource_name="consensus", verbose=True)',
-      'li.pl.dotplot(adata, top_n=20, orderby="magnitude_rank", filterby="specificity_rank", filter_lambda=lambda x: x <= 0.05)',
-      '',
-    ].join('\n');
-  }
-
-  // Fallback
+  const type = analysis && analysis.type;
+  const template = packMethods.getPythonEquivalent(type);
+  if (template) return _renderPythonTemplate(template, _pythonPlaceholderValues(analysis));
   return [
     '# Python equivalent for analysis type "' + type + '" is not yet built into Petri.',
-    '# Please refer to the R script and consult scanpy / squidpy / liana docs.',
+    '# Please refer to the R script and consult the relevant package documentation.',
     '',
   ].join('\n');
 }

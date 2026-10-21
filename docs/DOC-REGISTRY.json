@@ -7575,7 +7575,7 @@
       "registeredAt": "2026-10-21",
       "archivePolicy": "retain_stable_path",
       "tags": ["q-domain", "data-model", "backend", "pack", "G0"],
-      "notes": "2026-10-21 立项（用户「按照你的建议继续推进下去，最好能搞完 P4-C」）：P4-C 收尾 S2–S6 统一包。**S2 completed**：agent-workflow 模板下沉 pack（0.2.2）。**S3 completed**：demo assets（0.2.3）+ profile actors（0.2.4）下沉 pack，三个 bounded loader；域中性 179→143；test:changed 535 项 0 红 + closeout 十三门。S4-S6 open，包保持 active。"
+      "notes": "2026-10-21 立项（用户「按照你的建议继续推进下去，最好能搞完 P4-C」）：P4-C 收尾 S2–S6 统一包。**S2 completed**：agent-workflow 模板下沉 pack（0.2.2）。**S3 completed**：demo assets（0.2.3）+ profile actors（0.2.4）。**S4 completed**：methods Python 模板/引文下沉（0.2.5）+ 占位符渲染；域中性 179→103；test:changed 426 项 0 红 + closeout 十三门。S5-S6 open，包保持 active。"
     }
   ],
   "lastUpdated": "2026-10-21",

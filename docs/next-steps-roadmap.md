@@ -1,4 +1,6 @@
 # Petri Desktop — Current Next Steps
+最后更新：2026-10-21（**BLOCK-234 P4-C S4 completed；包 active**）：methods Python 等价模板（8 类）+ 报告引文（13 条）下沉 pack 0.2.5；核心改为有界装载 + 占位符渲染，无包诚实降级。证据=block234 4/4 + block220 13/13 + test:changed 426 项 0 红 + closeout 十三门；域中性 **143→103 处 / 68→60 键**。**下一阶段=S5 result/RS** → S6 前端与兼容白名单。plan=`docs/block-234-qdomain-p4c-tail-plan.md` §9。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-21（**BLOCK-234 P4-C S3 completed；包 active**）：demo assets（22 条）+ artifact profile actors 下沉 pack（0.2.3/0.2.4）+ 三个 bounded loader；`tools-assets` API 不变、profile schema 引擎留核心。证据=block234 8/8 + test:changed 535 项 0 红 + closeout 十三门；域中性 **163→143 处 / 80→68 键**。**下一阶段=S4 methods-export** → S5 result/RS → S6 前端与兼容白名单。plan=`docs/block-234-qdomain-p4c-tail-plan.md` §8。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**BLOCK-234 P4-C S2 completed；包 active**）：agent-workflow 三条模板下沉 pack `provides.agentWorkflowTemplates`（0.2.2）+ bounded loader；`list/create` 改读 pack，包缺失=零模板。证据=5/5 + 40/40 + 邻域 45/45 + test:changed 391 项 0 红 + closeout 十三门；域中性 **179→163 处 / 85→80 键**。**下一阶段=S3**（demo assets + artifact profiles）→ S4 methods → S5 result/RS 保真 → S6 前端与兼容白名单。plan=`docs/block-234-qdomain-p4c-tail-plan.md` §7。G0 开发期常态 · 不外推 packaged/Provider/GA。

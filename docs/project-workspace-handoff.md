@@ -1,7 +1,9 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
-最后更新：2026-10-21（**BLOCK-234 P4-C S3 completed；包 active**）
+最后更新：2026-10-21（**BLOCK-234 P4-C S4 completed；包 active**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**active 工作包=BLOCK-234（P4-C 收尾 S2–S6）**。**刚完成=S4（methods 模板/引文下沉 pack）**：pack 0.2.5 `methods/python-equivalents.json`（8 类模板 + 占位符）+ `methods/report-citations.json`（13 条）；`pack-methods.js` 新增有界装载/sanitize/getter，`methods-export.js` 改为模板渲染（无包诚实降级），报告引文由 pack 提供。证据=block234 4/4 + block220 13/13 + test:changed 426 项 0 红 + closeout 十三门；域中性 **143→103 处 / 68→60 键**。**下一阶段=S5 result/RS**（compare/rerun/selection/interpret/cohort）→ S6 前端与兼容白名单。plan=`docs/block-234-qdomain-p4c-tail-plan.md` §9。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**active 工作包=BLOCK-234（P4-C 收尾 S2–S6）**。**刚完成=S3（demo assets + artifact profile actors 下沉 pack）**：pack 0.2.3 `demo-assets.json`（22 条）+ 0.2.4 `artifact-profile-actors.json` + 两个 bounded loader；`tools-assets` API 不变，profile schema 引擎留核心；6 个 profile 的 actors 在 `deepFreeze` 前合并；pl4a/pl4b/g0-sdc0/g0-third-wave/hle/agent-workflow 接夹具。证据=block234 8/8 + test:changed 535 项 0 红 + closeout 十三门；域中性 **163→143 处 / 80→68 键**。**下一阶段=S4 methods-export** → S5 result/RS 保真 → S6 前端与兼容白名单；最终剩余量须为显式兼容白名单。plan=`docs/block-234-qdomain-p4c-tail-plan.md` §8。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

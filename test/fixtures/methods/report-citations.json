@@ -1,0 +1,15 @@
+[
+  "Hao Y, Stuart T, Kowalski MH, et al. (2024) Dictionary learning for integrative, multimodal and scalable single-cell analysis. Nat Biotechnol 42:293-304.",
+  "Wolf FA, Angerer P, Theis FJ. (2018) SCANPY: large-scale single-cell gene expression data analysis. Genome Biol 19:15.",
+  "McInnes L, Healy J, Melville J. (2018) UMAP: Uniform Manifold Approximation and Projection. arXiv:1802.03426.",
+  "Traag VA, Waltman L, van Eck NJ. (2019) From Louvain to Leiden: guaranteeing well-connected communities. Sci Rep 9:5233.",
+  "Korsunsky I, Millard N, Fan J, et al. (2019) Fast, sensitive and accurate integration of single-cell data with Harmony. Nat Methods 16:1289-1296.",
+  "Wu T, Hu E, Xu S, et al. (2021) clusterProfiler 4.0: A universal enrichment tool for interpreting omics data. Innovation 2:100141.",
+  "Cao J, Spielmann M, Qiu X, et al. (2019) The single-cell transcriptional landscape of mammalian organogenesis. Nature 566:496-502.",
+  "Jin S, Plikus MV, Nie Q. (2024) CellChat for systematic analysis of cell-cell communication from single-cell transcriptomics. Nat Protoc 20:180-219.",
+  "Palla G, Spitzer H, Klein M, et al. (2022) Squidpy: a scalable framework for spatial omics analysis. Nat Methods 19:171-178.",
+  "Marconato L, Palla G, Yamauchi KA, et al. (2024) SpatialData: an open and universal data framework for spatial omics. Nat Methods 22:58-62.",
+  "Kleshchevnikov V, Shmatko A, Dann E, et al. (2022) Cell2location maps fine-grained cell types in spatial transcriptomics. Nat Biotechnol 40:661-671.",
+  "Biancalani T, Scalia G, Buffoni L, et al. (2021) Deep learning and alignment of spatially resolved single-cell transcriptomes with Tangram. Nat Methods 18:1352-1362.",
+  "Dimitrov D, Türei D, Garrido-Rodriguez M, et al. (2022) Comparison of methods and resources for cell-cell communication inference. Nat Commun 13:3224."
+]

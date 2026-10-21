@@ -27,6 +27,8 @@ const MAX_FILE_BYTES = 256 * 1024;
 const MAX_TYPES = 200;
 const MAX_ENTRIES_PER_TYPE = 40;
 const MAX_ENTRY_CHARS = 400;
+const MAX_TEMPLATE_LINES = 400;
+const MAX_REPORT_CITATIONS = 40;
 
 function readBoundedJson(filePath, packRoot, warnings, label) {
   const resolved = path.resolve(filePath);
@@ -91,6 +93,49 @@ function sanitizeCitations(raw, packId, warnings) {
   return out;
 }
 
+function sanitizePythonEquivalents(raw, packId, warnings) {
+  if (!isPlainObject(raw)) {
+    warnings.push({ packId, code: 'python_equivalents_not_object' });
+    return {};
+  }
+  const out = {};
+  const types = Object.keys(raw).slice(0, MAX_TYPES);
+  if (Object.keys(raw).length > MAX_TYPES) {
+    warnings.push({ packId, code: 'python_equivalents_types_truncated', kept: types.length });
+  }
+  for (const type of types) {
+    const lines = raw[type];
+    if (!Array.isArray(lines)) {
+      warnings.push({ packId, code: 'python_equivalent_not_array', type });
+      continue;
+    }
+    const clean = lines
+      .filter((line) => typeof line === 'string')
+      .slice(0, MAX_TEMPLATE_LINES)
+      .map((line) => clip(line, MAX_ENTRY_CHARS));
+    if (lines.length > MAX_TEMPLATE_LINES) {
+      warnings.push({ packId, code: 'python_equivalent_truncated', type, kept: clean.length });
+    }
+    if (clean.length > 0) out[type] = clean;
+  }
+  return out;
+}
+
+function sanitizeReportCitations(raw, packId, warnings) {
+  if (!Array.isArray(raw)) {
+    warnings.push({ packId, code: 'report_citations_not_array' });
+    return [];
+  }
+  const clean = raw
+    .filter((item) => typeof item === 'string' && item.trim())
+    .slice(0, MAX_REPORT_CITATIONS)
+    .map((item) => clip(item.trim(), MAX_ENTRY_CHARS));
+  if (raw.length > MAX_REPORT_CITATIONS) {
+    warnings.push({ packId, code: 'report_citations_truncated', kept: clean.length });
+  }
+  return clean;
+}
+
 function sanitizeToolLabels(raw, packId, warnings) {
   if (!isPlainObject(raw)) {
     warnings.push({ packId, code: 'tool_labels_not_object' });
@@ -128,6 +173,8 @@ function loadPackMethods() {
   const warnings = [];
   const citations = {};
   const toolLabels = {};
+  const pythonEquivalents = {};
+  let reportCitations = [];
   const contributions = [];
   const ordered = packs
     .filter((pack) => pack && pack.enabled !== false && pack.packRoot)
@@ -139,6 +186,8 @@ function loadPackMethods() {
     if (!isPlainObject(methods)) continue;
     const packCitations = {};
     const packLabels = {};
+    const packTemplates = {};
+    let packReportCitations = [];
     if (typeof methods.citations === 'string' && methods.citations.trim()) {
       const file = path.join(pack.packRoot, methods.citations.trim());
       const parsed = readBoundedJson(file, pack.packRoot, warnings, methods.citations.trim());
@@ -149,7 +198,23 @@ function loadPackMethods() {
       const parsed = readBoundedJson(file, pack.packRoot, warnings, methods.toolLabels.trim());
       if (parsed !== null) Object.assign(packLabels, sanitizeToolLabels(parsed, packId, warnings));
     }
-    contributions.push({ packId, citations: packCitations, toolLabels: packLabels });
+    if (typeof methods.pythonEquivalents === 'string' && methods.pythonEquivalents.trim()) {
+      const file = path.join(pack.packRoot, methods.pythonEquivalents.trim());
+      const parsed = readBoundedJson(file, pack.packRoot, warnings, methods.pythonEquivalents.trim());
+      if (parsed !== null) Object.assign(packTemplates, sanitizePythonEquivalents(parsed, packId, warnings));
+    }
+    if (typeof methods.reportCitations === 'string' && methods.reportCitations.trim()) {
+      const file = path.join(pack.packRoot, methods.reportCitations.trim());
+      const parsed = readBoundedJson(file, pack.packRoot, warnings, methods.reportCitations.trim());
+      if (parsed !== null) packReportCitations = sanitizeReportCitations(parsed, packId, warnings);
+    }
+    contributions.push({
+      packId,
+      citations: packCitations,
+      toolLabels: packLabels,
+      pythonEquivalents: packTemplates,
+      reportCitations: packReportCitations,
+    });
     for (const [type, list] of Object.entries(packCitations)) {
       if (citations[type]) warnings.push({ packId, code: 'citations_overridden', type });
       citations[type] = list;
@@ -158,8 +223,16 @@ function loadPackMethods() {
       if (toolLabels[type]) warnings.push({ packId, code: 'tool_label_overridden', type });
       toolLabels[type] = label;
     }
+    for (const [type, lines] of Object.entries(packTemplates)) {
+      if (pythonEquivalents[type]) warnings.push({ packId, code: 'python_equivalent_overridden', type });
+      pythonEquivalents[type] = lines;
+    }
+    if (packReportCitations.length > 0) {
+      if (reportCitations.length > 0) warnings.push({ packId, code: 'report_citations_overridden' });
+      reportCitations = packReportCitations;
+    }
   }
-  return { citations, toolLabels, packs: contributions, warnings };
+  return { citations, toolLabels, pythonEquivalents, reportCitations, packs: contributions, warnings };
 }
 
 function getCitations(type, bundle) {
@@ -176,10 +249,24 @@ function getToolLabel(type, bundle) {
   return typeof label === 'string' && label ? label : null;
 }
 
+function getPythonEquivalent(type, bundle) {
+  if (typeof type !== 'string' || !type) return null;
+  const source = bundle && bundle.pythonEquivalents ? bundle : loadPackMethods();
+  const lines = source.pythonEquivalents[type];
+  return Array.isArray(lines) ? lines.slice() : null;
+}
+
+function getReportCitations(bundle) {
+  const source = bundle && Array.isArray(bundle.reportCitations) ? bundle : loadPackMethods();
+  return Array.isArray(source.reportCitations) ? source.reportCitations.slice() : [];
+}
+
 module.exports = {
   loadPackMethods,
   getCitations,
   getToolLabel,
+  getPythonEquivalent,
+  getReportCitations,
   MAX_FILE_BYTES,
   MAX_TYPES,
   MAX_ENTRIES_PER_TYPE,

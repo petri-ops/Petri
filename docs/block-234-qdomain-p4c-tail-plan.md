@@ -107,3 +107,25 @@ BLOCK-234 只有在 S2–S6 全部收口（或剩余量经裁决为显式兼容�
 - demo 映射与 actor 映射均为启动时读取；安装/停用包后需重启后端生效（与既有 pack 装配纪律一致）。
 - 包缺失时 actors 为空、demo 保护集合为空；profile schema 校验不依赖 actor 数据。
 - 下一阶段=S4（methods-export 模板/引文下沉 pack）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 9. S4 收口（2026-10-21）
+
+**S4 completed；BLOCK-234 仍 active（S5–S6 open）。**
+
+### 9.1 交付
+
+- pack 0.2.5：`methods/python-equivalents.json`（8 类模板 + `{{MIN_CELLS}}` 等占位符）与 `methods/report-citations.json`（13 条）下沉；`provides.methods` 扩展两个路径。
+- `pack-methods.js`：新增 `pythonEquivalents` / `reportCitations` 的有界装载与 sanitize（≤400 行/类型、≤40 条引文、400 字符/条），getter 导出。
+- `methods-export.js`：`_pythonEquivalent` 改为 pack 模板 + 占位符渲染（无包→通用 fallback）；报告引文改为 pack 数组（无包→省略参考文献段）；封面标题通用化；Methods prompt 示例去具体包名。
+
+### 9.2 验证
+
+- 域中性：**143→103 处 / 68→60 键**（methods-export 40 处归零），0 新增/0 恶化。
+- `test:changed`：**426 项 / 422 pass / 0 fail / 4 skip**；`block234-methods-templates` 4/4 + `block220-pack-methods` 13/13。
+- `npm run closeout` **十三门 PASS**（report 级 `skills:check` OK）。
+
+### 9.3 边界
+
+- 模板为纯数据，不执行 pack 代码；无包时 Python 等价与引文诚实降级。
+- 报告引文由 Markdown 文本渲染为 `<li>` 并转义，不再内联 HTML 片段。
+- 下一阶段=S5（result/RS 模块：compare/rerun/selection/interpret/cohort）。G0 开发期常态 · 不外推 packaged/Provider/GA。
