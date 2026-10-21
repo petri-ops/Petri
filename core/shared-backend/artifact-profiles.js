@@ -11,6 +11,7 @@
 
 const crypto = require('crypto');
 const { loadArtifactProfileActors } = require('./pack-artifact-profile-actors');
+const { loadDataModelExtensions } = require('./pack-data-model-extensions');
 
 const ARTIFACT_PROFILE_REGISTRY_VERSION = 1;
 const PROFILE_KINDS = Object.freeze(['data', 'artifact', 'display']);
@@ -306,6 +307,61 @@ const ARTIFACT_PROFILES = {
     ],
   }),
 };
+
+// BLOCK-235 — canonical profiles are immutable core truth. Installed packs may
+// add new profiles (artifact types/fields) through `dataModelExtensions`; an
+// extension can never replace a canonical id and is validated by the same SDC-0
+// definition rules before it enters the registry.
+const ARTIFACT_PROFILE_EXTENSION_WARNINGS = [];
+const EXTENSION_PROFILE_IDS = [];
+
+function applyDataModelExtensions({ profiles = ARTIFACT_PROFILES, extensions = [], warnings = [] } = {}) {
+  const added = [];
+  for (const entry of extensions) {
+    const definition = entry && typeof entry === 'object' ? entry.definition : null;
+    const profileId = definition && typeof definition.profileId === 'string'
+      ? definition.profileId.trim()
+      : '';
+    if (!profileId) {
+      warnings.push({ packId: entry?.packId || null, code: 'artifact_profile_extension_id_invalid' });
+      continue;
+    }
+    if (Object.prototype.hasOwnProperty.call(profiles, profileId)) {
+      warnings.push({
+        packId: entry.packId || null,
+        code: 'artifact_profile_extension_override_rejected',
+        profileId,
+      });
+      continue;
+    }
+    const profile = defineProfile(definition);
+    const validation = validateProfileDefinition(profile);
+    if (!validation.valid) {
+      warnings.push({
+        packId: entry.packId || null,
+        code: 'artifact_profile_extension_invalid',
+        profileId,
+        errors: validation.errors,
+      });
+      continue;
+    }
+    profiles[profileId] = profile;
+    added.push(profileId);
+  }
+  return { added, warnings };
+}
+
+try {
+  const { profiles: extensionProfiles, warnings } = loadDataModelExtensions();
+  ARTIFACT_PROFILE_EXTENSION_WARNINGS.push(...warnings);
+  const applied = applyDataModelExtensions({
+    extensions: extensionProfiles,
+    warnings: ARTIFACT_PROFILE_EXTENSION_WARNINGS,
+  });
+  EXTENSION_PROFILE_IDS.push(...applied.added);
+} catch {
+  /* pack extensions unavailable → canonical registry only */
+}
 
 // BLOCK-234 — producer/consumer lists are domain data owned by installed packs.
 // Profiles keep empty lists when no pack is installed (schema engine still works).
@@ -609,10 +665,20 @@ function validateColumnSchema(profileId, columnNames) {
   return { valid: errors.length === 0, errors, warnings };
 }
 
-const registryValidation = validateProfileRegistry();
+let registryValidation = validateProfileRegistry();
+if (!registryValidation.valid && EXTENSION_PROFILE_IDS.length > 0) {
+  for (const profileId of EXTENSION_PROFILE_IDS) delete ARTIFACT_PROFILES[profileId];
+  EXTENSION_PROFILE_IDS.length = 0;
+  ARTIFACT_PROFILE_EXTENSION_WARNINGS.push({
+    code: 'artifact_profile_extension_registry_rejected',
+    errors: registryValidation.errors,
+  });
+  registryValidation = validateProfileRegistry();
+}
 if (!registryValidation.valid) {
   throw new Error(`artifact_profile_registry_invalid:${registryValidation.errors.join(',')}`);
 }
+deepFreeze(ARTIFACT_PROFILE_EXTENSION_WARNINGS);
 
 module.exports = {
   ARTIFACT_PROFILE_REGISTRY_VERSION,
@@ -621,6 +687,8 @@ module.exports = {
   PROFILE_COMPATIBILITY_STATUSES,
   PROFILE_CHANGE_CLASSES,
   ARTIFACT_PROFILES,
+  ARTIFACT_PROFILE_EXTENSION_WARNINGS,
+  applyDataModelExtensions,
   canonicalStringify,
   sha256,
   parseProfileIdentity,

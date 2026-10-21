@@ -20,3 +20,9 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-21T09:48:36.377Z -->
 最后更新：2026-10-21（**BLOCK-228 Q9 K2 崩溃同意/本地提示 completed**）：crashReporter 仅本地（不上传）+ session-health 异常退出检测 + dump 文件名清单 + `crashNotice`（默认 true）+ 标题栏下方横幅（打开目录/知道了）。证据=Node 7/7 + 前端 2/2 + 9223 离屏 live 5/5（亮/暗截图）+ theme/types/lint/code-size PASS。reopen=minidump 栈解析/上传/崩溃率/版本聚合。plan=docs/block-228-q9-crash-consent-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-21T10:34:56.028Z -->
+最后更新：2026-10-21（**BLOCK-229 E7 电脑控制（Windows 边界内）completed**）：.NET 8 SDK + sidecar/axfixture 构建成功；host 只读 status + 后端 `status/probe` + 设置面板（权限提示/测试连接）；控制动作仍走 `computer_*` + 完全访问 + ackToken。证据=路由 2/2 + 面板 2/2 + 9223 离屏 live 6/6（亮/暗截图）+ types/lint/theme/code-size PASS。reopen=macOS 构建/权限、PiP、真实 click/type 端到端。plan=docs/block-229-e7-computer-use-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-21T10:43:48.933Z -->
+最后更新：2026-10-21（**BLOCK-230 Q-DOMAIN P4 第一片 completed**）：modality 默认 `general`；pack `provides.modalities` 扩展值（归一/上限/非法 diagnostic，仅 modality 的包保留）；未知回落 general，存量不迁移。证据=Node 4/4 + REST 实机 6/6 + closeout。**不是完整 P4**：权限通用化/域中性归零/RS 保真/导出联邦基线仍 reopen。plan=docs/block-230-qdomain-p4-modality-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。

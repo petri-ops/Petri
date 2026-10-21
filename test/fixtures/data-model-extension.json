@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "artifactProfiles": [
+    {
+      "profileId": "petri.custom-table.v1",
+      "familyId": "petri.custom-table",
+      "profileKind": "data",
+      "description": "Domain-declared generic tabular dataset",
+      "scientificMeaning": "A pack-declared tabular dataset with a stable row identifier and a numeric measure",
+      "granularity": "row",
+      "orientation": "rows_entities_columns_measures",
+      "requiredColumns": [
+        { "name": "id", "type": "string", "nullable": false },
+        { "name": "value", "type": "number", "nullable": true }
+      ],
+      "identifierNamespaces": ["custom"],
+      "validationRules": [
+        { "rule": "id_unique", "description": "identifier values must be unique", "severity": "error" }
+      ]
+    }
+  ]
+}

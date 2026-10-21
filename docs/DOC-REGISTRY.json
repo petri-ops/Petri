@@ -7575,9 +7575,24 @@
       "registeredAt": "2026-10-21",
       "archivePolicy": "retain_stable_path",
       "tags": ["q-domain", "data-model", "backend", "pack", "G0"],
-      "notes": "2026-10-21 立项（用户「按照你的建议继续推进下去，最好能搞完 P4-C」）：P4-C 收尾 S2–S6 统一包。**S2 completed**：agent-workflow 模板下沉 pack（0.2.2）。**S3 completed**：demo assets（0.2.3）+ profile actors（0.2.4）。**S4 completed**：methods Python 模板/引文下沉（0.2.5）+ 占位符渲染；域中性 179→103；test:changed 426 项 0 红 + closeout 十三门。S5-S6 open，包保持 active。"
+      "notes": "2026-10-21 立项（用户「按照你的建议继续推进下去，最好能搞完 P4-C」）：P4-C 收尾 S2–S6 统一包。**S2 completed**：agent-workflow 模板下沉 pack（0.2.2）。**S3 completed**：demo assets（0.2.3）+ profile actors（0.2.4）。**S4 completed**：methods Python 模板/引文下沉（0.2.5）+ 占位符渲染；域中性 179→103；test:changed 426 项 0 红 + closeout 十三门。**S5 completed**：scientific profiles 下沉（0.2.6；103→48）。**S6 completed**：前端/桌面收敛 + compat 白名单 + examplePrompts（0.2.7；48→11 处 / 6 键），closeout 十三门 + output:judge PASS。**completed（2026-10-21）**。"
+    },
+    {
+      "id": "BLOCK-235-QDOMAIN-P4D-DATAMODEL",
+      "capability": "qdomain-p4d-datamodel",
+      "path": "docs/block-235-qdomain-p4d-datamodel-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P5-CLOSED",
+      "canonical": true,
+      "truthDomain": "qdomain-p4d-datamodel",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-21",
+      "archivePolicy": "retain_stable_path",
+      "tags": ["q-domain", "data-model", "pack", "export", "federation", "G0"],
+      "notes": "2026-10-21 立项（用户「可以的 冲 P4余项」）：P4-D dataModelExtensions additive 扩展契约 + 导出/联邦域中性基线；canonical SDC-0 profile 不可覆盖。**completed（2026-10-21）**：block235 6/6 + 导出/联邦基线 4/4 + test:changed 443 项 0 红 + closeout 十三门 + output:judge PASS；域中性保持 11 处 / 6 键 compat。"
     }
   ],
   "lastUpdated": "2026-10-21",
-  "documentCount": 386
+  "documentCount": 387
 }

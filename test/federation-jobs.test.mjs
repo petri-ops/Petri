@@ -133,6 +133,12 @@ test('BLOCK-85 P2: job forward -> status -> file -> revoke propagation -> offlin
     assert.equal(seen.fileJob, 'job_peer0001');
     assert.equal(seen.file, 'volcano.png');
 
+    // 3b. 领域中性基线：任意通用文件名同样透传，不要求 artifact profile/扩展名白名单
+    const genericFile = await fetch(`${cmdBase}/api/federation/peers/${peerId}/jobs/job_peer0001/file/notes.txt`);
+    assert.equal(genericFile.status, 200);
+    assert.equal(seen.fileJob, 'job_peer0001');
+    assert.equal(seen.file, 'notes.txt');
+
     // 4. 鉴权传播：对端吊销联邦会话 → 转发全部 401 peer_session_invalid
     const stores = getStores(execRoot);
     const execSession = stores.sessions.list().find((session) => !session.revoked);

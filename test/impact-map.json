@@ -4765,6 +4765,38 @@
         "test/g0-third-wave.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block235-qdomain-p4d-datamodel",
+      "note": "BLOCK-235 P4-D — dataModelExtensions additive 扩展契约 + 导出/联邦域中性基线；canonical SDC-0 profile 不可覆盖。",
+      "patterns": [
+        "core/shared-backend/pack-data-model-extensions.js",
+        "core/shared-backend/artifact-profiles.js",
+        "test/block235-*.test.mjs",
+        "test/fixtures/data-model-extension.json",
+        "test/helpers/data-model-extensions-pack-fixture.mjs",
+        "test/helpers/block235-registry-probe.mjs",
+        "test/federation-jobs.test.mjs",
+        "docs/block-235-qdomain-p4d-datamodel-plan.md",
+        "acceptance/block-235/**"
+      ],
+      "tests": [
+        "test/block235-data-model-extensions.test.mjs",
+        "test/block235-data-model-registry-integration.test.mjs",
+        "test/block235-export-federation-baseline.test.mjs",
+        "test/g0-sdc0-profile-registry.test.mjs",
+        "test/block234-profile-actors.test.mjs",
+        "test/hle-c5r-regression.test.mjs",
+        "test/block131-domain-validation.test.mjs",
+        "test/agent-workflow.test.mjs",
+        "test/agent-workflow-phase6.test.mjs",
+        "test/conversation-export.test.mjs",
+        "test/delivery-manifest.test.mjs",
+        "test/federation-jobs.test.mjs",
+        "test/block88-project-grants.test.mjs",
+        "test/domain-neutrality.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }
