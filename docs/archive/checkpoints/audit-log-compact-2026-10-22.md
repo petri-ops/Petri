@@ -9,3 +9,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-22T01:49:27.561Z -->
 | ✅ BLOCK-202 整包（2026-10-17，用户「行 搞完W3」，当日立项当日收口） | 2026-10-17 | **阶段 A 速赢 III completed**：network 族（代理四项，启动时写 env，NO_PROXY 强制回环，CA 缺失诊断，restartRequired 诚实提示）+ runtime 族（审批默认档位仅缺省兜底、并发 1-8/深度 1-3 env 优先、工具白/黑名单曝光层）+ `/api/network`、`/api/runtime-policy` + 两设置面板；配置注册表扩 **8 族/35 键**，config-transfer 同步覆盖。四档判定与 BLOCK-180 链零改动。**9223 离屏探针 15/15 allPass**（acceptance/block-202/）；block202 11/11 + 前端 7/7；code-size 面板 670（抽 UsageSection，净不增）。UI-519/520 verified。 | zcode |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-22T04:42:09.282Z -->
+| ✅ UI-523 composer 运行计量条（2026-10-18，用户「开 UI-523 包 整完」；UI 轨当日闭环） | 2026-10-18 | **三段读数 + 环搬迁 completed**：本次 轮/步/tok/s（loop `usage` 事件）+ 会话 tok/缓存命中（`GET /api/ai/usage-conversation` 只读聚合，user+conversation 双过滤）+ 上下文%（预算环搬入条内，同一组件实例）；不可算一律 `—`。9223 实机腿 **10/10** + 隔离后端腿 **14/14**（`acceptance/ui-523/`；provider=mock，非真实 Provider）；契约 10/10 + 组件/hook 20/20。详见 `docs/ui-productization-audit.md` §UI-523。G0 开发期常态 · 不外推 packaged/Provider/GA | zcode |

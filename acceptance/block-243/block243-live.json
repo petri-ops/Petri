@@ -1,0 +1,93 @@
+{
+  "name": "block243-approval-contract-live",
+  "startedAt": "2026-10-22T02:42:55.646Z",
+  "finishedAt": "2026-10-22T02:43:06.890Z",
+  "providerCalls": 3,
+  "mockRequests": [
+    {
+      "n": 1,
+      "lastUser": "对归档库执行破坏性操作，目标是 db"
+    },
+    {
+      "n": 2,
+      "lastUser": "对归档库执行破坏性操作，目标是 db"
+    },
+    {
+      "n": 3,
+      "lastUser": "对归档库执行破坏性操作，目标是 db"
+    }
+  ],
+  "assertions": [
+    {
+      "name": "E1_isolated_backend",
+      "pass": true,
+      "detail": "隔离后端 :55286"
+    },
+    {
+      "name": "E2_mcp_connected",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"id\":\"many\",\"toolCount\":6}"
+    },
+    {
+      "name": "E3_project_conversation",
+      "pass": true,
+      "detail": "projectId=p_mvixrrx4_d6fx"
+    },
+    {
+      "name": "E4_task_started",
+      "pass": true,
+      "detail": "taskId=90d0775a-f795-4e96-b574-eacd92ddcb7d"
+    },
+    {
+      "name": "A1_trust_deny_envelope",
+      "pass": true,
+      "detail": "{\"requestId\":\"apr_52ac866541d65e6d12\",\"guardKey\":\"mcp:many\",\"dimension\":\"mcp-trust\",\"mcpServerId\":\"many\",\"approvalVariant\":\"info\",\"explanation\":\"MCP 服务「many」的信任位为 ask，且工具声明 destructiveHint（可能不可逆）。批准仅放行本次调用；可在扩展页把该服务信任位改为 allow。\",\"argsPreview\":\"{\\\"target\\\":\\\"db\\\"}\",\"inputEditable\":true,\"pendingRequestCount\":1,\"duplicate"
+    },
+    {
+      "name": "A2_approval_explanation",
+      "pass": true,
+      "detail": "variant=info args={\"target\":\"db\"}"
+    },
+    {
+      "name": "A3_pending_count_duplicate",
+      "pass": true,
+      "detail": "pending=1 duplicate=false"
+    },
+    {
+      "name": "B1_updated_input_revalidation",
+      "pass": true,
+      "detail": "status=400 error=updated_input_invalid details=[{\"path\":\"$.target\",\"code\":\"invalid_type\",\"expected\":\"string\"}]"
+    },
+    {
+      "name": "B2_approve_with_edit",
+      "pass": true,
+      "detail": "status=200 resp={\"ok\":true,\"guardKey\":\"mcp:many\",\"always\":false,\"scope\":\"once\",\"requestId\":\"apr_52ac866541d65e6d12\",\"decision\":\"approve\",\"status\":\"approved\",\"updatedInput\":true}"
+    },
+    {
+      "name": "C1_override_executed",
+      "pass": true,
+      "detail": "called:many_destructive:{\"target\":\"archive\"}"
+    },
+    {
+      "name": "C2_override_audit_meta",
+      "pass": true,
+      "detail": "{\"requestId\":\"apr_52ac866541d65e6d12\",\"edited\":true,\"guardKey\":\"mcp:many\",\"originalFingerprint\":\"687be64467d4dd50f7c12ea56b2d09d5\",\"effectiveFingerprint\":\"c48ff15be16398a1369c628084bcd8bb\"}"
+    },
+    {
+      "name": "C3_task_completed",
+      "pass": true,
+      "detail": "任务正常收口"
+    },
+    {
+      "name": "D1_permission_resolved_endpoint",
+      "pass": true,
+      "detail": "{\"taskId\":\"90d0775a-f795-4e96-b574-eacd92ddcb7d\",\"eventType\":\"permission.resolved\",\"guardKey\":\"mcp:many\",\"always\":false,\"scope\":\"once\",\"requestId\":\"apr_52ac866541d65e6d12\",\"decision\":\"approve\",\"updatedInput\":true,\"toolName\":\"mcp_many_many_destructive\",\"mcpServerId\":\"many\",\"reason\":\"BLOCK-243 live：改为归档目标\",\"durationMs\":8511,\"at\":\"2026-10-22T02:43:05.504Z\"}"
+    },
+    {
+      "name": "D2_permission_resolved_payload",
+      "pass": true,
+      "detail": "{\"event\":\"permission.resolved\",\"requestId\":\"apr_52ac866541d65e6d12\",\"decision\":\"approve\",\"behavior\":\"allow\",\"scope\":\"once\",\"reason\":\"BLOCK-243 live：改为归档目标\",\"toolName\":\"mcp_many_many_destructive\",\"guardKey\":\"mcp:many\",\"dimension\":\"mcp-trust\",\"mcpServerId\":\"many\",\"updatedInput\":true,\"originalInputHash\":\"687be64467d4dd50f7c12ea56b2d09d5\",\"effectiveInputHash\":\"c48ff15be16398a1369c628084bcd8bb\",\"originalInput\":\"{\\\"target\\\":\\\"db\\\"}\",\"effectiveInput\":\"{\\\"target\\\":\\\"archive\\\"}\",\"inputTruncated\":false,\"durationMs\":8511,\"at\""
+    }
+  ],
+  "allPass": true
+}

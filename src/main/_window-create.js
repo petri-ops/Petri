@@ -105,10 +105,13 @@ async function createWindow({
     ...(IS_TEST_INSTANCE ? { ...testWindowBounds, ...testWindowSize } : {}),
     // BLOCK-213 前置修复（2026-10-18 用户反馈「不要 TEST 有窗口的状态」）：
     // macOS 会把越界坐标的窗口**夹回可见区**（实测请求 x≈-1400 时落在 x=221），
-    // 于是"离屏"变成"屏幕上多一个 TEST 窗"。测试实例改为**根本不 show**：
+    // 于是"离屏"变成"屏幕上多一个 TEST 窗"。测试实例默认改为**根本不 show**：
     // 配合 backgroundThrottling:false，隐藏窗口仍持续渲染（rAF 不被节流），
     // CDP 的 Page.captureScreenshot 照常出图——验收面不变，屏幕干净。
-    ...(IS_TEST_INSTANCE ? { show: false } : {}),
+    // BLOCK-243 UI-551 实机抓真：Windows 离屏隐藏窗在复杂页面下
+    // Page.captureScreenshot 会等不到合成帧（20s 超时），`--onscreen`
+    // 必须真正 show（否则与启动器语义冲突）。
+    ...(IS_TEST_INSTANCE && process.env.PETRI_TEST_ONSCREEN !== "1" ? { show: false } : {}),
     minWidth: 720,
     minHeight: 520,
     title: IS_TEST_INSTANCE ? `[TEST] ${BRAND.APP_NAME}` : BRAND.APP_NAME, // BLOCK-61：品牌单一事实源；[TEST] 前缀=BLOCK-100 窗口级标记

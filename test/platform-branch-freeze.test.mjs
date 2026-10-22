@@ -29,6 +29,9 @@ const BASELINE = new Set([
   'scripts/block176-w7-live.mjs',
   // BLOCK-178 — 探针 win32 npm.cmd spawn 差异（Node spawnSync 对 .cmd 需 shell，同 W7 登记理由）
   'scripts/block178-live.mjs',
+  // BLOCK-243 UI-551 — 隔离栈起停的 win32 taskkill 进程树差异（dev-only 一次性
+  // 实机探针，收敛到 platform-compat 无收益），登记即留痕。
+  'scripts/ui551-ui-live.mjs',
   'core/petri-server/agent-tools/system-info-tools.js',
   'core/petri-server/agent-tools/workspace-tools.js',
   'core/petri-server/agent-tools/workspace-tools/internals.js',

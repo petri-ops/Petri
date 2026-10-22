@@ -119,14 +119,14 @@ function replaceToolResultData(envelope, data) {
 async function executeToolCall(name, args = {}, ctx = {}, options = {}) {
   const startedAt = process.hrtime.bigint();
   let data;
+  let appliedInputOverride = null;
   try {
     // BLOCK-33 P3 — options.onOutput（可选）透传到 handler（workspace_exec 流式输出）
-    data = await interceptAgentToolCall(
-      name,
-      args,
-      ctx,
-      typeof options.onOutput === 'function' ? { onOutput: options.onOutput } : {}
-    );
+    const handlerOptions = {};
+    if (typeof options.onOutput === 'function') handlerOptions.onOutput = options.onOutput;
+    // BLOCK-243 — 编辑参数替换元数据（原始/生效指纹、requestId）随结果回传审计面。
+    handlerOptions.onInputOverride = (meta) => { appliedInputOverride = meta; };
+    data = await interceptAgentToolCall(name, args, ctx, handlerOptions);
   } catch (error) {
     // BLOCK-171 CP-1 — 协作取消归类：handler 抛 AbortError('tool_cancel_requested')
     // 时诚实入 envelope 为 tool_cancelled（区别于真失败；模型可据此收尾叙事）。
@@ -143,6 +143,9 @@ async function executeToolCall(name, args = {}, ctx = {}, options = {}) {
           error: 'tool_failed',
           message: error && error.message ? error.message : String(error),
         };
+  }
+  if (appliedInputOverride && data && typeof data === 'object' && !Array.isArray(data)) {
+    data = { ...data, appliedInputOverride };
   }
   const durationMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
   const envelope = buildEnvelope(name, args, data, ctx, options, durationMs);
@@ -180,6 +183,10 @@ function commonData(data) {
     // BLOCK-171 CP-2 — 确认通道键（dynamic_guard / user_rule_require_ack 拒绝
     // 携带；前端确认卡与模型重试都依赖该键可见）
     'guardKey', 'dimension', 'ruleId',
+    // BLOCK-243 — MCP trust / 审批变体与确定性解释（模型可如实叙述）
+    'mcpServerId', 'approvalVariant', 'explanation',
+    // BLOCK-243 — 用户编辑参数后的执行替换元数据（原始/生效指纹）
+    'appliedInputOverride',
   ]) {
     if (data[key] !== undefined) compact[key] = data[key];
   }

@@ -1,20 +1,20 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 
 /**
- * GuardAckCard — 动态防护/用户规则 require-ack 确认卡（BLOCK-171 CP-2）。
+ * GuardAckCard — 动态防护/用户规则/MCP trust 确认卡（BLOCK-171 CP-2；BLOCK-243 Q1 v2）。
  *
- * 后端 dynamic_guard / user_rule_require_ack 拒绝已携带 guardKey（存量缺陷
- * 修复后透出）；本卡=确认通道的用户可见面：放行一次 / 本任务总是放行 /
- * 拒绝（dismiss）。ack 写 task 内确认集（策略读侧即时生效，模型重试即过），
- * guard_ack 事件入 task_events（审批记录可复审）。
+ * 后端 deny 信封（toolResult.approval）是唯一数据源：
+ * - 变体：dynamic_guard=danger / user_rule=warning / mcp_trust=info；
+ * - 意图解释：服务端确定性规则派生（不伪造模型解释）；
+ * - 长命令折叠（span 高亮保持）；参数 JSON 编辑（脱敏/有界未截断才可编辑）；
+ * - 范围：仅本次 / 本任务（维度 ack，任务结束失效）/ 始终信任 MCP 服务
+ *   （写 trust=allow，仅 mcp_trust 请求可选）——后两者两步武装；
+ * - 待审批计数与重复调用提示。
  *
- * BLOCK-180 — 审批一等资源面：
- * - requestId 在场时按「请求级决策」上送（approve/deny），否则退化为存量键级；
- * - command + spans（服务端 command-risk-spans 分析）在卡内高亮风险片段——
- *   用户看得到批的是什么（前端不重复实现风险规则，单一真相在服务端）；
- * - 「本任务总是放行」两步武装（先确认条，二次点击才生效=先武装后使用）。
+ * 编辑参数只允许一次性批准：批准时上送 updatedInput，后端重跑 schema/preflight/
+ * policy 并登记「原始指纹→生效参数」替换；模型重试原调用时执行生效参数并留审计。
  */
 interface CommandRiskSpan {
   start: number;
@@ -31,9 +31,23 @@ export interface GuardAckCardProps {
   command?: string | null;
   spans?: CommandRiskSpan[] | null;
   armedGuardKeys?: string[];
-  onAck: (mode: 'once' | 'always') => void;
+  variant?: 'danger' | 'warning' | 'info';
+  explanation?: string;
+  argsPreview?: string | null;
+  inputEditable?: boolean;
+  pendingRequestCount?: number;
+  duplicatePending?: boolean;
+  mcpServerId?: string | null;
+  canAlways?: boolean;
+  onAck: (mode: 'once' | 'task' | 'always', updatedInput?: unknown) => void;
   onDismiss: () => void;
 }
+
+const VARIANT_META: Record<'danger' | 'warning' | 'info', { title: string; icon: 'shield' | 'alert-triangle' | 'info' }> = {
+  danger: { title: '动态防护确认', icon: 'shield' },
+  warning: { title: '规则确认', icon: 'alert-triangle' },
+  info: { title: 'MCP 服务确认', icon: 'info' },
+};
 
 /** 按风险 span 切分命令串：命中片段高亮（kind 即色），其余原样。 */
 function renderCommandWithSpans(command: string, spans: CommandRiskSpan[] | null | undefined): React.ReactElement {
@@ -56,6 +70,14 @@ function renderCommandWithSpans(command: string, spans: CommandRiskSpan[] | null
   return <code className="sc-guard-card__command">{parts}</code>;
 }
 
+function prettyJson(text: string): string {
+  try {
+    return JSON.stringify(JSON.parse(text), null, 2);
+  } catch {
+    return text;
+  }
+}
+
 export function GuardAckCard({
   toolName,
   guardKey,
@@ -65,34 +87,158 @@ export function GuardAckCard({
   command,
   spans,
   armedGuardKeys = [],
+  variant = 'danger',
+  explanation,
+  argsPreview,
+  inputEditable = false,
+  pendingRequestCount = 0,
+  duplicatePending = false,
+  mcpServerId,
+  canAlways = false,
   onAck,
   onDismiss,
 }: GuardAckCardProps): React.ReactElement {
-  // BLOCK-180 P3 — 「本任务总是放行」两步武装：先出确认条，二次点击才生效。
-  const [armConfirming, setArmConfirming] = useState(false);
-  const requestArm = useCallback(() => setArmConfirming(true), []);
-  const cancelArm = useCallback(() => setArmConfirming(false), []);
+  const meta = VARIANT_META[variant] || VARIANT_META.danger;
+  const [armScope, setArmScope] = useState<'task' | 'always' | null>(null);
+  const [commandExpanded, setCommandExpanded] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState('');
+  const [editError, setEditError] = useState<string | null>(null);
+
+  const prettyPreview = useMemo(() => (argsPreview ? prettyJson(argsPreview) : ''), [argsPreview]);
+  const foldable = Boolean(command && (command.length > 240 || command.split('\n').length > 4));
+
+  const beginEdit = useCallback(() => {
+    setDraft(prettyPreview);
+    setEditError(null);
+    setEditing(true);
+    setArmScope(null);
+  }, [prettyPreview]);
+
+  const cancelEdit = useCallback(() => {
+    setEditing(false);
+    setDraft('');
+    setEditError(null);
+  }, []);
+
+  const approveOnce = useCallback(() => {
+    if (!editing) {
+      onAck('once');
+      return;
+    }
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(draft);
+    } catch (error) {
+      setEditError(`JSON 解析失败：${error instanceof Error ? error.message : String(error)}`);
+      return;
+    }
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      setEditError('参数必须是 JSON 对象。');
+      return;
+    }
+    let unchanged = false;
+    try {
+      unchanged = JSON.stringify(parsed) === JSON.stringify(JSON.parse(argsPreview || '{}'));
+    } catch {
+      unchanged = false;
+    }
+    setEditError(null);
+    setEditing(false);
+    if (unchanged) onAck('once');
+    else onAck('once', parsed);
+  }, [argsPreview, draft, editing, onAck]);
+
+  const requestArm = useCallback((scope: 'task' | 'always') => {
+    setEditing(false);
+    setArmScope(scope);
+  }, []);
+  const cancelArm = useCallback(() => setArmScope(null), []);
   const confirmArm = useCallback(() => {
-    setArmConfirming(false);
-    onAck('always');
-  }, [onAck]);
+    if (!armScope) return;
+    const scope = armScope;
+    setArmScope(null);
+    onAck(scope);
+  }, [armScope, onAck]);
+
+  const explanationText = explanation || message || `工具 ${toolName} 命中审批维度，需要你确认后放行。`;
 
   return (
-    <div className="sc-guard-card" role="alertdialog" aria-label="动态防护确认" data-testid="guard-ack-card">
+    <div
+      className={`sc-guard-card sc-guard-card--${variant}`}
+      role="alertdialog"
+      aria-label={meta.title}
+      data-testid="guard-ack-card"
+      data-variant={variant}
+    >
       <div className="sc-guard-card__head">
         <span className="sc-guard-card__icon" aria-hidden="true">
-          <Icon name="shield" size={14} />
+          <Icon name={meta.icon} size={14} />
         </span>
-        <span className="sc-guard-card__title">动态防护确认</span>
+        <span className="sc-guard-card__title">{meta.title}</span>
         <code className="sc-guard-card__key" title={guardKey}>{guardKey}</code>
         {requestId ? <code className="sc-guard-card__req" title={`审批请求 ${requestId}`}>{requestId.slice(0, 12)}…</code> : null}
       </div>
-      <p className="sc-guard-card__message">{message || `工具 ${toolName} 命中动态审批维度，需要你确认后放行。`}</p>
+      <p className="sc-guard-card__message">{message || `工具 ${toolName} 命中审批维度，需要你确认后放行。`}</p>
+      <p className="sc-guard-card__explanation" data-testid="guard-ack-explanation">{explanationText}</p>
+      {pendingRequestCount > 1 ? (
+        <p className="sc-guard-card__meta" data-testid="guard-ack-pending-count">还有 {pendingRequestCount - 1} 个待审批请求</p>
+      ) : null}
+      {duplicatePending ? (
+        <p className="sc-guard-card__meta" data-testid="guard-ack-duplicate">重复调用已合并到同一审批请求</p>
+      ) : null}
       {command ? (
         <div className="sc-guard-card__command-row" data-testid="guard-ack-command">
-          {renderCommandWithSpans(command, spans)}
+          <div className={`sc-guard-card__command-fold${commandExpanded ? ' is-expanded' : ''}`}>
+            {renderCommandWithSpans(command, spans)}
+          </div>
+          {foldable ? (
+            <button
+              type="button"
+              className="sc-guard-card__fold-toggle"
+              data-testid="guard-ack-command-toggle"
+              onClick={() => setCommandExpanded((value) => !value)}
+            >
+              {commandExpanded ? '收起命令' : '展开全部命令'}
+            </button>
+          ) : null}
         </div>
       ) : null}
+
+      {argsPreview ? (
+        <div className="sc-guard-card__args" data-testid="guard-ack-args">
+          {editing ? (
+            <textarea
+              className="sc-guard-card__args-input"
+              data-testid="guard-ack-args-input"
+              aria-label="编辑工具参数（JSON）"
+              value={draft}
+              rows={Math.min(12, Math.max(4, draft.split('\n').length + 1))}
+              onChange={(event) => { setDraft(event.target.value); setEditError(null); }}
+              spellCheck={false}
+            />
+          ) : (
+            <div className="sc-guard-card__args-preview" data-testid="guard-ack-args-preview">{prettyPreview}</div>
+          )}
+          {editError ? (
+            <p className="sc-guard-card__args-error" role="alert" data-testid="guard-ack-args-error">{editError}</p>
+          ) : null}
+          {inputEditable ? (
+            editing ? (
+              <button type="button" className="sc-guard-card__fold-toggle" data-testid="guard-ack-edit-cancel" onClick={cancelEdit}>
+                取消编辑
+              </button>
+            ) : (
+              <button type="button" className="sc-guard-card__fold-toggle" data-testid="guard-ack-edit-toggle" onClick={beginEdit}>
+                编辑参数
+              </button>
+            )
+          ) : (
+            <p className="sc-guard-card__meta">参数含敏感字段或过大，仅只读展示。</p>
+          )}
+        </div>
+      ) : null}
+
       {armedGuardKeys.length > 0 ? (
         <div className="sc-guard-card__armed" data-testid="guard-ack-armed">
           {armedGuardKeys.map((key) => (
@@ -100,9 +246,16 @@ export function GuardAckCard({
           ))}
         </div>
       ) : null}
-      {armConfirming ? (
+
+      {armScope ? (
         <div className="sc-guard-card__arm-confirm" role="alert" data-testid="guard-ack-arm-confirm">
-          <span>武装后本任务内「{guardKey}」维度不再询问（任务结束自动失效）。确认武装？</span>
+          {armScope === 'always' ? (
+            <span>
+              将 MCP 服务{ mcpServerId ? `「${mcpServerId}」` : ''}的信任位改为 allow（自动批准其 destructive 工具），可在扩展页随时改回。确认？
+            </span>
+          ) : (
+            <span>武装后本任务内「{guardKey}」维度不再询问（任务结束自动失效）。确认武装？</span>
+          )}
           <button
             type="button"
             className="sc-guard-card__btn sc-guard-card__btn-primary"
@@ -110,7 +263,7 @@ export function GuardAckCard({
             data-testid="guard-ack-arm-confirm-yes"
             onClick={confirmArm}
           >
-            确认武装
+            确认
           </button>
           <button
             type="button"
@@ -129,19 +282,36 @@ export function GuardAckCard({
             className="sc-guard-card__btn sc-guard-card__btn-primary"
             disabled={busy}
             data-testid="guard-ack-once"
-            onClick={() => onAck('once')}
+            onClick={approveOnce}
           >
-            放行一次
+            {editing ? '批准并应用' : '放行一次'}
           </button>
-          <button
-            type="button"
-            className="sc-guard-card__btn"
-            disabled={busy}
-            data-testid="guard-ack-always"
-            onClick={requestArm}
-          >
-            本任务总是放行
-          </button>
+          {editing ? (
+            <span className="sc-guard-card__hint" data-testid="guard-ack-edit-hint">编辑参数按一次性批准；如需本任务/始终范围，请取消编辑后按原参数批准。</span>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="sc-guard-card__btn"
+                disabled={busy}
+                data-testid="guard-ack-task"
+                onClick={() => requestArm('task')}
+              >
+                本任务总是放行
+              </button>
+              {canAlways ? (
+                <button
+                  type="button"
+                  className="sc-guard-card__btn"
+                  disabled={busy}
+                  data-testid="guard-ack-always"
+                  onClick={() => requestArm('always')}
+                >
+                  始终信任此服务
+                </button>
+              ) : null}
+            </>
+          )}
           <button
             type="button"
             className="sc-guard-card__btn sc-guard-card__btn-ghost"
@@ -162,9 +332,22 @@ interface GuardAckRecord {
   guardKey: string;
   always: boolean;
   at: string;
+  eventType?: string;
+  scope?: 'once' | 'task' | 'always';
   requestId?: string;
   decision?: string;
+  updatedInput?: boolean;
+  toolName?: string | null;
+  mcpServerId?: string | null;
+  reason?: string | null;
+  durationMs?: number | null;
   command?: string;
+}
+
+function scopeLabel(record: GuardAckRecord): string {
+  if (record.scope === 'always') return '始终';
+  if (record.scope === 'task' || record.always) return '本任务';
+  return '仅本次';
 }
 
 function useGuardAckHistory(enabled: boolean): { records: GuardAckRecord[]; loading: boolean; error: string | null; reload: () => void } {
@@ -237,9 +420,17 @@ export function GuardAckHistoryPanel(): React.ReactElement {
             <span className="sc-guard-history__time">{record.at.replace('T', ' ').slice(0, 19)}</span>
             <code className="sc-guard-history__key" title={record.requestId ? `审批请求 ${record.requestId}` : record.guardKey}>{record.guardKey}</code>
             {record.decision ? (
-              <span className="sc-guard-history__decision" title={record.command || undefined}>{record.decision === 'approve' ? '批准' : '拒绝'}·{record.always ? 'always' : 'once'}</span>
+              <span
+                className="sc-guard-history__decision"
+                title={record.reason || record.command || undefined}
+                data-testid="guard-history-decision"
+              >
+                {record.decision === 'approve' ? '批准' : '拒绝'}·{scopeLabel(record)}
+                {record.updatedInput ? '·参数已编辑' : ''}
+                {typeof record.durationMs === 'number' ? `·${Math.round(record.durationMs)}ms` : ''}
+              </span>
             ) : (
-              <span className="sc-guard-history__scope">{record.always ? '本任务总是放行' : '放行一次'}</span>
+              <span className="sc-guard-history__scope">{scopeLabel(record)}</span>
             )}
             <span className="sc-guard-history__task" title={record.taskId}>{record.taskId.slice(0, 12)}…</span>
           </li>

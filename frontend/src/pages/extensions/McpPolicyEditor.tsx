@@ -2,8 +2,8 @@
  * McpPolicyEditor — UI-547（Q8 深化）MCP 服务级工具治理。
  *
  * 只编辑真正生效的两项：白名单（非空=只投影名单内工具）与阻断（永远优先）。
- * 信任位仍是只读标记——BLOCK-221 明确 trust 不改变审批默认，降档必须随 Q1
- * 审批事件契约一起做；这里不造「可编辑信任」的假象。
+ * BLOCK-243（Q1）起信任位已生效：ask 时声明 destructiveHint 的工具需审批，
+ * allow 时自动批准；审批卡「始终信任此服务」可写该位，本面板只读展示当前值。
  */
 
 import React, { useState } from 'react';
@@ -94,11 +94,37 @@ export function McpPolicyEditor({ server, onSave }: McpPolicyEditorProps): React
       <div className={styles.head}>
         <span>工具治理</span>
         <span className={styles.trust} data-testid={`mcp-policy-trust-${server.id}`}>
-          信任位 {policy.trust === 'allow' ? 'allow（仅标记）' : 'ask（默认）'}
+          信任位 {policy.trust === 'allow' ? 'allow（destructive 工具自动批准）' : 'ask（destructive 工具需确认）'}
+          {policy.trust === 'allow' ? (
+            <button
+              type="button"
+              className={`${styles.save} ${styles.revoke}`}
+              disabled={saving}
+              data-testid={`mcp-policy-trust-revoke-${server.id}`}
+              onClick={() => {
+                setError('');
+                setDiagnostics([]);
+                setSaving(true);
+                void onSave({ trust: 'ask' }).then((result) => {
+                  setSaving(false);
+                  if (!result.ok) {
+                    setError(result.error || '保存失败');
+                    setDiagnostics(result.diagnostics);
+                  }
+                }).catch(() => {
+                  setSaving(false);
+                  setError('保存失败');
+                });
+              }}
+            >
+              改回 ask
+            </button>
+          ) : null}
         </span>
       </div>
       <p className={styles.note}>
-        白名单非空时只投影名单内工具；阻断优先于白名单。审批默认不随信任位改变（接入待 Q1）。
+        白名单非空时只投影名单内工具；阻断优先于白名单。信任位只影响声明 destructiveHint 的变更类工具；
+        审批卡「始终信任此服务」可把该位改为 allow。
       </p>
       <span className={styles.metrics} data-testid={`mcp-policy-metrics-${server.id}`}>
         {policy.catalogMode

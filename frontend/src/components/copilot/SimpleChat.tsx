@@ -941,39 +941,81 @@ export function SimpleChat({
   }, [steerNotice, streaming]);
 
   // BLOCK-171 CP-2 — 确认通道卡：从 run 快照工具活动派生最新一条待确认拒绝
-  // （dynamic_guard / user_rule_require_ack 且带 guardKey；本地已裁定键跳过）。
-  // BLOCK-180 — 派生扩展字段：requestId/command/spans（审批一等资源面）。
+  // （dynamic_guard / user_rule_require_ack / mcp_trust_required 且带 guardKey；本地已裁定键跳过）。
+  // BLOCK-243 Q1 — 优先读 toolResult.approval（长命令/参数不被 data 预览截断），
+  // 旧快照回落 resultData；过期请求不再展示。
   const [ackedGuardKeys, setAckedGuardKeys] = useState<string[]>([]);
   const [guardAckBusy, setGuardAckBusy] = useState(false);
+  const [guardAckNotice, setGuardAckNotice] = useState<string | null>(null);
+  useEffect(() => {
+    if (!guardAckNotice) return undefined;
+    const timer = window.setTimeout(() => setGuardAckNotice(null), 5000);
+    return () => window.clearTimeout(timer);
+  }, [guardAckNotice]);
   const pendingGuardAck = useMemo(() => {
     const acts = activeRun?.toolActivities || [];
     for (let i = acts.length - 1; i >= 0; i -= 1) {
-      const activity = acts[i] as { status?: string; name?: string; resultData?: unknown };
+      const activity = acts[i] as {
+        status?: string;
+        name?: string;
+        resultData?: {
+          error?: string; reason?: string; guardKey?: string; message?: string;
+          requestId?: string; command?: string; spans?: Array<{ start: number; end: number; kind: string }>;
+        };
+        approval?: {
+          requestId?: string;
+          guardKey?: string;
+          approvalVariant?: 'danger' | 'warning' | 'info';
+          explanation?: string;
+          command?: string | null;
+          spans?: Array<{ start: number; end: number; kind: string }> | null;
+          argsPreview?: string | null;
+          inputEditable?: boolean;
+          pendingRequestCount?: number;
+          duplicatePending?: boolean;
+          mcpServerId?: string | null;
+          expiresAt?: string;
+          message?: string;
+        };
+      };
       if (activity.status !== 'denied' && activity.status !== 'error') continue;
-      const data = activity.resultData as {
-        error?: string; reason?: string; guardKey?: string; message?: string;
-        requestId?: string; command?: string; spans?: Array<{ start: number; end: number; kind: string }>;
-      } | undefined;
-      if (!data || !data.guardKey) continue;
+      const approval = activity.approval;
+      const data = activity.resultData;
+      const guardKey = approval?.guardKey || data?.guardKey;
+      if (!guardKey) continue;
       // BLOCK-181 代行评估抓真 — 信封 error 实为 *_triggered（reason 才是
       // dynamic_guard/user_rule_require_ack）；两字段都接受以兼容历史快照。
-      const isGuardDeny = data.error === 'dynamic_guard' || data.error === 'dynamic_guard_triggered'
-        || data.reason === 'dynamic_guard' || data.error === 'user_rule_require_ack'
-        || data.reason === 'user_rule_require_ack';
+      const isGuardDeny = Boolean(approval)
+        || data?.error === 'dynamic_guard' || data?.error === 'dynamic_guard_triggered'
+        || data?.reason === 'dynamic_guard' || data?.error === 'user_rule_require_ack'
+        || data?.reason === 'user_rule_require_ack'
+        || data?.error === 'mcp_trust_required' || data?.reason === 'mcp_trust_required';
       if (!isGuardDeny) continue;
-      if (ackedGuardKeys.includes(data.guardKey)) continue;
+      if (ackedGuardKeys.includes(guardKey)) continue;
+      if (approval?.expiresAt && Date.parse(approval.expiresAt) <= Date.now()) continue;
+      const isMcpTrust = Boolean(approval?.mcpServerId)
+        || data?.error === 'mcp_trust_required' || data?.reason === 'mcp_trust_required';
+      const isUserRule = data?.error === 'user_rule_require_ack' || data?.reason === 'user_rule_require_ack';
       return {
-        guardKey: data.guardKey,
+        guardKey,
         toolName: activity.name || '',
-        message: data.message || '',
-        requestId: typeof data.requestId === 'string' ? data.requestId : undefined,
-        command: typeof data.command === 'string' ? data.command : null,
-        spans: Array.isArray(data.spans) ? data.spans : null,
+        message: approval?.message || data?.message || '',
+        requestId: approval?.requestId || data?.requestId,
+        command: approval?.command ?? data?.command ?? null,
+        spans: approval?.spans ?? data?.spans ?? null,
+        variant: approval?.approvalVariant || (isMcpTrust ? 'info' : isUserRule ? 'warning' : 'danger'),
+        explanation: approval?.explanation,
+        argsPreview: approval?.argsPreview ?? null,
+        inputEditable: approval?.inputEditable === true,
+        pendingRequestCount: approval?.pendingRequestCount ?? 0,
+        duplicatePending: approval?.duplicatePending === true,
+        mcpServerId: approval?.mcpServerId ?? null,
+        canAlways: isMcpTrust,
       };
     }
     return null;
   }, [activeRun, ackedGuardKeys]);
-  const handleGuardAck = useCallback((mode: 'once' | 'always') => {
+  const handleGuardAck = useCallback((mode: 'once' | 'task' | 'always', updatedInput?: unknown) => {
     if (!pendingGuardAck || !conversationId) return;
     const runTaskId = getConversationRunSnapshot(conversationId)?.taskId;
     if (!runTaskId) return;
@@ -984,19 +1026,33 @@ export function SimpleChat({
         'Content-Type': 'application/json',
         ...(getToken() ? { Authorization: 'Bearer ' + getToken() } : {}),
       },
-      // BLOCK-180 — requestId 在场=请求级决策；缺席=存量键级放行（向后兼容）
+      // BLOCK-243 — scope 取代 always 布尔；updatedInput 仅一次性批准可带。
       body: JSON.stringify({
         guardKey: pendingGuardAck.guardKey,
-        always: mode === 'always',
+        scope: mode,
         ...(pendingGuardAck.requestId ? { requestId: pendingGuardAck.requestId, decision: 'approve' } : {}),
+        ...(updatedInput !== undefined ? { updatedInput } : {}),
       }),
     })
-      .then((response) => response.json().catch(() => ({})))
-      .then((data: { ok?: unknown }) => {
-        if (data && data.ok) setAckedGuardKeys((current) => [...current, pendingGuardAck.guardKey]);
+      .then(async (response) => {
+        const data = (await response.json().catch(() => ({}))) as { ok?: unknown; message?: unknown; error?: unknown };
+        if (data && data.ok) {
+          setAckedGuardKeys((current) => [...current, pendingGuardAck.guardKey]);
+          if (updatedInput !== undefined) {
+            setGuardAckNotice('已按你编辑的参数批准；模型重试该调用时将执行生效参数。');
+          } else if (mode === 'always') {
+            setGuardAckNotice('已将该 MCP 服务的信任位改为 allow。');
+          }
+          return;
+        }
+        const reason = typeof data.message === 'string' && data.message
+          ? data.message
+          : typeof data.error === 'string' && data.error ? data.error : `HTTP ${response.status}`;
+        setGuardAckNotice(`审批未生效：${reason}`);
       })
       .catch(() => {
         // 网络失败保留卡片（用户可重试）；本地态不变
+        setGuardAckNotice('审批未生效：网络错误，请重试。');
       })
       .finally(() => setGuardAckBusy(false));
   }, [conversationId, pendingGuardAck]);
@@ -1012,7 +1068,7 @@ export function SimpleChat({
         'Content-Type': 'application/json',
         ...(getToken() ? { Authorization: 'Bearer ' + getToken() } : {}),
       },
-      body: JSON.stringify({ requestId: pendingGuardAck.requestId, guardKey: pendingGuardAck.guardKey, decision: 'deny' }),
+      body: JSON.stringify({ requestId: pendingGuardAck.requestId, guardKey: pendingGuardAck.guardKey, decision: 'deny', scope: 'once' }),
     }).catch(() => { /* deny 上送失败不阻塞本地关卡 */ });
   }, [conversationId, pendingGuardAck]);
 
@@ -1654,9 +1710,14 @@ export function SimpleChat({
               <div className="sc-attachment-notice" role="status">{steerNotice}</div>
             )}
             {/* BLOCK-171 CP-2 — 动态防护确认卡（require-ack 用户可见面）；
-                BLOCK-180 — 审批资源面：requestId 级决策/command span 高亮/两步武装 */}
+                BLOCK-180 — 审批资源面：requestId 级决策/command span 高亮/两步武装；
+                BLOCK-243 — 三变体/确定性解释/参数编辑/范围/计数 */}
+            {guardAckNotice && (
+              <div className="sc-attachment-notice" role="status" data-testid="guard-ack-notice">{guardAckNotice}</div>
+            )}
             {pendingGuardAck && (
               <GuardAckCard
+                key={pendingGuardAck.requestId || pendingGuardAck.guardKey}
                 toolName={pendingGuardAck.toolName}
                 guardKey={pendingGuardAck.guardKey}
                 message={pendingGuardAck.message}
@@ -1665,6 +1726,14 @@ export function SimpleChat({
                 command={pendingGuardAck.command}
                 spans={pendingGuardAck.spans}
                 armedGuardKeys={ackedGuardKeys}
+                variant={pendingGuardAck.variant}
+                explanation={pendingGuardAck.explanation}
+                argsPreview={pendingGuardAck.argsPreview}
+                inputEditable={pendingGuardAck.inputEditable}
+                pendingRequestCount={pendingGuardAck.pendingRequestCount}
+                duplicatePending={pendingGuardAck.duplicatePending}
+                mcpServerId={pendingGuardAck.mcpServerId}
+                canAlways={pendingGuardAck.canAlways}
                 onAck={handleGuardAck}
                 onDismiss={handleGuardDismiss}
               />

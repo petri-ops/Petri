@@ -286,7 +286,14 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
           'user_rule_triggered',
           `用户规则拦截：规则「${match.rule.id}」（${match.rule.action === 'deny' ? '动作=拒绝' : '动作=需确认'}）。` +
           `（guardKey=${match.guardKey}）`,
-          { ruleId: match.rule.id, guardKey: match.guardKey }
+          {
+            ruleId: match.rule.id,
+            guardKey: match.guardKey,
+            ...(match.rule.action === 'deny' ? {} : {
+              approvalVariant: 'warning',
+              explanation: `你的用户规则「${match.rule.id}」要求此调用先确认；批准仅放行本次调用（本任务范围可在卡内选择）。`,
+            }),
+          }
         );
       }
       if (!acked && fingerprintApproved) fingerprintConsumable = fingerprint;
@@ -307,7 +314,44 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
           'dynamic_guard_triggered',
           `动态防护拦截：${guard.detail}（guardKey=${guard.guardKey}）。` +
           '该调用命中动态审批维度；如属误判请调整调用方式，放行需经用户确认通道。',
-          { guardKey: guard.guardKey, dimension: guard.dimension }
+          {
+            guardKey: guard.guardKey,
+            dimension: guard.dimension,
+            approvalVariant: 'danger',
+            explanation: `动态防护：${guard.detail}。批准仅放行本次调用；如属误判请调整调用方式。`,
+          }
+        );
+      }
+      fingerprintConsumable = fingerprint;
+    }
+  }
+
+  // BLOCK-243 Q1 — MCP 服务信任位（判定序第四层）：trust='ask' 时仅对声明
+  // destructiveHint 的工具要求审批；trust='allow' 自动放行。trust 由拦截器在
+  // 调用时从 mcp-server-policy 重读注入（投影快照不作放行依据）。与用户规则/
+  // 动态防护共用同一 guardKey ack（task）与指纹放行（once）通道。
+  if (
+    operation.mutating
+    && ctx.mcpApproval
+    && ctx.mcpApproval.destructive === true
+    && ctx.mcpApproval.serverId
+  ) {
+    const serverId = String(ctx.mcpApproval.serverId);
+    const guardKey = `mcp:${serverId}`;
+    if (ctx.mcpApproval.trust !== 'allow' && !isGuardAcked(ctx, guardKey)) {
+      const fingerprint = callFingerprint(name, args);
+      if (!isFingerprintApproved(ctx, fingerprint)) {
+        return deny(
+          'mcp_trust_required',
+          'mcp_trust_required',
+          `MCP 服务「${serverId}」的信任位为 ask；工具 ${name} 声明 destructiveHint（可能执行不可逆操作），需要你确认后放行。`,
+          {
+            guardKey,
+            dimension: 'mcp-trust',
+            mcpServerId: serverId,
+            approvalVariant: 'info',
+            explanation: `MCP 服务「${serverId}」的信任位为 ask，且工具声明 destructiveHint（可能不可逆）。批准仅放行本次调用；可在扩展页把该服务信任位改为 allow。`,
+          }
         );
       }
       fingerprintConsumable = fingerprint;
@@ -319,6 +363,7 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
   if (!preflight) {
     return allow(operation.delegatedApproval ? 'delegated_approval' : 'policy_allowed', {
       delegatedApproval: operation.delegatedApproval,
+      ...(fingerprintConsumable ? { fingerprintConsumable } : {}),
     });
   }
   if (preflight.ok === false) return preflightDenial(preflight);

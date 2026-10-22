@@ -22,6 +22,34 @@ function publicData(data) {
   };
 }
 
+/**
+ * BLOCK-243 — 审批卡载荷（toolResult 顶层，独立于 data 截断）。
+ * 长命令按 8000 字符截断并裁掉越界 span；参数预览已由审批资源脱敏/有界。
+ */
+const APPROVAL_FIELDS = [
+  'requestId', 'guardKey', 'dimension', 'ruleId', 'mcpServerId',
+  'approvalVariant', 'explanation', 'command', 'spans', 'argsPreview',
+  'inputEditable', 'pendingRequestCount', 'duplicatePending', 'expiresAt', 'message',
+];
+const APPROVAL_COMMAND_LIMIT = 8000;
+
+function approvalPayload(result) {
+  if (!result || typeof result !== 'object' || Array.isArray(result)) return null;
+  if (!result.guardKey) return null;
+  const payload = {};
+  for (const key of APPROVAL_FIELDS) {
+    if (result[key] !== undefined) payload[key] = result[key];
+  }
+  if (typeof payload.command === 'string' && payload.command.length > APPROVAL_COMMAND_LIMIT) {
+    payload.command = payload.command.slice(0, APPROVAL_COMMAND_LIMIT);
+    payload.commandTruncated = true;
+    if (Array.isArray(payload.spans)) {
+      payload.spans = payload.spans.filter((span) => span && Number(span.end) <= APPROVAL_COMMAND_LIMIT);
+    }
+  }
+  return payload;
+}
+
 // UI-273 增补 — 写操作的逐行改动（统计 + 截断 hunks）。挂在 toolResult 顶层而非 data 内：
 // data 受 PUBLIC_DATA_LIMIT 截断，超限会被整体替换为 preview 字符串，diff 必须独立存活。
 const CHANGE_DIFF_LIMIT = 4000;
@@ -70,6 +98,7 @@ function summarizeResultObject(obj) {
 function buildToolResultEvent(envelope, args = {}, options = {}) {
   const result = envelope.data;
   const published = publicData(result);
+  const approval = approvalPayload(result);
   const summary = result && typeof result === 'object'
     ? Array.isArray(result)
       ? `返回 ${result.length} 条`
@@ -98,6 +127,9 @@ function buildToolResultEvent(envelope, args = {}, options = {}) {
       truncated: Boolean(envelope.truncated || published.truncated),
       sideEffects: envelope.sideEffects,
       data: published.data,
+      // BLOCK-243 — 审批卡数据独立于 data 存活（长命令/参数不会被
+      // publicData 的 1600 字符上限整块替换而丢失）。
+      ...(approval ? { approval } : {}),
       // UI-273 — 写操作逐行改动（独立于 data，规避 publicData 截断）
       ...(boundedChangeDiff(result) ? { changeDiff: boundedChangeDiff(result) } : {}),
       // UI-315 优化 — exec 实际使用的 shell 短标签（独立于 data，规避

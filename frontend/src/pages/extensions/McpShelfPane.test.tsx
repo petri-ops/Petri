@@ -20,6 +20,7 @@ interface DraftBody {
   url?: string;
   allow?: string[];
   block?: string[];
+  trust?: 'ask' | 'allow';
 }
 
 function withServers(
@@ -188,7 +189,7 @@ describe('BLOCK-156 McpShelfPane', () => {
     expect(screen.getByTestId('mcp-auth-badge-auth-ok').textContent).toContain('已授权');
   });
 
-  it('UI-547 — 治理摘要与 trust 只读呈现（不造可编辑的假象）', async () => {
+  it('UI-547 / BLOCK-243 — 治理摘要与 trust 当前值呈现（ask 不提供直接授权入口）', async () => {
     withServers([row({
       id: 'gov',
       status: 'connected',
@@ -205,6 +206,31 @@ describe('BLOCK-156 McpShelfPane', () => {
     expect(screen.getByTestId<HTMLInputElement>('mcp-policy-allow-gov').value).toBe('read_file');
     expect(screen.getByTestId<HTMLInputElement>('mcp-policy-block-gov').value).toBe('delete_file');
     expect(screen.queryByTestId('mcp-policy-trust-select-gov')).toBeNull();
+    expect(screen.queryByTestId('mcp-policy-trust-revoke-gov')).toBeNull();
+  });
+
+  it('BLOCK-243 — trust allow 可在货架改回 ask（PUT policy trust=ask）', async () => {
+    const mock = withServers([row({
+      id: 'gov-allow',
+      status: 'connected',
+      toolCount: 5,
+      policy: {
+        trust: 'allow', allowCount: 1, blockCount: 0,
+        allow: ['read_file'], block: [], projectedToolCount: 4,
+      },
+    })]);
+    render(<McpShelfPane />);
+    await waitFor(() => expect(screen.getByTestId('mcp-policy-gov-allow')).toBeTruthy());
+    expect(screen.getByTestId('mcp-policy-trust-gov-allow').textContent).toContain('allow');
+    fireEvent.click(screen.getByTestId('mcp-policy-trust-revoke-gov-allow'));
+    await waitFor(() => expect(screen.getByTestId('mcp-notice').textContent).toContain('已保存 gov-allow'));
+
+    const puts = (mock.mock.calls as Array<[string, RequestInit | undefined]>)
+      .filter(([u, i]) => /\/mcp\/servers\/gov-allow\/policy$/.test(String(u)) && i?.method === 'PUT');
+    expect(puts).toHaveLength(1);
+    const rawBody = puts[0][1]?.body;
+    const body = typeof rawBody === 'string' ? (JSON.parse(rawBody) as DraftBody) : {};
+    expect(body).toEqual({ trust: 'ask' });
   });
 
   it('UI-547 — 保存白名单/阻断走 PUT policy 并提示成功', async () => {

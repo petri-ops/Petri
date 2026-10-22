@@ -7757,8 +7757,30 @@
         "G0"
       ],
       "notes": "2026-10-22 立项（用户「按照建议开 242深链安装安全面 一次整完」）：petri-install:// pack/mcp 双 kind 安全预览——来源/大小/SHA-256/风险/替换警告；确认重取对账+sha 双验；env 禁止；安装复用 pack-lifecycle/installPlugin。**completed（2026-10-22）**：core 8/8 + 弹层 2/2 + 通道 5/5 + 隔离 9223 live 10/10 + closeout 十三门；UI-550 verified。"
+    },
+    {
+      "id": "BLOCK-243-Q1-APPROVAL-CONTRACT",
+      "capability": "q1-approval-contract",
+      "path": "docs/block-243-q1-approval-contract-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P5-CLOSED",
+      "canonical": true,
+      "truthDomain": "q1-approval-contract",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-22",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "approval",
+        "trust",
+        "mcp",
+        "q1",
+        "governance",
+        "G0"
+      ],
+      "notes": "2026-10-22 立项（用户「按照建议推进 Q1 信任与审批 或 Q9 长尾可以排队」）：审批契约 v2——scope once/task/always + updatedInput 重校验 + permission.resolved 审计 + 重复/计数；MCP trust='ask' 对 destructive 工具生效、allow 自动放行；审批卡 v2（变体/解释/折叠/参数编辑/范围/计数）。**completed（2026-10-22）**：Node 契约 15/15 + 邻域 69 通过 0 失败 + 前端 59/59 + types 0 + API 实机 14/14 + 隔离 9223 亮 21/21/暗 21/21 + closeout；UI-551 verified。"
     }
   ],
-  "lastUpdated": "2026-10-21",
-  "documentCount": 387
+  "lastUpdated": "2026-10-22",
+  "documentCount": 388
 }

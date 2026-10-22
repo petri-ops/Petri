@@ -1,0 +1,115 @@
+{
+  "name": "ui551-approval-live",
+  "darkMode": false,
+  "startedAt": "2026-10-22T04:18:41.500Z",
+  "finishedAt": "2026-10-22T04:18:49.087Z",
+  "providerCalls": 4,
+  "assertions": [
+    {
+      "name": "E1_mcp_connected",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"id\":\"many\",\"toolCount\":6}"
+    },
+    {
+      "name": "E2_isolated_stack",
+      "pass": true,
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / data=C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui551-live-Fqb5G8"
+    },
+    {
+      "name": "E1_project_created",
+      "pass": true,
+      "detail": "projectId=p_mvj16yt8_v20h status=200"
+    },
+    {
+      "name": "E2_full_access",
+      "pass": true,
+      "detail": "already_full"
+    },
+    {
+      "name": "E3_message_typed",
+      "pass": true,
+      "detail": "ok:21"
+    },
+    {
+      "name": "E4_send_enabled",
+      "pass": true,
+      "detail": "{\"disabled\":false,\"title\":\"发送消息\",\"tag\":\"BUTTON\"}"
+    },
+    {
+      "name": "A1_card_variant_info",
+      "pass": true,
+      "detail": "variant=info"
+    },
+    {
+      "name": "A2_card_explanation",
+      "pass": true,
+      "detail": "MCP 服务「many」的信任位为 ask，且工具声明 destructiveHint（可能不可逆）。批准仅放行本次调用；可在扩展页把该服务信任位改为 allow。"
+    },
+    {
+      "name": "A3_card_args_preview",
+      "pass": true,
+      "detail": "{\n  \"target\": \"db\"\n}"
+    },
+    {
+      "name": "A4_scope_buttons",
+      "pass": true,
+      "detail": "task=true always=true edit=true"
+    },
+    {
+      "name": "A5_single_request",
+      "pass": true,
+      "detail": "pending=false duplicate=false"
+    },
+    {
+      "name": "A6_card_screenshot",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\petri\\acceptance\\ui-551\\ui551-approval-card-light.png"
+    },
+    {
+      "name": "B1_args_editor_open",
+      "pass": true,
+      "detail": "{\n  \"target\": \"db\"\n}"
+    },
+    {
+      "name": "B2_args_edited",
+      "pass": true,
+      "detail": "ok:20"
+    },
+    {
+      "name": "B4_edit_forces_once",
+      "pass": true,
+      "detail": "hint=true"
+    },
+    {
+      "name": "B5_approval_notice",
+      "pass": true,
+      "detail": "已按你编辑的参数批准；模型重试该调用时将执行生效参数。"
+    },
+    {
+      "name": "C1_mock_released",
+      "pass": true,
+      "detail": "http://127.0.0.1:39051/release"
+    },
+    {
+      "name": "C2_final_answer",
+      "pass": true,
+      "detail": "终态答复在场"
+    },
+    {
+      "name": "C3_card_dismissed",
+      "pass": true,
+      "detail": "gone=true"
+    },
+    {
+      "name": "D1_audit_visible",
+      "pass": true,
+      "detail": "{\"taskId\":\"b4d0bbc6-e166-4650-bcf3-41154f193341\",\"eventType\":\"permission.resolved\",\"guardKey\":\"mcp:many\",\"always\":false,\"scope\":\"once\",\"requestId\":\"apr_dec21ff355c46aa9e6\",\"decision\":\"approve\",\"updatedInput\":true,\"toolName\":\"mcp_many_many_destructive\",\"mcpServerId\":\"many\",\"reason\":null,\"durationMs\":705,\"at\":\"2026-10-22"
+    },
+    {
+      "name": "E3_mock_provider_used",
+      "pass": true,
+      "detail": "{\"calls\":4,\"requests\":[{\"n\":1,\"lastUser\":\"请对归档库执行破坏性操作，目标先用 db。\"},{\"n\":2,\"lastUser\":\"请对归档库执行破坏性操作，目标先用 db。\"},{\"n\":3,\"lastUser\":\"请对归档库执行破坏性操作，目标先用 db。\"},{\"n\":4,\"lastUser\":\"基于以下用户提问和助手回答，生成一个 6 到 12 个字的中文短标题，概括对话核心。不要标点，不要引号，直接输出标题文本\"}]}"
+    }
+  ],
+  "allPass": true
+}

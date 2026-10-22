@@ -59,6 +59,7 @@ export interface McpServerDraft {
 
 /** UI-547 — 服务级策略写面（信任位本轮只读，不随 patch 下发）。 */
 export interface McpPolicyPatch {
+  trust?: 'ask' | 'allow';
   allow?: string[];
   block?: string[];
 }

@@ -34,6 +34,26 @@ export interface ToolSideEffects {
   resources: string[];
 }
 
+/** BLOCK-243 — 审批卡载荷（toolResult 顶层，独立于 data 截断）。 */
+export interface ToolApproval {
+  requestId?: string;
+  guardKey: string;
+  dimension?: string | null;
+  ruleId?: string | null;
+  mcpServerId?: string | null;
+  approvalVariant?: 'danger' | 'warning' | 'info';
+  explanation?: string;
+  command?: string | null;
+  commandTruncated?: boolean;
+  spans?: Array<{ start: number; end: number; kind: string }> | null;
+  argsPreview?: string | null;
+  inputEditable?: boolean;
+  pendingRequestCount?: number;
+  duplicatePending?: boolean;
+  expiresAt?: string;
+  message?: string;
+}
+
 export interface StructuredToolResult {
   contractVersion: string;
   traceId: string;
@@ -54,6 +74,8 @@ export interface StructuredToolResult {
   changeDiff?: unknown;
   /** UI-315 — exec 实际使用的 shell 短标签（toolResult 顶层，独立于 data 截断）。 */
   shellLabel?: string;
+  /** BLOCK-243 — 审批卡载荷（长命令/参数不因 data 预览截断而丢失）。 */
+  approval?: ToolApproval;
 }
 
 export interface ToolResultEvent {

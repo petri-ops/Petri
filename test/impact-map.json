@@ -4876,6 +4876,51 @@
         "test/domain-neutrality.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block243-q1-approval-contract",
+      "note": "BLOCK-243 Q1 — 审批契约 v2（scope once/task/always、updatedInput 重校验、permission.resolved 审计、重复 pending 计数）+ MCP trust='ask' 对 destructive 工具生效 + 审批卡 v2。",
+      "patterns": [
+        "core/petri-server/helpers/approval-request-store.js",
+        "core/petri-server/helpers/approval-input-revalidation.js",
+        "core/petri-server/agent-tools/agent-tool-policy.js",
+        "core/petri-server/agent-tools/agent-tool-interceptor.js",
+        "core/petri-server/agent-tools/tool-events.js",
+        "core/petri-server/agent-tools/tool-execution.js",
+        "core/petri-server/agent-tools/mcp-projection.js",
+        "core/petri-server/routes/ai-agent/task-actions.js",
+        "frontend/src/components/copilot/SimpleChat/GuardAckCard.tsx",
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "frontend/src/components/copilot/toolActivity.ts",
+        "frontend/src/components/copilot/copilotClient/types.ts",
+        "frontend/src/components/copilot/simple-chat.css",
+        "frontend/src/pages/extensions/McpPolicyEditor.tsx",
+        "frontend/src/pages/extensions/McpPolicyEditor.module.css",
+        "frontend/src/hooks/useMcpServers.ts",
+        "test/block243-*.test.mjs",
+        "scripts/block243-approval-live.mjs",
+        "scripts/ui551-ui-live.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui551-approval-live.cjs",
+        "docs/block-243-q1-approval-contract-plan.md",
+        "acceptance/block-243/**",
+        "acceptance/ui-551/**"
+      ],
+      "tests": [
+        "test/block243-approval-contract.test.mjs",
+        "test/block243-mcp-trust-projection.test.mjs",
+        "test/approval-request-store.test.mjs",
+        "test/block180-approval-resource.test.mjs",
+        "test/agent-tool-policy.test.mjs",
+        "test/block171-guard-ack.test.mjs",
+        "test/mcp-projection.test.mjs",
+        "test/block241-mcp-lazy-catalog.test.mjs",
+        "test/block221-mcp-server-policy.test.mjs",
+        "frontend/src/components/copilot/SimpleChat/GuardAckCard.test.tsx",
+        "frontend/src/components/copilot/toolActivity.test.ts",
+        "frontend/src/pages/extensions/McpShelfPane.test.tsx",
+        "frontend/src/styles/theme-token-contract.test.ts"
+      ],
+      "classifiesScripts": true
     }
   ]
 }

@@ -4451,6 +4451,8 @@
 
 .sc-guard-card__actions {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: var(--petri-space-2);
 }
 
@@ -4486,6 +4488,136 @@
 .sc-guard-card__btn-ghost {
   background: transparent;
   color: var(--petri-text-muted);
+}
+
+/* BLOCK-243 — 审批卡 v2：变体 / 解释 / 命令折叠 / 参数编辑 / 计数 */
+.sc-guard-card--danger {
+  background: var(--petri-danger-bg);
+}
+
+.sc-guard-card--warning {
+  background: var(--petri-warning-bg);
+}
+
+.sc-guard-card--info {
+  background: var(--petri-bg-subtle);
+  border-inline-start: 3px solid var(--petri-info);
+}
+
+.sc-guard-card--warning .sc-guard-card__icon {
+  color: var(--petri-warning);
+}
+
+.sc-guard-card--info .sc-guard-card__icon {
+  color: var(--petri-info);
+}
+
+.sc-guard-card--warning .sc-guard-card__btn-primary {
+  background: var(--petri-warning);
+  color: var(--petri-on-solid);
+}
+
+.sc-guard-card--warning .sc-guard-card__btn-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--petri-warning) 85%, var(--petri-text));
+}
+
+.sc-guard-card--info .sc-guard-card__btn-primary {
+  background: var(--petri-info);
+  color: var(--petri-on-solid);
+}
+
+.sc-guard-card--info .sc-guard-card__btn-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--petri-info) 85%, var(--petri-text));
+}
+
+.sc-guard-card__explanation {
+  margin: 0 0 var(--petri-space-2);
+  color: var(--petri-text);
+  font-size: inherit; /* BLOCK-178 存量棘轮清偿：正文/标题性小字归位 14px */
+  line-height: 1.5;
+}
+
+.sc-guard-card__meta {
+  margin: var(--petri-space-1) 0;
+  color: var(--petri-text-tertiary);
+  font-size: inherit;
+}
+
+.sc-guard-card__command-row,
+.sc-guard-card__args {
+  min-width: 0;
+  margin: var(--petri-space-2) 0;
+}
+
+.sc-guard-card__command-fold {
+  max-height: 4.5em;
+  overflow: hidden;
+}
+
+.sc-guard-card__command-fold.is-expanded {
+  max-height: none;
+}
+
+.sc-guard-card__command {
+  display: block;
+  margin: 0;
+  padding: var(--petri-space-2);
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-bg-canvas);
+  color: var(--petri-text);
+  font-family: var(--petri-font-mono);
+  font-size: inherit;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.sc-guard-card__fold-toggle {
+  margin-top: var(--petri-space-1);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--petri-text-secondary);
+  cursor: pointer;
+  font-size: inherit;
+}
+
+.sc-guard-card__fold-toggle:hover {
+  text-decoration: underline;
+}
+
+.sc-guard-card__args-preview,
+.sc-guard-card__args-input {
+  box-sizing: border-box;
+  width: 100%;
+  max-height: 12em;
+  overflow: auto;
+  margin: 0;
+  padding: var(--petri-space-2);
+  border: 1px solid var(--petri-border-input);
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-bg-canvas);
+  color: var(--petri-text);
+  font-family: var(--petri-font-mono);
+  font-size: inherit;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.sc-guard-card__args-input {
+  min-height: 4.5em;
+  resize: vertical;
+}
+
+.sc-guard-card__args-error {
+  margin: var(--petri-space-1) 0 0;
+  color: var(--petri-danger);
+  font-size: inherit;
+}
+
+.sc-guard-card__hint {
+  align-self: center;
+  color: var(--petri-text-tertiary);
+  font-size: inherit;
 }
 
 /* 审批记录（设置→决策原语） */

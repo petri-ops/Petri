@@ -273,7 +273,7 @@ function _catalogContract() {
   };
 }
 
-function _callContract() {
+function _callContract(mcpApproval = null) {
   return {
     contractVersion: '1.0.0',
     category: 'action',
@@ -282,6 +282,7 @@ function _callContract() {
     resources: ['mcp.server'],
     estimatedDurationMs: 60_000,
     hints: { readOnly: false, destructive: false, openWorld: true, idempotent: false },
+    ...(mcpApproval ? { mcpApproval } : {}),
     notes: 'BLOCK-241 catalog proxy: target tool policies rechecked at call time; conservative R2/execution.',
   };
 }
@@ -437,14 +438,20 @@ function getMcpToolEntry(name) {
     };
   }
   if (row.kind === 'call') {
+    // BLOCK-243 — 目录代理无法静态知道目标 hint：只要目录含 destructive 工具就
+    // 保守附审批元数据（trust ask 时由 policy 要求确认）。
+    const hasDestructive = row.catalogTools.some((entry) => readMcpHints(entry.tool).destructive);
     return {
       definition: deepShape(_callDefinition(row.serverId)),
       handler: async (args) => _callHandler(row.serverId, args),
-      contract: _callContract(),
+      contract: _callContract(hasDestructive ? { serverId: row.serverId, destructive: true } : null),
     };
   }
 
   const policy = row.policy || toolPolicy.policyFor(row.name);
+  const hints = readMcpHints(row.tool);
+  const contract = mcpToolContract(row.tool, policy.contractMode);
+  if (hints.destructive) contract.mcpApproval = { serverId: row.serverId, destructive: true };
   return {
     definition: deepShape({
       type: 'function',
@@ -458,7 +465,7 @@ function getMcpToolEntry(name) {
       },
     }),
     handler: async (args) => _callServerToolResult(row.serverId, row.toolName, args ?? {}, policy.timeoutMs),
-    contract: mcpToolContract(row.tool, policy.contractMode),
+    contract,
   };
 }
 

@@ -3,6 +3,7 @@ import type {
   ToolOutputEvent,
   ToolResultEvent,
   ToolSideEffects,
+  ToolApproval,
 } from './copilotClient';
 import type { IconName } from '@/components/icons/Icon';
 
@@ -94,6 +95,8 @@ export interface ToolActivityItem {
   /** UI-437 v5.6 — 工具返回数据本体（后端 publicData 已界定的 bounded 版本）；
    *  活动行展开时渲染「返回」详情。 */
   resultData?: unknown;
+  /** BLOCK-243 — 审批卡载荷（toolResult 顶层，独立于 data 截断）。 */
+  approval?: ToolApproval;
 }
 
 const ACTIVITY_STATUSES: ToolActivityStatus[] = [
@@ -103,6 +106,14 @@ const ACTIVITY_STATUSES: ToolActivityStatus[] = [
   'error',
   'denied',
 ];
+
+function parseToolApproval(value: unknown): ToolApproval | undefined {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  const raw = value as Record<string, unknown>;
+  if (typeof raw.guardKey !== 'string' || raw.guardKey === '') return undefined;
+  // 后端单一构造（tool-events.approvalPayload），前端只做存在性边界检查。
+  return { ...(value as ToolApproval), guardKey: raw.guardKey };
+}
 
 /** Restore only the safe, bounded activity shape persisted with a message. */
 export function restoreToolActivities(value: unknown): ToolActivityItem[] {
@@ -160,6 +171,7 @@ export function restoreToolActivities(value: unknown): ToolActivityItem[] {
     agentRunId: typeof raw.agentRunId === 'string' ? raw.agentRunId : undefined,
     // UI-437 v5.6 — 结果数据本体（后端 publicData 已界定的有界形状）随 meta 恢复
     resultData: 'resultData' in raw ? raw.resultData : undefined,
+    approval: parseToolApproval(raw.approval),
     }];
   });
 }
@@ -634,6 +646,8 @@ export function mergeToolResultActivity(
     // UI-437 v5.6 — 结果数据本体（后端 publicData 已界定的 bounded 版本），供展开详情
     // UI-437 v5.6 修复 — resultData 是本次结果新到的数据，不能走「保留旧值」分支
     resultData: result?.data,
+    // BLOCK-243 — 审批卡载荷（顶层，独立于 data 截断）；旧事件无该字段时保留既有值
+    approval: parseToolApproval(result?.approval) ?? (index >= 0 ? current[index].approval : undefined),
   };
 
   if (index < 0) return [...current, item];

@@ -20,8 +20,38 @@ const { queueUserMessage, launchUserFollowup } = require('../../agent-tools/spaw
 const { getToolCancellation } = require('../../helpers/tool-cancel-registry');
 const { ackGuard } = require('../../helpers/guard-ack-store');
 // BLOCK-180 P0 — 审批请求一等资源决策（requestId 级 approve/deny + 指纹放行）
-const { decideApprovalRequest, approveTaskFingerprint } = require('../../helpers/approval-request-store');
+// BLOCK-243 — scope once/task/always、updatedInput 重校验、permission.resolved 审计
+const {
+  decideApprovalRequest,
+  approveTaskFingerprint,
+  getApprovalRequest,
+  buildPermissionResolvedEvent,
+} = require('../../helpers/approval-request-store');
+const { revalidateUpdatedInput } = require('../../helpers/approval-input-revalidation');
+const mcpServerPolicy = require('../../helpers/mcp-server-policy');
 const db = require('../../db').getAsyncDatabase();
+
+/** BLOCK-243 — 「始终信任」把该 MCP 服务 trust 置为 allow（配置写入单源=mcp-server-policy）。 */
+function writeMcpTrustAllow(serverId) {
+  if (!serverId) return { ok: false, error: 'always_scope_unavailable' };
+  try {
+    const policyStore = mcpServerPolicy.readStore();
+    const current = mcpServerPolicy.policyForServer(serverId, policyStore);
+    policyStore.servers[String(serverId)] = { ...current, trust: 'allow' };
+    const written = mcpServerPolicy.writeStore(policyStore);
+    return written.ok ? { ok: true, serverId } : { ok: false, error: 'trust_write_failed' };
+  } catch {
+    return { ok: false, error: 'trust_write_failed' };
+  }
+}
+
+function appendTaskEvent(taskKey, eventType, payload) {
+  try {
+    const events = agentTaskStore.getAgentTaskEventsSince(taskKey, 0, 1000000);
+    const seq = (events.length ? events[events.length - 1].seq : 0) + 1;
+    agentTaskStore.appendAgentTaskEvent(taskKey, seq, eventType, payload);
+  } catch { /* SSE 可见性失败不阻塞决策 */ }
+}
 
 const STATUS_HTTP = {
   invalid_arguments: 400,
@@ -90,12 +120,12 @@ module.exports = {
   });
 
   // BLOCK-171 CP-2 — 确认通道写侧：require-ack 弹卡的用户裁定落点。
-  // ack 写入 task 内确认集（策略读侧即时生效）；guard_ack 事件入 task_events
-  // （审批记录可复审=可审计治理的自有形态）。
   // BLOCK-180 P0/P1/P3 — 审批一等资源决策面：请求体带 requestId 时走请求级
   // 决策（approve+once=指纹放行一次 / approve+always=指纹+维度级 guardKey 放行 /
-  // deny=拒绝并留痕）；仅 guardKey 时保持存量键级放行（向后兼容）。`always`
-  // 形参自此真实消费（语义=任务内 always；跨会话仍归 ORC-1 用户规则面）。
+  // deny=拒绝并留痕）；仅 guardKey 时保持存量键级放行（向后兼容）。
+  // BLOCK-243 Q1 — scope once/task/always；updatedInput 先重跑 schema/preflight/
+  // policy（只放行本次 guardKey）再登记批准；任务事件写 permission.resolved；
+  // always 仅 MCP 请求可用，写该服务 trust=allow。
   app.post('/api/ai/agent/task/:taskId/guard-ack', async (req, res) => {
     const userId = req.user && req.user.id;
     if (!userId) return res.status(401).json({ ok: false, error: 'unauthorized', message: '未登录' });
@@ -103,20 +133,55 @@ module.exports = {
     if (!task) return res.status(404).json({ ok: false, error: 'not_found', message: '任务不存在' });
     if (task.user_id && task.user_id !== userId) return res.status(403).json({ ok: false, error: 'forbidden', message: '无权确认该任务防护' });
     const taskKey = task.taskId || req.params.taskId;
-    const guardKey = String((req.body && req.body.guardKey) || '').trim();
-    const requestId = String((req.body && req.body.requestId) || '').trim();
-    const always = (req.body && req.body.always) === true;
-    const decision = String((req.body && req.body.decision) || 'approve').trim();
+    const body = req.body || {};
+    const guardKey = String(body.guardKey || '').trim();
+    const requestId = String(body.requestId || '').trim();
+    const decision = String(body.decision || 'approve').trim();
+    const scopeInput = body.scope === undefined ? '' : String(body.scope).trim();
+    const legacyAlways = body.always === true;
+    const scope = scopeInput || (legacyAlways ? 'task' : 'once');
+    const reason = body.reason === undefined ? null : String(body.reason).trim().slice(0, 500);
+    const hasUpdatedInput = body.updatedInput !== undefined && body.updatedInput !== null;
     if (!guardKey && !requestId) return res.status(400).json({ ok: false, error: 'invalid_arguments', message: 'guardKey 或 requestId 必须提供一个' });
+    if (!['once', 'task', 'always'].includes(scope)) {
+      return res.status(400).json({ ok: false, error: 'invalid_arguments', message: 'scope 必须是 once/task/always 之一' });
+    }
+    if (hasUpdatedInput && decision !== 'approve') {
+      return res.status(400).json({ ok: false, error: 'updated_input_with_deny', message: '拒绝决策不能携带编辑参数' });
+    }
 
     let requestOutcome = null;
+    let effectiveInput = null;
     if (requestId) {
+      const pending = getApprovalRequest(taskKey, requestId);
+      if (!pending) return res.status(409).json({ ok: false, error: 'request_not_found', message: '审批请求不存在或已清理' });
+      if (pending.status !== 'pending') {
+        return res.status(409).json({
+          ok: false,
+          error: pending.status === 'expired' ? 'request_expired' : 'request_already_decided',
+          requestId,
+          status: pending.status,
+        });
+      }
+      if (hasUpdatedInput) {
+        const checked = await revalidateUpdatedInput({ request: pending, updatedInput: body.updatedInput });
+        if (!checked.ok) {
+          const status = checked.error === 'updated_input_denied' ? 403 : 400;
+          return res.status(status).json({ ok: false, ...checked });
+        }
+        effectiveInput = checked.args;
+      }
       requestOutcome = decideApprovalRequest({
         taskId: taskKey,
         requestId,
         decision,
-        mode: always ? 'always' : 'once',
+        scope,
+        updatedInput: effectiveInput || undefined,
+        reason,
         ackGuardKey: (key) => ackGuard(taskKey, key),
+        applyAlways: decision === 'approve' && scope === 'always'
+          ? (request) => writeMcpTrustAllow(request.mcpServerId)
+          : undefined,
       });
       if (!requestOutcome.ok) {
         const status = ['request_not_found', 'request_expired', 'request_already_decided'].includes(requestOutcome.error) ? 409 : 400;
@@ -124,65 +189,106 @@ module.exports = {
       }
     }
     const effectiveGuardKey = guardKey || (requestOutcome && requestOutcome.request && requestOutcome.request.guardKey) || '';
-    let keyAcked = null;
-    if (requestOutcome && requestOutcome.ok && decision === 'approve' && requestOutcome.consumeOnUse) {
-      // BLOCK-180 P1 — 「放行一次」=请求级指纹放行（不写维度级确认集——
-      // 维度级是 always 语义；指纹由拦截器执行前消耗）
-      const fingerprinted = approveTaskFingerprint(taskKey, requestOutcome.fingerprint);
-      if (!fingerprinted.ok) return res.status(400).json({ ok: false, ...fingerprinted });
-    } else if (effectiveGuardKey && (decision === 'approve' || !requestId)) {
-      // always（或旧形态无 requestId）写维度级确认集；deny 请求级决策不写维度放行
-      keyAcked = ackGuard(taskKey, effectiveGuardKey);
+    if (!requestId && effectiveGuardKey && decision === 'approve') {
+      // 旧形态无 requestId：保持键级放行（once 语义=本任务内该维度，非指纹）
+      const keyAcked = ackGuard(taskKey, effectiveGuardKey);
       if (keyAcked && keyAcked.ok === false) return res.status(400).json({ ok: false, ...keyAcked });
     }
-    try {
-      const events = agentTaskStore.getAgentTaskEventsSince(taskKey, 0, 1000000);
-      const seq = (events.length ? events[events.length - 1].seq : 0) + 1;
-      const request = requestOutcome && requestOutcome.request;
-      agentTaskStore.appendAgentTaskEvent(
-        taskKey, seq,
-        'guard_ack',
-        {
-          event: 'guard_ack',
-          guardKey: effectiveGuardKey || (request && request.guardKey) || guardKey,
-          always,
-          // BLOCK-180 — 请求级决策留痕（旧字段全保留，事件向后兼容）
-          ...(requestId ? { requestId, decision, toolName: request && request.toolName } : {}),
-          ...(request && request.command ? { command: request.command, spans: request.spans } : {}),
-          at: new Date().toISOString(),
-        }
-      );
-    } catch { /* SSE 可见性失败不阻塞确认 */ }
+    if (requestOutcome && requestOutcome.ok && decision === 'approve' && requestOutcome.consumeOnUse) {
+      // BLOCK-180 P1 — 「放行一次」=请求级指纹放行（不写维度级确认集——
+      // 维度级是 task 语义；指纹由拦截器执行前消耗）；BLOCK-243 编辑参数时
+      // 批准的是 effective 指纹（原参数重试不自动放行）。
+      const fingerprinted = approveTaskFingerprint(taskKey, requestOutcome.fingerprint);
+      if (!fingerprinted.ok) return res.status(400).json({ ok: false, ...fingerprinted });
+    }
+
+    const request = requestOutcome && requestOutcome.request;
+    const effectiveScope = (requestOutcome && requestOutcome.scope) || scope;
+    if (request) {
+      appendTaskEvent(taskKey, 'guard_ack', {
+        event: 'guard_ack',
+        guardKey: effectiveGuardKey || request.guardKey,
+        always: effectiveScope !== 'once',
+        scope: effectiveScope,
+        ...(requestId ? { requestId, decision, toolName: request.toolName } : {}),
+        ...(request.command ? { command: request.command, spans: request.spans } : {}),
+        ...(request.updatedInput ? { updatedInput: true } : {}),
+        at: new Date().toISOString(),
+      });
+      appendTaskEvent(taskKey, 'permission.resolved', buildPermissionResolvedEvent(request, {
+        decision,
+        scope: effectiveScope,
+        reason,
+      }));
+    } else {
+      appendTaskEvent(taskKey, 'guard_ack', {
+        event: 'guard_ack',
+        guardKey: effectiveGuardKey || guardKey,
+        always: scope !== 'once',
+        scope,
+        at: new Date().toISOString(),
+      });
+    }
     return res.json({
       ok: true,
-      guardKey: effectiveGuardKey,
-      always,
+      guardKey: effectiveGuardKey || guardKey,
+      always: effectiveScope !== 'once',
+      scope: effectiveScope,
       ...(requestOutcome && requestOutcome.ok ? { requestId, decision, status: requestOutcome.request.status } : {}),
+      ...(request && request.updatedInput ? { updatedInput: true } : {}),
+      ...(request && request.mcpServerId && effectiveScope === 'always' && decision === 'approve'
+        ? { trustChanged: true, mcpServerId: request.mcpServerId }
+        : {}),
     });
   });
 
   // BLOCK-171 CP-2 — 审批记录复查（guard_ack 事件 × 本人任务，最新 50）。
+  // BLOCK-243 — 合并 permission.resolved，并按 requestId 去重（同一决策优先
+  // 审计事件，legacy guard_ack 行继续可见）。
   app.get('/api/ai/agent/guard-events', async (req, res) => {
     const userId = req.user && req.user.id;
     if (!userId) return res.status(401).json({ ok: false, error: 'unauthorized', message: '未登录' });
     try {
       const limit = Math.max(1, Math.min(Number(req.query.limit) || 50, 200));
       const rows = await db.prepare(
-        `SELECT e.task_id AS task_id, e.payload AS payload, e.created_at AS created_at
+        `SELECT e.task_id AS task_id, e.event_type AS event_type, e.payload AS payload, e.created_at AS created_at
          FROM task_events e JOIN tasks t ON t.id = e.task_id
-         WHERE e.event_type = 'guard_ack' AND t.user_id = ?
+         WHERE e.event_type IN ('guard_ack', 'permission.resolved') AND t.user_id = ?
          ORDER BY e.created_at DESC LIMIT ?`
-      ).all(userId, limit);
-      const events = rows.map((row) => {
+      ).all(userId, Math.min(limit * 2, 400));
+      const mapped = rows.map((row) => {
         let payload = {};
         try { payload = JSON.parse(row.payload || '{}'); } catch { /* 损坏留痕按空投影 */ }
+        const scope = payload.scope || (payload.always === true ? 'task' : 'once');
         return {
           taskId: row.task_id,
+          eventType: row.event_type,
           guardKey: String(payload.guardKey || ''),
-          always: payload.always === true,
+          always: scope !== 'once',
+          scope,
+          requestId: payload.requestId || null,
+          decision: payload.decision || null,
+          updatedInput: payload.updatedInput === true,
+          toolName: payload.toolName || null,
+          mcpServerId: payload.mcpServerId || null,
+          reason: payload.reason || null,
+          durationMs: Number.isFinite(payload.durationMs) ? payload.durationMs : null,
           at: row.created_at,
         };
       });
+      const byRequest = new Map();
+      const legacy = [];
+      for (const item of mapped) {
+        if (!item.requestId) {
+          legacy.push(item);
+          continue;
+        }
+        const existing = byRequest.get(item.requestId);
+        if (!existing || item.eventType === 'permission.resolved') byRequest.set(item.requestId, item);
+      }
+      const events = [...byRequest.values(), ...legacy]
+        .sort((a, b) => String(b.at).localeCompare(String(a.at)))
+        .slice(0, limit);
       return res.json({ ok: true, events });
     } catch (e) {
       return res.status(500).json({ ok: false, error: 'guard_events_failed', message: e && e.message ? e.message : String(e) });

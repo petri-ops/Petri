@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-22（**UI-551 审批卡 v2 + MCP 信任位生效 verified（dev Electron 边界内；隔离 9223 亮 21/21 + 暗 21/21）**，BLOCK-243 / Q1）：审批卡三变体（danger/warning/info）+ 确定性意图解释 + 长命令折叠 + 参数 JSON 编辑 + 范围选择（仅本次/本任务/始终信任 MCP 服务，后两者两步武装）+ 待审批计数/重复提示；MCP `trust='ask'` 对 destructiveHint 工具触发审批、`allow` 自动放行，货架可改回 ask。证据=Node 契约 15/15 + 邻域 69 通过 0 失败 + 前端 59/59 + types 0 + API 实机 14/14 + 隔离 9223 亮/暗各 21/21（`acceptance/ui-551/` 双截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-22（**UI-550 深链安装安全面 verified（dev Electron 边界内；隔离 9223 live 10/10）**，BLOCK-242 / Q8）：扩展页「从链接安装」+ 全局预览弹层——名称/来源/下载地址/大小/SHA-256/风险/替换警告只读展示；确认后才安装（重取对账 + sha 双验）；env 禁止。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-22（**UI-549 MCP 大目录目录模式 verified（dev Electron 边界内；9223 离屏 live 7/7）**，BLOCK-241 / Q8）：货架显示「目录模式 · N 个工具按需加载 · 生效入口 2」；agent 只投影 catalog(R1)/call(R2)，调用时复核策略。证据=block241 5/5 + projection 15/15 + 前端 18/18 + live 7/7。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -5322,3 +5324,11 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **验证（代码）**：core **8/8**（解析/守卫/manifest schema/受控拉取/预览/TOCTOU/sha 双验/MCP 替换门）；弹层组件 **2/2**；通道漂移 **5/5**；`quality:types` 0。
 - **实机腿（隔离 9223，10/10）**：`acceptance/ui-550/`——pack mock manifest 预览（名称/来源/大小/sha/风险/替换警告）→ mcp 深链真实安装（REST 核对落盘）→ 冲突 id 未勾选禁用、勾选后替换 → 亮/暗截图；main 进程以隔离数据根 + `PETRI_INSTALL_ALLOW_PRIVATE=1` 启动，零用户数据污染。
 - **未做（reopen）**：packaged 真机外部点击唤起（G1+）、代码签名/公证、来源 allowlist、运行时自动安装接审批（随 Q1）、包签名/信任链、多 pack manifest 选择。
+
+## UI-551: 审批卡 v2 + MCP 信任位生效（2026-10-22 **verified（dev Electron 边界内；隔离 9223 亮 21/21 + 暗 21/21）**，BLOCK-243 / Q1）
+
+- **变化面**：审批卡按来源分三变体（dynamic_guard=danger / user_rule=warning / mcp_trust=info）；确定性意图解释（服务端规则派生，不伪造模型解释）；长命令折叠；参数 JSON 编辑（脱敏且有界未截断时才可编辑）；范围选择——仅本次 / 本任务 / 始终信任此 MCP 服务（后两者两步武装）；待审批计数与重复调用提示；MCP `trust='ask'` 对 destructiveHint 工具触发审批、`trust='allow'` 自动放行（调用时重读策略），货架在 allow 时提供「改回 ask」。
+- **为什么这样设计（自有形态）**：审批不是「一键放行」而是可解释、可编辑、可审计的控制面——编辑参数必须重新过 schema/preflight/policy，只放行本次审批维度；once 只批准生效参数（执行期按「原始指纹→生效参数」一次性替换），task 写任务级 ack，always 仅 MCP 且写入可见的 trust 位；审计 `permission.resolved` 记录原始/生效参数哈希与耗时。
+- **验证**：Node 契约 **15/15**（scope/override/重校验/trust 三态/投影元数据/拦截器信封）+ 审批/MCP 邻域 **69 通过 0 失败**；前端 GuardAckCard **13/13** + toolActivity **16/16** + McpShelfPane **13/13** + theme **17/17**；`quality:types` 0；隔离后端 API 实机 **14/14**（`acceptance/block-243/`）；隔离 9223 UI 亮 **21/21** + 暗 **21/21**（`acceptance/ui-551/`：卡片变体/解释/参数预览/范围按钮 → 编辑参数 → 批准 → 替换执行 → 终态答复 → 审计可见；亮/暗截图）。
+- **实机抓真**：测试实例 `show:false` 与 `--onscreen` 语义冲突导致 Windows 隐藏窗截图 20s 超时；修正 `src/main/_window-create.js` 在 `PETRI_TEST_ONSCREEN=1` 时真实显示窗口后截图恢复。卡片可见时热切主题会触发 `ProjectWorkspace` 既存重渲染警告（非本包文件面）；暗色截图改为「卡片出现前切主题」的独立运行，最终两次运行无该警告。
+- **未做（reopen）**：非 MCP 维度持久化「始终」（需用户规则合成 UI）、模型/本地模型意图解释、编辑重发 + workspace-checkpoint 回退、访问权限三档选择器与完全访问确认层、sideTask 变体/批量决策面板。

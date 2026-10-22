@@ -134,6 +134,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui548-mcp-oauth-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui549-mcp-catalog-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui550-install-deeplink-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui551-approval-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/workspace-file-ops.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/workspace-panel-motion.cjs",
     "files::.agents/skills/petri-dev-infra/scripts/normalize-eol.mjs",
