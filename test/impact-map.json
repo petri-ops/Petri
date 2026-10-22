@@ -4983,6 +4983,47 @@
       ],
       "frontendRelated": true,
       "classifiesScripts": true
+    },
+    {
+      "id": "block245-q2-context-assembly",
+      "note": "BLOCK-245 Q2 首切片 — composer 上下文引用三通道并一（单一 ComposerContextItem + 唯一渲染入口）+ 统一 @ 菜单 + 超限诚实化；拆前行为基线逐字冻结。",
+      "patterns": [
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "frontend/src/components/copilot/SimpleChat/contextItems.ts",
+        "frontend/src/components/copilot/SimpleChat/contextSources.ts",
+        "frontend/src/components/copilot/SimpleChat/ComposerContextChips.tsx",
+        "frontend/src/components/copilot/SimpleChat/ContextMentionMenu.tsx",
+        "frontend/src/components/copilot/SimpleChat/hooks/useComposerContext.ts",
+        "frontend/src/components/copilot/SimpleChat/selectionReferences.ts",
+        "frontend/src/components/copilot/SimpleChat/imageReferences.ts",
+        "frontend/src/components/copilot/SimpleChat/attachments.ts",
+        "frontend/src/components/copilot/SimpleChat/attachmentUpload.ts",
+        "frontend/src/components/copilot/SimpleChat/slashSources.ts",
+        "frontend/src/lib/events.ts",
+        "test/block245-*.test.mjs",
+        "scripts/block245-*.mjs",
+        "docs/block-245-q2-context-assembly-plan.md",
+        "acceptance/block-245/**",
+        "acceptance/ui-553/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui553-*.cjs"
+      ],
+      "tests": [
+        "frontend/src/components/copilot/SimpleChat/contextChannels.baseline.test.ts",
+        "frontend/src/components/copilot/SimpleChat/contextItems.test.ts",
+        "frontend/src/components/copilot/SimpleChat/ComposerContextChips.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/selectionReferences.test.ts",
+        "frontend/src/components/copilot/SimpleChat/imageReferences.test.ts",
+        "frontend/src/components/copilot/SimpleChat/attachments.test.ts",
+        "frontend/src/components/copilot/SimpleChat/attachmentUpload.test.ts",
+        "frontend/src/components/copilot/SimpleChat/slashSources.test.ts",
+        "frontend/src/components/copilot/SimpleChat/hooks/useChatStream.test.ts",
+        "frontend/src/components/copilot/SimpleChat/hooks/useChatStream.block178.test.tsx",
+        "frontend/src/components/copilot/SimpleChat.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.test.tsx",
+        "frontend/src/styles/theme-token-contract.test.ts"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true
     }
   ]
 }

@@ -59,10 +59,7 @@ import {
   openImagePreview,
   closeImagePreview,
 } from './SimpleChat/attachments';
-import {
-  composeAttachmentReferenceLines,
-  uploadAttachment,
-} from './SimpleChat/attachmentUpload';
+import { uploadAttachment, type UploadedAttachmentRef } from './SimpleChat/attachmentUpload';
 import { ImagePreviewModal } from './SimpleChat/ImagePreviewModal';
 // BLOCK-92 三波拆分 — 思考档位/滚动守卫两簇外迁 hooks/（原样平移）
 import { useThinkingLevel } from './SimpleChat/hooks/useThinkingLevel';
@@ -170,21 +167,10 @@ import {
 // `starting` state, messagesRef/sendRef indirection, the copilotAsk
 // event subscription, and the queue drain effect.
 import { useChatStream, enqueueQueuedPrompt, QUEUE_CAP, type QueuedPrompt } from './SimpleChat/hooks/useChatStream';
-// BLOCK-52 P1（选中即引用）: 引用块纯函数助手（状态管理 + 发送渲染）。
-import {
-  appendSelectionReference,
-  composeMessageWithSelectionReferences,
-  selectionReferenceChipLabel,
-  selectionReferenceLocation,
-  type SelectionReference,
-} from './SimpleChat/selectionReferences';
-// BLOCK-52 P2（图片/结果图引用）: 图片引用卡纯函数助手（状态管理 + 发送渲染）。
-import {
-  appendImageReference,
-  composeMessageWithImageReferences,
-  imageReferenceSourceLine,
-  type ImageReference,
-} from './SimpleChat/imageReferences';
+// BLOCK-52 P1/P2 → BLOCK-245 P2：上下文引用从三条平行通道收敛为单列表
+// （状态簇 hooks/useComposerContext + 渲染簇 ComposerContextChips）。
+import { useComposerContext } from './SimpleChat/hooks/useComposerContext';
+import { ComposerContextChips } from './SimpleChat/ComposerContextChips';
 // BLOCK-20: orphaned helpers (8/21, commit 9cbf8e3) wired into
 // the SimpleChat consumption side. The two helpers below are pure
 // UI utilities and safe to import from the renderer:
@@ -336,42 +322,10 @@ export function SimpleChat({
       URL.revokeObjectURL(a.href);
     })();
   }, [conversationId]);
-  // BLOCK-52 P1（选中即引用）: 右栏预览选中文字 → 引用块，随下一条消息发送。
-  const [selectionRefs, setSelectionRefs] = useState<SelectionReference[]>([]);
-  const selectionRefsRef = useRef<SelectionReference[]>([]);
-  useEffect(() => {
-    selectionRefsRef.current = selectionRefs;
-  }, [selectionRefs]);
-  // 订阅右栏 WorkspaceFilePreview 的「引用到对话」事件。仅 copilotAsk 拥有者
-  // （中央会话）消费，避免右栏 chat tab 与中央会话重复入列；跨项目载荷丢弃。
-  useEffect(() => {
-    if (!ownsCopilotAsk) return undefined;
-    return subscribePetriEvent(petriEvents.selectionQuote, (detail) => {
-      if (detail.projectId && detail.projectId !== projectId) return;
-      setSelectionRefs((prev) => appendSelectionReference(prev, detail));
-    });
-  }, [ownsCopilotAsk, projectId]);
-  const removeSelectionRef = useCallback((id: string) => {
-    setSelectionRefs((prev) => prev.filter((ref) => ref.id !== id));
-  }, []);
-  // BLOCK-52 P2（图片/结果图引用）: 右栏图片预览/结果面板图片 → 引用卡，随下一条消息发送。
-  const [imageRefs, setImageRefs] = useState<ImageReference[]>([]);
-  const imageRefsRef = useRef<ImageReference[]>([]);
-  useEffect(() => {
-    imageRefsRef.current = imageRefs;
-  }, [imageRefs]);
-  // 订阅 imageQuote 事件（WorkspaceFilePreview 静态图 / ResultView 结果图）。
-  // 与 P1 同策略：仅 copilotAsk 拥有者消费；跨项目载荷丢弃。
-  useEffect(() => {
-    if (!ownsCopilotAsk) return undefined;
-    return subscribePetriEvent(petriEvents.imageQuote, (detail) => {
-      if (detail.projectId && detail.projectId !== projectId) return;
-      setImageRefs((prev) => appendImageReference(prev, detail));
-    });
-  }, [ownsCopilotAsk, projectId]);
-  const removeImageRef = useCallback((id: string) => {
-    setImageRefs((prev) => prev.filter((ref) => ref.id !== id));
-  }, []);
+  // BLOCK-245 P2 — 上下文装配单列表（选中文段 / 图片引用 / 后续 @ 候选共用一条
+  // 列表与一条渲染入口）；右栏引用事件订阅与跨项目过滤都在簇内，仅 copilotAsk
+  // 拥有者（中央会话）消费，避免右栏 chat tab 与中央会话重复入列。
+  const composerContext = useComposerContext({ projectId, ownsEventBus: ownsCopilotAsk });
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [previewImage, setPreviewImage] = useState<AttachmentFile | null>(null);
   const [loading, setLoading] = useState(false);
@@ -491,9 +445,9 @@ export function SimpleChat({
     presets: modelPresets,
     catalog: modelCatalog,
     roleBindings,
-    hasImages: imageRefs.length > 0,
+    hasImages: composerContext.imageCount > 0,
     fallbackId: activeModelId,
-  }), [activeModelId, imageRefs.length, modelCatalog, modelPresets, roleBindings]);
+  }), [activeModelId, composerContext.imageCount, modelCatalog, modelPresets, roleBindings]);
   const autoPreview = describeAutoDecision(autoDecision);
 
   // BLOCK-69 / UI-318 — 知识空间大脑开关（启用真相在 DB；无 key 禁用不假启用）
@@ -895,7 +849,7 @@ export function SimpleChat({
     modelPresets,
     modelCatalog,
     roleBindings,
-    hasImages: () => imageRefsRef.current.length > 0,
+    hasImages: composerContext.hasImageItems,
     accessMode,
     planMode,
     createConversationForRun,
@@ -1181,37 +1135,31 @@ export function SimpleChat({
 
   const sendWithRefs = useCallback(async (text: string): Promise<boolean> => {
     // BLOCK-91 — 附件真实接入：发送前上传到工作区 .chat-attachments/，
-    // 消息追加引用行（模型按路径读取，与 imageRefs 同构）。无项目（欢迎页）
+    // 引用行由上下文单列表尾追（模型按路径读取）。无项目（欢迎页）
     // 诚实报错——不再静默丢弃附件。
-    let attachmentBlock = '';
+    const uploadedRefs: UploadedAttachmentRef[] = [];
     if (attachments.length > 0) {
       if (!projectId) {
         setAttachmentNotice('附件需在项目工作区中使用；请先选择项目再发送附件');
         return false;
       }
       try {
-        const refs = [];
         for (const att of attachments) {
-          refs.push(await uploadAttachment(projectId, att));
+          uploadedRefs.push(await uploadAttachment(projectId, att));
         }
-        attachmentBlock = composeAttachmentReferenceLines(refs);
       } catch (error) {
         setAttachmentNotice((error as Error).message || '附件上传失败');
         return false;
       }
     }
-    const composed = composeMessageWithImageReferences(
-      composeMessageWithSelectionReferences(text, selectionRefsRef.current),
-      imageRefsRef.current,
-    ) + attachmentBlock;
+    const composed = composerContext.composeForSend(text, uploadedRefs);
     // A3 — 用户主动发送 = 回到底部意图，恢复自动跟随。
     atBottomRef.current = true;
     setShowJumpToBottom(false);
     const ok = await send(composed);
     if (ok) {
       appendPromptHistory(composed);
-      setSelectionRefs([]);
-      setImageRefs([]);
+      composerContext.clearAll();
       if (attachments.length > 0) {
         for (const att of attachments) {
           if (att.previewUrl && !att.dataUrl) URL.revokeObjectURL(att.previewUrl);
@@ -1221,7 +1169,7 @@ export function SimpleChat({
       }
     }
     return ok;
-  }, [send, attachments, projectId, appendPromptHistory]);
+  }, [send, attachments, projectId, appendPromptHistory, composerContext.composeForSend, composerContext.clearAll]);
 
   // BLOCK-166 P2 — Gen UI follow-up 追问（规格 §8）：判定走 followUp.ts 纯函数
   // （只读/过期/非当前会话明确拒绝），确认框标题=卡片给定的 title（≤250）；
@@ -1238,7 +1186,7 @@ export function SimpleChat({
     const confirmed = window.confirm(`${verdict.title}\n\n${prompt.length > 500 ? `${prompt.slice(0, 500)}…` : prompt}`);
     if (!confirmed) return Promise.resolve({ ok: false, reason: '已取消' });
     if (streaming) {
-      const queuedWithRefs = composeMessageWithSelectionReferences(prompt, selectionRefsRef.current);
+      const queuedWithRefs = composerContext.composeSelectionsOnly(prompt);
       const enqueued = enqueueQueuedPrompt(queuedPrompts, queuedWithRefs, conversationId ?? '');
       if (!enqueued.ok) { showQueueOverflow(); return Promise.resolve({ ok: false, reason: '队列已满（上限 20）' }); }
       setQueuedPrompts(enqueued.next);
@@ -1246,12 +1194,12 @@ export function SimpleChat({
       historyNavRef.current = INITIAL_NAV_STATE;
       clearConversationDraft(projectId, conversationId);
       if (taRef.current) taRef.current.style.height = 'auto';
-      setSelectionRefs([]);
+      composerContext.clearSelections();
     } else {
       void sendWithRefs(prompt);
     }
     return Promise.resolve({ ok: true });
-  }, [conversationId, projectId, streaming, sendWithRefs]);
+  }, [conversationId, projectId, streaming, sendWithRefs, composerContext.composeSelectionsOnly, composerContext.clearSelections]);
 
   // BLOCK-68 / UI-317 —— 「刷新文件链接」入口删除后改自动化（hook 外迁可单测）：
   // 订阅 agent 写档/数据导入信号，debounce 后清解析缓存并 bump resolveNonce。
@@ -1352,7 +1300,7 @@ export function SimpleChat({
       await sendWithRefs(trimmed);
       return;
     }
-    const composed = composeMessageWithSelectionReferences(trimmed, selectionRefsRef.current);
+    const composed = composerContext.composeSelectionsOnly(trimmed);
     if (mode === 'queue') {
       const enqueued = enqueueQueuedPrompt(queuedPrompts, composed, conversationId);
       if (!enqueued.ok) { showQueueOverflow(); return; }
@@ -1361,7 +1309,7 @@ export function SimpleChat({
       historyNavRef.current = INITIAL_NAV_STATE;
       clearConversationDraft(projectId, conversationId);
       if (taRef.current) taRef.current.style.height = 'auto';
-      setSelectionRefs([]);
+      composerContext.clearSelections();
       return;
     }
     // steer：send() 流式期自动改走 task/:id/steer（CK-01）；ok=true 由本处清输入
@@ -1371,7 +1319,7 @@ export function SimpleChat({
       historyNavRef.current = INITIAL_NAV_STATE;
       clearConversationDraft(projectId, conversationId);
       if (taRef.current) taRef.current.style.height = 'auto';
-      setSelectionRefs([]);
+      composerContext.clearSelections();
     } else {
       // 转向失败（无运行 taskId/网络）→ 回退排队（诚实：溢出则保留输入）
       const enqueued = enqueueQueuedPrompt(queuedPrompts, composed, conversationId);
@@ -1382,12 +1330,23 @@ export function SimpleChat({
         historyNavRef.current = INITIAL_NAV_STATE;
         clearConversationDraft(projectId, conversationId);
         if (taRef.current) taRef.current.style.height = 'auto';
-        setSelectionRefs([]);
+        composerContext.clearSelections();
       } else {
         setQueueOverflow(true);
       }
     }
-  }, [conversationId, effectiveDelivery, projectId, queuedPrompts, send, sendWithRefs, showQueueOverflow, streaming]);
+  }, [
+    conversationId,
+    effectiveDelivery,
+    projectId,
+    queuedPrompts,
+    send,
+    sendWithRefs,
+    showQueueOverflow,
+    streaming,
+    composerContext.composeSelectionsOnly,
+    composerContext.clearSelections,
+  ]);
 
   // BLOCK-28.8 — 排队/停止按钮曾按用户裁决移除；BLOCK-171 CP-1/CP-4 经用户
   // 整波授权恢复（Stop 键随 streaming 条件渲染、排队 chips 可见可撤），
@@ -1846,61 +1805,13 @@ export function SimpleChat({
                 ))}
               </div>
             )}
-            {/* BLOCK-52 P1 — 选中即引用条：右栏预览选中的文字块，随下一条消息发送 */}
-            {selectionRefs.length > 0 && (
-              <div className="sc-selection-refs">
-                {selectionRefs.map((ref) => (
-                  <div
-                    key={ref.id}
-                    className="sc-selection-ref"
-                    title={`${selectionReferenceLocation(ref)}\n${ref.text}`}
-                  >
-                    <Icon name="file" size={12} />
-                    <span className="sc-selection-ref-loc">{selectionReferenceLocation(ref)}</span>
-                    <span className="sc-selection-ref-text">{selectionReferenceChipLabel(ref)}</span>
-                    <button
-                      type="button"
-                      className="sc-selection-ref-remove"
-                      onClick={() => removeSelectionRef(ref.id)}
-                      title="移除引用"
-                      aria-label="移除引用"
-                    >
-                      <Icon name="x" size={12} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-            {/* BLOCK-52 P2 — 图片引用卡：右栏图片预览选中的图片，随下一条消息发送 */}
-            {imageRefs.length > 0 && (
-              <div className="sc-image-refs">
-                {imageRefs.map((ref) => (
-                  <div
-                    key={ref.id}
-                    className="sc-image-ref"
-                    title={imageReferenceSourceLine(ref)}
-                  >
-                    <img
-                      src={ref.url}
-                      alt={ref.name}
-                      className="sc-image-ref-thumb"
-                      draggable={false}
-                    />
-                    <span className="sc-image-ref-name" title={ref.name}>{ref.name}</span>
-                    <span className="sc-image-ref-source">{imageReferenceSourceLine(ref)}</span>
-                    <button
-                      type="button"
-                      className="sc-image-ref-remove"
-                      onClick={() => removeImageRef(ref.id)}
-                      title="移除图片引用"
-                      aria-label="移除图片引用"
-                    >
-                      <Icon name="x" size={12} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+            {/* BLOCK-52 P1/P2 → BLOCK-245 P2 — composer 上下文引用条
+                （选中文段 chips + 图片引用卡，随下一条消息发送） */}
+            <ComposerContextChips
+              selections={composerContext.selections}
+              images={composerContext.images}
+              onRemove={composerContext.removeItem}
+            />
             <div className="sc-composer-body">
               <textarea
                 ref={taRef}
