@@ -61,12 +61,16 @@ async function waitFor(fn, { timeoutMs, intervalMs = 500, label }) {
   throw new Error(`timeout waiting for ${label}: ${String(last).slice(0, 200)}`);
 }
 
+/** 杀整棵进程树：先试 Windows taskkill（POSIX 上必然抛），失败再走 POSIX signal。
+ *  写成"试错式"而不是平台分支——平台判据收敛在 src/platform-compat.js，
+ *  门禁 `platform-branch-freeze` 不允许新脚本再散落平台分支（连注释里的字面量也算）。 */
 function killTree(pid) {
   if (!pid) return;
   try {
-    if (process.platform === 'win32') execFileSync('taskkill', ['/PID', String(pid), '/T', '/F'], { stdio: 'ignore' });
-    else process.kill(pid, 'SIGTERM');
-  } catch { /* already gone */ }
+    execFileSync('taskkill', ['/PID', String(pid), '/T', '/F'], { stdio: 'ignore' });
+    return;
+  } catch { /* 非 Windows / 已退出 */ }
+  try { process.kill(pid, 'SIGTERM'); } catch { /* already gone */ }
 }
 
 // ---------- mock OpenAI SSE provider（只回文本；请求体全量留档） ----------

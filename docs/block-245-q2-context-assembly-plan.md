@@ -10,7 +10,7 @@ acceptance:
   - 测试：前端组件/纯函数测试（基线冻结测 + contextItems 单列表语义 + `@` 菜单过滤/上限/来源标签/不可用提示 + 超限提示）+ 既有 `selectionReferences.test.ts`(6)/`imageReferences.test.ts`(5)/`attachments.test.ts`/`attachmentUpload.test.ts`/`slashSources.test.ts` 回归绿 + types 0 + `test:changed` 定向。
   - 实机腿：隔离 9223（mock provider）走「`@` 选文件 + 选技能 + 引用结果产物 → 发送 → 消息正文引用标签在场 → 模型请求体含引用块 → 移除一项后重发只剩余下引用 → 超限提示可见」+ 亮/暗截图；UI-553 台账 verified；closeout 十三门 PASS。
 reopen: C13 速记板（需 SQLite 迁移 `src/migrations/016_*.sql`，独立包）、C12 划词动作生产者面（`WorkspaceFilePreview` 组件不存在，`selectionQuote` 目前是**有消费无生产**的半截管线）、C17 跨会话引用作为上下文资源（fork 后端已有，本包只做候选源里的「历史会话」引用形状）、C4 消息动作注册表化（`SimpleChatMessageRow.tsx` 369 行内联、全文件仅 1 个 testid）、B2 计划反馈输入、C11 图片保存/多图导航、G1+。
-status: active
+status: completed
 ---
 
 # BLOCK-245 · Q2 首切片：上下文装配收敛 + 统一 `@` 菜单
@@ -52,11 +52,11 @@ status: active
 | --- | --- | --- |
 | ✅ **P1 拆前基线**（commit `5e9e7ba4`）| `SimpleChat/contextChannels.baseline.test.ts`：对现有三条通道的纯函数输入/输出逐字快照（含组合顺序、上限、去重、截断文案、【】头） | 基线测先绿；此后任何改动都跑它 |
 | ✅ **P2 三通道并一**（commit `fc1671cd`）| 新增 `contextItems.ts`：`ComposerContextItem` + `appendContextItem` + `composeContextBlock` + 单源上限常量；SimpleChat 的 refs 状态合并为单一列表；三处组装点改调同一函数 | P1 基线测**逐字不变**通过；SimpleChat 引用相关行数不增（`gate:code-size` 基线不放宽） |
-| ▶️ **P3 `@` 候选聚合**（下一步）| `SimpleChat/contextSources.ts`：八类候选的 provider 形状（异步、有界、可取消、带 `unavailableReason`），复用既有端点/hook，不新建后端读侧 | 单测：每类源的形状/上限/失败原因；无新依赖、无新存储 |
-| **P4 `@` 菜单 UI** | `SimpleChat/ContextMentionMenu.tsx`（触发/过滤/分组/来源标签/键盘可达/不可用诚实提示）+ composer 接入 + 选中即产 `ComposerContextItem` | 组件测试；超限/无结果/源不可用三类提示可见 |
-| **P5 上限诚实化（C16 部分）** | 附件与引用超限由静默 `console.warn`/`slice` 改为用户可见提示（文案单源）；`MAX_*` 常量集中 | 单测断言"超限必产生可见提示且不丢已有项" |
-| **P6 实机腿** | 隔离 9223 + mock provider：`@` 选文件/技能/结果产物 → 发送 → 请求体含引用块 → 移除一项重发 → 超限提示；亮/暗截图 | live 断言全绿；UI-553 verified |
-| **P7 收口** | 定向/回归 + `output:judge` + closeout 十三门 + canonical 回写（plan/roadmap/handoff/AUDIT-LOG/UI 台账/Q-MATRIX C15/C16 行） | 十三门 PASS |
+| ✅ **P3 `@` 候选聚合**（commit `21299d13`）| `SimpleChat/contextSources.ts`：七源候选同形聚合（有界、带 `unavailableReason`/`note`/`truncated`），复用既有端点/hook，不新建后端读侧 | 单测 23 条：每源形状/上限/失败原因；无新依赖、无新存储 ✅ |
+| ✅ **P4 `@` 菜单 UI**（commits `470315ca`/`ec8c4947`）| `SimpleChat/ContextMentionMenu.tsx`（触发/过滤/分组/来源标签/键盘可达/不可用诚实提示）+ composer 接入 + 选中即产 `ComposerContextItem` + 候选 chip 可见可移除 | 组件 7 + 交互 6；超限/无结果/源不可用三类提示可见 ✅ |
+| ✅ **P5 上限诚实化（C16 部分）**（commit `2900b73b`）| 附件与引用超限由静默 `console.warn`/`slice` 改为用户可见提示（文案单源 `contextLimits.ts`）；跨组上限常量仍各在本域（附件 `MAX_ATTACHMENTS` / 引用 `CONTEXT_GROUP_CAPS`），文案集中不搬常量 | 单测断言"超限必可见且不丢已有项" ✅ |
+| ✅ **P6 实机腿**（commit `d5075011`）| 隔离 9223 + mock provider：`@` 选文件/技能/结果产物 → 发送 → 请求体含引用块 → 移除一项重发 → 超限提示；亮/暗截图 | live 亮 22/22 · 暗 22/22；UI-553 verified ✅ |
+| ✅ **P7 收口** | 定向/回归 + `output:judge` + closeout 十三门 + canonical 回写（plan/roadmap/handoff/AUDIT-LOG/UI 台账/Q-MATRIX C15/C16 行） | 十三门 PASS ✅ |
 
 **批内纪律**：
 
@@ -98,18 +98,28 @@ G0 开发期常态 · 不外推 packaged/Provider/GA。
 | P0 立项 | ✅ | commit `83629ead`：plan + DOC-REGISTRY（`BLOCK-245-Q2-CONTEXT-ASSEMBLY` active/P0-LAUNCH）+ README 273 + AUDIT-LOG 启动行/记录行 + roadmap/handoff 恢复点 + UI-553 台账 in_progress |
 | P1 拆前基线 | ✅ | commit `5e9e7ba4`：`SimpleChat/contextChannels.baseline.test.ts` 12 条逐字断言（三通道形状、组合次序 image→selection→text→attachment、上限 8/4、相邻同源去重、8000 截断文案、全角【】头纪律） |
 | P2 三通道并一 | ✅ | commit `fc1671cd`：`contextItems.ts`（`ComposerContextItem` + 分组上限/去重 + 返回 `deduped`/`dropped` 信号 + 唯一 `composeContextMessage`）、`hooks/useComposerContext.ts`（列表状态 + 右栏引用事件订阅 + 三个组装入口）、`ComposerContextChips.tsx`（chip JSX 平移）+ 等价测与渲染锚点；`SimpleChat.tsx` 2210→**2121**（code-size 台账随批下调，总行数 −89）；P1 基线一字未改仍绿，定向前端 56/56、types 0、eslint 0 |
-| P3 → P7 | 未做 | 见下「未做清单」 |
+| P3 `@` 候选聚合 | ✅ | commit `21299d13`：`SimpleChat/contextSources.ts`（七源同形候选；逐源上限 12·6·6·6·6·4·6 + 硬上限 200；`unavailableReason`/`note`/`truncated` 三信号；`@` 触发解析与 token 摘除）+ `hooks/useContextSources.ts`（七个既有端点各自独立结算）+ `listConversationsStrict`（宽容版逐字不变，只为区分「源不可用」与「真零结果」）；单测 23 条 + 变异红证（去掉边界判据 → 1 红 → 恢复 23 绿） |
+| P4 `@` 菜单 UI | ✅ | commits `470315ca`（主体）+ `ec8c4947`（补漏）：`ContextMentionMenu.tsx`（按源分组、来源标签、空结果/不可用原因/上限条数/有界 note；靠右缘锚定向左展开）+ `hooks/useContextMention.ts`（触发/过滤/↑↓ 回车 Esc/选中回落，选中只产 `ComposerContextItem`）；组件 7 + 交互 6；斜杠面板平移 `SlashCommandPanel.tsx`（零行为变化）；`SimpleChat.tsx` 2121→**2119**（基线随批下调）。补漏动因=实机准备期抓真：`@` 候选进了单列表却**无 chip 渲染**（用户看不见也移不掉），补 `others` 第三簇 |
+| P5 上限诚实化 | ✅ | commit `2900b73b`：`SimpleChat/contextLimits.ts` 文案单源（附件超大/超量/引用超限/同源去重）；`attachments.onDrop` 由 `console.warn` + `slice` 改**返回可见文案**（体积与数量逐因拼接、已有附件一条不丢）；`useComposerContext` 消费 `deduped`/`dropped` → `notice`（state 与镜像收成单一写入口 `commit`）；测试 15 条 |
+| P6 实机腿 | ✅ | commit `d5075011`：`scripts/block245-context-mention-live.mjs`（隔离 :3001/:3000/:9223 + mock provider 请求体留档 + 合成 done job 作结果源夹具）+ flow `ui553-context-mention-live.cjs`；**亮 22/22 · 暗 22/22**；反证链=请求体真含 4 条引用块 → 移除一条重发降为 2 条且不含【引用结果】→ 超上限提示可见。实机抓真两条（脚本侧修正）：①首启角色揭示浮层覆盖整页使截图失真（新增 `elementFromPoint` 命中断言）；②辅助链路（标题/记忆）复用同一 provider 导致"最后一次请求"数错引用块 |
+| P7 收口 | ✅ | UI-553 → verified；Q-MATRIX C15 🟡→✅（C16 保持 🟡）、§6.5 第 2 行、§5 统计句漏回写一并纠正（✅40/🟡41/🔴14/⛔7=102）；closeout 十三门 + `output:judge`；canonical 回写见 §6 |
 
-**未做清单（按依赖序）**
+**遗留（reopen，非本包验收缺口）**
 
-1. **P3 `@` 候选聚合**：新文件 `SimpleChat/contextSources.ts`（纯聚合/过滤/有界 + 每源 `unavailableReason`）+ 一个消费 hook 负责装载真实数据面。已核实的可用数据源（**别造第二套采集**）：工作区树 `GET /api/workspaces/:id/tree?prefix=&limit=&offset=`（`RightFileTree.tsx:139/151` 已用，目录分页先例）与 `?recursive=1`（`AnalysisLaunchPanel.tsx:198`，注意 500 条上限按「根层优先」消耗）；产品 Skills 与 run_tool 模板走 `slashSources.fetchSlashEntries`/`filterSlashEntries`；MCP 连接器 `useMcpServers`（`/mcp/servers`）；历史会话 `copilotConversationsClient`（`GET /api/ai/conversations`）；知识空间 `lib/knowledgeClient.ts`；结果产物/Agent·子任务两条**尚未核实具体端点**，动手前先实码确认（不确定就别写，避免臆造形状）。
-2. **P4 `@` 菜单 UI**：`ContextMentionMenu.tsx` + composer 接入（textarea 光标处 `@` 触发、上下/回车/Esc、来源标签、逐项上限、不可用与空结果诚实提示、选中产 `ComposerContextItem` 入 P2 单列表）。样式遵 `petri-css-theme`（token 阶梯、禁零定义、infima 特异性），改样式必跑 `theme-token-contract.test.ts`；弹层若靠右缘要向左展开（先例：`.notificationMenu`）。
-3. **P5 上限诚实化（C16 部分）**：`attachments.ts:95/112` 的 `console.warn` + `slice` 静默截断改为用户可见提示，文案单源；`appendContextItem` 已返回 `deduped`/`dropped`，接上即可。既有语义「无项目时附件诚实报错」保持。
-4. **P6 实机腿**：`scripts/block245-context-mention-live.mjs`（照 `scripts/block244-approval-tail-live.mjs` 的隔离栈：:3001/:3000/:9223 + mock provider + 临时数据根，`PETRI_TEST_ONSCREEN=1`）+ flow `.agents/skills/petri-dev-infra/dev-verify/flows/ui553-context-mention-live.cjs`；断言必须含反证：**请求体里真有引用块**、移除一项后引用数减少、超限提示可见；亮/暗截图入 `acceptance/ui-553/`，同份报告落 `acceptance/block-245/`。踩坑提醒（本仓实测）：长链路会被 `ProjectWorkspace` 既存重渲染环拖慢 CDP（该缺陷已在 AUDIT-LOG「当前待处理项」登记，不是本包要修的），把关键断言拆腿/必要时回落 REST 并如实标 `source`；mock 的多工具调用要逐 delta 分片发；不要并行跑前端门禁与 Node 大套件（vitest fork 会 `spawn ENOMEM`，单跑即绿）。
-5. **P7 收口**：`test:changed` 定向（新路径已登记 `test/impact-map.json` 规则 `block245-q2-context-assembly`，改前端路径前先跑 `test:changed:list` 确认 unknown 为空）→ UI-553 转 verified → Q-MATRIX 的 C15/C16 两行回写 + §6.5 第 2 行状态 → `npm run closeout`（十三门；PATH 需含 Git `usr/bin` 与 `bin`；**别把 closeout 接管道**，退出码会被 tail 吞）→ `npm run output:judge` 带 `--request-file/--file` → 本地提交。**推送需用户单独发令**。
+1. **C16 形态补全**：文件夹整体展开（现为目录条目引用）、选中代码块（选中文本已有）、应用快照。
+2. **C13 速记板**（需 `src/migrations/016_*.sql`）、**C12 划词动作生产者**（`selectionQuote` 有消费无生产）、**C4 消息动作注册表化**、**C11 图片保存/多图导航**、**B2 计划反馈输入**、**C17 跨会话引用完整语义**——一律挂在本包收敛出的单一 `ComposerContextItem` 通道上，不另建第二条。
+3. **数据面板的两处诚实边界**：工作区树 `recursive=1` 有 500 条上限（已以 `note` 如实提示「只覆盖前 500 项」）；结果产物腿的实机验证用**合成 done job**，真实工具链产物未在本包跑（真跑需生信依赖，与本包结构面无关）。
+4. **技能源的失败原因不可细分**：`fetchSlashEntries` 内部按源降级（bridge 缺失/模板端点失败都表现为空），候选源沿用该口径，不二次猜测原因——若后续要细分，须先修 `slashSources` 本身（避免两份真相）。
 
-**接手必读红线**（写在 plan §1 批内纪律，这里只提最容易破的三条）：零新依赖；**不建第四注入通道**（候选源只产 `ComposerContextItem`，事件面复用 `selectionQuote`/`imageQuote`，`events.ts:243-247` 的 D2 裁决有效）；引用上行仍是正文内引用块，**不新增第二份落库真相**；`SimpleChat.tsx` 新基线 2121 为棘轮上限（新逻辑一律落 `SimpleChat/*` 子模块）。
+**接手必读红线**（写在 plan §1 批内纪律，这里只提最容易破的三条）：零新依赖；**不建第四注入通道**（候选源只产 `ComposerContextItem`，事件面复用 `selectionQuote`/`imageQuote`，`events.ts:243-247` 的 D2 裁决有效）；引用上行仍是正文内引用块，**不新增第二份落库真相**；`SimpleChat.tsx` 新基线 **2119** 为棘轮上限（新逻辑一律落 `SimpleChat/*` 子模块）。
 
 **非范围（别顺手做）**：C13 速记板（需 `src/migrations/016_*.sql`，判据见 `src/migrations/README.md`：用户数据表一律走迁移，禁代码内 CREATE TABLE）、C12 划词动作生产者（`selectionQuote` 有消费无生产，`WorkspaceFilePreview` 组件不存在）、C4 消息动作注册表化、C11 图片保存/多图、B2 计划反馈（`usePlanApprovalFlow.ts:83` 的 `keep-planning` 现在直接 return 不发消息）、C17 完整语义、G1+。
 
-**Git 现状**：未推送，本地领先笔数以 `git rev-list --count origin/main..HEAD` 为准（不在此写死，避免每加一笔就过期）。本包提交=`83629ead` 立项 / `5e9e7ba4` P1 基线 / `fc1671cd` P2 并一 / `d4fc3d07`+`ac463923` 阶段回写 / `694125ff` ui-audit 门修直；前一包 `90f17073` 是 BLOCK-244 收口。工作区干净。
+**Git 现状**：未推送（推送需用户单独发令），本地领先笔数以 `git rev-list --count origin/main..HEAD` 为准。本包提交=`83629ead` 立项 / `5e9e7ba4` P1 基线 / `fc1671cd` P2 并一 / `d4fc3d07`+`ac463923`+`ea79bfc4` 阶段回写 / `694125ff` ui-audit 门修直 / `21299d13` P3 / `470315ca` P4 / `2900b73b` P5 / `ec8c4947` P4 补 / `d5075011` P6；前一包 `90f17073` 是 BLOCK-244 收口。
+
+## 6. 收口证据（P7）
+
+- **前端定向**：`block245` 规则 13 个前端测试文件全绿（`contextChannels.baseline` 一字未改仍绿）；`quality:types` 0；`quality:lint` 0 error（本包新增 0 error，warnings 沿用仓库既有 `security/detect-object-injection` 族）。
+- **实机**：`acceptance/ui-553/`（13 件）+ `acceptance/block-245/`（7 件），亮 22/22 · 暗 22/22。
+- **治理**：`npm run closeout` 十三门 PASS；`npm run output:judge` 结论见交付说明。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

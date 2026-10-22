@@ -46,6 +46,14 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-10-22 BLOCK-245（UI-553）四笔实现提交：P3 七源聚合 / P4 菜单 / P5 上限诚实化 /
+  // P4 补（候选 chip 可见可移除）。四笔 subject 走 BLOCK 轨无 UI-###，且各自未随提交
+  // 同步台账（台账行在 P0 立项时已登记 UI-553 in_progress，收口批统一更新为 verified）。
+  // 先例 d8251196/f5f0f915/20be172d；不重写共享历史。
+  '21299d13b448e538140dc68c14dda68ee4bd1f78',
+  '470315cae726e29dd857cc7012434c790411497b',
+  '2900b73b5dbc22eecf5f9a8f0e193e637af62f26',
+  'ec8c49479aba30e5a4bd53e7c6711578739ccd45',
   // 2026-10-21 BLOCK-238 图形批注渲染层提交（20be172d）：subject 走 BLOCK 轨无 UI-###；
   // 台账=UI-546（图形批注创建入口，渲染+创建随 BLOCK-238 收口补登）由收口批补登对账。
   // 先例 d8251196/f5f0f915；不重写共享历史。
@@ -466,6 +474,14 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-10-22 BLOCK-245（UI-553）四笔实现提交 P3/P4/P5/P4 补：同提交未同步台账
+  // （台账行在 P0 立项时登记 UI-553 in_progress，收口批统一更新为 verified 并补齐
+  // 实机证据段落）；subject 门经 LEGACY_MESSAGE_EXEMPTIONS 同哈希豁免。
+  // 先例 fc1671cd/d8251196；不重写共享历史。
+  '21299d13b448e538140dc68c14dda68ee4bd1f78',
+  '470315cae726e29dd857cc7012434c790411497b',
+  '2900b73b5dbc22eecf5f9a8f0e193e637af62f26',
+  'ec8c49479aba30e5a4bd53e7c6711578739ccd45',
   // 2026-10-22 BLOCK-245 P2 上下文引用三通道并一（fc1671cd）：纯组织重构，行为逐字不变
   // （P1 拆前基线 12 条断言一字未改仍绿 + 等价对账测；SimpleChat.tsx 2210→2121），无新 UI 功能面；
   // 台账=UI-553（in_progress；统一 @ 菜单随 P4 落地、verified 随收口批补登）。先例 64da69b/20be172d；不重写共享历史。

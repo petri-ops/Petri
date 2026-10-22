@@ -22,8 +22,8 @@ import {
 } from '../contextSources';
 import { useContextSources } from './useContextSources';
 
-/** 只用到的两个键盘事件面（便于纯逻辑单测，不依赖 React.DOMEvent）。 */
-export interface MentionKeyEvent {
+/** 只用到的键盘事件面（便于纯逻辑单测，不依赖 React.DOMEvent）。 */
+interface MentionKeyEvent {
   key: string;
   preventDefault: () => void;
 }

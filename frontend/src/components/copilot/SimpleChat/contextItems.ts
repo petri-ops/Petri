@@ -34,7 +34,7 @@ import type { UploadedAttachmentRef } from './attachmentUpload';
 export type ContextGroup = 'image' | 'reference' | 'attachment';
 
 /** 条目种类（chip 图标、移除与后续统计用；组决定渲染位置）。 */
-export type ContextKind =
+type ContextKind =
   | 'selection'
   | 'image'
   | 'attachment'

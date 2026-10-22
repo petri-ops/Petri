@@ -59,7 +59,7 @@ export const CONTEXT_SOURCE_CAPS: Record<ContextSourceId, number> = {
 };
 
 /** 单源绝对硬上限（装载面防御：即便端点返回上万行也不进内存无限膨胀）。 */
-export const CONTEXT_SOURCE_HARD_LIMIT = 200;
+const CONTEXT_SOURCE_HARD_LIMIT = 200;
 
 export interface ContextCandidate {
   /** 全局唯一键：`<sourceId>:<rawId>`（React key / 键盘导航定位）。 */
@@ -120,7 +120,7 @@ export function unavailableContextSource(sourceId: ContextSourceId, reason: stri
 }
 
 /** 源可用但结果有界：保留候选 + 一条可读提示（不谎称全量）。 */
-export function noteContextSource(
+function noteContextSource(
   sourceId: ContextSourceId,
   candidates: ContextCandidate[],
   note: string | null,

@@ -7807,8 +7807,8 @@
       "capability": "q2-context-assembly",
       "path": "docs/block-245-q2-context-assembly-plan.md",
       "kind": "work-package",
-      "status": "active",
-      "phase": "P0-LAUNCH",
+      "status": "completed",
+      "phase": "P7-CLOSED",
       "canonical": true,
       "truthDomain": "q2-context-assembly",
       "entrypoint": "docs/README.md",
@@ -7825,7 +7825,7 @@
         "refactor",
         "G0"
       ],
-      "notes": "2026-10-22 立项（用户「启动下一包 Q2 的开发」）：Q2 首切片=结构地基。勘察实证 composer 引用是三条互不复用的平行通道（selectionReferences / imageReferences / attachmentUpload 各自 make-append-上限-去重-头纪律，SimpleChat.tsx:1203-1206 三层套嵌，另在两处旁路重复部分组装），命中「叠层修复/平行第二套」重构信号 → 先做拆前行为基线 + 三通道并一（单一 ComposerContextItem + 单一 composeContextBlock），再挂统一 @ 菜单（八类候选同源）与上限诚实化（C16）。非范围=C13 速记板（需 SQLite 迁移）/C12 划词生产者/C4 动作注册表/B2 计划反馈/G1+。"
+      "notes": "2026-10-22 立项（用户「启动下一包 Q2 的开发」）：Q2 首切片=结构地基。勘察实证 composer 引用是三条互不复用的平行通道（selectionReferences / imageReferences / attachmentUpload 各自 make-append-上限-去重-头纪律，SimpleChat.tsx:1203-1206 三层套嵌，另在两处旁路重复部分组装），命中「叠层修复/平行第二套」重构信号 → 先做拆前行为基线 + 三通道并一（单一 ComposerContextItem + 单一 composeContextBlock），再挂统一 @ 菜单（八类候选同源）与上限诚实化（C16）。非范围=C13 速记板（需 SQLite 迁移）/C12 划词生产者/C4 动作注册表/B2 计划反馈/G1+。2026-10-22 收口：P3–P7 全交付，拆前基线 12 条一字未改仍绿，@ 七源同源聚合（逐源上限 + 不可用原因），超限静默截断改可见提示；SimpleChat.tsx 2210→2119（棘轮随批下调），隔离 9223 亮 22/22 · 暗 22/22（反证=请求体引用块 4→2），UI-553 verified；C15 ✅ / C16 保持 🟡（形态补全 reopen）。"
     }
   ],
   "lastUpdated": "2026-10-22",

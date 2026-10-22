@@ -11,3 +11,7 @@
 最后更新：2026-10-22（**BLOCK-241 Q8 大目录懒加载立项 active（P0-LAUNCH）**）：超阈值 MCP server 只投影 `catalog`（R1，list/describe）+ `call`（R2，按名代理）；调用时复核 server/tool policy；小目录零变化；状态面显示目录模式。非范围=动态 hint 降档/分页/设置页阈值/Q1 审批。plan=`docs/block-241-q8-mcp-lazy-catalog-plan.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-22（**Q8 余项轻量批：MCP 四 hint completed；无 active 工作包**）：destructive/openWorld 覆盖 readOnly 降档（保守 R2），idempotent 记录；零 annotations 零漂移；不新增审批通道。证据=block240 7/7 + projection 15/15 + closeout 十三门。plan=本条目（轻量包）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-22（**Q8 余项轻量批：MCP 四 hint 进策略 active**）：destructive/openWorld 覆盖 readOnly 降档（保守 R2）、idempotent 记录；零 annotations 零漂移；不新增审批通道。plan=本条目（轻量包）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-22T16:31:10.447Z -->
+最后更新：2026-10-22（**BLOCK-242 Q8 深链安装安全面立项 active（P0-LAUNCH）**）：`petri-install://` pack/mcp 双 kind——来源/下载地址/大小/SHA-256/风险/替换警告只读预览；确认重取对账 + sha 双验；env 禁止；安装复用 pack-lifecycle/installPlugin；扩展页「从链接安装」。非范围=packaged 真机唤起/签名/远程目录/Q1 审批。plan=`docs/block-242-q8-deeplink-install-plan.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。
+最后更新：2026-10-22（**BLOCK-241 Q8 大目录懒加载 completed；无 active 工作包**）：超阈值 MCP server 只投影 catalog(R1 list/describe)+call(R2 按名代理)；调用时复核 server/tool policy；小目录零变化；货架显示目录模式。证据=block241 5/5 + projection 15/15 + 前端 18/18 + 9223 live 7/7 + closeout 十三门；UI-549 verified。reopen=按 hint 动态降档/分页>200/设置页阈值/真实>200/Q1。plan=`docs/block-241-q8-mcp-lazy-catalog-plan.md` §6。G0 开发期常态 · 不外推 packaged/Provider/GA。

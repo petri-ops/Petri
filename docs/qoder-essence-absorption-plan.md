@@ -195,8 +195,8 @@ status: planned
 | C12 | 划词操作 | 复制/加入任务/侧聊提问/加入速记/批注 | `selectionBus` + 引用已有；无速记/批注 | 🟡 | 选中即行动 | Q2/Q6 |
 | C13 | 速记板 | 片段/图片/搜索/来源会话/图片批注 | 无 | 🔴 | 学习型产品的捕获面 | Q2/Q6 |
 | C14 | 后续建议/提示词润色 | `followupSuggestions`、`polishPrompt` | Gen UI follow-up 已有；composer 无 | 🟡 | 降低下一句成本 | Q9 |
-| C15 | 统一 `@` 上下文菜单 | 任务/指令/Skill/插件/连接器/Agent/文件/会话 | 文件引用 + 斜杠；未统一 | 🟡 | 一个入口装配上下文 | Q2 |
-| C16 | 附件形态 | 文件夹/选中文本/选中代码/应用快照/20 上限 | 图片/文件已有；缺文件夹/代码/快照 | 🟡 | 上下文形态完整 | Q2 |
+| C15 | 统一 `@` 上下文菜单 | 任务/指令/Skill/插件/连接器/Agent/文件/会话 | composer 光标处 `@` 打开统一菜单，七源同源聚合（文件·文件夹 / 技能 / MCP 连接器 / 智能体 profile / 结果产物 / 知识空间 / 历史会话），带来源标签、逐源上限、不可用原因；选中只产 `ComposerContextItem` 进单列表（BLOCK-245 P3/P4 + UI-553 实机 22/22） | ✅ | 一个入口装配上下文（不要重建第二条注入通道） | — |
+| C16 | 附件形态 | 文件夹/选中文本/选中代码/应用快照/20 上限 | 上限诚实化已落地（附件超量/超大与引用超限由静默 `console.warn`/`slice` 改可见提示，文案单源 = `SimpleChat/contextLimits.ts`；BLOCK-245 P5）；形态仍缺**文件夹整体引用**（现为目录条目引用而非递归展开）、**选中代码块**（选中文本已有）、**应用快照** | 🟡 | 上下文形态完整（上限诚实是前半，形态补全是后半） | Q2-REM |
 | C17 | 跨会话引用 | `chatSessionDrop`、引用上限 | 无 | 🟡 | 会话作为上下文资源 | Q2 |
 | C18 | 语音/实时语音/纪要 | live voice、纪要、超时、权限错误 | 无 | ⛔ | 与当前主线不符，暂不做 | — |
 | C19 | 结构化提问 | AskUserQuestion（选项/多选/自由输入） | `ask_user_question` 工具 + 暂停/超时诚实降级 + 问题卡（单选/多选/自由输入/跳过）+ 回答经 task 路由唤醒同一轮（BLOCK-244） | ✅ | 让 Agent 在长任务中可结构化提问 | Q1/Q2 |
@@ -315,7 +315,7 @@ status: planned
 
 > **工具宇宙映射（2026-10-20 抽查）**：Qoder 41 工具中，Monitor/TaskStop/BashInput/BashOutput/BashResize/TaskCreate/TaskGet/TaskUpdate/TaskList/UpdateTopic/CompleteTask 已有 process/terminal/todo/plan 等价物，不单列矩阵行；CodebaseInvestigator 记 F9（待核）；ImageSearch/ImageGen/VideoGen/VideoGenRetrieve 记 L7（⛔）；AskUserQuestion/NotebookEdit 记 C19/E12（待补）。
 
-**矩阵统计（2026-10-22 BLOCK-243 回写，机械计数）**：✅ 32 · 🟡 47 · 🔴 16 · ⛔ 7 = **102 点**（A3/A4/A6/D2/J3/J5 → ✅；A2/A5/J4/L5 → 🟡；E5/E13/K*/D*/E7/L6/L8 现状按证据更新）。Q1–Q9 剩余以 §6.5 为准；⛔ 不进入波次。**口径已同步**：DOC-REGISTRY 注记与 §12 更新记录统一为 102/32/47/16/7。
+**矩阵统计（2026-10-22 BLOCK-245 回写，机械计数）**：✅ 40 · 🟡 41 · 🔴 14 · ⛔ 7 = **102 点**（本轮 C15 统一 `@` 菜单 → ✅；C16 上限诚实化落地但形态仍需补全 → 保持 🟡。基线取 BLOCK-244 收口口径 ✅39/🟡42/🔴14/⛔7——本句此前仍停在 BLOCK-243 的 32/47/16，属漏回写，本轮一并纠正）。Q1–Q9 剩余以 §6.5 为准；⛔ 不进入波次。**口径已同步**：DOC-REGISTRY 注记与 §12 更新记录统一为 102/40/41/14/7。
 
 ## 6. 多波次计划（Q0–Q9）
 
@@ -387,7 +387,7 @@ status: planned
 
 ### Q2 — 上下文装配与捕获（约 1–2 周）
 
-> 2026-10-22 立项 **BLOCK-245（首切片，active）**：先做结构地基——composer 引用现状是三条互不复用的平行通道（`selectionReferences.ts` / `imageReferences.ts` / `attachmentUpload.ts`，各自 state/append/上限/去重/全角【】头纪律，组装点在 `SimpleChat.tsx:1203-1206` 且 `:1241`/`:1355` 旁路重复），直接挂 `@` 菜单会形成第四套 → 按「先收敛再加面」执行：拆前逐字行为基线 → 单一 `ComposerContextItem` + `composeContextBlock` → 八类候选统一 `@` 菜单 → 超限静默截断改可见（C16 部分）。C13/C12/C4/C11/B2 与 C17 完整语义留作后续片（§6.5 第 2 行）。
+> 2026-10-22 立项 **BLOCK-245（首切片 `completed`，commit 见 plan §5）**：先做结构地基——composer 引用现状是三条互不复用的平行通道（`selectionReferences.ts` / `imageReferences.ts` / `attachmentUpload.ts`，各自 state/append/上限/去重/全角【】头纪律，组装点在 `SimpleChat.tsx:1203-1206` 且 `:1241`/`:1355` 旁路重复），直接挂 `@` 菜单会形成第四套 → 按「先收敛再加面」执行：拆前逐字行为基线 → 单一 `ComposerContextItem` + `composeContextBlock` → 八类候选统一 `@` 菜单 → 超限静默截断改可见（C16 部分）。**已交付**：C15 ✅（统一 `@` 菜单七源同源聚合）+ C16 上限诚实化前半 + `SimpleChat.tsx` 2210→2119（棘轮随批下调）；实机 22/22 亮暗各一轮，反证含「请求体真含 4 条引用块 → 移除一条后降为 2 条」。C13/C12/C4/C11/B2 与 C17 完整语义/C16 形态补全留作后续片（§6.5 第 2 行）。
 
 **目标**：把「上下文」从零散引用变成一个可理解、可限制、可复用的装配面。
 
@@ -673,7 +673,7 @@ status: planned
 | 序 | ID | 剩余内容 | 依赖/边界 | 量级 |
 | --- | --- | --- | --- | --- |
 | 1 | Q1-REM **（completed · BLOCK-244 · 2026-10-22）** | 已交付：A1 逐工具审批门；A5 同参连续 N 次循环检测+继续/终止；A8 逐工具 allow/ask/deny 完整面；C5 workspace-checkpoint 编辑重发；C19 AskUserQuestion；D3 完全访问确认层；A7 sideTask 变体。仍 reopen：A2 模型/本地意图解释（本轮为确定性解释）；PAT/Lark/协作按 §2.6 不复刻 | BLOCK-243/244 已闭环；A9/A10 不重建 | 2–4 天 |
-| 2 | Q2 **（首切片已立项 · BLOCK-245 active：上下文装配收敛 + 统一 @ 菜单 + C16 上限诚实化）** | 剩余：**C13 速记板**（需 `src/migrations/016_*.sql`，独立包）、**C12 划词动作**（生产者面缺失：`selectionQuote` 有消费无生产）、**C17 跨会话引用**完整语义、**C4 消息动作注册表化**、**C11 图片保存/多图导航**、**B2 计划反馈输入**（`usePlanApprovalFlow.ts:83` keep-planning 现在直接 return 不发消息） | BLOCK-245 收敛出单一 ContextItem 列表后，其余条目挂在这条唯一通道上；C13 与 Q6 速记合并 | 首切片 3–5 天 + 余项 1 周 |
+| 2 | Q2 **（首切片 completed · BLOCK-245 · 2026-10-22：上下文装配收敛 + 统一 @ 菜单 + C16 上限诚实化）** | 已交付：三通道并一为单一 `ComposerContextItem`（拆前基线逐字不变）、`@` 七源同源聚合（C15 ✅）、附件/引用超限可见提示（C16 前半）。剩余：**C13 速记板**（需 `src/migrations/016_*.sql`，独立包）、**C12 划词动作**（生产者面缺失：`selectionQuote` 有消费无生产）、**C17 跨会话引用**完整语义、**C4 消息动作注册表化**、**C11 图片保存/多图导航**、**B2 计划反馈输入**（`usePlanApprovalFlow.ts:83` keep-planning 现在直接 return 不发消息）、**C16 形态补全**（文件夹整体展开 / 选中代码 / 应用快照） | 剩余条目一律挂在 BLOCK-245 收敛出的单一 ContextItem 通道上，不再建第二条；C13 与 Q6 速记合并 | 余项 1 周 |
 | 3 | Q2b | L1 web_search + L2 web_fetch；provider 抽象（DeepSeek 首实现，SearXNG/MCP 预留）；设置页；SSRF/重定向/大小/content-type/超时；默认关+授权+来源/成本/审计 | Q2 来源标签最小投影 | 1 周 |
 | 4 | Q3 | C1 时间线锚点；C2 活动卡补齐；C3 事件级轨迹+筛选+recordedOnly；H3 证据面；K1 轮次/工具级边界 | Q1/Q2b 事件；与 Q5 evidence tab 合并 | 1 周 |
 | 5 | Q4a | C7 子代理暂停；C10 团队活动；F1 roster/stop-all；F3 结构化输出；F4 子代理工具约束；F5 journal；F9 CodebaseInvestigator | Q3 团队活动可见 | 1–2 周 |
@@ -780,3 +780,4 @@ Q-DOMAIN（垂直去核化，跨波次）
 | 2026-10-20 | Q6 | BLOCK-219 垂直切片收口：E5/C12 部分落地（PDF/图像**矩形**批注 + 加入任务；批次外=椭圆/箭头/画笔/文字/马赛克、文本选中批注、速记板 C13 随 Q2、PPTX/DOCX、pack 面）；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——E5 仍 🟡（PPTX/DOCX 未覆盖），C12 仍 🟡（无速记/批注进侧聊） | `docs/block-219-q6-annotation-host-plan.md` §6 + `acceptance/block-219/`（13/13） |
 | 2026-10-22 | Q6/Q8/Q1 汇总回写 | BLOCK-238 椭圆/箭头；BLOCK-239 HTTP OAuth；BLOCK-240 四 hint；BLOCK-241 懒加载；BLOCK-242 深链；BLOCK-243 审批契约+trust；A3/A4/A6/D2/J3/J5→✅，A2/A5/J4/L5→🟡，E5/E13/K*/D*/E7/L6/L8 现状更新；矩阵 **✅32 / 🟡47 / 🔴16 / ⛔7 = 102**；剩余队列 §6.5 | 各 BLOCK plan §收口 + `acceptance/block-243/`、`acceptance/ui-551/` |
 | 2026-10-22 | Q1-REM | BLOCK-244 收口：逐工具审批策略 allow/ask/deny（A1/A8）、同参循环防护 `loop_guard`（A5，交互运行由 `repeated_tool_call` 硬停交棒审批层）、确定性意图 + sideTask 变体（A2 部分/A7）、AskUserQuestion（C19）、完全访问确认层（D3）、编辑重发 + checkpoint 回退（C5）；A1/A5/A7/A8/C5/C19/D3→✅，A2 仍 🟡（模型解释 reopen）；矩阵 **✅39 / 🟡42 / 🔴14 / ⛔7 = 102** | `docs/block-244-q1-rem-approval-tail-plan.md` §5 + `acceptance/block-244/`、`acceptance/ui-552/`（亮/暗 28/28） |
+| 2026-10-22 | Q2 首切片 | BLOCK-245 收口：三通道并一（拆前基线逐字不变）+ `@` 七源同源聚合 + 超限可见提示；**C15 🟡→✅**（一个入口装配上下文），**C16 保持 🟡**（上限诚实化已落地，文件夹整体/选中代码/应用快照仍缺）；矩阵 **✅40 / 🟡41 / 🔴14 / ⛔7 = 102**（同时纠正 §5 统计句仍停在 BLOCK-243 的 32/47/16 的漏回写） | `docs/block-245-q2-context-assembly-plan.md` §5 + `acceptance/ui-553/`、`acceptance/block-245/`（亮/暗各 22/22） |
