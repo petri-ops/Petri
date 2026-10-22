@@ -4994,6 +4994,8 @@
         "frontend/src/components/copilot/SimpleChat/ComposerContextChips.tsx",
         "frontend/src/components/copilot/SimpleChat/ContextMentionMenu.tsx",
         "frontend/src/components/copilot/SimpleChat/hooks/useComposerContext.ts",
+        "frontend/src/components/copilot/SimpleChat/hooks/useContextSources.ts",
+        "frontend/src/components/copilot/copilotConversationsClient.ts",
         "frontend/src/components/copilot/SimpleChat/selectionReferences.ts",
         "frontend/src/components/copilot/SimpleChat/imageReferences.ts",
         "frontend/src/components/copilot/SimpleChat/attachments.ts",
@@ -5010,6 +5012,9 @@
       "tests": [
         "frontend/src/components/copilot/SimpleChat/contextChannels.baseline.test.ts",
         "frontend/src/components/copilot/SimpleChat/contextItems.test.ts",
+        "frontend/src/components/copilot/SimpleChat/contextSources.test.ts",
+        "frontend/src/components/copilot/SimpleChat/ContextMentionMenu.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/hooks/useContextMention.test.tsx",
         "frontend/src/components/copilot/SimpleChat/ComposerContextChips.test.tsx",
         "frontend/src/components/copilot/SimpleChat/selectionReferences.test.ts",
         "frontend/src/components/copilot/SimpleChat/imageReferences.test.ts",

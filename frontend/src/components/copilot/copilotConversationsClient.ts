@@ -58,25 +58,51 @@ export interface ConversationMessage {
   meta?: Record<string, unknown> | null;
 }
 
+/**
+ * 会话列表的**抛错**实现（单一 URL/信封知识，`listConversations` 与
+ * `listConversationsStrict` 共用）。
+ *
+ * BLOCK-245 P3 — `@` 候选源要求「源不可用」与「真零结果」可区分：宽容版
+ * 把传输失败塌缩成空数组，用作「有候选就出、失败就老实说原因」的源时
+ * 会说谎（后端挂了也显示"没有会话"）。故拆出抛错版，宽容版行为逐字不变。
+ */
+async function fetchConversationsOrThrow(
+  status: ConversationStatus | 'all',
+  projectId?: string,
+  opts?: { includeFederated?: boolean }
+): Promise<ConversationSummary[]> {
+  let url = getApiPrefix() + '/ai/conversations?status=' + status;
+  if (projectId) url += '&project_id=' + encodeURIComponent(projectId);
+  // BLOCK-88 P2（D3）：显式查看联邦委托会话（服务端默认视图隔离）
+  if (opts && opts.includeFederated) url += '&includeFederated=1';
+  const resp = await fetch(url, {
+    headers: getAuthHeader(),
+  });
+  if (!resp.ok) throw new Error(`会话列表请求失败（${resp.status}）`);
+  const data = (await resp.json()) as ConversationsEnvelope;
+  if (data.status !== 'ok') throw new Error('会话列表返回异常');
+  return data.conversations || [];
+}
+
 export async function listConversations(
   status: ConversationStatus | 'all' = 'active',
   projectId?: string,
   opts?: { includeFederated?: boolean }
 ): Promise<ConversationSummary[]> {
   try {
-    let url = getApiPrefix() + '/ai/conversations?status=' + status;
-    if (projectId) url += '&project_id=' + encodeURIComponent(projectId);
-    // BLOCK-88 P2（D3）：显式查看联邦委托会话（服务端默认视图隔离）
-    if (opts && opts.includeFederated) url += '&includeFederated=1';
-    const resp = await fetch(url, {
-      headers: getAuthHeader(),
-    });
-    if (!resp.ok) return [];
-    const data = (await resp.json()) as ConversationsEnvelope;
-    return data.status === 'ok' ? data.conversations || [] : [];
+    return await fetchConversationsOrThrow(status, projectId, opts);
   } catch {
     return [];
   }
+}
+
+/** 同源同信封的抛错版（`@` 候选源用，见上方注释）。 */
+export async function listConversationsStrict(
+  status: ConversationStatus | 'all' = 'active',
+  projectId?: string,
+  opts?: { includeFederated?: boolean }
+): Promise<ConversationSummary[]> {
+  return fetchConversationsOrThrow(status, projectId, opts);
 }
 
 export async function createConversation(
