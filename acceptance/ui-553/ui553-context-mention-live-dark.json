@@ -1,0 +1,121 @@
+{
+  "name": "ui553-context-mention-live",
+  "darkMode": true,
+  "syntheticArtifactJob": "tj_ui553_synthetic",
+  "startedAt": "2026-10-22T16:17:03.105Z",
+  "finishedAt": "2026-10-22T16:17:14.517Z",
+  "providerCalls": 5,
+  "assertions": [
+    {
+      "name": "E1_project_created",
+      "pass": true,
+      "detail": "projectId=p_mvjquqpj_ypjs status=200"
+    },
+    {
+      "name": "E1b_workspace_resolved",
+      "pass": true,
+      "detail": "C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui553-live-sjbYKK\\data\\projects\\ui-553-mvjquqpj"
+    },
+    {
+      "name": "E2_synthetic_done_job",
+      "pass": true,
+      "detail": "jobs=1 status=200"
+    },
+    {
+      "name": "E3_isolated_stack",
+      "pass": true,
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / data=C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui553-live-sjbYKK"
+    },
+    {
+      "name": "M0_first_run_overlay_dismissed",
+      "pass": true,
+      "detail": "click=clicked"
+    },
+    {
+      "name": "M1_mention_menu_open",
+      "pass": true,
+      "detail": "[{\"label\":\"文件\",\"items\":11}]"
+    },
+    {
+      "name": "M1b_panel_hittable",
+      "pass": true,
+      "detail": "{\"inside\":true,\"blockedBy\":\"\",\"rect\":{\"top\":144,\"left\":849,\"w\":420,\"h\":340}}"
+    },
+    {
+      "name": "M2_file_picked",
+      "pass": true,
+      "detail": "[{\"kind\":\"file\",\"label\":\"f0.txt文件\"}]"
+    },
+    {
+      "name": "M3_token_stripped",
+      "pass": true,
+      "detail": "\"\""
+    },
+    {
+      "name": "M4_skill_picked",
+      "pass": true,
+      "detail": "[{\"kind\":\"file\",\"label\":\"f0.txt文件\"},{\"kind\":\"skill\",\"label\":\"编码实战手册（coding/playbook）技能\"}]"
+    },
+    {
+      "name": "M5a_result_source_present",
+      "pass": true,
+      "detail": "[\"UI-553 合成结果已完成 · scanpy_recipe结果\"]"
+    },
+    {
+      "name": "M5_result_picked",
+      "pass": true,
+      "detail": "[\"file\",\"skill\",\"artifact\"]"
+    },
+    {
+      "name": "M6_keyboard_pick",
+      "pass": true,
+      "detail": "before=3 after=4"
+    },
+    {
+      "name": "M7_request_has_reference_block",
+      "pass": true,
+      "detail": "refs=4 head=【引用文件】\n> path：f0.txt\n\n【引用技能】\n> 技能：coding-playbook\n> 说明：通用编码任务的实战守则：项目约定优先、先读后改、小步最小改动、验证闭环（先跑测试再宣称通过）、诚实汇报。编码任务开始时获取本守则并"
+    },
+    {
+      "name": "M8_request_has_result_reference",
+      "pass": true,
+      "detail": "【引用文件】\n> path：f0.txt\n\n【引用技能】\n> 技能：coding-playbook\n> 说明：通用编码任务的实战守则：项目约定优先、先读后改、小步最小改动、验证闭环（先跑测试再宣称通过）、诚实汇报。编码任务开始时获取本守则并全程遵循。\n\n【引用结果】\n> jobId：tj_ui553_synthetic\n> 工具：scanpy_recipe\n> 完成于：2026/10/23 00:"
+    },
+    {
+      "name": "M9_chips_cleared_after_send",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "M10a_artifact_removed",
+      "pass": true,
+      "detail": "removed"
+    },
+    {
+      "name": "M10b_chip_count_dropped",
+      "pass": true,
+      "detail": "before=3 after=2"
+    },
+    {
+      "name": "M10c_second_request_fewer_refs",
+      "pass": true,
+      "detail": "first=4 second=2 chips=2"
+    },
+    {
+      "name": "M10d_second_request_has_no_result_ref",
+      "pass": true,
+      "detail": "【引用文件】\n> path：f1.txt\n\n【引用文件】\n> path：f2.txt\n\n请根据我引用的上下文回答。"
+    },
+    {
+      "name": "M11_limit_notice_visible",
+      "pass": true,
+      "detail": "引用已达上限（同组最多 8 条）：最早加入的 1 条已移出，请重新选择要引用的项"
+    },
+    {
+      "name": "E4_mock_provider_used",
+      "pass": true,
+      "detail": "5"
+    }
+  ],
+  "allPass": true
+}
