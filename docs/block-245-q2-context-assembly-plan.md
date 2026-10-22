@@ -112,4 +112,4 @@ G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 **非范围（别顺手做）**：C13 速记板（需 `src/migrations/016_*.sql`，判据见 `src/migrations/README.md`：用户数据表一律走迁移，禁代码内 CREATE TABLE）、C12 划词动作生产者（`selectionQuote` 有消费无生产，`WorkspaceFilePreview` 组件不存在）、C4 消息动作注册表化、C11 图片保存/多图、B2 计划反馈（`usePlanApprovalFlow.ts:83` 的 `keep-planning` 现在直接 return 不发消息）、C17 完整语义、G1+。
 
-**Git 现状**：`main` 领先 `origin/main` 6 笔 = `90f17073`（BLOCK-244 收口）+ 本包 `83629ead` 立项 / `5e9e7ba4` P1 / `fc1671cd` P2 / `d4fc3d07` 阶段回写 / `694125ff` ui-audit 门两处修直；工作区干净，未推送。
+**Git 现状**：未推送，本地领先笔数以 `git rev-list --count origin/main..HEAD` 为准（不在此写死，避免每加一笔就过期）。本包提交=`83629ead` 立项 / `5e9e7ba4` P1 基线 / `fc1671cd` P2 并一 / `d4fc3d07`+`ac463923` 阶段回写 / `694125ff` ui-audit 门修直；前一包 `90f17073` 是 BLOCK-244 收口。工作区干净。
