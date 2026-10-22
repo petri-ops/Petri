@@ -207,13 +207,16 @@ function runScript(args = []) {
   return spawnSync('node', [SCRIPT, ...args], {
     cwd: REPO_ROOT,
     encoding: 'utf8',
-    timeout: 60000,
+    // 真实仓扫描要遍历 ENFORCEMENT_BASELINE..HEAD 的全部提交（本机实测约 170s，
+    // 且只随历史增长而变慢）。原来的 60s 上限会让 spawnSync 杀死子进程并把
+    // status 变成 null —— 门是绿的、断言却假红。给足余量，并在超时时把原因写明。
+    timeout: Number(process.env.UI_AUDIT_GATE_TEST_TIMEOUT_MS || 300000),
   })
 }
 
 test('default `npm run ui:audit:check` against the real repo still PASSes with exit 0', () => {
   const r = runScript([])
-  assert.equal(r.status, 0, `default mode must remain exit 0; got ${r.status}\n${r.stderr}`)
+  assert.equal(r.status, 0, `default mode must remain exit 0; got ${r.status}${r.status === null ? '（被 timeout 杀死，非门禁判红；可调 UI_AUDIT_GATE_TEST_TIMEOUT_MS）' : ''}\n${r.stderr}`)
   assert.match(r.stdout, /同步检查通过/, 'default mode stdout must show PASS message')
 })
 

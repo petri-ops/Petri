@@ -466,6 +466,10 @@ const LEGACY_MESSAGE_EXEMPTIONS = new Set([
 // ledger reconciliation. Exempt only the same-commit audit-file requirement;
 // their messages remain subject to the UI-### issue-id gate above.
 const LEGACY_AUDIT_SYNC_EXEMPTIONS = new Set([
+  // 2026-10-22 BLOCK-245 P2 上下文引用三通道并一（fc1671cd）：纯组织重构，行为逐字不变
+  // （P1 拆前基线 12 条断言一字未改仍绿 + 等价对账测；SimpleChat.tsx 2210→2121），无新 UI 功能面；
+  // 台账=UI-553（in_progress；统一 @ 菜单随 P4 落地、verified 随收口批补登）。先例 64da69b/20be172d；不重写共享历史。
+  'fc1671cd4e47f87468f8b06c349c47069752623c',
   // 2026-10-21 BLOCK-238 图形批注渲染层提交（20be172d）：同提交未同步台账；
   // 台账=UI-546（渲染层已在先行提交落地，创建入口随 BLOCK-238 补齐）由收口批补登对账。
   // 先例 d8251196/f5f0f915；不重写共享历史。
