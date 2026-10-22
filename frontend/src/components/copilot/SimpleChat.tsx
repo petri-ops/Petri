@@ -798,9 +798,9 @@ export function SimpleChat({
   const handleDrop = useCallback((e: React.DragEvent) => {
     // BLOCK-150 加映 / BLOCK-155 放宽 — 图片前置门（放行判据单源 imageInputAllowed：
     // vision_configured || 聊天渠道视觉能力，两者皆无才阻断；返回提示文案则落 attachmentNotice）
-    const notice = onDrop(e, setAttachments, setIsDraggingOver, { visionEnabled: visionConfigured, chatVisionCapable });
+    const notice = onDrop(e, setAttachments, setIsDraggingOver, { visionEnabled: visionConfigured, chatVisionCapable }, attachments.length);
     if (notice) setAttachmentNotice(notice);
-  }, [visionConfigured, chatVisionCapable]);
+  }, [visionConfigured, chatVisionCapable, attachments.length]);
 
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
     const notice = onPaste(e, setAttachments, { visionEnabled: visionConfigured, chatVisionCapable });
@@ -1807,6 +1807,7 @@ export function SimpleChat({
               selections={composerContext.selections}
               images={composerContext.images}
               onRemove={composerContext.removeItem}
+              notice={composerContext.notice}
             />
             <div className="sc-composer-body">
               <textarea

@@ -18,11 +18,14 @@ export interface ComposerContextChipsProps {
   selections: SelectionReference[];
   images: ImageReference[];
   onRemove: (id: string) => void;
+  /** BLOCK-245 P5 — 上限/去重提示（文案单源 = contextLimits；null = 无异常）。 */
+  notice?: string | null;
 }
 
-export function ComposerContextChips({ selections, images, onRemove }: ComposerContextChipsProps) {
+export function ComposerContextChips({ selections, images, onRemove, notice }: ComposerContextChipsProps) {
   return (
     <>
+      {notice ? <div className="sc-attachment-notice" role="status">{notice}</div> : null}
       {selections.length > 0 && (
         <div className="sc-selection-refs">
           {selections.map((ref) => (

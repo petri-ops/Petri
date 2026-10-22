@@ -5015,6 +5015,8 @@
         "frontend/src/components/copilot/SimpleChat/contextSources.test.ts",
         "frontend/src/components/copilot/SimpleChat/ContextMentionMenu.test.tsx",
         "frontend/src/components/copilot/SimpleChat/hooks/useContextMention.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/hooks/useComposerContext.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/contextLimits.test.ts",
         "frontend/src/components/copilot/SimpleChat/ComposerContextChips.test.tsx",
         "frontend/src/components/copilot/SimpleChat/selectionReferences.test.ts",
         "frontend/src/components/copilot/SimpleChat/imageReferences.test.ts",

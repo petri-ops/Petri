@@ -14,6 +14,7 @@ import { makeImageReference, type ImageReference } from '../imageReferences';
 import { makeSelectionReference, type SelectionReference } from '../selectionReferences';
 import type { UploadedAttachmentRef } from '../attachmentUpload';
 import {
+  CONTEXT_GROUP_CAPS,
   appendContextItem,
   attachmentContextItems,
   composeContextMessage,
@@ -22,6 +23,7 @@ import {
   selectionContextItem,
   type ComposerContextItem,
 } from '../contextItems';
+import { contextDedupedNotice, contextLimitNotice } from '../contextLimits';
 import type { ImageQuoteDetail, SelectionQuoteDetail } from '@/lib/events';
 
 // 成员一律写成属性（函数类型）而非方法签名：调用点会把它们从对象上解构下来
@@ -43,6 +45,8 @@ export interface ComposerContextApi {
   hasImageItems: () => boolean;
   /** 追加一条候选（`@` 菜单选中面；上限/去重/信号全部走 contextItems 单源）。 */
   addItem: (item: ComposerContextItem) => void;
+  /** 上限/去重的人话提示（P5 诚实化：不再是静默丢弃）；null = 无异常。 */
+  notice: string | null;
   removeItem: (id: string) => void;
   clearSelections: () => void;
   clearAll: () => void;
@@ -57,14 +61,26 @@ export interface UseComposerContextOptions {
 export function useComposerContext(options: UseComposerContextOptions): ComposerContextApi {
   const { projectId, ownsEventBus } = options;
   const [items, setItems] = useState<ComposerContextItem[]>([]);
+  const [notice, setNotice] = useState<string | null>(null);
   const itemsRef = useRef<ComposerContextItem[]>([]);
-  useEffect(() => {
-    itemsRef.current = items;
-  }, [items]);
+  // 单一写入口：state 与镜像同时前进（P5 的 replace 语义不能靠 effect 追平）。
+  const commit = useCallback((next: ComposerContextItem[]) => {
+    itemsRef.current = next;
+    setItems(next);
+  }, []);
 
   const addItem = useCallback((item: ComposerContextItem) => {
-    setItems((prev) => appendContextItem(prev, item).items);
-  }, []);
+    const result = appendContextItem(itemsRef.current, item);
+    commit(result.items);
+    // P5 — 上限/去重由信号转人话（文案单源 = contextLimits），不再静默。
+    if (result.dropped > 0) {
+      setNotice(contextLimitNotice(item.group, CONTEXT_GROUP_CAPS[item.group] ?? 0, result.dropped));
+    } else if (result.deduped) {
+      setNotice(contextDedupedNotice(item.group));
+    } else {
+      setNotice(null);
+    }
+  }, [commit]);
 
   const addSelection = useCallback((detail: SelectionQuoteDetail) => {
     if (detail.projectId && detail.projectId !== projectId) return;
@@ -101,14 +117,14 @@ export function useComposerContext(options: UseComposerContextOptions): Composer
   const hasImageItems = useCallback(() => itemsRef.current.some((entry) => entry.group === 'image'), []);
 
   const removeItem = useCallback((id: string) => {
-    setItems((prev) => removeContextItem(prev, id));
-  }, []);
+    commit(removeContextItem(itemsRef.current, id));
+  }, [commit]);
 
   const clearSelections = useCallback(() => {
-    setItems((prev) => prev.filter((entry) => entry.group !== 'reference'));
-  }, []);
+    commit(itemsRef.current.filter((entry) => entry.group !== 'reference'));
+  }, [commit]);
 
-  const clearAll = useCallback(() => setItems([]), []);
+  const clearAll = useCallback(() => commit([]), [commit]);
 
   const selections = useMemo(
     () => items.filter((entry) => entry.kind === 'selection').map((entry) => entry.payload as SelectionReference),
@@ -128,6 +144,7 @@ export function useComposerContext(options: UseComposerContextOptions): Composer
     composeSelectionsOnly,
     hasImageItems,
     addItem,
+    notice,
     removeItem,
     clearSelections,
     clearAll,

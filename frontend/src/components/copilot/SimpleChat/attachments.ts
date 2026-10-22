@@ -13,6 +13,7 @@
 // ============================================================
 
 import type * as React from 'react';
+import { attachmentCountNotice, attachmentTooLargeNotice } from './contextLimits';
 
 export interface AttachmentFile {
   id: string;
@@ -30,10 +31,10 @@ export const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
 /** 单次消息附件数量上限。 */
 export const MAX_ATTACHMENTS = 8;
 
-/** 附件大小校验：超限返回报错文案。 */
+/** 附件大小校验：超限返回报错文案（文案单源 = contextLimits）。 */
 export function validateAttachmentSize(size: number, name: string): string | null {
   if (size > MAX_ATTACHMENT_BYTES) {
-    return `${name} 超过 10MB 附件上限`;
+    return attachmentTooLargeNotice(name, MAX_ATTACHMENT_BYTES);
   }
   return null;
 }
@@ -65,12 +66,19 @@ export function onDragLeave(
   }
 }
 
-/** Drop: turn FileList into AttachmentFile rows with object-URL preview for images. */
+/**
+ * Drop: turn FileList into AttachmentFile rows with object-URL preview for images.
+ *
+ * BLOCK-245 P5（C16）— 返回的提示文案不再只是"识图未配置"：超体积与超数量的
+ * 拒收同样以可见文案回给宿主（原先是 `console.warn` + 静默 slice）。`existingCount`
+ * 只用于**算出被拒条数**（渲染面仍在下面按 prev 实算，不因入参漂移而丢已有项）。
+ */
 export function onDrop(
   e: React.DragEvent,
   setAttachments: React.Dispatch<React.SetStateAction<AttachmentFile[]>>,
   setIsDraggingOver: (value: boolean) => void,
-  options?: ImageInputGateOptions
+  options?: ImageInputGateOptions,
+  existingCount = 0
 ): string | void {
   e.preventDefault();
   e.stopPropagation();
@@ -88,11 +96,12 @@ export function onDrop(
 
   // BLOCK-91 — 上限守卫 + 拖入文件保留原始句柄（发送前由 uploadAttachment 读取）；
   // 图片异步读取 dataUrl（与粘贴行为对齐，此前拖入图片无内容载荷、发送即丢失）。
+  const notices: string[] = [];
   const newAttachments: AttachmentFile[] = [];
   for (const file of files) {
     const tooBig = validateAttachmentSize(file.size, file.name);
     if (tooBig) {
-      console.warn('[attachments]', tooBig);
+      notices.push(tooBig);
       continue;
     }
     newAttachments.push({
@@ -104,14 +113,13 @@ export function onDrop(
       file,
     });
   }
-  if (newAttachments.length === 0) return;
+  const rejected = Math.max(0, newAttachments.length - Math.max(0, MAX_ATTACHMENTS - existingCount));
+  if (rejected > 0) notices.push(attachmentCountNotice(MAX_ATTACHMENTS, rejected));
+  if (newAttachments.length === 0) return notices.length > 0 ? notices.join('；') : undefined;
 
   setAttachments((prev) => {
     const room = Math.max(0, MAX_ATTACHMENTS - prev.length);
-    if (newAttachments.length > room) {
-      console.warn('[attachments]', `附件数量超出上限 ${MAX_ATTACHMENTS}，已截断`);
-      return [...prev, ...newAttachments.slice(0, room)];
-    }
+    if (newAttachments.length > room) return [...prev, ...newAttachments.slice(0, room)];
     return [...prev, ...newAttachments];
   });
 
@@ -125,6 +133,7 @@ export function onDrop(
       reader.readAsDataURL(att.file);
     }
   }
+  return notices.length > 0 ? notices.join('；') : undefined;
 }
 
 /** Paste: read clipboard image items as data URLs and append them to the attachment list. */
