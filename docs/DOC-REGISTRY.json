@@ -7208,7 +7208,7 @@
         "mcp",
         "G0"
       ],
-      "notes": "方向母纲（planned）；2026-10-21 P0 对账：Q5/P2-UI/P2b 切片/Q6 切片/P3 切片/Q8 切片/Q9 切片均已 completed；reopen 集中在 P2b 全量高级 tab 迁移（P1 候选）、Q6 全量批注（P2 候选）、Q8 深化（P3 候选）、Q9 分段边界扩展（P4 候选）。"
+      "notes": "方向母纲（planned）；2026-10-21 P0 对账：Q5/P2-UI/P2b 切片/Q6 切片/P3 切片/Q8 切片/Q9 切片均已 completed。**2026-10-22 回写**：BLOCK-238/239/240/241/242/243 收口后 Q-MATRIX **✅32 / 🟡47 / 🔴16 / ⛔7 = 102**；剩余收敛到 §6.5 队列（Q1-REM/Q2/Q2b/Q3/Q4a/Q7/Q4b/Q5-REM/Q6-REM/Q8-REM/Q9-REM/P4-REM + V-REM UI-544/545/546 实机腿）。"
     },
     {
       "id": "BLOCK-214-QDOMAIN-P1-PACK-SKILLS",

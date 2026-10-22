@@ -155,14 +155,14 @@ status: planned
 
 | # | 体验面 | Qoder 0.4.8 行为（证据） | Petri 现状（证据） | 判定 | 汲取的精华 | 波次 |
 | --- | --- | --- | --- | --- | --- | --- |
-| A1 | 通用工具审批卡 | 允许一次/本任务/始终/选项下拉；`allowOnce/allowSession/allowAlways/allowOptions` | `GuardAckCard` 只覆盖动态防护/用户规则；无通用工具审批 | 🟡 | 范围选项与审批语义分层 | Q1 |
-| A2 | 审批意图解释 | 「解释」按钮、分析中骨架、失败仍可允许/拒绝 | 无 | 🔴 | 让用户「看懂再批」 | Q1 |
-| A3 | 命令预览折叠/展开 | 240px 上限、`line-clamp-2`、展开完整内容 | 风险片段高亮已有；无折叠 | 🟡 | 渐进披露 + 风险可见 | Q1 |
-| A4 | 审批可改写参数 | `updatedInput` 执行前替换，审计记原始/生效 | 只有 allow/deny | 🔴 | 审批从闸门升级为控制面 | Q1 |
-| A5 | 重复工具调用检测 | 同参连续 N 次提示可能循环，继续/终止 | 无 | 🔴 | 防死循环的显式确认 | Q1 |
-| A6 | 多请求排队计数 | `pendingCount`「还有 N 个权限请求」 | 无 | 🔴 | 多审批不淹没 | Q1 |
-| A7 | 审批变体 | MCP / PAT / Lark / 目录 / 协作 / sideTask 变体 | 通用 MCP 审批 | 🟡 | 只借审批卡变体形态；Lark/PAT/协作服务不接入（§2.6） | Q8 |
-| A8 | 工具允许/拒绝列表 | `agentToolAllow/deny` + 说明（允许不是「一律禁止」） | `AgentRulesPanel` + 全局策略；逐工具白名单不完整 | 🟡 | 把「为什么放行」讲清楚 | Q1 |
+| A1 | 通用工具审批卡 | 允许一次/本任务/始终/选项下拉；`allowOnce/allowSession/allowAlways/allowOptions` | GuardAckCard 三变体 + once/task/always 范围（BLOCK-243）；非 guard 触发的通用工具审批门未做 | 🟡 | 范围选项与审批语义分层 | Q1 |
+| A2 | 审批意图解释 | 「解释」按钮、分析中骨架、失败仍可允许/拒绝 | 确定性意图解释已交付（BLOCK-243）；模型/本地模型解释未做 | 🟡 | 让用户「看懂再批」 | Q1 |
+| A3 | 命令预览折叠/展开 | 240px 上限、`line-clamp-2`、展开完整内容 | 风险片段高亮 + 长命令折叠（BLOCK-243） | ✅ | 渐进披露 + 风险可见 | Q1 |
+| A4 | 审批可改写参数 | `updatedInput` 执行前替换，审计记原始/生效 | updatedInput 重校验 + 一次性参数替换 + 审计（BLOCK-243） | ✅ | 审批从闸门升级为控制面 | Q1 |
+| A5 | 重复工具调用检测 | 同参连续 N 次提示可能循环，继续/终止 | pending 重复合并/计数（BLOCK-243）；同参连续 N 次循环检测 + 继续/终止未做 | 🟡 | 防死循环的显式确认 | Q1 |
+| A6 | 多请求排队计数 | `pendingCount`「还有 N 个权限请求」 | pendingCount + duplicatePending（BLOCK-243） | ✅ | 多审批不淹没 | Q1 |
+| A7 | 审批变体 | MCP / PAT / Lark / 目录 / 协作 / sideTask 变体 | MCP trust 审批变体已交付（BLOCK-243）；sideTask 变体未做；PAT/Lark/协作按 §2.6 不复刻 | 🟡 | 只借审批卡变体形态；Lark/PAT/协作服务不接入（§2.6） | Q8 |
+| A8 | 工具允许/拒绝列表 | `agentToolAllow/deny` + 说明（允许不是「一律禁止」） | AgentRulesPanel + 全局策略；逐工具 allow/deny 完整面与放行说明未做（BLOCK-243 未覆盖） | 🟡 | 把「为什么放行」讲清楚 | Q1 |
 | A9 | 审批审计 | `permission.resolved` 记 decision/reason/updated_input/duration | `task_events`、决策面板已有 | ✅ | 不重建；Q1 只补字段 | — |
 | A10 | 两步武装 | 无 | `GuardAckCard` 先武装后使用 | ✅ | Petri 独有，不借 | — |
 
@@ -172,7 +172,7 @@ status: planned
 | --- | --- | --- | --- | --- | --- | --- |
 | B1 | 计划批准三选一 | 开始实现/调整/暂不实施 | `PlanApprovalCard` 批准/清上下文执行/继续计划 | ✅ | Petri 已对齐且更细 | — |
 | B2 | 计划反馈回路 | `requestChanges` 输入「告诉 Qoder 计划需要如何调整」 | 无 | 🔴 | 计划不是只读弹窗 | Q2 |
-| B3 | 计划版本/状态/复制/下载 | `specArtifact` 版本 tabs、pending/approved/accepted、copy/download | **Q5 已交付计划面**：会话计划列表 + 状态/步骤/spec + 复制/下载 `.md` + 加入对话；修订版本 tabs 未做 | 🟡 | 计划作为可追溯产物 | Q5 |
+| B3 | 计划版本/状态/复制/下载 | `specArtifact` 版本 tabs、pending/approved/accepted、copy/download | Q5 计划面基础（BLOCK-216）；修订版本 tabs 未做 | 🟡 | 计划作为可追溯产物 | Q5 |
 | B4 | 目标模式 | active/completed/paused/blocked/usage/budget + elapsed | 无 | 🔴 | 长跑目标的状态机 | Q7 |
 | B5 | 目标用量/预算受限 | `usageLimited/budgetLimited` | 只有成本上限提示 | 🟡 | 目标级预算可见 | Q7 |
 | B6 | 目标工具契约 | GetGoal/CreateGoal/UpdateGoal 三件 | 只有 `spawn_agent` 的 goals 参数；无独立目标工具 | 🟡 | 目标可查询/可更新 | Q7 |
@@ -185,7 +185,7 @@ status: planned
 | C2 | 活动卡类型 | 思考/工具/文件改动/命令/压缩/子代理/提问/失败/图像生成 | Petri 多数已有；缺压缩/提问/hook/失败卡 | 🟡 | 事件类型完整、状态同源 | Q3 |
 | C3 | 执行轨迹视图 | 对话/轨迹切换、9 类筛选、跟随最新、recorded-only | `LlmTranscriptViewer` 是模型 I/O，不是事件轨迹 | 🔴 | 事件级可观测 | Q3 |
 | C4 | 消息动作 | 复制 MD/加入任务/从回复建分支/评价/结果统计 | 复制/导出/编辑已有；无分支/加入上下文/评价 | 🟡 | 每条消息可再利用 | Q2/Q3 |
-| C5 | 编辑重发 + 文件回退 | 回退本轮文件修改并重发；部分未记录时诚实警告 | 编辑重发已有；无文件回退 | 🔴 | 可逆的对话修正 | Q1 |
+| C5 | 编辑重发 + 文件回退 | 回退本轮文件修改并重发；部分未记录时诚实警告 | 编辑重发已有；workspace-checkpoint 回退未做（BLOCK-243 明确 reopen） | 🔴 | 可逆的对话修正 | Q1 |
 | C6 | 队列/steer/插队/打断 | send now/steer/interrupt and run/edit/reorder | BLOCK-178 已对齐 | ✅ | 不重建 | — |
 | C7 | 后台子代理面板 | 运行/暂停/停止/打开工作区/阶段性回复 | `AgentRunPanel` 有中断/留言/续派；无暂停 | 🟡 | 长任务可暂停 | Q4 |
 | C8 | 后台进程面板 | 日志/停止/命令折叠/失联 | `ToolActivityDock` 已对齐 | ✅ | 不重建 | — |
@@ -199,34 +199,34 @@ status: planned
 | C16 | 附件形态 | 文件夹/选中文本/选中代码/应用快照/20 上限 | 图片/文件已有；缺文件夹/代码/快照 | 🟡 | 上下文形态完整 | Q2 |
 | C17 | 跨会话引用 | `chatSessionDrop`、引用上限 | 无 | 🟡 | 会话作为上下文资源 | Q2 |
 | C18 | 语音/实时语音/纪要 | live voice、纪要、超时、权限错误 | 无 | ⛔ | 与当前主线不符，暂不做 | — |
-| C19 | 结构化提问 | AskUserQuestion（选项/多选/自由输入） | 无；只有审批卡/guard 确认 | 🔴 | 让 Agent 在长任务中可结构化提问 | Q1/Q2 |
+| C19 | 结构化提问 | AskUserQuestion（选项/多选/自由输入） | 无结构化提问；审批卡/guard 确认不是 AskUserQuestion（Q1/Q2 未做） | 🔴 | 让 Agent 在长任务中可结构化提问 | Q1/Q2 |
 
 ### D. 模型与权限选择
 
 | # | 体验面 | Qoder 行为 | Petri 现状 | 判定 | 精华 | 波次 |
 | --- | --- | --- | --- | --- | --- | --- |
-| D1 | 模型选择器状态 | 分类/失效/无权限/Workspace 限制/加载失败/低峰折扣 | 模型菜单已有；状态原因不全 | 🟡 | 失败可解释 | Q9 |
-| D2 | 每模型思考/上下文/可见性 | 模型设置表：effort/contextWindow/visible | 生成参数 + 推理档位已有；非逐模型表 | 🟡 | 模型能力透明 | Q9 |
-| D3 | 访问权限选择器 | 三档描述 + 完全访问确认（能力清单/风险提示） | 四档选择器已有；无确认弹层 | 🟡 | 高危档位显式确认 | Q1 |
-| D4 | 自动选模型 | Auto 档 | 模型预设已有 | 🟡 | 任务适配 | Q9 |
+| D1 | 模型选择器状态 | 分类/失效/无权限/Workspace 限制/加载失败/低峰折扣 | 目录状态/缺密钥/隐藏逐行可见（BLOCK-224）；低峰折扣/权限/价格/缓存未做 | 🟡 | 失败可解释 | Q9 |
+| D2 | 每模型思考/上下文/可见性 | 模型设置表：effort/contextWindow/visible | 逐模型可见性/上下文/默认思考档（BLOCK-224） | ✅ | 模型能力透明 | Q9 |
+| D3 | 访问权限选择器 | 三档描述 + 完全访问确认（能力清单/风险提示） | 四档选择器已有；完全访问确认弹层未做（BLOCK-243 明确 reopen） | 🟡 | 高危档位显式确认 | Q1 |
+| D4 | 自动选模型 | Auto 档 | Auto 按任务/附件选模（BLOCK-225）；复杂度/成本权重/审计/覆盖确认未做 | 🟡 | 任务适配 | Q9 |
 
 ### E. 工作区与文件
 
 | # | 体验面 | Qoder 行为 | Petri 现状 | 判定 | 精华 | 波次 |
 | --- | --- | --- | --- | --- | --- | --- |
-| E1 | 统一工作面标签 | code/files/browser/changes/spec/terminal/evidence/agent/sidechat/plugin | **Q5 已统一右轨**：files/browser/analyze/review/jobs/io/agent + generated/plan/evidence + pack views 共享 surface 注册表；工作区 URL 模式、底部终端、侧聊仍各宿主 | 🟡 | 工作面稳定可寻 | Q5 |
+| E1 | 统一工作面标签 | code/files/browser/changes/spec/terminal/evidence/agent/sidechat/plugin | Q5 右轨统一（BLOCK-216）；工作区 URL 模式/底部终端/侧聊仍各宿主 | 🟡 | 工作面稳定可寻 | Q5 |
 | E2 | 标签关闭菜单/单例/序号 | close others/right/all、single、ordinal | **Q5 已交付**：统一 close/others/right/all、单例/序号模型、按项目持久化、tab 右键菜单；文件 tab 原有关闭策略保留 | ✅ | 标签生命周期一致 | Q5 |
 | E3 | 生成文件视图 | 当前工作区版本 vs 工具记录、空/错/无证据 | **Q5 已交付生成文件面**：会话改动 + 工作区版本/工具记录来源 + empty/loading/error/no-evidence 四态；工具记录无内容时如实说明 | ✅ | AI 产物可追溯 | Q5 |
-| E4 | 文件预览动作 | 默认应用打开/文件管理器显示 | 系统应用打开已有；**Q5 补 `file:show-in-folder` IPC**（未点验 OS 文件管理器实际行为） | 🟡 | 系统级衔接 | Q5 |
-| E5 | 文档产物批注 | PDF/PPTX/DOCX/XLSX/图片 → 批注加入任务 | PDF/xlsx viewer + 文本选择；无批注/PPTX/DOCX | 🟡 | 读-批-问闭环 | Q6 |
+| E4 | 文件预览动作 | 默认应用打开/文件管理器显示 | 系统应用打开已有；file:show-in-folder IPC 已补（BLOCK-216），OS 文件管理器实际行为未点验 | 🟡 | 系统级衔接 | Q5 |
+| E5 | 文档产物批注 | PDF/PPTX/DOCX/XLSX/图片 → 批注加入任务 | PDF/图像矩形批注 + 椭圆/箭头入口（BLOCK-219/238）；画笔/文字/马赛克/Office/文本批注未做 | 🟡 | 读-批-问闭环 | Q6 |
 | E6 | 内置浏览器 | 有 | `BrowserPanel` 已有 | ✅ | 不重建 | — |
-| E7 | 电脑使用画中画 | PiP 显示/隐藏/会话级隐藏 | computer 工具有；无 PiP | 🟡 | 自动化过程可见 | Q9 |
+| E7 | 电脑使用画中画 | PiP 显示/隐藏/会话级隐藏 | Windows sidecar/status/probe/设置面板（BLOCK-229）；macOS/PiP/真实 click-type 未做 | 🟡 | 自动化过程可见 | Q9 |
 | E8 | 终端多 tab/上限 | 有 | `BottomTerminal` 已有 | ✅ | 不重建 | — |
-| E9 | 终端分屏 | terminal split limit | 无；**Q5 明确 deferred**（node-pty 会话/tab 生命周期耦合，成本不可控，不夹带） | 🟡 | 多命令并行 | Q5 reopen |
+| E9 | 终端分屏 | terminal split limit | 无终端分屏；Q5 明确 deferred | 🟡 | 多命令并行 | Q5 reopen |
 | E10 | 审阅/历史/blame | per-turn patch + push | Petri 更深 | ✅ | 不借 | — |
 | E11 | 工作树 UI | Enter/Exit/恢复/清理 | G0 deferred | ⛔ | 阶段禁区 | — |
-| E12 | Notebook 单元格编辑 | NotebookEdit（cell 级读写/执行） | `.ipynb` 只能当文本编辑；无 cell 级工具 | 🟡 | 数据科学工作流一等公民 | Q5 |
-| E13 | 生信 Result Studio 结果面 | Qoder 无同等对照（其结果为通用 artifact 预览） | **P2b 垂直切片**：result mode 主 body 已由 pack `resultSurfaces` 渲染（图/表/文本/report 源码）；lineage/compare/history/selection/revisions 仍核心 `core-transitional` | 🟡 | 结果页保持生信专属；核心只做 artifact/truth host | Q-DOMAIN P2b reopen |
+| E12 | Notebook 单元格编辑 | NotebookEdit（cell 级读写/执行） | 无 Notebook cell 级编辑工具 | 🟡 | 数据科学工作流一等公民 | Q5 |
+| E13 | 生信 Result Studio 结果面 | Qoder 无同等对照（其结果为通用 artifact 预览） | P2b 主 body + BLOCK-236 tab/compare（UI-544/545 实机未跑）；lineage/history/selection/revisions/annotations/methods/export 全量未做 | 🟡 | 结果页保持生信专属；核心只做 artifact/truth host | Q-DOMAIN P2b reopen |
 
 ### F. 多智能体与编排
 
@@ -238,7 +238,7 @@ status: planned
 | F4 | 子代理工具约束 | `disallowedTools/additionalTools/requiredTools/omitAgentsMd` | profile 只有 role/model/concurrency/reportGuard | 🔴 | 最小权限子代理 | Q4 |
 | F5 | 子代理 journal | `journal.jsonl` 一行一结果；诊断前先读 | 有 task_events；无运行级 journal | 🔴 | 可诊断的编排 | Q4 |
 | F6 | 编排 DAG | 有 team 视图 | Petri DAG 已有 | ✅ | 不重建 | — |
-| F7 | 多窗格/分屏 | panes split/maximize/resize | ArtifactPinPane 分屏 | 🟡 | 通用窗格模型 | Q5 |
+| F7 | 多窗格/分屏 | panes split/maximize/resize | ArtifactPinPane 分屏已有；通用 pane split/maximize/resize 未做 | 🟡 | 通用窗格模型 | Q5 |
 | F8 | 工作流脚本 | agent/parallel/pipeline/phase/log/budget/resume | 无 | 🔴 | 确定性多代理编排 | Q4b（大包，单列） |
 | F9 | 代码库调查员 | CodebaseInvestigator（专用调查 Agent） | 有 codegraph_* 查询 + spawn_agent；无同名专用角色 | 🟡 | 调查可复核、可复用 | Q4 |
 
@@ -259,8 +259,8 @@ status: planned
 | --- | --- | --- | --- | --- | --- | --- |
 | H1 | 知识空间/检索/引用 | knowledge center | Petri 更深 | ✅ | 不重建 | — |
 | H2 | 结果产物/血缘/分屏/查看器 | 无同等 | Result Studio 独有 | ✅ | 不重建 | — |
-| H3 | 证据/核验状态 | evidence tab / result status | **Q5 已交付证据槽位 + 最小索引**（artifact truth/版本/可用性/相关工作面）；事件级轨迹由 Q3 扩展同一面 | 🟡 | 证据面统一 | Q3/Q5 |
-| H4 | 计划/规格 artifact 版本 | specArtifact | **Q5 已交付计划面基础**（状态/步骤/spec）；修订版本 tabs 未做 | 🟡 | 计划可追溯 | Q5 |
+| H3 | 证据/核验状态 | evidence tab / result status | Q5 证据槽位基础（BLOCK-216）；事件级轨迹随 Q3 | 🟡 | 证据面统一 | Q3/Q5 |
+| H4 | 计划/规格 artifact 版本 | specArtifact | Q5 计划面基础（BLOCK-216）；修订版本 tabs 未做 | 🟡 | 计划可追溯 | Q5 |
 
 ### I. 自动化与任务
 
@@ -278,24 +278,24 @@ status: planned
 | --- | --- | --- | --- | --- | --- | --- |
 | J1 | 扩展中心/技能货架 | 有 | UI-480/506/507/527 更深 | ✅ | 不重建 | — |
 | J2 | 技能自进化建议 | 建议列表/一键建任务/忽略 | 无 | 🟡 | 技能可演进 | Q8 |
-| J3 | 插件视图 tab | plugin view host | content plugins 部分 | 🟡 | 插件即工作面 | Q8 |
-| J4 | MCP 信任/默认拒绝/OAuth/懒加载 | per-server trust、项目级默认不批准、authenticate tool、discovered_tool_ | 只有 readOnlyHint 降档 | 🔴 | 不可信 MCP 默认拒绝；OAuth 走目标 server 自己的端点 | Q8 |
-| J5 | 深链安装安全警告 | 名称/来源/下载地址/大小/SHA-256/风险 | 无 | 🟡 | 安装前看清来源 | Q8 |
+| J3 | 插件视图 tab | plugin view host | Q5 surface host + pack views（BLOCK-216） | ✅ | 插件即工作面 | Q8 |
+| J4 | MCP 信任/默认拒绝/OAuth/懒加载 | per-server trust、项目级默认不批准、authenticate tool、discovered_tool_ | HTTP OAuth（BLOCK-239）+ 懒加载（BLOCK-241）+ trust ask/destructive 门（BLOCK-243）+ 四 hint（BLOCK-240）；agent authenticate/stdio/SSE/非 destructive 默认策略未做 | 🟡 | 不可信 MCP 默认拒绝；OAuth 走目标 server 自己的端点 | Q8 |
+| J5 | 深链安装安全警告 | 名称/来源/下载地址/大小/SHA-256/风险 | 深链安装安全面（BLOCK-242） | ✅ | 安装前看清来源 | Q8 |
 | J6 | Agent builder | 自定义 Agent/角色 | agent roles 只有内置 | 🟡 | 用户自定义专长 | Q8/Q9 |
 
 ### K. 外壳、可靠性与个性化
 
 | # | 体验面 | Qoder 行为 | Petri 现状 | 判定 | 精华 | 波次 |
 | --- | --- | --- | --- | --- | --- | --- |
-| K1 | 分段错误边界 | 应用/页面/预览/轮次/工具五级 | RouteErrorBoundary 页面级 | 🟡 | 局部崩溃不白屏 | Q9 |
-| K2 | 崩溃同意/本地解析 | consent + minidump 本地解析 | 无 crashReporter | 🟡 | 隐私边界 + 证据 | Q9 |
-| K3 | 退出/更新运行摘要 | 运行/后台/排队/等待交互计数 | 无 | 🟡 | 退出不误杀工作 | Q9 |
-| K4 | 托盘/系统通知 | 托盘最小化、轮次完成/失败/权限/提问通知 | 应用内 notice；无系统通知/托盘 | 🟡 | 长跑可离开窗口 | Q9 |
+| K1 | 分段错误边界 | 应用/页面/预览/轮次/工具五级 | 页面/预览段错误边界（BLOCK-222）；轮次/工具/应用级未做 | 🟡 | 局部崩溃不白屏 | Q9 |
+| K2 | 崩溃同意/本地解析 | consent + minidump 本地解析 | 本地崩溃记录/横幅（BLOCK-228）；minidump 解析/上传未做 | 🟡 | 隐私边界 + 证据 | Q9 |
+| K3 | 退出/更新运行摘要 | 运行/后台/排队/等待交互计数 | 退出摘要三选一（BLOCK-223）；逐项操作未做 | 🟡 | 退出不误杀工作 | Q9 |
+| K4 | 托盘/系统通知 | 托盘最小化、轮次完成/失败/权限/提问通知 | 系统通知/托盘/通知中心/免打扰（BLOCK-223/226）；点击跳转/系统历史/审批穿透/声音/类型开关未做 | 🟡 | 长跑可离开窗口 | Q9 |
 | K5 | 命令面板 | 有 | UI-528 已对齐 | ✅ | 不重建 | — |
 | K6 | 设置搜索/导出/重置 | 有 | UI-516/517/518 更深 | ✅ | 不重建 | — |
 | K7 | 键位/推理档位 | 有 | UI-514/515 更深 | ✅ | 不重建 | — |
 | K8 | 主题/字号/动效 | 有 | UI-488/489/525 更深 | ✅ | 不重建 | — |
-| K9 | 引导/数据导入 | 首启 overlay/角色揭示/导入 | welcome 页；无角色揭示/导入 | 🟡 | 首启即建立心智 | Q9 |
+| K9 | 引导/数据导入 | 首启 overlay/角色揭示/导入 | 角色揭示（BLOCK-227）；分步引导/数据导入未做 | 🟡 | 首启即建立心智 | Q9 |
 | K10 | 国际化 | zh/en | i18n ⛔ | ⛔ | 阶段禁区 | — |
 | K11 | 宠物/伴随/语音浮层 | desktop pet/companion/live voice | 无 | ⛔ | 与 Petri 人设不符 | — |
 | K12 | 数据政策/积分/云额度/更新 | 有 | 不做云侧 | ⛔ | 本地优先 | — |
@@ -308,14 +308,14 @@ status: planned
 | L2 | 网页抓取 | 核心工具 `WebFetch`，云端抓取 + 独立 model purpose | 无 `web_fetch`；`defuddle` 技能仅单 URL 提取 | 🔴 | 只借行为合同（URL→Markdown/来源）；**不接 Qoder 端点** | Q2b |
 | L3 | 浏览器连接器 | Chrome/Edge 扩展 + native messaging + `/sdk/browser-use/v1` | `BrowserPanel` UI；无 Agent 网页操作 | 🟡 | 只借行为合同（浏览器可操作）；**不复刻 Qoder SDK/端点** | Q9 |
 | L4 | 电脑控制 | 随包 `qoder-computer-use` 插件 + `qoder.computer-control` 技能 + 原生 addon | 8 个 `computer_*` + macOS/Windows sidecar（未构建）+ block48/63 | 🟡 | 只借行为合同（语义树+确认门）；**不搬 Qoder 插件代码** | Q9 |
-| L5 | 插件宿主契约 | plugin host（utility process + WebContentsView）+ 离线内容寻址插件包 | `plugin-loader`/`pack-registry` 有领域包；无通用 UI host API | 🔴 | manifest + host API + sandbox | Q0.5/Q5 |
-| L6 | 插件权限/生命周期/审计 | 深链安装显示来源/哈希/风险；插件离线包 | pack 权限词表 + MCP 信任位存在，未统一生命周期/审计 | 🟡 | 默认拒绝 + 可授权 + 审计 | Q8 |
+| L5 | 插件宿主契约 | plugin host（utility process + WebContentsView）+ 离线内容寻址插件包 | Q5 surface/pack host API 已交付（BLOCK-216）；通用 utility-process host/sandbox 未做 | 🟡 | manifest + host API + sandbox | Q0.5/Q5 |
+| L6 | 插件权限/生命周期/审计 | 深链安装显示来源/哈希/风险；插件离线包 | 深链安装（BLOCK-242）+ trust（BLOCK-243）已交付；插件生命周期/审计统一未做 | 🟡 | 默认拒绝 + 可授权 + 审计 | Q8 |
 | L7 | 生成式媒体 | ImageSearch/ImageGen/VideoGen/VideoGenRetrieve | 只有 `read_image`（读图）；无图像/视频搜索与生成 | ⛔ | 不纳入 G0；重开=用户明确需求 + Provider 预算 | — |
-| L8 | 垂直领域完全插件化 | Qoder 以插件/扩展承载领域能力 | 执行层/skills/prompt 已在 pack；**P2-UI action 契约已通**；**P2b result 主面已由 pack resultSurface 渲染**；高级 tab 与 data model 仍在核心 | 🟡 | 核心零领域硬编码；领域能力随包交付；结果页仍生信专属 | Q-DOMAIN P2b reopen/P3/P4 |
+| L8 | 垂直领域完全插件化 | Qoder 以插件/扩展承载领域能力 | P2-UI/P2b/P3/P4 结构片已交付；P4 高级 Result Studio/域中性白名单余项未清 | 🟡 | 核心零领域硬编码；领域能力随包交付；结果页仍生信专属 | Q-DOMAIN P2b reopen/P3/P4 |
 
 > **工具宇宙映射（2026-10-20 抽查）**：Qoder 41 工具中，Monitor/TaskStop/BashInput/BashOutput/BashResize/TaskCreate/TaskGet/TaskUpdate/TaskList/UpdateTopic/CompleteTask 已有 process/terminal/todo/plan 等价物，不单列矩阵行；CodebaseInvestigator 记 F9（待核）；ImageSearch/ImageGen/VideoGen/VideoGenRetrieve 记 L7（⛔）；AskUserQuestion/NotebookEdit 记 C19/E12（待补）。
 
-**矩阵统计（2026-10-20 P2-UI 收口后，机械计数）**：✅ 26 · 🟡 47 · 🔴 22 · ⛔ 7 = **102 点**（E2/E3 → ✅；E1 🔴→🟡 部分交付；L8 🔴→🟡 部分交付）。Q1–Q9 需要处理的主要是 24 个 🔴 与 47 个 🟡 中真正影响体验的部分；⛔ 不进入波次。**口径已同步**：DOC-REGISTRY 注记与 §12 更新记录统一为 102/24/47/24/7。
+**矩阵统计（2026-10-22 BLOCK-243 回写，机械计数）**：✅ 32 · 🟡 47 · 🔴 16 · ⛔ 7 = **102 点**（A3/A4/A6/D2/J3/J5 → ✅；A2/A5/J4/L5 → 🟡；E5/E13/K*/D*/E7/L6/L8 现状按证据更新）。Q1–Q9 剩余以 §6.5 为准；⛔ 不进入波次。**口径已同步**：DOC-REGISTRY 注记与 §12 更新记录统一为 102/32/47/16/7。
 
 ## 6. 多波次计划（Q0–Q9）
 
@@ -382,6 +382,8 @@ status: planned
 - 回归：现有 GuardAckCard/审批/队列测试全绿。
 
 **风险**：编辑参数不得绕过风险策略；「始终」必须有界且可见；意图解释不得伪造，失败要如实降级。
+
+> 2026-10-22：**BLOCK-243 已交付 Q1 主体**（A1 三变体+once/task/always 范围、A3 命令折叠、A4 updatedInput 重校验/一次性替换、A6 计数、MCP trust）。剩余见 §6.5 Q1-REM；矩阵已回写：A3/A4/A6 ✅，A2/A5/A7/A8/D3 🟡，C5/C19 🔴。
 
 ### Q2 — 上下文装配与捕获（约 1–2 周）
 
@@ -514,6 +516,8 @@ status: planned
 ### Q5 — 统一工作面与生成文件（约 1–2 周）
 
 > **2026-10-20：BLOCK-216 已收口（completed，closeout 十三门 + 9223 live 19/19）**。交付=右轨 surface 注册表/tab 状态机/pack `views`·`resultSurfaces`·`uiActions` 贡献投影 + `petri-pack://` 独立 origin + 生成文件/计划/证据面 + 文件管理器显示 IPC。边界=终端分屏 E9 deferred；工作区 URL 模式/底部终端/侧聊维持现有宿主；P2b result 主面已由 pack 渲染（BLOCK-218 垂直切片），高级 tab 仍核心过渡。
+>
+> 2026-10-22 对账：Q5 主体已完成；剩余 E1/E4/F7/B3/H4/H3/E9 见 §6.5 Q5-REM。
 
 **目标**：把散落在面板/抽屉/浮层里的工作面收成稳定标签，并让 AI 生成文件可追溯。
 
@@ -538,6 +542,8 @@ status: planned
 ### Q6 — 产物批注与学习闭环（约 1–2 周）
 
 > 2026-10-20：**垂直切片已立项并收口 [BLOCK-219](./block-219-q6-annotation-host-plan.md)（completed）**——核心 annotation host（`result_annotations` 旁路元数据 + 归一化 0..1 坐标 + 有界/项目隔离）+ PDF 页与图像区域批注（结果面/工作区预览）+「加入任务」经 `petri:copilot-ask`；实机 13/13，批注不写原始产物。**未做（reopen）**：椭圆/箭头/画笔/文字/马赛克与撤销重做、文本选中批注与速记板（C13 随 Q2）、PPTX/DOCX/XLSX、pack iframe 面批注（需窄桥契约）、Agent 侧批注读取工具。
+>
+> 2026-10-22：**椭圆/箭头创建入口已由 BLOCK-238 交付**（UI-546 无实机腿）。剩余画笔/文字/马赛克/文本批注/C13/Office/pack iframe/Agent 读取，见 §6.5 Q6-REM。
 
 **目标**：让「读产物 → 批注 → 追问/继续分析」成为闭环，服务 Petri 的学习/科研场景。
 
@@ -589,6 +595,8 @@ status: planned
 > 2026-10-22：**大目录懒加载已由 BLOCK-241 交付（completed；UI-549 verified dev Electron；catalog R1 + call R2 代理，调用时复核策略）**。**剩余**：深链安装安全面、技能自进化建议、Agent builder；trust 随 Q1；OAuth 余项随 BLOCK-239 reopen。
 >
 > 2026-10-22：**深链安装安全面已由 BLOCK-242 交付（completed；UI-550 verified dev Electron；`petri-install://` pack/mcp 预览/替换警告/sha 双验/env 禁止）**。**Q8 剩余**：trust 降档接审批（随 Q1）、技能自进化建议与 Agent builder（可选）；packaged 真机唤起/签名/allowlist 属 G1+。
+>
+> 2026-10-22：**trust 降档已随 BLOCK-243 交付**——`trust='ask'` 对 destructiveHint 工具要求审批，`trust='allow'` 自动放行，货架可改回 ask。**Q8 剩余 = §6.5 Q8-REM**：J2/J6（可选）+ J4 reopen（agent authenticate/stdio/SSE/非 destructive 默认策略）+ OAuth revoke/账号切换 + G1+ 项。
 
 **目标**：把 MCP 从「能用」升级为「默认不信任、可授权、可解释」；补齐扩展安装安全面。
 
@@ -632,6 +640,8 @@ status: planned
 > 2026-10-21：**P4-C 收尾 [BLOCK-234](./block-234-qdomain-p4c-tail-plan.md) completed（S2–S6）**——S6 前端/桌面 37 处清零，剩余 11 处 / 6 键为显式兼容白名单（permissions/guest/modality/schema/runtime-bundle/security-extension，门禁逐键一致）；pack 0.2.7 `provides.examplePrompts`。域中性 **179→11 处 / 85→6 键**。**无 active 工作包**；P4 余项=导出/联邦基线、dataModelExtensions（需独立阶段发令）。
 >
 > 2026-10-21：**P4-D 余项 [BLOCK-235](./block-235-qdomain-p4d-datamodel-plan.md) completed**——`dataModelExtensions` additive 扩展契约（pack 可新增 artifact 类型/字段，canonical SDC-0 profile 不可覆盖；bounded loader + SDC-0 校验；冲突/非法 fail-closed）+ 导出/联邦域中性基线。域中性保持 **11 处 / 6 键 compat**。**P4 数据模型/权限轨道结构余项收口；无 active 工作包；下一包需用户发令**。G0 开发期常态 · 不外推 packaged/Provider/GA。
+>
+> 2026-10-22 对账：Q9 八个垂直切片已完成；剩余 K1/K2/K3/K4/K9/D1/D4/E7/C14/L3/L4 见 §6.5 Q9-REM。
 
 **目标**：把「长跑、离开窗口、出错、首启」这些边缘体验补到第一梯队。
 
@@ -653,6 +663,28 @@ status: planned
 - 诚实边界：崩溃解析不可用时只报文件名，不伪造栈。
 
 **风险**：托盘/通知跨平台差异；不要在 G0 碰更新/Provider；崩溃 wasm 许可需另行评估。
+
+### 6.5 剩余队列（2026-10-22 对账，串行）
+
+> 本表把「已立项包未覆盖 / 整波未开工 / 已交付面收尾」收敛为一处；排队序以本表为准，执行仍按单工作包串行与立项检查单。量级继承母纲颗粒度，不含返工与 G1+。
+
+| 序 | ID | 剩余内容 | 依赖/边界 | 量级 |
+| --- | --- | --- | --- | --- |
+| 1 | Q1-REM | A1 非 guard 通用审批门；A2 模型/本地意图解释；A5 同参连续 N 次循环检测+继续/终止；A8 逐工具 allow/deny 完整面；C5 workspace-checkpoint 编辑重发；C19 AskUserQuestion；D3 完全访问确认层；A7 sideTask 变体（PAT/Lark/协作按 §2.6 不复刻） | BLOCK-243 主体已完成；A9/A10 不重建 | 2–4 天 |
+| 2 | Q2 | C15 统一 @ 菜单；C12 划词动作；C13 速记板；C17 跨会话引用；C16 附件形态；C4 消息动作；C11 图片保存/多图；B2 计划反馈 | Q1/Q2 可并行；C13 与 Q6 速记合并 | 1–2 周 |
+| 3 | Q2b | L1 web_search + L2 web_fetch；provider 抽象（DeepSeek 首实现，SearXNG/MCP 预留）；设置页；SSRF/重定向/大小/content-type/超时；默认关+授权+来源/成本/审计 | Q2 来源标签最小投影 | 1 周 |
+| 4 | Q3 | C1 时间线锚点；C2 活动卡补齐；C3 事件级轨迹+筛选+recordedOnly；H3 证据面；K1 轮次/工具级边界 | Q1/Q2b 事件；与 Q5 evidence tab 合并 | 1 周 |
+| 5 | Q4a | C7 子代理暂停；C10 团队活动；F1 roster/stop-all；F3 结构化输出；F4 子代理工具约束；F5 journal；F9 CodebaseInvestigator | Q3 团队活动可见 | 1–2 周 |
+| 6 | Q7 | I1 定时任务；I2 composer 入口；I3 任务看板；I5 唤醒提醒；B4 目标状态机；B5 预算；B6 目标工具 | Q4a | 1–2 周 |
+| 7 | Q4b | F8 工作流脚本（meta/agent/parallel/pipeline/phase/log/budget/resume）；确定性沙箱；并发/代理/预算帽；journal/血缘；opt-in | Q4a 后单列立项 | 2–3 周 |
+| 8 | Q5-REM | E1 工作区 URL/底部终端/侧聊宿主统一；E4 OS 文件管理器点验；F7 通用窗格；B3/H4 修订版本 tabs；H3 事件级证据（随 Q3）；E9 终端分屏 deferred | BLOCK-216 主体已完成 | 0.5–1 周 |
+| 9 | Q6-REM | E5 画笔/文字/马赛克+撤销重做；文本选中批注；C13 速记板（与 Q2 合并）；PPTX/DOCX/XLSX；pack iframe 批注窄桥；Agent 批注读取工具；UI-546 实机腿 | BLOCK-219/238 主体已完成；P2b/Q5 已就绪 | 1 周+实机 |
+| 10 | Q8-REM | J2 技能自进化建议（可选）；J6 Agent builder（可选）；J4 reopen：agent authenticate/stdio/SSE/非 destructive 默认策略；OAuth revoke/账号切换；真实 provider 矩阵=G1+；packaged 深链/签名/allowlist=G1+ | Q8 主体已完成；G1+ 不计 | 0.5 周（可选） |
+| 11 | Q9-REM | K1 轮次/工具/应用级边界；K2 minidump 解析/上传；K3 摘要逐项操作；K4 通知点击/系统历史/审批穿透/声音/类型开关；K9 分步引导/数据导入；D1 低峰/权限/价格/缓存；D4 成本/复杂度/审计/覆盖确认；E7 macOS/PiP/真实 click-type；C14 后续建议/润色；L3 浏览器连接器；L4 电脑控制余项 | Q8 后；可与 Q5/Q6 余项互换 | 1–2 周 |
+| 12 | P4-REM | E13 Result Studio 高级 tab 全量迁 pack（lineage/compare/history/selection/revisions/annotations/methods/export）；域中性 11 处/6 键 compat 是否清零（需裁决）；真实结果页保真实机 | 母纲硬约束：最后 | 1–2 周 |
+| V | V-REM | UI-544/545/546 实机腿（结果面 tab/compare、图形批注） | 代码+单测已绿；纯验证债 | 1–2 天 |
+
+> 推荐执行序：**Q1-REM → Q2 → Q2b → Q3 → Q4a → Q7 → Q5-REM/Q6-REM → Q8-REM → Q9-REM → P4-REM**；Q4b 在 Q4a 后单列。Q1-REM 可并入 Q2 作为首批 rider；Q5/Q6 余项与 Q9 可在主序中互换。V-REM 随对应 UI 包或独立验证批收口。
 
 ## 7. 波次依赖与排序
 
@@ -744,3 +776,4 @@ Q-DOMAIN（垂直去核化，跨波次）
 | 2026-10-20 | Q8 | BLOCK-221 垂直切片收口：MCP 凭据脱敏 + 服务级 allow/block + 投影过滤 + 策略路由；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——J3/J4 部分落地（无 OAuth、无深链安装、trust 未接审批） | `docs/block-221-q8-mcp-governance-plan.md` §5 |
 | 2026-10-20 | Q-DOMAIN P3 | BLOCK-220 垂直切片收口：legacy 化石注册表删除（单一注册源）+ methods 引用/工具标签下沉 pack `provides.methods`；域中性基线 **261→208 处**（tool-registry 31 归零、methods-export 62→24）；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——L8 仍 🟡（data model 与脚本模板未下沉） | `docs/block-220-qdomain-p3-methods-plan.md` §8 |
 | 2026-10-20 | Q6 | BLOCK-219 垂直切片收口：E5/C12 部分落地（PDF/图像**矩形**批注 + 加入任务；批次外=椭圆/箭头/画笔/文字/马赛克、文本选中批注、速记板 C13 随 Q2、PPTX/DOCX、pack 面）；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——E5 仍 🟡（PPTX/DOCX 未覆盖），C12 仍 🟡（无速记/批注进侧聊） | `docs/block-219-q6-annotation-host-plan.md` §6 + `acceptance/block-219/`（13/13） |
+| 2026-10-22 | Q6/Q8/Q1 汇总回写 | BLOCK-238 椭圆/箭头；BLOCK-239 HTTP OAuth；BLOCK-240 四 hint；BLOCK-241 懒加载；BLOCK-242 深链；BLOCK-243 审批契约+trust；A3/A4/A6/D2/J3/J5→✅，A2/A5/J4/L5→🟡，E5/E13/K*/D*/E7/L6/L8 现状更新；矩阵 **✅32 / 🟡47 / 🔴16 / ⛔7 = 102**；剩余队列 §6.5 | 各 BLOCK plan §收口 + `acceptance/block-243/`、`acceptance/ui-551/` |

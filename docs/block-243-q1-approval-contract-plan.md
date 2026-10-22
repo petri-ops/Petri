@@ -8,7 +8,7 @@ acceptance:
   - MCP 信任：trust='ask' 时仅 destructiveHint 工具需要审批（guardKey=mcp:<serverId>，dimension=mcp-trust）；trust='allow' 自动放行；策略在调用时重读，投影快照不作放行依据；目录模式 call 代理只要目录含 destructive 工具即保守要求审批。
   - 审批卡 v2：danger/warning/info 三变体（dynamic_guard/user_rule/mcp_trust）+ 确定性意图解释（不伪造模型解释）+ 长命令折叠 + 参数 JSON 编辑（有界未截断才可编辑）+ 范围选择（仅本次/本任务/始终信任 MCP 服务，后两者两步武装）+ 待审批计数与重复调用提示。
   - 测试：Node 契约测试（updatedInput 重校验/新 guard 拒绝/scope 失效/重复检测/审计字段/MCP trust ask-allow/目录代理保守审批）+ 前端 GuardAckCard 变体/折叠/编辑/范围/计数 + 既有审批族回归 + 隔离 9223 live（mock provider：guard → 解释 → 编辑参数 → 批准 → 重试放行 → 审计可查）+ 亮/暗截图；closeout 十三门 PASS。
-reopen: 非 MCP 维度的持久化「始终」（需用户规则合成 UI）、模型/本地模型意图解释、编辑重发 + workspace-checkpoint 回退、访问权限三档选择器与完全访问确认层、sideTask 变体、多请求批量决策面板、stdio/SSE OAuth、真实 provider 矩阵（G1+）。
+reopen: 非 MCP 维度的持久化「始终」（需用户规则合成 UI）、模型/本地模型意图解释、编辑重发 + workspace-checkpoint 回退、访问权限三档选择器与完全访问确认层、sideTask 变体、多请求批量决策面板、A1 非 guard 触发的通用工具审批门、A5 同参连续 N 次循环检测+继续/终止、A8 逐工具 allow/deny 完整面与放行说明、C19 AskUserQuestion 结构化提问、MCP stdio/SSE OAuth、真实 provider 矩阵（G1+）。
 status: completed
 ---
 
@@ -48,6 +48,10 @@ status: completed
 ## 3. 非范围（reopen）
 
 - 非 MCP 维度的持久化「始终」（需要把 guard 维度合成为用户规则的 UI 与规则模型扩展）。
+- **A1 非 guard 触发的通用工具审批门**：本卡只由动态防护/用户规则/MCP trust 触发，尚不是「所有工具的通用审批」。
+- **A5 同参连续 N 次循环检测 + 继续/终止**：本轮只做 pending 重复合并/计数，未做模型循环防呆确认。
+- **A8 逐工具 allow/deny 完整面**：现有 AgentRulesPanel/全局策略，未做逐工具白名单 UI 与放行说明。
+- **C19 AskUserQuestion 结构化提问**：选项/多选/自由输入未做（Q1/Q2）。
 - 模型/本地模型意图解释（本轮确定性解释；失败可继续语义由确定性解释天然满足）。
 - 编辑重发 + `workspace-checkpoint` 回退（本轮只做参数批准与模型重试引导，不做文件回退）。
 - 访问权限三档选择器 + 完全访问确认弹层（Q1 D3，另包）。
@@ -96,7 +100,7 @@ G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 - trust 生效只对声明 `destructiveHint` 的 MCP 工具；非 destructive/只读工具行为不变（D4 零漂移）。
 - 编辑参数只允许 once（task/always 必须先按原参数建立范围），避免「编辑 + 维度放行」绕过精确批准。
-- 未做（reopen，见 §3）：非 MCP 维度的持久化「始终」（需用户规则合成 UI）、模型/本地模型意图解释、编辑重发 + workspace-checkpoint 回退、访问权限三档选择器与完全访问确认层、sideTask 变体与批量决策面板。
+- 未做（reopen，见 §3）：非 MCP 维度的持久化「始终」（需用户规则合成 UI）、模型/本地模型意图解释、编辑重发 + workspace-checkpoint 回退、访问权限三档选择器与完全访问确认层、sideTask 变体与批量决策面板；**A1 非 guard 通用审批门、A5 同参循环检测、A8 逐工具 allow/deny 完整面、C19 AskUserQuestion** 亦未做。Q1 余项统一收敛到 Qoder 总纲 §6.5 `Q1-REM`。
 - 实机观察：在卡片可见时切换主题会触发 `ProjectWorkspace` 既存的重渲染警告（非本包文件面）；暗色截图改为「卡片出现前切主题」的独立运行，最终两次运行控制台均无该警告；如后续需要主题热切，另行立项修复该既存环。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
