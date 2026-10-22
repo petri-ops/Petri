@@ -3717,6 +3717,33 @@
       "classifiesScripts": true
     },
     {
+      "id": "block239-mcp-oauth",
+      "note": "BLOCK-239 Q8 MCP OAuth（HTTP）：SDK OAuth provider/auth + localhost callback + 密文 token store + 货架授权入口；stdio/SSE/revoke/真实 provider 矩阵不在范围。",
+      "patterns": [
+        "core/petri-server/helpers/mcp-oauth-store.js",
+        "core/petri-server/mcp/oauth-provider.js",
+        "core/petri-server/mcp/client-manager.js",
+        "core/petri-server/routes/mcp-client.js",
+        "frontend/src/hooks/useMcpServers.ts",
+        "frontend/src/pages/extensions/**",
+        "test/block239-*.test.mjs",
+        "test/fixtures/mcp-oauth-server.mjs",
+        "acceptance/ui-548/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui548-*.cjs"
+      ],
+      "tests": [
+        "test/block239-mcp-oauth.test.mjs",
+        "test/mcp-client-manager.test.mjs",
+        "test/mcp-client-settings.test.mjs",
+        "test/block163-mcp-http-transport.test.mjs",
+        "test/block221-mcp-server-policy.test.mjs",
+        "frontend/src/pages/extensions/McpShelfPane.test.tsx",
+        "frontend/src/pages/extensions/index.test.tsx"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true
+    },
+    {
       "id": "ui-479-responsive-collapse",
       "note": "UI-479 侧栏自适应收起（2026-10-09 verified）：useResponsivePanelCollapse + deriveResponsivePanels 纯函数；补登记 acceptance/ui-479 读者映射（昨日收口后目录新增未随 closeout 重跑 test:changed，BLOCK-156 收口链抓真，机械补账）。",
       "patterns": [

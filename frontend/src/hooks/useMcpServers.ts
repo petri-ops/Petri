@@ -9,7 +9,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getApiPrefix } from '@/lib/env';
 
-export type McpServerStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
+export type McpServerStatus =
+  | 'connecting'
+  | 'connected'
+  | 'disconnected'
+  | 'error'
+  | 'auth_required'
+  | 'authorizing';
 
 /**
  * 后端 getStatuses() 行形状（配置 ∪ 运行态）。
@@ -24,6 +30,9 @@ export interface McpServerRow {
   envKeys: string[];
   envCount: number;
   autoConnect: boolean;
+  transport?: 'stdio' | 'http';
+  url?: string;
+  auth?: 'authorized' | 'required' | 'unknown';
   status: McpServerStatus;
   error: string | null;
   toolCount: number;
@@ -43,6 +52,8 @@ export interface McpServerDraft {
   command: string;
   args: string[];
   env?: Record<string, string>;
+  transport?: 'stdio' | 'http';
+  url?: string;
 }
 
 /** UI-547 — 服务级策略写面（信任位本轮只读，不随 patch 下发）。 */
@@ -61,6 +72,13 @@ export interface McpPolicyDiagnostic {
 export interface McpUpdatePolicyResult {
   ok: boolean;
   diagnostics: McpPolicyDiagnostic[];
+  error?: string;
+}
+
+export interface McpAuthenticateResult {
+  ok: boolean;
+  authorizationUrl?: string;
+  toolCount?: number;
   error?: string;
 }
 
@@ -136,6 +154,7 @@ export function useMcpServers(): {
   connect: (id: string) => Promise<void>;
   disconnect: (id: string) => Promise<void>;
   updatePolicy: (id: string, patch: McpPolicyPatch) => Promise<McpUpdatePolicyResult>;
+  authenticate: (id: string) => Promise<McpAuthenticateResult>;
 } {
   const [servers, setServers] = useState<McpServerRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -171,10 +190,12 @@ export function useMcpServers(): {
     return () => clearTimeout(t);
   }, [refresh]);
 
-  // 连接中的 server 轮询状态（连接是异步过程，最长 20s；2s 步进）
+  // 连接/授权中的 server 轮询状态（连接最长 20s；授权等待用户完成；2s 步进）
   useEffect(() => {
-    const anyConnecting = servers.some((s) => s.status === 'connecting');
-    if (!anyConnecting) return;
+    const anyPending = servers.some(
+      (s) => s.status === 'connecting' || s.status === 'authorizing',
+    );
+    if (!anyPending) return;
     const timer = setInterval(() => void refresh(), 2_000);
     return () => clearInterval(timer);
   }, [servers, refresh]);
@@ -271,6 +292,34 @@ export function useMcpServers(): {
     [refresh],
   );
 
+  const authenticate = useCallback(
+    async (id: string): Promise<McpAuthenticateResult> => {
+      setBusyId(id);
+      setNotice(null);
+      try {
+        const data = await apiJson(`/mcp/servers/${encodeURIComponent(id)}/authenticate`, {
+          method: 'POST',
+        });
+        if (data.status === 'redirect' && typeof data.authorizationUrl === 'string') {
+          setNotice('已生成授权链接，正在打开浏览器…');
+          await refresh();
+          return { ok: true, authorizationUrl: data.authorizationUrl };
+        }
+        setNotice(`已授权并连接 ${id}（${Number(data.toolCount ?? 0)} 个工具）`);
+        await refresh();
+        return { ok: true, toolCount: Number(data.toolCount ?? 0) };
+      } catch (e) {
+        const message = errText(e instanceof Error ? e.message : e, '授权失败');
+        setNotice(`授权失败：${message}`);
+        await refresh();
+        return { ok: false, error: message };
+      } finally {
+        setBusyId(null);
+      }
+    },
+    [refresh],
+  );
+
   return {
     servers,
     loading,
@@ -283,5 +332,6 @@ export function useMcpServers(): {
     connect,
     disconnect,
     updatePolicy,
+    authenticate,
   };
 }

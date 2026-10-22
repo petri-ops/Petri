@@ -14,7 +14,10 @@
 
 'use strict';
 
+const crypto = require('node:crypto');
 const settings = require('../helpers/mcp-settings');
+const oauthProvider = require('./oauth-provider');
+const oauthStore = require('../helpers/mcp-oauth-store');
 
 const CONNECT_TIMEOUT_MS = 20_000;
 const LIST_TOOLS_TIMEOUT_MS = 10_000;
@@ -42,7 +45,12 @@ async function _loadSdk() {
       try {
         ({ StreamableHTTPClientTransport } = await import('@modelcontextprotocol/sdk/client/streamableHttp.js'));
       } catch { /* 旧 SDK 无此传输：http 配置在 connect 时诚实报错 */ }
-      return { Client, StdioClientTransport, StreamableHTTPClientTransport };
+      // BLOCK-239 — 授权需求判定用 SDK 的 UnauthorizedError（缺失时回退消息匹配）
+      let UnauthorizedError = null;
+      try {
+        ({ UnauthorizedError } = await import('@modelcontextprotocol/sdk/client/auth.js'));
+      } catch { /* 旧 SDK 无 auth 模块 */ }
+      return { Client, StdioClientTransport, StreamableHTTPClientTransport, UnauthorizedError };
     })().catch((e) => {
       _sdkPromise = null; // 失败不缓存——下次重试
       throw e;
@@ -55,7 +63,7 @@ function _session(id) {
   if (!_sessions.has(id)) {
     _sessions.set(id, {
       status: 'disconnected', tools: [], error: null, client: null, connectedAt: null,
-      transport: 'stdio', lastErrorAt: null,
+      transport: 'stdio', lastErrorAt: null, authStartedAt: null,
     });
   }
   return _sessions.get(id);
@@ -81,8 +89,11 @@ async function connectServer(id) {
 
   sess.status = 'connecting';
   sess.error = null;
+  let UnauthorizedError = null;
   try {
-    const { Client, StdioClientTransport, StreamableHTTPClientTransport } = await _loadSdk();
+    const sdk = await _loadSdk();
+    UnauthorizedError = sdk.UnauthorizedError;
+    const { Client, StdioClientTransport, StreamableHTTPClientTransport } = sdk;
     const client = new Client({ name: 'petri-desktop', version: '0.1.0' }, {
       capabilities: {},
     });
@@ -96,7 +107,13 @@ async function connectServer(id) {
       if (!cfg.url || !/^https?:\/\//.test(cfg.url)) {
         throw new Error('http_url_required');
       }
-      transport = new StreamableHTTPClientTransport(new URL(cfg.url));
+      // BLOCK-239 — 有 token 才挂 provider（刷新/复用）；无 token 不自动生成
+      // 授权 URL，避免启动 autoConnect 时为所有未授权 server 造 pending 状态。
+      const useAuth = oauthStore.hasTokens(id);
+      transport = new StreamableHTTPClientTransport(
+        new URL(cfg.url),
+        useAuth ? { authProvider: oauthProvider.createOAuthProvider(id) } : undefined,
+      );
     } else {
       transport = new StdioClientTransport({
         command: cfg.command,
@@ -118,12 +135,133 @@ async function connectServer(id) {
     sess.tools = Array.isArray(listResult && listResult.tools) ? listResult.tools : [];
     return { ok: true, toolCount: sess.tools.length };
   } catch (e) {
-    sess.status = 'error';
-    sess.error = e && e.message ? String(e.message) : String(e);
+    const authRequired = isAuthRequired(e, UnauthorizedError);
+    sess.status = authRequired ? 'auth_required' : 'error';
+    sess.error = authRequired
+      ? 'authorization_required'
+      : (e && e.message ? String(e.message) : String(e));
     sess.lastErrorAt = Date.now();
     sess.client = null;
+    sess.authStartedAt = null;
+    return { ok: false, error: authRequired ? 'authorization_required' : sess.error };
+  }
+}
+
+function isAuthRequired(error, UnauthorizedErrorClass) {
+  if (UnauthorizedErrorClass && error instanceof UnauthorizedErrorClass) return true;
+  if (error && error.name === 'UnauthorizedError') return true;
+  const message = String((error && error.message) || error || '');
+  return /unauthorized|missing authorization|invalid_token|\b401\b/i.test(message);
+}
+
+function safeStateEqual(left, right) {
+  const a = Buffer.from(String(left || ''));
+  const b = Buffer.from(String(right || ''));
+  return a.length === b.length && a.length > 0 && crypto.timingSafeEqual(a, b);
+}
+
+/**
+ * BLOCK-239 — 开始 OAuth 授权。返回 redirect（含 authorizationUrl）或 connected。
+ * 不自己打开浏览器；由路由把 URL 交给 UI。
+ */
+async function beginAuthorization(id, options = {}) {
+  const cfg = settings.getMcpServer(id);
+  if (!cfg) return { ok: false, error: 'server_not_found' };
+  if (cfg.transport !== 'http') return { ok: false, error: 'oauth_requires_http' };
+  const sess = _session(id);
+  if (sess.status === 'connected') return { ok: true, status: 'connected', toolCount: sess.tools.length };
+
+  await _closeQuietly(id);
+  sess.status = 'authorizing';
+  sess.error = null;
+  sess.authStartedAt = Date.now();
+
+  let client = null;
+  let UnauthorizedError = null;
+  try {
+    const sdk = await _loadSdk();
+    UnauthorizedError = sdk.UnauthorizedError;
+    const { Client, StreamableHTTPClientTransport } = sdk;
+    if (!StreamableHTTPClientTransport) throw new Error('http_transport_unavailable_in_sdk');
+    const provider = oauthProvider.createOAuthProvider(id, { redirectBase: options.redirectBase });
+    client = new Client({ name: 'petri-desktop', version: '0.1.0' }, { capabilities: {} });
+    const transport = new StreamableHTTPClientTransport(new URL(cfg.url), { authProvider: provider });
+    await _withTimeout(client.connect(transport), CONNECT_TIMEOUT_MS, 'connect');
+    sess.client = client;
+    sess.transport = 'http';
+    sess.status = 'connected';
+    sess.connectedAt = Date.now();
+    sess.authStartedAt = null;
+    const listResult = await _withTimeout(client.listTools(), LIST_TOOLS_TIMEOUT_MS, 'list_tools')
+      .catch((e) => {
+        sess.error = `list_tools_failed: ${e.message}`;
+        return null;
+      });
+    sess.tools = Array.isArray(listResult && listResult.tools) ? listResult.tools : [];
+    return { ok: true, status: 'connected', toolCount: sess.tools.length };
+  } catch (e) {
+    const authRequired = isAuthRequired(e, UnauthorizedError);
+    const authorizationUrl = authRequired ? oauthProvider.authorizationUrlFor(id) : null;
+    if (client) {
+      try { await client.close(); } catch { /* 部分连接关闭失败不掩盖主错误 */ }
+    }
+    if (authRequired && authorizationUrl) {
+      sess.status = 'authorizing';
+      sess.error = null;
+      sess.client = null;
+      return { ok: true, status: 'redirect', authorizationUrl };
+    }
+    sess.status = 'error';
+    sess.error = authRequired
+      ? 'authorization_url_missing'
+      : (e && e.message ? String(e.message) : String(e));
+    sess.lastErrorAt = Date.now();
+    sess.authStartedAt = null;
     return { ok: false, error: sess.error };
   }
+}
+
+/**
+ * BLOCK-239 — 回调完成授权：校验 state → finishAuth（SDK 换 token 并 saveTokens）
+ * → 重连。失败只返回可读错误码，不把 code/token 写日志。
+ */
+async function completeAuthorization(id, code, state) {
+  const cfg = settings.getMcpServer(id);
+  if (!cfg) return { ok: false, error: 'server_not_found' };
+  const pending = oauthProvider.pendingFor(id);
+  const sess = _session(id);
+  if (!pending) {
+    sess.status = 'error';
+    sess.error = 'authorization_pending_missing';
+    return { ok: false, error: sess.error };
+  }
+  if (!safeStateEqual(pending.state, state)) {
+    sess.status = 'error';
+    sess.error = 'authorization_state_invalid';
+    return { ok: false, error: sess.error };
+  }
+
+  let transport = null;
+  try {
+    const { StreamableHTTPClientTransport } = await _loadSdk();
+    if (!StreamableHTTPClientTransport) throw new Error('http_transport_unavailable_in_sdk');
+    const provider = oauthProvider.createOAuthProvider(id, { redirectBase: pending.redirectBase });
+    transport = new StreamableHTTPClientTransport(new URL(cfg.url), { authProvider: provider });
+    await _withTimeout(transport.finishAuth(String(code)), CONNECT_TIMEOUT_MS, 'finish_auth');
+  } catch {
+    if (transport) {
+      try { await transport.close(); } catch { /* already closed */ }
+    }
+    sess.status = 'error';
+    sess.error = 'authorization_exchange_failed';
+    sess.lastErrorAt = Date.now();
+    return { ok: false, error: sess.error };
+  }
+  try { await transport.close(); } catch { /* already closed */ }
+  oauthStore.clearPending(id);
+  const conn = await connectServer(id);
+  if (!conn.ok) return conn;
+  return { ok: true, toolCount: conn.toolCount };
 }
 
 async function _closeQuietly(id) {
@@ -147,6 +285,7 @@ async function disconnectServer(id) {
   sess.tools = [];
   sess.error = null;
   sess.connectedAt = null;
+  sess.authStartedAt = null;
   return { ok: true };
 }
 
@@ -187,6 +326,11 @@ function getStatuses() {
     // BLOCK-221（Q8）— 凭据脱敏：env 值是第三方 server 的 token（落盘密文、读侧已还原明文），
     // 绝不随状态面出 HTTP。只透键名与数量，够前端解释「这台配了 2 个环境变量」。
     const { env, ...rest } = cfg;
+    const auth = cfg.transport === 'http'
+      ? (oauthStore.hasTokens(cfg.id) ? 'authorized'
+        : (sess && (sess.status === 'auth_required' || sess.status === 'authorizing')) ? 'required'
+          : 'unknown')
+      : null;
     return {
       ...rest,
       envKeys: env ? Object.keys(env).sort() : [],
@@ -195,9 +339,13 @@ function getStatuses() {
       error: sess ? sess.error : null,
       toolCount: sess ? sess.tools.length : 0,
       connectedAt: sess ? sess.connectedAt : null,
-      // CAP-3 健康面：传输类型 + 最近错误时间戳透出
-      transport: sess ? (sess.transport || 'stdio') : (cfg.transport || 'stdio'),
+      // CAP-3 健康面：传输类型 + 最近错误时间戳透出。
+      // BLOCK-239 — 未连接/授权失败时也要如实显示**配置的**传输；sess.transport
+      // 在成功连接前仍是默认 stdio，不能拿它覆盖 http 配置。
+      transport: cfg.transport === 'http' ? 'http' : (sess ? (sess.transport || 'stdio') : 'stdio'),
       lastErrorAt: sess ? sess.lastErrorAt : null,
+      // BLOCK-239 — 只透授权状态，不出现 token/client_secret
+      ...(auth ? { auth } : {}),
     };
   });
   return rows;
@@ -227,6 +375,8 @@ function _resetForTests() {
 
 module.exports = {
   connectServer,
+  beginAuthorization,
+  completeAuthorization,
   disconnectServer,
   callServerTool,
   listServerTools,

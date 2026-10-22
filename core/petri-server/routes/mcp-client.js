@@ -22,7 +22,30 @@ const settings = require('../helpers/mcp-settings');
 const manager = require('../mcp/client-manager');
 const toolPolicy = require('../helpers/mcp-tool-policy');
 const serverPolicy = require('../helpers/mcp-server-policy');
+const oauthStore = require('../helpers/mcp-oauth-store');
 const projection = require('../agent-tools/mcp-projection');
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function oauthPage(title, message) {
+  return [
+    '<!doctype html><html><head><meta charset="utf-8">',
+    `<title>${escapeHtml(title)} · Petri</title>`,
+    '<style>body{font-family:system-ui,sans-serif;background:#0b1220;color:#e6edf3;display:grid;place-items:center;min-height:100vh;margin:0}',
+    'main{max-width:520px;padding:32px;border:1px solid #243149;border-radius:12px;background:#111a2e}',
+    'h1{font-size:20px;margin:0 0 12px}p{line-height:1.6;color:#b7c3d6}</style>',
+    '</head><body><main>',
+    `<h1>${escapeHtml(title)}</h1><p>${escapeHtml(message)}</p>`,
+    '</main></body></html>',
+  ].join('');
+}
 
 function registerMcpClientRoutes(app) {
   app.get('/api/mcp/servers', (_req, res) => {
@@ -73,14 +96,66 @@ function registerMcpClientRoutes(app) {
     });
   });
 
+  // BLOCK-239 — OAuth 授权入口（UI 发起；不在 connect 时自动造 pending）
+  app.post('/api/mcp/servers/:id/authenticate', async (req, res) => {
+    const id = String(req.params.id || '');
+    const cfg = settings.getMcpServer(id);
+    if (!cfg) {
+      res.status(404).json({ status: 'error', error: 'server_not_found' });
+      return;
+    }
+    if (cfg.transport !== 'http') {
+      res.status(400).json({ status: 'error', error: 'oauth_requires_http' });
+      return;
+    }
+    const redirectBase = `${req.protocol}://${req.get('host')}`;
+    const result = await manager.beginAuthorization(id, { redirectBase });
+    if (!result.ok) {
+      res.status(502).json({ status: 'error', error: result.error });
+      return;
+    }
+    if (result.status === 'connected') {
+      res.json({ status: 'connected', toolCount: result.toolCount });
+      return;
+    }
+    res.json({ status: 'redirect', authorizationUrl: result.authorizationUrl });
+  });
+
+  // BLOCK-239 — OAuth loopback callback（浏览器直达；state 即 CSRF 校验）
+  app.get('/api/mcp/oauth/callback/:serverId', async (req, res) => {
+    res.set('Cache-Control', 'no-store');
+    const id = String(req.params.serverId || '');
+    const code = String(req.query.code || '');
+    const state = String(req.query.state || '');
+    const providerError = String(req.query.error || '');
+    if (providerError) {
+      res.status(400).type('html').send(oauthPage('授权未完成', `服务端返回 ${escapeHtml(providerError)}。请回到 Petri 重试。`));
+      return;
+    }
+    if (!code || !state) {
+      res.status(400).type('html').send(oauthPage('授权失败', '回调缺少 code 或 state，请回到 Petri 重试。'));
+      return;
+    }
+    const result = await manager.completeAuthorization(id, code, state);
+    if (!result.ok) {
+      res.status(400).type('html').send(oauthPage('授权失败', `原因：${escapeHtml(result.error || 'authorization_failed')}。请回到 Petri 重试。`));
+      return;
+    }
+    res.status(200).type('html').send(oauthPage('授权完成', '已完成授权并重新连接，可以关闭此页面回到 Petri。'));
+  });
+
   app.post('/api/mcp/servers', express.json(), (req, res) => {
     const body = req.body || {};
+    const transport = body.transport === 'http' ? 'http' : 'stdio';
     const { server, error } = settings.upsertMcpServer({
       id: body.id,
       command: body.command,
       args: Array.isArray(body.args) ? body.args : [],
       env: body.env && typeof body.env === 'object' ? body.env : {},
       autoConnect: body.autoConnect !== false,
+      // BLOCK-239 — 路由必须保真 transport/url，否则 HTTP server 会被静默降级为 stdio
+      transport,
+      ...(transport === 'http' ? { url: body.url } : {}),
     });
     if (error) {
       res.status(400).json({ status: 'error', error });
@@ -97,6 +172,7 @@ function registerMcpClientRoutes(app) {
       res.status(error === 'server_not_found' ? 404 : 400).json({ status: 'error', error });
       return;
     }
+    oauthStore.removeServer(id);
     res.json({ status: 'ok', removed });
   });
 

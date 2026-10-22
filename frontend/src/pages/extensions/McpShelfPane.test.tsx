@@ -16,6 +16,8 @@ interface DraftBody {
   command?: string;
   args?: string[];
   autoConnect?: boolean;
+  transport?: 'stdio' | 'http';
+  url?: string;
   allow?: string[];
   block?: string[];
 }
@@ -39,6 +41,12 @@ function withServers(
           return new Response(JSON.stringify({ status: 'error', error: 'missing_command' }), { status: 400 });
         }
         return new Response(JSON.stringify({ status: 'ok', server: body }), { status: 200 });
+      }
+      if (/\/mcp\/servers\/[^/]+\/authenticate$/.test(url) && method === 'POST') {
+        return new Response(JSON.stringify({
+          status: 'redirect',
+          authorizationUrl: 'https://auth.example/authorize?state=abc',
+        }), { status: 200 });
       }
       if (/\/mcp\/servers\/[^/]+\/policy$/.test(url) && method === 'PUT') {
         if (putPolicy) return putPolicy(body);
@@ -81,6 +89,7 @@ const row = (over: Partial<Record<string, unknown>> = {}) => ({
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  vi.restoreAllMocks();
 });
 
 describe('BLOCK-156 McpShelfPane', () => {
@@ -121,6 +130,43 @@ describe('BLOCK-156 McpShelfPane', () => {
     const calls = (mock.mock.calls as Array<[string, RequestInit | undefined]>)
       .filter(([u, i]) => String(u).endsWith('/connect') && i?.method === 'POST');
     expect(calls.length).toBe(1);
+  });
+
+  it('BLOCK-239 — HTTP server 需要授权时显示 url 与授权入口，点击打开浏览器', async () => {
+    const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+    const mock = withServers([row({
+      id: 'oauth-srv',
+      transport: 'http',
+      url: 'http://127.0.0.1:9999/mcp',
+      status: 'auth_required',
+      auth: 'required',
+      command: 'ignored',
+      args: [],
+    })]);
+    render(<McpShelfPane />);
+    await waitFor(() => expect(screen.getByTestId('mcp-card-oauth-srv')).toBeTruthy());
+    expect(screen.getByText('http://127.0.0.1:9999/mcp')).toBeTruthy();
+    expect(screen.getByTestId('mcp-card-oauth-srv').textContent).toContain('需要授权');
+
+    fireEvent.click(screen.getByTestId('mcp-authenticate-oauth-srv'));
+    await waitFor(() => expect(openSpy).toHaveBeenCalledTimes(1));
+    expect(openSpy.mock.calls[0][0]).toBe('https://auth.example/authorize?state=abc');
+    await waitFor(() => expect(screen.getByTestId('mcp-auth-url')).toBeTruthy());
+    const posts = (mock.mock.calls as Array<[string, RequestInit | undefined]>)
+      .filter(([u, i]) => /\/authenticate$/.test(String(u)) && i?.method === 'POST');
+    expect(posts).toHaveLength(1);
+  });
+
+  it('BLOCK-239 — 授权等待态与已授权徽标', async () => {
+    withServers([
+      row({ id: 'auth-wait', transport: 'http', status: 'authorizing', auth: 'required' }),
+      row({ id: 'auth-ok', transport: 'http', status: 'connected', auth: 'authorized', toolCount: 2 }),
+    ]);
+    render(<McpShelfPane />);
+    await waitFor(() => expect(screen.getByTestId('mcp-card-auth-wait')).toBeTruthy());
+    expect(screen.getByTestId('mcp-card-auth-wait').textContent).toContain('等待授权');
+    expect(screen.getByTestId<HTMLButtonElement>('mcp-authorizing-auth-wait').disabled).toBe(true);
+    expect(screen.getByTestId('mcp-auth-badge-auth-ok').textContent).toContain('已授权');
   });
 
   it('UI-547 — 治理摘要与 trust 只读呈现（不造可编辑的假象）', async () => {
@@ -209,6 +255,31 @@ describe('BLOCK-156 McpShelfPane', () => {
     fireEvent.click(screen.getByTestId('mcp-policy-save-gov4'));
     await waitFor(() => expect(screen.getByTestId('mcp-policy-diagnostics-gov4').textContent)
       .toContain('block_invalid_name'));
+  });
+
+  it('BLOCK-239 — 添加 HTTP server 提交 transport/url', async () => {
+    const mock = withServers([]);
+    render(<McpShelfPane />);
+    await waitFor(() => expect(screen.getByTestId('mcp-empty')).toBeTruthy());
+    fireEvent.click(screen.getByTestId('mcp-add-toggle'));
+    fireEvent.change(screen.getByTestId('mcp-form-transport'), { target: { value: 'http' } });
+    fireEvent.change(screen.getByTestId('mcp-form-id'), { target: { value: 'remote' } });
+    fireEvent.change(screen.getByTestId('mcp-form-url'), { target: { value: 'https://example.com/mcp' } });
+    fireEvent.click(screen.getByTestId('mcp-form-submit'));
+    await waitFor(() => expect(screen.getByTestId('mcp-notice').textContent).toContain('已添加 remote'));
+
+    const posts = (mock.mock.calls as Array<[string, RequestInit | undefined]>)
+      .filter(([u, i]) => String(u).endsWith('/mcp/servers') && i?.method === 'POST');
+    const rawBody = posts[0][1]?.body;
+    const body = typeof rawBody === 'string' ? (JSON.parse(rawBody) as DraftBody) : {};
+    expect(body).toMatchObject({
+      id: 'remote',
+      command: 'http',
+      args: [],
+      transport: 'http',
+      url: 'https://example.com/mcp',
+      autoConnect: false,
+    });
   });
 
   it('添加流：合法表单提交 POST /mcp/servers（args 空白切分）', async () => {

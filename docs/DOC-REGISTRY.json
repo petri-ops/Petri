@@ -7694,6 +7694,27 @@
         "G0"
       ],
       "notes": "2026-10-21 补立项（用户「补 BLOCK-238 立项」）：Q6 图形批注创建入口——kind 选择贯通工具条/会话/载荷；契约与渲染三笔先行提交（edad85ea/20be172d/3d219d45）为补登记对象；零迁移。**completed（2026-10-21）**：红绿 5 红→25/25 + 邻域 42/42 + Node 13/13 + types 0 + closeout 十三门；UI-546 in_progress（无实机腿）。"
+    },
+    {
+      "id": "BLOCK-239-Q8-MCP-OAUTH",
+      "capability": "q8-mcp-oauth",
+      "path": "docs/block-239-q8-mcp-oauth-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P5-CLOSED",
+      "canonical": true,
+      "truthDomain": "q8-mcp-oauth",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-22",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "mcp",
+        "oauth",
+        "q8",
+        "security",
+        "G0"
+      ],
+      "notes": "2026-10-22 立项（用户「搞完 下一队列」）：HTTP MCP OAuth 授权码流程——SDK 原生 provider/auth + localhost callback + 密文 token store + 货架授权入口；stdio/SSE/revoke/真实 provider 矩阵不在范围。**completed（2026-10-22）**：Node 集成 6/6 + 前端 17/17 + 邻域 26/26 + 9223 live 11/11 + closeout 十三门；UI-548 verified。实机抓真=REST transport 丢失 + 未连接传输显示错误，均已修。"
     }
   ],
   "lastUpdated": "2026-10-21",

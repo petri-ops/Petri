@@ -129,7 +129,8 @@
   font-size: var(--petri-font-size-xs, 12px);
 }
 
-.mcpField > input {
+.mcpField > input,
+.mcpField > select {
   height: 30px;
   padding: 0 var(--petri-space-3);
   border: 1px solid var(--petri-border-card);
@@ -140,7 +141,8 @@
   min-width: 0;
 }
 
-.mcpField > input:focus {
+.mcpField > input:focus,
+.mcpField > select:focus {
   outline: 1px solid var(--petri-accent);
 }
 
@@ -214,6 +216,21 @@
 
 .mcpStatus_error {
   color: var(--petri-accent);
+}
+
+.mcpStatus_auth_required {
+  border-color: var(--petri-warning);
+  color: var(--petri-warning);
+}
+
+.mcpStatus_authorizing {
+  border-color: var(--petri-info);
+  color: var(--petri-info);
+}
+
+.mcpAuthHint {
+  display: block;
+  color: var(--petri-text-tertiary);
 }
 
 .mcpCardCmd {

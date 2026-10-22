@@ -1,0 +1,63 @@
+{
+  "name": "ui548-mcp-oauth-live",
+  "startedAt": "2026-10-21T23:47:14.967Z",
+  "finishedAt": "2026-10-21T23:47:24.888Z",
+  "assertions": [
+    {
+      "name": "R1_http_server_created",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"server\":{\"id\":\"ui548-oauth\",\"command\":\"ignored\",\"args\":[],\"env\":{},\"autoConnect\":false,\"transport\":\"http\",\"url\":\"http://127.0.0.1:50469/mcp\"}}"
+    },
+    {
+      "name": "R2_connect_requires_auth",
+      "pass": true,
+      "detail": "HTTP 502 {\"status\":\"error\",\"error\":\"authorization_required\"}"
+    },
+    {
+      "name": "R3_auth_required_zero_tools",
+      "pass": true,
+      "detail": "{\"id\":\"ui548-oauth\",\"command\":\"ignored\",\"args\":[],\"autoConnect\":false,\"transport\":\"http\",\"url\":\"http://127.0.0.1:50469/mcp\",\"envKeys\":[],\"envCount\":0,\"status\":\"auth_required\",\"error\":\"authorization_required\",\"toolCount\":0,\"connectedAt\":null,\"lastErrorAt\":1792626435322,\"auth\":\"required\",\"policy\":{\"trust\":\"ask\",\"allowCount\":0,\"blockCount\":0,\"allow\":[],\"block\":[],\"projectedToolCount\":0}}"
+    },
+    {
+      "name": "D1_card_present",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "D2_card_shows_auth_required_and_url",
+      "pass": true,
+      "detail": "ui548-oauth需要授权http://127.0.0.1:50469/mcp授权后才能发现并调用该 server 的工具工具治理信任位 ask（默认）白名单非空时只投影名单内工具；阻断优先于白名单。审批默认不随信任位改变（接入待 Q1）。生效 0 · 已连接 0 · 白名单 0 · 阻断 0白名单（逗号/空格分隔；空=全部允许）阻断（逗号/空格分隔；优先于白名单）保存治理只写本机策略文件，不改 server 配置授权移除"
+    },
+    {
+      "name": "D3_authorize_clicked_opens_url",
+      "pass": true,
+      "detail": "http://127.0.0.1:50468/authorize?response_type=code&client_id=9fdcdd60-6898-40e1-8e8c-ba5053349c94&code_challenge=LTfTT3JcLR0Oq6TAgbRs3e7TGcGualrmLjXQwT2HIxw&code_challenge_method=S256&redirect_uri=http%3A%2F%2Flocalhost%3A3001%2Fapi%2Fmcp%2Foauth%2Fcallback%2Fui548-oauth&state=918b2f430cc7b17c5024a210c29937a55ecf416aed21978e&scope=mcp%3Atools&resource=http%3A%2F%2F127.0.0.1%3A50469%2Fmcp"
+    },
+    {
+      "name": "R4_callback_completed",
+      "pass": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "R5_connected_with_tools",
+      "pass": true,
+      "detail": "{\"id\":\"ui548-oauth\",\"command\":\"ignored\",\"args\":[],\"autoConnect\":false,\"transport\":\"http\",\"url\":\"http://127.0.0.1:50469/mcp\",\"envKeys\":[],\"envCount\":0,\"status\":\"connected\",\"error\":null,\"toolCount\":2,\"connectedAt\":1792626436484,\"lastErrorAt\":1792626435322,\"auth\":\"authorized\",\"policy\":{\"trust\":\"ask\",\"allowCount\":0,\"blockCount\":0,\"allow\":[],\"block\":[],\"projectedToolCount\":2}}"
+    },
+    {
+      "name": "D4_ui_shows_connected_and_authorized",
+      "pass": true,
+      "detail": "ui548-oauth已连接http://127.0.0.1:50469/mcp2 个工具已授权工具治理信任位 ask（默认）白名单非空时只投影名单内工具；阻断优先于白名单。审批默认不随信任位改变（接入待 Q1）。生效 2 · 已连接 2 · 白名单 0 · 阻断 0白名单（逗号/空格分隔；空=全部允许）阻断（逗号/空格分隔；优先于白名单）保存治理只写本机策略文件，不改 server 配置断开移除"
+    },
+    {
+      "name": "D5_screenshots",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\petri\\acceptance\\ui-548\\ui548-mcp-oauth-light.png | D:\\1.WorkDir\\petri\\acceptance\\ui-548\\ui548-mcp-oauth-dark.png"
+    },
+    {
+      "name": "R6_server_removed",
+      "pass": true,
+      "detail": "null"
+    }
+  ],
+  "allPass": true
+}

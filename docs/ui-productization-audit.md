@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-22（**UI-548 MCP OAuth 授权入口 verified（dev Electron 边界内；9223 离屏 live 11/11）**，BLOCK-239 / Q8）：HTTP server 卡片显示 url/传输；需要授权时提供入口并打开浏览器；授权后自动重连、工具出现、已授权徽标；token 密文落盘。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-22（**UI-547 MCP 货架工具治理 verified（dev Electron 边界内；9223 离屏 live 12/12）**，Q8 深化 / BLOCK-221 reopen）：allow/block 工具编辑 + 生效投影计数 + 后端 diagnostics；信任位只读（随 Q1）。证据=红绿 4 红→14/14 + MCP Node 33/33 + live 12/12 + 亮/暗截图。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-21（**UI-546 图形批注创建入口落地（代码+组件测试绿，无实机腿）**，BLOCK-238 / Q6）：工具条绘制态形状三档（矩形/椭圆/箭头）+ kind 经 session/hook/REST 贯通 + draft 形状预览 + 列表形状标签；红绿 5 红→25/25 + 邻域 42/42 + Node 13/13 + types 0。实机腿未跑 → in_progress。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -5291,3 +5293,12 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **实机腿（9223 离屏，12/12）**：`acceptance/ui-547/`——fixture server 连接（2 工具，默认投影 2）→ 货架治理编辑器 → 阻断 `fixture_lookup_readonly` → 保存 → 投影 **2→1** + 策略落盘（`GET /policy` 含 block）→ 亮/暗截图；收尾重置策略并移除 fixture。
 - **Rider（收口期抓真）**：`test/agent-tool-policy.test.mjs` 仍假定 `sample-metrics` 在静态 HEAVY_TOOLS；BLOCK-234 S5 已改为 pack `provides.scientificProfiles`，测试未装 fixture pack → 自动执行断言红。修=测试装最小 pack（`installWorkflowPackFixture({ heavyTools })`）+ `agent-approval` 同源夹具；产品代码零改动。
 - **未做（reopen）**：trust 编辑（随 Q1）、OAuth per-server authenticate、大目录懒加载/按需 schema、深链安装安全面、`destructive/openWorld/idempotent` 三 hint 进策略；技能自进化建议不在本条。
+
+## UI-548: MCP OAuth 授权入口（2026-10-22 **verified（dev Electron 边界内；9223 离屏 live 11/11）**，BLOCK-239 / Q8）
+
+- **变化面**：MCP 货架新增 HTTP/OAuth——添加表单可选「本地 stdio / HTTP（OAuth）」并填 URL；HTTP 卡片显示 url 与传输；无 token 连接显示「需要授权」+ 授权按钮，点击打开系统浏览器；授权中轮询，授权完成后显示「已连接」「已授权」与工具数；失败显示可读原因，授权 URL 同时以兜底链接展示。
+- **为什么这样设计（自有形态）**：OAuth 授权是用户显式动作，不由模型/自动连接触发外部浏览器；token/verifier 只进密文 store，状态面只出 authorized/required。回调复用本机 :3001 + state/PKCE，不新起回调进程、不引入第二套凭据系统。
+- **验证（代码）**：红绿 5 红→**6/6** Node 集成（auth_required→授权 URL→callback→connected→工具出现→token 密文/重连复用/state 错/stdio 400/未知 404/REST transport 保真）+ 前端 **17/17** + MCP 邻域 **26/26** + `quality:types` 0。
+- **实机腿（9223 离屏，11/11）**：`acceptance/ui-548/`——mock OAuth+MCP HTTP server → 卡片「需要授权」+ URL → 点击授权（探针截获 `window.open`，避免真开系统浏览器）→ flow 模拟浏览器完成 callback → 后端 connected（2 工具）→ UI「已连接/已授权」→ 亮/暗截图；收尾移除 server。
+- **实机抓真**：①REST `POST /api/mcp/servers` 未透传 `transport/url`，HTTP 被静默降级 stdio（修路由 + 回归断言）；②`getStatuses` 未连接时用会话默认 transport，HTTP 卡片误显示 stdio（修按配置传输显示）。
+- **未做（reopen）**：stdio/SSE OAuth、token revoke/账号切换、agent 主动 authenticate 工具、真实第三方 provider 矩阵（G1+）、trust 接审批（随 Q1）。

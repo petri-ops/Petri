@@ -39,3 +39,7 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-21T15:43:42.904Z -->
 最后更新：2026-10-21（**BLOCK-234 P4-C S5 completed；包仍 active**）：result/RS 科学语义下沉 pack `provides.scientificProfiles`（compare/rerun/cohort/planner/selection/heavy/interpret；pack 0.2.6）；核心只留有界引擎与不变量，无包诚实降级。证据=block234 6/6 + compare/rerun/replay/changeset/selection/approval/planner 定向全绿 + test:changed 1039 项 0 红 + Jev 追加 56/56 + closeout 十三门；域中性 **103→48 处 / 60→27 键**。**下一阶段=S6 前端/桌面 + 兼容白名单**。plan=docs/block-234-qdomain-p4c-tail-plan.md §10。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-21T23:51:47.154Z -->
+最后更新：2026-10-21（**BLOCK-235 Q-DOMAIN P4-D 立项 active**）：P4 余项收口——`dataModelExtensions` additive 扩展契约（pack 新增 artifact 类型/字段，canonical SDC-0 profile 不可覆盖）+ 导出/联邦域中性基线；域中性保持 11 处 / 6 键 compat。单工作包串行。plan=docs/block-235-qdomain-p4d-datamodel-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。
+最后更新：2026-10-21（**BLOCK-234 P4-C S6 completed；BLOCK-234 completed**）：前端/桌面 37 处领域词清零；剩余 11 处 / 6 键登记为显式兼容白名单（compat：permissions/guest/modality/schema/runtime-bundle/security-extension，每条带 category/owner/reason，门禁断言逐键一致）；pack 0.2.7 `provides.examplePrompts`；h5 家族前缀保留 h5ad 行为。证据=domain-neutrality 3/3 + block234 示例卡 3/3 + 前端 33/33 + test:changed 1238 项 0 红 + Jev 追加 67/67 + closeout 十三门 + output:judge PASS。域中性 **48→11 处 / 27→6 键**。**无 active 工作包；下一包需用户发令**。plan=docs/block-234-qdomain-p4c-tail-plan.md §11。G0 开发期常态 · 不外推 packaged/Provider/GA。
