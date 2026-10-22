@@ -3696,6 +3696,7 @@
         "core/petri-server/routes/mcp-client.js",
         "core/petri-server/agent-tools/mcp-projection.js",
         "test/fixtures/mcp-fixture-server.cjs",
+        "test/block240-*.test.mjs",
         "scripts/block156-*.mjs",
         "acceptance/block-156/**",
         "acceptance/ui-547/**",
@@ -3712,7 +3713,8 @@
         "frontend/src/pages/extensions/McpShelfPane.test.tsx",
         "test/agent-tool-registry.test.mjs",
         "test/agent-tool-policy.test.mjs",
-        "test/skill-import-directory.test.mjs"
+        "test/skill-import-directory.test.mjs",
+        "test/block240-mcp-hints.test.mjs"
       ],
       "classifiesScripts": true
     },

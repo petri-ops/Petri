@@ -1,4 +1,8 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-10-22（**Q8 余项轻量批：MCP 四 hint completed；无 active 工作包**）：destructive/openWorld 覆盖 readOnly 降档（保守 R2），idempotent 记录；零 annotations 零漂移；不新增审批通道。证据=block240 7/7 + projection 15/15 + closeout 十三门。plan=本条目（轻量包）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+最后更新：2026-10-22（**Q8 余项轻量批：MCP 四 hint 进策略 active**）：destructive/openWorld 覆盖 readOnly 降档（保守 R2）、idempotent 记录；零 annotations 零漂移；不新增审批通道。plan=本条目（轻量包）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-22（**BLOCK-239 Q8 MCP OAuth completed；无 active 工作包**）：HTTP MCP OAuth 授权码流程——SDK provider/auth + localhost callback + 密文 token store + 货架授权入口；授权前零投影、授权后重连出现。证据=Node 集成 6/6 + 前端 17/17 + 邻域 26/26 + 9223 live 11/11 + closeout 十三门。实机抓真=REST transport 丢失 + 未连接传输显示错误，均已修。UI-548 verified。stdio/SSE/revoke/真实 provider 矩阵 reopen。plan=`docs/block-239-q8-mcp-oauth-plan.md` §6。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-22（**BLOCK-239 Q8 MCP OAuth 立项 active（P0-LAUNCH）**）：HTTP MCP server 授权码流程——SDK 原生 `OAuthClientProvider`/`auth()` + localhost callback + 密文 token store + 货架授权入口；授权前工具零投影、授权后重连出现。非范围=stdio/SSE OAuth/revoke/真实 provider 矩阵。plan=`docs/block-239-q8-mcp-oauth-plan.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -13,7 +17,6 @@
 
 最后更新：2026-10-21（**P0 台账对账 completed**）：①UI 台账 41 条 `in_progress` 逐条给判定——5 条凭仓内证据翻 `verified`（block-61 brand-live 8 断言 / block-46 两张截图 / block-78 两卷 13+10 断言 / block-79 5 断言 / ui-481 截图），23 条只有代码与单测线索、4 条声称实机但无产物、3 条证据引用失效、6 条含「退役」语义但非本条被替代——**全部原地留 note，不越纪律升级**；②backlog 6 行 legacy planned 全部销号/改判（W7、PL-1 由包交付；BIO-2/3 由 UI 覆盖；BIO-4 已随 BLOCK-121/138 实机跑通）；③竞争力总纲 W6 改判 **partial**（CP-19 已交付，CP-16/17/18 未立项）。证据=`docs/ui-productization-audit.md` §P0 台账对账小结 + backlog 顶部对账行。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-最后更新：2026-10-21（**BLOCK-235 P4-D completed；无 active 工作包**）：`dataModelExtensions` additive 扩展契约——pack 可新增 artifact 类型/字段，扩展先过 SDC-0 校验，canonical 6 profile 不可覆盖；导出/联邦域中性基线（general 会话导出、扩展 artifact 类型 manifest 保真、联邦 grants/文件透传）落地。证据=block235 6/6 + 基线 4/4 + test:changed 443 项 0 红 + closeout 十三门 + output:judge PASS；域中性保持 11 处 / 6 键 compat。**下一包需用户发令**。plan=docs/block-235-qdomain-p4d-datamodel-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 
 
@@ -117,6 +120,7 @@
 > 已收口条目（✅）**一律移入「最近处理记录」**，不得在本区段堆积——本次清理将 23 条已收口项迁出，
 > 待处理项由 28 行降为 8 行（活跃项占比 100%）。新增 ✅ 项请直接追加到「最近处理记录」。
 ## 最近处理记录
+| ✅ Q8 四 hint（MCP，2026-10-22；用户「Q8 余项 搞完」） | 2026-10-22 | **completed**：`mcpToolContract` 把 readOnly/destructive/openWorld/idempotent 四 hint 写入合同——destructive/openWorld **覆盖** readOnly 降档（保守 R2/execution），idempotent 记录不改变风险档；零 annotations 零漂移；显式 contractMode 仍优先。证据=block240 7/7 + mcp-projection 15/15 + closeout 十三门。非范围=审批语义变更（随 Q1）、懒加载、深链安装 | Q8 / light |
 | ✅ BLOCK-239（Q8 MCP OAuth，2026-10-22；用户「搞完 下一队列」） | 2026-10-22 | **completed**：HTTP MCP OAuth 授权码流程——SDK 原生 provider/auth + localhost callback + 密文 token store + 货架授权入口；授权前零投影、授权后重连出现。证据=Node 集成 6/6 + 前端 17/17 + 邻域 26/26 + 9223 live 11/11 + closeout 十三门 + output:judge PASS；UI-548 verified。实机抓真=REST transport 丢失 + 未连接传输显示错误，均已修。stdio/SSE/revoke/真实 provider 矩阵 reopen。plan=docs/block-239-q8-mcp-oauth-plan.md §6 | BLOCK-239 / P5-CLOSED |
 | ✅ BLOCK-238（Q6 图形批注创建入口，2026-10-21；用户「补 BLOCK-238 立项 → 读完 4 个文件 → 改一个验一个 → 组件测试 → UI-546 + closeout」） | 2026-10-21 | **completed**：椭圆/箭头创建入口贯通——工具条三档形状 + kind 经 session/hook/REST 落库 + draft 预览 + 列表形状标签；零迁移、旧调用回落 region。证据=红绿 5 红→25/25 + 邻域 42/42 + Node 13/13 + types 0 + closeout 十三门 + output:judge PASS；UI-546 **in_progress（无实机腿）**。治理补票=三笔先行提交不改写。plan=docs/block-238-q6-graphic-annotation-entry-plan.md §6 | BLOCK-238 / P5-CLOSED |
 | ✅ BLOCK-235 P4-D（dataModelExtensions + 导出/联邦基线，2026-10-21；用户「可以的 冲 P4余项」） | 2026-10-21 | **completed**：pack `provides.dataModelExtensions` additive 扩展契约（bounded loader + SDC-0 校验；canonical 6 profile 不可覆盖；冲突/非法 fail-closed）；导出/联邦域中性基线（general 会话导出、扩展 artifact 类型 manifest 保真、联邦 grants/文件透传）。证据=block235 6/6 + 基线 4/4 + test:changed 443 项 0 红 + closeout 十三门 + output:judge PASS；域中性保持 11 处 / 6 键 compat。**无 active 工作包**。plan=docs/block-235-qdomain-p4d-datamodel-plan.md §7 | BLOCK-235 / P5-CLOSED |

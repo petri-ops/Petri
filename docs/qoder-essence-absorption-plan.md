@@ -583,6 +583,8 @@ status: planned
 > 2026-10-22：**货架 UI 操作面已由 UI-547 交付（verified dev Electron；allow/block 编辑 + 生效投影计数 + 400 diagnostics）**；trust 仍只读（随 Q1）。**reopen 剩余**：trust 降档接审批（随 Q1）、OAuth、懒加载、深链安装、三 hint 进策略、技能自进化建议。
 >
 > 2026-10-22：**HTTP MCP OAuth 已由 BLOCK-239 交付（completed；UI-548 verified dev Electron；SDK provider/auth + localhost callback + 密文 token store）**。**reopen 剩余**：stdio/SSE OAuth、token revoke/账号切换、agent 主动 authenticate 工具、真实第三方 provider 矩阵（G1+）、trust 降档接审批（随 Q1）、大目录懒加载、深链安装安全面、三 hint 进策略、技能自进化建议。
+>
+> 2026-10-22：**三 hint 进策略已由 Q8 轻量批交付**（destructive/openWorld 覆盖 readOnly 降档；idempotent 记录；零 annotations 零漂移）。**剩余**：大目录懒加载、深链安装安全面、技能自进化建议、Agent builder；trust 降档随 Q1；stdio/SSE OAuth 等随 BLOCK-239 reopen。
 
 **目标**：把 MCP 从「能用」升级为「默认不信任、可授权、可解释」；补齐扩展安装安全面。
 

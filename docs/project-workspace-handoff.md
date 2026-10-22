@@ -1,7 +1,9 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
-最后更新：2026-10-22（**BLOCK-239 Q8 MCP OAuth completed；无 active 工作包**）
+最后更新：2026-10-22（**Q8 余项轻量批：MCP 四 hint completed；无 active 工作包**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=Q8 四 hint 轻量批**：`mcpToolContract` 把 readOnly/destructive/openWorld/idempotent 写入合同——destructive/openWorld 覆盖 readOnly 降档（保守 R2/execution），idempotent 记录不改变风险档；零 annotations 零漂移；显式 contractMode 仍优先。证据=block240 7/7 + mcp-projection 15/15 + closeout 十三门。**下一包需用户发令**：Q8 余项（大目录懒加载 / 深链安装安全面）或 Q9 长尾；UI-544/545/546 实机腿仍欠；trust 降档随 Q1。**收口 PATH** 需同时含 Git `usr\bin`（GNU tar）与 `bin`（bash）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-239（Q8 深化 · MCP OAuth）**：HTTP MCP server 授权码流程——SDK 原生 `OAuthClientProvider`/`auth()` + localhost callback（复用 :3001）+ 密文 token store（`mcp-env-crypto`）+ `auth_required/authorizing` 状态 + 货架授权入口（含 stdio/HTTP 添加入口）。证据=Node 集成 6/6 + 前端 17/17 + MCP 邻域 26/26 + theme 17/17 + types 0 + 9223 live 11/11（`acceptance/ui-548/` 亮/暗截图）+ closeout 十三门；UI-548 verified。实机抓真=REST transport 丢失 + 未连接传输显示错误，均已修。**边界**：stdio/SSE OAuth、revoke/账号切换、agent 主动 authenticate 工具、真实 provider 矩阵（G1+）、trust 接审批（随 Q1）reopen。**下一包需用户发令**：Q8 余项（懒加载/深链/三 hint）或 Q9 长尾；UI-544/545/546 实机腿仍欠。**收口 PATH** 需同时含 Git `usr\bin`（GNU tar）与 `bin`（bash）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

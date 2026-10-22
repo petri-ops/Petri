@@ -34,11 +34,41 @@ const MAX_PROJECTED_TOOLS = toolPolicy.DEFAULT_PROJECTION_LIMIT;
  * BLOCK-157 CAP-1 分级：tool.annotations.readOnlyHint === true 时投影为
  * retrieval/none/R1（只读检索族 → read/plan 档可用，与内置只读工具同待遇）；
  * 无注释/destructive 倾向保守维持 execution/R2（D4 默认零漂移）。 */
+function readMcpHints(tool) {
+  const annotations = tool && typeof tool === 'object'
+    && tool.annotations && typeof tool.annotations === 'object'
+    ? tool.annotations
+    : {};
+  return {
+    readOnly: annotations.readOnlyHint === true,
+    destructive: annotations.destructiveHint === true,
+    openWorld: annotations.openWorldHint === true,
+    idempotent: annotations.idempotentHint === true,
+  };
+}
+
+function activeHintNames(hints) {
+  return [
+    hints.readOnly ? 'readOnlyHint' : null,
+    hints.destructive ? 'destructiveHint' : null,
+    hints.openWorld ? 'openWorldHint' : null,
+    hints.idempotent ? 'idempotentHint' : null,
+  ].filter(Boolean);
+}
+
+function hintSuffix(hints) {
+  const active = activeHintNames(hints);
+  return active.length > 0 ? `；hints=[${active.join(',')}]` : '';
+}
+
 function mcpToolContract(tool, contractMode = 'auto') {
   // BLOCK-204（W5）— 逐工具 `contractMode` 覆盖只作用于**喂给既有四档判定的合同输入**：
   //  · read-only → 与 readOnlyHint=true 同形（read/plan 档可用）
   //  · mutating  → 与保守默认同形（execution/R2：read/plan 禁、write 档白名单外禁）
   //  · auto      → 逐字保留 BLOCK-157 CAP-1 的原推导（默认零漂移）
+  // BLOCK-240（Q8）— 四 hint 进合同：destructive/openWorld 覆盖 readOnly 降档；
+  // idempotent 只记录，不改变风险档。显式 contractMode 仍是用户声明，优先于 hint。
+  const hints = readMcpHints(tool);
   if (contractMode === 'read-only') {
     return {
       contractVersion: '1.0.0',
@@ -47,7 +77,8 @@ function mcpToolContract(tool, contractMode = 'auto') {
       riskTier: 'R1',
       resources: ['mcp.server'],
       estimatedDurationMs: 60_000,
-      notes: 'BLOCK-204 W5: contractMode=read-only → read/plan 档可用（用户显式声明）',
+      hints,
+      notes: 'BLOCK-204 W5: contractMode=read-only → read/plan 档可用（用户显式声明）' + hintSuffix(hints),
     };
   }
   if (contractMode === 'mutating') {
@@ -58,11 +89,28 @@ function mcpToolContract(tool, contractMode = 'auto') {
       riskTier: 'R2',
       resources: ['mcp.server'],
       estimatedDurationMs: 60_000,
-      notes: 'BLOCK-204 W5: contractMode=mutating → 保守档（read/plan 禁）',
+      hints,
+      notes: 'BLOCK-204 W5: contractMode=mutating → 保守档（read/plan 禁）' + hintSuffix(hints),
     };
   }
-  const annotations = tool && typeof tool === 'object' ? tool.annotations : null;
-  if (annotations && annotations.readOnlyHint === true) {
+  if (hints.destructive || hints.openWorld) {
+    const reason = hints.destructive && hints.readOnly
+      ? 'BLOCK-240: destructiveHint=true overrides readOnlyHint=true → R2/execution（保守）'
+      : hints.destructive
+        ? 'BLOCK-240: destructiveHint=true → R2/execution（保守）'
+        : 'BLOCK-240: openWorldHint=true → R2/execution（开放世界保守）';
+    return {
+      contractVersion: '1.0.0',
+      category: 'action',
+      sideEffect: 'execution',
+      riskTier: 'R2',
+      resources: ['mcp.server'],
+      estimatedDurationMs: 60_000,
+      hints,
+      notes: reason + (hints.idempotent ? '；idempotentHint=true（记录，不改变风险档）' : ''),
+    };
+  }
+  if (hints.readOnly) {
     return {
       contractVersion: '1.0.0',
       category: 'retrieval',
@@ -70,7 +118,9 @@ function mcpToolContract(tool, contractMode = 'auto') {
       riskTier: 'R1',
       resources: ['mcp.server'],
       estimatedDurationMs: 60_000,
-      notes: 'BLOCK-157 CAP-1: annotations.readOnlyHint=true → read/plan 档可用（只读检索族）',
+      hints,
+      notes: 'BLOCK-157 CAP-1: annotations.readOnlyHint=true → read/plan 档可用（只读检索族）'
+        + (hints.idempotent ? '；idempotentHint=true（记录，不改变风险档）' : ''),
     };
   }
   return {
@@ -80,7 +130,9 @@ function mcpToolContract(tool, contractMode = 'auto') {
     riskTier: 'R2',
     resources: ['mcp.server'],
     estimatedDurationMs: 60_000,
-    notes: 'BLOCK-156 P3 projection: third-party MCP server tool（D4 保守默认；CAP-1 仅 readOnlyHint 降档）',
+    hints,
+    notes: 'BLOCK-156 P3 projection: third-party MCP server tool（D4 保守默认）'
+      + (hints.idempotent ? '；idempotentHint=true（记录，不改变风险档）' : ''),
   };
 }
 
