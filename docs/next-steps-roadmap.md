@@ -1,4 +1,6 @@
 # Petri Desktop — Current Next Steps
+最后更新：2026-10-22（**BLOCK-242 Q8 深链安装安全面 completed；无 active 工作包**）：`petri-install://` pack/mcp 双 kind 只读预览（来源/下载地址/大小/SHA-256/风险/替换警告）+ 确认重取对账 + sha 双验 + env 禁止；扩展页「从链接安装」。证据=core 8/8 + 弹层 2/2 + 通道 5/5 + 隔离 9223 live 10/10 + closeout 十三门；UI-550 verified。**Q8 完成面=OAuth/hints/懒加载/深链；剩余=trust 降档（随 Q1）+ 可选 J2/J6**。**下一步**=Q1 信任与审批（需发令）或 Q9 长尾；UI-544/545/546 实机腿仍欠。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-22（**BLOCK-241 Q8 大目录懒加载 completed；无 active 工作包**）：超阈值 MCP server 只投影 catalog(R1 list/describe)+call(R2 按名代理)；调用时复核 server/tool policy；小目录零变化；货架显示目录模式。证据=block241 5/5 + projection 15/15 + 前端 18/18 + 9223 live 7/7 + closeout 十三门；UI-549 verified。**下一步**=Q8 深链安装安全面（独立 BLOCK）或 Q9 长尾；UI-544/545/546 实机腿仍欠；trust 随 Q1。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-22（**Q8 余项轻量批：MCP 四 hint completed；无 active 工作包**）：destructive/openWorld 覆盖 readOnly 降档（R2），idempotent 记录；零 annotations 零漂移。证据=block240 7/7 + projection 15/15 + closeout 十三门。**下一步**=Q8 余项（大目录懒加载 / 深链安装安全面）或 Q9 长尾；UI-544/545/546 实机腿仍欠。G0 开发期常态 · 不外推 packaged/Provider/GA。

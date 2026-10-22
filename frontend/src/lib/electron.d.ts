@@ -58,6 +58,41 @@ type BranchRowRecord = {
   is_active: number | boolean;
 };
 
+/** BLOCK-242 — 深链安装预览（见 src/main/install-deep-link-core.js）。 */
+export interface InstallDeepLinkMcpServer {
+  id: string;
+  name: string;
+  transport: 'stdio' | 'http';
+  command?: string;
+  args?: string[];
+  url?: string;
+}
+export interface InstallDeepLinkPackArchive {
+  url: string;
+  sizeBytes: number | null;
+  sha256: string;
+}
+export interface InstallDeepLinkPreview {
+  kind: 'pack' | 'mcp';
+  link: string;
+  source: { host: string | null; url: string | null };
+  pack?: {
+    packId: string;
+    name: string;
+    version: string | null;
+    description: string | null;
+    source: string | null;
+    archive: InstallDeepLinkPackArchive;
+    mcpServers: InstallDeepLinkMcpServer[];
+  };
+  server?: InstallDeepLinkMcpServer;
+  risk: { level: 'caution'; reasons: string[] };
+  requiresReplace: { pack: boolean; mcp: string[] };
+}
+export interface InstallDeepLinkExpected {
+  archive: { url: string; sha256: string; sizeBytes?: number | null };
+}
+
 declare global {
   interface Window {
     /** BLOCK-61 品牌桥主全局名。 */
@@ -274,6 +309,33 @@ declare global {
           error?: string;
         }>;
         onInstallProgress: (callback: (payload: { pluginId: string; progress: { ratio: number; received: number; total: number } }) => void) => () => void;
+      };
+      // BLOCK-242 — petri-install:// 深链安装安全面
+      installDeepLink: {
+        preview: (url: string) => Promise<
+          | { ok: true; preview: InstallDeepLinkPreview }
+          | { ok: false; error: string; message?: string }
+        >;
+        confirm: (payload: {
+          url: string;
+          expected?: InstallDeepLinkExpected;
+          allowReplaceMcp?: boolean;
+        }) => Promise<
+          | {
+            ok: true;
+            kind: 'pack' | 'mcp';
+            packId?: string;
+            serverId?: string;
+            replaced?: boolean;
+            requiresRestart?: boolean;
+            mcpInstalled?: string[];
+            mcpFailed?: Array<{ id: string; ok: boolean; error: string | null }>;
+            partial?: boolean;
+          }
+          | { ok: false; error: string; message?: string }
+        >;
+        onDeepLink: (callback: (payload: { url: string }) => void) => () => void;
+        pending: () => Promise<{ url: string | null }>;
       };
       // G0-RS: Skills discovery & execution bridge
       skills: {

@@ -145,6 +145,13 @@ const CHANNELS = {
     uninstall: 'pack:uninstall',
     uninstallPlan: 'pack:uninstall-plan',
   },
+  // BLOCK-242 — petri-install:// 深链安装（预览只读 / 确认安装 / main→renderer 推送）
+  installDeepLink: {
+    deepLink: 'install:deep-link',
+    preview: 'install:preview-deep-link',
+    confirm: 'install:confirm-deep-link',
+    pending: 'install:pending-deep-link',
+  },
   plugin: {
     // BLOCK-158 商店面退役：仅存目录读面（listInstalled/listRemote=运行时目录投影，
     // 供包卡片运行时标题/体积）；install/uninstall/checkUpdates 随商店面移除，

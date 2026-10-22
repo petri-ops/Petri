@@ -272,6 +272,19 @@ const desktopBridgeSurface = {
     },
   },
 
+  // BLOCK-242 — petri-install:// 深链安装：预览只读 / 确认安装 / main→renderer 推送
+  installDeepLink: {
+    preview: (url) => ipcRenderer.invoke('install:preview-deep-link', url),
+    confirm: (payload) => ipcRenderer.invoke('install:confirm-deep-link', payload),
+    pending: () => ipcRenderer.invoke('install:pending-deep-link'),
+    onDeepLink: (callback) => {
+      if (typeof callback !== 'function') return () => {};
+      const listener = (_event, payload) => callback(payload);
+      ipcRenderer.on('install:deep-link', listener);
+      return () => ipcRenderer.removeListener('install:deep-link', listener);
+    },
+  },
+
   // M2-9：content-plugin 文档桥（docs.tsx 运行时拉取已装教程插件）
   contentPlugins: {
     list: () => ipcRenderer.invoke('content-plugin:list'),

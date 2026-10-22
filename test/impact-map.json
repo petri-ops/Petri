@@ -3770,6 +3770,29 @@
       "classifiesScripts": true
     },
     {
+      "id": "block242-deeplink-install",
+      "note": "BLOCK-242 Q8 深链安装安全面：petri-install:// pack/mcp 预览/风险/替换警告 + 确认重取对账 + sha 双验 + env 禁止；OS 协议/扩展页入口。",
+      "patterns": [
+        "src/main/install-deep-link-core.js",
+        "src/main/deep-link-protocol.js",
+        "src/ipc/install-deep-link.js",
+        "frontend/src/components/desktop/InstallDeepLinkDialog.tsx",
+        "frontend/src/components/desktop/InstallDeepLinkDialog.test.tsx",
+        "frontend/src/pages/extensions/index.tsx",
+        "test/block242-*.test.mjs",
+        "acceptance/ui-550/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui550-*.cjs"
+      ],
+      "tests": [
+        "test/block242-deeplink-install.test.mjs",
+        "test/ipc-channels-registry.test.mjs",
+        "frontend/src/components/desktop/InstallDeepLinkDialog.test.tsx",
+        "frontend/src/pages/extensions/index.test.tsx"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true
+    },
+    {
       "id": "ui-479-responsive-collapse",
       "note": "UI-479 侧栏自适应收起（2026-10-09 verified）：useResponsivePanelCollapse + deriveResponsivePanels 纯函数；补登记 acceptance/ui-479 读者映射（昨日收口后目录新增未随 closeout 重跑 test:changed，BLOCK-156 收口链抓真，机械补账）。",
       "patterns": [

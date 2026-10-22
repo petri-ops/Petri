@@ -71,6 +71,17 @@ export default function ExtensionsPage(): React.ReactElement {
           <span className={globalStyles.title}>扩展中心</span>
           <span className={globalStyles.subtitle}>领域扩展 · 通用技能 · MCP 服务</span>
         </div>
+        {/* BLOCK-242 — 深链安装粘贴入口（与 petri-install:// OS 推送共用预览/确认弹层） */}
+        <button
+          type="button"
+          className={globalStyles.backBtn}
+          onClick={() => window.dispatchEvent(new CustomEvent('petri:open-install-deep-link'))}
+          title="从链接安装（petri-install:// 预览后确认）"
+          data-testid="extensions-install-from-link"
+        >
+          <Icon name="plus" size={16} />
+          <span>从链接安装</span>
+        </button>
       </header>
 
       <nav className={styles.shelfBar} role="tablist" aria-label="扩展货架">

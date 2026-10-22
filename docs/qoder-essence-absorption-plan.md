@@ -587,6 +587,8 @@ status: planned
 > 2026-10-22：**三 hint 进策略已由 Q8 轻量批交付**（destructive/openWorld 覆盖 readOnly 降档；idempotent 记录；零 annotations 零漂移）。**剩余**：大目录懒加载、深链安装安全面、技能自进化建议、Agent builder；trust 降档随 Q1；stdio/SSE OAuth 等随 BLOCK-239 reopen。
 >
 > 2026-10-22：**大目录懒加载已由 BLOCK-241 交付（completed；UI-549 verified dev Electron；catalog R1 + call R2 代理，调用时复核策略）**。**剩余**：深链安装安全面、技能自进化建议、Agent builder；trust 随 Q1；OAuth 余项随 BLOCK-239 reopen。
+>
+> 2026-10-22：**深链安装安全面已由 BLOCK-242 交付（completed；UI-550 verified dev Electron；`petri-install://` pack/mcp 预览/替换警告/sha 双验/env 禁止）**。**Q8 剩余**：trust 降档接审批（随 Q1）、技能自进化建议与 Agent builder（可选）；packaged 真机唤起/签名/allowlist 属 G1+。
 
 **目标**：把 MCP 从「能用」升级为「默认不信任、可授权、可解释」；补齐扩展安装安全面。
 

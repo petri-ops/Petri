@@ -166,6 +166,20 @@ const setMainWindow = (w) => { _mainWindow = w; };
 // 回调中无 catch，直接导致主进程 Uncaught Exception）。
 const mainWindow = { isDestroyed() { return _mainWindow == null || _mainWindow.isDestroyed(); }, get webContents() { return _mainWindow?.webContents; }, isMinimized() { return _mainWindow?.isMinimized(); }, isFocused() { return _mainWindow?.isFocused(); }, restore() { _mainWindow?.restore(); }, show() { _mainWindow?.show(); }, focus() { _mainWindow?.focus(); } };
 
+// BLOCK-242 — petri-install:// 深链：open-url 必须早于 ready 注册；路由先于单实例锁创建。
+const { createDeepLinkRouter, extractInstallDeepLink, installProtocol } = require("./main/deep-link-protocol");
+const deepLinkRouter = createDeepLinkRouter({
+  send: (url) => {
+    const win = getMainWindow();
+    if (win && win.webContents) win.webContents.send(CHANNELS.installDeepLink.deepLink, { url });
+  },
+});
+app.on("open-url", (event, url) => {
+  event.preventDefault();
+  const link = extractInstallDeepLink([url]);
+  if (link) deepLinkRouter.handle(link);
+});
+
 // Petri owns local backend ports and must run as a single application
 // instance. A repeated launch focuses the existing window instead of starting
 // another R/Python service stack.
@@ -173,12 +187,15 @@ const hasSingleInstanceLock = app.requestSingleInstanceLock();
 if (!hasSingleInstanceLock) {
   app.quit();
 } else {
-  app.on("second-instance", () => {
+  app.on("second-instance", (_event, argv) => {
     const win = getMainWindow();
-    if (!win) return;
-    if (win.isMinimized()) win.restore();
-    win.show();
-    win.focus();
+    if (win) {
+      if (win.isMinimized()) win.restore();
+      win.show();
+      win.focus();
+    }
+    const link = extractInstallDeepLink(argv);
+    if (link) deepLinkRouter.handle(link);
   });
 }
 
@@ -686,6 +703,9 @@ async function main() {
    // BLOCK-84：领域包一键装/卸 IPC（记录制；boot 接线由 server 启动消费）
    const { registerPackIpc } = require("./ipc/pack");
    registerPackIpc();
+   // BLOCK-242 — petri-install:// 深链安装 IPC（preview/confirm/pending）
+   const { registerInstallDeepLinkIpc } = require("./ipc/install-deep-link");
+   registerInstallDeepLinkIpc({ deepLinkRouter });
   // Capture procs as a snapshot — IPC handlers fetch a fresh
   // snapshot at invocation time via getProcs() from backend-proc-manager.
   const _procsSnapshot = getProcs();
@@ -725,6 +745,11 @@ async function main() {
 
   // 7. 创建窗口
   // createWindow extracted to src/main/_window-create.js (SUB-15.1 PHASE 3)
+  // BLOCK-242 — 注册 petri-install://（测试实例跳过）；冷启动 argv 链接进 pending
+  installProtocol(app, { isTestInstance: IS_TEST_INSTANCE });
+  const coldInstallLink = extractInstallDeepLink(process.argv);
+  if (coldInstallLink) deepLinkRouter.handle(coldInstallLink);
+
   await createWindow({
     BrowserWindow,
     shell,

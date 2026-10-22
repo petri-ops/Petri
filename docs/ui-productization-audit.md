@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-22（**UI-550 深链安装安全面 verified（dev Electron 边界内；隔离 9223 live 10/10）**，BLOCK-242 / Q8）：扩展页「从链接安装」+ 全局预览弹层——名称/来源/下载地址/大小/SHA-256/风险/替换警告只读展示；确认后才安装（重取对账 + sha 双验）；env 禁止。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-22（**UI-549 MCP 大目录目录模式 verified（dev Electron 边界内；9223 离屏 live 7/7）**，BLOCK-241 / Q8）：货架显示「目录模式 · N 个工具按需加载 · 生效入口 2」；agent 只投影 catalog(R1)/call(R2)，调用时复核策略。证据=block241 5/5 + projection 15/15 + 前端 18/18 + live 7/7。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-22（**UI-548 MCP OAuth 授权入口 verified（dev Electron 边界内；9223 离屏 live 11/11）**，BLOCK-239 / Q8）：HTTP server 卡片显示 url/传输；需要授权时提供入口并打开浏览器；授权后自动重连、工具出现、已授权徽标；token 密文落盘。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -5312,3 +5314,11 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **验证（代码）**：block241 集成 **5/5**（大目录只出 catalog/call、list/describe、call、block/disable/unknown、投影后新增 block 立即生效、小目录零变化）；mcp-projection **15/15**；前端 **18/18**；`quality:types` 0。
 - **实机腿（9223 离屏，7/7）**：`acceptance/ui-549/`——many-tools stdio server（6 工具）→ connected → 货架 metrics「目录模式 · 6 个工具按需加载 · 生效入口 2」→ 亮/暗截图；收尾移除 server。
 - **未做（reopen）**：按目标工具 hint 动态降档（read-only 目标在 read/plan 直接调用）、catalog 分页/搜索 >200、设置页可调阈值、真实 >200 工具目录实机、trust/Q1 审批联动。
+
+## UI-550: 深链安装安全面（`petri-install://` 预览 + 确认）（2026-10-22 **verified（dev Electron 边界内；隔离 9223 live 10/10）**，BLOCK-242 / Q8）
+
+- **变化面**：扩展页头部新增「从链接安装」入口；全局预览弹层支持 `petri-install://pack?...`（领域包）与 `petri-install://mcp?...`（MCP 配置）——只读展示名称/来源/manifest URL/下载地址/大小/SHA-256/风险原因/替换警告（同名包、MCP id 冲突）；MCP 冲突需显式勾选「允许替换」才可安装；env 值禁止进链接；安装结果含「已写入 MCP/需重启/部分失败」。
+- **为什么这样设计（自有形态）**：预览零副作用，确认时才重新取 manifest 与预览快照对账（防 TOCTOU），下载后复核 sha256/size；私网/非 https 默认拒（测试显式放行 loopback）；凭据不进链接——把「可解释的安装」做成本地优先的治理面，而不是照抄一键静默安装。
+- **验证（代码）**：core **8/8**（解析/守卫/manifest schema/受控拉取/预览/TOCTOU/sha 双验/MCP 替换门）；弹层组件 **2/2**；通道漂移 **5/5**；`quality:types` 0。
+- **实机腿（隔离 9223，10/10）**：`acceptance/ui-550/`——pack mock manifest 预览（名称/来源/大小/sha/风险/替换警告）→ mcp 深链真实安装（REST 核对落盘）→ 冲突 id 未勾选禁用、勾选后替换 → 亮/暗截图；main 进程以隔离数据根 + `PETRI_INSTALL_ALLOW_PRIVATE=1` 启动，零用户数据污染。
+- **未做（reopen）**：packaged 真机外部点击唤起（G1+）、代码签名/公证、来源 allowlist、运行时自动安装接审批（随 Q1）、包签名/信任链、多 pack manifest 选择。

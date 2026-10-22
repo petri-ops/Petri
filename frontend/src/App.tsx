@@ -27,6 +27,7 @@ import { useAppCommands } from '@/components/copilot/useAppCommands';
 import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
 // BLOCK-223 — 桌面外壳渲染侧宿主（通知偏好镜像 + 退出摘要弹窗）
 import { DesktopShellProvider } from '@/components/shell/DesktopShellProvider';
+import { InstallDeepLinkDialog } from '@/components/desktop/InstallDeepLinkDialog';
 // BLOCK-42 — pending-scroll 全局 Provider（见 AppShell 内注释）
 import { PendingScrollProvider } from '@/lib/pendingScrollContext';
 // BLOCK-106 P1 — 路由级代码分割：首屏路由 `/`（欢迎页）保持直包，其余页面切
@@ -269,6 +270,8 @@ export default function App(): React.ReactElement {
         {/* BLOCK-159 P1-9 / UI-482 — 投影断连横幅（仅投影环境渲染，桌面零行为） */}
         <ProjectionLinkBanner />
         <CrashNoticeBanner />
+        {/* BLOCK-242 — petri-install:// 深链安装预览弹层（全局） */}
+        <InstallDeepLinkDialog />
         <AppRailProvider>
           <WorkspacePanelsProvider>
             {/* BLOCK-200 P1 — 键位注册表：命令面板徽章、App 级派发器、工作区/档位快捷键同源 */}

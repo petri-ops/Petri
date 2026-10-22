@@ -1,0 +1,58 @@
+{
+  "name": "ui550-install-deeplink-live",
+  "startedAt": "2026-10-22T01:59:50.119Z",
+  "finishedAt": "2026-10-22T01:59:54.964Z",
+  "assertions": [
+    {
+      "name": "D1_manual_entry_present",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "D2_pack_preview_fields",
+      "pass": true,
+      "detail": "领域包 · UI-550 演示包（ui550-pack）来源：127.0.0.1 · http://127.0.0.1:54511/manifest.json下载地址：http://127.0.0.1:54511/pack.zip大小：4 B · SHA-256：aaaaaaaaaaaaaaaa…随包写入 MCP：ui550-target风险：来源未验证（安装前请自行核对）；将写入 MCP 配置；将替换已有 MCP 配置 ui550-target；本地测试来源（loopback）允许替换已有 MCP 配置（ui550-target）取消安装"
+    },
+    {
+      "name": "D3_preview_screenshots",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\petri\\acceptance\\ui-550\\ui550-deeplink-preview-light.png | D:\\1.WorkDir\\petri\\acceptance\\ui-550\\ui550-deeplink-preview-dark.png"
+    },
+    {
+      "name": "D4_mcp_preview",
+      "pass": true,
+      "detail": "MCP 配置 · ui550-new（ui550-new）命令：C:\\Users\\Admin\\AppData\\Roaming\\fnm\\node-versions\\v24.20.0\\installation\\node.exe 风险：来源未验证（安装前请自行核对）取消安装"
+    },
+    {
+      "name": "D5_mcp_installed",
+      "pass": true,
+      "detail": "安装完成：MCP 配置 ui550-new"
+    },
+    {
+      "name": "R1_new_mcp_persisted",
+      "pass": true,
+      "detail": "[\"ui550-target\",\"ui550-new\"]"
+    },
+    {
+      "name": "D6_conflict_warning",
+      "pass": true,
+      "detail": "MCP 配置 · ui550-target（ui550-target）命令：C:\\Users\\Admin\\AppData\\Roaming\\fnm\\node-versions\\v24.20.0\\installation\\node.exe 风险：来源未验证（安装前请自行核对）；将替换已有 MCP 配置 ui550-target允许替换已有 MCP 配置（ui550-target）取消安装"
+    },
+    {
+      "name": "D7_install_gated",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "D8_mcp_replaced",
+      "pass": true,
+      "detail": "安装完成：MCP 配置 ui550-target"
+    },
+    {
+      "name": "R2_cleanup",
+      "pass": true,
+      "detail": "[]"
+    }
+  ],
+  "allPass": true
+}
