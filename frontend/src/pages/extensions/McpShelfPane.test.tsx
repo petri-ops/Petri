@@ -157,6 +157,25 @@ describe('BLOCK-156 McpShelfPane', () => {
     expect(posts).toHaveLength(1);
   });
 
+  it('BLOCK-241 — 大目录显示目录模式与按需工具数', async () => {
+    withServers([row({
+      id: 'many-srv',
+      status: 'connected',
+      toolCount: 6,
+      policy: {
+        trust: 'ask', allowCount: 0, blockCount: 0, allow: [], block: [],
+        projectedToolCount: 2,
+        catalogMode: { mode: 'catalog', total: 6 },
+      },
+    })]);
+    render(<McpShelfPane />);
+    await waitFor(() => expect(screen.getByTestId('mcp-policy-many-srv')).toBeTruthy());
+    const metrics = screen.getByTestId('mcp-policy-metrics-many-srv').textContent || '';
+    expect(metrics).toContain('目录模式');
+    expect(metrics).toContain('6 个工具按需加载');
+    expect(metrics).toContain('生效入口 2');
+  });
+
   it('BLOCK-239 — 授权等待态与已授权徽标', async () => {
     withServers([
       row({ id: 'auth-wait', transport: 'http', status: 'authorizing', auth: 'required' }),

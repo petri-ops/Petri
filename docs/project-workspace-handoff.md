@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-22（**BLOCK-241 Q8 大目录懒加载 completed；无 active 工作包**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-241（Q8 深化 · 大目录懒加载）**：超阈值 MCP server 只投影 `mcp_<server>__catalog`（R1，list/describe）+ `mcp_<server>__call`（R2，按名代理）；call 时复核 server allow/block + 逐工具 enabled/timeout；小目录零变化；`/servers` 附 `catalogMode`，货架显示目录模式。证据=block241 5/5 + mcp-projection 15/15 + 前端 18/18 + theme 17/17 + types 0 + 9223 live 7/7（`acceptance/ui-549/` 亮/暗截图）+ closeout 十三门；UI-549 verified。**边界**：按目标 hint 动态降档、分页/搜索 >200、设置页可调阈值、真实 >200 工具目录、trust/Q1 审批联动 reopen。**下一包需用户发令**：Q8 深链安装安全面（独立 BLOCK）或 Q9 长尾；UI-544/545/546 实机腿仍欠。**收口 PATH** 需同时含 Git `usr\bin`（GNU tar）与 `bin`（bash）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-22（**Q8 余项轻量批：MCP 四 hint completed；无 active 工作包**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=Q8 四 hint 轻量批**：`mcpToolContract` 把 readOnly/destructive/openWorld/idempotent 写入合同——destructive/openWorld 覆盖 readOnly 降档（保守 R2/execution），idempotent 记录不改变风险档；零 annotations 零漂移；显式 contractMode 仍优先。证据=block240 7/7 + mcp-projection 15/15 + closeout 十三门。**下一包需用户发令**：Q8 余项（大目录懒加载 / 深链安装安全面）或 Q9 长尾；UI-544/545/546 实机腿仍欠；trust 降档随 Q1。**收口 PATH** 需同时含 Git `usr\bin`（GNU tar）与 `bin`（bash）。G0 开发期常态 · 不外推 packaged/Provider/GA。

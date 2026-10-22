@@ -3746,6 +3746,30 @@
       "classifiesScripts": true
     },
     {
+      "id": "block241-mcp-lazy-catalog",
+      "note": "BLOCK-241 Q8 大目录懒加载：catalog(R1 list/describe)+call(R2 按名代理)，调用时复核 server/tool policy；小目录零变化；货架目录模式。",
+      "patterns": [
+        "core/petri-server/agent-tools/mcp-projection.js",
+        "frontend/src/hooks/useMcpServers.ts",
+        "frontend/src/pages/extensions/**",
+        "test/block241-*.test.mjs",
+        "test/fixtures/mcp-many-tools-server.cjs",
+        "acceptance/ui-549/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui549-*.cjs"
+      ],
+      "tests": [
+        "test/block241-mcp-lazy-catalog.test.mjs",
+        "test/mcp-projection.test.mjs",
+        "test/mcp-client-manager.test.mjs",
+        "test/block204-mcp-tool-policy.test.mjs",
+        "test/block221-mcp-server-policy.test.mjs",
+        "test/block240-mcp-hints.test.mjs",
+        "frontend/src/pages/extensions/McpShelfPane.test.tsx"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true
+    },
+    {
       "id": "ui-479-responsive-collapse",
       "note": "UI-479 侧栏自适应收起（2026-10-09 verified）：useResponsivePanelCollapse + deriveResponsivePanels 纯函数；补登记 acceptance/ui-479 读者映射（昨日收口后目录新增未随 closeout 重跑 test:changed，BLOCK-156 收口链抓真，机械补账）。",
       "patterns": [

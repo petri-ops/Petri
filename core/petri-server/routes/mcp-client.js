@@ -52,9 +52,15 @@ function registerMcpClientRoutes(app) {
     // BLOCK-221（Q8）— 每行附服务级策略摘要：治理状态要可见（env 已由 manager 脱敏）
     const store = serverPolicy.readStore();
     const projCounts = projection.projectedCountByServer();
+    const catalogs = projection.catalogModeByServer();
     const servers = manager.getStatuses().map((row) => ({
       ...row,
-      policy: { ...serverPolicy.summaryFor(row.id, store), projectedToolCount: projCounts[row.id] || 0 },
+      policy: {
+        ...serverPolicy.summaryFor(row.id, store),
+        projectedToolCount: projCounts[row.id] || 0,
+        // BLOCK-241 — 大目录：解释“生效入口 2 / 已连接 N”
+        catalogMode: catalogs[row.id] || null,
+      },
     }));
     res.json({ status: 'ok', servers });
   });

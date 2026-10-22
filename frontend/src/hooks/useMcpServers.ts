@@ -44,6 +44,7 @@ export interface McpServerRow {
     allow: string[];
     block: string[];
     projectedToolCount: number;
+    catalogMode?: { mode: 'catalog'; total: number } | null;
   };
 }
 

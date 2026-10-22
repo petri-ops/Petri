@@ -1,0 +1,43 @@
+{
+  "name": "ui549-mcp-catalog-live",
+  "startedAt": "2026-10-22T01:04:01.394Z",
+  "finishedAt": "2026-10-22T01:04:33.861Z",
+  "assertions": [
+    {
+      "name": "R1_many_server_created",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"server\":{\"id\":\"ui549-many\",\"command\":\"C:\\\\Users\\\\Admin\\\\AppData\\\\Roaming\\\\fnm\\\\node-versions\\\\v24.20.0\\\\installation\\\\node.exe\",\"args\":[\"D:\\\\1.WorkDir\\\\petri\\\\test\\\\fixtures\\\\mcp-many-tools-server.cjs\"],\"env\":{},\"autoConnect\":false,\"transport\":\"stdio\"}}"
+    },
+    {
+      "name": "R2_connected_six_tools",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"id\":\"ui549-many\",\"toolCount\":6}"
+    },
+    {
+      "name": "R3_catalog_mode",
+      "pass": true,
+      "detail": "{\"trust\":\"ask\",\"allowCount\":0,\"blockCount\":0,\"allow\":[],\"block\":[],\"projectedToolCount\":2,\"catalogMode\":{\"mode\":\"catalog\",\"total\":6}}"
+    },
+    {
+      "name": "D1_catalog_metrics_present",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "D2_catalog_mode_copy",
+      "pass": true,
+      "detail": "目录模式 · 6 个工具按需加载 · 生效入口 2"
+    },
+    {
+      "name": "D3_screenshots",
+      "pass": true,
+      "detail": "D:\\1.WorkDir\\petri\\acceptance\\ui-549\\ui549-mcp-catalog-light.png | D:\\1.WorkDir\\petri\\acceptance\\ui-549\\ui549-mcp-catalog-dark.png"
+    },
+    {
+      "name": "R4_server_removed",
+      "pass": true,
+      "detail": "[]"
+    }
+  ],
+  "allPass": true
+}

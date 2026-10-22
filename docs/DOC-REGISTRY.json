@@ -7715,6 +7715,27 @@
         "G0"
       ],
       "notes": "2026-10-22 立项（用户「搞完 下一队列」）：HTTP MCP OAuth 授权码流程——SDK 原生 provider/auth + localhost callback + 密文 token store + 货架授权入口；stdio/SSE/revoke/真实 provider 矩阵不在范围。**completed（2026-10-22）**：Node 集成 6/6 + 前端 17/17 + 邻域 26/26 + 9223 live 11/11 + closeout 十三门；UI-548 verified。实机抓真=REST transport 丢失 + 未连接传输显示错误，均已修。"
+    },
+    {
+      "id": "BLOCK-241-Q8-MCP-LAZY-CATALOG",
+      "capability": "q8-mcp-lazy-catalog",
+      "path": "docs/block-241-q8-mcp-lazy-catalog-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P5-CLOSED",
+      "canonical": true,
+      "truthDomain": "q8-mcp-lazy-catalog",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-22",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "mcp",
+        "lazy-loading",
+        "q8",
+        "governance",
+        "G0"
+      ],
+      "notes": "2026-10-22 立项（用户「启动 BLOCK-241：大目录懒加载」）：超阈值 server 只投影 catalog(R1)+call(R2)，按需 schema/按名代理调用；调用时复核 server/tool policy；小目录零变化。**completed（2026-10-22）**：block241 5/5 + projection 15/15 + 前端 18/18 + 9223 live 7/7 + closeout 十三门；UI-549 verified。"
     }
   ],
   "lastUpdated": "2026-10-21",

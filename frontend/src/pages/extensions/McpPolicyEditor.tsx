@@ -101,8 +101,15 @@ export function McpPolicyEditor({ server, onSave }: McpPolicyEditorProps): React
         白名单非空时只投影名单内工具；阻断优先于白名单。审批默认不随信任位改变（接入待 Q1）。
       </p>
       <span className={styles.metrics} data-testid={`mcp-policy-metrics-${server.id}`}>
-        生效 {policy.projectedToolCount} · 已连接 {server.toolCount} · 白名单 {policy.allowCount} · 阻断 {policy.blockCount}
+        {policy.catalogMode
+          ? `目录模式 · ${policy.catalogMode.total} 个工具按需加载 · 生效入口 ${policy.projectedToolCount}`
+          : `生效 ${policy.projectedToolCount} · 已连接 ${server.toolCount} · 白名单 ${policy.allowCount} · 阻断 ${policy.blockCount}`}
       </span>
+      {policy.catalogMode && (
+        <span className={styles.note}>
+          目录模式：agent 先读 catalog（list/describe），调用经 call 代理并复核服务级/逐工具策略。
+        </span>
+      )}
       <label className={styles.field}>
         <span>白名单（逗号/空格分隔；空=全部允许）</span>
         <input

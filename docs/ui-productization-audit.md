@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-22（**UI-549 MCP 大目录目录模式 verified（dev Electron 边界内；9223 离屏 live 7/7）**，BLOCK-241 / Q8）：货架显示「目录模式 · N 个工具按需加载 · 生效入口 2」；agent 只投影 catalog(R1)/call(R2)，调用时复核策略。证据=block241 5/5 + projection 15/15 + 前端 18/18 + live 7/7。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-22（**UI-548 MCP OAuth 授权入口 verified（dev Electron 边界内；9223 离屏 live 11/11）**，BLOCK-239 / Q8）：HTTP server 卡片显示 url/传输；需要授权时提供入口并打开浏览器；授权后自动重连、工具出现、已授权徽标；token 密文落盘。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-22（**UI-547 MCP 货架工具治理 verified（dev Electron 边界内；9223 离屏 live 12/12）**，Q8 深化 / BLOCK-221 reopen）：allow/block 工具编辑 + 生效投影计数 + 后端 diagnostics；信任位只读（随 Q1）。证据=红绿 4 红→14/14 + MCP Node 33/33 + live 12/12 + 亮/暗截图。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -5302,3 +5304,11 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **实机腿（9223 离屏，11/11）**：`acceptance/ui-548/`——mock OAuth+MCP HTTP server → 卡片「需要授权」+ URL → 点击授权（探针截获 `window.open`，避免真开系统浏览器）→ flow 模拟浏览器完成 callback → 后端 connected（2 工具）→ UI「已连接/已授权」→ 亮/暗截图；收尾移除 server。
 - **实机抓真**：①REST `POST /api/mcp/servers` 未透传 `transport/url`，HTTP 被静默降级 stdio（修路由 + 回归断言）；②`getStatuses` 未连接时用会话默认 transport，HTTP 卡片误显示 stdio（修按配置传输显示）。
 - **未做（reopen）**：stdio/SSE OAuth、token revoke/账号切换、agent 主动 authenticate 工具、真实第三方 provider 矩阵（G1+）、trust 接审批（随 Q1）。
+
+## UI-549: MCP 大目录目录模式（catalog/call 代理）（2026-10-22 **verified（dev Electron 边界内；9223 离屏 live 7/7）**，BLOCK-241 / Q8）
+
+- **变化面**：MCP server 可用工具数超过阈值（默认 30）时，货架工具治理显示「目录模式 · N 个工具按需加载 · 生效入口 2」与解释；agent 工具面只出现 `catalog`（R1，list/describe）与 `call`（R2，按名代理调用），真实工具不再逐个投影；小目录（≤阈值）逐字保持原逐工具投影。
+- **为什么这样设计（自有形态）**：把「硬截断第 41 个工具」改成「先列目录、schema 按需、调用经代理」；`call` 在每次调用时重新读 server allow/block + 逐工具 enabled/timeout，投影快照不能成为放行依据；`catalog` 只读、不泄露 blocked/disabled 工具。`call` 合同保守 R2——read/plan 可发现目录但不能执行，避免代理绕过档位。
+- **验证（代码）**：block241 集成 **5/5**（大目录只出 catalog/call、list/describe、call、block/disable/unknown、投影后新增 block 立即生效、小目录零变化）；mcp-projection **15/15**；前端 **18/18**；`quality:types` 0。
+- **实机腿（9223 离屏，7/7）**：`acceptance/ui-549/`——many-tools stdio server（6 工具）→ connected → 货架 metrics「目录模式 · 6 个工具按需加载 · 生效入口 2」→ 亮/暗截图；收尾移除 server。
+- **未做（reopen）**：按目标工具 hint 动态降档（read-only 目标在 read/plan 直接调用）、catalog 分页/搜索 >200、设置页可调阈值、真实 >200 工具目录实机、trust/Q1 审批联动。
