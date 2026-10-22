@@ -33,6 +33,8 @@ export interface ComposerContextApi {
   /** chip 渲染用的结构化载荷（按组拆分，顺序=加入序）。 */
   selections: SelectionReference[];
   images: ImageReference[];
+  /** 其余七类候选（文件/技能/连接器/智能体/结果/知识空间/会话）的条目本身。 */
+  others: ComposerContextItem[];
   imageCount: number;
   /** 引用块（图片 + 选中文段）+ 用户文本 + 附件尾追——发送面的唯一组装入口。 */
   composeForSend: (text: string, attachments?: UploadedAttachmentRef[]) => string;
@@ -134,11 +136,18 @@ export function useComposerContext(options: UseComposerContextOptions): Composer
     () => items.filter((entry) => entry.kind === 'image').map((entry) => entry.payload as ImageReference),
     [items],
   );
+  // 单列表里除选中文段/图片外的其余条目（`@` 菜单产出的七类）——UI 必须可见可移除，
+  // 否则"引用"只在正文里存在、用户看不见（诚实性缺口）。
+  const others = useMemo(
+    () => items.filter((entry) => entry.group === 'reference' && entry.kind !== 'selection'),
+    [items],
+  );
 
   return {
     items,
     selections,
     images,
+    others,
     imageCount: images.length,
     composeForSend,
     composeSelectionsOnly,

@@ -1806,6 +1806,7 @@ export function SimpleChat({
             <ComposerContextChips
               selections={composerContext.selections}
               images={composerContext.images}
+              others={composerContext.others}
               onRemove={composerContext.removeItem}
               notice={composerContext.notice}
             />

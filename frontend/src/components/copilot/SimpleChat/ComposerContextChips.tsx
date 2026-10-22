@@ -13,16 +13,19 @@ import {
   selectionReferenceLocation,
   type SelectionReference,
 } from './selectionReferences';
+import type { ComposerContextItem } from './contextItems';
 
 export interface ComposerContextChipsProps {
   selections: SelectionReference[];
   images: ImageReference[];
+  /** BLOCK-245 P4 — `@` 菜单产出的其余引用（文件/技能/连接器/智能体/结果/知识空间/会话）。 */
+  others?: ComposerContextItem[];
   onRemove: (id: string) => void;
   /** BLOCK-245 P5 — 上限/去重提示（文案单源 = contextLimits；null = 无异常）。 */
   notice?: string | null;
 }
 
-export function ComposerContextChips({ selections, images, onRemove, notice }: ComposerContextChipsProps) {
+export function ComposerContextChips({ selections, images, others = [], onRemove, notice }: ComposerContextChipsProps) {
   return (
     <>
       {notice ? <div className="sc-attachment-notice" role="status">{notice}</div> : null}
@@ -43,6 +46,31 @@ export function ComposerContextChips({ selections, images, onRemove, notice }: C
                 onClick={() => onRemove(ref.id)}
                 title="移除引用"
                 aria-label="移除引用"
+              >
+                <Icon name="x" size={12} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      {others.length > 0 && (
+        <div className="sc-selection-refs">
+          {others.map((item) => (
+            <div
+              key={item.id}
+              className="sc-selection-ref"
+              data-context-kind={item.kind}
+              title={item.lines.join('\n')}
+            >
+              <Icon name="file" size={12} />
+              <span className="sc-selection-ref-loc">{item.label}</span>
+              <span className="sc-selection-ref-text">{item.source}</span>
+              <button
+                type="button"
+                className="sc-selection-ref-remove"
+                onClick={() => onRemove(item.id)}
+                title="移除引用"
+                aria-label="移除上下文引用"
               >
                 <Icon name="x" size={12} />
               </button>

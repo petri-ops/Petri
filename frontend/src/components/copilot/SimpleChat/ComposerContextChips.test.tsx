@@ -3,6 +3,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { ComposerContextChips } from './ComposerContextChips';
+import type { ComposerContextItem } from './contextItems';
 import type { ImageReference } from './imageReferences';
 import type { SelectionReference } from './selectionReferences';
 
@@ -47,5 +48,27 @@ describe('ComposerContextChips（BLOCK-245 P2）', () => {
     const { container } = render(<ComposerContextChips selections={[]} images={[]} onRemove={vi.fn()} />);
     expect(container.querySelector('.sc-selection-refs')).toBeNull();
     expect(container.querySelector('.sc-image-refs')).toBeNull();
+  });
+
+  it('BLOCK-245 P4 — `@` 产出的其余引用在 composer 可见且可逐项移除', () => {
+    const onRemove = vi.fn();
+    const other: ComposerContextItem = {
+      id: 'ctx-file-src/a.R',
+      kind: 'file',
+      group: 'reference',
+      label: 'src/a.R',
+      source: '文件',
+      lines: ['【引用文件】', '> path：src/a.R'],
+      dedupeKey: 'file|src/a.R',
+      payload: {},
+    };
+    const { container } = render(
+      <ComposerContextChips selections={[]} images={[]} others={[other]} onRemove={onRemove} />,
+    );
+    expect(screen.getByText('src/a.R')).toBeTruthy();
+    expect(screen.getByText('文件')).toBeTruthy();
+    expect(container.querySelector('[data-context-kind="file"]')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: '移除上下文引用' }));
+    expect(onRemove).toHaveBeenCalledWith('ctx-file-src/a.R');
   });
 });
