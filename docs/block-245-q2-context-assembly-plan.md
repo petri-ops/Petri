@@ -50,9 +50,9 @@ status: active
 
 | 阶段 | 内容 | 出口断言 |
 | --- | --- | --- |
-| **P1 拆前基线** | `SimpleChat/contextChannels.baseline.test.ts`：对现有三条通道的纯函数输入/输出逐字快照（含组合顺序、上限、去重、截断文案、【】头） | 基线测先绿；此后任何改动都跑它 |
-| **P2 三通道并一** | 新增 `contextItems.ts`：`ComposerContextItem` + `appendContextItem` + `composeContextBlock` + 单源上限常量；SimpleChat 的 refs 状态合并为单一列表；三处组装点改调同一函数 | P1 基线测**逐字不变**通过；SimpleChat 引用相关行数不增（`gate:code-size` 基线不放宽） |
-| **P3 `@` 候选聚合** | `SimpleChat/contextSources.ts`：八类候选的 provider 形状（异步、有界、可取消、带 `unavailableReason`），复用既有端点/hook，不新建后端读侧 | 单测：每类源的形状/上限/失败原因；无新依赖、无新存储 |
+| ✅ **P1 拆前基线**（commit `5e9e7ba4`）| `SimpleChat/contextChannels.baseline.test.ts`：对现有三条通道的纯函数输入/输出逐字快照（含组合顺序、上限、去重、截断文案、【】头） | 基线测先绿；此后任何改动都跑它 |
+| ✅ **P2 三通道并一**（commit `fc1671cd`）| 新增 `contextItems.ts`：`ComposerContextItem` + `appendContextItem` + `composeContextBlock` + 单源上限常量；SimpleChat 的 refs 状态合并为单一列表；三处组装点改调同一函数 | P1 基线测**逐字不变**通过；SimpleChat 引用相关行数不增（`gate:code-size` 基线不放宽） |
+| ▶️ **P3 `@` 候选聚合**（下一步）| `SimpleChat/contextSources.ts`：八类候选的 provider 形状（异步、有界、可取消、带 `unavailableReason`），复用既有端点/hook，不新建后端读侧 | 单测：每类源的形状/上限/失败原因；无新依赖、无新存储 |
 | **P4 `@` 菜单 UI** | `SimpleChat/ContextMentionMenu.tsx`（触发/过滤/分组/来源标签/键盘可达/不可用诚实提示）+ composer 接入 + 选中即产 `ComposerContextItem` | 组件测试；超限/无结果/源不可用三类提示可见 |
 | **P5 上限诚实化（C16 部分）** | 附件与引用超限由静默 `console.warn`/`slice` 改为用户可见提示（文案单源）；`MAX_*` 常量集中 | 单测断言"超限必产生可见提示且不丢已有项" |
 | **P6 实机腿** | 隔离 9223 + mock provider：`@` 选文件/技能/结果产物 → 发送 → 请求体含引用块 → 移除一项重发 → 超限提示；亮/暗截图 | live 断言全绿；UI-553 verified |
@@ -90,3 +90,26 @@ completed = P1–P5 全部落地 + 基线逐字不变 + 前端/定向/live 证�
 只称「定向 + 专项门禁通过」，不称全量通过（根 `npm run check` 与 `test:all:workspace` 默认不跑）。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 5. 阶段进度（换 agent 接手锚点，2026-10-22 收工态）
+
+| 阶段 | 状态 | 落点与证据 |
+| --- | --- | --- |
+| P0 立项 | ✅ | commit `83629ead`：plan + DOC-REGISTRY（`BLOCK-245-Q2-CONTEXT-ASSEMBLY` active/P0-LAUNCH）+ README 273 + AUDIT-LOG 启动行/记录行 + roadmap/handoff 恢复点 + UI-553 台账 in_progress |
+| P1 拆前基线 | ✅ | commit `5e9e7ba4`：`SimpleChat/contextChannels.baseline.test.ts` 12 条逐字断言（三通道形状、组合次序 image→selection→text→attachment、上限 8/4、相邻同源去重、8000 截断文案、全角【】头纪律） |
+| P2 三通道并一 | ✅ | commit `fc1671cd`：`contextItems.ts`（`ComposerContextItem` + 分组上限/去重 + 返回 `deduped`/`dropped` 信号 + 唯一 `composeContextMessage`）、`hooks/useComposerContext.ts`（列表状态 + 右栏引用事件订阅 + 三个组装入口）、`ComposerContextChips.tsx`（chip JSX 平移）+ 等价测与渲染锚点；`SimpleChat.tsx` 2210→**2121**（code-size 台账随批下调，总行数 −89）；P1 基线一字未改仍绿，定向前端 56/56、types 0、eslint 0 |
+| P3 → P7 | 未做 | 见下「未做清单」 |
+
+**未做清单（按依赖序）**
+
+1. **P3 `@` 候选聚合**：新文件 `SimpleChat/contextSources.ts`（纯聚合/过滤/有界 + 每源 `unavailableReason`）+ 一个消费 hook 负责装载真实数据面。已核实的可用数据源（**别造第二套采集**）：工作区树 `GET /api/workspaces/:id/tree?prefix=&limit=&offset=`（`RightFileTree.tsx:139/151` 已用，目录分页先例）与 `?recursive=1`（`AnalysisLaunchPanel.tsx:198`，注意 500 条上限按「根层优先」消耗）；产品 Skills 与 run_tool 模板走 `slashSources.fetchSlashEntries`/`filterSlashEntries`；MCP 连接器 `useMcpServers`（`/mcp/servers`）；历史会话 `copilotConversationsClient`（`GET /api/ai/conversations`）；知识空间 `lib/knowledgeClient.ts`；结果产物/Agent·子任务两条**尚未核实具体端点**，动手前先实码确认（不确定就别写，避免臆造形状）。
+2. **P4 `@` 菜单 UI**：`ContextMentionMenu.tsx` + composer 接入（textarea 光标处 `@` 触发、上下/回车/Esc、来源标签、逐项上限、不可用与空结果诚实提示、选中产 `ComposerContextItem` 入 P2 单列表）。样式遵 `petri-css-theme`（token 阶梯、禁零定义、infima 特异性），改样式必跑 `theme-token-contract.test.ts`；弹层若靠右缘要向左展开（先例：`.notificationMenu`）。
+3. **P5 上限诚实化（C16 部分）**：`attachments.ts:95/112` 的 `console.warn` + `slice` 静默截断改为用户可见提示，文案单源；`appendContextItem` 已返回 `deduped`/`dropped`，接上即可。既有语义「无项目时附件诚实报错」保持。
+4. **P6 实机腿**：`scripts/block245-context-mention-live.mjs`（照 `scripts/block244-approval-tail-live.mjs` 的隔离栈：:3001/:3000/:9223 + mock provider + 临时数据根，`PETRI_TEST_ONSCREEN=1`）+ flow `.agents/skills/petri-dev-infra/dev-verify/flows/ui553-context-mention-live.cjs`；断言必须含反证：**请求体里真有引用块**、移除一项后引用数减少、超限提示可见；亮/暗截图入 `acceptance/ui-553/`，同份报告落 `acceptance/block-245/`。踩坑提醒（本仓实测）：长链路会被 `ProjectWorkspace` 既存重渲染环拖慢 CDP（该缺陷已在 AUDIT-LOG「当前待处理项」登记，不是本包要修的），把关键断言拆腿/必要时回落 REST 并如实标 `source`；mock 的多工具调用要逐 delta 分片发；不要并行跑前端门禁与 Node 大套件（vitest fork 会 `spawn ENOMEM`，单跑即绿）。
+5. **P7 收口**：`test:changed` 定向（新路径已登记 `test/impact-map.json` 规则 `block245-q2-context-assembly`，改前端路径前先跑 `test:changed:list` 确认 unknown 为空）→ UI-553 转 verified → Q-MATRIX 的 C15/C16 两行回写 + §6.5 第 2 行状态 → `npm run closeout`（十三门；PATH 需含 Git `usr/bin` 与 `bin`；**别把 closeout 接管道**，退出码会被 tail 吞）→ `npm run output:judge` 带 `--request-file/--file` → 本地提交。**推送需用户单独发令**。
+
+**接手必读红线**（写在 plan §1 批内纪律，这里只提最容易破的三条）：零新依赖；**不建第四注入通道**（候选源只产 `ComposerContextItem`，事件面复用 `selectionQuote`/`imageQuote`，`events.ts:243-247` 的 D2 裁决有效）；引用上行仍是正文内引用块，**不新增第二份落库真相**；`SimpleChat.tsx` 新基线 2121 为棘轮上限（新逻辑一律落 `SimpleChat/*` 子模块）。
+
+**非范围（别顺手做）**：C13 速记板（需 `src/migrations/016_*.sql`，判据见 `src/migrations/README.md`：用户数据表一律走迁移，禁代码内 CREATE TABLE）、C12 划词动作生产者（`selectionQuote` 有消费无生产，`WorkspaceFilePreview` 组件不存在）、C4 消息动作注册表化、C11 图片保存/多图、B2 计划反馈（`usePlanApprovalFlow.ts:83` 的 `keep-planning` 现在直接 return 不发消息）、C17 完整语义、G1+。
+
+**Git 现状**：`main` 领先 `origin/main` 4 笔（`90f17073` BLOCK-244 收口 + 本包三笔），工作区干净。
