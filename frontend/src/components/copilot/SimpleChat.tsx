@@ -44,6 +44,10 @@ import {
 // 选中注入执行意图文本模板，v1 不跳页不自动执行）
 import { fetchSlashEntries, filterSlashEntries, slashIntentTemplate, type SlashEntry } from './SimpleChat/slashSources';
 import { classifySlashCommand } from './SimpleChat/slashExecute';
+// BLOCK-245 P4 — 斜杠面板 JSX 平移 + 统一 `@` 上下文菜单（composer 浮层两件套）
+import { SlashCommandPanel } from './SimpleChat/SlashCommandPanel';
+import { ContextMentionMenu } from './SimpleChat/ContextMentionMenu';
+import { useContextMention } from './SimpleChat/hooks/useContextMention';
 import {
   useDomainExamplePrompts,
   ExamplePrompts,
@@ -368,6 +372,16 @@ export function SimpleChat({
   const [slashFocusedIndex, setSlashFocusedIndex] = useState(0);
   const slashPanelRef = useRef<HTMLDivElement>(null);
   const slashListRef = useRef<HTMLDivElement>(null);
+  // BLOCK-245 P4 — 统一 `@` 菜单：触发/过滤/键盘/选中回落全在簇内；选中只产 ComposerContextItem 进 P2 单列表
+  const mention = useContextMention({
+    projectId, conversationId,
+    onPickItem: composerContext.addItem,
+    applyText: (text, caret) => {
+      setInput(text);
+      saveConversationDraft(projectId, conversationId, text);
+      requestAnimationFrame(() => taRef.current?.setSelectionRange(caret, caret));
+    },
+  });
   // Filtered commands based on query
   const combinedSlashEntries = useMemo(
     () => [
@@ -755,6 +769,8 @@ export function SimpleChat({
     saveConversationDraft(projectId, conversationId, value);
     historyNavRef.current = INITIAL_NAV_STATE;
     resizeTextarea(e.target);
+    // BLOCK-245 P4 — 光标处 `@` 触发（只在 token 边界触发，邮箱/路径不弹）
+    mention.syncInput(value, e.target.selectionStart ?? value.length);
 
     // Slash command detection
     if (value.startsWith('/')) {
@@ -1223,6 +1239,8 @@ export function SimpleChat({
   const runRounds = activeRun ? (activeRun.iteration ?? activeRun.loop?.iterations.length ?? null) : null;
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // BLOCK-245 P4 — `@` 菜单优先消费方向键/回车/Esc（展开时正文不接收这些键）
+    if (mention.handleKeyDown(e)) return;
     // Handle slash command navigation
     if (slashOpen) {
       if (e.key === 'ArrowUp') {
@@ -1609,43 +1627,21 @@ export function SimpleChat({
               回到底部
             </button>
           )}
-          {/* Slash command panel */}
-          {slashOpen && (
-            <div className="sc-slash-panel" ref={slashPanelRef}>
-              <div className="sc-slash-header">
-                <span className="sc-slash-title">命令</span>
-                <span className="sc-slash-hint">↑↓ 导航 · Enter 执行 · Esc 关闭</span>
-              </div>
-              <div className="sc-slash-list" ref={slashListRef}>
-                {filteredCommands.length === 0 ? (
-                  <div className="sc-slash-empty">未找到匹配命令</div>
-                ) : (
-                  filteredCommands.map((cmd, index) => (
-                    <button
-                      key={`${cmd.kind}:${cmd.id}`}
-                      type="button"
-                      className={`sc-slash-item ${index === slashFocusedIndex ? 'sc-slash-item-focused' : ''}`}
-                      onClick={() => executeSlashCommand(cmd.kind === 'action' ? cmd.id : `${cmd.kind}:${cmd.id}`)}
-                      onMouseEnter={() => setSlashFocusedIndex(index)}
-                    >
-                      {cmd.kind !== 'action' && (
-                        <span
-                          className="sc-slash-item-label"
-                          style={{ marginRight: 6, fontSize: 'var(--petri-font-size-sm)', color: 'var(--petri-accent, #3b82f6)' }}
-                        >
-                          {cmd.kind === 'skill' ? '技能' : '模板'}
-                        </span>
-                      )}
-                      <span className="sc-slash-item-label">{cmd.label}</span>
-                      <span className="sc-slash-item-desc">{cmd.description}</span>
-                    </button>
-                  ))
-                )}
-              </div>
-              {slashQuery === '' && filteredCommands.length > 0 && (
-                <div className="sc-slash-help-hint">输入 / 或命令名称搜索</div>
-              )}
-            </div>
+          {/* Slash command panel（BLOCK-245 P4 平移为子模块，零行为变化） */}
+          <SlashCommandPanel
+            open={slashOpen}
+            query={slashQuery}
+            entries={filteredCommands}
+            focusedIndex={slashFocusedIndex}
+            panelRef={slashPanelRef}
+            listRef={slashListRef}
+            onFocusIndex={setSlashFocusedIndex}
+            onPick={executeSlashCommand}
+          />
+          {/* BLOCK-245 P4 — 统一 `@` 上下文菜单（按源分组 / 来源标签 / 上限 / 不可用原因） */}
+          {mention.open && (
+            <ContextMentionMenu sources={mention.sources} activeId={mention.activeId}
+              loading={mention.loading} onPick={mention.pick} onHover={mention.hover} />
           )}
           <div
             ref={composerBarRef}

@@ -41,6 +41,8 @@ export interface ComposerContextApi {
   composeSelectionsOnly: (text: string) => string;
   /** 非响应式读取（useChatStream 的 hasImages getter 用，避免每轮新依赖）。 */
   hasImageItems: () => boolean;
+  /** 追加一条候选（`@` 菜单选中面；上限/去重/信号全部走 contextItems 单源）。 */
+  addItem: (item: ComposerContextItem) => void;
   removeItem: (id: string) => void;
   clearSelections: () => void;
   clearAll: () => void;
@@ -125,6 +127,7 @@ export function useComposerContext(options: UseComposerContextOptions): Composer
     composeForSend,
     composeSelectionsOnly,
     hasImageItems,
+    addItem,
     removeItem,
     clearSelections,
     clearAll,
