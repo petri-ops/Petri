@@ -43,6 +43,8 @@ const {
   createApprovalRequests,
   releaseApprovalRequests,
 } = require('./helpers/approval-request-store');
+// BLOCK-244 Q1-REM — 结构化提问资源随任务释放（超时/取消如实降级）
+const { releaseUserQuestions } = require('./helpers/user-question-store');
 // BLOCK-176 CP-18 — 任务级成本硬熔断（ai-settings costCapCny；上限未配置=零行为变化）
 const { resolveCostCapCny, isCostCapExceeded } = require('./helpers/cost-cap');
 const { getAiSettings } = require('./helpers/ai-settings');
@@ -598,7 +600,12 @@ async function runLoop({
   const aborted = () => (typeof shouldAbort === 'function' ? shouldAbort() : false);
   const resultEditProgress = createResultEditProgressRecorder();
   const traceId = createTraceId();
-  const toolCallController = createAgentToolCallController({ maxToolCalls: config.MAX_AGENT_TOOL_CALLS || 50 });
+  // BLOCK-244 Q1-REM — 审批资源在位时（交互运行），同参重复交给 loop_guard 审批层，
+  // 不再由 repeated_tool_call 硬停抢先静默拒绝；无审批通道保持原硬停。
+  const toolCallController = createAgentToolCallController({
+    maxToolCalls: config.MAX_AGENT_TOOL_CALLS || 50,
+    canAskApproval: () => Boolean(toolCtx && toolCtx.approvalRequests),
+  });
   // BLOCK-179 — 正文工具块修复的可用名单（config.tools = run 声明面收窄后口径；
   // 名单外候选一律 keep，防演示/文档引用误提升）。
   const block179AvailableToolNames = new Set(
@@ -1153,6 +1160,12 @@ ${compactSummaryText}`,
             ackInfo = result._ackPromise;
             delete result._ackPromise;
           }
+          // BLOCK-244 — 结构化提问：先发问题事件让前端渲染，再 await 用户回答。
+          let questionInfo = null;
+          if (result && result.needQuestion && result._questionPromise) {
+            questionInfo = result._questionPromise;
+            delete result._questionPromise;
+          }
           if (name === 'run_tool' && result && typeof result === 'object') {
             if (result.needApproval) pendingApprovalEmitted = true;
             if (result.toolJobId && !result.needApproval) {
@@ -1177,6 +1190,22 @@ ${compactSummaryText}`,
               result.unhandled = true;
               result.message = (result.message || '操作已记录') + '（前端报错：' + ackResult.info.error + '）';
             }
+          }
+          if (questionInfo) {
+            const answered = await questionInfo;
+            if (answered && answered.answered) {
+              result.needQuestion = false;
+              result.answered = true;
+              result.answer = answered.answer;
+            } else {
+              result.needQuestion = false;
+              result.timedOut = true;
+              result.message = (result.message || '等待用户回答') + '（用户未在时限内回答，已跳过）';
+            }
+            const answerEvent = buildToolResultEvent({ ...envelope, data: result }, args, { iteration: iter + 1 });
+            assistantToolActivities.recordResult(answerEvent);
+            _emit(answerEvent);
+            if (callId) toolResultEventsByCallId[callId] = answerEvent;
           }
           envelope = replaceToolResultData(envelope, result);
           return { envelope, result, args, name, callId };
@@ -1530,6 +1559,7 @@ ${compactSummaryText}`,
   // BLOCK-180 P0 — 审批请求资源随任务释放（同上生命周期；过期惰性判定，
   // 不靠定时器，释放即终局）。
   if (toolCtx.taskId) releaseApprovalRequests(toolCtx.taskId);
+  if (toolCtx.taskId) releaseUserQuestions(toolCtx.taskId);
 
   return {
     assistantText: assistantAcc,

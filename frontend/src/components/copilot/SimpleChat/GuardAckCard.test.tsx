@@ -189,4 +189,21 @@ describe('GuardAckCard（BLOCK-243 Q1 v2）', () => {
     expect(screen.getByTestId('guard-ack-pending-count').textContent).toContain('2');
     expect(screen.getByTestId('guard-ack-duplicate').textContent).toContain('重复调用');
   });
+
+  it('确定性意图/影响与侧边任务变体在场', () => {
+    render(
+      <GuardAckCard
+        {...base}
+        variant="sideTask"
+        source="side-task"
+        intent={{ action: '执行本地命令', impact: '执行本地命令/外部操作', reversible: '可能不可逆', reason: '工具审批策略 ask' }}
+      />,
+    );
+    const card = screen.getByTestId('guard-ack-card');
+    expect(card.getAttribute('data-variant')).toBe('sideTask');
+    expect(card.textContent).toContain('侧边任务确认');
+    expect(screen.getByTestId('guard-ack-intent').textContent).toContain('意图');
+    expect(screen.getByTestId('guard-ack-intent').textContent).toContain('可能不可逆');
+    expect(screen.getByTestId('guard-ack-source').textContent).toContain('侧边任务');
+  });
 });

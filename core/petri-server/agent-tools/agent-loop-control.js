@@ -317,6 +317,8 @@ function createAgentToolCallController(options = {}) {
   const maxToolCalls = Number.isFinite(configuredMax) && configuredMax > 0
     ? Math.max(1, configuredMax)
     : Number.POSITIVE_INFINITY;
+  // BLOCK-244 — 交互运行（存在审批资源 store）时同参重复交给 loop_guard 审批层。
+  const canAskApproval = typeof options.canAskApproval === 'function' ? options.canAskApproval : () => false;
   const seenProviderCallIds = new Set();
   const reservedProtocolCallIds = new Set();
   let lastSemanticCallKey = null;
@@ -420,7 +422,10 @@ function createAgentToolCallController(options = {}) {
       ? consecutiveSemanticCallCount + 1
       : 1;
     lastSemanticCallKey = semanticKey;
-    if (consecutiveSemanticCallCount >= MAX_IDENTICAL_TOOL_CALLS) {
+    // BLOCK-244 Q1-REM（A5）实机抓真：交互运行有审批通道时，硬停会抢在 loop_guard
+    // 之前把同参重复变成无人可确认的静默拒绝。此时让位给审批层（用户继续/终止），
+    // 无审批通道（无人值守/批处理）保持原硬停语义。
+    if (consecutiveSemanticCallCount >= MAX_IDENTICAL_TOOL_CALLS && !canAskApproval()) {
       repeatedCallAnomaly = true;
       anomaly = {
         code: 'repeated_tool_call',

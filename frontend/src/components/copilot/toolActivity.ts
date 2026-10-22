@@ -4,6 +4,7 @@ import type {
   ToolResultEvent,
   ToolSideEffects,
   ToolApproval,
+  UserQuestion,
 } from './copilotClient';
 import type { IconName } from '@/components/icons/Icon';
 
@@ -97,6 +98,8 @@ export interface ToolActivityItem {
   resultData?: unknown;
   /** BLOCK-243 — 审批卡载荷（toolResult 顶层，独立于 data 截断）。 */
   approval?: ToolApproval;
+  /** BLOCK-244 — 结构化提问载荷（toolResult 顶层）。 */
+  question?: UserQuestion;
 }
 
 const ACTIVITY_STATUSES: ToolActivityStatus[] = [
@@ -113,6 +116,13 @@ function parseToolApproval(value: unknown): ToolApproval | undefined {
   if (typeof raw.guardKey !== 'string' || raw.guardKey === '') return undefined;
   // 后端单一构造（tool-events.approvalPayload），前端只做存在性边界检查。
   return { ...(value as ToolApproval), guardKey: raw.guardKey };
+}
+
+function parseUserQuestion(value: unknown): UserQuestion | undefined {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  const raw = value as Record<string, unknown>;
+  if (typeof raw.questionId !== 'string' || raw.questionId === '') return undefined;
+  return value;
 }
 
 /** Restore only the safe, bounded activity shape persisted with a message. */
@@ -172,6 +182,7 @@ export function restoreToolActivities(value: unknown): ToolActivityItem[] {
     // UI-437 v5.6 — 结果数据本体（后端 publicData 已界定的有界形状）随 meta 恢复
     resultData: 'resultData' in raw ? raw.resultData : undefined,
     approval: parseToolApproval(raw.approval),
+    question: parseUserQuestion(raw.question),
     }];
   });
 }
@@ -241,6 +252,7 @@ const TOOL_ACTIVITY_VERBS: Readonly<Record<string, string>> = {
   "codegraph_classify_edges": "已盘点依赖",
   "artifact_revision_list": "已列出",
   "artifact_revision_restore": "已恢复",
+  "ask_user_question": "已提问",
   "computer_authorize": "已授权",
   "computer_click": "已点击",
   "computer_press": "已按键",
@@ -327,6 +339,7 @@ export const TOOL_ACTIVITY_ICONS: Readonly<Record<string, IconName>> = {
   "codegraph_classify_edges": "git-branch",
   "artifact_revision_list": "archive",
   "artifact_revision_restore": "archive",
+  "ask_user_question": "message-circle",
   "computer_authorize": "eye",
   "computer_click": "eye",
   "computer_press": "eye",
@@ -648,6 +661,8 @@ export function mergeToolResultActivity(
     resultData: result?.data,
     // BLOCK-243 — 审批卡载荷（顶层，独立于 data 截断）；旧事件无该字段时保留既有值
     approval: parseToolApproval(result?.approval) ?? (index >= 0 ? current[index].approval : undefined),
+    // BLOCK-244 — 结构化提问载荷（回答事件会用同一 callId 覆盖）
+    question: parseUserQuestion(result?.question) ?? (index >= 0 ? current[index].question : undefined),
   };
 
   if (index < 0) return [...current, item];

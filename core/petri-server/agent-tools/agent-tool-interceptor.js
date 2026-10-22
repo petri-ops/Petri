@@ -9,7 +9,10 @@ const {
   callFingerprint,
   findInputOverride,
   consumeInputOverride,
+  recordToolCall,
 } = require('../helpers/approval-request-store');
+// BLOCK-244 — 逐工具审批策略（ask/deny/allow）在拦截器注入，policy 保持纯函数。
+const toolApprovalPolicy = require('../helpers/tool-approval-policy');
 
 function matchesType(value, expected) {
   if (expected === 'object') return !!value && typeof value === 'object' && !Array.isArray(value);
@@ -109,11 +112,33 @@ function resolveMcpApprovalContext(entry) {
   }
 }
 
+/** BLOCK-244 — 审批卡的确定性意图/影响（工具描述 + 合同；不伪造模型解释）。 */
+function approvalIntent(entry, name, decision) {
+  const description = entry && entry.definition && entry.definition.function
+    ? String(entry.definition.function.description || '')
+    : '';
+  const sideEffect = entry && entry.contract ? entry.contract.sideEffect : 'none';
+  const impact = sideEffect === 'execution'
+    ? '执行本地命令/外部操作'
+    : sideEffect === 'workspace-write'
+      ? '修改项目文件'
+      : sideEffect === 'state-write'
+        ? '写入应用状态'
+        : '只读/检索';
+  return {
+    action: description.slice(0, 240) || name,
+    impact,
+    reversible: sideEffect === 'none' ? '可逆/只读' : '可能不可逆',
+    reason: (decision && (decision.explanation || decision.message)) || '',
+  };
+}
+
 // BLOCK-180 P0 — 审批请求注册（deny 携 guardKey 且任务注入了资源 store 时）。
 // 请求幂等（同指纹+guardKey 复用 pending 请求），信封附 requestId/spans/expiresAt
 // （guardKey 既有字段不动，前端与事件向后兼容）。store 缺席=存量行为（纯键确认）。
 // BLOCK-243 — 附 mcpServerId/argsPreview/计数/重复标记与执行上下文快照（供编辑重校验）。
-function attachApprovalRequest(ctx, { name, args, decision }) {
+// BLOCK-244 — 附确定性 intent 与来源（side-task 用于子代理审批变体）。
+function attachApprovalRequest(ctx, { name, args, decision, entry }) {
   if (!decision || !decision.guardKey) return {};
   const store = ctx && ctx.approvalRequests;
   if (!store) return {};
@@ -125,6 +150,8 @@ function attachApprovalRequest(ctx, { name, args, decision }) {
       projectId: ctx.projectId,
       userId: ctx.userId,
     };
+    const intent = approvalIntent(entry, name, decision);
+    const source = ctx.taskKind === 'subagent' ? 'side-task' : 'main';
     const registered = require('../helpers/approval-request-store').registerApprovalRequest(store, {
       toolName: name,
       args,
@@ -133,6 +160,8 @@ function attachApprovalRequest(ctx, { name, args, decision }) {
       detail: decision.message,
       mcpServerId: decision.mcpServerId || null,
       ctxSnapshot,
+      intent,
+      source,
     });
     if (!registered.ok) return {};
     const { request } = registered;
@@ -146,6 +175,8 @@ function attachApprovalRequest(ctx, { name, args, decision }) {
         : {}),
       pendingRequestCount: registered.pendingCount,
       duplicatePending: registered.created === false,
+      intent,
+      source,
     };
   } catch {
     // 资源层故障不阻断既有 deny 语义（fail-soft 回纯键确认）
@@ -201,6 +232,10 @@ function createAgentToolInterceptor(options = {}) {
       const mcpApproval = resolveMcpApprovalContext(entry);
       if (mcpApproval) ctx = { ...ctx, mcpApproval };
     }
+    // BLOCK-244 — 逐工具审批策略在调用时读取（策略文件改动即时生效）。
+    if (!ctx.toolApprovalMode) {
+      try { ctx = { ...ctx, toolApprovalMode: toolApprovalPolicy.modeFor(name) }; } catch { /* fail-soft allow */ }
+    }
 
     // BLOCK-243 — 编辑参数批准：模型重试原调用时替换为生效参数；原始指纹用于
     // 审计与替换消费，策略按生效参数重新判定（只代理本次 guardKey）。
@@ -222,15 +257,22 @@ function createAgentToolInterceptor(options = {}) {
         details: argumentErrors,
       };
     }
+    // BLOCK-244 — 记录模型侧每次有效尝试（循环防护只看尾部连续同指纹）；
+    // 被审批/策略拒绝的尝试在返回前撤销记录，避免与主审批门叠加。
+    let recordedFingerprint = null;
+    try { recordedFingerprint = recordToolCall(ctx, name, boundOriginalArgs); } catch { /* 历史层故障不阻断调用 */ }
 
     const initialDecision = decide({ name, args, ctx: decisionCtx, contract: entry.contract });
     if (initialDecision.decision === 'deny') {
+      if (recordedFingerprint && initialDecision.error !== 'loop_guard') {
+        try { require('../helpers/approval-request-store').removeToolCall(ctx, recordedFingerprint); } catch { /* ignore */ }
+      }
       // BLOCK-171 CP-2 — 确认通道键随拒绝对外透出（存量缺陷修复：policyResult
       // 曾丢弃 extra，guardKey 从未到达 envelope，确认 UI 无从确认）。
       // BLOCK-180 P0 — 审批请求资源随拒绝注册并透出（requestId/spans/expiresAt）。
       return policyResult(initialDecision, {
         ...approvalFields(initialDecision),
-        ...attachApprovalRequest(ctx, { name, args, decision: initialDecision }),
+        ...attachApprovalRequest(ctx, { name, args, decision: initialDecision, entry }),
       });
     }
 
@@ -240,9 +282,12 @@ function createAgentToolInterceptor(options = {}) {
     }
     const decision = decide({ name, args, ctx: decisionCtx, contract: entry.contract, preflight });
     if (decision.decision === 'deny') {
+      if (recordedFingerprint && decision.error !== 'loop_guard') {
+        try { require('../helpers/approval-request-store').removeToolCall(ctx, recordedFingerprint); } catch { /* ignore */ }
+      }
       return policyResult(decision, {
         ...approvalFields(decision),
-        ...attachApprovalRequest(ctx, { name, args, decision }),
+        ...attachApprovalRequest(ctx, { name, args, decision, entry }),
       });
     }
 

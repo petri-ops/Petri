@@ -42,6 +42,15 @@ export interface ToolApproval {
   ruleId?: string | null;
   mcpServerId?: string | null;
   approvalVariant?: 'danger' | 'warning' | 'info';
+  /** BLOCK-244 — 子代理来源（side-task 变体）。 */
+  source?: 'main' | 'side-task';
+  /** BLOCK-244 — 确定性意图/影响（工具描述 + 合同，不伪造模型解释）。 */
+  intent?: {
+    action?: string;
+    impact?: string;
+    reversible?: string;
+    reason?: string;
+  };
   explanation?: string;
   command?: string | null;
   commandTruncated?: boolean;
@@ -52,6 +61,25 @@ export interface ToolApproval {
   duplicatePending?: boolean;
   expiresAt?: string;
   message?: string;
+}
+
+/** BLOCK-244 — AskUserQuestion 结构化提问载荷（toolResult 顶层）。 */
+interface UserQuestionOption {
+  id: string;
+  label: string;
+  description?: string;
+}
+
+export interface UserQuestion {
+  needQuestion?: boolean;
+  questionId?: string;
+  question?: string;
+  options?: UserQuestionOption[];
+  multiSelect?: boolean;
+  allowFreeText?: boolean;
+  answered?: boolean;
+  answer?: { selected: string[]; text: string };
+  timedOut?: boolean;
 }
 
 export interface StructuredToolResult {
@@ -76,6 +104,8 @@ export interface StructuredToolResult {
   shellLabel?: string;
   /** BLOCK-243 — 审批卡载荷（长命令/参数不因 data 预览截断而丢失）。 */
   approval?: ToolApproval;
+  /** BLOCK-244 — 结构化提问载荷（独立于 data 截断）。 */
+  question?: UserQuestion;
 }
 
 export interface ToolResultEvent {

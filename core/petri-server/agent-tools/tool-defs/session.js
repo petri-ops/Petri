@@ -450,5 +450,43 @@ module.exports = [
         ]
       }
     }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "ask_user_question",
+      "description": "向用户提出结构化问题并等待回答：可给 2-8 个选项、支持单选/多选/自由输入。用于需求歧义、方案取舍或需要用户提供关键参数时；不要用它代替普通收尾问答或伪造回答。回答会作为本工具结果返回。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "description": "要问用户的问题（1-500 字符）"
+          },
+          "options": {
+            "type": "array",
+            "description": "可选选项，最多 8 个；每个含 id/label，可选 description",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string", "description": "选项 id（回答时回传）" },
+                "label": { "type": "string", "description": "展示文案" },
+                "description": { "type": "string", "description": "可选补充说明" }
+              },
+              "required": ["id", "label"]
+            }
+          },
+          "multiSelect": {
+            "type": "boolean",
+            "description": "是否允许多选，默认 false"
+          },
+          "allowFreeText": {
+            "type": "boolean",
+            "description": "是否允许自由输入，默认 true"
+          }
+        },
+        "required": ["question"]
+      }
+    }
   }
 ];

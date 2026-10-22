@@ -1,0 +1,141 @@
+{
+  "taskId": "a5e197b9-3a3d-49b1-8b8d-1cdb17233d0f",
+  "events": [
+    {
+      "seq": 1,
+      "eventType": "run_started"
+    },
+    {
+      "seq": 2,
+      "eventType": "conversation"
+    },
+    {
+      "seq": 3,
+      "eventType": "token_budget"
+    },
+    {
+      "seq": 4,
+      "eventType": "iter"
+    },
+    {
+      "seq": 5,
+      "eventType": "token_budget"
+    },
+    {
+      "seq": 6,
+      "eventType": "tool_call"
+    },
+    {
+      "seq": 7,
+      "eventType": "tool_result"
+    },
+    {
+      "seq": 8,
+      "eventType": "user_question_answered"
+    },
+    {
+      "seq": 8,
+      "eventType": "tool_result"
+    },
+    {
+      "seq": 9,
+      "eventType": "iter"
+    },
+    {
+      "seq": 10,
+      "eventType": "token_budget"
+    },
+    {
+      "seq": 11,
+      "eventType": "tool_call"
+    },
+    {
+      "seq": 12,
+      "eventType": "tool_result"
+    },
+    {
+      "seq": 13,
+      "eventType": "iter"
+    },
+    {
+      "seq": 14,
+      "eventType": "token_budget"
+    },
+    {
+      "seq": 15,
+      "eventType": "guard_ack"
+    },
+    {
+      "seq": 15,
+      "eventType": "tool_call"
+    },
+    {
+      "seq": 16,
+      "eventType": "permission.resolved"
+    },
+    {
+      "seq": 16,
+      "eventType": "tool_result"
+    },
+    {
+      "seq": 17,
+      "eventType": "iter"
+    },
+    {
+      "seq": 18,
+      "eventType": "token_budget"
+    },
+    {
+      "seq": 19,
+      "eventType": "tool_call"
+    },
+    {
+      "seq": 20,
+      "eventType": "tool_result"
+    },
+    {
+      "seq": 21,
+      "eventType": "iter"
+    },
+    {
+      "seq": 22,
+      "eventType": "token_budget"
+    },
+    {
+      "seq": 23,
+      "eventType": "tool_call"
+    },
+    {
+      "seq": 24,
+      "eventType": "tool_result"
+    },
+    {
+      "seq": 25,
+      "eventType": "iter"
+    },
+    {
+      "seq": 26,
+      "eventType": "token_budget"
+    },
+    {
+      "seq": 27,
+      "eventType": "guard_ack"
+    },
+    {
+      "seq": 27,
+      "eventType": "delta"
+    },
+    {
+      "seq": 28,
+      "eventType": "permission.resolved"
+    },
+    {
+      "seq": 28,
+      "eventType": "done"
+    },
+    {
+      "seq": 29,
+      "eventType": "run_terminal"
+    }
+  ]
+}

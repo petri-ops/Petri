@@ -330,8 +330,12 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
   // destructiveHint 的工具要求审批；trust='allow' 自动放行。trust 由拦截器在
   // 调用时从 mcp-server-policy 重读注入（投影快照不作放行依据）。与用户规则/
   // 动态防护共用同一 guardKey ack（task）与指纹放行（once）通道。
+  // BLOCK-244 — 逐工具显式策略（ask/deny）是更具体的用户裁决，优先于服务级
+  // trust；否则同一调用会叠两次审批。
+  const explicitToolApproval = ctx.toolApprovalMode === 'deny' || ctx.toolApprovalMode === 'ask';
   if (
-    operation.mutating
+    !explicitToolApproval
+    && operation.mutating
     && ctx.mcpApproval
     && ctx.mcpApproval.destructive === true
     && ctx.mcpApproval.serverId
@@ -351,6 +355,63 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
             mcpServerId: serverId,
             approvalVariant: 'info',
             explanation: `MCP 服务「${serverId}」的信任位为 ask，且工具声明 destructiveHint（可能不可逆）。批准仅放行本次调用；可在扩展页把该服务信任位改为 allow。`,
+          }
+        );
+      }
+      fingerprintConsumable = fingerprint;
+    }
+  }
+
+  // BLOCK-244 Q1-REM — 通用工具审批策略（A1/A8）：逐工具 allow/ask/deny。
+  // allow=默认零漂移；ask 复用现有 guardKey/指纹通道（tool:<name>）；deny 直接拦截。
+  if (ctx.toolApprovalMode === 'deny') {
+    return deny(
+      'tool_denied_by_policy',
+      'tool_denied_by_policy',
+      `工具审批策略：工具「${name}」被设为拒绝。`,
+      {
+        approvalVariant: 'danger',
+        explanation: `你的工具审批策略把「${name}」设为 deny；如误配请到设置→决策原语调整。`,
+      }
+    );
+  }
+  if (ctx.toolApprovalMode === 'ask') {
+    const guardKey = `tool:${name}`;
+    if (!isGuardAcked(ctx, guardKey)) {
+      const fingerprint = callFingerprint(name, args);
+      if (!isFingerprintApproved(ctx, fingerprint)) {
+        return deny(
+          'tool_approval_required',
+          'tool_approval_required',
+          `工具审批策略：工具「${name}」被设为每次询问，需要你确认后放行。`,
+          {
+            guardKey,
+            dimension: 'tool-approval',
+            approvalVariant: 'warning',
+            explanation: `工具审批策略：工具「${name}」被设为 ask（每次调用需确认）。批准仅放行本次调用；可在设置→决策原语改为 allow。`,
+          }
+        );
+      }
+      fingerprintConsumable = fingerprint;
+    }
+  }
+
+  // BLOCK-244 Q1-REM — 同参连续循环防护（A5）：mutating 工具连续 N 次相同调用
+  // 触发确认；read-only/检索族不触发（轮询是合法行为）。ack/指纹语义同上。
+  if (operation.mutating) {
+    const loop = evaluateLoopGuard(name, args, ctx);
+    if (loop.flagged && !isGuardAcked(ctx, loop.guardKey)) {
+      const fingerprint = callFingerprint(name, args);
+      if (!isFingerprintApproved(ctx, fingerprint)) {
+        return deny(
+          'loop_guard',
+          'loop_guard',
+          `循环防护：检测到连续 ${loop.count} 次相同调用，可能陷入循环。请确认是否继续。`,
+          {
+            guardKey: loop.guardKey,
+            dimension: 'loop',
+            approvalVariant: 'warning',
+            explanation: `循环防护：最近连续 ${loop.count} 次调用参数完全相同（${name}）。继续可能重复执行；拒绝会让模型停止重试。`,
           }
         );
       }
@@ -419,11 +480,36 @@ function evaluateUserRules(name, args, ctx = {}) {
   return require('../helpers/agent-user-rules').evaluateUserRules(name, args, ctx && ctx.userRules);
 }
 
+/** BLOCK-244 — 循环防护阈值（env 覆盖，2..10，默认 3）。 */
+function loopGuardThreshold() {
+  const raw = Number(process.env.PETRI_LOOP_GUARD_THRESHOLD);
+  return Number.isInteger(raw) && raw >= 2 && raw <= 10 ? raw : 3;
+}
+
+/** BLOCK-244 — 从 ctx.approvalRequests.callHistory 读取尾部同指纹连续次数。 */
+function evaluateLoopGuard(name, args, ctx = {}) {
+  const history = ctx && ctx.approvalRequests && Array.isArray(ctx.approvalRequests.callHistory)
+    ? ctx.approvalRequests.callHistory
+    : null;
+  if (!history || history.length === 0) return { flagged: false };
+  const fingerprint = callFingerprint(name, args);
+  let count = 0;
+  for (let i = history.length - 1; i >= 0; i -= 1) {
+    if (history[i].fingerprint === fingerprint) count += 1;
+    else break;
+  }
+  const threshold = loopGuardThreshold();
+  if (count < threshold) return { flagged: false };
+  return { flagged: true, threshold, count, fingerprint, guardKey: `loop:${fingerprint}` };
+}
+
 module.exports = {
   decideAgentToolCall,
   effectiveOperation,
   evaluateUserRules,
   evaluateDynamicGuards,
+  evaluateLoopGuard,
+  loopGuardThreshold,
   isProtectedScientificSource,
   checkAllowedDownstream,
 };

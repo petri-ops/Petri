@@ -41,6 +41,7 @@ import { useEndpointProfilesEditor } from './DesktopSettingsPanel/useEndpointPro
 import { MemoryPanel } from './DesktopSettingsPanel/sections/MemoryPanel';
 // BLOCK-160 W2 P2（ORC-1）— Agent 用户规则面板（rules.json CRUD 读面）
 import { AgentRulesPanel } from './DesktopSettingsPanel/sections/AgentRulesPanel';
+import { ToolApprovalPanel } from './DesktopSettingsPanel/sections/ToolApprovalPanel';
 import { DecisionConfigPanel } from './DesktopSettingsPanel/sections/DecisionConfigPanel';
 import { GenerationDefaultsPanel } from './DesktopSettingsPanel/sections/GenerationDefaultsPanel';
 import { KeymapPanel } from './DesktopSettingsPanel/sections/KeymapPanel';
@@ -586,10 +587,11 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
 
         {activeSection === 'usage' && <UsageSection versionKey={settingsVersion} />}
 
-        {/* BLOCK-160 W2 P2（ORC-1）— Agent 用户规则节（与决策观测节相邻） */}
+        {/* BLOCK-160 W2 P2（ORC-1）— Agent 用户规则节；BLOCK-244 逐工具审批策略（allow/ask/deny） */}
         {activeSection === 'decisions' && (
           <section className="petri-settings-section">
             <AgentRulesPanel />
+            <ToolApprovalPanel />
           </section>
         )}
 

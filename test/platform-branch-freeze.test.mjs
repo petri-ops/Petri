@@ -32,6 +32,8 @@ const BASELINE = new Set([
   // BLOCK-243 UI-551 — 隔离栈起停的 win32 taskkill 进程树差异（dev-only 一次性
   // 实机探针，收敛到 platform-compat 无收益），登记即留痕。
   'scripts/ui551-ui-live.mjs',
+  // BLOCK-244 UI-552 — 同型隔离栈起停（win32 taskkill 进程树），dev-only 一次性探针。
+  'scripts/block244-approval-tail-live.mjs',
   'core/petri-server/agent-tools/system-info-tools.js',
   'core/petri-server/agent-tools/workspace-tools.js',
   'core/petri-server/agent-tools/workspace-tools/internals.js',

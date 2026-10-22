@@ -55,6 +55,7 @@ import {
 import { type ChatMessage } from '@/components/copilot/copilotClient';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 import { resolveAutoPreset } from '@/lib/auto-model';
+import { createTurnCheckpoint } from '@/lib/turn-checkpoints';
 import { type SimpleMessage } from '../types';
 
 /** BLOCK-102 P2 — 排队追问带会话归属：drain 只消费当前会话的条目，
@@ -322,6 +323,12 @@ export function useChatStream({
           return false;
         }
       }
+
+      // BLOCK-244 Q1-REM — 发送同时发起工作树快照（best-effort，不 await）：
+      // 非 git/非桌面/失败都不登记也不阻断发送；ref 落 localStorage 供编辑重发回退。
+      // 不 await 的缘由：await 会把快照塞进 send 的宏任务链，与既有 drain 守卫测试
+      // （fake timers + act 收敛）冲突，发送链路不得被安全网拖住。
+      void createTurnCheckpoint({ projectId, conversationId: targetConversationId, text: trimmed });
 
       // BLOCK-55 P1 — 清上下文执行：仅发 spec 自包含首 turn，不带会话历史
       const history: ChatMessage[] = messagesRef.current

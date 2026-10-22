@@ -4504,6 +4504,15 @@
   border-inline-start: 3px solid var(--petri-info);
 }
 
+.sc-guard-card--sideTask {
+  background: var(--petri-bg-subtle);
+  border-inline-start: 3px solid var(--petri-warning);
+}
+
+.sc-guard-card--sideTask .sc-guard-card__icon {
+  color: var(--petri-warning);
+}
+
 .sc-guard-card--warning .sc-guard-card__icon {
   color: var(--petri-warning);
 }
@@ -4541,6 +4550,26 @@
   margin: var(--petri-space-1) 0;
   color: var(--petri-text-tertiary);
   font-size: inherit;
+}
+
+.sc-guard-card__intent {
+  display: grid;
+  gap: 2px;
+  margin: 0 0 var(--petri-space-2);
+  padding: var(--petri-space-2);
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-bg-canvas);
+  color: var(--petri-text-secondary);
+  font-size: inherit;
+}
+
+.sc-guard-card__intent b {
+  color: var(--petri-text);
+  font-weight: 600;
+}
+
+.sc-guard-card__intent-reason {
+  color: var(--petri-text-tertiary);
 }
 
 .sc-guard-card__command-row,
@@ -4678,4 +4707,221 @@
   color: var(--petri-text);
   text-decoration: underline;
   cursor: pointer;
+}
+
+/* BLOCK-244 — AskUserQuestion 结构化提问卡 */
+.sc-question-card {
+  margin: 0 var(--petri-space-2) var(--petri-space-2);
+  padding: var(--petri-space-3);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-subtle);
+  border-inline-start: 3px solid var(--petri-info);
+}
+
+.sc-question-card__head {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-2);
+}
+
+.sc-question-card__icon {
+  display: inline-flex;
+  color: var(--petri-info);
+}
+
+.sc-question-card__title {
+  font-size: inherit;
+  color: var(--petri-text);
+  font-weight: 600;
+}
+
+.sc-question-card__question {
+  margin: var(--petri-space-2) 0;
+  color: var(--petri-text);
+  font-size: inherit;
+  line-height: 1.5;
+}
+
+.sc-question-card__options {
+  display: grid;
+  gap: var(--petri-space-1);
+  margin-bottom: var(--petri-space-2);
+}
+
+.sc-question-card__option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--petri-space-2);
+  width: 100%;
+  padding: var(--petri-space-2);
+  border: 1px solid var(--petri-border-input);
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-bg-canvas);
+  color: var(--petri-text);
+  font-size: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.sc-question-card__option:hover:not(:disabled) {
+  background: var(--petri-hover);
+}
+
+.sc-question-card__option.is-selected {
+  border-color: var(--petri-info);
+  background: var(--petri-bg-elevated);
+}
+
+.sc-question-card__option:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.sc-question-card__marker {
+  flex: 0 0 1.2em;
+  color: var(--petri-info);
+  font-weight: 600;
+}
+
+.sc-question-card__option-body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sc-question-card__option-label {
+  color: var(--petri-text);
+}
+
+.sc-question-card__option-desc {
+  color: var(--petri-text-tertiary);
+}
+
+.sc-question-card__input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 3em;
+  margin-bottom: var(--petri-space-2);
+  padding: var(--petri-space-2);
+  border: 1px solid var(--petri-border-input);
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-bg-canvas);
+  color: var(--petri-text);
+  font: inherit;
+  resize: vertical;
+}
+
+.sc-question-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--petri-space-2);
+}
+
+.sc-question-card__btn {
+  padding: var(--petri-space-1) var(--petri-space-3);
+  border: none;
+  border-radius: var(--petri-radius-pill);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text);
+  font-size: inherit;
+  cursor: pointer;
+}
+
+.sc-question-card__btn:hover:not(:disabled) {
+  background: var(--petri-hover);
+}
+
+.sc-question-card__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.sc-question-card__btn-primary {
+  background: var(--petri-info);
+  color: var(--petri-on-solid);
+}
+
+.sc-question-card__btn-ghost {
+  background: transparent;
+  color: var(--petri-text-muted);
+}
+
+/* BLOCK-244 — 完全访问确认层 */
+.sc-full-access-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--petri-space-4);
+  background: color-mix(in srgb, var(--petri-bg-canvas) 72%, transparent);
+}
+
+.sc-full-access-dialog {
+  width: min(520px, 100%);
+  padding: var(--petri-space-4);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-lg);
+  background: var(--petri-bg-elevated);
+  color: var(--petri-text);
+  box-shadow: var(--petri-shadow-float);
+}
+
+.sc-full-access-dialog__head {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-2);
+}
+
+.sc-full-access-dialog__icon {
+  display: inline-flex;
+  color: var(--petri-danger);
+}
+
+.sc-full-access-dialog__intro,
+.sc-full-access-dialog__risk {
+  margin: var(--petri-space-2) 0;
+  color: var(--petri-text-secondary);
+  font-size: inherit;
+  line-height: 1.5;
+}
+
+.sc-full-access-dialog__risk {
+  color: var(--petri-warning-text);
+}
+
+.sc-full-access-dialog__list {
+  margin: var(--petri-space-2) 0;
+  padding-inline-start: 1.4em;
+  color: var(--petri-text-secondary);
+  font-size: inherit;
+  line-height: 1.6;
+}
+
+.sc-full-access-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--petri-space-2);
+  margin-top: var(--petri-space-3);
+}
+
+.sc-full-access-dialog__btn {
+  padding: var(--petri-space-1) var(--petri-space-3);
+  border: none;
+  border-radius: var(--petri-radius-pill);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text);
+  font-size: inherit;
+  cursor: pointer;
+}
+
+.sc-full-access-dialog__btn:hover {
+  background: var(--petri-hover);
+}
+
+.sc-full-access-dialog__btn-primary {
+  background: var(--petri-danger);
+  color: var(--petri-on-solid);
 }

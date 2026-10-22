@@ -11,6 +11,10 @@
     "label": "已恢复",
     "icon": "archive"
   },
+  "ask_user_question": {
+    "label": "已提问",
+    "icon": "message-circle"
+  },
   "computer_authorize": {
     "label": "已授权",
     "icon": "eye"

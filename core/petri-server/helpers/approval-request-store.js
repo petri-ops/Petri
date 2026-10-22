@@ -83,6 +83,8 @@ function createApprovalRequests(taskId) {
     // BLOCK-243 — 编辑参数批准后的一次性替换：原始指纹 → 生效参数。
     // 模型重试原调用时拦截器替换为生效参数（原始/生效都进审计）。
     overrides: new Map(),
+    // BLOCK-244 — 同参连续调用历史（循环防护；只存指纹+时刻，不存参数）。
+    callHistory: [],
   };
   stores.set(taskId, store);
   return store;
@@ -105,6 +107,28 @@ function consumeInputOverride(ctx, fingerprint) {
   const store = ctx && ctx.approvalRequests;
   if (!store || !(store.overrides instanceof Map) || !fingerprint) return;
   store.overrides.delete(fingerprint);
+}
+
+/** BLOCK-244 — 记录一次工具调用尝试（循环防护；有界 50 条）。 */
+function recordToolCall(ctx, toolName, args) {
+  const store = ctx && ctx.approvalRequests;
+  if (!store || !Array.isArray(store.callHistory)) return null;
+  const fingerprint = callFingerprint(toolName, args);
+  store.callHistory.push({ fingerprint, at: Date.now() });
+  if (store.callHistory.length > 50) store.callHistory.splice(0, store.callHistory.length - 50);
+  return fingerprint;
+}
+
+function getCallHistory(ctx) {
+  const store = ctx && ctx.approvalRequests;
+  return store && Array.isArray(store.callHistory) ? store.callHistory : [];
+}
+
+/** 撤销最近一次记录（审批/策略拒绝的尝试不进入循环计数）。 */
+function removeToolCall(ctx, fingerprint) {
+  const history = getCallHistory(ctx);
+  const last = history[history.length - 1];
+  if (last && (!fingerprint || last.fingerprint === fingerprint)) history.pop();
 }
 
 function getApprovalRequests(taskId) {
@@ -166,6 +190,8 @@ function registerApprovalRequest(store, {
   detail,
   mcpServerId = null,
   ctxSnapshot = null,
+  intent = null,
+  source = 'main',
 }) {
   if (!store || !(store.requests instanceof Map)) return { ok: false, error: 'store_required' };
   if (!toolName) return { ok: false, error: 'tool_required' };
@@ -196,6 +222,8 @@ function registerApprovalRequest(store, {
     dimension: dimension || null,
     detail: detail || null,
     mcpServerId: mcpServerId ? String(mcpServerId) : null,
+    intent: intent && typeof intent === 'object' ? intent : null,
+    source: source === 'side-task' ? 'side-task' : 'main',
     command,
     spans: command ? analyzeCommandRiskSpans(command) : [],
     argsPreview: preview.text,
@@ -333,6 +361,7 @@ function buildPermissionResolvedEvent(request, outcome = {}) {
     guardKey: request.guardKey,
     dimension: request.dimension || null,
     mcpServerId: request.mcpServerId || null,
+    source: request.source || 'main',
     updatedInput: request.updatedInput === true,
     originalInputHash: request.originalFingerprint || request.fingerprint,
     effectiveInputHash: request.effectiveFingerprint || request.fingerprint,
@@ -399,6 +428,9 @@ module.exports = {
   decideApprovalRequest,
   findInputOverride,
   consumeInputOverride,
+  recordToolCall,
+  getCallHistory,
+  removeToolCall,
   buildPermissionResolvedEvent,
   getApprovalRequest,
   isFingerprintApproved,

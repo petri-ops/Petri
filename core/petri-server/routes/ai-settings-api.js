@@ -149,6 +149,50 @@ function registerAiSettingsRoutes(app) {
       res.status(500).json({ status: 'error', error: error.message });
     }
   });
+
+  // BLOCK-244 Q1-REM — 逐工具审批策略（A1/A8）：allow/ask/deny。
+  // 读侧附静态工具清单（名称/描述/合同摘要），供设置页搜索与逐工具编辑。
+  app.get('/api/ai/tool-approval-policy', (req, res) => {
+    try {
+      const helper = require('../helpers/tool-approval-policy');
+      const registry = require('../agent-tools/registry');
+      const store = helper.readStore();
+      const tools = registry.getProviderToolDefs().map((definition) => {
+        const name = definition && definition.function ? definition.function.name : '';
+        const contract = registry.getToolContract(name);
+        return {
+          name,
+          description: String((definition && definition.function && definition.function.description) || '').slice(0, 300),
+          category: contract ? contract.category : null,
+          sideEffect: contract ? contract.sideEffect : null,
+          riskTier: contract ? contract.riskTier : null,
+        };
+      }).filter((tool) => tool.name).sort((a, b) => a.name.localeCompare(b.name));
+      res.json({ status: 'ok', modes: store.tools, tools });
+    } catch (error) {
+      res.status(500).json({ status: 'error', error: error.message });
+    }
+  });
+
+  app.put('/api/ai/tool-approval-policy', express.json(), (req, res) => {
+    try {
+      const helper = require('../helpers/tool-approval-policy');
+      const body = req.body || {};
+      const probe = helper.validateModes(Array.isArray(body.modes) ? body.modes : []);
+      if (!probe.ok) {
+        res.status(400).json({ status: 'error', error: 'policy_rejected', diagnostics: probe.diagnostics });
+        return;
+      }
+      const result = helper.writeStore({ version: helper.VERSION, tools: probe.modes });
+      if (!result.ok) {
+        res.status(400).json({ status: 'error', error: result.error, diagnostics: result.diagnostics || [] });
+        return;
+      }
+      res.json({ status: 'ok', count: Object.keys(probe.modes).length, modes: probe.modes });
+    } catch (error) {
+      res.status(500).json({ status: 'error', error: error.message });
+    }
+  });
 }
 
 module.exports = { registerAiSettingsRoutes, computeVisionConfigured };

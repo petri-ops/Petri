@@ -26,6 +26,7 @@ export type {
   ToolResultEvent,
   ToolSideEffects,
   ToolApproval,
+  UserQuestion,
   StructuredToolResult,
 } from './copilotClient/types';
 export {

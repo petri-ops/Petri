@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-22（**UI-552 Q1-REM 审批控制面收尾 verified（dev Electron 边界内；隔离 9223 亮 28/28 + 暗 28/28；BLOCK-244 / Q1 P0-LAUNCH）**）：工具审批策略面板（逐工具 allow/ask/deny）、循环防护卡、意图/侧边任务变体、`ask_user_question` 问题卡、完全访问确认弹层、编辑重发 checkpoint 回退。实机抓真两条已修（审批事件 `intent`/`source` 白名单缺失；`repeated_tool_call` 硬停抢在循环审批前）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-22（**UI-551 审批卡 v2 + MCP 信任位生效 verified（dev Electron 边界内；隔离 9223 亮 21/21 + 暗 21/21）**，BLOCK-243 / Q1）：审批卡三变体（danger/warning/info）+ 确定性意图解释 + 长命令折叠 + 参数 JSON 编辑 + 范围选择（仅本次/本任务/始终信任 MCP 服务，后两者两步武装）+ 待审批计数/重复提示；MCP `trust='ask'` 对 destructiveHint 工具触发审批、`allow` 自动放行，货架可改回 ask。证据=Node 契约 15/15 + 邻域 69 通过 0 失败 + 前端 59/59 + types 0 + API 实机 14/14 + 隔离 9223 亮/暗各 21/21（`acceptance/ui-551/` 双截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-22（**UI-550 深链安装安全面 verified（dev Electron 边界内；隔离 9223 live 10/10）**，BLOCK-242 / Q8）：扩展页「从链接安装」+ 全局预览弹层——名称/来源/下载地址/大小/SHA-256/风险/替换警告只读展示；确认后才安装（重取对账 + sha 双验）；env 禁止。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -5332,3 +5334,11 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **验证**：Node 契约 **15/15**（scope/override/重校验/trust 三态/投影元数据/拦截器信封）+ 审批/MCP 邻域 **69 通过 0 失败**；前端 GuardAckCard **13/13** + toolActivity **16/16** + McpShelfPane **13/13** + theme **17/17**；`quality:types` 0；隔离后端 API 实机 **14/14**（`acceptance/block-243/`）；隔离 9223 UI 亮 **21/21** + 暗 **21/21**（`acceptance/ui-551/`：卡片变体/解释/参数预览/范围按钮 → 编辑参数 → 批准 → 替换执行 → 终态答复 → 审计可见；亮/暗截图）。
 - **实机抓真**：测试实例 `show:false` 与 `--onscreen` 语义冲突导致 Windows 隐藏窗截图 20s 超时；修正 `src/main/_window-create.js` 在 `PETRI_TEST_ONSCREEN=1` 时真实显示窗口后截图恢复。卡片可见时热切主题会触发 `ProjectWorkspace` 既存重渲染警告（非本包文件面）；暗色截图改为「卡片出现前切主题」的独立运行，最终两次运行无该警告。
 - **未做（reopen）**：非 MCP 维度持久化「始终」（需用户规则合成 UI）、模型/本地模型意图解释、编辑重发 + workspace-checkpoint 回退、访问权限三档选择器与完全访问确认层、sideTask 变体/批量决策面板。
+
+## UI-552: Q1-REM 审批控制面收尾（2026-10-22 **verified（dev Electron 边界内；隔离 9223 亮 28/28 + 暗 28/28；BLOCK-244 / Q1 P0-LAUNCH）**）
+
+- **变化面**：设置→决策原语新增「工具审批策略」逐工具 allow/ask/deny（可搜索/保存/400 diagnostics）；审批卡新增循环防护（同参连续 N 次）、确定性意图/影响块、侧边任务变体；聊天新增 `ask_user_question` 问题卡（单选/多选/自由输入）；切换到「完全访问」时能力/风险确认弹层（本会话一次）；编辑用户消息时可选回退本轮 checkpoint 并重发。
+- **为什么这样设计（自有形态）**：把审批从「命中 guard 才弹卡」扩展为可配置策略 + 循环防呆 + 结构化提问 + 可逆编辑；所有新入口复用既有审批资源/guardKey/指纹通道与 `permission.resolved` 审计，不建第二套审批；checkpoint 复用 BLOCK-176 的 plumbing 快照，不触碰 HEAD/暂存区。
+- **实机证据**：`acceptance/ui-552/`（完全访问弹层/提问卡/策略卡/循环卡/checkpoint 对话框 × 亮暗）+ `ui552-audit-light|dark.json`（后端事件真相：`permission.resolved`×2 + `user_question_answered`）+ 同份报告落 `acceptance/block-244/`。断言链：`D1–D4`（取消不改档→确认切档）、`K0–K4`（checkpoint 记录→编辑→回退把文件从 v3 恢复 v2→输入回填）、`Q1–Q2`（提问卡→回答）、`A1–A5`（策略 ask 卡 + 意图块→批准→复位→同参 3 次循环卡→批准）、`C1–C3`（终态 + 审计）。
+- **实机抓真**：① `APPROVAL_FIELDS` 缺 `intent`/`source` ⇒ 意图块在真链路恒空（已补白名单并把断言下移到事件层）；② `repeated_tool_call` 硬停抢在 `loop_guard` 之前 ⇒ 交互运行改为有审批通道时交棒审批层（无审批通道仍硬停）；③ `ProjectWorkspace` 既存重渲染环拖慢长链路尾部探针（已登记 AUDIT-LOG，不归本包修复）。
+- **回归面**：Node block244 7/7 + 5/5；前端 56/56；types 0；lint 0 新增违规；`SimpleChat.tsx` 2211→2210（审批面外迁 `hooks/useApprovalSurfaces.ts` + `ApprovalSurfaces.tsx`）。

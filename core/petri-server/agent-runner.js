@@ -759,6 +759,8 @@ async function runAgentLoop({
   // Build tool context
   const toolCtx = {
     userId,
+    // BLOCK-244 — 审批卡来源变体：side-task（子代理）vs main。
+    taskKind: kind || 'primary',
     // BLOCK-172 CP-7 — 生成参数全局缺省进 loop（reqBody temperature/max_tokens 与
     // 预算 headroom 消费；未配置=loop 侧既有 0.4/16384 零行为变化）
     generationDefaults: getGenerationDefaults(),

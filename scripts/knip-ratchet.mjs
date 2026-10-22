@@ -38,6 +38,11 @@ function runKnipJson() {
     cwd: ROOT,
     encoding: 'utf8',
     maxBuffer: 256 * 1024 * 1024,
+    // knip 的 oxc-parser raw-transfer 会一次性申请 ~6GB ArrayBuffer
+    // （BLOCK_SIZE 2147483632 + BLOCK_ALIGN 4294967296），本机直接 RangeError
+    // （Array buffer allocation failed）。knip 官方提供 KNIP_DISABLE_RAW_TRANSFER=1
+    // 走普通反序列化路径：只改解析速度，不改输出契约（BLOCK-244 收口实机抓真）。
+    env: { ...process.env, KNIP_DISABLE_RAW_TRANSFER: '1' },
   });
   if (result.error) {
     console.error(`[knip-ratchet] knip 无法启动：${result.error.message}`);

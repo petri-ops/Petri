@@ -30,6 +30,9 @@ const APPROVAL_FIELDS = [
   'requestId', 'guardKey', 'dimension', 'ruleId', 'mcpServerId',
   'approvalVariant', 'explanation', 'command', 'spans', 'argsPreview',
   'inputEditable', 'pendingRequestCount', 'duplicatePending', 'expiresAt', 'message',
+  // BLOCK-244 — 确定性意图解释与来源（side-task 变体）必须随审批载荷透出，
+  // 否则审批卡只能回到默认 danger 变体、意图块恒空。
+  'intent', 'source',
 ];
 const APPROVAL_COMMAND_LIMIT = 8000;
 
@@ -46,6 +49,22 @@ function approvalPayload(result) {
     if (Array.isArray(payload.spans)) {
       payload.spans = payload.spans.filter((span) => span && Number(span.end) <= APPROVAL_COMMAND_LIMIT);
     }
+  }
+  return payload;
+}
+
+/** BLOCK-244 — 结构化提问载荷（toolResult 顶层，独立于 data 截断）。 */
+const QUESTION_FIELDS = [
+  'needQuestion', 'questionId', 'question', 'options', 'multiSelect',
+  'allowFreeText', 'answered', 'answer', 'timedOut',
+];
+
+function questionPayload(result) {
+  if (!result || typeof result !== 'object' || Array.isArray(result)) return null;
+  if (!result.questionId) return null;
+  const payload = {};
+  for (const key of QUESTION_FIELDS) {
+    if (result[key] !== undefined) payload[key] = result[key];
   }
   return payload;
 }
@@ -99,6 +118,7 @@ function buildToolResultEvent(envelope, args = {}, options = {}) {
   const result = envelope.data;
   const published = publicData(result);
   const approval = approvalPayload(result);
+  const question = questionPayload(result);
   const summary = result && typeof result === 'object'
     ? Array.isArray(result)
       ? `返回 ${result.length} 条`
@@ -130,6 +150,8 @@ function buildToolResultEvent(envelope, args = {}, options = {}) {
       // BLOCK-243 — 审批卡数据独立于 data 存活（长命令/参数不会被
       // publicData 的 1600 字符上限整块替换而丢失）。
       ...(approval ? { approval } : {}),
+      // BLOCK-244 — 结构化提问数据独立于 data 存活。
+      ...(question ? { question } : {}),
       // UI-273 — 写操作逐行改动（独立于 data，规避 publicData 截断）
       ...(boundedChangeDiff(result) ? { changeDiff: boundedChangeDiff(result) } : {}),
       // UI-315 优化 — exec 实际使用的 shell 短标签（独立于 data，规避
@@ -374,6 +396,7 @@ const TOOL_ACTIVITY_VERBS = Object.freeze({
   "codegraph_classify_edges": "已盘点依赖",
   "artifact_revision_list": "已列出",
   "artifact_revision_restore": "已恢复",
+  "ask_user_question": "已提问",
   "computer_authorize": "已授权",
   "computer_click": "已点击",
   "computer_press": "已按键",

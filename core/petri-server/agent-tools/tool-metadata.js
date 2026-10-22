@@ -82,6 +82,9 @@ const TOOL_METADATA = {
   interrupt_agent: { readOnly: false, destructive: true, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
   send_message: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: null },
   followup_task: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: null },
+  // BLOCK-244 Q1-REM C19 — 结构化提问：暂停本轮等用户回答（超时如实降级），
+  // 非只读（写提问资源 + task 事件）、不可并发（阻塞本轮）、风险低（无副作用面）。
+  ask_user_question: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: false, riskLevel: 'low', timeoutMs: 300000 },
 
   // ---- 会话/工具栏域 ----
   system_info: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },

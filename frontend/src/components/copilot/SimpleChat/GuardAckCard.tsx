@@ -31,8 +31,10 @@ export interface GuardAckCardProps {
   command?: string | null;
   spans?: CommandRiskSpan[] | null;
   armedGuardKeys?: string[];
-  variant?: 'danger' | 'warning' | 'info';
+  variant?: 'danger' | 'warning' | 'info' | 'sideTask';
   explanation?: string;
+  intent?: { action?: string; impact?: string; reversible?: string; reason?: string } | null;
+  source?: 'main' | 'side-task';
   argsPreview?: string | null;
   inputEditable?: boolean;
   pendingRequestCount?: number;
@@ -43,10 +45,11 @@ export interface GuardAckCardProps {
   onDismiss: () => void;
 }
 
-const VARIANT_META: Record<'danger' | 'warning' | 'info', { title: string; icon: 'shield' | 'alert-triangle' | 'info' }> = {
+const VARIANT_META: Record<'danger' | 'warning' | 'info' | 'sideTask', { title: string; icon: 'shield' | 'alert-triangle' | 'info' | 'bot' }> = {
   danger: { title: '动态防护确认', icon: 'shield' },
   warning: { title: '规则确认', icon: 'alert-triangle' },
   info: { title: 'MCP 服务确认', icon: 'info' },
+  sideTask: { title: '侧边任务确认', icon: 'bot' },
 };
 
 /** 按风险 span 切分命令串：命中片段高亮（kind 即色），其余原样。 */
@@ -89,6 +92,8 @@ export function GuardAckCard({
   armedGuardKeys = [],
   variant = 'danger',
   explanation,
+  intent = null,
+  source = 'main',
   argsPreview,
   inputEditable = false,
   pendingRequestCount = 0,
@@ -181,6 +186,16 @@ export function GuardAckCard({
       </div>
       <p className="sc-guard-card__message">{message || `工具 ${toolName} 命中审批维度，需要你确认后放行。`}</p>
       <p className="sc-guard-card__explanation" data-testid="guard-ack-explanation">{explanationText}</p>
+      {intent && (intent.action || intent.impact) ? (
+        <div className="sc-guard-card__intent" data-testid="guard-ack-intent">
+          {intent.action ? <span><b>意图</b> {intent.action}</span> : null}
+          {intent.impact ? <span><b>影响</b> {intent.impact}{intent.reversible ? ` · ${intent.reversible}` : ''}</span> : null}
+          {intent.reason ? <span className="sc-guard-card__intent-reason">{intent.reason}</span> : null}
+        </div>
+      ) : null}
+      {source === 'side-task' ? (
+        <p className="sc-guard-card__meta" data-testid="guard-ack-source">来源：侧边任务（子代理）</p>
+      ) : null}
       {pendingRequestCount > 1 ? (
         <p className="sc-guard-card__meta" data-testid="guard-ack-pending-count">还有 {pendingRequestCount - 1} 个待审批请求</p>
       ) : null}

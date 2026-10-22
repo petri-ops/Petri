@@ -155,14 +155,14 @@ status: planned
 
 | # | 体验面 | Qoder 0.4.8 行为（证据） | Petri 现状（证据） | 判定 | 汲取的精华 | 波次 |
 | --- | --- | --- | --- | --- | --- | --- |
-| A1 | 通用工具审批卡 | 允许一次/本任务/始终/选项下拉；`allowOnce/allowSession/allowAlways/allowOptions` | GuardAckCard 三变体 + once/task/always 范围（BLOCK-243）；非 guard 触发的通用工具审批门未做 | 🟡 | 范围选项与审批语义分层 | Q1 |
+| A1 | 通用工具审批卡 | 允许一次/本任务/始终/选项下拉；`allowOnce/allowSession/allowAlways/allowOptions` | GuardAckCard 三变体 + once/task/always 范围（BLOCK-243）；逐工具审批策略 ask 门对所有工具生效（BLOCK-244） | ✅ | 范围选项与审批语义分层 | Q1 |
 | A2 | 审批意图解释 | 「解释」按钮、分析中骨架、失败仍可允许/拒绝 | 确定性意图解释已交付（BLOCK-243）；模型/本地模型解释未做 | 🟡 | 让用户「看懂再批」 | Q1 |
 | A3 | 命令预览折叠/展开 | 240px 上限、`line-clamp-2`、展开完整内容 | 风险片段高亮 + 长命令折叠（BLOCK-243） | ✅ | 渐进披露 + 风险可见 | Q1 |
 | A4 | 审批可改写参数 | `updatedInput` 执行前替换，审计记原始/生效 | updatedInput 重校验 + 一次性参数替换 + 审计（BLOCK-243） | ✅ | 审批从闸门升级为控制面 | Q1 |
-| A5 | 重复工具调用检测 | 同参连续 N 次提示可能循环，继续/终止 | pending 重复合并/计数（BLOCK-243）；同参连续 N 次循环检测 + 继续/终止未做 | 🟡 | 防死循环的显式确认 | Q1 |
+| A5 | 重复工具调用检测 | 同参连续 N 次提示可能循环，继续/终止 | 同参连续 N 次（默认 3，env 可调）→ `loop_guard` 审批卡，once/task ack + 指纹放行；read-only 豁免；交互运行由 `repeated_tool_call` 硬停交棒审批层（BLOCK-244） | ✅ | 防死循环的显式确认 | Q1 |
 | A6 | 多请求排队计数 | `pendingCount`「还有 N 个权限请求」 | pendingCount + duplicatePending（BLOCK-243） | ✅ | 多审批不淹没 | Q1 |
-| A7 | 审批变体 | MCP / PAT / Lark / 目录 / 协作 / sideTask 变体 | MCP trust 审批变体已交付（BLOCK-243）；sideTask 变体未做；PAT/Lark/协作按 §2.6 不复刻 | 🟡 | 只借审批卡变体形态；Lark/PAT/协作服务不接入（§2.6） | Q8 |
-| A8 | 工具允许/拒绝列表 | `agentToolAllow/deny` + 说明（允许不是「一律禁止」） | AgentRulesPanel + 全局策略；逐工具 allow/deny 完整面与放行说明未做（BLOCK-243 未覆盖） | 🟡 | 把「为什么放行」讲清楚 | Q1 |
+| A7 | 审批变体 | MCP / PAT / Lark / 目录 / 协作 / sideTask 变体 | MCP trust / dynamic_guard / user_rule / tool-approval / loop / sideTask 变体齐备（BLOCK-243/244）；PAT/Lark/协作按 §2.6 不复刻 | ✅ | 只借审批卡变体形态；Lark/PAT/协作服务不接入（§2.6） | Q8 |
+| A8 | 工具允许/拒绝列表 | `agentToolAllow/deny` + 说明（允许不是「一律禁止」） | 逐工具 allow/ask/deny 策略（`tool-approval-policy.json` + 设置→决策原语面板 + 400 diagnostics），放行说明进审批卡解释（BLOCK-244） | ✅ | 把「为什么放行」讲清楚 | Q1 |
 | A9 | 审批审计 | `permission.resolved` 记 decision/reason/updated_input/duration | `task_events`、决策面板已有 | ✅ | 不重建；Q1 只补字段 | — |
 | A10 | 两步武装 | 无 | `GuardAckCard` 先武装后使用 | ✅ | Petri 独有，不借 | — |
 
@@ -185,7 +185,7 @@ status: planned
 | C2 | 活动卡类型 | 思考/工具/文件改动/命令/压缩/子代理/提问/失败/图像生成 | Petri 多数已有；缺压缩/提问/hook/失败卡 | 🟡 | 事件类型完整、状态同源 | Q3 |
 | C3 | 执行轨迹视图 | 对话/轨迹切换、9 类筛选、跟随最新、recorded-only | `LlmTranscriptViewer` 是模型 I/O，不是事件轨迹 | 🔴 | 事件级可观测 | Q3 |
 | C4 | 消息动作 | 复制 MD/加入任务/从回复建分支/评价/结果统计 | 复制/导出/编辑已有；无分支/加入上下文/评价 | 🟡 | 每条消息可再利用 | Q2/Q3 |
-| C5 | 编辑重发 + 文件回退 | 回退本轮文件修改并重发；部分未记录时诚实警告 | 编辑重发已有；workspace-checkpoint 回退未做（BLOCK-243 明确 reopen） | 🔴 | 可逆的对话修正 | Q1 |
+| C5 | 编辑重发 + 文件回退 | 回退本轮文件修改并重发；部分未记录时诚实警告 | 每轮发送前建无副作用 checkpoint（非 git/纯净树如实不建）；编辑时给「回退本轮文件并重发/仅重发/取消」，回退失败如实提示不静默（BLOCK-244） | ✅ | 可逆的对话修正 | Q1 |
 | C6 | 队列/steer/插队/打断 | send now/steer/interrupt and run/edit/reorder | BLOCK-178 已对齐 | ✅ | 不重建 | — |
 | C7 | 后台子代理面板 | 运行/暂停/停止/打开工作区/阶段性回复 | `AgentRunPanel` 有中断/留言/续派；无暂停 | 🟡 | 长任务可暂停 | Q4 |
 | C8 | 后台进程面板 | 日志/停止/命令折叠/失联 | `ToolActivityDock` 已对齐 | ✅ | 不重建 | — |
@@ -199,7 +199,7 @@ status: planned
 | C16 | 附件形态 | 文件夹/选中文本/选中代码/应用快照/20 上限 | 图片/文件已有；缺文件夹/代码/快照 | 🟡 | 上下文形态完整 | Q2 |
 | C17 | 跨会话引用 | `chatSessionDrop`、引用上限 | 无 | 🟡 | 会话作为上下文资源 | Q2 |
 | C18 | 语音/实时语音/纪要 | live voice、纪要、超时、权限错误 | 无 | ⛔ | 与当前主线不符，暂不做 | — |
-| C19 | 结构化提问 | AskUserQuestion（选项/多选/自由输入） | 无结构化提问；审批卡/guard 确认不是 AskUserQuestion（Q1/Q2 未做） | 🔴 | 让 Agent 在长任务中可结构化提问 | Q1/Q2 |
+| C19 | 结构化提问 | AskUserQuestion（选项/多选/自由输入） | `ask_user_question` 工具 + 暂停/超时诚实降级 + 问题卡（单选/多选/自由输入/跳过）+ 回答经 task 路由唤醒同一轮（BLOCK-244） | ✅ | 让 Agent 在长任务中可结构化提问 | Q1/Q2 |
 
 ### D. 模型与权限选择
 
@@ -207,7 +207,7 @@ status: planned
 | --- | --- | --- | --- | --- | --- | --- |
 | D1 | 模型选择器状态 | 分类/失效/无权限/Workspace 限制/加载失败/低峰折扣 | 目录状态/缺密钥/隐藏逐行可见（BLOCK-224）；低峰折扣/权限/价格/缓存未做 | 🟡 | 失败可解释 | Q9 |
 | D2 | 每模型思考/上下文/可见性 | 模型设置表：effort/contextWindow/visible | 逐模型可见性/上下文/默认思考档（BLOCK-224） | ✅ | 模型能力透明 | Q9 |
-| D3 | 访问权限选择器 | 三档描述 + 完全访问确认（能力清单/风险提示） | 四档选择器已有；完全访问确认弹层未做（BLOCK-243 明确 reopen） | 🟡 | 高危档位显式确认 | Q1 |
+| D3 | 访问权限选择器 | 三档描述 + 完全访问确认（能力清单/风险提示） | 四档选择器 + 完全访问确认弹层（能力清单/风险/可切回，本会话确认一次，取消不改档）（BLOCK-244） | ✅ | 高危档位显式确认 | Q1 |
 | D4 | 自动选模型 | Auto 档 | Auto 按任务/附件选模（BLOCK-225）；复杂度/成本权重/审计/覆盖确认未做 | 🟡 | 任务适配 | Q9 |
 
 ### E. 工作区与文件
@@ -383,7 +383,7 @@ status: planned
 
 **风险**：编辑参数不得绕过风险策略；「始终」必须有界且可见；意图解释不得伪造，失败要如实降级。
 
-> 2026-10-22：**BLOCK-243 已交付 Q1 主体**（A1 三变体+once/task/always 范围、A3 命令折叠、A4 updatedInput 重校验/一次性替换、A6 计数、MCP trust）。剩余见 §6.5 Q1-REM；矩阵已回写：A3/A4/A6 ✅，A2/A5/A7/A8/D3 🟡，C5/C19 🔴。
+> 2026-10-22：**Q1 主体（BLOCK-243）+ 余项（BLOCK-244）已全部交付**——A1 三变体+once/task/always 范围、A3 命令折叠、A4 updatedInput 重校验/一次性替换、A6 计数、MCP trust；余项 A1 逐工具审批门、A5 循环防护、A7 sideTask、A8 逐工具 allow/ask/deny、C5 checkpoint 编辑回退、C19 AskUserQuestion、D3 完全访问确认。矩阵已回写：A1/A3/A4/A5/A6/A7/A8/C5/C19/D3 ✅，A2 🟡（仅剩模型/本地意图解释，reopen）。
 
 ### Q2 — 上下文装配与捕获（约 1–2 周）
 
@@ -670,7 +670,7 @@ status: planned
 
 | 序 | ID | 剩余内容 | 依赖/边界 | 量级 |
 | --- | --- | --- | --- | --- |
-| 1 | Q1-REM | A1 非 guard 通用审批门；A2 模型/本地意图解释；A5 同参连续 N 次循环检测+继续/终止；A8 逐工具 allow/deny 完整面；C5 workspace-checkpoint 编辑重发；C19 AskUserQuestion；D3 完全访问确认层；A7 sideTask 变体（PAT/Lark/协作按 §2.6 不复刻） | BLOCK-243 主体已完成；A9/A10 不重建 | 2–4 天 |
+| 1 | Q1-REM **（completed · BLOCK-244 · 2026-10-22）** | 已交付：A1 逐工具审批门；A5 同参连续 N 次循环检测+继续/终止；A8 逐工具 allow/ask/deny 完整面；C5 workspace-checkpoint 编辑重发；C19 AskUserQuestion；D3 完全访问确认层；A7 sideTask 变体。仍 reopen：A2 模型/本地意图解释（本轮为确定性解释）；PAT/Lark/协作按 §2.6 不复刻 | BLOCK-243/244 已闭环；A9/A10 不重建 | 2–4 天 |
 | 2 | Q2 | C15 统一 @ 菜单；C12 划词动作；C13 速记板；C17 跨会话引用；C16 附件形态；C4 消息动作；C11 图片保存/多图；B2 计划反馈 | Q1/Q2 可并行；C13 与 Q6 速记合并 | 1–2 周 |
 | 3 | Q2b | L1 web_search + L2 web_fetch；provider 抽象（DeepSeek 首实现，SearXNG/MCP 预留）；设置页；SSRF/重定向/大小/content-type/超时；默认关+授权+来源/成本/审计 | Q2 来源标签最小投影 | 1 周 |
 | 4 | Q3 | C1 时间线锚点；C2 活动卡补齐；C3 事件级轨迹+筛选+recordedOnly；H3 证据面；K1 轮次/工具级边界 | Q1/Q2b 事件；与 Q5 evidence tab 合并 | 1 周 |
@@ -684,7 +684,7 @@ status: planned
 | 12 | P4-REM | E13 Result Studio 高级 tab 全量迁 pack（lineage/compare/history/selection/revisions/annotations/methods/export）；域中性 11 处/6 键 compat 是否清零（需裁决）；真实结果页保真实机 | 母纲硬约束：最后 | 1–2 周 |
 | V | V-REM | UI-544/545/546 实机腿（结果面 tab/compare、图形批注） | 代码+单测已绿；纯验证债 | 1–2 天 |
 
-> 推荐执行序：**Q1-REM → Q2 → Q2b → Q3 → Q4a → Q7 → Q5-REM/Q6-REM → Q8-REM → Q9-REM → P4-REM**；Q4b 在 Q4a 后单列。Q1-REM 可并入 Q2 作为首批 rider；Q5/Q6 余项与 Q9 可在主序中互换。V-REM 随对应 UI 包或独立验证批收口。
+> 推荐执行序（Q1-REM 已于 BLOCK-244 收口）：**Q2 → Q2b → Q3 → Q4a → Q7 → Q5-REM/Q6-REM → Q8-REM → Q9-REM → P4-REM**；Q4b 在 Q4a 后单列。Q5/Q6 余项与 Q9 可在主序中互换。V-REM 随对应 UI 包或独立验证批收口。
 
 ## 7. 波次依赖与排序
 
@@ -777,3 +777,4 @@ Q-DOMAIN（垂直去核化，跨波次）
 | 2026-10-20 | Q-DOMAIN P3 | BLOCK-220 垂直切片收口：legacy 化石注册表删除（单一注册源）+ methods 引用/工具标签下沉 pack `provides.methods`；域中性基线 **261→208 处**（tool-registry 31 归零、methods-export 62→24）；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——L8 仍 🟡（data model 与脚本模板未下沉） | `docs/block-220-qdomain-p3-methods-plan.md` §8 |
 | 2026-10-20 | Q6 | BLOCK-219 垂直切片收口：E5/C12 部分落地（PDF/图像**矩形**批注 + 加入任务；批次外=椭圆/箭头/画笔/文字/马赛克、文本选中批注、速记板 C13 随 Q2、PPTX/DOCX、pack 面）；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——E5 仍 🟡（PPTX/DOCX 未覆盖），C12 仍 🟡（无速记/批注进侧聊） | `docs/block-219-q6-annotation-host-plan.md` §6 + `acceptance/block-219/`（13/13） |
 | 2026-10-22 | Q6/Q8/Q1 汇总回写 | BLOCK-238 椭圆/箭头；BLOCK-239 HTTP OAuth；BLOCK-240 四 hint；BLOCK-241 懒加载；BLOCK-242 深链；BLOCK-243 审批契约+trust；A3/A4/A6/D2/J3/J5→✅，A2/A5/J4/L5→🟡，E5/E13/K*/D*/E7/L6/L8 现状更新；矩阵 **✅32 / 🟡47 / 🔴16 / ⛔7 = 102**；剩余队列 §6.5 | 各 BLOCK plan §收口 + `acceptance/block-243/`、`acceptance/ui-551/` |
+| 2026-10-22 | Q1-REM | BLOCK-244 收口：逐工具审批策略 allow/ask/deny（A1/A8）、同参循环防护 `loop_guard`（A5，交互运行由 `repeated_tool_call` 硬停交棒审批层）、确定性意图 + sideTask 变体（A2 部分/A7）、AskUserQuestion（C19）、完全访问确认层（D3）、编辑重发 + checkpoint 回退（C5）；A1/A5/A7/A8/C5/C19/D3→✅，A2 仍 🟡（模型解释 reopen）；矩阵 **✅39 / 🟡42 / 🔴14 / ⛔7 = 102** | `docs/block-244-q1-rem-approval-tail-plan.md` §5 + `acceptance/block-244/`、`acceptance/ui-552/`（亮/暗 28/28） |

@@ -64,6 +64,8 @@ const {
   tool_resident_task_read,
 } = require('./workspace-tools');
 const { tool_system_info } = require('./system-info-tools');
+// BLOCK-244 Q1-REM — 结构化提问（C19）：暂停等用户回答，回答回传同一 tool 结果
+const { tool_ask_user_question } = require('./ask-user-tools');
 const { tool_knowledge_search, tool_knowledge_status, tool_knowledge_read } = require('./knowledge-tools');
 const {
   tool_knowledge_space_list,
@@ -134,6 +136,7 @@ const HANDLERS = {
   resident_task_list: tool_resident_task_list,
   resident_task_read: tool_resident_task_read,
   system_info: tool_system_info,
+  ask_user_question: tool_ask_user_question,
   computer_snapshot: tool_computer_snapshot,
   computer_click: tool_computer_click,
   computer_type: tool_computer_type,
@@ -247,6 +250,8 @@ const CONTRACTS = {
   resident_task_read: contract('workspace', 'none', 'R0', ['project.files'], 1000),
   // BLOCK-33 P1 — 环境自省：只读零副作用，不依赖项目工作区（category 非 workspace → 不走 preflight）
   system_info: contract('verification', 'none', 'R0', ['local.process'], 1000),
+  // BLOCK-244 Q1-REM — 结构化提问：无副作用但会暂停等待用户（UI 会话资源）
+  ask_user_question: contract('action', 'none', 'R0', ['ui.session'], 300000),
   // BLOCK-48 P3 — Computer Use（macOS）：快照/授权/等待为只读面；控制类
   // action/execution/R2（仅完全访问档，read/planMode/ws-write 由 policy 自动拒）；
   // screenshot 产物落项目工作区（vision/workspace-write，项目写档即可用）。

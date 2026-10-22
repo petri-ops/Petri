@@ -7208,7 +7208,7 @@
         "mcp",
         "G0"
       ],
-      "notes": "方向母纲（planned）；2026-10-21 P0 对账：Q5/P2-UI/P2b 切片/Q6 切片/P3 切片/Q8 切片/Q9 切片均已 completed。**2026-10-22 回写**：BLOCK-238/239/240/241/242/243 收口后 Q-MATRIX **✅32 / 🟡47 / 🔴16 / ⛔7 = 102**；剩余收敛到 §6.5 队列（Q1-REM/Q2/Q2b/Q3/Q4a/Q7/Q4b/Q5-REM/Q6-REM/Q8-REM/Q9-REM/P4-REM + V-REM UI-544/545/546 实机腿）。"
+      "notes": "方向母纲（planned）；2026-10-21 P0 对账：Q5/P2-UI/P2b 切片/Q6 切片/P3 切片/Q8 切片/Q9 切片均已 completed。**2026-10-22 回写**：BLOCK-238/239/240/241/242/243 收口后 Q-MATRIX **✅32 / 🟡47 / 🔴16 / ⛔7 = 102**；**BLOCK-244（Q1-REM）收口后再回写为 ✅39 / 🟡42 / 🔴14 / ⛔7 = 102**（A1/A5/A7/A8/C5/C19/D3→✅，A2 仍 🟡 只剩模型意图解释）；剩余收敛到 §6.5 队列（Q2/Q2b/Q3/Q4a/Q7/Q4b/Q5-REM/Q6-REM/Q8-REM/Q9-REM/P4-REM + V-REM UI-544/545/546 实机腿）。"
     },
     {
       "id": "BLOCK-214-QDOMAIN-P1-PACK-SKILLS",
@@ -7779,6 +7779,28 @@
         "G0"
       ],
       "notes": "2026-10-22 立项（用户「按照建议推进 Q1 信任与审批 或 Q9 长尾可以排队」）：审批契约 v2——scope once/task/always + updatedInput 重校验 + permission.resolved 审计 + 重复/计数；MCP trust='ask' 对 destructive 工具生效、allow 自动放行；审批卡 v2（变体/解释/折叠/参数编辑/范围/计数）。**completed（2026-10-22）**：Node 契约 15/15 + 邻域 69 通过 0 失败 + 前端 59/59 + types 0 + API 实机 14/14 + 隔离 9223 亮 21/21/暗 21/21 + closeout；UI-551 verified。"
+    },
+    {
+      "id": "BLOCK-244-Q1-REM-APPROVAL-TAIL",
+      "capability": "q1-rem-approval-tail",
+      "path": "docs/block-244-q1-rem-approval-tail-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P5-CLOSED",
+      "canonical": true,
+      "truthDomain": "q1-rem-approval-tail",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-22",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "approval",
+        "loop-guard",
+        "ask-user",
+        "checkpoint",
+        "q1",
+        "G0"
+      ],
+      "notes": "2026-10-22 立项（用户「开始 Q1-REM 一次性搞定」）：通用工具审批策略 A1/A8、循环防护 A5、意图/侧边任务 A2/A7、AskUserQuestion C19、完全访问确认 D3、编辑重发 checkpoint C5。2026-10-22 收口：六片全交付，隔离 9223 亮/暗各 28/28，UI-552 verified；实机抓真修掉审批事件白名单缺 intent/source，并把同参重复的归属从 repeated_tool_call 硬停交棒给 loop_guard 审批层（无审批通道仍硬停）。"
     }
   ],
   "lastUpdated": "2026-10-22",

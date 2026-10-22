@@ -80,6 +80,8 @@ import { ResultEditProgressList } from './SimpleChat/ResultEditProgressList';
 // BLOCK-154 波次 3 — 消息行组件（memo 渲染边界，契约见该文件头与 SimpleChatMessageRow.test.tsx）。
 import { SimpleChatMessageRow } from './SimpleChat/SimpleChatMessageRow';
 import { GuardAckCard } from './SimpleChat/GuardAckCard';
+import { ApprovalSurfaces } from './SimpleChat/ApprovalSurfaces';
+import { useApprovalSurfaces } from './SimpleChat/hooks/useApprovalSurfaces';
 import { resolveGenUiFollowUp, type GenUiFollowUpRequest, type GenUiFollowUpResult } from './gen-ui/followUp';
 import { useSummaryRetry } from './SimpleChat/hooks/useSummaryRetry';
 import { useModelAccessMenus } from './SimpleChat/hooks/useModelAccessMenus';
@@ -138,7 +140,6 @@ import {
   useSubAgentTasksForConversation,
   resumeOrphanAgentTasks,
   getConversationRunSnapshot,
-  clearConversationRun,
 } from './conversationRunStore';
 import { useErrorFormatter } from './useErrorFormatter';
 import { useDurableConversationLoop } from '@/hooks/useDurableConversationLoop';
@@ -966,6 +967,8 @@ export function SimpleChat({
           requestId?: string;
           guardKey?: string;
           approvalVariant?: 'danger' | 'warning' | 'info';
+          source?: 'main' | 'side-task';
+          intent?: { action?: string; impact?: string; reversible?: string; reason?: string };
           explanation?: string;
           command?: string | null;
           spans?: Array<{ start: number; end: number; kind: string }> | null;
@@ -996,6 +999,8 @@ export function SimpleChat({
       const isMcpTrust = Boolean(approval?.mcpServerId)
         || data?.error === 'mcp_trust_required' || data?.reason === 'mcp_trust_required';
       const isUserRule = data?.error === 'user_rule_require_ack' || data?.reason === 'user_rule_require_ack';
+      const isSideTask = approval?.source === 'side-task';
+      const variant: 'danger' | 'warning' | 'info' | 'sideTask' = isSideTask ? 'sideTask' : approval?.approvalVariant || (isMcpTrust ? 'info' : isUserRule ? 'warning' : 'danger');
       return {
         guardKey,
         toolName: activity.name || '',
@@ -1003,7 +1008,9 @@ export function SimpleChat({
         requestId: approval?.requestId || data?.requestId,
         command: approval?.command ?? data?.command ?? null,
         spans: approval?.spans ?? data?.spans ?? null,
-        variant: approval?.approvalVariant || (isMcpTrust ? 'info' : isUserRule ? 'warning' : 'danger'),
+        variant,
+        intent: approval?.intent ?? null,
+        source: approval?.source,
         explanation: approval?.explanation,
         argsPreview: approval?.argsPreview ?? null,
         inputEditable: approval?.inputEditable === true,
@@ -1072,6 +1079,9 @@ export function SimpleChat({
     }).catch(() => { /* deny 上送失败不阻塞本地关卡 */ });
   }, [conversationId, pendingGuardAck]);
 
+  // BLOCK-244 Q1-REM — 审批控制面收尾簇（完全访问确认/结构化提问/编辑重发 checkpoint）。
+  const approvalSurfaces = useApprovalSurfaces({ conversationId, projectId, activeRun, messages, setMessages, setInput, taRef, streaming, setAccessMode });
+
   // BLOCK-171 CP-4 — 排队追问可见可撤（当前会话的 queued 条目，带位次）。
   // BLOCK-178 P1 — 管理操作锚点改稳定 id；撤回=回填输入框编辑重发。
   const visibleQueuedPrompts = queuedPrompts.filter((q) => q.conversationId === conversationId);
@@ -1094,23 +1104,7 @@ export function SimpleChat({
   }, [moveQueued]);
 
   // BLOCK-178 P0 — 用户消息「编辑」：回退到该消息之前 + 文本回填输入框（重发即新轮）。
-  // 仅历史消息可编辑（run 投影件 indexOf 不到，行组件不渲染编辑钮——诚实边界）。
-  const handleEditUserMessage = useCallback((m: SimpleMessage) => {
-    if (streaming) return;
-    const idx = messages.indexOf(m);
-    if (idx < 0) return;
-    const truncated = messages.slice(0, idx);
-    setMessages(truncated);
-    if (conversationId) clearConversationRun(conversationId);
-    const content = m.content ?? '';
-    setInput(content);
-    try { saveConversationDraft(projectId, conversationId, content); } catch { /* 草稿面失败不阻塞 */ }
-    if (taRef.current) {
-      taRef.current.focus();
-      const len = content.length;
-      taRef.current.setSelectionRange(len, len);
-    }
-  }, [conversationId, messages, projectId, setInput, streaming]);
+  // BLOCK-244 — checkpoint 回退选择在 useApprovalSurfaces（仅历史消息可编辑）。
 
   // BLOCK-171 CP-1 — 运行簇取消：POST tool-cancel（后端注册表精确 abort + tool_cancel
   // 事件留痕）。标识稳定（taskId 经 snapshot 读，不入依赖）→ 不破坏行级 memo。
@@ -1583,7 +1577,7 @@ export function SimpleChat({
                 onFileReferenceClick={handleFileReferenceClick}
                 onCopyMessage={copyMessage}
                 onRegenerate={regenerate}
-                onEditUserMessage={m.role === 'user' && !m.pending && i < messages.length && !streaming ? handleEditUserMessage : undefined}
+                onEditUserMessage={m.role === 'user' && !m.pending && i < messages.length && !streaming ? approvalSurfaces.handleEditUserMessage : undefined}
                 onForkAt={handleForkAt}
                 onRetrySummary={retrySummary}
                 onGenUiFollowUp={handleGenUiFollowUp}
@@ -1709,6 +1703,9 @@ export function SimpleChat({
             {steerNotice && (
               <div className="sc-attachment-notice" role="status">{steerNotice}</div>
             )}
+            {/* BLOCK-244 — 完全访问确认 / checkpoint 回退 / 结构化提问卡 */}
+            <ApprovalSurfaces state={approvalSurfaces} />
+
             {/* BLOCK-171 CP-2 — 动态防护确认卡（require-ack 用户可见面）；
                 BLOCK-180 — 审批资源面：requestId 级决策/command span 高亮/两步武装；
                 BLOCK-243 — 三变体/确定性解释/参数编辑/范围/计数 */}
@@ -1728,6 +1725,8 @@ export function SimpleChat({
                 armedGuardKeys={ackedGuardKeys}
                 variant={pendingGuardAck.variant}
                 explanation={pendingGuardAck.explanation}
+                intent={pendingGuardAck.intent}
+                source={pendingGuardAck.source}
                 argsPreview={pendingGuardAck.argsPreview}
                 inputEditable={pendingGuardAck.inputEditable}
                 pendingRequestCount={pendingGuardAck.pendingRequestCount}
@@ -1948,7 +1947,7 @@ export function SimpleChat({
                           type="button"
                           className={`sc-access-option ${accessMode === 'full' ? 'sc-access-option-active' : ''}`}
                           onClick={() => {
-                            setAccessMode('full');
+                            approvalSurfaces.requestFullAccess();
                             setAccessMenuOpen(false);
                           }}
                         >

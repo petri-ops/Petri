@@ -1,0 +1,150 @@
+{
+  "name": "ui552-approval-tail-live",
+  "darkMode": true,
+  "startedAt": "2026-10-22T13:10:55.373Z",
+  "finishedAt": "2026-10-22T13:12:13.066Z",
+  "providerCalls": 9,
+  "assertions": [
+    {
+      "name": "E1_project_created",
+      "pass": true,
+      "detail": "projectId=p_mvjk7do6_5iy3 status=200"
+    },
+    {
+      "name": "E1b_workspace_resolved",
+      "pass": true,
+      "detail": "C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui552-live-IhClga\\data\\projects\\ui-552-mvjk7do6"
+    },
+    {
+      "name": "E2_mcp_connected",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"id\":\"many\",\"toolCount\":6}"
+    },
+    {
+      "name": "E3_policy_ask_written",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"count\":1,\"modes\":{\"mcp_many_many_echo\":\"ask\"}}"
+    },
+    {
+      "name": "E4_isolated_stack",
+      "pass": true,
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / data=C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui552-live-IhClga"
+    },
+    {
+      "name": "D1_read_mode",
+      "pass": true,
+      "detail": "只读模式"
+    },
+    {
+      "name": "D2_dialog_capability_risk",
+      "pass": true,
+      "detail": "风险：命令可能在项目外产生不可逆修改；后台进程会持续占用资源。你可以随时在档位菜单切回「项目写」或「只读」。"
+    },
+    {
+      "name": "D3_cancel_keeps_mode",
+      "pass": true,
+      "detail": "只读模式"
+    },
+    {
+      "name": "D4_confirm_switches_full",
+      "pass": true,
+      "detail": "完全访问"
+    },
+    {
+      "name": "K0_probe_typed",
+      "pass": true,
+      "detail": "ok:21"
+    },
+    {
+      "name": "K0b_probe_reply",
+      "pass": true,
+      "detail": "探针轮完成。"
+    },
+    {
+      "name": "K1_checkpoint_recorded",
+      "pass": true,
+      "detail": "[{\"conversationId\":\"conv_f5f32cac-082\",\"contentHash\":\"ea580baf\",\"ref\":\"be1c2a8bb82d6716ef1d0ad3155bb4a9c051d245\",\"at\":1792674662583}]"
+    },
+    {
+      "name": "K2_edit_button",
+      "pass": true,
+      "detail": "msg-edit-user"
+    },
+    {
+      "name": "K3_rollback_restores_files",
+      "pass": true,
+      "detail": "\"v2\\n\""
+    },
+    {
+      "name": "K4_edit_refills_input",
+      "pass": true,
+      "detail": "checkpoint 探针轮：只回一句话。"
+    },
+    {
+      "name": "E1_message_typed",
+      "pass": true,
+      "detail": "ok:19"
+    },
+    {
+      "name": "Q1_question_card",
+      "pass": true,
+      "detail": "选择继续方式"
+    },
+    {
+      "name": "Q2_answer_submitted",
+      "pass": true,
+      "detail": "option=opt-run"
+    },
+    {
+      "name": "A1_policy_card",
+      "pass": true,
+      "detail": "variant=warning"
+    },
+    {
+      "name": "A2_intent_block",
+      "pass": true,
+      "detail": "意图 [MCP:many] 回显消息影响 执行本地命令/外部操作 · 可能不可逆工具审批策略：工具「mcp_many_many_echo」被设为 ask（每次调用需确认）。批准仅放行本次调用；可在设置→决策原语改为 allow。"
+    },
+    {
+      "name": "A3_main_source",
+      "pass": true,
+      "detail": "null"
+    },
+    {
+      "name": "A4_policy_reset_allow",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"count\":0,\"modes\":{}}"
+    },
+    {
+      "name": "A4b_policy_readback_empty",
+      "pass": true,
+      "detail": "{}"
+    },
+    {
+      "name": "A5_loop_card",
+      "pass": true,
+      "detail": "variant=warning"
+    },
+    {
+      "name": "C1_final_text",
+      "pass": true,
+      "detail": "source=persisted"
+    },
+    {
+      "name": "C2_permission_resolved_audit",
+      "pass": true,
+      "detail": "count=2 taskId=cb8fd5ca-dee1-45dc-b2cb-a4f975e80956"
+    },
+    {
+      "name": "C3_question_answered_audit",
+      "pass": true,
+      "detail": "taskId=cb8fd5ca-dee1-45dc-b2cb-a4f975e80956 types=token_budget,guard_ack,delta,permission.resolved,done,run_terminal"
+    },
+    {
+      "name": "E5_mock_provider_used",
+      "pass": true,
+      "detail": "{\"calls\":9,\"releases\":{\"policy\":true,\"loop\":true},\"requests\":[{\"n\":1,\"phase\":\"probe\",\"lastTool\":\"\"},{\"n\":2,\"phase\":\"probe\",\"lastTool\":\"\"},{\"n\":3,\"phase\":\"initial\",\"lastTool\":\"\"},{\"n\":4,\"phase\":\"after-question\",\"lastTool\":\"{\\\"contractVersion"
+    }
+  ],
+  "allPass": true
+}

@@ -29,6 +29,8 @@ const {
 } = require('../../helpers/approval-request-store');
 const { revalidateUpdatedInput } = require('../../helpers/approval-input-revalidation');
 const mcpServerPolicy = require('../../helpers/mcp-server-policy');
+// BLOCK-244 Q1-REM — 结构化提问回答（暂停资源的用户裁定落点）
+const { answerUserQuestion } = require('../../helpers/user-question-store');
 const db = require('../../db').getAsyncDatabase();
 
 /** BLOCK-243 — 「始终信任」把该 MCP 服务 trust 置为 allow（配置写入单源=mcp-server-policy）。 */
@@ -240,6 +242,32 @@ module.exports = {
         ? { trustChanged: true, mcpServerId: request.mcpServerId }
         : {}),
     });
+  });
+
+  // BLOCK-244 Q1-REM — 结构化提问回答：task 内 questionId 级裁定；回答由
+  // user-question-store 唤醒 tool 的 _questionPromise，同一轮把答案回传模型。
+  app.post('/api/ai/agent/task/:taskId/question/:questionId', async (req, res) => {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({ ok: false, error: 'unauthorized', message: '未登录' });
+    const task = agentTaskStore.getAgentTask(req.params.taskId);
+    if (!task) return res.status(404).json({ ok: false, error: 'not_found', message: '任务不存在' });
+    if (task.user_id && task.user_id !== userId) return res.status(403).json({ ok: false, error: 'forbidden', message: '无权回答该任务的问题' });
+    const taskKey = task.taskId || req.params.taskId;
+    const questionId = String(req.params.questionId || '').trim();
+    const answer = req.body && req.body.answer;
+    const outcome = answerUserQuestion(taskKey, questionId, answer);
+    if (!outcome.ok) {
+      const status = outcome.error === 'question_not_found' ? 404 : 400;
+      return res.status(status).json({ ok: false, ...outcome });
+    }
+    appendTaskEvent(taskKey, 'user_question_answered', {
+      event: 'user_question_answered',
+      questionId,
+      selected: outcome.answer.selected,
+      text: outcome.answer.text.slice(0, 500),
+      at: new Date().toISOString(),
+    });
+    return res.json({ ok: true, questionId, answer: outcome.answer });
   });
 
   // BLOCK-171 CP-2 — 审批记录复查（guard_ack 事件 × 本人任务，最新 50）。
