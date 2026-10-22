@@ -7801,6 +7801,31 @@
         "G0"
       ],
       "notes": "2026-10-22 立项（用户「开始 Q1-REM 一次性搞定」）：通用工具审批策略 A1/A8、循环防护 A5、意图/侧边任务 A2/A7、AskUserQuestion C19、完全访问确认 D3、编辑重发 checkpoint C5。2026-10-22 收口：六片全交付，隔离 9223 亮/暗各 28/28，UI-552 verified；实机抓真修掉审批事件白名单缺 intent/source，并把同参重复的归属从 repeated_tool_call 硬停交棒给 loop_guard 审批层（无审批通道仍硬停）。"
+    },
+    {
+      "id": "BLOCK-245-Q2-CONTEXT-ASSEMBLY",
+      "capability": "q2-context-assembly",
+      "path": "docs/block-245-q2-context-assembly-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "phase": "P0-LAUNCH",
+      "canonical": true,
+      "truthDomain": "q2-context-assembly",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-22",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "qoder",
+        "q2",
+        "context-assembly",
+        "composer",
+        "at-mention",
+        "attachments",
+        "ui-ux",
+        "refactor",
+        "G0"
+      ],
+      "notes": "2026-10-22 立项（用户「启动下一包 Q2 的开发」）：Q2 首切片=结构地基。勘察实证 composer 引用是三条互不复用的平行通道（selectionReferences / imageReferences / attachmentUpload 各自 make-append-上限-去重-头纪律，SimpleChat.tsx:1203-1206 三层套嵌，另在两处旁路重复部分组装），命中「叠层修复/平行第二套」重构信号 → 先做拆前行为基线 + 三通道并一（单一 ComposerContextItem + 单一 composeContextBlock），再挂统一 @ 菜单（八类候选同源）与上限诚实化（C16）。非范围=C13 速记板（需 SQLite 迁移）/C12 划词生产者/C4 动作注册表/B2 计划反馈/G1+。"
     }
   ],
   "lastUpdated": "2026-10-22",

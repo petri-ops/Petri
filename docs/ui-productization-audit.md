@@ -1,6 +1,6 @@
 # Petri Desktop UI 产品化审计台账
 
-最后更新：2026-10-22（**UI-552 Q1-REM 审批控制面收尾 verified（dev Electron 边界内；隔离 9223 亮 28/28 + 暗 28/28；BLOCK-244 / Q1 P0-LAUNCH）**）：工具审批策略面板（逐工具 allow/ask/deny）、循环防护卡、意图/侧边任务变体、`ask_user_question` 问题卡、完全访问确认弹层、编辑重发 checkpoint 回退。实机抓真两条已修（审批事件 `intent`/`source` 白名单缺失；`repeated_tool_call` 硬停抢在循环审批前）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+最后更新：2026-10-22（**UI-553 统一 `@` 上下文菜单 + 上下文装配收敛 in_progress（BLOCK-245 / Q2 P0-LAUNCH）**）：候选八类同源（文件·技能·连接器·Agent/子任务·结果产物·知识空间·历史会话），带来源标签/上限/不可用提示；先把选中文段/图片/附件三条平行通道并一为单一 ComposerContextItem + composeContextBlock（拆前行为基线逐字不变），附件与引用超限由静默截断改可见提示。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-22（**UI-551 审批卡 v2 + MCP 信任位生效 verified（dev Electron 边界内；隔离 9223 亮 21/21 + 暗 21/21）**，BLOCK-243 / Q1）：审批卡三变体（danger/warning/info）+ 确定性意图解释 + 长命令折叠 + 参数 JSON 编辑 + 范围选择（仅本次/本任务/始终信任 MCP 服务，后两者两步武装）+ 待审批计数/重复提示；MCP `trust='ask'` 对 destructiveHint 工具触发审批、`allow` 自动放行，货架可改回 ask。证据=Node 契约 15/15 + 邻域 69 通过 0 失败 + 前端 59/59 + types 0 + API 实机 14/14 + 隔离 9223 亮/暗各 21/21（`acceptance/ui-551/` 双截图）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
@@ -5334,6 +5334,12 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **验证**：Node 契约 **15/15**（scope/override/重校验/trust 三态/投影元数据/拦截器信封）+ 审批/MCP 邻域 **69 通过 0 失败**；前端 GuardAckCard **13/13** + toolActivity **16/16** + McpShelfPane **13/13** + theme **17/17**；`quality:types` 0；隔离后端 API 实机 **14/14**（`acceptance/block-243/`）；隔离 9223 UI 亮 **21/21** + 暗 **21/21**（`acceptance/ui-551/`：卡片变体/解释/参数预览/范围按钮 → 编辑参数 → 批准 → 替换执行 → 终态答复 → 审计可见；亮/暗截图）。
 - **实机抓真**：测试实例 `show:false` 与 `--onscreen` 语义冲突导致 Windows 隐藏窗截图 20s 超时；修正 `src/main/_window-create.js` 在 `PETRI_TEST_ONSCREEN=1` 时真实显示窗口后截图恢复。卡片可见时热切主题会触发 `ProjectWorkspace` 既存重渲染警告（非本包文件面）；暗色截图改为「卡片出现前切主题」的独立运行，最终两次运行无该警告。
 - **未做（reopen）**：非 MCP 维度持久化「始终」（需用户规则合成 UI）、模型/本地模型意图解释、编辑重发 + workspace-checkpoint 回退、访问权限三档选择器与完全访问确认层、sideTask 变体/批量决策面板。
+
+## UI-553: 统一 `@` 上下文菜单 + 上下文装配收敛（2026-10-22 **in_progress（立项；BLOCK-245 / Q2 P0-LAUNCH）**）
+
+- **变化面**：composer 输入 `@` 打开统一上下文菜单（文件·文件夹 / 技能 / MCP 连接器 / Agent·子任务 / 结果产物 / 知识空间 / 历史会话），候选带来源标签、逐项上限、不可用如实原因；底层先把「选中文段 / 图片引用 / 附件」三条互不复用的平行通道并一为单一 `ComposerContextItem` 列表 + 单一 `composeContextBlock`；附件与引用超限从静默 `console.warn` 截断改为用户可见提示。
+- **为什么这样设计（自有形态）**：上下文是「可理解、可限制、可审计」的装配面而不是拼接字符串——引用在正文内对模型可读（本地主权、无第二份落库真相），在 composer 侧可逐项移除、有计数上限、有来源标签（治理透明）；收敛先于加面，避免 `@` 菜单变成第四条注入通道（`events.ts:243-247` D2 裁决）。
+- **待验证**：拆前行为基线逐字不变（P1/P2）+ contextItems/contextSources/ContextMentionMenu/超限提示 组件与纯函数测试 + 既有三条通道回归绿 + types 0 + 隔离 9223 live（`@` 选文件+技能+结果产物 → 请求体真含引用块 → 移除一项重发引用减少 → 超限提示可见）+ 亮/暗截图。
 
 ## UI-552: Q1-REM 审批控制面收尾（2026-10-22 **verified（dev Electron 边界内；隔离 9223 亮 28/28 + 暗 28/28；BLOCK-244 / Q1 P0-LAUNCH）**）
 
