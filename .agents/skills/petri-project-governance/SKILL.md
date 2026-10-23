@@ -131,3 +131,15 @@ Documentation gates complement code, scientific, UI, Provider, packaged-app, and
 ## Hand off clearly
 
 State the Plan IDs and registry entries changed, commands run, acceptance outcome, unresolved candidates, worktree/branch ownership, and any WIP deliberately left untouched.
+
+**下一步建议唯一化（用户裁决 2026-10-24）**：收口/交接给"下一个工作包"建议时，**必须先跑一次 Jev 决策，并且只给一个建议**——不得输出"Q7 或 §6.5 继续""A / B 二选一""以下候选供你选"这类多选：
+
+```
+npm run next:suggest -- --context "<本包收口摘要 + 当前队列/未收口缺口>" \
+  --candidates "Q7|Q4b|Q5-REM|Q6-REM|Q8-REM|Q9-REM|P4-REM"
+```
+
+- 取脚本返回的**单个** `suggestion` 作为唯一建议，并附 Jev confidence；Jev 不可用（`reason=jev_unavailable:*`）时按候选**首个**兜底，如实标注"Jev 不可用，按队列序默认"——仍然只给一个。
+- 候选集应来自母纲 §6.5 / backlog 的**真实可开工项**（含当前未收口缺口）；单列大包（如 Q4b）可以进候选，但建议落地前需用户显式发令。
+- 本规则只约束"建议形态"，不改变"新包开工需用户发令"的治理纪律；advice-only，不设门禁、不写决策阈值。
+

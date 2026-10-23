@@ -21,6 +21,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { cloudOverrides as readCloudOverrides } from './lib/jev-cloud-supply.mjs';
 import { createRequire } from 'node:module';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -82,30 +83,6 @@ function anchorDecisionDbPath() {
   }
 }
 
-/** 解析 cloud 供给（备份 env 文件只读，值不回显不落日志）。 */
-function cloudOverrides() {
-  const envFile = path.join(root, '.petri-dev-user-data', 'jev.env.bak-by-user-request');
-  let raw = '';
-  try {
-    raw = fs.readFileSync(envFile, 'utf8');
-  } catch {
-    return { error: `cloud 供给不可用：读不到 ${path.relative(root, envFile)}` };
-  }
-  let apiKey = null;
-  let baseUrl = null;
-  let model = null;
-  for (const line of raw.split(/\r?\n/)) {
-    const m = line.match(/^\s*(TYPESAFE_[A-Z_]+)\s*=\s*(.*)\s*$/);
-    if (!m) continue;
-    const value = m[2].replace(/^['"]|['"]$/g, '');
-    if (m[1] === 'TYPESAFE_API_KEY') apiKey = value;
-    else if (m[1] === 'TYPESAFE_BASE_URL') baseUrl = value;
-    else if (m[1] === 'TYPESAFE_MODEL') model = value;
-  }
-  if (!apiKey) return { error: 'cloud 供给不可用：备份 env 文件无 TYPESAFE_API_KEY' };
-  return { overrides: { apiKey, baseUrl: baseUrl || 'https://api.typesafe.ai', model: model || 'jev-1.13.0' } };
-}
-
 async function main() {
   const args = process.argv.slice(2);
   const outIdx = args.indexOf('-o');
@@ -125,7 +102,7 @@ async function main() {
   anchorDecisionDbPath();
   let overrides = {};
   if (supply === 'cloud') {
-    const cloud = cloudOverrides();
+    const cloud = readCloudOverrides(root);
     if (cloud.error) {
       console.error(cloud.error);
       process.exit(3);

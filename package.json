@@ -247,7 +247,8 @@
     "evals:replay": "node scripts/evals-run.mjs --suite=real --provider=replay",
     "evals:judge": "node scripts/evals-run.mjs --suite=real --provider=real --judge",
     "evals:catalog": "node scripts/evals-catalog.mjs",
-    "evals:admission": "node scripts/evals-admission.mjs"
+    "evals:admission": "node scripts/evals-admission.mjs",
+    "next:suggest": "node scripts/next-work-suggest.mjs"
   },
   "dependencies": {
     "@electron/notarize": "^2.5.0",

@@ -2815,12 +2815,14 @@
     },
     {
       "id": "block118-dev-decision-tooling",
-      "note": "BLOCK-118-DEV-DECISION-TOOLING：开发时决策工具化（Jev/Laya 提效开发流程；产品运行时零改动）。test:suggest/doc:suggest 双供给建议 CLI（block118-dev-suggest-run.mjs）+ doc-suggest 内核与 CLI（block118-doc-suggest.mjs，五 canonical 文档并行 noul + frontend/src 确定性硬规则 + 仅 planDoc 有 Jev 门控 θ=0.5）+ 语料构建（block118-build-doc-corpus.mjs，git 历史挖掘+伴随提交吸收+context 意图信号）+ 双供给校准 harness（block118-doc-calibrate.mjs / block118-laya-calibrate.mjs）。契约=test/block118-doc-suggest.test.mjs（9 项）。证据 acceptance/block-118/（含 test-suggest Laya 不可采纳负裁决与 doc-suggest 三轮 D-修订迭代存档）。",
+      "note": "BLOCK-118-DEV-DECISION-TOOLING：开发时决策工具化（Jev/Laya 提效开发流程；产品运行时零改动）。test:suggest/doc:suggest 双供给建议 CLI（block118-dev-suggest-run.mjs）+ doc-suggest 内核与 CLI（block118-doc-suggest.mjs，五 canonical 文档并行 noul + frontend/src 确定性硬规则 + 仅 planDoc 有 Jev 门控 θ=0.5）+ 语料构建（block118-build-doc-corpus.mjs，git 历史挖掘+伴随提交吸收+context 意图信号）+ 双供给校准 harness（block118-doc-calibrate.mjs / block118-laya-calibrate.mjs）。契约=test/block118-doc-suggest.test.mjs（9 项）。证据 acceptance/block-118/（含 test-suggest Laya 不可采纳负裁决与 doc-suggest 三轮 D-修订迭代存档）。 BLOCK-249 收口追加：next-work-suggest（Jev 选唯一下一个工作包；shared cloud supply scripts/lib/jev-cloud-supply.mjs）。",
       "patterns": [
         "scripts/block118-*.mjs",
         "acceptance/block-118/**",
         "test/block118-*.test.mjs",
-        "scripts/decision-*.mjs"
+        "scripts/decision-*.mjs",
+        "scripts/next-work-suggest.mjs",
+        "scripts/lib/jev-cloud-supply.mjs"
       ],
       "tests": [
         "test/block118-doc-suggest.test.mjs"
