@@ -673,7 +673,7 @@ status: planned
 | 序 | ID | 剩余内容 | 依赖/边界 | 量级 |
 | --- | --- | --- | --- | --- |
 | 1 | Q1-REM **（completed · BLOCK-244 · 2026-10-22）** | 已交付：A1 逐工具审批门；A5 同参连续 N 次循环检测+继续/终止；A8 逐工具 allow/ask/deny 完整面；C5 workspace-checkpoint 编辑重发；C19 AskUserQuestion；D3 完全访问确认层；A7 sideTask 变体。仍 reopen：A2 模型/本地意图解释（本轮为确定性解释）；PAT/Lark/协作按 §2.6 不复刻 | BLOCK-243/244 已闭环；A9/A10 不重建 | 2–4 天 |
-| 2 | Q2 **（首切片 completed · BLOCK-245 · 2026-10-22：上下文装配收敛 + 统一 @ 菜单 + C16 上限诚实化）** | 已交付：三通道并一为单一 `ComposerContextItem`（拆前基线逐字不变）、`@` 七源同源聚合（C15 ✅）、附件/引用超限可见提示（C16 前半）。剩余：**C13 速记板**（需 `src/migrations/016_*.sql`，独立包）、**C12 划词动作**（生产者面缺失：`selectionQuote` 有消费无生产）、**C17 跨会话引用**完整语义、**C4 消息动作注册表化**、**C11 图片保存/多图导航**、**B2 计划反馈输入**（`usePlanApprovalFlow.ts:83` keep-planning 现在直接 return 不发消息）、**C16 形态补全**（文件夹整体展开 / 选中代码 / 应用快照） | 剩余条目一律挂在 BLOCK-245 收敛出的单一 ContextItem 通道上，不再建第二条；C13 与 Q6 速记合并 | 余项 1 周 |
+| 2 | Q2 **（首切片 completed · BLOCK-245 · 2026-10-22；余项 active · BLOCK-246 · 2026-10-23「Q2 余项 整完」）** | 已交付：三通道并一为单一 `ComposerContextItem`（拆前基线逐字不变）、`@` 七源同源聚合（C15 ✅）、附件/引用超限可见提示（C16 前半）。剩余（全部由 BLOCK-246 承接）：**C13 速记板**、**C12 划词动作生产者**（`selectionQuote` 有消费无生产）、**C17 跨会话引用**完整语义、**C4 消息动作注册表化**、**C11 图片保存/多图导航**、**B2 计划反馈输入**、**C16 形态补全**（文件夹整体展开 / 选中代码 / 应用快照） | 剩余条目一律挂在 BLOCK-245 收敛出的单一 ContextItem 通道上，不再建第二条；C13 与 Q6 速记合并 | 余项 1 周 |
 | 3 | Q2b | L1 web_search + L2 web_fetch；provider 抽象（DeepSeek 首实现，SearXNG/MCP 预留）；设置页；SSRF/重定向/大小/content-type/超时；默认关+授权+来源/成本/审计 | Q2 来源标签最小投影 | 1 周 |
 | 4 | Q3 | C1 时间线锚点；C2 活动卡补齐；C3 事件级轨迹+筛选+recordedOnly；H3 证据面；K1 轮次/工具级边界 | Q1/Q2b 事件；与 Q5 evidence tab 合并 | 1 周 |
 | 5 | Q4a | C7 子代理暂停；C10 团队活动；F1 roster/stop-all；F3 结构化输出；F4 子代理工具约束；F5 journal；F9 CodebaseInvestigator | Q3 团队活动可见 | 1–2 周 |

@@ -7826,8 +7826,34 @@
         "G0"
       ],
       "notes": "2026-10-22 立项（用户「启动下一包 Q2 的开发」）：Q2 首切片=结构地基。勘察实证 composer 引用是三条互不复用的平行通道（selectionReferences / imageReferences / attachmentUpload 各自 make-append-上限-去重-头纪律，SimpleChat.tsx:1203-1206 三层套嵌，另在两处旁路重复部分组装），命中「叠层修复/平行第二套」重构信号 → 先做拆前行为基线 + 三通道并一（单一 ComposerContextItem + 单一 composeContextBlock），再挂统一 @ 菜单（八类候选同源）与上限诚实化（C16）。非范围=C13 速记板（需 SQLite 迁移）/C12 划词生产者/C4 动作注册表/B2 计划反馈/G1+。2026-10-22 收口：P3–P7 全交付，拆前基线 12 条一字未改仍绿，@ 七源同源聚合（逐源上限 + 不可用原因），超限静默截断改可见提示；SimpleChat.tsx 2210→2119（棘轮随批下调），隔离 9223 亮 22/22 · 暗 22/22（反证=请求体引用块 4→2），UI-553 verified；C15 ✅ / C16 保持 🟡（形态补全 reopen）。"
+    },
+    {
+      "id": "BLOCK-246-Q2-REM",
+      "capability": "q2-rem",
+      "path": "docs/block-246-q2-rem-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "phase": "P0-LAUNCH",
+      "canonical": true,
+      "truthDomain": "q2-rem",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-23",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "qoder",
+        "q2",
+        "scratchpad",
+        "selection-actions",
+        "message-actions",
+        "image-preview",
+        "plan-feedback",
+        "context-shapes",
+        "cross-session",
+        "G0"
+      ],
+      "notes": "2026-10-23 立项（用户「Q2 余项 整完」）：BLOCK-245 首切片收口后，把 §6.5 第 2 行剩余七项一次做完——C13 速记板（迁移 016 + store/route/面板）、C12 划词动作生产者（WorkspaceFilePreview 选区 → 复制/加入对话/侧聊/加入速记/批注不可用如实）、C4 消息动作注册表（+加入上下文/评价）、C11 图片预览（保存/多图/缩放预设）、B2 计划反馈输入（keep-planning 不再吞意见）、C16 形态补全（文件夹整体引用/选中代码块/应用快照）、C17 跨会话引用（有界摘要 + 拖放）。红线=零新依赖 / 不建第四注入通道（全挂单一 ComposerContextItem）/ 用户数据表只走迁移 / SimpleChat.tsx 只许变短。非范围=C13 图片批注（并入 Q6）/C12 选择总线重构/C4 结果统计/C11 编辑面/B2 修订案自动生成/C17 跨设备/G1+。"
     }
   ],
-  "lastUpdated": "2026-10-22",
-  "documentCount": 388
+  "lastUpdated": "2026-10-23",
+  "documentCount": 389
 }

@@ -4985,6 +4985,48 @@
       "classifiesScripts": true
     },
     {
+      "id": "block246-q2-rem",
+      "note": "BLOCK-246 Q2 余项 — C13 速记板（迁移 016 + store/route + 面板）、C12 划词动作生产者（WorkspaceFilePreview 选区）、C4 消息动作注册表、C11 图片预览、B2 计划反馈、C16 上下文形态（文件夹/代码/快照）、C17 跨会话引用；全部挂 BLOCK-245 的单一 ComposerContextItem 通道。",
+      "patterns": [
+        "src/migrations/016_*.sql",
+        "core/shared-backend/scratchpad-*.js",
+        "core/petri-server/routes/scratchpad.js",
+        "frontend/src/lib/scratchpadClient.ts",
+        "frontend/src/components/copilot/SimpleChat/ScratchpadPanel.tsx",
+        "frontend/src/components/copilot/SimpleChat/SelectionActionBar.tsx",
+        "frontend/src/components/copilot/SimpleChat/selectionActions*.ts",
+        "frontend/src/components/copilot/SimpleChat/messageActions.ts",
+        "frontend/src/components/copilot/SimpleChat/sessionDigest.ts",
+        "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.tsx",
+        "frontend/src/components/copilot/SimpleChat/ImagePreviewModal.tsx",
+        "frontend/src/components/copilot/SimpleChat/PlanApprovalCard.tsx",
+        "frontend/src/components/copilot/SimpleChat/hooks/usePlanApprovalFlow.ts",
+        "frontend/src/pages/project-workspace/WorkspaceFilePreview.tsx",
+        "test/block246-*.test.mjs",
+        "scripts/block246-*.mjs",
+        "docs/block-246-q2-rem-plan.md",
+        "acceptance/block-246/**",
+        "acceptance/ui-554/**",
+        "acceptance/ui-555/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui554-*.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui555-*.cjs"
+      ],
+      "tests": [
+        "frontend/src/components/copilot/SimpleChat/ContextMentionMenu.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/contextItems.test.ts",
+        "frontend/src/components/copilot/SimpleChat/contextSources.test.ts",
+        "frontend/src/components/copilot/SimpleChat/contextChannels.baseline.test.ts",
+        "frontend/src/components/copilot/SimpleChat/ComposerContextChips.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/PlanApprovalCard.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/hooks/useComposerContext.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/hooks/useChatStream.test.ts",
+        "frontend/src/styles/theme-token-contract.test.ts"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true
+    },
+    {
       "id": "block245-q2-context-assembly",
       "note": "BLOCK-245 Q2 首切片 — composer 上下文引用三通道并一（单一 ComposerContextItem + 唯一渲染入口）+ 统一 @ 菜单 + 超限诚实化；拆前行为基线逐字冻结。",
       "patterns": [
