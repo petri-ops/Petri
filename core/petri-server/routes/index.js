@@ -56,6 +56,8 @@ module.exports = async function registerRoutes(app) {
     ['Feedback', () => require('./feedback')(app)],
     // BLOCK-246 C13：速记板（用户资产旁路表；上限/清洗单源在 shared-backend/scratchpad-store）
     ['Scratchpad', () => require('./scratchpad')(app)],
+    // BLOCK-246 C4：逐条回复的赞/踩（模型质量信号；与 feedback 意见箱分表）
+    ['Message ratings', () => require('./message-ratings')(app)],
     ['AI chat', () => require('./ai-chat')(app)],
     ['AI agent', () => require('./ai-agent')(app)],
     ['AI settings', () => require('./ai-settings-api').registerAiSettingsRoutes(app)],

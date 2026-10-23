@@ -67,7 +67,8 @@ status: active
 | P0 立项 | ✅ | registry/impact-map/README/roadmap/handoff/AUDIT-LOG 同步 |
 | P1 C13 速记板 | ✅ | `016_scratchpad.sql`（由 `scratchpad-schema.js` 生成，Node 测逐字节一致）+ `scratchpad-store.js`（正文 8000 字 / 图片约 1.5MB / 单页 ≤100，超限返可读原因）+ `routes/scratchpad.js`（GET/POST/DELETE，注册于 routes/index.js）+ `lib/scratchpadClient.ts` + `ScratchpadPanel`/`ScratchpadDock`（composer 底栏 Ⓟ 钮）+ `scratchpadContextItem`（引用入单一通道）；Node 12/12 + 前端 6+6+27（基线 12 条仍绿）；`SimpleChat.tsx` 2119→**2118**（基线随批下调） |
 | P2 C12 划词动作 | ✅ | `SimpleChat/selectionActions.ts`（纯：动作清单/截断/事件载荷/速记载荷，批注**可见但禁用**并给理由）+ `SelectionActionBar.tsx`（视口定位、贴边翻转、mousedown 保选区）+ `pages/project-workspace/usePreviewSelection.ts`（CodeMirror 走 `EditorApi.getSelection()` 有行号，Markdown 视图走 `window.getSelection()` 无行号如实留空）+ 挂载在 `WorkspaceFilePreview`；**这是 `selectionQuote` 的第一个生产者**。测试 9/9 + 预览面回归 8/8。边界：侧聊提问=复制选区并打开侧聊（`sideChatOpen` 无载荷、不为此给 SimpleChat 加预填 prop），提示语如实说明"粘贴即可提问" |
-| P3 → P8 | 未做 | 见 §3 |
+| P3 C4 消息动作 | ✅ | `SimpleChat/messageActions.ts` 注册表（顺序=复制→重新生成→分支→加入上下文→赞/踩；禁用带理由；`nextRating` 切换语义）+ `SimpleChatMessageRow` 两处硬编码块收成一张表（`{...rowProps(key)}` 一行注入，既有 memo 边界测仍绿）+ `hooks/useMessageActions.ts`（加入上下文产 `message` 组条目；评价乐观更新 + 失败回滚 + 可见提示）+ `017_message_ratings.sql`/`message-rating-{schema,store}.js`/`routes/message-ratings.js`/`lib/messageRatingClient.ts`（**与 feedback 意见箱分表**：那边最短 5 字 + 频率限制 + 推送通知，逐条赞踩塞进去会互相污染）。测试 Node 5/5 + 前端 12 + 3；`SimpleChat.tsx` 2118→**2115**（顺手把 BLOCK-9.2 的历史清单压成 4 行） |
+| P4 → P8 | 未做 | 见 §3 |
 
 **实码锚点（已核实）**
 

@@ -49,7 +49,8 @@ type ContextKind =
   | 'scratchpad'
   | 'folder'
   | 'code'
-  | 'snapshot';
+  | 'snapshot'
+  | 'message';
 
 export interface ComposerContextItem {
   id: string;
@@ -185,6 +186,42 @@ export function scratchpadContextItem(entry: ScratchpadQuoteInput): ComposerCont
     lines,
     dedupeKey: `scratchpad|${entry.entryId}`,
     payload: { entryId: entry.entryId, kind: entry.kind, sourceRef: entry.sourceRef },
+  };
+}
+
+/** 回复正文进引用块的上限（C4「加入上下文」；与速记块同量级，保持可读）。 */
+export const MAX_MESSAGE_QUOTE_CHARS = 2000;
+
+/**
+ * 会话里的一条回复 → reference 组条目（C4「加入上下文」）。
+ *
+ * 为什么需要它：用户常要"就上一条回复继续追问/对比"，此前只能复制粘贴。
+ * 走同一条唯一通道，因此可逐项移除、有上限、有来源标签。
+ */
+export function messageQuoteContextItem(input: {
+  messageKey: string;
+  content: string;
+  conversationId?: string | null;
+}): ComposerContextItem {
+  const chars = Array.from(input.content);
+  const clipped = chars.length > MAX_MESSAGE_QUOTE_CHARS
+    ? `${chars.slice(0, MAX_MESSAGE_QUOTE_CHARS).join('')}\n…（回复过长，已截断前 ${MAX_MESSAGE_QUOTE_CHARS} 字）`
+    : input.content;
+  const firstLine = (clipped.split('\n').find((line) => line.trim()) ?? '').trim();
+  const label = firstLine.slice(0, 40) || '上一条回复';
+  return {
+    id: `ctx-message-${input.messageKey}`,
+    kind: 'message',
+    group: 'reference',
+    label,
+    source: '会话回复',
+    lines: [
+      '【引用回复】',
+      ...(input.conversationId ? [`> 会话：${input.conversationId}`] : []),
+      ...clipped.split('\n').map((line) => `> ${line}`),
+    ],
+    dedupeKey: `message|${input.messageKey}`,
+    payload: { messageKey: input.messageKey, conversationId: input.conversationId ?? null },
   };
 }
 

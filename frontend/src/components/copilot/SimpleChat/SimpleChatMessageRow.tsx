@@ -37,6 +37,8 @@ import type { ExtractContext, FileReferenceClickDetail } from '@/lib/chat-file-r
 import type { FormattedError } from '../useErrorFormatter';
 import { parseInlineAttachments, workspaceFileUrl, type InlineAttachmentImage } from './attachmentInline';
 import { ImagePreviewModal } from './ImagePreviewModal';
+// BLOCK-246 C4 — 动作注册表（复制/重新生成/分支/加入上下文/评价）
+import { buildMessageActions, type MessageActionId, type MessageRatingValue } from './messageActions';
 
 export interface SimpleChatMessageRowProps {
   m: SimpleMessage;
@@ -81,6 +83,12 @@ export interface SimpleChatMessageRowProps {
   onEditUserMessage?: (m: SimpleMessage) => void;
   onForkAt: (absoluteIndex: number) => void | Promise<void>;
   onRetrySummary: (toolJobId: string) => void | Promise<void>;
+  /** BLOCK-246 C4 — 把这条回复作为上下文引用进 composer（不传 = 不显示该动作）。 */
+  onQuoteToContext?: (messageKey: string, content: string) => void;
+  /** BLOCK-246 C4 — 赞/踩（不传 = 不显示评价动作）。 */
+  onRateMessage?: (messageKey: string, rating: MessageRatingValue) => void;
+  /** 当前评价（受控；null = 未评价）。 */
+  messageRating?: MessageRatingValue | null;
 }
 
 export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
@@ -114,12 +122,62 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
   onEditUserMessage,
   onForkAt,
   onRetrySummary,
+  onQuoteToContext,
+  onRateMessage,
+  messageRating = null,
 }: SimpleChatMessageRowProps): React.ReactElement {
   // BLOCK-150 加映（UI-477）— 用户消息图片附件内联渲染：图片附件行抽成 <img>
   //（经 /file 端点按路径取图），不再停留为「[附件: 路径]」文本行。
   const inlineImages = m.role === 'user' ? parseInlineAttachments(m.content || '') : { text: '', images: [] };
   // UI-477 加映 — 点击放大（复用 ImagePreviewModal）；悬挂式小图不占正文主区。
   const [zoomedImage, setZoomedImage] = useState<InlineAttachmentImage | null>(null);
+  // BLOCK-246 C4 — 动作来自注册表；宿主没给回调的动作不渲染（不留死按钮）。
+  const actions = buildMessageActions({
+    role: m.role === 'user' ? 'user' : 'assistant',
+    hasContent: Boolean(m.content),
+    pending: Boolean(m.pending),
+    streaming,
+    forking: forkingAtIndex === forkAbsoluteIndex,
+    copied: copiedMessageKey === messageKey,
+    rating: messageRating,
+  }).filter((action) => {
+    if (action.id === 'edit') return Boolean(onEditUserMessage);
+    if (action.id === 'quote-context') return Boolean(onQuoteToContext);
+    if (action.id === 'rate-up' || action.id === 'rate-down') return Boolean(onRateMessage);
+    return true;
+  });
+  const runAction = (id: MessageActionId) => {
+    if (id === 'edit') onEditUserMessage?.(m);
+    else if (id === 'copy') void onCopyMessage(messageKey, m.content);
+    else if (id === 'regenerate') void onRegenerate();
+    else if (id === 'fork') void onForkAt(forkAbsoluteIndex);
+    else if (id === 'quote-context') onQuoteToContext?.(messageKey, m.content);
+    else if (id === 'rate-up') onRateMessage?.(messageKey, 'up');
+    else if (id === 'rate-down') onRateMessage?.(messageKey, 'down');
+  };
+  const actionBar = actions.length === 0 ? null : (
+    <div className="sc-msg-actions">
+      {actions.map((action) => (
+        <React.Fragment key={action.id}>
+          <button
+            type="button"
+            className="sc-msg-action"
+            onClick={() => runAction(action.id)}
+            disabled={action.disabled}
+            title={action.title}
+            aria-label={action.title}
+            aria-pressed={action.pressed}
+            data-testid={action.id === 'edit' ? 'msg-edit-user' : `msg-action-${action.id}`}
+          >
+            <Icon name={action.icon} size={14} />
+            {action.label}
+          </button>
+          {action.dividerAfter && <span className="sc-msg-action-divider" aria-hidden="true" />}
+        </React.Fragment>
+      ))}
+      <MessageTime ts={m.ts} />
+    </div>
+  );
   return (
     <>
       {isTopicShiftStart && (
@@ -228,23 +286,8 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
               ))}
             </div>
           )}
-          {m.role === 'user' && m.content && !m.pending && onEditUserMessage && (
-            <div className="sc-msg-actions">
-              <button
-                type="button"
-                className="sc-msg-action"
-                onClick={() => onEditUserMessage(m)}
-                title="编辑并重发：回退到这条消息之前，文本回填输入框"
-                aria-label="编辑并重发"
-                data-testid="msg-edit-user"
-              >
-                <Icon name="pencil" size={14} />
-                编辑
-              </button>
-              <span className="sc-msg-action-divider" aria-hidden="true" />
-              <MessageTime ts={m.ts} />
-            </div>
-          )}
+          {m.role === 'user' && actionBar}
+
           {zoomedImage && createPortal(
             <ImagePreviewModal
               attachment={{
@@ -321,47 +364,7 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
               </div>
             );
           })()}
-          {m.role === 'assistant' && m.content && !m.pending && (
-            <div className="sc-msg-actions">
-              <button
-                type="button"
-                className="sc-msg-action"
-                onClick={() => void onCopyMessage(messageKey, m.content)}
-                title="复制回复"
-                aria-label="复制回复"
-              >
-                <Icon name={copiedMessageKey === messageKey ? 'check' : 'copy'} size={14} />
-                {copiedMessageKey === messageKey ? '已复制' : '复制'}
-              </button>
-              <span className="sc-msg-action-divider" aria-hidden="true" />
-              <button
-                type="button"
-                className="sc-msg-action"
-                onClick={() => void onRegenerate()}
-                disabled={streaming}
-                title="用当前模型重新生成这条回复"
-                aria-label="重新生成回复"
-              >
-                <Icon name="repeat" size={14} />
-                重新生成
-              </button>
-              <span className="sc-msg-action-divider" aria-hidden="true" />
-              <button
-                type="button"
-                className="sc-msg-action"
-                onClick={() => void onForkAt(forkAbsoluteIndex)}
-                disabled={forkingAtIndex !== null}
-                title={`以此消息为终点创建分支（新分支将包含从开始到这条回复的所有消息）`}
-                aria-label="创建分支"
-              >
-                <Icon name="git-branch" size={14} />
-                {forkingAtIndex === forkAbsoluteIndex ? '创建中…' : '创建分支'}
-              </button>
-              {/* UI-271 增补：回复时间移至操作行「创建分支」右侧 */}
-              <span className="sc-msg-action-divider" aria-hidden="true" />
-              <MessageTime ts={m.ts} />
-            </div>
-          )}
+          {m.role === 'assistant' && actionBar}
         </div>
       </div>
     </>

@@ -3,18 +3,10 @@
 // Replaces the complex CopilotChat for the desktop workspace.
 // Pure message list + input, driven by projectId/conversationId.
 //
-// BLOCK-9.2 PHASE 4: extracted to ./SimpleChat/{types.ts,helpers.tsx,attachments.ts,ImagePreviewModal.tsx,formatHarness.ts,hooks/useChatStream.ts}.
-//   • 189-line types.ts holds 14 type/const declarations.
-//   • 108-line helpers.ts holds MessageMeta + ExamplePrompts + compactStageConclusion.
-//   • attachments.ts holds AttachmentFile type + drag/drop/paste/remove/open/close helpers.
-//   • ImagePreviewModal.tsx holds the image preview modal component (~110 lines).
-//   • formatHarness.ts holds the 5 pure harness payload formatting helpers
-//     (stringifyParamValue / shortValue / formatHarnessRepair / formatHarnessWarning /
-//     formatHarnessDiagnosticIssue).
-//   • hooks/useChatStream.ts owns the 5 stream-related callbacks
-//     (send / stop / regenerate / queue / runInBackground) plus the
-//     `starting` state, `messagesRef` / `sendRef` indirection, the
-//     `copilotAsk` event subscription, and the queue drain effect.
+// BLOCK-9.2 PHASE 4 起，本文件只留装配：types/helpers/attachments/ImagePreviewModal/
+// formatHarness 各居 ./SimpleChat/ 一文件，流式回调（send/stop/regenerate/queue/
+// runInBackground）与队列消费在 hooks/useChatStream.ts；后续批次继续按域外迁，
+// 本文件受 code-size 棘轮约束（只许变短，新逻辑一律落子模块）。
 //
 // Pure code organization change; 0 behavior difference. All public exports
 // re-exported from main file to keep `import { ... } from '@/components/copilot/SimpleChat'` working.
@@ -171,6 +163,8 @@ import { useChatStream, enqueueQueuedPrompt, QUEUE_CAP, type QueuedPrompt } from
 import { useComposerContext } from './SimpleChat/hooks/useComposerContext';
 // BLOCK-246 C13 速记板（钮 + 面板一体，引用结果已转成 ContextItem，宿主只背一行）
 import { ScratchpadDock } from './SimpleChat/ScratchpadDock';
+// BLOCK-246 C4 — 消息行新增动作（加入上下文 / 评价）的状态簇
+import { useMessageActions } from './SimpleChat/hooks/useMessageActions';
 import { ComposerContextChips } from './SimpleChat/ComposerContextChips';
 // BLOCK-20: orphaned helpers (8/21, commit 9cbf8e3) wired into
 // the SimpleChat consumption side. The two helpers below are pure
@@ -327,6 +321,8 @@ export function SimpleChat({
   // 列表与一条渲染入口）；右栏引用事件订阅与跨项目过滤都在簇内，仅 copilotAsk
   // 拥有者（中央会话）消费，避免右栏 chat tab 与中央会话重复入列。
   const composerContext = useComposerContext({ projectId, ownsEventBus: ownsCopilotAsk });
+  // BLOCK-246 C4 — 行级新增动作（加入上下文/评价）；失败复用附件提示条，不静默。
+  const messageActions = useMessageActions({ conversationId, projectId, addItem: composerContext.addItem, onNotice: setAttachmentNotice });
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [previewImage, setPreviewImage] = useState<AttachmentFile | null>(null);
   const [loading, setLoading] = useState(false);
@@ -1525,6 +1521,7 @@ export function SimpleChat({
             return (
               <SimpleChatMessageRow
                 key={key}
+                {...messageActions.rowProps(key)}
                 m={m}
                 messageKey={key}
                 isTopicShiftStart={i === topicShiftIndex}
