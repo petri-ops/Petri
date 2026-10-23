@@ -15,7 +15,7 @@ function image(id: string, name: string, overrides: Partial<AttachmentFile> = {}
     dataUrl: `data:image/png;base64,${id}`,
     previewUrl: `data:image/png;base64,${id}`,
     ...overrides,
-  } as AttachmentFile;
+  };
 }
 
 const gallery = [image('a', 'a.png'), image('b', 'b.png'), image('c', 'c.png')];

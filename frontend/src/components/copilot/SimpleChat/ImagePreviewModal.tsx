@@ -55,23 +55,27 @@ export function ImagePreviewModal({
     [attachment, items],
   );
   const anchorIndex = Math.max(0, gallery.findIndex((item) => item.id === attachment.id));
-  const [index, setIndex] = useState(anchorIndex);
-  const [zoom, setZoom] = useState(1);
+  const [view, setView] = useState({ anchor: anchorIndex, index: anchorIndex, zoom: 1 });
   const imageRef = useRef<HTMLImageElement>(null);
 
-  // 宿主换图（点另一张缩略图）时跟上；同一批内导航由本组件自己推进。
-  useEffect(() => {
-    setIndex(anchorIndex);
-    setZoom(1);
-  }, [anchorIndex, attachment.id]);
+  // 宿主换图（点另一张缩略图）时跟上：**渲染期对齐**而不是 effect 里 setState
+  // （反应式同步属于"props → state"派生，放 effect 会多跑一帧且触发级联渲染告警）。
+  if (view.anchor !== anchorIndex) {
+    setView({ anchor: anchorIndex, index: anchorIndex, zoom: 1 });
+  }
+  const index = view.index;
+  const zoom = view.zoom;
+  const setZoom = (next: number | ((prev: number) => number)) => setView((current) => ({
+    ...current,
+    zoom: typeof next === 'function' ? next(current.zoom) : next,
+  }));
 
   const current = gallery[index] ?? attachment;
   const hasGallery = gallery.length > 1;
 
   const goTo = useCallback((nextIndex: number) => {
     const clamped = (nextIndex + gallery.length) % gallery.length;
-    setIndex(clamped);
-    setZoom(1);
+    setView((current) => ({ ...current, index: clamped, zoom: 1 }));
     onNavigate?.(gallery[clamped]);
   }, [gallery, onNavigate]);
 

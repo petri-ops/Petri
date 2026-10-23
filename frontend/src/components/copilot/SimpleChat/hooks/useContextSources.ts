@@ -172,7 +172,7 @@ export function useContextSources(options: UseContextSourcesOptions): ContextSou
       { id: 'knowledge', run: loadKnowledge },
       { id: 'conversation', run: () => loadConversations(projectId, conversationId) },
       // C16 应用快照：无端点，永远可用（未选项目时以 note 说明原因）
-      { id: 'snapshot', run: async () => loadSnapshot(projectId, conversationId) },
+      { id: 'snapshot', run: () => Promise.resolve(loadSnapshot(projectId, conversationId)) },
     ];
     const settled = await Promise.allSettled(tasks.map((task) => task.run()));
     if (!alive.current || sequence.current !== requestId) return;

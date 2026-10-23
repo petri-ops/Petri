@@ -24,13 +24,13 @@ function entry(overrides: Partial<ScratchpadEntry> = {}): ScratchpadEntry {
 
 function makeApi(entries: ScratchpadEntry[], overrides: Partial<ScratchpadApi> = {}): ScratchpadApi {
   return {
-    list: vi.fn(async ({ query }: { query?: string } = {}) => ({
+    list: vi.fn(({ query }: { query?: string } = {}) => Promise.resolve({
       entries: query ? entries.filter((item) => item.body.includes(query)) : entries,
       total: entries.length,
       limit: 20,
       offset: 0,
     })),
-    remove: vi.fn(async () => true),
+    remove: vi.fn(() => Promise.resolve(true)),
     ...overrides,
   };
 }
@@ -67,7 +67,7 @@ describe('ScratchpadPanel', () => {
   });
 
   it('removes an entry and reports failure visibly', async () => {
-    const api = makeApi([entry()], { remove: vi.fn(async () => true) });
+    const api = makeApi([entry()], { remove: vi.fn(() => Promise.resolve(true)) });
     render(<ScratchpadPanel onClose={vi.fn()} onQuote={vi.fn()} api={api} />);
     await screen.findByText('PCA 笔记');
     fireEvent.click(screen.getByTestId('sc-scratch-remove'));
@@ -75,7 +75,7 @@ describe('ScratchpadPanel', () => {
     await waitFor(() => expect(screen.queryByTestId('sc-scratch-item')).toBeNull());
 
     cleanup();
-    const failing = makeApi([entry()], { remove: vi.fn(async () => { throw new Error('删除速记失败（HTTP 500）'); }) });
+    const failing = makeApi([entry()], { remove: vi.fn(() => Promise.reject(new Error('删除速记失败（HTTP 500）'))) });
     render(<ScratchpadPanel onClose={vi.fn()} onQuote={vi.fn()} api={failing} />);
     await screen.findByText('PCA 笔记');
     fireEvent.click(screen.getByTestId('sc-scratch-remove'));
@@ -83,7 +83,7 @@ describe('ScratchpadPanel', () => {
   });
 
   it('surfaces load failures with a retry affordance', async () => {
-    const api = makeApi([], { list: vi.fn(async () => { throw new Error('速记请求失败（HTTP 500）'); }) });
+    const api = makeApi([], { list: vi.fn(() => Promise.reject(new Error('速记请求失败（HTTP 500）'))) });
     render(<ScratchpadPanel onClose={vi.fn()} onQuote={vi.fn()} api={api} />);
     const error = await screen.findByTestId('sc-scratch-error');
     expect(error.textContent).toContain('HTTP 500');

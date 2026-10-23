@@ -2,16 +2,18 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, renderHook } from '@testing-library/react';
 
-const approvePlan = vi.fn();
-const fetchDraftPlansForConversation = vi.fn();
-const fetchPlansWithPendingRevision = vi.fn();
+interface PlanRow { id: string; title: string; steps: Array<{ n: number; title: string }> }
+
+const approvePlan = vi.fn<(planId: string, action: string) => Promise<void>>();
+const fetchDraftPlansForConversation = vi.fn<(conversationId: string) => Promise<PlanRow[]>>();
+const fetchPlansWithPendingRevision = vi.fn<(conversationId: string) => Promise<PlanRow[]>>();
 
 vi.mock('@/components/copilot/planApprovals', () => ({
-  approvePlan: (...args: unknown[]) => approvePlan(...args),
+  approvePlan: (planId: string, action: string) => approvePlan(planId, action),
   approvePlanRevision: vi.fn(),
   buildFreshPlanTurn: () => 'fresh-plan-turn',
-  fetchDraftPlansForConversation: (...args: unknown[]) => fetchDraftPlansForConversation(...args),
-  fetchPlansWithPendingRevision: (...args: unknown[]) => fetchPlansWithPendingRevision(...args),
+  fetchDraftPlansForConversation: (conversationId: string) => fetchDraftPlansForConversation(conversationId),
+  fetchPlansWithPendingRevision: (conversationId: string) => fetchPlansWithPendingRevision(conversationId),
 }));
 
 import { usePlanApprovalFlow } from './usePlanApprovalFlow';

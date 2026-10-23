@@ -171,7 +171,7 @@ status: planned
 | # | 体验面 | Qoder 行为 | Petri 现状 | 判定 | 精华 | 波次 |
 | --- | --- | --- | --- | --- | --- | --- |
 | B1 | 计划批准三选一 | 开始实现/调整/暂不实施 | `PlanApprovalCard` 批准/清上下文执行/继续计划 | ✅ | Petri 已对齐且更细 | — |
-| B2 | 计划反馈回路 | `requestChanges` 输入「告诉 Qoder 计划需要如何调整」 | 无 | 🔴 | 计划不是只读弹窗 | Q2 |
+| B2 | 计划反馈回路 | `requestChanges` 输入「告诉 Qoder 计划需要如何调整」 | 批准卡带意见输入，「继续讨论」把意见发回**同一计划**（只要求重排步骤表、不批准执行、不改档位），空意见=只收起卡片（BLOCK-246 P5 + 单测 5+3） | ✅ | 计划不是只读弹窗 | — |
 | B3 | 计划版本/状态/复制/下载 | `specArtifact` 版本 tabs、pending/approved/accepted、copy/download | Q5 计划面基础（BLOCK-216）；修订版本 tabs 未做 | 🟡 | 计划作为可追溯产物 | Q5 |
 | B4 | 目标模式 | active/completed/paused/blocked/usage/budget + elapsed | 无 | 🔴 | 长跑目标的状态机 | Q7 |
 | B5 | 目标用量/预算受限 | `usageLimited/budgetLimited` | 只有成本上限提示 | 🟡 | 目标级预算可见 | Q7 |
@@ -184,20 +184,20 @@ status: planned
 | C1 | 时间线/锚点/滚到最新 | `anchorNav`、`scrollToLatest`、turn fallback | `ConversationTimeline` 已有；无锚点导航 | 🟡 | 长会话快速定位 | Q3 |
 | C2 | 活动卡类型 | 思考/工具/文件改动/命令/压缩/子代理/提问/失败/图像生成 | Petri 多数已有；缺压缩/提问/hook/失败卡 | 🟡 | 事件类型完整、状态同源 | Q3 |
 | C3 | 执行轨迹视图 | 对话/轨迹切换、9 类筛选、跟随最新、recorded-only | `LlmTranscriptViewer` 是模型 I/O，不是事件轨迹 | 🔴 | 事件级可观测 | Q3 |
-| C4 | 消息动作 | 复制 MD/加入任务/从回复建分支/评价/结果统计 | 复制/导出/编辑已有；无分支/加入上下文/评价 | 🟡 | 每条消息可再利用 | Q2/Q3 |
+| C4 | 消息动作 | 复制 MD/加入任务/从回复建分支/评价/结果统计 | 动作收进 `messageActions.ts` 注册表；复制/重新生成/创建分支/**加入上下文**/赞踩齐备（评价落 017 独立表，与 feedback 意见箱分表）；结果统计仍缺（Q3 执行轨迹） | 🟡 | 每条消息可再利用 | Q3 |
 | C5 | 编辑重发 + 文件回退 | 回退本轮文件修改并重发；部分未记录时诚实警告 | 每轮发送前建无副作用 checkpoint（非 git/纯净树如实不建）；编辑时给「回退本轮文件并重发/仅重发/取消」，回退失败如实提示不静默（BLOCK-244） | ✅ | 可逆的对话修正 | Q1 |
 | C6 | 队列/steer/插队/打断 | send now/steer/interrupt and run/edit/reorder | BLOCK-178 已对齐 | ✅ | 不重建 | — |
 | C7 | 后台子代理面板 | 运行/暂停/停止/打开工作区/阶段性回复 | `AgentRunPanel` 有中断/留言/续派；无暂停 | 🟡 | 长任务可暂停 | Q4 |
 | C8 | 后台进程面板 | 日志/停止/命令折叠/失联 | `ToolActivityDock` 已对齐 | ✅ | 不重建 | — |
 | C9 | 侧边任务/侧聊 | 独立会话、继承上下文、文件变更 | `SideChatDock` 已对齐 | ✅ | 不重建 | — |
 | C10 | 团队活动/关联会话 | leader/member、需要处理、查看执行 | 无 | 🔴 | 团队不是黑盒 | Q4 |
-| C11 | 图片预览 | 缩放/复制/保存/多图/缩放预设 | `ImagePreviewModal` 已有 | 🟡 | 补保存/多图导航即可 | Q2 |
-| C12 | 划词操作 | 复制/加入任务/侧聊提问/加入速记/批注 | `selectionBus` + 引用已有；无速记/批注 | 🟡 | 选中即行动 | Q2/Q6 |
-| C13 | 速记板 | 片段/图片/搜索/来源会话/图片批注 | 无 | 🔴 | 学习型产品的捕获面 | Q2/Q6 |
+| C11 | 图片预览 | 缩放/复制/保存/多图/缩放预设 | 缩放（步进 + 50/100/200 预设）/ 保存（download 保留扩展名）/ 多图 N·M + ←→ 与首尾回卷 / 保留 1:1 与 Esc（BLOCK-246 P4 + 单测 6） | ✅ | 补保存/多图导航即可 | — |
+| C12 | 划词操作 | 复制/加入任务/侧聊提问/加入速记/批注 | 文件预览选区 → 动作条：复制 / 加入对话（`selectionQuote` **第一个生产者**）/ 加入速记 / 侧聊提问 / 批注（可见但禁用并给理由）；文本批注仍缺（只支持 PDF·图像） | 🟡 | 选中即行动 | Q6 |
+| C13 | 速记板 | 片段/图片/搜索/来源会话/图片批注 | 旁路表（迁移 016，schema 生成 .sql 逐字节一致）+ `/api/scratchpad`（列表/搜索/新建/删除，上限与清洗单源）+ composer 面板（搜索·引用·删除）+ 来源会话/文件/选区；引用走唯一 ContextItem 通道（图片不把 base64 塞上行）；**图片批注仍缺**（与 Q6 合并） | 🟡 | 学习型产品的捕获面 | Q6 |
 | C14 | 后续建议/提示词润色 | `followupSuggestions`、`polishPrompt` | Gen UI follow-up 已有；composer 无 | 🟡 | 降低下一句成本 | Q9 |
 | C15 | 统一 `@` 上下文菜单 | 任务/指令/Skill/插件/连接器/Agent/文件/会话 | composer 光标处 `@` 打开统一菜单，七源同源聚合（文件·文件夹 / 技能 / MCP 连接器 / 智能体 profile / 结果产物 / 知识空间 / 历史会话），带来源标签、逐源上限、不可用原因；选中只产 `ComposerContextItem` 进单列表（BLOCK-245 P3/P4 + UI-553 实机 22/22） | ✅ | 一个入口装配上下文（不要重建第二条注入通道） | — |
-| C16 | 附件形态 | 文件夹/选中文本/选中代码/应用快照/20 上限 | 上限诚实化已落地（附件超量/超大与引用超限由静默 `console.warn`/`slice` 改可见提示，文案单源 = `SimpleChat/contextLimits.ts`；BLOCK-245 P5）；形态仍缺**文件夹整体引用**（现为目录条目引用而非递归展开）、**选中代码块**（选中文本已有）、**应用快照** | 🟡 | 上下文形态完整（上限诚实是前半，形态补全是后半） | Q2-REM |
-| C17 | 跨会话引用 | `chatSessionDrop`、引用上限 | 无 | 🟡 | 会话作为上下文资源 | Q2 |
+| C16 | 附件形态 | 文件夹/选中文本/选中代码/应用快照/20 上限 | 五种形态齐备：上限诚实化（BLOCK-245 P5，文案单源 `contextLimits.ts`）+ **文件夹整体引用**（同树按前缀展开、上限 20 并报总数）+ **选中代码块**（`language` 加性字段 → 围栏块）+ **应用快照**（第八源，未知字段写「未接入」）+ 选中文本（既有）；附件条目上限沿用既有 `MAX_ATTACHMENTS` 可见提示 | ✅ | 上下文形态完整 | — |
+| C17 | 跨会话引用 | `chatSessionDrop`、引用上限 | `@` 会话源带**有界摘要**（末尾 8 条 × 每条 300 字 × 总 2000 字，裁剪必注明；只给前 6 个会话补摘要、逐条独立降级）；**从会话列表拖入 composer 仍缺** | 🟡 | 会话作为上下文资源 | Q2-REM |
 | C18 | 语音/实时语音/纪要 | live voice、纪要、超时、权限错误 | 无 | ⛔ | 与当前主线不符，暂不做 | — |
 | C19 | 结构化提问 | AskUserQuestion（选项/多选/自由输入） | `ask_user_question` 工具 + 暂停/超时诚实降级 + 问题卡（单选/多选/自由输入/跳过）+ 回答经 task 路由唤醒同一轮（BLOCK-244） | ✅ | 让 Agent 在长任务中可结构化提问 | Q1/Q2 |
 
@@ -315,7 +315,7 @@ status: planned
 
 > **工具宇宙映射（2026-10-20 抽查）**：Qoder 41 工具中，Monitor/TaskStop/BashInput/BashOutput/BashResize/TaskCreate/TaskGet/TaskUpdate/TaskList/UpdateTopic/CompleteTask 已有 process/terminal/todo/plan 等价物，不单列矩阵行；CodebaseInvestigator 记 F9（待核）；ImageSearch/ImageGen/VideoGen/VideoGenRetrieve 记 L7（⛔）；AskUserQuestion/NotebookEdit 记 C19/E12（待补）。
 
-**矩阵统计（2026-10-22 BLOCK-245 回写，机械计数）**：✅ 40 · 🟡 41 · 🔴 14 · ⛔ 7 = **102 点**（本轮 C15 统一 `@` 菜单 → ✅；C16 上限诚实化落地但形态仍需补全 → 保持 🟡。基线取 BLOCK-244 收口口径 ✅39/🟡42/🔴14/⛔7——本句此前仍停在 BLOCK-243 的 32/47/16，属漏回写，本轮一并纠正）。Q1–Q9 剩余以 §6.5 为准；⛔ 不进入波次。**口径已同步**：DOC-REGISTRY 注记与 §12 更新记录统一为 102/40/41/14/7。
+**矩阵统计（2026-10-23 BLOCK-246 回写，机械计数）**：✅ 43 · 🟡 39 · 🔴 13 · ⛔ 7 = **102 点**（本轮 B2 计划反馈、C11 图片预览、C16 附件形态 → ✅；C4 消息动作（缺结果统计）、C12 划词（缺文本批注）、C13 速记板（缺图片批注）、C17 跨会话（缺拖放）保持 🟡）。基线取 BLOCK-245 收口口径 ✅40/🟡41/🔴14/⛔7。Q1–Q9 剩余以 §6.5 为准；⛔ 不进入波次。**口径已同步**：DOC-REGISTRY 注记与 §12 更新记录统一为 102/43/39/13/7。
 
 ## 6. 多波次计划（Q0–Q9）
 
@@ -673,7 +673,7 @@ status: planned
 | 序 | ID | 剩余内容 | 依赖/边界 | 量级 |
 | --- | --- | --- | --- | --- |
 | 1 | Q1-REM **（completed · BLOCK-244 · 2026-10-22）** | 已交付：A1 逐工具审批门；A5 同参连续 N 次循环检测+继续/终止；A8 逐工具 allow/ask/deny 完整面；C5 workspace-checkpoint 编辑重发；C19 AskUserQuestion；D3 完全访问确认层；A7 sideTask 变体。仍 reopen：A2 模型/本地意图解释（本轮为确定性解释）；PAT/Lark/协作按 §2.6 不复刻 | BLOCK-243/244 已闭环；A9/A10 不重建 | 2–4 天 |
-| 2 | Q2 **（首切片 completed · BLOCK-245 · 2026-10-22；余项 active · BLOCK-246 · 2026-10-23「Q2 余项 整完」）** | 已交付：三通道并一为单一 `ComposerContextItem`（拆前基线逐字不变）、`@` 七源同源聚合（C15 ✅）、附件/引用超限可见提示（C16 前半）。剩余（全部由 BLOCK-246 承接）：**C13 速记板**、**C12 划词动作生产者**（`selectionQuote` 有消费无生产）、**C17 跨会话引用**完整语义、**C4 消息动作注册表化**、**C11 图片保存/多图导航**、**B2 计划反馈输入**、**C16 形态补全**（文件夹整体展开 / 选中代码 / 应用快照） | 剩余条目一律挂在 BLOCK-245 收敛出的单一 ContextItem 通道上，不再建第二条；C13 与 Q6 速记合并 | 余项 1 周 |
+| 2 | Q2 **completed（首切片 BLOCK-245 · 2026-10-22；余项 BLOCK-246 · 2026-10-23「Q2 余项 整完」）** | 已交付：三通道并一 + `@` 八源同源聚合（C15 ✅）、上限诚实化 + 文件夹/选中代码/应用快照（**C16 ✅**）、速记板（016）、划词动作生产者、消息动作注册表（+加入上下文/评价 017）、图片预览（保存/多图/预设，**C11 ✅**）、计划反馈（**B2 ✅**）、会话摘要。仍 🟡：**C4 结果统计**（随 Q3 执行轨迹）、**C12 文本批注** / **C13 图片批注**（Q6 批注域）、**C17 从会话列表拖入 composer** | 后续条目一律挂单一 ContextItem 通道；批注类并入 Q6，不另立捕获通道 | 余项按 Q3/Q6 波次 |
 | 3 | Q2b | L1 web_search + L2 web_fetch；provider 抽象（DeepSeek 首实现，SearXNG/MCP 预留）；设置页；SSRF/重定向/大小/content-type/超时；默认关+授权+来源/成本/审计 | Q2 来源标签最小投影 | 1 周 |
 | 4 | Q3 | C1 时间线锚点；C2 活动卡补齐；C3 事件级轨迹+筛选+recordedOnly；H3 证据面；K1 轮次/工具级边界 | Q1/Q2b 事件；与 Q5 evidence tab 合并 | 1 周 |
 | 5 | Q4a | C7 子代理暂停；C10 团队活动；F1 roster/stop-all；F3 结构化输出；F4 子代理工具约束；F5 journal；F9 CodebaseInvestigator | Q3 团队活动可见 | 1–2 周 |
@@ -780,4 +780,5 @@ Q-DOMAIN（垂直去核化，跨波次）
 | 2026-10-20 | Q6 | BLOCK-219 垂直切片收口：E5/C12 部分落地（PDF/图像**矩形**批注 + 加入任务；批次外=椭圆/箭头/画笔/文字/马赛克、文本选中批注、速记板 C13 随 Q2、PPTX/DOCX、pack 面）；**矩阵计数不变 ✅26 / 🟡47 / 🔴22 / ⛔7 = 102**——E5 仍 🟡（PPTX/DOCX 未覆盖），C12 仍 🟡（无速记/批注进侧聊） | `docs/block-219-q6-annotation-host-plan.md` §6 + `acceptance/block-219/`（13/13） |
 | 2026-10-22 | Q6/Q8/Q1 汇总回写 | BLOCK-238 椭圆/箭头；BLOCK-239 HTTP OAuth；BLOCK-240 四 hint；BLOCK-241 懒加载；BLOCK-242 深链；BLOCK-243 审批契约+trust；A3/A4/A6/D2/J3/J5→✅，A2/A5/J4/L5→🟡，E5/E13/K*/D*/E7/L6/L8 现状更新；矩阵 **✅32 / 🟡47 / 🔴16 / ⛔7 = 102**；剩余队列 §6.5 | 各 BLOCK plan §收口 + `acceptance/block-243/`、`acceptance/ui-551/` |
 | 2026-10-22 | Q1-REM | BLOCK-244 收口：逐工具审批策略 allow/ask/deny（A1/A8）、同参循环防护 `loop_guard`（A5，交互运行由 `repeated_tool_call` 硬停交棒审批层）、确定性意图 + sideTask 变体（A2 部分/A7）、AskUserQuestion（C19）、完全访问确认层（D3）、编辑重发 + checkpoint 回退（C5）；A1/A5/A7/A8/C5/C19/D3→✅，A2 仍 🟡（模型解释 reopen）；矩阵 **✅39 / 🟡42 / 🔴14 / ⛔7 = 102** | `docs/block-244-q1-rem-approval-tail-plan.md` §5 + `acceptance/block-244/`、`acceptance/ui-552/`（亮/暗 28/28） |
+| 2026-10-23 | Q2 余项 | BLOCK-246 收口：C13 速记板（迁移 016 旁路表 + store/route/面板）、C12 划词动作生产者（`selectionQuote` 首产）、C4 动作注册表（+加入上下文/评价，017 表）、C11 图片预览（保存/多图/预设）、B2 计划反馈（keep-planning 带意见）、C16 形态补全（文件夹/代码/快照）、C17 会话摘要；**B2/C11/C16 → ✅**，C4/C12/C13/C17 保持 🟡（余：结果统计 / 文本批注 / 图片批注 / 拖放）；矩阵 **✅43 / 🟡39 / 🔴13 / ⛔7 = 102** | `docs/block-246-q2-rem-plan.md` §5/§6 + `acceptance/ui-554/`、`acceptance/block-246/`（亮/暗各 19/19） |
 | 2026-10-22 | Q2 首切片 | BLOCK-245 收口：三通道并一（拆前基线逐字不变）+ `@` 七源同源聚合 + 超限可见提示；**C15 🟡→✅**（一个入口装配上下文），**C16 保持 🟡**（上限诚实化已落地，文件夹整体/选中代码/应用快照仍缺）；矩阵 **✅40 / 🟡41 / 🔴14 / ⛔7 = 102**（同时纠正 §5 统计句仍停在 BLOCK-243 的 32/47/16 的漏回写） | `docs/block-245-q2-context-assembly-plan.md` §5 + `acceptance/ui-553/`、`acceptance/block-245/`（亮/暗各 22/22） |

@@ -12,7 +12,7 @@ acceptance:
   - C17 跨会话引用：历史会话可作上下文资源，引用后组装**有界摘要**（条数/字符双上限 + 截断如实标注）；会话列表可拖入 composer 产同一 ContextItem；同源多会话有上限。
   - 测试与实机：逐阶段 Node/前端定向测试绿 + types 0 + `test:changed` unknown 为空；隔离 9223 实机腿（mock provider）覆盖速记板/划词动作/消息动作/图片预览/计划反馈/上下文形态/会话引用，亮暗截图入 `acceptance/ui-554/`、`acceptance/ui-555/` 并复制到 `acceptance/block-246/`；closeout 十三门 PASS。
 reopen: C13 图片批注（并入 Q6 速记面）、C12 跨 viewer 选择总线重构、C4 结果统计（Q3 执行轨迹）、C11 旋转/裁剪/图片编辑、B2 修订案自动生成、C16 20 项附件上限改造、C17 跨设备会话同步、G1+。
-status: active
+status: completed
 ---
 
 # BLOCK-246 — Q2 余项（C13 速记板 / C12 划词动作 / C4 消息动作 / C11 图片预览 / B2 计划反馈 / C16 形态补全 / C17 跨会话引用）
@@ -72,7 +72,9 @@ status: active
 | P5 B2 计划反馈 | ✅ | `PlanApprovalCard` 意见输入（不抢「继续讨论」文案，避免测试与读屏歧义）+ `usePlanApprovalFlow` keep-planning 带意见→发回同一计划（不批准、不改档位、不带 approvedPlanId）；空意见=原行为。测试 5+3 |
 | P6 C16 形态补全 | ✅ | 文件夹整体引用（按路径前缀从**同一份递归树**展开子文件，上限 20 并报总数；空目录如实说明"可能超出 500 条覆盖"）/ 选中代码块（`SelectionQuoteDetail.language` 加性字段 → 围栏代码块，非代码选区形状不变）/ 应用快照（第八源，无端点，未知字段写「未接入」）。测试 12（含两条既有断言按新行为更新） |
 | P7 C17 跨会话引用 | ✅ | `buildConversationDigest`（末尾 N 条 × 每条 300 字 × 总 2000 字三重有界 + 截断注明）+ 装载层只给前 6 个会话补摘要（逐条独立降级）+ 候选 `detail` 标「含摘要」；引用块追加摘要段。测试含在 P6 的 12 条里 |
-| P8 实机腿 + 收口 | 🔵 进行中 | 见 §4 |
+| P8 实机腿 + 收口 | ✅ | `scripts/block246-q2-rem-live.mjs` + flow `ui554-q2-rem-live.cjs`：隔离栈 + mock provider，**亮 19/19 · 暗 19/19**；覆盖速记板（种→面板→引用→chip）、应用快照源、文件夹整体引用、请求体含三块引用（反证）、消息行加入上下文 + 评价变「已赞」。证据 `acceptance/ui-554/`（6 图 + 2 JSON）+ `acceptance/block-246/`。实机抓真三条见 §6 |
+
+**未覆盖（如实）**：划词动作条、图片预览多图/保存、计划反馈输入三项只有单测，实机腿未覆盖（`UI-555 in_progress`）。
 
 **实码锚点（已核实）**
 
@@ -84,6 +86,15 @@ status: active
 - 上下文形态：`SimpleChat/contextSources.ts` 文件源已含**目录条目**（非递归展开）；`contextItems.ts` 已有 `file/artifact/skill/knowledge/session/selection/image` 七 kind，无 folder/code/snapshot。
 - 会话资源：`lib/copilotConversationsClient.ts` 提供列表（`listConversations`）；`@` 菜单会话源上限 6 且只产 label/描述，未组装摘要。
 
-## 6. 非范围
+## 6. 收口证据（P8）
+
+- **Node 测试**：`block246-scratchpad` 12/12（迁移逐字节 + store 语义 + HTTP 201/400/204/404）、`block246-message-ratings` 5/5（迁移 + 覆盖/撤销 + HTTP 400/404）。
+- **前端测试**（定向）：ScratchpadPanel 6、scratchpadContextItem 6、selectionActions 9、messageActions 12、useMessageActions 3、ImagePreviewModal 6、PlanApprovalCard 5、usePlanApprovalFlow 3、contextSourcesShapes 12；既有 contextSources 基线 24 与 `contextChannels.baseline` 12 条一字未改仍绿。
+- **实机**：`acceptance/ui-554/`（速记板/三 chip/消息动作 × 亮暗 + 两份断言 JSON）+ `acceptance/block-246/`。
+- **实机抓真三条**：① 首启角色揭示浮层在**导航之后**才异步出现 → 截图前必须再兜一次（BLOCK-245 同款坑，已固化在 flow 的 `ensureNoOverlay`）；② 速记板开态住在 React 里，宿主重渲染会把面板关掉（已在流程侧幂等"确保打开"，行为本身登记 AUDIT-LOG 待处理项）；③ `@` 面板先以"零分组"出现，必须等分组非空再判定，否则会把"还没装载完"误判成"源不存在"。
+- **诚实边界**：评价落 017 独立表（不塞 feedback 意见箱）；`sideChatOpen` 无载荷 → 侧聊提问=复制 + 打开；结果产物腿用合成 done job 夹具。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 7. 非范围
 
 C13 图片批注（并入 Q6）、C12 跨 viewer 选择总线重构、C4 结果统计、C11 旋转/裁剪、B2 修订案自动生成、C16 附件上限改造、C17 跨设备同步；G1+（Provider/公证/GA/打包发布）一律不提不做。

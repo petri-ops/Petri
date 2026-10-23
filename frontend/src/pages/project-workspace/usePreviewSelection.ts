@@ -20,7 +20,7 @@ import {
   type SelectionActionId,
 } from '@/components/copilot/SimpleChat/selectionActions';
 
-export interface PreviewSelectionState {
+interface PreviewSelectionState {
   text: string;
   /** 选区矩形左上角（视口坐标）。 */
   x: number;

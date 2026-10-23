@@ -8,8 +8,8 @@
 
 import { getApiPrefix } from '../components/copilot/copilotClient';
 
-export type ScratchpadKind = 'text' | 'image';
-export type ScratchpadSourceKind = 'manual' | 'conversation' | 'file' | 'selection';
+type ScratchpadKind = 'text' | 'image';
+type ScratchpadSourceKind = 'manual' | 'conversation' | 'file' | 'selection';
 
 export interface ScratchpadEntry {
   entryId: string;
@@ -43,7 +43,7 @@ export interface CreateScratchpadInput {
 }
 
 /** 列表单页默认条数（与后端默认一致；后端还会把上限夹到 100）。 */
-export const SCRATCHPAD_PAGE_SIZE = 20;
+const SCRATCHPAD_PAGE_SIZE = 20;
 
 async function readJson<T>(response: Response): Promise<T> {
   const data = (await response.json().catch(() => null)) as T | null;

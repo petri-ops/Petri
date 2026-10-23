@@ -22,7 +22,7 @@ export interface UseMessageActionsOptions {
   onNotice?: (message: string | null) => void;
 }
 
-export interface MessageRowActionProps {
+interface MessageRowActionProps {
   onQuoteToContext: (messageKey: string, content: string) => void;
   onRateMessage: (messageKey: string, rating: MessageRatingValue) => void;
   messageRating: MessageRatingValue | null;

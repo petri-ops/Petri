@@ -200,7 +200,7 @@ export function scratchpadContextItem(entry: ScratchpadQuoteInput): ComposerCont
 }
 
 /** 回复正文进引用块的上限（C4「加入上下文」；与速记块同量级，保持可读）。 */
-export const MAX_MESSAGE_QUOTE_CHARS = 2000;
+const MAX_MESSAGE_QUOTE_CHARS = 2000;
 
 /**
  * 会话里的一条回复 → reference 组条目（C4「加入上下文」）。
