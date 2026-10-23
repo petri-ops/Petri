@@ -3095,6 +3095,40 @@
   text-decoration: underline;
 }
 
+/* BLOCK-246 C12 — 划词动作条（视口定位，调用方已算好 left/top 与贴边翻转） */
+.sc-selection-bar {
+  position: fixed;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-1);
+  padding: var(--petri-space-1);
+  background: var(--petri-bg-elevated);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  box-shadow: var(--petri-shadow-float);
+}
+
+.sc-selection-action {
+  border: none;
+  border-radius: var(--petri-radius-sm);
+  background: transparent;
+  color: var(--petri-text);
+  font: inherit;
+  padding: 2px var(--petri-space-2);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sc-selection-action:hover:not(:disabled) {
+  background: var(--petri-hover);
+}
+
+.sc-selection-action:disabled {
+  color: var(--petri-text-tertiary);
+  cursor: not-allowed;
+}
+
 /* ============================================================
    CommandPalette — Spotlight-style command panel
    ============================================================ */

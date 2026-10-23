@@ -66,7 +66,8 @@ status: active
 | --- | --- | --- |
 | P0 立项 | ✅ | registry/impact-map/README/roadmap/handoff/AUDIT-LOG 同步 |
 | P1 C13 速记板 | ✅ | `016_scratchpad.sql`（由 `scratchpad-schema.js` 生成，Node 测逐字节一致）+ `scratchpad-store.js`（正文 8000 字 / 图片约 1.5MB / 单页 ≤100，超限返可读原因）+ `routes/scratchpad.js`（GET/POST/DELETE，注册于 routes/index.js）+ `lib/scratchpadClient.ts` + `ScratchpadPanel`/`ScratchpadDock`（composer 底栏 Ⓟ 钮）+ `scratchpadContextItem`（引用入单一通道）；Node 12/12 + 前端 6+6+27（基线 12 条仍绿）；`SimpleChat.tsx` 2119→**2118**（基线随批下调） |
-| P2 → P8 | 未做 | 见 §3 |
+| P2 C12 划词动作 | ✅ | `SimpleChat/selectionActions.ts`（纯：动作清单/截断/事件载荷/速记载荷，批注**可见但禁用**并给理由）+ `SelectionActionBar.tsx`（视口定位、贴边翻转、mousedown 保选区）+ `pages/project-workspace/usePreviewSelection.ts`（CodeMirror 走 `EditorApi.getSelection()` 有行号，Markdown 视图走 `window.getSelection()` 无行号如实留空）+ 挂载在 `WorkspaceFilePreview`；**这是 `selectionQuote` 的第一个生产者**。测试 9/9 + 预览面回归 8/8。边界：侧聊提问=复制选区并打开侧聊（`sideChatOpen` 无载荷、不为此给 SimpleChat 加预填 prop），提示语如实说明"粘贴即可提问" |
+| P3 → P8 | 未做 | 见 §3 |
 
 **实码锚点（已核实）**
 

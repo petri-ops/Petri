@@ -6161,6 +6161,15 @@ body:global(.petri-resizing-columns) * {
   background: var(--petri-bg);
 }
 
+/* BLOCK-246 C12 — 划词动作的结果提示（复制成功/已加入对话/存速记失败等） */
+.workspaceSelectionNotice {
+  flex-shrink: 0;
+  padding: var(--petri-space-1) var(--petri-space-3);
+  background: var(--petri-bg-elevated);
+  border-bottom: 1px solid var(--petri-divider);
+  color: var(--petri-text);
+}
+
 .workspaceBinaryFallback {
   display: flex;
   flex-direction: column;

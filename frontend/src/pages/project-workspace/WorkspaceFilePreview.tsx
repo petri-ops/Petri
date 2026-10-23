@@ -44,6 +44,9 @@ import { AnnotatableImagePane } from '@/components/annotations/AnnotatableImageP
 import { AnnotatablePdfPane } from '@/components/annotations/AnnotatablePdfPane';
 import { dispatchPetriEvent, petriEvents } from '@/lib/events';
 import type { AnnotationScope, AnnotationTaskTarget } from '@/lib/annotations';
+// BLOCK-246 C12 — 划词动作（selectionQuote 的第一个生产者）+ 动作条
+import { SelectionActionBar } from '@/components/copilot/SimpleChat/SelectionActionBar';
+import { usePreviewSelection } from './usePreviewSelection';
 
 // UI-400-6 — Markdown 目录解析：1-3 级 ATX 标题，跳过 ```/~~~ 围栏内伪标题。
 function parseMdHeadings(text: string): Array<{ level: 1 | 2 | 3; text: string }> {
@@ -300,6 +303,22 @@ export function WorkspaceFilePreview({
     }
   }, [text, textSaved, handleSaveCurrent]);
 
+  // BLOCK-246 C12 — 选区生产者：CodeMirror 面走 EditorApi（有行号），Markdown
+  // 渲染视图走 window.getSelection（无行号，如实留空）。动作结果就地提示。
+  const [selectionNotice, setSelectionNotice] = useState<string | null>(null);
+  const readEditorSelection = useCallback(
+    () => editorApiRef.current?.getSelection() ?? null,
+    [],
+  );
+  const previewSelection = usePreviewSelection({
+    containerRef: previewBodyRef,
+    projectId,
+    filePath: file?.path,
+    fileName: file?.name,
+    getEditorSelection: readEditorSelection,
+    onNotice: setSelectionNotice,
+  });
+
   // UI-451 — 脏检测外露：宿主 tab 条的未保存圆点与关闭确认消费（脏 = 既有
   // text !== textSaved，不新增状态源；status==='ready' 门闩挡掉刷新/loading 过渡期
   // text 暂空的假脏）。经 ref 转发回调（渲染期写 ref 违反 react-hooks/refs，同步走
@@ -332,7 +351,18 @@ export function WorkspaceFilePreview({
     >
     <div className={styles.workspacePreview}>
       {openError && <div className={styles.workspacePreviewError}>{openError}</div>}
-      <div className={styles.workspacePreviewBody} ref={previewBodyRef} onKeyDown={handlePreviewKeyDown}>
+      <div
+        className={styles.workspacePreviewBody}
+        ref={previewBodyRef}
+        onKeyDown={handlePreviewKeyDown}
+        onMouseUp={previewSelection.capture}
+        onKeyUp={previewSelection.capture}
+      >
+        {selectionNotice && (
+          <div className={styles.workspaceSelectionNotice} role="status" data-testid="preview-selection-notice">
+            {selectionNotice}
+          </div>
+        )}
         {status === 'loading' && <p className={styles.panelEmpty}>加载预览…</p>}
         {status === 'error' && <p className={styles.panelEmpty}>预览失败</p>}
         {status === 'unsupported' && !officePreview && (
@@ -555,6 +585,14 @@ export function WorkspaceFilePreview({
             </nav>
           )}
         </>
+      )}
+      {previewSelection.selection && (
+        <SelectionActionBar
+          actions={previewSelection.actions}
+          x={previewSelection.selection.x}
+          y={previewSelection.selection.y}
+          onPick={(id) => { void previewSelection.pick(id); }}
+        />
       )}
       {lightboxSrc && <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
     </div>
