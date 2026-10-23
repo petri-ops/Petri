@@ -64,8 +64,9 @@ status: active
 
 | 阶段 | 状态 | 备注 |
 | --- | --- | --- |
-| P0 立项 | 🔵 进行中 | 本文件 |
-| P1 → P8 | 未做 | 见 §3 |
+| P0 立项 | ✅ | registry/impact-map/README/roadmap/handoff/AUDIT-LOG 同步 |
+| P1 C13 速记板 | ✅ | `016_scratchpad.sql`（由 `scratchpad-schema.js` 生成，Node 测逐字节一致）+ `scratchpad-store.js`（正文 8000 字 / 图片约 1.5MB / 单页 ≤100，超限返可读原因）+ `routes/scratchpad.js`（GET/POST/DELETE，注册于 routes/index.js）+ `lib/scratchpadClient.ts` + `ScratchpadPanel`/`ScratchpadDock`（composer 底栏 Ⓟ 钮）+ `scratchpadContextItem`（引用入单一通道）；Node 12/12 + 前端 6+6+27（基线 12 条仍绿）；`SimpleChat.tsx` 2119→**2118**（基线随批下调） |
+| P2 → P8 | 未做 | 见 §3 |
 
 **实码锚点（已核实）**
 

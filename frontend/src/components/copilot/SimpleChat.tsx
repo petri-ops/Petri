@@ -15,11 +15,6 @@
 //     (send / stop / regenerate / queue / runInBackground) plus the
 //     `starting` state, `messagesRef` / `sendRef` indirection, the
 //     `copilotAsk` event subscription, and the queue drain effect.
-//   • The main component drops from ~2115 → ~1965 lines after this
-//     commit; send/stop/regenerate/queue/runInBackground + 9 hooks
-//     now live in the custom hook, called once at the position the
-//     inline `send` useCallback used to occupy. Hook order is fixed
-//     and documented at the top of useChatStream.ts.
 //
 // Pure code organization change; 0 behavior difference. All public exports
 // re-exported from main file to keep `import { ... } from '@/components/copilot/SimpleChat'` working.
@@ -174,6 +169,8 @@ import { useChatStream, enqueueQueuedPrompt, QUEUE_CAP, type QueuedPrompt } from
 // BLOCK-52 P1/P2 → BLOCK-245 P2：上下文引用从三条平行通道收敛为单列表
 // （状态簇 hooks/useComposerContext + 渲染簇 ComposerContextChips）。
 import { useComposerContext } from './SimpleChat/hooks/useComposerContext';
+// BLOCK-246 C13 速记板（钮 + 面板一体，引用结果已转成 ContextItem，宿主只背一行）
+import { ScratchpadDock } from './SimpleChat/ScratchpadDock';
 import { ComposerContextChips } from './SimpleChat/ComposerContextChips';
 // BLOCK-20: orphaned helpers (8/21, commit 9cbf8e3) wired into
 // the SimpleChat consumption side. The two helpers below are pure
@@ -2040,6 +2037,8 @@ export function SimpleChat({
                     />
                   )}
                 </div>
+                {/* BLOCK-246 C13 — 速记板入口（引用结果入同一条 ContextItem 通道） */}
+                <ScratchpadDock onQuote={composerContext.addItem} />
                 {/* BLOCK-171 CP-1 — Stop 复出（推翻 BLOCK-28.8；hook 内接后端级联取消）。
                     BLOCK-178 P0 — Stop 与发送并存：运行中发送钮保持可点，
                     点击按投递模式路由（转向=立即注入下一轮边界；排队=收尾后自动发）。 */}

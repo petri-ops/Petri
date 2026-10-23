@@ -44,7 +44,12 @@ type ContextKind =
   | 'agent'
   | 'artifact'
   | 'knowledge'
-  | 'conversation';
+  | 'conversation'
+  // BLOCK-246：速记板条目（C13）、文件夹整体引用 / 选中代码块 / 应用快照（C16）
+  | 'scratchpad'
+  | 'folder'
+  | 'code'
+  | 'snapshot';
 
 export interface ComposerContextItem {
   id: string;
@@ -128,6 +133,59 @@ export function attachmentContextItems(refs: UploadedAttachmentRef[]): ComposerC
       payload: ref,
     };
   });
+}
+
+/** 速记正文进引用块的上限（速记本身可到 8000 字，但上行块必须保持可读）。 */
+export const MAX_SCRATCHPAD_BLOCK_CHARS = 2000;
+
+export interface ScratchpadQuoteInput {
+  entryId: string;
+  kind: 'text' | 'image';
+  title: string | null;
+  body: string;
+  sourceKind: string;
+  sourceRef: string | null;
+  createdAt: string;
+}
+
+const SCRATCHPAD_SOURCE_LABELS: Record<string, string> = {
+  manual: '手动记录',
+  conversation: '会话',
+  file: '文件',
+  selection: '选区',
+};
+
+/**
+ * 速记板条目 → reference 组条目（C13「引用」出速记板的唯一出口）。
+ *
+ * 图片速记**不**把 data URL 塞进正文（几 MB 的 base64 会撑爆上行且对模型无意义），
+ * 只留一行来源说明——诚实标注"这里有一张图，但没有把图传上来"。
+ */
+export function scratchpadContextItem(entry: ScratchpadQuoteInput): ComposerContextItem {
+  // 首行取"第一个非空行"并去首尾空白：否则 chip 标题会带上缩进，读起来像坏数据。
+  const firstLine = (entry.body.split('\n').find((line) => line.trim()) ?? '').trim();
+  const title = entry.title || firstLine.slice(0, 40) || '速记';
+  const sourceLabel = SCRATCHPAD_SOURCE_LABELS[entry.sourceKind] ?? entry.sourceKind;
+  const lines = [`【引用速记 ${title}】`, `> 来源：${sourceLabel}${entry.sourceRef ? ` · ${entry.sourceRef}` : ''}`];
+  if (entry.kind === 'image') {
+    lines.push('> 内容：图片速记（图片本身未随引用上传，仅标注存在）');
+  } else {
+    const chars = Array.from(entry.body);
+    const clipped = chars.length > MAX_SCRATCHPAD_BLOCK_CHARS
+      ? `${chars.slice(0, MAX_SCRATCHPAD_BLOCK_CHARS).join('')}\n…（速记过长，已截断前 ${MAX_SCRATCHPAD_BLOCK_CHARS} 字）`
+      : entry.body;
+    lines.push(...clipped.split('\n').map((line) => `> ${line}`));
+  }
+  return {
+    id: `ctx-scratch-${entry.entryId}`,
+    kind: 'scratchpad',
+    group: 'reference',
+    label: title,
+    source: `速记板 · ${sourceLabel}`,
+    lines,
+    dedupeKey: `scratchpad|${entry.entryId}`,
+    payload: { entryId: entry.entryId, kind: entry.kind, sourceRef: entry.sourceRef },
+  };
 }
 
 export interface AppendContextResult {
