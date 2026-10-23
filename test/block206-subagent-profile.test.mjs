@@ -33,7 +33,7 @@ test('BLOCK-206 基线 — 对账：profile.concurrency 的域与 runtime.spawnC
   assert.ok(runtime && profile, '两条键都必须登记');
   assert.deepEqual(profile.domain, runtime.domain, 'profile 不许自带第二套并发上限');
   // 深度不属 profile（它是全局拓扑约束）：profile 字段里不得出现 maxDepth
-  assert.deepEqual(schema.itemFieldPaths('subagent-profile'), ['name', 'role', 'model', 'concurrency', 'reportGuard']);
+  assert.deepEqual(schema.itemFieldPaths('subagent-profile'), ['name', 'role', 'model', 'concurrency', 'reportGuard', 'tools.allow', 'tools.deny']);
 });
 
 test('BLOCK-206 基线 — 只能收紧：min(runtime, profile)，永不放宽', () => {

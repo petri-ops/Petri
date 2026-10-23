@@ -10,6 +10,19 @@ const { subscribeMock, metaMock } = vi.hoisted(() => ({
   metaMock: vi.fn(),
 }));
 
+vi.mock('@/lib/agentTeamClient', () => ({
+  fetchAgentTeam: vi.fn(() => Promise.resolve({
+    ok: true,
+    leader: { agentId: 'task-1', status: 'completed', agentStatus: 'completed', conversationId: 'conv_1', taskHead: '测试', createdAt: null, finishedAt: null },
+    members: [],
+    counts: { total: 0, running: 0, finished: 0, structuredInvalid: 0 },
+    journalAvailable: false,
+  })),
+  stopAgentTeam: vi.fn(),
+  pauseAgentTask: vi.fn(),
+  resumeAgentTask: vi.fn(),
+}));
+
 vi.mock('@/components/copilot/copilotClient', async (importOriginal) => {
   const original = await importOriginal<typeof import('@/components/copilot/copilotClient')>();
   return {

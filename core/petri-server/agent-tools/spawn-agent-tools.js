@@ -28,7 +28,12 @@ const {
 } = require('../helpers/ai-settings');
 const { aiTaskConcurrencyAcquire, aiTaskConcurrencyRelease } = require('../helpers/runtime');
 const { getOrCreateActiveConversation, getAssistantMessageByTaskId } = require('../helpers/conversations');
-
+// BLOCK-249（Q4a）— 结构化输出 / 团队 journal / 工具约束
+const jsonSchemaSubset = require('../helpers/json-schema-subset');
+const agentTeam = require('../helpers/agent-team');
+const agentJournal = require('../helpers/agent-journal');
+const toolFilter = require('../helpers/tool-filter');
+const MAX_STRUCTURED_RETRIES = 2;
 const MAX_TASK_CHARS = 8000;
 const MAX_INSTRUCTIONS_CHARS = 4000;
 const MAX_GOALS = 5;
@@ -72,6 +77,11 @@ const childTerminalBus = new EventEmitter();
 childTerminalBus.setMaxListeners(0);
 function notifyChildTerminal(agentId) {
   try { childTerminalBus.emit('terminal', String(agentId)); } catch {}
+  // BLOCK-249（Q4a）— 子代理终态追加运行级 journal 一行（best-effort，不阻塞收口）。
+  try {
+    const task = agentTaskStore.getAgentTask(agentId);
+    if (task) agentTeam.recordMemberJournal(task);
+  } catch { /* journal 失败不影响终态通知 */ }
 }
 
 function fail(error, message, extra = {}) {
@@ -312,7 +322,40 @@ async function spawn_agent(args, ctx) {
   const refsCheck = resolveTodoRefs(args && args.todoRefs, parentTaskId);
   if (!refsCheck.ok) return refsCheck.fail;
 
-  const userContent = instructions ? `${taskText}\n\n${instructions}` : taskText;
+  // BLOCK-249（Q4a）— 结构化输出：schema 形状闸（不支持的写法直接拒绝，不静默忽略）。
+  let structuredSchema = null;
+  if (args && args.schema !== undefined && args.schema !== null) {
+    const problems = jsonSchemaSubset.isSupportedSchema(args.schema);
+    if (problems.length > 0) {
+      return fail('invalid_arguments', `schema 不受支持：${problems.slice(0, 3).join('；')}`);
+    }
+    structuredSchema = args.schema;
+  }
+
+  // BLOCK-249（Q4a）— 子代理工具约束（只收紧）：profile.tools.allow/deny；
+  // 未知名不拒绝，但作为诊断回传给派发方（不静默吞）。
+  let toolPolicy = null;
+  let toolPolicyDiagnostics = [];
+  if (profile && profile.tools && (Array.isArray(profile.tools.allow) || Array.isArray(profile.tools.deny))) {
+    toolPolicy = {
+      ...(Array.isArray(profile.tools.allow) ? { allow: profile.tools.allow } : {}),
+      ...(Array.isArray(profile.tools.deny) ? { deny: profile.tools.deny } : {}),
+    };
+    try {
+      // 已知工具名取 tool-metadata（与 defs 四件套由完备性门禁对齐）——
+      // 不 require tool-defs：会把 registry → spawn-agent-tools → tool-defs 连成新环。
+      const knownNames = Object.keys(require('./tool-metadata').TOOL_METADATA);
+      toolPolicyDiagnostics = toolFilter.policyDiagnostics(toolPolicy, knownNames);
+    } catch {
+      toolPolicyDiagnostics = [];
+    }
+  }
+
+  const baseContent = instructions ? `${taskText}\n\n${instructions}` : taskText;
+  const structuredInstruction = structuredSchema
+    ? `\n\n【结构化输出要求】最终回复必须是**一个 JSON 值**，符合以下 JSON Schema，且不要包含任何解释文字或 Markdown 围栏：\n${JSON.stringify(structuredSchema)}\n无法完成时也必须返回 JSON 并说明错误。`
+    : '';
+  const userContent = `${baseContent}${structuredInstruction}`;
 
   const launched = launchSubAgent({
     parentTaskId,
@@ -325,11 +368,15 @@ async function spawn_agent(args, ctx) {
     profile: profile ? profile.name : null,
     goals: goalCheck.goals,
     todoRefs: refsCheck.refs,
+    toolPolicy,
+    structuredSchema,
     spawnSource: 'tool:spawn_agent',
   });
   if (launched.ok === false) return launched;
   return {
     ...launched,
+    ...(structuredSchema ? { structuredRequired: true } : {}),
+    ...(toolPolicyDiagnostics.length ? { toolPolicyDiagnostics } : {}),
     ...(refsCheck.refs.length ? { todoRefs: refsCheck.refs } : {}),
     ...(refsCheck.ignored.length ? {
       todoRefsIgnored: refsCheck.ignored,
@@ -347,8 +394,10 @@ async function spawn_agent(args, ctx) {
  * 加映 3：goals 落 params（汇报门逐目标核对）+ 任务书尾部「完成判据」段。
  * @returns {{ok:true, agentId:string, model?:string, role?:string} | {ok:false, error, message, ...}}
  */
-function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, userContent, model, role, goals = [], todoRefs = [], spawnSource }) {
+function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, userContent, model, role, goals = [], todoRefs = [], toolPolicy = null, structuredSchema = null, structuredAttempts = 0, spawnSource }) {
   const context = { ...(parentContext || {}) };
+  // BLOCK-249（Q4a）— 工具约束随 context 进入子 loop（只收紧；父层照常全量）。
+  if (toolPolicy) context.toolPolicy = toolPolicy;
   if (model.accessModeHint && !context.accessMode) context.accessMode = model.accessModeHint;
   const preset = model.preset;
   const providerName = (preset && preset.provider) || parentParams.providerName || getChatProviderName();
@@ -391,6 +440,8 @@ function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, use
         spawnSource,
         ...(role ? { role } : {}),
         ...(goalList.length ? { goals: goalList } : {}),
+        // BLOCK-249（Q4a）— 结构化输出契约随任务落库（终态校验/重试读它）
+        ...(structuredSchema ? { structuredSchema, structuredAttempts } : {}),
         // BLOCK-120 — todoRefs 落 params：终态对账按此把失败/取消子任务归属到清单条目
         //（D-3：子任务书不注入 refs——归因是父侧观测面，子侧上下文保持精简）
         ...(refList.length ? { todoRefs: refList } : {}),
@@ -634,6 +685,10 @@ async function followup_task(args, ctx) {
     role: roleCheck.role,
     goals,
     todoRefs,
+    // BLOCK-249（Q4a）— 续派继承工具约束与结构化契约（重试计数 +1）
+    toolPolicy: (childFull.params && childFull.params.context && childFull.params.context.toolPolicy) || null,
+    structuredSchema: (childFull.params && childFull.params.structuredSchema) || null,
+    structuredAttempts: ((childFull.params && childFull.params.structuredAttempts) || 0) + 1,
     spawnSource: 'tool:followup_task',
   });
   if (launched.ok === false) return launched;
@@ -785,6 +840,10 @@ async function launchUserFollowup({ childTaskId, userId, task }) {
     model,
     role: roleCheck.role,
     goals,
+    // BLOCK-249（Q4a）— 用户侧续派同样继承工具约束与结构化契约
+    toolPolicy: (child.params && child.params.context && child.params.context.toolPolicy) || null,
+    structuredSchema: (child.params && child.params.structuredSchema) || null,
+    structuredAttempts: ((child.params && child.params.structuredAttempts) || 0) + 1,
     spawnSource: 'user:followup',
   });
   if (launched.ok === false) return launched;
@@ -822,6 +881,8 @@ async function list_agents(args, ctx) {
       createdAt: t.createdAt,
       finishedAt: t.finishedAt || undefined,
       error: t.error || undefined,
+      // BLOCK-249（Q4a）— 结构化输出状态（无 schema 的成员不带该字段）
+      ...(agentTeam.evaluateStructured(t) ? { structured: agentTeam.evaluateStructured(t) } : {}),
     })),
   };
 }
@@ -831,35 +892,15 @@ async function list_agents(args, ctx) {
  * 只允许等待当前任务派生的子 agent（parentTaskId + userId 双重校验）。
  * @param {{agentId: string, timeout?: number}} args
  */
-async function wait_agent(args, ctx) {
-  const parentTaskId = ctx && ctx.taskId;
-  const userId = ctx && ctx.userId;
-  if (!parentTaskId || !userId) return fail('no_parent', 'wait_agent 只能在 agent 会话循环内调用。');
-  const agentId = String((args && args.agentId) || '').trim();
-  if (!agentId) return fail('invalid_arguments', '缺少 agentId。');
-
-  const first = agentTaskStore.getAgentTask(agentId);
-  if (!first) return fail('agent_not_found', '子 agent 不存在。');
-  if (first.userId && first.userId !== userId) return fail('permission_denied', '无权等待该子 agent。');
-  if (!first.params || first.params.parentTaskId !== parentTaskId) {
-    return fail('agent_not_child', '只能等待当前会话派生的子 agent。');
-  }
-
-  const timeoutMs = clampWaitTimeoutMs(args && args.timeout);
+/** 等待单个 agent 到终态（事件驱动等待；被 wait_agent 与结构化重试复用）。 */
+async function waitForAgentTerminal({ agentId, timeoutMs, ctx }) {
   const startedAt = Date.now();
-
   for (;;) {
     const task = agentTaskStore.getAgentTask(agentId);
-    if (!task) return fail('agent_not_found', '子 agent 不存在。');
+    if (!task) return { ok: false, error: 'agent_not_found', agentId, message: '子 agent 不存在。' };
     if (TERMINAL_TASK_STATUSES.has(task.status)) {
       const summary = await buildTerminalSummary(task);
-      return {
-        ok: true,
-        agentId,
-        status: task.status,
-        agentStatus: task.agentStatus,
-        summary,
-      };
+      return { ok: true, task, summary };
     }
     if (Date.now() - startedAt >= timeoutMs) {
       return {
@@ -896,6 +937,90 @@ async function wait_agent(args, ctx) {
   }
 }
 
+async function wait_agent(args, ctx) {
+  const parentTaskId = ctx && ctx.taskId;
+  const userId = ctx && ctx.userId;
+  if (!parentTaskId || !userId) return fail('no_parent', 'wait_agent 只能在 agent 会话循环内调用。');
+  const agentId = String((args && args.agentId) || '').trim();
+  if (!agentId) return fail('invalid_arguments', '缺少 agentId。');
+
+  const first = agentTaskStore.getAgentTask(agentId);
+  if (!first) return fail('agent_not_found', '子 agent 不存在。');
+  if (first.userId && first.userId !== userId) return fail('permission_denied', '无权等待该子 agent。');
+  if (!first.params || first.params.parentTaskId !== parentTaskId) {
+    return fail('agent_not_child', '只能等待当前会话派生的子 agent。');
+  }
+
+  const timeoutMs = clampWaitTimeoutMs(args && args.timeout);
+  let currentAgentId = agentId;
+  let attempts = 0;
+
+  for (;;) {
+    const waited = await waitForAgentTerminal({ agentId: currentAgentId, timeoutMs, ctx });
+    if (waited.ok !== true) return { ...waited, agentId: currentAgentId };
+    const task = waited.task;
+    // BLOCK-249（Q4a）— 结构化输出：终态校验；失败自动纠正续派（≤2 次），
+    // 仍失败如实回传错误清单（不拿原文冒充结构化）。
+    const structured = agentTeam.evaluateStructured(task, { attempts });
+    if (!structured || structured.ok || attempts >= MAX_STRUCTURED_RETRIES) {
+      return {
+        ok: true,
+        agentId: currentAgentId,
+        ...(currentAgentId !== agentId ? { originalAgentId: agentId } : {}),
+        status: task.status,
+        agentStatus: task.agentStatus,
+        summary: waited.summary,
+        ...(structured ? { structured } : {}),
+      };
+    }
+    const correction = [
+      '【结构化输出纠正】上一次终态不是符合约定 schema 的 JSON。',
+      '请只输出一个 JSON 值（不要解释、不要 Markdown 围栏），并满足约定的 JSON Schema。',
+      '校验错误：',
+      ...structured.errors.map((error) => `- ${error}`),
+    ].join('\n');
+    const follow = await launchUserFollowup({ childTaskId: task.taskId, userId, task: correction });
+    if (!follow || follow.ok !== true) {
+      return {
+        ok: true,
+        agentId: currentAgentId,
+        status: task.status,
+        agentStatus: task.agentStatus,
+        summary: waited.summary,
+        structured: { ...structured, ok: false, retryError: (follow && follow.error) || 'followup_failed' },
+      };
+    }
+    attempts += 1;
+    currentAgentId = follow.agentId;
+  }
+}
+
+/**
+ * read_agent_journal — BLOCK-249（Q4a）读取当前多代理运行的 journal（只读）。
+ * 诊断前先读 journal：一行一个成员终态（血缘/角色/状态/耗时/结果头/结构化有效性）。
+ */
+async function read_agent_journal(args, ctx) {
+  const selfTaskId = ctx && ctx.taskId;
+  if (!selfTaskId) return fail('no_parent', 'read_agent_journal 只能在 agent 会话循环内调用。');
+  const self = agentTaskStore.getAgentTask(selfTaskId);
+  if (!self) return fail('task_not_found', '当前任务不存在。');
+  // 子代理读自己所属的 leader 运行；主代理读写自己的运行。
+  const leaderTaskId = (self.params && self.params.kind === 'subagent' && self.params.parentTaskId)
+    ? self.params.parentTaskId
+    : selfTaskId;
+  const limit = Number.isFinite(Number(args && args.limit)) ? Number(args.limit) : 50;
+  const result = agentJournal.readJournal(leaderTaskId, { limit });
+  return {
+    ok: true,
+    leaderTaskId,
+    exists: result.exists,
+    entries: result.entries,
+    truncated: result.truncated,
+    corrupt: result.corrupt,
+    ...(result.exists ? {} : { note: '该运行还没有 journal 条目（子代理尚未终态，或不是多代理运行）。' }),
+  };
+}
+
 async function buildTerminalSummary(task) {
   const base = {
     task: String(task.params && task.params.messages && task.params.messages[0] && task.params.messages[0].content || '').slice(0, 120),
@@ -928,6 +1053,7 @@ module.exports = {
   followup_task,
   list_agents,
   wait_agent,
+  read_agent_journal,
   childTerminalBus,
   notifyChildTerminal,
   // BLOCK-65 P1-a：用户侧（HTTP）等价——agent 专属窗留言/续派，语义与工具版单源

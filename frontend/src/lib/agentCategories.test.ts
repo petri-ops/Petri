@@ -32,9 +32,9 @@ describe('agentCategories — 子智能体职能类别推断（UI-387）', () =>
 });
 
 describe('agentCategories — BLOCK-93 扩展角色集与显式 role 解析', () => {
-  it('十类别：六基础 + 四扩展（test/write/plan/fix），general 唯一兜底在最后', () => {
+  it('十一类别：六基础 + 四扩展（test/write/plan/fix）+ investigator，general 唯一兜底在最后', () => {
     expect(AGENT_CATEGORIES.map((c) => c.key)).toEqual([
-      'search', 'collect', 'organize', 'read', 'analysis', 'test', 'write', 'plan', 'fix', 'general',
+      'search', 'collect', 'organize', 'read', 'analysis', 'test', 'write', 'plan', 'fix', 'investigator', 'general',
     ]);
   });
 

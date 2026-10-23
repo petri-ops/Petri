@@ -5143,6 +5143,54 @@
       ],
       "frontendRelated": true,
       "classifiesScripts": true
+    },
+    {
+      "id": "block249-q4a-agent-team",
+      "note": "BLOCK-249 Q4a — 多智能体团队：team roster/停止回执/暂停恢复/工具约束/结构化输出/journal/调查员角色。",
+      "patterns": [
+        "core/petri-server/helpers/agent-team.js",
+        "core/petri-server/helpers/agent-journal.js",
+        "core/petri-server/helpers/agent-pause.js",
+        "core/petri-server/helpers/json-schema-subset.js",
+        "core/petri-server/helpers/tool-filter.js",
+        "core/petri-server/routes/ai-agent/team.js",
+        "core/petri-server/routes/ai-agent/index.js",
+        "core/petri-server/agent-tools/spawn-agent-tools.js",
+        "core/petri-server/agent-tools/agent-roles.js",
+        "core/petri-server/agent-tools/registry.js",
+        "core/petri-server/agent-tools/tool-metadata.js",
+        "core/petri-server/agent-tools/tool-events.js",
+        "core/petri-server/agent-tools/tool-defs/agent-orchestration.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/loop-orchestrator.js",
+        "core/petri-server/agent-task-store.js",
+        "core/packages/shared-config/config-schema.js",
+        "frontend/src/lib/agentTeamClient.ts",
+        "frontend/src/lib/agentCategories.ts",
+        "frontend/src/components/workspace-panels/AgentTeamRoster.tsx",
+        "frontend/src/components/workspace-panels/AgentTeamRoster.module.css",
+        "frontend/src/components/workspace-panels/AgentRunPanel.tsx",
+        "frontend/src/pages/project-workspace.tsx",
+        "test/block249-*.test.mjs",
+        "scripts/block249-*.mjs",
+        "docs/block-249-q4a-agent-team-plan.md",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui559-*.cjs",
+        "acceptance/block-249/**",
+        "acceptance/ui-559/**"
+      ],
+      "tests": [
+        "test/block249-team.test.mjs",
+        "test/agent-tool-registry.test.mjs",
+        "test/block113-tool-prerouting.test.mjs",
+        "test/block116-decision-platform.test.mjs",
+        "test/block157-skill-visibility.test.mjs",
+        "test/tool-activity-labels.test.mjs",
+        "frontend/src/components/workspace-panels/AgentTeamRoster.test.tsx",
+        "frontend/src/components/workspace-panels/AgentRunPanel.test.tsx",
+        "frontend/src/lib/agentCategories.test.ts"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true
     }
   ]
 }

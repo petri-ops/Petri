@@ -98,7 +98,7 @@ const {
   send_message,
   followup_task,
 } = require('./spawn-agent-tools');
-const { spawn_agent, list_agents, wait_agent } = require('./spawn-agent-tools');
+const { spawn_agent, list_agents, wait_agent, read_agent_journal } = require('./spawn-agent-tools');
 
 const CONTRACT_VERSION = '1.0.0';
 const RISK_TIERS = Object.freeze(['R0', 'R1', 'R2', 'R3']);
@@ -195,6 +195,7 @@ const HANDLERS = {
   // BLOCK-49 — 多 Agent 派生（进程内复用 subagent 执行链；spawn fail-closed 于 policy 层）
   spawn_agent,
   list_agents,
+  read_agent_journal,
   wait_agent,
   // BLOCK-69 — 知识空间（双通道混合检索；只读，所有访问档位可用）
   knowledge_search: tool_knowledge_search,
@@ -319,6 +320,8 @@ const CONTRACTS = {
   // BLOCK-49 — spawn 立即返回（子 agent 时长不占工具执行预算）；wait 阻塞等待终态
   spawn_agent: contract('agent-management', 'state-write', 'R2', ['agent_tasks', 'loop_runs'], 2000),
   list_agents: contract('agent-management', 'none', 'R0', ['agent_tasks'], 500),
+  // BLOCK-249（Q4a）— 运行级 journal 只读（本地文件，无写面）
+  read_agent_journal: contract('agent-management', 'none', 'R0', ['agent_journal'], 500),
   wait_agent: contract('agent-management', 'none', 'R1', ['agent_tasks', 'loop_runs'], 300000, true),
   // BLOCK-69 — 知识空间：只读检索（搜索走 embedding 供应商；status 零外部依赖）
   knowledge_search: contract('retrieval', 'none', 'R0', ['knowledge.index', 'llm.provider'], 2500),

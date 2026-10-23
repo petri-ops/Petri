@@ -90,10 +90,10 @@ before(() => {
 // ── 注册表本体 ──────────────────────────────────────────────────
 
 describe('BLOCK-93 角色注册表', () => {
-  test('十角色完整性：key 唯一 + label/description/directive 非空', () => {
-    assert.equal(agentRoles.AGENT_ROLES.length, 10);
+  test('十一角色完整性：key 唯一 + label/description/directive 非空', () => {
+    assert.equal(agentRoles.AGENT_ROLES.length, 11);
     const keys = new Set(agentRoles.AGENT_ROLE_KEYS);
-    assert.equal(keys.size, 10, 'key 无重复');
+    assert.equal(keys.size, 11, 'key 无重复');
     for (const role of agentRoles.AGENT_ROLES) {
       assert.ok(role.label, `${role.key} label 缺失`);
       assert.ok(role.description, `${role.key} description 缺失`);

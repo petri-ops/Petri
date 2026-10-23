@@ -678,6 +678,15 @@ async function runLoop({
     }
 
     for (let iter = 0; iter < MAX_AGENT_ITERS && !aborted(); iter++) {
+      // BLOCK-249（Q4a）— 暂停门：只在**迭代边界**生效（进行中的工具不冻结）。
+      // 取消优先：暂停等待里一旦 shouldAbort 为真立即返回，由循环正常收口。
+      if (toolCtx && toolCtx.taskId) {
+        const agentPause = require('./helpers/agent-pause');
+        if (agentPause.isPaused(toolCtx.taskId)) {
+          await agentPause.waitWhilePaused(toolCtx.taskId, aborted);
+          if (aborted()) break;
+        }
+      }
       _emit({ event: 'iter', n: iter + 1 });
 
       // Pre-turn controller check

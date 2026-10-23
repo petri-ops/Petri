@@ -8,3 +8,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-23T13:32:11.202Z -->
 | ✅ BLOCK-235 P4-D（dataModelExtensions + 导出/联邦基线，2026-10-21；用户「可以的 冲 P4余项」） | 2026-10-21 | **completed**：pack `provides.dataModelExtensions` additive 扩展契约（bounded loader + SDC-0 校验；canonical 6 profile 不可覆盖；冲突/非法 fail-closed）；导出/联邦域中性基线（general 会话导出、扩展 artifact 类型 manifest 保真、联邦 grants/文件透传）。证据=block235 6/6 + 基线 4/4 + test:changed 443 项 0 红 + closeout 十三门 + output:judge PASS；域中性保持 11 处 / 6 键 compat。**无 active 工作包**。plan=docs/block-235-qdomain-p4d-datamodel-plan.md §7 | BLOCK-235 / P5-CLOSED |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-23T18:08:53.617Z -->
+| ✅ BLOCK-238（Q6 图形批注创建入口，2026-10-21；用户「补 BLOCK-238 立项 → 读完 4 个文件 → 改一个验一个 → 组件测试 → UI-546 + closeout」） | 2026-10-21 | **completed**：椭圆/箭头创建入口贯通——工具条三档形状 + kind 经 session/hook/REST 落库 + draft 预览 + 列表形状标签；零迁移、旧调用回落 region。证据=红绿 5 红→25/25 + 邻域 42/42 + Node 13/13 + types 0 + closeout 十三门 + output:judge PASS；UI-546 **in_progress（无实机腿）**。治理补票=三笔先行提交不改写。plan=docs/block-238-q6-graphic-annotation-entry-plan.md §6 | BLOCK-238 / P5-CLOSED |

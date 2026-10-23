@@ -187,10 +187,10 @@ status: planned
 | C4 | 消息动作 | 复制 MD/加入任务/从回复建分支/评价/结果统计 | 动作收进 `messageActions.ts` 注册表；复制/重新生成/创建分支/**加入上下文**/赞踩齐备（评价落 017 独立表）；**run 级结果统计已随 BLOCK-248 轨迹头部提供**；逐消息统计动作 reopen（无逐消息 token 真相） | 🟡 | 每条消息可再利用 | Q3 余项 |
 | C5 | 编辑重发 + 文件回退 | 回退本轮文件修改并重发；部分未记录时诚实警告 | 每轮发送前建无副作用 checkpoint（非 git/纯净树如实不建）；编辑时给「回退本轮文件并重发/仅重发/取消」，回退失败如实提示不静默（BLOCK-244） | ✅ | 可逆的对话修正 | Q1 |
 | C6 | 队列/steer/插队/打断 | send now/steer/interrupt and run/edit/reorder | BLOCK-178 已对齐 | ✅ | 不重建 | — |
-| C7 | 后台子代理面板 | 运行/暂停/停止/打开工作区/阶段性回复 | `AgentRunPanel` 有中断/留言/续派；无暂停 | 🟡 | 长任务可暂停 | Q4 |
+| C7 | 后台子代理面板 | 运行/暂停/停止/打开工作区/阶段性回复 | **✅** 中断/留言/续派 + **迭代边界暂停/恢复**（BLOCK-249；实机 `paused`/`running`） | ✅ | 长任务可暂停 | BLOCK-249 |
 | C8 | 后台进程面板 | 日志/停止/命令折叠/失联 | `ToolActivityDock` 已对齐 | ✅ | 不重建 | — |
 | C9 | 侧边任务/侧聊 | 独立会话、继承上下文、文件变更 | `SideChatDock` 已对齐 | ✅ | 不重建 | — |
-| C10 | 团队活动/关联会话 | leader/member、需要处理、查看执行 | 无 | 🔴 | 团队不是黑盒 | Q4 |
+| C10 | 团队活动/关联会话 | leader/member、需要处理、查看执行 | **✅** 团队 roster 带成员会话/最近事件/状态（BLOCK-249 team API + 面板） | ✅ | 团队不是黑盒 | BLOCK-249 |
 | C11 | 图片预览 | 缩放/复制/保存/多图/缩放预设 | 缩放（步进 + 50/100/200 预设）/ 保存（download 保留扩展名）/ 多图 N·M + ←→ 与首尾回卷 / 保留 1:1 与 Esc（BLOCK-246 P4 + 单测 6） | ✅ | 补保存/多图导航即可 | — |
 | C12 | 划词操作 | 复制/加入任务/侧聊提问/加入速记/批注 | 文件预览选区 → 动作条：复制 / 加入对话（`selectionQuote` **第一个生产者**）/ 加入速记 / 侧聊提问 / 批注（可见但禁用并给理由）；文本批注仍缺（只支持 PDF·图像） | 🟡 | 选中即行动 | Q6 |
 | C13 | 速记板 | 片段/图片/搜索/来源会话/图片批注 | 旁路表（迁移 016，schema 生成 .sql 逐字节一致）+ `/api/scratchpad`（列表/搜索/新建/删除，上限与清洗单源）+ composer 面板（搜索·引用·删除）+ 来源会话/文件/选区；引用走唯一 ContextItem 通道（图片不把 base64 塞上行）；**图片批注仍缺**（与 Q6 合并） | 🟡 | 学习型产品的捕获面 | Q6 |
@@ -232,15 +232,15 @@ status: planned
 
 | # | 体验面 | Qoder 行为 | Petri 现状 | 判定 | 精华 | 波次 |
 | --- | --- | --- | --- | --- | --- | --- |
-| F1 | 团队 roster | leader/member/成员会话/整体停止/部分确认 | DAG + AgentRunPanel；无 roster/stop-all | 🔴 | 团队是一等实体 | Q4 |
+| F1 | 团队 roster | leader/member/成员会话/整体停止/部分确认 | **✅** team API（leader+members/counts/journal）+ 整体停止逐成员回执（请求/已结束/未取消；实机 1/2） | ✅ | 团队是一等实体 | BLOCK-249 |
 | F2 | 子代理角色标签 | 前端/后端/QA/评审/调研/UX/运维/诊断等 | `agent-roles` 已有 | ✅ | 不重建 | — |
-| F3 | 结构化输出 | `agent({schema})` 强制 `StructuredOutput` + 校验 + 重试上限 | spawn 只回文本 | 🔴 | 结果机器可验 | Q4 |
-| F4 | 子代理工具约束 | `disallowedTools/additionalTools/requiredTools/omitAgentsMd` | profile 只有 role/model/concurrency/reportGuard | 🔴 | 最小权限子代理 | Q4 |
-| F5 | 子代理 journal | `journal.jsonl` 一行一结果；诊断前先读 | 有 task_events；无运行级 journal | 🔴 | 可诊断的编排 | Q4 |
+| F3 | 结构化输出 | `agent({schema})` 强制 `StructuredOutput` + 校验 + 重试上限 | **✅** spawn `schema`（最小子集）+ 终态校验 + followup 纠正 ≤2 + machine-readable（无隐藏工具，口径差异已注） | ✅ | 结果机器可验 | BLOCK-249 |
+| F4 | 子代理工具约束 | `disallowedTools/additionalTools/requiredTools/omitAgentsMd` | **✅** profile `tools.allow/deny`（只收紧、deny 优先、未知名诊断）；`omitAgentsMd` N/A（Petri 无此注入面） | ✅ | 最小权限子代理 | BLOCK-249 |
+| F5 | 子代理 journal | `journal.jsonl` 一行一结果；诊断前先读 | **✅** `<dataDir>/agent-journal/<leader>/journal.jsonl` + `read_agent_journal`（工具描述写明诊断前先读；实机 3 行） | ✅ | 可诊断的编排 | BLOCK-249 |
 | F6 | 编排 DAG | 有 team 视图 | Petri DAG 已有 | ✅ | 不重建 | — |
 | F7 | 多窗格/分屏 | panes split/maximize/resize | ArtifactPinPane 分屏已有；通用 pane split/maximize/resize 未做 | 🟡 | 通用窗格模型 | Q5 |
 | F8 | 工作流脚本 | agent/parallel/pipeline/phase/log/budget/resume | 无 | 🔴 | 确定性多代理编排 | Q4b（大包，单列） |
-| F9 | 代码库调查员 | CodebaseInvestigator（专用调查 Agent） | 有 codegraph_* 查询 + spawn_agent；无同名专用角色 | 🟡 | 调查可复核、可复用 | Q4 |
+| F9 | 代码库调查员 | CodebaseInvestigator（专用调查 Agent） | **✅** `investigator` 角色（只读 + codegraph_* + 证据路径；实机 roster 可见） | ✅ | 调查可复核、可复用 | BLOCK-249 |
 
 ### G. 上下文、记忆与计量
 
@@ -315,7 +315,7 @@ status: planned
 
 > **工具宇宙映射（2026-10-20 抽查）**：Qoder 41 工具中，Monitor/TaskStop/BashInput/BashOutput/BashResize/TaskCreate/TaskGet/TaskUpdate/TaskList/UpdateTopic/CompleteTask 已有 process/terminal/todo/plan 等价物，不单列矩阵行；CodebaseInvestigator 记 F9（待核）；ImageSearch/ImageGen/VideoGen/VideoGenRetrieve 记 L7（⛔）；AskUserQuestion/NotebookEdit 记 C19/E12（待补）。
 
-**矩阵统计（2026-10-23 BLOCK-248 回写，机械计数）**：✅ 47 · 🟡 38 · 🔴 10 · ⛔ 7 = **102 点**（本轮 C1/C2/C3 🔴→✅、H3 🟡→✅；K1 的轮次/工具级已补但仍缺应用级 → 保持 🟡；C4 逐消息统计 reopen → 保持 🟡）。基线取 BLOCK-247 收口口径 ✅43/🟡41/🔴11/⛔7。Q1–Q9 剩余以 §6.5 为准；⛔ 不进入波次。
+**矩阵统计（2026-10-23 BLOCK-249 回写，机械计数）**：✅ 54 · 🟡 36 · 🔴 5 · ⛔ 7 = **102 点**（本轮 C7/C10 🟡/🔴→✅、F1/F3/F4/F5 🔴→✅、F9 🟡→✅）。基线取 BLOCK-248 收口口径 ✅47/🟡38/🔴10/⛔7。Q1–Q9 剩余以 §6.5 为准；⛔ 不进入波次。
 
 ## 6. 多波次计划（Q0–Q9）
 
@@ -682,7 +682,7 @@ status: planned
 | 2 | Q2 **completed（首切片 BLOCK-245 · 2026-10-22；余项 BLOCK-246 · 2026-10-23「Q2 余项 整完」）** | 已交付：三通道并一 + `@` 八源同源聚合（C15 ✅）、上限诚实化 + 文件夹/选中代码/应用快照（**C16 ✅**）、速记板（016）、划词动作生产者、消息动作注册表（+加入上下文/评价 017）、图片预览（保存/多图/预设，**C11 ✅**）、计划反馈（**B2 ✅**）、会话摘要。仍 🟡：**C4 结果统计**（随 Q3 执行轨迹）、**C12 文本批注** / **C13 图片批注**（Q6 批注域）、**C17 从会话列表拖入 composer** | 后续条目一律挂单一 ContextItem 通道；批注类并入 Q6，不另立捕获通道 | 余项按 Q3/Q6 波次 |
 | 3 | Q2b | L1 web_search + L2 web_fetch；provider 抽象（DeepSeek 首实现，SearXNG/MCP 预留）；设置页；SSRF/重定向/大小/content-type/超时；默认关+授权+来源/成本/审计 | Q2 来源标签最小投影 | 1 周 |
 | 4 | Q3 **completed（BLOCK-248 · 2026-10-23）** | C1 对账（MessageRail 已在）；C2 活动卡对账 + 无 diff 诚实态；C3 事件级轨迹+筛选+recordedOnly；H3 证据面事件聚合；K1 轮次/工具级边界（应用级仍缺） | Q1/Q2b 事件；与 Q5 evidence tab 合并 | 已完成 |
-| 5 | Q4a | C7 子代理暂停；C10 团队活动；F1 roster/stop-all；F3 结构化输出；F4 子代理工具约束；F5 journal；F9 CodebaseInvestigator | Q3 团队活动可见 | 1–2 周 |
+| 5 | Q4a **completed（BLOCK-249 · 2026-10-23）** | C7 暂停/恢复；C10 团队活动；F1 roster/stop-all/部分回执；F3 结构化输出；F4 工具约束；F5 journal；F9 CodebaseInvestigator | Q3 团队活动可见 | 已完成（UI-559 in_progress：停止回执 UI 的 DOM 取证被既有重渲染环拖超时） |
 | 6 | Q7 | I1 定时任务；I2 composer 入口；I3 任务看板；I5 唤醒提醒；B4 目标状态机；B5 预算；B6 目标工具 | Q4a | 1–2 周 |
 | 7 | Q4b | F8 工作流脚本（meta/agent/parallel/pipeline/phase/log/budget/resume）；确定性沙箱；并发/代理/预算帽；journal/血缘；opt-in | Q4a 后单列立项 | 2–3 周 |
 | 8 | Q5-REM | E1 工作区 URL/底部终端/侧聊宿主统一；E4 OS 文件管理器点验；F7 通用窗格；B3/H4 修订版本 tabs；H3 事件级证据（随 Q3）；E9 终端分屏 deferred | BLOCK-216 主体已完成 | 0.5–1 周 |
@@ -790,3 +790,4 @@ Q-DOMAIN（垂直去核化，跨波次）
 | 2026-10-22 | Q2 首切片 | BLOCK-245 收口：三通道并一（拆前基线逐字不变）+ `@` 七源同源聚合 + 超限可见提示；**C15 🟡→✅**（一个入口装配上下文），**C16 保持 🟡**（上限诚实化已落地，文件夹整体/选中代码/应用快照仍缺）；矩阵 **✅40 / 🟡41 / 🔴14 / ⛔7 = 102**（同时纠正 §5 统计句仍停在 BLOCK-243 的 32/47/16 的漏回写） | `docs/block-245-q2-context-assembly-plan.md` §5 + `acceptance/ui-553/`、`acceptance/block-245/`（亮/暗各 22/22） |
 | 2026-10-23 | Q2b | BLOCK-247 收口：**L1 联网搜索 🔴→🟡**（`web_search` 已交付：自建 SearXNG、默认关 + 显式授权、每条结果带来源主机名 + 成本入账、未配置＝明确拒绝 `web_search_not_configured`）、**L2 网页抓取 🔴→🟡**（`web_fetch` 已交付：唯一出网口 + SSRF 硬边界 + 重定向逐跳复检 + 流式字节截断 + 文本类 content-type）；与 §6-Q2b 口径三处差异（provider=SearXNG 不绑厂商 / 配置族名 `web-search` / 工具签名收窄）已就地标注；矩阵 **✅43 / 🟡41 / 🔴11 / ⛔7 = 102**（来源标签屏幕可见性已在收口补齐，UI-557 verified；实机亮/暗各 23/23） | `docs/block-247-q2b-web-access-plan.md` §5 + `acceptance/ui-557/`、`acceptance/block-247/`（亮/暗各 21/21） |
 | 2026-10-23 | Q3 | BLOCK-248 收口：事件级轨迹——后端 `helpers/trajectory-events.js`（8 组分类/有界摘要/查询编排单源）+ `GET /api/ai/agent/trajectory`（会话+任务双鉴权、limit≤500、recordedOnly/availability）+ 右栏「轨迹」surface（9 筛选/跟随最新/失败定位/加载更早/模型 I/O 互链）+ 证据面执行事件聚合 + 写工具无 diff 诚实态 + 轮次/工具行 `SegmentBoundary`；**C1/C2/C3/H3 → ✅**（C1 对账=MessageRail 已在，不重复造），**K1 保持 🟡**（轮次/工具已补、应用级仍缺），C4 逐消息统计 reopen；矩阵 **✅47 / 🟡38 / 🔴10 / ⛔7 = 102**；实机亮/暗各 20/20（**离屏无窗**；截图如实 `unavailable`） | `docs/block-248-q3-execution-trace-plan.md` §6 + `acceptance/ui-558/`、`acceptance/block-248/` |
+| 2026-10-23 | Q4a | BLOCK-249 收口：团队 roster（leader+members/角色/最近事件/结构化与 journal 徽标）+ 整体停止逐成员回执（实机 requested=1/alreadyFinished=2）+ 迭代边界暂停/恢复（实机 paused/running）+ profile tools.allow/deny（只收紧）+ 结构化输出（schema 子集/终态校验/纠正 ≤2）+ 运行级 journal（实机 3 行）+ investigator 角色；**C7/C10/F1/F3/F4/F5/F9 → ✅**；矩阵 **✅54 / 🟡36 / 🔴5 / ⛔7 = 102**；实机两会话亮/暗各 19/20（停止回执 UI 的 DOM 被既有重渲染环拖超时 → UI-559 in_progress） | `docs/block-249-q4a-agent-team-plan.md` §6 + `acceptance/ui-559/`、`acceptance/block-249/` |

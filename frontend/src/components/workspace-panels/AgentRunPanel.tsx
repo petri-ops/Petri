@@ -34,6 +34,16 @@ import {
 } from '@/components/copilot/toolActivity';
 import { resolveAgentCategory } from '@/lib/agentCategories';
 import { Icon } from '@/components/icons/Icon';
+// BLOCK-249（Q4a）— 团队 roster + 暂停/恢复/整体停止
+import { AgentTeamRoster } from '@/components/workspace-panels/AgentTeamRoster';
+import {
+  fetchAgentTeam,
+  pauseAgentTask,
+  resumeAgentTask,
+  stopAgentTeam,
+  type AgentTeamStopReceipt,
+  type AgentTeamView,
+} from '@/lib/agentTeamClient';
 import styles from '@/pages/window/command-center.module.css';
 import shellStyles from '@/components/window/window-shell.module.css';
 
@@ -206,8 +216,87 @@ export function AgentRunPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runId]);
 
-  const handleInterrupt = useCallback(async () => {
-    if (!runId || !interruptArmed) return;
+  // BLOCK-249（Q4a）— 团队 roster：服务端投影为唯一真相。
+  // 状态按 runId 归属：换成员时旧结果自然失效（派生为空），不在 effect 里同步 setState。
+  const [teamState, setTeamState] = useState<{
+    runId: string;
+    view: AgentTeamView | null;
+    receipt: AgentTeamStopReceipt | null;
+  }>({ runId: '', view: null, receipt: null });
+  const [teamBusy, setTeamBusy] = useState(false);
+  const [teamError, setTeamError] = useState('');
+  const team = teamState.runId === runId ? teamState.view : null;
+  const teamReceipt = teamState.runId === runId ? teamState.receipt : null;
+
+  const refreshTeam = useCallback(async () => {
+    if (!runId) return;
+    try {
+      const view = await fetchAgentTeam(runId);
+      setTeamState((prev) => ({ ...prev, runId, view }));
+      setTeamError('');
+    } catch (error) {
+      setTeamError(error instanceof Error ? error.message : 'team_failed');
+    }
+  }, [runId]);
+
+  useEffect(() => {
+    // 延后一拍（异步拉取）：不在 effect 同步体里直接 setState（react-hooks/set-state-in-effect）。
+    const timer = window.setTimeout(() => { void refreshTeam(); }, 0);
+    return () => window.clearTimeout(timer);
+  }, [runId, refreshTeam]);
+
+  // 只在"还有成员在跑"时轮询：终态团队不再制造无谓重渲染（长回合后渲染器本就紧张）。
+  useEffect(() => {
+    if (!runId || !team || team.counts.running === 0) return undefined;
+    const timer = window.setInterval(() => { void refreshTeam(); }, 2500);
+    return () => window.clearInterval(timer);
+  }, [runId, team, refreshTeam]);
+
+  const handleTeamSelect = useCallback((agentId: string) => {
+    onSpawnedAgent?.(agentId);
+  }, [onSpawnedAgent]);
+
+  const handleTeamPause = useCallback(async (agentId: string) => {
+    setTeamBusy(true);
+    setTeamError('');
+    try {
+      await pauseAgentTask(agentId);
+      await refreshTeam();
+    } catch (error) {
+      setTeamError(error instanceof Error ? `暂停失败：${error.message}` : '暂停失败');
+    } finally {
+      setTeamBusy(false);
+    }
+  }, [refreshTeam]);
+
+  const handleTeamResume = useCallback(async (agentId: string) => {
+    setTeamBusy(true);
+    setTeamError('');
+    try {
+      await resumeAgentTask(agentId);
+      await refreshTeam();
+    } catch (error) {
+      setTeamError(error instanceof Error ? `恢复失败：${error.message}` : '恢复失败');
+    } finally {
+      setTeamBusy(false);
+    }
+  }, [refreshTeam]);
+
+  const handleTeamStop = useCallback(async (leaderId: string) => {
+    setTeamBusy(true);
+    setTeamError('');
+    try {
+      const receipt = await stopAgentTeam(leaderId);
+      setTeamState((prev) => ({ ...prev, runId: leaderId, receipt }));
+      await refreshTeam();
+    } catch (error) {
+      setTeamError(error instanceof Error ? `停止团队失败：${error.message}` : '停止团队失败');
+    } finally {
+      setTeamBusy(false);
+    }
+  }, [refreshTeam]);
+
+  const handleInterrupt = useCallback(async () => {    if (!runId || !interruptArmed) return;
     setActionError('');
     setActionNote('');
     setInterruptArmed(false);
@@ -296,6 +385,17 @@ export function AgentRunPanel({
       {errorText && <div className={styles.loadError} role="alert">{errorText}</div>}
       {actionNote && <div className={styles.drillNote} role="status">{actionNote}</div>}
       {actionError && <div className={styles.loadError} role="alert">{actionError}</div>}
+      {teamError && <div className={styles.loadError} role="alert">团队状态：{teamError}</div>}
+      <AgentTeamRoster
+        team={team}
+        currentAgentId={runId}
+        busy={teamBusy}
+        receipt={teamReceipt}
+        onSelectAgent={handleTeamSelect}
+        onPause={(agentId) => { void handleTeamPause(agentId); }}
+        onResume={(agentId) => { void handleTeamResume(agentId); }}
+        onStopTeam={(leaderId) => { void handleTeamStop(leaderId); }}
+      />
 
       {/* BLOCK-65 P1-a — 交互区（UI-404：终态默认收起，运行中默认展开；点击标题切换） */}
       <section className={styles.agentSection} data-testid="agent-run-actions">

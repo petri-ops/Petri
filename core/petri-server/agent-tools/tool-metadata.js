@@ -79,6 +79,8 @@ const TOOL_METADATA = {
   spawn_agent: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
   wait_agent: { readOnly: true, destructive: false, concurrentSafe: false, needsApproval: false, riskLevel: 'medium', timeoutMs: null },
   list_agents: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
+  // BLOCK-249（Q4a）— journal 只读（诊断摘要；事件真相仍在 task_events）
+  read_agent_journal: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
   interrupt_agent: { readOnly: false, destructive: true, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
   send_message: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: null },
   followup_task: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: null },

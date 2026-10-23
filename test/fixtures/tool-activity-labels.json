@@ -328,5 +328,9 @@
   "workspace_write": {
     "label": "已写入",
     "icon": "pencil"
+  },
+  "read_agent_journal": {
+    "label": "已读 journal",
+    "icon": "list-details"
   }
 }

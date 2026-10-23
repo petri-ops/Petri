@@ -28,3 +28,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-23T13:32:11.202Z -->
 最后更新：2026-10-22（**BLOCK-244 Q1-REM 审批控制面收尾立项 active（P0-LAUNCH）**）：逐工具 allow/ask/deny 策略（A1/A8）+ 同参循环防护（A5）+ 确定性意图/侧边任务变体（A2/A7）+ `ask_user_question` 结构化提问（C19）+ 完全访问确认层（D3）+ 编辑重发 workspace-checkpoint（C5）；复用既有审批资源/guardKey/指纹通道。非范围=模型意图解释/规则合成 UI/多问题批次/G1+。plan=`docs/block-244-q1-rem-approval-tail-plan.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-23T18:08:53.616Z -->
+最后更新：2026-10-22（**BLOCK-244 Q1-REM 审批控制面收尾 completed；UI-552 verified**）：逐工具审批策略 allow/ask/deny（A1/A8）+ 同参循环防护 `loop_guard`（A5）+ 确定性意图/sideTask 变体（A2 部分/A7）+ `ask_user_question` 结构化提问（C19）+ 完全访问确认层（D3）+ 编辑重发 workspace-checkpoint 回退（C5）。证据=Node block244 7/7+5/5 + 前端 56/56 + types 0 + 隔离 9223 亮 28/28 暗 28/28（`acceptance/ui-552/`、`acceptance/block-244/`）。实机抓真三条：审批事件白名单缺 `intent`/`source`（已补 + 断言下移事件层）；`repeated_tool_call` 硬停抢在循环审批前（改为有审批通道时交棒 `loop_guard`，无通道仍硬停）；`ProjectWorkspace` 既存重渲染环拖慢长链路探针（已在本文件「当前待处理项」登记）。Q-MATRIX 回写 **✅39 / 🟡42 / 🔴14 / ⛔7 = 102**。`SimpleChat.tsx` 2211→2210（审批面外迁 hooks/组件）。plan=`docs/block-244-q1-rem-approval-tail-plan.md` §5。G0 开发期常态 · 不外推 packaged/Provider/GA。

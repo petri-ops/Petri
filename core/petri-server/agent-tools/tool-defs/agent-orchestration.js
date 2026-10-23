@@ -111,9 +111,18 @@ module.exports = [
               "test",
               "write",
               "plan",
-              "fix"
+              "fix",
+              "investigator"
             ],
-            "description": "可选，子智能体的专职角色：search=检索 collect=搜集 organize=整理 read=读取 analysis=分析 general=通用 test=测试 write=写作 plan=规划 fix=修复（注入对应职责指令，软约束）"
+            "description": "可选，子智能体的专职角色：search=检索 collect=搜集 organize=整理 read=读取 analysis=分析 general=通用 test=测试 write=写作 plan=规划 fix=修复 investigator=代码库调查员（注入对应职责指令，软约束）"
+          },
+          "profile": {
+            "type": "string",
+            "description": "可选，子智能体 profile 名（声明式缺省：role/model/并发/tools.allow·deny）；未配置 profile 或省略时走原路径"
+          },
+          "schema": {
+            "type": "object",
+            "description": "可选，结构化输出 JSON Schema（最小子集：type/required/properties/items/enum/additionalProperties/minimum/maximum）。终态正文必须是符合该 schema 的 JSON；校验失败自动纠正重试（≤2 次），仍失败如实回错误清单"
           },
           "model": {
             "type": "string",
@@ -139,6 +148,22 @@ module.exports = [
         "required": [
           "task"
         ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "read_agent_journal",
+      "description": "读取当前多代理运行的 journal：一行一个子智能体终态（血缘/角色/状态/耗时/结果头/结构化有效性）。**诊断多代理运行前先读它**；journal 是诊断摘要，事件真相仍看时间线（task_events）。只能读当前运行（子代理读所属 leader 的运行）。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "description": "最多返回行数（默认 50，上限 200）"
+          }
+        }
       }
     }
   },

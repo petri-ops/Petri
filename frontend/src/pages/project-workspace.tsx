@@ -373,9 +373,8 @@ export function ProjectWorkspace(): React.ReactElement {
       acknowledgeConversationChanges(activeConvId);
     }
   }, [rightTab, activeConvId]);
-  // UI-385 — 右栏「智能体」tab：子智能体详情不再弹独立窗。工具行内联卡 /
-  // SubAgentsBar（活动条 + 俯瞰 + spawn 自动唤起）/ 续派统一派发本事件，
-  // 这里切 tab 并把面板指到该 runId。
+  // UI-385 — 右栏「智能体」tab：工具行内联卡 / SubAgentsBar / 续派统一派发事件，
+  // 这里切 tab 并把面板指到该 runId（详情不再弹独立窗）。
   const [agentTabRunId, setAgentTabRunId] = useState<string | null>(null);
   useEffect(() => {
     return subscribePetriEvent(petriEvents.agentOpenInRail, (detail) => {
@@ -1030,6 +1029,7 @@ export function ProjectWorkspace(): React.ReactElement {
     activeConvId,
     // UI-385 — 右栏「智能体」tab 数据源（agentOpenInRail 事件写入）
     agentRunId: agentTabRunId,
+    onAgentRunSwitch: (runId: string) => { setAgentTabRunId(runId); openRightPanel('agent'); }, // BLOCK-249 团队 roster 点成员
     openRightTabs,
     rightTab,
     rightToolMenuOpen,

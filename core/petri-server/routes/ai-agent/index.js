@@ -16,6 +16,7 @@ const chat = require('./chat');
 const context = require('./context');
 const events = require('./events');
 const trajectory = require('./trajectory'); // BLOCK-248（Q3）执行轨迹只读端点
+const team = require('./team'); // BLOCK-249（Q4a）多智能体团队控制面
 const tools = require('./tools');
 const backgroundProcesses = require('./background-processes');
 const llmTranscripts = require('./llm-transcripts');
@@ -39,6 +40,7 @@ module.exports = {
     costCap.register(app); // BLOCK-176 CP-18
     events.register(app);
     trajectory.register(app); // BLOCK-248（Q3）
+    team.register(app); // BLOCK-249（Q4a）
     backgroundProcesses.register(app);
     llmTranscripts.register(app);
     conversationChanges.register(app);

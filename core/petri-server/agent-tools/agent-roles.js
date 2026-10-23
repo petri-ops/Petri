@@ -96,6 +96,16 @@ const AGENT_ROLES = [
       '你是修复型子智能体：先复现与定位（只读手段优先），再实施最小修复。' +
       '修复范围严格限定在缺陷本身，不顺手重构；修复必须配套验证说明或测试；无法定位时如实报告已排除的假设。',
   },
+  // BLOCK-249（Q4a）F9 — 代码库调查员（CodebaseInvestigator）：只读、证据路径优先。
+  {
+    key: 'investigator',
+    label: '调查员',
+    description: '对代码库做可复核的只读调查（结构 / 调用关系 / 改动影响）',
+    directive:
+      '你是代码库调查员：只读调查，不改任何文件。优先用 codegraph_*（谁引用/被谁引用/调用路径）与 workspace_search/workspace_find/workspace_read 取证；' +
+      '每条结论附具体文件路径与行号，明确区分「已证实」与「推测」；调查范围外的问题只登记不展开；' +
+      '最终产出「问题 → 证据 → 结论」三段式清单，便于父 agent 复核与复用。',
+  },
 ];
 
 const AGENT_ROLE_KEYS = AGENT_ROLES.map((r) => r.key);

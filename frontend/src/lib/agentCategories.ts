@@ -24,7 +24,8 @@ export interface AgentCategory {
     | 'test'
     | 'write'
     | 'plan'
-    | 'fix';
+    | 'fix'
+    | 'investigator';
   label: string;
   /** 彩色 emoji 图标（用户裁决：比单色线条图标生动直观）。 */
   emoji: string;
@@ -41,6 +42,7 @@ export const AGENT_CATEGORIES: readonly AgentCategory[] = [
   { key: 'write', label: '写作', emoji: '✍️' },
   { key: 'plan', label: '规划', emoji: '🗺️' },
   { key: 'fix', label: '修复', emoji: '🔧' },
+  { key: 'investigator', label: '调查员', emoji: '🔬' },
   { key: 'general', label: '通用', emoji: '🤖' },
 ] as const;
 

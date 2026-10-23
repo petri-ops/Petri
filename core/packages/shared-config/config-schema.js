@@ -672,6 +672,16 @@ const CONFIG_KEYS = Object.freeze([
     key: 'subagentProfile.<item>.reportGuard', family: 'subagent-profile', path: '<item>.reportGuard',
     type: 'string', domain: { oneOf: ['inherit'] }, envKeys: [], aliases: [], mutable: true, ui: 'none',
   },
+  // BLOCK-249（Q4a）— 子代理工具约束（只收紧）：allow 取交集、deny 优先。
+  // 不是权限系统：policy/审批/四档判定照常全量生效，这里只收窄下发给模型的名单。
+  {
+    key: 'subagentProfile.<item>.tools.allow', family: 'subagent-profile', path: '<item>.tools.allow',
+    type: 'array', domain: { maxItems: 128 }, envKeys: [], aliases: [], mutable: true, ui: 'none',
+  },
+  {
+    key: 'subagentProfile.<item>.tools.deny', family: 'subagent-profile', path: '<item>.tools.deny',
+    type: 'array', domain: { maxItems: 128 }, envKeys: [], aliases: [], mutable: true, ui: 'none',
+  },
   // —— 项目信任级（BLOCK-207 / W7b）——
   // `defaultLevel` 默认 `inherit` = 零行为变化：**不配置就不干预任何项目**。"最保守"在这里的
   // 正确形态是"默认不动"，不是"上线即把所有项目降级"（那会把存量用户的任务直接打断）。

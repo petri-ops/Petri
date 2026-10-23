@@ -452,6 +452,7 @@ const TOOL_ACTIVITY_VERBS = Object.freeze({
   "knowledge_space_rename": "已重命名",
   "knowledge_status": "已查询",
   "list_agents": "已列出",
+  "read_agent_journal": "已读 journal",
   "plan": "已规划",
   "process_status": "已查询",
   "process_stop": "已停止",

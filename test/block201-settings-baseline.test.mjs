@@ -36,7 +36,7 @@ test('设置分区清单冻结：10 个分区 id（搜索索引必须逐项覆�
   assert.equal(ids.length, 10, `分区数应为 10（实得 ${ids.length}）：${ids.join(', ')}`);
 });
 
-test('配置注册表冻结：18 族 / 103 键（BLOCK-210 data-retention；BLOCK-223 user-prefs 2 键；BLOCK-225 autoModel；BLOCK-226 quietHours；BLOCK-227 roleRevealSeen；BLOCK-228 crashNotice；BLOCK-247 web-search 8 键）', () => {
+test('配置注册表冻结：18 族 / 105 键（BLOCK-210 data-retention；BLOCK-223 user-prefs 2 键；BLOCK-225 autoModel；BLOCK-226 quietHours；BLOCK-227 roleRevealSeen；BLOCK-228 crashNotice；BLOCK-247 web-search 8 键；BLOCK-249 subagent-profile tools 2 键）', () => {
   // 2026-10-17 两次显式上调（BLOCK-203 W4a）：
   //  P1+P2：8 族/35 键 → 9 族/38 键（user-prefs：theme/fontScale/accent）；
   //  P3   ：9 族/38 键 → 10 族/43 键（skills-prefs：version + disabled.<id>.{at,reason}
@@ -64,7 +64,8 @@ test('配置注册表冻结：18 族 / 103 键（BLOCK-210 data-retention；BLOC
   //   BLOCK-247（Q2b）：17 族/95 键 → 18 族/103 键（web-search：enabled/provider/searxngBaseUrl/
   //     maxResults/timeoutMs/fetchMaxBytes/allowedHosts/blockedHosts；默认关 + 即时生效，
   //     独立成族不塞 network——network 是"往 env 写代理"的源头（有"需重启"语义），两者混族会造出第二套真相）。
-  assert.equal(schema.CONFIG_KEYS.length, 103);
+  //   BLOCK-249（Q4a）：103 → 105 键（subagent-profile + tools.allow/tools.deny：子代理工具约束只收紧）。
+  assert.equal(schema.CONFIG_KEYS.length, 105);
 });
 
 test('导出/导入的族集合 == 注册表族集合（漏族/未注册族都算红）', () => {

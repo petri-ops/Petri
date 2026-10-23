@@ -1,0 +1,148 @@
+/* BLOCK-249（Q4a）— 团队 roster。颜色/间距走 --petri-*；按钮一律用共享
+   ui/controls/button.module.css 变体，本文件不定义按钮类（按钮清单棘轮）。 */
+
+.roster {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-2);
+  padding: var(--petri-space-2);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-subtle);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-2);
+  flex-wrap: wrap;
+}
+
+.title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--petri-space-1);
+  color: var(--petri-text);
+}
+
+.counts {
+  color: var(--petri-text-secondary);
+}
+
+.badge,
+.badgeOk,
+.badgeWarn {
+  padding: 0 6px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: 999px;
+  color: var(--petri-text-secondary);
+  white-space: nowrap;
+}
+
+.badgeOk {
+  border-color: var(--petri-success);
+  color: var(--petri-success);
+}
+
+.badgeWarn {
+  border-color: var(--petri-danger);
+  color: var(--petri-danger);
+}
+
+.leader {
+  display: flex;
+  align-items: baseline;
+  gap: var(--petri-space-2);
+  padding: var(--petri-space-1);
+  border-left: 2px solid var(--petri-text-tertiary);
+  color: var(--petri-text-secondary);
+}
+
+.role {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--petri-text);
+  white-space: nowrap;
+}
+
+.status {
+  flex: 0 0 auto;
+  color: var(--petri-text-secondary);
+  white-space: nowrap;
+}
+
+.task {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  flex: 0 0 auto;
+  color: var(--petri-text-tertiary);
+  font-family: var(--petri-font-mono);
+  white-space: nowrap;
+}
+
+.members {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.member {
+  display: flex;
+  align-items: baseline;
+  gap: var(--petri-space-2);
+  width: 100%;
+  padding: var(--petri-space-1);
+  border: 1px solid transparent;
+  border-radius: var(--petri-radius-sm);
+  background: transparent;
+  color: var(--petri-text-secondary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.member:hover {
+  background: var(--petri-bg-surface);
+}
+
+.memberActive {
+  border-color: var(--petri-border-card);
+  background: var(--petri-bg-surface);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-2);
+  flex-wrap: wrap;
+}
+
+.receipt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-1);
+  padding: var(--petri-space-1);
+  border: 1px dashed var(--petri-border-card);
+  border-radius: var(--petri-radius-sm);
+  color: var(--petri-text-secondary);
+}
+
+.receiptRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--petri-space-2);
+  color: var(--petri-text-tertiary);
+  font-family: var(--petri-font-mono);
+}
+
+.empty {
+  margin: 0;
+  color: var(--petri-text-muted);
+}

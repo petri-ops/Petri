@@ -1,0 +1,110 @@
+{
+  "name": "ui559-team-live",
+  "darkMode": true,
+  "startedAt": "2026-10-23T18:04:46.903Z",
+  "finishedAt": "2026-10-23T18:07:29.709Z",
+  "providerCalls": 9,
+  "assertions": [
+    {
+      "name": "E1_project_created",
+      "pass": true,
+      "detail": "projectId=p_mvla54x8_xqbc status=200"
+    },
+    {
+      "name": "E1b_workspace_resolved",
+      "pass": true,
+      "detail": "C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui559-live-0sFO72\\data\\projects\\ui-559-mvla54x8"
+    },
+    {
+      "name": "E2_isolated_stack",
+      "pass": true,
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / data=C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui559-live-0sFO72"
+    },
+    {
+      "name": "W0_project_selected",
+      "pass": true,
+      "detail": "selected"
+    },
+    {
+      "name": "W1_message_sent",
+      "pass": true,
+      "detail": "sent"
+    },
+    {
+      "name": "R1_leader_task_resolved",
+      "pass": true,
+      "detail": "conversation=conv_ac70559a-cbf leader=b4e01af8-2a3a-4e96-9929-f4988b00aeb3"
+    },
+    {
+      "name": "R2_three_members_with_roles",
+      "pass": true,
+      "detail": "members=3 roles=[\"search\",\"investigator\",\"search\"]"
+    },
+    {
+      "name": "R3_structured_valid",
+      "pass": true,
+      "detail": "{\"required\":true,\"ok\":true,\"errors\":[],\"value\":{\"answer\":42},\"attempts\":0}"
+    },
+    {
+      "name": "R4_team_settled_for_stop",
+      "pass": true,
+      "detail": "{\"total\":3,\"running\":1,\"finished\":2,\"structuredInvalid\":0}"
+    },
+    {
+      "name": "R5_pause_iteration_boundary_api",
+      "pass": true,
+      "detail": "status=200 effective=iteration_boundary state=paused"
+    },
+    {
+      "name": "R6_resume_same_task_api",
+      "pass": true,
+      "detail": "status=200 state=running"
+    },
+    {
+      "name": "R7_stop_partial_receipt_api",
+      "pass": true,
+      "detail": "{\"status\":200,\"summary\":{\"requested\":1,\"alreadyFinished\":2,\"notCancelled\":0},\"members\":[[\"639a08\",\"already_finished\"],[\"2862e0\",\"cancel_requested\"],[\"4ecbc5\",\"already_finished\"]]}"
+    },
+    {
+      "name": "E4_leader_resolved_for_ui",
+      "pass": true,
+      "detail": "b4e01af8-2a3a-4e96-9929-f4988b00aeb3"
+    },
+    {
+      "name": "E5_ui_session_restarted",
+      "pass": true,
+      "detail": "second Electron session on the same data root"
+    },
+    {
+      "name": "W2_leader_env",
+      "pass": true,
+      "detail": "b4e01af8-2a3a-4e96-9929-f4988b00aeb3"
+    },
+    {
+      "name": "W3_ui_session_ready",
+      "pass": true,
+      "detail": "projectVisible=UI-559 团队探针项目"
+    },
+    {
+      "name": "R8_roster_visible_ui",
+      "pass": true,
+      "detail": "visible"
+    },
+    {
+      "name": "R9_roster_members_ui",
+      "pass": true,
+      "detail": "{\"rows\":3,\"hasInvestigator\":true,\"hasStructured\":true,\"hasJournal\":true,\"counts\":\"3 成员 · 0 在跑 · 3 已结束\"}"
+    },
+    {
+      "name": "R10_stop_receipt_ui",
+      "pass": false,
+      "detail": "stopClicked=clicked/eval_failed:cdp_eval_timeout"
+    },
+    {
+      "name": "E3_mock_provider_used",
+      "pass": true,
+      "detail": "9"
+    }
+  ],
+  "allPass": false
+}

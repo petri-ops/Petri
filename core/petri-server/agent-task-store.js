@@ -488,6 +488,16 @@ const stmts = {
   eventPayloads: db.prepare(
     `SELECT payload FROM task_events WHERE task_id = ? AND event_type = ? ORDER BY seq ASC`
   ),
+  // BLOCK-249（Q4a）— 团队投影/暂停：最近事件时间、agent_status 翻转、合成事件 seq。
+  lastEventAt: db.prepare(
+    `SELECT MAX(created_at) AS at FROM task_events WHERE task_id = ?`
+  ),
+  maxEventSeq: db.prepare(
+    `SELECT MAX(seq) AS m FROM task_events WHERE task_id = ?`
+  ),
+  setAgentStatus: db.prepare(
+    `UPDATE tasks SET agent_status = ? WHERE id = ? AND type = 'agent_loop'`
+  ),
 };
 
 function insertAgentTask({ taskId, userId, params }) {
@@ -603,6 +613,47 @@ function hasAgentTaskEventBefore(taskId, seq) {
     return Boolean(stmts.hasEventBefore.get(taskId, Number(seq)));
   } catch {
     return false;
+  }
+}
+
+// BLOCK-249（Q4a）— 团队成员最近事件时间（roster「团队活动」列）。
+function getAgentTaskLastEventAt(taskId) {
+  if (!taskId) return null;
+  try {
+    const row = stmts.lastEventAt.get(String(taskId));
+    return row && row.at ? String(row.at) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** 暂停/恢复只翻 agent_status（status 仍 running）；非 running 任务拒绝。 */
+function setAgentTaskPaused(taskId, paused) {
+  const task = getAgentTask(taskId);
+  if (!task) return { ok: false, error: 'not_found' };
+  if (paused) {
+    if (task.status !== 'running') return { ok: false, error: 'not_running', status: task.status };
+    stmts.setAgentStatus.run('paused', String(taskId));
+    return { ok: true, agentStatus: 'paused' };
+  }
+  if (task.agentStatus !== 'paused') return { ok: false, error: 'not_paused', agentStatus: task.agentStatus };
+  stmts.setAgentStatus.run('running', String(taskId));
+  return { ok: true, agentStatus: 'running' };
+}
+
+/** 合成一条运行事件（暂停/恢复等控制面事件）——走同一 task_events 通道。 */
+function appendSyntheticAgentEvent(taskId, eventType, payload = {}) {
+  try {
+    const row = stmts.maxEventSeq.get(String(taskId));
+    const seq = (row && Number.isFinite(Number(row.m)) ? Number(row.m) : 0) + 1;
+    appendAgentTaskEvent(String(taskId), seq, eventType, {
+      event: eventType,
+      at: new Date().toISOString(),
+      ...payload,
+    });
+    return { ok: true, seq };
+  } catch (error) {
+    return { ok: false, error: String(error && error.message || error) };
   }
 }
 
@@ -801,6 +852,7 @@ function serializeFilesChanged(filesChanged) {
 // BLOCK-31 P1: filesChanged 为可选权威清单（agent-files-changed.js 聚合产物），
 // 传空/缺省时保留列中原值（COALESCE）。
 function markAgentTaskDone(taskId, filesChanged) {
+  try { require('./helpers/agent-pause').clear(String(taskId)); } catch { /* best-effort */ }
   try { eventBus.publishInvalidation('jobs', { taskId, state: 'completed' }); } catch { /* 通知失败不阻塞落库 */ }
   stmts.updateStatus.run(
     'done',
@@ -816,6 +868,7 @@ function markAgentTaskDone(taskId, filesChanged) {
 }
 
 function markAgentTaskFailed(taskId, error, filesChanged) {
+  try { require('./helpers/agent-pause').clear(String(taskId)); } catch { /* best-effort */ }
   try { eventBus.publishInvalidation('jobs', { taskId, state: 'failed' }); } catch { /* 通知失败不阻塞落库 */ }
   stmts.updateStatus.run(
     'failed',
@@ -963,6 +1016,7 @@ function isAgentTaskCancellationRequested(taskId) {
 }
 
 function markAgentTaskCancelled(taskId, filesChanged) {
+  try { require('./helpers/agent-pause').clear(String(taskId)); } catch { /* best-effort */ }
   try { eventBus.publishInvalidation('jobs', { taskId, state: 'cancelled' }); } catch { /* 通知失败不阻塞落库 */ }
   stmts.updateStatus.run(
     'cancelled',
@@ -1122,6 +1176,9 @@ module.exports = {
   getRecentAgentTaskEvents,
   getAgentTaskEventsBefore,
   hasAgentTaskEventBefore,
+  getAgentTaskLastEventAt,
+  setAgentTaskPaused,
+  appendSyntheticAgentEvent,
   getLatestPrimaryTaskForConversation,
   getAgentTaskTrajectoryStats,
   coalesceTaskDeltas,

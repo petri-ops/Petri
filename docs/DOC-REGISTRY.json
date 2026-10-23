@@ -7899,8 +7899,31 @@
         "G0"
       ],
       "notes": "2026-10-23 立项（用户「按母纲 §6.5 队列进 Q3（执行轨迹），直接推完」）：把「这一轮到底发生了什么」做成事件级执行轨迹。交付=后端单源 helpers/trajectory-events.js（8 组分类 + 有界摘要 + 查询编排，前端不二次解释 payload）+ agent-task-store 尾部/更早分页与 run 级统计（usage tokens / tool_result 失败）+ GET /api/ai/agent/trajectory（会话归属+任务 user_id 双校验、limit≤500、availability/recordedOnly/truncated/hasMoreOlder）+ 右栏「轨迹」surface（9 chips / 跟随最新 / 失败定位 / 统计头 / 加载更早 / 模型 I/O 互链）+ 证据面「执行事件」统计与入口 + 写工具无 diff 诚实态 + TurnBoundary/ToolRowBoundary（SegmentBoundary 注入）。P0 对账纠正 C1：MessageRail（UI-262）已提供用户消息导航，不重复造。证据=Node block248 6/6 + live-window-policy 1/1 + 前端定向 54/54 + types 0 + 隔离 9223 亮/暗各 20/20（离屏，无可见测试窗；截图不可得如实标 screenshot_unavailable）（acceptance/ui-558/、acceptance/block-248/）+ closeout。同期移除 6 个 live 脚本的 PETRI_TEST_ONSCREEN=1 并固化窗口策略门禁（用户二次要求屏幕不留测试窗）。reopen=逐消息结果统计（无逐消息 token 真相）/跨会话联邦轨迹/Electron capturePage 测试 IPC。"
+    },
+    {
+      "id": "BLOCK-249-Q4A-AGENT-TEAM",
+      "capability": "q4a-agent-team",
+      "path": "docs/block-249-q4a-agent-team-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P6-CLOSED",
+      "canonical": true,
+      "truthDomain": "q4a-agent-team",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-23",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "qoder",
+        "q4a",
+        "agent-team",
+        "roster",
+        "journal",
+        "structured-output",
+        "G0"
+      ],
+      "notes": "2026-10-23 立项（用户「整完Q4a」）：把子智能体从「一个面板」升级为「一个团队」。交付=team API（leader+members/counts/journal，跨用户 403）+ 停止团队逐成员回执（cancel_requested/already_finished/not_cancelled）+ 迭代边界暂停/恢复（agent_paused/agent_resumed 事件）+ profile tools.allow/deny（只收紧、deny 优先）+ 结构化输出（schema 最小子集、终态校验、followup 纠正 ≤2、machine-readable）+ 运行级 journal（<dataDir>/agent-journal/<leader>/journal.jsonl + read_agent_journal 只读工具）+ investigator（CodebaseInvestigator）角色 + 前端团队 roster（成员切换/暂停恢复/两步停止回执）。诚实差异：omitAgentsMd N/A（Petri 无 AGENTS.md 注入）；无隐藏 structured_output 工具（用 spawn 参数+终态校验）；暂停只在迭代边界。证据=Node block249 7/7 + 前端 18/18 + types 0 + lint 0 error + 隔离 9223 两会话亮/暗各 19/20（roster/结构化/暂停恢复/API 部分回执/journal 实机；停止回执 UI 的 DOM 取证被既有重渲染环拖超时 → UI-559 in_progress）。reopen=回执 UI 实机取证/跨机团队/Q4b 工作流脚本。"
     }
   ],
   "lastUpdated": "2026-10-23",
-  "documentCount": 391
+  "documentCount": 392
 }

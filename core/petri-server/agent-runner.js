@@ -724,7 +724,10 @@ async function runAgentLoop({
   });
   // BLOCK-99 G4 — 会话台工具子集（context.toolSubset === 'knowledge-console' 时只下发
   // knowledge 白名单；其余值维持全量）。policy 层照常全量生效，此处是最外层收窄。
-  const tools = resolveToolDefsForContext(context, getToolDefs());
+  const baseTools = resolveToolDefsForContext(context, getToolDefs());
+  // BLOCK-249（Q4a）— 子代理工具约束（只收紧）：deny 优先、allow 取交集；
+  // 未配置 policy 时原样返回（零行为变化）。
+  const tools = require('./helpers/tool-filter').filterToolDefs(baseTools, context && context.toolPolicy);
   // BLOCK-113 W1-3 — 工具两跳预路由（默认关 PETRI_JEV_TOOL_ROUTE=1）：
   // 主任务且无既有子集时，最近一条用户消息经决策原语九域+all 分类；采纳（特定域且
   // conf≥θ）→ defs 收窄为「路由域 ∪ session 基础件」；all/低置信/任何失败 → 全量
